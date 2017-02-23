@@ -345,6 +345,7 @@ static inline int _MMG5_devangle(double* n1,double *n2,double crit) {
 int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
                   int cas,char metRidTyp){
   MMG5_pTetra         pt,pt1,pt0;
+  MMG5_Tetra          t0;
   MMG5_xTetra         xt,xt1;
   MMG5_pxTetra        pxt0,pxt;
   int            ilist,k,open,iel,jel,*newtet,nump,*adja,j,ia,ib;
@@ -359,7 +360,7 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
 #warning CECILE modification angle in split1b
   /*check the deviation for new triangles*/
   {
-    ar = 0.9;///*_MMG5_ANGEDG*/
+    ar = _MMG5_ANGEDG;
     /* analyze surfacic ball of p */
     ifirst = 0;
     for (k=0; k<ilist; k++) {
@@ -371,17 +372,19 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
       pt   = &mesh->tetra[iel];
       if(!pt->xt) continue;
       pxt  = &mesh->xtetra[pt->xt];
-
-      pt0  = &mesh->tetra[0];
       
       int *adja = &mesh->adja[4*(iel-1)+1];
 #warning treat SD case
       for(int iad=0 ; iad<4 ; iad++) {
         if(adja[iad]) continue;
         /*normal at the two new triangles*/
-        memcpy(pt0,pt,sizeof(MMG5_Tetra));
-        pt0->v[ia] = ip;
-        if ( !_MMG5_norface(mesh,0,iad,n) )  return(0);
+        memcpy(&t0,pt,sizeof(MMG5_Tetra));
+        t0.v[ia] = ip;
+        if ( _MMG5_norpts(mesh,
+                     t0.v[_MMG5_idir[iad][0]],
+                     t0.v[_MMG5_idir[iad][1]],
+                          t0.v[_MMG5_idir[iad][2]],n)) return(0);
+          //if ( !_MMG5_norface(mesh,0,iad,n) )  return(0);
         /*test deviation angle with the splitted edge */
         if(ifirst) {
           if(ifirst==pt->v[ia]) {/*compare n and new0*/
@@ -398,9 +401,14 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
           memcpy(new0,n,3*sizeof(double));
         }
         //memcpy(pt0,pt,sizeof(MMG5_Tetra));
-        pt0->v[ia] = pt->v[ia];
-        pt0->v[ib] = ip;
-        if ( !_MMG5_norface(mesh,0,iad,n1) )  return(0);
+        t0.v[ia] = pt->v[ia];
+        t0.v[ib] = ip;
+        if ( _MMG5_norpts(mesh,
+                          t0.v[_MMG5_idir[iad][0]],
+                          t0.v[_MMG5_idir[iad][1]],
+                          t0.v[_MMG5_idir[iad][2]],n1)) return(0);
+        
+        //if ( !_MMG5_norface(mesh,0,iad,n1) )  return(0);
 
         /*test deviation angle with the splitted edge */
         if(ifirst) {
