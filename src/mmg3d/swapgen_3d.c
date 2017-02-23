@@ -283,7 +283,10 @@ int _MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,int *list,
     fprintf(stdout,"  ## Warning: unable to swap internal edge.\n");
     return(-1);
   }
-  else if ( !ier )  return(0);
+  else if ( !ier )  {
+    _MMG3D_delPt(mesh,np);
+    return(0);
+  }
 
   /** Second step : collapse of np towards enhancing configuration */
   start = nconf / 4;

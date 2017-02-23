@@ -451,7 +451,10 @@ int _MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,
     fprintf(stdout,"  ## Warning: unable to swap boundary edge.\n");
     return(-1);
   }
-  else if ( !ier )  return(0);
+  else if ( !ier )  {
+    _MMG3D_delPt(mesh,nm);
+    return(0);
+  }
 
   /* Collapse m on na after taking (new) ball of m */
   memset(list,0,(MMG3D_LMAX+2)*sizeof(int));
