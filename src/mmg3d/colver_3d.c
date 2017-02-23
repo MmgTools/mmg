@@ -573,13 +573,30 @@ int _MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
       ia = _MMG5_iarf[iopp][ia];    /* edge between l-1 and l in local num of tetra */
 
       if ( (!pt->xt) || (!(mesh->xtetra[pt->xt].tag[ia] & MG_GEO)) ) {
+#warning CECILE calcul angle a tester : check everything ok and clean the code
+        pt1 = &mesh->tetra[lists[l-1]/4];
+        assert(pt1->xt);
+        for (ip=0; ip<4; ip++)
+          if ( pt1->v[ip] == nump )  break;
+        assert(ip<4);
+        memcpy(pt0,pt1,sizeof(MMG5_Tetra));
+        pt0->v[ip] = numq;
+        if ( !_MMG5_norface(mesh,lists[l-1]/4,lists[l-1]%4,nprvold) )  return(0);
+        if ( !_MMG5_norface(mesh,0,lists[l-1]%4,nprvnew) )    return(0);
 
         devold = nprvold[0]*ncurold[0] + nprvold[1]*ncurold[1] + nprvold[2]*ncurold[2];
         devnew = nprvnew[0]*ncurnew[0] + nprvnew[1]*ncurnew[1] + nprvnew[2]*ncurnew[2];
+#warning CECILE : pourquoi on ne met pas dhd ici au lieu de angedg
         if ( devold < _MMG5_ANGEDG ) {
-          if ( devnew < devold )  return(0);
+          if ( devnew < devold )  {
+            printf("rejet1\n");
+            return(0);
+          }
         }
-        else if ( devnew < _MMG5_ANGEDG )  return(0);
+        else if ( devnew < _MMG5_ANGEDG )  {
+          printf("rejet2\n");
+          return(0);
+        }
       }
     }
 
