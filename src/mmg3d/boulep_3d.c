@@ -1327,8 +1327,8 @@ int _MMG5_coquilface(MMG5_pMesh mesh,int start,int ia,int *list,int *it1,
                      int *it2,int silent) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
-  int     *adja,piv,adj,na,nb,ilist,pradj,i;
-  char     iface,isbdy;
+  int           *adja,piv,adj,na,nb,ilist,pradj,i;
+  char          iface,isbdy;
 
   pt = &mesh->tetra[start];
 

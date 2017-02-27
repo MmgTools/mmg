@@ -97,7 +97,7 @@ inline double _MMG5_nonorsurf(MMG5_pMesh mesh,MMG5_pTria pt) {
  * \param ip2 second point of face.
  * \param ip3 third point of face.
  * \param n pointer to store the computed normal.
- * \return 1
+ * \return 1 if success, 0 otherwise.
  *
  * Compute normalized face normal given three points on the surface.
  *

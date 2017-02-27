@@ -1053,7 +1053,7 @@ _MMG5_adptet_delone(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree) {
   /* renumerotation if available */
   if ( !_MMG5_scotchCall(mesh,met) )
     return(0);
-  
+
   if(mesh->info.optimLES) {
     if(!_MMG5_optetLES(mesh,met,octree)) return(0);
   }

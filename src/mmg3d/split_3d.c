@@ -312,18 +312,106 @@ int _MMG3D_simbulgept(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int ip) {
   return(1);
 }
 
-static inline int _MMG5_devangle(double* n1,double *n2,double crit) {
+/**
+ * \param n1 first normal
+ * \param n2 second normal
+ *
+ * \return 1 if success, 0 if fail
+ *
+ * Check if the angle between n1 and n2 is larger than the ridge
+ * criterion. If yes, return 1, 0 otherwise (ridge creation).
+ *
+ */
+static inline
+int _MMG3D_devangle(double* n1, double *n2, double crit)
+{
   double dev;
 
   dev = n1[0]*n2[0] + n1[1]*n2[1] + n1[2]*n2[2];
 
-  if(dev < crit) {
-    //if(dev < 0) printf("dev negatif %e\n",dev);
+  if ( dev < crit ) {
     return(0);
   }
 
   return(1);
+}
 
+/**
+ * \param mesh  pointer toward the mesh structure
+ * \param start index of the tetra that we want to split
+ * \param iface local index of the boundary face that we want to split
+ * \param ia    local index of the boundary edge that we want to split
+ * \param idx   local index of the new tetra that we want to study after the
+ *              splitting of the tetra \a start (idx=0 or 1)
+ * \param ip    new point index
+ * \param n0    normal of the new boundary face in the tetra idx.
+ *
+ * \return 1 if success (no new sharp angle), 0 if we create a sharp angle,
+ *         -1 if fail.
+ *
+ * Check that the split of the edge \a ia of the tetra \a start does not create
+ * a ridge along the \f$ idx^{th} \f$ edge opposite to \ip in the boundary
+ * triangle \a iface. Store the normal of the \f$ idx^{th} \f$ boundary triangle
+ * in \a n0.
+ *
+ */
+static inline
+int _MMG3D_normalDeviation(MMG5_pMesh mesh , int  start, char   iface, char ia,
+                           int        idx  , int  ip   , double n0[3], double ba[3])
+{
+  MMG5_Tria tt0, tt1;
+  double    n1[3];
+  int       iedge,iploc,iedgeOpp,list[MMG3D_LMAX+2],it1,it2,it, ier;
+
+  /* Store the first boundary triangle (the one that is created in the boundary
+   * face that we split) */
+  _MMG5_tet2tri(mesh,start,iface,&tt0);
+
+  iedge = _MMG5_iarfinv[iface][ia];
+
+  #warning to remove
+  ba[0] = mesh->point[tt0.v[_MMG5_iprv2[iedge]]].c[0] - mesh->point[tt0.v[_MMG5_inxt2[iedge]]].c[0];
+  ba[1] = mesh->point[tt0.v[_MMG5_iprv2[iedge]]].c[1] - mesh->point[tt0.v[_MMG5_inxt2[iedge]]].c[1];
+  ba[2] = mesh->point[tt0.v[_MMG5_iprv2[iedge]]].c[2] - mesh->point[tt0.v[_MMG5_inxt2[iedge]]].c[2];
+
+  switch (idx)
+  {
+  case 0:
+    iploc = _MMG5_iprv2[iedge];
+    break;
+  case 1:
+    iploc = _MMG5_inxt2[iedge];
+    break;
+  }
+
+  tt0.v[iploc] = ip;
+
+  /* Compute the normal of the first triangle */
+  if ( !_MMG5_nortri(mesh, &tt0, n0) ) return -1;
+
+  if ( tt0.tag[iploc] & MG_GEO || tt0.tag[iploc] & MG_NOM ) return 1;
+
+  iedgeOpp = _MMG5_iarf[iface][iploc];
+
+  /* Store the second boundary triangle (triangle adjacent to the first triangle
+   * through the edge iploc */
+  if ( !_MMG5_coquilface( mesh, start, iedgeOpp, list, &it1, &it2, 0) ) return -1;
+
+  if ( it1/4 != start || it1%4 != iface ) {
+    assert ( it2/4==start && it2%4==iface );
+    it = it1;
+  }
+  else {
+    it = it2;
+  }
+  _MMG5_tet2tri(mesh,it/4,it%4,&tt1);
+
+  /* Compute the normal of the second triangle */
+  if ( !_MMG5_nortri(mesh, &tt1, n1) ) return -1;
+
+  ier =  _MMG3D_devangle( n0, n1, mesh->info.dhd );
+
+  return ( ier );
 }
 
 /**
@@ -335,7 +423,7 @@ static inline int _MMG5_devangle(double* n1,double *n2,double crit) {
  * \param cas flag to watch the length of the new edges.
  * \param metRidTyp Type of storage of ridges metrics: 0 for classic storage,
  * 1 for special storage.
- * \return -1 if lack of memory, 0 if we don't split the edge, 1 if success.
+ * \return -1 if we fail, 0 if we don't split the edge, 1 if success.
  *
  * Split edge \f$list[0]\%6\f$, whose shell list is passed, introducing point \a
  * ip Beware : shell has to be enumerated in ONLY ONE TRAVEL (always same
@@ -345,101 +433,79 @@ static inline int _MMG5_devangle(double* n1,double *n2,double crit) {
 int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
                   int cas,char metRidTyp){
   MMG5_pTetra    pt,pt1,pt0;
-  MMG5_Tetra     t0;
   MMG5_xTetra    xt,xt1;
   MMG5_pxTetra   pxt0,pxt;
-  int            ilist,k,open,iel,jel,*newtet,nump,*adja,j,ia,ib,iad;
-  int           *adjan,nei2,nei3,mel,ifirst;
+  double         lmin,lmax,len;
+  double         n0[6],n1[6];
+#warning ajeter
+  double         ba0[6], ba1[6];
+  int            ilist,k,open,iel,jel,*newtet,nump,*adja,j,iface;
+  int           *adjan,nei2,nei3,mel,idx,ier;
   char           ie,tau[4],isxt,isxt1,i,voy;
   unsigned char *taued;
-  double         lmin,lmax,len;
-  double         n[3],n1[3],new0[3],new1[3],devnew,ar;
 
   ilist = ret / 2;
   open  = ret % 2;
-#warning CECILE modification angle in split1b
-  /*check the deviation for new triangles*/
 
-  ar = _MMG5_ANGEDG;
+  /** Check the deviation for new triangles */
+
   /* analyze surfacic ball of p */
-  ifirst = 0;
+  idx = 0;
   for (k=0; k<ilist; k++) {
     iel = list[k] / 6;
     ie  = list[k] % 6;
-    ia = _MMG5_iare[ie][0];
-    ib = _MMG5_iare[ie][1];
 
     pt   = &mesh->tetra[iel];
     if(!pt->xt) continue;
 
     pxt  = &mesh->xtetra[pt->xt];
 
-    adja = &mesh->adja[4*(iel-1)+1];
-#warning treat SD case
-
     for ( j=0; j<2; ++j ) {
-      iad = _MMG5_ifar[ie][j];
-      if ( !(pxt->ftag[iad] & MG_BDY) ) continue;
+      iface = _MMG5_ifar[ie][j];
+      if ( !(pxt->ftag[iface] & MG_BDY) ) continue;
 
-      /* Normal at the two new triangles */
-      memcpy(&t0,pt,sizeof(MMG5_Tetra));
-      t0.v[ia] = ip;
-      if ( !_MMG5_norpts(mesh,
-                         t0.v[_MMG5_idir[iad][0]],
-                         t0.v[_MMG5_idir[iad][1]],
-                         t0.v[_MMG5_idir[iad][2]],n)) return(0);
+      /* Normal deviation between the two new triangles and their neighbors */
+      ier = _MMG3D_normalDeviation(mesh,iel,iface,ie,0,ip,&n0[idx],&ba0[idx]);
+      if ( ier < 0 ) return -1;
+      else if ( ier==0 ) return 0;
 
-      //if ( !_MMG5_norface(mesh,0,iad,n) )  return(0);
-      /* Test deviation angle with the splitted edge */
-      if(ifirst) {
+      ier = _MMG3D_normalDeviation(mesh,iel,iface,ie,1,ip,&n1[idx],&ba1[idx]);
+      if ( ier < 0 ) return -1;
+      else if ( ier==0 ) return 0;
 
-        if(ifirst==pt->v[ia]) {
-          /* Compare n and new0 */
-          if(!_MMG5_devangle(n,new0,ar)) {
-            return(0);
-          }
-        } else { /* Compare n and new1 */
-          if(!_MMG5_devangle(n,new1,ar)) {
-            return(0);
-          }
-        }
+      assert(
+        (ba0[idx]  -ba1[idx])  *(ba0[idx]  -ba1[idx])+
+        (ba0[idx+1]-ba1[idx+1])*(ba0[idx+1]-ba1[idx+1])+
+        (ba0[idx+2]-ba1[idx+2])*(ba0[idx+2]-ba1[idx+2])
+             <=_MMG5_EPSD2);
 
-      } else {
-        memcpy(new0,n,3*sizeof(double));
-      }
-      //memcpy(pt0,pt,sizeof(MMG5_Tetra));
-      t0.v[ia] = pt->v[ia];
-      t0.v[ib] = ip;
-      if ( !_MMG5_norpts(mesh,
-                         t0.v[_MMG5_idir[iad][0]],
-                         t0.v[_MMG5_idir[iad][1]],
-                         t0.v[_MMG5_idir[iad][2]],n1)) return(0);
-
-      //if ( !_MMG5_norface(mesh,0,iad,n1) )  return(0);
-
-      /* Test deviation angle with the splitted edge */
-      if(ifirst) {
-        if(ifirst==pt->v[ib]) {
-          /* Compare n1 and new0 */
-          if(!_MMG5_devangle(n1,new0,ar)) {
-            return(0);
-          }
-        } else {
-          /* Compare n and new1 */
-          if(!_MMG5_devangle(n1,new1,ar)) {
-            return(0);
-          }
-        }
-      } else {
-        memcpy(new1,n1,3*sizeof(double));
-      }
-
-      /* Check normal deviation for new edge */
-      if(!_MMG5_devangle(n,n1,ar)) {
+      /* Test sharp angle creation along the new edge */
+      if ( !_MMG3D_devangle(&n0[idx],&n1[idx],mesh->info.dhd) ) {
         return(0);
       }
-      if(!ifirst) ifirst = pt->v[ia];
 
+      if ( !idx ) idx = 3;
+      else {
+        /* Test sharp angle creation along the splitted edge */
+         assert (
+          (ba0[0  ]  +ba0[idx])  *(ba0[  0]  +ba0[idx])+
+          (ba0[  1]  +ba0[idx+1])*(ba0[  1]  +ba0[idx+1])+
+          (ba0[  2]  +ba0[idx+2])*(ba0[  2]  +ba0[idx+2])
+          <=_MMG5_EPSD2 );
+
+        assert (
+          (ba1[0  ]  +ba1[idx])  *(ba1[  0]  +ba1[idx])+
+          (ba1[  1]  +ba1[idx+1])*(ba1[  1]  +ba1[idx+1])+
+          (ba1[  2]  +ba1[idx+2])*(ba1[  2]  +ba1[idx+2])
+          <=_MMG5_EPSD2 );
+
+        if ( !_MMG3D_devangle(&n0[0],&n1[idx],mesh->info.dhd) ) {
+          return(0);
+        }
+        if ( !_MMG3D_devangle(&n1[0],&n0[idx],mesh->info.dhd) ) {
+          return(0);
+        }
+      }
     }
   }
 
