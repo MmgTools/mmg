@@ -354,12 +354,12 @@ int _MMG3D_normalAdjaTri(MMG5_pMesh mesh , int start, char iface, int ia,
                          double n[3]                                     )
 {
   MMG5_Tria tt;
-  int       iploc,iedgeOpp,list[MMG3D_LMAX+2],it1,it2,it;
+  int       iedgeOpp,list[MMG3D_LMAX+2],it1,it2,it;
 
-  iedgeOpp = _MMG5_iarf[iface][iploc];
+  iedgeOpp = _MMG5_iarf[iface][ia];
 
   /** Store the adjacent boundary triangle (triangle adjacent to \a iface
-   * through the edge iploc */
+   * through the edge ia */
   if ( !_MMG5_coquilface( mesh, start, iedgeOpp, list, &it1, &it2, 0) ) return 0;
 
   if ( it1/4 != start || it1%4 != iface ) {
