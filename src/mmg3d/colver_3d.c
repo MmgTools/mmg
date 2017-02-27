@@ -134,8 +134,8 @@ static int
 _MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,char iedg,int *lists,int ilists) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
-  int      nump,numq,piv0,piv,iel,jel,nap,nbp,naq,nbq,nro,adj,*adja;
-  char     ip,iq,ipiv,iopp,i,j,jface,ipa,ipb,isface;
+  int           nump,numq,piv0,piv,iel,jel,nap,nbp,naq,nbq,nro,adj,*adja;
+  char          ip,iq,ipiv,iopp,i,j,jface,ipa,ipb,isface;
 
   pt = &mesh->tetra[k];
   ip = _MMG5_idir[iface][_MMG5_inxt2[iedg]];
@@ -433,17 +433,17 @@ _MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,char iedg,int *lists,int ili
 int _MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
                      char iedg,int *listv,int ilistv,int *lists,int ilists,
                      char typchk) {
-  MMG5_pTetra        pt,pt0,pt1;
-  MMG5_pxTetra       pxt;
-  MMG5_pPoint        p0;
-  MMG5_Tria          tt;
-  MMG5_pPar          par;
-  double        calold,calnew,caltmp,nprvold[3],nprvnew[3],ncurold[3],ncurnew[3];
-  double        ps,devold,devnew,hmax,hausd;
-  int           ipp,nump,numq,l,iel,kk;
-  int           nr,nbbdy,ndepmin,ndepplus,isloc;
-  int16_t       tag;
-  char          iopp,ia,ip,i,iq,i0,i1,ier,isminp,isplp;
+  MMG5_pTetra  pt,pt0,pt1;
+  MMG5_pxTetra pxt;
+  MMG5_pPoint  p0;
+  MMG5_Tria    tt;
+  MMG5_pPar    par;
+  double       calold,calnew,caltmp,nprvold[3],nprvnew[3],ncurold[3],ncurnew[3];
+  double       ps,devold,devnew,hmax,hausd;
+  int          ipp,nump,numq,l,iel,kk;
+  int          nr,nbbdy,ndepmin,ndepplus,isloc,iedgeOpp;
+  int16_t      tag;
+  char         iopp,ia,ip,i,iq,i0,i1,ier,isminp,isplp;
 
   pt   = &mesh->tetra[k];
   pxt  = 0;
