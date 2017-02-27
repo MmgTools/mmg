@@ -338,6 +338,47 @@ int _MMG3D_devangle(double* n1, double *n2, double crit)
 
 /**
  * \param mesh  pointer toward the mesh structure
+ * \param start index of the working tetra
+ * \param iface local index of the boundary face of the tetra \a start
+ * \param ia    local index on face \a iface of the edge through which we seek
+ *              the adjacent triangle of the triangle \a iface of \a start.
+ * \param n     normal of the new boundary face in the tetra idx.
+ *
+ * \return 1 if success, 0 if fail.
+ *
+ * Compute the normal of the adjacent triangle of the triangle \a iface of the
+ * tetra \a start through the edge \a ia (in local numbering of the face).
+ *
+ */
+int _MMG3D_normalAdjaTri(MMG5_pMesh mesh , int start, char iface, int ia,
+                         double n[3]                                     )
+{
+  MMG5_Tria tt;
+  int       iploc,iedgeOpp,list[MMG3D_LMAX+2],it1,it2,it;
+
+  iedgeOpp = _MMG5_iarf[iface][iploc];
+
+  /** Store the adjacent boundary triangle (triangle adjacent to \a iface
+   * through the edge iploc */
+  if ( !_MMG5_coquilface( mesh, start, iedgeOpp, list, &it1, &it2, 0) ) return 0;
+
+  if ( it1/4 != start || it1%4 != iface ) {
+    assert ( it2/4==start && it2%4==iface );
+    it = it1;
+  }
+  else {
+    it = it2;
+  }
+  _MMG5_tet2tri(mesh,it/4,it%4,&tt);
+
+  /** Compute the normal of the second triangle */
+  if ( !_MMG5_nortri(mesh, &tt, n) ) return 0;
+
+  return 1;
+}
+
+/**
+ * \param mesh  pointer toward the mesh structure
  * \param start index of the tetra that we want to split
  * \param iface local index of the boundary face that we want to split
  * \param ia    local index of the boundary edge that we want to split
@@ -350,7 +391,7 @@ int _MMG3D_devangle(double* n1, double *n2, double crit)
  *         -1 if fail.
  *
  * Check that the split of the edge \a ia of the tetra \a start does not create
- * a ridge along the \f$ idx^{th} \f$ edge opposite to \ip in the boundary
+ * a ridge along the \f$ idx^{th} \f$ edge opposite to \a ip in the boundary
  * triangle \a iface. Store the normal of the \f$ idx^{th} \f$ boundary triangle
  * in \a n0.
  *
@@ -359,11 +400,11 @@ static inline
 int _MMG3D_normalDeviation(MMG5_pMesh mesh , int  start, char   iface, char ia,
                            int        idx  , int  ip   , double n0[3], double ba[3])
 {
-  MMG5_Tria tt0, tt1;
+  MMG5_Tria tt0;
   double    n1[3];
-  int       iedge,iploc,iedgeOpp,list[MMG3D_LMAX+2],it1,it2,it, ier;
+  int       iedge,iploc,ier;
 
-  /* Store the first boundary triangle (the one that is created in the boundary
+  /** Store the first boundary triangle (the one that is created in the boundary
    * face that we split) */
   _MMG5_tet2tri(mesh,start,iface,&tt0);
 
@@ -386,28 +427,14 @@ int _MMG3D_normalDeviation(MMG5_pMesh mesh , int  start, char   iface, char ia,
 
   tt0.v[iploc] = ip;
 
-  /* Compute the normal of the first triangle */
+  /** Compute the normal of the first triangle */
   if ( !_MMG5_nortri(mesh, &tt0, n0) ) return -1;
 
   if ( tt0.tag[iploc] & MG_GEO || tt0.tag[iploc] & MG_NOM ) return 1;
 
-  iedgeOpp = _MMG5_iarf[iface][iploc];
-
-  /* Store the second boundary triangle (triangle adjacent to the first triangle
-   * through the edge iploc */
-  if ( !_MMG5_coquilface( mesh, start, iedgeOpp, list, &it1, &it2, 0) ) return -1;
-
-  if ( it1/4 != start || it1%4 != iface ) {
-    assert ( it2/4==start && it2%4==iface );
-    it = it1;
-  }
-  else {
-    it = it2;
-  }
-  _MMG5_tet2tri(mesh,it/4,it%4,&tt1);
-
-  /* Compute the normal of the second triangle */
-  if ( !_MMG5_nortri(mesh, &tt1, n1) ) return -1;
+  /** Compute the normal of the second triangle (triangle adjacent to the first
+   * through the edge iploc) */
+  if ( !_MMG3D_normalAdjaTri(mesh,start,iface,iploc,n1) ) return -1;
 
   ier =  _MMG3D_devangle( n0, n1, mesh->info.dhd );
 

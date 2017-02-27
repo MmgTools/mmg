@@ -418,6 +418,9 @@ _MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,char iedg,int *lists,int ili
  * \param iface face through wich we perform the collapse
  * \param iedg edge to collapse
  * \param listv pointer toward the list of the tetra in the ball of \a p0.
+ * \param ilistv number of tetra in the ball of \a p0.
+ * \param lists pointer toward the surfacic ball of \a p0.
+ * \param ilists number of tetra in the surfacic ball of \a p0.
  * \param typchk  typchk type of checking permformed for edge length
  * (hmax or _MMG5_LLONG criterion).
  *
