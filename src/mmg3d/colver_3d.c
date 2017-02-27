@@ -132,10 +132,14 @@ int _MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
  *  (pq, or ia in local tet notation) */
 static int
 _MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,char iedg,int *lists,int ilists) {
-  MMG5_pTetra   pt;
+  MMG5_pTetra   pt,pt0;
   MMG5_pxTetra  pxt;
+  double        n0[3],n1[3],devnew;
   int           nump,numq,piv0,piv,iel,jel,nap,nbp,naq,nbq,nro,adj,*adja;
+  int           iedgeOpp;
   char          ip,iq,ipiv,iopp,i,j,jface,ipa,ipb,isface;
+
+  pt0  = &mesh->tetra[0];
 
   pt = &mesh->tetra[k];
   ip = _MMG5_idir[iface][_MMG5_inxt2[iedg]];
@@ -149,6 +153,7 @@ _MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,char iedg,int *lists,int ili
 
   /* Surface ball has been enumerated as f1,...,f2 - f1,f2 = both triangles of surface shell */
   if ( piv0 == numq ) {
+
     /*  Point nap, facing the first vanishing face in surface ball of p */
     nro = pt->v[_MMG5_idir[iface][_MMG5_iprv2[_MMG5_idirinv[iface][ip]]]];
 
@@ -210,13 +215,33 @@ _MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,char iedg,int *lists,int ili
       return(0);
     }
 
+    pxt = &mesh->xtetra[mesh->tetra[k].xt];
+    iedgeOpp = _MMG5_iarf[iface][ip];
+    if ( !pxt->tag[iedgeOpp] & MG_GEO ) {
+      /* Check the normal deviation between the boundary faces nump-numq-nro and
+       * numq-nro-.. */
+      memcpy(pt0,&mesh->tetra[k],sizeof(MMG5_Tetra));
+      pt0->v[ip] = numq;
+
+      if ( !_MMG5_norface(mesh,0  ,iface,n0) )  return(0);
+      if ( !_MMG5_norface(mesh,iel,iopp ,n1) )  return(0);
+
+      devnew = n0[0]*n1[0] + n0[1]*n1[1] + n0[2]*n1[2];
+      if ( devnew < mesh->info.dhd )  {
+#warning ajeter
+        printf("ON REJETTE DANS TOPCHKCOL 1\n");
+        return(0);
+      }
+    }
+
+
     /*  Point nbp, facing the second vanishing face in surface ball of p */
     jel   = lists[ilists-1] / 4;
     jface = lists[ilists-1] % 4;
     pt    = &mesh->tetra[jel];
     for (j=0; j<3; j++) {
       i = _MMG5_idir[jface][j];
-      if ( pt->v[i] != nump && pt->v[i] != numq )  break;
+      if ( pt->v[i]!=nump && pt->v[i] != numq )  break;
     }
     assert(j<3);
 
@@ -277,6 +302,35 @@ _MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,char iedg,int *lists,int ili
         k,_MMG3D_indElt(mesh,k),nbp,_MMG3D_indPt(mesh,nbp));*/
       return(0);
     }
+
+    jel   = lists[ilists-1] / 4;
+    jface = lists[ilists-1] % 4;
+    pt    = &mesh->tetra[jel];
+
+    for (j=0; j<3; j++) {
+      i = _MMG5_idir[jface][j];
+      if ( pt->v[i] == nump ) break;
+    }
+
+    pxt = &mesh->xtetra[mesh->tetra[jel].xt];
+    iedgeOpp = _MMG5_iarf[jface][j];
+    if ( !pxt->tag[iedgeOpp] & MG_GEO ) {
+      /* Check the normal deviation between the boundary faces nump-numq-nro and
+       * numq-nro-.. */
+      memcpy(pt0,&mesh->tetra[jel],sizeof(MMG5_Tetra));
+      pt0->v[i] = numq;
+
+      if ( !_MMG5_norface(mesh,0  ,jface,n0) )  return(0);
+      if ( !_MMG5_norface(mesh,iel,iopp ,n1) )  return(0);
+
+      devnew = n0[0]*n1[0] + n0[1]*n1[1] + n0[2]*n1[2];
+      if ( devnew < mesh->info.dhd )  {
+#warning ajeter
+        printf("ON REJETTE DANS TOPCHKCOL 2\n");
+        return(0);
+      }
+    }
+
   }
   /* Surface ball has been enumerated as f1,f2,... */
   else {
@@ -424,6 +478,8 @@ _MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,char iedg,int *lists,int ili
  * \param typchk  typchk type of checking permformed for edge length
  * (hmax or _MMG5_LLONG criterion).
  *
+ * \return 1 if success, 0 if the point cannot be collapsed, -1 if fail.
+ *
  * Check whether collapse ip -> iq could be performed, ip boundary point ;
  *  'mechanical' tests (positive jacobian) are not performed here ;
  *  iface = boundary face on which lie edge iedg - in local face num.
@@ -569,13 +625,27 @@ int _MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
     ps = ncurold[0]*ncurnew[0] + ncurold[1]*ncurnew[1] + ncurold[2]*ncurnew[2];
     if ( ps < 0.0 )  return(0);
 
-    /* check normal deviation */
+    /* check normal deviation between l and its neighbour through the edge ia */
+    ia       = _MMG5_idirinv[iopp][ip]; /* index of p in tria iopp */
+
+    iedgeOpp =  _MMG5_iarf[iface][ia];
+    if ( !(mesh->xtetra[pt->xt].tag[iedgeOpp] & MG_GEO) ) {
+      if ( !_MMG3D_normalAdjaTri(mesh,iel,iopp,ia,nprvnew) )  return -1;
+
+      devnew = nprvnew[0]*ncurnew[0] + nprvnew[1]*ncurnew[1] + nprvnew[2]*ncurnew[2];
+
+      if ( devnew < mesh->info.dhd )  {
+        printf("ON REJETTE POUR ADJACENT COLLAPSE\n");
+        return(0);
+      }
+    }
+
     if ( l > 1 ) {
-      ia = _MMG5_idirinv[iopp][ip]; /* index of p in tria iopp */
+      /* check normal deviation between l and l-1 */
       ia = _MMG5_iprv2[ia];         /* edge between l-1 and l, in local num of tria */
       ia = _MMG5_iarf[iopp][ia];    /* edge between l-1 and l in local num of tetra */
 
-      if ( (!pt->xt) || (!(mesh->xtetra[pt->xt].tag[ia] & MG_GEO)) ) {
+      if ( !(mesh->xtetra[pt->xt].tag[ia] & MG_GEO) ) {
 #warning CECILE calcul angle a tester : check everything ok and clean the code
         pt1 = &mesh->tetra[lists[l-1]/4];
         assert(pt1->xt);
