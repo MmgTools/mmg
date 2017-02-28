@@ -632,6 +632,7 @@ int _MMG2_adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
     imax = -1;
     lmax = -1.0;
     for (i=0; i<3; i++) {
+      if ( MG_SIN(pt->tag[i]) ) continue;
       i1 = _MMG5_inxt2[i];
       i2 = _MMG5_iprv2[i];
       

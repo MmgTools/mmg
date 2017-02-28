@@ -198,7 +198,7 @@ static int _MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
      * p1=mesh->point[pt->v[i1]]: p0 is singular */
     _MMG5_norpts(mesh,pt->v[i0],pt->v[i1],pt->v[i2],n);
 
-    _MMG5_bezierEdge(mesh,idp,pt->v[i1],b0,b1,
+    _MMG5_BezierEdge(mesh,idp,pt->v[i1],b0,b1,
                      MG_EDG(pxt->tag[_MMG5_iarf[ifac][i]]),n);
 
     /* tangent vector */

@@ -675,6 +675,7 @@ int _MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
   _MMG5_SAFE_MALLOC(callist, ilistv, double);
 
   calold = calnew = DBL_MAX;
+
   for (l=0; l<ilistv; l++) {
     k    = listv[l] / 4;
     i0 = listv[l] % 4;
@@ -684,12 +685,16 @@ int _MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
     pt0->v[i0] = 0;
     calold = MG_MIN(calold, pt->qual);
     callist[l]=_MMG5_orcal(mesh,met,0);
-  if (callist[l] < _MMG5_EPSD) {
-    _MMG5_SAFE_FREE(callist);
-    return(0);
-  }
+
+    if (callist[l] < _MMG5_EPSD) {
+      _MMG5_SAFE_FREE(callist);
+      return(0);
+    }
     calnew = MG_MIN(calnew,callist[l]);
+
   }
+
+
   if (calold < _MMG5_NULKAL && calnew <= calold) {
     _MMG5_SAFE_FREE(callist);
     return(0);

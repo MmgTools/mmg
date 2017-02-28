@@ -621,13 +621,13 @@ int MMG2D_Set_triangle(MMG5_pMesh mesh, int v0, int v1, int v2, int ref, int pos
   return(1);
 }
 
-/* int MMG2D_Set_requiredTriangle(MMG5_pMesh mesh, int k) { */
-/*   assert ( k <= mesh->nt ); */
-/*   mesh->tria[k].tag[0] |= M_REQUIRED; */
-/*   mesh->tria[k].tag[1] |= M_REQUIRED; */
-/*   mesh->tria[k].tag[2] |= M_REQUIRED; */
-/*   return(1); */
-/* } */
+int MMG2D_Set_requiredTriangle(MMG5_pMesh mesh, int k) {
+  assert ( k <= mesh->nt );
+  mesh->tria[k].tag[0] |= MG_REQ;
+  mesh->tria[k].tag[1] |= MG_REQ;
+  mesh->tria[k].tag[2] |= MG_REQ;
+  return(1);
+}
 
 int MMG2D_Get_triangle(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* ref
                        ,int* isRequired) {
@@ -795,12 +795,12 @@ int MMG2D_Set_requiredEdge(MMG5_pMesh mesh, int k) {
 
   ped = &mesh->edge[k];
 
-  ped->tag |= M_REQUIRED;
+  ped->tag |= MG_REQ;
 
   ppt = &mesh->point[ped->a];
-  ppt->tag |= M_REQUIRED;
+  ppt->tag |= MG_REQ;
   ppt = &mesh->point[ped->b];
-  ppt->tag |= M_REQUIRED;
+  ppt->tag |= MG_REQ;
 
   return(1);
 }
