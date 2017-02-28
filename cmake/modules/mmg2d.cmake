@@ -27,6 +27,9 @@
 ## =============================================================================
 
 SET(MMG2D_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src/mmg2d)
+SET(MMG2D_BINARY_DIR ${CMAKE_BINARY_DIR}/src/mmg2d)
+
+FILE(MAKE_DIRECTORY ${MMG2D_BINARY_DIR})
 
 ############################################################################
 #####
@@ -35,12 +38,12 @@ SET(MMG2D_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src/mmg2d)
 ############################################################################
 
 IF ( NOT WIN32 )
-  ADD_CUSTOM_COMMAND(OUTPUT ${MMG2D_SOURCE_DIR}/libmmg2df.h
-    COMMAND genheader ${MMG2D_SOURCE_DIR}/libmmg2df.h
+  ADD_CUSTOM_COMMAND(OUTPUT ${MMG2D_BINARY_DIR}/libmmg2df.h
+    COMMAND genheader ${MMG2D_BINARY_DIR}/libmmg2df.h
     ${MMG2D_SOURCE_DIR}/libmmg2d.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     DEPENDS genheader ${MMG2D_SOURCE_DIR}/libmmg2d.h
-    ${COMMON_SOURCE_DIR}/libmmgtypesf.h
+    ${COMMON_BINARY_DIR}/libmmgtypesf.h
     ${COMMON_SOURCE_DIR}/libmmgtypes.h
     ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
     COMMENT "Generating Fortran header for mmg2d"
@@ -55,6 +58,7 @@ ENDIF()
 
 # Header files
 INCLUDE_DIRECTORIES(${MMG2D_SOURCE_DIR})
+INCLUDE_DIRECTORIES(${COMMON_BINARY_DIR})
 
 # Source files
 FILE(
@@ -62,12 +66,13 @@ FILE(
   sourcemmg2d_files
   ${MMG2D_SOURCE_DIR}/*.c   ${MMG2D_SOURCE_DIR}/*.h
   ${COMMON_SOURCE_DIR}/*.c ${COMMON_SOURCE_DIR}/*.h
+  ${COMMON_BINARY_DIR}/mmgcommon.h
   )
 LIST(REMOVE_ITEM sourcemmg2d_files
   ${MMG2D_SOURCE_DIR}/mmg2d.c
   ${MMG2D_SOURCE_DIR}/lib${PROJECT_NAME}2df.c
-  ${CMAKE_SOURCE_DIR}/src/libmmg.h
-  ${CMAKE_SOURCE_DIR}/src/libmmgf.h
+  ${CMAKE_SOURCE_DIR}/src/mmg/libmmg.h
+  ${CMAKE_SOURCE_DIR}/src/mmg/libmmgf.h
   ${REMOVE_FILE})
 FILE(
   GLOB
@@ -118,7 +123,7 @@ ENDIF ( )
 # Compile static library
 IF ( LIBMMG2D_STATIC )
   ADD_LIBRARY(${PROJECT_NAME}2d_a  STATIC
-    ${MMG2D_SOURCE_DIR}/lib${PROJECT_NAME}2df.h
+    ${MMG2D_BINARY_DIR}/lib${PROJECT_NAME}2df.h
     ${sourcemmg2d_files} ${libmmg2d_file} )
   SET_TARGET_PROPERTIES(${PROJECT_NAME}2d_a PROPERTIES OUTPUT_NAME
     ${PROJECT_NAME}2d)
@@ -131,7 +136,7 @@ ENDIF()
 # Compile shared library
 IF ( LIBMMG2D_SHARED )
   ADD_LIBRARY(${PROJECT_NAME}2d_so SHARED
-    ${MMG2D_SOURCE_DIR}/lib${PROJECT_NAME}2df.h
+    ${MMG2D_BINARY_DIR}/lib${PROJECT_NAME}2df.h
     ${sourcemmg2d_files} ${libmmg2d_file})
   SET_TARGET_PROPERTIES(${PROJECT_NAME}2d_so PROPERTIES
     OUTPUT_NAME ${PROJECT_NAME}2d)
@@ -147,9 +152,9 @@ IF ( LIBMMG2D_STATIC OR LIBMMG2D_SHARED )
   # mmg2d header files needed for library
   SET( mmg2d_headers
     ${MMG2D_SOURCE_DIR}/libmmg2d.h
-    ${MMG2D_SOURCE_DIR}/libmmg2df.h
+    ${MMG2D_BINARY_DIR}/libmmg2df.h
     ${COMMON_SOURCE_DIR}/libmmgtypes.h
-    ${COMMON_SOURCE_DIR}/libmmgtypesf.h
+    ${COMMON_BINARY_DIR}/libmmgtypesf.h
     )
   SET(MMG2D_INCLUDE ${CMAKE_SOURCE_DIR}/include/mmg/mmg2d )
   SET( mmg2d_includes
@@ -162,13 +167,13 @@ IF ( LIBMMG2D_STATIC OR LIBMMG2D_SHARED )
   INSTALL(FILES ${mmg2d_headers} DESTINATION include/mmg/mmg2d)
 
   ADD_CUSTOM_COMMAND(OUTPUT ${MMG2D_INCLUDE}/libmmgtypesf.h
-    COMMAND ${CMAKE_COMMAND} -E copy ${COMMON_SOURCE_DIR}/libmmgtypesf.h ${MMG2D_INCLUDE}/libmmgtypesf.h
+    COMMAND ${CMAKE_COMMAND} -E copy ${COMMON_BINARY_DIR}/libmmgtypesf.h ${MMG2D_INCLUDE}/libmmgtypesf.h
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    DEPENDS ${COMMON_SOURCE_DIR}/libmmgtypesf.h)
+    DEPENDS ${COMMON_BINARY_DIR}/libmmgtypesf.h)
   ADD_CUSTOM_COMMAND(OUTPUT ${MMG2D_INCLUDE}/libmmg2df.h
-    COMMAND ${CMAKE_COMMAND} -E copy ${MMG2D_SOURCE_DIR}/libmmg2df.h ${MMG2D_INCLUDE}/libmmg2df.h
+    COMMAND ${CMAKE_COMMAND} -E copy ${MMG2D_BINARY_DIR}/libmmg2df.h ${MMG2D_INCLUDE}/libmmg2df.h
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    DEPENDS ${MMG2D_SOURCE_DIR}/libmmg2df.h)
+    DEPENDS ${MMG2D_BINARY_DIR}/libmmg2df.h)
 
   # Install header files in project directory
   FILE(INSTALL  ${mmg2d_headers} DESTINATION ${MMG2D_INCLUDE}
@@ -197,7 +202,7 @@ ENDIF ( )
 ###############################################################################
 
 ADD_EXECUTABLE(${PROJECT_NAME}2d
-  ${MMG2D_SOURCE_DIR}/lib${PROJECT_NAME}2df.h ${sourcemmg2d_files} ${mainmmg2d_file} )
+  ${MMG2D_BINARY_DIR}/lib${PROJECT_NAME}2df.h ${sourcemmg2d_files} ${mainmmg2d_file} )
 
 IF ( WIN32 AND NOT MINGW AND USE_SCOTCH )
   my_add_link_flags(${PROJECT_NAME}2d "/SAFESEH:NO")

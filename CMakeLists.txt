@@ -25,6 +25,13 @@ INCLUDE(CMakeDependentOption)
 
 PROJECT (mmg)
 
+# Executable path
+SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
+SET(COMMON_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src/common)
+SET(COMMON_BINARY_DIR ${CMAKE_BINARY_DIR}/src/common)
+
+FILE(MAKE_DIRECTORY ${COMMON_BINARY_DIR})
+
 ###############################################################################
 #####
 #####         Release version and date
@@ -53,7 +60,7 @@ ENDIF ()
 
 # Create mmgcommon.h file with the good release and architecture infos.
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/src/common/mmgcommon.h.in
-  ${CMAKE_BUILD_DIR}/src/common/mmgcommon.h @ONLY)
+  ${CMAKE_BINARY_DIR}/src/common/mmgcommon.h @ONLY)
 
 ###############################################################################
 #####
@@ -64,9 +71,6 @@ CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/src/common/mmgcommon.h.in
 # To see flags and options of compilation
 #SET(CMAKE_VERBOSE_MAKEFILE TRUE)
 
-# Executable path
-SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
-SET(COMMON_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src/common)
 
 # Find "exotic" compilers
 IF (${CMAKE_C_COMPILER} MATCHES Clang OR ${CMAKE_C_COMPILER} MATCHES clang)
@@ -169,8 +173,8 @@ ENDIF()
 
 IF ( NOT WIN32 )
   ADD_EXECUTABLE(genheader ${CMAKE_SOURCE_DIR}/scripts/genheader.c)
-  ADD_CUSTOM_COMMAND(OUTPUT ${COMMON_SOURCE_DIR}/libmmgtypesf.h
-    COMMAND genheader ${COMMON_SOURCE_DIR}/libmmgtypesf.h
+  ADD_CUSTOM_COMMAND(OUTPUT ${COMMON_BINARY_DIR}/libmmgtypesf.h
+    COMMAND genheader ${COMMON_BINARY_DIR}/libmmgtypesf.h
     ${COMMON_SOURCE_DIR}/libmmgtypes.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     DEPENDS genheader ${COMMON_SOURCE_DIR}/libmmgtypes.h
