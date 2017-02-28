@@ -147,137 +147,135 @@ _MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,char iedg,int *lists,int ili
   ipiv = iq;
 
   /* Surface ball has been enumerated as f1,...,f2 - f1,f2 = both triangles of surface shell */
-  if ( piv0 == numq ) {
-    /*  Point nap, facing the first vanishing face in surface ball of p */
-    nro = pt->v[_MMG5_idir[iface][iedg]];
+  /*  Point nap, facing the first vanishing face in surface ball of p */
+  nro = pt->v[_MMG5_idir[iface][iedg]];
 
-    jel = lists[1] / 4;
-    jface = lists[1] % 4;
+  jel = lists[1] / 4;
+  jface = lists[1] % 4;
 
-    pt = &mesh->tetra[jel];
-    for (j=0; j<3; j++) {
-      i = _MMG5_idir[jface][j];
-      if ( pt->v[i] != nump && pt->v[i] != nro ) break;
+  pt = &mesh->tetra[jel];
+  for (j=0; j<3; j++) {
+    i = _MMG5_idir[jface][j];
+    if ( pt->v[i] != nump && pt->v[i] != nro ) break;
+  }
+  assert(j<3);
+
+  nap = pt->v[i];
+
+  /* Unfold shell of (nq,nro), starting from (k,iface), with pivot np */
+  adj = k;
+  piv = nump;
+  do {
+    iel = adj;
+    pt = &mesh->tetra[iel];
+    adja = &mesh->adja[4*(iel-1)+1];
+
+    /* Identification of edge number in tetra iel */
+    for (i=0; i<6; i++) {
+      ipa = _MMG5_iare[i][0];
+      ipb = _MMG5_iare[i][1];
+      if ( ((pt->v[ipa] == numq) && (pt->v[ipb] == nro)) ||
+           ((pt->v[ipa] == nro)  && (pt->v[ipb] == numq))  ) break;
     }
-    assert(j<3);
+    assert(i<6);
 
-    nap = pt->v[i];
-
-    /* Unfold shell of (nq,nro), starting from (k,iface), with pivot np */
-    adj = k;
-    piv = nump;
-    do {
-      iel = adj;
-      pt = &mesh->tetra[iel];
-      adja = &mesh->adja[4*(iel-1)+1];
-
-      /* Identification of edge number in tetra iel */
-      for (i=0; i<6; i++) {
-        ipa = _MMG5_iare[i][0];
-        ipb = _MMG5_iare[i][1];
-        if ( ((pt->v[ipa] == numq) && (pt->v[ipb] == nro)) ||
-             ((pt->v[ipa] == nro)  && (pt->v[ipb] == numq))  ) break;
-      }
-      assert(i<6);
-
-      /* set sense of travel */
-      if ( pt->v[ _MMG5_ifar[i][0] ] == piv ) {
-        adj  = adja[ _MMG5_ifar[i][0] ] / 4;
-        ipiv = _MMG5_ifar[i][1];
-        iopp = _MMG5_ifar[i][0];
-        piv  = pt->v[ipiv];
-      }
-      else {
-        adj  = adja[ _MMG5_ifar[i][1] ] / 4;
-        ipiv = _MMG5_ifar[i][0];
-        iopp = _MMG5_ifar[i][1];
-        piv  = pt->v[ipiv];
-      }
-
-      isface = 0;
-      if ( pt->xt ) {
-        pxt = &mesh->xtetra[pt->xt];
-        isface = (MG_BDY & pxt->ftag[iopp]);
-      }
+    /* set sense of travel */
+    if ( pt->v[ _MMG5_ifar[i][0] ] == piv ) {
+      adj  = adja[ _MMG5_ifar[i][0] ] / 4;
+      ipiv = _MMG5_ifar[i][1];
+      iopp = _MMG5_ifar[i][0];
+      piv  = pt->v[ipiv];
     }
-    while ( adj && ( adj != k ) && !isface );
-
-    naq = piv;
-    if ( nap == naq ) {
-      /*printf("%s: %d: On devrait rarement passer ici:",__FILE__,__LINE__);
-        printf(" k=%d (%d in saveMesh), nap=%d (%d in saveMesh)\n",
-        k,_MMG3D_indElt(mesh,k),nap,_MMG3D_indPt(mesh,nap));*/
-      return(0);
+    else {
+      adj  = adja[ _MMG5_ifar[i][1] ] / 4;
+      ipiv = _MMG5_ifar[i][0];
+      iopp = _MMG5_ifar[i][1];
+      piv  = pt->v[ipiv];
     }
 
-    /*  Point nbp, facing the second vanishing face in surface ball of p */
-    jel   = lists[ilists-1] / 4;
-    jface = lists[ilists-1] % 4;
-    pt    = &mesh->tetra[jel];
-    for (j=0; j<3; j++) {
-      i = _MMG5_idir[jface][j];
-      if ( pt->v[i] != nump && pt->v[i] != numq )  break;
+    isface = 0;
+    if ( pt->xt ) {
+      pxt = &mesh->xtetra[pt->xt];
+      isface = (MG_BDY & pxt->ftag[iopp]);
     }
-    assert(j<3);
+  }
+  while ( adj && ( adj != k ) && !isface );
 
-    nro   = pt->v[i];
-    jel   = lists[ilists-2] / 4;
-    jface = lists[ilists-2] % 4;
-    pt    = &mesh->tetra[jel];
-    for (j=0; j<3; j++) {
-      i = _MMG5_idir[jface][j];
-      if ( pt->v[i] != nump && pt->v[i] != nro )  break;
+  naq = piv;
+  if ( nap == naq ) {
+    /*printf("%s: %d: On devrait rarement passer ici:",__FILE__,__LINE__);
+      printf(" k=%d (%d in saveMesh), nap=%d (%d in saveMesh)\n",
+      k,_MMG3D_indElt(mesh,k),nap,_MMG3D_indPt(mesh,nap));*/
+    return(0);
+  }
+
+  /*  Point nbp, facing the second vanishing face in surface ball of p */
+  jel   = lists[ilists-1] / 4;
+  jface = lists[ilists-1] % 4;
+  pt    = &mesh->tetra[jel];
+  for (j=0; j<3; j++) {
+    i = _MMG5_idir[jface][j];
+    if ( pt->v[i] != nump && pt->v[i] != numq )  break;
+  }
+  assert(j<3);
+
+  nro   = pt->v[i];
+  jel   = lists[ilists-2] / 4;
+  jface = lists[ilists-2] % 4;
+  pt    = &mesh->tetra[jel];
+  for (j=0; j<3; j++) {
+    i = _MMG5_idir[jface][j];
+    if ( pt->v[i] != nump && pt->v[i] != nro )  break;
+  }
+  assert(j<3);
+
+  nbp = pt->v[i];
+
+  /* Unfold shell of (nq,nro), starting from (jel,jface), with pivot np */
+  adj = lists[ilists-1] / 4;
+  piv=  nump;
+  do {
+    iel  = adj;
+    pt   = &mesh->tetra[iel];
+    adja = &mesh->adja[4*(iel-1)+1];
+
+    /* Identification of edge number in tetra iel */
+    for (i=0; i<6; i++) {
+      ipa = _MMG5_iare[i][0];
+      ipb = _MMG5_iare[i][1];
+      if ( ((pt->v[ipa] == numq) && (pt->v[ipb] == nro)) ||
+           ((pt->v[ipa] == nro) && (pt->v[ipb] == numq))  ) break;
     }
-    assert(j<3);
+    assert(i<6);
 
-    nbp = pt->v[i];
-
-    /* Unfold shell of (nq,nro), starting from (jel,jface), with pivot np */
-    adj = lists[ilists-1] / 4;
-    piv=  nump;
-    do {
-      iel  = adj;
-      pt   = &mesh->tetra[iel];
-      adja = &mesh->adja[4*(iel-1)+1];
-
-      /* Identification of edge number in tetra iel */
-      for (i=0; i<6; i++) {
-        ipa = _MMG5_iare[i][0];
-        ipb = _MMG5_iare[i][1];
-        if ( ((pt->v[ipa] == numq) && (pt->v[ipb] == nro)) ||
-             ((pt->v[ipa] == nro) && (pt->v[ipb] == numq))  ) break;
-      }
-      assert(i<6);
-
-      /* set sense of travel */
-      if ( pt->v[ _MMG5_ifar[i][0] ] == piv ) {
-        adj  = adja[ _MMG5_ifar[i][0] ] / 4;
-        ipiv = _MMG5_ifar[i][1];
-        iopp = _MMG5_ifar[i][0];
-        piv  = pt->v[ipiv];
-      }
-      else {
-        adj  = adja[ _MMG5_ifar[i][1] ] / 4;
-        ipiv = _MMG5_ifar[i][0];
-        iopp = _MMG5_ifar[i][1];
-        piv  = pt->v[ipiv];
-      }
-
-      isface = 0;
-      if ( pt->xt ) {
-        pxt    = &mesh->xtetra[pt->xt];
-        isface = (MG_BDY & pxt->ftag[iopp]);
-      }
+    /* set sense of travel */
+    if ( pt->v[ _MMG5_ifar[i][0] ] == piv ) {
+      adj  = adja[ _MMG5_ifar[i][0] ] / 4;
+      ipiv = _MMG5_ifar[i][1];
+      iopp = _MMG5_ifar[i][0];
+      piv  = pt->v[ipiv];
     }
-    while ( adj && ( adj != k ) && !isface );
-
-    nbq = piv;
-    if ( nbp == nbq ) {
-      /*printf("%s: %d: On devrait rarement passer ici:",__FILE__,__LINE__);
-        printf(" k=%d (%d in saveMesh), nbp=%d (%d in saveMesh)\n",
-        k,_MMG3D_indElt(mesh,k),nbp,_MMG3D_indPt(mesh,nbp));*/
-      return(0);
+    else {
+      adj  = adja[ _MMG5_ifar[i][1] ] / 4;
+      ipiv = _MMG5_ifar[i][0];
+      iopp = _MMG5_ifar[i][1];
+      piv  = pt->v[ipiv];
     }
+
+    isface = 0;
+    if ( pt->xt ) {
+      pxt    = &mesh->xtetra[pt->xt];
+      isface = (MG_BDY & pxt->ftag[iopp]);
+    }
+  }
+  while ( adj && ( adj != k ) && !isface );
+
+  nbq = piv;
+  if ( nbp == nbq ) {
+    /*printf("%s: %d: On devrait rarement passer ici:",__FILE__,__LINE__);
+      printf(" k=%d (%d in saveMesh), nbp=%d (%d in saveMesh)\n",
+      k,_MMG3D_indElt(mesh,k),nbp,_MMG3D_indPt(mesh,nbp));*/
+    return(0);
   }
 
   return(1);
