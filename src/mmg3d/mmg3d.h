@@ -305,6 +305,7 @@ int    _MMG5_movbdyridpt_ani(MMG5_pMesh, MMG5_pSol,_MMG3D_pOctree, int*, int,
                              int*, int ,int);
 int    _MMG3D_movv_ani(MMG5_pMesh ,MMG5_pSol ,int ,int );
 int    _MMG3D_movv_iso(MMG5_pMesh ,MMG5_pSol ,int ,int );
+int  _MMG3D_normalAdjaTri(MMG5_pMesh,int,char,int,double n[3]);
 int  _MMG5_chkswpbdy(MMG5_pMesh, MMG5_pSol,int*, int, int, int,char);
 int  _MMG5_swpbdy(MMG5_pMesh,MMG5_pSol,int*,int,int,_MMG3D_pOctree,char);
 int  _MMG5_swpgen(MMG5_pMesh,MMG5_pSol,int, int, int*,_MMG3D_pOctree,char);

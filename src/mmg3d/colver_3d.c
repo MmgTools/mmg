@@ -128,8 +128,10 @@ int _MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
 }
 
 /** Topological check on the surface ball of np and nq in collapsing np->nq ;
- *  iface = boundary face on which lie edge iedg - in local face num.
- *  (pq, or ia in local tet notation) */
+ *  iface = boundary face on which lie edge iedg - in local face num.  (pq, or
+ *  ia in local tet notation). See the Mmg Google
+ *  Drive/Documentation/mmg3d/topchkcol_bdy3D.pdf for a picture of the
+ *  configuration */
 static int
 _MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,char iedg,int *lists,int ilists) {
   MMG5_pTetra   pt,pt0;
@@ -223,11 +225,7 @@ _MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,char iedg,int *lists,int ili
       if ( !_MMG5_norface(mesh,iel,iopp    ,n1) )  return(0);
 
       devnew = n0[0]*n1[0] + n0[1]*n1[1] + n0[2]*n1[2];
-      if ( devnew < mesh->info.dhd )  {
-#warning ajeter
-        printf("ON REJETTE DANS TOPCHKCOL 1\n");
-        return(0);
-      }
+      if ( devnew < mesh->info.dhd ) return(0);
     }
 
 
@@ -310,11 +308,7 @@ _MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,char iedg,int *lists,int ili
       if ( !_MMG5_norface(mesh,iel,iopp    ,n1) )  return(0);
 
       devnew = n0[0]*n1[0] + n0[1]*n1[1] + n0[2]*n1[2];
-      if ( devnew < mesh->info.dhd )  {
-#warning ajeter
-        printf("ON REJETTE DANS TOPCHKCOL 2\n");
-        return(0);
-      }
+      if ( devnew < mesh->info.dhd )  return(0);
     }
 
   }
@@ -620,10 +614,7 @@ int _MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
 
       devnew = nprvnew[0]*ncurnew[0] + nprvnew[1]*ncurnew[1] + nprvnew[2]*ncurnew[2];
 
-      if ( devnew < mesh->info.dhd )  {
-        printf("ON REJETTE POUR ADJACENT COLLAPSE\n");
-        return(0);
-      }
+      if ( devnew < mesh->info.dhd ) return(0);
     }
 
     if ( l > 1 ) {

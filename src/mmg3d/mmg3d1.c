@@ -495,7 +495,9 @@ int _MMG5_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree, int typchk
           /* CAUTION: trigger collapse with 2 elements */
           if ( ilist <= 1 )  continue;
           ier = _MMG5_chkswpbdy(mesh,met,list,ilist,it1,it2,typchk);
-          if ( ier ) {
+          if ( ier <  0 )
+            return -1;
+          else if ( ier ) {
             ier = _MMG5_swpbdy(mesh,met,list,ret,it1,octree,typchk);
             if ( ier > 0 )  ns++;
             else if ( ier < 0 )  return(-1);
