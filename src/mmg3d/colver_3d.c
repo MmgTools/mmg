@@ -135,9 +135,8 @@ _MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,char iedg,int *lists,int ili
   MMG5_pTetra   pt,pt0;
   MMG5_pxTetra  pxt;
   double        n0[3],n1[3],devnew;
-  int           nump,numq,piv0,piv,iel,jel,nap,nbp,naq,nbq,nro,adj,*adja;
-  int           iedgeOpp;
-  char          ip,iq,ipiv,iopp,i,j,jface,ipa,ipb,isface;
+  int           nump,numq,piv0,piv,iel,jel,jel1,nap,nbp,naq,nbq,nro,adj,*adja;
+  char          ip,iq,ipiv,iopp,i,j,j1,jface,jface1,ipa,ipb,isface;
 
   pt0  = &mesh->tetra[0];
 
@@ -215,16 +214,13 @@ _MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,char iedg,int *lists,int ili
       return(0);
     }
 
-    pxt = &mesh->xtetra[mesh->tetra[k].xt];
-    iedgeOpp = _MMG5_iarf[iface][ip];
-    if ( !pxt->tag[iedgeOpp] & MG_GEO ) {
-      /* Check the normal deviation between the boundary faces nump-numq-nro and
-       * numq-nro-.. */
-      memcpy(pt0,&mesh->tetra[k],sizeof(MMG5_Tetra));
-      pt0->v[ip] = numq;
+    if ( !( (pxt->tag[_MMG5_iarf[iface][_MMG5_inxt2[iedg]]] & MG_GEO) ||
+            (pxt->tag[_MMG5_iarf[iface][_MMG5_iprv2[iedg]]] & MG_GEO)   ) ) {
 
-      if ( !_MMG5_norface(mesh,0  ,iface,n0) )  return(0);
-      if ( !_MMG5_norface(mesh,iel,iopp ,n1) )  return(0);
+      /* Check the normal deviation between the boundary faces sharing the edge
+       * numq (or nump)-nro */
+      if ( !_MMG5_norpts (mesh,numq,nro,nap,n0) )  return(0);
+      if ( !_MMG5_norface(mesh,iel,iopp    ,n1) )  return(0);
 
       devnew = n0[0]*n1[0] + n0[1]*n1[1] + n0[2]*n1[2];
       if ( devnew < mesh->info.dhd )  {
@@ -236,14 +232,14 @@ _MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,char iedg,int *lists,int ili
 
 
     /*  Point nbp, facing the second vanishing face in surface ball of p */
-    jel   = lists[ilists-1] / 4;
-    jface = lists[ilists-1] % 4;
-    pt    = &mesh->tetra[jel];
-    for (j=0; j<3; j++) {
-      i = _MMG5_idir[jface][j];
+    jel1   = lists[ilists-1] / 4;
+    jface1 = lists[ilists-1] % 4;
+    pt     = &mesh->tetra[jel1];
+    for (j1=0; j1<3; j1++) {
+      i = _MMG5_idir[jface1][j1];
       if ( pt->v[i]!=nump && pt->v[i] != numq )  break;
     }
-    assert(j<3);
+    assert(j1<3);
 
     nro   = pt->v[i];
     jel   = lists[ilists-2] / 4;
@@ -303,25 +299,15 @@ _MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,char iedg,int *lists,int ili
       return(0);
     }
 
-    jel   = lists[ilists-1] / 4;
-    jface = lists[ilists-1] % 4;
-    pt    = &mesh->tetra[jel];
+    pxt      = &mesh->xtetra[mesh->tetra[jel1].xt];
 
-    for (j=0; j<3; j++) {
-      i = _MMG5_idir[jface][j];
-      if ( pt->v[i] == nump ) break;
-    }
+    if ( !( (pxt->tag[_MMG5_iarf[jface1][_MMG5_iprv2[j1]]] & MG_GEO) ||
+            (pxt->tag[_MMG5_iarf[jface1][_MMG5_inxt2[j1]]] & MG_GEO)   ) ) {
 
-    pxt = &mesh->xtetra[mesh->tetra[jel].xt];
-    iedgeOpp = _MMG5_iarf[jface][j];
-    if ( !pxt->tag[iedgeOpp] & MG_GEO ) {
-      /* Check the normal deviation between the boundary faces nump-numq-nro and
-       * numq-nro-.. */
-      memcpy(pt0,&mesh->tetra[jel],sizeof(MMG5_Tetra));
-      pt0->v[i] = numq;
-
-      if ( !_MMG5_norface(mesh,0  ,jface,n0) )  return(0);
-      if ( !_MMG5_norface(mesh,iel,iopp ,n1) )  return(0);
+      /* Check the normal deviation between the boundary faces sharing the edge
+       * numq (or nump)-nro */
+      if ( !_MMG5_norpts (mesh,nro,numq,nbp,n0) )  return(0);
+      if ( !_MMG5_norface(mesh,iel,iopp    ,n1) )  return(0);
 
       devnew = n0[0]*n1[0] + n0[1]*n1[1] + n0[2]*n1[2];
       if ( devnew < mesh->info.dhd )  {
@@ -470,7 +456,7 @@ _MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,char iedg,int *lists,int ili
  * \param met pointer toward the metric structure.
  * \param k index of element in which we collapse.
  * \param iface face through wich we perform the collapse
- * \param iedg edge to collapse
+ * \param iedg edge to collapse (in local face num)
  * \param listv pointer toward the list of the tetra in the ball of \a p0.
  * \param ilistv number of tetra in the ball of \a p0.
  * \param lists pointer toward the surfacic ball of \a p0.
