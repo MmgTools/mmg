@@ -113,7 +113,7 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
   int         npreq,ntreq,nereq,nedreq,nqreq,ncor,ned,ng,bin,iswp;
   int         binch,bdim,bpos,i,k,ip,idn;
   int         *ina,v[3],ref,nt,na,nr,ia,aux,nref;
-  char        *ptr,data[128],chaine[128];
+  char        *ptr,*data,chaine[128];
 
   posnp = posnt = posne = posncor = 0;
   posnpreq = posntreq = posnereq = posned = posnedreq = posnr = 0;
@@ -124,8 +124,11 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
   ina = NULL;
   mesh->np = mesh->nt = mesh->ne = 0;
 
+  _MMG5_SAFE_CALLOC(data,strlen(filename)+6,char);
+
   strcpy(data,filename);
   ptr = strstr(data,".mesh");
+
   if ( !ptr ) {
     /* data contains the filename without extension */
     strcat(data,".meshb");
@@ -151,6 +154,7 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
   }
 
   fprintf(stdout,"  %%%% %s OPENED\n",data);
+  _MMG5_SAFE_FREE(data);
 
   if (!bin) {
     strcpy(chaine,"D");
@@ -983,10 +987,13 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
   int          k,na,nc,np,ne,nn,nr,nre,nedreq,ntreq,nt,nereq;
   int          npr,nprreq,nq,nqreq;
   int          bin,binch,bpos;
-  char         data[128],chaine[128],*ptr;
+  char         *data,chaine[128],*ptr;
 
   mesh->ver = 2;
   bin = 0;
+
+  _MMG5_SAFE_CALLOC(data,strlen(filename)+6,char);
+
   strcpy(data,filename);
   ptr = strstr(data,".mesh");
   if ( !ptr ) {
@@ -1019,6 +1026,7 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
     }
   }
   fprintf(stdout,"  %%%% %s OPENED\n",data);
+  _MMG5_SAFE_FREE(data);
 
   /*entete fichier*/
   binch=0; bpos=10;
@@ -1630,12 +1638,13 @@ int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
   int         binch,bdim,iswp;
   int         i,k,bin,bpos;
   long        posnp;
-  char        *ptr,data[128],chaine[128];
+  char        *ptr,*data,chaine[128];
 
   posnp = 0;
   bin   = 0;
   iswp  = 0;
 
+  _MMG5_SAFE_CALLOC(data,strlen(filename)+6,char);
   strcpy(data,filename);
 
   ptr = strstr(data,".mesh");
@@ -1666,7 +1675,7 @@ int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
     }
   }
   fprintf(stdout,"  %%%% %s OPENED\n",data);
-
+  _MMG5_SAFE_FREE(data);
 
   /* read solution or metric */
   if(!bin) {
@@ -1894,7 +1903,7 @@ int MMG3D_saveSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
   FILE*        inm;
   MMG5_pPoint  ppt;
   double       dbuf[6],mtmp[3],r[3][3],tmp;
-  char        *ptr,data[128],chaine[128];
+  char        *ptr,*data,chaine[128];
   int          binch,bpos,bin,np,k,typ,i;
 
   if ( !met->m )  return(-1);
@@ -1902,6 +1911,7 @@ int MMG3D_saveSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
   met->ver = 2;
   bin = 0;
 
+  _MMG5_SAFE_CALLOC(data,strlen(filename)+6,char);
   strcpy(data,filename);
   ptr = strstr(data,".sol");
   if ( ptr ) {
@@ -1935,6 +1945,7 @@ int MMG3D_saveSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
   }
 
   fprintf(stdout,"  %%%% %s OPENED\n",data);
+  _MMG5_SAFE_FREE(data);
 
   /*entete fichier*/
   binch=bpos=0;
