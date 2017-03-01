@@ -195,8 +195,8 @@ PROGRAM main
   !> 1) Manually get the mesh (in this example we show how to save the mesh
   !!    in the mesh.o.mesh file)
   OPEN(unit=inm,file="mesh.o.mesh",form="formatted",status="replace")
-  WRITE(inm,*),"MeshVersionFormatted 2"
-  WRITE(inm,*),"Dimension 3"
+  WRITE(inm,*) "MeshVersionFormatted 2"
+  WRITE(inm,*) "Dimension 3"
 
   !> a) get the size of the mesh: vertices, tetra,prisms, triangles, quads,edges
   CALL MMG3D_Get_meshSize(mmgMesh,np,ne,%val(0),nt,%val(0),na,ier)
@@ -213,8 +213,8 @@ PROGRAM main
 
   nreq = 0; nc = 0
   WRITE(inm,*)
-  WRITE(inm,*),"Vertices"
-  WRITE(inm,*),np
+  WRITE(inm,*) "Vertices"
+  WRITE(inm,*) np
 
   DO k=1, np
      !> b) Vertex recovering
@@ -224,96 +224,96 @@ PROGRAM main
           ref,corner(k),required(k),ier)
      IF ( ier /= 1 ) CALL EXIT(109)
 
-     WRITE(inm,FMT),Point(1),Point(2),Point(3),ref
+     WRITE(inm,FMT) Point(1),Point(2),Point(3),ref
      IF ( corner(k)/=0 )  nc=nc+1
      IF ( required(k)/=0 )  nreq=nreq+1
   ENDDO
 
   WRITE(inm,*)
-  WRITE(inm,*),"Corners"
-  WRITE(inm,*), nc
+  WRITE(inm,*) "Corners"
+  WRITE(inm,*)  nc
 
   DO k=1, np
-    IF ( corner(k)/=0 )  WRITE(inm,*) ,k
+    IF ( corner(k)/=0 )  WRITE(inm,*) k
   ENDDO
   WRITE(inm,*)
 
-  WRITE(inm,*),"RequiredVertices"
-  WRITE(inm,*), nreq
+  WRITE(inm,*) "RequiredVertices"
+  WRITE(inm,*)  nreq
 
   DO k=1,np
-    IF ( required(k)/=0 ) WRITE(inm,*),k
+    IF ( required(k)/=0 ) WRITE(inm,*) k
   ENDDO
   WRITE(inm,*)
   DEALLOCATE(corner)
 
   nreq = 0;
-  WRITE(inm,*),"Triangles"
-  WRITE(inm,*),nt
+  WRITE(inm,*) "Triangles"
+  WRITE(inm,*) nt
 
   DO k=1,nt
     !> d) Triangles recovering
      CALL MMG3D_Get_triangle(mmgMesh,Tria(1),Tria(2),Tria(3),ref,required(k),ier)
      IF ( ier /= 1 ) CALL EXIT(110)
-     WRITE(inm,*),Tria(1),Tria(2),Tria(3),ref
+     WRITE(inm,*) Tria(1),Tria(2),Tria(3),ref
      IF ( required(k)/=0 )  nreq=nreq+1;
   ENDDO
   WRITE(inm,*)
 
-  WRITE(inm,*),"RequiredTriangles"
-  WRITE(inm,*),nreq
+  WRITE(inm,*) "RequiredTriangles"
+  WRITE(inm,*) nreq
   DO k=1,nt
-    IF ( required(k)/=0 ) WRITE(inm,*),k
+    IF ( required(k)/=0 ) WRITE(inm,*) k
   ENDDO
   WRITE(inm,*)
 
   nreq = 0;nr = 0;
-  WRITE(inm,*),"Edges"
-  WRITE(inm,*),na
+  WRITE(inm,*) "Edges"
+  WRITE(inm,*) na
   DO k=1,na
      !> e) Edges recovering
      CALL MMG3D_Get_edge(mmgMesh,Edge(1),Edge(2),ref,ridge(k),required(k),ier)
      IF ( ier /= 1 ) CALL EXIT(111)
-     WRITE(inm,*),Edge(1),Edge(2),ref
+     WRITE(inm,*) Edge(1),Edge(2),ref
      IF ( ridge(k)/=0 )     nr = nr+1
      IF ( required(k)/=0 )  nreq = nreq+1
   ENDDO
   WRITE(inm,*)
 
-  WRITE(inm,*),"RequiredEdges"
-  WRITE(inm,*),nreq
+  WRITE(inm,*) "RequiredEdges"
+  WRITE(inm,*) nreq
   DO k=1,na
-    IF ( required(k) /=0 ) WRITE(inm,*),k
+    IF ( required(k) /=0 ) WRITE(inm,*) k
   ENDDO
   WRITE(inm,*)
 
-  WRITE(inm,*),"Ridges"
-  WRITE(inm,*),nr
+  WRITE(inm,*) "Ridges"
+  WRITE(inm,*) nr
   DO k=1,na
-    IF ( ridge(k) /=0 ) WRITE(inm,*),k
+    IF ( ridge(k) /=0 ) WRITE(inm,*) k
   ENDDO
   WRITE(inm,*)
 
   nreq = 0;
-  WRITE(inm,*),"Tetrahedra"
-  WRITE(inm,*),ne
+  WRITE(inm,*) "Tetrahedra"
+  WRITE(inm,*) ne
   DO k=1,ne
     !> c) Tetra recovering
      CALL MMG3D_Get_tetrahedron(mmgMesh,Tetra(1),Tetra(2),Tetra(3),Tetra(4),&
           ref,required(k),ier)
     IF ( ier /= 1 ) CALL EXIT(112)
-    WRITE(inm,*),Tetra(1),Tetra(2),Tetra(3),Tetra(4),ref
+    WRITE(inm,*) Tetra(1),Tetra(2),Tetra(3),Tetra(4),ref
     IF ( required(k) /= 0 )  nreq = nreq+1
   ENDDO
   WRITE(inm,*)
 
-  WRITE(inm,*),"RequiredTetrahedra"
-  WRITE(inm,*),nreq
+  WRITE(inm,*) "RequiredTetrahedra"
+  WRITE(inm,*) nreq
   DO k=1,ne
-    IF ( required(k) /= 0 ) WRITE(inm,*),k
+    IF ( required(k) /= 0 ) WRITE(inm,*) k
   ENDDO
 
-  WRITE(inm,*),"End"
+  WRITE(inm,*) "End"
   CLOSE(inm)
 
   DEALLOCATE(required)
@@ -322,8 +322,8 @@ PROGRAM main
   !> 2) Manually get the solution (in this example we show how to save the
   !!    solution in the mesh.o.sol file)
   OPEN(unit=inm,file="mesh.o.sol",form="formatted",status="replace")
-  WRITE(inm,*),"MeshVersionFormatted 2"
-  WRITE(inm,*),"Dimension 3"
+  WRITE(inm,*) "MeshVersionFormatted 2"
+  WRITE(inm,*) "Dimension 3"
   WRITE(inm,*)
 
   !> a) get the size of the sol: type of entity (SolAtVertices,...),
@@ -335,19 +335,19 @@ PROGRAM main
      CALL EXIT(114);
   ENDIF
 
-  WRITE(inm,*),"SolAtVertices"
-  WRITE(inm,*),np
-  WRITE(inm,*),"1 1"
+  WRITE(inm,*) "SolAtVertices"
+  WRITE(inm,*) np
+  WRITE(inm,*) "1 1"
   WRITE(inm,*)
   DO k=1,np
     !> b) Vertex recovering
      CALL MMG3D_Get_scalarSol(mmgSol,Sol,ier)
      IF ( ier /= 1 ) CALL EXIT(115)
-     WRITE(inm,*),Sol
+     WRITE(inm,*) Sol
   ENDDO
   WRITE(inm,*)
 
-  WRITE(inm,*),"End"
+  WRITE(inm,*) "End"
   CLOSE(inm)
 
   !> 3) Free the MMG3D5 structures

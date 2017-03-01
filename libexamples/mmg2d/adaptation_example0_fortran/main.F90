@@ -118,8 +118,8 @@ PROGRAM main
   !> First solution: Manually get the mesh (in this example we show how to save the mesh
   !!    in the sortie.mesh file)
   OPEN(unit=inm,file=filename,form="formatted",status="replace")
-  WRITE(inm,*),"MeshVersionFormatted 2"
-  WRITE(inm,*),"Dimension 2"
+  WRITE(inm,*) "MeshVersionFormatted 2"
+  WRITE(inm,*) "Dimension 2"
 
   !> a) get the size of the mesh: vertices triangles, edges
 
@@ -139,8 +139,8 @@ PROGRAM main
 
   nreq = 0; nc = 0
   WRITE(inm,*)
-  WRITE(inm,*),"Vertices"
-  WRITE(inm,*),np
+  WRITE(inm,*) "Vertices"
+  WRITE(inm,*) np
 
   DO k=1, np
      !> b) Vertex recovering
@@ -165,8 +165,8 @@ PROGRAM main
 
   ! Comment if you don't want to get the corners
   !!$ WRITE(inm,*)
-  !!$ WRITE(inm,*),"Corners"
-  !!$ WRITE(inm,*), nc
+  !!$ WRITE(inm,*) "Corners"
+  !!$ WRITE(inm,*)  nc
   !!$
   !!$ DO k=1, np
   !!$   IF ( corner(k)/=0 )  WRITE(inm,*) ,k
@@ -174,18 +174,18 @@ PROGRAM main
   !!$ WRITE(inm,*)
   !!$
   ! Comment if you don't want to get the required vertices
-  !!$ WRITE(inm,*),"RequiredVertices"
-  !!$ WRITE(inm,*), nreq
+  !!$ WRITE(inm,*) "RequiredVertices"
+  !!$ WRITE(inm,*)  nreq
   !!$
   !!$ DO k=1,np
-  !!$   IF ( required(k)/=0 ) WRITE(inm,*),k
+  !!$   IF ( required(k)/=0 ) WRITE(inm,*) k
   !!$ ENDDO
   !!$ WRITE(inm,*)
   !!$ DEALLOCATE(corner)
 
   nreq = 0;
-  WRITE(inm,*),"Triangles"
-  WRITE(inm,*),nt
+  WRITE(inm,*) "Triangles"
+  WRITE(inm,*) nt
 
   DO k=1,nt
     !> d) Triangles recovering
@@ -195,23 +195,23 @@ PROGRAM main
      CALL MMG2D_Get_triangle(mmgMesh,Tria(1),Tria(2),Tria(3),ref,%val(0),ier)
 
      IF ( ier /= 1 ) CALL EXIT(110)
-     WRITE(inm,*),Tria(1),Tria(2),Tria(3),ref
+     WRITE(inm,*) Tria(1),Tria(2),Tria(3),ref
      ! Comment if you don't want to get the required triangles
      !!$ IF ( required(k)/=0 )  nreq=nreq+1;
   ENDDO
   WRITE(inm,*)
 
   ! Comment if you don't want to get the required triangles
-  !!$ WRITE(inm,*),"RequiredTriangles"
-  !!$ WRITE(inm,*),nreq
+  !!$ WRITE(inm,*) "RequiredTriangles"
+  !!$ WRITE(inm,*) nreq
   !!$ DO k=1,nt
-  !!$   IF ( required(k)/=0 ) WRITE(inm,*),k
+  !!$   IF ( required(k)/=0 ) WRITE(inm,*) k
   !!$ ENDDO
   !!$ WRITE(inm,*)
 
   nreq = 0;nr = 0;
-  WRITE(inm,*),"Edges"
-  WRITE(inm,*),na
+  WRITE(inm,*) "Edges"
+  WRITE(inm,*) na
   DO k=1,na
      !> e) Edges recovering
      !!$ CALL MMG2D_Get_edge(mmgMesh,Edge(1),Edge(2),ref,ridge(k),required(k),ier)
@@ -219,7 +219,7 @@ PROGRAM main
      CALL MMG2D_Get_edge(mmgMesh,Edge(1),Edge(2),ref,%val(0),%val(0),ier)
 
      IF ( ier /= 1 ) CALL EXIT(111)
-     WRITE(inm,*),Edge(1),Edge(2),ref
+     WRITE(inm,*) Edge(1),Edge(2),ref
 
      ! Comment if you don't want to get the ridges
      !!$ IF ( ridge(k)/=0 )     nr = nr+1
@@ -229,22 +229,22 @@ PROGRAM main
   WRITE(inm,*)
 
   ! Comment if you don't want to get the required edges
-  !!$ WRITE(inm,*),"RequiredEdges"
-  !!$ WRITE(inm,*),nreq
+  !!$ WRITE(inm,*) "RequiredEdges"
+  !!$ WRITE(inm,*) nreq
   !!$ DO k=1,na
-  !!$   IF ( required(k) /=0 ) WRITE(inm,*),k
+  !!$   IF ( required(k) /=0 ) WRITE(inm,*) k
   !!$ ENDDO
   !!$ WRITE(inm,*)
 
   ! Comment if you don't want to get the ridges
-  !!$ WRITE(inm,*),"Ridges"
-  !!$ WRITE(inm,*),nr
+  !!$ WRITE(inm,*) "Ridges"
+  !!$ WRITE(inm,*) nr
   !!$ DO k=1,na
-  !!$   IF ( ridge(k) /=0 ) WRITE(inm,*),k
+  !!$   IF ( ridge(k) /=0 ) WRITE(inm,*) k
   !!$ ENDDO
   !!$ WRITE(inm,*)
 
-  WRITE(inm,*),"End"
+  WRITE(inm,*) "End"
   CLOSE(inm)
 
   ! Comment if you don't want to get the required edges
