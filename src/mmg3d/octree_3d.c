@@ -1180,11 +1180,13 @@ int NearNeighborSquare(MMG5_pMesh mesh, double* ani, _MMG3D_pOctree q, int no, d
   MMG5_pPoint   ppt,ppt1;
   _MMG3D_octree_s** qlist;
   int ns,nver;
-  double rect[2*dim];
+  double *rect;
   double lmin =10;
   double x,y,z;
   int nmin;
   int i, j;
+
+  _MMG5_SAFE_MALLOC(rect,2*dim,double);
 
   ppt = &mesh->point[no];
   rect[0] = ppt->c[0]-l;
@@ -1221,6 +1223,7 @@ int NearNeighborSquare(MMG5_pMesh mesh, double* ani, _MMG3D_pOctree q, int no, d
   }
 
   _MMG5_SAFE_FREE(qlist);
+  _MMG5_SAFE_FREE(rect);
 
   if (sqrt(lmin)<l)
     return nmin;
