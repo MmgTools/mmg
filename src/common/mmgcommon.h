@@ -56,7 +56,7 @@ extern "C" {
 #include "libmmgcommon.h"
 
 #define MG_VER   "5.2.2"
-#define MG_REL   "Feb 8, 2017"
+#define MG_REL   "Mar 1, 2017"
 #define MG_CPY   "Copyright (c) IMB-LJLL, 2004-"
 #define MG_STR   "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"
 
