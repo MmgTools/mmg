@@ -282,36 +282,46 @@ int _MMG5_intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr) {
       dm[0]   = 0.5 * (trimn + sqDelta);
       dm[1]   = 0.5 * (trimn - sqDelta);
 
-      vp0[0] = m[1];
-      vp0[1] = (dm[0]-m[0]);
-      vnorm  = sqrt(vp0[0]*vp0[0] + vp0[1]*vp0[1]);
-      if ( vnorm < _MMG5_EPS ) {
-        vp0[0] = (dm[0] - m[2]);
-        vp0[1] = m[1];
+      if(fabs(dm[0]-dm[1]) < _MMG5_EPS) {
+        vp0[1] = 0;
+        vp1[0] = 0;
+        vp1[1] = 1;
+        vp0[0] = 1;
+        vp0[1] = 0;
+        vp1[0] = 0;
+        vp1[1] = 1;
+      } else {
+        vp0[0] = m[1];
+        vp0[1] = (dm[0]-m[0]);
         vnorm  = sqrt(vp0[0]*vp0[0] + vp0[1]*vp0[1]);
+        if ( vnorm < _MMG5_EPS ) {
+          vp0[0] = (dm[0] - m[2]);
+          vp0[1] = m[1];
+          vnorm  = sqrt(vp0[0]*vp0[0] + vp0[1]*vp0[1]);
 
-        if ( vnorm < _MMG5_EPS ) return(0);
-      }
+          if ( vnorm < _MMG5_EPS ) return(0);
+        }
 
-      vnorm   = 1.0 / vnorm;
-      vp0[0] *= vnorm;
-      vp0[1] *= vnorm;
+        vnorm   = 1.0 / vnorm;
+        vp0[0] *= vnorm;
+        vp0[1] *= vnorm;
 
-      vp1[0] = m[1];
-      vp1[1] = (dm[1]-m[0]);
-      vnorm  = sqrt(vp1[0]*vp1[0] + vp1[1]*vp1[1]);
-
-      if ( vnorm < _MMG5_EPS ) {
-        vp1[0] = (dm[1] - m[2]);
-        vp1[1] = m[1];
+        vp1[0] = m[1];
+        vp1[1] = (dm[1]-m[0]);
         vnorm  = sqrt(vp1[0]*vp1[0] + vp1[1]*vp1[1]);
 
-        if ( vnorm < _MMG5_EPS ) return(0);
-      }
+        if ( vnorm < _MMG5_EPS ) {
+          vp1[0] = (dm[1] - m[2]);
+          vp1[1] = m[1];
+          vnorm  = sqrt(vp1[0]*vp1[0] + vp1[1]*vp1[1]);
 
-      vnorm   = 1.0 / vnorm;
-      vp1[0] *= vnorm;
-      vp1[1] *= vnorm;
+          if ( vnorm < _MMG5_EPS ) return(0);
+        }
+
+        vnorm   = 1.0 / vnorm;
+        vp1[0] *= vnorm;
+        vp1[1] *= vnorm;
+      }
     }
     /* Eigenvalues of the resulting matrix*/
     dn[0] = MG_MAX(dm[0],lambda[0]*dm[0]);
