@@ -68,10 +68,6 @@ CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/src/common/mmgcommon.h.in
 #####
 ###############################################################################
 
-# To see flags and options of compilation
-#SET(CMAKE_VERBOSE_MAKEFILE TRUE)
-
-
 # Find "exotic" compilers
 IF (${CMAKE_C_COMPILER} MATCHES Clang OR ${CMAKE_C_COMPILER} MATCHES clang)
   # using clang
