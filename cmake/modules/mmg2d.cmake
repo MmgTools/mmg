@@ -177,14 +177,19 @@ ENDIF ( )
 TARGET_LINK_LIBRARIES(${PROJECT_NAME}2d ${LIBRARIES})
 INSTALL(TARGETS ${PROJECT_NAME}2d RUNTIME DESTINATION bin)
 
-# in debug mode we name the executable mmg2d_debug
-SET_TARGET_PROPERTIES(${PROJECT_NAME}2d PROPERTIES DEBUG_POSTFIX _debug)
-# in Release mode we name the executable mmg2d_O3
-SET_TARGET_PROPERTIES(${PROJECT_NAME}2d PROPERTIES RELEASE_POSTFIX _O3)
-# in RelWithDebInfo mode we name the executable mmg2d_O3d
-SET_TARGET_PROPERTIES(${PROJECT_NAME}2d PROPERTIES RELWITHDEBINFO_POSTFIX _O3d)
-# in MinSizeRel mode we name the executable mmg2d_O3
-SET_TARGET_PROPERTIES(${PROJECT_NAME}2d PROPERTIES MINSIZEREL_POSTFIX _Os)
+IF ( CMAKE_BUILD_TYPE MATCHES "Debug" )
+  # in debug mode we name the executable mmg2d_debug
+  SET_TARGET_PROPERTIES(${PROJECT_NAME}2d PROPERTIES DEBUG_POSTFIX _debug)
+ELSEIF ( CMAKE_BUILD_TYPE MATCHES "Release" )
+  # in Release mode we name the executable mmg2d_O3
+  SET_TARGET_PROPERTIES(${PROJECT_NAME}2d PROPERTIES RELEASE_POSTFIX _O3)
+ELSEIF ( CMAKE_BUILD_TYPE MATCHES "RelWithDebInfo" )
+  # in RelWithDebInfo mode we name the executable mmg2d_O3d
+  SET_TARGET_PROPERTIES(${PROJECT_NAME}2d PROPERTIES RELWITHDEBINFO_POSTFIX _O3d)
+ELSEIF ( CMAKE_BUILD_TYPE MATCHES "MinSizeRel" )
+  # in MinSizeRel mode we name the executable mmg2d_O3
+  SET_TARGET_PROPERTIES(${PROJECT_NAME}2d PROPERTIES MINSIZEREL_POSTFIX _Os)
+ENDIF ( )
 
 ###############################################################################
 #####
@@ -202,17 +207,17 @@ IF ( BUILD_TESTING )
   ##--------------------------- Add tests and configure it ------------##
   ##-------------------------------------------------------------------##
   # Add runtime that we want to test for mmg2d
-  IF( MMG2D_CI )
-    IF(${CMAKE_BUILD_TYPE} MATCHES "Debug")
+  IF ( MMG2D_CI )
+    IF ( CMAKE_BUILD_TYPE MATCHES "Debug" )
       SET(EXECUT_MMG2D ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}2d_debug)
       SET(BUILDNAME ${BUILDNAME}_debug CACHE STRING "build name variable")
-    ELSEIF(${CMAKE_BUILD_TYPE} MATCHES "Release")
+    ELSEIF ( CMAKE_BUILD_TYPE MATCHES "Release" )
       SET(EXECUT_MMG2D ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}2d_O3)
       SET(BUILDNAME ${BUILDNAME}_O3 CACHE STRING "build name variable")
-    ELSEIF(${CMAKE_BUILD_TYPE} MATCHES "RelWithDebInfo")
+    ELSEIF( CMAKE_BUILD_TYPE MATCHES "RelWithDebInfo" )
       SET(EXECUT_MMG2D ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}2d_O3d)
       SET(BUILDNAME ${BUILDNAME}_O3d CACHE STRING "build name variable")
-    ELSEIF(${CMAKE_BUILD_TYPE} MATCHES "MinSizeRel")
+    ELSEIF ( CMAKE_BUILD_TYPE MATCHES "MinSizeRel" )
       SET(EXECUT_MMG2D ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}2d_Os)
       SET(BUILDNAME ${BUILDNAME}_Os CACHE STRING "build name variable")
     ELSE()
