@@ -245,7 +245,7 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename,
   int         ver,oneBin,k,i;
   int         nt,na,nq,ne,npr,np;
   int         typ,tagNum;
-  char        *ptr,data[128],chaine[128],verNum[3];
+  char        *ptr,data[128],chaine[128],verNum[5];
 
   ver = oneBin = 0;
   *posNodes = 0;
