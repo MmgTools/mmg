@@ -242,11 +242,10 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename,
                            int *nelts) {
   double      dbuf[9];
   float       fbuf[9];
-  size_t      len;
   int         ver,oneBin,k,i;
   int         nt,na,nq,ne,npr,np;
   int         typ,tagNum;
-  char        *line,*ptr,data[128],chaine[128],verNum[3];
+  char        *ptr,data[128],chaine[128],verNum[5];
 
   ver = oneBin = 0;
   *posNodes = 0;
@@ -255,8 +254,6 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename,
   *nelts = 0;
   *bin = 0;
   *iswp = 0;
-  line = NULL;
-  len = 0;
   mesh->np = mesh->nt = mesh->ne = 0;
   nt = na = nq = ne = npr = np = 0;
 
@@ -281,7 +278,6 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename,
       return(0);
     }
   }
-
   fprintf(stdout,"  %%%% %s OPENED\n",data);
 
 
@@ -335,13 +331,13 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename,
         /* String tags */
         fscanf((*inm),"%d ",&tagNum);
         for ( k=0; k<tagNum; ++k ) {
-          getline(&line, &len,(*inm));
+          fscanf((*inm),"%*[^\n]%*c");
         }
 
         /* Real tags */
         fscanf((*inm),"%d ",&tagNum);
         for ( k=0; k<tagNum; ++k ) {
-          getline(&line, &len,(*inm));
+          fscanf((*inm),"%*[^\n]%*c");
         }
 
         /* Integer tags */
@@ -405,7 +401,7 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename,
             ++np;
             break;
           }
-          getline(&line,&len,*inm);
+          fscanf((*inm),"%*[^\n]%*c");
         }
       }
       else {
@@ -470,15 +466,12 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
   MMG5_pPoint ppt;
   double      aux, dbuf[9];
   float       fbuf[9],fc;
-  size_t      len;
   int         k,i,l,nref,iadr;
   int         *ina_t,*ina_a,nt,na,nq,ne,npr;
   int         nbl_t,nbl_a,typ,tagNum,ref,idx,num;
   int         v[4];
-  char        *line;
 
   ina_t = ina_a = NULL;
-  line = NULL;
 
   /** Second step: read the nodes and elements */
   rewind((*inm));
@@ -1113,13 +1106,13 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
     /* String tags ignored */
     fscanf((*inm),"%d ",&tagNum);
     for ( k=0; k<=tagNum; ++k ) {
-      getline(&line, &len,(*inm));
+      fscanf((*inm),"%*[^\n]%*c");
     }
 
     /* Real tags ignored */
     fscanf((*inm),"%d ",&tagNum);
     for ( k=0; k<=tagNum; ++k ) {
-      getline(&line, &len,(*inm));
+      fscanf((*inm),"%*[^\n]%*c");
     }
 
     /* Integer tags : allow to recover the number of sols and their types */
@@ -1322,8 +1315,6 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
   }
 
   fclose((*inm));
-
-  if ( line ) _MMG5_SAFE_FREE(line);
 
   return(1);
 }
