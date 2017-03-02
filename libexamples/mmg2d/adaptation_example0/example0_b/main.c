@@ -161,7 +161,7 @@ int main(int argc,char *argv[]) {
     if ( MMG2D_Get_vertex(mmgMesh,&(Point[0]),&(Point[1]),
                           &ref,&(corner[k]),&(required[k])) != 1 )
       exit(EXIT_FAILURE);
-    fprintf(inm,"%.15lg %.15lg %.15lg %d \n",Point[0],Point[1],Point[2],ref);
+    fprintf(inm,"%.15lg %.15lg %d \n",Point[0],Point[1],ref);
     if ( corner[k] )  nc++;
     if ( required[k] )  nreq++;
   }
