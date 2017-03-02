@@ -167,17 +167,15 @@ ENDIF()
 #####
 ############################################################################
 
-IF ( NOT WIN32 )
-  ADD_EXECUTABLE(genheader ${CMAKE_SOURCE_DIR}/scripts/genheader.c)
-  ADD_CUSTOM_COMMAND(OUTPUT ${COMMON_BINARY_DIR}/libmmgtypesf.h
-    COMMAND genheader ${COMMON_BINARY_DIR}/libmmgtypesf.h
-    ${COMMON_SOURCE_DIR}/libmmgtypes.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    DEPENDS genheader ${COMMON_SOURCE_DIR}/libmmgtypes.h
-    ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
-    COMMENT "Generating Fortran header for libmmgtypes.h file"
-    )
-ENDIF()
+ADD_EXECUTABLE(genheader ${CMAKE_SOURCE_DIR}/scripts/genheader.c)
+ADD_CUSTOM_COMMAND(OUTPUT ${COMMON_BINARY_DIR}/libmmgtypesf.h
+  COMMAND genheader ${COMMON_BINARY_DIR}/libmmgtypesf.h
+  ${COMMON_SOURCE_DIR}/libmmgtypes.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+  DEPENDS genheader ${COMMON_SOURCE_DIR}/libmmgtypes.h
+  ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
+  COMMENT "Generating Fortran header for libmmgtypes.h file"
+  )
 
 ###############################################################################
 #####
@@ -587,24 +585,5 @@ SET(CPACK_OUTPUT_FILE_PREFIX "../archives")
 #SET(CPACK_SOURCE_IGNORE_FILES ";build*" ${CPACK_SOURCE_IGNORE_FILES}  )
 #SET(CPACK_SOURCE_IGNORE_FILES ";doc/doxygen/.*/html;doc/doxygen/.*/Doxyfile$"
 #  ${CPACK_SOURCE_IGNORE_FILES}  )
-
-#IF ( WIN32 AND (NOT UNIX) )
-#  #  # Warning compilation under windows not tested
-#  #  #SET(CPACK_PACKAGE_ICON "${CMAKE_SOURCE_DIR}/logo.pdf")
-#  #  SET(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\${PROJECT_NAME}.exe")
-#  #  SET(CPACK_NSIS_DISPLAY_NAME
-#  #    "${CPACK_PACKAGE_INSTALL_DIRECTORY} mmg: surface and volume remeshers")
-#  #  SET(CPACK_NSIS_HELP_LINK "http:\\\\\\\\www.mmgtools.org‎")
-#  #  SET(CPACK_NSIS_URL_INFO_ABOUT
-#  #    "http:\\\\\\\\www.math.u-bordeaux1.fr/~dobrzyns/.../mmg3d.php‎")
-#  #  SET(CPACK_NSIS_CONTACT ${CPACK_PACKAGE_CONTACT})
-#  #  SET(CPACK_NSIS_MODIFY_PATH ON) # Choice to add prog dir to the system PATH
-#  #  SET(CPACK_PACKAGING_INSTALL_PREFIX "${PROJECT_NAME}" CACHE PATH
-#  #    "Where you want to install your package")
-#  #  MARK_AS_ADVANCED(CPACK_PACKAGING_INSTALL_PREFIX)
-#  #ELSEIF (APPLE )
-#  #  SET(CPACK_BINARY_OSX11 "ON")
-#  #ELSEIF ( UNIX )
-#ENDIF (  WIN32 AND (NOT UNIX) )
 
 INCLUDE(CPack)

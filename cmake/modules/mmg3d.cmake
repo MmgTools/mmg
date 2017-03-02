@@ -37,18 +37,16 @@ FILE(MAKE_DIRECTORY ${MMG3D_BINARY_DIR})
 #####
 ############################################################################
 
-IF ( NOT WIN32 )
-  ADD_CUSTOM_COMMAND(OUTPUT ${MMG3D_BINARY_DIR}/libmmg3df.h
-    COMMAND genheader ${MMG3D_BINARY_DIR}/libmmg3df.h
-    ${MMG3D_SOURCE_DIR}/libmmg3d.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    DEPENDS genheader ${MMG3D_SOURCE_DIR}/libmmg3d.h
-    ${COMMON_BINARY_DIR}/libmmgtypesf.h
-    ${COMMON_SOURCE_DIR}/libmmgtypes.h
-    ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
-    COMMENT "Generating Fortran header for mmg3d"
-    )
-ENDIF()
+ADD_CUSTOM_COMMAND(OUTPUT ${MMG3D_BINARY_DIR}/libmmg3df.h
+  COMMAND genheader ${MMG3D_BINARY_DIR}/libmmg3df.h
+  ${MMG3D_SOURCE_DIR}/libmmg3d.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+  DEPENDS genheader ${MMG3D_SOURCE_DIR}/libmmg3d.h
+  ${COMMON_BINARY_DIR}/libmmgtypesf.h
+  ${COMMON_SOURCE_DIR}/libmmgtypes.h
+  ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
+  COMMENT "Generating Fortran header for mmg3d"
+  )
 
 ############################################################################
 #####

@@ -37,18 +37,16 @@ FILE(MAKE_DIRECTORY ${MMG2D_BINARY_DIR})
 #####
 ############################################################################
 
-IF ( NOT WIN32 )
-  ADD_CUSTOM_COMMAND(OUTPUT ${MMG2D_BINARY_DIR}/libmmg2df.h
-    COMMAND genheader ${MMG2D_BINARY_DIR}/libmmg2df.h
-    ${MMG2D_SOURCE_DIR}/libmmg2d.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    DEPENDS genheader ${MMG2D_SOURCE_DIR}/libmmg2d.h
-    ${COMMON_BINARY_DIR}/libmmgtypesf.h
-    ${COMMON_SOURCE_DIR}/libmmgtypes.h
-    ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
-    COMMENT "Generating Fortran header for mmg2d"
-    )
-ENDIF()
+ADD_CUSTOM_COMMAND(OUTPUT ${MMG2D_BINARY_DIR}/libmmg2df.h
+  COMMAND genheader ${MMG2D_BINARY_DIR}/libmmg2df.h
+  ${MMG2D_SOURCE_DIR}/libmmg2d.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+  DEPENDS genheader ${MMG2D_SOURCE_DIR}/libmmg2d.h
+  ${COMMON_BINARY_DIR}/libmmgtypesf.h
+  ${COMMON_SOURCE_DIR}/libmmgtypes.h
+  ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
+  COMMENT "Generating Fortran header for mmg2d"
+  )
 
 ###############################################################################
 #####

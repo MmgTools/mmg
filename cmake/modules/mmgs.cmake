@@ -37,18 +37,16 @@ SET(MMGS_BINARY_DIR ${CMAKE_BINARY_DIR}/src/mmgs)
 
 FILE(MAKE_DIRECTORY ${MMGS_BINARY_DIR})
 
-IF ( NOT WIN32 )
-  ADD_CUSTOM_COMMAND(OUTPUT ${MMGS_BINARY_DIR}/libmmgsf.h
-    COMMAND genheader ${MMGS_BINARY_DIR}/libmmgsf.h
-    ${MMGS_SOURCE_DIR}/libmmgs.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    DEPENDS genheader ${MMGS_SOURCE_DIR}/libmmgs.h
-    ${COMMON_BINARY_DIR}/libmmgtypesf.h
-    ${COMMON_SOURCE_DIR}/libmmgtypes.h
-    ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
-    COMMENT "Generating Fortran header for mmgs"
-    )
-ENDIF ( )
+ADD_CUSTOM_COMMAND(OUTPUT ${MMGS_BINARY_DIR}/libmmgsf.h
+  COMMAND genheader ${MMGS_BINARY_DIR}/libmmgsf.h
+  ${MMGS_SOURCE_DIR}/libmmgs.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+  DEPENDS genheader ${MMGS_SOURCE_DIR}/libmmgs.h
+  ${COMMON_BINARY_DIR}/libmmgtypesf.h
+  ${COMMON_SOURCE_DIR}/libmmgtypes.h
+  ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
+  COMMENT "Generating Fortran header for mmgs"
+  )
 
 ###############################################################################
 #####
