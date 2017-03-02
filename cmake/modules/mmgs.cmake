@@ -27,6 +27,7 @@
 ## =============================================================================
 
 SET(MMGS_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src/mmgs)
+SET(MMGS_BINARY_DIR ${CMAKE_BINARY_DIR}/src/mmgs)
 
 ############################################################################
 #####
@@ -34,18 +35,18 @@ SET(MMGS_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src/mmgs)
 #####
 ############################################################################
 
-IF ( NOT WIN32 )
-  ADD_CUSTOM_COMMAND(OUTPUT ${MMGS_SOURCE_DIR}/libmmgsf.h
-    COMMAND genheader ${MMGS_SOURCE_DIR}/libmmgsf.h
-    ${MMGS_SOURCE_DIR}/libmmgs.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    DEPENDS genheader ${MMGS_SOURCE_DIR}/libmmgs.h
-    ${COMMON_SOURCE_DIR}/libmmgtypesf.h
-    ${COMMON_SOURCE_DIR}/libmmgtypes.h
-    ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
-    COMMENT "Generating Fortran header for mmgs"
-    )
-ENDIF ( )
+FILE(MAKE_DIRECTORY ${MMGS_BINARY_DIR})
+
+ADD_CUSTOM_COMMAND(OUTPUT ${MMGS_BINARY_DIR}/libmmgsf.h
+  COMMAND genheader ${MMGS_BINARY_DIR}/libmmgsf.h
+  ${MMGS_SOURCE_DIR}/libmmgs.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+  DEPENDS genheader ${MMGS_SOURCE_DIR}/libmmgs.h
+  ${COMMON_BINARY_DIR}/libmmgtypesf.h
+  ${COMMON_SOURCE_DIR}/libmmgtypes.h
+  ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
+  COMMENT "Generating Fortran header for mmgs"
+  )
 
 ###############################################################################
 #####
@@ -55,6 +56,7 @@ ENDIF ( )
 
 # Header files
 INCLUDE_DIRECTORIES(${MMGS_SOURCE_DIR})
+INCLUDE_DIRECTORIES(${COMMON_BINARY_DIR})
 
 # Source files
 FILE(
@@ -62,12 +64,13 @@ FILE(
   sourcemmgs_files
   ${MMGS_SOURCE_DIR}/*.c   ${MMGS_SOURCE_DIR}/*.h
   ${COMMON_SOURCE_DIR}/*.c ${COMMON_SOURCE_DIR}/*.h
+  ${COMMON_BINARY_DIR}/mmgcommon.h
   )
 LIST(REMOVE_ITEM sourcemmgs_files
   ${MMGS_SOURCE_DIR}/mmgs.c
-  ${MMGS_SOURCE_DIR}/lib${PROJECT_NAME}sf.c
-  ${CMAKE_SOURCE_DIR}/src/libmmg.h
-  ${CMAKE_SOURCE_DIR}/src/libmmgf.h
+  ${MMGS_BINARY_DIR}/lib${PROJECT_NAME}sf.c
+  ${CMAKE_SOURCE_DIR}/src/mmg/libmmg.h
+  ${CMAKE_SOURCE_DIR}/src/mmg/libmmgf.h
   ${REMOVE_FILE})
 FILE(
   GLOB
@@ -78,7 +81,7 @@ FILE(
   GLOB
   libmmgs_file
   ${MMGS_SOURCE_DIR}/lib${PROJECT_NAME}s.c
-  ${MMGS_SOURCE_DIR}/lib${PROJECT_NAME}sf.c
+  ${MMGS_BINARY_DIR}/lib${PROJECT_NAME}sf.c
   )
 
 ############################################################################
@@ -89,7 +92,7 @@ FILE(
 
 IF ( LIBMMGS_STATIC )
   ADD_LIBRARY(${PROJECT_NAME}s_a  STATIC
-    ${MMGS_SOURCE_DIR}/lib${PROJECT_NAME}sf.h
+    ${MMGS_BINARY_DIR}/lib${PROJECT_NAME}sf.h
     ${sourcemmgs_files} ${libmmgs_file} )
   SET_TARGET_PROPERTIES(${PROJECT_NAME}s_a PROPERTIES OUTPUT_NAME
     ${PROJECT_NAME}s)
@@ -102,7 +105,7 @@ ENDIF()
 # Compile shared library
 IF ( LIBMMGS_SHARED )
   ADD_LIBRARY(${PROJECT_NAME}s_so SHARED
-    ${MMGS_SOURCE_DIR}/lib${PROJECT_NAME}sf.h
+    ${MMGS_BINARY_DIR}/lib${PROJECT_NAME}sf.h
     ${sourcemmgs_files} ${libmmgs_file})
   SET_TARGET_PROPERTIES(${PROJECT_NAME}s_so PROPERTIES
     OUTPUT_NAME ${PROJECT_NAME}s)
@@ -118,9 +121,9 @@ IF ( LIBMMGS_STATIC OR LIBMMGS_SHARED )
   # mmgs header files needed for library
   SET( mmgs_headers
     ${MMGS_SOURCE_DIR}/libmmgs.h
-    ${MMGS_SOURCE_DIR}/libmmgsf.h
+    ${MMGS_BINARY_DIR}/libmmgsf.h
     ${COMMON_SOURCE_DIR}/libmmgtypes.h
-    ${COMMON_SOURCE_DIR}/libmmgtypesf.h
+    ${COMMON_BINARY_DIR}/libmmgtypesf.h
     )
   SET(MMGS_INCLUDE ${CMAKE_SOURCE_DIR}/include/mmg/mmgs )
   SET( mmgs_includes
@@ -134,13 +137,13 @@ IF ( LIBMMGS_STATIC OR LIBMMGS_SHARED )
   INSTALL(FILES ${mmgs_headers} DESTINATION include/mmg/mmgs)
 
   ADD_CUSTOM_COMMAND(OUTPUT ${MMGS_INCLUDE}/libmmgtypesf.h
-    COMMAND ${CMAKE_COMMAND} -E copy ${COMMON_SOURCE_DIR}/libmmgtypesf.h ${MMGS_INCLUDE}/libmmgtypesf.h
+    COMMAND ${CMAKE_COMMAND} -E copy ${COMMON_BINARY_DIR}/libmmgtypesf.h ${MMGS_INCLUDE}/libmmgtypesf.h
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    DEPENDS ${COMMON_SOURCE_DIR}/libmmgtypesf.h)
+    DEPENDS ${COMMON_BINARY_DIR}/libmmgtypesf.h)
   ADD_CUSTOM_COMMAND(OUTPUT ${MMGS_INCLUDE}/libmmgsf.h
-    COMMAND ${CMAKE_COMMAND} -E copy ${MMGS_SOURCE_DIR}/libmmgsf.h ${MMGS_INCLUDE}/libmmgsf.h
+    COMMAND ${CMAKE_COMMAND} -E copy ${MMGS_BINARY_DIR}/libmmgsf.h ${MMGS_INCLUDE}/libmmgsf.h
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    DEPENDS ${MMGS_SOURCE_DIR}/libmmgsf.h)
+    DEPENDS ${MMGS_BINARY_DIR}/libmmgsf.h)
 
   # Install header files in project directory
   FILE(INSTALL  ${mmgs_headers} DESTINATION ${MMGS_INCLUDE}
@@ -172,7 +175,7 @@ ENDIF()
 ###############################################################################
 
 ADD_EXECUTABLE(${PROJECT_NAME}s
-  ${MMGS_SOURCE_DIR}/lib${PROJECT_NAME}sf.h
+  ${MMGS_BINARY_DIR}/lib${PROJECT_NAME}sf.h
   ${sourcemmgs_files} ${mainmmgs_file})
 
 IF ( WIN32 AND NOT MINGW AND USE_SCOTCH )
