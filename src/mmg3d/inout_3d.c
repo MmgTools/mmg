@@ -2102,20 +2102,3 @@ int MMG3D_saveSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
   fclose(inm);
   return(1);
 }
-
-/** Old API °°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°*/
-int MMG5_loadMesh(MMG5_pMesh mesh) {
-  return(MMG3D_loadMesh(mesh,mesh->namein));
-}
-
-int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
-  return(MMG3D_loadSol(mesh,met,met->namein));
-}
-
-int MMG5_saveMesh(MMG5_pMesh mesh) {
-  return(MMG3D_saveMesh(mesh,mesh->nameout));
-}
-
-int MMG5_saveMet(MMG5_pMesh mesh,MMG5_pSol met) {
-  return(MMG3D_saveSol(mesh,met,met->nameout));
-}

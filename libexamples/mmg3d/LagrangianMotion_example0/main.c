@@ -98,7 +98,7 @@ int main(int argc,char *argv[]) {
 
   /**------------------- Lagrangian motion option ----------------------------*/
   /* Ask for lagrangian motion (mode 1) */
-  if ( MMG3D_Set_iparameter(mmgMesh,mmgDisp,MMG5_IPARAM_lag, 1) != 1 )
+  if ( MMG3D_Set_iparameter(mmgMesh,mmgDisp,MMG3D_IPARAM_lag, 1) != 1 )
     exit(EXIT_FAILURE);
 
   /** With MMG3D_loadSol function */

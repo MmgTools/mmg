@@ -967,13 +967,3 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
   disp->npi = disp->np;
   _LIBMMG5_RETURN(mesh,met,MMG5_SUCCESS);
 }
-
-/** Old API °°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°*/
-
-int MMG5_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met)
-{
-  printf("  ## MMG5_mmg3dlib: "
-         "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
-        " be removed soon\n." );
-  return(MMG3D_mmg3dlib(mesh,met));
-}
