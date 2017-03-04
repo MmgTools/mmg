@@ -250,10 +250,20 @@ SET(CMAKE_MACOSX_RPATH 1)
 #####
 ###############################################################################
 
+FUNCTION (INVERT_BOOL OUTVAR INVAR)
+  IF(${INVAR})
+    SET(${OUTVAR} OFF PARENT_SCOPE)
+  ELSE()
+    SET(${OUTVAR} ON PARENT_SCOPE)
+  ENDIF()
+ENDFUNCTION()
+
+INVERT_BOOL("BUILD_STATIC_LIBS" ${BUILD_SHARED_LIBS})
+
 #------------------------------- mmg2d
-CMAKE_DEPENDENT_OPTION ( LIBMMG2D_STATIC "Compile the mmg2d static library" ON
+CMAKE_DEPENDENT_OPTION ( LIBMMG2D_STATIC "Compile the mmg2d static library" ${BUILD_STATIC_LIBS}
   "BUILD_MMG2D" OFF)
-CMAKE_DEPENDENT_OPTION ( LIBMMG2D_SHARED "Compile the mmg2d dynamic library" OFF
+CMAKE_DEPENDENT_OPTION ( LIBMMG2D_SHARED "Compile the mmg2d dynamic library" ${BUILD_SHARED_LIBS}
   "BUILD_MMG2D" OFF )
 IF (LIBMMG2D_STATIC OR LIBMMG2D_SHARED)
   SET(LIBMMG2D_INTERNAL ON )
@@ -270,9 +280,9 @@ CMAKE_DEPENDENT_OPTION(
   "BUILD_TESTING;BUILD_MMG2D" OFF)
 
 #------------------------------- mmgs
-CMAKE_DEPENDENT_OPTION ( LIBMMGS_STATIC "Compile the mmgs static library" ON
+CMAKE_DEPENDENT_OPTION ( LIBMMGS_STATIC "Compile the mmgs static library" ${BUILD_STATIC_LIBS}
   "BUILD_MMGS" OFF)
-CMAKE_DEPENDENT_OPTION ( LIBMMGS_SHARED "Compile the mmgs dynamic library" OFF
+CMAKE_DEPENDENT_OPTION ( LIBMMGS_SHARED "Compile the mmgs dynamic library" ${BUILD_SHARED_LIBS}
   "BUILD_MMGS" OFF)
 IF (LIBMMGS_STATIC OR LIBMMGS_SHARED)
   SET(LIBMMGS_INTERNAL ON )
@@ -289,9 +299,9 @@ CMAKE_DEPENDENT_OPTION(
   "BUILD_TESTING;BUILD_MMGS" OFF )
 
 #------------------------------- mmg3d
-CMAKE_DEPENDENT_OPTION ( LIBMMG3D_STATIC "Compile the mmg3d static library" ON
+CMAKE_DEPENDENT_OPTION ( LIBMMG3D_STATIC "Compile the mmg3d static library" ${BUILD_STATIC_LIBS}
   "BUILD_MMG3D" OFF)
-CMAKE_DEPENDENT_OPTION ( LIBMMG3D_SHARED "Compile the mmg3d dynamic library" OFF
+CMAKE_DEPENDENT_OPTION ( LIBMMG3D_SHARED "Compile the mmg3d dynamic library" ${BUILD_SHARED_LIBS}
   "BUILD_MMG3D" OFF )
 IF (LIBMMG3D_STATIC OR LIBMMG3D_SHARED)
   SET(LIBMMG3D_INTERNAL ON )
@@ -329,10 +339,10 @@ CMAKE_DEPENDENT_OPTION ( USE_SCOTCH "Use SCOTCH TOOL for renumbering" ON
 
 #---------------------------- mmg library gathering mmg2d, mmgs and mmg3d libs
 CMAKE_DEPENDENT_OPTION ( LIBMMG_STATIC
-  "Compile the mmg static library (mmg2d + mmgs + mmg3d)" ON
+  "Compile the mmg static library (mmg2d + mmgs + mmg3d)" ${BUILD_STATIC_LIBS}
   "BUILD_MMG" OFF)
 CMAKE_DEPENDENT_OPTION ( LIBMMG_SHARED
-  "Compile the mmg dynamic library (mmg2d + mmgs + mmg3d)" OFF
+  "Compile the mmg dynamic library (mmg2d + mmgs + mmg3d)" ${BUILD_SHARED_LIBS}
   "BUILD_MMG" OFF )
 IF (LIBMMG_STATIC OR LIBMMG_SHARED)
   SET(LIBMMG_INTERNAL ON )
