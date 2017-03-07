@@ -245,8 +245,8 @@ IF ( BUILD_TESTING )
   ##-------------------------------------------------------------------##
   ##------- Set the continuous integration options --------------------##
   ##-------------------------------------------------------------------##
-  SET(MMG3D_CI_TESTS ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d )
-  SET(MMG_CI_TESTS ${CMAKE_SOURCE_DIR}/ci_tests/mmg )
+  SET(MMG3D_CI_TESTS ${CI_DIR}/mmg3d )
+  SET(MMG_CI_TESTS ${CI_DIR}/mmg )
 
   ##-------------------------------------------------------------------##
   ##--------------------------- Add tests and configure it ------------##

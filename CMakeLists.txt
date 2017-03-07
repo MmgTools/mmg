@@ -163,7 +163,7 @@ ELSE ()
 ENDIF()
 ############################################################################
 #####
-#####         Fortran header: libmmgcommonf.h
+#####         Fortran header: libmmgtypesf.h
 #####
 ############################################################################
 
@@ -393,6 +393,11 @@ CMAKE_DEPENDENT_OPTION ( COVERAGE "Watch code coverage (Linux only)" OFF
 "BUILD_TESTING;CMAKE_COMPILER_IS_GNUCC" OFF )
 
 IF( BUILD_TESTING )
+  # Path toward the continuous integration directory
+  SET ( CI_DIR ${CMAKE_SOURCE_DIR}/ci_tests
+    CACHE PATH "Path toward the continuous integration directory" )
+  MARK_AS_ADVANCED ( CI_DIR )
+  MESSAGE(STATUS ${CI_DIR})
 
   ##-------------------------------------------------------------------##
   ##------- Get the continuous integration tests ----------------------##
@@ -402,7 +407,8 @@ IF( BUILD_TESTING )
   ##-------------------------------------------------------------------##
   ##------- Set the continuous integration options --------------------##
   ##-------------------------------------------------------------------##
-  SET(MMG_CI_TESTS ${CMAKE_SOURCE_DIR}/ci_tests/mmg )
+
+  SET ( MMG_CI_TESTS ${CI_DIR}/mmg )
 
   # Remove the --show-reachable=yes option from the default valgrind command
   SET(VALGRIND_COMMAND_OPTIONS "-q --tool=memcheck ")

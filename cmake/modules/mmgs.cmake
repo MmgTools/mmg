@@ -204,8 +204,8 @@ IF ( BUILD_TESTING )
   ##-------------------------------------------------------------------##
   ##------- Set the continuous integration options --------------------##
   ##-------------------------------------------------------------------##
-  SET(MMGS_CI_TESTS ${CMAKE_SOURCE_DIR}/ci_tests/mmgs )
-  SET(MMG_CI_TESTS ${CMAKE_SOURCE_DIR}/ci_tests/mmg )
+  SET(MMGS_CI_TESTS ${CI_DIR}/mmgs )
+  SET(MMG_CI_TESTS ${CI_DIR}/mmg )
 
   ##-------------------------------------------------------------------##
   ##--------------------------- Add tests and configure it ------------##
