@@ -18,13 +18,13 @@ ENDIF ( )
 
 IF ( LIBMMG_STATIC )
 
-  TARGET_LINK_LIBRARIES(libmmg_example0_a ${PROJECT_NAME}_a)
-  TARGET_LINK_LIBRARIES(libmmg_cpp_a ${PROJECT_NAME}_a)
+  TARGET_LINK_LIBRARIES(libmmg_example0_a lib${PROJECT_NAME}_a)
+  TARGET_LINK_LIBRARIES(libmmg_cpp_a lib${PROJECT_NAME}_a)
 
 ELSEIF ( LIBMMG_SHARED )
 
-  TARGET_LINK_LIBRARIES(libmmg_example0_a ${PROJECT_NAME}_so)
-  TARGET_LINK_LIBRARIES(libmmg_cpp_a ${PROJECT_NAME}_so)
+  TARGET_LINK_LIBRARIES(libmmg_example0_a lib${PROJECT_NAME}_so)
+  TARGET_LINK_LIBRARIES(libmmg_cpp_a lib${PROJECT_NAME}_so)
 
 ELSE ()
   MESSAGE(WARNING "You must activate the compilation of the static or"
@@ -52,11 +52,11 @@ IF (CMAKE_Fortran_COMPILER)
 
   IF ( LIBMMG_STATIC )
 
-    TARGET_LINK_LIBRARIES(libmmg_fortran_a  ${PROJECT_NAME}_a)
+    TARGET_LINK_LIBRARIES(libmmg_fortran_a  lib${PROJECT_NAME}_a)
 
   ELSEIF ( LIBMMG_SHARED )
 
-    TARGET_LINK_LIBRARIES(libmmg_fortran_a  ${PROJECT_NAME}_so)
+    TARGET_LINK_LIBRARIES(libmmg_fortran_a  lib${PROJECT_NAME}_so)
 
   ELSE ()
     MESSAGE(WARNING "You must activate the compilation of the static or"

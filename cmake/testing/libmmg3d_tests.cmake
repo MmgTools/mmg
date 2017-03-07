@@ -35,21 +35,21 @@ ADD_EXECUTABLE(libmmg3d_example5
 
 IF ( LIBMMG3D_STATIC )
 
-  TARGET_LINK_LIBRARIES(libmmg3d_example0_a ${PROJECT_NAME}3d_a)
-  TARGET_LINK_LIBRARIES(libmmg3d_example0_b ${PROJECT_NAME}3d_a)
-  TARGET_LINK_LIBRARIES(libmmg3d_example1   ${PROJECT_NAME}3d_a)
-  TARGET_LINK_LIBRARIES(libmmg3d_example2   ${PROJECT_NAME}3d_a)
-  TARGET_LINK_LIBRARIES(libmmg3d_example4   ${PROJECT_NAME}3d_a)
-  TARGET_LINK_LIBRARIES(libmmg3d_example5   ${PROJECT_NAME}3d_a)
+  TARGET_LINK_LIBRARIES(libmmg3d_example0_a lib${PROJECT_NAME}3d_a)
+  TARGET_LINK_LIBRARIES(libmmg3d_example0_b lib${PROJECT_NAME}3d_a)
+  TARGET_LINK_LIBRARIES(libmmg3d_example1   lib${PROJECT_NAME}3d_a)
+  TARGET_LINK_LIBRARIES(libmmg3d_example2   lib${PROJECT_NAME}3d_a)
+  TARGET_LINK_LIBRARIES(libmmg3d_example4   lib${PROJECT_NAME}3d_a)
+  TARGET_LINK_LIBRARIES(libmmg3d_example5   lib${PROJECT_NAME}3d_a)
 
 ELSEIF ( LIBMMG3D_SHARED )
 
-  TARGET_LINK_LIBRARIES(libmmg3d_example0_a ${PROJECT_NAME}3d_so)
-  TARGET_LINK_LIBRARIES(libmmg3d_example0_b ${PROJECT_NAME}3d_so)
-  TARGET_LINK_LIBRARIES(libmmg3d_example1   ${PROJECT_NAME}3d_so)
-  TARGET_LINK_LIBRARIES(libmmg3d_example2   ${PROJECT_NAME}3d_so)
-  TARGET_LINK_LIBRARIES(libmmg3d_example4   ${PROJECT_NAME}3d_so)
-  TARGET_LINK_LIBRARIES(libmmg3d_example5   ${PROJECT_NAME}3d_so)
+  TARGET_LINK_LIBRARIES(libmmg3d_example0_a lib${PROJECT_NAME}3d_so)
+  TARGET_LINK_LIBRARIES(libmmg3d_example0_b lib${PROJECT_NAME}3d_so)
+  TARGET_LINK_LIBRARIES(libmmg3d_example1   lib${PROJECT_NAME}3d_so)
+  TARGET_LINK_LIBRARIES(libmmg3d_example2   lib${PROJECT_NAME}3d_so)
+  TARGET_LINK_LIBRARIES(libmmg3d_example4   lib${PROJECT_NAME}3d_so)
+  TARGET_LINK_LIBRARIES(libmmg3d_example5   lib${PROJECT_NAME}3d_so)
 
 ELSE ()
   MESSAGE(WARNING "You must activate the compilation of the static or"
@@ -84,13 +84,13 @@ IF (CMAKE_Fortran_COMPILER)
 
   IF ( LIBMMG3D_STATIC )
 
-    TARGET_LINK_LIBRARIES(libmmg3d_fortran_a  ${PROJECT_NAME}3d_a)
-    TARGET_LINK_LIBRARIES(libmmg3d_fortran_b  ${PROJECT_NAME}3d_a)
+    TARGET_LINK_LIBRARIES(libmmg3d_fortran_a  lib${PROJECT_NAME}3d_a)
+    TARGET_LINK_LIBRARIES(libmmg3d_fortran_b  lib${PROJECT_NAME}3d_a)
 
   ELSEIF ( LIBMMG3D_SHARED )
 
-    TARGET_LINK_LIBRARIES(libmmg3d_fortran_a  ${PROJECT_NAME}3d_so)
-    TARGET_LINK_LIBRARIES(libmmg3d_fortran_b  ${PROJECT_NAME}3d_so)
+    TARGET_LINK_LIBRARIES(libmmg3d_fortran_a  lib${PROJECT_NAME}3d_so)
+    TARGET_LINK_LIBRARIES(libmmg3d_fortran_b  lib${PROJECT_NAME}3d_so)
 
   ELSE ()
     MESSAGE(WARNING "You must activate the compilation of the static or"

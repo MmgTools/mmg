@@ -27,17 +27,17 @@ ADD_EXECUTABLE(libmmg2d_example2
 
 IF ( LIBMMG2D_STATIC )
 
-  TARGET_LINK_LIBRARIES(libmmg2d_example0_a ${PROJECT_NAME}2d_a)
-  TARGET_LINK_LIBRARIES(libmmg2d_example0_b ${PROJECT_NAME}2d_a)
-  TARGET_LINK_LIBRARIES(libmmg2d_example1 ${PROJECT_NAME}2d_a)
-  TARGET_LINK_LIBRARIES(libmmg2d_example2 ${PROJECT_NAME}2d_a)
+  TARGET_LINK_LIBRARIES(libmmg2d_example0_a lib${PROJECT_NAME}2d_a)
+  TARGET_LINK_LIBRARIES(libmmg2d_example0_b lib${PROJECT_NAME}2d_a)
+  TARGET_LINK_LIBRARIES(libmmg2d_example1   lib${PROJECT_NAME}2d_a)
+  TARGET_LINK_LIBRARIES(libmmg2d_example2   lib${PROJECT_NAME}2d_a)
 
 ELSEIF ( LIBMMG2D_SHARED )
 
-  TARGET_LINK_LIBRARIES(libmmg2d_example0_a ${PROJECT_NAME}2d_so)
-  TARGET_LINK_LIBRARIES(libmmg2d_example0_b ${PROJECT_NAME}2d_so)
-  TARGET_LINK_LIBRARIES(libmmg2d_example1 ${PROJECT_NAME}2d_so)
-  TARGET_LINK_LIBRARIES(libmmg2d_example2 ${PROJECT_NAME}2d_so)
+  TARGET_LINK_LIBRARIES(libmmg2d_example0_a lib${PROJECT_NAME}2d_so)
+  TARGET_LINK_LIBRARIES(libmmg2d_example0_b lib${PROJECT_NAME}2d_so)
+  TARGET_LINK_LIBRARIES(libmmg2d_example1   lib${PROJECT_NAME}2d_so)
+  TARGET_LINK_LIBRARIES(libmmg2d_example2   lib${PROJECT_NAME}2d_so)
 
 ELSE ()
   MESSAGE(WARNING "You must activate the compilation of the static or"
@@ -72,13 +72,13 @@ IF (CMAKE_Fortran_COMPILER)
 
   IF ( LIBMMG2D_STATIC )
 
-    TARGET_LINK_LIBRARIES(libmmg2d_fortran_a ${PROJECT_NAME}2d_a)
-    TARGET_LINK_LIBRARIES(libmmg2d_fortran_b ${PROJECT_NAME}2d_a)
+    TARGET_LINK_LIBRARIES(libmmg2d_fortran_a lib${PROJECT_NAME}2d_a)
+    TARGET_LINK_LIBRARIES(libmmg2d_fortran_b lib${PROJECT_NAME}2d_a)
 
   ELSEIF ( LIBMMG2D_SHARED )
 
-    TARGET_LINK_LIBRARIES(libmmg2d_fortran_a ${PROJECT_NAME}2d_so)
-    TARGET_LINK_LIBRARIES(libmmg2d_fortran_b ${PROJECT_NAME}2d_so)
+    TARGET_LINK_LIBRARIES(libmmg2d_fortran_a lib${PROJECT_NAME}2d_so)
+    TARGET_LINK_LIBRARIES(libmmg2d_fortran_b lib${PROJECT_NAME}2d_so)
 
   ELSE ()
     MESSAGE(WARNING "You must activate the compilation of the static or"

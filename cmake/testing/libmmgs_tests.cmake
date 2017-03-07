@@ -28,17 +28,17 @@ ADD_EXECUTABLE(libmmgs_example2
 
 IF ( LIBMMGS_STATIC )
 
-  TARGET_LINK_LIBRARIES(libmmgs_example0_a ${PROJECT_NAME}s_a)
-  TARGET_LINK_LIBRARIES(libmmgs_example0_b ${PROJECT_NAME}s_a)
-  TARGET_LINK_LIBRARIES(libmmgs_example1 ${PROJECT_NAME}s_a)
-  TARGET_LINK_LIBRARIES(libmmgs_example2 ${PROJECT_NAME}s_a)
+  TARGET_LINK_LIBRARIES(libmmgs_example0_a lib${PROJECT_NAME}s_a)
+  TARGET_LINK_LIBRARIES(libmmgs_example0_b lib${PROJECT_NAME}s_a)
+  TARGET_LINK_LIBRARIES(libmmgs_example1   lib${PROJECT_NAME}s_a)
+  TARGET_LINK_LIBRARIES(libmmgs_example2   lib${PROJECT_NAME}s_a)
 
 ELSEIF ( LIBMMGS_SHARED )
 
-  TARGET_LINK_LIBRARIES(libmmgs_example0_a ${PROJECT_NAME}s_so)
-  TARGET_LINK_LIBRARIES(libmmgs_example0_b ${PROJECT_NAME}s_so)
-  TARGET_LINK_LIBRARIES(libmmgs_example1 ${PROJECT_NAME}s_so)
-  TARGET_LINK_LIBRARIES(libmmgs_example2 ${PROJECT_NAME}s_so)
+  TARGET_LINK_LIBRARIES(libmmgs_example0_a lib${PROJECT_NAME}s_so)
+  TARGET_LINK_LIBRARIES(libmmgs_example0_b lib${PROJECT_NAME}s_so)
+  TARGET_LINK_LIBRARIES(libmmgs_example1   lib${PROJECT_NAME}s_so)
+  TARGET_LINK_LIBRARIES(libmmgs_example2   lib${PROJECT_NAME}s_so)
 
 ELSE ()
   MESSAGE(WARNING "You must activate the compilation of the static or"
@@ -71,13 +71,13 @@ IF (CMAKE_Fortran_COMPILER)
 
   IF ( LIBMMGS_STATIC )
 
-    TARGET_LINK_LIBRARIES(libmmgs_fortran_a ${PROJECT_NAME}s_a)
-    TARGET_LINK_LIBRARIES(libmmgs_fortran_b ${PROJECT_NAME}s_a)
+    TARGET_LINK_LIBRARIES(libmmgs_fortran_a lib${PROJECT_NAME}s_a)
+    TARGET_LINK_LIBRARIES(libmmgs_fortran_b lib${PROJECT_NAME}s_a)
 
   ELSEIF ( LIBMMGS_SHARED )
 
-    TARGET_LINK_LIBRARIES(libmmgs_fortran_a ${PROJECT_NAME}s_so)
-    TARGET_LINK_LIBRARIES(libmmgs_fortran_b ${PROJECT_NAME}s_so)
+    TARGET_LINK_LIBRARIES(libmmgs_fortran_a lib${PROJECT_NAME}s_so)
+    TARGET_LINK_LIBRARIES(libmmgs_fortran_b lib${PROJECT_NAME}s_so)
 
   ELSE ()
     MESSAGE(WARNING "You must activate the compilation of the static or"
