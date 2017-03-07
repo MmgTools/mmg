@@ -540,6 +540,8 @@ static int _MMG5_norver(MMG5_pMesh mesh) {
       }
     }
   }
+  mesh->nc1 = 0;
+
   if ( abs(mesh->info.imprim) > 3 && nn+nt > 0 ) {
     if ( nnr )
       fprintf(stdout,"     %d input normals ignored\n",nnr);
