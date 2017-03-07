@@ -206,7 +206,6 @@ ENDIF()
 
 IF ( TEST_LIBMMG3D )
   INCLUDE(cmake/testing/libmmg3d_tests.cmake)
-  INCLUDE(cmake/testing/libmmg3d_oldAPI_tests.cmake)
 ENDIF()
 
 ###############################################################################
