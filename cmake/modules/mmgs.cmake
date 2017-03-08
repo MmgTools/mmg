@@ -37,19 +37,9 @@ FILE(MAKE_DIRECTORY ${MMGS_BINARY_DIR})
 #####
 ############################################################################
 
-# Wrap add_custom_command into add_custom target to remove dpendencies from the
-# custom command and thus allow parallel build.
-ADD_CUSTOM_COMMAND(OUTPUT ${MMGS_BINARY_DIR}/libmmgsf.h
-  COMMAND genheader ${MMGS_BINARY_DIR}/libmmgsf.h
-  ${MMGS_SOURCE_DIR}/libmmgs.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-  DEPENDS genheader ${MMGS_SOURCE_DIR}/libmmgs.h
-  ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
-  COMMENT "Generating Fortran header for mmgs"
+GENERATE_FORTRAN_HEADER (
+  ${MMGS_SOURCE_DIR} libmmgs.h ${MMGS_BINARY_DIR} libmmgsf.h mmgs
   )
-ADD_CUSTOM_TARGET(mmgs_fortran_header
-  ALL
-  DEPENDS ${MMGS_BINARY_DIR}/libmmgsf.h)
 
 ###############################################################################
 #####
@@ -135,23 +125,14 @@ IF ( LIBMMGS_STATIC OR LIBMMGS_SHARED )
   # Install header files in /usr/local or equivalent
   INSTALL(FILES ${mmgs_headers} DESTINATION include/mmg/mmgs)
 
-  # Wrap add_custom_command into add_custom target to remove dpendencies from the
-  # custom command and thus allow parallel build.
-  ADD_CUSTOM_COMMAND(OUTPUT ${MMGS_INCLUDE}/libmmgtypesf.h
-    COMMAND ${CMAKE_COMMAND} -E copy ${COMMON_BINARY_DIR}/libmmgtypesf.h ${MMGS_INCLUDE}/libmmgtypesf.h
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    DEPENDS mmg_fortran_header)
-  ADD_CUSTOM_TARGET ( copys_libmmgtypesf ALL
-    DEPENDS ${MMGS_INCLUDE}/libmmgtypesf.h )
-  ADD_DEPENDENCIES ( copys_libmmgtypesf mmg_fortran_header )
+  COPY_FORTRAN_HEADER (
+    ${COMMON_BINARY_DIR} libmmgtypesf.h ${MMGS_INCLUDE} libmmgtypesf.h
+    mmg_fortran_header copys_libmmgtypesf )
 
-  ADD_CUSTOM_COMMAND(OUTPUT ${MMGS_INCLUDE}/libmmgsf.h
-    COMMAND ${CMAKE_COMMAND} -E copy ${MMGS_BINARY_DIR}/libmmgsf.h ${MMGS_INCLUDE}/libmmgsf.h
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    DEPENDS mmgs_fortran_header)
-  ADD_CUSTOM_TARGET ( copy_libmmgsf ALL
-    DEPENDS ${MMGS_INCLUDE}/libmmgsf.h )
-  ADD_DEPENDENCIES ( copy_libmmgsf mmgs_fortran_header )
+  COPY_FORTRAN_HEADER (
+    ${MMGS_BINARY_DIR} libmmgsf.h ${MMGS_INCLUDE} libmmgsf.h
+    mmgs_fortran_header copy_libmmgsf
+    )
 
   # Copy header files in project directory at configuration step
   # (generated file don't exists yet or are outdated)
@@ -193,19 +174,7 @@ ENDIF ( )
 TARGET_LINK_LIBRARIES(${PROJECT_NAME}s ${LIBRARIES})
 INSTALL(TARGETS ${PROJECT_NAME}s RUNTIME DESTINATION bin)
 
-IF ( CMAKE_BUILD_TYPE MATCHES "Debug" )
-  # in debug mode we name the executable mmgs_debug
-  SET_TARGET_PROPERTIES(${PROJECT_NAME}s PROPERTIES DEBUG_POSTFIX _debug)
-ELSEIF ( CMAKE_BUILD_TYPE MATCHES "Release" )
-  # in Release mode we name the executable mmgs_O3
-  SET_TARGET_PROPERTIES(${PROJECT_NAME}s PROPERTIES RELEASE_POSTFIX _O3)
-ELSEIF ( CMAKE_BUILD_TYPE MATCHES "RelWithDebInfo" )
-  # in RelWithDebInfo mode we name the executable mmgs_O3d
-  SET_TARGET_PROPERTIES(${PROJECT_NAME}s PROPERTIES RELWITHDEBINFO_POSTFIX _O3d)
-ELSEIF ( CMAKE_BUILD_TYPE MATCHES "MinSizeRel" )
-  # in MinSizeRel mode we name the executable mmgs_O3
-  SET_TARGET_PROPERTIES(${PROJECT_NAME}s PROPERTIES MINSIZEREL_POSTFIX _Os)
-ENDIF ( )
+ADD_TARGET_POSTFIX(${PROJECT_NAME}s)
 
 ###############################################################################
 #####

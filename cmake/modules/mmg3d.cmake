@@ -37,20 +37,9 @@ FILE(MAKE_DIRECTORY ${MMG3D_BINARY_DIR})
 #####
 ############################################################################
 
-# Wrap add_custom_command into add_custom target to remove dpendencies from the
-# custom command and thus allow parallel build.
-ADD_CUSTOM_COMMAND(OUTPUT ${MMG3D_BINARY_DIR}/libmmg3df.h
-  COMMAND genheader ${MMG3D_BINARY_DIR}/libmmg3df.h
-  ${MMG3D_SOURCE_DIR}/libmmg3d.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-  DEPENDS genheader ${MMG3D_SOURCE_DIR}/libmmg3d.h
-  ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
-  COMMENT "Generating Fortran header for mmg3d"
+GENERATE_FORTRAN_HEADER (
+  ${MMG3D_SOURCE_DIR} libmmg3d.h ${MMG3D_BINARY_DIR} libmmg3df.h mmg3d
   )
-
-ADD_CUSTOM_TARGET(mmg3d_fortran_header
-  ALL
-  DEPENDS ${MMG3D_BINARY_DIR}/libmmg3df.h)
 
 ############################################################################
 #####
@@ -178,22 +167,14 @@ IF ( LIBMMG3D_STATIC OR LIBMMG3D_SHARED )
   # Install header files in /usr/local or equivalent
   INSTALL(FILES ${mmg3d_headers} DESTINATION include/mmg/mmg3d)
 
-  ADD_CUSTOM_COMMAND(OUTPUT ${MMG3D_INCLUDE}/libmmgtypesf.h
-    COMMAND ${CMAKE_COMMAND} -E copy ${COMMON_BINARY_DIR}/libmmgtypesf.h
-    ${MMG3D_INCLUDE}/libmmgtypesf.h
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    DEPENDS mmg_fortran_header)
-  ADD_CUSTOM_TARGET ( copy3d_libmmgtypesf ALL
-    DEPENDS ${MMG3D_INCLUDE}/libmmgtypesf.h )
-  ADD_DEPENDENCIES ( copy3d_libmmgtypesf mmg_fortran_header )
+  COPY_FORTRAN_HEADER (
+    ${COMMON_BINARY_DIR} libmmgtypesf.h ${MMG3D_INCLUDE} libmmgtypesf.h
+    mmg_fortran_header copy3d_libmmgtypesf )
 
-  ADD_CUSTOM_COMMAND(OUTPUT ${MMG3D_INCLUDE}/libmmg3df.h
-    COMMAND ${CMAKE_COMMAND} -E copy ${MMG3D_BINARY_DIR}/libmmg3df.h ${MMG3D_INCLUDE}/libmmg3df.h
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    DEPENDS mmg3d_fortran_header)
-  ADD_CUSTOM_TARGET ( copy_libmmg3df ALL
-    DEPENDS ${MMG3D_INCLUDE}/libmmg3df.h )
-  ADD_DEPENDENCIES ( copy_libmmg3df mmg3d_fortran_header )
+  COPY_FORTRAN_HEADER (
+    ${MMG3D_BINARY_DIR} libmmg3df.h ${MMG3D_INCLUDE} libmmg3df.h
+    mmg3d_fortran_header copy_libmmg3df
+    )
 
   # Copy header files in project directory at configuration step
   # (generated file don't exists yet or are outdated)
@@ -233,19 +214,7 @@ ENDIF ( )
 TARGET_LINK_LIBRARIES(${PROJECT_NAME}3d ${LIBRARIES})
 INSTALL(TARGETS ${PROJECT_NAME}3d RUNTIME DESTINATION bin)
 
-IF ( CMAKE_BUILD_TYPE MATCHES "Debug" )
-  # in debug mode we name the executable mmg3d_debug
-  SET_TARGET_PROPERTIES(${PROJECT_NAME}3d PROPERTIES DEBUG_POSTFIX _debug)
-ELSEIF ( CMAKE_BUILD_TYPE MATCHES "Release" )
-  # in Release mode we name the executable mmg3d_O3
-  SET_TARGET_PROPERTIES(${PROJECT_NAME}3d PROPERTIES RELEASE_POSTFIX _O3)
-ELSEIF ( CMAKE_BUILD_TYPE MATCHES "RelWithDebInfo" )
-  # in RelWithDebInfo mode we name the executable mmg3d_O3d
-  SET_TARGET_PROPERTIES(${PROJECT_NAME}3d PROPERTIES RELWITHDEBINFO_POSTFIX _O3d)
-ELSEIF ( CMAKE_BUILD_TYPE MATCHES "MinSizeRel" )
-  # in MinSizeRel mode we name the executable mmg3d_O3
-  SET_TARGET_PROPERTIES(${PROJECT_NAME}s PROPERTIES MINSIZEREL_POSTFIX _Os)
-ENDIF ( )
+ADD_TARGET_POSTFIX(${PROJECT_NAME}3d)
 
 ###############################################################################
 #####

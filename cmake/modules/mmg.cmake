@@ -122,60 +122,37 @@ IF ( LIBMMG_STATIC OR LIBMMG_SHARED )
   INSTALL(FILES ${mmg3d_headers} DESTINATION include/mmg/mmg3d)
   INSTALL(FILES ${mmg_headers} DESTINATION include/mmg)
 
-  ADD_CUSTOM_COMMAND(OUTPUT ${MMG_INCLUDE}/libmmgtypesf.h
-    COMMAND ${CMAKE_COMMAND} -E copy ${COMMON_BINARY_DIR}/libmmgtypesf.h ${MMG_INCLUDE}/libmmgtypesf.h
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    DEPENDS ${COMMON_BINARY_DIR}/libmmgtypesf.h)
-  ADD_CUSTOM_TARGET ( copy_libmmgtypesf ALL
-    DEPENDS ${MMG_INCLUDE}/libmmgtypesf.h )
-  ADD_DEPENDENCIES ( copy_libmmgtypesf mmg_fortran_header )
-
   IF ( (NOT LIBMMG2D_STATIC) AND (NOT LIBMMG2D_SHARED) )
-    ADD_CUSTOM_COMMAND(OUTPUT ${MMG2D_INCLUDE}/libmmg2df.h
-      COMMAND ${CMAKE_COMMAND} -E copy  ${MMG2D_BINARY_DIR}/libmmg2df.h ${MMG2D_INCLUDE}/libmmg2df.h
-      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-      )
-    ADD_CUSTOM_TARGET ( copy_libmmg2df ALL
-      DEPENDS ${MMG2D_INCLUDE}/libmmg2df.h )
-    ADD_DEPENDENCIES ( copy_libmmg2df mmg2d_fortran_header )
+    COPY_FORTRAN_HEADER (
+      ${COMMON_BINARY_DIR} libmmgtypesf.h ${MMG2D_INCLUDE} libmmgtypesf.h
+      mmg_fortran_header copy2d_libmmgtypesf )
 
-    ADD_CUSTOM_TARGET(copy_2d_headers ALL
-      DEPENDS
-      copy_libmmg2df copy_libmmgtypesf
-      ${CMAKE_SOURCE_DIR}/include/mmg/mmg2d/libmmg2d.h
-      ${CMAKE_SOURCE_DIR}/include/mmg/mmg2d/libmmgtypes.h )
+    COPY_FORTRAN_HEADER (
+      ${MMG2D_BINARY_DIR} libmmg2df.h ${MMG2D_INCLUDE} libmmg2df.h
+      mmg2d_fortran_header copy_libmmg2df
+      )
   ENDIF ()
 
   IF ( (NOT LIBMMGS_STATIC) AND (NOT LIBMMGS_SHARED) )
-    ADD_CUSTOM_COMMAND(OUTPUT ${MMGS_INCLUDE}/libmmgsf.h
-      COMMAND ${CMAKE_COMMAND} -E copy  ${MMGS_BINARY_DIR}/libmmgsf.h ${MMGS_INCLUDE}/libmmgsf.h
-      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-      DEPENDS ${MMGS_BINARY_DIR}/libmmgsf.h)
-    ADD_CUSTOM_TARGET ( copy_libmmgsf ALL
-      DEPENDS ${MMGS_INCLUDE}/libmmgsf.h )
-    ADD_DEPENDENCIES ( copy_libmmgsf mmgs_fortran_header )
+    COPY_FORTRAN_HEADER (
+      ${COMMON_BINARY_DIR} libmmgtypesf.h ${MMGS_INCLUDE} libmmgtypesf.h
+      mmg_fortran_header copys_libmmgtypesf )
 
-    ADD_CUSTOM_TARGET(copy_s_headers ALL
-      DEPENDS
-      copy_libmmgsf copy_libmmgtypesf
-      ${CMAKE_SOURCE_DIR}/include/mmg/mmgs/libmmgs.h
-      ${CMAKE_SOURCE_DIR}/include/mmg/mmgs/libmmgtypes.h )
+    COPY_FORTRAN_HEADER (
+      ${MMGS_BINARY_DIR} libmmgsf.h ${MMGS_INCLUDE} libmmgsf.h
+      mmgs_fortran_header copy_libmmgsf
+    )
   ENDIF()
+
   IF ( (NOT LIBMMG3D_STATIC) AND (NOT LIBMMG3D_SHARED) )
-    ADD_CUSTOM_COMMAND(OUTPUT ${MMG3D_INCLUDE}/libmmg3df.h
-      COMMAND ${CMAKE_COMMAND} -E copy  ${MMG3D_BINARY_DIR}/libmmg3df.h ${MMG3D_INCLUDE}/libmmg3df.h
-      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-      DEPENDS ${MMG3D_BINARY_DIR}/libmmg3df.h)
-    ADD_CUSTOM_TARGET ( copy_libmmg3df ALL
-      DEPENDS ${MMG3D_INCLUDE}/libmmg3df.h )
-    ADD_DEPENDENCIES ( copy_libmmg3df mmg3d_fortran_header )
+    COPY_FORTRAN_HEADER (
+      ${COMMON_BINARY_DIR} libmmgtypesf.h ${MMG3D_INCLUDE} libmmgtypesf.h
+      mmg_fortran_header copy3d_libmmgtypesf )
 
-    ADD_CUSTOM_TARGET(copy_3d_headers ALL
-      DEPENDS
-      copy_libmmg3df copy_libmmgtypesf
-      ${CMAKE_SOURCE_DIR}/include/mmg/mmg3d/libmmg3d.h
-      ${CMAKE_SOURCE_DIR}/include/mmg/mmg3d/libmmgtypes.h )
-
+    COPY_FORTRAN_HEADER (
+      ${MMG3D_BINARY_DIR} libmmg3df.h ${MMG3D_INCLUDE} libmmg3df.h
+      mmg3d_fortran_header copy_libmmg3df
+      )
   ENDIF()
 
   FILE(INSTALL ${CMAKE_SOURCE_DIR}/src/mmg/libmmgf.h DESTINATION  ${CMAKE_SOURCE_DIR}/include/mmg/)
@@ -198,7 +175,7 @@ IF ( LIBMMG_STATIC OR LIBMMG_SHARED )
 
   ADD_CUSTOM_TARGET(copy_mmg_headers ALL
     DEPENDS
-    copy_2d_headers copy_s_headers copy_3d_headers copy_libmmgtypesf
+    copy_2d_headers copy_s_headers copy_3d_headers
     ${CMAKE_SOURCE_DIR}/include/mmg/libmmgf.h
     ${CMAKE_SOURCE_DIR}/include/mmg/libmmg.h
     ${CMAKE_SOURCE_DIR}/include/mmg/mmg3d/libmmgtypes.h )

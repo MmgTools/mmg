@@ -37,21 +37,9 @@ FILE(MAKE_DIRECTORY ${MMG2D_BINARY_DIR})
 #####
 ############################################################################
 
-# Wrap add_custom_command into add_custom target to remove dpendencies from the
-# custom command and thus allow parallel build.
-ADD_CUSTOM_COMMAND(OUTPUT ${MMG2D_BINARY_DIR}/libmmg2df.h
-  COMMAND genheader ${MMG2D_BINARY_DIR}/libmmg2df.h
-  ${MMG2D_SOURCE_DIR}/libmmg2d.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-  DEPENDS genheader ${MMG2D_SOURCE_DIR}/libmmg2d.h
-  ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
-  COMMENT "Generating Fortran header for mmg2d"
+GENERATE_FORTRAN_HEADER (
+  ${MMG2D_SOURCE_DIR} libmmg2d.h ${MMG2D_BINARY_DIR} libmmg2df.h mmg2d
   )
-ADD_CUSTOM_TARGET(mmg2d_fortran_header
-  ALL
-  DEPENDS ${MMG2D_BINARY_DIR}/libmmg2df.h)
-
-
 
 ###############################################################################
 #####
@@ -166,24 +154,14 @@ IF ( LIBMMG2D_STATIC OR LIBMMG2D_SHARED )
   # Install header files in /usr/local or equivalent
   INSTALL(FILES ${mmg2d_headers} DESTINATION include/mmg/mmg2d)
 
-  # Wrap add_custom_command into add_custom target to remove dpendencies from the
-  # custom command and thus allow parallel build.
-  ADD_CUSTOM_COMMAND(OUTPUT ${MMG2D_INCLUDE}/libmmgtypesf.h
-    COMMAND ${CMAKE_COMMAND} -E copy ${COMMON_BINARY_DIR}/libmmgtypesf.h ${MMG2D_INCLUDE}/libmmgtypesf.h
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    DEPENDS mmg_fortran_header)
-  ADD_CUSTOM_TARGET ( copy2d_libmmgtypesf ALL
-    DEPENDS ${MMG2D_INCLUDE}/libmmgtypesf.h )
-  ADD_DEPENDENCIES ( copy2d_libmmgtypesf mmg_fortran_header )
+  COPY_FORTRAN_HEADER (
+    ${COMMON_BINARY_DIR} libmmgtypesf.h ${MMG2D_INCLUDE} libmmgtypesf.h
+    mmg_fortran_header copy2d_libmmgtypesf )
 
-  ADD_CUSTOM_COMMAND(OUTPUT ${MMG2D_INCLUDE}/libmmg2df.h  ${MMG2D_INCLUDE}/libmmg2d.h
-    COMMAND ${CMAKE_COMMAND} -E copy ${MMG2D_BINARY_DIR}/libmmg2df.h ${MMG2D_INCLUDE}/libmmg2df.h
-    COMMAND ${CMAKE_COMMAND} -E copy ${MMG2D_SOURCE_DIR}/libmmg2d.h  ${MMG2D_INCLUDE}/libmmg2d.h
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    DEPENDS mmg2d_fortran_header)
-  ADD_CUSTOM_TARGET ( copy_libmmg2df ALL
-    DEPENDS ${MMG2D_INCLUDE}/libmmg2df.h ${MMG2D_INCLUDE}/libmmg2d.h )
-  ADD_DEPENDENCIES ( copy_libmmg2df mmg2d_fortran_header )
+  COPY_FORTRAN_HEADER (
+    ${MMG2D_BINARY_DIR} libmmg2df.h ${MMG2D_INCLUDE} libmmg2df.h
+    mmg2d_fortran_header copy_libmmg2df
+    )
 
   # Copy header files in project directory at configuration step
   # (generated file don't exists yet or are outdated)
@@ -225,19 +203,7 @@ ENDIF ( )
 TARGET_LINK_LIBRARIES(${PROJECT_NAME}2d ${LIBRARIES})
 INSTALL(TARGETS ${PROJECT_NAME}2d RUNTIME DESTINATION bin)
 
-IF ( CMAKE_BUILD_TYPE MATCHES "Debug" )
-  # in debug mode we name the executable mmg2d_debug
-  SET_TARGET_PROPERTIES(${PROJECT_NAME}2d PROPERTIES DEBUG_POSTFIX _debug)
-ELSEIF ( CMAKE_BUILD_TYPE MATCHES "Release" )
-  # in Release mode we name the executable mmg2d_O3
-  SET_TARGET_PROPERTIES(${PROJECT_NAME}2d PROPERTIES RELEASE_POSTFIX _O3)
-ELSEIF ( CMAKE_BUILD_TYPE MATCHES "RelWithDebInfo" )
-  # in RelWithDebInfo mode we name the executable mmg2d_O3d
-  SET_TARGET_PROPERTIES(${PROJECT_NAME}2d PROPERTIES RELWITHDEBINFO_POSTFIX _O3d)
-ELSEIF ( CMAKE_BUILD_TYPE MATCHES "MinSizeRel" )
-  # in MinSizeRel mode we name the executable mmg2d_O3
-  SET_TARGET_PROPERTIES(${PROJECT_NAME}2d PROPERTIES MINSIZEREL_POSTFIX _Os)
-ENDIF ( )
+ADD_TARGET_POSTFIX(${PROJECT_NAME}2d)
 
 ###############################################################################
 #####
