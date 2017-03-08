@@ -37,16 +37,21 @@ FILE(MAKE_DIRECTORY ${MMG2D_BINARY_DIR})
 #####
 ############################################################################
 
+# Wrap add_custom_command into add_custom target to remove dpendencies from the
+# custom command and thus allow parallel build.
 ADD_CUSTOM_COMMAND(OUTPUT ${MMG2D_BINARY_DIR}/libmmg2df.h
   COMMAND genheader ${MMG2D_BINARY_DIR}/libmmg2df.h
   ${MMG2D_SOURCE_DIR}/libmmg2d.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
   DEPENDS genheader ${MMG2D_SOURCE_DIR}/libmmg2d.h
-  ${COMMON_BINARY_DIR}/libmmgtypesf.h
-  ${COMMON_SOURCE_DIR}/libmmgtypes.h
   ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
   COMMENT "Generating Fortran header for mmg2d"
   )
+ADD_CUSTOM_TARGET(mmg2d_fortran_header
+  ALL
+  DEPENDS ${MMG2D_BINARY_DIR}/libmmg2df.h)
+
+
 
 ###############################################################################
 #####
@@ -80,7 +85,6 @@ FILE(
 FILE(
   GLOB
   libmmg2d_file
-  ${MMG2D_SOURCE_DIR}/lib${PROJECT_NAME}2d.c
   ${MMG2D_SOURCE_DIR}/lib${PROJECT_NAME}2df.c
   )
 
@@ -106,11 +110,11 @@ ENDIF()
 
 IF (ELAS_NOTFOUND)
 MESSAGE ( WARNING "Elas is a library to solve the linear elasticity "
-"problem (see https://github.com/SUscTools/SUscElas to download it). "
+    "problem (see https://github.com/SUscTools/Elas to download it). "
 "This library is needed to use the lagrangian motion option. "
-"If you have already installed SUscElas and want to use it, "
+    "If you have already installed Elas and want to use it, "
 "please set the CMake variable or environment variable ELAS_DIR "
-"to your SUscElas directory.")
+"to your Elas directory.")
 ENDIF ( )
 
 ############################################################################
@@ -121,7 +125,6 @@ ENDIF ( )
 # Compile static library
 IF ( LIBMMG2D_STATIC )
   ADD_LIBRARY(lib${PROJECT_NAME}2d_a  STATIC
-    ${MMG2D_BINARY_DIR}/lib${PROJECT_NAME}2df.h
     ${sourcemmg2d_files} ${libmmg2d_file} )
   SET_TARGET_PROPERTIES(lib${PROJECT_NAME}2d_a PROPERTIES OUTPUT_NAME
     ${PROJECT_NAME}2d)
@@ -134,7 +137,6 @@ ENDIF()
 # Compile shared library
 IF ( LIBMMG2D_SHARED )
   ADD_LIBRARY(lib${PROJECT_NAME}2d_so SHARED
-    ${MMG2D_BINARY_DIR}/lib${PROJECT_NAME}2df.h
     ${sourcemmg2d_files} ${libmmg2d_file})
   SET_TARGET_PROPERTIES(lib${PROJECT_NAME}2d_so PROPERTIES
     OUTPUT_NAME ${PROJECT_NAME}2d)
@@ -164,22 +166,36 @@ IF ( LIBMMG2D_STATIC OR LIBMMG2D_SHARED )
   # Install header files in /usr/local or equivalent
   INSTALL(FILES ${mmg2d_headers} DESTINATION include/mmg/mmg2d)
 
+  # Wrap add_custom_command into add_custom target to remove dpendencies from the
+  # custom command and thus allow parallel build.
   ADD_CUSTOM_COMMAND(OUTPUT ${MMG2D_INCLUDE}/libmmgtypesf.h
     COMMAND ${CMAKE_COMMAND} -E copy ${COMMON_BINARY_DIR}/libmmgtypesf.h ${MMG2D_INCLUDE}/libmmgtypesf.h
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    DEPENDS ${COMMON_BINARY_DIR}/libmmgtypesf.h)
-  ADD_CUSTOM_COMMAND(OUTPUT ${MMG2D_INCLUDE}/libmmg2df.h
-    COMMAND ${CMAKE_COMMAND} -E copy ${MMG2D_BINARY_DIR}/libmmg2df.h ${MMG2D_INCLUDE}/libmmg2df.h
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    DEPENDS ${MMG2D_BINARY_DIR}/libmmg2df.h)
+    DEPENDS mmg_fortran_header)
+  ADD_CUSTOM_TARGET ( copy2d_libmmgtypesf ALL
+    DEPENDS ${MMG2D_INCLUDE}/libmmgtypesf.h )
+  ADD_DEPENDENCIES ( copy2d_libmmgtypesf mmg_fortran_header )
 
-  # Install header files in project directory
+  ADD_CUSTOM_COMMAND(OUTPUT ${MMG2D_INCLUDE}/libmmg2df.h  ${MMG2D_INCLUDE}/libmmg2d.h
+    COMMAND ${CMAKE_COMMAND} -E copy ${MMG2D_BINARY_DIR}/libmmg2df.h ${MMG2D_INCLUDE}/libmmg2df.h
+    COMMAND ${CMAKE_COMMAND} -E copy ${MMG2D_SOURCE_DIR}/libmmg2d.h  ${MMG2D_INCLUDE}/libmmg2d.h
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    DEPENDS mmg2d_fortran_header)
+  ADD_CUSTOM_TARGET ( copy_libmmg2df ALL
+    DEPENDS ${MMG2D_INCLUDE}/libmmg2df.h ${MMG2D_INCLUDE}/libmmg2d.h )
+  ADD_DEPENDENCIES ( copy_libmmg2df mmg2d_fortran_header )
+
+  # Copy header files in project directory at configuration step
+  # (generated file don't exists yet or are outdated)
   FILE(INSTALL  ${mmg2d_headers} DESTINATION ${MMG2D_INCLUDE}
     PATTERN "libmmg*f.h"  EXCLUDE)
 
   ADD_CUSTOM_TARGET(copy_2d_headers ALL
-    DEPENDS  ${MMG2D_INCLUDE}/libmmg2df.h  ${MMG2D_INCLUDE}/libmmg2d.h
-     ${MMG2D_INCLUDE}/libmmgtypesf.h  ${MMG2D_INCLUDE}/libmmgtypes.h )
+    DEPENDS
+    copy_libmmg2df copy2d_libmmgtypesf
+    ${MMG2D_INCLUDE}/libmmg2d.h
+    ${MMG2D_INCLUDE}/libmmgtypes.h
+    )
 
 ENDIF()
 
@@ -200,7 +216,7 @@ ENDIF ( )
 ###############################################################################
 
 ADD_EXECUTABLE(${PROJECT_NAME}2d
-  ${MMG2D_BINARY_DIR}/lib${PROJECT_NAME}2df.h ${sourcemmg2d_files} ${mainmmg2d_file} )
+  ${sourcemmg2d_files} ${mainmmg2d_file} )
 
 IF ( WIN32 AND NOT MINGW AND USE_SCOTCH )
   my_add_link_flags(${PROJECT_NAME}2d "/SAFESEH:NO")

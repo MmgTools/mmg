@@ -37,16 +37,20 @@ FILE(MAKE_DIRECTORY ${MMG3D_BINARY_DIR})
 #####
 ############################################################################
 
+# Wrap add_custom_command into add_custom target to remove dpendencies from the
+# custom command and thus allow parallel build.
 ADD_CUSTOM_COMMAND(OUTPUT ${MMG3D_BINARY_DIR}/libmmg3df.h
   COMMAND genheader ${MMG3D_BINARY_DIR}/libmmg3df.h
   ${MMG3D_SOURCE_DIR}/libmmg3d.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
   DEPENDS genheader ${MMG3D_SOURCE_DIR}/libmmg3d.h
-  ${COMMON_BINARY_DIR}/libmmgtypesf.h
-  ${COMMON_SOURCE_DIR}/libmmgtypes.h
   ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
   COMMENT "Generating Fortran header for mmg3d"
   )
+
+ADD_CUSTOM_TARGET(mmg3d_fortran_header
+  ALL
+  DEPENDS ${MMG3D_BINARY_DIR}/libmmg3df.h)
 
 ############################################################################
 #####
@@ -80,7 +84,7 @@ FILE(
   ${COMMON_BINARY_DIR}/mmgcommon.h
   )
 LIST(REMOVE_ITEM source_files
-  ${MMG3D_SOURCE_DIR}/mmg3d.c
+  ${MMG3D_SOURCE_DIR}/${PROJECT_NAME}3d.c
   ${MMG3D_SOURCE_DIR}/lib${PROJECT_NAME}3df.c
   ${CMAKE_SOURCE_DIR}/src/mmg/libmmg.h
   ${CMAKE_SOURCE_DIR}/src/mmg/libmmgf.h
@@ -93,7 +97,6 @@ FILE(
 FILE(
   GLOB
   lib_file
-  #${MMG3D_SOURCE_DIR}/library_tools.c
   ${MMG3D_SOURCE_DIR}/lib${PROJECT_NAME}3df.c
   )
 
@@ -131,11 +134,9 @@ ENDIF ( )
 #####         Compile mmg3d libraries
 #####
 ############################################################################
-
 # Compile static library
 IF ( LIBMMG3D_STATIC )
   ADD_LIBRARY(lib${PROJECT_NAME}3d_a  STATIC
-    ${MMG3D_BINARY_DIR}/lib${PROJECT_NAME}3df.h
     ${source_files} ${lib_file} )
   SET_TARGET_PROPERTIES(lib${PROJECT_NAME}3d_a PROPERTIES OUTPUT_NAME
     ${PROJECT_NAME}3d)
@@ -148,7 +149,6 @@ ENDIF()
 # Compile shared library
 IF ( LIBMMG3D_SHARED )
   ADD_LIBRARY(lib${PROJECT_NAME}3d_so SHARED
-    ${MMG3D_BINARY_DIR}/lib${PROJECT_NAME}3df.h
     ${source_files} ${lib_file})
   SET_TARGET_PROPERTIES(lib${PROJECT_NAME}3d_so PROPERTIES
     VERSION ${CMAKE_RELEASE_VERSION} SOVERSION 5)
@@ -182,19 +182,29 @@ IF ( LIBMMG3D_STATIC OR LIBMMG3D_SHARED )
     COMMAND ${CMAKE_COMMAND} -E copy ${COMMON_BINARY_DIR}/libmmgtypesf.h
     ${MMG3D_INCLUDE}/libmmgtypesf.h
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    DEPENDS ${COMMON_BINARY_DIR}/libmmgtypesf.h)
+    DEPENDS mmg_fortran_header)
+  ADD_CUSTOM_TARGET ( copy3d_libmmgtypesf ALL
+    DEPENDS ${MMG3D_INCLUDE}/libmmgtypesf.h )
+  ADD_DEPENDENCIES ( copy3d_libmmgtypesf mmg_fortran_header )
+
   ADD_CUSTOM_COMMAND(OUTPUT ${MMG3D_INCLUDE}/libmmg3df.h
     COMMAND ${CMAKE_COMMAND} -E copy ${MMG3D_BINARY_DIR}/libmmg3df.h ${MMG3D_INCLUDE}/libmmg3df.h
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    DEPENDS ${MMG3D_BINARY_DIR}/libmmg3df.h)
+    DEPENDS mmg3d_fortran_header)
+  ADD_CUSTOM_TARGET ( copy_libmmg3df ALL
+    DEPENDS ${MMG3D_INCLUDE}/libmmg3df.h )
+  ADD_DEPENDENCIES ( copy_libmmg3df mmg3d_fortran_header )
 
-  # Install header files in project directory
+  # Copy header files in project directory at configuration step
+  # (generated file don't exists yet or are outdated)
   FILE(INSTALL  ${mmg3d_headers} DESTINATION ${MMG3D_INCLUDE}
     PATTERN "libmmg*f.h"  EXCLUDE)
 
   ADD_CUSTOM_TARGET(copy_3d_headers ALL
-    DEPENDS  ${MMG3D_INCLUDE}/libmmg3df.h  ${MMG3D_INCLUDE}/libmmg3d.h
-    ${MMG3D_INCLUDE}/libmmgtypesf.h ${MMG3D_INCLUDE}/libmmgtypes.h )
+    DEPENDS
+    copy_libmmg3df copy3d_libmmgtypesf
+    ${MMG3D_INCLUDE}/libmmg3d.h
+    ${MMG3D_INCLUDE}/libmmgtypes.h )
 
 ENDIF()
 
@@ -214,7 +224,6 @@ ENDIF()
 #####
 ###############################################################################
 ADD_EXECUTABLE(${PROJECT_NAME}3d
-  ${MMG3D_BINARY_DIR}/lib${PROJECT_NAME}3df.h
   ${source_files} ${main_file})
 
 IF ( WIN32 AND NOT MINGW AND USE_SCOTCH )
@@ -224,15 +233,19 @@ ENDIF ( )
 TARGET_LINK_LIBRARIES(${PROJECT_NAME}3d ${LIBRARIES})
 INSTALL(TARGETS ${PROJECT_NAME}3d RUNTIME DESTINATION bin)
 
-# in debug mode we name the executable mmg3d_debug
-SET_TARGET_PROPERTIES(${PROJECT_NAME}3d PROPERTIES DEBUG_POSTFIX _debug)
-# in Release mode we name the executable mmg3d_O3
-SET_TARGET_PROPERTIES(${PROJECT_NAME}3d PROPERTIES RELEASE_POSTFIX _O3)
-# in RelWithDebInfo mode we name the executable mmg3d_O3d
-SET_TARGET_PROPERTIES(${PROJECT_NAME}3d PROPERTIES RELWITHDEBINFO_POSTFIX _O3d)
-# in MinSizeRel mode we name the executable mmg3d_Os
-SET_TARGET_PROPERTIES(${PROJECT_NAME}3d PROPERTIES MINSIZEREL_POSTFIX _Os)
-
+IF ( CMAKE_BUILD_TYPE MATCHES "Debug" )
+  # in debug mode we name the executable mmg3d_debug
+  SET_TARGET_PROPERTIES(${PROJECT_NAME}3d PROPERTIES DEBUG_POSTFIX _debug)
+ELSEIF ( CMAKE_BUILD_TYPE MATCHES "Release" )
+  # in Release mode we name the executable mmg3d_O3
+  SET_TARGET_PROPERTIES(${PROJECT_NAME}3d PROPERTIES RELEASE_POSTFIX _O3)
+ELSEIF ( CMAKE_BUILD_TYPE MATCHES "RelWithDebInfo" )
+  # in RelWithDebInfo mode we name the executable mmg3d_O3d
+  SET_TARGET_PROPERTIES(${PROJECT_NAME}3d PROPERTIES RELWITHDEBINFO_POSTFIX _O3d)
+ELSEIF ( CMAKE_BUILD_TYPE MATCHES "MinSizeRel" )
+  # in MinSizeRel mode we name the executable mmg3d_O3
+  SET_TARGET_PROPERTIES(${PROJECT_NAME}s PROPERTIES MINSIZEREL_POSTFIX _Os)
+ENDIF ( )
 
 ###############################################################################
 #####

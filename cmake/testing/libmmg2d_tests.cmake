@@ -59,9 +59,13 @@ IF (CMAKE_Fortran_COMPILER)
   ENABLE_LANGUAGE (Fortran)
 
   ADD_EXECUTABLE(libmmg2d_fortran_a
-    ${CMAKE_SOURCE_DIR}/libexamples/mmg2d/adaptation_example0_fortran/example0_a/main.F90  ${mmg2d_includes})
- ADD_EXECUTABLE(libmmg2d_fortran_b
-    ${CMAKE_SOURCE_DIR}/libexamples/mmg2d/adaptation_example0_fortran/example0_b/main.F90  ${mmg2d_includes})
+    ${CMAKE_SOURCE_DIR}/libexamples/mmg2d/adaptation_example0_fortran/example0_a/main.F90)
+  ADD_DEPENDENCIES(libmmg2d_fortran_a copy_2d_headers)
+
+  ADD_EXECUTABLE(libmmg2d_fortran_b
+    ${CMAKE_SOURCE_DIR}/libexamples/mmg2d/adaptation_example0_fortran/example0_b/main.F90)
+  ADD_DEPENDENCIES(libmmg2d_fortran_b copy_2d_headers)
+
 
   IF ( WIN32 AND ((NOT MINGW) AND USE_SCOTCH) )
 

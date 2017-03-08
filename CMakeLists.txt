@@ -177,6 +177,10 @@ ADD_CUSTOM_COMMAND(OUTPUT ${COMMON_BINARY_DIR}/libmmgtypesf.h
   COMMENT "Generating Fortran header for libmmgtypes.h file"
   )
 
+ADD_CUSTOM_TARGET(mmg_fortran_header
+  ALL
+  DEPENDS ${COMMON_BINARY_DIR}/libmmgtypesf.h)
+
 ###############################################################################
 #####
 #####         Sources and libraries

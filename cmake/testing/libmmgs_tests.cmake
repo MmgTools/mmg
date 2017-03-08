@@ -60,10 +60,12 @@ IF (CMAKE_Fortran_COMPILER)
   ENABLE_LANGUAGE (Fortran)
 
   ADD_EXECUTABLE(libmmgs_fortran_a
-    ${CMAKE_SOURCE_DIR}/libexamples/mmgs/adaptation_example0_fortran/example0_a/main.F90 ${mmgs_includes})
+    ${CMAKE_SOURCE_DIR}/libexamples/mmgs/adaptation_example0_fortran/example0_a/main.F90)
+  ADD_DEPENDENCIES(libmmgs_fortran_a copy_s_headers)
 
   ADD_EXECUTABLE(libmmgs_fortran_b
-    ${CMAKE_SOURCE_DIR}/libexamples/mmgs/adaptation_example0_fortran/example0_b/main.F90 ${mmgs_includes})
+    ${CMAKE_SOURCE_DIR}/libexamples/mmgs/adaptation_example0_fortran/example0_b/main.F90)
+  ADD_DEPENDENCIES(libmmgs_fortran_b copy_s_headers)
 
   IF ( WIN32 AND ((NOT MINGW) AND USE_SCOTCH) )
     my_add_link_flags(libmmgs_fortran "/SAFESEH:NO")

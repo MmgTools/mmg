@@ -7,9 +7,9 @@ INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include)
 ###############################################################################
 
 ADD_EXECUTABLE(libmmg_example0_a
-  ${CMAKE_SOURCE_DIR}/libexamples/mmg/adaptation_example0/main.c ${mmg_includes})
+  ${CMAKE_SOURCE_DIR}/libexamples/mmg/adaptation_example0/main.c)
 ADD_EXECUTABLE(libmmg_cpp_a
-  ${CMAKE_SOURCE_DIR}/libexamples/mmg/adaptation_example0_cpp/main.cpp ${mmg_includes})
+  ${CMAKE_SOURCE_DIR}/libexamples/mmg/adaptation_example0_cpp/main.cpp)
 
 IF ( WIN32 AND NOT MINGW AND USE_SCOTCH )
   my_add_link_flags(libmmg_example0_a "/SAFESEH:NO")
@@ -43,8 +43,8 @@ IF (CMAKE_Fortran_COMPILER)
   ENABLE_LANGUAGE (Fortran)
 
   ADD_EXECUTABLE(libmmg_fortran_a
-    ${CMAKE_SOURCE_DIR}/libexamples/mmg/adaptation_example0_fortran/main.F90
-    ${mmg_includes} ${mmg2d_includes} ${mmgs_includes} ${mmg3d_includes})
+    ${CMAKE_SOURCE_DIR}/libexamples/mmg/adaptation_example0_fortran/main.F90)
+  ADD_DEPENDENCIES(libmmg_fortran_a copy_mmg_headers )
 
   IF ( WIN32 AND NOT MINGW AND USE_SCOTCH )
     my_add_link_flags(libmmg_fortran_a "/SAFESEH:NO")

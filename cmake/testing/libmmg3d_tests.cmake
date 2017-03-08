@@ -72,10 +72,12 @@ IF (CMAKE_Fortran_COMPILER)
   ENABLE_LANGUAGE (Fortran)
 
   ADD_EXECUTABLE(libmmg3d_fortran_a
-    ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/adaptation_example0_fortran/example0_a/main.F90 ${mmg3d_includes})
+    ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/adaptation_example0_fortran/example0_a/main.F90)
+  ADD_DEPENDENCIES(libmmg3d_fortran_a copy_3d_headers)
 
   ADD_EXECUTABLE(libmmg3d_fortran_b
-    ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/adaptation_example0_fortran/example0_b/main.F90 ${mmg3d_includes})
+    ${CMAKE_SOURCE_DIR}/libexamples/mmg3d/adaptation_example0_fortran/example0_b/main.F90)
+  ADD_DEPENDENCIES(libmmg3d_fortran_b copy_3d_headers)
 
   IF ( WIN32 AND ((NOT MINGW) AND USE_SCOTCH) )
     my_add_link_flags(libmmg3d_fortran_a "/SAFESEH:NO")
