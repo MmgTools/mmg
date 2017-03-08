@@ -441,7 +441,11 @@ int main(int argc,char *argv[]) {
   }
   if ( ier < 1)
     _MMG2D_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
-
+  
+  /* Read parameter file */
+  if ( !MMG2_parsop(mesh,met) )
+    _MMG2D_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
+  
   /* Read displacement if any */
   if ( mesh->info.lag >= 0 ) {
 
@@ -475,7 +479,7 @@ int main(int argc,char *argv[]) {
       _MMG2D_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
     }
   }
-
+  
   chrono(OFF,&MMG5_ctim[1]);
   printim(MMG5_ctim[1].gdif,stim);
   fprintf(stdout,"  -- DATA READING COMPLETED.     %s\n",stim);

@@ -164,17 +164,19 @@ int _MMG2_singul(MMG5_pMesh mesh) {
 
         if ( !ns )  continue;
         if ( (ng+nr) > 2 ) {
+          /* Previous classification may be subject to discussion, and may depend on the user's need */
+          ppt->tag |= MG_NOM;
+          nm++;
           /* Two ridge curves and one ref curve: non manifold situation */
-          if ( ng == 2 && nr == 1 ) {
+          /*if ( ng == 2 && nr == 1 ) {
             ppt->tag |= MG_NOM;
             nm++;
           }
-          /* Other situations: corner */
           else {
             ppt->tag |= MG_CRN + MG_REQ;
             nre++;
             nc++;
-          }
+          }*/
         }
         /* One ridge curve and one ref curve meeting at a point */
         else if ( (ng == 1) && (nr == 1) ) {

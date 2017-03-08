@@ -41,11 +41,50 @@
  *
  **/
 
+/* Identify whether a triangle with reference ref should be split, and the labels of the resulting triangles */
+int _MMG2_isSplit(MMG5_pMesh mesh,int ref,int *refint,int *refext) {
+  MMG5_pMat    pm;
+  int          k;
+  char         spl;
+  
+  /* Check in the info->mat table if reference ref is supplied by the user */
+  for (k=0; k<mesh->info.nmat; k++) {
+    pm = &mesh->info.mat[k];
+    if ( pm->ref == ref ) {
+      if ( !pm->dospl ) return(0);
+      else {
+        *refint = pm->rin;
+        *refext = pm->rex;
+        return(1);
+      }
+    }
+  }
+  
+  /* Default case: split with references MG_MINUS, MG_PLUS */
+  *refint = MG_MINUS;
+  *refext = MG_PLUS;
+  return(1);
+  
+}
+
+/* Retrieve the initial domain reference associated to the (split) reference ref */
+int _MMG2_getIniRef(MMG5_pMesh mesh,int ref) {
+  MMG5_pMat     pm;
+  int           k;
+    
+  for (k=0; k<mesh->info.nmat; k++) {
+    pm = &mesh->info.mat[k];
+    if ( pm->ref == ref && !pm->dospl ) return(pm->ref);
+    if ( ref == pm->rin || ref == pm->rex ) return(pm->ref);
+  }
+  return(ref);
+}
+
 /* Reset MG_ISO vertex and edge references to 0 */
 int _MMG2_resetRef(MMG5_pMesh mesh) {
   MMG5_pTria      pt;
   MMG5_pPoint     p0;
-  int             k;
+  int             k,ref;
   char            i;
   
   for (k=1; k<=mesh->nt; k++) {
@@ -57,6 +96,14 @@ int _MMG2_resetRef(MMG5_pMesh mesh) {
       if ( pt->edg[i] == MG_ISO ) pt->edg[i] = 0;
       if ( p0->ref == MG_ISO ) p0->ref = 0;
     }
+  }
+  
+  /* Reset the triangle references to their initial distribution */
+  for (k=1; k<=mesh->nt; k++) {
+    pt = &mesh->tria[k];
+    if ( !pt->v[0] ) continue;
+    ref = _MMG2_getIniRef(mesh,pt->ref);
+    pt->ref = ref;
   }
   
   return(1);
@@ -351,7 +398,7 @@ int _MMG2_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol){
   MMG5_pPoint  p0,p1;
   _MMG5_Hash   hash;
   double       v0,v1,s,c[2];
-  int          k,ip0,ip1,nb,np,nt,ns,vx[3];
+  int          k,ip0,ip1,nb,np,nt,ns,refint,refext,vx[3];
   char         i,i0,i1;
 
   /* Reset flag field for points */
@@ -407,6 +454,8 @@ int _MMG2_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol){
 
       np = _MMG5_hashGet(&hash,ip0,ip1);
       if ( np ) continue;
+      
+      if ( !_MMG2_isSplit(mesh,pt->ref,&refint,&refext) ) continue;
 
       v0 = sol->m[ip0];
       v1 = sol->m[ip1];
@@ -485,13 +534,14 @@ int _MMG2_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol){
 int _MMG2_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol){
   MMG5_pTria    pt;
   double        v,v1;
-  int           k,ip,ip1;
+  int           k,ip,ip1,ier,ref,refint,refext;
   char          i,nmn,npl,nz;
 
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) ) continue;
 
+    ref = pt->ref;
     nmn = npl = nz = 0;
     for (i=0; i<3; i++) {
       ip = pt->v[i];
@@ -506,16 +556,22 @@ int _MMG2_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol){
     }
 
     assert(nz < 3);
+    ier = _MMG2_isSplit(mesh,ref,&refint,&refext);
+
     if ( npl ) {
-      assert ( !nmn );
-      pt->ref = MG_PLUS;
+      if ( ier ) {
+        assert ( !nmn );
+        pt->ref = refext;
+      }
     }
     else {
-      assert ( !npl );
-      pt->ref = MG_MINUS;
+      if ( ier ) {
+        assert ( !npl );
+        pt->ref = refint;
+      }
     }
 
-    // Set MG_ISO ref at ls edges
+    /* Set MG_ISO ref at ls edges */
     if ( nz == 2 ) {
       for (i=0; i<3; i++) {
         ip  = pt->v[_MMG5_inxt2[i]];
@@ -608,6 +664,9 @@ int MMG2_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol) {
   /* Clean memory */
   _MMG5_DEL_MEM(mesh,sol->m,(sol->size*(sol->npmax+1))*sizeof(double));
   sol->np = 0;
+  
+  if ( mesh->info.mat )
+    free( mesh->info.mat );
 
   return(1);
 }

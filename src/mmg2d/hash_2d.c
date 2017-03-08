@@ -296,16 +296,10 @@ int MMG2_bdryEdge(MMG5_pMesh mesh) {
       pa = &mesh->edge[mesh->na];
       pa->a = pt->v[i1];
       pa->b = pt->v[i2];
-
-      /* Case of an external boundary edge */
-      if ( !iel ) {
-        pa->tag = pt->tag[i];
-        pa->ref = pt->edg[i];
-      }
-      /* Case of an internal boundary edge */
-      else {
-        pa->ref = mesh->info.iso ? MG_ISO : pt->edg[i];
-      }
+      
+      pa->tag = pt->tag[i];
+      pa->ref = pt->edg[i];
+      
     }
   }
 
@@ -420,12 +414,7 @@ int MMG2_pack(MMG5_pMesh mesh,MMG5_pSol sol) {
             /* the base field is used to be able to recover the tria (and its face)
              * from which comes a boundary edge */
             ped->base = 3*k+i;
-            if ( !iel ) {
-              ped->ref = pt->edg[i];
-            }
-            else {
-              ped->ref = mesh->info.iso ? MG_ISO : pt->edg[i];
-            }
+            ped->ref = pt->edg[i];
           }
         }
       }
