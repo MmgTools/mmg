@@ -54,26 +54,17 @@ INCLUDE_DIRECTORIES(${COMMON_BINARY_DIR})
 # Source files
 FILE(
   GLOB
-  sourcemmgs_files
-  ${MMGS_SOURCE_DIR}/*.c   ${MMGS_SOURCE_DIR}/*.h
-  ${COMMON_SOURCE_DIR}/*.c ${COMMON_SOURCE_DIR}/*.h
-  ${COMMON_BINARY_DIR}/mmgcommon.h
+  mmgs_library_files
+  ${MMGS_SOURCE_DIR}/*.c
+  ${COMMON_SOURCE_DIR}/*.c
   )
-LIST(REMOVE_ITEM sourcemmgs_files
+LIST(REMOVE_ITEM mmgs_library_files
   ${MMGS_SOURCE_DIR}/mmgs.c
-  ${MMGS_BINARY_DIR}/lib${PROJECT_NAME}sf.c
-  ${CMAKE_SOURCE_DIR}/src/mmg/libmmg.h
-  ${CMAKE_SOURCE_DIR}/src/mmg/libmmgf.h
-  ${REMOVE_FILE})
+  ${REMOVE_FILE} )
 FILE(
   GLOB
-  mainmmgs_file
+  mmgs_main_file
   ${MMGS_SOURCE_DIR}/mmgs.c
-  )
-FILE(
-  GLOB
-  libmmgs_file
-  ${MMGS_SOURCE_DIR}/lib${PROJECT_NAME}sf.c
   )
 
 ############################################################################
@@ -83,8 +74,7 @@ FILE(
 ############################################################################
 
 IF ( LIBMMGS_STATIC )
-  ADD_LIBRARY(lib${PROJECT_NAME}s_a  STATIC
-    ${sourcemmgs_files} ${libmmgs_file} )
+  ADD_LIBRARY ( lib${PROJECT_NAME}s_a  STATIC ${mmgs_library_files} )
   SET_TARGET_PROPERTIES(lib${PROJECT_NAME}s_a PROPERTIES OUTPUT_NAME
     ${PROJECT_NAME}s)
   TARGET_LINK_LIBRARIES(lib${PROJECT_NAME}s_a ${LIBRARIES})
@@ -95,8 +85,7 @@ ENDIF()
 
 # Compile shared library
 IF ( LIBMMGS_SHARED )
-  ADD_LIBRARY(lib${PROJECT_NAME}s_so SHARED
-    ${sourcemmgs_files} ${libmmgs_file})
+  ADD_LIBRARY(lib${PROJECT_NAME}s_so SHARED ${mmgs_library_files} )
   SET_TARGET_PROPERTIES(lib${PROJECT_NAME}s_so PROPERTIES
     OUTPUT_NAME ${PROJECT_NAME}s)
   SET_TARGET_PROPERTIES(lib${PROJECT_NAME}s_so PROPERTIES
@@ -164,8 +153,7 @@ ENDIF()
 #####
 ###############################################################################
 
-ADD_EXECUTABLE(${PROJECT_NAME}s
-  ${sourcemmgs_files} ${mainmmgs_file})
+ADD_EXECUTABLE ( ${PROJECT_NAME}s ${mmgs_library_files} ${mmgs_main_file} )
 
 IF ( WIN32 AND NOT MINGW AND USE_SCOTCH )
   my_add_link_flags(${PROJECT_NAME}s "/SAFESEH:NO")

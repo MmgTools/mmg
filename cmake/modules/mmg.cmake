@@ -38,10 +38,7 @@
 # Compile static library
 IF ( LIBMMG_STATIC )
   ADD_LIBRARY(lib${PROJECT_NAME}_a  STATIC
-    ${sourcemmg2d_files} ${libmmg2d_file}
-    ${sourcemmgs_files} ${libmmgs_file}
-    ${source_files} ${lib_file}
-    ${CMAKE_SOURCE_DIR}/src/mmg/libmmg.h
+    ${mmg2d_library_files} ${mmgs_library_files} ${mmg3d_library_files}
     )
   SET_TARGET_PROPERTIES(lib${PROJECT_NAME}_a PROPERTIES OUTPUT_NAME
     ${PROJECT_NAME})
@@ -54,10 +51,7 @@ ENDIF()
 # Compile shared library
 IF ( LIBMMG_SHARED )
   ADD_LIBRARY(lib${PROJECT_NAME}_so SHARED
-    ${sourcemmg2d_files} ${libmmg2d_file}
-    ${sourcemmgs_files} ${libmmgs_file}
-    ${source_files} ${lib_file}
-    ${CMAKE_SOURCE_DIR}/src/mmg/libmmg.h
+    ${mmg2d_library_files} ${mmgs_library_files} ${mmg3d_library_files}
     )
   SET_TARGET_PROPERTIES(lib${PROJECT_NAME}_so PROPERTIES
     VERSION ${CMAKE_RELEASE_VERSION} SOVERSION 5)

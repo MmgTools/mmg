@@ -67,16 +67,16 @@ INCLUDE_DIRECTORIES(${COMMON_BINARY_DIR})
 # Library files
 FILE(
   GLOB
-  library_files
+  mmg3d_library_files
   ${MMG3D_SOURCE_DIR}/*.c
   ${COMMON_SOURCE_DIR}/*.c
   )
-LIST(REMOVE_ITEM library_files
+LIST(REMOVE_ITEM mmg3d_library_files
   ${MMG3D_SOURCE_DIR}/${PROJECT_NAME}3d.c
 )
 FILE(
   GLOB
-  main_file
+  mmg3d_main_file
   ${MMG3D_SOURCE_DIR}/mmg3d.c
   )
 
@@ -116,7 +116,7 @@ ENDIF ( )
 ############################################################################
 # Compile static library
 IF ( LIBMMG3D_STATIC )
-  ADD_LIBRARY(lib${PROJECT_NAME}3d_a  STATIC ${library_files} )
+  ADD_LIBRARY(lib${PROJECT_NAME}3d_a  STATIC ${mmg3d_library_files} )
   SET_TARGET_PROPERTIES(lib${PROJECT_NAME}3d_a PROPERTIES OUTPUT_NAME
     ${PROJECT_NAME}3d)
   TARGET_LINK_LIBRARIES(lib${PROJECT_NAME}3d_a ${LIBRARIES})
@@ -127,7 +127,7 @@ ENDIF()
 
 # Compile shared library
 IF ( LIBMMG3D_SHARED )
-  ADD_LIBRARY(lib${PROJECT_NAME}3d_so SHARED ${library_files})
+  ADD_LIBRARY(lib${PROJECT_NAME}3d_so SHARED ${mmg3d_library_files})
   SET_TARGET_PROPERTIES(lib${PROJECT_NAME}3d_so PROPERTIES
     VERSION ${CMAKE_RELEASE_VERSION} SOVERSION 5)
   SET_TARGET_PROPERTIES(lib${PROJECT_NAME}3d_so PROPERTIES
@@ -193,7 +193,7 @@ ENDIF()
 #####         Compile MMG3D executable
 #####
 ###############################################################################
-ADD_EXECUTABLE(${PROJECT_NAME}3d ${library_files} ${main_file})
+ADD_EXECUTABLE(${PROJECT_NAME}3d ${mmg3d_library_files} ${mmg3d_main_file})
 
 IF ( WIN32 AND NOT MINGW AND USE_SCOTCH )
   my_add_link_flags(${PROJECT_NAME}3d "/SAFESEH:NO")

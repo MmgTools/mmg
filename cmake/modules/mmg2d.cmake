@@ -48,32 +48,23 @@ GENERATE_FORTRAN_HEADER (
 ###############################################################################
 
 # Header files
-INCLUDE_DIRECTORIES(${MMG2D_SOURCE_DIR})
+#INCLUDE_DIRECTORIES(${MMG2D_SOURCE_DIR})
 INCLUDE_DIRECTORIES(${COMMON_BINARY_DIR})
 
 # Source files
 FILE(
   GLOB
-  sourcemmg2d_files
-  ${MMG2D_SOURCE_DIR}/*.c   ${MMG2D_SOURCE_DIR}/*.h
-  ${COMMON_SOURCE_DIR}/*.c ${COMMON_SOURCE_DIR}/*.h
-  ${COMMON_BINARY_DIR}/mmgcommon.h
+  mmg2d_library_files
+  ${MMG2D_SOURCE_DIR}/*.c
+  ${COMMON_SOURCE_DIR}/*.c
   )
-LIST(REMOVE_ITEM sourcemmg2d_files
+LIST(REMOVE_ITEM mmg2d_library_files
   ${MMG2D_SOURCE_DIR}/mmg2d.c
-  ${MMG2D_SOURCE_DIR}/lib${PROJECT_NAME}2df.c
-  ${CMAKE_SOURCE_DIR}/src/mmg/libmmg.h
-  ${CMAKE_SOURCE_DIR}/src/mmg/libmmgf.h
-  ${REMOVE_FILE})
+  ${REMOVE_FILE} )
 FILE(
   GLOB
-  mainmmg2d_file
+  mmg2d_main_file
   ${MMG2D_SOURCE_DIR}/mmg2d.c
-  )
-FILE(
-  GLOB
-  libmmg2d_file
-  ${MMG2D_SOURCE_DIR}/lib${PROJECT_NAME}2df.c
   )
 
 ############################################################################
@@ -112,8 +103,7 @@ ENDIF ( )
 ############################################################################
 # Compile static library
 IF ( LIBMMG2D_STATIC )
-  ADD_LIBRARY(lib${PROJECT_NAME}2d_a  STATIC
-    ${sourcemmg2d_files} ${libmmg2d_file} )
+  ADD_LIBRARY ( lib${PROJECT_NAME}2d_a  STATIC ${mmg2d_library_files} )
   SET_TARGET_PROPERTIES(lib${PROJECT_NAME}2d_a PROPERTIES OUTPUT_NAME
     ${PROJECT_NAME}2d)
   TARGET_LINK_LIBRARIES(lib${PROJECT_NAME}2d_a ${LIBRARIES})
@@ -124,8 +114,7 @@ ENDIF()
 
 # Compile shared library
 IF ( LIBMMG2D_SHARED )
-  ADD_LIBRARY(lib${PROJECT_NAME}2d_so SHARED
-    ${sourcemmg2d_files} ${libmmg2d_file})
+  ADD_LIBRARY ( lib${PROJECT_NAME}2d_so SHARED ${mmg2d_library_files} )
   SET_TARGET_PROPERTIES(lib${PROJECT_NAME}2d_so PROPERTIES
     OUTPUT_NAME ${PROJECT_NAME}2d)
   SET_TARGET_PROPERTIES(lib${PROJECT_NAME}2d_so PROPERTIES
@@ -193,8 +182,7 @@ ENDIF ( )
 #####
 ###############################################################################
 
-ADD_EXECUTABLE(${PROJECT_NAME}2d
-  ${sourcemmg2d_files} ${mainmmg2d_file} )
+ADD_EXECUTABLE(${PROJECT_NAME}2d ${mmg2d_library_files} ${mmg2d_main_file} )
 
 IF ( WIN32 AND NOT MINGW AND USE_SCOTCH )
   my_add_link_flags(${PROJECT_NAME}2d "/SAFESEH:NO")
