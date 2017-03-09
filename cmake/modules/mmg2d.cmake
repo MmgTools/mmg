@@ -138,21 +138,7 @@ IF ( LIBMMG2D_STATIC OR LIBMMG2D_SHARED )
   # Install header files in /usr/local or equivalent
   INSTALL(FILES ${mmg2d_headers} DESTINATION include/mmg/mmg2d)
 
-  COPY_FORTRAN_HEADER (
-    ${COMMON_BINARY_DIR} libmmgtypesf.h ${MMG2D_INCLUDE} libmmgtypesf.h
-    mmg_fortran_header copy2d_libmmgtypesf )
-
-  COPY_FORTRAN_HEADER (
-    ${MMG2D_BINARY_DIR} libmmg2df.h ${MMG2D_INCLUDE} libmmg2df.h
-    mmg2d_fortran_header copy_libmmg2df
-    )
-
-  ADD_CUSTOM_TARGET(copy_2d_headers ALL
-    DEPENDS
-    copy_libmmg2df copy2d_libmmgtypesf
-    ${MMG2D_INCLUDE}/libmmg2d.h
-    ${MMG2D_INCLUDE}/libmmgtypes.h
-    )
+  COPY_FORTRAN_HEADER_AND_CREATE_TARGET ( ${MMG2D_BINARY_DIR} ${MMG2D_INCLUDE} 2d )
 
   # Copy header files in project directory at configuration step
   # (generated file don't exists yet or are outdated)

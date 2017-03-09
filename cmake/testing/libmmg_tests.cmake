@@ -36,7 +36,7 @@ SET ( MMG_LIB_TESTS_MAIN_PATH
   ${CMAKE_SOURCE_DIR}/libexamples/mmg/adaptation_example0_cpp/main.cpp
   )
 
-IF ( LIBMMG2D_STATIC )
+IF ( LIBMMG_STATIC )
   SET ( lib_name lib${PROJECT_NAME}_a )
 ELSE ( )
   SET ( lib_name lib${PROJECT_NAME}_so )

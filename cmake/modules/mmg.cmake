@@ -99,56 +99,15 @@ IF ( LIBMMG_STATIC OR LIBMMG_SHARED )
   INSTALL(FILES ${mmg_headers} DESTINATION include/mmg)
 
   IF ( (NOT LIBMMG2D_STATIC) AND (NOT LIBMMG2D_SHARED) )
-    COPY_FORTRAN_HEADER (
-      ${COMMON_BINARY_DIR} libmmgtypesf.h ${MMG2D_INCLUDE} libmmgtypesf.h
-      mmg_fortran_header copy2d_libmmgtypesf )
-
-    COPY_FORTRAN_HEADER (
-      ${MMG2D_BINARY_DIR} libmmg2df.h ${MMG2D_INCLUDE} libmmg2df.h
-      mmg2d_fortran_header copy_libmmg2df
-      )
-
-    ADD_CUSTOM_TARGET(copy_2d_headers ALL
-      DEPENDS
-      copy_libmmgsf copy2d_libmmgtypesf
-      ${MMG2D_INCLUDE}/libmmgs.h
-      ${MMG2D_INCLUDE}/libmmgtypes.h )
-
+    COPY_FORTRAN_HEADER_AND_CREATE_TARGET ( ${MMG2D_BINARY_DIR} ${MMG2D_INCLUDE} 2d )
   ENDIF ()
 
   IF ( (NOT LIBMMGS_STATIC) AND (NOT LIBMMGS_SHARED) )
-    COPY_FORTRAN_HEADER (
-      ${COMMON_BINARY_DIR} libmmgtypesf.h ${MMGS_INCLUDE} libmmgtypesf.h
-      mmg_fortran_header copys_libmmgtypesf )
-
-    COPY_FORTRAN_HEADER (
-      ${MMGS_BINARY_DIR} libmmgsf.h ${MMGS_INCLUDE} libmmgsf.h
-      mmgs_fortran_header copy_libmmgsf
-      )
-
-    ADD_CUSTOM_TARGET(copy_s_headers ALL
-      DEPENDS
-      copy_libmmgsf copys_libmmgtypesf
-      ${MMGS_INCLUDE}/libmmgs.h
-      ${MMGS_INCLUDE}/libmmgtypes.h )
-
+    COPY_FORTRAN_HEADER_AND_CREATE_TARGET ( ${MMGS_BINARY_DIR} ${MMGS_INCLUDE} s )
   ENDIF()
 
   IF ( (NOT LIBMMG3D_STATIC) AND (NOT LIBMMG3D_SHARED) )
-    COPY_FORTRAN_HEADER (
-      ${COMMON_BINARY_DIR} libmmgtypesf.h ${MMG3D_INCLUDE} libmmgtypesf.h
-      mmg_fortran_header copy3d_libmmgtypesf )
-
-    COPY_FORTRAN_HEADER (
-      ${MMG3D_BINARY_DIR} libmmg3df.h ${MMG3D_INCLUDE} libmmg3df.h
-      mmg3d_fortran_header copy_libmmg3df
-      )
-
-    ADD_CUSTOM_TARGET(copy_3d_headers ALL
-      DEPENDS
-      copy_libmmg3df copy3d_libmmgtypesf
-      ${MMG3D_INCLUDE}/libmmg3d.h
-      ${MMG3D_INCLUDE}/libmmgtypes.h )
+    COPY_FORTRAN_HEADER_AND_CREATE_TARGET ( ${MMG3D_BINARY_DIR} ${MMG3D_INCLUDE} 3d )
   ENDIF()
 
   FILE(INSTALL ${CMAKE_SOURCE_DIR}/src/mmg/libmmgf.h DESTINATION  ${CMAKE_SOURCE_DIR}/include/mmg/)

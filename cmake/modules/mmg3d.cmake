@@ -152,20 +152,7 @@ IF ( LIBMMG3D_STATIC OR LIBMMG3D_SHARED )
   # Install header files in /usr/local or equivalent
   INSTALL(FILES ${mmg3d_headers} DESTINATION include/mmg/mmg3d)
 
-  COPY_FORTRAN_HEADER (
-    ${COMMON_BINARY_DIR} libmmgtypesf.h ${MMG3D_INCLUDE} libmmgtypesf.h
-    mmg_fortran_header copy3d_libmmgtypesf )
-
-  COPY_FORTRAN_HEADER (
-    ${MMG3D_BINARY_DIR} libmmg3df.h ${MMG3D_INCLUDE} libmmg3df.h
-    mmg3d_fortran_header copy_libmmg3df
-    )
-
-  ADD_CUSTOM_TARGET(copy_3d_headers ALL
-    DEPENDS
-    copy_libmmg3df copy3d_libmmgtypesf
-    ${MMG3D_INCLUDE}/libmmg3d.h
-    ${MMG3D_INCLUDE}/libmmgtypes.h )
+  COPY_FORTRAN_HEADER_AND_CREATE_TARGET ( ${MMG3D_BINARY_DIR} ${MMG3D_INCLUDE} 3d )
 
   # Copy header files in project directory at configuration step
   # (generated file don't exists yet or are outdated)

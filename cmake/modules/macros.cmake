@@ -49,6 +49,37 @@ MACRO ( COPY_FORTRAN_HEADER
 
 ENDMACRO ( )
 
+
+###############################################################################
+#####
+#####         Copy an automatically generated header file to another place
+#####         and create the associated target
+#####
+###############################################################################
+MACRO ( COPY_FORTRAN_HEADER_AND_CREATE_TARGET
+    binary_dir include_dir target_identifier )
+
+  COPY_FORTRAN_HEADER (
+    ${COMMON_BINARY_DIR} libmmgtypesf.h
+    ${include_dir} libmmgtypesf.h
+    mmg_fortran_header copy${target_identifier}_libmmgtypesf )
+
+  COPY_FORTRAN_HEADER (
+    ${binary_dir}
+    libmmg${target_identifier}f.h ${include_dir}
+    libmmg${target_identifier}f.h
+    mmg${target_identifier}_fortran_header copy_libmmg${target_identifier}f
+    )
+
+  ADD_CUSTOM_TARGET(copy_${target_identifier}_headers ALL
+    DEPENDS
+    copy_libmmg${target_identifier}f copy${target_identifier}_libmmgtypesf
+    ${include_dir}/libmmg${target_identifier}.h
+    ${include_dir}/libmmgtypes.h )
+
+ENDMACRO ( )
+
+
 ###############################################################################
 #####
 #####         Add a target postfix depending on the build type

@@ -109,21 +109,7 @@ IF ( LIBMMGS_STATIC OR LIBMMGS_SHARED )
   # Install header files in /usr/local or equivalent
   INSTALL(FILES ${mmgs_headers} DESTINATION include/mmg/mmgs)
 
-  COPY_FORTRAN_HEADER (
-    ${COMMON_BINARY_DIR} libmmgtypesf.h ${MMGS_INCLUDE} libmmgtypesf.h
-    mmg_fortran_header copys_libmmgtypesf )
-
-  COPY_FORTRAN_HEADER (
-    ${MMGS_BINARY_DIR} libmmgsf.h ${MMGS_INCLUDE} libmmgsf.h
-    mmgs_fortran_header copy_libmmgsf
-    )
-
-  ADD_CUSTOM_TARGET(copy_s_headers ALL
-    DEPENDS
-    copy_libmmgsf copys_libmmgtypesf
-    ${MMGS_INCLUDE}/libmmgs.h
-    ${MMGS_INCLUDE}/libmmgtypes.h )
-
+  COPY_FORTRAN_HEADER_AND_CREATE_TARGET ( ${MMGS_BINARY_DIR} ${MMGS_INCLUDE} s )
 
   # Copy header files in project directory at configuration step
   # (generated file don't exists yet or are outdated)
