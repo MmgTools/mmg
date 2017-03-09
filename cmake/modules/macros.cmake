@@ -77,9 +77,9 @@ ENDMACRO ( )
 #####
 ###############################################################################
 
-MACRO ( ADD_LIBRARY_TEST target_name main_path target_dependencies lib_name )
+MACRO ( ADD_LIBRARY_TEST target_name main_path target_dependency lib_name )
   ADD_EXECUTABLE ( ${target_name} ${main_path} )
-  ADD_DEPENDENCIES( ${target_name} ${target_dependencies} )
+  ADD_DEPENDENCIES( ${target_name} ${target_dependency} )
 
   TARGET_INCLUDE_DIRECTORIES ( ${target_name} PUBLIC ${CMAKE_SOURCE_DIR}/include )
 
