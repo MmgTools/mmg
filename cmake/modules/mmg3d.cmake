@@ -189,7 +189,17 @@ ENDIF()
 #####         Compile MMG3D executable
 #####
 ###############################################################################
-ADD_EXECUTABLE(${PROJECT_NAME}3d ${mmg3d_library_files} ${mmg3d_main_file})
+IF ( NOT TARGET libmmg3d_a AND NOT TARGET libmmg3d_so )
+  ADD_EXECUTABLE(${PROJECT_NAME}3d ${mmg3d_library_files} ${mmg3d_main_file})
+ELSE ( )
+  ADD_EXECUTABLE(${PROJECT_NAME}3d ${mmg3d_main_file})
+
+  IF ( NOT TARGET libmmg3d_a )
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME}3d libmmg3d_so)
+  ELSE ( )
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME}3d libmmg3d_a)
+  ENDIF ( )
+ENDIF ( )
 
 IF ( WIN32 AND NOT MINGW AND USE_SCOTCH )
   my_add_link_flags(${PROJECT_NAME}3d "/SAFESEH:NO")

@@ -107,6 +107,13 @@ IF ( LIBMMG_STATIC OR LIBMMG_SHARED )
       ${MMG2D_BINARY_DIR} libmmg2df.h ${MMG2D_INCLUDE} libmmg2df.h
       mmg2d_fortran_header copy_libmmg2df
       )
+
+    ADD_CUSTOM_TARGET(copy_2d_headers ALL
+      DEPENDS
+      copy_libmmgsf copy2d_libmmgtypesf
+      ${MMG2D_INCLUDE}/libmmgs.h
+      ${MMG2D_INCLUDE}/libmmgtypes.h )
+
   ENDIF ()
 
   IF ( (NOT LIBMMGS_STATIC) AND (NOT LIBMMGS_SHARED) )
@@ -117,7 +124,14 @@ IF ( LIBMMG_STATIC OR LIBMMG_SHARED )
     COPY_FORTRAN_HEADER (
       ${MMGS_BINARY_DIR} libmmgsf.h ${MMGS_INCLUDE} libmmgsf.h
       mmgs_fortran_header copy_libmmgsf
-    )
+      )
+
+    ADD_CUSTOM_TARGET(copy_s_headers ALL
+      DEPENDS
+      copy_libmmgsf copys_libmmgtypesf
+      ${MMGS_INCLUDE}/libmmgs.h
+      ${MMGS_INCLUDE}/libmmgtypes.h )
+
   ENDIF()
 
   IF ( (NOT LIBMMG3D_STATIC) AND (NOT LIBMMG3D_SHARED) )
@@ -129,6 +143,12 @@ IF ( LIBMMG_STATIC OR LIBMMG_SHARED )
       ${MMG3D_BINARY_DIR} libmmg3df.h ${MMG3D_INCLUDE} libmmg3df.h
       mmg3d_fortran_header copy_libmmg3df
       )
+
+    ADD_CUSTOM_TARGET(copy_3d_headers ALL
+      DEPENDS
+      copy_libmmg3df copy3d_libmmgtypesf
+      ${MMG3D_INCLUDE}/libmmg3d.h
+      ${MMG3D_INCLUDE}/libmmgtypes.h )
   ENDIF()
 
   FILE(INSTALL ${CMAKE_SOURCE_DIR}/src/mmg/libmmgf.h DESTINATION  ${CMAKE_SOURCE_DIR}/include/mmg/)

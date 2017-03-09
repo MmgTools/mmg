@@ -147,8 +147,17 @@ ENDIF()
 #####         Compile MMGS executable
 #####
 ###############################################################################
+IF ( NOT TARGET libmmgs_a AND NOT TARGET libmmgs_so )
+  ADD_EXECUTABLE(${PROJECT_NAME}s ${mmgs_library_files} ${mmgs_main_file})
+ELSE ( )
+  ADD_EXECUTABLE(${PROJECT_NAME}s ${mmgs_main_file})
 
-ADD_EXECUTABLE ( ${PROJECT_NAME}s ${mmgs_library_files} ${mmgs_main_file} )
+  IF ( NOT TARGET libmmgs_a )
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME}s libmmgs_so)
+  ELSE ( )
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME}s libmmgs_a)
+  ENDIF ( )
+ENDIF ( )
 
 IF ( WIN32 AND NOT MINGW AND USE_SCOTCH )
   my_add_link_flags(${PROJECT_NAME}s "/SAFESEH:NO")

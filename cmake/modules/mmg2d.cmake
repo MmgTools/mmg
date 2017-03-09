@@ -177,7 +177,17 @@ ENDIF ( )
 #####
 ###############################################################################
 
-ADD_EXECUTABLE(${PROJECT_NAME}2d ${mmg2d_library_files} ${mmg2d_main_file} )
+IF ( NOT TARGET libmmg2d_a AND NOT TARGET libmmg2d_so )
+  ADD_EXECUTABLE(${PROJECT_NAME}2d ${mmg2d_library_files} ${mmg2d_main_file})
+ELSE ( )
+  ADD_EXECUTABLE(${PROJECT_NAME}2d ${mmg2d_main_file})
+
+  IF ( NOT TARGET libmmg2d_a )
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME}2d libmmg2d_so)
+  ELSE ( )
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME}2d libmmg2d_a)
+  ENDIF ( )
+ENDIF ( )
 
 IF ( WIN32 AND NOT MINGW AND USE_SCOTCH )
   my_add_link_flags(${PROJECT_NAME}2d "/SAFESEH:NO")
