@@ -398,12 +398,12 @@ MARK_AS_ADVANCED(LONG_TESTS)
 CMAKE_DEPENDENT_OPTION ( COVERAGE "Watch code coverage (Linux only)" OFF
 "BUILD_TESTING;CMAKE_COMPILER_IS_GNUCC" OFF )
 
+# Path toward the continuous integration directory
+SET ( CI_DIR ${CMAKE_SOURCE_DIR}/ci_tests
+  CACHE PATH "Path toward the continuous integration directory" )
+MARK_AS_ADVANCED ( CI_DIR )
+
 IF( BUILD_TESTING )
-  # Path toward the continuous integration directory
-  SET ( CI_DIR ${CMAKE_SOURCE_DIR}/ci_tests
-    CACHE PATH "Path toward the continuous integration directory" )
-  MARK_AS_ADVANCED ( CI_DIR )
-  MESSAGE(STATUS ${CI_DIR})
 
   ##-------------------------------------------------------------------##
   ##------- Get the continuous integration tests ----------------------##
@@ -499,10 +499,6 @@ IF(DOXYGEN_FOUND)
   ADD_CUSTOM_TARGET(mmg2d_doc
     COMMAND ${DOXYGEN_EXECUTABLE}
     ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg2d/Doxyfile
-    # COMMAND ${CMAKE_COMMAND} -E chdir
-    # ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg2d/latex make
-    # COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg2d/latex/refman.pdf
-    # ${CMAKE_CURRENT_SOURCE_DIR} WORKING_DIRECTORY
     ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg2d COMMENT "Generating MMG2D API
     documentation with Doxygen.  Open up the
     ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg2d/html/index.html file to see
@@ -514,10 +510,6 @@ IF(DOXYGEN_FOUND)
   ADD_CUSTOM_TARGET(mmgs_doc
     COMMAND ${DOXYGEN_EXECUTABLE}
     ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmgs/Doxyfile
-    # COMMAND ${CMAKE_COMMAND} -E chdir
-    # ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmgs/latex make
-    # COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmgs/latex/refman.pdf
-    # ${CMAKE_CURRENT_SOURCE_DIR} WORKING_DIRECTORY
     ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmgs COMMENT "Generating MMGS API
     documentation with Doxygen.  Open up the
     ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmgs/html/index.html file to see
@@ -529,10 +521,6 @@ IF(DOXYGEN_FOUND)
   ADD_CUSTOM_TARGET(mmg3d_doc
     COMMAND ${DOXYGEN_EXECUTABLE}
     ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg3d/Doxyfile
-    # COMMAND ${CMAKE_COMMAND} -E chdir
-    # ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg3d/latex make
-    # COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg3d/latex/refman.pdf
-    # ${CMAKE_CURRENT_SOURCE_DIR} WORKING_DIRECTORY
     ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg3d
     COMMENT "Generating MMG3D API documentation with Doxygen. Open up the
     ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg3d/html/index.html file to see
