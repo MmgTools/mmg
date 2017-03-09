@@ -4,8 +4,8 @@
 #####
 ###############################################################################
 
-MACRO ( GENERATE_FORTRAN_HEADER
-    in_dir in_file out_dir out_file name
+MACRO ( GENERATE_FORTRAN_HEADER name
+    in_dir in_file out_dir out_file
     )
   # Wrap add_custom_command into add_custom target to remove dpendencies from
   # the custom command and thus allow parallel build.
@@ -70,6 +70,36 @@ MACRO ( ADD_TARGET_POSTFIX target_name )
     SET_TARGET_PROPERTIES(${target_name} PROPERTIES MINSIZEREL_POSTFIX _Os)
   ENDIF ( )
 ENDMACRO ( )
+
+###############################################################################
+#####
+#####         Add Executable that must be tested by ci
+#####
+###############################################################################
+
+MACRO ( ADD_EXEC_TO_CI_TESTS exec_name )
+
+  IF(${CMAKE_BUILD_TYPE} MATCHES "Debug")
+    SET(EXECUT ${EXECUTABLE_OUTPUT_PATH}/${exec_name}_debug)
+    SET(BUILDNAME ${BUILDNAME}_debug CACHE STRING "build name variable")
+  ELSEIF(${CMAKE_BUILD_TYPE} MATCHES "Release")
+    SET(EXECUT ${EXECUTABLE_OUTPUT_PATH}/${exec_name}_O3)
+    SET(BUILDNAME ${BUILDNAME}_O3 CACHE STRING "build name variable")
+  ELSEIF(${CMAKE_BUILD_TYPE} MATCHES "RelWithDebInfo")
+    SET(EXECUT ${EXECUTABLE_OUTPUT_PATH}/${exec_name}3d_O3d)
+    SET(BUILDNAME ${BUILDNAME}_O3d CACHE STRING "build name variable")
+  ELSEIF(${CMAKE_BUILD_TYPE} MATCHES "MinSizeRel")
+    SET(EXECUT ${EXECUTABLE_OUTPUT_PATH}/${exec_name}3d_Os)
+    SET(BUILDNAME ${BUILDNAME}_Os CACHE STRING "build name variable")
+  ELSE()
+    SET(EXECUT ${EXECUTABLE_OUTPUT_PATH}/${exec_name}3d)
+    SET(BUILDNAME ${BUILDNAME} CACHE STRING "build name variable")
+  ENDIF()
+
+  SET ( LISTEXEC_${exec_name} ${EXECUT} )
+
+ENDMACRO ( )
+
 
 ###############################################################################
 #####

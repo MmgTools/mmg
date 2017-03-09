@@ -37,8 +37,8 @@ FILE(MAKE_DIRECTORY ${MMGS_BINARY_DIR})
 #####
 ############################################################################
 
-GENERATE_FORTRAN_HEADER (
-  ${MMGS_SOURCE_DIR} libmmgs.h ${MMGS_BINARY_DIR} libmmgsf.h mmgs
+GENERATE_FORTRAN_HEADER ( mmgs
+  ${MMGS_SOURCE_DIR} libmmgs.h ${MMGS_BINARY_DIR} libmmgsf.h
   )
 
 ###############################################################################
@@ -177,25 +177,8 @@ IF ( BUILD_TESTING )
   ##-------------------------------------------------------------------##
   # Add runtime that we want to test for mmgs
   IF( MMGS_CI )
-    IF(${CMAKE_BUILD_TYPE} MATCHES "Debug")
-      FILE(TO_NATIVE_PATH ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}s_debug  EXECUT_MMGS)
-      #SET(EXECUT_MMGS ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}s_debug)
-      SET(BUILDNAME ${BUILDNAME}_debug CACHE STRING "build name variable")
-    ELSEIF(${CMAKE_BUILD_TYPE} MATCHES "Release")
-      SET(EXECUT_MMGS ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}s_O3)
-      SET(BUILDNAME ${BUILDNAME}_O3 CACHE STRING "build name variable")
-    ELSEIF(${CMAKE_BUILD_TYPE} MATCHES "RelWithDebInfo")
-      SET(EXECUT_MMGS ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}s_O3d)
-      SET(BUILDNAME ${BUILDNAME}_O3d CACHE STRING "build name variable")
-    ELSEIF(${CMAKE_BUILD_TYPE} MATCHES "MinSizeRel")
-      SET(EXECUT_MMGS ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}s_Os)
-      SET(BUILDNAME ${BUILDNAME}_Os CACHE STRING "build name variable")
-    ELSE()
-      SET(EXECUT_MMGS ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}s)
-      SET(BUILDNAME ${BUILDNAME} CACHE STRING "build name variable")
-    ENDIF()
 
-    SET ( LISTEXEC_MMGS ${EXECUT_MMGS} )
+    ADD_EXEC_TO_CI_TESTS ( ${PROJECT_NAME}s )
 
     IF ( TEST_LIBMMGS )
       SET(LIBMMGS_EXEC0_a ${EXECUTABLE_OUTPUT_PATH}/libmmgs_example0_a)

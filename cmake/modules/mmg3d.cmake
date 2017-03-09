@@ -37,8 +37,9 @@ FILE(MAKE_DIRECTORY ${MMG3D_BINARY_DIR})
 #####
 ############################################################################
 
-GENERATE_FORTRAN_HEADER (
-  ${MMG3D_SOURCE_DIR} libmmg3d.h ${MMG3D_BINARY_DIR} libmmg3df.h mmg3d
+
+GENERATE_FORTRAN_HEADER ( mmg3d
+  ${MMG3D_SOURCE_DIR} libmmg3d.h ${MMG3D_BINARY_DIR} libmmg3df.h
   )
 
 ############################################################################
@@ -226,24 +227,8 @@ IF ( BUILD_TESTING )
       SET ( RUN_AGAIN OFF )
     ENDIF ( )
 
-    IF(${CMAKE_BUILD_TYPE} MATCHES "Debug")
-      SET(EXECUT_MMG3D ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}3d_debug)
-      SET(BUILDNAME ${BUILDNAME}_debug CACHE STRING "build name variable")
-    ELSEIF(${CMAKE_BUILD_TYPE} MATCHES "Release")
-      SET(EXECUT_MMG3D ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}3d_O3)
-      SET(BUILDNAME ${BUILDNAME}_O3 CACHE STRING "build name variable")
-    ELSEIF(${CMAKE_BUILD_TYPE} MATCHES "RelWithDebInfo")
-      SET(EXECUT_MMG3D ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}3d_O3d)
-      SET(BUILDNAME ${BUILDNAME}_O3d CACHE STRING "build name variable")
-    ELSEIF(${CMAKE_BUILD_TYPE} MATCHES "MinSizeRel")
-      SET(EXECUT_MMG3D ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}3d_Os)
-      SET(BUILDNAME ${BUILDNAME}_Os CACHE STRING "build name variable")
-    ELSE()
-      SET(EXECUT_MMG3D ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}3d)
-      SET(BUILDNAME ${BUILDNAME} CACHE STRING "build name variable")
-    ENDIF()
+    ADD_EXEC_TO_CI_TESTS ( ${PROJECT_NAME}3d )
 
-    SET ( LISTEXEC_MMG3D ${EXECUT_MMG3D} )
     IF ( TEST_LIBMMG3D )
       SET(LIBMMG3D_EXEC0_a ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_example0_a)
       SET(LIBMMG3D_EXEC0_b ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_example0_b)

@@ -168,20 +168,10 @@ ENDIF()
 #####         Fortran header: libmmgtypesf.h
 #####
 ############################################################################
-
 ADD_EXECUTABLE(genheader ${CMAKE_SOURCE_DIR}/scripts/genheader.c)
-ADD_CUSTOM_COMMAND(OUTPUT ${COMMON_BINARY_DIR}/libmmgtypesf.h
-  COMMAND genheader ${COMMON_BINARY_DIR}/libmmgtypesf.h
-  ${COMMON_SOURCE_DIR}/libmmgtypes.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-  DEPENDS genheader ${COMMON_SOURCE_DIR}/libmmgtypes.h
-  ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
-  COMMENT "Generating Fortran header for libmmgtypes.h file"
+GENERATE_FORTRAN_HEADER ( mmg
+  ${COMMON_SOURCE_DIR} libmmgtypes.h ${COMMON_BINARY_DIR} libmmgtypesf.h
   )
-
-ADD_CUSTOM_TARGET(mmg_fortran_header
-  ALL
-  DEPENDS ${COMMON_BINARY_DIR}/libmmgtypesf.h)
 
 ###############################################################################
 #####

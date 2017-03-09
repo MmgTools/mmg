@@ -37,8 +37,8 @@ FILE(MAKE_DIRECTORY ${MMG2D_BINARY_DIR})
 #####
 ############################################################################
 
-GENERATE_FORTRAN_HEADER (
-  ${MMG2D_SOURCE_DIR} libmmg2d.h ${MMG2D_BINARY_DIR} libmmg2df.h mmg2d
+GENERATE_FORTRAN_HEADER ( mmg2d
+  ${MMG2D_SOURCE_DIR} libmmg2d.h ${MMG2D_BINARY_DIR} libmmg2df.h
   )
 
 ###############################################################################
@@ -205,24 +205,9 @@ IF ( BUILD_TESTING )
   ##-------------------------------------------------------------------##
   # Add runtime that we want to test for mmg2d
   IF ( MMG2D_CI )
-    IF ( CMAKE_BUILD_TYPE MATCHES "Debug" )
-      SET(EXECUT_MMG2D ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}2d_debug)
-      SET(BUILDNAME ${BUILDNAME}_debug CACHE STRING "build name variable")
-    ELSEIF ( CMAKE_BUILD_TYPE MATCHES "Release" )
-      SET(EXECUT_MMG2D ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}2d_O3)
-      SET(BUILDNAME ${BUILDNAME}_O3 CACHE STRING "build name variable")
-    ELSEIF( CMAKE_BUILD_TYPE MATCHES "RelWithDebInfo" )
-      SET(EXECUT_MMG2D ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}2d_O3d)
-      SET(BUILDNAME ${BUILDNAME}_O3d CACHE STRING "build name variable")
-    ELSEIF ( CMAKE_BUILD_TYPE MATCHES "MinSizeRel" )
-      SET(EXECUT_MMG2D ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}2d_Os)
-      SET(BUILDNAME ${BUILDNAME}_Os CACHE STRING "build name variable")
-    ELSE()
-      SET(EXECUT_MMG2D ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}2d)
-      SET(BUILDNAME ${BUILDNAME} CACHE STRING "build name variable")
-    ENDIF()
 
-    SET ( LISTEXEC_MMG2D ${EXECUT_MMG2D} )
+    ADD_EXEC_TO_CI_TESTS ( ${PROJECT_NAME}2d )
+
     IF ( TEST_LIBMMG2D )
       SET(LIBMMG2D_EXEC0_a ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_example0_a)
       SET(LIBMMG2D_EXEC0_b ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_example0_b)
