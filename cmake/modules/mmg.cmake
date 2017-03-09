@@ -91,24 +91,6 @@ IF ( LIBMMG_STATIC OR LIBMMG_SHARED )
   SET(MMGS_INCLUDE ${CMAKE_SOURCE_DIR}/include/mmg/mmgs )
   SET(MMG3D_INCLUDE ${CMAKE_SOURCE_DIR}/include/mmg/mmg3d )
   SET(MMG_INCLUDE ${CMAKE_SOURCE_DIR}/include/mmg )
-  SET( mmg2d_includes
-    ${MMG2D_INCLUDE}/libmmg2d.h
-    ${MMG2D_INCLUDE}/libmmg2df.h
-    )
-  SET( mmgs_includes
-    ${MMGS_INCLUDE}/libmmgs.h
-    ${MMGS_INCLUDE}/libmmgsf.h
-    )
-  SET( mmg3d_includes
-    ${MMG3D_INCLUDE}/libmmg3d.h
-    ${MMG3D_INCLUDE}/libmmg3df.h
-    )
-  SET( mmg_includes
-    ${MMG_INCLUDE}/libmmg.h
-    ${MMG_INCLUDE}/libmmgf.h
-    ${MMG_INCLUDE}/mmg3d/libmmgtypes.h
-    ${MMG_INCLUDE}/mmg3d/libmmgtypesf.h
-    )
 
   # Install header files in /usr/local or equivalent
   INSTALL(FILES ${mmg2d_headers} DESTINATION include/mmg/mmg2d)

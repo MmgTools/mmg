@@ -147,12 +147,7 @@ IF ( LIBMMG3D_STATIC OR LIBMMG3D_SHARED )
     ${COMMON_BINARY_DIR}/libmmgtypesf.h
     )
   SET(MMG3D_INCLUDE ${CMAKE_SOURCE_DIR}/include/mmg/mmg3d )
-  SET( mmg3d_includes
-    ${MMG3D_INCLUDE}/libmmg3d.h
-    ${MMG3D_INCLUDE}/libmmg3df.h
-    ${MMG3D_INCLUDE}/libmmgtypes.h
-    ${MMG3D_INCLUDE}/libmmgtypesf.h
-    )
+
   # Install header files in /usr/local or equivalent
   INSTALL(FILES ${mmg3d_headers} DESTINATION include/mmg/mmg3d)
 

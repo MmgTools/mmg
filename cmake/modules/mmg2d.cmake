@@ -134,12 +134,7 @@ IF ( LIBMMG2D_STATIC OR LIBMMG2D_SHARED )
     ${COMMON_BINARY_DIR}/libmmgtypesf.h
     )
   SET(MMG2D_INCLUDE ${CMAKE_SOURCE_DIR}/include/mmg/mmg2d )
-  SET( mmg2d_includes
-    ${MMG2D_INCLUDE}/libmmg2d.h
-    ${MMG2D_INCLUDE}/libmmg2df.h
-    ${MMG2D_INCLUDE}/libmmgtypes.h
-    ${MMG2D_INCLUDE}/libmmgtypesf.h
-    )
+
   # Install header files in /usr/local or equivalent
   INSTALL(FILES ${mmg2d_headers} DESTINATION include/mmg/mmg2d)
 

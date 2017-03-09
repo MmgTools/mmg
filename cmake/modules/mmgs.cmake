@@ -105,12 +105,7 @@ IF ( LIBMMGS_STATIC OR LIBMMGS_SHARED )
     ${COMMON_BINARY_DIR}/libmmgtypesf.h
     )
   SET(MMGS_INCLUDE ${CMAKE_SOURCE_DIR}/include/mmg/mmgs )
-  SET( mmgs_includes
-    ${MMGS_INCLUDE}/libmmgs.h
-    ${MMGS_INCLUDE}/libmmgsf.h
-    ${MMGS_INCLUDE}/libmmgtypes.h
-    ${MMGS_INCLUDE}/libmmgtypesf.h
-    )
+
   # Install header files in /usr/local or equivalent
   INSTALL(FILES ${mmgs_headers} DESTINATION include/mmg/mmgs)
 
