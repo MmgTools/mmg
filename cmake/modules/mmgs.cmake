@@ -118,17 +118,17 @@ IF ( LIBMMGS_STATIC OR LIBMMGS_SHARED )
     mmgs_fortran_header copy_libmmgsf
     )
 
-  # Copy header files in project directory at configuration step
-  # (generated file don't exists yet or are outdated)
-  FILE(INSTALL  ${mmgs_headers} DESTINATION ${MMGS_INCLUDE}
-    PATTERN "libmmg*f.h"  EXCLUDE)
-
   ADD_CUSTOM_TARGET(copy_s_headers ALL
     DEPENDS
     copy_libmmgsf copys_libmmgtypesf
     ${MMGS_INCLUDE}/libmmgs.h
     ${MMGS_INCLUDE}/libmmgtypes.h )
 
+
+  # Copy header files in project directory at configuration step
+  # (generated file don't exists yet or are outdated)
+  FILE(INSTALL  ${mmgs_headers} DESTINATION ${MMGS_INCLUDE}
+    PATTERN "libmmg*f.h"  EXCLUDE)
 
 ENDIF()
 

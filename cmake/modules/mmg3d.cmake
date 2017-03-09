@@ -161,16 +161,16 @@ IF ( LIBMMG3D_STATIC OR LIBMMG3D_SHARED )
     mmg3d_fortran_header copy_libmmg3df
     )
 
-  # Copy header files in project directory at configuration step
-  # (generated file don't exists yet or are outdated)
-  FILE(INSTALL  ${mmg3d_headers} DESTINATION ${MMG3D_INCLUDE}
-    PATTERN "libmmg*f.h"  EXCLUDE)
-
   ADD_CUSTOM_TARGET(copy_3d_headers ALL
     DEPENDS
     copy_libmmg3df copy3d_libmmgtypesf
     ${MMG3D_INCLUDE}/libmmg3d.h
     ${MMG3D_INCLUDE}/libmmgtypes.h )
+
+  # Copy header files in project directory at configuration step
+  # (generated file don't exists yet or are outdated)
+  FILE(INSTALL  ${mmg3d_headers} DESTINATION ${MMG3D_INCLUDE}
+    PATTERN "libmmg*f.h"  EXCLUDE)
 
 ENDIF()
 

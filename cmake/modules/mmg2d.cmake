@@ -147,17 +147,17 @@ IF ( LIBMMG2D_STATIC OR LIBMMG2D_SHARED )
     mmg2d_fortran_header copy_libmmg2df
     )
 
-  # Copy header files in project directory at configuration step
-  # (generated file don't exists yet or are outdated)
-  FILE(INSTALL  ${mmg2d_headers} DESTINATION ${MMG2D_INCLUDE}
-    PATTERN "libmmg*f.h"  EXCLUDE)
-
   ADD_CUSTOM_TARGET(copy_2d_headers ALL
     DEPENDS
     copy_libmmg2df copy2d_libmmgtypesf
     ${MMG2D_INCLUDE}/libmmg2d.h
     ${MMG2D_INCLUDE}/libmmgtypes.h
     )
+
+  # Copy header files in project directory at configuration step
+  # (generated file don't exists yet or are outdated)
+  FILE(INSTALL  ${mmg2d_headers} DESTINATION ${MMG2D_INCLUDE}
+    PATTERN "libmmg*f.h"  EXCLUDE)
 
 ENDIF()
 
