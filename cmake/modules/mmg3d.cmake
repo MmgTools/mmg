@@ -61,32 +61,23 @@ ENDIF()
 ###############################################################################
 
 # Header files
-INCLUDE_DIRECTORIES(${MMG3D_SOURCE_DIR})
+#INCLUDE_DIRECTORIES(${MMG3D_SOURCE_DIR})
 INCLUDE_DIRECTORIES(${COMMON_BINARY_DIR})
 
-# Source files
+# Library files
 FILE(
   GLOB
-  source_files
-  ${MMG3D_SOURCE_DIR}/*.c   ${MMG3D_SOURCE_DIR}/*.h
-  ${COMMON_SOURCE_DIR}/*.c ${COMMON_SOURCE_DIR}/*.h
-  ${COMMON_BINARY_DIR}/mmgcommon.h
+  library_files
+  ${MMG3D_SOURCE_DIR}/*.c
+  ${COMMON_SOURCE_DIR}/*.c
   )
-LIST(REMOVE_ITEM source_files
+LIST(REMOVE_ITEM library_files
   ${MMG3D_SOURCE_DIR}/${PROJECT_NAME}3d.c
-  ${MMG3D_SOURCE_DIR}/lib${PROJECT_NAME}3df.c
-  ${CMAKE_SOURCE_DIR}/src/mmg/libmmg.h
-  ${CMAKE_SOURCE_DIR}/src/mmg/libmmgf.h
-  ${REMOVE_FILE})
+)
 FILE(
   GLOB
   main_file
   ${MMG3D_SOURCE_DIR}/mmg3d.c
-  )
-FILE(
-  GLOB
-  lib_file
-  ${MMG3D_SOURCE_DIR}/lib${PROJECT_NAME}3df.c
   )
 
 ############################################################################
@@ -125,8 +116,7 @@ ENDIF ( )
 ############################################################################
 # Compile static library
 IF ( LIBMMG3D_STATIC )
-  ADD_LIBRARY(lib${PROJECT_NAME}3d_a  STATIC
-    ${source_files} ${lib_file} )
+  ADD_LIBRARY(lib${PROJECT_NAME}3d_a  STATIC ${library_files} )
   SET_TARGET_PROPERTIES(lib${PROJECT_NAME}3d_a PROPERTIES OUTPUT_NAME
     ${PROJECT_NAME}3d)
   TARGET_LINK_LIBRARIES(lib${PROJECT_NAME}3d_a ${LIBRARIES})
@@ -137,8 +127,7 @@ ENDIF()
 
 # Compile shared library
 IF ( LIBMMG3D_SHARED )
-  ADD_LIBRARY(lib${PROJECT_NAME}3d_so SHARED
-    ${source_files} ${lib_file})
+  ADD_LIBRARY(lib${PROJECT_NAME}3d_so SHARED ${library_files})
   SET_TARGET_PROPERTIES(lib${PROJECT_NAME}3d_so PROPERTIES
     VERSION ${CMAKE_RELEASE_VERSION} SOVERSION 5)
   SET_TARGET_PROPERTIES(lib${PROJECT_NAME}3d_so PROPERTIES
@@ -204,8 +193,7 @@ ENDIF()
 #####         Compile MMG3D executable
 #####
 ###############################################################################
-ADD_EXECUTABLE(${PROJECT_NAME}3d
-  ${source_files} ${main_file})
+ADD_EXECUTABLE(${PROJECT_NAME}3d ${library_files} ${main_file})
 
 IF ( WIN32 AND NOT MINGW AND USE_SCOTCH )
   my_add_link_flags(${PROJECT_NAME}3d "/SAFESEH:NO")
