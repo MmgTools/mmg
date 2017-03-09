@@ -20,7 +20,6 @@
 ##  use this copy of the mmg distribution only if you accept them.
 ## =============================================================================
 
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include)
 
 ###############################################################################
 #####
@@ -28,87 +27,51 @@ INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include)
 #####
 ###############################################################################
 
-ADD_EXECUTABLE(libmmgs_example0_a
-  ${CMAKE_SOURCE_DIR}/libexamples/mmgs/adaptation_example0/example0_a/main.c ${mmgs_includes})
-
-ADD_EXECUTABLE(libmmgs_example0_b
-  ${CMAKE_SOURCE_DIR}/libexamples/mmgs/adaptation_example0/example0_b/main.c ${mmgs_includes})
-
-ADD_EXECUTABLE(libmmgs_example1
-  ${CMAKE_SOURCE_DIR}/libexamples/mmgs/adaptation_example1/main.c ${mmgs_includes})
-
-ADD_EXECUTABLE(libmmgs_example2
-  ${CMAKE_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_example0/main.c ${mmgs_includes})
-
-
- IF ( WIN32 AND ((NOT MINGW) AND USE_SCOTCH) )
-    my_add_link_flags(libmmg3d_example0_a "/SAFESEH:NO")
-    my_add_link_flags(libmmg3d_example0_b "/SAFESEH:NO")
-    my_add_link_flags(libmmgs_example1 "/SAFESEH:NO")
-    my_add_link_flags(libmmgs_example2 "/SAFESEH:NO")
- ENDIF ( )
+SET ( MMGS_LIB_TESTS
+  libmmgs_example0_a
+  libmmgs_example0_b
+  libmmgs_example1
+  libmmgs_example2
+  )
+SET ( MMGS_LIB_TESTS_MAIN_PATH
+  ${CMAKE_SOURCE_DIR}/libexamples/mmgs/adaptation_example0/example0_a/main.c
+  ${CMAKE_SOURCE_DIR}/libexamples/mmgs/adaptation_example0/example0_b/main.c
+  ${CMAKE_SOURCE_DIR}/libexamples/mmgs/adaptation_example1/main.c
+  ${CMAKE_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_example0/main.c
+  )
 
 IF ( LIBMMGS_STATIC )
-
-  TARGET_LINK_LIBRARIES(libmmgs_example0_a lib${PROJECT_NAME}s_a)
-  TARGET_LINK_LIBRARIES(libmmgs_example0_b lib${PROJECT_NAME}s_a)
-  TARGET_LINK_LIBRARIES(libmmgs_example1   lib${PROJECT_NAME}s_a)
-  TARGET_LINK_LIBRARIES(libmmgs_example2   lib${PROJECT_NAME}s_a)
-
-ELSEIF ( LIBMMGS_SHARED )
-
-  TARGET_LINK_LIBRARIES(libmmgs_example0_a lib${PROJECT_NAME}s_so)
-  TARGET_LINK_LIBRARIES(libmmgs_example0_b lib${PROJECT_NAME}s_so)
-  TARGET_LINK_LIBRARIES(libmmgs_example1   lib${PROJECT_NAME}s_so)
-  TARGET_LINK_LIBRARIES(libmmgs_example2   lib${PROJECT_NAME}s_so)
-
+  SET ( lib_name lib${PROJECT_NAME}s_a )
+ELSE ( )
+  SET ( lib_name lib${PROJECT_NAME}s_so )
 ELSE ()
   MESSAGE(WARNING "You must activate the compilation of the static or"
     " shared ${PROJECT_NAME} library to compile this tests." )
-ENDIF ()
+ENDIF ( )
 
-INSTALL(TARGETS libmmgs_example0_a  RUNTIME DESTINATION bin )
-INSTALL(TARGETS libmmgs_example0_b  RUNTIME DESTINATION bin )
-INSTALL(TARGETS libmmgs_example1  RUNTIME DESTINATION bin )
-INSTALL(TARGETS libmmgs_example2  RUNTIME DESTINATION bin )
-
-###############################################################################
-#####
 #####         Fortran Tests
-#####
-###############################################################################
+IF ( CMAKE_Fortran_COMPILER )
+  ENABLE_LANGUAGE ( Fortran )
 
-IF (CMAKE_Fortran_COMPILER)
-  ENABLE_LANGUAGE (Fortran)
+  SET ( MMGS_LIB_TESTS ${MMGS_LIB_TESTS}
+    libmmgs_fortran_a
+    libmmgs_fortran_b
+    )
 
-  ADD_EXECUTABLE(libmmgs_fortran_a
-    ${CMAKE_SOURCE_DIR}/libexamples/mmgs/adaptation_example0_fortran/example0_a/main.F90)
-  ADD_DEPENDENCIES(libmmgs_fortran_a copy_s_headers)
-
-  ADD_EXECUTABLE(libmmgs_fortran_b
-    ${CMAKE_SOURCE_DIR}/libexamples/mmgs/adaptation_example0_fortran/example0_b/main.F90)
-  ADD_DEPENDENCIES(libmmgs_fortran_b copy_s_headers)
-
-  IF ( WIN32 AND ((NOT MINGW) AND USE_SCOTCH) )
-    my_add_link_flags(libmmgs_fortran "/SAFESEH:NO")
-  ENDIF ( )
-
-  IF ( LIBMMGS_STATIC )
-
-    TARGET_LINK_LIBRARIES(libmmgs_fortran_a lib${PROJECT_NAME}s_a)
-    TARGET_LINK_LIBRARIES(libmmgs_fortran_b lib${PROJECT_NAME}s_a)
-
-  ELSEIF ( LIBMMGS_SHARED )
-
-    TARGET_LINK_LIBRARIES(libmmgs_fortran_a lib${PROJECT_NAME}s_so)
-    TARGET_LINK_LIBRARIES(libmmgs_fortran_b lib${PROJECT_NAME}s_so)
-
-  ELSE ()
-    MESSAGE(WARNING "You must activate the compilation of the static or"
-      " shared ${PROJECT_NAME} library to compile this tests." )
-  ENDIF ( )
-
-  INSTALL(TARGETS libmmgs_fortran_a RUNTIME DESTINATION bin )
-  INSTALL(TARGETS libmmgs_fortran_b RUNTIME DESTINATION bin )
+  SET ( MMGS_LIB_TESTS_MAIN_PATH ${MMGS_LIB_TESTS_MAIN_PATH}
+    ${CMAKE_SOURCE_DIR}/libexamples/mmgs/adaptation_example0_fortran/example0_a/main.F90
+    ${CMAKE_SOURCE_DIR}/libexamples/mmgs/adaptation_example0_fortran/example0_b/main.F90
+    )
 
 ENDIF ( CMAKE_Fortran_COMPILER )
+
+LIST(LENGTH MMGS_LIB_TESTS nbTests_tmp)
+MATH(EXPR nbTests "${nbTests_tmp} - 1")
+
+FOREACH ( test_idx RANGE ${nbTests} )
+  LIST ( GET MMGS_LIB_TESTS           ${test_idx} test_name )
+  LIST ( GET MMGS_LIB_TESTS_MAIN_PATH ${test_idx} main_path )
+
+  ADD_LIBRARY_TEST ( ${test_name} ${main_path} copy_s_headers ${lib_name} )
+
+ENDFOREACH ( )
