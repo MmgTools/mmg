@@ -96,7 +96,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
   mesh->np = mesh->nt = mesh->na = mesh->xp = 0;
   nq = 0;
 
-  _MMG5_SAFE_CALLOC(data,strlen(filename)+6,char);
+  _MMG5_SAFE_CALLOC(data,strlen(filename)+7,char);
   strcpy(data,filename);
   ptr = strstr(data,".mesh");
   if ( !ptr ) {
@@ -748,7 +748,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
   bin = 0;
 
   /* Name of file */
-  _MMG5_SAFE_CALLOC(data,strlen(filename)+6,char);
+  _MMG5_SAFE_CALLOC(data,strlen(filename)+7,char);
   strcpy(data,filename);
   ptr = strstr(data,".mesh");
   if ( !ptr ) {

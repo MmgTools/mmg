@@ -245,7 +245,7 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename,
   int         ver,oneBin,k,i;
   int         nt,na,nq,ne,npr,np;
   int         typ,tagNum;
-  char        *ptr,data[128],chaine[128],verNum[5];
+  char        *ptr,*data,chaine[128],verNum[5];
 
   ver = oneBin = 0;
   *posNodes = 0;
@@ -256,6 +256,8 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename,
   *iswp = 0;
   mesh->np = mesh->nt = mesh->ne = 0;
   nt = na = nq = ne = npr = np = 0;
+
+  _MMG5_SAFE_CALLOC(data,strlen(filename)+7,char);
 
   strcpy(data,filename);
   ptr = strstr(data,".msh");
@@ -279,6 +281,7 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename,
     }
   }
   fprintf(stdout,"  %%%% %s OPENED\n",data);
+  _MMG5_SAFE_FREE(data);
 
 
   /* Detection of the different fields of the file */
@@ -1331,11 +1334,13 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   double      dbuf[6],mtmp[3],r[3][3];
   int         bin,k,i,typ,nelts,word, header[3],iadr;
   int         nq,ne,npr,np,nt,na;
-  char        *ptr,data[128];
+  char        *ptr,*data;
 
   bin = 0;
 
+  _MMG5_SAFE_CALLOC(data,strlen(filename)+7,char);
   strcpy(data,filename);
+
   ptr = strstr(data,".msh");
   if ( !ptr ) {
     /* data contains the filename without extension */
@@ -1361,6 +1366,7 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   }
 
   fprintf(stdout,"  %%%% %s OPENED\n",data);
+  _MMG5_SAFE_FREE(data);
 
   /* Entete fichier*/
   fprintf(inm,"$MeshFormat\n");

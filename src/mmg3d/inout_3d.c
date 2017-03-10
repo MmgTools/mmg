@@ -124,7 +124,7 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
   ina = NULL;
   mesh->np = mesh->nt = mesh->ne = 0;
 
-  _MMG5_SAFE_CALLOC(data,strlen(filename)+6,char);
+  _MMG5_SAFE_CALLOC(data,strlen(filename)+7,char);
 
   strcpy(data,filename);
   ptr = strstr(data,".mesh");
@@ -994,7 +994,7 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
   mesh->ver = 2;
   bin = 0;
 
-  _MMG5_SAFE_CALLOC(data,strlen(filename)+6,char);
+  _MMG5_SAFE_CALLOC(data,strlen(filename)+7,char);
 
   strcpy(data,filename);
   ptr = strstr(data,".mesh");
