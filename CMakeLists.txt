@@ -34,6 +34,11 @@ SET(COMMON_BINARY_DIR ${CMAKE_BINARY_DIR}/src/common)
 
 FILE(MAKE_DIRECTORY ${COMMON_BINARY_DIR})
 
+# Path toward the continuous integration directory
+SET ( CI_DIR ${CMAKE_SOURCE_DIR}/ci_tests
+  CACHE PATH "Path toward the continuous integration directory" )
+MARK_AS_ADVANCED ( CI_DIR )
+
 ###############################################################################
 #####
 #####         Release version and date
@@ -385,11 +390,6 @@ MARK_AS_ADVANCED(LONG_TESTS)
 
 CMAKE_DEPENDENT_OPTION ( COVERAGE "Watch code coverage (Linux only)" OFF
 "BUILD_TESTING;CMAKE_COMPILER_IS_GNUCC" OFF )
-
-# Path toward the continuous integration directory
-SET ( CI_DIR ${CMAKE_SOURCE_DIR}/ci_tests
-  CACHE PATH "Path toward the continuous integration directory" )
-MARK_AS_ADVANCED ( CI_DIR )
 
 IF( BUILD_TESTING )
 
