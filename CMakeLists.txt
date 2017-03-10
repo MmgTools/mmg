@@ -175,11 +175,9 @@ GENERATE_FORTRAN_HEADER ( mmg
 
 ###############################################################################
 #####
-#####         Sources and libraries
+#####         libraries
 #####
 ###############################################################################
-# Header files
-INCLUDE_DIRECTORIES(${COMMON_SOURCE_DIR})
 
 # Libraries
 IF ( NOT WIN32 OR MINGW )

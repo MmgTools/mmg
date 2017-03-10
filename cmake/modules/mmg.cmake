@@ -36,31 +36,32 @@
 ############################################################################
 
 # Compile static library
+FILE(
+  GLOB
+  mmg_library_files
+  ${MMG2D_SOURCE_DIR}/*.c
+  ${MMG3D_SOURCE_DIR}/*.c
+  ${MMGS_SOURCE_DIR}/*.c
+  ${COMMON_SOURCE_DIR}/*.c
+  )
+LIST(REMOVE_ITEM mmg_library_files
+  ${MMG2D_SOURCE_DIR}/mmg2d.c
+  ${MMGS_SOURCE_DIR}/mmgs.c
+  ${MMG3D_SOURCE_DIR}/mmg3d.c
+  ${REMOVE_FILE} )
+
+
 IF ( LIBMMG_STATIC )
-  ADD_LIBRARY(lib${PROJECT_NAME}_a  STATIC
-    ${mmg2d_library_files} ${mmgs_library_files} ${mmg3d_library_files}
-    )
-  SET_TARGET_PROPERTIES(lib${PROJECT_NAME}_a PROPERTIES OUTPUT_NAME
-    ${PROJECT_NAME})
-  TARGET_LINK_LIBRARIES(lib${PROJECT_NAME}_a ${LIBRARIES})
-  INSTALL(TARGETS lib${PROJECT_NAME}_a
-    ARCHIVE DESTINATION lib
-    LIBRARY DESTINATION lib)
+  ADD_AND_INSTALL_LIBRARY ( lib${PROJECT_NAME}_a  STATIC
+    "${mmg_library_files}"
+    ${PROJECT_NAME} )
 ENDIF()
 
 # Compile shared library
 IF ( LIBMMG_SHARED )
-  ADD_LIBRARY(lib${PROJECT_NAME}_so SHARED
-    ${mmg2d_library_files} ${mmgs_library_files} ${mmg3d_library_files}
-    )
-  SET_TARGET_PROPERTIES(lib${PROJECT_NAME}_so PROPERTIES
-    VERSION ${CMAKE_RELEASE_VERSION} SOVERSION 5)
-  SET_TARGET_PROPERTIES(lib${PROJECT_NAME}_so PROPERTIES
-    OUTPUT_NAME ${PROJECT_NAME})
-  TARGET_LINK_LIBRARIES(lib${PROJECT_NAME}_so ${LIBRARIES})
-  INSTALL(TARGETS lib${PROJECT_NAME}_so
-    ARCHIVE DESTINATION lib
-    LIBRARY DESTINATION lib)
+  ADD_AND_INSTALL_LIBRARY ( lib${PROJECT_NAME}_so  SHARED
+    "${mmg_library_files}"
+    ${PROJECT_NAME} )
 ENDIF()
 
 IF ( LIBMMG_STATIC OR LIBMMG_SHARED )

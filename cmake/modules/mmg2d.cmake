@@ -47,10 +47,6 @@ GENERATE_FORTRAN_HEADER ( mmg2d
 #####
 ###############################################################################
 
-# Header files
-#INCLUDE_DIRECTORIES(${MMG2D_SOURCE_DIR})
-INCLUDE_DIRECTORIES(${COMMON_BINARY_DIR})
-
 # Source files
 FILE(
   GLOB
@@ -103,26 +99,14 @@ ENDIF ( )
 ############################################################################
 # Compile static library
 IF ( LIBMMG2D_STATIC )
-  ADD_LIBRARY ( lib${PROJECT_NAME}2d_a  STATIC ${mmg2d_library_files} )
-  SET_TARGET_PROPERTIES(lib${PROJECT_NAME}2d_a PROPERTIES OUTPUT_NAME
-    ${PROJECT_NAME}2d)
-  TARGET_LINK_LIBRARIES(lib${PROJECT_NAME}2d_a ${LIBRARIES})
-  INSTALL(TARGETS lib${PROJECT_NAME}2d_a
-    ARCHIVE DESTINATION lib
-    LIBRARY DESTINATION lib)
+  ADD_AND_INSTALL_LIBRARY ( lib${PROJECT_NAME}2d_a STATIC
+    "${mmg2d_library_files}" ${PROJECT_NAME}2d )
 ENDIF()
 
 # Compile shared library
 IF ( LIBMMG2D_SHARED )
-  ADD_LIBRARY ( lib${PROJECT_NAME}2d_so SHARED ${mmg2d_library_files} )
-  SET_TARGET_PROPERTIES(lib${PROJECT_NAME}2d_so PROPERTIES
-    OUTPUT_NAME ${PROJECT_NAME}2d)
-  SET_TARGET_PROPERTIES(lib${PROJECT_NAME}2d_so PROPERTIES
-    VERSION ${CMAKE_RELEASE_VERSION} SOVERSION 5)
-  TARGET_LINK_LIBRARIES(lib${PROJECT_NAME}2d_so ${LIBRARIES})
-  INSTALL(TARGETS lib${PROJECT_NAME}2d_so
-    ARCHIVE DESTINATION lib
-    LIBRARY DESTINATION lib)
+  ADD_AND_INSTALL_LIBRARY ( lib${PROJECT_NAME}2d_so SHARED
+    "${mmg2d_library_files}" ${PROJECT_NAME}2d )
 ENDIF()
 
 IF ( LIBMMG2D_STATIC OR LIBMMG2D_SHARED )
@@ -162,27 +146,8 @@ ENDIF ( )
 #####         Compile MMG2D executable
 #####
 ###############################################################################
-
-IF ( NOT TARGET libmmg2d_a AND NOT TARGET libmmg2d_so )
-  ADD_EXECUTABLE(${PROJECT_NAME}2d ${mmg2d_library_files} ${mmg2d_main_file})
-ELSE ( )
-  ADD_EXECUTABLE(${PROJECT_NAME}2d ${mmg2d_main_file})
-
-  IF ( NOT TARGET libmmg2d_a )
-    TARGET_LINK_LIBRARIES(${PROJECT_NAME}2d libmmg2d_so)
-  ELSE ( )
-    TARGET_LINK_LIBRARIES(${PROJECT_NAME}2d libmmg2d_a)
-  ENDIF ( )
-ENDIF ( )
-
-IF ( WIN32 AND NOT MINGW AND USE_SCOTCH )
-  my_add_link_flags(${PROJECT_NAME}2d "/SAFESEH:NO")
-ENDIF ( )
-
-TARGET_LINK_LIBRARIES(${PROJECT_NAME}2d ${LIBRARIES})
-INSTALL(TARGETS ${PROJECT_NAME}2d RUNTIME DESTINATION bin)
-
-ADD_TARGET_POSTFIX(${PROJECT_NAME}2d)
+ADD_AND_INSTALL_EXECUTABLE ( ${PROJECT_NAME}2d
+  "${mmg2d_library_files}" ${mmg2d_main_file} )
 
 ###############################################################################
 #####

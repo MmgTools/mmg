@@ -79,6 +79,70 @@ MACRO ( COPY_FORTRAN_HEADER_AND_CREATE_TARGET
 
 ENDMACRO ( )
 
+###############################################################################
+#####
+#####         Add a library to build and needed include dir, set its
+#####         properties, add link dependencies and the install rule
+#####
+###############################################################################
+
+MACRO ( ADD_AND_INSTALL_LIBRARY
+    target_name target_type sources output_name )
+
+  ADD_LIBRARY ( ${target_name} ${target_type} ${sources} )
+
+  TARGET_INCLUDE_DIRECTORIES ( ${target_name}
+    PRIVATE  ${COMMON_BINARY_DIR} ${COMMON_SOURCE_DIR} )
+
+  SET_TARGET_PROPERTIES ( ${target_name}
+    PROPERTIES OUTPUT_NAME ${output_name} )
+
+  TARGET_LINK_LIBRARIES ( ${target_name} ${LIBRARIES} )
+
+  INSTALL ( TARGETS ${target_name}
+    ARCHIVE DESTINATION lib
+    LIBRARY DESTINATION lib )
+
+ENDMACRO ( )
+
+###############################################################################
+#####
+#####         Add an executable to build and needed include dir, set its
+#####         postfix, add link dependencies and the install rule
+#####
+###############################################################################
+
+MACRO ( ADD_AND_INSTALL_EXECUTABLE
+    exec_name lib_files main_file )
+
+  IF ( NOT TARGET lib${exec_name}_a AND NOT TARGET lib${exec_name}_so )
+    ADD_EXECUTABLE ( ${exec_name} ${lib_files} ${main_file} )
+  ELSE ( )
+    ADD_EXECUTABLE ( ${exec_name} ${main_file})
+
+    IF ( NOT TARGET lib${exec_name}_a )
+      TARGET_LINK_LIBRARIES(${exec_name} lib${exec_name}_so)
+    ELSE ( )
+      TARGET_LINK_LIBRARIES(${exec_name} lib${exec_name}_a)
+    ENDIF ( )
+
+  ENDIF ( )
+
+  IF ( WIN32 AND NOT MINGW AND USE_SCOTCH )
+    my_add_link_flags ( ${exec_name} "/SAFESEH:NO")
+  ENDIF ( )
+
+  TARGET_INCLUDE_DIRECTORIES ( ${exec_name}
+    PUBLIC ${COMMON_BINARY_DIR} ${COMMON_SOURCE_DIR} )
+
+  TARGET_LINK_LIBRARIES ( ${exec_name} ${LIBRARIES})
+
+  INSTALL(TARGETS ${exec_name} RUNTIME DESTINATION bin)
+
+  ADD_TARGET_POSTFIX(${exec_name})
+
+ENDMACRO ( )
+
 
 ###############################################################################
 #####

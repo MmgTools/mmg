@@ -61,10 +61,6 @@ ENDIF()
 #####
 ###############################################################################
 
-# Header files
-#INCLUDE_DIRECTORIES(${MMG3D_SOURCE_DIR})
-INCLUDE_DIRECTORIES(${COMMON_BINARY_DIR})
-
 # Library files
 FILE(
   GLOB
@@ -115,28 +111,17 @@ ENDIF ( )
 #####         Compile mmg3d libraries
 #####
 ############################################################################
+
 # Compile static library
 IF ( LIBMMG3D_STATIC )
-  ADD_LIBRARY(lib${PROJECT_NAME}3d_a  STATIC ${mmg3d_library_files} )
-  SET_TARGET_PROPERTIES(lib${PROJECT_NAME}3d_a PROPERTIES OUTPUT_NAME
-    ${PROJECT_NAME}3d)
-  TARGET_LINK_LIBRARIES(lib${PROJECT_NAME}3d_a ${LIBRARIES})
-  INSTALL(TARGETS lib${PROJECT_NAME}3d_a
-    ARCHIVE DESTINATION lib
-    LIBRARY DESTINATION lib)
+  ADD_AND_INSTALL_LIBRARY ( lib${PROJECT_NAME}3d_a STATIC
+    "${mmg3d_library_files}" ${PROJECT_NAME}3d )
 ENDIF()
 
 # Compile shared library
 IF ( LIBMMG3D_SHARED )
-  ADD_LIBRARY(lib${PROJECT_NAME}3d_so SHARED ${mmg3d_library_files})
-  SET_TARGET_PROPERTIES(lib${PROJECT_NAME}3d_so PROPERTIES
-    VERSION ${CMAKE_RELEASE_VERSION} SOVERSION 5)
-  SET_TARGET_PROPERTIES(lib${PROJECT_NAME}3d_so PROPERTIES
-    OUTPUT_NAME ${PROJECT_NAME}3d)
-  TARGET_LINK_LIBRARIES(lib${PROJECT_NAME}3d_so ${LIBRARIES})
-  INSTALL(TARGETS lib${PROJECT_NAME}3d_so
-    ARCHIVE DESTINATION lib
-    LIBRARY DESTINATION lib)
+  ADD_AND_INSTALL_LIBRARY ( lib${PROJECT_NAME}3d_so SHARED
+    "${mmg3d_library_files}" ${PROJECT_NAME}3d )
 ENDIF()
 
 IF ( LIBMMG3D_STATIC OR LIBMMG3D_SHARED )
@@ -176,26 +161,8 @@ ENDIF()
 #####         Compile MMG3D executable
 #####
 ###############################################################################
-IF ( NOT TARGET libmmg3d_a AND NOT TARGET libmmg3d_so )
-  ADD_EXECUTABLE(${PROJECT_NAME}3d ${mmg3d_library_files} ${mmg3d_main_file})
-ELSE ( )
-  ADD_EXECUTABLE(${PROJECT_NAME}3d ${mmg3d_main_file})
-
-  IF ( NOT TARGET libmmg3d_a )
-    TARGET_LINK_LIBRARIES(${PROJECT_NAME}3d libmmg3d_so)
-  ELSE ( )
-    TARGET_LINK_LIBRARIES(${PROJECT_NAME}3d libmmg3d_a)
-  ENDIF ( )
-ENDIF ( )
-
-IF ( WIN32 AND NOT MINGW AND USE_SCOTCH )
-  my_add_link_flags(${PROJECT_NAME}3d "/SAFESEH:NO")
-ENDIF ( )
-
-TARGET_LINK_LIBRARIES(${PROJECT_NAME}3d ${LIBRARIES})
-INSTALL(TARGETS ${PROJECT_NAME}3d RUNTIME DESTINATION bin)
-
-ADD_TARGET_POSTFIX(${PROJECT_NAME}3d)
+ADD_AND_INSTALL_EXECUTABLE ( ${PROJECT_NAME}3d
+  "${mmg3d_library_files}" ${mmg3d_main_file} )
 
 ###############################################################################
 #####

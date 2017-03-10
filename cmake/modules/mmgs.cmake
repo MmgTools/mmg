@@ -47,10 +47,6 @@ GENERATE_FORTRAN_HEADER ( mmgs
 #####
 ###############################################################################
 
-# Header files
-INCLUDE_DIRECTORIES(${MMGS_SOURCE_DIR})
-INCLUDE_DIRECTORIES(${COMMON_BINARY_DIR})
-
 # Source files
 FILE(
   GLOB
@@ -73,27 +69,16 @@ FILE(
 #####
 ############################################################################
 
+# Compile static library
 IF ( LIBMMGS_STATIC )
-  ADD_LIBRARY ( lib${PROJECT_NAME}s_a  STATIC ${mmgs_library_files} )
-  SET_TARGET_PROPERTIES(lib${PROJECT_NAME}s_a PROPERTIES OUTPUT_NAME
-    ${PROJECT_NAME}s)
-  TARGET_LINK_LIBRARIES(lib${PROJECT_NAME}s_a ${LIBRARIES})
-  INSTALL(TARGETS lib${PROJECT_NAME}s_a
-    ARCHIVE DESTINATION lib
-    LIBRARY DESTINATION lib)
+  ADD_AND_INSTALL_LIBRARY ( lib${PROJECT_NAME}s_a STATIC
+    "${mmgs_library_files}" ${PROJECT_NAME}s )
 ENDIF()
 
 # Compile shared library
 IF ( LIBMMGS_SHARED )
-  ADD_LIBRARY(lib${PROJECT_NAME}s_so SHARED ${mmgs_library_files} )
-  SET_TARGET_PROPERTIES(lib${PROJECT_NAME}s_so PROPERTIES
-    OUTPUT_NAME ${PROJECT_NAME}s)
-  SET_TARGET_PROPERTIES(lib${PROJECT_NAME}s_so PROPERTIES
-    VERSION ${CMAKE_RELEASE_VERSION} SOVERSION 5)
-  TARGET_LINK_LIBRARIES(lib${PROJECT_NAME}s_so ${LIBRARIES})
-  INSTALL(TARGETS lib${PROJECT_NAME}s_so
-    ARCHIVE DESTINATION lib
-    LIBRARY DESTINATION lib)
+  ADD_AND_INSTALL_LIBRARY ( lib${PROJECT_NAME}s_so SHARED
+    "${mmgs_library_files}" ${PROJECT_NAME}s )
 ENDIF()
 
 IF ( LIBMMGS_STATIC OR LIBMMGS_SHARED )
@@ -133,26 +118,8 @@ ENDIF()
 #####         Compile MMGS executable
 #####
 ###############################################################################
-IF ( NOT TARGET libmmgs_a AND NOT TARGET libmmgs_so )
-  ADD_EXECUTABLE(${PROJECT_NAME}s ${mmgs_library_files} ${mmgs_main_file})
-ELSE ( )
-  ADD_EXECUTABLE(${PROJECT_NAME}s ${mmgs_main_file})
-
-  IF ( NOT TARGET libmmgs_a )
-    TARGET_LINK_LIBRARIES(${PROJECT_NAME}s libmmgs_so)
-  ELSE ( )
-    TARGET_LINK_LIBRARIES(${PROJECT_NAME}s libmmgs_a)
-  ENDIF ( )
-ENDIF ( )
-
-IF ( WIN32 AND NOT MINGW AND USE_SCOTCH )
-  my_add_link_flags(${PROJECT_NAME}s "/SAFESEH:NO")
-ENDIF ( )
-
-TARGET_LINK_LIBRARIES(${PROJECT_NAME}s ${LIBRARIES})
-INSTALL(TARGETS ${PROJECT_NAME}s RUNTIME DESTINATION bin)
-
-ADD_TARGET_POSTFIX(${PROJECT_NAME}s)
+ADD_AND_INSTALL_EXECUTABLE ( ${PROJECT_NAME}s
+  "${mmgs_library_files}" ${mmgs_main_file} )
 
 ###############################################################################
 #####
