@@ -172,7 +172,7 @@ ENDMACRO ( )
 #####
 ###############################################################################
 
-MACRO ( ADD_EXEC_TO_CI_TESTS exec_name )
+MACRO ( ADD_EXEC_TO_CI_TESTS exec_name list_name )
 
   IF(${CMAKE_BUILD_TYPE} MATCHES "Debug")
     SET(EXECUT ${EXECUTABLE_OUTPUT_PATH}/${exec_name}_debug)
@@ -191,7 +191,7 @@ MACRO ( ADD_EXEC_TO_CI_TESTS exec_name )
     SET(BUILDNAME ${BUILDNAME} CACHE STRING "build name variable")
   ENDIF()
 
-  SET ( LISTEXEC_${exec_name} ${EXECUT} )
+  SET ( ${list_name} ${EXECUT} )
 
 ENDMACRO ( )
 

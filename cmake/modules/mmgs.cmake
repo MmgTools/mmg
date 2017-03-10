@@ -140,7 +140,7 @@ IF ( BUILD_TESTING )
   # Add runtime that we want to test for mmgs
   IF( MMGS_CI )
 
-    ADD_EXEC_TO_CI_TESTS ( ${PROJECT_NAME}s )
+    ADD_EXEC_TO_CI_TESTS ( ${PROJECT_NAME}s EXECUT_MMGS )
 
     IF ( TEST_LIBMMGS )
       SET(LIBMMGS_EXEC0_a ${EXECUTABLE_OUTPUT_PATH}/libmmgs_example0_a)
