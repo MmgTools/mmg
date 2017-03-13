@@ -50,7 +50,7 @@
 int _MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, _MMG5_Hash *hash, int chkISO) {
   MMG5_pTria     pt,pt1;
   _MMG5_hedge    *ph;
-  int            *adja,k,jel,lel,hmax,dup,nmf,ia,ib;
+  int            *adja,k,kk,jel,lel,hmax,dup,nmf,ia,ib;
   char           i,i1,i2,j,l,ok;
   unsigned int   key;
 
@@ -136,8 +136,19 @@ int _MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, _MMG5_Hash *hash, int chkISO) 
         }
         else if ( !ph->nxt ) {
           ph->nxt = hash->nxt;
+
+          if ( hash->nxt >= hash->max-1 ) {
+            if ( mesh->info.ddebug )
+              fprintf(stderr,"  ## Memory alloc problem (edge): %d\n",hash->max);
+            _MMG5_TAB_RECALLOC(mesh,hash->item,hash->max,0.2,_MMG5_hedge,
+                               "_MMG5_edge",return(0));
+
+            for (kk=hash->item[hash->nxt].nxt; kk<hash->max; kk++)
+              hash->item[kk].nxt = kk+1;
+          }
           ph = &hash->item[ph->nxt];
           assert(ph);
+
           hash->nxt = ph->nxt;
           ph->a = ia;
           ph->b = ib;
