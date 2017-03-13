@@ -148,15 +148,19 @@ IF ( BUILD_TESTING )
       SET(LIBMMGS_EXEC1   ${EXECUTABLE_OUTPUT_PATH}/libmmgs_example1)
       SET(LIBMMGS_EXEC2   ${EXECUTABLE_OUTPUT_PATH}/libmmgs_example2)
 
-      ADD_TEST(NAME libmmgs_example0_a   COMMAND ${LIBMMGS_EXEC0_a})
+      ADD_TEST(NAME libmmgs_example0_a   COMMAND ${LIBMMGS_EXEC0_a}
+        "${CMAKE_SOURCE_DIR}/libexamples/mmgs/adaptation_example0/example0_a/cube.mesh")
       ADD_TEST(NAME libmmgs_example0_b   COMMAND ${LIBMMGS_EXEC0_b})
-      ADD_TEST(NAME libmmgs_example1   COMMAND ${LIBMMGS_EXEC1})
-      ADD_TEST(NAME libmmgs_example2   COMMAND ${LIBMMGS_EXEC2})
+      ADD_TEST(NAME libmmgs_example1   COMMAND ${LIBMMGS_EXEC1}
+        "${CMAKE_SOURCE_DIR}/libexamples/mmgs/adaptation_example1/2spheres")
+      ADD_TEST(NAME libmmgs_example2   COMMAND ${LIBMMGS_EXEC2}
+        "${CMAKE_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_example0/teapot")
 
       IF ( CMAKE_Fortran_COMPILER)
         SET(LIBMMGS_EXECFORTRAN_a ${EXECUTABLE_OUTPUT_PATH}/libmmgs_fortran_a)
         SET(LIBMMGS_EXECFORTRAN_b ${EXECUTABLE_OUTPUT_PATH}/libmmgs_fortran_b)
-        ADD_TEST(NAME libmmgs_fortran_a   COMMAND ${LIBMMGS_EXECFORTRAN_a})
+        ADD_TEST(NAME libmmgs_fortran_a   COMMAND ${LIBMMGS_EXECFORTRAN_a}
+          "${CMAKE_SOURCE_DIR}/libexamples/mmgs/adaptation_example0_fortran/example0_a/cube.mesh")
         ADD_TEST(NAME libmmgs_fortran_b   COMMAND ${LIBMMGS_EXECFORTRAN_b})
       ENDIF()
 

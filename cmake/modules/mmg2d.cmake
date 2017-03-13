@@ -170,16 +170,21 @@ IF ( BUILD_TESTING )
     ADD_EXEC_TO_CI_TESTS ( ${PROJECT_NAME}2d EXECUT_MMG2D )
 
     IF ( TEST_LIBMMG2D )
-      SET(LIBMMG2D_EXEC0_a ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_example0_a)
+      SET(LIBMMG2D_EXEC0_a ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_example0_a
+        "${CMAKE_SOURCE_DIR}/libexamples/mmg2d/adaptation_example0/example0_a/init.mesh")
+
       SET(LIBMMG2D_EXEC0_b ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_example0_b)
-      SET(LIBMMG2D_EXEC1 ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_example1)
+      SET(LIBMMG2D_EXEC1 ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_example1
+        "${CMAKE_SOURCE_DIR}/libexamples/mmg2d/adaptation_example1/dom.mesh")
 
       ADD_TEST(NAME libmmg2d_example0_a   COMMAND ${LIBMMG2D_EXEC0_a})
       ADD_TEST(NAME libmmg2d_example0_b   COMMAND ${LIBMMG2D_EXEC0_b})
       ADD_TEST(NAME libmmg2d_example1   COMMAND ${LIBMMG2D_EXEC1})
 
       IF ( CMAKE_Fortran_COMPILER)
-        SET(LIBMMG2D_EXECFORTRAN_a ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_fortran_a)
+        SET(LIBMMG2D_EXECFORTRAN_a ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_fortran_a
+          "${CMAKE_SOURCE_DIR}/libexamples/mmg2d/adaptation_example0_fortran/example0_a/init.mesh")
+
         SET(LIBMMG2D_EXECFORTRAN_b ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_fortran_b)
         ADD_TEST(NAME libmmg2d_fortran_a   COMMAND ${LIBMMG2D_EXECFORTRAN_a})
         ADD_TEST(NAME libmmg2d_fortran_b   COMMAND ${LIBMMG2D_EXECFORTRAN_b})

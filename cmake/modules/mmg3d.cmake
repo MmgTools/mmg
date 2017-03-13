@@ -202,19 +202,25 @@ IF ( BUILD_TESTING )
       SET(LIBMMG3D_EXEC4   ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_example4)
       SET(LIBMMG3D_EXEC5   ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_example5)
 
-      ADD_TEST(NAME libmmg3d_example0_a COMMAND ${LIBMMG3D_EXEC0_a})
+      ADD_TEST(NAME libmmg3d_example0_a COMMAND ${LIBMMG3D_EXEC0_a}
+        "${CMAKE_SOURCE_DIR}/libexamples/mmg3d/adaptation_example0/example0_a/cube.mesh")
       ADD_TEST(NAME libmmg3d_example0_b COMMAND ${LIBMMG3D_EXEC0_b})
       ADD_TEST(NAME libmmg3d_example1   COMMAND ${LIBMMG3D_EXEC1})
-      ADD_TEST(NAME libmmg3d_example2   COMMAND ${LIBMMG3D_EXEC2})
+      ADD_TEST(NAME libmmg3d_example2   COMMAND ${LIBMMG3D_EXEC2}
+        "${CMAKE_SOURCE_DIR}/libexamples/mmg3d/adaptation_example2/2spheres.mesh")
       IF ( USE_ELAS )
-        ADD_TEST(NAME libmmg3d_example4   COMMAND ${LIBMMG3D_EXEC4})
+        ADD_TEST(NAME libmmg3d_example4   COMMAND ${LIBMMG3D_EXEC4}
+          "${CMAKE_SOURCE_DIR}/libexamples/mmg3d/LagrangianMotion_example0/tinyBoxt")
       ENDIF ()
-      ADD_TEST(NAME libmmg3d_example5   COMMAND ${LIBMMG3D_EXEC5})
+      ADD_TEST(NAME libmmg3d_example5   COMMAND ${LIBMMG3D_EXEC5}
+        "${CMAKE_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_example0/test")
 
       SET( LISTEXEC_MMG3D ${LISTEXEC_MMG3D} )
 
       IF ( CMAKE_Fortran_COMPILER)
-        SET(LIBMMG3D_EXECFORTRAN_a ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_fortran_a)
+        SET(LIBMMG3D_EXECFORTRAN_a ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_fortran_a
+          "${CMAKE_SOURCE_DIR}/libexamples/mmg3d/adaptation_example0_fortran/example0_a/cube.mesh")
+
         SET(LIBMMG3D_EXECFORTRAN_b ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_fortran_b)
         ADD_TEST(NAME libmmg3d_fortran_a  COMMAND ${LIBMMG3D_EXECFORTRAN_a})
         ADD_TEST(NAME libmmg3d_fortran_b  COMMAND ${LIBMMG3D_EXECFORTRAN_b})

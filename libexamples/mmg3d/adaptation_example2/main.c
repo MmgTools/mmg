@@ -51,23 +51,22 @@ int main(int argc,char *argv[]) {
   MMG5_pMesh      mmgMesh;
   MMG5_pSol       mmgSol;
   int             k,ier;
-  char            *pwd,*inname,*outname;
+  char            *inname;
 
   fprintf(stdout,"  -- TEST MMG3DLIB \n");
 
+  if ( argc != 2 ) {
+    printf(" Usage: %s filein \n",argv[0]);
+    return(1);
+  }
+
   /* Name and path of the mesh files */
-  pwd = getenv("PWD");
-  inname = (char *) calloc(strlen(pwd) + 51, sizeof(char));
+  inname = (char *) calloc(strlen(argv[1]) + 1, sizeof(char));
   if ( inname == NULL ) {
     perror("  ## Memory problem: calloc");
     exit(EXIT_FAILURE);
   }
-  outname = (char *) calloc(strlen(pwd) + 60, sizeof(char));
-  if ( outname == NULL ) {
-    perror("  ## Memory problem: calloc");
-    exit(EXIT_FAILURE);
-  }
-  sprintf(inname, "%s%s%s", pwd, "/../libexamples/mmg3d/adaptation_example2/", "2spheres");
+  strcpy(inname,argv[1]);
 
   /** 1) Initialisation of mesh and sol structures */
   /* args of InitMesh:
@@ -143,10 +142,9 @@ int main(int argc,char *argv[]) {
     fprintf(stdout,"BAD ENDING OF MMG3DLIB\n");
 
   /* (Not mandatory) Automatically save the mesh */
-  sprintf(outname, "%s%s%s", pwd, "/../libexamples/mmg3d/adaptation_example2/", "2spheres_1.o");
-  MMG3D_saveMesh(mmgMesh,outname);
+  MMG3D_saveMesh(mmgMesh,"2spheres_1.o");
 
-  if ( MMG3D_saveSol(mmgMesh,mmgSol,outname) != 1 )
+  if ( MMG3D_saveSol(mmgMesh,mmgSol,"2spheres_1.o") != 1 )
     exit(EXIT_FAILURE);
 
 
@@ -214,12 +212,11 @@ int main(int argc,char *argv[]) {
 
 
   /* 7) Automatically save the mesh */
-  sprintf(outname, "%s%s%s", pwd, "/../libexamples/mmg3d/adaptation_example2/", "2spheres_2.o");
-  if ( MMG3D_saveMesh(mmgMesh,outname) != 1 )
+  if ( MMG3D_saveMesh(mmgMesh,"2spheres_2.o") != 1 )
     exit(EXIT_FAILURE);
 
   /* 8) Automatically save the solution */
-  if ( MMG3D_saveSol(mmgMesh,mmgSol,outname) != 1 )
+  if ( MMG3D_saveSol(mmgMesh,mmgSol,"2spheres_2.o") != 1 )
     exit(EXIT_FAILURE);
 
 
@@ -230,8 +227,6 @@ int main(int argc,char *argv[]) {
 
   free(inname);
   inname = NULL;
-  free(outname);
-  outname = NULL;
 
   return(ier);
 }

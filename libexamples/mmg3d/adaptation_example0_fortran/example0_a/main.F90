@@ -16,15 +16,21 @@ PROGRAM main
 
   MMG5_DATA_PTR_T    :: mmgMesh
   MMG5_DATA_PTR_T    :: mmgSol
-  INTEGER            :: ier
-  CHARACTER(len=255) :: pwd
-  CHARACTER(len=300) :: filename
+  INTEGER            :: ier,argc
+  CHARACTER(len=300) :: exec_name,filename
 
   WRITE(*,*) "  -- TEST MMG3DLIB"
 
+  argc =  COMMAND_ARGUMENT_COUNT();
+  CALL get_command_argument(0, exec_name)
+
+  IF ( argc /=1 ) THEN
+     PRINT*," Usage: ",exec_name," file_name"
+     CALL EXIT(1);
+  ENDIF
+
   ! Name and path of the mesh file
-  CALL getenv("PWD",pwd)
-  WRITE(filename,*) TRIM(pwd),"/../libexamples/mmg3d/adaptation_example0_fortran/example0_a/cube"
+  CALL get_command_argument(1, filename)
 
   !> ------------------------------ STEP   I --------------------------
   !! 1) Initialisation of mesh and sol structures

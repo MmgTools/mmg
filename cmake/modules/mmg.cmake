@@ -162,15 +162,21 @@ IF ( BUILD_TESTING )
   IF( MMG_CI )
     # Add libmmg tests
     IF ( TEST_LIBMMG )
-      SET(LIBMMG_EXEC0_a ${EXECUTABLE_OUTPUT_PATH}/libmmg_example0_a)
-      SET(LIBMMG_CPP_a   ${EXECUTABLE_OUTPUT_PATH}/libmmg_cpp_a)
+      SET(LIBMMG_EXEC0_a ${EXECUTABLE_OUTPUT_PATH}/libmmg_example0_a
+        ${CMAKE_SOURCE_DIR}/libexamples/mmg/adaptation_example0/init
+        ${CMAKE_SOURCE_DIR}/libexamples/mmg/adaptation_example0/cube )
+      SET(LIBMMG_CPP_a   ${EXECUTABLE_OUTPUT_PATH}/libmmg_cpp_a
+        ${CMAKE_SOURCE_DIR}/libexamples/mmg/adaptation_example0_cpp/init
+        ${CMAKE_SOURCE_DIR}/libexamples/mmg/adaptation_example0_cpp/cube )
 
      ADD_TEST(NAME libmmg_example0_a   COMMAND ${LIBMMG_EXEC0_a})
      ADD_TEST(NAME libmmg_cpp_a        COMMAND ${LIBMMG_CPP_a})
 
       IF ( CMAKE_Fortran_COMPILER)
         SET(LIBMMG_FORTRAN_a ${EXECUTABLE_OUTPUT_PATH}/libmmg_fortran_a)
-        ADD_TEST(NAME libmmg_fortran   COMMAND ${LIBMMG_FORTRAN_a})
+        ADD_TEST(NAME libmmg_fortran   COMMAND ${LIBMMG_FORTRAN_a}
+          ${CMAKE_SOURCE_DIR}/libexamples/mmg/adaptation_example0/init
+          ${CMAKE_SOURCE_DIR}/libexamples/mmg/adaptation_example0/cube)
       ENDIF()
     ENDIF ()
 
