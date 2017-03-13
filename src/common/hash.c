@@ -136,6 +136,8 @@ int _MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, _MMG5_Hash *hash, int chkISO) 
         }
         else if ( !ph->nxt ) {
           ph->nxt = hash->nxt;
+          ph = &hash->item[ph->nxt];
+          assert(ph);
 
           if ( hash->nxt >= hash->max-1 ) {
             if ( mesh->info.ddebug )
@@ -143,11 +145,11 @@ int _MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, _MMG5_Hash *hash, int chkISO) 
             _MMG5_TAB_RECALLOC(mesh,hash->item,hash->max,0.2,_MMG5_hedge,
                                "_MMG5_edge",return(0));
 
-            for (kk=hash->item[hash->nxt].nxt; kk<hash->max; kk++)
+            ph = &hash->item[hash->nxt];
+
+            for (kk=ph->nxt; kk<hash->max; kk++)
               hash->item[kk].nxt = kk+1;
           }
-          ph = &hash->item[ph->nxt];
-          assert(ph);
 
           hash->nxt = ph->nxt;
           ph->a = ia;
