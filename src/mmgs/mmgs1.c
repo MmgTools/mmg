@@ -585,6 +585,14 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           ppt->n[1] *= dd;
           ppt->n[2] *= dd;
         }
+        else {
+          printf("  ## Warning: Flattened angle around ridge. Unable to split it.\n");
+
+          do {
+            _MMGS_delPt(mesh,mesh->np);
+          } while ( mesh->np>npinit );
+          return(-1);
+        }
       }
     }
   }
