@@ -544,7 +544,7 @@ int _MMG2_adptri(MMG5_pMesh mesh,MMG5_pSol met) {
 
   nns = nnc = nnsw = nnm = it = 0;
   maxit = 5;
-
+  
   do {
     
     if ( !mesh->info.noinsert ) {
@@ -660,7 +660,16 @@ int _MMG2_adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
       return(ns);
     }
     else if ( ip > 0 ) {
+      
       ier = _MMG2_split1b(mesh,k,imax,ip);
+      
+      if ( ddb ) {
+        {
+          MMG2_bdryEdge(mesh);
+          _MMG2_savemesh_db(mesh,mesh->nameout,0);
+          exit(0);
+        }
+      }
 
       /* Lack of memory; abort the routine */
       if ( !ier ) {

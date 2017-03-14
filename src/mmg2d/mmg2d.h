@@ -358,6 +358,7 @@ int _MMG2_movedgpt(MMG5_pMesh ,MMG5_pSol ,int ,int *,char );
 int _MMG2_movintpt(MMG5_pMesh ,MMG5_pSol ,int ,int *,char );
 int _MMG2_movintpt_ani(MMG5_pMesh ,MMG5_pSol ,int ,int *,char );
 int _MMG2_chkmsh(MMG5_pMesh );
+int _MMG2_chkor(MMG5_pMesh );
 int _MMG2_savenor_db(MMG5_pMesh ,char *,char );
 int _MMG2_savedisp_db(MMG5_pMesh mesh,MMG5_pSol ,char *,char );
 int _MMG2_velextLS(MMG5_pMesh ,MMG5_pSol );
