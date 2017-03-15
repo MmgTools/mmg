@@ -1351,7 +1351,11 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           else
             ier = _MMG5_intmet(mesh,met,k,ia,ip,0.5);
 
-          if ( !ier )  return(-1);
+          if ( !ier ) {
+            printf ( "  ## Unable to interpolate metric between points %d and %d.\n",
+                     _MMG3D_indPt(mesh,ip1),_MMG3D_indPt(mesh,ip2));
+            return(-1);
+          }
           else if ( ier < 0 ) {
             _MMG3D_delPt(mesh,ip);
             continue;
