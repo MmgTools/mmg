@@ -41,8 +41,10 @@
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
 
-#define SCOTCH_5 TOSTRING(SCOTCH_VERSION)=='5.0'||TOSTRING(SCOTCH_VERSION)=='5.1'||TOSTRING(SCOTCH_VERSION)=='5'
-#define SCOTCH_6 TOSTRING(SCOTCH_VERSION)=='6'
+#define SCOTCH_5 (!strcmp(TOSTRING(SCOTCH_VERSION),"5.0") ||            \
+                  !strcmp(TOSTRING(SCOTCH_VERSION),"5.1") || !strcmp(TOSTRING(SCOTCH_VERSION),"5"))
+
+#define SCOTCH_6 !strcmp(TOSTRING(SCOTCH_VERSION),"6")
 
 #define CHECK_SCOTCH(t,m,e) if(0!=t){perror(m);return(e);}
 
