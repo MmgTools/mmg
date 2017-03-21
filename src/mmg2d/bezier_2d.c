@@ -130,8 +130,8 @@ int _MMG2_bezierCurv(MMG5_pMesh mesh,int k,char i,double s,double *o,double *no)
   
   /* When the edge is not geometric, simply take the midpoint */
   if ( !MG_EDG(pt->tag[i]) ) {
-    o[0] = 0.5*(p1->c[0]+p2->c[0]);
-    o[1] = 0.5*(p1->c[1]+p2->c[1]);
+    o[0] = (1-s)*p1->c[0]+s*p2->c[0];
+    o[1] = (1-s)*p1->c[1]+s*p2->c[1];
     memset(no,0,2*sizeof(double));
     return(1);
   }
