@@ -147,10 +147,10 @@ int _MMG5_countBinaryElts(FILE **inm, const int nelts,const int iswp,
       for ( idx=0; idx<num; ++idx ) {
         fread(&i,sw,1,(*inm));
         for ( l=0; l<tagNum; ++l ) fread(&i,sw,1,(*inm));
-        fread(&i,sw,1,(*inm)); // quad->v[0]
-        fread(&i,sw,1,(*inm)); // quad->v[1]
-        fread(&i,sw,1,(*inm)); // quad->v[2]
-        fread(&i,sw,1,(*inm)); // quad->v[3]
+        fread(&i,sw,1,(*inm)); // quadra->v[0]
+        fread(&i,sw,1,(*inm)); // quadra->v[1]
+        fread(&i,sw,1,(*inm)); // quadra->v[2]
+        fread(&i,sw,1,(*inm)); // quadra->v[3]
       }
       (*nq) += num;
       k  += num;
@@ -606,7 +606,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
         break;
       case 3:
         /* Quad */
-        pq1 = &mesh->quad[++nq];
+        pq1 = &mesh->quadra[++nq];
         fscanf((*inm),"%d %d %d %d ",&pq1->v[0],&pq1->v[1],&pq1->v[2],&pq1->v[3]);
         pq1->ref = ref;
         assert( nq<=mesh->nquad );
@@ -800,13 +800,13 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
             fread(&i,sw,1,(*inm));
             break;
           default:
-            fprintf(stderr,"  ## Error: elt (quad) %%d: Expected 2 or 3 tags (%d given).\n",
+            fprintf(stderr,"  ## Error: elt (quadrangle) %%d: Expected 2 or 3 tags (%d given).\n",
                     tagNum);
             return(-1);
           }
           if(iswp) ref = _MMG5_swapbin(ref);
 
-          pq1 = &mesh->quad[++nq];
+          pq1 = &mesh->quadra[++nq];
           for ( i=0; i<4 ; ++i ) {
             fread(&l,sw,1,(*inm));
             if ( iswp ) l = _MMG5_swapbin(l);
@@ -1417,7 +1417,7 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   }
   nq = 0;
   for (k=1; k<=mesh->nquad; k++) {
-    pq = &mesh->quad[k];
+    pq = &mesh->quadra[k];
     if ( !MG_EOK(pq) )  continue;
     nq++;
   }
@@ -1531,7 +1531,7 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   }
 
   for (k=1; k<=mesh->nquad; ++k) {
-    pq = &mesh->quad[k];
+    pq = &mesh->quadra[k];
     if ( !MG_EOK(pq) ) continue;
     ++nelts;
 

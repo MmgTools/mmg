@@ -988,7 +988,7 @@ END INTERFACE
 !  * \return 0 if failed, 1 otherwise.
 !  *
 !  * Read mesh and sol at MSH file format (.msh extension). We read only
-!  * low-order points, edges, tria, quad, tetra and prisms.
+!  * low-order points, edges, tria, quadra, tetra and prisms.
 !  *
 !  * \remark Fortran interface:
 !  */

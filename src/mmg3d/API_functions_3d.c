@@ -170,8 +170,8 @@ int MMG3D_Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nprism,
     _MMG5_DEL_MEM(mesh,mesh->prism,(mesh->nprism+1)*sizeof(MMG5_Prism));
   if ( mesh->tria )
     _MMG5_DEL_MEM(mesh,mesh->tria,(mesh->nt+1)*sizeof(MMG5_Tria));
-  if ( mesh->quad )
-    _MMG5_DEL_MEM(mesh,mesh->quad,(mesh->nquad+1)*sizeof(MMG5_Quad));
+  if ( mesh->quadra )
+    _MMG5_DEL_MEM(mesh,mesh->quadra,(mesh->nquad+1)*sizeof(MMG5_Quad));
   if ( mesh->edge )
     _MMG5_DEL_MEM(mesh,mesh->edge,(mesh->na+1)*sizeof(MMG5_Edge));
 
@@ -233,7 +233,7 @@ int MMG3D_Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nprism,
 
   if ( mesh->nquad ) {
     _MMG5_ADD_MEM(mesh,(mesh->nquad+1)*sizeof(MMG5_Quad),"initial quadrilaterals",return(0));
-    _MMG5_SAFE_CALLOC(mesh->quad,(mesh->nquad+1),MMG5_Quad);
+    _MMG5_SAFE_CALLOC(mesh->quadra,(mesh->nquad+1),MMG5_Quad);
   }
 
   mesh->namax = mesh->na;
@@ -920,11 +920,11 @@ int MMG3D_Set_quadrilateral(MMG5_pMesh mesh, int v0, int v1, int v2, int v3,
     return(0);
   }
 
-  mesh->quad[pos].v[0] = v0;
-  mesh->quad[pos].v[1] = v1;
-  mesh->quad[pos].v[2] = v2;
-  mesh->quad[pos].v[3] = v3;
-  mesh->quad[pos].ref  = ref;
+  mesh->quadra[pos].v[0] = v0;
+  mesh->quadra[pos].v[1] = v1;
+  mesh->quadra[pos].v[2] = v2;
+  mesh->quadra[pos].v[3] = v3;
+  mesh->quadra[pos].ref  = ref;
 
   return(1);
 }
@@ -954,7 +954,7 @@ int MMG3D_Get_quadrilateral(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* v3,
     return(0);
   }
 
-  pq = &mesh->quad[nqi];
+  pq = &mesh->quadra[nqi];
   *v0  = pq->v[0];
   *v1  = pq->v[1];
   *v2  = pq->v[2];
@@ -980,7 +980,7 @@ int  MMG3D_Set_quadrilaterals(MMG5_pMesh mesh, int *quads, int *refs) {
   for (i=1;i<=mesh->nquad;i++)
   {
     j = (i-1)*4;
-    pq = &mesh->quad[i];
+    pq = &mesh->quadra[i];
     pq->v[0] = quads[j]  ;
     pq->v[1] = quads[j+1];
     pq->v[2] = quads[j+2];
@@ -998,7 +998,7 @@ int  MMG3D_Get_quadrilaterals(MMG5_pMesh mesh, int *quads, int *refs, int *areRe
   for (i=1;i<=mesh->nquad;i++)
   {
     j = (i-1)*4;
-    pq = &mesh->quad[i];
+    pq = &mesh->quadra[i];
     quads[j]   = pq->v[0];
     quads[j+1] = pq->v[1];
     quads[j+2] = pq->v[2];

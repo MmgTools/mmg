@@ -478,9 +478,9 @@ int  MMG3D_Set_quadrilateral(MMG5_pMesh mesh, int v0, int v1,
 /**
  * \param mesh pointer toward the mesh structure.
  * \param quads pointer toward the table of the quads vertices
- * Vertices of the \f$i^{th}\f$ quad are stored in quads[(i-1)*3]\@3.
+ * Vertices of the \f$i^{th}\f$ quadra are stored in quads[(i-1)*3]\@3.
  * \param refs pointer toward the table of the quadrilateral references.
- * refs[i-1] is the ref of the \f$i^{th}\f$ quad.
+ * refs[i-1] is the ref of the \f$i^{th}\f$ quadra.
  * \return 0 if failed, 1 otherwise.
  *
  * Set vertices and references of the mesh quadrilaterals.
@@ -1176,11 +1176,11 @@ int  MMG3D_Get_quadrilateral(MMG5_pMesh mesh, int* v0, int* v1, int* v2,int* v3,
 /**
  * \param mesh pointer toward the mesh structure.
  * \param quads pointer toward the table of the quadrilaterals vertices
- * Vertices of the \f$i^{th}\f$ quad are stored in tria[(i-1)*4]\@4.
+ * Vertices of the \f$i^{th}\f$ quadra are stored in tria[(i-1)*4]\@4.
  * \param refs pointer toward the table of the quadrilaterals references.
- * refs[i-1] is the ref of the \f$i^{th}\f$ quad.
+ * refs[i-1] is the ref of the \f$i^{th}\f$ quadra.
  * \param areRequired pointer toward table of the flags saying if quadrilaterals
- * are required. areRequired[i-1]=1 if the \f$i^{th}\f$ quad
+ * are required. areRequired[i-1]=1 if the \f$i^{th}\f$ quadra
  * is required.
  * \return 0 if failed, 1 otherwise.
  *
@@ -1393,7 +1393,7 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename);
  * \return 0 if failed, 1 otherwise.
  *
  * Read mesh and sol at MSH file format (.msh extension). We read only
- * low-order points, edges, tria, quad, tetra and prisms.
+ * low-order points, edges, tria, quadra, tetra and prisms.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_LOADMSHMESH(mesh,sol,filename,strlen,retval)\n

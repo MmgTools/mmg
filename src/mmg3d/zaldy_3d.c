@@ -246,7 +246,7 @@ int _MMG3D_zaldy(MMG5_pMesh mesh) {
   }
   if ( mesh->nquad ) {
     _MMG5_ADD_MEM(mesh,(mesh->nquad+1)*sizeof(MMG5_Quad),"initial quadrilaterals",return(0));
-    _MMG5_SAFE_CALLOC(mesh->quad,(mesh->nquad+1),MMG5_Quad);
+    _MMG5_SAFE_CALLOC(mesh->quadra,(mesh->nquad+1),MMG5_Quad);
   }
 
 
