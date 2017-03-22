@@ -506,7 +506,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
           fread(&ref,sw,1,inm);
           if(iswp) ref=swapbin(ref);
         }
-        if ( abs(ref) != MG_ISO ) {
+        if (  !isMG_ISO(abs(ref)) ) {
           ped = &mesh->edge[++mesh->na];
           ped->a   = a;
           ped->b   = b;

@@ -1545,20 +1545,20 @@ int _MMG3D_skipIso(MMG5_pMesh mesh) {
   int    k;
 
   if ( (mesh->info.imprim > 5) || mesh->info.ddebug )
-    fprintf(stdout,"  ## Warning: skip of all entites with %d reference.\n",MG_ISO);
+    fprintf(stdout,"  ## Warning: skip of all entites with %d reference.\n", MG_ISO_);
 
   /* Skip triangles with MG_ISO refs */
   k = 1;
   do {
     ptt = &mesh->tria[k];
-    if ( abs(ptt->ref) != MG_ISO ) continue;
+    if ( !isMG_ISO(abs(ptt->ref))  ) continue;
     /* here ptt is the first tri of mesh->tria that we want to delete */
     do {
       ptt1 = &mesh->tria[mesh->nti];
     }
-    while( (abs(ptt1->ref) == MG_ISO) && (k <= --mesh->nti) );
+    while( isMG_ISO(abs(ptt1->ref)) && (k <= --mesh->nti) );
 
-    if ( abs(ptt1->ref) != MG_ISO )
+    if ( !isMG_ISO(abs(ptt1->ref))  )
       /* ptt1 is the last tri of mesh->tria that we want to keep */
       memcpy(ptt,ptt1,sizeof(MMG5_Tria));
   } while( ++k <= mesh->nti );
@@ -1577,7 +1577,7 @@ int _MMG3D_skipIso(MMG5_pMesh mesh) {
   k = 1;
   do {
     pa = &mesh->edge[k];
-    if ( abs(pa->ref) != MG_ISO ) {
+    if ( !isMG_ISO(abs(pa->ref))  ) {
       pa->ref = abs(pa->ref);
       continue;
     }
@@ -1585,9 +1585,9 @@ int _MMG3D_skipIso(MMG5_pMesh mesh) {
     do {
       pa1 = &mesh->edge[mesh->nai];
     }
-    while( (abs(pa1->ref) == MG_ISO) && (k <= --mesh->nai) );
+    while( isMG_ISO(abs(pa1->ref) ) && (k <= --mesh->nai) );
 
-    if ( abs(pa1->ref) != MG_ISO ) {
+    if ( !isMG_ISO(abs(pa1->ref))  ) {
       /* pa1 is the last edge of mesh->edge that we want to keep */
       memcpy(pa,pa1,sizeof(MMG5_Edge));
       pa1->ref = abs(pa1->ref);

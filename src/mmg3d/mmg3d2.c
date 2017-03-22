@@ -619,11 +619,13 @@ static int _MMG3D_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol) {
     assert(nz < 4);
     if ( npls ) {
       assert(!nmns);
-      pt->ref = MG_PLUS;
+      //pt->ref = MG_PLUS;
+      setMG_PLUS(&(pt->ref)) ;
     }
     else {
       assert(nmns);
-      pt->ref = MG_MINUS;
+      //pt->ref = MG_MINUS;
+      setMG_MINUS(&(pt->ref)) ;
     }
   }
   return(1);
@@ -895,8 +897,8 @@ int _MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int n
     assert( ilist < MMG3D_LMAX+2 );
     pt->flag = base;
 
-    if ( pt->ref == MG_MINUS ) isminq = 1;
-    else if ( pt->ref == MG_PLUS ) isplq = 1;
+    if ( isMG_MINUS(pt->ref) ) isminq = 1;
+    else if ( isMG_PLUS(pt->ref)  ) isplq = 1;
 
     cur = 0;
     while( cur < ilist ) {
@@ -912,8 +914,8 @@ int _MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int n
         jel /= 4;
         pt1 = &mesh->tetra[jel];
 
-        if ( pt1->ref == MG_MINUS ) isminq = 1;
-        else if ( pt1->ref == MG_PLUS ) isplq = 1;
+        if ( isMG_MINUS(pt1->ref)  ) isminq = 1;
+        else if ( isMG_PLUS(pt1->ref)  ) isplq = 1;
 
         if ( pt1->flag == base ) continue;
         pt1->flag = base;
@@ -927,12 +929,12 @@ int _MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int n
         ilist++;
 
         /* check if jel is an available starting tetra for further enumeration */
-        if ( !ndeppq && pt1->ref == MG_PLUS ) {
+        if ( !ndeppq && isMG_PLUS(pt1->ref)  ) {
           for(ip=0; ip<4; ip++)
             if ( pt1->v[ip] == nump ) break;
           if( ip == 4 ) ndeppq = jel;
         }
-        if( !ndepmq && pt1->ref == MG_MINUS ) {
+        if( !ndepmq && isMG_MINUS(pt1->ref)  ) {
           for(ip=0; ip<4; ip++)
             if ( pt1->v[ip] == nump ) break;
           if( ip == 4 ) ndepmq = jel;
