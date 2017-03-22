@@ -432,10 +432,10 @@ int _MMG5_mmg3dRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
     }
   }
 
-  /* Modify the numbering of the nodes of each quad */
+  /* Modify the numbering of the nodes of each quadra */
   for( k = 1; k <= mesh->nquad; ++k) {
     for(j = 0; j<4 ; j++) {
-      mesh->quad[k].v[j] = permNodTab[mesh->quad[k].v[j]];
+      mesh->quadra[k].v[j] = permNodTab[mesh->quadra[k].v[j]];
     }
   }
 

@@ -597,7 +597,7 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
     fseek(inm,posnq,SEEK_SET);
 
     for (k=1; k<=mesh->nquad; k++) {
-      pq1 = &mesh->quad[k];
+      pq1 = &mesh->quadra[k];
       if (!bin)
         fscanf(inm,"%d %d %d %d %d",&pq1->v[0],&pq1->v[1],&pq1->v[2],
                &pq1->v[3],&pq1->ref);
@@ -626,7 +626,7 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
           fprintf(stdout,"   Warning: required quadrilaterals number"
                   " %8d IGNORED\n",i);
         } else {
-          pq1 = &mesh->quad[i];
+          pq1 = &mesh->quadra[i];
           pq1->tag[0] |= MG_REQ;
           pq1->tag[1] |= MG_REQ;
           pq1->tag[2] |= MG_REQ;
@@ -1451,7 +1451,7 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
   if ( mesh->nquad ) {
 
     for (k=1; k<=mesh->nquad; k++) {
-      pq = &mesh->quad[k];
+      pq = &mesh->quadra[k];
       if ( !MG_EOK(pq) ) {
         continue;
       }
@@ -1476,7 +1476,7 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
       fwrite(&nq,sw,1,inm);
     }
     for (k=1; k<=mesh->nquad; k++) {
-      pq = &mesh->quad[k];
+      pq = &mesh->quadra[k];
       if ( !MG_EOK(pq) ) continue;
 
       if(!bin) {
@@ -1504,7 +1504,7 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
         fwrite(&nqreq,sw,1,inm);
       }
       for (k=0; k<=mesh->nquad; k++) {
-        pq = &mesh->quad[k];
+        pq = &mesh->quadra[k];
         if ( (pq->tag[0] & MG_REQ) && (pq->tag[1] & MG_REQ)
              && pq->tag[2] & MG_REQ && pq->tag[3] & MG_REQ ) {
           if(!bin) {
