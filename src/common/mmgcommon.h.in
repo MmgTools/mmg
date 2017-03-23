@@ -456,6 +456,7 @@ extern void _MMG5_Free_ilinkedList( MMG5_pMesh mesh, _MMG5_iNode *liLi );
 extern void _MMG5_Free_dlinkedList( MMG5_pMesh mesh, _MMG5_dNode *liLi );
 int    _MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int i);
 int    _MMG5_hashEdge(MMG5_pMesh mesh,_MMG5_Hash *hash,int a,int b,int k);
+int    _MMG5_hashUpdate(_MMG5_Hash *hash,int a,int b,int k);
 int    _MMG5_hashGet(_MMG5_Hash *hash,int a,int b);
 int    _MMG5_hashNew(MMG5_pMesh mesh, _MMG5_Hash *hash,int hsiz,int hmax);
 int    _MMG5_intmetsavedir(MMG5_pMesh mesh, double *m,double *n,double *mr);

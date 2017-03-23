@@ -241,6 +241,41 @@ int _MMG5_hashEdge(MMG5_pMesh mesh,_MMG5_Hash *hash, int a,int b,int k) {
 }
 
 /**
+ * \param mesh pointer toward the mesh structure.
+ * \param hash pointer toward the hash table of edges.
+ * \param a index of the first extremity of the edge.
+ * \param b index of the second extremity of the edge.
+ * \param k new index of point along the edge.
+ * \return 1 if success, 0 if fail (edge is not found).
+ *
+ * Update the index of the point stored along the edge \f$[a;b]\f$
+ *
+ */
+int _MMG5_hashUpdate(_MMG5_Hash *hash, int a,int b,int k) {
+  _MMG5_hedge  *ph;
+  int          key,ia,ib,j;
+
+  ia  = MG_MIN(a,b);
+  ib  = MG_MAX(a,b);
+  key = (_MMG5_KA*ia + _MMG5_KB*ib) % hash->siz;
+  ph  = &hash->item[key];
+
+  while ( ph->a ) {
+    if ( ph->a == ia && ph->b == ib ) {
+      ph->k = k;
+      return 1;
+    }
+
+    if ( !ph->nxt ) return 0;
+
+    ph = &hash->item[ph->nxt];
+
+  }
+
+  return 0;
+}
+
+/**
  * \param hash pointer toward the hash table of edges.
  * \param a index of the first extremity of the edge.
  * \param b index of the second extremity of the edge.

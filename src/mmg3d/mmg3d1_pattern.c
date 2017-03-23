@@ -169,7 +169,11 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
       if ( !ier ) {
         ier = _MMG3D_dichoto1b(mesh,met,list,ilist,ip);
       }
-      ier = _MMG5_split1b(mesh,met,list,ilist,ip,1,1);
+      /* We can create element with 0 qualities at machine epsilon even when ip
+      is the mid edge point */
+      ier = _MMG3D_simbulgept(mesh,met,list,ilist,ip);
+      if ( ier ) ier = _MMG5_split1b(mesh,met,list,ilist,ip,1,1);
+
       /* if we realloc memory in _MMG5_split1b pt and pxt pointers are not valid */
       pt = &mesh->tetra[k];
       pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
@@ -238,7 +242,10 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
           continue;
         }
       }
-      ier = _MMG5_split1b(mesh,met,list,ilist,ip,1,1);
+      ier = _MMG3D_simbulgept(mesh,met,list,ilist,ip);
+      if ( ier )
+        ier = _MMG5_split1b(mesh,met,list,ilist,ip,1,1);
+
       if ( ier < 0 ) {
         fprintf(stderr,"  ## Error: unable to split.\n");
         return(-1);

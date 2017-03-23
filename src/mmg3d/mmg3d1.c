@@ -956,7 +956,7 @@ _MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   MMG5_xTetra  *pxt;
   _MMG5_Hash    hash;
   MMG5_pPar     par;
-  double   ll,o[3],ux,uy,uz,hma2;
+  double   ll,o[3],ux,uy,uz,hma2,mincal;
   int      l,vx[6],k,ip,ip1,ip2,nap,ns,ne,memlack,ier;
   char     i,j,ia;
 
@@ -997,6 +997,7 @@ _MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   }
 
   /** 2. Set flags and split internal edges */
+  mincal = FLT_MAX;
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
     if ( !MG_EOK(pt) )  continue;
@@ -1040,15 +1041,19 @@ _MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
             }
           }
           hma2 = _MMG5_LLONG*_MMG5_LLONG*hma2*hma2;
-          if ( ll > hma2 )
+          if ( ll > hma2 ) {
             ip = _MMG5_hashGet(&hash,ip1,ip2);
+            mincal = MG_MIN(mincal,pt->qual);
+          }
         }
         else if ( typchk == 2 ) {
           ll = _MMG5_lenedg(mesh,met,i,pt);
           // Case of an internal tetra with 4 ridges vertices.
           if ( ll == 0 ) continue;
-          if ( ll > _MMG5_LLONG )
+          if ( ll > _MMG5_LLONG ) {
             ip = _MMG5_hashGet(&hash,ip1,ip2);
+            mincal = MG_MIN(mincal,pt->qual);
+          }
         }
       }
       if ( ip < 0 ) continue;
@@ -1101,6 +1106,16 @@ _MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
 
   /** 3. check and split */
 split:
+ if ( mincal < _MMG5_EPS ) {
+   /* Avoid the creation of bad quality elements because */
+   if ( mesh->info.imprim > 5 || mesh->info.ddebug )
+     printf("  ## Warning: Too bad quality for the worst element."
+            " Volumic patterns skipped.\n");
+
+   _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
+   return(0);
+ }
+
   ns = 0;
   ne = mesh->ne;
   for (k=1; k<=ne; k++) {
@@ -1492,15 +1507,39 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           if ( vx[ia] > 0 )  mesh->point[vx[ia]].flag++;
       }
       else {
-        for (ia=0,i=0; i<3; i++) {
-          for (j=i+1; j<4; j++,ia++) {
-            if ( vx[ia] > 0 ) {
-              p1 = &mesh->point[pt->v[_MMG5_iare[ia][0]]];
-              p2 = &mesh->point[pt->v[_MMG5_iare[ia][1]]];
-              ppt = &mesh->point[vx[ia]];
-              ppt->c[0] = 0.5 * (p1->c[0] + p2->c[0]);
-              ppt->c[1] = 0.5 * (p1->c[1] + p2->c[1]);
-              ppt->c[2] = 0.5 * (p1->c[2] + p2->c[2]);
+        if ( it < 20 ) {
+          for (ia=0,i=0; i<3; i++) {
+            for (j=i+1; j<4; j++,ia++) {
+              if ( vx[ia] > 0 ) {
+                if ( it < 20 ) {
+                  p1 = &mesh->point[pt->v[_MMG5_iare[ia][0]]];
+                  p2 = &mesh->point[pt->v[_MMG5_iare[ia][1]]];
+                  ppt = &mesh->point[vx[ia]];
+                  ppt->c[0] = 0.5 * (p1->c[0] + p2->c[0]);
+                  ppt->c[1] = 0.5 * (p1->c[1] + p2->c[1]);
+                  ppt->c[2] = 0.5 * (p1->c[2] + p2->c[2]);
+                }
+              }
+            }
+          }
+        }
+        else {
+          if ( it==20 && (mesh->info.ddebug || mesh->info.imprim > 5) ) {
+            printf("  ## Warning: Surfacic pattern: unable to find a valid split.\n"
+                   "              Point(s) deletion." );
+          }
+          for (ia=0,i=0; i<3; i++) {
+            for (j=i+1; j<4; j++,ia++) {
+              if ( vx[ia] > 0 ) {
+                if ( !_MMG5_hashUpdate(&hash,pt->v[_MMG5_iare[ia][0]],
+                                       pt->v[_MMG5_iare[ia][1]],-1) ) {
+                  printf("  ## Error: Unable to delete point idx along edge %d %d.\n",
+                         pt->v[_MMG5_iare[ia][0]], pt->v[_MMG5_iare[ia][1]]);
+                  _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
+                  return -1;
+                }
+                _MMG3D_delPt(mesh,vx[ia]);
+              }
             }
           }
         }
@@ -1508,11 +1547,13 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
     }
     nc += ni;
   }
-  while( ni > 0 && ++it < 20 );
+  while( ni > 0 && ++it < 40 );
+
   if ( mesh->info.ddebug && nc ) {
     fprintf(stdout,"     %d corrected, %d invalid\n",nc,ni);
     fflush(stdout);
   }
+
 
   /** 4. splitting */
   ns = 0;
