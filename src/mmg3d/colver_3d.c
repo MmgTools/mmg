@@ -107,7 +107,7 @@ int _MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
     else
       caltmp = _MMG5_orcal(mesh,met,0);
 
-    if ( caltmp < _MMG5_EPSD )  return(0);
+    if ( caltmp < _MMG5_NULKAL )  return(0);
     calnew = MG_MIN(calnew,caltmp);
     /* check length */
     if ( typchk == 2 && met->m ) {
@@ -121,8 +121,8 @@ int _MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
       }
     }
   }
-  if ( calold < _MMG5_NULKAL && calnew <= calold )  return(0);
-  else if ( calnew < _MMG5_NULKAL || calnew < 0.3*calold )  return(0);
+  if ( calold < _MMG5_EPSOK && calnew <= calold )  return(0);
+  else if ( calnew < _MMG5_EPSOK || calnew < 0.3*calold )  return(0);
 
   return(ilist);
 }
@@ -407,11 +407,11 @@ int _MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
     else
       caltmp = _MMG5_orcal(mesh,met,0);
 
-    if ( caltmp < _MMG5_EPSD )  return(0);
+    if ( caltmp < _MMG5_NULKAL )  return(0);
     calnew = MG_MIN(calnew,caltmp);
   }
-  if ( calold < _MMG5_NULKAL && calnew <= calold )  return(0);
-  else if ( calnew < _MMG5_NULKAL || calnew < 0.3*calold )  return(0);
+  if ( calold < _MMG5_EPSOK && calnew <= calold )  return(0);
+  else if ( calnew < _MMG5_EPSOK || calnew < 0.3*calold )  return(0);
 
   /* analyze surfacic ball of p */
   for (l=1; l<ilists-1; l++) {

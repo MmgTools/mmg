@@ -296,16 +296,16 @@ int _MMG3D_simbulgept(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int ip) {
     pt0->v[ia] = 0;
     calold = MG_MIN(calold,pt->qual);
     caltmp = _MMG5_orcal(mesh,met,0);
-    if ( caltmp < _MMG5_EPSD )  return(0);
+    if ( caltmp < _MMG5_EPSOK )  return(0);
     calnew = MG_MIN(calnew,caltmp);
 
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     pt0->v[ib] = 0;
     caltmp = _MMG5_orcal(mesh,met,0);
-    if ( caltmp < _MMG5_EPSD )  return(0);
+    if ( caltmp < _MMG5_EPSOK )  return(0);
     calnew = MG_MIN(calnew,caltmp);
   }
-  /*if ( calold < _MMG5_NULKAL && calnew <= calold )  return(0);
+  /*if ( calold < _MMG5_EPSOK && calnew <= calold )  return(0);
     else if ( calnew < 0.3*calold )  return(0);*/
 
 

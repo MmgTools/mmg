@@ -421,7 +421,7 @@ int _MMG5_chkmovmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t) {
         c[i][j] = ppt->c[j]+tau*v[j];
     }
     
-    if( _MMG5_caltet_iso_4pt(c[0],c[1],c[2],c[3]) < _MMG5_NULKAL) return(0);  //     Other criteria : eg. a rate of degradation, etc... ?
+    if( _MMG5_caltet_iso_4pt(c[0],c[1],c[2],c[3]) < _MMG5_EPSOK) return(0);  //     Other criteria : eg. a rate of degradation, etc... ?
   }
 
   return(1);
