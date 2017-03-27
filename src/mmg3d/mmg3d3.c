@@ -37,6 +37,8 @@
 
 #include "mmg3d.h"
 #include "ls_calls.h"
+#include "inlined_functions_3d.h"
+
 #define _MMG5_DEGTOL  1.e-1
 
 extern char  ddb;
@@ -86,55 +88,6 @@ inline int _MMG5_intdispvol(double *v1, double *v2, double *vp, double t) {
     vp[i] = (1.0-t)*v1[i] + t*v2[i];
   
   return(1);
-}
-
-/** compute quality iso of a tetra given by the 4 points a,b,c,d */
-static
-inline double _MMG5_caltet_iso_4pt(double *a, double *b, double *c, double *d) {
-  double     abx,aby,abz,acx,acy,acz,adx,ady,adz,bcx,bcy,bcz,bdx,bdy,bdz,cdx,cdy,cdz;
-  double     vol,v1,v2,v3,rap;
-  
-  /* volume */
-  abx = b[0] - a[0];
-  aby = b[1] - a[1];
-  abz = b[2] - a[2];
-  rap = abx*abx + aby*aby + abz*abz;
-  
-  acx = c[0] - a[0];
-  acy = c[1] - a[1];
-  acz = c[2] - a[2];
-  rap += acx*acx + acy*acy + acz*acz;
-  
-  adx = d[0] - a[0];
-  ady = d[1] - a[1];
-  adz = d[2] - a[2];
-  rap += adx*adx + ady*ady + adz*adz;
-  
-  v1  = acy*adz - acz*ady;
-  v2  = acz*adx - acx*adz;
-  v3  = acx*ady - acy*adx;
-  vol = abx * v1 + aby * v2 + abz * v3;
-  if ( vol < _MMG5_EPSD2 )  return(0.0);
-  
-  bcx = c[0] - b[0];
-  bcy = c[1] - b[1];
-  bcz = c[2] - b[2];
-  rap += bcx*bcx + bcy*bcy + bcz*bcz;
-  
-  bdx = d[0] - b[0];
-  bdy = d[1] - b[1];
-  bdz = d[2] - b[2];
-  rap += bdx*bdx + bdy*bdy + bdz*bdz;
-  
-  cdx = d[0] - c[0];
-  cdy = d[1] - c[1];
-  cdz = d[2] - c[2];
-  rap += cdx*cdx + cdy*cdy + cdz*cdz;
-  if ( rap < _MMG5_EPSD2 )  return(0.0);
-  
-  /* quality = vol / len^3/2 */
-  rap = rap * sqrt(rap);
-  return(vol / rap);
 }
 
 /**
