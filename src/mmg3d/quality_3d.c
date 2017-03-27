@@ -68,9 +68,12 @@ int _MMG3D_tetraQual(MMG5_pMesh mesh, MMG5_pSol met) {
     }
   }
 
-  if ( minqual == 0.0 ) {
+  if ( minqual < _MMG5_NULKAL ) {
     fprintf(stderr,"  ## ERROR: TOO BAD QUALITY FOR THE WORST ELEMENT (%d)\n",iel);
     return(0);
+  }
+  else if ( minqual < _MMG5_EPSOK ) {
+    fprintf(stderr,"  ## WARNING: VERY BAD QUALITY FOR THE WORST ELEMENT (%d)\n",iel);
   }
 
   return(1);
@@ -151,8 +154,7 @@ inline double _MMG5_caltet33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
   det = mm[0] * ( mm[3]*mm[5] - mm[4]*mm[4]) \
       - mm[1] * ( mm[1]*mm[5] - mm[2]*mm[4]) \
       + mm[2] * ( mm[1]*mm[4] - mm[2]*mm[3]);
-  if ( det < _MMG5_EPSOK )   {
-    //printf("--- INVALID METRIC : DET  %e\n",det);
+  if ( det < _MMG5_EPSD2 )   {
     return(0.0);
   }
   det = sqrt(det) * vol;
@@ -470,9 +472,12 @@ int _MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
           _MMG3D_indPt(mesh,mesh->tetra[iel].v[2]),_MMG3D_indPt(mesh,mesh->tetra[iel].v[3]));
 #endif
   if ( abs(mesh->info.imprim) < 3 ){
-    if (rapmin == 0){
+    if ( rapmin < _MMG5_NULKAL ){
       fprintf(stderr,"  ## ERROR: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
       return(0);
+    }
+    else if ( rapmin < _MMG5_EPSOK ) {
+      fprintf(stderr,"  ## WARNING: VERY BAD QUALITY FOR THE WORST ELEMENT\n");
     }
     return(1);
   }
@@ -488,10 +493,14 @@ int _MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
               i/5.,i/5.+0.2,his[i],100.*(his[i]/(float)(mesh->ne-nex)));
     }
   }
-  if (rapmin == 0){
+  if (rapmin < _MMG5_NULKAL ){
     fprintf(stderr,"  ## ERROR: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
     return(0);
   }
+  else if ( rapmin < _MMG5_EPSOK ) {
+    fprintf(stderr,"  ## WARNING: VERY BAD QUALITY FOR THE WORST ELEMENT\n");
+  }
+
   return(1);
 }
 
@@ -576,10 +585,14 @@ int _MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
           _MMG3D_indPt(mesh,mesh->tetra[iel].v[2]),_MMG3D_indPt(mesh,mesh->tetra[iel].v[3]));
 #endif
   if ( abs(mesh->info.imprim) < 3 ){
-    if (rapmin == 0){
+    if ( rapmin < _MMG5_NULKAL ){
       fprintf(stderr,"  ## ERROR: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
       return(0);
     }
+    else if ( rapmin < _MMG5_EPSOK ) {
+      fprintf(stderr,"  ## WARNING: VERY BAD QUALITY FOR THE WORST ELEMENT\n");
+    }
+
     return(1);
   }
 
@@ -595,10 +608,14 @@ int _MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
     }
     if(nrid) fprintf(stdout,"\n  ## WARNING: %d TETRA WITH 4 RIDGES POINTS\n",nrid);
   }
-  if (rapmin == 0){
+  if ( rapmin < _MMG5_NULKAL ) {
     fprintf(stderr,"  ## ERROR: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
     return(0);
   }
+  else if ( rapmin < _MMG5_EPSOK ) {
+    fprintf(stderr,"  ## WARNING: VERY BAD QUALITY FOR THE WORST ELEMENT\n");
+  }
+
   return(1);
 }
 
