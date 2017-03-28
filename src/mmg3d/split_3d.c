@@ -109,14 +109,14 @@ int _MMG3D_split1_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
   memcpy(pt0,pt,sizeof(MMG5_Tetra));
   pt0->v[tau[1]] = vx[taued[0]];
   vnew = _MMG5_orvol(mesh->point,pt0->v);
-  if ( vnew < _MMG5_EPSD2 )  return(0);
-  else if ( vold > _MMG5_NULKAL && vnew < _MMG5_NULKAL )  return(0);
+  if ( vnew < _MMG5_NULKAL )  return(0);
+  else if ( vold >= _MMG5_EPSOK && vnew < _MMG5_EPSOK )  return(0);
 
   memcpy(pt0,pt,sizeof(MMG5_Tetra));
   pt0->v[tau[0]] = vx[taued[0]];
   vnew = _MMG5_orvol(mesh->point,pt0->v);
-  if ( vnew < _MMG5_EPSD2 )  return(0);
-  else if ( vold > _MMG5_NULKAL && vnew < _MMG5_NULKAL )  return(0);
+  if ( vnew < _MMG5_NULKAL )  return(0);
+  else if ( vold >= _MMG5_EPSOK && vnew < _MMG5_EPSOK )  return(0);
 
   return(1);
 }
@@ -966,36 +966,36 @@ int _MMG5_split2sf_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]){
   pt0->v[tau[1]] = vx[taued[4]];
   pt0->v[tau[2]] = vx[taued[5]];
   vnew = _MMG5_orvol(mesh->point,pt0->v);
-  if ( vnew < _MMG5_EPSD2 )  return(0);
-  else if ( vold > _MMG5_NULKAL && vnew < _MMG5_NULKAL )  return(0);
+  if ( vnew < _MMG5_NULKAL )  return(0);
+  else if ( vold >= _MMG5_EPSOK && vnew < _MMG5_EPSOK )  return(0);
 
   if ( imin == tau[1] ) {
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     pt0->v[tau[2]] = vx[taued[5]];
     pt0->v[tau[3]] = vx[taued[4]];
     vnew = _MMG5_orvol(mesh->point,pt0->v);
-    if ( vnew < _MMG5_EPSD2 )  return(0);
-    else if ( vold > _MMG5_NULKAL && vnew < _MMG5_NULKAL )  return(0);
+    if ( vnew < _MMG5_NULKAL )  return(0);
+    else if ( vold >= _MMG5_EPSOK && vnew < _MMG5_EPSOK )  return(0);
 
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     pt0->v[tau[3]] = vx[taued[5]];
     vnew = _MMG5_orvol(mesh->point,pt0->v);
-    if ( vnew < _MMG5_EPSD2 )  return(0);
-    else if ( vold > _MMG5_NULKAL && vnew < _MMG5_NULKAL )  return(0);
+    if ( vnew < _MMG5_NULKAL )  return(0);
+    else if ( vold >= _MMG5_EPSOK && vnew < _MMG5_EPSOK )  return(0);
   }
   else {
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     pt0->v[tau[3]] = vx[taued[4]];
     vnew = _MMG5_orvol(mesh->point,pt0->v);
-    if ( vnew < _MMG5_EPSD2 )  return(0);
-    else if ( vold > _MMG5_NULKAL && vnew < _MMG5_NULKAL )  return(0);
+    if ( vnew < _MMG5_NULKAL )  return(0);
+    else if ( vold >= _MMG5_EPSOK && vnew < _MMG5_EPSOK )  return(0);
 
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     pt0->v[tau[1]] = vx[taued[4]];
     pt0->v[tau[3]] = vx[taued[5]];
     vnew = _MMG5_orvol(mesh->point,pt0->v);
-    if ( vnew < _MMG5_EPSD2 )  return(0);
-    else if ( vold > _MMG5_NULKAL && vnew < _MMG5_NULKAL )  return(0);
+    if ( vnew < _MMG5_NULKAL )  return(0);
+    else if ( vold >= _MMG5_EPSOK && vnew < _MMG5_EPSOK )  return(0);
   }
   return(1);
 }
@@ -1451,30 +1451,30 @@ int _MMG3D_split3_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
   pt0->v[tau[1]] = vx[taued[0]];
   pt0->v[tau[2]] = vx[taued[1]];
   vnew = _MMG5_orvol(mesh->point,pt0->v);
-  if ( vnew < _MMG5_EPSD2 )  return(0);
-  else if ( vold > _MMG5_NULKAL && vnew < _MMG5_NULKAL )  return(0);
+  if ( vnew < _MMG5_NULKAL )  return(0);
+  else if ( vold >= _MMG5_EPSOK && vnew < _MMG5_EPSOK )  return(0);
 
   memcpy(pt0,pt,sizeof(MMG5_Tetra));
   pt0->v[tau[0]] = vx[taued[0]];
   pt0->v[tau[2]] = vx[taued[3]];
   vnew = _MMG5_orvol(mesh->point,pt0->v);
-  if ( vnew < _MMG5_EPSD2 )  return(0);
-  else if ( vold > _MMG5_NULKAL && vnew < _MMG5_NULKAL )  return(0);
+  if ( vnew < _MMG5_NULKAL )  return(0);
+  else if ( vold >= _MMG5_EPSOK && vnew < _MMG5_EPSOK )  return(0);
 
   memcpy(pt0,pt,sizeof(MMG5_Tetra));
   pt0->v[tau[0]] = vx[taued[1]];
   pt0->v[tau[1]] = vx[taued[3]];
   vnew = _MMG5_orvol(mesh->point,pt0->v);
-  if ( vnew < _MMG5_EPSD2 )  return(0);
-  else if ( vold > _MMG5_NULKAL && vnew < _MMG5_NULKAL )  return(0);
+  if ( vnew < _MMG5_NULKAL )  return(0);
+  else if ( vold >= _MMG5_EPSOK && vnew < _MMG5_EPSOK )  return(0);
 
   memcpy(pt0,pt,sizeof(MMG5_Tetra));
   pt0->v[tau[0]] = vx[taued[0]];
   pt0->v[tau[1]] = vx[taued[3]];
   pt0->v[tau[2]] = vx[taued[1]];
   vnew = _MMG5_orvol(mesh->point,pt0->v);
-  if ( vnew < _MMG5_EPSD2 )  return(0);
-  else if ( vold > _MMG5_NULKAL && vnew < _MMG5_NULKAL )  return(0);
+  if ( vnew < _MMG5_NULKAL )  return(0);
+  else if ( vold >= _MMG5_EPSOK && vnew < _MMG5_EPSOK )  return(0);
 
   return(1);
 }
