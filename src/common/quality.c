@@ -60,7 +60,7 @@ double _MMG5_caltri33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt) {
 
   /* 2*area */
   anisurf  = _MMG5_surftri33_ani(mesh,pt,ma,mb,mc);
-  if ( anisurf <= _MMG5_EPSD ) return(0.0);
+  if ( anisurf <= _MMG5_EPSD2 ) return(0.0);
 
   dd  = 1.0 / 3.0;
   for (i=0; i<6; i++)
@@ -93,7 +93,7 @@ double _MMG5_caltri33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt) {
   rap = l0 + l1 + l2;
 
   /* quality = 2*area/length */
-  if ( rap > _MMG5_EPSD ) {
+  if ( rap > _MMG5_EPSD2 ) {
     return( anisurf / rap);
   }
   else
@@ -176,7 +176,7 @@ inline double _MMG5_caltri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
 
   rap = l0 + l1 + l2;
 
-  if ( rap < _MMG5_EPSD ) return(0.0);
+  if ( rap < _MMG5_EPSD2 ) return(0.0);
 
   /* quality = 2*area/length */
   return (anisurf / rap);
