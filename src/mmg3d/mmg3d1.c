@@ -941,6 +941,45 @@ static int _MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
 
 /**
  * \param mesh pointer toward the mesh structure.
+ * \param hash pointer toward the hash table of edges.
+ * \return 0 if failed, 1 if success
+ *
+ * Delete the points inserted by pattern if the pattern step fail.
+ *
+ */
+static inline
+int _MMG3D_delPatternPts(MMG5_pMesh mesh,_MMG5_Hash hash)
+{
+  MMG5_pTetra   pt;
+  int           vx[6],k,ia,i,j;
+
+  /* Delete the useless added points */
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+    if ( !MG_EOK(pt) || (pt->tag & MG_REQ) ) continue;
+
+    memset(vx,0,6*sizeof(int));
+    for (ia=0,i=0; i<3; i++) {
+      for (j=i+1; j<4; j++,ia++) {
+        if ( pt->xt && (mesh->xtetra[pt->xt].tag[ia] & MG_REQ) ) continue;
+        vx[ia] = _MMG5_hashGet(&hash,pt->v[i],pt->v[j]);
+        if ( vx[ia] > 0 ) {
+          _MMG3D_delPt(mesh,vx[ia]);
+          if ( !_MMG5_hashUpdate(&hash,pt->v[i],pt->v[j],-1) ) {
+            printf("  ## Error: Unable to delete point idx along edge %d %d.\n",
+                   pt->v[i], pt->v[j]);
+            _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
+            return 0;
+          }
+        }
+      }
+    }
+  }
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
  * \param typchk type of checking permformed for edge length (hmax or _MMG5_LLONG criterion).
  * \return -1 if failed.
@@ -1107,6 +1146,9 @@ _MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   /** 3. check and split */
 split:
  if ( mincal < _MMG5_EPS ) {
+   /* Delete the useless added points */
+   if ( !_MMG3D_delPatternPts(mesh,hash) ) return -1;
+
    /* Avoid the creation of bad quality elements because */
    if ( mesh->info.imprim > 5 || mesh->info.ddebug )
      printf("  ## Warning: Too bad quality for the worst element."
@@ -1216,14 +1258,14 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   _MMG5_Hash    hash;
   MMG5_pPar     par;
   double        o[3],no[3],to[3],dd,len,hmax,hausd;
-  int           vx[6],k,l,ip,ic,it,nap,nc,ni,ne,npinit,ns,ip1,ip2,ier,isloc;
+  int           vx[6],k,l,ip,ic,it,nap,nc,ni,ne,ns,ip1,ip2,ier,isloc;
   char          i,j,ia,i1,i2;
   static double uv[3][2] = { {0.5,0.5}, {0.,0.5}, {0.5,0.} };
 
   /** 1. analysis of boundary elements */
   if ( !_MMG5_hashNew(mesh,&hash,mesh->np,7*mesh->np) ) return(-1);
   ns = nap = 0;
-  npinit=mesh->np;
+
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
     if ( !MG_EOK(pt) || (pt->tag & MG_REQ) || !pt->xt )  continue;
@@ -1345,9 +1387,7 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
                               fprintf(stderr,"  ## Error: unable to allocate a new point.\n");
                               _MMG5_INCREASE_MEM_MESSAGE();
-                              do {
-                                _MMG3D_delPt(mesh,mesh->np);
-                              } while ( mesh->np>npinit );
+                              _MMG3D_delPatternPts(mesh,hash);
                               return(-1)
                               ,o,MG_BDY);
           // Now pb->p contain a wrong memory address.
