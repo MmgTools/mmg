@@ -64,7 +64,7 @@ int _MMG5_intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,
 
   if ( pt->xt ) {
     pxt = &mesh->xtetra[pt->xt];
-    if ( pxt->tag[i] & MG_GEO  ) {
+    if ( pxt->tag[i] & MG_GEO && !(pxt->tag[i] & MG_NOM)  ) {
       ppt = &mesh->point[ip];
       assert(ppt->xp);
       pxp = &mesh->xpoint[ppt->xp];

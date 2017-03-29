@@ -52,9 +52,7 @@
 int _MMG5_kPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr,
                           SCOTCH_Num *permVrtTab,MMG5_pMesh mesh) {
   int boxNbr, vertIdx;
-#ifdef SCOTCH_5
   SCOTCH_Num logMaxVal, SupMaxVal, InfMaxVal, maxVal;
-#endif
   char s[200];
   SCOTCH_Num *sortPartTb;
   SCOTCH_Strat strat ;
@@ -69,11 +67,12 @@ int _MMG5_kPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr,
 
   /* Initializing SCOTCH functions */
   CHECK_SCOTCH(SCOTCH_stratInit(&strat), "scotch_stratInit", 0) ;
-#ifdef SCOTCH_6
-  CHECK_SCOTCH(SCOTCH_archCmplt(&arch, boxNbr), "scotch_archCmplt", 0) ;
-#else
-  CHECK_SCOTCH(SCOTCH_archVcmplt(&arch), "scotch_archVcmplt", 0) ;
-#endif
+  if ( SCOTCH_6 ) {
+    CHECK_SCOTCH(SCOTCH_archCmplt(&arch, boxNbr), "scotch_archCmplt", 0) ;
+  }
+  else {
+    CHECK_SCOTCH(SCOTCH_archVcmplt(&arch), "scotch_archVcmplt", 0) ;
+  }
   sprintf(s, "m{vert=%d,low=r{job=t,map=t,poli=S,sep=m{vert=80,low=h{pass=10}f{bal=0.0005,move=80},asc=f{bal=0.005,move=80}}}}", vertNbr / boxVertNbr);
   CHECK_SCOTCH(SCOTCH_stratGraphMap(&strat, s), "scotch_stratGraphMap", 0) ;
 
@@ -84,41 +83,41 @@ int _MMG5_kPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr,
   CHECK_SCOTCH(SCOTCH_graphMap(&graf, &arch, &strat, sortPartTb), "scotch_graphMap", 0);
 
 
-#ifdef SCOTCH_6
-  // Looking for the max value in sortPartTb and computing sortPartTb as
-  // followed :
-  //  - sortPartTb[2i] is the box value
-  //  - sortPartTb[2i+1] is the vertex number
-  maxVal = sortPartTb[0];
-#endif
+  if ( SCOTCH_6 ) {
+    // Looking for the max value in sortPartTb and computing sortPartTb as
+    // followed :
+    //  - sortPartTb[2i] is the box value
+    //  - sortPartTb[2i+1] is the vertex number
+    maxVal = sortPartTb[0];
+  }
   for (vertIdx = vertNbr - 1 ; vertIdx >= 0 ; vertIdx--) {
     sortPartTb[2*vertIdx] = sortPartTb[vertIdx];
     sortPartTb[2*vertIdx+1] = vertIdx + 1;
-#ifdef SCOTCH_5
-    if (sortPartTb[vertIdx] > maxVal)
-      maxVal = sortPartTb[vertIdx];
-#endif
-  }
-
-#ifdef SCOTCH_5
-  // Determining the log of MaxVal
-  logMaxVal = 0;
-  while ( maxVal > 0) {
-    logMaxVal++;
-    maxVal >>= 1;
-  }
-
-  // Infering the interval in which box values will be
-  InfMaxVal = logMaxVal << logMaxVal;
-  SupMaxVal = (logMaxVal << (logMaxVal + 1)) - 1;
-
-  // Increasing box values until they are in the previous interval
-  for (vertIdx = 0 ; vertIdx < vertNbr ; vertIdx++) {
-    while (!(sortPartTb[2*vertIdx] >= InfMaxVal && sortPartTb[2*vertIdx] <= SupMaxVal)) {
-      sortPartTb[2*vertIdx] <<= 1;
+    if ( SCOTCH_5 ) {
+      if (sortPartTb[vertIdx] > maxVal)
+        maxVal = sortPartTb[vertIdx];
     }
   }
-#endif
+
+  if ( SCOTCH_5 ) {
+    // Determining the log of MaxVal
+    logMaxVal = 0;
+    while ( maxVal > 0) {
+      logMaxVal++;
+      maxVal >>= 1;
+    }
+
+    // Infering the interval in which box values will be
+    InfMaxVal = logMaxVal << logMaxVal;
+    SupMaxVal = (logMaxVal << (logMaxVal + 1)) - 1;
+
+    // Increasing box values until they are in the previous interval
+    for (vertIdx = 0 ; vertIdx < vertNbr ; vertIdx++) {
+      while (!(sortPartTb[2*vertIdx] >= InfMaxVal && sortPartTb[2*vertIdx] <= SupMaxVal)) {
+        sortPartTb[2*vertIdx] <<= 1;
+      }
+    }
+  }
 
   // Sorting the tabular, which contains box values and vertex numbers
   _SCOTCHintSort2asc1(sortPartTb, vertNbr);
@@ -191,6 +190,13 @@ int _MMG5_scotchCall(MMG5_pMesh mesh, MMG5_pSol met)
 #ifdef USE_SCOTCH
   /*check enough vertex to renum*/
   if ( mesh->info.renum && (mesh->np/2. > _MMG5_BOXSIZE) && mesh->np>100000 ) {
+
+    if ( (SCOTCH_5 && SCOTCH_6 ) || ( (!SCOTCH_5) && (!SCOTCH_6) ) ) {
+      printf(" ## Error: fail to determine scotch version.\n");
+      printf("           No renumbering.\n");
+      return 1;
+    }
+
     /* renumbering begin */
     if ( mesh->info.imprim > 5 )
       fprintf(stdout,"  -- RENUMBERING. \n");

@@ -48,9 +48,9 @@ extern "C" {
 #define M_LAMBDA  0.34
 #define M_MU      0.33
 
-#define EPS30  1.e-30
 #define _MMG2_EPSD   1.e-10 //e-20??
 #define EPSA   1.e-12
+
 #define TGV    1.e15
 #define PRECI  1.
 #define SIZE    0.75

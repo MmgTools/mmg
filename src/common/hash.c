@@ -50,7 +50,7 @@
 int _MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, _MMG5_Hash *hash, int chkISO) {
   MMG5_pTria     pt,pt1;
   _MMG5_hedge    *ph;
-  int            *adja,k,jel,lel,hmax,dup,nmf,ia,ib;
+  int            *adja,k,kk,jel,lel,hmax,dup,nmf,ia,ib;
   char           i,i1,i2,j,l,ok;
   unsigned int   key;
 
@@ -138,6 +138,19 @@ int _MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, _MMG5_Hash *hash, int chkISO) 
           ph->nxt = hash->nxt;
           ph = &hash->item[ph->nxt];
           assert(ph);
+
+          if ( hash->nxt >= hash->max-1 ) {
+            if ( mesh->info.ddebug )
+              fprintf(stderr,"  ## Memory alloc problem (edge): %d\n",hash->max);
+            _MMG5_TAB_RECALLOC(mesh,hash->item,hash->max,0.2,_MMG5_hedge,
+                               "_MMG5_edge",return(0));
+
+            ph = &hash->item[hash->nxt];
+
+            for (kk=ph->nxt; kk<hash->max; kk++)
+              hash->item[kk].nxt = kk+1;
+          }
+
           hash->nxt = ph->nxt;
           ph->a = ia;
           ph->b = ib;
@@ -225,6 +238,41 @@ int _MMG5_hashEdge(MMG5_pMesh mesh,_MMG5_Hash *hash, int a,int b,int k) {
   ph->nxt = 0;
 
   return(1);
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param hash pointer toward the hash table of edges.
+ * \param a index of the first extremity of the edge.
+ * \param b index of the second extremity of the edge.
+ * \param k new index of point along the edge.
+ * \return 1 if success, 0 if fail (edge is not found).
+ *
+ * Update the index of the point stored along the edge \f$[a;b]\f$
+ *
+ */
+int _MMG5_hashUpdate(_MMG5_Hash *hash, int a,int b,int k) {
+  _MMG5_hedge  *ph;
+  int          key,ia,ib,j;
+
+  ia  = MG_MIN(a,b);
+  ib  = MG_MAX(a,b);
+  key = (_MMG5_KA*ia + _MMG5_KB*ib) % hash->siz;
+  ph  = &hash->item[key];
+
+  while ( ph->a ) {
+    if ( ph->a == ia && ph->b == ib ) {
+      ph->k = k;
+      return 1;
+    }
+
+    if ( !ph->nxt ) return 0;
+
+    ph = &hash->item[ph->nxt];
+
+  }
+
+  return 0;
 }
 
 /**

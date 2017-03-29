@@ -51,23 +51,22 @@ int main(int argc,char *argv[]) {
   MMG5_pMesh      mmgMesh;
   MMG5_pSol       mmgSol;
   int             ier;
-  char            *pwd,*inname,*outname;
+  char            *inname;
 
   fprintf(stdout,"  -- TEST MMGSLIB \n");
 
+  if ( argc != 2 ) {
+    printf(" Usage: %s filein \n",argv[0]);
+    return(1);
+  }
+
   /* Name and path of the mesh files */
-  pwd = getenv("PWD");
-  inname = (char *) calloc(strlen(pwd) + 51, sizeof(char));
+  inname = (char *) calloc(strlen(argv[1]) + 1, sizeof(char));
   if ( inname == NULL ) {
     perror("  ## Memory problem: calloc");
     exit(EXIT_FAILURE);
   }
-  outname = (char *) calloc(strlen(pwd) + 60, sizeof(char));
-  if ( outname == NULL ) {
-    perror("  ## Memory problem: calloc");
-    exit(EXIT_FAILURE);
-  }
-  sprintf(inname, "%s%s%s", pwd, "/../libexamples/mmgs/adaptation_example1/", "2spheres");
+  strcpy(inname,argv[1]);
 
   /** 1) Initialisation of mesh and sol structures */
   /* args of InitMesh:
@@ -140,7 +139,6 @@ int main(int argc,char *argv[]) {
     fprintf(stdout,"BAD ENDING OF MMGSLIB\n");
 
   /* (Not mandatory) Automatically save the mesh */
-  sprintf(outname, "%s%s%s", pwd, "/../libexamples/mmgs/adaptation_example1/", "2spheres_1.o.mesh");
   MMGS_saveMesh(mmgMesh,"2spheres_1.o");
 
   /* (Not mandatory) Automatically save the solution */
@@ -195,7 +193,6 @@ int main(int argc,char *argv[]) {
     fprintf(stdout,"BAD ENDING OF MMGSLIB\n");
 
   /* (Not mandatory) Automatically save the mesh */
-  sprintf(outname, "%s%s%s", pwd, "/../libexamples/mmgs/adaptation_example1/", "2spheres_2.o.mesh");
   if ( MMGS_saveMesh(mmgMesh,"2spheres_2.o") != 1 )
     exit(EXIT_FAILURE);
 
@@ -210,8 +207,6 @@ int main(int argc,char *argv[]) {
 
   free(inname);
   inname = NULL;
-  free(outname);
-  outname = NULL;
 
   return(ier);
 }

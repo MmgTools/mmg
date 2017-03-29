@@ -52,19 +52,22 @@ int main(int argc,char *argv[]) {
   MMG5_pMesh      mmgMesh;
   MMG5_pSol       mmgSol;
   int             ier;
-  char            *pwd,*inname;
+  char            *inname;
 
   fprintf(stdout,"  -- TEST MMGSLS \n");
 
+  if ( argc != 2 ) {
+    printf(" Usage: %s filein \n",argv[0]);
+    return(1);
+  }
+
   /* Name and path of the mesh files */
-  pwd = getenv("PWD");
-  inname = (char *) calloc(strlen(pwd) + 61, sizeof(char));
+  inname = (char *) calloc(strlen(argv[1]) + 1, sizeof(char));
   if ( inname == NULL ) {
     perror("  ## Memory problem: calloc");
     exit(EXIT_FAILURE);
   }
-
-  sprintf(inname, "%s%s%s", pwd, "/../libexamples/mmgs/IsosurfDiscretization_example0/", "teapot");
+  strcpy(inname,argv[1]);
 
   /** 1) Initialisation of mesh and sol structures */
   /* args of InitMesh:

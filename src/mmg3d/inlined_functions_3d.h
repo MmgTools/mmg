@@ -315,33 +315,22 @@ inline double _MMG3D_caltetLES_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt)
   return(cal/_MMG5_ALPHAD);
 }
 
-
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the meric structure.
- * \param pt pointer toward a tetrahedra.
+ * \param a pointer toward the coor of the first tetra vertex.
+ * \param b pointer toward the coor of the second tetra vertex.
+ * \param c pointer toward the coor of the third tetra vertex.
+ * \param d pointer toward the coor of the fourth tetra vertex.
  * \return The isotropic quality of the tet.
  *
- * Compute the quality of the tet pt with respect to the isotropic metric \a
- * met.
+ * Compute the quality of a tetra given by 4 points a,b,c,d with respect to the
+ * isotropic metric \a met.
  *
  */
 static
-inline double _MMG5_caltet_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra  pt) {
-  double       abx,aby,abz,acx,acy,acz,adx,ady,adz,bcx,bcy,bcz,bdx,bdy,bdz,cdx,cdy,cdz;
+inline double _MMG5_caltet_iso_4pt(double *a, double *b, double *c, double *d) {
+  double       abx,aby,abz,acx,acy,acz,adx,ady,adz,bcx,bcy,bcz,bdx,bdy,bdz;
+  double       cdx,cdy,cdz;
   double       vol,v1,v2,v3,rap;
-  double       *a,*b,*c,*d;
-  int          ia, ib, ic, id;
-
-  ia = pt->v[0];
-  ib = pt->v[1];
-  ic = pt->v[2];
-  id = pt->v[3];
-
-  a = mesh->point[ia].c;
-  b = mesh->point[ib].c;
-  c = mesh->point[ic].c;
-  d = mesh->point[id].c;
 
   /* volume */
   abx = b[0] - a[0];
@@ -384,6 +373,35 @@ inline double _MMG5_caltet_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra  pt) {
   /* quality = vol / len^3/2 */
   rap = rap * sqrt(rap);
   return(vol / rap);
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param pt pointer toward a tetrahedra.
+ * \return The isotropic quality of the tet.
+ *
+ * Compute the quality of the tet pt with respect to the isotropic metric \a
+ * met.
+ *
+ */
+static
+inline double _MMG5_caltet_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra  pt) {
+  double       *a,*b,*c,*d;
+  int          ia, ib, ic, id;
+
+  ia = pt->v[0];
+  ib = pt->v[1];
+  ic = pt->v[2];
+  id = pt->v[3];
+
+  a = mesh->point[ia].c;
+  b = mesh->point[ib].c;
+  c = mesh->point[ic].c;
+  d = mesh->point[id].c;
+
+  return(_MMG5_caltet_iso_4pt(a,b,c,d));
+
 }
 
 /**
@@ -456,7 +474,7 @@ inline double _MMG5_caltet_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
   det = mm[0] * ( mm[3]*mm[5] - mm[4]*mm[4]) \
       - mm[1] * ( mm[1]*mm[5] - mm[2]*mm[4]) \
       + mm[2] * ( mm[1]*mm[4] - mm[2]*mm[3]);
-  if ( det < _MMG5_EPSOK )   {
+  if ( det < _MMG5_EPSD2 )   {
     //printf("--- INVALID METRIC : DET  %e\n",det);
     return(0.0);
   }

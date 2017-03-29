@@ -21,7 +21,9 @@
 ## =============================================================================
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0)
+
 INCLUDE(CMakeDependentOption)
+INCLUDE(cmake/modules/macros.cmake)
 
 PROJECT (mmg)
 
@@ -32,6 +34,11 @@ SET(COMMON_BINARY_DIR ${CMAKE_BINARY_DIR}/src/common)
 
 FILE(MAKE_DIRECTORY ${COMMON_BINARY_DIR})
 
+# Path toward the continuous integration directory
+SET ( CI_DIR ${CMAKE_SOURCE_DIR}/ci_tests
+  CACHE PATH "Path toward the continuous integration directory" )
+MARK_AS_ADVANCED ( CI_DIR )
+
 ###############################################################################
 #####
 #####         Release version and date
@@ -39,8 +46,8 @@ FILE(MAKE_DIRECTORY ${COMMON_BINARY_DIR})
 ###############################################################################
 SET (CMAKE_RELEASE_VERSION_MAJOR "5" )
 SET (CMAKE_RELEASE_VERSION_MINOR "2" )
-SET (CMAKE_RELEASE_VERSION_PATCH "2" )
-SET (CMAKE_RELEASE_DATE "Mar 1, 2017" )
+SET (CMAKE_RELEASE_VERSION_PATCH "4" )
+SET (CMAKE_RELEASE_DATE "Mar 22, 2017" )
 
 SET (CMAKE_RELEASE_VERSION
   "${CMAKE_RELEASE_VERSION_MAJOR}.${CMAKE_RELEASE_VERSION_MINOR}.${CMAKE_RELEASE_VERSION_PATCH}")
@@ -163,27 +170,19 @@ ELSE ()
 ENDIF()
 ############################################################################
 #####
-#####         Fortran header: libmmgcommonf.h
+#####         Fortran header: libmmgtypesf.h
 #####
 ############################################################################
-
 ADD_EXECUTABLE(genheader ${CMAKE_SOURCE_DIR}/scripts/genheader.c)
-ADD_CUSTOM_COMMAND(OUTPUT ${COMMON_BINARY_DIR}/libmmgtypesf.h
-  COMMAND genheader ${COMMON_BINARY_DIR}/libmmgtypesf.h
-  ${COMMON_SOURCE_DIR}/libmmgtypes.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-  DEPENDS genheader ${COMMON_SOURCE_DIR}/libmmgtypes.h
-  ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
-  COMMENT "Generating Fortran header for libmmgtypes.h file"
+GENERATE_FORTRAN_HEADER ( mmg
+  ${COMMON_SOURCE_DIR} libmmgtypes.h ${COMMON_BINARY_DIR} libmmgtypesf.h
   )
 
 ###############################################################################
 #####
-#####         Sources and libraries
+#####         libraries
 #####
 ###############################################################################
-# Header files
-INCLUDE_DIRECTORIES(${COMMON_SOURCE_DIR})
 
 # Libraries
 IF ( NOT WIN32 OR MINGW )
@@ -402,7 +401,8 @@ IF( BUILD_TESTING )
   ##-------------------------------------------------------------------##
   ##------- Set the continuous integration options --------------------##
   ##-------------------------------------------------------------------##
-  SET(MMG_CI_TESTS ${CMAKE_SOURCE_DIR}/ci_tests/mmg )
+
+  SET ( MMG_CI_TESTS ${CI_DIR}/mmg )
 
   # Remove the --show-reachable=yes option from the default valgrind command
   SET(VALGRIND_COMMAND_OPTIONS "-q --tool=memcheck ")
@@ -487,10 +487,6 @@ IF(DOXYGEN_FOUND)
   ADD_CUSTOM_TARGET(mmg2d_doc
     COMMAND ${DOXYGEN_EXECUTABLE}
     ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg2d/Doxyfile
-    # COMMAND ${CMAKE_COMMAND} -E chdir
-    # ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg2d/latex make
-    # COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg2d/latex/refman.pdf
-    # ${CMAKE_CURRENT_SOURCE_DIR} WORKING_DIRECTORY
     ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg2d COMMENT "Generating MMG2D API
     documentation with Doxygen.  Open up the
     ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg2d/html/index.html file to see
@@ -502,10 +498,6 @@ IF(DOXYGEN_FOUND)
   ADD_CUSTOM_TARGET(mmgs_doc
     COMMAND ${DOXYGEN_EXECUTABLE}
     ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmgs/Doxyfile
-    # COMMAND ${CMAKE_COMMAND} -E chdir
-    # ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmgs/latex make
-    # COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmgs/latex/refman.pdf
-    # ${CMAKE_CURRENT_SOURCE_DIR} WORKING_DIRECTORY
     ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmgs COMMENT "Generating MMGS API
     documentation with Doxygen.  Open up the
     ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmgs/html/index.html file to see
@@ -517,10 +509,6 @@ IF(DOXYGEN_FOUND)
   ADD_CUSTOM_TARGET(mmg3d_doc
     COMMAND ${DOXYGEN_EXECUTABLE}
     ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg3d/Doxyfile
-    # COMMAND ${CMAKE_COMMAND} -E chdir
-    # ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg3d/latex make
-    # COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg3d/latex/refman.pdf
-    # ${CMAKE_CURRENT_SOURCE_DIR} WORKING_DIRECTORY
     ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg3d
     COMMENT "Generating MMG3D API documentation with Doxygen. Open up the
     ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg3d/html/index.html file to see

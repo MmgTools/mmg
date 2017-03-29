@@ -246,7 +246,7 @@ int _MMG5_invmat(double *m,double *mi) {
   bb  = m[4]*m[2] - m[1]*m[5];
   cc  = m[1]*m[4] - m[2]*m[3];
   det = m[0]*aa + m[1]*bb + m[2]*cc;
-  if ( fabs(det) < _MMG5_EPS3 )  return(0);
+  if ( fabs(det) < _MMG5_EPSD2 )  return(0);
   det = 1.0 / det;
 
   mi[0] = aa*det;

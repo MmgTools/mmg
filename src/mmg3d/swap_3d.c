@@ -387,7 +387,7 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
       calnew = MG_MIN(calnew,caltmp);
     }
   }
-  if ( calold < _MMG5_NULKAL && calnew <= calold )  return(0);
+  if ( calold < _MMG5_EPSOK && calnew <= calold )  return(0);
   else if ( calnew < 0.3 * calold )  return(0);
 
   return(1);

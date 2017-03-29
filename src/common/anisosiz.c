@@ -1032,6 +1032,7 @@ int _MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int i)
 
   // edge length in metric mtan1: sqrt(t^(t1) * mtan1 * t1).
   ps1 =  mtan1[0]*t1[0]*t1[0] + 2.0*mtan1[1]*t1[0]*t1[1] + mtan1[2]*t1[1]*t1[1];
+  assert ( ps1  > 0. );
   ps1 = sqrt(ps1);
 
   _MMG5_rmtr(r2,m2,mr2);
@@ -1054,6 +1055,7 @@ int _MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int i)
 
   // edge length: sqrt(t^(t2) * mtan2 * t2)
   ps2 = mtan2[0]*t2[0]*t2[0] + 2.0*mtan2[1]*t2[0]*t2[1] + mtan2[2]*t2[1]*t2[1];
+  assert ( ps2  > 0. );
   ps2 = sqrt(ps2);
 
   /* Metric in p1 has to be changed */

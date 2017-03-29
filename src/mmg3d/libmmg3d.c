@@ -173,7 +173,6 @@ int _MMG3D_bdryBuild(MMG5_pMesh mesh) {
   MMG5_hgeom  *ph;
   int         k,i,nr;
 
-  nr = 0;
 
   /* rebuild triangles*/
   mesh->nt = 0;
@@ -186,7 +185,7 @@ int _MMG3D_bdryBuild(MMG5_pMesh mesh) {
   if ( mesh->htab.geom )
     _MMG5_DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(MMG5_hgeom));
 
-  mesh->na = 0;
+  mesh->na = nr = 0;
   /* in the worst case (all edges are marked), we will have around 1 edge per *
    * triangle (we count edges only one time) */
   mesh->memCur += (long long)((3*mesh->nt+2)*sizeof(MMG5_hgeom));
@@ -334,7 +333,7 @@ int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
     pp->v[5] = mesh->point[pp->v[5]].tmp;
   }
   for (k=1; k<=mesh->nquad; k++) {
-    pq = &mesh->quad[k];
+    pq = &mesh->quadra[k];
     if ( !MG_EOK(pq) )  continue;
 
     pq->v[0] = mesh->point[pq->v[0]].tmp;
@@ -376,9 +375,21 @@ int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   /*compact vertices*/
   np  = 0;
   nbl = 1;
+  mesh->nc1 = 0;
+
+
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
     if ( !MG_VOK(ppt) )  continue;
+
+    if ( ppt->tag & MG_BDY &&
+         !(ppt->tag & MG_CRN || ppt->tag & MG_NOM || MG_EDG(ppt->tag)) ) {
+      assert ( ppt->xp );
+
+      memcpy(ppt->n,mesh->xpoint[ppt->xp].n1,3*sizeof(double));
+      ++mesh->nc1;
+    }
+
     np++;
     if ( k!=nbl ) {
       pptnew = &mesh->point[nbl];
@@ -388,6 +399,7 @@ int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
     }
     nbl++;
   }
+
   mesh->np = np;
   if ( met && met->m )
     met->np  = np;
@@ -966,14 +978,4 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
     fprintf(stdout,"\n   MMG3DMOV: ELAPSED TIME  %s\n",stim);
   disp->npi = disp->np;
   _LIBMMG5_RETURN(mesh,met,MMG5_SUCCESS);
-}
-
-/** Old API °°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°*/
-
-int MMG5_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met)
-{
-  printf("  ## MMG5_mmg3dlib: "
-         "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
-        " be removed soon\n." );
-  return(MMG3D_mmg3dlib(mesh,met));
 }

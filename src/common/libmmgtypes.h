@@ -484,7 +484,7 @@ typedef struct {
   MMG5_pPrism    prism; /*!< Pointer toward the \ref MMG5_Prism structure */
   MMG5_pxPrism   xprism; /*!< Pointer toward the \ref MMG5_pxPrism structure */
   MMG5_pTria     tria; /*!< Pointer toward the \ref MMG5_Tria structure */
-  MMG5_pQuad     quad; /*!< Pointer toward the \ref MMG5_Quad structure */
+  MMG5_pQuad     quadra; /*!< Pointer toward the \ref MMG5_Quad structure */
   MMG5_pEdge     edge; /*!< Pointer toward the \ref MMG5_Edge structure */
   MMG5_HGeom     htab; /*!< \ref MMG5_HGeom structure */
   MMG5_Info      info; /*!< \ref MMG5_Info structure */

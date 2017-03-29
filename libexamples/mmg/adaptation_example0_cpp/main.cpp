@@ -54,14 +54,17 @@ int main(int argc,char *argv[]) {
   MMG5_pMesh      mmgMesh;
   MMG5_pSol       mmgSol;
   int             ier;
-  string          pwd,filename,filename_os,filename_o3d;
+  string          filename,filename_os,filename_o3d;
 
   fprintf(stdout,"  -- TEST MMGLIB \n");
 
+  if ( argc != 3 ) {
+    printf(" Usage: %s 2d_filein 3d_filein \n",argv[0]);
+    return(1);
+  }
+
   /** ================== 2d remeshing using the mmg2d library ========== */
-  pwd = getenv("PWD");
-  filename = pwd +
-      "/../libexamples/mmg2d/adaptation_example0_cpp" + "init";
+  filename = argv[1];
 
   /** ------------------------------ STEP   I -------------------------- */
   /** 1) Initialisation of mesh and sol structures */
@@ -118,9 +121,19 @@ int main(int argc,char *argv[]) {
   /** ================ surface remeshing using the mmgs library ======== */
 
   /* Name and path of the mesh file */
-  pwd = getenv("PWD");
-  filename = pwd + "/../libexamples/mmg/adaptation_example0_cpp/" + "cube";
-  filename_os = pwd + "/../libexamples/mmg/adaptation_example0_cpp/" + "cube.s";
+
+  filename = argv[2];
+  filename_os = argv[2];
+
+  std::size_t found = filename_os.find(".mesh");
+  if (found==std::string::npos) {
+    found = filename_os.find(".msh");
+  }
+
+  if (found!=std::string::npos) {
+    filename_os.replace(found,1,"\0");
+  }
+  filename_os += ".s";
 
   /** ------------------------------ STEP   I -------------------------- */
   /** 1) Initialisation of mesh and sol structures */
@@ -179,7 +192,17 @@ int main(int argc,char *argv[]) {
                 MMG5_ARG_end);
 
   /** ================== 3d remeshing using the mmg3d library ========== */
-  filename_o3d =  pwd + "/../libexamples/mmg/adaptation_example0_cpp/" + "cube.3d";
+  filename_o3d = argv[2];
+
+  found = filename_o3d.find(".mesh");
+  if (found==std::string::npos) {
+    found = filename_o3d.find(".msh");
+  }
+
+  if (found!=std::string::npos) {
+    filename_o3d.replace(found,1,"\0");
+  }
+  filename_o3d += ".3d";
 
   /** ------------------------------ STEP   I -------------------------- */
   /** 1) Initialisation of mesh and sol structures */

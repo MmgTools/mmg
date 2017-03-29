@@ -75,7 +75,7 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   dd = info->max[1]-info->min[1];
   if ( dd > info->delta )
     info->delta = dd;
-  if ( info->delta < EPS30 ) {
+  if ( info->delta < _MMG5_EPSD ) {
     fprintf(stdout,"  ## Unable to scale mesh.\n");
     return(0);
   }

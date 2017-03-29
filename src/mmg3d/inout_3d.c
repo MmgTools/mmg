@@ -124,7 +124,7 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
   ina = NULL;
   mesh->np = mesh->nt = mesh->ne = 0;
 
-  _MMG5_SAFE_CALLOC(data,strlen(filename)+6,char);
+  _MMG5_SAFE_CALLOC(data,strlen(filename)+7,char);
 
   strcpy(data,filename);
   ptr = strstr(data,".mesh");
@@ -139,6 +139,7 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
       strcat(data,".mesh");
       if( !(inm = fopen(data,"rb")) ) {
         fprintf(stderr,"  ** %s  NOT FOUND.\n",data);
+        _MMG5_SAFE_FREE(data);
         return(0);
       }
     }
@@ -149,6 +150,7 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
     if ( ptr )  bin = 1;
     if( !(inm = fopen(data,"rb")) ) {
       fprintf(stderr,"  ** %s  NOT FOUND.\n",data);
+      _MMG5_SAFE_FREE(data);
       return(0);
     }
   }
@@ -595,7 +597,7 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
     fseek(inm,posnq,SEEK_SET);
 
     for (k=1; k<=mesh->nquad; k++) {
-      pq1 = &mesh->quad[k];
+      pq1 = &mesh->quadra[k];
       if (!bin)
         fscanf(inm,"%d %d %d %d %d",&pq1->v[0],&pq1->v[1],&pq1->v[2],
                &pq1->v[3],&pq1->ref);
@@ -624,7 +626,7 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
           fprintf(stdout,"   Warning: required quadrilaterals number"
                   " %8d IGNORED\n",i);
         } else {
-          pq1 = &mesh->quad[i];
+          pq1 = &mesh->quadra[i];
           pq1->tag[0] |= MG_REQ;
           pq1->tag[1] |= MG_REQ;
           pq1->tag[2] |= MG_REQ;
@@ -994,7 +996,7 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
   mesh->ver = 2;
   bin = 0;
 
-  _MMG5_SAFE_CALLOC(data,strlen(filename)+6,char);
+  _MMG5_SAFE_CALLOC(data,strlen(filename)+7,char);
 
   strcpy(data,filename);
   ptr = strstr(data,".mesh");
@@ -1006,6 +1008,7 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
       strcat(data,".mesh");
       if( !(inm = fopen(data,"w")) ) {
         fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",data);
+        _MMG5_SAFE_FREE(data);
         return(0);
       }
     } else {
@@ -1018,11 +1021,13 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
       bin = 1;
       if( !(inm = fopen(data,"wb")) ) {
         fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",data);
+        _MMG5_SAFE_FREE(data);
         return(0);
       }
     } else {
       if( !(inm = fopen(data,"w")) ) {
         fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",data);
+        _MMG5_SAFE_FREE(data);
         return(0);
       }
     }
@@ -1446,7 +1451,7 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
   if ( mesh->nquad ) {
 
     for (k=1; k<=mesh->nquad; k++) {
-      pq = &mesh->quad[k];
+      pq = &mesh->quadra[k];
       if ( !MG_EOK(pq) ) {
         continue;
       }
@@ -1471,7 +1476,7 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
       fwrite(&nq,sw,1,inm);
     }
     for (k=1; k<=mesh->nquad; k++) {
-      pq = &mesh->quad[k];
+      pq = &mesh->quadra[k];
       if ( !MG_EOK(pq) ) continue;
 
       if(!bin) {
@@ -1499,7 +1504,7 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
         fwrite(&nqreq,sw,1,inm);
       }
       for (k=0; k<=mesh->nquad; k++) {
-        pq = &mesh->quad[k];
+        pq = &mesh->quadra[k];
         if ( (pq->tag[0] & MG_REQ) && (pq->tag[1] & MG_REQ)
              && pq->tag[2] & MG_REQ && pq->tag[3] & MG_REQ ) {
           if(!bin) {
@@ -1664,6 +1669,7 @@ int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
       strcat(data,".sol");
       if (!(inm = fopen(data,"rb"))  ) {
         fprintf(stderr,"  ** %s  NOT FOUND. USE DEFAULT METRIC.\n",data);
+        _MMG5_SAFE_FREE(data);
         return(0);
       }
     } else {
@@ -1673,6 +1679,7 @@ int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
   else {
     if (!(inm = fopen(data,"rb")) ) {
       fprintf(stderr,"  ** %s  NOT FOUND. USE DEFAULT METRIC.\n",data);
+      _MMG5_SAFE_FREE(data);
       return(0);
     }
   }
@@ -1924,6 +1931,7 @@ int MMG3D_saveSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
 
     if( !(inm = fopen(data,"wb")) ) {
       fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",data);
+      _MMG5_SAFE_FREE(data);
       return(0);
     }
   }
@@ -1940,6 +1948,7 @@ int MMG3D_saveSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
       strcat(data,".sol");
       if (!(inm = fopen(data,"wb")) ) {
         fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",data);
+        _MMG5_SAFE_FREE(data);
         return(0);
       }
       else bin = 1;
@@ -2101,21 +2110,4 @@ int MMG3D_saveSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
   }
   fclose(inm);
   return(1);
-}
-
-/** Old API °°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°*/
-int MMG5_loadMesh(MMG5_pMesh mesh) {
-  return(MMG3D_loadMesh(mesh,mesh->namein));
-}
-
-int MMG5_loadMet(MMG5_pMesh mesh,MMG5_pSol met) {
-  return(MMG3D_loadSol(mesh,met,met->namein));
-}
-
-int MMG5_saveMesh(MMG5_pMesh mesh) {
-  return(MMG3D_saveMesh(mesh,mesh->nameout));
-}
-
-int MMG5_saveMet(MMG5_pMesh mesh,MMG5_pSol met) {
-  return(MMG3D_saveSol(mesh,met,met->nameout));
 }

@@ -96,7 +96,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
   mesh->np = mesh->nt = mesh->na = mesh->xp = 0;
   nq = 0;
 
-  _MMG5_SAFE_CALLOC(data,strlen(filename)+6,char);
+  _MMG5_SAFE_CALLOC(data,strlen(filename)+7,char);
   strcpy(data,filename);
   ptr = strstr(data,".mesh");
   if ( !ptr ) {
@@ -107,6 +107,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
       strcat(data,".mesh");
       if (!(inm = fopen(data,"rb")) ) {
         fprintf(stderr,"  ** %s  NOT FOUND.\n",data);
+        _MMG5_SAFE_FREE(data);
         return(0);
       }
     }
@@ -119,6 +120,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
 
     if( !(inm = fopen(data,"rb")) ) {
       fprintf(stderr,"  ** %s  NOT FOUND.\n",data);
+      _MMG5_SAFE_FREE(data);
       return(0);
     }
   }
@@ -567,6 +569,7 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
     if ( ptr )  bin = 1;
     if( !(inm = fopen(data,"rb")) ) {
       fprintf(stderr,"  ** %s  NOT FOUND.\n",data);
+      _MMG5_SAFE_FREE(data);
       return(0);
     }
   }
@@ -582,6 +585,7 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
       strcat(data,".sol");
       if (!(inm = fopen(data,"rb")) ) {
         fprintf(stderr,"  ** %s  NOT FOUND.\n",data);
+        _MMG5_SAFE_FREE(data);
         return(0);
       }
     }
@@ -748,7 +752,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
   bin = 0;
 
   /* Name of file */
-  _MMG5_SAFE_CALLOC(data,strlen(filename)+6,char);
+  _MMG5_SAFE_CALLOC(data,strlen(filename)+7,char);
   strcpy(data,filename);
   ptr = strstr(data,".mesh");
   if ( !ptr ) {
@@ -759,6 +763,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
       strcat(data,".mesh");
       if( !(inm = fopen(data,"wb")) ) {
         fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",data);
+        _MMG5_SAFE_FREE(data);
         return(0);
       }
     }
@@ -771,6 +776,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
     if( ptr )  bin = 1;
     if( !(inm = fopen(data,"wb")) ) {
       fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",data);
+      _MMG5_SAFE_FREE(data);
       return(0);
     }
   }
@@ -1209,6 +1215,7 @@ int MMG2D_saveSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
     if ( ptr )  bin = 1;
     if( !(inm = fopen(data,"wb")) ) {
       fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",data);
+      _MMG5_SAFE_FREE(data);
       return(0);
     }
   }
@@ -1223,6 +1230,7 @@ int MMG2D_saveSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
       strcat(data,".sol");
       if (!(inm = fopen(data,"wb")) ) {
         fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",data);
+        _MMG5_SAFE_FREE(data);
         return(0);
       }
       else bin = 1;

@@ -37,15 +37,8 @@ FILE(MAKE_DIRECTORY ${MMG2D_BINARY_DIR})
 #####
 ############################################################################
 
-ADD_CUSTOM_COMMAND(OUTPUT ${MMG2D_BINARY_DIR}/libmmg2df.h
-  COMMAND genheader ${MMG2D_BINARY_DIR}/libmmg2df.h
-  ${MMG2D_SOURCE_DIR}/libmmg2d.h ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-  DEPENDS genheader ${MMG2D_SOURCE_DIR}/libmmg2d.h
-  ${COMMON_BINARY_DIR}/libmmgtypesf.h
-  ${COMMON_SOURCE_DIR}/libmmgtypes.h
-  ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
-  COMMENT "Generating Fortran header for mmg2d"
+GENERATE_FORTRAN_HEADER ( mmg2d
+  ${MMG2D_SOURCE_DIR} libmmg2d.h ${MMG2D_BINARY_DIR} libmmg2df.h
   )
 
 ###############################################################################
@@ -54,34 +47,20 @@ ADD_CUSTOM_COMMAND(OUTPUT ${MMG2D_BINARY_DIR}/libmmg2df.h
 #####
 ###############################################################################
 
-# Header files
-INCLUDE_DIRECTORIES(${MMG2D_SOURCE_DIR})
-INCLUDE_DIRECTORIES(${COMMON_BINARY_DIR})
-
 # Source files
 FILE(
   GLOB
-  sourcemmg2d_files
-  ${MMG2D_SOURCE_DIR}/*.c   ${MMG2D_SOURCE_DIR}/*.h
-  ${COMMON_SOURCE_DIR}/*.c ${COMMON_SOURCE_DIR}/*.h
-  ${COMMON_BINARY_DIR}/mmgcommon.h
+  mmg2d_library_files
+  ${MMG2D_SOURCE_DIR}/*.c
+  ${COMMON_SOURCE_DIR}/*.c
   )
-LIST(REMOVE_ITEM sourcemmg2d_files
+LIST(REMOVE_ITEM mmg2d_library_files
   ${MMG2D_SOURCE_DIR}/mmg2d.c
-  ${MMG2D_SOURCE_DIR}/lib${PROJECT_NAME}2df.c
-  ${CMAKE_SOURCE_DIR}/src/mmg/libmmg.h
-  ${CMAKE_SOURCE_DIR}/src/mmg/libmmgf.h
-  ${REMOVE_FILE})
+  ${REMOVE_FILE} )
 FILE(
   GLOB
-  mainmmg2d_file
+  mmg2d_main_file
   ${MMG2D_SOURCE_DIR}/mmg2d.c
-  )
-FILE(
-  GLOB
-  libmmg2d_file
-  ${MMG2D_SOURCE_DIR}/lib${PROJECT_NAME}2d.c
-  ${MMG2D_SOURCE_DIR}/lib${PROJECT_NAME}2df.c
   )
 
 ############################################################################
@@ -106,11 +85,11 @@ ENDIF()
 
 IF (ELAS_NOTFOUND)
 MESSAGE ( WARNING "Elas is a library to solve the linear elasticity "
-"problem (see https://github.com/SUscTools/SUscElas to download it). "
+    "problem (see https://github.com/SUscTools/Elas to download it). "
 "This library is needed to use the lagrangian motion option. "
-"If you have already installed SUscElas and want to use it, "
+    "If you have already installed Elas and want to use it, "
 "please set the CMake variable or environment variable ELAS_DIR "
-"to your SUscElas directory.")
+"to your Elas directory.")
 ENDIF ( )
 
 ############################################################################
@@ -120,30 +99,14 @@ ENDIF ( )
 ############################################################################
 # Compile static library
 IF ( LIBMMG2D_STATIC )
-  ADD_LIBRARY(${PROJECT_NAME}2d_a  STATIC
-    ${MMG2D_BINARY_DIR}/lib${PROJECT_NAME}2df.h
-    ${sourcemmg2d_files} ${libmmg2d_file} )
-  SET_TARGET_PROPERTIES(${PROJECT_NAME}2d_a PROPERTIES OUTPUT_NAME
-    ${PROJECT_NAME}2d)
-  TARGET_LINK_LIBRARIES(${PROJECT_NAME}2d_a ${LIBRARIES})
-  INSTALL(TARGETS ${PROJECT_NAME}2d_a
-    ARCHIVE DESTINATION lib
-    LIBRARY DESTINATION lib)
+  ADD_AND_INSTALL_LIBRARY ( lib${PROJECT_NAME}2d_a STATIC
+    "${mmg2d_library_files}" ${PROJECT_NAME}2d )
 ENDIF()
 
 # Compile shared library
 IF ( LIBMMG2D_SHARED )
-  ADD_LIBRARY(${PROJECT_NAME}2d_so SHARED
-    ${MMG2D_BINARY_DIR}/lib${PROJECT_NAME}2df.h
-    ${sourcemmg2d_files} ${libmmg2d_file})
-  SET_TARGET_PROPERTIES(${PROJECT_NAME}2d_so PROPERTIES
-    OUTPUT_NAME ${PROJECT_NAME}2d)
-  SET_TARGET_PROPERTIES(${PROJECT_NAME}2d_so PROPERTIES
-    VERSION ${CMAKE_RELEASE_VERSION} SOVERSION 5)
-  TARGET_LINK_LIBRARIES(${PROJECT_NAME}2d_so ${LIBRARIES})
-  INSTALL(TARGETS ${PROJECT_NAME}2d_so
-    ARCHIVE DESTINATION lib
-    LIBRARY DESTINATION lib)
+  ADD_AND_INSTALL_LIBRARY ( lib${PROJECT_NAME}2d_so SHARED
+    "${mmg2d_library_files}" ${PROJECT_NAME}2d )
 ENDIF()
 
 IF ( LIBMMG2D_STATIC OR LIBMMG2D_SHARED )
@@ -155,31 +118,16 @@ IF ( LIBMMG2D_STATIC OR LIBMMG2D_SHARED )
     ${COMMON_BINARY_DIR}/libmmgtypesf.h
     )
   SET(MMG2D_INCLUDE ${CMAKE_SOURCE_DIR}/include/mmg/mmg2d )
-  SET( mmg2d_includes
-    ${MMG2D_INCLUDE}/libmmg2d.h
-    ${MMG2D_INCLUDE}/libmmg2df.h
-    ${MMG2D_INCLUDE}/libmmgtypes.h
-    ${MMG2D_INCLUDE}/libmmgtypesf.h
-    )
+
   # Install header files in /usr/local or equivalent
   INSTALL(FILES ${mmg2d_headers} DESTINATION include/mmg/mmg2d)
 
-  ADD_CUSTOM_COMMAND(OUTPUT ${MMG2D_INCLUDE}/libmmgtypesf.h
-    COMMAND ${CMAKE_COMMAND} -E copy ${COMMON_BINARY_DIR}/libmmgtypesf.h ${MMG2D_INCLUDE}/libmmgtypesf.h
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    DEPENDS ${COMMON_BINARY_DIR}/libmmgtypesf.h)
-  ADD_CUSTOM_COMMAND(OUTPUT ${MMG2D_INCLUDE}/libmmg2df.h
-    COMMAND ${CMAKE_COMMAND} -E copy ${MMG2D_BINARY_DIR}/libmmg2df.h ${MMG2D_INCLUDE}/libmmg2df.h
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    DEPENDS ${MMG2D_BINARY_DIR}/libmmg2df.h)
+  COPY_FORTRAN_HEADER_AND_CREATE_TARGET ( ${MMG2D_BINARY_DIR} ${MMG2D_INCLUDE} 2d )
 
-  # Install header files in project directory
+  # Copy header files in project directory at configuration step
+  # (generated file don't exists yet or are outdated)
   FILE(INSTALL  ${mmg2d_headers} DESTINATION ${MMG2D_INCLUDE}
     PATTERN "libmmg*f.h"  EXCLUDE)
-
-  ADD_CUSTOM_TARGET(copy_2d_headers ALL
-    DEPENDS  ${MMG2D_INCLUDE}/libmmg2df.h  ${MMG2D_INCLUDE}/libmmg2d.h
-     ${MMG2D_INCLUDE}/libmmgtypesf.h  ${MMG2D_INCLUDE}/libmmgtypes.h )
 
 ENDIF()
 
@@ -198,30 +146,8 @@ ENDIF ( )
 #####         Compile MMG2D executable
 #####
 ###############################################################################
-
-ADD_EXECUTABLE(${PROJECT_NAME}2d
-  ${MMG2D_BINARY_DIR}/lib${PROJECT_NAME}2df.h ${sourcemmg2d_files} ${mainmmg2d_file} )
-
-IF ( WIN32 AND NOT MINGW AND USE_SCOTCH )
-  my_add_link_flags(${PROJECT_NAME}2d "/SAFESEH:NO")
-ENDIF ( )
-
-TARGET_LINK_LIBRARIES(${PROJECT_NAME}2d ${LIBRARIES})
-INSTALL(TARGETS ${PROJECT_NAME}2d RUNTIME DESTINATION bin)
-
-IF ( CMAKE_BUILD_TYPE MATCHES "Debug" )
-  # in debug mode we name the executable mmg2d_debug
-  SET_TARGET_PROPERTIES(${PROJECT_NAME}2d PROPERTIES DEBUG_POSTFIX _debug)
-ELSEIF ( CMAKE_BUILD_TYPE MATCHES "Release" )
-  # in Release mode we name the executable mmg2d_O3
-  SET_TARGET_PROPERTIES(${PROJECT_NAME}2d PROPERTIES RELEASE_POSTFIX _O3)
-ELSEIF ( CMAKE_BUILD_TYPE MATCHES "RelWithDebInfo" )
-  # in RelWithDebInfo mode we name the executable mmg2d_O3d
-  SET_TARGET_PROPERTIES(${PROJECT_NAME}2d PROPERTIES RELWITHDEBINFO_POSTFIX _O3d)
-ELSEIF ( CMAKE_BUILD_TYPE MATCHES "MinSizeRel" )
-  # in MinSizeRel mode we name the executable mmg2d_O3
-  SET_TARGET_PROPERTIES(${PROJECT_NAME}2d PROPERTIES MINSIZEREL_POSTFIX _Os)
-ENDIF ( )
+ADD_AND_INSTALL_EXECUTABLE ( ${PROJECT_NAME}2d
+  "${mmg2d_library_files}" ${mmg2d_main_file} )
 
 ###############################################################################
 #####
@@ -233,42 +159,32 @@ IF ( BUILD_TESTING )
   ##-------------------------------------------------------------------##
   ##------- Set the continuous integration options --------------------##
   ##-------------------------------------------------------------------##
-  SET(MMG2D_CI_TESTS ${CMAKE_SOURCE_DIR}/ci_tests/mmg2d )
+  SET(MMG2D_CI_TESTS ${CI_DIR}/mmg2d )
 
   ##-------------------------------------------------------------------##
   ##--------------------------- Add tests and configure it ------------##
   ##-------------------------------------------------------------------##
   # Add runtime that we want to test for mmg2d
   IF ( MMG2D_CI )
-    IF ( CMAKE_BUILD_TYPE MATCHES "Debug" )
-      SET(EXECUT_MMG2D ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}2d_debug)
-      SET(BUILDNAME ${BUILDNAME}_debug CACHE STRING "build name variable")
-    ELSEIF ( CMAKE_BUILD_TYPE MATCHES "Release" )
-      SET(EXECUT_MMG2D ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}2d_O3)
-      SET(BUILDNAME ${BUILDNAME}_O3 CACHE STRING "build name variable")
-    ELSEIF( CMAKE_BUILD_TYPE MATCHES "RelWithDebInfo" )
-      SET(EXECUT_MMG2D ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}2d_O3d)
-      SET(BUILDNAME ${BUILDNAME}_O3d CACHE STRING "build name variable")
-    ELSEIF ( CMAKE_BUILD_TYPE MATCHES "MinSizeRel" )
-      SET(EXECUT_MMG2D ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}2d_Os)
-      SET(BUILDNAME ${BUILDNAME}_Os CACHE STRING "build name variable")
-    ELSE()
-      SET(EXECUT_MMG2D ${EXECUTABLE_OUTPUT_PATH}/${PROJECT_NAME}2d)
-      SET(BUILDNAME ${BUILDNAME} CACHE STRING "build name variable")
-    ENDIF()
 
-    SET ( LISTEXEC_MMG2D ${EXECUT_MMG2D} )
+    ADD_EXEC_TO_CI_TESTS ( ${PROJECT_NAME}2d EXECUT_MMG2D )
+
     IF ( TEST_LIBMMG2D )
-      SET(LIBMMG2D_EXEC0_a ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_example0_a)
+      SET(LIBMMG2D_EXEC0_a ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_example0_a
+        "${CMAKE_SOURCE_DIR}/libexamples/mmg2d/adaptation_example0/example0_a/init.mesh")
+
       SET(LIBMMG2D_EXEC0_b ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_example0_b)
-      SET(LIBMMG2D_EXEC1 ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_example1)
+      SET(LIBMMG2D_EXEC1 ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_example1
+        "${CMAKE_SOURCE_DIR}/libexamples/mmg2d/adaptation_example1/dom.mesh")
 
       ADD_TEST(NAME libmmg2d_example0_a   COMMAND ${LIBMMG2D_EXEC0_a})
       ADD_TEST(NAME libmmg2d_example0_b   COMMAND ${LIBMMG2D_EXEC0_b})
       ADD_TEST(NAME libmmg2d_example1   COMMAND ${LIBMMG2D_EXEC1})
 
       IF ( CMAKE_Fortran_COMPILER)
-        SET(LIBMMG2D_EXECFORTRAN_a ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_fortran_a)
+        SET(LIBMMG2D_EXECFORTRAN_a ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_fortran_a
+          "${CMAKE_SOURCE_DIR}/libexamples/mmg2d/adaptation_example0_fortran/example0_a/init.mesh")
+
         SET(LIBMMG2D_EXECFORTRAN_b ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_fortran_b)
         ADD_TEST(NAME libmmg2d_fortran_a   COMMAND ${LIBMMG2D_EXECFORTRAN_a})
         ADD_TEST(NAME libmmg2d_fortran_b   COMMAND ${LIBMMG2D_EXECFORTRAN_b})

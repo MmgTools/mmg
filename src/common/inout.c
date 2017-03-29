@@ -147,10 +147,10 @@ int _MMG5_countBinaryElts(FILE **inm, const int nelts,const int iswp,
       for ( idx=0; idx<num; ++idx ) {
         fread(&i,sw,1,(*inm));
         for ( l=0; l<tagNum; ++l ) fread(&i,sw,1,(*inm));
-        fread(&i,sw,1,(*inm)); // quad->v[0]
-        fread(&i,sw,1,(*inm)); // quad->v[1]
-        fread(&i,sw,1,(*inm)); // quad->v[2]
-        fread(&i,sw,1,(*inm)); // quad->v[3]
+        fread(&i,sw,1,(*inm)); // quadra->v[0]
+        fread(&i,sw,1,(*inm)); // quadra->v[1]
+        fread(&i,sw,1,(*inm)); // quadra->v[2]
+        fread(&i,sw,1,(*inm)); // quadra->v[3]
       }
       (*nq) += num;
       k  += num;
@@ -245,7 +245,7 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename,
   int         ver,oneBin,k,i;
   int         nt,na,nq,ne,npr,np;
   int         typ,tagNum;
-  char        *ptr,data[128],chaine[128],verNum[5];
+  char        *ptr,*data,chaine[128],verNum[5];
 
   ver = oneBin = 0;
   *posNodes = 0;
@@ -256,6 +256,8 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename,
   *iswp = 0;
   mesh->np = mesh->nt = mesh->ne = 0;
   nt = na = nq = ne = npr = np = 0;
+
+  _MMG5_SAFE_CALLOC(data,strlen(filename)+7,char);
 
   strcpy(data,filename);
   ptr = strstr(data,".msh");
@@ -268,6 +270,7 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename,
       strcat(data,".msh");
       if( !((*inm) = fopen(data,"rb")) ) {
         fprintf(stderr,"  ** %s  NOT FOUND.\n",data);
+        _MMG5_SAFE_FREE(data);
         return(0);
       }
     }
@@ -275,10 +278,12 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename,
   else {
     if( !((*inm) = fopen(data,"rb")) ) {
       fprintf(stderr,"  ** %s  NOT FOUND.\n",data);
+      _MMG5_SAFE_FREE(data);
       return(0);
     }
   }
   fprintf(stdout,"  %%%% %s OPENED\n",data);
+  _MMG5_SAFE_FREE(data);
 
 
   /* Detection of the different fields of the file */
@@ -606,7 +611,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
         break;
       case 3:
         /* Quad */
-        pq1 = &mesh->quad[++nq];
+        pq1 = &mesh->quadra[++nq];
         fscanf((*inm),"%d %d %d %d ",&pq1->v[0],&pq1->v[1],&pq1->v[2],&pq1->v[3]);
         pq1->ref = ref;
         assert( nq<=mesh->nquad );
@@ -800,13 +805,13 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
             fread(&i,sw,1,(*inm));
             break;
           default:
-            fprintf(stderr,"  ## Error: elt (quad) %%d: Expected 2 or 3 tags (%d given).\n",
+            fprintf(stderr,"  ## Error: elt (quadrangle) %%d: Expected 2 or 3 tags (%d given).\n",
                     tagNum);
             return(-1);
           }
           if(iswp) ref = _MMG5_swapbin(ref);
 
-          pq1 = &mesh->quad[++nq];
+          pq1 = &mesh->quadra[++nq];
           for ( i=0; i<4 ; ++i ) {
             fread(&l,sw,1,(*inm));
             if ( iswp ) l = _MMG5_swapbin(l);
@@ -1331,11 +1336,13 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   double      dbuf[6],mtmp[3],r[3][3];
   int         bin,k,i,typ,nelts,word, header[3],iadr;
   int         nq,ne,npr,np,nt,na;
-  char        *ptr,data[128];
+  char        *ptr,*data;
 
   bin = 0;
 
+  _MMG5_SAFE_CALLOC(data,strlen(filename)+7,char);
   strcpy(data,filename);
+
   ptr = strstr(data,".msh");
   if ( !ptr ) {
     /* data contains the filename without extension */
@@ -1346,6 +1353,7 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
       strcat(data,".msh");
       if( !(inm = fopen(data,"wb")) ) {
         fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",data);
+        _MMG5_SAFE_FREE(data);
         return(0);
       }
     }
@@ -1356,11 +1364,13 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
     if ( ptr ) bin = 1;
     if( !(inm = fopen(data,"wb")) ) {
       fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",data);
+      _MMG5_SAFE_FREE(data);
       return(0);
     }
   }
 
   fprintf(stdout,"  %%%% %s OPENED\n",data);
+  _MMG5_SAFE_FREE(data);
 
   /* Entete fichier*/
   fprintf(inm,"$MeshFormat\n");
@@ -1417,7 +1427,7 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   }
   nq = 0;
   for (k=1; k<=mesh->nquad; k++) {
-    pq = &mesh->quad[k];
+    pq = &mesh->quadra[k];
     if ( !MG_EOK(pq) )  continue;
     nq++;
   }
@@ -1531,7 +1541,7 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   }
 
   for (k=1; k<=mesh->nquad; ++k) {
-    pq = &mesh->quad[k];
+    pq = &mesh->quadra[k];
     if ( !MG_EOK(pq) ) continue;
     ++nelts;
 
