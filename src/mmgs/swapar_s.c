@@ -275,6 +275,7 @@ int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,char typchk) {
 
   /* if the quality is very bad, don't degrade it, even to improve the surface
    * approx. */
+#warning URGENT check the threshold value
   if ( calchg < _MMG5_EPS && calnat >= calchg ) return(0);
 
   /* else we can degrade the quality to improve the surface approx. */

@@ -312,12 +312,11 @@ int movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
     caltmp = caleltsig_iso(mesh,NULL,iel);
     calold = MG_MIN(calold,caltmp);
     caltmp = caleltsig_iso(mesh,NULL,0);
-    if ( caltmp < _MMG5_EPSD )        return(0);
+    if ( caltmp < _MMG5_NULKAL )        return(0);
     calnew = MG_MIN(calnew,caltmp);
-    /*if ( (calnew < BADKAL) && (calnew<=calold) )  return(0);
-      if ( chkedg(mesh,0) )  return(0); */
   }
-  if ( calold < NULKAL && calnew <= calold )      return(0);
+  if ( calold < _MMG5_EPSOK && calnew <= calold ) return(0);
+  else if (calnew < _MMG5_EPSOK)    return(0);
   else if ( calnew < 0.3*calold )  return(0);
 
   /* Finally, update coordinates and normals of point, if new position is accepted : */
@@ -848,6 +847,7 @@ int movridpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
     pt0->v[i0] = 0;
     calold = caleltsig_iso(mesh,NULL,iel);
     calnew = caleltsig_iso(mesh,NULL,0);
+#warning URGENT check the threshold value
     if ( (calnew < 0.001) && (calnew<calold) )  return(0);
     //if ( chkedg(mesh,0) )  return(0);
   }

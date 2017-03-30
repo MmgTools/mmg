@@ -171,13 +171,13 @@ int _MMGS_simbulgept(MMG5_pMesh mesh,MMG5_pSol met, int k,int i,int ip) {
   is         = _MMG5_iprv2[i];
   pt0->v[is] = 0;
   cal        = _MMG5_calelt(mesh,met,pt0);
-  if ( cal < _MMG5_EPSD )  return(0);
+  if ( cal < _MMG5_EPSOK )  return(0);
 
   pt0->v[is] = pt->v[is];
   is         = _MMG5_inxt2[i];
   pt0->v[is] = 0;
   cal        = _MMG5_calelt(mesh,met,pt0);
-  if ( cal < _MMG5_EPSD )  return(0);
+  if ( cal < _MMG5_EPSOK )  return(0);
 
   // Check the validity of the two triangles created from the triangle adjacent
   // to k by edge i.
@@ -189,13 +189,13 @@ int _MMGS_simbulgept(MMG5_pMesh mesh,MMG5_pSol met, int k,int i,int ip) {
   is         = _MMG5_iprv2[iadja];
   pt0->v[is] = 0;
   cal        = _MMG5_calelt(mesh,met,pt0);
-  if ( cal < _MMG5_EPSD )  return(0);
+  if ( cal < _MMG5_EPSOK )  return(0);
 
   pt0->v[is] = pt->v[is];
   is         = _MMG5_inxt2[iadja];
   pt0->v[is] = 0;
   cal        = _MMG5_calelt(mesh,met,pt0);
-  if ( cal < _MMG5_EPSD )  return(0);
+  if ( cal < _MMG5_EPSOK )  return(0);
 
   return(1);
 }

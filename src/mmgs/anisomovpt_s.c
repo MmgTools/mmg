@@ -162,7 +162,7 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
 
   area = - gv[1]*(lispoi[3*(kel+1)+1] - lispoi[3*(kel)+1]) \
     + gv[0]*(lispoi[3*(kel+1)+2] - lispoi[3*(kel)+2]);
-  if ( fabs(area) < _MMG5_EPSD )  return(0);
+  if ( fabs(area) < _MMG5_EPSD2 )  return(0);
   area = 1.0 / area;
   step *= area;
 
@@ -175,7 +175,7 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
 
   /* Computation of the barycentric coordinates of the new point in the corresponding triangle. */
   area = lispoi[3*kel+1]*lispoi[3*(kel+1)+2] - lispoi[3*kel+2]*lispoi[3*(kel+1)+1];
-  if ( area < _MMG5_EPSD )  return(0);
+  if ( area < _MMG5_EPSD2 )  return(0);
   area = 1.0 / area;
   lambda[1] = lispoi[3*(kel+1)+2]*gv[0] - lispoi[3*(kel+1)+1]*gv[1];
   lambda[2] = -lispoi[3*(kel)+2]*gv[0] + lispoi[3*(kel)+1]*gv[1];
@@ -237,10 +237,15 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
     caltmp = caleltsig_ani(mesh,met,iel);
     calold = MG_MIN(calold,caltmp);
     caltmp = caleltsig_ani(mesh,met,0);
-    if ( caltmp < _MMG5_EPSD )        return(0);
+    if ( caltmp < _MMG5_EPSD2 )  {
+      /* We don't check the input triangle qualities, thus we may have a very
+       * bad triangle in our mesh */
+      return(0);
+    }
     calnew = MG_MIN(calnew,caltmp);
 
-    if ( calold < NULKAL && calnew <= calold )  return(0);
+    if ( calold < _MMG5_EPSOK && calnew <= calold )  return(0);
+    else if (calnew < _MMG5_EPSOK)  return(0);
     else if ( calnew < 0.3*calold )      return(0);
     /* if ( chkedg(mesh,0) )  return(0); */
   }
@@ -463,7 +468,7 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
       nn2[2] = no2[2]+np2[2];
 
       ps2 = (p2->c[0]-p0->c[0])*nn1[0]+(p2->c[1]-p0->c[1])*nn1[1]+(p2->c[2]-p0->c[2])*nn1[2];
-      if ( ll2old < _MMG5_EPSD )  return(0);
+      if ( ll2old < _MMG5_EPSD2 )  return(0);
       ps2 *= (2.0 / ll2old);
       nn1[0] -= ps2*(p2->c[0]-p0->c[0]);
       nn1[1] -= ps2*(p2->c[1]-p0->c[1]);
@@ -534,7 +539,7 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
       nn2[2] = no2[2]+np1[2];
 
       ps2 = (p2->c[0]-p0->c[0])*nn1[0]+(p2->c[1]-p0->c[1])*nn1[1]+(p2->c[2]-p0->c[2])*nn1[2];
-      if ( ll2old < _MMG5_EPSD )  return(0);
+      if ( ll2old < _MMG5_EPSD2 )  return(0);
       ps2 *= (2.0 / ll2old);
       nn1[0] -= ps2*(p2->c[0]-p0->c[0]);
       nn1[1] -= ps2*(p2->c[1]-p0->c[1]);
@@ -632,7 +637,7 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
       nn2[2] = no2[2]+np2[2];
 
       ps2 = (p1->c[0]-p0->c[0])*nn1[0]+(p1->c[1]-p0->c[1])*nn1[1]+(p1->c[2]-p0->c[2])*nn1[2];
-      if ( ll1old < _MMG5_EPSD )  return(0);
+      if ( ll1old < _MMG5_EPSD2 )  return(0);
       ps2 *= (2.0 / ll1old);
       nn1[0] -= ps2*(p1->c[0]-p0->c[0]);
       nn1[1] -= ps2*(p1->c[1]-p0->c[1]);
@@ -702,7 +707,7 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
       nn2[2] = no2[2]+np1[2];
 
       ps2 = (p1->c[0]-p0->c[0])*nn1[0]+(p1->c[1]-p0->c[1])*nn1[1]+(p1->c[2]-p0->c[2])*nn1[2];
-      if ( ll1old < _MMG5_EPSD )  return(0);
+      if ( ll1old < _MMG5_EPSD2 )  return(0);
       ps2 *= (2.0 / ll1old);
       nn1[0] -= ps2*(p1->c[0]-p0->c[0]);
       nn1[1] -= ps2*(p1->c[1]-p0->c[1]);
@@ -817,6 +822,7 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
 
     calold = caleltsig_ani(mesh,met,iel);
     calnew = caleltsig_ani(mesh,met,0);
+#warning URGENT check the threshold value
     if ( (calnew < 0.001) && (calnew<calold) ) {
       ppt0->tag = 0;
       return(0);
