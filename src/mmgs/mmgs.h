@@ -34,10 +34,10 @@ extern "C" {
 /* numerical accuracy */
 #define ALPHAD    3.464101615137755   /* 6.0 / sqrt(3.0)  */
 
-#define LOPTL     1.4
-#define LOPTS     0.71
-#define LLONG     2.0
-#define LSHRT     0.3
+#define _MMGS_LOPTL     1.4
+#define _MMGS_LOPTS     0.71
+#define _MMGS_LLONG     2.0
+#define _MMGS_LSHRT     0.3
 
 #define _MMG5_LMAX  1024
 #define _MMGS_BADKAL      2.e-2

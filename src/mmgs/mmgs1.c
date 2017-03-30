@@ -530,7 +530,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         i1 = _MMG5_inxt2[i];
         i2 = _MMG5_iprv2[i];
         len = _MMG5_lenSurfEdg(mesh,met,pt->v[i1],pt->v[i2],0);
-        if ( len > LLONG )  MG_SET(pt->flag,i);
+        if ( len > _MMGS_LLONG )  MG_SET(pt->flag,i);
       }
       if ( !pt->flag )  continue;
     }
@@ -952,7 +952,7 @@ static int colelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
       }
       else {
         ll = _MMG5_lenSurfEdg(mesh,met,pt->v[i1],pt->v[i2],0);
-        if ( ll > LSHRT )  continue;
+        if ( ll > _MMGS_LSHRT )  continue;
       }
 
       /* check if geometry preserved */
@@ -1002,7 +1002,7 @@ static int adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
         imax = i;
       }
     }
-    if ( lmax < LOPTL )  continue;
+    if ( lmax < _MMGS_LOPTL )  continue;
     else if ( MS_SIN(pt->tag[imax]) )  continue;
 
     /* check length */
@@ -1063,7 +1063,7 @@ static int adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
       if ( p1->tag & MG_NOM || p2->tag & MG_NOM )  continue;
 
       len = _MMG5_lenSurfEdg(mesh,met,pt->v[i1],pt->v[i2],0);
-      if ( len > LOPTS )  continue;
+      if ( len > _MMGS_LOPTS )  continue;
 
       p1 = &mesh->point[pt->v[i1]];
       p2 = &mesh->point[pt->v[i2]];

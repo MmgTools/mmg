@@ -54,8 +54,8 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
   ip2 = pt->v[i2];
   if ( typchk == 2 && met->m ) {
     lon = _MMG5_lenSurfEdg(mesh,met,ip1,ip2,0);
-    lon = MG_MIN(lon,LSHRT);
-    lon = MG_MAX(1.0/lon,LLONG);
+    lon = MG_MIN(lon,_MMGS_LSHRT);
+    lon = MG_MAX(1.0/lon,_MMGS_LLONG);
   }
 
   /* collect all triangles around vertex i1 */

@@ -96,7 +96,7 @@ int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,char typchk) {
   if ( typchk == 2 && met->m ) {
     loni = _MMG5_lenSurfEdg(mesh,met,ip1,ip2,0);
     lona = _MMG5_lenSurfEdg(mesh,met,ip0,iq,0);
-    if ( loni > 1.0 )  loni = MG_MIN(1.0 / loni,LSHRT);
+    if ( loni > 1.0 )  loni = MG_MIN(1.0 / loni,_MMGS_LSHRT);
     if ( lona > 1.0 )  lona = 1.0 / lona;
     if ( lona < loni )  return(0);
   }
