@@ -6,9 +6,7 @@ To call the **mmg2d** library, you must:
   2. call the MMG2D library (**MMG2D_mmg2dmesh** function);
   3. get the final mesh and sol.
 
-  Results are saved in the **_result.mesh_** and **_result.sol_** files.  
-
-  We read mesh and solution files (**_carretest.mesh_** and **_carretest.sol_**) using the **MMG2D_loadMesh** and **MMG2D_loadSol** functions.
+  We read mesh and solution files using the **MMG2D_loadMesh** and **MMG2D_loadSol** functions.
 
   We ask for a maximal edge size of 0.1 using the **MMG2D_Set_dparameter** function.
   We increase the verbosity level using the **MMG2D_Set_iparameter** function.
@@ -36,9 +34,3 @@ To call the **mmg2d** library, you must:
 > gcc -I$CMAKE_INSTALL_PREFIX/include/mmg/mmg2d main.c -L$CMAKE_INSTALL_PREFIX/lib -lmmg2d
 > export LD_LIBRARY_PATH=$CMAKE_INSTALL_PREFIX/lib:$LD_LIBRARY_PATH
 > ```
-
-## III/ Execution
-Because it contains hard coded paths to the mesh and solution files, the tests must be run from a subdirectory of the root of your **mmg** project.
-
-> Example  
-> Assuming that your **mmg** project is cloned into the **_mmg_** directory (default case), you can run the test from the **_mmg/build/_** or **_mmg/libexamples_** directories but not from the **_mmg/libexamples/mmg2d/_** folder.

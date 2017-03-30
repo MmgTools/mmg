@@ -60,8 +60,31 @@ int main(int argc,char *argv[]) {
   int             np, nt, na, nc, nr, nreq, typEntity, typSol;
   int             ref, Tria[3], Edge[2], *corner, *required, *ridge;
   double          Point[3],Sol;
+  char            *fileout,*solout;
 
   fprintf(stdout,"  -- TEST MMGSLIB \n");
+
+  if ( argc != 2 ) {
+    printf(" Usage: %s fileout\n",argv[0]);
+    return(1);
+  }
+
+  /* Name and path of the mesh file */
+  fileout = (char *) calloc(strlen(argv[1]) + 1, sizeof(char));
+  if ( fileout == NULL ) {
+    perror("  ## Memory problem: calloc");
+    exit(EXIT_FAILURE);
+  }
+  strcpy(fileout,argv[1]);
+  strcat(fileout,".mesh");
+
+  solout = (char *) calloc(strlen(argv[1]) + 5, sizeof(char));
+  if ( solout == NULL ) {
+    perror("  ## Memory problem: calloc");
+    exit(EXIT_FAILURE);
+  }
+  strcpy(solout,argv[1]);
+  strcat(solout,".sol");
 
   /** ------------------------------ STEP   I -------------------------- */
   /** 1) Initialisation of mesh and sol structures */
@@ -161,10 +184,9 @@ int main(int argc,char *argv[]) {
       that will write .mesh(b)/.sol formatted files or manually get your mesh/sol
       using the MMGS_getMesh/MMGS_getSol functions */
 
-  /** 1) Manually get the mesh (in this example we show how to save the mesh
-      in the mesh.o.mesh file) */
-  if( !(inm = fopen("cube.o.mesh","w")) ) {
-    fprintf(stderr,"  ** UNABLE TO OPEN cube.o.mesh FILE.\n");
+  /** 1) Manually get the mesh */
+  if( !(inm = fopen(fileout,"w")) ) {
+    fprintf(stderr,"  ** UNABLE TO OPEN OUTPUT MESH FILE.\n");
     exit(EXIT_FAILURE);
   }
   fprintf(inm,"MeshVersionFormatted 2\n");
@@ -256,10 +278,9 @@ int main(int argc,char *argv[]) {
   free(ridge);
   ridge    = NULL;
 
-  /** 2) Manually get the solution (in this example we show how to save the
-      solution in the mesh.o.sol file) */
-  if( !(inm = fopen("mesh.o.sol","w")) ) {
-    fprintf(stderr,"  ** UNABLE TO OPEN mesh.o.sol FILE.\n");
+  /** 2) Manually get the solution */
+  if( !(inm = fopen(solout,"w")) ) {
+    fprintf(stderr,"  ** UNABLE TO OPEN OUTPUT SOL FILE.\n");
     exit(EXIT_FAILURE);
   }
   fprintf(inm,"MeshVersionFormatted 2\n");
@@ -287,6 +308,12 @@ int main(int argc,char *argv[]) {
   MMGS_Free_all(MMG5_ARG_start,
                 MMG5_ARG_ppMesh,&mmgMesh,MMG5_ARG_ppMet,&mmgSol,
                 MMG5_ARG_end);
+
+  free(fileout);
+  fileout = NULL;
+
+  free(solout);
+  solout = NULL;
 
   return(ier);
 }

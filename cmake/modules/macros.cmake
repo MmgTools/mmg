@@ -135,7 +135,7 @@ MACRO ( ADD_AND_INSTALL_EXECUTABLE
   TARGET_INCLUDE_DIRECTORIES ( ${exec_name}
     PUBLIC ${COMMON_BINARY_DIR} ${COMMON_SOURCE_DIR} )
 
-  TARGET_LINK_LIBRARIES ( ${exec_name} ${LIBRARIES})
+  TARGET_LINK_LIBRARIES ( ${exec_name} ${LIBRARIES} )
 
   INSTALL(TARGETS ${exec_name} RUNTIME DESTINATION bin)
 
@@ -212,7 +212,49 @@ MACRO ( ADD_LIBRARY_TEST target_name main_path target_dependency lib_name )
     MY_ADD_LINK_FLAGS ( ${target_name} "/SAFESEH:NO" )
   ENDIF ( )
 
-  TARGET_LINK_LIBRARIES ( ${target_name} ${lib_name} )
+  TARGET_LINK_LIBRARIES ( ${target_name}  ${lib_name} )
   INSTALL(TARGETS ${target_name} RUNTIME DESTINATION bin )
+
+ENDMACRO ( )
+
+
+###############################################################################
+#####
+#####         Add a test and run it again if RUN_AGAIN option is enabled
+#####
+###############################################################################
+
+MACRO ( ADD_RUN_AGAIN_TESTS exec_name test_names args input_files )
+
+  LIST(LENGTH test_names test_number)
+  MATH(EXPR len2 "${test_number} - 1")
+
+  FOREACH ( it RANGE ${len2} )
+    LIST(GET test_names   ${it} test_name)
+    LIST(GET input_files  ${it} input_file)
+    LIST(GET args         ${it} arg)
+
+    ADD_TEST(NAME ${test_name}
+      COMMAND ${exec_name} ${arg}
+      ${input_file}
+      -out ${CTEST_OUTPUT_DIR}/${test_name}-out.o.meshb )
+
+    SET_TESTS_PROPERTIES ( ${test_name}
+      PROPERTIES FIXTURES_SETUP ${test_name} )
+
+    IF ( RUN_AGAIN )
+      ADD_TEST(NAME ${test_name}_2
+        COMMAND ${exec_name} ${arg}
+        ${CTEST_OUTPUT_DIR}/${test_name}-out.o.meshb
+        -out ${CTEST_OUTPUT_DIR}/${test_name}_2-out.o.meshb
+        )
+
+      SET_TESTS_PROPERTIES ( ${test_name}_2
+        PROPERTIES FIXTURES_REQUIRED ${test_name} )
+
+    ENDIF ( )
+
+  ENDFOREACH ( )
+
 
 ENDMACRO ( )

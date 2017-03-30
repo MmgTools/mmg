@@ -183,6 +183,9 @@ IF ( BUILD_TESTING )
   # Add runtime that we want to test for mmg3d
   IF ( MMG3D_CI )
 
+    SET ( CTEST_OUTPUT_DIR ${CMAKE_BINARY_DIR}/TEST_OUTPUTS )
+    FILE ( MAKE_DIRECTORY  ${CTEST_OUTPUT_DIR} )
+
     IF ( LONG_TESTS )
       # Run some tests twice with the output of the previous test as input
       OPTION ( RUN_AGAIN "Enable/Disable second run of some tests" ON )
@@ -192,7 +195,7 @@ IF ( BUILD_TESTING )
     ENDIF ( )
 
     ADD_EXEC_TO_CI_TESTS ( ${PROJECT_NAME}3d EXECUT_MMG3D )
-    SET ( LISTEXEC_MMG3D ${EXECUT_MMG3D} )
+    SET ( LISTEXEC_MMG ${EXECUT_MMG3D} )
 
     IF ( TEST_LIBMMG3D )
       SET(LIBMMG3D_EXEC0_a ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_example0_a)
@@ -203,37 +206,49 @@ IF ( BUILD_TESTING )
       SET(LIBMMG3D_EXEC5   ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_example5)
 
       ADD_TEST(NAME libmmg3d_example0_a COMMAND ${LIBMMG3D_EXEC0_a}
-        "${CMAKE_SOURCE_DIR}/libexamples/mmg3d/adaptation_example0/example0_a/cube.mesh")
-      ADD_TEST(NAME libmmg3d_example0_b COMMAND ${LIBMMG3D_EXEC0_b})
-      ADD_TEST(NAME libmmg3d_example1   COMMAND ${LIBMMG3D_EXEC1})
+        "${CMAKE_SOURCE_DIR}/libexamples/mmg3d/adaptation_example0/example0_a/cube.mesh"
+        "${CTEST_OUTPUT_DIR}/libmmg3d_Adaptation_0_a-cube.o"
+        )
+      ADD_TEST(NAME libmmg3d_example0_b COMMAND ${LIBMMG3D_EXEC0_b}
+       "${CTEST_OUTPUT_DIR}/libmmg3d_Adaptation_0_b.o.mesh"
+        )
+      ADD_TEST(NAME libmmg3d_example1   COMMAND ${LIBMMG3D_EXEC1}
+        "${CTEST_OUTPUT_DIR}/libmmg3d_Adaptation_1.o.mesh"
+        )
       ADD_TEST(NAME libmmg3d_example2   COMMAND ${LIBMMG3D_EXEC2}
-        "${CMAKE_SOURCE_DIR}/libexamples/mmg3d/adaptation_example2/2spheres.mesh")
+        "${CMAKE_SOURCE_DIR}/libexamples/mmg3d/adaptation_example2/2spheres.mesh"
+        "${CTEST_OUTPUT_DIR}/libmmg3d_Adaptation_1-2spheres_1.o"
+        "${CTEST_OUTPUT_DIR}/libmmg3d_Adaptation_1-2spheres_2.o"
+        )
       IF ( USE_ELAS )
         ADD_TEST(NAME libmmg3d_example4   COMMAND ${LIBMMG3D_EXEC4}
-          "${CMAKE_SOURCE_DIR}/libexamples/mmg3d/LagrangianMotion_example0/tinyBoxt")
+          "${CMAKE_SOURCE_DIR}/libexamples/mmg3d/LagrangianMotion_example0/tinyBoxt"
+          "${CTEST_OUTPUT_DIR}/libmmg3d_LagrangianMotion_0-tinyBoxt.o"
+          )
       ENDIF ()
       ADD_TEST(NAME libmmg3d_example5   COMMAND ${LIBMMG3D_EXEC5}
-        "${CMAKE_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_example0/test")
-
-      SET( LISTEXEC_MMG3D ${LISTEXEC_MMG3D} )
+        "${CMAKE_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_example0/test"
+        "${CTEST_OUTPUT_DIR}/libmmg3d-IsosurfDiscretization_0-test.o"
+        )
 
       IF ( CMAKE_Fortran_COMPILER)
-        SET(LIBMMG3D_EXECFORTRAN_a ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_fortran_a
-          "${CMAKE_SOURCE_DIR}/libexamples/mmg3d/adaptation_example0_fortran/example0_a/cube.mesh")
+        SET(LIBMMG3D_EXECFORTRAN_a ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_fortran_a )
 
         SET(LIBMMG3D_EXECFORTRAN_b ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_fortran_b)
-        ADD_TEST(NAME libmmg3d_fortran_a  COMMAND ${LIBMMG3D_EXECFORTRAN_a})
-        ADD_TEST(NAME libmmg3d_fortran_b  COMMAND ${LIBMMG3D_EXECFORTRAN_b})
+        ADD_TEST(NAME libmmg3d_fortran_a  COMMAND ${LIBMMG3D_EXECFORTRAN_a}
+          "${CMAKE_SOURCE_DIR}/libexamples/mmg3d/adaptation_example0_fortran/example0_a/cube.mesh"
+          "${CTEST_OUTPUT_DIR}/libmmg3d-Adaptation_Fortran_0_a-cube.o"
+          )
+        ADD_TEST(NAME libmmg3d_fortran_b  COMMAND ${LIBMMG3D_EXECFORTRAN_b}
+          "${CTEST_OUTPUT_DIR}/libmmg3d-Adaptation_Fortran_0_b-cube.o"
+          )
       ENDIF()
 
     ENDIF ( TEST_LIBMMG3D )
 
     # Add more tests
     INCLUDE( ${CMAKE_SOURCE_DIR}/cmake/testing/mmg3d_tests.cmake )
-
-    IF ( RUN_AGAIN )
-      INCLUDE( ${CMAKE_SOURCE_DIR}/cmake/testing/mmg3d_rerun_tests.cmake )
-    ENDIF()
+    INCLUDE( ${CMAKE_SOURCE_DIR}/cmake/testing/mmg_tests.cmake )
 
   ENDIF ( MMG3D_CI )
 

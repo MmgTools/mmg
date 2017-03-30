@@ -146,6 +146,7 @@ ENDIF ( )
 #####         Compile MMG2D executable
 #####
 ###############################################################################
+
 ADD_AND_INSTALL_EXECUTABLE ( ${PROJECT_NAME}2d
   "${mmg2d_library_files}" ${mmg2d_main_file} )
 
@@ -167,27 +168,40 @@ IF ( BUILD_TESTING )
   # Add runtime that we want to test for mmg2d
   IF ( MMG2D_CI )
 
+    SET ( CTEST_OUTPUT_DIR ${CMAKE_BINARY_DIR}/TEST_OUTPUTS )
+    FILE ( MAKE_DIRECTORY  ${CTEST_OUTPUT_DIR} )
+
     ADD_EXEC_TO_CI_TESTS ( ${PROJECT_NAME}2d EXECUT_MMG2D )
 
     IF ( TEST_LIBMMG2D )
-      SET(LIBMMG2D_EXEC0_a ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_example0_a
-        "${CMAKE_SOURCE_DIR}/libexamples/mmg2d/adaptation_example0/example0_a/init.mesh")
+      SET(LIBMMG2D_EXEC0_a ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_example0_a )
 
-      SET(LIBMMG2D_EXEC0_b ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_example0_b)
-      SET(LIBMMG2D_EXEC1 ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_example1
-        "${CMAKE_SOURCE_DIR}/libexamples/mmg2d/adaptation_example1/dom.mesh")
+      SET(LIBMMG2D_EXEC0_b ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_example0_b )
+      SET(LIBMMG2D_EXEC1 ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_example1 )
 
-      ADD_TEST(NAME libmmg2d_example0_a   COMMAND ${LIBMMG2D_EXEC0_a})
-      ADD_TEST(NAME libmmg2d_example0_b   COMMAND ${LIBMMG2D_EXEC0_b})
-      ADD_TEST(NAME libmmg2d_example1   COMMAND ${LIBMMG2D_EXEC1})
+      ADD_TEST(NAME libmmg2d_example0_a   COMMAND ${LIBMMG2D_EXEC0_a}
+        "${CMAKE_SOURCE_DIR}/libexamples/mmg2d/adaptation_example0/example0_a/init.mesh"
+        "${CTEST_OUTPUT_DIR}/libmmg2d_Adaptation_0_a-init.o"
+        )
+      ADD_TEST(NAME libmmg2d_example0_b   COMMAND ${LIBMMG2D_EXEC0_b}
+        "${CTEST_OUTPUT_DIR}/libmmg2d_Adaptation_0_b.o.mesh"
+        )
+      ADD_TEST(NAME libmmg2d_example1   COMMAND ${LIBMMG2D_EXEC1}
+        "${CMAKE_SOURCE_DIR}/libexamples/mmg2d/adaptation_example1/dom.mesh"
+        "${CTEST_OUTPUT_DIR}/libmmg2d_Adaptation_1-dom.o"
+       )
 
       IF ( CMAKE_Fortran_COMPILER)
-        SET(LIBMMG2D_EXECFORTRAN_a ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_fortran_a
-          "${CMAKE_SOURCE_DIR}/libexamples/mmg2d/adaptation_example0_fortran/example0_a/init.mesh")
+        SET(LIBMMG2D_EXECFORTRAN_a ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_fortran_a )
 
-        SET(LIBMMG2D_EXECFORTRAN_b ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_fortran_b)
-        ADD_TEST(NAME libmmg2d_fortran_a   COMMAND ${LIBMMG2D_EXECFORTRAN_a})
-        ADD_TEST(NAME libmmg2d_fortran_b   COMMAND ${LIBMMG2D_EXECFORTRAN_b})
+        SET(LIBMMG2D_EXECFORTRAN_b ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_fortran_b )
+        ADD_TEST(NAME libmmg2d_fortran_a   COMMAND ${LIBMMG2D_EXECFORTRAN_a}
+          "${CMAKE_SOURCE_DIR}/libexamples/mmg2d/adaptation_example0_fortran/example0_a/init.mesh"
+          "${CTEST_OUTPUT_DIR}/libmmg2d-Adaptation_Fortran_0_a-init.o"
+         )
+        ADD_TEST(NAME libmmg2d_fortran_b   COMMAND ${LIBMMG2D_EXECFORTRAN_b}
+          "${CTEST_OUTPUT_DIR}/libmmg2d_Adaptation_Fortran_0_b.o"
+         )
       ENDIF()
 
     ENDIF()

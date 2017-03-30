@@ -30,9 +30,3 @@ To call the **mmg** library, you must:
 > gfortran -I$CMAKE_INSTALL_PREFIX/include/mmg/ main.F90 -L$CMAKE_INSTALL_PREFIX/lib -lmmg
 > export LD_LIBRARY_PATH=$CMAKE_INSTALL_PREFIX/lib:$LD_LIBRARY_PATH
 > ```
-
-## III/ Execution
-Because it contains hard coded paths to the mesh and solution files, the tests must be run from a subdirectory of the root of your **mmg** project.
-
-> Example  
-> Assuming that your **mmg** project is cloned into the **_mmg_** directory (default case), you can run the test from the **_mmg/build/_** or **_mmg/libexamples_** directories but not from the **_mmg/libexamples/mmg/_** folder.

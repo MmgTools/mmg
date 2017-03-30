@@ -17,20 +17,23 @@ PROGRAM main
   MMG5_DATA_PTR_T    :: mmgMesh
   MMG5_DATA_PTR_T    :: mmgSol
   INTEGER            :: ier,argc
-  CHARACTER(len=350) :: tdfile,tdfileout, bdfile, bdfileout,exec_name
+  CHARACTER(len=350) :: tdfile,tdfileout, bdfile, bdfileout,exec_name,fileout
 
   WRITE(*,*) "  -- TEST MMGLIB"
 
   argc =  COMMAND_ARGUMENT_COUNT();
   CALL get_command_argument(0, exec_name)
 
-  IF ( argc /=2 ) THEN
-     PRINT*,argc," Usage: ",TRIM(exec_name)," 2d_file_name 3d_file_name"
+  IF ( argc /=3 ) THEN
+     PRINT*,argc," Usage: ",TRIM(exec_name),&
+          " 2d_file_name 3d_file_name output_file_name"
      CALL EXIT(1);
   ENDIF
 
   ! Name and path of the mesh file
   CALL get_command_argument(1, bdfile)
+  CALL get_command_argument(2, tdfile)
+  CALL get_command_argument(3, fileout)
 
   !> ================== 2d remeshing using the mmg2d library
   !! ------------------------------ STEP   I --------------------------
@@ -87,8 +90,8 @@ PROGRAM main
   !!    using the MMG2D_getMesh/MMG2D_getSol functions
 
   !> 1) Automatically save the mesh
-  CALL MMG2D_saveMesh(mmgMesh,"init.2d.mesh",&
-       LEN(TRIM(ADJUSTL("init.2d.mesh"))),ier)
+  CALL MMG2D_saveMesh(mmgMesh,TRIM(ADJUSTL(fileout)) // ".2d.mesh",&
+       LEN(TRIM(ADJUSTL(fileout)) // ".2d.mesh"),ier)
   IF ( ier /= 1 ) THEN
      CALL EXIT(106)
   ENDIF
@@ -96,8 +99,8 @@ PROGRAM main
   !> 2) Automatically save the solution
 
   !! b) save the solution in a file named bdfileout
-  CALL MMG2D_saveSol(mmgMesh,mmgSol,"init.2d.sol",&
-       LEN(TRIM(ADJUSTL("init.2d.sol"))),ier)
+  CALL MMG2D_saveSol(mmgMesh,mmgSol,TRIM(ADJUSTL(fileout)) // ".2d.mesh",&
+       LEN(TRIM(ADJUSTL(fileout)) // ".2d.mesh"),ier)
   IF ( ier /= 1 ) THEN
      CALL EXIT(107)
   ENDIF
@@ -117,9 +120,6 @@ PROGRAM main
   !! mmgMesh: your MMG5_pMesh (that store your mesh)
   !! MMG5_ARG_ppMet: next arg will be a pointer over a MMG5_pSol storing a metric
   !! mmgSol: your MMG5_pSol (that store your metric) */
-
-  ! Name and path of the mesh file
-  CALL get_command_argument(2, tdfile)
 
   mmgMesh = 0
   mmgSol  = 0
@@ -170,15 +170,15 @@ PROGRAM main
   !!    using the MMGS_getMesh/MMGS_getSol functions
 
   !> 1) Automatically save the mesh
-  CALL MMGS_saveMesh(mmgMesh,"cube.s.mesh",&
-       LEN(TRIM(ADJUSTL("cube.s.mesh"))),ier);
+  CALL MMGS_saveMesh(mmgMesh,TRIM(ADJUSTL(fileout)) // ".s.mesh",&
+       LEN(TRIM(ADJUSTL(fileout)) // ".s.mesh"),ier);
   IF ( ier /= 1 ) THEN
      CALL EXIT(108)
   ENDIF
 
   !> 2) Automatically save the solution
-  CALL MMGS_saveSol(mmgMesh,mmgSol,"cube.s.sol",&
-       LEN(TRIM(ADJUSTL("cube.s.sol"))),ier);
+  CALL MMGS_saveSol(mmgMesh,mmgSol,TRIM(ADJUSTL(fileout))//".s.sol",&
+       LEN(TRIM(ADJUSTL(fileout))//".s.sol"),ier);
   IF ( ier /= 1 ) THEN
      CALL EXIT(107)
   ENDIF
@@ -247,15 +247,15 @@ PROGRAM main
   !!    using the MMG3D_getMesh/MMG3D_getSol functions
 
   !> 1) Automatically save the mesh
-  CALL MMG3D_saveMesh(mmgMesh,"cube.3d.mesh",&
-       LEN(TRIM(ADJUSTL("cube.3d.mesh"))),ier)
+  CALL MMG3D_saveMesh(mmgMesh,TRIM(ADJUSTL(fileout)) // ".3d.mesh",&
+       LEN(TRIM(ADJUSTL(fileout)) // ".3d.mesh"),ier)
   IF ( ier /= 1 ) THEN
      CALL EXIT(108)
   ENDIF
 
   !> 2) Automatically save the solution
-  CALL MMG3D_saveSol(mmgMesh,mmgSol,"cube.3d.sol",&
-       LEN(TRIM(ADJUSTL("cube.3d.sol"))),ier)
+  CALL MMG3D_saveSol(mmgMesh,mmgSol,TRIM(ADJUSTL(fileout)) // ".3d.sol",&
+       LEN(TRIM(ADJUSTL(fileout)) // ".3d.sol"),ier)
   IF ( ier /= 1 ) THEN
      CALL EXIT(107)
   ENDIF

@@ -52,8 +52,21 @@ int main(int argc,char *argv[]) {
   MMG5_pMesh      mmgMesh;
   MMG5_pSol       mmgSol;
   int             ier,k;
+  char            *outname;
 
   fprintf(stdout,"  -- TEST MMG3DLIB \n");
+  if ( argc != 2 ) {
+    printf(" Usage: %s  fileout \n",argv[0]);
+    return(1);
+  }
+
+  /* Name and path of the mesh files */
+  outname = (char *) calloc(strlen(argv[1]) + 1, sizeof(char));
+  if ( outname == NULL ) {
+    perror("  ## Memory problem: calloc");
+    exit(EXIT_FAILURE);
+  }
+  strcpy(outname,argv[1]);
 
   /** ------------------------------ STEP   I -------------------------- */
   /** 1) Initialisation of mesh and sol structures */
@@ -157,15 +170,17 @@ int main(int argc,char *argv[]) {
       using the MMG3D_getMesh/MMG3D_getSol functions */
 
   /** 1) Automatically save the mesh */
-  if ( MMG3D_saveMesh(mmgMesh,"result0.mesh") != 1 ) exit(EXIT_FAILURE);
+  if ( MMG3D_saveMesh(mmgMesh,outname) != 1 ) exit(EXIT_FAILURE);
 
   /** 2) Automatically save the solution */
-  if ( MMG3D_saveSol(mmgMesh,mmgSol,"result0.sol") !=1 ) exit(EXIT_FAILURE);
+  if ( MMG3D_saveSol(mmgMesh,mmgSol,outname) !=1 ) exit(EXIT_FAILURE);
 
   /** 3) Free the MMG3D5 structures */
   MMG3D_Free_all(MMG5_ARG_start,
                  MMG5_ARG_ppMesh,&mmgMesh,MMG5_ARG_ppMet,&mmgSol,
                  MMG5_ARG_end);
+  free(outname);
+  outname = NULL;
 
   return(ier);
 }

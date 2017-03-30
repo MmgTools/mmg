@@ -20,6 +20,8 @@
 ##  use this copy of the Mmg distribution only if you accept them.
 ## =============================================================================
 
+GET_FILENAME_COMPONENT ( SHRT_EXECUT_MMGS ${EXECUT_MMGS} NAME )
+
 ###############################################################################
 #####
 #####         Continuous Integration
@@ -27,20 +29,21 @@
 ###############################################################################
 
 # Simple tests: must already pass
-ADD_TEST(NAME SimpleTeapot
-  COMMAND ${EXECUT_MMGS}
-  ${MMGS_CI_TESTS}/Teapot/teapot
-  -out ${MMGS_CI_TESTS}/Teapot/teapot.d.meshb)
+SET ( test_names mmgs_SimpleTeapot )
+SET ( input_files ${MMGS_CI_TESTS}/Teapot/teapot )
+SET ( args  "-v 5" )
 
-ADD_TEST(NAME CubeAni
+ADD_RUN_AGAIN_TESTS ( ${EXECUT_MMGS} "${test_names}" "${args}" "${input_files}" )
+
+ADD_TEST(NAME mmgs_CubeAni
   COMMAND ${EXECUT_MMGS}
   ${MMGS_CI_TESTS}/CubeAni/cube
-  -out ${MMGS_CI_TESTS}/CubeAni/cube.d.meshb)
+  -out ${CTEST_OUTPUT_DIR}/mmgs_CubeAni-cube.d.meshb)
 
-ADD_TEST(NAME SphereAni
+ADD_TEST(NAME mmgs_SphereAni
   COMMAND ${EXECUT_MMGS}
   ${MMGS_CI_TESTS}/SphereAni/sphere
-  -out ${MMGS_CI_TESTS}/SphereAni/sphere.d.meshb)
+  -out ${CTEST_OUTPUT_DIR}/mmgs_SphereAni-sphere.d.meshb)
 
 
 ###############################################################################
@@ -50,14 +53,16 @@ ADD_TEST(NAME SphereAni
 ###############################################################################
 
 # Binary gmsh
-ADD_TEST(NAME binary_gmsh_s
+ADD_TEST(NAME mmgs_binary_gmsh_s
   COMMAND ${EXECUT_MMGS} -v 5
-  ${MMGS_CI_TESTS}/GmshInout/cube.mshb)
+  ${MMGS_CI_TESTS}/GmshInout/cube.mshb
+  ${CTEST_OUTPUT_DIR}/)
 
 # Ascii gmsh
-ADD_TEST(NAME ascii_gmsh_s
+ADD_TEST(NAME mmgs_ascii_gmsh_s
   COMMAND ${EXECUT_MMGS} -v 5
-  ${MMGS_CI_TESTS}/GmshInout/cube.msh)
+  ${MMGS_CI_TESTS}/GmshInout/cube.msh
+  ${CTEST_OUTPUT_DIR}/)
 
 
 ###############################################################################
@@ -72,20 +77,20 @@ ADD_TEST(NAME ascii_gmsh_s
 #####         Manifold cases
 #####
 ###############################################################################
-ADD_TEST(NAME Rhino_M
+ADD_TEST(NAME mmgs_Rhino_M
   COMMAND ${EXECUT_MMGS} -v 5
   ${MMGS_CI_TESTS}/Rhino_M/rhino -hausd 1
-  -out ${MMGS_CI_TESTS}/Rhino_M/rhino.d.meshb)
+  -out ${CTEST_OUTPUT_DIR}/mmgs_Rhino_M-rhino.d.meshb)
 
 ###############################################################################
 #####
 #####         Non manifold cases
 #####
 ###############################################################################
-ADD_TEST(NAME Cow_NM_hausd10
+ADD_TEST(NAME mmgs_Cow_NM_hausd10
   COMMAND ${EXECUT_MMGS} -v 5
   ${MMGS_CI_TESTS}/Cow_NM/cow -hausd 10
-  -out ${MMGS_CI_TESTS}/Cow_NM/cow.d.meshb)
+  -out ${CTEST_OUTPUT_DIR}/mmgs_Cow_NM_hausd10-cow.d.meshb)
 
 ###############################################################################
 #####
@@ -93,25 +98,25 @@ ADD_TEST(NAME Cow_NM_hausd10
 #####
 ###############################################################################
 # Test the Ls option
-ADD_TEST(NAME OptLs_teapot
+ADD_TEST(NAME mmgs_OptLs_teapot
   COMMAND ${EXECUT_MMGS} -v 5 -ls
   ${MMGS_CI_TESTS}/OptLs_teapot/teapot
-  ${MMGS_CI_TESTS}/OptLs_teapot/teapot.simple.o.meshb)
+  ${CTEST_OUTPUT_DIR}/mmgs_OptLs_teapot-teapot.simple.o.meshb)
 
-ADD_TEST(NAME OptLs_teapot_keepRef
+ADD_TEST(NAME mmgs_OptLs_teapot_keepRef
   COMMAND ${EXECUT_MMGS} -v 5 -ls -keep-ref
   ${MMGS_CI_TESTS}/OptLs_teapot/teapot
-  ${MMGS_CI_TESTS}/OptLs_teapot/teapot.keep-ref.o.meshb)
+  ${CTEST_OUTPUT_DIR}/mmgs_OptLs_teapot_keepRef-teapot.keep-ref.o.meshb)
 
-ADD_TEST(NAME OptLs_teapot_0.5_keepRef
+ADD_TEST(NAME mmgs_OptLs_teapot_0.5_keepRef
   COMMAND ${EXECUT_MMGS} -v 5 -ls 0.5 -keep-ref
   ${MMGS_CI_TESTS}/OptLs_teapot/teapot
-  ${MMGS_CI_TESTS}/OptLs_teapot/teapot.0.5.keep-ref.o.meshb)
+  ${CTEST_OUTPUT_DIR}/mmgs_OptLs_teapot_0.5_keepRef-teapot.0.5.keep-ref.o.meshb)
 
-ADD_TEST(NAME OptLs_teapot2
+ADD_TEST(NAME mmgs_OptLs_teapot2
   COMMAND ${EXECUT_MMGS} -v 5 -ls -nr
   ${MMGS_CI_TESTS}/OptLs_teapot/teapot
-  ${MMGS_CI_TESTS}/OptLs_teapot/teapot.o.meshb)
+  ${CTEST_OUTPUT_DIR}/mmgs_OptLs_teapot2-teapot.o.meshb)
 
 
 ###############################################################################
@@ -119,12 +124,12 @@ ADD_TEST(NAME OptLs_teapot2
 #####         Detected Bugs
 #####
 ###############################################################################
-ADD_TEST(NAME Car_NM
+ADD_TEST(NAME mmgs_Car_NM
   COMMAND ${EXECUT_MMGS} -v 5
   ${MMGS_CI_TESTS}/Car_NM/car
-  -out ${MMGS_CI_TESTS}/Car_NM/car.d.meshb)
+  -out ${CTEST_OUTPUT_DIR}/mmgs_Car_NM-car.d.meshb)
 
-ADD_TEST(NAME Cow_NM_hausd20
+ADD_TEST(NAME mmgs_Cow_NM_hausd20
   COMMAND ${EXECUT_MMGS} -v 5
   ${MMGS_CI_TESTS}/Cow_NM/cow -hausd 20
-  -out ${MMGS_CI_TESTS}/Cow_NM/cow.d.meshb)
+  -out ${CTEST_OUTPUT_DIR}/mmgs_Cow_NM_hausd20-cow.d.meshb)

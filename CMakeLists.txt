@@ -393,6 +393,9 @@ CMAKE_DEPENDENT_OPTION ( COVERAGE "Watch code coverage (Linux only)" OFF
 
 IF( BUILD_TESTING )
 
+  SET ( CTEST_OUTPUT_DIR ${CMAKE_BINARY_DIR}/TEST_OUTPUTS )
+  FILE ( MAKE_DIRECTORY  ${CTEST_OUTPUT_DIR} )
+
   ##-------------------------------------------------------------------##
   ##------- Get the continuous integration tests ----------------------##
   ##-------------------------------------------------------------------##
@@ -453,17 +456,17 @@ IF( BUILD_TESTING )
     SET(EXECUT_MMG ${EXECUT_MMGS} ${EXECUT_MMG3D})
 
     # Change authorisations for some files...
-    IF ( EXISTS ${MMG_CI_TESTS}/LeakCheck_AbnormalEnd7/unreadable.meshb)
-      FILE(REMOVE ${MMG_CI_TESTS}/LeakCheck_AbnormalEnd7/unwrittable.meshb)
+    IF ( EXISTS ${CTEST_OUTPUT_DIR}/LeakCheck_AbnormalEnd7/unreadable.meshb)
+      FILE(REMOVE ${CTEST_OUTPUT_DIR}/LeakCheck_AbnormalEnd7/unwrittable.meshb)
     ENDIF()
     FILE(COPY ${MMG_CI_TESTS}/LeakCheck_AbnormalEnd7/dout.mesh
-      DESTINATION ${MMG_CI_TESTS}/LeakCheck_AbnormalEnd7/unwrittable.meshb)
+      DESTINATION ${CTEST_OUTPUT_DIR}/AbnormalEnd7/unwrittable.meshb)
 
-    IF ( EXISTS ${MMG_CI_TESTS}/LeakCheck_AbnormalEnd8/unwrittable.sol)
-      FILE(REMOVE ${MMG_CI_TESTS}/LeakCheck_AbnormalEnd8/unwrittable.sol)
+    IF ( EXISTS ${CTEST_OUTPUT_DIR}/LeakCheck_AbnormalEnd8/unwrittable.sol)
+      FILE(REMOVE ${CTEST_OUTPUT_DIR}/LeakCheck_AbnormalEnd8/unwrittable.sol)
     ENDIF()
     FILE(COPY ${MMG_CI_TESTS}/LeakCheck_AbnormalEnd8/dsol.sol
-      DESTINATION ${MMG_CI_TESTS}/LeakCheck_AbnormalEnd8/unwrittable.sol)
+      DESTINATION ${CTEST_OUTPUT_DIR}/AbnormalEnd8/unwrittable.sol)
 
     # Add common tests for mmgs/3d appli
     INCLUDE( ${CMAKE_SOURCE_DIR}/cmake/testing/mmg_tests.cmake )

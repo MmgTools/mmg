@@ -51,12 +51,12 @@ int main(int argc,char *argv[]) {
   MMG5_pMesh      mmgMesh;
   MMG5_pSol       mmgSol;
   int             k,ier;
-  char            *inname;
+  char            *inname, *outname1, *outname2;
 
   fprintf(stdout,"  -- TEST MMG3DLIB \n");
 
-  if ( argc != 2 ) {
-    printf(" Usage: %s filein \n",argv[0]);
+  if ( argc != 4 ) {
+    printf(" Usage: %s filein fileout1 filout2 \n",argv[0]);
     return(1);
   }
 
@@ -67,6 +67,20 @@ int main(int argc,char *argv[]) {
     exit(EXIT_FAILURE);
   }
   strcpy(inname,argv[1]);
+
+  outname1 = (char *) calloc(strlen(argv[2]) + 1, sizeof(char));
+  if ( outname1 == NULL ) {
+    perror("  ## Memory problem: calloc");
+    exit(EXIT_FAILURE);
+  }
+  strcpy(outname1,argv[2]);
+
+  outname2 = (char *) calloc(strlen(argv[3]) + 1, sizeof(char));
+  if ( outname2 == NULL ) {
+    perror("  ## Memory problem: calloc");
+    exit(EXIT_FAILURE);
+  }
+  strcpy(outname2,argv[3]);
 
   /** 1) Initialisation of mesh and sol structures */
   /* args of InitMesh:
@@ -142,9 +156,9 @@ int main(int argc,char *argv[]) {
     fprintf(stdout,"BAD ENDING OF MMG3DLIB\n");
 
   /* (Not mandatory) Automatically save the mesh */
-  MMG3D_saveMesh(mmgMesh,"2spheres_1.o");
+  MMG3D_saveMesh(mmgMesh,outname1);
 
-  if ( MMG3D_saveSol(mmgMesh,mmgSol,"2spheres_1.o") != 1 )
+  if ( MMG3D_saveSol(mmgMesh,mmgSol,outname1) != 1 )
     exit(EXIT_FAILURE);
 
 
@@ -212,11 +226,11 @@ int main(int argc,char *argv[]) {
 
 
   /* 7) Automatically save the mesh */
-  if ( MMG3D_saveMesh(mmgMesh,"2spheres_2.o") != 1 )
+  if ( MMG3D_saveMesh(mmgMesh,outname2) != 1 )
     exit(EXIT_FAILURE);
 
   /* 8) Automatically save the solution */
-  if ( MMG3D_saveSol(mmgMesh,mmgSol,"2spheres_2.o") != 1 )
+  if ( MMG3D_saveSol(mmgMesh,mmgSol,outname2) != 1 )
     exit(EXIT_FAILURE);
 
 
@@ -227,6 +241,12 @@ int main(int argc,char *argv[]) {
 
   free(inname);
   inname = NULL;
+
+  free(outname1);
+  outname1 = NULL;
+
+  free(outname2);
+  outname2 = NULL;
 
   return(ier);
 }
