@@ -215,7 +215,7 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
 
 
   /* Mesh improvement */
-  if ( (!mesh->info.noinsert) && !MMG2_mmg2d1n(mesh,sol) ) {
+  if ( !MMG2_mmg2d1n(mesh,sol) ) {
     if ( !MMG2_unscaleMesh(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
     _MMG2D_RETURN_AND_PACK(mesh,sol,MMG5_LOWFAILURE);
   }
