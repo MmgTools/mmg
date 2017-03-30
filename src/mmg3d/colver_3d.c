@@ -60,7 +60,7 @@ int _MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
     if ( !lon ) return(0);
 
     lon = MG_MIN(lon,_MMG5_LSHRT);
-    lon = MG_MAX(1.0/lon,_MMG5_LLONG);
+    lon = MG_MAX(1.0/lon,_MMG3D_LLONG);
   }
   calold = calnew = DBL_MAX;
   for (j=0; j<ilist; j++) {
@@ -289,7 +289,7 @@ _MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,char iedg,int *lists,int ili
  * \param iedg edge to collapse
  * \param listv pointer toward the list of the tetra in the ball of \a p0.
  * \param typchk  typchk type of checking permformed for edge length
- * (hmax or _MMG5_LLONG criterion).
+ * (hmax or _MMG3D_LLONG criterion).
  *
  * Check whether collapse ip -> iq could be performed, ip boundary point ;
  *  'mechanical' tests (positive jacobian) are not performed here ;

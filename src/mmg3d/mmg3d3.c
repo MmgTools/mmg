@@ -576,7 +576,7 @@ int _MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met) {
 
   /* Estimates of the minimum and maximum edge lengths in the mesh */
   avlen = _MMG5_estavglen(mesh);
-  mesh->info.hmax = _MMG5_LLONG*avlen;
+  mesh->info.hmax = _MMG3D_LLONG*avlen;
   mesh->info.hmin = _MMG5_LOPTS*avlen;
   
   //printf("Average length: %f ; proceed with hmin = %f, hmax = %f\n",avlen,mesh->info.hmin,mesh->info.hmax);

@@ -378,7 +378,7 @@ char _MMG5_chkedg(MMG5_pMesh mesh,MMG5_Tria *pt,char ori, double hmax,
     /*   } */
     /* } */
 
-    hma2 = _MMG5_LLONG*_MMG5_LLONG*hmax*hmax;
+    hma2 = _MMG3D_LLONG*_MMG3D_LLONG*hmax*hmax;
 
     /* check length */
     ux = p[i2]->c[0] - p[i1]->c[0];
@@ -995,7 +995,7 @@ int _MMG3D_delPatternPts(MMG5_pMesh mesh,_MMG5_Hash hash)
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
- * \param typchk type of checking permformed for edge length (hmax or _MMG5_LLONG criterion).
+ * \param typchk type of checking permformed for edge length (hmax or _MMG3D_LLONG criterion).
  * \return -1 if failed.
  * \return number of new points.
  *
@@ -1093,7 +1093,7 @@ _MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
               break;
             }
           }
-          hma2 = _MMG5_LLONG*_MMG5_LLONG*hma2*hma2;
+          hma2 = _MMG3D_LLONG*_MMG3D_LLONG*hma2*hma2;
           if ( ll > hma2 ) {
             ip = _MMG5_hashGet(&hash,ip1,ip2);
             mincal = MG_MIN(mincal,pt->qual);
@@ -1103,7 +1103,7 @@ _MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           ll = _MMG5_lenedg(mesh,met,i,pt);
           // Case of an internal tetra with 4 ridges vertices.
           if ( ll == 0 ) continue;
-          if ( ll > _MMG5_LLONG ) {
+          if ( ll > _MMG3D_LLONG ) {
             ip = _MMG5_hashGet(&hash,ip1,ip2);
             mincal = MG_MIN(mincal,pt->qual);
           }
@@ -1254,7 +1254,7 @@ split:
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
- * \param typchk type of checking permformed for edge length (hmax or _MMG5_LLONG criterion).
+ * \param typchk type of checking permformed for edge length (hmax or _MMG3D_LLONG criterion).
  * \return -1 if failed.
  * \return number of new points.
  *
@@ -1365,7 +1365,7 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         len = _MMG5_lenedg(mesh,met,ia,pt);
         // Case of an internal tetra with 4 ridges vertices.
         if ( len == 0 ) continue;
-        if ( len > _MMG5_LLONG )  MG_SET(pt->flag,ia);
+        if ( len > _MMG3D_LLONG )  MG_SET(pt->flag,ia);
         /* Treat here the ridges coming from a corner (we can not do that after
          * because the corner don't have xpoints) */
         if ( (mesh->point[ip1].tag & MG_CRN) ||  (mesh->point[ip2].tag & MG_CRN) ) {
