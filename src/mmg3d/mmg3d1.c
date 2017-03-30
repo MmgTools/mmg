@@ -1529,21 +1529,16 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
       }
       if ( !pt->flag )  continue;
 
-      if ( pt->qual < _MMG5_EPSOK ) {
-        ier = 0;
-      }
-      else {
-        switch (pt->flag) {
-        case 1: case 2: case 4: case 8: case 16: case 32:
-          ier = _MMG3D_split1_sim(mesh,met,k,vx);
-          break;
-        case 11: case 21: case 38: case 56:
-          ier = _MMG3D_split3_sim(mesh,met,k,vx);
-          break;
-        default:
-          ier = _MMG5_split2sf_sim(mesh,met,k,vx);
-          break;
-        }
+      switch (pt->flag) {
+      case 1: case 2: case 4: case 8: case 16: case 32:
+        ier = _MMG3D_split1_sim(mesh,met,k,vx);
+        break;
+      case 11: case 21: case 38: case 56:
+        ier = _MMG3D_split3_sim(mesh,met,k,vx);
+        break;
+      default:
+        ier = _MMG5_split2sf_sim(mesh,met,k,vx);
+        break;
       }
       if ( ier )  continue;
 

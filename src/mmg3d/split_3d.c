@@ -77,6 +77,9 @@ int _MMG3D_split1_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
   /* tau = sigma^-1 = permutation that sends the reference config (edge 01 split) to the current */
   pt = &mesh->tetra[k];
   vold = _MMG5_orvol(mesh->point,pt->v);
+
+  if ( vold < _MMG5_EPSOK )  return(0);
+
   pt0 = &mesh->tetra[0];
 
   /* default is case 1 */
@@ -110,13 +113,13 @@ int _MMG3D_split1_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
   pt0->v[tau[1]] = vx[taued[0]];
   vnew = _MMG5_orvol(mesh->point,pt0->v);
   if ( vnew < _MMG5_NULKAL )  return(0);
-  else if ( vold >= _MMG5_EPSOK && vnew < _MMG5_EPSOK )  return(0);
+  else if ( vnew < _MMG5_EPSOK )  return(0);
 
   memcpy(pt0,pt,sizeof(MMG5_Tetra));
   pt0->v[tau[0]] = vx[taued[0]];
   vnew = _MMG5_orvol(mesh->point,pt0->v);
   if ( vnew < _MMG5_NULKAL )  return(0);
-  else if ( vold >= _MMG5_EPSOK && vnew < _MMG5_EPSOK )  return(0);
+  else if ( vnew < _MMG5_EPSOK )  return(0);
 
   return(1);
 }
@@ -305,8 +308,7 @@ int _MMG3D_simbulgept(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int ip) {
     if ( caltmp < _MMG5_EPSOK )  return(0);
     calnew = MG_MIN(calnew,caltmp);
   }
-  /*if ( calold < _MMG5_EPSOK && calnew <= calold )  return(0);
-    else if ( calnew < 0.3*calold )  return(0);*/
+  /* if ( calnew < 0.3*calold )  return(0);*/
 
 
   return(1);
@@ -909,6 +911,8 @@ int _MMG5_split2sf_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]){
   pt0 = &mesh->tetra[0];
   vold = _MMG5_orvol(mesh->point,pt->v);
 
+  if ( vold < _MMG5_EPSOK ) return 0;
+
   /* identity is case 48 */
   tau[0] = 0 ; tau[1] = 1 ; tau[2] = 2 ; tau[3] = 3;
   taued = &permedge[0][0];
@@ -966,36 +970,36 @@ int _MMG5_split2sf_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]){
   pt0->v[tau[1]] = vx[taued[4]];
   pt0->v[tau[2]] = vx[taued[5]];
   vnew = _MMG5_orvol(mesh->point,pt0->v);
-  if ( vnew < _MMG5_NULKAL )  return(0);
-  else if ( vold >= _MMG5_EPSOK && vnew < _MMG5_EPSOK )  return(0);
+  if ( vnew < _MMG5_NULKAL || vold < _MMG5_EPSOK )  return(0);
+  else if ( vnew < _MMG5_EPSOK )  return(0);
 
   if ( imin == tau[1] ) {
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     pt0->v[tau[2]] = vx[taued[5]];
     pt0->v[tau[3]] = vx[taued[4]];
     vnew = _MMG5_orvol(mesh->point,pt0->v);
-    if ( vnew < _MMG5_NULKAL )  return(0);
-    else if ( vold >= _MMG5_EPSOK && vnew < _MMG5_EPSOK )  return(0);
+    if ( vnew < _MMG5_NULKAL|| vold < _MMG5_EPSOK )  return(0);
+    else if ( vnew < _MMG5_EPSOK )  return(0);
 
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     pt0->v[tau[3]] = vx[taued[5]];
     vnew = _MMG5_orvol(mesh->point,pt0->v);
-    if ( vnew < _MMG5_NULKAL )  return(0);
-    else if ( vold >= _MMG5_EPSOK && vnew < _MMG5_EPSOK )  return(0);
+    if ( vnew < _MMG5_NULKAL || vold < _MMG5_EPSOK )  return(0);
+    else if ( vnew < _MMG5_EPSOK )  return(0);
   }
   else {
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     pt0->v[tau[3]] = vx[taued[4]];
     vnew = _MMG5_orvol(mesh->point,pt0->v);
     if ( vnew < _MMG5_NULKAL )  return(0);
-    else if ( vold >= _MMG5_EPSOK && vnew < _MMG5_EPSOK )  return(0);
+    else if ( vnew < _MMG5_EPSOK )  return(0);
 
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     pt0->v[tau[1]] = vx[taued[4]];
     pt0->v[tau[3]] = vx[taued[5]];
     vnew = _MMG5_orvol(mesh->point,pt0->v);
     if ( vnew < _MMG5_NULKAL )  return(0);
-    else if ( vold >= _MMG5_EPSOK && vnew < _MMG5_EPSOK )  return(0);
+    else if ( vnew < _MMG5_EPSOK )  return(0);
   }
   return(1);
 }
@@ -1428,6 +1432,8 @@ int _MMG3D_split3_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
   pt0 = &mesh->tetra[0];
   vold = _MMG5_orvol(mesh->point,pt->v);
 
+  if ( vold < _MMG5_EPSOK ) return 0;
+
   /* identity is case 11 */
   tau[0] = 0 ; tau[1] = 1 ; tau[2] = 2 ; tau[3] = 3;
   taued = &permedge[0][0];
@@ -1452,21 +1458,21 @@ int _MMG3D_split3_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
   pt0->v[tau[2]] = vx[taued[1]];
   vnew = _MMG5_orvol(mesh->point,pt0->v);
   if ( vnew < _MMG5_NULKAL )  return(0);
-  else if ( vold >= _MMG5_EPSOK && vnew < _MMG5_EPSOK )  return(0);
+  else if ( vnew < _MMG5_EPSOK )  return(0);
 
   memcpy(pt0,pt,sizeof(MMG5_Tetra));
   pt0->v[tau[0]] = vx[taued[0]];
   pt0->v[tau[2]] = vx[taued[3]];
   vnew = _MMG5_orvol(mesh->point,pt0->v);
   if ( vnew < _MMG5_NULKAL )  return(0);
-  else if ( vold >= _MMG5_EPSOK && vnew < _MMG5_EPSOK )  return(0);
+  else if ( vnew < _MMG5_EPSOK )  return(0);
 
   memcpy(pt0,pt,sizeof(MMG5_Tetra));
   pt0->v[tau[0]] = vx[taued[1]];
   pt0->v[tau[1]] = vx[taued[3]];
   vnew = _MMG5_orvol(mesh->point,pt0->v);
   if ( vnew < _MMG5_NULKAL )  return(0);
-  else if ( vold >= _MMG5_EPSOK && vnew < _MMG5_EPSOK )  return(0);
+  else if ( vnew < _MMG5_EPSOK )  return(0);
 
   memcpy(pt0,pt,sizeof(MMG5_Tetra));
   pt0->v[tau[0]] = vx[taued[0]];
@@ -1474,7 +1480,7 @@ int _MMG3D_split3_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
   pt0->v[tau[2]] = vx[taued[1]];
   vnew = _MMG5_orvol(mesh->point,pt0->v);
   if ( vnew < _MMG5_NULKAL )  return(0);
-  else if ( vold >= _MMG5_EPSOK && vnew < _MMG5_EPSOK )  return(0);
+  else if ( vnew < _MMG5_EPSOK )  return(0);
 
   return(1);
 }
