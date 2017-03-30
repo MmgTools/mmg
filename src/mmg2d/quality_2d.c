@@ -190,7 +190,7 @@ void MMG2_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
     }
     if ( rap > 0.5 )  med++;
     if ( rap > 0.12 ) good++;
-    if ( rap < _MMG5_BADKAL )  mesh->info.badkal = 1;
+    if ( rap < _MMG2D_BADKAL )  mesh->info.badkal = 1;
     rapavg += rap;
     rapmax  = MG_MAX(rapmax,rap);
     ir = MG_MIN(4,(int)(5.0*rap));

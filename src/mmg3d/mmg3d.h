@@ -102,7 +102,7 @@ extern "C" {
 #define _MMG5_LOPTL     1.3
 #define _MMG5_LOPTS     0.6
 
-#define _MMG5_BADKAL    0.2
+#define _MMG3D_BADKAL    0.2
 
 #define _MMG3D_NPMAX  1000000 //200000
 #define _MMG3D_NAMAX   200000 //40000
