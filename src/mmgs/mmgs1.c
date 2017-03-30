@@ -121,7 +121,20 @@ int _MMGS_dichoto(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
       }
     }
   }
-  return(1);
+
+  /* For very ill-shaped elements we can have no valid position */
+  switch (pt->flag) {
+  case 1: case 2: case 4:
+    ier = _MMGS_split1_sim(mesh,met,k,j,vx);
+    break;
+  case 7:
+    ier = _MMGS_split3_sim(mesh,met,k,vx);
+    break;
+  default:
+    ier = _MMG5_split2_sim(mesh,met,k,vx);
+    break;
+  }
+  return(ier);
 }
 
 /**
@@ -130,7 +143,7 @@ int _MMGS_dichoto(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
  * \param iel index of the starting triangle.
  * \param ia local index of the edge to split in \a k.
  * \param ip index of the point that we try to create.
- * \return 1.
+ * \return 1 if success, 0 otherwise.
  *
  * Find acceptable position for _MMG5_split1b, starting from point ip.
  *
@@ -182,11 +195,12 @@ int _MMGS_dichoto1b(MMG5_pMesh mesh, MMG5_pSol met, int iel, int ia, int ip) {
   while ( ++it < maxit );
   if ( !ier )  t = to;
 
+  /* For very ill-shaped elements, we can have no valid position */
   ppt->c[0] = m[0] + t*(o[0]-m[0]);
   ppt->c[1] = m[1] + t*(o[1]-m[1]);
   ppt->c[2] = m[2] + t*(o[2]-m[2]);
 
-  return(1);
+  return( _MMGS_simbulgept(mesh,met,iel,ia,ip) );
 }
 
 /* check if edge need to be split and return a binary coding the numbers of the edges of tria iel that should be split according to a hausdorff distance criterion */
@@ -1004,10 +1018,12 @@ static int adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
       return (ns);
     }
     else if ( ip > 0 ) {
-      if ( !_MMGS_simbulgept(mesh,met,k,imax,ip) ) {
-        _MMGS_dichoto1b(mesh,met,k,imax,ip);
+      ier = _MMGS_simbulgept(mesh,met,k,imax,ip);
+      if ( !ier ) {
+        ier = _MMGS_dichoto1b(mesh,met,k,imax,ip);
       }
-      ier = split1b(mesh,k,imax,ip);
+      if ( ier ) ier = split1b(mesh,k,imax,ip);
+
       if ( !ier ) {
         /* Lack of memory, go to collapse step. */
         _MMGS_delPt(mesh,ip);

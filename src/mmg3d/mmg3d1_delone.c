@@ -520,9 +520,6 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
           if ( !ier ) {
             ier = _MMG3D_dichoto1b(mesh,met,list,ilist,ip);
           }
-          /* We can create element with 0 qualities at machine epsilon even when ip
-             is the mid edge point */
-          ier = _MMG3D_simbulgept(mesh,met,list,ilist,ip);
           if ( ier )
             ier = _MMG5_split1b(mesh,met,list,ilist,ip,1,1);
 

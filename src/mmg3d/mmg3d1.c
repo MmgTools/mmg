@@ -80,7 +80,7 @@ void _MMG5_tet2tri(MMG5_pMesh mesh,int k,char ie,MMG5_Tria *ptt) {
  * \param met pointer toward the metric structure.
  * \param k tetrahedron index.
  * \param vx pointer toward table of edges to split.
- * \return 1.
+ * \return 1 if success, 0 if fail.
  *
  * Find acceptable position for splitting.
  *
@@ -156,7 +156,20 @@ int _MMG3D_dichoto(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
       }
     }
   }
-  return(1);
+
+  /* For very ill-shaped elements, we can have no valid position */
+  switch (pt->flag) {
+  case 1: case 2: case 4: case 8: case 16: case 32:
+    ier = _MMG3D_split1_sim(mesh,met,k,vx);
+    break;
+  case 11: case 21: case 38: case 56:
+    ier = _MMG3D_split3_sim(mesh,met,k,vx);
+    break;
+  default:
+    ier = _MMG5_split2sf_sim(mesh,met,k,vx);
+    break;
+  }
+  return(ier);
 }
 
 /**
@@ -165,7 +178,7 @@ int _MMG3D_dichoto(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
  * \param list pointer toward the shell of edge.
  * \param ret double of the number of tetrahedra in the shell.
  * \param ip new point index.
- * \return 1.
+ * \return 1 if success, 0 if fail
  *
  * Find acceptable position for _MMG5_split1b, passing the shell of
  * considered edge, starting from o point.
@@ -218,11 +231,12 @@ int _MMG3D_dichoto1b(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int ip) {
   while ( ++it < maxit );
   if ( !ier )  t = to;
 
+  /* For very ill-shaped elements, we can have novalid position */
   ppt->c[0] = m[0] + t*(o[0]-m[0]);
   ppt->c[1] = m[1] + t*(o[1]-m[1]);
   ppt->c[2] = m[2] + t*(o[2]-m[2]);
 
-  return(1);
+  return( _MMG3D_simbulgept(mesh,met,list,ret,ip) );
 }
 
 /**
