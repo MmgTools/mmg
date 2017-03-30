@@ -168,16 +168,16 @@ int _MMG2_chkcol(MMG5_pMesh mesh, MMG5_pSol met,int k,char i,int *list,char typc
       
       /* Check quality and volume inversion */
       if ( typchk == 2 && met->m && met->size == 3 )
-        caltmp = ALPHAD*_MMG2_caltri_ani(mesh,met,pt1);
+        caltmp = _MMG2D_ALPHAD*_MMG2_caltri_ani(mesh,met,pt1);
       else
-        caltmp = ALPHAD*_MMG2_caltri_iso(mesh,NULL,pt1);
+        caltmp = _MMG2D_ALPHAD*_MMG2_caltri_iso(mesh,NULL,pt1);
       
       calold = MG_MIN(calold,caltmp);
       
       if ( typchk == 2 && met->m && met->size == 3 )
-        caltmp = ALPHAD*_MMG2_caltri_ani(mesh,met,pt0);
+        caltmp = _MMG2D_ALPHAD*_MMG2_caltri_ani(mesh,met,pt0);
       else
-        caltmp = ALPHAD*_MMG2_caltri_iso(mesh,NULL,pt0);
+        caltmp = _MMG2D_ALPHAD*_MMG2_caltri_iso(mesh,NULL,pt0);
       
       if ( caltmp < _MMG2_NULKAL )  return(0);
       calnew = MG_MIN(calnew,caltmp);

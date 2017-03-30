@@ -183,7 +183,7 @@ void MMG2_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
       continue;
     }
     ok++;
-    rap = ALPHAD * MMG2D_caltri(mesh,met,pt);
+    rap = _MMG2D_ALPHAD * MMG2D_caltri(mesh,met,pt);
     if ( rap < rapmin ) {
       rapmin = rap;
       iel    = ok;
@@ -239,7 +239,7 @@ void MMG2_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
 /*   for (k=0; k<=33; k++)  his01[k] = 0; */
 /*   for (k=0; k<=10; k++)  his10[k] = 0; */
 
-/*   coef = ALPHA; */
+/*   coef = _MMG2D_ALPHA; */
 /*   nex  = 0; */
 /*   for (k=1; k<=mesh->nt; k++) { */
 /*     pt = &mesh->tria[k]; */
@@ -249,7 +249,7 @@ void MMG2_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
 /*     } */
 /*     nn++; */
 
-/*     rap4 = ALPHA * MMG2_caltri(mesh,sol,pt); */
+/*     rap4 = _MMG2D_ALPHA * MMG2_caltri(mesh,sol,pt); */
 /*     rap4 = M_MAX(rap4,EPSD); */
 /*     ir   = (int)rap4; */
 /*     if ( rap4 > rapmax ) { */
