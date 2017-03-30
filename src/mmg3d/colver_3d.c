@@ -59,7 +59,7 @@ int _MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
 
     if ( !lon ) return(0);
 
-    lon = MG_MIN(lon,_MMG5_LSHRT);
+    lon = MG_MIN(lon,_MMG3D_LSHRT);
     lon = MG_MAX(1.0/lon,_MMG3D_LLONG);
   }
   calold = calnew = DBL_MAX;

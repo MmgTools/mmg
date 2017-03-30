@@ -889,7 +889,7 @@ static int _MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           ll = _MMG5_lenedg(mesh,met,_MMG5_iarf[i][j],pt);
           // Case of an internal tetra with 4 ridges vertices.
           if ( ll == 0 ) continue;
-          if ( ll > _MMG5_LSHRT )  continue;
+          if ( ll > _MMG3D_LSHRT )  continue;
         }
 
 

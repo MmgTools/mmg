@@ -98,7 +98,7 @@ extern "C" {
 /* numerical accuracy */
 #define _MMG3D_ALPHAD    20.7846096908265    //0.04811252243247      /* 12*sqrt(3) */
 #define _MMG3D_LLONG     2.5//2.0   // 1.414213562373
-#define _MMG5_LSHRT     0.3  // 0.707106781186
+#define _MMG3D_LSHRT     0.3  // 0.707106781186
 #define _MMG5_LOPTL     1.3
 #define _MMG5_LOPTS     0.6
 
