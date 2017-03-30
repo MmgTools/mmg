@@ -43,9 +43,9 @@ extern "C" {
 #define _MMGS_BADKAL      2.e-2
 #define _MMGS_NULKAL      1.e-4
 
-#define _MMG5_NPMAX     500000
-#define _MMG5_NTMAX    1000000
-#define _MMG5_XPMAX     500000
+#define _MMGS_NPMAX     500000
+#define _MMGS_NTMAX    1000000
+#define _MMGS_XPMAX     500000
 
 
 #define MS_SIN(tag)      ((tag & MG_CRN) || (tag & MG_REQ) || (tag & MG_NOM))

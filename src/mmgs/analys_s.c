@@ -584,7 +584,7 @@ static int norver(MMG5_pMesh mesh) {
   }
 
   /* memory to store normals on both sides of ridges */
-  mesh->xpmax = MG_MAX(1.5*xp,_MMG5_XPMAX);
+  mesh->xpmax = MG_MAX(1.5*xp,_MMGS_XPMAX);
   _MMG5_ADD_MEM(mesh,(mesh->xpmax+1)*sizeof(MMG5_xPoint),"boundary points",return(0));
   _MMG5_SAFE_CALLOC(mesh->xpoint,mesh->xpmax+1,MMG5_xPoint);
 
