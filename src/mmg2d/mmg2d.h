@@ -52,7 +52,7 @@ extern "C" {
 #define _MMG2D_EPSA   1.e-12
 
 #define _MMG2D_PRECI  1.
-#define SIZE    0.75
+#define _MMG2D_SIZE   0.75
 #define COS90   0.0
 #define ALPHA  0.28867513459
 #define ALPHAD 3.464101615137755   /* 6.0 / sqrt(3.0)  */
