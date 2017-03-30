@@ -27,10 +27,10 @@
 ###############################################################################
 
 # Simple test: must already pass
-ADD_TEST(NAME Circle
+ADD_TEST(NAME mmg2d_Circle
   COMMAND ${EXECUT_MMG2D} -v 5
   ${MMG2D_CI_TESTS}/Circle/cercle
-  -out ${MMG2D_CI_TESTS}/Circle/cercle.o.meshb)
+  -out cercle.o.meshb)
 
 
 ###############################################################################
@@ -40,12 +40,12 @@ ADD_TEST(NAME Circle
 ###############################################################################
 
 # Binary gmsh
-ADD_TEST(NAME binary_gmsh_2d
+ADD_TEST(NAME mmg2d_binary_gmsh_2d
   COMMAND ${EXECUT_MMG2D} -v 5
   ${MMG2D_CI_TESTS}/GmshInout/cercle1.mshb)
 
 # Ascii gmsh
-ADD_TEST(NAME ascii_gmsh_2d
+ADD_TEST(NAME mmg2d_ascii_gmsh_2d
   COMMAND ${EXECUT_MMG2D} -v 5
   ${MMG2D_CI_TESTS}/GmshInout/cercle1.msh)
 
@@ -56,16 +56,16 @@ ADD_TEST(NAME ascii_gmsh_2d
 #####         Isotropic cases
 #####
 ###############################################################################
-ADD_TEST(NAME SquareIso
+ADD_TEST(NAME mmg2d_SquareIso
   COMMAND ${EXECUT_MMG2D} -v 5
   ${MMG2D_CI_TESTS}/SquareIso/carretest
-  -out ${MMG2D_CI_TESTS}/SquareIso/carretest.o.meshb)
+  -out carretest.o.meshb)
 
 ####### -nosurf option
-ADD_TEST(NAME 2squares
+ADD_TEST(NAME mmg2d_2squares
   COMMAND ${EXECUT_MMG2D} -msh 2 -hmax 1 -nosurf -v 5
   ${MMG2D_CI_TESTS}/2squares/2squares
-  -out ${MMG2D_CI_TESTS}/2squares/2squares.o.meshb)
+  -out 2squares.o.meshb)
 
 
 ###############################################################################
@@ -73,37 +73,37 @@ ADD_TEST(NAME 2squares
 #####         Anisotropic cases
 #####
 ###############################################################################
-ADD_TEST(NAME SquareAniso
+ADD_TEST(NAME mmg2d_SquareAniso
   COMMAND ${EXECUT_MMG2D} -v 5
   ${MMG2D_CI_TESTS}/SquareAniso/adap1
-  -out ${MMG2D_CI_TESTS}/SquareAniso/adap1.o.meshb)
+  adap1.o.meshb)
 
 ###############################################################################
 #####
 #####         Mesh generation
 #####
 ###############################################################################
-ADD_TEST(NAME SquareGeneration
+ADD_TEST(NAME mmg2d_SquareGeneration
   COMMAND ${EXECUT_MMG2D} -v 5
   ${MMG2D_CI_TESTS}/SquareGeneration/carretest
-  -out ${MMG2D_CI_TESTS}/SquareGeneration/carretest.o.meshb)
+  carretest.o.meshb)
 
-ADD_TEST(NAME NacaGeneration
+ADD_TEST(NAME mmg2d_NacaGeneration
   COMMAND ${EXECUT_MMG2D} -v 5
   ${MMG2D_CI_TESTS}/NacaGeneration/naca
-  -out ${MMG2D_CI_TESTS}/NacaGeneration/naca.o.meshb)
+  -out naca.o.meshb)
 
 ###############################################################################
 #####
 #####         Implicit domain discretization
 #####
 ###############################################################################
-#ADD_TEST(NAME LSDiscretization
+#ADD_TEST(NAME mmg2d_LSDiscretization
 #  COMMAND ${EXECUT_MMG2D} -v 5 -ls
 #  ${MMG2D_CI_TESTS}/LSDiscretization/dom
-#  -out ${MMG2D_CI_TESTS}/LSDiscretization/dom.o.meshb)
+#  -out dom.o.meshb)
 #
-#ADD_TEST(NAME LSDiscretization2
+#ADD_TEST(NAME mmg2d_LSDiscretization2
 #  COMMAND ${EXECUT_MMG2D} -v 5 -ls
 #  ${MMG2D_CI_TESTS}/LSDiscretization/nacai
-#  -out ${MMG2D_CI_TESTS}/LSDiscretization/nacai.o.meshb)
+#  -out nacai.o.meshb)

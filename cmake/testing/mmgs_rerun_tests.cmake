@@ -26,16 +26,18 @@
 #####
 ##############################################################################
 #####
-ADD_TEST(NAME TorusholesAni_${EXECUT_MMGS}_2
+ADD_TEST(NAME mmgs_TorusholesAni_${EXECUT_MMGS}_2
  COMMAND ${EXECUT_MMGS} -v 5 -hgrad 1.15
  ${MMG_CI_TESTS}/TorusholesAni/torusholes.o.meshb
  -out ${MMG_CI_TESTS}/TorusholesAni/torusholes.o.o.meshb)
 
-SET_TESTS_PROPERTIES(TorusholesAni_${EXECUT_MMGS}_2 PROPERTIES DEPENDS TorusholesAni_${EXECUT_MMGS})
+SET_TESTS_PROPERTIES(mmgs_TorusholesAni_${EXECUT_MMGS}_2 PROPERTIES
+  DEPENDS mmgs_TorusholesAni_${EXECUT_MMGS})
 
-ADD_TEST(NAME TorusholesAni_chocCyl_${EXECUT_MMGS}_2
+ADD_TEST(NAME mmgs_TorusholesAni_chocCyl_${EXECUT_MMGS}_2
  COMMAND ${EXECUT_MMGS} -v 5 -hgrad 1.15
  ${MMG_CI_TESTS}/TorusholesAni_chocCyl/torusholesTiny.o.meshb
  -out ${MMG_CI_TESTS}/TorusholesAni_chocCyl/torusholesTiny.o.o.meshb)
 
-SET_TESTS_PROPERTIES(TorusholesAni_chocCyl_${EXECUT_MMGS}_2 PROPERTIES DEPENDS TorusholesAni_chocCyl_${EXECUT_MMGS})
+SET_TESTS_PROPERTIES(mmgs_TorusholesAni_chocCyl_${EXECUT_MMGS}_2 PROPERTIES
+  DEPENDS mmgs_TorusholesAni_chocCyl_${EXECUT_MMGS})
