@@ -49,7 +49,7 @@ extern "C" {
 #define M_MU      0.33
 
 #define _MMG2_EPSD   1.e-10 //e-20??
-#define EPSA   1.e-12
+#define _MMG2D_EPSA   1.e-12
 
 #define _MMG2D_PRECI  1.
 #define SIZE    0.75
