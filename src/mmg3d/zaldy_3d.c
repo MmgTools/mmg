@@ -135,7 +135,7 @@ void _MMG3D_memOption(MMG5_pMesh mesh) {
 
   mesh->npmax = MG_MAX(1.5*mesh->np,_MMG3D_NPMAX);
   mesh->nemax = MG_MAX(1.5*mesh->ne,_MMG5_NEMAX);
-  mesh->ntmax = MG_MAX(1.5*mesh->nt,_MMG5_NTMAX);
+  mesh->ntmax = MG_MAX(1.5*mesh->nt,_MMG3D_NTMAX);
 
   if ( mesh->info.mem <= 0 ) {
     if ( mesh->memMax )
@@ -158,7 +158,7 @@ void _MMG3D_memOption(MMG5_pMesh mesh) {
       mesh->memMax= (long long)(mesh->info.mem)*million;
     }
 
-    /* if asked memory is lower than default _MMG3D_NPMAX/_MMG5_NEMAX/_MMG5_NTMAX we take lower values */
+    /* if asked memory is lower than default _MMG3D_NPMAX/_MMG5_NEMAX/_MMG3D_NTMAX we take lower values */
     ctri = 2;
 
     /* Euler-poincare: ne = 6*np; nt = 2*np; na = np/5 *
@@ -208,7 +208,7 @@ void _MMG3D_memOption(MMG5_pMesh mesh) {
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {
     fprintf(stdout,"  _MMG3D_NPMAX    %d\n",mesh->npmax);
-    fprintf(stdout,"  _MMG5_NTMAX    %d\n",mesh->ntmax);
+    fprintf(stdout,"  _MMG3D_NTMAX    %d\n",mesh->ntmax);
     fprintf(stdout,"  _MMG5_NEMAX    %d\n",mesh->nemax);
   }
 

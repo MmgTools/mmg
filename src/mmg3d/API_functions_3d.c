@@ -206,7 +206,7 @@ int MMG3D_Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nprism,
   } else {
     mesh->npmax = MG_MAX(1.5*mesh->np,_MMG3D_NPMAX);
     mesh->nemax = MG_MAX(1.5*mesh->ne,_MMG5_NEMAX);
-    mesh->ntmax = MG_MAX(1.5*mesh->nt,_MMG5_NTMAX);
+    mesh->ntmax = MG_MAX(1.5*mesh->nt,_MMG3D_NTMAX);
 
   }
   _MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(MMG5_Point),"initial vertices",
