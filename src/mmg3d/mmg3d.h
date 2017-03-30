@@ -105,7 +105,7 @@ extern "C" {
 #define _MMG5_BADKAL    0.2
 
 #define _MMG3D_NPMAX  1000000 //200000
-#define _MMG5_NAMAX   200000 //40000
+#define _MMG3D_NAMAX   200000 //40000
 #define _MMG5_NTMAX  2000000 //400000
 #define _MMG5_NEMAX  6000000 //1200000
 

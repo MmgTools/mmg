@@ -1054,7 +1054,7 @@ int _MMG5_hGeom(MMG5_pMesh mesh) {
   /* if edges exist in mesh, hash special edges from existing field */
   if ( mesh->na ) {
     if ( !mesh->htab.geom ) {
-      mesh->namax = MG_MAX(1.5*mesh->na,_MMG5_NAMAX);
+      mesh->namax = MG_MAX(1.5*mesh->na,_MMG3D_NAMAX);
       _MMG5_ADD_MEM(mesh,(3*mesh->namax+2)*sizeof(MMG5_hgeom),"htab",return(0));
       _MMG5_hNew(&mesh->htab,mesh->na,3*mesh->namax,1);
     }
@@ -1124,7 +1124,7 @@ int _MMG5_hGeom(MMG5_pMesh mesh) {
     if ( mesh->htab.geom )
       _MMG5_DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(MMG5_hgeom));
 
-    mesh->namax = MG_MAX(1.5*mesh->na,_MMG5_NAMAX);
+    mesh->namax = MG_MAX(1.5*mesh->na,_MMG3D_NAMAX);
     _MMG5_ADD_MEM(mesh,(3*mesh->namax+2)*sizeof(MMG5_hgeom),"htab",return(0));
     _MMG5_hNew(&mesh->htab,mesh->na,3*mesh->namax,1);
     mesh->na = 0;
