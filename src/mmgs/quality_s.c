@@ -400,10 +400,10 @@ int _MMGS_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
     ok++;
 
     if ( met->m && (met->size == 6) ) {
-      rap = ALPHAD * _MMG5_caltri33_ani(mesh,met,pt);
+      rap = _MMGS_ALPHAD * _MMG5_caltri33_ani(mesh,met,pt);
     }
     else
-      rap = ALPHAD * _MMG5_calelt(mesh,NULL,pt);
+      rap = _MMGS_ALPHAD * _MMG5_calelt(mesh,NULL,pt);
 
     if ( rap < rapmin ) {
       rapmin = rap;
@@ -421,7 +421,7 @@ int _MMGS_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
   fprintf(stdout,"     BEST   %8.6f  AVRG.   %8.6f  WRST.   %8.6f (%d)\n",
           rapmax,rapavg / (mesh->nt-nex),rapmin,iel);
 
-  rapminOnAlpha = rapmin/ALPHAD;
+  rapminOnAlpha = rapmin/_MMGS_ALPHAD;
   if ( abs(mesh->info.imprim) >= 3 ){
 
     /* print histo */
@@ -433,7 +433,7 @@ int _MMGS_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
     }
   }
 
-  return ( _MMG5_minQualCheck(iel,rapmin,ALPHAD) );
+  return ( _MMG5_minQualCheck(iel,rapmin,_MMGS_ALPHAD) );
 }
 
 /**
@@ -466,7 +466,7 @@ int _MMGS_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
     }
     ok++;
 
-    rap = ALPHAD * _MMG5_calelt(mesh,met,pt);
+    rap = _MMGS_ALPHAD * _MMG5_calelt(mesh,met,pt);
 
     if ( rap < rapmin ) {
       rapmin = rap;
@@ -494,7 +494,7 @@ int _MMGS_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
     }
   }
 
-  return ( _MMG5_minQualCheck(iel,rapmin,ALPHAD) );
+  return ( _MMG5_minQualCheck(iel,rapmin,_MMGS_ALPHAD) );
 }
 
 #define COS145   -0.81915204428899

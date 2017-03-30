@@ -32,14 +32,14 @@ extern "C" {
 #endif
 
 /* numerical accuracy */
-#define ALPHAD    3.464101615137755   /* 6.0 / sqrt(3.0)  */
+#define _MMGS_ALPHAD    3.464101615137755   /* 6.0 / sqrt(3.0)  */
 
 #define _MMGS_LOPTL     1.4
 #define _MMGS_LOPTS     0.71
 #define _MMGS_LLONG     2.0
 #define _MMGS_LSHRT     0.3
 
-#define _MMG5_LMAX  1024
+#define _MMGS_LMAX  1024
 #define _MMGS_BADKAL      2.e-2
 #define _MMGS_NULKAL      1.e-4
 

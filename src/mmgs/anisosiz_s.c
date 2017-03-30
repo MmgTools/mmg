@@ -55,7 +55,7 @@ static int _MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   double             *m,n[3],isqhmin,isqhmax,b0[3],b1[3],ps1,tau[3];
   double             ntau2,gammasec[3];
   double             c[3],kappa,maxkappa,alpha,hausd,hausd_v;
-  int                ilist,list[_MMG5_LMAX+2],k,i,iel,idp,isloc,init_s;
+  int                ilist,list[_MMGS_LMAX+2],k,i,iel,idp,isloc,init_s;
   unsigned char      i0,i1,i2;
 
   pt  = &mesh->tria[it];
@@ -188,10 +188,10 @@ static int _MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   MMG5_pPoint    p0,p1,p2;
   _MMG5_Bezier   b;
   MMG5_pPar      par;
-  int            k,iel,idp,ilist1,ilist2,ilist,*list,list1[_MMG5_LMAX+2];
-  int            list2[_MMG5_LMAX+2],iprid[2],ier,isloc;
+  int            k,iel,idp,ilist1,ilist2,ilist,*list,list1[_MMGS_LMAX+2];
+  int            list2[_MMGS_LMAX+2],iprid[2],ier,isloc;
   double         *m,isqhmin,isqhmax,*n1,*n2,*n,*t,trot[2],u[2];
-  double         r[3][3],lispoi[3*_MMG5_LMAX+1],ux,uy,uz,det,bcu[3];
+  double         r[3][3],lispoi[3*_MMGS_LMAX+1],ux,uy,uz,det,bcu[3];
   double         detg,detd;
   unsigned char  i,i0,i1,i2;
 
@@ -364,8 +364,8 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   MMG5_pPoint        p0,p1;
   _MMG5_Bezier       b;
   MMG5_pPar          par;
-  int                i,ilist,list[_MMG5_LMAX+2],k,iel,ipref[2],idp,isloc;
-  double             *m,isqhmin,isqhmax,*n,r[3][3],lispoi[3*_MMG5_LMAX+1];
+  int                i,ilist,list[_MMGS_LMAX+2],k,iel,ipref[2],idp,isloc;
+  double             *m,isqhmin,isqhmax,*n,r[3][3],lispoi[3*_MMGS_LMAX+1];
   double             ux,uy,uz,det2d,intm[3],c[3];
   double             tAA[6],tAb[3],hausd;
   unsigned char      i0,i1,i2;
@@ -547,8 +547,8 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   MMG5_pPoint         p0,p1;
   _MMG5_Bezier        b;
   MMG5_pPar           par;
-  int                 ilist,list[_MMG5_LMAX+2],k,iel,idp,isloc,i;
-  double              *n,*m,r[3][3],ux,uy,uz,lispoi[3*_MMG5_LMAX+1];
+  int                 ilist,list[_MMGS_LMAX+2],k,iel,idp,isloc,i;
+  double              *n,*m,r[3][3],ux,uy,uz,lispoi[3*_MMGS_LMAX+1];
   double              det2d,c[3],isqhmin,isqhmax;
   double              tAA[6],tAb[3],hausd;
   unsigned char       i0,i1;
