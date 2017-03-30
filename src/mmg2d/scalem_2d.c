@@ -81,7 +81,7 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   }
 
   /* normalize coordinates */
-  dd = PRECI / info->delta;
+  dd = _MMG2D_PRECI / info->delta;
 
   mesh->info.hausd *= dd;
 
@@ -314,7 +314,7 @@ int MMG2_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   info = &mesh->info;
 
   /* de-normalize coordinates */
-  dd = info->delta / (double)PRECI;
+  dd = info->delta / (double)_MMG2D_PRECI;
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
     if ( !M_VOK(ppt) )  continue;

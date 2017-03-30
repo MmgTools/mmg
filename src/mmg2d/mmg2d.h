@@ -51,8 +51,7 @@ extern "C" {
 #define _MMG2_EPSD   1.e-10 //e-20??
 #define EPSA   1.e-12
 
-#define TGV    1.e15
-#define PRECI  1.
+#define _MMG2D_PRECI  1.
 #define SIZE    0.75
 #define COS90   0.0
 #define ALPHA  0.28867513459

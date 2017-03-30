@@ -453,7 +453,7 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   /* Top left corner */
   c[0] = -0.5; //mesh->info.min[0] - 1.;
-  c[1] =  PRECI / mesh->info.delta *(mesh->info.max[1]-mesh->info.min[1]) + 0.5;//mesh->info.max[1] + 1.;
+  c[1] =  _MMG2D_PRECI / mesh->info.delta *(mesh->info.max[1]-mesh->info.min[1]) + 0.5;//mesh->info.max[1] + 1.;
   ip2 = _MMG2D_newPt(mesh,c,0);
   if ( !ip2 ) {
     /* reallocation of point table */
@@ -465,7 +465,7 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
   }
 
   /* Bottom right corner */
-  c[0] =  PRECI / mesh->info.delta *(mesh->info.max[0]-mesh->info.min[0]) + 0.5;//mesh->info.max[0] + 1.;
+  c[0] =  _MMG2D_PRECI / mesh->info.delta *(mesh->info.max[0]-mesh->info.min[0]) + 0.5;//mesh->info.max[0] + 1.;
   c[1] = -0.5;//mesh->info.min[1] - 1.;
   ip3 = _MMG2D_newPt(mesh,c,0);
   if ( !ip3 ) {
@@ -478,8 +478,8 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
   }
 
   /* Top right corner */
-  c[0] =  PRECI / mesh->info.delta *(mesh->info.max[0]-mesh->info.min[0]) + 0.5;//mesh->info.max[0] + 1.;
-  c[1] = PRECI / mesh->info.delta *(mesh->info.max[1]-mesh->info.min[1]) + 0.5;//mesh->info.max[1] + 1.;
+  c[0] =  _MMG2D_PRECI / mesh->info.delta *(mesh->info.max[0]-mesh->info.min[0]) + 0.5;//mesh->info.max[0] + 1.;
+  c[1] = _MMG2D_PRECI / mesh->info.delta *(mesh->info.max[1]-mesh->info.min[1]) + 0.5;//mesh->info.max[1] + 1.;
   ip4 = _MMG2D_newPt(mesh,c,0);
   if ( !ip4 ) {
     /* reallocation of point table */

@@ -41,7 +41,7 @@ pBucket MMG2_newBucket(MMG5_pMesh mesh,int nmax) {
 
 
   /* insert vertices */
-  dd = nmax / (double)PRECI;
+  dd = nmax / (double)_MMG2D_PRECI;
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
     if ( !M_VOK(ppt) )  continue;
@@ -78,7 +78,7 @@ int buckin_ani(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,int ip) {
 
   ppt  = &mesh->point[ip];
   siz  = bucket->size;
-  dd   = siz / (double)PRECI;
+  dd   = siz / (double)_MMG2D_PRECI;
   iadr = ip*sol->size;
   ma   = &sol->m[iadr];
   dmi  = LFILT*LFILT;
@@ -181,7 +181,7 @@ int buckin_iso(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,int ip) {
 
   ppt = &mesh->point[ip];
   siz = bucket->size;
-  dd  = siz / (double)PRECI;
+  dd  = siz / (double)_MMG2D_PRECI;
   hpi = LFILT * sol->m[ip];
   hp1 = hpi*hpi;
   ii  = M_MAX(0,(int)(dd * ppt->c[0])-1);
@@ -255,7 +255,7 @@ int MMG2_addBucket(MMG5_pMesh mesh,pBucket bucket,int ip) {
 
   ppt = &mesh->point[ip];
   siz = bucket->size;
-  dd  = siz / (double)PRECI;
+  dd  = siz / (double)_MMG2D_PRECI;
   ii  = M_MAX(0,(int)(dd * ppt->c[0])-1);
   jj  = M_MAX(0,(int)(dd * ppt->c[1])-1);
   ic  = jj*siz + ii;
@@ -281,7 +281,7 @@ int MMG2_delBucket(MMG5_pMesh mesh,pBucket bucket,int ip) {
 
   ppt = &mesh->point[ip];
   siz = bucket->size;
-  dd  = siz / (double)PRECI;
+  dd  = siz / (double)_MMG2D_PRECI;
   ii  = M_MAX(0,(int)(dd * ppt->c[0])-1);
   jj  = M_MAX(0,(int)(dd * ppt->c[1])-1);
   ic  = jj*siz + ii;
