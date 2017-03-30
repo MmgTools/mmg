@@ -109,9 +109,7 @@ extern "C" {
 #define _MMG3D_NTMAX  2000000 //400000
 #define _MMG3D_NEMAX  6000000 //1200000
 
-#define _MMG5_BOXSIZE 500
-
-#define _MMG5_SHORTMAX     0x7fff
+#define _MMG3D_SHORTMAX     0x7fff
 
 
 /** \brief next vertex of tetra: {1,2,3,0,1,2,3} */

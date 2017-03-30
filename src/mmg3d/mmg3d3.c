@@ -407,7 +407,7 @@ int _MMG5_chkmovmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t) {
   char         i,j;
   
   /* Pseudo time-step = fraction of disp to perform */
-  tau = (double)t / _MMG5_SHORTMAX;
+  tau = (double)t / _MMG3D_SHORTMAX;
   
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
@@ -437,7 +437,7 @@ short _MMG5_dikomv(MMG5_pMesh mesh,MMG5_pSol disp) {
   it = 0;
   
   tmin = 0;
-  tmax = _MMG5_SHORTMAX;
+  tmax = _MMG3D_SHORTMAX;
   
   /* If full displacement can be achieved */
   if ( _MMG5_chkmovmesh(mesh,disp,tmax) )
@@ -477,7 +477,7 @@ int _MMG5_dispmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t,int itdeg) {
   int           k,np;
   char          i,j;
   
-  tau = (double)t /_MMG5_SHORTMAX;
+  tau = (double)t /_MMG3D_SHORTMAX;
   ctau = 1.0 - tau;
   
   /* Identify elements which are very distorted in the process */
@@ -609,7 +609,7 @@ int _MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met) {
         return(0);
       }
     
-      tau = tau + ((double)t /_MMG5_SHORTMAX)*(1.0-tau);
+      tau = tau + ((double)t /_MMG3D_SHORTMAX)*(1.0-tau);
       if ( (abs(mesh->info.imprim) > 3 ) || mesh->info.ddebug )
         printf("   ---> Realized displacement: %f\n",tau);
     
@@ -670,7 +670,7 @@ int _MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met) {
       nnnc   += nnc;
       nnns   += nns;
 
-      if ( t == _MMG5_SHORTMAX ) break;
+      if ( t == _MMG3D_SHORTMAX ) break;
     }
     if ( mesh->info.imprim && abs(mesh->info.imprim) < 4 ) {
       printf("   ---> Realized displacement: %f\n",tau);
@@ -679,7 +679,7 @@ int _MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met) {
                " swapped, %d vertices moved.\n",nnnspl,nnnc,nnns,nnnm);
     }
     
-    if ( t == _MMG5_SHORTMAX ) break;
+    if ( t == _MMG3D_SHORTMAX ) break;
   }
   /* Clean memory */
   /* Doing this, memcur of mesh is decreased by size of displacement */
