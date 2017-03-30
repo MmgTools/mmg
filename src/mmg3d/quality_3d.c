@@ -49,7 +49,7 @@ int _MMG3D_tetraQual(MMG5_pMesh mesh, MMG5_pSol met) {
   double      minqual;
   int         k,iel;
 
-  minqual = 2./_MMG5_ALPHAD;
+  minqual = 2./_MMG3D_ALPHAD;
 
   /*compute tet quality*/
   for (k=1; k<=mesh->ne; k++) {
@@ -68,7 +68,7 @@ int _MMG3D_tetraQual(MMG5_pMesh mesh, MMG5_pSol met) {
     }
   }
 
-  return ( _MMG5_minQualCheck(iel,minqual,_MMG5_ALPHAD) );
+  return ( _MMG5_minQualCheck(iel,minqual,_MMG3D_ALPHAD) );
 }
 
 /**
@@ -328,7 +328,7 @@ static int _MMG3D_printquaLES(MMG5_pMesh mesh,MMG5_pSol met) {
     if ( _MMG5_orvol(mesh->point,pt->v) < 0.0 ) {
       fprintf(stdout," ## Warning: negative volume\n");
     }
-    rap = 1 - _MMG5_ALPHAD * pt->qual;
+    rap = 1 - _MMG3D_ALPHAD * pt->qual;
     if ( rap > rapmin ) {
       rapmin = rap;
       iel    = ok;
@@ -437,7 +437,7 @@ int _MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
     if ( _MMG5_orvol(mesh->point,pt->v) < 0.0 ) {
       fprintf(stdout," ## Warning: negative volume\n");
     }
-    rap = _MMG5_ALPHAD * pt->qual;
+    rap = _MMG3D_ALPHAD * pt->qual;
     if ( rap < rapmin ) {
       rapmin = rap;
       iel    = ok;
@@ -478,7 +478,7 @@ int _MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
     }
   }
 
-  return ( _MMG5_minQualCheck(iel,rapmin,_MMG5_ALPHAD) );
+  return ( _MMG5_minQualCheck(iel,rapmin,_MMG3D_ALPHAD) );
 }
 
 /**
@@ -535,7 +535,7 @@ int _MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
       nrid++;
       continue;
     }
-    rap = _MMG5_ALPHAD * pt->qual;
+    rap = _MMG3D_ALPHAD * pt->qual;
     if ( rap < rapmin ) {
       rapmin = rap;
       iel    = ok;
@@ -578,7 +578,7 @@ int _MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
     }
   }
 
-  return ( _MMG5_minQualCheck(iel,rapmin,_MMG5_ALPHAD) );
+  return ( _MMG5_minQualCheck(iel,rapmin,_MMG3D_ALPHAD) );
 }
 
 /**
@@ -692,19 +692,19 @@ int _MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcib
         }
         dnaddloc *= 1./lon;
         if(!loc) {
-          if(_MMG5_ALPHAD * pt->qual >= 0.5) /*on ne compte les points internes que pour les (tres) bons tetras*/
+          if(_MMG3D_ALPHAD * pt->qual >= 0.5) /*on ne compte les points internes que pour les (tres) bons tetras*/
             dnaddloc = dnaddloc;
-          else if(_MMG5_ALPHAD * pt->qual >= 1./5.)
+          else if(_MMG3D_ALPHAD * pt->qual >= 1./5.)
             dnaddloc = dned / lon + 2*dnface/3.;
           else
             dnaddloc = dned / lon ;
           //rajout de 30% parce que 1) on vise des longueurs de 0.7 et
           //2) on ne tient pas compte du fait qu'on divise tjs par 2 dans la generation
-          if( (_MMG5_ALPHAD*pt->qual <= 1./50.) )
+          if( (_MMG3D_ALPHAD*pt->qual <= 1./50.) )
             dnaddloc = 0;
-          else  if((_MMG5_ALPHAD*pt->qual <= 1./10.) )
+          else  if((_MMG3D_ALPHAD*pt->qual <= 1./10.) )
             dnaddloc =  0.2*dnaddloc;
-          else if((len > 10) && (_MMG5_ALPHAD*pt->qual >= 1./1.5) ) //on sous-estime uniquement pour les tres bons
+          else if((len > 10) && (_MMG3D_ALPHAD*pt->qual >= 1./1.5) ) //on sous-estime uniquement pour les tres bons
             dnaddloc = dnaddloc*0.3 + dnaddloc;
           else if(len < 6 && len>3)
             dnaddloc = 0.7*dnaddloc;

@@ -494,7 +494,7 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
   }
 
   ntot = 0;
-  crit = 0.2 / _MMG5_ALPHAD;
+  crit = 0.2 / _MMG3D_ALPHAD;
 
   it = 0;
   maxit = 10;
