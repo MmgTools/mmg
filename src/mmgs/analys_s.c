@@ -319,7 +319,7 @@ static void nmpoints(MMG5_pMesh mesh) {
 /*   char     i,ia,i1,i2,j,typ; */
 
 /*   it = ndd = 0; */
-/*   declic = BADKAL / ALPHAD; */
+/*   declic = _MMGS_BADKAL / ALPHAD; */
 
 /*   do { */
 /*     nd = 0; */

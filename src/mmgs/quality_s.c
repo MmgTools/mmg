@@ -410,7 +410,7 @@ int _MMGS_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
       iel    = ok;
     }
     if ( rap > 0.5 )  med++;
-    if ( rap < BADKAL )  mesh->info.badkal = 1;
+    if ( rap < _MMGS_BADKAL )  mesh->info.badkal = 1;
     rapavg += rap;
     rapmax  = MG_MAX(rapmax,rap);
     ir = MG_MIN(4,(int)(5.0*rap));
@@ -473,7 +473,7 @@ int _MMGS_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
       iel    = ok;
     }
     if ( rap > 0.5 )  med++;
-    if ( rap < BADKAL )  mesh->info.badkal = 1;
+    if ( rap < _MMGS_BADKAL )  mesh->info.badkal = 1;
     rapavg += rap;
     rapmax  = MG_MAX(rapmax,rap);
     ir = MG_MIN(4,(int)(5.0*rap));

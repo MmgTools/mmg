@@ -133,7 +133,7 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
         kal = ALPHAD*_MMG5_calelt(mesh,met,pt0);
       else
         kal = ALPHAD*_MMG5_caltri_iso(mesh,NULL,pt0);
-      if ( kal < NULKAL )  return(0);
+      if ( kal < _MMGS_NULKAL )  return(0);
 
       memcpy(n0old,n1old,3*sizeof(double));
       memcpy(n0new,n1new,3*sizeof(double));
@@ -192,7 +192,7 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
       kal = ALPHAD*_MMG5_calelt(mesh,met,pt0);
     else
       kal = ALPHAD*_MMG5_caltri_iso(mesh,NULL,pt0);
-    if ( kal < NULKAL )  return(0);
+    if ( kal < _MMGS_NULKAL )  return(0);
   }
 
   /* for specific configurations along open ridge */
@@ -232,7 +232,7 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
       kal = ALPHAD*_MMG5_calelt(mesh,met,pt0);
     else
       kal = ALPHAD*_MMG5_caltri_iso(mesh,NULL,pt0);
-    if ( kal < NULKAL )  return(0);
+    if ( kal < _MMGS_NULKAL )  return(0);
 
   }
 
@@ -495,7 +495,8 @@ int litcol(MMG5_pMesh mesh,int k,char i,double kali) {
       }
       /* check quality */
       kal = ALPHAD*_MMG5_caltri_iso(mesh,NULL,pt0);
-      if ( kal < NULKAL )  return(0);
+#warning URGENT threshold check
+      if ( kal < _MMGS_NULKAL )  return(0);
     }
 
     /* check angle between 1st and last triangles */
