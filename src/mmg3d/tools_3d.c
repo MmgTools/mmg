@@ -137,8 +137,7 @@ inline int _MMG5_BezierRidge(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,
 
     p0 = &mesh->point[ip0];  /* Ref point, from which step is counted */
     p1 = &mesh->point[ip1];
-    if ( !p0->xp || !p1->xp )  return(0);
-    else if ( !(MG_GEO & p0->tag) || !(MG_GEO & p1->tag) )  return(0);
+    if ( !(MG_GEO & p0->tag) || !(MG_GEO & p1->tag) )  return(0);
 
     ux = p1->c[0] - p0->c[0];
     uy = p1->c[1] - p0->c[1];
