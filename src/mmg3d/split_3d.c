@@ -526,6 +526,9 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
           (ba1[  2]  +ba1[idx+2])*(ba1[  2]  +ba1[idx+2])
           <=_MMG5_EPSD2 );
 
+        /*don't check if it is a ridge edge*/
+        if(pxt->tag[ie] & MG_GEO || pxt->tag[ie] & MG_NOM) continue;
+        
         if ( !_MMG3D_devangle(&n0[0],&n1[idx],mesh->info.dhd) ) {
           return(0);
         }
