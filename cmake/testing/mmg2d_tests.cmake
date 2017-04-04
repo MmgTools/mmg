@@ -27,10 +27,10 @@
 ###############################################################################
 
 # Simple test: must already pass
-ADD_TEST(NAME mmg2d_Circle
+ADD_TEST(NAME mmg2d_SimpleCircle
   COMMAND ${EXECUT_MMG2D} -v 5
   ${MMG2D_CI_TESTS}/Circle/cercle
-  -out ${CTEST_OUTPUT_DIR}/mmg2d_Circle-cercle.o.meshb)
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_SimpleCircle-cercle.o.meshb)
 
 
 ###############################################################################
