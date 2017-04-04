@@ -322,7 +322,6 @@ int _MMG3D_simbulgept(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int ip) {
  * criterion. If yes, return 1, 0 otherwise (ridge creation).
  *
  */
-static inline
 int _MMG3D_devangle(double* n1, double *n2, double crit)
 {
   double dev;

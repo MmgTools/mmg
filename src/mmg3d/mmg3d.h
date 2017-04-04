@@ -239,6 +239,7 @@ int  _MMG5_setNmTag(MMG5_pMesh mesh, _MMG5_Hash *hash);
   int  _MMG5_chkcol_bdy(MMG5_pMesh,MMG5_pSol,int,char,char,int*,int,int*,int,char);
 int  _MMG5_chkmanicoll(MMG5_pMesh,int,int,int,int,int,char,char);
 int  _MMG5_chkmani(MMG5_pMesh mesh);
+int  _MMG3D_devangle(double* n1, double *n2, double crit);
 int  _MMG5_colver(MMG5_pMesh,MMG5_pSol,int *,int,char,char);
 int  _MMG3D_analys(MMG5_pMesh mesh);
 int  _MMG3D_hashTria(MMG5_pMesh mesh, _MMG5_Hash*);
