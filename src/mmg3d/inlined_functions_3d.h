@@ -312,7 +312,7 @@ inline double _MMG3D_caltetLES_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt)
 
   // the normalization by ALPHAD
   //in order to be coherent with the other quality measure
-  return(cal/_MMG5_ALPHAD);
+  return(cal/_MMG3D_ALPHAD);
 }
 
 /**

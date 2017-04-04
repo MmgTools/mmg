@@ -62,7 +62,7 @@ int _MMG3D_optlap(MMG5_pMesh mesh,MMG5_pSol sol) {
   _MMG5_SAFE_CALLOC(compt, mesh->np+1, int);
 
   it  = 1;
-  declic = 3./_MMG5_ALPHAD;
+  declic = 3./_MMG3D_ALPHAD;
   do {
 
     /*initialisation*/

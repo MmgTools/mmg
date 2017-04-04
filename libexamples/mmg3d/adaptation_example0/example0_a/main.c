@@ -51,12 +51,12 @@ int main(int argc,char *argv[]) {
   MMG5_pMesh      mmgMesh;
   MMG5_pSol       mmgSol;
   int             ier;
-  char            *filename;
+  char            *filename, *fileout;
 
   fprintf(stdout,"  -- TEST MMG3DLIB \n");
 
-  if ( argc != 2 ) {
-    printf(" Usage: %s filein \n",argv[0]);
+  if ( argc != 3 ) {
+    printf(" Usage: %s filein fileout \n",argv[0]);
     return(1);
   }
 
@@ -67,6 +67,13 @@ int main(int argc,char *argv[]) {
     exit(EXIT_FAILURE);
   }
   strcpy(filename,argv[1]);
+
+  fileout = (char *) calloc(strlen(argv[2]) + 1, sizeof(char));
+  if ( fileout == NULL ) {
+    perror("  ## Memory problem: calloc");
+    exit(EXIT_FAILURE);
+  }
+  strcpy(fileout,argv[2]);
 
   /** ------------------------------ STEP   I -------------------------- */
   /** 1) Initialisation of mesh and sol structures */
@@ -121,13 +128,13 @@ int main(int argc,char *argv[]) {
       using the MMG3D_getMesh/MMG3D_getSol functions */
 
   /** 1) Automatically save the mesh */
-  if ( MMG3D_saveMesh(mmgMesh,"cube.o.mesh") != 1 ) {
+  if ( MMG3D_saveMesh(mmgMesh,fileout) != 1 ) {
     fprintf(stdout,"UNABLE TO SAVE MESH\n");
     return(MMG5_STRONGFAILURE);
   }
 
   /** 2) Automatically save the solution */
-  if ( MMG3D_saveSol(mmgMesh,mmgSol,"cube.o.sol") != 1 ) {
+  if ( MMG3D_saveSol(mmgMesh,mmgSol,fileout) != 1 ) {
     fprintf(stdout,"UNABLE TO SAVE SOL\n");
     return(MMG5_LOWFAILURE);
   }
@@ -139,6 +146,9 @@ int main(int argc,char *argv[]) {
 
   free(filename);
   filename = NULL;
+
+  free(fileout);
+  fileout = NULL;
 
   return(ier);
 }

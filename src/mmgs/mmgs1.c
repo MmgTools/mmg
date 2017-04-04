@@ -121,7 +121,20 @@ int _MMGS_dichoto(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
       }
     }
   }
-  return(1);
+
+  /* For very ill-shaped elements we can have no valid position */
+  switch (pt->flag) {
+  case 1: case 2: case 4:
+    ier = _MMGS_split1_sim(mesh,met,k,j,vx);
+    break;
+  case 7:
+    ier = _MMGS_split3_sim(mesh,met,k,vx);
+    break;
+  default:
+    ier = _MMG5_split2_sim(mesh,met,k,vx);
+    break;
+  }
+  return(ier);
 }
 
 /**
@@ -130,7 +143,7 @@ int _MMGS_dichoto(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
  * \param iel index of the starting triangle.
  * \param ia local index of the edge to split in \a k.
  * \param ip index of the point that we try to create.
- * \return 1.
+ * \return 1 if success, 0 otherwise.
  *
  * Find acceptable position for _MMG5_split1b, starting from point ip.
  *
@@ -182,11 +195,12 @@ int _MMGS_dichoto1b(MMG5_pMesh mesh, MMG5_pSol met, int iel, int ia, int ip) {
   while ( ++it < maxit );
   if ( !ier )  t = to;
 
+  /* For very ill-shaped elements, we can have no valid position */
   ppt->c[0] = m[0] + t*(o[0]-m[0]);
   ppt->c[1] = m[1] + t*(o[1]-m[1]);
   ppt->c[2] = m[2] + t*(o[2]-m[2]);
 
-  return(1);
+  return( _MMGS_simbulgept(mesh,met,iel,ia,ip) );
 }
 
 /* check if edge need to be split and return a binary coding the numbers of the edges of tria iel that should be split according to a hausdorff distance criterion */
@@ -399,7 +413,7 @@ static int swpmsh(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
 static int movtri(MMG5_pMesh mesh,MMG5_pSol met,int maxit) {
   MMG5_pTria    pt;
   MMG5_pPoint   ppt;
-  int      it,k,ier,base,nm,ns,nnm,list[_MMG5_LMAX+2],ilist;
+  int      it,k,ier,base,nm,ns,nnm,list[_MMGS_LMAX+2],ilist;
   char     i;
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
@@ -447,6 +461,44 @@ static int movtri(MMG5_pMesh mesh,MMG5_pSol met,int maxit) {
   return(nnm);
 }
 
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param hash pointer toward the hash table of edges.
+ * \return 0 if failed, 1 if success
+ *
+ * Delete the points inserted by pattern if the pattern step fail.
+ *
+ */
+static inline
+int _MMGS_delPatternPts(MMG5_pMesh mesh,_MMG5_Hash hash)
+{
+  MMG5_pTria   pt;
+  int          vx[3],k,i,i1,i2;
+
+  /* Delete the useless added points */
+  for (k=1; k<=mesh->nt; k++) {
+    pt = &mesh->tria[k];
+    if ( !MG_EOK(pt) || pt->ref < 0 )  continue;
+
+    for (i=0; i<3; i++) {
+      i1    = _MMG5_inxt2[i];
+      i2    = _MMG5_inxt2[i1];
+      vx[i] = _MMG5_hashGet(&hash,pt->v[i1],pt->v[i2]);
+
+      if ( vx[i] > 0 ) {
+        _MMGS_delPt(mesh,vx[i]);
+        if ( !_MMG5_hashUpdate(&hash,pt->v[i1],pt->v[i2],-1) ) {
+          printf("  ## Error: Unable to delete point idx along edge %d %d.\n",
+                 pt->v[i1], pt->v[i2]);
+          _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
+          return 0;
+        }
+      }
+    }
+  }
+  return 1;
+}
+
 /* analyze triangles and split if needed */
 static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   MMG5_pTria    pt;
@@ -455,14 +507,13 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   _MMG5_Bezier  pb;
   MMG5_pxPoint  go;
   double        s,o[3],no[3],to[3],dd,len;
-  int           vx[3],i,j,ip,ip1,ip2,ier,k,ns,nc,ni,ic,nt,npinit,it;
+  int           vx[3],i,j,ip,ip1,ip2,ier,k,ns,nc,ni,ic,nt,it;
   char          i1,i2;
   static double uv[3][2] = { {0.5,0.5}, {0.,0.5}, {0.5,0.} };
 
   _MMG5_hashNew(mesh,&hash,mesh->np,3*mesh->np);
   ns = 0;
   s  = 0.5;
-  npinit = mesh->np;
   for (k=1; k<=mesh->nt; k++) {
 
     pt = &mesh->tria[k];
@@ -479,7 +530,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         i1 = _MMG5_inxt2[i];
         i2 = _MMG5_iprv2[i];
         len = _MMG5_lenSurfEdg(mesh,met,pt->v[i1],pt->v[i2],0);
-        if ( len > LLONG )  MG_SET(pt->flag,i);
+        if ( len > _MMGS_LLONG )  MG_SET(pt->flag,i);
       }
       if ( !pt->flag )  continue;
     }
@@ -510,10 +561,8 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           _MMGS_POINT_REALLOC(mesh,met,ip,mesh->gap,
                               fprintf(stderr,"  ## Error: unable to allocate a new point.\n");
                               _MMG5_INCREASE_MEM_MESSAGE();
-                              do {
-                                _MMGS_delPt(mesh,mesh->np);
-                              } while ( mesh->np>npinit );
-                              return(-1)
+                              _MMGS_delPatternPts( mesh, hash);
+                              return -1
                               ,o,MG_EDG(pt->tag[i]) ? to : no);
           // Now pb->p contain a wrong memory address.
           pb.p[0] = &mesh->point[pt->v[0]];
@@ -562,10 +611,8 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         }
 
         if ( !ier ) {
-          // Unable to compute the metric
-          do {
-            _MMGS_delPt(mesh,mesh->np);
-          } while ( mesh->np>npinit );
+          printf ( "  ## Unable to interpolate metric between points %d and %d.\n",
+                   _MMGS_indPt(mesh,ip1),_MMGS_indPt(mesh,ip2));
           return(-1);
         }
       }
@@ -587,11 +634,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         }
         else {
           printf("  ## Warning: Flattened angle around ridge. Unable to split it.\n");
-
-          do {
-            _MMGS_delPt(mesh,mesh->np);
-          } while ( mesh->np>npinit );
-          return(-1);
+          if ( !_MMGS_delPatternPts( mesh, hash) ) return -1;
         }
       }
     }
@@ -697,21 +740,41 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           if ( vx[i] > 0 )  mesh->point[vx[i]].flag++;
       }
       else {
-        for (i=0; i<3; i++) {
-          if ( vx[i] > 0 ) {
-            p1 = &mesh->point[pt->v[_MMG5_iprv2[i]]];
-            p2 = &mesh->point[pt->v[_MMG5_inxt2[i]]];
-            ppt = &mesh->point[vx[i]];
-            ppt->c[0] = 0.5 * (p1->c[0] + p2->c[0]);
-            ppt->c[1] = 0.5 * (p1->c[1] + p2->c[1]);
-            ppt->c[2] = 0.5 * (p1->c[2] + p2->c[2]);
+        if ( it < 20 ) {
+          for (i=0; i<3; i++) {
+            if ( vx[i] > 0 ) {
+              p1 = &mesh->point[pt->v[_MMG5_iprv2[i]]];
+              p2 = &mesh->point[pt->v[_MMG5_inxt2[i]]];
+              ppt = &mesh->point[vx[i]];
+              ppt->c[0] = 0.5 * (p1->c[0] + p2->c[0]);
+              ppt->c[1] = 0.5 * (p1->c[1] + p2->c[1]);
+              ppt->c[2] = 0.5 * (p1->c[2] + p2->c[2]);
+            }
+          }
+        }
+        else {
+          if ( it==20 && (mesh->info.ddebug || mesh->info.imprim > 5) ) {
+            printf("  ## Warning: unable to find a valid pattern to split.\n"
+                   "              Point(s) deletion." );
+          }
+          for (i=0; i<3; i++) {
+            if ( vx[i] > 0 ) {
+              if ( !_MMG5_hashUpdate(&hash,pt->v[_MMG5_iprv2[i]],
+                                     pt->v[_MMG5_inxt2[i]],-1) ) {
+                  printf("  ## Error: Unable to delete point idx along edge %d %d.\n",
+                         pt->v[_MMG5_iprv2[i]], pt->v[_MMG5_inxt2[i]]);
+                  _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
+                  return -1;
+              }
+              _MMGS_delPt(mesh,vx[i]);
+            }
           }
         }
       }
     }
     nc += ni;
   }
-  while( ni > 0 && ++it < 20 );
+  while( ni > 0 && ++it < 40 );
 
   if ( mesh->info.ddebug && nc ) {
     fprintf(stdout,"     %d corrected,  %d invalid\n",nc,ni);
@@ -839,7 +902,7 @@ static int colelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   MMG5_pPoint   p1,p2;
   MMG5_pPar     par;
   double        ll,ux,uy,uz,hmin;
-  int           list[_MMG5_LMAX+2],ilist,k,nc,l,isloc;
+  int           list[_MMGS_LMAX+2],ilist,k,nc,l,isloc;
   char          i,i1,i2;
 
   nc = 0;
@@ -889,7 +952,7 @@ static int colelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
       }
       else {
         ll = _MMG5_lenSurfEdg(mesh,met,pt->v[i1],pt->v[i2],0);
-        if ( ll > LSHRT )  continue;
+        if ( ll > _MMGS_LSHRT )  continue;
       }
 
       /* check if geometry preserved */
@@ -939,7 +1002,7 @@ static int adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
         imax = i;
       }
     }
-    if ( lmax < LOPTL )  continue;
+    if ( lmax < _MMGS_LOPTL )  continue;
     else if ( MS_SIN(pt->tag[imax]) )  continue;
 
     /* check length */
@@ -955,10 +1018,12 @@ static int adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
       return (ns);
     }
     else if ( ip > 0 ) {
-      if ( !_MMGS_simbulgept(mesh,met,k,imax,ip) ) {
-        _MMGS_dichoto1b(mesh,met,k,imax,ip);
+      ier = _MMGS_simbulgept(mesh,met,k,imax,ip);
+      if ( !ier ) {
+        ier = _MMGS_dichoto1b(mesh,met,k,imax,ip);
       }
-      ier = split1b(mesh,k,imax,ip);
+      if ( ier ) ier = split1b(mesh,k,imax,ip);
+
       if ( !ier ) {
         /* Lack of memory, go to collapse step. */
         _MMGS_delPt(mesh,ip);
@@ -977,7 +1042,7 @@ static int adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria    pt;
   MMG5_pPoint   p1,p2;
   double   len;
-  int      k,list[_MMG5_LMAX+2],ilist,nc;
+  int      k,list[_MMGS_LMAX+2],ilist,nc;
   char     i,i1,i2;
 
   nc = 0;
@@ -998,7 +1063,7 @@ static int adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
       if ( p1->tag & MG_NOM || p2->tag & MG_NOM )  continue;
 
       len = _MMG5_lenSurfEdg(mesh,met,pt->v[i1],pt->v[i2],0);
-      if ( len > LOPTS )  continue;
+      if ( len > _MMGS_LOPTS )  continue;
 
       p1 = &mesh->point[pt->v[i1]];
       p2 = &mesh->point[pt->v[i2]];

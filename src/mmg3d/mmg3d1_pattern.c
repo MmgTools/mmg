@@ -45,7 +45,7 @@
  * \return -1 if failed.
  * \return number of new points.
  *
- * Split edges of length bigger than _MMG5_LOPTL.
+ * Split edges of length bigger than _MMG3D_LOPTL.
  *
  */
 static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
@@ -81,7 +81,7 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
     if ( imax==-1 )
       fprintf(stdout,"%s:%d: Warning: all edges of tetra %d are required or of length null.\n",
               __FILE__,__LINE__,k);
-    if ( lmax < _MMG5_LOPTL )  continue;
+    if ( lmax < _MMG3D_LOPTL )  continue;
 
     /* proceed edges according to lengths */
     ifa0 = _MMG5_ifar[imax][0];
@@ -169,9 +169,6 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
       if ( !ier ) {
         ier = _MMG3D_dichoto1b(mesh,met,list,ilist,ip);
       }
-      /* We can create element with 0 qualities at machine epsilon even when ip
-      is the mid edge point */
-      ier = _MMG3D_simbulgept(mesh,met,list,ilist,ip);
       if ( ier ) ier = _MMG5_split1b(mesh,met,list,ilist,ip,1,1);
 
       /* if we realloc memory in _MMG5_split1b pt and pxt pointers are not valid */
@@ -269,7 +266,7 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
  * \return -1 if failed.
  * \return number of deleted points.
  *
- * Collapse edges of length smaller than _MMG5_LOPTS.
+ * Collapse edges of length smaller than _MMG3D_LOPTS.
  *
  */
 static int _MMG5_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
@@ -303,7 +300,7 @@ static int _MMG5_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
     if ( imin==-1 )
       fprintf(stdout,"%s:%d: Warning: all edges of tetra %d are boundary and required\n",
               __FILE__,__LINE__,k);
-    if ( lmin > _MMG5_LOPTS )  continue;
+    if ( lmin > _MMG3D_LOPTS )  continue;
 
     // Case of an internal tetra with 4 ridges vertices.
     if ( lmin == 0 ) continue;

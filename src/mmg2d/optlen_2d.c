@@ -116,7 +116,7 @@
 //      /* adjust position */
 //      coe  = HQCOEF;
 //      iter = 1;
-//      if(cal > 10./ALPHA) {
+//      if(cal > 10./_MMG2D_ALPHA) {
 //        ctg  = 0.99 * cal;
 //      } else {
 //        ctg  = cal * HCRIT;
@@ -276,7 +276,7 @@
 //      /* adjust position */
 //      coe  = HQCOEF;
 //      iter = 1;
-//      if(cal > 10./ALPHA) {
+//      if(cal > 10./_MMG2D_ALPHA) {
 //        ctg  = 0.99 * cal;
 //      } else {
 //        ctg  = cal * HCRIT;
@@ -432,7 +432,7 @@
 //      /* adjust position */
 //      coe  = HQCOEF;
 //      iter = 1;
-//      if(cal > 10./ALPHA) {
+//      if(cal > 10./_MMG2D_ALPHA) {
 //        ctg  = 0.99 * cal;
 //      } else {
 //        ctg  = cal * HCRIT;

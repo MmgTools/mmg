@@ -158,7 +158,7 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
   /* else */
   /*   mesh->info.dhd  = 180.-optdbl[1]; */
   /* /\*this options are not used inside library version*\/ */
-  /* //qdegrad[0] = 10./ALPHA; */
+  /* //qdegrad[0] = 10./_MMG2D_ALPHA; */
   /* //qdegrad[1] = 1.3; */
   /* mesh->info.renum = 0; */
 

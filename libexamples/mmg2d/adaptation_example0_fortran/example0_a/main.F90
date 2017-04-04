@@ -17,20 +17,22 @@ PROGRAM main
   MMG5_DATA_PTR_T    :: mmgMesh
   MMG5_DATA_PTR_T    :: mmgSol
   INTEGER            :: ier,argc
-  CHARACTER(len=300) :: exec_name,filename
+  CHARACTER(len=300) :: exec_name,filename,fileout
 
   PRINT*,"  -- TEST MMG2DLIB"
 
   argc =  COMMAND_ARGUMENT_COUNT();
   CALL get_command_argument(0, exec_name)
 
-  IF ( argc /=1 ) THEN
-     PRINT*," Usage: ",exec_name," file_name"
+  IF ( argc /=2 ) THEN
+     PRINT*," Usage: ",exec_name," input_file_name output_file_name"
      CALL EXIT(1);
   ENDIF
 
   ! Name and path of the mesh file
   CALL get_command_argument(1, filename)
+  CALL get_command_argument(2, fileout)
+
 
   !> ------------------------------ STEP   I --------------------------
   !! 1) Initialisation of mesh and sol structures
@@ -92,11 +94,11 @@ PROGRAM main
   !!    using the MMG2D_getMesh/MMG2D_getSol functions
 
   !> 1) Automatically save the mesh
-  CALL MMG2D_saveMesh(mmgMesh,"sortie.o.mesh",LEN("sortie.o.mesh"),ier)
+  CALL MMG2D_saveMesh(mmgMesh,TRIM(ADJUSTL(fileout)),LEN(TRIM(ADJUSTL(fileout))),ier)
   IF ( ier /= 1 ) CALL EXIT(106)
 
   !> 2) Automatically save the solution
-  CALL MMG2D_saveSol(mmgMesh,mmgSol,"sortie.o.sol",LEN("sortie.o.sol"),ier)
+  CALL MMG2D_saveSol(mmgMesh,mmgSol,TRIM(ADJUSTL(fileout)),LEN(TRIM(ADJUSTL(fileout))),ier)
   IF ( ier /= 1 ) CALL EXIT(107)
 
   !> 3) Free the MMG2D5 structures

@@ -42,7 +42,7 @@ int movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   MMG5_pPoint   p0,p1,ppt0;
   MMG5_pTria    pt,pt0;
   _MMG5_Bezier   b;
-  double   aa,bb,ab,ll,l,mlon,devmean,GV[3],gv[2],cosalpha,sinalpha,r[3][3],*n,lispoi[3*_MMG5_LMAX+1];
+  double   aa,bb,ab,ll,l,mlon,devmean,GV[3],gv[2],cosalpha,sinalpha,r[3][3],*n,lispoi[3*_MMGS_LMAX+1];
   double   ux,uy,uz,det2d,detloc,step,lambda[3],uv[2],o[3],no[3],to[3],Vold,Vnew,calold,calnew,caltmp;
   int      ier,iel,ipp,k,kel,npt,ibeg,iend;
   char     i0,i1,i2;
@@ -312,12 +312,11 @@ int movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
     caltmp = caleltsig_iso(mesh,NULL,iel);
     calold = MG_MIN(calold,caltmp);
     caltmp = caleltsig_iso(mesh,NULL,0);
-    if ( caltmp < _MMG5_EPSD )        return(0);
+    if ( caltmp < _MMG5_NULKAL )        return(0);
     calnew = MG_MIN(calnew,caltmp);
-    /*if ( (calnew < BADKAL) && (calnew<=calold) )  return(0);
-      if ( chkedg(mesh,0) )  return(0); */
   }
-  if ( calold < NULKAL && calnew <= calold )      return(0);
+  if ( calold < _MMG5_EPSOK && calnew <= calold ) return(0);
+  else if (calnew < _MMG5_EPSOK)    return(0);
   else if ( calnew < 0.3*calold )  return(0);
 
   /* Finally, update coordinates and normals of point, if new position is accepted : */
@@ -848,6 +847,7 @@ int movridpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
     pt0->v[i0] = 0;
     calold = caleltsig_iso(mesh,NULL,iel);
     calnew = caleltsig_iso(mesh,NULL,0);
+#warning URGENT check the threshold value
     if ( (calnew < 0.001) && (calnew<calold) )  return(0);
     //if ( chkedg(mesh,0) )  return(0);
   }

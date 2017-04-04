@@ -110,7 +110,7 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,double *qdegrad) 
       case 'd':  /* debug */
         if ( !strcmp(argv[i],"-degrad") ) {
           ++i;
-          qdegrad[0] = atof(argv[i++])/ALPHA;
+          qdegrad[0] = atof(argv[i++])/_MMG2D_ALPHA;
           qdegrad[1] = atof(argv[i]);
         } else {
           if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_debug,1) )
@@ -414,7 +414,7 @@ int main(int argc,char *argv[]) {
                    MMG5_ARG_ppDisp,&disp,
                    MMG5_ARG_end);
 
-  qdegrad[0] = 10./ALPHA;
+  qdegrad[0] = 10./_MMG2D_ALPHA;
   qdegrad[1] = 1.3;
 
 //  sol.type = 1;

@@ -21,20 +21,32 @@
 int main(int argc,char *argv[]) {
   MMG5_pMesh      mmgMesh;
   MMG5_pSol       mmgSol;
-  char            *pwd,*filename;
+  char            *pwd,*filename, *outname;
 
   int             ier;
 
   fprintf(stdout,"  -- TEST MMG2DMESH \n");
 
+
+  if ( argc != 2 ) {
+    printf(" Usage: %s filein fileout \n",argv[0]);
+    return(1);
+  }
+
   /* Name and path of the mesh file */
-  pwd = getenv("PWD");
-  filename = (char *) calloc(strlen(pwd) + 58, sizeof(char));
+  filename = (char *) calloc(strlen(argv[1]) + 1, sizeof(char));
   if ( filename == NULL ) {
     perror("  ## Memory problem: calloc");
     exit(EXIT_FAILURE);
   }
-  sprintf(filename, "%s%s%s", pwd, "/../libexamples/mmg2d/squareGeneration_example2/", "carretest");
+  strcpy(filename,argv[1]);
+
+  outname = (char *) calloc(strlen(argv[2]) + 1, sizeof(char));
+  if ( outname == NULL ) {
+    perror("  ## Memory problem: calloc");
+    exit(EXIT_FAILURE);
+  }
+  strcpy(outname,argv[2]);
 
   /** ------------------------------ STEP   I -------------------------- */
   /** 1) Initialisation of mesh and sol structures */
@@ -75,11 +87,11 @@ int main(int argc,char *argv[]) {
     fprintf(stdout,"BAD ENDING OF MMG2DMESH\n");
 
   /*save result*/
-  if ( MMG2D_saveMesh(mmgMesh,"result.mesh") != 1 )
+  if ( MMG2D_saveMesh(mmgMesh,outname) != 1 )
     exit(EXIT_FAILURE);
 
   /*save metric*/
-  if ( MMG2D_saveSol(mmgMesh,mmgSol,"result") != 1 )
+  if ( MMG2D_saveSol(mmgMesh,mmgSol,outname) != 1 )
     exit(EXIT_FAILURE);
 
   /** 3) Free the MMG2D structures */
@@ -89,6 +101,10 @@ int main(int argc,char *argv[]) {
 
   free(filename);
   filename = NULL;
+
+
+  free(outname);
+  outname = NULL;
 
   return(0);
 }

@@ -287,3 +287,33 @@ void _MMG5_displayHisto(MMG5_pMesh mesh, int ned, double *avlen,
     }
   }
 }
+
+/**
+ * \param iel index of the worst tetra of the mesh
+ * \param minqual quality of the worst tetra of the mesh (normalized by \a alpha)
+ * \param alpha normalisation parameter for the quality
+ *
+ * \return 1 if success, 0 if fail (the quality is lower than _MMG5_NULKAL).
+ *
+ * Print warning or error messages depending on the quality of the worst tetra
+ * of the mesh.
+ *
+ */
+int _MMG5_minQualCheck ( int iel, double minqual, double alpha )
+{
+  double minqualOnAlpha;
+
+  minqualOnAlpha = minqual/alpha;
+
+  if ( minqualOnAlpha < _MMG5_NULKAL ) {
+    fprintf(stderr,"  ## ERROR: TOO BAD QUALITY FOR THE WORST ELEMENT: "
+            "(elt %d -> %15e)\n",iel,minqual);
+    return(0);
+  }
+  else if ( minqualOnAlpha < _MMG5_EPSOK ) {
+    fprintf(stderr,"  ## WARNING: VERY BAD QUALITY FOR THE WORST ELEMENT: "
+            "(elt %d -> %15e)\n",iel,minqual);
+  }
+
+  return(1);
+}

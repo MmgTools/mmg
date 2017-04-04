@@ -15,7 +15,8 @@ PROGRAM main
 
   MMG5_DATA_PTR_T  :: mmgMesh
   MMG5_DATA_PTR_T  :: mmgSol
-  INTEGER          :: ier,k
+  INTEGER          :: ier,k,argc
+  CHARACTER(len=300) :: exec_name,fileout
 
   !> To save final mesh in a file
   INTEGER          :: inm=10
@@ -27,6 +28,17 @@ PROGRAM main
   CHARACTER(LEN=31) :: FMT="(E14.8,1X,E14.8,1X,I3)"
 
   PRINT*,"  -- TEST MMG2DLIB"
+
+  argc =  COMMAND_ARGUMENT_COUNT();
+  CALL get_command_argument(0, exec_name)
+
+  IF ( argc /=1 ) THEN
+     PRINT*," Usage: ",TRIM(exec_name)," output_file_name"
+     CALL EXIT(1);
+  ENDIF
+
+ ! Name and path of the mesh file
+  CALL get_command_argument(1, fileout)
 
   !> ------------------------------ STEP   I --------------------------
   !! 1) Initialisation of mesh and sol structures
@@ -125,9 +137,8 @@ PROGRAM main
   !! that will write .mesh(b)/.sol formatted files or manually get your mesh/sol
   !! using the MMG2D_getMesh/MMG2D_getSol functions
 
-  !> 1) Manually get the mesh (in this example we show how to save the mesh
-  !!    in the mesh.o.mesh file)
-  OPEN(unit=inm,file="mesh.o.mesh",form="formatted",status="replace")
+  !> 1) Manually get the mesh
+  OPEN(unit=inm,file=TRIM(ADJUSTL(fileout))//".mesh",form="formatted",status="replace")
   WRITE(inm,*) "MeshVersionFormatted 2"
   WRITE(inm,*) "Dimension 3"
 
@@ -233,9 +244,8 @@ PROGRAM main
   DEALLOCATE(required)
   DEALLOCATE(ridge)
 
-  !> 2) Manually get the solution (in this example we show how to save the
-  !!    solution in the mesh.o.sol file)
-  OPEN(unit=inm,file="sortie.o.sol",form="formatted",status="replace")
+  !> 2) Manually get the solution
+  OPEN(unit=inm,file=TRIM(ADJUSTL(fileout))//".sol",form="formatted",status="replace")
   WRITE(inm,*) "MeshVersionFormatted 2"
   WRITE(inm,*) "Dimension 2"
   WRITE(inm,*)

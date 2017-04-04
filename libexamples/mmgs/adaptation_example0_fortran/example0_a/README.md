@@ -6,8 +6,8 @@ To call the **mmgs** library, you must:
   2. call the MMGS library;
   3. get the final mesh and sol.
 
-  We read mesh and solution files (**_cube.mesh_** and **_cube.sol_**) using the **MMGS_loadMesh** and **MMGS_loadSol** functions.
-  Results are saved in the **_cube.o.mesh_** and **_cube.o.sol_** files using **MMGS_saveMesh** and **MMGS_saveSol** functions.
+  We read mesh and solution files using the **MMGS_loadMesh** and **MMGS_loadSol** functions.
+  Results are saved using **MMGS_saveMesh** and **MMGS_saveSol** functions.
 
 ## II/ Compilation
   1. Build and install the **mmgs** shared and static library. We suppose in the following that you have installed the **mmgs** library in the **_$CMAKE_INSTALL_PREFIX_** directory (see the [installation](https://github.com/MmgTools/Mmg/wiki/Setup-guide#iii-installation) section of the setup guide);
@@ -30,9 +30,3 @@ To call the **mmgs** library, you must:
 > gcc -I$CMAKE_INSTALL_PREFIX/include/mmg/mmgs main.c -L$CMAKE_INSTALL_PREFIX/lib -lmmgs
 > export LD_LIBRARY_PATH=$CMAKE_INSTALL_PREFIX/lib:$LD_LIBRARY_PATH
 > ```
-
-## III/ Execution
-Because it contains hard coded paths to the mesh and solution files, the tests must be run from a subdirectory of the root of your **mmg** project.
-
-> Example  
-> Assuming that your **mmg** project is cloned into the **_mmg_** directory (default case), you can run the test from the **_mmg/build/_** or **_mmg/libexamples_** directories but not from the **_mmg/libexamples/mmgs/_** folder.

@@ -96,23 +96,20 @@ extern "C" {
   }while(0)
 
 /* numerical accuracy */
-#define _MMG5_ALPHAD    20.7846096908265    //0.04811252243247      /* 12*sqrt(3) */
-#define _MMG5_LLONG     2.5//2.0   // 1.414213562373
-#define _MMG5_LSHRT     0.3  // 0.707106781186
-#define _MMG5_LOPTL     1.3
-#define _MMG5_LOPTS     0.6
+#define _MMG3D_ALPHAD    20.7846096908265    //0.04811252243247      /* 12*sqrt(3) */
+#define _MMG3D_LLONG     2.5//2.0   // 1.414213562373
+#define _MMG3D_LSHRT     0.3  // 0.707106781186
+#define _MMG3D_LOPTL     1.3
+#define _MMG3D_LOPTS     0.6
 
-#define _MMG5_BADKAL    0.2
-#define _MMG5_NULKAL    1.e-30
+#define _MMG3D_BADKAL    0.2
 
-#define _MMG5_NPMAX  1000000 //200000
-#define _MMG5_NAMAX   200000 //40000
-#define _MMG5_NTMAX  2000000 //400000
-#define _MMG5_NEMAX  6000000 //1200000
+#define _MMG3D_NPMAX  1000000 //200000
+#define _MMG3D_NAMAX   200000 //40000
+#define _MMG3D_NTMAX  2000000 //400000
+#define _MMG3D_NEMAX  6000000 //1200000
 
-#define _MMG5_BOXSIZE 500
-
-#define _MMG5_SHORTMAX     0x7fff
+#define _MMG3D_SHORTMAX     0x7fff
 
 
 /** \brief next vertex of tetra: {1,2,3,0,1,2,3} */

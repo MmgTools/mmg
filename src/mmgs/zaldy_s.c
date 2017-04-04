@@ -107,8 +107,8 @@ void _MMGS_memOption(MMG5_pMesh mesh) {
 
   mesh->memMax = _MMG5_memSize();
 
-  mesh->npmax = MG_MAX(1.5*mesh->np,_MMG5_NPMAX);
-  mesh->ntmax = MG_MAX(1.5*mesh->nt,_MMG5_NTMAX);
+  mesh->npmax = MG_MAX(1.5*mesh->np,_MMGS_NPMAX);
+  mesh->ntmax = MG_MAX(1.5*mesh->nt,_MMGS_NTMAX);
 
   if ( mesh->info.mem <= 0 ) {
     if ( mesh->memMax )
@@ -130,7 +130,7 @@ void _MMGS_memOption(MMG5_pMesh mesh) {
       mesh->memMax= (long long)(mesh->info.mem)*million;
     }
 
-    /* if asked memory is lower than default _MMG5_NPMAX/_MMG5_NTMAX we take lower values */
+    /* if asked memory is lower than default _MMGS_NPMAX/_MMGS_NTMAX we take lower values */
 
     /* point+tria+adja */
     bytes = sizeof(MMG5_Point) + sizeof(MMG5_xPoint) +
@@ -164,8 +164,8 @@ void _MMGS_memOption(MMG5_pMesh mesh) {
             _MMG5_safeLL2LCast((long long)(mesh->memMax/million)));
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {
-    fprintf(stdout,"  _MMG5_NPMAX    %d\n",mesh->npmax);
-    fprintf(stdout,"  _MMG5_NTMAX    %d\n",mesh->ntmax);
+    fprintf(stdout,"  _MMGS_NPMAX    %d\n",mesh->npmax);
+    fprintf(stdout,"  _MMGS_NTMAX    %d\n",mesh->ntmax);
   }
 
   return;

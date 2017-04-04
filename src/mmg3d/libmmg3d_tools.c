@@ -617,10 +617,10 @@ void MMG3D_searchqua(MMG5_pMesh mesh,MMG5_pSol met,double critmin, int *eltab,
       continue;
 
     if ( (!metRidTyp) && met->m && met->size>1 ) {
-      rap = _MMG5_ALPHAD * _MMG5_caltet33_ani(mesh,met,pt);
+      rap = _MMG3D_ALPHAD * _MMG5_caltet33_ani(mesh,met,pt);
     }
     else {
-      rap = _MMG5_ALPHAD * _MMG5_caltet(mesh,met,pt);
+      rap = _MMG3D_ALPHAD * _MMG5_caltet(mesh,met,pt);
     }
 
     if ( rap == 0.0 || rap < critmin ) {

@@ -122,7 +122,7 @@ int _MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,
   //CECILE : je vois pas pourquoi ca ameliore de faire ce test
   //plus rapide mais du coup on elimine des swap...
   //4/01/14 commentaire
-  // if ( calold*_MMG5_ALPHAD > 0.5 )  return(0);
+  // if ( calold*_MMG3D_ALPHAD > 0.5 )  return(0);
 
   /* Prevent swap of an external boundary edge */
   if ( !adj )  return(0);

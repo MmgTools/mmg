@@ -6,16 +6,14 @@ To call the **mmg3d** library, you must:
   2. call the MMG5 library;
   3. get the final mesh and sol.
 
-  Results are saved in the **_mesh.o.mesh_** and **_mesh.o.sol_** files.  
-
 ### example0_a  
-  We read mesh and solution files (**_cube.mesh_** and **_cube.sol_**) using the **MMG3D_loadMesh** and **MMG3D_loadSol** functions.
+  We read mesh and solution files using the **MMG3D_loadMesh** and **MMG3D_loadSol** functions.
   Results are saved using **MMG3D_saveMesh** and **MMG3D_saveSol** functions.
 
 ### example0_b
   The mesh and solution are hard coded.    
   They are build in MMG5 format using API functions and are recovered by the same way.  
-  We show how to recover the mesh/sol by writting it in mesh.o.mesh/sol file.
+  We show how to recover the mesh/sol by writting it in a file.
 
 ## II/ Compilation
   1. Build and install the **mmg3d** shared and static library. We suppose in the following that you have installed the **mmg3d** library in the **_$CMAKE_INSTALL_PREFIX_** directory (see the [installation](https://github.com/MmgTools/Mmg/wiki/Setup-guide#iii-installation) section of the setup guide);
@@ -38,9 +36,3 @@ To call the **mmg3d** library, you must:
 > gfortran -I$CMAKE_INSTALL_PREFIX/include main.c -L$CMAKE_INSTALL_PREFIX/lib -lmmg3d
 > export LD_LIBRARY_PATH=$CMAKE_INSTALL_PREFIX/lib:$LD_LIBRARY_PATH
 > ```
-
-## III/ Execution
-Because it contains hard coded paths to the mesh and solution files, the tests must be run from a subdirectory of the root of your **mmg** project.
-
-> Example  
-> Assuming that your **mmg** project is cloned into the **_mmg_** directory (default case), you can run the test from the **_mmg/build/_** or **_mmg/libexamples_** directories but not from the **_mmg/libexamples/mmg3d/_** folder.

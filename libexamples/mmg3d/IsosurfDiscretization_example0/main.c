@@ -52,12 +52,12 @@ int main(int argc,char *argv[]) {
   MMG5_pMesh      mmgMesh;
   MMG5_pSol       mmgSol;
   int             ier;
-  char            *inname;
+  char            *inname,*outname;
 
   fprintf(stdout,"  -- TEST MMG3DLS \n");
 
-  if ( argc != 2 ) {
-    printf(" Usage: %s filein \n",argv[0]);
+  if ( argc != 3 ) {
+    printf(" Usage: %s filein fileout\n",argv[0]);
     return(1);
   }
 
@@ -68,6 +68,14 @@ int main(int argc,char *argv[]) {
     exit(EXIT_FAILURE);
   }
   strcpy(inname,argv[1]);
+
+
+  outname = (char *) calloc(strlen(argv[2]) + 1, sizeof(char));
+  if ( outname == NULL ) {
+    perror("  ## Memory problem: calloc");
+    exit(EXIT_FAILURE);
+  }
+  strcpy(outname,argv[2]);
 
   /** 1) Initialisation of mesh and sol structures */
   /* args of InitMesh:
@@ -126,11 +134,11 @@ int main(int argc,char *argv[]) {
     fprintf(stdout,"BAD ENDING OF MMG3DLS\n");
 
   /* (Not mandatory) Automatically save the mesh */
-  if ( MMG3D_saveMesh(mmgMesh,"test.o") != 1 )
+  if ( MMG3D_saveMesh(mmgMesh,outname) != 1 )
     exit(EXIT_FAILURE);
 
   /* (Not mandatory) Automatically save the solution */
-  if ( MMG3D_saveSol(mmgMesh,mmgSol,"test.o") != 1 )
+  if ( MMG3D_saveSol(mmgMesh,mmgSol,outname) != 1 )
     exit(EXIT_FAILURE);
 
   /* 9) free the MMG3D5 structures */
@@ -140,6 +148,9 @@ int main(int argc,char *argv[]) {
 
   free(inname);
   inname = NULL;
+
+  free(outname);
+  outname = NULL;
 
   return(ier);
 }

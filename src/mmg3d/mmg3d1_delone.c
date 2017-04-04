@@ -40,8 +40,8 @@
 
 char  ddb;
 
-#define _MMG5_LOPTL_MMG5_DEL     1.41
-#define _MMG5_LOPTS_MMG5_DEL     0.6
+#define _MMG3D_LOPTL_MMG5_DEL     1.41
+#define _MMG3D_LOPTS_MMG5_DEL     0.6
 
 /* Decomment this part to debug */
 //int MMG_npuiss,MMG_nvol,MMG_npres,MMG_npd;
@@ -61,8 +61,8 @@ char  ddb;
  * \return -1 if fail and we don't save the mesh, 0 if fail but we try to save
  * the mesh, 1 otherwise.
  *
- * \a adpsplcol loop: split edges longer than \ref _MMG5_LOPTL_MMG5_DEL and
- * collapse edges shorter than \ref _MMG5_LOPTS_MMG5_DEL.
+ * \a adpsplcol loop: split edges longer than \ref _MMG3D_LOPTL_MMG5_DEL and
+ * collapse edges shorter than \ref _MMG3D_LOPTS_MMG5_DEL.
  *
  */
 static inline int
@@ -114,7 +114,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
       fprintf(stdout,"%s:%d: Warning: all edges of tetra %d are boundary and required\n",
               __FILE__,__LINE__,k);
 
-    if ( lmax >= _MMG5_LOPTL_MMG5_DEL )  {
+    if ( lmax >= _MMG3D_LOPTL_MMG5_DEL )  {
       /* proceed edges according to lengths */
       ifa0 = _MMG5_ifar[imax][0];
       ifa1 = _MMG5_ifar[imax][1];
@@ -354,7 +354,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
       }
     }
   collapse:
-    if(lmin <= _MMG5_LOPTS_MMG5_DEL) {
+    if(lmin <= _MMG3D_LOPTS_MMG5_DEL) {
       // Case of an internal tetra with 4 ridges vertices.
       if ( lmin == 0 ) continue;
 
@@ -417,7 +417,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
         }
         else if (ilist < 0 )  return(-1);
       }
-    } //end if lmin < _MMG5_LOPTS_MMG5_DEL
+    } //end if lmin < _MMG3D_LOPTS_MMG5_DEL
 
     /*2) longest and shortest edges are stucked => try another edges*/
     imaxtet = imax;
@@ -428,8 +428,8 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
 
     for (ii=0; ii<6; ii++) {
       if ( pt->xt && (pxt->tag[ii] & MG_REQ) )  continue;
-      if ( (ii==imintet) && (lmintet < _MMG5_LOPTS_MMG5_DEL)) continue;
-      if ( (ii==imaxtet) && (lmaxtet > _MMG5_LOPTL_MMG5_DEL) ) continue;
+      if ( (ii==imintet) && (lmintet < _MMG3D_LOPTS_MMG5_DEL)) continue;
+      if ( (ii==imaxtet) && (lmaxtet > _MMG3D_LOPTL_MMG5_DEL) ) continue;
 
       ip1  = _MMG5_iare[ii][0];
       ip2  = _MMG5_iare[ii][1];
@@ -439,7 +439,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
       lmax = len;
       imin = ii;
       lmin = len;
-      if ( lmax >= _MMG5_LOPTL_MMG5_DEL )  {
+      if ( lmax >= _MMG3D_LOPTL_MMG5_DEL )  {
         /* proceed edges according to lengths */
         ifa0 = _MMG5_ifar[imax][0];
         ifa1 = _MMG5_ifar[imax][1];
@@ -520,9 +520,6 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
           if ( !ier ) {
             ier = _MMG3D_dichoto1b(mesh,met,list,ilist,ip);
           }
-          /* We can create element with 0 qualities at machine epsilon even when ip
-             is the mid edge point */
-          ier = _MMG3D_simbulgept(mesh,met,list,ilist,ip);
           if ( ier )
             ier = _MMG5_split1b(mesh,met,list,ilist,ip,1,1);
 
@@ -677,7 +674,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
         }
       }
     collapse2:
-      if(lmin > _MMG5_LOPTS_MMG5_DEL) continue;
+      if(lmin > _MMG3D_LOPTS_MMG5_DEL) continue;
       // Case of an internal tetra with 4 ridges vertices.
       if ( lmin == 0 ) continue;
 
@@ -752,8 +749,8 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
  * \return -1 if fail and we dont try to end the remesh process,
  * 0 if fail but we try to end the remesh process and 1 if success.
  *
- * Split edges longer than \ref _MMG5_LOPTL_MMG5_DEL and collapse edges shorter
- * than \ref _MMG5_LOPTS_MMG5_DEL.
+ * Split edges longer than \ref _MMG3D_LOPTL_MMG5_DEL and collapse edges shorter
+ * than \ref _MMG3D_LOPTS_MMG5_DEL.
  *
  */
 static int

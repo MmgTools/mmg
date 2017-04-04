@@ -49,16 +49,14 @@ extern "C" {
 #define M_MU      0.33
 
 #define _MMG2_EPSD   1.e-10 //e-20??
-#define EPSA   1.e-12
+#define _MMG2D_EPSA   1.e-12
 
-#define TGV    1.e15
-#define PRECI  1.
-#define SIZE    0.75
-#define COS90   0.0
-#define ALPHA  0.28867513459
-#define ALPHAD 3.464101615137755   /* 6.0 / sqrt(3.0)  */
+#define _MMG2D_PRECI  1.
+#define _MMG2D_SIZE   0.75
+#define _MMG2D_ALPHA  0.28867513459
+#define _MMG2D_ALPHAD 3.464101615137755   /* 6.0 / sqrt(3.0)  */
 #define MMG2_LONMAX 1024
-#define _MMG5_BADKAL    0.2
+#define _MMG2D_BADKAL    0.2
 #define _MMG2_NULKAL    1.e-6
 #define _MMG2_ANGCORN   -1.e-6
 #define _MMG2_SHORTMAX     0x7fff

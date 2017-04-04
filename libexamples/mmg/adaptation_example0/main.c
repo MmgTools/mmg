@@ -52,12 +52,12 @@ int main(int argc,char *argv[]) {
   MMG5_pMesh      mmgMesh;
   MMG5_pSol       mmgSol;
   int             ier;
-  char            *filename,*filename_os,*filename_o3d,*ptr;
+  char            *filename,*filename_o2d,*filename_os,*filename_o3d,*ptr;
 
   fprintf(stdout,"  -- TEST MMGLIB \n");
 
-  if ( argc != 3 ) {
-    printf(" Usage: %s 2d_filein 3d_filein \n",argv[0]);
+  if ( argc != 4 ) {
+    printf(" Usage: %s 2d_filein 3d_filein fileout\n",argv[0]);
     return(1);
   }
 
@@ -116,9 +116,20 @@ int main(int argc,char *argv[]) {
 
   /** 1) Automatically save the mesh */
   /*save result*/
-  if ( MMG2D_saveMesh(mmgMesh,"result.mesh") != 1 )  exit(EXIT_FAILURE);
+  filename_o2d = (char *) calloc(strlen(argv[3]) + 4, sizeof(char));
+  if ( filename_o2d == NULL ) {
+    perror("  ## Memory problem: calloc");
+    exit(EXIT_FAILURE);
+  }
+  strcpy(filename_o2d,argv[3]);
+  ptr = strstr(filename_o2d,".mesh");
+  if ( !ptr )  ptr = strstr(filename_o2d,".msh");
+  if ( ptr ) *ptr = '\0';
+  strcat(filename_o2d,".2d");
+
+  if ( MMG2D_saveMesh(mmgMesh,filename_o2d) != 1 )  exit(EXIT_FAILURE);
   /*save metric*/
-  if ( MMG2D_saveSol(mmgMesh,mmgSol,"result") != 1 )  exit(EXIT_FAILURE);
+  if ( MMG2D_saveSol(mmgMesh,mmgSol,filename_o2d) != 1 )  exit(EXIT_FAILURE);
 
   /** 2) Free the MMG2D structures */
   MMG2D_Free_all(MMG5_ARG_start,
@@ -137,12 +148,12 @@ int main(int argc,char *argv[]) {
   }
   strcpy(filename,argv[2]);
 
-  filename_os = (char *) calloc(strlen(argv[2]) + 3, sizeof(char));
+  filename_os = (char *) calloc(strlen(argv[3]) + 3, sizeof(char));
   if ( filename_os == NULL ) {
     perror("  ## Memory problem: calloc");
     exit(EXIT_FAILURE);
   }
-  strcpy(filename_os,argv[2]);
+  strcpy(filename_os,argv[3]);
   ptr = strstr(filename_os,".mesh");
   if ( !ptr )  ptr = strstr(filename_os,".msh");
   if ( ptr ) *ptr = '\0';
@@ -205,12 +216,12 @@ int main(int argc,char *argv[]) {
                 MMG5_ARG_end);
 
   /** ================== 3d remeshing using the mmg3d library ========== */
-  filename_o3d = (char *) calloc(strlen(argv[2]) + 4, sizeof(char));
+  filename_o3d = (char *) calloc(strlen(argv[3]) + 4, sizeof(char));
   if ( filename_o3d == NULL ) {
     perror("  ## Memory problem: calloc");
     exit(EXIT_FAILURE);
   }
-  strcpy(filename_o3d,argv[2]);
+  strcpy(filename_o3d,argv[3]);
   ptr = strstr(filename_o3d,".mesh");
   if ( !ptr )  ptr = strstr(filename_o3d,".msh");
   if ( ptr ) *ptr = '\0';
@@ -272,6 +283,7 @@ int main(int argc,char *argv[]) {
                  MMG5_ARG_end);
 
   free(filename);
+  free(filename_o2d);
   free(filename_os);
   free(filename_o3d);
 

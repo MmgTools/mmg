@@ -80,7 +80,7 @@ void _MMG5_tet2tri(MMG5_pMesh mesh,int k,char ie,MMG5_Tria *ptt) {
  * \param met pointer toward the metric structure.
  * \param k tetrahedron index.
  * \param vx pointer toward table of edges to split.
- * \return 1.
+ * \return 1 if success, 0 if fail.
  *
  * Find acceptable position for splitting.
  *
@@ -156,7 +156,20 @@ int _MMG3D_dichoto(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
       }
     }
   }
-  return(1);
+
+  /* For very ill-shaped elements, we can have no valid position */
+  switch (pt->flag) {
+  case 1: case 2: case 4: case 8: case 16: case 32:
+    ier = _MMG3D_split1_sim(mesh,met,k,vx);
+    break;
+  case 11: case 21: case 38: case 56:
+    ier = _MMG3D_split3_sim(mesh,met,k,vx);
+    break;
+  default:
+    ier = _MMG5_split2sf_sim(mesh,met,k,vx);
+    break;
+  }
+  return(ier);
 }
 
 /**
@@ -165,7 +178,7 @@ int _MMG3D_dichoto(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
  * \param list pointer toward the shell of edge.
  * \param ret double of the number of tetrahedra in the shell.
  * \param ip new point index.
- * \return 1.
+ * \return 1 if success, 0 if fail
  *
  * Find acceptable position for _MMG5_split1b, passing the shell of
  * considered edge, starting from o point.
@@ -218,11 +231,12 @@ int _MMG3D_dichoto1b(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int ip) {
   while ( ++it < maxit );
   if ( !ier )  t = to;
 
+  /* For very ill-shaped elements, we can have novalid position */
   ppt->c[0] = m[0] + t*(o[0]-m[0]);
   ppt->c[1] = m[1] + t*(o[1]-m[1]);
   ppt->c[2] = m[2] + t*(o[2]-m[2]);
 
-  return(1);
+  return( _MMG3D_simbulgept(mesh,met,list,ret,ip) );
 }
 
 /**
@@ -364,7 +378,7 @@ char _MMG5_chkedg(MMG5_pMesh mesh,MMG5_Tria *pt,char ori, double hmax,
     /*   } */
     /* } */
 
-    hma2 = _MMG5_LLONG*_MMG5_LLONG*hmax*hmax;
+    hma2 = _MMG3D_LLONG*_MMG3D_LLONG*hmax*hmax;
 
     /* check length */
     ux = p[i2]->c[0] - p[i1]->c[0];
@@ -543,7 +557,7 @@ int _MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double crit,
     for (k=1; k<=mesh->ne; k++) {
       pt = &mesh->tetra[k];
       if ( !MG_EOK(pt) || (pt->tag & MG_REQ) )  continue;
-      if ( pt->qual > 0.0288675 /*0.6/_MMG5_ALPHAD*/ )  continue;
+      if ( pt->qual > 0.0288675 /*0.6/_MMG3D_ALPHAD*/ )  continue;
 
       for (i=0; i<6; i++) {
         /* Prevent swap of a ref or tagged edge */
@@ -877,7 +891,7 @@ static int _MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           ll = _MMG5_lenedg(mesh,met,_MMG5_iarf[i][j],pt);
           // Case of an internal tetra with 4 ridges vertices.
           if ( ll == 0 ) continue;
-          if ( ll > _MMG5_LSHRT )  continue;
+          if ( ll > _MMG3D_LSHRT )  continue;
         }
 
 
@@ -943,8 +957,47 @@ static int _MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
 
 /**
  * \param mesh pointer toward the mesh structure.
+ * \param hash pointer toward the hash table of edges.
+ * \return 0 if failed, 1 if success
+ *
+ * Delete the points inserted by pattern if the pattern step fail.
+ *
+ */
+static inline
+int _MMG3D_delPatternPts(MMG5_pMesh mesh,_MMG5_Hash hash)
+{
+  MMG5_pTetra   pt;
+  int           vx[6],k,ia,i,j;
+
+  /* Delete the useless added points */
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+    if ( !MG_EOK(pt) || (pt->tag & MG_REQ) ) continue;
+
+    memset(vx,0,6*sizeof(int));
+    for (ia=0,i=0; i<3; i++) {
+      for (j=i+1; j<4; j++,ia++) {
+        if ( pt->xt && (mesh->xtetra[pt->xt].tag[ia] & MG_REQ) ) continue;
+        vx[ia] = _MMG5_hashGet(&hash,pt->v[i],pt->v[j]);
+        if ( vx[ia] > 0 ) {
+          _MMG3D_delPt(mesh,vx[ia]);
+          if ( !_MMG5_hashUpdate(&hash,pt->v[i],pt->v[j],-1) ) {
+            printf("  ## Error: Unable to delete point idx along edge %d %d.\n",
+                   pt->v[i], pt->v[j]);
+            _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
+            return 0;
+          }
+        }
+      }
+    }
+  }
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
- * \param typchk type of checking permformed for edge length (hmax or _MMG5_LLONG criterion).
+ * \param typchk type of checking permformed for edge length (hmax or _MMG3D_LLONG criterion).
  * \return -1 if failed.
  * \return number of new points.
  *
@@ -1042,7 +1095,7 @@ _MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
               break;
             }
           }
-          hma2 = _MMG5_LLONG*_MMG5_LLONG*hma2*hma2;
+          hma2 = _MMG3D_LLONG*_MMG3D_LLONG*hma2*hma2;
           if ( ll > hma2 ) {
             ip = _MMG5_hashGet(&hash,ip1,ip2);
             mincal = MG_MIN(mincal,pt->qual);
@@ -1052,7 +1105,7 @@ _MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           ll = _MMG5_lenedg(mesh,met,i,pt);
           // Case of an internal tetra with 4 ridges vertices.
           if ( ll == 0 ) continue;
-          if ( ll > _MMG5_LLONG ) {
+          if ( ll > _MMG3D_LLONG ) {
             ip = _MMG5_hashGet(&hash,ip1,ip2);
             mincal = MG_MIN(mincal,pt->qual);
           }
@@ -1109,6 +1162,9 @@ _MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   /** 3. check and split */
 split:
  if ( mincal < _MMG5_EPS ) {
+   /* Delete the useless added points */
+   if ( !_MMG3D_delPatternPts(mesh,hash) ) return -1;
+
    /* Avoid the creation of bad quality elements because */
    if ( mesh->info.imprim > 5 || mesh->info.ddebug )
      printf("  ## Warning: Too bad quality for the worst element."
@@ -1200,7 +1256,7 @@ split:
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
- * \param typchk type of checking permformed for edge length (hmax or _MMG5_LLONG criterion).
+ * \param typchk type of checking permformed for edge length (hmax or _MMG3D_LLONG criterion).
  * \return -1 if failed.
  * \return number of new points.
  *
@@ -1218,14 +1274,14 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   _MMG5_Hash    hash;
   MMG5_pPar     par;
   double        o[3],no[3],to[3],dd,len,hmax,hausd;
-  int           vx[6],k,l,ip,ic,it,nap,nc,ni,ne,npinit,ns,ip1,ip2,ier,isloc;
+  int           vx[6],k,l,ip,ic,it,nap,nc,ni,ne,ns,ip1,ip2,ier,isloc;
   char          i,j,ia,i1,i2;
   static double uv[3][2] = { {0.5,0.5}, {0.,0.5}, {0.5,0.} };
 
   /** 1. analysis of boundary elements */
   if ( !_MMG5_hashNew(mesh,&hash,mesh->np,7*mesh->np) ) return(-1);
   ns = nap = 0;
-  npinit=mesh->np;
+
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
     if ( !MG_EOK(pt) || (pt->tag & MG_REQ) || !pt->xt )  continue;
@@ -1311,11 +1367,11 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         len = _MMG5_lenedg(mesh,met,ia,pt);
         // Case of an internal tetra with 4 ridges vertices.
         if ( len == 0 ) continue;
-        if ( len > _MMG5_LLONG )  MG_SET(pt->flag,ia);
+        if ( len > _MMG3D_LLONG )  MG_SET(pt->flag,ia);
         /* Treat here the ridges coming from a corner (we can not do that after
          * because the corner don't have xpoints) */
         if ( (mesh->point[ip1].tag & MG_CRN) ||  (mesh->point[ip2].tag & MG_CRN) ) {
-          if ( len > _MMG5_LOPTL )  MG_SET(pt->flag,ia);
+          if ( len > _MMG3D_LOPTL )  MG_SET(pt->flag,ia);
         }
       }
     }
@@ -1347,9 +1403,7 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
                               fprintf(stderr,"  ## Error: unable to allocate a new point.\n");
                               _MMG5_INCREASE_MEM_MESSAGE();
-                              do {
-                                _MMG3D_delPt(mesh,mesh->np);
-                              } while ( mesh->np>npinit );
+                              _MMG3D_delPatternPts(mesh,hash);
                               return(-1)
                               ,o,MG_BDY);
           // Now pb->p contain a wrong memory address.
@@ -1491,21 +1545,16 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
       }
       if ( !pt->flag )  continue;
 
-      if ( pt->qual < _MMG5_EPSOK ) {
-        ier = 0;
-      }
-      else {
-        switch (pt->flag) {
-        case 1: case 2: case 4: case 8: case 16: case 32:
-          ier = _MMG3D_split1_sim(mesh,met,k,vx);
-          break;
-        case 11: case 21: case 38: case 56:
-          ier = _MMG3D_split3_sim(mesh,met,k,vx);
-          break;
-        default:
-          ier = _MMG5_split2sf_sim(mesh,met,k,vx);
-          break;
-        }
+      switch (pt->flag) {
+      case 1: case 2: case 4: case 8: case 16: case 32:
+        ier = _MMG3D_split1_sim(mesh,met,k,vx);
+        break;
+      case 11: case 21: case 38: case 56:
+        ier = _MMG3D_split3_sim(mesh,met,k,vx);
+        break;
+      default:
+        ier = _MMG5_split2sf_sim(mesh,met,k,vx);
+        break;
       }
       if ( ier )  continue;
 

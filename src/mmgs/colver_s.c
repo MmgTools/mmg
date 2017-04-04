@@ -54,8 +54,8 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
   ip2 = pt->v[i2];
   if ( typchk == 2 && met->m ) {
     lon = _MMG5_lenSurfEdg(mesh,met,ip1,ip2,0);
-    lon = MG_MIN(lon,LSHRT);
-    lon = MG_MAX(1.0/lon,LLONG);
+    lon = MG_MIN(lon,_MMGS_LSHRT);
+    lon = MG_MAX(1.0/lon,_MMGS_LLONG);
   }
 
   /* collect all triangles around vertex i1 */
@@ -130,10 +130,10 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
 
       /* check quality */
       if ( typchk == 2 && met->m )
-        kal = ALPHAD*_MMG5_calelt(mesh,met,pt0);
+        kal = _MMGS_ALPHAD*_MMG5_calelt(mesh,met,pt0);
       else
-        kal = ALPHAD*_MMG5_caltri_iso(mesh,NULL,pt0);
-      if ( kal < NULKAL )  return(0);
+        kal = _MMGS_ALPHAD*_MMG5_caltri_iso(mesh,NULL,pt0);
+      if ( kal < _MMGS_NULKAL )  return(0);
 
       memcpy(n0old,n1old,3*sizeof(double));
       memcpy(n0new,n1new,3*sizeof(double));
@@ -189,10 +189,10 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
 
     /* check quality */
     if ( typchk == 2 && met->m )
-      kal = ALPHAD*_MMG5_calelt(mesh,met,pt0);
+      kal = _MMGS_ALPHAD*_MMG5_calelt(mesh,met,pt0);
     else
-      kal = ALPHAD*_MMG5_caltri_iso(mesh,NULL,pt0);
-    if ( kal < NULKAL )  return(0);
+      kal = _MMGS_ALPHAD*_MMG5_caltri_iso(mesh,NULL,pt0);
+    if ( kal < _MMGS_NULKAL )  return(0);
   }
 
   /* for specific configurations along open ridge */
@@ -229,10 +229,10 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
 
     /* check quality */
     if ( typchk == 2 && met->m )
-      kal = ALPHAD*_MMG5_calelt(mesh,met,pt0);
+      kal = _MMGS_ALPHAD*_MMG5_calelt(mesh,met,pt0);
     else
-      kal = ALPHAD*_MMG5_caltri_iso(mesh,NULL,pt0);
-    if ( kal < NULKAL )  return(0);
+      kal = _MMGS_ALPHAD*_MMG5_caltri_iso(mesh,NULL,pt0);
+    if ( kal < _MMGS_NULKAL )  return(0);
 
   }
 
@@ -435,7 +435,7 @@ int litcol(MMG5_pMesh mesh,int k,char i,double kali) {
   MMG5_pTria     pt,pt0,pt1;
   MMG5_pPoint    p1,p2;
   double         kal,ps,cosnold,cosnnew,n0old[3],n0new[3],n1old[3],n1new[3],n00old[3],n00new[3];
-  int            *adja,list[_MMG5_LMAX+2],jel,ip2,l,ilist;
+  int            *adja,list[_MMGS_LMAX+2],jel,ip2,l,ilist;
   char           i1,i2,j,jj,j2,open;
 
   pt0 = &mesh->tria[0];
@@ -494,8 +494,9 @@ int litcol(MMG5_pMesh mesh,int k,char i,double kali) {
         memcpy(n0new,n1new,3*sizeof(double));
       }
       /* check quality */
-      kal = ALPHAD*_MMG5_caltri_iso(mesh,NULL,pt0);
-      if ( kal < NULKAL )  return(0);
+      kal = _MMGS_ALPHAD*_MMG5_caltri_iso(mesh,NULL,pt0);
+#warning URGENT threshold check
+      if ( kal < _MMGS_NULKAL )  return(0);
     }
 
     /* check angle between 1st and last triangles */

@@ -54,12 +54,13 @@ int main(int argc,char *argv[]) {
   MMG5_pMesh      mmgMesh;
   MMG5_pSol       mmgSol;
   int             ier;
-  string          filename,filename_os,filename_o3d;
+  string          filename,filename_os,filename_o2d,filename_o3d;
+  std::size_t     found;
 
   fprintf(stdout,"  -- TEST MMGLIB \n");
 
-  if ( argc != 3 ) {
-    printf(" Usage: %s 2d_filein 3d_filein \n",argv[0]);
+  if ( argc != 4 ) {
+    printf(" Usage: %s 2d_filein 3d_filein fileout\n",argv[0]);
     return(1);
   }
 
@@ -85,11 +86,11 @@ int main(int argc,char *argv[]) {
       file formatted or manually set your mesh using the MMG2D_Set* functions */
 
   /** with MMG2D_loadMesh function */
-  if ( MMG2D_loadMesh(mmgMesh,"init.mesh") != 1 )  exit(EXIT_FAILURE);
+  if ( MMG2D_loadMesh(mmgMesh,filename.c_str()) != 1 )  exit(EXIT_FAILURE);
   /** 3) Build sol in MMG5 format */
   /** Two solutions: just use the MMG2D_loadSol function that will read a .sol(b)
       file formatted or manually set your sol using the MMG2D_Set* functions */
-  if ( MMG2D_loadSol(mmgMesh,mmgSol,"init") != 1 )  exit(EXIT_FAILURE);
+  if ( MMG2D_loadSol(mmgMesh,mmgSol,filename.c_str()) != 1 )  exit(EXIT_FAILURE);
 
   /** ------------------------------ STEP  II -------------------------- */
   /** remesh function */
@@ -107,11 +108,22 @@ int main(int argc,char *argv[]) {
       that will write .mesh(b)/.sol formatted files or manually get your mesh/sol
       using the MMG2D_getMesh/MMG2D_getSol functions */
 
+  filename_o2d = argv[3];
+
+  found = filename_o2d.find(".mesh");
+  if (found==std::string::npos) {
+    found = filename_o2d.find(".msh");
+  }
+
+  if (found!=std::string::npos) {
+    filename_o2d.replace(found,1,"\0");
+  }
+  filename_o2d += ".2d";
   /** 1) Automatically save the mesh */
   /*save result*/
-  if ( MMG2D_saveMesh(mmgMesh,"result.mesh") != 1 )  exit(EXIT_FAILURE);
+  if ( MMG2D_saveMesh(mmgMesh,filename_o2d.c_str()) != 1 )  exit(EXIT_FAILURE);
   /*save metric*/
-  if ( MMG2D_saveSol(mmgMesh,mmgSol,"result") != 1 )  exit(EXIT_FAILURE);
+  if ( MMG2D_saveSol(mmgMesh,mmgSol,filename_o2d.c_str()) != 1 )  exit(EXIT_FAILURE);
 
   /** 2) Free the MMG2D structures */
   MMG2D_Free_all(MMG5_ARG_start,
@@ -121,11 +133,10 @@ int main(int argc,char *argv[]) {
   /** ================ surface remeshing using the mmgs library ======== */
 
   /* Name and path of the mesh file */
+  filename    = argv[2];
+  filename_os = argv[3];
 
-  filename = argv[2];
-  filename_os = argv[2];
-
-  std::size_t found = filename_os.find(".mesh");
+  found = filename_os.find(".mesh");
   if (found==std::string::npos) {
     found = filename_os.find(".msh");
   }

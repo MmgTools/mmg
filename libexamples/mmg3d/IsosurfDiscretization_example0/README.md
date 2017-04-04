@@ -1,8 +1,7 @@
 # Example of basic use of library **libmmg3d** for a level-set discretization test case
 
 ## I/ Implementation
-  We read the mesh and level-set values at the mesh nodes in the **_test.mesh_** and **_test.sol_** files and then, we discretize the implicit function and optimize the mesh. we save results in the **_test.o.mesh/sol_** files.
-
+  We read the mesh and level-set values at the mesh nodes in files and then, we discretize the implicit function and optimize the mesh.
 
 ## II/ Compilation
   1. Build and install the **mmg3d** shared and/or static library. We suppose in the following that you have installed the **mmg3d** library in the **_$CMAKE_INSTALL_PREFIX_** directory (see the [installation](https://github.com/MmgTools/Mmg/wiki/Setup-guide#iii-installation) section of the setup guide);
@@ -25,9 +24,3 @@
 > gcc -I$CMAKE_INSTALL_PREFIX/include/mmg/mmg3d main.c -L$CMAKE_INSTALL_PREFIX/lib -lmmg3d
 > export LD_LIBRARY_PATH=$CMAKE_INSTALL_PREFIX/lib:$LD_LIBRARY_PATH
 > ```
-
-## III/ Execution
-Because it contains hard coded paths to the mesh and solution files, the tests must be run from a subdirectory of the root of your **mmg** project.
-
-> Example  
-> Assuming that your **mmg** project is cloned into the **_mmg_** directory (default case), you can run the test from the **_mmg/build/_** or **_mmg/libexamples_** directories but not from the **_mmg/libexamples/mmg3d/_** folder.

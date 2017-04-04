@@ -49,11 +49,14 @@
  */
 int _MMGS_split1_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,int *vx) {
   MMG5_pTria      pt,pt0;
-  double          n[3],nref[3],cal;
+  double          n[3],nref[3],vnew,vold;
   int             is;
 
   pt  = &mesh->tria[k];
- _MMG5_nonUnitNorPts(mesh, pt->v[0], pt->v[1],pt->v[2],nref);
+  _MMG5_nonUnitNorPts(mesh, pt->v[0], pt->v[1],pt->v[2],nref);
+
+  vold = nref[0]*nref[0] + nref[1]*nref[1] + nref[2]*nref[2];
+  if ( vold < _MMG5_EPSOK ) return 0;
 
   pt0 = &mesh->tria[0];
 
@@ -65,8 +68,8 @@ int _MMGS_split1_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,int *vx) {
 
   _MMG5_nonUnitNorPts(mesh, pt0->v[0], pt0->v[1],pt0->v[2],n);
 
-  cal = n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
-  if ( cal < _MMG5_EPSD )  return(0);
+  vnew = n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
+  if ( vnew < _MMG5_EPSOK )  return(0);
 
   /* Check if we create a tri with wrong orientation */
   if ( nref[0]*n[0]+nref[1]*n[1]+nref[2]*n[2] < 0 ) {
@@ -79,8 +82,8 @@ int _MMGS_split1_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,int *vx) {
 
   _MMG5_nonUnitNorPts(mesh, pt0->v[0], pt0->v[1],pt0->v[2],n);
 
-  cal = n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
-  if ( cal < _MMG5_EPSD )  return(0);
+  vnew = n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
+  if ( vnew < _MMG5_EPSOK )  return(0);
 
   /* Check if we create a tri with wrong orientation */
   if ( nref[0]*n[0]+nref[1]*n[1]+nref[2]*n[2] < 0 ) {
@@ -171,13 +174,13 @@ int _MMGS_simbulgept(MMG5_pMesh mesh,MMG5_pSol met, int k,int i,int ip) {
   is         = _MMG5_iprv2[i];
   pt0->v[is] = 0;
   cal        = _MMG5_calelt(mesh,met,pt0);
-  if ( cal < _MMG5_EPSD )  return(0);
+  if ( cal < _MMG5_EPSOK )  return(0);
 
   pt0->v[is] = pt->v[is];
   is         = _MMG5_inxt2[i];
   pt0->v[is] = 0;
   cal        = _MMG5_calelt(mesh,met,pt0);
-  if ( cal < _MMG5_EPSD )  return(0);
+  if ( cal < _MMG5_EPSOK )  return(0);
 
   // Check the validity of the two triangles created from the triangle adjacent
   // to k by edge i.
@@ -189,13 +192,13 @@ int _MMGS_simbulgept(MMG5_pMesh mesh,MMG5_pSol met, int k,int i,int ip) {
   is         = _MMG5_iprv2[iadja];
   pt0->v[is] = 0;
   cal        = _MMG5_calelt(mesh,met,pt0);
-  if ( cal < _MMG5_EPSD )  return(0);
+  if ( cal < _MMG5_EPSOK )  return(0);
 
   pt0->v[is] = pt->v[is];
   is         = _MMG5_inxt2[iadja];
   pt0->v[is] = 0;
   cal        = _MMG5_calelt(mesh,met,pt0);
-  if ( cal < _MMG5_EPSD )  return(0);
+  if ( cal < _MMG5_EPSOK )  return(0);
 
   return(1);
 }
@@ -332,11 +335,14 @@ int split1b(MMG5_pMesh mesh,int k,char i,int ip) {
  */
 int _MMG5_split2_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
   MMG5_pTria    pt,pt0;
-  double        n[3],nref[3],cal;
+  double        n[3],nref[3],vold,vnew;
   int           i1,i2,i;
 
   pt  = &mesh->tria[k];
- _MMG5_nonUnitNorPts(mesh, pt->v[0], pt->v[1],pt->v[2],nref);
+  _MMG5_nonUnitNorPts(mesh, pt->v[0], pt->v[1],pt->v[2],nref);
+
+  vold = nref[0]*nref[0] + nref[1]*nref[1] + nref[2]*nref[2];
+  if ( vold < _MMG5_EPSOK ) return 0;
 
   pt0 = &mesh->tria[0];
 
@@ -353,8 +359,8 @@ int _MMG5_split2_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
   pt0->v[i2] = vx[i];
   _MMG5_nonUnitNorPts(mesh, pt0->v[0], pt0->v[1],pt0->v[2],n);
 
-  cal = n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
-  if ( cal < _MMG5_EPSD )  return(0);
+  vnew = n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
+  if ( vnew < _MMG5_EPSOK )  return(0);
 
   /* Check if we create a tri with wrong orientation */
   if ( nref[0]*n[0]+nref[1]*n[1]+nref[2]*n[2] < 0 ) {
@@ -367,8 +373,8 @@ int _MMG5_split2_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
 
   _MMG5_nonUnitNorPts(mesh, pt0->v[0], pt0->v[1],pt0->v[2],n);
 
-  cal = n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
-  if ( cal < _MMG5_EPSD )  return(0);
+  vnew = n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
+  if ( vnew < _MMG5_EPSOK )  return(0);
 
   /* Check if we create a tri with wrong orientation */
   if ( nref[0]*n[0]+nref[1]*n[1]+nref[2]*n[2] < 0 ) {
@@ -382,8 +388,8 @@ int _MMG5_split2_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
 
   _MMG5_nonUnitNorPts(mesh, pt0->v[0], pt0->v[1],pt0->v[2],n);
 
-  cal = n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
-  if ( cal < _MMG5_EPSD )  return(0);
+  vnew = n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
+  if ( vnew < _MMG5_EPSOK )  return(0);
 
   /* Check if we create a tri with wrong orientation */
   if ( nref[0]*n[0]+nref[1]*n[1]+nref[2]*n[2] < 0 ) {
@@ -476,10 +482,13 @@ int _MMGS_split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
  */
 int _MMGS_split3_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
   MMG5_pTria    pt,pt0;
-  double        n[3],nref[3],cal;
+  double        n[3],nref[3],vnew,vold;
 
   pt   = &mesh->tria[k];
- _MMG5_nonUnitNorPts(mesh, pt->v[0], pt->v[1],pt->v[2],nref);
+  _MMG5_nonUnitNorPts(mesh, pt->v[0], pt->v[1],pt->v[2],nref);
+
+  vold = nref[0]*nref[0] + nref[1]*nref[1] + nref[2]*nref[2];
+  if ( vold < _MMG5_EPSOK ) return 0;
 
   pt0  = &mesh->tria[0];
 
@@ -492,8 +501,8 @@ int _MMGS_split3_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
 
   _MMG5_nonUnitNorPts(mesh, pt0->v[0], pt0->v[1],pt0->v[2],n);
 
-  cal = n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
-  if ( cal < _MMG5_EPSD )  return(0);
+  vnew = n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
+  if ( vnew < _MMG5_EPSOK )  return(0);
 
   /* Check if we create a tri with wrong orientation */
   if ( nref[0]*n[0]+nref[1]*n[1]+nref[2]*n[2] < 0 ) {
@@ -507,8 +516,8 @@ int _MMGS_split3_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
 
   _MMG5_nonUnitNorPts(mesh, pt0->v[0], pt0->v[1],pt0->v[2],n);
 
-  cal = n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
-  if ( cal < _MMG5_EPSD )  return(0);
+  vnew = n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
+  if ( vnew < _MMG5_EPSOK )  return(0);
 
   /* Check if we create a tri with wrong orientation */
   if ( nref[0]*n[0]+nref[1]*n[1]+nref[2]*n[2] < 0 ) {
@@ -522,8 +531,8 @@ int _MMGS_split3_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
 
   _MMG5_nonUnitNorPts(mesh, pt0->v[0], pt0->v[1],pt0->v[2],n);
 
-  cal = n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
-  if ( cal < _MMG5_EPSD )  return(0);
+  vnew = n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
+  if ( vnew < _MMG5_EPSOK )  return(0);
 
   /* Check if we create a tri with wrong orientation */
   if ( nref[0]*n[0]+nref[1]*n[1]+nref[2]*n[2] < 0 ) {
@@ -538,8 +547,8 @@ int _MMGS_split3_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
 
   _MMG5_nonUnitNorPts(mesh, pt0->v[0], pt0->v[1],pt0->v[2],n);
 
-  cal = n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
-  if ( cal < _MMG5_EPSD )  return(0);
+  vnew = n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
+  if ( vnew < _MMG5_EPSOK )  return(0);
 
   /* Check if we create a tri with wrong orientation */
   if ( nref[0]*n[0]+nref[1]*n[1]+nref[2]*n[2] < 0 ) {

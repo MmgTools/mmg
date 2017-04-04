@@ -59,8 +59,8 @@ int _MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
 
     if ( !lon ) return(0);
 
-    lon = MG_MIN(lon,_MMG5_LSHRT);
-    lon = MG_MAX(1.0/lon,_MMG5_LLONG);
+    lon = MG_MIN(lon,_MMG3D_LSHRT);
+    lon = MG_MAX(1.0/lon,_MMG3D_LLONG);
   }
   calold = calnew = DBL_MAX;
   for (j=0; j<ilist; j++) {
@@ -322,7 +322,7 @@ _MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,char iedg,int *lists,int ili
  * \param lists pointer toward the surfacic ball of \a p0.
  * \param ilists number of tetra in the surfacic ball of \a p0.
  * \param typchk  typchk type of checking permformed for edge length
- * (hmax or _MMG5_LLONG criterion).
+ * (hmax or _MMG3D_LLONG criterion).
  *
  * \return 1 if success, 0 if the point cannot be collapsed, -1 if fail.
  *
