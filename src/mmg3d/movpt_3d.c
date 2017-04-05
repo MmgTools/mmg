@@ -357,9 +357,9 @@ int _MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
   _MMG5_Bezier      b;
   double            *n,r[3][3],lispoi[3*MMG3D_LMAX+1],ux,uy,uz,det2d;
   double            detloc,oppt[2],step,lambda[3];
-  double            ll,m[2],uv[2],o[3],no[3],to[3],ncur[3],nprev[3],nneighi[3];
+  double            ll,m[2],uv[2],o[3],no[3],to[3];
   double            calold,calnew,caltmp,*callist;
-  int               k,kel,iel,l,n0,na,nb,ntempa,ntempb,ntempc,nut,nxp,ier;
+  int               k,kel,iel,l,n0,na,nb,ntempa,ntempb,ntempc,nut,nxp;
   unsigned char     i0,iface,i;
 
   step = 0.1;
@@ -647,18 +647,7 @@ int _MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
   pxp->n1[1] = no[1];
   pxp->n1[2] = no[2];
 
-  /* For each surfacic triangle build a virtual displaced triangle for check
-   * purposes :
-   *      - check the new triangle qualities;
-   *      - check normal deviation with the adjacent through the edge facing n0
-   *        and the previous one */
-  k           = lists[ilists-1] / 4;
-  iface       = lists[ilists-1] % 4;
-  pt          = &mesh->tetra[k];
-
-  _MMG5_tet2tri(mesh,k,iface,&tt);
-  if ( !_MMG5_nortri(mesh, &tt, nprev) ) return 0;
-
+  /* For each surfacic triangle, build a virtual displaced triangle for check purposes */
   calold = calnew = DBL_MAX;
   for (l=0; l<ilists; l++) {
     k           = lists[l] / 4;
@@ -680,33 +669,6 @@ int _MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
       return(0);
     }
     calnew = MG_MIN(calnew,caltmp);
-
-    if ( !_MMG5_nortri(mesh, &tt, ncur) ) return 0;
-
-    if ( ( !(tt.tag[i] & MG_GEO) ) && ( !(tt.tag[i] & MG_NOM) ) ) {
-      /* Check normal deviation between k and the triangle facing n0 */
-      if ( !_MMG3D_normalAdjaTri(mesh,k,iface, i,nneighi) ) {
-        //puts ( "bdyreg_pt : fail");
-        return 0;
-      }
-      ier =  _MMG3D_devangle( ncur, nneighi, mesh->info.dhd );
-      if ( ier <= 0 ) {
-        //puts ( "bdyreg_pt : rejet 2");
-        return 0;
-      }
-    }
-
-    i = _MMG5_iprv2[i];
-
-    if ( ( !(tt.tag[i] & MG_GEO) ) && ( !(tt.tag[i] & MG_NOM) ) ) {
-      /* Check normal deviation between k and the previous triangle */
-      ier =  _MMG3D_devangle( ncur, nprev, mesh->info.dhd );
-      if ( ier<=0 ) {
-        //puts ( "bdyreg_pt : rejet 3");
-        return 0;
-      }
-    }
-    memcpy(nprev, ncur, 3*sizeof(double));
   }
   if ( calold < _MMG5_EPSOK && calnew <= calold )    return(0);
   else if (calnew < _MMG5_EPSOK) return(0);
@@ -803,10 +765,9 @@ int _MMG5_movbdyrefpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
   MMG5_pxPoint          pxp;
   MMG5_pPar             par;
   double                step,ll1old,ll2old,o[3],no[3],to[3];
-  double                ncur[3],nprev[3],nneighi[3];
   double                calold,calnew,caltmp,*callist,hmax,hausd;
   int                   l,iel,ip0,ipa,ipb,iptmpa,iptmpb,it1,it2,ip1,ip2,ip,nxp;
-  int                   isloc,j,ier;
+  int                   isloc,j;
   int16_t               tag;
   unsigned char         i,i0,ie,iface,iface1,iface2,iea,ieb,ie1,ie2;
 
@@ -1012,18 +973,7 @@ int _MMG5_movbdyrefpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
   pxp->n1[1] = no[1];
   pxp->n1[2] = no[2];
 
-  /* For each surfacic triangle build a virtual displaced triangle for check
-   * purposes :
-   *      - check the new triangle qualities;
-   *      - check normal deviation with the adjacent through the edge facing ip0
-   *        and the previous one */
-  iel         = lists[ilists-1] / 4;
-  iface       = lists[ilists-1] % 4;
-  pt          = &mesh->tetra[iel];
-
-  _MMG5_tet2tri(mesh,iel,iface,&tt);
-  if ( !_MMG5_nortri(mesh, &tt, nprev) ) return 0;
-
+  /* For each surface triangle, build a virtual displaced triangle for check purposes */
   calold = calnew = DBL_MAX;
   for( l=0 ; l<ilists ; l++ ){
     iel         = lists[l] / 4;
@@ -1098,33 +1048,6 @@ int _MMG5_movbdyrefpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
       memset(pxp,0,sizeof(MMG5_xPoint));
       return(0);
     }
-
-    if ( !_MMG5_nortri(mesh, &tt, ncur) ) return 0;
-
-    if ( ( !(tt.tag[i] & MG_GEO) ) && ( !(tt.tag[i] & MG_NOM) ) ) {
-      /* Check normal deviation between iel and the triangle facing ip0 */
-      if ( !_MMG3D_normalAdjaTri(mesh,iel,iface, i,nneighi) ) {
-        //puts ( "bdyreg_pt : fail");
-        return 0;
-      }
-      ier =  _MMG3D_devangle( ncur, nneighi, mesh->info.dhd );
-      if ( ier <= 0 ) {
-        //puts ( "bdyreg_pt : rejet 2");
-        return 0;
-      }
-    }
-
-    i = _MMG5_iprv2[i];
-
-    if ( ( !(tt.tag[i] & MG_GEO) ) && ( !(tt.tag[i] & MG_NOM) ) ) {
-      /* Check normal deviation between k and the previous triangle */
-      ier =  _MMG3D_devangle( ncur, nprev, mesh->info.dhd );
-      if ( ier<=0 ) {
-        //puts ( "bdyreg_pt : rejet 3");
-        return 0;
-      }
-    }
-    memcpy(nprev, ncur, 3*sizeof(double));
   }
   if ( calold < _MMG5_EPSOK && calnew <= calold )    return(0);
   else if ( calnew < calold )    return(0);
@@ -1212,9 +1135,9 @@ int _MMG5_movbdynompt_iso(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree, 
   MMG5_Tria         tt;
   MMG5_pPar         par;
   double            step,ll1old,ll2old,calold,calnew,caltmp,*callist;
-  double            o[3],no[3],nprev[3],ncur[3],nneighi[3],to[3],hmax,hausd;
+  double            o[3],no[3],to[3],hmax,hausd;
   int               ip0,ip1,ip2,ip,iel,ipa,ipb,l,iptmpa,iptmpb,it1,it2,nxp;
-  int               j,isloc,ier;
+  int               j,isloc;
   int16_t           tag;
   char              iface,i,i0,iea,ieb,ie,ie1,ie2,iface1,iface2;
 
@@ -1418,18 +1341,7 @@ int _MMG5_movbdynompt_iso(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree, 
   pxp->n1[1] = no[1];
   pxp->n1[2] = no[2];
 
-  /* For each surfacic triangle build a virtual displaced triangle for check
-   * purposes :
-   *      - check the new triangle qualities;
-   *      - check normal deviation with the adjacent through the edge facing ip0
-   *        and the previous one */
-  iel         = lists[ilists-1] / 4;
-  iface       = lists[ilists-1] % 4;
-  pt          = &mesh->tetra[iel];
-
-  _MMG5_tet2tri(mesh,iel,iface,&tt);
-  if ( !_MMG5_nortri(mesh, &tt, nprev) ) return 0;
-
+  /* For each surface triangle, build a virtual displaced triangle for check purposes */
   calold = calnew = DBL_MAX;
   for( l=0 ; l<ilists ; l++ ){
     iel         = lists[l] / 4;
@@ -1505,33 +1417,6 @@ int _MMG5_movbdynompt_iso(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree, 
       memset(pxp,0,sizeof(MMG5_xPoint));
       return(0);
     }
-
-    if ( !_MMG5_nortri(mesh, &tt, ncur) ) return 0;
-
-    if ( ( !(tt.tag[i] & MG_GEO) ) && ( !(tt.tag[i] & MG_NOM) ) ) {
-      /* Check normal deviation between iel and the triangle facing ip0 */
-      if ( !_MMG3D_normalAdjaTri(mesh,iel,iface, i,nneighi) ) {
-        //puts ( "bdyreg_pt : fail");
-        return 0;
-      }
-      ier =  _MMG3D_devangle( ncur, nneighi, mesh->info.dhd );
-      if ( ier <= 0 ) {
-        //puts ( "bdyreg_pt : rejet 2");
-        return 0;
-      }
-    }
-
-    i = _MMG5_iprv2[i];
-
-    if ( ( !(tt.tag[i] & MG_GEO) ) && ( !(tt.tag[i] & MG_NOM) ) ) {
-      /* Check normal deviation between k and the previous triangle */
-      ier =  _MMG3D_devangle( ncur, nprev, mesh->info.dhd );
-      if ( ier<=0 ) {
-        //puts ( "bdyreg_pt : rejet 3");
-        return 0;
-      }
-    }
-    memcpy(nprev, ncur, 3*sizeof(double));
   }
   if ( calold < _MMG5_EPSOK && calnew <= calold )    return(0);
   else if ( calnew < calold )    return(0);
@@ -1615,10 +1500,9 @@ int _MMG5_movbdyridpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
   MMG5_pxPoint         pxp;
   MMG5_pPar            par;
   double               step,ll1old,ll2old,o[3],no1[3],no2[3],to[3];
-  double               nprev[3],ncur[3],nneighi[3];
   double               calold,calnew,caltmp,*callist,hmax,hausd;
   int                  l,iel,ip0,ipa,ipb,iptmpa,iptmpb,it1,it2,ip1,ip2,ip,nxp;
-  int                  j,isloc,ier;
+  int                  j,isloc;
   int16_t              tag;
   unsigned char        i,i0,ie,iface,iface1,iface2,iea,ieb,ie1,ie2;
 
@@ -1827,18 +1711,7 @@ int _MMG5_movbdyridpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
   pxp->n2[1] = no2[1];
   pxp->n2[2] = no2[2];
 
-  /* For each surfacic triangle build a virtual displaced triangle for check
-   * purposes :
-   *      - check the new triangle qualities;
-   *      - check normal deviation with the adjacent through the edge facing ip0
-   *        and the previous one */
-  iel         = lists[ilists-1] / 4;
-  iface       = lists[ilists-1] % 4;
-  pt          = &mesh->tetra[iel];
-
-  _MMG5_tet2tri(mesh,iel,iface,&tt);
-  if ( !_MMG5_nortri(mesh, &tt, nprev) ) return 0;
-
+  /* For each surfacic triangle, build a virtual displaced triangle for check purposes */
   calold = calnew = DBL_MAX;
   for (l=0; l<ilists; l++) {
     iel         = lists[l] / 4;
@@ -1910,33 +1783,6 @@ int _MMG5_movbdyridpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
       memset(pxp,0,sizeof(MMG5_xPoint));
       return(0);
     }
-
-    if ( !_MMG5_nortri(mesh, &tt, ncur) ) return 0;
-
-    if ( ( !(tt.tag[i] & MG_GEO) ) && ( !(tt.tag[i] & MG_NOM) ) ) {
-      /* Check normal deviation between iel and the triangle facing ip0 */
-      if ( !_MMG3D_normalAdjaTri(mesh,iel,iface, i,nneighi) ) {
-        //puts ( "bdyreg_pt : fail");
-        return 0;
-      }
-      ier =  _MMG3D_devangle( ncur, nneighi, mesh->info.dhd );
-      if ( ier <= 0 ) {
-        //puts ( "bdyreg_pt : rejet 2");
-        return 0;
-      }
-    }
-
-    i = _MMG5_iprv2[i];
-
-    if ( ( !(tt.tag[i] & MG_GEO) ) && ( !(tt.tag[i] & MG_NOM) ) ) {
-      /* Check normal deviation between k and the previous triangle */
-      ier =  _MMG3D_devangle( ncur, nprev, mesh->info.dhd );
-      if ( ier<=0 ) {
-        //puts ( "bdyreg_pt : rejet 3");
-        return 0;
-      }
-    }
-    memcpy(nprev, ncur, 3*sizeof(double));
   }
   if ( calold < _MMG5_EPSOK && calnew <= calold )    return(0);
   else if ( calnew <= calold )  return(0);

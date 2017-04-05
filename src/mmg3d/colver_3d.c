@@ -505,12 +505,10 @@ int _MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
 #warning CECILE : pourquoi on ne met pas dhd ici au lieu de angedg
         if ( devold < _MMG5_ANGEDG ) {
           if ( devnew < devold )  {
-            printf("rejet1\n");
             return(0);
           }
         }
         else if ( devnew < _MMG5_ANGEDG )  {
-          printf("rejet2\n");
           return(0);
         }
       }
