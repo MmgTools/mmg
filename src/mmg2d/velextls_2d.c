@@ -49,7 +49,7 @@
 int* _MMG2_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
   MMG5_pTria      pt,pt1;
   MMG5_pPoint     p0;
-  double          u[2];
+  double          u[2],v[2];
   int             k,iel,jel,n,npf,nef,ip,nlay,refdirh,refdirnh,ilist,ilisto,ilistck;
   int             vper[3],*perm,*list,*adja,*invperm;
   char            i,j,jedg;
@@ -60,6 +60,8 @@ int* _MMG2_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
   npf        = 0;
   nef        = 0;
   u[0]       = u[1] = 0.0;
+  v[0]       = 0.;
+  v[1]       = -1.0;
   ilist      = ilisto = ilistck = 0;
   list       = (int*)calloc(mesh->nt+1,sizeof(int));
   perm       = (int*)calloc(mesh->np+1,sizeof(int));
@@ -241,6 +243,10 @@ int* _MMG2_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
     printf("Number of packed triangles %d, points %d, edges %d\n",ilist,npf,nef);
   
   /* Add boundary conditions */
+  /*if ( !LS_setBC(lsst,Dirichlet,refdirnh,'v',LS_edg,v) ) {
+    fprintf(stdout,"  ## Problem in fn LS_set BC. Exiting.\n");
+    return(0);
+    }*/
   if ( !LS_setBC(lsst,Dirichlet,refdirnh,'f',LS_edg,NULL) ) {
     fprintf(stdout,"  ## Problem in fn LS_set BC. Exiting.\n");
     return(0);
