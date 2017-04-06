@@ -192,11 +192,9 @@ int _MMG2_boulen(MMG5_pMesh mesh, int start,char ip, int *pleft, int *pright, do
  *
  */
 int _MMG2_boulet(MMG5_pMesh mesh,int start,char ip,int *list) {
-  MMG5_pTria    pt;
   int           *adja,k,ilist;
   char          i,i1,i2;
   
-  pt = &mesh->tria[start];
   ilist = 0;
   
   /* store neighbors */
@@ -247,7 +245,7 @@ int _MMG2_boulet(MMG5_pMesh mesh,int start,char ip,int *list) {
  */
 int _MMG2_bouleendp(MMG5_pMesh mesh,int start,char ip,int *ip1,int *ip2) {
   MMG5_pTria    pt;
-  int           *adja,k,iel,jel,np;
+  int           *adja,k,np;
   char          i,i1,i2;
   
   *ip1 = 0;
@@ -264,10 +262,7 @@ int _MMG2_bouleendp(MMG5_pMesh mesh,int start,char ip,int *ip1,int *ip2) {
     adja = &mesh->adja[3*(k-1)+1];
     i1 = _MMG5_inxt2[i];
     i2 = _MMG5_iprv2[i];
-    
-    iel = adja[i1] / 3;
-    jel = adja[i2] / 3;
-    
+
     if ( MG_EDG(pt->tag[i1]) ) {
       if ( *ip1 == 0 ) *ip1 = pt->v[i2];
       else {
@@ -316,10 +311,7 @@ int _MMG2_bouleendp(MMG5_pMesh mesh,int start,char ip,int *ip1,int *ip2) {
     adja = &mesh->adja[3*(k-1)+1];
     i1 = _MMG5_inxt2[i];
     i2 = _MMG5_iprv2[i];
-    
-    iel = adja[i1] / 3;
-    jel = adja[i2] / 3;
-    
+
     if ( MG_EDG(pt->tag[i1]) ) {
       if ( *ip1 == 0 )
         *ip1 = pt->v[i2];

@@ -35,7 +35,7 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTria      pt,pt1;
   MMG5_pEdge      ped;
   MMG5_pPoint     ppt;
-  int             k,l,kk,nex,list[MMG2_LONMAX],kdep,lon,voy,iel,iare,ied;
+  int             k,l,kk,nex,list[MMG2_LONMAX],kdep,lon,iel,iare,ied;
   int             ia,ib,ilon,rnd,idep,*adja,ir,adj,list2[3];
   char            i,i1,i2,j;
 //  int       iadr2,*adja2,ndel,iadr,ped0,ped1;
@@ -177,7 +177,6 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
           
           /* Check the adjacent triangle in the pipe */
           adj = adja[ir] / 3;
-          voy = adja[ir] % 3;
           pt1 = &mesh->tria[adj];
           if ( pt1->base != (mesh->base+1) ) continue;
           

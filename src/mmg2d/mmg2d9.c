@@ -52,7 +52,7 @@ double _MMG2_estavglen(MMG5_pMesh mesh) {
     pt = &mesh->tria[k];
     for (i=0; i<3; i++) {
       i1 = _MMG5_inxt2[i];
-      i1 = _MMG5_iprv2[i];
+      i2 = _MMG5_iprv2[i];
 
       p1 = &mesh->point[pt->v[i1]];
       p2 = &mesh->point[pt->v[i2]];
@@ -109,7 +109,7 @@ inline double _MMG2_caltri_iso_3pt(double *a,double *b,double *c) {
 int _MMG2_chkmovmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t) {
   MMG5_pTria   pt;
   MMG5_pPoint  ppt;
-  double       *v,c[3][2],tau,cal;
+  double       *v,c[3][2],tau;
   int          k,np;
   char         i,j;
 

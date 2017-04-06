@@ -220,7 +220,7 @@ int _MMG2_snapval(MMG5_pMesh mesh, MMG5_pSol sol, double *tmp) {
  by assumption, i inxt[i] is one edge of the implicit boundary */
 int _MMG2_chkmaniball(MMG5_pMesh mesh, int start, char istart) {
   MMG5_pTria         pt;
-  int                *adja,k,iel,refstart;
+  int                *adja,k,refstart;
   char               i,i1;
 
   pt = &mesh->tria[start];

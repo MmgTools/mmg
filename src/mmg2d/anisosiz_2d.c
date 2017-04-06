@@ -56,7 +56,7 @@ int _MMG2_defaultmet_2d(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
 int _MMG2_defmetbdy_2d(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
   MMG5_pTria      pt;
   MMG5_pPoint     p0,p1,p2;
-  double          hausd,sqhmin,sqhmax,ux,uy,ll,li,ps1,ps2,lm,ltmp,pv,M1,M2,t[2],t1[2],t2[2],b1[2],b2[2],*n,*m;
+  double          hausd,sqhmin,sqhmax,ux,uy,ll,li,ps1,ps2,lm,ltmp,pv,M1,M2,t1[2],t2[2],b1[2],b2[2],*n,*m;
   double          gpp1[2],gpp2[2];
   int             ilist,iel,ip,ip1,ip2,it[2],l,list[MMG2_LONMAX+2];
   char            i0,i1,i2,j;
@@ -219,7 +219,7 @@ int _MMG2_defmetbdy_2d(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
 int _MMG2_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria     pt;
   MMG5_pPoint    ppt;
-  double         hmax,hmin,hausd,mm[3],mr[3];
+  double         mm[3],mr[3];
   int            k,ip;
   char           ismet,isdef,i;
   
@@ -228,10 +228,6 @@ int _MMG2_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
     fprintf(stdout,"  ** Defining isotropic map\n");
   
   if ( mesh->info.hmax < 0.0 )  mesh->info.hmax = 0.5 * mesh->info.delta;
-  
-  hmax = mesh->info.hmax;
-  hausd = mesh->info.hausd;
-  hmin = mesh->info.hmin;
   
   /* Allocate the structure */
   if ( met->m )

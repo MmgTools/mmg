@@ -253,7 +253,7 @@ int _MMG5_hashEdge(MMG5_pMesh mesh,_MMG5_Hash *hash, int a,int b,int k) {
  */
 int _MMG5_hashUpdate(_MMG5_Hash *hash, int a,int b,int k) {
   _MMG5_hedge  *ph;
-  int          key,ia,ib,j;
+  int          key,ia,ib;
 
   ia  = MG_MIN(a,b);
   ib  = MG_MAX(a,b);
