@@ -52,7 +52,7 @@ double _MMG2_estavglen(MMG5_pMesh mesh) {
     pt = &mesh->tria[k];
     for (i=0; i<3; i++) {
       i1 = _MMG5_inxt2[i];
-      i1 = _MMG5_iprv2[i];
+      i2 = _MMG5_iprv2[i];
 
       p1 = &mesh->point[pt->v[i1]];
       p2 = &mesh->point[pt->v[i2]];
@@ -109,7 +109,7 @@ inline double _MMG2_caltri_iso_3pt(double *a,double *b,double *c) {
 int _MMG2_chkmovmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t) {
   MMG5_pTria   pt;
   MMG5_pPoint  ppt;
-  double       *v,c[3][2],tau,cal;
+  double       *v,c[3][2],tau;
   int          k,np;
   char         i,j;
 
@@ -435,7 +435,32 @@ int _MMG2_swpmshlag(MMG5_pMesh mesh,MMG5_pSol met,double crit,int itdeg) {
 
   return(nns);
 }
-
+/** For debugging purposes: save disp */
+int _MMG2D_saveDisp(MMG5_pMesh mesh,MMG5_pSol disp) {
+  FILE        *out;
+  int         k;
+  char        data[256],*ptr;
+  
+  strcpy(data,"disp.sol");
+  ptr = strstr(data,".sol");
+  if(ptr) *ptr = '\0';
+  strcat(data,"disp.sol");
+  
+  out = fopen(data,"w");
+  printf("save disp\n");
+  fprintf(out,"MeshVersionFormatted 1\n\nDimension\n%d\n\n",disp->dim);
+  fprintf(out,"SolAtVertices\n%d\n 1 2\n",disp->np);
+  
+  /* Print solutions */
+  for(k=1; k<= disp->np; k++) {
+    fprintf(out,"%f %f\n",disp->m[2*k+0],disp->m[2*k+1]);
+  }
+  
+  fprintf(out,"\nEnd");
+  fclose(out);
+  
+  return(1);
+}
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
@@ -541,7 +566,7 @@ int MMG2_mmg2d9(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met) {
             " CMake's flag set to ON to use the rigidbody movement.\n");
     return(0);
 #endif
-
+    //_MMG2D_saveDisp(mesh,disp);
     /* Sequence of dichotomy loops to find the largest admissible displacements */
     for (itdc=1; itdc<=maxitdc; itdc++) {
       nnspl = nnc = nns = nnm = 0;
@@ -589,17 +614,20 @@ int MMG2_mmg2d9(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met) {
           /* Swap of edges in tetra that have resulted distorted from the process */
           /* I do not know whether it is safe to put NULL in metric here (a
            * priori ok, since there is no vertex creation or suppression) */
-          ns = _MMG2_swpmshlag(mesh,met,1.1,itdc);
-          if ( ns < 0 ) {
-            fprintf(stdout,"  ## Problem in swaptetlag. Exiting.\n");
-            return(0);
+          if ( !mesh->info.noswap ) {
+            ns = _MMG2_swpmshlag(mesh,met,1.1,itdc);
+            if ( ns < 0 ) {
+              fprintf(stdout,"  ## Problem in swaptetlag. Exiting.\n");
+              return(0);
+            }
           }
-
           /* Relocate vertices of tetra which have been distorted in the displacement process */
-          nm = _MMG2_movtrilag(mesh,met,itdc);
-          if ( nm < 0 ) {
-            fprintf(stdout,"  ## Problem in movtetlag. Exiting.\n");
-            return(0);
+          if ( !mesh->info.nomove ) {
+            nm = _MMG2_movtrilag(mesh,met,itdc);
+            if ( nm < 0 ) {
+              fprintf(stdout,"  ## Problem in movtetlag. Exiting.\n");
+              return(0);
+            }
           }
 
           if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && (nspl+nc+ns+nm > 0) )

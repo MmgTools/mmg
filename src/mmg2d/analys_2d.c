@@ -40,7 +40,7 @@ extern char ddb;
     count number of subdomains or connected components */
 int _MMG2_setadj(MMG5_pMesh mesh) {
   MMG5_pTria       pt,pt1;
-  int              *pile,*adja,ipil,k,kk,ncc,ip1,ip2,nr,nref,nt;
+  int              *pile,*adja,ipil,k,kk,ncc,ip1,ip2,nr,nref;
   char             i,ii,i1,i2;
 
   if ( abs(mesh->info.imprim) > 5  || mesh->info.ddebug )
@@ -311,8 +311,8 @@ int _MMG2_regnor(MMG5_pMesh mesh) {
   MMG5_pTria            pt;
   MMG5_pPoint           ppt,p1,p2;
   double                *tmp,dd,ps,lm1,lm2,nx,ny,ux,uy,nxt,nyt,res,res0,n[2];
-  int                   *adja,k,iel,ip1,ip2,nn,it,maxit;
-  char                  i,i1,i2,ier;
+  int                   k,iel,ip1,ip2,nn,it,maxit;
+  char                  i,ier;
 
   it = 0;
   maxit = 10;

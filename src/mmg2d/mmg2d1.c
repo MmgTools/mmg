@@ -359,7 +359,7 @@ int _MMG2_dichoto(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
   double       o[3][2],p[3][2];
   float        to,tp,t;
   int          ia,ib,ier,it,maxit;
-  char         i,i1,i2,j;
+  char         i,i1,i2;
 
   pt = &mesh->tria[k];
 
@@ -394,7 +394,6 @@ int _MMG2_dichoto(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
         ps = &mesh->point[vx[i]];
         ps->c[0] = o[i][0] + t*(p[i][0] - o[i][0]);
         ps->c[1] = o[i][1] + t*(p[i][1] - o[i][1]);
-        j=i;
       }
     }
     switch (pt->flag) {
@@ -618,9 +617,8 @@ int _MMG2_adptri(MMG5_pMesh mesh,MMG5_pSol met) {
  a one-by-one basis */
 int _MMG2_adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria         pt;
-  MMG5_pPoint        p1,p2;
   double             lmax,len;
-  int                k,ns,ip1,ip2,ip,ier;
+  int                k,ns,ip,ier;
   char               i,i1,i2,imax;
 
   ns = 0;
@@ -650,8 +648,6 @@ int _MMG2_adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
     /* Check the feasibility of splitting */
     i1 = _MMG5_inxt2[imax];
     i2 = _MMG5_iprv2[imax];
-    p1 = &mesh->point[pt->v[i1]];
-    p2 = &mesh->point[pt->v[i2]];
 
     ip = _MMG2_chkspl(mesh,met,k,imax);
 

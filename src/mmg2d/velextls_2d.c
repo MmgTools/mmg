@@ -241,6 +241,10 @@ int* _MMG2_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
     printf("Number of packed triangles %d, points %d, edges %d\n",ilist,npf,nef);
   
   /* Add boundary conditions */
+  /*if ( !LS_setBC(lsst,Dirichlet,refdirnh,'v',LS_edg,v) ) {
+    fprintf(stdout,"  ## Problem in fn LS_set BC. Exiting.\n");
+    return(0);
+    }*/
   if ( !LS_setBC(lsst,Dirichlet,refdirnh,'f',LS_edg,NULL) ) {
     fprintf(stdout,"  ## Problem in fn LS_set BC. Exiting.\n");
     return(0);

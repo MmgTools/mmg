@@ -109,7 +109,7 @@ _MMG5_BezierTgt(double c1[3],double c2[3],double n1[3],double n2[3],double t1[3]
  */
 inline double
 _MMG5_BezierGeod(double c1[3],double c2[3],double t1[3],double t2[3]) {
-  double alpha,t[3],ll,ps,nt2,ux,uy,uz;
+  double /*alpha,t[3],ps,*/ux,uy,uz,ll;
 
   ux = c2[0] - c1[0];
   uy = c2[1] - c1[1];

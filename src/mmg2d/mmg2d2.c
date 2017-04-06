@@ -123,8 +123,8 @@ int MMG2_settagtriangles(MMG5_pMesh mesh,MMG5_pSol sol) {
 /* Find out whether triangle pt is inside or outside (i.e. contains bb points or not) */
 /* Return <0 value if triangle outside ; > 0 if triangle inside */
 int MMG2_findtrianglestate(MMG5_pMesh mesh,int k,int ip1,int ip2,int ip3,int ip4,int base) {
-  MMG5_pTria       pt,pt1;
-  int              l,nb;
+  MMG5_pTria       pt;
+  int              nb;
   char             i;
 
   pt = &mesh->tria[k];
@@ -205,7 +205,7 @@ int MMG2_markSD(MMG5_pMesh mesh) {
   MMG5_pPoint  ppt;
   int          k,l,iadr,*adja,ped0,ped1,*list,ipil,ncurc,nref;
   int          kinit,nt,nsd,ip1,ip2,ip3,ip4,ned,iel,voy;
-  char         i,j,i1,i2;
+  char         i,i1,i2;
 
   /* Reset flag field for triangles */
   for(k=1 ; k<=mesh->nt ; k++)

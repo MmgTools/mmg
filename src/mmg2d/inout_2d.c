@@ -552,7 +552,6 @@ int MMG2D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   FILE       *inm;
   float       fsol;
-  double      dsol;
   long        posnp;
   int         binch,bdim,iswp;
   int         k,i,isol,type,bin,dim,btyp,bpos;
@@ -1198,7 +1197,6 @@ int MMG2D_saveSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   FILE*        inm;
   MMG5_pPoint       ppt;
   float        fsol;
-  double       dsol;
   int          i,k,nbl,isol,bin,bpos,typ;
   char        *ptr,*data,chaine[128];
   int          binch;

@@ -114,9 +114,8 @@ double _MMG2_lencurv_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2) {
 /* print histo of edge lengths */
 int MMG2_prilen(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTria       pt;
-  double      lavg,len,ecart,som,lmin,lmax,*ca,*cb,*ma,*mb;
+  double      lavg,len,ecart,som,lmin,lmax;
   int         k,l,navg,ia,ipa,ipb,iamin,ibmin,iamax,ibmax,hl[9];
-  int       iadr;
   static double bd[9] = {0.0, 0.3, 0.6, 0.7071, 0.9, 1.3, 1.4142, 2.0, 5.0};
 //{0.0, 0.2, 0.5, 0.7071, 0.9, 1.111, 1.4142, 2.0, 5.0 };
   navg  = 0;
@@ -141,16 +140,9 @@ int MMG2_prilen(MMG5_pMesh mesh,MMG5_pSol sol) {
 
       ipa = MMG2_iare[ia][0];
       ipb = MMG2_iare[ia][1];
-      ca  = &mesh->point[pt->v[ipa]].c[0];
-      cb  = &mesh->point[pt->v[ipb]].c[0];
-
-      iadr = pt->v[ipa]*sol->size;
-      ma   = &sol->m[iadr];
-      iadr = pt->v[ipb]*sol->size;
-      mb   = &sol->m[iadr];
 
       len = MMG2D_lencurv(mesh,sol,pt->v[ipa],pt->v[ipb]);
-      //len = MMG2_length(ca,cb,ma,mb);
+
       navg++;
       ecart = len;
       lavg += len;

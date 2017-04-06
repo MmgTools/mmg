@@ -27,7 +27,7 @@ extern unsigned char ddb;
 /* Check whether the validity and the geometry of the mesh are preserved when collapsing edge i (p1->p2)*/
 int _MMG2_chkcol(MMG5_pMesh mesh, MMG5_pSol met,int k,char i,int *list,char typchk) {
   MMG5_pTria           pt0,pt,pt1,pt2;
-  MMG5_pPoint          ppt,p1,p2;
+  MMG5_pPoint          ppt,p2;
   double               lon,len,calold,calnew,caltmp;
   int                  ip1,ip2,ipb,l,ll,lj,jel,kel,ilist,*adja;
   unsigned char        i1,i2,j,jj,j2,voy,open;
@@ -237,7 +237,6 @@ int _MMG2_chkcol(MMG5_pMesh mesh, MMG5_pSol met,int k,char i,int *list,char typc
     else if ( !(pt1->tag[jj] & MG_GEO) )  return(0);
     
     /* What is the meaning of this test ? see mmgs */
-    p1 = &mesh->point[ip1];
     p2 = &mesh->point[pt1->v[jj]];
     
     /* Check geometric approximation */
