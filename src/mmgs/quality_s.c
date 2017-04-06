@@ -380,7 +380,7 @@ int _MMGS_prilen(MMG5_pMesh mesh, MMG5_pSol met, int metRidTyp) {
  */
 int _MMGS_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria    pt;
-  double        rap,rapmin,rapminOnAlpha,rapmax,rapavg,med;
+  double        rap,rapmin,rapmax,rapavg,med;
   int           i,k,iel,ok,ir,imax,nex,his[5];
 
   rapmin  = 1.0;
@@ -421,7 +421,6 @@ int _MMGS_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
   fprintf(stdout,"     BEST   %8.6f  AVRG.   %8.6f  WRST.   %8.6f (%d)\n",
           rapmax,rapavg / (mesh->nt-nex),rapmin,iel);
 
-  rapminOnAlpha = rapmin/_MMGS_ALPHAD;
   if ( abs(mesh->info.imprim) >= 3 ){
 
     /* print histo */

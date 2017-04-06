@@ -21,7 +21,7 @@
 int main(int argc,char *argv[]) {
   MMG5_pMesh      mmgMesh;
   MMG5_pSol       mmgSol;
-  char            *pwd,*filename, *outname;
+  char            *filename, *outname;
 
   int             ier;
 
