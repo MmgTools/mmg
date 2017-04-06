@@ -717,7 +717,7 @@ int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   printim(ctim[3].gdif,stim);
   if ( mesh->info.imprim ) {
     fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
-    fprintf(stdout,"\n  %s\n   END OF MODULE MMG3D: IMB-LJLL \n  %s\n",MG_STR,MG_STR);
+    fprintf(stdout,"\n  %s\n   END OF MODULE MMG2D: IMB-LJLL \n  %s\n",MG_STR,MG_STR);
   }
 
   /* Unscale mesh */
@@ -739,5 +739,5 @@ int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   if ( mesh->info.imprim )
     fprintf(stdout,"\n   MMG2DMOV: ELAPSED TIME  %s\n",stim);
 
-  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+  _LIBMMG5_RETURN(mesh,met,MMG5_SUCCESS);
 }
