@@ -439,7 +439,7 @@ int _MMG2_swpmshlag(MMG5_pMesh mesh,MMG5_pSol met,double crit,int itdeg) {
 int _MMG2D_saveDisp(MMG5_pMesh mesh,MMG5_pSol disp) {
   FILE        *out;
   int         k;
-  char        j,data[256],*ptr;
+  char        data[256],*ptr;
   
   strcpy(data,"disp.sol");
   ptr = strstr(data,".sol");
