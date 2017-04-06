@@ -104,8 +104,8 @@ inline int _MMG5_intdispvol(double *v1, double *v2, double *vp, double t) {
  */
 static int _MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itdeg, int* warn) {
   MMG5_pTetra     pt;
-  MMG5_pPoint     p0,p1,ppt;
-  double     dd,len,lmax,o[3],hma2;
+  MMG5_pPoint     p0,p1;
+  double     len,lmax,o[3],hma2;
   double    *m1,*m2,*mp;
   int        k,ip,ip1,ip2,list[MMG3D_LMAX+2],ilist,ns,ier,iadr;
   char       imax,i,i1,i2;
@@ -169,7 +169,6 @@ static int _MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itdeg, 
       /* reallocation of point table */
       _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,*warn=1;break,o,MG_NOTAG);
     }
-    ppt = &mesh->point[ip];
     
     /* Interpolation of metric, if any */
     if ( met->m ) {
@@ -335,7 +334,6 @@ static int _MMG5_coltetlag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
   MMG5_pPoint     p0,p1;
   double     ll,ux,uy,uz,hmi2;
   int        k,nc,list[MMG3D_LMAX+2],ilist,base,nnm;
-  int16_t    tag;
   int        ier;
   char       i,j,ip,iq,isnm;
 
@@ -402,7 +400,7 @@ static int _MMG5_coltetlag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
 int _MMG5_chkmovmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t) {
   MMG5_pTetra  pt;
   MMG5_pPoint  ppt;
-  double       *v,c[4][3],tau,cal;
+  double       *v,c[4][3],tau;
   int          k,np;
   char         i,j;
   
@@ -529,7 +527,7 @@ int _MMG5_dispmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t,int itdeg) {
 int _MMG5_saveDisp(MMG5_pMesh mesh,MMG5_pSol disp) {
   FILE        *out;
   int         k;
-  char        j,data[256],*ptr;
+  char        data[256],*ptr;
   
   strcpy(data,disp->namein);
   ptr = strstr(data,".sol");
