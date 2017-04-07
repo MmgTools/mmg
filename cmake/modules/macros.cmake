@@ -5,13 +5,14 @@
 ###############################################################################
 
 MACRO ( GENERATE_FORTRAN_HEADER name
-    in_dir in_file out_dir out_file
+    in_dir in_file include_dir out_dir out_file
     )
   # Wrap add_custom_command into add_custom target to remove dpendencies from
   # the custom command and thus allow parallel build.
   ADD_CUSTOM_COMMAND (
     OUTPUT ${out_dir}/${out_file}
-    COMMAND genheader ${out_dir}/${out_file} ${in_dir}/${in_file}  ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
+    COMMAND genheader ${out_dir}/${out_file} ${in_dir}/${in_file} ${include_dir}
+    ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     DEPENDS genheader ${in_dir}/${in_file}
     ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
@@ -91,8 +92,8 @@ MACRO ( ADD_AND_INSTALL_LIBRARY
 
   ADD_LIBRARY ( ${target_name} ${target_type} ${sources} )
 
-  TARGET_INCLUDE_DIRECTORIES ( ${target_name}
-    PRIVATE  ${COMMON_BINARY_DIR} ${COMMON_SOURCE_DIR} )
+  TARGET_INCLUDE_DIRECTORIES ( ${target_name} PRIVATE
+    ${COMMON_BINARY_DIR} ${COMMON_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/include )
 
   SET_TARGET_PROPERTIES ( ${target_name}
     PROPERTIES OUTPUT_NAME ${output_name} )
@@ -132,10 +133,10 @@ MACRO ( ADD_AND_INSTALL_EXECUTABLE
     my_add_link_flags ( ${exec_name} "/SAFESEH:NO")
   ENDIF ( )
 
-  TARGET_INCLUDE_DIRECTORIES ( ${exec_name}
-    PUBLIC ${COMMON_BINARY_DIR} ${COMMON_SOURCE_DIR} )
+  TARGET_INCLUDE_DIRECTORIES ( ${exec_name} PUBLIC
+    ${COMMON_BINARY_DIR} ${COMMON_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/include )
 
-  TARGET_LINK_LIBRARIES ( ${exec_name} ${LIBRARIES} )
+  TARGET_LINK_LIBRARIES ( ${exec_name} ${LIBRARIES}  )
 
   INSTALL(TARGETS ${exec_name} RUNTIME DESTINATION bin)
 
