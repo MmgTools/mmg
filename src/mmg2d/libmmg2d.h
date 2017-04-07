@@ -38,7 +38,7 @@
 extern "C" {
 #endif
 
-#include "libmmgtypes.h"
+#include "mmg/mmg2d/libmmgtypes.h"
 
 /**
  * Maximum array size when storing adjacent points (or ball) of a vertex.

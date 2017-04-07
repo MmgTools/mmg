@@ -175,7 +175,9 @@ ENDIF()
 ############################################################################
 ADD_EXECUTABLE(genheader ${CMAKE_SOURCE_DIR}/scripts/genheader.c)
 GENERATE_FORTRAN_HEADER ( mmg
-  ${COMMON_SOURCE_DIR} libmmgtypes.h ${COMMON_BINARY_DIR} libmmgtypesf.h
+  ${COMMON_SOURCE_DIR} libmmgtypes.h
+  ${COMMON_BINARY_DIR}
+  ${COMMON_BINARY_DIR} libmmgtypesf.h
   )
 
 ###############################################################################

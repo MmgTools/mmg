@@ -50,22 +50,24 @@
 */
 int main (int argc, char ** argv)
 {
-  char * header_f  = NULL;
-  char * libmmg_h  = NULL;
-  char * genfort   = NULL;
-  char * cmd       = NULL;
-  FILE * file      = NULL;
+  char * header_f       = NULL;
+  char * libmmg_h       = NULL;
+  char * libmmg_include = NULL;
+  char * genfort        = NULL;
+  char * cmd            = NULL;
+  FILE * file           = NULL;
 
-  if (argc != 4)
+  if (argc != 5)
     {
-      fprintf(stderr, "usage : %s headerNameFortran.h libmmgtypes.h"
-              " genfort.pl\n",argv[0]);
+      fprintf(stderr, "usage : %s headerNameFortran.h headerNameC.h"
+              " libmmgtypesf_include_dir genfort.pl\n",argv[0]);
       return EXIT_FAILURE;
     }
 
-  header_f  = argv[1];
-  libmmg_h  = argv[2];
-  genfort   = argv[3];
+  header_f       = argv[1];
+  libmmg_h       = argv[2];
+  libmmg_include = argv[3];
+  genfort        = argv[4];
 
   /* Fortran header */
   file = fopen (header_f,"w");
@@ -90,7 +92,7 @@ int main (int argc, char ** argv)
 
   /* Include libmmgtypesf.h if needed. */
   if(strstr(libmmg_h,"libmmgtypes.h")==NULL) {
-    fprintf(file,"#include \"libmmgtypesf.h\"\n\n");
+    fprintf(file,"#include \"%s/libmmgtypesf.h\"\n\n",libmmg_include);
   }
   else {
     /* Compute the size of the C pointer for the Fortran programm */
