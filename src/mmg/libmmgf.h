@@ -35,8 +35,8 @@
 #ifndef _MMGFLIB_H
 #define _MMGFLIB_H
 
-#include "mmg2d/libmmg2df.h"
-#include "mmgs/libmmgsf.h"
-#include "mmg3d/libmmg3df.h"
+#include "mmg/mmg2d/libmmg2df.h"
+#include "mmg/mmgs/libmmgsf.h"
+#include "mmg/mmg3d/libmmg3df.h"
 
 #endif

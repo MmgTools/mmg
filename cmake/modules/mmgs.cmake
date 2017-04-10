@@ -26,8 +26,10 @@
 ##
 ## =============================================================================
 
-SET(MMGS_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src/mmgs)
-SET(MMGS_BINARY_DIR ${CMAKE_BINARY_DIR}/src/mmgs)
+SET(MMGS_SOURCE_DIR      ${CMAKE_SOURCE_DIR}/src/mmgs)
+SET(MMGS_BINARY_DIR      ${CMAKE_BINARY_DIR}/src/mmgs)
+SET(MMGS_SHRT_INCLUDE    mmg/mmgs )
+SET(MMGS_INCLUDE         ${CMAKE_SOURCE_DIR}/include/${MMGS_SHRT_INCLUDE} )
 
 FILE(MAKE_DIRECTORY ${MMGS_BINARY_DIR})
 
@@ -38,7 +40,9 @@ FILE(MAKE_DIRECTORY ${MMGS_BINARY_DIR})
 ############################################################################
 
 GENERATE_FORTRAN_HEADER ( mmgs
-  ${MMGS_SOURCE_DIR} libmmgs.h ${MMGS_BINARY_DIR} libmmgsf.h
+  ${MMGS_SOURCE_DIR} libmmgs.h
+  ${MMGS_SHRT_INCLUDE}
+  ${MMGS_BINARY_DIR} libmmgsf.h
   )
 
 ###############################################################################
@@ -81,27 +85,23 @@ IF ( LIBMMGS_SHARED )
     "${mmgs_library_files}" ${PROJECT_NAME}s )
 ENDIF()
 
-IF ( LIBMMGS_STATIC OR LIBMMGS_SHARED )
-  # mmgs header files needed for library
-  SET( mmgs_headers
-    ${MMGS_SOURCE_DIR}/libmmgs.h
-    ${MMGS_BINARY_DIR}/libmmgsf.h
-    ${COMMON_SOURCE_DIR}/libmmgtypes.h
-    ${COMMON_BINARY_DIR}/libmmgtypesf.h
-    )
-  SET(MMGS_INCLUDE ${CMAKE_SOURCE_DIR}/include/mmg/mmgs )
+# mmgs header files needed for library
+SET( mmgs_headers
+  ${MMGS_SOURCE_DIR}/libmmgs.h
+  ${MMGS_BINARY_DIR}/libmmgsf.h
+  ${COMMON_SOURCE_DIR}/libmmgtypes.h
+  ${COMMON_BINARY_DIR}/libmmgtypesf.h
+  )
 
-  # Install header files in /usr/local or equivalent
-  INSTALL(FILES ${mmgs_headers} DESTINATION include/mmg/mmgs)
+# Install header files in /usr/local or equivalent
+INSTALL(FILES ${mmgs_headers} DESTINATION include/mmg/mmgs)
 
-  COPY_FORTRAN_HEADER_AND_CREATE_TARGET ( ${MMGS_BINARY_DIR} ${MMGS_INCLUDE} s )
+COPY_FORTRAN_HEADER_AND_CREATE_TARGET ( ${MMGS_BINARY_DIR} ${MMGS_INCLUDE} s )
 
-  # Copy header files in project directory at configuration step
-  # (generated file don't exists yet or are outdated)
-  FILE(INSTALL  ${mmgs_headers} DESTINATION ${MMGS_INCLUDE}
-    PATTERN "libmmg*f.h"  EXCLUDE)
-
-ENDIF()
+# Copy header files in project directory at configuration step
+# (generated file don't exists yet or are outdated)
+FILE(INSTALL  ${mmgs_headers} DESTINATION ${MMGS_INCLUDE}
+  PATTERN "libmmg*f.h"  EXCLUDE)
 
 ############################################################################
 #####

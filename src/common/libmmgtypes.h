@@ -466,15 +466,15 @@ typedef struct {
   int       nenil; /*!< Index of first unused element */
   int       nanil; /*!< Index of first unused edge (2d only)*/
   int      *adja; /*!< Table of tetrahedron adjacency: if
-                    \f$adja[4*i+1+j]=4*k+l\f$ then the \f$i^{th}\f$ and
+                    \f$adja[4*(i-1)+1+j]=4*k+l\f$ then the \f$i^{th}\f$ and
                     \f$k^th\f$ tetrahedra are adjacent and share their
                     faces \a j and \a l (resp.) */
   int      *adjt; /*!< Table of triangles adjacency: if
-                    \f$adjt[3*i+1+j]=3*k+l\f$ then the \f$i^{th}\f$ and
+                    \f$adjt[3*(i-1)+1+j]=3*k+l\f$ then the \f$i^{th}\f$ and
                     \f$k^th\f$ triangles are adjacent and share their
                     edges \a j and \a l (resp.) */
   int      *adjapr; /*!< Table of prisms adjacency: if
-                    \f$adjapr[5*i+1+j]=5*k+l\f$ then the \f$i^{th}\f$ and
+                    \f$adjapr[5*(i-1)+1+j]=5*k+l\f$ then the \f$i^{th}\f$ and
                     \f$k^th\f$ prism are adjacent and share their
                     faces \a j and \a l (resp.) */
   MMG5_pPoint    point; /*!< Pointer toward the \ref MMG5_Point structure */

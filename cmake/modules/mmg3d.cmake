@@ -26,8 +26,10 @@
 ##
 ## =============================================================================
 
-SET(MMG3D_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src/mmg3d)
-SET(MMG3D_BINARY_DIR ${CMAKE_BINARY_DIR}/src/mmg3d)
+SET(MMG3D_SOURCE_DIR      ${CMAKE_SOURCE_DIR}/src/mmg3d)
+SET(MMG3D_BINARY_DIR      ${CMAKE_BINARY_DIR}/src/mmg3d)
+SET(MMG3D_SHRT_INCLUDE    mmg/mmg3d )
+SET(MMG3D_INCLUDE         ${CMAKE_SOURCE_DIR}/include/${MMG3D_SHRT_INCLUDE} )
 
 FILE(MAKE_DIRECTORY ${MMG3D_BINARY_DIR})
 
@@ -39,7 +41,9 @@ FILE(MAKE_DIRECTORY ${MMG3D_BINARY_DIR})
 
 
 GENERATE_FORTRAN_HEADER ( mmg3d
-  ${MMG3D_SOURCE_DIR} libmmg3d.h ${MMG3D_BINARY_DIR} libmmg3df.h
+  ${MMG3D_SOURCE_DIR} libmmg3d.h
+  ${MMG3D_SHRT_INCLUDE}
+  ${MMG3D_BINARY_DIR} libmmg3df.h
   )
 
 ############################################################################
@@ -124,27 +128,23 @@ IF ( LIBMMG3D_SHARED )
     "${mmg3d_library_files}" ${PROJECT_NAME}3d )
 ENDIF()
 
-IF ( LIBMMG3D_STATIC OR LIBMMG3D_SHARED )
-  # mmg3d header files needed for library
-  SET( mmg3d_headers
-    ${MMG3D_SOURCE_DIR}/libmmg3d.h
-    ${MMG3D_BINARY_DIR}/libmmg3df.h
-    ${COMMON_SOURCE_DIR}/libmmgtypes.h
-    ${COMMON_BINARY_DIR}/libmmgtypesf.h
-    )
-  SET(MMG3D_INCLUDE ${CMAKE_SOURCE_DIR}/include/mmg/mmg3d )
+# mmg3d header files needed for library
+SET( mmg3d_headers
+  ${MMG3D_SOURCE_DIR}/libmmg3d.h
+  ${MMG3D_BINARY_DIR}/libmmg3df.h
+  ${COMMON_SOURCE_DIR}/libmmgtypes.h
+  ${COMMON_BINARY_DIR}/libmmgtypesf.h
+  )
 
-  # Install header files in /usr/local or equivalent
-  INSTALL(FILES ${mmg3d_headers} DESTINATION include/mmg/mmg3d)
+# Install header files in /usr/local or equivalent
+INSTALL(FILES ${mmg3d_headers} DESTINATION include/mmg/mmg3d)
 
-  COPY_FORTRAN_HEADER_AND_CREATE_TARGET ( ${MMG3D_BINARY_DIR} ${MMG3D_INCLUDE} 3d )
+COPY_FORTRAN_HEADER_AND_CREATE_TARGET ( ${MMG3D_BINARY_DIR} ${MMG3D_INCLUDE} 3d )
 
-  # Copy header files in project directory at configuration step
-  # (generated file don't exists yet or are outdated)
-  FILE(INSTALL  ${mmg3d_headers} DESTINATION ${MMG3D_INCLUDE}
-    PATTERN "libmmg*f.h"  EXCLUDE)
-
-ENDIF()
+# Copy header files in project directory at configuration step
+# (generated file don't exists yet or are outdated)
+FILE(INSTALL  ${mmg3d_headers} DESTINATION ${MMG3D_INCLUDE}
+  PATTERN "libmmg*f.h"  EXCLUDE)
 
 ############################################################################
 #####
