@@ -81,14 +81,23 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
   double     lmin,lfilt;
   int        imin,iq;
   int        ii;
-  double     lmaxtet,lmintet;
+  double     lmaxtet,lmintet,volmin;
   int        imaxtet,imintet,base;
+
+  /*first try to adapt the bdry so very strict criterion on the volume for Delaunay insertion*/
+  if(phase1)
+    volmin = 1e-1;
+  else
+    volmin = 1e-15;
+
+ 
+  volmin=1e-15;
 
   base  = ++mesh->mark;
   for (k=1; k<=ne; k++) {
     pt = &mesh->tetra[k];
     if ( !MG_EOK(pt)  || (pt->tag & MG_REQ) )   continue;
-    else if ( pt->mark < base-1 )  continue;
+    //else if ( pt->mark < base-1 )  continue;
     pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
 
     /* 1) find longest and shortest edge  and try to manage it*/
@@ -326,7 +335,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
           (*ifilt)++;
           goto collapse;
         } else {
-          lon = _MMG5_cavity(mesh,met,k,ip,list,ilist/2);
+          lon = _MMG5_cavity(mesh,met,k,ip,list,ilist/2,volmin);
           if ( lon < 1 ) {
             // MMG_npd++; // decomment to debug
             _MMG3D_delPt(mesh,ip);
@@ -647,7 +656,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
             (*ifilt)++;
             goto collapse2;
           } else {
-            lon = _MMG5_cavity(mesh,met,k,ip,list,ilist/2);
+            lon = _MMG5_cavity(mesh,met,k,ip,list,ilist/2,volmin);
             if ( lon < 1 ) {
               // MMG_npd++; // decomment to debug
               _MMG3D_delPt(mesh,ip);

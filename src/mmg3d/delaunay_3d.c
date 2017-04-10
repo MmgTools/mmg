@@ -337,7 +337,7 @@ int _MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
 }
 
 /* cavity correction for quality */
-static int _MMG5_correction_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip,int* list,int ilist,int nedep) {
+static int _MMG5_correction_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip,int* list,int ilist,int nedep,double volmin) {
   MMG5_pPoint        ppt,p1,p2,p3;
   MMG5_pTetra        pt;
   double        dd,det,nn,eps,eps2,ux,uy,uz,vx,vy,vz,v1,v2,v3;
@@ -405,7 +405,7 @@ static int _MMG5_correction_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip,int* list,i
         h2 = vx*vx + vy*vy + vz*vz;
         h3 = (p2->c[0] - p3->c[0])*(p2->c[0] - p3->c[0]) + (p2->c[1] - p3->c[1])*(p2->c[1] - p3->c[1])
           + (p2->c[2] - p3->c[2])*(p2->c[2] - p3->c[2]);
-        if ( dd < VOLMIN*sqrt(h1*h2*h3) )  break;
+        if ( dd < volmin*sqrt(h1*h2*h3) )  break;
 
         /* average metric */
         mb   = &met->m[6*ib];
@@ -488,7 +488,7 @@ static int _MMG5_correction_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip,int* list,i
 
 /* cavity correction for quality */
 static int
-_MMG5_correction_iso(MMG5_pMesh mesh,int ip,int *list,int ilist,int nedep) {
+_MMG5_correction_iso(MMG5_pMesh mesh,int ip,int *list,int ilist,int nedep,double volmin) {
   MMG5_pPoint ppt,p1,p2,p3;
   MMG5_pTetra      pt;
   double           dd,nn,eps,eps2,ux,uy,uz,vx,vy,vz,v1,v2,v3;
@@ -544,7 +544,7 @@ _MMG5_correction_iso(MMG5_pMesh mesh,int ip,int *list,int ilist,int nedep) {
           + v3*(ppt->c[2]-p1->c[2]);
         // MMG_cas=1; // uncomment to debug
         //printf("on trouve vol %e <? %e\n",dd,VOLMIN);
-        if ( dd < VOLMIN )  break;
+        if ( dd < volmin )  break;
 
         /* point close to face */
         nn = (v1*v1 + v2*v2 + v3*v3);
@@ -586,7 +586,7 @@ _MMG5_correction_iso(MMG5_pMesh mesh,int ip,int *list,int ilist,int nedep) {
  * Mark elements in cavity and update the list of tetra in the cavity.
  *
  */
-int _MMG5_cavity_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel,int ip,int* list,int lon) {
+int _MMG5_cavity_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel,int ip,int* list,int lon,double volmin) {
   MMG5_pPoint    ppt;
   MMG5_pTetra    pt,pt1,ptc;
   double    c[3],eps,dd,ray,ux,uy,uz,crit;
@@ -704,7 +704,7 @@ int _MMG5_cavity_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel,int ip,int* list,int 
   while ( ipil < ilist );
 
   /* global overflow */
-  ilist = _MMG5_correction_ani(mesh,met,ip,list,ilist,lon);
+  ilist = _MMG5_correction_ani(mesh,met,ip,list,ilist,lon,volmin);
 
   if ( isreq ) ilist = -abs(ilist);
 
@@ -733,7 +733,7 @@ int _MMG5_cavity_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel,int ip,int* list,int 
  * Mark elements in cavity and update the list of tetra in the cavity.
  *
  */
-int _MMG5_cavity_iso(MMG5_pMesh mesh,MMG5_pSol sol,int iel,int ip,int *list,int lon) {
+int _MMG5_cavity_iso(MMG5_pMesh mesh,MMG5_pSol sol,int iel,int ip,int *list,int lon,double volmin) {
   MMG5_pPoint ppt;
   MMG5_pTetra      pt,pt1,ptc;
   double           c[3],crit,dd,eps,ray,ct[12];
@@ -829,7 +829,7 @@ int _MMG5_cavity_iso(MMG5_pMesh mesh,MMG5_pSol sol,int iel,int ip,int *list,int 
   while ( ipil < ilist );
 
   /* global overflow: obsolete avec la reallocation */
-  ilist = _MMG5_correction_iso(mesh,ip,list,ilist,lon);
+  ilist = _MMG5_correction_iso(mesh,ip,list,ilist,lon,volmin);
 
   if ( isreq ) ilist = -abs(ilist);
 
