@@ -474,8 +474,10 @@ int _MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
     /* check normal deviation between l and its neighbour through the edge ia */
     ia       = _MMG5_idirinv[iopp][ip]; /* index of p in tria iopp */
 
-    iedgeOpp =  _MMG5_iarf[iface][ia];
-    if ( !(mesh->xtetra[pt->xt].tag[iedgeOpp] & MG_GEO) ) {
+    iedgeOpp =  _MMG5_iarf[iopp][ia];
+    if ( ! ( (mesh->xtetra[pt->xt].tag[iedgeOpp] & MG_GEO) ||
+             (mesh->xtetra[pt->xt].tag[iedgeOpp] & MG_NOM) ) ) {
+
       if ( !_MMG3D_normalAdjaTri(mesh,iel,iopp,ia,nprvnew) )  return -1;
 
       devnew = nprvnew[0]*ncurnew[0] + nprvnew[1]*ncurnew[1] + nprvnew[2]*ncurnew[2];
