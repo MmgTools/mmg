@@ -98,14 +98,14 @@ void _MMG3D_scalarSolTruncature(MMG5_pMesh mesh, MMG5_pSol met) {
   /* Detect the point used only by prisms */
   if ( mesh->nprism ) {
     for (k=1; k<=mesh->np; k++) {
-      mesh->point[k].flag = 0;
+      mesh->point[k].flag = 1;
     }
     for (k=1; k<=mesh->ne; k++) {
       pt = &mesh->tetra[k];
       if ( !MG_EOK(pt) ) continue;
 
       for (i=0; i<4; i++) {
-        mesh->point[pt->v[i]].flag = 1;
+        mesh->point[pt->v[i]].flag = 0;
       }
 
     }
@@ -120,7 +120,7 @@ void _MMG3D_scalarSolTruncature(MMG5_pMesh mesh, MMG5_pSol met) {
     mesh->info.hmin = FLT_MAX;
     for (k=1; k<=mesh->np; k++)  {
       ppt = &mesh->point[k];
-      if ( !MG_VOK(ppt) || !ppt->flag ) continue;
+      if ( !MG_VOK(ppt) || ppt->flag ) continue;
       mesh->info.hmin = MG_MIN(mesh->info.hmin,met->m[k]);
     }
   }
@@ -129,7 +129,7 @@ void _MMG3D_scalarSolTruncature(MMG5_pMesh mesh, MMG5_pSol met) {
     mesh->info.hmax = 0.;
     for (k=1; k<=mesh->np; k++)  {
       ppt = &mesh->point[k];
-      if ( !MG_VOK(ppt) || !ppt->flag ) continue;
+      if ( !MG_VOK(ppt) || ppt->flag ) continue;
       mesh->info.hmax = MG_MAX(mesh->info.hmax,met->m[k]);
     }
   }
@@ -538,7 +538,7 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
   /* scaling mesh */
   if ( !_MMG5_scaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
 
-  if ( !_MMG3D_tetraQual(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
+  if ( !_MMG3D_tetraQual(mesh,met,0) ) _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
 
   if ( abs(mesh->info.imprim) > 0 ) {
     if ( !_MMG3D_inqua(mesh,met) ) {
@@ -703,7 +703,7 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol met) {
  /* scaling mesh */
   if ( !_MMG5_scaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
 
-  if ( !_MMG3D_tetraQual(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
+  if ( !_MMG3D_tetraQual(mesh,met,0) ) _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
 
   if ( abs(mesh->info.imprim) > 0 ) {
     if ( !_MMG3D_inqua(mesh,met) ) {
@@ -876,7 +876,7 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
   chrono(ON,&(ctim[2]));
   MMG3D_setfunc(mesh,met);
 
-  if ( !_MMG3D_tetraQual(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
+  if ( !_MMG3D_tetraQual(mesh,met,0) ) _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
 
   if ( abs(mesh->info.imprim) > 0 ) {
     if ( !_MMG3D_inqua(mesh,met) ) {

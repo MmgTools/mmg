@@ -26,10 +26,12 @@
 ##
 ## =============================================================================
 
-SET(MMG2D_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src/mmg2d)
-SET(MMG2D_BINARY_DIR ${CMAKE_BINARY_DIR}/src/mmg2d)
+SET(MMG2D_SOURCE_DIR      ${CMAKE_SOURCE_DIR}/src/mmg2d)
+SET(MMG2D_BINARY_DIR      ${CMAKE_BINARY_DIR}/src/mmg2d)
+SET(MMG2D_SHRT_INCLUDE    mmg/mmg2d )
+SET(MMG2D_INCLUDE         ${CMAKE_SOURCE_DIR}/include/${MMG2D_SHRT_INCLUDE} )
 
-FILE(MAKE_DIRECTORY ${MMG2D_BINARY_DIR})
+FILE(MAKE_DIRECTORY  ${MMG2D_BINARY_DIR})
 
 ############################################################################
 #####
@@ -38,7 +40,9 @@ FILE(MAKE_DIRECTORY ${MMG2D_BINARY_DIR})
 ############################################################################
 
 GENERATE_FORTRAN_HEADER ( mmg2d
-  ${MMG2D_SOURCE_DIR} libmmg2d.h ${MMG2D_BINARY_DIR} libmmg2df.h
+  ${MMG2D_SOURCE_DIR} libmmg2d.h
+  ${MMG2D_SHRT_INCLUDE}
+  ${MMG2D_BINARY_DIR} libmmg2df.h
   )
 
 ###############################################################################
@@ -109,27 +113,23 @@ IF ( LIBMMG2D_SHARED )
     "${mmg2d_library_files}" ${PROJECT_NAME}2d )
 ENDIF()
 
-IF ( LIBMMG2D_STATIC OR LIBMMG2D_SHARED )
-  # mmg2d header files needed for library
-  SET( mmg2d_headers
-    ${MMG2D_SOURCE_DIR}/libmmg2d.h
-    ${MMG2D_BINARY_DIR}/libmmg2df.h
-    ${COMMON_SOURCE_DIR}/libmmgtypes.h
-    ${COMMON_BINARY_DIR}/libmmgtypesf.h
-    )
-  SET(MMG2D_INCLUDE ${CMAKE_SOURCE_DIR}/include/mmg/mmg2d )
+# mmg2d header files needed for library
+SET( mmg2d_headers
+  ${MMG2D_SOURCE_DIR}/libmmg2d.h
+  ${MMG2D_BINARY_DIR}/libmmg2df.h
+  ${COMMON_SOURCE_DIR}/libmmgtypes.h
+  ${COMMON_BINARY_DIR}/libmmgtypesf.h
+  )
 
-  # Install header files in /usr/local or equivalent
-  INSTALL(FILES ${mmg2d_headers} DESTINATION include/mmg/mmg2d)
+# Install header files in /usr/local or equivalent
+INSTALL(FILES ${mmg2d_headers} DESTINATION include/mmg/mmg2d)
 
-  COPY_FORTRAN_HEADER_AND_CREATE_TARGET ( ${MMG2D_BINARY_DIR} ${MMG2D_INCLUDE} 2d )
+COPY_FORTRAN_HEADER_AND_CREATE_TARGET ( ${MMG2D_BINARY_DIR} ${MMG2D_INCLUDE} 2d )
 
-  # Copy header files in project directory at configuration step
-  # (generated file don't exists yet or are outdated)
-  FILE(INSTALL  ${mmg2d_headers} DESTINATION ${MMG2D_INCLUDE}
-    PATTERN "libmmg*f.h"  EXCLUDE)
-
-ENDIF()
+# Copy header files in project directory at configuration step
+# (generated file don't exists yet or are outdated)
+FILE(INSTALL  ${mmg2d_headers} DESTINATION ${MMG2D_INCLUDE}
+  PATTERN "libmmg*f.h"  EXCLUDE)
 
 ############################################################################
 #####

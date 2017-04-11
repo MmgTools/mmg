@@ -46,8 +46,8 @@ MARK_AS_ADVANCED ( CI_DIR )
 ###############################################################################
 SET (CMAKE_RELEASE_VERSION_MAJOR "5" )
 SET (CMAKE_RELEASE_VERSION_MINOR "2" )
-SET (CMAKE_RELEASE_VERSION_PATCH "4" )
-SET (CMAKE_RELEASE_DATE "Mar 22, 2017" )
+SET (CMAKE_RELEASE_VERSION_PATCH "5" )
+SET (CMAKE_RELEASE_DATE "Apr. 10, 2017" )
 
 SET (CMAKE_RELEASE_VERSION
   "${CMAKE_RELEASE_VERSION_MAJOR}.${CMAKE_RELEASE_VERSION_MINOR}.${CMAKE_RELEASE_VERSION_PATCH}")
@@ -175,7 +175,9 @@ ENDIF()
 ############################################################################
 ADD_EXECUTABLE(genheader ${CMAKE_SOURCE_DIR}/scripts/genheader.c)
 GENERATE_FORTRAN_HEADER ( mmg
-  ${COMMON_SOURCE_DIR} libmmgtypes.h ${COMMON_BINARY_DIR} libmmgtypesf.h
+  ${COMMON_SOURCE_DIR} libmmgtypes.h
+  ${COMMON_BINARY_DIR}
+  ${COMMON_BINARY_DIR} libmmgtypesf.h
   )
 
 ###############################################################################

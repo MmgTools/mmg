@@ -70,7 +70,7 @@ int main(int argc,char *argv[]) {
   }
 
   /* Name and path of the mesh file */
-  fileout = (char *) calloc(strlen(argv[1]) + 1, sizeof(char));
+  fileout = (char *) calloc(strlen(argv[1]) + 6, sizeof(char));
   if ( fileout == NULL ) {
     perror("  ## Memory problem: calloc");
     exit(EXIT_FAILURE);

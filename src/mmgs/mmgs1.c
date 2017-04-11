@@ -487,7 +487,7 @@ int _MMGS_delPatternPts(MMG5_pMesh mesh,_MMG5_Hash hash)
 
       if ( vx[i] > 0 ) {
         _MMGS_delPt(mesh,vx[i]);
-        if ( !_MMG5_hashUpdate(&hash,pt->v[i1],pt->v[i2],-1) ) {
+        if ( !_MMG5_hashUpdate(&hash,pt->v[i1],pt->v[i2],0) ) {
           printf("  ## Error: Unable to delete point idx along edge %d %d.\n",
                  pt->v[i1], pt->v[i2]);
           _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
@@ -760,7 +760,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           for (i=0; i<3; i++) {
             if ( vx[i] > 0 ) {
               if ( !_MMG5_hashUpdate(&hash,pt->v[_MMG5_iprv2[i]],
-                                     pt->v[_MMG5_inxt2[i]],-1) ) {
+                                     pt->v[_MMG5_inxt2[i]],0) ) {
                   printf("  ## Error: Unable to delete point idx along edge %d %d.\n",
                          pt->v[_MMG5_iprv2[i]], pt->v[_MMG5_inxt2[i]]);
                   _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));

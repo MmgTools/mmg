@@ -39,12 +39,13 @@ extern char ddb;
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the meric structure.
+ * \param metRidTyp metric storage (classic or special)
  * \return 1 if success, 0 if fail.
  *
  * Compute the quality of the tetras over the mesh.
  *
  */
-int _MMG3D_tetraQual(MMG5_pMesh mesh, MMG5_pSol met) {
+int _MMG3D_tetraQual(MMG5_pMesh mesh, MMG5_pSol met,char metRidTyp) {
   MMG5_pTetra pt;
   double      minqual;
   int         k,iel;
@@ -56,7 +57,7 @@ int _MMG3D_tetraQual(MMG5_pMesh mesh, MMG5_pSol met) {
     pt = &mesh->tetra[k];
      if( !MG_EOK(pt) )   continue;
 
-     if ( met->size == 6 && met->m ) {
+     if ( !metRidTyp && met->size == 6 && met->m ) {
        pt->qual = _MMG5_caltet33_ani(mesh,met,pt);
      }
      else
