@@ -1130,6 +1130,9 @@ int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
     }
   }
 
+  /*update quality*/
+  if ( !_MMG3D_tetraQual(mesh,met,1) ) return(0);
+
   if ( !_MMG5_anatet(mesh,met,2,0) ) {
     fprintf(stderr,"  ## Unable to split mesh. Exiting.\n");
     if ( octree )
