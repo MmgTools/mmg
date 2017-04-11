@@ -233,7 +233,9 @@ MACRO ( ADD_RUN_AGAIN_TESTS exec_name test_names args input_files )
   FOREACH ( it RANGE ${len2} )
     LIST(GET test_names   ${it} test_name)
     LIST(GET input_files  ${it} input_file)
-    LIST(GET args         ${it} arg)
+    LIST(GET args         ${it} _arg_)
+
+    STRING(REPLACE " " ";" arg ${_arg_})
 
     ADD_TEST(NAME ${test_name}
       COMMAND ${exec_name} ${arg}
