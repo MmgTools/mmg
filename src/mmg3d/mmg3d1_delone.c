@@ -957,7 +957,7 @@ _MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
       }
       nnf += nf;
 
-      nf = _MMG5_swptet(mesh,met,declic,octree,2);
+      nf += _MMG5_swptet(mesh,met,crit,0.0288675,octree,2);
       if ( nf < 0 ) {
         fprintf(stderr,"  ## Unable to improve mesh. Exiting.\n");
         return(0);
