@@ -787,8 +787,7 @@ _MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree, int* warn) 
         return(0);
       }
       nnf += nf;
-      if(it==2 || it==6/*&& it==1 || it==3 || it==5 || it > 8*/) {
-        nf += _MMG5_swptet(mesh,met,1.053,octree,2);
+        nf += _MMG5_swptet(mesh,met,1.053,0.0288675,octree,2);
       } else {
         nf += 0;
       }
@@ -869,7 +868,7 @@ _MMG5_optetLES(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
       nw = 0;
     /* badly shaped process */
     if ( !mesh->info.noswap ) {
-      nf = _MMG5_swptet(mesh,met,declic,octree,2);
+      nf = _MMG5_swptet(mesh,met,declic,0.0288675,octree,2);
       if ( nf < 0 ) {
         fprintf(stderr,"  ## Unable to improve mesh. Exiting.\n");
         return(0);
@@ -934,13 +933,14 @@ _MMG5_optetLES(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
  */
 static int
 _MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
-  int it,nnm,nnf,maxit,nm,nf,nw;
-  double declic;
+  MMG5_pTetra pt;
+  int it,nnm,nnf,maxit,nm,nf,nw,k;
+  double crit;
 
   /* shape optim */
   it = nnm = nnf = 0;
-  maxit = 4;
-  declic = 1.053;
+  maxit = 10;
+  crit = 1.053;
   do {
     /* treatment of bad elements*/
     if(it < 5) {
@@ -1029,7 +1029,7 @@ _MMG5_adptet_delone(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree) {
       return(0);
     }
     nnf = nf;
-    nf = _MMG5_swptet(mesh,met,1.053,octree,2);
+    nf = _MMG5_swptet(mesh,met,1.053,0.0288675,octree,2);
     if ( nf < 0 ) {
       fprintf(stderr,"  ## Unable to improve mesh. Exiting.\n");
       return(0);

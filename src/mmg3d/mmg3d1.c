@@ -542,7 +542,7 @@ int _MMG5_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree, int typchk
  * Internal edge flipping.
  *
  */
-int _MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double crit,
+int _MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double crit,double declic,
                  _MMG3D_pOctree octree,int typchk) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
@@ -557,7 +557,7 @@ int _MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double crit,
     for (k=1; k<=mesh->ne; k++) {
       pt = &mesh->tetra[k];
       if ( !MG_EOK(pt) || (pt->tag & MG_REQ) )  continue;
-      if ( pt->qual > 0.0288675 /*0.6/_MMG3D_ALPHAD*/ )  continue;
+      if ( pt->qual > declic/*0.0288675*/ /*0.6/_MMG3D_ALPHAD*/ )  continue;
 
       for (i=0; i<6; i++) {
         /* Prevent swap of a ref or tagged edge */

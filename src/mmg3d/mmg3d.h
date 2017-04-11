@@ -374,7 +374,7 @@ char _MMG5_chkedg(MMG5_pMesh mesh,MMG5_Tria *pt,char ori,double,double,int);
 int  _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met, char typchk, int patternMode) ;
 int  _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree,int maxitin);
 int  _MMG5_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree, int);
-int  _MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double,_MMG3D_pOctree, int);
+  int  _MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double,double,_MMG3D_pOctree, int);
 
 /* pointers */
 /* init structures */
