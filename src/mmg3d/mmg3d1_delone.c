@@ -787,16 +787,15 @@ _MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree, int* warn) 
         return(0);
       }
       nnf += nf;
-        nf += _MMG5_swptet(mesh,met,1.053,0.0288675,octree,2);
-      } else {
-        nf += 0;
-      }
+      nf += _MMG5_swptet(mesh,met,1.053,0.0288675,octree,2);
       if ( nf < 0 ) {
         fprintf(stderr,"  ## Unable to improve mesh. Exiting.\n");
         return(0);
       }
+    } else {
+      nf = 0;
     }
-    else  nf = 0;
+
 
     if ( !mesh->info.nomove ) {
       /*perform only boundary moves*/
