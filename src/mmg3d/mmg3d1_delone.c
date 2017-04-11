@@ -85,12 +85,6 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
   int        imaxtet,imintet,base;
 
   /*first try to adapt the bdry so very strict criterion on the volume for Delaunay insertion*/
-  if(phase1)
-    volmin = 1e-1;
-  else
-    volmin = 1e-15;
-
- 
   volmin=1e-15;
 
   base  = ++mesh->mark;
