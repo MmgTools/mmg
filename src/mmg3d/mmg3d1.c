@@ -1775,7 +1775,7 @@ int _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,char typchk, int patternMode) {
       }
       nnf += nf;
 
-      nf = _MMG5_swptet(mesh,met,1.1,NULL,typchk);
+      nf = _MMG5_swptet(mesh,met,1.1,0.0288675,NULL,typchk);
       if ( nf < 0 ) {
         fprintf(stderr,"  ## Unable to improve mesh. Exiting.\n");
         return(0);
