@@ -509,7 +509,6 @@ int _MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
 
         devnew = nadja[0]*ncurnew[0] + nadja[1]*ncurnew[1] + nadja[2]*ncurnew[2];
         if ( devnew < mesh->info.dhd ) {
-          printf ("YESSSS8\n");
           return(0);
         }
       }
@@ -641,7 +640,6 @@ int _MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
     devnew = nadja[0]*ncurnew[0] + nadja[1]*ncurnew[1] + nadja[2]*ncurnew[2];
 
     if ( devnew < mesh->info.dhd ) {
-      printf ("YESSSS2\n");
       return(0);
     }
   }

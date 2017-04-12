@@ -334,9 +334,11 @@ int _MMG3D_normalDeviation(MMG5_pMesh mesh , int  start, char   iface, char ia,
  */
 int _MMG3D_simbulgept(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int ip) {
   MMG5_pTetra    pt,pt0;
+  MMG5_pxTetra   pxt;
   MMG5_pPoint    ppt0;
   double         calold,calnew,caltmp;
-  int            k,iel,ilist;
+  double         n0[6],n1[6],ba0[6],ba1[6];
+  int            j,k,iel,ilist,idx,iface,ier;
   char           ie,ia,ib;
 
   ilist = ret / 2;
@@ -370,6 +372,72 @@ int _MMG3D_simbulgept(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int ip) {
   }
   /* if ( calnew < 0.3*calold )  return(0);*/
 
+
+
+   /** Check the deviation for new triangles */
+
+  /* analyze surfacic ball of p */
+  idx = 0;
+  for (k=0; k<ilist; k++) {
+    iel = list[k] / 6;
+    ie  = list[k] % 6;
+
+    pt   = &mesh->tetra[iel];
+    if(!pt->xt) continue;
+
+    pxt  = &mesh->xtetra[pt->xt];
+
+    for ( j=0; j<2; ++j ) {
+      iface = _MMG5_ifar[ie][j];
+      if ( !(pxt->ftag[iface] & MG_BDY) ) continue;
+
+      /* Normal deviation between the two new triangles and their neighbors */
+      ier = _MMG3D_normalDeviation(mesh,iel,iface,ie,0,ip,&n0[idx],&ba0[idx]);
+      if ( ier < 0 ) return -1;
+      else if ( ier==0 ) return 0;
+
+      ier = _MMG3D_normalDeviation(mesh,iel,iface,ie,1,ip,&n1[idx],&ba1[idx]);
+      if ( ier < 0 ) return -1;
+      else if ( ier==0 ) return 0;
+
+      assert(
+        (ba0[idx]  -ba1[idx])  *(ba0[idx]  -ba1[idx])+
+        (ba0[idx+1]-ba1[idx+1])*(ba0[idx+1]-ba1[idx+1])+
+        (ba0[idx+2]-ba1[idx+2])*(ba0[idx+2]-ba1[idx+2])
+             <=_MMG5_EPSD2);
+
+      /* Test sharp angle creation along the new edge */
+      if ( !_MMG3D_devangle(&n0[idx],&n1[idx],mesh->info.dhd) ) {
+        return(0);
+      }
+
+      if ( !idx ) idx = 3;
+      else {
+        /* Test sharp angle creation along the splitted edge */
+         assert (
+          (ba0[0  ]  +ba0[idx])  *(ba0[  0]  +ba0[idx])+
+          (ba0[  1]  +ba0[idx+1])*(ba0[  1]  +ba0[idx+1])+
+          (ba0[  2]  +ba0[idx+2])*(ba0[  2]  +ba0[idx+2])
+          <=_MMG5_EPSD2 );
+
+        assert (
+          (ba1[0  ]  +ba1[idx])  *(ba1[  0]  +ba1[idx])+
+          (ba1[  1]  +ba1[idx+1])*(ba1[  1]  +ba1[idx+1])+
+          (ba1[  2]  +ba1[idx+2])*(ba1[  2]  +ba1[idx+2])
+          <=_MMG5_EPSD2 );
+
+        /*don't check if it is a ridge edge*/
+        if(pxt->tag[ie] & MG_GEO || pxt->tag[ie] & MG_NOM) continue;
+        
+        if ( !_MMG3D_devangle(&n0[0],&n1[idx],mesh->info.dhd) ) {
+          return(0);
+        }
+        if ( !_MMG3D_devangle(&n1[0],&n0[idx],mesh->info.dhd) ) {
+          return(0);
+        }
+      }
+    }
+  }
 
   return(1);
 }
