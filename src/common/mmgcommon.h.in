@@ -427,6 +427,7 @@ typedef struct _MMG5_dNode_s {
 /* Functions declarations */
 extern double _MMG5_det3pt1vec(double c0[3],double c1[3],double c2[3],double v[3]);
 extern double _MMG5_det4pt(double c0[3],double c1[3],double c2[3],double c3[3]);
+int   _MMG5_devangle(double* n1, double *n2, double crit);
 extern double _MMG5_orvol(MMG5_pPoint point,int *v);
 extern int _MMG5_Add_inode( MMG5_pMesh mesh, _MMG5_iNode **liLi, int val );
 extern int _MMG5_Alloc_inode( MMG5_pMesh mesh, _MMG5_iNode **node );

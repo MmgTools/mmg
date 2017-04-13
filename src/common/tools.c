@@ -35,6 +35,30 @@
 
 #include "mmgcommon.h"
 
+
+/**
+ * \param n1 first normal
+ * \param n2 second normal
+ *
+ * \return 1 if success, 0 if fail
+ *
+ * Check if the angle between n1 and n2 is larger than the ridge
+ * criterion. If yes, return 1, 0 otherwise (ridge creation).
+ *
+ */
+int _MMG5_devangle(double* n1, double *n2, double crit)
+{
+  double dev;
+
+  dev = n1[0]*n2[0] + n1[1]*n2[1] + n1[2]*n2[2];
+
+  if ( dev < crit ) {
+    return(0);
+  }
+
+  return(1);
+}
+
 /**
  * \param mesh pointer toward the mesh stucture.
  * \param ip1 first point of face.

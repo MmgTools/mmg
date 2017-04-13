@@ -316,7 +316,7 @@ int _MMG3D_normalDeviation(MMG5_pMesh mesh , int  start, char   iface, char ia,
    * through the edge iploc) */
   if ( !_MMG3D_normalAdjaTri(mesh,start,iface,iploc,n1) ) return -1;
 
-  ier =  _MMG3D_devangle( n0, n1, mesh->info.dhd );
+  ier =  _MMG5_devangle( n0, n1, mesh->info.dhd );
 
   return ( ier );
 }
@@ -407,7 +407,7 @@ int _MMG3D_simbulgept(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int ip) {
              <=_MMG5_EPSD2);
 
       /* Test sharp angle creation along the new edge */
-      if ( !_MMG3D_devangle(&n0[idx],&n1[idx],mesh->info.dhd) ) {
+      if ( !_MMG5_devangle(&n0[idx],&n1[idx],mesh->info.dhd) ) {
         return(0);
       }
 
@@ -429,37 +429,14 @@ int _MMG3D_simbulgept(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int ip) {
         /*don't check if it is a ridge edge*/
         if(pxt->tag[ie] & MG_GEO || pxt->tag[ie] & MG_NOM) continue;
 
-        if ( !_MMG3D_devangle(&n0[0],&n1[idx],mesh->info.dhd) ) {
+        if ( !_MMG5_devangle(&n0[0],&n1[idx],mesh->info.dhd) ) {
           return(0);
         }
-        if ( !_MMG3D_devangle(&n1[0],&n0[idx],mesh->info.dhd) ) {
+        if ( !_MMG5_devangle(&n1[0],&n0[idx],mesh->info.dhd) ) {
           return(0);
         }
       }
     }
-  }
-
-  return(1);
-}
-
-/**
- * \param n1 first normal
- * \param n2 second normal
- *
- * \return 1 if success, 0 if fail
- *
- * Check if the angle between n1 and n2 is larger than the ridge
- * criterion. If yes, return 1, 0 otherwise (ridge creation).
- *
- */
-int _MMG3D_devangle(double* n1, double *n2, double crit)
-{
-  double dev;
-
-  dev = n1[0]*n2[0] + n1[1]*n2[1] + n1[2]*n2[2];
-
-  if ( dev < crit ) {
-    return(0);
   }
 
   return(1);
