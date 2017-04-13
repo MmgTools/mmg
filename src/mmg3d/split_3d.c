@@ -428,7 +428,7 @@ int _MMG3D_simbulgept(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int ip) {
 
         /*don't check if it is a ridge edge*/
         if(pxt->tag[ie] & MG_GEO || pxt->tag[ie] & MG_NOM) continue;
-        
+
         if ( !_MMG3D_devangle(&n0[0],&n1[idx],mesh->info.dhd) ) {
           return(0);
         }
@@ -2789,7 +2789,7 @@ void _MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],char metRid
  * \param met pointer toward the metric structure.
  * \param k tetra index.
  * \param metRidTyp metric storage (classic or special)
- * \return 0 if fail, index of created point otherwise (\a ib) 
+ * \return 0 if fail, index of created point otherwise (\a ib)
  *
  * Split a tetra in 4 tetras by introducing its barycenter. FOR NOW : flags,
  * that tell which edge should be split, are not updated (erased) : UPDATE
