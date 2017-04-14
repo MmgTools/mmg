@@ -35,7 +35,7 @@
 
 #include "mmg3d.h"
 
-#define KC    13
+#define _MMG5_KC    13
 
 extern char  ddb;
 
@@ -226,7 +226,7 @@ int MMG3D_hashTetra(MMG5_pMesh mesh, int pack) {
 
       /* compute key and insert */
       sum = pt->v[i1] + pt->v[i2] + pt->v[i3];
-      key = _MMG5_KA*mins + _MMG5_KB*maxs + KC*sum;
+      key = _MMG5_KA*mins + _MMG5_KB*maxs + _MMG5_KC*sum;
       key = key % hsize + 1;
       iadr++;
       link[iadr] = hcode[key];
@@ -353,7 +353,7 @@ int MMG3D_hashPrism(MMG5_pMesh mesh) {
       mins_b = pp->v[i1] + pp->v[i2] + pp->v[i3] -mins -maxs;
 
       /* compute key and insert */
-      key = _MMG5_KA*mins + _MMG5_KB*mins_b + KC*maxs;
+      key = _MMG5_KA*mins + _MMG5_KB*mins_b + _MMG5_KC*maxs;
       key = key % hsize + 1;
       iadr++;
       link[iadr] = hcode[key];
@@ -380,7 +380,7 @@ int MMG3D_hashPrism(MMG5_pMesh mesh) {
       mins_b = MG_MIN( MG_MIN(max12,max34),MG_MAX(min12,min34));
 
       /* compute key and insert */
-      key = _MMG5_KA*mins + _MMG5_KB*mins_b + KC*maxs;
+      key = _MMG5_KA*mins + _MMG5_KB*mins_b + _MMG5_KC*maxs;
       key = key % hsize + 1;
       iadr++;
       link[iadr] = hcode[key];
