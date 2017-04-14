@@ -45,9 +45,9 @@ int MMG3D_movetetrapoints(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree,in
   nm = ns = 0;
   maxit = 1;
   base = mesh->base;
-  
+
   pt = &mesh->tetra[k];
-  
+
   /* point j on face i */
   for (i=0; i<4; i++) {
     for (j=0; j<3; j++) {
@@ -100,7 +100,7 @@ int MMG3D_movetetrapoints(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree,in
             continue;
           else if ( ier<0 )
             return(-1);
-          
+
           n = &(mesh->xpoint[ppt->xp].n1[0]);
           // if ( MG_GET(pxt->ori,i) ) {
           /* Useless because if the orientation of the tetra face is
@@ -146,7 +146,7 @@ int _MMG3D_coledges(MMG5_pMesh mesh,MMG5_pSol met,int k,int i) {
   char        iface,ief;
 
   pt = &mesh->tetra[k];
-  
+
    /*3 possibilities to remove the vertex ib*/
     for(ied = 0 ; ied<3 ;ied++) {
       iedg  = _MMG5_arpt[i][ied];
@@ -164,7 +164,7 @@ int _MMG3D_coledges(MMG5_pMesh mesh,MMG5_pSol met,int k,int i) {
       i1    = _MMG5_idir[iface][_MMG5_inxt2[ief]];
 
       ilistcol = _MMG5_boulevolp(mesh,k,i1,listcol);
-      
+
       ilistcol = _MMG5_chkcol_int(mesh,met,k,iface,ief,listcol,ilistcol,2);
       if ( ilistcol > 0 ) {
         ier = _MMG5_colver(mesh,met,listcol,ilistcol,iq,2);
@@ -181,7 +181,7 @@ int _MMG3D_coledges(MMG5_pMesh mesh,MMG5_pSol met,int k,int i) {
     return(0);
 }
 
-/*try to delete the point i of tet k 
+/*try to delete the point i of tet k
 try all the edges containing i*/
 int _MMG3D_deletePoint(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,
                        int k,int i) {
@@ -198,7 +198,7 @@ int _MMG3D_deletePoint(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,
       return(1);
     }
   }
-  
+
   return(0);
 }
 
@@ -301,7 +301,7 @@ int MMG3D_optbdry(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree,int k) {
     ier = _MMG3D_deletePoint(mesh,met,octree,k,i);
     if(ier) return(1);
   }
-  
+
   /*First : try to swap the 3 internal edges*/
   if(!mesh->info.noswap) {
     for(ied = 0 ; ied<3 ;ied++) {
@@ -313,7 +313,7 @@ int MMG3D_optbdry(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree,int k) {
     }
     /*try to swap the bdry edges*/
     if ( !pt->xt ) {printf("boum\n");exit(0);}
-    
+
     pxt = &mesh->xtetra[pt->xt];
     ier = 0;
     assert( (pxt->ftag[i] & MG_BDY) );
@@ -343,7 +343,7 @@ int MMG3D_optbdry(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree,int k) {
       }
     }
   }
-  
+
   /*Try : try to remove the non-bdry vertex*/
   if(!mesh->info.noinsert) {
     ier = _MMG3D_coledges(mesh,met,k,ib);

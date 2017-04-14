@@ -311,7 +311,17 @@ static int MMG3D_typelt(MMG5_pMesh mesh,int iel,int *item) {
   return(1);
 }
 
-
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param octree pointer toward the octree structure.
+ * \param k elt index.
+ * \param iar index of edge to not try to swap.
+ * \return -1 if fail, 0 if we don't swap anything, 1 otherwise.
+ *
+ * Try to swap edge \a iar of tetra \a k.
+ *
+ */
 int _MMG3D_swpItem(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,int k,int iar) {
   MMG5_pTetra   pt,pt1;
   MMG5_pxTetra  pxt;
