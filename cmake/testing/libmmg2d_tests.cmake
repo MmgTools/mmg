@@ -42,7 +42,7 @@ SET ( MMG2D_LIB_TESTS_MAIN_PATH
 
 IF ( LIBMMG2D_STATIC )
   SET ( lib_name lib${PROJECT_NAME}2d_a )
-ELSE ( )
+ELSEIF ( LIBMMG2D_SHARED )
   SET ( lib_name lib${PROJECT_NAME}2d_so )
 ELSE ()
   MESSAGE(WARNING "You must activate the compilation of the static or"

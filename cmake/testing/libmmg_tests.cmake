@@ -38,7 +38,7 @@ SET ( MMG_LIB_TESTS_MAIN_PATH
 
 IF ( LIBMMG_STATIC )
   SET ( lib_name lib${PROJECT_NAME}_a )
-ELSE ( )
+ELSEIF ( LIBMMG_SHARED )
   SET ( lib_name lib${PROJECT_NAME}_so )
 ELSE ()
   MESSAGE(WARNING "You must activate the compilation of the static or"
