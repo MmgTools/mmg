@@ -127,28 +127,32 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
   if ( ps < _MMG5_ANGEDG ) return(0);
 
   /* Check normal deviation with neighbours */
-  if ( !(tt1.tag[_MMG5_iprv2[ia1]] & MG_GEO ) ) {
+  if ( ! ( ( tt1.tag[_MMG5_iprv2[ia1]] & MG_GEO ) ||
+           ( tt1.tag[_MMG5_iprv2[ia1]] & MG_NOM ) ) ) {
     if ( !_MMG3D_normalAdjaTri(mesh,iel1,ifa1,_MMG5_iprv2[ia1],n) ) return -1;
     ps = b0[0]*n[0] + b0[1]*n[1] + b0[2]*n[2];
 
     if ( ps < mesh->info.dhd )  return(0);
   }
 
-  if ( !(tt2.tag[_MMG5_inxt2[ia2]] & MG_GEO ) ) {
+  if ( !( (tt2.tag[_MMG5_inxt2[ia2]] & MG_GEO ) ||
+          (tt2.tag[_MMG5_inxt2[ia2]] & MG_NOM ) ) ) {
     if ( !_MMG3D_normalAdjaTri(mesh,iel2,ifa2,_MMG5_inxt2[ia2],n) ) return -1;
     ps = b0[0]*n[0] + b0[1]*n[1] + b0[2]*n[2];
 
     if ( ps < mesh->info.dhd )  return(0);
   }
 
-  if ( !(tt1.tag[_MMG5_inxt2[ia1]] & MG_GEO ) ) {
+  if ( ! ( (tt1.tag[_MMG5_inxt2[ia1]] & MG_GEO ) ||
+           (tt1.tag[_MMG5_inxt2[ia1]] & MG_NOM ) ) ) {
     if ( !_MMG3D_normalAdjaTri(mesh,iel1,ifa1,_MMG5_inxt2[ia1],n) ) return -1;
     ps = b1[0]*n[0] + b1[1]*n[1] + b1[2]*n[2];
 
     if ( ps < mesh->info.dhd )  return(0);
   }
 
-  if ( !(tt2.tag[_MMG5_iprv2[ia2]] & MG_GEO ) ) {
+  if ( ! ( (tt2.tag[_MMG5_iprv2[ia2]] & MG_GEO ) ||
+           (tt2.tag[_MMG5_iprv2[ia2]] & MG_NOM ) ) ) {
     if ( !_MMG3D_normalAdjaTri(mesh,iel2,ifa2,_MMG5_iprv2[ia2],n) ) return -1;
     ps = b1[0]*n[0] + b1[1]*n[1] + b1[2]*n[2];
 

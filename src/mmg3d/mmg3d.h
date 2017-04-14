@@ -312,7 +312,13 @@ int  _MMG5_srcface(MMG5_pMesh mesh,int n0,int n1,int n2);
 int _MMG5_chkptonbdy(MMG5_pMesh,int);
 double _MMG5_orcal_poi(double a[3],double b[3],double c[3],double d[3]);
 int _MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcible);
-int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree);
+/*function for agressive optimization*/
+int MMG3D_opttyp(MMG5_pMesh , MMG5_pSol ,_MMG3D_pOctree );
+int _MMG3D_swpItem(MMG5_pMesh ,  MMG5_pSol ,_MMG3D_pOctree ,int ,int );
+int _MMG3D_splitItem(MMG5_pMesh ,  MMG5_pSol ,_MMG3D_pOctree ,int ,int ,double );
+int MMG3D_optbdry(MMG5_pMesh ,MMG5_pSol ,_MMG3D_pOctree ,int );
+int MMG3D_movetetrapoints(MMG5_pMesh ,MMG5_pSol ,_MMG3D_pOctree ,int ) ;
+
 int _MMG5_trydisp(MMG5_pMesh,double *,short);
 int _MMG5_dichodisp(MMG5_pMesh,double *);
 int _MMG5_lapantilap(MMG5_pMesh,double *);
@@ -368,7 +374,7 @@ char _MMG5_chkedg(MMG5_pMesh mesh,MMG5_Tria *pt,char ori,double,double,int);
 int  _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met, char typchk, int patternMode) ;
 int  _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree,int maxitin);
 int  _MMG5_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree, int);
-int  _MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double,_MMG3D_pOctree, int);
+  int  _MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double,double,_MMG3D_pOctree, int);
 
 /* pointers */
 /* init structures */

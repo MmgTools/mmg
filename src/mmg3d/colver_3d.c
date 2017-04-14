@@ -340,12 +340,12 @@ int _MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
   MMG5_pPoint  p0;
   MMG5_Tria    tt;
   MMG5_pPar    par;
-  double       calold,calnew,caltmp,nprvold[3],nprvnew[3],ncurold[3],ncurnew[3];
+  double       calold,calnew,caltmp,nadja[3],nprvold[3],nprvnew[3],ncurold[3],ncurnew[3];
   double       ps,devold,devnew,hmax,hausd;
   int          ipp,nump,numq,l,iel,kk;
   int          nr,nbbdy,ndepmin,ndepplus,isloc,iedgeOpp;
   int16_t      tag;
-  char         iopp,ia,ip,i,iq,i0,i1,ier,isminp,isplp;
+  char         iopp,iopp2,ia,ip,i,iq,i0,i1,ier,isminp,isplp;
 
   pt   = &mesh->tetra[k];
   pxt  = 0;
@@ -453,7 +453,7 @@ int _MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
     iel  = lists[l] / 4;
     iopp = lists[l] % 4;
     pt   = &mesh->tetra[iel];
-    pxt = &mesh->xtetra[pt->xt];
+    pxt  = &mesh->xtetra[pt->xt];
     assert(pt->xt);
 
     /* retrieve vertex in tetra */
@@ -474,31 +474,52 @@ int _MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
     /* check normal deviation between l and its neighbour through the edge ia */
     ia       = _MMG5_idirinv[iopp][ip]; /* index of p in tria iopp */
 
-    iedgeOpp =  _MMG5_iarf[iface][ia];
-    if ( !(mesh->xtetra[pt->xt].tag[iedgeOpp] & MG_GEO) ) {
-      if ( !_MMG3D_normalAdjaTri(mesh,iel,iopp,ia,nprvnew) )  return -1;
+    iedgeOpp =  _MMG5_iarf[iopp][ia];
 
-      devnew = nprvnew[0]*ncurnew[0] + nprvnew[1]*ncurnew[1] + nprvnew[2]*ncurnew[2];
+    if ( ! ( (mesh->xtetra[pt->xt].tag[iedgeOpp] & MG_GEO) ||
+             (mesh->xtetra[pt->xt].tag[iedgeOpp] & MG_NOM) ) ) {
+
+      if ( !_MMG3D_normalAdjaTri(mesh,iel,iopp,ia,nadja) )  return -1;
+
+      devnew = nadja[0]*ncurnew[0] + nadja[1]*ncurnew[1] + nadja[2]*ncurnew[2];
 
       if ( devnew < mesh->info.dhd ) return(0);
     }
 
-    if ( l > 1 ) {
+    if ( l == 1 ) {
+      /* check normal deviation between the new first tri of the surfacic ball
+       * and the surfacic triangle facing ip in the old first tri of the
+       * surfacic ball (that vanishes due to the collapse)
+       */
+      kk    = lists[0] / 4;
+      iopp2 = lists[0] % 4;
+      pt1   = &mesh->tetra[kk];
+      assert(pt1->xt);
+
+      /* retrieve vertex ip in tria iopp2 */
+      for (ipp=0; ipp<3; ipp++)
+        if ( pt1->v[_MMG5_idir[iopp2][ipp]] == nump )  break;
+      assert(ipp<3);
+
+      iedgeOpp =  _MMG5_iarf[iopp2][ipp];
+
+      if ( ! ( (mesh->xtetra[pt1->xt].tag[iedgeOpp] & MG_GEO) ||
+               (mesh->xtetra[pt1->xt].tag[iedgeOpp] & MG_NOM) ) ) {
+        if ( !_MMG3D_normalAdjaTri(mesh,kk,iopp2,ipp,nadja) )  return -1;
+
+        devnew = nadja[0]*ncurnew[0] + nadja[1]*ncurnew[1] + nadja[2]*ncurnew[2];
+        if ( devnew < mesh->info.dhd ) {
+          return(0);
+        }
+      }
+    }
+    else {
       /* check normal deviation between l and l-1 */
       ia = _MMG5_iprv2[ia];         /* edge between l-1 and l, in local num of tria */
       ia = _MMG5_iarf[iopp][ia];    /* edge between l-1 and l in local num of tetra */
 
       if ( !(mesh->xtetra[pt->xt].tag[ia] & MG_GEO) ) {
 #warning CECILE calcul angle a tester : check everything ok and clean the code
-        pt1 = &mesh->tetra[lists[l-1]/4];
-        assert(pt1->xt);
-        for (ip=0; ip<4; ip++)
-          if ( pt1->v[ip] == nump )  break;
-        assert(ip<4);
-        memcpy(pt0,pt1,sizeof(MMG5_Tetra));
-        pt0->v[ip] = numq;
-        if ( !_MMG5_norface(mesh,lists[l-1]/4,lists[l-1]%4,nprvold) )  return(0);
-        if ( !_MMG5_norface(mesh,0,lists[l-1]%4,nprvnew) )    return(0);
 
         devold = nprvold[0]*ncurold[0] + nprvold[1]*ncurold[1] + nprvold[2]*ncurold[2];
         devnew = nprvnew[0]*ncurnew[0] + nprvnew[1]*ncurnew[1] + nprvnew[2]*ncurnew[2];
@@ -594,6 +615,33 @@ int _MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
 
     memcpy(nprvold,ncurold,3*sizeof(double));
     memcpy(nprvnew,ncurnew,3*sizeof(double));
+  }
+
+  /* check normal deviation between the new last tri of the surfacic ball
+   * and the surfacic triangle facing ip in the old last tri of the
+   * surfacic ball (that vanishes due to the collapse)
+   */
+  kk    = lists[ilists-1] / 4;
+  iopp2 = lists[ilists-1] % 4;
+  pt1   = &mesh->tetra[kk];
+  assert(pt1->xt);
+
+  /* retrieve vertex ip in tria iopp2 */
+  for (ipp=0; ipp<3; ipp++)
+    if ( pt1->v[_MMG5_idir[iopp2][ipp]] == nump )  break;
+  assert(ipp<3);
+
+  iedgeOpp =  _MMG5_iarf[iopp2][ipp];
+
+  if ( ! ( (mesh->xtetra[pt1->xt].tag[iedgeOpp] & MG_GEO) ||
+           (mesh->xtetra[pt1->xt].tag[iedgeOpp] & MG_NOM) ) ) {
+    if ( !_MMG3D_normalAdjaTri(mesh,kk,iopp2,ipp,nadja) )  return -1;
+
+    devnew = nadja[0]*ncurnew[0] + nadja[1]*ncurnew[1] + nadja[2]*ncurnew[2];
+
+    if ( devnew < mesh->info.dhd ) {
+      return(0);
+    }
   }
 
   /* Ensure collapse does not lead to a non manifold configuration (case of implicit surface)*/

@@ -411,7 +411,7 @@ static int _MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met) {
       }
       nnf += nf;
 
-      nf = _MMG5_swptet(mesh,met,1.053,NULL,2);
+      nf = _MMG5_swptet(mesh,met,1.053,0.0288675,NULL,2);
       if ( nf < 0 ) {
         fprintf(stderr,"  ## Unable to improve mesh. Exiting.\n");
         return(0);
@@ -479,7 +479,7 @@ static int _MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met) {
       }
       nnf += nf;
 
-      nf = _MMG5_swptet(mesh,met,1.053,NULL,2);
+      nf = _MMG5_swptet(mesh,met,1.053,0.0288675,NULL,2);
       if ( nf < 0 ) {
         fprintf(stderr,"  ## Unable to improve mesh. Exiting.\n");
         return(0);

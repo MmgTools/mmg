@@ -61,7 +61,7 @@
  *    - 7: 0 obtuse face, 4 acute face, 0 big edge, 2 small edge.
  *
  */
-int MMG3D_typelt(MMG5_pMesh mesh,int iel,int *item) {
+static int MMG3D_typelt(MMG5_pMesh mesh,int iel,int *item) {
   MMG5_pTetra    pt;
   MMG5_pPoint    pa,pb,pc,pd;
   double    abx,aby,abz,acx,acy,acz,adx,ady,adz,v1,v2,v3,vol;
@@ -310,7 +310,9 @@ int MMG3D_typelt(MMG5_pMesh mesh,int iel,int *item) {
   item[0] = 0;
   return(1);
 }
-static inline int _MMG3D_swpItem(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,int k,int iar) {
+
+
+int _MMG3D_swpItem(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,int k,int iar) {
   MMG5_pTetra   pt,pt1;
   MMG5_pxTetra  pxt;
   int           l,list[MMG3D_LMAX+2],lon,iel,nconf,ier;
@@ -399,7 +401,6 @@ int _MMG3D_swpalmostall(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,
  * Try to split edge number \a iar of tetra \a k
  *
  */
-static inline
 int _MMG3D_splitItem(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,
                      int k,int iar,double OCRIT) {
   MMG5_pTetra   pt;
@@ -478,20 +479,7 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
   int            ier,i,nd,ne,npeau;
   int            it,maxit,ntot;
 //  double         OCRIT = 1.01;
-  int ddebug ;
-
-  //printf("on lance anatet4\n");
-  ier = 0;//_MMG5_anatet4(mesh,met,1);
-  if(ier) {
-    printf("on a splitte %d\n",ier);
-    /* memory free */
-    _MMG5_DEL_MEM(mesh,mesh->adja,(4*mesh->nemax+5)*sizeof(int));
-    // Attention, faut-il recalculer la table d'adjacence des prisme ici?
-    if ( !MMG3D_hashTetra(mesh,1) ) {
-      fprintf(stderr,"  ## Hashing problem. Exit program.\n");
-      return(0);
-    }
-  }
+  int ddebug,nbdy,nbdy2 ;
 
   ntot = 0;
   crit = 0.2 / _MMG3D_ALPHAD;
@@ -501,12 +489,13 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
   do {
     ne = mesh->ne;
     nd = 0;
+    nbdy = nbdy2 = 0;
     memset(cs,0,10*sizeof(int));
     memset(ds,0,10*sizeof(int));
 
     for (k=1 ; k<=ne ; k++) {
       pt = &mesh->tetra[k];
-      if(!pt->v[0]) continue;
+      if(!MG_EOK(pt)  || (pt->tag & MG_REQ) ) continue;
       /* if(pt->qual <= 3.117138e-07) {printf("k %d ityp %d %e npeau %d\n",k,ityp,pt->qual,npeau);
          ddebug = 1;}
          else*/
@@ -525,18 +514,15 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
       for(i=0 ; i<4 ; i++) {
         if(!adja[i]) npeau++;
       }
-      if(npeau>1 && !mesh->info.noswap) {
-        if( mesh->info.imprim<-4 ) printf("%d faces de peau!!!! %d (typ %d) %e\n",npeau,k,ityp,pt->qual);
-        /* if ( !_MMG5_split4bar(mesh,met,k,1) ) return(-1); */
-        /* else { */
-        /*   nd++;  */
-        /*   ds[ityp]++; */
-        /*   printf("on a splitte\n"); */
-        /*   continue; */
-        /* } */
+      if(npeau>1) {
+        if( 1 || mesh->info.imprim<-4 ) printf("%d faces de peau!!!! %d (typ %d) %e\n",npeau,k,ityp,pt->qual / _MMG3D_ALPHAD);
+        nbdy++;
+      } else {
+        nbdy2++;
       }
       if(npeau) {
-        ier = 0;//MMG3D_optbdry(mesh,sol,k);
+        assert(pt->xt);
+        ier = MMG3D_optbdry(mesh,met,octree,k);
         if(ier) {
           nd++;
           ds[ityp]++;
@@ -565,7 +551,7 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
             /*   OCRIT *= 0.5; */
             /* } else */
             /*   OCRIT *= 0.75; */
-            ier = 0;//_MMG3D_splitItem(mesh,met,octree,k,item[0],OCRIT);
+            ier = _MMG3D_splitItem(mesh,met,octree,k,item[0],1.01);
             if(ddebug) printf("on split %d ?\n",ier);
 
             if(ier) {
@@ -583,7 +569,7 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
             ds[ityp]++;
             break;
           }
-          ier = 0;//_MMG3D_splitalmostall(mesh,met,octree,k,item[0]);
+          ier = _MMG3D_splitalmostall(mesh,met,octree,k,item[0]);
           if(ddebug) printf("on split2 %d ?\n",ier);
 
           if(ier > 0) {
@@ -617,10 +603,11 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
         break;
       }/*end switch*/
     }/*end for k*/
-    /* for (k=0; k<=7; k++)
-       if ( cs[k] )
-       printf("  optim [%d]      = %5d   %5d  %6.2f %%\n",k,cs[k],ds[k],100.0*ds[k]/cs[k]);
-    */
+    /* printf("bdry : %d %d\n",nbdy,nbdy2); */
+    /*  for (k=0; k<=7; k++) */
+    /*    if ( cs[k] ) */
+    /*    printf("  optim [%d]      = %5d   %5d  %6.2f %%\n",k,cs[k],ds[k],100.0*ds[k]/cs[k]); */
+    
     ntot += nd;
   } while (nd && it++<maxit);
 
