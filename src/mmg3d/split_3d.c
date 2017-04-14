@@ -466,7 +466,8 @@ int _MMG3D_normalAdjaTri(MMG5_pMesh mesh , int start, char iface, int ia,
 
   /** Store the adjacent boundary triangle (triangle adjacent to \a iface
    * through the edge ia */
-  if ( !_MMG5_coquilface( mesh, start, iedgeOpp, list, &it1, &it2, 0) ) return 0;
+  if ( !_MMG5_coquilface( mesh,start,iface,iedgeOpp,list,&it1,&it2,0) )
+    return 0;
 
   if ( it1/4 != start || it1%4 != iface ) {
     assert ( it2/4==start && it2%4==iface );
@@ -505,13 +506,10 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
                   int cas,char metRidTyp){
   MMG5_pTetra    pt,pt1,pt0;
   MMG5_xTetra    xt,xt1;
-  MMG5_pxTetra   pxt0,pxt;
+  MMG5_pxTetra   pxt0;
   double         lmin,lmax,len;
-  double         n0[6],n1[6];
-#warning ajeter
-  double         ba0[6], ba1[6];
   int            ilist,k,open,iel,jel,*newtet,nump,*adja,j,iface;
-  int           *adjan,nei2,nei3,mel,idx,ier;
+  int           *adjan,nei2,nei3,mel;
   char           ie,tau[4],isxt,isxt1,i,voy;
   unsigned char *taued;
 

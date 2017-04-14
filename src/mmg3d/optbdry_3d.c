@@ -325,7 +325,7 @@ int MMG3D_optbdry(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree,int k) {
            (pxt->tag[ia] & MG_NOM) )
         continue;
 
-      ret = _MMG5_coquilface(mesh,k,ia,list,&it1,&it2,0);
+      ret = _MMG5_coquilface(mesh,k,i,ia,list,&it1,&it2,0);
       ilist = ret / 2;
       if ( ret < 0 )  return(-1);
       /* CAUTION: trigger collapse with 2 elements */
