@@ -338,8 +338,9 @@ int _MMG3D_simbulgept(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int ip) {
   MMG5_pPoint    ppt0;
   double         calold,calnew,caltmp;
   double         n0[6],n1[6],ba0[6],ba1[6];
-  int            j,k,iel,ilist,idx,iface,ier;
-  char           ie,ia,ib;
+  int            j,k,iel,ilist,idx,iface,ier,sum1,sum2,mins1,mins2,maxs1,maxs2;
+  int            is0,is1,is2;
+  char           ie,ia,ib,complete,wrongOri;
 
   ilist = ret / 2;
   pt0  = &mesh->tetra[0];
@@ -377,7 +378,7 @@ int _MMG3D_simbulgept(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int ip) {
    /** Check the deviation for new triangles */
 
   /* analyze surfacic ball of p */
-  idx = 0;
+  wrongOri = complete = idx = 0;
   for (k=0; k<ilist; k++) {
     iel = list[k] / 6;
     ie  = list[k] % 6;
@@ -390,6 +391,10 @@ int _MMG3D_simbulgept(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int ip) {
     for ( j=0; j<2; ++j ) {
       iface = _MMG5_ifar[ie][j];
       if ( !(pxt->ftag[iface] & MG_BDY) ) continue;
+
+      is0 = pt->v[_MMG5_idir[iface][0]];
+      is1 = pt->v[_MMG5_idir[iface][1]];
+      is2 = pt->v[_MMG5_idir[iface][2]];
 
       /* Normal deviation between the two new triangles and their neighbors */
       ier = _MMG3D_normalDeviation(mesh,iel,iface,ie,0,ip,&n0[idx],&ba0[idx]);
@@ -411,23 +416,51 @@ int _MMG3D_simbulgept(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int ip) {
         return(0);
       }
 
-      if ( !idx ) idx = 3;
+      if ( !idx ) {
+        sum1 = is0 + is1 + is2;
+        mins1 = MG_MIN(is0, MG_MIN(is1,is2));
+        maxs1 = MG_MAX(is0, MG_MAX(is1,is2));
+        idx = 3;
+      }
       else {
+        /* don't check if it is a ridge edge or if we have already cross 2
+         * boundaries */
+        if ( complete || pxt->tag[ie] & MG_GEO || pxt->tag[ie] & MG_NOM )
+          continue;
+
+        /* We are manifold thus we have exactly two faces in our shell: check
+         * that we don't see twice a boundary face (multidomain case) */
+        sum2 = is0 + is1 + is2;
+        mins2 = MG_MIN(is0, MG_MIN(is1,is2));
+        maxs2 = MG_MAX(is0, MG_MAX(is1,is2));
+
+        if ( (sum2 == sum1 && mins2 == mins1 && maxs2 == maxs1) ) {
+          /* Multidomain: we see the tria for the second time (and from another
+           * side), this means that the next seen tria will be seen from the
+           * wrong side. */
+          wrongOri = 1;
+          continue;
+        }
+        else if ( wrongOri ) {
+          /* We skeep this tria because it is seen from a wrong side. The next
+           * will be ok */
+          wrongOri = 0;
+          continue;
+        }
+        complete = 1;
+
         /* Test sharp angle creation along the splitted edge */
          assert (
-          (ba0[0  ]  +ba0[idx])  *(ba0[  0]  +ba0[idx])+
+          (ba0[  0]  +ba0[idx])  *(ba0[  0]  +ba0[idx])+
           (ba0[  1]  +ba0[idx+1])*(ba0[  1]  +ba0[idx+1])+
           (ba0[  2]  +ba0[idx+2])*(ba0[  2]  +ba0[idx+2])
           <=_MMG5_EPSD2 );
 
         assert (
-          (ba1[0  ]  +ba1[idx])  *(ba1[  0]  +ba1[idx])+
+          (ba1[  0]  +ba1[idx])  *(ba1[  0]  +ba1[idx])+
           (ba1[  1]  +ba1[idx+1])*(ba1[  1]  +ba1[idx+1])+
           (ba1[  2]  +ba1[idx+2])*(ba1[  2]  +ba1[idx+2])
           <=_MMG5_EPSD2 );
-
-        /*don't check if it is a ridge edge*/
-        if(pxt->tag[ie] & MG_GEO || pxt->tag[ie] & MG_NOM) continue;
 
         if ( !_MMG5_devangle(&n0[0],&n1[idx],mesh->info.dhd) ) {
           return(0);
@@ -508,7 +541,7 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
   MMG5_xTetra    xt,xt1;
   MMG5_pxTetra   pxt0;
   double         lmin,lmax,len;
-  int            ilist,k,open,iel,jel,*newtet,nump,*adja,j,iface;
+  int            ilist,k,open,iel,jel,*newtet,nump,*adja,j;
   int           *adjan,nei2,nei3,mel;
   char           ie,tau[4],isxt,isxt1,i,voy;
   unsigned char *taued;
