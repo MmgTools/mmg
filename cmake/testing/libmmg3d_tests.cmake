@@ -45,7 +45,7 @@ SET ( MMG3D_LIB_TESTS_MAIN_PATH
 
 IF ( LIBMMG3D_STATIC )
   SET ( lib_name lib${PROJECT_NAME}3d_a )
-ELSE ( )
+ELSEIF ( LIBMMG3D_SHARED )
   SET ( lib_name lib${PROJECT_NAME}3d_so )
 ELSE ()
   MESSAGE(WARNING "You must activate the compilation of the static or"
