@@ -406,6 +406,17 @@ typedef struct {
                      \f$i^{th}\f$ edge of the prism */
 } MMG5_xPrism;
 typedef MMG5_xPrism * MMG5_pxPrism;
+
+/**
+ * \struc MMG5_Mat
+ * \brief To store user-defined references in the mesh (useful in LS mode)
+ */
+typedef struct {
+  char dospl;
+  int  ref,rin,rex;
+} MMG5_Mat;
+typedef MMG5_Mat * MMG5_pMat;
+
 /**
  * \struct MMG5_Info
  * \brief Store input parameters of the run.
@@ -416,12 +427,14 @@ typedef struct {
   int           mem,npar,npari;
   int           renum;
   int           octree;
+  int           nmat;
   char          nreg;
   char          imprim,ddebug,badkal,iso,fem,lag;
   char          parTyp; /*!< Contains binary flags to say which kind of local
                           param are setted: if \f$tag = 1+2+4\f$ then the point
                           is \a MG_Vert, MG_Tria and MG_Tetra */
   unsigned char optim, optimLES, noinsert, noswap, nomove, nosurf;
+  MMG5_pMat     mat;
 } MMG5_Info;
 
 /**

@@ -33,6 +33,8 @@
 
 #include "mmg2d.h"
 
+extern unsigned char ddb;
+
 /* Check whether splitting of edge i in tria k is possible and return the newly created point;
    possibly perform a dichotomy to find the latest valid position for the point */
 int _MMG2_chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
@@ -170,13 +172,12 @@ int _MMG2_chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
         caltmp = _MMG2D_ALPHAD*MMG2D_caltri(mesh,met,pt0);
         calnew = MG_MIN(calnew,caltmp);
       }
-
+      
       ier = ( calnew > _MMG5_EPSD );
       if ( ier ) {
         isv = 1;
+        to = t;
         if ( t == tp ) break;
-        else
-          to = t;
       }
       else
         tp = t;
@@ -188,9 +189,14 @@ int _MMG2_chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
         t = 0.5*(to+tp);
     }
     while ( ++it < maxit );
-
+    
+    /* One satisfying position has been found: to */
+    if ( isv ) {
+      ppt->c[0] = mid[0] + to*(o[0] - mid[0]);
+      ppt->c[1] = mid[1] + to*(o[1] - mid[1]);
+    }
     /* No satisfying position has been found */
-    if ( !isv ) {
+    else {
       _MMG2D_delPt(mesh,ip);
       return(0);
     }

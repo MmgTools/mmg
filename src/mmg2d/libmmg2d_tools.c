@@ -60,6 +60,66 @@ void MMG2D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
   return;
 }
 
+/* Read parameter file DEFAULT.mmg2d */
+int MMG2_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
+  int      ret,i,nspl,nun;
+  char     *ptr,data[256];
+  FILE     *in;
+  MMG5_pMat     pm;
+  fpos_t   position;
+  
+  /* Check for parameter file */
+  strcpy(data,mesh->namein);
+  ptr = strstr(data,".mesh");
+  if ( ptr ) *ptr = '\0';
+  strcat(data,".mmg2d");
+  in = fopen(data,"rb");
+  
+  if ( !in ) {
+    sprintf(data,"%s","DEFAULT.mmg2d");
+    in = fopen(data,"rb");
+    if ( !in )
+      return(1);
+  }
+  fprintf(stdout,"  %%%% %s OPENED\n",data);
+  
+  /* Read parameters */
+  while ( !feof(in) ) {
+    ret = fscanf(in,"%s",data);
+    if ( !ret || feof(in) ) break;
+    for (i=0; i<strlen(data); i++) data[i] = tolower(data[i]);
+    
+    /* Read user defined references for the LS mode */
+    if ( !strcmp(data,"lsreferences") ) {
+      ret = fscanf(in,"%d",&mesh->info.nmat);
+      
+      if ( mesh->info.nmat ) {
+        _MMG5_SAFE_CALLOC(mesh->info.mat,mesh->info.nmat,MMG5_Mat);
+        for (i=0; i<mesh->info.nmat; i++) {
+          pm = &mesh->info.mat[i];
+          fscanf(in,"%d",&pm->ref);
+          fgetpos(in,&position);
+          fscanf(in,"%s",data);
+          if ( !strcmp(data,"nosplit") ) {
+            pm->dospl = 0;
+            pm->rin = pm->ref;
+            pm->rex = pm->ref;
+          }
+          else {
+            fsetpos(in,&position);
+            fscanf(in,"%d",&pm->rin);
+            fscanf(in,"%d",&pm->rex);
+            pm->dospl = 1;
+          }
+        }
+      }
+    }
+  }
+  
+  fclose(in);
+  return(1);
+}
+
 int MMG2D_Get_adjaTri(MMG5_pMesh mesh, int kel, int listri[3]) {
 
   if ( ! mesh->adja ) {

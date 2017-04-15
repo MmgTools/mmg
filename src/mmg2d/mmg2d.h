@@ -291,6 +291,9 @@ int _MMG2_delone(MMG5_pMesh ,MMG5_pSol ,int ,int *,int );
 int _MMG2_cenrad_iso(MMG5_pMesh ,double *,double *,double *);
 
 /* Adds Charles */
+int _MMG2_getIniRef(MMG5_pMesh ,int );
+int _MMG2_isSplit(MMG5_pMesh ,int ,int *,int *);
+int MMG2_parsop(MMG5_pMesh ,MMG5_pSol );
 int _MMG2_ismaniball(MMG5_pMesh , MMG5_pSol , int , char );
 int _MMG2_snapval(MMG5_pMesh ,MMG5_pSol ,double *);
 int _MMG2_chkmanimesh(MMG5_pMesh );
@@ -353,6 +356,7 @@ int _MMG2_movedgpt(MMG5_pMesh ,MMG5_pSol ,int ,int *,char );
 int _MMG2_movintpt(MMG5_pMesh ,MMG5_pSol ,int ,int *,char );
 int _MMG2_movintpt_ani(MMG5_pMesh ,MMG5_pSol ,int ,int *,char );
 int _MMG2_chkmsh(MMG5_pMesh );
+int _MMG2_chkor(MMG5_pMesh );
 int _MMG2_savenor_db(MMG5_pMesh ,char *,char );
 int _MMG2_savedisp_db(MMG5_pMesh mesh,MMG5_pSol ,char *,char );
 int _MMG2_velextLS(MMG5_pMesh ,MMG5_pSol );

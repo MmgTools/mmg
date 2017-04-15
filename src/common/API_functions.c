@@ -69,6 +69,8 @@ void _MMG5_Init_parameters(MMG5_pMesh mesh) {
   mesh->info.noswap   =  0;  /* [0/1]    ,avoid/allow edge or face flipping */
   /** MMG5_IPARAM_nomove = 0 */
   mesh->info.nomove   =  0;  /* [0/1]    ,avoid/allow point relocation */
+  /** MMG5_IPARAM nmat = 0 */
+  mesh->info.nmat = 0;  /* [n]    ,number of user-defined references */
 
   /* default values for doubles */
   /** MMG5_DPARAM_angleDetection = \ref _MMG5_ANGEDG */
@@ -81,6 +83,10 @@ void _MMG5_Init_parameters(MMG5_pMesh mesh) {
   mesh->info.hausd    = 0.01;     /* control Hausdorff */
   /** MMG5_DPARAM_hgrad = 1.3 */
   mesh->info.hgrad    = 0.26236426446;      /* control gradation; */
+  
+  /* default values for pointers */
+  /** MMG5_PPARAM = NULL */
+  mesh->info.mat = NULL;  /* list of user-defined references */
 
   /** MMG3D_IPARAM_lag = -1 used by mmg3d only but need to be negative in the
    * scaleMesh function */
