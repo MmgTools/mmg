@@ -130,7 +130,6 @@ int _MMG2_chkcol(MMG5_pMesh mesh, MMG5_pSol met,int k,char i,int *list,char typc
       if ( abs(pt->ref) != abs(pt1->ref) )  return(0);
     }*/
 
-
     /* Travel the ball of i1 (but for the two elements 0 and ilist-1 (the last one in the case of
      a closed ball) which will disappear */
     for (l=1; l<ilist-1+open; l++) {
@@ -239,10 +238,16 @@ int _MMG2_chkcol(MMG5_pMesh mesh, MMG5_pSol met,int k,char i,int *list,char typc
     /* What is the meaning of this test ? see mmgs */
     p2 = &mesh->point[pt1->v[jj]];
     
-    /* Check geometric approximation */
+    /* Check quality and geometric approximation: elements with two trias in the ball should be removed */
     pt0 = &mesh->tria[0];
     memcpy(pt0,pt1,sizeof(MMG5_Tria));
     pt0->v[j] = ip2;
+    
+    calold = _MMG2D_ALPHAD*_MMG2_caltri_iso(mesh,NULL,pt1);
+    calnew = _MMG2D_ALPHAD*_MMG2_caltri_iso(mesh,NULL,pt0);
+    if ( calnew < _MMG2_NULKAL )  return(0);
+    if ( calold < _MMG2_NULKAL && calnew <= calold )  return(0);
+    
     if ( typchk == 1 )
       if ( _MMG2_chkedg(mesh,0) )  return(0);
   }

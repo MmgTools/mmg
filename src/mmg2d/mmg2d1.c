@@ -74,6 +74,7 @@ int _MMG2_anatri(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         fprintf(stdout,"  ## Unable to collapse mesh. Exiting.\n");
         return(0);
       }
+    
     }
     else {
       ns = 0;
@@ -480,7 +481,7 @@ int _MMG2_colelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
       
       /* Check whether the geometry is preserved */
       ilist = _MMG2_chkcol(mesh,met,k,i,list,typchk);
-
+      
       if ( ilist > 3 || ( ilist == 3 && open ) ) {
         nc += _MMG2_colver(mesh,ilist,list);
         break;

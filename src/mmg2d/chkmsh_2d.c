@@ -309,8 +309,8 @@ int _MMG2_chkor(MMG5_pMesh mesh) {
     p2 = &mesh->point[pt->v[2]];
     
     det = (p1->c[0]-p0->c[0])*(p2->c[1]-p0->c[1]) - (p1->c[1]-p0->c[1])*(p2->c[0]-p0->c[0]);
-    if( _MMG2_caltri_iso(mesh,NULL,pt) <= 0.001) return(0);
-    //if ( det <= 0.0 ) return(0);
+    //if( _MMG2_caltri_iso(mesh,NULL,pt) <= 0.001) return(0);
+    if ( det <= 0.0 ) return(0);
   }
   
   return(1);
