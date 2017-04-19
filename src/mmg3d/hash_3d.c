@@ -894,7 +894,8 @@ int _MMG5_hPop(MMG5_HGeom *hash,int a,int b,int *ref,int16_t *tag) {
 
   *ref = 0;
   *tag = 0;
-  if ( !hash->siz )  return(0);
+
+  assert ( hash->siz );
 
   ia  = MG_MIN(a,b);
   ib  = MG_MAX(a,b);
@@ -952,7 +953,9 @@ int _MMG5_hGet(MMG5_HGeom *hash,int a,int b,int *ref,int16_t *tag) {
 
   *tag = 0;
   *ref = 0;
-  if ( !hash->siz )  return(0);
+
+  assert ( hash->siz );
+
   ia  = MG_MIN(a,b);
   ib  = MG_MAX(a,b);
   key = (_MMG5_KA*ia + _MMG5_KB*ib) % hash->siz;
@@ -980,7 +983,8 @@ void _MMG5_hEdge(MMG5_pMesh mesh,MMG5_HGeom *hash,int a,int b,int ref,int16_t ta
   MMG5_hgeom  *ph;
   int     key,ia,ib,j;
 
-  if ( !hash->siz )  return;
+  assert ( hash->siz );
+
   ia  = MG_MIN(a,b);
   ib  = MG_MAX(a,b);
   key = (_MMG5_KA*ia + _MMG5_KB*ib) % hash->siz;
