@@ -1018,21 +1018,25 @@ void _MMG5_hEdge(MMG5_pMesh mesh,int a,int b,int ref,int16_t tag) {
 }
 
 /** to store edge on geometry */
-int _MMG5_hNew(MMG5_HGeom *hash,int hsiz,int hmax,int secure) {
+int _MMG5_hNew(MMG5_pMesh mesh,MMG5_HGeom *hash,int hsiz,int hmax,int secure) {
   int   k;
 
   /* adjust hash table params */
-  hash->geom = (MMG5_hgeom*)calloc(hmax+2,sizeof(MMG5_hgeom));
+  hash->siz  = hsiz + 1;
+  hash->max  = hmax + 2;
+  hash->nxt  = hash->siz;
+
+  _MMG5_ADD_MEM(mesh,(hash->max+1)*sizeof(MMG5_hgeom),"Edge hash table",return(0));
+  hash->geom = (MMG5_hgeom*)calloc(hash->max+1,sizeof(MMG5_hgeom));
+
   if ( !hash->geom ) {
     perror("  ## Memory problem: calloc");
     if ( !secure )  return(0);
     else  exit(EXIT_FAILURE);
   }
-  hash->siz  = hsiz;
-  hash->max  = hmax + 1;
-  hash->nxt  = hsiz;
-  for (k=hsiz; k<hash->max; k++)
+  for (k=hash->siz; k<hash->max; k++)
     hash->geom[k].nxt = k+1;
+
   return 1;
 }
 
@@ -1055,8 +1059,7 @@ int _MMG5_hGeom(MMG5_pMesh mesh) {
   if ( mesh->na ) {
     if ( !mesh->htab.geom ) {
       mesh->namax = MG_MAX(1.5*mesh->na,_MMG3D_NAMAX);
-      _MMG5_ADD_MEM(mesh,(3*mesh->namax+2)*sizeof(MMG5_hgeom),"htab",return(0));
-      _MMG5_hNew(&mesh->htab,mesh->na,3*mesh->namax,1);
+      _MMG5_hNew(mesh,&mesh->htab,mesh->na,3*mesh->namax,1);
     }
     else {
       if ( abs(mesh->info.imprim) > 3 || mesh->info.ddebug ) {
@@ -1125,8 +1128,7 @@ int _MMG5_hGeom(MMG5_pMesh mesh) {
       _MMG5_DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(MMG5_hgeom));
 
     mesh->namax = MG_MAX(1.5*mesh->na,_MMG3D_NAMAX);
-    _MMG5_ADD_MEM(mesh,(3*mesh->namax+2)*sizeof(MMG5_hgeom),"htab",return(0));
-    _MMG5_hNew(&mesh->htab,mesh->na,3*mesh->namax,1);
+    _MMG5_hNew(mesh,&mesh->htab,mesh->na,3*mesh->namax,1);
     mesh->na = 0;
 
     /* build hash for edges */

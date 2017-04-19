@@ -189,13 +189,7 @@ int _MMG3D_bdryBuild(MMG5_pMesh mesh) {
   /* in the worst case (all edges are marked), we will have around 1 edge per *
    * triangle (we count edges only one time) */
   mesh->memCur += (long long)((3*mesh->nt+2)*sizeof(MMG5_hgeom));
-  if ( (mesh->memCur) > (mesh->memMax) ) {
-    mesh->memCur -= (long long)((3*mesh->nt+2)*sizeof(MMG5_hgeom));
-    fprintf(stdout,"  ## Warning:");
-    fprintf(stdout," unable to allocate an hash table to store the mesh edges."
-      "\n  ## Warning: uncomplete mesh\n");
-  }
-  else if ( _MMG5_hNew(&mesh->htab,mesh->nt,3*(mesh->nt),0) ) {
+  if ( _MMG5_hNew(mesh,&mesh->htab,mesh->nt,3*(mesh->nt),0) ) {
     for (k=1; k<=mesh->ne; k++) {
       pt   = &mesh->tetra[k];
       if ( MG_EOK(pt) &&  pt->xt ) {
