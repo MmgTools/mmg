@@ -1,6 +1,7 @@
 CMakeCache.txt
 CTestConfig.cmake
 *~
+*.swp
 
 archives
 bin
@@ -28,3 +29,4 @@ ci_tests
 
 src/common/mmg.h
 
+include/*

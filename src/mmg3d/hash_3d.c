@@ -894,7 +894,8 @@ int _MMG5_hPop(MMG5_HGeom *hash,int a,int b,int *ref,int16_t *tag) {
 
   *ref = 0;
   *tag = 0;
-  if ( !hash->siz )  return(0);
+
+  assert ( hash->siz );
 
   ia  = MG_MIN(a,b);
   ib  = MG_MAX(a,b);
@@ -952,7 +953,9 @@ int _MMG5_hGet(MMG5_HGeom *hash,int a,int b,int *ref,int16_t *tag) {
 
   *tag = 0;
   *ref = 0;
-  if ( !hash->siz )  return(0);
+
+  assert ( hash->siz );
+
   ia  = MG_MIN(a,b);
   ib  = MG_MAX(a,b);
   key = (_MMG5_KA*ia + _MMG5_KB*ib) % hash->siz;
@@ -976,37 +979,38 @@ int _MMG5_hGet(MMG5_HGeom *hash,int a,int b,int *ref,int16_t *tag) {
 }
 
 /** store edge on geometry */
-void _MMG5_hEdge(MMG5_pMesh mesh,int a,int b,int ref,int16_t tag) {
+void _MMG5_hEdge(MMG5_pMesh mesh,MMG5_HGeom *hash,int a,int b,int ref,int16_t tag) {
   MMG5_hgeom  *ph;
   int     key,ia,ib,j;
 
-  if ( !mesh->htab.siz )  return;
+  assert ( hash->siz );
+
   ia  = MG_MIN(a,b);
   ib  = MG_MAX(a,b);
-  key = (_MMG5_KA*ia + _MMG5_KB*ib) % mesh->htab.siz;
-  ph  = &mesh->htab.geom[key];
+  key = (_MMG5_KA*ia + _MMG5_KB*ib) % hash->siz;
+  ph  = &hash->geom[key];
 
   if ( ph->a == ia && ph->b == ib )
     return;
   else if ( ph->a ) {
     while ( ph->nxt ) {
-      ph = &mesh->htab.geom[ph->nxt];
+      ph = &hash->geom[ph->nxt];
       if ( ph->a == ia && ph->b == ib )  return;
     }
-    ph->nxt = mesh->htab.nxt;
-    ph      = &mesh->htab.geom[mesh->htab.nxt];
+    ph->nxt = hash->nxt;
+    ph      = &hash->geom[hash->nxt];
     ph->a   = ia;   ph->b   = ib;
     ph->ref = ref;  ph->tag = tag;
-    mesh->htab.nxt = ph->nxt;
+    hash->nxt = ph->nxt;
     ph->nxt = 0;
-    if ( mesh->htab.nxt >= mesh->htab.max ) {
+    if ( hash->nxt >= hash->max ) {
       if ( mesh->info.ddebug )
-        fprintf(stdout,"  ## Memory alloc problem (edge): %d\n",mesh->htab.max);
-      _MMG5_TAB_RECALLOC(mesh,mesh->htab.geom,mesh->htab.max,0.2,MMG5_hgeom,
+        fprintf(stdout,"  ## Memory alloc problem (edge): %d\n",hash->max);
+      _MMG5_TAB_RECALLOC(mesh,hash->geom,hash->max,0.2,MMG5_hgeom,
                          "larger htab table",
                          fprintf(stderr,"  Exit program.\n");
                          exit(EXIT_FAILURE));
-      for (j=mesh->htab.nxt; j<mesh->htab.max; j++)  mesh->htab.geom[j].nxt = j+1;
+      for (j=hash->nxt; j<hash->max; j++)  hash->geom[j].nxt = j+1;
     }
     return;
   }
@@ -1018,21 +1022,25 @@ void _MMG5_hEdge(MMG5_pMesh mesh,int a,int b,int ref,int16_t tag) {
 }
 
 /** to store edge on geometry */
-int _MMG5_hNew(MMG5_HGeom *hash,int hsiz,int hmax,int secure) {
+int _MMG5_hNew(MMG5_pMesh mesh,MMG5_HGeom *hash,int hsiz,int hmax,int secure) {
   int   k;
 
   /* adjust hash table params */
-  hash->geom = (MMG5_hgeom*)calloc(hmax+2,sizeof(MMG5_hgeom));
+  hash->siz  = hsiz + 1;
+  hash->max  = hmax + 2;
+  hash->nxt  = hash->siz;
+
+  _MMG5_ADD_MEM(mesh,(hash->max+1)*sizeof(MMG5_hgeom),"Edge hash table",return(0));
+  hash->geom = (MMG5_hgeom*)calloc(hash->max+1,sizeof(MMG5_hgeom));
+
   if ( !hash->geom ) {
     perror("  ## Memory problem: calloc");
     if ( !secure )  return(0);
     else  exit(EXIT_FAILURE);
   }
-  hash->siz  = hsiz;
-  hash->max  = hmax + 1;
-  hash->nxt  = hsiz;
-  for (k=hsiz; k<hash->max; k++)
+  for (k=hash->siz; k<hash->max; k++)
     hash->geom[k].nxt = k+1;
+
   return 1;
 }
 
@@ -1055,8 +1063,7 @@ int _MMG5_hGeom(MMG5_pMesh mesh) {
   if ( mesh->na ) {
     if ( !mesh->htab.geom ) {
       mesh->namax = MG_MAX(1.5*mesh->na,_MMG3D_NAMAX);
-      _MMG5_ADD_MEM(mesh,(3*mesh->namax+2)*sizeof(MMG5_hgeom),"htab",return(0));
-      _MMG5_hNew(&mesh->htab,mesh->na,3*mesh->namax,1);
+      _MMG5_hNew(mesh,&mesh->htab,mesh->na,3*mesh->namax,1);
     }
     else {
       if ( abs(mesh->info.imprim) > 3 || mesh->info.ddebug ) {
@@ -1071,7 +1078,7 @@ int _MMG5_hGeom(MMG5_pMesh mesh) {
     /* store initial edges */
     for (k=1; k<=mesh->na; k++) {
       pa = &mesh->edge[k];
-      _MMG5_hEdge(mesh,pa->a,pa->b,pa->ref,pa->tag);
+      _MMG5_hEdge(mesh,&mesh->htab,pa->a,pa->b,pa->ref,pa->tag);
     }
 
     /* now check triangles */
@@ -1125,8 +1132,7 @@ int _MMG5_hGeom(MMG5_pMesh mesh) {
       _MMG5_DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(MMG5_hgeom));
 
     mesh->namax = MG_MAX(1.5*mesh->na,_MMG3D_NAMAX);
-    _MMG5_ADD_MEM(mesh,(3*mesh->namax+2)*sizeof(MMG5_hgeom),"htab",return(0));
-    _MMG5_hNew(&mesh->htab,mesh->na,3*mesh->namax,1);
+    _MMG5_hNew(mesh,&mesh->htab,mesh->na,3*mesh->namax,1);
     mesh->na = 0;
 
     /* build hash for edges */
@@ -1142,10 +1148,10 @@ int _MMG5_hGeom(MMG5_pMesh mesh) {
             if ( mesh->info.iso )
               pt->edg[i] = ( pt->edg[i] != 0 ) ?  -abs(pt->edg[i]) : MG_ISO;
           }
-          _MMG5_hEdge(mesh,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]);
+          _MMG5_hEdge(mesh,&mesh->htab,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]);
         }
          else if ( k < kk && ( pt->edg[i] || pt->tag[i] ) )
-          _MMG5_hEdge(mesh,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]);
+          _MMG5_hEdge(mesh,&mesh->htab,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]);
       }
     }
     /* now check triangles */
