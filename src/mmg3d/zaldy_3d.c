@@ -188,17 +188,19 @@ void _MMG3D_memOption(MMG5_pMesh mesh) {
        (mesh->npmax < mesh->np || mesh->ntmax < mesh->nt || mesh->nemax < mesh->ne)) {
       memtmp = (mesh->np * bytes + reservedMem)/million;
       memtmp = MG_MAX(memtmp, (mesh->nt*bytes/ctri + reservedMem)/million );
-      memtmp = MG_MAX(memtmp, (mesh->ne*bytes/6* + reservedMem)/million );
+      memtmp = MG_MAX(memtmp, (mesh->ne*bytes/6 + reservedMem)/million );
       mesh->memMax = memtmp+1;
       fprintf(stderr,"  ## ERROR: asking for %d Mo of memory ",mesh->info.mem);
-      fprintf(stderr,"is not enough to load mesh. You need to ask %d Mo minimum\n",
-              (int)mesh->memMax);
+      fprintf(stderr,"is not enough to load mesh. You need to ask %ld Mo minimum\n",
+              _MMG5_safeLL2LCast(mesh->memMax));
+      return;
     }
     if(mesh->info.mem*million < reservedMem) {
       mesh->memMax = reservedMem;
       fprintf(stderr,"  ## ERROR: asking for %d Mo of memory ",mesh->info.mem);
-      fprintf(stderr,"is not enough to load mesh. You need to ask %d Mo minimum\n",
-              (int)(mesh->memMax/million));
+      fprintf(stderr,"is not enough to load mesh. You need to ask %ld Mo minimum\n",
+              _MMG5_safeLL2LCast(mesh->memMax/million));
+      return;
     }
   }
 
