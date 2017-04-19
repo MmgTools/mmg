@@ -197,7 +197,7 @@ int _MMG3D_bdryBuild(MMG5_pMesh mesh) {
           if ( mesh->xtetra[pt->xt].edg[i] ||
                ( mesh->xtetra[pt->xt].tag[i] & MG_REQ ||
                  MG_EDG(mesh->xtetra[pt->xt].tag[i])) )
-            _MMG5_hEdge(mesh,pt->v[_MMG5_iare[i][0]],pt->v[_MMG5_iare[i][1]],
+            _MMG5_hEdge(mesh,&mesh->htab,pt->v[_MMG5_iare[i][0]],pt->v[_MMG5_iare[i][1]],
                         mesh->xtetra[pt->xt].edg[i],mesh->xtetra[pt->xt].tag[i]);
         }
       }
