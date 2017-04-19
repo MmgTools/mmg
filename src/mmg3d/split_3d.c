@@ -4248,6 +4248,7 @@ int _MMG5_splitedg(MMG5_pMesh mesh, MMG5_pSol met,int iel, int iar, double crit)
   MMG5_pPoint  p0,p1;
   double       o[3];
   int          list[MMG3D_LMAX+2],i0,i1,ip,warn,lon,ier;
+  int16_t      tag;
 
   warn = 0;
   pt = &mesh->tetra[iel];

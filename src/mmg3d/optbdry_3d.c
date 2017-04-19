@@ -217,8 +217,8 @@ int MMG3D_optbdry(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree,int k) {
   MMG5_pTetra  pt;
   MMG5_pxTetra pxt;
   double       lint,lbdy,len,lmin,lmax;
-  int          iadr,imin,imax;
-  int          iq,ib,i,j,*adja,ipb,list[MMG3D_LMAX+2];
+  int          imin,imax;
+  int          iq,ib,i,j,ipb,list[MMG3D_LMAX+2];
   int          iedg,ier,ilist,i1,ied,ia,it1,it2,ret,imove;
   char         iface,ief;
 
@@ -226,10 +226,11 @@ int MMG3D_optbdry(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree,int k) {
 
   pt = &mesh->tetra[k];
   assert(pt->xt);
-  iadr = 4*(k-1) + 1;
-  adja = &mesh->adja[iadr];
 
-  for(i=0 ; i<4 ; i++) if(!adja[i]) break;
+  pxt = &mesh->xtetra[pt->xt];
+
+  for(i=0 ; i<4 ; i++)
+    if ( pxt->ftag[i] & MG_BDY ) break;
 
   ib  = i;
   ipb = pt->v[ib];
@@ -312,11 +313,7 @@ int MMG3D_optbdry(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree,int k) {
       }
     }
     /*try to swap the bdry edges*/
-    if ( !pt->xt ) {printf("boum\n");exit(0);}
-
-    pxt = &mesh->xtetra[pt->xt];
     ier = 0;
-    assert( (pxt->ftag[i] & MG_BDY) );
     for (j=0; j<3; j++) {
       ia  = _MMG5_iarf[i][j];
 

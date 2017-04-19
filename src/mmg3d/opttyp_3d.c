@@ -484,8 +484,9 @@ int _MMG3D_splitalmostall(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,
  */
 int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
   MMG5_pTetra    pt;
+  MMG5_pxTetra   pxt;
   double         crit;
-  int            k,ityp,cs[10],ds[10],item[2],*adja,iadr;
+  int            k,ityp,cs[10],ds[10],item[2];
   int            ier,i,nd,ne,npeau;
   int            it,maxit,ntot;
 //  double         OCRIT = 1.01;
@@ -517,12 +518,14 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
       cs[ityp]++;
 
       /*tet with bdry faces*/
-      iadr = 4*(k-1) + 1;
-      adja = &mesh->adja[iadr];
+      pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
+
       /*optim bdry tetra*/
       npeau = 0;
-      for(i=0 ; i<4 ; i++) {
-        if(!adja[i]) npeau++;
+      if ( pxt ) {
+        for(i=0 ; i<4 ; i++) {
+          if ( pxt->ftag[i] & MG_BDY ) npeau++;
+        }
       }
       if(npeau>1) {
         if( 1 || mesh->info.imprim<-4 ) printf("%d faces de peau!!!! %d (typ %d) %e\n",npeau,k,ityp,pt->qual / _MMG3D_ALPHAD);
@@ -531,8 +534,7 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
         nbdy2++;
       }
       if(npeau) {
-        assert(pt->xt);
-        ier = MMG3D_optbdry(mesh,met,octree,k);
+        ier = 0;//MMG3D_optbdry(mesh,met,octree,k);
         if(ier) {
           nd++;
           ds[ityp]++;
@@ -561,7 +563,7 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
             /*   OCRIT *= 0.5; */
             /* } else */
             /*   OCRIT *= 0.75; */
-            ier = _MMG3D_splitItem(mesh,met,octree,k,item[0],1.01);
+            ier = 0;//_MMG3D_splitItem(mesh,met,octree,k,item[0],1.01);
             if(ddebug) printf("on split %d ?\n",ier);
 
             if(ier) {
@@ -571,7 +573,7 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
             }
           } /*end noinsert*/
 
-          ier = _MMG3D_swpalmostall(mesh,met,octree,k,item[0]);
+          ier = 0;//_MMG3D_swpalmostall(mesh,met,octree,k,item[0]);
           if(ddebug) printf("on swp2 %d ?\n",ier);
 
           if(ier > 0) {
@@ -579,7 +581,7 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
             ds[ityp]++;
             break;
           }
-          ier = _MMG3D_splitalmostall(mesh,met,octree,k,item[0]);
+          ier = 0;// _MMG3D_splitalmostall(mesh,met,octree,k,item[0]);
           if(ddebug) printf("on split2 %d ?\n",ier);
 
           if(ier > 0) {
