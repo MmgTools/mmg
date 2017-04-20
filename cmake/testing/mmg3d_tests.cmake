@@ -104,9 +104,6 @@ IF ( LONG_TESTS )
     # Third: We refine some parts and unrefined others
     mmg3d_Various_refunref_Santa_met0.05_hausd0.001_ar90
     mmg3d_Various_refunref_Santa_met0.05_hausd0.0001_ar90
-    # 4: Refinment on a solution
-    mmg3d_Various_adpsol_hgrad1_M6Mach_Eps0.001_hmin0.001_hmax2
-    mmg3d_Various_adpsol_hgrad1_M6Mach_Eps0.0005_hmin0.0001_hmax3
     # 5: MultiDomain
     mmg3d_MultiDom_Cube
     mmg3d_MultiDom_Ellipse
@@ -157,9 +154,6 @@ IF ( LONG_TESTS )
     ### Santa
     ${MMG3D_CI_TESTS}/Various_refunref_Santa_met0.05_hausd0.001_ar90/santa
     ${MMG3D_CI_TESTS}/Various_refunref_Santa_met0.05_hausd0.0001_ar90/santa
-    ### M6
-    ${MMG3D_CI_TESTS}/Various_adpsol_hgrad1_M6Mach_Eps0.001_hmin0.001_hmax2/M6
-    ${MMG3D_CI_TESTS}/Various_adpsol_hgrad1_M6Mach_Eps0.0005_hmin0.0001_hmax3/M6
     ### MultiDomain
     ${MMG3D_CI_TESTS}/MultiDom_Cube/c
     ${MMG3D_CI_TESTS}/MultiDom_Ellipse/c.d
@@ -209,9 +203,6 @@ IF ( LONG_TESTS )
     ### Santa
     "-v 5 -hausd 0.001 -ar 90"
     "-v 5 -hausd 0.0001 -ar 90"
-    ### M6
-    "-v 5 -sol ${MMG3D_CI_TESTS}/Various_adpsol_hgrad1_M6Mach_Eps0.001_hmin0.001_hmax2/metM6.sol -hausd 0.1 -ar 60"
-    "-v 5 -sol ${MMG3D_CI_TESTS}/Various_adpsol_hgrad1_M6Mach_Eps0.0005_hmin0.0001_hmax3/metM6.sol -hausd 0.1 -ar 60"
     ### MultiDomain
     "-v 5 -hmax 0.02"
     "-v 5 -hausd 0.0003"
@@ -222,6 +213,69 @@ IF ( LONG_TESTS )
 ENDIF ( )
 
 ADD_RUN_AGAIN_TESTS ( ${EXECUT_MMG3D} "${test_names}" "${args}" "${input_files}" )
+
+### M6
+SET ( test_name
+    # 4: Refinment on a solution
+    mmg3d_Various_adpsol_hgrad1_M6Mach_Eps0.001_hmin0.001_hmax2
+    )
+SET ( input_file
+    ${MMG3D_CI_TESTS}/Various_adpsol_hgrad1_M6Mach_Eps0.001_hmin0.001_hmax2/M6
+    )
+
+ADD_TEST(NAME ${test_name}
+  COMMAND ${EXECUT_MMG3D}
+  ### M6
+  "-v 5 -sol ${MMG3D_CI_TESTS}/Various_adpsol_hgrad1_M6Mach_Eps0.001_hmin0.001_hmax2/metM6.sol -hausd 0.1 -ar 60"
+  -out ${CTEST_OUTPUT_DIR}/${test_name}-out.o.meshb )
+
+SET_TESTS_PROPERTIES ( ${test_name}
+  PROPERTIES FIXTURES_SETUP ${test_name} )
+
+IF ( RUN_AGAIN )
+  ADD_TEST(NAME ${test_name}_2
+    COMMAND ${EXECUT_MMG3D}
+    "-v 5 -hausd 0.1 -ar 60"
+    ${CTEST_OUTPUT_DIR}/${test_name}-out.o.meshb
+    -out ${CTEST_OUTPUT_DIR}/${test_name}_2-out.o.meshb
+    )
+
+  SET_TESTS_PROPERTIES ( ${test_name}_2
+    PROPERTIES FIXTURES_REQUIRED ${test_name} )
+
+ENDIF ( )
+
+SET ( test_name
+    # 4: Refinment on a solution
+    mmg3d_Various_adpsol_hgrad1_M6Mach_Eps0.0005_hmin0.0001_hmax3
+    )
+SET ( input_file
+    ${MMG3D_CI_TESTS}/Various_adpsol_hgrad1_M6Mach_Eps0.0005_hmin0.0001_hmax3/M6
+    )
+
+ADD_TEST(NAME ${test_name}
+  COMMAND ${EXECUT_MMG3D}
+  ### M6
+  "-v 5 -sol ${MMG3D_CI_TESTS}/Various_adpsol_hgrad1_M6Mach_Eps0.0005_hmin0.0001_hmax3/metM6.sol -hausd 0.1 -ar 60"
+  -out ${CTEST_OUTPUT_DIR}/${test_name}-out.o.meshb )
+
+SET_TESTS_PROPERTIES ( ${test_name}
+  PROPERTIES FIXTURES_SETUP ${test_name} )
+
+IF ( RUN_AGAIN )
+  ADD_TEST(NAME ${test_name}_2
+    COMMAND ${EXECUT_MMG3D}
+  "-v 5 -hausd 0.1 -ar 60"
+    ${CTEST_OUTPUT_DIR}/${test_name}-out.o.meshb
+    -out ${CTEST_OUTPUT_DIR}/${test_name}_2-out.o.meshb
+    )
+
+  SET_TESTS_PROPERTIES ( ${test_name}_2
+    PROPERTIES FIXTURES_REQUIRED ${test_name} )
+
+ENDIF ( )
+
+
 
 
 ###############################################################################
