@@ -43,7 +43,7 @@ int _MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
                      char iedg,int *list,int ilist,char typchk) {
   MMG5_pTetra   pt,pt0;
   MMG5_pPoint   p0;
-  double   calold,calnew,caltmp,lon,ll;
+  double   calold,calnew,caltmp,ll;
   int      j,iel,nq,nr;
   char     i,jj,ip,iq;
 
@@ -53,15 +53,6 @@ int _MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
   pt0 = &mesh->tetra[0];
   nq  = pt->v[iq];
 
-  lon = 1.e20;
-  if ( typchk == 2 && met->m ) {
-    lon = _MMG5_lenedg(mesh,met,_MMG5_iarf[iface][iedg],pt);
-
-    if ( !lon ) return(0);
-
-    lon = MG_MIN(lon,_MMG3D_LSHRT);
-    lon = MG_MAX(1.0/lon,_MMG3D_LLONG);
-  }
   calold = calnew = DBL_MAX;
   for (j=0; j<ilist; j++) {
     iel = list[j] / 4;
@@ -116,7 +107,7 @@ int _MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
          * the modified edges of pt0 are boundaries): for a more precise
          * computation, we need to update the edge tags of pt0.  */
         ll = _MMG5_lenedgspl(mesh,met,jj,pt0);
-        if ( (!ll) || (ll > lon) )
+        if ( (!ll) || (ll > _MMG3D_LOPTL) )
           return(0);
       }
     }
