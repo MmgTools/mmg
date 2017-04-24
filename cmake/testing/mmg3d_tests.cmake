@@ -226,6 +226,7 @@ SET ( input_file
 ADD_TEST(NAME ${test_name}
   COMMAND ${EXECUT_MMG3D}
   ### M6
+  ${input_file}}
   "-v 5 -sol ${MMG3D_CI_TESTS}/Various_adpsol_hgrad1_M6Mach_Eps0.001_hmin0.001_hmax2/metM6.sol -hausd 0.1 -ar 60"
   -out ${CTEST_OUTPUT_DIR}/${test_name}-out.o.meshb )
 
@@ -255,6 +256,7 @@ SET ( input_file
 
 ADD_TEST(NAME ${test_name}
   COMMAND ${EXECUT_MMG3D}
+  ${input_file}
   ### M6
   "-v 5 -sol ${MMG3D_CI_TESTS}/Various_adpsol_hgrad1_M6Mach_Eps0.0005_hmin0.0001_hmax3/metM6.sol -hausd 0.1 -ar 60"
   -out ${CTEST_OUTPUT_DIR}/${test_name}-out.o.meshb )
