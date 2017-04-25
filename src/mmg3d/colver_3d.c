@@ -1106,7 +1106,7 @@ int _MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,cha
         }
       }
     }
-    _MMG3D_delElt(mesh,iel);
+    if ( !_MMG3D_delElt(mesh,iel) ) return -1;
   }
 
   /* Update vertices coordinates for elements that do not belong to the shell of (pq) */

@@ -42,10 +42,12 @@ extern char  ddb;
 /**
  * \param mesh pointer toward the mesh structure.
  *
+ * \return 1 if success, 0 if fail
+ *
  * tetra packing.
  *
  */
-static void
+static int
 _MMG5_paktet(MMG5_pMesh mesh) {
   MMG5_pTetra   pt,pt1;
   int      k;
@@ -57,7 +59,7 @@ _MMG5_paktet(MMG5_pMesh mesh) {
       pt1 = &mesh->tetra[mesh->ne];
       assert(MG_EOK(pt1));
       memcpy(pt,pt1,sizeof(MMG5_Tetra));
-      _MMG3D_delElt(mesh,mesh->ne);
+      if ( !_MMG3D_delElt(mesh,mesh->ne) )  return 0;
     }
   }
   while ( ++k < mesh->ne );
@@ -74,6 +76,7 @@ _MMG5_paktet(MMG5_pMesh mesh) {
       mesh->tetra[k].v[3] = k+1;
     }
   }
+  return 1;
 }
 
 /**
@@ -194,7 +197,9 @@ int MMG3D_hashTetra(MMG5_pMesh mesh, int pack) {
     fprintf(stdout,"  ** SETTING STRUCTURE\n");
 
   /* packing : if not hash does not work */
-  if ( pack )  _MMG5_paktet(mesh);
+  if ( pack )  {
+    if ( ! _MMG5_paktet(mesh) ) return 0;
+  }
 
   /* memory alloc */
   _MMG5_ADD_MEM(mesh,(4*mesh->nemax+5)*sizeof(int),"adjacency table",

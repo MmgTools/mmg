@@ -173,7 +173,6 @@ int _MMG3D_coledges(MMG5_pMesh mesh,MMG5_pSol met,int k,int i) {
         else if(ier) {
           _MMG3D_delPt(mesh,ier);
           //printf("del succeed\n");
-          //exit(0);
           return(1);
         }
       }

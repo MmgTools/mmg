@@ -67,14 +67,12 @@ int _MMG5_movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,
   ppt0   = &mesh->point[0];
   memset(ppt0,0,sizeof(MMG5_Point));
 
-  iel = list[0] / 4;
-  i0  = list[0] % 4;
-
   /* Coordinates of optimal point */
   calold = DBL_MAX;
   totvol = 0.0;
   for (k=0; k<ilist; k++) {
     iel = list[k] / 4;
+    i0  = list[k] % 4;
     pt = &mesh->tetra[iel];
     p0 = &mesh->point[pt->v[0]];
     p1 = &mesh->point[pt->v[1]];
@@ -112,6 +110,24 @@ int _MMG5_movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,
       return(0);
     }
     calnew = MG_MIN(calnew,callist[k]);
+
+    if ( improve==2 ) {
+      double len1,len2;
+      for (int iloc = 0; iloc < 3; ++iloc ) {
+        len1 =  _MMG5_lenedg_iso(mesh,met,_MMG5_arpt[i0][iloc],pt);
+        len2 =  _MMG5_lenedg_iso(mesh,met,_MMG5_arpt[i0][iloc],pt0);
+        if ( (len1 < _MMG3D_LOPTL && len2 >= _MMG3D_LOPTL) || (len1 > _MMG3D_LOPTL && len2 >len1 ) ) {
+          //puts ( "rejected long \n" );
+          return 0;
+        }
+
+       if ( (len1 > _MMG3D_LOPTS && len2 <= _MMG3D_LOPTS) || (len1 < _MMG3D_LOPTS && len2 <len1 ) ) {
+           //puts ( "rejected small \n" );
+          return 0;
+        }
+      }
+    }
+
   }
   if (calold < _MMG5_EPSOK && calnew <= calold) {
     _MMG5_SAFE_FREE(callist);
@@ -340,7 +356,7 @@ int _MMG5_movintptLES_iso(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,
  * \param ilists size of the surfacic ball.
  * \param improve force the new minimum element quality to be greater or equal
  * than 1.02 of the old minimum element quality.
- * \return 0 if fail, 1 if success.
+ * \return 0 if we can not move, 1 if success, -1 if fail.
  *
  * Move boundary regular point, whose volumic and surfacic balls are passed.
  *
@@ -554,7 +570,7 @@ int _MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
   if(!_MMG5_bezierCP(mesh,&tt,&b,MG_GET(pxt->ori,iface))){
     fprintf(stderr,"%s:%d: Error: function _MMG5_bezierCP return 0\n",
             __FILE__,__LINE__);
-    exit(EXIT_FAILURE);
+    return -1;
   }
 
   /* Now, for Bezier interpolation, one should identify which of i,i1,i2 is 0,1,2
@@ -620,7 +636,7 @@ int _MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
   if(!_MMG3D_bezierInt(&b,uv,o,no,to)){
     fprintf(stderr,"%s:%d: Error: function _MMG3D_bezierInt return 0\n",
             __FILE__,__LINE__);
-    exit(EXIT_FAILURE);
+    return -1;
   }
 
   /* Test : make sure that geometric approximation has not been degraded too much */

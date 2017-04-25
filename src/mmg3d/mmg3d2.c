@@ -108,8 +108,8 @@ _MMG5_ismaniball(MMG5_pMesh mesh,MMG5_pSol sol,int k,int indp) {
     if ( sol->m[pt->v[ip]]-mesh->info.ls != 0.0 )  break;
   }
   if ( j == 3) {
-    fprintf(stderr,"  *** Problem in function _MMG5_ismaniball : tetra %d : 4 null values",k);
-    exit(EXIT_FAILURE);
+    fprintf(stdout,"  *** Problem in function _MMG5_ismaniball : tetra %d : 4 null values",k);
+    return 0;
   }
 
   v = sol->m[pt->v[ip]]-mesh->info.ls;
@@ -371,7 +371,7 @@ static int _MMG3D_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol,double *tmp) {
       }
     }
   }
-  
+
   if ( (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) && ns+nc > 0 )
     fprintf(stdout,"     %8d points snapped, %d corrected\n",ns,nc);
 
@@ -630,8 +630,17 @@ static int _MMG3D_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol) {
   return(1);
 }
 
-/** Check whether implicit surface is orientable in ball of point ip in tet iel ;
-    Beware : may return 0 when implicit boundary is tangent to outer boundary */
+/**
+ * \param mesh pointer toward the mesh
+ * \param start index of the starting tetra
+ * \param ip point index
+ *
+ * \return 1 if success, 0 if fail
+ *
+ * Check whether implicit surface is orientable in ball of point ip in tet iel ;
+ * Beware : may return 0 when implicit boundary is tangent to outer boundary
+ *
+ */
 int _MMG5_chkmaniball(MMG5_pMesh mesh, int start, char ip){
   MMG5_pTetra    pt,pt1;
   int       ref,base,ilist,nump,k,cur,k1,nref;
@@ -796,8 +805,16 @@ int _MMG5_chkmani(MMG5_pMesh mesh){
   return(1);
 }
 
-/** Check whether implicit surface enclosed in volume is orientable (perform an additionnal
-    test w.r.t. _MMG5_chkmani) */
+/**
+ * \param mesh pointer toward the mesh structure
+ * \param sol pointer toward the metric
+ *
+ * \return 1 if success, 0 otherwise.
+ *
+ * Check whether implicit surface enclosed in volume is orientable (perform an
+ * additionnal test w.r.t. _MMG5_chkmani)
+ *
+ */
 int _MMG5_chkmani2(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTetra    pt,pt1;
   int       k,iel;
@@ -819,7 +836,7 @@ int _MMG5_chkmani2(MMG5_pMesh mesh,MMG5_pSol sol) {
     }
     if(cnt == 4) {
       fprintf(stderr,"Problem in tetra %d : 4 vertices on implicit boundary",k);
-      exit(EXIT_FAILURE);
+      return 0;
     }
   }
 
@@ -840,7 +857,7 @@ int _MMG5_chkmani2(MMG5_pMesh mesh,MMG5_pSol sol) {
 
         if(!_MMG5_chkmaniball(mesh,k,ip)){
           fprintf(stderr,"Non orientable implicit surface : ball of point %d\n",pt->v[ip]);
-          exit(EXIT_FAILURE);
+          return 0;
         }
       }
     }
@@ -1414,7 +1431,7 @@ int _MMG3D_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   _MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(double),"temporary table",
                 fprintf(stderr,"  Exit program.\n");
-                exit(EXIT_FAILURE));
+                return 0);
   _MMG5_SAFE_CALLOC(tmp,mesh->npmax+1,double);
 
   /* Snap values of level set function if need be, then discretize it */

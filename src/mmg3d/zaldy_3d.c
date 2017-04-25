@@ -105,15 +105,23 @@ int _MMG3D_newElt(MMG5_pMesh mesh) {
   return(curiel);
 }
 
-
-void _MMG3D_delElt(MMG5_pMesh mesh,int iel) {
+/**
+ * \param mesh pointer toward the mesh
+ * \param iel index of the element to delete
+ *
+ * \return 1 if success, 0 if fail
+ *
+ * Delete the element \a iel
+ *
+ */
+int _MMG3D_delElt(MMG5_pMesh mesh,int iel) {
   MMG5_pTetra   pt;
   int      iadr;
 
   pt = &mesh->tetra[iel];
   if ( !MG_EOK(pt) ) {
     fprintf(stderr,"  ## INVALID ELEMENT %d.\n",iel);
-    exit(EXIT_FAILURE);
+    return(0);
   }
   memset(pt,0,sizeof(MMG5_Tetra));
   pt->v[3] = mesh->nenil;
@@ -124,6 +132,7 @@ void _MMG3D_delElt(MMG5_pMesh mesh,int iel) {
   if ( iel == mesh->ne ) {
     while ( !MG_EOK((&mesh->tetra[mesh->ne])) )  mesh->ne--;
   }
+  return 1;
 }
 
 /** memory repartition for the -m option */
@@ -217,7 +226,14 @@ void _MMG3D_memOption(MMG5_pMesh mesh) {
   return;
 }
 
-/** allocate main structure */
+/**
+ * \param mesh pointer toward the mesh
+ *
+ * \return 1 if success, 0 if fail
+ *
+ * allocate main structure
+ *
+ */
 int _MMG3D_zaldy(MMG5_pMesh mesh) {
   int     k;
 
@@ -225,12 +241,12 @@ int _MMG3D_zaldy(MMG5_pMesh mesh) {
 
   _MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(MMG5_Point),"initial vertices",
                 fprintf(stderr,"  Exit program.\n");
-                exit(EXIT_FAILURE));
+                return 0);
   _MMG5_SAFE_CALLOC(mesh->point,mesh->npmax+1,MMG5_Point);
 
   _MMG5_ADD_MEM(mesh,(mesh->nemax+1)*sizeof(MMG5_Tetra),"initial tetrahedra",
                 fprintf(stderr,"  Exit program.\n");
-                exit(EXIT_FAILURE));
+                return 0);
   _MMG5_SAFE_CALLOC(mesh->tetra,mesh->nemax+1,MMG5_Tetra);
 
   if ( mesh->nt ) {

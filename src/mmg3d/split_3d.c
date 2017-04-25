@@ -129,10 +129,12 @@ int _MMG3D_split1_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
  * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
  * \param metRidTyp metric storage (classic or special)
  *
+ * \return 0 if fail, 1 otherwise
+ *
  * Split 1 edge of tetra \a k.
  *
  */
-void _MMG5_split1(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
+int _MMG5_split1(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
   MMG5_pTetra   pt,pt1;
   MMG5_xTetra   xt,xt1;
   MMG5_pxTetra  pxt0;
@@ -148,7 +150,7 @@ void _MMG5_split1(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) 
                         fprintf(stderr,"  ## Error: unable to allocate a new element.\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
                         fprintf(stderr,"  Exit program.\n");
-                        exit(EXIT_FAILURE));
+                        return 0);
     pt = &mesh->tetra[k];
   }
 
@@ -233,7 +235,7 @@ nextstep1:
                            "larger xtetra table",
                            mesh->xt--;
                            fprintf(stderr,"  Exit program.\n");
-                           exit(EXIT_FAILURE));
+                           return 0);
         pxt0 = &mesh->xtetra[pt->xt];
       }
       pt1->xt = mesh->xt;
@@ -256,6 +258,7 @@ nextstep1:
     pt->qual=_MMG5_orcal(mesh,met,k);
     pt1->qual=_MMG5_orcal(mesh,met,iel);
   }
+  return 1;
 }
 /**
  * \param mesh  pointer toward the mesh structure
@@ -661,7 +664,7 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
                           _MMG5_INCREASE_MEM_MESSAGE();
                           k--;
                           for ( ; k>=0 ; --k ) {
-                            _MMG3D_delElt(mesh,abs(newtet[k]));
+                            if ( !_MMG3D_delElt(mesh,abs(newtet[k])) ) return -1;
                           }
                           return(-1));
       pt  = &mesh->tetra[iel];
@@ -1205,8 +1208,19 @@ int _MMG5_split2sf_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]){
   return(1);
 }
 
-/** Split of two edges that belong to a common face : 1 tetra becomes 3 */
-void _MMG5_split2sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp){
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param k index of element to split.
+ * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
+ * \param metRidTyp metric storage (classic or special)
+ *
+ * \return 0 if fail, 1 otherwise
+ *
+ * Split of two edges that belong to a common face : 1 tetra becomes 3
+ *
+ */
+int _MMG5_split2sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp){
   MMG5_pTetra        pt[3];
   MMG5_xTetra        xt[3];
   MMG5_pxTetra       pxt0;
@@ -1226,7 +1240,7 @@ void _MMG5_split2sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp
                         fprintf(stderr,"  ## Error: unable to allocate a new element.\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
                         fprintf(stderr,"  Exit program.\n");
-                        exit(EXIT_FAILURE));
+                        return 0);
     pt[0] = &mesh->tetra[newtet[0]];
   }
   pt[1] = &mesh->tetra[iel];
@@ -1239,7 +1253,7 @@ void _MMG5_split2sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp
                         fprintf(stderr,"  ## Error: unable to allocate a new element.\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
                         fprintf(stderr,"  Exit program.\n");
-                        exit(EXIT_FAILURE));
+                        return 0);
     pt[0] = &mesh->tetra[newtet[0]];
     pt[1] = &mesh->tetra[newtet[1]];
   }
@@ -1371,7 +1385,7 @@ void _MMG5_split2sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp
                                "larger xtetra table",
                                mesh->xt--;
                                fprintf(stderr,"  Exit program.\n");
-                               exit(EXIT_FAILURE));
+                               return 0);
           }
           pt[i]->xt = mesh->xt;
           pxt0 = &mesh->xtetra[mesh->xt];
@@ -1398,7 +1412,7 @@ void _MMG5_split2sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp
                                  "larger xtetra table",
                                  mesh->xt--;
                                  fprintf(stderr,"  Exit program.\n");
-                                 exit(EXIT_FAILURE));
+                                 return 0);
             }
             pt[i]->xt = mesh->xt;
             pxt0 = &mesh->xtetra[mesh->xt];
@@ -1421,11 +1435,22 @@ void _MMG5_split2sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp
     pt[1]->qual=_MMG5_orcal(mesh,met,newtet[1]);
     pt[2]->qual=_MMG5_orcal(mesh,met,newtet[2]);
   }
-
+  return 1;
 }
 
-/** Split of two OPPOSITE edges */
-void _MMG5_split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param k index of element to split.
+ * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
+ * \param metRidTyp metric storage (classic or special)
+ *
+ * \return 0 if fail, 1 otherwise
+ *
+ * Split of two OPPOSITE edges
+ *
+ */
+int _MMG5_split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
   MMG5_pTetra   pt[4];
   MMG5_xTetra   xt[4];
   MMG5_pxTetra  pxt0;
@@ -1445,7 +1470,7 @@ void _MMG5_split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) 
                         fprintf(stderr,"  ## Error: unable to allocate a new element.\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
                         fprintf(stderr,"  Exit program.\n");
-                        exit(EXIT_FAILURE));
+                        return 0);
     pt[0] = &mesh->tetra[newtet[0]];
   }
   pt[1] = &mesh->tetra[iel];
@@ -1458,7 +1483,7 @@ void _MMG5_split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) 
                         fprintf(stderr,"  ## Error: unable to allocate a new element.\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
                         fprintf(stderr,"  Exit program.\n");
-                        exit(EXIT_FAILURE));
+                        return 0);
     pt[0] = &mesh->tetra[newtet[0]];
     pt[1] = &mesh->tetra[newtet[1]];
   }
@@ -1472,7 +1497,7 @@ void _MMG5_split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) 
                         fprintf(stderr,"  ## Error: unable to allocate a new element.\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
                         fprintf(stderr,"  Exit program.\n");
-                        exit(EXIT_FAILURE));
+                        return 0);
     pt[0] = &mesh->tetra[newtet[0]];
     pt[1] = &mesh->tetra[newtet[1]];
     pt[2] = &mesh->tetra[newtet[2]];
@@ -1564,7 +1589,7 @@ void _MMG5_split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) 
                                "larger xtetra table",
                                mesh->xt--;
                                fprintf(stderr,"  Exit program.\n");
-                               exit(EXIT_FAILURE));
+                               return 0);
           }
           pt[i]->xt = mesh->xt;
           pxt0 = &mesh->xtetra[mesh->xt];
@@ -1593,7 +1618,7 @@ void _MMG5_split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) 
                                  "larger xtetra table",
                                  mesh->xt--;
                                  fprintf(stderr,"  Exit program.\n");
-                                 exit(EXIT_FAILURE));
+                                 return 0);
             }
             pt[i]->xt = mesh->xt;
             pxt0 = &mesh->xtetra[mesh->xt];
@@ -1620,7 +1645,7 @@ void _MMG5_split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) 
     pt[2]->qual=_MMG5_orcal(mesh,met,newtet[2]);
     pt[3]->qual=_MMG5_orcal(mesh,met,newtet[3]);
   }
-
+  return 1;
 }
 
 /** Simulate split of 1 face (3 edges) */
@@ -1682,8 +1707,19 @@ int _MMG3D_split3_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
   return(1);
 }
 
-/** 1 face (3 edges) subdivided */
-void _MMG5_split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param k index of element to split.
+ * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
+ * \param metRidTyp metric storage (classic or special)
+ *
+ * \return 0 if fail, 1 otherwise
+ *
+ * 1 face (3 edges) subdivided
+ *
+ */
+int _MMG5_split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
   MMG5_pTetra    pt[4];
   MMG5_xTetra    xt[4];
   MMG5_pxTetra   pxt0;
@@ -1704,7 +1740,7 @@ void _MMG5_split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) 
                         fprintf(stderr,"  ## Error: unable to allocate a new element.\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
                         fprintf(stderr,"  Exit program.\n");
-                        exit(EXIT_FAILURE));
+                        return 0);
     pt[0] = &mesh->tetra[newtet[0]];
   }
   pt[1] = &mesh->tetra[iel];
@@ -1717,7 +1753,7 @@ void _MMG5_split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) 
                         fprintf(stderr,"  ## Error: unable to allocate a new element.\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
                         fprintf(stderr,"  Exit program.\n");
-                        exit(EXIT_FAILURE));
+                        return 0);
     pt[0] = &mesh->tetra[newtet[0]];
     pt[1] = &mesh->tetra[newtet[1]];
   }
@@ -1731,7 +1767,7 @@ void _MMG5_split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) 
                         fprintf(stderr,"  ## Error: unable to allocate a new element.\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
                         fprintf(stderr,"  Exit program.\n");
-                        exit(EXIT_FAILURE));
+                        return 0);
     pt[0] = &mesh->tetra[newtet[0]];
     pt[1] = &mesh->tetra[newtet[1]];
     pt[2] = &mesh->tetra[newtet[2]];
@@ -1826,7 +1862,7 @@ void _MMG5_split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) 
                                "larger xtetra table",
                                mesh->xt--;
                                fprintf(stderr,"  Exit program.\n");
-                               exit(EXIT_FAILURE));
+                               return 0);
           }
           pt[i]->xt = mesh->xt;
           pxt0 = &mesh->xtetra[mesh->xt];
@@ -1853,7 +1889,7 @@ void _MMG5_split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) 
                                  "larger xtetra table",
                                  mesh->xt--;
                                  fprintf(stderr,"  Exit program.\n");
-                                 exit(EXIT_FAILURE));
+                                 return 0);
             }
             pt[i]->xt = mesh->xt;
             pxt0 = &mesh->xtetra[mesh->xt];
@@ -1877,10 +1913,22 @@ void _MMG5_split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) 
     pt[2]->qual=_MMG5_orcal(mesh,met,newtet[2]);
     pt[3]->qual=_MMG5_orcal(mesh,met,newtet[3]);
   }
+  return 1;
 }
 
-/** Split 3 edge in cone configuration */
-void _MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param k index of element to split.
+ * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
+ * \param metRidTyp metric storage (classic or special)
+ *
+ * \return 0 if fail, 1 otherwise
+ *
+ * Split 3 edge in cone configuration
+ *
+ */
+int _MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
   MMG5_pTetra    pt[4];
   MMG5_xTetra    xt[4];
   MMG5_pxTetra   pxt0;
@@ -1901,7 +1949,7 @@ void _MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidT
                         fprintf(stderr,"  ## Error: unable to allocate a new element.\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
                         fprintf(stderr,"  Exit program.\n");
-                        exit(EXIT_FAILURE));
+                        return 0);
     pt[0] = &mesh->tetra[newtet[0]];
   }
   pt[1] = &mesh->tetra[iel];
@@ -1914,7 +1962,7 @@ void _MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidT
                         fprintf(stderr,"  ## Error: unable to allocate a new element.\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
                         fprintf(stderr,"  Exit program.\n");
-                        exit(EXIT_FAILURE));
+                        return 0);
     pt[0] = &mesh->tetra[newtet[0]];
     pt[1] = &mesh->tetra[newtet[1]];
   }
@@ -1928,7 +1976,7 @@ void _MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidT
                         fprintf(stderr,"  ## Error: unable to allocate a new element.\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
                         fprintf(stderr,"  Exit program.\n");
-                        exit(EXIT_FAILURE));
+                        return 0);
     pt[0] = &mesh->tetra[newtet[0]];
     pt[1] = &mesh->tetra[newtet[1]];
     pt[2] = &mesh->tetra[newtet[2]];
@@ -2175,7 +2223,7 @@ void _MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidT
                                "larger xtetra table",
                                mesh->xt--;
                                fprintf(stderr,"  Exit program.\n");
-                               exit(EXIT_FAILURE));
+                               return 0);
           }
           pt[i]->xt = mesh->xt;
           pxt0 = &mesh->xtetra[mesh->xt];
@@ -2202,7 +2250,7 @@ void _MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidT
                                  "larger xtetra table",
                                  mesh->xt--;
                                  fprintf(stderr,"  Exit program.\n");
-                                 exit(EXIT_FAILURE));
+                                 return 0);
             }
             pt[i]->xt = mesh->xt;
             pxt0 = &mesh->xtetra[mesh->xt];
@@ -2226,10 +2274,22 @@ void _MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidT
     pt[2]->qual=_MMG5_orcal(mesh,met,newtet[2]);
     pt[3]->qual=_MMG5_orcal(mesh,met,newtet[3]);
   }
-
+  return 1;
 }
 
-void _MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],char metRidTyp){
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param k index of element to split.
+ * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
+ * \param metRidTyp metric storage (classic or special)
+ *
+ * \return 0 if fail, 1 otherwise
+ *
+ * Split 3 opposite edges in a tetra
+ *
+ */
+int _MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],char metRidTyp){
   MMG5_pTetra        pt[5];
   MMG5_xTetra        xt[5];
   MMG5_pxTetra       pxt0;
@@ -2386,7 +2446,7 @@ void _MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],char metRid
                         fprintf(stderr,"  ## Error: unable to allocate a new element.\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
                         fprintf(stderr,"  Exit program.\n");
-                        exit(EXIT_FAILURE));
+                        return 0);
     pt[0] = &mesh->tetra[newtet[0]];
   }
 
@@ -2400,7 +2460,7 @@ void _MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],char metRid
                         fprintf(stderr,"  ## Error: unable to allocate a new element.\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
                         fprintf(stderr,"  Exit program.\n");
-                        exit(EXIT_FAILURE));
+                        return 0);
     pt[0] = &mesh->tetra[newtet[0]];
     pt[1] = &mesh->tetra[newtet[1]];
   }
@@ -2414,7 +2474,7 @@ void _MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],char metRid
                         fprintf(stderr,"  ## Error: unable to allocate a new element.\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
                         fprintf(stderr,"  Exit program.\n");
-                        exit(EXIT_FAILURE));
+                        return 0);
     pt[0] = &mesh->tetra[newtet[0]];
     pt[1] = &mesh->tetra[newtet[1]];
     pt[2] = &mesh->tetra[newtet[2]];
@@ -2445,7 +2505,7 @@ void _MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],char metRid
                           fprintf(stderr,"  ## Error: unable to allocate a new element.\n");
                           _MMG5_INCREASE_MEM_MESSAGE();
                           fprintf(stderr,"  Exit program.\n");
-                          exit(EXIT_FAILURE));
+                          return 0);
       pt[0] = &mesh->tetra[newtet[0]];
       pt[1] = &mesh->tetra[newtet[1]];
       pt[2] = &mesh->tetra[newtet[2]];
@@ -2663,7 +2723,7 @@ void _MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],char metRid
                                  "larger xtetra table",
                                  mesh->xt--;
                                  fprintf(stderr,"  Exit program.\n");
-                                 exit(EXIT_FAILURE));
+                                 return 0);
             }
             pt[i]->xt = mesh->xt;
             pxt0 = &mesh->xtetra[mesh->xt];
@@ -2691,7 +2751,7 @@ void _MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],char metRid
                                    "larger xtetra table",
                                    mesh->xt--;
                                    fprintf(stderr,"  Exit program.\n");
-                                   exit(EXIT_FAILURE));
+                                   return 0);
               }
               pt[i]->xt = mesh->xt;
               pxt0 = &mesh->xtetra[mesh->xt];
@@ -2729,7 +2789,7 @@ void _MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],char metRid
                                  "larger xtetra table",
                                  mesh->xt--;
                                  fprintf(stderr,"  Exit program.\n");
-                                 exit(EXIT_FAILURE));
+                                 return 0);
             }
             pt[i]->xt = mesh->xt;
             pxt0 = &mesh->xtetra[mesh->xt];
@@ -2757,7 +2817,7 @@ void _MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],char metRid
                                    "larger xtetra table",
                                    mesh->xt--;
                                    fprintf(stderr,"  Exit program.\n");
-                                   exit(EXIT_FAILURE));
+                                   return 0);
               }
               pt[i]->xt = mesh->xt;
               pxt0 = &mesh->xtetra[mesh->xt];
@@ -2788,7 +2848,7 @@ void _MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],char metRid
       pt[4]->qual=_MMG5_orcal(mesh,met,newtet[4]);
     }
   }
-
+  return 1;
 }
 
 
@@ -2866,7 +2926,7 @@ int _MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k,char metRidTyp) {
                         fprintf(stderr,"  ## Error: unable to allocate a new element.\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
                         _MMG3D_delPt(mesh,ib);
-                        _MMG3D_delElt(mesh,newtet[1]);
+                        if ( !_MMG3D_delElt(mesh,newtet[1]) ) return 0;
                         return(0));
     pt[0] = &mesh->tetra[newtet[0]];
     pt[1] = &mesh->tetra[newtet[1]];
@@ -2881,8 +2941,8 @@ int _MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k,char metRidTyp) {
                         fprintf(stderr,"  ## Error: unable to allocate a new element.\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
                         _MMG3D_delPt(mesh,ib);
-                        _MMG3D_delElt(mesh,newtet[1]);
-                        _MMG3D_delElt(mesh,newtet[2]);
+                        if ( !_MMG3D_delElt(mesh,newtet[1]) ) return 0;
+                        if ( !_MMG3D_delElt(mesh,newtet[2]) ) return 0;
                         return(0));
     pt[0] = &mesh->tetra[newtet[0]];
     pt[1] = &mesh->tetra[newtet[1]];
@@ -3015,8 +3075,19 @@ int _MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k,char metRidTyp) {
   return(ib);
 }
 
-/** Split 4 edges in a configuration when 3 lie on the same face */
-void _MMG5_split4sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param k index of element to split.
+ * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
+ * \param metRidTyp metric storage (classic or special)
+ *
+ * \return 0 if fail, 1 otherwise
+ *
+ * Split 4 edges in a configuration when 3 lie on the same face
+ *
+ */
+int _MMG5_split4sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
   MMG5_pTetra    pt[6];
   MMG5_xTetra    xt[6];
   MMG5_pxTetra   pxt0;
@@ -3101,7 +3172,7 @@ void _MMG5_split4sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp
                           fprintf(stderr,"  ## Error: unable to allocate a new element.\n");
                           _MMG5_INCREASE_MEM_MESSAGE();
                           fprintf(stderr,"  Exit program.\n");
-                          exit(EXIT_FAILURE));
+                          return 0);
       for ( i=0; i<j; i++)
         pt[i] = &mesh->tetra[newtet[i]];
     }
@@ -3248,7 +3319,7 @@ void _MMG5_split4sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp
                                "larger xtetra table",
                                mesh->xt--;
                                fprintf(stderr,"  Exit program.\n");
-                               exit(EXIT_FAILURE));
+                               return 0);
           }
           pt[i]->xt = mesh->xt;
           pxt0 = &mesh->xtetra[mesh->xt];
@@ -3276,7 +3347,7 @@ void _MMG5_split4sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp
                                  "larger xtetra table",
                                  mesh->xt--;
                                  fprintf(stderr,"  Exit program.\n");
-                                 exit(EXIT_FAILURE));
+                                 return 0);
             }
             pt[i]->xt = mesh->xt;
             pxt0 = &mesh->xtetra[mesh->xt];
@@ -3298,10 +3369,22 @@ void _MMG5_split4sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp
       pt[i]->qual=_MMG5_orcal(mesh,met,newtet[i]);
     }
   }
+  return 1;
 }
 
-/** Split 4 edges in a configuration when no 3 edges lie on the same face */
-void _MMG5_split4op(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param k index of element to split.
+ * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
+ * \param metRidTyp metric storage (classic or special)
+ *
+ * \return 0 if fail, 1 otherwise
+ *
+ * Split 4 edges in a configuration when no 3 edges lie on the same face
+ *
+ */
+int _MMG5_split4op(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
   MMG5_pTetra        pt[6];
   MMG5_xTetra        xt[6];
   MMG5_pxTetra       pxt0;
@@ -3342,7 +3425,7 @@ void _MMG5_split4op(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp
                           fprintf(stderr,"  ## Error: unable to allocate a new element.\n");
                           _MMG5_INCREASE_MEM_MESSAGE();
                           fprintf(stderr,"  Exit program.\n");
-                          exit(EXIT_FAILURE));
+                          return 0);
       for ( i=0; i<j; i++)
         pt[i] = &mesh->tetra[newtet[i]];
     }
@@ -3505,7 +3588,7 @@ void _MMG5_split4op(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp
                                "larger xtetra table",
                                mesh->xt--;
                                fprintf(stderr,"  Exit program.\n");
-                               exit(EXIT_FAILURE));
+                               return 0);
           }
           pt[i]->xt = mesh->xt;
           pxt0 = &mesh->xtetra[mesh->xt];
@@ -3533,7 +3616,7 @@ void _MMG5_split4op(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp
                                  "larger xtetra table",
                                  mesh->xt--;
                                  fprintf(stderr,"  Exit program.\n");
-                                 exit(EXIT_FAILURE));
+                                 return 0);
             }
             pt[i]->xt = mesh->xt;
             pxt0 = &mesh->xtetra[mesh->xt];
@@ -3555,10 +3638,22 @@ void _MMG5_split4op(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp
       pt[i]->qual=_MMG5_orcal(mesh,met,newtet[i]);
     }
   }
+  return 1;
 }
 
-/** Split 5 edges */
-void _MMG5_split5(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param k index of element to split.
+ * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
+ * \param metRidTyp metric storage (classic or special)
+ *
+ * \return 0 if fail, 1 otherwise
+ *
+ * Split 5 edges
+ *
+ */
+int _MMG5_split5(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
   MMG5_pTetra    pt[7];
   MMG5_xTetra    xt[7];
   MMG5_pxTetra   pxt0;
@@ -3580,7 +3675,7 @@ void _MMG5_split5(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) 
                           fprintf(stderr,"  ## Error: unable to allocate a new element.\n");
                           _MMG5_INCREASE_MEM_MESSAGE();
                           fprintf(stderr,"  Exit program.\n");
-                          exit(EXIT_FAILURE));
+                          return 0);
       for ( j=0; j<i; j++)
         pt[j] = &mesh->tetra[newtet[j]];
     }
@@ -3761,7 +3856,7 @@ void _MMG5_split5(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) 
                                "larger xtetra table",
                                mesh->xt--;
                                fprintf(stderr,"  Exit program.\n");
-                               exit(EXIT_FAILURE));
+                               return 0);
           }
           pt[i]->xt = mesh->xt;
           pxt0 = &mesh->xtetra[mesh->xt];
@@ -3789,7 +3884,7 @@ void _MMG5_split5(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) 
                                  "larger xtetra table",
                                  mesh->xt--;
                                  fprintf(stderr,"  Exit program.\n");
-                                 exit(EXIT_FAILURE));
+                                 return 0);
             }
             pt[i]->xt = mesh->xt;
             pxt0 = &mesh->xtetra[mesh->xt];
@@ -3811,10 +3906,22 @@ void _MMG5_split5(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) 
       pt[i]->qual=_MMG5_orcal(mesh,met,newtet[i]);
     }
   }
+  return 1;
 }
 
-/** split all faces (6 edges) */
-void _MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param k index of element to split.
+ * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
+ * \param metRidTyp metric storage (classic or special)
+ *
+ * \return 0 if fail, 1 otherwise
+ *
+ * split all faces (6 edges)
+ *
+ */
+int _MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
   MMG5_pTetra    pt[8];
   MMG5_xTetra    xt0,xt;
   MMG5_pxTetra   pxt;
@@ -3838,7 +3945,7 @@ void _MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) 
                           fprintf(stderr,"  ## Error: unable to allocate a new element.\n");
                           _MMG5_INCREASE_MEM_MESSAGE();
                           fprintf(stderr,"  Exit program.\n");
-                          exit(EXIT_FAILURE));
+                          return 0);
       for ( j=0; j<i; j++ )
         pt[j] = &mesh->tetra[newtet[j]];
     }
@@ -3900,7 +4007,7 @@ void _MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) 
                              "larger xtetra table",
                              mesh->xt--;
                              fprintf(stderr,"  Exit program.\n");
-                             exit(EXIT_FAILURE));
+                             return 0);
         }
         pt[1]->xt = mesh->xt;
         pxt = &mesh->xtetra[pt[1]->xt];
@@ -3940,7 +4047,7 @@ void _MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) 
                              "larger xtetra table",
                              mesh->xt--;
                              fprintf(stderr,"  Exit program.\n");
-                             exit(EXIT_FAILURE));
+                             return 0);
         }
         pt[2]->xt = mesh->xt;
         pxt = &mesh->xtetra[pt[2]->xt];
@@ -3981,7 +4088,7 @@ void _MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) 
                              "larger xtetra table",
                              mesh->xt--;
                              fprintf(stderr,"  Exit program.\n");
-                             exit(EXIT_FAILURE));
+                             return 0);
         }
         pt[3]->xt = mesh->xt;
         pxt = &mesh->xtetra[pt[3]->xt];
@@ -4025,7 +4132,7 @@ void _MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) 
                              "larger xtetra table",
                              mesh->xt--;
                              fprintf(stderr,"  Exit program.\n");
-                             exit(EXIT_FAILURE));
+                             return 0);
         }
         pt[4]->xt = mesh->xt;
         pxt = &mesh->xtetra[pt[4]->xt];
@@ -4069,7 +4176,7 @@ void _MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) 
                              "larger xtetra table",
                              mesh->xt--;
                              fprintf(stderr,"  Exit program.\n");
-                             exit(EXIT_FAILURE));
+                             return 0);
         }
         pt[5]->xt = mesh->xt;
         pxt = &mesh->xtetra[pt[5]->xt];
@@ -4113,7 +4220,7 @@ void _MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) 
                              "larger xtetra table",
                              mesh->xt--;
                              fprintf(stderr,"  Exit program.\n");
-                             exit(EXIT_FAILURE));
+                             return 0);
         }
         pt[6]->xt = mesh->xt;
         pxt = &mesh->xtetra[pt[6]->xt];
@@ -4157,7 +4264,7 @@ void _MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) 
                              "larger xtetra table",
                              mesh->xt--;
                              fprintf(stderr,"  Exit program.\n");
-                             exit(EXIT_FAILURE));
+                             return 0);
         }
         pt[7]->xt = mesh->xt;
         pxt = &mesh->xtetra[pt[7]->xt];
@@ -4175,6 +4282,7 @@ void _MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) 
       pt[i]->qual=_MMG5_orcal(mesh,met,newtet[i]);
     }
   }
+  return 1;
 }
 
 

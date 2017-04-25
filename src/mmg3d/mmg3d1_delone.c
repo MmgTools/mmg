@@ -775,8 +775,7 @@ _MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree, int* warn) 
       ifilt = 0;
       ne = mesh->ne;
       ier = _MMG5_boucle_for(mesh,met,octree,ne,&ifilt,&ns,&nc,warn,it);
-      if(ier<0) exit(EXIT_FAILURE);
-      else if(!ier) return(-1);
+      if ( ier<=0 ) return -1;
     } /* End conditional loop on mesh->info.noinsert */
     else  ns = nc = ifilt = 0;
 

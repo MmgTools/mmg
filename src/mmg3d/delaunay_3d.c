@@ -211,7 +211,7 @@ int _MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
                                   " element but the mesh will be valid.\n");
                           for(ll=1 ; ll<k ; ll++) {
                             mesh->tetra[ielnum[ll]].v[0] = 1;
-                            _MMG3D_delElt(mesh,ielnum[ll]);
+                            if ( !_MMG3D_delElt(mesh,ielnum[ll]) )  return -1;
                           }
                           return(-1);
         );
@@ -326,7 +326,7 @@ int _MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
   tref = mesh->tetra[list[0]].ref;
   for (k=0; k<ilist; k++) {
     assert(tref==mesh->tetra[list[k]].ref);
-    _MMG3D_delElt(mesh,list[k]);
+    if ( !_MMG3D_delElt(mesh,list[k]) ) return -1;
   }
 
   //ppt = &mesh->point[ip];
