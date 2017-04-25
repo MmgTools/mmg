@@ -199,7 +199,7 @@ int MMG3D_hashTetra(MMG5_pMesh mesh, int pack) {
   /* memory alloc */
   _MMG5_ADD_MEM(mesh,(4*mesh->nemax+5)*sizeof(int),"adjacency table",
                 fprintf(stderr,"  Exit program.\n");
-                exit(EXIT_FAILURE));
+                return 0);
   _MMG5_SAFE_CALLOC(mesh->adja,4*mesh->nemax+5,int);
   _MMG5_SAFE_CALLOC(hcode,mesh->ne+5,int);
 
@@ -317,7 +317,7 @@ int MMG3D_hashPrism(MMG5_pMesh mesh) {
   /* memory alloc */
   _MMG5_ADD_MEM(mesh,(5*mesh->nprism+6)*sizeof(int),"prism adjacency table",
                 printf("  Exit program.\n");
-                exit(EXIT_FAILURE));
+                return 0);
   _MMG5_SAFE_CALLOC(mesh->adjapr,5*mesh->nprism+6,int);
   _MMG5_SAFE_CALLOC(hcode,mesh->nprism+6,int);
 
@@ -979,7 +979,7 @@ int _MMG5_hGet(MMG5_HGeom *hash,int a,int b,int *ref,int16_t *tag) {
 }
 
 /** store edge on geometry */
-void _MMG5_hEdge(MMG5_pMesh mesh,MMG5_HGeom *hash,int a,int b,int ref,int16_t tag) {
+int _MMG5_hEdge(MMG5_pMesh mesh,MMG5_HGeom *hash,int a,int b,int ref,int16_t tag) {
   MMG5_hgeom  *ph;
   int     key,ia,ib,j;
 
@@ -991,11 +991,11 @@ void _MMG5_hEdge(MMG5_pMesh mesh,MMG5_HGeom *hash,int a,int b,int ref,int16_t ta
   ph  = &hash->geom[key];
 
   if ( ph->a == ia && ph->b == ib )
-    return;
+    return 1;
   else if ( ph->a ) {
     while ( ph->nxt ) {
       ph = &hash->geom[ph->nxt];
-      if ( ph->a == ia && ph->b == ib )  return;
+      if ( ph->a == ia && ph->b == ib )  return 1;
     }
     ph->nxt = hash->nxt;
     ph      = &hash->geom[hash->nxt];
@@ -1009,20 +1009,20 @@ void _MMG5_hEdge(MMG5_pMesh mesh,MMG5_HGeom *hash,int a,int b,int ref,int16_t ta
       _MMG5_TAB_RECALLOC(mesh,hash->geom,hash->max,0.2,MMG5_hgeom,
                          "larger htab table",
                          fprintf(stderr,"  Exit program.\n");
-                         exit(EXIT_FAILURE));
+                         return 0);
       for (j=hash->nxt; j<hash->max; j++)  hash->geom[j].nxt = j+1;
     }
-    return;
+    return 1;
   }
   /* insert new edge */
   ph->a   = ia;   ph->b   = ib;
   ph->ref = ref;  ph->tag = tag;
   ph->nxt = 0;
-  return;
+  return 1;
 }
 
 /** to store edge on geometry */
-int _MMG5_hNew(MMG5_pMesh mesh,MMG5_HGeom *hash,int hsiz,int hmax,int secure) {
+int _MMG5_hNew(MMG5_pMesh mesh,MMG5_HGeom *hash,int hsiz,int hmax) {
   int   k;
 
   /* adjust hash table params */
@@ -1035,8 +1035,7 @@ int _MMG5_hNew(MMG5_pMesh mesh,MMG5_HGeom *hash,int hsiz,int hmax,int secure) {
 
   if ( !hash->geom ) {
     perror("  ## Memory problem: calloc");
-    if ( !secure )  return(0);
-    else  exit(EXIT_FAILURE);
+    return(0);
   }
   for (k=hash->siz; k<hash->max; k++)
     hash->geom[k].nxt = k+1;
@@ -1063,7 +1062,8 @@ int _MMG5_hGeom(MMG5_pMesh mesh) {
   if ( mesh->na ) {
     if ( !mesh->htab.geom ) {
       mesh->namax = MG_MAX(1.5*mesh->na,_MMG3D_NAMAX);
-      _MMG5_hNew(mesh,&mesh->htab,mesh->na,3*mesh->namax,1);
+      if ( !_MMG5_hNew(mesh,&mesh->htab,mesh->na,3*mesh->namax) )
+        return 0;
     }
     else {
       if ( abs(mesh->info.imprim) > 3 || mesh->info.ddebug ) {
@@ -1078,7 +1078,8 @@ int _MMG5_hGeom(MMG5_pMesh mesh) {
     /* store initial edges */
     for (k=1; k<=mesh->na; k++) {
       pa = &mesh->edge[k];
-      _MMG5_hEdge(mesh,&mesh->htab,pa->a,pa->b,pa->ref,pa->tag);
+      if ( !_MMG5_hEdge(mesh,&mesh->htab,pa->a,pa->b,pa->ref,pa->tag) )
+        return 0;
     }
 
     /* now check triangles */
@@ -1132,7 +1133,9 @@ int _MMG5_hGeom(MMG5_pMesh mesh) {
       _MMG5_DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(MMG5_hgeom));
 
     mesh->namax = MG_MAX(1.5*mesh->na,_MMG3D_NAMAX);
-    _MMG5_hNew(mesh,&mesh->htab,mesh->na,3*mesh->namax,1);
+    if ( !_MMG5_hNew(mesh,&mesh->htab,mesh->na,3*mesh->namax) )
+      return 0;
+
     mesh->na = 0;
 
     /* build hash for edges */
@@ -1148,10 +1151,12 @@ int _MMG5_hGeom(MMG5_pMesh mesh) {
             if ( mesh->info.iso )
               pt->edg[i] = ( pt->edg[i] != 0 ) ?  -abs(pt->edg[i]) : MG_ISO;
           }
-          _MMG5_hEdge(mesh,&mesh->htab,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]);
+          if ( !_MMG5_hEdge(mesh,&mesh->htab,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]) )
+            return 0;
         }
          else if ( k < kk && ( pt->edg[i] || pt->tag[i] ) )
-          _MMG5_hEdge(mesh,&mesh->htab,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]);
+          if ( !_MMG5_hEdge(mesh,&mesh->htab,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]))
+            return 0;
       }
     }
     /* now check triangles */
@@ -1652,7 +1657,7 @@ int _MMG5_bdrySet(MMG5_pMesh mesh) {
 
   _MMG5_ADD_MEM(mesh,(mesh->xtmax+1)*sizeof(MMG5_xTetra),"boundary tetrahedra",
                 fprintf(stderr,"  Exit program.\n");
-                exit(EXIT_FAILURE));
+                return 0);
   _MMG5_SAFE_CALLOC(mesh->xtetra,mesh->xtmax+1,MMG5_xTetra);
 
   /* assign references to tetras faces */
@@ -1676,7 +1681,7 @@ int _MMG5_bdrySet(MMG5_pMesh mesh) {
                                "larger xtetra table",
                                mesh->xt--;
                                fprintf(stderr,"  Exit program.\n");
-                               exit(EXIT_FAILURE));
+                               return 0);
           }
           pt->xt = mesh->xt;
         }
@@ -1731,7 +1736,7 @@ int _MMG5_bdrySet(MMG5_pMesh mesh) {
   mesh->xpr     = 0;
   _MMG5_ADD_MEM(mesh,(mesh->nprism+1)*sizeof(MMG5_xPrism),"boundary prisms",
                 fprintf(stderr,"  Exit program.\n");
-                exit(EXIT_FAILURE));
+                return 0);
   _MMG5_SAFE_CALLOC(mesh->xprism,mesh->nprism+1,MMG5_xPrism);
 
   /* assign references to prism faces */
@@ -1771,7 +1776,7 @@ int _MMG5_bdrySet(MMG5_pMesh mesh) {
   }
   _MMG5_ADD_MEM(mesh,(mesh->xpr-mesh->nprism)*sizeof(MMG5_xPrism),"boundary prisms",
                 fprintf(stderr,"  Exit program.\n");
-                exit(EXIT_FAILURE));
+                return 0);
   _MMG5_SAFE_RECALLOC(mesh->xprism,mesh->nprism+1,mesh->xpr+1,MMG5_xPrism,
                       "boundary prisms");
 

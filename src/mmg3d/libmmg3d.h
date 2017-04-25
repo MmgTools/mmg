@@ -1644,12 +1644,13 @@ int  MMG3D_mmg3dmov(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSol disp );
  * Print the default parameters values.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG3D_DEFAULTVALUES(mesh)\n
+ * >   SUBROUTINE MMG3D_DEFAULTVALUES(mesh,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
  */
-void MMG3D_defaultValues(MMG5_pMesh mesh);
+int MMG3D_defaultValues(MMG5_pMesh mesh);
 
 /**
  * \param argc number of command line arguments.
@@ -1684,17 +1685,19 @@ int  MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met);
 int  MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met);
 /**
  * \param prog pointer toward the program name.
+ * \param return 1 if success, 0 if fail.
  *
  * Print help for mmg3d options.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG3D_USAGE(prog,strlen)\n
+ * >   SUBROUTINE MMG3D_USAGE(prog,strlen,retval)\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: prog\n
  * >     INTEGER, INTENT(IN)            :: strlen\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
  */
-void  MMG3D_usage(char *prog);
+int  MMG3D_usage(char *prog);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param info pointer toward the info structure.

@@ -92,8 +92,9 @@ static double _MMG5_swapd(double sbin)
 /**
  * \param mesh pointer toward the mesh structure.
  * \param filename name of file.
- * \return 0 if the file is not found, -1 if we detect mismatch parameters,
- * 1 otherwise.
+ *
+ * \return 0 if the file is not found, -1 if we detect mismatch parameters or we
+ * fail, 1 otherwise.
  *
  * Read mesh data.
  *
@@ -536,7 +537,7 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
       else if ( mesh->nt < nt ) {
         _MMG5_ADD_MEM(mesh,(mesh->nt-nt)*sizeof(MMG5_Tria),"triangles",
                       fprintf(stderr,"  Exit program.\n");
-                      exit(EXIT_FAILURE));
+                      return -1);
         _MMG5_SAFE_RECALLOC(mesh->tria,nt+1,(mesh->nt+1),MMG5_Tria,"triangles");
       }
     }
@@ -675,7 +676,7 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
       else if ( mesh->na < na ) {
         _MMG5_ADD_MEM(mesh,(mesh->na-na)*sizeof(MMG5_Edge),"edges",
                       fprintf(stderr,"  Exit program.\n");
-                      exit(EXIT_FAILURE));
+                      return -1);
         _MMG5_SAFE_RECALLOC(mesh->edge,na+1,(mesh->na+1),MMG5_Edge,"edges");
       }
     }
@@ -961,7 +962,7 @@ int MMG3D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
     fprintf(stderr,"  ** MISSING DATA.\n");
     fprintf(stderr," Check that your mesh contains tetrahedra.\n");
     fprintf(stderr," Exit program.\n");
-      return(-1);
+    return(-1);
   }
 
   return ( MMG5_loadMshMesh_part2( mesh, sol,&inm,
@@ -1633,7 +1634,7 @@ int MMG3D_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.
  * \param filename name of file.
- * \return -1 data invalid, 0 no file, 1 ok.
+ * \return -1 data invalid or we fail, 0 no file, 1 ok.
  *
  * Load metric field.
  *
@@ -1785,7 +1786,7 @@ int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
 
   _MMG5_ADD_MEM(mesh,(met->size*(met->npmax+1))*sizeof(double),"initial solution",
                 fprintf(stderr,"  Exit program.\n");
-                exit(EXIT_FAILURE));
+                return -1);
   _MMG5_SAFE_CALLOC(met->m,met->size*(met->npmax+1),double);
 
   /* read mesh solutions */

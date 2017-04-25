@@ -79,7 +79,7 @@ inline double _MMG5_lenedgCoor_iso(double *ca,double *cb,double *ma,double *mb) 
  * \param hmin minimal edge size.
  * \param hmax maximal edge size.
  * \param hausd hausdorff value.
- * \return the isotropic size at the point.
+ * \return the isotropic size at the point if success, FLT_MAX if fail.
  *
  * Define isotropic size at regular point nump, whose surfacic ball is provided.
  *
@@ -102,7 +102,7 @@ _MMG5_defsizreg(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,
 
   if ( !p0->xp || MG_EDG(p0->tag) || (p0->tag & MG_NOM) || (p0->tag & MG_REQ))  {
     fprintf(stderr,"    ## Func. _MMG5_defsizreg : wrong point qualification : xp ? %d\n",p0->xp);
-    return(0);
+    return(FLT_MAX);
   }
   isqhmin = 1.0 / (hmin*hmin);
   isqhmax = 1.0 / (hmax*hmax);
@@ -111,9 +111,9 @@ _MMG5_defsizreg(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,
 
   /* Step 1 : rotation matrix that sends normal n to the third coordinate vector of R^3 */
   if ( !_MMG5_rotmatrix(n,r) ) {
-    fprintf(stderr,"%s:%d: Error: function _MMG5_rotmatrix return 0\n",
+    fprintf(stderr,"%s:%d: Warning: function _MMG5_rotmatrix return 0\n",
             __FILE__,__LINE__);
-    exit(EXIT_FAILURE);
+    return(FLT_MAX);
   }
 
   /* Step 2 : rotation of the oriented surfacic ball with r : lispoi[k] is the common edge
@@ -240,9 +240,9 @@ _MMG5_defsizreg(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,
 
     pxt   = &mesh->xtetra[mesh->tetra[iel].xt];
     if ( !_MMG5_bezierCP(mesh,&tt,&b,MG_GET(pxt->ori,iface)) ) {
-      fprintf(stderr,"%s:%d: Error: function _MMG5_bezierCP return 0\n",
+      fprintf(stderr,"%s:%d: Warning: function _MMG5_bezierCP return 0\n",
               __FILE__,__LINE__);
-      exit(EXIT_FAILURE);
+      return(FLT_MAX);
     }
 
     for (i0=0; i0<3; i0++) {
@@ -382,9 +382,9 @@ _MMG5_defsizreg(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,
   /* At this point, intm stands for the integral matrix of Taubin's approach : vp[0] and vp[1]
      are the two pr. directions of curvature, and the two curvatures can be inferred from lambdas*/
   if( !_MMG5_eigensym(intm,kappa,vp) ){
-    fprintf(stderr,"%s:%d: Error: function _MMG5_eigensym return 0\n",
+    fprintf(stderr,"%s:%d: Warning: function _MMG5_eigensym return 0\n",
             __FILE__,__LINE__);
-    exit(EXIT_FAILURE);
+    return(FLT_MAX);
   }
 
   /* h computation : h(x) = sqrt( 9*hausd / (2 * max(kappa1(x),kappa2(x)) ) */
