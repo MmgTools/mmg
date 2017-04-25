@@ -80,7 +80,7 @@ static int _MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
 
   ilist = boulet(mesh,it,ip,list);
   if ( !ilist ) {
-    fprintf(stderr,"%s:%d:Error: unable to compute the ball af the point %d.\n",
+    fprintf(stdout,"%s:%d:Warning: Metric not computed at point %d: unable to compute its ball\n",
            __FILE__,__LINE__, idp);
     return(0);
   }

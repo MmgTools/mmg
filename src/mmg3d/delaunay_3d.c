@@ -36,12 +36,11 @@
 
 #ifndef PATTERN
 
-#define  _MMG5_EPSRAD       1.00005
+#define  _MMG3D_EPSRAD       1.00005
 //For Various_adpsol_hgrad1_M6Mach_Eps0.001_hmin0.001_hmax2 test case:
-//pbs with _MMG5_EPSCON=5e-4 and VOLMIN=1e-15 (MMG3D does not insert enough vertex...)
-#define  _MMG5_EPSCON       1e-5//5.0e-4//1.e-4//1.0e-3
-#define  VOLMIN       1e-15//1.e-10//1.0e-15  --> vol negatif qd on rejoue
-#define LONMAX     4096
+//pbs with _MMG3D_EPSCON=5e-4 and VOLMIN=1e-15 (MMG3D does not insert enough vertex...)
+#define  _MMG3D_EPSCON       1e-5//5.0e-4//1.e-4//1.0e-3
+#define _MMG3D_LONMAX     4096
 
 // int MMG_cas; uncomment to debug
 
@@ -145,7 +144,7 @@ int _MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
   int              vois[4],iadrold;/*,ii,kk,_MMG5_iare1,_MMG5_iare2;*/
   short            i1;
   char             alert;
-  int              tref,isused=0,ixt,ielnum[3*LONMAX+1],ll;
+  int              tref,isused=0,ixt,ielnum[3*_MMG3D_LONMAX+1],ll;
   _MMG5_Hash       hedg;
 
   //obsolete avec la realloc
@@ -195,7 +194,7 @@ int _MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
   }
   if ( alert )  {return(0);}
   /* hash table params */
-  if ( size > 3*LONMAX )  return(0);
+  if ( size > 3*_MMG3D_LONMAX )  return(0);
   if ( !_MMG5_hashNew(mesh,&hedg,size,3*size) ) { /*3*size suffit */
     fprintf(stderr,"  ## Unable to complete mesh.\n");
     return(-1);
@@ -282,7 +281,7 @@ int _MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
                                    "larger xtetra table",
                                    mesh->xt--;
                                    fprintf(stderr,"  Exit program.\n");
-                                   exit(EXIT_FAILURE));
+                                   return -1);
               }
               pt1->xt = mesh->xt;
               pxt0 = &mesh->xtetra[pt1->xt];
@@ -336,8 +335,22 @@ int _MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
   return(1);
 }
 
-/* cavity correction for quality */
-static int _MMG5_correction_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip,int* list,int ilist,int nedep,double volmin) {
+/**
+ * \param mesh pointer toward the mesh structure
+ * \param met pointer toward the met structure
+ * \param ip index of the point to insert
+ * \param list poiner toward the cavity of the point
+ * \param ilist number of elts in the cavity
+ * \param nedep ???
+ * \param volmin minimal authorized volume
+ *
+ * \return 0 if fail (unused point), the size of the corrected cavity otherwise
+ *
+ * Cavity correction for quality (aniso).
+ *
+ */
+static int _MMG5_correction_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip,int* list,
+                                int ilist,int nedep,double volmin) {
   MMG5_pPoint        ppt,p1,p2,p3;
   MMG5_pTetra        pt;
   double        dd,det,nn,eps,eps2,ux,uy,uz,vx,vy,vz,v1,v2,v3;
@@ -349,7 +362,7 @@ static int _MMG5_correction_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip,int* list,i
   if ( ppt->tag & MG_NUL )  return(ilist);
   base = mesh->base;
   lon  = ilist;
-  eps  = _MMG5_EPSCON;
+  eps  = _MMG3D_EPSCON;
   eps2 = eps*eps;
 
   /* average metric */
@@ -399,7 +412,7 @@ static int _MMG5_correction_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip,int* list,i
         dd = v1*(ppt->c[0]-p1->c[0]) + v2*(ppt->c[1]-p1->c[1]) \
           + v3*(ppt->c[2]-p1->c[2]);
         // MMG_cas=1; // uncomment to debug
-        //if ( dd < VOLMIN )  break;
+
         /*test sur le volume avec un eps local*/
         h1 = ux*ux + uy*uy + uz*uz;
         h2 = vx*vx + vy*vy + vz*vz;
@@ -463,13 +476,15 @@ static int _MMG5_correction_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip,int* list,i
 
           printf("on trouve len : %e %e %e\n",len,sqrt(eps2)*sqrt(mm[0]),pow(sqrt(eps2)*sqrt(det),1./3.));
           printf("len carre %e %e\n",mm[0]*v1*v1*ph*ph + mm[3]*v2*v2*ph*ph + mm[5]*v3*v3*ph*ph,dd2);
-          exit(0);
+          return(0);
           break;
           }*/
         // MMG_cas=0; // uncomment to debug
       }
       if ( i < 4 || pt->tag & MG_REQ ) {
-        if ( ipil <= nedep )   {/*printf("on veut tout retirer ? %d %d\n",ipil,nedep);*/return(0);   }
+        if ( ipil <= nedep )   {
+          return(0);
+        }
         /* remove iel from list */
         pt->flag = base-1;
         list[ipil] = list[--lon];
@@ -486,7 +501,20 @@ static int _MMG5_correction_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip,int* list,i
 }
 
 
-/* cavity correction for quality */
+/**
+ * \param mesh pointer toward the mesh structure
+ * \param met pointer toward the met structure
+ * \param ip index of the point to insert
+ * \param list poiner toward the cavity of the point
+ * \param ilist number of elts in the cavity
+ * \param nedep ???
+ * \param volmin minimal authorized volume
+ *
+ * \return 0 if fail (unused point), the size of the corrected cavity otherwise
+ *
+ * Cavity correction for quality (iso).
+ *
+ */
 static int
 _MMG5_correction_iso(MMG5_pMesh mesh,int ip,int *list,int ilist,int nedep,double volmin) {
   MMG5_pPoint ppt,p1,p2,p3;
@@ -499,7 +527,7 @@ _MMG5_correction_iso(MMG5_pMesh mesh,int ip,int *list,int ilist,int nedep,double
   if ( ppt->tag & MG_NUL )  return(ilist);
   base = mesh->base;
   lon  = ilist;
-  eps  = _MMG5_EPSCON;
+  eps  = _MMG3D_EPSCON;
   eps2 = eps*eps;
   do {
     ipil = lon-1;
@@ -543,7 +571,7 @@ _MMG5_correction_iso(MMG5_pMesh mesh,int ip,int *list,int ilist,int nedep,double
         dd = v1*(ppt->c[0]-p1->c[0]) + v2*(ppt->c[1]-p1->c[1]) \
           + v3*(ppt->c[2]-p1->c[2]);
         // MMG_cas=1; // uncomment to debug
-        //printf("on trouve vol %e <? %e\n",dd,VOLMIN);
+
         if ( dd < volmin )  break;
 
         /* point close to face */
@@ -614,7 +642,7 @@ int _MMG5_cavity_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel,int ip,int* list,int 
     list[k] = list[k] / 6;
 
   /* grow cavity by adjacency */
-  eps   = _MMG5_EPSRAD * _MMG5_EPSRAD;
+  eps   = _MMG3D_EPSRAD * _MMG3D_EPSRAD;
   ilist = lon;
   ipil  = 0;
   iadr  = ip*6;
@@ -670,7 +698,7 @@ int _MMG5_cavity_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel,int ip,int* list,int 
           + 2.0*(mj[1]*ux*uy + mj[2]*ux*uz + mj[4]*uy*uz);
         crit += sqrt(dd/ray);
       }
-      crit *= _MMG5_EPSRAD;
+      crit *= _MMG3D_EPSRAD;
       if ( crit > 5.0 ) continue;
 
       /* lost face(s) */
@@ -698,7 +726,7 @@ int _MMG5_cavity_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel,int ip,int* list,int 
         list[ilist++] = adj;
       }
     }
-    if ( ilist > LONMAX - 3 )  return(-1);
+    if ( ilist > _MMG3D_LONMAX - 3 )  return(-1);
     ++ipil;
   }
   while ( ipil < ilist );
@@ -761,7 +789,7 @@ int _MMG5_cavity_iso(MMG5_pMesh mesh,MMG5_pSol sol,int iel,int ip,int *list,int 
     list[k] = list[k] / 6;
 
   /* grow cavity by adjacency */
-  eps   = _MMG5_EPSRAD*_MMG5_EPSRAD;
+  eps   = _MMG3D_EPSRAD*_MMG3D_EPSRAD;
   ilist = lon;
   ipil  = 0;
 
@@ -822,7 +850,7 @@ int _MMG5_cavity_iso(MMG5_pMesh mesh,MMG5_pSol sol,int iel,int ip,int *list,int 
         list[ilist++] = adj;
       }
     }
-    if ( ilist > LONMAX - 3 ) return(-1);
+    if ( ilist > _MMG3D_LONMAX - 3 ) return(-1);
 
     ++ipil;
   }

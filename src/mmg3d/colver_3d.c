@@ -658,9 +658,22 @@ int _MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
   return(ilistv);
 }
 
-/** Collapse vertex p = list[0]%4 of tetra list[0]/4 over vertex indq of tetra list[0]/4.
- *  Only physical tests (positive jacobian) are done (i.e. approximation of the surface,
- *  etc... must be performed outside). */
+/**
+ * \param mesh pointer toward the mesh
+ * \param met pointer toward the metric
+ * \param list pointer toward the ball of the point
+ * \param ilist number of elements in the ball of the point
+ * \param indq local index of the point on which we collapse
+ * \param typchk type of check performed depending on the remeshing step
+ *
+ * \return np the index of the collpased point if success, 0 if we cannot
+ * collapse, -1 if we fail.
+ *
+ * Collapse vertex p = list[0]%4 of tetra list[0]/4 over vertex indq of tetra
+ * list[0]/4.  Only physical tests (positive jacobian) are done
+ * (i.e. approximation of the surface, etc... must be performed outside).
+ *
+ */
 int _MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,char typchk) {
   MMG5_pTetra          pt,pt1;
   MMG5_pxTetra         pxt,pxt1;
@@ -678,8 +691,8 @@ int _MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,cha
 
   // Dynamic allocations for windows compatibility
   if (!(ind = malloc(ilist * sizeof(unsigned char[2])))) {
-	  perror("  ## Memory problem: malloc");
-	  exit(EXIT_FAILURE);
+    perror("  ## Memory problem: malloc");
+    return 0;
   }
   _MMG5_SAFE_CALLOC(p0_c, ilist, int);
   _MMG5_SAFE_CALLOC(p1_c, ilist, int);
@@ -989,7 +1002,8 @@ int _MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,cha
               _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                  "larger xtetra table",
                                  mesh->xt--;
-			                     _MMG5_SAFE_FREE(ind); _MMG5_SAFE_FREE(p0_c); _MMG5_SAFE_FREE(p1_c);
+                                 _MMG5_SAFE_FREE(ind); _MMG5_SAFE_FREE(p0_c);
+                                 _MMG5_SAFE_FREE(p1_c);
                                  return(-1));
             }
             pt1->xt = mesh->xt;

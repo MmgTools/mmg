@@ -138,8 +138,7 @@ int MMG3D_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int
 
     sol->npmax = mesh->npmax;
     _MMG5_ADD_MEM(mesh,(sol->size*(sol->npmax+1))*sizeof(double),"initial solution",
-                  fprintf(stderr,"  Exit program.\n");
-                  exit(EXIT_FAILURE));
+                  return 0);
     _MMG5_SAFE_CALLOC(sol->m,(sol->size*(sol->npmax+1)),double);
   }
   return(1);
@@ -210,14 +209,12 @@ int MMG3D_Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nprism,
 
   }
   _MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(MMG5_Point),"initial vertices",
-                fprintf(stderr,"  Exit program.\n");
-                exit(EXIT_FAILURE));
+                return 0);
   _MMG5_SAFE_CALLOC(mesh->point,mesh->npmax+1,MMG5_Point);
 
 
   _MMG5_ADD_MEM(mesh,(mesh->nemax+1)*sizeof(MMG5_Tetra),"initial tetrahedra",
-                fprintf(stderr,"  Exit program.\n");
-                exit(EXIT_FAILURE));
+                return 0);
   _MMG5_SAFE_CALLOC(mesh->tetra,mesh->nemax+1,MMG5_Tetra);
 
 
@@ -1660,12 +1657,12 @@ int MMG3D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam,int val){
     mesh->info.iso      = val;
     if ( mesh->info.iso )
       if ( mesh->nt && !_MMG3D_skipIso(mesh) )
-        exit(EXIT_FAILURE);
+        return 0;
     break;
   case MMG3D_IPARAM_lag :
 #ifdef USE_ELAS
     if ( val < 0 || val > 2 )
-      exit(EXIT_FAILURE);
+      return 0;
     mesh->info.lag = val;
 #else
     fprintf(stderr,"  ## Error:"
@@ -1705,7 +1702,7 @@ int MMG3D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam,int val){
 
     _MMG5_ADD_MEM(mesh,mesh->info.npar*sizeof(MMG5_Par),"parameters",
                   printf("  Exit program.\n");
-                  exit(EXIT_FAILURE));
+                  return 0);
     _MMG5_SAFE_CALLOC(mesh->info.par,mesh->info.npar,MMG5_Par);
 
     for (k=0; k<mesh->info.npar; k++) {
@@ -1724,7 +1721,7 @@ int MMG3D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam,int val){
 #endif
   case MMG3D_IPARAM_anisosize :
     if ( !MMG3D_Set_solSize(mesh,sol,MMG5_Vertex,0,MMG5_Tensor) )
-      exit(EXIT_FAILURE);
+      return 0;
 
   default :
     fprintf(stderr,"  ## Error: unknown type of parameter\n");
@@ -1789,7 +1786,7 @@ int MMG3D_Get_iparameter(MMG5_pMesh mesh, int iparam) {
 #endif
   default :
     fprintf(stderr,"  ## Error: unknown type of parameter\n");
-    exit(EXIT_FAILURE);
+    return 0;
   }
 }
 

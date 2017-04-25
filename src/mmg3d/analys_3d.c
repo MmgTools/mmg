@@ -550,8 +550,16 @@ static int _MMG5_norver(MMG5_pMesh mesh) {
   return(1);
 }
 
-/** Define continuous geometric support at non manifold vertices, using volume information */
-static void _MMG5_nmgeom(MMG5_pMesh mesh){
+/**
+ * \param mesh pointer toward the mesh
+ *
+ * \return 0 if fail, 1 otherwise
+ *
+ * Define continuous geometric support at non manifold vertices, using volume
+ * information.
+ *
+ */
+static int _MMG3D_nmgeom(MMG5_pMesh mesh){
   MMG5_pTetra     pt;
   MMG5_pPoint     p0;
   MMG5_pxPoint    pxp;
@@ -591,7 +599,7 @@ static void _MMG5_nmgeom(MMG5_pMesh mesh){
                                  "larger xpoint table",
                                  mesh->xp--;
                                  fprintf(stderr,"  Exit program.\n");
-                                 exit(EXIT_FAILURE));
+                                 return 0;);
             }
             p0->xp = mesh->xp;
           }
@@ -610,6 +618,7 @@ static void _MMG5_nmgeom(MMG5_pMesh mesh){
     p0->tag |= MG_REQ;
     p0->tag &= ~MG_NOSURF;
   }
+  return 1;
 }
 
 /** preprocessing stage: mesh analysis */
@@ -735,7 +744,7 @@ int _MMG3D_analys(MMG5_pMesh mesh) {
   }
 
   /* define geometry for non manifold points */
-  _MMG5_nmgeom(mesh);
+  if ( !_MMG3D_nmgeom(mesh) ) return 0;
 
   /* release memory */
   mesh->nt = 0;
