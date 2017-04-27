@@ -35,8 +35,18 @@
 
 extern unsigned char ddb;
 
-/* Check whether splitting of edge i in tria k is possible and return the newly created point;
-   possibly perform a dichotomy to find the latest valid position for the point */
+/**
+ * \param mesh pointer toward the mesh
+ * \param met pointer toward the metric
+ * \param k triangle index
+ * \param i local index of the edge to split
+ *
+ * \return 1 if we can split, 0 if not, -1 if fail.
+ *
+ * Check whether splitting of edge i in tria k is possible and return the newly created point;
+ * possibly perform a dichotomy to find the latest valid position for the point.
+ *
+ */
 int _MMG2_chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
   MMG5_pTria           pt,pt1,pt0;
   MMG5_pPoint          p1,p2,ppt;
@@ -75,9 +85,8 @@ int _MMG2_chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
                            _MMG5_INCREASE_MEM_MESSAGE();
                            do {
                              _MMG2D_delPt(mesh,mesh->np);
-                           } while ( mesh->np>npinit );
-                           return(-1)
-                           ,mid,pt->tag[i]);
+                           } while ( mesh->np>npinit );return -1;,
+                           mid,pt->tag[i],-1);
 
     }
 
@@ -127,9 +136,8 @@ int _MMG2_chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
                            _MMG5_INCREASE_MEM_MESSAGE();
                            do {
                              _MMG2D_delPt(mesh,mesh->np);
-                           } while ( mesh->np>npinit );
-                           return(-1)
-                           ,o,pt->tag[i]);
+                           } while ( mesh->np>npinit ); return -1;,
+                           o,pt->tag[i],-1);
     }
 
     ppt = &mesh->point[ip];
@@ -208,7 +216,18 @@ int _MMG2_chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
   return(ip);
 }
 
-/* Effective splitting of edge i in tria k: point ip is introduced and the adjacency structure in the mesh is preserved */
+/**
+ * \parma mesh pointer toward the mesh
+ * \param k index of the tria to split
+ * \param i local index of the edge to split
+ * \param ip global index of the new point
+ *
+ * \return 1 if success, 0 if fail
+ *
+ * Effective splitting of edge i in tria k: point ip is introduced and the
+ * adjacency structure in the mesh is preserved
+ *
+ */
 int _MMG2_split1b(MMG5_pMesh mesh,int k,char i,int ip) {
   MMG5_pTria         pt,pt1;
   int                *adja,iel,jel,kel,mel;
@@ -219,9 +238,7 @@ int _MMG2_split1b(MMG5_pMesh mesh,int k,char i,int ip) {
     _MMG2D_TRIA_REALLOC(mesh,iel,mesh->gap,
                         printf("  ## Error: unable to allocate a new element.\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
-                        printf("  Exit program.\n");
-                        exit(EXIT_FAILURE)
-      );
+                        printf("  Exit program.\n");return 0;,0);
   }
 
   pt = &mesh->tria[k];
@@ -263,9 +280,7 @@ int _MMG2_split1b(MMG5_pMesh mesh,int k,char i,int ip) {
       _MMG2D_TRIA_REALLOC(mesh,kel,mesh->gap,
                           printf("  ## Error: unable to allocate a new element.\n");
                           _MMG5_INCREASE_MEM_MESSAGE();
-                          printf("  Exit program.\n");
-                          exit(EXIT_FAILURE)
-        );
+                          printf("  Exit program.\n");return 0;,0);
     }
 
     pt  = &mesh->tria[jel];
@@ -303,7 +318,17 @@ int _MMG2_split1b(MMG5_pMesh mesh,int k,char i,int ip) {
   return(1);
 }
 
-/* Simulate the split of one edge in triangle k */
+/**
+ * \param mesh pointer toward the mesh
+ * \param sol pointer toward the metric
+ * \param k triangle index
+ * \param vx list of new point indices for each edge
+ *
+ * \return 0 if fail, 1 if success
+ *
+ * Simulate the split of one edge in triangle k
+ *
+ */
 int _MMG2_split1_sim(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
   MMG5_pTria         pt,pt0;
   double             cal;
@@ -338,7 +363,17 @@ int _MMG2_split1_sim(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
   return(1);
 }
 
-/* Split 1 edge of triangle k */
+/**
+ * \param mesh pointer toward the mesh
+ * \param sol pointer toward the metric
+ * \param k triangle index
+ * \param vx list of new point indices for each edge
+ *
+ * \return 0 if fail, 1 if success
+ *
+ * Split 1 edge of triangle k
+ *
+ */
 int _MMG2_split1(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
   MMG5_pTria       pt,pt1;
   MMG5_pPoint      p0;
@@ -373,9 +408,7 @@ int _MMG2_split1(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
     _MMG2D_TRIA_REALLOC(mesh,iel,mesh->gap,
                         printf("  ## Error: unable to allocate a new element.\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
-                        printf("  Exit program.\n");
-                        exit(EXIT_FAILURE)
-      );
+                        printf("  Exit program.\n");return 0;,0);
     pt = &mesh->tria[k];
   }
   pt1 = &mesh->tria[iel];
@@ -396,7 +429,17 @@ int _MMG2_split1(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
   return(1);
 }
 
-/* Simulate the split of two edges in triangle k */
+/**
+ * \param mesh pointer toward the mesh
+ * \param sol pointer toward the metric
+ * \param k triangle index
+ * \param vx list of new point indices for each edge
+ *
+ * \return 0 if fail, 1 if success
+ *
+ * Simulate the split of two edges in triangle k
+ *
+ */
 int _MMG2_split2_sim(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
   MMG5_pTria        pt,pt0;
   double            cal;
@@ -435,7 +478,17 @@ int _MMG2_split2_sim(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
   return(1);
 }
 
-/* Split 2 edges of triangle k */
+/**
+ * \param mesh pointer toward the mesh
+ * \param sol pointer toward the metric
+ * \param k triangle index
+ * \param vx list of new point indices for each edge
+ *
+ * \return 0 if fail, 1 if success
+ *
+ * Split 2 edges of triangle k
+ *
+ */
 int _MMG2_split2(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
   MMG5_pTria       pt,pt1,pt2;
   MMG5_pPoint      p1,p2;
@@ -474,9 +527,7 @@ int _MMG2_split2(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
     _MMG2D_TRIA_REALLOC(mesh,iel,mesh->gap,
                         printf("  ## Error: unable to allocate a new element.\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
-                        printf("  Exit program.\n");
-                        exit(EXIT_FAILURE)
-      );
+                        printf("  Exit program.\n");return 0;,0);
     pt = &mesh->tria[k];
   }
 
@@ -485,9 +536,7 @@ int _MMG2_split2(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
     _MMG2D_TRIA_REALLOC(mesh,jel,mesh->gap,
                         printf("  ## Error: unable to allocate a new element.\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
-                        printf("  Exit program.\n");
-                        exit(EXIT_FAILURE)
-      );
+                        printf("  Exit program.\n");return 0;,0);
     pt = &mesh->tria[k];
   }
 
@@ -516,7 +565,17 @@ int _MMG2_split2(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
   return(1);
 }
 
-/* Simulate the split of three edges in triangle k */
+/**
+ * \param mesh pointer toward the mesh
+ * \param sol pointer toward the metric
+ * \param k triangle index
+ * \param vx list of new point indices for each edge
+ *
+ * \return 0 if fail, 1 if success
+ *
+ * Simulate the split of three edges in triangle k
+ *
+ */
 int _MMG2_split3_sim(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
   MMG5_pTria         pt,pt0;
   double             cal;
@@ -544,7 +603,17 @@ int _MMG2_split3_sim(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
   return(1);
 }
 
-/* Split the three edges of triangle k */
+/**
+ * \param mesh pointer toward the mesh
+ * \param sol pointer toward the metric
+ * \param k triangle index
+ * \param vx list of new point indices for each edge
+ *
+ * \return 0 if fail, 1 if success
+ *
+ * Split the three edges of triangle k
+ *
+ */
 int _MMG2_split3(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
   MMG5_pTria          pt,pt1,pt2,pt3;
   MMG5_pPoint         p0,p1,p2;
@@ -572,8 +641,7 @@ int _MMG2_split3(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
     _MMG2D_TRIA_REALLOC(mesh,iel,mesh->gap,
                         printf("  ## Error: unable to allocate a new element.\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
-                        printf("  Exit program.\n");
-                        exit(EXIT_FAILURE));
+                        printf("  Exit program.\n");return 0;,0);
 
     pt = &mesh->tria[k];
   }
@@ -584,8 +652,7 @@ int _MMG2_split3(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
     _MMG2D_TRIA_REALLOC(mesh,jel,mesh->gap,
                         printf("  ## Error: unable to allocate a new element.\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
-                        printf("  Exit program.\n");
-                        exit(EXIT_FAILURE));
+                        printf("  Exit program.\n");return 0;,0);
     pt = &mesh->tria[k];
   }
 
@@ -595,8 +662,7 @@ int _MMG2_split3(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
     _MMG2D_TRIA_REALLOC(mesh,kel,mesh->gap,
                         printf("  ## Error: unable to allocate a new element.\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
-                        printf("  Exit program.\n");
-                        exit(EXIT_FAILURE));
+                        printf("  Exit program.\n");return 0;,0);
     pt = &mesh->tria[k];
   }
 

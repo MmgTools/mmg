@@ -694,8 +694,8 @@ int _MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,cha
     perror("  ## Memory problem: malloc");
     return 0;
   }
-  _MMG5_SAFE_CALLOC(p0_c, ilist, int);
-  _MMG5_SAFE_CALLOC(p1_c, ilist, int);
+  _MMG5_SAFE_CALLOC(p0_c, ilist, int,-1);
+  _MMG5_SAFE_CALLOC(p1_c, ilist, int,-1);
 
   iel = list[0] / 4;
   ip  = list[0] % 4;
@@ -1003,8 +1003,7 @@ int _MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,cha
                                  "larger xtetra table",
                                  mesh->xt--;
                                  _MMG5_SAFE_FREE(ind); _MMG5_SAFE_FREE(p0_c);
-                                 _MMG5_SAFE_FREE(p1_c);
-                                 return(-1));
+                                 _MMG5_SAFE_FREE(p1_c);return -1;,-1);
             }
             pt1->xt = mesh->xt;
             pxt = &mesh->xtetra[pt1->xt];

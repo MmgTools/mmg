@@ -45,36 +45,38 @@
  * \param sol pointer toward a sol structure (metric or level-set).
  * \param disp pointer toward a sol structure (displacement).
  *
+ * \return 1 if success, 0 if fail.
+ *
  * Allocate the mesh and solutions structures at \a MMG3D format.
  *
  */
 static inline
-void _MMG3D_Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol, MMG5_pSol *disp
+int _MMG3D_Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol, MMG5_pSol *disp
   ) {
 
   /* mesh allocation */
   if ( *mesh )  _MMG5_SAFE_FREE(*mesh);
-  _MMG5_SAFE_CALLOC(*mesh,1,MMG5_Mesh);
+  _MMG5_SAFE_CALLOC(*mesh,1,MMG5_Mesh,0);
 
   /* sol allocation */
   if ( !sol ) {
     fprintf(stderr,"  ## Error: an allocatable solution structure of type \"MMG5_pSol\""
            " is needed.\n");
     fprintf(stderr,"            Exit program.\n");
-    exit(EXIT_FAILURE);
+    return 0;
   }
 
   if ( *sol )  _MMG5_DEL_MEM(*mesh,*sol,sizeof(MMG5_Sol));
-  _MMG5_SAFE_CALLOC(*sol,1,MMG5_Sol);
+  _MMG5_SAFE_CALLOC(*sol,1,MMG5_Sol,0);
 
   /* displacement allocation */
   if ( disp ) {
     if ( *disp )
       _MMG5_DEL_MEM(*mesh,*disp,sizeof(MMG5_Sol));
-    _MMG5_SAFE_CALLOC(*disp,1,MMG5_Sol);
+    _MMG5_SAFE_CALLOC(*disp,1,MMG5_Sol,0);
   }
 
-  return;
+  return 1;
 }
 /**
  * \param mesh pointer toward the mesh structure.
@@ -137,10 +139,12 @@ void _MMG3D_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol disp
  * pointer toward a \a MMG5_pSol structure storing the displacement (and
  * identified by the MMG5_ARG_ppDisp keyword).
  *
+ * \return 1 if success, 0 if fail
+ *
  * Internal function for structure allocations (taking a va_list argument).
  *
  */
-void _MMG3D_Init_mesh_var( va_list argptr ) {
+int _MMG3D_Init_mesh_var( va_list argptr ) {
   MMG5_pMesh     *mesh;
   MMG5_pSol      *sol,*disp;
   int            typArg;
@@ -193,7 +197,7 @@ void _MMG3D_Init_mesh_var( va_list argptr ) {
   }
 
   /* allocations */
-  _MMG3D_Alloc_mesh(mesh,sol,disp);
+  if ( !_MMG3D_Alloc_mesh(mesh,sol,disp) ) return 0;
 
   /* initialisations */
   if ( disp )
@@ -201,7 +205,7 @@ void _MMG3D_Init_mesh_var( va_list argptr ) {
   else
     _MMG3D_Init_woalloc_mesh(*mesh,*sol,NULL);
 
-  return;
+  return 1;
 }
 
 /**
@@ -337,6 +341,7 @@ void _MMG3D_Free_structures_var(va_list argptr)
 
   MMG5_pMesh     *mesh;
   MMG5_pSol      *sol,*disp;
+  long           castedVal;
   int            typArg;
   int            meshCount;
 
@@ -438,8 +443,10 @@ void _MMG3D_Free_structures_var(va_list argptr)
   if ( (*mesh)->info.npar && (*mesh)->info.par )
     _MMG5_DEL_MEM((*mesh),(*mesh)->info.par,(*mesh)->info.npar*sizeof(MMG5_Par));
 
-  if ( (*mesh)->info.imprim>5 || (*mesh)->info.ddebug )
-    printf("  MEMORY USED AT END (bytes) %ld\n",_MMG5_safeLL2LCast((*mesh)->memCur));
+  if ( (*mesh)->info.imprim>5 || (*mesh)->info.ddebug ) {
+    castedVal = _MMG5_safeLL2LCast((*mesh)->memCur);
+    printf("  MEMORY USED AT END (bytes) %ld\n",castedVal);
+  }
 
   return;
 }

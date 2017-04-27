@@ -40,16 +40,16 @@
 
 #include "mmg2d.h"
 
-void MMG2D_Init_mesh(const int starter,...) {
+int MMG2D_Init_mesh(const int starter,...) {
   va_list argptr;
 
   va_start(argptr, starter);
 
-  _MMG2D_Init_mesh_var(argptr);
+  if ( !_MMG2D_Init_mesh_var(argptr) ) return 0;
 
   va_end(argptr);
 
-  return;
+  return 1;
 }
 
 void MMG2D_Init_fileNames(MMG5_pMesh mesh,MMG5_pSol sol
@@ -268,16 +268,16 @@ int MMG2D_Set_meshSize(MMG5_pMesh mesh, int np, int nt, int na) {
   }
   _MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(MMG5_Point),"initial vertices",
                 printf("  Exit program.\n");
-                exit(EXIT_FAILURE));
-  _MMG5_SAFE_CALLOC(mesh->point,mesh->npmax+1,MMG5_Point);
+                return 0);
+  _MMG5_SAFE_CALLOC(mesh->point,mesh->npmax+1,MMG5_Point,0);
 
   _MMG5_ADD_MEM(mesh,(mesh->ntmax+1)*sizeof(MMG5_Tria),"initial triangles",return(0));
-  _MMG5_SAFE_CALLOC(mesh->tria,mesh->ntmax+1,MMG5_Tria);
+  _MMG5_SAFE_CALLOC(mesh->tria,mesh->ntmax+1,MMG5_Tria,0);
 
   mesh->namax =  mesh->na;
   if ( mesh->na ) {
     _MMG5_ADD_MEM(mesh,(mesh->namax+1)*sizeof(MMG5_Edge),"initial edges",return(0));
-    _MMG5_SAFE_CALLOC(mesh->edge,(mesh->namax+1),MMG5_Edge);
+    _MMG5_SAFE_CALLOC(mesh->edge,(mesh->namax+1),MMG5_Edge,0);
   }
 
   /* keep track of empty links */
@@ -341,8 +341,8 @@ int MMG2D_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int
     sol->npmax = mesh->npmax;
     _MMG5_ADD_MEM(mesh,(sol->size*(sol->npmax+1))*sizeof(double),"initial solution",
                   printf("  Exit program.\n");
-                  exit(EXIT_FAILURE));
-    _MMG5_SAFE_CALLOC(sol->m,(sol->size*(sol->npmax+1)),double);
+                  return 0);
+    _MMG5_SAFE_CALLOC(sol->m,(sol->size*(sol->npmax+1)),double,0);
   }
   return(1);
 }

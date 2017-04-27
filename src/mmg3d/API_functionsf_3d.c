@@ -50,7 +50,7 @@ FORTRAN_VARIADIC ( MMG3D_INIT_MESH, mmg3d_init_mesh,
 
                  va_start(argptr, starter);
 
-                 _MMG3D_Init_mesh_var(argptr);
+                 if ( !_MMG3D_Init_mesh_var(argptr) ) exit(EXIT_FAILURE);
 
                  va_end(argptr);
 

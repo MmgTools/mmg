@@ -85,6 +85,8 @@ enum MMG2D_Param {
  * \param starter dummy argument used to initialize the variadic argument list
  * \param ... variadic arguments.
  *
+ * \return 1 if success, 0 if fail
+ *
  * For the MMGS_mmgslib function, you need
  * to call the \a MMGS_Init_mesh function with the following arguments :
  * MMGS_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh, MMG5_ARG_ppMet,
@@ -103,7 +105,7 @@ enum MMG2D_Param {
  * \remark No fortran interface to allow variadic arguments.
  *
  */
-void MMG2D_Init_mesh(const int starter,...);
+int MMG2D_Init_mesh(const int starter,...);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -289,7 +291,7 @@ int MMG2D_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity,
  * \param c1 coordinate of the point along the second dimension.
  * \param ref point reference.
  * \param pos position of the point in the mesh.
- * \return 1.
+ * \return 1 if success, 0 if fail.
  *
  * Set vertex of coordinates \a c0, \a c1 and reference \a ref
  * at position \a pos in mesh structure

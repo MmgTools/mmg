@@ -35,7 +35,14 @@
 
 #include "mmgs.h"
 
-/* topology: set adjacent, detect Moebius, flip faces, count connected comp. */
+/**
+ * \param mesh pointer toward the mesh
+ *
+ * \return 1 if success, 0 if fail
+ *
+ * topology: set adjacent, detect Moebius, flip faces, count connected comp.
+ *
+ */
 static int setadj(MMG5_pMesh mesh){
   MMG5_pTria   pt,pt1;
   int          *adja,*adjb,adji1,adji2,*pile,iad,ipil,ip1,ip2,gen;
@@ -46,7 +53,7 @@ static int setadj(MMG5_pMesh mesh){
   if ( abs(mesh->info.imprim) > 5  || mesh->info.ddebug )
     fprintf(stdout,"  ** SETTING TOPOLOGY\n");
 
-  _MMG5_SAFE_MALLOC(pile,mesh->nt+1,int);
+  _MMG5_SAFE_MALLOC(pile,mesh->nt+1,int,0);
 
   pile[1]  = 1;
   ipil     = 1;
@@ -586,7 +593,7 @@ static int norver(MMG5_pMesh mesh) {
   /* memory to store normals on both sides of ridges */
   mesh->xpmax = MG_MAX(1.5*xp,_MMGS_XPMAX);
   _MMG5_ADD_MEM(mesh,(mesh->xpmax+1)*sizeof(MMG5_xPoint),"boundary points",return(0));
-  _MMG5_SAFE_CALLOC(mesh->xpoint,mesh->xpmax+1,MMG5_xPoint);
+  _MMG5_SAFE_CALLOC(mesh->xpoint,mesh->xpmax+1,MMG5_xPoint,0);
 
   if ( xp ) {
     /* 2. process C0 vertices on curves, tangents */
@@ -610,7 +617,7 @@ static int norver(MMG5_pMesh mesh) {
           _MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,MMG5_xPoint,
                              "larger xpoint table",
                              mesh->xp--;
-                             return(0));
+                             return(0),0);
         }
         ppt->xp = mesh->xp;
         go = &mesh->xpoint[mesh->xp];
@@ -691,7 +698,7 @@ static int regnor(MMG5_pMesh mesh) {
   }
 
   /* allocate memory for normals */
-  _MMG5_SAFE_CALLOC(tabl,3*mesh->np+1,double);
+  _MMG5_SAFE_CALLOC(tabl,3*mesh->np+1,double,0);
 
   it   = 0;
   nit  = 2;

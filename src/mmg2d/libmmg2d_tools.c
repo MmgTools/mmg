@@ -60,7 +60,15 @@ void MMG2D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
   return;
 }
 
-/* Read parameter file DEFAULT.mmg2d */
+/**
+ * \param mesh pointer toward the mesh
+ * \param met pointer toward the metric
+ *
+ * \return 1 if success, 0 if fail
+ *
+ * Read parameter file DEFAULT.mmg2d
+ *
+ */
 int MMG2_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
   int      ret,i,nspl,nun;
   char     *ptr,data[256];
@@ -94,7 +102,7 @@ int MMG2_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
       ret = fscanf(in,"%d",&mesh->info.nmat);
       
       if ( mesh->info.nmat ) {
-        _MMG5_SAFE_CALLOC(mesh->info.mat,mesh->info.nmat,MMG5_Mat);
+        _MMG5_SAFE_CALLOC(mesh->info.mat,mesh->info.nmat,MMG5_Mat,0);
         for (i=0; i<mesh->info.nmat; i++) {
           pm = &mesh->info.mat[i];
           fscanf(in,"%d",&pm->ref);

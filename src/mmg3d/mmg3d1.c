@@ -1128,7 +1128,7 @@ _MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
                               _MMG5_INCREASE_MEM_MESSAGE();
                               memlack=1;
                               goto split
-                              ,o,0);
+                              ,o,0,-1);
           p1  = &mesh->point[ip1];
           p2  = &mesh->point[ip2];
         }
@@ -1404,9 +1404,8 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
                               fprintf(stderr,"  ## Error: unable to allocate a new point.\n");
                               _MMG5_INCREASE_MEM_MESSAGE();
-                              _MMG3D_delPatternPts(mesh,hash);
-                              return(-1)
-                              ,o,MG_BDY);
+                              _MMG3D_delPatternPts(mesh,hash);return -1;
+                              ,o,MG_BDY,-1);
           // Now pb->p contain a wrong memory address.
           pb.p[0] = &mesh->point[ptt.v[0]];
           pb.p[1] = &mesh->point[ptt.v[1]];

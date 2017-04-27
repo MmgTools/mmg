@@ -162,6 +162,7 @@ int _MMG5_getnElt(MMG5_pMesh mesh,int n) {
 /** memory repartition for the -m option */
 void _MMG2D_memOption(MMG5_pMesh mesh) {
   long long  million = 1048576L;
+  long       castedVal;
   int        ctri,npask,bytes,memtmp;
 
   mesh->memMax = _MMG5_memSize();
@@ -185,7 +186,8 @@ void _MMG2D_memOption(MMG5_pMesh mesh) {
     /* memory asked by user if possible, otherwise total physical memory */
     if ( (long long)(mesh->info.mem)*million > mesh->memMax && mesh->memMax ) {
       fprintf(stdout,"  ## Warning: asking for %d Mo of memory ",mesh->info.mem);
-      fprintf(stdout,"when only %ld available.\n",_MMG5_safeLL2LCast((long long)(mesh->memMax/million)));
+      castedVal = _MMG5_safeLL2LCast(mesh->memMax/million);
+      fprintf(stdout,"when only %ld available.\n",castedVal);
     }
     else {
       mesh->memMax= (long long)(mesh->info.mem)*million;
@@ -228,9 +230,10 @@ void _MMG2D_memOption(MMG5_pMesh mesh) {
     }
   }
 
-  if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
-    fprintf(stdout,"  MAXIMUM MEMORY AUTHORIZED (Mo)    %ld\n",
-            _MMG5_safeLL2LCast((long long)(mesh->memMax/million)));
+  if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug ) {
+    castedVal = _MMG5_safeLL2LCast(mesh->memMax/million);
+    fprintf(stdout,"  MAXIMUM MEMORY AUTHORIZED (Mo)    %ld\n",castedVal);
+  }
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {
     fprintf(stdout,"  _MMG2D_NPMAX    %d\n",mesh->npmax);
@@ -248,21 +251,21 @@ int MMG2D_zaldy(MMG5_pMesh mesh) {
 
   _MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(MMG5_Point),"initial vertices",
                 printf("  Exit program.\n");
-                exit(EXIT_FAILURE));
-  _MMG5_SAFE_CALLOC(mesh->point,mesh->npmax+1,MMG5_Point);
+                return 0);
+  _MMG5_SAFE_CALLOC(mesh->point,mesh->npmax+1,MMG5_Point,0);
 
   if ( mesh->xp ) {
     _MMG5_ADD_MEM(mesh,(mesh->xpmax+1)*sizeof(MMG5_xPoint),"initial xpoint",return(0));
-    _MMG5_SAFE_CALLOC(mesh->xpoint,mesh->xpmax+1,MMG5_xPoint);
+    _MMG5_SAFE_CALLOC(mesh->xpoint,mesh->xpmax+1,MMG5_xPoint,0);
     memset(&mesh->xpoint[0],0,sizeof(MMG5_xPoint));
   }
   _MMG5_ADD_MEM(mesh,(mesh->ntmax+1)*sizeof(MMG5_Tria),"initial triangles",return(0));
-  _MMG5_SAFE_CALLOC(mesh->tria,mesh->ntmax+1,MMG5_Tria);
+  _MMG5_SAFE_CALLOC(mesh->tria,mesh->ntmax+1,MMG5_Tria,0);
   memset(&mesh->tria[0],0,sizeof(MMG5_Tria));
 
   if ( mesh->na ) {
     _MMG5_ADD_MEM(mesh,(mesh->namax+1)*sizeof(MMG5_Edge),"initial edges",return(0));
-    _MMG5_SAFE_CALLOC(mesh->edge,(mesh->namax+1),MMG5_Edge);
+    _MMG5_SAFE_CALLOC(mesh->edge,(mesh->namax+1),MMG5_Edge,0);
   }
 
   /* keep track of empty links */
@@ -284,4 +287,3 @@ int MMG2D_zaldy(MMG5_pMesh mesh) {
 
   return(1);
 }
-

@@ -445,7 +445,8 @@ long long _MMG5_memSize (void) {
 }
 
 /**
-*Safe cast into a long */
+ * Safe cast into a long
+ */
 inline
 long _MMG5_safeLL2LCast(long long val)
 {
@@ -456,7 +457,25 @@ long _MMG5_safeLL2LCast(long long val)
   if ( (long long)(tmp_l) != val ) {
         fprintf(stderr,"  ## Error:");
         fprintf(stderr," unable to cast value.n");
-        exit(EXIT_FAILURE);
+        return 0.;
+  }
+  return(tmp_l);
+}
+
+/**
+ * Safe cast into an int
+ */
+inline
+long _MMG5_safeLL2ICast(long long val)
+{
+  int tmp_l;
+
+  tmp_l  = (int)(val);
+
+  if ( (long long)(tmp_l) != val ) {
+        fprintf(stderr,"  ## Error:");
+        fprintf(stderr," unable to cast value.n");
+        return 0.;
   }
   return(tmp_l);
 }
@@ -477,7 +496,7 @@ int _MMG5_Alloc_inode( MMG5_pMesh mesh, _MMG5_iNode **node ) {
   _MMG5_ADD_MEM(mesh,sizeof(_MMG5_iNode),"boundary reference node",
                 return(0););
 
-  _MMG5_SAFE_MALLOC(*node,1,_MMG5_iNode);
+  _MMG5_SAFE_MALLOC(*node,1,_MMG5_iNode,0);
 
   return(1);
 }
@@ -575,7 +594,7 @@ int _MMG5_Alloc_dnode( MMG5_pMesh mesh, _MMG5_dNode **node ) {
   _MMG5_ADD_MEM(mesh,sizeof(_MMG5_dNode),"node for hausdorff eval",
                 return(0););
 
-  _MMG5_SAFE_MALLOC(*node,1,_MMG5_dNode);
+  _MMG5_SAFE_MALLOC(*node,1,_MMG5_dNode,0);
 
   return(1);
 }

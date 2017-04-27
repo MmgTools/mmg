@@ -108,7 +108,8 @@ int _MMG5_hashEdgeDelone(MMG5_pMesh mesh,_MMG5_Hash *hash,int iel,int i,int *v) 
     ha->nxt   = 0;
 
     if ( hash->nxt >= hash->max ) {
-      _MMG5_TAB_RECALLOC(mesh,hash->item,hash->max,0.2,_MMG5_hedge,"face",return(0));
+      _MMG5_TAB_RECALLOC(mesh,hash->item,hash->max,0.2,_MMG5_hedge,"face",
+	                       return 0;,0);
       for (j=hash->nxt; j<hash->max; j++)  hash->item[j].nxt = j+1;
     }
     return(1);
@@ -213,8 +214,7 @@ int _MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
                             mesh->tetra[ielnum[ll]].v[0] = 1;
                             if ( !_MMG3D_delElt(mesh,ielnum[ll]) )  return -1;
                           }
-                          return(-1);
-        );
+                          return -1;,-1);
     }
   }
 
@@ -280,8 +280,7 @@ int _MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
                 _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                    "larger xtetra table",
                                    mesh->xt--;
-                                   fprintf(stderr,"  Exit program.\n");
-                                   return -1);
+                                   fprintf(stderr,"  Exit program.\n"); return -1;,-1);
               }
               pt1->xt = mesh->xt;
               pxt0 = &mesh->xtetra[pt1->xt];

@@ -33,11 +33,11 @@ pBucket MMG2_newBucket(MMG5_pMesh mesh,int nmax) {
   int      k,ic,ii,jj;
 
   /* memory alloc */
-  _MMG5_SAFE_CALLOC(bucket,1,Bucket);
+  _MMG5_SAFE_CALLOC(bucket,1,Bucket,0);
 
   bucket->size = nmax;
-  _MMG5_SAFE_CALLOC(bucket->head,nmax*nmax*nmax+1,int);
-  _MMG5_SAFE_CALLOC(bucket->link,mesh->npmax+1,int);
+  _MMG5_SAFE_CALLOC(bucket->head,nmax*nmax*nmax+1,int,0);
+  _MMG5_SAFE_CALLOC(bucket->link,mesh->npmax+1,int,0);
 
 
   /* insert vertices */

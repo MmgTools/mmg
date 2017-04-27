@@ -99,12 +99,14 @@ enum MMGS_Param {
  * Here,\a your_mesh is a \a MMG5_pMesh, \a your_metric and \a your_level_set
  * are \a MMG5_pSol.
  *
+ * \return 1 if success, 0 if fail
+ *
  * MMG structures allocation and initialization.
  *
  * \remark No fortran interface to allow variadic arguments.
  *
  */
-void MMGS_Init_mesh(const int starter,...);
+int MMGS_Init_mesh(const int starter,...);
 
 /**
  * \param mesh pointer toward the mesh structure.

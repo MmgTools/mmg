@@ -62,7 +62,7 @@ int _MMG5_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree, int
   double               calold,calnew,*callist,det;
   int                  k,iel,i0;
   // Dynamic alloc for windows comptibility
-  _MMG5_SAFE_MALLOC(callist, ilist, double);
+  _MMG5_SAFE_MALLOC(callist, ilist, double,0);
 
   pt0    = &mesh->tetra[0];
   ppt0   = &mesh->point[0];
@@ -204,7 +204,7 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
   static int        warn = 0;
 
   // Dynamic alloc for windows comptibility
-  _MMG5_SAFE_MALLOC(callist, ilistv, double);
+  _MMG5_SAFE_MALLOC(callist, ilistv, double,0);
 
   step = 0.1;
   if ( ilists < 2 )      return(0);
@@ -513,8 +513,7 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
   if ( nxp > mesh->xpmax ) {
     _MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,MMG5_xPoint,
                        "larger xpoint table",
-                       _MMG5_SAFE_FREE(callist);
-                       return(0));
+                       _MMG5_SAFE_FREE(callist);return 0;,0);
     n = &(mesh->xpoint[p0->xp].n1[0]);
   }
   ppt0->xp = nxp;
@@ -881,8 +880,7 @@ int _MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
   nxp = mesh->xp + 1;
   if ( nxp > mesh->xpmax ) {
     _MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,MMG5_xPoint,
-                       "larger xpoint table",
-                       return(0));
+                       "larger xpoint table",return 0;,0);
   }
   ppt0->xp = nxp;
   pxp = &mesh->xpoint[nxp];
@@ -976,7 +974,7 @@ int _MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
 
   /* Test : check whether all volumes remain positive with new position of the point */
   // Dynamic allocations for windows compatibility
-  _MMG5_SAFE_MALLOC(callist, ilistv, double);
+  _MMG5_SAFE_MALLOC(callist, ilistv, double,0);
 
   calold = calnew = DBL_MAX;
   for( l=0 ; l<ilistv ; l++ ){
@@ -1239,8 +1237,7 @@ int _MMG5_movbdynompt_ani(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree, 
   nxp = mesh->xp + 1;
   if ( nxp > mesh->xpmax ) {
     _MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,MMG5_xPoint,
-                       "larger xpoint table",
-                       return(0));
+                       "larger xpoint table",return 0;,0);
   }
   ppt0->xp = nxp;
   pxp = &mesh->xpoint[nxp];
@@ -1336,7 +1333,7 @@ int _MMG5_movbdynompt_ani(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree, 
 
   /* Test : check whether all volumes remain positive with new position of the point */
   // Dynamic allocations for windows compatibility
-  _MMG5_SAFE_MALLOC(callist, ilistv, double);
+  _MMG5_SAFE_MALLOC(callist, ilistv, double,0);
 
   calold = calnew = DBL_MAX;
   for( l=0 ; l<ilistv ; l++ ){
@@ -1601,8 +1598,7 @@ int _MMG5_movbdyridpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
   nxp = mesh->xp+1;
   if ( nxp > mesh->xpmax ) {
     _MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,MMG5_xPoint,
-                       "larger xpoint table",
-                       return(0));
+                       "larger xpoint table",return 0;,0);
   }
   ppt0->xp = nxp;
   pxp = &mesh->xpoint[nxp];
@@ -1703,7 +1699,7 @@ int _MMG5_movbdyridpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
 
   /* Test : check whether all volumes remain positive with new position of the point */
   // Dynamic allocations for windows compatibility
-  _MMG5_SAFE_MALLOC(callist, ilistv, double);
+  _MMG5_SAFE_MALLOC(callist, ilistv, double,0);
 
   calold = calnew = DBL_MAX;
   for (l=0; l<ilistv; l++) {

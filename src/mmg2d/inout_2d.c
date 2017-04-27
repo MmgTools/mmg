@@ -96,7 +96,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
   mesh->np = mesh->nt = mesh->na = mesh->xp = 0;
   nq = 0;
 
-  _MMG5_SAFE_CALLOC(data,strlen(filename)+7,char);
+  _MMG5_SAFE_CALLOC(data,strlen(filename)+7,char,0);
   strcpy(data,filename);
   ptr = strstr(data,".mesh");
   if ( !ptr ) {
@@ -548,7 +548,8 @@ int MMG2D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 }
 
 
-/* Load metric; btyp = 1: scalar size function; btyp = 2: (vector) displacement; btyp = 3: anisotropic metric tensor */
+/* Load metric; btyp = 1: scalar size function; btyp = 2: (vector) displacement;
+ * btyp = 3: anisotropic metric tensor */
 int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   FILE       *inm;
   float       fsol;
@@ -558,7 +559,7 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   char        *ptr,*data,chaine[128];
 
   bin = 0;
-  _MMG5_SAFE_CALLOC(data,strlen(filename)+6,char);
+  _MMG5_SAFE_CALLOC(data,strlen(filename)+6,char,-1);
   strcpy(data,filename);
 
   ptr = strstr(data,".sol");
@@ -675,8 +676,8 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
     return(-1);
   }
 
-  /* btyp = 1: scalar solution (isotropic metric or ls function, 
-     btyp = 2: vector field (displacement in Lagrangian mode), 
+  /* btyp = 1: scalar solution (isotropic metric or ls function,
+     btyp = 2: vector field (displacement in Lagrangian mode),
      btyp = 3: anisotropic metric */
   if ( btyp!= 1 && btyp != 2 && btyp != 3 ) {
     fprintf(stdout,"  ** DATA IGNORED\n");
@@ -689,7 +690,7 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   /* mem alloc */
   _MMG5_ADD_MEM(mesh,(sol->size*(mesh->npmax+1))*sizeof(double),
                 "initial solution",return(0));
-  _MMG5_SAFE_CALLOC(sol->m,(sol->size*(mesh->npmax+1)),double);
+  _MMG5_SAFE_CALLOC(sol->m,(sol->size*(mesh->npmax+1)),double,-1);
 
   /* Read mesh solutions */
   rewind(inm);
@@ -727,16 +728,6 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   return(1);
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
- *
- * Save mesh data.
- *
- * \warning you must call the \a MMG2_tassage function before saving your
- * mesh.
- */
 int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
   FILE*             inm;
   MMG5_pPoint       ppt;
@@ -751,7 +742,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
   bin = 0;
 
   /* Name of file */
-  _MMG5_SAFE_CALLOC(data,strlen(filename)+7,char);
+  _MMG5_SAFE_CALLOC(data,strlen(filename)+7,char,0);
   strcpy(data,filename);
   ptr = strstr(data,".mesh");
   if ( !ptr ) {
@@ -1204,7 +1195,7 @@ int MMG2D_saveSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   if ( !sol->np )  return(1);
   bin = 0;
 
-  _MMG5_SAFE_CALLOC(data,strlen(filename)+6,char);
+  _MMG5_SAFE_CALLOC(data,strlen(filename)+6,char,0);
   strcpy(data,filename);
 
   ptr = strstr(data,".sol");
@@ -1283,7 +1274,7 @@ int MMG2D_saveSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
     if ( !M_VOK(ppt) )  continue;
     nbl++;
   }
-  
+
   if ( !bin ) {
     strcpy(&chaine[0],"\n\nSolAtVertices\n");
     fprintf(inm,"%s",chaine);
@@ -1447,7 +1438,7 @@ int _MMG2_savemet_db(MMG5_pMesh mesh,MMG5_pSol met,char *filename,char pack) {
   if ( met->size == 1 ) typ =1;
   else if ( met->size == 3 ) typ = 3;
 
-  _MMG5_SAFE_CALLOC(data,strlen(filename)+6,char);
+  _MMG5_SAFE_CALLOC(data,strlen(filename)+6,char,0);
   strcpy(data,filename);
   ptr = strstr(data,".mesh");
   if ( ptr )
@@ -1504,7 +1495,7 @@ int _MMG2_savenor_db(MMG5_pMesh mesh,char *filename,char pack) {
   char               *ptr,*data;
   FILE               *out;
 
-  _MMG5_SAFE_CALLOC(data,strlen(filename)+6,char);
+  _MMG5_SAFE_CALLOC(data,strlen(filename)+6,char,0);
   strcpy(data,filename);
   ptr = strstr(data,".mesh");
   if ( ptr )
@@ -1559,7 +1550,7 @@ int _MMG2_savedisp_db(MMG5_pMesh mesh,MMG5_pSol disp,char *filename,char pack) {
   char               *ptr,*data;
   FILE               *out;
 
-  _MMG5_SAFE_CALLOC(data,strlen(filename)+6,char);
+  _MMG5_SAFE_CALLOC(data,strlen(filename)+6,char,0);
   strcpy(data,filename);
   ptr = strstr(data,".sol");
   if ( ptr )

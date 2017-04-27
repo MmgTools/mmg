@@ -82,12 +82,12 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
   int        imin,iq;
   int        ii;
   double     lmaxtet,lmintet,volmin;
-  int        imaxtet,imintet,base;
+  int        imaxtet,imintet;//,base;
 
   /*first try to adapt the bdry so very strict criterion on the volume for Delaunay insertion*/
   volmin=1e-15;
 
-  base  = ++mesh->mark;
+  //base  = ++mesh->mark;
   for (k=1; k<=ne; k++) {
     pt = &mesh->tetra[k];
     if ( !MG_EOK(pt)  || (pt->tag & MG_REQ) )   continue;
@@ -186,7 +186,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
           _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
                               *warn=1;
                               goto collapse,
-                              o,tag);
+                              o,tag,-1);
         }
         if ( met->m ) {
           if ( _MMG5_intmet(mesh,met,k,imax,ip,0.5) <=0 ) {
@@ -262,7 +262,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
           _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
                               *warn=1;
                               goto collapse,
-                              o,MG_NOTAG);
+                              o,MG_NOTAG,-1);
         }
         ppt = &mesh->point[ip];
         if ( met->m ) {
@@ -308,7 +308,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
           _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
                               *warn=1;
                               goto collapse,
-                              o,MG_NOTAG);
+                              o,MG_NOTAG,-1);
         }
         ppt = &mesh->point[ip];
         if ( met->m ) {
@@ -511,7 +511,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
             _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
                                 *warn=1;
                                 goto collapse2//break
-                                ,o,tag);
+                                ,o,tag,-1);
           }
           if ( met->m ) {
             if ( _MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
@@ -586,7 +586,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
             _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
                                 *warn=1;
                                 goto collapse2
-                                ,o,MG_NOTAG);
+                                ,o,MG_NOTAG,-1);
           }
           ppt = &mesh->point[ip];
           if ( met->m ) {
@@ -630,7 +630,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
             _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
                                 *warn=1;
                                 goto collapse2,
-                                o,MG_NOTAG);
+                                o,MG_NOTAG,-1);
           }
           ppt = &mesh->point[ip];
           if ( met->m ) {
@@ -931,8 +931,7 @@ _MMG5_optetLES(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
  */
 static int
 _MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
-  MMG5_pTetra pt;
-  int it,nnm,nnf,maxit,nm,nf,nw,k;
+  int it,nnm,nnf,maxit,nm,nf,nw;
   double crit;
 
   /* shape optim */

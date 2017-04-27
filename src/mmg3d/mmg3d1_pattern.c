@@ -152,7 +152,7 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
         _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
                             *warn=1;
                             break
-                            ,o,tag);
+                            ,o,tag,-1);
       }
       if ( met->m ) {
         ier = _MMG5_intmet(mesh,met,k,imax,ip,0.5);
@@ -225,7 +225,7 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
         _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
                             *warn=1;
                             break
-                            ,o,MG_NOTAG);
+                            ,o,MG_NOTAG,-1);
       }
       ppt = &mesh->point[ip];
       if ( met->m ) {

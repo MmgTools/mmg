@@ -193,62 +193,60 @@ extern "C" {
   }while(0)
 
 /** Safe allocation with calloc */
-#define _MMG5_SAFE_CALLOC(ptr,size,type) do     \
-  {                                             \
-    ptr = (type *)calloc((size),sizeof(type));  \
-    if ( !ptr ) {                               \
-      perror("  ## Memory problem: calloc");    \
-      exit(EXIT_FAILURE);                       \
-    }                                           \
+#define _MMG5_SAFE_CALLOC(ptr,size,type,retval) do  \
+  {                                                 \
+    ptr = (type *)calloc((size),sizeof(type));      \
+    if ( !ptr ) {                                   \
+      perror("  ## Memory problem: calloc");        \
+      return retval;                                \
+    }                                               \
   }while(0)
 
 /** Safe allocation with malloc */
-#define _MMG5_SAFE_MALLOC(ptr,size,type) do     \
-  {                                             \
-    ptr = (type *)malloc((size)*sizeof(type));  \
-    if ( !ptr ) {                               \
-      perror("  ## Memory problem: malloc");    \
-      exit(EXIT_FAILURE);                       \
-    }                                           \
+#define _MMG5_SAFE_MALLOC(ptr,size,type,retval) do  \
+  {                                                 \
+    ptr = (type *)malloc((size)*sizeof(type));      \
+    if ( !ptr ) {                                   \
+      perror("  ## Memory problem: malloc");        \
+      return retval;                                \
+    }                                               \
   }while(0)
 
 /** Safe reallocation */
-#define _MMG5_SAFE_REALLOC(ptr,size,type,message) do        \
+#define _MMG5_SAFE_REALLOC(ptr,size,type,message,retval) do \
   {                                                         \
     type* tmp;                                              \
     tmp = (type *)realloc((ptr),(size)*sizeof(type));       \
     if ( !tmp ) {                                           \
       _MMG5_SAFE_FREE(ptr);                                 \
       perror(" ## Memory problem: realloc");                \
-      exit(EXIT_FAILURE);                                   \
+      return retval;                                        \
     }                                                       \
                                                             \
     (ptr) = tmp;                                            \
   }while(0)
 
 /** safe reallocation with memset at 0 for the new values of tab */
-#define _MMG5_SAFE_RECALLOC(ptr,prevSize,newSize,type,message) do \
-  {                                                               \
-    type* tmp;                                                    \
-    int k;                                                        \
-                                                                  \
-    tmp = (type *)realloc((ptr),(newSize)*sizeof(type));          \
-    if ( !tmp ) {                                                 \
-      _MMG5_SAFE_FREE(ptr);                                       \
-      perror(" ## Memory problem: realloc");                      \
-      exit(EXIT_FAILURE);                                         \
-    }                                                             \
-                                                                  \
-    (ptr) = tmp;                                                  \
-    for ( k=prevSize; k<newSize; k++) {                           \
-      memset(&ptr[k],0,sizeof(type));                             \
-    }                                                             \
+#define _MMG5_SAFE_RECALLOC(ptr,prevSize,newSize,type,message,retval) do \
+  {                                                                     \
+    type* tmp;                                                          \
+                                                                        \
+    tmp = (type *)realloc((ptr),(newSize)*sizeof(type));                \
+    if ( !tmp ) {                                                       \
+      _MMG5_SAFE_FREE(ptr);                                             \
+      perror(" ## Memory problem: realloc");                            \
+      return retval;                                                    \
+    }                                                                   \
+                                                                        \
+    (ptr) = tmp;                                                        \
+    if ( newSize > prevSize )                                           \
+      memset(&ptr[prevSize],0,(newSize-prevSize)*sizeof(type));         \
   }while(0)
 
 /** Reallocation of ptr of type type at size (initSize+wantedGap*initSize)
     if possible or at maximum available size if not. Execute the command law
     if reallocation failed. Memset to 0 for the new values of table. */
-#define _MMG5_TAB_RECALLOC(mesh,ptr,initSize,wantedGap,type,message,law) do \
+#define _MMG5_TAB_RECALLOC(mesh,ptr,initSize,wantedGap,type,message,law,retval) do \
   {                                                                     \
     int gap;                                                            \
                                                                         \
@@ -267,7 +265,7 @@ extern "C" {
       gap = (int)(wantedGap*initSize);                                  \
                                                                         \
     _MMG5_ADD_MEM(mesh,gap*sizeof(type),message,law);                   \
-    _MMG5_SAFE_RECALLOC((ptr),initSize+1,initSize+gap+1,type,message);  \
+    _MMG5_SAFE_RECALLOC((ptr),initSize+1,initSize+gap+1,type,message,retval); \
     initSize = initSize+gap;                                            \
   }while(0);
 

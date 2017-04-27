@@ -86,7 +86,7 @@ static int _MMG5_setadj(MMG5_pMesh mesh){
   char    i,ii,i1,i2,ii1,ii2,voy;
 
   nvf = nf = ncc = ned = 0;
-  _MMG5_SAFE_MALLOC(pile,mesh->nt+1,int);
+  _MMG5_SAFE_MALLOC(pile,mesh->nt+1,int,0);
 
   pile[1] = 1;
   ipil    = 1;
@@ -434,7 +434,7 @@ static int _MMG5_norver(MMG5_pMesh mesh) {
   mesh->xpmax  = MG_MAX( (long long)(1.5*mesh->xp),mesh->npmax);
 
   _MMG5_ADD_MEM(mesh,(mesh->xpmax+1)*sizeof(MMG5_xPoint),"boundary points",return(0));
-  _MMG5_SAFE_CALLOC(mesh->xpoint,mesh->xpmax+1,MMG5_xPoint);
+  _MMG5_SAFE_CALLOC(mesh->xpoint,mesh->xpmax+1,MMG5_xPoint,0);
 
   /* compute normals + tangents */
   nn = ng = nt = nf = 0;
@@ -465,8 +465,7 @@ static int _MMG5_norver(MMG5_pMesh mesh) {
         if(mesh->xp > mesh->xpmax){
           _MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,MMG5_xPoint,
                              "larger xpoint table",
-                             mesh->xp--;
-                             return(0));
+                             mesh->xp--;return(0);,0);
         }
         ppt->xp = mesh->xp;
         pxp = &mesh->xpoint[ppt->xp];
@@ -487,8 +486,7 @@ static int _MMG5_norver(MMG5_pMesh mesh) {
       if(mesh->xp > mesh->xpmax){
         _MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,MMG5_xPoint,
                            "larger xpoint table",
-                           mesh->xp--;
-                           return(0));
+                           mesh->xp--;return 0;,0);
       }
       ppt->xp = mesh->xp;
       pxp = &mesh->xpoint[ppt->xp];
@@ -598,8 +596,8 @@ static int _MMG3D_nmgeom(MMG5_pMesh mesh){
               _MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,MMG5_xPoint,
                                  "larger xpoint table",
                                  mesh->xp--;
-                                 fprintf(stderr,"  Exit program.\n");
-                                 return 0;);
+                                 fprintf(stderr,"  Exit program.\n");return 0;,
+                                 0);
             }
             p0->xp = mesh->xp;
           }

@@ -262,7 +262,7 @@ int _MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,int *list,
                         printf("  ## Error: unable to allocate a new point\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
                         return(-1)
-                        ,m,0);
+                        ,m,0,-1);
   }
   if ( met->m ) {
     if ( typchk == 1 && (met->size>1) ) {

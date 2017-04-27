@@ -395,7 +395,7 @@ static int _MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol/*,double *tmp*/){
   MMG5_pPoint   p0,p1;
   _MMG5_Hash     hash;
   double   c[3],v0,v1,s;
-  int      vx[6],nb,k,ip0,ip1,np,ns,ne;
+  int      vx[6],nb,k,ip0,ip1,np,ns,ne,ier;
   char     ia;
   /* Commented because unused */
   /*MMG5_pPoint  p[4];*/
@@ -536,7 +536,7 @@ static int _MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol/*,double *tmp*/){
                             fprintf(stderr,"  ## Error: unable to allocate a new point\n");
                             _MMG5_INCREASE_MEM_MESSAGE();
                             return(0)
-                            ,c,0);
+                            ,c,0,0);
       }
       sol->m[np] = mesh->info.ls;
       _MMG5_hashEdge(mesh,&hash,ip0,ip1,np);
@@ -544,8 +544,9 @@ static int _MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol/*,double *tmp*/){
   }
 
   /* Proceed to splitting, according to flags to tets */
-  ne = mesh->ne;
-  ns = 0;
+  ne  = mesh->ne;
+  ns  = 0;
+  ier = 1;
   for (k=1; k<=ne; k++) {
     pt = &mesh->tetra[k];
     if ( !MG_EOK(pt) || (pt->tag & MG_REQ) )  continue;
@@ -557,23 +558,23 @@ static int _MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol/*,double *tmp*/){
     }
     switch (pt->flag) {
     case 1: case 2: case 4: case 8: case 16: case 32: /* 1 edge split */
-      _MMG5_split1(mesh,sol,k,vx,1);
+      ier = _MMG5_split1(mesh,sol,k,vx,1);
       ns++;
       break;
 
     case 48: case 24: case 40: case 6: case 34: case 36:
     case 20: case 5: case 17: case 9: case 3: case 10: /* 2 edges (same face) split */
-      _MMG5_split2sf(mesh,sol,k,vx,1);
+      ier = _MMG5_split2sf(mesh,sol,k,vx,1);
       ns++;
       break;
 
     case 7: case 25: case 42: case 52: /* 3 edges on conic configuration splitted */
-      _MMG5_split3cone(mesh,sol,k,vx,1);
+      ier = _MMG5_split3cone(mesh,sol,k,vx,1);
       ns++;
       break;
 
     case 30: case 45: case 51:
-      _MMG5_split4op(mesh,sol,k,vx,1);
+      ier = _MMG5_split4op(mesh,sol,k,vx,1);
       ns++;
       break;
 
@@ -581,6 +582,7 @@ static int _MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol/*,double *tmp*/){
       assert(pt->flag == 0);
       break;
     }
+    if ( !ier ) return 0;
   }
   if ( (mesh->info.ddebug || abs(mesh->info.imprim) > 5) && ns > 0 )
     fprintf(stdout,"     %7d splitted\n",ns);
@@ -1432,7 +1434,7 @@ int _MMG3D_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol) {
   _MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(double),"temporary table",
                 fprintf(stderr,"  Exit program.\n");
                 return 0);
-  _MMG5_SAFE_CALLOC(tmp,mesh->npmax+1,double);
+  _MMG5_SAFE_CALLOC(tmp,mesh->npmax+1,double,0);
 
   /* Snap values of level set function if need be, then discretize it */
   if ( !_MMG3D_snpval_ls(mesh,sol,tmp) ) {

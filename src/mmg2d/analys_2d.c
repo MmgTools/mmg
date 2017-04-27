@@ -36,8 +36,15 @@
 
 extern char ddb;
 
-/** Set tags GEO and REF to triangles and points by traveling the mesh;
-    count number of subdomains or connected components */
+/**
+ * \param mesh pointer toward the mesh
+ *
+ * \return 1 if success, 0 if fail
+ *
+ * Set tags GEO and REF to triangles and points by traveling the mesh;
+ * count number of subdomains or connected components
+ *
+ */
 int _MMG2_setadj(MMG5_pMesh mesh) {
   MMG5_pTria       pt,pt1;
   int              *pile,*adja,ipil,k,kk,ncc,ip1,ip2,nr,nref;
@@ -46,7 +53,7 @@ int _MMG2_setadj(MMG5_pMesh mesh) {
   if ( abs(mesh->info.imprim) > 5  || mesh->info.ddebug )
     fprintf(stdout,"  ** SETTING TOPOLOGY\n");
 
-  _MMG5_SAFE_MALLOC(pile,mesh->nt+1,int);
+  _MMG5_SAFE_MALLOC(pile,mesh->nt+1,int,0);
 
   /* Initialization of the pile */
   ncc = 1;
@@ -308,7 +315,15 @@ int _MMG2_norver(MMG5_pMesh mesh) {
   return(1);
 }
 
-/** Regularize normal vectors at boundary non singular edges with a Laplacian / antilaplacian smoothing */
+/**
+ * \param mesh pointer toward the mesh
+ *
+ * \return 0 if fail, 1 if success
+ *
+ * Regularize normal vectors at boundary non singular edges with a Laplacian /
+ * antilaplacian smoothing
+ *
+ */
 int _MMG2_regnor(MMG5_pMesh mesh) {
   MMG5_pTria            pt;
   MMG5_pPoint           ppt,p1,p2;
@@ -324,7 +339,7 @@ int _MMG2_regnor(MMG5_pMesh mesh) {
   lm2 = 0.399;
 
   /* Temporary table for normal vectors */
-  _MMG5_SAFE_CALLOC(tmp,2*mesh->np+1,double);
+  _MMG5_SAFE_CALLOC(tmp,2*mesh->np+1,double,0);
 
   /* Allocate a seed to each point */
   for (k=1; k<=mesh->nt; k++) {

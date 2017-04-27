@@ -465,7 +465,7 @@ int _MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,
                         printf("  ## Error: unable to allocate a new point\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
                         return(-1)
-                        ,c,MG_BDY);
+                        ,c,MG_BDY,-1);
   }
   if ( met->m ) {
     if ( typchk == 1 && (met->size>1) ) {

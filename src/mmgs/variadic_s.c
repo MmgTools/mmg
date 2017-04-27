@@ -43,28 +43,30 @@
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the sol structure.
  *
+ * \return 0 if fail, 1 if success
+ *
  * Allocate the mesh and solutions structures at \a MMGS format.
  *
  */
 static inline
-void _MMGS_Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol) {
+int _MMGS_Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol) {
 
   /* mesh allocation */
   if ( *mesh )  _MMG5_SAFE_FREE(*mesh);
-  _MMG5_SAFE_CALLOC(*mesh,1,MMG5_Mesh);
+  _MMG5_SAFE_CALLOC(*mesh,1,MMG5_Mesh,0);
 
   /* sol allocation */
   if ( !sol ) {
     fprintf(stderr,"  ## Error: an allocatable solution structure of type \"MMG5_pSol\""
            " is needed.\n");
     fprintf(stderr,"            Exit program.\n");
-    exit(EXIT_FAILURE);
+    return 0;
   }
 
   if ( *sol )  _MMG5_DEL_MEM(*mesh,*sol,sizeof(MMG5_Sol));
-  _MMG5_SAFE_CALLOC(*sol,1,MMG5_Sol);
+  _MMG5_SAFE_CALLOC(*sol,1,MMG5_Sol,0);
 
-  return;
+  return 1;
 }
 /**
  * \param mesh pointer toward the mesh structure.
@@ -114,7 +116,7 @@ void _MMGS_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol ) {
  * Internal function for structure allocations (taking a va_list argument).
  *
  */
-void _MMGS_Init_mesh_var( va_list argptr ) {
+int _MMGS_Init_mesh_var( va_list argptr ) {
   MMG5_pMesh     *mesh;
   MMG5_pSol      *sol;
   int            typArg;
@@ -162,12 +164,12 @@ void _MMGS_Init_mesh_var( va_list argptr ) {
   }
 
   /* allocations */
-  _MMGS_Alloc_mesh(mesh,sol);
+  if ( !_MMGS_Alloc_mesh(mesh,sol) )  return 0;
 
   /* initialisations */
   _MMGS_Init_woalloc_mesh(*mesh,*sol);
 
-  return;
+  return 1;
 }
 
 /**
@@ -282,6 +284,7 @@ void _MMGS_Free_structures_var(va_list argptr)
 
   MMG5_pMesh     *mesh;
   MMG5_pSol      *sol;
+  long           castedVal;
   int            typArg;
   int            meshCount;
 
@@ -345,8 +348,10 @@ void _MMGS_Free_structures_var(va_list argptr)
   if ( (*mesh)->info.npar && (*mesh)->info.par )
     _MMG5_DEL_MEM((*mesh),(*mesh)->info.par,(*mesh)->info.npar*sizeof(MMG5_Par));
 
-  if ( (*mesh)->info.imprim>5 || (*mesh)->info.ddebug )
-    printf("  MEMORY USED AT END (bytes) %ld\n",_MMG5_safeLL2LCast((*mesh)->memCur));
+  if ( (*mesh)->info.imprim>5 || (*mesh)->info.ddebug ) {
+    castedVal = _MMG5_safeLL2LCast((*mesh)->memCur);
+    printf("  MEMORY USED AT END (bytes) %ld\n",castedVal);
+  }
 
   return;
 }

@@ -118,12 +118,14 @@ enum MMG3D_Param {
  * Here,\a your_mesh is a \a MMG5_pMesh, \a your_metric \a your_level_set and
  * \a your_displacement are \a MMG5_pSol.
  *
+ * \return 1 if success, 0 if fail
+ *
  * MMG structures allocation and initialization.
  *
  * \remark No fortran interface to allow variadic arguments.
  *
  */
-void MMG3D_Init_mesh(const int starter,...);
+int MMG3D_Init_mesh(const int starter,...);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the sol structure.

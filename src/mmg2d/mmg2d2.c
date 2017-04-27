@@ -198,7 +198,14 @@ int MMG2_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
   return(1);
 }
 
-/** Put different references on different subdomains */
+/**
+ * \param mesh pointer toward the mesh structure.
+ *
+ * \return 0 if fail, 1 if success.
+ *
+ * Put different references on different subdomains
+ *
+ */
 int MMG2_markSD(MMG5_pMesh mesh) {
   MMG5_pTria   pt,pt1;
   MMG5_pEdge   ped;
@@ -211,7 +218,7 @@ int MMG2_markSD(MMG5_pMesh mesh) {
   for(k=1 ; k<=mesh->nt ; k++)
     mesh->tria[k].flag = mesh->mark;
 
-  _MMG5_SAFE_CALLOC(list,mesh->nt,int);
+  _MMG5_SAFE_CALLOC(list,mesh->nt,int,0);
   kinit = 0;
   nref  = 0;
   ip1   =  mesh->np;
@@ -410,7 +417,7 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
   /* This part seems useless */
   /* Deal with periodic vertices */
   if ( mesh->info.renum == -10 ) {
-    _MMG5_SAFE_CALLOC(numper,mesh->np+1,int);
+    _MMG5_SAFE_CALLOC(numper,mesh->np+1,int,0);
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
       for (kk=k; kk<=mesh->np; kk++) {
@@ -446,9 +453,8 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
     /* reallocation of point table */
     _MMG2D_POINT_REALLOC(mesh,sol,ip1,mesh->gap,
                          printf("  ## Error: unable to allocate a new point\n");
-                         _MMG5_INCREASE_MEM_MESSAGE();
-                         return(-1)
-                         ,c,0);
+                         _MMG5_INCREASE_MEM_MESSAGE();return -1;,
+                         c,0,-1);
   }
 
   /* Top left corner */
@@ -459,9 +465,8 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
     /* reallocation of point table */
     _MMG2D_POINT_REALLOC(mesh,sol,ip2,mesh->gap,
                          printf("  ## Error: unable to allocate a new point\n");
-                         _MMG5_INCREASE_MEM_MESSAGE();
-                         return(-1)
-                         ,c,0);
+                         _MMG5_INCREASE_MEM_MESSAGE();return -1;,
+                         c,0,-1);
   }
 
   /* Bottom right corner */
@@ -472,9 +477,8 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
     /* reallocation of point table */
     _MMG2D_POINT_REALLOC(mesh,sol,ip3,mesh->gap,
                          printf("  ## Error: unable to allocate a new point\n");
-                         _MMG5_INCREASE_MEM_MESSAGE();
-                         return(-1)
-                         ,c,0);
+                         _MMG5_INCREASE_MEM_MESSAGE(); return -1;,
+                         c,0,-1);
   }
 
   /* Top right corner */
@@ -485,9 +489,8 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
     /* reallocation of point table */
     _MMG2D_POINT_REALLOC(mesh,sol,ip4,mesh->gap,
                          printf("  ## Error: unable to allocate a new point\n");
-                         _MMG5_INCREASE_MEM_MESSAGE();
-                         return(-1)
-                         ,c,0);
+                         _MMG5_INCREASE_MEM_MESSAGE(); return -1;,
+                         c,0,-1);
   }
 
   assert ( ip1 == mesh->np-3 );
@@ -501,8 +504,8 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
     _MMG2D_TRIA_REALLOC(mesh,jel,mesh->gap,
                        printf("  ## Error: unable to allocate a new element.\n");
                        _MMG5_INCREASE_MEM_MESSAGE();
-                       printf("  Exit program.\n");
-                       exit(EXIT_FAILURE));
+                       printf("  Exit program.\n");return -1;,
+                       -1);
   }
   pt       = &mesh->tria[jel];
   pt->v[0] = ip1;
@@ -515,8 +518,8 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
     _MMG2D_TRIA_REALLOC(mesh,kel,mesh->gap,
                        printf("  ## Error: unable to allocate a new element.\n");
                        _MMG5_INCREASE_MEM_MESSAGE();
-                       printf("  Exit program.\n");
-                       exit(EXIT_FAILURE));
+                       printf("  Exit program.\n");return -1;,
+                       -1);
   }
   pt   = &mesh->tria[kel];
   pt->v[0] = ip1;
@@ -547,8 +550,9 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
     if ( !_MMG5_chkmsh(mesh,1,0) ) exit(EXIT_FAILURE);
 
   /* Mark SubDomains and remove the bounding box triangles */
-  if ( mesh->na )
-    MMG2_markSD(mesh);
+  if ( mesh->na ) {
+   if ( ! MMG2_markSD(mesh) ) return 0;
+  }
   else {
     /* Tag triangles : in = base ; out = -base ; Undetermined = 0*/
     if ( !MMG2_settagtriangles(mesh,sol) ) return(0);

@@ -48,7 +48,7 @@ FORTRAN_VARIADIC ( MMGS_INIT_MESH, mmgs_init_mesh,
 
                  va_start(argptr, starter);
 
-                 _MMGS_Init_mesh_var(argptr);
+                 if ( !_MMGS_Init_mesh_var(argptr) ) exit(EXIT_FAILURE);
 
                  va_end(argptr);
 

@@ -1032,7 +1032,7 @@ int _MMG5_defmetvol(MMG5_pMesh mesh,MMG5_pSol met) {
     met->size  = 6;
     met->dim   = 3;
     _MMG5_ADD_MEM(mesh,(6*(met->npmax+1))*sizeof(double),"solution",return(0));
-    _MMG5_SAFE_MALLOC(met->m,(6*(mesh->npmax+1)),double);
+    _MMG5_SAFE_MALLOC(met->m,(6*(mesh->npmax+1)),double,0);
 
 
     for (k=1; k<=mesh->ne; k++) {

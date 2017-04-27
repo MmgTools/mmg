@@ -103,6 +103,7 @@ void _MMGS_delElt(MMG5_pMesh mesh,int iel) {
 /** memory repartition for the -m option */
 void _MMGS_memOption(MMG5_pMesh mesh) {
   long long  million = 1048576L;
+  long       castedVal;
   int        npask,bytes,memtmp;
 
   mesh->memMax = _MMG5_memSize();
@@ -124,7 +125,8 @@ void _MMGS_memOption(MMG5_pMesh mesh) {
     /* memory asked by user if possible, otherwise total physical memory */
     if ( (long long)mesh->info.mem*million > mesh->memMax && mesh->memMax ) {
       fprintf(stdout,"  ## Warning: asking for %d Mo of memory ",mesh->info.mem);
-      fprintf(stdout,"when only %ld available.\n",_MMG5_safeLL2LCast((long long)(mesh->memMax/million)));
+      castedVal = _MMG5_safeLL2LCast((long long)(mesh->memMax/million));
+      fprintf(stdout,"when only %ld available.\n",castedVal);
     }
     else {
       mesh->memMax= (long long)(mesh->info.mem)*million;
@@ -159,9 +161,10 @@ void _MMGS_memOption(MMG5_pMesh mesh) {
     }
   }
 
-  if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
-    fprintf(stdout,"  MAXIMUM MEMORY AUTHORIZED (Mo)    %ld\n",
-            _MMG5_safeLL2LCast((long long)(mesh->memMax/million)));
+  if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug ) {
+    castedVal = _MMG5_safeLL2LCast((long long)(mesh->memMax/million));
+    fprintf(stdout,"  MAXIMUM MEMORY AUTHORIZED (Mo)    %ld\n",castedVal);
+  }
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {
     fprintf(stdout,"  _MMGS_NPMAX    %d\n",mesh->npmax);
@@ -171,6 +174,14 @@ void _MMGS_memOption(MMG5_pMesh mesh) {
   return;
 }
 
+/**
+ * \param mesh pointer toward the mesh
+ *
+ * \return 1 if success, 0 if fail
+ *
+ * allocate main structure
+ *
+ */
 int _MMGS_zaldy(MMG5_pMesh mesh) {
   int     k;
 
@@ -178,16 +189,16 @@ int _MMGS_zaldy(MMG5_pMesh mesh) {
 
   _MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(MMG5_Point),"initial vertices",
                 fprintf(stderr,"  Exit program.\n");
-                exit(EXIT_FAILURE));
-  _MMG5_SAFE_CALLOC(mesh->point,mesh->npmax+1,MMG5_Point);
+                return 0);
+  _MMG5_SAFE_CALLOC(mesh->point,mesh->npmax+1,MMG5_Point,0);
   _MMG5_ADD_MEM(mesh,(mesh->ntmax+1)*sizeof(MMG5_Tria),"initial triangles",
                 fprintf(stderr,"  Exit program.\n");
-                exit(EXIT_FAILURE));
-  _MMG5_SAFE_CALLOC(mesh->tria,mesh->ntmax+1,MMG5_Tria);
+                return 0);
+  _MMG5_SAFE_CALLOC(mesh->tria,mesh->ntmax+1,MMG5_Tria,0);
 
   if ( mesh->na ) {
     _MMG5_ADD_MEM(mesh,(mesh->na+1)*sizeof(MMG5_Edge),"initial edges",return(0));
-    _MMG5_SAFE_CALLOC(mesh->edge,(mesh->na+1),MMG5_Edge);
+    _MMG5_SAFE_CALLOC(mesh->edge,(mesh->na+1),MMG5_Edge,0);
   }
 
   /* store empty links */

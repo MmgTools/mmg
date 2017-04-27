@@ -213,12 +213,11 @@ int _MMG3D_bdryBuild(MMG5_pMesh mesh) {
     if ( mesh->na ) {
       _MMG5_ADD_MEM(mesh,(mesh->na+1)*sizeof(MMG5_Edge),"edges",
                     mesh->na = 0;
-                    printf("  ## Warning: uncomplete mesh\n")
-        );
+                    printf("  ## Warning: uncomplete mesh\n"));
     }
 
     if ( mesh->na ) {
-      _MMG5_SAFE_CALLOC(mesh->edge,mesh->na+1,MMG5_Edge);
+      _MMG5_SAFE_CALLOC(mesh->edge,mesh->na+1,MMG5_Edge,-1);
 
       mesh->na = 0;
       for (k=0; k<=mesh->htab.max; k++) {

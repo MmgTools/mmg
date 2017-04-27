@@ -392,14 +392,22 @@ int _MMG2_chkmanimesh(MMG5_pMesh mesh) {
   return(1);
 }
 
-/* Effective discretization of the 0 level set encoded in sol in the mesh */
+/**
+ * \param mesh pointer toward the mesh
+ * \param sol pointer toward the level-set
+ *
+ * \return 1 if success, 0 otherwise
+ *
+ * Effective discretization of the 0 level set encoded in sol in the mesh
+ *
+ */
 int _MMG2_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol){
   MMG5_pTria   pt;
   MMG5_pPoint  p0,p1;
   _MMG5_Hash   hash;
   double       v0,v1,s,c[2];
   int          k,ip0,ip1,nb,np,nt,ns,refint,refext,vx[3];
-  char         i,i0,i1;
+  char         i,i0,i1,ier;
 
   /* Reset flag field for points */
   for (k=1; k<=mesh->np; k++)
@@ -482,9 +490,9 @@ int _MMG2_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol){
   }
 
   /* Proceed to splitting by calling patterns */
-  nt = mesh->nt;
-  ns = 0;
-
+  nt  = mesh->nt;
+  ns  = 0;
+  ier = 1;
   for (k=1; k<=nt; k++) {
 
     pt = &mesh->tria[k];
@@ -506,13 +514,13 @@ int _MMG2_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol){
     switch( pt->flag ) {
       /* 1 edge split -> 0-+ */
       case 1: case 2: case 4:
-        _MMG2_split1(mesh,sol,k,vx);
+        ier = _MMG2_split1(mesh,sol,k,vx);
         ns++;
         break;
 
       /* 2 edge split -> +-- or -++ */
       case 3: case 5: case 6:
-        _MMG2_split2(mesh,sol,k,vx);
+        ier = _MMG2_split2(mesh,sol,k,vx);
         ns++;
         break;
 
@@ -520,6 +528,7 @@ int _MMG2_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol){
         assert(pt->flag==0);
         break;
     }
+    if ( !ier ) return 0;
   }
 
   if ( (mesh->info.ddebug || abs(mesh->info.imprim) > 5) && ns > 0 )
@@ -605,8 +614,8 @@ int MMG2_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol) {
   /* Allocate memory for tmp */
   _MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(double),"temporary table",
                 printf("  Exit program.\n");
-                exit(EXIT_FAILURE));
-  _MMG5_SAFE_CALLOC(tmp,mesh->npmax+1,double);
+                return 0);
+  _MMG5_SAFE_CALLOC(tmp,mesh->npmax+1,double,0);
 
   /* Snap values of the level set function which are very close to 0 to 0 exactly */
   if ( !_MMG2_snapval(mesh,sol,tmp) ) {

@@ -142,7 +142,7 @@ int _MMGS_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
   _MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(double),"temporary table",
                 fprintf(stderr,"  Exit program.\n");
                 exit(EXIT_FAILURE));
-  _MMG5_SAFE_CALLOC(tmp,mesh->npmax+1,double);
+  _MMG5_SAFE_CALLOC(tmp,mesh->npmax+1,double,0);
 
   /* create tetra adjacency */
   if ( !_MMGS_hashTria(mesh) ) {
@@ -375,7 +375,7 @@ static int _MMGS_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol){
   MMG5_pPoint  p0,p1;
   _MMG5_Hash   hash;
   double       c[3],v0,v1,s;
-  int          vx[3],nb,k,ip0,ip1,np,ns,nt;
+  int          vx[3],nb,k,ip0,ip1,np,ns,nt,ier;
   char         ia;
   /* reset point flags and h */
   for (k=1; k<=mesh->np; k++)
@@ -440,7 +440,7 @@ static int _MMGS_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol){
                             fprintf(stderr,"  ## Error: unable to allocate a new point\n");
                             _MMG5_INCREASE_MEM_MESSAGE();
                             return(0)
-                            ,c,NULL);
+                            ,c,NULL,0);
       }
       sol->m[np] = mesh->info.ls;
       _MMG5_hashEdge(mesh,&hash,ip0,ip1,np);
@@ -448,8 +448,9 @@ static int _MMGS_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol){
   }
 
   /* Proceed to splitting, according to flags to tris */
-  nt = mesh->nt;
-  ns = 0;
+  nt  = mesh->nt;
+  ns  = 0;
+  ier = 1;
   for (k=1; k<=nt; k++) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) )  continue;
@@ -463,27 +464,27 @@ static int _MMGS_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol){
     }
     switch (pt->flag) {
     case 1: /* 1 edge split */
-      _MMGS_split1(mesh,sol,k,0,vx);
+      ier = _MMGS_split1(mesh,sol,k,0,vx);
       ns++;
       break;
 
     case 2: /* 1 edge split */
-      _MMGS_split1(mesh,sol,k,1,vx);
+      ier = _MMGS_split1(mesh,sol,k,1,vx);
       ns++;
       break;
 
     case 4: /* 1 edge split */
-      _MMGS_split1(mesh,sol,k,2,vx);
+      ier = _MMGS_split1(mesh,sol,k,2,vx);
       ns++;
       break;
 
     case 3: case 5: case 6: /* 2 edges split */
-      _MMGS_split2(mesh,sol,k,vx);
+      ier = _MMGS_split2(mesh,sol,k,vx);
       ns++;
       break;
 
     case 7: /* 3 edges splitted */
-      _MMGS_split3(mesh,sol,k,vx);
+      ier =_MMGS_split3(mesh,sol,k,vx);
       ns++;
       break;
 
@@ -491,6 +492,7 @@ static int _MMGS_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol){
       assert(pt->flag == 0);
       break;
     }
+    if ( !ier ) return 0;
   }
   if ( (mesh->info.ddebug || abs(mesh->info.imprim) > 5) && ns > 0 )
     fprintf(stdout,"     %7d splitted\n",ns);

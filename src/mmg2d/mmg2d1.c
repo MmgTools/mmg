@@ -184,9 +184,8 @@ int _MMG2_anaelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
                             _MMG5_INCREASE_MEM_MESSAGE();
                             do {
                               _MMG2D_delPt(mesh,mesh->np);
-                            } while ( mesh->np>npinit );
-                            return(-1)
-                            ,o,pt->tag[i]);
+                            } while ( mesh->np>npinit );return -1;,
+                            o,pt->tag[i],-1);
       }
       ppt = &mesh->point[ip];
       if ( MG_EDG(pt->tag[i]) ) {
@@ -323,19 +322,17 @@ int _MMG2_anaelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
     }
     if ( pt->flag == 1 || pt->flag == 2 || pt->flag == 4 ) {
       ier = _MMG2_split1(mesh,met,k,vx);
-      assert(ier);
       ns++;
     }
     else if ( pt->flag == 7 ) {
       ier = _MMG2_split3(mesh,met,k,vx);
-      assert(ier);
       ns++;
     }
     else {
       ier = _MMG2_split2(mesh,met,k,vx);
-      assert(ier);
       ns++;
     }
+    if ( !ier ) return -1;
   }
   if ( (mesh->info.ddebug || abs(mesh->info.imprim) > 5) && ns > 0 )
     fprintf(stdout,"     %7d splitted\n",ns);

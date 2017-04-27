@@ -727,7 +727,7 @@ int MMG3D_doSol(MMG5_pMesh mesh,MMG5_pSol met) {
     int        i,k,ia,ib,ipa,ipb;
     int       *mark;
 
-    _MMG5_SAFE_CALLOC(mark,mesh->np+1,int);
+    _MMG5_SAFE_CALLOC(mark,mesh->np+1,int,0);
 
     /* Memory alloc */
     met->np     = mesh->np;
@@ -736,7 +736,7 @@ int MMG3D_doSol(MMG5_pMesh mesh,MMG5_pSol met) {
     met->dim    = mesh->dim;
 
     _MMG5_ADD_MEM(mesh,(met->size*(met->npmax+1))*sizeof(double),"solution",return(0));
-    _MMG5_SAFE_CALLOC(met->m,met->size*(met->npmax+1),double);
+    _MMG5_SAFE_CALLOC(met->m,met->size*(met->npmax+1),double,0);
 
     /* edges */
     for (k=1; k<=mesh->ne; k++) {

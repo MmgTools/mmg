@@ -62,12 +62,12 @@ extern "C" {
 
 /** Reallocation of point table and sol table and creation
     of point ip with coordinates o and tag tag*/
-#define _MMGS_POINT_REALLOC(mesh,sol,ip,wantedGap,law,o,tag ) do        \
+#define _MMGS_POINT_REALLOC(mesh,sol,ip,wantedGap,law,o,tag,retval ) do \
   {                                                                     \
     int klink;                                                          \
                                                                         \
     _MMG5_TAB_RECALLOC(mesh,mesh->point,mesh->npmax,wantedGap,MMG5_Point, \
-                       "larger point table",law);                       \
+                       "larger point table",law,retval);                \
                                                                         \
     mesh->npnil = mesh->np+1;                                           \
     for (klink=mesh->npnil; klink<mesh->npmax-1; klink++)               \
@@ -77,7 +77,8 @@ extern "C" {
     if ( sol->m ) {                                                     \
       _MMG5_ADD_MEM(mesh,(sol->size*(mesh->npmax-sol->npmax))*sizeof(double), \
                     "larger solution",law);                             \
-      _MMG5_SAFE_REALLOC(sol->m,sol->size*(mesh->npmax+1),double,"larger solution"); \
+      _MMG5_SAFE_REALLOC(sol->m,sol->size*(mesh->npmax+1),double,       \
+                         "larger solution",retval);                     \
     }                                                                   \
     sol->npmax = mesh->npmax;                                           \
                                                                         \
@@ -88,13 +89,13 @@ extern "C" {
 
 /** Reallocation of tria table and creation
     of tria jel */
-#define _MMGS_TRIA_REALLOC( mesh,jel,wantedGap,law ) do                 \
+#define _MMGS_TRIA_REALLOC( mesh,jel,wantedGap,law,retval ) do          \
   {                                                                     \
     int klink,oldSiz;                                                   \
                                                                         \
     oldSiz = mesh->ntmax;                                               \
     _MMG5_TAB_RECALLOC(mesh,mesh->tria,mesh->ntmax,wantedGap,MMG5_Tria, \
-                       "larger tria table",law);                        \
+                       "larger tria table",law,retval);                 \
                                                                         \
     mesh->nenil = mesh->nt+1;                                           \
     for (klink=mesh->nenil; klink<mesh->ntmax-1; klink++)               \
@@ -105,7 +106,7 @@ extern "C" {
       _MMG5_ADD_MEM(mesh,3*(mesh->ntmax-oldSiz)*sizeof(int),            \
                     "larger adja table",law);                           \
       _MMG5_SAFE_RECALLOC(mesh->adja,3*mesh->nt+5,3*mesh->ntmax+5,int   \
-                          ,"larger adja table");                        \
+                          ,"larger adja table",retval);                 \
     }                                                                   \
                                                                         \
     /* We try again to add the point */                                 \
@@ -114,7 +115,7 @@ extern "C" {
   }while(0)
 
 /* prototypes */
-void _MMGS_Init_mesh_var( va_list argptr );
+int  _MMGS_Init_mesh_var( va_list argptr );
 void _MMGS_Free_all_var( va_list argptr );
 void _MMGS_Free_structures_var( va_list argptr );
 void _MMGS_Free_names_var( va_list argptr );
