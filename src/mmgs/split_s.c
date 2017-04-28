@@ -284,7 +284,7 @@ int split1b(MMG5_pMesh mesh,int k,char i,int ip) {
     if ( !kel )  {
       _MMGS_TRIA_REALLOC(mesh,kel,mesh->gap,
                          _MMG5_INCREASE_MEM_MESSAGE();
-                         _MMGS_delElt(mesh,iel);
+                         if ( !_MMGS_delElt(mesh,iel) )  return 0;
                          return(0),0);
     }
     pt  = &mesh->tria[jel];

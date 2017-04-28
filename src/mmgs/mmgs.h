@@ -138,7 +138,7 @@ int  bouletrid(MMG5_pMesh mesh,int start,int ip,int *il1,int *l1,int *il2,int *l
 int  _MMGS_newPt(MMG5_pMesh mesh,double c[3],double n[3]);
 void _MMGS_delPt(MMG5_pMesh mesh,int ip);
 int  _MMGS_newElt(MMG5_pMesh mesh);
-void _MMGS_delElt(MMG5_pMesh mesh,int iel);
+int  _MMGS_delElt(MMG5_pMesh mesh,int iel);
 int  chkedg(MMG5_pMesh ,int );
 int  _MMG5_mmgsBezierCP(MMG5_pMesh ,MMG5_Tria*, _MMG5_pBezier, char ori);
 int  _MMGS_bezierInt(_MMG5_pBezier ,double *,double *,double *,double *);

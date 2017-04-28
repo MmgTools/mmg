@@ -81,14 +81,22 @@ int _MMGS_newElt(MMG5_pMesh mesh) {
   return(curiel);
 }
 
-
-void _MMGS_delElt(MMG5_pMesh mesh,int iel) {
+/**
+ * \param mesh pointer toward the mesh
+ * \param iel index of the element to delete
+ *
+ * \return 1 if success, 0 if fail
+ *
+ * Delete the element \a iel
+ *
+ */
+int _MMGS_delElt(MMG5_pMesh mesh,int iel) {
   MMG5_pTria    pt;
 
   pt = &mesh->tria[iel];
   if ( !MG_EOK(pt) ) {
     fprintf(stderr,"  ## INVALID ELEMENT %d.\n",iel);
-    exit(EXIT_FAILURE);
+    return 0;
   }
   memset(pt,0,sizeof(MMG5_Tria));
   pt->v[2] = mesh->nenil;
@@ -98,6 +106,7 @@ void _MMGS_delElt(MMG5_pMesh mesh,int iel) {
   if ( iel == mesh->nt ) {
     while ( !MG_EOK((&mesh->tria[mesh->nt])) )  mesh->nt--;
   }
+  return 1;
 }
 
 /** memory repartition for the -m option */

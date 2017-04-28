@@ -124,14 +124,14 @@ int _MMG2D_newElt(MMG5_pMesh mesh) {
 }
 
 /* Delete a triangle in the mesh and update the garbage collector accordingly */
-void _MMG2D_delElt(MMG5_pMesh mesh,int iel) {
+int _MMG2D_delElt(MMG5_pMesh mesh,int iel) {
   MMG5_pTria    pt;
   int      iadr;
 
   pt = &mesh->tria[iel];
   if ( !MG_EOK(pt) ) {
     fprintf(stdout,"  ## INVALID ELEMENT.\n");
-    return;
+    return 0;
   }
   memset(pt,0,sizeof(MMG5_Tria));
   pt->v[2] = mesh->nenil;
@@ -142,6 +142,7 @@ void _MMG2D_delElt(MMG5_pMesh mesh,int iel) {
 
   mesh->nenil = iel;
   if ( iel == mesh->nt )  mesh->nt--;
+  return 1;
 }
 
 

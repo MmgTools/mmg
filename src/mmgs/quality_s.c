@@ -312,7 +312,7 @@ int _MMGS_prilen(MMG5_pMesh mesh, MMG5_pSol met, int metRidTyp) {
       if(!_MMG5_hashEdge(mesh,&hash,np,nq,0)){
         fprintf(stderr,"%s:%d: Error: function _MMG5_hashEdge return 0\n",
                 __FILE__,__LINE__);
-        exit(EXIT_FAILURE);
+        return 0;
       }
     }
   }

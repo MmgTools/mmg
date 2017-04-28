@@ -910,7 +910,7 @@ static int colelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   MMG5_pPoint   p1,p2;
   MMG5_pPar     par;
   double        ll,ux,uy,uz,hmin;
-  int           list[_MMGS_LMAX+2],ilist,k,nc,l,isloc;
+  int           list[_MMGS_LMAX+2],ilist,k,nc,l,isloc,ier;
   char          i,i1,i2;
 
   nc = 0;
@@ -967,15 +967,21 @@ static int colelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
       /* check if geometry preserved */
       ilist = chkcol(mesh,met,k,i,list,typchk);
       if ( ilist > 3 ) {
-        nc += colver(mesh,list,ilist);
+        ier = colver(mesh,list,ilist);
+        if ( !ier ) return -1;
+        nc += ier;
         break;
       }
       else if ( ilist == 3 ) {
-        nc += colver3(mesh,list);
+        ier = colver3(mesh,list);
+        if ( !ier ) return -1;
+        nc += ier;
         break;
       }
       else if ( ilist == 2 ) {
-        nc += colver2(mesh,list);
+        ier = colver2(mesh,list);
+        if ( !ier ) return -1;
+        nc += ier;
         break;
       }
     }
@@ -1071,7 +1077,7 @@ static int adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria    pt;
   MMG5_pPoint   p1,p2;
   double   len;
-  int      k,list[_MMGS_LMAX+2],ilist,nc;
+  int      k,list[_MMGS_LMAX+2],ilist,nc,ier;
   char     i,i1,i2;
 
   nc = 0;
@@ -1103,15 +1109,21 @@ static int adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
       /* check if geometry preserved */
       ilist = chkcol(mesh,met,k,i,list,2);
       if ( ilist > 3 ) {
-        nc += colver(mesh,list,ilist);
+        ier =  colver(mesh,list,ilist);;
+        nc +=  ier;
+        if ( !ier ) return -1;
         break;
       }
       else if ( ilist == 3 ) {
-        nc += colver3(mesh,list);
+        ier = colver3(mesh,list);
+        nc += ier;
+        if ( !ier ) return -1;
         break;
       }
       else if ( ilist == 2 ) {
-        nc += colver2(mesh,list);
+        ier = colver2(mesh,list);
+        nc += ier;
+        if ( !ier ) return -1;
         break;
       }
     }

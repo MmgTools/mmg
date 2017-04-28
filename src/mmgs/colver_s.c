@@ -325,8 +325,10 @@ int colver(MMG5_pMesh mesh,int *list,int ilist) {
   }
 
   _MMGS_delPt(mesh,ip1);
-  _MMGS_delElt(mesh,list[0] / 3);
-  if ( !open )  _MMGS_delElt(mesh,list[ilist-1] / 3);
+  if ( !_MMGS_delElt(mesh,list[0] / 3) ) return 0;
+  if ( !open ) {
+    if ( !_MMGS_delElt(mesh,list[ilist-1] / 3) )  return 0;
+  }
 
   return(1);
 }
@@ -335,7 +337,7 @@ int colver(MMG5_pMesh mesh,int *list,int ilist) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param list pointer toward the ball of the point to collapse.
- * \return 1.
+ * \return 1 if success, 0 if fail.
  *
  * Collapse edge \f$list[0]%3\f$ in tet \f$list[0]/3\f$ (\f$ ip->i1\f$ ) for a
  * ball of the collapsed point of size 3: the collapsed point is removed.
@@ -396,8 +398,8 @@ int colver3(MMG5_pMesh mesh,int* list) {
 
   /* remove vertex + elements */
   _MMGS_delPt(mesh,ip);
-  _MMGS_delElt(mesh,iel);
-  _MMGS_delElt(mesh,kel);
+  if ( !_MMGS_delElt(mesh,iel) ) return 0;
+  if ( !_MMGS_delElt(mesh,kel) ) return 0;
 
   return(1);
 }
@@ -438,7 +440,7 @@ int colver2(MMG5_pMesh mesh,int* list) {
 
   /* remove vertex + element */
   _MMGS_delPt(mesh,ip);
-  _MMGS_delElt(mesh,jel);
+  if ( !_MMGS_delElt(mesh,jel) ) return 0;
 
   return(1);
 }

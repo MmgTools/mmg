@@ -141,7 +141,7 @@ int _MMGS_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   _MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(double),"temporary table",
                 fprintf(stderr,"  Exit program.\n");
-                exit(EXIT_FAILURE));
+                return 0);
   _MMG5_SAFE_CALLOC(tmp,mesh->npmax+1,double,0);
 
   /* create tetra adjacency */

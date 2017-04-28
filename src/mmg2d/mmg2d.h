@@ -225,7 +225,7 @@ void _MMG2D_delPt(MMG5_pMesh mesh,int ip) ;
 int _MMG5_newEdge(MMG5_pMesh mesh);
 void _MMG5_delEdge(MMG5_pMesh mesh,int iel);
 int _MMG2D_newElt(MMG5_pMesh mesh);
-void _MMG2D_delElt(MMG5_pMesh mesh,int iel);
+int  _MMG2D_delElt(MMG5_pMesh mesh,int iel);
 int _MMG5_getnElt(MMG5_pMesh mesh,int n);
 int MMG2D_zaldy(MMG5_pMesh mesh);
 long long _MMG5_memSize(void);

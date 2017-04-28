@@ -371,7 +371,7 @@ static void nmpoints(MMG5_pMesh mesh) {
 /*           p[0]->c[1] = vy - s*uy; */
 /*           p[0]->c[2] = vz - s*uz; */
           
-/*           delElt(mesh,k); */
+/*           if ( !delElt(mesh,k) )  return 0; */
 /*           nd++; */
 /*           continue; */
 /*         } */
