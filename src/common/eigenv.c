@@ -568,7 +568,7 @@ int _MMG5_eigenv(int symmat,double *mat,double lambda[3],double v[3][3]) {
     printf("w2 %f %f %f\n",w2[0],w2[1],w2[2]);
     printf("w3 %f %f %f\n",w3[0],w3[1],w3[2]);
     }
-    exit(1);
+    return(1);
     }
     }
     -------------------------------------------------------------------*/

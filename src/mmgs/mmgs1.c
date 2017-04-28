@@ -539,7 +539,8 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         i1 = _MMG5_inxt2[i];
         i2 = _MMG5_iprv2[i];
         len = _MMG5_lenSurfEdg(mesh,met,pt->v[i1],pt->v[i2],0);
-        if ( len > _MMGS_LLONG )  MG_SET(pt->flag,i);
+        if ( !len ) return -1;
+        else if ( len > _MMGS_LLONG )  MG_SET(pt->flag,i);
       }
       if ( !pt->flag )  continue;
     }
@@ -959,6 +960,7 @@ static int colelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
       }
       else {
         ll = _MMG5_lenSurfEdg(mesh,met,pt->v[i1],pt->v[i2],0);
+        if ( !ll ) return -1;
         if ( ll > _MMGS_LSHRT )  continue;
       }
 
@@ -984,6 +986,15 @@ static int colelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   return(nc);
 }
 
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ *
+ * \return -1 if failed or number of new points.
+ *
+ * Split edges of length bigger than _MMGS_LOPTL.
+ *
+ */
 static int adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria    pt;
   MMG5_pPoint   p1,p2;
@@ -1004,6 +1015,9 @@ static int adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
       i1  = _MMG5_inxt2[i];
       i2  = _MMG5_iprv2[i];
       len = _MMG5_lenSurfEdg(mesh,met,pt->v[i1],pt->v[i2],0);
+
+      if ( !len ) return -1;
+
       if ( len > lmax ) {
         lmax = len;
         imax = i;
@@ -1044,7 +1058,15 @@ static int adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
   return(ns);
 }
 
-/* analyze triangles and split or collapse to match gradation */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \return -1 if failed.
+ * \return number of deleted points.
+ *
+ * Collapse edges of length smaller than _MMGS_LOPTS.
+ *
+ */
 static int adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria    pt;
   MMG5_pPoint   p1,p2;
@@ -1070,7 +1092,8 @@ static int adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
       if ( p1->tag & MG_NOM || p2->tag & MG_NOM )  continue;
 
       len = _MMG5_lenSurfEdg(mesh,met,pt->v[i1],pt->v[i2],0);
-      if ( len > _MMGS_LOPTS )  continue;
+      if ( !len ) return -1;
+      else if ( len > _MMGS_LOPTS )  continue;
 
       p1 = &mesh->point[pt->v[i1]];
       p2 = &mesh->point[pt->v[i2]];

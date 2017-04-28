@@ -236,6 +236,7 @@ inline double _MMG5_caltri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
  * \param amax index of first extremity of the largest edge.
  * \param bmax index of second extremity of the largest edge.
  * \param lmax largest edge length.
+ * \param nullEdge number of edges for which we are unable to compute the length
  * \param bd pointer toward the table of the quality span.
  * \param hl pointer toward the table that store the number of edges for each
  * span of quality
@@ -245,7 +246,8 @@ inline double _MMG5_caltri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
  */
 void _MMG5_displayHisto(MMG5_pMesh mesh, int ned, double *avlen,
                         int amin, int bmin, double lmin,
-                        int amax, int bmax, double lmax, double *bd, int *hl )
+                        int amax, int bmax, double lmax,
+                        int nullEdge,double *bd, int *hl )
 {
   double dned;
   int    k;
@@ -285,6 +287,9 @@ void _MMG5_displayHisto(MMG5_pMesh mesh, int ned, double *avlen,
         fprintf(stdout,"     5.   < L         %8d   %5.2f %%  \n",
                 hl[8],100.*(hl[8]/(float)ned));
     }
+    if ( nullEdge )
+      fprintf(stdout,"\n     WARNING: unable to compute the length of %d"
+              " edges\n",nullEdge);
   }
 }
 

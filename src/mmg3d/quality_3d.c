@@ -191,7 +191,7 @@ int _MMG3D_prilen(MMG5_pMesh mesh, MMG5_pSol met, char metRidTyp) {
   MMG5_pPoint     ppt;
   _MMG5_Hash      hash;
   double          len,avlen,lmin,lmax;
-  int             k,np,nq,amin,bmin,amax,bmax,ned,hl[9],n;
+  int             k,np,nq,amin,bmin,amax,bmax,ned,hl[9],nullEdge,n;
   char            ia,i0,i1,ier,i;
   static double   bd[9]= {0.0, 0.3, 0.6, 0.7071, 0.9, 1.3, 1.4142, 2.0, 5.0};
   //{0.0, 0.2, 0.5, 0.7071, 0.9, 1.111, 1.4142, 2.0, 5.0};
@@ -202,6 +202,7 @@ int _MMG3D_prilen(MMG5_pMesh mesh, MMG5_pSol met, char metRidTyp) {
   lmax = 0.0;
   lmin = 1.e30;
   amin = amax = bmin = bmax = 0;
+  nullEdge = 0;
 
   /* Hash all edges in the mesh */
   if ( !_MMG5_hashNew(mesh,&hash,mesh->np,7*mesh->np) )  return(0);
@@ -247,43 +248,48 @@ int _MMG3D_prilen(MMG5_pMesh mesh, MMG5_pSol met, char metRidTyp) {
       /* Remove edge from hash ; ier = 1 if edge has been found */
       ier = _MMG5_hashPop(&hash,np,nq);
       if( ier ) {
-        ned ++;
         if ( (!metRidTyp) && met->size==6 && met->m ) {
           len = _MMG5_lenedg33_ani(mesh,met,ia,pt);
         }
         else
           len = _MMG5_lenedg(mesh,met,ia,pt);
 
-        assert( len!=0 );
-        avlen += len;
 
-        if( len < lmin ) {
-          lmin = len;
-          amin = np;
-          bmin = nq;
+        if ( !len ) {
+          ++nullEdge;
         }
+        else {
+          avlen += len;
+          ned ++;
 
-        if ( len > lmax ) {
-          lmax = len;
-          amax = np;
-          bmax = nq;
-        }
-
-        /* Locate size of edge among given table */
-        for(i=0; i<8; i++) {
-          if ( bd[i] <= len && len < bd[i+1] ) {
-            hl[i]++;
-            break;
+          if( len < lmin ) {
+            lmin = len;
+            amin = np;
+            bmin = nq;
           }
+
+          if ( len > lmax ) {
+            lmax = len;
+            amax = np;
+            bmax = nq;
+          }
+
+          /* Locate size of edge among given table */
+          for(i=0; i<8; i++) {
+            if ( bd[i] <= len && len < bd[i+1] ) {
+              hl[i]++;
+              break;
+            }
+          }
+          if( i == 8 ) hl[8]++;
         }
-        if( i == 8 ) hl[8]++;
       }
     }
   }
 
   /* Display histogram */
   _MMG5_displayHisto(mesh, ned, &avlen, amin, bmin, lmin,
-                     amax, bmax, lmax, &bd[0], &hl[0]);
+                     amax, bmax, lmax,nullEdge, &bd[0], &hl[0]);
 
   _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
   return(1);

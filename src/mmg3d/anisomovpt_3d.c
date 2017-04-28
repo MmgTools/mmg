@@ -852,6 +852,9 @@ int _MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
   /* Changes needed for choice of time step : see manuscript notes */
   ll1old = _MMG5_lenSurfEdg(mesh,met,ip0,ip1,0);
   ll2old = _MMG5_lenSurfEdg(mesh,met,ip0,ip2,0);
+
+  if ( (!ll1old) || (!ll2old) ) return 0;
+
   if ( ll1old < ll2old ) { //move towards p2
     iel = it2;
     ie  = ie2;
@@ -901,6 +904,9 @@ int _MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
   /* Check whether proposed move is admissible under consideration of distances */
   l1new = _MMG5_lenSurfEdg(mesh,met,0,ip1,0);
   l2new = _MMG5_lenSurfEdg(mesh,met,0,ip2,0);
+
+  if ( (!l1new) || (!l2new) ) return 0;
+
   if ( fabs(l2new -l1new) >= fabs(ll2old -ll1old) )
     return(0);
 
@@ -1210,6 +1216,8 @@ int _MMG5_movbdynompt_ani(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree, 
   ll1old = _MMG5_lenSurfEdg(mesh,met,ip0,ip1,0);
   ll2old = _MMG5_lenSurfEdg(mesh,met,ip0,ip2,0);
 
+  if ( (!ll1old) || (!ll2old) ) return 0;
+
   if ( ll1old < ll2old ) { //move towards p2
     iel = it2;
     ie  = ie2;
@@ -1258,6 +1266,9 @@ int _MMG5_movbdynompt_ani(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree, 
   /* Check whether proposed move is admissible under consideration of distances */
   l1new = _MMG5_lenSurfEdg(mesh,met,0,ip1,0);
   l2new = _MMG5_lenSurfEdg(mesh,met,0,ip2,0);
+
+  if ( (!l1new) || (!l2new) ) return 0;
+
   if ( fabs(l2new -l1new) >= fabs(ll2old -ll1old) )
     return(0);
 
@@ -1568,6 +1579,9 @@ int _MMG5_movbdyridpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
   /* Changes needed for choice of time step : see manuscript notes */
   l1old = _MMG5_lenSurfEdg(mesh,met,ip0,ip1,1);
   l2old = _MMG5_lenSurfEdg(mesh,met,ip0,ip2,1);
+
+  if ( (!l1old) || (!l2old) ) return 0;
+
   l1old = l1old*l1old;
   l2old = l2old*l2old;
 
@@ -1622,6 +1636,9 @@ int _MMG5_movbdyridpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
   /* Check whether proposed move is admissible under consideration of distances */
   l1new = _MMG5_lenSurfEdg(mesh,met,0,ip1,1);
   l2new = _MMG5_lenSurfEdg(mesh,met,0,ip2,1);
+
+  if ( (!l1new) || (!l2new) ) return 0;
+
   if ( fabs(l2new -l1new) >= fabs(l2old -l1old) )
     return(0);
 

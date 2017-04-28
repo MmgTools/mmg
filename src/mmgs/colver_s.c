@@ -37,7 +37,19 @@
 
 
 
-/* check if geometry preserved by collapsing edge i */
+/**
+ * \param mesh pointer toward the mesh
+ * \param met pointer toward the metric
+ * \param k index of the element in wich we collapse
+ * \param i index of the edge to collapse
+ * \param list pointer toward the ball of point
+ * \param typchk type of check to perform
+ *
+ * \return 0 if we can't move of if we fail, 1 if success
+ *
+ * check if geometry preserved by collapsing edge i
+ *
+ */
 int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
   MMG5_pTria     pt,pt0,pt1,pt2;
   MMG5_pPoint    p1,p2;
@@ -54,6 +66,7 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
   ip2 = pt->v[i2];
   if ( typchk == 2 && met->m ) {
     lon = _MMG5_lenSurfEdg(mesh,met,ip1,ip2,0);
+    if ( !lon ) return 0;
     lon = MG_MIN(lon,_MMGS_LSHRT);
     lon = MG_MAX(1.0/lon,_MMGS_LLONG);
   }
@@ -86,7 +99,7 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
       if ( typchk == 2 && met->m && !MG_EDG(mesh->point[ip2].tag) ) {
         ip1 = pt1->v[j2];
         len = _MMG5_lenSurfEdg(mesh,met,ip1,ip2,0);
-        if ( len > lon )  return(0);
+        if ( len > lon || !len )  return(0);
       }
 
       /* check normal flipping */
