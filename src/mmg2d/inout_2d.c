@@ -208,8 +208,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         mesh->dim = bdim;
         if(bdim!=2) {
           fprintf(stdout,"BAD MESH DIMENSION : %d\n",mesh->dim);
-          exit(EXIT_FAILURE);
-          return(1);
+          return 0;
         }
         continue;
       } else if(!mesh->np && binch==4) {  //Vertices
@@ -638,7 +637,6 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
         dim = bdim;
         if(bdim!=2) {
           fprintf(stdout,"BAD SOL DIMENSION : %d\n",bdim);
-          exit(EXIT_FAILURE);
           return(-1);
         }
         continue;

@@ -115,7 +115,6 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
   }
   else if ( sol->np && ( sol->np != mesh->np ) ) {
     fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER : %d != %d\n",sol->np,mesh->np);
-    //exit(EXIT_FAILURE);
   }
 
   chrono(OFF,&(ctim[1]));
@@ -123,46 +122,6 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
 
   if ( mesh->info.imprim )
     fprintf(stdout,"  --  INPUT DATA COMPLETED.     %s\n",stim);
-
-  /* /\* default values *\/ */
-  /* mesh->info.imprim = opt[5]; */
-  /* mesh->info.mem    = 0; */
-  /* mesh->info.ddebug = opt[1]; */
-  /* mesh->info.iso = 0; */
-  /* mesh->info.lag = -1; */
-  /* mesh->info.hmin = -1; */
-  /* mesh->info.hmax = -1; */
-  /* mesh->info.hausd = 0.01; */
-  /* switch(opt[0]) { */
-  /* case 0: */
-  /* case 1: */
-  /* case 2: */
-  /*   break; */
-  /* case 6: */
-  /*   mesh->info.iso = 1; */
-  /*   break; */
-  /* case 9: */
-  /* case 99: */
-  /*   mesh->info.lag = 0; */
-  /*   break; */
-  /* default: */
-  /*   fprintf(stdout,"option not recognized %d\n",opt[0]); */
-  /*   exit(EXIT_FAILURE); */
-  /* } */
-  /* mesh->info.noswap = opt[2]; */
-  /* mesh->info.nomove = opt[4]; */
-  /* mesh->info.noinsert = opt[3]; */
-  /* mesh->info.hgrad  = optdbl[0]; */
-  /* if(opt[6]) */
-  /*   mesh->info.dhd  = -1; */
-  /* else */
-  /*   mesh->info.dhd  = 180.-optdbl[1]; */
-  /* /\*this options are not used inside library version*\/ */
-  /* //qdegrad[0] = 10./_MMG2D_ALPHA; */
-  /* //qdegrad[1] = 1.3; */
-  /* mesh->info.renum = 0; */
-
-  /* sol->type = 1; */
 
   /* Set function pointers */
   MMG2D_setfunc(mesh,sol);
@@ -356,7 +315,6 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   else   if ( sol->np && (sol->np != mesh->np) ) {
     fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER : %d != %d\n",sol->np,mesh->np);
-    //exit(EXIT_FAILURE);
   }
   chrono(OFF,&(ctim[1]));
   printim(ctim[1].gdif,stim);

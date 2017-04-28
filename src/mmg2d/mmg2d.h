@@ -81,12 +81,14 @@ extern "C" {
 #define M_EOK(pt)     (pt && (pt->v[0] > 0))
 
 /** Free allocated pointers of mesh and sol structure and return value val */
-#define _MMG2D_RETURN_AND_FREE(mesh,met,disp,val)do                \
-  {                                                           \
-    MMG2D_Free_all(MMG5_ARG_start,                            \
-                   MMG5_ARG_ppMesh,&mesh,MMG5_ARG_ppMet,&met, \
-                   MMG5_ARG_end);                             \
-    return(val);                                              \
+#define _MMG2D_RETURN_AND_FREE(mesh,met,disp,val)do                 \
+  {                                                                 \
+    if ( !MMG2D_Free_all(MMG5_ARG_start,                            \
+                         MMG5_ARG_ppMesh,&mesh,MMG5_ARG_ppMet,&met, \
+                         MMG5_ARG_end) ) {                          \
+      return MMG5_LOWFAILURE;                                       \
+    }                                                               \
+    return(val);                                                    \
   }while(0)
 
 /**
@@ -241,9 +243,9 @@ int MMG2_mmg2d1(MMG5_pMesh ,MMG5_pSol );
 //int MMG2_colpoibdry(MMG5_pMesh ,MMG5_pSol , int ,int ,int ,int ,double );
 
 int  _MMG2D_Init_mesh_var( va_list argptr );
-void _MMG2D_Free_all_var( va_list argptr );
-void _MMG2D_Free_structures_var( va_list argptr );
-void _MMG2D_Free_names_var( va_list argptr );
+int  _MMG2D_Free_all_var( va_list argptr );
+int  _MMG2D_Free_structures_var( va_list argptr );
+int  _MMG2D_Free_names_var( va_list argptr );
 
 int MMG2_mmg2d2(MMG5_pMesh , MMG5_pSol);
 int MMG2_mmg2d6(MMG5_pMesh ,MMG5_pSol );

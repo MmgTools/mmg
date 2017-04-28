@@ -1096,6 +1096,8 @@ int  MMGS_saveSol(MMG5_pMesh mesh, MMG5_pSol met, const char *filename);
  * Here,\a your_mesh is a \a MMG5_pMesh, \a your_metric and \a your_level_set
  * are \a MMG5_pSol.
  *
+ * \return 0 if fail, 1 if success
+ *
  * Deallocations before return.
  *
  * \remark we pass the structures by reference in order to have argument
@@ -1104,7 +1106,7 @@ int  MMGS_saveSol(MMG5_pMesh mesh, MMG5_pSol met, const char *filename);
  * \remark no Fortran interface to allow variadic args.
  *
  */
-void MMGS_Free_all(const int starter,...);
+int MMGS_Free_all(const int starter,...);
 
 /**
  * \param starter dummy argument used to initialize the variadic argument list.
@@ -1126,6 +1128,8 @@ void MMGS_Free_all(const int starter,...);
  * Here, \a your_mesh is a pointer toward \a MMG5_pMesh and \a your_metric and
  * \a your_level_set a pointer toward \a MMG5_pSol.
  *
+ * \return 0 if fail, 1 if success
+ *
  * Structure deallocations before return.
  *
  * \remark we pass the structures by reference in order to have argument
@@ -1134,7 +1138,7 @@ void MMGS_Free_all(const int starter,...);
  * \remark no Fortran interface to allow variadic args.
  *
  */
-void MMGS_Free_structures(const int starter,...);
+int MMGS_Free_structures(const int starter,...);
 
 /**
  * \param starter dummy argument used to initialize the variadic argument list.
@@ -1153,6 +1157,8 @@ void MMGS_Free_structures(const int starter,...);
  * Here,\a your_mesh is a \a MMG5_pMesh, \a your_metric and \a your_level_set
  * are \a MMG5_pSol.
  *
+ * \return 0 if fail, 1 if success
+ *
  * Structure deallocations before return.
  *
  * \remark we pass the structures by reference in order to have argument
@@ -1161,7 +1167,7 @@ void MMGS_Free_structures(const int starter,...);
  * \remark no Fortran interface to allow variadic args.
  *
  */
-void MMGS_Free_names(const int starter,...);
+int MMGS_Free_names(const int starter,...);
 
 /* library */
 /**

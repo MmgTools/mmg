@@ -52,7 +52,18 @@ int _MMG2_defaultmet_2d(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
   return(1);
 }
 
-/* Calculate anisotropic metric tensor at (boundary) vertex i in triangle k on account of geometric approximation of the corresponding curve */
+/**
+ * \param mesh pointer toward the mesh
+ * \param met pointer toward the metric
+ * \param k index of the tria in which we work
+ * \param i index of the point on which we want to compute the metric
+ *
+ * \return 1 if success, 0 if fail
+ *
+ * Calculate anisotropic metric tensor at (boundary) vertex i in triangle k on
+ * account of geometric approximation of the corresponding curve
+ *
+ */
 int _MMG2_defmetbdy_2d(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
   MMG5_pTria      pt;
   MMG5_pPoint     p0,p1,p2;
@@ -94,7 +105,7 @@ int _MMG2_defmetbdy_2d(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
         }
         else if ( ip2 != pt->v[i2] ) {
           printf("   *** Function _MMG2_defmetbdy_2d: three edges connected at point %d - abort.\n",pt->v[i0]);
-          exit(EXIT_FAILURE);
+          return 0;
         }
       }
     }
@@ -111,7 +122,7 @@ int _MMG2_defmetbdy_2d(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
         }
         else if ( ip2 != pt->v[i1] ) {
           printf("   *** Function _MMG2_defmetbdy_2d: three edges connected at point %d - abort.\n",pt->v[i0]);
-          exit(EXIT_FAILURE);
+          return 0;
         }
       }
     }
@@ -120,7 +131,7 @@ int _MMG2_defmetbdy_2d(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
   /* Check that there are exactly two boundary points connected at p0 */
   if ( ip1 == 0 || ip2 == 0 ) {
     printf("   *** Function _MMG2_defmetbdy_2d: no two edges connected at edge, non singular point %d - abort.\n",pt->v[i0]);
-    exit(EXIT_FAILURE);
+    return 0;
   }
   
   lm = sqhmax;

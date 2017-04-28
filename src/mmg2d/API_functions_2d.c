@@ -42,14 +42,15 @@
 
 int MMG2D_Init_mesh(const int starter,...) {
   va_list argptr;
+  int     ier;
 
   va_start(argptr, starter);
 
-  if ( !_MMG2D_Init_mesh_var(argptr) ) return 0;
+  ier = _MMG2D_Init_mesh_var(argptr);
 
   va_end(argptr);
 
-  return 1;
+  return ier;
 }
 
 void MMG2D_Init_fileNames(MMG5_pMesh mesh,MMG5_pSol sol
@@ -150,7 +151,7 @@ int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
     break;
   case MMG2D_IPARAM_lag :
     if ( val < 0 || val > 2 )
-      exit(EXIT_FAILURE);
+      return 0;
     mesh->info.lag = val;
     break;
   case MMG2D_IPARAM_msh :
@@ -1191,44 +1192,45 @@ int MMG2D_Chk_meshData(MMG5_pMesh mesh,MMG5_pSol met) {
   return(1);
 }
 
-void MMG2D_Free_all(const int starter,...)
+int MMG2D_Free_all(const int starter,...)
 {
-
   va_list argptr;
+  int     ier;
 
   va_start(argptr, starter);
 
-  _MMG2D_Free_all_var(argptr);
+  ier = _MMG2D_Free_all_var(argptr);
 
   va_end(argptr);
 
-  return;
+  return ier;
 }
 
-void MMG2D_Free_structures(const int starter,...)
+int MMG2D_Free_structures(const int starter,...)
 {
+  int ier;
 
   va_list argptr;
 
   va_start(argptr, starter);
 
-  _MMG2D_Free_structures_var(argptr);
+  ier = _MMG2D_Free_structures_var(argptr);
 
   va_end(argptr);
 
-  return;
+  return ier;
 }
 
-void MMG2D_Free_names(const int starter,...)
+int MMG2D_Free_names(const int starter,...)
 {
-
   va_list argptr;
+  int     ier;
 
   va_start(argptr, starter);
 
-  _MMG2D_Free_names_var(argptr);
+  ier = _MMG2D_Free_names_var(argptr);
 
   va_end(argptr);
 
-  return;
+  return ier;
 }

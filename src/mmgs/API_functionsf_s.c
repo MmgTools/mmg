@@ -43,16 +43,18 @@
  * See \ref MMGS_Init_mesh function in common/libmmgcommon.h file.
  */
 FORTRAN_VARIADIC ( MMGS_INIT_MESH, mmgs_init_mesh,
-                 (const int starter, ... ),
-                 va_list argptr;
+                   (const int starter, ... ),
+                   va_list argptr;
+                   int     ier;
 
-                 va_start(argptr, starter);
+                   va_start(argptr, starter);
 
-                 if ( !_MMGS_Init_mesh_var(argptr) ) exit(EXIT_FAILURE);
+                   ier = _MMGS_Init_mesh_var(argptr);
 
-                 va_end(argptr);
+                   va_end(argptr);
 
-                 return;
+                   if ( !ier ) exit(EXIT_FAILURE);
+                   return;
   )
 
 /**
@@ -525,11 +527,15 @@ FORTRAN_VARIADIC(MMGS_FREE_ALL,mmgs_free_all,
                  (const int starter,...),
                  va_list argptr;
 
+                 int ier;
+
                  va_start(argptr, starter);
 
-                 _MMGS_Free_all_var(argptr);
+                 ier = _MMGS_Free_all_var(argptr);
 
                  va_end(argptr);
+
+                 if ( !ier ) exit(EXIT_FAILURE);
 
                  return;
   )
@@ -540,12 +546,15 @@ FORTRAN_VARIADIC(MMGS_FREE_ALL,mmgs_free_all,
 FORTRAN_VARIADIC(MMGS_FREE_STRUCTURES,mmgs_free_structures,
                  (const int starter,...),
                  va_list argptr;
+                 int     ier;
 
                  va_start(argptr, starter);
 
-                 _MMGS_Free_structures_var(argptr);
+                 ier = _MMGS_Free_structures_var(argptr);
 
                  va_end(argptr);
+
+                 if ( !ier ) exit(EXIT_FAILURE);
 
                  return;
   )
@@ -554,16 +563,19 @@ FORTRAN_VARIADIC(MMGS_FREE_STRUCTURES,mmgs_free_structures,
  * See \ref MMGS_Free_names function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_VARIADIC(MMGS_FREE_NAMES,mmgs_free_names,
-             (const int starter,...),
-             va_list argptr;
+                 (const int starter,...),
+                 va_list argptr;
+                 int     ier;
 
-             va_start(argptr, starter);
+                 va_start(argptr, starter);
 
-             _MMGS_Free_names_var(argptr);
+                 ier = _MMGS_Free_names_var(argptr);
 
-             va_end(argptr);
+                 va_end(argptr);
 
-             return;
+                 if ( !ier  ) exit(EXIT_FAILURE);
+
+                 return;
   )
 
 /**

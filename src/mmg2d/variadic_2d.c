@@ -225,19 +225,21 @@ int _MMG2D_Init_mesh_var( va_list argptr ) {
  * pointer toward a \a MMG5_pSol structure storing the displacement (and
  * identified by the MMG5_ARG_ppDisp keyword).
  *
+ * \return 0 if fail, 1 if success
+ *
  * Internal function for deallocations before return (taking a va_list as
  * argument).
  *
  * \remark we pass the structures by reference in order to have argument
  * compatibility between the library call from a Fortran code and a C code.
  */
-void _MMG2D_Free_all_var(va_list argptr)
+int _MMG2D_Free_all_var(va_list argptr)
 {
 
   MMG5_pMesh     *mesh;
   MMG5_pSol      *sol,*disp;
   int            typArg;
-  int            meshCount;
+  int            meshCount,ier;
 
   meshCount = 0;
   disp = sol = NULL;
@@ -261,7 +263,7 @@ void _MMG2D_Free_all_var(va_list argptr)
               " unexpected argument type: %d\n",typArg);
       fprintf(stderr," Argument type must be one of the following"
               " preprocessor variable: MMG5_ARG_ppMesh or MMG5_ARG_ppMet\n");
-      exit(EXIT_FAILURE);
+      return 0;
     }
   }
 
@@ -269,7 +271,7 @@ void _MMG2D_Free_all_var(va_list argptr)
     fprintf(stderr,"  ## Error: MMG2D_Free_all:\n"
             " you need to provide your mesh structure"
             " to allow to free the associated memory.\n");
-    exit(EXIT_FAILURE);
+    return 0;
   }
 
   if ( !sol ) {
@@ -281,14 +283,14 @@ void _MMG2D_Free_all_var(va_list argptr)
 
 
   if ( !disp )
-    MMG2D_Free_structures(MMG5_ARG_start,
-                          MMG5_ARG_ppMesh, mesh, MMG5_ARG_ppMet, sol,
-                          MMG5_ARG_end);
+    ier = MMG2D_Free_structures(MMG5_ARG_start,
+                                MMG5_ARG_ppMesh, mesh, MMG5_ARG_ppMet, sol,
+                                MMG5_ARG_end);
   else
-    MMG2D_Free_structures(MMG5_ARG_start,
-                          MMG5_ARG_ppMesh, mesh, MMG5_ARG_ppMet, sol,
-                          MMG5_ARG_ppDisp, disp,
-                          MMG5_ARG_end);
+    ier = MMG2D_Free_structures(MMG5_ARG_start,
+                                MMG5_ARG_ppMesh, mesh, MMG5_ARG_ppMet, sol,
+                                MMG5_ARG_ppDisp, disp,
+                                MMG5_ARG_end);
 
   _MMG5_SAFE_FREE(*mesh);
 
@@ -298,7 +300,7 @@ void _MMG2D_Free_all_var(va_list argptr)
   if ( disp )
     _MMG5_SAFE_FREE(*disp);
 
-  return;
+  return ier;
 }
 
 /**
@@ -318,6 +320,8 @@ void _MMG2D_Free_all_var(va_list argptr)
  * pointer toward a \a MMG5_pSol structure storing the displacement (and
  * identified by the MMG5_ARG_ppDisp keyword).
  *
+ * \return 1 if success, 0 if fail
+ *
  * Internal function for structures deallocations before return (taking a
  * va_list as argument).
  *
@@ -325,7 +329,7 @@ void _MMG2D_Free_all_var(va_list argptr)
  * compatibility between the library call from a Fortran code and a C code.
  *
  */
-void _MMG2D_Free_structures_var(va_list argptr)
+int _MMG2D_Free_structures_var(va_list argptr)
 {
 
   MMG5_pMesh     *mesh;
@@ -356,7 +360,7 @@ void _MMG2D_Free_structures_var(va_list argptr)
               " unexpected argument type: %d\n",typArg);
       fprintf(stderr," Argument type must be one of the following"
               " preprocessor variable: MMG5_ARG_ppMesh or MMG5_ARG_ppMet\n");
-      exit(EXIT_FAILURE);
+      return 0;
     }
   }
 
@@ -364,18 +368,22 @@ void _MMG2D_Free_structures_var(va_list argptr)
     fprintf(stderr,"  ## Error: MMG2D_Free_structures:\n"
             " you need to provide your mesh structure"
             " to allow to free the associated memory.\n");
-    exit(EXIT_FAILURE);
+    return 0;
   }
 
-  if ( !disp )
-    MMG2D_Free_names(MMG5_ARG_start,
-                     MMG5_ARG_ppMesh, mesh, MMG5_ARG_ppMet, sol,
-                     MMG5_ARG_end);
-  else
-    MMG2D_Free_names(MMG5_ARG_start,
-                     MMG5_ARG_ppMesh, mesh, MMG5_ARG_ppMet, sol,
-                     MMG5_ARG_ppDisp, disp,
-                     MMG5_ARG_end);
+  if ( !disp ) {
+    if ( !MMG2D_Free_names(MMG5_ARG_start,
+                           MMG5_ARG_ppMesh, mesh, MMG5_ARG_ppMet, sol,
+                           MMG5_ARG_end) )
+      return 0;
+  }
+  else {
+    if ( !MMG2D_Free_names(MMG5_ARG_start,
+                           MMG5_ARG_ppMesh, mesh, MMG5_ARG_ppMet, sol,
+                           MMG5_ARG_ppDisp, disp,
+                           MMG5_ARG_end) )
+      return 0;
+  }
 
   /* mesh */
   assert(mesh && *mesh);
@@ -412,7 +420,7 @@ void _MMG2D_Free_structures_var(va_list argptr)
     printf("  MEMORY USED AT END (bytes) %ld\n",castedVal);
   }
 
-  return;
+  return 1;
 }
 
 /**
@@ -427,11 +435,13 @@ void _MMG2D_Free_structures_var(va_list argptr)
  * Internal function for name deallocations before return (taking a va_list as
  * argument).
  *
+ * \return 0 if fail, 1 if success
+ *
  * \remark we pass the structures by reference in order to have argument
  * compatibility between the library call from a Fortran code and a C code.
  *
  */
-void _MMG2D_Free_names_var(va_list argptr)
+int _MMG2D_Free_names_var(va_list argptr)
 {
 
   MMG5_pMesh     *mesh;
@@ -461,7 +471,7 @@ void _MMG2D_Free_names_var(va_list argptr)
               " unexpected argument type: %d\n",typArg);
       fprintf(stderr," Argument type must be one of the following"
               " preprocessor variable: MMG5_ARG_ppMesh or MMG5_ARG_ppMet\n");
-      exit(EXIT_FAILURE);
+      return 0;
     }
   }
 
@@ -469,13 +479,14 @@ void _MMG2D_Free_names_var(va_list argptr)
     fprintf(stderr,"  ## Error: MMG2D_Free_names:\n"
             " you need to provide your mesh structure"
             " to allow to free the associated memory.\n");
-    exit(EXIT_FAILURE);
+    return 0;
   }
   if ( !sol ) {
     fprintf(stderr,"  ## Error: MMG2D_Free_names:\n"
             " you need to provide your metric structure"
             " (of type MMG5_pSol and indentified by the MMG5_ARG_ppMet"
             " preprocessor variable) to allow to free the associated memory.\n");
+    return 0;
   }
 
   /* mesh & met */
@@ -492,5 +503,5 @@ void _MMG2D_Free_names_var(va_list argptr)
     }
   }
 
-  return;
+  return 1;
 }

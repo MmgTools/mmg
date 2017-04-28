@@ -453,8 +453,8 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
     /* reallocation of point table */
     _MMG2D_POINT_REALLOC(mesh,sol,ip1,mesh->gap,
                          printf("  ## Error: unable to allocate a new point\n");
-                         _MMG5_INCREASE_MEM_MESSAGE();return -1;,
-                         c,0,-1);
+                         _MMG5_INCREASE_MEM_MESSAGE();return 0;,
+                         c,0,0);
   }
 
   /* Top left corner */
@@ -465,8 +465,8 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
     /* reallocation of point table */
     _MMG2D_POINT_REALLOC(mesh,sol,ip2,mesh->gap,
                          printf("  ## Error: unable to allocate a new point\n");
-                         _MMG5_INCREASE_MEM_MESSAGE();return -1;,
-                         c,0,-1);
+                         _MMG5_INCREASE_MEM_MESSAGE();return 0;,
+                         c,0,0);
   }
 
   /* Bottom right corner */
@@ -477,8 +477,8 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
     /* reallocation of point table */
     _MMG2D_POINT_REALLOC(mesh,sol,ip3,mesh->gap,
                          printf("  ## Error: unable to allocate a new point\n");
-                         _MMG5_INCREASE_MEM_MESSAGE(); return -1;,
-                         c,0,-1);
+                         _MMG5_INCREASE_MEM_MESSAGE(); return 0;,
+                         c,0,0);
   }
 
   /* Top right corner */
@@ -489,8 +489,8 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
     /* reallocation of point table */
     _MMG2D_POINT_REALLOC(mesh,sol,ip4,mesh->gap,
                          printf("  ## Error: unable to allocate a new point\n");
-                         _MMG5_INCREASE_MEM_MESSAGE(); return -1;,
-                         c,0,-1);
+                         _MMG5_INCREASE_MEM_MESSAGE(); return 0;,
+                         c,0,0);
   }
 
   assert ( ip1 == mesh->np-3 );
@@ -504,8 +504,8 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
     _MMG2D_TRIA_REALLOC(mesh,jel,mesh->gap,
                        printf("  ## Error: unable to allocate a new element.\n");
                        _MMG5_INCREASE_MEM_MESSAGE();
-                       printf("  Exit program.\n");return -1;,
-                       -1);
+                       printf("  Exit program.\n");return 0;,
+                       0);
   }
   pt       = &mesh->tria[jel];
   pt->v[0] = ip1;
@@ -518,8 +518,8 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
     _MMG2D_TRIA_REALLOC(mesh,kel,mesh->gap,
                        printf("  ## Error: unable to allocate a new element.\n");
                        _MMG5_INCREASE_MEM_MESSAGE();
-                       printf("  Exit program.\n");return -1;,
-                       -1);
+                       printf("  Exit program.\n");return 0;,
+                       0);
   }
   pt   = &mesh->tria[kel];
   pt->v[0] = ip1;
@@ -547,7 +547,7 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
   }
 
   if(mesh->info.ddebug)
-    if ( !_MMG5_chkmsh(mesh,1,0) ) exit(EXIT_FAILURE);
+    if ( !_MMG5_chkmsh(mesh,1,0) ) return 0;
 
   /* Mark SubDomains and remove the bounding box triangles */
   if ( mesh->na ) {

@@ -115,7 +115,7 @@ int _MMG2_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list,char im
   
   if ( k == ilist ) {
     printf("   *** Function _MMG2_movintpt_ani: impossible to locate gradient - abort.\n");
-    exit(EXIT_FAILURE);
+    return 0;
   }
   
   /* coordinates of the proposed position for relocation p = p0 + alpha*set*grp, so that

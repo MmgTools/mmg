@@ -316,7 +316,7 @@ int _MMG2_anaelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
         vx[i] = _MMG5_hashGet(&hash,pt->v[i1],pt->v[i2]);
         if ( !vx[i] ) {
           printf("Error: unable to create point on edge.\n Exit program.\n");
-          exit(EXIT_FAILURE);
+          return -1;
         }
       }
     }
@@ -611,8 +611,16 @@ int _MMG2_adptri(MMG5_pMesh mesh,MMG5_pSol met) {
   return(1);
 }
 
-/* Analysis and splitting routine for edges in the final step of the algorithm; edges are only splitted on
- a one-by-one basis */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ *
+ * \return -1 if failed or number of new points.
+ *
+ * Analysis and splitting routine for edges in the final step of the algorithm;
+ * edges are only splitted on a one-by-one basis
+ *
+ */
 int _MMG2_adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria         pt;
   double             lmax,len;
@@ -661,7 +669,7 @@ int _MMG2_adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
         {
           MMG2_bdryEdge(mesh);
           _MMG2_savemesh_db(mesh,mesh->nameout,0);
-          exit(0);
+          return -1;
         }
       }
 
@@ -843,7 +851,7 @@ int MMG2_mmg2d1n(MMG5_pMesh mesh,MMG5_pSol met) {
   /*{
     MMG2_bdryEdge(mesh);
     _MMG2_savemesh_db(mesh,mesh->nameout,0);
-    exit(0);
+    return 0;
   }*/
 
   return(1);

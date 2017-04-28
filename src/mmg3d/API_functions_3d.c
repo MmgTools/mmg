@@ -42,14 +42,15 @@
 
 int MMG3D_Init_mesh(const int starter,...) {
   va_list argptr;
+  int     ier;
 
   va_start(argptr, starter);
 
-  if ( !_MMG3D_Init_mesh_var(argptr) ) return 0;
+  ier = _MMG3D_Init_mesh_var(argptr);
 
   va_end(argptr);
 
-  return 1;
+  return ier;
 }
 void MMG3D_Init_fileNames(MMG5_pMesh mesh,MMG5_pSol sol
   ) {
@@ -1897,44 +1898,44 @@ int MMG3D_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref,
   return(1);
 }
 
-void MMG3D_Free_all(const int starter,...)
+int MMG3D_Free_all(const int starter,...)
 {
-
   va_list argptr;
+  int     ier;
 
   va_start(argptr, starter);
 
-  _MMG3D_Free_all_var(argptr);
+  ier = _MMG3D_Free_all_var(argptr);
 
   va_end(argptr);
 
-  return;
+  return ier;
 }
 
-void MMG3D_Free_structures(const int starter,...)
+int MMG3D_Free_structures(const int starter,...)
 {
-
   va_list argptr;
+  int     ier;
 
   va_start(argptr, starter);
 
-  _MMG3D_Free_structures_var(argptr);
+  ier = _MMG3D_Free_structures_var(argptr);
 
   va_end(argptr);
 
-  return;
+  return ier;
 }
 
-void MMG3D_Free_names(const int starter,...)
+int MMG3D_Free_names(const int starter,...)
 {
-
   va_list argptr;
+  int     ier;
 
   va_start(argptr, starter);
 
-  _MMG3D_Free_names_var(argptr);
+  ier = _MMG3D_Free_names_var(argptr);
 
   va_end(argptr);
 
-  return;
+  return ier;
 }

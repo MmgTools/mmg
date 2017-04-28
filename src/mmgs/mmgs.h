@@ -52,12 +52,14 @@ extern "C" {
 
 
 /** Free allocated pointers of mesh and sol structure and return value val */
-#define _MMGS_RETURN_AND_FREE(mesh,met,val)do                 \
-  {                                                           \
-    MMGS_Free_all(MMG5_ARG_start,                             \
-                  MMG5_ARG_ppMesh,&mesh,MMG5_ARG_ppMet,&met,  \
-                  MMG5_ARG_end);                              \
-    return(val);                                              \
+#define _MMGS_RETURN_AND_FREE(mesh,met,val)do                       \
+  {                                                                 \
+    if ( !MMGS_Free_all(MMG5_ARG_start,                             \
+                        MMG5_ARG_ppMesh,&mesh,MMG5_ARG_ppMet,&met,  \
+                        MMG5_ARG_end) ) {                           \
+      return MMG5_LOWFAILURE;                                       \
+    }                                                               \
+    return(val);                                                    \
   }while(0)
 
 /** Reallocation of point table and sol table and creation
@@ -116,9 +118,9 @@ extern "C" {
 
 /* prototypes */
 int  _MMGS_Init_mesh_var( va_list argptr );
-void _MMGS_Free_all_var( va_list argptr );
-void _MMGS_Free_structures_var( va_list argptr );
-void _MMGS_Free_names_var( va_list argptr );
+int  _MMGS_Free_all_var( va_list argptr );
+int  _MMGS_Free_structures_var( va_list argptr );
+int  _MMGS_Free_names_var( va_list argptr );
 
 int  _MMGS_zaldy(MMG5_pMesh mesh);
 int  assignEdge(MMG5_pMesh mesh);

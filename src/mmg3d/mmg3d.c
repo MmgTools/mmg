@@ -288,10 +288,11 @@ int main(int argc,char *argv[]) {
                   MMG5_ARG_ppDisp,&disp,
                   MMG5_ARG_end);
   /* reset default values for file names */
-  MMG3D_Free_names(MMG5_ARG_start,
-                   MMG5_ARG_ppMesh,&mesh,MMG5_ARG_ppMet,&met,
-                   MMG5_ARG_ppDisp,&disp,
-                   MMG5_ARG_end);
+  if ( !MMG3D_Free_names(MMG5_ARG_start,
+                         MMG5_ARG_ppMesh,&mesh,MMG5_ARG_ppMet,&met,
+                         MMG5_ARG_ppDisp,&disp,
+                         MMG5_ARG_end) )
+    return(MMG5_STRONGFAILURE);
 
 
   /* Set default metric size */

@@ -1653,7 +1653,7 @@ int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
   bin   = 0;
   iswp  = 0;
 
-  _MMG5_SAFE_CALLOC(data,strlen(filename)+6,char,0);
+  _MMG5_SAFE_CALLOC(data,strlen(filename)+6,char,-1);
   strcpy(data,filename);
 
   ptr = strstr(data,".mesh");

@@ -96,11 +96,11 @@ double _MMG2_lencurv_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2) {
   
   if ( l1 < 0.0 ) {
     printf("%s:%d:Error: negative edge length (%e)\n",__FILE__,__LINE__,l1);
-    exit(EXIT_FAILURE);
+    return 0.;
   }
   if ( l2 < 0.0 ) {
     printf("%s:%d:Error: negative edge length (%e)\n",__FILE__,__LINE__,l2);
-    exit(EXIT_FAILURE);
+    return 0.;
   }
   
   l1 = sqrt(l1);

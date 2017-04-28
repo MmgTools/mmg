@@ -853,6 +853,8 @@ int MMG2D_Chk_meshData(MMG5_pMesh mesh,MMG5_pSol met);
  * MMG5_ARG_ppMet,&empty_metric,MMG5_ARG_ppDisp, &your_displacement,
  * MMG5_ARG_end).
  *
+ * \return 0 if fail, 1 if success
+ *
  * Deallocations before return.
  *
  * \remark we pass the structures by reference in order to have argument
@@ -861,7 +863,7 @@ int MMG2D_Chk_meshData(MMG5_pMesh mesh,MMG5_pSol met);
  * \remark no Fortran interface to allow variadic args.
  *
  */
-void MMG2D_Free_all(const int starter,...);
+int MMG2D_Free_all(const int starter,...);
 
 /**
  * \param starter dummy argument used to initialize the variadic argument
@@ -884,6 +886,8 @@ void MMG2D_Free_all(const int starter,...);
  *  MMG5_ARG_ppMet,&empty_metric,MMG5_ARG_ppDisp, &your_displacement,
  * MMG5_ARG_end).
  *
+ * \return 0 if fail, 1 if success
+ *
  * Structure deallocations before return.
  *
  * \remark we pass the structures by reference in order to have argument
@@ -894,7 +898,7 @@ void MMG2D_Free_all(const int starter,...);
  * \remark no Fortran interface to allow variadic args.
  *
  */
-void MMG2D_Free_structures(const int starter,...);
+int MMG2D_Free_structures(const int starter,...);
 
 /**
  * \param starter dummy argument used to initialize the variadic argument
@@ -917,6 +921,8 @@ void MMG2D_Free_structures(const int starter,...);
  *  MMG5_ARG_ppMet,&empty_metric,MMG5_ARG_ppDisp, &your_displacement,
  * MMG5_ARG_end).
  *
+ * \return 0 if fail, 1 otherwise
+ *
  * Structure deallocations before return.
  *
  * \remark we pass the structures by reference in order to have argument
@@ -927,12 +933,12 @@ void MMG2D_Free_structures(const int starter,...);
  * \remark no Fortran interface to allow variadic args.
  *
  */
-void MMG2D_Free_names(const int starter,...);
+int MMG2D_Free_names(const int starter,...);
 
 /**
  * \param mesh pointer toward the mesh structure.
  * \param filename name of the readed file.
- * \return 0 or -1 if fail, 1 otherwise
+ * \return 0 if fail, 1 otherwise
  *
  * Read mesh data.
  *

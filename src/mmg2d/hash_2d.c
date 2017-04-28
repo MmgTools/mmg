@@ -62,7 +62,7 @@ int MMG2_hashTria(MMG5_pMesh mesh) {
   /* memory alloc */
   _MMG5_ADD_MEM(mesh,(3*mesh->ntmax+5)*sizeof(int),"adjacency table",
                 printf("  Exit program.\n");
-                exit(EXIT_FAILURE));
+                return 0;);
   _MMG5_SAFE_CALLOC(mesh->adja,3*mesh->ntmax+5,int,0);
 
   link  = mesh->adja;

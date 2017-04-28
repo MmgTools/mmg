@@ -118,7 +118,7 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
         fprintf(stdout,"  ## Error: mismatch parameters:"
                 " minimal mesh size larger than maximal one.\n");
         fprintf(stdout,"  Exit program.\n");
-        exit(EXIT_FAILURE);
+        return 0;
       }
       else if ( sethmin )
         mesh->info.hmax = 100. * mesh->info.hmin;

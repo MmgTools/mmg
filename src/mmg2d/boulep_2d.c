@@ -238,9 +238,10 @@ int _MMG2_boulet(MMG5_pMesh mesh,int start,char ip,int *list) {
  * \param mesh pointer toward the mesh structure.
  * \param start index of triangle to start.
  * \param ip index of point for wich we compute the ball.
- * \return in ip1, ip2 the two other endpoints of the boundary segments joining ip
+ * \return 1 if success, 0 if fail.
  *
- * Find the two endpoints of the boundary curves joining ip
+ * Find the two endpoints of the boundary curves joining ip and fill \a ip1 and
+ * \a ip2 with their indices.
  *
  */
 int _MMG2_bouleendp(MMG5_pMesh mesh,int start,char ip,int *ip1,int *ip2) {
@@ -269,7 +270,7 @@ int _MMG2_bouleendp(MMG5_pMesh mesh,int start,char ip,int *ip1,int *ip2) {
         if ( *ip2 != 0 && *ip1 != pt->v[i2] && *ip2 != pt->v[i2] ) {
           printf("Func. _MMG2_bouleendp: three boundary edges at non singular point %d: %d %d, and %d. Abort\n",\
                  np,*ip1,*ip2,pt->v[i2]);
-          exit(EXIT_FAILURE);
+          return 0;
         }
         if ( *ip1 != pt->v[i2] ) *ip2 = pt->v[i2];
       }
@@ -282,7 +283,7 @@ int _MMG2_bouleendp(MMG5_pMesh mesh,int start,char ip,int *ip1,int *ip2) {
         if ( *ip2 != 0 && *ip1 != pt->v[i1] && *ip2 != pt->v[i1] ) {
           printf("Func. _MMG2_bouleendp: three boundary edges at non singular point %d: %d %d, and %d. Abort\n",\
                  np,*ip1,*ip2,pt->v[i1]);
-          exit(EXIT_FAILURE);
+          return 0;
         }
         if ( *ip1 != pt->v[i1] ) *ip2 = pt->v[i1];
       }
@@ -319,7 +320,7 @@ int _MMG2_bouleendp(MMG5_pMesh mesh,int start,char ip,int *ip1,int *ip2) {
         if ( *ip2 != 0 && *ip1 != pt->v[i2] && *ip2 != pt->v[i2] ) {
           printf("Func. _MMG2_bouleendp: three boundary edges at non singular point %d: %d %d, and %d. Abort\n",\
                  np,*ip1,*ip2,pt->v[i2]);
-          exit(EXIT_FAILURE);
+          return 0;
         }
         if ( *ip1 != pt->v[i2] ) *ip2 = pt->v[i2];
       }
@@ -331,7 +332,7 @@ int _MMG2_bouleendp(MMG5_pMesh mesh,int start,char ip,int *ip1,int *ip2) {
         if ( *ip2 != 0 && *ip1 != pt->v[i1] && *ip2 != pt->v[i1] ) {
           printf("Func. _MMG2_bouleendp: three boundary edges at non singular point %d: %d %d, and %d. Abort\n",\
                  np,*ip1,*ip2,pt->v[i1]);
-          exit(EXIT_FAILURE);
+          return 0;
         }
         if ( *ip1 != pt->v[i1] ) *ip2 = pt->v[i1];
       }
