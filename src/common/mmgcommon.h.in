@@ -230,6 +230,7 @@ extern "C" {
 #define _MMG5_SAFE_RECALLOC(ptr,prevSize,newSize,type,message,retval) do \
   {                                                                     \
     type* tmp;                                                          \
+    int   k;                                                            \
                                                                         \
     tmp = (type *)realloc((ptr),(newSize)*sizeof(type));                \
     if ( !tmp ) {                                                       \
@@ -239,8 +240,9 @@ extern "C" {
     }                                                                   \
                                                                         \
     (ptr) = tmp;                                                        \
-    if ( newSize > prevSize )                                           \
-      memset(&ptr[prevSize],0,(newSize-prevSize)*sizeof(type));         \
+    for ( k=prevSize; k<newSize; k++) {                                 \
+      memset(&ptr[k],0,sizeof(type));                                   \
+    }                                                                   \
   }while(0)
 
 /** Reallocation of ptr of type type at size (initSize+wantedGap*initSize)
