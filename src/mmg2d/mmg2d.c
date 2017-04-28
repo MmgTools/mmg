@@ -71,6 +71,7 @@ static inline int _MMG5_defaultValues(MMG5_pMesh mesh, double qdegrad[2]) {
   return 1;
 }
 
+#warning add default value
 int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,double *qdegrad) {
   int     i;
   char    namein[128];

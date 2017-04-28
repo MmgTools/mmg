@@ -1124,7 +1124,7 @@ int MMGS_Get_iparameter(MMG5_pMesh mesh, int iparam) {
 #endif
   default :
     fprintf(stderr,"  ## Error: unknown type of parameter\n");
-    exit(EXIT_FAILURE);
+    return 0;
   }
 }
 

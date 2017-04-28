@@ -1228,13 +1228,14 @@ void  MMGS_setfunc(MMG5_pMesh mesh,MMG5_pSol met);
  * Print help for mmgs options.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMGS_USAGE(prog,strlen)\n
+ * >   SUBROUTINE MMGS_USAGE(prog,strlen,retval)\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: prog\n
  * >     INTEGER, INTENT(IN)            :: strlen\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
  */
-void MMGS_usage(char *prog);
+int MMGS_usage(char *prog);
 /**
  * \param argc number of command line arguments.
  * \param argv command line arguments.
@@ -1255,12 +1256,13 @@ int  MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met);
  * Print the default parameters values.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMGS_DEFAULTVALUES(mesh)\n
+ * >   SUBROUTINE MMGS_DEFAULTVALUES(mesh,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
  */
-void MMGS_defaultValues(MMG5_pMesh mesh);
+int MMGS_defaultValues(MMG5_pMesh mesh);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param info pointer toward the info structure.

@@ -425,7 +425,7 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
       else if ( (pt->v[i2] != ipref[0]) && (pt->v[i2] != ipref[1]) ) {
         fprintf(stderr,"%s:%d:Error: three adjacent ref at a non singular point\n",
                __FILE__,__LINE__);
-        exit(EXIT_FAILURE);
+        return 0;
       }
     }
 
@@ -439,7 +439,7 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
       else if ( (pt->v[i1] != ipref[0]) && (pt->v[i1] != ipref[1]) ) {
         fprintf(stderr,"%s:%d:Error: three adjacent ref at a non singular point\n",
                __FILE__,__LINE__);
-        exit(EXIT_FAILURE);
+        return 0;
       }
     }
 
