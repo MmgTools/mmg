@@ -44,7 +44,6 @@ static int MMG2D_usage(char *name) {
   fprintf(stdout,"-noinsert     no insertion/suppression point\n");
   fprintf(stdout,"-noswap       no edge flipping\n");
   fprintf(stdout,"-nomove       no point relocation\n");
-  fprintf(stdout,"-bucket val   Specify the size of bucket per dimension \n");
   fprintf(stdout,"\n\n");
 
   return 1;
@@ -64,8 +63,6 @@ static inline int _MMG5_defaultValues(MMG5_pMesh mesh, double qdegrad[2]) {
 
   fprintf(stdout,"Optimization threshold "
           "   (-degrad) : %e %e\n",qdegrad[0],qdegrad[1]);
-  fprintf(stdout,"Bucket size per dimension (-bucket) : %d\n",
-          mesh->info.octree);
   fprintf(stdout,"\n\n");
 
   return 1;
@@ -101,12 +98,6 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,double *qdegrad) 
       case 'A': /* anisotropy */
         if ( !MMG2D_Set_solSize(mesh,met,MMG5_Vertex,0,MMG5_Tensor) )
           return 0;
-        break;
-      case 'b':
-        if ( !strcmp(argv[i],"-bucket") && ++i < argc )
-          if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_bucket,
-                                     atoi(argv[i])) )
-            return 0;
         break;
       case 'd':  /* debug */
         if ( !strcmp(argv[i],"-degrad") ) {

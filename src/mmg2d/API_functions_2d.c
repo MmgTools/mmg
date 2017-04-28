@@ -99,8 +99,6 @@ void MMG2D_Init_parameters(MMG5_pMesh mesh) {
   mesh->info.dhd  = _MMG5_ANGEDG;
 
   //mesh->info.imprim = -7;
-
-  /* MMG2D_IPARAM_bucket = 64 */
   mesh->info.octree = 64;
 }
 
@@ -123,9 +121,6 @@ int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
       return(0);
     } else if(mesh->info.mem < 39)
       return(0);
-    break;
-  case MMG2D_IPARAM_bucket :
-    mesh->info.octree   = val;
     break;
   case MMG2D_IPARAM_debug :
     mesh->info.ddebug   = val;

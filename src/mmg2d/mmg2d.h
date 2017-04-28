@@ -274,11 +274,6 @@ int MMG2_kiudel(pQueue q,int iel);
 int MMG2_kiuput(pQueue q,int iel);
 int MMG2_kiupop(pQueue q);
 
-pBucket MMG2_newBucket(MMG5_pMesh mesh,int nmax);
-void MMG2_freeBucket(pBucket bucket);
-int  MMG2_addBucket(MMG5_pMesh mesh,pBucket bucket,int ip);
-int  MMG2_delBucket(MMG5_pMesh mesh,pBucket bucket,int ip);
-
 int MMG2_hashEdge(pHashTable edgeTable,int iel,int ia, int ib);
 //int MMG2_hashel(MMG5_pMesh mesh);
 int MMG2_hashNew(HashTable *hash,int hsize,int hmax);
@@ -374,8 +369,6 @@ int    optlen_iso(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base);
 int    optlen_iso_bar(MMG5_pMesh mesh,MMG5_pSol sol,double declic,int base);
 int    interp_ani(double *,double *,double * ,double );
 int    interp_iso(double *,double *,double * ,double );
-int    buckin_iso(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,int ip);
-int    buckin_ani(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,int ip);
 int    lissmet_iso(MMG5_pMesh mesh,MMG5_pSol sol);
 int    lissmet_ani(MMG5_pMesh mesh,MMG5_pSol sol);
 
@@ -383,7 +376,6 @@ double (*MMG2D_lencurv)(MMG5_pMesh ,MMG5_pSol ,int ,int );
 double (*MMG2D_caltri)(MMG5_pMesh ,MMG5_pSol ,MMG5_pTria );
 int    (*MMG2_optlen)(MMG5_pMesh ,MMG5_pSol ,double ,int );
 int    (*MMG2D_intmet)(MMG5_pMesh ,MMG5_pSol ,int ,char ,int ,double );
-int    (*MMG2D_buckin)(MMG5_pMesh ,MMG5_pSol ,pBucket ,int );
 int    (*MMG2D_gradsiz)(MMG5_pMesh ,MMG5_pSol );
 int    (*MMG2D_defsiz)(MMG5_pMesh ,MMG5_pSol );
 

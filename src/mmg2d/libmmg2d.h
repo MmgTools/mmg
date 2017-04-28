@@ -68,7 +68,6 @@ enum MMG2D_Param {
   MMG2D_IPARAM_noswap,            /*!< [1/0], Avoid/allow edge or face flipping */
   MMG2D_IPARAM_nomove,            /*!< [1/0], Avoid/allow point relocation */
   MMG2D_IPARAM_nosurf,            /*!< [1/0], Avoid/allow surface modifications */
-  MMG2D_IPARAM_bucket,            /*!< [n], Specify the size of the bucket per dimension (DELAUNAY) */
   MMG2D_DPARAM_angleDetection,    /*!< [val], Value for angle detection */
   MMG2D_DPARAM_hmin,              /*!< [val], Minimal mesh size */
   MMG2D_DPARAM_hmax,              /*!< [val], Maximal mesh size */
@@ -1146,7 +1145,7 @@ int MMG2D_doSol(MMG5_pMesh mesh ,MMG5_pSol met );
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward a sol structure.
  *
- * Set function pointers for length, caltri, buckin... depending if case is iso or aniso
+ * Set function pointers for length, caltri... depending if case is iso or aniso
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_SETFUNC(mesh,met)\n
