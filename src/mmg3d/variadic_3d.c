@@ -175,7 +175,7 @@ int _MMG3D_Init_mesh_var( va_list argptr ) {
               " of the MMG5_ARG* preprocessor variable:"
               " MMG5_ARG_ppMesh, MMG5_ARG_ppMet,"
               "  MMG5_ARG_ppLs, MMG5_ARG_ppDisp\n");
-      exit(EXIT_FAILURE);
+      return 0;
     }
   }
 
@@ -183,7 +183,7 @@ int _MMG3D_Init_mesh_var( va_list argptr ) {
     fprintf(stderr,"  ## Error: MMG3D_Init_mesh:\n"
             " you need to initialize the mesh structure that"
             " will contain your mesh.\n");
-    exit(EXIT_FAILURE);
+    return 0;
   }
 
   if ( !sol ) {
@@ -193,7 +193,7 @@ int _MMG3D_Init_mesh_var( va_list argptr ) {
             " MMG5_ARG_ppLs preprocessor variable) that will contain the output"
             " mesh metric"
             " informations, and the input one, if provided.\n.");
-    exit(EXIT_FAILURE);
+    return 0;
   }
 
   /* allocations */
