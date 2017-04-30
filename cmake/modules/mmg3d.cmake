@@ -246,9 +246,19 @@ IF ( BUILD_TESTING )
 
     ENDIF ( TEST_LIBMMG3D )
 
-    # Add more tests
-    INCLUDE( ${CMAKE_SOURCE_DIR}/cmake/testing/mmg3d_tests.cmake )
-    INCLUDE( ${CMAKE_SOURCE_DIR}/cmake/testing/mmg_tests.cmake )
+    IF ( ONLY_VERY_SHORT_TESTS )
+      SET ( CTEST_OUTPUT_DIR ${CMAKE_BINARY_DIR}/TEST_OUTPUTS )
+
+      ADD_TEST(NAME mmg3d_very_short COMMAND ${EXECUT_MMG3D}
+        "${CMAKE_SOURCE_DIR}/libexamples/mmg3d/adaptation_example0/example0_a/cube.mesh"
+        "${CTEST_OUTPUT_DIR}/libmmg3d_Adaptation_0_a-cube.o"
+        )
+    ELSE ( )
+
+      # Add more tests
+      INCLUDE( ${CMAKE_SOURCE_DIR}/cmake/testing/mmg3d_tests.cmake )
+      INCLUDE( ${CMAKE_SOURCE_DIR}/cmake/testing/mmg_tests.cmake )
+    ENDIF ( )
 
   ENDIF ( MMG3D_CI )
 
