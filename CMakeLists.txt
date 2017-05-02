@@ -380,6 +380,11 @@ ENDIF ( )
 OPTION ( BUILD_TESTING "Enable/Disable continuous integration" OFF )
 
 CMAKE_DEPENDENT_OPTION (
+  ONLY_VERY_SHORT_TESTS "Enable/Disable very short tests" OFF
+  "BUILD_TESTING;NOT LONG_TESTS" OFF )
+MARK_AS_ADVANCED(ONLY_VERY_SHORT_TESTS)
+
+CMAKE_DEPENDENT_OPTION (
   LONG_TESTS "Enable/Disable time consuming tests for the project" OFF
   "BUILD_TESTING" OFF )
 MARK_AS_ADVANCED(LONG_TESTS)
@@ -389,10 +394,15 @@ CMAKE_DEPENDENT_OPTION ( COVERAGE "Watch code coverage (Linux only)" OFF
 
 IF( BUILD_TESTING )
 
-  ##-------------------------------------------------------------------##
-  ##------- Get the continuous integration tests ----------------------##
-  ##-------------------------------------------------------------------##
-  INCLUDE(cmake/modules/LoadCiTests.cmake)
+  SET ( CTEST_OUTPUT_DIR ${CMAKE_BINARY_DIR}/TEST_OUTPUTS )
+  FILE ( MAKE_DIRECTORY  ${CTEST_OUTPUT_DIR} )
+
+  IF ( NOT ONLY_VERY_SHORT_TESTS )
+    ##-------------------------------------------------------------------##
+    ##------- Get the continuous integration tests ----------------------##
+    ##-------------------------------------------------------------------##
+    INCLUDE(cmake/modules/LoadCiTests.cmake)
+  ENDIF ( )
 
   ##-------------------------------------------------------------------##
   ##------- Set the continuous integration options --------------------##
@@ -460,8 +470,10 @@ IF( BUILD_TESTING )
     FILE(COPY ${MMG_CI_TESTS}/LeakCheck_AbnormalEnd8/dsol.sol
       DESTINATION ${MMG_CI_TESTS}/LeakCheck_AbnormalEnd8/unwrittable.sol)
 
-    # Add common tests for mmgs/3d appli
-    INCLUDE( ${CMAKE_SOURCE_DIR}/cmake/testing/mmg_tests.cmake )
+    IF ( NOT ONLY_VERY_SHORT_TESTS )
+      # Add common tests for mmgs/3d appli
+      INCLUDE( ${CMAKE_SOURCE_DIR}/cmake/testing/mmg_tests.cmake )
+    ENDIF ( )
 
   ENDIF(MMG3D_CI OR MMGS_CI)
 

@@ -248,13 +248,23 @@ IF ( BUILD_TESTING )
       ENDIF()
 
     ENDIF()
-    # Add mmgs tests
-    INCLUDE( ${CMAKE_SOURCE_DIR}/cmake/testing/mmgs_tests.cmake )
 
-    IF ( RUN_AGAIN )
-      INCLUDE( ${CMAKE_SOURCE_DIR}/cmake/testing/mmgs_rerun_tests.cmake )
-    ENDIF()
+    IF ( ONLY_VERY_SHORT_TESTS )
+      # Add mmgs tests
+      SET ( CTEST_OUTPUT_DIR ${CMAKE_BINARY_DIR}/TEST_OUTPUTS )
 
+      ADD_TEST(NAME mmgs_very_short   COMMAND ${EXECUT_MMGS}
+        "${CMAKE_SOURCE_DIR}/libexamples/mmgs/adaptation_example0/example0_a/cube.mesh"
+        "${CTEST_OUTPUT_DIR}/libmmgs_Adaptation_0_a-cube.o"
+        )
+
+    ELSE ( )
+      INCLUDE( ${CMAKE_SOURCE_DIR}/cmake/testing/mmgs_tests.cmake )
+
+      IF ( RUN_AGAIN )
+        INCLUDE( ${CMAKE_SOURCE_DIR}/cmake/testing/mmgs_rerun_tests.cmake )
+      ENDIF()
+    ENDIF ( )
 
   ENDIF ( MMGS_CI )
 
