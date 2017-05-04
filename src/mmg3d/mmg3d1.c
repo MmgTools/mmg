@@ -588,35 +588,23 @@ int _MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double crit,double declic,
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
  * \param octree pointer toward the octree structure.
- * \param maxitin maximum number of iteration.
+ * \param clickSurf triangle quality threshold under which we want to move
+ * \param moveVol internal move
+ * \param improveVol forbid volume degradation during the move
+ * \param maxit maximum number of iteration.
  * \return -1 if failed, number of moved points otherwise.
  *
  * Analyze tetrahedra and move points so as to make mesh more uniform.
- * In delaunay mode, a negative maxitin means that we don't move internal nodes.
  *
  */
-int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,int maxitin) {
+int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,
+                 double clickSurf,int moveVol, int improveVol, int maxit) {
   MMG5_pTetra        pt;
   MMG5_pPoint        ppt;
   MMG5_pxTetra       pxt;
   double        *n;
   int           i,k,ier,nm,nnm,ns,lists[MMG3D_LMAX+2],listv[MMG3D_LMAX+2],ilists,ilistv,it;
-  int           improve;
   unsigned char j,i0,base;
-  int           internal,maxit;
-
-  if ( maxitin<0 ) {
-    internal = 0;
-    maxit = abs(maxitin);
-  } else {
-    internal=1;
-    maxit = maxitin;
-  }
-  if ( maxit != 1 ) {
-    improve   = 1;
-  } else {
-    improve = 0;
-  }
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
     fprintf(stdout,"  ** OPTIMIZING MESH\n");
@@ -658,7 +646,7 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,int maxiti
               ier=_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,1);
               if( !ier )  continue;
               else if ( ier>0 )
-                ier = _MMG5_movbdynompt(mesh,met,octree,listv,ilistv,lists,ilists,improve);
+                ier = _MMG5_movbdynompt(mesh,met,octree,listv,ilistv,lists,ilists,improveVol);
               else
                 return(-1);
             }
@@ -666,7 +654,7 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,int maxiti
               ier=_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,0);
               if ( !ier )  continue;
               else if ( ier>0 )
-                ier = _MMG5_movbdyridpt(mesh,met,octree,listv,ilistv,lists,ilists,improve);
+                ier = _MMG5_movbdyridpt(mesh,met,octree,listv,ilistv,lists,ilists,improveVol);
               else
                 return(-1);
             }
@@ -675,7 +663,7 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,int maxiti
               if ( !ier )
                 continue;
               else if ( ier>0 )
-                ier = _MMG5_movbdyrefpt(mesh,met,octree,listv,ilistv,lists,ilists,improve);
+                ier = _MMG5_movbdyrefpt(mesh,met,octree,listv,ilistv,lists,ilists,improveVol);
               else
                 return(-1);
             }
@@ -698,14 +686,14 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,int maxiti
                 if ( !_MMG5_directsurfball(mesh,pt->v[i0],lists,ilists,n) )
                   continue;
               }
-              ier = _MMG5_movbdyregpt(mesh,met, octree, listv,ilistv,lists,ilists,improve);
+              ier = _MMG5_movbdyregpt(mesh,met, octree, listv,ilistv,lists,ilists,improveVol);
               if ( ier )  ns++;
             }
           }
-          else if ( internal ) {
+          else if ( moveVol ) {
             ilistv = _MMG5_boulevolp(mesh,k,i0,listv);
             if ( !ilistv )  continue;
-            ier = _MMG5_movintpt(mesh,met,octree,listv,ilistv,improve);
+            ier = _MMG5_movintpt(mesh,met,octree,listv,ilistv,improveVol);
           }
           if ( ier ) {
             nm++;
