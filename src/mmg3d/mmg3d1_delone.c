@@ -760,11 +760,11 @@ static int
 _MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree, int* warn) {
   int        nfilt,ifilt,ne,ier;
   int        ns,nc,it,nnc,nns,nnf,nnm,maxit,nf,nm;
-  double     maxgap;
+  double     maxgap,dd;
 
   /* Iterative mesh modifications */
   it = nnc = nns = nnf = nnm = nfilt = 0;
-  maxit = 10;
+  maxit = 50;
   mesh->gap = maxgap = 0.5;
   // MMG_npuiss = MMG_nvol = MMG_npres = MMG_npd = 0; // decomment to debug
   do {
@@ -825,9 +825,13 @@ _MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree, int* warn) 
       fprintf(stdout,"     %8d filtered, %8d splitted, %8d collapsed,"
               " %8d swapped, %8d moved\n",ifilt,ns,nc,nf,nm);
 
-    if ( ns < 10 && abs(nc-ns) < 3 )  break;
-    else if ( it > 3 && abs(nc-ns) < 0.3 * MG_MAX(nc,ns) )  break;
-
+    if( it > 5 ) {
+      //  if ( ns < 10 && abs(nc-ns) < 3 )  break;
+      //else if ( it > 3 && abs(nc-ns) < 0.3 * MG_MAX(nc,ns) )  break;
+      dd = abs(nc-ns);
+      if ( dd < 5 || dd < 0.05*MG_MAX(nc,ns) )   break;
+      //else if ( it > 12 && nc >= ns )  break;
+    }
   }
   while( ++it < maxit && nc+ns > 0 );
 
