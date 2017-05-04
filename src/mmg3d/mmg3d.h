@@ -285,9 +285,9 @@ int    _MMG5_movintpt_iso(MMG5_pMesh ,MMG5_pSol,_MMG3D_pOctree, int *, int , int
 int    _MMG5_movintptLES_iso(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree,int *,int,int);
 int    _MMG5_movintpt_ani(MMG5_pMesh ,MMG5_pSol,_MMG3D_pOctree,int *,int ,int);
 int    _MMG5_movbdyregpt_iso(MMG5_pMesh, MMG5_pSol,_MMG3D_pOctree,
-                             int*, int, int*, int ,int);
+                             int*, int, int*, int, int ,int);
 int    _MMG5_movbdyregpt_ani(MMG5_pMesh, MMG5_pSol,_MMG3D_pOctree,
-                             int*, int, int*, int ,int);
+                             int*, int, int*, int, int ,int);
 int    _MMG5_movbdyrefpt_iso(MMG5_pMesh, MMG5_pSol,_MMG3D_pOctree, int*, int,
                              int*, int ,int);
 int    _MMG5_movbdyrefpt_ani(MMG5_pMesh, MMG5_pSol,_MMG3D_pOctree, int*, int,
@@ -372,7 +372,7 @@ int  _MMG3D_dichoto1b(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int);
 char _MMG5_chkedg(MMG5_pMesh mesh,MMG5_Tria *pt,char ori,double,double,int);
 int  _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met, char typchk, int patternMode) ;
 int  _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree,
-                  double clickSurf,int moveVol,int improveVol,int maxit);
+                  double clickSurf,int moveVol,int improveSurf,int improveVol,int maxit);
 int  _MMG5_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree, int);
   int  _MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double,double,_MMG3D_pOctree, int);
 
@@ -404,7 +404,7 @@ int    (*_MMG5_gradsiz)(MMG5_pMesh ,MMG5_pSol );
 int    (*_MMG5_intmet)(MMG5_pMesh,MMG5_pSol,int,char,int, double);
 int    (*_MMG5_interp4bar)(MMG5_pMesh,MMG5_pSol,int,int,double *);
 int    (*_MMG5_movintpt)(MMG5_pMesh ,MMG5_pSol, _MMG3D_pOctree ,int *, int , int );
-int    (*_MMG5_movbdyregpt)(MMG5_pMesh, MMG5_pSol, _MMG3D_pOctree ,int*, int, int*, int ,int);
+int    (*_MMG5_movbdyregpt)(MMG5_pMesh, MMG5_pSol, _MMG3D_pOctree ,int*, int, int*, int, int ,int);
 int    (*_MMG5_movbdyrefpt)(MMG5_pMesh, MMG5_pSol, _MMG3D_pOctree ,int*, int, int*, int ,int);
 int    (*_MMG5_movbdynompt)(MMG5_pMesh, MMG5_pSol, _MMG3D_pOctree ,int*, int, int*, int ,int);
 int    (*_MMG5_movbdyridpt)(MMG5_pMesh, MMG5_pSol, _MMG3D_pOctree ,int*, int, int*, int ,int);

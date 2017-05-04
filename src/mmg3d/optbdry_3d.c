@@ -113,7 +113,8 @@ int MMG3D_movetetrapoints(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree,in
             if ( !_MMG5_directsurfball(mesh,pt->v[i0],lists,ilists,n) )
               continue;
           }
-          ier = _MMG5_movbdyregpt(mesh,met, octree, listv,ilistv,lists,ilists,improve);
+          #warning CECILE a modifier pour opttyp
+          ier = _MMG5_movbdyregpt(mesh,met, octree, listv,ilistv,lists,ilists,improve,improve);
           if ( ier )  ns++;
         }
       }

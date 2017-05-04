@@ -348,7 +348,7 @@ int _MMG5_movintptLES_iso(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,
  */
 int _MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree, int *listv,
                           int ilistv,int *lists,int ilists,
-                          int improve) {
+                          int improveSurf,int improveVol) {
   MMG5_pTetra       pt,pt0;
   MMG5_pxTetra      pxt;
   MMG5_pPoint       p0,p1,p2,ppt0;
@@ -672,7 +672,7 @@ int _MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
   }
   if ( calold < _MMG5_EPSOK && calnew <= calold )    return(0);
   else if (calnew < _MMG5_EPSOK) return(0);
-  else if (improve && calnew < 1.02*calold) return(0);
+  else if (improveSurf && calnew < 1.02*calold) return(0);
   else if ( calnew < 0.3*calold )        return(0);
   memset(pxp,0,sizeof(MMG5_xPoint));
 
@@ -710,7 +710,7 @@ int _MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
     _MMG5_SAFE_FREE(callist);
     return(0);
   }
-  else if (improve && calnew < calold) {
+  else if (improveVol && calnew < calold) {
     _MMG5_SAFE_FREE(callist);
     return(0);
   }

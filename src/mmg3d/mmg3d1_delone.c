@@ -799,7 +799,7 @@ _MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree, int* warn) 
 
     if ( !mesh->info.nomove ) {
       /*perform only boundary moves*/
-      nm = _MMG5_movtet(mesh,met,octree,0.1/3.46,0,0,1);
+      nm = _MMG5_movtet(mesh,met,octree,0.1/3.46,0,0,1,1);
       if ( nm < 0 ) {
         fprintf(stderr,"  ## Unable to improve mesh.\n");
         return(0);
@@ -876,7 +876,7 @@ _MMG5_optetLES(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
     else  nf = 0;
 
     if ( !mesh->info.nomove ) {
-      nm = _MMG5_movtet(mesh,met,octree,1.,1,1,3);
+      nm = _MMG5_movtet(mesh,met,octree,1.,1,1,1,3);
       if ( nm < 0 ) {
         fprintf(stderr,"  ## Unable to improve mesh.\n");
         return(0);
@@ -898,7 +898,7 @@ _MMG5_optetLES(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
   while( ++it < maxit && nw+nm+nf > 0 );
 
   if ( !mesh->info.nomove ) {
-    nm = _MMG5_movtet(mesh,met,octree,1.,1,1,3);
+    nm = _MMG5_movtet(mesh,met,octree,1.,1,1,1,3);
     if ( nm < 0 ) {
       fprintf(stderr,"  ## Unable to improve mesh.\n");
       return(0);
@@ -965,7 +965,7 @@ _MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
     else  nf = 0;
 
     if ( !mesh->info.nomove ) {
-      nm = _MMG5_movtet(mesh,met,octree,1.,1,1,0);
+      nm = _MMG5_movtet(mesh,met,octree,1.,1,1,1,0);
       if ( nm < 0 ) {
         fprintf(stderr,"  ## Unable to improve mesh.\n");
         return(0);
@@ -982,7 +982,7 @@ _MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
   while( ++it < maxit && nw+nm+nf > 0 );
 
   if ( !mesh->info.nomove ) {
-    nm = _MMG5_movtet(mesh,met,octree,1.,1,1,3);
+    nm = _MMG5_movtet(mesh,met,octree,1.,1,1,1,3);
     if ( nm < 0 ) {
       fprintf(stderr,"  ## Unable to improve mesh.\n");
       return(0);

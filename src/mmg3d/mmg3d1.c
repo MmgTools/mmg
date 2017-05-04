@@ -598,7 +598,7 @@ int _MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double crit,double declic,
  *
  */
 int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,
-                 double clickSurf,int moveVol, int improveVol, int maxit) {
+                 double clickSurf,int moveVol, int improveSurf, int improveVol, int maxit) {
   MMG5_pTetra        pt;
   MMG5_pPoint        ppt;
   MMG5_pxTetra       pxt;
@@ -686,7 +686,7 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,
                 if ( !_MMG5_directsurfball(mesh,pt->v[i0],lists,ilists,n) )
                   continue;
               }
-              ier = _MMG5_movbdyregpt(mesh,met, octree, listv,ilistv,lists,ilists,improveVol);
+              ier = _MMG5_movbdyregpt(mesh,met, octree, listv,ilistv,lists,ilists,improveSurf,improveVol);
               if ( ier )  ns++;
             }
           }
