@@ -947,7 +947,7 @@ _MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
   do {
     /* treatment of bad elements*/
     if(it < 5) {
-      nw = MMG3D_opttyp(mesh,met,octree);
+      nw = 0;//MMG3D_opttyp(mesh,met,octree);
     }
     else
       nw = 0;
