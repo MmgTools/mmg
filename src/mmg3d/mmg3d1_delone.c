@@ -798,8 +798,8 @@ _MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree, int* warn) 
 
 
     if ( !mesh->info.nomove ) {
-      /*perform only boundary moves*/
-      nm = _MMG5_movtet(mesh,met,octree,0.1/3.46,0,0,1,1);
+      /*perform only boundary moves critSurf,moveVol?, improveSurf, improveVol, maxiter*/
+      nm = _MMG5_movtet(mesh,met,octree,1./3.46,0,1,0,1);
       if ( nm < 0 ) {
         fprintf(stderr,"  ## Unable to improve mesh.\n");
         return(0);
