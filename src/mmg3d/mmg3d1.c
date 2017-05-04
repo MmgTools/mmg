@@ -602,7 +602,8 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,
   MMG5_pTetra        pt;
   MMG5_pPoint        ppt;
   MMG5_pxTetra       pxt;
-  double        *n;
+  MMG5_Tria          tt;
+  double        *n,caltri;
   int           i,k,ier,nm,nnm,ns,lists[MMG3D_LMAX+2],listv[MMG3D_LMAX+2],ilists,ilistv,it;
   unsigned char j,i0,base;
 
@@ -634,6 +635,15 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,
           if ( ppt->flag == base )  continue;
           else if ( MG_SIN(ppt->tag) )  continue;
 
+          if( pt->xt && (pxt->ftag[i] & MG_BDY)) {
+            _MMG5_tet2tri(mesh,k,i,&tt);
+            caltri = _MMG5_caltri(mesh,met,&tt);
+            
+            if ( caltri >= clickSurf) {
+              j = 3;
+              continue;
+            } 
+          }
           if ( maxit != 1 ) {
             ppt->flag = base;
           }
