@@ -37,6 +37,41 @@
 extern char ddb;
 
 /**
+ * \param mesh pointer towarad the mesh structure.
+ *
+ * Set all boundary edges to required and add a tag to detect that they are
+ * not realy required.
+ *
+ */
+static inline void MMG2D_reqBoundaries(MMG5_pMesh mesh) {
+  MMG5_pTria     ptt;
+  int            k;
+
+  /* The MG_REQ+MG_NOSURF tag mark the boundary edges that we dont want to touch
+   * but that are not really required (-nosurf option) */
+  for (k=1; k<=mesh->nt; k++) {
+    ptt = &mesh->tria[k];
+    if ( !(ptt->tag[0] & MG_REQ) ) {
+      ptt->tag[0] |= MG_REQ;
+      ptt->tag[0] |= MG_NOSURF;
+    }
+
+    if ( !(ptt->tag[1] & MG_REQ) ) {
+      ptt->tag[1] |= MG_REQ;
+      ptt->tag[1] |= MG_NOSURF;
+    }
+
+    if ( !(ptt->tag[2] & MG_REQ) ) {
+      ptt->tag[2] |= MG_REQ;
+      ptt->tag[2] |= MG_NOSURF;
+    }
+  }
+
+  return;
+}
+
+
+/**
  * \param mesh pointer toward the mesh
  *
  * \return 1 if success, 0 if fail
@@ -48,6 +83,7 @@ extern char ddb;
 int _MMG2_setadj(MMG5_pMesh mesh) {
   MMG5_pTria       pt,pt1;
   int              *pile,*adja,ipil,k,kk,ncc,ip1,ip2,nr,nref;
+  int16_t          tag;
   char             i,ii,i1,i2;
 
   if ( abs(mesh->info.imprim) > 5  || mesh->info.ddebug )
@@ -96,9 +132,29 @@ int _MMG2_setadj(MMG5_pMesh mesh) {
 
         /* Case of an external boundary */
         if ( !adja[i] ) {
-          pt->tag[i] |= (MG_GEO+MG_BDY);
-          mesh->point[ip1].tag |= (MG_GEO+MG_BDY);
-          mesh->point[ip2].tag |= (MG_GEO+MG_BDY);
+          tag = ( MG_GEO+MG_BDY );
+
+          if ( !mesh->info.nosurf ) {
+            pt->tag[i] |= tag;
+            mesh->point[ip1].tag |= tag;
+            mesh->point[ip2].tag |= tag;
+          }
+          else {
+            if ( !(pt->tag[i] & MG_REQ) )
+              pt->tag[i] |= ( tag+MG_REQ+MG_NOSURF );
+            else
+              pt->tag[i] |= tag;
+
+            if ( !(mesh->point[ip1].tag  & MG_REQ) )
+              mesh->point[ip1].tag |= ( tag+MG_REQ+MG_NOSURF );
+            else
+              mesh->point[ip1].tag |= tag;
+
+            if ( !(mesh->point[ip2].tag  & MG_REQ) )
+              mesh->point[ip2].tag |= ( tag+MG_REQ+MG_NOSURF );
+            else
+              mesh->point[ip2].tag |= tag;
+          }
           nr++;
           continue;
         }
@@ -108,10 +164,35 @@ int _MMG2_setadj(MMG5_pMesh mesh) {
 
         /* Case of a boundary between two subdomains */
         if ( abs(pt1->ref) != abs(pt->ref) ) {
-          pt->tag[i]   |= (MG_REF+MG_BDY);
-          pt1->tag[ii] |= (MG_REF+MG_BDY);
-          mesh->point[ip1].tag |= (MG_REF+MG_BDY);
-          mesh->point[ip2].tag |= (MG_REF+MG_BDY);
+          tag = ( MG_REF+MG_BDY );
+
+          if ( !mesh->info.nosurf ) {
+            pt->tag[i]   |= tag;
+            pt1->tag[ii] |= tag;
+            mesh->point[ip1].tag |= tag;
+            mesh->point[ip2].tag |= tag;
+          }
+          else {
+            if ( !(pt->tag[i] & MG_REQ) )
+              pt->tag[i]   |= ( tag+MG_REQ+MG_NOSURF );
+            else
+              pt->tag[i]   |= tag;
+
+            if ( !(pt1->tag[ii] & MG_REQ) )
+              pt1->tag[ii] |= ( tag+MG_REQ+MG_NOSURF );
+            else
+              pt1->tag[ii] |= tag;
+
+            if ( !(mesh->point[ip1].tag & MG_REQ ) )
+              mesh->point[ip1].tag |= ( tag+MG_REQ+MG_NOSURF );
+            else
+              mesh->point[ip1].tag |= tag;
+
+            if ( !(mesh->point[ip2].tag & MG_REQ ) )
+              mesh->point[ip2].tag |= ( tag+MG_REQ+MG_NOSURF );
+            else
+              mesh->point[ip2].tag |= tag;
+          }
           if ( kk > k ) nref++;
           continue;
         }

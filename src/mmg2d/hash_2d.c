@@ -366,6 +366,9 @@ int MMG2_pack(MMG5_pMesh mesh,MMG5_pSol sol) {
     ppt = &mesh->point[k];
     if ( !MG_VOK(ppt) )  continue;
     ppt->tmp = ++np;
+
+    if ( mesh->info.nosurf && (ppt->tag & MG_NOSURF) )
+      ppt->tag &= ~MG_REQ;
   }
 
   /* Count the number of edges in the mesh */
@@ -386,6 +389,12 @@ int MMG2_pack(MMG5_pMesh mesh,MMG5_pSol sol) {
 
     for (i=0; i<3; i++) {
       iel = adja[i] / 3;
+
+      if ( pt->tag[i] & MG_NOSURF ) {
+        pt->tag[i] &= ~MG_REQ;
+        pt->tag[i] &= ~MG_NOSURF;
+      }
+
       if ( !iel ) ++mesh->na;
       else if ( iel < k ) {
         pt1 = &mesh->tria[iel];
