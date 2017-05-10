@@ -732,7 +732,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
   MMG5_pEdge        ped;
   MMG5_pTria        pt;
   double            dblb;
-  int               k,ne,np,nc,nreq,ref,ntang;
+  int               k,ne,np,nc,nreq,nereq,nedreq,ref,ntang;
   int               bin, binch, bpos;
   char              *ptr,*data,chaine[128];
 
@@ -798,40 +798,6 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
     else binch = 2;
     fwrite(&binch,sw,1,inm);
   }
-
-  // //HACK SAVE ONLY SD ref 2
-  //   for (k=1; k<=mesh->np; k++) {
-  //     ppt = &mesh->point[k];
-  //     ppt->tag = MG_NUL;
-  //   }
-  //   for (k=1; k<=mesh->nt; k++) {
-  //     pt = &mesh->tria[k];
-  //  if (!M_EOK(pt)) continue;
-  //     if (pt->ref==2) {
-  //    mesh->point[pt->v[0]].tag &= ~MG_NUL;
-  //    mesh->point[pt->v[1]].tag &= ~MG_NUL;
-  //    mesh->point[pt->v[2]].tag &= ~MG_NUL;
-  //     } else {
-  //    pt->v[0] = 0;
-  //     }
-  //   }
-  //   for (k=1; k<=mesh->na; k++) {
-  //     ped = &mesh->edge[k];
-  //    if(!ped->a) continue;
-  //     ppt = &mesh->point[ped->a];
-  //    if(!M_VOK(ppt)) {
-  //      ped->a = 0;
-  //      continue;
-  //    }
-  //     ppt = &mesh->point[ped->b];
-  //    if(!M_VOK(ppt)) {
-  //      ped->a = 0;
-  //      continue;
-  //    }
-  //    ped->tag |= MG_REQ;
-  //    }
-  //
-  // //END HACK
 
   /* Write vertices */
   np = 0;
@@ -924,12 +890,12 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
   }
 
   /* Required vertex */
-  nreq = 0;
+  nreq = nc = 0;
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
     if ( M_VOK(ppt) ) {
       if ( mesh->info.nosurf && (ppt->tag & MG_NOSURF) ) continue;
-      if (ppt->tag & MG_REQ) nreq++;
+      if ( ppt->tag & MG_REQ )  nreq++;
     }
   }
   if ( nreq ) {
@@ -961,70 +927,52 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
   }
 
   /* edges */
-  // Warning : edges are not packed
-  ne = 0;
+  nedreq = 0;
   if ( mesh->na ) {
-    for (k=1; k<=mesh->na; k++) {
-      ped = &mesh->edge[k];
-      if ( ped->a ) ++ne;
-    }
-  }
-
-  if ( ne ) {
     if(!bin) {
       strcpy(&chaine[0],"\n\nEdges\n");
       fprintf(inm,"%s",chaine);
-      fprintf(inm,"%d\n",ne);
+      fprintf(inm,"%d\n",mesh->na);
     }
     else {
       binch = 5; //Edges
       fwrite(&binch,sw,1,inm);
-      bpos += 12 + 3*4*ne;//Pos
+      bpos += 12 + 3*4*mesh->na;//Pos
       fwrite(&bpos,sw,1,inm);
-      fwrite(&ne,sw,1,inm);
+      fwrite(&mesh->na,sw,1,inm);
     }
     for (k=1; k<=mesh->na; k++) {
       ped = &mesh->edge[k];
-      if(!ped->a) continue;
-      ref = ped->ref;
       if(!bin)
-        fprintf(inm,"%d %d %d\n",mesh->point[ped->a].tmp,mesh->point[ped->b].tmp,ref);
+        fprintf(inm,"%d %d %d\n",mesh->point[ped->a].tmp,mesh->point[ped->b].tmp,ped->ref);
       else
       {
         fwrite(&mesh->point[ped->a].tmp,sw,1,inm);
         fwrite(&mesh->point[ped->b].tmp,sw,1,inm);
         fwrite(&ped->ref,sw,1,inm);
       }
+      if ( ped->tag & MG_REQ ) nedreq++;
     }
 
-    /* required edges */
-    ne = 0;
-    for (k=1; k<=mesh->na; k++) {
-      ped = &mesh->edge[k];
-      if ( ped->a && (ped->tag & MG_REQ))  ne++;
-    }
-    if ( ne ) {
-      if ( !bin ) {
+    if ( nedreq ) {
+      if(!bin) {
         strcpy(&chaine[0],"\n\nRequiredEdges\n");
         fprintf(inm,"%s",chaine);
-        fprintf(inm,"%d\n",ne);
-      }
-      else {
+        fprintf(inm,"%d\n",nedreq);
+      } else {
         binch = 16; //RequiredEdges
         fwrite(&binch,sw,1,inm);
-        bpos += 12 + 4*ne;//Pos
+        bpos += 12 + 4*nedreq;//Pos
         fwrite(&bpos,sw,1,inm);
-        fwrite(&ne,sw,1,inm);
+        fwrite(&nedreq,sw,1,inm);
       }
       ne = 0;
       for (k=1; k<=mesh->na; k++) {
-        ped = &mesh->edge[k];
-        if ( !ped->a ) continue;
-        ++ne;
-        if ( (ped->tag & MG_REQ) ) {
-          if ( !bin )
-            fprintf(inm,"%d\n",ne);
-          else {
+        ne++;
+        if (  mesh->edge[k].tag & MG_REQ ) {
+          if(!bin) {
+            fprintf(inm,"%d \n",ne);
+          } else {
             fwrite(&ne,sw,1,inm);
           }
         }
@@ -1033,10 +981,14 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
   }
 
   /* elements */
-  ne = 0;
+  ne    = 0;
+  nereq = 0;
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
-    if ( M_EOK(pt) )  ne++;
+    if ( !MG_EOK(pt) ) continue;
+    ne++;
+    if ( (pt->tag[0] & MG_REQ) && (pt->tag[1] & MG_REQ) && pt->tag[2] & MG_REQ )
+      ++nereq;
   }
 
   if ( ne ) {
@@ -1069,8 +1021,34 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
         }
       }
     }
+    if ( nereq ) {
+      if(!bin) {
+        strcpy(&chaine[0],"\n\nRequiredTriangles\n");
+        fprintf(inm,"%s",chaine);
+        fprintf(inm,"%d \n",nereq);
+      } else {
+        binch = 17; //ReqTriangles
+        fwrite(&binch,sw,1,inm);
+        bpos += 12+4*nereq; //Pos
+        fwrite(&bpos,sw,1,inm);
+        fwrite(&nereq,sw,1,inm);
+      }
+      ne = 0;
+      for (k=1; k<=mesh->nt; k++) {
+        pt = &mesh->tria[k];
+        if ( !MG_EOK(pt) )  continue;
+        ++ne;
+        if ( (pt->tag[0] & MG_REQ) && (pt->tag[1] & MG_REQ)
+             && pt->tag[2] & MG_REQ ) {
+          if(!bin) {
+            fprintf(inm,"%d \n",ne);
+          } else {
+            fwrite(&ne,sw,1,inm);
+          }
+        }
+      }
+    }
   }
-
 
   /*savetangent*/
   ntang=0;
