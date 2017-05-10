@@ -378,6 +378,11 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol) {
     fprintf(stdout,"\n  -- PHASE 3 : MESH IMPROVEMENT\n");
   }
 
+  if ( !sol->np && mesh->info.optim ) {
+    if ( !MMG2D_doSol(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+    _MMG2D_scalarSolTruncature(mesh,sol);
+  }
+
   /* Mesh analysis */
   if (! _MMG2_analys(mesh) )
     _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
