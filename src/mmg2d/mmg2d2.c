@@ -297,9 +297,7 @@ int MMG2_markSD(MMG5_pMesh mesh) {
     for(k=1; k<=nt; k++) {
       pt = &mesh->tria[k];
       if ( !MG_EOK(pt) ) continue;
-      for(i=0; i<3; i++)
-        mesh->point[pt->v[i]].tag = 0;
-
+ 
       if ( pt->ref != 1 ) continue;
       /*update adjacencies*/
       iadr = 3*(k-1)+1;
@@ -319,8 +317,7 @@ int MMG2_markSD(MMG5_pMesh mesh) {
     for(k=1 ; k<=nt ; k++) {
       pt = &mesh->tria[k];
       if ( !MG_EOK(pt) ) continue;
-      for(i=0; i<3; i++)
-        mesh->point[pt->v[i]].tag = 0;
+
       if( !(pt->v[0]==ip1 || pt->v[1]==ip1 || pt->v[2]==ip1 ||
            pt->v[0]==ip2 || pt->v[1]==ip2 || pt->v[2]==ip2 ||
            pt->v[0]==ip3 || pt->v[1]==ip3 || pt->v[2]==ip3 ||
