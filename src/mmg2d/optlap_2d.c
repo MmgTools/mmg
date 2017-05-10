@@ -88,7 +88,7 @@ int MMG2_optlap(MMG5_pMesh mesh,MMG5_pSol sol) {
         /*sqrt((cini[2*ipa + 0]-cini[2*ipb + 0])*(cini[2*ipa + 0]-cini[2*ipb + 0]) +
           (cini[2*ipa + 1]-cini[2*ipb + 1])*(cini[2*ipa + 1]-cini[2*ipb + 1]));
         */len = 1./len;
-        if(ppta->tag & M_BDRY) {
+        if(ppta->tag & MG_BDY) {
           iadr = 2*ipa;
           cnew[iadr + 0] = 0;
           cnew[iadr + 1] = 0;
@@ -99,7 +99,7 @@ int MMG2_optlap(MMG5_pMesh mesh,MMG5_pSol sol) {
           cnew[iadr + 1] += pptb->c[1]*len;
           ncount[ipa]    += len;
         }
-        if(pptb->tag & M_BDRY) {
+        if(pptb->tag & MG_BDY) {
           iadr = 2*ipb;
           cnew[iadr + 0] = 0;
           cnew[iadr + 1] = 0;
@@ -119,7 +119,7 @@ int MMG2_optlap(MMG5_pMesh mesh,MMG5_pSol sol) {
       iadr = 2*k;
       cold[iadr + 0] = ppt->c[0];
       cold[iadr + 1] = ppt->c[1];
-      if ( ppt->tag & M_BDRY )  continue;
+      if ( ppt->tag & MG_BDY )  continue;
 
       cnew[iadr + 0] = ppt->c[0] + omega * (cnew[iadr + 0] / ncount[k] - ppt->c[0]);
       cnew[iadr + 1] = ppt->c[1] + omega * (cnew[iadr + 1] / ncount[k] - ppt->c[1]);
@@ -145,7 +145,7 @@ int MMG2_optlap(MMG5_pMesh mesh,MMG5_pSol sol) {
           (cini[2*ipa + 1]-cini[2*ipb + 1])*(cini[2*ipa + 1]-cini[2*ipb + 1]));
         */len = 1./len;
 
-        if(ppta->tag & M_BDRY) {
+        if(ppta->tag & MG_BDY) {
           iadr = 2*ipa;
           ncount[ipa] += 1;
         } else {
@@ -154,7 +154,7 @@ int MMG2_optlap(MMG5_pMesh mesh,MMG5_pSol sol) {
           ppta->c[1]  += cnew[iadr + 1]*len;
           ncount[ipa] += len;
         }
-        if(pptb->tag & M_BDRY) {
+        if(pptb->tag & MG_BDY) {
           iadr = 2*ipb;
           ncount[ipb] += 1;
         } else {
@@ -169,7 +169,7 @@ int MMG2_optlap(MMG5_pMesh mesh,MMG5_pSol sol) {
     for (k=1 ; k<=mesh->np ; k++) {
       ppt = &mesh->point[k];
       if ( !M_VOK(ppt) ) continue;
-      if ( ppt->tag & M_BDRY )  continue;
+      if ( ppt->tag & MG_BDY )  continue;
       iadr = 2*k;
       ppt->c[0] = cnew[iadr + 0] - mu * (ppt->c[0] / ncount[k] - cnew[iadr + 0]);
       ppt->c[1] = cnew[iadr + 1] - mu * (ppt->c[1] / ncount[k] - cnew[iadr + 1]);

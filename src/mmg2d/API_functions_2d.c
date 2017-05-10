@@ -467,7 +467,7 @@ int MMG2D_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, int* ref,
     *ref = mesh->point[mesh->npi].ref;
 
   if ( isCorner != NULL ) {
-    if ( mesh->point[mesh->npi].tag & M_CORNER )
+    if ( mesh->point[mesh->npi].tag & MG_CRN )
       *isCorner = 1;
     else
       *isCorner = 0;

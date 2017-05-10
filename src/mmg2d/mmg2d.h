@@ -66,13 +66,6 @@ extern "C" {
 #define MMG2_LOPTL      1.4
 #define MMG2_LOPTS     0.71
 
-#define M_NOSURF   (1 << 0) /**< 1 Mark for the nosurf option */
-#define M_BDRY     (1 << 1) /**< 2 Boundary */
-#define M_MOVE     (1 << 2) /**< 4 Moved point */
-//USE MG_REQ #define M_REQUIRED (1 << 3) /**< 8 Required entity */
-#define M_CORNER   (1 << 4) /**< 16 corner */
-#define M_SD       (1 << 5) /**< 32 interface between two domains */
-
 #define _MMG2D_NPMAX   50000
 #define _MMG2D_NEDMAX  100000
 #define _MMG2D_NEMAX   100000

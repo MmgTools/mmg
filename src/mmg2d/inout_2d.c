@@ -928,7 +928,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
     if ( M_VOK(ppt) ) {
-      if ( mesh->info.nosurf && (ppt->tag & M_NOSURF) ) continue;
+      if ( mesh->info.nosurf && (ppt->tag & MG_NOSURF) ) continue;
       if (ppt->tag & MG_REQ) nreq++;
     }
   }
@@ -948,9 +948,9 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
       if ( M_VOK(ppt) ) {
-        if ( mesh->info.nosurf && ( ppt->tag & M_NOSURF )) continue;
+        if ( mesh->info.nosurf && ( ppt->tag & MG_NOSURF )) continue;
         if ((ppt->tag & MG_REQ)
-            /*&& ( (ppt->tag & M_BDRY) || (ppt->tag & M_SD) ) */ ) {
+            /*&& ( (ppt->tag & MG_BDY) || (ppt->tag & MG_SD) ) */ ) {
           if(!bin)
             fprintf(inm,"%d\n",ppt->tmp);
           else
@@ -1077,8 +1077,8 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
   for(k=1 ; k<=mesh->np ; k++) {
     ppt = &mesh->point[k];
     if ( M_VOK(ppt) ) {
-      if(!(ppt->tag & M_BDRY)) continue;
-      if(ppt->tag & M_CORNER) continue;
+      if(!(ppt->tag & MG_BDY)) continue;
+      if(ppt->tag & MG_CRN) continue;
       ntang++;
     }
   }
@@ -1110,8 +1110,8 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
   /*   for(k=1 ; k<=mesh->np ; k++) { */
   /*     ppt = &mesh->point[k]; */
   /*     if(!M_VOK(ppt)) continue; */
-  /*     if(!(ppt->tag & M_BDRY)) continue; */
-  /*     if(ppt->tag & M_CORNER) continue; */
+  /*     if(!(ppt->tag & MG_BDY)) continue; */
+  /*     if(ppt->tag & MG_CRN) continue; */
   /*     if(mesh->info.nreg) { */
   /*       if ( !bin ) */
   /*         fprintf(inm,"%lf %lf %lf\n",ppt->n[0],ppt->n[1],0.e0); */
@@ -1149,8 +1149,8 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
   /*   for(k=1 ; k<=mesh->np ; k++) { */
   /*     ppt = &mesh->point[k]; */
   /*     if ( !M_VOK(ppt) ) continue; */
-  /*     if(!(ppt->tag & M_BDRY)) continue; */
-  /*     if(ppt->tag & M_CORNER) continue; */
+  /*     if(!(ppt->tag & MG_BDY)) continue; */
+  /*     if(ppt->tag & MG_CRN) continue; */
 
   /*     if(!bin) { */
   /*       fprintf(inm,"%d %d \n",ppt->tmp,nn++); */
