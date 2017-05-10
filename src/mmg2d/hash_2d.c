@@ -435,6 +435,7 @@ int MMG2_pack(MMG5_pMesh mesh,MMG5_pSol sol) {
              * from which comes a boundary edge */
             ped->base = 3*k+i;
             ped->ref = pt->edg[i];
+            ped->tag = pt->tag[i];
           }
         }
       }
