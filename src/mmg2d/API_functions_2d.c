@@ -618,10 +618,19 @@ int MMG2D_Set_triangle(MMG5_pMesh mesh, int v0, int v1, int v2, int ref, int pos
 }
 
 int MMG2D_Set_requiredTriangle(MMG5_pMesh mesh, int k) {
+  MMG5_pTria pt;
+  int        i;
+  
   assert ( k <= mesh->nt );
-  mesh->tria[k].tag[0] |= MG_REQ;
-  mesh->tria[k].tag[1] |= MG_REQ;
-  mesh->tria[k].tag[2] |= MG_REQ;
+  pt = &mesh->tria[k];
+
+  pt->tag[0] |= MG_REQ;
+  pt->tag[1] |= MG_REQ;
+  pt->tag[2] |= MG_REQ;
+
+  for(i=0 ; i<3 ;i++)
+    mesh->point[pt->v[i]].tag |= MG_REQ;
+
   return(1);
 }
 
