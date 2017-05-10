@@ -178,7 +178,7 @@ int _MMG2_cavity(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list) {
   ppt = &mesh->point[ip];
   base  = ++mesh->base;
   //isreq = 0;
-  tref = list[0];
+  tref = mesh->tria[list[0]].ref;
   mesh->tria[list[0]].base = base;
 
   /* Pile up cavity by adjacency */
@@ -226,7 +226,9 @@ int _MMG2_cavity(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list) {
         if ( !adi )  continue;
         pt1 = &mesh->tria[adi];
         if ( pt1->base == base && adi != jel ) {
-          if ( !adi || pt1->ref != tref )  break;
+          if ( pt1->ref != tref ) {
+            break;
+          }
         }
       }
       /* store tria */
