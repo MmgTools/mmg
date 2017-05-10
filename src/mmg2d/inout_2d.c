@@ -446,7 +446,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         if(iswp) ref=MMG_swapbin(ref);
       }
       ppt = &mesh->point[ref];
-      ppt->tag |= M_REQUIRED;
+      ppt->tag |= MG_REQ;
     }
   }
 
@@ -462,11 +462,11 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         if(iswp) ref=MMG_swapbin(ref);
       }
       ped = &mesh->edge[ref];
-      ped->tag |= M_REQUIRED;
+      ped->tag |= MG_REQ;
       ppt = &mesh->point[ped->a];
-      ppt->tag |= M_REQUIRED;
+      ppt->tag |= MG_REQ;
       ppt = &mesh->point[ped->b];
-      ppt->tag |= M_REQUIRED;
+      ppt->tag |= MG_REQ;
     }
   }
 
@@ -828,7 +828,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
   //      ped->a = 0;
   //      continue;
   //    }
-  //    ped->tag |= M_REQUIRED;
+  //    ped->tag |= MG_REQ;
   //    }
   //
   // //END HACK
@@ -1001,7 +1001,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
     ne = 0;
     for (k=1; k<=mesh->na; k++) {
       ped = &mesh->edge[k];
-      if ( ped->a && (ped->tag & M_REQUIRED))  ne++;
+      if ( ped->a && (ped->tag & MG_REQ))  ne++;
     }
     if ( ne ) {
       if ( !bin ) {
@@ -1021,7 +1021,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
         ped = &mesh->edge[k];
         if ( !ped->a ) continue;
         ++ne;
-        if ( (ped->tag & M_REQUIRED) ) {
+        if ( (ped->tag & MG_REQ) ) {
           if ( !bin )
             fprintf(inm,"%d\n",ne);
           else {

@@ -428,13 +428,13 @@ int MMG2D_Set_vertex(MMG5_pMesh mesh, double c0, double c1, int ref, int pos) {
 
 /* int MMG2D_Set_corner(MMG5_pMesh mesh, int k) { */
 /*   assert ( k <= mesh->np ); */
-/*   mesh->point[k].tag |= M_CORNER; */
+/*   mesh->point[k].tag |= MG_CRN; */
 /*   return(1); */
 /* } */
 
 /* int MMG2D_Set_requiredVertex(MMG5_pMesh mesh, int k) { */
 /*   assert ( k <= mesh->np ); */
-/*   mesh->point[k].tag |= M_REQUIRED; */
+/*   mesh->point[k].tag |= MG_REQ; */
 /*   return(1); */
 /* } */
 
@@ -474,7 +474,7 @@ int MMG2D_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, int* ref,
   }
 
   if ( isRequired != NULL ) {
-    if ( mesh->point[mesh->npi].tag & M_REQUIRED )
+    if ( mesh->point[mesh->npi].tag & MG_REQ )
       *isRequired = 1;
     else
       *isRequired = 0;

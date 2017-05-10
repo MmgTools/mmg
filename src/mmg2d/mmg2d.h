@@ -69,7 +69,7 @@ extern "C" {
 #define M_NOSURF   (1 << 0) /**< 1 Mark for the nosurf option */
 #define M_BDRY     (1 << 1) /**< 2 Boundary */
 #define M_MOVE     (1 << 2) /**< 4 Moved point */
-#define M_REQUIRED (1 << 3) /**< 8 Required entity */
+//USE MG_REQ #define M_REQUIRED (1 << 3) /**< 8 Required entity */
 #define M_CORNER   (1 << 4) /**< 16 corner */
 #define M_SD       (1 << 5) /**< 32 interface between two domains */
 

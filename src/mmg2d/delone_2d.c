@@ -231,7 +231,7 @@ int _MMG2_cavity(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list) {
       }
       /* store tria */
       if ( j == 3 ) {
-        //if ( pt->tag & M_REQUIRED ) isreq = 1;
+        //if ( pt->tag & MG_REQ ) isreq = 1;
         pt->base = base;
         list[ilist++] = adj;
       }
