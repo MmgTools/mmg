@@ -251,9 +251,7 @@ int _MMG2D_restart(MMG5_pMesh mesh){
     mesh->nanil = mesh->na + 1;
   }
 
-  for ( k=1; k<=mesh->np;  ++k ) {
-    mesh->point[k].tag = 0;
-  }
+ 
   return 1;
 }
 

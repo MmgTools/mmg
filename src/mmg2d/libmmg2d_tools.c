@@ -235,6 +235,15 @@ int MMG2D_Get_triFromEdge(MMG5_pMesh mesh, int ked, int *ktri, int *ied)
 
 }
 
+void MMG2D_Reset_verticestags(MMG5_pMesh mesh) {
+  int k;
+
+  for ( k=1; k<=mesh->np;  ++k ) {
+    mesh->point[k].tag = 0;
+  }
+
+}
+
 void MMG2D_Free_triangles(MMG5_pMesh mesh) {
 
   if ( mesh->adja )

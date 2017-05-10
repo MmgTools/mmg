@@ -1245,7 +1245,18 @@ int MMG2D_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start,
  *
  */
 int MMG2D_Get_triFromEdge(MMG5_pMesh mesh, int ked, int *ktri, int *ied);
-
+/**
+ * \param mesh pointer toward the mesh structure
+ *
+ * Reset the vertices tag (be careful all the tags are deleted).
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG2D_RESET_VERTICESTAGS(mesh)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh\n
+ * >   END SUBROUTINE\n
+ *
+ */
+void MMG2D_Reset_verticestags(MMG5_pMesh mesh);
 /**
  * \param mesh pointer toward the mesh structure
  *
