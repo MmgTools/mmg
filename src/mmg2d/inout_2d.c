@@ -803,7 +803,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
   np = 0;
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
-    if ( M_VOK(ppt) )  np++;
+    if ( MG_VOK(ppt) )  np++;
     ppt->tmp = np;
   }
 
@@ -827,7 +827,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
 
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
-    if ( M_VOK(ppt) ) {
+    if ( MG_VOK(ppt) ) {
       ref = ppt->ref;
       if ( mesh->info.nreg ) {
         if ( !bin )
@@ -858,7 +858,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
   nc = 0;
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
-    if ( M_VOK(ppt) && (ppt->tag & MG_CRN) )  nc++;
+    if ( MG_VOK(ppt) && (ppt->tag & MG_CRN) )  nc++;
   }
 
   if ( nc ) {
@@ -878,7 +878,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
 
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
-      if ( M_VOK(ppt) && (ppt->tag & MG_CRN) ) {
+      if ( MG_VOK(ppt) && (ppt->tag & MG_CRN) ) {
         if(!bin) {
           fprintf(inm,"%d\n",ppt->tmp);
         }
@@ -893,7 +893,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
   nreq = nc = 0;
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
-    if ( M_VOK(ppt) ) {
+    if ( MG_VOK(ppt) ) {
       if ( mesh->info.nosurf && (ppt->tag & MG_NOSURF) ) continue;
       if ( ppt->tag & MG_REQ )  nreq++;
     }
@@ -913,7 +913,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
     }
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
-      if ( M_VOK(ppt) ) {
+      if ( MG_VOK(ppt) ) {
         if ( mesh->info.nosurf && ( ppt->tag & MG_NOSURF )) continue;
         if ((ppt->tag & MG_REQ)
             /*&& ( (ppt->tag & MG_BDY) || (ppt->tag & MG_SD) ) */ ) {
@@ -1006,7 +1006,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
     }
     for (k=1; k<=mesh->nt; k++) {
       pt = &mesh->tria[k];
-      if ( M_EOK(pt) ) {
+      if ( MG_EOK(pt) ) {
         ref = pt->ref;
         if ( !bin ) {
           fprintf(inm,"%d %d %d %d\n",mesh->point[pt->v[0]].tmp,
@@ -1054,7 +1054,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
   ntang=0;
   for(k=1 ; k<=mesh->np ; k++) {
     ppt = &mesh->point[k];
-    if ( M_VOK(ppt) ) {
+    if ( MG_VOK(ppt) ) {
       if(!(ppt->tag & MG_BDY)) continue;
       if(ppt->tag & MG_CRN) continue;
       ntang++;
@@ -1087,7 +1087,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
 
   /*   for(k=1 ; k<=mesh->np ; k++) { */
   /*     ppt = &mesh->point[k]; */
-  /*     if(!M_VOK(ppt)) continue; */
+  /*     if(!MG_VOK(ppt)) continue; */
   /*     if(!(ppt->tag & MG_BDY)) continue; */
   /*     if(ppt->tag & MG_CRN) continue; */
   /*     if(mesh->info.nreg) { */
@@ -1126,7 +1126,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
   /*   nn=1; */
   /*   for(k=1 ; k<=mesh->np ; k++) { */
   /*     ppt = &mesh->point[k]; */
-  /*     if ( !M_VOK(ppt) ) continue; */
+  /*     if ( !MG_VOK(ppt) ) continue; */
   /*     if(!(ppt->tag & MG_BDY)) continue; */
   /*     if(ppt->tag & MG_CRN) continue; */
 
@@ -1247,7 +1247,7 @@ int MMG2D_saveSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   nbl = 0;
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
-    if ( !M_VOK(ppt) )  continue;
+    if ( !MG_VOK(ppt) )  continue;
     nbl++;
   }
 
@@ -1271,7 +1271,7 @@ int MMG2D_saveSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
-    if ( !M_VOK(ppt) )  continue;
+    if ( !MG_VOK(ppt) )  continue;
     isol = k * sol->size;
     if ( sol->ver < 2 ) {
       if ( !bin ) {

@@ -70,7 +70,7 @@ int MMG2_isInTriangle(MMG5_pMesh mesh,int k,double c[2]) {
   char            ier;
 
   pt = &mesh->tria[k];
-  if ( !M_EOK(pt) ) return(0);
+  if ( !MG_EOK(pt) ) return(0);
 
   ier = MMG2_coorbary(mesh,pt,&c[0],&det,&l1,&l2);
   if ( !ier )
@@ -224,7 +224,7 @@ int MMG2_findTria(MMG5_pMesh mesh,int ip) {
   
   do {
     pt = &mesh->tria[iel];
-    if ( !M_EOK(pt) )  {
+    if ( !MG_EOK(pt) )  {
       iel++;
       if ( iel > mesh->nt ) return(0);
       continue;
@@ -299,7 +299,7 @@ int MMG2_findTria(MMG5_pMesh mesh,int ip) {
   /*exhaustive search*/
   for (k=1 ; k<=mesh->nt ; k++) {
     pt = &mesh->tria[k];
-    if(!M_EOK(pt)) continue;
+    if(!MG_EOK(pt)) continue;
     if (pt->v[0]==ip || pt->v[1]==ip || pt->v[2]==ip) break;
   }
   if(k<=mesh->nt) {

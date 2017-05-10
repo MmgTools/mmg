@@ -208,7 +208,7 @@ int lissmet_iso(MMG5_pMesh mesh,MMG5_pSol sol) {
     hmax = 0.;
     for(k=1 ; k<=mesh->nt; k++) {
       ptt = &mesh->tria[k];
-      if(!M_EOK(ptt)) continue;
+      if(!MG_EOK(ptt)) continue;
       for(i=0 ; i<3 ; i++) {
         i1 = ptt->v[MMG2_iare[i][0]];
         i2 = ptt->v[MMG2_iare[i][1]];

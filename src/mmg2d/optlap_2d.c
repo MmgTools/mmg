@@ -60,7 +60,7 @@ int MMG2_optlap(MMG5_pMesh mesh,MMG5_pSol sol) {
   it     = 1;
   for (k=1 ; k<=mesh->np ; k++) {
     ppt = &mesh->point[k];
-    if ( !M_VOK(ppt) ) continue;
+    if ( !MG_VOK(ppt) ) continue;
     iadr = 2*k;
     cini[iadr + 0] = ppt->c[0];
     cini[iadr + 1] = ppt->c[1];
@@ -75,7 +75,7 @@ int MMG2_optlap(MMG5_pMesh mesh,MMG5_pSol sol) {
     /*laplacian*/
     for (k=1 ; k<=mesh->nt ; k++) {
       pt = &mesh->tria[k];
-      if ( !M_EOK(pt) ) continue;
+      if ( !MG_EOK(pt) ) continue;
 
       for (i=0 ; i<3 ; i++) {
         ipa  = pt->v[iare[i][0]];
@@ -115,7 +115,7 @@ int MMG2_optlap(MMG5_pMesh mesh,MMG5_pSol sol) {
 
     for (k=1 ; k<=mesh->np ; k++) {
       ppt = &mesh->point[k];
-      if ( !M_VOK(ppt) ) continue;
+      if ( !MG_VOK(ppt) ) continue;
       iadr = 2*k;
       cold[iadr + 0] = ppt->c[0];
       cold[iadr + 1] = ppt->c[1];
@@ -131,7 +131,7 @@ int MMG2_optlap(MMG5_pMesh mesh,MMG5_pSol sol) {
     /*anti-laplacian*/
     for (k=1 ; k<=mesh->nt ; k++) {
       pt = &mesh->tria[k];
-      if ( !M_EOK(pt) ) continue;
+      if ( !MG_EOK(pt) ) continue;
 
       for (i=0 ; i<3 ; i++) {
         ipa  = pt->v[iare[i][0]];
@@ -168,7 +168,7 @@ int MMG2_optlap(MMG5_pMesh mesh,MMG5_pSol sol) {
 
     for (k=1 ; k<=mesh->np ; k++) {
       ppt = &mesh->point[k];
-      if ( !M_VOK(ppt) ) continue;
+      if ( !MG_VOK(ppt) ) continue;
       if ( ppt->tag & MG_BDY )  continue;
       iadr = 2*k;
       ppt->c[0] = cnew[iadr + 0] - mu * (ppt->c[0] / ncount[k] - cnew[iadr + 0]);

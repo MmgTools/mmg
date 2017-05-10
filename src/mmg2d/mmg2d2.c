@@ -109,7 +109,7 @@ int MMG2_settagtriangles(MMG5_pMesh mesh,MMG5_pSol sol) {
     nd = 0;
     for(k=1; k<=mesh->nt; k++) {
       pt = &mesh->tria[k];
-      if ( !M_EOK(pt) )  continue;
+      if ( !MG_EOK(pt) )  continue;
       if ( !MMG2_findtrianglestate(mesh,k,ip1,ip2,ip3,ip4,base) ) nd++ ;
     }
 
@@ -356,7 +356,7 @@ int MMG2_markSD(MMG5_pMesh mesh) {
   /* Remove vertex*/
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
-    if ( !M_EOK(pt) )  continue;
+    if ( !MG_EOK(pt) )  continue;
     for (i=0; i<3; i++) {
       ppt = &mesh->point[ pt->v[i] ];
       ppt->tag &= ~MG_NUL;
@@ -368,12 +368,12 @@ int MMG2_markSD(MMG5_pMesh mesh) {
     ped = &mesh->edge[k];
     if ( !ped->a )  continue;
     ppt = &mesh->point[ ped->a ];
-    if ( !M_VOK(ppt) ) {
+    if ( !MG_VOK(ppt) ) {
       _MMG5_delEdge(mesh,k);
       continue;
     }
     ppt = &mesh->point[ ped->b ];
-    if ( !M_VOK(ppt) ) {
+    if ( !MG_VOK(ppt) ) {
       _MMG5_delEdge(mesh,k);
       continue;
     }

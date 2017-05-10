@@ -70,9 +70,6 @@ extern "C" {
 #define _MMG2D_NEDMAX  100000
 #define _MMG2D_NEMAX   100000
 
-#define M_VOK(ppt)    (ppt && (ppt->tag < MG_NUL))
-#define M_EOK(pt)     (pt && (pt->v[0] > 0))
-
 /** Free allocated pointers of mesh and sol structure and return value val */
 #define _MMG2D_RETURN_AND_FREE(mesh,met,disp,val)do                 \
   {                                                                 \

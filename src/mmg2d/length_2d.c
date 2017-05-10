@@ -133,7 +133,7 @@ int MMG2_prilen(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
-    if ( !M_EOK(pt) )  continue;
+    if ( !MG_EOK(pt) )  continue;
 
     for (ia=0; ia<3; ia++) {
       l = (&mesh->adja[3*(k-1)+1])[ia];

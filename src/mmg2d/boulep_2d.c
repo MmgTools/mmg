@@ -38,10 +38,10 @@ int MMG2_boulep(MMG5_pMesh mesh, int ifirst, int iploc, int * list) {
 
   if ( ifirst < 1 ) return(0);
   pt = &mesh->tria[ifirst];
-  if ( !M_EOK(pt) ) return(0);
+  if ( !MG_EOK(pt) ) return(0);
   ip = pt->v[iploc];
   ppt = &mesh->point[ip];
-  if ( !M_VOK(ppt) ) return(0);
+  if ( !MG_VOK(ppt) ) return(0);
 
   /* init list */
   ilist       = 1;
