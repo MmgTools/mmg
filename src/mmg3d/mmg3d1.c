@@ -1654,49 +1654,64 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
+ * \param nf number of swap performed.
  * \param typchk type of checking permformed.
  * \return -1 if failed, number of new points otherwise.
  *
  * Split tetra into 4 when more than 1 boundary face.
  *
  */
-static int _MMG5_anatet4(MMG5_pMesh mesh, MMG5_pSol met, char typchk) {
+static int _MMG5_anatet4(MMG5_pMesh mesh, MMG5_pSol met,int *nf, char typchk) {
   MMG5_pTetra  pt;
   MMG5_pPoint  ppt;
   MMG5_pxTetra pxt;
-  int          k,ns,nw,ier;
-  char         nf,j;
+  int          k,ns,ier;
+  char         nbdy,j;
 
-  ns = nw = 0;
+  ns = 0;
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
     if ( !MG_EOK(pt) || pt->ref < 0 || (pt->tag & MG_REQ) )   continue;
-    nf = 0;
+    nbdy = 0;
     if ( pt->xt ) {
       pxt = &mesh->xtetra[pt->xt];
       for (j=0; j<4; j++)
-        if ( pxt->ftag[j] & MG_BDY )  nf++;
+        if ( pxt->ftag[j] & MG_BDY )  nbdy++;
     }
-    if ( nf > 1 ) {
-      ier  = _MMG5_split4bar(mesh,met,k,typchk-1);
-      if ( !ier ) return(-1);
-      ns++;
-    }
-    else {
-      nf = 0;
-      for (j=0; j<4; j++) {
-        ppt = &mesh->point[pt->v[j]];
-        if ( ppt->tag & MG_BDY )  nf++;
+    if ( nbdy > 1 ) {
+      if ( !mesh->info.noswap ) {
+        /* Try to swap first */
+        ier = MMG3D_swap23(mesh,met,k,typchk-1);
+        if ( ier ) {
+          ++(*nf);
+          continue;
+        }
       }
-      if ( nf == 4 ) {
+
+      if ( !mesh->info.noinsert ) {
+        /* If unable to swap, try to split */
         ier  = _MMG5_split4bar(mesh,met,k,typchk-1);
         if ( !ier ) return(-1);
         ns++;
       }
     }
+    else {
+      nbdy = 0;
+      for (j=0; j<4; j++) {
+        ppt = &mesh->point[pt->v[j]];
+        if ( ppt->tag & MG_BDY )  nbdy++;
+      }
+      if ( nbdy == 4 ) {
+        if ( !mesh->info.noinsert ) {
+          ier  = _MMG5_split4bar(mesh,met,k,typchk-1);
+          if ( !ier ) return(-1);
+          ns++;
+        }
+      }
+    }
   }
   if ( (mesh->info.ddebug || abs(mesh->info.imprim) > 5) && ns > 0 )
-    fprintf(stdout,"     %7d boundary elements splitted\n",ns);
+    fprintf(stdout,"     boundary elements: %7d splitted %7d swapped\n",ns,*nf);
   return(ns);
 }
 
@@ -1721,16 +1736,16 @@ int _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,char typchk, int patternMode) {
   mesh->gap = 0.5;
   do {
 
+    /* split or swap tetra with more than 2 bdry faces */
+    nf = 0;
+    ier = _MMG5_anatet4(mesh,met,&nf,typchk);
+    if ( ier < 0 )  return(0);
+    ns = ier;
+
+    /* memory free */
+    _MMG5_DEL_MEM(mesh,mesh->adja,(4*mesh->nemax+5)*sizeof(int));
+
     if ( !mesh->info.noinsert ) {
-
-      /* split tetra with more than 2 bdry faces */
-      ier = _MMG5_anatet4(mesh,met,typchk);
-      if ( ier < 0 )  return(0);
-      ns = ier;
-
-      /* memory free */
-      _MMG5_DEL_MEM(mesh,mesh->adja,(4*mesh->nemax+5)*sizeof(int));
-
       /* analyze surface tetras */
       ier = _MMG5_anatets(mesh,met,typchk);
 
@@ -1769,20 +1784,20 @@ int _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,char typchk, int patternMode) {
 
     /* attempt to swap */
     if ( !mesh->info.noswap ) {
-      nf = _MMG5_swpmsh(mesh,met,NULL,typchk);
-      if ( nf < 0 ) {
+      ier = _MMG5_swpmsh(mesh,met,NULL,typchk);
+      if ( ier < 0 ) {
         fprintf(stderr,"  ## Unable to improve mesh. Exiting.\n");
         return(0);
       }
-      nnf += nf;
+      nf  += ier;
 
-      nf = _MMG5_swptet(mesh,met,1.1,0.0288675,NULL,typchk);
-      if ( nf < 0 ) {
+      ier = _MMG5_swptet(mesh,met,1.1,0.0288675,NULL,typchk);
+      if ( ier < 0 ) {
         fprintf(stderr,"  ## Unable to improve mesh. Exiting.\n");
         return(0);
       }
+      nf += ier;
     }
-    else  nf = 0;
 
     nnc += nc;
     nns += ns;
