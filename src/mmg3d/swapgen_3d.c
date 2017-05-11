@@ -330,8 +330,8 @@ int MMG3D_swap23(MMG5_pMesh mesh,MMG5_pSol met,int k,char metRidTyp) {
   MMG5_xTetra          xt[3];
   MMG5_pxTetra         pxt0,pxt1;
   double               vold0,vold,vnew;
-  int                  k1,conf0,conf1,*adja,v1,v2,v3,iel,np,xt1;
-  int                  adj0_1,adj0_2,adj0_3,adj1_1,adj1_2,adj1_3;
+  int                  k1,conf0,conf1,*adja,iel,np,xt1;
+  int                  adj0_2,adj0_3,adj1_1,adj1_2,adj1_3;
   char                 j0,j1,i,isxt[3];
   unsigned char        tau0[4],tau1[4];
   const unsigned char *taued0,*taued1;
@@ -510,7 +510,6 @@ int MMG3D_swap23(MMG5_pMesh mesh,MMG5_pSol met,int k,char metRidTyp) {
 
     /* Store the old adja */
     adja = &mesh->adja[4*(k-1) +1];
-    adj0_1 = adja[tau0[1]];
     adj0_2 = adja[tau0[2]];
     adj0_3 = adja[tau0[3]];
 
