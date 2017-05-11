@@ -745,7 +745,6 @@ int _MMG3D_analys(MMG5_pMesh mesh) {
   if ( !_MMG3D_nmgeom(mesh) ) return 0;
 
   /* release memory */
-  mesh->nt = 0;
   _MMG5_DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(MMG5_hgeom));
   _MMG5_DEL_MEM(mesh,mesh->adjt,(3*mesh->nt+4)*sizeof(int));
   _MMG5_DEL_MEM(mesh,mesh->tria,(mesh->nt+1)*sizeof(MMG5_Tria));
