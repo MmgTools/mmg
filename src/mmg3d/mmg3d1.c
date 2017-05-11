@@ -1682,7 +1682,10 @@ static int _MMG5_anatet4(MMG5_pMesh mesh, MMG5_pSol met,int *nf, char typchk) {
       if ( !mesh->info.noswap ) {
         /* Try to swap first */
         ier = MMG3D_swap23(mesh,met,k,typchk-1);
-        if ( ier ) {
+        if ( ier < 0 ) {
+          return -1;
+        }
+        else if ( ier ) {
           ++(*nf);
           continue;
         }

@@ -590,11 +590,11 @@ int MMG3D_swap23(MMG5_pMesh mesh,MMG5_pSol met,int k,char metRidTyp) {
 
       /* xt[2] */
       xt[1].tag[taued0[2]] = 0;
-      xt[1].tag[taued0[3]] = 0;
+      xt[1].tag[taued0[4]] = 0;
       xt[1].tag[taued0[5]] = 0;
 
       xt[1].edg[taued0[2]] = 0;
-      xt[1].edg[taued0[3]] = 0;
+      xt[1].edg[taued0[4]] = 0;
       xt[1].edg[taued0[5]] = 0;
 
       xt[1].ref[ tau0[0]] = 0;
@@ -705,10 +705,12 @@ int MMG3D_swap23(MMG5_pMesh mesh,MMG5_pSol met,int k,char metRidTyp) {
             pxt0 = &mesh->xtetra[mesh->xt];
             memcpy(pxt0,&xt[2],sizeof(MMG5_xTetra));
           }
+          else ptnew->xt = 0;
         }
         else {
+          pt1->xt   = 0;
           ptnew->xt = xt1;
-          memcpy(pxt1,&xt[1],sizeof(MMG5_xTetra));
+          memcpy(pxt1,&xt[2],sizeof(MMG5_xTetra));
         }
       }
       else {
