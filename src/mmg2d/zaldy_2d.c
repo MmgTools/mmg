@@ -187,7 +187,7 @@ void _MMG2D_memOption(MMG5_pMesh mesh) {
     /* memory asked by user if possible, otherwise total physical memory */
     if ( (long long)(mesh->info.mem)*million > mesh->memMax && mesh->memMax ) {
       fprintf(stdout,"  ## Warning: asking for %d Mo of memory ",mesh->info.mem);
-      castedVal = _MMG5_safeLL2LCast(mesh->memMax/million);
+      castedVal = _MMG5_SAFELL2LCAST(mesh->memMax/million);
       fprintf(stdout,"when only %ld available.\n",castedVal);
     }
     else {
@@ -232,7 +232,7 @@ void _MMG2D_memOption(MMG5_pMesh mesh) {
   }
 
   if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug ) {
-    castedVal = _MMG5_safeLL2LCast(mesh->memMax/million);
+    castedVal = _MMG5_SAFELL2LCAST(mesh->memMax/million);
     fprintf(stdout,"  MAXIMUM MEMORY AUTHORIZED (Mo)    %ld\n",castedVal);
   }
 

@@ -278,6 +278,9 @@ extern "C" {
     printf(" authorized memory with the -m option.\n");     \
   } while(0)
 
+#define _MMG5_SAFELL2LCAST(longlongval) (((longlongval) > (LONG_MAX)) ? : ((long)(longlongval)))
+#define _MMG5_SAFELL2ICAST(longlongval) (((longlongval) > (INT_MAX)) ? : ((int)(longlongval)))
+
 
 /** Inlined functions for libraries and executables */
 #ifdef USE_SCOTCH
@@ -480,7 +483,6 @@ typedef struct _MMG5_dNode_s {
  int           _MMG5_invmatg(double m[9],double mi[9]);
  double        _MMG5_ridSizeInNormalDir(MMG5_pMesh,int,double*,_MMG5_pBezier,double,double);
  double        _MMG5_ridSizeInTangentDir(MMG5_pMesh, MMG5_pPoint,int,int*,double,double);
- extern long   _MMG5_safeLL2LCast(long long val);
  int           _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met);
  int           _MMG5_scotchCall(MMG5_pMesh mesh, MMG5_pSol sol);
  int           _MMG5_solveDefmetregSys( MMG5_pMesh, double r[3][3], double *, double *,

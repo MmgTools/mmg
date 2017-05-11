@@ -445,44 +445,6 @@ long long _MMG5_memSize (void) {
 }
 
 /**
- * Safe cast into a long
- */
-inline
-long _MMG5_safeLL2LCast(long long val)
-{
-  long tmp_l;
-
-  tmp_l  = (long)(val);
-
-  if ( (long long)(tmp_l) != val ) {
-        fprintf(stderr,"  ## Error:");
-        fprintf(stderr," unable to cast value.n");
-        return 0.;
-  }
-  return(tmp_l);
-}
-
-/**
- * Safe cast into an int
- */
-inline
-long _MMG5_safeLL2ICast(long long val)
-{
-  int tmp_l;
-
-  tmp_l  = (int)(val);
-
-  if ( (long long)(tmp_l) != val ) {
-        fprintf(stderr,"  ## Error:");
-        fprintf(stderr," unable to cast value.n");
-        return 0.;
-  }
-  return(tmp_l);
-}
-
-
-
-/**
  * \param mesh pointer toward the mesh structure (for count of used memory).
  * \param node pointer toward a _MMG5_iNode (cell for linked list)
  * \return 1 if we can alloc the node \a node, 0 otherwise.
