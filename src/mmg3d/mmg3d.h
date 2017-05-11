@@ -141,6 +141,27 @@ static const unsigned char _MMG5_idir_pr[5][4] = { {0,1,2,0},{3,5,4,3},{1,4,5,2}
 /** \brief iarf[i]: edges of face i for a prism */
 static const unsigned char _MMG5_iarf_pr[5][5] = { {0,1,3,0}, {6,8,7,6}, {3,5,8,4}, {5,1,2,7},{0,4,6,2} };
 
+/** Table that associates to each (even) permutation of the 4 vertices of a tetrahedron
+ *  the corresponding permutation of its edges.\n Labels :
+ *    0  : [0,1,2,3]
+ *    1  : [0,2,3,1]
+ *    2  : [0,3,1,2]
+ *    3  : [1,0,3,2]
+ *    4  : [1,2,0,3]
+ *    5  : [1,3,2,0]
+ *    6  : [2,0,1,3]
+ *    7  : [2,1,3,0]
+ *    8  : [2,3,0,1]
+ *    9  : [3,0,2,1]
+ *    10 : [3,1,0,2]
+ *    11 : [3,2,1,0]
+ *  The edge 0 of the config 1 become the edge 1 of the reference config so permedge[1][0]=1 ...
+ */
+static const unsigned char MMG5_permedge[12][6] = {
+  {0,1,2,3,4,5}, {1,2,0,5,3,4}, {2,0,1,4,5,3}, {0,4,3,2,1,5},
+  {3,0,4,1,5,2}, {4,3,0,5,2,1}, {1,3,5,0,2,4}, {3,5,1,4,0,2},
+  {5,1,3,2,4,0}, {2,5,4,1,0,3}, {4,2,5,0,3,1}, {5,4,2,3,1,0} };
+
 /**
  * Octree cell.
  */

@@ -1661,13 +1661,13 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
  *
  */
 static int _MMG5_anatet4(MMG5_pMesh mesh, MMG5_pSol met, char typchk) {
-  MMG5_pTetra      pt;
-  MMG5_pPoint      ppt;
-  MMG5_pxTetra     pxt;
-  int         k,ns,ier;
-  char        nf,j;
+  MMG5_pTetra  pt;
+  MMG5_pPoint  ppt;
+  MMG5_pxTetra pxt;
+  int          k,ns,nw,ier;
+  char         nf,j;
 
-  ns = 0;
+  ns = nw = 0;
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
     if ( !MG_EOK(pt) || pt->ref < 0 || (pt->tag & MG_REQ) )   continue;

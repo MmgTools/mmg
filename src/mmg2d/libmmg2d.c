@@ -230,7 +230,7 @@ static inline
 int _MMG2D_restart(MMG5_pMesh mesh){
   int k;
 
- /** If needed, reallocate the missing structures */
+  /** If needed, reallocate the missing structures */
   if ( !mesh->tria ) {
     /* If we call the library more than one time and if we free the triangles
      * using the MMG2D_Free_triangles function we need to reallocate it */

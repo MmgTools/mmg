@@ -37,28 +37,6 @@
 
 extern char  ddb;
 
-/** Table that associates to each (even) permutation of the 4 vertices of a tetrahedron
- *  the corresponding permutation of its edges.\n Labels :
- *    0  : [0,1,2,3]
- *    1  : [0,2,3,1]
- *    2  : [0,3,1,2]
- *    3  : [1,0,3,2]
- *    4  : [1,2,0,3]
- *    5  : [1,3,2,0]
- *    6  : [2,0,1,3]
- *    7  : [2,1,3,0]
- *    8  : [2,3,0,1]
- *    9  : [3,0,2,1]
- *    10 : [3,1,0,2]
- *    11 : [3,2,1,0]
- *  The edge 0 of the config 1 become the edge 1 of the reference config so permedge[1][0]=1 ...
- */
-
-unsigned char permedge[12][6] = {
-  {0,1,2,3,4,5}, {1,2,0,5,3,4}, {2,0,1,4,5,3}, {0,4,3,2,1,5},
-  {3,0,4,1,5,2}, {4,3,0,5,2,1}, {1,3,5,0,2,4}, {3,5,1,4,0,2},
-  {5,1,3,2,4,0}, {2,5,4,1,0,3}, {4,2,5,0,3,1}, {5,4,2,3,1,0} };
-
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
@@ -70,9 +48,10 @@ unsigned char permedge[12][6] = {
  *
  */
 int _MMG3D_split1_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
-  MMG5_pTetra   pt,pt0;
-  double   vold,vnew;
-  unsigned char tau[4],*taued;
+  MMG5_pTetra         pt,pt0;
+  double              vold,vnew;
+  unsigned char       tau[4];
+  const unsigned char *taued;
 
   /* tau = sigma^-1 = permutation that sends the reference config (edge 01 split) to the current */
   pt = &mesh->tetra[k];
@@ -84,27 +63,27 @@ int _MMG3D_split1_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
 
   /* default is case 1 */
   tau[0] = 0 ; tau[1] = 1 ; tau[2] = 2 ; tau[3] = 3;
-  taued = &permedge[0][0];
+  taued = &MMG5_permedge[0][0];
   switch(pt->flag) {
   case 2:
     tau[0] = 2 ; tau[1] = 0 ; tau[2] = 1 ; tau[3] = 3;
-    taued = &permedge[6][0];
+    taued = &MMG5_permedge[6][0];
     break;
   case 4:
     tau[0] = 0 ; tau[1] = 3 ; tau[2] = 1 ; tau[3] = 2;
-    taued = &permedge[2][0];
+    taued = &MMG5_permedge[2][0];
     break;
   case 8:
     tau[0] = 1 ; tau[1] = 2 ; tau[2] = 0 ; tau[3] = 3;
-    taued = &permedge[4][0];
+    taued = &MMG5_permedge[4][0];
     break;
   case 16:
     tau[0] = 3 ; tau[1] = 1 ; tau[2] = 0 ; tau[3] = 2;
-    taued = &permedge[10][0];
+    taued = &MMG5_permedge[10][0];
     break;
   case 32:
     tau[0] = 3 ; tau[1] = 2 ; tau[2] = 1 ; tau[3] = 0;
-    taued = &permedge[11][0];
+    taued = &MMG5_permedge[11][0];
     break;
   }
 
@@ -135,12 +114,13 @@ int _MMG3D_split1_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
  *
  */
 int _MMG5_split1(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
-  MMG5_pTetra   pt,pt1;
-  MMG5_xTetra   xt,xt1;
-  MMG5_pxTetra  pxt0;
-  int      iel;
-  char     i,isxt,isxt1;
-  unsigned char tau[4],*taued;
+  MMG5_pTetra         pt,pt1;
+  MMG5_xTetra         xt,xt1;
+  MMG5_pxTetra        pxt0;
+  int                 iel;
+  char                i,isxt,isxt1;
+  unsigned char       tau[4];
+  const unsigned char *taued;
 
   /* create a new tetra */
   pt  = &mesh->tetra[k];
@@ -169,27 +149,27 @@ int _MMG5_split1(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
 
   /* default is case 1 */
   tau[0] = 0; tau[1] = 1; tau[2] = 2; tau[3] = 3;
-  taued = &permedge[0][0];
+  taued = &MMG5_permedge[0][0];
   switch(pt->flag) {
   case 2:
     tau[0] = 2; tau[1] = 0; tau[2] = 1; tau[3] = 3;
-    taued = &permedge[6][0];
+    taued = &MMG5_permedge[6][0];
     break;
   case 4:
     tau[0] = 0; tau[1] = 3; tau[2] = 1; tau[3] = 2;
-    taued = &permedge[2][0];
+    taued = &MMG5_permedge[2][0];
     break;
   case 8:
     tau[0] = 1; tau[1] = 2; tau[2] = 0; tau[3] = 3;
-    taued = &permedge[4][0];
+    taued = &MMG5_permedge[4][0];
     break;
   case 16:
     tau[0] = 3; tau[1] = 1; tau[2] = 0; tau[3] = 2;
-    taued = &permedge[10][0];
+    taued = &MMG5_permedge[10][0];
     break;
   case 32:
     tau[0] = 3; tau[1] = 2; tau[2] = 1; tau[3] = 0;
-    taued = &permedge[11][0];
+    taued = &MMG5_permedge[11][0];
     break;
   }
 
@@ -540,14 +520,14 @@ int _MMG3D_normalAdjaTri(MMG5_pMesh mesh , int start, char iface, int ia,
  */
 int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
                   int cas,char metRidTyp){
-  MMG5_pTetra    pt,pt1,pt0;
-  MMG5_xTetra    xt,xt1;
-  MMG5_pxTetra   pxt0;
-  double         lmin,lmax,len;
-  int            ilist,k,open,iel,jel,*newtet,nump,*adja,j;
-  int           *adjan,nei2,nei3,mel;
-  char           ie,tau[4],isxt,isxt1,i,voy;
-  unsigned char *taued;
+  MMG5_pTetra          pt,pt1,pt0;
+  MMG5_xTetra          xt,xt1;
+  MMG5_pxTetra         pxt0;
+  double               lmin,lmax,len;
+  int                  ilist,k,open,iel,jel,*newtet,nump,*adja,j;
+  int                 *adjan,nei2,nei3,mel;
+  char                 ie,tau[4],isxt,isxt1,i,voy;
+  const unsigned char *taued;
 
   ilist = ret / 2;
   open  = ret % 2;
@@ -582,27 +562,27 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
       memcpy(pt0,pt,sizeof(MMG5_Tetra));
       /* tau = sigma^-1 = permutation that sends the ref config (edge 01 split) to current */
       tau[0] = 0; tau[1] = 1; tau[2] = 2; tau[3] = 3;
-      taued = &permedge[0][0];
+      taued = &MMG5_permedge[0][0];
       switch(ie){
       case 1:
         tau[0] = 2; tau[1] = 0; tau[2] = 1; tau[3] = 3;
-        taued = &permedge[6][0];
+        taued = &MMG5_permedge[6][0];
         break;
       case 2:
         tau[0] = 0; tau[1] = 3; tau[2] = 1; tau[3] = 2;
-        taued = &permedge[2][0];
+        taued = &MMG5_permedge[2][0];
         break;
       case 3:
         tau[0] = 1; tau[1] = 2; tau[2] = 0; tau[3] = 3;
-        taued = &permedge[4][0];
+        taued = &MMG5_permedge[4][0];
         break;
       case 4:
         tau[0] = 3; tau[1] = 1; tau[2] = 0; tau[3] = 2;
-        taued = &permedge[10][0];
+        taued = &MMG5_permedge[10][0];
         break;
       case 5:
         tau[0] = 3; tau[1] = 2; tau[2] = 1; tau[3] = 0;
-        taued = &permedge[11][0];
+        taued = &MMG5_permedge[11][0];
         break;
       }
 
@@ -701,27 +681,27 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
 
     /* tau = sigma^-1 = permutation that sends the reference config (edge 01 split) to current */
     tau[0] = 0; tau[1] = 1; tau[2] = 2; tau[3] = 3;
-    taued = &permedge[0][0];
+    taued = &MMG5_permedge[0][0];
     switch(ie){
     case 1:
       tau[0] = 2; tau[1] = 0; tau[2] = 1; tau[3] = 3;
-      taued = &permedge[6][0];
+      taued = &MMG5_permedge[6][0];
       break;
     case 2:
       tau[0] = 0; tau[1] = 3; tau[2] = 1; tau[3] = 2;
-      taued = &permedge[2][0];
+      taued = &MMG5_permedge[2][0];
       break;
     case 3:
       tau[0] = 1; tau[1] = 2; tau[2] = 0; tau[3] = 3;
-      taued = &permedge[4][0];
+      taued = &MMG5_permedge[4][0];
       break;
     case 4:
       tau[0] = 3; tau[1] = 1; tau[2] = 0; tau[3] = 2;
-      taued = &permedge[10][0];
+      taued = &MMG5_permedge[10][0];
       break;
     case 5:
       tau[0] = 3; tau[1] = 2; tau[2] = 1; tau[3] = 0;
-      taued = &permedge[11][0];
+      taued = &MMG5_permedge[11][0];
       break;
     }
 
@@ -834,27 +814,27 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
 
     /* tau = sigma^-1 = permutation that sends the reference config (edge 01 split) to current */
     tau[0] = 0; tau[1] = 1; tau[2] = 2; tau[3] = 3;
-    taued = &permedge[0][0];
+    taued = &MMG5_permedge[0][0];
     switch(ie){
     case 1:
       tau[0] = 2; tau[1] = 0; tau[2] = 1; tau[3] = 3;
-      taued = &permedge[6][0];
+      taued = &MMG5_permedge[6][0];
       break;
     case 2:
       tau[0] = 0; tau[1] = 3; tau[2] = 1; tau[3] = 2;
-      taued = &permedge[2][0];
+      taued = &MMG5_permedge[2][0];
       break;
     case 3:
       tau[0] = 1; tau[1] = 2; tau[2] = 0; tau[3] = 3;
-      taued = &permedge[4][0];
+      taued = &MMG5_permedge[4][0];
       break;
     case 4:
       tau[0] = 3; tau[1] = 1; tau[2] = 0; tau[3] = 2;
-      taued = &permedge[10][0];
+      taued = &MMG5_permedge[10][0];
       break;
     case 5:
       tau[0] = 3; tau[1] = 2; tau[2] = 1; tau[3] = 0;
-      taued = &permedge[11][0];
+      taued = &MMG5_permedge[11][0];
       break;
     }
 
@@ -1112,9 +1092,10 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
 
 /** Simulate split of two edges that belong to a common face */
 int _MMG5_split2sf_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]){
-  MMG5_pTetra        pt,pt0;
-  double   vold,vnew;
-  unsigned char tau[4],*taued,imin;
+  MMG5_pTetra         pt,pt0;
+  double              vold,vnew;
+  unsigned char       tau[4],imin;
+  const unsigned char *taued;
 
   pt  = &mesh->tetra[k];
   pt0 = &mesh->tetra[0];
@@ -1124,51 +1105,51 @@ int _MMG5_split2sf_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]){
 
   /* identity is case 48 */
   tau[0] = 0 ; tau[1] = 1 ; tau[2] = 2 ; tau[3] = 3;
-  taued = &permedge[0][0];
+  taued = &MMG5_permedge[0][0];
   switch(pt->flag){
   case 24 :
     tau[0] = 0 ; tau[1] = 2 ; tau[2] = 3 ; tau[3] = 1;
-    taued = &permedge[1][0];
+    taued = &MMG5_permedge[1][0];
     break;
   case 40 :
     tau[0] = 0 ; tau[1] = 3 ; tau[2] = 1 ; tau[3] = 2;
-    taued = &permedge[2][0];
+    taued = &MMG5_permedge[2][0];
     break;
   case 6 :
     tau[0] = 1 ; tau[1] = 3 ; tau[2] = 2 ; tau[3] = 0;
-    taued = &permedge[5][0];
+    taued = &MMG5_permedge[5][0];
     break;
   case 34 :
     tau[0] = 1 ; tau[1] = 0 ; tau[2] = 3 ; tau[3] = 2;
-    taued = &permedge[3][0];
+    taued = &MMG5_permedge[3][0];
     break;
   case 36 :
     tau[0] = 1 ; tau[1] = 2 ; tau[2] = 0 ; tau[3] = 3;
-    taued = &permedge[4][0];
+    taued = &MMG5_permedge[4][0];
     break;
   case 20 :
     tau[0] = 2 ; tau[1] = 0 ; tau[2] = 1 ; tau[3] = 3;
-    taued = &permedge[6][0];
+    taued = &MMG5_permedge[6][0];
     break;
   case 5 :
     tau[0] = 2 ; tau[1] = 1 ; tau[2] = 3 ; tau[3] = 0;
-    taued = &permedge[7][0];
+    taued = &MMG5_permedge[7][0];
     break;
   case 17 :
     tau[0] = 2 ; tau[1] = 3 ; tau[2] = 0 ; tau[3] = 1;
-    taued = &permedge[8][0];
+    taued = &MMG5_permedge[8][0];
     break;
   case 9 :
     tau[0] = 3 ; tau[1] = 0 ; tau[2] = 2 ; tau[3] = 1;
-    taued = &permedge[9][0];
+    taued = &MMG5_permedge[9][0];
     break;
   case 3 :
     tau[0] = 3 ; tau[1] = 2 ; tau[2] = 1 ; tau[3] = 0;
-    taued = &permedge[11][0];
+    taued = &MMG5_permedge[11][0];
     break;
   case 10 :
     tau[0] = 3 ; tau[1] = 1 ; tau[2] = 0 ; tau[3] = 2;
-    taued = &permedge[10][0];
+    taued = &MMG5_permedge[10][0];
     break;
   }
 
@@ -1221,13 +1202,14 @@ int _MMG5_split2sf_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]){
  *
  */
 int _MMG5_split2sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp){
-  MMG5_pTetra        pt[3];
-  MMG5_xTetra        xt[3];
-  MMG5_pxTetra       pxt0;
-  int           iel,i;
-  int           newtet[3];
-  char          flg,imin,firstxt,isxt[3];
-  unsigned char tau[4],*taued;
+  MMG5_pTetra         pt[3];
+  MMG5_xTetra         xt[3];
+  MMG5_pxTetra        pxt0;
+  int                 iel,i;
+  int                 newtet[3];
+  char                flg,imin,firstxt,isxt[3];
+  unsigned char       tau[4];
+  const unsigned char *taued;
 
   pt[0] = &mesh->tetra[k];
   flg   = pt[0]->flag;
@@ -1275,51 +1257,51 @@ int _MMG5_split2sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp)
   }
   /* identity is case 48 */
   tau[0] = 0 ; tau[1] = 1 ; tau[2] = 2 ; tau[3] = 3;
-  taued = &permedge[0][0];
+  taued = &MMG5_permedge[0][0];
   switch(flg){
   case 24 :
     tau[0] = 0 ; tau[1] = 2 ; tau[2] = 3 ; tau[3] = 1;
-    taued = &permedge[1][0];
+    taued = &MMG5_permedge[1][0];
     break;
   case 40 :
     tau[0] = 0 ; tau[1] = 3 ; tau[2] = 1 ; tau[3] = 2;
-    taued = &permedge[2][0];
+    taued = &MMG5_permedge[2][0];
     break;
   case 6 :
     tau[0] = 1 ; tau[1] = 3 ; tau[2] = 2 ; tau[3] = 0;
-    taued = &permedge[5][0];
+    taued = &MMG5_permedge[5][0];
     break;
   case 34 :
     tau[0] = 1 ; tau[1] = 0 ; tau[2] = 3 ; tau[3] = 2;
-    taued = &permedge[3][0];
+    taued = &MMG5_permedge[3][0];
     break;
   case 36 :
     tau[0] = 1 ; tau[1] = 2 ; tau[2] = 0 ; tau[3] = 3;
-    taued = &permedge[4][0];
+    taued = &MMG5_permedge[4][0];
     break;
   case 20 :
     tau[0] = 2 ; tau[1] = 0 ; tau[2] = 1 ; tau[3] = 3;
-    taued = &permedge[6][0];
+    taued = &MMG5_permedge[6][0];
     break;
   case 5 :
     tau[0] = 2 ; tau[1] = 1 ; tau[2] = 3 ; tau[3] = 0;
-    taued = &permedge[7][0];
+    taued = &MMG5_permedge[7][0];
     break;
   case 17 :
     tau[0] = 2 ; tau[1] = 3 ; tau[2] = 0 ; tau[3] = 1;
-    taued = &permedge[8][0];
+    taued = &MMG5_permedge[8][0];
     break;
   case 9 :
     tau[0] = 3 ; tau[1] = 0 ; tau[2] = 2 ; tau[3] = 1;
-    taued = &permedge[9][0];
+    taued = &MMG5_permedge[9][0];
     break;
   case 3 :
     tau[0] = 3 ; tau[1] = 2 ; tau[2] = 1 ; tau[3] = 0;
-    taued = &permedge[11][0];
+    taued = &MMG5_permedge[11][0];
     break;
   case 10 :
     tau[0] = 3 ; tau[1] = 1 ; tau[2] = 0 ; tau[3] = 2;
-    taued = &permedge[10][0];
+    taued = &MMG5_permedge[10][0];
     break;
   }
 
@@ -1451,13 +1433,14 @@ int _MMG5_split2sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp)
  *
  */
 int _MMG5_split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
-  MMG5_pTetra   pt[4];
-  MMG5_xTetra   xt[4];
-  MMG5_pxTetra  pxt0;
-  int      i,iel;
-  int      newtet[4];
-  char     flg,firstxt,isxt[4];
-  unsigned char tau[4],*taued;
+  MMG5_pTetra         pt[4];
+  MMG5_xTetra         xt[4];
+  MMG5_pxTetra        pxt0;
+  int                 i,iel;
+  int                 newtet[4];
+  char                flg,firstxt,isxt[4];
+  unsigned char       tau[4];
+  const unsigned char *taued;
 
   pt[0] = &mesh->tetra[k];
   flg   = pt[0]->flag;
@@ -1522,15 +1505,15 @@ int _MMG5_split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
   }
   /* identity : case 33 */
   tau[0] = 0;  tau[1] = 1;  tau[2] = 2;  tau[3] = 3;
-  taued = &permedge[0][0];
+  taued = &MMG5_permedge[0][0];
   switch(flg){
   case 18:
     tau[0] = 3;  tau[1] = 1;  tau[2] = 0;  tau[3] = 2;
-    taued = &permedge[10][0];
+    taued = &MMG5_permedge[10][0];
     break;
   case 12:
     tau[0] = 0;  tau[1] = 3;  tau[2] = 1;  tau[3] = 2;
-    taued = &permedge[2][0];
+    taued = &MMG5_permedge[2][0];
     break;
   }
 
@@ -1650,9 +1633,10 @@ int _MMG5_split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
 
 /** Simulate split of 1 face (3 edges) */
 int _MMG3D_split3_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
-  MMG5_pTetra    pt,pt0;
-  double    vold,vnew;
-  unsigned char tau[4],*taued;
+  MMG5_pTetra         pt,pt0;
+  double              vold,vnew;
+  unsigned char       tau[4];
+  const unsigned char *taued;
 
   pt  = &mesh->tetra[k];
   pt0 = &mesh->tetra[0];
@@ -1662,19 +1646,19 @@ int _MMG3D_split3_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
 
   /* identity is case 11 */
   tau[0] = 0 ; tau[1] = 1 ; tau[2] = 2 ; tau[3] = 3;
-  taued = &permedge[0][0];
+  taued = &MMG5_permedge[0][0];
   switch(pt->flag) {
   case 21:
     tau[0] = 0 ; tau[1] = 3 ; tau[2] = 1 ; tau[3] = 2;
-    taued = &permedge[2][0];
+    taued = &MMG5_permedge[2][0];
     break;
   case 38:
     tau[0] = 3 ; tau[1] = 0 ; tau[2] = 2 ; tau[3] = 1;
-    taued = &permedge[9][0];
+    taued = &MMG5_permedge[9][0];
     break;
   case 56:
     tau[0] = 1 ; tau[1] = 3 ; tau[2] = 2 ; tau[3] = 0;
-    taued = &permedge[5][0];
+    taued = &MMG5_permedge[5][0];
     break;
   }
 
@@ -1720,13 +1704,14 @@ int _MMG3D_split3_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
  *
  */
 int _MMG5_split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
-  MMG5_pTetra    pt[4];
-  MMG5_xTetra    xt[4];
-  MMG5_pxTetra   pxt0;
-  int       iel,i;
-  int       newtet[4];
-  char      flg,firstxt,isxt[4];
-  unsigned char tau[4],*taued;
+  MMG5_pTetra         pt[4];
+  MMG5_xTetra         xt[4];
+  MMG5_pxTetra        pxt0;
+  int                 iel,i;
+  int                 newtet[4];
+  char                flg,firstxt,isxt[4];
+  unsigned char       tau[4];
+  const unsigned char *taued;
 
   pt[0] = &mesh->tetra[k];
   flg   = pt[0]->flag;
@@ -1793,19 +1778,19 @@ int _MMG5_split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
 
   /* update vertices, case 11 is default */
   tau[0] = 0; tau[1] = 1; tau[2] = 2; tau[3] = 3;
-  taued = &permedge[0][0];
+  taued = &MMG5_permedge[0][0];
   switch(flg) {
   case 21:
     tau[0] = 0 ; tau[1] = 3 ; tau[2] = 1 ; tau[3] = 2;
-    taued = &permedge[2][0];
+    taued = &MMG5_permedge[2][0];
     break;
   case 38:
     tau[0] = 3 ; tau[1] = 0 ; tau[2] = 2 ; tau[3] = 1;
-    taued = &permedge[9][0];
+    taued = &MMG5_permedge[9][0];
     break;
   case 56:
     tau[0] = 1 ; tau[1] = 3 ; tau[2] = 2 ; tau[3] = 0;
-    taued = &permedge[5][0];
+    taued = &MMG5_permedge[5][0];
     break;
   }
 
@@ -1929,13 +1914,14 @@ int _MMG5_split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
  *
  */
 int _MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
-  MMG5_pTetra    pt[4];
-  MMG5_xTetra    xt[4];
-  MMG5_pxTetra   pxt0;
-  int       iel,i;
-  int       newtet[4];
-  char      flg,firstxt,isxt[4],ia,ib;
-  unsigned char tau[4],*taued;
+  MMG5_pTetra         pt[4];
+  MMG5_xTetra         xt[4];
+  MMG5_pxTetra        pxt0;
+  int                 iel,i;
+  int                 newtet[4];
+  char                flg,firstxt,isxt[4],ia,ib;
+  unsigned char       tau[4];
+  const unsigned char *taued;
 
   pt[0]  = &mesh->tetra[k];
   flg = pt[0]->flag;
@@ -2002,22 +1988,22 @@ int _MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTy
 
   /* Set permutation of vertices : reference configuration is 7 */
   tau[0] = 0 ; tau[1] = 1 ; tau[2] = 2 ; tau[3] = 3;
-  taued = &permedge[0][0];
+  taued = &MMG5_permedge[0][0];
 
   switch(flg) {
   case 25:
     tau[0] = 1 ; tau[1] = 2 ; tau[2] = 0 ; tau[3] = 3;
-    taued = &permedge[4][0];
+    taued = &MMG5_permedge[4][0];
     break;
 
   case 42:
     tau[0] = 2 ; tau[1] = 0 ; tau[2] = 1 ; tau[3] = 3;
-    taued = &permedge[6][0];
+    taued = &MMG5_permedge[6][0];
     break;
 
   case 52:
     tau[0] = 3 ; tau[1] = 1 ; tau[2] = 0 ; tau[3] = 2;
-    taued = &permedge[10][0];
+    taued = &MMG5_permedge[10][0];
     break;
   }
 
@@ -2290,14 +2276,15 @@ int _MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTy
  *
  */
 int _MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],char metRidTyp){
-  MMG5_pTetra        pt[5];
-  MMG5_xTetra        xt[5];
-  MMG5_pxTetra       pxt0;
-  char          flg;
-  int           iel;
-  int           newtet[5];
-  unsigned char imin12,imin03,tau[4],*taued,sym[4],symed[6],ip0,ip1,ip2,ip3,ie0,ie1;
-  unsigned char ie2,ie3,ie4,ie5,isxt[5],firstxt,i;
+  MMG5_pTetra          pt[5];
+  MMG5_xTetra          xt[5];
+  MMG5_pxTetra         pxt0;
+  char                 flg;
+  int                  iel;
+  int                  newtet[5];
+  unsigned char        imin12,imin03,tau[4],sym[4],symed[6],ip0,ip1,ip2,ip3,ie0,ie1;
+  unsigned char        ie2,ie3,ie4,ie5,isxt[5],firstxt,i;
+  const unsigned char *taued;
 
   pt[0]  = &mesh->tetra[k];
   flg = pt[0]->flag;
@@ -2309,7 +2296,7 @@ int _MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],char metRidT
 
   /* Set permutation /symmetry of vertices : generic case : 35 */
   tau[0] = 0 ; tau[1] = 1 ; tau[2] = 2 ; tau[3] = 3;
-  taued = &permedge[0][0];
+  taued = &MMG5_permedge[0][0];
 
   sym[0] = 0;  sym[1] = 1 ; sym[2] = 2 ; sym[3] = 3;
   symed[0] = 0 ; symed[1] = 1 ; symed[2] = 2;
@@ -2318,7 +2305,7 @@ int _MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],char metRidT
   switch(flg) {
   case 19:
     tau[0] = 0 ; tau[1] = 1 ; tau[2] = 2 ; tau[3] = 3;
-    taued = &permedge[0][0];
+    taued = &MMG5_permedge[0][0];
 
     sym[0] = 0;  sym[1] = 2 ; sym[2] = 1 ; sym[3] = 3;
     symed[0] = 1 ; symed[1] = 0 ; symed[2] = 2;
@@ -2327,7 +2314,7 @@ int _MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],char metRidT
 
   case 13:
     tau[0] = 0 ; tau[1] = 3 ; tau[2] = 1 ; tau[3] = 2;
-    taued = &permedge[2][0];
+    taued = &MMG5_permedge[2][0];
 
     sym[0] = 0;  sym[1] = 1 ; sym[2] = 2 ; sym[3] = 3;
     symed[0] = 0 ; symed[1] = 1 ; symed[2] = 2;
@@ -2336,7 +2323,7 @@ int _MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],char metRidT
 
   case 37:
     tau[0] = 0 ; tau[1] = 3 ; tau[2] = 1 ; tau[3] = 2;
-    taued = &permedge[2][0];
+    taued = &MMG5_permedge[2][0];
 
     sym[0] = 0;  sym[1] = 2 ; sym[2] = 1 ; sym[3] = 3;
     symed[0] = 1 ; symed[1] = 0 ; symed[2] = 2;
@@ -2345,7 +2332,7 @@ int _MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],char metRidT
 
   case 22:
     tau[0] = 3 ; tau[1] = 1 ; tau[2] = 0 ; tau[3] = 2;
-    taued = &permedge[10][0];
+    taued = &MMG5_permedge[10][0];
 
     sym[0] = 0;  sym[1] = 1 ; sym[2] = 2 ; sym[3] = 3;
     symed[0] = 0 ; symed[1] = 1 ; symed[2] = 2;
@@ -2354,7 +2341,7 @@ int _MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],char metRidT
 
   case 28:
     tau[0] = 3 ; tau[1] = 1 ; tau[2] = 0 ; tau[3] = 2;
-    taued = &permedge[10][0];
+    taued = &MMG5_permedge[10][0];
 
     sym[0] = 0;  sym[1] = 2 ; sym[2] = 1 ; sym[3] = 3;
     symed[0] = 1 ; symed[1] = 0 ; symed[2] = 2;
@@ -2363,7 +2350,7 @@ int _MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],char metRidT
 
   case 26:
     tau[0] = 2 ; tau[1] = 0 ; tau[2] = 1 ; tau[3] = 3;
-    taued = &permedge[6][0];
+    taued = &MMG5_permedge[6][0];
 
     sym[0] = 0;  sym[1] = 1 ; sym[2] = 2 ; sym[3] = 3;
     symed[0] = 0 ; symed[1] = 1 ; symed[2] = 2;
@@ -2372,7 +2359,7 @@ int _MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],char metRidT
 
   case 14:
     tau[0] = 0 ; tau[1] = 2 ; tau[2] = 3 ; tau[3] = 1;
-    taued = &permedge[1][0];
+    taued = &MMG5_permedge[1][0];
 
     sym[0] = 0;  sym[1] = 2 ; sym[2] = 1 ; sym[3] = 3;
     symed[0] = 1 ; symed[1] = 0 ; symed[2] = 2;
@@ -2381,7 +2368,7 @@ int _MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],char metRidT
 
   case 49:
     tau[0] = 3 ; tau[1] = 2 ; tau[2] = 1 ; tau[3] = 0;
-    taued = &permedge[11][0];
+    taued = &MMG5_permedge[11][0];
 
     sym[0] = 0;  sym[1] = 1 ; sym[2] = 2 ; sym[3] = 3;
     symed[0] = 0 ; symed[1] = 1 ; symed[2] = 2;
@@ -2390,7 +2377,7 @@ int _MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],char metRidT
 
   case 50:
     tau[0] = 3 ; tau[1] = 2 ; tau[2] = 1 ; tau[3] = 0;
-    taued = &permedge[11][0];
+    taued = &MMG5_permedge[11][0];
 
     sym[0] = 0;  sym[1] = 2 ; sym[2] = 1 ; sym[3] = 3;
     symed[0] = 1 ; symed[1] = 0 ; symed[2] = 2;
@@ -2399,7 +2386,7 @@ int _MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],char metRidT
 
   case 44:
     tau[0] = 3 ; tau[1] = 0 ; tau[2] = 2 ; tau[3] = 1;
-    taued = &permedge[9][0];
+    taued = &MMG5_permedge[9][0];
 
     sym[0] = 0;  sym[1] = 1 ; sym[2] = 2 ; sym[3] = 3;
     symed[0] = 0 ; symed[1] = 1 ; symed[2] = 2;
@@ -2408,7 +2395,7 @@ int _MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],char metRidT
 
   case 41:
     tau[0] = 1 ; tau[1] = 2 ; tau[2] = 0 ; tau[3] = 3;
-    taued = &permedge[4][0];
+    taued = &MMG5_permedge[4][0];
 
     sym[0] = 0;  sym[1] = 2 ; sym[2] = 1 ; sym[3] = 3;
     symed[0] = 1 ; symed[1] = 0 ; symed[2] = 2;
@@ -2870,7 +2857,7 @@ int _MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k,char metRidTyp) {
   MMG5_xTetra   xt[4];
   MMG5_pxTetra  pxt0;
   double        o[3],cb[4];
-  int           i,ib,iel;
+  int           i,ib,iel,iadr,*adja,adj1,adj2,adj3;
   int           newtet[4];
   unsigned char isxt[4],firstxt;
 
@@ -3088,13 +3075,14 @@ int _MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k,char metRidTyp) {
  *
  */
 int _MMG5_split4sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
-  MMG5_pTetra    pt[6];
-  MMG5_xTetra    xt[6];
-  MMG5_pxTetra   pxt0;
-  int       iel;
-  int       newtet[6];
-  char      flg,firstxt,isxt[6],imin12,imin23,j,i;
-  unsigned char tau[4],*taued;
+  MMG5_pTetra         pt[6];
+  MMG5_xTetra         xt[6];
+  MMG5_pxTetra        pxt0;
+  int                 iel;
+  int                 newtet[6];
+  char                flg,firstxt,isxt[6],imin12,imin23,j,i;
+  unsigned char       tau[4];
+  const unsigned char *taued;
 
   pt[0]  = &mesh->tetra[k];
   flg = pt[0]->flag;
@@ -3103,61 +3091,61 @@ int _MMG5_split4sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp)
 
   /* Set permutation of vertices : reference configuration : 23 */
   tau[0] = 0 ; tau[1] = 1 ; tau[2] = 2 ; tau[3] = 3;
-  taued = &permedge[0][0];
+  taued = &MMG5_permedge[0][0];
   switch(flg){
   case 29:
     tau[0] = 1 ; tau[1] = 3 ; tau[2] = 2 ; tau[3] = 0;
-    taued = &permedge[5][0];
+    taued = &MMG5_permedge[5][0];
     break;
 
   case 53:
     tau[0] = 3 ; tau[1] = 0 ; tau[2] = 2 ; tau[3] = 1;
-    taued = &permedge[9][0];
+    taued = &MMG5_permedge[9][0];
     break;
 
   case 60:
     tau[0] = 3 ; tau[1] = 1 ; tau[2] = 0 ; tau[3] = 2;
-    taued = &permedge[10][0];
+    taued = &MMG5_permedge[10][0];
     break;
 
   case 57:
     tau[0] = 1 ; tau[1] = 2 ; tau[2] = 0 ; tau[3] = 3;
-    taued = &permedge[4][0];
+    taued = &MMG5_permedge[4][0];
     break;
 
   case 58:
     tau[0] = 2 ; tau[1] = 3 ; tau[2] = 0 ; tau[3] = 1;
-    taued = &permedge[8][0];
+    taued = &MMG5_permedge[8][0];
     break;
 
   case 27:
     tau[0] = 1 ; tau[1] = 0 ; tau[2] = 3 ; tau[3] = 2;
-    taued = &permedge[3][0];
+    taued = &MMG5_permedge[3][0];
     break;
 
   case 15:
     tau[0] = 0 ; tau[1] = 2 ; tau[2] = 3 ; tau[3] = 1;
-    taued = &permedge[1][0];
+    taued = &MMG5_permedge[1][0];
     break;
 
   case 43:
     tau[0] = 2 ; tau[1] = 1 ; tau[2] = 3 ; tau[3] = 0;
-    taued = &permedge[7][0];
+    taued = &MMG5_permedge[7][0];
     break;
 
   case 39:
     tau[0] = 0 ; tau[1] = 3 ; tau[2] = 1 ; tau[3] = 2;
-    taued = &permedge[2][0];
+    taued = &MMG5_permedge[2][0];
     break;
 
   case 54:
     tau[0] = 3 ; tau[1] = 2 ; tau[2] = 1 ; tau[3] = 0;
-    taued = &permedge[11][0];
+    taued = &MMG5_permedge[11][0];
     break;
 
   case 46:
     tau[0] = 2 ; tau[1] = 0 ; tau[2] = 1 ; tau[3] = 3;
-    taued = &permedge[6][0];
+    taued = &MMG5_permedge[6][0];
     break;
   }
 
@@ -3385,13 +3373,14 @@ int _MMG5_split4sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp)
  *
  */
 int _MMG5_split4op(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
-  MMG5_pTetra        pt[6];
-  MMG5_xTetra        xt[6];
-  MMG5_pxTetra       pxt0;
-  int           iel;
-  int           newtet[6];
-  char          flg,firstxt,isxt[6],i,j,imin01,imin23;
-  unsigned char tau[4],*taued;
+  MMG5_pTetra         pt[6];
+  MMG5_xTetra         xt[6];
+  MMG5_pxTetra        pxt0;
+  int                 iel;
+  int                 newtet[6];
+  char                flg,firstxt,isxt[6],i,j,imin01,imin23;
+  unsigned char       tau[4];
+  const unsigned char *taued;
 
   pt[0]  = &mesh->tetra[k];
   flg = pt[0]->flag;
@@ -3400,17 +3389,17 @@ int _MMG5_split4op(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp)
 
   /* Set permutation of vertices : reference configuration 30 */
   tau[0] = 0 ; tau[1] = 1 ; tau[2] = 2 ; tau[3] = 3;
-  taued = &permedge[0][0];
+  taued = &MMG5_permedge[0][0];
 
   switch(flg){
   case 45:
     tau[0] = 1 ; tau[1] = 3 ; tau[2] = 2 ; tau[3] = 0;
-    taued = &permedge[5][0];
+    taued = &MMG5_permedge[5][0];
     break;
 
   case 51:
     tau[0] = 1 ; tau[1] = 2 ; tau[2] = 0 ; tau[3] = 3;
-    taued = &permedge[4][0];
+    taued = &MMG5_permedge[4][0];
     break;
   }
 
@@ -3654,13 +3643,14 @@ int _MMG5_split4op(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp)
  *
  */
 int _MMG5_split5(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
-  MMG5_pTetra    pt[7];
-  MMG5_xTetra    xt[7];
-  MMG5_pxTetra   pxt0;
-  int       iel,i,j;
-  int       newtet[7];
-  char      flg,firstxt,isxt[7],imin;
-  unsigned char tau[4],*taued;
+  MMG5_pTetra         pt[7];
+  MMG5_xTetra         xt[7];
+  MMG5_pxTetra        pxt0;
+  int                 iel,i,j;
+  int                 newtet[7];
+  char                flg,firstxt,isxt[7],imin;
+  unsigned char       tau[4];
+  const unsigned char *taued;
 
   pt[0]  = &mesh->tetra[k];
   flg = pt[0]->flag;
@@ -3699,32 +3689,32 @@ int _MMG5_split5(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
 
   /* set permutation of vertices and edges ; reference configuration : 62 */
   tau[0] = 0 ; tau[1] = 1 ; tau[2] = 2 ; tau[3] = 3;
-  taued = &permedge[0][0];
+  taued = &MMG5_permedge[0][0];
 
   switch(flg) {
   case 61:
     tau[0] = 2 ; tau[1] = 0 ; tau[2] = 1 ; tau[3] = 3;
-    taued = &permedge[6][0];
+    taued = &MMG5_permedge[6][0];
     break;
 
   case 59:
     tau[0] = 0 ; tau[1] = 3 ; tau[2] = 1 ; tau[3] = 2;
-    taued = &permedge[2][0];
+    taued = &MMG5_permedge[2][0];
     break;
 
   case 55:
     tau[0] = 1 ; tau[1] = 2 ; tau[2] = 0 ; tau[3] = 3;
-    taued = &permedge[4][0];
+    taued = &MMG5_permedge[4][0];
     break;
 
   case 47:
     tau[0] = 3 ; tau[1] = 1 ; tau[2] = 0 ; tau[3] = 2;
-    taued = &permedge[10][0];
+    taued = &MMG5_permedge[10][0];
     break;
 
   case 31:
     tau[0] = 3 ; tau[1] = 2 ; tau[2] = 1 ; tau[3] = 0;
-    taued = &permedge[11][0];
+    taued = &MMG5_permedge[11][0];
     break;
   }
 
