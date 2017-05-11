@@ -2973,7 +2973,8 @@ int _MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k,char metRidTyp) {
     adja[1] = adj1;
     adja[2] = 4*newtet[2] + 1;
     adja[3] = 4*newtet[3] + 1;
-    mesh->adja[4*(adj1/4-1) + 1+adj1%4] = 4*newtet[1]+1;
+    if ( adj1 )
+      mesh->adja[4*(adj1/4-1) + 1+adj1%4] = 4*newtet[1]+1;
 
     iadr    = 4*(newtet[2]-1)+1;
     adja    = &mesh->adja[iadr];
@@ -2981,7 +2982,8 @@ int _MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k,char metRidTyp) {
     adja[1] = 4*newtet[1] + 2;
     adja[2] = adj2;
     adja[3] = 4*newtet[3] + 2;
-    mesh->adja[4*(adj2/4-1) + 1+adj2%4] = 4*newtet[2]+2;
+    if ( adj2 )
+      mesh->adja[4*(adj2/4-1) + 1+adj2%4] = 4*newtet[2]+2;
 
     iadr    = 4*(newtet[3]-1)+1;
     adja    = &mesh->adja[iadr];
@@ -2989,7 +2991,8 @@ int _MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k,char metRidTyp) {
     adja[1] = 4*newtet[1] + 3;
     adja[2] = 4*newtet[2] + 3;
     adja[3] = adj3;
-    mesh->adja[4*(adj3/4-1) + 1+adj3%4] = 4*newtet[3]+3;
+    if ( adj3 )
+      mesh->adja[4*(adj3/4-1) + 1+adj3%4] = 4*newtet[3]+3;
   }
 
   /* Update vertices and xt fields */
