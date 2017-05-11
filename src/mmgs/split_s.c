@@ -99,7 +99,7 @@ int _MMGS_split1_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,int *vx) {
  * \param k index of element to split.
  * \param i index of edge to split.
  * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
- * \return 1.
+ * \return 1 if success, 0 if fail.
  *
  * Split element \a k along edge \a i.
  *
@@ -116,8 +116,7 @@ int _MMGS_split1(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,int *vx) {
                        fprintf(stderr,"  ## Error: unable to allocate a new element.\n");
                        _MMG5_INCREASE_MEM_MESSAGE();
                        fprintf(stderr,"  Exit program.\n");
-                       exit(EXIT_FAILURE)
-      );
+                       return 0,0 );
   }
 
   pt  = &mesh->tria[k];
@@ -228,7 +227,7 @@ int split1b(MMG5_pMesh mesh,int k,char i,int ip) {
   if ( !iel )  {
     _MMGS_TRIA_REALLOC(mesh,iel,mesh->gap,
                        _MMG5_INCREASE_MEM_MESSAGE();
-                       return(0));
+                       return(0),0);
   }
   pt = &mesh->tria[k];
   pt->flag = 0;
@@ -285,8 +284,8 @@ int split1b(MMG5_pMesh mesh,int k,char i,int ip) {
     if ( !kel )  {
       _MMGS_TRIA_REALLOC(mesh,kel,mesh->gap,
                          _MMG5_INCREASE_MEM_MESSAGE();
-                         _MMGS_delElt(mesh,iel);
-                         return(0));
+                         if ( !_MMGS_delElt(mesh,iel) )  return 0;
+                         return(0),0);
     }
     pt  = &mesh->tria[jel];
     pt1 = &mesh->tria[kel];
@@ -404,7 +403,7 @@ int _MMG5_split2_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
  * \param met pointer toward the metric structure.
  * \param k index of element to split.
  * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
- * \return 1.
+ * \return 1 if success, 0 if fail.
  *
  * Split element \a k along the 2 edges \a i1 and \a i2.
  *
@@ -422,7 +421,7 @@ int _MMGS_split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
                        fprintf(stderr,"  ## Error: unable to allocate a new element.\n");
                        _MMG5_INCREASE_MEM_MESSAGE();
                        fprintf(stderr,"  Exit program.\n");
-                       exit(EXIT_FAILURE));
+                       return 0,0);
   }
   jel = _MMGS_newElt(mesh);
   if ( !jel ) {
@@ -430,7 +429,7 @@ int _MMGS_split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
                        fprintf(stderr,"  ## Error: unable to allocate a new element.\n");
                        _MMG5_INCREASE_MEM_MESSAGE();
                        fprintf(stderr,"  Exit program.\n");
-                       exit(EXIT_FAILURE));
+                       return 0,0);
   }
 
   pt  = &mesh->tria[k];
@@ -563,7 +562,7 @@ int _MMGS_split3_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
  * \param met pointer toward the metric structure.
  * \param k index of element to split.
  * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
- * \return 1.
+ * \return 1 if success, 0 if fail.
  *
  * Split element \a k along the 3 edges
  *
@@ -580,7 +579,7 @@ int _MMGS_split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
                        fprintf(stderr,"  ## Error: unable to allocate a new element.\n");
                        _MMG5_INCREASE_MEM_MESSAGE();
                        fprintf(stderr,"  Exit program.\n");
-                       exit(EXIT_FAILURE));
+                       return 0;, 0);
   }
   jel = _MMGS_newElt(mesh);
   if ( !jel ) {
@@ -588,7 +587,7 @@ int _MMGS_split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
                        fprintf(stderr,"  ## Error: unable to allocate a new element.\n");
                        _MMG5_INCREASE_MEM_MESSAGE();
                        fprintf(stderr,"  Exit program.\n");
-                       exit(EXIT_FAILURE));
+                       return 0;, 0);
   }
   kel = _MMGS_newElt(mesh);
   if ( !kel ) {
@@ -596,7 +595,7 @@ int _MMGS_split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
                        fprintf(stderr,"  ## Error: unable to allocate a new element.\n");
                        _MMG5_INCREASE_MEM_MESSAGE();
                        fprintf(stderr,"  Exit program.\n");
-                       exit(EXIT_FAILURE));
+                       return 0;, 0);
   }
 
   pt  = &mesh->tria[k];

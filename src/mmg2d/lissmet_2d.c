@@ -33,8 +33,14 @@
 #include "mmg2d.h"
 
 /**
+ * \param mesh pointer toward the mesh
+ * \param sol pointer toward the metric
+ *
+ * \return 0 if fail, 1 if success
+ *
  * Anisotropic gradation (h-gradation procedure). See:
  * http://www.ann.jussieu.fr/frey/publications/ijnme4398.pdf
+ *
  */
 int lissmet_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
   HashTable      edgeTable;
@@ -58,7 +64,7 @@ int lissmet_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
   edgeTable.size  = mesh->ntmax;
   edgeTable.nxtmax = 3*mesh->ntmax+1;
   edgeTable.hnxt  = mesh->ntmax;
-  _MMG5_SAFE_CALLOC(edgeTable.item,edgeTable.nxtmax,Hedge);
+  _MMG5_SAFE_CALLOC(edgeTable.item,edgeTable.nxtmax,Hedge,0);
 
   memset(edgeTable.item,0,edgeTable.nxtmax*sizeof(Hedge));
   for (k=edgeTable.size; k<edgeTable.nxtmax; k++)
@@ -202,7 +208,7 @@ int lissmet_iso(MMG5_pMesh mesh,MMG5_pSol sol) {
     hmax = 0.;
     for(k=1 ; k<=mesh->nt; k++) {
       ptt = &mesh->tria[k];
-      if(!M_EOK(ptt)) continue;
+      if(!MG_EOK(ptt)) continue;
       for(i=0 ; i<3 ; i++) {
         i1 = ptt->v[MMG2_iare[i][0]];
         i2 = ptt->v[MMG2_iare[i][1]];

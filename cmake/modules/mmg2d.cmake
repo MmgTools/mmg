@@ -205,8 +205,18 @@ IF ( BUILD_TESTING )
       ENDIF()
 
     ENDIF()
-    # Add mmg2d tests
-    INCLUDE( ${CMAKE_SOURCE_DIR}/cmake/testing/mmg2d_tests.cmake )
+
+    IF ( ONLY_VERY_SHORT_TESTS )
+      SET ( CTEST_OUTPUT_DIR ${CMAKE_BINARY_DIR}/TEST_OUTPUTS )
+
+      ADD_TEST(NAME mmg2d_very_short COMMAND ${EXECUT_MMG2D}
+        "${CMAKE_SOURCE_DIR}/libexamples/mmg2d/adaptation_example0/example0_a/init.mesh"
+        "${CTEST_OUTPUT_DIR}/libmmg2d_Adaptation_0_a-init.o"
+        )
+    ELSE ( )
+      # Add mmg2d tests
+      INCLUDE( ${CMAKE_SOURCE_DIR}/cmake/testing/mmg2d_tests.cmake )
+    ENDIF ( )
 
   ENDIF( MMG2D_CI )
 

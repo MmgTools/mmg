@@ -397,6 +397,11 @@ ENDIF ( )
 OPTION ( BUILD_TESTING "Enable/Disable continuous integration" OFF )
 
 CMAKE_DEPENDENT_OPTION (
+  ONLY_VERY_SHORT_TESTS "Enable/Disable very short tests" OFF
+  "BUILD_TESTING;NOT LONG_TESTS" OFF )
+MARK_AS_ADVANCED(ONLY_VERY_SHORT_TESTS)
+
+CMAKE_DEPENDENT_OPTION (
   LONG_TESTS "Enable/Disable time consuming tests for the project" OFF
   "BUILD_TESTING" OFF )
 MARK_AS_ADVANCED(LONG_TESTS)
@@ -409,10 +414,12 @@ IF( BUILD_TESTING )
   SET ( CTEST_OUTPUT_DIR ${CMAKE_BINARY_DIR}/TEST_OUTPUTS )
   FILE ( MAKE_DIRECTORY  ${CTEST_OUTPUT_DIR} )
 
-  ##-------------------------------------------------------------------##
-  ##------- Get the continuous integration tests ----------------------##
-  ##-------------------------------------------------------------------##
-  INCLUDE(cmake/modules/LoadCiTests.cmake)
+  IF ( NOT ONLY_VERY_SHORT_TESTS )
+    ##-------------------------------------------------------------------##
+    ##------- Get the continuous integration tests ----------------------##
+    ##-------------------------------------------------------------------##
+    INCLUDE(cmake/modules/LoadCiTests.cmake)
+ENDIF ( )
 
   ##-------------------------------------------------------------------##
   ##------- Set the continuous integration options --------------------##
@@ -464,7 +471,7 @@ IF( BUILD_TESTING )
     SET(CMAKE_EXE_LINKER_FLAGS_DEBUG "-g ${CMAKE_EXE_LINKER_FLAGS_DEBUG}")
   ENDIF ( )
 
-  IF ( MMG3D_CI OR MMGS_CI )
+  IF ( ( MMG3D_CI OR MMGS_CI ) AND NOT ONLY_VERY_SHORT_TESTS )
     SET(LISTEXEC_MMG ${LISTEXEC_MMGS} ${LISTEXEC_MMG3D})
     SET(EXECUT_MMG ${EXECUT_MMGS} ${EXECUT_MMG3D})
 
@@ -484,7 +491,7 @@ IF( BUILD_TESTING )
     # Add common tests for mmgs/3d appli
     INCLUDE( ${CMAKE_SOURCE_DIR}/cmake/testing/mmg_tests.cmake )
 
-  ENDIF(MMG3D_CI OR MMGS_CI)
+  ENDIF ( )
 
 ENDIF ( BUILD_TESTING )
 

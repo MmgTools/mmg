@@ -118,12 +118,14 @@ enum MMG3D_Param {
  * Here,\a your_mesh is a \a MMG5_pMesh, \a your_metric \a your_level_set and
  * \a your_displacement are \a MMG5_pSol.
  *
+ * \return 1 if success, 0 if fail
+ *
  * MMG structures allocation and initialization.
  *
  * \remark No fortran interface to allow variadic arguments.
  *
  */
-void MMG3D_Init_mesh(const int starter,...);
+int MMG3D_Init_mesh(const int starter,...);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the sol structure.
@@ -1503,6 +1505,8 @@ int MMG3D_saveSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename);
  * MMG5_ARG_ppMet,&empty_metric,MMG5_ARG_ppDisp, &your_displacement,
  * MMG5_ARG_end).
  *
+ * \return 1 if success, 0 if fail
+ *
  * Deallocations before return.
  *
  * \remark we pass the structures by reference in order to have argument
@@ -1511,7 +1515,7 @@ int MMG3D_saveSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename);
  * \remark no Fortran interface to allow variadic args.
  *
  */
-void MMG3D_Free_all(const int starter,...);
+int MMG3D_Free_all(const int starter,...);
 
 /**
  * \param starter dummy argument used to initialize the variadic argument
@@ -1534,6 +1538,8 @@ void MMG3D_Free_all(const int starter,...);
  *  MMG5_ARG_ppMet,&empty_metric,MMG5_ARG_ppDisp, &your_displacement,
  * MMG5_ARG_end).
  *
+ * \return 0 if fail, 1 if success
+ *
  * Structure deallocations before return.
  *
  * \remark we pass the structures by reference in order to have argument
@@ -1544,7 +1550,7 @@ void MMG3D_Free_all(const int starter,...);
  * \remark no Fortran interface to allow variadic args.
  *
  */
-void MMG3D_Free_structures(const int starter,...);
+int MMG3D_Free_structures(const int starter,...);
 
 /**
  * \param starter dummy argument used to initialize the variadic argument
@@ -1567,6 +1573,8 @@ void MMG3D_Free_structures(const int starter,...);
  *  MMG5_ARG_ppMet,&empty_metric,MMG5_ARG_ppDisp, &your_displacement,
  * MMG5_ARG_end).
  *
+ * \return 0 if fail, 1 if success
+ *
  * Structure deallocations before return.
  *
  * \remark we pass the structures by reference in order to have argument
@@ -1577,7 +1585,7 @@ void MMG3D_Free_structures(const int starter,...);
  * \remark no Fortran interface to allow variadic args.
  *
  */
-void MMG3D_Free_names(const int starter,...);
+int MMG3D_Free_names(const int starter,...);
 
 /* library */
 /**
@@ -1644,12 +1652,13 @@ int  MMG3D_mmg3dmov(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pSol disp );
  * Print the default parameters values.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG3D_DEFAULTVALUES(mesh)\n
+ * >   SUBROUTINE MMG3D_DEFAULTVALUES(mesh,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
  */
-void MMG3D_defaultValues(MMG5_pMesh mesh);
+int MMG3D_defaultValues(MMG5_pMesh mesh);
 
 /**
  * \param argc number of command line arguments.
@@ -1684,17 +1693,19 @@ int  MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met);
 int  MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met);
 /**
  * \param prog pointer toward the program name.
+ * \param return 1 if success, 0 if fail.
  *
  * Print help for mmg3d options.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG3D_USAGE(prog,strlen)\n
+ * >   SUBROUTINE MMG3D_USAGE(prog,strlen,retval)\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: prog\n
  * >     INTEGER, INTENT(IN)            :: strlen\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
  */
-void  MMG3D_usage(char *prog);
+int  MMG3D_usage(char *prog);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param info pointer toward the info structure.

@@ -35,7 +35,20 @@
 
 //extern char ddb;
 
-/* Relocate boundary vertex whose ball is passed; routine works both in the isotropic and anisotropic case */
+/**
+ * \param mesh pointer toward the mesh
+ * \param met pointer toward the metric structure.
+ * \param list pointer toward the ball of the point.
+ * \param ilist size of the ball.
+ * \param improve force the new minimum element quality to be greater or equal
+ * than 0.9 of the old minimum element quality.
+ *
+ * \return 0 if we can't move the point (or if we fail), 1 if we can.
+ *
+ * Relocate boundary vertex whose ball is passed; routine works both in the
+ * isotropic and anisotropic case
+ *
+ */
 int _MMG2_movedgpt(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list, char improve) {
   MMG5_pTria         pt,pt0;
   MMG5_pPoint        p0,p1,p2,ppt;
@@ -70,7 +83,7 @@ int _MMG2_movedgpt(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list, char impro
         }
         else if ( ip2 != pt->v[i2] ) {
           printf("   *** Function movedgpt: three edges connected at point %d - abort.\n",pt->v[i]);
-          exit(EXIT_FAILURE);
+          return 0;
         }
       }
     }
@@ -87,7 +100,7 @@ int _MMG2_movedgpt(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list, char impro
         }
         else if ( ip2 != pt->v[i1] ) {
           printf("   *** Function movedgpt: three edges connected at point %d - abort.\n",pt->v[i]);
-          exit(EXIT_FAILURE);
+          return 0;
         }
       }
     }
@@ -96,7 +109,7 @@ int _MMG2_movedgpt(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list, char impro
   /* Check that there are exactly two boundary points connected at p0 */
   if ( ip1 == 0 || ip2 == 0 ) {
     printf("   *** Function movedgpt: no two edges connected at edge, non singular point %d - abort.\n",pt->v[i]);
-    exit(EXIT_FAILURE);
+    return 0;
   }
   
   ip0 = pt->v[i];
@@ -171,7 +184,19 @@ int _MMG2_movedgpt(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list, char impro
   return(1);
 }
 
-/* Relocate internal vertex whose ball is passed */
+/**
+ * \param mesh pointer toward the mesh
+ * \param met pointer toward the metric structure.
+ * \param list pointer toward the ball of the point.
+ * \param ilist size of the ball.
+ * \param improve force the new minimum element quality to be greater or equal
+ * than 0.9 of the old minimum element quality.
+ *
+ * \return 0 if we can't move the point (or if we fail), 1 if we can.
+ *
+ * Relocate internal vertex whose ball is passed.
+ *
+ */
 int _MMG2_movintpt(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list,char improve) {
   MMG5_pTria        pt,pt0;
   MMG5_pPoint       p0,p1,p2,ppt0;

@@ -107,7 +107,7 @@ inline double _MMG5_lenedg33_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
     return( _MMG5_lenedgCoor_ani(mesh->point[ip1].c,mesh->point[ip2].c,
                                  &met->m[6*ip1],&met->m[6*ip2]) );
   }
-  exit(EXIT_FAILURE);
+  return 0.0;
 }
 
 /**
@@ -212,7 +212,7 @@ inline double _MMG5_lenedg_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
   } else {
     return(_MMG5_lenedgspl_ani(mesh ,met, ia, pt));
   }
-  exit(EXIT_FAILURE);
+  return 0.0;
 }
 
 /**

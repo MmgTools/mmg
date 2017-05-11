@@ -44,7 +44,7 @@
  * \param m0 metric at point np0.
  * \param m1 metric at point np1.
  * \param isedg 1 if the edge is a ridge, 0 otherwise.
- * \return length of edge according to the prescribed metric.
+ * \return length of edge according to the prescribed metric, 0 if fail.
  *
  * Compute length of surface edge \f$[np0;np1]\f$ according to the prescribed
  * aniso metrics \a m0 and \a m1.
@@ -159,11 +159,11 @@ double _MMG5_lenEdg(MMG5_pMesh mesh,int np0,int np1,
 
   if(l0 < 0) {
     printf("%s:%d:Error: negative edge length (%e)\n",__FILE__,__LINE__,l0);
-    exit(EXIT_FAILURE);
+    return(0.);
   }
   if(l1 < 0) {
     printf("%s:%d:Error: negative edge length (%e)\n",__FILE__,__LINE__,l1);
-    exit(EXIT_FAILURE);
+    return(0.);
   }
   l0 = 0.5*(sqrt(l0) + sqrt(l1));
 
@@ -176,7 +176,7 @@ double _MMG5_lenEdg(MMG5_pMesh mesh,int np0,int np1,
  * \param np0 index of edge's extremity.
  * \param np1 index of edge's extremity.
  * \param isedg 1 if the edge is a ridge, 0 otherwise.
- * \return length of edge according to the prescribed metric.
+ * \return length of edge according to the prescribed metric, 0 if fail.
  *
  * Compute length of surface edge \f$[i0;i1]\f$ according to the prescribed
  * aniso metric (for special storage of metrics at ridges points). Here the
@@ -203,7 +203,7 @@ double _MMG5_lenSurfEdg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,char i
     if ( !_MMG5_buildridmet(mesh,met,np0,ux,uy,uz,met0) )  {
       printf("%s:%d:Error: Unable to compute the metric along the ridge.\n "
              "Exit program.\n",__FILE__,__LINE__);
-      exit(EXIT_FAILURE);
+      return 0.;
     }
     m0 = met0;
   }
@@ -218,7 +218,7 @@ double _MMG5_lenSurfEdg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,char i
     if ( !_MMG5_buildridmet(mesh,met,np1,ux,uy,uz,met1) )  {
       printf("%s:%d:Error: Unable to compute the metric along the ridge.\n "
              "Exit program.\n",__FILE__,__LINE__);
-      exit(EXIT_FAILURE);
+      return 0.;
     }
     m1 = met1;
   }

@@ -395,8 +395,6 @@ static int _MMG2_coleltlag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
  * \param crit coefficient of quality improvment.
- * \param bucket pointer toward the bucket structure in delaunay mode and
- * toward the \a NULL pointer otherwise.
  * \param itdeg degraded elements.
  *
  * Internal edge flipping in the Lagrangian mode; only affects trias with cc itdeg

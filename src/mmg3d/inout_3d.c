@@ -92,8 +92,9 @@ static double _MMG5_swapd(double sbin)
 /**
  * \param mesh pointer toward the mesh structure.
  * \param filename name of file.
- * \return 0 if the file is not found, -1 if we detect mismatch parameters,
- * 1 otherwise.
+ *
+ * \return 0 if the file is not found, -1 if we detect mismatch parameters or we
+ * fail, 1 otherwise.
  *
  * Read mesh data.
  *
@@ -124,7 +125,7 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
   ina = NULL;
   mesh->np = mesh->nt = mesh->ne = 0;
 
-  _MMG5_SAFE_CALLOC(data,strlen(filename)+7,char);
+  _MMG5_SAFE_CALLOC(data,strlen(filename)+7,char,-1);
 
   strcpy(data,filename);
   ptr = strstr(data,".mesh");
@@ -508,7 +509,7 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
     /* Skip triangles with MG_ISO refs */
     if( mesh->info.iso ) {
       mesh->nt = 0;
-      _MMG5_SAFE_CALLOC(ina,nt+1,int);
+      _MMG5_SAFE_CALLOC(ina,nt+1,int,-1);
 
       for (k=1; k<=nt; k++) {
         if (!bin)
@@ -536,8 +537,9 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
       else if ( mesh->nt < nt ) {
         _MMG5_ADD_MEM(mesh,(mesh->nt-nt)*sizeof(MMG5_Tria),"triangles",
                       fprintf(stderr,"  Exit program.\n");
-                      exit(EXIT_FAILURE));
-        _MMG5_SAFE_RECALLOC(mesh->tria,nt+1,(mesh->nt+1),MMG5_Tria,"triangles");
+                      return -1);
+        _MMG5_SAFE_RECALLOC(mesh->tria,nt+1,(mesh->nt+1),MMG5_Tria,
+                            "triangles",-1);
       }
     }
     else {
@@ -641,7 +643,7 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
     na = mesh->na;
     if (mesh->info.iso ) {
       mesh->na = 0;
-      _MMG5_SAFE_CALLOC(ina,na+1,int);
+      _MMG5_SAFE_CALLOC(ina,na+1,int,-1);
     }
 
     rewind(inm);
@@ -675,8 +677,8 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
       else if ( mesh->na < na ) {
         _MMG5_ADD_MEM(mesh,(mesh->na-na)*sizeof(MMG5_Edge),"edges",
                       fprintf(stderr,"  Exit program.\n");
-                      exit(EXIT_FAILURE));
-        _MMG5_SAFE_RECALLOC(mesh->edge,na+1,(mesh->na+1),MMG5_Edge,"edges");
+                      return -1);
+        _MMG5_SAFE_RECALLOC(mesh->edge,na+1,(mesh->na+1),MMG5_Edge,"edges",-1);
       }
     }
 
@@ -842,7 +844,7 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
   }
 
   if ( ng > 0 ) {
-    _MMG5_SAFE_CALLOC(norm,3*ng+1,double);
+    _MMG5_SAFE_CALLOC(norm,3*ng+1,double,-1);
 
     rewind(inm);
     fseek(inm,posnormal,SEEK_SET);
@@ -961,7 +963,7 @@ int MMG3D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
     fprintf(stderr,"  ** MISSING DATA.\n");
     fprintf(stderr," Check that your mesh contains tetrahedra.\n");
     fprintf(stderr," Exit program.\n");
-      return(-1);
+    return(-1);
   }
 
   return ( MMG5_loadMshMesh_part2( mesh, sol,&inm,
@@ -996,7 +998,7 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
   mesh->ver = 2;
   bin = 0;
 
-  _MMG5_SAFE_CALLOC(data,strlen(filename)+7,char);
+  _MMG5_SAFE_CALLOC(data,strlen(filename)+7,char,0);
 
   strcpy(data,filename);
   ptr = strstr(data,".mesh");
@@ -1633,7 +1635,7 @@ int MMG3D_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.
  * \param filename name of file.
- * \return -1 data invalid, 0 no file, 1 ok.
+ * \return -1 data invalid or we fail, 0 no file, 1 ok.
  *
  * Load metric field.
  *
@@ -1651,7 +1653,7 @@ int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
   bin   = 0;
   iswp  = 0;
 
-  _MMG5_SAFE_CALLOC(data,strlen(filename)+6,char);
+  _MMG5_SAFE_CALLOC(data,strlen(filename)+6,char,-1);
   strcpy(data,filename);
 
   ptr = strstr(data,".mesh");
@@ -1785,8 +1787,8 @@ int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
 
   _MMG5_ADD_MEM(mesh,(met->size*(met->npmax+1))*sizeof(double),"initial solution",
                 fprintf(stderr,"  Exit program.\n");
-                exit(EXIT_FAILURE));
-  _MMG5_SAFE_CALLOC(met->m,met->size*(met->npmax+1),double);
+                return -1);
+  _MMG5_SAFE_CALLOC(met->m,met->size*(met->npmax+1),double,-1);
 
   /* read mesh solutions */
   rewind(inm);
@@ -1920,7 +1922,7 @@ int MMG3D_saveSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
   met->ver = 2;
   bin = 0;
 
-  _MMG5_SAFE_CALLOC(data,strlen(filename)+6,char);
+  _MMG5_SAFE_CALLOC(data,strlen(filename)+6,char,0);
   strcpy(data,filename);
   ptr = strstr(data,".sol");
   if ( ptr ) {

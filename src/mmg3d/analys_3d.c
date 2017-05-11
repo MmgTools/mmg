@@ -86,7 +86,7 @@ static int _MMG5_setadj(MMG5_pMesh mesh){
   char    i,ii,i1,i2,ii1,ii2,voy;
 
   nvf = nf = ncc = ned = 0;
-  _MMG5_SAFE_MALLOC(pile,mesh->nt+1,int);
+  _MMG5_SAFE_MALLOC(pile,mesh->nt+1,int,0);
 
   pile[1] = 1;
   ipil    = 1;
@@ -434,7 +434,7 @@ static int _MMG5_norver(MMG5_pMesh mesh) {
   mesh->xpmax  = MG_MAX( (long long)(1.5*mesh->xp),mesh->npmax);
 
   _MMG5_ADD_MEM(mesh,(mesh->xpmax+1)*sizeof(MMG5_xPoint),"boundary points",return(0));
-  _MMG5_SAFE_CALLOC(mesh->xpoint,mesh->xpmax+1,MMG5_xPoint);
+  _MMG5_SAFE_CALLOC(mesh->xpoint,mesh->xpmax+1,MMG5_xPoint,0);
 
   /* compute normals + tangents */
   nn = ng = nt = nf = 0;
@@ -465,8 +465,7 @@ static int _MMG5_norver(MMG5_pMesh mesh) {
         if(mesh->xp > mesh->xpmax){
           _MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,MMG5_xPoint,
                              "larger xpoint table",
-                             mesh->xp--;
-                             return(0));
+                             mesh->xp--;return(0);,0);
         }
         ppt->xp = mesh->xp;
         pxp = &mesh->xpoint[ppt->xp];
@@ -487,8 +486,7 @@ static int _MMG5_norver(MMG5_pMesh mesh) {
       if(mesh->xp > mesh->xpmax){
         _MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,MMG5_xPoint,
                            "larger xpoint table",
-                           mesh->xp--;
-                           return(0));
+                           mesh->xp--;return 0;,0);
       }
       ppt->xp = mesh->xp;
       pxp = &mesh->xpoint[ppt->xp];
@@ -550,8 +548,16 @@ static int _MMG5_norver(MMG5_pMesh mesh) {
   return(1);
 }
 
-/** Define continuous geometric support at non manifold vertices, using volume information */
-static void _MMG5_nmgeom(MMG5_pMesh mesh){
+/**
+ * \param mesh pointer toward the mesh
+ *
+ * \return 0 if fail, 1 otherwise
+ *
+ * Define continuous geometric support at non manifold vertices, using volume
+ * information.
+ *
+ */
+static int _MMG3D_nmgeom(MMG5_pMesh mesh){
   MMG5_pTetra     pt;
   MMG5_pPoint     p0;
   MMG5_pxPoint    pxp;
@@ -590,8 +596,8 @@ static void _MMG5_nmgeom(MMG5_pMesh mesh){
               _MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,MMG5_xPoint,
                                  "larger xpoint table",
                                  mesh->xp--;
-                                 fprintf(stderr,"  Exit program.\n");
-                                 exit(EXIT_FAILURE));
+                                 fprintf(stderr,"  Exit program.\n");return 0;,
+                                 0);
             }
             p0->xp = mesh->xp;
           }
@@ -610,6 +616,7 @@ static void _MMG5_nmgeom(MMG5_pMesh mesh){
     p0->tag |= MG_REQ;
     p0->tag &= ~MG_NOSURF;
   }
+  return 1;
 }
 
 /** preprocessing stage: mesh analysis */
@@ -735,10 +742,9 @@ int _MMG3D_analys(MMG5_pMesh mesh) {
   }
 
   /* define geometry for non manifold points */
-  _MMG5_nmgeom(mesh);
+  if ( !_MMG3D_nmgeom(mesh) ) return 0;
 
   /* release memory */
-  mesh->nt = 0;
   _MMG5_DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(MMG5_hgeom));
   _MMG5_DEL_MEM(mesh,mesh->adjt,(3*mesh->nt+4)*sizeof(int));
   _MMG5_DEL_MEM(mesh,mesh->tria,(mesh->nt+1)*sizeof(MMG5_Tria));

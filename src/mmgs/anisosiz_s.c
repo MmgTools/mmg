@@ -80,7 +80,7 @@ static int _MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
 
   ilist = boulet(mesh,it,ip,list);
   if ( !ilist ) {
-    fprintf(stderr,"%s:%d:Error: unable to compute the ball af the point %d.\n",
+    fprintf(stdout,"%s:%d:Warning: Metric not computed at point %d: unable to compute its ball\n",
            __FILE__,__LINE__, idp);
     return(0);
   }
@@ -425,7 +425,7 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
       else if ( (pt->v[i2] != ipref[0]) && (pt->v[i2] != ipref[1]) ) {
         fprintf(stderr,"%s:%d:Error: three adjacent ref at a non singular point\n",
                __FILE__,__LINE__);
-        exit(EXIT_FAILURE);
+        return 0;
       }
     }
 
@@ -439,7 +439,7 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
       else if ( (pt->v[i1] != ipref[0]) && (pt->v[i1] != ipref[1]) ) {
         fprintf(stderr,"%s:%d:Error: three adjacent ref at a non singular point\n",
                __FILE__,__LINE__);
-        exit(EXIT_FAILURE);
+        return 0;
       }
     }
 
@@ -754,7 +754,7 @@ int _MMGS_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
      met->size  = 6;
      met->dim   = 3;
      _MMG5_ADD_MEM(mesh,(6*(met->npmax+1))*sizeof(double),"solution",return(0));
-     _MMG5_SAFE_CALLOC(met->m,6*(mesh->npmax+1),double);
+     _MMG5_SAFE_CALLOC(met->m,6*(mesh->npmax+1),double,0);
   }
 
   for (k=1; k<=mesh->np; k++) {

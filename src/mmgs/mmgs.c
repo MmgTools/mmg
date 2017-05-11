@@ -92,7 +92,7 @@ static int _MMG5_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
     if ( !strcmp(data,"parameters") ) {
       fscanf(in,"%d",&npar);
       if ( !MMGS_Set_iparameter(mesh,met,MMGS_IPARAM_numberOfLocalParam,npar) )
-        exit(EXIT_FAILURE);
+        return 0;
 
       for (i=0; i<mesh->info.npar; i++) {
         fscanf(in,"%d %s ",&ref,buf);
@@ -101,12 +101,12 @@ static int _MMG5_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
 
         if ( !strcmp(buf,"triangles") || !strcmp(buf,"triangle") ) {
           if ( !MMGS_Set_localParameter(mesh,met,MMG5_Triangle,ref,fp1,fp2,hausd) ) {
-            exit(EXIT_FAILURE);
+            return 0;
           }
         }
         /* else if ( !strcmp(buf,"vertices") || !strcmp(buf,"vertex") ) { */
         /*   if ( !MMGS_Set_localParameter(mesh,met,MMG5_Vertex,ref,fp1,fp2,hausd) ) { */
-        /*     exit(EXIT_FAILURE); */
+        /*     return 0; */
         /*   } */
         /* } */
         else {

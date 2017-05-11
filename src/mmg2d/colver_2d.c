@@ -275,7 +275,6 @@ int _MMG2_colver(MMG5_pMesh mesh,int ilist,int *list) {
   
   /* Update of the vertex ip1 -> ip2 */
   mesh->point[ip2].tag |= mesh->point[ip1].tag;
-  mesh->point[ip2].ref = MG_MAX(mesh->point[ip1].ref,mesh->point[ip2].ref);
 
   for (k=1; k<ilist-1+open; k++) {
     jel = list[k] / 3;

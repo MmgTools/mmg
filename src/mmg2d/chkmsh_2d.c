@@ -42,7 +42,7 @@ int _MMG5_mmg2dChkmsh(MMG5_pMesh mesh, int severe,int base) {
 
   for (k=1; k<=mesh->nt; k++) {
     pt1 = &mesh->tria[k];
-    if ( !M_EOK(pt1) )  continue;
+    if ( !MG_EOK(pt1) )  continue;
     iadr = (k-1)*3 + 1;
     adja = &mesh->adja[iadr];
 
@@ -59,7 +59,7 @@ int _MMG5_mmg2dChkmsh(MMG5_pMesh mesh, int severe,int base) {
         return(0);
       }
       pt2 = &mesh->tria[adj];
-      if ( !M_EOK(pt2) ) {
+      if ( !MG_EOK(pt2) ) {
         fprintf(stdout,"  4. Invalid adjacent %d %d\n",adj,k);
         printf("vertices of %d: %d %d %d\n",
                k,pt1->v[0],pt1->v[1],pt1->v[2]);
@@ -100,11 +100,11 @@ int _MMG5_mmg2dChkmsh(MMG5_pMesh mesh, int severe,int base) {
 
   if ( !severe )  return(1);
 
-  _MMG5_SAFE_CALLOC(list,MMG2D_LMAX,int);
+  _MMG5_SAFE_CALLOC(list,MMG2D_LMAX,int,0);
 
   for (k=1; k<=mesh->nt; k++) {
     pt1 = &mesh->tria[k];
-    if ( !M_EOK(pt1) )  continue;
+    if ( !MG_EOK(pt1) )  continue;
     iadr = 3*(k-1) + 1;
     adja = &mesh->adja[iadr];
 
@@ -115,7 +115,7 @@ int _MMG5_mmg2dChkmsh(MMG5_pMesh mesh, int severe,int base) {
 
       ip  = pt1->v[i];
       ppt = &mesh->point[ip];
-      if ( !M_VOK(ppt) ) {
+      if ( !MG_VOK(ppt) ) {
       fprintf(stdout,"  6. Unused vertex %d  %d\n",k,ip);
       printf("%d %d %d\n",pt1->v[0],pt1->v[1],pt1->v[2]);
       return(0);

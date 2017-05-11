@@ -70,7 +70,7 @@ int MMG2_isInTriangle(MMG5_pMesh mesh,int k,double c[2]) {
   char            ier;
 
   pt = &mesh->tria[k];
-  if ( !M_EOK(pt) ) return(0);
+  if ( !MG_EOK(pt) ) return(0);
 
   ier = MMG2_coorbary(mesh,pt,&c[0],&det,&l1,&l2);
   if ( !ier )
@@ -96,10 +96,6 @@ int MMG2_cutEdge(MMG5_pMesh mesh,MMG5_pTria pt,MMG5_pPoint ppa,MMG5_pPoint ppb) 
   ier = MMG2_coorbary(mesh,pt,ppb->c,&det,&lb[0],&lb[1]);
   if ( !ier ) return(0);
   lb[2] = 1.0-(lb[0]+lb[1]);
-  
-  /* if(ddebug) printf("barya %e %e %e\n",la[0],la[1],la[2]); */
-  /* if(ddebug) printf("baryb %e %e %e\n",lb[0],lb[1],lb[2]); */
-  //if(ddebug) exit(EXIT_FAILURE);
   
   /* Check whether ppa or ppb is a vertex of pt */
   for (i=0; i<3; i++) {
@@ -228,7 +224,7 @@ int MMG2_findTria(MMG5_pMesh mesh,int ip) {
   
   do {
     pt = &mesh->tria[iel];
-    if ( !M_EOK(pt) )  {
+    if ( !MG_EOK(pt) )  {
       iel++;
       if ( iel > mesh->nt ) return(0);
       continue;
@@ -303,7 +299,7 @@ int MMG2_findTria(MMG5_pMesh mesh,int ip) {
   /*exhaustive search*/
   for (k=1 ; k<=mesh->nt ; k++) {
     pt = &mesh->tria[k];
-    if(!M_EOK(pt)) continue;
+    if(!MG_EOK(pt)) continue;
     if (pt->v[0]==ip || pt->v[1]==ip || pt->v[2]==ip) break;
   }
   if(k<=mesh->nt) {
@@ -312,10 +308,21 @@ int MMG2_findTria(MMG5_pMesh mesh,int ip) {
   return(0);
 }
 
-/* Calculate the list of all the triangles intersected by edge (ia,ib), starting from 
- kdep = one triangle in the ball of ia; 
- List lon starts at index 0 and goes to lon-1 and stores 3*k + iare, where iare is one intersected edge;
-   return 4 if edge exists in the mesh */
+/**
+ * \param mesh pointer toward the mesh
+ * \param ia index of first extremity of the edge
+ * \param ib index of second extremity of the edge
+ * \param kdep pointer toward the index of the first element intersecting the edge
+ * \param list pointer toward the list of elts intersected by the edge
+ *
+ * \return 4 if the edge exist in the mesh, 0 if fail, ??? otherwise
+ *
+ * Calculate the list of all the triangles intersected by edge (ia,ib), starting
+ * from kdep = one triangle in the ball of ia; List lon starts at index 0 and
+ * goes to lon-1 and stores 3*k + iare, where iare is one intersected edge;
+ * return 4 if edge exists in the mesh
+ *
+ */
 int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
   MMG5_pTria         pt;
   MMG5_pPoint        ppt1,ppt2,ppt3,ppt4,ppa,ppb;
@@ -573,7 +580,7 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
     if (fabs(area1) < EPSNULL || fabs(area2) < EPSNULL || fabs(area3) < EPSNULL) {
       fprintf(stdout,"  ## Error: unexpected failure."
               " Check your initial data and/or report the bug\n");
-      exit(EXIT_FAILURE);
+      return 0;
     }
 
     //ktemp = k;

@@ -99,12 +99,14 @@ enum MMGS_Param {
  * Here,\a your_mesh is a \a MMG5_pMesh, \a your_metric and \a your_level_set
  * are \a MMG5_pSol.
  *
+ * \return 1 if success, 0 if fail
+ *
  * MMG structures allocation and initialization.
  *
  * \remark No fortran interface to allow variadic arguments.
  *
  */
-void MMGS_Init_mesh(const int starter,...);
+int MMGS_Init_mesh(const int starter,...);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1094,6 +1096,8 @@ int  MMGS_saveSol(MMG5_pMesh mesh, MMG5_pSol met, const char *filename);
  * Here,\a your_mesh is a \a MMG5_pMesh, \a your_metric and \a your_level_set
  * are \a MMG5_pSol.
  *
+ * \return 0 if fail, 1 if success
+ *
  * Deallocations before return.
  *
  * \remark we pass the structures by reference in order to have argument
@@ -1102,7 +1106,7 @@ int  MMGS_saveSol(MMG5_pMesh mesh, MMG5_pSol met, const char *filename);
  * \remark no Fortran interface to allow variadic args.
  *
  */
-void MMGS_Free_all(const int starter,...);
+int MMGS_Free_all(const int starter,...);
 
 /**
  * \param starter dummy argument used to initialize the variadic argument list.
@@ -1124,6 +1128,8 @@ void MMGS_Free_all(const int starter,...);
  * Here, \a your_mesh is a pointer toward \a MMG5_pMesh and \a your_metric and
  * \a your_level_set a pointer toward \a MMG5_pSol.
  *
+ * \return 0 if fail, 1 if success
+ *
  * Structure deallocations before return.
  *
  * \remark we pass the structures by reference in order to have argument
@@ -1132,7 +1138,7 @@ void MMGS_Free_all(const int starter,...);
  * \remark no Fortran interface to allow variadic args.
  *
  */
-void MMGS_Free_structures(const int starter,...);
+int MMGS_Free_structures(const int starter,...);
 
 /**
  * \param starter dummy argument used to initialize the variadic argument list.
@@ -1151,6 +1157,8 @@ void MMGS_Free_structures(const int starter,...);
  * Here,\a your_mesh is a \a MMG5_pMesh, \a your_metric and \a your_level_set
  * are \a MMG5_pSol.
  *
+ * \return 0 if fail, 1 if success
+ *
  * Structure deallocations before return.
  *
  * \remark we pass the structures by reference in order to have argument
@@ -1159,7 +1167,7 @@ void MMGS_Free_structures(const int starter,...);
  * \remark no Fortran interface to allow variadic args.
  *
  */
-void MMGS_Free_names(const int starter,...);
+int MMGS_Free_names(const int starter,...);
 
 /* library */
 /**
@@ -1220,13 +1228,14 @@ void  MMGS_setfunc(MMG5_pMesh mesh,MMG5_pSol met);
  * Print help for mmgs options.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMGS_USAGE(prog,strlen)\n
+ * >   SUBROUTINE MMGS_USAGE(prog,strlen,retval)\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: prog\n
  * >     INTEGER, INTENT(IN)            :: strlen\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
  */
-void MMGS_usage(char *prog);
+int MMGS_usage(char *prog);
 /**
  * \param argc number of command line arguments.
  * \param argv command line arguments.
@@ -1247,12 +1256,13 @@ int  MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met);
  * Print the default parameters values.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMGS_DEFAULTVALUES(mesh)\n
+ * >   SUBROUTINE MMGS_DEFAULTVALUES(mesh,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
  */
-void MMGS_defaultValues(MMG5_pMesh mesh);
+int MMGS_defaultValues(MMG5_pMesh mesh);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param info pointer toward the info structure.

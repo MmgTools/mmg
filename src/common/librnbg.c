@@ -77,7 +77,7 @@ int _MMG5_kPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr,
   CHECK_SCOTCH(SCOTCH_stratGraphMap(&strat, s), "scotch_stratGraphMap", 0) ;
 
   _MMG5_ADD_MEM(mesh,2*vertNbr*sizeof(SCOTCH_Num),"sortPartTb",return(1));
-  _MMG5_SAFE_CALLOC(sortPartTb,2*vertNbr,SCOTCH_Num);
+  _MMG5_SAFE_CALLOC(sortPartTb,2*vertNbr,SCOTCH_Num,0);
 
   /* Partionning the graph */
   CHECK_SCOTCH(SCOTCH_graphMap(&graf, &arch, &strat, sortPartTb), "scotch_graphMap", 0);

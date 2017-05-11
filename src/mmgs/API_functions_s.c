@@ -39,16 +39,16 @@
 
 #include "mmgs.h"
 
-void MMGS_Init_mesh(const int starter,...) {
+int MMGS_Init_mesh(const int starter,...) {
   va_list argptr;
 
   va_start(argptr, starter);
 
-  _MMGS_Init_mesh_var(argptr);
+  if ( !_MMGS_Init_mesh_var(argptr) )  return 0;
 
   va_end(argptr);
 
-  return;
+  return 1;
 }
 
 void MMGS_Init_fileNames(MMG5_pMesh mesh,MMG5_pSol sol
@@ -117,8 +117,8 @@ int MMGS_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int 
     sol->npmax = mesh->npmax;
     _MMG5_ADD_MEM(mesh,(sol->size*(sol->npmax+1))*sizeof(double),"initial solution",
                   fprintf(stderr,"  Exit program.\n");
-                  exit(EXIT_FAILURE));
-    _MMG5_SAFE_CALLOC(sol->m,(sol->size*(sol->npmax+1)),double);
+                  return 0);
+    _MMG5_SAFE_CALLOC(sol->m,(sol->size*(sol->npmax+1)),double,0);
   }
   return(1);
 }
@@ -171,17 +171,17 @@ int MMGS_Set_meshSize(MMG5_pMesh mesh, int np, int nt, int na) {
   }
   _MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(MMG5_Point),"initial vertices",
                 fprintf(stderr,"  Exit program.\n");
-                exit(EXIT_FAILURE));
-  _MMG5_SAFE_CALLOC(mesh->point,mesh->npmax+1,MMG5_Point);
+                return 0);
+  _MMG5_SAFE_CALLOC(mesh->point,mesh->npmax+1,MMG5_Point,0);
 
   _MMG5_ADD_MEM(mesh,(mesh->ntmax+1)*sizeof(MMG5_Tria),"initial triangles",return(0));
-  _MMG5_SAFE_CALLOC(mesh->tria,mesh->ntmax+1,MMG5_Tria);
+  _MMG5_SAFE_CALLOC(mesh->tria,mesh->ntmax+1,MMG5_Tria,0);
 
 
   mesh->namax = mesh->na;
   if ( mesh->na ) {
     _MMG5_ADD_MEM(mesh,(mesh->na+1)*sizeof(MMG5_Edge),"initial edges",return(0));
-    _MMG5_SAFE_CALLOC(mesh->edge,(mesh->na+1),MMG5_Edge);
+    _MMG5_SAFE_CALLOC(mesh->edge,(mesh->na+1),MMG5_Edge,0);
   }
 
   /* keep track of empty links */
@@ -1055,8 +1055,8 @@ int MMGS_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
 
     _MMG5_ADD_MEM(mesh,mesh->info.npar*sizeof(MMG5_Par),"parameters",
                   fprintf(stderr,"  Exit program.\n");
-                  exit(EXIT_FAILURE));
-    _MMG5_SAFE_CALLOC(mesh->info.par,mesh->info.npar,MMG5_Par);
+                  return 0);
+    _MMG5_SAFE_CALLOC(mesh->info.par,mesh->info.npar,MMG5_Par,0);
 
     for (k=0; k<mesh->info.npar; k++) {
       mesh->info.par[k].elt   = MMG5_Noentity;
@@ -1124,7 +1124,7 @@ int MMGS_Get_iparameter(MMG5_pMesh mesh, int iparam) {
 #endif
   default :
     fprintf(stderr,"  ## Error: unknown type of parameter\n");
-    exit(EXIT_FAILURE);
+    return 0;
   }
 }
 
@@ -1231,44 +1231,44 @@ int MMGS_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref,
   return(1);
 }
 
-void MMGS_Free_all(const int starter,...)
+int MMGS_Free_all(const int starter,...)
 {
-
   va_list argptr;
+  int     ier;
 
   va_start(argptr, starter);
 
-  _MMGS_Free_all_var(argptr);
+  ier = _MMGS_Free_all_var(argptr);
 
   va_end(argptr);
 
-  return;
+  return ier;
 }
 
-void MMGS_Free_structures(const int starter,...)
+int MMGS_Free_structures(const int starter,...)
 {
-
   va_list argptr;
+  int     ier;
 
   va_start(argptr, starter);
 
-  _MMGS_Free_structures_var(argptr);
+  ier = _MMGS_Free_structures_var(argptr);
 
   va_end(argptr);
 
-  return;
+  return ier;
 }
 
-void MMGS_Free_names(const int starter,...)
+int MMGS_Free_names(const int starter,...)
 {
-
   va_list argptr;
+  int     ier;
 
   va_start(argptr, starter);
 
-  _MMGS_Free_names_var(argptr);
+  ier = _MMGS_Free_names_var(argptr);
 
   va_end(argptr);
 
-  return;
+  return ier;
 }

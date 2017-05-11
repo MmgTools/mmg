@@ -243,7 +243,7 @@ void MMG2_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
 /*   nex  = 0; */
 /*   for (k=1; k<=mesh->nt; k++) { */
 /*     pt = &mesh->tria[k]; */
-/*     if( !M_EOK(pt) ) { */
+/*     if( !MG_EOK(pt) ) { */
 /*       nex++; */
 /*       continue; */
 /*     } */

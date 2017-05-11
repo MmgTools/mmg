@@ -94,7 +94,16 @@ FORTRAN_NAME(MMG2D_GET_TRIFROMEDGE,mmg2d_get_trifromedge,
   *retval = MMG2D_Get_triFromEdge(*mesh,*ked,ktri,ied);
   return;
 }
+/**
+ * See \ref MMG2D_Reset_verticestags function in \ref mmg2d/libmmg2d.h file.
+ */
+FORTRAN_NAME(MMG2D_RESET_VERTICESTAGS,mmg2d_reset_verticestags,
+             (MMG5_pMesh *mesh),(mesh)) {
 
+  MMG2D_Reset_verticestags(*mesh);
+
+  return;
+}
 
 /**
  * See \ref MMG2D_Free_Triangles function in \ref mmg2d/libmmg2d.h file.

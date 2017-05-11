@@ -65,7 +65,7 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
-    if ( !M_VOK(ppt) ) continue;
+    if ( !MG_VOK(ppt) ) continue;
     for (i=0; i<2; i++) {
       if ( ppt->c[i] > info->max[i] )  info->max[i] = ppt->c[i];
       if ( ppt->c[i] < info->min[i] )  info->min[i] = ppt->c[i];
@@ -87,7 +87,7 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
-    if ( !M_VOK(ppt) )  continue;
+    if ( !MG_VOK(ppt) )  continue;
     ppt->c[0] = dd * (ppt->c[0] - info->min[0]);
     ppt->c[1] = dd * (ppt->c[1] - info->min[1]);
   }
@@ -118,7 +118,7 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
         fprintf(stdout,"  ## Error: mismatch parameters:"
                 " minimal mesh size larger than maximal one.\n");
         fprintf(stdout,"  Exit program.\n");
-        exit(EXIT_FAILURE);
+        return 0;
       }
       else if ( sethmin )
         mesh->info.hmax = 100. * mesh->info.hmin;
@@ -317,7 +317,7 @@ int MMG2_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   dd = info->delta / (double)_MMG2D_PRECI;
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
-    if ( !M_VOK(ppt) )  continue;
+    if ( !MG_VOK(ppt) )  continue;
     ppt->c[0] = ppt->c[0] * dd + info->min[0];
     ppt->c[1] = ppt->c[1] * dd + info->min[1];
   }
@@ -339,7 +339,7 @@ int MMG2_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
     dd = 1.0 / (dd*dd);
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
-      if ( !M_VOK(ppt) )  continue;
+      if ( !MG_VOK(ppt) )  continue;
       iadr = k*sol->size;
       for (i=0; i<sol->size; i++)  sol->m[iadr+i] *= dd;
     }

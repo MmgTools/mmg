@@ -36,17 +36,60 @@
 
 extern char ddb;
 
-/** Set tags GEO and REF to triangles and points by traveling the mesh;
-    count number of subdomains or connected components */
+/**
+ * \param mesh pointer towarad the mesh structure.
+ *
+ * Set all boundary edges to required and add a tag to detect that they are
+ * not realy required.
+ *
+ */
+static inline void MMG2D_reqBoundaries(MMG5_pMesh mesh) {
+  MMG5_pTria     ptt;
+  int            k;
+
+  /* The MG_REQ+MG_NOSURF tag mark the boundary edges that we dont want to touch
+   * but that are not really required (-nosurf option) */
+  for (k=1; k<=mesh->nt; k++) {
+    ptt = &mesh->tria[k];
+    if ( !(ptt->tag[0] & MG_REQ) ) {
+      ptt->tag[0] |= MG_REQ;
+      ptt->tag[0] |= MG_NOSURF;
+    }
+
+    if ( !(ptt->tag[1] & MG_REQ) ) {
+      ptt->tag[1] |= MG_REQ;
+      ptt->tag[1] |= MG_NOSURF;
+    }
+
+    if ( !(ptt->tag[2] & MG_REQ) ) {
+      ptt->tag[2] |= MG_REQ;
+      ptt->tag[2] |= MG_NOSURF;
+    }
+  }
+
+  return;
+}
+
+
+/**
+ * \param mesh pointer toward the mesh
+ *
+ * \return 1 if success, 0 if fail
+ *
+ * Set tags GEO and REF to triangles and points by traveling the mesh;
+ * count number of subdomains or connected components
+ *
+ */
 int _MMG2_setadj(MMG5_pMesh mesh) {
   MMG5_pTria       pt,pt1;
   int              *pile,*adja,ipil,k,kk,ncc,ip1,ip2,nr,nref;
+  int16_t          tag;
   char             i,ii,i1,i2;
 
   if ( abs(mesh->info.imprim) > 5  || mesh->info.ddebug )
     fprintf(stdout,"  ** SETTING TOPOLOGY\n");
 
-  _MMG5_SAFE_MALLOC(pile,mesh->nt+1,int);
+  _MMG5_SAFE_MALLOC(pile,mesh->nt+1,int,0);
 
   /* Initialization of the pile */
   ncc = 1;
@@ -89,9 +132,29 @@ int _MMG2_setadj(MMG5_pMesh mesh) {
 
         /* Case of an external boundary */
         if ( !adja[i] ) {
-          pt->tag[i] |= (MG_GEO+MG_BDY);
-          mesh->point[ip1].tag |= (MG_GEO+MG_BDY);
-          mesh->point[ip2].tag |= (MG_GEO+MG_BDY);
+          tag = ( MG_GEO+MG_BDY );
+
+          if ( !mesh->info.nosurf ) {
+            pt->tag[i] |= tag;
+            mesh->point[ip1].tag |= tag;
+            mesh->point[ip2].tag |= tag;
+          }
+          else {
+            if ( !(pt->tag[i] & MG_REQ) )
+              pt->tag[i] |= ( tag+MG_REQ+MG_NOSURF );
+            else
+              pt->tag[i] |= tag;
+
+            if ( !(mesh->point[ip1].tag  & MG_REQ) )
+              mesh->point[ip1].tag |= ( tag+MG_REQ+MG_NOSURF );
+            else
+              mesh->point[ip1].tag |= tag;
+
+            if ( !(mesh->point[ip2].tag  & MG_REQ) )
+              mesh->point[ip2].tag |= ( tag+MG_REQ+MG_NOSURF );
+            else
+              mesh->point[ip2].tag |= tag;
+          }
           nr++;
           continue;
         }
@@ -101,10 +164,35 @@ int _MMG2_setadj(MMG5_pMesh mesh) {
 
         /* Case of a boundary between two subdomains */
         if ( abs(pt1->ref) != abs(pt->ref) ) {
-          pt->tag[i]   |= (MG_REF+MG_BDY);
-          pt1->tag[ii] |= (MG_REF+MG_BDY);
-          mesh->point[ip1].tag |= (MG_REF+MG_BDY);
-          mesh->point[ip2].tag |= (MG_REF+MG_BDY);
+          tag = ( MG_REF+MG_BDY );
+
+          if ( !mesh->info.nosurf ) {
+            pt->tag[i]   |= tag;
+            pt1->tag[ii] |= tag;
+            mesh->point[ip1].tag |= tag;
+            mesh->point[ip2].tag |= tag;
+          }
+          else {
+            if ( !(pt->tag[i] & MG_REQ) )
+              pt->tag[i]   |= ( tag+MG_REQ+MG_NOSURF );
+            else
+              pt->tag[i]   |= tag;
+
+            if ( !(pt1->tag[ii] & MG_REQ) )
+              pt1->tag[ii] |= ( tag+MG_REQ+MG_NOSURF );
+            else
+              pt1->tag[ii] |= tag;
+
+            if ( !(mesh->point[ip1].tag & MG_REQ ) )
+              mesh->point[ip1].tag |= ( tag+MG_REQ+MG_NOSURF );
+            else
+              mesh->point[ip1].tag |= tag;
+
+            if ( !(mesh->point[ip2].tag & MG_REQ ) )
+              mesh->point[ip2].tag |= ( tag+MG_REQ+MG_NOSURF );
+            else
+              mesh->point[ip2].tag |= tag;
+          }
           if ( kk > k ) nref++;
           continue;
         }
@@ -308,7 +396,15 @@ int _MMG2_norver(MMG5_pMesh mesh) {
   return(1);
 }
 
-/** Regularize normal vectors at boundary non singular edges with a Laplacian / antilaplacian smoothing */
+/**
+ * \param mesh pointer toward the mesh
+ *
+ * \return 0 if fail, 1 if success
+ *
+ * Regularize normal vectors at boundary non singular edges with a Laplacian /
+ * antilaplacian smoothing
+ *
+ */
 int _MMG2_regnor(MMG5_pMesh mesh) {
   MMG5_pTria            pt;
   MMG5_pPoint           ppt,p1,p2;
@@ -324,7 +420,7 @@ int _MMG2_regnor(MMG5_pMesh mesh) {
   lm2 = 0.399;
 
   /* Temporary table for normal vectors */
-  _MMG5_SAFE_CALLOC(tmp,2*mesh->np+1,double);
+  _MMG5_SAFE_CALLOC(tmp,2*mesh->np+1,double,0);
 
   /* Allocate a seed to each point */
   for (k=1; k<=mesh->nt; k++) {
@@ -356,7 +452,7 @@ int _MMG2_regnor(MMG5_pMesh mesh) {
 
       if ( !ier ) {
         printf("*** problem in func. _MMG2_bouleendp. Abort.\n");
-        exit(EXIT_FAILURE);
+        return 0;
       }
 
       p1 = &mesh->point[ip1];
@@ -442,7 +538,7 @@ int _MMG2_regnor(MMG5_pMesh mesh) {
       ier = _MMG2_bouleendp(mesh,iel,i,&ip1,&ip2);
       if ( !ier ) {
         printf("*** problem in func. _MMG2_bouleendp. Abort.\n");
-        exit(EXIT_FAILURE);
+        return 0;
       }
 
       p1 = &mesh->point[ip1];

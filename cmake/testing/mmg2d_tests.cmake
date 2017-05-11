@@ -109,3 +109,8 @@ ADD_TEST(NAME mmg2d_NacaGeneration
 #  COMMAND ${EXECUT_MMG2D} -v 5 -ls
 #  ${MMG2D_CI_TESTS}/LSDiscretization/nacai
 #  -out ${CTEST_OUTPUT_DIR}/mmg2d_LSDiscretization2-nacai.o.meshb)
+
+ADD_TEST(NAME mmg2d_LSMultiMat
+  COMMAND ${EXECUT_MMG2D} -v 5 -ls -hmin 0.005 -hmax 0.1 -hausd 0.001 -hgrad 1.3
+  ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat
+  ${CTEST_OUTPUT_DIR}/mmg2d_LSMultiMat.o.meshb)

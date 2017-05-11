@@ -230,7 +230,7 @@ int _MMG5_countBinaryElts(FILE **inm, const int nelts,const int iswp,
  * \param posNodeData pointer toward the position of solution data in file
  * \param bin 1 if binary format
  * \param nelts number of elements in file
- * \return 1 if success.
+ * \return 1 if success, 0 if fail.
  *
  * Begin to read mesh at MSH file format. Read the mesh size informations.
  *
@@ -257,7 +257,7 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename,
   mesh->np = mesh->nt = mesh->ne = 0;
   nt = na = nq = ne = npr = np = 0;
 
-  _MMG5_SAFE_CALLOC(data,strlen(filename)+7,char);
+  _MMG5_SAFE_CALLOC(data,strlen(filename)+7,char,0);
 
   strcpy(data,filename);
   ptr = strstr(data,".msh");
@@ -454,7 +454,7 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename,
  * \param posNodeData position of solution data in file
  * \param bin 1 if binary format
  * \param nelts number of elements in file
- * \return 1 if success.
+ * \return 1 if success, 0 if fail.
  *
  * End to read mesh at MSH file format after the mesh alloc.
  *
@@ -540,10 +540,10 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
   /* Skip triangles and edges with MG_ISO refs */
   if( mesh->info.iso ) {
     if ( mesh->nt ) {
-      _MMG5_SAFE_CALLOC(ina_t,mesh->nt+1,int);
+      _MMG5_SAFE_CALLOC(ina_t,mesh->nt+1,int,0);
     }
     if ( mesh->na ) {
-      _MMG5_SAFE_CALLOC(ina_a,mesh->na+1,int);
+      _MMG5_SAFE_CALLOC(ina_a,mesh->na+1,int,0);
     }
   }
 
@@ -969,8 +969,8 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
       else if ( nt < mesh->nt ) {
         _MMG5_ADD_MEM(mesh,(nt-mesh->nt)*sizeof(MMG5_Tria),"triangles",
                       fprintf(stderr,"  Exit program.\n");
-                      exit(EXIT_FAILURE));
-        _MMG5_SAFE_RECALLOC(mesh->tria,mesh->nt+1,(nt+1),MMG5_Tria,"triangles");
+                      return 0);
+        _MMG5_SAFE_RECALLOC(mesh->tria,mesh->nt+1,(nt+1),MMG5_Tria,"triangles",0);
       }
       _MMG5_SAFE_FREE(ina_t);
       mesh->nt = nt;
@@ -981,8 +981,8 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
       else if ( na < mesh->na ) {
         _MMG5_ADD_MEM(mesh,(na-mesh->na)*sizeof(MMG5_Edge),"edges",
                       fprintf(stderr,"  Exit program.\n");
-                      exit(EXIT_FAILURE));
-        _MMG5_SAFE_RECALLOC(mesh->edge,mesh->na+1,(na+1),MMG5_Edge,"edges");
+                      return 0);
+        _MMG5_SAFE_RECALLOC(mesh->edge,mesh->na+1,(na+1),MMG5_Edge,"edges",0);
       }
       _MMG5_SAFE_FREE(ina_a);
       mesh->na = na;
@@ -1164,8 +1164,8 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
 
     _MMG5_ADD_MEM(mesh,(sol->size*(sol->npmax+1))*sizeof(double),"initial solution",
                   fprintf(stderr,"  Exit program.\n");
-                  exit(EXIT_FAILURE));
-    _MMG5_SAFE_CALLOC(sol->m,sol->size*(sol->npmax+1),double);
+                  return 0);
+    _MMG5_SAFE_CALLOC(sol->m,sol->size*(sol->npmax+1),double,0);
 
     /* isotropic solution */
     if ( sol->size == 1 ) {
@@ -1340,7 +1340,7 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 
   bin = 0;
 
-  _MMG5_SAFE_CALLOC(data,strlen(filename)+7,char);
+  _MMG5_SAFE_CALLOC(data,strlen(filename)+7,char,0);
   strcpy(data,filename);
 
   ptr = strstr(data,".msh");

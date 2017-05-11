@@ -39,11 +39,7 @@ void MMG2D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
     MMG2D_gradsiz  = _MMG2_gradsiz_ani;
     MMG2D_caltri   = _MMG2_caltri_ani;
     MMG2D_intmet   = _MMG2_intmet_ani;
-    
-#warning : remove if not used
-    MMG2D_buckin   = buckin_ani;
     //    MMG2_optlen    = optlen_ani;
-    
   }
   else {
     MMG2D_lencurv   = _MMG2_lencurv_iso;
@@ -51,16 +47,19 @@ void MMG2D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
     MMG2D_gradsiz   = _MMG2_gradsiz_iso;
     MMG2D_caltri    = _MMG2_caltri_iso;
     MMG2D_intmet    = _MMG2_intmet_iso;
-    
-#warning : remove if not used
-    MMG2D_buckin    = buckin_iso;
-    //    MMG2_optlen     = optlen_iso;
   }
-  
   return;
 }
 
-/* Read parameter file DEFAULT.mmg2d */
+/**
+ * \param mesh pointer toward the mesh
+ * \param met pointer toward the metric
+ *
+ * \return 1 if success, 0 if fail
+ *
+ * Read parameter file DEFAULT.mmg2d
+ *
+ */
 int MMG2_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
   int      ret,i,nspl,nun;
   char     *ptr,data[256];
@@ -94,7 +93,7 @@ int MMG2_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
       ret = fscanf(in,"%d",&mesh->info.nmat);
       
       if ( mesh->info.nmat ) {
-        _MMG5_SAFE_CALLOC(mesh->info.mat,mesh->info.nmat,MMG5_Mat);
+        _MMG5_SAFE_CALLOC(mesh->info.mat,mesh->info.nmat,MMG5_Mat,0);
         for (i=0; i<mesh->info.nmat; i++) {
           pm = &mesh->info.mat[i];
           fscanf(in,"%d",&pm->ref);
@@ -233,6 +232,15 @@ int MMG2D_Get_triFromEdge(MMG5_pMesh mesh, int ked, int *ktri, int *ied)
 
   return 1;
 
+
+}
+
+void MMG2D_Reset_verticestags(MMG5_pMesh mesh) {
+  int k;
+
+  for ( k=1; k<=mesh->np;  ++k ) {
+    mesh->point[k].tag = 0;
+  }
 
 }
 

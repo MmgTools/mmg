@@ -207,7 +207,7 @@ int chkeigen(MMG5_pMesh mesh,MMG5_pSol met,int k,double lambda[3]) {
 
         if ( !ord ) {
             fprintf(stderr,"wrong matrix \n");
-            exit(EXIT_FAILURE);
+            return 0;
         }
     }
 
@@ -215,6 +215,7 @@ int chkeigen(MMG5_pMesh mesh,MMG5_pSol met,int k,double lambda[3]) {
 }
 
 /**
+ * \return 0 if fail , 1 if success
  *
  * Check metric consistency.
  *
@@ -241,12 +242,12 @@ int chkmet(MMG5_pMesh mesh,MMG5_pSol met) {
             if( m[1] != 0.0 || m[2] != 0.0 || m[4] != 0.0 ){
                 fprintf(stderr,"   ### Error in definition of singular metric point %d,\
                      met %f %f %f %f %f %f  \n",k,m[0],m[1],m[2],m[3],m[4],m[5]);
-                exit(EXIT_FAILURE);
+                return 0;
             }
             else if ( m[0] != m[3] || m[0] != m[5] || m[3] != m[5] )  {
                 fprintf(stderr,"   ### Error in definition of singular metric point %d,\
                met %f %f %f %f %f %f  \n",k,m[0],m[1],m[2],m[3],m[4],m[5]);
-                exit(EXIT_FAILURE);
+                return 0;
             }
         }
         else if ( p0->tag & MG_GEO ) {
@@ -255,7 +256,7 @@ int chkmet(MMG5_pMesh mesh,MMG5_pSol met) {
                 if ( m[i] > isqhmin + 1.e-6 || m[i] < isqhmax - 1.e-6 ){
                     fprintf(stderr,"   ### Error in definition of metric at ridge point %d,\
                  met %f %f %f %f %f %f  \n",k,m[0],m[1],m[2],m[3],m[4],m[5]);
-                    exit(EXIT_FAILURE);
+                    return 0;
                 }
             }
         }
@@ -281,14 +282,14 @@ int chkmet(MMG5_pMesh mesh,MMG5_pSol met) {
                 fprintf(stderr,"   ### Error in definition of metric at regular point %d,\
                met %f %f %f %f %f %f  \n",k,m[0],m[1],m[2],m[3],m[4],m[5]);
                 fprintf(stderr,"eigenvalue : %f \n",lambda[0]);
-                exit(EXIT_FAILURE);
+                return 0;
             }
 
             if ( lambda[1] > isqhmin + 1.e-6 || lambda[1] < isqhmax - 1.e-6 ){
                 fprintf(stderr,"   ### Error in definition of metric at regular point %d,\
                met %f %f %f %f %f %f  \n",k,m[0],m[1],m[2],m[3],m[4],m[5]);
                 fprintf(stderr,"eigenvalue : %f \n",lambda[1]);
-                exit(EXIT_FAILURE);
+                return 0;
             }
         }
     }
@@ -298,7 +299,15 @@ int chkmet(MMG5_pMesh mesh,MMG5_pSol met) {
     return(1);
 }
 
-/* Check normal vectors consistency */
+/**
+ * \param mesh pointer toward the mesh
+ *
+ * \return 1 if success, 0 if fail.
+ *
+ * Check normal vectors consistency
+ *
+ * \warning unused
+ */
 int chknor(MMG5_pMesh mesh) {
     MMG5_pTria    pt;
     MMG5_pPoint   p0;
@@ -320,8 +329,8 @@ int chknor(MMG5_pMesh mesh) {
 
         dd = n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
         if ( dd < 0.9 ) {
-            fprintf(stderr,"point : %d normal n1 = %f %f %f : exit program\n",k,n[0],n[1],n[2]);
-            exit(EXIT_FAILURE);
+            fprintf(stderr,"point  %d normal n1 = %f %f %f : exit program\n",k,n[0],n[1],n[2]);
+            return 0;
         }
 
         n = &go->n2[0];
@@ -329,7 +338,7 @@ int chknor(MMG5_pMesh mesh) {
         dd = n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
         if ( dd < 0.9 ) {
             fprintf(stderr,"point : %d normal n2 = %f %f %f : exit program\n",k,n[0],n[1],n[2]);
-            exit(EXIT_FAILURE);
+            return 0;
         }
     }
 
@@ -351,14 +360,14 @@ int chknor(MMG5_pMesh mesh) {
                     ps = n[0]*nt[0] + n[1]*nt[1] + n[2]*nt[2];
                     if ( ps < -0.99 ) {
                         fprintf(stderr,"point %d in triangle %d : inconsistant normal : ps = %f \n",pt->v[i],k,ps);
-                        exit(EXIT_FAILURE);
+                        return 0;
                     }
 
                     n = &go->n2[0];
                     ps = n[0]*nt[0] + n[1]*nt[1] + n[2]*nt[2];
                     if ( ps < -0.99 ) {
                         fprintf(stderr,"point %d in triangle %d : inconsistant normal : ps = %f \n",pt->v[i],k,ps);
-                        exit(EXIT_FAILURE);
+                        return 0;
                     }
 
                 }
@@ -367,7 +376,7 @@ int chknor(MMG5_pMesh mesh) {
                     ps = n[0]*nt[0] + n[1]*nt[1] + n[2]*nt[2];
                     if ( ps < -0.99 ) {
                         fprintf(stderr,"point %d in triangle %d : inconsistant normal : ps = %f \n",pt->v[i],k,ps);
-                        exit(EXIT_FAILURE);
+                        return 0;
                     }
                 }
             }
@@ -376,7 +385,7 @@ int chknor(MMG5_pMesh mesh) {
                 ps = n[0]*nt[0] + n[1]*nt[1] + n[2]*nt[2];
                 if ( ps < -0.99 ) {
                     fprintf(stderr,"point %d in triangle %d : inconsistant normal : ps = %f \n",pt->v[i],k,ps);
-                    exit(EXIT_FAILURE);
+                    return 0;
                 }
             }
         }

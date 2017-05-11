@@ -167,7 +167,7 @@ static int _MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itdeg, 
       
     if ( !ip )  {
       /* reallocation of point table */
-      _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,*warn=1;break,o,MG_NOTAG);
+      _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,*warn=1;break,o,MG_NOTAG,-1);
     }
     
     /* Interpolation of metric, if any */

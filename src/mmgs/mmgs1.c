@@ -499,7 +499,16 @@ int _MMGS_delPatternPts(MMG5_pMesh mesh,_MMG5_Hash hash)
   return 1;
 }
 
-/* analyze triangles and split if needed */
+/**
+ * \param mesh pointer toward the mesh
+ * \param met pointer toward the metric
+ * \param typchk type of check performed depending on the remeshing step
+ *
+ * \return -1 if fail, the number of split otherwise
+ *
+ * Analyze triangles and split if needed
+ *
+ */
 static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   MMG5_pTria    pt;
   MMG5_pPoint   ppt,p1,p2;
@@ -511,7 +520,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   char          i1,i2;
   static double uv[3][2] = { {0.5,0.5}, {0.,0.5}, {0.5,0.} };
 
-  _MMG5_hashNew(mesh,&hash,mesh->np,3*mesh->np);
+  if ( !_MMG5_hashNew(mesh,&hash,mesh->np,3*mesh->np) ) return -1;
   ns = 0;
   s  = 0.5;
   for (k=1; k<=mesh->nt; k++) {
@@ -530,7 +539,8 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         i1 = _MMG5_inxt2[i];
         i2 = _MMG5_iprv2[i];
         len = _MMG5_lenSurfEdg(mesh,met,pt->v[i1],pt->v[i2],0);
-        if ( len > _MMGS_LLONG )  MG_SET(pt->flag,i);
+        if ( !len ) return -1;
+        else if ( len > _MMGS_LLONG )  MG_SET(pt->flag,i);
       }
       if ( !pt->flag )  continue;
     }
@@ -563,7 +573,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
                               _MMG5_INCREASE_MEM_MESSAGE();
                               _MMGS_delPatternPts( mesh, hash);
                               return -1
-                              ,o,MG_EDG(pt->tag[i]) ? to : no);
+                              ,o,MG_EDG(pt->tag[i]) ? to : no,-1);
           // Now pb->p contain a wrong memory address.
           pb.p[0] = &mesh->point[pt->v[0]];
           pb.p[1] = &mesh->point[pt->v[1]];
@@ -581,7 +591,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
             /* reallocation of xpoint table */
             _MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,MMG5_xPoint,
                                "larger xpoint table",
-                               return(-1));
+                               return(-1),-1);
           }
           ppt->xp  = mesh->xp;
           ppt->tag = pt->tag[i];
@@ -798,26 +808,24 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         vx[i] = _MMG5_hashGet(&hash,pt->v[i1],pt->v[i2]);
         if ( !vx[i] ) {
           fprintf(stderr,"Error: unable to create point on edge.\n Exit program.\n");
-          exit(EXIT_FAILURE);
+          return -1;
         }
         j = i;
       }
     }
     if ( pt->flag == 1 || pt->flag == 2 || pt->flag == 4 ) {
       ier = _MMGS_split1(mesh,met,k,j,vx);
-      assert(ier);
       ns++;
     }
     else if ( pt->flag == 7 ) {
       ier = _MMGS_split3(mesh,met,k,vx);
-      assert(ier);
       ns++;
     }
     else {
       ier = _MMGS_split2(mesh,met,k,vx);
-      assert(ier);
       ns++;
     }
+    if ( !ier ) return -1;
   }
   if ( (mesh->info.ddebug || abs(mesh->info.imprim) > 5) && ns > 0 )
     fprintf(stdout,"     %7d splitted\n",ns);
@@ -878,7 +886,7 @@ int chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,int i) {
     _MMGS_POINT_REALLOC(mesh,met,ip,mesh->gap,
                         _MMG5_INCREASE_MEM_MESSAGE();
                         return(-1)
-                        ,o,MG_EDG(pt->tag[i]) ? to : no);
+                        ,o,MG_EDG(pt->tag[i]) ? to : no,-1);
   }
 
   if ( MG_EDG(pt->tag[i]) ) {
@@ -902,7 +910,7 @@ static int colelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   MMG5_pPoint   p1,p2;
   MMG5_pPar     par;
   double        ll,ux,uy,uz,hmin;
-  int           list[_MMGS_LMAX+2],ilist,k,nc,l,isloc;
+  int           list[_MMGS_LMAX+2],ilist,k,nc,l,isloc,ier;
   char          i,i1,i2;
 
   nc = 0;
@@ -952,21 +960,28 @@ static int colelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
       }
       else {
         ll = _MMG5_lenSurfEdg(mesh,met,pt->v[i1],pt->v[i2],0);
+        if ( !ll ) return -1;
         if ( ll > _MMGS_LSHRT )  continue;
       }
 
       /* check if geometry preserved */
       ilist = chkcol(mesh,met,k,i,list,typchk);
       if ( ilist > 3 ) {
-        nc += colver(mesh,list,ilist);
+        ier = colver(mesh,list,ilist);
+        if ( !ier ) return -1;
+        nc += ier;
         break;
       }
       else if ( ilist == 3 ) {
-        nc += colver3(mesh,list);
+        ier = colver3(mesh,list);
+        if ( !ier ) return -1;
+        nc += ier;
         break;
       }
       else if ( ilist == 2 ) {
-        nc += colver2(mesh,list);
+        ier = colver2(mesh,list);
+        if ( !ier ) return -1;
+        nc += ier;
         break;
       }
     }
@@ -977,6 +992,15 @@ static int colelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   return(nc);
 }
 
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ *
+ * \return -1 if failed or number of new points.
+ *
+ * Split edges of length bigger than _MMGS_LOPTL.
+ *
+ */
 static int adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria    pt;
   MMG5_pPoint   p1,p2;
@@ -997,6 +1021,9 @@ static int adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
       i1  = _MMG5_inxt2[i];
       i2  = _MMG5_iprv2[i];
       len = _MMG5_lenSurfEdg(mesh,met,pt->v[i1],pt->v[i2],0);
+
+      if ( !len ) return -1;
+
       if ( len > lmax ) {
         lmax = len;
         imax = i;
@@ -1037,12 +1064,20 @@ static int adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
   return(ns);
 }
 
-/* analyze triangles and split or collapse to match gradation */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \return -1 if failed.
+ * \return number of deleted points.
+ *
+ * Collapse edges of length smaller than _MMGS_LOPTS.
+ *
+ */
 static int adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria    pt;
   MMG5_pPoint   p1,p2;
   double   len;
-  int      k,list[_MMGS_LMAX+2],ilist,nc;
+  int      k,list[_MMGS_LMAX+2],ilist,nc,ier;
   char     i,i1,i2;
 
   nc = 0;
@@ -1063,7 +1098,8 @@ static int adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
       if ( p1->tag & MG_NOM || p2->tag & MG_NOM )  continue;
 
       len = _MMG5_lenSurfEdg(mesh,met,pt->v[i1],pt->v[i2],0);
-      if ( len > _MMGS_LOPTS )  continue;
+      if ( !len ) return -1;
+      else if ( len > _MMGS_LOPTS )  continue;
 
       p1 = &mesh->point[pt->v[i1]];
       p2 = &mesh->point[pt->v[i2]];
@@ -1073,15 +1109,21 @@ static int adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
       /* check if geometry preserved */
       ilist = chkcol(mesh,met,k,i,list,2);
       if ( ilist > 3 ) {
-        nc += colver(mesh,list,ilist);
+        ier =  colver(mesh,list,ilist);;
+        nc +=  ier;
+        if ( !ier ) return -1;
         break;
       }
       else if ( ilist == 3 ) {
-        nc += colver3(mesh,list);
+        ier = colver3(mesh,list);
+        nc += ier;
+        if ( !ier ) return -1;
         break;
       }
       else if ( ilist == 2 ) {
-        nc += colver2(mesh,list);
+        ier = colver2(mesh,list);
+        nc += ier;
+        if ( !ier ) return -1;
         break;
       }
     }

@@ -273,7 +273,7 @@ int _MMG5_boulenm(MMG5_pMesh mesh,int start,int ip,int iface,
  * \param ip local index of the point in the tetrahedra \a start.
  * \param ng pointer toward the number of ridges.
  * \param nr pointer toward the number of reference edges.
- * \return ns the number of special edges passing through ip.
+ * \return ns the number of special edges passing through ip, -1 if fail.
  *
  * Count the numer of ridges and reference edges incident to
  * the vertex \a ip when ip is non-manifold.
@@ -295,8 +295,8 @@ int _MMG5_boulernm(MMG5_pMesh mesh, int start, int ip, int *ng, int *nr){
   hash.siz  = mesh->np;
   hash.max  = hmax + 1;
   hash.nxt  = hash.siz;
-  _MMG5_ADD_MEM(mesh,(hash.max+1)*sizeof(_MMG5_hedge),"hash table",return(0));
-  _MMG5_SAFE_CALLOC(hash.item,hash.max+1,_MMG5_hedge);
+  _MMG5_ADD_MEM(mesh,(hash.max+1)*sizeof(_MMG5_hedge),"hash table",return(-1));
+  _MMG5_SAFE_CALLOC(hash.item,hash.max+1,_MMG5_hedge,-1);
 
   for (k=hash.siz; k<hash.max; k++)
     hash.item[k].nxt = k+1;
@@ -351,7 +351,7 @@ int _MMG5_boulernm(MMG5_pMesh mesh, int start, int ip, int *ng, int *nr){
                 fprintf(stdout,"  ## Memory alloc problem (edge): %d\n",
                         hash.max);
               _MMG5_TAB_RECALLOC(mesh,hash.item,hash.max,0.2,_MMG5_hedge,
-                                 "_MMG5_edge",return(0));
+                                 "_MMG5_edge",return -1,-1);
               /* ph pointer may be false after realloc */
               ph        = &hash.item[hash.nxt];
 

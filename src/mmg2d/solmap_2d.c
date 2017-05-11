@@ -103,8 +103,16 @@ int MMG2D_doSol(MMG5_pMesh mesh,MMG5_pSol sol) {
   return(1);
 }
 
-/* New version for the definition of a size map; takes into account the
- curvature of the external and internal curves present in the mesh */
+/**
+ * \param mesh pointer toward the mesh
+ * \param met pointer toward the metric
+ *
+ * \return 0 if fail, 1 otherwise
+ *
+ * New version for the definition of a size map; takes into account the
+ * curvature of the external and internal curves present in the mesh
+ *
+ */
 int _MMG2_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria       pt;
   MMG5_pPoint      p1,p2;
@@ -131,7 +139,7 @@ int _MMG2_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
     
     if ( !met->m ) {
       _MMG5_ADD_MEM(mesh,(met->npmax+1)*sizeof(double),"solution",return(0));
-      _MMG5_SAFE_MALLOC(met->m,mesh->npmax+1,double);
+      _MMG5_SAFE_MALLOC(met->m,mesh->npmax+1,double,0);
 
     }
     /* Initialize metric with a constant size in the case met->np = 0 (meaning that no metric was supplied) */

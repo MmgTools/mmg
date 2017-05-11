@@ -67,6 +67,7 @@ void _MMG5_chkvol(MMG5_pMesh mesh) {
 }
 
 /**
+* \return 0 if fail, 1 otherwise
  *
  * \warning Not used.
  */
@@ -89,7 +90,7 @@ int _MMG5_chkmshsurf(MMG5_pMesh mesh){
 
       if(adja1[voy] / 3 != k){
         fprintf(stderr,"Wrong adjacency relation for triangles : %d %d \n",k,k1);
-        exit(EXIT_FAILURE);
+        return 0;
       }
     }
   }
@@ -239,6 +240,8 @@ int _MMG5_mmg3dChkmsh(MMG5_pMesh mesh,int severe,int base) {
 /**
  * Search boundary faces containing point np.
  *
+ * \return 0 if fail, 1 otherwise
+ *
  * \warning Not used.
  **/
 int _MMG5_chkptonbdy(MMG5_pMesh mesh,int np){
@@ -275,7 +278,7 @@ int _MMG5_chkptonbdy(MMG5_pMesh mesh,int np){
     if(p0->flag) continue;
     if(p0->tag & MG_BDY){
       fprintf(stderr,"      Fct. chkptonbdy : point %d tagged bdy while belonging to no BDY face\n",k);
-      exit(EXIT_FAILURE);
+      return 0;
     }
   }
 

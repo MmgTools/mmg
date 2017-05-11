@@ -40,16 +40,17 @@
 
 #include "mmg2d.h"
 
-void MMG2D_Init_mesh(const int starter,...) {
+int MMG2D_Init_mesh(const int starter,...) {
   va_list argptr;
+  int     ier;
 
   va_start(argptr, starter);
 
-  _MMG2D_Init_mesh_var(argptr);
+  ier = _MMG2D_Init_mesh_var(argptr);
 
   va_end(argptr);
 
-  return;
+  return ier;
 }
 
 void MMG2D_Init_fileNames(MMG5_pMesh mesh,MMG5_pSol sol
@@ -98,8 +99,6 @@ void MMG2D_Init_parameters(MMG5_pMesh mesh) {
   mesh->info.dhd  = _MMG5_ANGEDG;
 
   //mesh->info.imprim = -7;
-
-  /* MMG2D_IPARAM_bucket = 64 */
   mesh->info.octree = 64;
 }
 
@@ -122,9 +121,6 @@ int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
       return(0);
     } else if(mesh->info.mem < 39)
       return(0);
-    break;
-  case MMG2D_IPARAM_bucket :
-    mesh->info.octree   = val;
     break;
   case MMG2D_IPARAM_debug :
     mesh->info.ddebug   = val;
@@ -150,7 +146,7 @@ int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
     break;
   case MMG2D_IPARAM_lag :
     if ( val < 0 || val > 2 )
-      exit(EXIT_FAILURE);
+      return 0;
     mesh->info.lag = val;
     break;
   case MMG2D_IPARAM_msh :
@@ -268,16 +264,16 @@ int MMG2D_Set_meshSize(MMG5_pMesh mesh, int np, int nt, int na) {
   }
   _MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(MMG5_Point),"initial vertices",
                 printf("  Exit program.\n");
-                exit(EXIT_FAILURE));
-  _MMG5_SAFE_CALLOC(mesh->point,mesh->npmax+1,MMG5_Point);
+                return 0);
+  _MMG5_SAFE_CALLOC(mesh->point,mesh->npmax+1,MMG5_Point,0);
 
   _MMG5_ADD_MEM(mesh,(mesh->ntmax+1)*sizeof(MMG5_Tria),"initial triangles",return(0));
-  _MMG5_SAFE_CALLOC(mesh->tria,mesh->ntmax+1,MMG5_Tria);
+  _MMG5_SAFE_CALLOC(mesh->tria,mesh->ntmax+1,MMG5_Tria,0);
 
   mesh->namax =  mesh->na;
   if ( mesh->na ) {
     _MMG5_ADD_MEM(mesh,(mesh->namax+1)*sizeof(MMG5_Edge),"initial edges",return(0));
-    _MMG5_SAFE_CALLOC(mesh->edge,(mesh->namax+1),MMG5_Edge);
+    _MMG5_SAFE_CALLOC(mesh->edge,(mesh->namax+1),MMG5_Edge,0);
   }
 
   /* keep track of empty links */
@@ -341,8 +337,8 @@ int MMG2D_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int
     sol->npmax = mesh->npmax;
     _MMG5_ADD_MEM(mesh,(sol->size*(sol->npmax+1))*sizeof(double),"initial solution",
                   printf("  Exit program.\n");
-                  exit(EXIT_FAILURE));
-    _MMG5_SAFE_CALLOC(sol->m,(sol->size*(sol->npmax+1)),double);
+                  return 0);
+    _MMG5_SAFE_CALLOC(sol->m,(sol->size*(sol->npmax+1)),double,0);
   }
   return(1);
 }
@@ -432,13 +428,13 @@ int MMG2D_Set_vertex(MMG5_pMesh mesh, double c0, double c1, int ref, int pos) {
 
 /* int MMG2D_Set_corner(MMG5_pMesh mesh, int k) { */
 /*   assert ( k <= mesh->np ); */
-/*   mesh->point[k].tag |= M_CORNER; */
+/*   mesh->point[k].tag |= MG_CRN; */
 /*   return(1); */
 /* } */
 
 /* int MMG2D_Set_requiredVertex(MMG5_pMesh mesh, int k) { */
 /*   assert ( k <= mesh->np ); */
-/*   mesh->point[k].tag |= M_REQUIRED; */
+/*   mesh->point[k].tag |= MG_REQ; */
 /*   return(1); */
 /* } */
 
@@ -471,14 +467,14 @@ int MMG2D_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, int* ref,
     *ref = mesh->point[mesh->npi].ref;
 
   if ( isCorner != NULL ) {
-    if ( mesh->point[mesh->npi].tag & M_CORNER )
+    if ( mesh->point[mesh->npi].tag & MG_CRN )
       *isCorner = 1;
     else
       *isCorner = 0;
   }
 
   if ( isRequired != NULL ) {
-    if ( mesh->point[mesh->npi].tag & M_REQUIRED )
+    if ( mesh->point[mesh->npi].tag & MG_REQ )
       *isRequired = 1;
     else
       *isRequired = 0;
@@ -622,10 +618,19 @@ int MMG2D_Set_triangle(MMG5_pMesh mesh, int v0, int v1, int v2, int ref, int pos
 }
 
 int MMG2D_Set_requiredTriangle(MMG5_pMesh mesh, int k) {
+  MMG5_pTria pt;
+  int        i;
+  
   assert ( k <= mesh->nt );
-  mesh->tria[k].tag[0] |= MG_REQ;
-  mesh->tria[k].tag[1] |= MG_REQ;
-  mesh->tria[k].tag[2] |= MG_REQ;
+  pt = &mesh->tria[k];
+
+  pt->tag[0] |= MG_REQ;
+  pt->tag[1] |= MG_REQ;
+  pt->tag[2] |= MG_REQ;
+
+  for(i=0 ; i<3 ;i++)
+    mesh->point[pt->v[i]].tag |= MG_REQ;
+
   return(1);
 }
 
@@ -1191,44 +1196,45 @@ int MMG2D_Chk_meshData(MMG5_pMesh mesh,MMG5_pSol met) {
   return(1);
 }
 
-void MMG2D_Free_all(const int starter,...)
+int MMG2D_Free_all(const int starter,...)
 {
-
   va_list argptr;
+  int     ier;
 
   va_start(argptr, starter);
 
-  _MMG2D_Free_all_var(argptr);
+  ier = _MMG2D_Free_all_var(argptr);
 
   va_end(argptr);
 
-  return;
+  return ier;
 }
 
-void MMG2D_Free_structures(const int starter,...)
+int MMG2D_Free_structures(const int starter,...)
 {
+  int ier;
 
   va_list argptr;
 
   va_start(argptr, starter);
 
-  _MMG2D_Free_structures_var(argptr);
+  ier = _MMG2D_Free_structures_var(argptr);
 
   va_end(argptr);
 
-  return;
+  return ier;
 }
 
-void MMG2D_Free_names(const int starter,...)
+int MMG2D_Free_names(const int starter,...)
 {
-
   va_list argptr;
+  int     ier;
 
   va_start(argptr, starter);
 
-  _MMG2D_Free_names_var(argptr);
+  ier = _MMG2D_Free_names_var(argptr);
 
   va_end(argptr);
 
-  return;
+  return ier;
 }

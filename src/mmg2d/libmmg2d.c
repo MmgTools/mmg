@@ -109,13 +109,12 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
   /* Allocate memory if no metric is supplied */
   if ( !sol->m ) {
     _MMG5_ADD_MEM(mesh,(sol->size*(mesh->npmax+1))*sizeof(double),
-                  "initial solution",return(0));
-    _MMG5_SAFE_CALLOC(sol->m,sol->size*(mesh->npmax+1),double);
+                  "initial solution",return(MMG5_STRONGFAILURE));
+    _MMG5_SAFE_CALLOC(sol->m,sol->size*(mesh->npmax+1),double,MMG5_STRONGFAILURE);
     sol->np = 0;
   }
   else if ( sol->np && ( sol->np != mesh->np ) ) {
     fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER : %d != %d\n",sol->np,mesh->np);
-    //exit(EXIT_FAILURE);
   }
 
   chrono(OFF,&(ctim[1]));
@@ -123,46 +122,6 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
 
   if ( mesh->info.imprim )
     fprintf(stdout,"  --  INPUT DATA COMPLETED.     %s\n",stim);
-
-  /* /\* default values *\/ */
-  /* mesh->info.imprim = opt[5]; */
-  /* mesh->info.mem    = 0; */
-  /* mesh->info.ddebug = opt[1]; */
-  /* mesh->info.iso = 0; */
-  /* mesh->info.lag = -1; */
-  /* mesh->info.hmin = -1; */
-  /* mesh->info.hmax = -1; */
-  /* mesh->info.hausd = 0.01; */
-  /* switch(opt[0]) { */
-  /* case 0: */
-  /* case 1: */
-  /* case 2: */
-  /*   break; */
-  /* case 6: */
-  /*   mesh->info.iso = 1; */
-  /*   break; */
-  /* case 9: */
-  /* case 99: */
-  /*   mesh->info.lag = 0; */
-  /*   break; */
-  /* default: */
-  /*   fprintf(stdout,"option not recognized %d\n",opt[0]); */
-  /*   exit(EXIT_FAILURE); */
-  /* } */
-  /* mesh->info.noswap = opt[2]; */
-  /* mesh->info.nomove = opt[4]; */
-  /* mesh->info.noinsert = opt[3]; */
-  /* mesh->info.hgrad  = optdbl[0]; */
-  /* if(opt[6]) */
-  /*   mesh->info.dhd  = -1; */
-  /* else */
-  /*   mesh->info.dhd  = 180.-optdbl[1]; */
-  /* /\*this options are not used inside library version*\/ */
-  /* //qdegrad[0] = 10./_MMG2D_ALPHA; */
-  /* //qdegrad[1] = 1.3; */
-  /* mesh->info.renum = 0; */
-
-  /* sol->type = 1; */
 
   /* Set function pointers */
   MMG2D_setfunc(mesh,sol);
@@ -271,13 +230,13 @@ static inline
 int _MMG2D_restart(MMG5_pMesh mesh){
   int k;
 
- /** If needed, reallocate the missing structures */
+  /** If needed, reallocate the missing structures */
   if ( !mesh->tria ) {
     /* If we call the library more than one time and if we free the triangles
      * using the MMG2D_Free_triangles function we need to reallocate it */
     _MMG5_ADD_MEM(mesh,(mesh->ntmax+1)*sizeof(MMG5_Tria),
                   "initial triangles",return(0));
-    _MMG5_SAFE_CALLOC(mesh->tria,mesh->ntmax+1,MMG5_Tria);
+    _MMG5_SAFE_CALLOC(mesh->tria,mesh->ntmax+1,MMG5_Tria,0);
     mesh->nenil = mesh->nt + 1;
     for ( k=mesh->nenil; k<mesh->ntmax-1; k++) {
       mesh->tria[k].v[2] = k+1;
@@ -288,13 +247,11 @@ int _MMG2D_restart(MMG5_pMesh mesh){
      * using the MMG2D_Free_triangles function we need to reallocate it */
     _MMG5_ADD_MEM(mesh,(mesh->namax+1)*sizeof(MMG5_Edge),
                   "initial edges",return(0));
-    _MMG5_SAFE_CALLOC(mesh->edge,mesh->namax+1,MMG5_Edge);
+    _MMG5_SAFE_CALLOC(mesh->edge,mesh->namax+1,MMG5_Edge,0);
     mesh->nanil = mesh->na + 1;
   }
 
-  for ( k=1; k<=mesh->np;  ++k ) {
-    mesh->point[k].tag = 0;
-  }
+ 
   return 1;
 }
 
@@ -349,14 +306,13 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   if ( !sol->m ) {
     /* mem alloc */
     _MMG5_ADD_MEM(mesh,(sol->size*(mesh->npmax+1))*sizeof(double),
-                  "initial solution",return(0));
-    _MMG5_SAFE_CALLOC(sol->m,sol->size*(mesh->npmax+1),double);
+                  "initial solution",return(MMG5_STRONGFAILURE));
+    _MMG5_SAFE_CALLOC(sol->m,sol->size*(mesh->npmax+1),double,MMG5_STRONGFAILURE);
     sol->np = 0;
   }
 
   else   if ( sol->np && (sol->np != mesh->np) ) {
     fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER : %d != %d\n",sol->np,mesh->np);
-    //exit(EXIT_FAILURE);
   }
   chrono(OFF,&(ctim[1]));
   printim(ctim[1].gdif,stim);
@@ -399,8 +355,8 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   /* Memory alloc */
   _MMG5_ADD_MEM(mesh,(3*mesh->ntmax+5)*sizeof(int),"adjacency table",
                 printf("  Exit program.\n");
-                exit(EXIT_FAILURE));
-  _MMG5_SAFE_CALLOC(mesh->adja,3*mesh->ntmax+5,int);
+                return(MMG5_STRONGFAILURE));
+  _MMG5_SAFE_CALLOC(mesh->adja,3*mesh->ntmax+5,int,MMG5_STRONGFAILURE);
 
   /* Delaunay triangulation of the set of points contained in the mesh, enforcing the edges of the mesh */
   if ( mesh->info.imprim )
@@ -420,6 +376,11 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   chrono(ON,&ctim[4]);
   if ( mesh->info.imprim ) {
     fprintf(stdout,"\n  -- PHASE 3 : MESH IMPROVEMENT\n");
+  }
+
+  if ( !sol->np && mesh->info.optim ) {
+    if ( !MMG2D_doSol(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+    _MMG2D_scalarSolTruncature(mesh,sol);
   }
 
   /* Mesh analysis */

@@ -178,7 +178,7 @@ int _MMG2_cavity(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list) {
   ppt = &mesh->point[ip];
   base  = ++mesh->base;
   //isreq = 0;
-  tref = list[0];
+  tref = mesh->tria[list[0]].ref;
   mesh->tria[list[0]].base = base;
 
   /* Pile up cavity by adjacency */
@@ -226,12 +226,14 @@ int _MMG2_cavity(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list) {
         if ( !adi )  continue;
         pt1 = &mesh->tria[adi];
         if ( pt1->base == base && adi != jel ) {
-          if ( !adi || pt1->ref != tref )  break;
+          if ( pt1->ref != tref ) {
+            break;
+          }
         }
       }
       /* store tria */
       if ( j == 3 ) {
-        //if ( pt->tag & M_REQUIRED ) isreq = 1;
+        //if ( pt->tag & MG_REQ ) isreq = 1;
         pt->base = base;
         list[ilist++] = adj;
       }
@@ -322,10 +324,10 @@ int _MMG2_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
     ielnum[k] = _MMG2D_newElt(mesh);
     if ( !ielnum[k] ) {
       _MMG2D_TRIA_REALLOC(mesh,ielnum[k],mesh->gap,
-                         printf("  ## Error: unable to allocate a new element.\n");
-                         _MMG5_INCREASE_MEM_MESSAGE();
-                         printf("  Exit program.\n");
-                         exit(EXIT_FAILURE));
+                          printf("  ## Error: unable to allocate a new element.\n");
+                          _MMG5_INCREASE_MEM_MESSAGE();
+                          printf("  Exit program.\n");return(-1);,
+                          -1);
       pt1  = &mesh->tria[old];
     }
   }

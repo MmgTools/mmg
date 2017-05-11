@@ -188,8 +188,7 @@ int _MMG3D_bdryBuild(MMG5_pMesh mesh) {
   mesh->na = nr = 0;
   /* in the worst case (all edges are marked), we will have around 1 edge per *
    * triangle (we count edges only one time) */
-  mesh->memCur += (long long)((3*mesh->nt+2)*sizeof(MMG5_hgeom));
-  if ( _MMG5_hNew(mesh,&mesh->htab,mesh->nt,3*(mesh->nt),0) ) {
+  if ( _MMG5_hNew(mesh,&mesh->htab,mesh->nt,3*(mesh->nt)) ) {
     for (k=1; k<=mesh->ne; k++) {
       pt   = &mesh->tetra[k];
       if ( MG_EOK(pt) &&  pt->xt ) {
@@ -197,8 +196,9 @@ int _MMG3D_bdryBuild(MMG5_pMesh mesh) {
           if ( mesh->xtetra[pt->xt].edg[i] ||
                ( mesh->xtetra[pt->xt].tag[i] & MG_REQ ||
                  MG_EDG(mesh->xtetra[pt->xt].tag[i])) )
-            _MMG5_hEdge(mesh,&mesh->htab,pt->v[_MMG5_iare[i][0]],pt->v[_MMG5_iare[i][1]],
-                        mesh->xtetra[pt->xt].edg[i],mesh->xtetra[pt->xt].tag[i]);
+            if ( !_MMG5_hEdge(mesh,&mesh->htab,pt->v[_MMG5_iare[i][0]],pt->v[_MMG5_iare[i][1]],
+                              mesh->xtetra[pt->xt].edg[i],mesh->xtetra[pt->xt].tag[i]))
+              return -1;
         }
       }
     }
@@ -212,12 +212,11 @@ int _MMG3D_bdryBuild(MMG5_pMesh mesh) {
     if ( mesh->na ) {
       _MMG5_ADD_MEM(mesh,(mesh->na+1)*sizeof(MMG5_Edge),"edges",
                     mesh->na = 0;
-                    printf("  ## Warning: uncomplete mesh\n")
-        );
+                    printf("  ## Warning: uncomplete mesh\n"));
     }
 
     if ( mesh->na ) {
-      _MMG5_SAFE_CALLOC(mesh->edge,mesh->na+1,MMG5_Edge);
+      _MMG5_SAFE_CALLOC(mesh->edge,mesh->na+1,MMG5_Edge,-1);
 
       mesh->na = 0;
       for (k=0; k<=mesh->htab.max; k++) {

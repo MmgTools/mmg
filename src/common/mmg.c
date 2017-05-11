@@ -78,6 +78,7 @@ void _MMG5_mmgUsage(char *prog) {
  */
 void _MMG5_mmgDefaultValues(MMG5_pMesh mesh) {
   long long memMax;
+  long      castedVal;
 
   fprintf(stdout,"\nDefault parameters values:\n");
 
@@ -92,8 +93,8 @@ void _MMG5_mmgDefaultValues(MMG5_pMesh mesh) {
     /* default value = 800 Mo */
     memMax = _MMG5_MEMMAX;
   }
-  fprintf(stdout,"maximal memory size       (-m)      : %ld MBytes\n",
-          _MMG5_safeLL2LCast(memMax));
+  castedVal = _MMG5_SAFELL2LCAST(memMax);
+  fprintf(stdout,"maximal memory size       (-m)      : %ld MBytes\n",castedVal);
 
 
   fprintf(stdout,"\n**  Parameters\n");

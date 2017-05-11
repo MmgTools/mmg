@@ -36,7 +36,7 @@
 #include "mmgs.h"
 
 /* tria packing */
-static void paktri(MMG5_pMesh mesh) {
+static int paktri(MMG5_pMesh mesh) {
   MMG5_pTria   pt,pt1;
   int     k;
 
@@ -46,7 +46,7 @@ static void paktri(MMG5_pMesh mesh) {
     if ( !MG_EOK(pt) ) {
       pt1 = &mesh->tria[mesh->nt];
       memcpy(pt,pt1,sizeof(MMG5_Tria));
-      _MMGS_delElt(mesh,mesh->nt);
+      if ( !_MMGS_delElt(mesh,mesh->nt) )  return 0;
     }
   }
   while ( ++k < mesh->nt );
@@ -57,6 +57,7 @@ static void paktri(MMG5_pMesh mesh) {
   for(k=mesh->nenil; k<=mesh->ntmax-1; k++){
     mesh->tria[k].v[2] = k+1;
   }
+  return 1;
 }
 
 /**
@@ -100,12 +101,12 @@ int _MMGS_hashTria(MMG5_pMesh mesh) {
     fprintf(stdout,"  ** SETTING STRUCTURE\n");
 
   /* tassage */
-  paktri(mesh);
+  if ( !paktri(mesh) )  return 0;
 
   _MMG5_ADD_MEM(mesh,(3*mesh->ntmax+5)*sizeof(int),"adjacency table",
                 fprintf(stderr,"  Exit program.\n");
-                exit(EXIT_FAILURE));
-  _MMG5_SAFE_CALLOC(mesh->adja,3*mesh->ntmax+5,int);
+                return 0);
+  _MMG5_SAFE_CALLOC(mesh->adja,3*mesh->ntmax+5,int,0);
 
   ier = _MMG5_mmgHashTria(mesh, mesh->adja, &hash, 0);
   _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
@@ -140,7 +141,7 @@ int assignEdge(MMG5_pMesh mesh) {
   hash.siz  = mesh->na;
   hash.max  = 3*mesh->na+1;
   _MMG5_ADD_MEM(mesh,(hash.max+1)*sizeof(_MMG5_Hash),"hash table",return(0));
-  _MMG5_SAFE_CALLOC(hash.item,hash.max+1,_MMG5_hedge);
+  _MMG5_SAFE_CALLOC(hash.item,hash.max+1,_MMG5_hedge,0);
 
   hash.nxt  = mesh->na;
   for (k=mesh->na; k<hash.max; k++)
