@@ -188,7 +188,6 @@ int _MMG3D_bdryBuild(MMG5_pMesh mesh) {
   mesh->na = nr = 0;
   /* in the worst case (all edges are marked), we will have around 1 edge per *
    * triangle (we count edges only one time) */
-  mesh->memCur += (long long)((3*mesh->nt+2)*sizeof(MMG5_hgeom));
   if ( _MMG5_hNew(mesh,&mesh->htab,mesh->nt,3*(mesh->nt)) ) {
     for (k=1; k<=mesh->ne; k++) {
       pt   = &mesh->tetra[k];

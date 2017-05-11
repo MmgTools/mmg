@@ -278,8 +278,8 @@ extern "C" {
     printf(" authorized memory with the -m option.\n");     \
   } while(0)
 
-#define _MMG5_SAFELL2LCAST(longlongval) (((longlongval) > (LONG_MAX)) ? : ((long)(longlongval)))
-#define _MMG5_SAFELL2ICAST(longlongval) (((longlongval) > (INT_MAX)) ? : ((int)(longlongval)))
+#define _MMG5_SAFELL2LCAST(longlongval) (((longlongval) > (LONG_MAX)) ? 0 : ((long)(longlongval)))
+#define _MMG5_SAFELL2ICAST(longlongval) (((longlongval) > (INT_MAX)) ? 0 : ((int)(longlongval)))
 
 
 /** Inlined functions for libraries and executables */

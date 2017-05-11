@@ -1363,6 +1363,7 @@ int _MMG5_bdryTria(MMG5_pMesh mesh, int ntmesh) {
       }
     }
   }
+  assert(mesh->nt==ntmesh);
 
   if ( ntmesh != ntinit ) {
     /* set point tag */
