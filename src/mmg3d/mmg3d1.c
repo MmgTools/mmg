@@ -1680,7 +1680,8 @@ static int _MMG5_anatet4(MMG5_pMesh mesh, MMG5_pSol met,int *nf, char typchk) {
     if ( nbdy > 1 ) {
       if ( !mesh->info.noswap ) {
         /* Try to swap first */
-        ier = MMG3D_swap23(mesh,met,k,typchk-1);
+#warning remove the comment to tru to swap: but it is bugged for now
+        ier = 0;//MMG3D_swap23(mesh,met,k,typchk-1);
         if ( ier < 0 ) {
           return -1;
         }
