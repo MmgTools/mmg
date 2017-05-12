@@ -1137,7 +1137,7 @@ static int adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
 
 /* analyze triangles and split or collapse to match gradation */
 static int adptri(MMG5_pMesh mesh,MMG5_pSol met) {
-  int        it,nnc,nns,nnf,nnm,maxit,nc,ns,nf,nm;
+  int        it,it1,nnc,nns,nnf,nnm,maxit,nc,ns,nf,nm;
 
   /* iterative mesh modifications */
   it = nnc = nns = nnf = nnm = 0;
@@ -1199,13 +1199,50 @@ static int adptri(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( !_MMG5_scotchCall(mesh,met) )
     return(0);
 
+  /*shape optim*/
+  it1 = it;
+  it  = 0;
+  maxit = 2;
+  do {
+
+    if ( !mesh->info.nomove ) {
+      nm = movtri(mesh,met,5);
+      if ( nm < 0 ) {
+        fprintf(stderr,"  ## Unable to improve mesh.\n");
+        return(0);
+      }
+      nnm += nm;
+    }
+    else  nm = 0;
+
+    if ( !mesh->info.noswap ) {
+      nf = swpmsh(mesh,met,2);
+      if ( nf < 0 ) {
+        fprintf(stderr,"  ## Unable to improve mesh. Exiting.\n");
+        return(0);
+      }
+      nnf += nf;
+    }
+    else  nf = 0;
+
+    if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && nf+nm > 0 ){
+      fprintf(stdout,"                                            ");
+      fprintf(stdout,"%8d swapped, %8d moved\n",nf,nm);
+    }
+  }
+  while( ++it < maxit && nm+nf > 0 );
+
   if ( !mesh->info.nomove ) {
     nm = movtri(mesh,met,5);
     if ( nm < 0 ) {
       fprintf(stderr,"  ## Unable to improve mesh.\n");
       return(0);
     }
-    nnm += nm;
+  }
+  else  nm = 0;
+  nnm += nm;
+  if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && nm > 0 ) {
+    fprintf(stdout,"                                                              %8d moved\n",nm);
   }
 
   if ( mesh->info.imprim ) {
