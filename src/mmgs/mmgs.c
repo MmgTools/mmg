@@ -288,6 +288,8 @@ int main(int argc,char *argv[]) {
     ier = MMGS_loadMshMesh(mesh,met,mesh->namein);
     msh = 1;
   }
+  if ( ier<1 )
+    _MMGS_RETURN_AND_FREE(mesh,met,MMG5_STRONGFAILURE);
 
   if ( !msh ) {
     ier = MMGS_loadSol(mesh,met,met->namein);
