@@ -1050,8 +1050,9 @@ static int adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
       ier = _MMGS_simbulgept(mesh,met,k,imax,ip);
       if ( !ier ) {
         ier = _MMGS_dichoto1b(mesh,met,k,imax,ip);
+        if ( !ier ) continue;
       }
-      if ( ier ) ier = split1b(mesh,k,imax,ip);
+      ier = split1b(mesh,k,imax,ip);
 
       if ( !ier ) {
         /* Lack of memory, go to collapse step. */
