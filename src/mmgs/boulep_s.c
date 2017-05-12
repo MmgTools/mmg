@@ -55,16 +55,13 @@ int boulet(MMG5_pMesh mesh,int start,int ip,int *list) {
   pt = &mesh->tria[start];
 
   ppt = &mesh->point[pt->v[ip]];
-  if ( ppt->tag & MG_NOM ) {
-    return(0);
-  }
   ilist = 0;
 
   /* store neighbors */
   k = start;
   i = ip;
   do {
-    if ( ilist > _MMGS_LMAX-2 )  return(-ilist);
+    if ( ilist > _MMGS_LMAX-2 )  return(0);
     list[ilist] = 3*k + i;
     ++ilist;
 
@@ -77,6 +74,9 @@ int boulet(MMG5_pMesh mesh,int start,int ip,int *list) {
   while ( k && k != start );
   if ( k > 0 )  return(ilist);
 
+  if ( ppt->tag & MG_NOM )
+    return 0;
+
   /* check if boundary hit */
   k = start;
   i = ip;
@@ -88,7 +88,7 @@ int boulet(MMG5_pMesh mesh,int start,int ip,int *list) {
     i  = adja[i2] % 3;
     i  = _MMG5_iprv2[i];
 
-    if ( ilist > _MMGS_LMAX-2 )  return(-ilist);
+    if ( ilist > _MMGS_LMAX-2 )  return(0);
     list[ilist] = 3*k + i;
     ilist++;
   }
