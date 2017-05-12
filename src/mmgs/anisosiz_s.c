@@ -79,11 +79,8 @@ static int _MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   /* } */
 
   ilist = boulet(mesh,it,ip,list);
-  if ( !ilist ) {
-    fprintf(stdout,"%s:%d:Warning: Metric not computed at point %d: unable to compute its ball\n",
-           __FILE__,__LINE__, idp);
+  if ( !ilist )
     return(0);
-  }
 
   maxkappa = 0.0;
   for (k=0; k<ilist; k++) {
@@ -392,11 +389,8 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   /* } */
 
   ilist = boulet(mesh,it,ip,list);
-  if ( !ilist ) {
-    fprintf(stderr,"%s:%d:Error: unable to compute the ball af the point %d.\n",
-           __FILE__,__LINE__, idp);
+  if ( !ilist )
     return(0);
-  }
 
   /* Computation of the rotation matrix T_p0 S -> [z = 0] */
   n  = &mesh->xpoint[p0->xp].n1[0];
@@ -574,11 +568,8 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   /* } */
 
   ilist = boulet(mesh,it,ip,list);
-  if ( !ilist ) {
-    fprintf(stderr,"%s:%d:Error: unable to compute the ball af the point %d.\n",
-           __FILE__,__LINE__, idp);
+  if ( !ilist )
     return(0);
-  }
 
   /* Computation of the rotation matrix T_p0 S -> [z = 0] */
   n  = &p0->n[0];

@@ -438,6 +438,8 @@ static int movtri(MMG5_pMesh mesh,MMG5_pSol met,int maxit) {
         ier = 0;
         ilist = boulet(mesh,k,i,list);
 
+        if ( !ilist ) continue;
+
         if ( MG_EDG(ppt->tag) ) {
           ier = movridpt(mesh,met,list,ilist);
           if ( ier )  ns++;
