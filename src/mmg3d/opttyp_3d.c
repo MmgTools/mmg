@@ -332,6 +332,12 @@ int _MMG3D_swpItem(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,int k,i
 
   ier = 0;
   pt = &mesh->tetra[k];
+  /* Prevent swap of a ref or tagged edge */
+  if ( pt->xt ) {
+    pxt = &mesh->xtetra[pt->xt];
+    if ( pxt->edg[iar] || pxt->tag[iar] ) return(0);
+  }
+
   lon = _MMG5_coquil(mesh,k,iar,&list[0]);
   if(lon%2) return(0);
   lon = lon/2;
@@ -353,12 +359,6 @@ int _MMG3D_swpItem(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,int k,i
       ier = 0;
     } else {
       crit *= OCRIT;
-      /* Prevent swap of a ref or tagged edge */
-      if ( pt->xt ) {
-        pxt = &mesh->xtetra[pt->xt];
-        if ( pxt->edg[iar] || pxt->tag[iar] ) return(0);
-      }
-
       nconf = _MMG5_chkswpgen(mesh,met,k,iar,&lon,list,OCRIT,2);
       if ( nconf ) {
         ier = _MMG5_swpgen(mesh,met,nconf,lon,list,octree,2);
@@ -527,6 +527,7 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
           if ( pxt->ftag[i] & MG_BDY ) npeau++;
         }
       }
+      //Warning pbs for multidomain : can be bdy and have an adja
       if(npeau>1) {
         if( 1 || mesh->info.imprim<-4 ) printf("%d faces de peau!!!! %d (typ %d) %e\n",npeau,k,ityp,pt->qual / _MMG3D_ALPHAD);
         nbdy++;
@@ -563,7 +564,7 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
             /*   OCRIT *= 0.5; */
             /* } else */
             /*   OCRIT *= 0.75; */
-            ier = 0;//_MMG3D_splitItem(mesh,met,octree,k,item[0],1.01);
+            ier = _MMG3D_splitItem(mesh,met,octree,k,item[0],1.01);
             if(ddebug) printf("on split %d ?\n",ier);
 
             if(ier) {
@@ -573,7 +574,7 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
             }
           } /*end noinsert*/
 
-          ier = 0;//_MMG3D_swpalmostall(mesh,met,octree,k,item[0]);
+          ier = _MMG3D_swpalmostall(mesh,met,octree,k,item[0]);
           if(ddebug) printf("on swp2 %d ?\n",ier);
 
           if(ier > 0) {
@@ -581,7 +582,7 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
             ds[ityp]++;
             break;
           }
-          ier = 0;// _MMG3D_splitalmostall(mesh,met,octree,k,item[0]);
+          ier = _MMG3D_splitalmostall(mesh,met,octree,k,item[0]);
           if(ddebug) printf("on split2 %d ?\n",ier);
 
           if(ier > 0) {
