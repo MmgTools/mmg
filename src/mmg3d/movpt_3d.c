@@ -2037,7 +2037,7 @@ int _MMG3D_movv_iso(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
   for (l=1; l<lon; l++) {
     iel = list[l] / 4;
     pt1 = &mesh->tetra[iel];
-    if ( crit > pt1->qual )  crit = pt1->qual;
+    if ( crit < pt1->qual )  crit = pt1->qual;
   }
   /* if ( (crit > 100/ALPHAD) ) {
      crit *= 1.1;
