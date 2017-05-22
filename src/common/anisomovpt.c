@@ -58,6 +58,7 @@ int _MMG5_elementWeight(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pTria pt,
   double         Jacsigma[3][2],Jactmp[3][2],m[6],mo[6],density,to[3],no[3],ll;
   double         dens[3],*n1,*n2,ps1,ps2,intpt[2],ux,uy,uz;
   char           i0,i1,i2,j;
+  static char    mmgErr=0;
 
   i0 = 0;
   i1 = 1;
@@ -162,7 +163,10 @@ int _MMG5_elementWeight(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pTria pt,
 
     density = dens[0]*dens[2] - dens[1]*dens[1];
     if ( density <= 0.0 ) {
-      fprintf(stdout,"  ## Fct movptaniso: negative density \n");
+      if ( mmgErr )
+        fprintf(stdout,"  ## Fct movptaniso: negative density \n");
+      else
+        mmgErr = 1;
       continue;
     }
     density = sqrt(density);
@@ -185,5 +189,5 @@ int _MMG5_elementWeight(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pTria pt,
     i2 = _MMG5_inxt2[i2];
   }
 
-    return(1);
+  return(1);
 }

@@ -146,6 +146,8 @@ int  MMG5_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solin);
 int  MMG5_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solout);
 
 /* deallocations */
+void MMG5_Free_structures(MMG5_pMesh mesh,MMG5_pSol sol);
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.

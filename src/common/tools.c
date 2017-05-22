@@ -709,3 +709,52 @@ double MMG2_quickarea(double a[2],double b[2],double c[2]) {
 
   return(aire);
 }
+
+/**
+ * \param string_ptr pointer toward the string that will store the error message
+ * \param format string containg a valic C format
+ * \param ... the error message and values to format following the \a format
+ * rule ( as in printf )
+ *
+ * \return the length of the new message if success, -1 if fail.
+ *
+ * This function formats and stores in a string its arguments, after the first,
+ * under control of the \a format string. If the string was already allocated,
+ * It concantenates the new formatted string with the old one.
+ *
+ */
+int MMG5_errorMessage(char **string_ptr, const char *format, ...)
+{
+  va_list arg;
+  int     done;
+
+  va_start (arg, format);
+  done = MMG5_errorMessage_var(string_ptr, format, arg);
+  va_end (arg);
+
+  return done;
+}
+
+int MMG5_errorMessage_var(char **string_ptr, const char *format, va_list ap)
+{
+  va_list args;
+  int     len,len2, initLen;
+
+  if ( !*string_ptr )
+    initLen = 0;
+  else
+    initLen = strlen(*string_ptr);
+
+  va_copy (args, ap);
+  len = vsnprintf (NULL, 0, format, args);
+  va_end (args);
+
+  _MMG5_SAFE_REALLOC(*string_ptr,len+1+initLen,char," Unable to store warning/error message.",-1);
+
+  va_copy (args, ap);
+  len2 = vsprintf (&((*string_ptr)[initLen]), format, args);
+  assert (len2 == len);
+  va_end (args);
+
+  return len;
+}

@@ -502,6 +502,8 @@ typedef struct _MMG5_dNode_s {
  extern int    _MMG5_writeLocalParamAtTri( MMG5_pMesh,_MMG5_iNode *,FILE*);
  double         MMG2_quickarea(double a[2],double b[2],double c[2]);
 
+ int            MMG5_errorMessage(char **string_ptr, const char *format, ...);
+ int            MMG5_errorMessage_var(char **, const char *, va_list);
  int            MMG5_loadMshMesh_part1(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename,
                                        FILE **inm,long *posNodes, long *posElts,
                                        long *posNodeData, int *bin, int *iswp,
