@@ -642,11 +642,11 @@ int main(int argc,char *argv[]) {
   }
   if ( ier < 1)
     _MMG2D_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
-  
+
   /* Read parameter file */
   if ( !MMG2_parsop(mesh,met) )
     _MMG2D_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
-  
+
   /* Read displacement if any */
   if ( mesh->info.lag >= 0 ) {
 

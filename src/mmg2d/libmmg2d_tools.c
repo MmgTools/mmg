@@ -92,6 +92,11 @@ int MMG2_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
     if ( !strcmp(data,"lsreferences") ) {
       ret = fscanf(in,"%d",&mesh->info.nmat);
       
+      if ( !ret ) {
+        fprintf(stderr,"  %%%% Wrong format: %s\n",buf);
+        return 0;
+      }
+
       if ( mesh->info.nmat ) {
         _MMG5_SAFE_CALLOC(mesh->info.mat,mesh->info.nmat,MMG5_Mat,0);
         for (i=0; i<mesh->info.nmat; i++) {

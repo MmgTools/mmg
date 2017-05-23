@@ -481,10 +481,17 @@ int MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
 
       for (i=0; i<mesh->info.npar; i++) {
         ret = fscanf(in,"%d %s ",&ref,buf);
-        ret = fscanf(in,"%f %f %f",&fp1,&fp2,&hausd);
+        if ( ret )
+          ret = fscanf(in,"%f %f %f",&fp1,&fp2,&hausd);
+
+        if ( !ret ) {
+          fprintf(stderr,"  %%%% Wrong format: %s\n",buf);
+          return 0;
+        }
+
         for (j=0; j<strlen(buf); j++)  buf[j] = tolower(buf[j]);
 
-        if ( !strcmp(buf,"triangles") || !strcmp(buf,"triangle") ) {
+        if ( (!strcmp(buf,"triangles") || !strcmp(buf,"triangle")) ) {
           if ( !MMG3D_Set_localParameter(mesh,met,MMG5_Triangle,ref,fp1,fp2,hausd) ) {
             return 0;
           }
@@ -501,7 +508,7 @@ int MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
         }
         else {
           fprintf(stderr,"  %%%% Wrong format: %s\n",buf);
-          continue;
+          return 0;
         }
       }
     }
