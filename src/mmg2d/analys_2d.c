@@ -452,6 +452,7 @@ int _MMG2_regnor(MMG5_pMesh mesh) {
 
       if ( !ier ) {
         printf("*** problem in func. _MMG2_bouleendp. Abort.\n");
+        _MMG5_SAFE_FREE(tmp);
         return 0;
       }
 

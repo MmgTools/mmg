@@ -347,14 +347,17 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename,
 
         /* Integer tags */
         fscanf((*inm),"%d ",&tagNum);
-        if ( tagNum != 4 && tagNum !=3 ) {
-          fprintf(stderr,"   Error: node data: Expected 3 tags (%d given).\n",
+        if ( tagNum < 3 ) {
+          fprintf(stderr,"   Error: node data: Expected at least 3 tags (%d given).\n",
                   tagNum);
           return(-1);
         }
         fscanf((*inm),"%d ",&i); //time step
         fscanf((*inm),"%d ",&typ); //type of solution
         fscanf((*inm),"%d ",&sol->np);
+        for ( k=3; k<tagNum; ++k ) {
+          fscanf((*inm),"%d",&i);
+        }
 
         if ( mesh->ver==1 ) {
           for ( k=1; k<=sol->np; ++k ) {
@@ -551,17 +554,14 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
     for ( k=0; k<nelts; ++k)
     {
       fscanf((*inm),"%d %d %d ",&i,&typ, &tagNum);
-      switch(tagNum){
-      case 2:
-        fscanf((*inm),"%d %d ",&i,&ref);
-        break;
-      case 3:
-        fscanf((*inm),"%d %d %d ",&i,&ref,&i);
-        break;
-      default:
-        fprintf(stderr,"  ## Error: elt %d (type %d): Expected 2 or 3 tags (%d given).\n",
+      if ( tagNum < 2 ) {
+        fprintf(stderr,"  ## Error: elt %d (type %d): Expected at least 2 tags (%d given).\n",
                 k,typ,tagNum);
         return(-1);
+      }
+      fscanf((*inm),"%d %d ",&ref,&i);
+      for ( l=2; l<tagNum; ++l ) {
+        fscanf((*inm),"%d ",&i);
       }
 
       switch (typ) {
@@ -675,23 +675,22 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
           num = _MMG5_swapbin(num);
           tagNum = _MMG5_swapbin(tagNum);
         }
+        if ( tagNum < 2 ) {
+          fprintf(stderr,"  ## Error: Expected at least 2 tags per element (%d given).\n",
+                  tagNum);
+          return(-1);
+        }
+
         for ( idx=0; idx<num; ++idx ) {
           fread(&i,sw,1,(*inm));
-          switch(tagNum){
-          case 2:
+
+          fread(&ref,sw,1,(*inm));
+          fread(&i,sw,1,(*inm));
+
+          for ( l=2; l<tagNum; ++l ) {
             fread(&i,sw,1,(*inm));
-            fread(&ref,sw,1,(*inm));
-            break;
-          case 3:
-            fread(&i,sw,1,(*inm));
-            fread(&ref,sw,1,(*inm));
-            fread(&i,sw,1,(*inm));
-            break;
-          default:
-            fprintf(stderr,"  ## Error: elt (edge) %%d: Expected 2 or 3 tags (%d given).\n",
-                    tagNum);
-            return(-1);
           }
+
           if(iswp) ref = _MMG5_swapbin(ref);
 
           /* Skip edges with MG_ISO refs */
@@ -736,23 +735,22 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
           num = _MMG5_swapbin(num);
           tagNum = _MMG5_swapbin(tagNum);
         }
+        if ( tagNum < 2 ) {
+          fprintf(stderr,"  ## Error: Expected at least 2 tags per element (%d given).\n",
+                  tagNum);
+          return(-1);
+        }
+
         for ( idx=0; idx<num; ++idx ) {
           fread(&i,sw,1,(*inm));
-          switch(tagNum){
-          case 2:
+
+          fread(&ref,sw,1,(*inm));
+          fread(&i,sw,1,(*inm));
+
+          for ( l=2; l<tagNum; ++l ) {
             fread(&i,sw,1,(*inm));
-            fread(&ref,sw,1,(*inm));
-            break;
-          case 3:
-            fread(&i,sw,1,(*inm));
-            fread(&ref,sw,1,(*inm));
-            fread(&i,sw,1,(*inm));
-            break;
-          default:
-            fprintf(stderr,"  ## Error: elt (tria) %%d: Expected 2 or 3 tags (%d given).\n",
-                    tagNum);
-            return(-1);
           }
+
           if(iswp) ref = _MMG5_swapbin(ref);
 
           /* Skip triangles with MG_ISO refs */
@@ -792,23 +790,22 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
           num = _MMG5_swapbin(num);
           tagNum = _MMG5_swapbin(tagNum);
         }
+       if ( tagNum < 2 ) {
+          fprintf(stderr,"  ## Error: Expected at least 2 tags per element (%d given).\n",
+                  tagNum);
+          return(-1);
+        }
+
         for ( idx=0; idx<num; ++idx ) {
           fread(&i,sw,1,(*inm));
-          switch(tagNum){
-          case 2:
+
+          fread(&ref,sw,1,(*inm));
+          fread(&i,sw,1,(*inm));
+
+          for ( l=2; l<tagNum; ++l ) {
             fread(&i,sw,1,(*inm));
-            fread(&ref,sw,1,(*inm));
-            break;
-          case 3:
-            fread(&i,sw,1,(*inm));
-            fread(&ref,sw,1,(*inm));
-            fread(&i,sw,1,(*inm));
-            break;
-          default:
-            fprintf(stderr,"  ## Error: elt (quadrangle) %%d: Expected 2 or 3 tags (%d given).\n",
-                    tagNum);
-            return(-1);
           }
+
           if(iswp) ref = _MMG5_swapbin(ref);
 
           pq1 = &mesh->quadra[++nq];
@@ -830,23 +827,23 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
           num = _MMG5_swapbin(num);
           tagNum = _MMG5_swapbin(tagNum);
         }
+
+        if ( tagNum < 2 ) {
+          fprintf(stderr,"  ## Error: Expected at least 2 tags per element (%d given).\n",
+                  tagNum);
+          return(-1);
+        }
+
         for ( idx=0; idx<num; ++idx ) {
           fread(&i,sw,1,(*inm));
-          switch(tagNum){
-          case 2:
+
+          fread(&ref,sw,1,(*inm));
+          fread(&i,sw,1,(*inm));
+
+          for ( l=2; l<tagNum; ++l ) {
             fread(&i,sw,1,(*inm));
-            fread(&ref,sw,1,(*inm));
-            break;
-          case 3:
-            fread(&i,sw,1,(*inm));
-            fread(&ref,sw,1,(*inm));
-            fread(&i,sw,1,(*inm));
-            break;
-          default:
-            fprintf(stderr,"  ## Error: elt (tetra) %%d: Expected 2 or 3 tags (%d given).\n",
-                    tagNum);
-            return(-1);
           }
+
           if(iswp) ref = _MMG5_swapbin(ref);
 
           if ( mesh->ne ) {
@@ -877,24 +874,22 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
           num = _MMG5_swapbin(num);
           tagNum = _MMG5_swapbin(tagNum);
         }
-        for ( idx=0; idx<num; ++idx ){
+        if ( tagNum < 2 ) {
+          fprintf(stderr,"  ## Error: Expected at least 2 tags per element (%d given).\n",
+                  tagNum);
+          return(-1);
+        }
 
+        for ( idx=0; idx<num; ++idx ) {
           fread(&i,sw,1,(*inm));
-          switch(tagNum){
-          case 2:
+
+          fread(&ref,sw,1,(*inm));
+          fread(&i,sw,1,(*inm));
+
+          for ( l=2; l<tagNum; ++l ) {
             fread(&i,sw,1,(*inm));
-            fread(&ref,sw,1,(*inm));
-            break;
-          case 3:
-            fread(&i,sw,1,(*inm));
-            fread(&ref,sw,1,(*inm));
-            fread(&i,sw,1,(*inm));
-            break;
-          default:
-            fprintf(stderr,"  ## Error: elt (prism) %%d: Expected 2 or 3 tags (%d given).\n",
-                    tagNum);
-            return(-1);
           }
+
           if(iswp) ref = _MMG5_swapbin(ref);
 
           if ( mesh->nprism ) {
@@ -926,23 +921,22 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
           num = _MMG5_swapbin(num);
           tagNum = _MMG5_swapbin(tagNum);
         }
-        for ( idx=0; idx<num; ++idx ){
+        if ( tagNum < 2 ) {
+          fprintf(stderr,"  ## Error: Expected at least 2 tags per element (%d given).\n",
+                  tagNum);
+          return(-1);
+        }
+
+        for ( idx=0; idx<num; ++idx ) {
           fread(&i,sw,1,(*inm));
-          switch(tagNum){
-          case 2:
+
+          fread(&ref,sw,1,(*inm));
+          fread(&i,sw,1,(*inm));
+
+          for ( l=2; l<tagNum; ++l ) {
             fread(&i,sw,1,(*inm));
-            fread(&ref,sw,1,(*inm));
-            break;
-          case 3:
-            fread(&i,sw,1,(*inm));
-            fread(&ref,sw,1,(*inm));
-            fread(&i,sw,1,(*inm));
-            break;
-          default:
-            fprintf(stderr,"  ## Error: elt (corner) %%d: Expected 2 or 3 tags (%d given).\n",
-                    tagNum);
-            return(-1);
           }
+
           if(iswp) ref = _MMG5_swapbin(ref);
 
           fread(&l,sw,1,(*inm));
@@ -1122,16 +1116,20 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
 
     /* Integer tags : allow to recover the number of sols and their types */
     fscanf((*inm),"%d ",&tagNum);
-    if ( tagNum != 4 && tagNum !=3 ) {
-      fprintf(stderr,"   Error: node data: Expected 3 tags (%d given).\n",
+    if ( tagNum < 3 ) {
+      fprintf(stderr,"   Error: node data: Expected at least 3 tags (%d given).\n",
               tagNum);
       return(-1);
     }
 
     fscanf((*inm),"%d ",&i); //time step;
     fscanf((*inm),"%d ",&typ); //type of solution: 1=scalar, 3=vector, 9=tensor ;
-
     fscanf((*inm),"%d ",&sol->np);
+
+    for ( k=3; k<tagNum; ++k ) {
+      fscanf((*inm),"%d",&i);
+    }
+
     if ( mesh->np != sol->np ) {
       fprintf(stderr,"  ** MISMATCHES DATA: THE NUMBER OF VERTICES IN "
               "THE MESH (%d) DIFFERS FROM THE NUMBER OF VERTICES IN "
@@ -1465,7 +1463,7 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
     if ( !MG_VOK(ppt) ) continue;
     ++nelts;
 
-    if ( !bin ) fprintf(inm,"%d 15 2 0 %d %d\n",nelts,abs(ppt->ref),ppt->tmp);
+    if ( !bin ) fprintf(inm,"%d 15 2 %d 0 %d\n",nelts,abs(ppt->ref),ppt->tmp);
     else {
       fwrite(&nelts,sw,1,inm);
       word = 0;
@@ -1491,7 +1489,7 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
     ++nelts;
 
     if(!bin)
-      fprintf(inm,"%d 1 2 0 %d %d %d\n",nelts,pa->ref,
+      fprintf(inm,"%d 1 2 %d 0 %d %d\n",nelts,pa->ref,
               mesh->point[pa->a].tmp,mesh->point[pa->b].tmp);
     else {
       fwrite(&nelts,sw,1,inm);
@@ -1518,7 +1516,7 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
     ++nelts;
 
     if(!bin)
-      fprintf(inm,"%d 2 2 0 %d %d %d %d\n",nelts,ptt->ref,
+      fprintf(inm,"%d 2 2 %d 0 %d %d %d\n",nelts,ptt->ref,
               mesh->point[ptt->v[0]].tmp,mesh->point[ptt->v[1]].tmp,
               mesh->point[ptt->v[2]].tmp);
     else {
@@ -1546,7 +1544,7 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
     ++nelts;
 
     if(!bin)
-      fprintf(inm,"%d 3 2 0 %d %d %d %d %d\n",nelts,pq->ref,
+      fprintf(inm,"%d 3 2 %d 0 %d %d %d %d\n",nelts,pq->ref,
               mesh->point[pq->v[0]].tmp,mesh->point[pq->v[1]].tmp,
               mesh->point[pq->v[2]].tmp,mesh->point[pq->v[3]].tmp);
     else {
@@ -1575,7 +1573,7 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
     ++nelts;
 
     if(!bin)
-      fprintf(inm,"%d 4 2 0 %d %d %d %d %d\n",nelts,pt->ref,
+      fprintf(inm,"%d 4 2 %d 0 %d %d %d %d\n",nelts,pt->ref,
               mesh->point[pt->v[0]].tmp,mesh->point[pt->v[1]].tmp,
               mesh->point[pt->v[2]].tmp,mesh->point[pt->v[3]].tmp);
     else {
@@ -1604,7 +1602,7 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
     ++nelts;
 
     if(!bin)
-      fprintf(inm,"%d 6 2 0 %d %d %d %d %d %d %d\n",nelts,pp->ref,
+      fprintf(inm,"%d 6 2 %d 0 %d %d %d %d %d %d\n",nelts,pp->ref,
               mesh->point[pp->v[0]].tmp,mesh->point[pp->v[1]].tmp,
               mesh->point[pp->v[2]].tmp,mesh->point[pp->v[3]].tmp,
               mesh->point[pp->v[4]].tmp,mesh->point[pp->v[5]].tmp);
