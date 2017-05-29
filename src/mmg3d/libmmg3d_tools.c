@@ -61,7 +61,7 @@ void MMG3D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
 #endif
   }
   else if ( met->size == 6 ) {
-    if ( !met->m ) {
+    if ( !met->m && !mesh->info.optim /* && mesh->info.hsiz<=0.*/ ) {
       _MMG5_caltet          = _MMG5_caltet_iso;
       _MMG5_caltri          = _MMG5_caltri_iso;
       _MMG5_lenedg         = _MMG5_lenedg_iso;
@@ -801,12 +801,38 @@ int MMG3D_doSol(MMG5_pMesh mesh,MMG5_pSol met) {
         else return 0;
     }
 
+    /* if hmax is not specified, compute it from the metric */
+    if ( mesh->info.hmax < 0. ) {
+      if ( met->size == 1 ) {
+        dd = 0.;
+        for (k=1; k<=mesh->np; k++) {
+          p1 = &mesh->point[k];
+          if ( !mark[k] ) continue;
+          dd = MG_MAX(dd,met->m[k]);
+        }
+        assert ( dd );
+      }
+      else if ( met->size == 6 ) {
+        dd = FLT_MAX;
+        for (k=1; k<=mesh->np; k++) {
+          p1 = &mesh->point[k];
+          if ( !mark[k] ) continue;
+          iadr = 6*k;
+          dd = MG_MIN(dd,met->m[iadr]);
+        }
+        assert ( dd < FLT_MAX );
+        dd = 1./sqrt(dd);
+      }
+      mesh->info.hmax = 10.*dd;
+    }
+
+
     /* vertex size */
     if ( met->size == 1 ) {
       for (k=1; k<=mesh->np; k++) {
         p1 = &mesh->point[k];
         if ( !mark[k] ) {
-          met->m[k] = FLT_MAX;
+          met->m[k] = mesh->info.hmax;
           continue;
         }
         else
@@ -814,15 +840,11 @@ int MMG3D_doSol(MMG5_pMesh mesh,MMG5_pSol met) {
       }
     }
     else if ( met->size == 6 ) {
-#warning clean the call of hmax : dosol may be called by the user, in this case, hmax is probably not setted
       for (k=1; k<=mesh->np; k++) {
         p1 = &mesh->point[k];
         iadr = 6*k;
-        mark[k] = 0;
         if ( !mark[k] ) {
-          int eps = nextafter(0., +1.0/0.0);
           met->m[iadr]   = 1./(mesh->info.hmax*mesh->info.hmax);
-          met->m[iadr]   = 1./(eps*eps);
           met->m[iadr+3] = met->m[iadr];
           met->m[iadr+5] = met->m[iadr];
           continue;

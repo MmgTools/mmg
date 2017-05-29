@@ -1366,6 +1366,9 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         ip1 = pt->v[i1];
         ip2 = pt->v[i2];
         len = _MMG5_lenedg(mesh,met,ia,pt);
+
+        assert( isfinite(len) && (len!=-len) );
+
         // Case of an internal tetra with 4 ridges vertices.
         if ( len == 0 ) continue;
         if ( len > _MMG3D_LLONG )  MG_SET(pt->flag,ia);

@@ -110,12 +110,16 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
         imin = ii;
       }
     }
-    if ( imax==-1 && (mesh->info.ddebug || mesh->info.imprim > 5 ) )
+    if ( imax==-1 && (mesh->info.ddebug || mesh->info.imprim > 5 ) ) {
       fprintf(stdout,"%s:%d: Warning: all edges of tetra %d are boundary and required\n",
               __FILE__,__LINE__,k);
-    if ( imin==-1  && (mesh->info.ddebug || mesh->info.imprim > 5 ) )
+      continue;
+    }
+    if ( imin==-1  && (mesh->info.ddebug || mesh->info.imprim > 5 ) ) {
       fprintf(stdout,"%s:%d: Warning: all edges of tetra %d are boundary and required\n",
               __FILE__,__LINE__,k);
+      continue;
+    }
 
     if ( lmax >= _MMG3D_LOPTL_MMG5_DEL )  {
       /* proceed edges according to lengths */

@@ -93,6 +93,7 @@ void _MMG3D_Free_topoTables(MMG5_pMesh mesh) {
 void _MMG3D_solTruncature(MMG5_pMesh mesh, MMG5_pSol met) {
   MMG5_pTetra pt;
   MMG5_pPoint ppt;
+  double      isqhmin, isqhmax;
   int         i,k,iadr,sethmin,sethmax;
 
   /* Detect the point used only by prisms */
@@ -116,24 +117,52 @@ void _MMG3D_solTruncature(MMG5_pMesh mesh, MMG5_pSol met) {
   sethmin = sethmax = 1;
   if ( mesh->info.hmin < 0 ) {
     sethmin = 0;
-    mesh->info.hmin = FLT_MAX;
-    for (k=1; k<=mesh->np; k++)  {
-      ppt = &mesh->point[k];
-      if ( !MG_VOK(ppt) || ppt->flag ) continue;
-      iadr = met->size*k;
-      mesh->info.hmin = MG_MIN(mesh->info.hmin,met->m[iadr]);
+    if ( met->size == 1 ) {
+      mesh->info.hmin = FLT_MAX;
+      for (k=1; k<=mesh->np; k++)  {
+        ppt = &mesh->point[k];
+        if ( !MG_VOK(ppt) || ppt->flag ) continue;
+        mesh->info.hmin = MG_MIN(mesh->info.hmin,met->m[k]);
+      }
+    }
+    else if ( met->size == 6 ){
+      mesh->info.hmin = 0.;
+      for (k=1; k<=mesh->np; k++)  {
+        ppt = &mesh->point[k];
+        if ( !MG_VOK(ppt) || ppt->flag ) continue;
+        iadr = met->size*k;
+        mesh->info.hmin = MG_MAX(mesh->info.hmin,met->m[iadr]);
+        mesh->info.hmin = MG_MAX(mesh->info.hmin,met->m[iadr+3]);
+        mesh->info.hmin = MG_MAX(mesh->info.hmin,met->m[iadr+5]);
+      }
+      mesh->info.hmin = 1./sqrt(mesh->info.hmin);
     }
   }
+
   if ( mesh->info.hmax < 0 ) {
     sethmax = 1;
-    mesh->info.hmax = 0.;
-    for (k=1; k<=mesh->np; k++)  {
-      ppt = &mesh->point[k];
-      if ( !MG_VOK(ppt) || ppt->flag ) continue;
-      iadr = met->size*k;
-      mesh->info.hmax = MG_MAX(mesh->info.hmax,met->m[iadr]);
+    if ( met->size == 1 ) {
+      mesh->info.hmax = 0.;
+      for (k=1; k<=mesh->np; k++)  {
+        ppt = &mesh->point[k];
+        if ( !MG_VOK(ppt) || ppt->flag ) continue;
+        mesh->info.hmax = MG_MAX(mesh->info.hmax,met->m[k]);
+      }
+    }
+    else if ( met->size == 6 ){
+      mesh->info.hmax = FLT_MAX;
+      for (k=1; k<=mesh->np; k++)  {
+        ppt = &mesh->point[k];
+        if ( !MG_VOK(ppt) || ppt->flag ) continue;
+        iadr = met->size*k;
+        mesh->info.hmax = MG_MIN(mesh->info.hmax,met->m[iadr]);
+        mesh->info.hmax = MG_MIN(mesh->info.hmax,met->m[iadr+3]);
+        mesh->info.hmax = MG_MIN(mesh->info.hmax,met->m[iadr+5]);
+      }
+      mesh->info.hmax = 1./sqrt(mesh->info.hmax);
     }
   }
+
 
   if ( !sethmin ) {
     mesh->info.hmin *=.1;
@@ -161,11 +190,14 @@ void _MMG3D_solTruncature(MMG5_pMesh mesh, MMG5_pSol met) {
     }
   }
   else if ( met->size == 6 ) {
+    isqhmin = 1./(mesh->info.hmin*mesh->info.hmin);
+    isqhmax = 1./(mesh->info.hmax*mesh->info.hmax);
+
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
       if ( !MG_VOK(ppt) ) continue;
       iadr = 6*k;
-      met->m[iadr]   = MG_MIN(mesh->info.hmax,MG_MAX(mesh->info.hmin,met->m[iadr]));
+      met->m[iadr]   = MG_MAX(isqhmax,MG_MIN(isqhmin,met->m[iadr]));
       met->m[iadr+3] = met->m[iadr];
       met->m[iadr+5] = met->m[iadr];
     }
@@ -540,23 +572,9 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
 
   /* analysis */
   chrono(ON,&(ctim[2]));
-  MMG3D_setfunc(mesh,met);
-
   if ( mesh->info.imprim ) {
     fprintf(stdout,"\n  %s\n   MODULE MMG3D: IMB-LJLL : %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
     fprintf(stdout,"\n  -- PHASE 1 : ANALYSIS\n");
-  }
-
-  /* scaling mesh */
-  if ( !_MMG5_scaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
-
-  if ( !_MMG3D_tetraQual(mesh,met,0) ) _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
-
-  if ( abs(mesh->info.imprim) > 0 ) {
-    if ( !_MMG3D_inqua(mesh,met) ) {
-      if ( !_MMG5_unscaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
-      _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
-    }
   }
 
   /* specific meshing */
@@ -587,6 +605,20 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
 
   if ( mesh->info.hsiz > 0. ) {
     printf("Not yet implemented."); return 666;
+  }
+
+  MMG3D_setfunc(mesh,met);
+
+  /* scaling mesh */
+  if ( !_MMG5_scaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+
+  if ( !_MMG3D_tetraQual(mesh,met,0) ) _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
+
+  if ( abs(mesh->info.imprim) > 0 ) {
+    if ( !_MMG3D_inqua(mesh,met) ) {
+      if ( !_MMG5_unscaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+      _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
+    }
   }
 
   /* mesh analysis */
