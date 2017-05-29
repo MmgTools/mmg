@@ -295,7 +295,6 @@ int MMGS_mmgsls(MMG5_pMesh mesh,MMG5_pSol met)
 
   /* analysis */
   chrono(ON,&(ctim[2]));
-  MMGS_setfunc(mesh,met);
 
   if ( mesh->info.imprim ) {
     fprintf(stdout,"\n  %s\n   MODULE MMGSLS: IMB-LJLL : %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
@@ -303,6 +302,8 @@ int MMGS_mmgsls(MMG5_pMesh mesh,MMG5_pSol met)
   }
 
   if ( !_MMG5_scaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+
+  MMGS_setfunc(mesh,met);
 
   if ( abs(mesh->info.imprim) > 0 ) {
     if ( !_MMGS_inqua(mesh,met) ) {
@@ -431,7 +432,6 @@ int MMGS_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
 
   /* analysis */
   chrono(ON,&(ctim[2]));
-  MMGS_setfunc(mesh,met);
 
   if ( mesh->info.imprim ) {
     fprintf(stdout,"\n  %s\n   MODULE MMGS: IMB-LJLL : %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
@@ -439,6 +439,8 @@ int MMGS_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
   }
 
   if ( !_MMG5_scaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+
+  MMGS_setfunc(mesh,met);
 
   /* mesh analysis */
   if ( !_MMGS_analys(mesh) ) {
