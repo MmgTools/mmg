@@ -733,6 +733,16 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol met) {
             " discretization mode.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
+  if ( mesh->info.optim ) {
+    printf("  ## WARNING: OPTIM OPTION UNAVAILABLE IN ISOSURFACE"
+           " DISCRETIZATION MODE. IGNORED.\n");
+    mesh->info.optim = 0;
+  }
+  if ( mesh->info.hsiz>0. ) {
+    printf("  ## WARNING: HSIZ OPTION UNAVAILABLE INISOSURFACE"
+           " DISCRETIZATION MODE.\n");
+    mesh->info.hsiz = -1.;
+  }
 
 #ifdef USE_SCOTCH
   _MMG5_warnScotch(mesh);
@@ -760,15 +770,16 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol met) {
 
   /* analysis */
   chrono(ON,&(ctim[2]));
-  MMG3D_setfunc(mesh,met);
 
   if ( mesh->info.imprim ) {
     fprintf(stdout,"\n  %s\n   MODULE MMG3D: IMB-LJLL : %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
     fprintf(stdout,"\n  -- PHASE 1 : ANALYSIS\n");
   }
 
- /* scaling mesh */
+  /* scaling mesh */
   if ( !_MMG5_scaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+
+  MMG3D_setfunc(mesh,met);
 
   if ( !_MMG3D_tetraQual(mesh,met,0) ) _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
 
@@ -892,6 +903,16 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
             " unavailable (MMG3D_IPARAM_optimLES) in lagrangian mode.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
+  if ( mesh->info.optim ) {
+    printf("  ## WARNING: OPTIM OPTION UNAVAILABLE IN ISOSURFACE"
+           " DISCRETIZATION MODE. IGNORED.\n");
+    mesh->info.optim = 0;
+  }
+  if ( mesh->info.hsiz>0. ) {
+    printf("  ## WARNING: HSIZ OPTION UNAVAILABLE INISOSURFACE"
+           " DISCRETIZATION MODE.\n");
+    mesh->info.hsiz = -1.;
+  }
 
 #ifdef USE_SCOTCH
   _MMG5_warnScotch(mesh);
@@ -941,6 +962,15 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
 
   /* analysis */
   chrono(ON,&(ctim[2]));
+
+  if ( mesh->info.imprim ) {
+    fprintf(stdout,"\n  %s\n   MODULE MMG3D: IMB-LJLL : %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
+    fprintf(stdout,"\n  -- PHASE 1 : ANALYSIS\n");
+  }
+
+  /* scaling mesh */
+  if ( !_MMG5_scaleMesh(mesh,disp) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+
   MMG3D_setfunc(mesh,met);
 
   if ( !_MMG3D_tetraQual(mesh,met,0) ) _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
@@ -950,15 +980,6 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
       _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
     }
   }
-
-  if ( mesh->info.imprim ) {
-    fprintf(stdout,"\n  %s\n   MODULE MMG3D: IMB-LJLL : %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
-    fprintf(stdout,"\n  -- PHASE 1 : ANALYSIS\n");
-  }
-
- /* scaling mesh */
-  if ( !_MMG5_scaleMesh(mesh,disp) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
-
 
   /* mesh analysis */
   if ( !_MMG3D_analys(mesh) ) {
