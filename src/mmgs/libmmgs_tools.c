@@ -241,6 +241,11 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
             return 0;
           }
         }
+        else {
+          fprintf(stderr,"Unrecognized option %s\n",argv[i]);
+          MMGS_usage(argv[0]);
+          return 0;
+        }
         break;
 #ifdef USE_SCOTCH
       case 'r':

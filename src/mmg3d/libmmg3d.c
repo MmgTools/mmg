@@ -502,7 +502,7 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
   char      stim[32];
 
   if ( mesh->info.imprim ) {
-    fprintf(stdout,"  -- MMG3d, Release %s (%s) \n",MG_VER,MG_REL);
+    fprintf(stdout,"\n  -- MMG3d, Release %s (%s) \n",MG_VER,MG_REL);
     fprintf(stdout,"     %s\n",MG_CPY);
     fprintf(stdout,"     %s %s\n",__DATE__,__TIME__);
   }
@@ -523,28 +523,43 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
   tminit(ctim,TIMEMAX);
   chrono(ON,&(ctim[0]));
 
-  //MMG5_errorMessage(&mesh->info.errMessage,"error");
-
-  //MMG5_errorMessage(&mesh->info.errMessage,"error %s:%d blabla\n",__FILE__, __LINE__);
-
   /* Check options */
   if ( mesh->info.lag > -1 ) {
-    fprintf(stderr,"  ## Error: lagrangian mode unavailable (MMG3D_IPARAM_lag):\n"
+    fprintf(stderr,"\n  ## Error: lagrangian mode unavailable (MMG3D_IPARAM_lag):\n"
             "            You must call the MMG3D_mmg3dmov function to move a rigidbody.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
   else if ( mesh->info.iso ) {
-    fprintf(stderr,"  ## Error: level-set discretisation unavailable"
+    fprintf(stderr,"\n  ## Error: level-set discretisation unavailable"
             " (MMG3D_IPARAM_iso):\n"
             "          You must call the MMG3D_mmg3dmov function to use this option.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
   else if ( mesh->info.optimLES && met->size==6 ) {
-    fprintf(stdout,"  ## Error: strong mesh optimization for LES methods"
+    fprintf(stdout,"\n  ## Error: strong mesh optimization for LES methods"
             " unavailable (MMG3D_IPARAM_optimLES) with an anisotropic metric.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
-  //MMG5_errorMessage(&mesh->info.errMessage,"error2 %s:%d blablabla\n",__FILE__, __LINE__);
+  /* specific meshing */
+  if ( met->np ) {
+    if ( mesh->info.optim ) {
+      printf("\n  ## ERROR: MISMATCH OPTIONS: OPTIM OPTION CAN NOT BE USED"
+             " WITH AN INPUT METRIC.\n");
+      _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+    }
+
+    if ( mesh->info.hsiz>0. ) {
+      printf("\n  ## ERROR: MISMATCH OPTIONS: HSIZ OPTION CAN NOT BE USED"
+             " WITH AN INPUT METRIC.\n");
+      _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+    }
+  }
+
+  if ( mesh->info.optim &&  mesh->info.hsiz>0. ) {
+    printf("\n  ## ERROR: MISMATCH OPTIONS: HSIZ AND OPTIM OPTIONS CAN NOT BE USED"
+           " TOGETHER.\n");
+    _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+  }
 
 #ifdef USE_SCOTCH
   _MMG5_warnScotch(mesh);
@@ -558,12 +573,12 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
 
 
   if ( met->np && (met->np != mesh->np) ) {
-    fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
+    fprintf(stdout,"\n  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
     _MMG5_DEL_MEM(mesh,met->m,(met->size*(met->npmax+1))*sizeof(double));
     met->np = 0;
   }
   else if ( met->size!=1 && met->size!=6 ) {
-    fprintf(stderr,"  ## ERROR: WRONG DATA TYPE.\n");
+    fprintf(stderr,"\n  ## ERROR: WRONG DATA TYPE.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
 
@@ -579,27 +594,10 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
     fprintf(stdout,"\n  -- PHASE 1 : ANALYSIS\n");
   }
 
-  /* specific meshing */
-  if ( met->np ) {
-    if ( mesh->info.optim ) {
-      printf("  ## WARNING: METRIC PROVIDED: OPTIM OPTION IGNORED.\n");
-      mesh->info.optim = 0;
-    }
-
-    if ( mesh->info.hsiz>0. ) {
-     printf("  ## WARNING: METRIC PROVIDED: HSIZ OPTION IGNORED.\n");
-     mesh->info.hsiz = -1.;
-    }
-  }
-
-  if ( mesh->info.optim &&  mesh->info.hsiz>0. ) {
-    printf("  ## WARNING: HSIZ AND OPTIM OPTIONS ARE INCOMPATIBLE. HSIZ OPTION IGNORED.\n");
-    mesh->info.hsiz = -1.;
-  }
-
   /* scaling mesh */
   if ( !_MMG5_scaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
 
+  /* specific meshing */
   if ( mesh->info.optim ) {
     if ( !MMG3D_doSol(mesh,met) ) {
       if ( !_MMG5_unscaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
@@ -723,25 +721,25 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol met) {
 
   /* Check options */
   if ( mesh->info.lag > -1 ) {
-    fprintf(stderr,"  ## Error: lagrangian mode unavailable (MMG3D_IPARAM_lag):\n"
+    fprintf(stderr,"\n  ## Error: lagrangian mode unavailable (MMG3D_IPARAM_lag):\n"
             "            You must call the MMG3D_mmg3dmov function to move a rigidbody.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
   else if ( mesh->info.optimLES ) {
-    fprintf(stdout,"  ## Error: strong mesh optimization for LES methods"
+    fprintf(stdout,"\n  ## Error: strong mesh optimization for LES methods"
             " unavailable (MMG3D_IPARAM_optimLES) in isosurface"
             " discretization mode.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
   if ( mesh->info.optim ) {
-    printf("  ## WARNING: OPTIM OPTION UNAVAILABLE IN ISOSURFACE"
-           " DISCRETIZATION MODE. IGNORED.\n");
-    mesh->info.optim = 0;
+    printf("\n  ## ERROR: OPTIM OPTION UNAVAILABLE IN ISOSURFACE"
+           " DISCRETIZATION MODE\n");
+    _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
   if ( mesh->info.hsiz>0. ) {
-    printf("  ## WARNING: HSIZ OPTION UNAVAILABLE INISOSURFACE"
+    printf("\n  ## ERROR: HSIZ OPTION UNAVAILABLE IN ISOSURFACE"
            " DISCRETIZATION MODE.\n");
-    mesh->info.hsiz = -1.;
+    _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
 
 #ifdef USE_SCOTCH
@@ -754,12 +752,12 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol met) {
   _MMG5_warnOrientation(mesh);
 
   if ( met->np && (met->np != mesh->np) ) {
-    fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
+    fprintf(stdout,"\n  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
     _MMG5_DEL_MEM(mesh,met->m,(met->size*(met->npmax+1))*sizeof(double));
     met->np = 0;
   }
   else if ( met->size!=1 ) {
-    fprintf(stderr,"  ## ERROR: WRONG DATA TYPE.\n");
+    fprintf(stderr,"\n  ## ERROR: WRONG DATA TYPE.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
 
@@ -825,7 +823,7 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol met) {
 #ifdef PATTERN
   if ( !_MMG5_mmg3d1_pattern(mesh,met) ) {
     if ( !(mesh->adja) && !MMG3D_hashTetra(mesh,1) ) {
-      fprintf(stderr,"  ## Hashing problem. Invalid mesh.\n");
+      fprintf(stderr,"\n  ## Hashing problem. Invalid mesh.\n");
       _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
     }
     if ( !_MMG5_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
@@ -834,7 +832,7 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol met) {
 #else
   if ( !_MMG5_mmg3d1_pattern(mesh,met) ) {
     if ( !(mesh->adja) && !MMG3D_hashTetra(mesh,1) ) {
-      fprintf(stderr,"  ## Hashing problem. Invalid mesh.\n");
+      fprintf(stderr,"\n  ## Hashing problem. Invalid mesh.\n");
       _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
     }
     if ( !_MMG5_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
@@ -893,25 +891,23 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
 
   /* Check options */
   if ( mesh->info.iso ) {
-    fprintf(stderr,"  ## Error: level-set discretisation unavailable"
+    fprintf(stderr,"\n  ## Error: level-set discretisation unavailable"
             " (MMG3D_IPARAM_iso):\n"
             "          You must call the MMG3D_mmg3dmov function to use this option.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
   else if ( mesh->info.optimLES ) {
-    fprintf(stdout,"  ## Error: strong mesh optimization for LES methods"
+    fprintf(stdout,"\n  ## Error: strong mesh optimization for LES methods"
             " unavailable (MMG3D_IPARAM_optimLES) in lagrangian mode.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
   if ( mesh->info.optim ) {
-    printf("  ## WARNING: OPTIM OPTION UNAVAILABLE IN ISOSURFACE"
-           " DISCRETIZATION MODE. IGNORED.\n");
-    mesh->info.optim = 0;
+    printf("\n  ## ERROR: OPTIM OPTION UNAVAILABLE IN LAGRANGIAN MODE\n");
+    _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
   if ( mesh->info.hsiz>0. ) {
-    printf("  ## WARNING: HSIZ OPTION UNAVAILABLE INISOSURFACE"
-           " DISCRETIZATION MODE.\n");
-    mesh->info.hsiz = -1.;
+    printf("\n  ## ERROR: HSIZ OPTION UNAVAILABLE IN LAGRANGIAN MODE\n");
+    _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
 
 #ifdef USE_SCOTCH
@@ -925,7 +921,7 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
 
   if ( mesh->info.lag == -1 ) {
     if ( mesh->info.imprim )
-      fprintf(stdout,"  ## Warning: displacement mode for the rigidbody"
+      fprintf(stdout,"\n  ## Warning: displacement mode for the rigidbody"
               " movement is not set.\n"
               "               Lagrangian displacement computed according"
               " to mode 1.\n");
@@ -933,25 +929,25 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
   }
 
 #ifndef USE_ELAS
-  fprintf(stderr,"  ## Error: you need to compile with the USE_ELAS"
+  fprintf(stderr,"\n  ## Error: you need to compile with the USE_ELAS"
     " CMake's flag set to ON to use the rigidbody movement library.\n");
   _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
 #endif
 
   if ( !disp ) {
-    fprintf(stderr,"  ## Error: in lagrangian mode, a structure of type"
+    fprintf(stderr,"\n  ## Error: in lagrangian mode, a structure of type"
             " \"MMG5_pSol\" is needed to store the displacement field.\n"
             "            This structure must be different from the one used"
             " to store the metric.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
   if (disp->np && (disp->np != mesh->np) ) {
-    fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
+    fprintf(stdout,"\n  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
     _MMG5_DEL_MEM(mesh,disp->m,(disp->size*(disp->npmax+1))*sizeof(double));
     disp->np = 0;
   }
   else if (disp->size!=3) {
-    fprintf(stderr,"  ## ERROR: LAGRANGIAN MOTION OPTION NEED A VECTORIAL DISPLACEMENT\n");
+    fprintf(stderr,"\n  ## ERROR: LAGRANGIAN MOTION OPTION NEED A VECTORIAL DISPLACEMENT\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
 
@@ -1016,34 +1012,12 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
 #endif
   disp->npi = disp->np;
 
-  /* specific meshing */
-  if ( met->np ) {
-    if ( mesh->info.optim ) {
-      printf("  ## WARNING: METRIC PROVIDED: OPTIM OPTION IGNORED.\n");
-      mesh->info.optim = 0;
-    }
-
-    if ( mesh->info.hsiz>0. ) {
-     printf("  ## WARNING: METRIC PROVIDED: HSIZ OPTION IGNORED.\n");
-     mesh->info.hsiz = -1.;
-    }
-  }
-
-  if ( mesh->info.optim &&  mesh->info.hsiz>0. ) {
-    printf("  ## WARNING: HSIZ AND OPTIM OPTIONS ARE INCOMPATIBLE. HSIZ OPTION IGNORED.\n");
-    mesh->info.hsiz = -1.;
-  }
-
   if ( mesh->info.optim ) {
     if ( !MMG3D_doSol(mesh,met) ) {
       if ( !_MMG5_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
       _MMG5_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE);
     }
     _MMG3D_solTruncature(mesh,met);
-  }
-
-  if ( mesh->info.hsiz>0. ) {
-    printf("Not yet implemented."); return 666;
   }
 
 /* ******************* Add mesh improvement ? *************************** */

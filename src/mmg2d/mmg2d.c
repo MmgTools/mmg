@@ -713,26 +713,32 @@ int main(int argc,char *argv[]) {
     ier = MMG2D_mmg2dlib(mesh,met);
   }
 
-  if ( !strcmp(&mesh->nameout[strlen(mesh->nameout)-5],".mesh") ||
-       !strcmp(&mesh->nameout[strlen(mesh->nameout)-6],".meshb") )
-    msh = 0;
-  else if (!strcmp(&mesh->nameout[strlen(mesh->nameout)-4],".msh") ||
-           !strcmp(&mesh->nameout[strlen(mesh->nameout)-5],".mshb") )
-    msh = 1;
+  if ( ier != MMG5_STRONGFAILURE ) {
+    chrono(ON,&MMG5_ctim[1]);
+    if ( mesh->info.imprim )
+      fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh->nameout);
 
-  if ( !msh )
-    ierSave = MMG2D_saveMesh(mesh,mesh->nameout);
-  else
-    ierSave = MMG2D_saveMshMesh(mesh,met,mesh->nameout);
+    if ( !strcmp(&mesh->nameout[strlen(mesh->nameout)-5],".mesh") ||
+         !strcmp(&mesh->nameout[strlen(mesh->nameout)-6],".meshb") )
+      msh = 0;
+    else if (!strcmp(&mesh->nameout[strlen(mesh->nameout)-4],".msh") ||
+             !strcmp(&mesh->nameout[strlen(mesh->nameout)-5],".mshb") )
+      msh = 1;
 
-  if ( !ierSave )
-    _MMG2D_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
+    if ( !msh )
+      ierSave = MMG2D_saveMesh(mesh,mesh->nameout);
+    else
+      ierSave = MMG2D_saveMshMesh(mesh,met,mesh->nameout);
 
-  if( !msh && met->np )
-    MMG2D_saveSol(mesh,met,mesh->nameout);
+    if ( !ierSave )
+      _MMG2D_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
 
-  chrono(OFF,&MMG5_ctim[1]);
-  if ( mesh->info.imprim ) fprintf(stdout,"  -- WRITING COMPLETED\n");
+    if( !msh && met->np )
+      MMG2D_saveSol(mesh,met,mesh->nameout);
+
+    chrono(OFF,&MMG5_ctim[1]);
+    if ( mesh->info.imprim ) fprintf(stdout,"  -- WRITING COMPLETED\n");
+  }
 
   /* free mem */
   chrono(OFF,&MMG5_ctim[0]);

@@ -288,6 +288,18 @@ int MMGS_mmgsls(MMG5_pMesh mesh,MMG5_pSol met)
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
 
+  if ( mesh->info.optim ) {
+    printf("\n  ## ERROR: OPTIM OPTION UNAVAILABLE IN MMGS.\n");
+    _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+  }
+
+  if ( mesh->info.hsiz>0. ) {
+    printf("  ## ERROR: HSIZ OPTION UNAVAILABLE IN ISOSURFACE"
+           " DISCRETIZATION MODE.\n");
+    _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+  }
+
+
   chrono(OFF,&(ctim[1]));
   printim(ctim[1].gdif,stim);
   if ( mesh->info.imprim )
@@ -423,6 +435,19 @@ int MMGS_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
   else if ( met->size!=1 && met->size!=6 ) {
     fprintf(stderr,"  ## ERROR: WRONG DATA TYPE.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+  }
+  /* specific meshing */
+  if ( mesh->info.optim ) {
+    printf("\n  ## ERROR: OPTIM OPTION UNAVAILABLE IN MMGS.\n");
+    _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+  }
+
+  if ( met->np ) {
+    if ( mesh->info.hsiz>0. ) {
+      printf("\n  ## ERROR: MISMATCH OPTIONS: HSIZ OPTION CAN NOT BE USED"
+             " WITH AN INPUT METRIC.\n");
+      _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+    }
   }
 
   chrono(OFF,&(ctim[1]));
