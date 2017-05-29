@@ -78,7 +78,7 @@ static int _MMG5_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
     in = fopen(data,"rb");
     if ( !in )  return(1);
   }
-  fprintf(stdout,"  %%%% %s OPENED\n",data);
+  fprintf(stdout,"\n  %%%% %s OPENED\n",data);
 
   /* read parameters */
   mesh->info.npar = 0;

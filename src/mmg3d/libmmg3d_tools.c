@@ -470,7 +470,7 @@ int MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
       }
     }
   }
-  fprintf(stdout,"  %%%% %s OPENED\n",data);
+  fprintf(stdout,"\n  %%%% %s OPENED\n",data);
 
   /* read parameters */
   while ( !feof(in) ) {

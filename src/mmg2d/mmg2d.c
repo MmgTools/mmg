@@ -289,10 +289,11 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,double *qdegrad) 
         MMG2D_usage(argv[0]);
         return 0;
       case 'a':
-        if ( !strcmp(argv[i],"-ar") && ++i < argc )
+        if ( !strcmp(argv[i],"-ar") && ++i < argc ) {
           if ( !MMG2D_Set_dparameter(mesh,met,MMG2D_DPARAM_angleDetection,
                                      atof(argv[i])) )
             return 0;
+        }
         break;
       case 'A': /* anisotropy */
         if ( !MMG2D_Set_solSize(mesh,met,MMG5_Vertex,0,MMG5_Tensor) )

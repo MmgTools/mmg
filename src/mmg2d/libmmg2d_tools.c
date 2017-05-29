@@ -80,7 +80,7 @@ int MMG2_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
     if ( !in )
       return(1);
   }
-  fprintf(stdout,"  %%%% %s OPENED\n",data);
+  fprintf(stdout,"\n  %%%% %s OPENED\n",data);
   
   /* Read parameters */
   while ( !feof(in) ) {
@@ -117,6 +117,10 @@ int MMG2_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
           }
         }
       }
+    }
+    else {
+      fprintf(stderr,"  %%%% Wrong format: %s\n",data);
+      return 0;
     }
   }
   
