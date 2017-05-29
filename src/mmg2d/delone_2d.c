@@ -297,7 +297,9 @@ int _MMG2_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
     pt1  = &mesh->tria[old];
     for (i=0; i<3; i++) {
       ppt = &mesh->point[ pt1->v[i] ];
-      if ( !ppt->tagdel )  alert = 1;
+      if ( !ppt->tagdel ) {
+			 alert = 1;
+      }
     }
   }
   /* Reset tagdel field */
@@ -309,7 +311,7 @@ int _MMG2_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
       ppt->tagdel = 0;
     }
   }
-  if ( alert )  {return(0);}
+  if ( alert )  return(0);
   
   /* Hash table parameters */
   if ( size > 3*MMG2_LONMAX )  return(0);
