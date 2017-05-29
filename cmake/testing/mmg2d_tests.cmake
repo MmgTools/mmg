@@ -80,6 +80,11 @@ ADD_TEST(NAME mmg2d_SquareAniso
   ${MMG2D_CI_TESTS}/SquareAniso/adap1
   ${CTEST_OUTPUT_DIR}/mmg2d_SquareAniso-mmg2d_SquareAniso-adap1.o.meshb)
 
+ADD_TEST(NAME mmg2d_CircleOptimAni
+  COMMAND ${EXECUT_MMG2D} -v 5 -optim -A -sol 2
+  ${MMG2D_CI_TESTS}/Circle/cercle
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_CircleOptimAni-cercle.o.mesh)
+
 ###############################################################################
 #####
 #####         Mesh generation
