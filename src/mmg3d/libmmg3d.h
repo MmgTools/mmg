@@ -85,6 +85,7 @@ enum MMG3D_Param {
   MMG3D_DPARAM_angleDetection,    /*!< [val], Value for angle detection */
   MMG3D_DPARAM_hmin,              /*!< [val], Minimal mesh size */
   MMG3D_DPARAM_hmax,              /*!< [val], Maximal mesh size */
+  MMG3D_DPARAM_hsiz,              /*!< [val], Constant mesh size */
   MMG3D_DPARAM_hausd,             /*!< [val], Control global Hausdorff distance (on all the boundary surfaces of the mesh) */
   MMG3D_DPARAM_hgrad,             /*!< [val], Control gradation */
   MMG3D_DPARAM_ls,                /*!< [val], Value of level-set */

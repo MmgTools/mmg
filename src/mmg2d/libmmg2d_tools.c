@@ -61,11 +61,11 @@ void MMG2D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
  *
  */
 int MMG2_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
-  int      ret,i,nspl,nun;
+  int       ret,i,nspl,nun;
   char     *ptr,data[256];
   FILE     *in;
-  MMG5_pMat     pm;
-  fpos_t   position;
+  MMG5_pMat pm;
+  fpos_t    position;
   
   /* Check for parameter file */
   strcpy(data,mesh->namein);
@@ -93,7 +93,7 @@ int MMG2_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
       ret = fscanf(in,"%d",&mesh->info.nmat);
       
       if ( !ret ) {
-        fprintf(stderr,"  %%%% Wrong format: %s\n",buf);
+        fprintf(stderr,"  %%%% Wrong format: %d\n",mesh->info.nmat);
         return 0;
       }
 

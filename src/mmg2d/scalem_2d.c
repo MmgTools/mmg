@@ -92,17 +92,24 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
     ppt->c[1] = dd * (ppt->c[1] - info->min[1]);
   }
 
-  /* Check if hmin/hmax have been provided by the user and scale it if yes */
+  /* Check if hmin/hmax have been provided by the user and if we need to set
+   * it. scale it if yes */
   sethmin = 0;
   sethmax = 0;
 
-  if ( mesh->info.hmin > 0. ) {
-    mesh->info.hmin  *= dd;
-    sethmin = 1;
+  if ( /*mesh->info.hsiz > 0. ||*/ mesh->info.optim ) {
+    // We don't want to set hmin/hmax here, it will be done in solTruncature
+    sethmin = sethmax = 1;
   }
-  if ( mesh->info.hmax > 0. ) {
-    mesh->info.hmax  *= dd;
-    sethmax = 1;
+  else {
+    if ( mesh->info.hmin > 0. ) {
+      mesh->info.hmin  *= dd;
+      sethmin = 1;
+    }
+    if ( mesh->info.hmax > 0. ) {
+      mesh->info.hmax  *= dd;
+      sethmax = 1;
+    }
   }
 
   /* Warning: we don't want to compute hmin/hmax from the level-set! */
@@ -136,7 +143,6 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
    * and 10 \times the max of the metric sizes for hmax ). */
 
 #warning : write scaling of displacement vector field (size = 2)
-  
   switch (sol->size) {
   case 1:
     /* normalization */

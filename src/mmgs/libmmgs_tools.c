@@ -133,6 +133,12 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
                                     atof(argv[i])) )
             return 0;
         }
+        else if ( !strcmp(argv[i],"-hsiz") && ++i < argc ) {
+          if ( !MMGS_Set_dparameter(mesh,met,MMGS_DPARAM_hsiz,
+                                    atof(argv[i])) )
+            return 0;
+
+        }
         else if ( !strcmp(argv[i],"-hausd") && ++i <= argc ) {
           if ( !MMGS_Set_dparameter(mesh,met,MMGS_DPARAM_hausd,
                                     atof(argv[i])) )

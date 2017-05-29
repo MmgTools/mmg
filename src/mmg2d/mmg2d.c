@@ -322,6 +322,12 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,double *qdegrad) 
                                      atof(argv[i])) )
             return 0;
         }
+        else if ( !strcmp(argv[i],"-hsiz") && ++i < argc ) {
+          if ( !MMG2D_Set_dparameter(mesh,met,MMG2D_DPARAM_hsiz,
+                                     atof(argv[i])) )
+            return 0;
+
+        }
         else if ( !strcmp(argv[i],"-hausd") && ++i <= argc ) {
           if ( !MMG2D_Set_dparameter(mesh,met,MMG2D_DPARAM_hausd,
                                      atof(argv[i])) )

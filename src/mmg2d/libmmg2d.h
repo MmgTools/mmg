@@ -71,6 +71,7 @@ enum MMG2D_Param {
   MMG2D_DPARAM_angleDetection,    /*!< [val], Value for angle detection */
   MMG2D_DPARAM_hmin,              /*!< [val], Minimal mesh size */
   MMG2D_DPARAM_hmax,              /*!< [val], Maximal mesh size */
+  MMG2D_DPARAM_hsiz,              /*!< [val], Constant mesh size */
   MMG2D_DPARAM_hausd,             /*!< [val], Control global Hausdorff distance (on all the boundary surfaces of the mesh) */
   MMG2D_DPARAM_hgrad,             /*!< [val], Control gradation */
   MMG2D_DPARAM_ls,                /*!< [val], Value of level-set (not use for now) */

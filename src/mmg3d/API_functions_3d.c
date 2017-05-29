@@ -1806,6 +1806,9 @@ int MMG3D_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val)
   case MMG3D_DPARAM_hmax :
     mesh->info.hmax     = val;
     break;
+  case MMG3D_DPARAM_hsiz :
+    mesh->info.hsiz     = val;
+    break;
   case MMG3D_DPARAM_hgrad :
     mesh->info.hgrad    = val;
     if ( mesh->info.hgrad < 0.0 )

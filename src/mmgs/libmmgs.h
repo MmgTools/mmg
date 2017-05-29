@@ -73,6 +73,7 @@ enum MMGS_Param {
   MMGS_DPARAM_angleDetection,    /*!< [val], Value for angle detection */
   MMGS_DPARAM_hmin,              /*!< [val], Minimal mesh size */
   MMGS_DPARAM_hmax,              /*!< [val], Maximal mesh size */
+  MMGS_DPARAM_hsiz,              /*!< [val], Constant mesh size */
   MMGS_DPARAM_hausd,             /*!< [val], Control global Hausdorff distance (on all the boundary surfaces of the mesh) */
   MMGS_DPARAM_hgrad,             /*!< [val], Control gradation */
   MMGS_DPARAM_ls,                /*!< [val], Value of level-set */

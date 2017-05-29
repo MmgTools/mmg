@@ -207,6 +207,12 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
                                     atof(argv[i])) )
             return 0;
         }
+        else if ( !strcmp(argv[i],"-hsiz") && ++i < argc ) {
+          if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_hsiz,
+                                     atof(argv[i])) )
+            return 0;
+
+        }
         else if ( !strcmp(argv[i],"-hausd") && ++i <= argc ) {
           if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_hausd,
                                     atof(argv[i])) )
@@ -728,18 +734,17 @@ int MMG3D_searchlen(MMG5_pMesh mesh, MMG5_pSol met, double lmin,
 }
 
 int MMG3D_doSol(MMG5_pMesh mesh,MMG5_pSol met) {
-    MMG5_pTetra     pt;
-    MMG5_pPoint     p1,p2;
-    double     ux,uy,uz,dd;
-    int        i,k,ia,ib,ipa,ipb;
-    int       *mark;
+    MMG5_pTetra  pt;
+    MMG5_pPoint  p1,p2;
+    double       ux,uy,uz,dd;
+    int          i,k,iadr,ia,ib,ipa,ipb;
+    int         *mark;
 
     _MMG5_SAFE_CALLOC(mark,mesh->np+1,int,0);
 
     /* Memory alloc */
     met->np     = mesh->np;
     met->npmax  = mesh->npmax;
-    met->size   = 1;
     met->dim    = mesh->dim;
 
     _MMG5_ADD_MEM(mesh,(met->size*(met->npmax+1))*sizeof(double),"solution",return(0));
@@ -748,9 +753,10 @@ int MMG3D_doSol(MMG5_pMesh mesh,MMG5_pSol met) {
     /* edges */
     for (k=1; k<=mesh->ne; k++) {
         pt = &mesh->tetra[k];
-        if ( !pt->v[0] )  continue;
+        if ( !MG_EOK(pt) )  continue;
 
-        for (i=0; i<6; i++) {
+        if ( met->size == 1 ) {
+          for (i=0; i<6; i++) {
             ia  = _MMG5_iare[i][0];
             ib  = _MMG5_iare[i][1];
             ipa = pt->v[ia];
@@ -767,19 +773,68 @@ int MMG3D_doSol(MMG5_pMesh mesh,MMG5_pSol met) {
             mark[ipa]++;
             met->m[ipb] += dd;
             mark[ipb]++;
+          }
         }
+        else if ( met->size == 6 ) {
+          for (i=0; i<6; i++) {
+            ia  = _MMG5_iare[i][0];
+            ib  = _MMG5_iare[i][1];
+            ipa = pt->v[ia];
+            ipb = pt->v[ib];
+            p1  = &mesh->point[ipa];
+            p2  = &mesh->point[ipb];
+
+            ux  = p1->c[0] - p2->c[0];
+            uy  = p1->c[1] - p2->c[1];
+            uz  = p1->c[2] - p2->c[2];
+            dd  = sqrt(ux*ux + uy*uy + uz*uz);
+
+            iadr = 6*ipa;
+            met->m[iadr]   += dd;
+            mark[ipa]++;
+
+            iadr = 6*ipb;
+            met->m[iadr] += dd;
+            mark[ipb]++;
+          }
+        }
+        else return 0;
     }
 
     /* vertex size */
-    for (k=1; k<=mesh->np; k++) {
+    if ( met->size == 1 ) {
+      for (k=1; k<=mesh->np; k++) {
         p1 = &mesh->point[k];
         if ( !mark[k] ) {
-            met->m[k] = FLT_MAX;
-            continue;
+          met->m[k] = FLT_MAX;
+          continue;
         }
         else
-            met->m[k] = met->m[k] / (double)mark[k];
+          met->m[k] = met->m[k] / (double)mark[k];
+      }
     }
+    else if ( met->size == 6 ) {
+#warning clean the call of hmax : dosol may be called by the user, in this case, hmax is probably not setted
+      for (k=1; k<=mesh->np; k++) {
+        p1 = &mesh->point[k];
+        iadr = 6*k;
+        mark[k] = 0;
+        if ( !mark[k] ) {
+          int eps = nextafter(0., +1.0/0.0);
+          met->m[iadr]   = 1./(mesh->info.hmax*mesh->info.hmax);
+          met->m[iadr]   = 1./(eps*eps);
+          met->m[iadr+3] = met->m[iadr];
+          met->m[iadr+5] = met->m[iadr];
+          continue;
+        }
+        else {
+          met->m[iadr]   = (double)mark[k]*(double)mark[k]/(met->m[iadr]*met->m[iadr]);
+          met->m[iadr+3] = met->m[iadr];
+          met->m[iadr+5] = met->m[iadr];
+        }
+      }
+    }
+
     _MMG5_SAFE_FREE(mark);
     return(1);
 }

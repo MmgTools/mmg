@@ -87,13 +87,13 @@ void _MMG3D_Free_topoTables(MMG5_pMesh mesh) {
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the solution structure.
  *
- * Truncate a scalar metric by hmax and hmin values.
+ * Truncate a metric by hmax and hmin values.
  *
  */
-void _MMG3D_scalarSolTruncature(MMG5_pMesh mesh, MMG5_pSol met) {
+void _MMG3D_solTruncature(MMG5_pMesh mesh, MMG5_pSol met) {
   MMG5_pTetra pt;
   MMG5_pPoint ppt;
-  int         i,k,sethmin,sethmax;
+  int         i,k,iadr,sethmin,sethmax;
 
   /* Detect the point used only by prisms */
   if ( mesh->nprism ) {
@@ -107,13 +107,12 @@ void _MMG3D_scalarSolTruncature(MMG5_pMesh mesh, MMG5_pSol met) {
       for (i=0; i<4; i++) {
         mesh->point[pt->v[i]].flag = 0;
       }
-
     }
   }
 
 
   /* If not provided by the user, compute hmin/hmax from the metric computed by
-   * the DoSol function (isotropic metric) */
+   * the DoSol function. */
   sethmin = sethmax = 1;
   if ( mesh->info.hmin < 0 ) {
     sethmin = 0;
@@ -121,7 +120,8 @@ void _MMG3D_scalarSolTruncature(MMG5_pMesh mesh, MMG5_pSol met) {
     for (k=1; k<=mesh->np; k++)  {
       ppt = &mesh->point[k];
       if ( !MG_VOK(ppt) || ppt->flag ) continue;
-      mesh->info.hmin = MG_MIN(mesh->info.hmin,met->m[k]);
+      iadr = met->size*k;
+      mesh->info.hmin = MG_MIN(mesh->info.hmin,met->m[iadr]);
     }
   }
   if ( mesh->info.hmax < 0 ) {
@@ -130,7 +130,8 @@ void _MMG3D_scalarSolTruncature(MMG5_pMesh mesh, MMG5_pSol met) {
     for (k=1; k<=mesh->np; k++)  {
       ppt = &mesh->point[k];
       if ( !MG_VOK(ppt) || ppt->flag ) continue;
-      mesh->info.hmax = MG_MAX(mesh->info.hmax,met->m[k]);
+      iadr = met->size*k;
+      mesh->info.hmax = MG_MAX(mesh->info.hmax,met->m[iadr]);
     }
   }
 
@@ -152,11 +153,24 @@ void _MMG3D_scalarSolTruncature(MMG5_pMesh mesh, MMG5_pSol met) {
   }
 
   /* vertex size */
-  for (k=1; k<=mesh->np; k++) {
-    ppt = &mesh->point[k];
-    if ( !MG_VOK(ppt) ) continue;
-    met->m[k] = MG_MIN(mesh->info.hmax,MG_MAX(mesh->info.hmin,met->m[k]));
+  if ( met->size == 1 ) {
+    for (k=1; k<=mesh->np; k++) {
+      ppt = &mesh->point[k];
+      if ( !MG_VOK(ppt) ) continue;
+      met->m[k] = MG_MIN(mesh->info.hmax,MG_MAX(mesh->info.hmin,met->m[k]));
+    }
   }
+  else if ( met->size == 6 ) {
+    for (k=1; k<=mesh->np; k++) {
+      ppt = &mesh->point[k];
+      if ( !MG_VOK(ppt) ) continue;
+      iadr = 6*k;
+      met->m[iadr]   = MG_MIN(mesh->info.hmax,MG_MAX(mesh->info.hmin,met->m[iadr]));
+      met->m[iadr+3] = met->m[iadr];
+      met->m[iadr+5] = met->m[iadr];
+    }
+  }
+
   return;
 }
 
@@ -475,6 +489,10 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
   tminit(ctim,TIMEMAX);
   chrono(ON,&(ctim[0]));
 
+  //MMG5_errorMessage(&mesh->info.errMessage,"error");
+
+  //MMG5_errorMessage(&mesh->info.errMessage,"error %s:%d blabla\n",__FILE__, __LINE__);
+
   /* Check options */
   if ( mesh->info.lag > -1 ) {
     fprintf(stderr,"  ## Error: lagrangian mode unavailable (MMG3D_IPARAM_lag):\n"
@@ -492,6 +510,7 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
             " unavailable (MMG3D_IPARAM_optimLES) with an anisotropic metric.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
+  //MMG5_errorMessage(&mesh->info.errMessage,"error2 %s:%d blablabla\n",__FILE__, __LINE__);
 
 #ifdef USE_SCOTCH
   _MMG5_warnScotch(mesh);
@@ -541,12 +560,33 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
   /* specific meshing */
-  if ( mesh->info.optim && !met->np ) {
+  if ( met->np ) {
+    if ( mesh->info.optim ) {
+      printf("  ## WARNING: METRIC PROVIDED: OPTIM OPTION IGNORED.\n");
+      mesh->info.optim = 0;
+    }
+
+    if ( mesh->info.hsiz>0. ) {
+     printf("  ## WARNING: METRIC PROVIDED: HSIZ OPTION IGNORED.\n");
+     mesh->info.hsiz = -1.;
+    }
+  }
+
+  if ( mesh->info.optim &&  mesh->info.hsiz>0. ) {
+    printf("  ## WARNING: HSIZ AND OPTIM OPTIONS ARE INCOMPATIBLE. HSIZ OPTION IGNORED.\n");
+    mesh->info.hsiz = -1.;
+  }
+
+  if ( mesh->info.optim ) {
     if ( !MMG3D_doSol(mesh,met) ) {
       if ( !_MMG5_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
       _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
     }
-    _MMG3D_scalarSolTruncature(mesh,met);
+    _MMG3D_solTruncature(mesh,met);
+  }
+
+  if ( mesh->info.hsiz > 0. ) {
+    printf("Not yet implemented."); return 666;
   }
 
   /* mesh analysis */
@@ -921,14 +961,34 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
 #endif
   disp->npi = disp->np;
 
-  if ( !met->np ) {
+  /* specific meshing */
+  if ( met->np ) {
+    if ( mesh->info.optim ) {
+      printf("  ## WARNING: METRIC PROVIDED: OPTIM OPTION IGNORED.\n");
+      mesh->info.optim = 0;
+    }
+
+    if ( mesh->info.hsiz>0. ) {
+     printf("  ## WARNING: METRIC PROVIDED: HSIZ OPTION IGNORED.\n");
+     mesh->info.hsiz = -1.;
+    }
+  }
+
+  if ( mesh->info.optim &&  mesh->info.hsiz>0. ) {
+    printf("  ## WARNING: HSIZ AND OPTIM OPTIONS ARE INCOMPATIBLE. HSIZ OPTION IGNORED.\n");
+    mesh->info.hsiz = -1.;
+  }
+
+  if ( mesh->info.optim ) {
     if ( !MMG3D_doSol(mesh,met) ) {
-      if ( !_MMG5_unscaleMesh(mesh,disp) ) {
-        _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
-      }
+      if ( !_MMG5_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
       _MMG5_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE);
     }
-    _MMG3D_scalarSolTruncature(mesh,met);
+    _MMG3D_solTruncature(mesh,met);
+  }
+
+  if ( mesh->info.hsiz>0. ) {
+    printf("Not yet implemented."); return 666;
   }
 
 /* ******************* Add mesh improvement ? *************************** */

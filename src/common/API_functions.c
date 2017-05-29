@@ -79,11 +79,13 @@ void _MMG5_Init_parameters(MMG5_pMesh mesh) {
   mesh->info.hmin     = -1.;      /* minimal mesh size; */
   /** MMG5_DPARAM_hmax = double of the bounding box size */
   mesh->info.hmax     = -1.;      /* maximal mesh size; */
+  /** MMG5_DPARAM_hsiz= -1. */
+  mesh->info.hsiz     = -1.;      /* constant mesh size; */
   /** MMG5_DPARAM_hausd = 0.01 */
   mesh->info.hausd    = 0.01;     /* control Hausdorff */
   /** MMG5_DPARAM_hgrad = 1.3 */
   mesh->info.hgrad    = 0.26236426446;      /* control gradation; */
-  
+
   /* default values for pointers */
   /** MMG5_PPARAM = NULL */
   mesh->info.mat = NULL;  /* list of user-defined references */
