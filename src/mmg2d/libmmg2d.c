@@ -197,7 +197,13 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
   }
   else if ( sol->np && ( sol->np != mesh->np ) ) {
     fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER : %d != %d\n",sol->np,mesh->np);
+    _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
   }
+  else if ( sol->size!=1 && sol->size!=3 ) {
+    fprintf(stderr,"  ## ERROR: WRONG DATA TYPE.\n");
+    _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+  }
+
 
   chrono(OFF,&(ctim[1]));
   printim(ctim[1].gdif,stim);
@@ -219,18 +225,44 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
   /* Data analysis */
   chrono(ON,&ctim[2]);
   if ( mesh->info.imprim )   fprintf(stdout,"\n  -- PHASE 1 : DATA ANALYSIS\n");
-  if ( abs(mesh->info.imprim) > 4 )
-    fprintf(stdout,"  ** SETTING ADJACENCIES\n");
+
+  /* specific meshing */
+  if ( sol->np ) {
+    if ( mesh->info.optim ) {
+      printf("  ## WARNING: METRIC PROVIDED: OPTIM OPTION IGNORED.\n");
+      mesh->info.optim = 0;
+    }
+
+    if ( mesh->info.hsiz>0. ) {
+     printf("  ## WARNING: METRIC PROVIDED: HSIZ OPTION IGNORED.\n");
+     mesh->info.hsiz = -1.;
+    }
+  }
+
+  if ( mesh->info.optim &&  mesh->info.hsiz>0. ) {
+    printf("  ## WARNING: HSIZ AND OPTIM OPTIONS ARE INCOMPATIBLE. HSIZ OPTION IGNORED.\n");
+    mesh->info.hsiz = -1.;
+  }
 
   /* Scale input mesh */
   if ( !MMG2_scaleMesh(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
 
-  if ( !sol->np && mesh->info.optim ) {
-    if ( !MMG2D_doSol(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+  if ( mesh->info.optim ) {
+    if ( !MMG2D_doSol(mesh,sol) ) {
+     if ( !MMG2_unscaleMesh(mesh,sol) ) _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+     _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+    }
     _MMG2D_solTruncature(mesh,sol);
   }
 
+  if ( mesh->info.hsiz > 0. ) {
+    printf("Not yet implemented."); return 666;
+  }
+
   /* Create adjacency relations in the mesh */
+ if ( abs(mesh->info.imprim) > 4 )
+    fprintf(stdout,"  ** SETTING ADJACENCIES\n");
+
   if ( !MMG2_hashTria(mesh) )
     _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
 
@@ -395,7 +427,12 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   else   if ( sol->np && (sol->np != mesh->np) ) {
     fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER : %d != %d\n",sol->np,mesh->np);
+    _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+  }  else if ( sol->size!=1 && sol->size!=3 ) {
+    fprintf(stderr,"  ## ERROR: WRONG DATA TYPE.\n");
+    _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
   }
+
   chrono(OFF,&(ctim[1]));
   printim(ctim[1].gdif,stim);
   if ( mesh->info.imprim )
@@ -420,8 +457,7 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   }
 
   if ( mesh->info.imprim )   fprintf(stdout,"\n  -- PHASE 1 : DATA ANALYSIS\n");
-  if ( abs(mesh->info.imprim) > 4 )
-    fprintf(stdout,"  ** SETTING ADJACENCIES\n");
+
   if ( !MMG2_scaleMesh(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
 
   if ( mesh->info.ddebug && !_MMG5_chkmsh(mesh,1,0) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
@@ -460,14 +496,46 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol) {
     fprintf(stdout,"\n  -- PHASE 3 : MESH IMPROVEMENT\n");
   }
 
-  if ( !sol->np && mesh->info.optim ) {
-    if ( !MMG2D_doSol(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+  /* specific meshing */
+  if ( sol->np ) {
+    if ( mesh->info.optim ) {
+      printf("  ## WARNING: METRIC PROVIDED: OPTIM OPTION IGNORED.\n");
+      mesh->info.optim = 0;
+    }
+
+    if ( mesh->info.hsiz>0. ) {
+     printf("  ## WARNING: METRIC PROVIDED: HSIZ OPTION IGNORED.\n");
+     mesh->info.hsiz = -1.;
+    }
+  }
+
+  if ( mesh->info.optim &&  mesh->info.hsiz>0. ) {
+    printf("  ## WARNING: HSIZ AND OPTIM OPTIONS ARE INCOMPATIBLE. HSIZ OPTION IGNORED.\n");
+    mesh->info.hsiz = -1.;
+  }
+
+  if ( mesh->info.optim ) {
+    if ( !MMG2D_doSol(mesh,sol) ) {
+      if ( !MMG2_unscaleMesh(mesh,sol) )
+        _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+      _MMG2D_RETURN_AND_PACK(mesh,sol,MMG5_LOWFAILURE);
+    }
     _MMG2D_solTruncature(mesh,sol);
+  } else {
+    /* Set default hmin and hmax values */
+    if ( !MMG5_Set_defaultTruncatureSizes(mesh,mesh->info.hmin>0.,mesh->info.hmax>0.) ) {
+      if ( !MMG2_unscaleMesh(mesh,sol) )
+        _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+      _MMG2D_RETURN_AND_PACK(mesh,sol,MMG5_LOWFAILURE);
+    }
   }
 
   /* Mesh analysis */
-  if (! _MMG2_analys(mesh) )
-    _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+  if (! _MMG2_analys(mesh) ) {
+    if ( !MMG2_unscaleMesh(mesh,sol) )
+      _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+    _MMG2D_RETURN_AND_PACK(mesh,sol,MMG5_LOWFAILURE);
+  }
 
   /* Mesh improvement - call new version of mmg2d1 */
   if ( !MMG2_mmg2d1n(mesh,sol) ) {
@@ -559,6 +627,17 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol)
     sol->np = 0;
   }
 
+  if ( mesh->info.optim ) {
+    printf("  ## WARNING: OPTIM OPTION UNAVAILABLE IN ISOSURFACE"
+           " DISCRETIZATION MODE. IGNORED.\n");
+    mesh->info.optim = 0;
+  }
+  if ( mesh->info.hsiz>0. ) {
+    printf("  ## WARNING: HSIZ OPTION UNAVAILABLE INISOSURFACE"
+           " DISCRETIZATION MODE.\n");
+    mesh->info.hsiz = -1.;
+  }
+
   chrono(OFF,&(ctim[1]));
   printim(ctim[1].gdif,stim);
   if ( mesh->info.imprim )
@@ -579,11 +658,13 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol)
   /* analysis */
   chrono(ON,&ctim[2]);
   if ( mesh->info.imprim )   fprintf(stdout,"\n  -- PHASE 1 : DATA ANALYSIS\n");
-  if ( abs(mesh->info.imprim) > 4 )
-    fprintf(stdout,"  ** SETTING ADJACENCIES\n");
+
   if ( !MMG2_scaleMesh(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
 
+  if ( abs(mesh->info.imprim) > 4 )
+    fprintf(stdout,"  ** SETTING ADJACENCIES\n");
   if ( mesh->nt && !MMG2_hashTria(mesh) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+
   if ( mesh->info.ddebug && !_MMG5_chkmsh(mesh,1,0) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
 
   /* Print initial quality */
@@ -696,6 +777,17 @@ int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
     fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
     _MMG5_DEL_MEM(mesh,disp->m,(disp->size*(disp->npmax+1))*sizeof(double));
     disp->np = 0;
+  }
+
+  if ( mesh->info.optim ) {
+    printf("  ## WARNING: OPTIM OPTION UNAVAILABLE IN ISOSURFACE"
+           " DISCRETIZATION MODE. IGNORED.\n");
+    mesh->info.optim = 0;
+  }
+  if ( mesh->info.hsiz>0. ) {
+    printf("  ## WARNING: HSIZ OPTION UNAVAILABLE INISOSURFACE"
+           " DISCRETIZATION MODE.\n");
+    mesh->info.hsiz = -1.;
   }
 
   chrono(OFF,&(ctim[1]));

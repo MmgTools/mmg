@@ -49,10 +49,11 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   //Displ     pd;
   MMG5_pPoint    ppt;
   MMG5_Info     *info;
-  int            i,k,iadr,sethmin,sethmax;
   double         dd,isqhmin,isqhmax;
   double         *m;
   double         lambda[2],v[2][2];
+  int            i,k,iadr;
+  char           sethmin,sethmax;
 
   // pd  = mesh->disp;
 
@@ -98,7 +99,7 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   sethmax = 0;
 
   if ( mesh->info.hsiz > 0. || mesh->info.optim ) {
-    // We don't want to set hmin/hmax here, it will be done in solTruncature
+    // We don't want to set hmin/hmax, it will be done later
     sethmin = sethmax = 1;
   }
   else {
@@ -112,25 +113,15 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
     }
   }
 
+
   /* Warning: we don't want to compute hmin/hmax from the level-set! */
-  if ( mesh->info.iso || (!sol->np) ) {
+  if ( mesh->info.iso || mesh->info.lag>=0 ||
+       ((!sol->np) && ((!mesh->info.optim) && (mesh->info.hsiz <= 0.)) ) ) {
     /* Set default values to hmin/hmax from the bounding box if not provided by
      * the user */
-    if ( !sethmin )  mesh->info.hmin  = 0.01;
-
-    if ( !sethmax )  mesh->info.hmax  = 2.;
-
-    if ( mesh->info.hmax < mesh->info.hmin ) {
-      if ( sethmin && sethmax ) {
-        fprintf(stdout,"  ## Error: mismatch parameters:"
-                " minimal mesh size larger than maximal one.\n");
-        fprintf(stdout,"  Exit program.\n");
-        return 0;
-      }
-      else if ( sethmin )
-        mesh->info.hmax = 100. * mesh->info.hmin;
-      else
-        mesh->info.hmin = 0.01 * mesh->info.hmax;
+    if ( !MMG5_Set_defaultTruncatureSizes(mesh,sethmin,sethmax) ) {
+      fprintf(stdout,"  Exit program.\n");
+      return 0;
     }
     sethmin = 1;
     sethmax = 1;
