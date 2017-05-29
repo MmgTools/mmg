@@ -53,7 +53,7 @@ void _MMG2D_solTruncature(MMG5_pMesh mesh, MMG5_pSol met) {
   double      isqhmin, isqhmax;
   char        sethmin, sethmax;
 
-//  assert ( mesh->info.optim || mesh->info.hsiz > 0. );
+  assert ( mesh->info.optim || mesh->info.hsiz > 0. );
 
   /* If not provided by the user, compute hmin/hmax from the metric computed by
    * the DoSol function. */

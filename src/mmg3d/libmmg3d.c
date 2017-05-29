@@ -96,6 +96,8 @@ void _MMG3D_solTruncature(MMG5_pMesh mesh, MMG5_pSol met) {
   double      isqhmin, isqhmax;
   int         i,k,iadr,sethmin,sethmax;
 
+  assert ( mesh->info.optim || mesh->info.hsiz > 0. );
+
   /* Detect the point used only by prisms */
   if ( mesh->nprism ) {
     for (k=1; k<=mesh->np; k++) {

@@ -97,7 +97,7 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   sethmin = 0;
   sethmax = 0;
 
-  if ( /*mesh->info.hsiz > 0. ||*/ mesh->info.optim ) {
+  if ( mesh->info.hsiz > 0. || mesh->info.optim ) {
     // We don't want to set hmin/hmax here, it will be done in solTruncature
     sethmin = sethmax = 1;
   }
@@ -299,14 +299,6 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
     }
     break;
   }
-
-  /* Compute quality */
-#warning : Probably unused
-  for (k=1; k<=mesh->nt; k++) {
-    pt = &mesh->tria[k];
-    pt->qual = _MMG2_caltri_iso(mesh,sol,pt);
-  }
-
   return(1);
 }
 

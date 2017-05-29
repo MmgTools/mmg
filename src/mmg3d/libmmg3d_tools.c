@@ -61,7 +61,7 @@ void MMG3D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
 #endif
   }
   else if ( met->size == 6 ) {
-    if ( !met->m && !mesh->info.optim /* && mesh->info.hsiz<=0.*/ ) {
+    if ( !met->m && !mesh->info.optim && mesh->info.hsiz<=0. ) {
       _MMG5_caltet          = _MMG5_caltet_iso;
       _MMG5_caltri          = _MMG5_caltri_iso;
       _MMG5_lenedg         = _MMG5_lenedg_iso;

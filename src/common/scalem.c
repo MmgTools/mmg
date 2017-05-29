@@ -123,7 +123,7 @@ int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
   sethmin = 0;
   sethmax = 0;
 
-  if ( /* mesh->info.hsiz > 0. || */ mesh->info.optim ) {
+  if ( mesh->info.hsiz > 0. || mesh->info.optim ) {
     // We don't want to set hmin/hmax here, it will be done in solTruncature
     sethmin = sethmax = 1;
   }
