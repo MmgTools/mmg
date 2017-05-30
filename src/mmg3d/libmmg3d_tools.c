@@ -798,7 +798,10 @@ int MMG3D_doSol(MMG5_pMesh mesh,MMG5_pSol met) {
             mark[ipb]++;
           }
         }
-        else return 0;
+        else {
+          _MMG5_SAFE_FREE(mark);
+          return 0;
+        }
     }
 
     /* if hmax is not specified, compute it from the metric */
@@ -806,7 +809,6 @@ int MMG3D_doSol(MMG5_pMesh mesh,MMG5_pSol met) {
       if ( met->size == 1 ) {
         dd = 0.;
         for (k=1; k<=mesh->np; k++) {
-          p1 = &mesh->point[k];
           if ( !mark[k] ) continue;
           dd = MG_MAX(dd,met->m[k]);
         }
@@ -815,7 +817,6 @@ int MMG3D_doSol(MMG5_pMesh mesh,MMG5_pSol met) {
       else if ( met->size == 6 ) {
         dd = FLT_MAX;
         for (k=1; k<=mesh->np; k++) {
-          p1 = &mesh->point[k];
           if ( !mark[k] ) continue;
           iadr = 6*k;
           dd = MG_MIN(dd,met->m[iadr]);
@@ -830,7 +831,6 @@ int MMG3D_doSol(MMG5_pMesh mesh,MMG5_pSol met) {
     /* vertex size */
     if ( met->size == 1 ) {
       for (k=1; k<=mesh->np; k++) {
-        p1 = &mesh->point[k];
         if ( !mark[k] ) {
           met->m[k] = mesh->info.hmax;
           continue;
@@ -841,7 +841,6 @@ int MMG3D_doSol(MMG5_pMesh mesh,MMG5_pSol met) {
     }
     else if ( met->size == 6 ) {
       for (k=1; k<=mesh->np; k++) {
-        p1 = &mesh->point[k];
         iadr = 6*k;
         if ( !mark[k] ) {
           met->m[iadr]   = 1./(mesh->info.hmax*mesh->info.hmax);

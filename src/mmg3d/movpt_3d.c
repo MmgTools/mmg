@@ -116,12 +116,16 @@ int _MMG5_movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,
       for (int iloc = 0; iloc < 3; ++iloc ) {
         len1 =  _MMG5_lenedg_iso(mesh,met,_MMG5_arpt[i0][iloc],pt);
         len2 =  _MMG5_lenedg_iso(mesh,met,_MMG5_arpt[i0][iloc],pt0);
-        if ( (len1 < _MMG3D_LOPTL && len2 >= _MMG3D_LOPTL) || (len1 > _MMG3D_LOPTL && len2 >len1 ) ) {
+        if ( (len1 < _MMG3D_LOPTL && len2 >= _MMG3D_LOPTL) ||
+             (len1 > _MMG3D_LOPTL && len2 >len1 ) ) {
+          _MMG5_SAFE_FREE(callist);
           //puts ( "rejected long \n" );
           return 0;
         }
 
-       if ( (len1 > _MMG3D_LOPTS && len2 <= _MMG3D_LOPTS) || (len1 < _MMG3D_LOPTS && len2 <len1 ) ) {
+        if ( (len1 > _MMG3D_LOPTS && len2 <= _MMG3D_LOPTS) ||
+             (len1 < _MMG3D_LOPTS && len2 <len1 ) ) {
+         _MMG5_SAFE_FREE(callist);
            //puts ( "rejected small \n" );
           return 0;
         }
@@ -591,7 +595,6 @@ int _MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
   detloc = _MMG5_det3pt1vec(p0->c,p1->c,p2->c,n);
 
   /* ntempa = point to which is associated 1 -uv[0] - uv[1], ntempb = uv[0], ntempc = uv[1] */
-  ntempa = pt->v[_MMG5_idir[iface][0]];
   ntempb = pt->v[_MMG5_idir[iface][1]];
   ntempc = pt->v[_MMG5_idir[iface][2]];
 
@@ -668,7 +671,6 @@ int _MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
   for (l=0; l<ilists; l++) {
     k           = lists[l] / 4;
     iface       = lists[l] % 4;
-    pt          = &mesh->tetra[k];
 
     _MMG5_tet2tri(mesh,k,iface,&tt);
     calold = MG_MIN(calold,_MMG5_caltri(mesh,met,&tt));
@@ -947,15 +949,9 @@ int _MMG5_movbdyrefpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
     + (p2->c[2] -p0->c[2])* (p2->c[2] -p0->c[2]);
 
   if ( ll1old < ll2old ) { //move towards p2
-    iel = it2;
-    ie  = ie2;
-    iface = iface2;
     ip = ip2;
   }
   else {
-    iel = it1;
-    ie  = ie1;
-    iface = iface1;
     ip = ip1;
   }
 
@@ -1316,15 +1312,9 @@ int _MMG5_movbdynompt_iso(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree, 
     + (p2->c[2] -p0->c[2])* (p2->c[2] -p0->c[2]);
 
   if ( ll1old < ll2old ) { //move towards p2
-    iel = it2;
-    ie  = ie2;
-    iface = iface2;
     ip = ip2;
   }
   else {
-    iel = it1;
-    ie  = ie1;
-    iface = iface1;
     ip = ip1;
   }
 
@@ -1682,15 +1672,9 @@ int _MMG5_movbdyridpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
     + (p2->c[2] -p0->c[2])* (p2->c[2] -p0->c[2]);
 
   if ( ll1old < ll2old ) { //move towards p2
-    iel = it2;
-    ie  = ie2;
-    iface = iface2;
     ip = ip2;
   }
   else {
-    iel = it1;
-    ie  = ie1;
-    iface = iface1;
     ip = ip1;
   }
 

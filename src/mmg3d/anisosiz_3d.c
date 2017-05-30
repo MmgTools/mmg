@@ -465,8 +465,6 @@ static int _MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int kel,
       if ( pt->v[_MMG5_idir[ifac][i0]]==idp ) break;
     }
     assert(i0!=3);
-    i1  = _MMG5_inxt2[i0];
-    i2  = _MMG5_iprv2[i0];
 
     _MMG5_tet2tri(mesh,iel,ifac,&ptt);
     assert(pt->xt);

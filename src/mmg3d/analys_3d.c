@@ -162,6 +162,7 @@ static int _MMG5_setadj(MMG5_pMesh mesh){
           /* Moebius strip */
           if ( pt1->base < 0 ) {
             fprintf(stderr,"  ## Orientation problem (1).\n");
+            _MMG5_SAFE_FREE(pile);
             return(0);
           }
           /* flip orientation */

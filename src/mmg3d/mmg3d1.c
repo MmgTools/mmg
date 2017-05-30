@@ -213,7 +213,6 @@ int _MMG3D_dichoto1b(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int ip) {
 
   maxit = 4;
   it    = 0;
-  ier   = 0;
   tp    = 1.0;
   to    = 0.0;
   do {
@@ -289,7 +288,6 @@ char _MMG5_chkedg(MMG5_pMesh mesh,MMG5_Tria *pt,char ori, double hmax,
         n[i][2] *= -1.0;
       }
       assert(p[i]->xp);
-      pxp = &mesh->xpoint[p[i]->xp];
       memcpy(&t[i],p[i]->n,3*sizeof(double));
     }
     else {
@@ -1129,8 +1127,6 @@ _MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
                               memlack=1;
                               goto split
                               ,o,0,-1);
-          p1  = &mesh->point[ip1];
-          p2  = &mesh->point[ip2];
         }
 
         if ( met->m ) {
@@ -1399,6 +1395,7 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
       if ( ip > 0 && !(ptt.tag[j] & MG_GEO) )  continue;
 
       ier = _MMG3D_bezierInt(&pb,&uv[j][0],o,no,to);
+      assert(ier);
       /* new point along edge */
       if ( !ip ) {
         ip = _MMG3D_newPt(mesh,o,MG_BDY);
@@ -1416,8 +1413,6 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         }
         if ( !_MMG5_hashEdge(mesh,&hash,ip1,ip2,ip) )  return(-1);
         ppt = &mesh->point[ip];
-        p1  = &mesh->point[ip1];
-        p2  = &mesh->point[ip2];
 
         if ( met->m ) {
           if ( typchk == 1 && (met->size>1) )
@@ -1508,6 +1503,8 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           pxp = &mesh->xpoint[ppt->xp];
           if ( pt->xt )  ier = _MMG5_bezierCP(mesh,&ptt,&pb,MG_GET(pxt->ori,i));
           else  ier = _MMG5_bezierCP(mesh,&ptt,&pb,1);
+          assert(ier);
+
           ier = _MMG3D_bezierInt(&pb,&uv[j][0],o,no,to);
 
           dd = no[0]*pxp->n1[0]+no[1]*pxp->n1[1]+no[2]*pxp->n1[2];

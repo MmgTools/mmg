@@ -142,7 +142,7 @@ int _MMG3D_coledges(MMG5_pMesh mesh,MMG5_pSol met,int k,int i) {
   MMG5_pTetra pt;
   double      len;
   int         ied,iedg,iq,i1,ilistcol,listcol[MMG3D_LMAX+2];
-  int         il,ier;
+  int         ier;
   char        iface,ief;
 
   pt = &mesh->tetra[k];
@@ -217,9 +217,8 @@ int MMG3D_optbdry(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree,int k) {
   MMG5_pxTetra pxt;
   double       lint,lbdy,len,lmin,lmax;
   int          imin,imax;
-  int          iq,ib,i,j,ipb,list[MMG3D_LMAX+2];
-  int          iedg,ier,ilist,i1,ied,ia,it1,it2,ret,imove;
-  char         iface,ief;
+  int          ib,i,j,ipb,list[MMG3D_LMAX+2];
+  int          iedg,ier,ilist,ied,ia,it1,it2,ret,imove;
 
   imove = 0;
 

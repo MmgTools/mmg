@@ -128,7 +128,7 @@ int _MMG2_boulen(MMG5_pMesh mesh, int start,char ip, int *pleft, int *pright, do
   dd = ux*ux + uy*uy;
   
   if ( dd < _MMG5_EPSD ) {
-    MMG5_errorMessage(&mesh->info.errMessage,"%:%d:Error: Null edge length is"
+    MMG5_errorMessage(&mesh->info.errMessage,"%s:%d:Error: Null edge length is"
                       " 0 (%e).\n",__FILE__,__LINE__,dd);
     return 0;
   }

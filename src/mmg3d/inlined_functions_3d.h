@@ -429,8 +429,6 @@ inline double _MMG5_caltet_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
   ip[2] = pt->v[2];
   ip[3] = pt->v[3];
 
-  cal = _MMG5_NULKAL;
-
   /* average metric */
   if ( !_MMG5_moymet(mesh,met,pt,&mm[0]) )
     return (0.0);

@@ -666,7 +666,6 @@ int _MMG5_chkmaniball(MMG5_pMesh mesh, int start, char ip){
   while( cur < ilist ) {
     k = list[cur] / 4;
     i = list[cur] % 4;
-    pt = &mesh->tetra[k];
 
     adja = &mesh->adja[4*(k-1)+1];
     for(l=0; l<3; l++){
@@ -705,7 +704,6 @@ int _MMG5_chkmaniball(MMG5_pMesh mesh, int start, char ip){
   while(cur < ilist){
     k = list[cur] / 4;
     i = list[cur] % 4;
-    pt = &mesh->tetra[k];
 
     adja = &mesh->adja[4*(k-1)+1];
     for(l=0; l<3; l++){
@@ -1016,7 +1014,6 @@ int _MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int n
       iel = stor / 4;
       ip  = stor % 4;
 
-      pt = &mesh->tetra[iel];
       adja = &mesh->adja[4*(iel-1)+1];
 
       jp = ip;
@@ -1081,7 +1078,6 @@ int _MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int n
       iel = stor / 4;
       iq  = stor % 4;
 
-      pt = &mesh->tetra[iel];
       adja = &mesh->adja[4*(iel-1)+1];
 
       jq = iq;
@@ -1185,7 +1181,6 @@ int _MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int n
       iel = stor / 4;
       ip  = stor % 4;
 
-      pt = &mesh->tetra[iel];
       adja = &mesh->adja[4*(iel-1)+1];
 
       jp = ip;
@@ -1325,7 +1320,6 @@ int _MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int n
       stor *= -1;
       iel = stor / 4;
       ip  = stor % 4;
-      pt = &mesh->tetra[iel];
       adja = &mesh->adja[4*(iel-1)+1];
 
       jp = ip;
@@ -1366,7 +1360,6 @@ int _MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int n
     else {
       iel = stor / 4;
       iq  = stor % 4;
-      pt = &mesh->tetra[iel];
       adja = &mesh->adja[4*(iel-1)+1];
 
       jq = iq;

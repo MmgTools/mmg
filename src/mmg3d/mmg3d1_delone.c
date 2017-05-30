@@ -268,7 +268,6 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
                               goto collapse,
                               o,MG_NOTAG,-1);
         }
-        ppt = &mesh->point[ip];
         if ( met->m ) {
           if ( _MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
             _MMG3D_delPt(mesh,ip);
@@ -314,7 +313,6 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
                               goto collapse,
                               o,MG_NOTAG,-1);
         }
-        ppt = &mesh->point[ip];
         if ( met->m ) {
           if ( _MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
             _MMG3D_delPt(mesh,ip);
@@ -438,8 +436,6 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
       if ( (ii==imintet) && (lmintet < _MMG3D_LOPTS_MMG5_DEL)) continue;
       if ( (ii==imaxtet) && (lmaxtet > _MMG3D_LOPTL_MMG5_DEL) ) continue;
 
-      ip1  = _MMG5_iare[ii][0];
-      ip2  = _MMG5_iare[ii][1];
       len = _MMG5_lenedg(mesh,met,ii,pt);
 
       imax = ii;
@@ -592,7 +588,6 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
                                 goto collapse2
                                 ,o,MG_NOTAG,-1);
           }
-          ppt = &mesh->point[ip];
           if ( met->m ) {
             if ( _MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
               _MMG3D_delPt(mesh,ip);
@@ -636,7 +631,6 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
                                 goto collapse2,
                                 o,MG_NOTAG,-1);
           }
-          ppt = &mesh->point[ip];
           if ( met->m ) {
             if ( _MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
               _MMG3D_delPt(mesh,ip);
@@ -775,7 +769,7 @@ _MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree, int* warn) 
     if ( !mesh->info.noinsert ) {
       *warn=0;
       ns = nc = 0;
-      nf = nm = 0;
+      nm = 0;
       ifilt = 0;
       ne = mesh->ne;
       ier = _MMG5_boucle_for(mesh,met,octree,ne,&ifilt,&ns,&nc,warn,it);
