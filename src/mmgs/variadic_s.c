@@ -332,6 +332,7 @@ int _MMGS_Free_structures_var(va_list argptr)
 
  /* mesh */
   assert(mesh && *mesh);
+  assert(sol  && *sol);
 
   if ( (*mesh)->edge )
     _MMG5_DEL_MEM((*mesh),(*mesh)->edge,((*mesh)->na+1)*sizeof(MMG5_Edge));
@@ -421,6 +422,7 @@ int _MMGS_Free_names_var(va_list argptr)
   }
 
   /* mesh & met */
+  assert(mesh && *mesh && sol && *sol );
   MMG5_mmgFree_names(*mesh,*sol);
 
   return 1;

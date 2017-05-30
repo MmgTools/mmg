@@ -478,7 +478,6 @@ int litcol(MMG5_pMesh mesh,int k,char i,double kali) {
     for (l=1; l<ilist-1+open; l++) {
       jel = list[l] / 3;
       j   = list[l] % 3;
-      jj  = _MMG5_inxt2[j];
       j2  = _MMG5_iprv2[j];
       pt1 = &mesh->tria[jel];
 

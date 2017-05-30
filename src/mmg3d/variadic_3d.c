@@ -402,6 +402,7 @@ int _MMG3D_Free_structures_var(va_list argptr)
 
  /* mesh */
   assert(mesh && *mesh);
+  assert(sol  && *sol);
 
   if ( (*mesh)->tetra )
     _MMG5_DEL_MEM((*mesh),(*mesh)->tetra,((*mesh)->nemax+1)*sizeof(MMG5_Tetra));

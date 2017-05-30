@@ -177,7 +177,6 @@ int _MMGS_dichoto1b(MMG5_pMesh mesh, MMG5_pSol met, int iel, int ia, int ip) {
 
   maxit = 4;
   it    = 0;
-  ier   = 0;
   tp    = 1.0;
   to    = 0.0;
   do {
@@ -435,7 +434,6 @@ static int movtri(MMG5_pMesh mesh,MMG5_pSol met,int maxit) {
 
         if ( ppt->flag == base || MS_SIN(ppt->tag) || ppt->tag & MG_NOM )
           continue;
-        ier = 0;
         ilist = boulet(mesh,k,i,list);
 
         if ( !ilist ) continue;
@@ -1060,7 +1058,6 @@ static int adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
         return(ns);
       }
       /* if we realloc memory in split1b pt pointer is not valid aymore. */
-      pt = &mesh->tria[k];
       ns += ier;
     }
   }
@@ -1137,7 +1134,7 @@ static int adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
 
 /* analyze triangles and split or collapse to match gradation */
 static int adptri(MMG5_pMesh mesh,MMG5_pSol met) {
-  int        it,it1,nnc,nns,nnf,nnm,maxit,nc,ns,nf,nm;
+  int        it,nnc,nns,nnf,nnm,maxit,nc,ns,nf,nm;
 
   /* iterative mesh modifications */
   it = nnc = nns = nnf = nnm = 0;
@@ -1164,7 +1161,6 @@ static int adptri(MMG5_pMesh mesh,MMG5_pSol met) {
       ns = 0;
       nc = 0;
     }
-    nf = nm = 0;
 
     if ( !mesh->info.noswap ) {
       nf = swpmsh(mesh,met,2);
@@ -1200,7 +1196,6 @@ static int adptri(MMG5_pMesh mesh,MMG5_pSol met) {
     return(0);
 
   /*shape optim*/
-  it1 = it;
   it  = 0;
   maxit = 2;
   do {

@@ -107,7 +107,7 @@ int movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   GV[0] *= (4.0 / npt);
   GV[1] *= (4.0 / npt);
   GV[2] *= (4.0 / npt);
-  Vold  *= (1.0 / npt);
+  /* Vold  *= (1.0 / npt); */
 
   /* Step 2 : computation of the rotation matrix T_p0 S -> [z = 0] */
   n  = &p0->n[0]; //once again, that depends on what kind of point is considered.
@@ -213,7 +213,6 @@ int movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   }
 
   /* Sizing of time step : make sure point does not go out corresponding triangle. */
-  iel = list[kel] / 3;
   det2d = -gv[1]*(lispoi[3*(kel+1)+1] - lispoi[3*(kel)+1]) \
     +  gv[0]*(lispoi[3*(kel+1)+2] - lispoi[3*(kel)+2]);
   if ( fabs(det2d) < _MMG5_EPSD )  return(0);
@@ -240,8 +239,6 @@ int movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   /* Step 4 : come back to original problem, and compute patch in triangle iel */
   iel  = list[kel]/3;
   i0 = list[kel]%3;
-  i1 = _MMG5_inxt2[i0];
-  i2 = _MMG5_inxt2[i1];
   pt = &mesh->tria[iel];
 
   ier = _MMG5_bezierCP(mesh,pt,&b,1);
@@ -287,7 +284,7 @@ int movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
       + (p1->c[2]-o[2])*(p1->c[2]-o[2]) - mlon;
     Vnew   += devmean*devmean;
   }
-  Vnew  *= (1.0 / npt);
+  /* Vnew  *= (1.0 / npt); */
   /* if ( Vold < Vnew )  return(0); */
 
   /* Second test : check whether geometric approximation has not been too much degraded */
@@ -343,7 +340,6 @@ int movridpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   char    i0,i1,i2,isrid1,isrid2,isrid;
 
   step   = 0.1;
-  isrid  = 0  ;
   isrid1 = 0  ;  isrid2 = 0;
   it1    = 0  ;  it2    = 0;
   ip1    = 0  ;  ip2    = 0;

@@ -158,8 +158,6 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   }
 
   /* Sizing of time step : make sure point does not go out corresponding triangle. */
-  iel = list[kel] / 3;
-
   area = - gv[1]*(lispoi[3*(kel+1)+1] - lispoi[3*(kel)+1]) \
     + gv[0]*(lispoi[3*(kel+1)+2] - lispoi[3*(kel)+2]);
   if ( fabs(area) < _MMG5_EPSD2 )  return(0);
@@ -186,8 +184,6 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   /* Step 4 : come back to original problem, and compute patch in triangle iel */
   iel = list[kel] / 3;
   i0  = list[kel] % 3;
-  i1  = _MMG5_inxt2[i0];
-  i2  = _MMG5_inxt2[i1];
   pt  = &mesh->tria[iel];
 
   ier = _MMG5_bezierCP(mesh,pt,&pb,1);
@@ -277,7 +273,7 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   char     voy1,voy2,isrid,isrid1,isrid2,i0,i1,i2;
 //#warning this step is different than the one used on iso or for int pts in aniso
   step  = 0.2;
-  isrid = isrid1 = isrid2 = 0;
+  isrid1 = isrid2 = 0;
   it1   = it2 = 0;
   ip1   = ip2 = 0;
   voy1  = voy2 = 0;
