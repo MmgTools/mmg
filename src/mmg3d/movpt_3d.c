@@ -58,6 +58,8 @@ int _MMG5_movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,
   MMG5_pPoint               p0,p1,p2,p3,ppt0;
   double               vol,totvol;
   double               calold,calnew,*callist;
+  double len1,len2;
+  int    iloc;
   int                  k,iel,i0;
 
   // Dynamic alloc for windows comptibility
@@ -112,8 +114,7 @@ int _MMG5_movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,
     calnew = MG_MIN(calnew,callist[k]);
 
     if ( improve==2 ) {
-      double len1,len2;
-      for (int iloc = 0; iloc < 3; ++iloc ) {
+      for ( iloc = 0; iloc < 3; ++iloc ) {
         len1 =  _MMG5_lenedg_iso(mesh,met,_MMG5_arpt[i0][iloc],pt);
         len2 =  _MMG5_lenedg_iso(mesh,met,_MMG5_arpt[i0][iloc],pt0);
         if ( (len1 < _MMG3D_LOPTL && len2 >= _MMG3D_LOPTL) ||
