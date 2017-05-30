@@ -178,8 +178,10 @@ int _MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,
         if ( ( mesh->point[pt->v[_MMG5_ifar[i][0]]].tag & MG_BDY ) &&
              ( mesh->point[pt->v[_MMG5_ifar[i][1]]].tag & MG_BDY ) ) {
           if ( ( mesh->point[pt->v[_MMG5_iare[i][0]]].tag & MG_BDY ) ||
-               ( mesh->point[pt->v[_MMG5_iare[i][1]]].tag & MG_BDY ) )
-            return(0);
+               ( mesh->point[pt->v[_MMG5_iare[i][1]]].tag & MG_BDY ) ) {
+            ier = 0;
+            break;
+          }
         }
       }
 
