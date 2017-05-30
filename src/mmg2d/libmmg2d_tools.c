@@ -61,7 +61,7 @@ void MMG2D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
  *
  */
 int MMG2_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
-  int       ret,i,nspl,nun;
+  int       ret,i;
   char     *ptr,data[256];
   FILE     *in;
   MMG5_pMat pm;

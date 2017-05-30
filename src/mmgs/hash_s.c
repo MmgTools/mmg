@@ -35,7 +35,13 @@
 
 #include "mmgs.h"
 
-/* tria packing */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \return 1 if success, 0 if fail.
+ *
+ * tria packing
+ *
+ */
 static int paktri(MMG5_pMesh mesh) {
   MMG5_pTria   pt,pt1;
   int     k;
@@ -58,31 +64,6 @@ static int paktri(MMG5_pMesh mesh) {
     mesh->tria[k].v[2] = k+1;
   }
   return 1;
-}
-
-/**
- * \param mesh pointer towar the mesh structure.
- *
- * Set non-manifold tag at extremities of a non-manifold edge.
- *
- */
-static inline
-void _MMG5_setNmTag(MMG5_pMesh mesh) {
-  MMG5_pTria pt;
-  int        k,i;
-
-  for (k=1; k<=mesh->nt; k++) {
-    pt  = &mesh->tria[k];
-
-    for (i=0; i<3; i++) {
-      if ( pt->tag[i] & MG_NOM ) {
-        /* Set point tag to MG_NOM if edge is MG_NOM*/
-        mesh->point[pt->v[_MMG5_inxt2[i]]].tag |= MG_NOM;
-        mesh->point[pt->v[_MMG5_iprv2[i]]].tag |= MG_NOM;
-      }
-    }
-  }
-
 }
 
 /**

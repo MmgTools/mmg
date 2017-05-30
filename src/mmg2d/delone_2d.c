@@ -314,7 +314,7 @@ int _MMG2_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
   if ( alert )  return(0);
   
   /* Hash table parameters */
-  if ( size > 3*MMG2_LONMAX )  return(0);
+  if ( size >= 3*MMG2_LONMAX )  return(0);
   if ( !MMG2_hashNew(&hedg,size,3*size) ) { /*3*size is enough */
     fprintf(stdout,"  ## Unable to complete mesh.\n");
     return(-1);
@@ -330,7 +330,6 @@ int _MMG2_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
                           _MMG5_INCREASE_MEM_MESSAGE();
                           printf("  Exit program.\n");return(-1);,
                           -1);
-      pt1  = &mesh->tria[old];
     }
   }
 

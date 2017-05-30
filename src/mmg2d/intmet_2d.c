@@ -90,7 +90,6 @@ int _MMG5_interpmet22(MMG5_pMesh mesh,double *m,double *n,double s,double *mr) {
     else {
       dd    = m[0] - m[2];
       trimn = m[0] + m[2];
-      det   = m[0]*m[2] - m[1]*m[1];
       
       sqDelta = sqrt(fabs(dd*dd +4*0*m[1]*m[1]));
       dm[0]   = 0.5 * (trimn + sqDelta);

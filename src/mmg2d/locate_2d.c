@@ -333,7 +333,6 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
 
   k = *kdep;
   ncompt = 0;
-  ibreak = 0;
   lon = 0;
   ppa = &mesh->point[ia];
   ppb = &mesh->point[ib];
@@ -363,13 +362,9 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
     adja = &mesh->adja[iadr];
     ibreak = 0;
     ncompt++;
-    ivert = 0;
     if(pt->v[0]==ib || pt->v[1]==ib || pt->v[2]==ib) {
       ibreak = 1;
-      ivert  = 2;
     }
-    if(pt->v[0]==ia || pt->v[1]==ia || pt->v[2]==ia) ivert = 1;
-
     /* Current triangle has one vertex = to the last one of the processed edge */
     if ( pt->v[0] == ib || pt->v[1] == ib || pt->v[2] == ib ) ibreak = 1;
 

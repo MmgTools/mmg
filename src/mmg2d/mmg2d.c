@@ -84,7 +84,6 @@ int MMG2D_countLocalParamAtEdg( MMG5_pMesh mesh,_MMG5_iNode **bdyRefs) {
 
   /** Count the number of different boundary references and list it */
   (*bdyRefs) = NULL;
-  npar = 0;
 
   k = mesh->na? mesh->edge[1].ref : 0;
 

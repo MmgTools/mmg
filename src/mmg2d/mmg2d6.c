@@ -45,7 +45,6 @@
 int _MMG2_isSplit(MMG5_pMesh mesh,int ref,int *refint,int *refext) {
   MMG5_pMat    pm;
   int          k;
-  char         spl;
   
   /* Check in the info->mat table if reference ref is supplied by the user */
   for (k=0; k<mesh->info.nmat; k++) {

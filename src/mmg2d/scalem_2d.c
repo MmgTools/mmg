@@ -45,7 +45,6 @@
  *
  */
 int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
-  MMG5_pTria     pt;
   //Displ     pd;
   MMG5_pPoint    ppt;
   MMG5_Info     *info;

@@ -166,7 +166,7 @@ int MMG2_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
     ppt = &mesh->point[k];
     ppt->flag	= -10;
   }
-  ns = nus = iter = 0;
+  iter = 0;
   maxiter = 3;
 
 	do {

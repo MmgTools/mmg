@@ -433,8 +433,6 @@ int MMG5_Set_defaultTruncatureSizes(MMG5_pMesh mesh,char sethmin,char sethmax) {
 }
 
 int MMG5_Compute_constantSize(MMG5_pMesh mesh,MMG5_pSol met,double *hsiz) {
-  MMG5_pPoint  ppt;
-  int          k,iadr;
   char         sethmin,sethmax;
 
 
