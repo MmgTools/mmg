@@ -1245,7 +1245,6 @@ int _MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int n
       iel = stor / 4;
       iq  = stor % 4;
 
-      pt = &mesh->tetra[iel];
       adja = &mesh->adja[4*(iel-1)+1];
 
       jq = iq;

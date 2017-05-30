@@ -200,7 +200,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
         }
         ier = _MMG3D_simbulgept(mesh,met,list,ilist,ip);
         if ( !ier ) {
-          ier = _MMG3D_dichoto1b(mesh,met,list,ilist,ip);
+          _MMG3D_dichoto1b(mesh,met,list,ilist,ip);
         }
         /* We can create element with 0 qualities at machine epsilon even when ip
            is the mid edge point */
@@ -769,7 +769,6 @@ _MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree, int* warn) 
     if ( !mesh->info.noinsert ) {
       *warn=0;
       ns = nc = 0;
-      nm = 0;
       ifilt = 0;
       ne = mesh->ne;
       ier = _MMG5_boucle_for(mesh,met,octree,ne,&ifilt,&ns,&nc,warn,it);

@@ -997,7 +997,7 @@ int _MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,cha
               _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                  "larger xtetra table",
                                  mesh->xt--;
-                                 _MMG5_SAFE_FREE(ind); _MMG5_SAFE_FREE(p0_c);
+                                 _MMG5_SAFE_FREE(ind);_MMG5_SAFE_FREE(p0_c);
                                  _MMG5_SAFE_FREE(p1_c);return -1;,-1);
             }
             pt1->xt = mesh->xt;

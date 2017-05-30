@@ -1506,6 +1506,7 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           assert(ier);
 
           ier = _MMG3D_bezierInt(&pb,&uv[j][0],o,no,to);
+          assert(ier);
 
           dd = no[0]*pxp->n1[0]+no[1]*pxp->n1[1]+no[2]*pxp->n1[2];
           if ( dd > 1.0-_MMG5_EPS ) continue;

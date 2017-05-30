@@ -784,10 +784,10 @@ int _MMG5_movbdyrefpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
   MMG5_pPar             par;
   double                step,ll1old,ll2old,o[3],no[3],to[3];
   double                calold,calnew,caltmp,*callist,hmax,hausd;
-  int                   l,iel,ip0,ipa,ipb,iptmpa,iptmpb,it1,it2,ip1,ip2,ip,nxp;
+  int                   l,iel,ip0,ipa,ipb,iptmpa,iptmpb,ip1,ip2,ip,nxp;
   int                   isloc,j;
   int16_t               tag;
-  unsigned char         i,i0,ie,iface,iface1,iface2,iea,ieb,ie1,ie2;
+  unsigned char         i,i0,ie,iface,iea,ieb;
 
   step = 0.1;
   ip1 = ip2 = 0;
@@ -843,10 +843,7 @@ int _MMG5_movbdyrefpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
       if ( pt->xt )  tag = mesh->xtetra[pt->xt].tag[iea];
       else  tag = 0;
       if ( MG_REF & tag ) {
-        it1 = iel;
         ip1 = iptmpa;
-        ie1 = iea;
-        iface1 = iface;
         break;
       }
     }
@@ -854,10 +851,7 @@ int _MMG5_movbdyrefpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
       if ( pt->xt )  tag = mesh->xtetra[pt->xt].tag[ieb];
       else  tag = 0;
       if ( MG_REF & tag ) {
-        it1 = iel;
         ip1 = iptmpb;
-        ie1 = ieb;
-        iface1 = iface;
         break;
       }
     }
@@ -910,10 +904,7 @@ int _MMG5_movbdyrefpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
       if ( pt->xt )  tag = mesh->xtetra[pt->xt].tag[iea];
       else  tag = 0;
       if ( MG_REF & tag ) {
-        it2 = iel;
         ip2 = iptmpa;
-        ie2 = iea;
-        iface2 = iface;
         break;
       }
     }
@@ -921,10 +912,7 @@ int _MMG5_movbdyrefpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
       assert(pt->xt);
       tag = mesh->xtetra[pt->xt].tag[ieb];
       if ( MG_REF & tag ) {
-        it2 = iel;
         ip2 = iptmpb;
-        ie2 = ieb;
-        iface2 = iface;
         break;
       }
     }
@@ -1148,10 +1136,10 @@ int _MMG5_movbdynompt_iso(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree, 
   MMG5_pPar         par;
   double            step,ll1old,ll2old,calold,calnew,caltmp,*callist;
   double            o[3],no[3],to[3],hmax,hausd;
-  int               ip0,ip1,ip2,ip,iel,ipa,ipb,l,iptmpa,iptmpb,it1,it2,nxp;
+  int               ip0,ip1,ip2,ip,iel,ipa,ipb,l,iptmpa,iptmpb,nxp;
   int               j,isloc;
   int16_t           tag;
-  char              iface,i,i0,iea,ieb,ie,ie1,ie2,iface1,iface2;
+  char              iface,i,i0,iea,ieb,ie;
 
   step = 0.1;
   ip1 = ip2 = 0;
@@ -1207,10 +1195,7 @@ int _MMG5_movbdynompt_iso(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree, 
       if ( pt->xt )  tag = mesh->xtetra[pt->xt].tag[iea];
       else  tag = 0;
       if ( MG_NOM & tag ) {
-        it1 = iel;
         ip1 = iptmpa;
-        ie1 = iea;
-        iface1 = iface;
         break;
       }
     }
@@ -1218,10 +1203,7 @@ int _MMG5_movbdynompt_iso(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree, 
       if ( pt->xt )  tag = mesh->xtetra[pt->xt].tag[ieb];
       else  tag = 0;
       if ( MG_NOM & tag ) {
-        it1 = iel;
         ip1 = iptmpb;
-        ie1 = ieb;
-        iface1 = iface;
         break;
       }
     }
@@ -1274,10 +1256,7 @@ int _MMG5_movbdynompt_iso(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree, 
       if ( pt->xt )  tag = mesh->xtetra[pt->xt].tag[iea];
       else  tag = 0;
       if ( MG_NOM & tag ) {
-        it2 = iel;
         ip2 = iptmpa;
-        ie2 = iea;
-        iface2 = iface;
         break;
       }
     }
@@ -1285,10 +1264,7 @@ int _MMG5_movbdynompt_iso(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree, 
       assert(pt->xt);
       tag = mesh->xtetra[pt->xt].tag[ieb];
       if ( MG_NOM & tag ) {
-        it2 = iel;
         ip2 = iptmpb;
-        ie2 = ieb;
-        iface2 = iface;
         break;
       }
     }
@@ -1507,10 +1483,10 @@ int _MMG5_movbdyridpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
   MMG5_pPar            par;
   double               step,ll1old,ll2old,o[3],no1[3],no2[3],to[3];
   double               calold,calnew,caltmp,*callist,hmax,hausd;
-  int                  l,iel,ip0,ipa,ipb,iptmpa,iptmpb,it1,it2,ip1,ip2,ip,nxp;
+  int                  l,iel,ip0,ipa,ipb,iptmpa,iptmpb,ip1,ip2,ip,nxp;
   int                  j,isloc;
   int16_t              tag;
-  unsigned char        i,i0,ie,iface,iface1,iface2,iea,ieb,ie1,ie2;
+  unsigned char        i,i0,ie,iface,iea,ieb;
 
   step = 0.1;
   ip1 = ip2 = 0;
@@ -1566,10 +1542,7 @@ int _MMG5_movbdyridpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
       if ( pt->xt )  tag = mesh->xtetra[pt->xt].tag[iea];
       else  tag = 0;
       if ( MG_GEO & tag ) {
-        it1 = iel;
         ip1 = iptmpa;
-        ie1 = iea;
-        iface1 = iface;
         break;
       }
     }
@@ -1577,10 +1550,7 @@ int _MMG5_movbdyridpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
       if ( pt->xt )  tag = mesh->xtetra[pt->xt].tag[ieb];
       else  tag = 0;
       if ( MG_GEO & tag ) {
-        it1 = iel;
         ip1 = iptmpb;
-        ie1 = ieb;
-        iface1 = iface;
         break;
       }
     }
@@ -1633,10 +1603,7 @@ int _MMG5_movbdyridpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
       if ( pt->xt )  tag = mesh->xtetra[pt->xt].tag[iea];
       else  tag = 0;
       if ( MG_GEO & tag ) {
-        it2 = iel;
         ip2 = iptmpa;
-        ie2 = iea;
-        iface2 = iface;
         break;
       }
     }
@@ -1644,10 +1611,7 @@ int _MMG5_movbdyridpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
       if ( pt->xt )  tag = mesh->xtetra[pt->xt].tag[ieb];
       else  tag = 0;
       if ( MG_GEO & tag ) {
-        it2 = iel;
         ip2 = iptmpb;
-        ie2 = ieb;
-        iface2 = iface;
         break;
       }
     }
