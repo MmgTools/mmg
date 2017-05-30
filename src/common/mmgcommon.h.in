@@ -503,7 +503,6 @@ typedef struct _MMG5_dNode_s {
  int           _MMG5_intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr);
  extern int    _MMG5_countLocalParamAtTri( MMG5_pMesh,_MMG5_iNode **);
  extern int    _MMG5_writeLocalParamAtTri( MMG5_pMesh,_MMG5_iNode *,FILE*);
- extern int MMG5_Set_defaultTruncatureSizes(MMG5_pMesh mesh,char,char);
  double         MMG2_quickarea(double a[2],double b[2],double c[2]);
 
  int            MMG5_errorMessage(char **string_ptr, const char *format, ...);

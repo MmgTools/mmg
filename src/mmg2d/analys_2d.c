@@ -632,7 +632,8 @@ int _MMG2_regnor(MMG5_pMesh mesh) {
 
   /* reset the ppt->s tag */
   for (k=1; k<=mesh->np; ++k) {
-    mesh->point[k].s = 0;
+    ppt = &mesh->point[k];
+    ppt->s = 0;
   }
 
   if ( mesh->info.imprim < 0 || mesh->info.ddebug )  fprintf(stdout,"\n");

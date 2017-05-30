@@ -39,106 +39,6 @@
     }while(0)
 
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the solution structure.
- *
- * Truncate a metric by hmax and hmin values.
- *
- */
-static inline
-void _MMG2D_solTruncature(MMG5_pMesh mesh, MMG5_pSol met) {
-  MMG5_pPoint ppt;
-  int         k,iadr;
-  double      isqhmin, isqhmax;
-  char        sethmin, sethmax;
-
-  assert ( mesh->info.optim || mesh->info.hsiz > 0. );
-
-  /* If not provided by the user, compute hmin/hmax from the metric computed by
-   * the DoSol function. */
-  sethmin = sethmax = 1;
-  if ( mesh->info.hmin < 0. ) {
-    sethmin = 0;
-    if ( met->size == 1 ) {
-      mesh->info.hmin = FLT_MAX;
-      for (k=1; k<=mesh->np; k++)  {
-        ppt = &mesh->point[k];
-        if ( !MG_VOK(ppt) ) continue;
-        mesh->info.hmin = MG_MIN(mesh->info.hmin,met->m[k]);
-      }
-    }
-    else if ( met->size == 3 ){
-      mesh->info.hmin = 0.;
-      for (k=1; k<=mesh->np; k++)  {
-        ppt = &mesh->point[k];
-        if ( !MG_VOK(ppt) ) continue;
-        iadr = met->size*k;
-        mesh->info.hmin = MG_MAX(mesh->info.hmin,met->m[iadr]);
-        mesh->info.hmin = MG_MAX(mesh->info.hmin,met->m[iadr+2]);
-      }
-      mesh->info.hmin = 1./sqrt(mesh->info.hmin);
-    }
-  }
-  if ( mesh->info.hmax < 0. ) {
-    sethmax = 1;
-    if ( met->size == 1 ) {
-      mesh->info.hmax = 0.;
-      for (k=1; k<=mesh->np; k++)  {
-        ppt = &mesh->point[k];
-        if ( !MG_VOK(ppt) ) continue;
-        mesh->info.hmax = MG_MAX(mesh->info.hmax,met->m[k]);
-      }
-    }
-    else if ( met->size == 3 ){
-      mesh->info.hmax = FLT_MAX;
-      for (k=1; k<=mesh->np; k++)  {
-        ppt = &mesh->point[k];
-        if ( !MG_VOK(ppt) ) continue;
-        iadr = met->size*k;
-        mesh->info.hmax = MG_MIN(mesh->info.hmax,met->m[iadr]);
-        mesh->info.hmax = MG_MIN(mesh->info.hmax,met->m[iadr+2]);
-      }
-      mesh->info.hmax = 1./sqrt(mesh->info.hmax);
-    }
-  }
-
-  if ( !sethmin ) {
-    mesh->info.hmin *=.1;
-    /* Check that user has not given a hmax value lower that the founded
-     * hmin. */
-    if ( mesh->info.hmin > mesh->info.hmax ) {
-      mesh->info.hmin = 0.1*mesh->info.hmax;
-    }
-  }
-  if ( !sethmax ) {
-    mesh->info.hmax *=10.;
-    /* Check that user has not given a hmin value bigger that the founded
-     * hmax. */
-    if ( mesh->info.hmax < mesh->info.hmin ) {
-      mesh->info.hmax = 10.*mesh->info.hmin;
-    }
-  }
-
-  /* vertex size */
-  if ( met->size == 1 ) {
-    for (k=1; k<=mesh->np; k++) {
-      met->m[k] = MG_MIN(mesh->info.hmax,MG_MAX(mesh->info.hmin,met->m[k]));
-    }
-  }
-  else if ( met->size==3 ) {
-    isqhmin = 1./(mesh->info.hmin*mesh->info.hmin);
-    isqhmax = 1./(mesh->info.hmax*mesh->info.hmax);
-
-    for (k=1; k<=mesh->np; k++) {
-      iadr = 3*k;
-      met->m[iadr]   = MG_MAX(isqhmax,MG_MIN(isqhmin,met->m[iadr]));
-      met->m[iadr+2] = met->m[iadr];
-    }
-  }
-  return;
-}
-
 int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
 {
   mytime    ctim[TIMEMAX];
@@ -255,11 +155,14 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
      if ( !MMG2_unscaleMesh(mesh,sol) ) _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
      _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
     }
-    _MMG2D_solTruncature(mesh,sol);
+    MMG2D_solTruncatureForOptim(mesh,sol);
   }
 
   if ( mesh->info.hsiz > 0. ) {
-    printf("Not yet implemented."); return 666;
+    if ( !MMG2D_Set_constantSize(mesh,sol) ) {
+     if ( !MMG2_unscaleMesh(mesh,sol) ) _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+     _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+    }
   }
 
   /* Create adjacency relations in the mesh */
@@ -397,21 +300,21 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   /* Check options */
   if ( mesh->nt ) {
-    fprintf(stdout,"\n  ## Error: your mesh contains already triangles.\n"
-            " The mesh generation option is unavailable.\n");
+    fprintf(stdout,"\n  ## ERROR: YOUR MESH CONTAINS ALREADY TRIANGLES.\n"
+            " THE MESH GENERATION OPTION IS UNAVAILABLE.\n");
     _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
   }
 
   else if ( mesh->info.iso ) {
-    fprintf(stdout,"\n  ## Error: level-set discretisation unavailable"
+    fprintf(stdout,"\n  ## ERROR: LEVEL-SET DISCRETISATION UNAVAILABLE"
             " (MMG2D_IPARAM_iso):\n"
-            "          You must call the MMG2D_mmg2dls function to use this option.\n");
+            "          YOU MUST CALL THE MMG2D_MMG2DLS FUNCTION TO USE THIS OPTION.\n");
     _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
   }
 
   else if ( mesh->info.lag >= 0 ) {
-    fprintf(stdout,"\n  ## Error: lagrangian mode unavailable (MMG2D_IPARAM_lag):\n"
-            "            You must call the MMG2D_mmg2dmov function to move a rigidbody.\n");
+    fprintf(stdout,"\n  ## ERROR: LAGRANGIAN MODE UNAVAILABLE (MMG2D_IPARAM_lag):\n"
+            "            YOU MUST CALL THE MMG2D_MMG2DMOV FUNCTION TO MOVE A RIGIDBODY.\n");
     _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
   }
   /* specific meshing */
@@ -526,7 +429,7 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol) {
         _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
       _MMG2D_RETURN_AND_PACK(mesh,sol,MMG5_LOWFAILURE);
     }
-    _MMG2D_solTruncature(mesh,sol);
+    MMG2D_solTruncatureForOptim(mesh,sol);
   } else {
     /* Set default hmin and hmax values */
     if ( !MMG5_Set_defaultTruncatureSizes(mesh,mesh->info.hmin>0.,mesh->info.hmax>0.) ) {
@@ -606,8 +509,8 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol)
 
   /* Check options */
   if ( mesh->info.lag >= 0 ) {
-    fprintf(stdout,"\n  ## Error: lagrangian mode unavailable (MMG2D_IPARAM_lag):\n"
-            "            You must call the MMG2D_mmg2dmov function to move a rigidbody.\n");
+    fprintf(stdout,"\n  ## ERROR: LAGRANGIAN MODE UNAVAILABLE (MMG2D_IPARAM_lag):\n"
+            "            YOU MUST CALL THE MMG2D_mmg2dmov FUNCTION TO MOVE A RIGIDBODY.\n");
     _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
   }
 

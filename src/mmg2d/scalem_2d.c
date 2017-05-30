@@ -85,6 +85,8 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   dd = _MMG2D_PRECI / info->delta;
 
   mesh->info.hausd *= dd;
+  mesh->info.hsiz  *= dd;
+  mesh->info.ls    *= dd;
 
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
@@ -112,7 +114,6 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
       sethmax = 1;
     }
   }
-
 
   /* Warning: we don't want to compute hmin/hmax from the level-set! */
   if ( mesh->info.iso || mesh->info.lag>=0 ||
@@ -316,6 +317,8 @@ int MMG2_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   mesh->info.hmin  *= dd;
   mesh->info.hmax  *= dd;
   mesh->info.hausd *= dd;
+  mesh->info.hsiz  *= dd;
+  mesh->info.ls    *= dd;
 
   /* de-normalize metric */
   if ( !sol->np )  return(1);

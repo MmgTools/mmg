@@ -84,131 +84,6 @@ void _MMG3D_Free_topoTables(MMG5_pMesh mesh) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the solution structure.
- *
- * Truncate a metric by hmax and hmin values.
- *
- */
-void _MMG3D_solTruncature(MMG5_pMesh mesh, MMG5_pSol met) {
-  MMG5_pTetra pt;
-  MMG5_pPoint ppt;
-  double      isqhmin, isqhmax;
-  int         i,k,iadr,sethmin,sethmax;
-
-  assert ( mesh->info.optim || mesh->info.hsiz > 0. );
-
-  /* Detect the point used only by prisms */
-  if ( mesh->nprism ) {
-    for (k=1; k<=mesh->np; k++) {
-      mesh->point[k].flag = 1;
-    }
-    for (k=1; k<=mesh->ne; k++) {
-      pt = &mesh->tetra[k];
-      if ( !MG_EOK(pt) ) continue;
-
-      for (i=0; i<4; i++) {
-        mesh->point[pt->v[i]].flag = 0;
-      }
-    }
-  }
-
-
-  /* If not provided by the user, compute hmin/hmax from the metric computed by
-   * the DoSol function. */
-  sethmin = sethmax = 1;
-  if ( mesh->info.hmin < 0 ) {
-    sethmin = 0;
-    if ( met->size == 1 ) {
-      mesh->info.hmin = FLT_MAX;
-      for (k=1; k<=mesh->np; k++)  {
-        ppt = &mesh->point[k];
-        if ( !MG_VOK(ppt) || ppt->flag ) continue;
-        mesh->info.hmin = MG_MIN(mesh->info.hmin,met->m[k]);
-      }
-    }
-    else if ( met->size == 6 ){
-      mesh->info.hmin = 0.;
-      for (k=1; k<=mesh->np; k++)  {
-        ppt = &mesh->point[k];
-        if ( !MG_VOK(ppt) || ppt->flag ) continue;
-        iadr = met->size*k;
-        mesh->info.hmin = MG_MAX(mesh->info.hmin,met->m[iadr]);
-        mesh->info.hmin = MG_MAX(mesh->info.hmin,met->m[iadr+3]);
-        mesh->info.hmin = MG_MAX(mesh->info.hmin,met->m[iadr+5]);
-      }
-      mesh->info.hmin = 1./sqrt(mesh->info.hmin);
-    }
-  }
-
-  if ( mesh->info.hmax < 0 ) {
-    sethmax = 1;
-    if ( met->size == 1 ) {
-      mesh->info.hmax = 0.;
-      for (k=1; k<=mesh->np; k++)  {
-        ppt = &mesh->point[k];
-        if ( !MG_VOK(ppt) || ppt->flag ) continue;
-        mesh->info.hmax = MG_MAX(mesh->info.hmax,met->m[k]);
-      }
-    }
-    else if ( met->size == 6 ){
-      mesh->info.hmax = FLT_MAX;
-      for (k=1; k<=mesh->np; k++)  {
-        ppt = &mesh->point[k];
-        if ( !MG_VOK(ppt) || ppt->flag ) continue;
-        iadr = met->size*k;
-        mesh->info.hmax = MG_MIN(mesh->info.hmax,met->m[iadr]);
-        mesh->info.hmax = MG_MIN(mesh->info.hmax,met->m[iadr+3]);
-        mesh->info.hmax = MG_MIN(mesh->info.hmax,met->m[iadr+5]);
-      }
-      mesh->info.hmax = 1./sqrt(mesh->info.hmax);
-    }
-  }
-
-
-  if ( !sethmin ) {
-    mesh->info.hmin *=.1;
-    /* Check that user has not given a hmax value lower that the founded
-     * hmin. */
-    if ( mesh->info.hmin > mesh->info.hmax ) {
-      mesh->info.hmin = 0.1*mesh->info.hmax;
-    }
-  }
-  if ( !sethmax ) {
-    mesh->info.hmax *=10.;
-    /* Check that user has not given a hmin value bigger that the founded
-     * hmax. */
-    if ( mesh->info.hmax < mesh->info.hmin ) {
-      mesh->info.hmax = 10.*mesh->info.hmin;
-    }
-  }
-
-  /* vertex size */
-  if ( met->size == 1 ) {
-    for (k=1; k<=mesh->np; k++) {
-      ppt = &mesh->point[k];
-      if ( !MG_VOK(ppt) ) continue;
-      met->m[k] = MG_MIN(mesh->info.hmax,MG_MAX(mesh->info.hmin,met->m[k]));
-    }
-  }
-  else if ( met->size == 6 ) {
-    isqhmin = 1./(mesh->info.hmin*mesh->info.hmin);
-    isqhmax = 1./(mesh->info.hmax*mesh->info.hmax);
-
-    for (k=1; k<=mesh->np; k++) {
-      ppt = &mesh->point[k];
-      if ( !MG_VOK(ppt) ) continue;
-      iadr = 6*k;
-      met->m[iadr]   = MG_MAX(isqhmax,MG_MIN(isqhmin,met->m[iadr]));
-      met->m[iadr+3] = met->m[iadr];
-      met->m[iadr+5] = met->m[iadr];
-    }
-  }
-
-  return;
-}
-
-/**
  * \param mesh pointer toward the mesh structure (unused).
  * \return -1 if fail, the number of detected ridges otherwise
  *
@@ -525,19 +400,19 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
 
   /* Check options */
   if ( mesh->info.lag > -1 ) {
-    fprintf(stderr,"\n  ## Error: lagrangian mode unavailable (MMG3D_IPARAM_lag):\n"
-            "            You must call the MMG3D_mmg3dmov function to move a rigidbody.\n");
+    fprintf(stderr,"\n  ## ERROR: LAGRANGIAN MODE UNAVAILABLE (MMG3D_IPARAM_lag):\n"
+            "            YOU MUST CALL THE MMG3D_MMG3DMOV FUNCTION TO MOVE A RIGIDBODY.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
   else if ( mesh->info.iso ) {
-    fprintf(stderr,"\n  ## Error: level-set discretisation unavailable"
+    fprintf(stderr,"\n  ## ERROR: LEVEL-SET DISCRETISATION UNAVAILABLE"
             " (MMG3D_IPARAM_iso):\n"
-            "          You must call the MMG3D_mmg3dmov function to use this option.\n");
+            "          YOU MUST CALL THE MMG3D_MMG3DMOV FUNCTION TO USE THIS OPTION.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
   else if ( mesh->info.optimLES && met->size==6 ) {
-    fprintf(stdout,"\n  ## Error: strong mesh optimization for LES methods"
-            " unavailable (MMG3D_IPARAM_optimLES) with an anisotropic metric.\n");
+    fprintf(stdout,"\n  ## ERROR: STRONG MESH OPTIMIZATION FOR LES METHODS"
+            " UNAVAILABLE (MMG3D_IPARAM_optimLES) WITH AN ANISOTROPIC METRIC.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
   /* specific meshing */
@@ -603,11 +478,14 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
       if ( !_MMG5_unscaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
       _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
     }
-    _MMG3D_solTruncature(mesh,met);
+    _MMG3D_solTruncatureForOptim(mesh,met);
   }
 
   if ( mesh->info.hsiz > 0. ) {
-    printf("Not yet implemented."); return 666;
+    if ( !MMG3D_Set_constantSize(mesh,met) ) {
+     if ( !_MMG5_unscaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+    }
   }
 
   MMG3D_setfunc(mesh,met);
@@ -721,14 +599,14 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol met) {
 
   /* Check options */
   if ( mesh->info.lag > -1 ) {
-    fprintf(stderr,"\n  ## Error: lagrangian mode unavailable (MMG3D_IPARAM_lag):\n"
-            "            You must call the MMG3D_mmg3dmov function to move a rigidbody.\n");
+    fprintf(stderr,"\n  ## ERROR: LAGRANGIAN MODE UNAVAILABLE (MMG3D_IPARAM_lag):\n"
+            "            YOU MUST CALL THE MMG3D_MMG3DMOV FUNCTION TO MOVE A RIGIDBODY.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
   else if ( mesh->info.optimLES ) {
-    fprintf(stdout,"\n  ## Error: strong mesh optimization for LES methods"
-            " unavailable (MMG3D_IPARAM_optimLES) in isosurface"
-            " discretization mode.\n");
+    fprintf(stdout,"\n  ## ERROR: STRONG MESH OPTIMIZATION FOR LES METHODS"
+            " UNAVAILABLE (MMG3D_IPARAM_optimLES) IN ISOSURFACE"
+            " DISCRETIZATION MODE.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
   if ( mesh->info.optim ) {
@@ -891,14 +769,14 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
 
   /* Check options */
   if ( mesh->info.iso ) {
-    fprintf(stderr,"\n  ## Error: level-set discretisation unavailable"
+    fprintf(stderr,"\n  ## ERROR: LEVEL-SET DISCRETISATION UNAVAILABLE"
             " (MMG3D_IPARAM_iso):\n"
-            "          You must call the MMG3D_mmg3dmov function to use this option.\n");
+            "          YOU MUST CALL THE MMG3D_mmg3dmov FUNCTION TO USE THIS OPTION.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
   else if ( mesh->info.optimLES ) {
-    fprintf(stdout,"\n  ## Error: strong mesh optimization for LES methods"
-            " unavailable (MMG3D_IPARAM_optimLES) in lagrangian mode.\n");
+    fprintf(stdout,"\n  ## ERROR: STRONG MESH OPTIMIZATION FOR LES METHODS"
+            " UNAVAILABLE (MMG3D_IPARAM_optimLES) IN LAGRANGIAN MODE.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
   if ( mesh->info.optim ) {
@@ -929,16 +807,16 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
   }
 
 #ifndef USE_ELAS
-  fprintf(stderr,"\n  ## Error: you need to compile with the USE_ELAS"
-    " CMake's flag set to ON to use the rigidbody movement library.\n");
+  fprintf(stderr,"\n  ## ERROR: YOU NEED TO COMPILE WITH THE USE_ELAS"
+    " CMake's FLAG SET TO ON TO USE THE RIGIDBODY MOVEMENT LIBRARY.\n");
   _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
 #endif
 
   if ( !disp ) {
-    fprintf(stderr,"\n  ## Error: in lagrangian mode, a structure of type"
-            " \"MMG5_pSol\" is needed to store the displacement field.\n"
-            "            This structure must be different from the one used"
-            " to store the metric.\n");
+    fprintf(stderr,"\n  ## ERROR: IN LAGRANGIAN MODE, A STRUCTURE OF TYPE"
+            " \"MMG5_pSoL\" IS NEEDED TO STORE THE DISPLACEMENT FIELD.\n"
+            "            THIS STRUCTURE MUST BE DIFFERENT FROM THE ONE USED"
+            " TO STORE THE METRIC.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
   if (disp->np && (disp->np != mesh->np) ) {
@@ -1017,7 +895,7 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
       if ( !_MMG5_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
       _MMG5_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE);
     }
-    _MMG3D_solTruncature(mesh,met);
+    _MMG3D_solTruncatureForOptim(mesh,met);
   }
 
 /* ******************* Add mesh improvement ? *************************** */

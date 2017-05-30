@@ -190,6 +190,106 @@ int _MMG2D_writeLocalParam( MMG5_pMesh mesh ) {
 
 /**
  * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the solution structure.
+ *
+ * Truncate the metric computed by the DoSol function by hmax and hmin values
+ * (if setted by the user). Set hmin and hmax if they are not setted.
+ *
+ */
+void MMG2D_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
+  MMG5_pPoint ppt;
+  int         k,iadr;
+  double      isqhmin, isqhmax;
+  char        sethmin, sethmax;
+
+  assert ( mesh->info.optim || mesh->info.hsiz > 0. );
+
+  /* If not provided by the user, compute hmin/hmax from the metric computed by
+   * the DoSol function. */
+  sethmin = sethmax = 1;
+  if ( mesh->info.hmin < 0. ) {
+    sethmin = 0;
+    if ( met->size == 1 ) {
+      mesh->info.hmin = FLT_MAX;
+      for (k=1; k<=mesh->np; k++)  {
+        ppt = &mesh->point[k];
+        if ( !MG_VOK(ppt) ) continue;
+        mesh->info.hmin = MG_MIN(mesh->info.hmin,met->m[k]);
+      }
+    }
+    else if ( met->size == 3 ){
+      mesh->info.hmin = 0.;
+      for (k=1; k<=mesh->np; k++)  {
+        ppt = &mesh->point[k];
+        if ( !MG_VOK(ppt) ) continue;
+        iadr = met->size*k;
+        mesh->info.hmin = MG_MAX(mesh->info.hmin,met->m[iadr]);
+        mesh->info.hmin = MG_MAX(mesh->info.hmin,met->m[iadr+2]);
+      }
+      mesh->info.hmin = 1./sqrt(mesh->info.hmin);
+    }
+  }
+  if ( mesh->info.hmax < 0. ) {
+    sethmax = 1;
+    if ( met->size == 1 ) {
+      mesh->info.hmax = 0.;
+      for (k=1; k<=mesh->np; k++)  {
+        ppt = &mesh->point[k];
+        if ( !MG_VOK(ppt) ) continue;
+        mesh->info.hmax = MG_MAX(mesh->info.hmax,met->m[k]);
+      }
+    }
+    else if ( met->size == 3 ){
+      mesh->info.hmax = FLT_MAX;
+      for (k=1; k<=mesh->np; k++)  {
+        ppt = &mesh->point[k];
+        if ( !MG_VOK(ppt) ) continue;
+        iadr = met->size*k;
+        mesh->info.hmax = MG_MIN(mesh->info.hmax,met->m[iadr]);
+        mesh->info.hmax = MG_MIN(mesh->info.hmax,met->m[iadr+2]);
+      }
+      mesh->info.hmax = 1./sqrt(mesh->info.hmax);
+    }
+  }
+
+  if ( !sethmin ) {
+    mesh->info.hmin *=.1;
+    /* Check that user has not given a hmax value lower that the founded
+     * hmin. */
+    if ( mesh->info.hmin > mesh->info.hmax ) {
+      mesh->info.hmin = 0.1*mesh->info.hmax;
+    }
+  }
+  if ( !sethmax ) {
+    mesh->info.hmax *=10.;
+    /* Check that user has not given a hmin value bigger that the founded
+     * hmax. */
+    if ( mesh->info.hmax < mesh->info.hmin ) {
+      mesh->info.hmax = 10.*mesh->info.hmin;
+    }
+  }
+
+  /* vertex size */
+  if ( met->size == 1 ) {
+    for (k=1; k<=mesh->np; k++) {
+      met->m[k] = MG_MIN(mesh->info.hmax,MG_MAX(mesh->info.hmin,met->m[k]));
+    }
+  }
+  else if ( met->size==3 ) {
+    isqhmin = 1./(mesh->info.hmin*mesh->info.hmin);
+    isqhmax = 1./(mesh->info.hmax*mesh->info.hmax);
+
+    for (k=1; k<=mesh->np; k++) {
+      iadr = 3*k;
+      met->m[iadr]   = MG_MAX(isqhmax,MG_MIN(isqhmin,met->m[iadr]));
+      met->m[iadr+2] = met->m[iadr];
+    }
+  }
+  return;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
  * \param met pointer toward a sol structure (metric).
  * \param qdegrad optimization thresholds.
  * \return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if failed
@@ -204,6 +304,7 @@ int _MMG2D_writeLocalParam( MMG5_pMesh mesh ) {
 static inline
 int _MMG2D_defaultOption(MMG5_pMesh mesh,MMG5_pSol met, double qdegrad[2]) {
   mytime    ctim[TIMEMAX];
+  double    hsiz;
   char      stim[32];
 
   signal(SIGABRT,_MMG2_excfun);
@@ -252,6 +353,22 @@ int _MMG2D_defaultOption(MMG5_pMesh mesh,MMG5_pSol met, double qdegrad[2]) {
 
   /* scaling mesh and hmin/hmax computation*/
   if ( !MMG2_scaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+
+  /* specific meshing + update hmin/hmax */
+  if ( mesh->info.optim ) {
+    if ( !MMG2D_doSol(mesh,met) ) {
+      if ( !MMG2_unscaleMesh(mesh,met) )
+        _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+      _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
+    }
+    MMG2D_solTruncatureForOptim(mesh,met);
+  }
+  if ( mesh->info.hsiz > 0. ) {
+    if ( !MMG5_Compute_constantSize(mesh,met,&hsiz) ) {
+     if ( !MMG2_unscaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+    }
+  }
 
   /* unscaling mesh */
   if ( !MMG2_unscaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);

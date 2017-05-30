@@ -184,6 +184,7 @@ int _MMGS_writeLocalParam( MMG5_pMesh mesh ) {
 static inline
 int _MMGS_defaultOption(MMG5_pMesh mesh,MMG5_pSol met) {
   mytime    ctim[TIMEMAX];
+  double    hsiz;
   char      stim[32];
 
   _MMGS_Set_commonFunc();
@@ -233,6 +234,14 @@ int _MMGS_defaultOption(MMG5_pMesh mesh,MMG5_pSol met) {
 
   /* scaling mesh and hmin/hmax computation*/
   if ( !_MMG5_scaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+
+  /* Specific meshing + hmin/hmax update */
+  if ( mesh->info.hsiz > 0. ) {
+    if ( !MMG5_Compute_constantSize(mesh,met,&hsiz) ) {
+     if ( !_MMG5_unscaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+    }
+  }
 
   /* unscaling mesh */
   if ( !_MMG5_unscaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);

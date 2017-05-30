@@ -401,3 +401,85 @@ void MMG5_mmgFree_names(MMG5_pMesh mesh,MMG5_pSol met){
     }
   }
 }
+
+inline
+int MMG5_Set_defaultTruncatureSizes(MMG5_pMesh mesh,char sethmin,char sethmax) {
+
+  if ( !sethmin ) {
+    if ( sethmax ) {
+      mesh->info.hmin  = 0.01 * mesh->info.hmax;
+    } else {
+      mesh->info.hmin  = 0.01;
+    }
+  }
+
+  if ( !sethmax ) {
+    if ( sethmin ) {
+      mesh->info.hmax = 100. * mesh->info.hmin;
+    }
+    else {
+      mesh->info.hmax  = 2.;
+    }
+  }
+
+  if ( mesh->info.hmax < mesh->info.hmin ) {
+    assert ( sethmin && sethmax );
+    fprintf(stdout,"  ## Error: mismatch parameters:"
+            " minimal mesh size larger than maximal one.\n");
+    return 0;
+  }
+
+  return 1;
+}
+
+int MMG5_Compute_constantSize(MMG5_pMesh mesh,MMG5_pSol met,double *hsiz) {
+  MMG5_pPoint  ppt;
+  int          k,iadr;
+  char         sethmin,sethmax;
+
+
+  if ( mesh->info.hmin > mesh->info.hsiz ) {
+    fprintf(stderr,"  ## Error: Mismatched options: hmin (%e) is greater"
+            " than hsiz (%e). Exit Program.\n",mesh->info.hmin,mesh->info.hsiz);
+    return 0;
+  }
+
+  if ( mesh->info.hmax > 0. && mesh->info.hmax < mesh->info.hsiz ) {
+    fprintf(stderr,"  ## Error: Mismatched options: hmax (%e) is lower"
+            " than hsiz (%e). Exit Program.\n",mesh->info.hmax,mesh->info.hsiz);
+    return 0;
+  }
+
+  *hsiz = mesh->info.hsiz;
+
+  sethmin = sethmax = 0;
+  if ( mesh->info.hmin > 0. ) {
+    sethmin = 1;
+    *hsiz    =  MG_MAX(mesh->info.hmin,*hsiz);
+  }
+
+  if ( mesh->info.hmax > 0. ) {
+    sethmax = 1;
+    *hsiz    = MG_MIN(mesh->info.hmax,*hsiz);
+  }
+
+  /* Set hmin */
+  if ( !sethmin ) {
+    if ( sethmax ) {
+      mesh->info.hmin  = MG_MIN(0.1*(*hsiz),0.1*mesh->info.hmax);
+    } else {
+      mesh->info.hmin  = 0.1*(*hsiz);
+    }
+  }
+
+  /* Set hmax */
+  if ( !sethmax ) {
+    if ( sethmin ) {
+      mesh->info.hmax  = MG_MAX(10.*(*hsiz),10.*mesh->info.hmin);
+    } else {
+      mesh->info.hmax  = 10.*(*hsiz);
+    }
+  }
+
+  return 1;
+}

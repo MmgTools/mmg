@@ -1224,6 +1224,22 @@ void  MMGS_setfunc(MMG5_pMesh mesh,MMG5_pSol met);
 
 /* Tools for the library */
 /**
+ * \param mesh pointer toward the mesh structure
+ * \param met pointer toward the sol structure
+ * \return 1 if success
+ *
+ * Compute constant size map according to mesh->info.hsiz
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMGS_SET_CONSTANTSIZE(mesh,met,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT)     :: mesh,met\n
+ * >     INTEGER, INTENT(OUT)               :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+int MMGS_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met);
+
+/**
  * \param prog pointer toward the program name.
  *
  * Print help for mmgs options.

@@ -179,3 +179,13 @@ FORTRAN_NAME(MMG3D_DOSOL,mmg3d_dosol,
   *retval = MMG3D_doSol(*mesh,*met);
   return;
 }
+
+/**
+ * See \ref MMG3D_Set_constantSize function in \ref mmg3d/libmmg3d.h file.
+ */
+FORTRAN_NAME(MMG3D_SET_CONSTANTSIZE,mmg3d_set_constantsize,
+             (MMG5_pMesh *mesh,MMG5_pSol *met,int *retval),
+             (mesh,met,retval)) {
+  *retval =  MMG3D_Set_constantSize(*mesh,*met);
+  return;
+}

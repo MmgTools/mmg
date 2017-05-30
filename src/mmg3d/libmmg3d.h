@@ -1893,6 +1893,22 @@ int  MMG3D_hashTetra(MMG5_pMesh mesh, int pack);
  */
 int MMG3D_doSol(MMG5_pMesh mesh,MMG5_pSol met);
 
+/**
+ * \param mesh pointer toward the mesh structure
+ * \param met pointer toward the sol structure
+ * \return 1 if success
+ *
+ * Compute constant size map according to mesh->info.hsiz
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_SET_CONSTANTSIZE(mesh,met,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT)     :: mesh,met\n
+ * >     INTEGER, INTENT(OUT)               :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+int MMG3D_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met);
+
 /** To associate function pointers without calling MMG3D_mmg3dlib */
 /**
  * \param mesh pointer toward the mesh structure (unused).
