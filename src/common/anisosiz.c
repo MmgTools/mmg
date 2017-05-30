@@ -725,7 +725,6 @@ double _MMG5_ridSizeInTangentDir(MMG5_pMesh mesh, MMG5_pPoint p0, int idp,
 
   m = isqhmax;
   for (i=0; i<2; i++) {
-    kappacur = 0.0;
     // Remark: bezierEdge don't use n0 in case of a ridge so it's ok to call it
     // with an undefined n0.
     _MMG5_bezierEdge(mesh,idp,iprid[i],b0,b1,1,n0);

@@ -123,6 +123,11 @@ int MMG2D_doSol(MMG5_pMesh mesh,MMG5_pSol sol) {
       assert ( dd < FLT_MAX );
       dd = 1./sqrt(dd);
     }
+    else {
+      MMG5_errorMessage(&mesh->info.errMessage,"%s:%d:Error: Unexpected solution size\n",
+                        __FILE__,__LINE__,sol->size);
+      return 0;
+    }
     mesh->info.hmax = 10.*dd;
   }
 

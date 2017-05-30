@@ -37,41 +37,6 @@
 extern char ddb;
 
 /**
- * \param mesh pointer towarad the mesh structure.
- *
- * Set all boundary edges to required and add a tag to detect that they are
- * not realy required.
- *
- */
-static inline void MMG2D_reqBoundaries(MMG5_pMesh mesh) {
-  MMG5_pTria     ptt;
-  int            k;
-
-  /* The MG_REQ+MG_NOSURF tag mark the boundary edges that we dont want to touch
-   * but that are not really required (-nosurf option) */
-  for (k=1; k<=mesh->nt; k++) {
-    ptt = &mesh->tria[k];
-    if ( !(ptt->tag[0] & MG_REQ) ) {
-      ptt->tag[0] |= MG_REQ;
-      ptt->tag[0] |= MG_NOSURF;
-    }
-
-    if ( !(ptt->tag[1] & MG_REQ) ) {
-      ptt->tag[1] |= MG_REQ;
-      ptt->tag[1] |= MG_NOSURF;
-    }
-
-    if ( !(ptt->tag[2] & MG_REQ) ) {
-      ptt->tag[2] |= MG_REQ;
-      ptt->tag[2] |= MG_NOSURF;
-    }
-  }
-
-  return;
-}
-
-
-/**
  * \param mesh pointer toward the mesh
  *
  * \return 1 if success, 0 if fail
@@ -539,6 +504,7 @@ int _MMG2_regnor(MMG5_pMesh mesh) {
       ier = _MMG2_bouleendp(mesh,iel,i,&ip1,&ip2);
       if ( !ier ) {
         printf("*** problem in func. _MMG2_bouleendp. Abort.\n");
+        _MMG5_SAFE_FREE(tmp);
         return 0;
       }
 

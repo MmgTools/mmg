@@ -80,7 +80,11 @@ int _MMG5_kPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr,
   _MMG5_SAFE_CALLOC(sortPartTb,2*vertNbr,SCOTCH_Num,0);
 
   /* Partionning the graph */
-  CHECK_SCOTCH(SCOTCH_graphMap(&graf, &arch, &strat, sortPartTb), "scotch_graphMap", 0);
+  if ( 0!=SCOTCH_graphMap(&graf, &arch, &strat, sortPartTb) ) {
+    perror("scotch_graphMap");
+    _MMG5_DEL_MEM(mesh,sortPartTb,2*vertNbr*sizeof(SCOTCH_Num));
+    return 0;
+  }
 
 
   if ( SCOTCH_6 ) {

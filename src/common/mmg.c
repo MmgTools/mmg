@@ -129,7 +129,6 @@ int _MMG5_countLocalParamAtTri( MMG5_pMesh mesh,_MMG5_iNode **bdryRefs) {
 
   /** Count the number of different boundary references and list it */
   (*bdryRefs) = NULL;
-  npar = 0;
 
   k = mesh->nt? mesh->tria[1].ref : 0;
 

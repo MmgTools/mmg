@@ -73,10 +73,7 @@ double _MMG2_caltri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt) {
   h3 = bcx*bcx + bcy*bcy;
 
   hm = h1 + h2 + h3;
-  h1 = sqrt(h1);
-  h2 = sqrt(h2);
-  h3 = sqrt(h3);
-  
+
   if ( hm > _MMG2_EPSD ) {
     return ( area / hm );
   }

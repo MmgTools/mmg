@@ -108,7 +108,8 @@ int _MMG2_movedgpt(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list, char impro
   
   /* Check that there are exactly two boundary points connected at p0 */
   if ( ip1 == 0 || ip2 == 0 ) {
-    printf("   *** Function movedgpt: no two edges connected at edge, non singular point %d - abort.\n",pt->v[i]);
+    printf("   *** Function movedgpt: no two edges connected at edge, non"
+           " singular point %d - abort.\n",mesh->tetra[list[0]/3].v[list[0]%3]);
     return 0;
   }
   
@@ -142,7 +143,6 @@ int _MMG2_movedgpt(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list, char impro
   }
   
   i1 = _MMG5_inxt2[i];
-  i2 = _MMG5_iprv2[i];
   
   pt = &mesh->tria[iel];
   
@@ -261,6 +261,8 @@ int _MMG2_movintpt(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list,char improv
   else if ( calnew < 0.3 * calold ) return(0);
   
   /* Update of the coordinates of the point */
+  pt = &mesh->tria[list[0]/3];
+  i  = list[0] % 3;
   p0 = &mesh->point[pt->v[i]];
   p0->c[0] = b[0];
   p0->c[1] = b[1];

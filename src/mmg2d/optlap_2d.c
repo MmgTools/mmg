@@ -146,7 +146,6 @@ int MMG2_optlap(MMG5_pMesh mesh,MMG5_pSol sol) {
         */len = 1./len;
 
         if(ppta->tag & MG_BDY) {
-          iadr = 2*ipa;
           ncount[ipa] += 1;
         } else {
           iadr = 2*ipa;
@@ -155,7 +154,6 @@ int MMG2_optlap(MMG5_pMesh mesh,MMG5_pSol sol) {
           ncount[ipa] += len;
         }
         if(pptb->tag & MG_BDY) {
-          iadr = 2*ipb;
           ncount[ipb] += 1;
         } else {
           iadr = 2*ipb;
@@ -192,6 +190,7 @@ int MMG2_optlap(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   free(cold);
   free(cnew);
+  free(cini);
   free(ncount);
   return(1);
 }

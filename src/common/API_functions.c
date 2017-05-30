@@ -270,10 +270,10 @@ int MMG5_Set_outputMeshName(MMG5_pMesh mesh, const char* meshout) {
 
     }
     else {
-      _MMG5_ADD_MEM(mesh,7*sizeof(char),"output mesh name",
+      _MMG5_ADD_MEM(mesh,12*sizeof(char),"output mesh name",
                     fprintf(stderr,"  Exit program.\n");
                     return 0);
-      _MMG5_SAFE_CALLOC(mesh->nameout,7,char,0);
+      _MMG5_SAFE_CALLOC(mesh->nameout,12,char,0);
       if ( (mesh->info.imprim > 5) || mesh->info.ddebug ) {
         fprintf(stdout,"  ## Warning: no name given for output mesh.\n");
         fprintf(stdout,"     Use of default value \"mesh.o.mesh\".\n");
