@@ -200,8 +200,6 @@ ENDIF()
 ############################################################################
 # add SCOTCH library?
 IF( USE_SCOTCH )
-  # Set flags for building test program
-  INCLUDE_DIRECTORIES(${SCOTCH_INCLUDE_DIR})
 
   SET(CMAKE_REQUIRED_INCLUDES ${SCOTCH_INCLUDE_DIR})
   SET(CMAKE_REQUIRED_LIBRARIES ${SCOTCH_LIBRARY})
@@ -387,6 +385,11 @@ ENDIF ( )
 IF ( BUILD_MMG )
   INCLUDE(cmake/modules/mmg.cmake)
 ENDIF ( )
+
+IF( USE_SCOTCH )
+  # Include Scotch Dir here to ensure that Mmg doesn't search it's own headers in /usr/local
+  INCLUDE_DIRECTORIES(${SCOTCH_INCLUDE_DIR})
+ENDIF()
 
 ###############################################################################
 #####
