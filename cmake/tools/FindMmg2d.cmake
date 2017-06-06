@@ -41,8 +41,8 @@ FIND_PATH(MMG2D_INCLUDE_DIR
   HINTS ${MMG2D_INCLUDE_DIR}
   $ENV{MMG2D_INCLUDE_DIR}
   $ENV{HOME}/include/
-  ${MMG_DIR}/include/
-  $ENV{MMG_DIR}/include/
+  ${MMG_BUILD_DIR}/include/
+  $ENV{MMG_BUILD_DIR}/include/
   PATH_SUFFIXES
   DOC "Directory of mmg2d Headers")
 
@@ -52,8 +52,8 @@ FIND_LIBRARY(MMG2D_LIBRARY
   HINTS ${MMG2D_LIBRARY}
   $ENV{MMG2D_LIBRARY}
   $ENV{HOME}/lib
-  ${MMG_DIR}/lib
-  $ENV{MMG_DIR}/lib
+  ${MMG_BUILD_DIR}/lib
+  $ENV{MMG_BUILD_DIR}/lib
   DOC "The mmg2d library"
   )
 
@@ -62,7 +62,7 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(MMG2D DEFAULT_MSG
   MMG2D_INCLUDE_DIR MMG2D_LIBRARY)
 
 IF ( NOT MMG2D_FOUND )
-   MESSAGE (WARNING "\nMMG2D not found: you can set the 'MMG_DIR' environment"
-   " variable or the 'MMG_DIR' CMake variable to your MMG directory path"
+   MESSAGE (WARNING "\nMMG2D not found: you can set the 'MMG_BUILD_DIR' environment"
+   " variable or the 'MMG_BUILD_DIR' CMake variable to your MMG directory path"
    " to help us to fill the MMG2D library paths.\n" )
 ENDIF ()
