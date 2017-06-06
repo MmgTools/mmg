@@ -80,7 +80,7 @@ static int setadj(MMG5_pMesh mesh){
         if ( !mesh->point[ip1].tmp )  mesh->point[ip1].tmp = ++nvf;
         if ( !mesh->point[ip2].tmp )  mesh->point[ip2].tmp = ++nvf;
 
-        if ( MG_EDG(pt->tag[i]) ) {
+        if ( MG_EDG(pt->tag[i]) || pt->tag[i] & MG_REQ ) {
           mesh->point[ip1].tag |= pt->tag[i];
           mesh->point[ip2].tag |= pt->tag[i];
         }
@@ -98,15 +98,17 @@ static int setadj(MMG5_pMesh mesh){
         ii = adja[i] % 3;
         if ( kk > k )  ned++;
 
-        /* correct edge tag */
+        /* store adjacent */
         pt1 = &mesh->tria[kk];
-        if ( pt->tag[i] & MG_NOM && !(pt1->tag[ii] & MG_NOM) ) {
+
+        /* correct edge tag */
+        if ( (pt->tag[i] & MG_NOM) && !(pt1->tag[ii] & MG_NOM) ) {
           pt1->tag[ii] = pt->tag[i];
           pt1->edg[ii] = pt->edg[i];
           mesh->point[ip1].tag |= MG_NOM;
           mesh->point[ip2].tag |= MG_NOM;
         }
-        if ( pt1->tag[ii] & MG_NOM && !(pt->tag[i] & MG_NOM) ) {
+        if ( (pt1->tag[ii] & MG_NOM) && !(pt->tag[i] & MG_NOM) ) {
           pt->tag[i] = pt1->tag[ii];
           pt->edg[i] = pt1->edg[ii];
           mesh->point[ip1].tag |= MG_NOM;
