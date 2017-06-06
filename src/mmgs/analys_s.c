@@ -46,18 +46,19 @@
 static int setadj(MMG5_pMesh mesh){
   MMG5_pTria   pt,pt1;
   int          *adja,*adjb,adji1,adji2,*pile,iad,ipil,ip1,ip2,gen;
-  int          k,kk,iel,jel,nvf,nf,nr,nt,nre,ncc,ned,ref;
+  int          k,kk,iel,jel,nvf,nf,nr,nt,nre,nreq,ncc,ned,ref;
   int16_t      tag;
   char         i,ii,i1,i2,ii1,ii2,voy;
 
   if ( abs(mesh->info.imprim) > 5  || mesh->info.ddebug )
     fprintf(stdout,"  ** SETTING TOPOLOGY\n");
 
+  nvf = nf = ncc = ned = 0;
+
   _MMG5_SAFE_MALLOC(pile,mesh->nt+1,int,0);
 
-  pile[1]  = 1;
-  ipil     = 1;
-  nvf = nre = nr = nf = nt = ncc = ned = 0;
+  pile[1] = 1;
+  ipil    = 1;
 
   while ( ipil > 0 ) {
     ncc++;
@@ -70,7 +71,6 @@ static int setadj(MMG5_pMesh mesh){
 
       pt->cc = ncc;
       adja = &mesh->adja[3*(k-1)+1];
-      nt++;
       for (i=0; i<3; i++) {
         i1  = _MMG5_inxt2[i];
         i2  = _MMG5_iprv2[i];
@@ -90,7 +90,6 @@ static int setadj(MMG5_pMesh mesh){
           pt->tag[i] |= MG_GEO;
           mesh->point[ip1].tag |= MG_GEO;
           mesh->point[ip2].tag |= MG_GEO;
-          nr++;
           ned++;
           continue;
         }
@@ -120,7 +119,6 @@ static int setadj(MMG5_pMesh mesh){
           pt1->tag[ii] |= MG_REF;
           mesh->point[ip1].tag |= MG_REF;
           mesh->point[ip2].tag |= MG_REF;
-          nre++;
         }
 
         /* store adjacent */
@@ -140,7 +138,6 @@ static int setadj(MMG5_pMesh mesh){
             pt1->ref      = -abs(pt1->ref);
             pt->tag[i]   |= MG_REF;
             pt1->tag[ii] |= MG_REF;
-            nre++;
           }
           /* flip orientation */
           else if ( !(pt->tag[i] & MG_NOM) ) {
@@ -182,11 +179,11 @@ static int setadj(MMG5_pMesh mesh){
     }
     while ( ipil > 0 );
 
-    /* find next triangle */
+    /* find next unmarked triangle */
     ipil = 0;
     for (kk=1; kk<=mesh->nt; kk++) {
       pt = &mesh->tria[kk];
-      if ( pt->v[0] && (pt->cc == 0) ) {
+      if ( MG_EOK(pt) && (pt->cc == 0) ) {
         ipil = 1;
         pile[ipil] = kk;
         pt->flag   = 1;
@@ -196,31 +193,35 @@ static int setadj(MMG5_pMesh mesh){
   }
 
   /* bilan */
-  nr = nre = 0;
+  nr = nre = nreq = nt = 0;
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) )  continue;
+    nt++;
+    adja = &mesh->adja[3*(k-1)+1];
     for (i=0; i<3; i++) {
-      if ( !MG_EDG(pt->tag[i]) )  continue;
+      if ( ( !MG_EDG(pt->tag[i]) ) && ( !(pt->tag[i] & MG_REQ) ) )  continue;
 
-      adja = &mesh->adja[3*(k-1)+1];
       jel  = adja[i] / 3;
       if ( !jel || jel > k ) {
         if ( pt->tag[i] & MG_GEO )  nr++;
         if ( pt->tag[i] & MG_REF )  nre++;
+        if ( pt->tag[i] & MG_REQ )  nreq++;
       }
     }
   }
 
   if ( mesh->info.ddebug ) {
     fprintf(stdout,"  a- ridges: %d found.\n",nr);
+    fprintf(stdout,"  a- requir: %d found.\n",nreq);
     fprintf(stdout,"  a- connex: %d connected component(s)\n",ncc);
     fprintf(stdout,"  a- orient: %d flipped\n",nf);
   }
-  else if ( abs(mesh->info.imprim) > 4 ) {
+  else if ( abs(mesh->info.imprim) > 3 ) {
     gen = (2 - nvf + ned - nt) / 2;
     fprintf(stdout,"     Connected component: %d,  genus: %d,   reoriented: %d\n",ncc,gen,nf);
-    fprintf(stdout,"     Edges: %d,  tagged: %d,  ridges: %d,  refs: %d\n",ned,nr+nre,nr,nre);
+    fprintf(stdout,"     Edges: %d,  tagged: %d,  ridges: %d, required: %d, refs: %d\n",
+            ned,nr+nre+nreq,nr,nreq,nre);
   }
 
   _MMG5_SAFE_FREE(pile);
