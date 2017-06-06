@@ -135,8 +135,12 @@ static int _MMG5_setadj(MMG5_pMesh mesh){
         }
 
         kk = adja[i] / 3;
+
         ii = adja[i] % 3;
         if ( kk > k )  ned++;
+
+        /* store adjacent */
+        pt1 = &mesh->tria[kk];
 
         /* non manifold edge */
         if ( pt->tag[i] & MG_NOM ) {
@@ -145,8 +149,6 @@ static int _MMG5_setadj(MMG5_pMesh mesh){
           continue;
         }
 
-        /* store adjacent */
-        pt1 = &mesh->tria[kk];
         if ( abs(pt1->ref) != abs(pt->ref) ) {
           pt->tag[i]   |= MG_REF;
           if ( !(pt->tag[i] & MG_NOM) )  pt1->tag[ii] |= MG_REF;
@@ -755,6 +757,7 @@ int _MMG3D_analys(MMG5_pMesh mesh) {
   _MMG5_DEL_MEM(mesh,mesh->adjt,(3*mesh->nt+4)*sizeof(int));
   _MMG5_DEL_MEM(mesh,mesh->tria,(mesh->nt+1)*sizeof(MMG5_Tria));
   mesh->nt = 0;
+
   if ( mesh->nprism ) _MMG5_DEL_MEM(mesh,mesh->adjapr,(5*mesh->nprism+6)*sizeof(int));
 
   return(1);
