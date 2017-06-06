@@ -28,7 +28,7 @@ INCLUDE(cmake/modules/macros.cmake)
 PROJECT (mmg)
 
 # Executable path
-SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
+SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
 SET(COMMON_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src/common)
 SET(COMMON_BINARY_DIR ${CMAKE_BINARY_DIR}/src/common)
 
@@ -368,7 +368,7 @@ CMAKE_DEPENDENT_OPTION(
 #####         Build Targets and libmmg if needed
 #####
 ###############################################################################
-SET(LIBRARY_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/lib)
+SET(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib)
 
 IF ( BUILD_MMG2D )
   INCLUDE(cmake/modules/mmg2d.cmake)

@@ -93,7 +93,7 @@ MACRO ( ADD_AND_INSTALL_LIBRARY
   ADD_LIBRARY ( ${target_name} ${target_type} ${sources} )
 
   TARGET_INCLUDE_DIRECTORIES ( ${target_name} PRIVATE
-    ${COMMON_BINARY_DIR} ${COMMON_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/include )
+    ${COMMON_BINARY_DIR} ${COMMON_SOURCE_DIR} ${CMAKE_BINARY_DIR}/include )
 
   SET_TARGET_PROPERTIES ( ${target_name}
     PROPERTIES OUTPUT_NAME ${output_name} )
@@ -134,7 +134,7 @@ MACRO ( ADD_AND_INSTALL_EXECUTABLE
   ENDIF ( )
 
   TARGET_INCLUDE_DIRECTORIES ( ${exec_name} PUBLIC
-    ${COMMON_BINARY_DIR} ${COMMON_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/include )
+    ${COMMON_BINARY_DIR} ${COMMON_SOURCE_DIR} ${CMAKE_BINARY_DIR}/include )
 
   TARGET_LINK_LIBRARIES ( ${exec_name} ${LIBRARIES}  )
 
@@ -207,7 +207,7 @@ MACRO ( ADD_LIBRARY_TEST target_name main_path target_dependency lib_name )
   ADD_EXECUTABLE ( ${target_name} ${main_path} )
   ADD_DEPENDENCIES( ${target_name} ${target_dependency} )
 
-  TARGET_INCLUDE_DIRECTORIES ( ${target_name} PUBLIC ${CMAKE_SOURCE_DIR}/include )
+  TARGET_INCLUDE_DIRECTORIES ( ${target_name} PUBLIC ${CMAKE_BINARY_DIR}/include )
 
   IF ( WIN32 AND ((NOT MINGW) AND USE_SCOTCH) )
     MY_ADD_LINK_FLAGS ( ${target_name} "/SAFESEH:NO" )
