@@ -28,7 +28,7 @@ INCLUDE(cmake/modules/macros.cmake)
 PROJECT (mmg)
 
 # Executable path
-SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
+SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
 SET(COMMON_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src/common)
 SET(COMMON_BINARY_DIR ${CMAKE_BINARY_DIR}/src/common)
 
@@ -200,8 +200,6 @@ ENDIF()
 ############################################################################
 # add SCOTCH library?
 IF( USE_SCOTCH )
-  # Set flags for building test program
-  INCLUDE_DIRECTORIES(${SCOTCH_INCLUDE_DIR})
 
   SET(CMAKE_REQUIRED_INCLUDES ${SCOTCH_INCLUDE_DIR})
   SET(CMAKE_REQUIRED_LIBRARIES ${SCOTCH_LIBRARY})
@@ -370,7 +368,7 @@ CMAKE_DEPENDENT_OPTION(
 #####         Build Targets and libmmg if needed
 #####
 ###############################################################################
-SET(LIBRARY_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/lib)
+SET(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib)
 
 IF ( BUILD_MMG2D )
   INCLUDE(cmake/modules/mmg2d.cmake)
@@ -387,6 +385,11 @@ ENDIF ( )
 IF ( BUILD_MMG )
   INCLUDE(cmake/modules/mmg.cmake)
 ENDIF ( )
+
+IF( USE_SCOTCH )
+  # Include Scotch Dir here to ensure that Mmg doesn't search it's own headers in /usr/local
+  INCLUDE_DIRECTORIES(${SCOTCH_INCLUDE_DIR})
+ENDIF()
 
 ###############################################################################
 #####

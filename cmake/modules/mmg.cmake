@@ -88,10 +88,10 @@ IF ( LIBMMG_STATIC OR LIBMMG_SHARED )
     ${CMAKE_SOURCE_DIR}/src/mmg/libmmg.h
     ${CMAKE_SOURCE_DIR}/src/mmg/libmmgf.h
     )
-  SET(MMG2D_INCLUDE ${CMAKE_SOURCE_DIR}/include/mmg/mmg2d )
-  SET(MMGS_INCLUDE ${CMAKE_SOURCE_DIR}/include/mmg/mmgs )
-  SET(MMG3D_INCLUDE ${CMAKE_SOURCE_DIR}/include/mmg/mmg3d )
-  SET(MMG_INCLUDE ${CMAKE_SOURCE_DIR}/include/mmg )
+  SET(MMG2D_INCLUDE ${CMAKE_BINARY_DIR}/include/mmg/mmg2d )
+  SET(MMGS_INCLUDE ${CMAKE_BINARY_DIR}/include/mmg/mmgs )
+  SET(MMG3D_INCLUDE ${CMAKE_BINARY_DIR}/include/mmg/mmg3d )
+  SET(MMG_INCLUDE ${CMAKE_BINARY_DIR}/include/mmg )
 
   # Install header files in /usr/local or equivalent
   INSTALL(FILES ${mmg2d_headers} DESTINATION include/mmg/mmg2d)
@@ -99,29 +99,29 @@ IF ( LIBMMG_STATIC OR LIBMMG_SHARED )
   INSTALL(FILES ${mmg3d_headers} DESTINATION include/mmg/mmg3d)
   INSTALL(FILES ${mmg_headers} DESTINATION include/mmg)
 
-  FILE(INSTALL ${CMAKE_SOURCE_DIR}/src/mmg/libmmgf.h DESTINATION  ${CMAKE_SOURCE_DIR}/include/mmg/)
+  FILE(INSTALL ${CMAKE_SOURCE_DIR}/src/mmg/libmmgf.h DESTINATION  ${CMAKE_BINARY_DIR}/include/mmg/)
 
   # Install header files in project directory
   FILE(INSTALL  ${mmg2d_headers}
-    DESTINATION ${CMAKE_SOURCE_DIR}/include/mmg/mmg2d/
+    DESTINATION ${CMAKE_BINARY_DIR}/include/mmg/mmg2d/
     PATTERN "libmmg*f.h"  EXCLUDE)
   FILE(INSTALL  ${mmgs_headers}
-    DESTINATION ${CMAKE_SOURCE_DIR}/include/mmg/mmgs/
+    DESTINATION ${CMAKE_BINARY_DIR}/include/mmg/mmgs/
     PATTERN "libmmg*f.h"  EXCLUDE)
   FILE(INSTALL  ${mmg3d_headers}
-    DESTINATION ${CMAKE_SOURCE_DIR}/include/mmg/mmg3d/
+    DESTINATION ${CMAKE_BINARY_DIR}/include/mmg/mmg3d/
     PATTERN "libmmg*f.h"  EXCLUDE)
   FILE(INSTALL  ${mmg_headers}
-    DESTINATION ${CMAKE_SOURCE_DIR}/include/mmg/
+    DESTINATION ${CMAKE_BINARY_DIR}/include/mmg/
     PATTERN "libmmg*f.h"  EXCLUDE)
 
 
   ADD_CUSTOM_TARGET(copy_mmg_headers ALL
     DEPENDS
     copy_2d_headers copy_s_headers copy_3d_headers
-    ${CMAKE_SOURCE_DIR}/include/mmg/libmmgf.h
-    ${CMAKE_SOURCE_DIR}/include/mmg/libmmg.h
-    ${CMAKE_SOURCE_DIR}/include/mmg/mmg3d/libmmgtypes.h )
+    ${CMAKE_BINARY_DIR}/include/mmg/libmmgf.h
+    ${CMAKE_BINARY_DIR}/include/mmg/libmmg.h
+    ${CMAKE_BINARY_DIR}/include/mmg/mmg3d/libmmgtypes.h )
 
 ENDIF()
 
