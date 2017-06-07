@@ -66,6 +66,7 @@ int MMG3D_movetetrapoints(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree,in
       }
       ier = 0;
       if ( ppt->tag & MG_BDY ) {
+        continue;
         /* Catch a boundary point by a boundary face */
         if ( !pt->xt || !(MG_BDY & pxt->ftag[i]) )  continue;
         else if( ppt->tag & MG_NOM ){
@@ -121,7 +122,7 @@ int MMG3D_movetetrapoints(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree,in
       else if ( internal ) {
         ilistv = _MMG5_boulevolp(mesh,k,i0,listv);
         if ( !ilistv )  continue;
-        ier = _MMG5_movintpt(mesh,met,octree,listv,ilistv,improve);
+        ier =  _MMG3D_movnormal_iso(mesh,met,k,i0);//_MMG5_movintpt(mesh,met,octree,listv,ilistv,improve);
       }
       if ( ier ) {
         nm++;
@@ -235,7 +236,8 @@ int MMG3D_optbdry(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree,int k) {
   ib  = i;
   ipb = pt->v[ib];
 
-  /*First : try to move the vertex in order to improve the quality*/
+
+  /* try to move the vertex in order to improve the quality*/
   ier = 0;
   for(j = 0 ; j<10 ; j++) {
     imove = MMG3D_movetetrapoints(mesh,met,octree,k);
@@ -246,64 +248,20 @@ int MMG3D_optbdry(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree,int k) {
     //printf("youpi %d\n",ier);
     imove = 1;
     //return(1);
-  } else {
-    //printf("pas reussi on devrait bouger les points\n");
   }
-  assert(pt->xt);
 
-  /*look at the lenght edges*/
-  imax = -1;
-  lmax = 0;
-  lint = 0;
-  for(ied = 0 ; ied<3 ;ied++) {
-      iedg  = _MMG5_arpt[i][ied];
-      len =  _MMG5_lenedg(mesh,met,iedg,pt);
-      lint += len;
-      if(len > lmax) {
-        imax = iedg;
-        lmax = len;
-      }
-  }
-  lint /= 3.;
-  lbdy = 0;
-  imin = -1;
-  lmin = 1000;
-  for(ied = 0 ; ied<3 ;ied++) {
-      iedg  = _MMG5_iarf[i][ied];
-      len = _MMG5_lenedg(mesh,met,iedg,pt);
-      lbdy += len;
-      if(len < lmin) {
-        imin = iedg;
-        lmin = len;
-      }
-
-  }
-  lbdy /= 3.;
-  if(lint > 2.*lbdy) {
-    /* printf("internal edges too long..\n"); */
-    /* printf("lint %e -- lbdy %e for tet %d\n",lint,lbdy,k); */
-    /* printf("lmin %e -- lmax %e\n",lmin,lmax); */
-    ier = _MMG3D_splitItem(mesh,met,octree,k,imax,1.00001);
-    if(!ier) {
-      for(ied = 0 ; ied<3 ;ied++) {
-        iedg  = _MMG5_arpt[i][ied];
-        if(iedg == imax) continue;
-        ier = _MMG3D_splitItem(mesh,met,octree,k,iedg,1.00001);
-        if(ier)  {
-          return(1);
-        }
-      }
-    } else {
-      return(1);
-    }
-
+  if(!mesh->info.noinsert) {
+    /*try to remove the non-bdry vertex*/
+    ier = _MMG3D_coledges(mesh,met,k,ib);
+    if(ier) return(1);
 
     /* try to remove the non-bdry vertex : with all the edges containing the vertex*/
     ier = _MMG3D_deletePoint(mesh,met,octree,k,i);
     if(ier) return(1);
   }
 
-  /*First : try to swap the 3 internal edges*/
+
+  /*try to swap the 3 internal edges*/
   if(!mesh->info.noswap) {
     for(ied = 0 ; ied<3 ;ied++) {
       iedg  = _MMG5_arpt[i][ied];
@@ -340,15 +298,6 @@ int MMG3D_optbdry(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree,int k) {
       }
     }
   }
-
-  /*Try : try to remove the non-bdry vertex*/
-  if(!mesh->info.noinsert) {
-    ier = _MMG3D_coledges(mesh,met,k,ib);
-    if(ier) return(1);
-  }
-  /* try to remove the non-bdry vertex : with all the edges containing the vertex*/
-  ier = _MMG3D_deletePoint(mesh,met,octree,k,i);
-  if(ier) return(1);
 
 
   return(imove);

@@ -534,8 +534,8 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
       } else {
         nbdy2++;
       }
-      if(npeau) {
-        ier = 0;//MMG3D_optbdry(mesh,met,octree,k);
+      if(npeau==1) {
+        ier = MMG3D_optbdry(mesh,met,octree,k);
         if(ier) {
           nd++;
           ds[ityp]++;

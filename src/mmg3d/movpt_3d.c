@@ -2175,11 +2175,10 @@ int _MMG3D_movv_iso(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
     pt1 = &mesh->tetra[iel];
     if ( crit < pt1->qual )  crit = pt1->qual;
   }
-  /* if ( (crit > 100/ALPHAD) ) {
-     crit *= 1.1;
-     } else
-  */ crit *= 1.01;
-
+   if ( (crit < 0.01/_MMG3D_ALPHAD) ) {
+     crit *= 0.9;
+   } else
+     crit *= 1.01;
   coe     = 1.;
   iter    = 0;
   maxiter = 20;

@@ -247,6 +247,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
         continue;
       }
       else if(pt->xt){
+        continue;
         if ( (p0->tag & MG_BDY) && (p1->tag & MG_BDY) ) {
           continue;
         }
@@ -571,6 +572,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
           break;//imax continue;
         }
         else if(pt->xt){
+          continue;
           if ( (p0->tag & MG_BDY) && (p1->tag & MG_BDY) ) {
             continue;
           }
@@ -749,6 +751,71 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
  * \param octree pointer toward the octree structure.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Mesh optimization during insertion phase.
+ *
+ */
+static int
+_MMG5_optbad(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
+  int it,nnm,nnf,maxit,nm,nf,nw;
+  double crit;
+
+  /* shape optim */
+  it = nnm = nnf = 0;
+  maxit = 3;
+  crit = 1.053;
+
+  do {
+    /* treatment of bad elements*/
+    nw = MMG3D_opttyp(mesh,met,octree);
+    /* badly shaped process */
+    if ( !mesh->info.noswap ) {
+      nf = _MMG5_swpmsh(mesh,met,octree,2);
+      if ( nf < 0 ) {
+        fprintf(stderr,"  ## Unable to improve mesh. Exiting.\n");
+        return(0);
+      }
+      nnf += nf;
+
+      nf += _MMG5_swptet(mesh,met,crit,0.0288675,octree,2);
+      if ( nf < 0 ) {
+        fprintf(stderr,"  ## Unable to improve mesh. Exiting.\n");
+        return(0);
+      }
+    }
+    else  nf = 0;
+
+    if ( !mesh->info.nomove ) {
+      nm = _MMG5_movtet(mesh,met,octree,1.,1.,1,1,1,1,0);
+      if ( nm < 0 ) {
+        fprintf(stderr,"  ## Unable to improve mesh.\n");
+        return(0);
+      }
+    }
+    else  nm = 0;
+    nnm += nm;
+
+    if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && nw+nf+nm > 0 ){
+      fprintf(stdout,"                                          ");
+      fprintf(stdout,"  %8d improved, %8d swapped, %8d moved\n",nw,nf,nm);
+    }
+  }
+  while( ++it < maxit && nw+nm+nf > 0 );
+
+  if ( mesh->info.imprim ) {
+    if ( abs(mesh->info.imprim) < 5 && (nnf > 0 || nnm > 0) )
+      fprintf(stdout,"                                                 "
+              "        "
+              "      %8d swapped, %8d moved, %d iter. \n",nnf,nnm,it);
+  }
+  return(1);
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param octree pointer toward the octree structure.
  * \param warn set to 1 if we can't insert point due to lack of memory.
  * \return -1 if fail and we dont try to end the remesh process,
  * 0 if fail but we try to end the remesh process and 1 if success.
@@ -759,12 +826,14 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
  */
 static int
 _MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree, int* warn) {
+  MMG5_pTetra pt;
   int        nfilt,ifilt,ne,ier;
-  int        ns,nc,it,nnc,nns,nnf,nnm,maxit,nf,nm;
+  int        ns,nc,it,nnc,nns,nnf,nnm,maxit,nf,nm,noptim,k;
   double     maxgap,dd;
 
   /* Iterative mesh modifications */
   it = nnc = nns = nnf = nnm = nfilt = 0;
+  noptim = 0;
   maxit = 50;
   mesh->gap = maxgap = 0.5;
   // MMG_npuiss = MMG_nvol = MMG_npres = MMG_npd = 0; // decomment to debug
@@ -787,7 +856,8 @@ _MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree, int* warn) 
         return(0);
       }
       nnf += nf;
-      nf += _MMG5_swptet(mesh,met,1.053,0.0288675,octree,2);
+      nf += _MMG5_swptet(mesh,met,1.053,0.5/_MMG3D_ALPHAD/*0.0288675*/,octree,2);
+     
       if ( nf < 0 ) {
         fprintf(stderr,"  ## Unable to improve mesh. Exiting.\n");
         return(0);
@@ -798,8 +868,9 @@ _MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree, int* warn) 
 
 
     if ( !mesh->info.nomove ) {
-      /*perform only boundary moves critSurf,moveVol?, improveSurf, improveVol, maxiter*/
-      nm = _MMG5_movtet(mesh,met,octree,1./3.46,0,1,0,1);
+      /*perform only boundary moves critSurf,critVol, moveVol?, improveSurf, improveSurfVol,improveVol, maxiter*/
+      nm = _MMG5_movtet(mesh,met,octree,1./3.46,0.5/_MMG3D_ALPHAD,1,1,0,1,1);
+      
       if ( nm < 0 ) {
         fprintf(stderr,"  ## Unable to improve mesh.\n");
         return(0);
@@ -825,6 +896,19 @@ _MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree, int* warn) 
       fprintf(stdout,"     %8d filtered, %8d splitted, %8d collapsed,"
               " %8d swapped, %8d moved\n",ifilt,ns,nc,nf,nm);
 
+    /*optimization*/
+    dd = abs(nc-ns);
+    if ( !noptim && (it==5 || ((dd < 5) || (dd < 0.05*MG_MAX(nc,ns)) || !(ns+nc))) ) {
+      _MMG5_optbad(mesh,met,octree);
+      noptim = 1;
+#warning performance/release check the update of mark and remove this loop
+      for (k=1; k<=ne; k++) {
+        pt = &mesh->tetra[k];
+        if ( !MG_EOK(pt)  || (pt->tag & MG_REQ) )   continue;
+        pt->mark = mesh->mark;
+      }
+    }
+
     if( it > 5 ) {
       //  if ( ns < 10 && abs(nc-ns) < 3 )  break;
       //else if ( it > 3 && abs(nc-ns) < 0.3 * MG_MAX(nc,ns) )  break;
@@ -833,7 +917,7 @@ _MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree, int* warn) 
       //else if ( it > 12 && nc >= ns )  break;
     }
   }
-  while( ++it < maxit && nc+ns > 0 );
+  while( ++it < maxit && (noptim || nc+ns > 0) );
 
   if ( mesh->info.imprim ) {
     if ( (abs(mesh->info.imprim) < 5) && ( nnc || nns ) ) {
@@ -880,7 +964,7 @@ _MMG5_optetLES(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
     else  nf = 0;
 
     if ( !mesh->info.nomove ) {
-      nm = _MMG5_movtet(mesh,met,octree,1.,1,1,1,3);
+      nm = _MMG5_movtet(mesh,met,octree,1.,1.,1,1,1,1,3);
       if ( nm < 0 ) {
         fprintf(stderr,"  ## Unable to improve mesh.\n");
         return(0);
@@ -902,7 +986,7 @@ _MMG5_optetLES(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
   while( ++it < maxit && nw+nm+nf > 0 );
 
   if ( !mesh->info.nomove ) {
-    nm = _MMG5_movtet(mesh,met,octree,1.,1,1,1,3);
+    nm = _MMG5_movtet(mesh,met,octree,1.,1.,1,1,1,1,3);
     if ( nm < 0 ) {
       fprintf(stderr,"  ## Unable to improve mesh.\n");
       return(0);
@@ -946,7 +1030,7 @@ _MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
   do {
     /* treatment of bad elements*/
     if(it < 5) {
-      nw = 0;//MMG3D_opttyp(mesh,met,octree);
+      nw = MMG3D_opttyp(mesh,met,octree);
     }
     else
       nw = 0;
@@ -959,7 +1043,7 @@ _MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
       }
       nnf += nf;
 
-      nf += _MMG5_swptet(mesh,met,crit,0.0288675,octree,2);
+      nf += _MMG5_swptet(mesh,met,crit,0.9/_MMG3D_ALPHAD/*0.0288675*/,octree,2);
       if ( nf < 0 ) {
         fprintf(stderr,"  ## Unable to improve mesh. Exiting.\n");
         return(0);
@@ -968,7 +1052,7 @@ _MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
     else  nf = 0;
 
     if ( !mesh->info.nomove ) {
-      nm = _MMG5_movtet(mesh,met,octree,1.,1,1,1,0);
+      nm = _MMG5_movtet(mesh,met,octree,1.,1.,1,1,1,1,0);
       if ( nm < 0 ) {
         fprintf(stderr,"  ## Unable to improve mesh.\n");
         return(0);
@@ -981,11 +1065,15 @@ _MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
       fprintf(stdout,"                                          ");
       fprintf(stdout,"  %8d improved, %8d swapped, %8d moved\n",nw,nf,nm);
     }
+
+    if ( it > 3 ) {
+      if ( !nw && (!nm || !nf) )   break;
+    }
   }
   while( ++it < maxit && nw+nm+nf > 0 );
 
   if ( !mesh->info.nomove ) {
-    nm = _MMG5_movtet(mesh,met,octree,1.,1,1,1,3);
+    nm = _MMG5_movtet(mesh,met,octree,1.,1.,1,1,1,1,3);
     if ( nm < 0 ) {
       fprintf(stderr,"  ## Unable to improve mesh.\n");
       return(0);

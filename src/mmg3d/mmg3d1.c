@@ -589,7 +589,10 @@ int _MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double crit,double declic,
  * \param met pointer toward the metric structure.
  * \param octree pointer toward the octree structure.
  * \param clickSurf triangle quality threshold under which we want to move
+ * \param clickVol  tetra    quality threshold under which we want to move
  * \param moveVol internal move
+ * \param improveSurf forbid surface degradation during the move
+ * \param improveVolSurf forbid volume degradation during the surfacic move
  * \param improveVol forbid volume degradation during the move
  * \param maxit maximum number of iteration.
  * \return -1 if failed, number of moved points otherwise.
@@ -598,7 +601,8 @@ int _MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double crit,double declic,
  *
  */
 int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,
-                 double clickSurf,int moveVol, int improveSurf, int improveVol, int maxit) {
+                 double clickSurf,double clickVol,int moveVol, int improveSurf,
+                 int improveVolSurf, int improveVol, int maxit) {
   MMG5_pTetra        pt;
   MMG5_pPoint        ppt;
   MMG5_pxTetra       pxt;
@@ -621,7 +625,8 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,
     for (k=1; k<=mesh->ne; k++) {
       pt = &mesh->tetra[k];
       if ( !MG_EOK(pt) || pt->ref < 0 || (pt->tag & MG_REQ) )   continue;
-
+      if ( pt->qual > clickVol) continue;
+      
       /* point j on face i */
       for (i=0; i<4; i++) {
         for (j=0; j<3; j++) {
@@ -656,7 +661,7 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,
               ier=_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,1);
               if( !ier )  continue;
               else if ( ier>0 )
-                ier = _MMG5_movbdynompt(mesh,met,octree,listv,ilistv,lists,ilists,improveVol);
+                ier = _MMG5_movbdynompt(mesh,met,octree,listv,ilistv,lists,ilists,improveVolSurf);
               else
                 return(-1);
             }
@@ -664,7 +669,7 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,
               ier=_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,0);
               if ( !ier )  continue;
               else if ( ier>0 )
-                ier = _MMG5_movbdyridpt(mesh,met,octree,listv,ilistv,lists,ilists,improveVol);
+                ier = _MMG5_movbdyridpt(mesh,met,octree,listv,ilistv,lists,ilists,improveVolSurf);
               else
                 return(-1);
             }
@@ -673,7 +678,7 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,
               if ( !ier )
                 continue;
               else if ( ier>0 )
-                ier = _MMG5_movbdyrefpt(mesh,met,octree,listv,ilistv,lists,ilists,improveVol);
+                ier = _MMG5_movbdyrefpt(mesh,met,octree,listv,ilistv,lists,ilists,improveVolSurf);
               else
                 return(-1);
             }
@@ -697,7 +702,7 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,
                   continue;
               }
               ier = _MMG5_movbdyregpt(mesh,met,octree,listv,ilistv,
-                                      lists,ilists,improveSurf,improveVol);
+                                      lists,ilists,improveSurf,improveVolSurf);
               if (ier < 0 ) return -1;
               else if ( ier )  ns++;
             }
@@ -1811,7 +1816,7 @@ int _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,char typchk, int patternMode) {
 #endif
       fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped\n",ns,nc,nf);
     }
-    if ( it > 3 && abs(nc-ns) < 0.1 * MG_MAX(nc,ns) )  break;
+    if ( it > 3 && ( !(ns+nc) || (abs(nc-ns) < 0.1 * MG_MAX(nc,ns)) ) )  break;
   }
   while ( ++it < maxit && ns+nc+nf > 0 );
 
