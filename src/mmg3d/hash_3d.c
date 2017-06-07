@@ -1236,7 +1236,7 @@ int _MMG5_bdryTria(MMG5_pMesh mesh, int ntmesh) {
           if ( adj && ( pt->ref <= pt1->ref) )  continue;
         } else {
           if ( adj && ( (pt->ref<pt1->ref) || (!pt->xt) ||
-                        (!MG_GET(mesh->xtetra[pt->xt].ori,i) ) ) )
+                        (!(pxt->ftag[i] & MG_BDY)) || (!MG_GET(pxt->ori,i) ) ) )
             continue;
         }
 
@@ -1372,6 +1372,7 @@ int _MMG5_bdryTria(MMG5_pMesh mesh, int ntmesh) {
       }
     }
   }
+
   assert(mesh->nt==ntmesh);
 
   if ( ntmesh != ntinit ) {
