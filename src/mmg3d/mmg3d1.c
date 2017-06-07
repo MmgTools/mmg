@@ -636,7 +636,6 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,int maxiti
         for (j=0; j<3; j++) {
           if ( pt->xt ) {
             pxt = &mesh->xtetra[pt->xt];
-            if ( pxt->tag[_MMG5_iarf[i][j]] & MG_REQ )  continue;
           }
           else  pxt = 0;
           i0  = _MMG5_idir[i][j];
