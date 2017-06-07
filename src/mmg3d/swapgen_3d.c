@@ -125,7 +125,8 @@ int _MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,
   // if ( calold*_MMG3D_ALPHAD > 0.5 )  return(0);
 
   /* Prevent swap of an external boundary edge */
-  if ( !adj )  return(0);
+#warning Profiling : why we don't check the edge tag instead of computing the shell
+   if ( !adj ) return(0);
 
   assert(npol == (*ilist)); // du coup, apres on pourra virer npol
 
