@@ -66,7 +66,7 @@ static int setadj(MMG5_pMesh mesh){
     do {
       k  = pile[ipil--];
       pt = &mesh->tria[k];
-      pt->flag = 0;
+      pt->flag = 1;
       if ( !MG_EOK(pt) )  continue;
 
       pt->cc = ncc;
@@ -107,14 +107,15 @@ static int setadj(MMG5_pMesh mesh){
           pt1->edg[ii] = pt->edg[i];
           mesh->point[ip1].tag |= MG_NOM;
           mesh->point[ip2].tag |= MG_NOM;
+          continue;
         }
         if ( (pt1->tag[ii] & MG_NOM) && !(pt->tag[i] & MG_NOM) ) {
           pt->tag[i] = pt1->tag[ii];
           pt->edg[i] = pt1->edg[ii];
           mesh->point[ip1].tag |= MG_NOM;
           mesh->point[ip2].tag |= MG_NOM;
+          continue;
         }
-        if ( pt1->cc > 0 )  continue;
 
         if ( abs(pt1->ref) != abs(pt->ref) ) {
           pt->tag[i]   |= MG_REF;
