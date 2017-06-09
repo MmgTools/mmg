@@ -1651,15 +1651,15 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   fprintf(inm,"1\n");
   if ( sol->size == 1 ) {
     typ = 1;
-    fprintf(inm,"isotropic_metric\n");
+    fprintf(inm,"\"isotropic_metric\"\n");
   }
   else if ( sol->size == sol->dim ) {
     typ = 3;
-    fprintf(inm,"displacement_vector\n");
+    fprintf(inm,"\"displacement_vector\"\n");
   }
   else {
     typ = 9;
-    fprintf(inm,"anisotropic_metric\n");
+    fprintf(inm,"\"anisotropic_metric\"\n");
   }
 
   /* One real tag unused */
