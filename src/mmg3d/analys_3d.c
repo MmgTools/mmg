@@ -127,15 +127,14 @@ static int _MMG5_setadj(MMG5_pMesh mesh){
 
         /* open boundary */
         if ( !adja[i] ) {
-          pt->tag[i] |= MG_GEO;
-          mesh->point[ip1].tag |= MG_GEO;
-          mesh->point[ip2].tag |= MG_GEO;
+          pt->tag[i] |= MG_GEO + MG_OPNBDY;
+          mesh->point[ip1].tag |= MG_GEO + MG_OPNBDY;
+          mesh->point[ip2].tag |= MG_GEO + MG_OPNBDY;
           ned++;
           continue;
         }
 
         kk = adja[i] / 3;
-
         ii = adja[i] % 3;
         if ( kk > k )  ned++;
 
@@ -151,7 +150,7 @@ static int _MMG5_setadj(MMG5_pMesh mesh){
 
         if ( abs(pt1->ref) != abs(pt->ref) ) {
           pt->tag[i]   |= MG_REF;
-          if ( !(pt->tag[i] & MG_NOM) )  pt1->tag[ii] |= MG_REF;
+          pt1->tag[ii] |= MG_REF;
           mesh->point[ip1].tag |= MG_REF;
           mesh->point[ip2].tag |= MG_REF;
         }

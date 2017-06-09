@@ -1047,7 +1047,14 @@ int _MMG3D_localParamNm(MMG5_pMesh mesh,int iel,int iface,int ia,
    * fails because we have more than 2 boundaries in the edge shell
    * (non-manifold domain). In this case, we just take into account 2
    * boundaries of the shell */
-  ilistv = _MMG5_coquilface( mesh,iel,iface, ia,listv,&ifac1,&ifac2,1);
+
+  if ( pxt->tag[ia] & MG_OPNBDY ) {
+    ilistv = 1;
+    ifac1  = ifac2 = 4*iel + iface;
+  }
+  else {
+    ilistv = _MMG5_coquilface( mesh,iel,iface, ia,listv,&ifac1,&ifac2,1);
+  }
   if ( ilistv < 0 )
   {
     if ( mesh->info.ddebug || mesh->info.imprim>5 )

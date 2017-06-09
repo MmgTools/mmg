@@ -1347,13 +1347,13 @@ int _MMG5_coquilface(MMG5_pMesh mesh,int start,char iface,int ia,int *list,
 
   /* Ensure that the first boundary face found is ifac (nedded by normalAdjaTri
    * function in multidomain case) */
-  ifar_idx = _MMG5_ifar[ia][0]==iface ? 1 : 0;
+  ifar_idx = ((_MMG5_ifar[ia][0]==iface) ? 1 : 0);
   assert ( iface == _MMG5_ifar[ia][(ifar_idx+1)%2] );
 
   adj = adja[_MMG5_ifar[ia][ifar_idx]] / 4;
   piv = pt->v[iface];
 
-  pxt = &mesh->xtetra[pt->xt];
+  pxt   = &mesh->xtetra[pt->xt];
 
   assert ( pxt->ftag[iface] );
   *it1 = 4*start + iface;
@@ -1372,7 +1372,6 @@ int _MMG5_coquilface(MMG5_pMesh mesh,int start,char iface,int ia,int *list,
         printf("  ## Warning: you have more than 2 boundaries in the shell of your edge.\n");
         printf("  Problem may occur during remesh process.\n");
       }
-      //assert( *it2 == 0 );
       *it2 = 4*pradj+iface;
     }
 

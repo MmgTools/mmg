@@ -342,7 +342,6 @@ int _MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
   int          nr,nbbdy,ndepmin,ndepplus,isloc,iedgeOpp;
   int16_t      tag;
   char         iopp,iopp2,ia,ip,i,iq,i0,i1,ier,isminp,isplp;
-
   pt   = &mesh->tetra[k];
   pxt  = 0;
   pt0  = &mesh->tetra[0];
@@ -763,6 +762,7 @@ int _MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,cha
           ia = _MMG5_idir[ip][j];
           if ( pt->v[ia]==p1_c[i] ) {
             pxt->tag[_MMG5_arpt[ip][j]] |= pxt1->tag[ind[i][1]];
+#warning useless test because we take the max just below....?
             if ( !pxt->edg[_MMG5_arpt[ip][j]] )
               pxt->edg[_MMG5_arpt[ip][j]] = pxt1->edg[ind[i][1]];
             else if ( pxt1->edg[ind[i][1]] )
@@ -830,9 +830,19 @@ int _MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,cha
           pxt1->ref[voyp] = MG_MAX(pxt1->ref[voyp],pxt->ref[ip]);
           pxt1->ftag[voyp] = pxt1->ftag[voyp] | pxt->ftag[ip];
 
-          if ( qel && (pt1->ref < mesh->tetra[qel].ref) )  MG_CLR( pxt1->ori,voyp );
-          else   MG_SET(pxt1->ori,voyp);
-
+          if ( qel ) {
+            if ( pt1->ref < mesh->tetra[qel].ref )  MG_CLR( pxt1->ori,voyp );
+            else if ( mesh->info.itri && (pt1->ref == mesh->tetra[qel].ref) ) {
+              if ( pxt->ftag[ip] ) {
+                if ( MG_GET(pxt->ori,ip) )
+                  MG_SET( pxt1->ori,voyp );
+                else
+                  MG_CLR( pxt1->ori,voyp );
+              }
+            }
+            else  MG_SET( pxt1->ori,voyp );
+          }
+          else  MG_SET( pxt1->ori,voyp );
 
           /* update tags for edges */
           for ( j=0; j<3; j++ ) {
@@ -924,8 +934,19 @@ int _MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,cha
             pxt1->ref[voyq]  = MG_MAX(pxt1->ref[voyq],pxt->ref[iq]);
             pxt1->ftag[voyq] = (pxt1->ftag[voyq] | pxt->ftag[iq]);
 
-            if ( pel && (pt1->ref < mesh->tetra[pel].ref) )  MG_CLR( pxt1->ori,voyq );
-            else   MG_SET(pxt1->ori,voyq);
+            if ( pel ) {
+              if ( pt1->ref < mesh->tetra[pel].ref )  MG_CLR( pxt1->ori,voyq );
+              else if ( mesh->info.itri && (pt1->ref == mesh->tetra[pel].ref) ) {
+                if ( pxt->ftag[iq] ) {
+                  if ( MG_GET(pxt->ori,iq) )
+                    MG_SET( pxt1->ori,voyq );
+                  else
+                    MG_CLR( pxt1->ori,voyq );
+                }
+              }
+              else  MG_SET( pxt1->ori,voyq );
+            }
+            else  MG_SET( pxt1->ori,voyq );
 
             /* update tags for edges */
             for ( j=0; j<3; j++ ) {

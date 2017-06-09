@@ -341,6 +341,7 @@ int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
     pt->v[2] = mesh->point[pt->v[2]].tmp;
     pt->v[3] = mesh->point[pt->v[3]].tmp;
     ne++;
+
     if ( k!=nbl ) {
       ptnew = &mesh->tetra[nbl];
       memcpy(ptnew,pt,sizeof(MMG5_Tetra));
