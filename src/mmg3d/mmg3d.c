@@ -64,7 +64,6 @@ int _MMG5_countLocalParamAtTet( MMG5_pMesh mesh,_MMG5_iNode **bdyRefs) {
 
   /** Count the number of different boundary references and list it */
   (*bdyRefs) = NULL;
-  npar = 0;
 
   k = mesh->ne? mesh->tetra[1].ref : 0;
 
@@ -184,6 +183,7 @@ int _MMG3D_writeLocalParam( MMG5_pMesh mesh ) {
 static inline
 int _MMG3D_defaultOption(MMG5_pMesh mesh,MMG5_pSol met) {
   mytime    ctim[TIMEMAX];
+  double    hsiz;
   char      stim[32];
 
   _MMG3D_Set_commonFunc();
@@ -231,8 +231,24 @@ int _MMG3D_defaultOption(MMG5_pMesh mesh,MMG5_pSol met) {
     fprintf(stdout,"\n  -- DEFAULT PARAMETERS COMPUTATION\n");
   }
 
-  /* scaling mesh and hmin/hmax computation*/
+  /* scaling mesh + hmin/hmax computation*/
   if ( !_MMG5_scaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+
+  /* specific meshing + hmin/hmax update */
+  if ( mesh->info.optim ) {
+    if ( !MMG3D_doSol(mesh,met) ) {
+      if ( !_MMG5_unscaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+      _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
+    }
+    _MMG3D_solTruncatureForOptim(mesh,met);
+  }
+
+  if ( mesh->info.hsiz > 0. ) {
+    if ( !MMG5_Compute_constantSize(mesh,met,&hsiz) ) {
+     if ( !_MMG5_unscaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+    }
+  }
 
   /* unscaling mesh */
   if ( !_MMG5_unscaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);

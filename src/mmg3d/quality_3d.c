@@ -699,12 +699,13 @@ int _MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcib
         }
         dnaddloc *= 1./lon;
         if(!loc) {
-          if(_MMG3D_ALPHAD * pt->qual >= 0.5) /*on ne compte les points internes que pour les (tres) bons tetras*/
-            dnaddloc = dnaddloc;
-          else if(_MMG3D_ALPHAD * pt->qual >= 1./5.)
-            dnaddloc = dned / lon + 2*dnface/3.;
-          else
-            dnaddloc = dned / lon ;
+          /*on ne compte les points internes que pour les (tres) bons tetras*/
+          if( _MMG3D_ALPHAD * pt->qual < 0.5) {
+            if(_MMG3D_ALPHAD * pt->qual >= 1./5.)
+              dnaddloc = dned / lon + 2*dnface/3.;
+            else
+              dnaddloc = dned / lon ;
+          }
           //rajout de 30% parce que 1) on vise des longueurs de 0.7 et
           //2) on ne tient pas compte du fait qu'on divise tjs par 2 dans la generation
           if( (_MMG3D_ALPHAD*pt->qual <= 1./50.) )

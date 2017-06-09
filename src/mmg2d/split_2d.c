@@ -128,6 +128,8 @@ int _MMG2_chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
      a dichotomy is applied to find the largest distance to the edge that yields an admissible configuration */
   else {
     ier = _MMG2_bezierCurv(mesh,k,i,0.5,o,no);
+    if ( !ier ) return 0;
+
     ip  = _MMG2D_newPt(mesh,o,pt->tag[i]);
     if ( !ip ) {
       /* reallocation of point table */

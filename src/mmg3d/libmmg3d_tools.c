@@ -61,7 +61,7 @@ void MMG3D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
 #endif
   }
   else if ( met->size == 6 ) {
-    if ( !met->m ) {
+    if ( !met->m && !mesh->info.optim && mesh->info.hsiz<=0. ) {
       _MMG5_caltet          = _MMG5_caltet_iso;
       _MMG5_caltri          = _MMG5_caltri_iso;
       _MMG5_lenedg         = _MMG5_lenedg_iso;
@@ -206,6 +206,12 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
           if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_hmax,
                                     atof(argv[i])) )
             return 0;
+        }
+        else if ( !strcmp(argv[i],"-hsiz") && ++i < argc ) {
+          if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_hsiz,
+                                     atof(argv[i])) )
+            return 0;
+
         }
         else if ( !strcmp(argv[i],"-hausd") && ++i <= argc ) {
           if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_hausd,
@@ -464,7 +470,7 @@ int MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
       }
     }
   }
-  fprintf(stdout,"  %%%% %s OPENED\n",data);
+  fprintf(stdout,"\n  %%%% %s OPENED\n",data);
 
   /* read parameters */
   while ( !feof(in) ) {
@@ -481,10 +487,17 @@ int MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
 
       for (i=0; i<mesh->info.npar; i++) {
         ret = fscanf(in,"%d %s ",&ref,buf);
-        ret = fscanf(in,"%f %f %f",&fp1,&fp2,&hausd);
+        if ( ret )
+          ret = fscanf(in,"%f %f %f",&fp1,&fp2,&hausd);
+
+        if ( !ret ) {
+          fprintf(stderr,"  %%%% Wrong format: %s\n",buf);
+          return 0;
+        }
+
         for (j=0; j<strlen(buf); j++)  buf[j] = tolower(buf[j]);
 
-        if ( !strcmp(buf,"triangles") || !strcmp(buf,"triangle") ) {
+        if ( (!strcmp(buf,"triangles") || !strcmp(buf,"triangle")) ) {
           if ( !MMG3D_Set_localParameter(mesh,met,MMG5_Triangle,ref,fp1,fp2,hausd) ) {
             return 0;
           }
@@ -501,7 +514,7 @@ int MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
         }
         else {
           fprintf(stderr,"  %%%% Wrong format: %s\n",buf);
-          continue;
+          return 0;
         }
       }
     }
@@ -721,18 +734,17 @@ int MMG3D_searchlen(MMG5_pMesh mesh, MMG5_pSol met, double lmin,
 }
 
 int MMG3D_doSol(MMG5_pMesh mesh,MMG5_pSol met) {
-    MMG5_pTetra     pt;
-    MMG5_pPoint     p1,p2;
-    double     ux,uy,uz,dd;
-    int        i,k,ia,ib,ipa,ipb;
-    int       *mark;
+    MMG5_pTetra  pt;
+    MMG5_pPoint  p1,p2;
+    double       ux,uy,uz,dd;
+    int          i,k,iadr,ia,ib,ipa,ipb;
+    int         *mark;
 
     _MMG5_SAFE_CALLOC(mark,mesh->np+1,int,0);
 
     /* Memory alloc */
     met->np     = mesh->np;
     met->npmax  = mesh->npmax;
-    met->size   = 1;
     met->dim    = mesh->dim;
 
     _MMG5_ADD_MEM(mesh,(met->size*(met->npmax+1))*sizeof(double),"solution",return(0));
@@ -741,9 +753,10 @@ int MMG3D_doSol(MMG5_pMesh mesh,MMG5_pSol met) {
     /* edges */
     for (k=1; k<=mesh->ne; k++) {
         pt = &mesh->tetra[k];
-        if ( !pt->v[0] )  continue;
+        if ( !MG_EOK(pt) )  continue;
 
-        for (i=0; i<6; i++) {
+        if ( met->size == 1 ) {
+          for (i=0; i<6; i++) {
             ia  = _MMG5_iare[i][0];
             ib  = _MMG5_iare[i][1];
             ipa = pt->v[ia];
@@ -760,19 +773,128 @@ int MMG3D_doSol(MMG5_pMesh mesh,MMG5_pSol met) {
             mark[ipa]++;
             met->m[ipb] += dd;
             mark[ipb]++;
+          }
+        }
+        else if ( met->size == 6 ) {
+          for (i=0; i<6; i++) {
+            ia  = _MMG5_iare[i][0];
+            ib  = _MMG5_iare[i][1];
+            ipa = pt->v[ia];
+            ipb = pt->v[ib];
+            p1  = &mesh->point[ipa];
+            p2  = &mesh->point[ipb];
+
+            ux  = p1->c[0] - p2->c[0];
+            uy  = p1->c[1] - p2->c[1];
+            uz  = p1->c[2] - p2->c[2];
+            dd  = sqrt(ux*ux + uy*uy + uz*uz);
+
+            iadr = 6*ipa;
+            met->m[iadr]   += dd;
+            mark[ipa]++;
+
+            iadr = 6*ipb;
+            met->m[iadr] += dd;
+            mark[ipb]++;
+          }
+        }
+        else {
+          _MMG5_SAFE_FREE(mark);
+          return 0;
         }
     }
 
+    /* if hmax is not specified, compute it from the metric */
+    if ( mesh->info.hmax < 0. ) {
+      if ( met->size == 1 ) {
+        dd = 0.;
+        for (k=1; k<=mesh->np; k++) {
+          if ( !mark[k] ) continue;
+          dd = MG_MAX(dd,met->m[k]);
+        }
+        assert ( dd );
+      }
+      else if ( met->size == 6 ) {
+        dd = FLT_MAX;
+        for (k=1; k<=mesh->np; k++) {
+          if ( !mark[k] ) continue;
+          iadr = 6*k;
+          dd = MG_MIN(dd,met->m[iadr]);
+        }
+        assert ( dd < FLT_MAX );
+        dd = 1./sqrt(dd);
+      }
+      mesh->info.hmax = 10.*dd;
+    }
+
+
     /* vertex size */
-    for (k=1; k<=mesh->np; k++) {
-        p1 = &mesh->point[k];
+    if ( met->size == 1 ) {
+      for (k=1; k<=mesh->np; k++) {
         if ( !mark[k] ) {
-            met->m[k] = FLT_MAX;
-            continue;
+          met->m[k] = mesh->info.hmax;
+          continue;
         }
         else
-            met->m[k] = met->m[k] / (double)mark[k];
+          met->m[k] = met->m[k] / (double)mark[k];
+      }
     }
+    else if ( met->size == 6 ) {
+      for (k=1; k<=mesh->np; k++) {
+        iadr = 6*k;
+        if ( !mark[k] ) {
+          met->m[iadr]   = 1./(mesh->info.hmax*mesh->info.hmax);
+          met->m[iadr+3] = met->m[iadr];
+          met->m[iadr+5] = met->m[iadr];
+          continue;
+        }
+        else {
+          met->m[iadr]   = (double)mark[k]*(double)mark[k]/(met->m[iadr]*met->m[iadr]);
+          met->m[iadr+3] = met->m[iadr];
+          met->m[iadr+5] = met->m[iadr];
+        }
+      }
+    }
+
     _MMG5_SAFE_FREE(mark);
     return(1);
+}
+
+int MMG3D_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met) {
+  MMG5_pPoint ppt;
+  double      hsiz;
+  int         k,iadr;
+
+  /* Memory alloc */
+  met->np     = mesh->np;
+  met->npmax  = mesh->npmax;
+  met->dim    = mesh->dim;
+
+  _MMG5_ADD_MEM(mesh,(met->size*(met->npmax+1))*sizeof(double),"solution",return(0));
+  _MMG5_SAFE_CALLOC(met->m,met->size*(met->npmax+1),double,0);
+
+  if ( !MMG5_Compute_constantSize(mesh,met,&hsiz) )
+    return 0;
+
+  if ( met->size == 1 ) {
+    for (k=1; k<=mesh->np; k++) {
+      ppt = &mesh->point[k];
+      if ( !MG_VOK(ppt) ) continue;
+      met->m[k] = hsiz;
+    }
+  }
+  else {
+    hsiz    = 1./(hsiz*hsiz);
+
+    for (k=1; k<=mesh->np; k++) {
+      ppt = &mesh->point[k];
+      if ( !MG_VOK(ppt) ) continue;
+
+      iadr           = met->size*k;
+      met->m[iadr]   = hsiz;
+      met->m[iadr+3] = hsiz;
+      met->m[iadr+5] = hsiz;
+    }
+  }
+  return 1;
 }

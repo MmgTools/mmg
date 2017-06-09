@@ -402,6 +402,18 @@ ADD_TEST(NAME mmg3d_TetLoc_Ellipse
   -hgrad 2
   )
 
+##############################################################################
+#####
+#####         Check optim + aniso option
+#####
+##############################################################################
+#####
+ADD_TEST(NAME mmg3d_OptimAni_Sphere
+  COMMAND ${EXECUT_MMG3D} -v 5 -optim -A
+  ${MMG3D_CI_TESTS}/SphereIso_h_met/SphereIso0.5.meshb -sol 2
+  ${CTEST_OUTPUT_DIR}/mmg3d_OptimAni_Sphere.o.mesh
+  )
+
 
 ###############################################################################
 #####

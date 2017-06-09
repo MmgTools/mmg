@@ -81,6 +81,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
   MMG5_pPoint       ppt;
   MMG5_pEdge        ped;
   MMG5_pTria        pt;
+  MMG5_pQuad        pq1;
   float             fc;
   long         posnp,posnt,posncor,posned,posnq,posreq,posreqed;
   int          k,ref,tmp,ncor,norient,nreq,nreqed,bin,iswp,nq;
@@ -226,6 +227,15 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         fread(&mesh->nt,sw,1,inm);
         if(iswp) mesh->nt=MMG_swapbin(mesh->nt);
         posnt = ftell(inm);
+        rewind(inm);
+        fseek(inm,bpos,SEEK_SET);
+        continue;
+      } else if(!mesh->nquad && binch==7) {//Quadrilaterals
+        fread(&bpos,sw,1,inm); //NulPos
+        if(iswp) bpos=MMG_swapbin(bpos);
+        fread(&mesh->nquad,sw,1,inm);
+        if(iswp) mesh->nquad=MMG_swapbin(mesh->nquad);
+        posnq = ftell(inm);
         rewind(inm);
         fseek(inm,bpos,SEEK_SET);
         continue;
@@ -415,6 +425,27 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[ k ];
       ppt->tag &= ~MG_NUL;
+    }
+  }
+
+  /* read mesh quadrilaterals */
+  if ( mesh->nquad ) {
+    rewind(inm);
+    fseek(inm,posnq,SEEK_SET);
+
+    for (k=1; k<=mesh->nquad; k++) {
+      pq1 = &mesh->quadra[k];
+      if (!bin)
+        fscanf(inm,"%d %d %d %d %d",&pq1->v[0],&pq1->v[1],&pq1->v[2],
+               &pq1->v[3],&pq1->ref);
+      else {
+        for (i=0 ; i<4 ; i++) {
+          fread(&pq1->v[i],sw,1,inm);
+          if(iswp) pq1->v[i]=MMG_swapbin(pq1->v[i]);
+        }
+        fread(&pq1->ref,sw,1,inm);
+        if(iswp) pq1->ref=MMG_swapbin(pq1->ref);
+      }
     }
   }
 
@@ -648,7 +679,7 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
         fread(&binch,sw,1,inm); //nb sol
         if(iswp) binch=MMG_swapbin(binch);
         if(binch!=1) {
-          fprintf(stdout,"SEVERAL SOLUTION => IGNORED : %d\n",type);
+          fprintf(stdout,"SEVERAL SOLUTION => IGNORED : %d\n",binch);
           return(-1);
         }
         fread(&btyp,sw,1,inm); //typsol
@@ -1408,7 +1439,7 @@ int _MMG2_savemesh_db(MMG5_pMesh mesh,char *filename,char pack) {
 int _MMG2_savemet_db(MMG5_pMesh mesh,MMG5_pSol met,char *filename,char pack) {
   MMG5_pPoint        ppt;
   int                k,np;
-  char               *ptr,typ,*data;
+  char               *ptr,typ=0,*data;
   FILE               *out;
   
   if ( met->size == 1 ) typ =1;

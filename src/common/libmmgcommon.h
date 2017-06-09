@@ -146,6 +146,8 @@ int  MMG5_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solin);
 int  MMG5_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solout);
 
 /* deallocations */
+void MMG5_Free_structures(MMG5_pMesh mesh,MMG5_pSol sol);
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.
@@ -178,6 +180,33 @@ void MMG5_mmgFree_names(MMG5_pMesh mesh, MMG5_pSol met);
  *
  */
 int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sethmin 1 if hmin is already setted (>0.)
+ * \param sethmax 1 if hmax is already setted (>0.)
+ *
+ * \return 1 if success, 0 if we detect mismatch parameters
+ *
+ * Set default values for hmin and hmax  from the bounding box.
+ *
+ * \Remark not for extern users.
+ *
+ */
+extern int MMG5_Set_defaultTruncatureSizes(MMG5_pMesh mesh,char sethmin,char sethmax);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric.
+ * \param hsiz computed constant size to impose.
+ *
+ * \return 1 if success, 0 if fail
+ *
+ * Compute the constant size to impose according to hmin and hmax and store it in \a hsiz.
+ * Fill hmin and hamx if they are not setted by the user.
+ *
+ */
+int MMG5_Compute_constantSize(MMG5_pMesh mesh,MMG5_pSol met,double *hsize);
 
 #ifdef __cplusplus
 }

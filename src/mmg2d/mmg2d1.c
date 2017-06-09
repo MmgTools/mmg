@@ -42,7 +42,6 @@ int _MMG2_anatri(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   int      it,maxit,ns,nc,nsw,nns,nnc,nnsw;
 
   nns = nnc = nnsw = 0;
-  ns = nc = nsw = 0;
   it = 0;
   maxit = 5;
 
@@ -652,9 +651,6 @@ int _MMG2_adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
     else if ( MG_SIN(pt->tag[imax]) ) continue;
 
     /* Check the feasibility of splitting */
-    i1 = _MMG5_inxt2[imax];
-    i2 = _MMG5_iprv2[imax];
-
     ip = _MMG2_chkspl(mesh,met,k,imax);
 
     /* Lack of memory; abort the routine */
@@ -678,9 +674,6 @@ int _MMG2_adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
         _MMG2D_delPt(mesh,ip);
         return(ns);
       }
-
-      /* if we realloc memory in split1b pt pointer is not valid aymore. */
-      pt = &mesh->tria[k];
       ns += ier;
     }
   }
@@ -768,7 +761,6 @@ int _MMG2_movtri(MMG5_pMesh mesh,MMG5_pSol met,int maxit,char improve) {
       for (i=0; i<3; i++) {
         p0 = &mesh->point[pt->v[i]];
         if ( p0->flag == base || MG_SIN(p0->tag) || p0->tag & MG_NOM ) continue;
-        ier = 0;
 
         ilist = _MMG2_boulet(mesh,k,i,list);
 

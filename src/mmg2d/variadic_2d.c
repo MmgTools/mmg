@@ -334,7 +334,6 @@ int _MMG2D_Free_structures_var(va_list argptr)
 
   MMG5_pMesh     *mesh;
   MMG5_pSol      *sol,*disp;
-  long           castedVal;
   int            typArg;
   int            meshCount;
 
@@ -387,8 +386,6 @@ int _MMG2D_Free_structures_var(va_list argptr)
 
   /* mesh */
   assert(mesh && *mesh);
-  if ( (*mesh)->point )
-    _MMG5_DEL_MEM((*mesh),(*mesh)->point,((*mesh)->npmax+1)*sizeof(MMG5_Point));
 
   if ( (*mesh)->edge )
     _MMG5_DEL_MEM((*mesh),(*mesh)->edge,((*mesh)->namax+1)*sizeof(MMG5_Edge));
@@ -396,29 +393,14 @@ int _MMG2D_Free_structures_var(va_list argptr)
   if ( (*mesh)->adja )
     _MMG5_DEL_MEM((*mesh),(*mesh)->adja,(3*(*mesh)->ntmax+5)*sizeof(int));
 
-  if ( (*mesh)->xpoint )
-    _MMG5_DEL_MEM((*mesh),(*mesh)->xpoint,((*mesh)->xpmax+1)*sizeof(MMG5_xPoint));
-
   if ( (*mesh)->tria )
     _MMG5_DEL_MEM((*mesh),(*mesh)->tria,((*mesh)->ntmax+1)*sizeof(MMG5_Tria));
-
-  /* sol */
-  if ( sol && (*sol) && (*sol)->m ) {
-    _MMG5_DEL_MEM((*mesh),(*sol)->m,((*sol)->size*((*mesh)->npmax+1))*sizeof(double));
-  }
 
   /* disp */
   if ( disp && (*disp) && (*disp)->m )
     _MMG5_DEL_MEM((*mesh),(*disp)->m,((*disp)->size*((*disp)->npmax+1))*sizeof(double));
 
-  /* (*mesh)->info */
-  /* if ( (*mesh)->info.npar && (*mesh)->info.par ) */
-  /*   _MMG5_DEL_MEM((*mesh),(*mesh)->info.par,(*mesh)->info.npar*sizeof(MMG5_Par)); */
-
-  if ( (*mesh)->info.imprim>5 || (*mesh)->info.ddebug ) {
-    castedVal = _MMG5_SAFELL2LCAST((*mesh)->memCur);
-    printf("  MEMORY USED AT END (bytes) %ld\n",castedVal);
-  }
+  MMG5_Free_structures(*mesh,*sol);
 
   return 1;
 }

@@ -48,7 +48,7 @@ int lissmet_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTria     pt;
   MMG5_pPoint    p1,p2;
   double         hsiz,logh,logs,*ma,*mb,ux,uy,d1,d2,dd,rap,dh;
-  double         tail,coef,coef1,coef2,ma1[3],mb1[3],m[3],dd1,dd2;
+  double         tail,coef,ma1[3],mb1[3],m[3],dd1,dd2;
   int            i,nc,k,itour,maxtou,ncor,a,b,iadr;
   double         SQRT3DIV2=0.8660254037844386;
 
@@ -144,13 +144,6 @@ int lissmet_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
             coef      = exp(tail*logh);
             p1->tagdel = mesh->base;
             p2->tagdel = mesh->base;
-
-            /*coef1 = exp(dd2*logh);*/
-            coef1 = 1.0 + logh*dd2;
-            coef1 = 1.0 / (coef1*coef1);
-            /*coef2 = exp(dd1*logh);*/
-            coef2 = 1.0 + logh*dd1;
-            coef2 = 1.0 / (coef2*coef2);
 
             /* metric intersection */
             coef = 1.0 / (coef*coef);

@@ -127,11 +127,15 @@ int _MMG2_boulen(MMG5_pMesh mesh, int start,char ip, int *pleft, int *pright, do
   uy = p2->c[1] - p1->c[1];
   dd = ux*ux + uy*uy;
   
-  if ( dd > _MMG5_EPSD ) {
-    dd = 1.0 / sqrt(dd);
-    n1[0] = -uy*dd;
-    n1[1] = ux*dd;
+  if ( dd < _MMG5_EPSD ) {
+    MMG5_errorMessage(&mesh->info.errMessage,"%s:%d:Error: Null edge length is"
+                      " 0 (%e).\n",__FILE__,__LINE__,dd);
+    return 0;
   }
+
+  dd = 1.0 / sqrt(dd);
+  n1[0] = -uy*dd;
+  n1[1] = ux*dd;
   
   *pright = 3*k+i1;
   
@@ -159,11 +163,15 @@ int _MMG2_boulen(MMG5_pMesh mesh, int start,char ip, int *pleft, int *pright, do
   uy = p2->c[1] - p1->c[1];
   dd = ux*ux + uy*uy;
   
-  if ( dd > _MMG5_EPSD ) {
-    dd = 1.0 / sqrt(dd);
-    n2[0] = uy*dd;
-    n2[1] = -ux*dd;
+  if ( dd < _MMG5_EPSD ) {
+    MMG5_errorMessage(&mesh->info.errMessage,"%:%d:Error: Null edge length is"
+                      " 0 (%e).\n",__FILE__,__LINE__,dd);
+    return 0;
   }
+
+  dd = 1.0 / sqrt(dd);
+  n2[0] = uy*dd;
+  n2[1] = -ux*dd;
   
   *pleft = 3*k+i1;
   

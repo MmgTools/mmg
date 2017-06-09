@@ -99,7 +99,6 @@ int* _MMG2_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
     
     for (k=ilistck+1; k<=ilisto; k++) {
       iel   = list[k];
-      pt    = &mesh->tria[iel];
       adja  = &mesh->adja[3*(iel-1)+1];
       
       for (i=0; i<3; i++) {
@@ -207,7 +206,6 @@ int* _MMG2_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
     
     for (i=0; i<3; i++) {
       jel  = adja[i] / 3;
-      jedg = adja[i] % 3;
       
       /* Case where face i carries a non homogeneous Dirichlet BC */
       if ( pt->edg[i] == _MMG2_DISPREF ) {

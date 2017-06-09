@@ -157,11 +157,11 @@ double _MMG5_lenEdg(MMG5_pMesh mesh,int np0,int np1,
     +2.0*m1[1]*gammaprim1[0]*gammaprim1[1]  + 2.0*m1[2]*gammaprim1[0]*gammaprim1[2] \
     + 2.0*m1[4]*gammaprim1[1]*gammaprim1[2];
 
-  if(l0 < 0) {
+  if(l0 < 0.) {
     printf("%s:%d:Error: negative edge length (%e)\n",__FILE__,__LINE__,l0);
     return(0.);
   }
-  if(l1 < 0) {
+  if(l1 < 0.) {
     printf("%s:%d:Error: negative edge length (%e)\n",__FILE__,__LINE__,l1);
     return(0.);
   }

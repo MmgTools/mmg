@@ -119,3 +119,13 @@ FORTRAN_NAME(MMGS_GET_ADJAVERTICESFAST,mmgs_get_adjaverticesfast,
   *retval =  MMGS_Get_adjaVerticesFast(*mesh,*ip, *start,lispoi);
   return;
 }
+
+/**
+ * See \ref MMGS_Set_constantSize function in \ref mmgs/libmmgs.h file.
+ */
+FORTRAN_NAME(MMGS_SET_CONSTANTSIZE,mmgs_set_constantsize,
+             (MMG5_pMesh *mesh,MMG5_pSol *met,int *retval),
+             (mesh,met,retval)) {
+  *retval =  MMGS_Set_constantSize(*mesh,*met);
+  return;
+}

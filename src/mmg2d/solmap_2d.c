@@ -47,7 +47,7 @@ int MMG2D_doSol(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTria      ptt,pt;
   MMG5_pPoint     p1,p2;
   double          ux,uy,dd;
-  int             i,k,ib,ipa,ipb;
+  int             i,k,ib,iadr,ipa,ipb;
   int             MMG_inxtt[5] = {0,1,2,0,1};
 
   sol->np = mesh->np;
@@ -59,38 +59,109 @@ int MMG2D_doSol(MMG5_pMesh mesh,MMG5_pSol sol) {
     ptt = &mesh->tria[k];
     if ( !ptt->v[0] )  continue;
 
-    for (i=0; i<3; i++) {
-      ib  = MMG_inxtt[i+1];
-      ipa = ptt->v[i];
-      ipb = ptt->v[ib];
-      p1  = &mesh->point[ipa];
-      p2  = &mesh->point[ipb];
+    if ( sol->size == 1 ) {
+      for (i=0; i<3; i++) {
+        ib  = MMG_inxtt[i+1];
+        ipa = ptt->v[i];
+        ipb = ptt->v[ib];
+        p1  = &mesh->point[ipa];
+        p2  = &mesh->point[ipb];
 
-      ux  = p1->c[0] - p2->c[0];
-      uy  = p1->c[1] - p2->c[1];
-      dd  = sqrt(ux*ux + uy*uy);
+        ux  = p1->c[0] - p2->c[0];
+        uy  = p1->c[1] - p2->c[1];
+        dd  = sqrt(ux*ux + uy*uy);
 
-      sol->m[ipa] += dd;
-      p1->tagdel++;
-      sol->m[ipb] += dd;
-      p2->tagdel++;
+        sol->m[ipa] += dd;
+        p1->tagdel++;
+        sol->m[ipb] += dd;
+        p2->tagdel++;
+      }
     }
+    else if ( sol->size == 3 ) {
+      for (i=0; i<3; i++) {
+        ib  = MMG_inxtt[i+1];
+        ipa = ptt->v[i];
+        ipb = ptt->v[ib];
+        p1  = &mesh->point[ipa];
+        p2  = &mesh->point[ipb];
+
+        ux  = p1->c[0] - p2->c[0];
+        uy  = p1->c[1] - p2->c[1];
+        dd  = sqrt(ux*ux + uy*uy);
+
+        iadr = 3*ipa;
+        sol->m[iadr]   += dd;
+        p1->tagdel++;
+
+        iadr = 3*ipb;
+        sol->m[iadr]   += dd;
+        p2->tagdel++;
+      }
+    }
+    else return 0;
+  }
+
+  /* if hmax is not specified, compute it from the metric */
+  if ( mesh->info.hmax < 0. ) {
+    if ( sol->size == 1 ) {
+      dd = 0.;
+      for (k=1; k<=mesh->np; k++) {
+        p1 = &mesh->point[k];
+        if ( !p1->tagdel ) continue;
+        dd = MG_MAX(dd,sol->m[k]);
+      }
+      assert ( dd );
+    }
+    else if ( sol->size == 3 ) {
+      dd = FLT_MAX;
+      for (k=1; k<=mesh->np; k++) {
+        p1 = &mesh->point[k];
+        if ( !p1->tagdel ) continue;
+        iadr = 3*k;
+        dd = MG_MIN(dd,sol->m[iadr]);
+      }
+      assert ( dd < FLT_MAX );
+      dd = 1./sqrt(dd);
+    }
+    else {
+      MMG5_errorMessage(&mesh->info.errMessage,"%s:%d:Error: Unexpected solution size\n",
+                        __FILE__,__LINE__,sol->size);
+      return 0;
+    }
+    mesh->info.hmax = 10.*dd;
   }
 
   /* vertex size */
-  for (k=1; k<=mesh->np; k++) {
-    p1 = &mesh->point[k];
-    if ( !p1->tagdel )  {
-      sol->m[k] = FLT_MAX;
-      continue;
-    }
+  if ( sol->size == 1 ) {
+    for (k=1; k<=mesh->np; k++) {
+      p1 = &mesh->point[k];
+      if ( !p1->tagdel )  {
+        sol->m[k] = mesh->info.hmax;
+        continue;
+      }
 
-    sol->m[k] = sol->m[k] / (double)p1->tagdel;
-    p1->tagdel = 0;
+      sol->m[k] = sol->m[k] / (double)p1->tagdel;
+      p1->tagdel = 0;
+    }
+  }
+  else if ( sol->size == 3 ) {
+    for (k=1; k<=mesh->np; k++) {
+      p1 = &mesh->point[k];
+      iadr = 3*k;
+
+      if ( !p1->tagdel )  {
+        sol->m[iadr]   = 1./(mesh->info.hmax*mesh->info.hmax);
+        sol->m[iadr+2] = sol->m[iadr];
+        continue;
+      }
+      sol->m[iadr]   = (double)p1->tagdel*(double)p1->tagdel
+        / (sol->m[iadr]*sol->m[iadr]);
+      sol->m[iadr+2] = sol->m[iadr];
+      p1->tagdel = 0;
+    }
   }
 
   /* compute quality */
-#warning Probably unused
   if ( MMG2D_caltri ) {
     for (k=1; k<=mesh->nt; k++) {
       pt = &mesh->tria[k];
@@ -99,7 +170,7 @@ int MMG2D_doSol(MMG5_pMesh mesh,MMG5_pSol sol) {
   }
 
   if ( mesh->info.imprim < -4 )
-    fprintf(stdout,"     HMIN %f   HMAX %f\n",mesh->info.hmin,mesh->info.hmax);
+    fprintf(stdout,"   HMAX %f\n",mesh->info.hmax);
   return(1);
 }
 

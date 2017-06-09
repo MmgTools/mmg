@@ -357,7 +357,6 @@ int _MMG5_mmg3dBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,_MMG5_pBezier pb,char ori)
         pb->n[i][2] *= -1.0;
       }
       assert(p[i]->xp);
-      pxp = &mesh->xpoint[p[i]->xp];
       memcpy(&pb->t[i],p[i]->n,3*sizeof(double));
     }
     else {

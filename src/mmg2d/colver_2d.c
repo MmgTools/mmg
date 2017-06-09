@@ -234,11 +234,9 @@ int _MMG2_chkcol(MMG5_pMesh mesh, MMG5_pSol met,int k,char i,int *list,char typc
     pt1 = &mesh->tria[jel];
     if ( abs(pt->ref) != abs(pt1->ref) )  return(0);
     else if ( !(pt1->tag[jj] & MG_GEO) )  return(0);
-    
-    /* What is the meaning of this test ? see mmgs */
-    p2 = &mesh->point[pt1->v[jj]];
-    
-    /* Check quality and geometric approximation: elements with two trias in the ball should be removed */
+
+    /* Check quality and geometric approximation: elements with two trias in the
+     * ball should be removed */
     pt0 = &mesh->tria[0];
     memcpy(pt0,pt1,sizeof(MMG5_Tria));
     pt0->v[j] = ip2;

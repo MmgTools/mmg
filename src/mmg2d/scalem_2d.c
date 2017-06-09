@@ -45,14 +45,14 @@
  *
  */
 int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
-  MMG5_pTria     pt;
   //Displ     pd;
   MMG5_pPoint    ppt;
   MMG5_Info     *info;
-  int            i,k,iadr,sethmin,sethmax;
   double         dd,isqhmin,isqhmax;
   double         *m;
   double         lambda[2],v[2][2];
+  int            i,k,iadr;
+  char           sethmin,sethmax;
 
   // pd  = mesh->disp;
 
@@ -84,6 +84,8 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   dd = _MMG2D_PRECI / info->delta;
 
   mesh->info.hausd *= dd;
+  mesh->info.hsiz  *= dd;
+  mesh->info.ls    *= dd;
 
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
@@ -92,38 +94,34 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
     ppt->c[1] = dd * (ppt->c[1] - info->min[1]);
   }
 
-  /* Check if hmin/hmax have been provided by the user and scale it if yes */
+  /* Check if hmin/hmax have been provided by the user and if we need to set
+   * it. scale it if yes */
   sethmin = 0;
   sethmax = 0;
 
-  if ( mesh->info.hmin > 0. ) {
-    mesh->info.hmin  *= dd;
-    sethmin = 1;
+  if ( mesh->info.hsiz > 0. || mesh->info.optim ) {
+    // We don't want to set hmin/hmax, it will be done later
+    sethmin = sethmax = 1;
   }
-  if ( mesh->info.hmax > 0. ) {
-    mesh->info.hmax  *= dd;
-    sethmax = 1;
+  else {
+    if ( mesh->info.hmin > 0. ) {
+      mesh->info.hmin  *= dd;
+      sethmin = 1;
+    }
+    if ( mesh->info.hmax > 0. ) {
+      mesh->info.hmax  *= dd;
+      sethmax = 1;
+    }
   }
 
   /* Warning: we don't want to compute hmin/hmax from the level-set! */
-  if ( mesh->info.iso || (!sol->np) ) {
+  if ( mesh->info.iso || mesh->info.lag>=0 ||
+       ((!sol->np) && ((!mesh->info.optim) && (mesh->info.hsiz <= 0.)) ) ) {
     /* Set default values to hmin/hmax from the bounding box if not provided by
      * the user */
-    if ( !sethmin )  mesh->info.hmin  = 0.01;
-
-    if ( !sethmax )  mesh->info.hmax  = 2.;
-
-    if ( mesh->info.hmax < mesh->info.hmin ) {
-      if ( sethmin && sethmax ) {
-        fprintf(stdout,"  ## Error: mismatch parameters:"
-                " minimal mesh size larger than maximal one.\n");
-        fprintf(stdout,"  Exit program.\n");
-        return 0;
-      }
-      else if ( sethmin )
-        mesh->info.hmax = 100. * mesh->info.hmin;
-      else
-        mesh->info.hmin = 0.01 * mesh->info.hmax;
+    if ( !MMG5_Set_defaultTruncatureSizes(mesh,sethmin,sethmax) ) {
+      fprintf(stdout,"  Exit program.\n");
+      return 0;
     }
     sethmin = 1;
     sethmax = 1;
@@ -136,7 +134,6 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
    * and 10 \times the max of the metric sizes for hmax ). */
 
 #warning : write scaling of displacement vector field (size = 2)
-  
   switch (sol->size) {
   case 1:
     /* normalization */
@@ -293,14 +290,6 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
     }
     break;
   }
-
-  /* Compute quality */
-#warning : Probably unused
-  for (k=1; k<=mesh->nt; k++) {
-    pt = &mesh->tria[k];
-    pt->qual = _MMG2_caltri_iso(mesh,sol,pt);
-  }
-
   return(1);
 }
 
@@ -327,6 +316,8 @@ int MMG2_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   mesh->info.hmin  *= dd;
   mesh->info.hmax  *= dd;
   mesh->info.hausd *= dd;
+  mesh->info.hsiz  *= dd;
+  mesh->info.ls    *= dd;
 
   /* de-normalize metric */
   if ( !sol->np )  return(1);

@@ -137,20 +137,23 @@ extern "C" {
  * tria and tetra to the suitable value (needed by users to recover their mesh
  * using the API) */
 #define _LIBMMG5_RETURN(mesh,met,val)do          \
-{                                                \
-  signal(SIGABRT,SIG_DFL);                       \
-  signal(SIGFPE,SIG_DFL);                        \
-  signal(SIGILL,SIG_DFL);                        \
-  signal(SIGSEGV,SIG_DFL);                       \
-  signal(SIGTERM,SIG_DFL);                       \
-  signal(SIGINT,SIG_DFL);                        \
-  mesh->npi = mesh->np;                          \
-  mesh->nti = mesh->nt;                          \
-  mesh->nai = mesh->na;                          \
-  mesh->nei = mesh->ne;                          \
-  met->npi  = met->np;                           \
-  return(val);                                   \
-}while(0)
+  {                                              \
+    if ( mesh->info.errMessage )                 \
+      printf("%s",mesh->info.errMessage);        \
+                                                 \
+    signal(SIGABRT,SIG_DFL);                     \
+    signal(SIGFPE,SIG_DFL);                      \
+    signal(SIGILL,SIG_DFL);                      \
+    signal(SIGSEGV,SIG_DFL);                     \
+    signal(SIGTERM,SIG_DFL);                     \
+    signal(SIGINT,SIG_DFL);                      \
+    mesh->npi = mesh->np;                        \
+    mesh->nti = mesh->nt;                        \
+    mesh->nai = mesh->na;                        \
+    mesh->nei = mesh->ne;                        \
+    met->npi  = met->np;                         \
+    return(val);                                 \
+  }while(0)
 
 /* Macros for memory management */
 /** Check if used memory overflow maximal authorized memory.
@@ -502,6 +505,8 @@ typedef struct _MMG5_dNode_s {
  extern int    _MMG5_writeLocalParamAtTri( MMG5_pMesh,_MMG5_iNode *,FILE*);
  double         MMG2_quickarea(double a[2],double b[2],double c[2]);
 
+ int            MMG5_errorMessage(char **string_ptr, const char *format, ...);
+ int            MMG5_errorMessage_var(char **, const char *, va_list);
  int            MMG5_loadMshMesh_part1(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename,
                                        FILE **inm,long *posNodes, long *posElts,
                                        long *posNodeData, int *bin, int *iswp,

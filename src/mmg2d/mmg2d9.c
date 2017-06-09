@@ -93,9 +93,6 @@ inline double _MMG2_caltri_iso_3pt(double *a,double *b,double *c) {
   h3 = bcx*bcx + bcy*bcy;
 
   hm = h1 + h2 + h3;
-  h1 = sqrt(h1);
-  h2 = sqrt(h2);
-  h3 = sqrt(h3);
 
   if ( hm > _MMG2_EPSD ) {
     return ( area / hm );
@@ -291,8 +288,6 @@ int _MMG2_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itdeg,int *war
     i2 = _MMG5_iprv2[imax];
     ip1 = pt->v[i1];
     ip2 = pt->v[i2];
-    p1 = &mesh->point[ip1];
-    p2 = &mesh->point[ip2];
 
     ip = _MMG2_chkspl(mesh,met,k,imax);
 
@@ -310,7 +305,6 @@ int _MMG2_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itdeg,int *war
       }
 
       /* if we realloc memory in split1b pt pointer is not valid aymore. */
-      pt = &mesh->tria[k];
       ns += ier;
     }
 
@@ -495,7 +489,6 @@ int _MMG2_movtrilag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
       for (i=0; i<3; i++) {
         p0 = &mesh->point[pt->v[i]];
         if ( p0->flag == base || MG_SIN(p0->tag) || p0->tag & MG_NOM ) continue;
-        ier = 0;
 
         ilist = _MMG2_boulet(mesh,k,i,list);
 

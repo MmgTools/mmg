@@ -177,7 +177,6 @@ int _MMGS_dichoto1b(MMG5_pMesh mesh, MMG5_pSol met, int iel, int ia, int ip) {
 
   maxit = 4;
   it    = 0;
-  ier   = 0;
   tp    = 1.0;
   to    = 0.0;
   do {
@@ -435,8 +434,9 @@ static int movtri(MMG5_pMesh mesh,MMG5_pSol met,int maxit) {
 
         if ( ppt->flag == base || MS_SIN(ppt->tag) || ppt->tag & MG_NOM )
           continue;
-        ier = 0;
         ilist = boulet(mesh,k,i,list);
+
+        if ( !ilist ) continue;
 
         if ( MG_EDG(ppt->tag) ) {
           ier = movridpt(mesh,met,list,ilist);
@@ -1048,8 +1048,9 @@ static int adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
       ier = _MMGS_simbulgept(mesh,met,k,imax,ip);
       if ( !ier ) {
         ier = _MMGS_dichoto1b(mesh,met,k,imax,ip);
+        if ( !ier ) continue;
       }
-      if ( ier ) ier = split1b(mesh,k,imax,ip);
+      ier = split1b(mesh,k,imax,ip);
 
       if ( !ier ) {
         /* Lack of memory, go to collapse step. */
@@ -1057,7 +1058,6 @@ static int adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
         return(ns);
       }
       /* if we realloc memory in split1b pt pointer is not valid aymore. */
-      pt = &mesh->tria[k];
       ns += ier;
     }
   }
@@ -1161,7 +1161,6 @@ static int adptri(MMG5_pMesh mesh,MMG5_pSol met) {
       ns = 0;
       nc = 0;
     }
-    nf = nm = 0;
 
     if ( !mesh->info.noswap ) {
       nf = swpmsh(mesh,met,2);
@@ -1196,13 +1195,49 @@ static int adptri(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( !_MMG5_scotchCall(mesh,met) )
     return(0);
 
+  /*shape optim*/
+  it  = 0;
+  maxit = 2;
+  do {
+
+    if ( !mesh->info.nomove ) {
+      nm = movtri(mesh,met,5);
+      if ( nm < 0 ) {
+        fprintf(stderr,"  ## Unable to improve mesh.\n");
+        return(0);
+      }
+      nnm += nm;
+    }
+    else  nm = 0;
+
+    if ( !mesh->info.noswap ) {
+      nf = swpmsh(mesh,met,2);
+      if ( nf < 0 ) {
+        fprintf(stderr,"  ## Unable to improve mesh. Exiting.\n");
+        return(0);
+      }
+      nnf += nf;
+    }
+    else  nf = 0;
+
+    if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && nf+nm > 0 ){
+      fprintf(stdout,"                                            ");
+      fprintf(stdout,"%8d swapped, %8d moved\n",nf,nm);
+    }
+  }
+  while( ++it < maxit && nm+nf > 0 );
+
   if ( !mesh->info.nomove ) {
     nm = movtri(mesh,met,5);
     if ( nm < 0 ) {
       fprintf(stderr,"  ## Unable to improve mesh.\n");
       return(0);
     }
-    nnm += nm;
+  }
+  else  nm = 0;
+  nnm += nm;
+  if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && nm > 0 ) {
+    fprintf(stdout,"                                                              %8d moved\n",nm);
   }
 
   if ( mesh->info.imprim ) {

@@ -85,6 +85,7 @@ enum MMG3D_Param {
   MMG3D_DPARAM_angleDetection,    /*!< [val], Value for angle detection */
   MMG3D_DPARAM_hmin,              /*!< [val], Minimal mesh size */
   MMG3D_DPARAM_hmax,              /*!< [val], Maximal mesh size */
+  MMG3D_DPARAM_hsiz,              /*!< [val], Constant mesh size */
   MMG3D_DPARAM_hausd,             /*!< [val], Control global Hausdorff distance (on all the boundary surfaces of the mesh) */
   MMG3D_DPARAM_hgrad,             /*!< [val], Control gradation */
   MMG3D_DPARAM_ls,                /*!< [val], Value of level-set */
@@ -1891,6 +1892,22 @@ int  MMG3D_hashTetra(MMG5_pMesh mesh, int pack);
  *
  */
 int MMG3D_doSol(MMG5_pMesh mesh,MMG5_pSol met);
+
+/**
+ * \param mesh pointer toward the mesh structure
+ * \param met pointer toward the sol structure
+ * \return 1 if success
+ *
+ * Compute constant size map according to mesh->info.hsiz
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_SET_CONSTANTSIZE(mesh,met,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT)     :: mesh,met\n
+ * >     INTEGER, INTENT(OUT)               :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+int MMG3D_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met);
 
 /** To associate function pointers without calling MMG3D_mmg3dlib */
 /**

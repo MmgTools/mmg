@@ -227,7 +227,6 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
                             break
                             ,o,MG_NOTAG,-1);
       }
-      ppt = &mesh->point[ip];
       if ( met->m ) {
         ier = _MMG5_intmet(mesh,met,k,imax,ip,0.5);
         if ( !ier ) {
@@ -284,7 +283,6 @@ static int _MMG5_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
     pt = &mesh->tetra[k];
     if ( !MG_EOK(pt) || (pt->tag & MG_REQ) )  continue;
     pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
-    ier = 0;
 
     /* find shortest edge */
     imin = -1; lmin = DBL_MAX;

@@ -160,42 +160,63 @@ int MMG2_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pPoint  ppt;
   int     list[MMG2_LONMAX],lon;
   int     k,kk;
+  int iter,maxiter,ns,nus;
 
   for(k=1; k<=mesh->np-4; k++) {
     ppt = &mesh->point[k];
-
-    /* Find the triangle lel of the mesh containing ppt */
-    list[0] = MMG2_findTria(mesh,k);
-
-    /* Exhaustive search if not found */
-    if ( !list[0] ) {
-      if ( mesh->info.ddebug )
-        printf(" ** exhaustive search of point location.\n");
-
-      for(kk=1; kk<=mesh->nt; kk++) {
-        list[0] = MMG2_isInTriangle(mesh,kk,&ppt->c[0]);
-        if ( list[0] ) break;
-      }
-      if ( kk>mesh->nt ) {
-        fprintf(stdout,"  ## Error: no triangle found for vertex %d\n",k);
-        return(0);
-      }
-    }
-
-    /* Create the cavity of point k starting from list[0] */
-    lon = _MMG2_cavity(mesh,sol,k,list);
-
-    if ( lon < 1 ) {
-      fprintf(stdout,"  ## Error: unable to insert vertex %d\n",k);
-      return(0);
-    }
-
-    else {
-      _MMG2_delone(mesh,sol,k,list,lon);
-    }
+    ppt->flag	= -10;
   }
+  iter = 0;
+  maxiter = 3;
 
-  return(1);
+	do {
+    ns = nus = 0;
+    for(k=1; k<=mesh->np-4; k++) {
+      ppt = &mesh->point[k];
+		  if(ppt->flag != -10) continue;
+			nus++;
+      /* Find the triangle lel of the mesh containing ppt */
+      list[0] = MMG2_findTria(mesh,k);
+
+      /* Exhaustive search if not found */
+      if ( !list[0] ) {
+        if ( mesh->info.ddebug )
+          printf(" ** exhaustive search of point location.\n");
+
+        for(kk=1; kk<=mesh->nt; kk++) {
+          list[0] = MMG2_isInTriangle(mesh,kk,&ppt->c[0]);
+          if ( list[0] ) break;
+        }
+
+        if ( kk>mesh->nt ) {
+          fprintf(stdout,"  ## Error: no triangle found for vertex %d\n",k);
+          return(0);
+        }
+      }
+
+      /* Create the cavity of point k starting from list[0] */
+      lon = _MMG2_cavity(mesh,sol,k,list);
+
+      if ( lon < 1 ) {
+        fprintf(stdout,"  ## Error: unable to insert vertex %d\n",k);
+        return(0);
+      } else {
+				if(!_MMG2_delone(mesh,sol,k,list,lon)) {
+			    if(mesh->info.imprim > 4) fprintf(stdout,"  ## Impossible to insert point %d with Delaunay\n",k);
+        } else {
+          ppt->flag = 0;
+          ns++;
+        }
+      }
+    }
+	  if(mesh->info.imprim > 4) fprintf(stdout,"%d vertex inserted\n",ns);
+  } while (ns && ++iter<maxiter);
+
+	if(abs(nus-ns)) {
+	  fprintf(stdout,"  ## Error: some vertex are not inserted %d\n",abs(nus-ns));
+		return(0);
+  }
+	return(1);
 }
 
 /**

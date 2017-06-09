@@ -215,7 +215,7 @@ int  _MMG3D_octreein_ani(MMG5_pMesh,MMG5_pSol,_MMG3D_pOctree,int,double);
 
 /* prototypes */
 int  _MMG3D_tetraQual(MMG5_pMesh mesh, MMG5_pSol met,char metRidTyp);
-void _MMG3D_scalarSolTruncature(MMG5_pMesh mesh, MMG5_pSol met);
+void _MMG3D_solTruncature(MMG5_pMesh mesh, MMG5_pSol met);
 extern int _MMG5_directsurfball(MMG5_pMesh mesh, int ip, int *list, int ilist, double n[3]);
 
 int  _MMG3D_Init_mesh_var( va_list argptr );
@@ -352,6 +352,7 @@ int _MMG5_denoisbdy(MMG5_pMesh);
 int  _MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met);
 int  _MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met);
 int  _MMG3D_prilen(MMG5_pMesh mesh,MMG5_pSol met,char);
+void _MMG3D_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met);
 void _MMG5_defaultValues(MMG5_pMesh);
 int  _MMG5_intridmet(MMG5_pMesh,MMG5_pSol,int,int,double,double*,double*);
 int  _MMG5_intregmet(MMG5_pMesh,MMG5_pSol,int,char,double, double*);

@@ -125,7 +125,7 @@ int _MMG2_swapdelone(MMG5_pMesh mesh,MMG5_pSol sol,int k,char i,double crit,int 
 /* Check whether swap of edge i in triangle k is valid, and suitable for the mesh */
 int _MMG2_chkswp(MMG5_pMesh mesh, MMG5_pSol met,int k,char i,char typchk) {
   MMG5_pTria          pt,pt0,pt1;
-  double              loni,lona,cal1,cal2,calnat,calchg;
+  double              /*loni,lona,*/cal1,cal2,calnat,calchg;
   int                 *adja,ip,ip1,ip2,iq,kk;
   unsigned char       i1,i2,ii,ii1,ii2;
   
@@ -158,13 +158,13 @@ int _MMG2_chkswp(MMG5_pMesh mesh, MMG5_pSol met,int k,char i,char typchk) {
   /* Check length in typchk = 2 mode ; prevent swap if the created edge is
    longer than the swapped one, and than the maximum authorized edge length */
   /* I believe this test is hindering the reach of good quality */
-  if ( typchk == 2 && met->m ) {
-    loni = MMG2D_lencurv(mesh,met,ip1,ip2);
-    lona = MMG2D_lencurv(mesh,met,ip,iq);
-    if ( loni > 1.0 )  loni = MG_MIN(1.0 / loni,MMG2_LSHRT);
-    if ( lona > 1.0 )  lona = 1.0 / lona;
-    //if ( lona < loni )  return(0);
-  }
+  /* if ( typchk == 2 && met->m ) { */
+  /*   loni = MMG2D_lencurv(mesh,met,ip1,ip2); */
+  /*   lona = MMG2D_lencurv(mesh,met,ip,iq); */
+  /*   if ( loni > 1.0 )  loni = MG_MIN(1.0 / loni,MMG2_LSHRT); */
+  /*   if ( lona > 1.0 )  lona = 1.0 / lona; */
+  /*   if ( lona < loni )  return(0); */
+  /* } */
   
   /* Check qualities: see possible bug in mmgs + correct for metric (use in anisotropic?) */
   if ( typchk == 2 && met->m && met->size == 3 ) {

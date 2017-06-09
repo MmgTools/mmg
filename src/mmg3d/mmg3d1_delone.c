@@ -111,12 +111,16 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
         imin = ii;
       }
     }
-    if ( imax==-1 && (mesh->info.ddebug || mesh->info.imprim > 5 ) )
+    if ( imax==-1 && (mesh->info.ddebug || mesh->info.imprim > 5 ) ) {
       fprintf(stdout,"%s:%d: Warning: all edges of tetra %d are boundary and required\n",
               __FILE__,__LINE__,k);
-    if ( imin==-1  && (mesh->info.ddebug || mesh->info.imprim > 5 ) )
+      continue;
+    }
+    if ( imin==-1  && (mesh->info.ddebug || mesh->info.imprim > 5 ) ) {
       fprintf(stdout,"%s:%d: Warning: all edges of tetra %d are boundary and required\n",
               __FILE__,__LINE__,k);
+      continue;
+    }
 
     if ( lmax >= _MMG3D_LOPTL_MMG5_DEL )  {
       /* proceed edges according to lengths */
@@ -197,7 +201,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
         }
         ier = _MMG3D_simbulgept(mesh,met,list,ilist,ip);
         if ( !ier ) {
-          ier = _MMG3D_dichoto1b(mesh,met,list,ilist,ip);
+          _MMG3D_dichoto1b(mesh,met,list,ilist,ip);
         }
         /* We can create element with 0 qualities at machine epsilon even when ip
            is the mid edge point */
@@ -266,7 +270,6 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
                               goto collapse,
                               o,MG_NOTAG,-1);
         }
-        ppt = &mesh->point[ip];
         if ( met->m ) {
           if ( _MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
             _MMG3D_delPt(mesh,ip);
@@ -312,7 +315,6 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
                               goto collapse,
                               o,MG_NOTAG,-1);
         }
-        ppt = &mesh->point[ip];
         if ( met->m ) {
           if ( _MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
             _MMG3D_delPt(mesh,ip);
@@ -436,8 +438,6 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
       if ( (ii==imintet) && (lmintet < _MMG3D_LOPTS_MMG5_DEL)) continue;
       if ( (ii==imaxtet) && (lmaxtet > _MMG3D_LOPTL_MMG5_DEL) ) continue;
 
-      ip1  = _MMG5_iare[ii][0];
-      ip2  = _MMG5_iare[ii][1];
       len = _MMG5_lenedg(mesh,met,ii,pt);
 
       imax = ii;
@@ -591,7 +591,6 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
                                 goto collapse2
                                 ,o,MG_NOTAG,-1);
           }
-          ppt = &mesh->point[ip];
           if ( met->m ) {
             if ( _MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
               _MMG3D_delPt(mesh,ip);
@@ -635,7 +634,6 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
                                 goto collapse2,
                                 o,MG_NOTAG,-1);
           }
-          ppt = &mesh->point[ip];
           if ( met->m ) {
             if ( _MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
               _MMG3D_delPt(mesh,ip);
@@ -841,7 +839,6 @@ _MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree, int* warn) 
     if ( !mesh->info.noinsert ) {
       *warn=0;
       ns = nc = 0;
-      nf = nm = 0;
       ifilt = 0;
       ne = mesh->ne;
       ier = _MMG5_boucle_for(mesh,met,octree,ne,&ifilt,&ns,&nc,warn,it);

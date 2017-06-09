@@ -73,6 +73,7 @@ enum MMGS_Param {
   MMGS_DPARAM_angleDetection,    /*!< [val], Value for angle detection */
   MMGS_DPARAM_hmin,              /*!< [val], Minimal mesh size */
   MMGS_DPARAM_hmax,              /*!< [val], Maximal mesh size */
+  MMGS_DPARAM_hsiz,              /*!< [val], Constant mesh size */
   MMGS_DPARAM_hausd,             /*!< [val], Control global Hausdorff distance (on all the boundary surfaces of the mesh) */
   MMGS_DPARAM_hgrad,             /*!< [val], Control gradation */
   MMGS_DPARAM_ls,                /*!< [val], Value of level-set */
@@ -1222,6 +1223,22 @@ int  MMGS_mmgsls(MMG5_pMesh mesh, MMG5_pSol met);
 void  MMGS_setfunc(MMG5_pMesh mesh,MMG5_pSol met);
 
 /* Tools for the library */
+/**
+ * \param mesh pointer toward the mesh structure
+ * \param met pointer toward the sol structure
+ * \return 1 if success
+ *
+ * Compute constant size map according to mesh->info.hsiz
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMGS_SET_CONSTANTSIZE(mesh,met,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT)     :: mesh,met\n
+ * >     INTEGER, INTENT(OUT)               :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+int MMGS_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met);
+
 /**
  * \param prog pointer toward the program name.
  *

@@ -114,7 +114,7 @@ int setref(MMG5_pMesh mesh,int start,int ref,int putreq) {
     pt  = &mesh->tria[iel];
     pt->ref = ref;
   }
-
+  _MMG5_SAFE_FREE(list);
   return(1);
 }
 

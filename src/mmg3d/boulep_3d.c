@@ -1412,7 +1412,6 @@ int _MMG5_coquilface(MMG5_pMesh mesh,int start,char iface,int ia,int *list,
   assert(pt->xt);
   pxt = &mesh->xtetra[pt->xt];
 
-  adja = &mesh->adja[4*(adj-1)+1];
   if ( pt->v[ _MMG5_ifar[i][0] ] == piv ) {
     iface = _MMG5_ifar[i][1];
   }

@@ -297,8 +297,6 @@ int _MMG5_movtetlag(MMG5_pMesh mesh,MMG5_pSol met, int itdeg) {
         if ( ppt->flag == base )  continue;
         else if ( ppt->tag & MG_BDY ) continue;
 
-        ier = 0;
- 
         ilistv = _MMG5_boulevolp(mesh,k,i,listv);
         if ( !ilistv )  continue;
         
@@ -486,7 +484,6 @@ int _MMG5_dispmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t,int itdeg) {
     for (i=0; i<4; i++) {
       np = pt->v[i];
       ppt = &mesh->point[np];
-      v = &disp->m[3*np];
       for (j=0; j<3; j++)
         c[i][j] = ppt->c[j];
     }

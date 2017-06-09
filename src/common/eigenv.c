@@ -96,7 +96,6 @@ static int newton3(double p[4],double x[3]) {
   b = p[2];
   c = p[1];
   d = p[0];
-  n = 1;
 
   /* 1st derivative of f */
   da = 3.0;
@@ -587,10 +586,6 @@ int _MMG5_eigenv(int symmat,double *mat,double lambda[3],double v[3][3]) {
  */
 int _MMG5_eigen2(double *mm,double *lambda,double vp[2][2]) {
   double   m[3],dd,a1,xn,ddeltb,rr1,rr2,ux,uy;
-
-  /* init */
-  ux = 1.0;
-  uy = 0.0;
 
   /* normalize */
   memcpy(m,mm,3*sizeof(double));

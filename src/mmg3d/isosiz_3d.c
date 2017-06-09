@@ -403,7 +403,6 @@ _MMG5_defsizreg(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,
 
   /* Travel surfacic ball one last time and update non manifold point metric */
   for (k=0; k<ilists; k++) {
-    iel = lists[k] / 4;
     iface = lists[k] % 4;
 
     for (j=0; j<3; j++) {

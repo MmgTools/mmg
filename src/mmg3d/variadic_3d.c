@@ -348,7 +348,6 @@ int _MMG3D_Free_structures_var(va_list argptr)
 
   MMG5_pMesh     *mesh;
   MMG5_pSol      *sol,*disp;
-  long           castedVal;
   int            typArg;
   int            meshCount;
 
@@ -403,8 +402,7 @@ int _MMG3D_Free_structures_var(va_list argptr)
 
  /* mesh */
   assert(mesh && *mesh);
-  if ( (*mesh)->point )
-    _MMG5_DEL_MEM((*mesh),(*mesh)->point,((*mesh)->npmax+1)*sizeof(MMG5_Point));
+  assert(sol  && *sol);
 
   if ( (*mesh)->tetra )
     _MMG5_DEL_MEM((*mesh),(*mesh)->tetra,((*mesh)->nemax+1)*sizeof(MMG5_Tetra));
@@ -424,9 +422,6 @@ int _MMG3D_Free_structures_var(va_list argptr)
   if ( (*mesh)->adjapr )
     _MMG5_DEL_MEM((*mesh),(*mesh)->adjapr,(5*(*mesh)->nprism+6)*sizeof(int));
 
-  if ( (*mesh)->xpoint )
-    _MMG5_DEL_MEM((*mesh),(*mesh)->xpoint,((*mesh)->xpmax+1)*sizeof(MMG5_xPoint));
-
   if ( (*mesh)->htab.geom )
     _MMG5_DEL_MEM((*mesh),(*mesh)->htab.geom,((*mesh)->htab.max+1)*sizeof(MMG5_hgeom));
 
@@ -442,22 +437,11 @@ int _MMG3D_Free_structures_var(va_list argptr)
   if ( (*mesh)->xprism )
     _MMG5_DEL_MEM((*mesh),(*mesh)->xprism,((*mesh)->xpr+1)*sizeof(MMG5_xPrism));
 
-  /* sol */
-  if ( sol && (*sol) && (*sol)->m )
-    _MMG5_DEL_MEM((*mesh),(*sol)->m,((*sol)->size*((*sol)->npmax+1))*sizeof(double));
-
   /* disp */
   if ( disp && (*disp) && (*disp)->m )
     _MMG5_DEL_MEM((*mesh),(*disp)->m,((*disp)->size*((*disp)->npmax+1))*sizeof(double));
 
-  /* (*mesh)->info */
-  if ( (*mesh)->info.npar && (*mesh)->info.par )
-    _MMG5_DEL_MEM((*mesh),(*mesh)->info.par,(*mesh)->info.npar*sizeof(MMG5_Par));
-
-  if ( (*mesh)->info.imprim>5 || (*mesh)->info.ddebug ) {
-    castedVal = _MMG5_SAFELL2LCAST((*mesh)->memCur);
-    printf("  MEMORY USED AT END (bytes) %ld\n",castedVal);
-  }
+  MMG5_Free_structures(*mesh,*sol);
 
   return 1;
 }

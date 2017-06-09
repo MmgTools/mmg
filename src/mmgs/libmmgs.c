@@ -288,6 +288,18 @@ int MMGS_mmgsls(MMG5_pMesh mesh,MMG5_pSol met)
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
 
+  if ( mesh->info.optim ) {
+    printf("\n  ## ERROR: OPTIM OPTION UNAVAILABLE IN MMGS.\n");
+    _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+  }
+
+  if ( mesh->info.hsiz>0. ) {
+    printf("  ## ERROR: HSIZ OPTION UNAVAILABLE IN ISOSURFACE"
+           " DISCRETIZATION MODE.\n");
+    _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+  }
+
+
   chrono(OFF,&(ctim[1]));
   printim(ctim[1].gdif,stim);
   if ( mesh->info.imprim )
@@ -295,7 +307,6 @@ int MMGS_mmgsls(MMG5_pMesh mesh,MMG5_pSol met)
 
   /* analysis */
   chrono(ON,&(ctim[2]));
-  MMGS_setfunc(mesh,met);
 
   if ( mesh->info.imprim ) {
     fprintf(stdout,"\n  %s\n   MODULE MMGSLS: IMB-LJLL : %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
@@ -303,6 +314,8 @@ int MMGS_mmgsls(MMG5_pMesh mesh,MMG5_pSol met)
   }
 
   if ( !_MMG5_scaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+
+  MMGS_setfunc(mesh,met);
 
   if ( abs(mesh->info.imprim) > 0 ) {
     if ( !_MMGS_inqua(mesh,met) ) {
@@ -400,9 +413,9 @@ int MMGS_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
   chrono(ON,&(ctim[0]));
 
   if ( mesh->info.iso ) {
-    fprintf(stderr,"  ## Error: level-set discretisation unavailable"
+    fprintf(stderr,"  ## ERROR: LEVEL-SET DISCRETISATION UNAVAILABLe"
             " (MMGS_IPARAM_iso):\n"
-            "          You must call the MMGS_mmgsls function to use this option.\n");
+            "          YOU MUST CALL THE MMGS_MMGSLS FUNCTION TO USE THIS OPTION.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
 
@@ -423,6 +436,19 @@ int MMGS_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
     fprintf(stderr,"  ## ERROR: WRONG DATA TYPE.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
+  /* specific meshing */
+  if ( mesh->info.optim ) {
+    printf("\n  ## ERROR: OPTIM OPTION UNAVAILABLE IN MMGS.\n");
+    _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+  }
+
+  if ( met->np ) {
+    if ( mesh->info.hsiz>0. ) {
+      printf("\n  ## ERROR: MISMATCH OPTIONS: HSIZ OPTION CAN NOT BE USED"
+             " WITH AN INPUT METRIC.\n");
+      _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+    }
+  }
 
   chrono(OFF,&(ctim[1]));
   printim(ctim[1].gdif,stim);
@@ -431,14 +457,23 @@ int MMGS_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
 
   /* analysis */
   chrono(ON,&(ctim[2]));
-  MMGS_setfunc(mesh,met);
 
   if ( mesh->info.imprim ) {
     fprintf(stdout,"\n  %s\n   MODULE MMGS: IMB-LJLL : %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
     fprintf(stdout,"\n  -- PHASE 1 : ANALYSIS\n");
   }
 
+  /* scaling mesh */
   if ( !_MMG5_scaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+
+  if ( mesh->info.hsiz > 0. ) {
+    if ( !MMGS_Set_constantSize(mesh,met) ) {
+     if ( !_MMG5_unscaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+    }
+  }
+
+  MMGS_setfunc(mesh,met);
 
   /* mesh analysis */
   if ( !_MMGS_analys(mesh) ) {

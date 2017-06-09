@@ -677,6 +677,7 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
       else if ( mesh->na < na ) {
         _MMG5_ADD_MEM(mesh,(mesh->na-na)*sizeof(MMG5_Edge),"edges",
                       fprintf(stderr,"  Exit program.\n");
+                      _MMG5_SAFE_FREE(ina);
                       return -1);
         _MMG5_SAFE_RECALLOC(mesh->edge,na+1,(mesh->na+1),MMG5_Edge,"edges",-1);
       }
@@ -815,7 +816,6 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
   /* read mesh prisms */
   rewind(inm);
   fseek(inm,posnprism,SEEK_SET);
-  nref = 0;
   for (k=1; k<=mesh->nprism; k++) {
     pp = &mesh->prism[k];
     if (!bin)
@@ -1350,7 +1350,6 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
         ppt = &mesh->point[k];
         if ( !MG_VOK(ppt) || (!ppt->flag) || MG_SIN(ppt->tag) )  continue;
         else if ( MG_EDG(ppt->tag) || (ppt->tag & MG_NOM) ) {
-          pxp = &mesh->xpoint[ppt->xp];
           if(!bin) {
             fprintf(inm,"%.15lg %.15lg %.15lg \n",ppt->n[0],ppt->n[1],ppt->n[2]);
           } else {

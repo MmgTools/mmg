@@ -110,6 +110,7 @@ int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
 
   mesh->info.hausd *= dd;
   mesh->info.ls    *= dd;
+  mesh->info.hsiz  *=dd;
 
   /* normalize local parameters */
   for (k=0; k<mesh->info.npar; k++) {
@@ -123,13 +124,19 @@ int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
   sethmin = 0;
   sethmax = 0;
 
-  if ( mesh->info.hmin > 0. ) {
-    mesh->info.hmin  *= dd;
-    sethmin = 1;
+  if ( mesh->info.hsiz > 0. || mesh->info.optim ) {
+    // We don't want to set hmin/hmax here, it will be done in solTruncature
+    sethmin = sethmax = 1;
   }
-  if ( mesh->info.hmax > 0. ) {
-    mesh->info.hmax  *= dd;
-    sethmax = 1;
+  else {
+    if ( mesh->info.hmin > 0. ) {
+      mesh->info.hmin  *= dd;
+      sethmin = 1;
+    }
+    if ( mesh->info.hmax > 0. ) {
+      mesh->info.hmax  *= dd;
+      sethmax = 1;
+    }
   }
 
   /* Warning: we don't want to compute hmin/hmax from the level-set or the
@@ -137,21 +144,9 @@ int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( mesh->info.iso || (mesh->info.lag>-1) || (!met->m && !mesh->info.optim) ) {
     /* Set default values to hmin/hmax from the bounding box if not provided by
      * the user */
-    if ( !sethmin )  mesh->info.hmin  = 0.01;
-
-    if ( !sethmax )  mesh->info.hmax  = 2.;
-
-    if ( mesh->info.hmax < mesh->info.hmin ) {
-      if ( sethmin && sethmax ) {
-        fprintf(stderr,"  ## Error: mismatch parameters:"
-                " minimal mesh size larger than maximal one.\n");
-        fprintf(stderr,"  Exit program.\n");
-        return 0;
-      }
-      else if ( sethmin )
-        mesh->info.hmax = 100. * mesh->info.hmin;
-      else
-        mesh->info.hmin = 0.01 * mesh->info.hmax;
+    if ( !MMG5_Set_defaultTruncatureSizes(mesh,sethmin,sethmax) ) {
+      fprintf(stdout,"  Exit program.\n");
+      return 0;
     }
     sethmin = 1;
     sethmax = 1;
@@ -284,6 +279,7 @@ int _MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
   mesh->info.hmax  *= dd;
   mesh->info.hausd *= dd;
   mesh->info.ls    *= dd;
+  mesh->info.hsiz  *=dd;
 
   /* normalize local parameters */
   for (k=0; k<mesh->info.npar; k++) {

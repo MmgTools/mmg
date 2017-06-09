@@ -32,11 +32,11 @@
  *
  */
 int _MMG5_mmg2dChkmsh(MMG5_pMesh mesh, int severe,int base) {
-//  MMG5_pPoint ppt;
+  MMG5_pPoint ppt;
   MMG5_pTria  pt1,pt2;
   MMG5_pEdge         ped;
   int   *adja,*adja1,adj,adj1,k,i,iadr;
-//  int   kk,l,nk,j,ip,lon,len;
+  int   kk,l,nk,j,ip,lon,len;
   int     *list;
   unsigned char voy,voy1;
 
@@ -108,44 +108,46 @@ int _MMG5_mmg2dChkmsh(MMG5_pMesh mesh, int severe,int base) {
     iadr = 3*(k-1) + 1;
     adja = &mesh->adja[iadr];
 
-    /*for (i=0; i<3; i++) {
+    for (i=0; i<3; i++) {
       adj = (adja[i]-1) / 3 + 1;
-      voy = (adja[i]-1) % 3;
       if ( !adj )  continue;
 
       ip  = pt1->v[i];
       ppt = &mesh->point[ip];
       if ( !MG_VOK(ppt) ) {
-      fprintf(stdout,"  6. Unused vertex %d  %d\n",k,ip);
-      printf("%d %d %d\n",pt1->v[0],pt1->v[1],pt1->v[2]);
-      return(0);
+        fprintf(stdout,"  6. Unused vertex %d  %d\n",k,ip);
+        printf("%d %d %d\n",pt1->v[0],pt1->v[1],pt1->v[2]);
+        _MMG5_SAFE_FREE(list);
+        return(0);
       }
-      lon = boulep(mesh,k,i,list);
+      lon = MMG2_boulep(mesh,k,i,list);
       for (l=1; l<=lon; l++) {
-      kk  = list[l] / 3;
-      nk  = list[l] % 3;
-      pt2 = &mesh->tria[kk];
-      if ( pt2->v[nk] != ip ) {
-      fprintf(stdout,"  5. Wrong ball %d, %d\n",ip,pt2->v[nk]);
-      return(0);
-      }
+        kk  = list[l] / 3;
+        nk  = list[l] % 3;
+        pt2 = &mesh->tria[kk];
+        if ( pt2->v[nk] != ip ) {
+          fprintf(stdout,"  5. Wrong ball %d, %d\n",ip,pt2->v[nk]);
+          _MMG5_SAFE_FREE(list);
+          return(0);
+        }
       }
       if ( lon < 1 )  continue;
       len = 0;
       for (kk=1; kk<=mesh->nt; kk++) {
-      pt2 = &mesh->tria[kk];
-      if ( !pt2->v[0] )  continue;
-      for (j=0; j<3; j++)
-      if ( pt2->v[j] == ip ) {
-      len++;
-      break;
-      }
+        pt2 = &mesh->tria[kk];
+        if ( !pt2->v[0] )  continue;
+        for (j=0; j<3; j++)
+          if ( pt2->v[j] == ip ) {
+            len++;
+            break;
+          }
       }
       if ( len != lon ) {
-      fprintf(stdout,"  7. Incorrect ball %d: %d %d\n",pt1->v[i],lon,len);
-      return(0);
+        fprintf(stdout,"  7. Incorrect ball %d: %d %d\n",pt1->v[i],lon,len);
+        _MMG5_SAFE_FREE(list);
+        return(0);
       }
-      } */
+    }
   }
   _MMG5_SAFE_FREE(list);
   return(1);
@@ -176,7 +178,6 @@ int _MMG2_chkmsh(MMG5_pMesh mesh) {
         }
       }
       else {
-        pt1 = &mesh->tria[jel];
         adjaj = &mesh->adja[3*(jel-1)+1];
         if ( adjaj[j] / 3 != k ) {
           printf("Wrong adjacencies %d %d \n",k,jel);

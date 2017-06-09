@@ -79,11 +79,8 @@ static int _MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   /* } */
 
   ilist = boulet(mesh,it,ip,list);
-  if ( !ilist ) {
-    fprintf(stdout,"%s:%d:Warning: Metric not computed at point %d: unable to compute its ball\n",
-           __FILE__,__LINE__, idp);
+  if ( !ilist )
     return(0);
-  }
 
   maxkappa = 0.0;
   for (k=0; k<ilist; k++) {
@@ -321,8 +318,6 @@ static int _MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
 
     iel = list[k] / 3;
     i0  = list[k] % 3;
-    i1  = _MMG5_inxt2[i0];
-    i2  = _MMG5_iprv2[i0];
     pt = &mesh->tria[iel];
     if ( !_MMG5_bezierCP(mesh,pt,&b,1) )  continue;
 
@@ -377,10 +372,10 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
 
   /* local parameters at vertex: useless for now because new points are created
    * without reference (inside the domain) */
-  hausd   = mesh->info.hausd;
-  isqhmin = mesh->info.hmin;
-  isqhmax = mesh->info.hmax;
-  isloc = 0;
+  /* hausd   = mesh->info.hausd; */
+  /* isqhmin = mesh->info.hmin; */
+  /* isqhmax = mesh->info.hmax; */
+  /* isloc = 0; */
   /* for (i=0; i<mesh->info.npar; i++) { */
   /*   par = &mesh->info.par[i]; */
   /*   if ( (par->elt == MMG5_Vertex) && (p0->ref == par->ref ) ) { */
@@ -392,11 +387,8 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   /* } */
 
   ilist = boulet(mesh,it,ip,list);
-  if ( !ilist ) {
-    fprintf(stderr,"%s:%d:Error: unable to compute the ball af the point %d.\n",
-           __FILE__,__LINE__, idp);
+  if ( !ilist )
     return(0);
-  }
 
   /* Computation of the rotation matrix T_p0 S -> [z = 0] */
   n  = &mesh->xpoint[p0->xp].n1[0];
@@ -490,7 +482,6 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
        p1 is either regular, either on a ridge (or a singularity), but p0p1 is not ridge*/
     iel = list[k] / 3;
     i0  = list[k] % 3;
-    i1  = _MMG5_inxt2[i0];
     pt = &mesh->tria[iel];
     _MMG5_bezierCP(mesh,pt,&b,1);
 
@@ -559,10 +550,10 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
 
   /* local parameters at vertex: useless for now because new points are created
    * without reference (inside the domain) */
-  hausd   = mesh->info.hausd;
-  isqhmin = mesh->info.hmin;
-  isqhmax = mesh->info.hmax;
-  isloc     = 0;
+  /* hausd   = mesh->info.hausd; */
+  /* isqhmin = mesh->info.hmin; */
+  /* isqhmax = mesh->info.hmax; */
+  /* isloc     = 0; */
   /* for (i=0; i<mesh->info.npar; i++) { */
   /*   par = &mesh->info.par[i]; */
   /*   if ( (par->elt == MMG5_Vertex) && (p0->ref == par->ref ) ) { */
@@ -574,11 +565,8 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   /* } */
 
   ilist = boulet(mesh,it,ip,list);
-  if ( !ilist ) {
-    fprintf(stderr,"%s:%d:Error: unable to compute the ball af the point %d.\n",
-           __FILE__,__LINE__, idp);
+  if ( !ilist )
     return(0);
-  }
 
   /* Computation of the rotation matrix T_p0 S -> [z = 0] */
   n  = &p0->n[0];
@@ -641,7 +629,6 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
        singularity), but p0p1 is not ridge*/
     iel = list[k] / 3;
     i0  = list[k] % 3;
-    i1  = _MMG5_inxt2[i0];
     pt = &mesh->tria[iel];
     _MMG5_bezierCP(mesh,pt,&b,1);
 

@@ -173,7 +173,6 @@ inline double caleltsig_iso(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
 
   cal   = pv[0]*pv[0] + pv[1]*pv[1] + pv[2]*pv[2];
   sqcal = sqrt(cal);
-  ps1   = 0.0;
 
   if ( sqcal < _MMG5_EPSD2 )  return(0.0);
   invsqcal = 1.0 / sqcal;

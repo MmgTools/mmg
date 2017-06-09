@@ -61,11 +61,11 @@ void MMG2D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
  *
  */
 int MMG2_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
-  int      ret,i,nspl,nun;
+  int       ret,i;
   char     *ptr,data[256];
   FILE     *in;
-  MMG5_pMat     pm;
-  fpos_t   position;
+  MMG5_pMat pm;
+  fpos_t    position;
   
   /* Check for parameter file */
   strcpy(data,mesh->namein);
@@ -80,7 +80,7 @@ int MMG2_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
     if ( !in )
       return(1);
   }
-  fprintf(stdout,"  %%%% %s OPENED\n",data);
+  fprintf(stdout,"\n  %%%% %s OPENED\n",data);
   
   /* Read parameters */
   while ( !feof(in) ) {
@@ -92,6 +92,11 @@ int MMG2_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
     if ( !strcmp(data,"lsreferences") ) {
       ret = fscanf(in,"%d",&mesh->info.nmat);
       
+      if ( !ret ) {
+        fprintf(stderr,"  %%%% Wrong format: %d\n",mesh->info.nmat);
+        return 0;
+      }
+
       if ( mesh->info.nmat ) {
         _MMG5_SAFE_CALLOC(mesh->info.mat,mesh->info.nmat,MMG5_Mat,0);
         for (i=0; i<mesh->info.nmat; i++) {
@@ -112,6 +117,10 @@ int MMG2_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
           }
         }
       }
+    }
+    else {
+      fprintf(stderr,"  %%%% Wrong format: %s\n",data);
+      return 0;
     }
   }
   
@@ -234,6 +243,40 @@ int MMG2D_Get_triFromEdge(MMG5_pMesh mesh, int ked, int *ktri, int *ied)
 
 
 }
+
+int MMG2D_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met) {
+  MMG5_pPoint ppt;
+  double      hsiz;
+  int         k,iadr;
+
+  met->np = mesh->np;
+
+  if ( !MMG5_Compute_constantSize(mesh,met,&hsiz) )
+    return 0;
+
+  if ( met->size == 1 ) {
+    for (k=1; k<=mesh->np; k++) {
+      ppt = &mesh->point[k];
+      if ( !MG_VOK(ppt) ) continue;
+      met->m[k] = hsiz;
+    }
+  }
+  else {
+    hsiz    = 1./(hsiz*hsiz);
+
+    for (k=1; k<=mesh->np; k++) {
+      ppt = &mesh->point[k];
+      if ( !MG_VOK(ppt) ) continue;
+
+      iadr           = met->size*k;
+      met->m[iadr]   = hsiz;
+      met->m[iadr+2] = hsiz;
+    }
+  }
+  return 1;
+}
+
+
 
 void MMG2D_Reset_verticestags(MMG5_pMesh mesh) {
   int k;

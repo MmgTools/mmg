@@ -79,11 +79,13 @@ void _MMG5_Init_parameters(MMG5_pMesh mesh) {
   mesh->info.hmin     = -1.;      /* minimal mesh size; */
   /** MMG5_DPARAM_hmax = double of the bounding box size */
   mesh->info.hmax     = -1.;      /* maximal mesh size; */
+  /** MMG5_DPARAM_hsiz= -1. */
+  mesh->info.hsiz     = -1.;      /* constant mesh size; */
   /** MMG5_DPARAM_hausd = 0.01 */
   mesh->info.hausd    = 0.01;     /* control Hausdorff */
   /** MMG5_DPARAM_hgrad = 1.3 */
   mesh->info.hgrad    = 0.26236426446;      /* control gradation; */
-  
+
   /* default values for pointers */
   /** MMG5_PPARAM = NULL */
   mesh->info.mat = NULL;  /* list of user-defined references */
@@ -268,10 +270,10 @@ int MMG5_Set_outputMeshName(MMG5_pMesh mesh, const char* meshout) {
 
     }
     else {
-      _MMG5_ADD_MEM(mesh,7*sizeof(char),"output mesh name",
+      _MMG5_ADD_MEM(mesh,12*sizeof(char),"output mesh name",
                     fprintf(stderr,"  Exit program.\n");
                     return 0);
-      _MMG5_SAFE_CALLOC(mesh->nameout,7,char,0);
+      _MMG5_SAFE_CALLOC(mesh->nameout,12,char,0);
       if ( (mesh->info.imprim > 5) || mesh->info.ddebug ) {
         fprintf(stdout,"  ## Warning: no name given for output mesh.\n");
         fprintf(stdout,"     Use of default value \"mesh.o.mesh\".\n");
@@ -335,6 +337,43 @@ int MMG5_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solout) {
 
 /**
  * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the sol structure.
+ *
+ * Structures unallocation before return (common structures between all codes).
+ *
+ */
+void MMG5_Free_structures(MMG5_pMesh mesh,MMG5_pSol sol){
+  long           castedVal;
+
+  if ( mesh->point )
+    _MMG5_DEL_MEM(mesh,mesh->point,(mesh->npmax+1)*sizeof(MMG5_Point));
+
+  if ( mesh->xpoint )
+    _MMG5_DEL_MEM(mesh,mesh->xpoint,(mesh->xpmax+1)*sizeof(MMG5_xPoint));
+
+  if ( mesh->edge )
+    _MMG5_DEL_MEM(mesh,mesh->edge,(mesh->na+1)*sizeof(MMG5_Edge));
+
+  /* sol */
+  if ( sol && sol->m )
+    _MMG5_DEL_MEM(mesh,sol->m,(sol->size*(sol->npmax+1))*sizeof(double));
+
+  /* mesh->info */
+  if ( mesh->info.npar && mesh->info.par )
+    _MMG5_DEL_MEM(mesh,mesh->info.par,mesh->info.npar*sizeof(MMG5_Par));
+
+  _MMG5_SAFE_FREE(mesh->info.errMessage);
+
+  if ( mesh->info.imprim>5 || mesh->info.ddebug ) {
+    castedVal = _MMG5_SAFELL2LCAST(mesh->memCur);
+    printf("  MEMORY USED AT END (bytes) %ld\n",castedVal);
+  }
+
+  return;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.
  *
  * File name deallocations before return.
@@ -361,4 +400,84 @@ void MMG5_mmgFree_names(MMG5_pMesh mesh,MMG5_pSol met){
       _MMG5_DEL_MEM(mesh,met->nameout,(strlen(met->nameout)+1)*sizeof(char));
     }
   }
+}
+
+inline
+int MMG5_Set_defaultTruncatureSizes(MMG5_pMesh mesh,char sethmin,char sethmax) {
+
+  if ( !sethmin ) {
+    if ( sethmax ) {
+      mesh->info.hmin  = 0.01 * mesh->info.hmax;
+    } else {
+      mesh->info.hmin  = 0.01;
+    }
+  }
+
+  if ( !sethmax ) {
+    if ( sethmin ) {
+      mesh->info.hmax = 100. * mesh->info.hmin;
+    }
+    else {
+      mesh->info.hmax  = 2.;
+    }
+  }
+
+  if ( mesh->info.hmax < mesh->info.hmin ) {
+    assert ( sethmin && sethmax );
+    fprintf(stdout,"  ## Error: mismatch parameters:"
+            " minimal mesh size larger than maximal one.\n");
+    return 0;
+  }
+
+  return 1;
+}
+
+int MMG5_Compute_constantSize(MMG5_pMesh mesh,MMG5_pSol met,double *hsiz) {
+  char         sethmin,sethmax;
+
+
+  if ( mesh->info.hmin > mesh->info.hsiz ) {
+    fprintf(stderr,"  ## Error: Mismatched options: hmin (%e) is greater"
+            " than hsiz (%e). Exit Program.\n",mesh->info.hmin,mesh->info.hsiz);
+    return 0;
+  }
+
+  if ( mesh->info.hmax > 0. && mesh->info.hmax < mesh->info.hsiz ) {
+    fprintf(stderr,"  ## Error: Mismatched options: hmax (%e) is lower"
+            " than hsiz (%e). Exit Program.\n",mesh->info.hmax,mesh->info.hsiz);
+    return 0;
+  }
+
+  *hsiz = mesh->info.hsiz;
+
+  sethmin = sethmax = 0;
+  if ( mesh->info.hmin > 0. ) {
+    sethmin = 1;
+    *hsiz    =  MG_MAX(mesh->info.hmin,*hsiz);
+  }
+
+  if ( mesh->info.hmax > 0. ) {
+    sethmax = 1;
+    *hsiz    = MG_MIN(mesh->info.hmax,*hsiz);
+  }
+
+  /* Set hmin */
+  if ( !sethmin ) {
+    if ( sethmax ) {
+      mesh->info.hmin  = MG_MIN(0.1*(*hsiz),0.1*mesh->info.hmax);
+    } else {
+      mesh->info.hmin  = 0.1*(*hsiz);
+    }
+  }
+
+  /* Set hmax */
+  if ( !sethmax ) {
+    if ( sethmin ) {
+      mesh->info.hmax  = MG_MAX(10.*(*hsiz),10.*mesh->info.hmin);
+    } else {
+      mesh->info.hmax  = 10.*(*hsiz);
+    }
+  }
+
+  return 1;
 }

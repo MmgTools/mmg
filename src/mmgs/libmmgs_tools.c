@@ -133,6 +133,12 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
                                     atof(argv[i])) )
             return 0;
         }
+        else if ( !strcmp(argv[i],"-hsiz") && ++i < argc ) {
+          if ( !MMGS_Set_dparameter(mesh,met,MMGS_DPARAM_hsiz,
+                                    atof(argv[i])) )
+            return 0;
+
+        }
         else if ( !strcmp(argv[i],"-hausd") && ++i <= argc ) {
           if ( !MMGS_Set_dparameter(mesh,met,MMGS_DPARAM_hausd,
                                     atof(argv[i])) )
@@ -234,6 +240,11 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
             MMGS_usage(argv[0]);
             return 0;
           }
+        }
+        else {
+          fprintf(stderr,"Unrecognized option %s\n",argv[i]);
+          MMGS_usage(argv[0]);
+          return 0;
         }
         break;
 #ifdef USE_SCOTCH
@@ -450,4 +461,43 @@ int MMGS_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMGS
   while ( k );
 
   return nbpoi;
+}
+
+int MMGS_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met) {
+  MMG5_pPoint ppt;
+  double      hsiz;
+  int         k,iadr;
+
+  /* Memory alloc */
+  met->np     = mesh->np;
+  met->npmax  = mesh->npmax;
+  met->dim    = mesh->dim;
+
+  _MMG5_ADD_MEM(mesh,(met->size*(met->npmax+1))*sizeof(double),"solution",return(0));
+  _MMG5_SAFE_CALLOC(met->m,met->size*(met->npmax+1),double,0);
+
+  if ( !MMG5_Compute_constantSize(mesh,met,&hsiz) )
+    return 0;
+
+  if ( met->size == 1 ) {
+    for (k=1; k<=mesh->np; k++) {
+      ppt = &mesh->point[k];
+      if ( !MG_VOK(ppt) ) continue;
+      met->m[k] = hsiz;
+    }
+  }
+  else {
+    hsiz    = 1./(hsiz*hsiz);
+
+    for (k=1; k<=mesh->np; k++) {
+      ppt = &mesh->point[k];
+      if ( !MG_VOK(ppt) ) continue;
+
+      iadr           = met->size*k;
+      met->m[iadr]   = hsiz;
+      met->m[iadr+3] = hsiz;
+      met->m[iadr+5] = hsiz;
+    }
+  }
+  return 1;
 }

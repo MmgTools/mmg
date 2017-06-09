@@ -84,7 +84,6 @@ int MMG2D_countLocalParamAtEdg( MMG5_pMesh mesh,_MMG5_iNode **bdyRefs) {
 
   /** Count the number of different boundary references and list it */
   (*bdyRefs) = NULL;
-  npar = 0;
 
   k = mesh->na? mesh->edge[1].ref : 0;
 
@@ -204,6 +203,7 @@ int _MMG2D_writeLocalParam( MMG5_pMesh mesh ) {
 static inline
 int _MMG2D_defaultOption(MMG5_pMesh mesh,MMG5_pSol met, double qdegrad[2]) {
   mytime    ctim[TIMEMAX];
+  double    hsiz;
   char      stim[32];
 
   signal(SIGABRT,_MMG2_excfun);
@@ -253,6 +253,22 @@ int _MMG2D_defaultOption(MMG5_pMesh mesh,MMG5_pSol met, double qdegrad[2]) {
   /* scaling mesh and hmin/hmax computation*/
   if ( !MMG2_scaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
 
+  /* specific meshing + update hmin/hmax */
+  if ( mesh->info.optim ) {
+    if ( !MMG2D_doSol(mesh,met) ) {
+      if ( !MMG2_unscaleMesh(mesh,met) )
+        _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+      _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
+    }
+    MMG2D_solTruncatureForOptim(mesh,met);
+  }
+  if ( mesh->info.hsiz > 0. ) {
+    if ( !MMG5_Compute_constantSize(mesh,met,&hsiz) ) {
+     if ( !MMG2_unscaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+    }
+  }
+
   /* unscaling mesh */
   if ( !MMG2_unscaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
 
@@ -289,10 +305,11 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,double *qdegrad) 
         MMG2D_usage(argv[0]);
         return 0;
       case 'a':
-        if ( !strcmp(argv[i],"-ar") && ++i < argc )
+        if ( !strcmp(argv[i],"-ar") && ++i < argc ) {
           if ( !MMG2D_Set_dparameter(mesh,met,MMG2D_DPARAM_angleDetection,
                                      atof(argv[i])) )
             return 0;
+        }
         break;
       case 'A': /* anisotropy */
         if ( !MMG2D_Set_solSize(mesh,met,MMG5_Vertex,0,MMG5_Tensor) )
@@ -321,6 +338,12 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,double *qdegrad) 
           if ( !MMG2D_Set_dparameter(mesh,met,MMG2D_DPARAM_hmax,
                                      atof(argv[i])) )
             return 0;
+        }
+        else if ( !strcmp(argv[i],"-hsiz") && ++i < argc ) {
+          if ( !MMG2D_Set_dparameter(mesh,met,MMG2D_DPARAM_hsiz,
+                                     atof(argv[i])) )
+            return 0;
+
         }
         else if ( !strcmp(argv[i],"-hausd") && ++i <= argc ) {
           if ( !MMG2D_Set_dparameter(mesh,met,MMG2D_DPARAM_hausd,
@@ -642,11 +665,11 @@ int main(int argc,char *argv[]) {
   }
   if ( ier < 1)
     _MMG2D_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
-  
+
   /* Read parameter file */
   if ( !MMG2_parsop(mesh,met) )
     _MMG2D_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
-  
+
   /* Read displacement if any */
   if ( mesh->info.lag >= 0 ) {
 
@@ -707,26 +730,32 @@ int main(int argc,char *argv[]) {
     ier = MMG2D_mmg2dlib(mesh,met);
   }
 
-  if ( !strcmp(&mesh->nameout[strlen(mesh->nameout)-5],".mesh") ||
-       !strcmp(&mesh->nameout[strlen(mesh->nameout)-6],".meshb") )
-    msh = 0;
-  else if (!strcmp(&mesh->nameout[strlen(mesh->nameout)-4],".msh") ||
-           !strcmp(&mesh->nameout[strlen(mesh->nameout)-5],".mshb") )
-    msh = 1;
+  if ( ier != MMG5_STRONGFAILURE ) {
+    chrono(ON,&MMG5_ctim[1]);
+    if ( mesh->info.imprim )
+      fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh->nameout);
 
-  if ( !msh )
-    ierSave = MMG2D_saveMesh(mesh,mesh->nameout);
-  else
-    ierSave = MMG2D_saveMshMesh(mesh,met,mesh->nameout);
+    if ( !strcmp(&mesh->nameout[strlen(mesh->nameout)-5],".mesh") ||
+         !strcmp(&mesh->nameout[strlen(mesh->nameout)-6],".meshb") )
+      msh = 0;
+    else if (!strcmp(&mesh->nameout[strlen(mesh->nameout)-4],".msh") ||
+             !strcmp(&mesh->nameout[strlen(mesh->nameout)-5],".mshb") )
+      msh = 1;
 
-  if ( !ierSave )
-    _MMG2D_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
+    if ( !msh )
+      ierSave = MMG2D_saveMesh(mesh,mesh->nameout);
+    else
+      ierSave = MMG2D_saveMshMesh(mesh,met,mesh->nameout);
 
-  if( !msh && met->np )
-    MMG2D_saveSol(mesh,met,mesh->nameout);
+    if ( !ierSave )
+      _MMG2D_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
 
-  chrono(OFF,&MMG5_ctim[1]);
-  if ( mesh->info.imprim ) fprintf(stdout,"  -- WRITING COMPLETED\n");
+    if( !msh && met->np )
+      MMG2D_saveSol(mesh,met,mesh->nameout);
+
+    chrono(OFF,&MMG5_ctim[1]);
+    if ( mesh->info.imprim ) fprintf(stdout,"  -- WRITING COMPLETED\n");
+  }
 
   /* free mem */
   chrono(OFF,&MMG5_ctim[0]);

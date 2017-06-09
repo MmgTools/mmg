@@ -637,7 +637,6 @@ int _MMG5_setEdgeNmTag(MMG5_pMesh mesh, _MMG5_Hash *hash) {
 
             assert(ptet->xt);
             pxt = &mesh->xtetra[ptet->xt];
-            adja = &mesh->adja[4*(adj-1)+1];
             if ( ptet->v[ _MMG5_ifar[l][0] ] == piv ) {
               iface = _MMG5_ifar[l][1];
             }
@@ -1129,8 +1128,6 @@ int _MMG5_hGeom(MMG5_pMesh mesh) {
       pt   = &mesh->tria[k];
       adja = &mesh->adjt[3*(k-1)+1];
       for (i=0; i<3; i++) {
-        i1  = _MMG5_inxt2[i];
-        i2  = _MMG5_iprv2[i];
         kk  = adja[i] / 3;
         if ( !kk || pt->tag[i] & MG_NOM )
           mesh->na++;

@@ -47,7 +47,6 @@ int _MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
   int      j,iel,nq,nr;
   char     i,jj,ip,iq;
 
-  ip  = _MMG5_idir[iface][_MMG5_inxt2[iedg]];
   iq  = _MMG5_idir[iface][_MMG5_iprv2[iedg]];
   pt  = &mesh->tetra[k];
   pt0 = &mesh->tetra[0];
@@ -146,9 +145,6 @@ _MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,char iedg,int *lists,int ili
   iq = _MMG5_idir[iface][_MMG5_iprv2[iedg]];
   nump = pt->v[ip];
   numq = pt->v[iq];
-
-  /* Pivot in enumeration of the surface ball of np */
-  ipiv = iq;
 
   /* Surface ball has been enumerated as f1,...,f2 - f1,f2 = both triangles of surface shell */
   /*  Point nap, facing the first vanishing face in surface ball of p */
@@ -351,7 +347,6 @@ int _MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
   pt   = &mesh->tetra[k];
   pxt  = 0;
   pt0  = &mesh->tetra[0];
-  ia   = _MMG5_iarf[iface][iedg];
   ip   = _MMG5_idir[iface][_MMG5_inxt2[iedg]];
   nump = pt->v[ip];
   numq = pt->v[_MMG5_idir[iface][_MMG5_iprv2[iedg]]];
@@ -1003,7 +998,7 @@ int _MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,cha
               _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                  "larger xtetra table",
                                  mesh->xt--;
-                                 _MMG5_SAFE_FREE(ind); _MMG5_SAFE_FREE(p0_c);
+                                 _MMG5_SAFE_FREE(ind);_MMG5_SAFE_FREE(p0_c);
                                  _MMG5_SAFE_FREE(p1_c);return -1;,-1);
             }
             pt1->xt = mesh->xt;
@@ -1106,7 +1101,10 @@ int _MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,cha
         }
       }
     }
-    if ( !_MMG3D_delElt(mesh,iel) ) return -1;
+    if ( !_MMG3D_delElt(mesh,iel) ) {
+      _MMG5_SAFE_FREE(ind); _MMG5_SAFE_FREE(p0_c); _MMG5_SAFE_FREE(p1_c);
+      return -1;
+    }
   }
 
   /* Update vertices coordinates for elements that do not belong to the shell of (pq) */

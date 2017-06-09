@@ -104,7 +104,7 @@ int _MMG2_defmetbdy_2d(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
           it[1] = 3*iel+i1;
         }
         else if ( ip2 != pt->v[i2] ) {
-          printf("   *** Function _MMG2_defmetbdy_2d: three edges connected at point %d - abort.\n",pt->v[i0]);
+          printf("   *** Function _MMG2_defmetbdy_2d: three edges connected at point %d - abort.\n",ip);
           return 0;
         }
       }
@@ -121,7 +121,7 @@ int _MMG2_defmetbdy_2d(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
           it[1] = 3*iel+i2;
         }
         else if ( ip2 != pt->v[i1] ) {
-          printf("   *** Function _MMG2_defmetbdy_2d: three edges connected at point %d - abort.\n",pt->v[i0]);
+          printf("   *** Function _MMG2_defmetbdy_2d: three edges connected at point %d - abort.\n",ip);
           return 0;
         }
       }
@@ -130,7 +130,7 @@ int _MMG2_defmetbdy_2d(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
   
   /* Check that there are exactly two boundary points connected at p0 */
   if ( ip1 == 0 || ip2 == 0 ) {
-    printf("   *** Function _MMG2_defmetbdy_2d: no two edges connected at edge, non singular point %d - abort.\n",pt->v[i0]);
+    printf("   *** Function _MMG2_defmetbdy_2d: no two edges connected at edge, non singular point %d - abort.\n",ip);
     return 0;
   }
   
@@ -341,7 +341,6 @@ int _MMG2_grad2met_ani(MMG5_pMesh mesh,MMG5_pSol met,double *m,double *n,double 
     else {
       dd    = m[0] - m[2];
       trimn = m[0] + m[2];
-      det   = m[0]*m[2] - m[1]*m[1];
       
       sqDelta = sqrt(fabs(dd*dd +4*0*m[1]*m[1]));
       dm[0]   = 0.5 * (trimn + sqDelta);

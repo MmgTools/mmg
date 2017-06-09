@@ -78,7 +78,7 @@ static int _MMG5_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
     in = fopen(data,"rb");
     if ( !in )  return(1);
   }
-  fprintf(stdout,"  %%%% %s OPENED\n",data);
+  fprintf(stdout,"\n  %%%% %s OPENED\n",data);
 
   /* read parameters */
   mesh->info.npar = 0;
@@ -97,6 +97,12 @@ static int _MMG5_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
       for (i=0; i<mesh->info.npar; i++) {
         fscanf(in,"%d %s ",&ref,buf);
         ret = fscanf(in,"%f %f %f",&fp1,&fp2,&hausd);
+
+        if ( !ret ) {
+          fprintf(stderr,"  %%%% Wrong format: %s\n",buf);
+          return 0;
+        }
+
         for (j=0; j<strlen(buf); j++)  buf[j] = tolower(buf[j]);
 
         if ( !strcmp(buf,"triangles") || !strcmp(buf,"triangle") ) {
@@ -111,7 +117,7 @@ static int _MMG5_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
         /* } */
         else {
           fprintf(stdout,"  %%%% Wrong format: %s\n",buf);
-          continue;
+          return 0;
         }
       }
     }
@@ -178,6 +184,7 @@ int _MMGS_writeLocalParam( MMG5_pMesh mesh ) {
 static inline
 int _MMGS_defaultOption(MMG5_pMesh mesh,MMG5_pSol met) {
   mytime    ctim[TIMEMAX];
+  double    hsiz;
   char      stim[32];
 
   _MMGS_Set_commonFunc();
@@ -227,6 +234,14 @@ int _MMGS_defaultOption(MMG5_pMesh mesh,MMG5_pSol met) {
 
   /* scaling mesh and hmin/hmax computation*/
   if ( !_MMG5_scaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+
+  /* Specific meshing + hmin/hmax update */
+  if ( mesh->info.hsiz > 0. ) {
+    if ( !MMG5_Compute_constantSize(mesh,met,&hsiz) ) {
+     if ( !_MMG5_unscaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+    }
+  }
 
   /* unscaling mesh */
   if ( !_MMG5_unscaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
@@ -288,6 +303,8 @@ int main(int argc,char *argv[]) {
     ier = MMGS_loadMshMesh(mesh,met,mesh->namein);
     msh = 1;
   }
+  if ( ier<1 )
+    _MMGS_RETURN_AND_FREE(mesh,met,MMG5_STRONGFAILURE);
 
   if ( !msh ) {
     ier = MMGS_loadSol(mesh,met,met->namein);
