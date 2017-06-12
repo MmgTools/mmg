@@ -338,35 +338,13 @@ int _MMG3D_swpItem(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,int k,i
     if ( pxt->edg[iar] || pxt->tag[iar] ) return(0);
   }
 
-  lon = _MMG5_coquil(mesh,k,iar,&list[0]);
-  if(lon%2) return(0);
-  lon = lon/2;
-  if ( lon > 2 ) {
-    crit = pt->qual;
-    for (l=0; l<lon; l++) {
-      iel = list[l] / 6;
-      pt1 = &mesh->tetra[iel];
-      if(pt1->tag & MG_REQ) break;
-      if ( pt1->qual < crit )  crit = pt1->qual;
-      if ( pt1->xt ) {
-        pxt = &mesh->xtetra[pt1->xt];
-        for (j=0; j<4; j++)
-          if ( pxt->ftag[j] & MG_BDY )  nf++;
-      }
-    }
-    if(nf > 1) return(0);//printf("on risque de crreerrrr %d\n",nf);
-    if(l<lon)  {
-      ier = 0;
-    } else {
-      crit *= OCRIT;
-      nconf = _MMG5_chkswpgen(mesh,met,k,iar,&lon,list,OCRIT,2);
-      if ( nconf ) {
-        ier = _MMG5_swpgen(mesh,met,nconf,lon,list,octree,2);
-        if ( ier < 0 ) return(-1);
-        else
-          return(ier);
-      }
-    }
+  crit *= OCRIT;
+  nconf = _MMG5_chkswpgen(mesh,met,k,iar,&lon,list,OCRIT,2);
+  if ( nconf ) {
+    ier = _MMG5_swpgen(mesh,met,nconf,lon,list,octree,2);
+    if ( ier < 0 ) return(-1);
+    else
+      return(ier);
   }
 
   return(ier);
