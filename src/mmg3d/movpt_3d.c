@@ -2013,18 +2013,19 @@ int _MMG3D_movnormal_iso(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
       pt1 = &mesh->tetra[iel];
       qual = _MMG5_caltet(mesh,sol,pt1);
       if ( qual < crit ) {
-        if(l==0 && iter==0) {
- printf("tet %d (%d) -- %e < %e-- %e %e\n",l,iel,_MMG5_orvol(mesh->point,pt1->v),crit,pt1->qual,qual);          printf("%e %e %e 0\n",p1->c[0],p1->c[1],p1->c[2]);
+        if( mesh->info.ddebug && (l==0 && iter==0)) {
+          printf("tet %d (%d) -- %e < %e-- %e %e\n",l,iel,_MMG5_orvol(mesh->point,pt1->v),crit,pt1->qual,qual);
+          printf("%e %e %e 0\n",p1->c[0],p1->c[1],p1->c[2]);
           printf("%e %e %e 0\n",p2->c[0],p2->c[1],p2->c[2]);
           printf("%e %e %e 0\n",p3->c[0],p3->c[1],p2->c[2]);
-    ppa->c[0] = oldc[0] + coe * nx * len;
-    ppa->c[1] = oldc[1] + coe * ny * len;
-    ppa->c[2] = oldc[2] + coe * nz * len;
-         printf("%e %e %e 0\n",ppa->c[0],ppa->c[1],ppa->c[2]);
+          ppa->c[0] = oldc[0] + coe * nx * len;
+          ppa->c[1] = oldc[1] + coe * ny * len;
+          ppa->c[2] = oldc[2] + coe * nz * len;
+          printf("%e %e %e 0\n",ppa->c[0],ppa->c[1],ppa->c[2]);
           printf("%e %e %e 0\n",oldp[0],oldp[1],oldp[2]);
-          printf("\n\n n %e %e %e len %e %e\n",nx,ny,nz,len,coe);
-          printf("oldc %e %e %e\n",oldc[0],oldc[1],oldc[2]);
-          exit(0);
+          printf("\n\n n %e %e %e len %e coe %e\n",nx,ny,nz,len,coe);
+          printf("oldc %e %e %e hp %e\n",oldc[0],oldc[1],oldc[2],hp);
+          //exit(0);
         }
         break;
       }
