@@ -190,6 +190,8 @@ int _MMG3D_deletePoint(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,
   int         il,ilist,iel,ip,list[MMG3D_LMAX+2];
 
   ilist = _MMG5_boulevolp(mesh,k,i,list);
+#warning optimize : try to know how many tets we have around the vertex. See NM_Complex/nm4 to be sure this test is ok (if not the test is very long).
+  if (ilist > 30 ) return(0);
 
   for(il = 0 ; il<ilist ; il++) {
     iel = list[il] / 4;
@@ -235,6 +237,8 @@ int MMG3D_optbdry(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree,int k) {
   ib  = i;
   ipb = pt->v[ib];
 
+  /*check that the vertex is not a boundary one*/
+  if ( mesh->point[ipb].tag & MG_BDY ) return(0);
 
   /* try to move the vertex in order to improve the quality*/
   ier = 0;
