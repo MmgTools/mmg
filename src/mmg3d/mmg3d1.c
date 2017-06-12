@@ -889,7 +889,7 @@ static int _MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           }
 
           hmi2 = hmi2*hmi2;
-          if ( ll > hmi2 )  continue;
+          if ( ll > hmi2*_MMG3D_LSHRT )  continue;
         }
         else if ( typchk == 2 ) {
           ll = _MMG5_lenedg(mesh,met,_MMG5_iarf[i][j],pt);
