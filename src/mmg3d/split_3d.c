@@ -4437,6 +4437,7 @@ int _MMG5_splitedg(MMG5_pMesh mesh, MMG5_pSol met,int iel, int iar, double crit)
   }
   
   ier = _MMG3D_simbulgept(mesh,met,list,lon,ip);
+  if (!ier) return(0);
   ier = _MMG3D_chksplit(mesh,met,ip,&list[0],lon,crit);
   if(!ier) return(0);
   ier = _MMG5_split1b(mesh,met,list,lon,ip,0,1);
