@@ -627,8 +627,6 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,
       if ( !MG_EOK(pt) || pt->ref < 0 || (pt->tag & MG_REQ) )   continue;
       else if ( pt->mark < mesh->mark-2 )  continue;
 
-      if ( pt->qual > clickVol) continue;
-
       /* point j on face i */
       for (i=0; i<4; i++) {
         for (j=0; j<3; j++) {
@@ -708,7 +706,7 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,
               else if ( ier )  ns++;
             }
           }
-          else if ( moveVol ) {
+          else if ( moveVol && (pt->qual < clickVol) ) {
             ilistv = _MMG5_boulevolp(mesh,k,i0,listv);
             if ( !ilistv )  continue;
             ier = _MMG5_movintpt(mesh,met,octree,listv,ilistv,improveVol);
