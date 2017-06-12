@@ -651,7 +651,6 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
     }
     pt1 = &mesh->tetra[jel];
     memcpy(pt1,pt,sizeof(MMG5_Tetra));
-    pt1->mark = mesh->mark;
 
     if ( pt->v[tau[0]] == nump )
       newtet[k] = jel;
@@ -788,6 +787,9 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
       pt->qual=_MMG5_orcal(mesh,met,iel);
       pt1->qual=_MMG5_orcal(mesh,met,jel);
     }
+    pt->mark  = mesh->mark;
+    pt1->mark = mesh->mark;
+
 
     _MMG5_SAFE_FREE(newtet);
     return(1);
@@ -1084,6 +1086,8 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
       pt->qual=_MMG5_orcal(mesh,met,iel);
       pt1->qual=_MMG5_orcal(mesh,met,jel);
     }
+    pt->mark  = mesh->mark;
+    pt1->mark = mesh->mark;
   }
 
   _MMG5_SAFE_FREE(newtet);

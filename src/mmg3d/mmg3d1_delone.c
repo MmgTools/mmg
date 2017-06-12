@@ -92,7 +92,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
   for (k=1; k<=ne; k++) {
     pt = &mesh->tetra[k];
     if ( !MG_EOK(pt)  || (pt->tag & MG_REQ) )   continue;
-    else if ( pt->mark < base-1 )  continue;
+    else if ( pt->mark < base-2 )  continue;
     pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
 
     /* 1) find longest and shortest edge  and try to manage it*/
@@ -1024,6 +1024,8 @@ _MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
   it = nnm = nnf = 0;
   maxit = 10;
   crit = 1.053;
+  ++mesh->mark;
+
   do {
     /* treatment of bad elements*/
     if(it < 5) {

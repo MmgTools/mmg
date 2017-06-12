@@ -55,18 +55,19 @@ int _MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
   lon = 1.6;
   if ( typchk == 2 && met->m ) {
     lon = _MMG5_lenedg(mesh,met,_MMG5_iarf[iface][iedg],pt);
-    
+
     if ( !lon ) return(0);
     /*on cherche a se rapprocher de 1*/
     //lon = MG_MAX(0.8/lon,1.6);// test ok but less good than the next one
     lon = MG_MAX(2.-lon,1.6);
   }
-  
+
   calold = calnew = DBL_MAX;
   for (j=0; j<ilist; j++) {
     iel = list[j] / 4;
     ip  = list[j] % 4;
     pt  = &mesh->tetra[iel];
+
     /* exclude elements from shell */
     for (jj=0; jj<4; jj++)  if ( pt->v[jj] == nq )  break;
     if ( jj < 4 )  continue;

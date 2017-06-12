@@ -555,6 +555,8 @@ int _MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double crit,double declic,
     for (k=1; k<=mesh->ne; k++) {
       pt = &mesh->tetra[k];
       if ( !MG_EOK(pt) || (pt->tag & MG_REQ) )  continue;
+      else if ( pt->mark < mesh->mark-2 )  continue;
+
       if ( pt->qual > declic/*0.0288675*/ /*0.6/_MMG3D_ALPHAD*/ )  continue;
 
       for (i=0; i<6; i++) {
@@ -623,8 +625,10 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,
     for (k=1; k<=mesh->ne; k++) {
       pt = &mesh->tetra[k];
       if ( !MG_EOK(pt) || pt->ref < 0 || (pt->tag & MG_REQ) )   continue;
+      else if ( pt->mark < mesh->mark-2 )  continue;
+
       if ( pt->qual > clickVol) continue;
-      
+
       /* point j on face i */
       for (i=0; i<4; i++) {
         for (j=0; j<3; j++) {
@@ -640,11 +644,11 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,
           if( pt->xt && (pxt->ftag[i] & MG_BDY)) {
             _MMG5_tet2tri(mesh,k,i,&tt);
             caltri = _MMG5_caltri(mesh,met,&tt);
-            
+
             if ( caltri >= clickSurf) {
               j = 3;
               continue;
-            } 
+            }
           }
           if ( maxit != 1 ) {
             ppt->flag = base;
