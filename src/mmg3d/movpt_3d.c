@@ -2001,7 +2001,7 @@ int _MMG3D_movnormal_iso(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
     pt1 = &mesh->tetra[iel];
     if ( crit > pt1->qual )  crit = pt1->qual;
   }
-  coe     = 2.12132; //3/sqrt(2) : hauteur d'un tetra reg de cote c : sqrt(2)/3
+  coe     = 0.471404;//2.12132; //3/sqrt(2) : hauteur d'un tetra reg de cote c : c*sqrt(2)/3
   iter    = 0;
   maxiter = 10;
   do {
