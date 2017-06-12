@@ -663,7 +663,7 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,int maxiti
             else if ( ppt->tag & MG_GEO ) {
               if ( ppt->tag & MG_OPNBDY ) {
 #warning to implement
-                ier=0;
+                ier=_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,0);
               }
               else {
                 ier=_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,0);
@@ -792,15 +792,9 @@ static int _MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
 
             if ( p0->tag > tag ) continue;
             if ( isnm && mesh->adja[4*(k-1)+1+i] )  continue;
-            if ( tag & MG_OPNBDY ) {
-#warning to implement
-              continue;
-            }
-            else {
-              if (_MMG5_boulesurfvolp(mesh,k,ip,i,
-                                      list,&ilist,lists,&ilists,p0->tag & MG_NOM) < 0 )
-                return(-1);
-            }
+            if (_MMG5_boulesurfvolp(mesh,k,ip,i,
+                                    list,&ilist,lists,&ilists,p0->tag & MG_NOM) < 0 )
+              return(-1);
           }
           else {
             ilist = _MMG5_boulevolp(mesh,k,ip,list);
@@ -914,15 +908,9 @@ static int _MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
 
             if ( p0->tag > tag ) continue;
             if ( isnm && mesh->adja[4*(k-1)+1+i] )  continue;
-            if ( tag & MG_OPNBDY ) {
-#warning to implement
-              continue;
-            }
-            else {
-              if (_MMG5_boulesurfvolp(mesh,k,ip,i,
-                                      list,&ilist,lists,&ilists,p0->tag & MG_NOM) < 0 )
-                return(-1);
-            }
+            if (_MMG5_boulesurfvolp(mesh,k,ip,i,
+                                    list,&ilist,lists,&ilists,p0->tag & MG_NOM) < 0 )
+              return(-1);
           }
           else {
             ilist = _MMG5_boulevolp(mesh,k,ip,list);
@@ -939,7 +927,7 @@ static int _MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
             if ( mesh->adja[4*(k-1)+1+i] )  continue;
           }
           if ( p0->tag > tag )  continue;
-          ilist = 0;//_MMG5_chkcol_bdy(mesh,met,k,i,j,list,ilist,lists,ilists,typchk);
+          ilist = _MMG5_chkcol_bdy(mesh,met,k,i,j,list,ilist,lists,ilists,typchk);
         }
         /* internal face */
         else {
