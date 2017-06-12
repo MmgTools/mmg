@@ -898,12 +898,6 @@ _MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree, int* warn) 
     if ( !noptim && (it==5 || ((dd < 5) || (dd < 0.05*MG_MAX(nc,ns)) || !(ns+nc))) ) {
       _MMG5_optbad(mesh,met,octree);
       noptim = 1;
-#warning performance/release check the update of mark and remove this loop
-      for (k=1; k<=ne; k++) {
-        pt = &mesh->tetra[k];
-        if ( !MG_EOK(pt)  || (pt->tag & MG_REQ) )   continue;
-        pt->mark = mesh->mark;
-      }
     }
 
     if( it > 5 ) {
@@ -943,6 +937,7 @@ _MMG5_optetLES(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
   it = nnm = nnf = 0;
   maxit = 10;
   declic = 1.01;
+  ++mesh->mark;
   do {
     /* treatment of bad elements*/
     if(it < 5) {
