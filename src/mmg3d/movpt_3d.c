@@ -369,7 +369,7 @@ int _MMG5_movintptLES_iso(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,
  */
 int _MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree, int *listv,
                           int ilistv,int *lists,int ilists,
-                          int improve) {
+                          int improveSurf,int improveVol) {
   MMG5_pTetra       pt,pt0;
   MMG5_pxTetra      pxt;
   MMG5_pPoint       p0,p1,p2,ppt0;
@@ -691,7 +691,7 @@ int _MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
   }
   if ( calold < _MMG5_EPSOK && calnew <= calold )    return(0);
   else if (calnew < _MMG5_EPSOK) return(0);
-  else if (improve && calnew < 1.02*calold) return(0);
+  else if (improveSurf && calnew < 1.02*calold) return(0);
   else if ( calnew < 0.3*calold )        return(0);
   memset(pxp,0,sizeof(MMG5_xPoint));
 
@@ -729,7 +729,7 @@ int _MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
     _MMG5_SAFE_FREE(callist);
     return(0);
   }
-  else if (improve && calnew < calold) {
+  else if (improveVol && calnew < calold) {
     _MMG5_SAFE_FREE(callist);
     return(0);
   }
@@ -1914,7 +1914,144 @@ int _MMG3D_movv_ani(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
 
 }
 
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the metric structure.
+ * \param k tetra index.
+ * \param ib local index of the point inside the tetra k.
+ * \return 0 if fail, 1 if success.
+ *
+ * Move internal point according to the normal at the opposite face
+ * Try to increase the volume of the tetra.
+ *
+ * \remark the metric is not interpolated at the new position.
+ */
+int _MMG3D_movnormal_iso(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
+  MMG5_pTetra pt,pt1;
+  MMG5_pPoint ppa,ppb,p1,p2,p3;
+  int    j,iadr,ipb,iter,maxiter,l,lon,iel,i1,i2,i3,list[MMG3D_LMAX+2];;
+  double  hp,coe,crit,qualtet[MMG3D_LMAX+2];;
+  double ax,ay,az,bx,by,bz,nx,ny,nz,dd,len,qual,oldc[3],oldp[3];
 
+  assert(k);
+  assert(ib<4);
+  pt = &mesh->tetra[k];
+
+  ppa  = &mesh->point[pt->v[ib]];
+  if(ppa->tag & MG_BDY) return(0);
+
+  iadr = (pt->v[ib])*sol->size;
+  hp   = sol->m[iadr];
+
+  /*compute normal*/
+  i1 = pt->v[_MMG5_idir[ib][0]];
+  i2 = pt->v[_MMG5_idir[ib][1]];
+  i3 = pt->v[_MMG5_idir[ib][2]];
+  p1 = &mesh->point[i1];
+  p2 = &mesh->point[i2];
+  p3 = &mesh->point[i3];
+
+  ax = p3->c[0] - p1->c[0];
+  ay = p3->c[1] - p1->c[1];
+  az = p3->c[2] - p1->c[2];
+
+  bx = p2->c[0] - p1->c[0];
+  by = p2->c[1] - p1->c[1];
+  bz = p2->c[2] - p1->c[2];
+
+  nx = (ay*bz - az*by);
+  ny = (az*bx - ax*bz);
+  nz = (ax*by - ay*bx);
+
+  dd = sqrt(nx*nx+ny*ny+nz*nz);
+  dd = 1./dd;
+  nx *=dd;
+  ny *=dd;
+  nz *=dd;
+  len = 0;
+  for (j=0; j<3; j++) {
+    ipb = pt->v[ _MMG5_idir[ib][j] ];
+    ppb = &mesh->point[ipb];
+
+    ax  = ppb->c[0] - ppa->c[0];
+    ay  = ppb->c[1] - ppa->c[1];
+    az  = ppb->c[2] - ppa->c[2];
+
+    dd    =   sqrt(ax*ax +ay*ay +az*az);
+    len  +=   dd;
+  }
+
+  dd  = 1.0 / (double)3.;
+  len *= dd;
+
+
+  memcpy(oldp,ppa->c,3*sizeof(double));
+  oldc[0] = 1./3.*(p1->c[0]+p2->c[0]+p3->c[0]);
+  oldc[1] = 1./3.*(p1->c[1]+p2->c[1]+p3->c[1]);
+  oldc[2] = 1./3.*(p1->c[2]+p2->c[2]+p3->c[2]);
+
+  lon = _MMG5_boulevolp(mesh,k,ib,&list[0]);
+  if(mesh->info.imprim < 0) if(lon < 4 && lon) printf("lon petit : %d\n",lon);
+  if(!lon) return(0);
+
+  /*vol crit*/
+  crit = _MMG5_orvol(mesh->point,pt->v);
+  for (l=1; l<lon; l++) {
+    iel = list[l] / 4;
+    pt1 = &mesh->tetra[iel];
+    if ( crit > pt1->qual )  crit = pt1->qual;
+  }
+  coe     = 0.471404;//2.12132; //3/sqrt(2) : hauteur d'un tetra reg de cote c : c*sqrt(2)/3
+  iter    = 0;
+  maxiter = 10;
+  do {
+    ppa->c[0] = oldc[0] + coe * nx * len;
+    ppa->c[1] = oldc[1] + coe * ny * len;
+    ppa->c[2] = oldc[2] + coe * nz * len;
+    for (l=0; l<lon; l++) {
+      iel = list[l] / 4;
+      pt1 = &mesh->tetra[iel];
+      qual = _MMG5_caltet(mesh,sol,pt1);
+      if ( qual < crit ) {
+        if( mesh->info.ddebug && (l==0 && iter==0)) {
+          printf("tet %d (%d) -- %e < %e-- %e %e\n",l,iel,_MMG5_orvol(mesh->point,pt1->v),crit,pt1->qual,qual);
+          printf("%e %e %e 0\n",p1->c[0],p1->c[1],p1->c[2]);
+          printf("%e %e %e 0\n",p2->c[0],p2->c[1],p2->c[2]);
+          printf("%e %e %e 0\n",p3->c[0],p3->c[1],p2->c[2]);
+          ppa->c[0] = oldc[0] + coe * nx * len;
+          ppa->c[1] = oldc[1] + coe * ny * len;
+          ppa->c[2] = oldc[2] + coe * nz * len;
+          printf("%e %e %e 0\n",ppa->c[0],ppa->c[1],ppa->c[2]);
+          printf("%e %e %e 0\n",oldp[0],oldp[1],oldp[2]);
+          printf("\n\n n %e %e %e len %e coe %e\n",nx,ny,nz,len,coe);
+          printf("oldc %e %e %e hp %e\n",oldc[0],oldc[1],oldc[2],hp);
+          //exit(0);
+        }
+        break;
+      }
+      qualtet[l] = qual;
+
+    }
+    if ( l >= lon )  break;
+    coe *= 0.5;
+  }
+  while ( ++iter <= maxiter );
+  if ( iter > maxiter) {
+    memcpy(ppa->c,oldp,3*sizeof(double));
+    return(0);
+  }
+
+  for (l=0; l<lon; l++) {
+    iel = list[l] / 4;
+    pt1 = &mesh->tetra[iel];
+    pt1->qual = qualtet[l];
+    pt1->mark = mesh->mark;
+    //    if ( pt1->qual < declic )
+    //  MMG_kiudel(queue,iel);
+  }
+  return(1);
+
+}
 int _MMG3D_movv_iso(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
   MMG5_pTetra pt,pt1;
   MMG5_pPoint ppa,ppb,p1,p2,p3;
@@ -1986,13 +2123,12 @@ int _MMG3D_movv_iso(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
   for (l=1; l<lon; l++) {
     iel = list[l] / 4;
     pt1 = &mesh->tetra[iel];
-    if ( crit > pt1->qual )  crit = pt1->qual;
+    if ( crit < pt1->qual )  crit = pt1->qual;
   }
-  /* if ( (crit > 100/ALPHAD) ) {
-     crit *= 1.1;
-     } else
-  */ crit *= 1.01;
-
+   if ( (crit < 0.01/_MMG3D_ALPHAD) ) {
+     crit *= 0.9;
+   } else
+     crit *= 1.01;
   coe     = 1.;
   iter    = 0;
   maxiter = 20;

@@ -578,6 +578,10 @@ _MMG5_correction_iso(MMG5_pMesh mesh,int ip,int *list,int ilist,int nedep,double
         // MMG_cas=2; // uncomment to debug
         //printf("on trouve close ? %e %e\n",dd*dd,nn*eps2);
         if ( dd*dd < nn * eps2 )  break;
+#warning release : check that this test is valid ie not to strict (see mmg3d_CubeIso_0.5h_hminMax-out)
+        //  if(!adj)
+        //  if ( dd*dd < nn * 0.6*0.6 )  break;
+
         // MMG_cas=0; //uncomment to debug
       }
       if ( i < 4 ||  pt->tag & MG_REQ ) {

@@ -245,41 +245,40 @@ IF ( LONG_TESTS )
     SET_TESTS_PROPERTIES ( ${test_name}_2
       PROPERTIES FIXTURES_REQUIRED ${test_name} )
 
-  ENDIF ( RUN_AGAIN )
-ENDIF ( LONG_TESTS )
+  ENDIF ( )
 
-SET ( test_name
+  SET ( test_name
     # 4: Refinment on a solution
     mmg3d_Various_adpsol_hgrad1_M6Mach_Eps0.0005_hmin0.0001_hmax3
     )
-SET ( input_file
+  SET ( input_file
     ${MMG3D_CI_TESTS}/Various_adpsol_hgrad1_M6Mach_Eps0.0005_hmin0.0001_hmax3/M6
     )
 
-ADD_TEST(NAME ${test_name}
-  COMMAND ${EXECUT_MMG3D}
-  ${input_file}
-  ### M6
-  ${input_file}
-  -v 5 -sol ${MMG3D_CI_TESTS}/Various_adpsol_hgrad1_M6Mach_Eps0.0005_hmin0.0001_hmax3/metM6.sol -hausd 0.1 -ar 60
-  -out ${CTEST_OUTPUT_DIR}/${test_name}-out.o.meshb )
-
-SET_TESTS_PROPERTIES ( ${test_name}
-  PROPERTIES FIXTURES_SETUP ${test_name} )
-
-IF ( RUN_AGAIN )
-  ADD_TEST(NAME ${test_name}_2
+  ADD_TEST(NAME ${test_name}
     COMMAND ${EXECUT_MMG3D}
-  "-v 5 -hausd 0.1 -ar 60"
-    ${CTEST_OUTPUT_DIR}/${test_name}-out.o.meshb
-    -out ${CTEST_OUTPUT_DIR}/${test_name}_2-out.o.meshb
-    )
+    ${input_file}
+    ### M6
+    ${input_file}
+    -v 5 -sol ${MMG3D_CI_TESTS}/Various_adpsol_hgrad1_M6Mach_Eps0.0005_hmin0.0001_hmax3/metM6.sol -hausd 0.1 -ar 60
+    -out ${CTEST_OUTPUT_DIR}/${test_name}-out.o.meshb )
 
-  SET_TESTS_PROPERTIES ( ${test_name}_2
-    PROPERTIES FIXTURES_REQUIRED ${test_name} )
+  SET_TESTS_PROPERTIES ( ${test_name}
+    PROPERTIES FIXTURES_SETUP ${test_name} )
 
+  IF ( RUN_AGAIN )
+    ADD_TEST(NAME ${test_name}_2
+      COMMAND ${EXECUT_MMG3D}
+      "-v 5 -hausd 0.1 -ar 60"
+      ${CTEST_OUTPUT_DIR}/${test_name}-out.o.meshb
+      -out ${CTEST_OUTPUT_DIR}/${test_name}_2-out.o.meshb
+      )
+
+    SET_TESTS_PROPERTIES ( ${test_name}_2
+      PROPERTIES FIXTURES_REQUIRED ${test_name} )
+
+  ENDIF ( )
 ENDIF ( )
-
 
 
 
