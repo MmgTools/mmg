@@ -504,22 +504,22 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
         for(i=0 ; i<4 ; i++) {
           if ( pxt->ftag[i] & MG_BDY ) npeau++;
         }
-      }
-      //Warning pbs for multidomain : can be bdy and have an adja
-      if(npeau>1) {
+
+        //Warning pbs for multidomain : can be bdy and have an adja
+        if(npeau>1) {
 //#warning release remove this print
-        if( mesh->info.imprim<-4 ) printf("%d faces de peau!!!! %d (typ %d) %e\n",npeau,k,ityp,pt->qual / _MMG3D_ALPHAD);
-        nbdy++;
-        continue;
-      } else {
-        nbdy2++;
-      }
-      if(npeau==1) {
-        ier = MMG3D_optbdry(mesh,met,octree,k);
-        if(ier) {
-          nd++;
-          ds[ityp]++;
+          if( mesh->info.imprim<-4 ) printf("%d faces de peau!!!! %d (typ %d) %e\n",npeau,k,ityp,pt->qual / _MMG3D_ALPHAD);
+          nbdy++;
           continue;
+        } else if ( npeau ) {
+          nbdy2++;
+
+          ier = MMG3D_optbdry(mesh,met,octree,k);
+          if(ier) {
+            nd++;
+            ds[ityp]++;
+            continue;
+          }
         }
       }
 
