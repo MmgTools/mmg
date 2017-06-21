@@ -636,7 +636,7 @@ int _MMG5_cavity_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel,int ip,int* list,int 
   for (k=0; k<lon; k++) {
     mesh->tetra[list[k]/6].flag = base;
 
-    if ( !mesh->info.itri ) {
+    if ( !mesh->info.opnbdy ) {
       if ( tref != mesh->tetra[list[k]/6].ref ) {
         return(0);
       }
@@ -796,7 +796,7 @@ int _MMG5_cavity_iso(MMG5_pMesh mesh,MMG5_pSol sol,int iel,int ip,int *list,int 
   for (k=0; k<lon; k++) {
     mesh->tetra[list[k]/6].flag = base;
 
-    if ( !mesh->info.itri ) {
+    if ( !mesh->info.opnbdy ) {
       if ( tref != mesh->tetra[list[k]/6].ref ) {
         return(0);
       }

@@ -834,7 +834,7 @@ int _MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,cha
 
           if ( qel ) {
             if ( pt1->ref < mesh->tetra[qel].ref )  MG_CLR( pxt1->ori,voyp );
-            else if ( mesh->info.itri && (pt1->ref == mesh->tetra[qel].ref) ) {
+            else if ( mesh->info.opnbdy && (pt1->ref == mesh->tetra[qel].ref) ) {
               if ( pxt->ftag[ip] ) {
                 if ( MG_GET(pxt->ori,ip) )
                   MG_SET( pxt1->ori,voyp );
@@ -938,7 +938,7 @@ int _MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,cha
 
             if ( pel ) {
               if ( pt1->ref < mesh->tetra[pel].ref )  MG_CLR( pxt1->ori,voyq );
-              else if ( mesh->info.itri && (pt1->ref == mesh->tetra[pel].ref) ) {
+              else if ( mesh->info.opnbdy && (pt1->ref == mesh->tetra[pel].ref) ) {
                 if ( pxt->ftag[iq] ) {
                   if ( MG_GET(pxt->ori,iq) )
                     MG_SET( pxt1->ori,voyq );

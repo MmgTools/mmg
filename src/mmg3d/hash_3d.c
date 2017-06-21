@@ -1232,7 +1232,7 @@ int _MMG5_bdryTria(MMG5_pMesh mesh, int ntmesh) {
         adj = adja[i] / 4;
         pt1 = &mesh->tetra[adj];
 
-        if ( (!mesh->info.itri) || (!mesh->xtetra) ) {
+        if ( (!mesh->info.opnbdy) || (!mesh->xtetra) ) {
           if ( adj && ( pt->ref <= pt1->ref) )  continue;
         } else {
           if ( adj && ( (pt->ref<pt1->ref) || (!pt->xt) ||
@@ -1430,7 +1430,7 @@ int _MMG5_chkBdryTria(MMG5_pMesh mesh) {
     }
   }
 
-  if ( mesh->info.itri && mesh->xtetra ) {
+  if ( mesh->info.opnbdy && mesh->xtetra ) {
     /* We want to preserve internal triangle and we came from bdryBuild: we need
      * to count the preserved boudaries */
     for (k=1; k<=mesh->ne; k++) {
@@ -1525,7 +1525,7 @@ int _MMG5_chkBdryTria(MMG5_pMesh mesh) {
   if ( mesh->nt ) {
     if ( ! _MMG5_hashNew(mesh,&hashElt,0.51*ntmesh,1.51*ntmesh) ) return(0);
     // Hash the boundaries founded in the mesh
-    if ( mesh->info.itri) {
+    if ( mesh->info.opnbdy) {
       /* We want to keep the internal triangles: we mus hash all the tetra faces */
       for (k=1; k<=mesh->ne; k++) {
         pt = &mesh->tetra[k];
@@ -1625,7 +1625,7 @@ int _MMG5_chkBdryTria(MMG5_pMesh mesh) {
         continue;
       }
 
-      if ( mesh->info.itri ) {
+      if ( mesh->info.opnbdy ) {
         kk    = i/4;
         iface = i%4;
         adj   = mesh->adja[4*(kk-1)+1+iface];
@@ -1741,7 +1741,7 @@ int _MMG5_bdrySet(MMG5_pMesh mesh) {
   _MMG5_SAFE_CALLOC(mesh->xtetra,mesh->xtmax+1,MMG5_xTetra,0);
 
   /* assign references to tetras faces */
-  if ( !mesh->info.itri ) {
+  if ( !mesh->info.opnbdy ) {
     for (k=1; k<=mesh->ne; k++) {
       pt = &mesh->tetra[k];
       if ( !MG_EOK(pt) )  continue;
@@ -1807,7 +1807,7 @@ int _MMG5_bdrySet(MMG5_pMesh mesh) {
     }
   }
 
-  if ( !mesh->info.itri ) {
+  if ( !mesh->info.opnbdy ) {
     for (k=1; k<=mesh->ne; k++) {
       pt = &mesh->tetra[k];
       if ( !MG_EOK(pt) )  continue;

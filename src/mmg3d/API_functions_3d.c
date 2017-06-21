@@ -1654,8 +1654,8 @@ int MMG3D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam,int val){
       mesh->info.dhd    = _MMG5_ANGEDG;
     }
     break;
-  case MMG3D_IPARAM_internalTri :
-    mesh->info.itri = val;
+  case MMG3D_IPARAM_opnbdy :
+    mesh->info.opnbdy = val;
     break;
   case MMG3D_IPARAM_iso :
     mesh->info.iso      = val;

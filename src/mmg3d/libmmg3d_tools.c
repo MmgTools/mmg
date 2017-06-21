@@ -114,7 +114,7 @@ int MMG3D_usage(char *prog) {
   _MMG5_mmgUsage(prog);
 
   fprintf(stdout,"-A           enable anisotropy (without metric file).\n");
-  fprintf(stdout,"-itri        preserve input triangles at the interface of"
+  fprintf(stdout,"-opnbdy      preserve input triangles at the interface of"
           " two domains of the same reference.\n");
 
 #ifdef USE_ELAS
@@ -242,10 +242,6 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
             return 0;
           }
         }
-        else if ( !strcmp(argv[i],"-itri") ) {
-          if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_internalTri,1) )
-            return 0;
-        }
         break;
 
       case 'l':
@@ -321,6 +317,10 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
             MMG3D_usage(argv[0]);
             return 0;
           }
+        }
+        else if ( !strcmp(argv[i],"-opnbdy") ) {
+          if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_opnbdy,1) )
+            return 0;
         }
 #ifndef PATTERN
         else if ( !strcmp(argv[i],"-octree") && ++i < argc ) {

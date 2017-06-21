@@ -82,7 +82,7 @@ int _MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,
   npol++;
 
   /* Edge is on a boundary between two different domains */
-  if ( mesh->info.itri )
+  if ( mesh->info.opnbdy )
     if ( pt->xt && (mesh->xtetra[pt->xt].ftag[_MMG5_ifar[ia][1]] & MG_BDY) )
       return 0;
 
@@ -95,7 +95,7 @@ int _MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,
 
     /* Edge is on a boundary between two different domains */
     if ( pt->ref != refdom )  return(0);
-    else if ( mesh->info.itri ) {
+    else if ( mesh->info.opnbdy ) {
       if ( pt->xt && (mesh->xtetra[pt->xt].ftag[ifac] & MG_BDY) ) return 0;
     }
 
