@@ -1315,6 +1315,8 @@ int _MMG5_srcbdy(MMG5_pMesh mesh,int start,int ia) {
  * (to fill).
  * \param it2 pointer toward the index of the second boundary face sharing \a ia
  * (to fill).
+ * \param silent if 1, print error message for more than 2 boundary triangles
+ * in the shell
  * \return -1 if fail, \f$2*ilist\f$ if shell is closed, \f$2*ilist+1\f$
  * otherwise.
  *
@@ -1328,8 +1330,8 @@ int _MMG5_coquilface(MMG5_pMesh mesh,int start,char iface,int ia,int *list,
                      int *it1,int *it2,int silent) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
-  int           *adja,piv,adj,na,nb,ilist,pradj,i,ifar_idx;
-  char          isbdy;
+  int           *adja,piv,adj,na,nb,ilist,pradj,i,pri,ifar_idx,ier,nbdy;
+  char          isbdy,hasadja;
 
   pt = &mesh->tetra[start];
 
@@ -1337,47 +1339,38 @@ int _MMG5_coquilface(MMG5_pMesh mesh,int start,char iface,int ia,int *list,
   nb   = pt->v[ _MMG5_iare[ia][1] ];
 
   ilist = 0;
-  list[ilist] = 6*start+ia;
-  ilist++;
 
   *it1 = 0;
   *it2 = 0;
 
-  adja = &mesh->adja[4*(start-1)+1];
-
-  /* Ensure that the first boundary face found is ifac (nedded by normalAdjaTri
-   * function in multidomain case) */
-  ifar_idx = ((_MMG5_ifar[ia][0]==iface) ? 1 : 0);
+  /* Ensure that the first boundary face found is ifac (nedded in multidomain case) */
+  ifar_idx = _MMG5_ifar[ia][0]==iface ? 1 : 0;
   assert ( iface == _MMG5_ifar[ia][(ifar_idx+1)%2] );
 
-  adj = adja[_MMG5_ifar[ia][ifar_idx]] / 4;
-  piv = pt->v[iface];
+  piv = pt->v[_MMG5_ifar[ia][ifar_idx]];
+  adj = start;
+  i   = ia;
 
-  pxt   = &mesh->xtetra[pt->xt];
+  pxt = &mesh->xtetra[pt->xt];
 
   assert ( pxt->ftag[iface] );
   *it1 = 4*start + iface;
 
-  while ( adj && (adj != start) ) {
+  adja    = &mesh->adja[4*(start-1)+1];
+  hasadja = (adja[iface] > 0);
+
+  nbdy = 0;
+  do {
     pradj = adj;
+    pri   = i;
 
     /* travel through new tetra */
-    if ( _MMG5_coquilTravel(mesh,na,nb,&adj,&piv,&iface,&i) ) {
-      if ( *it2 && !silent ) {
-        // Algiane: for a manifold edge 2 cases :
-        // 1) the shell is open and we have more than 3 tri sharing the edge
-        // (highly non-manifold)
-        // 2) we have a non-manifold shape immersed in a domain (3 triangles
-        // sharing the edge and a closed shell)
-        printf("  ## Warning: you have more than 2 boundaries in the shell of your edge.\n");
-        printf("  Problem may occur during remesh process.\n");
-      }
-      *it2 = 4*pradj+iface;
-    }
+    ier = _MMG5_coquilTravel(mesh,na,nb,&adj,&piv,&iface,&i);
 
     /* fill the shell */
-    list[ilist] = 6*pradj +i;
+    list[ilist] = 6*pradj +pri;
     (ilist)++;
+
     /* overflow */
     if ( ilist > MMG3D_LMAX-2 ) {
       fprintf(stderr,"  ## Warning: problem in surface remesh process.");
@@ -1387,19 +1380,46 @@ int _MMG5_coquilface(MMG5_pMesh mesh,int start,char iface,int ia,int *list,
       fprintf(stderr," or/and the maximum mesh.\n");
       return(-1);
     }
-  }
+
+    if ( !ier ) continue;
+
+    if ( !(*it2) ) {
+      *it2 = 4*pradj+iface;
+    }
+    else {
+      nbdy++;
+      if ( (!silent) && ( adj!=start ) ) {
+        // Algiane: for a manifold edge 2 cases :
+        // 1) the shell is open and we have more than 3 tri sharing the edge
+        // (highly non-manifold)
+        // 2) we have a non-manifold shape immersed in a domain (3 triangles
+        // sharing the edge and a closed shell)
+        printf("  ## Warning: you have more than 2 boundaries in the shell of your edge.\n");
+        printf("  Problem may occur during remesh process.\n");
+      }
+    }
+
+  } while ( adj && (adj != start) );
 
   /* At this point, the first travel, in one direction, of the shell is
      complete. Now, analyze why the travel ended. */
   if ( adj == start ) {
-    if ( (!(*it2)) || ((*it1) == (*it2)) ) {
+    if ( !(*it2) ) {
+      printf("  ## Error: Wrong boundary tags: Only 1 boundary face found in"
+             " the shell of the edge\n");
+      return -1;
+    }
+
+    if ( !nbdy ) {
       _MMG5_coquilFaceErrorMessage(mesh, (*it1)/4, (*it2)/4);
       return(-1);
     }
-    return(2*ilist);
+    return (2*ilist);
   }
 
   /* A boundary has been detected : slightly different configuration */
+  if ( !hasadja ) return(2*ilist+1);
+
   assert(!adj);
   adj = list[ilist-1] / 6;
   i   = list[ilist-1] % 6;
@@ -1473,12 +1493,30 @@ int16_t _MMG5_coquilTravel(MMG5_pMesh mesh, int na, int nb, int* adj, int *piv,
   int          ipa,ipb,*adja;
   int16_t      isbdy;
 
-    pt = &mesh->tetra[*adj];
-    pxt = 0;
-    if ( pt->xt )
-      pxt = &mesh->xtetra[pt->xt];
+  pt = &mesh->tetra[*adj];
+  pxt = 0;
+  if ( pt->xt )
+    pxt = &mesh->xtetra[pt->xt];
 
-    /* identification of edge number in tetra *adj */
+  /* set new tetra for travel */
+  adja = &mesh->adja[4*(*adj-1)+1];
+  if ( pt->v[ _MMG5_ifar[*i][0] ] == *piv ) {
+    *iface = _MMG5_ifar[*i][0];
+    *adj = adja[ _MMG5_ifar[*i][0] ] / 4;
+    *piv = pt->v[ _MMG5_ifar[*i][1] ];
+  }
+  else {
+    assert(pt->v[ _MMG5_ifar[*i][1] ] == *piv );
+    *iface = _MMG5_ifar[*i][1];
+    *adj = adja[ _MMG5_ifar[*i][1] ] /4;
+    *piv = pt->v[ _MMG5_ifar[*i][0] ];
+  }
+  isbdy = pt->xt ? pxt->ftag[*iface] : 0;
+
+  /* identification of edge number in tetra *adj */
+  if ( *adj ) {
+    pt = &mesh->tetra[*adj];
+
     for (*i=0; *i<6; ++(*i)) {
       ipa = _MMG5_iare[*i][0];
       ipb = _MMG5_iare[*i][1];
@@ -1486,24 +1524,9 @@ int16_t _MMG5_coquilTravel(MMG5_pMesh mesh, int na, int nb, int* adj, int *piv,
            (pt->v[ipa] == nb && pt->v[ipb] == na))  break;
     }
     assert(*i<6);
+  }
 
-    /* set new tetra for travel */
-    adja = &mesh->adja[4*(*adj-1)+1];
-    if ( pt->v[ _MMG5_ifar[*i][0] ] == *piv ) {
-      *iface = _MMG5_ifar[*i][1];
-      *adj = adja[ _MMG5_ifar[*i][0] ] / 4;
-      *piv = pt->v[ *iface ];
-    }
-    else {
-      assert(pt->v[ _MMG5_ifar[*i][1] ] == *piv );
-      *iface = _MMG5_ifar[*i][0];
-      *adj = adja[ _MMG5_ifar[*i][1] ] /4;
-      *piv = pt->v[ *iface ];
-    }
-    isbdy = pt->xt ? pxt->ftag[*iface] : 0;
-
-    return(isbdy);
-
+  return(isbdy);
 }
 
 /**
