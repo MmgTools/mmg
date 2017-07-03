@@ -522,7 +522,7 @@ int _MMG5_setEdgeNmTag(MMG5_pMesh mesh, _MMG5_Hash *hash) {
   MMG5_pTria          pt;
   _MMG5_hedge         *ph;
   int                 *adja,adj,pradj,piv,ilist;
-  int                 k,i,i1,i2,ia,ib,l,it1,it2, nr;
+  int                 k,i,i1,i2,na,nb,l,it1,it2, nr;
   int                 ipa,ipb,count,start;
   unsigned int        key;
   char                isbdy,iface;
@@ -542,14 +542,14 @@ int _MMG5_setEdgeNmTag(MMG5_pMesh mesh, _MMG5_Hash *hash) {
         i2 = _MMG5_iprv2[i];
 
         /* compute key */
-        ia  = MG_MIN(pt->v[i1],pt->v[i2]);
-        ib  = MG_MAX(pt->v[i1],pt->v[i2]);
-        key = (_MMG5_KA*ia + _MMG5_KB*ib) % hash->siz;
+        na  = MG_MIN(pt->v[i1],pt->v[i2]);
+        nb  = MG_MAX(pt->v[i1],pt->v[i2]);
+        key = (_MMG5_KA*na + _MMG5_KB*nb) % hash->siz;
         ph  = &hash->item[key];
 
         assert(ph->a);
         while ( ph->a ) {
-          if ( ph->a == ia && ph->b == ib ) break;
+          if ( ph->a == na && ph->b == nb ) break;
           assert(ph->nxt);
           ph = &hash->item[ph->nxt];
         }
@@ -564,8 +564,8 @@ int _MMG5_setEdgeNmTag(MMG5_pMesh mesh, _MMG5_Hash *hash) {
           for (l=0; l<6; ++l) {
             ipa = _MMG5_iare[l][0];
             ipb = _MMG5_iare[l][1];
-            if ( (ptet->v[ipa] == ia && ptet->v[ipb] == ib) ||
-                 (ptet->v[ipa] == ib && ptet->v[ipb] == ia))  break;
+            if ( (ptet->v[ipa] == na && ptet->v[ipb] == nb) ||
+                 (ptet->v[ipa] == nb && ptet->v[ipb] == na))  break;
           }
           assert(l<6);
 
@@ -597,7 +597,7 @@ int _MMG5_setEdgeNmTag(MMG5_pMesh mesh, _MMG5_Hash *hash) {
           while ( adj && (adj != start) ) {
             pradj = adj;
             /* travel through new tetra */
-            if ( _MMG5_coquilTravel(mesh,ia,ib,&adj,&piv,&iface,&l) ) {
+            if ( _MMG5_coquilTravel(mesh,na,nb,&adj,&piv,&iface,&l) ) {
               if ( it1 == 0 ) {
                 it1 = 4*pradj+iface;
                 ++count;
@@ -612,7 +612,7 @@ int _MMG5_setEdgeNmTag(MMG5_pMesh mesh, _MMG5_Hash *hash) {
             if ( ++ilist > MMG3D_LMAX-2 ) {
               fprintf(stdout,"  ## Warning: problem in surface remesh process.");
               fprintf(stdout," Coquil of edge %d-%d contains too many elts.\n",
-                      _MMG3D_indPt(mesh,ia),_MMG3D_indPt(mesh,ib));
+                      _MMG3D_indPt(mesh,na),_MMG3D_indPt(mesh,nb));
               fprintf(stdout,"  ##          Try to modify the hausdorff number,");
               fprintf(stdout," or/and the maximum mesh.\n");
               return(0);
@@ -650,13 +650,13 @@ int _MMG5_setEdgeNmTag(MMG5_pMesh mesh, _MMG5_Hash *hash) {
 
             while ( adj ) {
               pradj = adj;
-              _MMG5_openCoquilTravel( mesh, ia, ib, &adj, &piv, &iface, &l );
+              _MMG5_openCoquilTravel( mesh, na, nb, &adj, &piv, &iface, &l );
 
               /* overflow */
               if ( ++ilist > MMG3D_LMAX-2 ) {
                 fprintf(stdout,"  ## Warning: problem in surface remesh process.");
                 fprintf(stdout," Coquil of edge %d-%d contains too many elts.\n",
-                        _MMG3D_indPt(mesh,ia),_MMG3D_indPt(mesh,ib));
+                        _MMG3D_indPt(mesh,na),_MMG3D_indPt(mesh,nb));
                 fprintf(stdout,"  ##          Try to modify the hausdorff number,");
                 fprintf(stdout," or/and the maximum mesh.\n");
                 return(0);
