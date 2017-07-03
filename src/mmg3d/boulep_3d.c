@@ -867,7 +867,7 @@ _MMG5_settag(MMG5_pMesh mesh,int start,int ia,int16_t tag,int edg) {
       pxt->tag[ia] |= tag;
       /* Remove the potential nosurf tag if initially the edge is
        * really required */
-      if ( (taginit & MG_REQ) && !(taginit & MG_NOSURF) ) {
+      if ( (taginit & MG_REQ) && ( (!(taginit & MG_NOSURF)) || !(tag & MG_NOSURF) ) ) {
         pxt->tag[ia] &= ~MG_NOSURF;
       }
       pxt->edg[ia]  = MG_MAX(pxt->edg[ia],edg);
@@ -891,7 +891,7 @@ _MMG5_settag(MMG5_pMesh mesh,int start,int ia,int16_t tag,int edg) {
         pxt->tag[i] |= tag;
         /* Remove the potential nosurf tag if initially the edge is
          * really required */
-        if ( (taginit & MG_REQ) && !(taginit & MG_NOSURF) ) {
+        if ( (taginit & MG_REQ) && ( (!(taginit & MG_NOSURF)) || !(tag & MG_NOSURF) ) ) {
           pxt->tag[ia] &= ~MG_NOSURF;
         }
         pxt->edg[i]  = MG_MAX(pxt->edg[i],edg);
