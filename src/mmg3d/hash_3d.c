@@ -1106,7 +1106,7 @@ int _MMG5_hGeom(MMG5_pMesh mesh) {
         /* If we use the nosurf option and the edge is required, we don't want
          * to detect it as an edge whose tag has been modified for the option */
         if ( mesh->info.nosurf && (tag & MG_REQ) )
-          pt->tag[i] &= ~MG_CRN;
+          pt->tag[i] &= ~MG_NOSURF;
 
         /* Mark edges as boundary edges */
         pt->tag[i] |= (tag | MG_BDY);
@@ -1302,18 +1302,15 @@ int _MMG5_bdryTria(MMG5_pMesh mesh, int ntmesh) {
 
           if ( !(ptt->tag[0] & MG_REQ) ) {
             ptt->tag[0] |= MG_REQ;
-            ptt->tag[0] |= MG_CRN;
-            ptt->tag[0] &= ~MG_NOSURF;
+            ptt->tag[0] |= MG_NOSURF;
           }
           if ( !(ptt->tag[1] & MG_REQ) ) {
             ptt->tag[1] |= MG_REQ;
-            ptt->tag[1] |= MG_CRN;
-            ptt->tag[1] &= ~MG_NOSURF;
+            ptt->tag[1] |= MG_NOSURF;
           }
           if ( !(ptt->tag[2] & MG_REQ) ) {
             ptt->tag[2] |= MG_REQ;
-            ptt->tag[2] |= MG_CRN;
-            ptt->tag[2] &= ~MG_NOSURF;
+            ptt->tag[2] |= MG_NOSURF;
           }
 
           continue;
