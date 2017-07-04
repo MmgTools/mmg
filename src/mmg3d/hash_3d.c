@@ -519,7 +519,7 @@ static inline
 int _MMG5_setEdgeNmTag(MMG5_pMesh mesh, _MMG5_Hash *hash) {
   MMG5_pTetra         ptet;
   MMG5_pxTetra        pxt;
-  MMG5_pTria          pt;
+  MMG5_pTria          ptt;
   _MMG5_hedge         *ph;
   int                 *adja,adj,pradj,piv,ilist;
   int                 k,i,l,i1,i2,na,nb,ia,it1,it2, nr;
@@ -532,18 +532,18 @@ int _MMG5_setEdgeNmTag(MMG5_pMesh mesh, _MMG5_Hash *hash) {
   /* First: seek edges at the interface of two distinct domains and mark it as
    * required */
   for (k=1; k<=mesh->nt; k++) {
-    pt  = &mesh->tria[k];
+    ptt  = &mesh->tria[k];
 
-    if ( !MG_EOK(pt) ) continue;
+    if ( !MG_EOK(ptt) ) continue;
 
     for (l=0; l<3; l++) {
-      if ( pt->tag[l] & MG_NOM ) {
+      if ( ptt->tag[l] & MG_NOM ) {
         i1 = _MMG5_inxt2[l];
         i2 = _MMG5_iprv2[l];
 
         /* compute key */
-        na  = MG_MIN(pt->v[i1],pt->v[i2]);
-        nb  = MG_MAX(pt->v[i1],pt->v[i2]);
+        na  = MG_MIN(ptt->v[i1],ptt->v[i2]);
+        nb  = MG_MAX(ptt->v[i1],ptt->v[i2]);
         key = (_MMG5_KA*na + _MMG5_KB*nb) % hash->siz;
         ph  = &hash->item[key];
 
@@ -556,7 +556,7 @@ int _MMG5_setEdgeNmTag(MMG5_pMesh mesh, _MMG5_Hash *hash) {
         /* Set edge tag and point tags to MG_REQ if the non-manifold edge shared
          * separated domains */
         if ( ph->s > 3 ) {
-          start = pt->cc/4;
+          start = ptt->cc/4;
           assert(start);
           ptet = &mesh->tetra[start];
 
@@ -680,15 +680,15 @@ int _MMG5_setEdgeNmTag(MMG5_pMesh mesh, _MMG5_Hash *hash) {
           /* If ph->s do not match the number of encountred boundaries we have
              separated domains. */
           if ( count != ph->s ) {
-            if ( !(pt->tag[l] & MG_REQ) ) {
-              pt->tag[l] |= MG_REQ;
-              pt->tag[l] &= ~MG_NOSURF;
+            if ( !(ptt->tag[l] & MG_REQ) ) {
+              ptt->tag[l] |= MG_REQ;
+              ptt->tag[l] &= ~MG_NOSURF;
               ++nr;
             }
-            mesh->point[pt->v[_MMG5_inxt2[l]]].tag |= MG_REQ;
-            mesh->point[pt->v[_MMG5_iprv2[l]]].tag |= MG_REQ;
-            mesh->point[pt->v[_MMG5_inxt2[l]]].tag &= ~MG_NOSURF;
-            mesh->point[pt->v[_MMG5_iprv2[l]]].tag &= ~MG_NOSURF;
+            mesh->point[ptt->v[_MMG5_inxt2[l]]].tag |= MG_REQ;
+            mesh->point[ptt->v[_MMG5_iprv2[l]]].tag |= MG_REQ;
+            mesh->point[ptt->v[_MMG5_inxt2[l]]].tag &= ~MG_NOSURF;
+            mesh->point[ptt->v[_MMG5_iprv2[l]]].tag &= ~MG_NOSURF;
           }
 
           /* Work done for this edge: reset ph->s/ */
