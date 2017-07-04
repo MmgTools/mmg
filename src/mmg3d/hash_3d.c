@@ -522,7 +522,7 @@ int _MMG5_setEdgeNmTag(MMG5_pMesh mesh, _MMG5_Hash *hash) {
   MMG5_pTria          pt;
   _MMG5_hedge         *ph;
   int                 *adja,adj,pradj,piv,ilist;
-  int                 k,i,i1,i2,na,nb,ia,it1,it2, nr;
+  int                 k,i,l,i1,i2,na,nb,ia,it1,it2, nr;
   int                 ipa,ipb,count,start;
   unsigned int        key;
   char                isbdy,iface;
@@ -536,10 +536,10 @@ int _MMG5_setEdgeNmTag(MMG5_pMesh mesh, _MMG5_Hash *hash) {
 
     if ( !MG_EOK(pt) ) continue;
 
-    for (i=0; i<3; i++) {
-      if ( pt->tag[i] & MG_NOM ) {
-        i1 = _MMG5_inxt2[i];
-        i2 = _MMG5_iprv2[i];
+    for (l=0; l<3; l++) {
+      if ( pt->tag[l] & MG_NOM ) {
+        i1 = _MMG5_inxt2[l];
+        i2 = _MMG5_iprv2[l];
 
         /* compute key */
         na  = MG_MIN(pt->v[i1],pt->v[i2]);
@@ -680,15 +680,15 @@ int _MMG5_setEdgeNmTag(MMG5_pMesh mesh, _MMG5_Hash *hash) {
           /* If ph->s do not match the number of encountred boundaries we have
              separated domains. */
           if ( count != ph->s ) {
-            if ( !(pt->tag[i] & MG_REQ) ) {
-              pt->tag[i] |= MG_REQ;
-              pt->tag[i] &= ~MG_NOSURF;
+            if ( !(pt->tag[l] & MG_REQ) ) {
+              pt->tag[l] |= MG_REQ;
+              pt->tag[l] &= ~MG_NOSURF;
               ++nr;
             }
-            mesh->point[pt->v[_MMG5_inxt2[i]]].tag |= MG_REQ;
-            mesh->point[pt->v[_MMG5_iprv2[i]]].tag |= MG_REQ;
-            mesh->point[pt->v[_MMG5_inxt2[i]]].tag &= ~MG_NOSURF;
-            mesh->point[pt->v[_MMG5_iprv2[i]]].tag &= ~MG_NOSURF;
+            mesh->point[pt->v[_MMG5_inxt2[l]]].tag |= MG_REQ;
+            mesh->point[pt->v[_MMG5_iprv2[l]]].tag |= MG_REQ;
+            mesh->point[pt->v[_MMG5_inxt2[l]]].tag &= ~MG_NOSURF;
+            mesh->point[pt->v[_MMG5_iprv2[l]]].tag &= ~MG_NOSURF;
           }
 
           /* Work done for this edge: reset ph->s/ */
