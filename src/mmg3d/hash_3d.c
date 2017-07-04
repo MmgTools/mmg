@@ -517,178 +517,130 @@ int MMG3D_hashPrism(MMG5_pMesh mesh) {
  */
 static inline
 int _MMG5_setEdgeNmTag(MMG5_pMesh mesh, _MMG5_Hash *hash) {
-  MMG5_pTetra         ptet;
+  MMG5_pTetra         pt;
   MMG5_pxTetra        pxt;
-  MMG5_pTria          pt;
+  MMG5_pTria          ptt;
   _MMG5_hedge         *ph;
-  int                 *adja,adj,pradj,piv,ilist;
-  int                 k,i,i1,i2,ia,ib,l,it1,it2, nr;
-  int                 ipa,ipb,count,start;
+  int                 adj,pradj,piv,ilist,list[MMG3D_LMAX+2];
+  int                 k,i,l,i1,i2,na,nb,ia,it1,it2, nr;
+  int                 ipa,ipb,nbdy,start;
   unsigned int        key;
-  char                isbdy,iface;
+  char                iface,hasadja;
 
   nr = 0;
 
   /* First: seek edges at the interface of two distinct domains and mark it as
    * required */
   for (k=1; k<=mesh->nt; k++) {
-    pt  = &mesh->tria[k];
+    ptt  = &mesh->tria[k];
 
-    if ( !MG_EOK(pt) ) continue;
+    if ( !MG_EOK(ptt) ) continue;
 
-    for (i=0; i<3; i++) {
-      if ( pt->tag[i] & MG_NOM ) {
-        i1 = _MMG5_inxt2[i];
-        i2 = _MMG5_iprv2[i];
+    for (l=0; l<3; l++) {
+      if ( ptt->tag[l] & MG_NOM ) {
+        i1 = _MMG5_inxt2[l];
+        i2 = _MMG5_iprv2[l];
 
         /* compute key */
-        ia  = MG_MIN(pt->v[i1],pt->v[i2]);
-        ib  = MG_MAX(pt->v[i1],pt->v[i2]);
-        key = (_MMG5_KA*ia + _MMG5_KB*ib) % hash->siz;
+        na  = MG_MIN(ptt->v[i1],ptt->v[i2]);
+        nb  = MG_MAX(ptt->v[i1],ptt->v[i2]);
+        key = (_MMG5_KA*na + _MMG5_KB*nb) % hash->siz;
         ph  = &hash->item[key];
 
         assert(ph->a);
         while ( ph->a ) {
-          if ( ph->a == ia && ph->b == ib ) break;
+          if ( ph->a == na && ph->b == nb ) break;
           assert(ph->nxt);
           ph = &hash->item[ph->nxt];
         }
         /* Set edge tag and point tags to MG_REQ if the non-manifold edge shared
          * separated domains */
         if ( ph->s > 3 ) {
-          start = pt->cc/4;
+          start = ptt->cc/4;
           assert(start);
-          ptet = &mesh->tetra[start];
+          pt = &mesh->tetra[start];
 
 
-          for (l=0; l<6; ++l) {
-            ipa = _MMG5_iare[l][0];
-            ipb = _MMG5_iare[l][1];
-            if ( (ptet->v[ipa] == ia && ptet->v[ipb] == ib) ||
-                 (ptet->v[ipa] == ib && ptet->v[ipb] == ia))  break;
+          for (ia=0; ia<6; ++ia) {
+            ipa = _MMG5_iare[ia][0];
+            ipb = _MMG5_iare[ia][1];
+            if ( (pt->v[ipa] == na && pt->v[ipb] == nb) ||
+                 (pt->v[ipa] == nb && pt->v[ipb] == na))  break;
           }
-          assert(l<6);
+          assert(ia<6);
 
 
-          count = 0;
+          /* Travel throug the shell of the edge until reaching a tetra without adjacent
+           * or until reaching th starting tetra */
+          iface = ptt->cc%4;
+          _MMG3D_coquilFaceFirstLoop(mesh,start,na,nb,iface,ia,list,&ilist,&it1,&it2,
+                                     &piv,&adj,&hasadja,&nbdy,1);
 
-          /* Travel through the edge's shell and count the number of founded
-           * boundaries. */
-          ilist = 0;
-
-          it1 = 0;
-          it2 = 0;
-
-          pradj = start;
-          adja = &mesh->adja[4*(start-1)+1];
-          adj = adja[_MMG5_ifar[l][0]] / 4;
-          piv = ptet->v[_MMG5_ifar[l][1]];
-
-          pxt = &mesh->xtetra[ptet->xt];
-
-          iface = _MMG5_ifar[l][1];
-          isbdy = pxt->ftag[iface];
-
-          if ( isbdy ) {
-            it1 = 4*start + iface;
-            ++count;
-          }
-
-          while ( adj && (adj != start) ) {
-            pradj = adj;
-            /* travel through new tetra */
-            if ( _MMG5_coquilTravel(mesh,ia,ib,&adj,&piv,&iface,&l) ) {
-              if ( it1 == 0 ) {
-                it1 = 4*pradj+iface;
-                ++count;
-              }
-              else {
-                it2 = 4*pradj+iface;
-                ++count;
-              }
-            }
-
-            /* overflow */
-            if ( ++ilist > MMG3D_LMAX-2 ) {
-              fprintf(stdout,"  ## Warning: problem in surface remesh process.");
-              fprintf(stdout," Coquil of edge %d-%d contains too many elts.\n",
-                      _MMG3D_indPt(mesh,ia),_MMG3D_indPt(mesh,ib));
-              fprintf(stdout,"  ##          Try to modify the hausdorff number,");
-              fprintf(stdout," or/and the maximum mesh.\n");
-              return(0);
-            }
-          }
 
           /* At this point, the first travel, in one direction, of the shell is
              complete. Now, analyze why the travel ended. */
           if ( adj == start ) {
-            if ( (!it1 || !it2) || (it1 == it2) ) {
-              _MMG5_coquilFaceErrorMessage(mesh, it1/4, it2/4);
+            if ( !it2 ) {
+              printf("  ## Warning: Wrong boundary tags: Only 1 boundary face found in"
+                     " the shell of the edge\n");
             }
+            if ( !nbdy )
+              _MMG5_coquilFaceErrorMessage(mesh, it1/4, it2/4);
           }
           else {
             /* A boundary has been detected : slightly different configuration */
-            assert(!adj);
-            adj = pradj;
-            ilist = 0;
+            if ( hasadja ) {
 
-            /* Start back everything from this tetra adj */
-            ptet = &mesh->tetra[adj];
+              /* Start back everything from this tetra adj */
+              _MMG3D_coquilFaceSecondLoopInit(mesh,piv,&iface,&i,list,&ilist,&it1,
+                                              &pradj,&adj);
 
-            assert(ptet->xt);
-            pxt = &mesh->xtetra[ptet->xt];
-            if ( ptet->v[ _MMG5_ifar[l][0] ] == piv ) {
-              iface = _MMG5_ifar[l][1];
-            }
-            else {
-              iface = _MMG5_ifar[l][0];
-            }
-            isbdy = pxt->ftag[iface];
-            assert( isbdy );
-            it1 = 4*pradj + iface;
-            count = 1;
+              nbdy = 0;
 
-            while ( adj ) {
-              pradj = adj;
-              _MMG5_openCoquilTravel( mesh, ia, ib, &adj, &piv, &iface, &l );
+              while ( adj ) {
+                pradj = adj;
 
-              /* overflow */
-              if ( ++ilist > MMG3D_LMAX-2 ) {
-                fprintf(stdout,"  ## Warning: problem in surface remesh process.");
-                fprintf(stdout," Coquil of edge %d-%d contains too many elts.\n",
-                        _MMG3D_indPt(mesh,ia),_MMG3D_indPt(mesh,ib));
-                fprintf(stdout,"  ##          Try to modify the hausdorff number,");
-                fprintf(stdout," or/and the maximum mesh.\n");
+                _MMG5_openCoquilTravel( mesh, na, nb, &adj, &piv, &iface, &i );
+
+                /* overflow */
+                if ( ++ilist > MMG3D_LMAX-2 ) {
+                  fprintf(stdout,"  ## Warning: problem in surface remesh process.");
+                  fprintf(stdout," Coquil of edge %d-%d contains too many elts.\n",
+                          _MMG3D_indPt(mesh,na),_MMG3D_indPt(mesh,nb));
+                  fprintf(stdout,"  ##          Try to modify the hausdorff number,");
+                  fprintf(stdout," or/and the maximum mesh.\n");
+                  return(0);
+                }
+
+                pt = &mesh->tetra[pradj];
+                if ( pt->xt ) {
+                  pxt = &mesh->xtetra[pt->xt];
+                  if ( pxt->ftag[iface] ) ++nbdy;
+                }
+              }
+
+              assert(!adj);
+              it2 = 4*pradj + iface;
+
+              if ( (!it1 || !it2) || (it1 == it2) ) {
+                _MMG5_coquilFaceErrorMessage(mesh, it1/4, it2/4);
                 return(0);
               }
-              if ( ptet->xt ) {
-                pxt = &mesh->xtetra[ptet->xt];
-                if ( pxt->ftag[iface] ) ++count;
-              }
-              ptet = &mesh->tetra[adj];
-            }
-
-            assert(!adj);
-            it2 = 4*pradj + iface;
-
-            if ( (!it1 || !it2) || (it1 == it2) ) {
-              _MMG5_coquilFaceErrorMessage(mesh, it1/4, it2/4);
-              return(0);
             }
           }
 
           /* If ph->s do not match the number of encountred boundaries we have
              separated domains. */
-          if ( count != ph->s ) {
-            if ( !(pt->tag[i] & MG_REQ) ) {
-              pt->tag[i] |= MG_REQ;
-              pt->tag[i] &= ~MG_NOSURF;
+          if ( nbdy+1 != ph->s ) {
+            if ( !(ptt->tag[l] & MG_REQ) ) {
+              ptt->tag[l] |= MG_REQ;
+              ptt->tag[l] &= ~MG_NOSURF;
               ++nr;
             }
-            mesh->point[pt->v[_MMG5_inxt2[i]]].tag |= MG_REQ;
-            mesh->point[pt->v[_MMG5_iprv2[i]]].tag |= MG_REQ;
-            mesh->point[pt->v[_MMG5_inxt2[i]]].tag &= ~MG_NOSURF;
-            mesh->point[pt->v[_MMG5_iprv2[i]]].tag &= ~MG_NOSURF;
+            mesh->point[ptt->v[_MMG5_inxt2[l]]].tag |= MG_REQ;
+            mesh->point[ptt->v[_MMG5_iprv2[l]]].tag |= MG_REQ;
+            mesh->point[ptt->v[_MMG5_inxt2[l]]].tag &= ~MG_NOSURF;
+            mesh->point[ptt->v[_MMG5_iprv2[l]]].tag &= ~MG_NOSURF;
           }
 
           /* Work done for this edge: reset ph->s/ */
@@ -1106,7 +1058,7 @@ int _MMG5_hGeom(MMG5_pMesh mesh) {
         /* If we use the nosurf option and the edge is required, we don't want
          * to detect it as an edge whose tag has been modified for the option */
         if ( mesh->info.nosurf && (tag & MG_REQ) )
-          pt->tag[i] &= ~MG_CRN;
+          pt->tag[i] &= ~MG_NOSURF;
 
         /* Mark edges as boundary edges */
         pt->tag[i] |= (tag | MG_BDY);
@@ -1302,18 +1254,15 @@ int _MMG5_bdryTria(MMG5_pMesh mesh, int ntmesh) {
 
           if ( !(ptt->tag[0] & MG_REQ) ) {
             ptt->tag[0] |= MG_REQ;
-            ptt->tag[0] |= MG_CRN;
-            ptt->tag[0] &= ~MG_NOSURF;
+            ptt->tag[0] |= MG_NOSURF;
           }
           if ( !(ptt->tag[1] & MG_REQ) ) {
             ptt->tag[1] |= MG_REQ;
-            ptt->tag[1] |= MG_CRN;
-            ptt->tag[1] &= ~MG_NOSURF;
+            ptt->tag[1] |= MG_NOSURF;
           }
           if ( !(ptt->tag[2] & MG_REQ) ) {
             ptt->tag[2] |= MG_REQ;
-            ptt->tag[2] |= MG_CRN;
-            ptt->tag[2] &= ~MG_NOSURF;
+            ptt->tag[2] |= MG_NOSURF;
           }
 
           continue;

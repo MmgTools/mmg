@@ -204,7 +204,8 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         fscanf(inm,"%d",&mesh->nei);
         posne = ftell(inm);
         continue;
-      } else if(!strncmp(chaine,"Prisms",strlen("Prisms"))) {
+      } else if((!strncmp(chaine,"Prisms",strlen("Prisms")))||
+                (!strncmp(chaine,"Pentahedra",strlen("Pentahedra")))) {
         fscanf(inm,"%d",&mesh->nprism);
         posnprism = ftell(inm);
         continue;

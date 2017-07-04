@@ -253,6 +253,12 @@ int  _MMG5_startedgsurfball(MMG5_pMesh mesh,int nump,int numq,int *list,int ilis
 int  _MMG5_srcbdy(MMG5_pMesh mesh,int start,int ia);
 int  _MMG5_coquil(MMG5_pMesh mesh, int start, int ia, int * list);
 int  _MMG5_coquilface(MMG5_pMesh mesh, int start,char iface,int,int*,int*,int*,int);
+int _MMG3D_coquilFaceFirstLoop(MMG5_pMesh mesh,int start,int na,int nb,char iface,
+                               char ia,int *list,int *ilist,int *it1,int *it2,
+                               int *piv,int *adj,char *hasadja,int *nbdy,int silent);
+void _MMG3D_coquilFaceSecondLoopInit(MMG5_pMesh mesh,int piv,char *iface,int *i,
+                                     int *list,int *ilist,int *it1,int *pradj,
+                                     int *adj);
 void _MMG5_coquilFaceErrorMessage(MMG5_pMesh mesh, int k1, int k2);
 int16_t _MMG5_coquilTravel(MMG5_pMesh, int, int, int*, int*, char*, int*);
 void _MMG5_openCoquilTravel(MMG5_pMesh, int, int, int*, int*, char*, int*);
