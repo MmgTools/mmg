@@ -1308,6 +1308,155 @@ int _MMG5_srcbdy(MMG5_pMesh mesh,int start,int ia) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param start index of the starting tetrahedron.
+ * \param na global index of the 1st extremity of the edge whose shell is computed
+ * \param nb global index of the  2d extremity of the edge whose shell is computed
+ * \param iface index of the face from which we come.
+ * \param ia index of edge whose shell is computed (in tetra).
+ * \param list pointer toward the list of tetra in the shell (to fill).
+ * \param ilist pointer toward the number of tetra in the shell (to fill).
+ * \param it1 pointer toward the index of the 1st boundary face sharing \a ia
+ * \param it2 pointer toward the index of the 2d boundary face sharing \a ia
+ * (to fill).
+ * \param adj pointer toward the adjacent to treat in the shell (to update)
+ * \param hasadja pointer toward 0 if we don't have adja through iface,
+ * 0 otherwise (to fill)
+ * \param nbdy pointer toward the number of boundaries found minus 1 (to update)
+ * \param silent if 1, print error message for more than 2 boundary triangles
+ * in the shell
+ *
+ * \return -1 if fail, 1 otherwise
+ *
+ * Travel in the shell of the edge until meeting the first tetra or reaching a
+ * tetra without adjacent. Fill \a it2 and \a list.
+ *
+ */
+int _MMG3D_coquilFaceFirstLoop(MMG5_pMesh mesh,int start,int na,int nb,char iface,
+                               char ia,int *list,int *ilist,int *it1,int *it2,
+                               int *piv,int *adj,char *hasadja,int *nbdy,int silent) {
+
+  MMG5_pTetra   pt;
+  MMG5_pxTetra  pxt;
+  int           *adja;
+  int           pradj,pri,ier,ifar_idx,i;
+
+  pt = &mesh->tetra[start];
+
+  *ilist = 0;
+
+  *it1 = 0;
+  *it2 = 0;
+
+  /* Ensure that the first boundary face found is ifac (nedded in multidomain case) */
+  ifar_idx = (_MMG5_ifar[ia][0]==iface) ? 1 : 0;
+  assert ( iface == _MMG5_ifar[ia][(ifar_idx+1)%2] );
+
+  (*piv)  = pt->v[_MMG5_ifar[ia][ifar_idx]];
+  *adj    = start;
+  i       = ia;
+
+  pxt = &mesh->xtetra[pt->xt];
+
+  assert ( pxt->ftag[iface] );
+  (*it1) = 4*start + iface;
+
+  adja       = &mesh->adja[4*(start-1)+1];
+  (*hasadja) = (adja[iface] > 0);
+
+  (*nbdy)    = 0;
+
+  do {
+    pradj = (*adj);
+    pri    = i;
+
+    /* travel through new tetra */
+    ier = _MMG5_coquilTravel(mesh,na,nb,adj,piv,&iface,&i);
+
+    /* fill the shell */
+    list[(*ilist)] = 6*pradj +pri;
+    (*ilist)++;
+
+    /* overflow */
+    if ( (*ilist) > MMG3D_LMAX-2 ) {
+      fprintf(stderr,"  ## Warning: problem in surface remesh process.");
+      fprintf(stderr," Coquil of edge %d-%d contains too many elts.\n",
+              _MMG3D_indPt(mesh,na),_MMG3D_indPt(mesh,nb));
+      fprintf(stderr,"  ##          Try to modify the hausdorff number,");
+      fprintf(stderr," or/and the maximum mesh.\n");
+      return(-1);
+    }
+
+    if ( !ier ) continue;
+
+    if ( !(*it2) ) {
+      *it2 = 4*pradj+iface;
+    }
+    else {
+      (*nbdy)++;
+      if ( (!silent) && ( (*adj)!=start ) ) {
+        // Algiane: for a manifold edge 2 cases :
+        // 1) the shell is open and we have more than 3 tri sharing the edge
+        // (highly non-manifold)
+        // 2) we have a non-manifold shape immersed in a domain (3 triangles
+        // sharing the edge and a closed shell)
+        printf("  ## Warning: you have more than 2 boundaries in the shell of your edge.\n");
+        printf("  Problem may occur during remesh process.\n");
+      }
+    }
+
+  } while ( (*adj) && ((*adj) != start) );
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param piv global index of the pivot.
+ * \param iface index of the face from which we come.
+ * \param i index of edge whose shell is computed (in tetra).
+ * \param list pointer toward the list of tetra in the shell (to fill).
+ * \param ilist pointer toward the number of tetra in the shell (to fill).
+ * \param it1 pointer toward the index of the 1st boundary face sharing \a ia
+ * \param pradj pointer toward the first tetra of the shell (to fill).
+ * \param adj pointer toward the adjacent to treat in the shell (to update)
+ *
+ * Initialize the travel in the shell of the edge in reverse direction than in
+ * the \a coquilFaceFirstLoop function.
+ *
+ */
+void _MMG3D_coquilFaceSecondLoopInit(MMG5_pMesh mesh,int piv,char *iface,int *i,
+                                     int *list,int *ilist,int *it1,int *pradj,
+                                     int *adj) {
+
+  MMG5_pTetra   pt;
+  MMG5_pxTetra  pxt;
+
+  assert( !(*adj) );
+
+  (*adj)      = list[(*ilist)-1] / 6;
+  (*i)        = list[(*ilist)-1] % 6;
+  (*ilist)     = 0;
+
+  (*pradj) = (*adj);
+  pt       = &mesh->tetra[(*adj)];
+  assert(pt->xt);
+  pxt      = &mesh->xtetra[pt->xt];
+
+  if ( pt->v[ _MMG5_ifar[(*i)][0] ] == piv ) {
+    (*iface) = _MMG5_ifar[(*i)][1];
+  }
+  else {
+    (*iface) = _MMG5_ifar[(*i)][0];
+  }
+
+  assert ( pxt->ftag[(*iface)] );
+
+  *it1 = 4*(*pradj) + (*iface);
+
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param start index of the starting tetrahedron.
  * \param iface index of the boundary face from which we come.
  * \param ia index of edge whose shell is computed (in tetra).
  * \param list pointer toward the list of tetra in the shell (to fill).
@@ -1329,77 +1478,20 @@ int _MMG5_srcbdy(MMG5_pMesh mesh,int start,int ia) {
 int _MMG5_coquilface(MMG5_pMesh mesh,int start,char iface,int ia,int *list,
                      int *it1,int *it2, int silent) {
   MMG5_pTetra   pt;
-  MMG5_pxTetra  pxt;
-  int           *adja,piv,adj,na,nb,ilist,pradj,i,pri,ifar_idx,ier,nbdy;
-  char          isbdy,hasadja;
+  int           piv,adj,na,nb,ilist,pradj,i,ier,nbdy;
+  char          hasadja;
 
   pt = &mesh->tetra[start];
 
   na   = pt->v[ _MMG5_iare[ia][0] ];
   nb   = pt->v[ _MMG5_iare[ia][1] ];
 
-  ilist = 0;
+  /* Travel throug the shell of the edge until reaching a tetra without adjacent
+   * or until reaching th starting tetra */
+  ier = _MMG3D_coquilFaceFirstLoop(mesh,start,na,nb,iface,ia,list,&ilist,it1,it2,
+                                   &piv,&adj,&hasadja,&nbdy,silent);
 
-  *it1 = 0;
-  *it2 = 0;
-
-  /* Ensure that the first boundary face found is ifac (nedded in multidomain case) */
-  ifar_idx = _MMG5_ifar[ia][0]==iface ? 1 : 0;
-  assert ( iface == _MMG5_ifar[ia][(ifar_idx+1)%2] );
-
-  piv = pt->v[_MMG5_ifar[ia][ifar_idx]];
-  adj = start;
-  i   = ia;
-
-  pxt = &mesh->xtetra[pt->xt];
-
-  assert ( pxt->ftag[iface] );
-  *it1 = 4*start + iface;
-
-  adja    = &mesh->adja[4*(start-1)+1];
-  hasadja = (adja[iface] > 0);
-
-  nbdy = 0;
-  do {
-    pradj = adj;
-    pri   = i;
-
-    /* travel through new tetra */
-    ier = _MMG5_coquilTravel(mesh,na,nb,&adj,&piv,&iface,&i);
-
-    /* fill the shell */
-    list[ilist] = 6*pradj +pri;
-    (ilist)++;
-
-    /* overflow */
-    if ( ilist > MMG3D_LMAX-2 ) {
-      fprintf(stderr,"  ## Warning: problem in surface remesh process.");
-      fprintf(stderr," Coquil of edge %d-%d contains too many elts.\n",
-              _MMG3D_indPt(mesh,na),_MMG3D_indPt(mesh,nb));
-      fprintf(stderr,"  ##          Try to modify the hausdorff number,");
-      fprintf(stderr," or/and the maximum mesh.\n");
-      return(-1);
-    }
-
-    if ( !ier ) continue;
-
-    if ( !(*it2) ) {
-      *it2 = 4*pradj+iface;
-    }
-    else {
-      nbdy++;
-      if ( (!silent) && ( adj!=start ) ) {
-        // Algiane: for a manifold edge 2 cases :
-        // 1) the shell is open and we have more than 3 tri sharing the edge
-        // (highly non-manifold)
-        // 2) we have a non-manifold shape immersed in a domain (3 triangles
-        // sharing the edge and a closed shell)
-        printf("  ## Warning: you have more than 2 boundaries in the shell of your edge.\n");
-        printf("  Problem may occur during remesh process.\n");
-      }
-    }
-
-  } while ( adj && (adj != start) );
+  if ( ier < 0 ) return ier;
 
   /* At this point, the first travel, in one direction, of the shell is
      complete. Now, analyze why the travel ended. */
@@ -1420,26 +1512,9 @@ int _MMG5_coquilface(MMG5_pMesh mesh,int start,char iface,int ia,int *list,
   /* A boundary has been detected : slightly different configuration */
   if ( !hasadja ) return(2*ilist+1);
 
-  assert(!adj);
-  adj = list[ilist-1] / 6;
-  i   = list[ilist-1] % 6;
-  ilist = 0;
-
   /* Start back everything from this tetra adj */
-  pradj = adj;
-  pt = &mesh->tetra[adj];
-  assert(pt->xt);
-  pxt = &mesh->xtetra[pt->xt];
-
-  if ( pt->v[ _MMG5_ifar[i][0] ] == piv ) {
-    iface = _MMG5_ifar[i][1];
-  }
-  else {
-    iface = _MMG5_ifar[i][0];
-  }
-  isbdy = pxt->ftag[iface];
-  assert(isbdy);
-  *it1 = 4*pradj + iface;
+  _MMG3D_coquilFaceSecondLoopInit(mesh,piv,&iface,&i,list,&ilist,it1,
+                                  &pradj,&adj);
 
   while ( adj ) {
     pradj = adj;
