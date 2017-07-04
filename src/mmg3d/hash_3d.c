@@ -517,7 +517,7 @@ int MMG3D_hashPrism(MMG5_pMesh mesh) {
  */
 static inline
 int _MMG5_setEdgeNmTag(MMG5_pMesh mesh, _MMG5_Hash *hash) {
-  MMG5_pTetra         ptet;
+  MMG5_pTetra         pt;
   MMG5_pxTetra        pxt;
   MMG5_pTria          ptt;
   _MMG5_hedge         *ph;
@@ -558,14 +558,14 @@ int _MMG5_setEdgeNmTag(MMG5_pMesh mesh, _MMG5_Hash *hash) {
         if ( ph->s > 3 ) {
           start = ptt->cc/4;
           assert(start);
-          ptet = &mesh->tetra[start];
+          pt = &mesh->tetra[start];
 
 
           for (ia=0; ia<6; ++ia) {
             ipa = _MMG5_iare[ia][0];
             ipb = _MMG5_iare[ia][1];
-            if ( (ptet->v[ipa] == na && ptet->v[ipb] == nb) ||
-                 (ptet->v[ipa] == nb && ptet->v[ipb] == na))  break;
+            if ( (pt->v[ipa] == na && pt->v[ipb] == nb) ||
+                 (pt->v[ipa] == nb && pt->v[ipb] == na))  break;
           }
           assert(ia<6);
 
@@ -582,9 +582,9 @@ int _MMG5_setEdgeNmTag(MMG5_pMesh mesh, _MMG5_Hash *hash) {
           pradj = start;
           adja = &mesh->adja[4*(start-1)+1];
           adj = adja[_MMG5_ifar[ia][0]] / 4;
-          piv = ptet->v[_MMG5_ifar[ia][1]];
+          piv = pt->v[_MMG5_ifar[ia][1]];
 
-          pxt = &mesh->xtetra[ptet->xt];
+          pxt = &mesh->xtetra[pt->xt];
 
           iface = _MMG5_ifar[ia][1];
           isbdy = pxt->ftag[iface];
@@ -633,11 +633,11 @@ int _MMG5_setEdgeNmTag(MMG5_pMesh mesh, _MMG5_Hash *hash) {
             ilist = 0;
 
             /* Start back everything from this tetra adj */
-            ptet = &mesh->tetra[adj];
+            pt = &mesh->tetra[adj];
 
-            assert(ptet->xt);
-            pxt = &mesh->xtetra[ptet->xt];
-            if ( ptet->v[ _MMG5_ifar[ia][0] ] == piv ) {
+            assert(pt->xt);
+            pxt = &mesh->xtetra[pt->xt];
+            if ( pt->v[ _MMG5_ifar[ia][0] ] == piv ) {
               iface = _MMG5_ifar[ia][1];
             }
             else {
@@ -661,11 +661,11 @@ int _MMG5_setEdgeNmTag(MMG5_pMesh mesh, _MMG5_Hash *hash) {
                 fprintf(stdout," or/and the maximum mesh.\n");
                 return(0);
               }
-              if ( ptet->xt ) {
-                pxt = &mesh->xtetra[ptet->xt];
+              if ( pt->xt ) {
+                pxt = &mesh->xtetra[pt->xt];
                 if ( pxt->ftag[iface] ) ++count;
               }
-              ptet = &mesh->tetra[adj];
+              pt = &mesh->tetra[adj];
             }
 
             assert(!adj);
