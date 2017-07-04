@@ -522,7 +522,7 @@ int _MMG5_setEdgeNmTag(MMG5_pMesh mesh, _MMG5_Hash *hash) {
   MMG5_pTria          pt;
   _MMG5_hedge         *ph;
   int                 *adja,adj,pradj,piv,ilist;
-  int                 k,i,i1,i2,na,nb,l,it1,it2, nr;
+  int                 k,i,i1,i2,na,nb,ia,it1,it2, nr;
   int                 ipa,ipb,count,start;
   unsigned int        key;
   char                isbdy,iface;
@@ -561,13 +561,13 @@ int _MMG5_setEdgeNmTag(MMG5_pMesh mesh, _MMG5_Hash *hash) {
           ptet = &mesh->tetra[start];
 
 
-          for (l=0; l<6; ++l) {
-            ipa = _MMG5_iare[l][0];
-            ipb = _MMG5_iare[l][1];
+          for (ia=0; ia<6; ++ia) {
+            ipa = _MMG5_iare[ia][0];
+            ipb = _MMG5_iare[ia][1];
             if ( (ptet->v[ipa] == na && ptet->v[ipb] == nb) ||
                  (ptet->v[ipa] == nb && ptet->v[ipb] == na))  break;
           }
-          assert(l<6);
+          assert(ia<6);
 
 
           count = 0;
@@ -581,12 +581,12 @@ int _MMG5_setEdgeNmTag(MMG5_pMesh mesh, _MMG5_Hash *hash) {
 
           pradj = start;
           adja = &mesh->adja[4*(start-1)+1];
-          adj = adja[_MMG5_ifar[l][0]] / 4;
-          piv = ptet->v[_MMG5_ifar[l][1]];
+          adj = adja[_MMG5_ifar[ia][0]] / 4;
+          piv = ptet->v[_MMG5_ifar[ia][1]];
 
           pxt = &mesh->xtetra[ptet->xt];
 
-          iface = _MMG5_ifar[l][1];
+          iface = _MMG5_ifar[ia][1];
           isbdy = pxt->ftag[iface];
 
           if ( isbdy ) {
@@ -597,7 +597,7 @@ int _MMG5_setEdgeNmTag(MMG5_pMesh mesh, _MMG5_Hash *hash) {
           while ( adj && (adj != start) ) {
             pradj = adj;
             /* travel through new tetra */
-            if ( _MMG5_coquilTravel(mesh,na,nb,&adj,&piv,&iface,&l) ) {
+            if ( _MMG5_coquilTravel(mesh,na,nb,&adj,&piv,&iface,&ia) ) {
               if ( it1 == 0 ) {
                 it1 = 4*pradj+iface;
                 ++count;
@@ -637,11 +637,11 @@ int _MMG5_setEdgeNmTag(MMG5_pMesh mesh, _MMG5_Hash *hash) {
 
             assert(ptet->xt);
             pxt = &mesh->xtetra[ptet->xt];
-            if ( ptet->v[ _MMG5_ifar[l][0] ] == piv ) {
-              iface = _MMG5_ifar[l][1];
+            if ( ptet->v[ _MMG5_ifar[ia][0] ] == piv ) {
+              iface = _MMG5_ifar[ia][1];
             }
             else {
-              iface = _MMG5_ifar[l][0];
+              iface = _MMG5_ifar[ia][0];
             }
             isbdy = pxt->ftag[iface];
             assert( isbdy );
@@ -650,7 +650,7 @@ int _MMG5_setEdgeNmTag(MMG5_pMesh mesh, _MMG5_Hash *hash) {
 
             while ( adj ) {
               pradj = adj;
-              _MMG5_openCoquilTravel( mesh, na, nb, &adj, &piv, &iface, &l );
+              _MMG5_openCoquilTravel( mesh, na, nb, &adj, &piv, &iface, &ia );
 
               /* overflow */
               if ( ++ilist > MMG3D_LMAX-2 ) {
