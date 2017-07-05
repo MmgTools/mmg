@@ -1136,6 +1136,25 @@ int MMG3D_Set_requiredTriangles(MMG5_pMesh mesh, int* reqIdx, int nreq) {
   return(1);
 }
 
+int MMG3D_Set_parallelTriangle(MMG5_pMesh mesh, int k) {
+  assert ( k <= mesh->nt );
+  mesh->tria[k].tag[0] |= MG_PARBDY;
+  mesh->tria[k].tag[1] |= MG_PARBDY;
+  mesh->tria[k].tag[2] |= MG_PARBDY;
+  return(1);
+}
+
+int MMG3D_Set_parallelTriangles(MMG5_pMesh mesh, int* parIdx, int npar) {
+  int k;
+
+  for ( k=0; k<npar; ++k ){
+    mesh->tria[parIdx[k]].tag[0] |= MG_PARBDY;
+    mesh->tria[parIdx[k]].tag[1] |= MG_PARBDY;
+    mesh->tria[parIdx[k]].tag[2] |= MG_PARBDY;
+  }
+  return(1);
+}
+
 int MMG3D_Set_ridge(MMG5_pMesh mesh, int k) {
   assert ( k <= mesh->na );
   mesh->edge[k].tag |= MG_GEO;
