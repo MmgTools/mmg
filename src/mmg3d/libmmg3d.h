@@ -623,6 +623,43 @@ int  MMG3D_Set_requiredTriangle(MMG5_pMesh mesh, int k);
 
 /**
  * \param mesh pointer toward the mesh structure.
+ * \param k triangle index.
+ * \return 1.
+ *
+ * Set triangle \a k as parallel (triangle at the interface between two
+ * processors, ie, this triangle is required).
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_SET_PARALLELTRIANGLE(mesh,k,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * >     INTEGER, INTENT(IN)           :: k\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+int  MMG3D_Set_parallelTriangle(MMG5_pMesh mesh, int k);
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param parIdx table of the indices of the parallel trias.
+ * \param npar number of triangles between processors.
+ * \return 1.
+ *
+ * Set the parallel triangles (triangles at the interface between processors, ie
+ * this triangles are required).
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_SET_PARALLELTRIANGLES(mesh,parIdx,npar,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * >     INTEGER, DIMENSION(*),INTENT(IN) :: parIdx\n
+ * >     INTEGER, INTENT(IN)           :: npar\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+ int  MMG3D_Set_parallelTriangles(MMG5_pMesh mesh, int *parIdx, int npar);
+
+/**
+ * \param mesh pointer toward the mesh structure.
  * \param k edge index.
  * \return 1.
  *
