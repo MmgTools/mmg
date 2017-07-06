@@ -1677,7 +1677,7 @@ static int _MMG5_anatet4(MMG5_pMesh mesh, MMG5_pSol met, char typchk) {
       for (j=0; j<4; j++)
         if ( ( pxt->ftag[j] & MG_BDY ) && (!(pxt->ftag[j] & MG_PARBDY)) )  nf++;
     }
-    if ( nf > 1 ) {
+    if ( (mesh->info.fem==typchk) && nf > 1 ) {
       ier  = _MMG5_split4bar(mesh,met,k,typchk-1);
       if ( !ier ) return(-1);
       ns++;
