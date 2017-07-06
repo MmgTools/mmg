@@ -196,6 +196,12 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
           }
         }
         break;
+      case 'f':  /* fem mesh */
+        if ( !strcmp(argv[i],"-fem") ) {
+          if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_fem,1) )
+            return 0;
+        }
+        break;
       case 'h':
         if ( !strcmp(argv[i],"-hmin") && ++i < argc ) {
           if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_hmin,

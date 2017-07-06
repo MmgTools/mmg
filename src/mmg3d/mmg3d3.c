@@ -560,7 +560,7 @@ int _MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met) {
   maxitdc = 100;
   t  = 0;
   
-  //mesh->info.fem = 1;
+  //++mesh->info.fem;
   
   if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
     fprintf(stdout,"  ** LAGRANGIAN MOTION\n");

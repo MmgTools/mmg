@@ -1755,7 +1755,7 @@ int _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,char typchk, int patternMode) {
       fprintf(stderr,"  ## Hashing problem. Exit program.\n");
       return(0);
     }
-    if ( typchk == 2 && it == maxit-1 )  mesh->info.fem = 1;
+    if ( typchk == 2 && it == maxit-1 )  ++mesh->info.fem;
 
     /* collapse short edges */
     if ( !mesh->info.noinsert ) {
