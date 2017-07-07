@@ -1044,7 +1044,6 @@ _MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           ip  = -1;
           if ( !_MMG5_hashEdge(mesh,&hash,ip1,ip2,ip) )  return(-1);
         }
-        break;
       }
     }
   }
