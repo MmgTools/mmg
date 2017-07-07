@@ -11,7 +11,7 @@ RUN apt-get update && \
 
 ## Optional module Scotch
 RUN apt-get install -y curl zlib1g-dev
-RUN curl -O http://gforge.inria.fr/frs/download.php/latestfile/298/scotch_6.0.4.tar.gz && \
+RUN curl -L -O http://gforge.inria.fr/frs/download.php/latestfile/298/scotch_6.0.4.tar.gz && \
     tar xzf scotch_6.0.4.tar.gz && \
     ( cd scotch_6.0.4/src && \
       ln -s Make.inc/Makefile.inc.x86-64_pc_linux2 Makefile.inc && \
