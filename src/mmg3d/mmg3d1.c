@@ -1050,7 +1050,6 @@ _MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           ip  = -1;
           if ( !_MMG5_hashEdge(mesh,&hash,ip1,ip2,ip) )  return(-1);
         }
-        break;
       }
     }
   }
@@ -1684,7 +1683,7 @@ static int _MMG5_anatet4(MMG5_pMesh mesh, MMG5_pSol met,int *nf, char typchk) {
       for (j=0; j<4; j++)
         if ( ( pxt->ftag[j] & MG_BDY ) && (!(pxt->ftag[j] & MG_PARBDY)) )  nbdy++;
     }
-    if ( (mesh->info.fem==typchk) && nbdy > 1 ) {
+    if ( nbdy > 1 ) {
       if ( !mesh->info.noswap ) {
         /* Try to swap first */
 #warning remove the comment to tru to swap: but it is bugged for now
@@ -1748,8 +1747,11 @@ int _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,char typchk, int patternMode) {
 
     /* split or swap tetra with more than 2 bdry faces */
     nf = 0;
-    ier = _MMG5_anatet4(mesh,met,&nf,typchk);
-    if ( ier < 0 )  return(0);
+    if ( mesh->info.fem == typchk ) {
+      ier = _MMG5_anatet4(mesh,met,&nf,typchk);
+      if ( ier < 0 )  return(0);
+    }
+    else ier = 0;
     ns = ier;
 
     /* memory free */
