@@ -36,7 +36,7 @@ void MMG3D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( met->size == 1 || ( met->size == 3 && mesh->info.lag >= 0 ) ) {
     if ( mesh->info.optimLES ) {
       _MMG5_caltet          = _MMG3D_caltetLES_iso;
-      _MMG5_movintpt        = _MMG5_movintptLES_iso;
+      _MMG5_movintpt        = _MMG5_movintpt_iso;
     }
     else {
       _MMG5_caltet          = _MMG5_caltet_iso;
