@@ -75,7 +75,7 @@ int _MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
     /* Update edges tag for pt0 (needed by lenedg). */
 
     /* prevent from recreating internal edge between boundaries */
-    if ( mesh->info.fem ) {
+    if ( mesh->info.fem  ) {
       p0 = &mesh->point[nq];
       if ( p0->tag & MG_BDY ) {
         i = ip;

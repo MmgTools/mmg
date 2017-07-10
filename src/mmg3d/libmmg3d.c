@@ -321,8 +321,10 @@ int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
     if ( !MG_VOK(ppt) )  continue;
     ppt->tmp = ++np;
 
-    if ( mesh->info.nosurf && (ppt->tag & MG_NOSURF) )
-        ppt->tag &= ~MG_REQ;
+    if ( ppt->tag & MG_NOSURF ) {
+      ppt->tag &= ~MG_NOSURF;
+      ppt->tag &= ~MG_REQ;
+    }
 
     if ( ppt->tag & MG_CRN )  nc++;
 
@@ -455,16 +457,14 @@ int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   }
 
   /* Remove the MG_REQ tags added by the nosurf option */
-  if ( mesh->info.nosurf ) {
-    for (k=1; k<=mesh->ne; k++) {
-      pt   = &mesh->tetra[k];
-      if ( MG_EOK(pt) &&  pt->xt ) {
+  for (k=1; k<=mesh->ne; k++) {
+    pt   = &mesh->tetra[k];
+    if ( MG_EOK(pt) &&  pt->xt ) {
 
-        for (i=0; i<6; i++) {
-          if ( mesh->xtetra[pt->xt].tag[i] & MG_NOSURF ) {
-            mesh->xtetra[pt->xt].tag[i] &= ~MG_REQ;
-            mesh->xtetra[pt->xt].tag[i] &= ~MG_NOSURF;
-          }
+      for (i=0; i<6; i++) {
+        if ( mesh->xtetra[pt->xt].tag[i] & MG_NOSURF ) {
+          mesh->xtetra[pt->xt].tag[i] &= ~MG_REQ;
+          mesh->xtetra[pt->xt].tag[i] &= ~MG_NOSURF;
         }
       }
     }

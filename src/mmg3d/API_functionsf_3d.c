@@ -476,6 +476,25 @@ FORTRAN_NAME(MMG3D_SET_REQUIREDTRIANGLES,mmg3d_set_requiredtriangles,
 }
 
 /**
+ * See \ref MMG3D_Set_parallelTriangle function in \ref mmg3d/libmmg3d.h file.
+ */
+FORTRAN_NAME(MMG3D_SET_PARALLELTRIANGLE,mmg3d_set_paralleltriangle,
+             (MMG5_pMesh *mesh, int *k, int* retval),
+             (mesh,k,retval)) {
+  *retval = MMG3D_Set_parallelTriangle(*mesh, *k);
+  return;
+}
+/**
+ * See \ref MMG3D_Set_parallelTriangles function in \ref mmg3d/libmmg3d.h file.
+ */
+FORTRAN_NAME(MMG3D_SET_PARALLELTRIANGLES,mmg3d_set_paralleltriangles,
+             (MMG5_pMesh *mesh, int *parIdx, int *npar, int* retval),
+             (mesh,parIdx,npar,retval)) {
+  *retval = MMG3D_Set_parallelTriangles(*mesh, parIdx, *npar);
+  return;
+}
+
+/**
  * See \ref MMG3D_Set_ridge function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_SET_RIDGE,mmg3d_set_ridge,

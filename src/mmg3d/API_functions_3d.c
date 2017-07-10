@@ -85,6 +85,8 @@ void MMG3D_Init_parameters(MMG5_pMesh mesh) {
   /* default values for integers */
   /* MMG3D_IPARAM_lag = -1 */
   mesh->info.lag      = -1;
+  /* MMG3D_IPARAM_fem = 0 */
+  mesh->info.fem      = 0;
   /* MMG3D_IPARAM_optim = 0 */
   mesh->info.optim    =  0;
   /* MMG3D_IPARAM_optimLES = 0 */
@@ -99,6 +101,7 @@ void MMG3D_Init_parameters(MMG5_pMesh mesh) {
 
   /* default values for doubles */
   mesh->info.ls       = 0.0;      /* level set value */
+
 
 
 #ifndef PATTERN
@@ -1136,6 +1139,25 @@ int MMG3D_Set_requiredTriangles(MMG5_pMesh mesh, int* reqIdx, int nreq) {
   return(1);
 }
 
+int MMG3D_Set_parallelTriangle(MMG5_pMesh mesh, int k) {
+  assert ( k <= mesh->nt );
+  mesh->tria[k].tag[0] |= MG_PARBDY;
+  mesh->tria[k].tag[1] |= MG_PARBDY;
+  mesh->tria[k].tag[2] |= MG_PARBDY;
+  return(1);
+}
+
+int MMG3D_Set_parallelTriangles(MMG5_pMesh mesh, int* parIdx, int npar) {
+  int k;
+
+  for ( k=0; k<npar; ++k ){
+    mesh->tria[parIdx[k]].tag[0] |= MG_PARBDY;
+    mesh->tria[parIdx[k]].tag[1] |= MG_PARBDY;
+    mesh->tria[parIdx[k]].tag[2] |= MG_PARBDY;
+  }
+  return(1);
+}
+
 int MMG3D_Set_ridge(MMG5_pMesh mesh, int k) {
   assert ( k <= mesh->na );
   mesh->edge[k].tag |= MG_GEO;
@@ -1654,6 +1676,10 @@ int MMG3D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam,int val){
       mesh->info.dhd    = _MMG5_ANGEDG;
     }
     break;
+  case MMG3D_IPARAM_fem :
+    mesh->info.fem      = 1;
+    break;
+
   case MMG3D_IPARAM_iso :
     mesh->info.iso      = val;
     if ( mesh->info.iso )
@@ -1729,7 +1755,7 @@ int MMG3D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam,int val){
     return(0);
   }
   /* other options */
-  mesh->info.fem      = 0;
+
   return(1);
 }
 

@@ -71,6 +71,7 @@ enum MMG3D_Param {
   MMG3D_IPARAM_debug,             /*!< [1/0], Turn on/off debug mode */
   MMG3D_IPARAM_angle,             /*!< [1/0], Turn on/off angle detection */
   MMG3D_IPARAM_iso,               /*!< [1/0], Level-set meshing */
+  MMG3D_IPARAM_fem,               /*!< [1/0], Generate a finite element mesh */
   MMG3D_IPARAM_lag,               /*!< [-1/0/1/2], Lagrangian option */
   MMG3D_IPARAM_optim,             /*!< [1/0], Optimize mesh keeping its initial edge sizes */
   MMG3D_IPARAM_optimLES,          /*!< [1/0], Strong mesh optimization for Les computations */
@@ -620,6 +621,43 @@ int  MMG3D_Set_requiredTriangle(MMG5_pMesh mesh, int k);
  *
  */
   int  MMG3D_Set_requiredTriangles(MMG5_pMesh mesh, int *reqIdx, int nreq);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param k triangle index.
+ * \return 1.
+ *
+ * Set triangle \a k as parallel (triangle at the interface between two
+ * processors, ie, this triangle is required).
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_SET_PARALLELTRIANGLE(mesh,k,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * >     INTEGER, INTENT(IN)           :: k\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+int  MMG3D_Set_parallelTriangle(MMG5_pMesh mesh, int k);
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param parIdx table of the indices of the parallel trias.
+ * \param npar number of triangles between processors.
+ * \return 1.
+ *
+ * Set the parallel triangles (triangles at the interface between processors, ie
+ * this triangles are required).
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_SET_PARALLELTRIANGLES(mesh,parIdx,npar,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * >     INTEGER, DIMENSION(*),INTENT(IN) :: parIdx\n
+ * >     INTEGER, INTENT(IN)           :: npar\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+ int  MMG3D_Set_parallelTriangles(MMG5_pMesh mesh, int *parIdx, int npar);
 
 /**
  * \param mesh pointer toward the mesh structure.

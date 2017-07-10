@@ -1999,7 +1999,7 @@ int _MMG3D_movnormal_iso(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
   for (l=1; l<lon; l++) {
     iel = list[l] / 4;
     pt1 = &mesh->tetra[iel];
-    if ( crit > pt1->qual )  crit = pt1->qual;
+    if ( pt1->qual < crit)  crit = pt1->qual;
   }
   coe     = 0.471404;//2.12132; //3/sqrt(2) : hauteur d'un tetra reg de cote c : c*sqrt(2)/3
   iter    = 0;
@@ -2123,12 +2123,13 @@ int _MMG3D_movv_iso(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
   for (l=1; l<lon; l++) {
     iel = list[l] / 4;
     pt1 = &mesh->tetra[iel];
-    if ( crit < pt1->qual )  crit = pt1->qual;
+    if ( pt1->qual < crit )
+      crit = pt1->qual;
   }
-   if ( (crit < 0.01/_MMG3D_ALPHAD) ) {
+  /* if ( (crit < 0.01/_MMG3D_ALPHAD) ) {
      crit *= 0.9;
    } else
-     crit *= 1.01;
+  */ crit *= 1.01;
   coe     = 1.;
   iter    = 0;
   maxiter = 20;

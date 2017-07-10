@@ -1682,9 +1682,9 @@ static int _MMG5_anatet4(MMG5_pMesh mesh, MMG5_pSol met,int *nf, char typchk) {
     if ( pt->xt ) {
       pxt = &mesh->xtetra[pt->xt];
       for (j=0; j<4; j++)
-        if ( pxt->ftag[j] & MG_BDY )  nbdy++;
+        if ( ( pxt->ftag[j] & MG_BDY ) && (!(pxt->ftag[j] & MG_PARBDY)) )  nbdy++;
     }
-    if ( nbdy > 1 ) {
+    if ( (mesh->info.fem==typchk) && nbdy > 1 ) {
       if ( !mesh->info.noswap ) {
         /* Try to swap first */
 #warning remove the comment to tru to swap: but it is bugged for now
@@ -1780,7 +1780,7 @@ int _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,char typchk, int patternMode) {
       fprintf(stderr,"  ## Hashing problem. Exit program.\n");
       return(0);
     }
-    if ( typchk == 2 && it == maxit-1 )  mesh->info.fem = 1;
+    if ( typchk == 2 && it == maxit-1 )  ++mesh->info.fem;
 
     /* collapse short edges */
     if ( !mesh->info.noinsert ) {

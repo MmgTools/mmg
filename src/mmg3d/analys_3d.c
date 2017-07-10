@@ -50,20 +50,37 @@ static inline void _MMG5_reqBoundaries(MMG5_pMesh mesh) {
    * but that are not really required (-nosurf option) */
   for (k=1; k<=mesh->nt; k++) {
     ptt = &mesh->tria[k];
-    if ( !(ptt->tag[0] & MG_REQ) ) {
+
+    if ( mesh->info.nosurf  && (!(ptt->tag[0] & MG_REQ)) ) {
       ptt->tag[0] |= MG_REQ;
       ptt->tag[0] |= MG_NOSURF;
     }
 
-    if ( !(ptt->tag[1] & MG_REQ) ) {
+    if ( ptt->tag[0] & MG_PARBDY ) {
+      ptt->tag[0] |= MG_NOSURF;
+      ptt->tag[0] |= MG_REQ;
+    }
+
+    if ( mesh->info.nosurf && (!(ptt->tag[1] & MG_REQ)) ) {
       ptt->tag[1] |= MG_REQ;
       ptt->tag[1] |= MG_NOSURF;
     }
 
-    if ( !(ptt->tag[2] & MG_REQ) ) {
+    if ( ptt->tag[1] & MG_PARBDY ) {
+      ptt->tag[1] |= MG_NOSURF;
+      ptt->tag[1] |= MG_REQ;
+    }
+
+    if ( mesh->info.nosurf && (!(ptt->tag[2] & MG_REQ)) ) {
       ptt->tag[2] |= MG_REQ;
       ptt->tag[2] |= MG_NOSURF;
     }
+
+    if ( ptt->tag[2] & MG_PARBDY ) {
+      ptt->tag[2] |= MG_NOSURF;
+      ptt->tag[2] |= MG_REQ;
+    }
+
   }
 
   return;
@@ -653,10 +670,9 @@ int _MMG3D_analys(MMG5_pMesh mesh) {
   _MMG5_freeXTets(mesh);
   _MMG5_freeXPrisms(mesh);
 
-  if ( mesh->info.nosurf ) {
-    /* Set surface triangles to required*/
-    _MMG5_reqBoundaries(mesh);
-  }
+  /* Set surface triangles to required in nosurf mode or for parallel boundaries */
+  _MMG5_reqBoundaries(mesh);
+
 
   /* create surface adjacency */
   if ( !_MMG3D_hashTria(mesh,&hash) ) {
