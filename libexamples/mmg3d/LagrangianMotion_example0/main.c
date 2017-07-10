@@ -138,10 +138,6 @@ int main(int argc,char *argv[]) {
   if ( MMG3D_saveMesh(mmgMesh,outname) != 1 )
     exit(EXIT_FAILURE);
 
-  /* (Not mandatory) Automatically save the solution */
-  if ( MMG3D_saveSol(mmgMesh,mmgSol,outname) != 1 )
-    exit(EXIT_FAILURE);
-
   /* 9) free the MMG3D5 structures */
   MMG3D_Free_all(MMG5_ARG_start,
                  MMG5_ARG_ppMesh,&mmgMesh,MMG5_ARG_ppMet,&mmgSol,
