@@ -237,7 +237,7 @@ IF ( LONG_TESTS )
   IF ( RUN_AGAIN )
     ADD_TEST(NAME ${test_name}_2
       COMMAND ${EXECUT_MMG3D}
-      -v 5 -hausd 0.1 -ar 60
+      -v 5 -hausd 0.1 -ar 60 -hgrad -1
       ${CTEST_OUTPUT_DIR}/${test_name}-out.o.meshb
       -out ${CTEST_OUTPUT_DIR}/${test_name}_2-out.o.meshb
       )
@@ -269,7 +269,7 @@ IF ( LONG_TESTS )
   IF ( RUN_AGAIN )
     ADD_TEST(NAME ${test_name}_2
       COMMAND ${EXECUT_MMG3D}
-      "-v 5 -hausd 0.1 -ar 60"
+      -v 5 -hausd 0.1 -ar 60 -hgrad -1
       ${CTEST_OUTPUT_DIR}/${test_name}-out.o.meshb
       -out ${CTEST_OUTPUT_DIR}/${test_name}_2-out.o.meshb
       )

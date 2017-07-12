@@ -247,7 +247,7 @@ MACRO ( ADD_RUN_AGAIN_TESTS exec_name test_names args input_files )
 
     IF ( RUN_AGAIN )
       ADD_TEST(NAME ${test_name}_2
-        COMMAND ${exec_name} ${arg}
+        COMMAND ${exec_name} ${arg} -hgrad -1
         ${CTEST_OUTPUT_DIR}/${test_name}-out.o.meshb
         -out ${CTEST_OUTPUT_DIR}/${test_name}_2-out.o.meshb
         )
