@@ -531,7 +531,6 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
         }
       }
       if(npeau>1) {
-        if( 1 || mesh->info.imprim<-4 ) printf("%d faces de peau!!!! %d (typ %d) %e\n",npeau,k,ityp,pt->qual / _MMG3D_ALPHAD);
         nbdy++;
       } else {
         nbdy2++;
