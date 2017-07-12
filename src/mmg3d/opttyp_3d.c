@@ -420,6 +420,9 @@ int _MMG3D_splitItem(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,
 
   ier = 0;
   pt = &mesh->tetra[k];
+
+  if ( mesh->info.noinsert ) return 0;
+
   len = _MMG5_lenedg(mesh,met,iar,pt);
   if(len > LLONG2) {
     ier = _MMG5_splitedg(mesh,met,k,iar,OCRIT);
@@ -590,6 +593,9 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
             break;
           }
         }
+
+        if ( mesh->info.nomove ) break;
+
         for(i=0 ; i<4 ; i++) {
           if(((met->size!=1) && _MMG3D_movv_ani(mesh,met,k,i)) || ((met->size==1) && _MMG3D_movv_iso(mesh,met,k,i))) {
             nd++;
@@ -599,6 +605,9 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
         }
         break;
       case 2: /*chapeau*/
+
+        if ( mesh->info.nomove ) break;
+
         if(((met->size!=1) && _MMG3D_movv_ani(mesh,met,k,item[0])) || ((met->size==1) && _MMG3D_movv_iso(mesh,met,k,item[0]))) {
           nd++;
           ds[ityp]++;
