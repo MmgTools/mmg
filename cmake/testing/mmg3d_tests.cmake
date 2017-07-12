@@ -33,6 +33,7 @@ SET ( test_names
   mmg3d_SimpleCube
   # MultiDomain
   mmg3d_MultiDom_Ellipse_fast
+  mmg3d_MultiDom_Ellipse_ReqEntities_fast
   # Non-manifold test case
   mmg3d_NM_Cube_fast
   mmg3d_NM_Complex_fast
@@ -42,6 +43,7 @@ SET ( input_files
   ${MMG3D_CI_TESTS}/Cube/cube
   ### Multidom
   ${MMG3D_CI_TESTS}/MultiDom_Ellipse/c.d
+  ${MMG3D_CI_TESTS}/MultiDom_Ellipse_ReqEntities/c.d
   ### non-manifold
   ${MMG3D_CI_TESTS}/NM_Cube/nm
   ${MMG3D_CI_TESTS}/NM_Complex/nm4
@@ -50,6 +52,7 @@ SET ( input_files
 SET ( args
   "-v 5"
   ### MultiDomain
+  "-v 5 -hausd 0.002"
   "-v 5 -hausd 0.002"
   ### non-manifold
   "-v 5 -hmax 0.1"
@@ -106,7 +109,9 @@ IF ( LONG_TESTS )
     mmg3d_Various_refunref_Santa_met0.05_hausd0.0001_ar90
     # 5: MultiDomain
     mmg3d_MultiDom_Cube
+    mmg3d_MultiDom_Cube_ReqEntities
     mmg3d_MultiDom_Ellipse
+    mmg3d_MultiDom_Ellipse_ReqEntities
     # Non-manifold test case
     mmg3d_NM_Cube
     mmg3d_NM_Complex
@@ -156,7 +161,9 @@ IF ( LONG_TESTS )
     ${MMG3D_CI_TESTS}/Various_refunref_Santa_met0.05_hausd0.0001_ar90/santa
     ### MultiDomain
     ${MMG3D_CI_TESTS}/MultiDom_Cube/c
+    ${MMG3D_CI_TESTS}/MultiDom_Cube_ReqEntities/c
     ${MMG3D_CI_TESTS}/MultiDom_Ellipse/c.d
+    ${MMG3D_CI_TESTS}/MultiDom_Ellipse_ReqEntities/c.d
     ${MMG3D_CI_TESTS}/NM_Cube/nm
     ${MMG3D_CI_TESTS}/NM_Complex/nm4
     )
@@ -205,6 +212,8 @@ IF ( LONG_TESTS )
     "-v 5 -hausd 0.0001 -ar 90"
     ### MultiDomain
     "-v 5 -hmax 0.02"
+    "-v 5 -hmax 0.02"
+    "-v 5 -hausd 0.0003"
     "-v 5 -hausd 0.0003"
     "-v 5 -hmax 0.05"
     "-v 5"
@@ -245,15 +254,15 @@ IF ( LONG_TESTS )
     SET_TESTS_PROPERTIES ( ${test_name}_2
       PROPERTIES FIXTURES_REQUIRED ${test_name} )
 
-  ENDIF ( )
+  ENDIF ( RUN_AGAIN )
 
   SET ( test_name
-    # 4: Refinment on a solution
-    mmg3d_Various_adpsol_hgrad1_M6Mach_Eps0.0005_hmin0.0001_hmax3
-    )
+      # 4: Refinment on a solution
+      mmg3d_Various_adpsol_hgrad1_M6Mach_Eps0.0005_hmin0.0001_hmax3
+      )
   SET ( input_file
-    ${MMG3D_CI_TESTS}/Various_adpsol_hgrad1_M6Mach_Eps0.0005_hmin0.0001_hmax3/M6
-    )
+      ${MMG3D_CI_TESTS}/Various_adpsol_hgrad1_M6Mach_Eps0.0005_hmin0.0001_hmax3/M6
+      )
 
   ADD_TEST(NAME ${test_name}
     COMMAND ${EXECUT_MMG3D}
@@ -266,20 +275,19 @@ IF ( LONG_TESTS )
   SET_TESTS_PROPERTIES ( ${test_name}
     PROPERTIES FIXTURES_SETUP ${test_name} )
 
-  IF ( RUN_AGAIN )
-    ADD_TEST(NAME ${test_name}_2
-      COMMAND ${EXECUT_MMG3D}
-      -v 5 -hausd 0.1 -ar 60 -hgrad -1
-      ${CTEST_OUTPUT_DIR}/${test_name}-out.o.meshb
-      -out ${CTEST_OUTPUT_DIR}/${test_name}_2-out.o.meshb
-      )
+    IF ( RUN_AGAIN )
+      ADD_TEST(NAME ${test_name}_2
+        COMMAND ${EXECUT_MMG3D}
+        -v 5 -hausd 0.1 -ar 60 -hgrad -1
+        ${CTEST_OUTPUT_DIR}/${test_name}-out.o.meshb
+        -out ${CTEST_OUTPUT_DIR}/${test_name}_2-out.o.meshb
+        )
 
     SET_TESTS_PROPERTIES ( ${test_name}_2
       PROPERTIES FIXTURES_REQUIRED ${test_name} )
 
   ENDIF ( )
-ENDIF ( )
-
+ENDIF ( LONG_TESTS )
 
 
 ###############################################################################

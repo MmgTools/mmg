@@ -398,6 +398,9 @@ int _MMG3D_splitItem(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,
 
   ier = 0;
   pt = &mesh->tetra[k];
+
+  if ( mesh->info.noinsert ) return 0;
+
   len = _MMG5_lenedg(mesh,met,iar,pt);
   if(len > LLONG2) {
     ier = _MMG5_splitedg(mesh,met,k,iar,OCRIT);
@@ -505,10 +508,7 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
           if ( pxt->ftag[i] & MG_BDY ) npeau++;
         }
 
-        //Warning pbs for multidomain : can be bdy and have an adja
         if(npeau>1) {
-//#warning release remove this print
-          if( mesh->info.imprim<-4 ) printf("%d faces de peau!!!! %d (typ %d) %e\n",npeau,k,ityp,pt->qual / _MMG3D_ALPHAD);
           nbdy++;
           continue;
         } else if ( npeau ) {
