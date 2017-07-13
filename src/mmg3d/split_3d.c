@@ -3279,36 +3279,25 @@ int _MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k,char metRidTyp) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \param k index of element to split.
- * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
- * \param metRidTyp metric storage (classic or special)
+ * \param pt initial tetra
+ * \param vx index of points to insert along edges
+ * \param tau vertices permutation
+ * \param taued edges permutation
+ * \param imin23 minimal index of vertices ip0 and ip3
+ * \param imin12 minimal index of vertices ip1 and ip2
  *
- * \return 0 if fail, 1 otherwise
- *
- * Split 4 edges in a configuration when 3 lie on the same face
+ * Set permutation of vertices for the split of 4 edges when 3 lie on the same
+ * face. Reference configuration 23
  *
  */
-int _MMG5_split4sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
-  MMG5_pTetra         pt[6];
-  MMG5_xTetra         xt[6];
-  MMG5_pxTetra        pxt0;
-  int                 iel;
-  int                 newtet[6];
-  char                flg,firstxt,isxt[6],imin12,imin23,j,i;
-  unsigned char       tau[4];
-  const unsigned char *taued;
+static inline
+void _MMG3D_configSplit4sf(MMG5_pTetra pt,int vx[6],unsigned char tau[4],
+                           const unsigned char *taued,
+                           unsigned char *imin23,unsigned char *imin12) {
 
-  pt[0]  = &mesh->tetra[k];
-  flg = pt[0]->flag;
-  pt[0]->flag  = 0;
-  newtet[0]=k;
-
-  /* Set permutation of vertices : reference configuration : 23 */
   tau[0] = 0 ; tau[1] = 1 ; tau[2] = 2 ; tau[3] = 3;
   taued = &MMG5_permedge[0][0];
-  switch(flg){
+  switch(pt->flag){
   case 29:
     tau[0] = 1 ; tau[1] = 3 ; tau[2] = 2 ; tau[3] = 0;
     taued = &MMG5_permedge[5][0];
@@ -3365,8 +3354,142 @@ int _MMG5_split4sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp)
     break;
   }
 
-  imin23 = ((pt[0])->v[tau[2]] < (pt[0])->v[tau[3]]) ? tau[2] : tau[3];
-  imin12 = ((pt[0])->v[tau[1]] < (pt[0])->v[tau[2]]) ? tau[1] : tau[2];
+  (*imin23) = (pt->v[tau[2]] < pt->v[tau[3]]) ? tau[2] : tau[3];
+  (*imin12) = (pt->v[tau[1]] < pt->v[tau[2]]) ? tau[1] : tau[2];
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param k index of element to split.
+ * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
+ *
+ * \return 0 if the split fail, 1 otherwise
+ *
+ *  Simulate split of 4 edges in a configuration when 3 lie on the same face.
+ *
+ */
+int _MMG3D_split4sf_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
+  MMG5_pTetra         pt,pt0;
+  double              vold,vnew;
+  unsigned char       tau[4];
+  unsigned char       imin23,imin12;
+  const unsigned char *taued = NULL;
+
+  pt  = &mesh->tetra[k];
+  pt0 = &mesh->tetra[0];
+  vold = _MMG5_orvol(mesh->point,pt->v);
+
+  if ( vold < _MMG5_EPSOK ) return 0;
+
+  /* Set permutation of vertices : reference configuration : 23 */
+  _MMG3D_configSplit4sf(pt,vx,tau,taued,&imin23,&imin12);
+
+  /* Generic formulation of split of 4 edges (with 3 on same face) */
+  memcpy(pt0,pt,sizeof(MMG5_Tetra));
+  pt0->v[tau[1]] = vx[taued[0]];
+  pt0->v[tau[2]] = vx[taued[1]];
+  pt0->v[tau[3]] = vx[taued[2]];
+  vnew = _MMG5_orvol(mesh->point,pt0->v);
+  if ( vnew < _MMG5_EPSOK )  return(0);
+
+  memcpy(pt0,pt,sizeof(MMG5_Tetra));
+  pt0->v[tau[0]] = vx[taued[2]];
+  pt0->v[tau[1]] = vx[taued[0]];
+  pt0->v[tau[2]] = vx[taued[1]];
+  pt0->v[tau[3]] = vx[taued[4]] ;
+  vnew = _MMG5_orvol(mesh->point,pt0->v);
+  if ( vnew < _MMG5_EPSOK )  return(0);
+
+  memcpy(pt0,pt,sizeof(MMG5_Tetra));
+  if ( imin12 == tau[1] ) {
+    pt0->v[tau[0]] = vx[taued[0]];
+    pt0->v[tau[2]] = vx[taued[1]];
+    pt0->v[tau[3]] = vx[taued[4]];
+    vnew = _MMG5_orvol(mesh->point,pt0->v);
+    if ( vnew < _MMG5_EPSOK )  return(0);
+
+    memcpy(pt0,pt,sizeof(MMG5_Tetra));
+    pt0->v[tau[0]] = vx[taued[1]];
+    pt0->v[tau[3]] = vx[taued[4]];
+    vnew = _MMG5_orvol(mesh->point,pt0->v);
+    if ( vnew < _MMG5_EPSOK )  return(0);
+  }
+  else {
+    pt0->v[tau[0]] = vx[taued[1]];
+    pt0->v[tau[1]] = vx[taued[0]];
+    pt0->v[tau[3]] = vx[taued[4]] ;
+    vnew = _MMG5_orvol(mesh->point,pt0->v);
+    if ( vnew < _MMG5_EPSOK )  return(0);
+
+    memcpy(pt0,pt,sizeof(MMG5_Tetra));
+    pt0->v[tau[0]] = vx[taued[0]];
+    pt0->v[tau[3]] = vx[taued[4]] ;
+    vnew = _MMG5_orvol(mesh->point,pt0->v);
+    if ( vnew < _MMG5_EPSOK )  return(0);
+  }
+
+  memcpy(pt0,pt,sizeof(MMG5_Tetra));
+  if ( imin23 == tau[2] ) {
+    pt0->v[tau[0]] = vx[taued[1]];
+    pt0->v[tau[1]] = vx[taued[4]];
+    pt0->v[tau[3]] = vx[taued[2]];
+    vnew = _MMG5_orvol(mesh->point,pt0->v);
+    if ( vnew < _MMG5_EPSOK )  return(0);
+
+    memcpy(pt0,pt,sizeof(MMG5_Tetra));
+    pt0->v[tau[0]] = vx[taued[2]];
+    pt0->v[tau[1]] = vx[taued[4]];
+    vnew = _MMG5_orvol(mesh->point,pt0->v);
+    if ( vnew < _MMG5_EPSOK )  return(0);
+  }
+  else {
+    pt0->v[tau[0]] = vx[taued[2]];
+    pt0->v[tau[1]] = vx[taued[4]];
+    pt0->v[tau[2]] = vx[taued[1]];
+    vnew = _MMG5_orvol(mesh->point,pt0->v);
+    if ( vnew < _MMG5_EPSOK )  return(0);
+
+    memcpy(pt0,pt,sizeof(MMG5_Tetra));
+    pt0->v[tau[0]] = vx[taued[1]];
+    pt0->v[tau[1]] = vx[taued[4]];
+    vnew = _MMG5_orvol(mesh->point,pt0->v);
+    if ( vnew < _MMG5_EPSOK )  return(0);
+  }
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param k index of element to split.
+ * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
+ * \param metRidTyp metric storage (classic or special)
+ *
+ * \return 0 if fail, 1 otherwise
+ *
+ * Split 4 edges in a configuration when 3 lie on the same face
+ *
+ */
+int _MMG5_split4sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
+  MMG5_pTetra         pt[6];
+  MMG5_xTetra         xt[6];
+  MMG5_pxTetra        pxt0;
+  int                 iel;
+  int                 newtet[6];
+  char                flg,firstxt,isxt[6],j,i;
+  unsigned char       tau[4],imin23,imin12;
+  const unsigned char *taued = NULL;
+
+  pt[0]  = &mesh->tetra[k];
+  flg = pt[0]->flag;
+  pt[0]->flag  = 0;
+  newtet[0]=k;
+
+  /* Set permutation of vertices : reference configuration : 23 */
+  _MMG3D_configSplit4sf(pt[0],vx,tau,taued,&imin23,&imin12);
+
 
   /* create 5 new tetras */
   for (j=1; j<6; j++) {
