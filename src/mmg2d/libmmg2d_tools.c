@@ -229,9 +229,29 @@ int MMG2D_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMG
 
 int MMG2D_Get_triFromEdge(MMG5_pMesh mesh, int ked, int *ktri, int *ied)
 {
+  MMG5_pEdge        ped;
   int val;
 
-  val = mesh->edge[ked].base;
+  if ( mesh->nai == mesh->na ) {
+    mesh->nai = 0;
+  }
+
+  mesh->nai++;
+
+  if ( mesh->nai > mesh->na ) {
+    fprintf(stdout,"  ## Error: unable to get edge.\n");
+    fprintf(stdout,"    The number of call of MMG2D_Get_triFromEdge function");
+    fprintf(stdout," can not exceed the number of edges: %d\n ",mesh->na);
+    return(0);
+  }
+
+  ped = &mesh->edge[mesh->nai];
+
+  while ( !ped->a && ++mesh->nai <= mesh->na ) {
+    ped = &mesh->edge[mesh->nai];
+  }
+
+  val = ped->base;
 
   if ( !val ) return(0);
 
