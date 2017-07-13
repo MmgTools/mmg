@@ -1243,16 +1243,15 @@ int MMG2D_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start,
                                int lispoi[MMG2D_LMAX]);
 /**
  * \param mesh pointer toward the mesh structure.
- * \param ked useless
+ * \param ked index of the boundary edge.
  * \param ktri pointer toward the index of the tri (filled by the function).
  * \param ied pointer toward the index of the edge of the triangle \a ktri that
  * correspond to the boundary edge \a ked.
  * \return 0 if fail, 1 otherwise
  *
- * Fill \a ktri by the index of the triangle to which belong the next processed
- * boundary edge and \a ied by the index of the edge of the triangle that
- * correspond to the edge. It must be called over all the mesh edges and will
- * process it in order.
+ * Fill \a ktri by the index of the triangle to which belong a boundary edge
+ * and \a ied by the index of the edge of the triangle that correspond to the
+ * edge.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_GET_TRIFROMEDGE(mesh,ked,ktri,ied,retval)\n
