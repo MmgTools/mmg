@@ -2264,35 +2264,39 @@ int _MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTy
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \param k index of element to split.
- * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
- * \param metRidTyp metric storage (classic or special)
+ * \param pt initial tetra
+ * \param vx index of points to insert along edges
+ * \param tau vertices permutation
+ * \param taued edges permutation
+ * \param sym vertices symmetry
+ * \param symed edges symmetry
+ * \param ip0 vertex 0 for reference config
+ * \param ip1 vertex 1 for reference config
+ * \param ip2 vertex 2 for reference config
+ * \param ip3 vertex 3 for reference config
+ * \param ie0 edge 0 for reference config
+ * \param ie1 edge 1 for reference config
+ * \param ie2 edge 2 for reference config
+ * \param ie3 edge 3 for reference config
+ * \param ie4 edge 4 for reference config
+ * \param ie5 edge 5 for reference config
+ * \param imin03 minimal index of vertices ip0 and ip3
+ * \param imin12 minimal index of vertices ip1 and ip2
  *
- * \return 0 if fail, 1 otherwise
- *
- * Split 3 opposite edges in a tetra
+ * Set permutation /symmetry of vertices for 3 opposite edges config:
+ * generic case : 35
  *
  */
-int _MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],char metRidTyp){
-  MMG5_pTetra          pt[5];
-  MMG5_xTetra          xt[5];
-  MMG5_pxTetra         pxt0;
-  char                 flg;
-  int                  iel;
-  int                  newtet[5];
-  unsigned char        imin12,imin03,tau[4],sym[4],symed[6],ip0,ip1,ip2,ip3,ie0,ie1;
-  unsigned char        ie2,ie3,ie4,ie5,isxt[5],firstxt,i;
-  const unsigned char *taued;
-
-  pt[0]  = &mesh->tetra[k];
-  flg = pt[0]->flag;
-  pt[0]->flag  = 0;
-  newtet[0]=k;
-
-  // To avoid warning about potentially uninitialized value for newtet[4]
-  newtet[4] = 0;
+static inline
+void _MMG3D_configSplit3op(MMG5_pTetra pt,int vx[6],unsigned char tau[4],
+                           const unsigned char *taued,
+                           unsigned char sym[4],  unsigned char symed[6],
+                           unsigned char *ip0,unsigned char *ip1,
+                           unsigned char *ip2,unsigned char *ip3,
+                           unsigned char *ie0,unsigned char *ie1,
+                           unsigned char *ie2,unsigned char *ie3,
+                           unsigned char *ie4,unsigned char *ie5,
+                           unsigned char *imin03,unsigned char *imin12) {
 
   /* Set permutation /symmetry of vertices : generic case : 35 */
   tau[0] = 0 ; tau[1] = 1 ; tau[2] = 2 ; tau[3] = 3;
@@ -2302,7 +2306,7 @@ int _MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],char metRidT
   symed[0] = 0 ; symed[1] = 1 ; symed[2] = 2;
   symed[3] = 3 ; symed[4] = 4 ; symed[5] = 5;
 
-  switch(flg) {
+  switch(pt->flag) {
   case 19:
     tau[0] = 0 ; tau[1] = 1 ; tau[2] = 2 ; tau[3] = 3;
     taued = &MMG5_permedge[0][0];
@@ -2403,28 +2407,197 @@ int _MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],char metRidT
     break;
   }
 
-  ip0 = tau[sym[0]];
-  ip1 = tau[sym[1]];
-  ip2 = tau[sym[2]];
-  ip3 = tau[sym[3]];
+  (*ip0) = tau[sym[0]];
+  (*ip1) = tau[sym[1]];
+  (*ip2) = tau[sym[2]];
+  (*ip3) = tau[sym[3]];
 
-  ie0 = taued[symed[0]];
-  ie1 = taued[symed[1]];
-  ie2 = taued[symed[2]];
-  ie3 = taued[symed[3]];
-  ie4 = taued[symed[4]];
-  ie5 = taued[symed[5]];
+  (*ie0) = taued[symed[0]];
+  (*ie1) = taued[symed[1]];
+  (*ie2) = taued[symed[2]];
+  (*ie3) = taued[symed[3]];
+  (*ie4) = taued[symed[4]];
+  (*ie5) = taued[symed[5]];
 
   /* Test : to be removed eventually */
-  assert(vx[ie0] > 0);
-  assert(vx[ie1] > 0);
-  assert(vx[ie5] > 0);
-  assert(vx[ie2] <= 0);
-  assert(vx[ie3] <= 0);
-  assert(vx[ie4] <= 0);
+  assert(vx[(*ie0)] > 0);
+  assert(vx[(*ie1)] > 0);
+  assert(vx[(*ie5)] > 0);
+  assert(vx[(*ie2)] <= 0);
+  assert(vx[(*ie3)] <= 0);
+  assert(vx[(*ie4)] <= 0);
 
-  imin03 = ((pt[0])->v[ip0] < (pt[0])->v[ip3]) ? ip0 : ip3;
-  imin12 = ((pt[0])->v[ip1] < (pt[0])->v[ip2]) ? ip1 : ip2;
+  (*imin03) = (pt->v[(*ip0)] < pt->v[(*ip3)]) ? (*ip0) : (*ip3);
+  (*imin12) = (pt->v[(*ip1)] < pt->v[(*ip2)]) ? (*ip1) : (*ip2);
+
+  return;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param k index of element to split.
+ * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
+ *
+ * \return 0 if the split fail, 1 otherwise
+ *
+ *  Simulate split of 3 edges in opposite configuration.
+ *
+ */
+int _MMG3D_split3op_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
+  MMG5_pTetra         pt,pt0;
+  double              vold,vnew;
+  unsigned char       tau[4],sym[4],symed[4],ip0,ip1,ip2,ip3,ie0,ie1,ie2,ie3;
+  unsigned char       ie4,ie5,imin03,imin12;
+  const unsigned char *taued;
+
+  pt  = &mesh->tetra[k];
+  pt0 = &mesh->tetra[0];
+  vold = _MMG5_orvol(mesh->point,pt->v);
+
+  if ( vold < _MMG5_EPSOK ) return 0;
+
+  /* Set permutation /symmetry of vertices : generic case : 35 */
+  _MMG3D_configSplit3op(pt,vx,tau,taued,sym,symed,&ip0,&ip1,&ip2,&ip3,
+                        &ie0,&ie1,&ie2,&ie3,&ie4,&ie5,&imin03,&imin12);
+
+  memcpy(pt0,pt,sizeof(MMG5_Tetra));
+  if ( (imin12 == ip2) && (imin03 == ip0) ) {
+    pt0->v[ip0] = vx[ie1] ;  pt0->v[ip1] = vx[ie0] ; pt0->v[ip3] = vx[ie5] ;
+    vnew = _MMG5_orvol(mesh->point,pt0->v);
+    if ( vnew < _MMG5_EPSOK )  return(0);
+
+    memcpy(pt0,pt,sizeof(MMG5_Tetra));
+    pt0->v[ip0] = vx[ie0] ; pt0->v[ip3] = vx[ie5] ;
+    vnew = _MMG5_orvol(mesh->point,pt0->v);
+    if ( vnew < _MMG5_EPSOK )  return(0);
+
+    memcpy(pt0,pt,sizeof(MMG5_Tetra));
+    pt0->v[ip0] = vx[ie0] ; pt0->v[ip2] = vx[ie5] ;
+    vnew = _MMG5_orvol(mesh->point,pt0->v);
+    if ( vnew < _MMG5_EPSOK )  return(0);
+
+    memcpy(pt0,pt,sizeof(MMG5_Tetra));
+    pt0->v[ip1] = vx[ie0] ; pt0->v[ip2] = vx[ie1] ; pt0->v[ip3] = vx[ie5] ;
+    vnew = _MMG5_orvol(mesh->point,pt0->v);
+    if ( vnew < _MMG5_EPSOK )  return(0);
+
+    memcpy(pt0,pt,sizeof(MMG5_Tetra));
+    pt0->v[ip1] = vx[ie0] ; pt0->v[ip2] = vx[ie5];
+    vnew = _MMG5_orvol(mesh->point,pt0->v);
+    if ( vnew < _MMG5_EPSOK )  return(0);
+  }
+
+  else if ( (imin12 == ip1) && (imin03 == ip0) ) {
+    pt0->v[ip0] = vx[ie1] ; pt0->v[ip3] = vx[ie5] ;
+    vnew = _MMG5_orvol(mesh->point,pt0->v);
+    if ( vnew < _MMG5_EPSOK )  return(0);
+
+    memcpy(pt0,pt,sizeof(MMG5_Tetra));
+    pt0->v[ip0] = vx[ie0] ; pt0->v[ip2] = vx[ie1] ; pt0->v[ip3] = vx[ie5];
+    vnew = _MMG5_orvol(mesh->point,pt0->v);
+    if ( vnew < _MMG5_EPSOK )  return(0);
+
+    memcpy(pt0,pt,sizeof(MMG5_Tetra));
+    pt0->v[ip0] = vx[ie0] ; pt0->v[ip2] = vx[ie5] ;
+    vnew = _MMG5_orvol(mesh->point,pt0->v);
+    if ( vnew < _MMG5_EPSOK )  return(0);
+
+    memcpy(pt0,pt,sizeof(MMG5_Tetra));
+    pt0->v[ip1] = vx[ie0] ; pt0->v[ip2] = vx[ie5];
+    vnew = _MMG5_orvol(mesh->point,pt0->v);
+    if ( vnew < _MMG5_EPSOK )  return(0);
+
+    memcpy(pt0,pt,sizeof(MMG5_Tetra));
+    pt0->v[ip1] = vx[ie0] ; pt0->v[ip2] = vx[ie1]; pt0->v[ip3] = vx[ie5];
+    vnew = _MMG5_orvol(mesh->point,pt0->v);
+    if ( vnew < _MMG5_EPSOK )  return(0);
+  }
+  else if ( (imin12 == ip2) && (imin03 == ip3) ) {
+    pt0->v[ip1] = vx[ie0] ; pt0->v[ip2] = vx[ie1] ;
+    vnew = _MMG5_orvol(mesh->point,pt0->v);
+    if ( vnew < _MMG5_EPSOK )  return(0);
+
+    memcpy(pt0,pt,sizeof(MMG5_Tetra));
+    pt0->v[ip0] = vx[ie1] ; pt0->v[ip1] = vx[ie0] ; pt0->v[ip2] = vx[ie5];
+    vnew = _MMG5_orvol(mesh->point,pt0->v);
+    if ( vnew < _MMG5_EPSOK )  return(0);
+
+    memcpy(pt0,pt,sizeof(MMG5_Tetra));
+    pt0->v[ip0] = vx[ie0] ; pt0->v[ip2] = vx[ie5] ;
+    vnew = _MMG5_orvol(mesh->point,pt0->v);
+    if ( vnew < _MMG5_EPSOK )  return(0);
+
+    memcpy(pt0,pt,sizeof(MMG5_Tetra));
+    pt0->v[ip0] = vx[ie1] ; pt0->v[ip1] = vx[ie0]; pt0->v[ip3] = vx[ie5];
+    vnew = _MMG5_orvol(mesh->point,pt0->v);
+    if ( vnew < _MMG5_EPSOK )  return(0);
+
+    memcpy(pt0,pt,sizeof(MMG5_Tetra));
+    pt0->v[ip0] = vx[ie0] ; pt0->v[ip3] = vx[ie5];
+    vnew = _MMG5_orvol(mesh->point,pt0->v);
+    if ( vnew < _MMG5_EPSOK )  return(0);
+  }
+  else {
+    assert((imin12 == ip1) && (imin03 == ip3)) ;
+
+    pt0->v[ip1] = vx[ie0] ; pt0->v[ip2] = vx[ie1] ;
+    vnew = _MMG5_orvol(mesh->point,pt0->v);
+    if ( vnew < _MMG5_EPSOK )  return(0);
+
+    memcpy(pt0,pt,sizeof(MMG5_Tetra));
+    pt0->v[ip0] = vx[ie1] ; pt0->v[ip3] = vx[ie5] ;
+    vnew = _MMG5_orvol(mesh->point,pt0->v);
+    if ( vnew < _MMG5_EPSOK )  return(0);
+
+    memcpy(pt0,pt,sizeof(MMG5_Tetra));
+    pt0->v[ip0] = vx[ie0] ; pt0->v[ip2] = vx[ie1] ;
+    vnew = _MMG5_orvol(mesh->point,pt0->v);
+    if ( vnew < _MMG5_EPSOK )  return(0);
+
+    memcpy(pt0,pt,sizeof(MMG5_Tetra));
+    pt0->v[ip0] = vx[ie1] ; pt0->v[ip2] = vx[ie5] ;
+    vnew = _MMG5_orvol(mesh->point,pt0->v);
+    if ( vnew < _MMG5_EPSOK )  return(0);
+  }
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param k index of element to split.
+ * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
+ * \param metRidTyp metric storage (classic or special)
+ *
+ * \return 0 if fail, 1 otherwise
+ *
+ * Split 3 opposite edges in a tetra
+ *
+ */
+int _MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],char metRidTyp){
+  MMG5_pTetra          pt[5];
+  MMG5_xTetra          xt[5];
+  MMG5_pxTetra         pxt0;
+  char                 flg;
+  int                  iel;
+  int                  newtet[5];
+  unsigned char        imin12,imin03,tau[4],sym[4],symed[6],ip0,ip1,ip2,ip3,ie0,ie1;
+  unsigned char        ie2,ie3,ie4,ie5,isxt[5],firstxt,i;
+  const unsigned char *taued;
+
+  pt[0]  = &mesh->tetra[k];
+  flg = pt[0]->flag;
+  pt[0]->flag  = 0;
+  newtet[0]=k;
+
+  // To avoid warning about potentially uninitialized value for newtet[4]
+  newtet[4] = 0;
+
+  /* Set permutation /symmetry of vertices : generic case : 35 */
+  _MMG3D_configSplit3op(pt[0],vx,tau,taued,sym,symed,&ip0,&ip1,&ip2,&ip3,
+                        &ie0,&ie1,&ie2,&ie3,&ie4,&ie5,&imin03,&imin12);
 
   /* Create new elements according to the current configuration */
   iel = _MMG3D_newElt(mesh);
