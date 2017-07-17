@@ -3704,6 +3704,126 @@ int _MMG5_split4sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp)
  * \param met pointer toward the metric structure.
  * \param k index of element to split.
  * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
+ *
+ * \return 0 if the split fail, 1 otherwise
+ *
+ *  Simulate split of 4 edges in opposite configuration.
+ *
+ */
+int _MMG3D_split4op_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
+  MMG5_pTetra         pt,pt0;
+  double              vold,vnew;
+  unsigned char       tau[4];
+  unsigned char       imin01,imin23;
+  const unsigned char *taued;
+
+  pt  = &mesh->tetra[k];
+  pt0 = &mesh->tetra[0];
+  vold = _MMG5_orvol(mesh->point,pt->v);
+
+  if ( vold < _MMG5_EPSOK ) return 0;
+
+  /* Set permutation of vertices : reference configuration 30 */
+  tau[0] = 0 ; tau[1] = 1 ; tau[2] = 2 ; tau[3] = 3;
+  taued = &MMG5_permedge[0][0];
+
+  switch(pt->flag){
+  case 45:
+    tau[0] = 1 ; tau[1] = 3 ; tau[2] = 2 ; tau[3] = 0;
+    taued = &MMG5_permedge[5][0];
+    break;
+
+  case 51:
+    tau[0] = 1 ; tau[1] = 2 ; tau[2] = 0 ; tau[3] = 3;
+    taued = &MMG5_permedge[4][0];
+    break;
+  }
+
+  imin01 = (pt->v[tau[0]] < pt->v[tau[1]]) ? tau[0] : tau[1];
+  imin23 = (pt->v[tau[2]] < pt->v[tau[3]]) ? tau[2] : tau[3];
+
+  /* Generic formulation for split of 4 edges, with no 3 edges lying on the same
+   * face */
+  memcpy(pt0,pt,sizeof(MMG5_Tetra));
+  if ( imin01 == tau[0] ) {
+    pt0->v[tau[2]] = vx[taued[3]]; pt0->v[tau[3]] = vx[taued[4]];
+    vnew = _MMG5_orvol(mesh->point,pt0->v);
+    if ( vnew < _MMG5_EPSOK )  return(0);
+
+    memcpy(pt0,pt,sizeof(MMG5_Tetra));
+    pt0->v[tau[1]] = vx[taued[4]]; pt0->v[tau[2]] = vx[taued[3]];
+    pt0->v[tau[3]] = vx[taued[2]];
+    vnew = _MMG5_orvol(mesh->point,pt0->v);
+    if ( vnew < _MMG5_EPSOK )  return(0);
+
+    memcpy(pt0,pt,sizeof(MMG5_Tetra));
+    pt0->v[tau[1]] = vx[taued[3]]; pt0->v[tau[2]] = vx[taued[1]];
+    pt0->v[tau[3]] = vx[taued[2]];
+    vnew = _MMG5_orvol(mesh->point,pt0->v);
+    if ( vnew < _MMG5_EPSOK )  return(0);
+  }
+  else {
+    pt0->v[tau[2]] = vx[taued[1]]; pt0->v[tau[3]] = vx[taued[2]];
+    vnew = _MMG5_orvol(mesh->point,pt0->v);
+    if ( vnew < _MMG5_EPSOK )  return(0);
+
+    memcpy(pt0,pt,sizeof(MMG5_Tetra));
+    pt0->v[tau[0]] = vx[taued[1]]; pt0->v[tau[2]] = vx[taued[3]];
+    pt0->v[tau[3]] = vx[taued[2]];
+    vnew = _MMG5_orvol(mesh->point,pt0->v);
+    if ( vnew < _MMG5_EPSOK )  return(0);
+
+    memcpy(pt0,pt,sizeof(MMG5_Tetra));
+    pt0->v[tau[0]] = vx[taued[2]]; pt0->v[tau[2]] = vx[taued[3]];
+    pt0->v[tau[3]] = vx[taued[4]];
+    vnew = _MMG5_orvol(mesh->point,pt0->v);
+    if ( vnew < _MMG5_EPSOK )  return(0);
+  }
+
+  memcpy(pt0,pt,sizeof(MMG5_Tetra));
+  if ( imin23 == tau[2] ) {
+    pt0->v[tau[0]] = vx[taued[2]]; pt0->v[tau[1]] = vx[taued[4]];
+    vnew = _MMG5_orvol(mesh->point,pt0->v);
+    if ( vnew < _MMG5_EPSOK )  return(0);
+
+    memcpy(pt0,pt,sizeof(MMG5_Tetra));
+    pt0->v[tau[0]] = vx[taued[2]]; pt0->v[tau[1]] = vx[taued[3]];
+    pt0->v[tau[3]] = vx[taued[4]];
+    vnew = _MMG5_orvol(mesh->point,pt0->v);
+    if ( vnew < _MMG5_EPSOK )  return(0);
+
+    memcpy(pt0,pt,sizeof(MMG5_Tetra));
+    pt0->v[tau[0]] = vx[taued[1]]; pt0->v[tau[1]] = vx[taued[3]];
+    pt0->v[tau[3]] = vx[taued[2]];
+    vnew = _MMG5_orvol(mesh->point,pt0->v);
+    if ( vnew < _MMG5_EPSOK )  return(0);
+  }
+  else {
+    pt0->v[tau[0]] = vx[taued[1]]; pt0->v[tau[1]] = vx[taued[3]];
+    vnew = _MMG5_orvol(mesh->point,pt0->v);
+    if ( vnew < _MMG5_EPSOK )  return(0);
+
+    memcpy(pt0,pt,sizeof(MMG5_Tetra));
+    pt0->v[tau[0]] = vx[taued[2]]; pt0->v[tau[1]] = vx[taued[3]];
+    pt0->v[tau[2]] = vx[taued[1]];
+    vnew = _MMG5_orvol(mesh->point,pt0->v);
+    if ( vnew < _MMG5_EPSOK )  return(0);
+
+    memcpy(pt0,pt,sizeof(MMG5_Tetra));
+    pt0->v[tau[0]] = vx[taued[2]]; pt0->v[tau[1]] = vx[taued[4]];
+    pt0->v[tau[2]] = vx[taued[3]];
+    vnew = _MMG5_orvol(mesh->point,pt0->v);
+    if ( vnew < _MMG5_EPSOK )  return(0);
+  }
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param k index of element to split.
+ * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
  * \param metRidTyp metric storage (classic or special)
  *
  * \return 0 if fail, 1 otherwise
@@ -3970,6 +4090,146 @@ int _MMG5_split4op(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp)
 }
 
 /**
+ * \param pt initial tetra
+ * \param vx index of points to insert along edges
+ * \param tau vertices permutation
+ * \param taued edges permutation
+ * \param imin minimal index of vertices \a tau[0] and \a tau[1]
+ *
+ * Set permutation of vertices for the split of 5 edges.
+ * Reference configuration is 62.
+ *
+ */
+static inline
+void _MMG3D_configSplit5(MMG5_pTetra pt,int vx[6],unsigned char tau[4],
+                         const unsigned char *taued,unsigned char *imin) {
+
+  /* set permutation of vertices and edges ; reference configuration : 62 */
+  tau[0] = 0 ; tau[1] = 1 ; tau[2] = 2 ; tau[3] = 3;
+  taued = &MMG5_permedge[0][0];
+
+  switch(pt->flag) {
+  case 61:
+    tau[0] = 2 ; tau[1] = 0 ; tau[2] = 1 ; tau[3] = 3;
+    taued = &MMG5_permedge[6][0];
+    break;
+
+  case 59:
+    tau[0] = 0 ; tau[1] = 3 ; tau[2] = 1 ; tau[3] = 2;
+    taued = &MMG5_permedge[2][0];
+    break;
+
+  case 55:
+    tau[0] = 1 ; tau[1] = 2 ; tau[2] = 0 ; tau[3] = 3;
+    taued = &MMG5_permedge[4][0];
+    break;
+
+  case 47:
+    tau[0] = 3 ; tau[1] = 1 ; tau[2] = 0 ; tau[3] = 2;
+    taued = &MMG5_permedge[10][0];
+    break;
+
+  case 31:
+    tau[0] = 3 ; tau[1] = 2 ; tau[2] = 1 ; tau[3] = 0;
+    taued = &MMG5_permedge[11][0];
+    break;
+  }
+
+  /* Generic formulation of split of 5 edges */
+  (*imin) = (pt->v[tau[0]] < pt->v[tau[1]]) ? tau[0] : tau[1];
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param k index of element to split.
+ * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
+ *
+ * \return 0 if the split fail, 1 otherwise
+ *
+ *  Simulate split of 5 edges.
+ *
+ */
+int _MMG3D_split5_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
+  MMG5_pTetra         pt,pt0;
+  double              vold,vnew;
+  unsigned char       tau[4];
+  unsigned char       imin;
+  const unsigned char *taued = NULL;
+
+  pt  = &mesh->tetra[k];
+  pt0 = &mesh->tetra[0];
+  vold = _MMG5_orvol(mesh->point,pt->v);
+
+  if ( vold < _MMG5_EPSOK ) return 0;
+
+  /* Set permutation of vertices : reference configuration : 62 */
+  _MMG3D_configSplit5(pt,vx,tau,taued,&imin);
+
+  /* Generic formulation of split of 5 edges */
+  memcpy(pt0,pt,sizeof(MMG5_Tetra));
+  pt0->v[tau[0]] = vx[taued[2]]; pt0->v[tau[1]] = vx[taued[4]];
+  pt0->v[tau[2]] = vx[taued[5]];
+  vnew = _MMG5_orvol(mesh->point,pt0->v);
+  if ( vnew < _MMG5_EPSOK )  return(0);
+
+  memcpy(pt0,pt,sizeof(MMG5_Tetra));
+  pt0->v[tau[0]] = vx[taued[1]]; pt0->v[tau[1]] = vx[taued[3]];
+  pt0->v[tau[3]] = vx[taued[5]];
+  vnew = _MMG5_orvol(mesh->point,pt0->v);
+  if ( vnew < _MMG5_EPSOK )  return(0);
+
+  memcpy(pt0,pt,sizeof(MMG5_Tetra));
+  pt0->v[tau[0]] = vx[taued[2]]; pt0->v[tau[1]] = vx[taued[4]];
+  vnew = _MMG5_orvol(mesh->point,pt0->v);
+  if ( vnew < _MMG5_EPSOK )  return(0);
+
+  memcpy(pt0,pt,sizeof(MMG5_Tetra));
+  pt0->v[tau[0]] = vx[taued[2]]; pt0->v[tau[1]] = vx[taued[3]];
+  pt0->v[tau[2]] = vx[taued[1]]; pt0->v[tau[3]] = vx[taued[5]];
+  vnew = _MMG5_orvol(mesh->point,pt0->v);
+  if ( vnew < _MMG5_EPSOK )  return(0);
+
+  memcpy(pt0,pt,sizeof(MMG5_Tetra));
+  if ( imin == tau[0] ) {
+    pt0->v[tau[2]] = vx[taued[3]]; pt0->v[tau[3]] = vx[taued[4]];
+    vnew = _MMG5_orvol(mesh->point,pt0->v);
+    if ( vnew < _MMG5_EPSOK )  return(0);
+
+    memcpy(pt0,pt,sizeof(MMG5_Tetra));
+    pt0->v[tau[1]] = vx[taued[4]]; pt0->v[tau[2]] = vx[taued[3]];
+    pt0->v[tau[3]] = vx[taued[2]];
+    vnew = _MMG5_orvol(mesh->point,pt0->v);
+    if ( vnew < _MMG5_EPSOK )  return(0);
+
+    memcpy(pt0,pt,sizeof(MMG5_Tetra));
+    pt0->v[tau[1]] = vx[taued[3]]; pt0->v[tau[2]] = vx[taued[1]];
+    pt0->v[tau[3]] = vx[taued[2]];
+    vnew = _MMG5_orvol(mesh->point,pt0->v);
+    if ( vnew < _MMG5_EPSOK )  return(0);
+  }
+  else {
+    pt0->v[tau[2]] = vx[taued[1]]; pt0->v[tau[3]] = vx[taued[2]];
+    vnew = _MMG5_orvol(mesh->point,pt0->v);
+    if ( vnew < _MMG5_EPSOK )  return(0);
+
+    memcpy(pt0,pt,sizeof(MMG5_Tetra));
+    pt0->v[tau[0]] = vx[taued[2]]; pt0->v[tau[2]] = vx[taued[3]];
+    pt0->v[tau[3]] = vx[taued[4]];
+    vnew = _MMG5_orvol(mesh->point,pt0->v);
+    if ( vnew < _MMG5_EPSOK )  return(0);
+
+    memcpy(pt0,pt,sizeof(MMG5_Tetra));
+    pt0->v[tau[0]] = vx[taued[1]]; pt0->v[tau[2]] = vx[taued[3]];
+    pt0->v[tau[3]] = vx[taued[2]];
+    vnew = _MMG5_orvol(mesh->point,pt0->v);
+    if ( vnew < _MMG5_EPSOK )  return(0);
+  }
+
+  return 1;
+}
+
+/**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
  * \param k index of element to split.
@@ -4027,39 +4287,9 @@ int _MMG5_split5(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
   }
 
   /* set permutation of vertices and edges ; reference configuration : 62 */
-  tau[0] = 0 ; tau[1] = 1 ; tau[2] = 2 ; tau[3] = 3;
-  taued = &MMG5_permedge[0][0];
-
-  switch(flg) {
-  case 61:
-    tau[0] = 2 ; tau[1] = 0 ; tau[2] = 1 ; tau[3] = 3;
-    taued = &MMG5_permedge[6][0];
-    break;
-
-  case 59:
-    tau[0] = 0 ; tau[1] = 3 ; tau[2] = 1 ; tau[3] = 2;
-    taued = &MMG5_permedge[2][0];
-    break;
-
-  case 55:
-    tau[0] = 1 ; tau[1] = 2 ; tau[2] = 0 ; tau[3] = 3;
-    taued = &MMG5_permedge[4][0];
-    break;
-
-  case 47:
-    tau[0] = 3 ; tau[1] = 1 ; tau[2] = 0 ; tau[3] = 2;
-    taued = &MMG5_permedge[10][0];
-    break;
-
-  case 31:
-    tau[0] = 3 ; tau[1] = 2 ; tau[2] = 1 ; tau[3] = 0;
-    taued = &MMG5_permedge[11][0];
-    break;
-  }
+  _MMG3D_configSplit5(pt[0],vx,tau,taued,&imin);
 
   /* Generic formulation of split of 5 edges */
-  imin = (pt[0]->v[tau[0]] < pt[0]->v[tau[1]]) ? tau[0] : tau[1];
-
   pt[0]->v[tau[0]] = vx[taued[2]] ;   pt[0]->v[tau[1]] = vx[taued[4]] ;   pt[0]->v[tau[2]] = vx[taued[5]];
   xt[0].tag[taued[0]] = 0;  xt[0].tag[taued[1]] = 0;
   xt[0].tag[taued[3]] = 0;  xt[0].edg[taued[0]] = 0;
@@ -4235,6 +4465,74 @@ int _MMG5_split5(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
       pt[i]->qual=_MMG5_orcal(mesh,met,newtet[i]);
     }
   }
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param k index of element to split.
+ * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
+ *
+ * \return 0 if the split fail, 1 otherwise
+ *
+ *  Simulate split of 6 edges.
+ *
+ */
+int _MMG3D_split6_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
+  MMG5_pTetra         pt,pt0;
+  double              vold,vnew;
+
+  pt  = &mesh->tetra[k];
+  pt0 = &mesh->tetra[0];
+  vold = _MMG5_orvol(mesh->point,pt->v);
+
+  if ( vold < _MMG5_EPSOK ) return 0;
+
+  /* Modify first tetra */
+  pt0->v[1] = vx[0]; pt0->v[2] = vx[1]; pt0->v[3] = vx[2];
+  vnew = _MMG5_orvol(mesh->point,pt0->v);
+  if ( vnew < _MMG5_EPSOK )  return(0);
+
+  /* Modify second tetra */
+  pt0->v[0] = vx[0]; pt0->v[2] = vx[3]; pt0->v[3] = vx[4];
+  vnew = _MMG5_orvol(mesh->point,pt0->v);
+  if ( vnew < _MMG5_EPSOK )  return(0);
+
+  /* Modify 3rd tetra */
+  pt0->v[0] = vx[1]; pt0->v[1] = vx[3]; pt0->v[3] = vx[5];
+  vnew = _MMG5_orvol(mesh->point,pt0->v);
+  if ( vnew < _MMG5_EPSOK )  return(0);
+
+  /* Modify 4th tetra */
+  pt0->v[0] = vx[2]; pt0->v[1] = vx[4]; pt0->v[2] = vx[5];
+  vnew = _MMG5_orvol(mesh->point,pt0->v);
+  if ( vnew < _MMG5_EPSOK )  return(0);
+
+  /* Modify 5th tetra */
+  pt0->v[0] = vx[0]; pt0->v[1] = vx[3]; pt0->v[2] = vx[1];
+  pt0->v[3] = vx[2];
+  vnew = _MMG5_orvol(mesh->point,pt0->v);
+  if ( vnew < _MMG5_EPSOK )  return(0);
+
+  /* Modify 6th tetra */
+  pt0->v[0] = vx[2]; pt0->v[1] = vx[0]; pt0->v[2] = vx[3];
+  pt0->v[3] = vx[4];
+  vnew = _MMG5_orvol(mesh->point,pt0->v);
+  if ( vnew < _MMG5_EPSOK )  return(0);
+
+  /* Modify 7th tetra */
+  pt0->v[0] = vx[2]; pt0->v[1] = vx[3]; pt0->v[2] = vx[1];
+  pt0->v[3] = vx[5];
+  vnew = _MMG5_orvol(mesh->point,pt0->v);
+  if ( vnew < _MMG5_EPSOK )  return(0);
+
+  /* Modify last tetra */
+  pt0->v[0] = vx[2]; pt0->v[1] = vx[3]; pt0->v[2] = vx[5];
+  pt0->v[3] = vx[4];
+  vnew = _MMG5_orvol(mesh->point,pt0->v);
+  if ( vnew < _MMG5_EPSOK )  return(0);
+
   return 1;
 }
 
