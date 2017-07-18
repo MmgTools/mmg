@@ -97,6 +97,8 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
   }
   iel1 = it1 / 4;
   ifa1 = it1 % 4;
+
+  assert(it2);
   iel2 = it2 / 4;
   ifa2 = it2 % 4;
   _MMG5_tet2tri(mesh,iel1,ifa1,&tt1);
