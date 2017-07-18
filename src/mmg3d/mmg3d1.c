@@ -1860,13 +1860,14 @@ int _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,char typchk, int patternMode) {
         }
         ns += ier;
       }
+
+      if ( !MMG3D_hashTetra(mesh,1) ) {
+        fprintf(stderr,"  ## Hashing problem. Exit program.\n");
+        return(0);
+      }
     }
     else  ns = 0;
 
-    if ( !MMG3D_hashTetra(mesh,1) ) {
-      fprintf(stderr,"  ## Hashing problem. Exit program.\n");
-      return(0);
-    }
     if ( typchk == 2 && it == maxit-1 )  ++mesh->info.fem;
 
     /* collapse short edges */
