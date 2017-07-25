@@ -1392,15 +1392,6 @@ int _MMG3D_coquilFaceFirstLoop(MMG5_pMesh mesh,int start,int na,int nb,char ifac
     }
     else {
       (*nbdy)++;
-      if ( (!silent) && ( (*adj)!=start ) ) {
-        // Algiane: for a manifold edge 2 cases :
-        // 1) the shell is open and we have more than 3 tri sharing the edge
-        // (highly non-manifold)
-        // 2) we have a non-manifold shape immersed in a domain (3 triangles
-        // sharing the edge and a closed shell)
-        printf("  ## Warning: you have more than 2 boundaries in the shell of your edge.\n");
-        printf("  Problem may occur during remesh process.\n");
-      }
     }
 
   } while ( (*adj) && ((*adj) != start) );
@@ -1505,7 +1496,19 @@ int _MMG5_coquilface(MMG5_pMesh mesh,int start,char iface,int ia,int *list,
     if ( !nbdy ) {
       _MMG5_coquilFaceErrorMessage(mesh, (*it1)/4, (*it2)/4);
       return(-1);
+    } else if ( nbdy > 1 ) {
+      if ( !silent ) {
+        // Algiane: for a manifold edge 2 cases :
+        // 1) the shell is open and we have more than 3 tri sharing the edge
+        // (highly non-manifold)
+        // 2) we have a non-manifold shape immersed in a domain (3 triangles
+        // sharing the edge and a closed shell)
+        printf("  ## Warning: you have %d boundaries in the shell of your edge.\n",nbdy+1);
+        printf("  Problem may occur during remesh process.\n");
+      }
+
     }
+
     return (2*ilist);
   }
 

@@ -131,11 +131,35 @@ int _MMG3D_dichoto(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
     case 1: case 2: case 4: case 8: case 16: case 32:
       ier = _MMG3D_split1_sim(mesh,met,k,vx);
       break;
+    case 48: case 24: case 40: case 6: case 34: case 36:
+    case 20: case 5: case 17: case 9: case 3: case 10:
+      ier =_MMG3D_split2sf_sim(mesh,met,k,vx);
+      break;
+    case 33: case 18: case 12:
+      ier = _MMG3D_split2_sim(mesh,met,k,vx);
+      break;
     case 11: case 21: case 38: case 56:
       ier = _MMG3D_split3_sim(mesh,met,k,vx);
       break;
-    default:
-      ier = _MMG5_split2sf_sim(mesh,met,k,vx);
+    case 7: case 25: case 42: case 52:
+      ier =_MMG3D_split3cone_sim(mesh,met,k,vx);
+      break;
+    case 35: case 19: case 13: case 37: case 22: case 28: case 26:
+    case 14: case 49: case 50: case 44: case 41:
+      ier = _MMG3D_split3op_sim(mesh,met,k,vx);
+      break;
+    case 23: case 29: case 53: case 60: case 57: case 58:
+    case 27: case 15: case 43: case 39: case 54: case 46:
+      ier = _MMG3D_split4sf_sim(mesh,met,k,vx);
+      break;
+    case 30: case 45: case 51:
+      ier = _MMG3D_split4op_sim(mesh,met,k,vx);
+      break;
+    case 62: case 61: case 59: case 55: case 47: case 31:
+      ier = _MMG3D_split5_sim(mesh,met,k,vx);
+      break;
+    case 63:
+      ier = _MMG3D_split6_sim(mesh,met,k,vx);
       break;
     }
     if ( ier )
@@ -162,11 +186,35 @@ int _MMG3D_dichoto(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
   case 1: case 2: case 4: case 8: case 16: case 32:
     ier = _MMG3D_split1_sim(mesh,met,k,vx);
     break;
+  case 48: case 24: case 40: case 6: case 34: case 36:
+  case 20: case 5: case 17: case 9: case 3: case 10:
+    ier =_MMG3D_split2sf_sim(mesh,met,k,vx);
+    break;
+  case 33: case 18: case 12:
+    ier = _MMG3D_split2_sim(mesh,met,k,vx);
+    break;
   case 11: case 21: case 38: case 56:
     ier = _MMG3D_split3_sim(mesh,met,k,vx);
     break;
-  default:
-    ier = _MMG5_split2sf_sim(mesh,met,k,vx);
+  case 7: case 25: case 42: case 52:
+    ier =_MMG3D_split3cone_sim(mesh,met,k,vx);
+    break;
+  case 35: case 19: case 13: case 37: case 22: case 28: case 26:
+  case 14: case 49: case 50: case 44: case 41:
+    ier = _MMG3D_split3op_sim(mesh,met,k,vx);
+    break;
+  case 23: case 29: case 53: case 60: case 57: case 58:
+  case 27: case 15: case 43: case 39: case 54: case 46:
+    ier = _MMG3D_split4sf_sim(mesh,met,k,vx);
+    break;
+  case 30: case 45: case 51:
+    ier = _MMG3D_split4op_sim(mesh,met,k,vx);
+    break;
+  case 62: case 61: case 59: case 55: case 47: case 31:
+    ier = _MMG3D_split5_sim(mesh,met,k,vx);
+    break;
+  case 63:
+    ier = _MMG3D_split6_sim(mesh,met,k,vx);
     break;
   }
   return(ier);
@@ -1554,11 +1602,35 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
       case 1: case 2: case 4: case 8: case 16: case 32:
         ier = _MMG3D_split1_sim(mesh,met,k,vx);
         break;
+      case 48: case 24: case 40: case 6: case 34: case 36:
+      case 20: case 5: case 17: case 9: case 3: case 10:
+        ier =_MMG3D_split2sf_sim(mesh,met,k,vx);
+        break;
+      case 33: case 18: case 12:
+        ier = _MMG3D_split2_sim(mesh,met,k,vx);
+        break;
       case 11: case 21: case 38: case 56:
         ier = _MMG3D_split3_sim(mesh,met,k,vx);
         break;
-      default:
-        ier = _MMG5_split2sf_sim(mesh,met,k,vx);
+      case 7: case 25: case 42: case 52:
+        ier =_MMG3D_split3cone_sim(mesh,met,k,vx);
+        break;
+      case 35: case 19: case 13: case 37: case 22: case 28: case 26:
+      case 14: case 49: case 50: case 44: case 41:
+        ier = _MMG3D_split3op_sim(mesh,met,k,vx);
+        break;
+      case 23: case 29: case 53: case 60: case 57: case 58:
+      case 27: case 15: case 43: case 39: case 54: case 46:
+        ier = _MMG3D_split4sf_sim(mesh,met,k,vx);
+        break;
+      case 30: case 45: case 51:
+        ier = _MMG3D_split4op_sim(mesh,met,k,vx);
+        break;
+      case 62: case 61: case 59: case 55: case 47: case 31:
+        ier = _MMG3D_split5_sim(mesh,met,k,vx);
+        break;
+      case 63:
+        ier = _MMG3D_split6_sim(mesh,met,k,vx);
         break;
       }
       if ( ier )  continue;
@@ -1573,14 +1645,12 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           for (ia=0,i=0; i<3; i++) {
             for (j=i+1; j<4; j++,ia++) {
               if ( vx[ia] > 0 ) {
-                if ( it < 20 ) {
-                  p1 = &mesh->point[pt->v[_MMG5_iare[ia][0]]];
-                  p2 = &mesh->point[pt->v[_MMG5_iare[ia][1]]];
-                  ppt = &mesh->point[vx[ia]];
-                  ppt->c[0] = 0.5 * (p1->c[0] + p2->c[0]);
-                  ppt->c[1] = 0.5 * (p1->c[1] + p2->c[1]);
-                  ppt->c[2] = 0.5 * (p1->c[2] + p2->c[2]);
-                }
+                p1 = &mesh->point[pt->v[_MMG5_iare[ia][0]]];
+                p2 = &mesh->point[pt->v[_MMG5_iare[ia][1]]];
+                ppt = &mesh->point[vx[ia]];
+                ppt->c[0] = 0.5 * (p1->c[0] + p2->c[0]);
+                ppt->c[1] = 0.5 * (p1->c[1] + p2->c[1]);
+                ppt->c[2] = 0.5 * (p1->c[2] + p2->c[2]);
               }
             }
           }
@@ -1632,17 +1702,57 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         }
       }
     }
-    switch (pt->flag) {
-    case 1: case 2: case 4: case 8: case 16: case 32:  /* 1 edge split */
+   switch (pt->flag) {
+    case 1: case 2: case 4: case 8: case 16: case 32: /* 1 edge split */
       if ( ! _MMG5_split1(mesh,met,k,vx,typchk-1) ) return -1;
       ns++;
       break;
-    case 11: case 21: case 38: case 56: /* 1 face (3 edges) subdivided */
-      if ( !_MMG5_split3(mesh,met,k,vx,typchk-1) ) return -1;
+    case 48: case 24: case 40: case 6: case 34: case 36:
+    case 20: case 5: case 17: case 9: case 3: case 10: /* 2 edges (same face) split */
+      if ( ! _MMG5_split2sf(mesh,met,k,vx,typchk-1) ) return -1;
       ns++;
       break;
-    default:
-      if ( ! _MMG5_split2sf(mesh,met,k,vx,typchk-1) ) return -1;
+
+    case 33: case 18: case 12: /* 2 opposite edges split */
+      if ( ! _MMG5_split2(mesh,met,k,vx,typchk-1) ) return -1;
+      ns++;
+      break;
+
+    case 11: case 21: case 38: case 56: /* 3 edges on the same faces splitted */
+      if ( ! _MMG5_split3(mesh,met,k,vx,typchk-1) ) return -1;
+      ns++;
+      break;
+
+    case 7: case 25: case 42: case 52: /* 3 edges on conic configuration splitted */
+      if ( ! _MMG5_split3cone(mesh,met,k,vx,typchk-1) ) return -1;
+      ns++;
+      break;
+
+    case 35: case 19: case 13: case 37: case 22: case 28: case 26:
+    case 14: case 49: case 50: case 44: case 41: /* 3 edges on opposite configuration splitted */
+      if ( ! _MMG5_split3op(mesh,met,k,vx,typchk-1) ) return -1;
+      ns++;
+      break;
+
+    case 23: case 29: case 53: case 60: case 57: case 58:
+    case 27: case 15: case 43: case 39: case 54: case 46: /* 4 edges with 3 lying on the same face splitted */
+      if ( ! _MMG5_split4sf(mesh,met,k,vx,typchk-1) ) return -1;
+      ns++;
+      break;
+
+      /* 4 edges with no 3 lying on the same face splitted */
+    case 30: case 45: case 51:
+      if ( ! _MMG5_split4op(mesh,met,k,vx,typchk-1) ) return -1;
+      ns++;
+      break;
+
+    case 62: case 61: case 59: case 55: case 47: case 31: /* 5 edges split */
+      if ( ! _MMG5_split5(mesh,met,k,vx,typchk-1) ) return -1;
+      ns++;
+      break;
+
+    case 63: /* 6 edges split */
+      if ( ! _MMG5_split6(mesh,met,k,vx,typchk-1) ) return -1;
       ns++;
       break;
     }
@@ -1775,13 +1885,14 @@ int _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,char typchk, int patternMode) {
         }
         ns += ier;
       }
+
+      if ( !MMG3D_hashTetra(mesh,1) ) {
+        fprintf(stderr,"  ## Hashing problem. Exit program.\n");
+        return(0);
+      }
     }
     else  ns = 0;
 
-    if ( !MMG3D_hashTetra(mesh,1) ) {
-      fprintf(stderr,"  ## Hashing problem. Exit program.\n");
-      return(0);
-    }
     if ( typchk == 2 && it == maxit-1 )  ++mesh->info.fem;
 
     /* collapse short edges */
