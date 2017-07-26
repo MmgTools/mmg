@@ -161,6 +161,7 @@ int _MMG5_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree, int
   p0->c[2] = ppt0->c[2];
   for (k=0; k<ilist; k++) {
     (&mesh->tetra[list[k]/4])->qual=callist[k];
+    (&mesh->tetra[list[k]/4])->mark=mesh->mark;
   }
 
   _MMG5_SAFE_FREE(callist);
@@ -188,7 +189,7 @@ int _MMG5_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree, int
  */
 int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree, int *listv,
                           int ilistv,int *lists,int ilists,
-                          int improve) {
+                          int improveSurf, int improveVol) {
   MMG5_pTetra       pt,pt0;
   MMG5_pxTetra      pxt;
   MMG5_pPoint       p0,p1,p2,ppt0;
@@ -599,7 +600,7 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
     _MMG5_SAFE_FREE(callist);
     return(0);
   }
-  else if (improve && calnew < 1.02*calold) {
+  else if (improveSurf && calnew < 1.02*calold) {
     _MMG5_SAFE_FREE(callist);
     return(0);
   }
@@ -635,7 +636,7 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
     _MMG5_SAFE_FREE(callist);
     return(0);
   }
-  else if (improve && calnew < calold) {
+  else if (improveVol && calnew < calold) {
     _MMG5_SAFE_FREE(callist);
     return(0);
   }
@@ -660,6 +661,7 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
 
   for(l=0; l<ilistv; l++){
     (&mesh->tetra[listv[l]/4])->qual= callist[l];
+    (&mesh->tetra[listv[l]/4])->mark= mesh->mark;
   }
   _MMG5_SAFE_FREE(callist);
   return(1);
@@ -1005,6 +1007,7 @@ int _MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
 
   for( l=0 ; l<ilistv ; l++ ){
     (&mesh->tetra[listv[l]/4])->qual = callist[l];
+    (&mesh->tetra[listv[l]/4])->mark = mesh->mark;
   }
   _MMG5_SAFE_FREE(callist);
   return(1);
@@ -1349,6 +1352,7 @@ int _MMG5_movbdynompt_ani(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree, 
 
   for(l=0; l<ilistv; l++){
     (&mesh->tetra[listv[l]/4])->qual = callist[l];
+    (&mesh->tetra[listv[l]/4])->mark = mesh->mark;
   }
   _MMG5_SAFE_FREE(callist);
   return(1);
@@ -1705,6 +1709,7 @@ int _MMG5_movbdyridpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
 
   for(l=0; l<ilistv; l++){
     (&mesh->tetra[listv[l]/4])->qual = callist[l];
+    (&mesh->tetra[listv[l]/4])->mark = mesh->mark;
   }
   _MMG5_SAFE_FREE(callist);
   return(1);

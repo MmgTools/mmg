@@ -328,7 +328,7 @@ char _MMG5_chkedg(MMG5_pMesh mesh,MMG5_Tria *pt,char ori, double hmax,
         n[i][2] *= -1.0;
       }
     }
-    else if (p[i]->tag & MG_NOM){
+    else if ( (p[i]->tag & MG_NOM) || (p[i]->tag & MG_OPNBDY) ){
       _MMG5_nortri(mesh,pt,n[i]);
       if(!ori) {
         n[i][0] *= -1.0;
@@ -603,6 +603,8 @@ int _MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double crit,double declic,
     for (k=1; k<=mesh->ne; k++) {
       pt = &mesh->tetra[k];
       if ( !MG_EOK(pt) || (pt->tag & MG_REQ) )  continue;
+      else if ( pt->mark < mesh->mark-2 )  continue;
+
       if ( pt->qual > declic/*0.0288675*/ /*0.6/_MMG3D_ALPHAD*/ )  continue;
 
       for (i=0; i<6; i++) {
@@ -634,35 +636,28 @@ int _MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double crit,double declic,
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
  * \param octree pointer toward the octree structure.
- * \param maxitin maximum number of iteration.
+ * \param clickSurf triangle quality threshold under which we want to move
+ * \param clickVol  tetra    quality threshold under which we want to move
+ * \param moveVol internal move
+ * \param improveSurf forbid surface degradation during the move
+ * \param improveVolSurf forbid volume degradation during the surfacic move
+ * \param improveVol forbid volume degradation during the move
+ * \param maxit maximum number of iteration.
  * \return -1 if failed, number of moved points otherwise.
  *
  * Analyze tetrahedra and move points so as to make mesh more uniform.
- * In delaunay mode, a negative maxitin means that we don't move internal nodes.
  *
  */
-int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,int maxitin) {
+int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,
+                 double clickSurf,double clickVol,int moveVol, int improveSurf,
+                 int improveVolSurf, int improveVol, int maxit) {
   MMG5_pTetra        pt;
   MMG5_pPoint        ppt;
   MMG5_pxTetra       pxt;
-  double        *n;
+  MMG5_Tria          tt;
+  double        *n,caltri;
   int           i,k,ier,nm,nnm,ns,lists[MMG3D_LMAX+2],listv[MMG3D_LMAX+2],ilists,ilistv,it;
-  int           improve;
   unsigned char j,i0,base;
-  int           internal,maxit;
-
-  if ( maxitin<0 ) {
-    internal = 0;
-    maxit = abs(maxitin);
-  } else {
-    internal=1;
-    maxit = maxitin;
-  }
-  if ( maxit != 1 ) {
-    improve   = 1;
-  } else {
-    improve = 0;
-  }
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
     fprintf(stdout,"  ** OPTIMIZING MESH\n");
@@ -678,6 +673,7 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,int maxiti
     for (k=1; k<=mesh->ne; k++) {
       pt = &mesh->tetra[k];
       if ( !MG_EOK(pt) || pt->ref < 0 || (pt->tag & MG_REQ) )   continue;
+      else if ( pt->mark < mesh->mark-2 )  continue;
 
       /* point j on face i */
       for (i=0; i<4; i++) {
@@ -686,32 +682,48 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,int maxiti
             pxt = &mesh->xtetra[pt->xt];
           }
           else  pxt = 0;
+
           i0  = _MMG5_idir[i][j];
           ppt = &mesh->point[pt->v[i0]];
           if ( ppt->flag == base )  continue;
           else if ( MG_SIN(ppt->tag) )  continue;
 
+          if( pt->xt && (pxt->ftag[i] & MG_BDY)) {
+            _MMG5_tet2tri(mesh,k,i,&tt);
+            caltri = _MMG5_caltri(mesh,met,&tt);
+
+            if ( caltri >= clickSurf) {
+              j = 3;
+              continue;
+            }
+          }
           if ( maxit != 1 ) {
             ppt->flag = base;
           }
           ier = 0;
           if ( ppt->tag & MG_BDY ) {
             /* Catch a boundary point by a boundary face */
-            if ( !pt->xt || !(MG_BDY & pxt->ftag[i]) )  continue;
+            if ( (!pt->xt) || !(MG_BDY & pxt->ftag[i]) )  continue;
             else if( ppt->tag & MG_NOM ){
-              if( mesh->adja[4*(k-1)+1+i] ) continue;
+              if ( mesh->adja[4*(k-1)+1+i] ) continue;
               ier=_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,1);
               if( !ier )  continue;
               else if ( ier>0 )
-                ier = _MMG5_movbdynompt(mesh,met,octree,listv,ilistv,lists,ilists,improve);
+                ier = _MMG5_movbdynompt(mesh,met,octree,listv,ilistv,lists,ilists,improveVolSurf);
               else
                 return(-1);
             }
             else if ( ppt->tag & MG_GEO ) {
-              ier=_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,0);
+              if ( ppt->tag & MG_OPNBDY ) {
+#warning to implement
+                ier=_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,0);
+              }
+              else {
+                ier=_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,0);
+              }
               if ( !ier )  continue;
               else if ( ier>0 )
-                ier = _MMG5_movbdyridpt(mesh,met,octree,listv,ilistv,lists,ilists,improve);
+                ier = _MMG5_movbdyridpt(mesh,met,octree,listv,ilistv,lists,ilists,improveVolSurf);
               else
                 return(-1);
             }
@@ -720,7 +732,7 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,int maxiti
               if ( !ier )
                 continue;
               else if ( ier>0 )
-                ier = _MMG5_movbdyrefpt(mesh,met,octree,listv,ilistv,lists,ilists,improve);
+                ier = _MMG5_movbdyrefpt(mesh,met,octree,listv,ilistv,lists,ilists,improveVolSurf);
               else
                 return(-1);
             }
@@ -743,15 +755,16 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,int maxiti
                 if ( !_MMG5_directsurfball(mesh,pt->v[i0],lists,ilists,n) )
                   continue;
               }
-              ier = _MMG5_movbdyregpt(mesh,met, octree, listv,ilistv,lists,ilists,improve);
-              if ( ier < 0 ) return -1;
+              ier = _MMG5_movbdyregpt(mesh,met,octree,listv,ilistv,
+                                      lists,ilists,improveSurf,improveVolSurf);
+              if (ier < 0 ) return -1;
               else if ( ier )  ns++;
             }
           }
-          else if ( internal ) {
+          else if ( moveVol && (pt->qual < clickVol) ) {
             ilistv = _MMG5_boulevolp(mesh,k,i0,listv);
             if ( !ilistv )  continue;
-            ier = _MMG5_movintpt(mesh,met,octree,listv,ilistv,improve);
+            ier = _MMG5_movintpt(mesh,met,octree,listv,ilistv,improveVol);
           }
           if ( ier ) {
             nm++;
@@ -931,7 +944,7 @@ static int _MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           }
 
           hmi2 = hmi2*hmi2;
-          if ( ll > hmi2 )  continue;
+          if ( ll > hmi2*_MMG3D_LSHRT )  continue;
         }
         else if ( typchk == 2 ) {
           ll = _MMG5_lenedg(mesh,met,_MMG5_iarf[i][j],pt);
@@ -1763,49 +1776,68 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
+ * \param nf number of swap performed.
  * \param typchk type of checking permformed.
  * \return -1 if failed, number of new points otherwise.
  *
  * Split tetra into 4 when more than 1 boundary face.
  *
  */
-static int _MMG5_anatet4(MMG5_pMesh mesh, MMG5_pSol met, char typchk) {
+static int _MMG5_anatet4(MMG5_pMesh mesh, MMG5_pSol met,int *nf, char typchk) {
   MMG5_pTetra  pt;
   MMG5_pPoint  ppt;
   MMG5_pxTetra pxt;
-  int          k,ns,nw,ier;
-  char         nf,j;
+  int          k,ns,ier;
+  char         nbdy,j;
 
-  ns = nw = 0;
+  ns = 0;
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
     if ( !MG_EOK(pt) || pt->ref < 0 || (pt->tag & MG_REQ) )   continue;
-    nf = 0;
+    nbdy = 0;
     if ( pt->xt ) {
       pxt = &mesh->xtetra[pt->xt];
       for (j=0; j<4; j++)
-        if ( ( pxt->ftag[j] & MG_BDY ) && (!(pxt->ftag[j] & MG_PARBDY)) )  nf++;
+        if ( ( pxt->ftag[j] & MG_BDY ) && (!(pxt->ftag[j] & MG_PARBDY)) )  nbdy++;
     }
-    if ( nf > 1 ) {
-      ier  = _MMG5_split4bar(mesh,met,k,typchk-1);
-      if ( !ier ) return(-1);
-      ns++;
-    }
-    else {
-      nf = 0;
-      for (j=0; j<4; j++) {
-        ppt = &mesh->point[pt->v[j]];
-        if ( ppt->tag & MG_BDY )  nf++;
+    if ( nbdy > 1 ) {
+      if ( !mesh->info.noswap ) {
+        /* Try to swap first */
+#warning remove the comment to tru to swap: but it is bugged for now
+        ier = 0;//MMG3D_swap23(mesh,met,k,typchk-1);
+        if ( ier < 0 ) {
+          return -1;
+        }
+        else if ( ier ) {
+          ++(*nf);
+          continue;
+        }
       }
-      if ( nf == 4 ) {
+
+      if ( !mesh->info.noinsert ) {
+        /* If unable to swap, try to split */
         ier  = _MMG5_split4bar(mesh,met,k,typchk-1);
         if ( !ier ) return(-1);
         ns++;
       }
     }
+    else {
+      nbdy = 0;
+      for (j=0; j<4; j++) {
+        ppt = &mesh->point[pt->v[j]];
+        if ( ppt->tag & MG_BDY )  nbdy++;
+      }
+      if ( nbdy == 4 ) {
+        if ( !mesh->info.noinsert ) {
+          ier  = _MMG5_split4bar(mesh,met,k,typchk-1);
+          if ( !ier ) return(-1);
+          ns++;
+        }
+      }
+    }
   }
   if ( (mesh->info.ddebug || abs(mesh->info.imprim) > 5) && ns > 0 )
-    fprintf(stdout,"     %7d boundary elements splitted\n",ns);
+    fprintf(stdout,"     boundary elements: %7d splitted %7d swapped\n",ns,*nf);
   return(ns);
 }
 
@@ -1830,19 +1862,19 @@ int _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,char typchk, int patternMode) {
   mesh->gap = 0.5;
   do {
 
+    /* split or swap tetra with more than 2 bdry faces */
+    nf = 0;
+    if ( mesh->info.fem == typchk ) {
+      ier = _MMG5_anatet4(mesh,met,&nf,typchk);
+      if ( ier < 0 )  return(0);
+    }
+    else ier = 0;
+    ns = ier;
+
+    /* memory free */
+    _MMG5_DEL_MEM(mesh,mesh->adja,(4*mesh->nemax+5)*sizeof(int));
+
     if ( !mesh->info.noinsert ) {
-
-      /* split tetra with more than 2 bdry faces */
-      if ( mesh->info.fem == typchk ) {
-        ier = _MMG5_anatet4(mesh,met,typchk);
-        if ( ier < 0 )  return(0);
-      }
-      else ier = 0;
-      ns = ier;
-
-      /* memory free */
-      _MMG5_DEL_MEM(mesh,mesh->adja,(4*mesh->nemax+5)*sizeof(int));
-
       /* analyze surface tetras */
       ier = _MMG5_anatets(mesh,met,typchk);
 
@@ -1882,20 +1914,20 @@ int _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,char typchk, int patternMode) {
 
     /* attempt to swap */
     if ( !mesh->info.noswap ) {
-      nf = _MMG5_swpmsh(mesh,met,NULL,typchk);
-      if ( nf < 0 ) {
+      ier = _MMG5_swpmsh(mesh,met,NULL,typchk);
+      if ( ier < 0 ) {
         fprintf(stderr,"  ## Unable to improve mesh. Exiting.\n");
         return(0);
       }
-      nnf += nf;
+      nf  += ier;
 
-      nf = _MMG5_swptet(mesh,met,1.1,0.0288675,NULL,typchk);
-      if ( nf < 0 ) {
+      ier = _MMG5_swptet(mesh,met,1.1,0.0288675,NULL,typchk);
+      if ( ier < 0 ) {
         fprintf(stderr,"  ## Unable to improve mesh. Exiting.\n");
         return(0);
       }
+      nf += ier;
     }
-    else  nf = 0;
 
     nnc += nc;
     nns += ns;
@@ -1906,7 +1938,7 @@ int _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,char typchk, int patternMode) {
 #endif
       fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped\n",ns,nc,nf);
     }
-    if ( it > 3 && abs(nc-ns) < 0.1 * MG_MAX(nc,ns) )  break;
+    if ( it > 3 && ( !(ns+nc) || (abs(nc-ns) < 0.1 * MG_MAX(nc,ns)) ) )  break;
   }
   while ( ++it < maxit && ns+nc+nf > 0 );
 

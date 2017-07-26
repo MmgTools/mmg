@@ -578,6 +578,10 @@ _MMG5_correction_iso(MMG5_pMesh mesh,int ip,int *list,int ilist,int nedep,double
         // MMG_cas=2; // uncomment to debug
         //printf("on trouve close ? %e %e\n",dd*dd,nn*eps2);
         if ( dd*dd < nn * eps2 )  break;
+#warning release : check that this test is valid ie not to strict (see mmg3d_CubeIso_0.5h_hminMax-out)
+        //  if(!adj)
+        //  if ( dd*dd < nn * 0.6*0.6 )  break;
+
         // MMG_cas=0; //uncomment to debug
       }
       if ( i < 4 ||  pt->tag & MG_REQ ) {
@@ -632,9 +636,19 @@ int _MMG5_cavity_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel,int ip,int* list,int 
   for (k=0; k<lon; k++) {
     mesh->tetra[list[k]/6].flag = base;
 
-    if (tref!=mesh->tetra[list[k]/6].ref) {
-      //printf("pbs coquil %d %d tet %d\n",tref,mesh->tetra[list[k]/6].ref,list[k]/6);
-      return(0);
+    if ( !mesh->info.opnbdy ) {
+      if ( tref != mesh->tetra[list[k]/6].ref ) {
+        return(0);
+      }
+    }
+    else {
+      pt = &mesh->tetra[list[k]/6];
+      if ( pt->xt ) {
+        l  = list[k]%6;
+        if ( (mesh->xtetra[pt->xt].ftag[_MMG5_ifar[l][0]] & MG_BDY) ||
+             (mesh->xtetra[pt->xt].ftag[_MMG5_ifar[l][1]] & MG_BDY) )
+          return(0);
+      }
     }
   }
   for (k=0; k<lon; k++)
@@ -665,8 +679,11 @@ int _MMG5_cavity_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel,int ip,int* list,int 
       adj >>= 2;
       voy = vois[i] % 4;
       pt  = &mesh->tetra[adj];
+
       /* boundary face */
-      if ( pt->flag == base || pt->ref != ptc->ref )  continue;
+      if ( pt->flag == base )  continue;
+      if ( pt->xt && (mesh->xtetra[pt->xt].ftag[voy] & MG_BDY) ) continue;
+
       for (j=0,l=0; j<4; j++,l+=3) {
         memcpy(&ct[l],mesh->point[pt->v[j]].c,3*sizeof(double));
       }
@@ -715,7 +732,7 @@ int _MMG5_cavity_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel,int ip,int* list,int 
 
         pt1 = &mesh->tetra[adi];
         if ( pt1->flag == base ) {
-          if ( pt1->ref != tref )  break;
+          if ( pt1->xt && (mesh->xtetra[pt1->xt].ftag[adjb[j]%4] & MG_BDY) ) break;
         }
       }
       /* store tetra */
@@ -761,7 +778,7 @@ int _MMG5_cavity_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel,int ip,int* list,int 
  *
  */
 int _MMG5_cavity_iso(MMG5_pMesh mesh,MMG5_pSol sol,int iel,int ip,int *list,int lon,double volmin) {
-  MMG5_pPoint ppt;
+  MMG5_pPoint      ppt;
   MMG5_pTetra      pt,pt1,ptc;
   double           c[3],crit,dd,eps,ray,ct[12];
   int             *adja,*adjb,k,adj,adi,voy,i,j,ilist,ipil,jel,iadr,base;
@@ -779,11 +796,22 @@ int _MMG5_cavity_iso(MMG5_pMesh mesh,MMG5_pSol sol,int iel,int ip,int *list,int 
   for (k=0; k<lon; k++) {
     mesh->tetra[list[k]/6].flag = base;
 
-    if (tref!=mesh->tetra[list[k]/6].ref) {
-      //printf("pbs coquil %d %d tet %d\n",tref,mesh->tetra[list[k]/6].ref,list[k]/6);
-      return(0);
+    if ( !mesh->info.opnbdy ) {
+      if ( tref != mesh->tetra[list[k]/6].ref ) {
+        return(0);
+      }
+    }
+    else {
+      pt = &mesh->tetra[list[k]/6];
+      if ( pt->xt ) {
+        l  = list[k]%6;
+        if ( (mesh->xtetra[pt->xt].ftag[_MMG5_ifar[l][0]] & MG_BDY) ||
+             (mesh->xtetra[pt->xt].ftag[_MMG5_ifar[l][1]] & MG_BDY) )
+          return(0);
+      }
     }
   }
+
   for (k=0; k<lon; k++)
     list[k] = list[k] / 6;
 
@@ -810,7 +838,8 @@ int _MMG5_cavity_iso(MMG5_pMesh mesh,MMG5_pSol sol,int iel,int ip,int *list,int 
       voy = vois[i] % 4;
       pt  = &mesh->tetra[adj];
       /* boundary face */
-      if ( pt->flag == base || pt->ref != ptc->ref )  continue;
+      if ( pt->flag == base )  continue;
+      if ( pt->xt && (mesh->xtetra[pt->xt].ftag[voy] & MG_BDY) ) continue;
 
       for (j=0,l=0; j<4; j++,l+=3) {
         memcpy(&ct[l],mesh->point[pt->v[j]].c,3*sizeof(double));
@@ -838,9 +867,8 @@ int _MMG5_cavity_iso(MMG5_pMesh mesh,MMG5_pSol sol,int iel,int ip,int *list,int 
         assert(adi !=jel);
 
         pt1 = &mesh->tetra[adi];
-        if ( pt1->flag == base ) {
-          if ( pt1->ref != tref )  break;
-        }
+        if ( pt1->flag == base )
+          if ( pt1->xt && (mesh->xtetra[pt1->xt].ftag[adjb[j]%4] & MG_BDY) ) break;
       }
       /* store tetra */
       if ( j == 4 ) {

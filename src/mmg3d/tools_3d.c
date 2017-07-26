@@ -275,17 +275,36 @@ inline int _MMG5_BezierRidge(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,
         no2[0] *= dd;
         no2[1] *= dd;
         no2[2] *= dd;
+
+        to[0] = no1[1]*no2[2] - no1[2]*no2[1];
+        to[1] = no1[2]*no2[0] - no1[0]*no2[2];
+        to[2] = no1[0]*no2[1] - no1[1]*no2[0];
+    }
+    else {
+      /* Open boundary: tangent interpolation (possibly flip (back) t1) */
+      ps = t0[0]*t1[0] + t0[1]*t1[1] + t0[2]*t1[2];
+      if ( ps < 0.0 ) {
+        t1[0] *= -1.0;
+        t1[1] *= -1.0;
+        t1[2] *= -1.0;
+      }
+      to[0] = (1.0-s)*t0[0] + s*t1[0];
+      to[1] = (1.0-s)*t0[1] + s*t1[1];
+      to[2] = (1.0-s)*t0[2] + s*t1[2];
+
+      /* Projection of the tangent in the tangent plane defined by no */
+      ps = to[0]*no1[0] + to[1]*no1[1] + to[2]*no1[2];
+      to[0] = to[0] -ps*no1[0];
+      to[1] = to[1] -ps*no1[1];
+      to[2] = to[2] -ps*no1[2];
     }
 
-    to[0] = no1[1]*no2[2] - no1[2]*no2[1];
-    to[1] = no1[2]*no2[0] - no1[0]*no2[2];
-    to[2] = no1[0]*no2[1] - no1[1]*no2[0];
     dd = to[0]*to[0] + to[1]*to[1] + to[2]*to[2];
     if ( dd > _MMG5_EPSD2 ) {
-        dd = 1.0/sqrt(dd);
-        to[0] *= dd;
-        to[1] *= dd;
-        to[2] *= dd;
+      dd = 1.0/sqrt(dd);
+      to[0] *= dd;
+      to[1] *= dd;
+      to[2] *= dd;
     }
 
     return(1);
@@ -1047,7 +1066,14 @@ int _MMG3D_localParamNm(MMG5_pMesh mesh,int iel,int iface,int ia,
    * fails because we have more than 2 boundaries in the edge shell
    * (non-manifold domain). In this case, we just take into account 2
    * boundaries of the shell */
-  ilistv = _MMG5_coquilface( mesh,iel,iface, ia,listv,&ifac1,&ifac2,1);
+
+  if ( pxt->tag[ia] & MG_OPNBDY ) {
+    ilistv = 1;
+    ifac1  = ifac2 = 4*iel + iface;
+  }
+  else {
+    ilistv = _MMG5_coquilface( mesh,iel,iface, ia,listv,&ifac1,&ifac2,1);
+  }
   if ( ilistv < 0 )
   {
     if ( mesh->info.ddebug || mesh->info.imprim>5 )

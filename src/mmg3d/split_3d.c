@@ -651,7 +651,6 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
     }
     pt1 = &mesh->tetra[jel];
     memcpy(pt1,pt,sizeof(MMG5_Tetra));
-    pt1->mark = mesh->mark;
 
     if ( pt->v[tau[0]] == nump )
       newtet[k] = jel;
@@ -788,6 +787,9 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
       pt->qual=_MMG5_orcal(mesh,met,iel);
       pt1->qual=_MMG5_orcal(mesh,met,jel);
     }
+    pt->mark  = mesh->mark;
+    pt1->mark = mesh->mark;
+
 
     _MMG5_SAFE_FREE(newtet);
     return(1);
@@ -1084,6 +1086,8 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
       pt->qual=_MMG5_orcal(mesh,met,iel);
       pt1->qual=_MMG5_orcal(mesh,met,jel);
     }
+    pt->mark  = mesh->mark;
+    pt1->mark = mesh->mark;
   }
 
   _MMG5_SAFE_FREE(newtet);
@@ -5226,9 +5230,11 @@ int _MMG3D_chksplit(MMG5_pMesh mesh, MMG5_pSol met,int ip,
  */
 int _MMG5_splitedg(MMG5_pMesh mesh, MMG5_pSol met,int iel, int iar, double crit){
   MMG5_pTetra  pt;
+  MMG5_pxTetra pxt;
   MMG5_pPoint  p0,p1;
   double       o[3];
   int          list[MMG3D_LMAX+2],i0,i1,ip,warn,lon,ier;
+  int16_t      tag;
 
   warn = 0;
   pt = &mesh->tetra[iel];
@@ -5241,6 +5247,21 @@ int _MMG5_splitedg(MMG5_pMesh mesh, MMG5_pSol met,int iel, int iar, double crit)
   i1 = pt->v[_MMG5_iare[iar][1]];
   p0  = &mesh->point[i0];
   p1  = &mesh->point[i1];
+
+  tag = MG_NOTAG;
+  if ( pt->xt ){
+    pxt  = &mesh->xtetra[pt->xt];
+    if ( (pxt->ftag[_MMG5_ifar[iar][0]] & MG_BDY) ||
+         (pxt->ftag[_MMG5_ifar[iar][1]] & MG_BDY) ) {
+      tag  = pxt->tag[iar];
+      tag |= MG_BDY;
+    }
+  }
+
+  if ( (p0->tag & MG_BDY) && (p1->tag & MG_BDY) ) {
+    return 0;
+  }
+
   o[0] = 0.5*(p0->c[0] + p1->c[0]);
   o[1] = 0.5*(p0->c[1] + p1->c[1]);
   o[2] = 0.5*(p0->c[2] + p1->c[2]);
@@ -5272,6 +5293,8 @@ int _MMG5_splitedg(MMG5_pMesh mesh, MMG5_pSol met,int iel, int iar, double crit)
     return(0);
   }
 
+  ier = _MMG3D_simbulgept(mesh,met,list,lon,ip);
+  if (!ier) return(0);
   ier = _MMG3D_chksplit(mesh,met,ip,&list[0],lon,crit);
   if(!ier) return(0);
   ier = _MMG5_split1b(mesh,met,list,lon,ip,0,1);

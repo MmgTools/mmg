@@ -72,6 +72,7 @@ enum MMG3D_Param {
   MMG3D_IPARAM_angle,             /*!< [1/0], Turn on/off angle detection */
   MMG3D_IPARAM_iso,               /*!< [1/0], Level-set meshing */
   MMG3D_IPARAM_nofem,             /*!< [1/0], Generate a non finite element mesh */
+  MMG3D_IPARAM_opnbdy,            /*!< [1/0], Preserve triangles at interface of 2 domains with same reference */
   MMG3D_IPARAM_lag,               /*!< [-1/0/1/2], Lagrangian option */
   MMG3D_IPARAM_optim,             /*!< [1/0], Optimize mesh keeping its initial edge sizes */
   MMG3D_IPARAM_optimLES,          /*!< [1/0], Strong mesh optimization for Les computations */

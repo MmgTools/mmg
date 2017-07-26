@@ -43,7 +43,7 @@ int _MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
                      char iedg,int *list,int ilist,char typchk) {
   MMG5_pTetra   pt,pt0;
   MMG5_pPoint   p0;
-  double   calold,calnew,caltmp,lon,ll;
+  double   calold,calnew,caltmp,ll,lon;
   int      j,iel,nq,nr;
   char     i,jj,ip,iq;
 
@@ -52,20 +52,22 @@ int _MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
   pt0 = &mesh->tetra[0];
   nq  = pt->v[iq];
 
-  lon = 1.e20;
+  lon = 1.6;
   if ( typchk == 2 && met->m ) {
     lon = _MMG5_lenedg(mesh,met,_MMG5_iarf[iface][iedg],pt);
 
     if ( !lon ) return(0);
-
-    lon = MG_MIN(lon,_MMG3D_LSHRT);
-    lon = MG_MAX(1.0/lon,_MMG3D_LLONG);
+    /*on cherche a se rapprocher de 1*/
+    //lon = MG_MAX(0.8/lon,1.6);// test ok but less good than the next one
+    lon = MG_MAX(2.-lon,1.6);
   }
+
   calold = calnew = DBL_MAX;
   for (j=0; j<ilist; j++) {
     iel = list[j] / 4;
     ip  = list[j] % 4;
     pt  = &mesh->tetra[iel];
+
     /* exclude elements from shell */
     for (jj=0; jj<4; jj++)  if ( pt->v[jj] == nq )  break;
     if ( jj < 4 )  continue;
@@ -115,7 +117,7 @@ int _MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
          * the modified edges of pt0 are boundaries): for a more precise
          * computation, we need to update the edge tags of pt0.  */
         ll = _MMG5_lenedgspl(mesh,met,jj,pt0);
-        if ( (!ll) || (ll > lon) )
+        if ( (!ll) || (ll > lon) )//LOPTL too small, we need to put greater than 1.41
           return(0);
       }
     }
@@ -342,7 +344,6 @@ int _MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
   int          nr,nbbdy,ndepmin,ndepplus,isloc,iedgeOpp;
   int16_t      tag;
   char         iopp,iopp2,ia,ip,i,iq,i0,i1,ier,isminp,isplp;
-
   pt   = &mesh->tetra[k];
   pxt  = 0;
   pt0  = &mesh->tetra[0];
@@ -763,6 +764,7 @@ int _MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,cha
           ia = _MMG5_idir[ip][j];
           if ( pt->v[ia]==p1_c[i] ) {
             pxt->tag[_MMG5_arpt[ip][j]] |= pxt1->tag[ind[i][1]];
+#warning useless test because we take the max just below....?
             if ( !pxt->edg[_MMG5_arpt[ip][j]] )
               pxt->edg[_MMG5_arpt[ip][j]] = pxt1->edg[ind[i][1]];
             else if ( pxt1->edg[ind[i][1]] )
@@ -830,9 +832,19 @@ int _MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,cha
           pxt1->ref[voyp] = MG_MAX(pxt1->ref[voyp],pxt->ref[ip]);
           pxt1->ftag[voyp] = pxt1->ftag[voyp] | pxt->ftag[ip];
 
-          if ( qel && (pt1->ref < mesh->tetra[qel].ref) )  MG_CLR( pxt1->ori,voyp );
-          else   MG_SET(pxt1->ori,voyp);
-
+          if ( qel ) {
+            if ( pt1->ref < mesh->tetra[qel].ref )  MG_CLR( pxt1->ori,voyp );
+            else if ( mesh->info.opnbdy && (pt1->ref == mesh->tetra[qel].ref) ) {
+              if ( pxt->ftag[ip] ) {
+                if ( MG_GET(pxt->ori,ip) )
+                  MG_SET( pxt1->ori,voyp );
+                else
+                  MG_CLR( pxt1->ori,voyp );
+              }
+            }
+            else  MG_SET( pxt1->ori,voyp );
+          }
+          else  MG_SET( pxt1->ori,voyp );
 
           /* update tags for edges */
           for ( j=0; j<3; j++ ) {
@@ -924,8 +936,19 @@ int _MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,cha
             pxt1->ref[voyq]  = MG_MAX(pxt1->ref[voyq],pxt->ref[iq]);
             pxt1->ftag[voyq] = (pxt1->ftag[voyq] | pxt->ftag[iq]);
 
-            if ( pel && (pt1->ref < mesh->tetra[pel].ref) )  MG_CLR( pxt1->ori,voyq );
-            else   MG_SET(pxt1->ori,voyq);
+            if ( pel ) {
+              if ( pt1->ref < mesh->tetra[pel].ref )  MG_CLR( pxt1->ori,voyq );
+              else if ( mesh->info.opnbdy && (pt1->ref == mesh->tetra[pel].ref) ) {
+                if ( pxt->ftag[iq] ) {
+                  if ( MG_GET(pxt->ori,iq) )
+                    MG_SET( pxt1->ori,voyq );
+                  else
+                    MG_CLR( pxt1->ori,voyq );
+                }
+              }
+              else  MG_SET( pxt1->ori,voyq );
+            }
+            else  MG_SET( pxt1->ori,voyq );
 
             /* update tags for edges */
             for ( j=0; j<3; j++ ) {

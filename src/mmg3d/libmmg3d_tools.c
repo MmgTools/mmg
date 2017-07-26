@@ -114,6 +114,8 @@ int MMG3D_usage(char *prog) {
   _MMG5_mmgUsage(prog);
 
   fprintf(stdout,"-A           enable anisotropy (without metric file).\n");
+  fprintf(stdout,"-opnbdy      preserve input triangles at the interface of"
+          " two domains of the same reference.\n");
 
 #ifdef USE_ELAS
   fprintf(stdout,"-lag [0/1/2] Lagrangian mesh displacement according to mode 0/1/2\n");
@@ -241,6 +243,7 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
           }
         }
         break;
+
       case 'l':
         if ( !strcmp(argv[i],"-lag") ) {
           if ( ++i < argc && isdigit(argv[i][0]) ) {
@@ -318,6 +321,10 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
             MMG3D_usage(argv[0]);
             return 0;
           }
+        }
+        else if ( !strcmp(argv[i],"-opnbdy") ) {
+          if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_opnbdy,1) )
+            return 0;
         }
 #ifndef PATTERN
         else if ( !strcmp(argv[i],"-octree") && ++i < argc ) {
