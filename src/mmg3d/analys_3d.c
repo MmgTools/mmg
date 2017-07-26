@@ -96,60 +96,67 @@ static inline void _MMG5_reqBoundaries(MMG5_pMesh mesh) {
  */
 static int _MMG5_setadj(MMG5_pMesh mesh){
   MMG5_pTria   pt,pt1;
-  MMG5_pPoint  ppt;
-  int    *adja,*adjb,adji1,adji2,*pile,iad,ipil,ip1,ip2,gen;
-  int     k,kk,iel,jel,nf,np,nr,nt,nre,nreq,ncc,ned,nvf,edg;
-  int16_t tag;
-  char    i,ii,i1,i2,ii1,ii2,voy;
+  int          *adja,*adjb,adji1,adji2,*pile,iad,ipil,ip1,ip2,gen;
+  int          k,kk,iel,jel,nvf,nf,nr,nt,nre,nreq,ncc,ned,ref;
+  int16_t      tag;
+  char         i,ii,i1,i2,ii1,ii2,voy;
 
   nvf = nf = ncc = ned = 0;
+
   _MMG5_SAFE_MALLOC(pile,mesh->nt+1,int,0);
 
   pile[1] = 1;
   ipil    = 1;
-  pt = &mesh->tria[1];
-  pt->flag = 1;
 
   while ( ipil > 0 ) {
     ncc++;
+
     do {
       k  = pile[ipil--];
       pt = &mesh->tria[k];
+      pt->flag = ncc;
       if ( !MG_EOK(pt) )  continue;
+
       adja = &mesh->adjt[3*(k-1)+1];
       for (i=0; i<3; i++) {
         i1  = _MMG5_inxt2[i];
         i2  = _MMG5_iprv2[i];
         ip1 = pt->v[i1];
         ip2 = pt->v[i2];
+
         if ( !mesh->point[ip1].tmp )  mesh->point[ip1].tmp = ++nvf;
         if ( !mesh->point[ip2].tmp )  mesh->point[ip2].tmp = ++nvf;
+
         if ( MG_EDG(pt->tag[i]) || pt->tag[i] & MG_REQ ) {
-              tag = mesh->point[ip1].tag;
-              mesh->point[ip1].tag |= pt->tag[i];
-              // Remove the MG_NOSURF tag if the vertex is really required.
-              if ( (tag & MG_REQ) && !(tag & MG_NOSURF) ) {
-                mesh->point[ip1].tag &= ~MG_NOSURF;
-              }
-              tag = mesh->point[ip2].tag;
-              mesh->point[ip2].tag |= pt->tag[i];
-              // Remove the MG_NOSURF tag if the vertex is really required.
-              if ( (tag & MG_REQ) && !(tag & MG_NOSURF) ) {
-                mesh->point[ip2].tag &= ~MG_NOSURF;
-              }
+          tag = mesh->point[ip1].tag;
+          mesh->point[ip1].tag |= pt->tag[i];
+          // Remove the MG_NOSURF tag if the vertex is really required.
+          if ( (tag & MG_REQ) && !(tag & MG_NOSURF) ) {
+            mesh->point[ip1].tag &= ~MG_NOSURF;
+          }
+          tag = mesh->point[ip2].tag;
+          mesh->point[ip2].tag |= pt->tag[i];
+          // Remove the MG_NOSURF tag if the vertex is really required.
+          if ( (tag & MG_REQ) && !(tag & MG_NOSURF) ) {
+            mesh->point[ip2].tag &= ~MG_NOSURF;
+          }
         }
 
         /* open boundary */
         if ( !adja[i] ) {
-          pt->tag[i] |= MG_GEO;
-          mesh->point[ip1].tag |= MG_GEO;
-          mesh->point[ip2].tag |= MG_GEO;
+          pt->tag[i] |= MG_GEO + MG_OPNBDY;
+          mesh->point[ip1].tag |= MG_GEO + MG_OPNBDY;
+          mesh->point[ip2].tag |= MG_GEO + MG_OPNBDY;
           ned++;
           continue;
         }
+
         kk = adja[i] / 3;
         ii = adja[i] % 3;
         if ( kk > k )  ned++;
+
+        /* store adjacent */
+        pt1 = &mesh->tria[kk];
 
         /* non manifold edge */
         if ( pt->tag[i] & MG_NOM ) {
@@ -158,16 +165,15 @@ static int _MMG5_setadj(MMG5_pMesh mesh){
           continue;
         }
 
-        /* store adjacent */
-        pt1 = &mesh->tria[kk];
         if ( abs(pt1->ref) != abs(pt->ref) ) {
           pt->tag[i]   |= MG_REF;
-          if ( !(pt->tag[i] & MG_NOM) )  pt1->tag[ii] |= MG_REF;
+          pt1->tag[ii] |= MG_REF;
           mesh->point[ip1].tag |= MG_REF;
           mesh->point[ip2].tag |= MG_REF;
         }
 
-        if ( pt1->flag == 0 ) {
+        /* store adjacent */
+        if ( !pt1->flag ) {
           pt1->flag    = ncc;
           pile[++ipil] = kk;
         }
@@ -178,7 +184,7 @@ static int _MMG5_setadj(MMG5_pMesh mesh){
         if ( pt1->v[ii1] == ip1 ) {
           /* Moebius strip */
           if ( pt1->base < 0 ) {
-            fprintf(stderr,"  ## Orientation problem (1).\n");
+            fprintf(stderr,"  ## Triangle orientation problem (1): Moebius strip?\n");
             _MMG5_SAFE_FREE(pile);
             return(0);
           }
@@ -195,12 +201,14 @@ static int _MMG5_setadj(MMG5_pMesh mesh){
             adji2 = mesh->adjt[iad+ii2];
             adjb[ii1] = adji2;
             adjb[ii2] = adji1;
+
+            /* modif tag + ref */
             tag = pt1->tag[ii1];
             pt1->tag[ii1] = pt1->tag[ii2];
             pt1->tag[ii2] = tag;
-            edg = pt1->edg[ii1];
+            ref = pt1->edg[ii1];
             pt1->edg[ii1] = pt1->edg[ii2];
-            pt1->edg[ii2] = edg;
+            pt1->edg[ii2] = ref;
 
             /* modif voyeurs */
             if ( adjb[ii1] ) {
@@ -234,19 +242,15 @@ static int _MMG5_setadj(MMG5_pMesh mesh){
   }
 
   /* bilan */
-  np = nr = nre = nreq = nt = 0;
+  nr = nre = nreq = nt = 0;
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) )  continue;
     nt++;
     adja = &mesh->adjt[3*(k-1)+1];
     for (i=0; i<3; i++) {
-      ppt = &mesh->point[pt->v[i]];
-      if ( !ppt->tmp ) {
-        ppt->tmp = 1;
-        np++;
-      }
       if ( ( !MG_EDG(pt->tag[i]) ) && ( !(pt->tag[i] & MG_REQ) ) )  continue;
+
       jel  = adja[i] / 3;
       if ( !jel || jel > k ) {
         if ( pt->tag[i] & MG_GEO )  nr++;
@@ -255,6 +259,7 @@ static int _MMG5_setadj(MMG5_pMesh mesh){
       }
     }
   }
+
   if ( mesh->info.ddebug ) {
     fprintf(stdout,"  a- ridges: %d found.\n",nr);
     fprintf(stdout,"  a- requir: %d found.\n",nreq);
@@ -267,6 +272,7 @@ static int _MMG5_setadj(MMG5_pMesh mesh){
     fprintf(stdout,"     Edges: %d,  tagged: %d,  ridges: %d, required: %d, refs: %d\n",
             ned,nr+nre+nreq,nr,nreq,nre);
   }
+
   _MMG5_SAFE_FREE(pile);
   return(1);
 }
@@ -766,6 +772,7 @@ int _MMG3D_analys(MMG5_pMesh mesh) {
   _MMG5_DEL_MEM(mesh,mesh->adjt,(3*mesh->nt+4)*sizeof(int));
   _MMG5_DEL_MEM(mesh,mesh->tria,(mesh->nt+1)*sizeof(MMG5_Tria));
   mesh->nt = 0;
+
   if ( mesh->nprism ) _MMG5_DEL_MEM(mesh,mesh->adjapr,(5*mesh->nprism+6)*sizeof(int));
 
   return(1);

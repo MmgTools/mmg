@@ -59,7 +59,7 @@ int _MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,
   double    calold,calnew,caltmp;
   int       na,nb,np,adj,piv,npol,refdom,k,l,iel;
   int       *adja,pol[MMG3D_LMAX+2];
-  char      i,ipa,ipb,ip,ier;
+  char      i,ipa,ipb,ip,ier,ifac;
 
   pt  = &mesh->tetra[start];
   refdom = pt->ref;
@@ -76,9 +76,15 @@ int _MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,
   (*ilist)++;
   adja = &mesh->adja[4*(start-1)+1];
   adj  = adja[_MMG5_ifar[ia][0]];      // start travelling by face (ia,0)
+  ifac = adj%4;
   piv  = pt->v[_MMG5_ifar[ia][1]];
   pol[npol] = 4*start + _MMG5_ifar[ia][1];
   npol++;
+
+  /* Edge is on a boundary between two different domains */
+  if ( mesh->info.opnbdy )
+    if ( pt->xt && (mesh->xtetra[pt->xt].ftag[_MMG5_ifar[ia][1]] & MG_BDY) )
+      return 0;
 
   while ( adj ) {
     adj /= 4;
@@ -89,6 +95,10 @@ int _MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,
 
     /* Edge is on a boundary between two different domains */
     if ( pt->ref != refdom )  return(0);
+    else if ( mesh->info.opnbdy ) {
+      if ( pt->xt && (mesh->xtetra[pt->xt].ftag[ifac] & MG_BDY) ) return 0;
+    }
+
     calold = MG_MIN(calold, pt->qual);
     /* identification of edge number in tetra adj */
     for (i=0; i<6; i++) {
@@ -118,6 +128,7 @@ int _MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,
       adj = adja[ _MMG5_ifar[i][1] ];
       piv = pt->v[ _MMG5_ifar[i][0] ];
     }
+    ifac = adj%4;
   }
   //CECILE : je vois pas pourquoi ca ameliore de faire ce test
   //plus rapide mais du coup on elimine des swap...

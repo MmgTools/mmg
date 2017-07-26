@@ -103,7 +103,6 @@ void MMG3D_Init_parameters(MMG5_pMesh mesh) {
   mesh->info.ls       = 0.0;      /* level set value */
 
 
-
 #ifndef PATTERN
   /* MMG3D_IPARAM_octree = 64 */
   mesh->info.octree = 32;
@@ -1679,7 +1678,9 @@ int MMG3D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam,int val){
   case MMG3D_IPARAM_fem :
     mesh->info.fem      = 1;
     break;
-
+  case MMG3D_IPARAM_opnbdy :
+    mesh->info.opnbdy = val;
+    break;
   case MMG3D_IPARAM_iso :
     mesh->info.iso      = val;
     if ( mesh->info.iso )

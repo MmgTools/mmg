@@ -186,10 +186,6 @@ int MMG3D_hashTetra(MMG5_pMesh mesh, int pack) {
 
   /* default */
   if ( mesh->adja ) {
-    if ( abs(mesh->info.imprim) > 3 || mesh->info.ddebug ) {
-      fprintf(stdout,"  ## Warning: no re-build of adjacencies of mesh. ");
-      fprintf(stdout,"mesh->adja must be freed to enforce analysis.\n");
-    }
     return(1);
   }
 
@@ -1169,8 +1165,11 @@ int _MMG5_bdryTria(MMG5_pMesh mesh, int ntmesh) {
         _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
         return(0);
       }
+      for (i=0; i<3; i++) {
+        ppt = &mesh->point[ptt->v[i]];
+        if ( !mesh->info.iso ) ppt->tag |= MG_BDY;
+      }
     }
-
   }
 
   /* Add boundary triangles stored on tetra */
@@ -1184,7 +1183,14 @@ int _MMG5_bdryTria(MMG5_pMesh mesh, int ntmesh) {
       for (i=0; i<4; i++) {
         adj = adja[i] / 4;
         pt1 = &mesh->tetra[adj];
-        if ( adj && ( pt->ref <= pt1->ref) )  continue;
+
+        if ( (!mesh->info.opnbdy) || (!mesh->xtetra) ) {
+          if ( adj && ( pt->ref <= pt1->ref) )  continue;
+        } else {
+          if ( adj && ( (pt->ref<pt1->ref) || (!pt->xt) ||
+                        (!(pxt->ftag[i] & MG_BDY)) || (!MG_GET(pxt->ori,i) ) ) )
+            continue;
+        }
 
         ia = pt->v[_MMG5_idir[i][0]];
         ib = pt->v[_MMG5_idir[i][1]];
@@ -1198,8 +1204,11 @@ int _MMG5_bdryTria(MMG5_pMesh mesh, int ntmesh) {
         mesh->nt++;
         ptt = &mesh->tria[mesh->nt];
         ptt->v[0] = pt->v[_MMG5_idir[i][0]];
+        mesh->point[ptt->v[0]].tag |= MG_BDY;
         ptt->v[1] = pt->v[_MMG5_idir[i][1]];
+        mesh->point[ptt->v[1]].tag |= MG_BDY;
         ptt->v[2] = pt->v[_MMG5_idir[i][2]];
+        mesh->point[ptt->v[2]].tag |= MG_BDY;
 
         /* the cc field is used to be able to recover the tetra (and its face)
          * from which comes a boundary triangle (when called by packmesh =>
@@ -1286,6 +1295,9 @@ int _MMG5_bdryTria(MMG5_pMesh mesh, int ntmesh) {
         ptt->v[0] = ia;
         ptt->v[1] = ib;
         ptt->v[2] = ic;
+        mesh->point[ptt->v[1]].tag |= MG_BDY;
+        mesh->point[ptt->v[2]].tag |= MG_BDY;
+        mesh->point[ptt->v[3]].tag |= MG_BDY;
 
         /* the cc field is used to be able to recover the prism (and its face)
          * from which comes a boundary triangle (when called by packmesh =>
@@ -1309,6 +1321,7 @@ int _MMG5_bdryTria(MMG5_pMesh mesh, int ntmesh) {
       }
     }
   }
+
   assert(mesh->nt==ntmesh);
 
   if ( ntmesh != ntinit ) {
@@ -1341,12 +1354,13 @@ int _MMG5_chkBdryTria(MMG5_pMesh mesh) {
   MMG5_pTetra    pt,pt1;
   MMG5_pPrism    pp,pp1;
   MMG5_pTria     ptt,pttnew;
-  int            *adja,adj,k,i,j,ntmesh;
-  int            ia,ib,ic, nbl,nt;
+  int            *adja,adj,k,kk,i,j,ntmesh;
+  int            ia,ib,ic, nbl,nt,ntpres;
+  int            iface;
   _MMG5_Hash     hashElt, hashTri;
 
   /** Step 1: scan the mesh and count the boundaries */
-  ntmesh = 0;
+  ntmesh = ntpres = 0;
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
     if ( !MG_EOK(pt) )  continue;
@@ -1358,11 +1372,33 @@ int _MMG5_chkBdryTria(MMG5_pMesh mesh) {
         ++ntmesh;
         continue;
       }
-
       adj /= 4;
       pt1 = &mesh->tetra[adj];
       if ( pt->ref > pt1->ref )
         ++ntmesh;
+    }
+  }
+
+  if ( mesh->info.opnbdy && mesh->xtetra ) {
+    /* We want to preserve internal triangle and we came from bdryBuild: we need
+     * to count the preserved boudaries */
+    for (k=1; k<=mesh->ne; k++) {
+      pt = &mesh->tetra[k];
+      if ( !MG_EOK(pt) || !pt->xt )  continue;
+      adja = &mesh->adja[4*(k-1)+1];
+      for (i=0; i<4; i++) {
+        adj = adja[i];
+
+        if ( !adj ) continue;
+
+        adj /= 4;
+        pt1 = &mesh->tetra[adj];
+
+        if ( pt->ref != pt1->ref ) continue;
+
+        if ( (mesh->xtetra[pt->xt].ftag[i] & MG_BDY) &&
+             (MG_GET(mesh->xtetra[pt->xt].ori,i) ) ) ++ntpres;
+      }
     }
   }
 
@@ -1390,7 +1426,7 @@ int _MMG5_chkBdryTria(MMG5_pMesh mesh) {
     }
   }
 
-  /* Detect the triangles at the interface of the tri and tetra (it have been
+  /* Detect the triangles at the interface of the prisms and tetra (they have been
    * counted twice) */
   if ( ! _MMG5_hashNew(mesh,&hashTri,0.51*ntmesh,1.51*ntmesh) ) return(0);
   for (k=1; k<=mesh->ne; k++) {
@@ -1438,26 +1474,41 @@ int _MMG5_chkBdryTria(MMG5_pMesh mesh) {
   if ( mesh->nt ) {
     if ( ! _MMG5_hashNew(mesh,&hashElt,0.51*ntmesh,1.51*ntmesh) ) return(0);
     // Hash the boundaries founded in the mesh
-    for (k=1; k<=mesh->ne; k++) {
-      pt = &mesh->tetra[k];
-      if ( !MG_EOK(pt) )  continue;
-      adja = &mesh->adja[4*(k-1)+1];
-      for (i=0; i<4; i++) {
-        adj = adja[i];
-        if ( !adj ) {
+    if ( mesh->info.opnbdy) {
+      /* We want to keep the internal triangles: we mus hash all the tetra faces */
+      for (k=1; k<=mesh->ne; k++) {
+        pt = &mesh->tetra[k];
+        if ( !MG_EOK(pt) )  continue;
+
+        for (i=0; i<4; i++) {
           ia = pt->v[_MMG5_idir[i][0]];
           ib = pt->v[_MMG5_idir[i][1]];
           ic = pt->v[_MMG5_idir[i][2]];
           if ( !_MMG5_hashFace(mesh,&hashElt,ia,ib,ic,4*k+i) ) return(0);
         }
-        adj /= 4;
+      }
+    } else {
+      for (k=1; k<=mesh->ne; k++) {
+        pt = &mesh->tetra[k];
+        if ( !MG_EOK(pt) )  continue;
+        adja = &mesh->adja[4*(k-1)+1];
+        for (i=0; i<4; i++) {
+          adj = adja[i];
+          if ( !adj ) {
+            ia = pt->v[_MMG5_idir[i][0]];
+            ib = pt->v[_MMG5_idir[i][1]];
+            ic = pt->v[_MMG5_idir[i][2]];
+            if ( !_MMG5_hashFace(mesh,&hashElt,ia,ib,ic,4*k+i) ) return(0);
+          }
+          adj /= 4;
 
-        pt1 = &mesh->tetra[adj];
-        if ( pt->ref > pt1->ref ) {
-          ia = pt->v[_MMG5_idir[i][0]];
-          ib = pt->v[_MMG5_idir[i][1]];
-          ic = pt->v[_MMG5_idir[i][2]];
-          if ( !_MMG5_hashFace(mesh,&hashElt,ia,ib,ic,4*k+i) ) return(0);
+          pt1 = &mesh->tetra[adj];
+          if ( pt->ref > pt1->ref ) {
+            ia = pt->v[_MMG5_idir[i][0]];
+            ib = pt->v[_MMG5_idir[i][1]];
+            ic = pt->v[_MMG5_idir[i][2]];
+            if ( !_MMG5_hashFace(mesh,&hashElt,ia,ib,ic,4*k+i) ) return(0);
+          }
         }
       }
     }
@@ -1512,14 +1563,26 @@ int _MMG5_chkBdryTria(MMG5_pMesh mesh) {
         return(0);
       }
       else if ( j > 0 ) {
-        /* the face already exist in the tria table */
+        /* the face already exists in the tria table */
         continue;
       }
 
       if ( !i ) {
         /* the triangle is not a boundary tri or a tri at the interface of two
-         * subdomains with different references */
+         * subdomains with different references and the user don't ask to keep
+         * it. */
         continue;
+      }
+
+      if ( mesh->info.opnbdy ) {
+        kk    = i/4;
+        iface = i%4;
+        adj   = mesh->adja[4*(kk-1)+1+iface];
+        /* Check if we have found a triangle at the interface of 2 doms of same
+         * ref */
+        if ( adj && mesh->tetra[kk].ref == mesh->tetra[adj/4].ref ) {
+          ++ntpres;
+        }
       }
 
       ++nt;
@@ -1540,13 +1603,23 @@ int _MMG5_chkBdryTria(MMG5_pMesh mesh) {
     _MMG5_DEL_MEM(mesh,hashElt.item,(hashElt.max+1)*sizeof(_MMG5_hedge));
     _MMG5_DEL_MEM(mesh,hashTri.item,(hashTri.max+1)*sizeof(_MMG5_hedge));
   }
+  ntmesh +=ntpres;
 
   /** Step 3: add the missing boundary triangles or, if the mesh contains
    * prisms, set to required the triangles at interface betwen prisms and tet */
+  if ( ntpres && (mesh->info.imprim > 5 || mesh->info.ddebug) )
+    printf("     %d triangles between 2 tetrahdra with same"
+           " references\n",ntpres);
+
   if ( mesh->nt==ntmesh && !mesh->nprism ) {
+    for (k=1; k<=mesh->nt; k++) {
+      ptt = &mesh->tria[k];
+      for (i=0; i<3; i++) {
+        if ( !mesh->info.iso ) mesh->point[ptt->v[i]].tag |= MG_BDY;
+      }
+    }
     return(1);
   }
-
 
   nbl = 0;
   if ( !mesh->nt ) {
@@ -1582,9 +1655,9 @@ int _MMG5_bdrySet(MMG5_pMesh mesh) {
   MMG5_pxTetra  pxt;
   MMG5_pxPrism  pxp;
   _MMG5_Hash     hash;
-  int      ref,*adja,adj,k,kt,ia,ib,ic,j,na;
-  int16_t  tag;
-  char     i;
+  int      ref,*adja,adj,k,kt,ia,ib,ic,j,na,initedg[3];
+  int16_t  tag,inittag[3];
+  char     i,i1,i2;
 
   if ( !mesh->nt )  return(1);
 
@@ -1617,19 +1690,53 @@ int _MMG5_bdrySet(MMG5_pMesh mesh) {
   _MMG5_SAFE_CALLOC(mesh->xtetra,mesh->xtmax+1,MMG5_xTetra,0);
 
   /* assign references to tetras faces */
-  for (k=1; k<=mesh->ne; k++) {
-    pt = &mesh->tetra[k];
-    if ( !MG_EOK(pt) )  continue;
-    adja = &mesh->adja[4*(k-1)+1];
-    for (i=0; i<4; i++) {
-      adj = adja[i] / 4;
-      pt1 = &mesh->tetra[adj];
-      if ( !adj || ( pt->ref != pt1->ref) ) {
+  if ( !mesh->info.opnbdy ) {
+    for (k=1; k<=mesh->ne; k++) {
+      pt = &mesh->tetra[k];
+      if ( !MG_EOK(pt) )  continue;
+      adja = &mesh->adja[4*(k-1)+1];
+      for (i=0; i<4; i++) {
+        adj = adja[i] / 4;
+        pt1 = &mesh->tetra[adj];
+        if ( !adj || ( pt->ref != pt1->ref) ) {
+          ia = pt->v[_MMG5_idir[i][0]];
+          ib = pt->v[_MMG5_idir[i][1]];
+          ic = pt->v[_MMG5_idir[i][2]];
+          kt = _MMG5_hashGetFace(&hash,ia,ib,ic);
+          assert(kt);
+          if ( !pt->xt ) {
+            mesh->xt++;
+            if ( mesh->xt > mesh->xtmax ) {
+              _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
+                                 "larger xtetra table",
+                                 mesh->xt--;
+                                 fprintf(stderr,"  Exit program.\n");return 0;,0);
+            }
+            pt->xt = mesh->xt;
+          }
+          ptt = &mesh->tria[kt];
+          pxt = &mesh->xtetra[mesh->xt];
+          pxt->ref[i]   = ptt->ref;
+          pxt->ftag[i] |= MG_BDY;
+          pxt->ftag[i] |= (ptt->tag[0] & ptt->tag[1] & ptt->tag[2]);
+        }
+      }
+    }
+  }
+  else {
+    /* Internal triangles preservations */
+    for (k=1; k<=mesh->ne; k++) {
+      pt = &mesh->tetra[k];
+      if ( !MG_EOK(pt) )  continue;
+      adja = &mesh->adja[4*(k-1)+1];
+      for (i=0; i<4; i++) {
         ia = pt->v[_MMG5_idir[i][0]];
         ib = pt->v[_MMG5_idir[i][1]];
         ic = pt->v[_MMG5_idir[i][2]];
         kt = _MMG5_hashGetFace(&hash,ia,ib,ic);
-        assert(kt);
+
+        if ( !kt ) continue;
+
         if ( !pt->xt ) {
           mesh->xt++;
           if ( mesh->xt > mesh->xtmax ) {
@@ -1649,34 +1756,109 @@ int _MMG5_bdrySet(MMG5_pMesh mesh) {
     }
   }
 
-
-  for (k=1; k<=mesh->ne; k++) {
-    pt = &mesh->tetra[k];
-    if ( !MG_EOK(pt) )  continue;
-    if ( !pt->xt )  continue;
-    pxt = &mesh->xtetra[pt->xt];
-    adja = &mesh->adja[4*(k-1)+1];
-    for (i=0; i<4; i++) {
-      adj = adja[i] / 4;
-      pt1 = &mesh->tetra[adj];
-      /* Set flag to know if tetra has the same orientation than the triangle */
-      if ( adj && pt->ref < pt1->ref )  MG_CLR(pxt->ori,i);
-      else  MG_SET(pxt->ori,i);
-      /* Set edge tag */
-      if ( pxt->ftag[i] ) {
-        if ( adj && (pt->ref <= pt1->ref || (pt->ref == MG_PLUS)) ) {
-          continue;
+  if ( !mesh->info.opnbdy ) {
+    for (k=1; k<=mesh->ne; k++) {
+      pt = &mesh->tetra[k];
+      if ( !MG_EOK(pt) )  continue;
+      if ( !pt->xt )  continue;
+      pxt = &mesh->xtetra[pt->xt];
+      adja = &mesh->adja[4*(k-1)+1];
+      for (i=0; i<4; i++) {
+        adj = adja[i] / 4;
+        pt1 = &mesh->tetra[adj];
+        /* Set flag to know if tetra has the same orientation than the triangle */
+        if ( adj && pt->ref < pt1->ref )  MG_CLR(pxt->ori,i);
+        else  MG_SET(pxt->ori,i);
+        /* Set edge tag */
+        if ( pxt->ftag[i] ) {
+          if ( adj && (pt->ref <= pt1->ref || (pt->ref == MG_PLUS)) ) {
+            continue;
+          }
+          else {
+            ia = pt->v[_MMG5_idir[i][0]];
+            ib = pt->v[_MMG5_idir[i][1]];
+            ic = pt->v[_MMG5_idir[i][2]];
+            kt = _MMG5_hashGetFace(&hash,ia,ib,ic);
+            ptt = &mesh->tria[kt];
+            for (j=0; j<3; j++) {
+              tag = pxt->ftag[i] | ptt->tag[j];
+              if ( tag )
+                _MMG5_settag(mesh,k,_MMG5_iarf[i][j],tag,ptt->edg[j]);
+            }
+          }
         }
-        else {
-          ia = pt->v[_MMG5_idir[i][0]];
-          ib = pt->v[_MMG5_idir[i][1]];
-          ic = pt->v[_MMG5_idir[i][2]];
-          kt = _MMG5_hashGetFace(&hash,ia,ib,ic);
-          ptt = &mesh->tria[kt];
-          for (j=0; j<3; j++) {
-            tag = pxt->ftag[i] | ptt->tag[j];
-            if ( tag )
-              _MMG5_settag(mesh,k,_MMG5_iarf[i][j],tag,ptt->edg[j]);
+      }
+    }
+  }
+  else {
+    for (k=1; k<=mesh->ne; k++) {
+      pt = &mesh->tetra[k];
+      if ( !MG_EOK(pt) )  continue;
+      if ( !pt->xt )  continue;
+      pxt = &mesh->xtetra[pt->xt];
+      adja = &mesh->adja[4*(k-1)+1];
+      for (i=0; i<4; i++) {
+        adj = adja[i] / 4;
+        pt1 = &mesh->tetra[adj];
+
+        ia = pt->v[_MMG5_idir[i][0]];
+        ib = pt->v[_MMG5_idir[i][1]];
+        ic = pt->v[_MMG5_idir[i][2]];
+        kt = _MMG5_hashGetFace(&hash,ia,ib,ic);
+
+        if ( !kt ) continue;
+
+        ptt = &mesh->tria[kt];
+
+        /* Set flag to know if tetra has the same orientation than the triangle
+         * + forcd the triangle numbering to match the tetra face numbering */
+        if ( adj ) {
+          for ( j=0; j<3; ++j ) {
+            i1 = _MMG5_inxt2[j];
+            i2 = _MMG5_inxt2[i1];
+            if (  ptt->v[j]==ia && ptt->v[i1]==ib && ptt->v[i2]==ic )
+              break;
+          }
+          if ( j<3 ) {
+            MG_SET(pxt->ori,i);
+            if ( j!=0 ) {
+              /* Triangle vertices+tag/edg reordering */
+              ptt->v[0] = ia;
+              ptt->v[1] = ib;
+              ptt->v[2] = ic;
+
+              inittag[0]  = ptt->tag[0];
+              inittag[1]  = ptt->tag[1];
+              inittag[2]  = ptt->tag[2];
+              ptt->tag[0] = inittag[j];
+              ptt->tag[1] = inittag[i1];
+              ptt->tag[2] = inittag[i2];
+
+              initedg[0]  = ptt->edg[0];
+              initedg[1]  = ptt->edg[1];
+              initedg[2]  = ptt->edg[2];
+              ptt->edg[0] = initedg[j];
+              ptt->edg[1] = initedg[i1];
+              ptt->edg[2] = initedg[i2];
+            }
+          }
+          else {
+            MG_CLR(pxt->ori,i);
+          }
+        }
+        else  MG_SET(pxt->ori,i);
+
+        /* Set edge tag */
+        if ( pxt->ftag[i] ) {
+          if ( adj && ( (pt->ref < pt1->ref) || !MG_GET(pxt->ori,i) ) ) {
+            continue;
+          }
+          else {
+            for (j=0; j<3; j++) {
+              tag = pxt->ftag[i] | ptt->tag[j];
+              if ( tag )
+                _MMG5_settag(mesh,k,_MMG5_iarf[i][j],tag,ptt->edg[j]);
+            }
           }
         }
       }
@@ -1831,7 +2013,6 @@ int _MMG5_bdryUpdate(MMG5_pMesh mesh) {
 int _MMG5_bdryPerm(MMG5_pMesh mesh) {
   MMG5_pTetra   pt,pt1;
   MMG5_pTria    ptt;
-  MMG5_pPoint   ppt;
   _MMG5_Hash    hash;
   int     *adja,adj,k,kt,ia,ib,ic,nf,npb;
   char     i;
@@ -1847,10 +2028,6 @@ int _MMG5_bdryPerm(MMG5_pMesh mesh) {
     if ( !_MMG5_hashFace(mesh,&hash,ptt->v[0],ptt->v[1],ptt->v[2],k) ) {
       _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
       return(0);
-    }
-    for (i=0; i<3; i++) {
-      ppt = &mesh->point[ptt->v[i]];
-      if ( !mesh->info.iso ) ppt->tag |= MG_BDY;
     }
   }
 
@@ -1888,5 +2065,6 @@ int _MMG5_bdryPerm(MMG5_pMesh mesh) {
     fprintf(stdout,"  ## %d faces reoriented\n",nf);
 
   _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
+
   return(1);
 }

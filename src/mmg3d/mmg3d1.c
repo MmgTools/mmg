@@ -328,7 +328,7 @@ char _MMG5_chkedg(MMG5_pMesh mesh,MMG5_Tria *pt,char ori, double hmax,
         n[i][2] *= -1.0;
       }
     }
-    else if (p[i]->tag & MG_NOM){
+    else if ( (p[i]->tag & MG_NOM) || (p[i]->tag & MG_OPNBDY) ){
       _MMG5_nortri(mesh,pt,n[i]);
       if(!ori) {
         n[i][0] *= -1.0;
@@ -682,6 +682,7 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,
             pxt = &mesh->xtetra[pt->xt];
           }
           else  pxt = 0;
+
           i0  = _MMG5_idir[i][j];
           ppt = &mesh->point[pt->v[i0]];
           if ( ppt->flag == base )  continue;
@@ -702,9 +703,9 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,
           ier = 0;
           if ( ppt->tag & MG_BDY ) {
             /* Catch a boundary point by a boundary face */
-            if ( !pt->xt || !(MG_BDY & pxt->ftag[i]) )  continue;
+            if ( (!pt->xt) || !(MG_BDY & pxt->ftag[i]) )  continue;
             else if( ppt->tag & MG_NOM ){
-              if( mesh->adja[4*(k-1)+1+i] ) continue;
+              if ( mesh->adja[4*(k-1)+1+i] ) continue;
               ier=_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,1);
               if( !ier )  continue;
               else if ( ier>0 )
@@ -713,7 +714,13 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,
                 return(-1);
             }
             else if ( ppt->tag & MG_GEO ) {
-              ier=_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,0);
+              if ( ppt->tag & MG_OPNBDY ) {
+#warning to implement
+                ier=_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,0);
+              }
+              else {
+                ier=_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,0);
+              }
               if ( !ier )  continue;
               else if ( ier>0 )
                 ier = _MMG5_movbdyridpt(mesh,met,octree,listv,ilistv,lists,ilists,improveVolSurf);
