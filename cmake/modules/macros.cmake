@@ -98,6 +98,8 @@ MACRO ( ADD_AND_INSTALL_LIBRARY
   SET_TARGET_PROPERTIES ( ${target_name}
     PROPERTIES OUTPUT_NAME ${output_name} )
 
+  SET_PROPERTY(TARGET ${target_name} PROPERTY C_STANDARD 99)
+
   TARGET_LINK_LIBRARIES ( ${target_name} ${LIBRARIES} )
 
   INSTALL ( TARGETS ${target_name}
@@ -120,6 +122,8 @@ MACRO ( ADD_AND_INSTALL_EXECUTABLE
     ADD_EXECUTABLE ( ${exec_name} ${lib_files} ${main_file} )
   ELSE ( )
     ADD_EXECUTABLE ( ${exec_name} ${main_file})
+
+    SET_PROPERTY(TARGET ${exec_name} PROPERTY C_STANDARD 99)
 
     IF ( NOT TARGET lib${exec_name}_a )
       TARGET_LINK_LIBRARIES(${exec_name} lib${exec_name}_so)
