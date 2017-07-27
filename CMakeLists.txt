@@ -510,12 +510,21 @@ IF(DOXYGEN_FOUND)
   CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg2d/Doxyfile.in
     ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg2d/Doxyfile @ONLY)
 
+  SET(MMG2DDOC_DIR ${CMAKE_BINARY_DIR}/doc/mmg2d)
+  SET(MMGSDOC_DIR ${CMAKE_BINARY_DIR}/doc/mmgs)
+  SET(MMG3DDOC_DIR ${CMAKE_BINARY_DIR}/doc/mmg3d)
+
+  FILE(MAKE_DIRECTORY ${MMG2DDOC_DIR})
+  FILE(MAKE_DIRECTORY ${MMGSDOC_DIR})
+  FILE(MAKE_DIRECTORY ${MMG3DDOC_DIR})
+
   ADD_CUSTOM_TARGET(mmg2d_doc
     COMMAND ${DOXYGEN_EXECUTABLE}
     ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg2d/Doxyfile
-    ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg2d COMMENT "Generating MMG2D API
+    WORKING_DIRECTORY ${MMG2DDOC_DIR}
+    COMMENT "Generating MMG2D API
     documentation with Doxygen.  Open up the
-    ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg2d/html/index.html file to see
+    ${MMG2DDOC_DIR}/html/index.html file to see
     it." VERBATIM )
 
   # MMGS Documentation
@@ -524,9 +533,10 @@ IF(DOXYGEN_FOUND)
   ADD_CUSTOM_TARGET(mmgs_doc
     COMMAND ${DOXYGEN_EXECUTABLE}
     ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmgs/Doxyfile
-    ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmgs COMMENT "Generating MMGS API
+    WORKING_DIRECTORY ${MMGSDOC_DIR}
+    COMMENT "Generating MMGS API
     documentation with Doxygen.  Open up the
-    ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmgs/html/index.html file to see
+    ${MMGSDOC_DIR}/html/index.html file to see
     it." VERBATIM )
 
   # MMG3D Documentation
@@ -535,14 +545,14 @@ IF(DOXYGEN_FOUND)
   ADD_CUSTOM_TARGET(mmg3d_doc
     COMMAND ${DOXYGEN_EXECUTABLE}
     ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg3d/Doxyfile
-    ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg3d
+    WORKING_DIRECTORY ${MMG3DDOC_DIR}
     COMMENT "Generating MMG3D API documentation with Doxygen. Open up the
     ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg3d/html/index.html file to see
     it" VERBATIM )
 
   ADD_CUSTOM_TARGET(doc DEPENDS mmgs_doc mmg3d_doc mmg2d_doc COMMENT "Generating
     MMG API documentation with Doxygen.  Open up the
-    ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg*/html/index.html file to see it"
+    ${CMAKE_BINARY_DIR}/doc/mmg*/html/index.html file to see it"
     VERBATIM )
 ENDIF ( DOXYGEN_FOUND )
 
