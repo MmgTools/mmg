@@ -1310,6 +1310,42 @@ split:
 }
 
 /**
+ * \param ppt pointer toward the point that we update
+ * \param pxp point toward the \a oot xpoint
+ * \param no normal at ppt
+ * \return 0 if failed, 1 if success.
+ *
+ * Starting from a point for which the normal \a pxp->n1 is already stored,
+ * store \a no in \a pxp->n2, compute the tangent with respect to this two
+ * normals and store it in \a ppt->n.
+ *
+ */
+static inline int
+_MMG3D_storeGeom(MMG5_pPoint ppt, MMG5_pxPoint pxp, double no[3]) {
+  double dd;
+
+  dd = no[0]*pxp->n1[0]+no[1]*pxp->n1[1]+no[2]*pxp->n1[2];
+  if ( dd > 1.0-_MMG5_EPS ) return 0;
+
+  memcpy(pxp->n2,no,3*sizeof(double));
+
+  /* a computation of the tangent with respect to these two normals is possible */
+  ppt->n[0] = pxp->n1[1]*pxp->n2[2] - pxp->n1[2]*pxp->n2[1];
+  ppt->n[1] = pxp->n1[2]*pxp->n2[0] - pxp->n1[0]*pxp->n2[2];
+  ppt->n[2] = pxp->n1[0]*pxp->n2[1] - pxp->n1[1]*pxp->n2[0];
+  dd = ppt->n[0]*ppt->n[0] + ppt->n[1]*ppt->n[1] + ppt->n[2]*ppt->n[2];
+  if ( dd > _MMG5_EPSD2 ) {
+    dd = 1.0 / sqrt(dd);
+    ppt->n[0] *= dd;
+    ppt->n[1] *= dd;
+    ppt->n[2] *= dd;
+  }
+  assert ( dd>_MMG5_EPSD2 );
+
+  return 1;
+}
+
+/**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
  * \param typchk type of checking permformed for edge length (hmax or _MMG3D_LLONG criterion).
@@ -1331,7 +1367,7 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   MMG5_pPar     par;
   double        o[3],no[3],to[3],dd,len,hmax,hausd;
   int           vx[6],k,l,ip,ic,it,nap,nc,ni,ne,ns,ip1,ip2,ier,isloc;
-  char          i,j,ia,i1,i2;
+  char          i,j,j2,ia,i1,i2,ifac;
   static double uv[3][2] = { {0.5,0.5}, {0.,0.5}, {0.5,0.} };
 
   /** 1. analysis of boundary elements */
@@ -1498,6 +1534,30 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         pxp = &mesh->xpoint[ppt->xp];
         memcpy(pxp->n1,no,3*sizeof(double));
         memcpy(ppt->n,to,3*sizeof(double));
+
+        if ( mesh->info.fem<typchk ) {
+          if ( MG_EDG(ptt.tag[j]) && !(ptt.tag[j] & MG_NOM) ) {
+            /* Update the second normal and the tangent at point ip if the edge
+             * is shared by 2 faces */
+            ifac = (_MMG5_ifar[ia][0] == i)? _MMG5_ifar[ia][1] : _MMG5_ifar[ia][0];
+            if ( pxt->ftag[ifac] & MG_BDY ) {
+              j2   = _MMG5_iarfinv[ifac][ia];
+
+              /* Compute tangent and normal with respect to the face ifac */
+              /* virtual triangle */
+              _MMG5_tet2tri(mesh,k,ifac,&ptt);
+
+              /* geometric support */
+              ier = _MMG5_bezierCP(mesh,&ptt,&pb,MG_GET(pxt->ori,ifac));
+              assert(ier);
+
+              ier = _MMG3D_bezierInt(&pb,&uv[j2][0],o,no,to);
+              assert(ier);
+
+              if ( !_MMG3D_storeGeom(ppt,pxp,no) ) continue;
+            }
+          }
+        }
         nap++;
       }
       else if ( MG_EDG(ptt.tag[j]) && !(ptt.tag[j] & MG_NOM) ) {
@@ -1505,21 +1565,7 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         assert(ppt->xp);
         pxp = &mesh->xpoint[ppt->xp];
 
-        dd = no[0]*pxp->n1[0]+no[1]*pxp->n1[1]+no[2]*pxp->n1[2];
-        if ( dd > 1.0-_MMG5_EPS ) continue;
-
-        memcpy(pxp->n2,no,3*sizeof(double));
-        /* a computation of the tangent with respect to these two normals is possible */
-        ppt->n[0] = pxp->n1[1]*pxp->n2[2] - pxp->n1[2]*pxp->n2[1];
-        ppt->n[1] = pxp->n1[2]*pxp->n2[0] - pxp->n1[0]*pxp->n2[2];
-        ppt->n[2] = pxp->n1[0]*pxp->n2[1] - pxp->n1[1]*pxp->n2[0];
-        dd = ppt->n[0]*ppt->n[0] + ppt->n[1]*ppt->n[1] + ppt->n[2]*ppt->n[2];
-        if ( dd > _MMG5_EPSD2 ) {
-          dd = 1.0 / sqrt(dd);
-          ppt->n[0] *= dd;
-          ppt->n[1] *= dd;
-          ppt->n[2] *= dd;
-        }
+        if ( !_MMG3D_storeGeom(ppt,pxp,no) ) continue;
       }
     }
   }
