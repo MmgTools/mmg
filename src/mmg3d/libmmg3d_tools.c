@@ -128,6 +128,7 @@ int MMG3D_usage(char *prog) {
 #endif
   fprintf(stdout,"\n");
 
+  fprintf(stdout,"-nofem       do not force Mmg to create a finite element mesh \n");
   fprintf(stdout,"-optim       mesh optimization\n");
   fprintf(stdout,"-optimLES    strong mesh optimization for LES computations\n");
   fprintf(stdout,"-noinsert    no point insertion/deletion \n");
