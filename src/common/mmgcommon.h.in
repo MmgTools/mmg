@@ -140,7 +140,7 @@ extern "C" {
 #define _LIBMMG5_RETURN(mesh,met,val)do          \
   {                                              \
     if ( mesh->info.errMessage )                 \
-      printf("%s",mesh->info.errMessage);        \
+      printf("\n%s\n",mesh->info.errMessage);    \
                                                  \
     signal(SIGABRT,SIG_DFL);                     \
     signal(SIGFPE,SIG_DFL);                      \
