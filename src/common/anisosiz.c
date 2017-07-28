@@ -48,13 +48,15 @@ static inline
 double _MMG5_surf(MMG5_pMesh mesh,double m[3][6],MMG5_pTria ptt) {
   _MMG5_Bezier   b;
   double         surf,dens,J[3][2],mJ[3][2],tJmJ[2][2];
-  char           i;
+  char           i,nullDens;
+  static char    mmgErr=0;
 
   surf = 0.0;
 
   if ( !_MMG5_bezierCP(mesh,ptt,&b,1) ) return(0.0);
 
   /* Compute density integrand of volume at the 3 vertices of T */
+  nullDens = 0;
   for (i=0; i<3; i++) {
     if ( i == 0 ) {
       J[0][0] = 3.0*( b.b[7][0] - b.b[0][0] ) ; J[0][1] = 3.0*( b.b[6][0] - b.b[0][0] );
@@ -87,12 +89,22 @@ double _MMG5_surf(MMG5_pMesh mesh,double m[3][6],MMG5_pTria ptt) {
     tJmJ[1][1] = J[0][1]*mJ[0][1] + J[1][1]*mJ[1][1] + J[2][1]*mJ[2][1];
 
     dens = tJmJ[0][0]*tJmJ[1][1] - tJmJ[1][0]*tJmJ[0][1];
-    /* if ( dens < 0.0 ) { */
-    /*   fprintf(stdout,"  ## Density should be positive : %E for elt %d %d %d \n",dens,ptt->v[0],ptt->v[1],ptt->v[2]); */
-    /*   return(0.0); */
-    /* } */
+    if ( dens <= _MMG5_EPSD2 ) {
+#ifndef DNDEBUG
+      if ( !mmgErr ) {
+        MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
+                          "  ## Warning: %s: at least 1 negative or null density \n",
+                          __func__);
+        mmgErr = 1;
+      }
+#endif
+      ++nullDens;
+      continue;
+    }
     surf += sqrt(fabs(dens));
   }
+
+  if ( nullDens==3 ) return 0;
 
   surf *= _MMG5_ATHIRD;
   return(surf);

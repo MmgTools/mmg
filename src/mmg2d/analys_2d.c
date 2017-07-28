@@ -316,7 +316,7 @@ int _MMG2_norver(MMG5_pMesh mesh) {
         ppt->s = 1;
         if ( !_MMG2_boulen(mesh,kk,ii,&pleft,&pright,ppt->n) ) {
           MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
-                            "  ## %s: Impossible to"
+                            "  ## Error: %s: Impossible to"
                             " calculate normal vector at vertex %d.\n",
                             __func__,pt->v[i]);
           return(0);
@@ -339,7 +339,7 @@ int _MMG2_norver(MMG5_pMesh mesh) {
         ppt->s = 1;
         if ( !_MMG2_boulen(mesh,kk,ii,&pleft,&pright,ppt->n) ) {
           MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
-                            "  ## %s: Impossible to"
+                            "  ## Error: %s: Impossible to"
                             " calculate normal vector at vertex %d.\n",
                             __func__,pt->v[i]);
           return(0);
@@ -423,7 +423,7 @@ int _MMG2_regnor(MMG5_pMesh mesh) {
 
       if ( !ier ) {
         MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
-                          "  ## %s: Abort.\n",__func__);
+                          "  ## Error: %s: Abort.\n",__func__);
         _MMG5_SAFE_FREE(tmp);
         return 0;
       }
@@ -511,7 +511,7 @@ int _MMG2_regnor(MMG5_pMesh mesh) {
       ier = _MMG2_bouleendp(mesh,iel,i,&ip1,&ip2);
       if ( !ier ) {
         MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
-                          "  ## %s: Abort.\n",__func__);
+                          "  ## Error: %s: Abort.\n",__func__);
         _MMG5_SAFE_FREE(tmp);
         return 0;
       }

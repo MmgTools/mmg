@@ -353,7 +353,7 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
       if ( !warn ) {
         ++warn;
         MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
-                          "  ## %s: Warning:"
+                          "  ## Warning: %s:"
                           " unable to compute optimal position for at least 1 point"
                           " (point %d on face %d of elt %d).\n",__func__,
                           _MMG3D_indPt(mesh,n0),iface,_MMG3D_indElt(mesh,iel) );

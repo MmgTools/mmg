@@ -167,8 +167,8 @@ int _MMG5_elementWeight(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pTria pt,
 #ifndef DNDEBUG
       if ( !mmgErr ) {
         MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
-                          "  ## %s: Warning: at least 1 negative density \n",
-                          __func__,1);
+                          "  ## Warning: %s: at least 1 negative or null density \n",
+                          __func__);
         mmgErr = 1;
       }
 #endif

@@ -756,8 +756,8 @@ int MMG5_errorMessage_var(char **string_ptr, int ddebug, const char *format, va_
 
     if ( len + initLen > SIZE_T_MAX ) {
       if ( !warn ) {
-        printf("  ## %s: Error: Maximal size reached for error message.\n",__func__);
-        printf("                Cannot print more informations.\n");
+        printf("  ## Error: %s: Maximal size reached for error message.",__func__);
+        printf(" Cannot print more informations.\n");
         warn = 1;
       }
       return 0;

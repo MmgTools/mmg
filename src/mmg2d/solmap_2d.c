@@ -125,8 +125,8 @@ int MMG2D_doSol(MMG5_pMesh mesh,MMG5_pSol sol) {
     }
     else {
       MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
-                        "%s:%d:Error: Unexpected solution size\n",
-                        __FILE__,__LINE__,sol->size);
+                        "  # Error: %s: Unexpected solution size (%d)\n",
+                        __func__,sol->size);
       return 0;
     }
     mesh->info.hmax = 10.*dd;
