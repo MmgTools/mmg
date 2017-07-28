@@ -315,7 +315,8 @@ int _MMG2_norver(MMG5_pMesh mesh) {
       do {
         ppt->s = 1;
         if ( !_MMG2_boulen(mesh,kk,ii,&pleft,&pright,ppt->n) ) {
-          MMG5_errorMessage(&mesh->info.errMessage,"  ## %s: Impossible to"
+          MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
+                            "  ## %s: Impossible to"
                             " calculate normal vector at vertex %d.\n",
                             __func__,pt->v[i]);
           return(0);
@@ -337,7 +338,8 @@ int _MMG2_norver(MMG5_pMesh mesh) {
       do {
         ppt->s = 1;
         if ( !_MMG2_boulen(mesh,kk,ii,&pleft,&pright,ppt->n) ) {
-          MMG5_errorMessage(&mesh->info.errMessage,"  ## %s: Impossible to"
+          MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
+                            "  ## %s: Impossible to"
                             " calculate normal vector at vertex %d.\n",
                             __func__,pt->v[i]);
           return(0);
@@ -420,7 +422,7 @@ int _MMG2_regnor(MMG5_pMesh mesh) {
       ier = _MMG2_bouleendp(mesh,iel,i,&ip1,&ip2);
 
       if ( !ier ) {
-        MMG5_errorMessage(&mesh->info.errMessage,
+        MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
                           "  ## %s: Abort.\n",__func__);
         _MMG5_SAFE_FREE(tmp);
         return 0;
@@ -508,7 +510,7 @@ int _MMG2_regnor(MMG5_pMesh mesh) {
 
       ier = _MMG2_bouleendp(mesh,iel,i,&ip1,&ip2);
       if ( !ier ) {
-        MMG5_errorMessage(&mesh->info.errMessage,
+        MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
                           "  ## %s: Abort.\n",__func__);
         _MMG5_SAFE_FREE(tmp);
         return 0;
@@ -621,42 +623,42 @@ int _MMG2_regnor(MMG5_pMesh mesh) {
 int _MMG2_analys(MMG5_pMesh mesh) {
   /* Transfer the boundary edge references to the triangles, if it has not been already done (option 1) */
   if ( !MMG2_assignEdge(mesh) ) {
-     MMG5_errorMessage(&mesh->info.errMessage,
+     MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
                        "  ## Problem in setting boundary. Exit program.\n");
     return(0);
   }
 
   /* Creation of adjacency relations in the mesh */
   if ( !MMG2_hashTria(mesh) ) {
-     MMG5_errorMessage(&mesh->info.errMessage,
+     MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
                        "  ## Hashing problem. Exit program.\n");
     return(0);
   }
 
   /* Set tags to triangles from geometric configuration */
   if ( !_MMG2_setadj(mesh) ) {
-    MMG5_errorMessage(&mesh->info.errMessage,
+    MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
                       "  ## Problem in function setadj. Exit program.\n");
     return(0);
   }
 
   /* Identify singularities in the mesh */
   if ( !_MMG2_singul(mesh) ) {
-     MMG5_errorMessage(&mesh->info.errMessage,
+     MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
                        "  ## Problem in identifying singularities. Exit program.\n");
     return(0);
   }
 
   /* Define normal vectors at vertices on curves */
   if ( !_MMG2_norver(mesh) ) {
-     MMG5_errorMessage(&mesh->info.errMessage,
+     MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
                        "  ## Problem in calculating normal vectors. Exit program.\n");
     return(0);
   }
 
   /* Regularize normal vector field with a Laplacian / anti-laplacian smoothing */
   /*if ( !_MMG2_regnor(mesh) ) {
-      MMG5_errorMessage(&mesh->info.errMessage,
+      MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
                         "  ## Problem in regularizing normal vectors. Exit program.\n");
      return(0);
   }*/

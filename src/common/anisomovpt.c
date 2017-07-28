@@ -57,13 +57,14 @@ int _MMG5_elementWeight(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pTria pt,
   MMG5_pPoint    p1,p2;
   double         Jacsigma[3][2],Jactmp[3][2],m[6],mo[6],density,to[3],no[3],ll;
   double         dens[3],*n1,*n2,ps1,ps2,intpt[2],ux,uy,uz;
-  char           i0,i1,i2,j;
+  char           i0,i1,i2,j,nullDens;
   static char    mmgErr=0;
 
   i0 = 0;
   i1 = 1;
   i2 = 2;
 
+  nullDens = 0;
   for (j=0; j<3; j++) {
     /* Set jacobian matrix of parametric Bezier patch, for each quadrature point */
     if ( j == 0 ) {  //w,u = 1/2, v = 0
@@ -162,13 +163,19 @@ int _MMG5_elementWeight(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pTria pt,
     dens[2] = Jacsigma[0][1]*Jactmp[0][1] + Jacsigma[1][1]*Jactmp[1][1] + Jacsigma[2][1]*Jactmp[2][1];
 
     density = dens[0]*dens[2] - dens[1]*dens[1];
-    if ( density <= 0.0 ) {
-      if ( mmgErr )
-        fprintf(stdout,"  ## Fct movptaniso: negative density \n");
-      else
+    if ( density <= _MMG5_EPSD2 ) {
+#ifndef DNDEBUG
+      if ( !mmgErr ) {
+        MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
+                          "  ## %s: Warning: at least 1 negative density \n",
+                          __func__,1);
         mmgErr = 1;
+      }
+#endif
+      ++nullDens;
       continue;
     }
+
     density = sqrt(density);
     /* Coordinates of the integration point */
     p1 = &mesh->point[pt->v[i0]];
@@ -188,6 +195,8 @@ int _MMG5_elementWeight(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pTria pt,
     i1 = _MMG5_inxt2[i1];
     i2 = _MMG5_inxt2[i2];
   }
+
+  if ( nullDens==3 ) return 0;
 
   return(1);
 }

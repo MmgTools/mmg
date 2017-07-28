@@ -352,8 +352,11 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
     if ( !_MMG5_elementWeight(mesh,met,&tt,p0,&pb,r,gv) ) {
       if ( !warn ) {
         ++warn;
-        printf("  ## Warning: unable to compute optimal position for at least"
-               " 1 point.\n" );
+        MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
+                          "  ## %s: Warning:"
+                          " unable to compute optimal position for at least 1 point"
+                          " (point %d on face %d of elt %d).\n",__func__,
+                          _MMG3D_indPt(mesh,n0),iface,_MMG3D_indElt(mesh,iel) );
       }
       _MMG5_SAFE_FREE(callist);
       return(0);

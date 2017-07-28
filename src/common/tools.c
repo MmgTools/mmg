@@ -712,6 +712,7 @@ double MMG2_quickarea(double a[2],double b[2],double c[2]) {
 
 /**
  * \param string_ptr pointer toward the string that will store the error message
+ * \param ddebug debug mode if 1: print directly the value
  * \param format string containg a valic C format
  * \param ... the error message and values to format following the \a format
  * rule ( as in printf )
@@ -723,38 +724,54 @@ double MMG2_quickarea(double a[2],double b[2],double c[2]) {
  * It concantenates the new formatted string with the old one.
  *
  */
-int MMG5_errorMessage(char **string_ptr, const char *format, ...)
+int MMG5_errorMessage(char **string_ptr, int ddebug, const char *format, ...)
 {
   va_list arg;
   int     done;
 
   va_start (arg, format);
-  done = MMG5_errorMessage_var(string_ptr, format, arg);
+  done = MMG5_errorMessage_var(string_ptr, ddebug, format, arg);
   va_end (arg);
 
   return done;
 }
 
-int MMG5_errorMessage_var(char **string_ptr, const char *format, va_list ap)
+int MMG5_errorMessage_var(char **string_ptr, int ddebug, const char *format, va_list ap)
 {
-  va_list args;
-  int     len,len2, initLen;
+  va_list    args;
+  size_t     initLen;
+  int        len,len2;
+  static int warn;
 
-  if ( !*string_ptr )
-    initLen = 0;
+  if ( !ddebug ) {
+    if ( !*string_ptr )
+      initLen = 0;
+    else {
+      initLen = strlen(*string_ptr);
+    }
+
+    va_copy (args, ap);
+    len = vsnprintf (NULL, 0, format, args);
+    va_end (args);
+
+    if ( len + initLen > SIZE_T_MAX ) {
+      if ( !warn ) {
+        printf("  ## %s: Error: Maximal size reached for error message.\n",__func__);
+        printf("                Cannot print more informations.\n");
+        warn = 1;
+      }
+      return 0;
+    }
+
+    _MMG5_SAFE_REALLOC(*string_ptr,len+1+initLen,char," Unable to store warning/error message.",-1);
+
+    va_copy (args, ap);
+    len2 = vsprintf (&((*string_ptr)[initLen]), format, args);
+    assert (len2 == len);
+    va_end (args);
+  }
   else
-    initLen = strlen(*string_ptr);
-
-  va_copy (args, ap);
-  len = vsnprintf (NULL, 0, format, args);
-  va_end (args);
-
-  _MMG5_SAFE_REALLOC(*string_ptr,len+1+initLen,char," Unable to store warning/error message.",-1);
-
-  va_copy (args, ap);
-  len2 = vsprintf (&((*string_ptr)[initLen]), format, args);
-  assert (len2 == len);
-  va_end (args);
+    vprintf(format,ap);
 
   return len;
 }
