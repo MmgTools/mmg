@@ -214,6 +214,8 @@ static inline
 void _MMGS_Set_commonFunc() {
   _MMG5_bezierCP          = _MMG5_mmgsBezierCP;
   _MMG5_chkmsh            = _MMG5_mmgsChkmsh;
+  _MMG5_indPt             = _MMGS_indPt;
+  _MMG5_indElt            = _MMGS_indElt;
 #ifdef USE_SCOTCH
   _MMG5_renumbering       = _MMG5_mmgsRenumbering;
 #endif

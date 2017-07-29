@@ -481,6 +481,9 @@ static inline
 void _MMG3D_Set_commonFunc() {
   _MMG5_bezierCP          = _MMG5_mmg3dBezierCP;
   _MMG5_chkmsh            = _MMG5_mmg3dChkmsh;
+  _MMG5_indPt             = _MMG3D_indPt;
+  _MMG5_indElt            = _MMG3D_indElt;
+
 #ifdef USE_SCOTCH
   _MMG5_renumbering       = _MMG5_mmg3dRenumbering;
 #endif

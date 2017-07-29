@@ -435,6 +435,7 @@ int _MMG5_solveDefmetregSys( MMG5_pMesh mesh, double r[3][3], double c[3],
                              double isqhmin, double isqhmax, double hausd)
 {
   double intm[3], kappa[2], vp[2][2], b0[3], b1[3], b2[3];
+  static int mmgWarn0=0;
 
   memset(intm,0x0,3*sizeof(double));
 
@@ -453,7 +454,12 @@ int _MMG5_solveDefmetregSys( MMG5_pMesh mesh, double r[3][3], double c[3],
 
   /* solve now (a b c) = tAA^{-1} * tAb */
   if ( !_MMG5_sys33sym(tAA,tAb,c) ) {
-    printf("%s:%d: Warning: unable to solve the system.\n",__FILE__,__LINE__);
+    if ( !mmgWarn0 ) {
+       MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
+                         "  ## Warning: %s: unable to solve the system on at"
+                         " least 1 point.\n",__func__);
+      mmgWarn0 = 1;
+    }
     return(0);
   }
   intm[0] = 2.0*c[0];
@@ -513,6 +519,7 @@ int _MMG5_solveDefmetregSys( MMG5_pMesh mesh, double r[3][3], double c[3],
 /**
  * \param mesh pointer toward the mesh structure.
  * \param p0 pointer toward the point on which we want to define the metric.
+ * \param ip index of point on which we try to define the metric (\a p0 )
  * \param ipref table containing the indices of the edge extremities.
  * \param r pointer toward the rotation matrix.
  * \param c physical coordinates of the curve edge mid-point.
@@ -528,7 +535,7 @@ int _MMG5_solveDefmetregSys( MMG5_pMesh mesh, double r[3][3], double c[3],
  * point.
  *
  */
-int _MMG5_solveDefmetrefSys( MMG5_pMesh mesh, MMG5_pPoint p0, int ipref[2],
+int _MMG5_solveDefmetrefSys( MMG5_pMesh mesh, MMG5_pPoint p0, int ip, int ipref[2],
                              double r[3][3], double c[3],
                              double tAA[6], double tAb[3], double *m,
                              double isqhmin, double isqhmax, double hausd)
@@ -537,6 +544,7 @@ int _MMG5_solveDefmetrefSys( MMG5_pMesh mesh, MMG5_pPoint p0, int ipref[2],
   double       intm[3], kappa[2], vp[2][2], b0[3], b1[3], b2[3], kappacur;
   double       gammasec[3],tau[2], ux, uy, uz, ps1, l, ll, *t, *t1;
   int          i;
+  static char  mmgWarn=0;
 
   memset(intm,0x0,3*sizeof(double));
 
@@ -554,7 +562,13 @@ int _MMG5_solveDefmetrefSys( MMG5_pMesh mesh, MMG5_pPoint p0, int ipref[2],
 
   /* solve now (a b c) = tAA^{-1} * tAb */
   if ( !_MMG5_sys33sym(tAA,tAb,c) ) {
-    printf("%s:%d: Warning: unable to solve the system.\n",__FILE__,__LINE__);
+    if ( !mmgWarn ) {
+      MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
+                        "  ## Warning: %s: unable to solve the system on at"
+                        " least 1 point (point %d along ref curve %d -- %d.\n",
+                        __func__,ip,ipref[0],ipref[1]);
+      mmgWarn = 1;
+    }
     return(0);
   }
   intm[0] = 2.0*c[0];
