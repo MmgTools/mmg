@@ -507,24 +507,6 @@ int _MMG5_solveDefmetregSys( MMG5_pMesh mesh, double r[3][3], double c[3],
 
   m[5] = r[0][2] * b0[2] + r[1][2] * b1[2] + r[2][2] * b2[2];
 
-  /* Security check : normal in the kernel */
-  /*if((fabs(p0->m[0]*n[0] + p0->m[1]*n[1] + p0->m[2]*n[2] ) > 1.0e-4)){
-    printf("VALEUR ETRANGE... %f \n",fabs(p0->m[0]*n[0] + p0->m[1]*n[1] + p0->m[2]*n[2] ));
-    }
-    if((fabs(p0->m[1]*n[0] + p0->m[3]*n[1] + p0->m[4]*n[2] ) > 1.0e-4)){
-    printf("VALEUR ETRANGE... %f \n",fabs(p0->m[1]*n[0] + p0->m[3]*n[1] + p0->m[4]*n[2] ));
-    }
-
-    if((fabs(p0->m[2]*n[0] + p0->m[4]*n[1] + p0->m[5]*n[2] ) > 1.0e-4)){
-    printf("VALEUR ETRANGE... %f \n",fabs(p0->m[2]*n[0] + p0->m[4]*n[1] + p0->m[5]*n[2]));
-    } */
-
-  /*if(ddb) {
-    printf("La matrice %f %f %f\n",p0->m[0],p0->m[1],p0->m[2]);
-    printf("            %f %f %f\n",p0->m[1],p0->m[3],p0->m[4]);
-    printf("            %f %f %f\n",p0->m[2],p0->m[4],p0->m[5]);
-
-    }*/
   return(1);
 }
 
