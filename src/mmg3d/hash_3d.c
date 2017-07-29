@@ -602,7 +602,7 @@ int _MMG5_setEdgeNmTag(MMG5_pMesh mesh, _MMG5_Hash *hash) {
                 if ( ++ilist > MMG3D_LMAX-2 ) {
                   fprintf(stdout,"  ## Warning: problem in surface remesh process.");
                   fprintf(stdout," Coquil of edge %d-%d contains too many elts.\n",
-                          _MMG3D_indPt(mesh,na),_MMG3D_indPt(mesh,nb));
+                          na,nb);
                   fprintf(stdout,"  ##          Try to modify the hausdorff number,");
                   fprintf(stdout," or/and the maximum mesh.\n");
                   return(0);
