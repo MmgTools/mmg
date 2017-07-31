@@ -81,17 +81,21 @@ static double Id[3][3] = {
  *
  */
 static int newton3(MMG5_pMesh mesh,double p[4],double x[3]) {
-  double     b,c,d,da,db,dc,epsd;
-  double     delta,fx,dfx,dxx;
-  double     fdx0,fdx1,dx0,dx1,x1,x2;
-  int        it,n;
+  double      b,c,d,da,db,dc,epsd;
+  double      delta,fx,dfx,dxx;
+  double      fdx0,fdx1,dx0,dx1,x1,x2;
+  int         it,n;
+  static char mmgWarn=0;
 
   /* coeffs polynomial, a=1 */
   if ( p[3] != 1. ) {
-    MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
-                      "  ## Error: %s: bad use of newton3 function, polynomial"
-                      " must be of type P(x) = x^3+bx^2+cx+d.\n  ## Exiting.\n",
-                      __func__);
+    if ( !mmgWarn ) {
+      MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
+                        "  ## Warning: %s: bad use of newton3 function, polynomial"
+                        " must be of type P(x) = x^3+bx^2+cx+d.\n",
+                        __func__);
+      mmgWarn = 1;
+    }
     return(0);
   }
 
