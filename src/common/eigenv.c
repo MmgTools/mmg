@@ -88,9 +88,10 @@ static int newton3(MMG5_pMesh mesh,double p[4],double x[3]) {
 
   /* coeffs polynomial, a=1 */
   if ( p[3] != 1. ) {
-    fprintf(stderr,"  ## Error: bad use of newton3 function, polynomial"
-            " must be of type P(x) = x^3+bx^2+cx+d. \n");
-    fprintf(stderr,"  ## Exiting.\n");
+    MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
+                      "  ## Error: %s: bad use of newton3 function, polynomial"
+                      " must be of type P(x) = x^3+bx^2+cx+d.\n  ## Exiting.\n",
+                      __func__);
     return(0);
   }
 
@@ -552,26 +553,42 @@ int _MMG5_eigenv(MMG5_pMesh mesh, int symmat,double *mat,double lambda[3],double
     if ( fabs(m[i]-mat[i]) > err )  err = fabs(m[i]-mat[i]);
 
     if ( err > 1.e03*maxm ) {
-    printf("\nProbleme eigenv3: err= %f\n",err*maxm);
-    printf("mat depart :\n");
-    printf("%13.6f  %13.6f  %13.6f\n",mat[0],mat[1],mat[2]);
-    printf("%13.6f  %13.6f  %13.6f\n",mat[1],mat[3],mat[4]);
-    printf("%13.6f  %13.6f  %13.6f\n",mat[2],mat[4],mat[5]);
-    printf("mat finale :\n");
-    printf("%13.6f  %13.6f  %13.6f\n",m[0],m[1],m[2]);
-    printf("%13.6f  %13.6f  %13.6f\n",m[1],m[3],m[4]);
-    printf("%13.6f  %13.6f  %13.6f\n",m[2],m[4],m[5]);
-    printf("lambda : %f %f %f\n",lambda[0],lambda[1],lambda[2]);
-    printf(" ordre %d\n",n);
-    printf("\nOrtho:\n");
-    printf("v1.v2 = %.14f\n",
+    MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
+    "  ## Error: %s:\nProbleme eigenv3: err= %f\n",__func__,err*maxm);
+    MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
+    "  ## Error: %s:mat depart :\n",__func__);
+    MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
+    "  ## Error: %s:%13.6f  %13.6f  %13.6f\n",__func__,mat[0],mat[1],mat[2]);
+    MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
+    "  ## Error: %s:%13.6f  %13.6f  %13.6f\n",__func__,mat[1],mat[3],mat[4]);
+    MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
+    "  ## Error: %s:%13.6f  %13.6f  %13.6f\n",__func__,mat[2],mat[4],mat[5]);
+    MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
+    "  ## Error: %s:mat finale :\n",__func__);
+    MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
+    "  ## Error: %s:%13.6f  %13.6f  %13.6f\n",__func__,m[0],m[1],m[2]);
+    MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
+    "  ## Error: %s:%13.6f  %13.6f  %13.6f\n",__func__,m[1],m[3],m[4]);
+    MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
+    "  ## Error: %s:%13.6f  %13.6f  %13.6f\n",__func__,m[2],m[4],m[5]);
+    MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
+    "  ## Error: %s:lambda : %f %f %f\n",__func__,lambda[0],lambda[1],lambda[2]);
+    MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
+    "  ## Error: %s: ordre %d\n",__func__,n);
+    MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
+    "  ## Error: %s:\nOrtho:\n",__func__);
+    MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
+    "  ## Error: %s:v1.v2 = %.14f\n",__func__,
     v[0][0]*v[1][0]+v[0][1]*v[1][1]+ v[0][2]*v[1][2]);
-    printf("v1.v3 = %.14f\n",
+    MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
+    "  ## Error: %s:v1.v3 = %.14f\n",__func__,
     v[0][0]*v[2][0]+v[0][1]*v[2][1]+ v[0][2]*v[2][2]);
-    printf("v2.v3 = %.14f\n",
+    MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
+    "  ## Error: %s:v2.v3 = %.14f\n",__func__,
     v[1][0]*v[2][0]+v[1][1]*v[2][1]+ v[1][2]*v[2][2]);
 
-    printf("Consistency\n");
+    MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
+    "  ## Error: %s:Consistency\n",__func__);
     for (i=0; i<3; i++) {
     tmpx = v[0][i]*m[0] + v[1][i]*m[1]
     + v[2][i]*m[2] - lambda[i]*v[0][i];
@@ -579,12 +596,16 @@ int _MMG5_eigenv(MMG5_pMesh mesh, int symmat,double *mat,double lambda[3],double
     + v[2][i]*m[4] - lambda[i]*v[1][i];
     tmpz = v[0][i]*m[2] + v[1][i]*m[4]
     + v[2][i]*m[5] - lambda[i]*v[2][i];
-    printf(" Av %d - lambda %d *v %d = %f %f %f\n",
-    i,i,i,tmpx,tmpy,tmpz);
+    MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
+    "  ## Error: %s: Av %d - lambda %d *v %d = %f %f %f\n",
+    __func__,i,i,i,tmpx,tmpy,tmpz);
 
-    printf("w1 %f %f %f\n",w1[0],w1[1],w1[2]);
-    printf("w2 %f %f %f\n",w2[0],w2[1],w2[2]);
-    printf("w3 %f %f %f\n",w3[0],w3[1],w3[2]);
+    MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
+    "  ## Error: %s:w1 %f %f %f\n",__func__,w1[0],w1[1],w1[2]);
+    MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
+    "  ## Error: %s:w2 %f %f %f\n",__func__,w2[0],w2[1],w2[2]);
+    MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
+    "  ## Error: %s:w3 %f %f %f\n",__func__,w3[0],w3[1],w3[2]);
     }
     return(1);
     }
@@ -596,6 +617,7 @@ int _MMG5_eigenv(MMG5_pMesh mesh, int symmat,double *mat,double lambda[3],double
 
 /**
  * \brief Find eigenvalues and vectors of a 2x2 matrix.
+ *\param mesh pointer toward the mesh.
  * \param mm pointer toward the matrix.
  * \param lambda pointer toward the output eigenvalues.
  * \param vp eigenvectors.
@@ -603,7 +625,7 @@ int _MMG5_eigenv(MMG5_pMesh mesh, int symmat,double *mat,double lambda[3],double
  *
  * \warning not used for now
  */
-int _MMG5_eigen2(double *mm,double *lambda,double vp[2][2]) {
+int _MMG5_eigen2(MMG5_pMesh mesh,double *mm,double *lambda,double vp[2][2]) {
   double   m[3],dd,a1,xn,ddeltb,rr1,rr2,ux,uy;
 
   /* normalize */
@@ -635,7 +657,8 @@ int _MMG5_eigen2(double *mm,double *lambda,double vp[2][2]) {
   ddeltb = a1*a1 - 4.0 * (m[0]*m[2] - m[1]*m[1]);
 
   if ( ddeltb < 0.0 ) {
-    fprintf(stderr,"  Delta: %f\n",ddeltb);
+    MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
+                      "  ## Error: %s: Delta: %f\n",__func__,ddeltb);
     ddeltb = 0.0;
   }
   ddeltb = sqrt(ddeltb);
