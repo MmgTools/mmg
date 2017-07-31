@@ -191,13 +191,20 @@ void _MMG5_swapNod(MMG5_pPoint points, double* sols, int* perm,
  **/
 int _MMG5_scotchCall(MMG5_pMesh mesh, MMG5_pSol met)
 {
+  static char mmgWarn  = 0;
+  static char mmgError = 0;
+
 #ifdef USE_SCOTCH
   /*check enough vertex to renum*/
   if ( mesh->info.renum && (mesh->np/2. > _MMG5_BOXSIZE) && mesh->np>100000 ) {
 
     if ( (SCOTCH_5 && SCOTCH_6 ) || ( (!SCOTCH_5) && (!SCOTCH_6) ) ) {
-      printf(" ## Error: fail to determine scotch version.\n");
-      printf("           No renumbering.\n");
+      if ( !mmgWarn ) {
+        MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
+                          "  ## Warning: %s: fail to determine scotch version."
+                          " No renumbering.\n",__func__);
+        mmgWarn = 1;
+      }
       return 1;
     }
 
@@ -206,8 +213,13 @@ int _MMG5_scotchCall(MMG5_pMesh mesh, MMG5_pSol met)
       fprintf(stdout,"  -- RENUMBERING. \n");
 
     if ( !_MMG5_renumbering(_MMG5_BOXSIZE,mesh, met) ) {
-      fprintf(stdout,"  ## Unable to renumbering mesh. \n");
-      fprintf(stdout,"  ## Try to run without renumbering option (-rn 0)\n");
+      if ( !mmgError ) {
+        MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
+                          "  ## Error: %s: Unable to renumbering mesh. "
+                          "Try to run without renumbering option (-rn 0).\n",
+                          __func__);
+        mmgError = 1;
+      }
       return(0);
     }
 
