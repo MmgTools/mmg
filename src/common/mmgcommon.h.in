@@ -470,7 +470,7 @@ typedef struct _MMG5_dNode_s {
  int           _MMG5_hashNew(MMG5_pMesh mesh, _MMG5_Hash *hash,int hsiz,int hmax);
  int           _MMG5_intmetsavedir(MMG5_pMesh mesh, double *m,double *n,double *mr);
  int           _MMG5_intridmet(MMG5_pMesh,MMG5_pSol,int,int,double,double*,double*);
- int           _MMG5_mmgIntmet33_ani(double*,double*,double*,double);
+ int           _MMG5_mmgIntmet33_ani(MMG5_pMesh,double*,double*,double*,double);
  int           _MMG5_mmgIntextmet(MMG5_pMesh,MMG5_pSol,int,double *,double *);
  long long     _MMG5_memSize(void);
  void          _MMG5_mmgDefaultValues(MMG5_pMesh mesh);

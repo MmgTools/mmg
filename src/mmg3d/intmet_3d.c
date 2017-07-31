@@ -112,7 +112,7 @@ int _MMG3D_intmet33_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,
   n   = &met->m[6*ip2];
   mr  = &met->m[6*ip];
 
-  return(_MMG5_mmgIntmet33_ani(m,n,mr,s));
+  return(_MMG5_mmgIntmet33_ani(mesh,m,n,mr,s));
 }
 
 /**

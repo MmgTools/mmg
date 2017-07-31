@@ -208,7 +208,7 @@ int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
         m    = &met->m[6*k];
 
         /* Check the input metric */
-        if ( !_MMG5_eigenv(1,m,lambda,v) ) {
+        if ( !_MMG5_eigenv(mesh,1,m,lambda,v) ) {
           fprintf(stderr,"  ## ERROR: WRONG METRIC AT POINT %d -- \n",k);
           return(0);
         }

@@ -163,6 +163,7 @@
 /* } */
 
 /**
+ * \param mesh pointer toward the mesh.
  * \param m input metric.
  * \param n input metric.
  * \param mr computed output metric.
@@ -174,14 +175,14 @@
  * the simultaneous reduction basis: linear interpolation of sizes.
  *
  */
-int _MMG5_mmgIntmet33_ani(double *m,double *n,double *mr,double s) {
+int _MMG5_mmgIntmet33_ani(MMG5_pMesh mesh,double *m,double *n,double *mr,double s) {
   int     order;
   double  lambda[3],vp[3][3],mu[3],is[6],isnis[6],mt[9],P[9],dd;
   char    i;
 
   /* Compute inverse of square root of matrix M : is =
    * P*diag(1/sqrt(lambda))*{^t}P */
-  order = _MMG5_eigenv(1,m,lambda,vp);
+  order = _MMG5_eigenv(mesh,1,m,lambda,vp);
   if ( !order ) return(0);
 
   for (i=0; i<3; i++) {
@@ -220,7 +221,7 @@ int _MMG5_mmgIntmet33_ani(double *m,double *n,double *mr,double s) {
   isnis[4] = is[1]*mt[2] + is[3]*mt[5] + is[4]*mt[8];
   isnis[5] = is[2]*mt[2] + is[4]*mt[5] + is[5]*mt[8];
 
-  order = _MMG5_eigenv(1,isnis,lambda,vp);
+  order = _MMG5_eigenv(mesh,1,isnis,lambda,vp);
   if ( !order ) return(0);
 
   /* P = is * (vp) */
@@ -750,7 +751,7 @@ int _MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,char i,
   _MMG5_rmtr(r,m2,m2old);
 
   /* Interpolate both metrics expressed in the same tangent plane. */
-  if ( !_MMG5_mmgIntmet33_ani(m1old,m2old,mr,s) ) {
+  if ( !_MMG5_mmgIntmet33_ani(mesh,m1old,m2old,mr,s) ) {
     if ( !warn ) {
       ++warn;
       fprintf(stderr,"Impossible interpolation between points : %d %d\n",pt->v[i1],pt->v[i2]);

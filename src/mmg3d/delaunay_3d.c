@@ -438,7 +438,7 @@ static int _MMG5_correction_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip,int* list,
           + 2.0*(mm[1]*v1*v2 + mm[2]*v1*v3 + mm[4]*v2*v3);
         /*if ( det*dd*dd*dd*dd*dd*dd < nn * nn * nn * eps2 * eps2 * eps2 )  break;*/
         /*//prendre le min des valeurs propres
-          eigenv(1,mm,lambda,vv);
+          eigenv(mesh,1,mm,lambda,vv);
           det = max(lambda[0],max(lambda[1],lambda[2]));
           if ( det*dd*dd < nn * eps2 )  break;
         *//*if ( pow(det,1./3.)*dd*dd < nn * eps2 )  break;*/

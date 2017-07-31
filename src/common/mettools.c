@@ -434,7 +434,7 @@ int _MMG5_mmgIntextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6],
    * every direction */
   if ( MG_SIN(p0->tag) || (p0->tag & MG_NOM) ) {
     /* Characteristic polynomial of me */
-    _MMG5_eigenv(1,me,lambda,vp);
+    _MMG5_eigenv(mesh,1,me,lambda,vp);
 
     hu = m[0];
     for(i=0; i<3; i++) {
@@ -568,7 +568,7 @@ int _MMG5_mmgIntextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6],
 
     /* Truncate the metric in the third direction (because me was not
      * truncated) */
-    _MMG5_eigenv(1,m,lambda,vp);
+    _MMG5_eigenv(mesh,1,m,lambda,vp);
 
     for (i=0; i<3; i++) {
       if(lambda[i]<=0) {

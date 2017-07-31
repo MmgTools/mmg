@@ -69,6 +69,7 @@ static double Id[3][3] = {
 /**
  * \fn static int newton3(double p[4],double x[3])
  * \brief Find root(s) of a polynomial of degree 3.
+ * \param mesh pointer toward the mesh.
  * \param p polynomial coefficients (b=p[2], c=p[1], d=p[0]).
  * \param x root(s) of polynomial.
  * \return 0 if no roots.
@@ -79,7 +80,7 @@ static double Id[3][3] = {
  * Find root(s) of a polynomial of degree 3: \f$P(x) = x^3+bx^2+cx+d\f$.
  *
  */
-static int newton3(double p[4],double x[3]) {
+static int newton3(MMG5_pMesh mesh,double p[4],double x[3]) {
   double     b,c,d,da,db,dc,epsd;
   double     delta,fx,dfx,dxx;
   double     fdx0,fdx1,dx0,dx1,x1,x2;
@@ -127,7 +128,9 @@ static int newton3(double p[4],double x[3]) {
       fx = d + x[2]*(c+x[2]*(b+x[2]));
       if ( fabs(fx) > _MG_EPSD2 ) {
 #ifdef DEBUG
-        fprintf(stderr,"  ## ERR 9100, newton3: fx= %E\n",fx);
+         MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
+                           "  ## Error: %s: ERR 9100, newton3: fx= %E.\n",
+                           __func__,fx);
 #endif
         return(0);
       }
@@ -143,7 +146,9 @@ static int newton3(double p[4],double x[3]) {
       fx = d + x[2]*(c+x[2]*(b+x[2]));
       if ( fabs(fx) > _MG_EPSD2 ) {
 #ifdef DEBUG
-        fprintf(stderr,"  ## ERR 9100, newton3: fx= %E\n",fx);
+        MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
+                          "  ## Error: %s: ERR 9100, newton3: fx= %E.\n",
+                          __func__,fx);
 #endif
         return(0);
       }
@@ -161,7 +166,9 @@ static int newton3(double p[4],double x[3]) {
     fx = d + x[0]*(c+x[0]*(b+x[0]));
     if ( fabs(fx) > _MG_EPSD2 ) {
 #ifdef DEBUG
-      fprintf(stderr,"  ## ERR 9100, newton3: fx= %E\n",fx);
+      MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
+                        "  ## Error: %s: ERR 9100, newton3: fx= %E\n.",
+                        __func__,fx);
 #endif
       return(0);
     }
@@ -170,7 +177,9 @@ static int newton3(double p[4],double x[3]) {
 
   else {
 #ifdef DEBUG
-    fprintf(stderr,"  ## ERR 9101, newton3: no real roots\n");
+    MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
+                      "  ## Error: %s: ERR 9101, newton3: no real roots.\n",
+                      __func__);
 #endif
     return(0);
   }
@@ -195,7 +204,9 @@ static int newton3(double p[4],double x[3]) {
     if ( dxx < 1.0e-10 ) {
       x[0] = x2;
       if ( fabs(fx) > _MG_EPSD2 ) {
-        fprintf(stderr,"  ## ERR 9102, newton3, no root found (fx %E).\n",fx);
+        MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
+                          "  ## Error: %s: ERR 9102, newton3, no root found (fx %E).\n",
+                          __func__,fx);
         return(0);
       }
       break;
@@ -209,7 +220,9 @@ static int newton3(double p[4],double x[3]) {
     x[0] = x1;
     fx   = d + x1*(c+(x1*(b+x1)));
     if ( fabs(fx) > _MG_EPSD2 ) {
-      fprintf(stderr,"  ## ERR 9102, newton3, no root found (fx %E).\n",fx);
+      MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
+                        "  ## Error: %s: ERR 9102, newton3, no root found (fx %E).\n",
+                        __func__,fx);
       return(0);
     }
   }
@@ -221,7 +234,8 @@ static int newton3(double p[4],double x[3]) {
   delta = db*db - 4.0*dc;
 
   if ( delta <= 0.0 ) {
-    fprintf(stderr,"  ## ERR 9103, newton3, det = 0.\n");
+    MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
+                      "  ## Error: %s: ERR 9103, newton3, det = 0.\n",__func__);
     return(0);
   }
 
@@ -233,12 +247,16 @@ static int newton3(double p[4],double x[3]) {
   /* check for root accuracy */
   fx = d + x[1]*(c+x[1]*(b+x[1]));
   if ( fabs(fx) > _MG_EPSD2 ) {
-    fprintf(stderr,"  ## ERR 9104, newton3: fx= %E  x= %E\n",fx,x[1]);
+    MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
+                      "  ## Error: %s: ERR 9104, newton3: fx= %E  x= %E.\n",
+                      __func__,fx,x[1]);
     return(0);
   }
   fx = d + x[2]*(c+x[2]*(b+x[2]));
   if ( fabs(fx) > _MG_EPSD2 ) {
-    fprintf(stderr,"  ## ERR 9104, newton3: fx= %E  x= %E\n",fx,x[2]);
+    MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
+                      "  ## Error: %s: ERR 9104, newton3: fx= %E  x= %E\n.",
+                      __func__,fx,x[2]);
     return(0);
   }
 #endif
@@ -248,6 +266,7 @@ static int newton3(double p[4],double x[3]) {
 
 /**
  * \brief Find eigenvalues and vectors of a 3x3 matrix.
+ * \param mesh pointer toward the mesh.
  * \param symmat 0 if matrix is not symetric, 1 otherwise.
  * \param mat pointer toward the matrix.
  * \param lambda eigenvalues.
@@ -258,7 +277,7 @@ static int newton3(double p[4],double x[3]) {
  * \remark the i^{th} eigenvector is stored in v[i][.].
  *
  */
-int _MMG5_eigenv(int symmat,double *mat,double lambda[3],double v[3][3]) {
+int _MMG5_eigenv(MMG5_pMesh mesh, int symmat,double *mat,double lambda[3],double v[3][3]) {
   double    a11,a12,a13,a21,a22,a23,a31,a32,a33;
   double    aa,bb,cc,dd,ee,ii,vx1[3],vx2[3],vx3[3],dd1,dd2,dd3;
   double    maxd,maxm,valm,p[4],w1[3],w2[3],w3[3];
@@ -364,7 +383,7 @@ int _MMG5_eigenv(int symmat,double *mat,double lambda[3],double v[3][3]) {
   }
 
   /* solve polynomial (find roots using newton) */
-  n = newton3(p,lambda);
+  n = newton3(mesh,p,lambda);
   if ( n <= 0 )  return(0);
 
   /* compute eigenvectors:

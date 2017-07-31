@@ -1188,7 +1188,7 @@ int _MMG5_defmetvol(MMG5_pMesh mesh,MMG5_pSol met) {
 
       /** Second step: set metric */
       m = &met->m[met->size*ip];
-      _MMG5_eigenv(1,m,lambda,v);
+      _MMG5_eigenv(mesh,1,m,lambda,v);
 
       for (i=0; i<3; i++) {
         if(lambda[i]<=0) {
@@ -1325,7 +1325,7 @@ int _MMG3D_nosurfsiz_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel, int iploc,
 
     /* Step 2: size truncature */
     m = &met->m[iadr];
-    _MMG5_eigenv(1,m,lambda,v);
+    _MMG5_eigenv(mesh,1,m,lambda,v);
 
     for (i=0; i<3; i++) {
       if(lambda[i]<=0) {
@@ -1593,7 +1593,7 @@ int _MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int ia) {
     if( ps1 >= alpha -_MMG5_EPS )
       return(-1);
 
-    _MMG5_eigenv(1,m1,lambda,vp);
+    _MMG5_eigenv(mesh,1,m1,lambda,vp);
     /* Project the vector t1 along the main directions of the metric */
     c[0] = t[0]*vp[0][0] + t[1]*vp[0][1] + t[2]*vp[0][2];
     c[1] = t[0]*vp[1][0] + t[1]*vp[1][1] + t[2]*vp[1][2];
@@ -1674,7 +1674,7 @@ int _MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int ia) {
     if( ps2 >= alpha - _MMG5_EPS)
       return(-1);
 
-    _MMG5_eigenv(1,m2,lambda,vp);
+    _MMG5_eigenv(mesh,1,m2,lambda,vp);
 
     c[0] = t[0]*vp[0][0] + t[1]*vp[0][1] + t[2]*vp[0][2];
     c[1] = t[0]*vp[1][0] + t[1]*vp[1][1] + t[2]*vp[1][2];
