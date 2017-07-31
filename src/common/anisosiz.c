@@ -565,8 +565,8 @@ int _MMG5_solveDefmetrefSys( MMG5_pMesh mesh, MMG5_pPoint p0, int ip, int ipref[
     if ( !mmgWarn ) {
       MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
                         "  ## Warning: %s: unable to solve the system on at"
-                        " least 1 point (point %d along ref curve %d -- %d.\n",
-                        __func__,ip,ipref[0],ipref[1]);
+                        " least 1 point.\n",
+                        __func__);
       mmgWarn = 1;
     }
     return(0);
