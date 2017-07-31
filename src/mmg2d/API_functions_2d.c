@@ -116,11 +116,7 @@ int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
     }
     else
       mesh->info.mem      = val;
-    _MMG2D_memOption(mesh);
-    if(mesh->np && (mesh->npmax < mesh->np || mesh->ntmax < mesh->nt )) {
-      return(0);
-    } else if(mesh->info.mem < 39)
-      return(0);
+    if ( !_MMG2D_memOption(mesh) ) return 0;
     break;
   case MMG2D_IPARAM_debug :
     mesh->info.ddebug   = val;
@@ -245,19 +241,9 @@ int MMG2D_Set_meshSize(MMG5_pMesh mesh, int np, int nt, int na) {
   /*tester si -m definie : renvoie 0 si pas ok et met la taille min dans info.mem */
   if( mesh->info.mem > 0) {
     if((mesh->npmax < mesh->np || mesh->ntmax < mesh->nt || mesh->namax < mesh->na) ) {
-      _MMG2D_memOption(mesh);
-      //     printf("pas de pbs ? %d %d %d %d %d %d -- %d\n",mesh->npmax,mesh->np,
-      //     mesh->ntmax,mesh->nt,mesh->nemax,mesh->ne,mesh->info.mem);
-      if((mesh->npmax < mesh->np || mesh->ntmax < mesh->nt)) {
-        fprintf(stdout,"mem insuffisante np : %d %d nt : %d %d \n"
-                ,mesh->npmax,mesh->np,
-                mesh->ntmax,mesh->nt);
-        return(0);
-      }
-      else
-        return(1);
+      if ( !_MMG2D_memOption(mesh) )  return 0;
     } else if(mesh->info.mem < 39) {
-      printf("mem insuffisante %d\n",mesh->info.mem);
+      fprintf(stderr,"not enough memory  %d\n",mesh->info.mem);
       return(0);
     }
   } else {

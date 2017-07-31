@@ -161,7 +161,7 @@ int _MMG5_getnElt(MMG5_pMesh mesh,int n) {
 }
 
 /** memory repartition for the -m option */
-void _MMG2D_memOption(MMG5_pMesh mesh) {
+int _MMG2D_memOption(MMG5_pMesh mesh) {
   long long  million = 1048576L;
   long       castedVal;
   int        ctri,npask,bytes,memtmp;
@@ -198,12 +198,12 @@ void _MMG2D_memOption(MMG5_pMesh mesh) {
     ctri = 2;
 
     /* Euler-poincare: ne = 6*np; nt = 2*np; na = np/5 *
-     * point+tria+tets+adja+adjt+sol+item *
+     * point+tria+edges+adjt+sol *
      * warning: we exceed memory in saveMesh when we call _MMG5_hNew */
     bytes = sizeof(MMG5_Point) +  0.1*sizeof(MMG5_xPoint) +
-      2*sizeof(MMG5_Tria) + 3*sizeof(int)
+      2*sizeof(MMG5_Tria) + 3*2*sizeof(int)
       + sizeof(MMG5_Sol) /*+ sizeof(Displ)*/
-      + sizeof(int) + 5*sizeof(int);
+      + 0.2*sizeof(MMG5_Edge);
 
     /*init allocation need 38Mo*/
     npask = (int)((double)(mesh->info.mem-38) / bytes * (int)million);
@@ -215,19 +215,21 @@ void _MMG2D_memOption(MMG5_pMesh mesh) {
     /*check if the memory asked is enough to load the mesh*/
     if(mesh->np &&
        (mesh->npmax < mesh->np || mesh->ntmax < mesh->nt || mesh->namax < mesh->na) ){
-      memtmp = (int)(mesh->np * bytes /(int)million + 38);
-      memtmp = MG_MAX(memtmp, (int)(mesh->nt * bytes /(ctri* (int)million) + 38));
-      memtmp = MG_MAX(memtmp, (int)(mesh->na * bytes /(ctri*(int)million) + 38));
-      mesh->memMax = (long long) memtmp+1;
+      memtmp = (long long)mesh->np * bytes /million + 38;
+      memtmp = MG_MAX(memtmp, ((long long)mesh->nt * bytes /(ctri*million) + 38));
+      memtmp = MG_MAX(memtmp, ((long long)mesh->na * bytes /(ctri*million) + 38));
+      mesh->memMax = (long long) memtmp*million+1;
       fprintf(stdout,"  ## ERROR: asking for %d Mo of memory ",mesh->info.mem);
       fprintf(stdout,"is not enough to load mesh. You need to ask %d Mo minimum\n",
               memtmp+1);
+      return 0;
     }
     if(mesh->info.mem < 39) {
-      mesh->memMax = (long long) 39;
+      mesh->memMax = (long long) 38 + 1;
       fprintf(stdout,"  ## ERROR: asking for %d Mo of memory ",mesh->info.mem);
-      fprintf(stdout,"is not enough to load mesh. You need to ask %d Mo minimum\n",
+      fprintf(stdout,"is not enough to load mesh. You need to ask %d o minimum\n",
               39);
+      return 0;
     }
   }
 
@@ -241,14 +243,14 @@ void _MMG2D_memOption(MMG5_pMesh mesh) {
     fprintf(stdout,"  _MMG2D_NTMAX    %d\n",mesh->ntmax);
   }
 
-  return;
+  return 1;
 }
 
 /* allocate main structure */
 int MMG2D_zaldy(MMG5_pMesh mesh) {
   int     k;
 
-  _MMG2D_memOption(mesh);
+  if ( !_MMG2D_memOption(mesh) )  return 0;
 
   _MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(MMG5_Point),"initial vertices",
                 printf("  Exit program.\n");

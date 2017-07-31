@@ -802,7 +802,7 @@ int _MMG3D_indPt(MMG5_pMesh mesh, int kp) {
     return(0);
 }
 
-/** Debug function (not use in clean code): print mesh->tria structure */
+/** Debug function (not use in clean code): print mesh->tetra structure */
 void _MMG5_printTetra(MMG5_pMesh mesh,char* fileName) {
     MMG5_pTetra  pt;
     MMG5_pxTetra pxt;

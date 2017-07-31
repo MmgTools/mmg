@@ -761,7 +761,7 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
   isqhmax = 1.0 / (isqhmax*isqhmax);
 
   /* Solve tAA * tmp_m = tAb and fill m with tmp_m (after rotation) */
-  return(_MMG5_solveDefmetrefSys( mesh, p0,idp, ipref, r, c, tAA, tAb, m,
+  return(_MMG5_solveDefmetrefSys( mesh, p0, ipref, r, c, tAA, tAb, m,
                                   isqhmin, isqhmax, hausd));
 }
 

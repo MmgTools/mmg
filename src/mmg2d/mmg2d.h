@@ -219,7 +219,7 @@ int  _MMG2D_delElt(MMG5_pMesh mesh,int iel);
 int _MMG5_getnElt(MMG5_pMesh mesh,int n);
 int MMG2D_zaldy(MMG5_pMesh mesh);
 long long _MMG5_memSize(void);
-void _MMG2D_memOption(MMG5_pMesh mesh);
+int _MMG2D_memOption(MMG5_pMesh mesh);
 
 int MMG2_scaleMesh(MMG5_pMesh ,MMG5_pSol );
 int MMG2_unscaleMesh(MMG5_pMesh ,MMG5_pSol );
@@ -350,6 +350,11 @@ int _MMG2_chkor(MMG5_pMesh );
 int _MMG2_savenor_db(MMG5_pMesh ,char *,char );
 int _MMG2_savedisp_db(MMG5_pMesh mesh,MMG5_pSol ,char *,char );
 int _MMG2_velextLS(MMG5_pMesh ,MMG5_pSol );
+
+/* useful functions to debug */
+int  _MMG2D_indElt(MMG5_pMesh mesh,int kel);
+int  _MMG2D_indPt(MMG5_pMesh mesh,int kp);
+
 
 /* functions pointers */
 double long_ani(double *ca,double *cb,double *ma,double *mb);

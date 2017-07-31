@@ -169,7 +169,7 @@ int  delref(MMG5_pMesh);
 int  chkmet(MMG5_pMesh,MMG5_pSol);
 int  chknor(MMG5_pMesh);
 long long _MMG5_memSize(void);
-void _MMGS_memOption(MMG5_pMesh mesh);
+int _MMGS_memOption(MMG5_pMesh mesh);
 
 #ifdef USE_SCOTCH
 int _MMG5_mmgsRenumbering(int vertBoxNbr, MMG5_pMesh mesh, MMG5_pSol sol);

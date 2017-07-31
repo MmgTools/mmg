@@ -110,7 +110,7 @@ int _MMGS_delElt(MMG5_pMesh mesh,int iel) {
 }
 
 /** memory repartition for the -m option */
-void _MMGS_memOption(MMG5_pMesh mesh) {
+int _MMGS_memOption(MMG5_pMesh mesh) {
   long long  million = 1048576L;
   long       castedVal;
   int        npask,bytes,memtmp;
@@ -155,18 +155,20 @@ void _MMGS_memOption(MMG5_pMesh mesh) {
     /*check if the memory asked is enough to load the mesh*/
     if(mesh->np &&
        (mesh->npmax < mesh->np || mesh->ntmax < mesh->nt )) {
-      memtmp = (int)(mesh->np * bytes /(int)million + 38);
-      memtmp = MG_MAX(memtmp, (int)(mesh->nt * bytes /(2 * (int)million) + 38));
-      mesh->memMax = (long long) memtmp+1;
+      memtmp = ((long long)mesh->np * bytes /million + 38);
+      memtmp = MG_MAX(memtmp, ((long long)mesh->nt * bytes /(2 *million) + 38));
+      mesh->memMax = (long long) memtmp*million+1;
       fprintf(stdout,"  ## ERROR: asking for %d Mo of memory ",mesh->info.mem);
       fprintf(stdout,"is not enough to load mesh. You need to ask %d Mo minimum\n",
               memtmp+1);
+      return 0;
     }
     if(mesh->info.mem < 39) {
       mesh->memMax = (long long) 39;
       fprintf(stdout,"  ## ERROR: asking for %d Mo of memory ",mesh->info.mem);
-      fprintf(stdout,"is not enough to load mesh. You need to ask %d Mo minimum\n",
+      fprintf(stdout,"is not enough to load mesh. You need to ask %d o minimum\n",
               39);
+      return 0;
     }
   }
 
@@ -180,7 +182,7 @@ void _MMGS_memOption(MMG5_pMesh mesh) {
     fprintf(stdout,"  _MMGS_NTMAX    %d\n",mesh->ntmax);
   }
 
-  return;
+  return 1;
 }
 
 /**
@@ -194,7 +196,7 @@ void _MMGS_memOption(MMG5_pMesh mesh) {
 int _MMGS_zaldy(MMG5_pMesh mesh) {
   int     k;
 
-  _MMGS_memOption(mesh);
+  if ( !_MMGS_memOption(mesh) )  return 0;
 
   _MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(MMG5_Point),"initial vertices",
                 fprintf(stderr,"  Exit program.\n");

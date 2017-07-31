@@ -518,7 +518,7 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   isqhmin = 1.0 / (isqhmin*isqhmin);
   isqhmax = 1.0 / (isqhmax*isqhmax);
 
-  return( _MMG5_solveDefmetrefSys(mesh,p0,idp,ipref,r,c,tAA,tAb,m,
+  return( _MMG5_solveDefmetrefSys(mesh,p0,ipref,r,c,tAA,tAb,m,
                                   isqhmin,isqhmax,hausd) );
 }
 

@@ -318,7 +318,7 @@ int _MMG2_norver(MMG5_pMesh mesh) {
           MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
                             "  ## Error: %s: Impossible to"
                             " calculate normal vector at vertex %d.\n",
-                            __func__,pt->v[i]);
+                            __func__,_MMG2D_indPt(mesh,pt->v[i]));
           return(0);
         }
         nn++;

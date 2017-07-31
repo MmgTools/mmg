@@ -519,7 +519,6 @@ int _MMG5_solveDefmetregSys( MMG5_pMesh mesh, double r[3][3], double c[3],
 /**
  * \param mesh pointer toward the mesh structure.
  * \param p0 pointer toward the point on which we want to define the metric.
- * \param ip index of point on which we try to define the metric (\a p0 )
  * \param ipref table containing the indices of the edge extremities.
  * \param r pointer toward the rotation matrix.
  * \param c physical coordinates of the curve edge mid-point.
@@ -535,7 +534,7 @@ int _MMG5_solveDefmetregSys( MMG5_pMesh mesh, double r[3][3], double c[3],
  * point.
  *
  */
-int _MMG5_solveDefmetrefSys( MMG5_pMesh mesh, MMG5_pPoint p0, int ip, int ipref[2],
+int _MMG5_solveDefmetrefSys( MMG5_pMesh mesh, MMG5_pPoint p0, int ipref[2],
                              double r[3][3], double c[3],
                              double tAA[6], double tAb[3], double *m,
                              double isqhmin, double isqhmax, double hausd)

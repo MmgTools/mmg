@@ -153,13 +153,7 @@ int MMGS_Set_meshSize(MMG5_pMesh mesh, int np, int nt, int na) {
   /*tester si -m defini : renvoie 0 si pas ok et met la taille min dans info.mem */
   if( mesh->info.mem > 0) {
     if ( mesh->npmax < mesh->np || mesh->ntmax < mesh->nt) {
-      _MMGS_memOption(mesh);
-
-      if ( mesh->npmax < mesh->np || mesh->ntmax < mesh->nt) {
-        fprintf(stderr,"not enough memory: np : %d %d nt : %d %d \n"
-                ,mesh->npmax,mesh->np, mesh->ntmax,mesh->nt);
-        return(0);
-      }
+      if ( !_MMGS_memOption(mesh) )  return 0;
     } else if(mesh->info.mem < 39) {
       fprintf(stderr,"not enough memory  %d\n",mesh->info.mem);
       return(0);
@@ -1003,11 +997,7 @@ int MMGS_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
     }
     else
       mesh->info.mem      = val;
-    _MMGS_memOption(mesh);
-    if(mesh->np && (mesh->npmax < mesh->np || mesh->ntmax < mesh->nt)) {
-      return(0);
-    } else if(mesh->info.mem < 39)
-      return(0);
+    if ( !_MMGS_memOption(mesh) ) return 0;
     break;
   case MMGS_IPARAM_debug :
     mesh->info.ddebug   = val;

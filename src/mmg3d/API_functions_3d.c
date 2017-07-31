@@ -192,15 +192,7 @@ int MMG3D_Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nprism,
   /*tester si -m definie : renvoie 0 si pas ok et met la taille min dans info.mem */
   if( mesh->info.mem > 0) {
     if((mesh->npmax < mesh->np || mesh->ntmax < mesh->nt || mesh->nemax < mesh->ne)) {
-      _MMG3D_memOption(mesh);
-
-      if((mesh->npmax < mesh->np || mesh->ntmax < mesh->nt
-          || mesh->nemax < mesh->ne)) {
-        fprintf(stderr,"not enough memory: np : %d %d nt : %d %d ne :%d %d\n"
-                ,mesh->npmax,mesh->np,
-                mesh->ntmax,mesh->nt,mesh->nemax,mesh->ne);
-        return(0);
-      }
+      if ( !_MMG3D_memOption(mesh) )  return 0;
     } else if(mesh->info.mem < 39) {
       fprintf(stderr,"not enough memory  %d\n",mesh->info.mem);
       return(0);
@@ -1645,11 +1637,7 @@ int MMG3D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam,int val){
     }
     else
       mesh->info.mem      = val;
-    _MMG3D_memOption(mesh);
-    if(mesh->np && (mesh->npmax < mesh->np || mesh->ntmax < mesh->nt || mesh->nemax < mesh->ne)) {
-      return(0);
-    } else if(mesh->info.mem < 39)
-      return(0);
+    if ( !_MMG3D_memOption(mesh) )  return 0;
     break;
 #ifndef PATTERN
   case MMG3D_IPARAM_octree :

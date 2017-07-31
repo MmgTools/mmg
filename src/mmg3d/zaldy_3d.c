@@ -136,7 +136,7 @@ int _MMG3D_delElt(MMG5_pMesh mesh,int iel) {
 }
 
 /** memory repartition for the -m option */
-void _MMG3D_memOption(MMG5_pMesh mesh) {
+int _MMG3D_memOption(MMG5_pMesh mesh) {
   long long  million = 1048576L,memtmp,reservedMem;
   long       castedVal;
   int        ctri,npask,bytes;
@@ -196,23 +196,23 @@ void _MMG3D_memOption(MMG5_pMesh mesh) {
     /* check if the memory asked is enough to load the mesh*/
     if(mesh->np &&
        (mesh->npmax < mesh->np || mesh->ntmax < mesh->nt || mesh->nemax < mesh->ne)) {
-      memtmp = (mesh->np * bytes + reservedMem)/million;
-      memtmp = MG_MAX(memtmp, (mesh->nt*bytes/ctri + reservedMem)/million );
-      memtmp = MG_MAX(memtmp, (mesh->ne*bytes/6 + reservedMem)/million );
-      mesh->memMax = memtmp+1;
+      memtmp = ((long long)mesh->np * bytes + reservedMem)/million;
+      memtmp = MG_MAX(memtmp, ((long long)mesh->nt*bytes/ctri + reservedMem)/million );
+      memtmp = MG_MAX(memtmp, ((long long)mesh->ne*bytes/6 + reservedMem)/million );
+      mesh->memMax = memtmp*million+1;
       fprintf(stderr,"  ## ERROR: asking for %d Mo of memory ",mesh->info.mem);
       castedVal =  _MMG5_SAFELL2LCAST(mesh->memMax);
       fprintf(stderr,"is not enough to load mesh. You need to ask %ld Mo minimum\n",
               castedVal);
-      return;
+      return 0;
     }
     if(mesh->info.mem*million < reservedMem) {
-      mesh->memMax = reservedMem;
+      mesh->memMax = reservedMem + 1;
       fprintf(stderr,"  ## ERROR: asking for %d Mo of memory ",mesh->info.mem);
-      castedVal = _MMG5_SAFELL2LCAST(mesh->memMax/million);
-      fprintf(stderr,"is not enough to load mesh. You need to ask %ld Mo minimum\n",
+      castedVal = _MMG5_SAFELL2LCAST(mesh->memMax);
+      fprintf(stderr,"is not enough to load mesh. You need to ask %ld O minimum\n",
               castedVal);
-      return;
+      return 0;
     }
   }
 
@@ -227,7 +227,7 @@ void _MMG3D_memOption(MMG5_pMesh mesh) {
     fprintf(stdout,"  _MMG3D_NEMAX    %d\n",mesh->nemax);
   }
 
-  return;
+  return 1;
 }
 
 /**
@@ -241,7 +241,7 @@ void _MMG3D_memOption(MMG5_pMesh mesh) {
 int _MMG3D_zaldy(MMG5_pMesh mesh) {
   int     k;
 
-  _MMG3D_memOption(mesh);
+  if ( !_MMG3D_memOption(mesh) )  return 0;
 
   _MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(MMG5_Point),"initial vertices",
                 fprintf(stderr,"  Exit program.\n");
