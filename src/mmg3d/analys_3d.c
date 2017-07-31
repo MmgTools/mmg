@@ -184,7 +184,9 @@ static int _MMG5_setadj(MMG5_pMesh mesh){
         if ( pt1->v[ii1] == ip1 ) {
           /* Moebius strip */
           if ( pt1->base < 0 ) {
-            fprintf(stderr,"  ## Triangle orientation problem (1): Moebius strip?\n");
+            MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
+            "  ## Error: %s: Triangle orientation problem (1): Moebius strip?\n",
+              __func__);
             _MMG5_SAFE_FREE(pile);
             return(0);
           }
@@ -420,9 +422,9 @@ static int _MMG5_norver(MMG5_pMesh mesh) {
   /* recomputation of normals only if mesh->xpoint has been freed */
   if ( mesh->xpoint ) {
     if ( abs(mesh->info.imprim) > 3 || mesh->info.ddebug ) {
-      fprintf(stdout,"  ## Warning: no research of boundary points");
-      fprintf(stdout," and normals of mesh. ");
-      fprintf(stdout,"mesh->xpoint must be freed to enforce analysis.\n");
+      fprintf(stdout,"  ## Warning: %s: no research of boundary points"
+              " and normals of mesh. mesh->xpoint must be freed to enforce"
+              " analysis.\n",__func__);
     }
     return(1);
   }
@@ -653,25 +655,29 @@ int _MMG3D_analys(MMG5_pMesh mesh) {
 
   /* create tetra adjacency */
   if ( !MMG3D_hashTetra(mesh,1) ) {
-    fprintf(stderr,"  ## Hashing problem (1). Exit program.\n");
+    MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
+                      "  ## Hashing problem (1). Exit program.\n");
     return(0);
   }
 
   /* create prism adjacency */
   if ( !MMG3D_hashPrism(mesh) ) {
-    fprintf(stdout,"  ## Prism hashing problem. Exit program.\n");
+    MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
+                      "  ## Prism hashing problem. Exit program.\n");
     return(0);
   }
   /* compatibility triangle orientation w/r tetras */
   if ( !_MMG5_bdryPerm(mesh) ) {
-    fprintf(stderr,"  ## Boundary orientation problem. Exit program.\n");
+    MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
+                      "  ## Boundary orientation problem. Exit program.\n");
     return(0);
   }
 
   /* identify surface mesh */
   if ( !_MMG5_chkBdryTria(mesh) ) {
-      fprintf(stderr,"  ## Boundary problem. Exit program.\n");
-      return(0);
+    MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
+                      "  ## Boundary problem. Exit program.\n");
+    return(0);
   }
   _MMG5_freeXTets(mesh);
   _MMG5_freeXPrisms(mesh);
@@ -683,13 +689,15 @@ int _MMG3D_analys(MMG5_pMesh mesh) {
   /* create surface adjacency */
   if ( !_MMG3D_hashTria(mesh,&hash) ) {
     _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
-    fprintf(stderr,"  ## Hashing problem (2). Exit program.\n");
+    MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
+                      "  ## Hashing problem (2). Exit program.\n");
     return(0);
   }
 
   /* build hash table for geometric edges */
   if ( !_MMG5_hGeom(mesh) ) {
-    fprintf(stderr,"  ## Hashing problem (0). Exit program.\n");
+    MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
+    "  ## Hashing problem (0). Exit program.\n");
     _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
     _MMG5_DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(MMG5_hgeom));
     return(0);
@@ -701,21 +709,24 @@ int _MMG3D_analys(MMG5_pMesh mesh) {
 
   /* identify connexity */
   if ( !_MMG5_setadj(mesh) ) {
-    fprintf(stderr,"  ## Topology problem. Exit program.\n");
+    MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
+                      "  ## Topology problem. Exit program.\n");
     _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
     return(0);
   }
 
   /* check for ridges */
   if ( mesh->info.dhd > _MMG5_ANGLIM && !_MMG5_setdhd(mesh) ) {
-    fprintf(stderr,"  ## Geometry problem. Exit program.\n");
+    MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
+                      "  ## Geometry problem. Exit program.\n");
     _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
     return(0);
   }
 
   /* identify singularities */
   if ( !_MMG5_singul(mesh) ) {
-    fprintf(stderr,"  ## MMG5_Singularity problem. Exit program.\n");
+    MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
+                      "  ## MMG5_Singularity problem. Exit program.\n");
     _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
     return(0);
   }
@@ -725,14 +736,16 @@ int _MMG3D_analys(MMG5_pMesh mesh) {
 
   /* define (and regularize) normals */
   if ( !_MMG5_norver(mesh) ) {
-    fprintf(stderr,"  ## Normal problem. Exit program.\n");
+    MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
+                      "  ## Normal problem. Exit program.\n");
     _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
     return(0);
   }
 
   /* set bdry entities to tetra */
   if ( !_MMG5_bdrySet(mesh) ) {
-    fprintf(stderr,"  ## Boundary problem. Exit program.\n");
+    MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
+                      "  ## Boundary problem. Exit program.\n");
     _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
     _MMG5_DEL_MEM(mesh,mesh->xpoint,(mesh->xpmax+1)*sizeof(MMG5_xPoint));
     return(0);
@@ -743,7 +756,8 @@ int _MMG3D_analys(MMG5_pMesh mesh) {
     fprintf(stdout,"  ** UPDATING TOPOLOGY AT NON-MANIFOLD POINTS\n");
 
   if ( !_MMG5_setNmTag(mesh,&hash) ) {
-    fprintf(stderr,"  ## Non-manifold topology problem. Exit program.\n");
+    MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
+                      "  ## Non-manifold topology problem. Exit program.\n");
     _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
     _MMG5_DEL_MEM(mesh,mesh->xpoint,(mesh->xpmax+1)*sizeof(MMG5_xPoint));
     return(0);
@@ -751,7 +765,8 @@ int _MMG3D_analys(MMG5_pMesh mesh) {
 
   /* build hash table for geometric edges */
   if ( !mesh->na && !_MMG5_hGeom(mesh) ) {
-    fprintf(stderr,"  ## Hashing problem (0). Exit program.\n");
+    MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
+                      "  ## Hashing problem (0). Exit program.\n");
     _MMG5_DEL_MEM(mesh,mesh->xpoint,(mesh->xpmax+1)*sizeof(MMG5_xPoint));
     _MMG5_DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(MMG5_hgeom));
     return(0);
@@ -759,7 +774,8 @@ int _MMG3D_analys(MMG5_pMesh mesh) {
 
   /* Update edges tags and references for xtetras */
   if ( !_MMG5_bdryUpdate(mesh) ) {
-    fprintf(stderr,"  ## Boundary problem. Exit program.\n");
+    MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
+                      "  ## Boundary problem. Exit program.\n");
     _MMG5_DEL_MEM(mesh,mesh->xpoint,(mesh->xpmax+1)*sizeof(MMG5_xPoint));
     return(0);
   }
