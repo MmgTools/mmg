@@ -135,8 +135,8 @@ int _MMG5_countLocalParamAtTri( MMG5_pMesh mesh,_MMG5_iNode **bdryRefs) {
   /* Try to alloc the first node */
   ier = _MMG5_Add_inode( mesh, bdryRefs, k );
   if ( ier < 0 ) {
-    fprintf(stderr,"  ## Error: unable to allocate the first boundary"
-           " reference node.\n");
+    fprintf(stderr,"  ## Error: %s: unable to allocate the first boundary"
+           " reference node.\n",__func__);
     return(0);
   }
   else {
@@ -148,8 +148,8 @@ int _MMG5_countLocalParamAtTri( MMG5_pMesh mesh,_MMG5_iNode **bdryRefs) {
     ier = _MMG5_Add_inode( mesh, bdryRefs, mesh->tria[k].ref );
 
     if ( ier < 0 ) {
-      printf("  ## Warning: unable to list the tria references.\n"
-             "              Uncomplete parameters file.\n" );
+      printf("  ## Warning: %s: unable to list the tria references."
+             " Uncomplete parameters file.\n",__func__ );
       break;
     }
     else if ( ier ) ++npar;

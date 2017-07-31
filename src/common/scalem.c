@@ -67,9 +67,10 @@ int _MMG5_boundingBox(MMG5_pMesh mesh) {
     if ( dd > mesh->info.delta )  mesh->info.delta = dd;
   }
   if ( mesh->info.delta < _MMG5_EPSD ) {
-    fprintf(stderr,"  ## Unable to scale mesh:\n");
-    fprintf(stderr,"  ## Check that your mesh contains non-zero points and "
-            "valid elements.\n");
+    MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
+                      "  ## Error: %s: unable to scale mesh:"
+                      " Check that your mesh contains non-zero points and "
+                      "valid elements.\n",__func__);
     return(0);
   }
 
@@ -145,7 +146,8 @@ int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
     /* Set default values to hmin/hmax from the bounding box if not provided by
      * the user */
     if ( !MMG5_Set_defaultTruncatureSizes(mesh,sethmin,sethmax) ) {
-      fprintf(stdout,"  Exit program.\n");
+      MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
+      "  ## Error: %s: Exit program.\n",__func__);
       return 0;
     }
     sethmin = 1;
@@ -160,7 +162,9 @@ int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
         met->m[k] *= dd;
         /* Check the metric */
         if ( (!mesh->info.iso) && met->m[k] <= 0) {
-          fprintf(stderr,"  ## ERROR: WRONG METRIC AT POINT %d -- \n",k);
+          MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
+                            "  ## Error: %s: at least 1 wrong metric"
+                            " (point %d).\n",__func__,k);
           return(0);
         }
       }
@@ -209,17 +213,19 @@ int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
 
         /* Check the input metric */
         if ( !_MMG5_eigenv(mesh,1,m,lambda,v) ) {
-          fprintf(stderr,"  ## ERROR: WRONG METRIC AT POINT %d -- \n",k);
+          MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
+                            "  ## Error: %s: unable to diagonalize at least"
+                            " 1 metric (point %d).\n",__func__,k);
           return(0);
         }
         for (i=0; i<3; i++) {
           if(lambda[i]<=0) {
-            fprintf(stderr,"  ## ERROR: WRONG METRIC AT POINT %d -- eigenvalue :"
-                   " %e %e %e -- det %e\n",k,lambda[0],lambda[1],lambda[2],
-                   m[0]*(m[3]*m[5]-m[4]*m[4])-m[1]*(m[1]*m[5]-m[2]*m[4])+
-                   m[2]*(m[1]*m[4]-m[2]*m[3]));
-            fprintf(stderr,"WRONG METRIC AT POINT %d -- metric %e %e %e %e %e %e\n",
-                   k,m[0],m[1],m[2],m[3],m[4],m[5]);
+            MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
+                            "  ## Error: %s: at least 1 wrong metric "
+                            "(point %d -> eigenvalues : %e %e %e).\n"
+                              "            metric tensor: %e %e %e %e %e %e.\n",
+                              __func__,k,lambda[0],lambda[1],lambda[2],
+                              m[0],m[1],m[2],m[3],m[4],m[5]);
             return(0);
           }
           if ( !sethmin )

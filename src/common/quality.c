@@ -311,13 +311,13 @@ int _MMG5_minQualCheck ( int iel, double minqual, double alpha )
   minqualOnAlpha = minqual/alpha;
 
   if ( minqualOnAlpha < _MMG5_NULKAL ) {
-    fprintf(stderr,"  ## ERROR: TOO BAD QUALITY FOR THE WORST ELEMENT: "
-            "(elt %d -> %15e)\n",iel,minqual);
+    fprintf(stderr,"  ## Error: %s: too bad quality for the worst element: "
+            "(elt %d -> %15e)\n",__func__,iel,minqual);
     return(0);
   }
   else if ( minqualOnAlpha < _MMG5_EPSOK ) {
-    fprintf(stderr,"  ## WARNING: VERY BAD QUALITY FOR THE WORST ELEMENT: "
-            "(elt %d -> %15e)\n",iel,minqual);
+    fprintf(stderr,"  ## Warning: %s: very bad quality for the worst element: "
+            "(elt %d -> %15e)\n",__func__,iel,minqual);
   }
 
   return(1);
