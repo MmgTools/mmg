@@ -98,6 +98,7 @@ static int _MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
   int                lists[MMG3D_LMAX+2],listv[MMG3D_LMAX+2],ilist,ilists,ilistv;
   int                k,iel,idp,ifac,isloc,init_s;
   unsigned char      i,i0,i1,i2;
+  static char        mmgWarn = 0;
 
   pt  = &mesh->tetra[kel];
   idp = pt->v[ip];
@@ -128,8 +129,11 @@ static int _MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
                               listv,&ilistv,lists,&ilists,(p0->tag & MG_NOM));
 
   if ( ilist!=1 ) {
-    fprintf(stdout,"%s:%d:Warning: Metric not computed at point %d: unable to compute its ball\n",
-            __FILE__,__LINE__, idp);
+    if ( !mmgWarn ) {
+      fprintf(stderr,"  ## Warning: %s: at least 1 metric not computed:"
+              " unable to compute the ball of point\n",__func__);
+      mmgWarn = 1;
+    }
     return 0;
   }
 
@@ -310,6 +314,7 @@ static int _MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int kel,
   double         r[3][3],lispoi[3*MMG3D_LMAX+1];
   double         detg,detd;
   int            i,i0,i1,i2,ifac,isloc;
+  static char    mmgWarn = 0;
 
   pt  = &mesh->tetra[kel];
   idp = pt->v[ip];
@@ -371,9 +376,11 @@ static int _MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int kel,
   ier = _MMG5_bouletrid(mesh,kel,iface,ip,&ilist1,list1,&ilist2,list2,
                         &iprid[0],&iprid[1] );
   if ( !ier ) {
-    fprintf(stdout,"%s:%d:Warning: Metric not computed at point %d:\n"
-            " unable to compute its ball\n",
-            __FILE__,__LINE__, idp);
+    if ( !mmgWarn ) {
+      fprintf(stderr,"  ## Warning: %s: at least 1 metric not computed:"
+              " unable to compute the ball of point\n",__func__);
+      mmgWarn = 1;
+    }
   }
 
   /* Specific size in direction of t */
@@ -520,6 +527,7 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
   double        ux,uy,uz,det2d,c[3];
   double        tAA[6],tAb[3], hausd;
   unsigned char i1,i2,itri1,itri2,i;
+  static char   mmgWarn0=0,mmgWarn1=0;
 
   ipref[0] = ipref[1] = 0;
   pt  = &mesh->tetra[kel];
@@ -548,9 +556,11 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
   ilist = _MMG5_boulesurfvolp(mesh,kel,ip,iface,listv,&ilistv,lists,&ilists,0);
 
   if ( ilist!=1 ) {
-    fprintf(stdout,"%s:%d:Warning: Metric not computed at point %d:\n"
-            " unable to compute its ball\n",
-           __FILE__,__LINE__, idp);
+    if ( !mmgWarn0 ) {
+      fprintf(stderr,"  ## Warning: %s: at least 1 metric not computed:"
+              " unable to compute the ball of point\n",__func__);
+      mmgWarn0 = 1;
+    }
     return(0);
   }
 
@@ -633,9 +643,11 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
         ipref[1] = pt->v[i2];
       }
       else if ( (pt->v[i2] != ipref[0]) && (pt->v[i2] != ipref[1]) ) {
-        fprintf(stdout,"%s:%d:Warning: Metric not computed at point %d:\n"
-                " three adjacent ref at a non singular point.\n",
-               __FILE__,__LINE__,idp);
+        if ( !mmgWarn1 ) {
+          fprintf(stderr,"  ## Warning: %s: at least 1 metric not computed:"
+                  " non singular point at intersection of 3 ref edges.\n",__func__);
+          mmgWarn1 = 1;
+        }
         return(0);
       }
     }
@@ -648,9 +660,11 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
         ipref[1] = pt->v[i1];
       }
       else if ( (pt->v[i1] != ipref[0]) && (pt->v[i1] != ipref[1]) ) {
-        fprintf(stdout,"%s:%d:Warning: Metric not computed at point %d:\n"
-                " three adjacent ref at a non singular point.\n",
-                __FILE__,__LINE__,idp);
+        if ( !mmgWarn1 ) {
+          fprintf(stderr,"  ## Warning: %s: at least 1 metric not computed:"
+                  " non singular point at intersection of 3 ref edges.\n",__func__);
+          mmgWarn1 = 1;
+        }
         return(0);
       }
     }
