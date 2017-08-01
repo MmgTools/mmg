@@ -481,6 +481,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
   int         *ina_t,*ina_a,nt,na,nq,ne,npr;
   int         nbl_t,nbl_a,typ,tagNum,ref,idx,num;
   int         v[4];
+  static char mmgWarn = 0;
 
   ina_t = ina_a = NULL;
 
@@ -657,8 +658,11 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
         assert( l<=mesh->np );
         break;
       default:
-        fprintf(stderr,"  ## Warning: %s: unexpected type of element:"
-                " element %d, type %d\n",__func__,k,typ );
+        if ( !mmgWarn ) {
+          fprintf(stderr,"  ## Warning: %s: unexpected type for at least 1 element:"
+                  " element %d, type %d\n",__func__,k,typ );
+          mmgWarn = 1;
+        }
       }
     }
   }

@@ -156,8 +156,8 @@ int MMG5_Set_inputMeshName(MMG5_pMesh mesh, const char* meshin) {
     _MMG5_SAFE_CALLOC(mesh->namein,10,char,0);
     strcpy(mesh->namein,"mesh.mesh");
     if ( (mesh->info.imprim > 5) || mesh->info.ddebug ) {
-      fprintf(stdout,"  ## Warning: no name given for input mesh.\n");
-      fprintf(stdout,"     Use of default value \"mesh.mesh\".\n");
+      fprintf(stdout,"  ## Warning: %s: no name given for input mesh.\n",__func__);
+      fprintf(stdout,"              Use of default value \"mesh.mesh\".\n");
     }
   }
   return(1);
@@ -275,8 +275,9 @@ int MMG5_Set_outputMeshName(MMG5_pMesh mesh, const char* meshout) {
                     return 0);
       _MMG5_SAFE_CALLOC(mesh->nameout,12,char,0);
       if ( (mesh->info.imprim > 5) || mesh->info.ddebug ) {
-        fprintf(stdout,"  ## Warning: no name given for output mesh.\n");
-        fprintf(stdout,"     Use of default value \"mesh.o.mesh\".\n");
+        fprintf(stdout,"  ## Warning: %s: no name given for output mesh.\n",
+                __func__);
+        fprintf(stdout,"              Use of default value \"mesh.o.mesh\".\n");
       }
       strcpy(mesh->nameout,"mesh.o.mesh");
     }
@@ -327,7 +328,7 @@ int MMG5_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solout) {
                          "output sol name",0);
     }
     else {
-      fprintf(stdout,"  ## Error: no name for output mesh. please, use");
+      fprintf(stdout,"  ## Error: %s: no name for output mesh. please, use",__func__);
       fprintf(stdout," the MMG5_Set_outputMeshName to set the mesh name.\n");
       return(0);
     }
@@ -422,8 +423,8 @@ int MMG5_Set_defaultTruncatureSizes(MMG5_pMesh mesh,char sethmin,char sethmax) {
 
   if ( mesh->info.hmax < mesh->info.hmin ) {
     assert ( sethmin && sethmax );
-    fprintf(stdout,"  ## Error: mismatch parameters:"
-            " minimal mesh size larger than maximal one.\n");
+    fprintf(stdout,"  ## Error: %s: mismatch parameters:"
+            " minimal mesh size larger than maximal one.\n",__func__);
     return 0;
   }
 
@@ -435,14 +436,16 @@ int MMG5_Compute_constantSize(MMG5_pMesh mesh,MMG5_pSol met,double *hsiz) {
 
 
   if ( mesh->info.hmin > mesh->info.hsiz ) {
-    fprintf(stderr,"  ## Error: Mismatched options: hmin (%e) is greater"
-            " than hsiz (%e). Exit Program.\n",mesh->info.hmin,mesh->info.hsiz);
+    fprintf(stderr,"  ## Error: %s: Mismatched options: hmin (%e) is greater"
+            " than hsiz (%e). Exit Program.\n",__func__,
+            mesh->info.hmin,mesh->info.hsiz);
     return 0;
   }
 
   if ( mesh->info.hmax > 0. && mesh->info.hmax < mesh->info.hsiz ) {
-    fprintf(stderr,"  ## Error: Mismatched options: hmax (%e) is lower"
-            " than hsiz (%e). Exit Program.\n",mesh->info.hmax,mesh->info.hsiz);
+    fprintf(stderr,"  ## Error: %s: Mismatched options: hmax (%e) is lower"
+            " than hsiz (%e). Exit Program.\n",__func__,
+            mesh->info.hmax,mesh->info.hsiz);
     return 0;
   }
 
