@@ -92,9 +92,8 @@ double _MMG5_surf(MMG5_pMesh mesh,double m[3][6],MMG5_pTria ptt) {
     if ( dens <= _MMG5_EPSD2 ) {
 #ifndef DNDEBUG
       if ( !mmgErr ) {
-        MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
-                          "  ## Warning: %s: at least 1 negative or null density \n",
-                          __func__);
+        fprintf(stderr,"  ## Warning: %s: at least 1 negative or null density \n",
+                __func__);
         mmgErr = 1;
       }
 #endif
@@ -455,9 +454,8 @@ int _MMG5_solveDefmetregSys( MMG5_pMesh mesh, double r[3][3], double c[3],
   /* solve now (a b c) = tAA^{-1} * tAb */
   if ( !_MMG5_sys33sym(tAA,tAb,c) ) {
     if ( !mmgWarn0 ) {
-       MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
-                         "  ## Warning: %s: unable to solve the system on at"
-                         " least 1 point.\n",__func__);
+       fprintf(stderr,"  ## Warning: %s: unable to solve the system on at"
+               " least 1 point.\n",__func__);
       mmgWarn0 = 1;
     }
     return(0);
@@ -562,10 +560,8 @@ int _MMG5_solveDefmetrefSys( MMG5_pMesh mesh, MMG5_pPoint p0, int ipref[2],
   /* solve now (a b c) = tAA^{-1} * tAb */
   if ( !_MMG5_sys33sym(tAA,tAb,c) ) {
     if ( !mmgWarn ) {
-      MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
-                        "  ## Warning: %s: unable to solve the system on at"
-                        " least 1 point.\n",
-                        __func__);
+      fprintf(stderr,"  ## Warning: %s: unable to solve the system on at"
+              " least 1 point.\n", __func__);
       mmgWarn = 1;
     }
     return(0);

@@ -194,7 +194,7 @@ int MMG3D_Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nprism,
     if((mesh->npmax < mesh->np || mesh->ntmax < mesh->nt || mesh->nemax < mesh->ne)) {
       if ( !_MMG3D_memOption(mesh) )  return 0;
     } else if(mesh->info.mem < 39) {
-      fprintf(stderr,"not enough memory  %d\n",mesh->info.mem);
+      fprintf(stderr,"  ## Error: %s: not enough memory  %d\n",__func__,mesh->info.mem);
       return(0);
     }
   } else {

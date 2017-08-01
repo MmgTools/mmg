@@ -674,14 +674,12 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
     det2d = lispoi[3*k+1]*lispoi[3*(k+1)+2] - lispoi[3*k+2]*lispoi[3*(k+1)+1];
     assert(det2d);
     if ( det2d <= 0.0 ) {
-      //fprintf(stderr,"PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
       return(0);
     }
   }
   det2d = lispoi[3*(ilists-1)+1]*lispoi[3*0+2] - lispoi[3*(ilists-1)+2]*lispoi[3*0+1];
   assert(det2d);
   if ( det2d <= 0.0 ) {
-    //fprintf(stderr,"PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
     return(0);
   }
   assert(ipref[0] && ipref[1]);
@@ -792,6 +790,7 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int kel,int iface, int 
   double         det2d,c[3],isqhmin,isqhmax;
   double         tAA[6],tAb[3],hausd;
   unsigned char  i1,i;
+  static char    mmgWarn = 0;
 
   pt  = &mesh->tetra[kel];
   idp = pt->v[ip];
@@ -817,9 +816,12 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int kel,int iface, int 
   ilist = _MMG5_boulesurfvolp(mesh,kel,ip,iface,listv,&ilistv,lists,&ilists,0);
 
   if ( ilist!=1 ) {
-    fprintf(stdout,"%s:%d:Warning: Metric not computed at point %d:\n"
-            " unable to compute its ball\n",
-            __FILE__,__LINE__, idp);
+    if ( !mmgWarn ) {
+      fprintf(stderr,"  ## Warning: %s: at least 1 metric not computed:"
+              " unable to compute the ball of point.\n",
+              __func__);
+      mmgWarn = 1;
+    }
     return(0);
   }
 
@@ -909,14 +911,12 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int kel,int iface, int 
     det2d = lispoi[3*k+1]*lispoi[3*(k+1)+2] - lispoi[3*k+2]*lispoi[3*(k+1)+1];
     assert(det2d);
     if ( det2d <= 0.0 ) {
-      //fprintf(stderr,"PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
       return(0);
     }
   }
   det2d = lispoi[3*(ilists-1)+1]*lispoi[3*0+2] - lispoi[3*(ilists-1)+2]*lispoi[3*0+1];
   assert(det2d);
   if ( det2d <= 0.0 ) {
-    //fprintf(stderr,"PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
     return(0);
   }
 
@@ -1189,11 +1189,10 @@ int _MMG5_defmetvol(MMG5_pMesh mesh,MMG5_pSol met) {
 
       /** Second step: set metric */
       m = &met->m[met->size*ip];
-      if ( !_MMG5_eigenv(mesh,1,m,lambda,v) ) {
+      if ( !_MMG5_eigenv(1,m,lambda,v) ) {
         if ( !mmgWarn ) {
-          MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
-                            "  ## Warning: %s: Unable to diagonalize at least"
-                            " 1 metric.\n",__func__);
+          fprintf(stderr,"  ## Warning: %s: Unable to diagonalize at least"
+                  " 1 metric.\n",__func__);
           mmgWarn = 1;
         }
         return 0;
@@ -1202,10 +1201,9 @@ int _MMG5_defmetvol(MMG5_pMesh mesh,MMG5_pSol met) {
       for (i=0; i<3; i++) {
         if(lambda[i]<=0) {
           if ( !mmgWarn ) {
-            MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
-                              "  ## Warning: %s: at least 1 wrong metric "
-                              "(eigenvalues : %e %e %e).\n",__func__,lambda[0],
-                              lambda[1],lambda[2]);
+            fprintf(stderr,"  ## Warning: %s: at least 1 wrong metric "
+                    "(eigenvalues : %e %e %e).\n",__func__,lambda[0],
+                    lambda[1],lambda[2]);
             mmgWarn = 1;
           }
           return(0);
@@ -1339,11 +1337,10 @@ int _MMG3D_nosurfsiz_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel, int iploc,
 
     /* Step 2: size truncature */
     m = &met->m[iadr];
-    if ( !_MMG5_eigenv(mesh,1,m,lambda,v) ) {
+    if ( !_MMG5_eigenv(1,m,lambda,v) ) {
       if ( !mmgWarn ) {
-        MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
-                          "  ## Warning: %s: Unable to diagonalize at least"
-                          " 1 metric.\n",__func__);
+        fprintf(stderr,"  ## Warning: %s: Unable to diagonalize at least"
+                " 1 metric.\n",__func__);
         mmgWarn = 1;
       }
       return 0;
@@ -1352,10 +1349,9 @@ int _MMG3D_nosurfsiz_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel, int iploc,
     for (i=0; i<3; i++) {
       if( lambda[i]<=0) {
         if ( !mmgWarn ) {
-          MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
-                            "  ## Warning: %s: at least 1 wrong metric "
-                            "(eigenvalues : %e %e %e).\n",__func__,lambda[0],
-                            lambda[1],lambda[2]);
+          fprintf(stderr,"  ## Warning: %s: at least 1 wrong metric "
+                  "(eigenvalues : %e %e %e).\n",__func__,lambda[0],
+                  lambda[1],lambda[2]);
           mmgWarn = 1;
         }
         return(0);
@@ -1467,8 +1463,7 @@ int _MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( mesh->info.hmax < 0.0 ) {
     //  mesh->info.hmax = 0.5 * mesh->info.delta;
     if ( !mmgErr ) {
-      MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
-                        "  ## Error: %s: negative hmax value.\n",__func__);
+      fprintf(stderr,"  ## Error: %s: negative hmax value.\n",__func__);
       mmgErr = 1;
     }
     return(0);
@@ -1534,10 +1529,9 @@ int _MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
           if ( ismet ) {
             if ( !_MMG3D_intextmet(mesh,met,pt->v[iploc],mm) ) {
               if ( !mmgErr ) {
-                 MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
-                                   "  ## Error: %s: unable to intersect metrics"
-                                   " at point %d.\n",__func__,
-                                   _MMG3D_indPt(mesh,pt->v[iploc]));
+                 fprintf(stderr,"  ## Error: %s: unable to intersect metrics"
+                         " at point %d.\n",__func__,
+                         _MMG3D_indPt(mesh,pt->v[iploc]));
                  mmgErr = 1;
               }
               return(0);
@@ -1630,11 +1624,10 @@ int _MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int ia) {
     if( ps1 >= alpha -_MMG5_EPS )
       return(-1);
 
-    if ( !_MMG5_eigenv(mesh,1,m1,lambda,vp) ) {
+    if ( !_MMG5_eigenv(1,m1,lambda,vp) ) {
       if ( !mmgWarn ) {
-        MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
-                          "  ## Warning: %s: Unable to diagonalize at least"
-                          " 1 metric.\n",__func__);
+        fprintf(stderr,"  ## Warning: %s: Unable to diagonalize at least"
+                " 1 metric.\n",__func__);
         mmgWarn = 1;
       }
       return -1;
@@ -1720,7 +1713,7 @@ int _MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int ia) {
     if( ps2 >= alpha - _MMG5_EPS)
       return(-1);
 
-    _MMG5_eigenv(mesh,1,m2,lambda,vp);
+    _MMG5_eigenv(1,m2,lambda,vp);
 
     c[0] = t[0]*vp[0][0] + t[1]*vp[0][1] + t[2]*vp[0][2];
     c[1] = t[0]*vp[1][0] + t[1]*vp[1][1] + t[2]*vp[1][2];

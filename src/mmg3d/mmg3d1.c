@@ -309,6 +309,7 @@ char _MMG5_chkedg(MMG5_pMesh mesh,MMG5_Tria *pt,char ori, double hmax,
   double   ps,ps2,ux,uy,uz,ll,il,alpha,dis,hma2;
   int      ia,ib,ic;//l,info;
   char     i,i1,i2;
+  static char mmgWarn0 = 0, mmgWarn1 = 0;
 
   ia   = pt->v[0];
   ib   = pt->v[1];
@@ -447,7 +448,11 @@ char _MMG5_chkedg(MMG5_pMesh mesh,MMG5_Tria *pt,char ori, double hmax,
       }
       else {
         if(!((p[i1]->tag & MG_NOM) ||  MG_EDG(p[i1]->tag) ) ) {
-          fprintf(stdout,"2. warning geometrical problem\n");
+          if ( !mmgWarn0 ) {
+            fprintf(stderr,"  ## Warning: %s: a- at least 1 geometrical"
+                    " problem\n",__func__);
+            mmgWarn0 = 1;
+          }
           return(0);
         }
         memcpy(t1,t[i1],3*sizeof(double));
@@ -465,7 +470,11 @@ char _MMG5_chkedg(MMG5_pMesh mesh,MMG5_Tria *pt,char ori, double hmax,
       }
       else {
         if(!((p[i2]->tag & MG_NOM) || MG_EDG(p[i2]->tag) ) ) {
-          fprintf(stdout,"2. warning geometrical problem\n");
+          if ( !mmgWarn1 ) {
+            fprintf(stderr,"  ## Warning: %s: b- at least 1 geometrical"
+                    " problem\n",__func__);
+            mmgWarn1 = 1;
+          }
           return(0);
         }
         memcpy(t2,t[i2],3*sizeof(double));
@@ -1041,8 +1050,10 @@ int _MMG3D_delPatternPts(MMG5_pMesh mesh,_MMG5_Hash hash)
         if ( vx[ia] > 0 ) {
           _MMG3D_delPt(mesh,vx[ia]);
           if ( !_MMG5_hashUpdate(&hash,pt->v[i],pt->v[j],-1) ) {
-            printf("  ## Error: Unable to delete point idx along edge %d %d.\n",
-                   pt->v[i], pt->v[j]);
+            fprintf(stderr,"  ## Error: %s: unable to delete point idx"
+                    " along edge %d %d.\n", __func__,
+                    _MMG3D_indPt(mesh,pt->v[i]),
+                    _MMG3D_indPt(mesh,pt->v[j]));
             _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
             return 0;
           }
@@ -1181,7 +1192,8 @@ _MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           /* reallocation of point table */
 
           _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
-                              printf("  ## Warning: unable to allocate a new point\n");
+                              printf("  ## Warning: %s: unable to allocate"
+                                     " a new point\n",__func__);
                               _MMG5_INCREASE_MEM_MESSAGE();
                               memlack=1;
                               goto split
@@ -1221,10 +1233,11 @@ split:
    /* Delete the useless added points */
    if ( !_MMG3D_delPatternPts(mesh,hash) ) return -1;
 
-   /* Avoid the creation of bad quality elements because */
-   if ( mesh->info.imprim > 5 || mesh->info.ddebug )
-     printf("  ## Warning: Too bad quality for the worst element."
-            " Volumic patterns skipped.\n");
+   /* Avoid the creation of bad quality elements */
+   if ( mesh->info.imprim > 5 || mesh->info.ddebug ) {
+     fprintf(stderr,"  ## Warning: %s: too bad quality for the worst element."
+             " Volumic patterns skipped.\n",__func__);
+   }
 
    _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
    return(0);
@@ -1369,6 +1382,7 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   int           vx[6],k,l,ip,ic,it,nap,nc,ni,ne,ns,ip1,ip2,ier,isloc;
   char          i,j,j2,ia,i1,i2,ifac;
   static double uv[3][2] = { {0.5,0.5}, {0.,0.5}, {0.5,0.} };
+  static char   mmgWarn = 0, mmgWarn2 = 0;
 
   /** 1. analysis of boundary elements */
   if ( !_MMG5_hashNew(mesh,&hash,mesh->np,7*mesh->np) ) return(-1);
@@ -1497,7 +1511,8 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         if ( !ip ) {
           /* reallocation of point table */
           _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
-                              fprintf(stderr,"  ## Error: unable to allocate a new point.\n");
+                              fprintf(stderr,"  ## Error: %s: unable to allocate"
+                                      " a new point.\n",__func__);
                               _MMG5_INCREASE_MEM_MESSAGE();
                               _MMG3D_delPatternPts(mesh,hash);return -1;
                               ,o,MG_BDY,-1);
@@ -1516,8 +1531,11 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
             ier = _MMG5_intmet(mesh,met,k,ia,ip,0.5);
 
           if ( !ier ) {
-            printf ( "  ## Unable to interpolate metric between points %d and %d.\n",
-                     _MMG3D_indPt(mesh,ip1),_MMG3D_indPt(mesh,ip2));
+            if ( !mmgWarn ) {
+              fprintf(stderr,"  ## Error: %s: unable to interpolate at least"
+                      " 1 metric.\n",__func__);
+              mmgWarn = 1;
+            }
             return(-1);
           }
           else if ( ier < 0 ) {
@@ -1710,16 +1728,21 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         }
         else {
           if ( it==20 && (mesh->info.ddebug || mesh->info.imprim > 5) ) {
-            printf("  ## Warning: Surfacic pattern: unable to find a valid split.\n"
-                   "              Point(s) deletion." );
+            if ( !mmgWarn2 ) {
+              printf("  ## Warning: %s: surfacic pattern: unable to find a"
+                     " valid split for at least 1 point. Point(s) deletion.",
+                     __func__ );
+              mmgWarn2 = 1;
+            }
           }
           for (ia=0,i=0; i<3; i++) {
             for (j=i+1; j<4; j++,ia++) {
               if ( vx[ia] > 0 ) {
                 if ( !_MMG5_hashUpdate(&hash,pt->v[_MMG5_iare[ia][0]],
                                        pt->v[_MMG5_iare[ia][1]],-1) ) {
-                  printf("  ## Error: Unable to delete point idx along edge %d %d.\n",
-                         pt->v[_MMG5_iare[ia][0]], pt->v[_MMG5_iare[ia][1]]);
+                  printf("  ## Error: %s: unable to delete point idx along edge %d %d.\n",
+                         __func__,_MMG3D_indPt(mesh,pt->v[_MMG5_iare[ia][0]]),
+                         _MMG3D_indPt(mesh,pt->v[_MMG5_iare[ia][1]]));
                   _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
                   return -1;
                 }

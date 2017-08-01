@@ -246,8 +246,7 @@ int _MMG5_intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr) {
   det = m[0]*m[2] - m[1]*m[1];
   if ( fabs(det) < _MMG5_EPS*_MMG5_EPS ) {
     if ( !mmgWarn ) {
-      MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
-                        "  ## Warning: %s: null metric det : %E \n",__func__,det);
+      fprintf(stderr,"  ## Warning: %s: null metric det : %E \n",__func__,det);
       mmgWarn = 1;
     }
     return(0);
@@ -265,9 +264,8 @@ int _MMG5_intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr) {
   lambda[0] = 0.5 * (trimn - sqDelta);
   if ( lambda[0] < 0.0 ) {
     if ( !mmgWarn1 ) {
-      MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
-                        "  ## Warning: %s: negative eigenvalue (%f).\n",
-                        __func__,lambda[0]);
+      fprintf(stderr,"  ## Warning: %s: negative eigenvalue (%f).\n",
+              __func__,lambda[0]);
       mmgWarn1 = 1;
     }
     return(0);
@@ -446,12 +444,11 @@ int _MMG5_mmgIntextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6],
    * every direction */
   if ( MG_SIN(p0->tag) || (p0->tag & MG_NOM) ) {
     /* Characteristic polynomial of me */
-    order = _MMG5_eigenv(mesh,1,me,lambda,vp);
+    order = _MMG5_eigenv(1,me,lambda,vp);
     if ( !order ) {
       if ( !mmgWarn ) {
-        MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
-                          "  ## Warning: %s: Unable to diagonalize at least"
-                          " 1 metric.\n",__func__);
+        fprintf(stderr,"  ## Warning: %s: Unable to diagonalize at least"
+                " 1 metric.\n",__func__);
         mmgWarn = 1;
       }
       return 0;
@@ -557,9 +554,8 @@ int _MMG5_mmgIntextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6],
     /* Intersection of metrics in the tangent plane */
     if ( !_MMG5_intersecmet22(mesh,mtan,metan,mr) ) {
       if ( !mmgWarn1 ) {
-        MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
-                          "  ## Warning: %s: impossible metric inersection:"
-                          " surfacic metric skipped.\n",__func__);
+        fprintf(stderr,"  ## Warning: %s: impossible metric inersection:"
+                " surfacic metric skipped.\n",__func__);
         mmgWarn1 = 1;
       }
       m[0] = me[0];
@@ -594,12 +590,11 @@ int _MMG5_mmgIntextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6],
 
     /* Truncate the metric in the third direction (because me was not
      * truncated) */
-    order = _MMG5_eigenv(mesh,1,m,lambda,vp);
+    order = _MMG5_eigenv(1,m,lambda,vp);
     if ( !order ) {
       if ( !mmgWarn ) {
-        MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
-                          "  ## Warning: %s: Unable to diagonalize at least"
-                          " 1 metric.\n",__func__);
+        fprintf(stderr,"  ## Warning: %s: Unable to diagonalize at least"
+                " 1 metric.\n",__func__);
         mmgWarn = 1;
       }
       return 0;
@@ -608,11 +603,9 @@ int _MMG5_mmgIntextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6],
     for (i=0; i<3; i++) {
       if( lambda[i]<=0) {
         if ( !mmgWarn2 ) {
-          MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
-                            "  ## Warning: %s: at least 1 wrong metric "
-                            "(eigenvalues : %e %e %e): "
-                            "surfacic metric skipped.\n",__func__,lambda[0],
-                            lambda[1],lambda[2]);
+          fprintf(stderr,"  ## Warning: %s: at least 1 wrong metric "
+                  "(eigenvalues : %e %e %e): surfacic metric skipped.\n",
+                  __func__,lambda[0],lambda[1],lambda[2]);
           mmgWarn2 = 1;
         }
         m[0] = me[0];

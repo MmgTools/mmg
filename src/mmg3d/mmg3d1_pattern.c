@@ -59,6 +59,7 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
   int        ns,ref,ier;
   int16_t    tag;
   char       imax,j,i,i1,i2,ifa0,ifa1;
+  static char mmgWarn = 0;
 
   *warn=0;
   ns = 0;
@@ -78,9 +79,14 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
         imax = i;
       }
     }
-    if ( imax==-1 )
-      fprintf(stdout,"%s:%d: Warning: all edges of tetra %d are required or of length null.\n",
-              __FILE__,__LINE__,k);
+    if ( imax==-1 ) {
+      if ( !mmgWarn ) {
+        fprintf(stderr,
+                "  ## Warning: %s: at least 1 tetra with 4 required"
+                " or null edges.\n",__func__);
+        mmgWarn = 1;
+      }
+    }
     if ( lmax < _MMG3D_LOPTL )  continue;
 
     /* proceed edges according to lengths */
@@ -176,7 +182,7 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
       pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
 
       if ( ier < 0 ) {
-        fprintf(stderr," ## Error: unable to split.\n");
+        fprintf(stderr," ## Error: %s: unable to split.\n",__func__);
         return(-1);
       }
       else if ( !ier ) {
@@ -243,7 +249,7 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
         ier = _MMG5_split1b(mesh,met,list,ilist,ip,1,1);
 
       if ( ier < 0 ) {
-        fprintf(stderr,"  ## Error: unable to split.\n");
+        fprintf(stderr,"  ## Error: %s: unable to split.\n",__func__);
         return(-1);
       }
       else if ( !ier ) {
@@ -277,6 +283,7 @@ static int _MMG5_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
   int        ier;
   int16_t    tag;
   char       imin,j,i,i1,i2,ifa0,ifa1;
+  static char mmgWarn = 0;
 
   nc = 0;
   for (k=1; k<=mesh->ne; k++) {
@@ -295,9 +302,14 @@ static int _MMG5_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
         imin = i;
       }
     }
-    if ( imin==-1 )
-      fprintf(stdout,"%s:%d: Warning: all edges of tetra %d are boundary and required\n",
-              __FILE__,__LINE__,k);
+    if ( imin==-1 ) {
+      if ( !mmgWarn ) {
+        fprintf(stderr,
+                "  ## Warning: %s: at least 1 tetra with 4 required"
+                " or null edges.\n",__func__);
+        mmgWarn = 1;
+      }
+    }
     if ( lmin > _MMG3D_LOPTS )  continue;
 
     // Case of an internal tetra with 4 ridges vertices.
@@ -435,10 +447,10 @@ static int _MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met) {
   while( ++it < maxit && nc+ns > 0 );
 
   if ( warn ) {
-    fprintf(stderr,"  ## Error:");
-    fprintf(stderr," unable to allocate a new point in last call"
-            " of _MMG5_adpspl.\n");
+    fprintf(stderr,"  ## Error: %s: unable to allocate a new point in last"
+            " call of _MMG5_adpspl.\n",__func__);
     _MMG5_INCREASE_MEM_MESSAGE();
+
     fprintf(stderr,"  ## Uncomplete mesh. Exiting\n" );
     return(0);
   }

@@ -348,8 +348,8 @@ int _MMG5_boulernm(MMG5_pMesh mesh, int start, int ip, int *ng, int *nr){
 
             if ( hash.nxt >= hash.max-1 ) {
               if ( mesh->info.ddebug )
-                fprintf(stdout,"  ## Memory alloc problem (edge): %d\n",
-                        hash.max);
+                fprintf(stderr,"  ## Warning: %s: memory alloc problem (edge):"
+                        " %d\n",__func__,hash.max);
               _MMG5_TAB_RECALLOC(mesh,hash.item,hash.max,0.2,_MMG5_hedge,
                                  "_MMG5_edge",return -1,-1);
               /* ph pointer may be false after realloc */
@@ -432,6 +432,7 @@ int _MMG5_boulesurfvolp(MMG5_pMesh mesh,int start,int ip,int iface,
   MMG5_pxTetra pxt;
   int  base,nump,k,k1,*adja,piv,na,nb,adj,cur,nvstart,fstart,aux;
   char iopp,ipiv,i,j,l,ipa,ipb,isface;
+  static char mmgErr=0;
 
   if ( isnm ) assert(!mesh->adja[4*(start-1)+iface+1]);
 
@@ -455,11 +456,16 @@ int _MMG5_boulesurfvolp(MMG5_pMesh mesh,int start,int ip,int iface,
     lists[(*ilists)] = 4*k+iopp;
     (*ilists)++;
     if ( *ilists >= MMG3D_LMAX ) {
-      fprintf(stderr,"  ## Warning: problem in surface remesh process.");
-      fprintf(stderr," Surface ball of point %d contains too many elts.\n",
-              nump);
-      fprintf(stderr,"  ##          Try to modify the hausdorff number,");
-      fprintf(stderr," or/and the maximum mesh.\n");
+      if ( !mmgErr ) {
+        fprintf(stderr,"  ## Warning: %s: problem in surface remesh process."
+                " Surface ball of at least 1 point (%d) contains too"
+                " many elts.\n"
+                "  ##          Try to modify the hausdorff number "
+                " or/and the maximum edge size.\n",__func__,
+                _MMG3D_indPt(mesh,nump));
+        mmgErr = 1;
+      }
+
       return(-1);
     }
 

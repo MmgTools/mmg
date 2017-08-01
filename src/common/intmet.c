@@ -53,8 +53,7 @@
 /*   /\* Compute imn = M^{-1}N *\/ */
 /*   det = m[0]*m[2] - m[1]*m[1]; */
 /*   if ( fabs(det) < _MMG5_EPS*_MMG5_EPS ) { */
-/*     MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug, */
-/*                       "  ## Error: %s: null metric det : %E \n",__func__,det); */
+/*     fprintf(stderr,"  ## Error: %s: null metric det : %E \n",__func__,det); */
 /*     return(0); */
 /*   } */
 /*   det = 1.0 / det; */
@@ -69,9 +68,8 @@
 
 /*   lambda[0] = 0.5 * (trimn - sqDelta); */
   /* if ( lambda[0] < 0.0 ) { */
-  /*   MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug, */
-  /*                     "  ## Error: %s: Les valeurs propres : %f \n", */
-  /*                     __func__,lambda[0]); */
+  /*   fprintf(stderr,"  ## Error: %s: Les valeurs propres : %f \n", */
+  /*            __func__,lambda[0]); */
   /*   return(0); */
   /* } */
 
@@ -166,7 +164,6 @@
 /* } */
 
 /**
- * \param mesh pointer toward the mesh.
  * \param m input metric.
  * \param n input metric.
  * \param mr computed output metric.
@@ -178,7 +175,7 @@
  * the simultaneous reduction basis: linear interpolation of sizes.
  *
  */
-int _MMG5_mmgIntmet33_ani(MMG5_pMesh mesh,double *m,double *n,double *mr,double s) {
+int _MMG5_mmgIntmet33_ani(double *m,double *n,double *mr,double s) {
   int     order;
   double  lambda[3],vp[3][3],mu[3],is[6],isnis[6],mt[9],P[9],dd;
   char    i;
@@ -186,12 +183,11 @@ int _MMG5_mmgIntmet33_ani(MMG5_pMesh mesh,double *m,double *n,double *mr,double 
 
   /* Compute inverse of square root of matrix M : is =
    * P*diag(1/sqrt(lambda))*{^t}P */
-  order = _MMG5_eigenv(mesh,1,m,lambda,vp);
+  order = _MMG5_eigenv(1,m,lambda,vp);
   if ( !order ) {
     if ( !mmgWarn ) {
-      MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
-                        "  ## Warning: %s: unable to diagonalize at least"
-                        " 1 metric.\n",__func__);
+      fprintf(stderr,"  ## Warning: %s: unable to diagonalize at least"
+              " 1 metric.\n",__func__);
       mmgWarn = 1;
     }
     return(0);
@@ -233,12 +229,11 @@ int _MMG5_mmgIntmet33_ani(MMG5_pMesh mesh,double *m,double *n,double *mr,double 
   isnis[4] = is[1]*mt[2] + is[3]*mt[5] + is[4]*mt[8];
   isnis[5] = is[2]*mt[2] + is[4]*mt[5] + is[5]*mt[8];
 
-  order = _MMG5_eigenv(mesh,1,isnis,lambda,vp);
+  order = _MMG5_eigenv(1,isnis,lambda,vp);
   if ( !order ) {
     if ( !mmgWarn ) {
-      MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
-                        "  ## Warning: %s: unable to diagonalize at least"
-                        " 1 metric.\n",__func__);
+      fprintf(stderr,"  ## Warning: %s: unable to diagonalize at least"
+              " 1 metric.\n",__func__);
       mmgWarn = 1;
     }
     return(0);
@@ -771,12 +766,11 @@ int _MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,char i,
   _MMG5_rmtr(r,m2,m2old);
 
   /* Interpolate both metrics expressed in the same tangent plane. */
-  if ( !_MMG5_mmgIntmet33_ani(mesh,m1old,m2old,mr,s) ) {
+  if ( !_MMG5_mmgIntmet33_ani(m1old,m2old,mr,s) ) {
     if ( !warn ) {
       ++warn;
-      MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
-                        "  ## Warning: %s: at least 1 impossible metric"
-                        " interpolation.\n", __func__);
+      fprintf(stderr,"  ## Warning: %s: at least 1 impossible metric"
+              " interpolation.\n", __func__);
     }
     return(0);
   }

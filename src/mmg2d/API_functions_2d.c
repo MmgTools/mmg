@@ -243,7 +243,7 @@ int MMG2D_Set_meshSize(MMG5_pMesh mesh, int np, int nt, int na) {
     if((mesh->npmax < mesh->np || mesh->ntmax < mesh->nt || mesh->namax < mesh->na) ) {
       if ( !_MMG2D_memOption(mesh) )  return 0;
     } else if(mesh->info.mem < 39) {
-      fprintf(stderr,"not enough memory  %d\n",mesh->info.mem);
+      fprintf(stderr,"  ## Error: %s: not enough memory (%d).\n",__func__,mesh->info.mem);
       return(0);
     }
   } else {

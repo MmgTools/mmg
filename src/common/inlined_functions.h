@@ -162,18 +162,16 @@ double _MMG5_lenEdg(MMG5_pMesh mesh,int np0,int np1,
 
   if( l0 < 0.) {
     if ( !mmgWarn ) {
-      MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
-                        "  ## Warning: %s: at least 1 negative edge length "
-                        "(%e)\n",__func__,l0);
+      fprintf(stderr,"  ## Warning: %s: at least 1 negative edge length "
+              "(%e)\n",__func__,l0);
       mmgWarn = 1;
     }
     return(0.);
   }
   if(l1 < 0.) {
     if ( !mmgWarn ) {
-      MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
-                        "  ## Warning: %s: at least 1 negative edge length "
-                        "(%e)\n",__func__,l1);
+      fprintf(stderr,"  ## Warning: %s: at least 1 negative edge length "
+              "(%e)\n",__func__,l1);
       mmgWarn = 1;
     }
     return(0.);
@@ -216,9 +214,8 @@ double _MMG5_lenSurfEdg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,char i
   else if ( MG_GEO & p0->tag ) {
     if ( !_MMG5_buildridmet(mesh,met,np0,ux,uy,uz,met0) )  {
       if ( !mmgWarn ) {
-        MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
-                          "  ## Warning: %s: a- unable to compute at least 1 ridge"
-                          " metric.\n",__func__);
+        fprintf(stderr,"  ## Warning: %s: a- unable to compute at least 1 ridge"
+                " metric.\n",__func__);
         mmgWarn = 1;
       }
       return 0.;
@@ -235,9 +232,8 @@ double _MMG5_lenSurfEdg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,char i
   else if ( MG_GEO & p1->tag ) {
     if ( !_MMG5_buildridmet(mesh,met,np1,ux,uy,uz,met1) )  {
       if ( !mmgWarn ) {
-        MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
-                          "  ## Warning: %s: b- unable to compute at least 1 ridge"
-                          " metric.\n",__func__);
+        fprintf(stderr,"  ## Warning: %s: b- unable to compute at least 1 ridge"
+                " metric.\n",__func__);
         mmgWarn = 1;
       }
       return 0.;

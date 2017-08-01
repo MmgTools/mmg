@@ -352,10 +352,9 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
     if ( !_MMG5_elementWeight(mesh,met,&tt,p0,&pb,r,gv) ) {
       if ( !warn ) {
         ++warn;
-        MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
-                          "  ## Warning: %s:"
-                          " unable to compute optimal position for at least"
-                          " 1 point.\n",__func__);
+        fprintf(stderr,"  ## Warning: %s:"
+                " unable to compute optimal position for at least"
+                " 1 point.\n",__func__);
       }
       _MMG5_SAFE_FREE(callist);
       return(0);

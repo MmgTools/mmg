@@ -362,8 +362,6 @@ void MMG5_Free_structures(MMG5_pMesh mesh,MMG5_pSol sol){
   if ( mesh->info.npar && mesh->info.par )
     _MMG5_DEL_MEM(mesh,mesh->info.par,mesh->info.npar*sizeof(MMG5_Par));
 
-  _MMG5_SAFE_FREE(mesh->info.errMessage);
-
   if ( mesh->info.imprim>5 || mesh->info.ddebug ) {
     castedVal = _MMG5_SAFELL2LCAST(mesh->memCur);
     printf("  MEMORY USED AT END (bytes) %ld\n",castedVal);

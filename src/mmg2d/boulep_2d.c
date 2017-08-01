@@ -128,9 +128,8 @@ int _MMG2_boulen(MMG5_pMesh mesh, int start,char ip, int *pleft, int *pright, do
   dd = ux*ux + uy*uy;
   
   if ( dd < _MMG5_EPSD ) {
-    MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
-                      "  ## Error: %s: Null edge"
-                      " length (%e).\n",__func__,dd);
+    fprintf(stderr,"  ## Error: %s: Null edge"
+            " length (%e).\n",__func__,dd);
     return 0;
   }
 
@@ -165,9 +164,8 @@ int _MMG2_boulen(MMG5_pMesh mesh, int start,char ip, int *pleft, int *pright, do
   dd = ux*ux + uy*uy;
   
   if ( dd < _MMG5_EPSD ) {
-    MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,
-                      "  ## Error: %s: Null edge length"
-                      " (%e).\n",__func__,dd);
+    fprintf(stderr,"  ## Error: %s: Null edge length"
+            " (%e).\n",__func__,dd);
     return 0;
   }
 
@@ -278,7 +276,7 @@ int _MMG2_bouleendp(MMG5_pMesh mesh,int start,char ip,int *ip1,int *ip2) {
       if ( *ip1 == 0 ) *ip1 = pt->v[i2];
       else {
         if ( *ip2 != 0 && *ip1 != pt->v[i2] && *ip2 != pt->v[i2] ) {
-          MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,"  ## Error: %s:"
+          fprintf(stderr,"  ## Error: %s:"
                             " three boundary edges at non singular point %d:"
                             " %d %d, and %d.\n Abort\n",__func__,
                             np,*ip1,*ip2,pt->v[i2]);
@@ -293,7 +291,7 @@ int _MMG2_bouleendp(MMG5_pMesh mesh,int start,char ip,int *ip1,int *ip2) {
         *ip1 = pt->v[i1];
       else {
         if ( *ip2 != 0 && *ip1 != pt->v[i1] && *ip2 != pt->v[i1] ) {
-          MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,"  ## Error: %s:"
+          fprintf(stderr,"  ## Error: %s:"
                             " three boundary edges at non singular point %d:"
                             " %d %d, and %d. Abort\n",__func__,
                             np,*ip1,*ip2,pt->v[i1]);
@@ -332,10 +330,10 @@ int _MMG2_bouleendp(MMG5_pMesh mesh,int start,char ip,int *ip1,int *ip2) {
         *ip1 = pt->v[i2];
       else {
         if ( *ip2 != 0 && *ip1 != pt->v[i2] && *ip2 != pt->v[i2] ) {
-          MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,"  ## Error: %s:"
-                            " three boundary edges at non singular point %d:"
-                            " %d %d, and %d. Abort\n",__func__,
-                            np,*ip1,*ip2,pt->v[i2]);
+          fprintf(stderr,"  ## Error: %s:"
+                  " three boundary edges at non singular point %d:"
+                  " %d %d, and %d. Abort\n",__func__,
+                  np,*ip1,*ip2,pt->v[i2]);
           return 0;
         }
         if ( *ip1 != pt->v[i2] ) *ip2 = pt->v[i2];
@@ -346,10 +344,10 @@ int _MMG2_bouleendp(MMG5_pMesh mesh,int start,char ip,int *ip1,int *ip2) {
       if ( *ip1 == 0 ) *ip1 = pt->v[i1];
       else {
         if ( *ip2 != 0 && *ip1 != pt->v[i1] && *ip2 != pt->v[i1] ) {
-          MMG5_errorMessage(&mesh->info.errMessage,mesh->info.ddebug,"  ## Error: %s:"
-                            " three boundary edges at non singular point %d:"
-                            " %d %d, and %d. Abort\n",__func__,
-                            np,*ip1,*ip2,pt->v[i1]);
+          fprintf(stderr,"  ## Error: %s:"
+                  " three boundary edges at non singular point %d:"
+                  " %d %d, and %d. Abort\n",__func__,
+                  np,*ip1,*ip2,pt->v[i1]);
           return 0;
         }
         if ( *ip1 != pt->v[i1] ) *ip2 = pt->v[i1];

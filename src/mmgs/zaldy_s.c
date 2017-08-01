@@ -158,14 +158,14 @@ int _MMGS_memOption(MMG5_pMesh mesh) {
       memtmp = ((long long)mesh->np * bytes /million + 38);
       memtmp = MG_MAX(memtmp, ((long long)mesh->nt * bytes /(2 *million) + 38));
       mesh->memMax = (long long) memtmp*million+1;
-      fprintf(stdout,"  ## ERROR: asking for %d Mo of memory ",mesh->info.mem);
+      fprintf(stdout,"  ## Error: %s: asking for %d Mo of memory ",__func__,mesh->info.mem);
       fprintf(stdout,"is not enough to load mesh. You need to ask %d Mo minimum\n",
               memtmp+1);
       return 0;
     }
     if(mesh->info.mem < 39) {
       mesh->memMax = (long long) 39;
-      fprintf(stdout,"  ## ERROR: asking for %d Mo of memory ",mesh->info.mem);
+      fprintf(stdout,"  ## Error: %s: asking for %d Mo of memory ",__func__,mesh->info.mem);
       fprintf(stdout,"is not enough to load mesh. You need to ask %d o minimum\n",
               39);
       return 0;
