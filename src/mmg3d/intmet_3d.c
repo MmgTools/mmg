@@ -277,12 +277,17 @@ int _MMG5_intvolmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,
 
   ier = _MMG5_intregvolmet(m1,m2,mr,s);
   if ( mesh->info.ddebug && ( (!ier) || (fabs(mr[5]) < 1e-6) ) ) {
-    fprintf(stderr,"%s:%d : Error\n",__FILE__,__LINE__);
-    fprintf(stderr,"pp1 : %d %d \n",MG_SIN(pp1->tag) || (MG_NOM & pp1->tag),pp1->tag & MG_GEO);
-    fprintf(stderr,"m1 %e %e %e %e %e %e\n",m1[0],m1[1],m1[2],m1[3],m1[4],m1[5]);
-    fprintf(stderr,"pp2 : %d %d \n",MG_SIN(pp2->tag) || (MG_NOM & pp2->tag),pp2->tag & MG_GEO);
-    fprintf(stderr,"m2 %e %e %e %e %e %e\n",m2[0],m2[1],m2[2],m2[3],m2[4],m2[5]);
-    fprintf(stderr,"mr %e %e %e %e %e %e\n",mr[0],mr[1],mr[2],mr[3],mr[4],mr[5]);
+    fprintf(stderr,"  ## Error: %s:\n",__func__);
+    fprintf(stderr,"            pp1 : %d %d \n",
+            MG_SIN(pp1->tag) || (MG_NOM & pp1->tag),pp1->tag & MG_GEO);
+    fprintf(stderr,"            m1 %e %e %e %e %e %e\n",
+            m1[0],m1[1],m1[2],m1[3],m1[4],m1[5]);
+    fprintf(stderr,"            pp2 : %d %d \n",
+            MG_SIN(pp2->tag) || (MG_NOM & pp2->tag),pp2->tag & MG_GEO);
+    fprintf(stderr,"            m2 %e %e %e %e %e %e\n",
+            m2[0],m2[1],m2[2],m2[3],m2[4],m2[5]);
+    fprintf(stderr,"            mr %e %e %e %e %e %e\n",
+            mr[0],mr[1],mr[2],mr[3],mr[4],mr[5]);
     return 0;
   }
 
@@ -332,17 +337,24 @@ int _MMG5_interp4barintern(MMG5_pSol met,int ip,double cb[4],double dm0[6],
                            double dm1[6],double dm2[6],double dm3[6]) {
   double        m0i[6],m1i[6],m2i[6],m3i[6],mi[6];
   int           i;
+  static char   mmgWarn=0;
 
  if ( !_MMG5_invmat(dm0,m0i) || !_MMG5_invmat(dm1,m1i) ||
        !_MMG5_invmat(dm2,m2i) || !_MMG5_invmat(dm3,m3i) ) {
-    fprintf(stderr,"\n  ## INTERP INVALID METRIC.\n");
+    if ( !mmgWarn ) {
+      mmgWarn = 1;
+      fprintf(stderr,"\n  ## Warning: %s: at least 1 invalid metric.\n",__func__);
+    }
     return(0);
   }
   for (i=0; i<6; i++)
     mi[i] = cb[0]*m0i[i] + cb[1]*m1i[i] + cb[2]*m2i[i] + cb[3]*m3i[i];
 
   if ( !_MMG5_invmat(mi,m0i) ) {
-    fprintf(stderr,"\n  ## INTERP INVALID METRIC.\n");
+    if ( !mmgWarn ) {
+      mmgWarn = 1;
+      fprintf(stderr,"\n  ## Warning: %s: at least 1 invalid metric.\n",__func__);
+    }
     return(0);
   }
 

@@ -226,7 +226,7 @@ int _MMG3D_bdryBuild(MMG5_pMesh mesh) {
   /* rebuild triangles*/
   mesh->nt = 0;
   if ( !_MMG5_chkBdryTria(mesh) ) {
-    fprintf(stderr," ## Error: unable to rebuild triangles\n");
+    fprintf(stderr,"\n  ## Error: %s: unable to rebuild triangles\n",__func__);
     return(-1);
   }
 
@@ -453,7 +453,8 @@ int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
 
   /* create prism adjacency */
   if ( !MMG3D_hashPrism(mesh) ) {
-    fprintf(stderr,"\n  ## Prism hashing problem. Exit program.\n");
+    fprintf(stderr,"\n  ## Error: %s: prism hashing problem. Exit program.\n",
+            __func__);
     return(0);
   }
 
@@ -492,7 +493,7 @@ int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
 
   /* to could save the mesh, the adjacency have to be correct */
   if ( mesh->info.ddebug && (!_MMG5_chkmsh(mesh,1,1) ) ) {
-    fprintf(stderr,"\n  ##  Problem. Invalid mesh.\n");
+    fprintf(stderr,"\n  ##  Warning: %s: invalid mesh.\n",__func__);
     return(0);
   }
 
