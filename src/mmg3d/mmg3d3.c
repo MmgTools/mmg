@@ -103,12 +103,13 @@ inline int _MMG5_intdispvol(double *v1, double *v2, double *vp, double t) {
  *
  */
 static int _MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itdeg, int* warn) {
-  MMG5_pTetra     pt;
-  MMG5_pPoint     p0,p1;
-  double     len,lmax,o[3],hma2;
-  double    *m1,*m2,*mp;
-  int        k,ip,ip1,ip2,list[MMG3D_LMAX+2],ilist,ns,ier,iadr;
-  char       imax,i,i1,i2;
+  MMG5_pTetra  pt;
+  MMG5_pPoint  p0,p1;
+  double       len,lmax,o[3],hma2;
+  double      *m1,*m2,*mp;
+  int          k,ip,ip1,ip2,list[MMG3D_LMAX+2],ilist,ns,ier,iadr;
+  char         imax,i,i1,i2;
+  static char  mmgWarn0 = 0;
   
   *warn=0;
   ns = 0;
@@ -141,8 +142,13 @@ static int _MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itdeg, 
         imax = i;
       }
     }
-    if ( imax==-1 )
-      fprintf(stdout,"%s:%d: Warning: all edges of tetra %d are required or of length null.\n",__FILE__,__LINE__,k);
+    if ( imax==-1 ) {
+      if ( !mmgWarn0 ){
+        mmgWarn0 = 1;
+        fprintf(stderr,"\n  ## Warning: %s: all edges of tetra %d are required"
+                " or of length null.\n",__func__,k);
+      }
+    }
     
     if ( lmax < hma2 )  continue;
     
@@ -196,7 +202,7 @@ static int _MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itdeg, 
     /* Il y a un check sur la taille des arêtes ici aussi ! */
     ier = _MMG5_split1b(mesh,met,list,ilist,ip,1,1);
     if ( ier < 0 ) {
-      fprintf(stderr,"\n  ## Error: unable to split.\n");
+      fprintf(stderr,"\n  ## Error: %s: unable to split.\n",__func__);
       return(-1);
     }
     else if ( !ier ) {
@@ -594,13 +600,13 @@ int _MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met) {
       t = _MMG5_dikomv(mesh,disp);
       if ( t == 0 ) {
         if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
-          printf("   *** Stop: impossible to proceed further\n");
+          fprintf(stderr,"\n   *** Stop: impossible to proceed further\n");
         break;
       }
   
       ier = _MMG5_dispmesh(mesh,disp,t,itdc);
       if ( !ier ) {
-        fprintf(stderr,"  ** Impossible motion\n");
+        fprintf(stderr,"\n  ** Impossible motion\n");
         return(0);
       }
     

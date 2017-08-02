@@ -382,6 +382,7 @@ int _MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
   double            calold,calnew,caltmp,*callist;
   int               k,kel,iel,l,n0,na,nb,ntempa,ntempb,ntempc,nut,nxp;
   unsigned char     i0,iface,i;
+  static char       mmgErr0=0,mmgErr1=0;
 
   step = 0.1;
   nut    = 0;
@@ -573,8 +574,11 @@ int _MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
   _MMG5_tet2tri(mesh,iel,iface,&tt);
 
   if(!_MMG5_bezierCP(mesh,&tt,&b,MG_GET(pxt->ori,iface))){
-    fprintf(stderr,"%s:%d: Error: function _MMG5_bezierCP return 0\n",
-            __FILE__,__LINE__);
+    if( !mmgErr0 ) {
+      mmgErr0 = 1;
+      fprintf(stderr,"\n  ## Error: %s: function _MMG5_bezierCP return 0.\n",
+              __func__);
+    }
     return -1;
   }
 
@@ -638,8 +642,11 @@ int _MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
     }
   }
   if(!_MMG3D_bezierInt(&b,uv,o,no,to)){
-    fprintf(stderr,"%s:%d: Error: function _MMG3D_bezierInt return 0\n",
-            __FILE__,__LINE__);
+   if( !mmgErr1 ) {
+      mmgErr1 = 1;
+      fprintf(stderr,"  ## Error: %s: function _MMG3D_bezierInt return 0.\n",
+              __func__);
+   }
     return -1;
   }
 
@@ -1818,6 +1825,7 @@ int _MMG3D_movv_ani(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
   int           j,iadr,ipb,iter,maxiter,l,lon,iel,i1,i2,i3,list[MMG3D_LMAX+2];
   double        *mp,coe,qualtet[MMG3D_LMAX+2];
   double        ax,ay,az,bx,by,bz,nx,ny,nz,dd,len,qual,oldc[3];
+
   assert(k);
   assert(ib<4);
   pt = &mesh->tetra[k];
@@ -1872,8 +1880,6 @@ int _MMG3D_movv_ani(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
   memcpy(oldc,ppa->c,3*sizeof(double));
 
   lon = _MMG5_boulevolp(mesh,k,ib,&list[0]);
-  if(mesh->info.imprim < 0 ) if(lon < 4 && lon) printf("lon petit : %d\n",lon);
-  if(!lon) return(0);
 
   coe     = 1.;
   iter    = 0;
@@ -1907,8 +1913,6 @@ int _MMG3D_movv_ani(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
     pt1 = &mesh->tetra[iel];
     pt1->qual = qualtet[l];
     pt1->mark = mesh->mark;
-    //    if ( pt1->qual < declic )
-    //  MMG_kiudel(queue,iel);
   }
   return(1);
 
@@ -1929,9 +1933,10 @@ int _MMG3D_movv_ani(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
 int _MMG3D_movnormal_iso(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
   MMG5_pTetra pt,pt1;
   MMG5_pPoint ppa,ppb,p1,p2,p3;
-  int    j,iadr,ipb,iter,maxiter,l,lon,iel,i1,i2,i3,list[MMG3D_LMAX+2];;
-  double  hp,coe,crit,qualtet[MMG3D_LMAX+2];;
-  double ax,ay,az,bx,by,bz,nx,ny,nz,dd,len,qual,oldc[3],oldp[3];
+  int         j,iadr,ipb,iter,maxiter,l,lon,iel,i1,i2,i3,list[MMG3D_LMAX+2];;
+  double      hp,coe,crit,qualtet[MMG3D_LMAX+2];;
+  double      ax,ay,az,bx,by,bz,nx,ny,nz,dd,len,qual,oldc[3],oldp[3];
+  static char mmgWarn0 = 0;
 
   assert(k);
   assert(ib<4);
@@ -1991,8 +1996,8 @@ int _MMG3D_movnormal_iso(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
   oldc[2] = 1./3.*(p1->c[2]+p2->c[2]+p3->c[2]);
 
   lon = _MMG5_boulevolp(mesh,k,ib,&list[0]);
-  if(mesh->info.imprim < 0) if(lon < 4 && lon) printf("lon petit : %d\n",lon);
-  if(!lon) return(0);
+
+  if ( !lon ) return(0);
 
   /*vol crit*/
   crit = _MMG5_orvol(mesh->point,pt->v);
@@ -2013,20 +2018,6 @@ int _MMG3D_movnormal_iso(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
       pt1 = &mesh->tetra[iel];
       qual = _MMG5_caltet(mesh,sol,pt1);
       if ( qual < crit ) {
-        if( mesh->info.ddebug && (l==0 && iter==0)) {
-          printf("tet %d (%d) -- %e < %e-- %e %e\n",l,iel,_MMG5_orvol(mesh->point,pt1->v),crit,pt1->qual,qual);
-          printf("%e %e %e 0\n",p1->c[0],p1->c[1],p1->c[2]);
-          printf("%e %e %e 0\n",p2->c[0],p2->c[1],p2->c[2]);
-          printf("%e %e %e 0\n",p3->c[0],p3->c[1],p2->c[2]);
-          ppa->c[0] = oldc[0] + coe * nx * len;
-          ppa->c[1] = oldc[1] + coe * ny * len;
-          ppa->c[2] = oldc[2] + coe * nz * len;
-          printf("%e %e %e 0\n",ppa->c[0],ppa->c[1],ppa->c[2]);
-          printf("%e %e %e 0\n",oldp[0],oldp[1],oldp[2]);
-          printf("\n\n n %e %e %e len %e coe %e\n",nx,ny,nz,len,coe);
-          printf("oldc %e %e %e hp %e\n",oldc[0],oldc[1],oldc[2],hp);
-          //exit(0);
-        }
         break;
       }
       qualtet[l] = qual;
@@ -2046,8 +2037,6 @@ int _MMG3D_movnormal_iso(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
     pt1 = &mesh->tetra[iel];
     pt1->qual = qualtet[l];
     pt1->mark = mesh->mark;
-    //    if ( pt1->qual < declic )
-    //  MMG_kiudel(queue,iel);
   }
   return(1);
 
@@ -2055,9 +2044,9 @@ int _MMG3D_movnormal_iso(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
 int _MMG3D_movv_iso(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
   MMG5_pTetra pt,pt1;
   MMG5_pPoint ppa,ppb,p1,p2,p3;
-  int    j,iadr,ipb,iter,maxiter,l,lon,iel,i1,i2,i3,list[MMG3D_LMAX+2];;
-  double  hp,coe,crit,qualtet[MMG3D_LMAX+2];;
-  double ax,ay,az,bx,by,bz,nx,ny,nz,dd,len,qual,oldc[3];
+  int         j,iadr,ipb,iter,maxiter,l,lon,iel,i1,i2,i3,list[MMG3D_LMAX+2];;
+  double      hp,coe,crit,qualtet[MMG3D_LMAX+2];;
+  double      ax,ay,az,bx,by,bz,nx,ny,nz,dd,len,qual,oldc[3];
 
   assert(k);
   assert(ib<4);
@@ -2110,12 +2099,11 @@ int _MMG3D_movv_iso(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
   dd  = 1.0 / (double)3.;
   len *= dd;
   if(len > 0.) len = 1.0 / len;
-  else printf("MMG_movevertex len %e\n",len);
 
   memcpy(oldc,ppa->c,3*sizeof(double));
 
   lon = _MMG5_boulevolp(mesh,k,ib,&list[0]);
-  if(mesh->info.imprim < 0) if(lon < 4 && lon) printf("lon petit : %d\n",lon);
+
   if(!lon) return(0);
 
   /*qual crit*/
@@ -2126,10 +2114,8 @@ int _MMG3D_movv_iso(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
     if ( pt1->qual < crit )
       crit = pt1->qual;
   }
-  /* if ( (crit < 0.01/_MMG3D_ALPHAD) ) {
-     crit *= 0.9;
-   } else
-  */ crit *= 1.01;
+
+  crit *= 1.01;
   coe     = 1.;
   iter    = 0;
   maxiter = 20;
@@ -2160,8 +2146,6 @@ int _MMG3D_movv_iso(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
     pt1 = &mesh->tetra[iel];
     pt1->qual = qualtet[l];
     pt1->mark = mesh->mark;
-    //    if ( pt1->qual < declic )
-    //  MMG_kiudel(queue,iel);
   }
   return(1);
 
