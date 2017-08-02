@@ -706,8 +706,8 @@ int MMG3D_searchlen(MMG5_pMesh mesh, MMG5_pSol met, double lmin,
       nq = pt->v[i1];
 
       if(!_MMG5_hashEdge(mesh,&hash,np,nq,0)){
-        fprintf(stderr,"%s:%d: Error: function _MMG5_hashEdge return 0\n",
-                __FILE__,__LINE__);
+        fprintf(stderr,"\n  ## Error: %s: function _MMG5_hashEdge return 0\n",
+                __func__);
         return 0;
       }
     }

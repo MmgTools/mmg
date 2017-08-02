@@ -70,8 +70,8 @@ int _MMG5_countLocalParamAtTet( MMG5_pMesh mesh,_MMG5_iNode **bdyRefs) {
   /* Try to alloc the first node */
   ier = _MMG5_Add_inode( mesh, bdyRefs, k );
   if ( ier < 0 ) {
-    fprintf(stderr,"\n  ## Error: unable to allocate the first boundary"
-           " reference node.\n");
+    fprintf(stderr,"\n  ## Error: %s: unable to allocate the first boundary"
+           " reference node.\n",__func__);
     return(0);
   }
   else {
@@ -83,8 +83,8 @@ int _MMG5_countLocalParamAtTet( MMG5_pMesh mesh,_MMG5_iNode **bdyRefs) {
     ier = _MMG5_Add_inode( mesh, bdyRefs, mesh->tetra[k].ref );
 
     if ( ier < 0 ) {
-      printf("  ## Warning: unable to list the tetra references.\n"
-             "              Uncomplete parameters file.\n" );
+      fprintf(stderr, "\n  ## Warning: %s: unable to list the tetra references.\n"
+              "              Uncomplete parameters file.\n",__func__ );
       break;
     }
     else if ( ier ) ++npar;
@@ -199,10 +199,10 @@ int _MMG3D_defaultOption(MMG5_pMesh mesh,MMG5_pSol met) {
   chrono(ON,&(ctim[0]));
 
   if ( mesh->info.npar ) {
-    fprintf(stderr,"\n  ## Error: "
+    fprintf(stderr,"\n  ## Error: %s: "
             "unable to save of a local parameter file with"
             " the default parameters values because local parameters"
-            " are provided.\n");
+            " are provided.\n",__func__);
     _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
   }
 
@@ -256,8 +256,8 @@ int _MMG3D_defaultOption(MMG5_pMesh mesh,MMG5_pSol met) {
   /* Save the local parameters file */
   mesh->mark = 0;
   if ( !_MMG3D_writeLocalParam(mesh) ) {
-    fprintf(stderr,"\n  ## Error: Unable to save the local parameters file.\n"
-            "            Exit program.\n");
+    fprintf(stderr,"\n  ## Error: %s: Unable to save the local parameters file.\n"
+            "            Exit program.\n",__func__);
      _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
   }
 

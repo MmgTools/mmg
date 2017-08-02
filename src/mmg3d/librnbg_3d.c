@@ -205,7 +205,8 @@ int _MMG5_mmg3dRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
     if (!mesh->tetra[tetraIdx].v[0]) continue;
     if (vertTab[vertOldTab[tetraIdx]] < 0) {
       if(vertOldTab[tetraIdx] == vertNbr) {
-        fprintf(stdout,"WARNING graph problem, no renum\n");
+        fprintf(stderr,"  ## Warning: %s: graph error, no renumbering.\n",
+                __func__);
         _MMG5_DEL_MEM(mesh,edgeTab,edgeSiz*sizeof(SCOTCH_Num));
         _MMG5_DEL_MEM(mesh,vertTab,(vertNbr+2)*sizeof(SCOTCH_Num));
         return(1);
@@ -214,7 +215,8 @@ int _MMG5_mmg3dRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
         vertTab[vertOldTab[tetraIdx]] = vertTab[vertOldTab[tetraIdx] + 1];
       else {
         if(vertOldTab[tetraIdx]+1 == vertNbr) {
-          fprintf(stdout,"WARNING graph problem, no renum\n");
+          fprintf(stderr,"  ## Warning: %s: graph error, no renumbering.\n",
+                  __func__);
           _MMG5_DEL_MEM(mesh,edgeTab,edgeSiz*sizeof(SCOTCH_Num));
           _MMG5_DEL_MEM(mesh,vertTab,(vertNbr+2)*sizeof(SCOTCH_Num));
           return(1);
@@ -224,7 +226,8 @@ int _MMG5_mmg3dRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
           i++;
         } while((vertTab[vertOldTab[tetraIdx] + i] < 0) && ((vertOldTab[tetraIdx] + i) < vertNbr));
         if(vertOldTab[tetraIdx] + i == vertNbr) {
-          fprintf(stdout,"WARNING graph problem, no renum\n");
+          fprintf(stderr,"  ## Warning: %s: graph error, no renumbering.\n",
+                  __func__);
           _MMG5_DEL_MEM(mesh,edgeTab,edgeSiz*sizeof(SCOTCH_Num));
           _MMG5_DEL_MEM(mesh,vertTab,(vertNbr+2)*sizeof(SCOTCH_Num));
           return(1);
