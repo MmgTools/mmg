@@ -474,7 +474,8 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         if(iswp) i=_MMG5_swapbin(i);
       }
       if(i>mesh->np) {
-        fprintf(stdout,"   Warning: Required Vertices number %8d IGNORED\n",i);
+        fprintf(stderr,"  ## Warning: %s: required Vertices number %8d"
+                " ignored.\n",__func__,i);
       } else {
         ppt = &mesh->point[i];
         ppt->tag |= MG_REQ;
@@ -494,7 +495,8 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         if(iswp) i=_MMG5_swapbin(i);
       }
       if(i>mesh->np) {
-        fprintf(stdout,"   Warning: Corner number %8d IGNORED\n",i);
+        fprintf(stderr,"  ## Warning: %s: corner number %8d ignored.\n",
+                __func__,i);
       } else {
         ppt = &mesh->point[i];
         ppt->tag |= MG_CRN;
@@ -570,7 +572,8 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
           if(iswp) i=_MMG5_swapbin(i);
         }
         if ( i>mesh->nt ) {
-          fprintf(stdout,"   Warning: required triangle number %8d IGNORED\n",i);
+          fprintf(stderr,"  ## Warning: %s: required triangle number %8d"
+                  " ignored.\n",__func__,i);
         } else {
           if( mesh->info.iso ){
             if( ina[i] == 0 ) continue;
@@ -626,8 +629,8 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
           if(iswp) i=_MMG5_swapbin(i);
         }
         if ( i>mesh->nquad ) {
-          fprintf(stdout,"   Warning: required quadrilaterals number"
-                  " %8d IGNORED\n",i);
+          fprintf(stderr,"  ## Warning: %s: required quadrilaterals number"
+                  " %8d ignored.\n",__func__,i);
         } else {
           pq1 = &mesh->quadra[i];
           pq1->tag[0] |= MG_REQ;
@@ -697,7 +700,8 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
           if(iswp) ia=_MMG5_swapbin(ia);
         }
         if(ia>na) {
-          fprintf(stdout,"   Warning Ridge number %8d IGNORED\n",ia);
+          fprintf(stderr,"  ## Warning: %s: ridge number %8d ignored.\n",
+                  __func__,ia);
           continue;
         }
         if( mesh->info.iso ){
@@ -726,7 +730,8 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
           if(iswp) ia=_MMG5_swapbin(ia);
         }
         if(ia>na) {
-          fprintf(stdout,"   Warning Required Edges number %8d/%8d IGNORED\n",ia,na);
+          fprintf(stderr,"  ## Warning: %s: required Edges number %8d/%8d"
+                  " ignored.\n",__func__,ia,na);
           continue;
         }
         if( mesh->info.iso ){
@@ -790,9 +795,9 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
     fprintf(stdout,"     $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ \n\n");
   }
   if(mesh->xt) {
-    fprintf(stdout,"\n     $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ \n");
-    fprintf(stdout,"         BAD ORIENTATION : vol < 0 -- %8d tetra reoriented\n",mesh->xt);
-    fprintf(stdout,"     $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ \n\n");
+    fprintf(stderr,"\n     $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ \n");
+    fprintf(stderr,"         BAD ORIENTATION : vol < 0 -- %8d tetra reoriented\n",mesh->xt);
+    fprintf(stderr,"     $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ \n\n");
   }
   mesh->xt = 0;
   /* get required tetrahedra */
@@ -807,7 +812,8 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         if(iswp) i=_MMG5_swapbin(i);
       }
       if(i>mesh->ne) {
-        fprintf(stdout,"   Warning Required Tetra number %8d IGNORED\n",i);
+        fprintf(stderr,"  ## Warning: %s: required Tetra number %8d"
+                " ignored.\n",__func__,i);
         continue;
       }
       pt = &mesh->tetra[i];
@@ -839,8 +845,8 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
 
   /* read geometric entities */
   if ( mesh->nc1 && !ng ) {
-    printf("  ## Warning: Your mesh don't contains Normals but contains"
-           " NormalAtVertices. The NormalAtVertices are deleted. \n");
+    fprintf(stderr,"  ## Warning: %s: your mesh don't contains Normals but contains"
+           " NormalAtVertices. The NormalAtVertices are deleted. \n",__func__);
     mesh->nc1 = 0;
   }
 
@@ -1695,7 +1701,7 @@ int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
       if(!strncmp(chaine,"Dimension",strlen("Dimension"))) {
         fscanf(inm,"%d",&met->dim);
         if(met->dim!=3) {
-          fprintf(stderr,"BAD SOL DIMENSION : %d\n",met->dim);
+          fprintf(stderr,"BAD SOL DIMENSION: %d\n",met->dim);
           return(-1);
         }
         continue;
@@ -1703,7 +1709,7 @@ int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
         fscanf(inm,"%d",&met->np);
         fscanf(inm,"%d",&met->type);
         if(met->type!=1) {
-          fprintf(stderr,"SEVERAL SOLUTION => IGNORED : %d\n",met->type);
+          fprintf(stderr,"SEVERAL SOLUTION => IGNORED: %d\n",met->type);
           return(-1);
         }
         fscanf(inm,"%d",&met->size);
@@ -1729,7 +1735,7 @@ int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
         fread(&met->dim,sw,1,inm);
         if(iswp) met->dim=_MMG5_swapbin(met->dim);
         if(met->dim!=3) {
-          fprintf(stderr,"BAD SOL DIMENSION : %d\n",met->dim);
+          fprintf(stderr,"BAD SOL DIMENSION: %d\n",met->dim);
           printf("  Exit program.\n");
           return(-1);
         }
@@ -1742,7 +1748,7 @@ int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
         fread(&met->type,sw,1,inm); //nb sol
         if(iswp) met->type=_MMG5_swapbin(met->type);
         if(met->type!=1) {
-          fprintf(stderr,"SEVERAL SOLUTION => IGNORED : %d\n",met->type);
+          fprintf(stderr,"SEVERAL SOLUTION => IGNORED: %d\n",met->type);
           return(-1);
         }
         fread(&met->size,sw,1,inm); //typsol

@@ -471,7 +471,6 @@ inline double _MMG5_caltet_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
       - mm[1] * ( mm[1]*mm[5] - mm[2]*mm[4]) \
       + mm[2] * ( mm[1]*mm[4] - mm[2]*mm[3]);
   if ( det < _MMG5_EPSD2 )   {
-    //printf("--- INVALID METRIC : DET  %e\n",det);
     return(0.0);
   }
   det = sqrt(det) * vol;
