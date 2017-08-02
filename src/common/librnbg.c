@@ -225,7 +225,10 @@ int _MMG5_scotchCall(MMG5_pMesh mesh, MMG5_pSol met)
       fprintf(stdout,"  -- PHASE RENUMBERING COMPLETED. \n");
     }
 
-    if ( mesh->info.ddebug )  _MMG5_chkmsh(mesh,1,0);
+    if ( mesh->info.ddebug ) {
+      if ( !_MMG5_chkmsh(mesh,1,0) )
+        return 0;
+    }
     /* renumbering end */
   }
   return(1);

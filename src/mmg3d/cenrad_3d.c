@@ -54,7 +54,7 @@ int _MMG5_cenrad_iso(MMG5_pMesh mesh,double *ct,double *c,double *rad) {
   ux = c4[0] - c1[0];
   uy = c4[1] - c1[1];
   uz = c4[2] - c1[2];
-  //if(fabs(sqrt(ux*ux + uy*uy + uz*uz))<1e-12) printf("garg 1 %e\n",fabs(sqrt(ux*ux + uy*uy + uz*uz)));
+
   dd = 1.0 / sqrt(ux*ux + uy*uy + uz*uz);
   n1[0] = ux*dd;
   n1[1] = uy*dd;
@@ -67,7 +67,7 @@ int _MMG5_cenrad_iso(MMG5_pMesh mesh,double *ct,double *c,double *rad) {
   ux = c4[0] - c2[0];
   uy = c4[1] - c2[1];
   uz = c4[2] - c2[2];
-  //if(fabs(sqrt(ux*ux + uy*uy + uz*uz))<1e-12) printf("garg 2 %e\n",fabs(sqrt(ux*ux + uy*uy + uz*uz)));
+
   dd = 1.0 / sqrt(ux*ux + uy*uy + uz*uz);
   n2[0] = ux*dd;
   n2[1] = uy*dd;
@@ -78,7 +78,7 @@ int _MMG5_cenrad_iso(MMG5_pMesh mesh,double *ct,double *c,double *rad) {
   ux = c4[0] - c3[0];
   uy = c4[1] - c3[1];
   uz = c4[2] - c3[2];
-  //if(fabs(sqrt(ux*ux + uy*uy + uz*uz))<1e-12) printf("garg 3 %e\n",fabs(sqrt(ux*ux + uy*uy + uz*uz)));
+
   dd = 1.0 / sqrt(ux*ux + uy*uy + uz*uz);
   n3[0] = ux*dd;
   n3[1] = uy*dd;
