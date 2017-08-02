@@ -1192,8 +1192,8 @@ _MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           /* reallocation of point table */
 
           _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
-                              printf("  ## Warning: %s: unable to allocate"
-                                     " a new point\n",__func__);
+                              fprintf(stderr,"\n  ## Warning: %s: unable to"
+                                     " allocate a new point\n",__func__);
                               _MMG5_INCREASE_MEM_MESSAGE();
                               memlack=1;
                               goto split
@@ -1511,8 +1511,8 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         if ( !ip ) {
           /* reallocation of point table */
           _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
-                              fprintf(stderr,"\n  ## Error: %s: unable to allocate"
-                                      " a new point.\n",__func__);
+                              fprintf(stderr,"\n  ## Error: %s: unable to"
+                                      " allocate a new point.\n",__func__);
                               _MMG5_INCREASE_MEM_MESSAGE();
                               _MMG3D_delPatternPts(mesh,hash);return -1;
                               ,o,MG_BDY,-1);
@@ -1729,8 +1729,8 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         else {
           if ( it==20 && (mesh->info.ddebug || mesh->info.imprim > 5) ) {
             if ( !mmgWarn2 ) {
-              printf("  ## Warning: %s: surfacic pattern: unable to find a"
-                     " valid split for at least 1 point. Point(s) deletion.",
+              fprintf(stderr,"\n  ## Warning: %s: surfacic pattern: unable to find"
+                      " a valid split for at least 1 point. Point(s) deletion.",
                      __func__ );
               mmgWarn2 = 1;
             }
@@ -1740,7 +1740,8 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
               if ( vx[ia] > 0 ) {
                 if ( !_MMG5_hashUpdate(&hash,pt->v[_MMG5_iare[ia][0]],
                                        pt->v[_MMG5_iare[ia][1]],-1) ) {
-                  printf("  ## Error: %s: unable to delete point idx along edge %d %d.\n",
+                  fprintf(stderr,"\n  ## Error: %s: unable to delete point"
+                          " idx along edge %d %d.\n",
                          __func__,_MMG3D_indPt(mesh,pt->v[_MMG5_iare[ia][0]]),
                          _MMG3D_indPt(mesh,pt->v[_MMG5_iare[ia][1]]));
                   _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));

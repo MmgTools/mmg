@@ -462,12 +462,12 @@ static inline
 void _MMG5_warnOrientation(MMG5_pMesh mesh) {
   if ( mesh->xt ) {
     if ( mesh->xt != mesh->ne ) {
-      fprintf(stdout,"  ## Warning: %d tetra on %d reoriented.\n",
-              mesh->xt,mesh->ne);
-      fprintf(stdout,"  Your mesh may be non-conform.\n");
+      fprintf(stderr,"  ## Warning: %s: %d tetra on %d reoriented.\n",
+              __func__,mesh->xt,mesh->ne);
+      fprintf(stderr,"  Your mesh may be non-conform.\n");
     }
     else {
-      fprintf(stdout,"  ## Warning: all tetra reoriented.\n");
+      fprintf(stderr,"  ## Warning: %s: all tetra reoriented.\n",__func__);
     }
   }
   mesh->xt = 0;
