@@ -148,8 +148,6 @@ int _MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
   int              tref,isused=0,ixt,ielnum[3*_MMG3D_LONMAX+1],ll;
   _MMG5_Hash       hedg;
 
-  //obsolete avec la realloc
-  // if ( mesh->ne + 2*ilist > mesh->nemax )  {printf("on passe ici boum\n");return(0);}
   base = mesh->base;
   /* external faces */
   size = 0;
@@ -197,7 +195,7 @@ int _MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
   /* hash table params */
   if ( size > 3*_MMG3D_LONMAX )  return(0);
   if ( !_MMG5_hashNew(mesh,&hedg,size,3*size) ) { /*3*size suffit */
-    fprintf(stderr,"  ## Unable to complete mesh.\n");
+    fprintf(stderr,"  ## Error: %s: unable to complete mesh.\n",__func__);
     return(-1);
   }
 
@@ -208,8 +206,8 @@ int _MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
 
     if ( !ielnum[k] ) {
       _MMG5_TETRA_REALLOC(mesh,ielnum[k],mesh->gap,
-                          fprintf(stderr,"  ## Error: unable to allocate a new"
-                                  " element but the mesh will be valid.\n");
+                          fprintf(stderr,"  ## Error: %s: unable to allocate a"
+                                  " new element.\n",__func__);
                           for(ll=1 ; ll<k ; ll++) {
                             mesh->tetra[ielnum[ll]].v[0] = 1;
                             if ( !_MMG3D_delElt(mesh,ielnum[ll]) )  return -1;

@@ -204,9 +204,6 @@ _MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,char iedg,int *lists,int ili
 
   naq = piv;
   if ( nap == naq ) {
-    /*printf("%s: %d: On devrait rarement passer ici:",__FILE__,__LINE__);
-      printf(" k=%d (%d in saveMesh), nap=%d (%d in saveMesh)\n",
-      k,_MMG3D_indElt(mesh,k),nap,_MMG3D_indPt(mesh,nap));*/
     return(0);
   }
 
@@ -285,9 +282,6 @@ _MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,char iedg,int *lists,int ili
 
   nbq = piv;
   if ( nbp == nbq ) {
-    /*printf("%s: %d: On devrait rarement passer ici:",__FILE__,__LINE__);
-      printf(" k=%d (%d in saveMesh), nbp=%d (%d in saveMesh)\n",
-      k,_MMG3D_indElt(mesh,k),nbp,_MMG3D_indPt(mesh,nbp));*/
     return(0);
   }
 

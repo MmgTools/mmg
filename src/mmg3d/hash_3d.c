@@ -306,8 +306,8 @@ int MMG3D_hashPrism(MMG5_pMesh mesh) {
   /* default */
   if ( mesh->adjapr ) {
     if ( abs(mesh->info.imprim) > 3 || mesh->info.ddebug ) {
-      fprintf(stdout,"  ## Warning: no re-build of adjacencies of prisms. ");
-      fprintf(stdout,"mesh->adjapr must be freed to enforce analysis.\n");
+      fprintf(stderr,"  ## Warning: %s: no re-build of adjacencies of prisms. "
+              "mesh->adjapr must be freed to enforce analysis.\n",__func__);
     }
     return(1);
   }
@@ -522,6 +522,7 @@ int _MMG5_setEdgeNmTag(MMG5_pMesh mesh, _MMG5_Hash *hash) {
   int                 ipa,ipb,nbdy,start;
   unsigned int        key;
   char                iface,hasadja;
+  static char         mmgWarn0=0,mmgWarn1=0;
 
   nr = 0;
 
@@ -577,8 +578,12 @@ int _MMG5_setEdgeNmTag(MMG5_pMesh mesh, _MMG5_Hash *hash) {
              complete. Now, analyze why the travel ended. */
           if ( adj == start ) {
             if ( !it2 ) {
-              printf("  ## Warning: Wrong boundary tags: Only 1 boundary face found in"
-                     " the shell of the edge\n");
+              if ( !mmgWarn0 ) {
+                mmgWarn0 = 1;
+                fprintf(stderr,"  ## Warning: %s: at lesat 1 wrong boundary tag:"
+                       " Only 1 boundary face found in the shell of the edge\n",
+                       __func__);
+              }
             }
             if ( !nbdy )
               _MMG5_coquilFaceErrorMessage(mesh, it1/4, it2/4);
@@ -600,11 +605,15 @@ int _MMG5_setEdgeNmTag(MMG5_pMesh mesh, _MMG5_Hash *hash) {
 
                 /* overflow */
                 if ( ++ilist > MMG3D_LMAX-2 ) {
-                  fprintf(stdout,"  ## Warning: problem in surface remesh process.");
-                  fprintf(stdout," Coquil of edge %d-%d contains too many elts.\n",
-                          na,nb);
-                  fprintf(stdout,"  ##          Try to modify the hausdorff number,");
-                  fprintf(stdout," or/and the maximum mesh.\n");
+                  if ( !mmgWarn1 ) {
+                    mmgWarn1 = 1;
+                    fprintf(stderr,"  ## Warning: %s: problem in surface remesh"
+                            " process. At least 1 shell of edge (%d-%d) contains"
+                            " too many elts.\n",__func__,_MMG3D_indPt(mesh,na),
+                            _MMG3D_indPt(mesh,nb));
+                    fprintf(stderr,"  ##          Try to modify the hausdorff"
+                            " number, or/and the maximum mesh.\n");
+                  }
                   return(0);
                 }
 
@@ -962,7 +971,7 @@ int _MMG5_hEdge(MMG5_pMesh mesh,MMG5_HGeom *hash,int a,int b,int ref,int16_t tag
     ph->nxt = 0;
     if ( hash->nxt >= hash->max ) {
       if ( mesh->info.ddebug )
-        fprintf(stdout,"  ## Memory alloc problem (edge): %d\n",hash->max);
+        fprintf(stderr,"  ## Memory alloc problem (edge): %d\n",hash->max);
       _MMG5_TAB_RECALLOC(mesh,hash->geom,hash->max,0.2,MMG5_hgeom,
                          "larger htab table",
                          fprintf(stderr,"  Exit program.\n");return 0;,0);
@@ -1023,8 +1032,9 @@ int _MMG5_hGeom(MMG5_pMesh mesh) {
     }
     else {
       if ( abs(mesh->info.imprim) > 3 || mesh->info.ddebug ) {
-        fprintf(stdout,"  ## Warning: no re-hash of edges of mesh. ");
-        fprintf(stdout,"mesh->htab.geom must be freed to enforce analysis.\n");
+        fprintf(stderr,"  ## Warning: %s: no re-hash of edges of mesh. ",
+                __func__);
+        fprintf(stderr,"mesh->htab.geom must be freed to enforce analysis.\n");
       }
       _MMG5_DEL_MEM(mesh,mesh->edge,(mesh->na+1)*sizeof(MMG5_Edge));
       mesh->na   = 0;
@@ -1594,7 +1604,8 @@ int _MMG5_chkBdryTria(MMG5_pMesh mesh) {
     }
     nbl = mesh->nt-nt;
     if ( nbl ) {
-      printf("  ## Warning: %d extra boundaries provided. Ignored\n",nbl);
+      fprintf(stderr,"  ## Warning: %s: %d extra boundaries provided."
+              " Ignored\n",__func__,nbl);
       _MMG5_ADD_MEM(mesh,(-nbl)*sizeof(MMG5_Tria),"triangles",return(0));
       mesh->nt = nt;
       _MMG5_SAFE_REALLOC(mesh->tria,mesh->nt+1,MMG5_Tria,"triangles",0);
@@ -1635,7 +1646,8 @@ int _MMG5_chkBdryTria(MMG5_pMesh mesh) {
     }
   }
   if ( nbl && (mesh->info.imprim > 5 || mesh->info.ddebug) )
-    printf("  ## Warning: %d extra boundaries founded\n",nbl);
+    fprintf(stderr,"  ## Warning: %s: %d extra boundaries founded\n",
+            __func__,nbl);
 
   return(_MMG5_bdryTria(mesh,ntmesh));
 }
@@ -1663,13 +1675,13 @@ int _MMG5_bdrySet(MMG5_pMesh mesh) {
 
   if ( mesh->xtetra ) {
     if ( abs(mesh->info.imprim) > 3 || mesh->info.ddebug ) {
-      fprintf(stderr,"  ## Error: mesh->xtetra must be freed.\n");
+      fprintf(stderr,"  ## Error: %s: mesh->xtetra must be freed.\n",__func__);
     }
     return(0);
   }
   if ( mesh->xprism ) {
     if ( abs(mesh->info.imprim) > 3 || mesh->info.ddebug ) {
-      fprintf(stderr,"  ## Error: mesh->xprism must be freed.\n");
+      fprintf(stderr,"  ## Error: %s: mesh->xprism must be freed.\n",__func__);
     }
     return(0);
   }
