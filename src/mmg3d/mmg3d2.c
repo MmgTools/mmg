@@ -89,10 +89,11 @@ _MMG5_invsl(double A[3][3],double b[3],double r[3]) {
 
 static int
 _MMG5_ismaniball(MMG5_pMesh mesh,MMG5_pSol sol,int k,int indp) {
-  MMG5_pTetra   pt,pt1;
-  double   v,v0,v1,v2;
-  int      *adja,list[MMG3D_LMAX+1],bdy[MMG3D_LMAX+1],ibdy,np,ilist,base,cur,iel,jel,res,l;
-  char     i,i0,i1,i2,j0,j1,j2,j,ip,nzeros,nopp,nsame;
+  MMG5_pTetra  pt,pt1;
+  double       v,v0,v1,v2;
+  int         *adja,list[MMG3D_LMAX+1],bdy[MMG3D_LMAX+1],ibdy,np,ilist,base,cur,iel,jel,res,l;
+  char         i,i0,i1,i2,j0,j1,j2,j,ip,nzeros,nopp,nsame;
+  static char  mmgWarn0 = 0;
 
   pt = &mesh->tetra[k];
   np = pt->v[indp];
@@ -108,7 +109,11 @@ _MMG5_ismaniball(MMG5_pMesh mesh,MMG5_pSol sol,int k,int indp) {
     if ( sol->m[pt->v[ip]]-mesh->info.ls != 0.0 )  break;
   }
   if ( j == 3) {
-    fprintf(stdout,"  *** Problem in function _MMG5_ismaniball : tetra %d : 4 null values",k);
+    if ( !mmgWarn0 ) {
+      mmgWarn0 = 1;
+      fprintf(stderr,"\n  ## Warning: %s:  at least 1 tetra with 4 null"
+              " values.\n",__func__);
+    }
     return 0;
   }
 
@@ -332,7 +337,8 @@ static int _MMG3D_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol,double *tmp) {
 
   /* create tetra adjacency */
   if ( !MMG3D_hashTetra(mesh,1) ) {
-    fprintf(stderr,"\n  ## Hashing problem (1). Exit program.\n");
+    fprintf(stderr,"\n  ## Error: %s: hashing problem (1). Exit program.\n",
+      __func__);
     return(0);
   }
 
@@ -346,8 +352,12 @@ static int _MMG3D_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol,double *tmp) {
     p0 = &mesh->point[k];
     if ( !MG_VOK(p0) ) continue;
     if ( fabs(sol->m[k]-mesh->info.ls) < _MMG5_EPS ) {
-      if ( mesh->info.ddebug )  fprintf(stdout,"  Snapping value %d ; previous value : %E\n",k,fabs(sol->m[k]));
-      tmp[k] = ( fabs(sol->m[k]-mesh->info.ls) < _MMG5_EPSD ) ? (mesh->info.ls-100.0*_MMG5_EPS) : sol->m[k];
+      if ( mesh->info.ddebug )
+        fprintf(stderr,"  ## Warning: %s: snapping value %d; "
+                "previous value: %E.\n",__func__,k,fabs(sol->m[k]));
+
+      tmp[k] = ( fabs(sol->m[k]-mesh->info.ls) < _MMG5_EPSD ) ?
+        (mesh->info.ls-100.0*_MMG5_EPS) : sol->m[k];
       p0->flag = 1;
       sol->m[k] = mesh->info.ls;
       ns++;
@@ -533,7 +543,8 @@ static int _MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol/*,double *tmp*/){
       np = _MMG3D_newPt(mesh,c,0);
       if ( !np ) {
         _MMG5_POINT_REALLOC(mesh,sol,np,0.2,
-                            fprintf(stderr,"\n  ## Error: unable to allocate a new point\n");
+                            fprintf(stderr,"\n  ## Error: %s: unable to"
+                                    " allocate a new point\n",__func__);
                             _MMG5_INCREASE_MEM_MESSAGE();
                             return(0)
                             ,c,0,0);
@@ -747,10 +758,11 @@ int _MMG5_chkmaniball(MMG5_pMesh mesh, int start, char ip){
 
 /** Check whether implicit surface enclosed in volume is orientable */
 int _MMG5_chkmani(MMG5_pMesh mesh){
-  MMG5_pTetra    pt,pt1;
-  int       k,iel,ref;
-  int       *adja;
-  char      i,j,ip,cnt;
+  MMG5_pTetra  pt,pt1;
+  int          k,iel,ref;
+  int         *adja;
+  char         i,j,ip,cnt;
+  static char  mmgWarn0 = 0;
 
   for(k=1; k<=mesh->np; k++){
     mesh->point[k].flag = 0;
@@ -774,7 +786,11 @@ int _MMG5_chkmani(MMG5_pMesh mesh){
       }
     }
     if ( cnt == 4 ) {
-      fprintf(stdout,"Tetra %d : 4 boundary faces \n",k);
+      if ( !mmgWarn0 ) {
+        mmgWarn0 = 1;
+        fprintf(stderr,"\n  ## Warning: %s: at least 1 tetra with 4 boundary"
+                " faces.\n",__func__);
+      }
       //return(0);
     }
   }
@@ -835,7 +851,8 @@ int _MMG5_chkmani2(MMG5_pMesh mesh,MMG5_pSol sol) {
       if( sol->m[pt->v[j]]-mesh->info.ls == 0.0 ) cnt++;
     }
     if(cnt == 4) {
-      fprintf(stderr,"Problem in tetra %d : 4 vertices on implicit boundary",k);
+      fprintf(stderr,"\n  ## Error: %s: tetra %d: 4 vertices on implicit boundary.\n",
+              __func__,k);
       return 0;
     }
   }
@@ -856,7 +873,8 @@ int _MMG5_chkmani2(MMG5_pMesh mesh,MMG5_pSol sol) {
         ip = _MMG5_idir[i][j];
 
         if(!_MMG5_chkmaniball(mesh,k,ip)){
-          fprintf(stderr,"Non orientable implicit surface : ball of point %d\n",pt->v[ip]);
+          fprintf(stderr,"\n  ## Error: %s: non orientable implicit surface:"
+                  " ball of point %d.\n",__func__,pt->v[ip]);
           return 0;
         }
       }
@@ -1345,8 +1363,8 @@ int _MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int n
 
         /* Only tets of the shell of (np,nq) can be added, unless future ball is non manifold */
         if ( indq == -1 ) {
-          fprintf(stdout,"  ## Warning: we should rarely passed here. ");
-          fprintf(stdout,"tetra %d =  %d %d %d %d, ref = %d\n",
+          fprintf(stderr,"\n  ## Warning: %s: we should rarely passed here. "
+                  "tetra %d =  %d %d %d %d, ref = %d.",__func__,
                   jel,pt1->v[0],pt1->v[1],pt1->v[2],pt1->v[3],pt1->ref);
           return(0);
         }
@@ -1386,8 +1404,8 @@ int _MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int n
 
         /* Only tets of the shell of (np,nq) can be added, unless future ball is non manifold */
         if ( indp == -1 ) {
-          fprintf(stdout,"  ## Warning: we should rarely passed here. ");
-          fprintf(stdout,"tetra %d =  %d %d %d %d, ref = %d\n",
+          fprintf(stderr,"\n  ## Warning: %s: we should rarely passed here. "
+                  "tetra %d =  %d %d %d %d, ref = %d\n",__func__,
                   jel,pt1->v[0],pt1->v[1],pt1->v[2],pt1->v[3],pt1->ref);
           return(0);
         }
@@ -1418,8 +1436,8 @@ int _MMG3D_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol) {
     fprintf(stdout,"  ** ISOSURFACE EXTRACTION\n");
 
   if ( mesh->nprism || mesh->nquad ) {
-    fprintf(stderr,"\n  ## Error: Isosurface extraction not available with hybrid"
-            " meshes. Exit program.\n");
+    fprintf(stderr,"\n  ## Error: Isosurface extraction not available with"
+            " hybrid meshes. Exit program.\n");
     return(0);
   }
 
