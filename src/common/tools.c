@@ -437,7 +437,7 @@ long long _MMG5_memSize (void) {
   if (mem == status.ullTotalPhys) return(mem);
   else return(LLONG_MAX);
 #else
-  fprintf(stderr,"  ## Warning: %s: unknown system, recover of maximal memory"
+  fprintf(stderr,"\n  ## Warning: %s: unknown system, recover of maximal memory"
           " not available.\n",__func__);
   return(0);
 #endif

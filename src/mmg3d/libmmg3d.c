@@ -453,7 +453,7 @@ int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
 
   /* create prism adjacency */
   if ( !MMG3D_hashPrism(mesh) ) {
-    fprintf(stderr,"  ## Prism hashing problem. Exit program.\n");
+    fprintf(stderr,"\n  ## Prism hashing problem. Exit program.\n");
     return(0);
   }
 
@@ -492,7 +492,7 @@ int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
 
   /* to could save the mesh, the adjacency have to be correct */
   if ( mesh->info.ddebug && (!_MMG5_chkmsh(mesh,1,1) ) ) {
-    fprintf(stderr,"  ##  Problem. Invalid mesh.\n");
+    fprintf(stderr,"\n  ##  Problem. Invalid mesh.\n");
     return(0);
   }
 
@@ -656,7 +656,7 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
 #ifdef PATTERN
   if ( !_MMG5_mmg3d1_pattern(mesh,met) ) {
     if ( !(mesh->adja) && !MMG3D_hashTetra(mesh,1) ) {
-      fprintf(stderr,"  ## Hashing problem. Invalid mesh.\n");
+      fprintf(stderr,"\n  ## Hashing problem. Invalid mesh.\n");
       _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
     }
     if ( !_MMG5_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
@@ -665,7 +665,7 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
 #else
   if ( !_MMG5_mmg3d1_delone(mesh,met) ) {
     if ( (!mesh->adja) && !MMG3D_hashTetra(mesh,1) ) {
-      fprintf(stderr,"  ## Hashing problem. Invalid mesh.\n");
+      fprintf(stderr,"\n  ## Hashing problem. Invalid mesh.\n");
       _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
     }
     if ( !_MMG5_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);

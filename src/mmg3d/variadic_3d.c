@@ -60,7 +60,7 @@ int _MMG3D_Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol, MMG5_pSol *disp
 
   /* sol allocation */
   if ( !sol ) {
-    fprintf(stderr,"  ## Error: an allocatable solution structure of type \"MMG5_pSol\""
+    fprintf(stderr,"\n  ## Error: an allocatable solution structure of type \"MMG5_pSol\""
            " is needed.\n");
     fprintf(stderr,"            Exit program.\n");
     return 0;
@@ -169,7 +169,7 @@ int _MMG3D_Init_mesh_var( va_list argptr ) {
       disp = va_arg(argptr,MMG5_pSol*);
       break;
     default:
-      fprintf(stderr,"  ## Error: MMG3D_Init_mesh:\n"
+      fprintf(stderr,"\n  ## Error: MMG3D_Init_mesh:\n"
               " unexpected argument type: %d\n",typArg);
       fprintf(stderr," Argument type must be one"
               " of the MMG5_ARG* preprocessor variable:"
@@ -180,14 +180,14 @@ int _MMG3D_Init_mesh_var( va_list argptr ) {
   }
 
   if ( meshCount !=1 ) {
-    fprintf(stderr,"  ## Error: MMG3D_Init_mesh:\n"
+    fprintf(stderr,"\n  ## Error: MMG3D_Init_mesh:\n"
             " you need to initialize the mesh structure that"
             " will contain your mesh.\n");
     return 0;
   }
 
   if ( !sol ) {
-    fprintf(stderr,"  ## Error: MMG3D_Init_mesh:\n"
+    fprintf(stderr,"\n  ## Error: MMG3D_Init_mesh:\n"
             " you need to initialize a solution structure"
             " (of type MMG5_pSol and indentified by the MMG5_ARG_ppMet or"
             " MMG5_ARG_ppLs preprocessor variable) that will contain the output"
@@ -263,7 +263,7 @@ int _MMG3D_Free_all_var(va_list argptr)
       disp = va_arg(argptr,MMG5_pSol*);
       break;
     default:
-      fprintf(stderr,"  ## Error: MMG3D_Free_all:\n"
+      fprintf(stderr,"\n  ## Error: MMG3D_Free_all:\n"
               " unexpected argument type: %d\n",typArg);
       fprintf(stderr," Argument type must be one of the following preprocessor"
               " variable:"
@@ -274,14 +274,14 @@ int _MMG3D_Free_all_var(va_list argptr)
   }
 
   if ( meshCount !=1 ) {
-    fprintf(stderr,"  ## Error: MMG3D_Free_all:\n"
+    fprintf(stderr,"\n  ## Error: MMG3D_Free_all:\n"
             " you need to provide your mesh structure"
             " to allow to free the associated memory.\n");
     return 0;
   }
 
   if ( !sol ) {
-    fprintf(stderr,"  ## Error: MMG3D_Free_all:\n"
+    fprintf(stderr,"\n  ## Error: MMG3D_Free_all:\n"
             " you need to provide your metric structure"
             " (of type MMG5_pSol and indentified by the MMG5_ARG_ppMet or"
             " MMG5_ARG_ppLs preprocessor variable)"
@@ -369,7 +369,7 @@ int _MMG3D_Free_structures_var(va_list argptr)
       disp = va_arg(argptr,MMG5_pSol*);
       break;
     default:
-      fprintf(stderr,"  ## Error: MMG3D_Free_structures:\n"
+      fprintf(stderr,"\n  ## Error: MMG3D_Free_structures:\n"
               " unexpected argument type: %d\n",typArg);
       fprintf(stderr," Argument type must be one of the following preprocessor"
               " variable:"
@@ -380,7 +380,7 @@ int _MMG3D_Free_structures_var(va_list argptr)
   }
 
   if ( meshCount !=1 ) {
-    fprintf(stderr,"  ## Error: MMG3D_Free_structures:\n"
+    fprintf(stderr,"\n  ## Error: MMG3D_Free_structures:\n"
             " you need to provide your mesh structure"
             " to allow to free the associated memory.\n");
     return 0;
@@ -502,7 +502,7 @@ int _MMG3D_Free_names_var(va_list argptr)
       disp = va_arg(argptr,MMG5_pSol*);
       break;
     default:
-      fprintf(stderr,"  ## Error: MMG3D_Free_names:\n"
+      fprintf(stderr,"\n  ## Error: MMG3D_Free_names:\n"
               " unexpected argument type: %d\n",typArg);
       fprintf(stderr," Argument type must be one of the following preprocessor"
               " variable:"
@@ -513,13 +513,13 @@ int _MMG3D_Free_names_var(va_list argptr)
   }
 
   if ( meshCount !=1 ) {
-    fprintf(stderr,"  ## Error: MMG3D_Free_names:\n"
+    fprintf(stderr,"\n  ## Error: MMG3D_Free_names:\n"
             " you need to provide your mesh structure"
             " to allow to free the associated memory.\n");
     return 0;
   }
   if ( !sol ) {
-    fprintf(stderr,"  ## Error: MMG3D_Free_names:\n"
+    fprintf(stderr,"\n  ## Error: MMG3D_Free_names:\n"
             " you need to provide your metric structure"
             " (of type MMG5_pSol and indentified by the MMG5_ARG_ppMet or"
             " MMG5_ARG_ppLs preprocessor variable)"

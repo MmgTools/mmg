@@ -200,7 +200,7 @@ int _MMG5_scotchCall(MMG5_pMesh mesh, MMG5_pSol met)
 
     if ( (SCOTCH_5 && SCOTCH_6 ) || ( (!SCOTCH_5) && (!SCOTCH_6) ) ) {
       if ( !mmgWarn ) {
-        fprintf(stderr,"  ## Warning: %s: fail to determine scotch version."
+        fprintf(stderr,"\n  ## Warning: %s: fail to determine scotch version."
                 " No renumbering.\n",__func__);
         mmgWarn = 1;
       }
@@ -213,7 +213,7 @@ int _MMG5_scotchCall(MMG5_pMesh mesh, MMG5_pSol met)
 
     if ( !_MMG5_renumbering(_MMG5_BOXSIZE,mesh, met) ) {
       if ( !mmgError ) {
-        fprintf(stderr,"  ## Error: %s: Unable to renumbering mesh. "
+        fprintf(stderr,"\n  ## Error: %s: Unable to renumbering mesh. "
                 "Try to run without renumbering option (-rn 0).\n",
                 __func__);
         mmgError = 1;

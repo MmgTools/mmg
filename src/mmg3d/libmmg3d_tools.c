@@ -585,12 +585,12 @@ int MMG3D_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,double critmin, double lmin,
 
   /* Check options */
   if ( mesh->info.lag > -1 ) {
-    fprintf(stderr,"  ## Error: lagrangian mode unavailable (MMG3D_IPARAM_lag):\n"
+    fprintf(stderr,"\n  ## Error: lagrangian mode unavailable (MMG3D_IPARAM_lag):\n"
             "            You must call the MMG3D_mmg3dmov function to move a rigidbody.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
   else if ( mesh->info.iso ) {
-    fprintf(stderr,"  ## Error: level-set discretisation unavailable"
+    fprintf(stderr,"\n  ## Error: level-set discretisation unavailable"
             " (MMG3D_IPARAM_iso):\n"
             "          You must call the MMG3D_mmg3dmov function to use this option.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
@@ -613,7 +613,7 @@ int MMG3D_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,double critmin, double lmin,
     met->np = 0;
   }
   else if ( met->size!=1 && met->size!=6 ) {
-    fprintf(stderr,"  ## ERROR: WRONG DATA TYPE.\n");
+    fprintf(stderr,"\n  ## ERROR: WRONG DATA TYPE.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
 

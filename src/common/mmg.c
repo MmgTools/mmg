@@ -135,7 +135,7 @@ int _MMG5_countLocalParamAtTri( MMG5_pMesh mesh,_MMG5_iNode **bdryRefs) {
   /* Try to alloc the first node */
   ier = _MMG5_Add_inode( mesh, bdryRefs, k );
   if ( ier < 0 ) {
-    fprintf(stderr,"  ## Error: %s: unable to allocate the first boundary"
+    fprintf(stderr,"\n  ## Error: %s: unable to allocate the first boundary"
            " reference node.\n",__func__);
     return(0);
   }

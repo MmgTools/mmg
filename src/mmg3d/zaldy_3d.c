@@ -120,7 +120,7 @@ int _MMG3D_delElt(MMG5_pMesh mesh,int iel) {
 
   pt = &mesh->tetra[iel];
   if ( !MG_EOK(pt) ) {
-    fprintf(stderr,"  ## INVALID ELEMENT %d.\n",iel);
+    fprintf(stderr,"\n  ## INVALID ELEMENT %d.\n",iel);
     return(0);
   }
   memset(pt,0,sizeof(MMG5_Tetra));
@@ -200,7 +200,7 @@ int _MMG3D_memOption(MMG5_pMesh mesh) {
       memtmp = MG_MAX(memtmp, ((long long)mesh->nt*bytes/ctri + reservedMem)/million );
       memtmp = MG_MAX(memtmp, ((long long)mesh->ne*bytes/6 + reservedMem)/million );
       mesh->memMax = memtmp*million+1;
-      fprintf(stderr,"  ## Error: %s: asking for %d Mo of memory ",__func__,mesh->info.mem);
+      fprintf(stderr,"\n  ## Error: %s: asking for %d Mo of memory ",__func__,mesh->info.mem);
       castedVal =  _MMG5_SAFELL2LCAST(mesh->memMax);
       fprintf(stderr,"is not enough to load mesh. You need to ask %ld Mo minimum\n",
               castedVal);
@@ -208,7 +208,7 @@ int _MMG3D_memOption(MMG5_pMesh mesh) {
     }
     if(mesh->info.mem*million < reservedMem) {
       mesh->memMax = reservedMem + 1;
-      fprintf(stderr,"  ## Error: %s: asking for %d Mo of memory ",__func__,mesh->info.mem);
+      fprintf(stderr,"\n  ## Error: %s: asking for %d Mo of memory ",__func__,mesh->info.mem);
       castedVal = _MMG5_SAFELL2LCAST(mesh->memMax);
       fprintf(stderr,"is not enough to load mesh. You need to ask %ld o minimum\n",
               castedVal);

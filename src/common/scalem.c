@@ -67,7 +67,7 @@ int _MMG5_boundingBox(MMG5_pMesh mesh) {
     if ( dd > mesh->info.delta )  mesh->info.delta = dd;
   }
   if ( mesh->info.delta < _MMG5_EPSD ) {
-    fprintf(stderr,"  ## Error: %s: unable to scale mesh:"
+    fprintf(stderr,"\n  ## Error: %s: unable to scale mesh:"
             " Check that your mesh contains non-zero points and "
             "valid elements.\n",__func__);
     return(0);
@@ -145,7 +145,7 @@ int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
     /* Set default values to hmin/hmax from the bounding box if not provided by
      * the user */
     if ( !MMG5_Set_defaultTruncatureSizes(mesh,sethmin,sethmax) ) {
-      fprintf(stderr,"  ## Error: %s: Exit program.\n",__func__);
+      fprintf(stderr,"\n  ## Error: %s: Exit program.\n",__func__);
       return 0;
     }
     sethmin = 1;
@@ -160,7 +160,7 @@ int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
         met->m[k] *= dd;
         /* Check the metric */
         if ( (!mesh->info.iso) && met->m[k] <= 0) {
-          fprintf(stderr,"  ## Error: %s: at least 1 wrong metric"
+          fprintf(stderr,"\n  ## Error: %s: at least 1 wrong metric"
                   " (point %d).\n",__func__,k);
           return(0);
         }
@@ -210,13 +210,13 @@ int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
 
         /* Check the input metric */
         if ( !_MMG5_eigenv(1,m,lambda,v) ) {
-          fprintf(stderr,"  ## Error: %s: unable to diagonalize at least"
+          fprintf(stderr,"\n  ## Error: %s: unable to diagonalize at least"
                   " 1 metric (point %d).\n",__func__,k);
           return(0);
         }
         for (i=0; i<3; i++) {
           if(lambda[i]<=0) {
-            fprintf(stderr,"  ## Error: %s: at least 1 wrong metric "
+            fprintf(stderr,"\n  ## Error: %s: at least 1 wrong metric "
                     "(point %d -> eigenvalues : %e %e %e).\n"
                     "            metric tensor: %e %e %e %e %e %e.\n",
                     __func__,k,lambda[0],lambda[1],lambda[2],

@@ -53,7 +53,7 @@
 /*   /\* Compute imn = M^{-1}N *\/ */
 /*   det = m[0]*m[2] - m[1]*m[1]; */
 /*   if ( fabs(det) < _MMG5_EPS*_MMG5_EPS ) { */
-/*     fprintf(stderr,"  ## Error: %s: null metric det : %E \n",__func__,det); */
+/*     fprintf(stderr,"\n  ## Error: %s: null metric det : %E \n",__func__,det); */
 /*     return(0); */
 /*   } */
 /*   det = 1.0 / det; */
@@ -68,7 +68,7 @@
 
 /*   lambda[0] = 0.5 * (trimn - sqDelta); */
   /* if ( lambda[0] < 0.0 ) { */
-  /*   fprintf(stderr,"  ## Error: %s: Les valeurs propres : %f \n", */
+  /*   fprintf(stderr,"\n  ## Error: %s: Les valeurs propres : %f \n", */
   /*            __func__,lambda[0]); */
   /*   return(0); */
   /* } */
@@ -186,7 +186,7 @@ int _MMG5_mmgIntmet33_ani(double *m,double *n,double *mr,double s) {
   order = _MMG5_eigenv(1,m,lambda,vp);
   if ( !order ) {
     if ( !mmgWarn ) {
-      fprintf(stderr,"  ## Warning: %s: unable to diagonalize at least"
+      fprintf(stderr,"\n  ## Warning: %s: unable to diagonalize at least"
               " 1 metric.\n",__func__);
       mmgWarn = 1;
     }
@@ -232,7 +232,7 @@ int _MMG5_mmgIntmet33_ani(double *m,double *n,double *mr,double s) {
   order = _MMG5_eigenv(1,isnis,lambda,vp);
   if ( !order ) {
     if ( !mmgWarn ) {
-      fprintf(stderr,"  ## Warning: %s: unable to diagonalize at least"
+      fprintf(stderr,"\n  ## Warning: %s: unable to diagonalize at least"
               " 1 metric.\n",__func__);
       mmgWarn = 1;
     }
@@ -769,7 +769,7 @@ int _MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,char i,
   if ( !_MMG5_mmgIntmet33_ani(m1old,m2old,mr,s) ) {
     if ( !warn ) {
       ++warn;
-      fprintf(stderr,"  ## Warning: %s: at least 1 impossible metric"
+      fprintf(stderr,"\n  ## Warning: %s: at least 1 impossible metric"
               " interpolation.\n", __func__);
     }
     return(0);

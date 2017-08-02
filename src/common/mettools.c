@@ -246,7 +246,7 @@ int _MMG5_intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr) {
   det = m[0]*m[2] - m[1]*m[1];
   if ( fabs(det) < _MMG5_EPS*_MMG5_EPS ) {
     if ( !mmgWarn ) {
-      fprintf(stderr,"  ## Warning: %s: null metric det : %E \n",__func__,det);
+      fprintf(stderr,"\n  ## Warning: %s: null metric det : %E \n",__func__,det);
       mmgWarn = 1;
     }
     return(0);
@@ -264,7 +264,7 @@ int _MMG5_intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr) {
   lambda[0] = 0.5 * (trimn - sqDelta);
   if ( lambda[0] < 0.0 ) {
     if ( !mmgWarn1 ) {
-      fprintf(stderr,"  ## Warning: %s: negative eigenvalue (%f).\n",
+      fprintf(stderr,"\n  ## Warning: %s: negative eigenvalue (%f).\n",
               __func__,lambda[0]);
       mmgWarn1 = 1;
     }
@@ -447,7 +447,7 @@ int _MMG5_mmgIntextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6],
     order = _MMG5_eigenv(1,me,lambda,vp);
     if ( !order ) {
       if ( !mmgWarn ) {
-        fprintf(stderr,"  ## Warning: %s: Unable to diagonalize at least"
+        fprintf(stderr,"\n  ## Warning: %s: Unable to diagonalize at least"
                 " 1 metric.\n",__func__);
         mmgWarn = 1;
       }
@@ -554,7 +554,7 @@ int _MMG5_mmgIntextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6],
     /* Intersection of metrics in the tangent plane */
     if ( !_MMG5_intersecmet22(mesh,mtan,metan,mr) ) {
       if ( !mmgWarn1 ) {
-        fprintf(stderr,"  ## Warning: %s: impossible metric inersection:"
+        fprintf(stderr,"\n  ## Warning: %s: impossible metric inersection:"
                 " surfacic metric skipped.\n",__func__);
         mmgWarn1 = 1;
       }
@@ -593,7 +593,7 @@ int _MMG5_mmgIntextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6],
     order = _MMG5_eigenv(1,m,lambda,vp);
     if ( !order ) {
       if ( !mmgWarn ) {
-        fprintf(stderr,"  ## Warning: %s: Unable to diagonalize at least"
+        fprintf(stderr,"\n  ## Warning: %s: Unable to diagonalize at least"
                 " 1 metric.\n",__func__);
         mmgWarn = 1;
       }
@@ -603,7 +603,7 @@ int _MMG5_mmgIntextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6],
     for (i=0; i<3; i++) {
       if( lambda[i]<=0) {
         if ( !mmgWarn2 ) {
-          fprintf(stderr,"  ## Warning: %s: at least 1 wrong metric "
+          fprintf(stderr,"\n  ## Warning: %s: at least 1 wrong metric "
                   "(eigenvalues : %e %e %e): surfacic metric skipped.\n",
                   __func__,lambda[0],lambda[1],lambda[2]);
           mmgWarn2 = 1;

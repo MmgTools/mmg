@@ -166,7 +166,7 @@ int _MMG5_elementWeight(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pTria pt,
     if ( density <= _MMG5_EPSD2 ) {
 #ifndef DNDEBUG
       if ( !mmgErr ) {
-        fprintf(stderr,"  ## Warning: %s: at least 1 negative or null density \n",
+        fprintf(stderr,"\n  ## Warning: %s: at least 1 negative or null density.\n",
                 __func__);
         mmgErr = 1;
       }

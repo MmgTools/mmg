@@ -449,7 +449,7 @@ char _MMG5_chkedg(MMG5_pMesh mesh,MMG5_Tria *pt,char ori, double hmax,
       else {
         if(!((p[i1]->tag & MG_NOM) ||  MG_EDG(p[i1]->tag) ) ) {
           if ( !mmgWarn0 ) {
-            fprintf(stderr,"  ## Warning: %s: a- at least 1 geometrical"
+            fprintf(stderr,"\n  ## Warning: %s: a- at least 1 geometrical"
                     " problem\n",__func__);
             mmgWarn0 = 1;
           }
@@ -471,7 +471,7 @@ char _MMG5_chkedg(MMG5_pMesh mesh,MMG5_Tria *pt,char ori, double hmax,
       else {
         if(!((p[i2]->tag & MG_NOM) || MG_EDG(p[i2]->tag) ) ) {
           if ( !mmgWarn1 ) {
-            fprintf(stderr,"  ## Warning: %s: b- at least 1 geometrical"
+            fprintf(stderr,"\n  ## Warning: %s: b- at least 1 geometrical"
                     " problem\n",__func__);
             mmgWarn1 = 1;
           }
@@ -1050,7 +1050,7 @@ int _MMG3D_delPatternPts(MMG5_pMesh mesh,_MMG5_Hash hash)
         if ( vx[ia] > 0 ) {
           _MMG3D_delPt(mesh,vx[ia]);
           if ( !_MMG5_hashUpdate(&hash,pt->v[i],pt->v[j],-1) ) {
-            fprintf(stderr,"  ## Error: %s: unable to delete point idx"
+            fprintf(stderr,"\n  ## Error: %s: unable to delete point idx"
                     " along edge %d %d.\n", __func__,
                     _MMG3D_indPt(mesh,pt->v[i]),
                     _MMG3D_indPt(mesh,pt->v[j]));
@@ -1235,7 +1235,7 @@ split:
 
    /* Avoid the creation of bad quality elements */
    if ( mesh->info.imprim > 5 || mesh->info.ddebug ) {
-     fprintf(stderr,"  ## Warning: %s: too bad quality for the worst element."
+     fprintf(stderr,"\n  ## Warning: %s: too bad quality for the worst element."
              " Volumic patterns skipped.\n",__func__);
    }
 
@@ -1511,7 +1511,7 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         if ( !ip ) {
           /* reallocation of point table */
           _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
-                              fprintf(stderr,"  ## Error: %s: unable to allocate"
+                              fprintf(stderr,"\n  ## Error: %s: unable to allocate"
                                       " a new point.\n",__func__);
                               _MMG5_INCREASE_MEM_MESSAGE();
                               _MMG3D_delPatternPts(mesh,hash);return -1;
@@ -1532,7 +1532,7 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
 
           if ( !ier ) {
             if ( !mmgWarn ) {
-              fprintf(stderr,"  ## Error: %s: unable to interpolate at least"
+              fprintf(stderr,"\n  ## Error: %s: unable to interpolate at least"
                       " 1 metric.\n",__func__);
               mmgWarn = 1;
             }
@@ -1948,7 +1948,7 @@ int _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,char typchk, int patternMode) {
       ier = _MMG5_anatets(mesh,met,typchk);
 
       if ( ier < 0 ) {
-        fprintf(stderr,"  ## Unable to complete surface mesh. Exit program.\n");
+        fprintf(stderr,"\n  ## Unable to complete surface mesh. Exit program.\n");
         return(0);
       }
       ns += ier;
@@ -1956,14 +1956,14 @@ int _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,char typchk, int patternMode) {
         /* analyze internal tetras */
         ier = _MMG5_anatetv(mesh,met,typchk);
         if ( ier < 0 ) {
-          fprintf(stderr,"  ## Unable to complete volume mesh. Exit program.\n");
+          fprintf(stderr,"\n  ## Unable to complete volume mesh. Exit program.\n");
           return(0);
         }
         ns += ier;
       }
 
       if ( !MMG3D_hashTetra(mesh,1) ) {
-        fprintf(stderr,"  ## Hashing problem. Exit program.\n");
+        fprintf(stderr,"\n  ## Hashing problem. Exit program.\n");
         return(0);
       }
     }
@@ -1975,7 +1975,7 @@ int _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,char typchk, int patternMode) {
     if ( !mesh->info.noinsert ) {
       nc = _MMG5_coltet(mesh,met,typchk);
       if ( nc < 0 ) {
-        fprintf(stderr,"  ## Unable to collapse mesh. Exiting.\n");
+        fprintf(stderr,"\n  ## Unable to collapse mesh. Exiting.\n");
         return(0);
       }
     }
@@ -1985,14 +1985,14 @@ int _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,char typchk, int patternMode) {
     if ( !mesh->info.noswap ) {
       ier = _MMG5_swpmsh(mesh,met,NULL,typchk);
       if ( ier < 0 ) {
-        fprintf(stderr,"  ## Unable to improve mesh. Exiting.\n");
+        fprintf(stderr,"\n  ## Unable to improve mesh. Exiting.\n");
         return(0);
       }
       nf  += ier;
 
       ier = _MMG5_swptet(mesh,met,1.1,0.0288675,NULL,typchk);
       if ( ier < 0 ) {
-        fprintf(stderr,"  ## Unable to improve mesh. Exiting.\n");
+        fprintf(stderr,"\n  ## Unable to improve mesh. Exiting.\n");
         return(0);
       }
       nf += ier;

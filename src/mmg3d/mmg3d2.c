@@ -332,7 +332,7 @@ static int _MMG3D_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol,double *tmp) {
 
   /* create tetra adjacency */
   if ( !MMG3D_hashTetra(mesh,1) ) {
-    fprintf(stderr,"  ## Hashing problem (1). Exit program.\n");
+    fprintf(stderr,"\n  ## Hashing problem (1). Exit program.\n");
     return(0);
   }
 
@@ -533,7 +533,7 @@ static int _MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol/*,double *tmp*/){
       np = _MMG3D_newPt(mesh,c,0);
       if ( !np ) {
         _MMG5_POINT_REALLOC(mesh,sol,np,0.2,
-                            fprintf(stderr,"  ## Error: unable to allocate a new point\n");
+                            fprintf(stderr,"\n  ## Error: unable to allocate a new point\n");
                             _MMG5_INCREASE_MEM_MESSAGE();
                             return(0)
                             ,c,0,0);
@@ -1418,7 +1418,7 @@ int _MMG3D_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol) {
     fprintf(stdout,"  ** ISOSURFACE EXTRACTION\n");
 
   if ( mesh->nprism || mesh->nquad ) {
-    fprintf(stderr,"  ## Error: Isosurface extraction not available with hybrid"
+    fprintf(stderr,"\n  ## Error: Isosurface extraction not available with hybrid"
             " meshes. Exit program.\n");
     return(0);
   }
@@ -1430,40 +1430,40 @@ int _MMG3D_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   /* Snap values of level set function if need be, then discretize it */
   if ( !_MMG3D_snpval_ls(mesh,sol,tmp) ) {
-    fprintf(stderr,"  ## Problem with implicit function. Exit program.\n");
+    fprintf(stderr,"\n  ## Problem with implicit function. Exit program.\n");
     return(0);
   }
   _MMG5_DEL_MEM(mesh,tmp,(mesh->npmax+1)*sizeof(double));
 
   if ( !MMG3D_hashTetra(mesh,1) ) {
-    fprintf(stderr,"  ## Hashing problem. Exit program.\n");
+    fprintf(stderr,"\n  ## Hashing problem. Exit program.\n");
     return(0);
   }
 
   /* compatibility triangle orientation w/r tetras */
   if ( !_MMG5_bdryPerm(mesh) ) {
-    fprintf(stderr,"  ## Boundary orientation problem. Exit program.\n");
+    fprintf(stderr,"\n  ## Boundary orientation problem. Exit program.\n");
     return(0);
   }
 
   if ( !_MMG5_chkBdryTria(mesh) ) {
-    fprintf(stderr,"  ## Boundary problem. Exit program.\n");
+    fprintf(stderr,"\n  ## Boundary problem. Exit program.\n");
     return(0);
   }
 
   /* build hash table for initial edges */
   if ( !_MMG5_hGeom(mesh) ) {
-    fprintf(stderr,"  ## Hashing problem (0). Exit program.\n");
+    fprintf(stderr,"\n  ## Hashing problem (0). Exit program.\n");
     return(0);
   }
 
   if ( !_MMG5_bdrySet(mesh) ) {
-    fprintf(stderr,"  ## Problem in setting boundary. Exit program.\n");
+    fprintf(stderr,"\n  ## Problem in setting boundary. Exit program.\n");
     return(0);
   }
 
   if ( !_MMG3D_cuttet_ls(mesh,sol/*,tmp*/) ) {
-    fprintf(stderr,"  ## Problem in discretizing implicit function. Exit program.\n");
+    fprintf(stderr,"\n  ## Problem in discretizing implicit function. Exit program.\n");
     return(0);
   }
 
@@ -1473,7 +1473,7 @@ int _MMG3D_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol) {
   mesh->nt = 0;
 
   if ( !_MMG3D_setref_ls(mesh,sol) ) {
-    fprintf(stderr,"  ## Problem in setting references. Exit program.\n");
+    fprintf(stderr,"\n  ## Problem in setting references. Exit program.\n");
     return(0);
   }
 

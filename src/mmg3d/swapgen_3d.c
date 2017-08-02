@@ -499,7 +499,7 @@ int MMG3D_swap23(MMG5_pMesh mesh,MMG5_pSol met,int k,char metRidTyp) {
     iel = _MMG3D_newElt(mesh);
     if ( !iel ) {
       _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
-                          fprintf(stderr,"  ## Error: unable to allocate a new element.\n");
+                          fprintf(stderr,"\n  ## Error: unable to allocate a new element.\n");
                           _MMG5_INCREASE_MEM_MESSAGE();
                           fprintf(stderr,"  Exit program.\n");
                           return -1,-1);
