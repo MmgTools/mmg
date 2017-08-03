@@ -797,8 +797,8 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
                                      pt->v[_MMG5_inxt2[i]],0) ) {
                 fprintf(stderr,"\n  ## Error: %s: unable to delete point"
                         " idx along edge %d %d.\n",
-                        __func__,_MMGS_indPt(mesh,pt->v[_MMG5_iare[ia][0]]),
-                        _MMGS_indPt(mesh,pt->v[_MMG5_iare[ia][1]]));
+                        __func__,_MMGS_indPt(mesh,pt->v[_MMG5_iprv2[i]]),
+                        _MMGS_indPt(mesh,pt->v[_MMG5_inxt2[i]]));
                 _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
                 return -1;
               }

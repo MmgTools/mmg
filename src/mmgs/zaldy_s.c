@@ -95,7 +95,7 @@ int _MMGS_delElt(MMG5_pMesh mesh,int iel) {
 
   pt = &mesh->tria[iel];
   if ( !MG_EOK(pt) ) {
-    fprintf(stderr,"  ## INVALID ELEMENT %d.\n",iel);
+    fprintf(stderr,"\n  ## INVALID ELEMENT %d.\n",iel);
     return 0;
   }
   memset(pt,0,sizeof(MMG5_Tria));
@@ -133,9 +133,10 @@ int _MMGS_memOption(MMG5_pMesh mesh) {
   else {
     /* memory asked by user if possible, otherwise total physical memory */
     if ( (long long)mesh->info.mem*million > mesh->memMax && mesh->memMax ) {
-      fprintf(stdout,"  ## Warning: asking for %d Mo of memory ",mesh->info.mem);
+      fprintf(stderr,"\n  ## Warning: %s: asking for %d Mo of memory ",__func__,
+              mesh->info.mem);
       castedVal = _MMG5_SAFELL2LCAST((long long)(mesh->memMax/million));
-      fprintf(stdout,"when only %ld available.\n",castedVal);
+      fprintf(stderr,"when only %ld available.\n",castedVal);
     }
     else {
       mesh->memMax= (long long)(mesh->info.mem)*million;
@@ -158,8 +159,9 @@ int _MMGS_memOption(MMG5_pMesh mesh) {
       memtmp = ((long long)mesh->np * bytes /million + 38);
       memtmp = MG_MAX(memtmp, ((long long)mesh->nt * bytes /(2 *million) + 38));
       mesh->memMax = (long long) memtmp*million+1;
-      fprintf(stdout,"  ## Error: %s: asking for %d Mo of memory ",__func__,mesh->info.mem);
-      fprintf(stdout,"is not enough to load mesh. You need to ask %d Mo minimum\n",
+      fprintf(stderr,"\n  ## Error: %s: asking for %d Mo of memory ",
+              __func__,mesh->info.mem);
+      fprintf(stderr,"is not enough to load mesh. You need to ask %d Mo minimum\n",
               memtmp+1);
       return 0;
     }
