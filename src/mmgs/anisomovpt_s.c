@@ -125,8 +125,8 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
     if ( !_MMG5_elementWeight(mesh,met,pt,p0,&pb,r,gv) ) {
       if ( !warn ) {
         ++warn;
-        fprintf(stderr,"  ## Warning: unable to compute optimal position for at least"
-               " 1 point.\n" );
+        fprintf(stderr,"\n  ## Warning: %s: unable to compute optimal position for at least"
+                " 1 point.\n" );
       }
       return(0);
     }
@@ -264,13 +264,15 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
 int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   MMG5_pTria    pt,pt0;
   MMG5_pPoint   p0,p1,p2,ppt0;
-  MMG5_pxPoint    go;
-  _MMG5_Bezier   b;
-  double  *m0,*m00,step,l1old,l2old,ll1old,ll2old,uv[2],o[3],nn1[3],nn2[3],to[3],mo[6];
-  double   lam0,lam1,lam2,*no1,*no2,*np1,*np2;
-  double   psn11,psn12,ps2,l1new,l2new,dd1,dd2,ddt,calold,calnew;
-  int      it1,it2,ip0,ip1,ip2,k,iel,ier;
-  char     voy1,voy2,isrid,isrid1,isrid2,i0,i1,i2;
+  MMG5_pxPoint  go;
+  _MMG5_Bezier  b;
+  double       *m0,*m00,step,l1old,l2old,ll1old,ll2old,uv[2],o[3],nn1[3],nn2[3],to[3],mo[6];
+  double        lam0,lam1,lam2,*no1,*no2,*np1,*np2;
+  double        psn11,psn12,ps2,l1new,l2new,dd1,dd2,ddt,calold,calnew;
+  int           it1,it2,ip0,ip1,ip2,k,iel,ier;
+  char          voy1,voy2,isrid,isrid1,isrid2,i0,i1,i2;
+  static char   mmgWarn0 = 0;
+
 //#warning this step is different than the one used on iso or for int pts in aniso
   step  = 0.2;
   isrid1 = isrid2 = 0;
@@ -303,7 +305,11 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
         }
       }
       else if ( it1 && it2 && (pt->v[i2] != ip1) && (pt->v[i2] != ip2) ) {
-        fprintf(stderr,"   *** function movridptaniso : 3 ridge edges landing on point %d\n",pt->v[i0]);
+        if ( !mmgWarn0 ) {
+          mmgWarn0 = 1;
+          fprintf(stderr,"\n  ## Warning: %s: at least 1 point at the"
+                  " intersection of 3 ridge edges\n",__func__);
+        }
         return(0);
       }
     }
@@ -324,7 +330,11 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
         }
       }
       else if ( it1 && it2 && (pt->v[i1] != ip1) && (pt->v[i1] != ip2) ) {
-        fprintf(stderr,"   *** function movridptaniso : 3 ridge edges landing on point %d\n",pt->v[i0]);
+        if ( !mmgWarn0 ) {
+          mmgWarn0 = 1;
+          fprintf(stderr,"\n  ## Warning: %s: at least 1 point at the"
+                  " intersection of 3 ridge edges\n",__func__);
+        }
         return(0);
       }
     }

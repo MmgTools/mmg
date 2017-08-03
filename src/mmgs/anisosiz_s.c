@@ -191,6 +191,7 @@ static int _MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   double         r[3][3],lispoi[3*_MMGS_LMAX+1],ux,uy,uz,det,bcu[3];
   double         detg,detd;
   unsigned char  i,i0,i1,i2;
+  static char    mmgWarn0=0;
 
   pt  = &mesh->tria[it];
   idp = pt->v[ip];
@@ -233,8 +234,11 @@ static int _MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
 
   ier = bouletrid(mesh,it,ip,&ilist1,list1,&ilist2,list2,&iprid[0],&iprid[1]);
   if ( !ier ) {
-    fprintf(stderr,"%s:%d:Error: unable to compute the two balls at the ridge"
-           " point %d.\n",__FILE__,__LINE__, idp);
+    if ( !mmgWarn0 ) {
+      mmgWarn0 = 1;
+      fprintf(stderr,"\n  ## Error: %s: unable to compute the two balls at at"
+              " least 1 ridge point.\n",__func__);
+    }
     return(0);
   }
 
@@ -364,6 +368,7 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   double             ux,uy,uz,det2d,intm[3],c[3];
   double             tAA[6],tAb[3],hausd;
   unsigned char      i0,i1,i2;
+  static char        mmgWarn0=0;
 
   ipref[0] = ipref[1] = 0;
   pt  = &mesh->tria[it];
@@ -415,8 +420,12 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
         ipref[1] = pt->v[i2];
       }
       else if ( (pt->v[i2] != ipref[0]) && (pt->v[i2] != ipref[1]) ) {
-        fprintf(stderr,"%s:%d:Error: three adjacent ref at a non singular point\n",
-               __FILE__,__LINE__);
+        if ( !mmgWarn0 ) {
+          mmgWarn0 = 1;
+          fprintf(stderr,"\n  ## Warning: %s: at least 1 metric not computed:"
+                  " non singular point at intersection of 3 ref edges.\n",
+                  __func__);
+        }
         return 0;
       }
     }
@@ -429,8 +438,12 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
         ipref[1] = pt->v[i1];
       }
       else if ( (pt->v[i1] != ipref[0]) && (pt->v[i1] != ipref[1]) ) {
-        fprintf(stderr,"%s:%d:Error: three adjacent ref at a non singular point\n",
-               __FILE__,__LINE__);
+        if ( !mmgWarn0 ) {
+          mmgWarn0 = 1;
+          fprintf(stderr,"\n  ## Warning: %s: at least 1 metric not computed:"
+                  " non singular point at intersection of 3 ref edges.\n",
+                  __func__);
+        }
         return 0;
       }
     }
@@ -453,13 +466,11 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   for (k=0; k<ilist-1; k++) {
     det2d = lispoi[3*k+1]*lispoi[3*(k+1)+2] - lispoi[3*k+2]*lispoi[3*(k+1)+1];
     if ( det2d < 0.0 ) {
-      //fprintf(stderr,"PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
       return(0);
     }
   }
   det2d = lispoi[3*(ilist-1)+1]*lispoi[3*0+2] - lispoi[3*(ilist-1)+2]*lispoi[3*0+1];
   if ( det2d < 0.0 ) {
-    //fprintf(stderr,"PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
     return(0);
   }
   assert(ipref[0] && ipref[1]);
@@ -601,13 +612,11 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   for (k=0; k<ilist-1; k++) {
     det2d = lispoi[3*k+1]*lispoi[3*(k+1)+2] - lispoi[3*k+2]*lispoi[3*(k+1)+1];
     if ( det2d <= 0.0 ) {
-      //fprintf(stderr,"PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
       return(0);
     }
   }
   det2d = lispoi[3*(ilist-1)+1]*lispoi[3*0+2] - lispoi[3*(ilist-1)+2]*lispoi[3*0+1];
   if ( det2d <= 0.0 ) {
-    //fprintf(stderr,"PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
     return(0);
   }
 
@@ -718,13 +727,17 @@ int _MMGS_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   double        mm[6];
   int           k;
   char          i,ismet;
+  static char   mmgErr=0;
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
     fprintf(stdout,"  ** Defining anisotropic map\n");
 
   if ( mesh->info.hmax < 0.0 ) {
     //  mesh->info.hmax = 0.5 * mesh->info.delta;
-    fprintf(stdout,"%s:%d:Error: negative hmax value.\n",__FILE__,__LINE__);
+    if ( !mmgErr ) {
+      fprintf(stderr,"\n  ## Error: %s: negative hmax value.\n",__func__);
+      mmgErr = 1;
+    }
     return(0);
   }
 
@@ -773,8 +786,12 @@ int _MMGS_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
       }
       if ( ismet ) {
         if ( !_MMGS_intextmet(mesh,met,pt->v[i],mm) ) {
-          fprintf(stdout,"%s:%d:Error: unable to intersect metrics"
-                  " at point %d.\n",__FILE__,__LINE__, pt->v[i]);
+          if ( !mmgErr ) {
+            fprintf(stderr,"\n  ## Error: %s: unable to intersect metrics"
+                    " at point %d.\n",__func__,
+                    _MMGS_indPt(mesh,pt->v[i]));
+            mmgErr = 1;
+          }
           return(0);
         }
       }
@@ -859,6 +876,8 @@ int gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   }
   while( ++it < maxit && nu > 0 );
 
-  if ( abs(mesh->info.imprim) > 4 )  fprintf(stdout,"     gradation: %7d updated, %d iter.\n",nup,it);
+  if ( abs(mesh->info.imprim) > 4 )
+    fprintf(stdout,"     gradation: %7d updated, %d iter.\n",nup,it);
+
   return(1);
 }
