@@ -112,10 +112,10 @@ void MMG3D_Init_parameters(MMG5_pMesh mesh) {
 int MMG3D_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int typSol) {
 
   if ( ( (mesh->info.imprim > 5) || mesh->info.ddebug ) && sol->m )
-    fprintf(stdout,"  ## Warning: %s: old solution deletion.\n",__func__);
+    fprintf(stderr,"\n  ## Warning: %s: old solution deletion.\n",__func__);
 
   if ( typEntity != MMG5_Vertex ) {
-    fprintf(stderr,"\n  ## Error: %s: mmg3d need a solution imposed on vertices\n",
+    fprintf(stderr,"\n  ## Error: %s: mmg3d need a solution imposed on vertices.\n",
             __func__);
     return(0);
   }
@@ -129,7 +129,7 @@ int MMG3D_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int
     sol->size = 6;
   }
   else {
-    fprintf(stderr,"\n  ## Error: %s: type of solution not yet implemented\n",
+    fprintf(stderr,"\n  ## Error: %s: type of solution not yet implemented.\n",
             __func__);
     return(0);
   }
@@ -155,7 +155,7 @@ int MMG3D_Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nprism,
 
   if ( ( (mesh->info.imprim > 5) || mesh->info.ddebug ) &&
        ( mesh->point || mesh->tria || mesh->tetra || mesh->edge) )
-    fprintf(stdout,"  ## Warning: %s: old mesh deletion.\n",__func__);
+    fprintf(stderr,"\n  ## Warning: %s: old mesh deletion.\n",__func__);
 
   if ( !np ) {
     fprintf(stderr,"  ** MISSING DATA:\n");
@@ -163,8 +163,8 @@ int MMG3D_Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nprism,
     return(0);
   }
   if ( !ne && (mesh->info.imprim > 4 || mesh->info.ddebug) ) {
-    fprintf(stdout,"  ** WARNING:\n");
-    fprintf(stdout,"     Your mesh don't contains tetrahedra.\n");
+    fprintf(stderr,"  ** WARNING:\n");
+    fprintf(stderr,"     Your mesh don't contains tetrahedra.\n");
   }
   if ( mesh->point )
     _MMG5_DEL_MEM(mesh,mesh->point,(mesh->npmax+1)*sizeof(MMG5_Point));
@@ -315,7 +315,7 @@ int MMG3D_Set_vertex(MMG5_pMesh mesh, double c0, double c1, double c2, int ref, 
   if ( !mesh->np ) {
     fprintf(stderr,"\n  ## Error: %s: you must set the number of points with the",
             __func__);
-    fprintf(stderr," MMG3D_Set_meshSize function before setting vertices in mesh\n");
+    fprintf(stderr," MMG3D_Set_meshSize function before setting vertices in mesh.\n");
     return(0);
   }
 
@@ -352,12 +352,12 @@ int MMG3D_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2, int* r
   if ( mesh->npi == mesh->np ) {
     mesh->npi = 0;
     if ( mesh->info.ddebug ) {
-      fprintf(stdout,"  ## Warning: %s: reset the internal counter of points.\n",
+      fprintf(stderr,"\n  ## Warning: %s: reset the internal counter of points.\n",
         __func__);
-      fprintf(stdout,"     You must pass here exactly one time (the first time ");
-      fprintf(stdout,"you call the MMG3D_Get_vertex function).\n");
-      fprintf(stdout,"     If not, the number of call of this function");
-      fprintf(stdout," exceed the number of points: %d\n ",mesh->np);
+      fprintf(stderr,"     You must pass here exactly one time (the first time ");
+      fprintf(stderr,"you call the MMG3D_Get_vertex function).\n");
+      fprintf(stderr,"     If not, the number of call of this function");
+      fprintf(stderr," exceed the number of points: %d\n ",mesh->np);
     }
   }
 
@@ -533,12 +533,12 @@ int MMG3D_Get_tetrahedron(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* v3,
   if ( mesh->nei == mesh->ne ) {
     mesh->nei = 0;
     if ( mesh->info.ddebug ) {
-      fprintf(stdout,"  ## Warning: %s: reset the internal counter of"
+      fprintf(stderr,"\n  ## Warning: %s: reset the internal counter of"
               " tetrahedra.\n",__func__);
-      fprintf(stdout,"     You must pass here exactly one time (the first time ");
-      fprintf(stdout,"you call the MMG3D_Get_tetrahedron function).\n");
-      fprintf(stdout,"     If not, the number of call of this function");
-      fprintf(stdout," exceed the number of tetrahedron: %d\n ",mesh->ne);
+      fprintf(stderr,"     You must pass here exactly one time (the first time ");
+      fprintf(stderr,"you call the MMG3D_Get_tetrahedron function).\n");
+      fprintf(stderr,"     If not, the number of call of this function");
+      fprintf(stderr," exceed the number of tetrahedron: %d\n ",mesh->ne);
     }
   }
 
@@ -697,12 +697,12 @@ int MMG3D_Get_prism(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* v3,
   if ( npri == mesh->nprism ) {
     npri = 0;
     if ( mesh->info.ddebug ) {
-      fprintf(stdout,"  ## Warning: %s: reset the internal counter of prisms.\n",
+      fprintf(stderr,"\n  ## Warning: %s: reset the internal counter of prisms.\n",
               __func__);
-      fprintf(stdout,"     You must pass here exactly one time (the first time ");
-      fprintf(stdout,"you call the MMG3D_Get_prism function).\n");
-      fprintf(stdout,"     If not, the number of call of this function");
-      fprintf(stdout," exceed the number of prisms: %d\n ",mesh->nprism);
+      fprintf(stderr,"     You must pass here exactly one time (the first time ");
+      fprintf(stderr,"you call the MMG3D_Get_prism function).\n");
+      fprintf(stderr,"     If not, the number of call of this function");
+      fprintf(stderr," exceed the number of prisms: %d\n ",mesh->nprism);
     }
   }
 
@@ -836,12 +836,12 @@ int MMG3D_Get_triangle(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* ref
   if ( mesh->nti == mesh->nt ) {
     mesh->nti = 0;
     if ( mesh->info.ddebug ) {
-      fprintf(stdout,"  ## Warning: %s: reset the internal counter of"
+      fprintf(stderr,"\n  ## Warning: %s: reset the internal counter of"
               " triangles.\n",__func__);
-      fprintf(stdout,"     You must pass here exactly one time (the first time ");
-      fprintf(stdout,"you call the MMG3D_Get_triangle function).\n");
-      fprintf(stdout,"     If not, the number of call of this function");
-      fprintf(stdout," exceed the number of triangles: %d\n ",mesh->nt);
+      fprintf(stderr,"     You must pass here exactly one time (the first time ");
+      fprintf(stderr,"you call the MMG3D_Get_triangle function).\n");
+      fprintf(stderr,"     If not, the number of call of this function");
+      fprintf(stderr," exceed the number of triangles: %d\n ",mesh->nt);
     }
   }
 
@@ -950,12 +950,12 @@ int MMG3D_Get_quadrilateral(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* v3,
   if ( nqi == mesh->nquad ) {
     nqi = 0;
     if ( mesh->info.ddebug ) {
-      fprintf(stdout,"  ## Warning: %s: reset the internal counter"
+      fprintf(stderr,"\n  ## Warning: %s: reset the internal counter"
               " of quadrilaterals.\n",__func__);
-      fprintf(stdout,"     You must pass here exactly one time (the first time ");
-      fprintf(stdout,"you call the MMG3D_Get_quadrilateral function).\n");
-      fprintf(stdout,"     If not, the number of call of this function");
-      fprintf(stdout," exceed the number of quadrilaterals: %d\n ",mesh->nquad);
+      fprintf(stderr,"     You must pass here exactly one time (the first time ");
+      fprintf(stderr,"you call the MMG3D_Get_quadrilateral function).\n");
+      fprintf(stderr,"     If not, the number of call of this function");
+      fprintf(stderr," exceed the number of quadrilaterals: %d\n ",mesh->nquad);
     }
   }
 
@@ -1069,12 +1069,12 @@ int MMG3D_Get_edge(MMG5_pMesh mesh, int* e0, int* e1, int* ref
   if ( mesh->nai == mesh->na ) {
     mesh->nai = 0;
     if ( mesh->info.ddebug ) {
-      fprintf(stdout,"  ## Warning: %s: reset the internal counter of edges.\n",
+      fprintf(stderr,"\n  ## Warning: %s: reset the internal counter of edges.\n",
         __func__);
-      fprintf(stdout,"     You must pass here exactly one time (the first time ");
-      fprintf(stdout,"you call the MMG3D_Get_edge function).\n");
-      fprintf(stdout,"     If not, the number of call of this function");
-      fprintf(stdout," exceed the number of edges: %d\n ",mesh->na);
+      fprintf(stderr,"     You must pass here exactly one time (the first time ");
+      fprintf(stderr,"you call the MMG3D_Get_edge function).\n");
+      fprintf(stderr,"     If not, the number of call of this function");
+      fprintf(stderr," exceed the number of edges: %d\n ",mesh->na);
     }
   }
 
@@ -1250,12 +1250,12 @@ int MMG3D_Get_scalarSol(MMG5_pSol met, double* s) {
   if ( met->npi == met->np ) {
     met->npi = 0;
     if ( ddebug ) {
-      fprintf(stdout,"  ## Warning: %s: reset the internal counter of points.\n",
+      fprintf(stderr,"\n  ## Warning: %s: reset the internal counter of points.\n",
         __func__);
-      fprintf(stdout,"     You must pass here exactly one time (the first time ");
-      fprintf(stdout,"you call the MMG3D_Get_scalarSol function).\n");
-      fprintf(stdout,"     If not, the number of call of this function");
-      fprintf(stdout," exceed the number of points: %d\n ",met->np);
+      fprintf(stderr,"     You must pass here exactly one time (the first time ");
+      fprintf(stderr,"you call the MMG3D_Get_scalarSol function).\n");
+      fprintf(stderr,"     If not, the number of call of this function");
+      fprintf(stderr," exceed the number of points: %d\n ",met->np);
     }
   }
 
@@ -1343,12 +1343,12 @@ int MMG3D_Get_vectorSol(MMG5_pSol met, double* vx, double* vy, double* vz) {
   if ( met->npi == met->np ) {
     met->npi = 0;
     if ( ddebug ) {
-      fprintf(stdout,"  ## Warning: %s: reset the internal counter of points.\n",
+      fprintf(stderr,"\n  ## Warning: %s: reset the internal counter of points.\n",
               __func__);
-      fprintf(stdout,"     You must pass here exactly one time (the first time ");
-      fprintf(stdout,"you call the MMG3D_Get_vectorSol function).\n");
-      fprintf(stdout,"     If not, the number of call of this function");
-      fprintf(stdout," exceed the number of points: %d\n ",met->np);
+      fprintf(stderr,"     You must pass here exactly one time (the first time ");
+      fprintf(stderr,"you call the MMG3D_Get_vectorSol function).\n");
+      fprintf(stderr,"     If not, the number of call of this function");
+      fprintf(stderr," exceed the number of points: %d\n ",met->np);
     }
   }
 
@@ -1456,12 +1456,12 @@ int MMG3D_Get_tensorSol(MMG5_pSol met, double *m11,double *m12, double *m13,
   if ( met->npi == met->np ) {
     met->npi = 0;
     if ( ddebug ) {
-      fprintf(stdout,"  ## Warning: %s: reset the internal counter of points.\n",
+      fprintf(stderr,"\n  ## Warning: %s: reset the internal counter of points.\n",
         __func__);
-      fprintf(stdout,"     You must pass here exactly one time (the first time ");
-      fprintf(stdout,"you call the MMG3D_Get_tensorSol function).\n");
-      fprintf(stdout,"     If not, the number of call of this function");
-      fprintf(stdout," exceed the number of points: %d\n ",met->np);
+      fprintf(stderr,"     You must pass here exactly one time (the first time ");
+      fprintf(stderr,"you call the MMG3D_Get_tensorSol function).\n");
+      fprintf(stderr,"     If not, the number of call of this function");
+      fprintf(stderr," exceed the number of points: %d\n ",met->np);
     }
   }
 
@@ -1597,7 +1597,7 @@ int _MMG3D_skipIso(MMG5_pMesh mesh) {
   int    k;
 
   if ( (mesh->info.imprim > 5) || mesh->info.ddebug )
-    fprintf(stdout,"  ## Warning: %s: skip of all entites with %d reference.\n",
+    fprintf(stderr,"\n  ## Warning: %s: skip of all entites with %d reference.\n",
             __func__,MG_ISO);
 
   /* Skip triangles with MG_ISO refs */
@@ -1674,9 +1674,9 @@ int MMG3D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam,int val){
     break;
   case MMG3D_IPARAM_mem :
     if ( val <= 0 ) {
-      fprintf(stdout,"  ## Warning: %s: maximal memory authorized must be"
+      fprintf(stderr,"\n  ## Warning: %s: maximal memory authorized must be"
               " strictly positive.\n",__func__);
-      fprintf(stdout,"  Reset to default value.\n");
+      fprintf(stderr,"  Reset to default value.\n");
     }
     else
       mesh->info.mem      = val;
@@ -1702,7 +1702,7 @@ int MMG3D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam,int val){
       mesh->info.dhd    = -1.;
     else {
       if ( (mesh->info.imprim > 5) || mesh->info.ddebug )
-        fprintf(stdout,"  ## Warning: %s: angle detection parameter set"
+        fprintf(stderr,"\n  ## Warning: %s: angle detection parameter set"
                 " to default value\n",__func__);
       mesh->info.dhd    = _MMG5_ANGEDG;
     }
@@ -1754,7 +1754,7 @@ int MMG3D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam,int val){
     if ( mesh->info.par ) {
       _MMG5_DEL_MEM(mesh,mesh->info.par,mesh->info.npar*sizeof(MMG5_Par));
       if ( (mesh->info.imprim > 5) || mesh->info.ddebug )
-        fprintf(stdout,"  ## Warning: %s: new local parameter values\n",__func__);
+        fprintf(stderr,"\n  ## Warning: %s: new local parameter values\n",__func__);
     }
     mesh->info.npar   = val;
     mesh->info.npari  = 0;
@@ -1934,9 +1934,9 @@ int MMG3D_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref,
       par->hmin  = hmin;
       par->hmax  = hmax;
       if ( (mesh->info.imprim > 5) || mesh->info.ddebug ) {
-          fprintf(stdout,"  ## Warning: %s: new parameters (hausd, hmin and hmax)",
+          fprintf(stderr,"\n  ## Warning: %s: new parameters (hausd, hmin and hmax)",
             __func__);
-          fprintf(stdout," for entities of type %d and of ref %d\n",typ,ref);
+          fprintf(stderr," for entities of type %d and of ref %d\n",typ,ref);
       }
       return 1;
     }
