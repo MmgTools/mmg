@@ -40,6 +40,7 @@ int _MMG2_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list,char im
   double             calold,calnew,area,det,alpha,ps,ps1,ps2,step,sqdetm1,sqdetm2,gr[2],grp[2],*m0,*m1,*m2;
   int                k,iel,ip0,ip1,ip2;
   char               i,i1,i2;
+  static char        mmgWarn0=0;
   
   pt0 = &mesh->tria[0];
   ppt0 = &mesh->point[0];
@@ -114,7 +115,11 @@ int _MMG2_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list,char im
   }
   
   if ( k == ilist ) {
-    printf("   *** Function _MMG2_movintpt_ani: impossible to locate gradient - abort.\n");
+    if ( !mmgWarn0 ) {
+      mmgWarn0=1;
+      fprintf(stderr,"\n  ## Error: %s: impossible to locate at least"
+              " 1 gradient - abort.\n",__func__);
+    }
     return 0;
   }
   

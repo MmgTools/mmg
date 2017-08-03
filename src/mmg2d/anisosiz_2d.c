@@ -71,6 +71,7 @@ int _MMG2_defmetbdy_2d(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
   double          gpp1[2],gpp2[2];
   int             ilist,iel,ip,ip1,ip2,it[2],l,list[MMG2_LONMAX+2];
   char            i0,i1,i2,j;
+  static char     mmgWarn0=0,mmgWarn1=0;
   
   sqhmin   = mesh->info.hmin*mesh->info.hmin;
   sqhmax   = mesh->info.hmax*mesh->info.hmax;
@@ -104,7 +105,11 @@ int _MMG2_defmetbdy_2d(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
           it[1] = 3*iel+i1;
         }
         else if ( ip2 != pt->v[i2] ) {
-          printf("   *** Function _MMG2_defmetbdy_2d: three edges connected at point %d - abort.\n",ip);
+          if ( !mmgWarn0 ) {
+            mmgWarn0 = 1;
+            fprintf(stderr,"\n  ## Warning: %s: at least 1 point at the"
+                    " intersection of 3 edges. abort.\n",__func__);
+          }
           return 0;
         }
       }
@@ -121,7 +126,11 @@ int _MMG2_defmetbdy_2d(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
           it[1] = 3*iel+i2;
         }
         else if ( ip2 != pt->v[i1] ) {
-          printf("   *** Function _MMG2_defmetbdy_2d: three edges connected at point %d - abort.\n",ip);
+          if ( !mmgWarn0 ) {
+            mmgWarn0 = 1;
+            fprintf(stderr,"\n  ## Warning: %s: at least 1 point at the"
+                    " intersection of 3 edges. abort.\n",__func__);
+          }
           return 0;
         }
       }
@@ -130,7 +139,11 @@ int _MMG2_defmetbdy_2d(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
   
   /* Check that there are exactly two boundary points connected at p0 */
   if ( ip1 == 0 || ip2 == 0 ) {
-    printf("   *** Function _MMG2_defmetbdy_2d: no two edges connected at edge, non singular point %d - abort.\n",ip);
+    if ( !mmgWarn1 ) {
+      mmgWarn1 = 1;
+      fprintf(stderr,"\n  ## Warning: %s: at least 1 point that is not"
+              "at the intersection of 2 edges. abort.\n",__func__);
+    }
     return 0;
   }
   
@@ -300,14 +313,19 @@ int _MMG2_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
 int _MMG2_grad2met_ani(MMG5_pMesh mesh,MMG5_pSol met,double *m,double *n,double difsiz) {
   double       det,dd,sqDelta,trimn,vnorm,hm,hn,lambda[2],dm[2],dn[2],imn[4],vp0[2],vp1[2],ip[4];
   char         ier;
-  
+  static char  mmgWarn0=0,mmgWarn1=0;
+
   ier = 0;
   
   /* Simultaneous reduction of m1 and m2 */
   /* Compute imn = M^{-1}N */
   det = m[0]*m[2] - m[1]*m[1];
   if ( fabs(det) < _MMG5_EPS*_MMG5_EPS ) {
-    fprintf(stderr,"  ## Function _MMG2_grad2met_ani: null metric det : %E \n",det);
+    if ( !mmgWarn0 ) {
+      mmgWarn0 = 1;
+      fprintf(stderr,"\n  ## Warning: %s: at least 1 null metric det : %E \n",
+              __func__,det);
+    }
     return(0);
   }
   det = 1.0 / det;
@@ -322,7 +340,11 @@ int _MMG2_grad2met_ani(MMG5_pMesh mesh,MMG5_pSol met,double *m,double *n,double 
   
   lambda[0] = 0.5 * (trimn - sqDelta);
   if ( lambda[0] < 0.0 ) {
-    fprintf(stderr," ## Function _MMG5_interpmet22: Eigenvalues : %f \n",lambda[0]);
+    if ( !mmgWarn0 ) {
+      mmgWarn0 = 1;
+      fprintf(stderr,"\n  ## Warning: %s: at least 1 metric with a "
+              "negative eigenvalue: %f \n",__func__,lambda[0]);
+    }
     return(0);
   }
   
