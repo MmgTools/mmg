@@ -445,7 +445,8 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
         if(iswp) i=swapbin(i);
       }
       if(i>mesh->np) {
-        fprintf(stdout,"   Warning Corner number %8d IGNORED\n",i);
+        fprintf(stderr,"\n  ## Warning: %s: corner number %8d ignored.\n",
+                __func__,i);
       } else {
         ppt = &mesh->point[i];
         ppt->tag |= MG_CRN;
@@ -465,7 +466,8 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
         if(iswp) i=swapbin(i);
       }
       if(i>mesh->np) {
-        fprintf(stdout,"   Warning Required Vertices number %8d IGNORED\n",i);
+        fprintf(stderr,"\n  ## Warning: %s: required Vertices number %8d ignored\n",
+                __func__,i);
       } else {
         ppt = &mesh->point[i];
         ppt->tag |= MG_REQ;
@@ -547,7 +549,8 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
           if(iswp) ia=swapbin(ia);
         }
         if ( (ia>na) || (ia<0) ) {
-          fprintf(stdout,"   Warning: ridge number %8d IGNORED\n",ia);
+          fprintf(stderr,"\n  ## Warning: %s: ridge number %8d ignored.\n",
+                  __func__,ia);
         }
         else {
           if( mesh->info.iso ){
@@ -573,7 +576,8 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
           if(iswp) ia=swapbin(ia);
         }
         if ( (ia>na) || (ia<0) ) {
-          fprintf(stdout,"   Warning: required edge number %8d IGNORED\n",ia);
+          fprintf(stderr,"\n  ## Warning: %s: required edge number %8d ignored\n",
+                  __func__,ia);
         }
         else {
           if( mesh->info.iso ){
@@ -592,8 +596,8 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
 
   /* read geometric entities */
   if ( mesh->nc1 && !ng ) {
-    printf("  ## Warning: Your mesh don't contains Normals but contains"
-             " NormalAtVertices. The NormalAtVertices are deleted. \n");
+    fprintf(stderr,"\n  ## Warning: %s: your mesh don't contains Normals but contains"
+            " NormalAtVertices. The NormalAtVertices are deleted. \n",__func__);
     mesh->nc1 = 0;
   }
 
