@@ -366,7 +366,6 @@ int movridpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
         }
       }
       else if ( it1 && it2 && (pt->v[i2] != ip1) && (pt->v[i2] != ip2) ) {
-        //fprintf(stderr,"WRONG CONFIGURATION : 3 ridge edges landing on point %d\n",pt->v[i0]);
         return(0);
       }
     }
@@ -385,7 +384,6 @@ int movridpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
         }
       }
       else if ( it1 && it2 && (pt->v[i1] != ip1) && (pt->v[i1] != ip2) ) {
-        //fprintf(stderr,"WRONG CONFIGURATION : 3 ridge edges landing on point %d\n",pt->v[i0]);
         return(0);
       }
     }

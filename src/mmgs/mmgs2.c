@@ -56,6 +56,7 @@ _MMGS_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, int start, char istart) {
   double           v1, v2;
   int              *adja,k,ip1,ip2,end1;
   char             i,i1,smsgn;
+  static char      mmgWarn=0;
 
   k = start;
   i = _MMG5_inxt2[istart];
@@ -114,8 +115,11 @@ _MMGS_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, int start, char istart) {
      else, the final triangle for the first travel must be that
      of the second one */
   if ( k != end1 ) {
-    fprintf(stderr,"  ## Warning: triangle %d, point %d ; unsnap \n",
-            start,mesh->tria[start].v[istart]);
+    if ( !mmgWarn ) {
+      mmgWarn = 1;
+      fprintf(stderr,"\n  ## Warning: %s: triangle %d, point %d; unsnap \n",
+              __func__,start,mesh->tria[start].v[istart]);
+    }
     return(0);
   }
   return(1);
@@ -146,7 +150,8 @@ int _MMGS_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   /* create tetra adjacency */
   if ( !_MMGS_hashTria(mesh) ) {
-    fprintf(stderr,"  ## Hashing problem (1). Exit program.\n");
+    fprintf(stderr,"\n  ## Error: %s: hashing problem (1). Exit program.\n",
+            __func__);
     return(0);
   }
 
@@ -161,8 +166,9 @@ int _MMGS_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
     if ( !MG_VOK(p0) ) continue;
     if ( fabs(sol->m[k]-mesh->info.ls) < _MMG5_EPS ) {
       if ( mesh->info.ddebug )
-        fprintf(stdout,"  Snapping value %d ; previous value : %E\n",
-                k,fabs(sol->m[k]));
+        fprintf(stderr,"  ## Warning: %s: snapping value %d; "
+                "previous value : %E\n",__func__,k,fabs(sol->m[k]));
+
       tmp[k] = ( fabs(sol->m[k]-mesh->info.ls) < _MMG5_EPSD ) ?
         (mesh->info.ls-100.0*_MMG5_EPS) : sol->m[k];
       p0->flag = 1;
@@ -310,6 +316,7 @@ int _MMGS_chkmanimesh(MMG5_pMesh mesh) {
   MMG5_pTria      pt;
   int             *adja,k,cnt,iel;
   char            i,i1;
+  static char     mmgWarn0 = 0;
 
 
   /* First check: check whether one triangle in the mesh has 3 boundary faces */
@@ -331,7 +338,11 @@ int _MMGS_chkmanimesh(MMG5_pMesh mesh) {
       }
     }
     if( cnt == 3 ) {
-      fprintf(stderr,"Triangle %d: 3 boundary edges\n",k);
+      if ( !mmgWarn0 ) {
+        mmgWarn0 = 1;
+        fprintf(stderr,"\n  ## Warning: %s: at least 1 triangle with 3 boundary"
+                " edges.\n",__func__);
+      }
       return(0);
     }
   }
@@ -437,7 +448,8 @@ static int _MMGS_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol){
       np = _MMGS_newPt(mesh,c,NULL);
       if ( !np ) {
         _MMGS_POINT_REALLOC(mesh,sol,np,0.2,
-                            fprintf(stderr,"  ## Error: unable to allocate a new point\n");
+                            fprintf(stderr,"\n  ## Error: %s: unable to"
+                                    " allocate a new point\n",__func__);
                             _MMG5_INCREASE_MEM_MESSAGE();
                             return(0)
                             ,c,NULL,0);
@@ -575,37 +587,37 @@ int _MMGS_mmgs2(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   /* Snap values of level set function if need be, then discretize it */
   if ( !_MMGS_snpval_ls(mesh,sol) ) {
-    fprintf(stderr,"  ## Problem with implicit function. Exit program.\n");
+    fprintf(stderr,"\n  ## Problem with implicit function. Exit program.\n");
     return(0);
   }
 
   /* Check the initial mesh adjacencies */
   if ( !_MMGS_hashTria(mesh) ) {
-    fprintf(stderr,"  ## Hashing problem. Exit program.\n");
+    fprintf(stderr,"\n  ## Hashing problem. Exit program.\n");
     return(0);
   }
 
   _MMG5_DEL_MEM(mesh,mesh->adja,(3*mesh->ntmax+5)*sizeof(int));
 
   if ( !_MMGS_cuttri_ls(mesh,sol) ) {
-    fprintf(stderr,"  ## Problem in discretizing implicit function. Exit program.\n");
+    fprintf(stderr,"\n  ## Problem in discretizing implicit function. Exit program.\n");
     return(0);
   }
 
   if ( !_MMGS_setref_ls(mesh,sol) ) {
-    fprintf(stderr,"  ## Problem in setting references. Exit program.\n");
+    fprintf(stderr,"\n  ## Problem in setting references. Exit program.\n");
     return(0);
   }
 
   /* Creation of adjacency relations in the mesh */
   if ( !_MMGS_hashTria(mesh) ) {
-    fprintf(stderr,"  ## Hashing problem. Exit program.\n");
+    fprintf(stderr,"\n  ## Hashing problem. Exit program.\n");
     return(0);
   }
 
   /* Check that the resulting mesh is manifold */
   if ( !_MMGS_chkmanimesh(mesh) ) {
-    fprintf(stderr,"  ## No manifold resulting situation. Exit program.\n");
+    fprintf(stderr,"\n  ## No manifold resulting situation. Exit program.\n");
     return(0);
   }
 
