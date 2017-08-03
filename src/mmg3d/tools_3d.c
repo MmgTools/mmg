@@ -998,6 +998,7 @@ int _MMG3D_localParamNm(MMG5_pMesh mesh,int iel,int iface,int ia,
   int          l,k,isloc,ifac1,ifac2,ip0,ip1;
   int          listv[MMG3D_LMAX+2],ilistv;
   char         i0,i1;
+  static char  mmgWarn0;
 
 
   hausd = mesh->info.hausd;
@@ -1076,9 +1077,13 @@ int _MMG3D_localParamNm(MMG5_pMesh mesh,int iel,int iface,int ia,
   }
   if ( ilistv < 0 )
   {
-    if ( mesh->info.ddebug || mesh->info.imprim>5 )
-      fprintf(stdout, "  ## Warning: unable to take into account local"
-              " parameters at vertices %d and %d.\n",ip0,ip1 );
+    if ( mesh->info.ddebug || mesh->info.imprim>5 ) {
+      if ( !mmgWarn0 ) {
+        mmgWarn0 = 1;
+        fprintf(stderr, "  ## Warning: %s: unable to take into account local"
+                " parameters at at least 1 vertex.\n",__func__ );
+      }
+    }
 
     if ( mesh->info.parTyp & MG_Tria ) {
       for ( l=0; l<mesh->info.npar; ++l) {

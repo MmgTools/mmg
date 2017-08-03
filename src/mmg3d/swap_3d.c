@@ -464,7 +464,8 @@ int _MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,
   nm = _MMG3D_newPt(mesh,c,MG_BDY);
   if ( !nm ) {
     _MMG5_POINT_REALLOC(mesh,met,np,mesh->gap,
-                        printf("  ## Error: unable to allocate a new point\n");
+                        fprintf(stderr,"\n  ## Error: %s: unable to allocate a"
+                               " new point\n",__func__);
                         _MMG5_INCREASE_MEM_MESSAGE();
                         return(-1)
                         ,c,MG_BDY,-1);
@@ -484,7 +485,8 @@ int _MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,
   pt1 = &mesh->tetra[iel1];
 
   if ( ier < 0 ) {
-    fprintf(stdout,"  ## Warning: unable to swap boundary edge.\n");
+    fprintf(stderr,"\n  ## Warning: %s: unable to swap boundary edge.\n",
+      __func__);
     return(-1);
   }
   else if ( !ier )  {
@@ -500,7 +502,7 @@ int _MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,
   }
   if ( pt1->v[im] != nm ){
     _MMG3D_delPt(mesh,nm);
-    fprintf(stdout,"%s:%d: Warning pt1->v[im] != nm\n",__FILE__,__LINE__);
+    fprintf(stderr,"\n  # Warning: %s: pt1->v[im] != nm.\n",__func__);
     return(0);
   }
   ilist = _MMG5_boulevolp(mesh,iel1,im,list);
@@ -510,7 +512,8 @@ int _MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,
 
   ier = _MMG5_colver(mesh,met,list,ilist,ipa,typchk);
   if ( ier < 0 ) {
-    fprintf(stdout,"  ## Warning: unable to swap boundary edge.\n");
+    fprintf(stderr,"\n  ## Warning: %s: unable to swap boundary edge.\n",
+      __func__);
     return(-1);
   }
   else if ( ier ) {

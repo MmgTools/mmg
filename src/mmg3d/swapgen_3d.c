@@ -273,7 +273,8 @@ int _MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,int *list,
   np  = _MMG3D_newPt(mesh,m,0);
   if(!np){
     _MMG5_POINT_REALLOC(mesh,met,np,mesh->gap,
-                        printf("  ## Error: unable to allocate a new point\n");
+                        fprintf(stderr,"\n  ## Error: %s: unable to allocate"
+                                " a new point\n",__func__);
                         _MMG5_INCREASE_MEM_MESSAGE();
                         return(-1)
                         ,m,0,-1);
@@ -294,7 +295,8 @@ int _MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,int *list,
   pt = &mesh->tetra[iel];
 
   if ( ier < 0 ) {
-    fprintf(stdout,"  ## Warning: unable to swap internal edge.\n");
+    fprintf(stderr,"\n  ## Warning: %s: unable to swap internal edge.\n",
+      __func__);
     return(-1);
   }
   else if ( !ier )  {
@@ -317,7 +319,8 @@ int _MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,int *list,
 
   ier = _MMG5_colver(mesh,met,list,nball,iq,typchk);
   if ( ier < 0 ) {
-    fprintf(stdout,"  ## Warning: unable to swap internal edge.\n");
+    fprintf(stderr,"\n  ## Warning: %s: unable to swap internal edge.\n",
+      __func__);
     return(-1);
   }
   else if ( ier ) _MMG3D_delPt(mesh,ier);
@@ -499,7 +502,8 @@ int MMG3D_swap23(MMG5_pMesh mesh,MMG5_pSol met,int k,char metRidTyp) {
     iel = _MMG3D_newElt(mesh);
     if ( !iel ) {
       _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
-                          fprintf(stderr,"\n  ## Error: unable to allocate a new element.\n");
+                          fprintf(stderr,"\n  ## Error: %s: unable to allocate"
+                                  " a new element.\n",__func__);
                           _MMG5_INCREASE_MEM_MESSAGE();
                           fprintf(stderr,"  Exit program.\n");
                           return -1,-1);
