@@ -111,8 +111,9 @@ int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
     break;
   case MMG2D_IPARAM_mem :
     if ( val <= 0 ) {
-      fprintf(stdout,"  ## Warning: maximal memory authorized must be strictly positive.\n");
-      fprintf(stdout,"  Reset to default value.\n");
+      fprintf(stderr,"\n  ## Warning: %s: maximal memory authorized must"
+              " be strictly positive.\n",__func__);
+      fprintf(stderr,"  Reset to default value.\n");
     }
     else
       mesh->info.mem      = val;
@@ -133,7 +134,8 @@ int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
       mesh->info.dhd    = -1.;
     else {
       if ( (mesh->info.imprim > 5) || mesh->info.ddebug )
-        fprintf(stdout,"  ## Warning: angle detection parameter set to default value\n");
+        fprintf(stderr,"\n  ## Warning: %s: angle detection parameter"
+                " set to default value\n",__func__);
       mesh->info.dhd    = _MMG5_ANGEDG;
     }
     break;
@@ -167,7 +169,7 @@ int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
     mesh->info.nosurf   = val;
     break;
   default :
-    fprintf(stdout,"  ## Error: unknown type of parameter\n");
+    fprintf(stderr,"\n  ## Error: %s: unknown type of parameter\n",__func__);
     return(0);
   }
   /* other options */
@@ -200,7 +202,8 @@ int MMG2D_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val)
     break;
   case MMG2D_DPARAM_hausd :
     if ( val <=0 ) {
-      fprintf(stdout,"  ## Error: hausdorff number must be strictly positive.\n");
+      fprintf(stderr,"\n  ## Error: %s: hausdorff number must be"
+              " strictly positive.\n",__func__);
       return(0);
     }
     else
@@ -208,10 +211,10 @@ int MMG2D_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val)
     break;
   case MMG2D_DPARAM_ls :
     mesh->info.ls       = val;
-    fprintf(stdout,"  ## Warning: unstable feature.\n");
     break;
   default :
-    fprintf(stdout,"  ## Error: unknown type of parameter\n");
+    fprintf(stderr,"\n  ## Error: %s: unknown type of parameter\n",
+      __func__);
     return(0);
   }
   return(1);
@@ -222,7 +225,7 @@ int MMG2D_Set_meshSize(MMG5_pMesh mesh, int np, int nt, int na) {
 
   if ( ( (mesh->info.imprim > 5) || mesh->info.ddebug ) &&
        ( mesh->point || mesh->tria || mesh->edge) )
-    fprintf(stdout,"  ## Warning: new mesh\n");
+    fprintf(stderr,"\n  ## Warning: %s: old mesh deletion.\n",__func__);
 
   if ( mesh->point )
     _MMG5_DEL_MEM(mesh,mesh->point,(mesh->npmax+1)*sizeof(MMG5_Point));
@@ -243,7 +246,8 @@ int MMG2D_Set_meshSize(MMG5_pMesh mesh, int np, int nt, int na) {
     if((mesh->npmax < mesh->np || mesh->ntmax < mesh->nt || mesh->namax < mesh->na) ) {
       if ( !_MMG2D_memOption(mesh) )  return 0;
     } else if(mesh->info.mem < 39) {
-      fprintf(stderr,"  ## Error: %s: not enough memory (%d).\n",__func__,mesh->info.mem);
+      fprintf(stderr,"\n  ## Error: %s: not enough memory (%d).\n",
+              __func__,mesh->info.mem);
       return(0);
     }
   } else {
@@ -278,7 +282,7 @@ int MMG2D_Set_meshSize(MMG5_pMesh mesh, int np, int nt, int na) {
   }
 
   if ( !mesh->nt ) {
-    fprintf(stdout,"  **WARNING NO GIVEN TRIANGLE\n");
+    fprintf(stderr,"  ** WARNING NO GIVEN TRIANGLE\n");
   }
 
   /* stats */
@@ -296,10 +300,11 @@ int MMG2D_Set_meshSize(MMG5_pMesh mesh, int np, int nt, int na) {
 int MMG2D_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int typSol) {
 
   if ( ( (mesh->info.imprim > 5) || mesh->info.ddebug ) && sol->m )
-    fprintf(stdout,"  ## Warning: new solution\n");
+    fprintf(stderr,"\n  ## Warning: %s: old solution deletion.\n",__func__);
 
   if ( typEntity != MMG5_Vertex ) {
-    fprintf(stdout,"  ## Error: MMG2D need a solution imposed on vertices\n");
+    fprintf(stderr,"\n  ## Error: %s: mmg2d need a solution imposed on vertices.\n",
+      __func__);
     return(0);
   }
   if ( typSol == MMG5_Scalar ) {
@@ -312,7 +317,8 @@ int MMG2D_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int
     sol->size = 3;
   }
   else {
-    fprintf(stdout,"  ## Error: type of solution not yet implemented\n");
+    fprintf(stderr,"\n  ## Error: %s: type of solution not yet implemented.\n",
+            __func__);
     return(0);
   }
 
@@ -381,23 +387,26 @@ int MMG2D_Get_meshSize(MMG5_pMesh mesh, int* np, int* nt, int* na) {
 int MMG2D_Set_vertex(MMG5_pMesh mesh, double c0, double c1, int ref, int pos) {
 
   if ( !mesh->np ) {
-    fprintf(stdout,"  ## Error: You must set the number of points with the");
-    fprintf(stdout," MMG2D_Set_meshSize function before setting vertices in mesh\n");
+    fprintf(stderr,"\n  ## Error: %s: you must set the number of points with the",
+            __func__);
+    fprintf(stderr," MMG2D_Set_meshSize function before setting vertices in mesh\n");
     return(0);
   }
 
   if ( pos > mesh->npmax ) {
-    fprintf(stdout,"  ## Error: unable to allocate a new point.\n");
-    fprintf(stdout,"    max number of points: %d\n",mesh->npmax);
+    fprintf(stderr,"\n  ## Error: %s: unable to allocate a new point.\n",
+            __func__);
+    fprintf(stderr,"    max number of points: %d\n",mesh->npmax);
     _MMG5_INCREASE_MEM_MESSAGE();
     return(0);
   }
 
   if ( pos > mesh->np ) {
-    fprintf(stdout,"  ## Error: attempt to set new vertex at position %d.",pos);
-    fprintf(stdout," Overflow of the given number of vertices: %d\n",mesh->np);
-    fprintf(stdout,"  ## Check the mesh size, its compactness or the position");
-    fprintf(stdout," of the vertex.\n");
+    fprintf(stderr,"\n  ## Error: %s: attempt to set new vertex at position %d.",
+            __func__,pos);
+    fprintf(stderr," Overflow of the given number of vertices: %d\n",mesh->np);
+    fprintf(stderr,"  ## Check the mesh size, its compactness or the position");
+    fprintf(stderr," of the vertex.\n");
     return(0);
   }
 
@@ -433,20 +442,21 @@ int MMG2D_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, int* ref,
  if ( mesh->npi == mesh->np ) {
    mesh->npi = 0;
    if ( mesh->info.ddebug ) {
-    fprintf(stdout,"  ## Warning: reset the internal counter of points.\n");
-    fprintf(stdout,"     You must pass here exactly one time (the first time ");
-    fprintf(stdout,"you call the MMG2D_Get_vertex function).\n");
-    fprintf(stdout,"     If not, the number of call of this function");
-    fprintf(stdout," exceed the number of points: %d\n ",mesh->np);
+    fprintf(stderr,"\n  ## Warning: %s: reset the internal counter of points.\n",
+            __func__);
+    fprintf(stderr,"     You must pass here exactly one time (the first time ");
+    fprintf(stderr,"you call the MMG2D_Get_vertex function).\n");
+    fprintf(stderr,"     If not, the number of call of this function");
+    fprintf(stderr," exceed the number of points: %d\n ",mesh->np);
    }
  }
 
   mesh->npi++;
 
   if ( mesh->npi > mesh->np ) {
-    fprintf(stdout,"  ## Error: unable to get point.\n");
-    fprintf(stdout,"     The number of call of MMG2D_Get_vertex function");
-    fprintf(stdout," exceed the number of points: %d\n ",mesh->np);
+    fprintf(stderr,"  ## Error: %s: unable to get point.\n",__func__);
+    fprintf(stderr,"     The number of call of MMG2D_Get_vertex function");
+    fprintf(stderr," exceed the number of points: %d\n ",mesh->np);
     return(0);
   }
 
@@ -542,23 +552,26 @@ int MMG2D_Set_triangle(MMG5_pMesh mesh, int v0, int v1, int v2, int ref, int pos
   int         i,j,ip,tmp;
 
   if ( !mesh->nt ) {
-    fprintf(stdout,"  ## Error: You must set the number of elements with the");
-    fprintf(stdout," MMG2D_Set_meshSize function before setting elements in mesh\n");
+    fprintf(stderr,"  ## Error: %s: You must set the number of elements with the",
+            __func__);
+    fprintf(stderr," MMG2D_Set_meshSize function before setting elements in mesh\n");
     return(0);
   }
 
   if ( pos > mesh->ntmax ) {
-    fprintf(stdout,"  ## Error: unable to allocate a new element.\n");
-    fprintf(stdout,"    max number of element: %d\n",mesh->ntmax);
+    fprintf(stderr,"  ## Error: %s: unable to allocate a new element.\n",
+            __func__);
+    fprintf(stderr,"    max number of element: %d\n",mesh->ntmax);
     _MMG5_INCREASE_MEM_MESSAGE();
     return(0);
   }
 
   if ( pos > mesh->nt ) {
-    fprintf(stdout,"  ## Error: attempt to set new triangle at position %d.",pos);
-    fprintf(stdout," Overflow of the given number of triangle: %d\n",mesh->nt);
-    fprintf(stdout,"  ## Check the mesh size, its compactness or the position");
-    fprintf(stdout," of the triangle.\n");
+    fprintf(stderr,"\n  ## Error: %s: attempt to set new triangle at position %d.",
+            __func__,pos);
+    fprintf(stderr," Overflow of the given number of triangle: %d\n",mesh->nt);
+    fprintf(stderr,"  ## Check the mesh size, its compactness or the position");
+    fprintf(stderr," of the triangle.\n");
     return(0);
   }
 
@@ -579,7 +592,8 @@ int MMG2D_Set_triangle(MMG5_pMesh mesh, int v0, int v1, int v2, int ref, int pos
                            mesh->point[pt->v[2]].c);
 
   if ( vol == 0.0 ) {
-    fprintf(stderr,"  ## Error: triangle %d has null area.\n",pos);
+    fprintf(stderr,"\n  ## Error: %s: triangle %d has null area.\n",
+            __func__,pos);
     for ( ip=0; ip<3; ip++ ) {
       ppt = &mesh->point[pt->v[ip]];
       for ( j=0; j<3; j++ ) {
@@ -591,7 +605,6 @@ int MMG2D_Set_triangle(MMG5_pMesh mesh, int v0, int v1, int v2, int ref, int pos
     }
   }
   else if(vol < 0) {
-    printf("Tr %d bad oriented\n",pos);
     tmp = pt->v[2];
     pt->v[2] = pt->v[1];
     pt->v[1] = tmp;
@@ -599,7 +612,8 @@ int MMG2D_Set_triangle(MMG5_pMesh mesh, int v0, int v1, int v2, int ref, int pos
     mesh->xt++;
   }
   if ( mesh->info.ddebug && (mesh->nt == pos) && mesh->xt > 0 ) {
-    fprintf(stdout,"  ## %d triangles reoriented\n",mesh->xt);
+    fprintf(stderr,"\n  ## Warning: %s: %d triangles reoriented\n",
+            __func__,mesh->xt);
     mesh->xt = 0;
   }
 
@@ -630,20 +644,22 @@ int MMG2D_Get_triangle(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* ref
   if ( mesh->nti == mesh->nt ) {
     mesh->nti = 0;
     if ( mesh->info.ddebug ) {
-      fprintf(stdout,"  ## Warning: reset the internal counter of triangles.\n");
-      fprintf(stdout,"     You must pass here exactly one time (the first time ");
-      fprintf(stdout,"you call the MMG2D_Get_triangle function).\n");
-      fprintf(stdout,"     If not, the number of call of this function");
-      fprintf(stdout," exceed the number of triangles: %d\n ",mesh->nt);
+      fprintf(stderr,"\n  ## Warning: %s: reset the internal counter of"
+              " triangles.\n",__func__);
+      fprintf(stderr,"     You must pass here exactly one time (the first time ");
+      fprintf(stderr,"you call the MMG2D_Get_triangle function).\n");
+      fprintf(stderr,"     If not, the number of call of this function");
+      fprintf(stderr," exceed the number of triangles: %d\n ",mesh->nt);
     }
   }
 
   mesh->nti++;
 
   if ( mesh->nti > mesh->nt ) {
-    fprintf(stdout,"  ## Error: unable to get triangle.\n");
-    fprintf(stdout,"    The number of call of MMG2D_Get_triangle function");
-    fprintf(stdout," can not exceed the number of triangles: %d\n ",mesh->nt);
+    fprintf(stderr,"\n  ## Error: %s: unable to get triangle.\n",
+            __func__);
+    fprintf(stderr,"    The number of call of MMG2D_Get_triangle function");
+    fprintf(stderr," can not exceed the number of triangles: %d\n ",mesh->nt);
     return(0);
   }
 
@@ -694,7 +710,8 @@ int  MMG2D_Set_triangles(MMG5_pMesh mesh, int *tria, int *refs) {
                            mesh->point[ptt->v[2]].c);
 
       if ( vol == 0.0 ) {
-        fprintf(stderr,"  ## Error: triangle %d has null area.\n",i);
+        fprintf(stderr,"\n  ## Error: %s: triangle %d has null area.\n",
+                __func__,i);
         for ( ip=0; ip<3; ip++ ) {
           ppt = &mesh->point[ptt->v[ip]];
           for ( j=0; j<3; j++ ) {
@@ -706,7 +723,6 @@ int  MMG2D_Set_triangles(MMG5_pMesh mesh, int *tria, int *refs) {
         }
       }
       else if(vol < 0) {
-        printf("Tr %d bad oriented\n",i);
         tmp = ptt->v[2];
         ptt->v[2] = ptt->v[1];
         ptt->v[1] = tmp;
@@ -714,7 +730,8 @@ int  MMG2D_Set_triangles(MMG5_pMesh mesh, int *tria, int *refs) {
         mesh->xt++;
       }
       if ( mesh->info.ddebug && mesh->xt > 0 ) {
-        fprintf(stdout,"  ## %d triangles reoriented\n",mesh->xt);
+        fprintf(stderr,"\n  ## Warning: %s: %d triangles reoriented\n",
+                __func__,mesh->xt);
       }
   }
   return 1;
@@ -750,23 +767,26 @@ int MMG2D_Set_edge(MMG5_pMesh mesh, int v0, int v1, int ref, int pos) {
   MMG5_pEdge pt;
 
   if ( !mesh->na ) {
-    fprintf(stdout,"  ## Error: You must set the number of elements with the");
-    fprintf(stdout," MMG2D_Set_meshSize function before setting elements in mesh\n");
+    fprintf(stderr,"\n  ## Error: %s: you must set the number of elements"
+            " with the",__func__);
+    fprintf(stderr," MMG2D_Set_meshSize function before setting elements in mesh\n");
     return(0);
   }
 
   if ( pos > mesh->namax ) {
-    fprintf(stdout,"  ## Error: unable to allocate a new element.\n");
-    fprintf(stdout,"    max number of element: %d\n",mesh->namax);
+    fprintf(stderr,"\n  ## Error: %s: unable to allocate a new element.\n",
+            __func__);
+    fprintf(stderr,"    max number of element: %d\n",mesh->namax);
     _MMG5_INCREASE_MEM_MESSAGE();
     return(0);
   }
 
   if ( pos > mesh->na ) {
-    fprintf(stdout,"  ## Error: attempt to set new edge at position %d.",pos);
-    fprintf(stdout," Overflow of the given number of edge: %d\n",mesh->na);
-    fprintf(stdout,"  ## Check the mesh size, its compactness or the position");
-    fprintf(stdout," of the edge.\n");
+    fprintf(stderr,"\n  ## Error: %s: attempt to set new edge at position %d.",
+            __func__,pos);
+    fprintf(stderr," Overflow of the given number of edge: %d\n",mesh->na);
+    fprintf(stderr,"  ## Check the mesh size, its compactness or the position");
+    fprintf(stderr," of the edge.\n");
     return(0);
   }
 
@@ -806,12 +826,13 @@ int MMG2D_Get_edge(MMG5_pMesh mesh, int* e0, int* e1, int* ref
   if ( mesh->nai == mesh->na ) {
     mesh->nai = 0;
     if ( mesh->info.ddebug ) {
-      fprintf(stdout,"  ## Warning: reset the internal counter of edges.\n");
-      fprintf(stdout,"     You must pass here exactly one time (the first time ");
-      fprintf(stdout,"you call the MMG2D_Get_edge function).\n");
-      fprintf(stdout,"     If not, the number of call of this function");
-      fprintf(stdout," exceed the number of edges.\n ");
-      fprintf(stdout,"     Please, call the MMG2D_Get_meshSize function to get"
+      fprintf(stderr,"\n  ## Warning: %s: reset the internal counter of edges.\n",
+              __func__);
+      fprintf(stderr,"     You must pass here exactly one time (the first time ");
+      fprintf(stderr,"you call the MMG2D_Get_edge function).\n");
+      fprintf(stderr,"     If not, the number of call of this function");
+      fprintf(stderr," exceed the number of edges.\n ");
+      fprintf(stderr,"     Please, call the MMG2D_Get_meshSize function to get"
               " this number.\n ");
     }
   }
@@ -819,9 +840,9 @@ int MMG2D_Get_edge(MMG5_pMesh mesh, int* e0, int* e1, int* ref
   mesh->nai++;
 
   if ( mesh->nai > mesh->na ) {
-    fprintf(stdout,"  ## Error: unable to get edge.\n");
-    fprintf(stdout,"    The number of call of MMG2D_Get_edge function");
-    fprintf(stdout," can not exceed the number of edges: %d\n ",mesh->na);
+    fprintf(stderr,"\n  ## Error: %s: unable to get edge.\n",__func__);
+    fprintf(stderr,"    The number of call of MMG2D_Get_edge function");
+    fprintf(stderr," can not exceed the number of edges: %d\n ",mesh->na);
     return(0);
   }
 
@@ -858,23 +879,26 @@ int MMG2D_Get_edge(MMG5_pMesh mesh, int* e0, int* e1, int* ref
 int MMG2D_Set_scalarSol(MMG5_pSol met, double s, int pos) {
 
   if ( !met->np ) {
-    fprintf(stdout,"  ## Error: You must set the number of solution with the");
-    fprintf(stdout," MMG2D_Set_solSize function before setting values");
-    fprintf(stdout," in solution structure \n");
+    fprintf(stderr,"\n  ## Error: %s: You must set the number of"
+            " solution with the",__func__);
+    fprintf(stderr," MMG2D_Set_solSize function before setting values");
+    fprintf(stderr," in solution structure \n");
     return(0);
   }
 
   if ( pos >= met->npmax ) {
-    fprintf(stdout,"  ## Error: unable to set a new solution.\n");
-    fprintf(stdout,"    max number of solutions: %d\n",met->npmax);
+    fprintf(stderr,"\n  ## Error: %s: unable to set a new solution.\n",
+            __func__);
+    fprintf(stderr,"    max number of solutions: %d\n",met->npmax);
     return(0);
   }
 
   if ( pos > met->np ) {
-    fprintf(stdout,"  ## Error: attempt to set new solution at position %d.",pos);
-    fprintf(stdout," Overflow of the given number of solutions: %d\n",met->np);
-    fprintf(stdout,"  ## Check the solution size, its compactness or the position");
-    fprintf(stdout," of the solution.\n");
+    fprintf(stderr,"\n  ## Error: %s: attempt to set new solution"
+            " at position %d.",__func__,pos);
+    fprintf(stderr," Overflow of the given number of solutions: %d\n",met->np);
+    fprintf(stderr,"  ## Check the solution size, its compactness or the position");
+    fprintf(stderr," of the solution.\n");
     return(0);
   }
 
@@ -889,20 +913,22 @@ int  MMG2D_Get_scalarSol(MMG5_pSol met, double* s)
   if ( met->npi == met->np ) {
     met->npi = 0;
     if ( ddebug ) {
-      fprintf(stdout,"  ## Warning: reset the internal counter of points.\n");
-      fprintf(stdout,"     You must pass here exactly one time (the first time ");
-      fprintf(stdout,"you call the MMG2D_Get_scalarSol function).\n");
-      fprintf(stdout,"     If not, the number of call of this function");
-      fprintf(stdout," exceed the number of points: %d\n ",met->np);
+      fprintf(stderr,"\n  ## Warning: %s: reset the internal counter"
+              " of points.\n",__func__);
+      fprintf(stderr,"     You must pass here exactly one time (the first time ");
+      fprintf(stderr,"you call the MMG2D_Get_scalarSol function).\n");
+      fprintf(stderr,"     If not, the number of call of this function");
+      fprintf(stderr," exceed the number of points: %d\n ",met->np);
     }
   }
 
   met->npi++;
 
   if ( met->npi > met->np ) {
-    fprintf(stdout,"  ## Error: unable to get solution.\n");
-    fprintf(stdout,"     The number of call of MMG2D_Get_scalarSol function");
-    fprintf(stdout," can not exceed the number of points: %d\n ",met->np);
+    fprintf(stderr,"\n  ## Error: %s: unable to get solution.\n",
+            __func__);
+    fprintf(stderr,"     The number of call of MMG2D_Get_scalarSol function");
+    fprintf(stderr," can not exceed the number of points: %d\n ",met->np);
     return(0);
   }
 
@@ -915,7 +941,8 @@ int  MMG2D_Set_scalarSols(MMG5_pSol met, double *s) {
   int k;
 
   if ( !met->np ) {
-    fprintf(stderr,"  ## Error: You must set the number of solution with the");
+    fprintf(stderr,"\n  ## Error: %s: you must set the number of"
+            " solution with the",__func__);
     fprintf(stderr," MMG2D_Set_solSize function before setting values");
     fprintf(stderr," in solution structure \n");
     return(0);
@@ -940,26 +967,30 @@ int MMG2D_Set_vectorSol(MMG5_pSol met, double vx,double vy, int pos) {
   int isol;
 
   if ( !met->np ) {
-    fprintf(stderr,"  ## Error: You must set the number of solution with the");
+    fprintf(stderr,"\n  ## Error: %s: you must set the number of"
+            " solution with the",__func__);
     fprintf(stderr," MMG2D_Set_solSize function before setting values");
     fprintf(stderr," in solution structure \n");
     return(0);
   }
   if ( pos < 1 ) {
-    fprintf(stderr,"  ## Error: unable to set a new solution.\n");
+    fprintf(stderr,"\n  ## Error: %s: unable to set a new solution.\n",
+            __func__);
     fprintf(stderr,"    Minimal index of the solution position must be 1.\n");
     return(0);
   }
   if ( pos >= met->npmax ) {
-    fprintf(stderr,"  ## Error: unable to set a new solution.\n");
+    fprintf(stderr,"\n  ## Error: %s: unable to set a new solution.\n",
+            __func__);
     fprintf(stderr,"    max number of solutions: %d\n",met->npmax);
     return(0);
   }
 
   if ( pos > met->np ) {
-    fprintf(stderr,"  ## Error: attempt to set new solution at position %d.",pos);
+    fprintf(stderr,"\n  ## Error: %s: attempt to set new solution"
+            " at position %d.",__func__,pos);
     fprintf(stderr," Overflow of the given number of solutions: %d\n",met->np);
-    fprintf(stderr,"  ## Check the solution size, its compactness or the position");
+    fprintf(stderr,"\n  ## Check the solution size, its compactness or the position");
     fprintf(stderr," of the solution.\n");
     return(0);
   }
@@ -980,18 +1011,19 @@ int MMG2D_Get_vectorSol(MMG5_pSol met, double* vx, double* vy) {
   if ( met->npi == met->np ) {
     met->npi = 0;
     if ( ddebug ) {
-      fprintf(stdout,"  ## Warning: reset the internal counter of points.\n");
-      fprintf(stdout,"     You must pass here exactly one time (the first time ");
-      fprintf(stdout,"you call the MMG2D_Get_vectorSol function).\n");
-      fprintf(stdout,"     If not, the number of call of this function");
-      fprintf(stdout," exceed the number of points: %d\n ",met->np);
+      fprintf(stderr,"\n  ## Warning: %s: reset the internal counter of points.\n",
+              __func__);
+      fprintf(stderr,"     You must pass here exactly one time (the first time ");
+      fprintf(stderr,"you call the MMG2D_Get_vectorSol function).\n");
+      fprintf(stderr,"     If not, the number of call of this function");
+      fprintf(stderr," exceed the number of points: %d\n ",met->np);
     }
   }
 
   met->npi++;
 
   if ( met->npi > met->np ) {
-    fprintf(stderr,"  ## Error: unable to get solution.\n");
+    fprintf(stderr,"\n  ## Error: %s: unable to get solution.\n",__func__);
     fprintf(stderr,"     The number of call of MMG2D_Get_vectorSol function");
     fprintf(stderr," can not exceed the number of points: %d\n ",met->np);
     return(0);
@@ -1008,7 +1040,8 @@ int MMG2D_Set_vectorSols(MMG5_pSol met, double *sols) {
   int k,j;
 
   if ( !met->np ) {
-    fprintf(stderr,"  ## Error: You must set the number of solution with the");
+    fprintf(stderr,"\n  ## Error: %s: you must set the number of"
+            " solution with the",__func__);
     fprintf(stderr," MMG2D_Set_solSize function before setting values");
     fprintf(stderr," in solution structure \n");
     return(0);
@@ -1045,23 +1078,26 @@ int MMG2D_Set_tensorSol(MMG5_pSol met, double m11, double m12, double m22,
   int isol;
 
   if ( !met->np ) {
-    fprintf(stdout,"  ## Error: You must set the number of solution with the");
-    fprintf(stdout," MMG2D_Set_solSize function before setting values");
-    fprintf(stdout," in solution structure \n");
+    fprintf(stderr,"\n  ## Error: %s: you must set the number of"
+            " solution with the",__func__);
+    fprintf(stderr," MMG2D_Set_solSize function before setting values");
+    fprintf(stderr," in solution structure \n");
     return(0);
   }
 
   if ( pos >= met->npmax ) {
-    fprintf(stdout,"  ## Error: unable to set a new solution.\n");
-    fprintf(stdout,"    max number of solutions: %d\n",met->npmax);
+    fprintf(stderr,"\n  ## Error: %s: unable to set a new solution.\n",
+            __func__);
+    fprintf(stderr,"    max number of solutions: %d\n",met->npmax);
     return(0);
   }
 
   if ( pos > met->np ) {
-    fprintf(stdout,"  ## Error: attempt to set new solution at position %d.",pos);
-    fprintf(stdout," Overflow of the given number of solutions: %d\n",met->np);
-    fprintf(stdout,"  ## Check the solution size, its compactness or the position");
-    fprintf(stdout," of the solution.\n");
+    fprintf(stderr,"\n  ## Error: %s: attempt to set new solution "
+            "at position %d.",__func__,pos);
+    fprintf(stderr," Overflow of the given number of solutions: %d\n",met->np);
+    fprintf(stderr,"  ## Check the solution size, its compactness or the position");
+    fprintf(stderr," of the solution.\n");
     return(0);
   }
   isol = pos * met->size;
@@ -1079,20 +1115,21 @@ int MMG2D_Get_tensorSol(MMG5_pSol met, double *m11,double *m12,double *m22)
   if ( met->npi == met->np ) {
     met->npi = 0;
     if ( ddebug ) {
-      fprintf(stdout,"  ## Warning: reset the internal counter of points.\n");
-      fprintf(stdout,"     You must pass here exactly one time (the first time ");
-      fprintf(stdout,"you call the MMG2D_Get_tensorSol function).\n");
-      fprintf(stdout,"     If not, the number of call of this function");
-      fprintf(stdout," exceed the number of points: %d\n ",met->np);
+      fprintf(stderr,"\n  ## Warning: %s: reset the internal counter of points.\n",
+              __func__);
+      fprintf(stderr,"     You must pass here exactly one time (the first time ");
+      fprintf(stderr,"you call the MMG2D_Get_tensorSol function).\n");
+      fprintf(stderr,"     If not, the number of call of this function");
+      fprintf(stderr," exceed the number of points: %d\n ",met->np);
     }
   }
 
   met->npi++;
 
   if ( met->npi > met->np ) {
-    fprintf(stdout,"  ## Error: unable to get solution.\n");
-    fprintf(stdout,"     The number of call of MMG2D_Get_tensorSol function");
-    fprintf(stdout," can not exceed the number of points: %d\n ",met->np);
+    fprintf(stderr,"\n  ## Error: %s: unable to get solution.\n",__func__);
+    fprintf(stderr,"     The number of call of MMG2D_Get_tensorSol function");
+    fprintf(stderr," can not exceed the number of points: %d\n ",met->np);
     return(0);
   }
 
@@ -1109,7 +1146,8 @@ int MMG2D_Set_tensorSols(MMG5_pSol met, double *sols) {
   int k,j;
 
   if ( !met->np ) {
-    fprintf(stderr,"  ## Error: You must set the number of solution with the");
+    fprintf(stderr,"\n  ## Error: %s: You must set the number"
+            " of solution with the",__func__);
     fprintf(stderr," MMG2D_Set_solSize function before setting values");
     fprintf(stderr," in solution structure \n");
     return(0);
@@ -1145,18 +1183,20 @@ int MMG2D_Get_tensorSols(MMG5_pSol met, double *sols) {
 int MMG2D_Chk_meshData(MMG5_pMesh mesh,MMG5_pSol met) {
 
   if ( (mesh->npi != mesh->np) || (mesh->nti != mesh->nt) ) {
-    fprintf(stdout,"  ## Error: if you don't use the MMG2D_loadMesh function,");
-    fprintf(stdout," you must call the MMG2D_Set_meshSize function to have a");
-    fprintf(stdout," valid mesh.\n");
-    fprintf(stdout," Missing datas.\n");
+    fprintf(stderr,"\n  ## Error: %s: if you don't use the MMG2D_loadMesh function,",
+            __func__);
+    fprintf(stderr," you must call the MMG2D_Set_meshSize function to have a");
+    fprintf(stderr," valid mesh.\n");
+    fprintf(stderr," Missing datas.\n");
     return(0);
   }
 
   if ( met->npi != met->np ) {
-    fprintf(stdout,"  ## Error: if you don't use the MMG2D_loadMet function,");
-    fprintf(stdout," you must call the MMG2D_Set_solSize function to have a");
-    fprintf(stdout," valid solution.\n");
-    fprintf(stdout," Missing datas.\n");
+    fprintf(stderr,"\n  ## Error: %s: if you don't use the MMG2D_loadMet function,",
+            __func__);
+    fprintf(stderr," you must call the MMG2D_Set_solSize function to have a");
+    fprintf(stderr," valid solution.\n");
+    fprintf(stderr," Missing datas.\n");
     return(0);
   }
 
@@ -1164,19 +1204,19 @@ int MMG2D_Chk_meshData(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( mesh->info.ddebug ) {
     if ( (!mesh->np) || (!mesh->point) ||
          (!mesh->nt)  ) {
-      fprintf(stdout,"  ** MISSING DATA.\n");
-      fprintf(stdout," Check that your mesh contains points.\n");
-      fprintf(stdout," Exit program.\n");
+      fprintf(stderr,"  ** MISSING DATA.\n");
+      fprintf(stderr," Check that your mesh contains points.\n");
+      fprintf(stderr," Exit program.\n");
       return(0);
     }
   }
 
   if ( mesh->dim != 2 ) {
-    fprintf(stdout,"  ** 2 DIMENSIONAL MESH NEEDED. Exit program.\n");
+    fprintf(stderr,"  ** 2 DIMENSIONAL MESH NEEDED. Exit program.\n");
     return(0);
   }
   if ( met->dim != 2 ) {
-    fprintf(stdout,"  ** WRONG DIMENSION FOR METRIC. Exit program.\n");
+    fprintf(stderr,"  ** WRONG DIMENSION FOR METRIC. Exit program.\n");
     return(0);
   }
   if ( !mesh->ver )  mesh->ver = 2;
