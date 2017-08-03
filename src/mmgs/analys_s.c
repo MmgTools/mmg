@@ -818,25 +818,25 @@ int _MMGS_analys(MMG5_pMesh mesh) {
 
   /* set tria edges tags */
   if ( !assignEdge(mesh) ) {
-    fprintf(stderr,"  ## Analysis problem. Exit program.\n");
+    fprintf(stderr,"\n  ## Analysis problem. Exit program.\n");
     return(0);
   }
 
   /* create adjacency */
   if ( !_MMGS_hashTria(mesh) ) {
-    fprintf(stderr,"  ## Hashing problem. Exit program.\n");
+    fprintf(stderr,"\n  ## Hashing problem. Exit program.\n");
     return(0);
   }
 
   /* delete badly shaped elts */
   /*if ( mesh->info.badkal && !delbad(mesh) ) {
-    fprintf(stderr,"  ## Geometry trouble. Exit program.\n");
+    fprintf(stderr,"\n  ## Geometry trouble. Exit program.\n");
     return(0);
     }*/
 
   /* identify connexity */
   if ( !setadj(mesh) ) {
-    fprintf(stderr,"  ## Topology problem. Exit program.\n");
+    fprintf(stderr,"\n  ## Topology problem. Exit program.\n");
     return(0);
   }
 
@@ -845,25 +845,25 @@ int _MMGS_analys(MMG5_pMesh mesh) {
 
   /* check for ridges */
   if ( mesh->info.dhd > _MMG5_ANGLIM && !setdhd(mesh) ) {
-    fprintf(stderr,"  ## Geometry problem. Exit program.\n");
+    fprintf(stderr,"\n  ## Geometry problem. Exit program.\n");
     return(0);
   }
 
   /* identify singularities */
   if ( !_MMG5_singul(mesh) ) {
-    fprintf(stderr,"  ## Singularity problem. Exit program.\n");
+    fprintf(stderr,"\n  ## Singularity problem. Exit program.\n");
     return(0);
   }
 
   /* define normals */
   if ( !mesh->xp ) {
     if ( !norver(mesh) ) {
-      fprintf(stderr,"  ## Normal problem. Exit program.\n");
+      fprintf(stderr,"\n  ## Normal problem. Exit program.\n");
       return(0);
     }
     /* regularize normals */
     if ( mesh->info.nreg && !regnor(mesh) ) {
-      fprintf(stderr,"  ## Normal regularization problem. Exit program.\n");
+      fprintf(stderr,"\n  ## Normal regularization problem. Exit program.\n");
       return(0);
     }
   }

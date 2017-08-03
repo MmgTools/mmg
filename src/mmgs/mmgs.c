@@ -200,10 +200,10 @@ int _MMGS_defaultOption(MMG5_pMesh mesh,MMG5_pSol met) {
   chrono(ON,&(ctim[0]));
 
   if ( mesh->info.npar ) {
-    fprintf(stderr,"\n  ## Error: "
+    fprintf(stderr,"\n  ## Error: %s: "
             "unable to save of a local parameter file with"
             " the default parameters values because local parameters"
-            " are provided.\n");
+            " are provided.\n",__func__);
     _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
   }
 
@@ -213,7 +213,7 @@ int _MMGS_defaultOption(MMG5_pMesh mesh,MMG5_pSol met) {
   chrono(ON,&(ctim[1]));
 
   if ( met->np && (met->np != mesh->np) ) {
-    fprintf(stderr,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
+    fprintf(stderr,"\n  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
     _MMG5_DEL_MEM(mesh,met->m,(met->size*(met->npmax+1))*sizeof(double));
     met->np = 0;
   }
@@ -249,8 +249,8 @@ int _MMGS_defaultOption(MMG5_pMesh mesh,MMG5_pSol met) {
   /* Save the local parameters file */
   mesh->mark = 0;
   if ( !_MMGS_writeLocalParam(mesh) ) {
-    fprintf(stderr,"  ## Error: Unable to save the local parameters file.\n"
-            "            Exit program.\n");
+    fprintf(stderr,"\n  ## Error: %s: unable to save the local parameters file.\n"
+            "            Exit program.\n",__func__);
      _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
   }
 
@@ -309,7 +309,7 @@ int main(int argc,char *argv[]) {
   if ( !msh ) {
     ier = MMGS_loadSol(mesh,met,met->namein);
     if ( ier==-1 ) {
-      fprintf(stderr,"  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
+      fprintf(stderr,"\n  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
       _MMGS_RETURN_AND_FREE(mesh,met,MMG5_STRONGFAILURE);
     }
   }

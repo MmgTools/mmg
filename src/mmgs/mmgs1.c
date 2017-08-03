@@ -211,6 +211,7 @@ int chkedg(MMG5_pMesh mesh,int iel) {
   double   ps,ps2,cosn,ux,uy,uz,ll,li,dd,hausd,hmax;
   int      l,isloc;
   char     i,i1,i2;
+  static char mmgWarn0 = 0, mmgWarn1 = 0;
 
   pt   = &mesh->tria[iel];
   p[0] = &mesh->point[pt->v[0]];
@@ -295,7 +296,11 @@ int chkedg(MMG5_pMesh mesh,int iel) {
       else{
         if(!((p[i1]->tag & MG_NOM) ||  MG_EDG(p[i1]->tag) ) ) {
           //  if(t[i1][0] > 10) {
-          fprintf(stderr,"1. warning geometrical problem\n");
+          if ( !mmgWarn0 ) {
+            fprintf(stderr,"\n  ## Warning: %s: a- at least 1 geometrical"
+                    " problem\n",__func__);
+            mmgWarn0 = 1;
+          }
           return(0);
         }
         memcpy(t1,t[i1],3*sizeof(double));
@@ -309,7 +314,11 @@ int chkedg(MMG5_pMesh mesh,int iel) {
       }
       else{
         if(!((p[i2]->tag & MG_NOM) || MG_EDG(p[i2]->tag) ) ) {
-          fprintf(stderr,"2. warning geometrical problem\n");
+          if ( !mmgWarn1 ) {
+            fprintf(stderr,"\n  ## Warning: %s: b- at least 1 geometrical"
+                    " problem\n",__func__);
+            mmgWarn1 = 1;
+          }
           return(0);
         }
         memcpy(t2,t[i2],3*sizeof(double));
@@ -488,8 +497,10 @@ int _MMGS_delPatternPts(MMG5_pMesh mesh,_MMG5_Hash hash)
       if ( vx[i] > 0 ) {
         _MMGS_delPt(mesh,vx[i]);
         if ( !_MMG5_hashUpdate(&hash,pt->v[i1],pt->v[i2],0) ) {
-          printf("  ## Error: Unable to delete point idx along edge %d %d.\n",
-                 pt->v[i1], pt->v[i2]);
+          fprintf(stderr,"\n  ## Error: %s: unable to delete point idx"
+                  " along edge %d %d.\n", __func__,
+                  _MMGS_indPt(mesh,pt->v[i1]),
+                  _MMGS_indPt(mesh,pt->v[i2]));
           _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
           return 0;
         }
@@ -519,6 +530,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   int           vx[3],i,j,ip,ip1,ip2,ier,k,ns,nc,ni,ic,nt,it;
   char          i1,i2;
   static double uv[3][2] = { {0.5,0.5}, {0.,0.5}, {0.5,0.} };
+  static char   mmgWarn0=0,mmgWarn1=0,mmgWarn2=0,mmgWarn3=0;
 
   if ( !_MMG5_hashNew(mesh,&hash,mesh->np,3*mesh->np) ) return -1;
   ns = 0;
@@ -569,7 +581,8 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         if ( !ip ) {
           /* reallocation of point table */
           _MMGS_POINT_REALLOC(mesh,met,ip,mesh->gap,
-                              fprintf(stderr,"  ## Error: unable to allocate a new point.\n");
+                              fprintf(stderr,"\n  ## Error: %s: unable to"
+                                      " allocate a new point.\n",__func__);
                               _MMG5_INCREASE_MEM_MESSAGE();
                               _MMGS_delPatternPts( mesh, hash);
                               return -1
@@ -621,8 +634,11 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         }
 
         if ( !ier ) {
-          printf ( "  ## Unable to interpolate metric between points %d and %d.\n",
-                   _MMGS_indPt(mesh,ip1),_MMGS_indPt(mesh,ip2));
+          if ( !mmgWarn0 ) {
+            fprintf(stderr,"\n  ## Error: %s: unable to interpolate at least"
+                    " 1 metric.\n",__func__);
+            mmgWarn0 = 1;
+          }
           return(-1);
         }
       }
@@ -643,7 +659,11 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           ppt->n[2] *= dd;
         }
         else {
-          printf("  ## Warning: Flattened angle around ridge. Unable to split it.\n");
+          if ( !mmgWarn1 ) {
+            mmgWarn1 = 1;
+            fprintf(stderr,"\n  ## Warning: %s: flattened angle around ridge."
+                    " Unable to split it.\n",__func__);
+          }
           if ( !_MMGS_delPatternPts( mesh, hash) ) return -1;
         }
       }
@@ -764,17 +784,23 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         }
         else {
           if ( it==20 && (mesh->info.ddebug || mesh->info.imprim > 5) ) {
-            printf("  ## Warning: unable to find a valid pattern to split.\n"
-                   "              Point(s) deletion." );
+            if ( !mmgWarn2 ) {
+              fprintf(stderr,"\n  ## Warning: %s: surfacic pattern: unable to"
+                      " find a valid split for at least 1 point. Point(s)"
+                      " deletion.",__func__ );
+              mmgWarn2 = 1;
+            }
           }
           for (i=0; i<3; i++) {
             if ( vx[i] > 0 ) {
               if ( !_MMG5_hashUpdate(&hash,pt->v[_MMG5_iprv2[i]],
                                      pt->v[_MMG5_inxt2[i]],0) ) {
-                  printf("  ## Error: Unable to delete point idx along edge %d %d.\n",
-                         pt->v[_MMG5_iprv2[i]], pt->v[_MMG5_inxt2[i]]);
-                  _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
-                  return -1;
+                fprintf(stderr,"\n  ## Error: %s: unable to delete point"
+                        " idx along edge %d %d.\n",
+                        __func__,_MMGS_indPt(mesh,pt->v[_MMG5_iare[ia][0]]),
+                        _MMGS_indPt(mesh,pt->v[_MMG5_iare[ia][1]]));
+                _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
+                return -1;
               }
               _MMGS_delPt(mesh,vx[i]);
             }
@@ -807,7 +833,11 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
       if ( MG_GET(pt->flag,i) ) {
         vx[i] = _MMG5_hashGet(&hash,pt->v[i1],pt->v[i2]);
         if ( !vx[i] ) {
-          fprintf(stderr,"Error: unable to create point on edge.\n Exit program.\n");
+          if ( !mmgWarn3 ) {
+            mmgWarn3 = 1;
+            fprintf(stderr,"\n  ## Error: %s: unable to create point on"
+                    " at least 1 edge.\n Exit program.\n",__func__);
+          }
           return -1;
         }
         j = i;
@@ -1143,7 +1173,7 @@ static int adptri(MMG5_pMesh mesh,MMG5_pSol met) {
     if ( !mesh->info.noinsert ) {
       ns = adpspl(mesh,met);
       if ( ns < 0 ) {
-        fprintf(stderr,"  ## Unable to complete mesh. Exit program.\n");
+        fprintf(stderr,"\n  ## Unable to complete mesh. Exit program.\n");
         return(0);
       }
 
@@ -1153,7 +1183,7 @@ static int adptri(MMG5_pMesh mesh,MMG5_pSol met) {
 
       nc = adpcol(mesh,met);
       if ( nc < 0 ) {
-        fprintf(stderr,"  ## Unable to complete mesh. Exit program.\n");
+        fprintf(stderr,"\n  ## Unable to complete mesh. Exit program.\n");
         return(0);
       }
     }
@@ -1165,7 +1195,7 @@ static int adptri(MMG5_pMesh mesh,MMG5_pSol met) {
     if ( !mesh->info.noswap ) {
       nf = swpmsh(mesh,met,2);
       if ( nf < 0 ) {
-        fprintf(stderr,"  ## Unable to improve mesh. Exiting.\n");
+        fprintf(stderr,"\n  ## Unable to improve mesh. Exiting.\n");
         return(0);
       }
     }
@@ -1174,7 +1204,7 @@ static int adptri(MMG5_pMesh mesh,MMG5_pSol met) {
     if ( !mesh->info.nomove ) {
       nm = movtri(mesh,met,1);
       if ( nm < 0 ) {
-        fprintf(stderr,"  ## Unable to improve mesh. Exiting.\n");
+        fprintf(stderr,"\n  ## Unable to improve mesh. Exiting.\n");
         return(0);
       }
     }
@@ -1203,7 +1233,7 @@ static int adptri(MMG5_pMesh mesh,MMG5_pSol met) {
     if ( !mesh->info.nomove ) {
       nm = movtri(mesh,met,5);
       if ( nm < 0 ) {
-        fprintf(stderr,"  ## Unable to improve mesh.\n");
+        fprintf(stderr,"\n  ## Unable to improve mesh.\n");
         return(0);
       }
       nnm += nm;
@@ -1213,7 +1243,7 @@ static int adptri(MMG5_pMesh mesh,MMG5_pSol met) {
     if ( !mesh->info.noswap ) {
       nf = swpmsh(mesh,met,2);
       if ( nf < 0 ) {
-        fprintf(stderr,"  ## Unable to improve mesh. Exiting.\n");
+        fprintf(stderr,"\n  ## Unable to improve mesh. Exiting.\n");
         return(0);
       }
       nnf += nf;
@@ -1230,7 +1260,7 @@ static int adptri(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( !mesh->info.nomove ) {
     nm = movtri(mesh,met,5);
     if ( nm < 0 ) {
-      fprintf(stderr,"  ## Unable to improve mesh.\n");
+      fprintf(stderr,"\n  ## Unable to improve mesh.\n");
       return(0);
     }
   }
@@ -1263,19 +1293,19 @@ static int anatri(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
       /* analyze surface */
       ns = anaelt(mesh,met,typchk);
       if ( ns < 0 ) {
-        fprintf(stderr,"  ## Unable to complete surface mesh. Exit program.\n");
+        fprintf(stderr,"\n  ## Unable to complete surface mesh. Exit program.\n");
         return(0);
       }
 
       if ( !_MMGS_hashTria(mesh) ) {
-        fprintf(stderr,"  ## Hashing problem. Exit program.\n");
+        fprintf(stderr,"\n  ## Hashing problem. Exit program.\n");
         return(0);
       }
 
       /* collapse short edges */
       nc = colelt(mesh,met,typchk);
       if ( nc < 0 ) {
-        fprintf(stderr,"  ## Unable to collapse mesh. Exiting.\n");
+        fprintf(stderr,"\n  ## Unable to collapse mesh. Exiting.\n");
         return(0);
       }
     }
@@ -1288,7 +1318,7 @@ static int anatri(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
     if ( !mesh->info.noswap ) {
       nf = swpmsh(mesh,met,typchk);
       if ( nf < 0 ) {
-        fprintf(stderr,"  ## Unable to improve mesh. Exiting.\n");
+        fprintf(stderr,"\n  ## Unable to improve mesh. Exiting.\n");
         return(0);
       }
     }
@@ -1322,7 +1352,7 @@ int _MMG5_mmgs1(MMG5_pMesh mesh,MMG5_pSol met) {
     fprintf(stdout,"  ** GEOMETRIC MESH\n");
 
   if ( !anatri(mesh,met,1) ) {
-    fprintf(stderr,"  ## Unable to split mesh-> Exiting.\n");
+    fprintf(stderr,"\n  ## Unable to split mesh-> Exiting.\n");
     return(0);
   }
   /* renumbering if available */
@@ -1335,19 +1365,19 @@ int _MMG5_mmgs1(MMG5_pMesh mesh,MMG5_pSol met) {
 
   /* define metric map */
   if ( !_MMG5_defsiz(mesh,met) ) {
-    fprintf(stderr,"  ## Metric undefined. Exit program.\n");
+    fprintf(stderr,"\n  ## Metric undefined. Exit program.\n");
     return(0);
   }
   if ( mesh->info.hgrad > 0. ) {
     if ( mesh->info.imprim )   fprintf(stdout,"\n  -- GRADATION : %8f\n",exp(mesh->info.hgrad));
     if (!gradsiz(mesh,met) ) {
-      fprintf(stderr,"  ## Gradation problem. Exit program.\n");
+      fprintf(stderr,"\n  ## Gradation problem. Exit program.\n");
       return(0);
     }
   }
 
   if ( !anatri(mesh,met,2) ) {
-    fprintf(stderr,"  ## Unable to proceed adaptation. Exit program.\n");
+    fprintf(stderr,"\n  ## Unable to proceed adaptation. Exit program.\n");
     return(0);
   }
 
@@ -1356,7 +1386,7 @@ int _MMG5_mmgs1(MMG5_pMesh mesh,MMG5_pSol met) {
     return(0);
 
   if ( !adptri(mesh,met) ) {
-    fprintf(stderr,"  ## Unable to adapt. Exit program.\n");
+    fprintf(stderr,"\n  ## Unable to adapt. Exit program.\n");
     return(0);
   }
 
