@@ -64,49 +64,75 @@ int _MMG5_mmgsChkmsh(MMG5_pMesh mesh,int severe,int base) {
             adj = adja[i] / 3;
             voy = adja[i] % 3;
             if ( !adj && !(pt1->tag[i] & MG_GEO) ) {
-                fprintf(stderr,"  0. Missing edge tag %d %d\n",k,adj);
-                fprintf(stderr,"triangle %d: %d %d %d \n",k,pt1->v[0],pt1->v[1],pt1->v[2]);
-                fprintf(stderr,"tag (%d): %d %d %d \n",k,pt1->tag[0],pt1->tag[1],pt1->tag[2]);
+                fprintf(stderr,"  ## Error: %s: 0. at least 1 missing edge"
+                        " tag %d %d\n",__func__,_MMGS_indElt(mesh,k),
+                        _MMGS_indElt(mesh,adj));
+                fprintf(stderr,"triangle %d: %d %d %d \n",_MMGS_indElt(mesh,k),
+                        _MMGS_indPt(mesh,pt1->v[0]),_MMGS_indPt(mesh,pt1->v[1]),
+                        _MMGS_indPt(mesh,pt1->v[2]));
+                fprintf(stderr,"tag (%d): %d %d %d \n",_MMGS_indElt(mesh,k),
+                        pt1->tag[0],pt1->tag[1],pt1->tag[2]);
                 return(0);
             }
             if ( adj == k ) {
-                fprintf(stderr,"  1. Wrong adjacency %d %d\n",k,adj);
-                fprintf(stderr,"triangle %d: %d %d %d \n",k,pt1->v[0],pt1->v[1],pt1->v[2]);
-                fprintf(stderr,"adj (%d): %d %d %d \n",k,adja[0]/3,adja[1]/3,adja[2]/3);
+                fprintf(stderr,"\n  ## Error: %s: 1. at least 1 wrong adjacency %d %d\n",
+                        __func__,_MMGS_indElt(mesh,k),_MMGS_indElt(mesh,adj));
+                fprintf(stderr,"triangle %d: %d %d %d \n",_MMGS_indElt(mesh,k),
+                        _MMGS_indPt(mesh,pt1->v[0]),_MMGS_indPt(mesh,pt1->v[1]),
+                        _MMGS_indPt(mesh,pt1->v[2]));
+                fprintf(stderr,"adj (%d): %d %d %d \n",_MMGS_indElt(mesh,k),
+                        _MMGS_indElt(mesh,adja[0]/3),_MMGS_indElt(mesh,adja[1]/3),
+                        _MMGS_indElt(mesh,adja[2]/3));
                 return(0);
             }
             pt2 = &mesh->tria[adj];
             if ( !MG_EOK(pt2) ) {
-                fprintf(stderr,"  4. Invalid adjacent %d %d\n",adj,k);
+                fprintf(stderr,"\n  ## Error: %s: 4. At least 1 invalid adjacent"
+                        " %d %d\n",__func__,_MMGS_indElt(mesh,adj),
+                        _MMGS_indElt(mesh,k));
                 fprintf(stderr,"vertices of k   %d: %d %d %d\n",
-                       k,pt1->v[0],pt1->v[1],pt1->v[2]);
+                        _MMGS_indElt(mesh,k),_MMGS_indPt(mesh,pt1->v[0]),
+                        _MMGS_indPt(mesh,pt1->v[1]),_MMGS_indPt(mesh,pt1->v[2]));
                 fprintf(stderr,"vertices of adj %d: %d %d %d \n",
-                       adj,pt2->v[0],pt2->v[1],pt2->v[2]);
+                        _MMGS_indElt(mesh,adj),_MMGS_indPt(mesh,pt2->v[0]),
+                        _MMGS_indPt(mesh,pt2->v[1]),_MMGS_indPt(mesh,pt2->v[2]));
                 return(0);
             }
             if ( (pt1->tag[i] != pt2->tag[voy]) || (pt1->edg[i] != pt2->edg[voy] ) ) {
-                fprintf(stderr,"  3. Wrong tag/ref %d %d  %d - %d\n",
-                        k,adj,pt1->tag[i],pt2->tag[voy]);
+                fprintf(stderr,"\n  ## Error: %s: 3. Wrong tag/ref %d %d"
+                        "  %d - %d\n",__func__,_MMGS_indElt(mesh,k),
+                        _MMGS_indElt(mesh,adj),pt1->tag[i],pt2->tag[voy]);
                 return(0);
             }
             adjb = &mesh->adja[3*(adj-1)+1];
             adj1 = adjb[voy] / 3;
             voy1 = adjb[voy] % 3;
             if ( adj1 != k || voy1 != i ) {
-                fprintf(stderr,"  2. Wrong adjacency %d %d\n",k,adj1);
-                fprintf(stderr,"vertices of %d: %d %d %d \n",k,
-                       pt1->v[0],pt1->v[1],pt1->v[2]);
-                fprintf(stderr,"vertices of adj %d: %d %d %d \n",adj,
-                       pt2->v[0],pt2->v[1],pt2->v[2]);
-                fprintf(stderr,"adj(%d): %d %d %d\n",k,adja[0]/3,adja[1]/3,adja[2]/3);
-                fprintf(stderr,"adj(%d): %d %d %d\n",adj,adjb[0]/3,adjb[1]/3,adjb[2]/3);
+                fprintf(stderr,"\n  ## Error: %s: 2. at least 1 wrong"
+                        " adjacency %d %d\n",__func__, _MMGS_indElt(mesh,k),
+                         _MMGS_indElt(mesh,adj1));
+                fprintf(stderr,"vertices of %d: %d %d %d \n",_MMGS_indElt(mesh,k),
+                        _MMGS_indPt(mesh,pt1->v[0]),_MMGS_indPt(mesh,pt1->v[1]),
+                        _MMGS_indPt(mesh,pt1->v[2]));
+                fprintf(stderr,"vertices of adj %d: %d %d %d \n",
+                        _MMGS_indElt(mesh,adj),
+                        _MMGS_indPt(mesh,pt2->v[0]),_MMGS_indPt(mesh,pt2->v[1]),
+                        _MMGS_indPt(mesh,pt2->v[2]));
+                fprintf(stderr,"adj(%d): %d %d %d\n",_MMGS_indElt(mesh,k),
+                        _MMGS_indElt(mesh,adja[0]/3),_MMGS_indElt(mesh,adja[1]/3),
+                        _MMGS_indElt(mesh,adja[2]/3));
+                fprintf(stderr,"adj(%d): %d %d %d\n",_MMGS_indElt(mesh,adj),
+                        _MMGS_indElt(mesh,adjb[0]/3),_MMGS_indElt(mesh,adjb[1]/3),
+                        _MMGS_indElt(mesh,adjb[2]/3));
                 return(0);
             }
             if ( !MS_SIN(pt1->tag[i]) ) {
                 j1 = _MMG5_inxt2[voy];
                 j2 = _MMG5_iprv2[voy];
                 if ( pt2->v[j2] != pt1->v[i1] || pt2->v[j1] != pt1->v[i2] ) {
-                    fprintf(stderr,"  8. Wrong orientation %d %d\n",k,adj);
+                    fprintf(stderr,"\n  ## Error: %s: 8. at least 1 wrong"
+                            " orientation %d %d\n",__func__,_MMGS_indElt(mesh,k),
+                            _MMGS_indElt(mesh,adj));
                     return(0);
                 }
             }
@@ -126,8 +152,11 @@ int _MMG5_mmgsChkmsh(MMG5_pMesh mesh,int severe,int base) {
             ip  = pt1->v[i];
             ppt = &mesh->point[ip];
             if ( !MG_VOK(ppt) ) {
-                fprintf(stderr,"  6. Unused vertex %d  %d\n",k,ip);
-                fprintf(stderr,"%d %d %d\n",pt1->v[0],pt1->v[1],pt1->v[2]);
+                fprintf(stderr,"\n  ## Error: %s: 6. at least 1 unused"
+                        " vertex %d  %d\n",__func__,
+                        _MMGS_indElt(mesh,k),_MMGS_indPt(mesh,ip));
+                fprintf(stderr,"%d %d %d\n",_MMGS_indPt(mesh,pt1->v[0]),
+                        _MMGS_indPt(mesh,pt1->v[1]),_MMGS_indPt(mesh,pt1->v[2]));
                 return(0);
             }
             else if ( MS_SIN(ppt->tag) )  continue;
@@ -139,7 +168,9 @@ int _MMG5_mmgsChkmsh(MMG5_pMesh mesh,int severe,int base) {
                 nk  = list[l] % 3;
                 pt2 = &mesh->tria[kk];
                 if ( pt2->v[nk] != ip ) {
-                    fprintf(stderr,"  5. Wrong ball %d, %d\n",ip,pt2->v[nk]);
+                    fprintf(stderr,"\n  ## Error: %s: 5. at least 1 wrong"
+                            " ball %d, %d\n",__func__,_MMGS_indPt(mesh,ip),
+                            _MMGS_indPt(mesh,pt2->v[nk]));
                     return(0);
                 }
             }
@@ -154,7 +185,8 @@ int _MMG5_mmgsChkmsh(MMG5_pMesh mesh,int severe,int base) {
                     }
             }
             if ( len != lon ) {
-                fprintf(stderr,"  7. Incorrect ball %d: %d %d\n",ip,lon,len);
+                fprintf(stderr,"\n  ## Error: %s: 7. at least 1 incorrect"
+                        " ball %d: %d %d\n",__func__,_MMGS_indPt(mesh,ip),lon,len);
                 ppt->tag |= MG_CRN + MG_REQ;
             }
         }
