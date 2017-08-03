@@ -218,8 +218,8 @@ int _MMG3D_prilen(MMG5_pMesh mesh, MMG5_pSol met, char metRidTyp) {
       nq = pt->v[i1];
 
       if(!_MMG5_hashEdge(mesh,&hash,np,nq,0)){
-        fprintf(stderr,"%s:%d: Error: function _MMG5_hashEdge return 0\n",
-                __FILE__,__LINE__);
+        fprintf(stderr,"  ## Error: %s: function _MMG5_hashEdge return 0\n",
+                __func__);
         return 0;
       }
     }
@@ -305,8 +305,9 @@ int _MMG3D_prilen(MMG5_pMesh mesh, MMG5_pSol met, char metRidTyp) {
  */
 static int _MMG3D_printquaLES(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTetra    pt;
-  double   rap,rapmin,rapmax,rapavg,med,good;
-  int      k,iel,ok,nex,his[5];
+  double         rap,rapmin,rapmax,rapavg,med,good;
+  int            k,iel,ok,nex,his[5];
+  static char    mmgWarn0=0;
 
   /*compute tet quality*/
   for (k=1; k<=mesh->ne; k++) {
@@ -332,8 +333,9 @@ static int _MMG3D_printquaLES(MMG5_pMesh mesh,MMG5_pSol met) {
       continue;
     }
     ok++;
-    if ( _MMG5_orvol(mesh->point,pt->v) < 0.0 ) {
-      fprintf(stdout," ## Warning: negative volume\n");
+    if ( (!mmgWarn0) && (_MMG5_orvol(mesh->point,pt->v) < 0.0) ) {
+      mmgWarn0 = 1;
+      fprintf(stderr,"  ## Warning: %s: at least 1 negative volume.\n",__func__);
     }
     rap = 1 - _MMG3D_ALPHAD * pt->qual;
     if ( rap > rapmin ) {
@@ -403,9 +405,10 @@ static int _MMG3D_printquaLES(MMG5_pMesh mesh,MMG5_pSol met) {
  *
  */
 int _MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
-  MMG5_pTetra    pt;
-  double   rap,rapmin,rapmax,rapavg,med,good;
-  int      i,k,iel,ok,ir,imax,nex,his[5];
+  MMG5_pTetra pt;
+  double      rap,rapmin,rapmax,rapavg,med,good;
+  int         i,k,iel,ok,ir,imax,nex,his[5];
+  static char mmgWarn0 = 0;
 
   if( mesh->info.optimLES ) return(_MMG3D_printquaLES(mesh,met));
 
@@ -441,8 +444,8 @@ int _MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
       continue;
     }
     ok++;
-    if ( _MMG5_orvol(mesh->point,pt->v) < 0.0 ) {
-      fprintf(stdout," ## Warning: negative volume\n");
+    if ( (!mmgWarn0) && (_MMG5_orvol(mesh->point,pt->v) < 0.0) ) {
+      fprintf(stderr,"  ## Warning: %s: at least 1 negative volume\n",__func__);
     }
     rap = _MMG3D_ALPHAD * pt->qual;
     if ( rap < rapmin ) {
@@ -498,10 +501,11 @@ int _MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
  *
  */
 int _MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
-  MMG5_pTetra    pt;
-  MMG5_pPoint    ppt;
-  double   rap,rapmin,rapmax,rapavg,med,good;
-  int      i,k,iel,ok,ir,imax,nex,his[5],n,nrid;
+  MMG5_pTetra pt;
+  MMG5_pPoint ppt;
+  double      rap,rapmin,rapmax,rapavg,med,good;
+  int         i,k,iel,ok,ir,imax,nex,his[5],n,nrid;
+  static char mmgWarn0 = 0;
 
   if( mesh->info.optimLES ) return(_MMG3D_printquaLES(mesh,met));
 
@@ -529,8 +533,10 @@ int _MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
       continue;
     }
     ok++;
-    if ( _MMG5_orvol(mesh->point,pt->v) < 0.0 ) {
-      fprintf(stdout," ## Warning: negative volume\n");
+    if ( (!mmgWarn0) && (_MMG5_orvol(mesh->point,pt->v) < 0.0) ) {
+      mmgWarn0 = 1;
+      fprintf(stderr,"  ## Warning: %s: at least 1 negative volume.\n",
+              __func__);
     }
     n = 0;
     for(i=0 ; i<4 ; i++) {

@@ -273,7 +273,6 @@ static int MMG3D_typelt(MMG5_pMesh mesh,int iel,int *item) {
     default:
       item[0] = iarmin;
       item[1] = iarmax;
-      //printf("default obtus %d\n",nobtus);
       return(7);
     }
   }
@@ -303,7 +302,6 @@ static int MMG3D_typelt(MMG5_pMesh mesh,int iel,int *item) {
     default:
       item[0] = iarmin;
       item[1] = iarmax;
-      //printf("default aigu\n");
       return(7);
     }
   }
@@ -488,9 +486,6 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
     for (k=1 ; k<=ne ; k++) {
       pt = &mesh->tetra[k];
       if(!MG_EOK(pt)  || (pt->tag & MG_REQ) ) continue;
-      /* if(pt->qual <= 3.117138e-07) {printf("k %d ityp %d %e npeau %d\n",k,ityp,pt->qual,npeau);
-         ddebug = 1;}
-         else*/
       ddebug = 0;
 
       if(pt->qual > crit) continue;
@@ -536,7 +531,7 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
         if(mesh->info.noswap) break;
 
         ier = _MMG3D_swpItem(mesh,met,octree,k,item[0]);
-        if(ddebug) printf("on swp %d ?\n",ier);
+
         if(ier > 0) {
           nd++;
           ds[ityp]++;
@@ -549,7 +544,6 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
             /* } else */
             /*   OCRIT *= 0.75; */
             ier = _MMG3D_splitItem(mesh,met,octree,k,item[0],1.01);
-            if(ddebug) printf("on split %d ?\n",ier);
 
             if(ier) {
               nd++;
@@ -559,7 +553,6 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
           } /*end noinsert*/
 
           ier = _MMG3D_swpalmostall(mesh,met,octree,k,item[0]);
-          if(ddebug) printf("on swp2 %d ?\n",ier);
 
           if(ier > 0) {
             nd++;
@@ -569,7 +562,6 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
 
           if ( !mesh->info.noinsert ) {
             ier = _MMG3D_splitalmostall(mesh,met,octree,k,item[0]);
-            if(ddebug) printf("on split2 %d ?\n",ier);
 
             if(ier > 0) {
               nd++;
@@ -607,6 +599,7 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
         break;
       }/*end switch*/
     }/*end for k*/
+
     /* printf("bdry : %d %d\n",nbdy,nbdy2); */
     /*  for (k=0; k<=7; k++) */
     /*    if ( cs[k] ) */

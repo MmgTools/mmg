@@ -174,7 +174,6 @@ int _MMG3D_coledges(MMG5_pMesh mesh,MMG5_pSol met,int k,int i) {
         if ( ier < 0 ) return(-1);
         else if(ier) {
           _MMG3D_delPt(mesh,ier);
-          //printf("del succeed\n");
           return(1);
         }
       }
@@ -248,9 +247,7 @@ int MMG3D_optbdry(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree,int k) {
     if(!imove) break;
   }
   if(ier) {
-    //printf("youpi %d\n",ier);
     imove = 1;
-    //return(1);
   }
 
   if(!mesh->info.noinsert) {
@@ -295,7 +292,6 @@ int MMG3D_optbdry(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree,int k) {
         ier = _MMG5_swpbdy(mesh,met,list,ret,it1,octree,2);
         if ( ier < 0 )  return(-1);
         else if(ier) {
-          //printf("swpbdy ok\n");
           return(1);
         }
       }

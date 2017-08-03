@@ -329,7 +329,8 @@ void _MMG3D_placeInListOctree(_MMG3D_octree_s** qlist, _MMG3D_octree_s* q, int i
   memmove(&(qlist[index+2]),&(qlist[index+1]),(size-(index+1))*sizeof(_MMG3D_octree_s*));
   #ifdef DEBUG
   if (index+2+(size-(index+1)>61 || index+1<0)
-    fprintf(stdout, "Error: in placeInListOctree index too large %i > 61\n", index+2+(size-(index+1));
+    fprintf(stderr, "\n  ## Error: %s: index"
+            " too large %i > 61\n",__func__, index+2+(size-(index+1));
   #endif
   qlist[index+1] = q;
 }
@@ -354,7 +355,8 @@ int _MMG3D_seekIndex (double* distList, double dist, int indexMin, int indexMax)
   {
     #ifdef DEBUG
       if (indexMin >= 60 || indexMax>=60)
-        fprintf(stdout,"Error: in seekIndex, index should not be that large %i %i\n",indexMin, indexMax);
+        fprintf(stderr,"\n  ## Error: %s: index should not be that large %i %i.\n",
+                __func__,indexMin, indexMax);
     #endif
     if (dist > distList[indexMax])
       return indexMax;
@@ -367,7 +369,8 @@ int _MMG3D_seekIndex (double* distList, double dist, int indexMin, int indexMax)
 
     #ifdef DEBUG
       if (indexMed >= 60 || indexMed < 0)
-        fprintf(stdout,"Error: in seekIndex, index should not be that large %i\n",indexMed);
+        fprintf(stderr,"\n  ## Error: %s: index should not be that large %i.\n",
+                __func__,indexMed);
     #endif
 
     if (dist > distList[indexMed])
@@ -1034,11 +1037,11 @@ void _MMG3D_printArbre(_MMG3D_pOctree q)
   int i;
   for (i = 0; i<sizeof(int)*8/dim; i++)
   {
-    fprintf(stdout,"\n profondeur %i \n", i);
+    fprintf(stdout,"\n depth %i \n", i);
     _MMG3D_printArbreDepth(q->q0, i, q->nv, dim);
 
   }
-  fprintf(stdout,"\n fin \n");
+  fprintf(stdout,"\n end \n");
 }
 
 /**
@@ -1056,11 +1059,11 @@ void _MMG3D_printSubArbre(_MMG3D_octree_s* q, int nv, int dim)
   int i;
   for (i = 0; i<sizeof(int)*8/dim; i++)
   {
-    fprintf(stdout,"\n profondeur %i \n", i);
+    fprintf(stdout,"\n depth %i \n", i);
     _MMG3D_printArbreDepth(q, i, nv, dim);
 
   }
-  fprintf(stdout,"\n fin \n");
+  fprintf(stdout,"\n end \n");
 }
 
 
@@ -1387,7 +1390,6 @@ int _MMG3D_octreein_ani(MMG5_pMesh mesh,MMG5_pSol sol,_MMG3D_pOctree octree,int 
   if (ncells < 0)
   {
     _MMG5_DEL_MEM(mesh,lococ,octree->nc*sizeof(_MMG3D_octree_s*));
-    //~ fprintf(stdout,"too many cells\n");
     return(0);
   }
   /* Check the octree cells */
