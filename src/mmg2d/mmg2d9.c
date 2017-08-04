@@ -247,6 +247,7 @@ int _MMG2_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itdeg,int *war
   double          hma2,lmax,len;
   int             k,ns,ip,ip1,ip2;
   char            i,i1,i2,imax,ier;
+  static char     mmgWarn0=0;
 
   *warn = 0;
   ns    = 0;
@@ -277,8 +278,11 @@ int _MMG2_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itdeg,int *war
       }
     }
 
-    if ( imax == -1 )
-      fprintf(stdout,"%s:%d: Warning: all edges of tria %d are required or of length null.\n",__FILE__,__LINE__,k);
+    if ( (imax == -1) && (!mmgWarn0) ) {
+      mmgWarn0=1;
+      fprintf(stderr,"\n  ## Warning: %s: at least 1 tria whose all edges"
+              " are required or of length null.\n",__func__);
+    }
 
     if ( lmax < hma2 )  continue;
     else if ( MG_SIN(pt->tag[imax]) ) continue;
@@ -549,12 +553,12 @@ int MMG2_mmg2d9(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met) {
 #ifdef USE_ELAS
     /* Extension of the displacement field */
     if ( !_MMG2_velextLS(mesh,disp) ) {
-      fprintf(stdout,"  ## Problem in func. _MMG2_velextLS. Exit program.\n");
+      fprintf(stderr,"\n  ## Problem in func. _MMG2_velextLS. Exit program.\n");
       return(0);
     }
 #else
-    fprintf(stderr,"  ## Error: you need to compile with the USE_ELAS"
-            " CMake's flag set to ON to use the rigidbody movement.\n");
+    fprintf(stderr,"\n  ## Error: %s: you need to compile with the USE_ELAS"
+            " CMake's flag set to ON to use the rigidbody movement.\n",__func__);
     return(0);
 #endif
     //_MMG2D_saveDisp(mesh,disp);

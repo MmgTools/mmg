@@ -115,6 +115,7 @@ int _MMG2_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, int start, char istart) {
   double           v1, v2;
   int              *adja,k,ip1,ip2,end1;
   char             i,i1,smsgn;
+  static char      mmgWarn=0;
 
   k = start;
   i = _MMG5_inxt2[istart];
@@ -167,7 +168,12 @@ int _MMG2_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, int start, char istart) {
   /* If first stop was due to an external boundary, the second one must too;
      else, the final triangle for the first travel must be that of the second one */
   if ( k != end1 ) {
-    printf("triangle %d, point %d ; unsnap \n",start,mesh->tria[start].v[istart]);
+    if ( !mmgWarn ) {
+      mmgWarn = 1;
+      fprintf(stderr,"\n  ## Warning: %s: unsnap at least 1 point "
+              "(point %d in tri %d).\n",__func__,_MMG2D_indElt(mesh,start),
+              _MMG2D_indPt(mesh,mesh->tria[start].v[istart]));
+    }
     return(0);
   }
   return(1);
@@ -338,7 +344,7 @@ int _MMG2_chkmanimesh(MMG5_pMesh mesh) {
   MMG5_pTria      pt,pt1;
   int             *adja,k,cnt,iel;
   char            i,i1;
-
+  static char     mmgWarn=0;
 
   /* First check: check whether one triangle in the mesh has 3 boundary faces */
   for (k=1; k<=mesh->nt; k++) {
@@ -360,7 +366,11 @@ int _MMG2_chkmanimesh(MMG5_pMesh mesh) {
       }
     }
     if( cnt == 3 ) {
-      printf("Triangle %d: 3 boundary edges\n",k);
+      if ( !mmgWarn ) {
+        mmgWarn = 1;
+        fprintf(stderr,"\n  ## Warning: %s: at least 1 triangle with 3 boundary"
+                " edges.\n",__func__);
+      }
       /* return(0); */
     }
   }
@@ -480,7 +490,8 @@ int _MMG2_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol){
 
       np = _MMG2D_newPt(mesh,c,0);
       if ( !np ) {
-        printf("*** Insufficient memory; abort\n");
+        fprintf(stderr,"\n  ## Error: %s: Insufficient memory; abort\n",
+          __func__);
         return(0);
       }
       sol->m[np] = 0.0;
@@ -618,7 +629,7 @@ int MMG2_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol) {
 
   /* Snap values of the level set function which are very close to 0 to 0 exactly */
   if ( !_MMG2_snapval(mesh,sol,tmp) ) {
-    fprintf(stdout,"  ## Wrong input implicit function. Exit program.\n");
+    fprintf(stderr,"\n  ## Wrong input implicit function. Exit program.\n");
     return(0);
   }
 
@@ -626,7 +637,7 @@ int MMG2_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol) {
 
   /* Creation of adjacency relations in the mesh */
   if ( !MMG2_hashTria(mesh) ) {
-    fprintf(stdout,"  ## Hashing problem. Exit program.\n");
+    fprintf(stderr,"\n  ## Hashing problem. Exit program.\n");
     return(0);
   }
 
@@ -635,37 +646,37 @@ int MMG2_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol) {
 
   /* Transfer the boundary edge references to the triangles */
   if ( !MMG2_assignEdge(mesh) ) {
-    fprintf(stdout,"  ## Problem in setting boundary. Exit program.\n");
+    fprintf(stderr,"\n  ## Problem in setting boundary. Exit program.\n");
     return(0);
   }
   
   /* Reset the MG_ISO field everywhere it appears */
   if ( !_MMG2_resetRef(mesh) ) {
-    fprintf(stdout,"  ## Problem in resetting references. Exit program.\n");
+    fprintf(stderr,"\n  ## Problem in resetting references. Exit program.\n");
     return(0);
   }
 
   /* Effective splitting of the crossed triangles */
   if ( !_MMG2_cuttri_ls(mesh,sol) ) {
-    fprintf(stdout,"  ## Problem in cutting triangles. Exit program.\n");
+    fprintf(stderr,"\n  ## Problem in cutting triangles. Exit program.\n");
     return(0);
   }
 
   /* Set references on the interior / exterior triangles*/
   if ( !_MMG2_setref_ls(mesh,sol) ) {
-    fprintf(stdout,"  ## Problem in setting references. Exit program.\n");
+    fprintf(stderr,"\n  ## Problem in setting references. Exit program.\n");
     return(0);
   }
 
   /* Creation of adjacency relations in the mesh */
   if ( !MMG2_hashTria(mesh) ) {
-    fprintf(stdout,"  ## Hashing problem. Exit program.\n");
+    fprintf(stderr,"\n  ## Hashing problem. Exit program.\n");
     return(0);
   }
   
   /* Check that the resulting mesh is manifold */
   if ( !_MMG2_chkmanimesh(mesh) ) {
-    fprintf(stdout,"  ## No manifold resulting situation. Exit program.\n");
+    fprintf(stderr,"\n  ## No manifold resulting situation. Exit program.\n");
     return(0);
   }
 
@@ -678,5 +689,3 @@ int MMG2_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol) {
 
   return(1);
 }
-
-
