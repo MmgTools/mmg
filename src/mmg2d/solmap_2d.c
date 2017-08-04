@@ -124,7 +124,7 @@ int MMG2D_doSol(MMG5_pMesh mesh,MMG5_pSol sol) {
       dd = 1./sqrt(dd);
     }
     else {
-      fprintf(stderr,"  # Error: %s: Unexpected solution size (%d)\n",
+      fprintf(stderr,"\n  # Error: %s: Unexpected solution size (%d)\n",
               __func__,sol->size);
       return 0;
     }
@@ -368,6 +368,8 @@ int _MMG2_gradsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   }
   while ( ++it < maxit && nu > 0 );
   
-  if ( abs(mesh->info.imprim) > 4 )  fprintf(stdout,"     gradation: %7d updated, %d iter.\n",nup,it);
+  if ( abs(mesh->info.imprim) > 4 )
+    fprintf(stdout,"     gradation: %7d updated, %d iter.\n",nup,it);
+
   return(1);
 }

@@ -55,6 +55,7 @@ int _MMG2_movedgpt(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list, char impro
   double             step,ll1,ll2,o[2],no[2],calold,calnew;
   int                k,iel,ip0,ip1,ip2,it1,it2;
   char               i,i1,i2;
+  static char        mmgWarn0=0,mmgWarn1=0;
     
   pt0 = &mesh->tria[0];
   step = 0.1;
@@ -82,7 +83,11 @@ int _MMG2_movedgpt(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list, char impro
           it2 = 3*iel+i1;
         }
         else if ( ip2 != pt->v[i2] ) {
-          printf("   *** Function movedgpt: three edges connected at point %d - abort.\n",pt->v[i]);
+          if ( !mmgWarn0 ) {
+            mmgWarn0 = 1;
+            fprintf(stderr,"\n  ## Warning: %s: at least 1 point at the "
+                    "intersection of 3 edges. abort.\n",__func__);
+          }
           return 0;
         }
       }
@@ -99,8 +104,12 @@ int _MMG2_movedgpt(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list, char impro
           it2 = 3*iel+i2;
         }
         else if ( ip2 != pt->v[i1] ) {
-          printf("   *** Function movedgpt: three edges connected at point %d - abort.\n",pt->v[i]);
-          return 0;
+          if ( !mmgWarn0 ) {
+            mmgWarn0 = 1;
+            fprintf(stderr,"\n  ## Warning: %s: at least 1 point at the "
+                    "intersection of 3 edges. abort.\n",__func__);
+          }
+         return 0;
         }
       }
     }
@@ -108,8 +117,11 @@ int _MMG2_movedgpt(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list, char impro
   
   /* Check that there are exactly two boundary points connected at p0 */
   if ( ip1 == 0 || ip2 == 0 ) {
-    printf("   *** Function movedgpt: no two edges connected at edge, non"
-           " singular point %d - abort.\n",mesh->tetra[list[0]/3].v[list[0]%3]);
+    if ( !mmgWarn1 ) {
+      mmgWarn1 = 1;
+      fprintf(stderr,"\n  ## Warning: %s: non singular point at end of edge.\n",
+              __func__);
+    }
     return 0;
   }
   

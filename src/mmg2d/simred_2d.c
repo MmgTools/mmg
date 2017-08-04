@@ -117,7 +117,7 @@ int simred(double *m1,double *m2,double *m) {
     /* if ( ddebug ) { */
     /*   _MMG5_eigensym(m,lambda,pp); */
     /*   if ( lambda[0] < -EPSD || lambda[1] < -EPSD ) { */
-    /*     fprintf(stderr,"  ## simred, not a metric !\n"); */
+    /*     fprintf(stderr,"\n  ## simred, not a metric !\n"); */
     /*     fprintf(stderr,"  %.6f %.6f %.6f\n", */
     /*             m[0],m[1],m[2]); */
     /*     fprintf(stderr,"  Lambda %f %f \n",lambda[0],lambda[1]); */

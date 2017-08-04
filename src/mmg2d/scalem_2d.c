@@ -53,6 +53,7 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   double         lambda[2],v[2][2];
   int            i,k,iadr;
   char           sethmin,sethmax;
+  static char    mmgWarn0=0, mmgWarn1=0;
 
   // pd  = mesh->disp;
 
@@ -76,7 +77,7 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   if ( dd > info->delta )
     info->delta = dd;
   if ( info->delta < _MMG5_EPSD ) {
-    fprintf(stdout,"  ## Unable to scale mesh.\n");
+    fprintf(stderr,"\n  ## Error: %s: Unable to scale mesh.\n",__func__);
     return(0);
   }
 
@@ -120,7 +121,7 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
     /* Set default values to hmin/hmax from the bounding box if not provided by
      * the user */
     if ( !MMG5_Set_defaultTruncatureSizes(mesh,sethmin,sethmax) ) {
-      fprintf(stdout,"  Exit program.\n");
+      fprintf(stderr,"  Exit program.\n");
       return 0;
     }
     sethmin = 1;
@@ -141,7 +142,11 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
       sol->m[k] *= dd;
       /* Check the metric */
       if (  (!mesh->info.iso) && sol->m[k] <= 0) {
-        printf("  ## ERROR: WRONG METRIC AT POINT %d -- \n",k);
+        if ( !mmgWarn0 ) {
+          mmgWarn0 = 1;
+          fprintf(stderr,"\n  ## Error: %s: at least 1 wrong metric.\n",
+                  __func__);
+        }
         return(0);
       }
     }
@@ -202,16 +207,21 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
 
         /* Check the input metric */
         if ( !_MMG5_eigensym(m,lambda,v) ) {
-          printf("  ## ERROR: WRONG METRIC AT POINT %d -- \n",k);
+          if ( !mmgWarn0 ) {
+            mmgWarn0 = 1;
+            fprintf(stderr,"\n  ## Error: %s: at least 1 wrong metric.\n",
+                    __func__);
+          }
           return(0);
         }
         for (i=0; i<2; i++) {
           if(lambda[i]<=0) {
-            printf("  ## ERROR: WRONG METRIC AT POINT %d -- eigenvalue :"
-                   " %e %e -- det %e\n",k,lambda[0],lambda[1],
-                   m[0]*m[2]-m[1]*m[1]);
-            printf("WRONG METRIC AT POINT %d -- metric %e %e %e\n",
-                   k,m[0],m[1],m[2]);
+            if ( !mmgWarn1 ) {
+              mmgWarn1 = 1;
+              fprintf(stderr,"\n  ## Error: %s: at least 1 wrong metric"
+                      " (eigenvalue : %e %e -- det %e\n",__func__,lambda[0],
+                      lambda[1],m[0]*m[2]-m[1]*m[1]);
+            }
             return(0);
           }
           mesh->info.hmin = MG_MIN(mesh->info.hmin,1./sqrt(lambda[i]));
@@ -226,16 +236,21 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
 
         /* Check the input metric */
         if ( !_MMG5_eigensym(m,lambda,v) ) {
-          printf("  ## ERROR: WRONG METRIC AT POINT %d -- \n",k);
+          if ( !mmgWarn0 ) {
+            mmgWarn0 = 1;
+            fprintf(stderr,"\n  ## Error: %s: at least 1 wrong metric.\n",
+                    __func__);
+          }
           return(0);
         }
         for (i=0; i<2; i++) {
           if(lambda[i]<=0) {
-            printf("  ## ERROR: WRONG METRIC AT POINT %d -- eigenvalue :"
-                   " %e %e -- det %e\n",k,lambda[0],lambda[1],
-                   m[0]*m[2]-m[1]*m[1]);
-            printf("WRONG METRIC AT POINT %d -- metric %e %e %e\n",
-                   k,m[0],m[1],m[2]);
+            if ( !mmgWarn1 ) {
+              mmgWarn1 = 1;
+              fprintf(stderr,"\n  ## Error: %s: at least 1 wrong metric"
+                      " (eigenvalue : %e %e -- det %e\n",__func__,lambda[0],
+                      lambda[1],m[0]*m[2]-m[1]*m[1]);
+            }
             return(0);
           }
           mesh->info.hmax = MG_MAX(mesh->info.hmax,1./sqrt(lambda[i]));
@@ -269,16 +284,21 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
       m    = &sol->m[iadr];
       /* Check the input metric */
       if ( !_MMG5_eigensym(m,lambda,v) ) {
-        printf("  ## ERROR: WRONG METRIC AT POINT %d -- \n",k);
+        if ( !mmgWarn0 ) {
+          mmgWarn0 = 1;
+          fprintf(stderr,"\n  ## Error: %s: at least 1 wrong metric.\n",
+                  __func__);
+        }
         return(0);
       }
       for (i=0; i<2; i++) {
         if(lambda[i]<=0) {
-          printf("  ## ERROR: WRONG METRIC AT POINT %d -- eigenvalue :"
-                 " %e %e -- det %e\n",k,lambda[0],lambda[1],
-                 m[0]*m[2]-m[1]*m[1]);
-          printf("WRONG METRIC AT POINT %d -- metric %e %e %e\n",
-                 k,m[0],m[1],m[2]);
+          if ( !mmgWarn1 ) {
+            mmgWarn1 = 1;
+            fprintf(stderr,"\n  ## Error: %s: at least 1 wrong metric"
+                    " (eigenvalue : %e %e -- det %e\n",__func__,lambda[0],
+                    lambda[1],m[0]*m[2]-m[1]*m[1]);
+          }
           return(0);
         }
         lambda[i]=MG_MIN(isqhmin,lambda[i]);
