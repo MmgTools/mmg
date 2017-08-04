@@ -32,13 +32,15 @@
  *
  */
 int _MMG5_mmg2dChkmsh(MMG5_pMesh mesh, int severe,int base) {
-  MMG5_pPoint ppt;
-  MMG5_pTria  pt1,pt2;
-  MMG5_pEdge         ped;
-  int   *adja,*adja1,adj,adj1,k,i,iadr;
-  int   kk,l,nk,j,ip,lon,len;
-  int     *list;
-  unsigned char voy,voy1;
+  MMG5_pPoint    ppt;
+  MMG5_pTria     pt1,pt2;
+  MMG5_pEdge     ped;
+  int           *adja,*adja1,adj,adj1,k,i,iadr;
+  int            kk,l,nk,j,ip,lon,len;
+  int           *list;
+  unsigned char  voy,voy1;
+  static char    mmgErr0=0,mmgErr1=0,mmgErr2=0,mmgErr3=0,mmgErr4=0,mmgErr5=0;
+  static char    mmgErr6=0;
 
   for (k=1; k<=mesh->nt; k++) {
     pt1 = &mesh->tria[k];
@@ -52,20 +54,35 @@ int _MMG5_mmg2dChkmsh(MMG5_pMesh mesh, int severe,int base) {
       if ( !adj )  continue;
 
       if ( adj == k ) {
-        fprintf(stdout,"  1. Wrong adjacency %d %d\n",k,adj);
-        printf("vertices of %d: %d %d %d \n",k,pt1->v[0],pt1->v[1],pt1->v[2]);
-        printf("adj of %d: %d %d %d \n",
-               k,adja[0]/3,adja[1]/3,adja[2]/3);
+        if ( !mmgErr0 ) {
+          mmgErr0 = 1;
+          fprintf(stderr,"\n  ## Error: %s: 1. at least 1 wrong"
+                  " adjacency %d %d\n",__func__,_MMG2D_indElt(mesh,k),
+                  _MMG2D_indElt(mesh,adj));
+          fprintf(stderr,"vertices of %d: %d %d %d \n",_MMG2D_indElt(mesh,k),
+                  _MMG2D_indPt(mesh,pt1->v[0]),_MMG2D_indPt(mesh,pt1->v[1]),
+                  _MMG2D_indPt(mesh,pt1->v[2]));
+          fprintf(stderr,"adj of %d: %d %d %d \n",
+                  k,adja[0]/3,adja[1]/3,adja[2]/3);
+        }
         return(0);
       }
       pt2 = &mesh->tria[adj];
       if ( !MG_EOK(pt2) ) {
-        fprintf(stdout,"  4. Invalid adjacent %d %d\n",adj,k);
-        printf("vertices of %d: %d %d %d\n",
-               k,pt1->v[0],pt1->v[1],pt1->v[2]);
-        printf("vertices adj %d: %d %d %d \n",
-               adj,pt2->v[0],pt2->v[1],pt2->v[2]);
-        printf("adj of %d: %d %d %d\n",k,adja[0]/3,adja[1]/3,adja[2]/3);
+        if ( !mmgErr1 ) {
+          mmgErr1 = 1;
+          fprintf(stderr,"\n  ## Error: %s: 4. at least 1 invalid"
+                  " adjacent %d %d\n",__func__,_MMG2D_indElt(mesh,adj),
+                  _MMG2D_indElt(mesh,k));
+          fprintf(stderr,"vertices of %d: %d %d %d\n",
+                  _MMG2D_indElt(mesh,k),_MMG2D_indPt(mesh,pt1->v[0]),
+                  _MMG2D_indPt(mesh,pt1->v[1]),_MMG2D_indPt(mesh,pt1->v[2]));
+          fprintf(stderr,"vertices adj %d: %d %d %d \n",
+                  adj,pt2->v[0],pt2->v[1],pt2->v[2]);
+          fprintf(stderr,"adj of %d: %d %d %d\n",_MMG2D_indElt(mesh,k),
+                  _MMG2D_indElt(mesh,adja[0]/3),_MMG2D_indElt(mesh,adja[1]/3),
+                  _MMG2D_indElt(mesh,adja[2]/3));
+        }
         return(0);
       }
       iadr  = (adj-1)*3 + 1;
@@ -73,24 +90,41 @@ int _MMG5_mmg2dChkmsh(MMG5_pMesh mesh, int severe,int base) {
       adj1  = adja1[voy] / 3;
       voy1  = adja1[voy] % 3;
       if ( adj1 != k || voy1 != i ) {
-        fprintf(stdout,"  2. Wrong adjacency %d %d\n",k,adj1);
-        printf("vertices of %d: %d %d %d \n",k,pt1->v[0],pt1->v[1],pt1->v[2]);
-        printf("adj(k) %d: %d %d %d \n",adj,pt2->v[0],pt2->v[1],pt2->v[2]);
-        printf("adj(%d): %d %d %d\n",
-               k,adja[0]/3,adja[1]/3,adja[2]/3);
-        printf("adj(%d): %d %d %d %d\n",
-               adj,adja1[0]/3,adja1[1]/3,adja1[2]/3,adja1[3]/3);
+        if ( !mmgErr2 ) {
+          mmgErr2 = 1;
+          fprintf(stderr,"\n  ## Error: %s: 2. at least 1 wrong adjacency"
+                  " %d %d\n",__func__,_MMG2D_indElt(mesh,k),_MMG2D_indElt(mesh,adj1));
+          fprintf(stderr,"vertices of %d: %d %d %d \n",_MMG2D_indElt(mesh,k),
+                  _MMG2D_indPt(mesh,pt1->v[0]),_MMG2D_indPt(mesh,pt1->v[1]),
+                  _MMG2D_indPt(mesh,pt1->v[2]));
+          fprintf(stderr,"adj(k) %d: %d %d %d \n",_MMG2D_indElt(mesh,adj),
+                  _MMG2D_indPt(mesh,pt2->v[0]),_MMG2D_indPt(mesh,pt2->v[1]),
+                  _MMG2D_indPt(mesh,pt2->v[2]));
+          fprintf(stderr,"adj(%d): %d %d %d\n",
+                  _MMG2D_indElt(mesh,k),_MMG2D_indElt(mesh,adja[0]/3),
+                  _MMG2D_indElt(mesh,adja[1]/3),_MMG2D_indElt(mesh,adja[2]/3));
+          fprintf(stderr,"adj(%d): %d %d %d %d\n",
+                  _MMG2D_indElt(mesh,adj),_MMG2D_indElt(mesh,adja1[0]/3),
+                  _MMG2D_indElt(mesh,adja1[1]/3),_MMG2D_indElt(mesh,adja1[2]/3),
+                  _MMG2D_indElt(mesh,adja1[3]/3));
+        }
         return(0);
       }
 
       /*chk edge*/
       if(pt1->edg[i]) {
         ped = &mesh->edge[pt1->edg[i]];
-        if(!(((ped->a==pt1->v[MMG2_iare[i][0]]) || (ped->a==pt1->v[MMG2_iare[i][1]]))
-             || ((ped->b==pt1->v[MMG2_iare[i][0]]) || (ped->b==pt1->v[MMG2_iare[i][1]])))) {
-          printf("  3. Wrong edge in triangle %d\n",k);
-          printf("vertices of %d: %d %d %d \n",k,pt1->v[0],pt1->v[1],pt1->v[2]);
-          printf("edge %d : %d %d\n",i,ped->a,ped->b);
+        if ( !mmgErr3 ) {
+          mmgErr3 = 1;
+          if(!(((ped->a==pt1->v[MMG2_iare[i][0]]) || (ped->a==pt1->v[MMG2_iare[i][1]]))
+               || ((ped->b==pt1->v[MMG2_iare[i][0]]) || (ped->b==pt1->v[MMG2_iare[i][1]])))) {
+            fprintf(stderr,"\n  ## Error: %s: 3. at least 1 wrong edge in triangle %d\n",
+                    __func__,_MMG2D_indElt(mesh,k));
+            fprintf(stderr,"vertices of %d: %d %d %d \n",_MMG2D_indElt(mesh,k),
+                    _MMG2D_indPt(mesh,pt1->v[0]),_MMG2D_indPt(mesh,pt1->v[1]),
+                    _MMG2D_indPt(mesh,pt1->v[2]));
+          }
+          fprintf(stderr,"edge %d : %d %d\n",i,ped->a,ped->b);
           return(0);
         }
       }
@@ -115,8 +149,13 @@ int _MMG5_mmg2dChkmsh(MMG5_pMesh mesh, int severe,int base) {
       ip  = pt1->v[i];
       ppt = &mesh->point[ip];
       if ( !MG_VOK(ppt) ) {
-        fprintf(stdout,"  6. Unused vertex %d  %d\n",k,ip);
-        printf("%d %d %d\n",pt1->v[0],pt1->v[1],pt1->v[2]);
+        if ( !mmgErr4 ) {
+          mmgErr4 = 1;
+          fprintf(stderr,"\n  ## Error: %s: 6. at least 1 unused vertex %d  %d\n",__func__,
+                  _MMG2D_indElt(mesh,k),_MMG2D_indPt(mesh,ip));
+          fprintf(stderr,"%d %d %d\n",_MMG2D_indPt(mesh,pt1->v[0]),
+                  _MMG2D_indPt(mesh,pt1->v[1]),_MMG2D_indPt(mesh,pt1->v[2]));
+        }
         _MMG5_SAFE_FREE(list);
         return(0);
       }
@@ -126,7 +165,11 @@ int _MMG5_mmg2dChkmsh(MMG5_pMesh mesh, int severe,int base) {
         nk  = list[l] % 3;
         pt2 = &mesh->tria[kk];
         if ( pt2->v[nk] != ip ) {
-          fprintf(stdout,"  5. Wrong ball %d, %d\n",ip,pt2->v[nk]);
+          if ( !mmgErr5 ) {
+            mmgErr5 = 1;
+            fprintf(stderr,"\n  ## Error: %s: 5. at least 1 wrong ball %d, %d\n",
+                    __func__,_MMG2D_indPt(mesh,ip),_MMG2D_indPt(mesh,pt2->v[nk]));
+          }
           _MMG5_SAFE_FREE(list);
           return(0);
         }
@@ -143,7 +186,11 @@ int _MMG5_mmg2dChkmsh(MMG5_pMesh mesh, int severe,int base) {
           }
       }
       if ( len != lon ) {
-        fprintf(stdout,"  7. Incorrect ball %d: %d %d\n",pt1->v[i],lon,len);
+        if ( !mmgErr6 ) {
+          mmgErr6 = 1;
+          fprintf(stderr,"\n  ## Error: %s: 7. at least 1 incorrect ball %d: %d %d\n",
+                  __func__,_MMG2D_indPt(mesh,pt1->v[i]),lon,len);
+        }
         _MMG5_SAFE_FREE(list);
         return(0);
       }
@@ -159,6 +206,8 @@ int _MMG2_chkmsh(MMG5_pMesh mesh) {
   MMG5_pPoint       p1,p2;
   int               *adja,*adjaj,k,jel;
   char              i,i1,i2,j;
+  static char       mmgErr0=0,mmgErr1=0,mmgErr2=0,mmgErr3=0,mmgErr4=0;
+  static char       mmgErr6=0,mmgErr5=0;
 
   /* Check adjacencies */
   for (k=1; k<=mesh->nt; k++) {
@@ -173,14 +222,24 @@ int _MMG2_chkmsh(MMG5_pMesh mesh) {
 
       if ( !jel ) {
         if ( !(pt->tag[i] & MG_GEO ) ) {
-          printf("Wrong tag of edge %d in tria %d \n",i,k);
+          if ( !mmgErr0 ) {
+            mmgErr0 = 1;
+            fprintf(stderr,"\n  ## Error: %s: at least 1 wrong  edge tag"
+                    " (edge %d in tria %d.)\n",
+                    __func__,i,_MMG2D_indElt(mesh,k));
+          }
           return(0);
         }
       }
       else {
         adjaj = &mesh->adja[3*(jel-1)+1];
         if ( adjaj[j] / 3 != k ) {
-          printf("Wrong adjacencies %d %d \n",k,jel);
+         if ( !mmgErr1 ) {
+            mmgErr1 = 1;
+            fprintf(stderr,"\n  ## Error: %s: at least 1 wrong adjacency"
+                    " (%d %d).\n",__func__,_MMG2D_indElt(mesh,k),
+                    _MMG2D_indElt(mesh,jel));
+         }
           return(0);
         }
       }
@@ -197,22 +256,42 @@ int _MMG2_chkmsh(MMG5_pMesh mesh) {
       i2 = _MMG5_iprv2[i];
       if ( pt->tag[i] & MG_GEO ) {
         if ( !(mesh->point[pt->v[i1]].tag & MG_GEO) && !( MG_SIN(mesh->point[pt->v[i1]].tag) )) {
-          printf("Tag inconsistency in triangle %d: edge %d, vertex %d\n",k,i,pt->v[i1]);
+         if ( !mmgErr2 ) {
+            mmgErr2 = 1;
+            fprintf(stderr,"\n  ## Error: %s: at least 1 tag inconsistency"
+                    " (triangle %d: edge %d, vertex %d)\n",__func__,
+                    _MMG2D_indElt(mesh,k),i,_MMG2D_indPt(mesh,pt->v[i1]));
+         }
           return(0);
         }
         if ( !(mesh->point[pt->v[i2]].tag & MG_GEO) && !( MG_SIN(mesh->point[pt->v[i2]].tag) )) {
-          printf("Tag inconsistency in triangle %d: edge %d, vertex %d\n",k,i,pt->v[i2]);
+          if ( !mmgErr2 ) {
+            mmgErr2 = 1;
+            fprintf(stderr,"\n  ## Error: %s: at least 1 tag inconsistency"
+                    " (triangle %d: edge %d, vertex %d)\n",__func__,
+                    _MMG2D_indElt(mesh,k),i,_MMG2D_indPt(mesh,pt->v[i2]));
+          }
           return(0);
         }
       }
 
       if ( pt->tag[i] & MG_REF ) {
         if ( !(mesh->point[pt->v[i1]].tag & MG_REF) && !( MG_SIN(mesh->point[pt->v[i1]].tag)) ) {
-          printf("Tag inconsistency in triangle %d: edge ref %d, vertex %d\n",k,i,pt->v[i1]);
+          if ( !mmgErr3 ) {
+            mmgErr3 = 1;
+            fprintf(stderr,"\n  ## Error: %s: at least 1 tag inconsistency"
+                    " (triangle %d: edge %d, vertex %d)\n",__func__,
+                    _MMG2D_indElt(mesh,k),i,_MMG2D_indPt(mesh,pt->v[i1]));
+          }
           return(0);
         }
         if ( !(mesh->point[pt->v[i2]].tag & MG_REF) && !( MG_SIN(mesh->point[pt->v[i2]].tag)) ) {
-          printf("Tag inconsistency in triangle %d: edge ref %d, vertex %d\n",k,i,pt->v[i2]);
+          if ( !mmgErr3 ) {
+            mmgErr3 = 1;
+            fprintf(stderr,"\n  ## Error: %s: at least 1 tag inconsistency"
+                    " (triangle %d: edge %d, vertex %d)\n",__func__,
+                    _MMG2D_indElt(mesh,k),i,_MMG2D_indPt(mesh,pt->v[i2]));
+          }
           return(0);
         }
       }
@@ -233,17 +312,26 @@ int _MMG2_chkmsh(MMG5_pMesh mesh) {
       jel = adja[i] / 3;
 
       if ( ( pt->tag[i] & MG_GEO ) && jel ) {
-        printf("edge %d %d is tagged boundary while it has a neighbour\n",pt->v[i1],pt->v[i2]);
+        if ( !mmgErr4 ) {
+          mmgErr4 = 1;
+          fprintf(stderr,"\n  ## Error: %s: at least 1 edge tagged boundary"
+                  " while it has a neighbour (%d %d).\n",__func__,
+                  _MMG2D_indPt(mesh,pt->v[i1]),_MMG2D_indPt(mesh,pt->v[i2]));
+        }
         return(0);
       }
 
       if ( pt->tag[i] & MG_REF ) {
         pt1 = &mesh->tria[jel];
-        if ( pt->ref == pt1->ref ) {
-          printf("edge %d %d is tagged ref while both corresponding triangles have same ref\n",pt->v[i1],pt->v[i2]);
-
+        if ( 1 &&  pt->ref == pt1->ref ) {
+          if ( !mmgErr5 ) {
+            mmgErr5 = 1;
+            fprintf(stderr,"\n  ## Error: %s: at least 1 edge tagged ref while"
+                    " both corresponding triangles have same ref (%d %d).\n",
+                     _MMG2D_indPt(mesh,pt->v[i1]), _MMG2D_indPt(mesh,pt->v[i2]));
+          }
           {
-            printf("Saving mesh...\n");
+            fprintf(stderr,"Saving mesh...\n");
             if ( !MMG2_hashTria(mesh) ) {
               fprintf(stdout,"  ## Hashing problem. Exit program.\n");
               return(0);
@@ -271,7 +359,12 @@ int _MMG2_chkmsh(MMG5_pMesh mesh) {
         i2 = _MMG5_iprv2[i];
         
         if ( !(pt->tag[i] & MG_BDY) ) {
-          printf("edge %d %d is tagged %d, but not MG_BDY\n",pt->v[i1],pt->v[i2],pt->tag[i]);
+          if ( !mmgErr6 ) {
+            mmgErr6 = 1;
+            fprintf(stderr,"\n  ## Error: %s: at least 1 edge (%d %d) tagged"
+                    " %d, but not MG_BDY\n",_MMG2D_indPt(mesh,pt->v[i1]),
+                    _MMG2D_indPt(mesh,pt->v[i2]),pt->tag[i]);
+          }
           return(0);
         }
         
@@ -279,12 +372,24 @@ int _MMG2_chkmsh(MMG5_pMesh mesh) {
         p2 = &mesh->point[pt->v[i2]];
         
         if ( !(p1->tag & MG_BDY) ) {
-          printf("edge %d %d is tagged %d, but point %d is not tagged BDY\n",pt->v[i1],pt->v[i2],pt->tag[i],pt->v[i1]);
+          if ( !mmgErr6 ) {
+            mmgErr6 = 1;
+            fprintf(stderr,"\n  ## Error: %s: at least 1 edge (%d %d) tagged %d,"
+                    " with a point (%d) not tagged BDY.\n",__func__,
+                    _MMG2D_indPt(mesh,pt->v[i1]),_MMG2D_indPt(mesh,pt->v[i2]),
+                    pt->tag[i],_MMG2D_indPt(mesh,pt->v[i1]));
+          }
           return(0);
         }
         
         if ( !(p2->tag & MG_BDY) ) {
-          printf("edge %d %d is tagged %d, but point %d is not tagged BDY\n",pt->v[i1],pt->v[i2],pt->tag[i],pt->v[i2]);
+          if ( !mmgErr6 ) {
+            mmgErr6 = 1;
+            fprintf(stderr,"\n  ## Error: %s: at least 1 edge (%d %d) tagged %d,"
+                    " with a point (%d) not tagged BDY.\n",__func__,
+                    _MMG2D_indPt(mesh,pt->v[i1]),_MMG2D_indPt(mesh,pt->v[i2]),
+                    pt->tag[i],_MMG2D_indPt(mesh,pt->v[i2]));
+          }
           return(0);
         }
       }
