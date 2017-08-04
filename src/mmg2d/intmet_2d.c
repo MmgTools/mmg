@@ -52,12 +52,18 @@ int _MMG2_intmet_iso(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s)
 
 /* Interpolation of metrics m and n according to parameter s; result is stored in mr. A simultaneous reduction of both matrices is performed and the sizes are interpolated. */
 int _MMG5_interpmet22(MMG5_pMesh mesh,double *m,double *n,double s,double *mr) {
-  double  det,imn[4],dd,den,sqDelta,trimn,lambda[2],vp0[2],vp1[2],dm[2],dn[2],vnorm,d0,d1,ip[4];
+  double      det,imn[4],dd,den,sqDelta,trimn,lambda[2],vp0[2],vp1[2],dm[2];
+  double      dn[2],vnorm,d0,d1,ip[4];
+  static char mmgWarn0=0,mmgWarn1=0;
 
   /* Compute imn = M^{-1}N */
   det = m[0]*m[2] - m[1]*m[1];
   if ( fabs(det) < _MMG5_EPS*_MMG5_EPS ) {
-    fprintf(stderr,"  ## Function _MMG5_interpmet22: null metric det : %E \n",det);
+    if ( !mmgWarn0 ) {
+      mmgWarn0 = 1;
+      fprintf(stderr,"\n  ## Error: %s: null metric det : %E \n",
+              __func__,det);
+    }
     return(0);
   }
   det = 1.0 / det;
@@ -72,7 +78,11 @@ int _MMG5_interpmet22(MMG5_pMesh mesh,double *m,double *n,double s,double *mr) {
   
   lambda[0] = 0.5 * (trimn - sqDelta);
   if ( lambda[0] < 0.0 ) {
-    fprintf(stderr," ## Function _MMG5_interpmet22: Eigenvalues : %f \n",lambda[0]);
+    if ( !mmgWarn1 ) {
+      mmgWarn1 = 1;
+      fprintf(stderr,"\n  ## Error: %s: at least 1 negative eigenvalue: %f \n",
+              __func__,lambda[0]);
+    }
     return(0);
   }
   
@@ -229,6 +239,7 @@ int _MMG2_intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s)
   double         *m1,*m2,*mr;
   int            ip1,ip2;
   char           i1,i2;
+  static char    mmgWarn=0;
   
   pt = &mesh->tria[k];
   i1 = _MMG5_inxt2[i];
@@ -240,7 +251,11 @@ int _MMG2_intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s)
   mr = &met->m[3*ip];
   
   if ( !_MMG5_interpmet22(mesh,m1,m2,s,mr) ) {
-    fprintf(stdout,"  ## Problem in function _MMG5_interpmet22. Naive interpolation.\n");
+    if ( !mmgWarn ) {
+      mmgWarn=1;
+      fprintf(stderr,"  ## Error: %s: at least 1 naive interpolation.\n",
+              __func__);
+    }
     mr[0] = (1.0-s)*m1[0] + s*m2[0];
     mr[1] = (1.0-s)*m1[1] + s*m2[1];
     mr[2] = (1.0-s)*m1[2] + s*m2[2];
