@@ -174,8 +174,9 @@ int MMG2D_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMG
   nbpoi = 0;
   do {
     if ( nbpoi == MMG2D_LMAX ) {
-      fprintf(stdout,"  ## Warning: unable to compute adjacent vertices of the"
-              " vertex %d:\nthe ball of point contain too many elements.\n",ip);
+      fprintf(stderr,"\n  ## Warning: %s: unable to compute adjacent"
+              " vertices of the vertex %d:\nthe ball of point contain too many"
+              " elements.\n",__func__,ip);
       return(0);
     }
     i1 = _MMG5_inxt2[i];
@@ -194,8 +195,9 @@ int MMG2D_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMG
 
   /* store the last point of the boundary triangle */
   if ( nbpoi == MMG2D_LMAX ) {
-    fprintf(stdout,"  ## Warning: unable to compute adjacent vertices of the"
-            " vertex %d:\nthe ball of point contain too many elements.\n",ip);
+    fprintf(stderr,"\n  ## Warning: %s: unable to compute adjacent vertices of the"
+            " vertex %d:\nthe ball of point contain too many elements.\n",
+            __func__,ip);
     return(0);
   }
   i1 = _MMG5_inxt2[i1];
@@ -212,8 +214,9 @@ int MMG2D_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMG
     if ( k == 0 )  break;
 
     if ( nbpoi == MMG2D_LMAX ) {
-      fprintf(stdout,"  ## Warning: unable to compute adjacent vertices of the"
-              " vertex %d:\nthe ball of point contain too many elements.\n",ip);
+      fprintf(stderr,"\n  ## Warning: %s: unable to compute adjacent vertices of the"
+              " vertex %d:\nthe ball of point contain too many elements.\n",
+              __func__,ip);
       return(0);
     }
     i  = adja[i2] % 3;

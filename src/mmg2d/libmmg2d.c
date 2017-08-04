@@ -168,14 +168,16 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
     _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
   }
   else if ( mesh->info.iso ) {
-    fprintf(stdout,"\n  ## Error: level-set discretisation unavailable"
+    fprintf(stdout,"\n  ## ERROR: LEVEL-SET DISCRETISATION UNAVAILABLE"
             " (MMG2D_IPARAM_iso):\n"
-            "          You must call the MMG2D_mmg2dls function to use this option.\n");
+            "          YOU MUST CALL THE MMG2D_mmg2dls FUNCTION TO USE THIS"
+            " OPTION.\n");
     _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
   }
   else if ( mesh->info.lag >= 0 ) {
-    fprintf(stdout,"\n  ## Error: lagrangian mode unavailable (MMG2D_IPARAM_lag):\n"
-            "            You must call the MMG2D_mmg2dmov function to move a rigidbody.\n");
+    fprintf(stdout,"\n  ## ERROR: LAGRANGIAN MODE UNAVAILABLE (MMG2D_IPARAM_lag):\n"
+            "            YOU MUST CALL THE MMG2D_mmg2dmov FUNCTION TO MOVE A"
+            " RIGIDBODY.\n");
     _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
   }
 

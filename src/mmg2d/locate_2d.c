@@ -40,6 +40,7 @@
 int MMG2_coorbary(MMG5_pMesh mesh,MMG5_pTria pt,double c[2],double* det,double* l1,double* l2) {
   MMG5_pPoint      p1,p2,p3;
   double           b2,b3;
+  static char      mmgWarn0=0;
 
   p1 = &mesh->point[pt->v[0]];
   p2 = &mesh->point[pt->v[1]];
@@ -48,7 +49,11 @@ int MMG2_coorbary(MMG5_pMesh mesh,MMG5_pTria pt,double c[2],double* det,double* 
   /* Calculate det (p2-p1,p3-p1) */
   *det = (p2->c[0]-p1->c[0])*(p3->c[1]-p1->c[1]) - (p2->c[1]-p1->c[1])*(p3->c[0]-p1->c[0]);
   if ( *det < _MMG5_EPSD ) {
-    printf("*** Function MMG2_coorbary: flat triangle; abort.\n");
+    if ( !mmgWarn0 ) {
+      mmgWarn0 = 1;
+      fprintf(stderr,"\n  ## Warning: %s: at least 1 flat triangle. abort.\n",
+        __func__);
+    }
     return(0);
   }
   *det = 1.0 / (*det);
@@ -116,8 +121,7 @@ int MMG2_cutEdge(MMG5_pMesh mesh,MMG5_pTria pt,MMG5_pPoint ppa,MMG5_pPoint ppb) 
       icompt++;
     }
   }
-  //printf("coor bary %e %e %e\n",la[0],la[1],la[2]);
-  //printf("coor bary %e %e %e\n",lb[0],lb[1],lb[2]);
+
   if ( icompt > 1 ) return(ireturn);
   return(0);
 }
@@ -211,10 +215,11 @@ int MMG2_cutEdgeTriangle(MMG5_pMesh mesh,int k,int ia,int ib) {
 
 /** Return the index of one triangle containing ip */
 int MMG2_findTria(MMG5_pMesh mesh,int ip) {
-  MMG5_pTria     pt;
-  MMG5_pPoint    ppt,p0,p1,p2;
-  int       k,find,iel,base,iadr,*adja,isign;
-  double    ax,ay,bx,by,dd,epsra,cx,cy,aire1,aire2,aire3;
+  MMG5_pTria  pt;
+  MMG5_pPoint ppt,p0,p1,p2;
+  int         k,find,iel,base,iadr,*adja,isign;
+  double      ax,ay,bx,by,dd,epsra,cx,cy,aire1,aire2,aire3;
+  static char mmgWarn0 = 0;
 
   ppt  = &mesh->point[ip];
   ++mesh->base;
@@ -230,9 +235,12 @@ int MMG2_findTria(MMG5_pMesh mesh,int ip) {
       continue;
     }
     
-    if ( pt->base == base )  {
-      //printf("gloups  pour %d base %d -- %d\n",iel,base,ip);
-      fprintf(stdout,"Warning numerical problem in findTria, please make a bug report\n");
+    if ( pt->base == base)  {
+      if ( !mmgWarn0 ) {
+        mmgWarn0 = 1;
+        fprintf(stderr,"\n  ## Warning: %s: numerical problem, please make"
+                " a bug report.\n",__func__);
+      }
       return(iel);
     }
     /* Check whether ip is one of the vertices of pt */
@@ -329,6 +337,7 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
   double             a[3],a11,a21,a12,a22,area1,area2,area3,prod1,prod2,prod3;
   double             niaib,npti;
   int                iadr,*adja,k,ibreak,i,ncompt,lon,iare,ivert;
+  static char        mmgWarn=0;
   //int       ktemp;
 
   k = *kdep;
@@ -534,13 +543,11 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
               iare = _MMG5_inxt2[i];
 
             k = adja[iare] / 3;
-            // if(mesh->info.ddebug) printf("on trouve adj %d (%d\n)\n",iare,k);
             ibreak = 1;
             break;
           }
         } /*end else de if((prod1 < 0) || (prod2 < 0) || (prod3 < 0))*/
-        // if(mesh->info.ddebug) printf("pourquoi on passe pas la!!!!!!!!!");
-        // if(ddebug) printf("iare %d\n",iare);
+
         if ( iare ) {
           //ktemp = k;
           k = adja[i] / 3;
@@ -573,8 +580,11 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
     
     /*a-t-on un pts sur l'arete iaib ?*/
     if (fabs(area1) < EPSNULL || fabs(area2) < EPSNULL || fabs(area3) < EPSNULL) {
-      fprintf(stdout,"  ## Error: unexpected failure."
-              " Check your initial data and/or report the bug\n");
+      if ( !mmgWarn ) {
+        mmgWarn = 1;
+        fprintf(stderr,"\n  ## Error: %s: unexpected failure."
+                " Check your initial data and/or report the bug.\n",__func__);
+      }
       return 0;
     }
 
