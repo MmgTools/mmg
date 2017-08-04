@@ -71,7 +71,6 @@ double MMG_swapd(double sbin)
   {
     p_out[i] = p_in[7-i];
   }
-  //printf("CONVERTION DOUBLE\n");
   return(out);
 }
 
@@ -331,7 +330,8 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         fscanf(inm,"%d",&ppt->ref);
       } else {
         if(mesh->info.nreg==2) {
-          fprintf(stdout,"binary not available with -msh option\n");
+          fprintf(stderr,"  ## Warning: %s: binary not available with"
+                  " -msh option.\n",__func__);
           return(0);
         }
         for (i=0 ; i<2 ; i++) {
@@ -407,8 +407,6 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
                            mesh->point[pt->v[2]].c);
 
       if(air < 0) {
-        if ( mesh->info.ddebug || mesh->info.imprim > 6 )
-          printf("Tr %d bad oriented\n",k);
         norient++;
         tmp = pt->v[2];
         pt->v[2] = pt->v[1];
@@ -547,11 +545,12 @@ int MMG2D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   if ( !MMG2D_zaldy(mesh) )  return(0);
 
   if ( mesh->ne || mesh->nprism ) {
-    fprintf(stderr,"  ## Error: Input mesh must be a two-dimensional mesh.\n");
+    fprintf(stderr,"\n  ## Error: %s: Input mesh must be a two-dimensional mesh.\n",
+            __func__);
     return(-1);
   }
   if ( !mesh->nt )
-      fprintf(stdout,"  **WARNING NO GIVEN TRIANGLE\n");
+      fprintf(stdout,"  ** WARNING NO GIVEN TRIANGLE\n");
 
   if (mesh->npmax < mesh->np || mesh->ntmax < mesh->nt )
     return(-1);
@@ -570,7 +569,8 @@ int MMG2D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
     z += fabs(ppt->c[2]);
   }
   if ( z > _MMG5_EPSOK ) {
-    fprintf(stderr,"  ## Error: Input mesh must be a two-dimensional mesh.\n");
+    fprintf(stderr,"\n  ## Error: %s: Input mesh must be a two-dimensional mesh.\n",
+            __func__);
     return(-1);
   }
 

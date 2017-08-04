@@ -152,8 +152,9 @@ int MMG2_hashTria(MMG5_pMesh mesh) {
 /*hash edge :
   return 1 if edge exist in the table*/
 int MMG2_hashEdge(pHashTable edgeTable,int iel,int ia, int ib) {
-  int       key,mins,maxs;
-  Hedge     *ha;
+  int         key,mins,maxs;
+  Hedge      *ha;
+  static char mmgErr = 0;
 
   /* compute key */
   if ( ia < ib ) {
@@ -183,7 +184,11 @@ int MMG2_hashEdge(pHashTable edgeTable,int iel,int ia, int ib) {
       ha      = &edgeTable->item[edgeTable->hnxt];
       ++edgeTable->hnxt;
       if ( edgeTable->hnxt == edgeTable->nxtmax ) {
-        fprintf(stdout,"  ## Memory alloc problem (edge): %d\n",edgeTable->nxtmax);
+        if ( !mmgErr ) {
+          mmgErr = 1;
+          fprintf(stderr,"\n  ## Error: %s: memory alloc problem (edge): %d.\n",
+                  __func__,edgeTable->nxtmax);
+        }
         return(0);
       }
     }
@@ -356,7 +361,8 @@ int MMG2_pack(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   /* Recreate adjacencies if need be */
   if ( !MMG2_hashTria(mesh) ) {
-    fprintf(stdout,"  ## Hashing problem. Exit program.\n");
+    fprintf(stderr,"\n  ## Warning: %s: hashing problem. Exit program.\n",
+            __func__);
     return(0);
   }
 
@@ -376,7 +382,8 @@ int MMG2_pack(MMG5_pMesh mesh,MMG5_pSol sol) {
   ned = 0;
 
   if ( mesh->edge ) {
-    fprintf(stdout,"  ## warning: unexpected edge table... Ignored data.\n");
+    fprintf(stderr,"\n  ## Warning: %s: unexpected edge table..."
+            " Ignored data.\n",__func__);
     _MMG5_DEL_MEM(mesh,mesh->edge,(mesh->na+1)*sizeof(MMG5_Edge));
     mesh->na = 0;
   }
@@ -415,7 +422,8 @@ int MMG2_pack(MMG5_pMesh mesh,MMG5_pSol sol) {
       mesh->namax = mesh->na;
       memWarn = 0;
       _MMG5_ADD_MEM(mesh,(mesh->namax+1)*sizeof(MMG5_Edge),"final edges",
-                    printf("  ## Warning: uncomplete mesh.\n");
+                    fprintf(stderr,"\n  ## Warning: %s: uncomplete mesh.\n",
+                            __func__);
                     memWarn=1);
     }
 

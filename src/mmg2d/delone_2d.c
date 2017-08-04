@@ -77,8 +77,6 @@ static int _MMG2_correction_iso(MMG5_pMesh mesh,int ip,int *list,int ilist,int n
       
       /* Remove triangle iel from the cavity if it leads to a degenerate triangle after insertion of ppt */
       if ( i < 3 /*||  pt->tag & MG_REQ*/ ) {
-        if ( ipil < nedep )
-        {/*printf("on veut tout retirer ? %d %d -- %d\n",ipil,nedep,iel);*/return(0);   }
         /* remove iel from list */
         pt->base = base-1;
         list[ipil] = list[--lon];
@@ -97,6 +95,7 @@ static int _MMG2_correction_iso(MMG5_pMesh mesh,int ip,int *list,int ilist,int n
 int _MMG2_hashEdgeDelone(MMG5_pMesh mesh,HashTable *hash,int iel,int i,int *v) {
   int             *adja,iadr,jel,j,key,mins,maxs;
   Hedge           *ha;
+  static char     mmgWarn0=0;
 
   /* Compute key */
   if ( v[0] < v[1] ) {
@@ -152,7 +151,12 @@ int _MMG2_hashEdgeDelone(MMG5_pMesh mesh,HashTable *hash,int iel,int i,int *v) {
     ha->nxt   = 0;
 
     if ( hash->hnxt >= hash->nxtmax ) {
-      if(mesh->info.imprim > 6) fprintf(stdout," ## Warning: overflow\n");
+      if(mesh->info.imprim > 6) {
+        if ( !mmgWarn0 ) {
+          mmgWarn0 = 1;
+          fprintf(stderr,"\n  ## Warning: %s: overflow.\n",__func__);
+        }
+      }
       return(0);
     }
     return(1);
@@ -174,6 +178,7 @@ int _MMG2_cavity(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list) {
   MMG5_pPoint     ppt;
   double          c[2],crit,dd,eps,rad,ct[6];
   int             *adja,*adjb,adj,adi,voy,i,j,ilist,ipil,jel,iadr,base,nei[3],l,tref; //isreq;
+  static char     mmgWarn0=0;
 
   ppt = &mesh->point[ip];
   base  = ++mesh->base;
@@ -200,10 +205,10 @@ int _MMG2_cavity(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list) {
       voy = nei[i] % 3;
       if ( !adj )  continue;
       pt  = &mesh->tria[adj];
-      
+
       /* Case where the triangle has already been piled, or a boundary face is hit */
       if ( pt->base == base || pt->ref != ptc->ref )  continue;
-      
+
       /* Store the 6 coordinates of the vertices of pt */
       for (j=0,l=0; j<3; j++,l+=2) {
         memcpy(&ct[l],mesh->point[pt->v[j]].c,2*sizeof(double));
@@ -237,8 +242,13 @@ int _MMG2_cavity(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list) {
         pt->base = base;
         list[ilist++] = adj;
       }
-      else
-        printf("Func cavity: one should never go through here\n");
+      else {
+        if ( !mmgWarn0 ) {
+          mmgWarn0 = 1;
+          fprintf(stderr,"\n  ## Error: %s: we pass here at least one time but one"
+                  " should never go through here.\n",__func__);
+        }
+      }
     }
     if ( ilist > MMG2_LONMAX - 3 ) return(-1);
 
@@ -260,6 +270,7 @@ int _MMG2_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
   short           i1;
   char            alert;
   HashTable       hedg;
+  static char     mmgWarn0=0,mmgWarn1=0;
 
   /* Reset tagdel field */
   for (k=1; k<=mesh->np; k++)
@@ -316,7 +327,7 @@ int _MMG2_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
   /* Hash table parameters */
   if ( size >= 3*MMG2_LONMAX )  return(0);
   if ( !MMG2_hashNew(&hedg,size,3*size) ) { /*3*size is enough */
-    fprintf(stdout,"  ## Unable to complete mesh.\n");
+    fprintf(stderr,"\n  ## Warning: %s: unable to complete mesh.\n",__func__);
     return(-1);
   }
 
@@ -326,7 +337,8 @@ int _MMG2_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
     ielnum[k] = _MMG2D_newElt(mesh);
     if ( !ielnum[k] ) {
       _MMG2D_TRIA_REALLOC(mesh,ielnum[k],mesh->gap,
-                          printf("  ## Error: unable to allocate a new element.\n");
+                          fprintf(stderr,"\n  ## Error: %s: unable to allocate"
+                                 " a new element.\n",__func__);
                           _MMG5_INCREASE_MEM_MESSAGE();
                           printf("  Exit program.\n");return(-1);,
                           -1);
@@ -359,8 +371,10 @@ int _MMG2_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
         pt1->qual = _MMG2_caltri_iso(mesh,sol,pt1);
         pt1->ref = pt->ref;
 
-        if ( pt1->qual < 1e-10 ) {
-          fprintf(stdout,"  ## Warning: creation of a very bad element.\n");
+        if ( (!mmgWarn0) && (pt1->qual < 1e-10) ) {
+          mmgWarn0 = 1;
+          fprintf(stderr,"  ## Warning: %s: creation of a very bad element.\n",
+                  __func__);
         }
 
         /* Update adjacency via the external face */
@@ -388,8 +402,9 @@ int _MMG2_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
   /* Remove the old triangles */
   tref = mesh->tria[list[0]].ref;
   for (k=0; k<ilist; k++) {
-    if ( tref != mesh->tria[list[k]].ref ) {
-      fprintf(stdout,"  ## Warning: sud-domain ignored\n");
+    if ( (!mmgWarn1) && (tref != mesh->tria[list[k]].ref) ) {
+      mmgWarn1 = 1;
+      fprintf(stderr,"\n  ## Warning: %s: sud-domain ignored.\n",__func__);
     }
     _MMG2D_delElt(mesh,list[k]);
   }
