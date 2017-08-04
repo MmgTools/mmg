@@ -49,7 +49,7 @@ int _MMG2_cenrad_iso(MMG5_pMesh mesh,double *ct,double *c,double *rad) {
 
   ux = c3[0] - c1[0];
   uy = c3[1] - c1[1];
-  //if(fabs(sqrt(ux*ux + uy*uy + uz*uz))<1e-12) printf("garg 1 %e\n",fabs(sqrt(ux*ux + uy*uy + uz*uz)));
+
   dd = 1.0 / sqrt(ux*ux + uy*uy);
   n1[0] = ux*dd;
   n1[1] = uy*dd;
@@ -59,7 +59,7 @@ int _MMG2_cenrad_iso(MMG5_pMesh mesh,double *ct,double *c,double *rad) {
 
   ux = c3[0] - c2[0];
   uy = c3[1] - c2[1];
-  //if(fabs(sqrt(ux*ux + uy*uy + uz*uz))<1e-12) printf("garg 2 %e\n",fabs(sqrt(ux*ux + uy*uy + uz*uz)));
+
   dd = 1.0 / sqrt(ux*ux + uy*uy);
   n2[0] = ux*dd;
   n2[1] = uy*dd;
