@@ -43,6 +43,7 @@ int MMG2_removeBBtriangles(MMG5_pMesh mesh) {
   MMG5_pTria      pt;
   int             ip1,ip2,ip3,ip4,k,iadr,*adja,iadr2,*adja2,iel,nd;
   char            i,ii;
+  static char     mmgWarn0=0;
 
   /* Bounding Box vertices */
   ip1 = mesh->np-3;
@@ -70,8 +71,11 @@ int MMG2_removeBBtriangles(MMG5_pMesh mesh) {
       continue;
     }
     else if ( !pt->base ) {
-      printf("  ## Warning: undetermined triangle %d : %d %d %d\n",
-             k,pt->v[0],pt->v[1],pt->v[2]);
+      if ( !mmgWarn0 ) {
+        mmgWarn0 = 1;
+        fprintf(stderr,"\n  ## Warning: %s: at least 1 undetermined"
+                " triangle.\n",__func__);
+      }
       nd++;
     }
   }
@@ -83,7 +87,8 @@ int MMG2_removeBBtriangles(MMG5_pMesh mesh) {
     _MMG2D_delPt(mesh,ip4);
   }
   else {
-    fprintf(stdout,"  ## Error: procedure failed : %d indetermined triangles\n",nd);
+    fprintf(stderr,"\n  ## Error: %s: procedure failed :"
+            " %d indetermined triangles.\n",__func__,nd);
     return(0);
   }
   return(1);
@@ -113,7 +118,9 @@ int MMG2_settagtriangles(MMG5_pMesh mesh,MMG5_pSol sol) {
       if ( !MMG2_findtrianglestate(mesh,k,ip1,ip2,ip3,ip4,base) ) nd++ ;
     }
 
-    if(mesh->info.ddebug) printf(" ** how many undetermined triangles ? %d\n",nd);
+    if(mesh->info.ddebug) {
+      printf(" ** how many undetermined triangles ? %d\n",nd);
+    }
   }
   while (nd && ++iter<maxiter);
 
@@ -157,10 +164,11 @@ int MMG2_findtrianglestate(MMG5_pMesh mesh,int k,int ip1,int ip2,int ip3,int ip4
  *
  */
 int MMG2_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
-  MMG5_pPoint  ppt;
-  int     list[MMG2_LONMAX],lon;
-  int     k,kk;
-  int iter,maxiter,ns,nus;
+  MMG5_pPoint ppt;
+  int         list[MMG2_LONMAX],lon;
+  int         k,kk;
+  int         iter,maxiter,ns,nus;
+  static char mmgWarn0=0,mmgWarn1=0,mmgWarn2=0;
 
   for(k=1; k<=mesh->np-4; k++) {
     ppt = &mesh->point[k];
@@ -189,7 +197,11 @@ int MMG2_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
         }
 
         if ( kk>mesh->nt ) {
-          fprintf(stdout,"  ## Error: no triangle found for vertex %d\n",k);
+          if ( !mmgWarn0 ) {
+            mmgWarn0 = 1;
+            fprintf(stderr,"\n  ## Error: %s: unable to find triangle"
+                    " for at least 1 vertex.\n",__func__);
+          }
           return(0);
         }
       }
@@ -198,11 +210,21 @@ int MMG2_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
       lon = _MMG2_cavity(mesh,sol,k,list);
 
       if ( lon < 1 ) {
-        fprintf(stdout,"  ## Error: unable to insert vertex %d\n",k);
+        if ( !mmgWarn1 ) {
+          mmgWarn1 = 1;
+          fprintf(stderr,"\n  ## Error: %s: unable to insert "
+                  "at least 1 vertex.\n",__func__);
+        }
         return(0);
       } else {
 				if(!_MMG2_delone(mesh,sol,k,list,lon)) {
-			    if(mesh->info.imprim > 4) fprintf(stdout,"  ## Impossible to insert point %d with Delaunay\n",k);
+			    if(mesh->info.imprim > 4) {
+            if ( !mmgWarn2 ) {
+              mmgWarn2 = 1;
+              fprintf(stderr,"\n  ## Warning: %s: unable to"
+                      " insert at least 1 point with Delaunay\n",__func__);
+            }
+          }
         } else {
           ppt->flag = 0;
           ns++;
@@ -213,7 +235,8 @@ int MMG2_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
   } while (ns && ++iter<maxiter);
 
 	if(abs(nus-ns)) {
-	  fprintf(stdout,"  ## Error: some vertex are not inserted %d\n",abs(nus-ns));
+	  fprintf(stderr,"  ## Error: %s: some vertex are not "
+            "inserted %d.\n",__func__,abs(nus-ns));
 		return(0);
   }
 	return(1);
@@ -441,19 +464,17 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
       for (kk=k; kk<=mesh->np; kk++) {
         if(k==kk) continue;
         ppt2 = &mesh->point[kk];
-        dd = (ppt->c[0]-ppt2->c[0])*(ppt->c[0]-ppt2->c[0])+(ppt->c[1]-ppt2->c[1])*(ppt->c[1]-ppt2->c[1]);
+        dd = (ppt->c[0]-ppt2->c[0])*(ppt->c[0]-ppt2->c[0])
+          +(ppt->c[1]-ppt2->c[1])*(ppt->c[1]-ppt2->c[1]);
         if ( dd < 1.e-6 ) {
-          //printf("point img %d %d\n",k,kk);
           ppt2->tmp = 1;
           if ( !numper[k] ) {
             numper[k] = kk;
           }
           else if ( numper[k]!=kk ){
             j = numper[k];
-            // printf("j = %d %d\n",j,numper[j]) ;
             while(numper[j] && numper[j]!=kk) {
               j = numper[j];
-              //printf("j = %d %d\n",j,numper[j]) ;
             }
             if(numper[j]!=kk) numper[j] = kk;
           }
@@ -470,7 +491,8 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
   if ( !ip1 ) {
     /* reallocation of point table */
     _MMG2D_POINT_REALLOC(mesh,sol,ip1,mesh->gap,
-                         printf("  ## Error: unable to allocate a new point\n");
+                         fprintf(stderr,"\n  ## Error: %s: unable to allocate"
+                                 " a new point.\n",__func__);
                          _MMG5_INCREASE_MEM_MESSAGE();return 0;,
                          c,0,0);
   }
@@ -482,7 +504,8 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
   if ( !ip2 ) {
     /* reallocation of point table */
     _MMG2D_POINT_REALLOC(mesh,sol,ip2,mesh->gap,
-                         printf("  ## Error: unable to allocate a new point\n");
+                         fprintf(stderr,"\n  ## Error: %s: unable to allocate"
+                                 " a new point.\n",__func__);
                          _MMG5_INCREASE_MEM_MESSAGE();return 0;,
                          c,0,0);
   }
@@ -494,7 +517,8 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
   if ( !ip3 ) {
     /* reallocation of point table */
     _MMG2D_POINT_REALLOC(mesh,sol,ip3,mesh->gap,
-                         printf("  ## Error: unable to allocate a new point\n");
+                         fprintf(stderr,"\n  ## Error: %s: unable to allocate a "
+                                 " new point.\n",__func__);
                          _MMG5_INCREASE_MEM_MESSAGE(); return 0;,
                          c,0,0);
   }
@@ -506,7 +530,8 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
   if ( !ip4 ) {
     /* reallocation of point table */
     _MMG2D_POINT_REALLOC(mesh,sol,ip4,mesh->gap,
-                         printf("  ## Error: unable to allocate a new point\n");
+                         fprintf(stderr,"\n  ## Error: %s: unable to allocate a"
+                                 " new point.\n",__func__);
                          _MMG5_INCREASE_MEM_MESSAGE(); return 0;,
                          c,0,0);
   }
@@ -520,7 +545,8 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
   jel  = _MMG2D_newElt(mesh);
   if ( !jel ) {
     _MMG2D_TRIA_REALLOC(mesh,jel,mesh->gap,
-                       printf("  ## Error: unable to allocate a new element.\n");
+                       fprintf(stderr,"\n  ## Error: %s: unable to allocate a"
+                               " new element.\n",__func__);
                        _MMG5_INCREASE_MEM_MESSAGE();
                        printf("  Exit program.\n");return 0;,
                        0);
@@ -534,7 +560,8 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
   kel  = _MMG2D_newElt(mesh);
   if ( !kel ) {
     _MMG2D_TRIA_REALLOC(mesh,kel,mesh->gap,
-                       printf("  ## Error: unable to allocate a new element.\n");
+                       fprintf(stderr,"\n  ## Error: %s: unable to allocate"
+                               " a new element.\n",__func__);
                        _MMG5_INCREASE_MEM_MESSAGE();
                        printf("  Exit program.\n");return 0;,
                        0);
@@ -560,7 +587,8 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   /* Enforcement of the boundary edges */
   if ( !MMG2_bdryenforcement(mesh,sol) ) {
-    printf("  ## Error: unable to enforce the boundaries.\n");
+    fprintf(stderr,"\n  ## Error: %s: unable to enforce the boundaries.\n",
+      __func__);
     return(0);
   }
 
