@@ -72,7 +72,7 @@ FOREACH(EXEC ${LISTEXEC_MMG})
   ADD_TEST(NAME mmg_LeakCheck_AbnormalEnd2_${SHRT_EXEC}
     COMMAND ${EXEC} -v 5
     ${MMG_CI_TESTS}/LeakCheck_AbnormalEnd2/d)
-  SET(passRegex "## Unable to scale mesh.")
+  SET(passRegex "unable to scale mesh:")
   SET_PROPERTY(TEST mmg_LeakCheck_AbnormalEnd2_${SHRT_EXEC}
     PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}")
   #####
