@@ -328,7 +328,8 @@ int _MMG2_chkmsh(MMG5_pMesh mesh) {
             mmgErr5 = 1;
             fprintf(stderr,"\n  ## Error: %s: at least 1 edge tagged ref while"
                     " both corresponding triangles have same ref (%d %d).\n",
-                     _MMG2D_indPt(mesh,pt->v[i1]), _MMG2D_indPt(mesh,pt->v[i2]));
+                    __func__,
+                    _MMG2D_indPt(mesh,pt->v[i1]), _MMG2D_indPt(mesh,pt->v[i2]));
           }
           {
             fprintf(stderr,"Saving mesh...\n");
@@ -362,7 +363,7 @@ int _MMG2_chkmsh(MMG5_pMesh mesh) {
           if ( !mmgErr6 ) {
             mmgErr6 = 1;
             fprintf(stderr,"\n  ## Error: %s: at least 1 edge (%d %d) tagged"
-                    " %d, but not MG_BDY\n",_MMG2D_indPt(mesh,pt->v[i1]),
+                    " %d, but not MG_BDY\n",__func__,_MMG2D_indPt(mesh,pt->v[i1]),
                     _MMG2D_indPt(mesh,pt->v[i2]),pt->tag[i]);
           }
           return(0);
