@@ -126,7 +126,7 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
       if ( !warn ) {
         ++warn;
         fprintf(stderr,"\n  ## Warning: %s: unable to compute optimal position for at least"
-                " 1 point.\n" );
+                " 1 point.\n",__func__ );
       }
       return(0);
     }

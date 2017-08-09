@@ -1066,6 +1066,14 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
   }
   /* vertices */
   np = nc = na = nr = nre = 0;
+
+  if ( !mesh->point ) {
+    fprintf(stderr, "\n  ## Error: %s: points array not allocated.\n",
+            __func__);
+    return 0;
+  }
+
+
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
     if ( MG_VOK(ppt) ) {
@@ -1153,15 +1161,21 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
 
   /* tetrahedra */
   ne = nereq = 0;
-  for (k=1; k<=mesh->ne; k++) {
-    pt = &mesh->tetra[k];
-    if ( !MG_EOK(pt) ) {
-      continue;
+  if ( mesh->tetra ) {
+    for (k=1; k<=mesh->ne; k++) {
+      pt = &mesh->tetra[k];
+      if ( !MG_EOK(pt) ) {
+        continue;
+      }
+      ne++;
+      if ( pt->tag & MG_REQ ){
+        nereq++;
+      }
     }
-    ne++;
-    if ( pt->tag & MG_REQ ){
-      nereq++;
-    }
+  }
+  else {
+    fprintf(stderr, "\n  ## Warning: %s: tetra array not allocated.\n",
+            __func__);
   }
 
   if(!bin) {

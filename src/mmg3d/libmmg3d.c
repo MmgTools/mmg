@@ -315,6 +315,17 @@ int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   int     iadr,iadrnew,iadrv,*adjav,*adja,*adjanew,voy;
 
   /* compact vertices */
+  if ( !mesh->point ) {
+    fprintf(stderr, "\n  ## Error: %s: points array not allocated.\n",
+            __func__);
+    return 0;
+  }
+  if ( !mesh->tetra ) {
+    fprintf(stderr, "\n  ## Error: %s: tetra array not allocated.\n",
+            __func__);
+    return 0;
+  }
+
   np = nc = 0;
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
@@ -348,17 +359,19 @@ int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
       ptnew = &mesh->tetra[nbl];
       memcpy(ptnew,pt,sizeof(MMG5_Tetra));
 
-      iadr = 4*(k-1) + 1;
-      adja = &mesh->adja[iadr];
-      iadrnew = 4*(nbl-1) + 1;
-      adjanew = &mesh->adja[iadrnew];
-      for(i=0 ; i<4 ; i++) {
-        adjanew[i] = adja[i];
-        if(!adja[i]) continue;
-        iadrv = 4*(adja[i]/4-1) +1;
-        adjav = &mesh->adja[iadrv];
-        voy = i;
-        adjav[adja[i]%4] = 4*nbl + voy;
+      if ( mesh->adja ) {
+        iadr = 4*(k-1) + 1;
+        adja = &mesh->adja[iadr];
+        iadrnew = 4*(nbl-1) + 1;
+        adjanew = &mesh->adja[iadrnew];
+        for(i=0 ; i<4 ; i++) {
+          adjanew[i] = adja[i];
+          if(!adja[i]) continue;
+          iadrv = 4*(adja[i]/4-1) +1;
+          adjav = &mesh->adja[iadrv];
+          voy = i;
+          adjav[adja[i]%4] = 4*nbl + voy;
+        }
       }
     }
     nbl++;
