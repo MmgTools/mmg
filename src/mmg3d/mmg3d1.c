@@ -1895,7 +1895,7 @@ static int _MMG5_anatet4(MMG5_pMesh mesh, MMG5_pSol met,int *nf, char typchk) {
       nbdy = 0;
       for (j=0; j<4; j++) {
         ppt = &mesh->point[pt->v[j]];
-        if ( ppt->tag & MG_BDY )  nbdy++;
+        if ( (ppt->tag & MG_BDY) && (!(ppt->tag & MG_PARBDY)) )  nbdy++;
       }
       if ( nbdy == 4 ) {
         if ( !mesh->info.noinsert ) {
