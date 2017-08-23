@@ -509,8 +509,8 @@ int MMG2_pack(MMG5_pMesh mesh,MMG5_pSol sol) {
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
       if ( !MG_VOK(ppt) )  continue;
-      isol    = (k-1) * sol->size + 1;
-      isolnew = (nbl-1) * sol->size + 1;
+      isol    = k * sol->size;
+      isolnew = nbl * sol->size;
 
       for (i=0; i<sol->size; i++)
         sol->m[isolnew + i] = sol->m[isol + i];
