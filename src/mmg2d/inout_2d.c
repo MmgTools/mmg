@@ -561,6 +561,14 @@ int MMG2D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 
   if ( ier < 1 ) return ( ier );
 
+  /*in case of mesh generation, all the points are used*/
+	if (!mesh->nt) {
+    for (k=1; k<=mesh->np; k++) {
+      ppt = &mesh->point[ k ];
+      ppt->tag &= ~MG_NUL;
+    }
+  }
+
   z = 0.;
   for ( k=1; k<=mesh->np; ++k ) {
     ppt = &mesh->point[k];
