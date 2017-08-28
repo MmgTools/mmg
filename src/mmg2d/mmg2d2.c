@@ -148,7 +148,6 @@ int MMG2_findtrianglestate(MMG5_pMesh mesh,int k,int ip1,int ip2,int ip3,int ip4
     return(-base);
   }
   else {
-    //#warning check if it is true with 1 bdry edge
     pt->base = base;
     return(base);
   }
