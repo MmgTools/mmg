@@ -303,7 +303,9 @@ int _MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
     else {
       for (k=1; k<=mesh->np ; k++) {
         ppt = &mesh->point[k];
-        if ( MG_VOK(ppt) )  met->m[k] *= dd;
+        if ( !MG_VOK(ppt) ) continue;
+        for (i=0; i<met->size; i++)
+          met->m[met->size*k+i] *= dd;
       }
     }
   }
