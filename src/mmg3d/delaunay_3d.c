@@ -36,19 +36,20 @@
 
 #ifndef PATTERN
 
-#define  _MMG3D_EPSRAD       1.00005
-//For Various_adpsol_hgrad1_M6Mach_Eps0.001_hmin0.001_hmax2 test case:
-//pbs with _MMG3D_EPSCON=5e-4 and VOLMIN=1e-15 (MMG3D does not insert enough vertex...)
-#define  _MMG3D_EPSCON       1e-5//5.0e-4//1.e-4//1.0e-3
-#define _MMG3D_LONMAX     4096
+#define _MMG3D_EPSRAD       1.00005
+/* For Various_adpsol_hgrad1_M6Mach_Eps0.001_hmin0.001_hmax2 test case:
+   pbs with _MMG3D_EPSCON=5e-4 (MMG3D does not insert enough vertex...)
+*/
+#define _MMG3D_EPSCON       1e-5 //5.0e-4
+#define _MMG3D_LONMAX       4096
 
-// int MMG_cas; uncomment to debug
-
+// uncomment to debug
+// int MMG_cas;
 // extern int MMG_npuiss,MMG_nvol,MMG_npres;
 
-#define KTA     7
-#define KTB    11
-#define KTC    13
+#define _MMG3D_KTA     7
+#define _MMG3D_KTB    11
+#define _MMG3D_KTC    13
 
 /* hash mesh edge v[0],v[1] (face i of iel) */
 int _MMG5_hashEdgeDelone(MMG5_pMesh mesh,_MMG5_Hash *hash,int iel,int i,int *v) {
@@ -64,7 +65,7 @@ int _MMG5_hashEdgeDelone(MMG5_pMesh mesh,_MMG5_Hash *hash,int iel,int i,int *v) 
     mins = v[1];
     maxs = v[0];
   }
-  key = KTA*mins + KTB*maxs;
+  key = _MMG3D_KTA*mins + _MMG3D_KTB*maxs;
   key = key % hash->siz;
   ha  = &hash->item[key];
 
@@ -109,7 +110,7 @@ int _MMG5_hashEdgeDelone(MMG5_pMesh mesh,_MMG5_Hash *hash,int iel,int i,int *v) 
 
     if ( hash->nxt >= hash->max ) {
       _MMG5_TAB_RECALLOC(mesh,hash->item,hash->max,0.2,_MMG5_hedge,"face",
-	                       return 0;,0);
+                         return 0;,0);
       for (j=hash->nxt; j<hash->max; j++)  hash->item[j].nxt = j+1;
     }
     return(1);
@@ -137,16 +138,16 @@ int _MMG5_hashEdgeDelone(MMG5_pMesh mesh,_MMG5_Hash *hash,int iel,int i,int *v) 
  *
  */
 int _MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
-  MMG5_pPoint ppt;
-  MMG5_pTetra      pt,pt1;
-  MMG5_xTetra           xt;
-  MMG5_pxTetra          pxt0;
-  int             *adja,*adjb,i,j,k,l,m,iel,jel,old,v[3],iadr,base,size;
-  int              vois[4],iadrold;/*,ii,kk,_MMG5_iare1,_MMG5_iare2;*/
-  short            i1;
-  char             alert;
-  int              tref,isused=0,ixt,ielnum[3*_MMG3D_LONMAX+1],ll;
-  _MMG5_Hash       hedg;
+  MMG5_pPoint   ppt;
+  MMG5_pTetra   pt,pt1;
+  MMG5_xTetra   xt;
+  MMG5_pxTetra  pxt0;
+  int          *adja,*adjb,i,j,k,l,m,iel,jel,old,v[3],iadr,base,size;
+  int           vois[4],iadrold;
+  short         i1;
+  char          alert;
+  int           tref,isused = 0,ixt,ielnum[3*_MMG3D_LONMAX+1],ll;
+  _MMG5_Hash    hedg;
 
   base = mesh->base;
   /* external faces */
@@ -326,8 +327,8 @@ int _MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
     if ( !_MMG3D_delElt(mesh,list[k]) ) return -1;
   }
 
-  //ppt = &mesh->point[ip];
-  //  ppt->flag = mesh->flag;
+  // ppt = &mesh->point[ip];
+  // ppt->flag = mesh->flag;
   _MMG5_DEL_MEM(mesh,hedg.item,(hedg.max+1)*sizeof(_MMG5_hedge));
   return(1);
 }
@@ -430,16 +431,19 @@ static int _MMG5_correction_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip,int* list,
         if ( det < _MMG5_EPSOK )  break;
 
         /* point close to face */
-        /*nn = (v1*v1 + v2*v2 + v3*v3);*/
+
         // MMG_cas=2; // uncomment to debug
         nn = mm[0]*v1*v1 + mm[3]*v2*v2 + mm[5]*v3*v3 \
           + 2.0*(mm[1]*v1*v2 + mm[2]*v1*v3 + mm[4]*v2*v3);
+
         /*if ( det*dd*dd*dd*dd*dd*dd < nn * nn * nn * eps2 * eps2 * eps2 )  break;*/
-        /*//prendre le min des valeurs propres
+        /*
           eigenv(1,mm,lambda,vv);
           det = max(lambda[0],max(lambda[1],lambda[2]));
           if ( det*dd*dd < nn * eps2 )  break;
-        *//*if ( pow(det,1./3.)*dd*dd < nn * eps2 )  break;*/
+        */
+        /* if ( pow(det,1./3.)*dd*dd < nn * eps2 )  break;*/
+
         if ( det*dd*dd < nn * eps2 )  break;
         /*if ( dd*dd < nn * eps2 ) {
           printf("en iso      : %e %e    %e %e\n",dd,nn,dd*dd,nn*eps2);
