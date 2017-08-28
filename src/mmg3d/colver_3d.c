@@ -509,11 +509,9 @@ int _MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
       ia = _MMG5_iarf[iopp][ia];    /* edge between l-1 and l in local num of tetra */
 
       if ( !(mesh->xtetra[pt->xt].tag[ia] & MG_GEO) ) {
-#warning CECILE calcul angle a tester : check everything ok and clean the code
-
         devold = nprvold[0]*ncurold[0] + nprvold[1]*ncurold[1] + nprvold[2]*ncurold[2];
         devnew = nprvnew[0]*ncurnew[0] + nprvnew[1]*ncurnew[1] + nprvnew[2]*ncurnew[2];
-#warning CECILE : pourquoi on ne met pas dhd ici au lieu de angedg
+//#warning CECILE : pourquoi on ne met pas dhd ici au lieu de angedg
         if ( devold < _MMG5_ANGEDG ) {
           if ( devnew < devold )  {
             return(0);
@@ -758,12 +756,8 @@ int _MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,cha
           ia = _MMG5_idir[ip][j];
           if ( pt->v[ia]==p1_c[i] ) {
             pxt->tag[_MMG5_arpt[ip][j]] |= pxt1->tag[ind[i][1]];
-#warning useless test because we take the max just below....?
-            if ( !pxt->edg[_MMG5_arpt[ip][j]] )
-              pxt->edg[_MMG5_arpt[ip][j]] = pxt1->edg[ind[i][1]];
-            else if ( pxt1->edg[ind[i][1]] )
-              pxt->edg[_MMG5_arpt[ip][j]] =
-                MG_MAX(pxt->edg[_MMG5_arpt[ip][j]],pxt1->edg[ind[i][1]]);
+            pxt->edg[_MMG5_arpt[ip][j]] =
+              MG_MAX(pxt->edg[_MMG5_arpt[ip][j]],pxt1->edg[ind[i][1]]);
             break;
           }
         }

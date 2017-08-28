@@ -173,8 +173,7 @@ int _MMG3D_memOption(MMG5_pMesh mesh) {
     ctri = 2;
 
     /* Euler-poincare: ne = 6*np; nt = 2*np; na = np/5 *
-     * point+tria+tets+adja+adjt+sol+item *
-     * warning: we exceed memory in saveMesh when we call _MMG5_hNew */
+     * point+tria+tets+adja+adjt+sol+item */
     bytes = sizeof(MMG5_Point) + sizeof(MMG5_xPoint) +
       6*sizeof(MMG5_Tetra) + ctri*sizeof(MMG5_xTetra) +
       4*6*sizeof(int) + ctri*3*sizeof(int) +
