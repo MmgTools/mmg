@@ -50,7 +50,7 @@ int _MMG2D_newPt(MMG5_pMesh mesh,double c[2],int16_t tag) {
   ppt->tmp    = 0;
   ppt->xp     = 0;
   ppt->tag = tag;
-  
+
   return(curpt);
 }
 

@@ -431,55 +431,11 @@ static int _MMG5_correction_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip,int* list,
         if ( det < _MMG5_EPSOK )  break;
 
         /* point close to face */
-
         // MMG_cas=2; // uncomment to debug
         nn = mm[0]*v1*v1 + mm[3]*v2*v2 + mm[5]*v3*v3 \
           + 2.0*(mm[1]*v1*v2 + mm[2]*v1*v3 + mm[4]*v2*v3);
 
-        /*if ( det*dd*dd*dd*dd*dd*dd < nn * nn * nn * eps2 * eps2 * eps2 )  break;*/
-        /*
-          eigenv(1,mm,lambda,vv);
-          det = max(lambda[0],max(lambda[1],lambda[2]));
-          if ( det*dd*dd < nn * eps2 )  break;
-        */
-        /* if ( pow(det,1./3.)*dd*dd < nn * eps2 )  break;*/
-
         if ( det*dd*dd < nn * eps2 )  break;
-        /*if ( dd*dd < nn * eps2 ) {
-          printf("en iso      : %e %e    %e %e\n",dd,nn,dd*dd,nn*eps2);
-          printf("en iso sqrt : %e %e    %e %e\n",dd,nn,dd/sqrt(nn),(sqrt(mm[0]))*(dd/sqrt(nn)));
-
-          dd1 = mm[0]*v1*v1 + mm[3]*v2*v2 + mm[5]*v3*v3 \
-          + 2.0*(mm[1]*v1*v2 + mm[2]*v1*v3 + mm[4]*v2*v3);
-          //len carre = (dd*dd/norm(v1v2v3)^2)*dd1/(norm(v1v2v3)^2
-          printf("aniso      : %e %e %e %e %e\n",(dd*dd/nn)*dd1/(nn),sqrt(dd*dd*dd1/(nn*sqrt(nn))),det,det*dd*dd,dd1*eps2);
-
-          nn = sqrt(nn);
-          ph = dd/nn;
-          v1 /= nn;
-          v2 /= nn;
-          v3 /= nn;
-          xh = ph*v1 + ppt->c[0];
-          yh = ph*v2 + ppt->c[1];
-          zh = ph*v3 + ppt->c[2];
-
-          //dist PH dans la met/
-          ux = xh - ppt->c[0];
-          uy = yh - ppt->c[1];
-          uz = zh - ppt->c[2];
-          dd = ux*ux + uy*uy + uz*uz;
-
-          dd2 =      mm[0]*ux*ux + mm[3]*uy*uy + mm[5]*uz*uz \
-          + 2.0*(mm[1]*ux*uy + mm[2]*ux*uz + mm[4]*uy*uz);
-          if ( dd2 <= 0.0 )  dd2 = 0.0;
-
-          len = sqrt(dd2);
-
-          printf("on trouve len : %e %e %e\n",len,sqrt(eps2)*sqrt(mm[0]),pow(sqrt(eps2)*sqrt(det),1./3.));
-          printf("len carre %e %e\n",mm[0]*v1*v1*ph*ph + mm[3]*v2*v2*ph*ph + mm[5]*v3*v3*ph*ph,dd2);
-          return(0);
-          break;
-          }*/
         // MMG_cas=0; // uncomment to debug
       }
       if ( i < 4 || pt->tag & MG_REQ ) {
@@ -577,17 +533,16 @@ _MMG5_correction_iso(MMG5_pMesh mesh,int ip,int *list,int ilist,int nedep,double
 
         /* point close to face */
         nn = (v1*v1 + v2*v2 + v3*v3);
-        // MMG_cas=2; // uncomment to debug
-        //printf("on trouve close ? %e %e\n",dd*dd,nn*eps2);
-        if ( dd*dd < nn * eps2 )  break;
-#warning release : check that this test is valid ie not to strict (see mmg3d_CubeIso_0.5h_hminMax-out)
-        //  if(!adj)
-        //  if ( dd*dd < nn * 0.6*0.6 )  break;
 
+        // MMG_cas=2; // uncomment to debug
+        if ( dd*dd < nn * eps2 )  break;
         // MMG_cas=0; //uncomment to debug
       }
       if ( i < 4 ||  pt->tag & MG_REQ ) {
-        if ( ipil <= nedep )  {/*printf("on veut tout retirer ? %d %d\n",ipil,nedep);*/return(0);   }
+        if ( ipil <= nedep )  {
+          return(0);
+        }
+
         /* remove iel from list */
         pt->flag = base-1;
         list[ipil] = list[--lon];
