@@ -24,6 +24,18 @@
 
 mytime   MMG5_ctim[TIMEMAX];
 
+
+/**
+ * Print elapsed time at end of process.
+ */
+static void _MMG5_endcod() {
+  char   stim[32];
+
+  chrono(OFF,&MMG5_ctim[0]);
+  printim(MMG5_ctim[0].gdif,stim);
+  fprintf(stdout,"\n   ELAPSED TIME  %s\n",stim);
+}
+
 static int MMG2D_usage(char *name) {
   _MMG5_mmgUsage(name);
 
@@ -577,33 +589,6 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,double *qdegrad) 
   return(1);
 }
 
-
-static void endcod() {
-  // double   ttot,ttim[TIMEMAX];
-  // int      k,call[TIMEMAX];
-
-  //chrono(OFF,&ctim[0]);
-//#warning message endcod : comment for merge
-  /* for (k=0; k<TIMEMAX; k++) { */
-  /*   call[k] = ctim[k].call; */
-  /*   ttim[k] = ctim[k].call ? gttime(ctim[k]) : 0.0; */
-  /* } */
-  /* ttot    = ttim[1]+ttim[2]+ttim[3]+ttim[4]; */
-  /* ttim[0] = M_MAX(ttim[0],ttot); */
-
-  /* fprintf(stdout,"\n  -- CPU REQUIREMENTS\n"); */
-  /* fprintf(stdout,"  in/out %8.2f %%    %3d. calls,   %7.2f sec/call\n", */
-  /*         100.*ttim[1]/ttim[0],call[1],ttim[1]/(float)call[1]); */
-  /* fprintf(stdout,"  analysis %8.2f %%    %3d. calls,   %7.2f sec/call\n", */
-  /*         100.*ttim[2]/ttim[0],call[2],ttim[2]/(float)call[2]); */
-  /* fprintf(stdout,"  remeshing  %8.2f %%    %3d. calls,   %7.2f sec/call\n", */
-  /*         100.*ttim[3]/ttim[0],call[3],ttim[3]/(float)call[3]); */
-  /* fprintf(stdout,"  total     %8.2f %%    %3d. calls,  %7.2f sec/call\n", */
-  /*         100.*ttot/ttim[0],call[0],ttot/(float)call[0]); */
-
-  /* fprintf(stdout,"\n   ELAPSED TIME  %.2f SEC.  (%.2f)\n",ttim[0],ttot); */
-}
-
 int main(int argc,char *argv[]) {
   MMG5_pMesh    mesh;
   MMG5_pSol     met,disp;
@@ -614,7 +599,7 @@ int main(int argc,char *argv[]) {
   msh = 0;
 
   /* interrupts */
-  atexit(endcod);
+  atexit(_MMG5_endcod);
 
   _MMG2D_Set_commonFunc();
   tminit(MMG5_ctim,TIMEMAX);
@@ -640,8 +625,6 @@ int main(int argc,char *argv[]) {
 
   qdegrad[0] = 10./_MMG2D_ALPHA;
   qdegrad[1] = 1.3;
-
-//  sol.type = 1;
 
   /* Set default metric size */
   if ( !MMG2D_Set_solSize(mesh,met,MMG5_Vertex,0,MMG5_Scalar) )
@@ -703,7 +686,7 @@ int main(int argc,char *argv[]) {
       _MMG2D_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
     }
   }
-  
+
   chrono(OFF,&MMG5_ctim[1]);
   printim(MMG5_ctim[1].gdif,stim);
   fprintf(stdout,"  -- DATA READING COMPLETED.     %s\n",stim);
