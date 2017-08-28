@@ -33,7 +33,15 @@
 
 #include "mmg2d.h"
 
-/* Fast calculation of the quality of Tria pt */
+/**
+ * \param mesh pointer toward the mesh
+ * \param pt pointer toward the tria
+ *
+ * \return the oriented area of the triangle.
+ *
+ * Compute oriented area of tria pt
+ *
+ */
 double _MMG2_quickcal(MMG5_pMesh mesh, MMG5_pTria pt) {
   MMG5_pPoint        p0,p1,p2;
   double             cal;
@@ -146,24 +154,25 @@ double _MMG2_caltri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt) {
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
  *
+ * \return 0 if the worst element has a nul quality, 1 otherwise.
+ *
  * Print histogram of mesh qualities.
  *
  */
-void MMG2_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
+int MMG2_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria    pt;
-  double   rap,rapmin,rapmax,rapavg,med,good;
-  int      i,k,iel,ok,ir,imax,nex,his[5];
-  
+  double        rap,rapmin,rapmax,rapavg,med,good;
+  int           i,k,iel,ok,ir,imax,nex,his[5];
+  static char   mmgWarn0;
+
   /* Compute triangle quality*/
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if( !MG_EOK(pt) )   continue;
-    
-#warning: add check for null quality
-    
+
     pt->qual = MMG2D_caltri(mesh,met,pt);
   }
-  if ( abs(mesh->info.imprim) <= 0 ) return;
+  if ( abs(mesh->info.imprim) <= 0 ) return 1;
 
   rapmin  = 2.0;
   rapmax  = 0.0;
@@ -180,6 +189,11 @@ void MMG2_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
       continue;
     }
     ok++;
+    if ( (!mmgWarn0) && (_MMG2_quickcal(mesh,pt) < 0.0) ) {
+      mmgWarn0 = 1;
+      fprintf(stderr,"  ## Warning: %s: at least 1 negative area\n",__func__);
+    }
+
     rap = _MMG2D_ALPHAD * MMG2D_caltri(mesh,met,pt);
     if ( rap < rapmin ) {
       rapmin = rap;
@@ -216,97 +230,6 @@ void MMG2_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
               i/5.,i/5.+0.2,his[i],100.*(his[i]/(float)(mesh->nt-nex)));
     }
   }
+
+  return ( _MMG5_minQualCheck(iel,rapmin,_MMG2D_ALPHAD) );
 }
-
-/* /\* print mesh quality histo *\/ */
-/* void MMG2_outqua(MMG5_pMesh mesh,MMG5_pSol sol) { */
-/*   MMG5_pTria     pt; */
-/*   double    coef,rap4,rapl,rapmin,rapmax,rapavg; */
-/*   int       his10[11],his01[33],rapnum; */
-/*   int       k,i,j,imax,iel,ir,nn,nex,ielreal; */
-
-/*   rapmin  =  1.e20; */
-/*   rapmax  = -1.e20; */
-/*   rapavg  = 0.0; */
-/*   rapnum  = 0; */
-/*   iel     = 0; */
-/*   ielreal = 0; */
-/*   nn      = 0; */
-
-/*   for (k=0; k<=33; k++)  his01[k] = 0; */
-/*   for (k=0; k<=10; k++)  his10[k] = 0; */
-
-/*   coef = _MMG2D_ALPHA; */
-/*   nex  = 0; */
-/*   for (k=1; k<=mesh->nt; k++) { */
-/*     pt = &mesh->tria[k]; */
-/*     if( !MG_EOK(pt) ) { */
-/*       nex++; */
-/*       continue; */
-/*     } */
-/*     nn++; */
-
-/*     rap4 = _MMG2D_ALPHA * MMG2_caltri(mesh,sol,pt); */
-/*     rap4 = M_MAX(rap4,EPSD); */
-/*     ir   = (int)rap4; */
-/*     if ( rap4 > rapmax ) { */
-/*       rapmax = rap4;  */
-/*       iel     = k; */
-/*       ielreal = k - nex; */
-/*     } */
-/*     rapavg += rap4; */
-/*     rapnum++; */
-
-/*     if ( rap4 > 1.0 && rap4 < 1e9 ) { */
-/*       rapmin = M_MIN(rapmin,rap4); */
-/*       if ( rap4 < 10.0 ) { */
-/*         his10[ir] += 1; */
-/*      his01[0]  += 1; */
-/*       } */
-/*       else if ( rap4 < 1e9 ) { */
-/*         rapl = M_MIN(log10(rap4),32.0); */
-/*         his01[(int)rapl] += 1; */
-/*      his01[0]  += 1; */
-/*       }  */
-/*     } else { */
-/*        printf("pbs qual %d : %e\n",k,rap4);   */
-/*     } */
-/*   } */
-
-/*   /\* print histo *\/ */
-/*   fprintf(stdout,"\n  -- MESH QUALITY   %d\n",rapnum); */
-/*   if ( rapavg / rapnum < 100.0 ) { */
-/*     pt = &mesh->tria[iel]; */
-/*     fprintf(stdout,"     BEST   %e  AVRG.   %e  WRST.   %e (%d)\n", */
-/*             rapmin,rapavg / rapnum,rapmax,ielreal); */
-/*   } */
-
-
-/*   if ( abs(mesh->info.imprim) < 4 )  return; */
-
-/*   fprintf(stdout,"\n     HISTOGRAMM\n"); */
-/*   j = 0; */
-/*   for (i=1; i<16; i++) */
-/*     j += his01[i]; */
-
-/*   for (i=M_MAX((int)rapmin,1); i<=M_MIN((int)rapmax,9); i++) { */
-/*     fprintf(stdout,"     %5d < Q < %5d   %7d   %6.2f %%\n", */
-/*      i,i+1,his10[i],100.*(his10[i]/(float)his01[0])); */
-/*   } */
-
-/*   /\* quality per interval *\/ */
-/*   if (j != 0) { */
-/*     fprintf(stdout,"\n"); */
-/*     imax = (int)(M_MIN(3,log10(rapmax))); */
-
-/*     for (i=1; i<=imax; i++) { */
-/*       fprintf(stdout,"     %5.0f < Q < %5.0f   %7d   %6.2f %%\n", */
-/*        pow(10.,i),pow(10.,i+1),his01[i],100.*(his01[i]/(float)his01[0])); */
-/*     } */
-/*     for (i=4; i<=(int)log10(rapmax); i++) { */
-/*       fprintf(stdout,"    10**%2d < Q < 10**%2d  %7d   %6.2f %%\n", */
-/*        i,i+1,his01[i],100.*(his01[i]/(float)his01[0])); */
-/*     } */
-/*   } */
-/* } */
-

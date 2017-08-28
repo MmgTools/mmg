@@ -445,6 +445,7 @@ int _MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
     }
     ok++;
     if ( (!mmgWarn0) && (_MMG5_orvol(mesh->point,pt->v) < 0.0) ) {
+      mmgWarn0 = 1;
       fprintf(stderr,"  ## Warning: %s: at least 1 negative volume\n",__func__);
     }
     rap = _MMG3D_ALPHAD * pt->qual;

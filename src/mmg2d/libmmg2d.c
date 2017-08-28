@@ -159,7 +159,7 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
 
   tminit(ctim,TIMEMAX);
   chrono(ON,&(ctim[0]));
-  
+
   /* Check options */
   if ( !mesh->nt ) {
     fprintf(stdout,"\n  ## ERROR: NO TRIANGLES IN THE MESH. \n");
@@ -276,7 +276,12 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
   if ( mesh->info.ddebug && !_MMG5_chkmsh(mesh,1,0) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
 
   /* Print initial quality history */
-  MMG2_outqua(mesh,sol);
+  if ( abs(mesh->info.imprim) > 0 ) {
+    if ( !MMG2_outqua(mesh,sol) ) {
+      if ( !MMG2_unscaleMesh(mesh,sol) ) _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+      _LIBMMG5_RETURN(mesh,sol,MMG5_LOWFAILURE);
+    }
+  }
 
   chrono(OFF,&(ctim[2]));
   printim(ctim[2].gdif,stim);
@@ -290,8 +295,10 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
     fprintf(stdout,"\n  -- PHASE 2 : MESH ADAPTATION\n");
 
   /* Mesh analysis */
-  if (! _MMG2_analys(mesh) )
-    _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+  if (! _MMG2_analys(mesh) ) {
+    if ( !MMG2_unscaleMesh(mesh,sol) ) _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+    _LIBMMG5_RETURN(mesh,sol,MMG5_LOWFAILURE);
+  }
 
 
   /* Mesh improvement */
@@ -315,10 +322,13 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
   if ( !MMG2_unscaleMesh(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
 
   /* Print output quality history */
-  MMG2_outqua(mesh,sol);
+   if ( !MMG2_outqua(mesh,sol) ) {
+     if ( !MMG2_unscaleMesh(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+     _MMG2D_RETURN_AND_PACK(mesh,sol,MMG5_LOWFAILURE);
+   }
 
   /* Print edge length histories */
-  if ( abs(mesh->info.imprim) > 1 )  {
+  if ( abs(mesh->info.imprim) > 4 )  {
     MMG2_prilen(mesh,sol);
   }
 
@@ -372,7 +382,6 @@ int _MMG2D_restart(MMG5_pMesh mesh){
     mesh->nanil = mesh->na + 1;
   }
 
- 
   return 1;
 }
 
@@ -563,10 +572,13 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   if ( !MMG2_unscaleMesh(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
 
   /* Print quality histories */
-  MMG2_outqua(mesh,sol);
+  if ( !MMG2_outqua(mesh,sol) ) {
+    if ( !MMG2_unscaleMesh(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+     _MMG2D_RETURN_AND_PACK(mesh,sol,MMG5_LOWFAILURE);
+  }
 
   /* Print edge length histories */
-  if ( abs(mesh->info.imprim) > 1 )  {
+  if ( abs(mesh->info.imprim) > 4 )  {
     MMG2_prilen(mesh,sol);
   }
 
@@ -678,7 +690,12 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol)
   if ( mesh->info.ddebug && !_MMG5_chkmsh(mesh,1,0) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
 
   /* Print initial quality */
-  MMG2_outqua(mesh,sol);
+  if ( abs(mesh->info.imprim) > 0 ) {
+    if ( !MMG2_outqua(mesh,sol) ) {
+      if ( !MMG2_unscaleMesh(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+      _MMG2D_RETURN_AND_PACK(mesh,sol,MMG5_LOWFAILURE);
+    }
+  }
 
   chrono(OFF,&(ctim[2]));
   printim(ctim[2].gdif,stim);
@@ -695,8 +712,10 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol)
     _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
 
   /* Mesh analysis */
-  if (! _MMG2_analys(mesh) )
-    _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+  if (! _MMG2_analys(mesh) ) {
+    if ( !MMG2_unscaleMesh(mesh,sol) ) _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+    _MMG2D_RETURN_AND_PACK(mesh,sol,MMG5_LOWFAILURE);
+  }
 
   chrono(OFF,&(ctim[3]));
   printim(ctim[3].gdif,stim);
@@ -725,7 +744,10 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol)
   if ( !MMG2_unscaleMesh(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
 
   /* Print quality histories */
-  MMG2_outqua(mesh,sol);
+  if ( !MMG2_outqua(mesh,sol) ) {
+    if ( !MMG2_unscaleMesh(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+    _MMG2D_RETURN_AND_PACK(mesh,sol,MMG5_LOWFAILURE);
+  }
 
   chrono(ON,&(ctim[1]));
   if ( mesh->info.imprim )  fprintf(stdout,"\n  -- MESH PACKED UP\n");
@@ -827,7 +849,12 @@ int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   if ( mesh->info.ddebug && !_MMG5_chkmsh(mesh,1,0) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
 
   /* Print initial quality */
-  MMG2_outqua(mesh,met);
+  if ( abs(mesh->info.imprim) > 0 ) {
+    if ( !MMG2_outqua(mesh,met) ) {
+      if ( !MMG2_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+      _MMG2D_RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
+    }
+  }
 
   /* Mesh analysis */
   if (! _MMG2_analys(mesh) )
@@ -869,7 +896,10 @@ int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   if ( !MMG2_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
 
   /* Print quality histories */
-  MMG2_outqua(mesh,met);
+  if ( !MMG2_outqua(mesh,met) ) {
+    if ( !MMG2_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+    _MMG2D_RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
+  }
 
   chrono(ON,&(ctim[1]));
   if ( mesh->info.imprim )  fprintf(stdout,"\n  -- MESH PACKED UP\n");

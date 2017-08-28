@@ -224,7 +224,7 @@ int _MMG2D_memOption(MMG5_pMesh mesh);
 int MMG2_scaleMesh(MMG5_pMesh ,MMG5_pSol );
 int MMG2_unscaleMesh(MMG5_pMesh ,MMG5_pSol );
 int MMG2_pack(MMG5_pMesh ,MMG5_pSol );
-void MMG2_outqua(MMG5_pMesh ,MMG5_pSol );
+int MMG2_outqua(MMG5_pMesh ,MMG5_pSol );
 //int MMG2_mmg2d0(MMG5_pMesh ,MMG5_pSol );
 int MMG2_mmg2d1(MMG5_pMesh ,MMG5_pSol );
 //int MMG2_split(MMG5_pMesh ,MMG5_pSol ,int ,int ,int,double );

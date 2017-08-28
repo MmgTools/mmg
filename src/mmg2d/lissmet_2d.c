@@ -29,6 +29,7 @@
  * \author Algiane Froehly (Inria/UBordeaux)
  * \version 5
  * \copyright GNU Lesser General Public License.
+ * \warning unused
  */
 #include "mmg2d.h"
 
