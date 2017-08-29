@@ -133,8 +133,6 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   /* metric truncature and normalization and default values for hmin/hmax if not
    * provided by the user ( 0.1 \times the minimum of the metric sizes for hmin
    * and 10 \times the max of the metric sizes for hmax ). */
-
-#warning : write scaling of displacement vector field (size = 2)
   switch (sol->size) {
   case 1:
     /* normalization */
@@ -189,7 +187,11 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
       }
     }
     break;
-
+  case 2:
+    for (k=1; k<=mesh->np; k++) {
+      sol->m[2*k]   *= dd;
+      sol->m[2*k+1] *= dd;
+    }
   case 3:
     dd = 1.0 / (dd*dd);
     /* Normalization */
@@ -317,8 +319,8 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
 int MMG2_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pPoint     ppt;
   MMG5_Info      *info;
-  double     dd;
-  int        i,k,iadr;
+  double          dd;
+  int             i,k,iadr;
 
   info = &mesh->info;
 
@@ -341,11 +343,23 @@ int MMG2_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   /* de-normalize metric */
   if ( !sol->np )  return(1);
+
   switch (sol->size) {
   case 1:
-    for (k=1; k<=mesh->np; k++)  sol->m[k] *= dd;
+    for (k=1; k<=mesh->np; k++) {
+      ppt = &mesh->point[k];
+      if ( !MG_VOK(ppt) )  continue;
+      sol->m[k] *= dd;
+    }
     break;
-
+  case 2:
+    for (k=1; k<=mesh->np; k++) {
+      ppt = &mesh->point[k];
+      if ( !MG_VOK(ppt) )  continue;
+      sol->m[2*k]   *= dd;
+      sol->m[2*k+1] *= dd;
+    }
+    break;
   case 3:
     dd = 1.0 / (dd*dd);
     for (k=1; k<=mesh->np; k++) {
