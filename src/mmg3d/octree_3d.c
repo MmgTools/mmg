@@ -484,9 +484,12 @@ int _MMG3D_getListSquareRec(_MMG3D_octree_s* q, double* center, double* rect,
     x = dist[nc-3] - center[0];
     y = dist[nc-2] - center[1];
     z = dist[nc-1] - center[2];
-    //#warning should be replaced with distance in metric?
+
+    // Should be replaced with distance in metric?
     distTemp = x*x+y*y+z*z;
-    //~ #warning anisotropic distance not tested (not so important, this only reorders the cells)
+
+    // Here the anisotropic distance not tested (not so important, this only
+    // reorders the cells)
     //~ distTemp = ani[0]*x*x+ani[3]*y*y+ani[5]*z*z+
                 //~ 2*(ani[1]*x*y+ani[2]*x*z+ani[4]*y*z);
     if (*index > 0)
@@ -519,9 +522,9 @@ int _MMG3D_getListSquareRec(_MMG3D_octree_s* q, double* center, double* rect,
       recCenter[i] = (rect[i]>center[i]);
       recCenter[i+3] = ((rect[i]+rect[i+3])>center[i]);
     }
-    
+
     // three loop describing the 8 branches in binary (k,j,i):(0,0,0),(0,0,1)....(1,1,1)
-    for(i=0;i<2;i++) 
+    for(i=0;i<2;i++)
     {
       for(j=0;j<2;j++)
       {
@@ -534,20 +537,20 @@ int _MMG3D_getListSquareRec(_MMG3D_octree_s* q, double* center, double* rect,
           {
             // set the branch number
             nBranch = i+2*j+4*k;
-            
+
             // set recttemp to the cell size of the branch nBranch
             recttemp[0] = center[0]-l*(1-i);
-            recttemp[1] = center[1]-l*(1-j);  
-            recttemp[2] = center[2]-l*(1-k); 
+            recttemp[1] = center[1]-l*(1-j);
+            recttemp[2] = center[2]-l*(1-k);
             recttemp[3] = recttemp[4] = recttemp[5] = l;
             // intersect the rectangle and the cell and store it in recttemp
             if ( !_MMG3D_intersectRect(rect,recttemp) ) return 0;
-            
+
             // set the new center
             centertemp[0] = center[0]-l/2+i*l;
             centertemp[1] = center[1]-l/2+j*l;
             centertemp[2] = center[2]-l/2+k*l;
-            
+
             // recursive call in the branch
             if ( !_MMG3D_getListSquareRec(&(q->branches[nBranch]),
                                           centertemp, recttemp, qlist, dist,
@@ -931,7 +934,7 @@ int _MMG3D_delOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver, const 
     --q->nbVer;
     nbVerTemp = q->branches[quadrant].nbVer;
 
-    // #warning calling recursively here is not optimal
+    // warning: calling recursively here is not optimal
     if(!_MMG3D_delOctreeRec(mesh, &(q->branches[quadrant]), ver, no, nv))
       return 0;
 
