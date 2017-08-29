@@ -515,7 +515,6 @@ int _MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   int            kk,isloc,ismet;
   char           i,j,ia,ised,i0,i1;
   MMG5_pPar      par;
-  static char    mmgWarn=0;
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
     fprintf(stdout,"  ** Defining isotropic map\n");

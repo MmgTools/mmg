@@ -1936,7 +1936,6 @@ int _MMG3D_movnormal_iso(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
   int         j,iadr,ipb,iter,maxiter,l,lon,iel,i1,i2,i3,list[MMG3D_LMAX+2];;
   double      hp,coe,crit,qualtet[MMG3D_LMAX+2];;
   double      ax,ay,az,bx,by,bz,nx,ny,nz,dd,len,qual,oldc[3],oldp[3];
-  static char mmgWarn0 = 0;
 
   assert(k);
   assert(ib<4);

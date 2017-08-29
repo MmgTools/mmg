@@ -243,8 +243,6 @@ int _MMG3D_splitItem(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,
 int MMG3D_optbdry(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree,int k) {
   MMG5_pTetra  pt;
   MMG5_pxTetra pxt;
-  double       lint,lbdy,len,lmin,lmax;
-  int          imin,imax;
   int          ib,i,j,ipb,list[MMG3D_LMAX+2];
   int          iedg,ier,ilist,ied,ia,it1,it2,ret,imove;
 

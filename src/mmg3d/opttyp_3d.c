@@ -323,12 +323,10 @@ static int MMG3D_typelt(MMG5_pMesh mesh,int iel,int *item) {
  *
  */
 int _MMG3D_swpItem(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,int k,int iar) {
-  MMG5_pTetra   pt,pt1;
+  MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
-  int           l,list[MMG3D_LMAX+2],lon,iel,nconf,ier;
-  double        crit;
+  int           list[MMG3D_LMAX+2],lon,nconf,ier;
   double        OCRIT = 1.01;
-  int           nf = 0,j;
 
   ier = 0;
   pt = &mesh->tetra[k];
@@ -338,7 +336,6 @@ int _MMG3D_swpItem(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,int k,i
     if ( pxt->edg[iar] || pxt->tag[iar] ) return(0);
   }
 
-  crit *= OCRIT;
   nconf = _MMG5_chkswpgen(mesh,met,k,iar,&lon,list,OCRIT,2);
   if ( nconf ) {
     ier = _MMG5_swpgen(mesh,met,nconf,lon,list,octree,2);

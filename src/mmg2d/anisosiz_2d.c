@@ -313,7 +313,7 @@ int _MMG2_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
 int _MMG2_grad2met_ani(MMG5_pMesh mesh,MMG5_pSol met,double *m,double *n,double difsiz) {
   double       det,dd,sqDelta,trimn,vnorm,hm,hn,lambda[2],dm[2],dn[2],imn[4],vp0[2],vp1[2],ip[4];
   char         ier;
-  static char  mmgWarn0=0,mmgWarn1=0;
+  static char  mmgWarn0=0;
 
   ier = 0;
   

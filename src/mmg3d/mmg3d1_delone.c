@@ -836,9 +836,8 @@ _MMG5_optbad(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
  */
 static int
 _MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree, int* warn) {
-  MMG5_pTetra pt;
   int        nfilt,ifilt,ne,ier;
-  int        ns,nc,it,nnc,nns,nnf,nnm,maxit,nf,nm,noptim,k;
+  int        ns,nc,it,nnc,nns,nnf,nnm,maxit,nf,nm,noptim;
   double     maxgap,dd;
 
   /* Iterative mesh modifications */
@@ -881,7 +880,7 @@ _MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree, int* warn) 
     if ( !mesh->info.nomove ) {
       /*perform only boundary moves critSurf,critVol, moveVol?, improveSurf, improveSurfVol,improveVol, maxiter*/
       nm = _MMG5_movtet(mesh,met,octree,1./3.46,0.5/_MMG3D_ALPHAD,1,1,0,1,1);
-      
+
       if ( nm < 0 ) {
         fprintf(stderr,"\n  ## Error: %s: Unable to improve mesh.\n",__func__);
         return(0);
