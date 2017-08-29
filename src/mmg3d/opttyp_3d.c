@@ -172,7 +172,7 @@ static int MMG3D_typelt(MMG5_pMesh mesh,int iel,int *item) {
 
   /* small volume: types 1,2,3,4 */
   if ( vol < volchk ) {
-    //puts("volume nul : type 1,2,3,4");
+    // puts("volume nul : type 1,2,3,4");
     ssmall = 0.4 * (s[0]+s[1]+s[2]+s[3]);
     isur   = 0;
     for (i=0; i<4; i++)
@@ -237,11 +237,12 @@ static int MMG3D_typelt(MMG5_pMesh mesh,int iel,int *item) {
     //puts("default");
     item[0] = 0;
     return(1);
-  }/*end chkvol*/
+  }/* end chkvol */
 
   dd = rapmin / rapmax;
   /* types 3,6,7 */
-  if ( dd < RAPMAX ) { /*ie une arete 4 fois plus gde qu'une autre*/
+  if ( dd < RAPMAX ) {
+    /* One edge is 4 time smaller than another one */
 
     for (i=0; i<6; i++)  h[i] = sqrt(h[i]);
 
@@ -251,7 +252,8 @@ static int MMG3D_typelt(MMG5_pMesh mesh,int iel,int *item) {
         i0 = _MMG5_idir[k][i];
         i1 = _MMG5_idir[k][_MMG5_inxt2[i]];
         i2 = _MMG5_idir[k][_MMG5_inxt2[i+1]];
-        if ( h[i0]+h[i1] < 1.2*h[i2] ) {/*1.4 ie une face obtus*/
+        if ( h[i0]+h[i1] < 1.2*h[i2] ) {
+          /* Obtuse face */
           nobtus++;
           item[0] = i2;
           item[1] = _MMG5_idir[k][_MMG5_inxt2[i+1]];
@@ -285,7 +287,7 @@ static int MMG3D_typelt(MMG5_pMesh mesh,int iel,int *item) {
         i0 = _MMG5_idir[k][i];
         i1 = _MMG5_idir[k][_MMG5_inxt2[i]];
         i2 = _MMG5_idir[k][_MMG5_inxt2[i+1]];
-        if ( h[i0]+h[i1] > 1.5*h[i2] )  naigu++;/*1.5*/
+        if ( h[i0]+h[i1] > 1.5*h[i2] )  naigu++;
       }
     }
     switch(naigu){
@@ -297,7 +299,7 @@ static int MMG3D_typelt(MMG5_pMesh mesh,int iel,int *item) {
       item[0] = iarmin;
       return(4);
     case 3:
-      /*#warning definir item*/
+      /* Item to define */
       return(5);
     default:
       item[0] = iarmin;
@@ -519,12 +521,11 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
       }
 
 #warning ASK CECILE: is it normal to pass here if we have bdries but optbdry has failed?
-
       switch(ityp) {
 
       case 1:  /* sliver */
-      case 3:  /* aileron*/
-      case 6:  /* O good face: move away closest vertices */
+      case 3:  /* fin */
+      case 6:  /* no good face: move away closest vertices */
       case 7:
       default:
 
@@ -537,7 +538,7 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
           ds[ityp]++;
           break;
         } else if(!ier) {
-          /*second try to split the biggest edge*/
+          /* second try to split the biggest edge */
           if(!mesh->info.noinsert) {
             /* if(_MMG5_orvolnorm(mesh,k) < 5.e-9) { */
             /*   OCRIT *= 0.5; */
@@ -550,7 +551,7 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
               ds[ityp]++;
               break;
             }
-          } /*end noinsert*/
+          } /* end noinsert */
 
           ier = _MMG3D_swpalmostall(mesh,met,octree,k,item[0]);
 
@@ -572,7 +573,8 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
         }
         if ( !mesh->info.nomove ) {
           for(i=0 ; i<4 ; i++) {
-            if(((met->size!=1) && _MMG3D_movv_ani(mesh,met,k,i)) || ((met->size==1) && _MMG3D_movv_iso(mesh,met,k,i))) {
+            if ( ((met->size!=1) && _MMG3D_movv_ani(mesh,met,k,i)) ||
+                 ((met->size==1) && _MMG3D_movv_iso(mesh,met,k,i)) ) {
               nd++;
               ds[ityp]++;
               break;
@@ -582,13 +584,15 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
         break;
       case 2: /*chapeau*/
         if ( !mesh->info.nomove ) {
-          if ( ( (met->size!=1) && _MMG3D_movv_ani(mesh,met,k,item[0])) || ((met->size==1) && _MMG3D_movv_iso(mesh,met,k,item[0]))) {
+          if ( ( (met->size!=1) && _MMG3D_movv_ani(mesh,met,k,item[0])) ||
+               ((met->size==1) && _MMG3D_movv_iso(mesh,met,k,item[0])) ) {
             nd++;
             ds[ityp]++;
           } else {
             for(i=0 ; i<4 ; i++) {
               if(item[0]==i) continue;
-              if(((met->size!=1) && _MMG3D_movv_ani(mesh,met,k,i)) || ((met->size==1) && _MMG3D_movv_iso(mesh,met,k,i))) {
+              if( ((met->size!=1) && _MMG3D_movv_ani(mesh,met,k,i)) ||
+                  ((met->size==1) && _MMG3D_movv_iso(mesh,met,k,i)) ) {
                 nd++;
                 ds[ityp]++;
                 break;
@@ -597,8 +601,8 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
           }
         }
         break;
-      }/*end switch*/
-    }/*end for k*/
+      } /* end switch */
+    } /* end for k */
 
     /* printf("bdry : %d %d\n",nbdy,nbdy2); */
     /*  for (k=0; k<=7; k++) */

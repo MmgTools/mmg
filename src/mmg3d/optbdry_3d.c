@@ -32,6 +32,16 @@
 
 #include "mmg3d.h"
 
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param k   index of a tetra
+ *
+ * \return 1 if we move one of the vertices, 0 otherwise.
+ *
+ * Try to move the vertices of the tetra \a k to improve its quality.
+ *
+ */
 int MMG3D_movetetrapoints(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree,int k) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
@@ -103,18 +113,11 @@ int MMG3D_movetetrapoints(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree,in
             return(-1);
 
           n = &(mesh->xpoint[ppt->xp].n1[0]);
-          // if ( MG_GET(pxt->ori,i) ) {
-          /* Useless because if the orientation of the tetra face is
-           * compatible with the triangle (MG_GET(ori,i)) we know that we
-           * are well orientated. Morever, may introduce numerical errors
-           * with wrinkled surfaces. */
-          // if ( !_MMG5_directsurfball(mesh, pt->v[i0],lists,ilists,n) )  continue;
-          // }
           if ( !MG_GET(pxt->ori,i) ) {
             if ( !_MMG5_directsurfball(mesh,pt->v[i0],lists,ilists,n) )
               continue;
           }
-          #warning CECILE a modifier pour opttyp
+#warning CECILE a modifier pour opttyp
           ier = _MMG5_movbdyregpt(mesh,met, octree, listv,ilistv,lists,ilists,improve,improve);
           if ( ier )  ns++;
         }
@@ -122,7 +125,7 @@ int MMG3D_movetetrapoints(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree,in
       else if ( internal ) {
         ilistv = _MMG5_boulevolp(mesh,k,i0,listv);
         if ( !ilistv )  continue;
-        ier =  _MMG3D_movnormal_iso(mesh,met,k,i0);//_MMG5_movintpt(mesh,met,octree,listv,ilistv,improve);
+        ier =  _MMG3D_movnormal_iso(mesh,met,k,i0);
       }
       if ( ier ) {
         nm++;
@@ -139,7 +142,17 @@ int MMG3D_movetetrapoints(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree,in
 
 }
 
-/*try to remove point i of tet k, try the three edges of k containing i*/
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param k   index of a tetra
+ * \param i   index of point to delete in tetra \a k.
+ *
+ * \return 1 if success, 0 if we can't delete the point.
+ *
+ * Try to remove point i of tet k, try the three edges of k containing i.
+ *
+ */
 int _MMG3D_coledges(MMG5_pMesh mesh,MMG5_pSol met,int k,int i) {
   MMG5_pTetra pt;
   double      len;
@@ -181,15 +194,24 @@ int _MMG3D_coledges(MMG5_pMesh mesh,MMG5_pSol met,int k,int i) {
     return(0);
 }
 
-/*try to delete the point i of tet k
-try all the edges containing i*/
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param octree pointer toward the octree structure.
+ * \param k   index of a tetra
+ * \param i   index of point to delete in tetra \a k.
+ *
+ * \return 1 if success, 0 if we can't delete the point.
+ *
+ * Try to delete the point i of tet k. Try all the edges containing i.
+ *
+ */
 int _MMG3D_deletePoint(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,
                        int k,int i) {
   MMG5_pTetra pt;
   int         il,ilist,iel,ip,list[MMG3D_LMAX+2];
 
   ilist = _MMG5_boulevolp(mesh,k,i,list);
-#warning optimize : try to know how many tets we have around the vertex. See NM_Complex/nm4 to be sure this test is ok (if not the test is very long).
   if (ilist > 30 ) return(0);
 
   for(il = 0 ; il<ilist ; il++) {
@@ -210,7 +232,10 @@ int _MMG3D_splitItem(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
+ * \param octree pointer toward the octree structure.
  * \param k   index of a tetra
+ *
+ * \return 1 if success, 0 if fail.
  *
  * Try to optimize the tetra k. This tetra has a face on the boundary.
  *
@@ -255,7 +280,8 @@ int MMG3D_optbdry(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree,int k) {
     ier = _MMG3D_coledges(mesh,met,k,ib);
     if(ier) return(1);
 
-    /* try to remove the non-bdry vertex : with all the edges containing the vertex*/
+    /* try to remove the non-bdry vertex : with all the edges containing the
+     * vertex */
     ier = _MMG3D_deletePoint(mesh,met,octree,k,i);
     if(ier) return(1);
   }
