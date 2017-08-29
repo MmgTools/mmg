@@ -262,7 +262,7 @@ nextstep1:
  */
 static inline
 int _MMG3D_normalDeviation(MMG5_pMesh mesh , int  start, char   iface, char ia,
-                           int        idx  , int  ip   , double n0[3], double ba[3])
+                           int        idx  , int  ip   , double n0[3])
 {
   MMG5_Tria tt0;
   double    n1[3];
@@ -273,11 +273,6 @@ int _MMG3D_normalDeviation(MMG5_pMesh mesh , int  start, char   iface, char ia,
   _MMG5_tet2tri(mesh,start,iface,&tt0);
 
   iedge = _MMG5_iarfinv[iface][ia];
-
-  #warning to remove
-  ba[0] = mesh->point[tt0.v[_MMG5_iprv2[iedge]]].c[0] - mesh->point[tt0.v[_MMG5_inxt2[iedge]]].c[0];
-  ba[1] = mesh->point[tt0.v[_MMG5_iprv2[iedge]]].c[1] - mesh->point[tt0.v[_MMG5_inxt2[iedge]]].c[1];
-  ba[2] = mesh->point[tt0.v[_MMG5_iprv2[iedge]]].c[2] - mesh->point[tt0.v[_MMG5_inxt2[iedge]]].c[2];
 
   switch (idx)
   {
@@ -321,7 +316,7 @@ int _MMG3D_simbulgept(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int ip) {
   MMG5_pxTetra   pxt;
   MMG5_pPoint    ppt0;
   double         calold,calnew,caltmp;
-  double         n0[6],n1[6],ba0[6],ba1[6];
+  double         n0[6],n1[6];
   int            j,k,iel,ilist,idx,iface,ier,sum1,sum2,mins1,mins2,maxs1,maxs2;
   int            is0,is1,is2;
   char           ie,ia,ib,complete,wrongOri;
@@ -357,10 +352,7 @@ int _MMG3D_simbulgept(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int ip) {
   }
   /* if ( calnew < 0.3*calold )  return(0);*/
 
-
-
-   /** Check the deviation for new triangles */
-
+  /** Check the deviation for new triangles */
   /* analyze surfacic ball of p */
   wrongOri = complete = idx = 0;
   for (k=0; k<ilist; k++) {
@@ -381,19 +373,13 @@ int _MMG3D_simbulgept(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int ip) {
       is2 = pt->v[_MMG5_idir[iface][2]];
 
       /* Normal deviation between the two new triangles and their neighbors */
-      ier = _MMG3D_normalDeviation(mesh,iel,iface,ie,0,ip,&n0[idx],&ba0[idx]);
+      ier = _MMG3D_normalDeviation(mesh,iel,iface,ie,0,ip,&n0[idx]);
       if ( ier < 0 ) return -1;
       else if ( ier==0 ) return 0;
 
-      ier = _MMG3D_normalDeviation(mesh,iel,iface,ie,1,ip,&n1[idx],&ba1[idx]);
+      ier = _MMG3D_normalDeviation(mesh,iel,iface,ie,1,ip,&n1[idx]);
       if ( ier < 0 ) return -1;
       else if ( ier==0 ) return 0;
-
-      assert(
-        (ba0[idx]  -ba1[idx])  *(ba0[idx]  -ba1[idx])+
-        (ba0[idx+1]-ba1[idx+1])*(ba0[idx+1]-ba1[idx+1])+
-        (ba0[idx+2]-ba1[idx+2])*(ba0[idx+2]-ba1[idx+2])
-             <=_MMG5_EPSD2);
 
       /* Test sharp angle creation along the new edge */
       if ( !_MMG5_devangle(&n0[idx],&n1[idx],mesh->info.dhd) ) {
@@ -434,18 +420,6 @@ int _MMG3D_simbulgept(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int ip) {
         complete = 1;
 
         /* Test sharp angle creation along the splitted edge */
-         assert (
-          (ba0[  0]  +ba0[idx])  *(ba0[  0]  +ba0[idx])+
-          (ba0[  1]  +ba0[idx+1])*(ba0[  1]  +ba0[idx+1])+
-          (ba0[  2]  +ba0[idx+2])*(ba0[  2]  +ba0[idx+2])
-          <=_MMG5_EPSD2 );
-
-        assert (
-          (ba1[  0]  +ba1[idx])  *(ba1[  0]  +ba1[idx])+
-          (ba1[  1]  +ba1[idx+1])*(ba1[  1]  +ba1[idx+1])+
-          (ba1[  2]  +ba1[idx+2])*(ba1[  2]  +ba1[idx+2])
-          <=_MMG5_EPSD2 );
-
         if ( !_MMG5_devangle(&n0[0],&n1[idx],mesh->info.dhd) ) {
           return(0);
         }
