@@ -723,13 +723,7 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,
                 return(-1);
             }
             else if ( ppt->tag & MG_GEO ) {
-              if ( ppt->tag & MG_OPNBDY ) {
-#warning to implement
-                ier=_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,0);
-              }
-              else {
-                ier=_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,0);
-              }
+              ier=_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,0);
               if ( !ier )  continue;
               else if ( ier>0 )
                 ier = _MMG5_movbdyridpt(mesh,met,octree,listv,ilistv,lists,ilists,improveVolSurf);
@@ -1871,21 +1865,8 @@ static int _MMG5_anatet4(MMG5_pMesh mesh, MMG5_pSol met,int *nf, char typchk) {
         if ( ( pxt->ftag[j] & MG_BDY ) && (!(pxt->ftag[j] & MG_PARBDY)) )  nbdy++;
     }
     if ( nbdy > 1 ) {
-      if ( !mesh->info.noswap ) {
-        /* Try to swap first */
-#warning remove the comment to tru to swap: but it is bugged for now
-        ier = 0;//MMG3D_swap23(mesh,met,k,typchk-1);
-        if ( ier < 0 ) {
-          return -1;
-        }
-        else if ( ier ) {
-          ++(*nf);
-          continue;
-        }
-      }
-
       if ( !mesh->info.noinsert ) {
-        /* If unable to swap, try to split */
+        /* Try to split */
         ier  = _MMG5_split4bar(mesh,met,k,typchk-1);
         if ( !ier ) return(-1);
         ns++;
