@@ -511,7 +511,6 @@ int litcol(MMG5_pMesh mesh,int k,char i,double kali) {
       }
       /* check quality */
       kal = _MMGS_ALPHAD*_MMG5_caltri_iso(mesh,NULL,pt0);
-#warning URGENT threshold check
       if ( kal < _MMGS_NULKAL )  return(0);
     }
 
