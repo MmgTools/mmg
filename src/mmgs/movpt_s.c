@@ -841,7 +841,7 @@ int movridpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
     pt0->v[i0] = 0;
     calold = caleltsig_iso(mesh,NULL,iel);
     calnew = caleltsig_iso(mesh,NULL,0);
-#warning URGENT check the threshold value
+
     if ( (calnew < 0.001) && (calnew<calold) )  return(0);
     //if ( chkedg(mesh,0) )  return(0);
   }
@@ -866,4 +866,3 @@ int movridpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
 
   return(1);
 }
-

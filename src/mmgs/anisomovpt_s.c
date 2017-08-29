@@ -273,7 +273,6 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   char          voy1,voy2,isrid,isrid1,isrid2,i0,i1,i2;
   static char   mmgWarn0 = 0;
 
-//#warning this step is different than the one used on iso or for int pts in aniso
   step  = 0.2;
   isrid1 = isrid2 = 0;
   it1   = it2 = 0;
@@ -834,7 +833,6 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
 
     calold = caleltsig_ani(mesh,met,iel);
     calnew = caleltsig_ani(mesh,met,0);
-#warning URGENT check the threshold value
     if ( (calnew < 0.001) && (calnew<calold) ) {
       ppt0->tag = 0;
       return(0);

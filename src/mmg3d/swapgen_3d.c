@@ -56,10 +56,10 @@ int _MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,
                     int *ilist,int *list,double crit,char typchk) {
   MMG5_pTetra    pt,pt0;
   MMG5_pPoint    p0;
-  double    calold,calnew,caltmp;
-  int       na,nb,np,adj,piv,npol,refdom,k,l,iel;
-  int       *adja,pol[MMG3D_LMAX+2];
-  char      i,ipa,ipb,ip,ier,ifac;
+  double         calold,calnew,caltmp;
+  int            na,nb,np,adj,piv,npol,refdom,k,l,iel;
+  int            *adja,pol[MMG3D_LMAX+2];
+  char           i,ipa,ipb,ip,ier,ifac;
 
   pt  = &mesh->tetra[start];
   refdom = pt->ref;
@@ -130,6 +130,7 @@ int _MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,
     }
     ifac = adj%4;
   }
+
   //CECILE : je vois pas pourquoi ca ameliore de faire ce test
   //plus rapide mais du coup on elimine des swap...
   //4/01/14 commentaire
