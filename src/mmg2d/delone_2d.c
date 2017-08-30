@@ -290,7 +290,7 @@ int _MMG2_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
     nei[2]  = adja[2]/3 ;
     for (i=0; i<3; i++) {
       jel = nei[i];
-      if ( !jel || mesh->tria[jel].base != base ) {
+      if ( (!jel) || (mesh->tria[jel].base != base) ) {
         for (j=0; j<2; j++) {
           i1  = MMG2_iare[i][j];
           ppt = &mesh->point[ pt1->v[i1] ];
@@ -361,7 +361,7 @@ int _MMG2_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
       j   = nei[i] % 3;
 
       /* Catch the associated external face */
-      if ( !jel || (mesh->tria[jel].base != base) ) {
+      if ( (!jel) || (mesh->tria[jel].base != base) ) {
         iel = ielnum[size++];
         assert(iel);
 

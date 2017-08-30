@@ -254,15 +254,12 @@ int _MMG2_boulet(MMG5_pMesh mesh,int start,char ip,int *list) {
  */
 int _MMG2_bouleendp(MMG5_pMesh mesh,int start,char ip,int *ip1,int *ip2) {
   MMG5_pTria    pt;
-  int           *adja,k,np;
+  int           *adja,k;
   char          i,i1,i2;
   static char   mmgWarn0=0;
   
   *ip1 = 0;
   *ip2 = 0;
-  pt = &mesh->tria[start];
-  
-  np = pt->v[ip];
   
   /* Travel elements in the forward sense */
   k = start;

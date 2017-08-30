@@ -401,7 +401,12 @@ int _MMG2D_Free_structures_var(va_list argptr)
   if ( disp && (*disp) && (*disp)->m )
     _MMG5_DEL_MEM((*mesh),(*disp)->m,((*disp)->size*((*disp)->npmax+1))*sizeof(double));
 
-  MMG5_Free_structures(*mesh,*sol);
+  if ( sol ) {
+    MMG5_Free_structures(*mesh,*sol);
+  }
+  else {
+    MMG5_Free_structures(*mesh,NULL);
+  }
 
   return 1;
 }

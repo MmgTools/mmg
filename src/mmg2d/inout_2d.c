@@ -596,7 +596,7 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   int         k,i,isol,type,bin,dim,btyp,bpos;
   char        *ptr,*data,chaine[128];
 
-  bin = 0;
+  bin = btyp = 0;
   _MMG5_SAFE_CALLOC(data,strlen(filename)+6,char,-1);
   strcpy(data,filename);
 
