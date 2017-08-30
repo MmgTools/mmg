@@ -1273,6 +1273,7 @@ int MMG2D_saveSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   /* Solution is a displacement vector field */
   case 2:
     typ = 2;
+    break;
   /* Solution is a metric tensor */
   case 3:
     typ = 3;
