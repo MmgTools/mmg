@@ -1740,7 +1740,7 @@ int _MMG5_bdrySet(MMG5_pMesh mesh) {
     for (k=1; k<=mesh->ne; k++) {
       pt = &mesh->tetra[k];
       if ( !MG_EOK(pt) )  continue;
-      adja = &mesh->adja[4*(k-1)+1];
+
       for (i=0; i<4; i++) {
         ia = pt->v[_MMG5_idir[i][0]];
         ib = pt->v[_MMG5_idir[i][1]];

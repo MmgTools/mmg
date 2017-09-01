@@ -44,7 +44,7 @@
  */
 static int paktri(MMG5_pMesh mesh) {
   MMG5_pTria   pt,pt1;
-  int     k;
+  int          k;
 
   k = 1;
   do {
