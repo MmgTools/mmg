@@ -264,13 +264,15 @@ int MMG3D_optbdry(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree,int k) {
 
   /* try to move the vertex in order to improve the quality*/
   ier = 0;
-  for(j = 0 ; j<10 ; j++) {
-    imove = MMG3D_movetetrapoints(mesh,met,octree,k);
-    ier += imove;
-    if(!imove) break;
-  }
-  if(ier) {
-    imove = 1;
+  if ( !mesh->info.nomove ) {
+    for(j = 0 ; j<10 ; j++) {
+      imove = MMG3D_movetetrapoints(mesh,met,octree,k);
+      ier += imove;
+      if(!imove) break;
+    }
+    if(ier) {
+      imove = 1;
+    }
   }
 
   if(!mesh->info.noinsert) {
