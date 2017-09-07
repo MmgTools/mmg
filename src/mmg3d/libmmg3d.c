@@ -487,7 +487,7 @@ int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
 
   if ( mesh->info.imprim ) {
     fprintf(stdout,"     NUMBER OF VERTICES   %8d   CORNERS %8d\n",mesh->np,nc);
-    fprintf(stdout,"     NUMBER OF ELEMENTS   %8d\n",mesh->ne);
+    fprintf(stdout,"     NUMBER OF TETRAHEDRA %8d\n",mesh->ne);
   }
 
   nr = _MMG3D_bdryBuild(mesh);

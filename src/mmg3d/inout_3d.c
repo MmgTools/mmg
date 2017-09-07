@@ -912,6 +912,10 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
   /* stats */
   if ( abs(mesh->info.imprim) > 3 ) {
     fprintf(stdout,"     NUMBER OF VERTICES       %8d\n",mesh->np);
+    fprintf(stdout,"     NUMBER OF TETRAHEDRA     %8d\n",mesh->ne);
+    if ( mesh->nprism )
+      fprintf(stdout,"     NUMBER OF PRISMS         %8d\n",mesh->nprism);
+
     if ( mesh->na ) {
       fprintf(stdout,"     NUMBER OF EDGES          %8d\n",mesh->na);
       if ( nr )
@@ -921,11 +925,6 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
       fprintf(stdout,"     NUMBER OF TRIANGLES      %8d\n",mesh->nt);
     if ( mesh->nquad )
       fprintf(stdout,"     NUMBER OF QUADRILATERALS %8d\n",mesh->nquad);
-
-    fprintf(stdout,"     NUMBER OF TETRAHEDRA     %8d\n",mesh->ne);
-
-    if ( mesh->nprism )
-      fprintf(stdout,"     NUMBER OF PRISMS         %8d\n",mesh->nprism);
 
 
     if ( npreq || nedreq || ntreq || nereq || nqreq ) {
@@ -939,7 +938,7 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
       if ( nqreq )
         fprintf(stdout,"                  QUADRILATERALS %8d \n",nqreq);
       if ( nereq )
-        fprintf(stdout,"                  TETRAHEDRAS    %8d \n",nereq);
+        fprintf(stdout,"                  TETRAHEDRA    %8d \n",nereq);
     }
     if(ncor) fprintf(stdout,"     NUMBER OF CORNERS        %8d \n",ncor);
   }
@@ -1620,6 +1619,11 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
   if ( mesh->info.imprim > 4 ) {
     fprintf(stdout,"     NUMBER OF VERTICES       %8d   CORNERS %8d"
             "   REQUIRED %8d\n",np,nc,nre);
+    fprintf(stdout,"     NUMBER OF TETRAHEDRA     %8d   REQUIRED  %8d\n",
+            ne,nereq);
+    if ( npr )
+      fprintf(stdout,"     NUMBER OF PRISMS         %8d\n",npr);
+
     if ( na )
       fprintf(stdout,"     NUMBER OF EDGES          %8d   RIDGES  %8d\n",na,nr);
     if ( mesh->nt )
@@ -1627,12 +1631,6 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
               mesh->nt, ntreq);
     if ( nq )
       fprintf(stdout,"     NUMBER OF QUADRILATERALS %8d\n",nq);
-
-    fprintf(stdout,"     NUMBER OF TETRAHEDRA     %8d   REQUIRED  %8d\n",
-            ne,nereq);
-    if ( npr )
-      fprintf(stdout,"     NUMBER OF PRISMS         %8d\n",npr);
-
   }
 
   /*fin fichier*/

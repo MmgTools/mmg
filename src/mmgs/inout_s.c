@@ -661,9 +661,10 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
 
   if ( abs(mesh->info.imprim) > 4 ) {
     fprintf(stdout,"     NUMBER OF VERTICES   %8d / %8d   CORNERS/REQ. %d / %d\n",mesh->npi,mesh->npmax,ncor,npreq);
+    fprintf(stdout,"     NUMBER OF TRIANGLES  %8d / %8d\n",mesh->nti,mesh->ntmax);
+
     if ( mesh->na )
       fprintf(stdout,"     NUMBER OF EDGES      %8d  RIDGES %6d\n",mesh->na,nri);
-    fprintf(stdout,"     NUMBER OF TRIANGLES  %8d / %8d\n",mesh->nti,mesh->ntmax);
   }
   fclose(inm);
   return(1);
@@ -1120,9 +1121,10 @@ int MMGS_saveMesh(MMG5_pMesh mesh, const char* filename) {
 
   if ( abs(mesh->info.imprim) > 4 ) {
     fprintf(stdout,"     NUMBER OF VERTICES   %8d  CORNERS    %6d\n",np,nc);
+    fprintf(stdout,"     NUMBER OF TRIANGLES  %8d\n",nt);
+
     if ( mesh->na )
       fprintf(stdout,"     NUMBER OF EDGES      %8d  RIDGES     %6d\n",mesh->na,nr);
-    fprintf(stdout,"     NUMBER OF TRIANGLES  %8d\n",nt);
     if ( nn+ng )
       fprintf(stdout,"     NUMBER OF NORMALS    %8d  TANGENTS   %6d\n",nn,ng);
   }

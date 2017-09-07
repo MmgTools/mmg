@@ -355,7 +355,7 @@ int MMG2_pack(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTria         pt,pt1,ptnew;
   MMG5_pEdge         ped;
   MMG5_pPoint        ppt,pptnew;
-  int                np,ned,nt,k,iel,nbl,isol,isolnew,memWarn;
+  int                np,ned,nt,k,iel,nbl,isol,isolnew,memWarn,nc;
   int                iadr,iadrnew,iadrv,*adjav,*adja,*adjanew,voy;
   char               i,i1,i2;
 
@@ -367,11 +367,13 @@ int MMG2_pack(MMG5_pMesh mesh,MMG5_pSol sol) {
   }
 
   /* Pack vertex indices */
-  np = 0;
+  np = nc = 0;
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
     if ( !MG_VOK(ppt) )  continue;
     ppt->tmp = ++np;
+
+    if ( ppt->tag & MG_CRN )  nc++;
 
     if ( mesh->info.nosurf && (ppt->tag & MG_NOSURF) )
       ppt->tag &= ~MG_REQ;
@@ -574,6 +576,14 @@ int MMG2_pack(MMG5_pMesh mesh,MMG5_pSol sol) {
     mesh->nenil = 0;
   }
 
+  if ( mesh->info.imprim ) {
+    fprintf(stdout,"     NUMBER OF VERTICES   %8d   CORNERS %8d\n",mesh->np,nc);
+    fprintf(stdout,"     NUMBER OF TRIANGLES  %8d\n",mesh->nt);
+
+    if ( mesh->na )
+      fprintf(stdout,"     NUMBER OF EDGES      %8d\n",mesh->na);
+  }
+
   if ( memWarn ) return 0;
 
   return(1);
@@ -591,7 +601,3 @@ int MMG2_pack(MMG5_pMesh mesh,MMG5_pSol sol) {
  optdbl[0] = hgrad
  optdbl[1] =ar
  */
-
-
-
-

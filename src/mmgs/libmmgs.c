@@ -237,9 +237,10 @@ int _MMGS_packMesh(MMG5_pMesh mesh,MMG5_pSol met) {
 
   if ( mesh->info.imprim ) {
     fprintf(stdout,"     NUMBER OF VERTICES   %8d   CORNERS %8d\n",mesh->np,nc);
+    fprintf(stdout,"     NUMBER OF TRIANGLES  %8d\n",mesh->nt);
+
     if ( mesh->na )
       fprintf(stdout,"     NUMBER OF EDGES      %8d   RIDGES  %8d\n",mesh->na,nr);
-    fprintf(stdout,"     NUMBER OF TRIANGLES  %8d\n",mesh->nt);
   }
   return(1);
 }

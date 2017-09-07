@@ -1085,20 +1085,18 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
   /* stats */
   if ( abs(mesh->info.imprim) > 3 ) {
     fprintf(stdout,"     NUMBER OF VERTICES       %8d\n",mesh->np);
-    if ( mesh->na ) {
-      fprintf(stdout,"     NUMBER OF EDGES          %8d\n",mesh->na);
-    }
-    if ( mesh->nt )
-      fprintf(stdout,"     NUMBER OF TRIANGLES      %8d\n",mesh->nt);
-    if ( mesh->nquad )
-      fprintf(stdout,"     NUMBER OF QUADRILATERALS %8d\n",mesh->nquad);
-
     if ( mesh->ne )
       fprintf(stdout,"     NUMBER OF TETRAHEDRA     %8d\n",mesh->ne);
 
     if ( mesh->nprism )
       fprintf(stdout,"     NUMBER OF PRISMS         %8d\n",mesh->nprism);
-
+    if ( mesh->nt )
+      fprintf(stdout,"     NUMBER OF TRIANGLES      %8d\n",mesh->nt);
+    if ( mesh->nquad )
+      fprintf(stdout,"     NUMBER OF QUADRILATERALS %8d\n",mesh->nquad);
+    if ( mesh->na ) {
+      fprintf(stdout,"     NUMBER OF EDGES          %8d\n",mesh->na);
+    }
   }
 
   /** Read the solution at nodes */
@@ -1633,18 +1631,17 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   /* stats */
   if ( abs(mesh->info.imprim) > 3 ) {
     fprintf(stdout,"     NUMBER OF VERTICES       %8d\n",np);
-    if ( na ) {
-      fprintf(stdout,"     NUMBER OF EDGES          %8d\n",na);
-    }
+    fprintf(stdout,"     NUMBER OF TETRAHEDRA     %8d\n",ne);
+    if ( npr )
+      fprintf(stdout,"     NUMBER OF PRISMS         %8d\n",npr);
     if ( nt )
       fprintf(stdout,"     NUMBER OF TRIANGLES      %8d\n",nt);
     if ( nq )
       fprintf(stdout,"     NUMBER OF QUADRILATERALS %8d\n",nq);
+    if ( na ) {
+      fprintf(stdout,"     NUMBER OF EDGES          %8d\n",na);
+    }
 
-    fprintf(stdout,"     NUMBER OF TETRAHEDRA     %8d\n",ne);
-
-    if ( npr )
-      fprintf(stdout,"     NUMBER OF PRISMS         %8d\n",npr);
   }
 
   /** Write solution */

@@ -177,6 +177,7 @@ int MMG5_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solin) {
 
   if ( sol->namein )
     _MMG5_DEL_MEM(mesh,sol->namein,(strlen(sol->namein)+1)*sizeof(char));
+
   if ( strlen(solin) ) {
     _MMG5_ADD_MEM(mesh,(strlen(solin)+1)*sizeof(char),"input sol name",
                   fprintf(stderr,"  Exit program.\n");

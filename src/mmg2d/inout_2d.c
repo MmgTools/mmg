@@ -522,6 +522,13 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
     }
   }
 
+  if ( abs(mesh->info.imprim) > 4 ) {
+    fprintf(stdout,"     NUMBER OF VERTICES   %8d  CORNERS    %6d\n",mesh->np,ncor);
+    fprintf(stdout,"     NUMBER OF TRIANGLES  %8d\n",mesh->nt);
+
+    if ( mesh->na )
+      fprintf(stdout,"     NUMBER OF EDGES      %8d\n",mesh->na);
+  }
 
   return(1);
 }
@@ -929,7 +936,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
   }
 
   /* Required vertex */
-  nreq = nc = 0;
+  nreq = 0;
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
     if ( MG_VOK(ppt) ) {
@@ -1155,6 +1162,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
   /*     fprintf(inm,"%s",chaine); */
   /*     fprintf(inm,"%d\n",ntang); */
   /*   } */
+
   /*   else { */
   /*     binch = 20; //normalatvertices */
   /*     fwrite(&binch,sw,1,inm); */
@@ -1187,6 +1195,14 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
   else {
     binch = 54; //End
     fwrite(&binch,sw,1,inm);
+  }
+
+  if ( abs(mesh->info.imprim) > 4 ) {
+    fprintf(stdout,"     NUMBER OF VERTICES   %8d  CORNERS    %6d\n",np,nc);
+    fprintf(stdout,"     NUMBER OF TRIANGLES  %8d\n",ne);
+
+    if ( mesh->na )
+      fprintf(stdout,"     NUMBER OF EDGES      %8d\n",mesh->na);
   }
 
   fclose(inm);
