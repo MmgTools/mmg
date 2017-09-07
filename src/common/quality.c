@@ -238,7 +238,8 @@ inline double _MMG5_caltri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
  * \param lmax largest edge length.
  * \param nullEdge number of edges for which we are unable to compute the length
  * \param bd pointer toward the table of the quality span.
- * \param hl pointer toward the table that store the number of edges for each
+ * \param hl pointer toward the table that store the number of edges for eac
+ * \param shift value to shift the target lenght interval
  * span of quality
  *
  * Display histogram of edge length.
@@ -247,7 +248,7 @@ inline double _MMG5_caltri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
 void _MMG5_displayHisto(MMG5_pMesh mesh, int ned, double *avlen,
                         int amin, int bmin, double lmin,
                         int amax, int bmax, double lmax,
-                        int nullEdge,double *bd, int *hl )
+                        int nullEdge,double *bd, int *hl,char shift)
 {
   double dned;
   int    k;
@@ -263,12 +264,10 @@ void _MMG5_displayHisto(MMG5_pMesh mesh, int ned, double *avlen,
           lmax,amax,bmax);
   if ( abs(mesh->info.imprim) < 3 ) return;
 
-  if ( hl[2]+hl[3]+hl[4] )
+  if ( hl[2+shift]+hl[3+shift]+hl[4+shift] )
     fprintf(stdout,"   %6.2f < L <%5.2f  %8d   %5.2f %%  \n",
-            bd[2],bd[5],hl[2]+hl[3]+hl[4],100.*(hl[2]+hl[3]+hl[4])/(double)ned);
-/*  if ( hl[3]+hl[4]+hl[5] ) */
-/*     fprintf(stdout,"   %6.2f < L <%5.2f  %8d   %5.2f %%  \n", */
-/*             bd[3],bd[6],hl[3]+hl[4]+hl[5],100.*(hl[3]+hl[4]+hl[5])/(double)ned); */
+            bd[2+shift],bd[5+shift],hl[2+shift]+hl[3+shift]+hl[4+shift],
+            100.*(hl[2+shift]+hl[3+shift]+hl[4+shift])/(double)ned);
 
   if ( abs(mesh->info.imprim) < 4 ) return;
 

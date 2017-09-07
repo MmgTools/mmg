@@ -194,7 +194,6 @@ int _MMG3D_prilen(MMG5_pMesh mesh, MMG5_pSol met, char metRidTyp) {
   int             k,np,nq,amin,bmin,amax,bmax,ned,hl[9],nullEdge,n;
   char            ia,i0,i1,ier,i;
   static double   bd[9]= {0.0, 0.3, 0.6, 0.7071, 0.9, 1.3, 1.4142, 2.0, 5.0};
-  //{0.0, 0.2, 0.5, 0.7071, 0.9, 1.111, 1.4142, 2.0, 5.0};
 
   memset(hl,0,9*sizeof(int));
   ned = 0;
@@ -224,7 +223,6 @@ int _MMG3D_prilen(MMG5_pMesh mesh, MMG5_pSol met, char metRidTyp) {
       }
     }
   }
-
 
   /* Pop edges from hash table, and analyze their length */
   for(k=1; k<=mesh->ne; k++) {
@@ -289,7 +287,7 @@ int _MMG3D_prilen(MMG5_pMesh mesh, MMG5_pSol met, char metRidTyp) {
 
   /* Display histogram */
   _MMG5_displayHisto(mesh, ned, &avlen, amin, bmin, lmin,
-                     amax, bmax, lmax,nullEdge, &bd[0], &hl[0]);
+                     amax, bmax, lmax,nullEdge, &bd[0], &hl[0],1);
 
   _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
   return(1);

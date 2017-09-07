@@ -285,7 +285,6 @@ int _MMGS_prilen(MMG5_pMesh mesh, MMG5_pSol met, int metRidTyp) {
   int             k,np,nq,amin,bmin,amax,bmax,ned,hl[9],nullEdge;
   char            ia,i0,i1,i;
   static double   bd[9]= {0.0, 0.3, 0.6, 0.7071, 0.9, 1.3, 1.4142, 2.0, 5.0};
-  //{0.0, 0.2, 0.5, 0.7071, 0.9, 1.111, 1.4142, 2.0, 5.0};
 
   memset(hl,0,9*sizeof(int));
   ned = 0;
@@ -369,7 +368,7 @@ int _MMGS_prilen(MMG5_pMesh mesh, MMG5_pSol met, int metRidTyp) {
 
   /* Display histogram */
   _MMG5_displayHisto(mesh, ned, &avlen, amin, bmin, lmin,
-                     amax, bmax, lmax, nullEdge, &bd[0], &hl[0]);
+                     amax, bmax, lmax, nullEdge, &bd[0], &hl[0],0);
 
   _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
   return(1);
