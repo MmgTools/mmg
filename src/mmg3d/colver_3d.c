@@ -511,7 +511,7 @@ int _MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
       if ( !(mesh->xtetra[pt->xt].tag[ia] & MG_GEO) ) {
         devold = nprvold[0]*ncurold[0] + nprvold[1]*ncurold[1] + nprvold[2]*ncurold[2];
         devnew = nprvnew[0]*ncurnew[0] + nprvnew[1]*ncurnew[1] + nprvnew[2]*ncurnew[2];
-//#warning CECILE : pourquoi on ne met pas dhd ici au lieu de angedg
+
         if ( devold < _MMG5_ANGEDG ) {
           if ( devnew < devold )  {
             return(0);

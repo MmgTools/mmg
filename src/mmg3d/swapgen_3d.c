@@ -477,7 +477,6 @@ int MMG3D_swap23(MMG5_pMesh mesh,MMG5_pSol met,int k,char metRidTyp) {
     memcpy(ptnew,pt0,sizeof(MMG5_Tetra));
     np    = pt1->v[tau1[0]];
 
-#warning which threshold to refuse the swap?
     ptnew->v[tau0[1]] = np;
     vnew = _MMG5_orvol(mesh->point,ptnew->v);
     if ( vnew < _MMG5_EPSD2 ) continue;

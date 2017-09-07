@@ -517,7 +517,6 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
         }
       }
 
-#warning ASK CECILE: is it normal to pass here if we have bdries but optbdry has failed?
       switch(ityp) {
 
       case 1:  /* sliver */

@@ -125,8 +125,12 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
   _MMG5_norpts(mesh,tt1.v[ia1],tt1.v[_MMG5_inxt2[ia1]],tt2.v[ia2],b0);
   _MMG5_norpts(mesh,tt2.v[ia2],tt2.v[_MMG5_inxt2[ia2]],tt1.v[ia1],b1);
   ps = b0[0]*b1[0] + b0[1]*b1[1] + b0[2]*b1[2];
-#warning dhd??
-  if ( ps < _MMG5_ANGEDG ) return(0);
+
+  /* Here we put ANGEDG because in nr mode the test over dhd may create inverted
+   * tetra */
+  if ( ps < _MMG5_ANGEDG ) {
+    return(0);
+  }
 
   /* Check normal deviation with neighbours */
   if ( ! ( ( tt1.tag[_MMG5_iprv2[ia1]] & MG_GEO ) ||

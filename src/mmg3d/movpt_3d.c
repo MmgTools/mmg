@@ -120,14 +120,12 @@ int _MMG5_movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,
         if ( (len1 < _MMG3D_LOPTL && len2 >= _MMG3D_LOPTL) ||
              (len1 > _MMG3D_LOPTL && len2 >len1 ) ) {
           _MMG5_SAFE_FREE(callist);
-          //puts ( "rejected long \n" );
           return 0;
         }
 
         if ( (len1 > _MMG3D_LOPTS && len2 <= _MMG3D_LOPTS) ||
              (len1 < _MMG3D_LOPTS && len2 <len1 ) ) {
-         _MMG5_SAFE_FREE(callist);
-           //puts ( "rejected small \n" );
+          _MMG5_SAFE_FREE(callist);
           return 0;
         }
       }
