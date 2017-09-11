@@ -170,7 +170,7 @@ typedef struct _MMG3D_octree_s
   struct _MMG3D_octree_s* branches; /*!< pointer toward the subtrees of the current octree */
   int* v;      /*!< vertex index */
   int  nbVer;  /*!< number of vertices in the sub tree */
-  unsigned char depth; /*!< sub tree depth */
+  int  depth; /*!< sub tree depth */
 } _MMG3D_octree_s;
 
 /**

@@ -119,7 +119,7 @@ void _MMG3D_freeOctree_s(MMG5_pMesh mesh,_MMG3D_octree_s* q, int nv)
 
   dim       = mesh->dim;
   sizBr     = 1<<dim;
-  nbBitsInt = sizeof(int)*8;
+  nbBitsInt = sizeof(int64_t)*8;
   depthMax  = nbBitsInt/dim - 1;
 
   if (q->nbVer>nv && q->depth < depthMax )
@@ -191,10 +191,10 @@ void _MMG3D_freeOctree(MMG5_pMesh mesh,_MMG3D_pOctree *q)
  * Get the integer containing the coordinates
  *
  */
-int _MMG3D_getOctreeCoordinate(_MMG3D_pOctree q, double* ver, int dim)
+int64_t _MMG3D_getOctreeCoordinate(_MMG3D_pOctree q, double* ver, int dim)
 {
-  int s=1<<10;
-  double prec = 1./(1<<30);
+  int64_t s    = 1<<10;
+  double  prec = 1./(1<<30);
   int place = 0;
   int ix = floor((ver[0]-prec)*s);
   int iy = floor((ver[1]-prec)*s);
@@ -202,9 +202,9 @@ int _MMG3D_getOctreeCoordinate(_MMG3D_pOctree q, double* ver, int dim)
   ix = (ix > 0) ? ix:0;
   iy = (iy > 0) ? iy:0;
   iz = (iz > 0) ? iz:0;
-  int i=0;
+  int64_t i=0;
   int j;
-  for(j=9; j>=0; j--)
+  for(j=19; j>=0; j--)
   {
     s=s>>1;
     i += ((ix & s) >> j)<<place;
@@ -659,7 +659,7 @@ int _MMG3D_addOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver,
   int      quadrant,sizBr;
   int      sizeRealloc;
 
-  nbBitsInt = sizeof(int)*8;
+  nbBitsInt = sizeof(int64_t)*8;
   dim       = mesh->dim;
   depthMax  = nbBitsInt/dim - 1; // maximum depth is to allow integer coordinates
   sizBr     = 1<<dim;
@@ -788,7 +788,6 @@ int _MMG3D_addOctree(MMG5_pMesh mesh, _MMG3D_pOctree q, const int no)
   {
     return 0;
   }
-  memcpy(&pt, mesh->point[no].c ,dim*sizeof(double));
 
   return 1;
 }
@@ -1201,6 +1200,7 @@ int NearNeighborSquare(MMG5_pMesh mesh, double* ani, _MMG3D_pOctree q, int no, d
   int nmin;
   int i, j;
 
+  nmin = 0;
   _MMG5_SAFE_MALLOC(rect,2*dim,double,-1);
 
   ppt = &mesh->point[no];
