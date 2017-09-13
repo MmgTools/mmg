@@ -716,8 +716,10 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   }
 
   if ( sol->np != mesh->np ) {
-    fprintf(stdout,"  ** WRONG DATA. IGNORED\n");
-    return(-1);
+    fprintf(stderr,"  ** MISMATCHES DATA: THE NUMBER OF VERTICES IN "
+            "THE MESH (%d) DIFFERS FROM THE NUMBER OF VERTICES IN "
+            "THE SOLUTION (%d) \n",mesh->np,sol->np);
+     return(-1);
   }
 
   /* btyp = 1: scalar solution (isotropic metric or ls function,
