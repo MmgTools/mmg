@@ -48,21 +48,21 @@ int _MMG5_boundingBox(MMG5_pMesh mesh) {
   double         dd;
 
   /* compute bounding box */
-  for (i=0; i<3; i++) {
+  for (i=0; i<mesh->dim; i++) {
     mesh->info.min[i] =  DBL_MAX;
     mesh->info.max[i] = -DBL_MAX;
   }
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
     if ( !MG_VOK(ppt) )  continue;
-    for (i=0; i<3; i++) {
+    for (i=0; i<mesh->dim; i++) {
       if ( ppt->c[i] > mesh->info.max[i] )  mesh->info.max[i] = ppt->c[i];
       if ( ppt->c[i] < mesh->info.min[i] )  mesh->info.min[i] = ppt->c[i];
     }
     ppt->tmp = 0;
   }
   mesh->info.delta = 0.0;
-  for (i=0; i<3; i++) {
+  for (i=0; i<mesh->dim; i++) {
     dd = mesh->info.max[i] - mesh->info.min[i];
     if ( dd > mesh->info.delta )  mesh->info.delta = dd;
   }
@@ -103,9 +103,8 @@ int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
     if ( !MG_VOK(ppt) )  continue;
-    ppt->c[0] = dd * (ppt->c[0] - mesh->info.min[0]);
-    ppt->c[1] = dd * (ppt->c[1] - mesh->info.min[1]);
-    ppt->c[2] = dd * (ppt->c[2] - mesh->info.min[2]);
+    for (i=0 ; i<mesh->dim ; i++)
+      ppt->c[i] = dd * (ppt->c[i] - mesh->info.min[i]);
   }
 
   mesh->info.hausd *= dd;
