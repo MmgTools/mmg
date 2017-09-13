@@ -760,7 +760,7 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol)
   chrono(OFF,&ctim[0]);
   printim(ctim[0].gdif,stim);
   if ( mesh->info.imprim )
-    fprintf(stdout,"\n   MMG2DLIB: ELAPSED TIME  %s\n",stim);
+    fprintf(stdout,"\n   MMG2DLS: ELAPSED TIME  %s\n",stim);
   _LIBMMG5_RETURN(mesh,sol,MMG5_SUCCESS);
 
 }

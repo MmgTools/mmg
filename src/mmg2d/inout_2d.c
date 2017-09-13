@@ -613,7 +613,7 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
     ptr = strstr(data,".solb");
     if ( ptr )  bin = 1;
     if( !(inm = fopen(data,"rb")) ) {
-      fprintf(stderr,"  ** %s  NOT FOUND.\n",data);
+      fprintf(stderr,"  ** %s  NOT FOUND. USE DEFAULT METRIC.\n",data);
       _MMG5_SAFE_FREE(data);
       return(0);
     }
@@ -629,7 +629,7 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
       *ptr = '\0';
       strcat(data,".sol");
       if (!(inm = fopen(data,"rb")) ) {
-        fprintf(stderr,"  ** %s  NOT FOUND.\n",data);
+        fprintf(stderr,"  ** %s  NOT FOUND. USE DEFAULT METRIC.\n",data);
         _MMG5_SAFE_FREE(data);
         return(0);
       }
@@ -654,7 +654,7 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
         fscanf(inm,"%d",&sol->np);
         fscanf(inm,"%d",&type);
         if ( type != 1 ) {
-          fprintf(stdout,"SEVERAL SOLUTION => IGNORED : %d\n",type);
+          fprintf(stdout,"SEVERAL SOLUTION => IGNORED: %d\n",type);
           return(-1);
         }
         fscanf(inm,"%d",&btyp);
@@ -682,7 +682,7 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
         if(iswp) bdim=MMG_swapbin(bdim);
         dim = bdim;
         if(bdim!=2) {
-          fprintf(stdout,"BAD SOL DIMENSION : %d\n",bdim);
+          fprintf(stdout,"BAD SOL DIMENSION: %d\n",bdim);
           return(-1);
         }
         continue;
@@ -694,7 +694,7 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
         fread(&binch,sw,1,inm); //nb sol
         if(iswp) binch=MMG_swapbin(binch);
         if(binch!=1) {
-          fprintf(stdout,"SEVERAL SOLUTION => IGNORED : %d\n",binch);
+          fprintf(stdout,"SEVERAL SOLUTION => IGNORED: %d\n",binch);
           return(-1);
         }
         fread(&btyp,sw,1,inm); //typsol
@@ -710,11 +710,6 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
     }
   }
 
-  if ( !sol->np ) {
-    fprintf(stdout,"  ** MISSING DATA.\n");
-    return(-1);
-  }
-
   if ( sol->np != mesh->np ) {
     fprintf(stderr,"  ** MISMATCHES DATA: THE NUMBER OF VERTICES IN "
             "THE MESH (%d) DIFFERS FROM THE NUMBER OF VERTICES IN "
@@ -726,7 +721,7 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
      btyp = 2: vector field (displacement in Lagrangian mode),
      btyp = 3: anisotropic metric */
   if ( btyp!= 1 && btyp != 2 && btyp != 3 ) {
-    fprintf(stdout,"  ** DATA IGNORED\n");
+    fprintf(stdout,"  ** DATA TYPE IGNORED %d \n",sol->size);
     sol->size = 1;
     sol->np = 0;
     return(-1);
