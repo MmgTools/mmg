@@ -56,30 +56,11 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   static char    mmgWarn0=0, mmgWarn1=0;
 
   // pd  = mesh->disp;
-
   /* compute bounding box */
-  info = &mesh->info;
-  for (i=0; i<2; i++) {
-    info->min[i] =  DBL_MAX;
-    info->max[i] = -DBL_MAX;
-  }
+  if ( ! _MMG5_boundingBox(mesh) ) return(0);
 
-  for (k=1; k<=mesh->np; k++) {
-    ppt = &mesh->point[k];
-    if ( !MG_VOK(ppt) ) continue;
-    for (i=0; i<2; i++) {
-      if ( ppt->c[i] > info->max[i] )  info->max[i] = ppt->c[i];
-      if ( ppt->c[i] < info->min[i] )  info->min[i] = ppt->c[i];
-    }
-  }
-  info->delta = info->max[0]-info->min[0];
-  dd = info->max[1]-info->min[1];
-  if ( dd > info->delta )
-    info->delta = dd;
-  if ( info->delta < _MMG5_EPSD ) {
-    fprintf(stderr,"\n  ## Error: %s: Unable to scale mesh.\n",__func__);
-    return(0);
-  }
+  info = &mesh->info;
+ 
 
   /* normalize coordinates */
   dd = _MMG2D_PRECI / info->delta;
