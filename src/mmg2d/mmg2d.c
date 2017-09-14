@@ -70,8 +70,14 @@ static int MMG2D_usage(char *name) {
  *
  */
 static inline int _MMG5_defaultValues(MMG5_pMesh mesh, double qdegrad[2]) {
+  double hgradexp;
+
+  hgradexp = mesh->info.hgrad;
+  mesh->info.hgrad = log(hgradexp);
 
   _MMG5_mmgDefaultValues(mesh);
+
+  mesh->info.hgrad = hgradexp;
 
   fprintf(stdout,"Optimization threshold "
           "   (-degrad) : %e %e\n",qdegrad[0],qdegrad[1]);
