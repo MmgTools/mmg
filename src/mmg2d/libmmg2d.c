@@ -539,6 +539,11 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol) {
       _MMG2D_RETURN_AND_PACK(mesh,sol,MMG5_LOWFAILURE);
     }
     MMG2D_solTruncatureForOptim(mesh,sol);
+  } else if (mesh->info.hsiz > 0.) {
+    if ( !MMG2D_Set_constantSize(mesh,sol) ) {
+     if ( !MMG2_unscaleMesh(mesh,sol) ) _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+     _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+    }
   } else {
     /* Set default hmin and hmax values */
     if ( !MMG5_Set_defaultTruncatureSizes(mesh,mesh->info.hmin>0.,mesh->info.hmax>0.) ) {
