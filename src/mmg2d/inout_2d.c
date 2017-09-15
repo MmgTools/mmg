@@ -661,7 +661,7 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   FILE       *inm;
   long        posnp;
   int         iswp,ier,dim;
-  int         k,i,ver,bin,np,nsols,*type;
+  int         k,ver,bin,np,nsols,*type;
 
   /** Read the file header */
   ier =  MMG5_loadSolHeader(filename,2,&inm,&ver,&bin,&iswp,&np,&dim,&nsols,
@@ -1284,7 +1284,7 @@ void MMG2D_writeDoubleSol(MMG5_pSol sol,FILE *inm,int bin,int pos) {
 int MMG2D_saveSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   FILE*        inm;
   MMG5_pPoint  ppt;
-  int          i,k,nbl,ier;
+  int          k,ier;
   int          binch,bin;
   int          *type,*size;
 
@@ -1343,7 +1343,7 @@ int MMG2D_saveAllSols(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename) {
   FILE*        inm;
   MMG5_pPoint  ppt;
   MMG5_pSol    psl;
-  int          i,j,k,nbl,ier;
+  int          j,k,ier;
   int          binch,bin;
   int          *type,*size;
 

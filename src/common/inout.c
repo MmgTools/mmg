@@ -2029,6 +2029,93 @@ void MMG5_readDoubleSol3D(MMG5_pSol sol,FILE *inm,int bin,int iswp,int pos) {
 }
 
 /**
+ * \param mesh pointer toward the mesh structure
+ * \param sol pointer toward an allocatable sol structure.
+ * \param inm pointer toward the solution file
+ * \param bin 1 if binary file
+ * \param index of the writted solution
+ *
+ * Write the solution value for vertex of index pos in double precision.
+ *
+ */
+void MMG5_writeDoubleSol3D(MMG5_pMesh mesh,MMG5_pSol sol,FILE *inm,int bin,
+                           int pos) {
+  MMG5_pPoint ppt;
+  double      dbuf[6],mtmp[3],r[3][3],tmp;
+  int         i;
+
+  switch ( sol->size ) {
+  case 1: case 3:
+    /* scalar or vector solution */
+    for (i=0; i<sol->size; i++) {
+      for (i=0; i<sol->size; i++) dbuf[i] = sol->m[sol->size*pos+i];
+      if(!bin){
+        for (i=0; i<sol->size; i++)
+          fprintf(inm," %.15lg",dbuf[i]);
+        fprintf(inm,"\n");
+      } else {
+        for(i=0; i<sol->size; i++)
+          fwrite((unsigned char*)&dbuf[i],sd,1,inm);
+      }
+    }
+    break;
+
+  case 6 :
+    /* tensor solution */
+    ppt = &mesh->point[pos];
+    if ( !(MG_SIN(ppt->tag) || (ppt->tag & MG_NOM) || (ppt->tag & MG_NOSURF))
+         && (ppt->tag & MG_GEO) ) {
+      if ( mesh->xp ) {
+        // Arbitrary, we take the metric associated to the surface ruled by n_1
+        mtmp[0] = sol->m[sol->size*(pos)];
+        mtmp[1] = sol->m[sol->size*(pos)+1];
+        mtmp[2] = sol->m[sol->size*(pos)+3];
+
+        // Rotation matrix.
+        r[0][0] = ppt->n[0];
+        r[1][0] = ppt->n[1];
+        r[2][0] = ppt->n[2];
+        r[0][1] = mesh->xpoint[ppt->xp].n1[1]*ppt->n[2]
+          - mesh->xpoint[ppt->xp].n1[2]*ppt->n[1];
+        r[1][1] = mesh->xpoint[ppt->xp].n1[2]*ppt->n[0]
+          - mesh->xpoint[ppt->xp].n1[0]*ppt->n[2];
+        r[2][1] = mesh->xpoint[ppt->xp].n1[0]*ppt->n[1]
+          - mesh->xpoint[ppt->xp].n1[1]*ppt->n[0];
+        r[0][2] = mesh->xpoint[ppt->xp].n1[0];
+        r[1][2] = mesh->xpoint[ppt->xp].n1[1];
+        r[2][2] = mesh->xpoint[ppt->xp].n1[2];
+
+        // Metric in the canonic space
+        dbuf[0] = mtmp[0]*r[0][0]*r[0][0] + mtmp[1]*r[0][1]*r[0][1] + mtmp[2]*r[0][2]*r[0][2];
+        dbuf[1] = mtmp[0]*r[0][0]*r[1][0] + mtmp[1]*r[0][1]*r[1][1] + mtmp[2]*r[0][2]*r[1][2];
+        dbuf[2] = mtmp[0]*r[0][0]*r[2][0] + mtmp[1]*r[0][1]*r[2][1] + mtmp[2]*r[0][2]*r[2][2];
+        dbuf[3] = mtmp[0]*r[1][0]*r[1][0] + mtmp[1]*r[1][1]*r[1][1] + mtmp[2]*r[1][2]*r[1][2];
+        dbuf[4] = mtmp[0]*r[1][0]*r[2][0] + mtmp[1]*r[1][1]*r[2][1] + mtmp[2]*r[1][2]*r[2][2];
+        dbuf[5] = mtmp[0]*r[2][0]*r[2][0] + mtmp[1]*r[2][1]*r[2][1] + mtmp[2]*r[2][2]*r[2][2];
+      }
+      else { // Cannot recover the metric
+        for (i=0; i<sol->size; i++)  dbuf[i] = 0.;
+      }
+    }
+    else {
+      for (i=0; i<sol->size; i++)  dbuf[i] = sol->m[sol->size*pos+i];
+    }
+    tmp = dbuf[2];
+    dbuf[2] = dbuf[3];
+    dbuf[3] = tmp;
+    if(!bin) {
+      for(i=0; i<sol->size; i++)
+        fprintf(inm,"%.15lg  ",dbuf[i]);
+      fprintf(inm,"\n");
+    } else {
+      for(i=0; i<sol->size; i++)
+        fwrite((unsigned char*)&dbuf[i],sd,1,inm);
+    }
+    break;
+  }
+}
+
+/**
  * \param mesh pointer toward the mesh structure.
  * \param filename name of file.
  * \param inm allocatable pointer toward the FILE structure.
@@ -2053,7 +2140,7 @@ int MMG5_saveSolHeader( MMG5_pMesh mesh,const char *filename,
   int         k;
   char        *ptr,*data,chaine[128];
 
-  *bin = 1;
+  *bin = 0;
 
   _MMG5_SAFE_CALLOC(data,strlen(filename)+6,char,0);
   strcpy(data,filename);

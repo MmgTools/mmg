@@ -1662,7 +1662,7 @@ int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
   FILE       *inm;
   long        posnp;
   int         iswp,ier,dim;
-  int         i,k,ver,bin,np,nsols,*type;
+  int         k,ver,bin,np,nsols,*type;
 
   /** Read the file header */
   ier =  MMG5_loadSolHeader(filename,3,&inm,&ver,&bin,&iswp,&np,&dim,&nsols,
@@ -1815,8 +1815,7 @@ int MMG3D_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
 int MMG3D_saveSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
   FILE*        inm;
   MMG5_pPoint  ppt;
-  double       dbuf[6],mtmp[3],r[3][3],tmp;
-  int          binch,bpos,bin,ier,k,i;
+  int          binch,bin,ier,k;
   int          *type,*size;
 
   if ( !met->m )  return(-1);
@@ -1840,92 +1839,66 @@ int MMG3D_saveSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
 
   if ( ier < 1 )  return ier;
 
-  /* write isotropic metric */
-  if ( met->size == 1 ) {
-    for (k=1; k<=mesh->np; k++) {
-      ppt = &mesh->point[k];
-      if ( MG_VOK(ppt) ) {
-        if(!bin) {
-          fprintf(inm,"%.15lg \n ",met->m[k]);
-        } else {
-          fwrite((unsigned char*)&met->m[k],sd,1,inm);
-        }
-      }
-    }
+  for (k=1; k<=mesh->np; k++) {
+    ppt = &mesh->point[k];
+    if ( !MG_VOK(ppt) ) continue;
+
+    MMG5_writeDoubleSol3D(mesh,met,inm,bin,k);
   }
 
-  /* write displacement */
-  else if ( met->size == 3 ) {
-    for (k=1; k<=mesh->np; k++) {
-      ppt = &mesh->point[k];
-      if ( MG_VOK(ppt) ) {
-        for (i=0; i<met->size; i++) dbuf[i] = met->m[met->size*k+i];
-        if ( !bin ) {
-          for (i=0; i<met->size; i++)
-            fprintf(inm,"%.15lg  ",dbuf[i]);
-          fprintf(inm,"\n");
-        }
-        else {
-          for(i=0; i<met->size; i++)
-            fwrite((unsigned char*)&dbuf[i],sd,1,inm);
-        }
-      }
-    }
+  /* End file */
+  if(!bin) {
+    fprintf(inm,"\n\nEnd\n");
+  } else {
+    binch = 54; //End
+    fwrite(&binch,sw,1,inm);
   }
-  /* write anisotropic metric */
-  else {
-    for (k=1; k<=mesh->np; k++) {
-      ppt = &mesh->point[k];
-      if ( MG_VOK(ppt) ) {
-        if ( !(MG_SIN(ppt->tag) || (ppt->tag & MG_NOM) || (ppt->tag & MG_NOSURF))
-             && (ppt->tag & MG_GEO) ) {
-          if ( mesh->xp ) {
-            // Arbitrary, we take the metric associated to the surface ruled by n_1
-            mtmp[0] = met->m[met->size*(k)];
-            mtmp[1] = met->m[met->size*(k)+1];
-            mtmp[2] = met->m[met->size*(k)+3];
+  fclose(inm);
+  return(1);
+}
 
-            // Rotation matrix.
-            r[0][0] = ppt->n[0];
-            r[1][0] = ppt->n[1];
-            r[2][0] = ppt->n[2];
-            r[0][1] = mesh->xpoint[ppt->xp].n1[1]*ppt->n[2]
-              - mesh->xpoint[ppt->xp].n1[2]*ppt->n[1];
-            r[1][1] = mesh->xpoint[ppt->xp].n1[2]*ppt->n[0]
-              - mesh->xpoint[ppt->xp].n1[0]*ppt->n[2];
-            r[2][1] = mesh->xpoint[ppt->xp].n1[0]*ppt->n[1]
-              - mesh->xpoint[ppt->xp].n1[1]*ppt->n[0];
-            r[0][2] = mesh->xpoint[ppt->xp].n1[0];
-            r[1][2] = mesh->xpoint[ppt->xp].n1[1];
-            r[2][2] = mesh->xpoint[ppt->xp].n1[2];
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the solutions array
+ * \param filename name of file.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Write solutions array
+ *
+ */
+int MMG3D_saveAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
+  MMG5_pSol    psl;
+  FILE*        inm;
+  MMG5_pPoint  ppt;
+  int          binch,bin,ier,k,j;
+  int          *type,*size;
 
-            // Metric in the canonic space
-            dbuf[0] = mtmp[0]*r[0][0]*r[0][0] + mtmp[1]*r[0][1]*r[0][1] + mtmp[2]*r[0][2]*r[0][2];
-            dbuf[1] = mtmp[0]*r[0][0]*r[1][0] + mtmp[1]*r[0][1]*r[1][1] + mtmp[2]*r[0][2]*r[1][2];
-            dbuf[2] = mtmp[0]*r[0][0]*r[2][0] + mtmp[1]*r[0][1]*r[2][1] + mtmp[2]*r[0][2]*r[2][2];
-            dbuf[3] = mtmp[0]*r[1][0]*r[1][0] + mtmp[1]*r[1][1]*r[1][1] + mtmp[2]*r[1][2]*r[1][2];
-            dbuf[4] = mtmp[0]*r[1][0]*r[2][0] + mtmp[1]*r[1][1]*r[2][1] + mtmp[2]*r[1][2]*r[2][2];
-            dbuf[5] = mtmp[0]*r[2][0]*r[2][0] + mtmp[1]*r[2][1]*r[2][1] + mtmp[2]*r[2][2]*r[2][2];
-          }
-          else { // Cannot recover the metric
-            for (i=0; i<met->size; i++)  dbuf[i] = 0.;
-          }
-        }
-        else {
-          for (i=0; i<met->size; i++)  dbuf[i] = met->m[met->size*k+i];
-        }
-        tmp = dbuf[2];
-        dbuf[2] = dbuf[3];
-        dbuf[3] = tmp;
-        if(!bin) {
-          for(i=0; i<met->size; i++)
-            fprintf(inm,"%.15lg  ",dbuf[i]);
-          fprintf(inm,"\n");
-        } else {
-          for(i=0; i<met->size; i++)
-            fwrite((unsigned char*)&dbuf[i],sd,1,inm);
-        }
-      }
+  if ( !sol[0]->m )  return(-1);
+
+  sol[0]->ver = 2;
+
+  _MMG5_SAFE_CALLOC(type,mesh->nsols,int,0);
+  _MMG5_SAFE_CALLOC(size,mesh->nsols,int,0);
+  for (k=0; k<mesh->nsols; ++k ) {
+    type[k] = sol[k]->type;
+    size[k] = sol[k]->size;
+  }
+
+  ier = MMG5_saveSolHeader( mesh,filename,&inm,sol[0]->ver,&bin,mesh->np,
+                            sol[0]->dim,mesh->nsols,type,size);
+
+  _MMG5_SAFE_FREE(type);
+  _MMG5_SAFE_FREE(size);
+
+  if ( ier < 1 )  return ier;
+
+  for (k=1; k<=mesh->np; k++) {
+    ppt = &mesh->point[k];
+    if ( !MG_VOK(ppt) ) continue;
+
+    for ( j=0; j<mesh->nsols; ++j ) {
+      psl = sol[j];
+      MMG5_writeDoubleSol3D(mesh,psl,inm,bin,k);
     }
   }
 
