@@ -93,11 +93,12 @@ void _MMG3D_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol disp
 
   _MMG3D_Set_commonFunc();
 
-  (mesh)->dim  = 3;
-  (mesh)->ver  = 2;
-  (sol)->dim   = 3;
-  (sol)->ver   = 2;
-  (sol)->size  = 1;
+  (mesh)->dim   = 3;
+  (mesh)->ver   = 2;
+  (mesh->nsols) = 1;
+  (sol)->dim    = 3;
+  (sol)->ver    = 2;
+  (sol)->size   = 1;
   if ( disp ) {
     (disp)->dim  = 3;
     (disp)->ver  = 2;

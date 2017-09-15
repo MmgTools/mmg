@@ -1802,6 +1802,8 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
  * \param np number of solutions of each type
  * \param dim solution dimension
  * \param nsols number of solutions of different types in the file
+ * \param type type of solutions
+ * \param posnp pointer toward the position of the point list in the file
  *
  * \return -1 data invalid or we fail, 0 no file, 1 ok.
  *
@@ -1896,7 +1898,7 @@ int MMG5_loadSolHeader( const char *filename,int meshDim,FILE **inm,int *ver,
         if ( *iswp ) bdim=_MMG5_swapbin(bdim);
         fread(dim,sw,1,*inm);
         if ( *iswp ) *dim=_MMG5_swapbin(*dim);
-        if ( *dim!=3 ) {
+        if ( *dim!=meshDim ) {
           fprintf(stderr,"BAD SOL DIMENSION: %d\n",*dim);
           printf("  Exit program.\n");
           fclose(*inm);
@@ -1904,7 +1906,7 @@ int MMG5_loadSolHeader( const char *filename,int meshDim,FILE **inm,int *ver,
         }
         continue;
       } else if(binch==62) {  //SolAtVertices
-        fread(&binch,sw,1,*inm); //NulPos
+        fread(&binch,sw,1,*inm); //Pos
         if ( *iswp ) binch=_MMG5_swapbin(binch);
         fread(np,sw,1,*inm);
         if ( *iswp ) *np=_MMG5_swapbin(*np);

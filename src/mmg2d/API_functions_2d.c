@@ -307,6 +307,9 @@ int MMG2D_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int
       __func__);
     return(0);
   }
+
+  sol->type = typSol;
+
   if ( typSol == MMG5_Scalar ) {
     sol->size = 1;
   }

@@ -81,8 +81,10 @@ void _MMGS_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol ) {
 
   _MMGS_Set_commonFunc();
 
-  (mesh)->dim  = 3;
-  (mesh)->ver  = 2;
+  (mesh)->dim   = 3;
+  (mesh)->ver   = 2;
+  (mesh)->nsols = 1;
+
   (sol)->dim   = 3;
   (sol)->ver   = 2;
   (sol)->size  = 1;
