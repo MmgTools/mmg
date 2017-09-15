@@ -469,6 +469,7 @@ typedef struct {
   int       type; /*!< Type of the mesh */
   int       npi,nti,nai,nei,np,na,nt,ne,npmax,namax,ntmax,nemax,xpmax,xtmax;
   int       nquad,nprism; /* number of quadrangles and prisms */
+  int       nsols; /* number of solutions in the solution file (mshmet/int) */
   int       nc1;
 
   int       base; /*!< Used with \a flag to know if an entity has been

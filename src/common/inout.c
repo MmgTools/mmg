@@ -1791,3 +1791,312 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 
   return(1);
 }
+
+/**
+ * \param filename name of file.
+ * \param meshDim mesh dimenson.
+ * \param inm allocatable pointer toward the FILE structure
+ * \param ver file version (1=simple precision, 2=double)
+ * \param bin 1 if the file is a binary
+ * \param iswp 1 or 0 depending on the endianness (binary only)
+ * \param np number of solutions of each type
+ * \param dim solution dimension
+ * \param nsols number of solutions of different types in the file
+ *
+ * \return -1 data invalid or we fail, 0 no file, 1 ok.
+ *
+ * Open the "filename" solution file and read the file header.
+ *
+ */
+int MMG5_loadSolHeader( const char *filename,int meshDim,FILE **inm,int *ver,
+                        int *bin,int *iswp,int *np,int *dim,int *nsols,int **type,
+                        long *posnp) {
+  int         binch,bdim;
+  int         bpos,i;
+  char        *ptr,*data,chaine[128];
+
+  *posnp = 0;
+  *bin   = 0;
+  *iswp  = 0;
+  *ver   = 0;
+
+  _MMG5_SAFE_CALLOC(data,strlen(filename)+6,char,-1);
+  strcpy(data,filename);
+
+  ptr = strstr(data,".mesh");
+  if ( ptr )  *ptr = '\0';
+
+  ptr = strstr(data,".sol");
+
+  if ( !ptr ) {
+    /* data contains the filename without extension */
+    strcat(data,".solb");
+    if (!(*inm = fopen(data,"rb"))  ) {
+      /* our file is not a .solb file, try with .sol ext */
+      ptr  = strstr(data,".solb");
+      *ptr = '\0';
+      strcat(data,".sol");
+      if (!(*inm = fopen(data,"rb"))  ) {
+        fprintf(stderr,"  ** %s  NOT FOUND.\n",data);
+        _MMG5_SAFE_FREE(data);
+        return(0);
+      }
+    } else {
+      *bin = 1;
+    }
+  }
+  else {
+    if (!(*inm = fopen(data,"rb")) ) {
+      fprintf(stderr,"  ** %s  NOT FOUND.\n",data);
+      _MMG5_SAFE_FREE(data);
+      return(0);
+    }
+  }
+  fprintf(stdout,"  %%%% %s OPENED\n",data);
+  _MMG5_SAFE_FREE(data);
+
+  /* read solution or metric */
+  if(!*bin) {
+    strcpy(chaine,"DDD");
+    while(fscanf(*inm,"%s",&chaine[0])!=EOF && strncmp(chaine,"End",strlen("End")) ) {
+      if(!strncmp(chaine,"Dimension",strlen("Dimension"))) {
+        fscanf(*inm,"%d",dim);
+        if ( *dim!=meshDim ) {
+          fprintf(stderr,"BAD SOL DIMENSION: %d\n",*dim);
+          fclose(*inm);
+          return(-1);
+        }
+        continue;
+      } else if(!strncmp(chaine,"SolAtVertices",strlen("SolAtVertices"))) {
+        fscanf(*inm,"%d",np);
+        fscanf(*inm,"%d",nsols);
+        _MMG5_SAFE_CALLOC(*type,*nsols,int,-1);
+        for ( i=0; i<*nsols; ++i ) {
+          fscanf(*inm,"%d",&((*type)[i]));
+        }
+        *posnp = ftell(*inm);
+        break;
+      }
+    }
+  } else {
+    fread(&binch,sw,1,*inm);
+    if(binch==16777216) (*iswp)=1;
+    else if(binch!=1) {
+      fprintf(stdout,"BAD FILE ENCODING\n");
+      fclose(*inm);
+      return -1;
+    }
+    fread(ver,sw,1,*inm);
+    if ( *iswp ) *ver = _MMG5_swapbin(*ver);
+    while(fread(&binch,sw,1,*inm)!=EOF && binch!=54 ) {
+      if ( *iswp ) binch=_MMG5_swapbin(binch);
+      if(binch==54) break;
+      if(binch==3) {  //Dimension
+        fread(&bdim,sw,1,*inm);  //NulPos=>20
+        if ( *iswp ) bdim=_MMG5_swapbin(bdim);
+        fread(dim,sw,1,*inm);
+        if ( *iswp ) *dim=_MMG5_swapbin(*dim);
+        if ( *dim!=3 ) {
+          fprintf(stderr,"BAD SOL DIMENSION: %d\n",*dim);
+          printf("  Exit program.\n");
+          fclose(*inm);
+          return(-1);
+        }
+        continue;
+      } else if(binch==62) {  //SolAtVertices
+        fread(&binch,sw,1,*inm); //NulPos
+        if ( *iswp ) binch=_MMG5_swapbin(binch);
+        fread(np,sw,1,*inm);
+        if ( *iswp ) *np=_MMG5_swapbin(*np);
+        fread(nsols,sw,1,*inm); //nb sol
+        if ( *iswp ) *nsols =_MMG5_swapbin(*nsols);
+
+        _MMG5_SAFE_CALLOC(*type,*nsols,int,-1); //typSol
+        for ( i=0; i<*nsols; ++i ) {
+          fread(&((*type)[i]),sw,1,*inm);
+          if ( *iswp ) (*type)[i]=_MMG5_swapbin((*type)[i]);
+        }
+        *posnp = ftell(*inm);
+        break;
+      } else {
+        fread(&bpos,sw,1,*inm); //Pos
+        if ( *iswp ) bpos=_MMG5_swapbin(bpos);
+        rewind(*inm);
+        fseek(*inm,bpos,SEEK_SET);
+      }
+    }
+  }
+
+  return 1;
+}
+
+/**
+ * \param sol pointer toward an allocatable sol structure.
+ * \param inm pointer toward the solution file
+ * \param bin 1 if binary file
+ * \param iswp Endianess
+ * \param index of the readed solution
+ *
+ * Read the solution value for vertex of index pos in floating precision.
+ *
+ */
+void MMG5_readFloatSol3D(MMG5_pSol sol,FILE *inm,int bin,int iswp,int pos) {
+  float       fbuf[6],tmpf;
+  int         i;
+
+  switch ( sol->size ) {
+  case 1: case 3:
+    /* scalar or vector solution */
+    for (i=0; i<sol->size; i++) {
+      if(!bin){
+        fscanf(inm,"%f",&fbuf[0]);
+      } else {
+        fread(&fbuf[0],sw,1,inm);
+        if(iswp) fbuf[0]=_MMG5_swapf(fbuf[0]);
+      }
+      sol->m[sol->size*pos+i] = fbuf[0];
+    }
+    break;
+  case 6 :
+    /* Tensor solution */
+    if(!bin){
+      for(i=0 ; i<sol->size ; i++)
+        fscanf(inm,"%f",&fbuf[i]);
+    } else {
+      for(i=0 ; i<sol->size ; i++) {
+        fread(&fbuf[i],sw,1,inm);
+        if(iswp) fbuf[i]=_MMG5_swapf(fbuf[i]);
+      }
+    }
+    tmpf    = fbuf[2];
+    fbuf[2] = fbuf[3];
+    fbuf[3] = tmpf;
+    for (i=0; i<6; i++)  sol->m[6*pos+i] = fbuf[i];
+    break;
+  }
+}
+
+/**
+ * \param sol pointer toward an allocatable sol structure.
+ * \param inm pointer toward the solution file
+ * \param bin 1 if binary file
+ * \param iswp Endianess
+ * \param index of the readed solution
+ *
+ * Read the solution value for vertex of index pos in double precision.
+ *
+ */
+void MMG5_readDoubleSol3D(MMG5_pSol sol,FILE *inm,int bin,int iswp,int pos) {
+  double      dbuf[6],tmpd;
+  int         i;
+
+  switch ( sol->size ) {
+  case 1: case 3:
+    /* scalar or vector solution */
+    for (i=0; i<sol->size; i++) {
+      if(!bin){
+        fscanf(inm,"%lf",&dbuf[0]);
+      } else {
+        fread(&dbuf[0],sd,1,inm);
+        if(iswp) dbuf[0]=_MMG5_swapd(dbuf[0]);
+      }
+      sol->m[sol->size*pos+i] = dbuf[0];
+    }
+    break;
+
+  case 6 :
+    /* tensor solution */
+    if(!bin){
+      for(i=0 ; i<sol->size ; i++)
+        fscanf(inm,"%lf",&dbuf[i]);
+    } else {
+      for(i=0 ; i<sol->size ; i++) {
+        fread(&dbuf[i],sd,1,inm);
+        if(iswp) dbuf[i]=_MMG5_swapf(dbuf[i]);
+      }
+    }
+    tmpd    = dbuf[2];
+    dbuf[2] = dbuf[3];
+    dbuf[3] = tmpd;
+    for (i=0; i<sol->size; i++)  sol->m[6*pos+i] = dbuf[i];
+    break;
+  }
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param type type of the metric
+ * \param inm metric file
+ * \return 1 if success, -1 if fail
+ *
+ * Check if the type of the metric is compatible with the remeshing mode.
+ * If not, deallocate the type array and close the metric file.
+ *
+ */
+int MMG5_chkMetricType(MMG5_pMesh mesh,int *type, FILE *inm) {
+
+  /* 1: scalar solution (isotropic metric or ls function,
+     2: vector field (displacement in Lagrangian mode),
+     3: anisotropic metric */
+  if ( mesh->info.lag == -1 ) {
+    if ( type[0]!=1 && type[0]!=3) {
+      fprintf(stderr,"  ** DATA TYPE IGNORED %d \n",type[0]);
+      _MMG5_SAFE_FREE(type);
+      fclose(inm);
+      return(-1);
+    }
+  }
+  else {
+    if ( type[0] != 2 ) {
+      fprintf(stderr,"  ** MISMATCH DATA TYPE FOR LAGRANGIAN MODE %d \n",
+              type[0]);
+      _MMG5_SAFE_FREE(type);
+      fclose(inm);
+      return(-1);
+    }
+  }
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ *
+ * print metric statistics
+ *
+ */
+void MMG5_printMetStats(MMG5_pMesh mesh,MMG5_pSol met) {
+  if ( abs(mesh->info.imprim) > 3 ) {
+    if ( met->size == 1 )
+      fprintf(stdout,"     NUMBER OF SCALAR VALUES %8d\n",met->np);
+    else if ( met->size == 3 )
+      fprintf(stdout,"     NUMBER OF VECTOR VALUES %8d\n",met->np);
+    else
+      fprintf(stdout,"     NUMBER OF TENSOR VALUES %8d\n",met->np);
+  }
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the solutions array.
+ *
+ * print solutions statistics
+ *
+ */
+void MMG5_printSolStats(MMG5_pMesh mesh,MMG5_pSol *sol) {
+  int j;
+
+  if ( abs(mesh->info.imprim) > 3 ) {
+    fprintf(stdout,"     NUMBER OF SOLUTIONS PER ENTITY %8d\n",mesh->nsols);
+    fprintf(stdout,"     TYPE OF SOLUTIONS:\n          ");
+    for ( j=0; j<mesh->nsols; ++j ) {
+      if ( sol[j]->size == 1 )
+        fprintf(stdout," SCALAR");
+      else if ( sol[j]->size == 3 )
+        fprintf(stdout," VECTOR");
+      else
+        fprintf(stdout," TENSOR");
+    }
+    fprintf(stdout,"\n");
+  }
+}
