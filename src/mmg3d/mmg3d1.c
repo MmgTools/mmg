@@ -1912,20 +1912,19 @@ int _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,char typchk, int patternMode) {
   maxit = 5;
   mesh->gap = 0.5;
   do {
-
-    /* split or swap tetra with more than 2 bdry faces */
-    nf = 0;
-    if ( mesh->info.fem == typchk ) {
-      ier = _MMG5_anatet4(mesh,met,&nf,typchk);
-      if ( ier < 0 )  return(0);
-    }
-    else ier = 0;
-    ns = ier;
-
     /* memory free */
     _MMG5_DEL_MEM(mesh,mesh->adja,(4*mesh->nemax+5)*sizeof(int));
 
     if ( !mesh->info.noinsert ) {
+      /* split or swap tetra with more than 2 bdry faces */
+      nf = 0;
+      if ( mesh->info.fem == typchk ) {
+        ier = _MMG5_anatet4(mesh,met,&nf,typchk);
+        if ( ier < 0 )  return(0);
+      }
+      else ier = 0;
+      ns = ier;
+
       /* analyze surface tetras */
       ier = _MMG5_anatets(mesh,met,typchk);
 

@@ -3274,7 +3274,7 @@ int _MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k,char metRidTyp) {
   MMG5_xTetra   xt[4];
   MMG5_pxTetra  pxt0;
   double        o[3],cb[4];
-  int           i,ib,iel,iadr,*adja,adj1,adj2,adj3;
+  int           i,ib,iel;
   int           newtet[4];
   unsigned char isxt[4],firstxt;
 
@@ -3371,49 +3371,6 @@ int _MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k,char metRidTyp) {
     memcpy(&xt[1],pxt0,sizeof(MMG5_xTetra));
     memcpy(&xt[2],pxt0,sizeof(MMG5_xTetra));
     memcpy(&xt[3],pxt0,sizeof(MMG5_xTetra));
-  }
-
-  /* Update adjacency */
-  if ( mesh->adja ) {
-    iadr  = 4*(newtet[0]-1)+1;
-    adja  = &mesh->adja[iadr];
-
-    /* Store the old adjacents */
-    adj1 = mesh->adja[iadr+1];
-    adj2 = mesh->adja[iadr+2];
-    adj3 = mesh->adja[iadr+3];
-
-    /* Update the new ones */
-    adja[1] = 4*newtet[1];
-    adja[2] = 4*newtet[2];
-    adja[3] = 4*newtet[3];
-
-    iadr    = 4*(newtet[1]-1)+1;
-    adja    = &mesh->adja[iadr];
-    adja[0] = 4*newtet[0] + 1;
-    adja[1] = adj1;
-    adja[2] = 4*newtet[2] + 1;
-    adja[3] = 4*newtet[3] + 1;
-    if ( adj1 )
-      mesh->adja[4*(adj1/4-1) + 1+adj1%4] = 4*newtet[1]+1;
-
-    iadr    = 4*(newtet[2]-1)+1;
-    adja    = &mesh->adja[iadr];
-    adja[0] = 4*newtet[0] + 2;
-    adja[1] = 4*newtet[1] + 2;
-    adja[2] = adj2;
-    adja[3] = 4*newtet[3] + 2;
-    if ( adj2 )
-      mesh->adja[4*(adj2/4-1) + 1+adj2%4] = 4*newtet[2]+2;
-
-    iadr    = 4*(newtet[3]-1)+1;
-    adja    = &mesh->adja[iadr];
-    adja[0] = 4*newtet[0] + 3;
-    adja[1] = 4*newtet[1] + 3;
-    adja[2] = 4*newtet[2] + 3;
-    adja[3] = adj3;
-    if ( adj3 )
-      mesh->adja[4*(adj3/4-1) + 1+adj3%4] = 4*newtet[3]+3;
   }
 
   /* Update vertices and xt fields */
