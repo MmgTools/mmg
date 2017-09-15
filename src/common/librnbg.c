@@ -191,10 +191,11 @@ void _MMG5_swapNod(MMG5_pPoint points, double* sols, int* perm,
  **/
 int _MMG5_scotchCall(MMG5_pMesh mesh, MMG5_pSol met)
 {
+
+#ifdef USE_SCOTCH
   static char mmgWarn  = 0;
   static char mmgError = 0;
 
-#ifdef USE_SCOTCH
   /*check enough vertex to renum*/
   if ( mesh->info.renum && (mesh->np/2. > _MMG5_BOXSIZE) && mesh->np>100000 ) {
 
