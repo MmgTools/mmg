@@ -1506,6 +1506,25 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename);
 int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename);
 /**
  * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the solutions array
+ * \param filename name of file.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Load solutions array
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_LOADALLSOLS(mesh,sol,filename,strlen,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
+ * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
+ * >     INTEGER, INTENT(IN)            :: strlen\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+int  MMG3D_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char* filename);
+
+/**
+ * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.
  * \param filename name of file.
  * \return 0 if failed, 1 otherwise.
@@ -1522,6 +1541,24 @@ int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename);
  *
  */
 int MMG3D_saveSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename);
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the solutions array
+ * \param filename name of the solution file.
+ * \return 0 or -1 if fail, 1 otherwise.
+ *
+ * Save solutions array
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_SAVEALLSOLS(mesh,sol,filename,strlen,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
+ * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
+ * >     INTEGER, INTENT(IN)            :: strlen\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+int MMG3D_saveAllSols(MMG5_pMesh  mesh,MMG5_pSol *sol ,const char *filename);
 
 /* deallocations */
 /**

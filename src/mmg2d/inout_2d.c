@@ -759,8 +759,8 @@ int MMG2D_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
   if ( *sol )  _MMG5_DEL_MEM(mesh,*sol,(mesh->nsols)*sizeof(MMG5_Sol));
   _MMG5_SAFE_CALLOC(*sol,nsols,MMG5_Sol,-1);
 
-  for ( j=0; j<nsols; ++j ) {
-    psl = sol[j];
+  for ( j=0; j<nsols; ++j) {
+    psl = *sol+j;
 
     /* Allocate and store the header informations for each solution */
     if ( !MMG2D_Set_solSize(mesh,psl,MMG5_Vertex,mesh->np,type[j]) ) {
@@ -777,11 +777,11 @@ int MMG2D_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
   rewind(inm);
   fseek(inm,posnp,SEEK_SET);
 
-  if ( sol[0]->ver == 1 ) {
+  if ( (*sol)[0].ver == 1 ) {
     /* Simple precision */
     for (k=1; k<=mesh->np; k++) {
       for ( j=0; j<nsols; ++j ) {
-        psl = sol[j];
+        psl = *sol+j;
         MMG2D_readFloatSol(psl,inm,bin,iswp,k);
       }
     }
@@ -790,7 +790,7 @@ int MMG2D_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
     /* Double precision */
     for (k=1; k<=mesh->np; k++) {
       for ( j=0; j<nsols; ++j ) {
-        psl = sol[j];
+        psl = *sol+j;
         MMG2D_readDoubleSol(psl,inm,bin,iswp,k);
       }
     }
@@ -1262,8 +1262,7 @@ void MMG2D_writeDoubleSol(MMG5_pSol sol,FILE *inm,int bin,int pos) {
 
   if ( !bin ) {
     for (i=0; i<sol->size; i++)
-      fprintf(inm,"%.15lg ",sol->m[isol + i]);
-    fprintf(inm,"\n");
+      fprintf(inm," %.15lg",sol->m[isol + i]);
   }
   else {
     for (i=0; i<sol->size; i++)
@@ -1315,6 +1314,7 @@ int MMG2D_saveSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
     if ( !MG_VOK(ppt) )  continue;
 
     MMG2D_writeDoubleSol(sol,inm,bin,k);
+    fprintf(inm,"\n");
   }
 
   /* End file */
@@ -1348,19 +1348,19 @@ int MMG2D_saveAllSols(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename) {
   int          *type,*size;
 
 
-  if ( !sol[0]->np )  return(1);
+  if ( !(*sol)[0].np )  return(1);
 
   _MMG5_SAFE_CALLOC(type,mesh->nsols,int,0);
   _MMG5_SAFE_CALLOC(size,mesh->nsols,int,0);
 
   for (k=0; k<mesh->nsols; ++k ) {
-    sol[k]->ver = 2;
-    type[k]     = sol[k]->type;
-    size[k]     = sol[k]->size;
+    (*sol)[k].ver = 2;
+    type[k]     = (*sol)[k].type;
+    size[k]     = (*sol)[k].size;
   }
 
-  ier = MMG5_saveSolHeader( mesh,filename,&inm,sol[0]->ver,&bin,mesh->np,
-                            sol[0]->dim,mesh->nsols,type,size);
+  ier = MMG5_saveSolHeader( mesh,filename,&inm,(*sol)[0].ver,&bin,mesh->np,
+                            (*sol)[0].dim,mesh->nsols,type,size);
 
   _MMG5_SAFE_FREE(type);
   _MMG5_SAFE_FREE(size);
@@ -1372,9 +1372,10 @@ int MMG2D_saveAllSols(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename) {
     if ( !MG_VOK(ppt) )  continue;
 
     for ( j=0; j<mesh->nsols; ++j ) {
-      psl = sol[j];
+      psl = *sol + j;
       MMG2D_writeDoubleSol(psl,inm,bin,k);
     }
+    fprintf(inm,"\n");
   }
 
   /* End file */

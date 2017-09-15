@@ -990,6 +990,24 @@ int MMG2D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
  *
  */
 int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,const char * filename);
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the solutions array
+ * \param filename name of file.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Load solutions array
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG2D_LOADALLSOLS(mesh,sol,filename,strlen,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
+ * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
+ * >     INTEGER, INTENT(IN)            :: strlen\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+int MMG2D_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char* filename);
 
 int MMG2D_loadVect(MMG5_pMesh ,char *);
 
@@ -1047,6 +1065,26 @@ int MMG2D_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
  *
  */
 int MMG2D_saveSol(MMG5_pMesh  mesh,MMG5_pSol sol ,const char *filename);
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the solutions array
+ * \param filename name of the solution file.
+ * \return 0 or -1 if fail, 1 otherwise.
+ *
+ * Save solutions array
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG2D_SAVEALLSOLS(mesh,sol,filename,strlen,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
+ * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
+ * >     INTEGER, INTENT(IN)            :: strlen\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+int MMG2D_saveAllSols(MMG5_pMesh  mesh,MMG5_pSol *sol ,const char *filename);
+
+
 int MMG2D_saveVect(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename,double lambda);
 
 /**

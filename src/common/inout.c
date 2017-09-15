@@ -2052,7 +2052,6 @@ void MMG5_writeDoubleSol3D(MMG5_pMesh mesh,MMG5_pSol sol,FILE *inm,int bin,
       if(!bin){
         for (i=0; i<sol->size; i++)
           fprintf(inm," %.15lg",dbuf[i]);
-        fprintf(inm,"\n");
       } else {
         for(i=0; i<sol->size; i++)
           fwrite((unsigned char*)&dbuf[i],sd,1,inm);
@@ -2106,7 +2105,6 @@ void MMG5_writeDoubleSol3D(MMG5_pMesh mesh,MMG5_pSol sol,FILE *inm,int bin,
     if(!bin) {
       for(i=0; i<sol->size; i++)
         fprintf(inm,"%.15lg  ",dbuf[i]);
-      fprintf(inm,"\n");
     } else {
       for(i=0; i<sol->size; i++)
         fwrite((unsigned char*)&dbuf[i],sd,1,inm);
@@ -2212,7 +2210,7 @@ int MMG5_saveSolHeader( MMG5_pMesh mesh,const char *filename,
     fprintf(*inm,"%d\n",np);
     fprintf(*inm,"%d",nsols);
     for (k=0; k<nsols; ++k )
-      fprintf(*inm," %d\n",type[k]);
+      fprintf(*inm," %d",type[k]);
     fprintf(*inm,"\n");
   } else {
     binch = 62; //Vertices
@@ -2300,9 +2298,9 @@ void MMG5_printSolStats(MMG5_pMesh mesh,MMG5_pSol *sol) {
     fprintf(stdout,"     NUMBER OF SOLUTIONS PER ENTITY %8d\n",mesh->nsols);
     fprintf(stdout,"     TYPE OF SOLUTIONS:\n          ");
     for ( j=0; j<mesh->nsols; ++j ) {
-      if ( sol[j]->size == 1 )
+      if ( (*sol)[j].size == 1 )
         fprintf(stdout," SCALAR");
-      else if ( sol[j]->size == 3 )
+      else if ( (*sol)[j].size == 3 )
         fprintf(stdout," VECTOR");
       else
         fprintf(stdout," TENSOR");
