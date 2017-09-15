@@ -2000,12 +2000,12 @@ void MMG5_readDoubleSol3D(MMG5_pSol sol,FILE *inm,int bin,int iswp,int pos) {
     /* scalar or vector solution */
     for (i=0; i<sol->size; i++) {
       if(!bin){
-        fscanf(inm,"%lf",&dbuf[0]);
+        fscanf(inm,"%lf",&dbuf[i]);
       } else {
-        fread(&dbuf[0],sd,1,inm);
-        if(iswp) dbuf[0]=_MMG5_swapd(dbuf[0]);
+        fread(&dbuf[i],sd,1,inm);
+        if(iswp) dbuf[i]=_MMG5_swapd(dbuf[i]);
       }
-      sol->m[sol->size*pos+i] = dbuf[0];
+      sol->m[sol->size*pos+i] = dbuf[i];
     }
     break;
 
