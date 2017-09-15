@@ -1848,6 +1848,9 @@ int MMG5_loadSolHeader( const char *filename,int meshDim,FILE **inm,int *ver,
     }
   }
   else {
+    ptr = strstr(data,".solb");
+    if ( ptr )  *bin = 1;
+
     if (!(*inm = fopen(data,"rb")) ) {
       fprintf(stderr,"  ** %s  NOT FOUND. USE DEFAULT METRIC.\n",data);
       _MMG5_SAFE_FREE(data);
@@ -2024,6 +2027,125 @@ void MMG5_readDoubleSol3D(MMG5_pSol sol,FILE *inm,int bin,int iswp,int pos) {
     break;
   }
 }
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param filename name of file.
+ * \param inm allocatable pointer toward the FILE structure.
+ * \param ver file version (1=simple precision, 2=double).
+ * \param bin 1 if the file is a binary.
+ * \param np number of solutions of each type.
+ * \param dim solution dimension.
+ * \param nsols number of solutions of different types in the file.
+ * \param type type of solutions.
+ * \param size size of solutions.
+ * \param bpos position in the binary file.
+ *
+ * \return 0 if unable to open the file, 1 if success.
+ *
+ * Open the "filename" solution file and read the file header.
+ *
+ */
+int MMG5_saveSolHeader( MMG5_pMesh mesh,const char *filename,
+                        FILE **inm,int ver,int *bin,int np,int dim,
+                        int nsols,int *type,int *size,int *bpos) {
+  MMG5_pPoint ppt;
+  int         binch;
+  int         k;
+  char        *ptr,*data,chaine[128];
+
+  *bin = 1;
+
+  _MMG5_SAFE_CALLOC(data,strlen(filename)+6,char,0);
+  strcpy(data,filename);
+  ptr = strstr(data,".sol");
+  if ( ptr ) {
+    // filename contains the solution extension
+    ptr = strstr(data,".solb");
+
+    if ( ptr )  *bin = 1;
+
+    if( !(*inm = fopen(data,"wb")) ) {
+      fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",data);
+      _MMG5_SAFE_FREE(data);
+      return(0);
+    }
+  }
+  else
+  {
+    // filename don't contains the solution extension
+    ptr = strstr(data,".mesh");
+    if ( ptr ) *ptr = '\0';
+
+    strcat(data,".sol");
+    if (!(*inm = fopen(data,"wb")) ) {
+      ptr  = strstr(data,".solb");
+      *ptr = '\0';
+      strcat(data,".sol");
+      if (!(*inm = fopen(data,"wb")) ) {
+        fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",data);
+        _MMG5_SAFE_FREE(data);
+        return(0);
+      }
+      else *bin = 1;
+    }
+  }
+
+  fprintf(stdout,"  %%%% %s OPENED\n",data);
+  _MMG5_SAFE_FREE(data);
+
+  /*entete fichier*/
+  binch=*bpos=0;
+  if(!*bin) {
+    strcpy(&chaine[0],"MeshVersionFormatted\n");
+    fprintf(*inm,"%s %d",chaine,ver);
+    strcpy(&chaine[0],"\n\nDimension\n");
+    fprintf(*inm,"%s %d",chaine,dim);
+  } else {
+    binch = 1; //MeshVersionFormatted
+    fwrite(&binch,sw,1,*inm);
+    binch = ver; //version
+    fwrite(&binch,sw,1,*inm);
+    binch = 3; //Dimension
+    fwrite(&binch,sw,1,*inm);
+    *bpos = 20; //Pos
+    fwrite(&*bpos,sw,1,*inm);
+    binch = dim;
+    fwrite(&binch,sw,1,*inm);
+  }
+
+  np = 0;
+  for (k=1; k<=mesh->np; k++) {
+    ppt = &mesh->point[k];
+    if ( MG_VOK(ppt) )  np++;
+  }
+
+  if(!*bin) {
+    strcpy(&chaine[0],"\n\nSolAtVertices\n");
+    fprintf(*inm,"%s",chaine);
+    fprintf(*inm,"%d\n",np);
+    fprintf(*inm,"%d",nsols);
+    for (k=0; k<nsols; ++k )
+      fprintf(*inm," %d\n",type[k]);
+    fprintf(*inm,"\n");
+  } else {
+    binch = 62; //Vertices
+    fwrite(&binch,sw,1,*inm);
+    *bpos += 16;
+
+    for (k=0; k<nsols; ++k )
+      *bpos += 4 + (size[k]*ver)*4*np; //Pos
+    fwrite(bpos,sw,1,*inm);
+
+    fwrite(&np,sw,1,*inm);
+    fwrite(&nsols,sw,1,*inm);
+    for (k=0; k<nsols; ++k )
+      fwrite(&type[k],sw,1,*inm);
+  }
+
+  return 1;
+}
+
 
 /**
  * \param mesh pointer toward the mesh structure.
