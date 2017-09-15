@@ -1816,7 +1816,7 @@ int MMG3D_saveSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
   FILE*        inm;
   MMG5_pPoint  ppt;
   double       dbuf[6],mtmp[3],r[3][3],tmp;
-  int          binch,bpos,bin,np,ier,k,i;
+  int          binch,bpos,bin,ier,k,i;
   int          *type,*size;
 
   if ( !met->m )  return(-1);
@@ -1832,9 +1832,13 @@ int MMG3D_saveSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
     size[k] = met->size;
   }
 
+  ier = MMG5_saveSolHeader( mesh,filename,&inm,met->ver,&bin,mesh->np,met->dim,
+                            mesh->nsols,type,size);
 
-  ier = MMG5_saveSolHeader( mesh,filename,&inm,met->ver,&bin,met->np,met->dim,
-                            mesh->nsols,type,size,&bpos);
+  _MMG5_SAFE_FREE(type);
+  _MMG5_SAFE_FREE(size);
+
+  if ( ier < 1 )  return ier;
 
   /* write isotropic metric */
   if ( met->size == 1 ) {

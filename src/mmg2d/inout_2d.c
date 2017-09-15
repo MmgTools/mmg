@@ -1245,153 +1245,141 @@ int MMG2D_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   return(MMG5_saveMshMesh(mesh,sol,filename));
 }
 
-/* Save solution file */
+/**
+ * \param sol pointer toward an allocatable sol structure.
+ * \param inm pointer toward the solution file
+ * \param bin 1 if binary file
+ * \param index of the writted solution
+ *
+ * Write the solution value for vertex of index pos in double precision.
+ *
+ */
+static inline
+void MMG2D_writeDoubleSol(MMG5_pSol sol,FILE *inm,int bin,int pos) {
+  int          i,isol;
+
+  isol = pos * sol->size;
+
+  if ( !bin ) {
+    for (i=0; i<sol->size; i++)
+      fprintf(inm,"%.15lg ",sol->m[isol + i]);
+    fprintf(inm,"\n");
+  }
+  else {
+    for (i=0; i<sol->size; i++)
+      fwrite(&sol->m[isol + i],sd,1,inm);
+  }
+}
+
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the sol structure.
+ * \param filename name of file.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Write isotropic or anisotropic metric.
+ *
+ */
 int MMG2D_saveSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   FILE*        inm;
-  MMG5_pPoint       ppt;
-  float        fsol;
-  int          i,k,nbl,isol,bin,bpos,typ;
-  char        *ptr,*data,chaine[128];
-  int          binch;
+  MMG5_pPoint  ppt;
+  int          i,k,nbl,ier;
+  int          binch,bin;
+  int          *type,*size;
+
 
   if ( !sol->np )  return(1);
-  bin = 0;
 
-  _MMG5_SAFE_CALLOC(data,strlen(filename)+6,char,0);
-  strcpy(data,filename);
+  sol->ver = 2;
 
-  ptr = strstr(data,".sol");
-  if ( ptr ) {
-    ptr = strstr(data,".solb");
-    if ( ptr )  bin = 1;
-    if( !(inm = fopen(data,"wb")) ) {
-      fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",data);
-      _MMG5_SAFE_FREE(data);
-      return(0);
-    }
-  }
-  else  {
-    ptr = strstr(data,".mesh");
-    if ( ptr ) *ptr = '\0';
+  assert ( mesh->nsols==1 );
 
-    strcat(data,".sol");
-    if (!(inm = fopen(data,"wb")) ) {
-      ptr  = strstr(data,".solb");
-      *ptr = '\0';
-      strcat(data,".sol");
-      if (!(inm = fopen(data,"wb")) ) {
-        fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",data);
-        _MMG5_SAFE_FREE(data);
-        return(0);
-      }
-      else bin = 1;
-    }
+  _MMG5_SAFE_CALLOC(type,mesh->nsols,int,0);
+  _MMG5_SAFE_CALLOC(size,mesh->nsols,int,0);
+  for (k=0; k<mesh->nsols; ++k ) {
+    type[k] = sol->type;
+    size[k] = sol->size;
   }
 
-  fprintf(stdout,"  %%%% %s OPENED\n",data);
-  _MMG5_SAFE_FREE(data);
+  ier = MMG5_saveSolHeader( mesh,filename,&inm,sol->ver,&bin,mesh->np,sol->dim,
+                            mesh->nsols,type,size);
 
-  /* Entete fichier */
-  if ( !bin ) {
-    strcpy(&chaine[0],"MeshVersionFormatted 2\n");
-    fprintf(inm,"%s",chaine);
+  _MMG5_SAFE_FREE(type);
+  _MMG5_SAFE_FREE(size);
 
-    strcpy(&chaine[0],"\n\nDimension 2\n");
-    fprintf(inm,"%s ",chaine);
-  }
-  else {
-    binch = 1; //MeshVersionFormatted
-    fwrite(&binch,sw,1,inm);
-    binch = 2; //version
-    fwrite(&binch,sw,1,inm);
-    binch = 3; //Dimension
-    fwrite(&binch,sw,1,inm);
-    bpos = 20; //Pos
-    fwrite(&bpos,sw,1,inm);
-    binch = 2;
-    fwrite(&binch,sw,1,inm);
-  }
-
-  switch(sol->size) {
-  /* Solution is a size map */
-  case 1:
-    typ = 1;
-    break;
-  /* Solution is a displacement vector field */
-  case 2:
-    typ = 2;
-    break;
-  /* Solution is a metric tensor */
-  case 3:
-    typ = 3;
-    break;
-  default:
-    fprintf(stdout,"  ** DATA IGNORED\n");
-    return(0);
-  }
-
-  /* write data */
-  nbl = 0;
-  for (k=1; k<=mesh->np; k++) {
-    ppt = &mesh->point[k];
-    if ( !MG_VOK(ppt) )  continue;
-    nbl++;
-  }
-
-  if ( !bin ) {
-    strcpy(&chaine[0],"\n\nSolAtVertices\n");
-    fprintf(inm,"%s",chaine);
-    fprintf(inm,"%d\n",nbl);
-    fprintf(inm,"%d %d\n",1,typ);
-  }
-  else {
-    binch = 62; //Vertices
-    fwrite(&binch,sw,1,inm);
-    bpos += 20+(sol->size*sol->ver)*4*nbl; //Pos
-    fwrite(&bpos,sw,1,inm);
-    fwrite(&nbl,sw,1,inm);
-    binch = 1; //nb sol
-    fwrite(&binch,sw,1,inm);
-    binch = typ; //typ sol
-    fwrite(&binch,sw,1,inm);
-  }
+  if ( ier < 1 ) return ier;
 
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
     if ( !MG_VOK(ppt) )  continue;
-    isol = k * sol->size;
-    if ( sol->ver < 2 ) {
-      if ( !bin ) {
-        for (i=0; i<sol->size; i++) {
-          fsol = (float) sol->m[isol + i];
-          fprintf(inm,"%f ",fsol);
-        }
-        fprintf(inm,"\n");
-      }
-      else {
-        for (i=0; i<sol->size; i++) {
-          fsol = (float) sol->m[isol + i];
-          fwrite(&fsol,sw,1,inm);
-        }
-      }
-    }
-    else {
-      if ( !bin ) {
-        for (i=0; i<sol->size; i++)
-          fprintf(inm,"%.15lg ",sol->m[isol + i]);
-        fprintf(inm,"\n");
-      }
-      else {
-        for (i=0; i<sol->size; i++)
-          fwrite(&sol->m[isol + i],sd,1,inm);
-      }
+
+    MMG2D_writeDoubleSol(sol,inm,bin,k);
+  }
+
+  /* End file */
+  if ( !bin ) {
+    fprintf(inm,"\n\nEnd\n");
+  }
+  else {
+    binch = 54; //End
+    fwrite(&binch,sw,1,inm);
+  }
+  fclose(inm);
+
+  return(1);
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the solutions array.
+ * \param filename name of file.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Write 1 or more solutions.
+ *
+ */
+int MMG2D_saveAllSols(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename) {
+  FILE*        inm;
+  MMG5_pPoint  ppt;
+  MMG5_pSol    psl;
+  int          i,j,k,nbl,ier;
+  int          binch,bin;
+  int          *type,*size;
+
+
+  if ( !sol[0]->np )  return(1);
+
+  _MMG5_SAFE_CALLOC(type,mesh->nsols,int,0);
+  _MMG5_SAFE_CALLOC(size,mesh->nsols,int,0);
+
+  for (k=0; k<mesh->nsols; ++k ) {
+    sol[k]->ver = 2;
+    type[k]     = sol[k]->type;
+    size[k]     = sol[k]->size;
+  }
+
+  ier = MMG5_saveSolHeader( mesh,filename,&inm,sol[0]->ver,&bin,mesh->np,
+                            sol[0]->dim,mesh->nsols,type,size);
+
+  _MMG5_SAFE_FREE(type);
+  _MMG5_SAFE_FREE(size);
+
+  if ( ier < 1 ) return ier;
+
+  for (k=1; k<=mesh->np; k++) {
+    ppt = &mesh->point[k];
+    if ( !MG_VOK(ppt) )  continue;
+
+    for ( j=0; j<mesh->nsols; ++j ) {
+      psl = sol[j];
+      MMG2D_writeDoubleSol(psl,inm,bin,k);
     }
   }
 
   /* End file */
   if ( !bin ) {
-    strcpy(&chaine[0],"\n\nEnd\n");
-    fprintf(inm,"%s",chaine);
+    fprintf(inm,"\n\nEnd\n");
   }
   else {
     binch = 54; //End

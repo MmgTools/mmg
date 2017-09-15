@@ -2039,7 +2039,6 @@ void MMG5_readDoubleSol3D(MMG5_pSol sol,FILE *inm,int bin,int iswp,int pos) {
  * \param nsols number of solutions of different types in the file.
  * \param type type of solutions.
  * \param size size of solutions.
- * \param bpos position in the binary file.
  *
  * \return 0 if unable to open the file, 1 if success.
  *
@@ -2048,9 +2047,9 @@ void MMG5_readDoubleSol3D(MMG5_pSol sol,FILE *inm,int bin,int iswp,int pos) {
  */
 int MMG5_saveSolHeader( MMG5_pMesh mesh,const char *filename,
                         FILE **inm,int ver,int *bin,int np,int dim,
-                        int nsols,int *type,int *size,int *bpos) {
+                        int nsols,int *type,int *size) {
   MMG5_pPoint ppt;
-  int         binch;
+  int         binch,bpos;
   int         k;
   char        *ptr,*data,chaine[128];
 
@@ -2095,7 +2094,7 @@ int MMG5_saveSolHeader( MMG5_pMesh mesh,const char *filename,
   _MMG5_SAFE_FREE(data);
 
   /*entete fichier*/
-  binch=*bpos=0;
+  binch=bpos=0;
   if(!*bin) {
     strcpy(&chaine[0],"MeshVersionFormatted\n");
     fprintf(*inm,"%s %d",chaine,ver);
@@ -2108,8 +2107,8 @@ int MMG5_saveSolHeader( MMG5_pMesh mesh,const char *filename,
     fwrite(&binch,sw,1,*inm);
     binch = 3; //Dimension
     fwrite(&binch,sw,1,*inm);
-    *bpos = 20; //Pos
-    fwrite(&*bpos,sw,1,*inm);
+    bpos = 20; //Pos
+    fwrite(&bpos,sw,1,*inm);
     binch = dim;
     fwrite(&binch,sw,1,*inm);
   }
@@ -2131,11 +2130,11 @@ int MMG5_saveSolHeader( MMG5_pMesh mesh,const char *filename,
   } else {
     binch = 62; //Vertices
     fwrite(&binch,sw,1,*inm);
-    *bpos += 16;
+    bpos += 16;
 
     for (k=0; k<nsols; ++k )
-      *bpos += 4 + (size[k]*ver)*4*np; //Pos
-    fwrite(bpos,sw,1,*inm);
+      bpos += 4 + (size[k]*ver)*4*np; //Pos
+    fwrite(&bpos,sw,1,*inm);
 
     fwrite(&np,sw,1,*inm);
     fwrite(&nsols,sw,1,*inm);
