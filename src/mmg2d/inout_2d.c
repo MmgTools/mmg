@@ -803,7 +803,6 @@ int MMG2D_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
   return(1);
 }
 
-
 int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
   FILE*             inm;
   MMG5_pPoint       ppt;

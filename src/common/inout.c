@@ -1837,7 +1837,7 @@ int MMG5_loadSolHeader( const char *filename,int meshDim,FILE **inm,int *ver,
       *ptr = '\0';
       strcat(data,".sol");
       if (!(*inm = fopen(data,"rb"))  ) {
-        fprintf(stderr,"  ** %s  NOT FOUND.\n",data);
+        fprintf(stderr,"  ** %s  NOT FOUND. USE DEFAULT METRIC.\n",data);
         _MMG5_SAFE_FREE(data);
         return(0);
       }
@@ -1847,7 +1847,7 @@ int MMG5_loadSolHeader( const char *filename,int meshDim,FILE **inm,int *ver,
   }
   else {
     if (!(*inm = fopen(data,"rb")) ) {
-      fprintf(stderr,"  ** %s  NOT FOUND.\n",data);
+      fprintf(stderr,"  ** %s  NOT FOUND. USE DEFAULT METRIC.\n",data);
       _MMG5_SAFE_FREE(data);
       return(0);
     }

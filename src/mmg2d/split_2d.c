@@ -119,7 +119,7 @@ int _MMG2_chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
     }
 
     /* Delete point and abort splitting if one of the created triangles is nearly degenerate */
-    if ( calnew < _MMG5_EPSD ) {
+    if ( calnew < _MMG5_EPSOK ) {
       _MMG2D_delPt(mesh,ip);
       return(0);
     }
@@ -183,7 +183,7 @@ int _MMG2_chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
         calnew = MG_MIN(calnew,caltmp);
       }
       
-      ier = ( calnew > _MMG5_EPSD );
+      ier = ( calnew > _MMG5_EPSOK );
       if ( ier ) {
         isv = 1;
         to = t;

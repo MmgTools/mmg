@@ -70,8 +70,14 @@ static int MMG2D_usage(char *name) {
  *
  */
 static inline int _MMG5_defaultValues(MMG5_pMesh mesh, double qdegrad[2]) {
+  double hgradexp;
+
+  hgradexp = mesh->info.hgrad;
+  mesh->info.hgrad = log(hgradexp);
 
   _MMG5_mmgDefaultValues(mesh);
+
+  mesh->info.hgrad = hgradexp;
 
   fprintf(stdout,"Optimization threshold "
           "   (-degrad) : %e %e\n",qdegrad[0],qdegrad[1]);
@@ -676,10 +682,8 @@ int main(int argc,char *argv[]) {
   else if ( !msh ) {
     ier = MMG2D_loadSol(mesh,met,met->namein);
     if ( ier == -1 ) {
-      if ( (met->size != MMG5_Scalar) && (met->size != MMG5_Tensor) ) {
-        fprintf(stdout,"  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
+        fprintf(stdout,"\n  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
         _MMG2D_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
-      }
     }
     if ( mesh->info.iso && !ier ) {
       fprintf(stdout,"  ## ERROR: NO ISOVALUE DATA.\n");

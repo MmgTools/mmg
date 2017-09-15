@@ -318,9 +318,6 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
     fprintf(stdout,"\n  %s\n   END OF MODULE MMG2D: IMB-LJLL \n  %s\n",MG_STR,MG_STR);
   }
 
-  /* Unscale mesh */
-  if ( !MMG2_unscaleMesh(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
-
   /* Print output quality history */
    if ( !MMG2_outqua(mesh,sol) ) {
      if ( !MMG2_unscaleMesh(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
@@ -335,6 +332,8 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
   chrono(ON,&(ctim[1]));
   if ( mesh->info.imprim )  fprintf(stdout,"\n  -- MESH PACKED UP\n");
 
+  /* Unscale mesh */
+  if ( !MMG2_unscaleMesh(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
   if (!MMG2_pack(mesh,sol) ) _LIBMMG5_RETURN(mesh,sol,MMG5_LOWFAILURE);
 
   chrono(OFF,&(ctim[1]));
@@ -540,6 +539,11 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol) {
       _MMG2D_RETURN_AND_PACK(mesh,sol,MMG5_LOWFAILURE);
     }
     MMG2D_solTruncatureForOptim(mesh,sol);
+  } else if (mesh->info.hsiz > 0.) {
+    if ( !MMG2D_Set_constantSize(mesh,sol) ) {
+     if ( !MMG2_unscaleMesh(mesh,sol) ) _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+     _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+    }
   } else {
     /* Set default hmin and hmax values */
     if ( !MMG5_Set_defaultTruncatureSizes(mesh,mesh->info.hmin>0.,mesh->info.hmax>0.) ) {
@@ -760,7 +764,7 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol)
   chrono(OFF,&ctim[0]);
   printim(ctim[0].gdif,stim);
   if ( mesh->info.imprim )
-    fprintf(stdout,"\n   MMG2DLIB: ELAPSED TIME  %s\n",stim);
+    fprintf(stdout,"\n   MMG2DLS: ELAPSED TIME  %s\n",stim);
   _LIBMMG5_RETURN(mesh,sol,MMG5_SUCCESS);
 
 }

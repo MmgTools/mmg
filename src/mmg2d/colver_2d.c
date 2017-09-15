@@ -49,8 +49,7 @@ int _MMG2_chkcol(MMG5_pMesh mesh, MMG5_pSol met,int k,char i,int *list,char typc
   /* If typchk == 2, avoid recreating long edges */
   if ( typchk == 2 && met->m ) {
     lon = MMG2D_lencurv(mesh,met,ip1,ip2);
-    lon = MG_MIN(lon,MMG2_LSHRT);
-    lon = MG_MAX(1.0/lon,MMG2_LLONG);
+    lon = MG_MAX(2.-lon,1.6);
   }
   
   /* Avoid collapsing a boundary point over a regular one (leads to boundary degeneration) */
