@@ -1816,105 +1816,25 @@ int MMG3D_saveSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
   FILE*        inm;
   MMG5_pPoint  ppt;
   double       dbuf[6],mtmp[3],r[3][3],tmp;
-  char        *ptr,*data,chaine[128];
-  int          binch,bpos,bin,np,k,typ,i;
+  int          binch,bpos,bin,np,ier,k,i;
+  int          *type,*size;
 
   if ( !met->m )  return(-1);
 
   met->ver = 2;
-  bin = 0;
 
-  _MMG5_SAFE_CALLOC(data,strlen(filename)+6,char,0);
-  strcpy(data,filename);
-  ptr = strstr(data,".sol");
-  if ( ptr ) {
-    // filename contains the solution extension
-    ptr = strstr(data,".solb");
+  assert ( mesh->nsols==1 );
 
-    if ( ptr )  bin = 1;
-
-    if( !(inm = fopen(data,"wb")) ) {
-      fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",data);
-      _MMG5_SAFE_FREE(data);
-      return(0);
-    }
-  }
-  else
-  {
-    // filename don't contains the solution extension
-    ptr = strstr(data,".mesh");
-    if ( ptr ) *ptr = '\0';
-
-    strcat(data,".sol");
-    if (!(inm = fopen(data,"wb")) ) {
-      ptr  = strstr(data,".solb");
-      *ptr = '\0';
-      strcat(data,".sol");
-      if (!(inm = fopen(data,"wb")) ) {
-        fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",data);
-        _MMG5_SAFE_FREE(data);
-        return(0);
-      }
-      else bin = 1;
-    }
+  _MMG5_SAFE_CALLOC(type,mesh->nsols,int,0);
+  _MMG5_SAFE_CALLOC(size,mesh->nsols,int,0);
+  for (k=0; k<mesh->nsols; ++k ) {
+    type[k] = met->type;
+    size[k] = met->size;
   }
 
-  fprintf(stdout,"  %%%% %s OPENED\n",data);
-  _MMG5_SAFE_FREE(data);
 
-  /*entete fichier*/
-  binch=bpos=0;
-  if(!bin) {
-    strcpy(&chaine[0],"MeshVersionFormatted 2\n");
-    fprintf(inm,"%s",chaine);
-    strcpy(&chaine[0],"\n\nDimension 3\n");
-    fprintf(inm,"%s ",chaine);
-  } else {
-    binch = 1; //MeshVersionFormatted
-    fwrite(&binch,sw,1,inm);
-    binch = 2; //version
-    fwrite(&binch,sw,1,inm);
-    binch = 3; //Dimension
-    fwrite(&binch,sw,1,inm);
-    bpos = 20; //Pos
-    fwrite(&bpos,sw,1,inm);
-    binch = 3;
-    fwrite(&binch,sw,1,inm);
-
-  }
-
-  np = 0;
-  for (k=1; k<=mesh->np; k++) {
-    ppt = &mesh->point[k];
-    if ( MG_VOK(ppt) )  np++;
-  }
-
-  if(met->size==1) {
-    typ = 1;
-  }
-  else if ( met->size == 3 ) {
-    typ = 2;
-  }
-  else {
-    typ = 3;
-  }
-
-  if(!bin) {
-    strcpy(&chaine[0],"\n\nSolAtVertices\n");
-    fprintf(inm,"%s",chaine);
-    fprintf(inm,"%d\n",np);
-    fprintf(inm,"%d %d\n",1,typ);
-  } else {
-    binch = 62; //Vertices
-    fwrite(&binch,sw,1,inm);
-    bpos += 20+(met->size*met->ver)*4*np; //Pos
-    fwrite(&bpos,sw,1,inm);
-    fwrite(&np,sw,1,inm);
-    binch = 1; //nb sol
-    fwrite(&binch,sw,1,inm);
-    binch = typ; //typ sol
-    fwrite(&binch,sw,1,inm);
-  }
+  ier = MMG5_saveSolHeader( mesh,filename,&inm,met->ver,&bin,met->np,met->dim,
+                            mesh->nsols,type,size,&bpos);
 
   /* write isotropic metric */
   if ( met->size == 1 ) {
@@ -1929,6 +1849,7 @@ int MMG3D_saveSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
       }
     }
   }
+
   /* write displacement */
   else if ( met->size == 3 ) {
     for (k=1; k<=mesh->np; k++) {
@@ -2004,10 +1925,9 @@ int MMG3D_saveSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
     }
   }
 
-  /*fin fichier*/
+  /* End file */
   if(!bin) {
-    strcpy(&chaine[0],"\n\nEnd\n");
-    fprintf(inm,"%s",chaine);
+    fprintf(inm,"\n\nEnd\n");
   } else {
     binch = 54; //End
     fwrite(&binch,sw,1,inm);
