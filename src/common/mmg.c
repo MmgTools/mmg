@@ -184,3 +184,25 @@ int _MMG5_writeLocalParamAtTri( MMG5_pMesh mesh, _MMG5_iNode *bdryRefs,
 
   return(1);
 }
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param mesh pointer toward the msh value.
+ *
+ * Update the msh value if we detect that the user want to force output at Gmsh
+ * or Medit format.
+ *
+ */
+void MMG5_chooseOutputFormat(MMG5_pMesh mesh, int *msh) {
+  int len;
+
+  len = strlen(mesh->nameout);
+
+  if ( ( len>4 && !strcmp(&mesh->nameout[len-5],".mesh") ) ||
+       ( len>5 && !strcmp(&mesh->nameout[len-6],".meshb") ) )
+    *msh = 0;
+  else if ( ( len>3 && !strcmp(&mesh->nameout[len-4],".msh") ) ||
+            ( len>4 && !strcmp(&mesh->nameout[len-5],".mshb") ))
+    *msh = 1;
+
+}

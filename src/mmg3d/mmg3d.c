@@ -404,12 +404,7 @@ int main(int argc,char *argv[]) {
     if ( mesh->info.imprim )
       fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh->nameout);
 
-    if ( !strcmp(&mesh->nameout[strlen(mesh->nameout)-5],".mesh") ||
-         !strcmp(&mesh->nameout[strlen(mesh->nameout)-6],".meshb") )
-      msh = 0;
-    else if (!strcmp(&mesh->nameout[strlen(mesh->nameout)-4],".msh") ||
-             !strcmp(&mesh->nameout[strlen(mesh->nameout)-5],".mshb") )
-      msh = 1;
+    MMG5_chooseOutputFormat(mesh,&msh);
 
     if ( !msh )
       ierSave = MMG3D_saveMesh(mesh,mesh->nameout);
