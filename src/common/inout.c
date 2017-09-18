@@ -233,7 +233,7 @@ int _MMG5_countBinaryElts(FILE **inm, const int nelts,const int iswp,
  * \param posNodeData pointer toward the position of solution data in file
  * \param bin 1 if binary format
  * \param nelts number of elements in file
- * \return 1 if success, 0 if fail.
+ * \return 1 if success, 0 if file is not found, -1 if fail.
  *
  * Begin to read mesh at MSH file format. Read the mesh size informations.
  *
@@ -247,7 +247,7 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename,
   float       fbuf[9];
   int         ver,oneBin,k,i;
   int         nt,na,nq,ne,npr,np;
-  int         typ,tagNum;
+  int         typ,tagNum,nodeDataCount;
   char        *ptr,*data,chaine[128],verNum[5];
 
   ver = oneBin = 0;
@@ -259,6 +259,7 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename,
   *iswp = 0;
   mesh->np = mesh->nt = mesh->ne = 0;
   nt = na = nq = ne = npr = np = 0;
+  nodeDataCount = 0;
 
   _MMG5_SAFE_CALLOC(data,strlen(filename)+7,char,0);
 
@@ -298,6 +299,7 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename,
       if ( strncmp(verNum,"2.2",3) ) {
         fprintf(stderr,"\n  ## Error: %s: bad format version (%s)."
                 " Please, use the format version 2.2.\n",__func__,verNum);
+        fclose(*inm);
         return(-1);
       }
       if ( *bin ) {
@@ -333,6 +335,12 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename,
     } else if(!strncmp(chaine,"$EndNodes",strlen("$EndNodes"))) {
       continue;
     } else if(!strncmp(chaine,"$NodeData",strlen("$NodeData"))) {
+      if ( ++nodeDataCount > 1 ) {
+        fprintf(stderr,"SEVERAL SOLUTION => IGNORED\n");
+        fclose(*inm);
+        return -1;
+      }
+
       *posNodeData = ftell((*inm));
       if ( *bin ) {
         /* Skip the binary nodes data */
@@ -353,6 +361,7 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename,
         if ( tagNum < 3 ) {
           fprintf(stderr,"\n  ## Error: %s: node data: Expected at least 3 tags (%d given).\n",
                   __func__,tagNum);
+          fclose(*inm);
           return(-1);
         }
         fscanf((*inm),"%d ",&i); //time step
@@ -416,8 +425,10 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename,
         }
       }
       else {
-        if ( !_MMG5_countBinaryElts(inm,*nelts,*iswp,&np,&na,&nt,&nq,&ne,&npr) )
+        if ( !_MMG5_countBinaryElts(inm,*nelts,*iswp,&np,&na,&nt,&nq,&ne,&npr) ) {
+          fclose(*inm);
           return -1;
+        }
       }
       continue;
     }
@@ -430,6 +441,7 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename,
     fprintf(stderr,"  ** MISSING DATA.\n");
     fprintf(stderr,"     Check that your mesh contains points and elements.\n");
     fprintf(stderr,"     Exit program.\n");
+    fclose(*inm);
     return(-1);
   }
 
@@ -445,6 +457,7 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename,
     fprintf(stderr,"  ** MISSING DATA.\n");
     fprintf(stderr,"     Check that your mesh contains points.\n");
     fprintf(stderr,"     Exit program.\n");
+    fclose(*inm);
     return(-1);
   }
   return 1;
@@ -561,6 +574,9 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
       if ( tagNum < 2 ) {
         fprintf(stderr,"\n  ## Error: %s: elt %d (type %d): Expected at least 2 tags (%d given).\n",
                 __func__,k,typ,tagNum);
+        if ( ina_t ) _MMG5_SAFE_FREE(ina_t);
+        if ( ina_a ) _MMG5_SAFE_FREE(ina_a);
+        fclose(*inm);
         return(-1);
       }
       fscanf((*inm),"%d %d ",&ref,&i);
@@ -685,6 +701,9 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
         if ( tagNum < 2 ) {
           fprintf(stderr,"\n  ## Error: %s: Expected at least 2 tags per element (%d given).\n",
                   __func__,tagNum);
+          if ( ina_t ) _MMG5_SAFE_FREE(ina_t);
+          if ( ina_a ) _MMG5_SAFE_FREE(ina_a);
+          fclose(*inm);
           return(-1);
         }
 
@@ -745,6 +764,9 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
         if ( tagNum < 2 ) {
           fprintf(stderr,"\n  ## Error: %s: Expected at least 2 tags per element (%d given).\n",
                   __func__,tagNum);
+          if ( ina_t ) _MMG5_SAFE_FREE(ina_t);
+          if ( ina_a ) _MMG5_SAFE_FREE(ina_a);
+          fclose(*inm);
           return(-1);
         }
 
@@ -800,6 +822,9 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
        if ( tagNum < 2 ) {
           fprintf(stderr,"\n  ## Error: %s: Expected at least 2 tags per element (%d given).\n",
                   __func__,tagNum);
+          if ( ina_t ) _MMG5_SAFE_FREE(ina_t);
+          if ( ina_a ) _MMG5_SAFE_FREE(ina_a);
+          fclose(*inm);
           return(-1);
         }
 
@@ -838,6 +863,9 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
         if ( tagNum < 2 ) {
           fprintf(stderr,"\n  ## Error: %s: Expected at least 2 tags per element (%d given).\n",
                   __func__,tagNum);
+          if ( ina_t ) _MMG5_SAFE_FREE(ina_t);
+          if ( ina_a ) _MMG5_SAFE_FREE(ina_a);
+          fclose(*inm);
           return(-1);
         }
 
@@ -884,6 +912,9 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
         if ( tagNum < 2 ) {
           fprintf(stderr,"\n  ## Error: %s: Expected at least 2 tags per element (%d given).\n",
                   __func__,tagNum);
+          if ( ina_t ) _MMG5_SAFE_FREE(ina_t);
+          if ( ina_a ) _MMG5_SAFE_FREE(ina_a);
+          fclose(*inm);
           return(-1);
         }
 
@@ -931,6 +962,9 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
         if ( tagNum < 2 ) {
           fprintf(stderr,"\n  ## Error: %s: Expected at least 2 tags per element (%d given).\n",
                   __func__,tagNum);
+          if ( ina_t ) _MMG5_SAFE_FREE(ina_t);
+          if ( ina_a ) _MMG5_SAFE_FREE(ina_a);
+          fclose(*inm);
           return(-1);
         }
 
@@ -957,6 +991,9 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
       default:
         fprintf(stderr,"\n  ## Error: %s: unexpected type of element (%d)\n",
                 __func__,typ);
+        if ( ina_t ) _MMG5_SAFE_FREE(ina_t);
+        if ( ina_a ) _MMG5_SAFE_FREE(ina_a);
+        fclose(*inm);
         return(-1);
       }
     }
@@ -971,6 +1008,9 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
       else if ( nt < mesh->nt ) {
         _MMG5_ADD_MEM(mesh,(nt-mesh->nt)*sizeof(MMG5_Tria),"triangles",
                       fprintf(stderr,"  Exit program.\n");
+                      fclose(*inm);
+                      if ( ina_t ) _MMG5_SAFE_FREE(ina_t);
+                      if ( ina_a ) _MMG5_SAFE_FREE(ina_a);
                       return 0);
         _MMG5_SAFE_RECALLOC(mesh->tria,mesh->nt+1,(nt+1),MMG5_Tria,"triangles",0);
       }
@@ -983,6 +1023,9 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
       else if ( na < mesh->na ) {
         _MMG5_ADD_MEM(mesh,(na-mesh->na)*sizeof(MMG5_Edge),"edges",
                       fprintf(stderr,"  Exit program.\n");
+                      fclose(*inm);
+                      if ( ina_t ) _MMG5_SAFE_FREE(ina_t);
+                      if ( ina_a ) _MMG5_SAFE_FREE(ina_a);
                       return 0);
         _MMG5_SAFE_RECALLOC(mesh->edge,mesh->na+1,(na+1),MMG5_Edge,"edges",0);
       }
@@ -1125,6 +1168,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
     if ( tagNum < 3 ) {
       fprintf(stderr,"   Error: %s: node data: Expected at least 3 tags (%d given).\n",
               __func__,tagNum);
+      fclose(*inm);
       return(-1);
     }
 
@@ -1140,6 +1184,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
       fprintf(stderr,"  ** MISMATCHES DATA: THE NUMBER OF VERTICES IN "
               "THE MESH (%d) DIFFERS FROM THE NUMBER OF VERTICES IN "
               "THE SOLUTION (%d) \n",mesh->np,sol->np);
+      fclose(*inm);
       return(-1);
     }
 
@@ -1152,11 +1197,13 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
       }
       else {
         fprintf(stderr,"  ** DATA TYPE IGNORED %d \n",typ);
+        fclose(*inm);
         return(-1);
       }
     }
     else {
       if ( typ != 3 ) {
+        fclose(*inm);
         return(-1);
       }
       sol->size = sol->dim;
@@ -1168,6 +1215,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
 
     _MMG5_ADD_MEM(mesh,(sol->size*(sol->npmax+1))*sizeof(double),"initial solution",
                   fprintf(stderr,"  Exit program.\n");
+                  fclose(*inm);
                   return 0);
     _MMG5_SAFE_CALLOC(sol->m,sol->size*(sol->npmax+1),double,0);
 
