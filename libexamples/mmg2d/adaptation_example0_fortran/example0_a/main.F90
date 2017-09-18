@@ -25,7 +25,7 @@ PROGRAM main
   CALL get_command_argument(0, exec_name)
 
   IF ( argc /=2 ) THEN
-     PRINT*," Usage: ",exec_name," input_file_name output_file_name"
+     PRINT*," Usage: ",TRIM(ADJUSTL(exec_name))," input_file_name output_file_name"
      CALL EXIT(1);
   ENDIF
 

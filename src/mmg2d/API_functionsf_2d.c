@@ -620,11 +620,31 @@ FORTRAN_NAME(MMG2D_LOADSOL,mmg2d_loadsol,
   return;
 }
 
+/**
+ * See \ref MMG2D_loadAllSols function in \ref mmg2d/libmmg2d.h file.
+ */
+FORTRAN_NAME(MMG2D_LOADALLSOLS,mmg2d_loadallsols,
+             (MMG5_pMesh *mesh,MMG5_pSol *sol,char *meshin,int* strlen,int* retval),
+             (mesh,sol,meshin,strlen,retval)){
+  char *tmp = NULL;
+
+  tmp = (char*)malloc((*strlen+1)*sizeof(char));
+  strncpy(tmp,meshin,*strlen);
+  tmp[*strlen] = '\0';
+
+  *retval = MMG2D_loadAllSols(*mesh,sol,tmp);
+  _MMG5_SAFE_FREE(tmp);
+
+  return;
+}
+
 
 /**
  * See \ref MMG2D_saveSol function in \ref mmg2d/libmmg2d.h file.
  */
-FORTRAN_NAME(MMG2D_SAVESOL,mmg2d_savesol,(MMG5_pMesh *mesh,MMG5_pSol *met,char *meshin,int *strlen,int* retval),(mesh,met,meshin,strlen,retval)){
+FORTRAN_NAME(MMG2D_SAVESOL,mmg2d_savesol,(MMG5_pMesh *mesh,MMG5_pSol *met,
+                                          char *meshin,int *strlen,int* retval),
+             (mesh,met,meshin,strlen,retval)){
   char *tmp = NULL;
 
   tmp = (char*)malloc((*strlen+1)*sizeof(char));
@@ -632,6 +652,24 @@ FORTRAN_NAME(MMG2D_SAVESOL,mmg2d_savesol,(MMG5_pMesh *mesh,MMG5_pSol *met,char *
   tmp[*strlen] = '\0';
 
   *retval = MMG2D_saveSol(*mesh,*met,tmp);
+  _MMG5_SAFE_FREE(tmp);
+
+  return;
+}
+
+/**
+ * See \ref MMG2D_saveSol function in \ref mmg2d/libmmg2d.h file.
+ */
+FORTRAN_NAME(MMG2D_SAVEALLSOLS,mmg2d_saveallsols,(MMG5_pMesh *mesh,MMG5_pSol *sol,
+                                                  char *meshin,int *strlen,int* retval),
+             (mesh,sol,meshin,strlen,retval)){
+  char *tmp = NULL;
+
+  tmp = (char*)malloc((*strlen+1)*sizeof(char));
+  strncpy(tmp,meshin,*strlen);
+  tmp[*strlen] = '\0';
+
+  *retval = MMG2D_saveAllSols(*mesh,sol,tmp);
   _MMG5_SAFE_FREE(tmp);
 
   return;
