@@ -1435,7 +1435,7 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename);
  * \param filename name of file.
  * \return 0 if failed, 1 otherwise.
  *
- * Read mesh and sol at MSH file format (.msh extension). We read only
+ * Read mesh and 0 or 1 data at MSH file format (.msh extension). We read only
  * low-order points, edges, tria, quadra, tetra and prisms.
  *
  * \remark Fortran interface:
@@ -1473,8 +1473,8 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename);
  * \param filename name of file.
  * \return 0 if failed, 1 otherwise.
  *
- * Write mesh and sol at MSH file format (.msh extension). Write binary file for
- * .mshb extension and ASCII for .msh one.
+ * Write mesh and 0 or 1 data at MSH file format (.msh extension). Write binary
+ * file for .mshb extension and ASCII for .msh one.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SAVEMSHMESH(mesh,sol,filename,strlen,retval)\n
@@ -1492,7 +1492,8 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename);
  * \param filename name of file.
  * \return -1 data invalid, 0 no file, 1 ok.
  *
- * Load metric field.
+ * Load metric field. The solution file must contains only 1 solution: the
+ * metric
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_LOADSOL(mesh,met,filename,strlen,retval)\n
@@ -1510,7 +1511,7 @@ int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename);
  * \param filename name of file.
  * \return 0 if failed, 1 otherwise.
  *
- * Load solutions array
+ * Load 1 or more solutions in a solution file at medit file format.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_LOADALLSOLS(mesh,sol,filename,strlen,retval)\n
@@ -1547,7 +1548,7 @@ int MMG3D_saveSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename);
  * \param filename name of the solution file.
  * \return 0 or -1 if fail, 1 otherwise.
  *
- * Save solutions array
+ * Save 1 or more solutions at medit solution file format
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SAVEALLSOLS(mesh,sol,filename,strlen,retval)\n

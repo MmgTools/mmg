@@ -992,8 +992,8 @@ int  MMGS_loadMesh(MMG5_pMesh mesh, const char* filename);
  * \param filename name of file.
  * \return 0 if failed, 1 otherwise.
  *
- * Read mesh and sol at MSH file format (.msh extension). We read only
- * low-order points, edges, tria, quad, tetra and prisms.
+ * Read mesh and 0 or 1 data field at MSH file format (.msh extension). We read
+ * only low-order points, edges, tria, quad, tetra and prisms.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_LOADMSHMESH(mesh,sol,filename,strlen,retval)\n
@@ -1029,7 +1029,7 @@ int  MMGS_saveMesh(MMG5_pMesh mesh, const char *filename);
  * \param filename name of file.
  * \return 0 if failed, 1 otherwise.
  *
- * Write mesh and sol at MSH  file format (.msh extension).
+ * Write mesh and 0 or 1 data field at MSH  file format (.msh extension).
  * Save file at ASCII format for .msh extension, at binary format for .mshb one.
  *
  * \remark Fortran interface:
@@ -1048,7 +1048,8 @@ int  MMGS_saveMesh(MMG5_pMesh mesh, const char *filename);
  * \param filename name of file.
  * \return 0 if failed, 1 otherwise.
  *
- * Load metric field.
+ * Load metric field. The solution file (at medit file format) must contains
+ * only 1 solution: the metric.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_LOADSOL(mesh,met,filename,strlen,retval)\n
@@ -1066,7 +1067,7 @@ int  MMGS_loadSol(MMG5_pMesh mesh,MMG5_pSol met, const char* filename);
  * \param filename name of file.
  * \return 0 if failed, 1 otherwise.
  *
- * Load solutions array
+ * Load 1 or more solutions in a solution file at medit file format.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_LOADALLSOLS(mesh,sol,filename,strlen,retval)\n
@@ -1084,7 +1085,7 @@ int  MMGS_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char* filename);
  * \param filename name of file.
  * \return 0 if failed, 1 otherwise.
  *
- * Write isotropic or anisotropic metric.
+ * Write isotropic or anisotropic metric at medit file format.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SAVESOL(mesh,met,filename,strlen,retval)\n
@@ -1102,7 +1103,7 @@ int  MMGS_saveSol(MMG5_pMesh mesh, MMG5_pSol met, const char *filename);
  * \param filename name of the solution file.
  * \return 0 or -1 if fail, 1 otherwise.
  *
- * Save solutions array
+ * Save 1 or more solutions in a solution file at medit file format.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SAVEALLSOLS(mesh,sol,filename,strlen,retval)\n
