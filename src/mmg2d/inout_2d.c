@@ -898,7 +898,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
       bpos += 12+(1+2*mesh->ver)*4*np; //NullPos
 
     fwrite(&bpos,sw,1,inm);
-    fwrite(&ne,sw,1,inm);
+    fwrite(&np,sw,1,inm);
   }
   fflush(inm);
 
@@ -950,7 +950,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
       fwrite(&binch,sw,1,inm);
       bpos += 12+4*nc; //NullPos
       fwrite(&bpos,sw,1,inm);
-      fwrite(&ne,sw,1,inm);
+      fwrite(&nc,sw,1,inm);
     }
 
     for (k=1; k<=mesh->np; k++) {
@@ -986,7 +986,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
       fwrite(&binch,sw,1,inm);
       bpos += 12+4*nreq; //NullPos
       fwrite(&bpos,sw,1,inm);
-      fwrite(&ne,sw,1,inm);
+      fwrite(&nreq,sw,1,inm);
     }
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
