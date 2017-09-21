@@ -100,7 +100,6 @@ _MMG5_ismaniball(MMG5_pMesh mesh,MMG5_pSol sol,int k,int indp) {
   if ( fabs(sol->m[np]-mesh->info.ls) > _MMG5_EPSD2 )  return(1);
 
   memset(bdy,0,(MMG3D_LMAX+1)*sizeof(int));
-
   memset(list,0,(MMG3D_LMAX+1)*sizeof(int));
 
   /* Sign of a starting point in ball of np */
@@ -108,13 +107,13 @@ _MMG5_ismaniball(MMG5_pMesh mesh,MMG5_pSol sol,int k,int indp) {
     ip = _MMG5_idir[indp][j];
     if ( sol->m[pt->v[ip]]-mesh->info.ls != 0.0 )  break;
   }
-  if ( j == 3) {
+  if ( j == 3 ) {
     if ( !mmgWarn0 ) {
       mmgWarn0 = 1;
       fprintf(stderr,"\n  ## Warning: %s:  at least 1 tetra with 4 null"
               " values.\n",__func__);
     }
-    return 0;
+    return(0);
   }
 
   v = sol->m[pt->v[ip]]-mesh->info.ls;
@@ -173,11 +172,6 @@ _MMG5_ismaniball(MMG5_pMesh mesh,MMG5_pSol sol,int k,int indp) {
     }
     cur++;
   }
-  /* 0 value has been snapped accidentally */
-  if ( !res ) {
-    return(0);
-  }
-
 
   /* Fill in list bdy, corresponding to the support tetras of the boundary to be created */
   ibdy = 0;
@@ -216,13 +210,39 @@ _MMG5_ismaniball(MMG5_pMesh mesh,MMG5_pSol sol,int k,int indp) {
       nsame++;
     else
       nopp++;
+    
+    /* If no starting face with one vertex with opposite sign to v has been found, 
+     the only possibility for an admissible config is that adjacent to a face with 3 values equal to 0 has such vertex;
+        v0,v1 are reused */
+    if ( !res && nzeros == 2 && nsame == 1 ) {
+      for (j=0; j<3; j++) {
+        i0 = _MMG5_idir[i][j];
+        v0 = sol->m[pt->v[i0]] - mesh->info.ls;
+        if ( v0 != 0.0 && MG_SMSGN(v,v0) ) break;
+      }
+      
+      adja = &mesh->adja[4*(iel-1)+1];
+      jel = adja[i0] / 4;
+      j0 = adja[i0] % 4;
+      pt1 = &mesh->tetra[jel];
+      v1 = sol->m[pt1->v[j0]];
+      if ( v1 != 0.0 && !MG_SMSGN(v,v1) ) {
+        for (j=0; j<4; j++)
+          if ( pt1->v[j] == np ) break;
+        res = 4*jel+j;
+      }
+    }
 
     if ( ( nzeros == 2 && nsame == 1 ) || ( nsame >= 1 && nopp >= 1 ) )  {
       bdy[ibdy] = list[l];
       ibdy++;
     }
   }
-
+  
+  /* Invalid configuration has been created */
+  if ( !res )
+    return(0);
+    
   /* Reset the current part of the ball, and start back the process with the other sign */
   iel = res / 4;
   pt = &mesh->tetra[iel];
@@ -345,7 +365,7 @@ static int _MMG3D_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol,double *tmp) {
   /* Reset point flags */
   for (k=1; k<=mesh->np; k++)
     mesh->point[k].flag = 0;
-
+  
   /* Snap values of sol that are close to 0 to 0 exactly */
   ns = nc = 0;
   for (k=1; k<=mesh->np; k++) {
@@ -381,6 +401,12 @@ static int _MMG3D_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol,double *tmp) {
       }
     }
   }
+  
+  /* printf("Coucou on passe dans snapval\n");
+  p0 = &mesh->point[318];
+  printf("Point 318 : %f %f %f \n",p0->c[0],p0->c[1],p0->c[2]);
+  printf("La valeur %E \n",sol->m[318]);
+  exit(0);*/
 
   if ( (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) && ns+nc > 0 )
     fprintf(stdout,"     %8d points snapped, %d corrected\n",ns,nc);

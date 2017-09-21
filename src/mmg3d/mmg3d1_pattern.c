@@ -555,7 +555,7 @@ int _MMG5_mmg3d1_pattern(MMG5_pMesh mesh,MMG5_pSol met) {
     fprintf(stderr,"\n  ## Non orientable implicit surface. Exit program.\n");
     return(0);
   }
-
+  
   /**--- stage 1: geometric mesh */
   if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
     fprintf(stdout,"  ** GEOMETRIC MESH\n");
