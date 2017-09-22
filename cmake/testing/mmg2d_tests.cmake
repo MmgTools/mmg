@@ -63,6 +63,16 @@ ADD_TEST(NAME mmg2d_SquareIso
   ${MMG2D_CI_TESTS}/SquareIso/carretest
   -out ${CTEST_OUTPUT_DIR}/mmg2d_SquareIso-carretest.o.meshb)
 
+ADD_TEST(NAME mmg2d_SquareIso_nonConstant
+  COMMAND ${EXECUT_MMG2D} -v 5
+  ${MMG2D_CI_TESTS}/SquareIso/non-constant
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_non-constant.o.meshb)
+
+ADD_TEST(NAME mmg2d_SquareIso_nonConstant2
+  COMMAND ${EXECUT_MMG2D} -v 5
+  ${MMG2D_CI_TESTS}/SquareIso/non-constant-2
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_non-constant-2.o.meshb)
+
 ####### -nosurf option
 ADD_TEST(NAME mmg2d_2squares
   COMMAND ${EXECUT_MMG2D} -msh 2 -hmax 1 -nosurf -v 5
