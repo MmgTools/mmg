@@ -154,7 +154,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
 
   if (!bin) {
     strcpy(chaine,"D");
-    while(fscanf(inm,"%s",&chaine[0])!=EOF && strncmp(chaine,"End",strlen("End")) ) {
+    while(fscanf(inm,"%127s",&chaine[0])!=EOF && strncmp(chaine,"End",strlen("End")) ) {
       if(!strncmp(chaine,"MeshVersionFormatted",strlen("MeshVersionFormatted"))) {
         fscanf(inm,"%d",&mesh->ver);
         continue;

@@ -292,9 +292,9 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename,
 
   /* Detection of the different fields of the file */
   strcpy(chaine,"D");
-  while(fscanf((*inm),"%s ",&chaine[0])!=EOF ) {
+  while(fscanf((*inm),"%127s ",&chaine[0])!=EOF ) {
     if(!strncmp(chaine,"$MeshFormat",strlen("$MeshFormat"))) {
-      fscanf((*inm),"%s %d %d ",verNum,bin,&ver);
+      fscanf((*inm),"%4s %d %d ",verNum,bin,&ver);
       mesh->ver = ver/4;
       if ( strncmp(verNum,"2.2",3) ) {
         fprintf(stderr,"\n  ## Error: %s: bad format version (%s)."
@@ -1911,7 +1911,7 @@ int MMG5_loadSolHeader( const char *filename,int meshDim,FILE **inm,int *ver,
   /* read solution or metric */
   if(!*bin) {
     strcpy(chaine,"DDD");
-    while(fscanf(*inm,"%s",&chaine[0])!=EOF && strncmp(chaine,"End",strlen("End")) ) {
+    while(fscanf(*inm,"%127s",&chaine[0])!=EOF && strncmp(chaine,"End",strlen("End")) ) {
       if(!strncmp(chaine,"Dimension",strlen("Dimension"))) {
         fscanf(*inm,"%d",dim);
         if ( *dim!=meshDim ) {
