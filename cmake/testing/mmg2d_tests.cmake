@@ -96,7 +96,7 @@ ADD_TEST(NAME mmg2d_SquareGeneration
   ${CTEST_OUTPUT_DIR}/mmg2d_SquareGeneration-carretest.o.meshb)
 
 ADD_TEST(NAME mmg2d_NacaGeneration
-  COMMAND ${EXECUT_MMG2D} -v 5
+  COMMAND ${EXECUT_MMG2D} -v 5 -hausd 0.001
   ${MMG2D_CI_TESTS}/NacaGeneration/naca
   -out ${CTEST_OUTPUT_DIR}/mmg2d_NacaGeneration-naca.o.meshb)
 
