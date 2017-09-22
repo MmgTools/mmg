@@ -407,7 +407,7 @@ int MMG2_pack(MMG5_pMesh mesh,MMG5_pSol sol) {
       if ( !iel ) ++mesh->na;
       else if ( iel < k ) {
         pt1 = &mesh->tria[iel];
-        if ( pt->ref != pt1->ref ) ++mesh->na;
+        if ( MG_SIN(pt->tag[i]) ) ++mesh->na;
       }
     }
   }
@@ -445,7 +445,7 @@ int MMG2_pack(MMG5_pMesh mesh,MMG5_pSol sol) {
           i2 = _MMG5_iprv2[i];
           iel = adja[i] / 3;
           pt1 = &mesh->tria[iel];
-          if ( !iel || ( iel < k && pt->ref != pt1->ref) ) {
+          if ( !iel || ( iel < k && MG_SIN(pt->tag[i]) ) ) {
             ++ned;
             ped = &mesh->edge[ned];
             ped->a = pt->v[i1];
