@@ -210,8 +210,8 @@ _MMG5_ismaniball(MMG5_pMesh mesh,MMG5_pSol sol,int k,int indp) {
       nsame++;
     else
       nopp++;
-    
-    /* If no starting face with one vertex with opposite sign to v has been found, 
+
+    /* If no starting face with one vertex with opposite sign to v has been found,
      the only possibility for an admissible config is that adjacent to a face with 3 values equal to 0 has such vertex;
         v0,v1 are reused */
     if ( !res && nzeros == 2 && nsame == 1 ) {
@@ -220,7 +220,7 @@ _MMG5_ismaniball(MMG5_pMesh mesh,MMG5_pSol sol,int k,int indp) {
         v0 = sol->m[pt->v[i0]] - mesh->info.ls;
         if ( v0 != 0.0 && MG_SMSGN(v,v0) ) break;
       }
-      
+
       adja = &mesh->adja[4*(iel-1)+1];
       jel = adja[i0] / 4;
       j0 = adja[i0] % 4;
@@ -238,11 +238,11 @@ _MMG5_ismaniball(MMG5_pMesh mesh,MMG5_pSol sol,int k,int indp) {
       ibdy++;
     }
   }
-  
+
   /* Invalid configuration has been created */
   if ( !res )
     return(0);
-    
+
   /* Reset the current part of the ball, and start back the process with the other sign */
   iel = res / 4;
   pt = &mesh->tetra[iel];
@@ -365,7 +365,7 @@ static int _MMG3D_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol,double *tmp) {
   /* Reset point flags */
   for (k=1; k<=mesh->np; k++)
     mesh->point[k].flag = 0;
-  
+
   /* Snap values of sol that are close to 0 to 0 exactly */
   ns = nc = 0;
   for (k=1; k<=mesh->np; k++) {
@@ -401,12 +401,6 @@ static int _MMG3D_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol,double *tmp) {
       }
     }
   }
-  
-  /* printf("Coucou on passe dans snapval\n");
-  p0 = &mesh->point[318];
-  printf("Point 318 : %f %f %f \n",p0->c[0],p0->c[1],p0->c[2]);
-  printf("La valeur %E \n",sol->m[318]);
-  exit(0);*/
 
   if ( (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) && ns+nc > 0 )
     fprintf(stdout,"     %8d points snapped, %d corrected\n",ns,nc);
