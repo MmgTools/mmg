@@ -101,7 +101,7 @@ void _MMG5_mmgDefaultValues(MMG5_pMesh mesh) {
   fprintf(stdout,"\n**  Parameters\n");
   fprintf(stdout,"angle detection           (-ar)     : %lf\n",
           180/M_PI*acos(mesh->info.dhd) );
-  fprintf(stdout,"minimal mesh size         (-hmin)   : 0.01 of "
+  fprintf(stdout,"minimal mesh size         (-hmin)   : 0.001 of "
           "the mesh bounding box if no metric is provided, 0.1 times the "
           "minimum of the metric sizes otherwise.\n");
   fprintf(stdout,"maximal mesh size         (-hmax)   : size of "
