@@ -210,8 +210,8 @@ _MMG5_ismaniball(MMG5_pMesh mesh,MMG5_pSol sol,int k,int indp) {
       nsame++;
     else
       nopp++;
-    
-    /* If no starting face with one vertex with opposite sign to v has been found, 
+
+    /* If no starting face with one vertex with opposite sign to v has been found,
      the only possibility for an admissible config is that adjacent to a face with 3 values equal to 0 has such vertex;
         v0,v1 are reused */
     if ( !res && nzeros == 2 && nsame == 1 ) {
@@ -220,7 +220,7 @@ _MMG5_ismaniball(MMG5_pMesh mesh,MMG5_pSol sol,int k,int indp) {
         v0 = sol->m[pt->v[i0]] - mesh->info.ls;
         if ( v0 != 0.0 && MG_SMSGN(v,v0) ) break;
       }
-      
+
       adja = &mesh->adja[4*(iel-1)+1];
       jel = adja[i0] / 4;
       j0 = adja[i0] % 4;
@@ -238,11 +238,11 @@ _MMG5_ismaniball(MMG5_pMesh mesh,MMG5_pSol sol,int k,int indp) {
       ibdy++;
     }
   }
-  
+
   /* Invalid configuration has been created */
   if ( !res )
     return(0);
-    
+
   /* Reset the current part of the ball, and start back the process with the other sign */
   iel = res / 4;
   pt = &mesh->tetra[iel];
@@ -365,7 +365,7 @@ static int _MMG3D_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol,double *tmp) {
   /* Reset point flags */
   for (k=1; k<=mesh->np; k++)
     mesh->point[k].flag = 0;
-  
+
   /* Snap values of sol that are close to 0 to 0 exactly */
   ns = nc = 0;
   for (k=1; k<=mesh->np; k++) {
@@ -401,12 +401,6 @@ static int _MMG3D_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol,double *tmp) {
       }
     }
   }
-  
-  /* printf("Coucou on passe dans snapval\n");
-  p0 = &mesh->point[318];
-  printf("Point 318 : %f %f %f \n",p0->c[0],p0->c[1],p0->c[2]);
-  printf("La valeur %E \n",sol->m[318]);
-  exit(0);*/
 
   if ( (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) && ns+nc > 0 )
     fprintf(stdout,"     %8d points snapped, %d corrected\n",ns,nc);
@@ -428,11 +422,13 @@ static int _MMG3D_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol,double *tmp) {
  */
 static int _MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol/*,double *tmp*/){
   MMG5_pTetra   pt;
+  MMG5_pxTetra  pxt;
   MMG5_pPoint   p0,p1;
-  _MMG5_Hash     hash;
-  double   c[3],v0,v1,s;
-  int      vx[6],nb,k,ip0,ip1,np,ns,ne,ier;
-  char     ia;
+  _MMG5_Hash    hash;
+  double        c[3],v0,v1,s;
+  int           vx[6],nb,k,ip0,ip1,np,ns,ne,ier;
+  char          ia,j,npneg;
+  static char   mmgWarn = 0;
   /* Commented because unused */
   /*MMG5_pPoint  p[4];*/
   /*double   *grad,A[3][3],b[3],*g0,*g1,area,a,d,dd,s1,s2;*/
@@ -520,6 +516,38 @@ static int _MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol/*,double *tmp*/){
 
   /* Create intersection points at 0 isovalue and set flags to tetras */
   if ( !_MMG5_hashNew(mesh,&hash,nb,7*nb) ) return(0);
+  /* Hash all boundary and required edges, and put ip = -1 in hash structure */
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+    if ( !MG_EOK(pt) )  continue;
+
+    /* avoid split of edges belonging to a required tet */
+    if ( pt->tag & MG_REQ ) {
+      for (ia=0; ia<6; ia++) {
+        ip0 = pt->v[_MMG5_iare[ia][0]];
+        ip1 = pt->v[_MMG5_iare[ia][1]];
+        np  = -1;
+        if ( !_MMG5_hashEdge(mesh,&hash,ip0,ip1,np) )  return(-1);
+      }
+      continue;
+    }
+
+    if ( !pt->xt ) continue;
+
+    pxt = &mesh->xtetra[pt->xt];
+    for (ia=0; ia<4; ia++) {
+      if ( pxt->ftag[ia] & MG_BDY ) {
+        for (j=0; j<3; j++) {
+          ip0 = pt->v[_MMG5_idir[ia][_MMG5_inxt2[j]]];
+          ip1 = pt->v[_MMG5_idir[ia][_MMG5_iprv2[j]]];
+          np  = -1;
+          if ( !_MMG5_hashEdge(mesh,&hash,ip0,ip1,np) )  return(-1);
+        }
+      }
+    }
+  }
+
+
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
     if ( !MG_EOK(pt) )  continue;
@@ -528,7 +556,8 @@ static int _MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol/*,double *tmp*/){
       ip0 = pt->v[_MMG5_iare[ia][0]];
       ip1 = pt->v[_MMG5_iare[ia][1]];
       np  = _MMG5_hashGet(&hash,ip0,ip1);
-      if ( np )  continue;
+
+      if ( np>0 )  continue;
 
       p0 = &mesh->point[ip0];
       p1 = &mesh->point[ip1];
@@ -537,6 +566,8 @@ static int _MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol/*,double *tmp*/){
       if ( fabs(v0) < _MMG5_EPSD2 || fabs(v1) < _MMG5_EPSD2 )  continue;
       else if ( MG_SMSGN(v0,v1) )  continue;
       else if ( !p0->flag || !p1->flag )  continue;
+
+      npneg = (np<0);
 
       /* g0 = &grad[3*(p0->flag -1)+1]; */
       /* g1 = &grad[3*(p1->flag -1)+1]; */
@@ -576,7 +607,18 @@ static int _MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol/*,double *tmp*/){
                             ,c,0,0);
       }
       sol->m[np] = mesh->info.ls;
-      _MMG5_hashEdge(mesh,&hash,ip0,ip1,np);
+
+      if ( npneg ) {
+        /* We split a required edges */
+        if ( !mmgWarn ) {
+          mmgWarn = 1;
+          fprintf(stderr,"  ## Warning: %s: the level-set intersect at least"
+                  " one required entity. Required entity ignored.\n\n",__func__);
+        }
+        _MMG5_hashUpdate(&hash,ip0,ip1,np);
+      }
+      else
+        _MMG5_hashEdge(mesh,&hash,ip0,ip1,np);
     }
   }
 
@@ -591,7 +633,7 @@ static int _MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol/*,double *tmp*/){
     memset(vx,0,6*sizeof(int));
     for (ia=0; ia<6; ia++) {
       vx[ia] = _MMG5_hashGet(&hash,pt->v[_MMG5_iare[ia][0]],pt->v[_MMG5_iare[ia][1]]);
-      if ( vx[ia] )  MG_SET(pt->flag,ia);
+      if ( vx[ia] > 0 )  MG_SET(pt->flag,ia);
     }
     switch (pt->flag) {
     case 1: case 2: case 4: case 8: case 16: case 32: /* 1 edge split */
