@@ -307,11 +307,13 @@ int _MMG2_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   return(1);
 }
 
-/* Perform simultaneous reduction of matrices m1 and m2, and truncate characteristic sizes so that
- the difference between two corresponding sizes is less than difsiz. Return ier, where (ier & 1) if metric m
- is altered, and (ier & 2) if metric n is altered */
+/* Perform simultaneous reduction of matrices m1 and m2, and truncate
+ characteristic sizes so that the difference between two corresponding sizes is
+ less than difsiz. Return ier, where (ier & 1) if metric m is altered, and (ier
+ & 2) if metric n is altered */
 int _MMG2_grad2met_ani(MMG5_pMesh mesh,MMG5_pSol met,double *m,double *n,double difsiz) {
-  double       det,dd,sqDelta,trimn,vnorm,hm,hn,lambda[2],dm[2],dn[2],imn[4],vp0[2],vp1[2],ip[4];
+  double       det,dd,sqDelta,trimn,vnorm,hm,hn,lambda[2],dm[2],dn[2],imn[4];
+  double       vp[2][2],ip[4];
   char         ier;
   static char  mmgWarn0=0;
 
@@ -350,14 +352,15 @@ int _MMG2_grad2met_ani(MMG5_pMesh mesh,MMG5_pSol met,double *m,double *n,double 
   
   /* First case : matrices m and n are homothetic: n = lambda0*m */
   if ( sqDelta < _MMG5_EPS ) {
-    /* Subase where m is diaonal */
+
+    /* Subcase where m is diaonal */
     if ( fabs(m[1]) < _MMG5_EPS ) {
       dm[0]   = m[0];
       dm[1]   = m[2];
-      vp0[0] = 1;
-      vp0[1] = 0;
-      vp1[0] = 0;
-      vp1[1] = 1;
+      vp[0][0] = 1;
+      vp[0][1] = 0;
+      vp[1][0] = 0;
+      vp[1][1] = 1;
     }
     /* Subcase where m is not diagonal; dd,trimn,... are reused */
     else {
@@ -365,37 +368,39 @@ int _MMG2_grad2met_ani(MMG5_pMesh mesh,MMG5_pSol met,double *m,double *n,double 
       trimn = m[0] + m[2];
       
       sqDelta = sqrt(fabs(dd*dd +4*0*m[1]*m[1]));
+      
+
       dm[0]   = 0.5 * (trimn + sqDelta);
       dm[1]   = 0.5 * (trimn - sqDelta);
       
-      vp0[0] = m[1];
-      vp0[1] = (dm[0]-m[0]);
-      vnorm  = sqrt(vp0[0]*vp0[0] + vp0[1]*vp0[1]);
+      vp[0][0] = m[1];
+      vp[0][1] = (dm[0]-m[0]);
+      vnorm  = sqrt(vp[0][0]*vp[0][0] + vp[0][1]*vp[0][1]);
       if ( vnorm < _MMG5_EPS ) {
-        vp0[0] = (dm[0] - m[2]);
-        vp0[1] = m[1];
-        vnorm  = sqrt(vp0[0]*vp0[0] + vp0[1]*vp0[1]);
+        vp[0][0] = (dm[0] - m[2]);
+        vp[0][1] = m[1];
+        vnorm  = sqrt(vp[0][0]*vp[0][0] + vp[0][1]*vp[0][1]);
         if ( vnorm < _MMG5_EPS ) return(0);
       }
       
       vnorm   = 1.0 / vnorm;
-      vp0[0] *= vnorm;
-      vp0[1] *= vnorm;
+      vp[0][0] *= vnorm;
+      vp[0][1] *= vnorm;
       
-      vp1[0] = m[1];
-      vp1[1] = (dm[1]-m[0]);
-      vnorm  = sqrt(vp1[0]*vp1[0] + vp1[1]*vp1[1]);
+      vp[1][0] = m[1];
+      vp[1][1] = (dm[1]-m[0]);
+      vnorm  = sqrt(vp[1][0]*vp[1][0] + vp[1][1]*vp[1][1]);
       
       if ( vnorm < _MMG5_EPS ) {
-        vp1[0] = (dm[1] - m[2]);
-        vp1[1] = m[1];
-        vnorm  = sqrt(vp1[0]*vp1[0] + vp1[1]*vp1[1]);
+        vp[1][0] = (dm[1] - m[2]);
+        vp[1][1] = m[1];
+        vnorm  = sqrt(vp[1][0]*vp[1][0] + vp[1][1]*vp[1][1]);
         if ( vnorm < _MMG5_EPS ) return(0);
       }
-      
+
       vnorm   = 1.0 / vnorm;
-      vp1[0] *= vnorm;
-      vp1[1] *= vnorm;
+      vp[1][0] *= vnorm;
+      vp[1][1] *= vnorm;
     }
     
     /* Eigenvalues of metric n */
@@ -404,44 +409,44 @@ int _MMG2_grad2met_ani(MMG5_pMesh mesh,MMG5_pSol met,double *m,double *n,double 
     
   }
   /* Second case: both eigenvalues of imn are distinct ; theory says qf associated to m and n
-   are diagonalizable in basis (vp0, vp1) - the coreduction basis */
+   are diagonalizable in basis (vp[0], vp[1]) - the coreduction basis */
   else {
     lambda[1] = 0.5 * (trimn + sqDelta);
     assert(lambda[1] >= 0.0);
     
-    vp0[0] = imn[1];
-    vp0[1] = (lambda[0] - imn[0]);
-    vnorm  = sqrt(vp0[0]*vp0[0] + vp0[1]*vp0[1]);
+    vp[0][0] = imn[1];
+    vp[0][1] = (lambda[0] - imn[0]);
+    vnorm  = sqrt(vp[0][0]*vp[0][0] + vp[0][1]*vp[0][1]);
     
     if ( vnorm < _MMG5_EPS ) {
-      vp0[0] = (lambda[0] - imn[3]);
-      vp0[1] = imn[2];
-      vnorm  = sqrt(vp0[0]*vp0[0] + vp0[1]*vp0[1]);
+      vp[0][0] = (lambda[0] - imn[3]);
+      vp[0][1] = imn[2];
+      vnorm  = sqrt(vp[0][0]*vp[0][0] + vp[0][1]*vp[0][1]);
     }
     
     vnorm   = 1.0 / vnorm;
-    vp0[0] *= vnorm;
-    vp0[1] *= vnorm;
+    vp[0][0] *= vnorm;
+    vp[0][1] *= vnorm;
     
-    vp1[0] = imn[1];
-    vp1[1] = (lambda[1] - imn[0]);
-    vnorm  = sqrt(vp1[0]*vp1[0] + vp1[1]*vp1[1]);
+    vp[1][0] = imn[1];
+    vp[1][1] = (lambda[1] - imn[0]);
+    vnorm  = sqrt(vp[1][0]*vp[1][0] + vp[1][1]*vp[1][1]);
     
     if ( vnorm < _MMG5_EPS ) {
-      vp1[0] = (lambda[1] - imn[3]);
-      vp1[1] = imn[2];
-      vnorm  = sqrt(vp1[0]*vp1[0] + vp1[1]*vp1[1]);
+      vp[1][0] = (lambda[1] - imn[3]);
+      vp[1][1] = imn[2];
+      vnorm  = sqrt(vp[1][0]*vp[1][0] + vp[1][1]*vp[1][1]);
     }
     
     vnorm   = 1.0 / vnorm;
-    vp1[0] *= vnorm;
-    vp1[1] *= vnorm;
+    vp[1][0] *= vnorm;
+    vp[1][1] *= vnorm;
     
     /* Compute diagonal values in simultaneous reduction basis */
-    dm[0] = m[0]*vp0[0]*vp0[0] + 2.0*m[1]*vp0[0]*vp0[1] + m[2]*vp0[1]*vp0[1];
-    dm[1] = m[0]*vp1[0]*vp1[0] + 2.0*m[1]*vp1[0]*vp1[1] + m[2]*vp1[1]*vp1[1];
-    dn[0] = n[0]*vp0[0]*vp0[0] + 2.0*n[1]*vp0[0]*vp0[1] + n[2]*vp0[1]*vp0[1];
-    dn[1] = n[0]*vp1[0]*vp1[0] + 2.0*n[1]*vp1[0]*vp1[1] + n[2]*vp1[1]*vp1[1];
+    dm[0] = m[0]*vp[0][0]*vp[0][0] + 2.0*m[1]*vp[0][0]*vp[0][1] + m[2]*vp[0][1]*vp[0][1];
+    dm[1] = m[0]*vp[1][0]*vp[1][0] + 2.0*m[1]*vp[1][0]*vp[1][1] + m[2]*vp[1][1]*vp[1][1];
+    dn[0] = n[0]*vp[0][0]*vp[0][0] + 2.0*n[1]*vp[0][0]*vp[0][1] + n[2]*vp[0][1]*vp[0][1];
+    dn[1] = n[0]*vp[1][0]*vp[1][0] + 2.0*n[1]*vp[1][0]*vp[1][1] + n[2]*vp[1][1]*vp[1][1];
   }
   
   /* Gradation of sizes = 1/sqrt(eigenv of the tensors) in the first direction */
@@ -476,15 +481,15 @@ int _MMG2_grad2met_ani(MMG5_pMesh mesh,MMG5_pSol met,double *m,double *n,double 
     ier = ier | 1;
   }
   
-  /* Update of the metrics = tP^-1 diag(d0,d1)P^-1, P = (vp0, vp1) stored in columns */
-  det = vp0[0]*vp1[1] - vp0[1]*vp1[0];
+  /* Update of the metrics = tP^-1 diag(d0,d1)P^-1, P = (vp[0], vp[1]) stored in columns */
+  det = vp[0][0]*vp[1][1] - vp[0][1]*vp[1][0];
   if ( fabs(det) < _MMG5_EPS )  return(0);
   det = 1.0 / det;
   
-  ip[0] =  vp1[1]*det;
-  ip[1] = -vp1[0]*det;
-  ip[2] = -vp0[1]*det;
-  ip[3] =  vp0[0]*det;
+  ip[0] =  vp[1][1]*det;
+  ip[1] = -vp[1][0]*det;
+  ip[2] = -vp[0][1]*det;
+  ip[3] =  vp[0][0]*det;
   
   if ( ier | 1 ) {
     m[0] = dm[0]*ip[0]*ip[0] + dm[1]*ip[2]*ip[2];
