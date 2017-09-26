@@ -50,23 +50,23 @@ int _MMG2_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   double           ps1,ps2,ux,uy,ll,li,lm,hmax,hausd,hmin;
   int              k,ip1,ip2;
   unsigned char    i,i1,i2;
-  
-  
+
+
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
     fprintf(stdout,"  ** Defining isotropic map\n");
-  
+
   if ( mesh->info.hmax < 0.0 )  mesh->info.hmax = 0.5 * mesh->info.delta;
-  
+
   hmax = mesh->info.hmax;
   hausd = mesh->info.hausd;
   hmin = mesh->info.hmin;
-  
+
   /* Allocate the structure */
   if ( !met->np ) {
     met->npmax = mesh->npmax;
     met->np    = mesh->np;
     met->size  = 1;
-    
+
     if ( !met->m ) {
       _MMG5_ADD_MEM(mesh,(met->npmax+1)*sizeof(double),"solution",return(0));
       _MMG5_SAFE_MALLOC(met->m,mesh->npmax+1,double,0);
@@ -76,28 +76,28 @@ int _MMG2_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
     for (k=1; k<=mesh->np; k++)
       met->m[k] = hmax;
   }
-  
+
   /* Only the boundary edges impose a minimal size feature */
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) ) continue;
-    
+
     for (i=0; i<3; i++) {
       if ( !MG_EDG(pt->tag[i]) ) continue;
       i1 = _MMG5_inxt2[i];
       i2 = _MMG5_iprv2[i];
       ip1 = pt->v[i1];
       ip2 = pt->v[i2];
-      
+
       p1 = &mesh->point[ip1];
       p2 = &mesh->point[ip2];
-      
+
       ux = p2->c[0] - p1->c[0];
       uy = p2->c[1] - p1->c[1];
       ll = ux*ux + uy*uy;
       if ( ll < _MMG5_EPSD ) continue;
       li = 1.0 / sqrt(ll);
-      
+
       /* Recovery of the two tangent vectors associated to points p1,p2; they need not be oriented in the same fashion */
       if ( MG_SIN(p1->tag) || (p1->tag & MG_NOM) ) {
         t1[0] = li*ux;
@@ -107,7 +107,7 @@ int _MMG2_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
         t1[0] = -p1->n[1];
         t1[1] = p1->n[0];
       }
-      
+
       if ( MG_SIN(p2->tag) || (p2->tag & MG_NOM) ) {
         li = 1.0 / sqrt(ll);
         t2[0] = li*ux;
@@ -117,37 +117,37 @@ int _MMG2_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
         t2[0] = -p2->n[1];
         t2[1] = p2->n[0];
       }
-      
+
       /* Calculation of the two Bezier coefficients along the curve */
       ps1   = ux*t1[0] + uy*t1[1];
       b1[0] = p1->c[0] + _MMG5_ATHIRD*ps1*t1[0];
       b1[1] = p1->c[1] + _MMG5_ATHIRD*ps1*t1[1];
-      
+
       ps2   = ux*t2[0]+uy*t2[1];
       b2[0] = p2->c[0] - _MMG5_ATHIRD*ps2*t2[0];
       b2[1] = p2->c[1] - _MMG5_ATHIRD*ps2*t2[1];
-      
+
       ps1 *= ps1;
       ps2 *= ps2;
-      
+
       if ( ps1 < _MMG5_EPSD || ps2 < _MMG5_EPSD ) continue;
-      
+
       /* \gamma^{\prime\prime}(0); \gamma^\prime(0) = ps*t1 by construction */
       gpp1[0] = 6.0*(p1->c[0] - 2.0*b1[0] + b2[0]);
       gpp1[1] = 6.0*(p1->c[1] - 2.0*b1[1] + b2[1]);
-      
+
       /* Vector product gpp1 ^ t1 */
       pv = gpp1[0]*t1[1] - gpp1[1]*t1[0];
       M1 = fabs(pv)/ps1;
-      
+
       /* \gamma^{\prime\prime}(1); \gamma^\prime(1) = -ps*t2 by construction */
       gpp2[0] = 6.0*(p2->c[0] - 2.0*b2[0] + b1[0]);
       gpp2[1] = 6.0*(p2->c[1] - 2.0*b2[1] + b1[1]);
-      
+
       /* Vector product gpp2 ^ t2 */
       pv = gpp2[0]*t2[1] - gpp2[1]*t2[0];
       M2 = fabs(pv)/ps2;
-      
+
       M1 = MG_MAX(M1,M2);
       if ( M1 < _MMG5_EPSD)
         lm = hmax;
@@ -159,7 +159,7 @@ int _MMG2_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
       met->m[ip2] = MG_MAX(hmin,MG_MIN(met->m[ip2],lm));
     }
   }
-  
+
   return(1);
 }
 
@@ -178,25 +178,25 @@ int _MMG2_gradsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   double            hgrad,ll,h1,h2,hn;
   int               k,it,ip1,ip2,maxit,nup,nu;
   unsigned char     i,i1,i2;
-  
-  
+
+
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
     fprintf(stdout,"  ** Grading mesh\n");
-  
+
   for (k=1; k<=mesh->np; k++)
     mesh->point[k].flag = mesh->base;
-  
+
   hgrad = log(mesh->info.hgrad);
   it = nup = 0;
   maxit = 100;
-  
+
   do {
     mesh->base++;
     nu = 0;
     for (k=1; k<=mesh->nt; k++) {
       pt = &mesh->tria[k];
       if ( !MG_EOK(pt) )  continue;
-      
+
       for (i=0; i<3; i++) {
         i1  = _MMG5_inxt2[i];
         i2  = _MMG5_iprv2[i];
@@ -205,10 +205,10 @@ int _MMG2_gradsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
         p1 = &mesh->point[ip1];
         p2 = &mesh->point[ip2];
         if ( p1->flag < mesh->base-1 && p2->flag < mesh->base-1 )  continue;
-        
+
         ll = (p2->c[0]-p1->c[0])*(p2->c[0]-p1->c[0]) + (p2->c[1]-p1->c[1])*(p2->c[1]-p1->c[1]);
         ll = sqrt(ll);
-        
+
         h1 = met->m[ip1];
         h2 = met->m[ip2];
         if ( h1 < h2 ) {
@@ -234,7 +234,7 @@ int _MMG2_gradsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
     nup += nu;
   }
   while ( ++it < maxit && nu > 0 );
-  
+
   if ( abs(mesh->info.imprim) > 4 )
     fprintf(stdout,"     gradation: %7d updated, %d iter.\n",nup,it);
 
