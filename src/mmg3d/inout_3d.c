@@ -1646,6 +1646,14 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
 }
 
 int MMG3D_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
+  MMG5_pSol soltab[1];
+
+  soltab[0] = sol;
+  return(MMG5_saveMshMesh(mesh,soltab,filename));
+}
+
+int MMG3D_saveMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename) {
+
   return(MMG5_saveMshMesh(mesh,sol,filename));
 }
 

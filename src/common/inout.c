@@ -1377,7 +1377,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
 }
 
 
-int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
+int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename) {
   FILE*       inm;
   MMG5_pPoint ppt;
   MMG5_pTetra pt;
@@ -1385,10 +1385,12 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   MMG5_pTria  ptt;
   MMG5_pQuad  pq;
   MMG5_pEdge  pa;
+  MMG5_pSol   psl;
   double      dbuf[6],mtmp[3],r[3][3];
   int         bin,k,i,typ,nelts,word, header[3],iadr;
-  int         nq,ne,npr,np,nt,na;
+  int         nq,ne,npr,np,nt,na,isol;
   char        *ptr,*data;
+  static char mmgWarn = 0;
 
   bin = 0;
 
@@ -1693,148 +1695,155 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   }
 
   /** Write solution */
-  if ( !sol->m ) {
-    fclose(inm);
-    return(1);
-  }
+  for ( isol=0; isol<mesh->nsols; ++isol) {
+    psl = *sol + isol;
 
-  fprintf(inm,"$NodeData\n");
-
-  /* One string tag saying the type of solution saved */
-  fprintf(inm,"1\n");
-  if ( sol->size == 1 ) {
-    typ = 1;
-    fprintf(inm,"\"isotropic_metric\"\n");
-  }
-  else if ( sol->size == sol->dim ) {
-    typ = 3;
-    fprintf(inm,"\"displacement_vector\"\n");
-  }
-  else {
-    typ = 9;
-    fprintf(inm,"\"anisotropic_metric\"\n");
-  }
-
-  /* One real tag unused */
-  fprintf(inm,"1\n");
-  fprintf(inm,"0.0\n"); // time value: unused
-
-  /* Three integer tags */
-  fprintf(inm,"3\n");
-  fprintf(inm,"0\n"); // Time step: unused
-  fprintf(inm,"%d\n",typ);
-  fprintf(inm,"%d\n",np);
-
-  /** Save the solution at following format:
-      "idx sol" */
-  if ( sol->size!= (sol->dim*(sol->dim+1))/2 ) {
-    for (k=1; k<=mesh->np; k++) {
-      ppt = &mesh->point[k];
-      if ( !MG_VOK(ppt) ) continue;
-
-      iadr = k*sol->size;
-      if ( sol->dim == 2 )
-        dbuf[2] = 0; // z-component for a vector field
-
-      for ( i=0; i<sol->size; ++i )
-        dbuf[i] = sol->m[iadr+i];
-
-      if ( !bin ) {
-        fprintf(inm,"%d",ppt->tmp);
-        for ( i=0; i<typ; ++i )
-          fprintf(inm," %lg",dbuf[i]);
-        fprintf(inm,"\n");
+    if ( !psl->m ) {
+      if ( !mmgWarn ) {
+        mmgWarn = 1;
+        fprintf(stderr, "  ## Warning: %s: missing data for at least 1 solution."
+                " Skipped.\n",__func__);
       }
-      else {
-        fwrite(&ppt->tmp,sw,1,inm);
-        fwrite(&dbuf,sd,typ,inm);
-      }
+      continue;
     }
-  }
-  else {
-    for (k=1; k<=mesh->np; k++) {
-      ppt = &mesh->point[k];
-      if ( !MG_VOK(ppt) ) continue;
 
-      if ( sol->dim == 3 ) {
-        if ( !(MG_SIN(ppt->tag) || (ppt->tag & MG_NOM) || (ppt->tag & MG_NOSURF))
-             && (ppt->tag & MG_GEO) ) {
-          if ( mesh->xp ) {
-            // Arbitrary, we take the metric associated to the surface ruled by n_1
-            iadr = sol->size*k;
-            mtmp[0] = sol->m[iadr];
-            mtmp[1] = sol->m[iadr+1];
-            mtmp[2] = sol->m[iadr+3];
+    fprintf(inm,"$NodeData\n");
 
-            // Rotation matrix.
-            r[0][0] = ppt->n[0];
-            r[1][0] = ppt->n[1];
-            r[2][0] = ppt->n[2];
-            r[0][1] = mesh->xpoint[ppt->xp].n1[1]*ppt->n[2]
-              - mesh->xpoint[ppt->xp].n1[2]*ppt->n[1];
-            r[1][1] = mesh->xpoint[ppt->xp].n1[2]*ppt->n[0]
-              - mesh->xpoint[ppt->xp].n1[0]*ppt->n[2];
-            r[2][1] = mesh->xpoint[ppt->xp].n1[0]*ppt->n[1]
-              - mesh->xpoint[ppt->xp].n1[1]*ppt->n[0];
-            r[0][2] = mesh->xpoint[ppt->xp].n1[0];
-            r[1][2] = mesh->xpoint[ppt->xp].n1[1];
-            r[2][2] = mesh->xpoint[ppt->xp].n1[2];
+    /* One string tag saying the type of solution saved */
+    fprintf(inm,"1\n");
 
-            // Metric in the canonic space
-            dbuf[0] = mtmp[0]*r[0][0]*r[0][0] + mtmp[1]*r[0][1]*r[0][1] + mtmp[2]*r[0][2]*r[0][2];
-            dbuf[1] = mtmp[0]*r[0][0]*r[1][0] + mtmp[1]*r[0][1]*r[1][1] + mtmp[2]*r[0][2]*r[1][2];
-            dbuf[2] = mtmp[0]*r[0][0]*r[2][0] + mtmp[1]*r[0][1]*r[2][1] + mtmp[2]*r[0][2]*r[2][2];
-            dbuf[3] = mtmp[0]*r[1][0]*r[1][0] + mtmp[1]*r[1][1]*r[1][1] + mtmp[2]*r[1][2]*r[1][2];
-            dbuf[4] = mtmp[0]*r[1][0]*r[2][0] + mtmp[1]*r[1][1]*r[2][1] + mtmp[2]*r[1][2]*r[2][2];
-            dbuf[5] = mtmp[0]*r[2][0]*r[2][0] + mtmp[1]*r[2][1]*r[2][1] + mtmp[2]*r[2][2]*r[2][2];
-          }
-          else { // Cannot recover the metric
-            for (i=0; i<sol->size; i++)  dbuf[i] = 0.;
-          }
+    if ( psl->size == 1 ) {
+      typ = 1;
+    }
+    else if ( psl->size == psl->dim ) {
+      typ = 3;
+    }
+    else {
+      typ = 9;
+    }
+    fprintf(inm,"\"%s\"\n",psl->namein);
+
+    /* One real tag unused */
+    fprintf(inm,"1\n");
+    fprintf(inm,"0.0\n"); // time value: unused
+
+    /* Three integer tags */
+    fprintf(inm,"3\n");
+    fprintf(inm,"0\n"); // Time step: unused
+    fprintf(inm,"%d\n",typ);
+    fprintf(inm,"%d\n",np);
+
+    /** Save the solution at following format:
+        "idx sol" */
+    if ( psl->size!= (psl->dim*(psl->dim+1))/2 ) {
+      for (k=1; k<=mesh->np; k++) {
+        ppt = &mesh->point[k];
+        if ( !MG_VOK(ppt) ) continue;
+
+        iadr = k*psl->size;
+        if ( psl->dim == 2 )
+          dbuf[2] = 0; // z-component for a vector field
+
+        for ( i=0; i<psl->size; ++i )
+          dbuf[i] = psl->m[iadr+i];
+
+        if ( !bin ) {
+          fprintf(inm,"%d",ppt->tmp);
+          for ( i=0; i<typ; ++i )
+            fprintf(inm," %lg",dbuf[i]);
+          fprintf(inm,"\n");
         }
         else {
-          iadr = sol->size*k;
-          for (i=0; i<sol->size; i++)  dbuf[i] = sol->m[iadr+i];
-        }
-      }
-
-      if(!bin) {
-        fprintf(inm,"%d",ppt->tmp);
-        if ( sol->dim==2 ) {
-          iadr = k*sol->size;
-          fprintf(inm," %.15lg %.15lg %.15lg %.15lg %.15lg %.15lg"
-                  " %.15lg %.15lg %.15lg \n",
-                  sol->m[iadr],sol->m[iadr+1],0.,sol->m[iadr+1],sol->m[iadr+2],0.,0.,0.,1.);
-        }
-        else {
-          fprintf(inm," %.15lg %.15lg %.15lg %.15lg %.15lg %.15lg"
-                  " %.15lg %.15lg %.15lg \n", dbuf[0],dbuf[1],dbuf[2],
-                  dbuf[1],dbuf[3],dbuf[4],dbuf[2],dbuf[4],dbuf[5]);
-        }
-      }
-      else {
-        fwrite(&ppt->tmp,sw,1,inm);
-        if ( sol->dim==2 ) {
-          iadr = k*sol->size;
-          fwrite(&sol->m[iadr],sd,2,inm);
-          dbuf[0] = dbuf[1] = dbuf[2] = 0.;
-          dbuf[3] = 1.;
-          fwrite(&dbuf,sd,1,inm);
-          fwrite(&sol->m[iadr+1],sd,2,inm);
-          fwrite(&dbuf,sd,4,inm);
-        }
-        else {
-          fwrite(&dbuf[0],sd,3,inm);
-          fwrite(&dbuf[1],sd,1,inm);
-          fwrite(&dbuf[3],sd,2,inm);
-          fwrite(&dbuf[2],sd,1,inm);
-          fwrite(&dbuf[4],sd,2,inm);
+          fwrite(&ppt->tmp,sw,1,inm);
+          fwrite(&dbuf,sd,typ,inm);
         }
       }
     }
+    else {
+      for (k=1; k<=mesh->np; k++) {
+        ppt = &mesh->point[k];
+        if ( !MG_VOK(ppt) ) continue;
+
+        if ( psl->dim == 3 ) {
+          if ( !(MG_SIN(ppt->tag) || (ppt->tag & MG_NOM) || (ppt->tag & MG_NOSURF))
+               && (ppt->tag & MG_GEO) ) {
+            if ( mesh->xp ) {
+              // Arbitrary, we take the metric associated to the surface ruled by n_1
+              iadr = psl->size*k;
+              mtmp[0] = psl->m[iadr];
+              mtmp[1] = psl->m[iadr+1];
+              mtmp[2] = psl->m[iadr+3];
+
+              // Rotation matrix.
+              r[0][0] = ppt->n[0];
+              r[1][0] = ppt->n[1];
+              r[2][0] = ppt->n[2];
+              r[0][1] = mesh->xpoint[ppt->xp].n1[1]*ppt->n[2]
+                - mesh->xpoint[ppt->xp].n1[2]*ppt->n[1];
+              r[1][1] = mesh->xpoint[ppt->xp].n1[2]*ppt->n[0]
+                - mesh->xpoint[ppt->xp].n1[0]*ppt->n[2];
+              r[2][1] = mesh->xpoint[ppt->xp].n1[0]*ppt->n[1]
+                - mesh->xpoint[ppt->xp].n1[1]*ppt->n[0];
+              r[0][2] = mesh->xpoint[ppt->xp].n1[0];
+              r[1][2] = mesh->xpoint[ppt->xp].n1[1];
+              r[2][2] = mesh->xpoint[ppt->xp].n1[2];
+
+              // Metric in the canonic space
+              dbuf[0] = mtmp[0]*r[0][0]*r[0][0] + mtmp[1]*r[0][1]*r[0][1] + mtmp[2]*r[0][2]*r[0][2];
+              dbuf[1] = mtmp[0]*r[0][0]*r[1][0] + mtmp[1]*r[0][1]*r[1][1] + mtmp[2]*r[0][2]*r[1][2];
+              dbuf[2] = mtmp[0]*r[0][0]*r[2][0] + mtmp[1]*r[0][1]*r[2][1] + mtmp[2]*r[0][2]*r[2][2];
+              dbuf[3] = mtmp[0]*r[1][0]*r[1][0] + mtmp[1]*r[1][1]*r[1][1] + mtmp[2]*r[1][2]*r[1][2];
+              dbuf[4] = mtmp[0]*r[1][0]*r[2][0] + mtmp[1]*r[1][1]*r[2][1] + mtmp[2]*r[1][2]*r[2][2];
+              dbuf[5] = mtmp[0]*r[2][0]*r[2][0] + mtmp[1]*r[2][1]*r[2][1] + mtmp[2]*r[2][2]*r[2][2];
+            }
+            else { // Cannot recover the metric
+              for (i=0; i<psl->size; i++)  dbuf[i] = 0.;
+            }
+          }
+          else {
+            iadr = psl->size*k;
+            for (i=0; i<psl->size; i++)  dbuf[i] = psl->m[iadr+i];
+          }
+        }
+
+        if(!bin) {
+          fprintf(inm,"%d",ppt->tmp);
+          if ( psl->dim==2 ) {
+            iadr = k*psl->size;
+            fprintf(inm," %.15lg %.15lg %.15lg %.15lg %.15lg %.15lg"
+                    " %.15lg %.15lg %.15lg \n",
+                    psl->m[iadr],psl->m[iadr+1],0.,psl->m[iadr+1],psl->m[iadr+2],0.,0.,0.,1.);
+          }
+          else {
+            fprintf(inm," %.15lg %.15lg %.15lg %.15lg %.15lg %.15lg"
+                    " %.15lg %.15lg %.15lg \n", dbuf[0],dbuf[1],dbuf[2],
+                    dbuf[1],dbuf[3],dbuf[4],dbuf[2],dbuf[4],dbuf[5]);
+          }
+        }
+        else {
+          fwrite(&ppt->tmp,sw,1,inm);
+          if ( psl->dim==2 ) {
+            iadr = k*psl->size;
+            fwrite(&psl->m[iadr],sd,2,inm);
+            dbuf[0] = dbuf[1] = dbuf[2] = 0.;
+            dbuf[3] = 1.;
+            fwrite(&dbuf,sd,1,inm);
+            fwrite(&psl->m[iadr+1],sd,2,inm);
+            fwrite(&dbuf,sd,4,inm);
+          }
+          else {
+            fwrite(&dbuf[0],sd,3,inm);
+            fwrite(&dbuf[1],sd,1,inm);
+            fwrite(&dbuf[3],sd,2,inm);
+            fwrite(&dbuf[2],sd,1,inm);
+            fwrite(&dbuf[4],sd,2,inm);
+          }
+        }
+      }
+    }
+    if ( bin ) fprintf(inm,"\n");
+    fprintf(inm,"$EndNodeData\n");
   }
-  if ( bin ) fprintf(inm,"\n");
-  fprintf(inm,"$EndNodeData\n");
   fclose(inm);
 
   return(1);

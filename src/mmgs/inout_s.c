@@ -1141,9 +1141,16 @@ int MMGS_saveMesh(MMG5_pMesh mesh, const char* filename) {
 }
 
 int MMGS_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
-  return(MMG5_saveMshMesh(mesh,sol,filename));
+  MMG5_pSol soltab[1];
+
+  soltab[0] = sol;
+  return(MMG5_saveMshMesh(mesh,soltab,filename));
 }
 
+int MMGS_saveMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename) {
+
+  return(MMG5_saveMshMesh(mesh,sol,filename));
+}
 
 /**
  * \param mesh pointer toward the mesh structure.

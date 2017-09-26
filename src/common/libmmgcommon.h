@@ -163,11 +163,11 @@ void MMG5_Free_structures(MMG5_pMesh mesh,MMG5_pSol sol);
 void MMG5_mmgFree_names(MMG5_pMesh mesh, MMG5_pSol met);
 /**
  * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the solution structure.
+ * \param sol pointer toward an array of solutions.
  * \param filename name of file.
  * \return 0 if failed, 1 otherwise.
  *
- * Write mesh and sol at MSH  file format (.msh extension).
+ * Write mesh and a list of solutions at MSH  file format (.msh extension).
  * Write binary file for .mshb extension.and ASCII for .msh one.
  *
  * \remark Fortran interface:
@@ -179,7 +179,7 @@ void MMG5_mmgFree_names(MMG5_pMesh mesh, MMG5_pSol met);
  * >   END SUBROUTINE\n
  *
  */
-int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
 
 /**
  * \param mesh pointer toward the mesh structure.
