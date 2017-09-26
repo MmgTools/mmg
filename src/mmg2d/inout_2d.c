@@ -739,6 +739,8 @@ int MMG2D_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
   long        posnp;
   int         iswp,ier,dim;
   int         j,k,ver,bin,np,nsols,*type;
+  char        data[10];
+  static char mmgWarn = 0;
 
   /** Read the file header */
   ier =  MMG5_loadSolHeader(filename,2,&inm,&ver,&bin,&iswp,&np,&dim,&nsols,
@@ -756,11 +758,31 @@ int MMG2D_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
 
   /** Sol tab allocation */
   mesh->nsols = nsols;
+
+  if ( nsols > 99999 ) {
+    fprintf(stderr,"\n  ## Error: %s: unexpected number of data (%d).\n",
+            __func__,nsols);
+    _MMG5_SAFE_FREE(type);
+    fclose(inm);
+    return -1;
+  }
+
   if ( *sol )  _MMG5_DEL_MEM(mesh,*sol,(mesh->nsols)*sizeof(MMG5_Sol));
   _MMG5_SAFE_CALLOC(*sol,nsols,MMG5_Sol,-1);
 
   for ( j=0; j<nsols; ++j) {
     psl = *sol+j;
+
+    /* Give an arbitrary name to the solution because the Medit format has non
+     * name field */
+    sprintf(data,"sol_%d",j);
+    if ( !MMG2D_Set_inputSolName(mesh,psl,data) ) {
+      if ( !mmgWarn ) {
+        mmgWarn = 1;
+        fprintf(stderr,"\n  ## Warning: %s: unable to set solution name for"
+                " at least 1 solution.\n",__func__);
+      }
+    }
 
     /* Allocate and store the header informations for each solution */
     if ( !MMG2D_Set_solSize(mesh,psl,MMG5_Vertex,mesh->np,type[j]) ) {
