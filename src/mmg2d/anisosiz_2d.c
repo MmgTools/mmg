@@ -33,7 +33,17 @@
  **/
 #include "mmg2d.h"
 
-/* Impose default metric (isotropic, with size hmax) at vertex i in triangle k */
+/**
+ * \param mesh pointer toward the mesh
+ * \param met pointer toward the metric
+ * \param k elt index
+ * \param i vertex index in triangle \a k
+ *
+ * \return 0 if fail, 1 if success
+ *
+ * Impose default metric (isotropic, with size hmax) at vertex i in triangle k.
+ *
+ */
 int _MMG2_defaultmet_2d(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
   MMG5_pTria       pt;
   double           *m,isqhmax;
@@ -238,8 +248,15 @@ int _MMG2_defmetbdy_2d(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
   return(1);
 }
 
-/* Definition of an anisotropic metric tensor field based on the geometry of the domain;
- this tensor field is intersected by a user-defined tensor field */
+/**
+ * \param mesh pointer toward the mesh
+ * \param met pointer toward the metric
+ *
+ * \return 0 if fail, 1 if success
+ *
+ * Definition of an anisotropic metric tensor field based on the geometry of the
+ * domain; this tensor field is intersected by a user-defined tensor field
+ */
 int _MMG2_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria     pt;
   MMG5_pPoint    ppt;
@@ -307,10 +324,23 @@ int _MMG2_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   return(1);
 }
 
-/* Perform simultaneous reduction of matrices m1 and m2, and truncate
- characteristic sizes so that the difference between two corresponding sizes is
- less than difsiz. Return ier, where (ier & 1) if metric m is altered, and (ier
- & 2) if metric n is altered */
+/**
+ * \param mesh pointer toward the mesh
+ * \param met pointer toward the metric
+ * \param m frist metric
+ * \param n second metric
+ * \param difsiz maximal size gap authorized by the gradation.
+ *
+ * \return 0 if fail or we don't need to modify the sizes. ier, where (ier & 1)
+ * if metric m is altered, and (ier & 2) if metric n is altered.
+ *
+ * Perform simultaneous reduction of matrices m1 and m2, and truncate
+ * characteristic sizes so that the difference between two corresponding sizes
+ * is less than difsiz.
+ *
+ * Ref : https://www.rocq.inria.fr/gamma/Frederic.Alauzet/cours/cea2010_V2.pdf
+ *
+ */
 int _MMG2_grad2met_ani(MMG5_pMesh mesh,MMG5_pSol met,double *m,double *n,double difsiz) {
   double       det,dd,sqDelta,trimn,vnorm,hm,hn,lambda[2],dm[2],dn[2],imn[4];
   double       vp[2][2],ip[4];
