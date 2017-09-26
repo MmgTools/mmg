@@ -499,7 +499,15 @@ int _MMG2_grad2met_ani(MMG5_pMesh mesh,MMG5_pSol met,double *m,double *n,double 
 
 }
 
-/* Anisotropic mesh gradation routine */
+/**
+ * \param mesh pointer toward the mesh
+ * \param met pointer toward the metric
+ *
+ * \return 0 if fail, 1 otherwise
+ *
+ * Anisotropic mesh gradation routine
+ *
+ */
 int _MMG2_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria        pt;
   MMG5_pPoint       p1,p2;
@@ -534,7 +542,8 @@ int _MMG2_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
         p2 = &mesh->point[ip2];
         if ( p1->flag < mesh->base-1 && p2->flag < mesh->base-1 )  continue;
 
-        ll = (p2->c[0]-p1->c[0])*(p2->c[0]-p1->c[0]) + (p2->c[1]-p1->c[1])*(p2->c[1]-p1->c[1]);
+        ll = (p2->c[0]-p1->c[0])*(p2->c[0]-p1->c[0])
+          + (p2->c[1]-p1->c[1])*(p2->c[1]-p1->c[1]);
         ll = sqrt(ll);
 
         /* Maximum allowed difference between the prescribed sizes in p1 and p2 */
@@ -543,7 +552,8 @@ int _MMG2_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
         m1 = &met->m[3*ip1];
         m2 = &met->m[3*ip2];
 
-        /* bit 0 of ier = 0 if metric m1 is untouched, 1 otherwise ;  bit 1 of ier = 0 if metric m2 is untouched, 1 otherwise*/
+        /* bit 0 of ier = 0 if metric m1 is untouched, 1 otherwise; bit 1 of
+         * ier = 0 if metric m2 is untouched, 1 otherwise*/
         ier = _MMG2_grad2met_ani(mesh,met,m1,m2,difsiz);
 
         if ( ier & 1 ) {
