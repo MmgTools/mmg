@@ -363,46 +363,9 @@ int _MMG2_grad2met_ani(MMG5_pMesh mesh,MMG5_pSol met,double *m,double *n,double 
       vp[1][1] = 1;
     }
     /* Subcase where m is not diagonal; dd,trimn,... are reused */
-    else {
-      dd    = m[0] - m[2];
-      trimn = m[0] + m[2];
-      
-      sqDelta = sqrt(fabs(dd*dd +4*0*m[1]*m[1]));
-      
+    else
+      _MMG5_eigensym(m,dm,vp);
 
-      dm[0]   = 0.5 * (trimn + sqDelta);
-      dm[1]   = 0.5 * (trimn - sqDelta);
-      
-      vp[0][0] = m[1];
-      vp[0][1] = (dm[0]-m[0]);
-      vnorm  = sqrt(vp[0][0]*vp[0][0] + vp[0][1]*vp[0][1]);
-      if ( vnorm < _MMG5_EPS ) {
-        vp[0][0] = (dm[0] - m[2]);
-        vp[0][1] = m[1];
-        vnorm  = sqrt(vp[0][0]*vp[0][0] + vp[0][1]*vp[0][1]);
-        if ( vnorm < _MMG5_EPS ) return(0);
-      }
-      
-      vnorm   = 1.0 / vnorm;
-      vp[0][0] *= vnorm;
-      vp[0][1] *= vnorm;
-      
-      vp[1][0] = m[1];
-      vp[1][1] = (dm[1]-m[0]);
-      vnorm  = sqrt(vp[1][0]*vp[1][0] + vp[1][1]*vp[1][1]);
-      
-      if ( vnorm < _MMG5_EPS ) {
-        vp[1][0] = (dm[1] - m[2]);
-        vp[1][1] = m[1];
-        vnorm  = sqrt(vp[1][0]*vp[1][0] + vp[1][1]*vp[1][1]);
-        if ( vnorm < _MMG5_EPS ) return(0);
-      }
-
-      vnorm   = 1.0 / vnorm;
-      vp[1][0] *= vnorm;
-      vp[1][1] *= vnorm;
-    }
-    
     /* Eigenvalues of metric n */
     dn[0] = lambda[0]*dm[0];
     dn[1] = lambda[0]*dm[1];

@@ -36,7 +36,7 @@ void MMG2D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( met->size == 3 ) {
     MMG2D_lencurv  = _MMG2_lencurv_ani;
     MMG2D_defsiz   = _MMG2_defsiz_ani;
-    MMG2D_gradsiz  = _MMG2_gradsiz_ani;
+    MMG2D_gradsiz  = lissmet_ani;
     MMG2D_caltri   = _MMG2_caltri_ani;
     MMG2D_intmet   = _MMG2_intmet_ani;
     //    MMG2_optlen    = optlen_ani;
