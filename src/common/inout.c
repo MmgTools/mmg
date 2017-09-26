@@ -1376,8 +1376,65 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol sol,FILE **inm,
   return(1);
 }
 
+/**
+ * \param mesh pointer toward the mesh structure
+ * \param sol pointer toward the sol structure.
+ * \param index of point in which we want to build the metric
+ * \param dbuf builded metric
+ *
+ * Build the metric at point \a ip depending with its type (ridge/not ridge).
+ *
+ */
+static inline
+void  MMG5_build3DMetric(MMG5_pMesh mesh,MMG5_pSol sol,int ip,
+                         double dbuf[6]) {
+  MMG5_pPoint ppt;
+  double      mtmp[3],r[3][3];
+  int         i;
 
-int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename) {
+  ppt = &mesh->point[ip];
+  if ( !(MG_SIN(ppt->tag) || (ppt->tag & MG_NOM) || (ppt->tag & MG_NOSURF))
+       && (ppt->tag & MG_GEO) ) {
+    if ( mesh->xp ) {
+      // Arbitrary, we take the metric associated to the surface ruled by n_1
+      mtmp[0] = sol->m[sol->size*(ip)];
+      mtmp[1] = sol->m[sol->size*(ip)+1];
+      mtmp[2] = sol->m[sol->size*(ip)+3];
+
+      // Rotation matrix.
+      r[0][0] = ppt->n[0];
+      r[1][0] = ppt->n[1];
+      r[2][0] = ppt->n[2];
+      r[0][1] = mesh->xpoint[ppt->xp].n1[1]*ppt->n[2]
+        - mesh->xpoint[ppt->xp].n1[2]*ppt->n[1];
+      r[1][1] = mesh->xpoint[ppt->xp].n1[2]*ppt->n[0]
+        - mesh->xpoint[ppt->xp].n1[0]*ppt->n[2];
+      r[2][1] = mesh->xpoint[ppt->xp].n1[0]*ppt->n[1]
+        - mesh->xpoint[ppt->xp].n1[1]*ppt->n[0];
+      r[0][2] = mesh->xpoint[ppt->xp].n1[0];
+      r[1][2] = mesh->xpoint[ppt->xp].n1[1];
+      r[2][2] = mesh->xpoint[ppt->xp].n1[2];
+
+      // Metric in the canonic space
+      dbuf[0] = mtmp[0]*r[0][0]*r[0][0] + mtmp[1]*r[0][1]*r[0][1] + mtmp[2]*r[0][2]*r[0][2];
+      dbuf[1] = mtmp[0]*r[0][0]*r[1][0] + mtmp[1]*r[0][1]*r[1][1] + mtmp[2]*r[0][2]*r[1][2];
+      dbuf[2] = mtmp[0]*r[0][0]*r[2][0] + mtmp[1]*r[0][1]*r[2][1] + mtmp[2]*r[0][2]*r[2][2];
+      dbuf[3] = mtmp[0]*r[1][0]*r[1][0] + mtmp[1]*r[1][1]*r[1][1] + mtmp[2]*r[1][2]*r[1][2];
+      dbuf[4] = mtmp[0]*r[1][0]*r[2][0] + mtmp[1]*r[1][1]*r[2][1] + mtmp[2]*r[1][2]*r[2][2];
+      dbuf[5] = mtmp[0]*r[2][0]*r[2][0] + mtmp[1]*r[2][1]*r[2][1] + mtmp[2]*r[2][2]*r[2][2];
+    }
+    else { // Cannot recover the metric
+      for (i=0; i<sol->size; i++)  dbuf[i] = 0.;
+    }
+  }
+  else {
+    for (i=0; i<sol->size; i++)  dbuf[i] = sol->m[sol->size*ip+i];
+  }
+}
+
+
+int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename,
+                     int metricFile) {
   FILE*       inm;
   MMG5_pPoint ppt;
   MMG5_pTetra pt;
@@ -1386,7 +1443,7 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename) {
   MMG5_pQuad  pq;
   MMG5_pEdge  pa;
   MMG5_pSol   psl;
-  double      dbuf[6],mtmp[3],r[3][3];
+  double      dbuf[6];
   int         bin,k,i,typ,nelts,word, header[3],iadr;
   int         nq,ne,npr,np,nt,na,isol;
   char        *ptr,*data;
@@ -1765,44 +1822,12 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename) {
         if ( !MG_VOK(ppt) ) continue;
 
         if ( psl->dim == 3 ) {
-          if ( !(MG_SIN(ppt->tag) || (ppt->tag & MG_NOM) || (ppt->tag & MG_NOSURF))
-               && (ppt->tag & MG_GEO) ) {
-            if ( mesh->xp ) {
-              // Arbitrary, we take the metric associated to the surface ruled by n_1
-              iadr = psl->size*k;
-              mtmp[0] = psl->m[iadr];
-              mtmp[1] = psl->m[iadr+1];
-              mtmp[2] = psl->m[iadr+3];
-
-              // Rotation matrix.
-              r[0][0] = ppt->n[0];
-              r[1][0] = ppt->n[1];
-              r[2][0] = ppt->n[2];
-              r[0][1] = mesh->xpoint[ppt->xp].n1[1]*ppt->n[2]
-                - mesh->xpoint[ppt->xp].n1[2]*ppt->n[1];
-              r[1][1] = mesh->xpoint[ppt->xp].n1[2]*ppt->n[0]
-                - mesh->xpoint[ppt->xp].n1[0]*ppt->n[2];
-              r[2][1] = mesh->xpoint[ppt->xp].n1[0]*ppt->n[1]
-                - mesh->xpoint[ppt->xp].n1[1]*ppt->n[0];
-              r[0][2] = mesh->xpoint[ppt->xp].n1[0];
-              r[1][2] = mesh->xpoint[ppt->xp].n1[1];
-              r[2][2] = mesh->xpoint[ppt->xp].n1[2];
-
-              // Metric in the canonic space
-              dbuf[0] = mtmp[0]*r[0][0]*r[0][0] + mtmp[1]*r[0][1]*r[0][1] + mtmp[2]*r[0][2]*r[0][2];
-              dbuf[1] = mtmp[0]*r[0][0]*r[1][0] + mtmp[1]*r[0][1]*r[1][1] + mtmp[2]*r[0][2]*r[1][2];
-              dbuf[2] = mtmp[0]*r[0][0]*r[2][0] + mtmp[1]*r[0][1]*r[2][1] + mtmp[2]*r[0][2]*r[2][2];
-              dbuf[3] = mtmp[0]*r[1][0]*r[1][0] + mtmp[1]*r[1][1]*r[1][1] + mtmp[2]*r[1][2]*r[1][2];
-              dbuf[4] = mtmp[0]*r[1][0]*r[2][0] + mtmp[1]*r[1][1]*r[2][1] + mtmp[2]*r[1][2]*r[2][2];
-              dbuf[5] = mtmp[0]*r[2][0]*r[2][0] + mtmp[1]*r[2][1]*r[2][1] + mtmp[2]*r[2][2]*r[2][2];
-            }
-            else { // Cannot recover the metric
-              for (i=0; i<psl->size; i++)  dbuf[i] = 0.;
-            }
+          if ( metricFile ) {
+            assert(mesh->nsols==1);
+            MMG5_build3DMetric(mesh,psl,k,dbuf);
           }
           else {
-            iadr = psl->size*k;
-            for (i=0; i<psl->size; i++)  dbuf[i] = psl->m[iadr+i];
+            for (i=0; i<psl->size; i++)  dbuf[i] = psl->m[psl->size*k+i];
           }
         }
 
@@ -2098,7 +2123,7 @@ void MMG5_readDoubleSol3D(MMG5_pSol sol,FILE *inm,int bin,int iswp,int pos) {
 void MMG5_writeDoubleSol3D(MMG5_pMesh mesh,MMG5_pSol sol,FILE *inm,int bin,
                            int pos) {
   MMG5_pPoint ppt;
-  double      dbuf[6],mtmp[3],r[3][3],tmp;
+  double      dbuf[6],tmp;
   int         i;
 
   switch ( sol->size ) {
@@ -2118,44 +2143,8 @@ void MMG5_writeDoubleSol3D(MMG5_pMesh mesh,MMG5_pSol sol,FILE *inm,int bin,
 
   case 6 :
     /* tensor solution */
-    ppt = &mesh->point[pos];
-    if ( !(MG_SIN(ppt->tag) || (ppt->tag & MG_NOM) || (ppt->tag & MG_NOSURF))
-         && (ppt->tag & MG_GEO) ) {
-      if ( mesh->xp ) {
-        // Arbitrary, we take the metric associated to the surface ruled by n_1
-        mtmp[0] = sol->m[sol->size*(pos)];
-        mtmp[1] = sol->m[sol->size*(pos)+1];
-        mtmp[2] = sol->m[sol->size*(pos)+3];
+    MMG5_build3DMetric(mesh,sol,pos,dbuf);
 
-        // Rotation matrix.
-        r[0][0] = ppt->n[0];
-        r[1][0] = ppt->n[1];
-        r[2][0] = ppt->n[2];
-        r[0][1] = mesh->xpoint[ppt->xp].n1[1]*ppt->n[2]
-          - mesh->xpoint[ppt->xp].n1[2]*ppt->n[1];
-        r[1][1] = mesh->xpoint[ppt->xp].n1[2]*ppt->n[0]
-          - mesh->xpoint[ppt->xp].n1[0]*ppt->n[2];
-        r[2][1] = mesh->xpoint[ppt->xp].n1[0]*ppt->n[1]
-          - mesh->xpoint[ppt->xp].n1[1]*ppt->n[0];
-        r[0][2] = mesh->xpoint[ppt->xp].n1[0];
-        r[1][2] = mesh->xpoint[ppt->xp].n1[1];
-        r[2][2] = mesh->xpoint[ppt->xp].n1[2];
-
-        // Metric in the canonic space
-        dbuf[0] = mtmp[0]*r[0][0]*r[0][0] + mtmp[1]*r[0][1]*r[0][1] + mtmp[2]*r[0][2]*r[0][2];
-        dbuf[1] = mtmp[0]*r[0][0]*r[1][0] + mtmp[1]*r[0][1]*r[1][1] + mtmp[2]*r[0][2]*r[1][2];
-        dbuf[2] = mtmp[0]*r[0][0]*r[2][0] + mtmp[1]*r[0][1]*r[2][1] + mtmp[2]*r[0][2]*r[2][2];
-        dbuf[3] = mtmp[0]*r[1][0]*r[1][0] + mtmp[1]*r[1][1]*r[1][1] + mtmp[2]*r[1][2]*r[1][2];
-        dbuf[4] = mtmp[0]*r[1][0]*r[2][0] + mtmp[1]*r[1][1]*r[2][1] + mtmp[2]*r[1][2]*r[2][2];
-        dbuf[5] = mtmp[0]*r[2][0]*r[2][0] + mtmp[1]*r[2][1]*r[2][1] + mtmp[2]*r[2][2]*r[2][2];
-      }
-      else { // Cannot recover the metric
-        for (i=0; i<sol->size; i++)  dbuf[i] = 0.;
-      }
-    }
-    else {
-      for (i=0; i<sol->size; i++)  dbuf[i] = sol->m[sol->size*pos+i];
-    }
     tmp = dbuf[2];
     dbuf[2] = dbuf[3];
     dbuf[3] = tmp;

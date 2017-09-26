@@ -165,21 +165,22 @@ void MMG5_mmgFree_names(MMG5_pMesh mesh, MMG5_pSol met);
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward an array of solutions.
  * \param filename name of file.
+ * \param metricData 1 if the data saved is a metric (if only 1 data)
  * \return 0 if failed, 1 otherwise.
  *
  * Write mesh and a list of solutions at MSH  file format (.msh extension).
  * Write binary file for .mshb extension.and ASCII for .msh one.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG5_SAVEMSHMESH(mesh,sol,filename,strlen,retval)\n
+ * >   SUBROUTINE MMG5_SAVEMSHMESH(mesh,sol,filename,strlen,metricData,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
- * >     INTEGER, INTENT(IN)            :: strlen\n
+ * >     INTEGER, INTENT(IN)            :: strlen,metricData\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
  */
-int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
+int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename,const int metricData);
 
 /**
  * \param mesh pointer toward the mesh structure.
