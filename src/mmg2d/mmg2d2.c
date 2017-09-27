@@ -230,7 +230,7 @@ int MMG2_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
         }
       }
     }
-	  if(mesh->info.imprim > 5) fprintf(stdout,"%d vertex inserted\n",ns);
+	  if(mesh->info.imprim > 5) fprintf(stdout,"     %8d vertex inserted\n",ns);
   } while (ns && ++iter<maxiter);
 
 	if(abs(nus-ns)) {
