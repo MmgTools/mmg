@@ -159,6 +159,8 @@ int* _MMG2_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
   /* Step 4: creation of the mesh for elasticity */
   if ( !LS_mesh(lsst,npf,nef,ilist,0) ) {
     fprintf(stdout,"  ## Problem in function LS_mesh. Exiting.\n");
+    free(perm);
+    free(list);
     return(0);
   }
   
@@ -179,6 +181,8 @@ int* _MMG2_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
     
     if ( !LS_addVer(lsst,ip,p0->c,p0->ref) ) {
       fprintf(stdout,"  ## Problem in fn LS_addVer. Exiting.\n");
+      free(perm);
+      free(list);
       return(0);
     }
   }
@@ -193,6 +197,8 @@ int* _MMG2_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
     
     if (!LS_addTri(lsst,k,vper,0) ) {
       fprintf(stdout,"  ## Problem in fn LS_addTet. Exiting.\n");
+      free(perm);
+      free(list);
       return(0);
     }
   }
@@ -218,6 +224,8 @@ int* _MMG2_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
         
         if ( !LS_addEdg(lsst,nef,vper,refdirnh) ) {
           fprintf(stdout,"  ## Problem in fn LS_addEdg. Exiting.\n");
+          free(perm);
+          free(list);
           return(0);
         }
       }
@@ -229,6 +237,8 @@ int* _MMG2_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
         
         if ( !LS_addEdg(lsst,nef,vper,refdirh) ) {
           fprintf(stdout,"  ## Problem in fn LS_addEdg. Exiting.\n");
+          free(perm);
+          free(list);
           return(0);
         }
       }
@@ -241,27 +251,37 @@ int* _MMG2_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
   /* Add boundary conditions */
   /*if ( !LS_setBC(lsst,Dirichlet,refdirnh,'v',LS_edg,v) ) {
     fprintf(stdout,"  ## Problem in fn LS_set BC. Exiting.\n");
+    free(perm);
+    free(list);
     return(0);
     }*/
   if ( !LS_setBC(lsst,Dirichlet,refdirnh,'f',LS_edg,NULL) ) {
     fprintf(stdout,"  ## Problem in fn LS_set BC. Exiting.\n");
+    free(perm);
+    free(list);
     return(0);
   }
   
   if ( !LS_setBC(lsst,Dirichlet,refdirh,'v',LS_edg,u) ) {
     fprintf(stdout,"  ## Problem in fn LS_set BC. Exiting.\n");
+    free(perm);
+    free(list);
     return(0);
   }
   
   /* Add materials */
   if ( !LS_setLame(lsst,0,_LS_LAMBDA,_LS_MU) ) {
     fprintf(stdout,"  ## Problem in fn LS_setLame. Exiting.\n");
+    free(perm);
+    free(list);
     return(0);
   }
   
   /* Transfer displacement */
   if ( !LS_newSol(lsst) ) {
     fprintf(stdout,"  ## Problem in fn LS_CreaSol. Exiting.\n");
+    free(perm);
+    free(list);
     return(0);
   }
   
@@ -275,6 +295,7 @@ int* _MMG2_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
   }
   
   *npfin = npf;
+  free(perm);
   free(list);
   return(invperm);
 }
