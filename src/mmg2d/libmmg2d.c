@@ -267,9 +267,6 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
   }
 
   /* Create adjacency relations in the mesh */
- if ( abs(mesh->info.imprim) > 4 )
-    fprintf(stdout,"  ** SETTING ADJACENCIES\n");
-
   if ( !MMG2_hashTria(mesh) )
     _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
 
@@ -283,6 +280,12 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
     }
   }
 
+  /* Mesh analysis */
+  if (! _MMG2_analys(mesh) ) {
+    if ( !MMG2_unscaleMesh(mesh,sol) ) _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+    _LIBMMG5_RETURN(mesh,sol,MMG5_LOWFAILURE);
+  }
+
   chrono(OFF,&(ctim[2]));
   printim(ctim[2].gdif,stim);
   if ( mesh->info.imprim )
@@ -292,23 +295,12 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
   chrono(ON,&ctim[3]);
 
   if ( mesh->info.imprim )
-    fprintf(stdout,"\n  -- PHASE 2 : MESH ADAPTATION\n");
-
-  /* Mesh analysis */
-  if (! _MMG2_analys(mesh) ) {
-    if ( !MMG2_unscaleMesh(mesh,sol) ) _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
-    _LIBMMG5_RETURN(mesh,sol,MMG5_LOWFAILURE);
-  }
-
+    fprintf(stdout,"\n  -- PHASE 2 : %s MESHING\n",sol->size < 3 ? "ISOTROPIC" : "ANISOTROPIC");
 
   /* Mesh improvement */
   if ( !MMG2_mmg2d1n(mesh,sol) ) {
     if ( !MMG2_unscaleMesh(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
     _MMG2D_RETURN_AND_PACK(mesh,sol,MMG5_LOWFAILURE);
-  }
-
-  if ( mesh->info.imprim ) {
-    fprintf(stdout,"  -- PHASE 3 COMPLETED.     %s\n",stim);
   }
 
   chrono(OFF,&(ctim[3]));
@@ -491,19 +483,11 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol) {
     _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
   }
 
-  if ( mesh->info.imprim )   fprintf(stdout,"\n  -- PHASE 1 : DATA ANALYSIS\n");
+  if ( mesh->info.imprim )   fprintf(stdout,"\n  -- PHASE 1 : MESH GENERATION\n");
 
   if ( !MMG2_scaleMesh(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
 
   if ( mesh->info.ddebug && !_MMG5_chkmsh(mesh,1,0) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
-
-  chrono(OFF,&(ctim[2]));
-  printim(ctim[2].gdif,stim);
-  if ( mesh->info.imprim )
-    fprintf(stdout,"  -- PHASE 1 COMPLETED.     %s\n",stim);
-
-  /* Specific meshing */
-  chrono(ON,&ctim[3]);
 
   /* Memory alloc */
   _MMG5_ADD_MEM(mesh,(3*mesh->ntmax+5)*sizeof(int),"adjacency table",
@@ -511,24 +495,22 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol) {
                 return(MMG5_STRONGFAILURE));
   _MMG5_SAFE_CALLOC(mesh->adja,3*mesh->ntmax+5,int,MMG5_STRONGFAILURE);
 
-  /* Delaunay triangulation of the set of points contained in the mesh, enforcing the edges of the mesh */
-  if ( mesh->info.imprim )
-    fprintf(stdout,"\n  -- PHASE 2 : MESH GENERATION\n");
-
+  /* Delaunay triangulation of the set of points contained in the mesh,
+   * enforcing the edges of the mesh */
   if ( !MMG2_mmg2d2(mesh,sol) )  {
     if ( !MMG2_unscaleMesh(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
     _MMG2D_RETURN_AND_PACK(mesh,sol,MMG5_LOWFAILURE);
   }
 
-  chrono(OFF,&(ctim[3]));
-  printim(ctim[3].gdif,stim);
+  chrono(OFF,&(ctim[2]));
+  printim(ctim[2].gdif,stim);
   if ( mesh->info.imprim )
-    fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
+    fprintf(stdout,"  -- PHASE 1 COMPLETED.     %s\n",stim);
 
   /* remeshing */
-  chrono(ON,&ctim[4]);
+  chrono(ON,&ctim[3]);
   if ( mesh->info.imprim ) {
-    fprintf(stdout,"\n  -- PHASE 3 : MESH IMPROVEMENT\n");
+    fprintf(stdout,"\n  -- PHASE 2 : ANALYSIS\n");
   }
 
   /* specific meshing */
@@ -560,13 +542,21 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol) {
     _MMG2D_RETURN_AND_PACK(mesh,sol,MMG5_LOWFAILURE);
   }
 
+  chrono(OFF,&(ctim[3]));
+  printim(ctim[3].gdif,stim);
+  if ( mesh->info.imprim )
+    fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
+
   /* Mesh improvement - call new version of mmg2d1 */
+  chrono(ON,&(ctim[4]));
+  fprintf(stdout,"\n  -- PHASE 3 : MESH IMPROVEMENT\n");
+
   if ( !MMG2_mmg2d1n(mesh,sol) ) {
     _MMG2D_RETURN_AND_PACK(mesh,sol,MMG5_LOWFAILURE);
   }
 
   chrono(OFF,&(ctim[4]));
-  printim(ctim[5].gdif,stim);
+  printim(ctim[4].gdif,stim);
   if ( mesh->info.imprim ) {
     fprintf(stdout,"  -- PHASE 3 COMPLETED.     %s\n",stim);
     fprintf(stdout,"\n  %s\n   END OF MODULE MMG2D: IMB-LJLL \n  %s\n",MG_STR,MG_STR);
@@ -669,26 +659,24 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol)
   if ( mesh->info.imprim )
     fprintf(stdout,"  --  INPUT DATA COMPLETED.     %s\n",stim);
 
+  chrono(ON,&ctim[2]);
 
   /* Set pointers */
   MMG2D_setfunc(mesh,sol);
   _MMG2D_Set_commonFunc();
 
-  fprintf(stdout,"\n  %s\n   MODULE MMG2D-IMB/LJLL : %s (%s) %s\n  %s\n",
-          MG_STR,MG_VER,MG_REL,sol->size == 1 ? "ISO" : "ANISO",MG_STR);
+  if ( mesh->info.imprim ) {
+    fprintf(stdout,"\n  %s\n   MODULE MMG2D: IMB-LJLL : %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
+    fprintf(stdout,"\n  -- PHASE 1 : ISOSURFACE DISCRETIZATION\n");
+  }
+
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {
     fprintf(stdout,"  MAXIMUM NUMBER OF POINTS    (NPMAX) : %8d\n",mesh->npmax);
     fprintf(stdout,"  MAXIMUM NUMBER OF TRIANGLES (NTMAX) : %8d\n",mesh->ntmax);
   }
 
-  /* analysis */
-  chrono(ON,&ctim[2]);
-  if ( mesh->info.imprim )   fprintf(stdout,"\n  -- PHASE 1 : DATA ANALYSIS\n");
-
   if ( !MMG2_scaleMesh(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
 
-  if ( abs(mesh->info.imprim) > 4 )
-    fprintf(stdout,"  ** SETTING ADJACENCIES\n");
   if ( mesh->nt && !MMG2_hashTria(mesh) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
 
   if ( mesh->info.ddebug && !_MMG5_chkmsh(mesh,1,0) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
@@ -701,19 +689,19 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol)
     }
   }
 
+  /* Discretization of the mesh->info.ls isovalue of sol in the mesh */
+  if (! MMG2_mmg2d6(mesh,sol) )
+    _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+
   chrono(OFF,&(ctim[2]));
   printim(ctim[2].gdif,stim);
   if ( mesh->info.imprim )
     fprintf(stdout,"  -- PHASE 1 COMPLETED.     %s\n",stim);
 
-  chrono(ON,&ctim[3]);
+  chrono(ON,&(ctim[3]));
   if ( mesh->info.imprim ) {
-    fprintf(stdout,"\n  -- PHASE 2 : LEVEL-SET DISCRETIZATION\n");
+    fprintf(stdout,"\n  -- PHASE 2 : ANALYSIS\n");
   }
-
-  /* Discretization of the mesh->info.ls isovalue of sol in the mesh */
-  if (! MMG2_mmg2d6(mesh,sol) )
-    _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
 
   /* Mesh analysis */
   if (! _MMG2_analys(mesh) ) {
@@ -835,18 +823,20 @@ int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   MMG2D_setfunc(mesh,met);
   _MMG2D_Set_commonFunc();
 
-  fprintf(stdout,"\n  %s\n   MODULE MMG2D-IMB/LJLL : %s (%s) %s\n  %s\n",
-          MG_STR,MG_VER,MG_REL,met->size == 1 ? "ISO" : "ANISO",MG_STR);
+  chrono(ON,&ctim[2]);
+
+  if ( mesh->info.imprim ) {
+    fprintf(stdout,"\n  %s\n   MODULE MMGS: IMB-LJLL : %s (%s)\n  %s\n",
+            MG_STR,MG_VER,MG_REL,MG_STR);
+    fprintf(stdout,"\n  -- PHASE 1 : ANALYSIS\n");
+  }
+
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {
     fprintf(stdout,"  MAXIMUM NUMBER OF POINTS    (NPMAX) : %8d\n",mesh->npmax);
     fprintf(stdout,"  MAXIMUM NUMBER OF TRIANGLES (NTMAX) : %8d\n",mesh->ntmax);
   }
 
   /* Analysis */
-  chrono(ON,&ctim[2]);
-  if ( mesh->info.imprim )   fprintf(stdout,"\n  -- PHASE 1 : DATA ANALYSIS\n");
-  if ( abs(mesh->info.imprim) > 4 )
-    fprintf(stdout,"  ** SETTING ADJACENCIES\n");
   if ( !MMG2_scaleMesh(mesh,disp) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
 
   if ( mesh->nt && !MMG2_hashTria(mesh) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);

@@ -311,7 +311,7 @@ int MMGS_mmgsls(MMG5_pMesh mesh,MMG5_pSol met)
 
   if ( mesh->info.imprim ) {
     fprintf(stdout,"\n  %s\n   MODULE MMGSLS: IMB-LJLL : %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
-    fprintf(stdout,"\n  -- PHASE 1 : ANALYSIS\n");
+    fprintf(stdout,"\n  -- PHASE 1 : ISOSURFACE DISCRETIZATION\n");
   }
 
   if ( !_MMG5_scaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
@@ -332,6 +332,16 @@ int MMGS_mmgsls(MMG5_pMesh mesh,MMG5_pSol met)
   }
   if ( !_MMGS_mmgs2(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
 
+  chrono(OFF,&(ctim[2]));
+  printim(ctim[2].gdif,stim);
+  if ( mesh->info.imprim )
+    fprintf(stdout,"  -- PHASE 1 COMPLETED.     %s\n",stim);
+
+  chrono(ON,&(ctim[3]));
+  if ( mesh->info.imprim ) {
+    fprintf(stdout,"\n  -- PHASE 2 : ANALYSIS\n");
+  }
+
   /* mesh analysis */
   if ( !_MMGS_analys(mesh) ) {
     if ( !_MMG5_unscaleMesh(mesh,met) )
@@ -339,15 +349,15 @@ int MMGS_mmgsls(MMG5_pMesh mesh,MMG5_pSol met)
     _MMGS_RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
   }
 
-  chrono(OFF,&(ctim[2]));
-  printim(ctim[2].gdif,stim);
+  chrono(OFF,&(ctim[3]));
+  printim(ctim[3].gdif,stim);
   if ( mesh->info.imprim )
-    fprintf(stdout,"  -- PHASE 1 COMPLETED.     %s\n",stim);
+    fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
 
   /* mesh adaptation */
-  chrono(ON,&(ctim[3]));
+  chrono(ON,&(ctim[4]));
   if ( mesh->info.imprim ) {
-      fprintf(stdout,"\n  -- PHASE 2 : ISOTROPIC MESHING\n");
+    fprintf(stdout,"\n  -- PHASE 3 : MESH IMPROVEMENT\n");
   }
 
   if ( !_MMG5_mmgs1(mesh,met) ) {
@@ -359,10 +369,10 @@ int MMGS_mmgsls(MMG5_pMesh mesh,MMG5_pSol met)
     _MMGS_RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
   }
 
-  chrono(OFF,&(ctim[3]));
-  printim(ctim[3].gdif,stim);
+  chrono(OFF,&(ctim[4]));
+  printim(ctim[4].gdif,stim);
   if ( mesh->info.imprim ) {
-    fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
+    fprintf(stdout,"  -- PHASE 3 COMPLETED.     %s\n",stim);
     fprintf(stdout,"\n  %s\n   END OF MODULE MMGSLS: IMB-LJLL \n  %s\n",MG_STR,MG_STR);
   }
 

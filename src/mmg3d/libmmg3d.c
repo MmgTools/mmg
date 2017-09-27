@@ -785,12 +785,11 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( mesh->info.imprim )
     fprintf(stdout,"  --  INPUT DATA COMPLETED.     %s\n",stim);
 
-  /* analysis */
   chrono(ON,&(ctim[2]));
 
   if ( mesh->info.imprim ) {
     fprintf(stdout,"\n  %s\n   MODULE MMG3D: IMB-LJLL : %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
-    fprintf(stdout,"\n  -- PHASE 1 : ANALYSIS\n");
+    fprintf(stdout,"\n  -- PHASE 1 : ISOSURFACE DISCRETIZATION\n");
   }
 
   /* scaling mesh */
@@ -814,22 +813,31 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol met) {
   }
   if ( !_MMG3D_mmg3d2(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
 
+  chrono(OFF,&(ctim[2]));
+  printim(ctim[2].gdif,stim);
+  if ( mesh->info.imprim )
+    fprintf(stdout,"  -- PHASE 1 COMPLETED.     %s\n",stim);
+
+  chrono(ON,&(ctim[3]));
+  if ( mesh->info.imprim ) {
+    fprintf(stdout,"\n  -- PHASE 2 : ANALYSIS\n");
+  }
+
   /* mesh analysis */
   if ( !_MMG3D_analys(mesh) ) {
     if ( !_MMG5_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
     _MMG5_RETURN_AND_PACK(mesh,met,NULL,MMG5_LOWFAILURE);
   }
 
-
-  chrono(OFF,&(ctim[2]));
-  printim(ctim[2].gdif,stim);
+  chrono(OFF,&(ctim[3]));
+  printim(ctim[3].gdif,stim);
   if ( mesh->info.imprim )
-    fprintf(stdout,"  -- PHASE 1 COMPLETED.     %s\n",stim);
+    fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
 
   /* mesh adaptation */
-  chrono(ON,&(ctim[3]));
+  chrono(ON,&(ctim[4]));
   if ( mesh->info.imprim ) {
-    fprintf(stdout,"\n  -- PHASE 2 : ISOTROPIC MESHING\n");
+    fprintf(stdout,"\n  -- PHASE 3 : MESH IMPROVEMENT\n");
   }
 
   /* renumerotation if available */
@@ -859,10 +867,10 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 #endif
 
-  chrono(OFF,&(ctim[3]));
-  printim(ctim[3].gdif,stim);
+  chrono(OFF,&(ctim[4]));
+  printim(ctim[4].gdif,stim);
   if ( mesh->info.imprim ) {
-    fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
+    fprintf(stdout,"  -- PHASE 3 COMPLETED.     %s\n",stim);
     fprintf(stdout,"\n  %s\n   END OF MODULE MMG3d: IMB-LJLL \n  %s\n",MG_STR,MG_STR);
   }
 
