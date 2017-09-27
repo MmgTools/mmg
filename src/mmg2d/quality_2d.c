@@ -164,7 +164,7 @@ int MMG2_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
     pt = &mesh->tria[k];
     if( !MG_EOK(pt) )   continue;
 
-    if ( !met->np ) {
+    if ( !met->m ) {
       pt->qual = _MMG2_caltri_iso(mesh,met,pt);
     }
     else
@@ -192,7 +192,7 @@ int MMG2_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
       fprintf(stderr,"  ## Warning: %s: at least 1 negative area\n",__func__);
     }
 
-    if ( !met->np ) {
+    if ( !met->m ) {
       rap = _MMG2D_ALPHAD * _MMG2_caltri_iso(mesh,met,pt);
     }
     else

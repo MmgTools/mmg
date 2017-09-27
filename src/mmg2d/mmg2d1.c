@@ -780,7 +780,7 @@ int _MMG2_movtri(MMG5_pMesh mesh,MMG5_pSol met,int maxit,char improve) {
           if ( ier ) ns++;
         }
         else {
-          if ( met->size == 3 )
+          if ( met->size == 3 && met->m )
             ier = _MMG2_movintpt_ani(mesh,met,ilist,list,improve);
           else
             ier = _MMG2_movintpt(mesh,met,ilist,list,improve);
