@@ -45,7 +45,7 @@ int MMGS_Init_mesh(const int starter,...) {
 
   va_start(argptr, starter);
 
-  ier = _MMGS_Init_mesh_var(argptr) );
+  ier = _MMGS_Init_mesh_var(argptr);
 
   va_end(argptr);
 
