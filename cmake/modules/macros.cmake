@@ -43,7 +43,10 @@ MACRO ( COPY_FORTRAN_HEADER
     OUTPUT  ${out_dir}/${out_file}
     COMMAND ${CMAKE_COMMAND} -E copy  ${in_dir}/${in_file} ${out_dir}/${out_file}
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    DEPENDS ${file_dependencies} )
+    DEPENDS ${file_dependencies} ${in_dir}/${in_file}
+    COMMENT "Copying ${in_dir}/${in_file} in ${out_dir}/${out_file}"
+    )
+
   ADD_CUSTOM_TARGET ( ${target_name} ALL
     DEPENDS ${out_dir}/${out_file} )
   ADD_DEPENDENCIES ( ${target_name} ${file_dependencies} )
