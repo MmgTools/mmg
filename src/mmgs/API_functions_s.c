@@ -41,14 +41,15 @@
 
 int MMGS_Init_mesh(const int starter,...) {
   va_list argptr;
+  int     ier;
 
   va_start(argptr, starter);
 
-  if ( !_MMGS_Init_mesh_var(argptr) )  return 0;
+  ier = _MMGS_Init_mesh_var(argptr) );
 
   va_end(argptr);
 
-  return 1;
+  return ier;
 }
 
 void MMGS_Init_fileNames(MMG5_pMesh mesh,MMG5_pSol sol
