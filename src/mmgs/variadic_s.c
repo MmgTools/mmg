@@ -206,12 +206,12 @@ int _MMGS_Free_all_var(va_list argptr)
 {
 
   MMG5_pMesh     *mesh;
-  MMG5_pSol      *sol;
+  MMG5_pSol      psl,*sol,*sols;
   int            typArg;
-  int            meshCount;
+  int            meshCount,i;
 
   meshCount = 0;
-  sol = NULL;
+  sol = sols = NULL;
 
   while ( (typArg = va_arg(argptr,int)) != MMG5_ARG_end )
   {
@@ -223,6 +223,9 @@ int _MMGS_Free_all_var(va_list argptr)
       break;
     case(MMG5_ARG_ppMet): case(MMG5_ARG_ppLs):
       sol = va_arg(argptr,MMG5_pSol*);
+      break;
+    case(MMG5_ARG_ppSols):
+      sols = va_arg(argptr,MMG5_pSol*);
       break;
     default:
       fprintf(stderr,"\n  ## Error: %s: MMGS_Free_all:\n"
@@ -256,10 +259,20 @@ int _MMGS_Free_all_var(va_list argptr)
                              MMG5_ARG_end) )
     return 0;
 
-  _MMG5_SAFE_FREE(*mesh);
-
   if ( sol )
     _MMG5_SAFE_FREE(*sol);
+
+  if ( sols ) {
+    for ( i=0; i<(*mesh)->nsols; ++i ) {
+      psl = (*sols) + i;
+      if ( psl->m ) {
+        _MMG5_DEL_MEM(*mesh,psl->m,(psl->size*(psl->npmax+1))*sizeof(double));
+      }
+    }
+    _MMG5_DEL_MEM(*mesh,*sols,((*mesh)->nsols)*sizeof(MMG5_Sol));
+  }
+
+  _MMG5_SAFE_FREE(*mesh);
 
   return 1;
 }

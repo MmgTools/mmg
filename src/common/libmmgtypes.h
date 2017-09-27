@@ -111,6 +111,16 @@
  */
 #define MMG5_ARG_ppDisp 5
 /**
+ * \def MMG5_ARG_ppSols
+ *
+ * Pointer toward an array of MMG5_Sol structures storing a list of solutions
+ * allocations purposes)
+ *
+ * \remark we cannot use an enum because used in
+ * variadic functions).
+ */
+#define MMG5_ARG_ppSols  6
+/**
  * \def MMG5_ARG_pMesh
  *
  * MMG5_pMesh structure
@@ -118,7 +128,7 @@
  * \remark we cannot use an enum because used in
  * variadic functions).
  */
-#define MMG5_ARG_pMesh  6
+#define MMG5_ARG_pMesh  7
 /**
  * \def MMG5_ARG_pMet
  *
@@ -127,7 +137,7 @@
  * \remark we cannot use an enum because used in
  * variadic functions).
  */
-#define MMG5_ARG_pMet   7
+#define MMG5_ARG_pMet   8
 /**
  * \def MMG5_ARG_pDisp
  *
@@ -136,7 +146,7 @@
  * \remark we cannot use an enum because used in
  * variadic functions).
  */
-#define MMG5_ARG_pDisp  8
+#define MMG5_ARG_pDisp  9
 /**
  * \def MMG5_ARG_end
  *
@@ -146,7 +156,7 @@
  * \remark we cannot use an enum because used in
  * variadic functions).
  */
-#define MMG5_ARG_end    9
+#define MMG5_ARG_end    10
 
 /**
  * \enum MMG5_type

@@ -1015,6 +1015,11 @@ int MMG3D_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
   if ( ier < 1 ) return (ier);
 
   if ( *sol )  _MMG5_DEL_MEM(mesh,*sol,(mesh->nsols)*sizeof(MMG5_Sol));
+
+  _MMG5_ADD_MEM(mesh,nsols*sizeof(MMG5_Sol),"solutions array",
+                printf("  Exit program.\n"); fclose(inm);
+                _MMG5_SAFE_FREE(posNodeData);
+                return -1);
   _MMG5_SAFE_CALLOC(*sol,nsols,MMG5_Sol,-1);
 
   if ( !_MMG3D_zaldy(mesh) ) {
@@ -1844,6 +1849,11 @@ int MMG3D_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
   }
 
   if ( *sol )  _MMG5_DEL_MEM(mesh,*sol,(mesh->nsols)*sizeof(MMG5_Sol));
+
+  _MMG5_ADD_MEM(mesh,nsols*sizeof(MMG5_Sol),"solutions array",
+                printf("  Exit program.\n"); fclose(inm);
+                _MMG5_SAFE_FREE(type);
+                return -1);
   _MMG5_SAFE_CALLOC(*sol,nsols,MMG5_Sol,-1);
 
   for ( j=0; j<nsols; ++j ) {
@@ -1914,7 +1924,6 @@ int MMG3D_saveSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
   FILE*        inm;
   MMG5_pPoint  ppt;
   int          binch,bin,ier,k;
-  int          *type,*size;
 
   if ( !met->m )  return(-1);
 
@@ -1922,18 +1931,8 @@ int MMG3D_saveSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
 
   assert ( mesh->nsols==1 );
 
-  _MMG5_SAFE_CALLOC(type,mesh->nsols,int,0);
-  _MMG5_SAFE_CALLOC(size,mesh->nsols,int,0);
-  for (k=0; k<mesh->nsols; ++k ) {
-    type[k] = met->type;
-    size[k] = met->size;
-  }
-
   ier = MMG5_saveSolHeader( mesh,filename,&inm,met->ver,&bin,mesh->np,met->dim,
-                            mesh->nsols,type,size);
-
-  _MMG5_SAFE_FREE(type);
-  _MMG5_SAFE_FREE(size);
+                            mesh->nsols,&met->type,&met->size);
 
   if ( ier < 1 )  return ier;
 
