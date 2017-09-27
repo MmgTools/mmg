@@ -556,6 +556,22 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
             " UNAVAILABLE (MMG3D_IPARAM_optimLES) WITH AN ANISOTROPIC METRIC.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
+
+  if ( mesh->info.imprim ) fprintf(stdout,"\n  -- MMG3DLIB: INPUT DATA\n");
+
+  chrono(ON,&(ctim[1]));
+
+  /* check input */
+  if ( met->np && (met->np != mesh->np) ) {
+    fprintf(stdout,"\n  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
+    _MMG5_DEL_MEM(mesh,met->m,(met->size*(met->npmax+1))*sizeof(double));
+    met->np = 0;
+  }
+  else if ( met->size!=1 && met->size!=6 ) {
+    fprintf(stderr,"\n  ## ERROR: WRONG DATA TYPE.\n");
+    _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+  }
+
   /* specific meshing */
   if ( met->np ) {
     if ( mesh->info.optim ) {
@@ -581,22 +597,7 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
   _MMG5_warnScotch(mesh);
 #endif
 
-  if ( mesh->info.imprim ) fprintf(stdout,"\n  -- MMG3DLIB: INPUT DATA\n");
-  /* load data */
-  chrono(ON,&(ctim[1]));
   _MMG5_warnOrientation(mesh);
-
-
-
-  if ( met->np && (met->np != mesh->np) ) {
-    fprintf(stdout,"\n  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
-    _MMG5_DEL_MEM(mesh,met->m,(met->size*(met->npmax+1))*sizeof(double));
-    met->np = 0;
-  }
-  else if ( met->size!=1 && met->size!=6 ) {
-    fprintf(stderr,"\n  ## ERROR: WRONG DATA TYPE.\n");
-    _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
-  }
 
   chrono(OFF,&(ctim[1]));
   printim(ctim[1].gdif,stim);

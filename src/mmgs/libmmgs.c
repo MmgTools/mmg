@@ -435,7 +435,8 @@ int MMGS_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
 #endif
 
   if ( mesh->info.imprim ) fprintf(stdout,"\n  -- MMGS: INPUT DATA\n");
-  /* load data */
+
+  /* Check input */
   chrono(ON,&(ctim[1]));
 
   if ( met->np && (met->np != mesh->np) ) {

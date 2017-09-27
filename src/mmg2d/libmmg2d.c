@@ -181,22 +181,13 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
     _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
   }
 
+
   if ( mesh->info.imprim ) fprintf(stdout,"\n  -- MMG2DLIB: INPUT DATA\n");
 
-  /* Load data */
+  /* Check input */
   chrono(ON,&(ctim[1]));
 
-  sol->np   = mesh->np;
-  sol->ver  = mesh->ver;
-
-  /* Allocate memory if no metric is supplied */
-  if ( !sol->m ) {
-    _MMG5_ADD_MEM(mesh,(sol->size*(mesh->npmax+1))*sizeof(double),
-                  "initial solution",return(MMG5_STRONGFAILURE));
-    _MMG5_SAFE_CALLOC(sol->m,sol->size*(mesh->npmax+1),double,MMG5_STRONGFAILURE);
-    sol->np = 0;
-  }
-  else if ( sol->np && ( sol->np != mesh->np ) ) {
+  if ( sol->np && ( sol->np != mesh->np ) ) {
     fprintf(stdout,"\n  ## WARNING: WRONG SOLUTION NUMBER : %d != %d\n",sol->np,mesh->np);
     _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
   }
@@ -204,6 +195,7 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
     fprintf(stderr,"\n  ## ERROR: WRONG DATA TYPE.\n");
     _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
   }
+
   /* specific meshing */
   if ( sol->np ) {
     if ( mesh->info.optim ) {
@@ -442,19 +434,11 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   }
 
   if ( mesh->info.imprim ) fprintf(stdout,"\n  -- MMG2DMESH: INPUT DATA\n");
-  /* load data */
+
+  /* Check input */
   chrono(ON,&(ctim[1]));
-  sol->ver  = mesh->ver;
 
-  if ( !sol->m ) {
-    /* mem alloc */
-    _MMG5_ADD_MEM(mesh,(sol->size*(mesh->npmax+1))*sizeof(double),
-                  "initial solution",return(MMG5_STRONGFAILURE));
-    _MMG5_SAFE_CALLOC(sol->m,sol->size*(mesh->npmax+1),double,MMG5_STRONGFAILURE);
-    sol->np = 0;
-  }
-
-  else   if ( sol->np && (sol->np != mesh->np) ) {
+  if ( sol->np && (sol->np != mesh->np) ) {
     fprintf(stdout,"\n  ## WARNING: WRONG SOLUTION NUMBER : %d != %d\n",sol->np,mesh->np);
     _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
   }  else if ( sol->size!=1 && sol->size!=3 ) {
@@ -623,7 +607,7 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol)
     _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
   }
 
-  /* Load data */
+  /* Check input */
   if ( mesh->info.imprim ) fprintf(stdout,"\n  -- MMG2DLS: INPUT DATA\n");
   chrono(ON,&(ctim[1]));
 

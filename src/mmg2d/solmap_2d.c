@@ -50,7 +50,15 @@ int MMG2D_doSol(MMG5_pMesh mesh,MMG5_pSol sol) {
   int             i,k,ib,iadr,ipa,ipb;
   int             MMG_inxtt[5] = {0,1,2,0,1};
 
-  sol->np = mesh->np;
+  /* Memory alloc */
+  sol->np     = mesh->np;
+  sol->npmax  = mesh->npmax;
+  sol->dim    = mesh->dim;
+
+  _MMG5_ADD_MEM(mesh,(sol->size*(sol->npmax+1))*sizeof(double),"solution",return(0));
+  _MMG5_SAFE_CALLOC(sol->m,sol->size*(sol->npmax+1),double,0);
+
+
   for (k=1; k<=mesh->np; k++) {
     p1 = &mesh->point[k];
     p1->tagdel = 0;
