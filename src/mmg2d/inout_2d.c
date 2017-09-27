@@ -359,7 +359,6 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         if(iswp) ppt->ref=MMG_swapbin(ppt->ref);
       }
     }
-    ppt->tag = 0;
     ppt->tag = MG_NUL;
   }
 

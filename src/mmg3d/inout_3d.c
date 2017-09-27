@@ -1144,6 +1144,7 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
   if ( !mesh->point ) {
     fprintf(stderr, "\n  ## Error: %s: points array not allocated.\n",
             __func__);
+    fclose(inm);
     return 0;
   }
 

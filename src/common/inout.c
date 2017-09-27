@@ -1028,7 +1028,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
       mesh->nt = nt;
     }
     if ( mesh->na ) {
-      if( !mesh->na )
+      if( !na )
         _MMG5_DEL_MEM(mesh,mesh->edge,(mesh->na+1)*sizeof(MMG5_Edge));
       else if ( na < mesh->na ) {
         _MMG5_ADD_MEM(mesh,(na-mesh->na)*sizeof(MMG5_Edge),"edges",
