@@ -286,6 +286,8 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
     _LIBMMG5_RETURN(mesh,sol,MMG5_LOWFAILURE);
   }
 
+  if ( mesh->info.imprim > 1 && sol->m && sol->np ) MMG2_prilen(mesh,sol);
+
   chrono(OFF,&(ctim[2]));
   printim(ctim[2].gdif,stim);
   if ( mesh->info.imprim )
