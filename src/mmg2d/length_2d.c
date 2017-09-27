@@ -151,7 +151,10 @@ int MMG2_prilen(MMG5_pMesh mesh,MMG5_pSol sol) {
       ipa = MMG2_iare[ia][0];
       ipb = MMG2_iare[ia][1];
 
-      len = MMG2D_lencurv(mesh,sol,pt->v[ipa],pt->v[ipb]);
+      if ( sol->m )
+        len = MMG2D_lencurv(mesh,sol,pt->v[ipa],pt->v[ipb]);
+      else
+        len = _MMG2_lencurv_iso(mesh,sol,pt->v[ipa],pt->v[ipb]);
 
       navg++;
       ecart = len;
