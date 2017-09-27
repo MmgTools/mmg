@@ -186,18 +186,30 @@ int _MMG2D_writeLocalParam( MMG5_pMesh mesh ) {
   fprintf(stdout,"\n  %%%% %s OPENED\n",data);
 
   nparEdg = MMG2D_countLocalParamAtEdg( mesh, &edgRefs);
-  if ( !nparEdg ) return 0;
+  if ( !nparEdg ) {
+    fclose(out);
+    return 0;
+  }
 
   nparTri = _MMG5_countLocalParamAtTri( mesh, &triRefs);
-  if ( !nparTri ) return 0;
+  if ( !nparTri ) {
+    fclose(out);
+    return 0;
+  }
 
   fprintf(out,"parameters\n %d\n",nparTri+nparEdg);
 
   /** Write local param at triangles */
-  if (! MMG2D_writeLocalParamAtEdg(mesh,edgRefs,out) ) return 0;
+  if (! MMG2D_writeLocalParamAtEdg(mesh,edgRefs,out) ) {
+    fclose(out);
+    return 0;
+  }
 
   /** Write local param at tetra */
-  if (! _MMG5_writeLocalParamAtTri(mesh,triRefs,out) ) return 0;
+  if (! _MMG5_writeLocalParamAtTri(mesh,triRefs,out) ) {
+    fclose(out);
+    return 0;
+  }
 
   fclose(out);
   fprintf(stdout,"  -- WRITING COMPLETED\n");
@@ -575,7 +587,7 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,double *qdegrad) 
   if ( mesh->namein == NULL ) {
     fprintf(stdout,"  -- INPUT MESH NAME ?\n");
     fflush(stdin);
-    fscanf(stdin,"%s",namein);
+    fscanf(stdin,"%127s",namein);
     if ( !MMG2D_Set_inputMeshName(mesh,namein) )
       return 0;
   }

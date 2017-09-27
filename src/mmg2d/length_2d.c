@@ -72,7 +72,7 @@ double _MMG2_lencurv_iso(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2) {
   l = (p2->c[0]-p1->c[0])*(p2->c[0]-p1->c[0]) + (p2->c[1]-p1->c[1])*(p2->c[1]-p1->c[1]);
   l = sqrt(l);
   r = h2 / h1 - 1.0;
-  len = ( fabs(r) < _MMG5_EPS ) ? ( l/h1 ) : ( l / (h2-h1) * log(r+1.0) );
+  len = ( fabs(r) < _MMG5_EPS ) ? ( l/h1 ) : ( l / (h2-h1) * log1p(r) );
     
   return(len);
 }

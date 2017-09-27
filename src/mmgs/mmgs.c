@@ -157,11 +157,17 @@ int _MMGS_writeLocalParam( MMG5_pMesh mesh ) {
 
   npar = _MMG5_countLocalParamAtTri( mesh, &triRefs);
 
-  if ( !npar ) return 0;
+  if ( !npar ) {
+    fclose(out);
+    return 0;
+  }
 
   fprintf(out,"parameters\n %d\n",npar);
 
-  if ( !_MMG5_writeLocalParamAtTri(mesh, triRefs, out) ) return 0;
+  if ( !_MMG5_writeLocalParamAtTri(mesh, triRefs, out) ) {
+    fclose(out);
+    return 0;
+  }
 
   fclose(out);
   fprintf(stdout,"  -- WRITING COMPLETED\n");

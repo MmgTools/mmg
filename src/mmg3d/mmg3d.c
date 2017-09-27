@@ -149,18 +149,30 @@ int _MMG3D_writeLocalParam( MMG5_pMesh mesh ) {
   fprintf(stdout,"\n  %%%% %s OPENED\n",data);
 
   nparTri = _MMG5_countLocalParamAtTri( mesh, &triRefs);
-  if ( !nparTri ) return 0;
+  if ( !nparTri ) {
+    fclose(out);
+    return 0;
+  }
 
   nparTet = _MMG5_countLocalParamAtTet( mesh, &tetRefs);
-  if ( !nparTet ) return 0;
+  if ( !nparTet ) {
+    fclose(out);
+    return 0;
+  }
 
   fprintf(out,"parameters\n %d\n",nparTri+nparTet);
 
   /** Write local param at triangles */
-  if (! _MMG5_writeLocalParamAtTri(mesh,triRefs,out) ) return 0;
+  if (! _MMG5_writeLocalParamAtTri(mesh,triRefs,out) ) {
+    fclose(out);
+    return 0;
+  }
 
   /** Write local param at tetra */
-  if (! _MMG5_writeLocalParamAtTet(mesh,tetRefs,out) ) return 0;
+  if (! _MMG5_writeLocalParamAtTet(mesh,tetRefs,out) ) {
+    fclose(out);
+    return 0;
+  }
 
   fclose(out);
   fprintf(stdout,"  -- WRITING COMPLETED\n");
