@@ -86,6 +86,7 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
                 " or null edges.\n",__func__);
         mmgWarn = 1;
       }
+      continue;
     }
     if ( lmax < _MMG3D_LOPTL )  continue;
 
@@ -309,6 +310,7 @@ static int _MMG5_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
                 " or null edges.\n",__func__);
         mmgWarn = 1;
       }
+      continue;
     }
     if ( lmin > _MMG3D_LOPTS )  continue;
 

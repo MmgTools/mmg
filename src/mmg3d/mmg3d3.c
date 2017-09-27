@@ -148,6 +148,7 @@ static int _MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itdeg, 
         fprintf(stderr,"\n  ## Warning: %s: all edges of tetra %d are required"
                 " or of length null.\n",__func__,k);
       }
+      continue;
     }
     
     if ( lmax < hma2 )  continue;

@@ -112,21 +112,25 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
         imin = ii;
       }
     }
-    if ( imax==-1 && (mesh->info.ddebug || mesh->info.imprim > 5 ) ) {
-      if ( !mmgWarn0 ) {
-        mmgWarn0 = 1;
-        fprintf(stderr,"\n  # Warning: %s: all edges of tetra %d are"
-                " boundary and required.\n",
-                __func__,k);
+    if ( imax==-1 ) {
+      if ( (mesh->info.ddebug || mesh->info.imprim > 5 ) ) {
+        if ( !mmgWarn0 ) {
+          mmgWarn0 = 1;
+          fprintf(stderr,"\n  # Warning: %s: all edges of tetra %d are"
+                  " boundary and required.\n",
+                  __func__,k);
+        }
       }
       continue;
     }
-    if ( imin==-1  && (mesh->info.ddebug || mesh->info.imprim > 5 ) ) {
-      if ( !mmgWarn0 ) {
-        mmgWarn0 = 1;
-        fprintf(stderr,"\n  # Warning: %s: all edges of tetra %d are"
-                " boundary and required.\n",
-                __func__,k);
+    if ( imin==-1 ) {
+      if ( (mesh->info.ddebug || mesh->info.imprim > 5 ) ) {
+        if ( !mmgWarn0 ) {
+          mmgWarn0 = 1;
+          fprintf(stderr,"\n  # Warning: %s: all edges of tetra %d are"
+                  " boundary and required.\n",
+                  __func__,k);
+        }
       }
       continue;
     }
