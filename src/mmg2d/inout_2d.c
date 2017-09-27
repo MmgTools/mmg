@@ -533,43 +533,21 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
   return(1);
 }
 
-/* Load mesh file at gmsh format */
-int MMG2D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
-  FILE*       inm;
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Check mesh data for a Msh mesh : mark the vertices as used if no triangles in
+ * the mesh (mesh generation) and check that all z-componants are 0.
+ *
+ */
+static inline
+int MMG2D_2dMshCheck(MMG5_pMesh mesh) {
   MMG5_pPoint ppt;
   double      z;
-  long        posNodes,posElts,posNodeData;
-  int         ier,k;
-  int         bin,iswp,nelts;
+  int         k;
 
-  mesh->dim = 2;
-
-  ier = MMG5_loadMshMesh_part1(mesh,sol,filename,&inm,
-                               &posNodes,&posElts,&posNodeData,
-                               &bin,&iswp,&nelts);
-  if ( ier < 1 ) return (ier);
-
-  if ( !MMG2D_zaldy(mesh) )  return(0);
-
-  if ( mesh->ne || mesh->nprism ) {
-    fprintf(stderr,"\n  ## Error: %s: Input mesh must be a two-dimensional mesh.\n",
-            __func__);
-    return(-1);
-  }
-  if ( !mesh->nt )
-      fprintf(stdout,"  ** WARNING NO GIVEN TRIANGLE\n");
-
-  if (mesh->npmax < mesh->np || mesh->ntmax < mesh->nt )
-    return(-1);
-
-  ier = MMG5_loadMshMesh_part2( mesh, sol,&inm,
-                                posNodes,posElts,posNodeData,
-                                bin,iswp,nelts);
-
-  if ( ier < 1 ) return ( ier );
-
-  /*in case of mesh generation, all the points are used*/
-	if (!mesh->nt) {
+  if (!mesh->nt) {
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[ k ];
       ppt->tag &= ~MG_NUL;
@@ -586,8 +564,119 @@ int MMG2D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   if ( z > _MMG5_EPSOK ) {
     fprintf(stderr,"\n  ## Error: %s: Input mesh must be a two-dimensional mesh.\n",
             __func__);
+    return 0;
+  }
+  return 1;
+}
+
+int MMG2D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
+  FILE*       inm;
+  long        posNodes,posElts,*posNodeData;
+  int         ier;
+  int         bin,iswp,nelts,nsols;
+
+  mesh->dim = 2;
+
+  ier = MMG5_loadMshMesh_part1(mesh,filename,&inm,
+                               &posNodes,&posElts,&posNodeData,
+                               &bin,&iswp,&nelts,&nsols);
+  if ( ier < 1 )  return (ier);
+
+  if ( nsols!=1 ) {
+    fprintf(stderr,"SEVERAL SOLUTION => IGNORED: %d\n",nsols);
+    fclose(inm);
+    _MMG5_SAFE_FREE(posNodeData);
     return(-1);
   }
+
+  if ( !MMG2D_zaldy(mesh) ) {
+    fclose(inm);
+    _MMG5_SAFE_FREE(posNodeData);
+    return(0);
+  }
+
+  if ( mesh->ne || mesh->nprism ) {
+    fprintf(stderr,"\n  ## Error: %s: Input mesh must be a two-dimensional mesh.\n",
+            __func__);
+    fclose(inm);
+    _MMG5_SAFE_FREE(posNodeData);
+    return(-1);
+  }
+  if ( !mesh->nt )
+      fprintf(stdout,"  ** WARNING NO GIVEN TRIANGLE\n");
+
+  if (mesh->npmax < mesh->np || mesh->ntmax < mesh->nt ) {
+    fclose(inm);
+    _MMG5_SAFE_FREE(posNodeData);
+    return(-1);
+  }
+
+  ier = MMG5_loadMshMesh_part2( mesh,&sol,&inm,
+                                posNodes,posElts,posNodeData,
+                                bin,iswp,nelts);
+
+  _MMG5_SAFE_FREE(posNodeData);
+  if ( ier < 1 ) return ( ier );
+
+  /* Check the metric type */
+  ier = MMG5_chkMetricType(mesh,&sol->type,inm);
+  if ( ier <1 ) return ier;
+
+  /* Mark all points as used in case of mesh generation and check the
+   * z-componant */
+  if ( !MMG2D_2dMshCheck(mesh) ) return -1;
+
+  return(1);
+}
+
+int MMG2D_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename) {
+  FILE*       inm;
+  long        posNodes,posElts,*posNodeData;
+  int         ier;
+  int         bin,iswp,nelts,nsols;
+
+  mesh->dim = 2;
+
+  ier = MMG5_loadMshMesh_part1(mesh,filename,&inm,
+                               &posNodes,&posElts,&posNodeData,
+                               &bin,&iswp,&nelts,&nsols);
+  if ( ier < 1 )  return (ier);
+
+  if ( *sol )  _MMG5_DEL_MEM(mesh,*sol,(mesh->nsols)*sizeof(MMG5_Sol));
+  _MMG5_SAFE_CALLOC(*sol,nsols,MMG5_Sol,-1);
+
+  if ( !MMG2D_zaldy(mesh) ) {
+    fclose(inm);
+    _MMG5_SAFE_FREE(posNodeData);
+    return(0);
+  }
+
+  if ( mesh->ne || mesh->nprism ) {
+    fprintf(stderr,"\n  ## Error: %s: Input mesh must be a two-dimensional mesh.\n",
+            __func__);
+    fclose(inm);
+    _MMG5_SAFE_FREE(posNodeData);
+    return(-1);
+  }
+  if ( !mesh->nt )
+      fprintf(stdout,"  ** WARNING NO GIVEN TRIANGLE\n");
+
+  if (mesh->npmax < mesh->np || mesh->ntmax < mesh->nt ) {
+    fclose(inm);
+    _MMG5_SAFE_FREE(posNodeData);
+    return(-1);
+  }
+
+  ier = MMG5_loadMshMesh_part2( mesh,sol,&inm,
+                                posNodes,posElts,posNodeData,
+                                bin,iswp,nelts);
+
+  _MMG5_SAFE_FREE(posNodeData);
+  if ( ier < 1 ) return ( ier );
+
+  /* Mark all points as used in case of mesh generation and check the
+   * z-componant */
+  if ( !MMG2D_2dMshCheck(mesh) ) return -1;
 
   return(1);
 }
@@ -1264,14 +1353,10 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
 }
 
 int MMG2D_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
-  MMG5_pSol soltab[1];
-
-  soltab[0] = sol;
-  return(MMG5_saveMshMesh(mesh,soltab,filename,1));
+  return(MMG5_saveMshMesh(mesh,&sol,filename,1));
 }
 
 int MMG2D_saveMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename) {
-
   return(MMG5_saveMshMesh(mesh,sol,filename,0));
 }
 

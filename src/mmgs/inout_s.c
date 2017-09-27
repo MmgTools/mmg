@@ -672,17 +672,28 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
 
 int MMGS_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   FILE*       inm;
-  long        posNodes,posElts,posNodeData;
-  int         ier,bin,iswp,nelts;
+  long        posNodes,posElts,*posNodeData;
+  int         ier,bin,iswp,nelts,nsols;
 
   mesh->dim = 3;
 
-  ier = MMG5_loadMshMesh_part1(mesh,sol,filename,&inm,
+  ier = MMG5_loadMshMesh_part1(mesh,filename,&inm,
                                &posNodes,&posElts,&posNodeData,
-                               &bin,&iswp,&nelts);
-  if ( ier < 1 ) return (ier);
+                               &bin,&iswp,&nelts,&nsols);
+  if ( ier < 1 )  return (ier);
 
-  if ( !_MMGS_zaldy(mesh) )  return(0);
+  if ( nsols!=1 ) {
+    fprintf(stderr,"SEVERAL SOLUTION => IGNORED: %d\n",nsols);
+    fclose(inm);
+    _MMG5_SAFE_FREE(posNodeData);
+    return(-1);
+  }
+
+  if ( !_MMGS_zaldy(mesh) ) {
+    fclose(inm);
+    _MMG5_SAFE_FREE(posNodeData);
+    return(0);
+  }
 
   mesh->ne = mesh->nprism = 0;
 
@@ -690,16 +701,76 @@ int MMGS_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
     fprintf(stderr,"  ** MISSING DATA.\n");
     fprintf(stderr," Check that your mesh contains triangles.\n");
     fprintf(stderr," Exit program.\n");
+    fclose(inm);
+    _MMG5_SAFE_FREE(posNodeData);
     return(-1);
   }
 
 
-  if (mesh->npmax < mesh->np || mesh->ntmax < mesh->nt )
+  if (mesh->npmax < mesh->np || mesh->ntmax < mesh->nt ) {
+    fclose(inm);
+    _MMG5_SAFE_FREE(posNodeData);
     return(-1);
+  }
 
-  return ( MMG5_loadMshMesh_part2( mesh, sol,&inm,
-                                   posNodes,posElts,posNodeData,
-                                   bin,iswp,nelts) );
+  ier = MMG5_loadMshMesh_part2( mesh, &sol,&inm,
+                                posNodes,posElts,posNodeData,
+                                bin,iswp,nelts);
+  _MMG5_SAFE_FREE(posNodeData);
+  if ( ier < 1 ) return ( ier );
+
+  /* Check the metric type */
+  ier = MMG5_chkMetricType(mesh,&sol->type,inm);
+
+  return ier;
+}
+
+
+int MMGS_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename) {
+  FILE*       inm;
+  long        posNodes,posElts,*posNodeData;
+  int         ier,bin,iswp,nelts,nsols;
+
+  mesh->dim = 3;
+
+  ier = MMG5_loadMshMesh_part1(mesh,filename,&inm,
+                               &posNodes,&posElts,&posNodeData,
+                               &bin,&iswp,&nelts,&nsols);
+  if ( ier < 1 )  return (ier);
+
+  if ( *sol )  _MMG5_DEL_MEM(mesh,*sol,(mesh->nsols)*sizeof(MMG5_Sol));
+  _MMG5_SAFE_CALLOC(*sol,nsols,MMG5_Sol,-1);
+
+  if ( !_MMGS_zaldy(mesh) ) {
+    fclose(inm);
+    _MMG5_SAFE_FREE(posNodeData);
+    return(0);
+  }
+
+  mesh->ne = mesh->nprism = 0;
+
+  if ( !mesh->nt ) {
+    fprintf(stderr,"  ** MISSING DATA.\n");
+    fprintf(stderr," Check that your mesh contains triangles.\n");
+    fprintf(stderr," Exit program.\n");
+    fclose(inm);
+    _MMG5_SAFE_FREE(posNodeData);
+    return(-1);
+  }
+
+
+  if (mesh->npmax < mesh->np || mesh->ntmax < mesh->nt ) {
+    fclose(inm);
+    _MMG5_SAFE_FREE(posNodeData);
+    return(-1);
+  }
+
+  ier = MMG5_loadMshMesh_part2( mesh, sol,&inm,
+                                posNodes,posElts,posNodeData,
+                                bin,iswp,nelts);
+  _MMG5_SAFE_FREE(posNodeData);
+
+  return ier;
 }
 
 /**
@@ -1141,10 +1212,8 @@ int MMGS_saveMesh(MMG5_pMesh mesh, const char* filename) {
 }
 
 int MMGS_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
-  MMG5_pSol soltab[1];
 
-  soltab[0] = sol;
-  return(MMG5_saveMshMesh(mesh,soltab,filename,1));
+  return(MMG5_saveMshMesh(mesh,&sol,filename,1));
 }
 
 int MMGS_saveMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename) {

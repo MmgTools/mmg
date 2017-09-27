@@ -1005,7 +1005,25 @@ int  MMGS_loadMesh(MMG5_pMesh mesh, const char* filename);
  *
  */
 int MMGS_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
-
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward a list of solution structures.
+ * \param filename name of file.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Read mesh and a list of data at MSH file format (.msh extension). We read only
+ * low-order points, edges, tria, quadra, tetra and prisms.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMGS_LOADMSHMESH_AND_ALLDATA(mesh,sol,filename,strlen,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
+ * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
+ * >     INTEGER, INTENT(IN)            :: strlen\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+int MMGS_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param filename name of file.
@@ -1041,18 +1059,20 @@ int  MMGS_saveMesh(MMG5_pMesh mesh, const char *filename);
  * >   END SUBROUTINE\n
  *
  */
-  int MMGS_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+ int MMGS_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the solution structure.
  * \param filename name of file.
  * \return 0 if failed, 1 otherwise.
  *
- * Write mesh and a list of data fields at MSH  file format (.msh extension).
- * Save file at ASCII format for .msh extension, at binary format for .mshb one.
+ * Write mesh and a list of data fields (that are considered as solutions and
+ * not metrics, thus, we do nothing over the ridge points) at MSH file format
+ * (.msh extension).  Save file at ASCII format for .msh extension, at binary
+ * format for .mshb one.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMGS_SAVEMSHMESH(mesh,sol,filename,strlen,retval)\n
+ * >   SUBROUTINE MMGS_SAVEMSHMESH_AND_ALLDATA(mesh,sol,filename,strlen,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
  * >     INTEGER, INTENT(IN)            :: strlen\n
@@ -1060,7 +1080,7 @@ int  MMGS_saveMesh(MMG5_pMesh mesh, const char *filename);
  * >   END SUBROUTINE\n
  *
  */
-  int MMGS_saveMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
+int MMGS_saveMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.
