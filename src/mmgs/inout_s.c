@@ -682,7 +682,7 @@ int MMGS_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
                                &bin,&iswp,&nelts,&nsols);
   if ( ier < 1 )  return (ier);
 
-  if ( nsols!=1 ) {
+  if ( nsols > 1 ) {
     fprintf(stderr,"SEVERAL SOLUTION => IGNORED: %d\n",nsols);
     fclose(inm);
     _MMG5_SAFE_FREE(posNodeData);
