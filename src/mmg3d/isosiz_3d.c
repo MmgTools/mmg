@@ -65,7 +65,7 @@ inline double _MMG5_lenedgCoor_iso(double *ca,double *cb,double *ma,double *mb) 
     + (cb[2]-ca[2])*(cb[2]-ca[2]);
   l = sqrt(l);
   r = h2 / h1 - 1.0;
-  len = fabs(r) < _MMG5_EPS ? l / h1 : l / (h2-h1) * log(r+1.0);
+  len = fabs(r) < _MMG5_EPS ? l / h1 : l / (h2-h1) * log1p(r);
 
   return(len);
 }
