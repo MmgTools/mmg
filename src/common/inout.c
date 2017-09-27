@@ -1153,6 +1153,12 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
   }
 
   /** Read the solution at nodes */
+  /* Init (*sol)[0] for the case where nsols=0 */
+  psl = *sol;
+  psl->ver = mesh->ver;
+  psl->dim = mesh->dim;
+  psl->type = 1;
+
   for ( isol=0; isol < mesh->nsols; ++isol ) {
     assert ( posNodeData[isol] );
 
