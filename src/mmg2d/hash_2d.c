@@ -321,10 +321,10 @@ int MMG2_bdryEdge(MMG5_pMesh mesh) {
       pa = &mesh->edge[mesh->na];
       pa->a = pt->v[i1];
       pa->b = pt->v[i2];
-      
+
       pa->tag = pt->tag[i];
       pa->ref = pt->edg[i];
-      
+
     }
   }
 

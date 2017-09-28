@@ -32,8 +32,6 @@
  */
 #include "mmg2d.h"
 
-unsigned char ddb;
-
 /* Mesh adaptation routine for the first stages of the algorithm: intertwine splitting
  based on patterns, collapses and swaps.
    typchk = 1 -> adaptation based on edge lengths
@@ -671,14 +669,6 @@ int _MMG2_adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
     else if ( ip > 0 ) {
       
       ier = _MMG2_split1b(mesh,k,imax,ip);
-      
-      if ( ddb ) {
-        {
-          MMG2_bdryEdge(mesh);
-          _MMG2_savemesh_db(mesh,mesh->nameout,0);
-          return -1;
-        }
-      }
 
       /* Lack of memory; abort the routine */
       if ( !ier ) {
@@ -849,13 +839,6 @@ int MMG2_mmg2d1n(MMG5_pMesh mesh,MMG5_pSol met) {
     fprintf(stderr,"  ## Unable to make fine improvements. Exit program.\n");
     return(0);
   }
-  
-  /* Debug save of the mesh */
-  /*{
-    MMG2_bdryEdge(mesh);
-    _MMG2_savemesh_db(mesh,mesh->nameout,0);
-    return 0;
-  }*/
 
   return(1);
 }
