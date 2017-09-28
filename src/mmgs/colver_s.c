@@ -131,17 +131,17 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
 
       /* check geometric support */
       if ( l == 1 ) {
-        pt0->tag[j2] = MG_MAX(pt0->tag[j2],pt->tag[i1]);
+        pt0->tag[j2] |= pt->tag[i1];
       }
       else if ( l == ilist-2+open ) {
         if ( !open ) {
           ll = list[ilist-1] / 3;
           lj = list[ilist-1] % 3;
-          pt0->tag[jj] = MG_MAX(pt0->tag[jj],mesh->tria[ll].tag[lj]);
+          pt0->tag[jj] |= mesh->tria[ll].tag[lj];
         }
         else {
           assert ( list[0]/3 == k );
-          pt0->tag[jj] = MG_MAX(pt0->tag[jj],pt->tag[i]);
+          pt0->tag[jj] |= pt->tag[i];
         }
       }
       if ( chkedg(mesh,0) )  return(0);
@@ -289,7 +289,7 @@ int colver(MMG5_pMesh mesh,int *list,int ilist) {
   jj  = list[1] % 3;
   j   = _MMG5_iprv2[jj];
   pt1 = &mesh->tria[jel];
-  pt1->tag[j] = MG_MAX(pt->tag[i1],pt1->tag[j]);
+  pt1->tag[j] |= pt->tag[i1];
   pt1->edg[j] = MG_MAX(pt->edg[i1],pt1->edg[j]);
   if ( adja[i1] ) {
     kel = adja[i1] / 3;
@@ -297,7 +297,7 @@ int colver(MMG5_pMesh mesh,int *list,int ilist) {
     mesh->adja[3*(kel-1)+1+k] = 3*jel + j;
     mesh->adja[3*(jel-1)+1+j] = 3*kel + k;
     pt2 = &mesh->tria[kel];
-    pt2->tag[k] = MG_MAX(pt1->tag[j],pt2->tag[k]);
+    pt2->tag[k] |= pt1->tag[j];
     pt2->edg[k] = MG_MAX(pt1->edg[j],pt2->edg[k]);
   }
   else
@@ -313,7 +313,7 @@ int colver(MMG5_pMesh mesh,int *list,int ilist) {
     jj  = list[ilist-2] % 3;
     j   = _MMG5_inxt2[jj];
     pt1 = &mesh->tria[jel];
-    pt1->tag[j] = MG_MAX(pt->tag[i1],pt1->tag[j]);
+    pt1->tag[j] |= pt->tag[i1];
     pt1->edg[j] = MG_MAX(pt->edg[i1],pt1->edg[j]);
     adja = &mesh->adja[3*(iel-1)+1];
     if ( adja[i1] ) {
@@ -322,7 +322,7 @@ int colver(MMG5_pMesh mesh,int *list,int ilist) {
       mesh->adja[3*(kel-1)+1+k] = 3*jel + j;
       mesh->adja[3*(jel-1)+1+j] = 3*kel + k;
       pt2 = &mesh->tria[kel];
-      pt2->tag[k] = MG_MAX(pt1->tag[j],pt2->tag[k]);
+      pt2->tag[k] |= pt1->tag[j];
       pt2->edg[k] = MG_MAX(pt1->edg[j],pt2->edg[k]);
     }
     else
