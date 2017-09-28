@@ -323,7 +323,7 @@ int _MMG2_chkmsh(MMG5_pMesh mesh) {
 
       if ( pt->tag[i] & MG_REF ) {
         pt1 = &mesh->tria[jel];
-        if ( 1 &&  pt->ref == pt1->ref ) {
+        if ( pt->ref == pt1->ref ) {
           if ( !mmgErr5 ) {
             mmgErr5 = 1;
             fprintf(stderr,"\n  ## Error: %s: at least 1 edge tagged ref while"
