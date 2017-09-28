@@ -330,24 +330,39 @@ int  MMG2D_Set_vertex(MMG5_pMesh mesh, double c0, double c1,
  *
  */
  int  MMG2D_Set_vertices(MMG5_pMesh mesh, double *vertices,int *refs);
-/* /\** */
-/*  * \param mesh pointer toward the mesh structure. */
-/*  * \param k vertex index. */
-/*  * \return 1. */
-/*  * */
-/*  * Set corner at point \a pos. */
-/*  * */
-/*  *\/ */
-/* int  MMG2D_Set_corner(MMG5_pMesh mesh, int k); */
-/* /\** */
-/*  * \param mesh pointer toward the mesh structure. */
-/*  * \param k vertex index. */
-/*  * \return 1. */
-/*  * */
-/*  * Set point \a k as required. */
-/*  * */
-/*  *\/ */
-/* int  MMG2D_Set_requiredVertex(MMG5_pMesh mesh, int k); */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param k vertex index.
+ * \return 1.
+ *
+ * Set corner at point \a pos.
+ *
+ * \remark Fortran interface
+ *
+ * >   SUBROUTINE MMG2D_SET_CORNER(mesh,k,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * >     INTEGER, INTENT(IN)           :: k\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+int  MMG2D_Set_corner(MMG5_pMesh mesh, int k);
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param k vertex index.
+ * \return 1.
+ *
+ * Set point \a k as required.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG2D_SET_REQUIREDVERTEX(mesh,k,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * >     INTEGER, INTENT(IN)           :: k\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+int  MMG2D_Set_requiredVertex(MMG5_pMesh mesh, int k);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -437,6 +452,22 @@ int MMG2D_Set_edge(MMG5_pMesh mesh, int v0, int v1, int ref, int pos);
  *
  */
 int  MMG2D_Set_requiredEdge(MMG5_pMesh mesh, int k);
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param k edge index.
+ * \return 1.
+ *
+ * Set edge \a k as parallel.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG2D_SET_PARALLELEDGE(mesh,k,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * >     INTEGER, INTENT(IN)           :: k\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+int  MMG2D_Set_parallelEdge(MMG5_pMesh mesh, int k);
 /**
  * \param met pointer toward the sol structure.
  * \param s solution scalar value.

@@ -134,10 +134,15 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
         pt0->tag[j2] = MG_MAX(pt0->tag[j2],pt->tag[i1]);
       }
       else if ( l == ilist-2+open ) {
-        ll = list[ilist-1+open] / 3;
-        if ( ll > mesh->nt )  return(0);
-        lj = list[ilist-1+open] % 3;
-        pt0->tag[jj] = MG_MAX(pt0->tag[jj],mesh->tria[ll].tag[lj]);
+        if ( !open ) {
+          ll = list[ilist-1] / 3;
+          lj = list[ilist-1] % 3;
+          pt0->tag[jj] = MG_MAX(pt0->tag[jj],mesh->tria[ll].tag[lj]);
+        }
+        else {
+          assert ( list[0]/3 == k );
+          pt0->tag[jj] = MG_MAX(pt0->tag[jj],pt->tag[i]);
+        }
       }
       if ( chkedg(mesh,0) )  return(0);
 

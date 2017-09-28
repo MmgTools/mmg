@@ -428,17 +428,17 @@ int MMG2D_Set_vertex(MMG5_pMesh mesh, double c0, double c1, int ref, int pos) {
   return(1);
 }
 
-/* int MMG2D_Set_corner(MMG5_pMesh mesh, int k) { */
-/*   assert ( k <= mesh->np ); */
-/*   mesh->point[k].tag |= MG_CRN; */
-/*   return(1); */
-/* } */
+int MMG2D_Set_corner(MMG5_pMesh mesh, int k) {
+  assert ( k <= mesh->np );
+  mesh->point[k].tag |= MG_CRN;
+  return(1);
+}
 
-/* int MMG2D_Set_requiredVertex(MMG5_pMesh mesh, int k) { */
-/*   assert ( k <= mesh->np ); */
-/*   mesh->point[k].tag |= MG_REQ; */
-/*   return(1); */
-/* } */
+int MMG2D_Set_requiredVertex(MMG5_pMesh mesh, int k) {
+  assert ( k <= mesh->np );
+  mesh->point[k].tag |= MG_REQ;
+  return(1);
+}
 
 int MMG2D_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, int* ref,
                     int* isCorner, int* isRequired) {
@@ -627,7 +627,7 @@ int MMG2D_Set_triangle(MMG5_pMesh mesh, int v0, int v1, int v2, int ref, int pos
 int MMG2D_Set_requiredTriangle(MMG5_pMesh mesh, int k) {
   MMG5_pTria pt;
   int        i;
-  
+
   assert ( k <= mesh->nt );
   pt = &mesh->tria[k];
 
@@ -819,6 +819,24 @@ int MMG2D_Set_requiredEdge(MMG5_pMesh mesh, int k) {
   ppt->tag |= MG_REQ;
   ppt = &mesh->point[ped->b];
   ppt->tag |= MG_REQ;
+
+  return(1);
+}
+
+int MMG2D_Set_parallelEdge(MMG5_pMesh mesh, int k) {
+  MMG5_pPoint ppt;
+  MMG5_pEdge  ped;
+
+  assert ( k <= mesh->na );
+
+  ped = &mesh->edge[k];
+
+  ped->tag |= MG_PARBDY;
+
+  ppt = &mesh->point[ped->a];
+  ppt->tag |= MG_PARBDY;
+  ppt = &mesh->point[ped->b];
+  ppt->tag |= MG_PARBDY;
 
   return(1);
 }
