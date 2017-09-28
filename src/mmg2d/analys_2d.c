@@ -90,7 +90,7 @@ int _MMG2_setadj(MMG5_pMesh mesh) {
         }
 
         /* Transfer tags if i is already an edge (e.g. supplied by the user) */
-        if ( MG_EDG(pt->tag[i]) ) {
+        if ( MG_EDG(pt->tag[i]) || (pt->tag[i] & MG_REQ) ) {
           mesh->point[ip1].tag |= pt->tag[i];
           mesh->point[ip2].tag |= pt->tag[i];
         }
@@ -99,26 +99,27 @@ int _MMG2_setadj(MMG5_pMesh mesh) {
         if ( !adja[i] ) {
           tag = ( MG_GEO+MG_BDY );
 
-          if ( !mesh->info.nosurf ) {
+          if ( ( !(pt->tag[i] & MG_REQ) ) &&
+               ( mesh->info.nosurf || (pt->tag[i] & MG_PARBDY ) ) ) {
+              pt->tag[i] |= ( tag + MG_REQ + MG_NOSURF );
+            }
+          else
             pt->tag[i] |= tag;
-            mesh->point[ip1].tag |= tag;
-            mesh->point[ip2].tag |= tag;
+
+          if ( ( !(mesh->point[ip1].tag & MG_REQ) ) &&
+               ( mesh->info.nosurf || (pt->tag[i] & MG_PARBDY ) ) ) {
+            mesh->point[ip1].tag |= ( tag+MG_REQ+MG_NOSURF );
           }
           else {
-            if ( !(pt->tag[i] & MG_REQ) )
-              pt->tag[i] |= ( tag+MG_REQ+MG_NOSURF );
-            else
-              pt->tag[i] |= tag;
+            mesh->point[ip1].tag |= tag;
+          }
 
-            if ( !(mesh->point[ip1].tag  & MG_REQ) )
-              mesh->point[ip1].tag |= ( tag+MG_REQ+MG_NOSURF );
-            else
-              mesh->point[ip1].tag |= tag;
-
-            if ( !(mesh->point[ip2].tag  & MG_REQ) )
-              mesh->point[ip2].tag |= ( tag+MG_REQ+MG_NOSURF );
-            else
-              mesh->point[ip2].tag |= tag;
+          if ( ( !(mesh->point[ip2].tag & MG_REQ) ) &&
+               ( mesh->info.nosurf || (pt->tag[i] & MG_PARBDY ) ) ) {
+            mesh->point[ip2].tag |= ( tag+MG_REQ+MG_NOSURF );
+          }
+          else {
+            mesh->point[ip2].tag |= tag;
           }
           nr++;
           continue;

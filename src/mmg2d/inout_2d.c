@@ -82,15 +82,15 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
   MMG5_pTria        pt;
   MMG5_pQuad        pq1;
   float             fc;
-  long         posnp,posnt,posncor,posned,posnq,posreq,posreqed;
-  int          k,ref,tmp,ncor,norient,nreq,nreqed,bin,iswp,nq;
+  long         posnp,posnt,posncor,posned,posnq,posreq,posreqed,posntreq;
+  int          k,ref,tmp,ncor,norient,nreq,ntreq,nreqed,bin,iswp,nq;
   char        *ptr,*data,chaine[128];
   double       air,dtmp;
   int          i,bdim,binch,bpos;
 
 
-  posnp = posnt = posncor = posned = posnq = posreq = posreqed = 0;
-  ncor = nreq = nreqed = 0;
+  posnp = posnt = posncor = posned = posnq = posreq = posreqed = posntreq = 0;
+  ncor = nreq = nreqed = ntreq = 0;
   bin = 0;
   iswp = 0;
   mesh->np = mesh->nt = mesh->na = mesh->xp = 0;
@@ -179,6 +179,11 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         posreqed = ftell(inm);
         continue;
       }
+      else if(!strncmp(chaine,"RequiredTriangles",strlen("RequiredTriangles"))) {
+        fscanf(inm,"%d",&ntreq);
+        posntreq = ftell(inm);
+        continue;
+      }
       else if(!strncmp(chaine,"Quadrilaterals",strlen("Quadrilaterals"))) {
         fscanf(inm,"%d",&nq);
         posnq = ftell(inm);
@@ -226,6 +231,16 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         fread(&mesh->nt,sw,1,inm);
         if(iswp) mesh->nt=MMG_swapbin(mesh->nt);
         posnt = ftell(inm);
+        rewind(inm);
+        fseek(inm,bpos,SEEK_SET);
+        continue;
+      }
+        else if(binch==17) {  //RequiredTriangles
+        fread(&bpos,sw,1,inm); //NulPos
+        if(iswp) bpos=MMG_swapbin(bpos);
+        fread(&ntreq,sw,1,inm);
+        if(iswp) ntreq=MMG_swapbin(ntreq);
+        posntreq = ftell(inm);
         rewind(inm);
         fseek(inm,bpos,SEEK_SET);
         continue;
@@ -416,6 +431,28 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
       fprintf(stdout,"\n     $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ \n");
       fprintf(stdout,"         BAD ORIENTATION : vol < 0 -- %8d element(s) reoriented\n",norient);
       fprintf(stdout,"     $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ \n\n");
+    }
+
+    if ( ntreq ) {
+      rewind(inm);
+      fseek(inm,posntreq,SEEK_SET);
+      for (k=1; k<=ntreq; k++) {
+        if(!bin)
+          fscanf(inm,"%d",&i);
+        else {
+          fread(&i,sw,1,inm);
+          if(iswp) i=MMG_swapbin(i);
+        }
+        if ( i>mesh->nt ) {
+          fprintf(stderr,"\n  ## Warning: %s: required triangle number %8d"
+                  " ignored.\n",__func__,i);
+        } else {
+          pt = &mesh->tria[i];
+          pt->tag[0] |= MG_REQ;
+          pt->tag[1] |= MG_REQ;
+          pt->tag[2] |= MG_REQ;
+        }
+      }
     }
   }
   else {
