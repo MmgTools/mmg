@@ -1844,7 +1844,7 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
  * \param typchk type of checking permformed.
  * \return -1 if failed, number of new points otherwise.
  *
- * Split tetra into 4 when more than 1 boundary face.
+ * Split tetra into 4 when more than 1 boundary faceor with 4 boundary vertices.
  *
  */
 static int _MMG5_anatet4(MMG5_pMesh mesh, MMG5_pSol met,int *nf, char typchk) {
@@ -1912,6 +1912,8 @@ int _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,char typchk, int patternMode) {
   maxit = 5;
   mesh->gap = 0.5;
   do {
+    if ( typchk == 2 && it == maxit-1 )  ++mesh->info.fem;
+
     /* memory free */
     _MMG5_DEL_MEM(mesh,mesh->adja,(4*mesh->nemax+5)*sizeof(int));
 
@@ -1949,8 +1951,6 @@ int _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,char typchk, int patternMode) {
       fprintf(stderr,"\n  ## Hashing problem. Exit program.\n");
       return(0);
     }
-
-    if ( typchk == 2 && it == maxit-1 )  ++mesh->info.fem;
 
     /* collapse short edges */
     if ( !mesh->info.noinsert ) {
