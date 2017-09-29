@@ -215,105 +215,101 @@ int MMG2_cutEdgeTriangle(MMG5_pMesh mesh,int k,int ia,int ib) {
 
 /** Return the index of one triangle containing ip */
 int MMG2_findTria(MMG5_pMesh mesh,int ip) {
-  MMG5_pTria  pt;
+  MMG5_pTria  pt,pt1;
   MMG5_pPoint ppt,p0,p1,p2;
-  int         k,find,iel,base,iadr,*adja,isign;
+  int         k,find,iel,base,iadr,*adja,isign,iter,ier;
+  int         mvDir[3],jel,i;
   double      ax,ay,bx,by,dd,epsra,cx,cy,aire1,aire2,aire3;
+  double      l1,l2,l3,det,eps;
   static char mmgWarn0 = 0;
 
   ppt  = &mesh->point[ip];
   ++mesh->base;
   base = ++mesh->base;
-  find = 0;
+  find = iter = 0;
   iel  = 1;
-  
   do {
+    mvDir[0] = mvDir[1] = mvDir[2] = 0;
+    iter++;
     pt = &mesh->tria[iel];
     if ( !MG_EOK(pt) )  {
       iel++;
       if ( iel > mesh->nt ) return(0);
       continue;
     }
-    
+
     if ( pt->base == base)  {
       if ( !mmgWarn0 ) {
         mmgWarn0 = 1;
         fprintf(stderr,"\n  ## Warning: %s: numerical problem, please make"
                 " a bug report.\n",__func__);
       }
+      printf("num problem\n");
       return(iel);
     }
     /* Check whether ip is one of the vertices of pt */
-    if ( pt->v[0] == ip || pt->v[1] == ip || pt->v[2] == ip ) return(iel);
+    if ( (pt->v[0] == ip) || (pt->v[1] == ip) || (pt->v[2] == ip) ) return(iel);
+
     pt->base = base;
     iadr = 3*(iel-1)+1;
     adja = &mesh->adja[iadr];
-    /*Calculation of the barycentric coordinates of ip in tria iel*/
-    /*det(BM,CM)AM + det(CM,AM)BM + det(AM,BM)CM = 0*/
-    p0 = &mesh->point[pt->v[0]];
-    p1 = &mesh->point[pt->v[1]];
-    p2 = &mesh->point[pt->v[2]];
 
-    ax = p1->c[0] - p0->c[0];
-    ay = p1->c[1] - p0->c[1];
-    bx = p2->c[0] - p0->c[0];
-    by = p2->c[1] - p0->c[1];
-    dd = ax*by - ay*bx;
-    isign = dd > 0.0 ? 1 : -1;
-    epsra = isign * (EPST*dd);
-    
-    /* barycentric */
-    bx = p1->c[0] - ppt->c[0];
-    by = p1->c[1] - ppt->c[1];
-    cx = p2->c[0] - ppt->c[0];
-    cy = p2->c[1] - ppt->c[1];
+    /*compute the barycentric coordinates*/
+    ier = MMG2_coorbary(mesh,pt,mesh->point[ip].c,&det,&l1,&l2);
+    if ( !ier ) return(0);
 
-    /* p in 1 */
-    aire1 = isign*(bx*cy - by*cx);
-    if ( aire1 < epsra && adja[0] ) {
-      iel = adja[0] / 3;
-      continue;
+    l3 = 1-l1-l2;
+    /*warning -1e12 is too strict*/
+    eps = (-1e-9)*_MMG2_quickcal(mesh,pt);
+
+    /*find in which direction we can move*/
+    if (l1<eps)
+      mvDir[0] = 1;
+    if (l2<eps)
+      mvDir[1] = 1;
+    if (l3<eps)
+      mvDir[2] = 1;
+
+    /*if all the barycentric coordinates are positive, we find the triangle*/
+    if(!mvDir[0] && !mvDir[1] && !mvDir[2]) {
+      find = 1;
+      break;
     }
 
-    ax = p0->c[0] - ppt->c[0];
-    ay = p0->c[1] - ppt->c[1];
-    aire2 = isign*(cx*ay - cy*ax);
-    if ( aire2 < epsra && adja[1] ) {
-      iel = adja[1] / 3;
-      continue;
+    /*first, try to move in an optimal direction*/
+    iel = 0;
+    for(i=0;i<3; i++) {
+      if (!mvDir[i]) continue;
+      jel = adja[i]/3;
+
+      if (!jel) continue;
+      pt1 = &mesh->tria[jel];
+
+      if(pt1->base == mesh->base) continue;
+      iel = jel;
+      break;
     }
 
-    //aire3 = -epsra*EPSR - (aire1 + aire2);
-    /*try to be more robust...*/
-    // aire3 = M_MAX(aire3,isign*(bx*ay - by*ax));
-    aire3 = (isign*(ax*by - ay*bx));
-    if ( aire3 < epsra && adja[2] ) {
-      iel = adja[2] / 3;
-      continue;
+    /*second, the optimal move is not possible, so try to move in one direction*/
+    if(i==3) {
+      for(i=0;i<3; i++) {
+      	if (mvDir[i]) continue;
+      	jel = adja[i]/3;
+      	if (!jel) continue;
+      	pt1 = &mesh->tria[jel];
+      	if(pt1->base == mesh->base) continue;
+      	iel = jel;
+        break;
+      }
     }
-    find = 1;
-    /*aire1 = M_MAX(aire1,0.0);
-      aire2 = M_MAX(aire2,0.0);
-      aire3 = M_MAX(aire3,0.0);
 
-      dd = aire1+aire2+aire3;
-      if ( dd != 0.0 )  dd = 1.0 / dd;
-      cb[0] = aire1 * dd;
-      cb[1] = aire2 * dd;
-      cb[2] = aire3 * dd;*/
+    /*we already see all the adj triangle so we can do nothing*/
+    if (iel == 0) {
+      iter = mesh->nt+1;
+    }
+  } while (!find && (iter<=mesh->nt));
 
-  } while (!find);
-
-  /*exhaustive search*/
-  for (k=1 ; k<=mesh->nt ; k++) {
-    pt = &mesh->tria[k];
-    if(!MG_EOK(pt)) continue;
-    if (pt->v[0]==ip || pt->v[1]==ip || pt->v[2]==ip) break;
-  }
-  if(k<=mesh->nt) {
-    return(k);
-  }
-  return(0);
+  return(iel);
 }
 
 /**
