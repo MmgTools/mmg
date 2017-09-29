@@ -1074,9 +1074,18 @@ _MMG5_deltag(MMG5_pMesh mesh,int start,int ia,int16_t tag) {
   return(1);
 }
 
-/** Find all tets sharing edge ia of tetra start
-    return 2*ilist if shell is closed, 2*ilist +1 otherwise
-    return 0 if one of the tet of the shell is required */
+/**
+ * \param mesh pointer toward the mesh structure
+ * \param start index of the starting tetra
+ * \param ia index of the edge
+ * \param list list of tetra sharing the edge \a ia
+ *
+ * \return 2*ilist if shell is closed, 2*ilist +1 otherwise, 0 if one of the tet
+ * of the shell is required
+ *
+ * Find all tets sharing edge ia of tetra start.
+ *
+ */
 int _MMG5_coquil(MMG5_pMesh mesh,int start,int ia,int * list) {
   MMG5_pTetra pt;
   int         ilist,*adja,piv,adj,na,nb,ipa,ipb;

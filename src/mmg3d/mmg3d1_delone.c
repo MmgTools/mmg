@@ -96,7 +96,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
     else if ( pt->mark < base-2 )  continue;
     pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
 
-    /* 1) find longest and shortest edge  and try to manage it*/
+    /* 1) find longest and shortest edge  and try to manage it */
     imax = -1; lmax = 0.0;
     imin = -1; lmin = DBL_MAX;
     for (ii=0; ii<6; ii++) {
@@ -266,6 +266,8 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
       else if(pt->xt){
         continue;
         if ( (p0->tag & MG_BDY) && (p1->tag & MG_BDY) ) {
+          /* Some tetra have a boundary edges but no xtetra, thus if we split
+           * here, we create a boundary point but without the suitable tag */
           continue;
         }
         ilist = _MMG5_coquil(mesh,k,imax,list);
@@ -439,7 +441,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
       }
     } //end if lmin < _MMG3D_LOPTS_MMG5_DEL
 
-    /*2) longest and shortest edges are stucked => try another edges*/
+    /* 2) longest and shortest edges are stucked => try the other edges */
     imaxtet = imax;
     imintet = imin;
     lmaxtet = lmax;
@@ -587,6 +589,8 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
         else if(pt->xt){
           continue;
           if ( (p0->tag & MG_BDY) && (p1->tag & MG_BDY) ) {
+            /* Some tetra have a boundary edges but no xtetra, thus if we split
+             * here, we create a boundary point but without the suitable tag */
             continue;
           }
           ilist = _MMG5_coquil(mesh,k,imax,list);
