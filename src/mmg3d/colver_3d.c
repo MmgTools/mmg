@@ -101,6 +101,34 @@ int _MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
         if ( nr==3 ) return(0);
       }
     }
+    else {
+      /* In aniso : prevent from creating a tetra with 4 ridges vertices or
+       * internal edges between to ridges (unable to split it after because of
+       * the ridge metric) */
+      if ( met->size==6 ) {
+        p0 = &mesh->point[nq];
+
+        if ( p0->tag & MG_GEO ) {
+          i = ip;
+          for (jj=0; jj<3; jj++) {
+            i = _MMG5_inxt3[i];
+            p0 = &mesh->point[pt->v[i]];
+            if ( p0->tag & MG_GEO )  return(0);
+          }
+        }
+
+        if ( p0->tag & MG_GEO ) {
+          i  = ip;
+          nr = 0;
+          for (jj=0; jj<3; jj++) {
+            i = _MMG5_inxt3[i];
+            p0 = &mesh->point[pt->v[i]];
+            if ( p0->tag & MG_GEO ) ++nr;
+          }
+          if ( nr==3 ) return(0);
+        }
+      }
+    }
 
     pt0->v[ip] = nq;
 
