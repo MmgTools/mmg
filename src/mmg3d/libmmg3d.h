@@ -1783,7 +1783,7 @@ int MMG3D_defaultValues(MMG5_pMesh mesh);
  * \param argv command line arguments.
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.
- * \return 1.
+ * \return 1 if we want to run Mmg after, 0 if not or if fail.
  *
  * Store command line arguments.
  *

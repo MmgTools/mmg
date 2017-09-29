@@ -166,6 +166,7 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
   for ( i=1; i< argc; ++i ) {
     if ( !strcmp(argv[i],"-val") ) {
       if ( !MMG3D_defaultValues(mesh) ) return 0;
+      return 0;
     }
   }
 
