@@ -48,9 +48,10 @@
  */
 inline int _MMG5_moymet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,double *m1) {
   MMG5_pPoint  ppt;
-  double  mm[6],*mp;
-  double  dd;
-  int     i,k,n;
+  double       mm[6],*mp;
+  double       dd;
+  int          i,k,n;
+  static char  mmgWarn=0;
 
   n = 0;
   for (k=0; k<6; ++k) mm[k] = 0.;
@@ -65,7 +66,11 @@ inline int _MMG5_moymet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,double *m1)
   }
 
   if(!n) {
-    // fprintf(stderr,"\n  ## Warning: 4 ridges points... Unable to compute metric.\n");
+    if ( !mmgWarn ) {
+      mmgWarn=1;
+      fprintf(stderr,"\n  ## Warning: %s: at least 1 tetra with 4 ridges vertices"
+              "... Unable to compute metric.\n",__func__);
+    }
     return(0);
   }
   dd = 1./n;

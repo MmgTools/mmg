@@ -1521,7 +1521,7 @@ int _MMG5_coquilface(MMG5_pMesh mesh,int start,char iface,int ia,int *list,
   nb   = pt->v[ _MMG5_iare[ia][1] ];
 
   /* Travel throug the shell of the edge until reaching a tetra without adjacent
-   * or until reaching th starting tetra */
+   * or until reaching the starting tetra */
   ier = _MMG3D_coquilFaceFirstLoop(mesh,start,na,nb,iface,ia,list,&ilist,it1,it2,
                                    &piv,&adj,&hasadja,&nbdy,silent);
 
