@@ -23,7 +23,7 @@
 #include "mmg2d.h"
 
 #define  _MMG2_EPSRAD       1.00005
-#define  _MMG2_AREAMIN       1e-30
+#define  _MMG2_AREAMIN      1e-15 //1e-20 failed : creation of too bad element
 
 #define KTA     7
 #define KTB    11
@@ -371,7 +371,7 @@ int _MMG2_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
         pt1->qual = _MMG2_caltri_iso(mesh,sol,pt1);
         pt1->ref = pt->ref;
 
-        if ( (!mmgWarn0) && (pt1->qual < 1e-10) ) {
+        if ( (!mmgWarn0) && (pt1->qual < _MMG2_AREAMIN) ) {
           mmgWarn0 = 1;
           fprintf(stderr,"  ## Warning: %s: creation of a very bad element.\n",
                   __func__);
