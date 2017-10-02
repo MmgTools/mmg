@@ -83,12 +83,16 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
   int          ii;
   double       lmaxtet,lmintet,volmin;
   int          imaxtet,imintet,base;
+  char         chkRidTet;
   static char  mmgWarn0 = 0;
 
   /*first try to adapt the bdry so very strict criterion on the volume for Delaunay insertion*/
   volmin=1e-15;
 
   base = ++mesh->mark;
+
+  if ( met->size==6 )  chkRidTet=1;
+  else chkRidTet=0;
 
   for (k=1; k<=ne; k++) {
     pt = &mesh->tetra[k];
@@ -220,7 +224,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
            is the mid edge point */
         ier = _MMG3D_simbulgept(mesh,met,list,ilist,ip);
         if ( ier )
-          ier = _MMG5_split1b(mesh,met,list,ilist,ip,1,1);
+          ier = _MMG5_split1b(mesh,met,list,ilist,ip,1,1,chkRidTet);
 
         /* if we realloc memory in _MMG5_split1b pt and pxt pointers are not valid */
         pt = &mesh->tetra[k];
@@ -293,7 +297,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
         }
         ier = _MMG3D_simbulgept(mesh,met,list,ilist,ip);
         if ( ier )
-          ier = _MMG5_split1b(mesh,met,list,ilist,ip,1,1);
+          ier = _MMG5_split1b(mesh,met,list,ilist,ip,1,1,0);
         if ( ier < 0 ) {
           fprintf(stderr,"\n  ## Error: %s: unable to split.\n",__func__);
           _MMG3D_delPt(mesh,ip);
@@ -541,7 +545,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
             ier = _MMG3D_dichoto1b(mesh,met,list,ilist,ip);
           }
           if ( ier )
-            ier = _MMG5_split1b(mesh,met,list,ilist,ip,1,1);
+            ier = _MMG5_split1b(mesh,met,list,ilist,ip,1,1,chkRidTet);
 
           /* if we realloc memory in _MMG5_split1b pt and pxt pointers are not valid */
           pt = &mesh->tetra[k];
@@ -616,7 +620,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
           }
           ier = _MMG3D_simbulgept(mesh,met,list,ilist,ip);
           if ( ier )
-            ier = _MMG5_split1b(mesh,met,list,ilist,ip,1,1);
+            ier = _MMG5_split1b(mesh,met,list,ilist,ip,1,1,0);
           if ( ier < 0 ) {
             fprintf(stderr,"\n  ## Error: %s: unable to split.\n",__func__);
             _MMG3D_delPt(mesh,ip);

@@ -486,6 +486,7 @@ int _MMG3D_normalAdjaTri(MMG5_pMesh mesh , int start, char iface, int ia,
  * \param cas flag to watch the length of the new edges.
  * \param metRidTyp Type of storage of ridges metrics: 0 for classic storage,
  * 1 for special storage.
+ * \param chkRidTet if 1, avoid the creation of a tet with 4 ridge vertices
  * \return -1 if we fail, 0 if we don't split the edge, 1 if success.
  *
  * Split edge \f$list[0]\%6\f$, whose shell list is passed, introducing point \a
@@ -494,7 +495,7 @@ int _MMG3D_normalAdjaTri(MMG5_pMesh mesh , int start, char iface, int ia,
  *
  */
 int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
-                  int cas,char metRidTyp){
+                  int cas,char metRidTyp,char chkRidTet){
   MMG5_pTetra          pt,pt1,pt0;
   MMG5_xTetra          xt,xt1;
   MMG5_pxTetra         pxt0;
@@ -566,6 +567,11 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
       }
 
       pt0->v[_MMG5_isar[ie][1]] = ip;
+      if ( chkRidTet ) {
+        if ( !_MMG3D_chk4ridVertices(mesh,pt0) ) {
+          break;
+        }
+      }
       if ( (!metRidTyp) && met->m && met->size>1 )
         len = _MMG5_lenedgspl33_ani(mesh,met,taued[5],pt0);
       else
@@ -574,6 +580,12 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
       memcpy(pt0,pt,sizeof(MMG5_Tetra));
 
       pt0->v[_MMG5_isar[ie][0]] = ip;
+      if ( chkRidTet ) {
+        if ( !_MMG3D_chk4ridVertices(mesh,pt0) ) {
+          break;
+        }
+      }
+
       if ( (!metRidTyp) && met->m && met->size>1 )
         len = _MMG5_lenedgspl33_ani(mesh,met,taued[5],pt0);
       else
@@ -5257,7 +5269,7 @@ int _MMG5_splitedg(MMG5_pMesh mesh, MMG5_pSol met,int iel, int iar, double crit)
   if (!ier) return(0);
   ier = _MMG3D_chksplit(mesh,met,ip,&list[0],lon,crit);
   if(!ier) return(0);
-  ier = _MMG5_split1b(mesh,met,list,lon,ip,0,1);
+  ier = _MMG5_split1b(mesh,met,list,lon,ip,0,1,0);
   if ( ier < 0 ) {
     fprintf(stderr,"\n  ## Error: %s: unable to split.\n",__func__);
     return(-1);

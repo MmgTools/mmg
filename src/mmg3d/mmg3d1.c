@@ -1892,6 +1892,45 @@ static int _MMG5_anatet4(MMG5_pMesh mesh, MMG5_pSol met,int *nf, char typchk) {
   return(ns);
 }
 
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param nf number of swap performed.
+ * \param typchk type of checking permformed.
+ * \return -1 if failed, number of new points otherwise.
+ *
+ * Split tetra into 4 when more than 1 boundary faceor with 4 boundary vertices.
+ *
+ */
+static int _MMG5_anatet4rid(MMG5_pMesh mesh, MMG5_pSol met,int *nf, char typchk) {
+  MMG5_pTetra  pt;
+  MMG5_pPoint  ppt;
+  int          k,ns,ier;
+  char         nrid,j;
+
+  ns = 0;
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+    if ( !MG_EOK(pt) || pt->ref < 0 || (pt->tag & MG_REQ) )   continue;
+    nrid = 0;
+
+    for (j=0; j<4; j++) {
+      ppt = &mesh->point[pt->v[j]];
+      if ( (ppt->tag & MG_GEO) )  nrid++;
+    }
+    if ( nrid == 4 ) {
+      if ( !mesh->info.noinsert ) {
+        ier  = _MMG5_split4bar(mesh,met,k,typchk-1);
+        if ( !ier ) return(-1);
+        ns++;
+      }
+    }
+  }
+  if ( (mesh->info.ddebug || abs(mesh->info.imprim) > 5) && ns > 0 )
+    fprintf(stdout,"     boundary elements: %7d splitted\n",ns);
+  return(ns);
+}
+
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1923,6 +1962,10 @@ int _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,char typchk, int patternMode) {
       nf = 0;
       if ( mesh->info.fem == typchk ) {
         ier = _MMG5_anatet4(mesh,met,&nf,typchk);
+        if ( ier < 0 )  return(0);
+      }
+      else if ( (met->size==6) && (typchk == 1) && (it == minit) ) {
+        ier = _MMG5_anatet4rid(mesh,met,&nf,typchk);
         if ( ier < 0 )  return(0);
       }
       else ier = 0;

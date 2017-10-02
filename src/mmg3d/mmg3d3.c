@@ -201,7 +201,7 @@ static int _MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itdeg, 
     }
     
     /* Il y a un check sur la taille des arêtes ici aussi ! */
-    ier = _MMG5_split1b(mesh,met,list,ilist,ip,1,1);
+    ier = _MMG5_split1b(mesh,met,list,ilist,ip,1,1,0);
     if ( ier < 0 ) {
       fprintf(stderr,"\n  ## Error: %s: unable to split.\n",__func__);
       return(-1);

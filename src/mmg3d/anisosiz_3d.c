@@ -35,6 +35,27 @@
 
 #include "inlined_functions_3d.h"
 
+int _MMG3D_chk4ridVertices(MMG5_pMesh mesh, MMG5_pTetra pt) {
+  MMG5_pPoint  ppt;
+  int          i;
+  int          n;
+  static char  mmgWarn=0;
+
+  n = 0;
+  for(i=0 ; i<4 ; i++) {
+    ppt = &mesh->point[pt->v[i]];
+    if(!(MG_SIN(ppt->tag) || MG_NOM & ppt->tag) && (ppt->tag & MG_GEO)) continue;
+    n++;
+  }
+
+  if(!n) {
+    //fprintf(stderr,"\n  ## Warning: 4 ridges points... Unable to compute metric.\n");
+    return(0);
+  }
+
+  return 1;
+}
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.

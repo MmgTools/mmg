@@ -49,20 +49,25 @@
  *
  */
 static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
-  MMG5_pTetra     pt;
-  MMG5_pxTetra    pxt;
-  MMG5_Tria       ptt;
-  MMG5_pPoint     p0,p1,ppt;
-  MMG5_pxPoint    pxp;
-  double     dd,len,lmax,o[3],to[3],no1[3],no2[3],v[3];
-  int        k,ip,ip1,ip2,list[MMG3D_LMAX+2],ilist;
-  int        ns,ref,ier;
-  int16_t    tag;
-  char       imax,j,i,i1,i2,ifa0,ifa1;
-  static char mmgWarn = 0;
+ MMG5_pTetra  pt;
+ MMG5_pxTetra pxt;
+ MMG5_Tria    ptt;
+ MMG5_pPoint  p0,p1,ppt;
+ MMG5_pxPoint pxp;
+ double       dd,len,lmax,o[3],to[3],no1[3],no2[3],v[3];
+ int          k,ip,ip1,ip2,list[MMG3D_LMAX+2],ilist;
+ int          ns,ref,ier;
+ int16_t      tag;
+ char         imax,j,i,i1,i2,ifa0,ifa1;
+ char         chkRidTet;
+ static char  mmgWarn    = 0;
 
   *warn=0;
   ns = 0;
+
+  if ( met->size==6 )  chkRidTet=1;
+  else chkRidTet=0;
+
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
     if ( !MG_EOK(pt) || (pt->tag & MG_REQ) )   continue;
@@ -176,7 +181,7 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
       if ( !ier ) {
         ier = _MMG3D_dichoto1b(mesh,met,list,ilist,ip);
       }
-      if ( ier ) ier = _MMG5_split1b(mesh,met,list,ilist,ip,1,1);
+      if ( ier ) ier = _MMG5_split1b(mesh,met,list,ilist,ip,1,1,chkRidTet);
 
       /* if we realloc memory in _MMG5_split1b pt and pxt pointers are not valid */
       pt = &mesh->tetra[k];
@@ -247,7 +252,7 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
       }
       ier = _MMG3D_simbulgept(mesh,met,list,ilist,ip);
       if ( ier )
-        ier = _MMG5_split1b(mesh,met,list,ilist,ip,1,1);
+        ier = _MMG5_split1b(mesh,met,list,ilist,ip,1,1,0);
 
       if ( ier < 0 ) {
         fprintf(stderr,"\n  ## Error: %s: unable to split.\n",__func__);

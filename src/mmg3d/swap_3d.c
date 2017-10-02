@@ -483,7 +483,7 @@ int _MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,
     }
   }
 
-  ier = _MMG5_split1b(mesh,met,list,ret,nm,0,typchk-1);
+  ier = _MMG5_split1b(mesh,met,list,ret,nm,0,typchk-1,0);
   /* pointer adress may change if we need to realloc memory during split */
   pt  = &mesh->tetra[iel];
   pt1 = &mesh->tetra[iel1];

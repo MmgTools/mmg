@@ -290,7 +290,7 @@ int _MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,int *list,
 
   /** First step : split of edge (na,nb) */
   ret = 2*ilist + 0;
-  ier = _MMG5_split1b(mesh,met,list,ret,np,0,typchk-1);
+  ier = _MMG5_split1b(mesh,met,list,ret,np,0,typchk-1,0);
   /* pointer adress may change if we need to realloc memory during split */
   pt = &mesh->tetra[iel];
 

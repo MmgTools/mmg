@@ -294,7 +294,7 @@ int  _MMG3D_mmg3d2(MMG5_pMesh ,MMG5_pSol );
 int  _MMG5_mmg3dChkmsh(MMG5_pMesh,int,int);
 int  _MMG3D_split1_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]);
 int  _MMG5_split1(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp);
-int  _MMG5_split1b(MMG5_pMesh,MMG5_pSol,int*,int,int,int,char);
+int  _MMG5_split1b(MMG5_pMesh,MMG5_pSol,int*,int,int,int,char,char);
 int  _MMG5_splitedg(MMG5_pMesh mesh, MMG5_pSol met,int iel, int iar, double crit);
 int  _MMG3D_split2sf_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]);
 int  _MMG5_split2sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char);
@@ -434,6 +434,7 @@ int    _MMG3D_defsiz_ani(MMG5_pMesh ,MMG5_pSol );
 int    _MMG5_gradsiz_iso(MMG5_pMesh ,MMG5_pSol );
 int    _MMG5_gradsiz_ani(MMG5_pMesh ,MMG5_pSol );
 double     _MMG5_meansizreg_iso(MMG5_pMesh,MMG5_pSol,int,int*,int,double,double);
+int        _MMG3D_chk4ridVertices(MMG5_pMesh mesh,MMG5_pTetra pt);
 extern int _MMG5_moymet(MMG5_pMesh ,MMG5_pSol ,MMG5_pTetra ,double *);
 
 
