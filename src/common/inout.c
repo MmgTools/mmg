@@ -304,11 +304,8 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,const char *filename,
       fscanf((*inm),"%4s %d %d ",verNum,bin,&ver);
       mesh->ver = ver/4;
       if ( strncmp(verNum,"2.2",3) ) {
-        fprintf(stderr,"\n  ## Error: %s: bad format version (%s)."
+        fprintf(stderr,"\n  ## Warning: %s: format version (%s) may be not supported."
                 " Please, use the format version 2.2.\n",__func__,verNum);
-        fclose(*inm);
-        _MMG5_SAFE_FREE(*posNodeData);
-        return(-1);
       }
       if ( *bin ) {
         fread(&oneBin,sw,1,(*inm));
