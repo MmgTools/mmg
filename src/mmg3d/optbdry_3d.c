@@ -226,9 +226,6 @@ int _MMG3D_deletePoint(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,
   return(0);
 }
 
-int _MMG3D_splitItem(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,
-                     int k,int iar,double OCRIT);
-
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
