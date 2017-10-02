@@ -1888,7 +1888,7 @@ static int _MMG5_anatet4(MMG5_pMesh mesh, MMG5_pSol met,int *nf, char typchk) {
     }
   }
   if ( (mesh->info.ddebug || abs(mesh->info.imprim) > 5) && ns > 0 )
-    fprintf(stdout,"     boundary elements: %7d splitted %7d swapped\n",ns,*nf);
+    fprintf(stdout,"     boundary elements: %7d splitted\n",ns);
   return(ns);
 }
 

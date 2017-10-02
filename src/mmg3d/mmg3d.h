@@ -433,8 +433,9 @@ int    _MMG3D_defsiz_iso(MMG5_pMesh,MMG5_pSol );
 int    _MMG3D_defsiz_ani(MMG5_pMesh ,MMG5_pSol );
 int    _MMG5_gradsiz_iso(MMG5_pMesh ,MMG5_pSol );
 int    _MMG5_gradsiz_ani(MMG5_pMesh ,MMG5_pSol );
-double    _MMG5_meansizreg_iso(MMG5_pMesh,MMG5_pSol,int,int*,int,double,double);
-extern int    _MMG5_moymet(MMG5_pMesh ,MMG5_pSol ,MMG5_pTetra ,double *);
+double     _MMG5_meansizreg_iso(MMG5_pMesh,MMG5_pSol,int,int*,int,double,double);
+extern int _MMG5_moymet(MMG5_pMesh ,MMG5_pSol ,MMG5_pTetra ,double *);
+
 
 double (*_MMG5_lenedg)(MMG5_pMesh ,MMG5_pSol ,int, MMG5_pTetra );
 double (*_MMG5_lenedgspl)(MMG5_pMesh ,MMG5_pSol ,int, MMG5_pTetra );

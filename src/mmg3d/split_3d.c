@@ -528,7 +528,11 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
     }
     assert( lmin!=0 );
 
-    /* cree-t-on une trop petite arete ? (voir le bug de BUG_Split1b_SpereIso_0.125h_met) */
+    /** 2 different checks :
+        1) are we creating a too small edge  (BUG_Split1b_SpereIso_0.125h_met)
+        2) in aniso and from the last wave of anatet(typchk=1): avoid the
+        creation of a tetra with 4 ridge vertices.
+    **/
     for (j=0; j<ilist; j++) {
       iel = list[j] / 6;
       pt  = &mesh->tetra[iel];
