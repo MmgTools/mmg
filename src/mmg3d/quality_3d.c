@@ -586,7 +586,7 @@ int _MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
         fprintf(stdout,"     %5.1f < Q < %5.1f   %7d   %6.2f %%\n",
                 i/5.,i/5.+0.2,his[i],100.*(his[i]/(float)(mesh->ne-nex)));
       }
-      if(nrid) fprintf(stdout,"\n  ## WARNING: %d TETRA WITH 4 RIDGES POINTS\n",nrid);
+      if ( met->size==6 && nrid ) fprintf(stdout,"\n  ## WARNING: %d TETRA WITH 4 RIDGES POINTS\n",nrid);
     }
   }
 
