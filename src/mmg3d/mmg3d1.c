@@ -1905,14 +1905,15 @@ static int _MMG5_anatet4(MMG5_pMesh mesh, MMG5_pSol met,int *nf, char typchk) {
  *
  */
 int _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,char typchk, int patternMode) {
-  int     ier,nc,ns,nf,nnc,nns,nnf,it,maxit;
+  int     ier,nc,ns,nf,nnc,nns,nnf,it,minit,maxit;
 
   /* analyze tetras : initial splitting */
   nns = nnc = nnf = it = 0;
+  minit = 3;
   maxit = 5;
   mesh->gap = 0.5;
   do {
-    if ( typchk == 2 && it == maxit-1 )  ++mesh->info.fem;
+    if ( typchk == 2 && it == minit )  ++mesh->info.fem;
 
     /* memory free */
     _MMG5_DEL_MEM(mesh,mesh->adja,(4*mesh->nemax+5)*sizeof(int));
@@ -1988,7 +1989,7 @@ int _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,char typchk, int patternMode) {
 #endif
       fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped\n",ns,nc,nf);
     }
-    if ( it > 3 && ( !(ns+nc) || (abs(nc-ns) < 0.1 * MG_MAX(nc,ns)) ) )  break;
+    if ( it > minit && ( !(ns+nc) || (abs(nc-ns) < 0.1 * MG_MAX(nc,ns)) ) )  break;
   }
   while ( ++it < maxit && ns+nc+nf > 0 );
 
