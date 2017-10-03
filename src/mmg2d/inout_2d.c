@@ -662,6 +662,9 @@ int MMG2D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
    * z-componant */
   if ( !MMG2D_2dMshCheck(mesh) ) return -1;
 
+  /* No metric in the input file but we will automatically compute it */
+  if ( !mesh->nsols ) mesh->nsols=1;
+
   return(1);
 }
 

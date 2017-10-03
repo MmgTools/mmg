@@ -722,6 +722,9 @@ int MMGS_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   /* Check the metric type */
   ier = MMG5_chkMetricType(mesh,&sol->type,inm);
 
+  /* No metric in the input file but we will automatically compute it */
+  if ( !mesh->nsols ) mesh->nsols=1;
+
   return ier;
 }
 
