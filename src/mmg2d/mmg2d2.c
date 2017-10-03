@@ -166,7 +166,7 @@ int MMG2_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pPoint ppt;
   int         list[MMG2_LONMAX],lon;
   int         k,kk;
-  int         iter,maxiter,ns,nus;
+  int         iter,maxiter,ns,nus,nu,nud;
   static char mmgWarn0=0,mmgWarn1=0,mmgWarn2=0;
 
   for(k=1; k<=mesh->np-4; k++) {
@@ -174,10 +174,12 @@ int MMG2_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
     ppt->flag	= -10;
   }
   iter = 0;
-  maxiter = 3;
-
+  maxiter = 10;
+  
 	do {
     ns = nus = 0;
+    nu = nud = 0;
+    mmgWarn1 = mmgWarn2 = 0;
     for(k=1; k<=mesh->np-4; k++) {
       ppt = &mesh->point[k];
 		  if(ppt->flag != -10) continue;
@@ -199,7 +201,7 @@ int MMG2_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
           if ( !mmgWarn0 ) {
             mmgWarn0 = 1;
             fprintf(stderr,"\n  ## Error: %s: unable to find triangle"
-                    " for at least 1 vertex.\n",__func__);
+                    " for at least vertex %8d.\n",__func__,k);
           }
           return(0);
         }
@@ -209,19 +211,21 @@ int MMG2_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
       lon = _MMG2_cavity(mesh,sol,k,list);
 
       if ( lon < 1 ) {
+        nu++;
         if ( !mmgWarn1 ) {
           mmgWarn1 = 1;
-          fprintf(stderr,"\n  ## Error: %s: unable to insert "
-                  "at least 1 vertex.\n",__func__);
+          if(mesh->info.imprim < 0) fprintf(stderr,"\n  ## Warning: %s: unable to insert "
+                                            "at least 1 vertex. (%8d)\n",__func__,k);
         }
-        return(0);
+        continue;
       } else {
 				if(!_MMG2_delone(mesh,sol,k,list,lon)) {
 			    if(mesh->info.imprim > 4) {
+            nud++;
             if ( !mmgWarn2 ) {
               mmgWarn2 = 1;
-              fprintf(stderr,"\n  ## Warning: %s: unable to"
-                      " insert at least 1 point with Delaunay\n",__func__);
+              if(mesh->info.imprim < 0) fprintf(stderr,"\n  ## Warning: %s: unable to"
+                                                " insert at least 1 point with Delaunay (%8d)\n",__func__,k);
             }
           }
         } else {
@@ -230,7 +234,11 @@ int MMG2_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
         }
       }
     }
-	  if(mesh->info.imprim > 5) fprintf(stdout,"     %8d vertex inserted\n",ns);
+
+    if(mesh->info.imprim > 4)
+      fprintf(stdout,"     %8d vertex inserted %8d not inserted\n",ns,nu+nud);
+    if(mesh->info.imprim < 0)
+      fprintf(stdout,"     unable to insert %8d vertex : cavity %8d -- delaunay %8d \n",nu+nud,nu,nud);
   } while (ns && ++iter<maxiter);
 
 	if(abs(nus-ns)) {
