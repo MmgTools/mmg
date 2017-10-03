@@ -352,7 +352,7 @@ int MMG2_bdryEdge(MMG5_pMesh mesh) {
  *
  */
 int MMG2_pack(MMG5_pMesh mesh,MMG5_pSol sol) {
-  MMG5_pTria         pt,pt1,ptnew;
+  MMG5_pTria         pt,ptnew;
   MMG5_pEdge         ped;
   MMG5_pPoint        ppt,pptnew;
   int                np,ned,nt,k,iel,nbl,isol,isolnew,memWarn,nc;
@@ -408,7 +408,6 @@ int MMG2_pack(MMG5_pMesh mesh,MMG5_pSol sol) {
 
       if ( !iel ) ++mesh->na;
       else if ( iel < k ) {
-        pt1 = &mesh->tria[iel];
         if ( MG_SIN(pt->tag[i]) ) ++mesh->na;
       }
     }
@@ -446,7 +445,6 @@ int MMG2_pack(MMG5_pMesh mesh,MMG5_pSol sol) {
           i1 = _MMG5_inxt2[i];
           i2 = _MMG5_iprv2[i];
           iel = adja[i] / 3;
-          pt1 = &mesh->tria[iel];
           if ( (!iel) || ( iel < k && MG_SIN(pt->tag[i]) ) ) {
             ++ned;
             ped = &mesh->edge[ned];
