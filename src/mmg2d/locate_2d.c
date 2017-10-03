@@ -216,7 +216,7 @@ int MMG2_cutEdgeTriangle(MMG5_pMesh mesh,int k,int ia,int ib) {
 /** Return the index of one triangle containing ip */
 int MMG2_findTria(MMG5_pMesh mesh,int ip) {
   MMG5_pTria  pt,pt1;
-  int         k,find,iel,base,iadr,*adja,isign,iter,ier;
+  int         find,iel,base,iadr,*adja,iter,ier;
   int         mvDir[3],jel,i;
   double      l1,l2,l3,det,eps;
   static char mmgWarn0 = 0;
