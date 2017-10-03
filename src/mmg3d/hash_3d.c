@@ -1165,20 +1165,29 @@ int _MMG5_bdryTria(MMG5_pMesh mesh, int ntmesh) {
   hash.item = NULL;
 
   ntinit = mesh->nt;
-  if ( mesh->nt ) {
+
+  if  ( mesh->nprism && (ntmesh!=ntinit) ) {
+    /* If a triangle at the interface between a prism and a tetra is not
+     * provided, the hashtable is used to recover from the prism a boundary tria
+     * created by tetra */
+    if ( ! _MMG5_hashNew(mesh,&hash,0.51*ntmesh,1.51*ntmesh) ) return(0);
+    tofree=1;
+  }
+  else if ( mesh->nt ) {
     /* Hash given bdry triangles */
     if ( ! _MMG5_hashNew(mesh,&hash,0.51*mesh->nt,1.51*mesh->nt) ) return(0);
     tofree=1;
-    for (k=1; k<=mesh->nt; k++) {
-      ptt = &mesh->tria[k];
-      if ( !_MMG5_hashFace(mesh,&hash,ptt->v[0],ptt->v[1],ptt->v[2],k) ) {
-        _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
-        return(0);
-      }
-      for (i=0; i<3; i++) {
-        ppt = &mesh->point[ptt->v[i]];
-        if ( !mesh->info.iso ) ppt->tag |= MG_BDY;
-      }
+  }
+
+  for (k=1; k<=mesh->nt; k++) {
+    ptt = &mesh->tria[k];
+    if ( !_MMG5_hashFace(mesh,&hash,ptt->v[0],ptt->v[1],ptt->v[2],k) ) {
+      _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
+      return(0);
+    }
+    for (i=0; i<3; i++) {
+      ppt = &mesh->point[ptt->v[i]];
+      if ( !mesh->info.iso ) ppt->tag |= MG_BDY;
     }
   }
 
@@ -1209,6 +1218,14 @@ int _MMG5_bdryTria(MMG5_pMesh mesh, int ntmesh) {
         kt = _MMG5_hashGetFace(&hash,ia,ib,ic);
         if ( kt ) {
           continue;
+        }
+        else if ( mesh->nprism ) {
+          /* Update the list of boundary trias to be able to recover tria at the
+           * interface between tet and prisms */
+          if ( !_MMG5_hashFace(mesh,&hash,ia,ib,ic,mesh->nt+1) ) {
+            _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
+            return(0);
+          }
         }
 
         mesh->nt++;
