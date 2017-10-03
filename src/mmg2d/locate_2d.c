@@ -216,14 +216,11 @@ int MMG2_cutEdgeTriangle(MMG5_pMesh mesh,int k,int ia,int ib) {
 /** Return the index of one triangle containing ip */
 int MMG2_findTria(MMG5_pMesh mesh,int ip) {
   MMG5_pTria  pt,pt1;
-  MMG5_pPoint ppt,p0,p1,p2;
   int         k,find,iel,base,iadr,*adja,isign,iter,ier;
   int         mvDir[3],jel,i;
-  double      ax,ay,bx,by,dd,epsra,cx,cy,aire1,aire2,aire3;
   double      l1,l2,l3,det,eps;
   static char mmgWarn0 = 0;
 
-  ppt  = &mesh->point[ip];
   ++mesh->base;
   base = ++mesh->base;
   find = iter = 0;
@@ -244,7 +241,6 @@ int MMG2_findTria(MMG5_pMesh mesh,int ip) {
         fprintf(stderr,"\n  ## Warning: %s: numerical problem, please make"
                 " a bug report.\n",__func__);
       }
-      printf("num problem\n");
       return(iel);
     }
     /* Check whether ip is one of the vertices of pt */

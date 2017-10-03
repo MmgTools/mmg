@@ -468,7 +468,7 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
   int            ier,i,nd,ne,npeau;
   int            it,maxit,ntot,base;
 //  double         OCRIT = 1.01;
-  int ddebug,nbdy,nbdy2 ;
+  int            nbdy,nbdy2 ;
 
   ntot = 0;
   crit = 0.2 / _MMG3D_ALPHAD;
@@ -487,8 +487,6 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
       pt = &mesh->tetra[k];
       if(!MG_EOK(pt)  || (pt->tag & MG_REQ) ) continue;
       else if ( pt->mark < base-2 )  continue;
-
-      ddebug = 0;
 
       if(pt->qual > crit) continue;
 

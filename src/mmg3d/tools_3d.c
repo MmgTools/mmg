@@ -995,9 +995,8 @@ int _MMG3D_localParamNm(MMG5_pMesh mesh,int iel,int iface,int ia,
   MMG5_pxTetra pxt;
   MMG5_pPar    par;
   double       hausd, hmin, hmax;
-  int          l,k,isloc,ifac1,ifac2,ip0,ip1;
+  int          l,k,isloc,ifac1,ifac2;
   int          listv[MMG3D_LMAX+2],ilistv;
-  char         i0,i1;
   static char  mmgWarn0;
 
 
@@ -1009,13 +1008,16 @@ int _MMG3D_localParamNm(MMG5_pMesh mesh,int iel,int iface,int ia,
   pt = &mesh->tetra[iel];
   pxt = &mesh->xtetra[pt->xt];
 
-  i0 = _MMG5_iare[ia][0];
-  i1 = _MMG5_iare[ia][1];
-  ip0 = pt->v[i0];
-  ip1 = pt->v[i1];
-
   /* local parameters at vertices: useless for now because new points are
    * created without reference (inside the domain) */
+
+  /* int          ip0,ip1; */
+  /* char         i0,i1; */
+  /* i0 = _MMG5_iare[ia][0]; */
+  /* i1 = _MMG5_iare[ia][1]; */
+  /* ip0 = pt->v[i0]; */
+  /* ip1 = pt->v[i1]; */
+
   /* if ( mesh->info.parTyp & MG_Vert ) { */
   /*   p0  = &mesh->point[ip0]; */
   /*   p1  = &mesh->point[ip1]; */

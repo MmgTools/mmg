@@ -208,7 +208,6 @@ int _MMG3D_coledges(MMG5_pMesh mesh,MMG5_pSol met,int k,int i) {
  */
 int _MMG3D_deletePoint(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,
                        int k,int i) {
-  MMG5_pTetra pt;
   int         il,ilist,iel,ip,list[MMG3D_LMAX+2];
 
   ilist = _MMG5_boulevolp(mesh,k,i,list);
@@ -217,7 +216,6 @@ int _MMG3D_deletePoint(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,
   for(il = 0 ; il<ilist ; il++) {
     iel = list[il] / 4;
     ip  = list[il] % 4;
-    pt  = &mesh->tetra[iel];
     if( _MMG3D_coledges(mesh,met,iel,ip) ) {
       return(1);
     }

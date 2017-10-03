@@ -1931,8 +1931,8 @@ int _MMG3D_movv_ani(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
 int _MMG3D_movnormal_iso(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
   MMG5_pTetra pt,pt1;
   MMG5_pPoint ppa,ppb,p1,p2,p3;
-  int         j,iadr,ipb,iter,maxiter,l,lon,iel,i1,i2,i3,list[MMG3D_LMAX+2];;
-  double      hp,coe,crit,qualtet[MMG3D_LMAX+2];;
+  int         j,iadr,ipb,iter,maxiter,l,lon,iel,i1,i2,i3,list[MMG3D_LMAX+2];
+  double      coe,crit,qualtet[MMG3D_LMAX+2];
   double      ax,ay,az,bx,by,bz,nx,ny,nz,dd,len,qual,oldc[3],oldp[3];
 
   assert(k);
@@ -1943,7 +1943,6 @@ int _MMG3D_movnormal_iso(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
   if(ppa->tag & MG_BDY) return(0);
 
   iadr = (pt->v[ib])*sol->size;
-  hp   = sol->m[iadr];
 
   /*compute normal*/
   i1 = pt->v[_MMG5_idir[ib][0]];

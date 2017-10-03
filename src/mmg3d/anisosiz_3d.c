@@ -39,7 +39,6 @@ int _MMG3D_chk4ridVertices(MMG5_pMesh mesh, MMG5_pTetra pt) {
   MMG5_pPoint  ppt;
   int          i;
   int          n;
-  static char  mmgWarn=0;
 
   n = 0;
   for(i=0 ; i<4 ; i++) {
