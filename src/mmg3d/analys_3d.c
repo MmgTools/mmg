@@ -143,10 +143,12 @@ static int _MMG5_setadj(MMG5_pMesh mesh){
         }
 
         /* open boundary */
+        tag = MG_GEO;
+        if ( mesh->info.opnbdy ) tag += MG_OPNBDY;
         if ( !adja[i] ) {
-          pt->tag[i] |= MG_GEO + MG_OPNBDY;
-          mesh->point[ip1].tag |= MG_GEO + MG_OPNBDY;
-          mesh->point[ip2].tag |= MG_GEO + MG_OPNBDY;
+          pt->tag[i] |= tag;
+          mesh->point[ip1].tag |= tag;
+          mesh->point[ip2].tag |= tag;
           ned++;
           continue;
         }
