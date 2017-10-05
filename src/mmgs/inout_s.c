@@ -1427,10 +1427,8 @@ int MMGS_saveSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
 
   met->ver = 2;
 
-  assert ( mesh->nsols==1 );
-
   ier = MMG5_saveSolHeader( mesh,filename,&inm,met->ver,&bin,mesh->np,met->dim,
-                            mesh->nsols,&met->type,&met->size);
+                            1,&met->type,&met->size);
 
   if ( ier < 1 )  return ier;
 
