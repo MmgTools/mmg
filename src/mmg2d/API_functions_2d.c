@@ -315,7 +315,7 @@ int MMG2D_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int
     sol->size = 1;
   }
   else if ( typSol == MMG5_Vector ) {
-    sol->size = 3;
+    sol->size = 2;
   }
   else if ( typSol == MMG5_Tensor ) {
     sol->size = 3;
