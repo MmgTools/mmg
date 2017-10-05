@@ -87,14 +87,14 @@ enum MMG2D_Param {
  *
  * \return 1 if success, 0 if fail
  *
- * For the MMGS_mmgslib function, you need
- * to call the \a MMGS_Init_mesh function with the following arguments :
- * MMGS_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh, MMG5_ARG_ppMet,
+ * For the MMG2D_mmgslib function, you need
+ * to call the \a MMG2D_Init_mesh function with the following arguments :
+ * MMG2D_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh, MMG5_ARG_ppMet,
  * &your_metric,MMG5_ARG_end).
  *
- * For the MMGS_mmgsls function, you need
- * to call the \a MMGS_Init_mesh function with the following arguments :
- * MMGS_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh, MMG5_ARG_ppLs,
+ * For the MMG2D_mmgsls function, you need
+ * to call the \a MMG2D_Init_mesh function with the following arguments :
+ * MMG2D_Init_mesh(MMG5_ARG_start,MMG5_ARG_ppMesh, &your_mesh, MMG5_ARG_ppLs,
  * &your_level_set,MMG5_ARG_end).
  *
  * Here,\a your_mesh is a \a MMG5_pMesh, \a your_metric and \a your_level_set

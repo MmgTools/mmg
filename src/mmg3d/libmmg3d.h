@@ -2055,7 +2055,7 @@ void  MMG3D_setfunc(MMG5_pMesh mesh,MMG5_pSol met);
  * triangle.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG2D_GET_TETFROMTRIA(mesh,ktri,ktet,iface,retval)\n
+ * >   SUBROUTINE MMG3D_GET_TETFROMTRIA(mesh,ktri,ktet,iface,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(IN)              :: mesh\n
  * >     INTEGER, INTENT(IN)                      :: ktri\n
  * >     INTEGER, INTENT(OUT)                     :: ktet,iface,retval\n
