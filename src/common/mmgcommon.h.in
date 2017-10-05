@@ -520,7 +520,7 @@ void            MMG5_readFloatSol3D(MMG5_pSol,FILE*,int,int,int);
 void            MMG5_readDoubleSol3D(MMG5_pSol,FILE*,int,int,int);
 int             MMG5_saveSolHeader( MMG5_pMesh,const char*,FILE**,int,int*,int,
                                     int,int,int*,int*);
-void            MMG5_writeDoubleSol3D(MMG5_pMesh,MMG5_pSol,FILE*,int,int);
+void            MMG5_writeDoubleSol3D(MMG5_pMesh,MMG5_pSol,FILE*,int,int,int);
 void            MMG5_printMetStats(MMG5_pMesh mesh,MMG5_pSol met);
 void            MMG5_printSolStats(MMG5_pMesh mesh,MMG5_pSol *sol);
 void            MMG5_chooseOutputFormat(MMG5_pMesh mesh, int *msh);

@@ -1942,7 +1942,7 @@ int MMG3D_saveSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
     ppt = &mesh->point[k];
     if ( !MG_VOK(ppt) ) continue;
 
-    MMG5_writeDoubleSol3D(mesh,met,inm,bin,k);
+    MMG5_writeDoubleSol3D(mesh,met,inm,bin,k,1);
     fprintf(inm,"\n");
   }
 
@@ -1998,7 +1998,7 @@ int MMG3D_saveAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
 
     for ( j=0; j<mesh->nsols; ++j ) {
       psl = *sol+j;
-      MMG5_writeDoubleSol3D(mesh,psl,inm,bin,k);
+      MMG5_writeDoubleSol3D(mesh,psl,inm,bin,k,0);
     }
     fprintf(inm,"\n");
   }

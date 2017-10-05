@@ -2149,13 +2149,14 @@ void MMG5_readDoubleSol3D(MMG5_pSol sol,FILE *inm,int bin,int iswp,int pos) {
  * \param sol pointer toward an allocatable sol structure.
  * \param inm pointer toward the solution file
  * \param bin 1 if binary file
- * \param index of the writted solution
+ * \param pos of the writted solution
+ * \param metricData 1 if the data saved is a metric (if only 1 data)
  *
  * Write the solution value for vertex of index pos in double precision.
  *
  */
 void MMG5_writeDoubleSol3D(MMG5_pMesh mesh,MMG5_pSol sol,FILE *inm,int bin,
-                           int pos) {
+                           int pos,int metricData) {
   double      dbuf[6],tmp;
   int         i;
 
@@ -2176,7 +2177,8 @@ void MMG5_writeDoubleSol3D(MMG5_pMesh mesh,MMG5_pSol sol,FILE *inm,int bin,
 
   case 6 :
     /* tensor solution */
-    MMG5_build3DMetric(mesh,sol,pos,dbuf);
+    if ( metricData )
+      MMG5_build3DMetric(mesh,sol,pos,dbuf);
 
     tmp = dbuf[2];
     dbuf[2] = dbuf[3];
