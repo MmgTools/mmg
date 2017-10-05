@@ -1685,6 +1685,7 @@ int _MMG5_bdrySet(MMG5_pMesh mesh) {
   MMG5_pxPrism  pxp;
   _MMG5_Hash     hash;
   int      ref,*adja,adj,k,kt,ia,ib,ic,j,na,initedg[3];
+  int      ie_tet,ie_tri,ip0_tet,ip1_tet,ip0_tri,ip1_tri;
   int16_t  tag,inittag[3];
   char     i,i1,i2;
 
@@ -1795,12 +1796,9 @@ int _MMG5_bdrySet(MMG5_pMesh mesh) {
       for (i=0; i<4; i++) {
         adj = adja[i] / 4;
         pt1 = &mesh->tetra[adj];
-        /* Set flag to know if tetra has the same orientation than the triangle */
-        if ( adj && pt->ref < pt1->ref )  MG_CLR(pxt->ori,i);
-        else  MG_SET(pxt->ori,i);
         /* Set edge tag */
         if ( pxt->ftag[i] ) {
-          if ( adj && (pt->ref <= pt1->ref || (pt->ref == MG_PLUS)) ) {
+          if ( adj && (pt->ref == pt1->ref ) ) {
             continue;
           }
           else {
@@ -1809,11 +1807,21 @@ int _MMG5_bdrySet(MMG5_pMesh mesh) {
             ic = pt->v[_MMG5_idir[i][2]];
             kt = _MMG5_hashGetFace(&hash,ia,ib,ic);
             ptt = &mesh->tria[kt];
-            for (j=0; j<3; j++) {
-              tag = pxt->ftag[i] | ptt->tag[j];
-              if ( tag )
-                _MMG5_settag(mesh,k,_MMG5_iarf[i][j],tag,ptt->edg[j]);
+
+            /* Set flag to know if tetra has the same orientation than the
+             * triangle: here, we can not suppose that the triangle are oriented
+             * with respect to the face orientation because for non manifold
+             * cases, setadj may have reoriented the triangles */
+            if ( ptt->v[0] == ia && ptt->v[1] == ib && ptt->v[2] == ic ) {
+              MG_SET(pxt->ori,i);
+              for (j=0; j<3; j++) {
+                tag = pxt->ftag[i] | ptt->tag[j];
+                if ( tag )
+                  _MMG5_settag(mesh,k,_MMG5_iarf[i][j],tag,ptt->edg[j]);
+              }
             }
+            else
+              MG_CLR(pxt->ori,i);
           }
         }
       }
