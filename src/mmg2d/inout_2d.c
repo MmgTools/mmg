@@ -1455,7 +1455,7 @@ int MMG2D_saveSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   sol->ver = 2;
 
   ier = MMG5_saveSolHeader( mesh,filename,&inm,sol->ver,&bin,mesh->np,sol->dim,
-                            mesh->nsols,&sol->type,&sol->size);
+                            1,&sol->type,&sol->size);
 
   if ( ier < 1 ) return ier;
 

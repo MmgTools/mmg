@@ -532,6 +532,7 @@ typedef struct {
   int       size; /* Number of solutions per entity */
   int       type; /* Type of the solution (scalar, vectorial of tensorial) */
   double   *m; /*!< Solution values */
+  double    umin,umax; /*!<Min/max values for the solution */
   char     *namein; /*!< Input solution file name */
   char     *nameout; /*!< Output solution file name */
 } MMG5_Sol;
