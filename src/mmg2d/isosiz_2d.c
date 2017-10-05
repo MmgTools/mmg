@@ -63,15 +63,12 @@ int _MMG2_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
 
   /* Allocate the structure */
   if ( !met->np ) {
-    met->npmax = mesh->npmax;
-    met->np    = mesh->np;
-    met->size  = 1;
 
-    if ( !met->m ) {
-      _MMG5_ADD_MEM(mesh,(met->npmax+1)*sizeof(double),"solution",return(0));
-      _MMG5_SAFE_MALLOC(met->m,mesh->npmax+1,double,0);
-
+    /* Allocate and store the header informations for each solution */
+    if ( !MMG2D_Set_solSize(mesh,met,MMG5_Vertex,mesh->np,1) ) {
+      return 0;
     }
+
     /* Initialize metric with a constant size in the case met->np = 0 (meaning that no metric was supplied) */
     for (k=1; k<=mesh->np; k++)
       met->m[k] = hmax;

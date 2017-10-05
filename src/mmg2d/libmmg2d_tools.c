@@ -253,12 +253,14 @@ int MMG2D_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met) {
   int         k,iadr;
 
   /* Memory alloc */
-  met->np     = mesh->np;
-  met->npmax  = mesh->npmax;
-  met->dim    = mesh->dim;
+  if ( met->size!=1 && met->size!=3 ) {
+    fprintf(stderr,"\n  ## Error: %s: unexpected size of metric: %d.\n",
+            __func__,met->size);
+    return 0;
+  }
 
-  _MMG5_ADD_MEM(mesh,(met->size*(met->npmax+1))*sizeof(double),"solution",return(0));
-  _MMG5_SAFE_CALLOC(met->m,met->size*(met->npmax+1),double,0);
+  if ( !MMG2D_Set_solSize(mesh,met,MMG5_Vertex,mesh->np,met->size) )
+    return 0;
 
   if ( !MMG5_Compute_constantSize(mesh,met,&hsiz) )
     return 0;

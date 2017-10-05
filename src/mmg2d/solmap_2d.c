@@ -51,13 +51,14 @@ int MMG2D_doSol(MMG5_pMesh mesh,MMG5_pSol sol) {
   int             MMG_inxtt[5] = {0,1,2,0,1};
 
   /* Memory alloc */
-  sol->np     = mesh->np;
-  sol->npmax  = mesh->npmax;
-  sol->dim    = mesh->dim;
+  if ( sol->size!=1 && sol->size!=3 ) {
+    fprintf(stderr,"\n  ## Error: %s: unexpected size of metric: %d.\n",
+            __func__,sol->size);
+    return 0;
+  }
 
-  _MMG5_ADD_MEM(mesh,(sol->size*(sol->npmax+1))*sizeof(double),"solution",return(0));
-  _MMG5_SAFE_CALLOC(sol->m,sol->size*(sol->npmax+1),double,0);
-
+  if ( !MMG2D_Set_solSize(mesh,sol,MMG5_Vertex,mesh->np,sol->size) )
+    return 0;
 
   for (k=1; k<=mesh->np; k++) {
     p1 = &mesh->point[k];

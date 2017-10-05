@@ -534,12 +534,11 @@ int _MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   /* alloc structure */
   if ( !met->m ) {
     ismet      = 0;
-    met->np    = mesh->np;
-    met->npmax = mesh->npmax;
-    met->size  = 1;
-    met->dim   = 3;
-    _MMG5_ADD_MEM(mesh,(met->npmax+1)*sizeof(double),"solution",return(0));
-    _MMG5_SAFE_MALLOC(met->m,(mesh->npmax+1),double,0);
+
+    /* Allocate and store the header informations for each solution */
+    if ( !MMG3D_Set_solSize(mesh,met,MMG5_Vertex,mesh->np,1) ) {
+      return 0;
+    }
 
     /* init constant size */
     for (k=1; k<=mesh->ne; k++) {

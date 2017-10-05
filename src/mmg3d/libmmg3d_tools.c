@@ -750,18 +750,22 @@ int MMG3D_doSol(MMG5_pMesh mesh,MMG5_pSol met) {
     MMG5_pTetra  pt;
     MMG5_pPoint  p1,p2;
     double       ux,uy,uz,dd;
-    int          i,k,iadr,ia,ib,ipa,ipb;
+    int          i,k,iadr,ia,ib,ipa,ipb,type;
     int         *mark;
 
     _MMG5_SAFE_CALLOC(mark,mesh->np+1,int,0);
 
     /* Memory alloc */
-    met->np     = mesh->np;
-    met->npmax  = mesh->npmax;
-    met->dim    = mesh->dim;
+    if ( met->size==1 ) type=1;
+    else if ( met->size==6 ) type = 3;
+    else {
+      fprintf(stderr,"\n  ## Error: %s: unexpected size of metric: %d.\n",
+              __func__,met->size);
+      return 0;
+    }
 
-    _MMG5_ADD_MEM(mesh,(met->size*(met->npmax+1))*sizeof(double),"solution",return(0));
-    _MMG5_SAFE_CALLOC(met->m,met->size*(met->npmax+1),double,0);
+    if ( !MMG3D_Set_solSize(mesh,met,MMG5_Vertex,mesh->np,type) )
+      return 0;
 
     /* edges */
     for (k=1; k<=mesh->ne; k++) {
@@ -876,15 +880,18 @@ int MMG3D_doSol(MMG5_pMesh mesh,MMG5_pSol met) {
 int MMG3D_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pPoint ppt;
   double      hsiz;
-  int         k,iadr;
+  int         k,iadr,type;
 
   /* Memory alloc */
-  met->np     = mesh->np;
-  met->npmax  = mesh->npmax;
-  met->dim    = mesh->dim;
-
-  _MMG5_ADD_MEM(mesh,(met->size*(met->npmax+1))*sizeof(double),"solution",return(0));
-  _MMG5_SAFE_CALLOC(met->m,met->size*(met->npmax+1),double,0);
+  if ( met->size==1 ) type=1;
+  else if ( met->size==6 ) type = 3;
+  else {
+    fprintf(stderr,"\n  ## Error: %s: unexpected size of metric: %d.\n",
+            __func__,met->size);
+    return 0;
+  }
+  if ( !MMG3D_Set_solSize(mesh,met,MMG5_Vertex,mesh->np,type) )
+    return 0;
 
   if ( !MMG5_Compute_constantSize(mesh,met,&hsiz) )
     return 0;
