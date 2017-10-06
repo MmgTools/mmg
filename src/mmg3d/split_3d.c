@@ -293,7 +293,9 @@ int _MMG3D_normalDeviation(MMG5_pMesh mesh , int  start, char   iface, char ia,
 
   /** Compute the normal of the second triangle (triangle adjacent to the first
    * through the edge iploc) */
-  if ( !_MMG3D_normalAdjaTri(mesh,start,iface,iploc,n1) ) return -1;
+  ier = _MMG3D_normalAdjaTri(mesh,start,iface,iploc,n1);
+  if ( ier<0 ) return -1;
+  else if ( !ier ) return 0;
 
   ier =  _MMG5_devangle( n0, n1, mesh->info.dhd );
 
@@ -441,7 +443,7 @@ int _MMG3D_simbulgept(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int ip) {
  *              the adjacent triangle of the triangle \a iface of \a start.
  * \param n     normal of the new boundary face in the tetra idx.
  *
- * \return 1 if success, 0 if fail.
+ * \return 1 if success, 0 if we want to refuse the collapse, -1 if fail.
  *
  * Compute the normal of the adjacent triangle of the triangle \a iface of the
  * tetra \a start through the edge \a ia (in local numbering of the face).
@@ -458,10 +460,12 @@ int _MMG3D_normalAdjaTri(MMG5_pMesh mesh , int start, char iface, int ia,
   /** Store the adjacent boundary triangle (triangle adjacent to \a iface
    * through the edge ia */
   if ( !_MMG5_coquilface( mesh,start,iface,iedgeOpp,list,&it1,&it2,0) )
-    return 0;
+    return -1;
 
   if ( it1/4 != start || it1%4 != iface ) {
-    assert ( it2/4==start && it2%4==iface );
+    //assert ( it2/4==start && it2%4==iface );
+    if ( it2/4!=start || it2%4!=iface ) return 0;
+
     it = it1;
   }
   else {

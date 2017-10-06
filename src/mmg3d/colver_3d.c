@@ -499,7 +499,9 @@ int _MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
     if ( ! ( (mesh->xtetra[pt->xt].tag[iedgeOpp] & MG_GEO) ||
              (mesh->xtetra[pt->xt].tag[iedgeOpp] & MG_NOM) ) ) {
 
-      if ( !_MMG3D_normalAdjaTri(mesh,iel,iopp,ia,nadja) )  return -1;
+      ier = _MMG3D_normalAdjaTri(mesh,iel,iopp,ia,nadja);
+      if ( ier < 0 )  return -1;
+      else if (!ier ) return 0;
 
       devnew = nadja[0]*ncurnew[0] + nadja[1]*ncurnew[1] + nadja[2]*ncurnew[2];
 
@@ -525,7 +527,10 @@ int _MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
 
       if ( ! ( (mesh->xtetra[pt1->xt].tag[iedgeOpp] & MG_GEO) ||
                (mesh->xtetra[pt1->xt].tag[iedgeOpp] & MG_NOM) ) ) {
-        if ( !_MMG3D_normalAdjaTri(mesh,kk,iopp2,ipp,nadja) )  return -1;
+        ier = _MMG3D_normalAdjaTri(mesh,kk,iopp2,ipp,nadja);
+
+        if ( ier < 0 )  return -1;
+        else if ( !ier )  return 0;
 
         devnew = nadja[0]*ncurnew[0] + nadja[1]*ncurnew[1] + nadja[2]*ncurnew[2];
         if ( devnew < mesh->info.dhd ) {
@@ -653,7 +658,9 @@ int _MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
 
   if ( ! ( (mesh->xtetra[pt1->xt].tag[iedgeOpp] & MG_GEO) ||
            (mesh->xtetra[pt1->xt].tag[iedgeOpp] & MG_NOM) ) ) {
-    if ( !_MMG3D_normalAdjaTri(mesh,kk,iopp2,ipp,nadja) )  return -1;
+    ier = _MMG3D_normalAdjaTri(mesh,kk,iopp2,ipp,nadja);
+    if ( ier < 0 )  return -1;
+    else if ( !ier ) return 0;
 
     devnew = nadja[0]*ncurnew[0] + nadja[1]*ncurnew[1] + nadja[2]*ncurnew[2];
 

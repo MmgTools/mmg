@@ -572,7 +572,8 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
 
     if ( ( !(tt.tag[i] & MG_GEO) ) && ( !(tt.tag[i] & MG_NOM) ) ) {
       /* Check normal deviation between k and the triangle facing n0 */
-      if ( !_MMG3D_normalAdjaTri(mesh,k,iface, i,nneighi) ) {
+      ier = _MMG3D_normalAdjaTri(mesh,k,iface, i,nneighi);
+      if ( ier <= 0 ) {
         return 0;
       }
       ier =  _MMG5_devangle( ncur, nneighi, mesh->info.dhd );
@@ -934,7 +935,8 @@ int _MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
 
     if ( ( !(tt.tag[i] & MG_GEO) ) && ( !(tt.tag[i] & MG_NOM) ) ) {
       /* Check normal deviation between iel and the triangle facing ip0 */
-      if ( !_MMG3D_normalAdjaTri(mesh,iel,iface, i,nneighi) ) {
+      ier = _MMG3D_normalAdjaTri(mesh,iel,iface, i,nneighi);
+      if ( ier <=0 ) {
         return 0;
       }
       ier =  _MMG5_devangle( ncur, nneighi, mesh->info.dhd );
@@ -1278,7 +1280,8 @@ int _MMG5_movbdynompt_ani(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree, 
 
     if ( ( !(tt.tag[i] & MG_GEO) ) && ( !(tt.tag[i] & MG_NOM) ) ) {
       /* Check normal deviation between iel and the triangle facing ip0 */
-      if ( !_MMG3D_normalAdjaTri(mesh,iel,iface, i,nneighi) ) {
+      ier = _MMG3D_normalAdjaTri(mesh,iel,iface, i,nneighi);
+      if ( ier <=0 ) {
         return 0;
       }
       ier =  _MMG5_devangle( ncur, nneighi, mesh->info.dhd );
@@ -1631,7 +1634,8 @@ int _MMG5_movbdyridpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
 
     if ( ( !(tt.tag[i] & MG_GEO) ) && ( !(tt.tag[i] & MG_NOM) ) ) {
       /* Check normal deviation between iel and the triangle facing ip0 */
-      if ( !_MMG3D_normalAdjaTri(mesh,iel,iface, i,nneighi) ) {
+      ier = _MMG3D_normalAdjaTri(mesh,iel,iface, i,nneighi);
+      if ( ier <=0 ) {
         return 0;
       }
       ier =  _MMG5_devangle( ncur, nneighi, mesh->info.dhd );
