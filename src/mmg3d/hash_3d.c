@@ -1685,7 +1685,6 @@ int _MMG5_bdrySet(MMG5_pMesh mesh) {
   MMG5_pxPrism  pxp;
   _MMG5_Hash     hash;
   int      ref,*adja,adj,k,kt,ia,ib,ic,j,na,initedg[3];
-  int      ie_tet,ie_tri,ip0_tet,ip1_tet,ip0_tri,ip1_tri;
   int16_t  tag,inittag[3];
   char     i,i1,i2;
 
