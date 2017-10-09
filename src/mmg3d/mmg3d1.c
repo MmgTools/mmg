@@ -1944,15 +1944,20 @@ static int _MMG5_anatet4rid(MMG5_pMesh mesh, MMG5_pSol met,int *nf, char typchk)
  *
  */
 int _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,char typchk, int patternMode) {
-  int     ier,nc,ns,nf,nnc,nns,nnf,it,minit,maxit;
+  int     ier,nc,ns,nf,nnc,nns,nnf,it,minit,maxit,lastit;
 
   /* analyze tetras : initial splitting */
   nns = nnc = nnf = it = 0;
+  lastit = 0;
   minit = 3;
   maxit = 5;
   mesh->gap = 0.5;
   do {
-    if ( typchk == 2 && it == minit )  ++mesh->info.fem;
+    if ( it >= maxit-1 || ns+nc+nf == 0 ) {
+      ++lastit;
+    }
+
+    if ( typchk==2 && lastit==1 )  ++mesh->info.fem;
 
     /* memory free */
     _MMG5_DEL_MEM(mesh,mesh->adja,(4*mesh->nemax+5)*sizeof(int));
@@ -1964,7 +1969,7 @@ int _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,char typchk, int patternMode) {
         ier = _MMG5_anatet4(mesh,met,&nf,typchk);
         if ( ier < 0 )  return(0);
       }
-      else if ( (met->size==6) && (typchk == 1) && (it == minit) ) {
+      else if ( (met->size==6) && (typchk == 1) && lastit ) {
         ier = _MMG5_anatet4rid(mesh,met,&nf,typchk);
         if ( ier < 0 )  return(0);
       }
@@ -2032,9 +2037,13 @@ int _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,char typchk, int patternMode) {
 #endif
       fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped\n",ns,nc,nf);
     }
-    if ( it > minit && ( !(ns+nc) || (abs(nc-ns) < 0.1 * MG_MAX(nc,ns)) ) )  break;
+
+    if ( it > minit && ( !(ns+nc) || (abs(nc-ns) < 0.1 * MG_MAX(nc,ns)) ) ) {
+      if ( lastit ) break;
+      ++lastit;
+    }
   }
-  while ( ++it < maxit && ns+nc+nf > 0 );
+  while ( ++it < maxit && (ns+nc+nf > 0 || !lastit) );
 
   if ( mesh->info.imprim ) {
     if ( (abs(mesh->info.imprim) < 5 || mesh->info.ddebug ) && nns+nnc > 0 ) {
