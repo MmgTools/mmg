@@ -199,31 +199,9 @@ ENDIF()
 #####         Scotch
 #####
 ############################################################################
-# add SCOTCH library?
-IF( USE_SCOTCH )
-
-  SET(CMAKE_REQUIRED_INCLUDES ${SCOTCH_INCLUDE_DIR})
-  SET(CMAKE_REQUIRED_LIBRARIES ${SCOTCH_LIBRARY})
-  SET(CMAKE_REQUIRED_LIBRARIES ${SCOTCHERR_LIBRARY})
-
-  SET(CMAKE_C_FLAGS "-DUSE_SCOTCH ${CMAKE_C_FLAGS}")
-
-  IF ( NOT WIN32 )
-    SET(SCOTCH_LINK_FLAGS "-lpthread")
-  ELSE ()
-    # On win32, it is easier to compile scotch without the pthreads so, don't use the -lpthread flag
-
-    # Turn off "Image Has Safe Exception Handlers" linker option (SAFESEH error of visual studio):
-    # see the my_add_link_flags macro.
-    INCLUDE(cmake/config/AddCompileLinkFlags.cmake)
-  ENDIF ()
-
-  MESSAGE(STATUS
-    "Compilation with scotch: ${SCOTCH_LIBRARY}")
-  SET( LIBRARIES ${SCOTCH_LINK_FLAGS} ${LIBRARIES})
-  SET( LIBRARIES ${SCOTCHERR_LIBRARY} ${LIBRARIES})
-  SET( LIBRARIES ${SCOTCH_LIBRARY} ${LIBRARIES})
-ENDIF()
+# Find SCOTCH library?
+SET(SCOTCH_DIR "" CACHE PATH "Installation directory for scotch")
+INCLUDE(cmake/modules/FindScotch.cmake)
 
 IF ( SCOTCH_NOTFOUND )
   MESSAGE ( WARNING "Scotch library not found:"
@@ -337,11 +315,34 @@ CMAKE_DEPENDENT_OPTION (
   "BUILD_MMG3D;ELAS_FOUND" OFF)
 
 # add Scotch library?
-SET(SCOTCH_DIR "" CACHE PATH "Installation directory for scotch")
-INCLUDE(cmake/modules/FindScotch.cmake)
-
 CMAKE_DEPENDENT_OPTION ( USE_SCOTCH "Use SCOTCH TOOL for renumbering" ON
   "SCOTCH_FOUND;BUILD_MMGS3D" OFF)
+
+IF( USE_SCOTCH )
+
+  SET(CMAKE_REQUIRED_INCLUDES ${SCOTCH_INCLUDE_DIR})
+  SET(CMAKE_REQUIRED_LIBRARIES ${SCOTCH_LIBRARY})
+  SET(CMAKE_REQUIRED_LIBRARIES ${SCOTCHERR_LIBRARY})
+
+  SET(CMAKE_C_FLAGS "-DUSE_SCOTCH ${CMAKE_C_FLAGS}")
+
+  IF ( NOT WIN32 )
+    SET(SCOTCH_LINK_FLAGS "-lpthread")
+  ELSE ()
+    # On win32, it is easier to compile scotch without the pthreads so, don't use the -lpthread flag
+
+    # Turn off "Image Has Safe Exception Handlers" linker option (SAFESEH error of visual studio):
+    # see the my_add_link_flags macro.
+    INCLUDE(cmake/config/AddCompileLinkFlags.cmake)
+  ENDIF ()
+
+  MESSAGE(STATUS
+    "Compilation with scotch: ${SCOTCH_LIBRARY}")
+  SET( LIBRARIES ${SCOTCH_LINK_FLAGS} ${LIBRARIES})
+  SET( LIBRARIES ${SCOTCHERR_LIBRARY} ${LIBRARIES})
+  SET( LIBRARIES ${SCOTCH_LIBRARY} ${LIBRARIES})
+ENDIF()
+
 
 #---------------------------- mmg library gathering mmg2d, mmgs and mmg3d libs
 CMAKE_DEPENDENT_OPTION ( LIBMMG_STATIC
