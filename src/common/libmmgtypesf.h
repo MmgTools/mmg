@@ -41,6 +41,8 @@
 !  */
 
 ! #include <stdint.h>
+! #include <stdarg.h>
+
 
 #ifndef _LIBMMGTYPES_H
 #define _LIBMMGTYPES_H
@@ -78,8 +80,6 @@
 !  */
 
 #define MG_ISO    10
-
-! #include <stdarg.h>
 
 ! /**
 !  * \def MMG5_ARG_start
@@ -451,6 +451,18 @@
 !                      \f$i^{th}\f$ edge of the prism */
 ! } MMG5_xPrism;
 ! typedef MMG5_xPrism * MMG5_pxPrism;
+
+! /**
+!  * \struc MMG5_Mat
+!  * \brief To store user-defined references in the mesh (useful in LS mode)
+!  */
+
+! typedef struct {
+!   char dospl;
+!   int  ref,rin,rex;
+! } MMG5_Mat;
+! typedef MMG5_Mat * MMG5_pMat;
+
 ! /**
 !  * \struct MMG5_Info
 !  * \brief Store input parameters of the run.
@@ -462,12 +474,14 @@
 !   int           mem,npar,npari;
 !   int           renum;
 !   int           octree;
+!   int           nmat;
 !   char          nreg;
 !   char          imprim,ddebug,badkal,iso,fem,lag;
 !   char          parTyp; /*!< Contains binary flags to say which kind of local
 !                           param are setted: if \f$tag = 1+2+4\f$ then the point
 !                           is \a MG_Vert, MG_Tria and MG_Tetra */
 !   unsigned char optim, optimLES, noinsert, noswap, nomove, nosurf;
+!   MMG5_pMat     mat;
 ! } MMG5_Info;
 
 ! /**
@@ -532,7 +546,7 @@
 !   MMG5_pPrism    prism; /*!< Pointer toward the \ref MMG5_Prism structure */
 !   MMG5_pxPrism   xprism; /*!< Pointer toward the \ref MMG5_pxPrism structure */
 !   MMG5_pTria     tria; /*!< Pointer toward the \ref MMG5_Tria structure */
-!   MMG5_pQuad     quadra; /*!< Pointer toward the \ref MMG5_Quad structure */
+!   MMG5_pQuad     quad; /*!< Pointer toward the \ref MMG5_Quad structure */
 !   MMG5_pEdge     edge; /*!< Pointer toward the \ref MMG5_Edge structure */
 !   MMG5_HGeom     htab; /*!< \ref MMG5_HGeom structure */
 !   MMG5_Info      info; /*!< \ref MMG5_Info structure */

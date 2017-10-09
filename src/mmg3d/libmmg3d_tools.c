@@ -36,7 +36,7 @@ void MMG3D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( met->size == 1 || ( met->size == 3 && mesh->info.lag >= 0 ) ) {
     if ( mesh->info.optimLES ) {
       _MMG5_caltet          = _MMG3D_caltetLES_iso;
-      _MMG5_movintpt        = _MMG5_movintptLES_iso;
+      _MMG5_movintpt        = _MMG5_movintpt_iso;
     }
     else {
       _MMG5_caltet          = _MMG5_caltet_iso;
@@ -61,7 +61,7 @@ void MMG3D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
 #endif
   }
   else if ( met->size == 6 ) {
-    if ( !met->m ) {
+    if ( !met->m && !mesh->info.optim && mesh->info.hsiz<=0. ) {
       _MMG5_caltet          = _MMG5_caltet_iso;
       _MMG5_caltri          = _MMG5_caltri_iso;
       _MMG5_lenedg         = _MMG5_lenedg_iso;
@@ -109,10 +109,13 @@ int MMG3D_Get_adjaTet(MMG5_pMesh mesh, int kel, int listet[4]) {
   return(1);
 }
 
-void MMG3D_usage(char *prog) {
+int MMG3D_usage(char *prog) {
 
   _MMG5_mmgUsage(prog);
+
   fprintf(stdout,"-A           enable anisotropy (without metric file).\n");
+  fprintf(stdout,"-opnbdy      preserve input triangles at the interface of"
+          " two domains of the same reference.\n");
 
 #ifdef USE_ELAS
   fprintf(stdout,"-lag [0/1/2] Lagrangian mesh displacement according to mode 0/1/2\n");
@@ -125,6 +128,7 @@ void MMG3D_usage(char *prog) {
 #endif
   fprintf(stdout,"\n");
 
+  fprintf(stdout,"-nofem       do not force Mmg to create a finite element mesh \n");
   fprintf(stdout,"-optim       mesh optimization\n");
   fprintf(stdout,"-optimLES    strong mesh optimization for LES computations\n");
   fprintf(stdout,"-noinsert    no point insertion/deletion \n");
@@ -133,10 +137,10 @@ void MMG3D_usage(char *prog) {
   fprintf(stdout,"-nosurf      no surface modifications\n");
   fprintf(stdout,"\n\n");
 
-  exit(EXIT_FAILURE);
+  return 1;
 }
 
-void MMG3D_defaultValues(MMG5_pMesh mesh) {
+int MMG3D_defaultValues(MMG5_pMesh mesh) {
 
   _MMG5_mmgDefaultValues(mesh);
 
@@ -151,7 +155,7 @@ void MMG3D_defaultValues(MMG5_pMesh mesh) {
 #endif
   fprintf(stdout,"\n\n");
 
-  exit(EXIT_FAILURE);
+  return 1;
 }
 
 int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
@@ -161,7 +165,8 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
   /* First step: search if user want to see the default parameters values. */
   for ( i=1; i< argc; ++i ) {
     if ( !strcmp(argv[i],"-val") ) {
-      MMG3D_defaultValues(mesh);
+      if ( !MMG3D_defaultValues(mesh) ) return 0;
+      return 0;
     }
   }
 
@@ -172,17 +177,17 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
       switch(argv[i][1]) {
       case '?':
         MMG3D_usage(argv[0]);
-        break;
+        return 0;
 
       case 'a':
         if ( !strcmp(argv[i],"-ar") && ++i < argc )
           if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_angleDetection,
                                     atof(argv[i])) )
-            exit(EXIT_FAILURE);
+            return 0;
         break;
       case 'A': /* anisotropy */
         if ( !MMG3D_Set_solSize(mesh,met,MMG5_Vertex,0,MMG5_Tensor) )
-          exit(EXIT_FAILURE);
+          return 0;
         break;
       case 'd':
         if ( !strcmp(argv[i],"-default") ) {
@@ -191,7 +196,7 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
         else {
           /* debug */
           if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_debug,1) ) {
-            exit(EXIT_FAILURE);
+            return 0;
           }
         }
         break;
@@ -199,61 +204,73 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
         if ( !strcmp(argv[i],"-hmin") && ++i < argc ) {
           if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_hmin,
                                     atof(argv[i])) )
-            exit(EXIT_FAILURE);
+            return 0;
         }
         else if ( !strcmp(argv[i],"-hmax") && ++i < argc ) {
           if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_hmax,
                                     atof(argv[i])) )
-            exit(EXIT_FAILURE);
+            return 0;
+        }
+        else if ( !strcmp(argv[i],"-hsiz") && ++i < argc ) {
+          if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_hsiz,
+                                     atof(argv[i])) )
+            return 0;
+
         }
         else if ( !strcmp(argv[i],"-hausd") && ++i <= argc ) {
           if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_hausd,
                                     atof(argv[i])) )
-            exit(EXIT_FAILURE);
+            return 0;
         }
         else if ( !strcmp(argv[i],"-hgrad") && ++i <= argc ) {
           if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_hgrad,
                                     atof(argv[i])) )
-            exit(EXIT_FAILURE);
+            return 0;
         }
-        else
+        else {
           MMG3D_usage(argv[0]);
+          return 0;
+        }
         break;
       case 'i':
         if ( !strcmp(argv[i],"-in") ) {
           if ( ++i < argc && isascii(argv[i][0]) && argv[i][0]!='-') {
             if ( !MMG3D_Set_inputMeshName(mesh, argv[i]) )
-              exit(EXIT_FAILURE);
+              return 0;
 
           }else{
             fprintf(stderr,"Missing filname for %c%c\n",argv[i-1][1],argv[i-1][2]);
             MMG3D_usage(argv[0]);
+            return 0;
           }
         }
         break;
+
       case 'l':
         if ( !strcmp(argv[i],"-lag") ) {
           if ( ++i < argc && isdigit(argv[i][0]) ) {
             if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_lag,atoi(argv[i])) )
-              exit(EXIT_FAILURE);
+              return 0;
           }
           else if ( i == argc ) {
             fprintf(stderr,"Missing argument option %s\n",argv[i-1]);
             MMG3D_usage(argv[0]);
+            return 0;
           }
           else {
             fprintf(stderr,"Missing argument option %s\n",argv[i-1]);
             MMG3D_usage(argv[0]);
             i--;
+            return 0;
           }
         }
         else if ( !strcmp(argv[i],"-ls") ) {
           if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_iso,1) )
-            exit(EXIT_FAILURE);
+            return 0;
           if ( ++i < argc && (isdigit(argv[i][0]) ||
                               (argv[i][0]=='-' && isdigit(argv[i][1])) ) ) {
             if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_ls,atof(argv[i])) )
-              exit(EXIT_FAILURE);
+              return 0;
           }
           else i--;
         }
@@ -261,60 +278,70 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
       case 'm':  /* memory */
         if ( ++i < argc && isdigit(argv[i][0]) ) {
           if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_mem,atoi(argv[i])) )
-            exit(EXIT_FAILURE);
+            return 0;
         }
         else {
           fprintf(stderr,"Missing argument option %c\n",argv[i-1][1]);
           MMG3D_usage(argv[0]);
+          return 0;
         }
         break;
       case 'n':
-        if ( !strcmp(argv[i],"-nr") ) {
+        if ( !strcmp(argv[i],"-nofem") ) {
+          if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_nofem,1) )
+            return 0;
+        }
+        else if ( !strcmp(argv[i],"-nr") ) {
           if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_angle,0) )
-            exit(EXIT_FAILURE);
+            return 0;
         }
         else if ( !strcmp(argv[i],"-noswap") ) {
           if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_noswap,1) )
-            exit(EXIT_FAILURE);
+            return 0;
         }
         else if( !strcmp(argv[i],"-noinsert") ) {
           if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_noinsert,1) )
-            exit(EXIT_FAILURE);
+            return 0;
         }
         else if( !strcmp(argv[i],"-nomove") ) {
           if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_nomove,1) )
-            exit(EXIT_FAILURE);
+            return 0;
         }
         else if( !strcmp(argv[i],"-nosurf") ) {
           if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_nosurf,1) )
-            exit(EXIT_FAILURE);
+            return 0;
         }
         break;
       case 'o':
         if ( !strcmp(argv[i],"-out") ) {
           if ( ++i < argc && isascii(argv[i][0])  && argv[i][0]!='-') {
             if ( !MMG3D_Set_outputMeshName(mesh,argv[i]) )
-              exit(EXIT_FAILURE);
+              return 0;
           }else{
             fprintf(stderr,"Missing filname for %c%c%c\n",
                     argv[i-1][1],argv[i-1][2],argv[i-1][3]);
             MMG3D_usage(argv[0]);
+            return 0;
           }
+        }
+        else if ( !strcmp(argv[i],"-opnbdy") ) {
+          if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_opnbdy,1) )
+            return 0;
         }
 #ifndef PATTERN
         else if ( !strcmp(argv[i],"-octree") && ++i < argc ) {
           if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_octree,
                                      atoi(argv[i])) )
-            exit(EXIT_FAILURE);
+            return 0;
         }
 #endif
         else if( !strcmp(argv[i],"-optimLES") ) {
           if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_optimLES,1) )
-            exit(EXIT_FAILURE);
+            return 0;
         }
         else if( !strcmp(argv[i],"-optim") ) {
           if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_optim,1) )
-            exit(EXIT_FAILURE);
+            return 0;
         }
         break;
 #ifdef USE_SCOTCH
@@ -323,16 +350,18 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
           if ( ++i < argc ) {
             if ( isdigit(argv[i][0]) ) {
               if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_renum,atoi(argv[i])) )
-                exit(EXIT_FAILURE);
+                return 0;
             }
             else {
               fprintf(stderr,"Missing argument option %s\n",argv[i-1]);
               MMG3D_usage(argv[0]);
+              return 0;
             }
           }
           else {
             fprintf(stderr,"Missing argument option %s\n",argv[i-1]);
             MMG3D_usage(argv[0]);
+            return 0;
           }
         }
         break;
@@ -341,11 +370,12 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
         if ( !strcmp(argv[i],"-sol") ) {
           if ( ++i < argc && isascii(argv[i][0]) && argv[i][0]!='-' ) {
             if ( !MMG3D_Set_inputSolName(mesh,met,argv[i]) )
-              exit(EXIT_FAILURE);
+              return 0;
           }
           else {
             fprintf(stderr,"Missing filname for %c%c%c\n",argv[i-1][1],argv[i-1][2],argv[i-1][3]);
             MMG3D_usage(argv[0]);
+            return 0;
           }
         }
         break;
@@ -353,7 +383,7 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
         if ( ++i < argc ) {
           if ( argv[i][0] == '-' || isdigit(argv[i][0]) ) {
             if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_verbose,atoi(argv[i])) )
-              exit(EXIT_FAILURE);
+              return 0;
           }
           else
             i--;
@@ -361,29 +391,32 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
         else {
           fprintf(stderr,"Missing argument option %c\n",argv[i-1][1]);
           MMG3D_usage(argv[0]);
+          return 0;
         }
         break;
       default:
         fprintf(stderr,"Unrecognized option %s\n",argv[i]);
         MMG3D_usage(argv[0]);
+        return 0;
       }
     }
     else {
       if ( mesh->namein == NULL ) {
         if ( !MMG3D_Set_inputMeshName(mesh,argv[i]) )
-          exit(EXIT_FAILURE);
+          return 0;
         if ( mesh->info.imprim == -99 ) {
           if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_verbose,5) )
-            exit(EXIT_FAILURE);
+            return 0;
         }
       }
       else if ( mesh->nameout == NULL ) {
         if ( !MMG3D_Set_outputMeshName(mesh,argv[i]) )
-          exit(EXIT_FAILURE);
+          return 0;
       }
       else {
         fprintf(stdout,"Argument %s ignored\n",argv[i]);
         MMG3D_usage(argv[0]);
+        return 0;
       }
     }
     i++;
@@ -395,7 +428,7 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
     fflush(stdin);
     fscanf(stdin,"%d",&i);
     if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_verbose,i) )
-      exit(EXIT_FAILURE);
+      return 0;
   }
 
   if ( mesh->namein == NULL ) {
@@ -403,21 +436,21 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
     fflush(stdin);
     fscanf(stdin,"%s",namein);
     if ( !MMG3D_Set_inputMeshName(mesh,namein) )
-      exit(EXIT_FAILURE);
+      return 0;
   }
 
   if ( mesh->nameout == NULL ) {
     if ( !MMG3D_Set_outputMeshName(mesh,"") )
-      exit(EXIT_FAILURE);
+      return 0;
   }
 
   if ( met->namein == NULL ) {
     if ( !MMG3D_Set_inputSolName(mesh,met,"") )
-      exit(EXIT_FAILURE);
+      return 0;
   }
   if ( met->nameout == NULL ) {
     if ( !MMG3D_Set_outputSolName(mesh,met,"") )
-      exit(EXIT_FAILURE);
+      return 0;
   }
 
   return(1);
@@ -450,7 +483,7 @@ int MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
       }
     }
   }
-  fprintf(stdout,"  %%%% %s OPENED\n",data);
+  fprintf(stdout,"\n  %%%% %s OPENED\n",data);
 
   /* read parameters */
   while ( !feof(in) ) {
@@ -463,31 +496,38 @@ int MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
     if ( !strcmp(data,"parameters") ) {
       fscanf(in,"%d",&npar);
       if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_numberOfLocalParam,npar) )
-        exit(EXIT_FAILURE);
+        return 0;
 
       for (i=0; i<mesh->info.npar; i++) {
         ret = fscanf(in,"%d %s ",&ref,buf);
-        ret = fscanf(in,"%f %f %f",&fp1,&fp2,&hausd);
+        if ( ret )
+          ret = fscanf(in,"%f %f %f",&fp1,&fp2,&hausd);
+
+        if ( !ret ) {
+          fprintf(stderr,"  %%%% Wrong format: %s\n",buf);
+          return 0;
+        }
+
         for (j=0; j<strlen(buf); j++)  buf[j] = tolower(buf[j]);
 
-        if ( !strcmp(buf,"triangles") || !strcmp(buf,"triangle") ) {
+        if ( (!strcmp(buf,"triangles") || !strcmp(buf,"triangle")) ) {
           if ( !MMG3D_Set_localParameter(mesh,met,MMG5_Triangle,ref,fp1,fp2,hausd) ) {
-            exit(EXIT_FAILURE);
+            return 0;
           }
         }
         /* else if ( !strcmp(buf,"vertices") || !strcmp(buf,"vertex") ) { */
         /*   if ( !MMG3D_Set_localParameter(mesh,met,MMG5_Vertex,ref,fp1,fp2,hausd) ) { */
-        /*     exit(EXIT_FAILURE); */
+        /*     return 0; */
         /*   } */
         /* } */
         else if ( !strcmp(buf,"tetrahedra") || !strcmp(buf,"tetrahedron") ) {
           if ( !MMG3D_Set_localParameter(mesh,met,MMG5_Tetrahedron,ref,fp1,fp2,hausd) ) {
-            exit(EXIT_FAILURE);
+            return 0;
           }
         }
         else {
           fprintf(stderr,"  %%%% Wrong format: %s\n",buf);
-          continue;
+          return 0;
         }
       }
     }
@@ -546,12 +586,12 @@ int MMG3D_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,double critmin, double lmin,
 
   /* Check options */
   if ( mesh->info.lag > -1 ) {
-    fprintf(stderr,"  ## Error: lagrangian mode unavailable (MMG3D_IPARAM_lag):\n"
+    fprintf(stderr,"\n  ## Error: lagrangian mode unavailable (MMG3D_IPARAM_lag):\n"
             "            You must call the MMG3D_mmg3dmov function to move a rigidbody.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
   else if ( mesh->info.iso ) {
-    fprintf(stderr,"  ## Error: level-set discretisation unavailable"
+    fprintf(stderr,"\n  ## Error: level-set discretisation unavailable"
             " (MMG3D_IPARAM_iso):\n"
             "          You must call the MMG3D_mmg3dmov function to use this option.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
@@ -574,7 +614,7 @@ int MMG3D_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,double critmin, double lmin,
     met->np = 0;
   }
   else if ( met->size!=1 && met->size!=6 ) {
-    fprintf(stderr,"  ## ERROR: WRONG DATA TYPE.\n");
+    fprintf(stderr,"\n  ## ERROR: WRONG DATA TYPE.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
 
@@ -617,10 +657,10 @@ void MMG3D_searchqua(MMG5_pMesh mesh,MMG5_pSol met,double critmin, int *eltab,
       continue;
 
     if ( (!metRidTyp) && met->m && met->size>1 ) {
-      rap = _MMG5_ALPHAD * _MMG5_caltet33_ani(mesh,met,pt);
+      rap = _MMG3D_ALPHAD * _MMG5_caltet33_ani(mesh,met,pt);
     }
     else {
-      rap = _MMG5_ALPHAD * _MMG5_caltet(mesh,met,pt);
+      rap = _MMG3D_ALPHAD * _MMG5_caltet(mesh,met,pt);
     }
 
     if ( rap == 0.0 || rap < critmin ) {
@@ -667,9 +707,9 @@ int MMG3D_searchlen(MMG5_pMesh mesh, MMG5_pSol met, double lmin,
       nq = pt->v[i1];
 
       if(!_MMG5_hashEdge(mesh,&hash,np,nq,0)){
-        fprintf(stderr,"%s:%d: Error: function _MMG5_hashEdge return 0\n",
-                __FILE__,__LINE__);
-        exit(EXIT_FAILURE);
+        fprintf(stderr,"\n  ## Error: %s: function _MMG5_hashEdge return 0\n",
+                __func__);
+        return 0;
       }
     }
   }
@@ -707,29 +747,33 @@ int MMG3D_searchlen(MMG5_pMesh mesh, MMG5_pSol met, double lmin,
 }
 
 int MMG3D_doSol(MMG5_pMesh mesh,MMG5_pSol met) {
-    MMG5_pTetra     pt;
-    MMG5_pPoint     p1,p2;
-    double     ux,uy,uz,dd;
-    int        i,k,ia,ib,ipa,ipb;
-    int       *mark;
+    MMG5_pTetra  pt;
+    MMG5_pPoint  p1,p2;
+    double       ux,uy,uz,dd;
+    int          i,k,iadr,ia,ib,ipa,ipb,type;
+    int         *mark;
 
-    _MMG5_SAFE_CALLOC(mark,mesh->np+1,int);
+    _MMG5_SAFE_CALLOC(mark,mesh->np+1,int,0);
 
     /* Memory alloc */
-    met->np     = mesh->np;
-    met->npmax  = mesh->npmax;
-    met->size   = 1;
-    met->dim    = mesh->dim;
+    if ( met->size==1 ) type=1;
+    else if ( met->size==6 ) type = 3;
+    else {
+      fprintf(stderr,"\n  ## Error: %s: unexpected size of metric: %d.\n",
+              __func__,met->size);
+      return 0;
+    }
 
-    _MMG5_ADD_MEM(mesh,(met->size*(met->npmax+1))*sizeof(double),"solution",return(0));
-    _MMG5_SAFE_CALLOC(met->m,met->size*(met->npmax+1),double);
+    if ( !MMG3D_Set_solSize(mesh,met,MMG5_Vertex,mesh->np,type) )
+      return 0;
 
     /* edges */
     for (k=1; k<=mesh->ne; k++) {
         pt = &mesh->tetra[k];
-        if ( !pt->v[0] )  continue;
+        if ( !MG_EOK(pt) )  continue;
 
-        for (i=0; i<6; i++) {
+        if ( met->size == 1 ) {
+          for (i=0; i<6; i++) {
             ia  = _MMG5_iare[i][0];
             ib  = _MMG5_iare[i][1];
             ipa = pt->v[ia];
@@ -746,106 +790,131 @@ int MMG3D_doSol(MMG5_pMesh mesh,MMG5_pSol met) {
             mark[ipa]++;
             met->m[ipb] += dd;
             mark[ipb]++;
+          }
+        }
+        else if ( met->size == 6 ) {
+          for (i=0; i<6; i++) {
+            ia  = _MMG5_iare[i][0];
+            ib  = _MMG5_iare[i][1];
+            ipa = pt->v[ia];
+            ipb = pt->v[ib];
+            p1  = &mesh->point[ipa];
+            p2  = &mesh->point[ipb];
+
+            ux  = p1->c[0] - p2->c[0];
+            uy  = p1->c[1] - p2->c[1];
+            uz  = p1->c[2] - p2->c[2];
+            dd  = sqrt(ux*ux + uy*uy + uz*uz);
+
+            iadr = 6*ipa;
+            met->m[iadr]   += dd;
+            mark[ipa]++;
+
+            iadr = 6*ipb;
+            met->m[iadr] += dd;
+            mark[ipb]++;
+          }
+        }
+        else {
+          _MMG5_SAFE_FREE(mark);
+          return 0;
         }
     }
 
+    /* if hmax is not specified, compute it from the metric */
+    if ( mesh->info.hmax < 0. ) {
+      if ( met->size == 1 ) {
+        dd = 0.;
+        for (k=1; k<=mesh->np; k++) {
+          if ( !mark[k] ) continue;
+          dd = MG_MAX(dd,met->m[k]);
+        }
+        assert ( dd );
+      }
+      else if ( met->size == 6 ) {
+        dd = FLT_MAX;
+        for (k=1; k<=mesh->np; k++) {
+          if ( !mark[k] ) continue;
+          iadr = 6*k;
+          dd = MG_MIN(dd,met->m[iadr]);
+        }
+        assert ( dd < FLT_MAX );
+        dd = 1./sqrt(dd);
+      }
+      mesh->info.hmax = 10.*dd;
+    }
+
+
     /* vertex size */
-    for (k=1; k<=mesh->np; k++) {
-        p1 = &mesh->point[k];
+    if ( met->size == 1 ) {
+      for (k=1; k<=mesh->np; k++) {
         if ( !mark[k] ) {
-            met->m[k] = FLT_MAX;
-            continue;
+          met->m[k] = mesh->info.hmax;
+          continue;
         }
         else
-            met->m[k] = met->m[k] / (double)mark[k];
+          met->m[k] = met->m[k] / (double)mark[k];
+      }
     }
+    else if ( met->size == 6 ) {
+      for (k=1; k<=mesh->np; k++) {
+        iadr = 6*k;
+        if ( !mark[k] ) {
+          met->m[iadr]   = 1./(mesh->info.hmax*mesh->info.hmax);
+          met->m[iadr+3] = met->m[iadr];
+          met->m[iadr+5] = met->m[iadr];
+          continue;
+        }
+        else {
+          met->m[iadr]   = (double)mark[k]*(double)mark[k]/(met->m[iadr]*met->m[iadr]);
+          met->m[iadr+3] = met->m[iadr];
+          met->m[iadr+5] = met->m[iadr];
+        }
+      }
+    }
+
     _MMG5_SAFE_FREE(mark);
     return(1);
 }
 
-/** Old API °°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°*/
-int MMG5_Get_adjaTet(MMG5_pMesh mesh, int kel, int *v0, int *v1, int *v2, int *v3) {
-  printf("  ##  MMG5_Get_adjaTet: "
-         "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
-        " be removed soon\n." );
-  int listet[4],ier;
+int MMG3D_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met) {
+  MMG5_pPoint ppt;
+  double      hsiz;
+  int         k,iadr,type;
 
-  ier = MMG3D_Get_adjaTet(mesh,kel,listet);
-  if (ier!=1) return ier;
+  /* Memory alloc */
+  if ( met->size==1 ) type=1;
+  else if ( met->size==6 ) type = 3;
+  else {
+    fprintf(stderr,"\n  ## Error: %s: unexpected size of metric: %d.\n",
+            __func__,met->size);
+    return 0;
+  }
+  if ( !MMG3D_Set_solSize(mesh,met,MMG5_Vertex,mesh->np,type) )
+    return 0;
 
-  *v0=listet[0];
-  *v1=listet[1];
-  *v2=listet[2];
-  *v3=listet[3];
+  if ( !MMG5_Compute_constantSize(mesh,met,&hsiz) )
+    return 0;
+
+  if ( met->size == 1 ) {
+    for (k=1; k<=mesh->np; k++) {
+      ppt = &mesh->point[k];
+      if ( !MG_VOK(ppt) ) continue;
+      met->m[k] = hsiz;
+    }
+  }
+  else {
+    hsiz    = 1./(hsiz*hsiz);
+
+    for (k=1; k<=mesh->np; k++) {
+      ppt = &mesh->point[k];
+      if ( !MG_VOK(ppt) ) continue;
+
+      iadr           = met->size*k;
+      met->m[iadr]   = hsiz;
+      met->m[iadr+3] = hsiz;
+      met->m[iadr+5] = hsiz;
+    }
+  }
   return 1;
-}
-
-void MMG5_usage(char *prog) {
-  printf("  ## MMG5_usage: "
-         "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
-        " be removed soon\n." );
-
-  MMG3D_usage(prog);
-  return;
-}
-
-void MMG5_defaultValues(MMG5_pMesh mesh) {
-  printf("  ## MMG5_defaultValues: "
-         "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
-        " be removed soon\n." );
-
-  MMG3D_defaultValues(mesh);
-  return;
-}
-
-int MMG5_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
-  printf("  ## MMG5_parsar: "
-         "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
-        " be removed soon\n." );
-
-  return(MMG3D_parsar(argc,argv, mesh, met) );
-}
-
-int MMG5_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
-  printf("  ## MMG5_parsop: "
-         "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
-        " be removed soon\n." );
-
-  return(MMG3D_parsop(mesh,met));
-}
-
-int MMG5_stockOptions(MMG5_pMesh mesh, MMG5_Info *info) {
-  printf("  ## MMG5_stockOptions: "
-         "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
-        " be removed soon\n." );
-
-  return(MMG3D_stockOptions(mesh,info) );
-}
-
-int MMG5_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,double critmin, double lmin,
-                    double lmax, int *eltab,char metRidTyp) {
-  printf("  ## MMG5_mmg3dcheck: "
-         "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
-        " be removed soon\n." );
-
-  return(MMG3D_mmg3dcheck( mesh, met, critmin, lmin,lmax, eltab, metRidTyp));
-}
-
-void MMG5_searchqua(MMG5_pMesh mesh,MMG5_pSol met,double critmin, int *eltab,
-                    char metRidTyp) {
-  printf("  ## MMG5_searchqua: "
-         "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
-        " be removed soon\n." );
-
-  MMG3D_searchqua( mesh, met,critmin,eltab, metRidTyp);
-  return;
-}
-
-int MMG5_searchlen(MMG5_pMesh mesh, MMG5_pSol met, double lmin,
-                   double lmax, int *eltab,char metRidTyp) {
-  printf("  ## MMG5_searchlen: "
-         "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
-        " be removed soon\n." );
-
-  return(MMG3D_searchlen(mesh, met,  lmin,lmax,eltab,metRidTyp));
 }

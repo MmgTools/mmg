@@ -51,23 +51,36 @@ int main(int argc,char *argv[]) {
   MMG5_pMesh      mmgMesh;
   MMG5_pSol       mmgSol;
   int             ier;
-  char            *pwd,*inname,*outname;
+  char            *inname, *outname1, *outname2;
 
   fprintf(stdout,"  -- TEST MMGSLIB \n");
 
+  if ( argc != 4 ) {
+    printf(" Usage: %s filein fileout1 fileout2 \n",argv[0]);
+    return(1);
+  }
+
   /* Name and path of the mesh files */
-  pwd = getenv("PWD");
-  inname = (char *) calloc(strlen(pwd) + 51, sizeof(char));
+  inname = (char *) calloc(strlen(argv[1]) + 1, sizeof(char));
   if ( inname == NULL ) {
     perror("  ## Memory problem: calloc");
     exit(EXIT_FAILURE);
   }
-  outname = (char *) calloc(strlen(pwd) + 60, sizeof(char));
-  if ( outname == NULL ) {
+  strcpy(inname,argv[1]);
+
+  outname1 = (char *) calloc(strlen(argv[2]) + 1, sizeof(char));
+  if ( outname1 == NULL ) {
     perror("  ## Memory problem: calloc");
     exit(EXIT_FAILURE);
   }
-  sprintf(inname, "%s%s%s", pwd, "/../libexamples/mmgs/adaptation_example1/", "2spheres");
+  strcpy(outname1,argv[2]);
+
+  outname2 = (char *) calloc(strlen(argv[3]) + 1, sizeof(char));
+  if ( outname2 == NULL ) {
+    perror("  ## Memory problem: calloc");
+    exit(EXIT_FAILURE);
+  }
+  strcpy(outname2,argv[3]);
 
   /** 1) Initialisation of mesh and sol structures */
   /* args of InitMesh:
@@ -140,11 +153,10 @@ int main(int argc,char *argv[]) {
     fprintf(stdout,"BAD ENDING OF MMGSLIB\n");
 
   /* (Not mandatory) Automatically save the mesh */
-  sprintf(outname, "%s%s%s", pwd, "/../libexamples/mmgs/adaptation_example1/", "2spheres_1.o.mesh");
-  MMGS_saveMesh(mmgMesh,"2spheres_1.o");
+  MMGS_saveMesh(mmgMesh,outname1);
 
   /* (Not mandatory) Automatically save the solution */
-  if ( MMGS_saveSol(mmgMesh,mmgSol,"2spheres_1.o") != 1 )
+  if ( MMGS_saveSol(mmgMesh,mmgSol,outname1) != 1 )
     exit(EXIT_FAILURE);
 
 
@@ -195,12 +207,11 @@ int main(int argc,char *argv[]) {
     fprintf(stdout,"BAD ENDING OF MMGSLIB\n");
 
   /* (Not mandatory) Automatically save the mesh */
-  sprintf(outname, "%s%s%s", pwd, "/../libexamples/mmgs/adaptation_example1/", "2spheres_2.o.mesh");
-  if ( MMGS_saveMesh(mmgMesh,"2spheres_2.o") != 1 )
+  if ( MMGS_saveMesh(mmgMesh,outname2) != 1 )
     exit(EXIT_FAILURE);
 
   /* (Not mandatory) Automatically save the solution */
-  if ( MMGS_saveSol(mmgMesh,mmgSol,"2spheres_2.o") != 1 )
+  if ( MMGS_saveSol(mmgMesh,mmgSol,outname2) != 1 )
     exit(EXIT_FAILURE);
 
   /* 7) free the MMGS structures */
@@ -210,8 +221,12 @@ int main(int argc,char *argv[]) {
 
   free(inname);
   inname = NULL;
-  free(outname);
-  outname = NULL;
+
+  free(outname1);
+  outname1 = NULL;
+
+  free(outname2);
+  outname2 = NULL;
 
   return(ier);
 }

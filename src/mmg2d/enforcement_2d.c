@@ -28,193 +28,226 @@
  * \param sol pointer toward the sol structure.
  * \return 0 if fail, 1 otherwise.
  *
- * Check if all edges exist and if not force them.
+ * Check if all edges exist in the mesh and if not force them.
  *
  */
 int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTria      pt,pt1;
   MMG5_pEdge      ped;
-  int       i,j,k,kk,nex,*list,kdep,lon,voy,iel,iare,ied;
-  int       ia,ib,ilon,rnd,idep,*adja,ir,adj,list2[3],iter;//,iadr,ped0,ped1;
-//  int       iadr2,*adja2,ndel;
-
-  _MMG5_SAFE_CALLOC(list,MMG2D_LMAX,int);
+  MMG5_pPoint     ppt;
+  int             k,l,kk,nex,list[MMG2_LONMAX],kdep,lon,iel,iare,ied;
+  int             ia,ib,ilon,rnd,idep,*adja,ir,adj,list2[3];
+  char            i,i1,i2,j;
+//  int       iadr2,*adja2,ndel,iadr,ped0,ped1;
+  static char     mmgWarn0=0,mmgWarn1=0,mmgWarn2=0,mmgWarn3=0;
+  static char     mmgWarn4=0,mmgWarn5=0,mmgWarn6=0,mmgWarn7=0;
+  static char     mmgWarn8=0;
 
   nex = 0;
-
-  /** Liste edges to enforce */
-  for(i=1 ; i<=mesh->na ; i++) {
-    /* Edge to create */
-    ped = &mesh->edge[i];
-    if(!ped->a) continue;
-    if(ped->base < 0) {
+  
+  /* Associate seed to each point in the mesh */
+  for (k=1; k<=mesh->np; k++) {
+    ppt = &mesh->point[k];
+    if ( MG_VOK(ppt) ) ppt->s = 0;
+  }
+  
+  for (k=1; k<=mesh->nt; k++) {
+    pt = &mesh->tria[k];
+    if ( !MG_EOK(pt) ) continue;
+    for (i=0; i<3; i++)
+      mesh->point[pt->v[i]].s = k;
+  }
+  
+  /* Check for the existing edges in the mesh */
+  /* No command for identifying whether an edge is valid or not? */
+  for(k=1; k<=mesh->na; k++) {
+    ped = &mesh->edge[k];
+    if ( !ped->a ) continue;
+    if ( ped->base < 0 ) {
       nex++;
       continue;
     }
-    /* Find first edge extremity */
-    kdep = MMG2_findTria(mesh,ped->a);
-    assert(kdep);
-
-    if(mesh->tria[kdep].v[0]==ped->a)
+    
+    ppt = &mesh->point[ped->a];
+    kdep = ppt->s;
+    pt = &mesh->tria[kdep];
+    
+    if ( pt->v[0] == ped->a )
       j=0;
-    else if(mesh->tria[kdep].v[1]==ped->a)
+    else if ( pt->v[1] == ped->a )
       j=1;
     else
       j=2;
-
-    lon = MMG2_boulep(mesh,kdep,j,list);
-    if(lon>MMG2D_LMAX) {
-      printf("  ## Error: too many triangles (%d) around the vertex %d\n",
-             lon,ped->a);
-      exit(EXIT_FAILURE);
-    } else if(!lon) {
-      printf(" ## Error: problem with point %d of triangle %d\n",
-             mesh->tria[kdep].v[j],kdep);
-      _MMG5_SAFE_FREE(list);
+    
+    lon = _MMG2_boulet(mesh,kdep,j,list);
+    
+    if ( lon <= 0 ) {
+      if ( !mmgWarn0 ) {
+        mmgWarn0=1;
+        fprintf(stderr,"\n  ## Error: %s: at least 1 wrong ball "
+                "(point %d of triangle %d).\n",__func__,
+                _MMG2D_indPt(mesh, mesh->tria[kdep].v[j]),_MMG2D_indElt(mesh,kdep));
+      }
       return(0);
     }
-    assert(lon);
-
-    /* Find second edge extremity */
-    for (j=1 ; j<=lon ; j++) {
-      iel = list[j];
-      pt = &mesh->tria[iel/3];
-      voy = iel%3;
-      if (pt->v[MMG2_iare[(voy+1)%3][0]]==ped->b) {
+    
+    for (l=0; l<lon; l++) {
+      iel = list[l] / 3;
+      pt  = &mesh->tria[iel];
+      i = list[l] % 3;
+      i1 = _MMG5_inxt2[i];
+      i2 = _MMG5_iprv2[i];
+      
+      if ( pt->v[i1] == ped->b ) {
         ped->base = -1;
         nex++;
         break;
       }
-      else if (pt->v[MMG2_iare[(voy+2)%3][1]]==ped->b) {
+      else if ( pt->v[i2] == ped->b ) {
         ped->base = -1;
         nex++;
         break;
       }
     }
-
-
-    if(j>lon) {
-      /* Missing edge */
-      if(mesh->info.imprim > 5) printf("  ** missing edge %d %d \n",
-                                       ped->a,ped->b);
+    
+    if ( l >= lon ) {
+      if ( (mesh->info.imprim > 5) && (!mmgWarn1) ) {
+        mmgWarn1 = 1;
+        fprintf(stderr,"\n  ## Error: %s: at least 1 missing edge (%d %d).\n",
+                __func__,_MMG2D_indPt(mesh,ped->a),_MMG2D_indPt(mesh,ped->b));
+      }
       ped->base = kdep;
     }
   }
-
-  /** Enforce edges */
-  if(nex!=mesh->na) {
-    if(mesh->info.imprim > 4)
+    
+  /* Now treat the missing edges */
+  if ( nex != mesh->na ) {
+    if(mesh->info.imprim > 5)
       printf(" ** number of missing edges : %d\n",mesh->na-nex);
-
-    for(kk=1 ; kk<=mesh->na ; kk++) {
+    
+    for (kk=1; kk<=mesh->na; kk++) {
       ped = &mesh->edge[kk];
-    if( !ped->a || ped->base < 0) continue;
+      if ( !ped->a || ped->base < 0 ) continue;
       ia = ped->a;
       ib = ped->b;
       kdep = ped->base;
+      
       if(mesh->info.ddebug)
         printf("\n  -- edge enforcement %d %d\n",ia,ib);
 
-      if(!(lon=MMG2_locateEdge(mesh,ia,ib,&kdep,list))) {
-        if(mesh->info.ddebug)
-          printf("  ## Error: edge not found\n");
-        _MMG5_SAFE_FREE(list);
+      if ( !(lon=MMG2_locateEdge(mesh,ia,ib,&kdep,list)) ) {
+        if ( mesh->info.ddebug && (!mmgWarn2) ) {
+          fprintf(stderr,"\n  ## Error: %s: at least 1 edge not found.\n",
+                  __func__);
+          mmgWarn2=1;
+        }
         return(0);
       }
-      if(!(lon<0 || lon==4)) {
-        if(mesh->info.ddebug)
-          printf("  ** Unable to force edge: %d %d -- %d\n",ia,ib,lon);
-        exit(EXIT_FAILURE);
+      
+      if ( !( lon < 0 || lon == 4 ) ) {
+        if ( mesh->info.ddebug && (!mmgWarn3) ) {
+          mmgWarn3=1;
+          fprintf(stderr,"\n ## Error: %s: Unable to force at least"
+                  " 1 edge (%d %d -- %d).\n",__func__,_MMG2D_indPt(mesh,ia),
+                  _MMG2D_indPt(mesh,ib),lon);
+        }
+        return 0;
       }
-      /*edge exist*/
-      if(lon==4) {
-        if(mesh->info.ddebug) printf("  ** Existing edge\n");
-        //exit(EXIT_FAILURE);
+      
+      /* Considered edge actually exists */
+      if ( lon == 4 ) {
+        if ( mesh->info.ddebug && (!mmgWarn4) ) {
+          mmgWarn4=1;
+          fprintf(stderr,"\n  ## Warning: %s: existing edge.\n",__func__);
+        }
       }
-      if(lon>MMG2D_LMAX) {
-        printf(" ## Error: too many triangles (%d)\n",lon);
-        exit(EXIT_FAILURE);
+      if( (!mmgWarn5) && (lon>MMG2_LONMAX) ) {
+        mmgWarn5 = 1;
+        fprintf(stderr,"\n  ## Error: %s: at least 1 edge intersecting too many"
+               " triangles (%d)\n",__func__,lon);
       }
-      if(lon<2) {
-        if(mesh->info.ddebug) printf("  ** few edges... %d\n",lon);
-        //exit(EXIT_FAILURE);
+      if ( lon<2 ) {
+        if ( mesh->info.ddebug && (!mmgWarn6) ) {
+          mmgWarn6 = 1;
+          fprintf(stderr,"\n  ## Warning: %s: few edges... %d\n",__func__,lon);
+        }
       }
       lon = -lon;
       ilon = lon;
 
-      /*retournement d'arêtes aleatoirement dans la liste, tant que */
+      /* Randomly swap edges in the list, while... */
       srand(time(NULL));
-      iter=0;
-      while (ilon>0 && iter++<2*lon) {
-        rnd = (rand()%lon);
+      
+      while ( ilon > 0 ) {
+        rnd = ( rand() % lon );
+        k   = list[rnd] / 3;
 
-        k = list[rnd]/3;
-        if(mesh->info.ddebug) {
-          printf("  ** Random edge swap\n");
-          /* for(i=0 ; i<lon ; i++) { */
-          /*   if((mesh->tria[list[i]/3]).base == mesh->base+1) */
-          /*     printf("%de tr : %d base %d == %d\n",i+1,list[i]/3,mesh->tria[list[i]/3].base,mesh->base+1); */
-          /*   else */
-          /*     printf("pas base %de tr %d \n",i+1,list[i]/3); */
-
-          /*   printf("vertex %d %d %d\n",mesh->tria[list[i]/3].v[0],mesh->tria[list[i]/3].v[1], */
-          /*          mesh->tria[list[i]/3].v[2]); */
-          /* } */
-        }
-
-        /*check k in Pipe*/
-        i=0;
-        k = list[rnd]/3;
-        while(i++<lon) {
+        /* Check for triangle k in the pipe until one triangle with base+1 is met (indicating that it is 
+           crossed by the considered edge) */
+        l = 0;
+        while ( l++ < lon ) {
           pt = &mesh->tria[k];
-          if(pt->base == mesh->base+1) break;
-          k = list[(++rnd)%lon]/3;
+          if ( pt->base == mesh->base+1 ) break;
+          k = list[(++rnd)%lon] / 3;
         }
-        assert(i<=lon);
-        idep = list[rnd]%3;
+        
+        assert ( l <= lon );
+        idep = list[rnd] % 3;
         // if(mesh->info.ddebug) printf("i= %d < %d ? on demarre avec %d\n",i,lon+1,k);
         adja = &mesh->adja[3*(k-1)+1];
-        for(i=0 ; i<3 ; i++) {
-          ir = (idep+i)%3;
-          /*check adj in Pipe*/
-          adj = adja[ir]/3;
-          voy = adja[ir]%3;
+        
+        for (i=0; i<3; i++) {
+          ir = (idep+i) % 3;
+          
+          /* Check the adjacent triangle in the pipe */
+          adj = adja[ir] / 3;
           pt1 = &mesh->tria[adj];
-          if (pt1->base != (mesh->base+1)) {
+          if ( pt1->base != (mesh->base+1) ) continue;
+          
+          /* Swap edge ir in triangle k, corresponding to a situation where both triangles are to base+1 */
+          if ( !_MMG2_swapdelone(mesh,sol,k,ir,1e+4,list2) ) {
+            if ( mesh->info.ddebug && (!mmgWarn7) ) {
+              mmgWarn7 = 1;
+              fprintf(stderr,"\n  ## Warning: %s: unable to swap at least 1"
+                      " edge.\n",__func__);
+            }
             continue;
           }
-          /************************/
-          /********swap***********/
-          /************************/
-          if(!MMG2_swapar(mesh,sol,k,ir,1e+4,list2)) {
-            if(mesh->info.ddebug) printf("  ## Warning: unable to swap\n");
-            continue;
-          }
-          if(mesh->info.ddebug) printf("  ** Successful swap\n");
-          /*new tr intersecté par ia-ib ??*/
-          for(ied=1 ; ied<3 ; ied++) {
+          
+          /* Is new triangle intersected by ia-ib ?? */
+          for (ied=1; ied<3; ied++) {
             iare = MMG2_cutEdgeTriangle(mesh,list2[ied],ia,ib);
-            if(!iare) { /*tr not in pipe*/
+            if ( !iare ) { /*tr not in pipe*/
               ilon--;
-              if(mesh->info.ddebug)
-                printf("  ## Warning: tr %d not intersected ==> %d\n",list2[ied],ilon);
+              if ( mesh->info.ddebug && (!mmgWarn8) ) {
+                mmgWarn8 = 1;
+                fprintf(stderr,"\n  ## Warning: %s: at least 1 triangle (%d)"
+                        " not intersected ==> %d\n",__func__,
+                        _MMG2D_indElt(mesh,list2[ied]),ilon);
+              }
               mesh->tria[list2[ied]].base = mesh->base;
-            } else if(iare < 0) {
+            }
+            else if ( iare < 0 ) {
               mesh->tria[list2[ied]].base = mesh->base;
               ilon -= 2;
-            } else {
-              if(mesh->info.ddebug) printf("  ** tr intersected %d \n",list2[ied]);
+            }
+            else {
+              if ( mesh->info.ddebug )
+                printf("  ** tr intersected %d \n",list2[ied]);
               mesh->tria[list2[ied]].base = mesh->base+1;
             }
           }
           break;
         }
      }
-  }/*end k --> mesh->na*/
+    }
   }
-
-  _MMG5_SAFE_FREE(list);
-
+  
+  /* Reset ->s field of vertices */
+  for (k=1; k<=mesh->np; k++) {
+    ppt = &mesh->point[k];
+    if ( MG_VOK(ppt) ) ppt->s = 0;
+  }
 
 /*   //check if there are more bdry edges.. and delete tr      */
 /* #warning a optimiser en mettant un pile et un while */

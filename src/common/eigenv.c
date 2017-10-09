@@ -80,23 +80,26 @@ static double Id[3][3] = {
  *
  */
 static int newton3(double p[4],double x[3]) {
-  double     b,c,d,da,db,dc,epsd;
-  double     delta,fx,dfx,dxx;
-  double     fdx0,fdx1,dx0,dx1,x1,x2;
-  int        it,n;
+  double      b,c,d,da,db,dc,epsd;
+  double      delta,fx,dfx,dxx;
+  double      fdx0,fdx1,dx0,dx1,x1,x2;
+  int         it,n;
+  static char mmgWarn=0;
 
   /* coeffs polynomial, a=1 */
   if ( p[3] != 1. ) {
-    fprintf(stderr,"  ## Error: bad use of newton3 function, polynomial"
-            " must be of type P(x) = x^3+bx^2+cx+d. \n");
-    fprintf(stderr,"  ## Exiting.\n");
+    if ( !mmgWarn ) {
+      fprintf(stderr,"\n  ## Warning: %s: bad use of newton3 function, polynomial"
+              " must be of type P(x) = x^3+bx^2+cx+d.\n",
+              __func__);
+      mmgWarn = 1;
+    }
     return(0);
   }
 
   b = p[2];
   c = p[1];
   d = p[0];
-  n = 1;
 
   /* 1st derivative of f */
   da = 3.0;
@@ -128,7 +131,8 @@ static int newton3(double p[4],double x[3]) {
       fx = d + x[2]*(c+x[2]*(b+x[2]));
       if ( fabs(fx) > _MG_EPSD2 ) {
 #ifdef DEBUG
-        fprintf(stderr,"  ## ERR 9100, newton3: fx= %E\n",fx);
+         fprintf(stderr,"\n  ## Error: %s: ERR 9100, newton3: fx= %E.\n",
+                 __func__,fx);
 #endif
         return(0);
       }
@@ -144,7 +148,8 @@ static int newton3(double p[4],double x[3]) {
       fx = d + x[2]*(c+x[2]*(b+x[2]));
       if ( fabs(fx) > _MG_EPSD2 ) {
 #ifdef DEBUG
-        fprintf(stderr,"  ## ERR 9100, newton3: fx= %E\n",fx);
+        fprintf(stderr,"\n  ## Error: %s: ERR 9100, newton3: fx= %E.\n",
+                __func__,fx);
 #endif
         return(0);
       }
@@ -162,7 +167,8 @@ static int newton3(double p[4],double x[3]) {
     fx = d + x[0]*(c+x[0]*(b+x[0]));
     if ( fabs(fx) > _MG_EPSD2 ) {
 #ifdef DEBUG
-      fprintf(stderr,"  ## ERR 9100, newton3: fx= %E\n",fx);
+      fprintf(stderr,"\n  ## Error: %s: ERR 9100, newton3: fx= %E.\n",
+              __func__,fx);
 #endif
       return(0);
     }
@@ -171,7 +177,8 @@ static int newton3(double p[4],double x[3]) {
 
   else {
 #ifdef DEBUG
-    fprintf(stderr,"  ## ERR 9101, newton3: no real roots\n");
+    fprintf(stderr,"\n  ## Error: %s: ERR 9101, newton3: no real roots.\n",
+            __func__);
 #endif
     return(0);
   }
@@ -196,7 +203,9 @@ static int newton3(double p[4],double x[3]) {
     if ( dxx < 1.0e-10 ) {
       x[0] = x2;
       if ( fabs(fx) > _MG_EPSD2 ) {
-        fprintf(stderr,"  ## ERR 9102, newton3, no root found (fx %E).\n",fx);
+        fprintf(stderr,"\n  ## Error: %s: ERR 9102, newton3, no root found"
+                " (fx %E).\n",
+                __func__,fx);
         return(0);
       }
       break;
@@ -210,7 +219,9 @@ static int newton3(double p[4],double x[3]) {
     x[0] = x1;
     fx   = d + x1*(c+(x1*(b+x1)));
     if ( fabs(fx) > _MG_EPSD2 ) {
-      fprintf(stderr,"  ## ERR 9102, newton3, no root found (fx %E).\n",fx);
+      fprintf(stderr,"\n  ## Error: %s: ERR 9102, newton3, no root found"
+              " (fx %E).\n",
+              __func__,fx);
       return(0);
     }
   }
@@ -222,7 +233,7 @@ static int newton3(double p[4],double x[3]) {
   delta = db*db - 4.0*dc;
 
   if ( delta <= 0.0 ) {
-    fprintf(stderr,"  ## ERR 9103, newton3, det = 0.\n");
+    fprintf(stderr,"\n  ## Error: %s: ERR 9103, newton3, det = 0.\n",__func__);
     return(0);
   }
 
@@ -234,12 +245,14 @@ static int newton3(double p[4],double x[3]) {
   /* check for root accuracy */
   fx = d + x[1]*(c+x[1]*(b+x[1]));
   if ( fabs(fx) > _MG_EPSD2 ) {
-    fprintf(stderr,"  ## ERR 9104, newton3: fx= %E  x= %E\n",fx,x[1]);
+    fprintf(stderr,"\n  ## Error: %s: ERR 9104, newton3: fx= %E  x= %E.\n",
+            __func__,fx,x[1]);
     return(0);
   }
   fx = d + x[2]*(c+x[2]*(b+x[2]));
   if ( fabs(fx) > _MG_EPSD2 ) {
-    fprintf(stderr,"  ## ERR 9104, newton3: fx= %E  x= %E\n",fx,x[2]);
+    fprintf(stderr,"\n  ## Error: %s: ERR 9104, newton3: fx= %E  x= %E.\n",
+            __func__,fx,x[2]);
     return(0);
   }
 #endif
@@ -534,26 +547,26 @@ int _MMG5_eigenv(int symmat,double *mat,double lambda[3],double v[3][3]) {
     if ( fabs(m[i]-mat[i]) > err )  err = fabs(m[i]-mat[i]);
 
     if ( err > 1.e03*maxm ) {
-    printf("\nProbleme eigenv3: err= %f\n",err*maxm);
-    printf("mat depart :\n");
-    printf("%13.6f  %13.6f  %13.6f\n",mat[0],mat[1],mat[2]);
-    printf("%13.6f  %13.6f  %13.6f\n",mat[1],mat[3],mat[4]);
-    printf("%13.6f  %13.6f  %13.6f\n",mat[2],mat[4],mat[5]);
-    printf("mat finale :\n");
-    printf("%13.6f  %13.6f  %13.6f\n",m[0],m[1],m[2]);
-    printf("%13.6f  %13.6f  %13.6f\n",m[1],m[3],m[4]);
-    printf("%13.6f  %13.6f  %13.6f\n",m[2],m[4],m[5]);
-    printf("lambda : %f %f %f\n",lambda[0],lambda[1],lambda[2]);
-    printf(" ordre %d\n",n);
-    printf("\nOrtho:\n");
-    printf("v1.v2 = %.14f\n",
+    fprintf(stderr,"\n  ## Error: %s:\nProbleme eigenv3: err= %f\n",__func__,err*maxm);
+    fprintf(stderr,"\n  ## Error: %s:mat depart :\n",__func__);
+    fprintf(stderr,"\n  ## Error: %s:%13.6f  %13.6f  %13.6f\n",__func__,mat[0],mat[1],mat[2]);
+    fprintf(stderr,"\n  ## Error: %s:%13.6f  %13.6f  %13.6f\n",__func__,mat[1],mat[3],mat[4]);
+    fprintf(stderr,"\n  ## Error: %s:%13.6f  %13.6f  %13.6f\n",__func__,mat[2],mat[4],mat[5]);
+    fprintf(stderr,"\n  ## Error: %s:mat finale :\n",__func__);
+    fprintf(stderr,"\n  ## Error: %s:%13.6f  %13.6f  %13.6f\n",__func__,m[0],m[1],m[2]);
+    fprintf(stderr,"\n  ## Error: %s:%13.6f  %13.6f  %13.6f\n",__func__,m[1],m[3],m[4]);
+    fprintf(stderr,"\n  ## Error: %s:%13.6f  %13.6f  %13.6f\n",__func__,m[2],m[4],m[5]);
+    fprintf(stderr,"\n  ## Error: %s:lambda : %f %f %f\n",__func__,lambda[0],lambda[1],lambda[2]);
+    fprintf(stderr,"\n  ## Error: %s: ordre %d\n",__func__,n);
+    fprintf(stderr,"\n  ## Error: %s:\nOrtho:\n",__func__);
+    fprintf(stderr,"\n  ## Error: %s:v1.v2 = %.14f\n",__func__,
     v[0][0]*v[1][0]+v[0][1]*v[1][1]+ v[0][2]*v[1][2]);
-    printf("v1.v3 = %.14f\n",
+    fprintf(stderr,"\n  ## Error: %s:v1.v3 = %.14f\n",__func__,
     v[0][0]*v[2][0]+v[0][1]*v[2][1]+ v[0][2]*v[2][2]);
-    printf("v2.v3 = %.14f\n",
+    fprintf(stderr,"\n  ## Error: %s:v2.v3 = %.14f\n",__func__,
     v[1][0]*v[2][0]+v[1][1]*v[2][1]+ v[1][2]*v[2][2]);
 
-    printf("Consistency\n");
+    fprintf(stderr,"\n  ## Error: %s:Consistency\n",__func__);
     for (i=0; i<3; i++) {
     tmpx = v[0][i]*m[0] + v[1][i]*m[1]
     + v[2][i]*m[2] - lambda[i]*v[0][i];
@@ -561,14 +574,14 @@ int _MMG5_eigenv(int symmat,double *mat,double lambda[3],double v[3][3]) {
     + v[2][i]*m[4] - lambda[i]*v[1][i];
     tmpz = v[0][i]*m[2] + v[1][i]*m[4]
     + v[2][i]*m[5] - lambda[i]*v[2][i];
-    printf(" Av %d - lambda %d *v %d = %f %f %f\n",
-    i,i,i,tmpx,tmpy,tmpz);
+    fprintf(stderr,"\n  ## Error: %s: Av %d - lambda %d *v %d = %f %f %f\n",
+    __func__,i,i,i,tmpx,tmpy,tmpz);
 
-    printf("w1 %f %f %f\n",w1[0],w1[1],w1[2]);
-    printf("w2 %f %f %f\n",w2[0],w2[1],w2[2]);
-    printf("w3 %f %f %f\n",w3[0],w3[1],w3[2]);
+    fprintf(stderr,"\n  ## Error: %s:w1 %f %f %f\n",__func__,w1[0],w1[1],w1[2]);
+    fprintf(stderr,"\n  ## Error: %s:w2 %f %f %f\n",__func__,w2[0],w2[1],w2[2]);
+    fprintf(stderr,"\n  ## Error: %s:w3 %f %f %f\n",__func__,w3[0],w3[1],w3[2]);
     }
-    exit(1);
+    return(1);
     }
     }
     -------------------------------------------------------------------*/
@@ -587,10 +600,6 @@ int _MMG5_eigenv(int symmat,double *mat,double lambda[3],double v[3][3]) {
  */
 int _MMG5_eigen2(double *mm,double *lambda,double vp[2][2]) {
   double   m[3],dd,a1,xn,ddeltb,rr1,rr2,ux,uy;
-
-  /* init */
-  ux = 1.0;
-  uy = 0.0;
 
   /* normalize */
   memcpy(m,mm,3*sizeof(double));
@@ -621,7 +630,7 @@ int _MMG5_eigen2(double *mm,double *lambda,double vp[2][2]) {
   ddeltb = a1*a1 - 4.0 * (m[0]*m[2] - m[1]*m[1]);
 
   if ( ddeltb < 0.0 ) {
-    fprintf(stderr,"  Delta: %f\n",ddeltb);
+    fprintf(stderr,"\n  ## Error: %s: Delta: %f\n",__func__,ddeltb);
     ddeltb = 0.0;
   }
   ddeltb = sqrt(ddeltb);

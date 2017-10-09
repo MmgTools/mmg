@@ -52,22 +52,26 @@ int main(int argc,char *argv[]) {
   MMG5_pMesh      mmgMesh;
   MMG5_pSol       mmgSol;
   int             ier;
-  char            *pwd,*filename,*filename_os,*filename_o3d;
+  char            *filename,*filename_o2d,*filename_os,*filename_o3d,*ptr;
 
   fprintf(stdout,"  -- TEST MMGLIB \n");
 
+  if ( argc != 4 ) {
+    printf(" Usage: %s 2d_filein 3d_filein fileout\n",argv[0]);
+    return(1);
+  }
+
   /** ================== 2d remeshing using the mmg2d library ========== */
 
- /* Name and path of the mesh file */
-  pwd = getenv("PWD");
-  filename = (char *) calloc(strlen(pwd) +
-                             strlen("/../libexamples/mmg/adaptation_example0/init")+1,
-                             sizeof(char));
+  /* Name and path of the mesh file */
+  filename = (char *) calloc(strlen(argv[1]) + 1, sizeof(char));
   if ( filename == NULL ) {
     perror("  ## Memory problem: calloc");
     exit(EXIT_FAILURE);
   }
-  sprintf(filename, "%s%s%s", pwd, "/../libexamples/mmg/adaptation_example0/", "init");
+  strcpy(filename,argv[1]);
+
+ /* Name and path of the mesh file */
 
   /** ------------------------------ STEP   I -------------------------- */
   /** 1) Initialisation of mesh and sol structures */
@@ -112,9 +116,20 @@ int main(int argc,char *argv[]) {
 
   /** 1) Automatically save the mesh */
   /*save result*/
-  if ( MMG2D_saveMesh(mmgMesh,"result.mesh") != 1 )  exit(EXIT_FAILURE);
+  filename_o2d = (char *) calloc(strlen(argv[3]) + 4, sizeof(char));
+  if ( filename_o2d == NULL ) {
+    perror("  ## Memory problem: calloc");
+    exit(EXIT_FAILURE);
+  }
+  strcpy(filename_o2d,argv[3]);
+  ptr = strstr(filename_o2d,".mesh");
+  if ( !ptr )  ptr = strstr(filename_o2d,".msh");
+  if ( ptr ) *ptr = '\0';
+  strcat(filename_o2d,".2d");
+
+  if ( MMG2D_saveMesh(mmgMesh,filename_o2d) != 1 )  exit(EXIT_FAILURE);
   /*save metric*/
-  if ( MMG2D_saveSol(mmgMesh,mmgSol,"result") != 1 )  exit(EXIT_FAILURE);
+  if ( MMG2D_saveSol(mmgMesh,mmgSol,filename_o2d) != 1 )  exit(EXIT_FAILURE);
 
   /** 2) Free the MMG2D structures */
   MMG2D_Free_all(MMG5_ARG_start,
@@ -126,23 +141,23 @@ int main(int argc,char *argv[]) {
   /** ================ surface remeshing using the mmgs library ======== */
 
   /* Name and path of the mesh file */
-  pwd = getenv("PWD");
-  filename = (char *) calloc(strlen(pwd) + 1 +
-                             strlen("/../libexamples/mmg/adaptation_example0/cube"),
-                             sizeof(char));
+  filename = (char *) calloc(strlen(argv[2]) + 1, sizeof(char));
   if ( filename == NULL ) {
     perror("  ## Memory problem: calloc");
     exit(EXIT_FAILURE);
   }
-  filename_os = (char *) calloc(strlen(pwd) + 1 +
-                                strlen("/../libexamples/mmg/adaptation_example0/cube.s"),
-                                sizeof(char));
+  strcpy(filename,argv[2]);
+
+  filename_os = (char *) calloc(strlen(argv[3]) + 3, sizeof(char));
   if ( filename_os == NULL ) {
     perror("  ## Memory problem: calloc");
     exit(EXIT_FAILURE);
   }
-  sprintf(filename, "%s%s%s", pwd, "/../libexamples/mmg/adaptation_example0/", "cube");
-  sprintf(filename_os, "%s%s%s", pwd, "/../libexamples/mmg/adaptation_example0/", "cube.s");
+  strcpy(filename_os,argv[3]);
+  ptr = strstr(filename_os,".mesh");
+  if ( !ptr )  ptr = strstr(filename_os,".msh");
+  if ( ptr ) *ptr = '\0';
+  strcat(filename_os,".s");
 
   /** ------------------------------ STEP   I -------------------------- */
   /** 1) Initialisation of mesh and sol structures */
@@ -201,14 +216,16 @@ int main(int argc,char *argv[]) {
                 MMG5_ARG_end);
 
   /** ================== 3d remeshing using the mmg3d library ========== */
-  filename_o3d = (char *) calloc(strlen(pwd) + 1 +
-                                 strlen("/../libexamples/mmg/adaptation_example0/cube.3d"),
-                                 sizeof(char));
+  filename_o3d = (char *) calloc(strlen(argv[3]) + 4, sizeof(char));
   if ( filename_o3d == NULL ) {
     perror("  ## Memory problem: calloc");
     exit(EXIT_FAILURE);
   }
-  sprintf(filename_o3d, "%s%s%s", pwd, "/../libexamples/mmg/adaptation_example0/", "cube.3d");
+  strcpy(filename_o3d,argv[3]);
+  ptr = strstr(filename_o3d,".mesh");
+  if ( !ptr )  ptr = strstr(filename_o3d,".msh");
+  if ( ptr ) *ptr = '\0';
+  strcat(filename_o3d,".3d");
 
   /** ------------------------------ STEP   I -------------------------- */
   /** 1) Initialisation of mesh and sol structures */
@@ -266,6 +283,7 @@ int main(int argc,char *argv[]) {
                  MMG5_ARG_end);
 
   free(filename);
+  free(filename_o2d);
   free(filename_os);
   free(filename_o3d);
 

@@ -36,6 +36,41 @@
 
 extern char ddb;
 
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the meric structure.
+ * \param metRidTyp metric storage (classic or special)
+ * \return 1 if success, 0 if fail.
+ *
+ * Compute the quality of the tetras over the mesh.
+ *
+ */
+int _MMG3D_tetraQual(MMG5_pMesh mesh, MMG5_pSol met,char metRidTyp) {
+  MMG5_pTetra pt;
+  double      minqual;
+  int         k,iel;
+
+  minqual = 2./_MMG3D_ALPHAD;
+
+  /*compute tet quality*/
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+     if( !MG_EOK(pt) )   continue;
+
+     if ( !metRidTyp && met->size == 6 && met->m ) {
+       pt->qual = _MMG5_caltet33_ani(mesh,met,pt);
+     }
+     else
+       pt->qual = _MMG5_orcal(mesh,met,k);
+
+    if ( pt->qual < minqual ) {
+      minqual = pt->qual;
+      iel     = k;
+    }
+  }
+
+  return ( _MMG5_minQualCheck(iel,minqual,_MMG3D_ALPHAD) );
+}
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -112,8 +147,7 @@ inline double _MMG5_caltet33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
   det = mm[0] * ( mm[3]*mm[5] - mm[4]*mm[4]) \
       - mm[1] * ( mm[1]*mm[5] - mm[2]*mm[4]) \
       + mm[2] * ( mm[1]*mm[4] - mm[2]*mm[3]);
-  if ( det < _MMG5_EPSOK )   {
-    //printf("--- INVALID METRIC : DET  %e\n",det);
+  if ( det < _MMG5_EPSD2 )   {
     return(0.0);
   }
   det = sqrt(det) * vol;
@@ -154,12 +188,12 @@ inline double _MMG5_caltet33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
  */
 int _MMG3D_prilen(MMG5_pMesh mesh, MMG5_pSol met, char metRidTyp) {
   MMG5_pTetra     pt;
+  MMG5_pPoint     ppt;
   _MMG5_Hash      hash;
   double          len,avlen,lmin,lmax;
-  int             k,np,nq,amin,bmin,amax,bmax,ned,hl[9];
+  int             k,np,nq,amin,bmin,amax,bmax,ned,hl[9],nullEdge,n;
   char            ia,i0,i1,ier,i;
   static double   bd[9]= {0.0, 0.3, 0.6, 0.7071, 0.9, 1.3, 1.4142, 2.0, 5.0};
-  //{0.0, 0.2, 0.5, 0.7071, 0.9, 1.111, 1.4142, 2.0, 5.0};
 
   memset(hl,0,9*sizeof(int));
   ned = 0;
@@ -167,6 +201,7 @@ int _MMG3D_prilen(MMG5_pMesh mesh, MMG5_pSol met, char metRidTyp) {
   lmax = 0.0;
   lmin = 1.e30;
   amin = amax = bmin = bmax = 0;
+  nullEdge = 0;
 
   /* Hash all edges in the mesh */
   if ( !_MMG5_hashNew(mesh,&hash,mesh->np,7*mesh->np) )  return(0);
@@ -182,19 +217,26 @@ int _MMG3D_prilen(MMG5_pMesh mesh, MMG5_pSol met, char metRidTyp) {
       nq = pt->v[i1];
 
       if(!_MMG5_hashEdge(mesh,&hash,np,nq,0)){
-        fprintf(stderr,"%s:%d: Error: function _MMG5_hashEdge return 0\n",
-                __FILE__,__LINE__);
-        exit(EXIT_FAILURE);
+        fprintf(stderr,"  ## Error: %s: function _MMG5_hashEdge return 0\n",
+                __func__);
+        return 0;
       }
     }
   }
-
 
   /* Pop edges from hash table, and analyze their length */
   for(k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
     if ( !MG_EOK(pt) ) continue;
-
+    n = 0;
+    for(i=0 ; i<4 ; i++) {
+      ppt = &mesh->point[pt->v[i]];
+      if(!(MG_SIN(ppt->tag) || MG_NOM & ppt->tag) && (ppt->tag & MG_GEO)) continue;
+      n++;
+    }
+    if(!n) {
+      continue;
+    }
     for(ia=0; ia<6; ia++) {
       i0 = _MMG5_iare[ia][0];
       i1 = _MMG5_iare[ia][1];
@@ -204,43 +246,48 @@ int _MMG3D_prilen(MMG5_pMesh mesh, MMG5_pSol met, char metRidTyp) {
       /* Remove edge from hash ; ier = 1 if edge has been found */
       ier = _MMG5_hashPop(&hash,np,nq);
       if( ier ) {
-        ned ++;
         if ( (!metRidTyp) && met->size==6 && met->m ) {
           len = _MMG5_lenedg33_ani(mesh,met,ia,pt);
         }
         else
           len = _MMG5_lenedg(mesh,met,ia,pt);
 
-        assert( len!=0 );
-        avlen += len;
 
-        if( len < lmin ) {
-          lmin = len;
-          amin = np;
-          bmin = nq;
+        if ( !len ) {
+          ++nullEdge;
         }
+        else {
+          avlen += len;
+          ned ++;
 
-        if ( len > lmax ) {
-          lmax = len;
-          amax = np;
-          bmax = nq;
-        }
-
-        /* Locate size of edge among given table */
-        for(i=0; i<8; i++) {
-          if ( bd[i] <= len && len < bd[i+1] ) {
-            hl[i]++;
-            break;
+          if( len < lmin ) {
+            lmin = len;
+            amin = np;
+            bmin = nq;
           }
+
+          if ( len > lmax ) {
+            lmax = len;
+            amax = np;
+            bmax = nq;
+          }
+
+          /* Locate size of edge among given table */
+          for(i=0; i<8; i++) {
+            if ( bd[i] <= len && len < bd[i+1] ) {
+              hl[i]++;
+              break;
+            }
+          }
+          if( i == 8 ) hl[8]++;
         }
-        if( i == 8 ) hl[8]++;
       }
     }
   }
 
   /* Display histogram */
   _MMG5_displayHisto(mesh, ned, &avlen, amin, bmin, lmin,
-                     amax, bmax, lmax, &bd[0], &hl[0]);
+                     amax, bmax, lmax,nullEdge, &bd[0], &hl[0],1);
 
   _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
   return(1);
@@ -256,8 +303,9 @@ int _MMG3D_prilen(MMG5_pMesh mesh, MMG5_pSol met, char metRidTyp) {
  */
 static int _MMG3D_printquaLES(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTetra    pt;
-  double   rap,rapmin,rapmax,rapavg,med,good;
-  int      k,iel,ok,nex,his[5];
+  double         rap,rapmin,rapmax,rapavg,med,good;
+  int            k,iel,ok,nex,his[5];
+  static char    mmgWarn0=0;
 
   /*compute tet quality*/
   for (k=1; k<=mesh->ne; k++) {
@@ -283,17 +331,18 @@ static int _MMG3D_printquaLES(MMG5_pMesh mesh,MMG5_pSol met) {
       continue;
     }
     ok++;
-    if ( _MMG5_orvol(mesh->point,pt->v) < 0.0 ) {
-      fprintf(stdout," ## Warning: negative volume\n");
+    if ( (!mmgWarn0) && (_MMG5_orvol(mesh->point,pt->v) < 0.0) ) {
+      mmgWarn0 = 1;
+      fprintf(stderr,"  ## Warning: %s: at least 1 negative volume.\n",__func__);
     }
-    rap = 1 - _MMG5_ALPHAD * pt->qual;
+    rap = 1 - _MMG3D_ALPHAD * pt->qual;
     if ( rap > rapmin ) {
       rapmin = rap;
       iel    = ok;
     }
     if ( rap < 0.9 )  med++;
     if ( rap < 0.6 ) good++;
-    // if ( rap < _MMG5_BADKAL )  mesh->info.badkal = 1;
+    // if ( rap < _MMG3D_BADKAL )  mesh->info.badkal = 1;
     rapavg += rap;
     rapmax  = MG_MIN(rapmax,rap);
     if(rap < 0.6)
@@ -354,9 +403,10 @@ static int _MMG3D_printquaLES(MMG5_pMesh mesh,MMG5_pSol met) {
  *
  */
 int _MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
-  MMG5_pTetra    pt;
-  double   rap,rapmin,rapmax,rapavg,med,good;
-  int      i,k,iel,ok,ir,imax,nex,his[5];
+  MMG5_pTetra pt;
+  double      rap,rapmin,rapmax,rapavg,med,good;
+  int         i,k,iel,ok,ir,imax,nex,his[5];
+  static char mmgWarn0 = 0;
 
   if( mesh->info.optimLES ) return(_MMG3D_printquaLES(mesh,met));
 
@@ -392,17 +442,18 @@ int _MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
       continue;
     }
     ok++;
-    if ( _MMG5_orvol(mesh->point,pt->v) < 0.0 ) {
-      fprintf(stdout," ## Warning: negative volume\n");
+    if ( (!mmgWarn0) && (_MMG5_orvol(mesh->point,pt->v) < 0.0) ) {
+      mmgWarn0 = 1;
+      fprintf(stderr,"  ## Warning: %s: at least 1 negative volume\n",__func__);
     }
-    rap = _MMG5_ALPHAD * pt->qual;
+    rap = _MMG3D_ALPHAD * pt->qual;
     if ( rap < rapmin ) {
       rapmin = rap;
       iel    = ok;
     }
     if ( rap > 0.5 )  med++;
     if ( rap > 0.12 ) good++;
-    if ( rap < _MMG5_BADKAL )  mesh->info.badkal = 1;
+    if ( rap < _MMG3D_BADKAL )  mesh->info.badkal = 1;
     rapavg += rap;
     rapmax  = MG_MAX(rapmax,rap);
     ir = MG_MIN(4,(int)(5.0*rap));
@@ -421,30 +472,22 @@ int _MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
           _MMG3D_indPt(mesh,mesh->tetra[iel].v[0]),_MMG3D_indPt(mesh,mesh->tetra[iel].v[1]),
           _MMG3D_indPt(mesh,mesh->tetra[iel].v[2]),_MMG3D_indPt(mesh,mesh->tetra[iel].v[3]));
 #endif
-  if ( abs(mesh->info.imprim) < 3 ){
-    if (rapmin == 0){
-      fprintf(stderr,"  ## ERROR: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
-      return(0);
+
+  if ( mesh->info.imprim >= 3 ) {
+    /* print histo */
+    fprintf(stdout,"     HISTOGRAMM:");
+    fprintf(stdout,"  %6.2f %% > 0.12\n",100.0*(good/(float)(mesh->ne-nex)));
+    if ( abs(mesh->info.imprim) > 3 ) {
+      fprintf(stdout,"                  %6.2f %% >  0.5\n",100.0*( med/(float)(mesh->ne-nex)));
+      imax = MG_MIN(4,(int)(5.*rapmax));
+      for (i=imax; i>=(int)(5*rapmin); i--) {
+        fprintf(stdout,"     %5.1f < Q < %5.1f   %7d   %6.2f %%\n",
+                i/5.,i/5.+0.2,his[i],100.*(his[i]/(float)(mesh->ne-nex)));
+      }
     }
-    return(1);
   }
 
-  /* print histo */
-  fprintf(stdout,"     HISTOGRAMM:");
-  fprintf(stdout,"  %6.2f %% > 0.12\n",100.0*(good/(float)(mesh->ne-nex)));
-  if ( abs(mesh->info.imprim) > 3 ) {
-    fprintf(stdout,"                  %6.2f %% >  0.5\n",100.0*( med/(float)(mesh->ne-nex)));
-    imax = MG_MIN(4,(int)(5.*rapmax));
-    for (i=imax; i>=(int)(5*rapmin); i--) {
-      fprintf(stdout,"     %5.1f < Q < %5.1f   %7d   %6.2f %%\n",
-              i/5.,i/5.+0.2,his[i],100.*(his[i]/(float)(mesh->ne-nex)));
-    }
-  }
-  if (rapmin == 0){
-    fprintf(stderr,"  ## ERROR: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
-    return(0);
-  }
-  return(1);
+  return ( _MMG5_minQualCheck(iel,rapmin,_MMG3D_ALPHAD) );
 }
 
 /**
@@ -457,9 +500,11 @@ int _MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
  *
  */
 int _MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
-  MMG5_pTetra    pt;
-  double   rap,rapmin,rapmax,rapavg,med,good;
-  int      i,k,iel,ok,ir,imax,nex,his[5];
+  MMG5_pTetra pt;
+  MMG5_pPoint ppt;
+  double      rap,rapmin,rapmax,rapavg,med,good;
+  int         i,k,iel,ok,ir,imax,nex,his[5],n,nrid;
+  static char mmgWarn0 = 0;
 
   if( mesh->info.optimLES ) return(_MMG3D_printquaLES(mesh,met));
 
@@ -479,7 +524,7 @@ int _MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
 
   for (k=0; k<5; k++)  his[k] = 0;
 
-  nex = ok = 0;
+  nex = ok = nrid = 0;
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
     if( !MG_EOK(pt) ) {
@@ -487,17 +532,29 @@ int _MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
       continue;
     }
     ok++;
-    if ( _MMG5_orvol(mesh->point,pt->v) < 0.0 ) {
-      fprintf(stdout," ## Warning: negative volume\n");
+    if ( (!mmgWarn0) && (_MMG5_orvol(mesh->point,pt->v) < 0.0) ) {
+      mmgWarn0 = 1;
+      fprintf(stderr,"  ## Warning: %s: at least 1 negative volume.\n",
+              __func__);
     }
-    rap = _MMG5_ALPHAD * pt->qual;
+    n = 0;
+    for(i=0 ; i<4 ; i++) {
+      ppt = &mesh->point[pt->v[i]];
+      if(!(MG_SIN(ppt->tag) || MG_NOM & ppt->tag) && (ppt->tag & MG_GEO)) continue;
+      n++;
+    }
+    if(!n) {
+      nrid++;
+      continue;
+    }
+    rap = _MMG3D_ALPHAD * pt->qual;
     if ( rap < rapmin ) {
       rapmin = rap;
       iel    = ok;
     }
     if ( rap > 0.5 )  med++;
     if ( rap > 0.12 ) good++;
-    if ( rap < _MMG5_BADKAL )  mesh->info.badkal = 1;
+    if ( rap < _MMG3D_BADKAL )  mesh->info.badkal = 1;
     rapavg += rap;
     rapmax  = MG_MAX(rapmax,rap);
     ir = MG_MIN(4,(int)(5.0*rap));
@@ -516,30 +573,24 @@ int _MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
           _MMG3D_indPt(mesh,mesh->tetra[iel].v[0]),_MMG3D_indPt(mesh,mesh->tetra[iel].v[1]),
           _MMG3D_indPt(mesh,mesh->tetra[iel].v[2]),_MMG3D_indPt(mesh,mesh->tetra[iel].v[3]));
 #endif
-  if ( abs(mesh->info.imprim) < 3 ){
-    if (rapmin == 0){
-      fprintf(stderr,"  ## ERROR: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
-      return(0);
+
+  if ( abs(mesh->info.imprim) >= 3 ){
+
+    /* print histo */
+    fprintf(stdout,"     HISTOGRAMM:");
+    fprintf(stdout,"  %6.2f %% > 0.12\n",100.0*(good/(float)(mesh->ne-nex)));
+    if ( abs(mesh->info.imprim) > 3 ) {
+      fprintf(stdout,"                  %6.2f %% >  0.5\n",100.0*( med/(float)(mesh->ne-nex)));
+      imax = MG_MIN(4,(int)(5.*rapmax));
+      for (i=imax; i>=(int)(5*rapmin); i--) {
+        fprintf(stdout,"     %5.1f < Q < %5.1f   %7d   %6.2f %%\n",
+                i/5.,i/5.+0.2,his[i],100.*(his[i]/(float)(mesh->ne-nex)));
+      }
+      if ( met->size==6 && nrid ) fprintf(stdout,"\n  ## WARNING: %d TETRA WITH 4 RIDGES POINTS\n",nrid);
     }
-    return(1);
   }
 
-  /* print histo */
-  fprintf(stdout,"     HISTOGRAMM:");
-  fprintf(stdout,"  %6.2f %% > 0.12\n",100.0*(good/(float)(mesh->ne-nex)));
-  if ( abs(mesh->info.imprim) > 3 ) {
-    fprintf(stdout,"                  %6.2f %% >  0.5\n",100.0*( med/(float)(mesh->ne-nex)));
-    imax = MG_MIN(4,(int)(5.*rapmax));
-    for (i=imax; i>=(int)(5*rapmin); i--) {
-      fprintf(stdout,"     %5.1f < Q < %5.1f   %7d   %6.2f %%\n",
-              i/5.,i/5.+0.2,his[i],100.*(his[i]/(float)(mesh->ne-nex)));
-    }
-  }
-  if (rapmin == 0){
-    fprintf(stderr,"  ## ERROR: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
-    return(0);
-  }
-  return(1);
+  return ( _MMG5_minQualCheck(iel,rapmin,_MMG3D_ALPHAD) );
 }
 
 /**
@@ -653,19 +704,20 @@ int _MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcib
         }
         dnaddloc *= 1./lon;
         if(!loc) {
-          if(_MMG5_ALPHAD * pt->qual >= 0.5) /*on ne compte les points internes que pour les (tres) bons tetras*/
-            dnaddloc = dnaddloc;
-          else if(_MMG5_ALPHAD * pt->qual >= 1./5.)
-            dnaddloc = dned / lon + 2*dnface/3.;
-          else
-            dnaddloc = dned / lon ;
+          /*on ne compte les points internes que pour les (tres) bons tetras*/
+          if( _MMG3D_ALPHAD * pt->qual < 0.5) {
+            if(_MMG3D_ALPHAD * pt->qual >= 1./5.)
+              dnaddloc = dned / lon + 2*dnface/3.;
+            else
+              dnaddloc = dned / lon ;
+          }
           //rajout de 30% parce que 1) on vise des longueurs de 0.7 et
           //2) on ne tient pas compte du fait qu'on divise tjs par 2 dans la generation
-          if( (_MMG5_ALPHAD*pt->qual <= 1./50.) )
+          if( (_MMG3D_ALPHAD*pt->qual <= 1./50.) )
             dnaddloc = 0;
-          else  if((_MMG5_ALPHAD*pt->qual <= 1./10.) )
+          else  if((_MMG3D_ALPHAD*pt->qual <= 1./10.) )
             dnaddloc =  0.2*dnaddloc;
-          else if((len > 10) && (_MMG5_ALPHAD*pt->qual >= 1./1.5) ) //on sous-estime uniquement pour les tres bons
+          else if((len > 10) && (_MMG3D_ALPHAD*pt->qual >= 1./1.5) ) //on sous-estime uniquement pour les tres bons
             dnaddloc = dnaddloc*0.3 + dnaddloc;
           else if(len < 6 && len>3)
             dnaddloc = 0.7*dnaddloc;

@@ -22,111 +22,127 @@
 
 FOREACH(EXEC ${LISTEXEC_MMG})
 
+  GET_FILENAME_COMPONENT ( SHRT_EXEC ${EXEC} NAME )
+
   ##############################################################################
   #####
   #####         Aniso test case
   #####
   ##############################################################################
   #####
-  ADD_TEST(NAME CubeVolAni_${EXEC}
+
+  SET ( test_names
+    mmg_TorusholesAni_${SHRT_EXEC}
+    mmg_TorusholesAni_chocCyl_${SHRT_EXEC}
+    )
+
+  SET ( input_files
+    ${MMG_CI_TESTS}/TorusholesAni/torusholes
+    ${MMG_CI_TESTS}/TorusholesAni_chocCyl/torusholesTiny
+    )
+
+  SET ( args
+    "-v 5 -hgrad 1.15"
+    "-v 5 -hgrad 1.15"
+    )
+
+  ADD_RUN_AGAIN_TESTS ( ${EXEC} "${test_names}" "${args}" "${input_files}" )
+
+  ADD_TEST(NAME mmg_CubeVolAni_${SHRT_EXEC}
   COMMAND ${EXEC} -v 5
   ${MMG_CI_TESTS}/CubeVolAni/cube
-  -out ${MMG_CI_TESTS}/CubeVolAni/cube.o.meshb)
+  -out ${CTEST_OUTPUT_DIR}/mmg_CubeVolAni_${SHRT_EXEC}-cube.o.meshb)
 
-  ADD_TEST(NAME CubeVolAni2_${EXEC}
+  ADD_TEST(NAME mmg_CubeVolAni2_${SHRT_EXEC}
   COMMAND ${EXEC} -v 5
   ${MMG_CI_TESTS}/CubeVolAni2/cube
-  -out ${MMG_CI_TESTS}/CubeVolAni2/cube.o.meshb)
+  -out ${CTEST_OUTPUT_DIR}/mmg_CubeVolAni2_${SHRT_EXEC}-cube.o.meshb)
 
-  ADD_TEST(NAME SphereVolAni_${EXEC}
+  ADD_TEST(NAME mmg_SphereVolAni_${SHRT_EXEC}
   COMMAND ${EXEC} -v 5
   ${MMG_CI_TESTS}/SphereVolAni/sphere
-  -out ${MMG_CI_TESTS}/SphereVolAni/sphere.o.meshb)
+  -out ${CTEST_OUTPUT_DIR}/mmg_SphereVolAni_${SHRT_EXEC}-sphere.o.meshb)
 
-  ADD_TEST(NAME TorusholesAni_${EXEC}
-  COMMAND ${EXEC} -v 5 -hgrad 1.15
-  ${MMG_CI_TESTS}/TorusholesAni/torusholes
-  -out ${MMG_CI_TESTS}/TorusholesAni/torusholes.o.meshb)
-
- ADD_TEST(NAME TorusholesAni_chocCyl_${EXEC}
-  COMMAND ${EXEC} -v 5 -hgrad 1.15
-  ${MMG_CI_TESTS}/TorusholesAni_chocCyl/torusholesTiny
-  -out ${MMG_CI_TESTS}/TorusholesAni_chocCyl/torusholesTiny.o.meshb)
   ##############################################################################
   #####
   #####         Check Memory Leak
   #####
   ##############################################################################
   #####
-  ADD_TEST(NAME LeakCheck_AbnormalEnd2_${EXEC}
+  ADD_TEST(NAME mmg_LeakCheck_AbnormalEnd2_${SHRT_EXEC}
     COMMAND ${EXEC} -v 5
     ${MMG_CI_TESTS}/LeakCheck_AbnormalEnd2/d)
-  SET(passRegex "## Unable to scale mesh.")
-  SET_PROPERTY(TEST LeakCheck_AbnormalEnd2_${EXEC}
+  SET(passRegex "unable to scale mesh:")
+  SET_PROPERTY(TEST mmg_LeakCheck_AbnormalEnd2_${SHRT_EXEC}
     PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}")
   #####
-  ADD_TEST(NAME LeakCheck_AbnormalEnd7_${EXEC}
-    COMMAND ${EXEC} -v 5
-    ${MMG_CI_TESTS}/LeakCheck_AbnormalEnd7/d
-    -out ${MMG_CI_TESTS}/LeakCheck_AbnormalEnd7/unwrittable.meshb)
-  SET(passRegex "\\*\\* UNABLE TO OPEN.*")
-  SET_PROPERTY(TEST LeakCheck_AbnormalEnd7_${EXEC}
-    PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}")
-  #####
-  ADD_TEST(NAME LeakCheck_AbnormalEnd8_${EXEC}
-    COMMAND ${EXEC} -v 5
-    ${MMG_CI_TESTS}/LeakCheck_AbnormalEnd8/d
-    -out ${MMG_CI_TESTS}/LeakCheck_AbnormalEnd8/unwrittable.meshb)
-  SET(passRegex "\\*\\* UNABLE TO OPEN.*.sol")
-  SET_PROPERTY(TEST LeakCheck_AbnormalEnd8_${EXEC}
-    PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}")
-  #####
-  #####
-  ADD_TEST(NAME LeakCheck_args0_${EXEC}
-    COMMAND ${EXEC} -v 5
-    ${MMG_CI_TESTS}/LeakCheck_args0/d)
-  #####
-  ADD_TEST(NAME LeakCheck_args1_${EXEC}
-    COMMAND ${EXEC} -v 5
-    -in ${MMG_CI_TESTS}/LeakCheck_args1/d -sol
-    ${MMG_CI_TESTS}/LeakCheck_args1/dsol.sol
-    -out ${MMG_CI_TESTS}/LeakCheck_args1/dout.meshb)
+ ADD_TEST(NAME mmg_LeakCheck_AbnormalEnd7_${SHRT_EXEC}
+   COMMAND ${EXEC} -v 5
+   ${MMG_CI_TESTS}/LeakCheck_AbnormalEnd7/d
+   -out ${CTEST_OUTPUT_DIR}/AbnormalEnd7/unwrittable.meshb)
+ SET(passRegex "\\*\\* UNABLE TO OPEN.*")
+ SET_PROPERTY(TEST mmg_LeakCheck_AbnormalEnd7_${SHRT_EXEC}
+   PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}")
+ #####
+ ADD_TEST(NAME mmg_LeakCheck_AbnormalEnd8_${SHRT_EXEC}
+   COMMAND ${EXEC} -v 5
+   ${MMG_CI_TESTS}/LeakCheck_AbnormalEnd8/d
+   -out ${CTEST_OUTPUT_DIR}/AbnormalEnd8/unwrittable.meshb)
+ SET(passRegex "\\*\\* UNABLE TO OPEN.*.sol")
+ SET_PROPERTY(TEST mmg_LeakCheck_AbnormalEnd8_${SHRT_EXEC}
+   PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}")
+ #####
+ #####
+ ADD_TEST(NAME mmg_LeakCheck_args0_${SHRT_EXEC}
+   COMMAND ${EXEC} -v 5
+   ${MMG_CI_TESTS}/LeakCheck_args0/d
+   ${CTEST_OUTPUT_DIR}/mmg_LeakCheck_args0_${SHRT_EXEC}-d.o)
+ #####
+ ADD_TEST(NAME mmg_LeakCheck_args1_${SHRT_EXEC}
+   COMMAND ${EXEC} -v 5
+   -in ${MMG_CI_TESTS}/LeakCheck_args1/d -sol
+   ${MMG_CI_TESTS}/LeakCheck_args1/dsol.sol
+   -out  ${CTEST_OUTPUT_DIR}/mmg_LeakCheck_args1_${SHRT_EXEC}-dout.meshb)
 
-  ##############################################################################
-  #####
-  #####         Check Local parameters
-  #####
-  ##############################################################################
-  #####
-  ADD_TEST(NAME HausdLoc_2Spheres${EXEC}
-    COMMAND ${EXEC} -v 5 -hgrad 2
-    ${MMG_CI_TESTS}/HausdLoc_2Spheres/2spheres
-    ${MMG_CI_TESTS}/HausdLoc_2Spheres/2spheres.o.meshb
-    -hgrad 2
-    )
-  #####
-  ADD_TEST(NAME hminmaxLoc_2Spheres${EXEC}
-    COMMAND ${EXEC} -v 5 -hgrad 2
-    ${MMG_CI_TESTS}/HausdLoc_2Spheres/2spheres
-    ${MMG_CI_TESTS}/HausdLoc_2Spheres/2spheres.o.meshb
-    -hgrad 2
-    )
+ ##############################################################################
+ #####
+ #####         Check Local parameters
+ #####
+ ##############################################################################
+ #####
+ ADD_TEST(NAME mmg_HausdLoc_2Spheres${SHRT_EXEC}
+   COMMAND ${EXEC} -v 5 -hgrad 2
+   ${MMG_CI_TESTS}/HausdLoc_2Spheres/2spheres
+   ${CTEST_OUTPUT_DIR}/mmg_HausdLoc_2Spheres${SHRT_EXEC}-2spheres.o.meshb
+   -hgrad 2
+   )
+ #####
+ ADD_TEST(NAME mmg_hminmaxLoc_2Spheres${SHRT_EXEC}
+   COMMAND ${EXEC} -v 5 -hgrad 2
+   ${MMG_CI_TESTS}/HausdLoc_2Spheres/2spheres
+   ${CTEST_OUTPUT_DIR}/mmg_HausdLoc_2Spheres${SHRT_EXEC}-2spheres.o.meshb
+   -hgrad 2
+   )
 
 
-  ##############################################################################
-  #####
-  #####         Check Precision
-  #####
-  ##############################################################################
-  #####
-  ADD_TEST(NAME MeshVersionFormatted1_${EXEC}
-    COMMAND ${EXEC} -v 5
-    -in ${MMG_CI_TESTS}/MeshVersionFormatted1/d
-    -sol ${MMG_CI_TESTS}/MeshVersionFormatted1/dsol.sol)
-  #####
-  ADD_TEST(NAME MeshVersionFormatted2_${EXEC}
-    COMMAND ${EXEC} -v 5
-    -in ${MMG_CI_TESTS}/MeshVersionFormatted2/d
-    -sol ${MMG_CI_TESTS}/MeshVersionFormatted2/dsol.sol)
+ ##############################################################################
+ #####
+ #####         Check Precision
+ #####
+ ##############################################################################
+ #####
+ ADD_TEST(NAME mmg_MeshVersionFormatted1_${SHRT_EXEC}
+   COMMAND ${EXEC} -v 5
+   -in ${MMG_CI_TESTS}/MeshVersionFormatted1/d
+   -sol ${MMG_CI_TESTS}/MeshVersionFormatted1/dsol.sol
+   ${CTEST_OUTPUT_DIR}/mmg_MeshVersionFormatted1_${SHRT_EXEC}-d.o
+   )
+ #####
+ ADD_TEST(NAME mmg_MeshVersionFormatted2_${SHRT_EXEC}
+   COMMAND ${EXEC} -v 5
+   -in ${MMG_CI_TESTS}/MeshVersionFormatted2/d
+   -sol ${MMG_CI_TESTS}/MeshVersionFormatted2/dsol.sol
+   ${CTEST_OUTPUT_DIR}/mmg_MeshVersionFormatted2_${SHRT_EXEC}-d.o
+   )
 
 ENDFOREACH(EXEC)

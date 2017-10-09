@@ -43,16 +43,18 @@
  * See \ref MMGS_Init_mesh function in common/libmmgcommon.h file.
  */
 FORTRAN_VARIADIC ( MMGS_INIT_MESH, mmgs_init_mesh,
-                 (const int starter, ... ),
-                 va_list argptr;
+                   (const int starter, ... ),
+                   va_list argptr;
+                   int     ier;
 
-                 va_start(argptr, starter);
+                   va_start(argptr, starter);
 
-                 _MMGS_Init_mesh_var(argptr);
+                   ier = _MMGS_Init_mesh_var(argptr);
 
-                 va_end(argptr);
+                   va_end(argptr);
 
-                 return;
+                   if ( !ier ) exit(EXIT_FAILURE);
+                   return;
   )
 
 /**
@@ -525,11 +527,15 @@ FORTRAN_VARIADIC(MMGS_FREE_ALL,mmgs_free_all,
                  (const int starter,...),
                  va_list argptr;
 
+                 int ier;
+
                  va_start(argptr, starter);
 
-                 _MMGS_Free_all_var(argptr);
+                 ier = _MMGS_Free_all_var(argptr);
 
                  va_end(argptr);
+
+                 if ( !ier ) exit(EXIT_FAILURE);
 
                  return;
   )
@@ -540,12 +546,15 @@ FORTRAN_VARIADIC(MMGS_FREE_ALL,mmgs_free_all,
 FORTRAN_VARIADIC(MMGS_FREE_STRUCTURES,mmgs_free_structures,
                  (const int starter,...),
                  va_list argptr;
+                 int     ier;
 
                  va_start(argptr, starter);
 
-                 _MMGS_Free_structures_var(argptr);
+                 ier = _MMGS_Free_structures_var(argptr);
 
                  va_end(argptr);
+
+                 if ( !ier ) exit(EXIT_FAILURE);
 
                  return;
   )
@@ -554,16 +563,19 @@ FORTRAN_VARIADIC(MMGS_FREE_STRUCTURES,mmgs_free_structures,
  * See \ref MMGS_Free_names function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_VARIADIC(MMGS_FREE_NAMES,mmgs_free_names,
-             (const int starter,...),
-             va_list argptr;
+                 (const int starter,...),
+                 va_list argptr;
+                 int     ier;
 
-             va_start(argptr, starter);
+                 va_start(argptr, starter);
 
-             _MMGS_Free_names_var(argptr);
+                 ier = _MMGS_Free_names_var(argptr);
 
-             va_end(argptr);
+                 va_end(argptr);
 
-             return;
+                 if ( !ier  ) exit(EXIT_FAILURE);
+
+                 return;
   )
 
 /**
@@ -604,6 +616,24 @@ FORTRAN_NAME(MMGS_LOADMSHMESH,mmgs_loadmshmesh,
   return;
 }
 
+/**
+ * See \ref MMGS_loadMshMesh_and_allData function in \ref mmgs/libmmgs.h file.
+ */
+FORTRAN_NAME(MMGS_LOADMSHMESH_AND_ALLDATA,mmgs_loadmshmesh_and_alldata,
+             (MMG5_pMesh *mesh, MMG5_pSol *sol,char* filename, int *strlen,int* retval),
+             (mesh,sol,filename,strlen, retval)){
+  char *tmp = NULL;
+
+  tmp = (char*)malloc((*strlen+1)*sizeof(char));
+  strncpy(tmp,filename,*strlen);
+  tmp[*strlen] = '\0';
+
+  *retval = MMGS_loadMshMesh_and_allData(*mesh,sol,tmp);
+
+  _MMG5_SAFE_FREE(tmp);
+
+  return;
+}
 
 /**
  * See \ref MMGS_loadSol function in \ref mmgs/libmmgs.h file.
@@ -625,6 +655,25 @@ FORTRAN_NAME(MMGS_LOADSOL,mmgs_loadsol,
   return;
 }
 
+/**
+ * See \ref MMGS_loadAllSols function in \ref mmgs/libmmgs.h file.
+ */
+FORTRAN_NAME(MMGS_LOADALLSOLS,mmgs_loadallsols,
+             (MMG5_pMesh *mesh,MMG5_pSol *sol,char* meshin, int *strlen,int* retval),
+             (mesh,sol,meshin,strlen,retval)){
+
+  char *tmp = NULL;
+
+  tmp = (char*)malloc((*strlen+1)*sizeof(char));
+  strncpy(tmp,meshin,*strlen);
+  tmp[*strlen] = '\0';
+
+  *retval = MMGS_loadAllSols(*mesh,sol,tmp);
+
+ _MMG5_SAFE_FREE(tmp);
+
+  return;
+}
 /**
  * See \ref MMGS_saveMesh function in \ref mmgs/libmmgs.h file.
  */
@@ -677,6 +726,46 @@ FORTRAN_NAME(MMGS_SAVESOL,mmgs_savesol,
   tmp[*strlen] = '\0';
 
   *retval = MMGS_saveSol(*mesh,*met,tmp);
+
+  _MMG5_SAFE_FREE(tmp);
+
+  return;
+}
+
+/**
+ * See \ref MMGS_saveMshMesh function in \ref mmgs/libmmgs.h file.
+ */
+FORTRAN_NAME(MMGS_SAVEMSHMESH_AND_ALLDATA,mmgs_savemshmesh_and_alldata,
+             (MMG5_pMesh *mesh, MMG5_pSol *sol,char* filename, int *strlen,
+              int* retval),
+             (mesh,sol,filename,strlen,retval)){
+  char *tmp = NULL;
+
+  tmp = (char*)malloc((*strlen+1)*sizeof(char));
+  strncpy(tmp,filename,*strlen);
+  tmp[*strlen] = '\0';
+
+  *retval = MMGS_saveMshMesh_and_allData(*mesh,sol,tmp);
+
+  _MMG5_SAFE_FREE(tmp);
+
+  return;
+}
+
+/**
+ * See \ref MMGS_saveAllSols function in \ref mmgs/libmmgs.h file.
+ */
+FORTRAN_NAME(MMGS_SAVEALLSOLS,mmgs_saveallsols,
+             (MMG5_pMesh *mesh,MMG5_pSol *sol,char *meshin,int *strlen,int* retval),
+             (mesh,sol,meshin,strlen,retval)){
+
+  char *tmp = NULL;
+
+  tmp = (char*)malloc((*strlen+1)*sizeof(char));
+  strncpy(tmp,meshin,*strlen);
+  tmp[*strlen] = '\0';
+
+  *retval = MMGS_saveAllSols(*mesh,sol,tmp);
 
   _MMG5_SAFE_FREE(tmp);
 

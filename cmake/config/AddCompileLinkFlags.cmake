@@ -1,5 +1,5 @@
 ## =============================================================================
-##  This file is part of the mmg software package for the tetrahedral
+##  This file is part of the mmg software package for the simplicial
 ##  mesh modification.
 ##**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
 ##

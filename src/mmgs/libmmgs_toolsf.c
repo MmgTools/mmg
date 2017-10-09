@@ -57,14 +57,14 @@ FORTRAN_NAME(MMGS_SETFUNC,mmgs_setfunc,
  * See \ref MMGS_usage function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_NAME(MMGS_USAGE,mmgs_usage,
-             (char *prog,int *strlen),
-             (prog,strlen)) {
+             (char *prog,int *strlen,int *retval),
+             (prog,strlen,retval)) {
   char *tmp = NULL;
 
   tmp = (char*)malloc((*strlen+1)*sizeof(char));
   strncpy(tmp,prog,*strlen);
   tmp[*strlen] = '\0';
-  MMGS_usage(tmp);
+  *retval = MMGS_usage(tmp);
   _MMG5_SAFE_FREE(tmp);
 
   return;
@@ -74,9 +74,9 @@ FORTRAN_NAME(MMGS_USAGE,mmgs_usage,
  * See \ref MMGS_defaultValues function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_NAME(MMGS_DEFAULTVALUES,mmgs_defaultvalues,
-             (MMG5_pMesh *mesh),
-             (mesh)) {
-  MMGS_defaultValues(*mesh);
+             (MMG5_pMesh *mesh, int* retval),
+             (mesh,retval)) {
+  *retval = MMGS_defaultValues(*mesh);
   return;
 }
 
@@ -117,5 +117,15 @@ FORTRAN_NAME(MMGS_GET_ADJAVERTICESFAST,mmgs_get_adjaverticesfast,
                (MMG5_pMesh *mesh,int* ip, int *start, int* lispoi, int* retval),
                (mesh,ip,start,lispoi,retval)) {
   *retval =  MMGS_Get_adjaVerticesFast(*mesh,*ip, *start,lispoi);
+  return;
+}
+
+/**
+ * See \ref MMGS_Set_constantSize function in \ref mmgs/libmmgs.h file.
+ */
+FORTRAN_NAME(MMGS_SET_CONSTANTSIZE,mmgs_set_constantsize,
+             (MMG5_pMesh *mesh,MMG5_pSol *met,int *retval),
+             (mesh,met,retval)) {
+  *retval =  MMGS_Set_constantSize(*mesh,*met);
   return;
 }

@@ -33,22 +33,40 @@
  **/
 #include "mmg2d.h"
 
-/*simultaneous reduction*/
+/**
+   Inversion of a symetric matrix m/.
+*/
+static inline
+int _MMG2_invmat(double *m,double *minv) {
+  double        det;
+
+  if(fabs(m[1]) < _MMG2_EPSD) { /*mat diago*/
+    minv[0] = 1./m[0];
+    minv[1] = 0;
+    minv[2] = 1./m[2];
+  } else {
+    det = m[0]*m[2] - m[1]*m[1];
+    det = 1. / det;
+    minv[0] = det * m[2];
+    minv[1] = - det * m[1];
+    minv[2] = det * m[0];
+  }
+  return(1);
+}
+
+/* Simultaneous reduction of matrices m1, m2; result is stored in m */
 int simred(double *m1,double *m2,double *m) {
   double  lambda[2],hh[2],det,pp[2][2];
   double  maxd1,maxd2,ex,ey,m1i[3],n[4],pi[4];
 
   /* check diag matrices */
-  if ( fabs(m1[1]) < EPSD && fabs(m2[1]) < EPSD ) {
+  if ( fabs(m1[1]) < _MMG2_EPSD && fabs(m2[1]) < _MMG2_EPSD ) {
     m[0] = M_MAX(m1[0],m2[0]);
     m[2] = M_MAX(m1[2],m2[2]);
     m[1] = 0.0;
     return(1);
   }
-  if ( !MMG2_invmat(m1,m1i) )  return(0);
-
-
-
+  if ( !_MMG2_invmat(m1,m1i) )  return(0);
 
   /* n = (m1)^-1*m2 : stocke en ligne*/
   n[0] = m1i[0]*m2[0] + m1i[1]*m2[1];
@@ -58,7 +76,7 @@ int simred(double *m1,double *m2,double *m) {
 
   _MMG5_eigensym(n,lambda,pp);
 
-  if ( fabs(lambda[0]-lambda[1]) < EPSD ) {
+  if ( fabs(lambda[0]-lambda[1]) < _MMG2_EPSD ) {
     m[0] = m[2] = lambda[0];
     m[1] = 0.0;
     return(1);
@@ -66,7 +84,7 @@ int simred(double *m1,double *m2,double *m) {
   else {
     /* matrix of passage */
     det = pp[0][0]*pp[1][1]-pp[1][0]*pp[0][1];
-    if(fabs(det) < EPSD) return(0);
+    if(fabs(det) < _MMG2_EPSD) return(0);
 
     det = 1./det;
     pi[0] = det*pp[1][1];
@@ -99,7 +117,7 @@ int simred(double *m1,double *m2,double *m) {
     /* if ( ddebug ) { */
     /*   _MMG5_eigensym(m,lambda,pp); */
     /*   if ( lambda[0] < -EPSD || lambda[1] < -EPSD ) { */
-    /*     fprintf(stderr,"  ## simred, not a metric !\n"); */
+    /*     fprintf(stderr,"\n  ## simred, not a metric !\n"); */
     /*     fprintf(stderr,"  %.6f %.6f %.6f\n", */
     /*             m[0],m[1],m[2]); */
     /*     fprintf(stderr,"  Lambda %f %f \n",lambda[0],lambda[1]); */
@@ -109,7 +127,4 @@ int simred(double *m1,double *m2,double *m) {
 
     return(1);
   }
-
-
-
 }

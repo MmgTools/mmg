@@ -35,6 +35,30 @@
 
 #include "mmgcommon.h"
 
+
+/**
+ * \param n1 first normal
+ * \param n2 second normal
+ *
+ * \return 1 if success, 0 if fail
+ *
+ * Check if the angle between n1 and n2 is larger than the ridge
+ * criterion. If yes, return 1, 0 otherwise (ridge creation).
+ *
+ */
+int _MMG5_devangle(double* n1, double *n2, double crit)
+{
+  double dev;
+
+  dev = n1[0]*n2[0] + n1[1]*n2[1] + n1[2]*n2[2];
+
+  if ( dev < crit ) {
+    return(0);
+  }
+
+  return(1);
+}
+
 /**
  * \param mesh pointer toward the mesh stucture.
  * \param ip1 first point of face.
@@ -97,7 +121,7 @@ inline double _MMG5_nonorsurf(MMG5_pMesh mesh,MMG5_pTria pt) {
  * \param ip2 second point of face.
  * \param ip3 third point of face.
  * \param n pointer to store the computed normal.
- * \return 1
+ * \return 1 if success, 0 otherwise.
  *
  * Compute normalized face normal given three points on the surface.
  *
@@ -246,7 +270,7 @@ int _MMG5_invmat(double *m,double *mi) {
   bb  = m[4]*m[2] - m[1]*m[5];
   cc  = m[1]*m[4] - m[2]*m[3];
   det = m[0]*aa + m[1]*bb + m[2]*cc;
-  if ( fabs(det) < _MMG5_EPS3 )  return(0);
+  if ( fabs(det) < _MMG5_EPSD2 )  return(0);
   det = 1.0 / det;
 
   mi[0] = aa*det;
@@ -413,31 +437,13 @@ long long _MMG5_memSize (void) {
   if (mem == status.ullTotalPhys) return(mem);
   else return(LLONG_MAX);
 #else
-  fprintf(stderr,"  ## WARNING: UNKNOWN SYSTEM, RECOVER OF MAXIMAL MEMORY NOT AVAILABLE.\n");
+  fprintf(stderr,"\n  ## Warning: %s: unknown system, recover of maximal memory"
+          " not available.\n",__func__);
   return(0);
 #endif
 
   return(mem);
 }
-
-/**
-*Safe cast into a long */
-inline
-long _MMG5_safeLL2LCast(long long val)
-{
-  long tmp_l;
-
-  tmp_l  = (long)(val);
-
-  if ( (long long)(tmp_l) != val ) {
-        fprintf(stderr,"  ## Error:");
-        fprintf(stderr," unable to cast value.n");
-        exit(EXIT_FAILURE);
-  }
-  return(tmp_l);
-}
-
-
 
 /**
  * \param mesh pointer toward the mesh structure (for count of used memory).
@@ -453,7 +459,7 @@ int _MMG5_Alloc_inode( MMG5_pMesh mesh, _MMG5_iNode **node ) {
   _MMG5_ADD_MEM(mesh,sizeof(_MMG5_iNode),"boundary reference node",
                 return(0););
 
-  _MMG5_SAFE_MALLOC(*node,1,_MMG5_iNode);
+  _MMG5_SAFE_MALLOC(*node,1,_MMG5_iNode,0);
 
   return(1);
 }
@@ -551,7 +557,7 @@ int _MMG5_Alloc_dnode( MMG5_pMesh mesh, _MMG5_dNode **node ) {
   _MMG5_ADD_MEM(mesh,sizeof(_MMG5_dNode),"node for hausdorff eval",
                 return(0););
 
-  _MMG5_SAFE_MALLOC(*node,1,_MMG5_dNode);
+  _MMG5_SAFE_MALLOC(*node,1,_MMG5_dNode,0);
 
   return(1);
 }
@@ -704,3 +710,4 @@ double MMG2_quickarea(double a[2],double b[2],double c[2]) {
 
   return(aire);
 }
+

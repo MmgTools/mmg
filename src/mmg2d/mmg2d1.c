@@ -32,579 +32,765 @@
  */
 #include "mmg2d.h"
 
-#define BUCKSIZ    64
-#define M_LONG     1.4//1.85//1.4//1.421
-#define M_SHORT    0.65//0.8//0.65//0.707
+/* Mesh adaptation routine for the first stages of the algorithm: intertwine splitting
+ based on patterns, collapses and swaps.
+   typchk = 1 -> adaptation based on edge lengths
+   typchk = 2 -> adaptation based on lengths calculated in metric met */
+int _MMG2_anatri(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
+  int      it,maxit,ns,nc,nsw,nns,nnc,nnsw;
 
-int MMG2_invmat(double *m,double *minv) {
-  double        det;
+  nns = nnc = nnsw = 0;
+  it = 0;
+  maxit = 5;
 
-  if(fabs(m[1]) < EPSD) { /*mat diago*/
-    minv[0] = 1./m[0];
-    minv[1] = 0;
-    minv[2] = 1./m[2];
-  } else {
-    det = m[0]*m[2] - m[1]*m[1];
-    det = 1. / det;
-    minv[0] = det * m[2];
-    minv[1] = - det * m[1];
-    minv[2] = det * m[0];
-  }
-  return(1);
-}
+  /* Main routine; intertwine split, collapse and swaps */
+  do {
+    if ( typchk == 2 && it == 0 )  mesh->info.fem = 1;
+    
+    if ( !mesh->info.noinsert ) {
+      /* Memory free */
+      _MMG5_DEL_MEM(mesh,mesh->adja,(3*mesh->ntmax+5)*sizeof(int));
+      mesh->adja = 0;
+      
+      /* Split long edges according to patterns */
+      ns = _MMG2_anaelt(mesh,met,typchk);
+      if ( ns < 0 ) {
+        fprintf(stderr,"  ## Unable to complete surface mesh. Exit program.\n");
+        return(0);
+      }
 
-int interp_ani(double *ma,double *mb,double *mp,double t) {
-  double  dma[3],dmb[3],mai[3],mbi[3],mi[3];
-  int   i;
-
-  for (i=0; i<3; i++) {
-    dma[i] = ma[i];
-    dmb[i] = mb[i];
-  }
-
-  if ( !MMG2_invmat(dma,mai) || !MMG2_invmat(dmb,mbi) ) {
-    fprintf(stderr,"  ## Error: unable to interpole the metric.\n");
-    return(0);
-  }
-
-  for (i=0; i<3; i++)
-    mi[i] = (1.0-t)*mai[i] + t*mbi[i];
-
-  if ( !MMG2_invmat(mi,mai) ) {
-    fprintf(stderr,"  ## Error: invalid metric.\n");
-    return(0);
-  }
-
-  for (i=0; i<3; i++)  mp[i] = mai[i];
-  return(1);
-}
-
-int interp_iso(double *ma,double *mb,double *mp,double t) {
-
-  *mp = (1.0-t)*(*ma) + t*(*mb);
-  return(1);
-}
-
-static int cassar(MMG5_pMesh mesh,MMG5_pSol sol,int ia,int ib,double t) {
-  MMG5_pPoint   p1,p2;
-  //Displ      pd;
-  double   c[2],t1,*ma,*mb,*mp;
-  int      ip,iadr,memlack;
-
-  memlack = 0;
-
-  p1 = &mesh->point[ia];
-  p2 = &mesh->point[ib];
-  t1 = 1.0 - t;
-
-  c[0] = t1*p1->c[0] +  t*p2->c[0];
-  c[1] = t1*p1->c[1] +  t*p2->c[1];
-  ip   = _MMG2D_newPt(mesh,c,0);
-  if ( !ip ) {
-    /* reallocation of point table */
-
-    _MMG2D_POINT_REALLOC(mesh,sol,ip,mesh->gap,
-                         printf("  ## Error: unable to allocate a new point\n");
-                         _MMG5_INCREASE_MEM_MESSAGE();
-                         memlack=1;
-                         return(-1)
-                         ,c,0);
-    p1  = &mesh->point[ia];
-    p2  = &mesh->point[ib];
-  }
-
-
-  /*interpol metric*/
-  iadr = ia*sol->size;
-  ma  = &sol->m[iadr];
-
-  iadr = ib*sol->size;
-  mb  = &sol->m[iadr];
-
-  iadr = ip*sol->size;
-  mp  = &sol->m[iadr];
-
-  if ( sol->size==1 ) {
-    if(!interp_iso(ma,mb,mp,t1) ) return(-1);
-  }
-  else {
-    if(!interp_ani(ma,mb,mp,t1) ) return(-1);
-  }
-
-  /*interpol dep si option 9*/
-  if( mesh->info.lag >=0) {
-    printf(" ## Error: option not available:"
-           " comment because of merge needs mmg2d1 option 9\n");
-    exit(EXIT_FAILURE);
-    // pd = mesh->disp;
-    //pd.mv[2*(ip-1) + 1 + 0] = t1*pd.mv[2*(ia-1) + 1 + 0] + t*pd.mv[2*(ib-1) + 1 + 0];
-    //pd.mv[2*(ip-1) + 1 + 1] = t1*pd.mv[2*(ia-1) + 1 + 1] + t*pd.mv[2*(ib-1) + 1 + 1];
-  }
-  if ( memlack )  return(-1);
-  return(ip);
-}
-
-/*compute new vertex on bdry*/
-static int cassarbdry(MMG5_pMesh mesh,MMG5_pSol sol,int ied,int ia,int ib,double t,double *tang) {
-  MMG5_pPoint   p0,p1,ppt;
-  MMG5_pEdge    ped;
-  // Displ      pd;
-  double   c[2],pc1[2],pc2[2],t0[2],t1[2],t_1,*ma,*mb,*mp;//,dx,dy;
-  double   l;
-  int      ip,iadr,i,inv,memlack;
-  inv = 0;
-  memlack = 0;
-  p0 = &mesh->point[ia];
-  p1 = &mesh->point[ib];
-
-  l = (p0->c[0] - p1->c[0])*(p0->c[0] - p1->c[0]) +
-    (p0->c[1] - p1->c[1])*(p0->c[1] - p1->c[1]);
-  l = sqrt(l);
-  ped = &mesh->edge[ied];
-  if(ia != ped->a) {
-    assert(ib == ped->a);
-    for(i=0 ; i<2 ; i++) {
-      t0[i] = l*p0->n[i];
-      t1[i] = l*p1->n[i];
+      /* Recreate adjacencies */
+      if ( !MMG2_hashTria(mesh) ) {
+        fprintf(stdout,"  ## Hashing problem. Exit program.\n");
+        return(0);
+      }
+      
+      /* Collapse short edges */
+      nc = _MMG2_colelt(mesh,met,typchk);
+      if ( nc < 0 ) {
+        fprintf(stderr,"  ## Unable to collapse mesh. Exiting.\n");
+        return(0);
+      }
+    
     }
-    /*if corner, recompute the tangent*/
-    if(p0->tag & M_CORNER) {
-      for(i=0 ; i<2 ; i++)
-        t0[i] = p0->c[i] - p1->c[i];
-    }
-    if(p1->tag & M_CORNER) {
-      for(i=0 ; i<2 ; i++)
-        t1[i] = p0->c[i] - p1->c[i];
-    }
-  } else {
-    assert(ib == ped->b);
-    for(i=0 ; i<2 ; i++) {
-      t0[i] = l*p0->n[i];
-      t1[i] = l*p1->n[i];
-    }
-    /*if corner, recompute the tangent*/
-    if(p0->tag & M_CORNER) {
-      for(i=0 ; i<2 ; i++)
-        t0[i] = p1->c[i] - p0->c[i];
-    }
-    if(p1->tag & M_CORNER) {
-      for(i=0 ; i<2 ; i++)
-        t1[i] = p1->c[i] - p0->c[i];
+    else {
+      ns = 0;
+      nc = 0;
     }
 
-  }
-
-
-  /*check if t0 has the same sens of vect(P0P1)*/
-  if(t0[0]/(p1->c[0]-p0->c[0]) < 0 || t0[1]/(p1->c[1]-p0->c[1])<0) {
-    //printf("t0/pOp1 %e %e\n",t0[0]/(p1->c[0]-p0->c[0]),t0[1]/(p1->c[1]-p0->c[1]));
-    for(i=0 ; i<2 ; i++) {
-      t0[i] *= -1;
-    }
-    inv = 1;
-  }
-  /*check if t1 has the opposite sens of vect(P0P1)*/
-  if(t1[0]/(p1->c[0]-p0->c[0]) > 0 || t1[1]/(p1->c[1]-p0->c[1])>0) {
-    //printf("t1/pOp1 %e %e\n",t0[0]/(p1->c[0]-p0->c[0]),t0[1]/(p1->c[1]-p0->c[1]));
-    for(i=0 ; i<2 ; i++) {
-      t1[i] *= -1;
-    }
-  }
-  /*control points*/
-  for(i=0 ; i<2 ; i++) {
-    pc1[i] = (t0[i]+3*p0->c[i])/3.;
-    pc2[i] = (t1[i]+3*p1->c[i])/3.;
-  }
-
-  /*coor new point*/
-  t_1 = 1.0 - t;
-  for(i=0 ; i<2 ; i++) {
-    c[i] = t_1*t_1*t_1*p0->c[i] + 3*t*t_1*t_1*pc1[i] + 3*t*t*t_1*pc2[i] +  t*t*t*p1->c[i];
-  }
-  // printf("c %e %e -- mid %e %e\n",c[0],c[1],0.5*(p0->c[0]+p1->c[0]),0.5*(p0->c[1]+p1->c[1]));
-  ip   = _MMG2D_newPt(mesh,c,0);
-  if ( !ip ) {
-    /* reallocation of point table */
-
-    _MMG2D_POINT_REALLOC(mesh,sol,ip,mesh->gap,
-                         printf("  ## Error: unable to allocate a new bdry point\n");
-                         _MMG5_INCREASE_MEM_MESSAGE();
-                         memlack=1;
-                         return(-1);
-                         ,c,0);
-    p0 = &mesh->point[ia];
-    p1 = &mesh->point[ib];
-  }
-
-  /*tangent new point*/
-  ppt = &mesh->point[ip];
-  for(i=0 ; i<2 ; i++) {
-    // tang[i] = -(-3*t_1*t_1*p0->c[i] +(3*t_1*(1-3*t))*pc1[i]
-    //    + (3*t*(2-3*t))*pc2[i] +  3*t*t*p1->c[i]);
-    // printf("tang %e %e diff %e\n",tang[i],(3./8.)*(p1->c[i]+pc2[i]-pc1[i]-p0->c[i]),
-    //     fabs(tang[i]-(3./8.)*(p1->c[i]+pc2[i]-pc1[i]-p0->c[i])));
-    tang[i] = (3./8.)*(p1->c[i]+pc2[i]-pc1[i]-p0->c[i]);
-  }
-  l = tang[0]*tang[0] + tang[1]*tang[1];
-  l = 1./sqrt(l);
-  tang[0] *= l;
-  tang[1] *= l;
-  /*check if tang has the same sens than P0P*/
-  if(inv) {
-    if ((tang[0]/(ppt->c[0]-p0->c[0]) > 0 || tang[1]/(ppt->c[1]-p0->c[1])>0)) {
-      //printf("tang/pOp1 %e %e\n",t0[0]/(p1->c[0]-p0->c[0]),t0[1]/(p1->c[1]-p0->c[1]));
-      for(i=0 ; i<2 ; i++) {
-        tang[i] *= -1;
+    /* Swap edges */
+    if ( !mesh->info.noswap ) {
+      nsw = _MMG2_swpmsh(mesh,met,typchk);
+      if ( nsw < 0 ) {
+        fprintf(stderr,"  ## Unable to improve mesh. Exiting.\n");
+        return(0);
       }
     }
-  } else if((tang[0]/(ppt->c[0]-p0->c[0]) < 0 || tang[1]/(ppt->c[1]-p0->c[1])<0)) {
-    //printf("tang/pOp1 %e %e\n",t0[0]/(p1->c[0]-p0->c[0]),t0[1]/(p1->c[1]-p0->c[1]));
-    for(i=0 ; i<2 ; i++) {
-      tang[i] *= -1;
+    else nsw = 0;
+
+    nns += ns;
+    nnc += nc;
+    nnsw += nsw;
+
+    if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && ns+nc > 0 )
+      fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped\n",ns,nc,nsw);
+    if ( it > 3 && abs(nc-ns) < 0.1 * MG_MAX(nc,ns) )  break;
+  }
+  while ( ++it < maxit && ns+nc+nsw >0 );
+
+  if ( mesh->info.imprim ) {
+    if ( (abs(mesh->info.imprim) < 5 || mesh->info.ddebug ) && nns+nnc > 0 )
+      fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %d iter.\n",nns,nnc,nnsw,it);
+  }
+  return(1);
+}
+
+/* Travel triangles and split long edges according to patterns */
+int _MMG2_anaelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
+  MMG5_pTria      pt;
+  MMG5_pPoint     ppt,p1,p2;
+  _MMG5_Hash      hash;
+  double          len,s,o[2],no[2];
+  int             ns,nc,npinit,ni,k,nt,ip1,ip2,ip,it,vx[3];
+  char            i,ic,i1,i2,ier;
+  static char     mmgWarn0=0;
+
+  s = 0.5;
+  ns = 0;
+  npinit = mesh->np;
+
+  if ( !_MMG5_hashNew(mesh,&hash,mesh->np,3*mesh->np) ) return(0);
+
+  /* Step 1: travel mesh, check edges, and tag those to be split; create the new vertices in hash */
+  for (k=1; k<=mesh->nt; k++) {
+    pt = &mesh->tria[k];
+    if ( !MG_EOK(pt) || (pt->ref < 0) ) continue;
+    if ( MG_SIN(pt->tag[0]) || MG_SIN(pt->tag[1]) || MG_SIN(pt->tag[2]) )  continue;
+
+    /* Check if pt should be cut */
+    pt->flag = 0;
+
+    /* typchk=1 : split on geometric basis and rough size considerations */
+    if ( typchk == 1) {
+      if ( !_MMG2_chkedg(mesh,k) ) continue;
+    }
+    /* typchk =2 : split on basis of edge lengths in the metric */
+    else if ( typchk ==2 ) {
+      for (i=0; i<3; i++) {
+        i1 = _MMG5_inxt2[i];
+        i2 = _MMG5_iprv2[i];
+        len = MMG2D_lencurv(mesh,met,pt->v[i1],pt->v[i2]);
+        if ( len > MMG2_LLONG ) MG_SET(pt->flag,i);
+      }
+    }
+    
+    /* mesh->info.fem : split edges which are not MG_BDY, but whose vertices are both MG_BDY */
+    if ( mesh->info.fem ) {
+      for (i=0; i<3; i++) {
+        i1 = _MMG5_inxt2[i];
+        i2 = _MMG5_iprv2[i];
+        p1 = &mesh->point[pt->v[i1]];
+        p2 = &mesh->point[pt->v[i2]];
+        if ( (p1->tag & MG_BDY) && (p2->tag & MG_BDY) && !(pt->tag[i] & MG_BDY) ) MG_SET(pt->flag,i);
+      }
+    }
+    
+    if ( !pt->flag ) continue;
+    ns++;
+
+    /* Travel edges to split and create new points */
+    for (i=0; i<3; i++) {
+      if ( !MG_GET(pt->flag,i) ) continue;
+      i1  = _MMG5_inxt2[i];
+      i2  = _MMG5_iprv2[i];
+      ip1 = pt->v[i1];
+      ip2 = pt->v[i2];
+      ip = _MMG5_hashGet(&hash,ip1,ip2);
+      if ( ip > 0 ) continue;
+
+      /* Geometric attributes of the new point */
+      ier = _MMG2_bezierCurv(mesh,k,i,s,o,no);
+      if ( !ier ) {
+        MG_CLR(pt->flag,i);
+        continue;
+      }
+      ip = _MMG2D_newPt(mesh,o,pt->tag[i]);
+      if ( !ip ) {
+        /* reallocation of point table */
+        _MMG2D_POINT_REALLOC(mesh,met,ip,mesh->gap,
+                            fprintf(stderr,"\n  ## Error: %s: unable to"
+                                    " allocate a new point.\n",__func__);
+                            _MMG5_INCREASE_MEM_MESSAGE();
+                            do {
+                              _MMG2D_delPt(mesh,mesh->np);
+                            } while ( mesh->np>npinit );return -1;,
+                            o,pt->tag[i],-1);
+      }
+      ppt = &mesh->point[ip];
+      if ( MG_EDG(pt->tag[i]) ) {
+        ppt->n[0] = no[0];
+        ppt->n[1] = no[1];
+      }
+
+      /* If there is a metric in the mesh, interpolate it at the new point */
+      if ( met->m )
+        MMG2D_intmet(mesh,met,k,i,ip,s);
+
+      /* Add point to the hashing structure */
+      _MMG5_hashEdge(mesh,&hash,ip1,ip2,ip);
     }
   }
-
-/*   /\*change the two other tangents*\/ */
-/*   if(ia != ped->a) { */
-/*     assert(ib == ped->a); */
-/*     for(i=0 ; i<2 ; i++) { */
-/*       /\*t0*\/ */
-/*       p0->n[i] = -(3./2.)*(pc1[i]-p0->c[i]); */
-/*       /\*t1*\/ */
-/*       p1->n[i] = -(3./2.)*(p1->c[i]-pc2[i]); */
-/*     } */
-/*     /\*check tangent orientation*\/ */
-/* #warning remove ? check orientation tangent */
-/*     dx = t1[0]/p0->n[0]; */
-/*     dy = t1[1]/p0->n[1]; */
-/*     if(dy < 0 || dx <0) { */
-/*       //printf("1) pbs de colinearite %e\n",fabs(dx-dy)); */
-/*     } */
-/*     dx = t0[0]/p1->n[0]; */
-/*     dy = t0[1]/p1->n[1]; */
-/*     if(dx < 0 || dy <0) { */
-/*       //printf("3) pbs de colinearite %e %e %e\n",fabs(dx-dy),dx,dy); */
-/*     } */
-/*   } else { */
-/*     assert(ib == ped->b); */
-/*     for(i=0 ; i<2 ; i++) { */
-/*       /\*t0*\/ */
-/*       p0->n[i] = -(3./2.)*(pc1[i]-p0->c[i]); */
-/*       /\*t1*\/ */
-/*       p1->n[i] = -(3./2.)*(p1->c[i]-pc2[i]); */
-/*     } */
-/*     /\*check tangent orientation*\/ */
-/* #warning remove ? check orientation tangent */
-/*     dx = t1[0]/p1->n[0]; */
-/*     dy = t1[1]/p1->n[1]; */
-/*     if(dx < 0 || dy <0) { */
-/*       //printf("2) pbs de colinearite %e %e %e\n",fabs(dx-dy),dx,dy); */
-/*     } */
-/*     dx = t0[0]/p0->n[0]; */
-/*     dy = t0[1]/p0->n[1]; */
-/*     if(dx < 0 || dy <0) { */
-/*       //printf("4) pbs de colinearite pts %d %e %e %e\n",ia,fabs(dx-dy),dx,dy); */
-/*       for(i=0 ; i<2 ; i++) { */
-/*         p0->n[i] *= -1; */
-/*       } */
-
-/*     } */
-/*   } */
-
-  /*interpol metric*/
-  iadr = ia*sol->size;
-  ma  = &sol->m[iadr];
-
-  iadr = ib*sol->size;
-  mb  = &sol->m[iadr];
-
-  iadr = ip*sol->size;
-  mp  = &sol->m[iadr];
-
-  if ( sol->size==1 ) {
-    if(!interp_iso(ma,mb,mp,t_1) ) return(-1);
-  }
-  else {
-    if(!interp_ani(ma,mb,mp,t_1) ) return(-1);
+  if ( !ns ) {
+    _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
+    return(ns);
   }
 
-  /*interpol dep si option 9*/
-  if( mesh->info.lag >= 0) {
-//#warning option 9
-    printf(" ## Error: option not available:"
-           " comment because of merge needs mmg2d1 option 9\n");
-    exit(EXIT_FAILURE);
-    /* pd = mesh->disp; */
-    /* pd.mv[2*(ip-1) + 1 + 0] = t_1*pd.mv[2*(ia-1) + 1 + 0] + t*pd.mv[2*(ib-1) + 1 + 0]; */
-    /* pd.mv[2*(ip-1) + 1 + 1] = t_1*pd.mv[2*(ia-1) + 1 + 1] + t*pd.mv[2*(ib-1) + 1 + 1]; */
+  /* Step 2: Make flags at triangles consistent between themselves (check if adjacent triangle is split) */
+  for (k=1; k<=mesh->nt; k++) {
+    pt = &mesh->tria[k];
+    if ( !MG_EOK(pt) || pt->ref < 0 ) continue;
+    else if ( pt->flag == 7 ) continue;
+    nc = 0;
+
+    for (i=0; i<3; i++) {
+      i1 = _MMG5_iprv2[i];
+      i2 = _MMG5_inxt2[i];
+      if ( !MG_GET(pt->flag,i) && !MG_SIN(pt->tag[i]) ) {
+        ip = _MMG5_hashGet(&hash,pt->v[i1],pt->v[i2]);
+        if ( ip > 0 ) {
+          MG_SET(pt->flag,i);
+          nc++;
+        }
+      }
+    }
+    if ( nc > 0 ) ns++;
   }
-  if ( memlack )  return(-1);
-  return(ip);
+  if ( mesh->info.ddebug && ns ) {
+    fprintf(stdout,"     %d analyzed  %d proposed\n",mesh->nt,ns);
+    fflush(stdout);
+  }
+
+  /* Step 3: Simulate splitting and delete points leading to an invalid configuration */
+  for (k=1; k<=mesh->np; k++)
+    mesh->point[k].flag = 0;
+
+  it = 1;
+  nc = 0;
+  do {
+    ni = 0;
+    for ( k=1; k<= mesh->nt; k++) {
+      pt = &mesh->tria[k];
+      if ( !MG_EOK(pt) || pt->ref < 0 ) continue;
+      else if ( pt->flag == 0 ) continue;
+
+      vx[0] = vx[1] =vx[2] = 0;
+      pt->flag = 0;
+      ic = 0;
+
+      for (i=0; i<3; i++) {
+        i1 = _MMG5_iprv2[i];
+        i2 = _MMG5_inxt2[i];
+        vx[i] = _MMG5_hashGet(&hash,pt->v[i1],pt->v[i2]);
+        if ( vx[i] > 0 ) {
+          MG_SET(pt->flag,i);
+          if ( mesh->point[vx[i]].flag > 2 )  ic = 1;
+        }
+      }
+
+      if ( !pt->flag )  continue;
+      switch (pt->flag) {
+        case 1: case 2: case 4:
+          ier = _MMG2_split1_sim(mesh,met,k,vx);
+          break;
+        case 7:
+          ier = _MMG2_split3_sim(mesh,met,k,vx);
+          break;
+        default:
+          ier = _MMG2_split2_sim(mesh,met,k,vx);
+          break;
+      }
+      if ( ier )  continue;
+
+      /* An edge is invalidated in the process */
+      ni++;
+      if ( ic == 0 && _MMG2_dichoto(mesh,met,k,vx) ) {
+        for (i=0; i<3; i++)
+          if ( vx[i] > 0 )  mesh->point[vx[i]].flag++;
+      }
+      /* Relocate point at the center of the edge */
+      else {
+        for (i=0; i<3; i++) {
+          if ( vx[i] > 0 ) {
+            p1 = &mesh->point[pt->v[_MMG5_iprv2[i]]];
+            p2 = &mesh->point[pt->v[_MMG5_inxt2[i]]];
+            ppt = &mesh->point[vx[i]];
+            ppt->c[0] = 0.5 * (p1->c[0] + p2->c[0]);
+            ppt->c[1] = 0.5 * (p1->c[1] + p2->c[1]);
+          }
+        }
+      }
+    }
+    nc += ni;
+  }
+  while ( ni >0 && ++it <20 );
+
+  if ( mesh->info.ddebug && nc ) {
+    fprintf(stdout,"     %d corrected,  %d invalid\n",nc,ni);
+    fflush(stdout);
+  }
+
+  /* step 4: effective splitting */
+  ns = 0;
+  nt = mesh->nt;
+  for (k=1; k<=nt; k++) {
+    pt = &mesh->tria[k];
+    if ( !MG_EOK(pt) || pt->ref < 0 )  continue;
+    else if ( pt->flag == 0 )  continue;
+
+    vx[0] = vx[1] = vx[2] = 0;
+    for (i=0; i<3; i++) {
+      i1 = _MMG5_inxt2[i];
+      i2 = _MMG5_inxt2[i1];
+      if ( MG_GET(pt->flag,i) ) {
+        vx[i] = _MMG5_hashGet(&hash,pt->v[i1],pt->v[i2]);
+        if ( !vx[i] ) {
+          if ( !mmgWarn0 ) {
+            mmgWarn0 = 1;
+            fprintf(stderr,"\n  ## Error: %s: unable to create point on"
+                    " at least 1 edge.\n Exit program.\n",__func__);
+          }
+          return -1;
+        }
+      }
+    }
+    if ( pt->flag == 1 || pt->flag == 2 || pt->flag == 4 ) {
+      ier = _MMG2_split1(mesh,met,k,vx);
+      ns++;
+    }
+    else if ( pt->flag == 7 ) {
+      ier = _MMG2_split3(mesh,met,k,vx);
+      ns++;
+    }
+    else {
+      ier = _MMG2_split2(mesh,met,k,vx);
+      ns++;
+    }
+    if ( !ier ) return -1;
+  }
+  if ( (mesh->info.ddebug || abs(mesh->info.imprim) > 5) && ns > 0 )
+    fprintf(stdout,"     %7d splitted\n",ns);
+  _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
+
+  return(ns);
 }
 
 /**
- * \param mesh poitner toward the mesh structure.
- * \param sol pointer toward the sol structure.
- * \param bucket pointer toward the bucket structure.
- * \param declic quality threshold.
- * \param alert if 1, we are unable to create a new vertex.
- * \param ni number of inserted points.
- * \param nc nuber of collapsed points.
- * \return 0 if fail, 1 otherwise.
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param k element index.
+ * \param vx pointer toward table of edges to split.
+ * \return 1.
  *
- * Analyse the edges, split the longer and collapse the shorter one.
+ * Find acceptable position for splitting.
  *
  */
-static int analar(MMG5_pMesh mesh,MMG5_pSol sol,pBucket bucket,
-                  double declic,int *alert, int *ni, int *nc) {
-  MMG5_pTria    pt;
-  MMG5_pPoint   ppa,ppb;
-  double  *ca,*cb,*ma,*mb,tail,t,tang[2];
-  int     *adja,voi[3],k,iadr,adj,/*base,*/nbp,npp,ip;
-  int     nt,ier;
-  int     i,i1,i2;
-  int     ins,i0,ii0;
+int _MMG2_dichoto(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
+  MMG5_pTria   pt;
+  MMG5_pPoint  pa,pb,ps;
+  double       o[3][2],p[3][2];
+  float        to,tp,t;
+  int          ia,ib,ier,it,maxit;
+  char         i,i1,i2;
 
-//  base  = ++mesh->base;
-  (*ni)  = 0;
-  (*nc)  = 0;
-  nt  = mesh->nt;
-  npp = 0;
+  pt = &mesh->tria[k];
 
-  for (k=1; k<=nt; k++) {
-    pt = &mesh->tria[k];
-    if ( !M_EOK(pt) )  continue;
-    //else if ( /*pt->flag = base-1 || pt->qual < declic*/ )  continue;
-
-    /* base internal edges */
-    iadr  = 3*(k-1) + 1;
-    adja  = &mesh->adja[iadr];
-    voi[0] = adja[0];
-    voi[1] = adja[1];
-    voi[2] = adja[2];
-    i0 = 0;
-    if (!voi[1]) i0 = 1;
-    if (!voi[2]) i0 = 2;
-    for (ii0=i0; ii0<i0+3; ii0++) {
-      i = ii0%3;
-      adj = voi[i] / 3;
-
-      i1   = pt->v[MMG2_idir[i+1]];
-      i2   = pt->v[MMG2_idir[i+2]];
-
-      ppa  = &mesh->point[i1];
-      ppb  = &mesh->point[i2];
-      //#warning bad test for edge required
-      if((ppa->tag & M_REQUIRED) && (ppb->tag & M_REQUIRED)) {
-        //printf("edge required %d %d\n",i1,i2);
-        continue;
-      }
-      ca   = &ppa->c[0];
-      cb   = &ppb->c[0];
-      iadr = i1*sol->size;
-      ma   = &sol->m[iadr];
-      iadr = i2*sol->size;
-      mb   = &sol->m[iadr];
-      tail = MMG2_length(ca,cb,ma,mb);
-
-      if ( tail > M_LONG && *alert <= 1 ) {
-        npp++;
-        nbp = tail + 0.5;
-        if ( nbp*(nbp+1) < 0.99*tail*tail )  nbp++;
-        t = 1.0 / (float)nbp;
-        if ( nbp < 3 || nbp > 15 )  t = 0.5;
-        if ( !adj || pt->ref != mesh->tria[adj].ref )  {
-          /*add bdry*/
-          if(!pt->edg[i])  {
-            /* if(mesh->info.ddebug) { */
-            /*   printf("tr %d : %d %d %d mais %d\n",k,pt->edg[0],pt->edg[1],pt->edg[2],i); */
-            /*   printf("%d %d %d\n",pt->v[0],pt->v[1],pt->v[2]); */
-            /* } */
-            assert(mesh->tria[adj].ref!=pt->ref);
-            assert((mesh->tria[adj]).edg[voi[i]%3]);
-//#warning find why we have to do that
-            pt->edg[i] = (mesh->tria[adj]).edg[voi[i]%3];
-          }
-          assert(pt->edg[i]);
-          ip = cassarbdry(mesh,sol,pt->edg[i],i1,i2,0.5,tang);
-        } else {
-          ip = cassar(mesh,sol,i1,i2,t);
-        }
-        if(ip < 0) {
-          if(mesh->info.imprim > 6)
-            printf("  ## Warning: impossible to create new vertex\n");
-          //return(0);
-          //printf("ahhhhhhhhhhhhhhhh\n");
-          *alert = 2;
-        } else {
-          if ( !adj || pt->ref != mesh->tria[adj].ref )  {
-            /*boundary edge*/
-            if(!adj) {
-              ins = MMG2_splitbdry(mesh,sol,ip,k,i,tang);
-              if(!ins) {
-                _MMG2D_delPt(mesh,ip);
-                continue;
-              }
-              mesh->point[ip].tag |= M_BDRY;
-              (*ni) += 1;
-              break;
-            } else {
-              mesh->point[ip].tag |= M_SD;
-              ins = MMG2_split(mesh,sol,ip,k,voi[i],0.05);
-              if(!ins) {
-                _MMG2D_delPt(mesh,ip);
-                continue;
-              }
-              (*ni) += 1;
-              break;
-            }
-            continue;
-          } else {
-            ins = MMG2_split(mesh,sol,ip,k,voi[i],0.65);
-            if(!ins) {
-              _MMG2D_delPt(mesh,ip);
-              continue;
-            }
-            (*ni) += 1;
-            break;
-          }
-        }
-      }
-
-      else if ( tail < M_SHORT ) {
-        if ( !adj || pt->ref != mesh->tria[adj].ref )  {
-          if(!adj) {
-
-            ier = MMG2_colpoibdry(mesh,sol,k,i,MMG2_iare[i][0],
-                                  MMG2_iare[i][1],2.75);
-            if ( ier ==-1 ) return(0);
-
-            else if ( !ier ){
-              ier = MMG2_colpoibdry(mesh,sol,k,i,MMG2_iare[i][1],
-                                    MMG2_iare[i][0],2.75);
-              if ( ier==-1 ) return(0);
-              else if ( !ier ){
-                continue;
-              } else {
-                (*nc)++;
-                _MMG2D_delPt(mesh,i1);
-                break;
-              }
-            }
-            (*nc)++;
-            _MMG2D_delPt(mesh,i2);
-            break;
-          } else {
-            if(!MMG2_colpoi(mesh,sol,k,i,MMG2_iare[i][0],MMG2_iare[i][1],2.75)) {
-              if(!MMG2_colpoi(mesh,sol,k,i,MMG2_iare[i][1],MMG2_iare[i][0],2.75)) {
-                continue;
-              } else {
-                (*nc)++;
-                _MMG2D_delPt(mesh,i1);
-                break;
-              }
-            }
-            _MMG2D_delPt(mesh,i2);
-            (*nc)++;
-            break;
-          }
-        } else {
-          if(!MMG2_colpoi(mesh,sol,k,i,MMG2_iare[i][0],MMG2_iare[i][1],2.75)) {
-            if(!MMG2_colpoi(mesh,sol,k,i,MMG2_iare[i][1],MMG2_iare[i][0],2.75)) {
-              continue;
-            } else {
-              (*nc)++;
-              _MMG2D_delPt(mesh,i1);
-              break;
-
-            }
-          }
-          (*nc)++;
-          _MMG2D_delPt(mesh,i2);
-          break;
-        }
-      }
+  /* Get point on curve and along segment for edge split */
+  for (i=0; i<3; i++) {
+    memset(p[i],0,2*sizeof(double));
+    memset(o[i],0,2*sizeof(double));
+    if ( vx[i] > 0 ) {
+      i1 = _MMG5_inxt2[i];
+      i2 = _MMG5_inxt2[i1];
+      ia = pt->v[i1];
+      ib = pt->v[i2];
+      pa = &mesh->point[ia];
+      pb = &mesh->point[ib];
+      ps = &mesh->point[vx[i]];
+      o[i][0] = 0.5 * (pa->c[0] + pb->c[0]);
+      o[i][1] = 0.5 * (pa->c[1] + pb->c[1]);
+      p[i][0] = ps->c[0];
+      p[i][1] = ps->c[1];
     }
   }
-  if ( mesh->info.imprim > 5 ) {
-    fprintf(stdout,"    %8d INSERTED %8d COLLAPSED\n",*ni,*nc);
+  maxit = 4;
+  it = 0;
+  tp = 1.0;
+  to = 0.0;
+
+  do {
+    /* compute new position */
+    t = 0.5 * (tp + to);
+    for (i=0; i<3; i++) {
+      if ( vx[i] > 0 ) {
+        ps = &mesh->point[vx[i]];
+        ps->c[0] = o[i][0] + t*(p[i][0] - o[i][0]);
+        ps->c[1] = o[i][1] + t*(p[i][1] - o[i][1]);
+      }
+    }
+    switch (pt->flag) {
+      case 1: case 2: case 4:
+        ier = _MMG2_split1_sim(mesh,met,k,vx);
+        break;
+      case 7:
+        ier = _MMG2_split3_sim(mesh,met,k,vx);
+        break;
+      default:
+        ier = _MMG2_split2_sim(mesh,met,k,vx);
+        break;
+    }
+    if ( ier )
+      to = t;
+    else
+      tp = t;
+  }
+  while ( ++it < maxit );
+
+  /* restore coords of last valid pos. */
+  if ( !ier ) {
+    t = to;
+    for (i=0; i<3; i++) {
+      if ( vx[i] > 0 ) {
+        ps = &mesh->point[vx[i]];
+        ps->c[0] = o[i][0] + t*(p[i][0] - o[i][0]);
+        ps->c[1] = o[i][1] + t*(p[i][1] - o[i][1]);
+      }
+    }
   }
   return(1);
 }
-static int analargeom(MMG5_pMesh mesh,MMG5_pSol sol,int *alert) {
-  MMG5_pTria    pt;
-  MMG5_pPoint   ppa,ppb;
-  double  tail,tang[2];
-  int     *adja,voi[3],k,iadr,adj,/* base ,*/npp,ip;
-  int     nt;
-  int     i,i1,i2,ni,maxtou,it;
-  int     ins,i0,ii0,nitot;
-  maxtou = 30;
-  it     = 0;
-  nitot = 0;
+
+/* Travel triangles and collapse short edges */
+int _MMG2_colelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
+  MMG5_pTria         pt;
+  MMG5_pPoint        p1,p2;
+  double             ux,uy,ll,hmin2;
+  int                list[MMG2_LONMAX+2],ilist,nc,k;
+  unsigned char      i,i1,i2,open;
+
+  nc = 0;
+  hmin2 = mesh->info.hmin * mesh->info.hmin;
+
+  for (k=1; k<=mesh->nt; k++) {
+    pt = &mesh->tria[k];
+    if ( !MG_EOK(pt) || pt->ref < 0 ) continue;
+
+    /* Travel 3 edges of the triangle and decide whether to collapse p1->p2, based on length criterion */
+    pt->flag = 0; // was here before, but probably serves for nothing
+
+    for (i=0; i<3; i++) {
+      if ( MG_SIN(pt->tag[i]) ) continue;
+      i1 = _MMG5_inxt2[i];
+      i2 = _MMG5_iprv2[i];
+      p1 = &mesh->point[pt->v[i1]];
+      p2 = &mesh->point[pt->v[i2]];
+      if ( MG_SIN(p1->tag) || p1->tag & MG_NOM ) continue;
+
+      /* Impossible to collapse a surface point onto a non surface point -- impossible to
+       collapse a surface point along a non geometric edge */
+      else if ( p1->tag & MG_GEO ) {
+        if ( ! (p2->tag & MG_GEO) || !(pt->tag[i] & MG_GEO) ) continue;
+      }
+      /* Same test for REF points */
+      else if ( p1->tag & MG_REF ) {
+        if ( ! (p2->tag & MG_GEO || p2->tag & MG_REF) || !(pt->tag[i] & MG_REF) ) continue;
+      }
+
+      open = (mesh->adja[3*(k-1)+1+i] == 0) ? 1 : 0;
+
+      /* Check length */
+      if ( typchk == 1 ) {
+        ux = p2->c[0] - p1->c[0];
+        uy = p2->c[1] - p1->c[1];
+        ll = ux*ux + uy*uy;
+        if ( ll > hmin2 ) continue;
+      }
+      else {
+        ll = MMG2D_lencurv(mesh,met,pt->v[i1],pt->v[i2]);
+        if ( ll > MMG2_LSHRT ) continue;
+      }
+      
+      /* Check whether the geometry is preserved */
+      ilist = _MMG2_chkcol(mesh,met,k,i,list,typchk);
+      
+      if ( ilist > 3 || ( ilist == 3 && open ) ) {
+        nc += _MMG2_colver(mesh,ilist,list);
+        break;
+      }
+      else if ( ilist == 3 ) {
+        nc += _MMG2_colver3(mesh,list);
+        break;
+      }
+      else if ( ilist == 2 ) {
+        nc += _MMG2_colver2(mesh,list);
+        break;
+      }
+    }
+  }
+
+  if ( nc > 0 && (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) )
+    fprintf(stdout,"     %8d vertices removed\n",nc);
+
+  return(nc);
+}
+
+/* Travel triangles and swap edges to improve quality */
+int _MMG2_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
+  MMG5_pTria          pt;
+  int                 it,maxit,ns,nns,k;
+  unsigned char       i;
+
+  it = nns = 0;
+  maxit = 2;
+  mesh->base++;
+
   do {
-    ni  = 0;
-    // base  = ++mesh->base;
-    nt    = mesh->nt;
-    npp   = 0;
-    for (k=1; k<=nt; k++) {
+    ns = 0;
+    for (k=1; k<=mesh->nt; k++) {
       pt = &mesh->tria[k];
-      if ( !M_EOK(pt) )  continue;
-      //else if ( /*pt->flag = base-1 || pt->qual < declic*/ )  continue;
+      if ( !MG_EOK(pt) || pt->ref < 0 ) continue;
 
-      /* base internal edges */
-      iadr  = 3*(k-1) + 1;
-      adja  = &mesh->adja[iadr];
-      voi[0] = adja[0];
-      voi[1] = adja[1];
-      voi[2] = adja[2];
-      i0 = 0;
-      if (!voi[1]) i0 = 1;
-      if (!voi[2]) i0 = 2;
-      for (ii0=i0; ii0<i0+3; ii0++) {
-        i = ii0%3;
-        adj = voi[i] / 3;
-
-        i1   = pt->v[MMG2_idir[i+1]];
-        i2   = pt->v[MMG2_idir[i+2]];
-
-        ppa  = &mesh->point[i1];
-        ppb  = &mesh->point[i2];
-        //#warning bad test for edge required
-        if((ppa->tag & M_REQUIRED) && (ppb->tag & M_REQUIRED)) {
-          //printf("edge required %d %d\n",i1,i2);
-          continue;
-        }
-        if ( adj )  continue;
-
-        tail = MMG2_chkedg(mesh,ppa,ppb);
-        if(!tail) continue;
-        if ( *alert <= 1 ) {
-          npp++;
-          assert(pt->edg[i]);
-          ip = cassarbdry(mesh,sol,pt->edg[i],i1,i2,0.5,tang);
-
-          if(ip < 0) {
-            if(mesh->info.imprim > 6) printf("  ## Warning: impossible to create new vertex\n");
-            *alert = 2;
-          }
-          ins = MMG2_splitbdry(mesh,sol,ip,k,i,tang);
-          if(!ins) {
-            _MMG2D_delPt(mesh,ip);
-            continue;
-          }
-          mesh->point[ip].tag |= M_BDRY;
-          ni += 1;
+      for (i=0; i<3; i++) {
+        if ( MG_SIN(pt->tag[i]) || MG_EDG(pt->tag[i]) ) continue;
+        else if ( _MMG2_chkswp(mesh,met,k,i,typchk) ) {
+          ns += _MMG2_swapar(mesh,k,i);
           break;
         }
       }
     }
-    if ( mesh->info.imprim > 5 ) {
-      fprintf(stdout,"    %8d INSERTED \n",ni);
+    nns += ns;
+  }
+  while ( ns > 0 && ++it<maxit );
+  if ( (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) && nns > 0 )
+    fprintf(stdout,"     %8d edge swapped\n",nns);
+
+  return(nns);
+}
+
+
+/* Mesh adaptation routine for the final stage of the algorithm: intertwine splitting
+ based on patterns, collapses, swaps and vertex relocations.*/
+int _MMG2_adptri(MMG5_pMesh mesh,MMG5_pSol met) {
+  int                  maxit,it,nns,ns,nnc,nc,nnsw,nsw,nnm,nm;
+
+  nns = nnc = nnsw = nnm = it = 0;
+  maxit = 5;
+  
+  do {
+    
+    if ( !mesh->info.noinsert ) {
+      ns = _MMG2_adpspl(mesh,met);
+      if ( ns < 0 ) {
+        fprintf(stderr,"  ## Problem in function adpspl."
+                " Unable to complete mesh. Exit program.\n");
+        return(0);
+      }
+      
+      nc = _MMG2_adpcol(mesh,met);
+      if ( nc < 0 ) {
+        fprintf(stderr,"  ## Problem in function adpcol."
+                " Unable to complete mesh. Exit program.\n");
+        return(0);
+      }
     }
-    nitot +=ni;
-  } while(ni > 0 && it++ < maxtou);
-  return(nitot);
+    else {
+      ns = 0;
+      nc = 0;
+    }
+    
+    if ( !mesh->info.noswap ) {
+      nsw = _MMG2_swpmsh(mesh,met,2);
+      if ( nsw < 0 ) {
+        fprintf(stderr,"  ## Problem in function swpmsh."
+                " Unable to complete mesh. Exit program.\n");
+        return(0);
+      }
+    }
+    else
+      nsw = 0;
+
+    if ( !mesh->info.nomove ) {
+      nm = _MMG2_movtri(mesh,met,1,0);
+      if ( nm < 0 ) {
+        fprintf(stderr,"  ## Problem in function movtri. "
+                "Unable to complete mesh. Exit program.\n");
+        return(0);
+      }
+    }
+    else
+      nm = 0;
+    
+    nns  += ns;
+    nnc  += nc;
+    nnsw += nsw;
+    nnm  += nm;
+
+    if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && ns+nc+nsw+nm > 0 )
+      fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %8d moved\n",ns,nc,nsw,nm);
+    if ( ns < 10 && abs(nc-ns) < 3 )  break;
+    else if ( it > 3 && abs(nc-ns) < 0.3 * MG_MAX(nc,ns) )  break;
+  }
+  while( ++it < maxit && (nc+ns+nsw+nm > 0) );
+  
+  /* Last iterations of vertex relocation only */
+  if ( !mesh->info.nomove ) {
+    nm = _MMG2_movtri(mesh,met,5,1);
+    if ( nm < 0 ) {
+      fprintf(stderr,"  ## Problem in function movtri. Unable to complete mesh."
+              " Exit program.\n");
+      return(0);
+    }
+    nnm += nm;
+  }
+
+  if ( mesh->info.imprim ) {
+    if ( abs(mesh->info.imprim) < 5 && (nnc > 0 || nns > 0) )
+      fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %8d moved, %d iter. \n",nns,nnc,nnsw,nnm,it);
+  }
+  return(1);
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ *
+ * \return -1 if failed or number of new points.
+ *
+ * Analysis and splitting routine for edges in the final step of the algorithm;
+ * edges are only splitted on a one-by-one basis
+ *
+ */
+int _MMG2_adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
+  MMG5_pTria         pt;
+  double             lmax,len;
+  int                k,ns,ip,ier;
+  char               i,i1,i2,imax;
+
+  ns = 0;
+  
+  for (k=1; k<=mesh->nt; k++) {
+    pt = &mesh->tria[k];
+    if ( !MG_EOK(pt) || pt->ref < 0 ) continue;
+
+    imax = -1;
+    lmax = -1.0;
+    for (i=0; i<3; i++) {
+      if ( MG_SIN(pt->tag[i]) ) continue;
+      i1 = _MMG5_inxt2[i];
+      i2 = _MMG5_iprv2[i];
+      
+      len = MMG2D_lencurv(mesh,met,pt->v[i1],pt->v[i2]);
+
+      if ( len > lmax ) {
+        lmax = len;
+        imax = i;
+      }
+    }
+
+    if ( lmax < MMG2_LOPTL ) continue;
+    else if ( MG_SIN(pt->tag[imax]) ) continue;
+
+    /* Check the feasibility of splitting */
+    ip = _MMG2_chkspl(mesh,met,k,imax);
+
+    /* Lack of memory; abort the routine */
+    if ( ip < 0 ){
+      return(ns);
+    }
+    else if ( ip > 0 ) {
+      
+      ier = _MMG2_split1b(mesh,k,imax,ip);
+
+      /* Lack of memory; abort the routine */
+      if ( !ier ) {
+        _MMG2D_delPt(mesh,ip);
+        return(ns);
+      }
+      ns += ier;
+    }
+  }
+
+  return(ns);
+}
+
+/* Analysis and collapse routine for edges in the final step of the algorithm */
+int _MMG2_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
+  MMG5_pTria        pt;
+  MMG5_pPoint       p1,p2;
+  double            len;
+  int               k,nc,ilist,list[MMG2_LONMAX+2];
+  char              i,i1,i2,open;
+
+  nc = 0;
+  for (k=1; k<=mesh->nt; k++) {
+    pt = &mesh->tria[k];
+    if ( !MG_EOK(pt) || pt->ref < 0 ) continue;
+
+    /* Check edge length, and attempt collapse */
+    pt->flag = 0;
+    for (i=0; i<3; i++) {
+      if ( MG_SIN(pt->tag[i]) ) continue;
+
+      open = ( mesh->adja[3*(k-1)+1+i] == 0 ) ? 1 : 0;
+
+      i1 = _MMG5_inxt2[i];
+      i2 = _MMG5_iprv2[i];
+      p1 = &mesh->point[pt->v[i1]];
+      p2 = &mesh->point[pt->v[i2]];
+
+      if ( MG_SIN(p1->tag) || p1->tag & MG_NOM ) continue;
+      else if ( p1->tag & MG_GEO ) {
+        if ( ! (p2->tag & MG_GEO) || !(pt->tag[i] & MG_GEO) ) continue;
+      }
+      else if ( p1->tag & MG_REF ) {
+        if ( ! (p2->tag & MG_GEO || p2->tag & MG_REF) || !(pt->tag[i] & MG_REF) ) continue;
+      }
+
+      len = MMG2D_lencurv(mesh,met,pt->v[i1],pt->v[i2]);
+
+      if ( len > MMG2_LOPTS ) continue;
+
+      ilist = _MMG2_chkcol(mesh,met,k,i,list,2);
+
+      if ( ilist > 3 || ( ilist==3 && open ) ) {
+        nc += _MMG2_colver(mesh,ilist,list);
+        break;
+      }
+      else if ( ilist == 3 ) {
+        nc += _MMG2_colver3(mesh,list);
+        break;
+      }
+      else if ( ilist == 2 ) {
+        nc += _MMG2_colver2(mesh,list);
+        break;
+      }
+    }
+  }
+
+  return(nc);
+}
+
+/* Analyze points to relocate them according to a quality criterion */
+int _MMG2_movtri(MMG5_pMesh mesh,MMG5_pSol met,int maxit,char improve) {
+  MMG5_pTria           pt;
+  MMG5_pPoint          p0;
+  int                  base,k,nnm,nm,ns,it,ilist,list[MMG2_LONMAX+2];
+  char                 i,ier;
+
+  it = nnm = 0;
+  base = 0;
+  
+  for (k=1; k<=mesh->np; k++)
+    mesh->point[k].flag = base;
+
+  do {
+    base++;
+    nm = ns = 0;
+    for (k=1; k<=mesh->nt; k++) {
+      pt = &mesh->tria[k];
+      if ( !MG_EOK(pt) || pt->ref < 0 ) continue;
+
+      for (i=0; i<3; i++) {
+        p0 = &mesh->point[pt->v[i]];
+        if ( p0->flag == base || MG_SIN(p0->tag) || p0->tag & MG_NOM ) continue;
+
+        ilist = _MMG2_boulet(mesh,k,i,list);
+
+        if ( MG_EDG(p0->tag) ) {
+          ier = _MMG2_movedgpt(mesh,met,ilist,list,improve);
+          if ( ier ) ns++;
+        }
+        else {
+          if ( met->size == 3 && met->m )
+            ier = _MMG2_movintpt_ani(mesh,met,ilist,list,improve);
+          else
+            ier = _MMG2_movintpt(mesh,met,ilist,list,improve);
+        }
+
+        if ( ier ) {
+          nm++;
+          p0->flag = base;
+        }
+      }
+    }
+    nnm += nm;
+    if ( mesh->info.ddebug )  fprintf(stdout,"     %8d moved, %d geometry\n",nm,ns);
+  }
+  while ( ++it < maxit && nm > 0 );
+
+  if ( (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) && nnm > 0 )
+    fprintf(stdout,"     %8d vertices moved, %d iter.\n",nnm,it);
+
+  return(nnm);
 }
 
 /**
@@ -612,82 +798,47 @@ static int analargeom(MMG5_pMesh mesh,MMG5_pSol sol,int *alert) {
  * \param sol pointer toward the sol structure.
  * \return 1 if success, 0 if strongly fail.
  *
- * Mesh adaptation.
+ * Mesh adaptation -- new version of mmg2d1.c
  *
  **/
-int MMG2_mmg2d1(MMG5_pMesh mesh,MMG5_pSol sol) {
-  pBucket  bucket;
-  double   declic;
-  int      ns,base,alert,it,maxtou;
-  int      nadd,ndel,nswp,ngeom,ni,nc;
+int MMG2_mmg2d1n(MMG5_pMesh mesh,MMG5_pSol met) {
+  
+  /* Stage 1: creation of a geometric mesh */
+  if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
+    fprintf(stdout,"  ** GEOMETRIC MESH\n");
+  
+  if ( !_MMG2_anatri(mesh,met,1) ) {
+    fprintf(stderr,"  ## Unable to split mesh-> Exiting.\n");
+    return(0);
+  }
+  
+  /* Stage 2: creation of a computational mesh */
+  if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
+    fprintf(stdout,"  ** COMPUTATIONAL MESH\n");
 
-  nadd = ndel = nswp = 0;
-  if ( mesh->info.imprim < 0 ) {
-    MMG2_outqua(mesh,sol);
-    MMG2_prilen(mesh,sol);
+  if ( !MMG2D_defsiz(mesh,met) ) {
+    fprintf(stderr,"  ## Metric undefined. Exit program.\n");
+    return(0);
   }
 
-  /* 1. Delaunization */
-  if ( mesh->info.imprim < -4 )
-    fprintf(stdout,"  -- DELAUNIZATION\n");
-
-  /* edge flip */
-  if(!mesh->info.noswap) {
-    declic = 1.1 / ALPHA;
-    base   = mesh->base;
-    ns = MMG2_cendel(mesh,sol,declic,base);
-    nswp += ns;
-    if ( mesh->info.imprim > 5 )
-      fprintf(stdout,"  -- %8d SWAPPED\n",ns);
-  }
-  alert  = 0;
-
-  /* 1. Geometric mesh */
-  if ( mesh->info.imprim > 3 )
-    fprintf(stdout,"  -- GEOMETRIC MESH\n");
-
-  ngeom = analargeom(mesh,sol,&alert);
-  if ( mesh->info.imprim && (abs(mesh->info.imprim) < 6) )
-    fprintf(stdout,"     %8d splitted\n",ngeom);
-
-  /* 2. field points */
-  bucket = MMG2_newBucket(mesh,M_MAX(mesh->info.octree,BUCKSIZ));
-  assert(bucket);
-  declic = 1.5 / ALPHA;
-  maxtou = 30;
-  it     = 0;
-  do {
-    ni = 0;
-    nc = 0;
-    if ( !analar(mesh,sol,bucket,declic,&alert,&ni,&nc) ) {
+  if ( mesh->info.hgrad > 0. ) {
+    if ( mesh->info.imprim )   fprintf(stdout,"\n  -- GRADATION : %8f\n",mesh->info.hgrad);
+    if (!MMG2D_gradsiz(mesh,met) ) {
+      fprintf(stderr,"  ## Gradation problem. Exit program.\n");
       return(0);
     }
-    nadd += ni;
-    ndel += nc;
-    if(!mesh->info.noswap) {
-      ns = MMG2_cendel(mesh,sol,declic,mesh->base);
-      nswp += ns;
-      if ( mesh->info.imprim > 5 )
-        fprintf(stdout,"  -- %8d SWAPPED\n",ns);
-    }
   }
-  while ( ++it < maxtou && (ni+nc > 0));
-  //while ( ++it < maxtou && (ni+nc > 0));//> 0.05*mesh->np));
-
-  if ( mesh->info.imprim && (abs(mesh->info.imprim) < 6) && ( nadd || ndel ) ) {
-    fprintf(stdout,"     %8d splitted, %8d collapsed,"
-            " %8d swapped.\n",nadd,ndel,nswp);
+  
+  if ( !_MMG2_anatri(mesh,met,2) ) {
+    fprintf(stderr,"  ## Unable to proceed adaptation. Exit program.\n");
+    return(0);
   }
-
-  if ( mesh->info.imprim < 0 ) {
-    MMG2_outqua(mesh,sol);
-    MMG2_prilen(mesh,sol);
+  
+  /* Stage 3: fine mesh improvements */
+  if ( !_MMG2_adptri(mesh,met) ) {
+    fprintf(stderr,"  ## Unable to make fine improvements. Exit program.\n");
+    return(0);
   }
-
-  /* free memory */
-  _MMG5_SAFE_FREE(bucket->head);
-  _MMG5_SAFE_FREE(bucket->link);
-  _MMG5_SAFE_FREE(bucket);
 
   return(1);
 }

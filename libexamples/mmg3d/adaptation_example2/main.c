@@ -51,23 +51,36 @@ int main(int argc,char *argv[]) {
   MMG5_pMesh      mmgMesh;
   MMG5_pSol       mmgSol;
   int             k,ier;
-  char            *pwd,*inname,*outname;
+  char            *inname, *outname1, *outname2;
 
   fprintf(stdout,"  -- TEST MMG3DLIB \n");
 
+  if ( argc != 4 ) {
+    printf(" Usage: %s filein fileout1 filout2 \n",argv[0]);
+    return(1);
+  }
+
   /* Name and path of the mesh files */
-  pwd = getenv("PWD");
-  inname = (char *) calloc(strlen(pwd) + 51, sizeof(char));
+  inname = (char *) calloc(strlen(argv[1]) + 1, sizeof(char));
   if ( inname == NULL ) {
     perror("  ## Memory problem: calloc");
     exit(EXIT_FAILURE);
   }
-  outname = (char *) calloc(strlen(pwd) + 60, sizeof(char));
-  if ( outname == NULL ) {
+  strcpy(inname,argv[1]);
+
+  outname1 = (char *) calloc(strlen(argv[2]) + 1, sizeof(char));
+  if ( outname1 == NULL ) {
     perror("  ## Memory problem: calloc");
     exit(EXIT_FAILURE);
   }
-  sprintf(inname, "%s%s%s", pwd, "/../libexamples/mmg3d/adaptation_example2/", "2spheres");
+  strcpy(outname1,argv[2]);
+
+  outname2 = (char *) calloc(strlen(argv[3]) + 1, sizeof(char));
+  if ( outname2 == NULL ) {
+    perror("  ## Memory problem: calloc");
+    exit(EXIT_FAILURE);
+  }
+  strcpy(outname2,argv[3]);
 
   /** 1) Initialisation of mesh and sol structures */
   /* args of InitMesh:
@@ -143,10 +156,9 @@ int main(int argc,char *argv[]) {
     fprintf(stdout,"BAD ENDING OF MMG3DLIB\n");
 
   /* (Not mandatory) Automatically save the mesh */
-  sprintf(outname, "%s%s%s", pwd, "/../libexamples/mmg3d/adaptation_example2/", "2spheres_1.o");
-  MMG3D_saveMesh(mmgMesh,outname);
+  MMG3D_saveMesh(mmgMesh,outname1);
 
-  if ( MMG3D_saveSol(mmgMesh,mmgSol,outname) != 1 )
+  if ( MMG3D_saveSol(mmgMesh,mmgSol,outname1) != 1 )
     exit(EXIT_FAILURE);
 
 
@@ -214,12 +226,11 @@ int main(int argc,char *argv[]) {
 
 
   /* 7) Automatically save the mesh */
-  sprintf(outname, "%s%s%s", pwd, "/../libexamples/mmg3d/adaptation_example2/", "2spheres_2.o");
-  if ( MMG3D_saveMesh(mmgMesh,outname) != 1 )
+  if ( MMG3D_saveMesh(mmgMesh,outname2) != 1 )
     exit(EXIT_FAILURE);
 
   /* 8) Automatically save the solution */
-  if ( MMG3D_saveSol(mmgMesh,mmgSol,outname) != 1 )
+  if ( MMG3D_saveSol(mmgMesh,mmgSol,outname2) != 1 )
     exit(EXIT_FAILURE);
 
 
@@ -230,8 +241,12 @@ int main(int argc,char *argv[]) {
 
   free(inname);
   inname = NULL;
-  free(outname);
-  outname = NULL;
+
+  free(outname1);
+  outname1 = NULL;
+
+  free(outname2);
+  outname2 = NULL;
 
   return(ier);
 }

@@ -78,7 +78,7 @@ static int _MMG5_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
     in = fopen(data,"rb");
     if ( !in )  return(1);
   }
-  fprintf(stdout,"  %%%% %s OPENED\n",data);
+  fprintf(stdout,"\n  %%%% %s OPENED\n",data);
 
   /* read parameters */
   mesh->info.npar = 0;
@@ -92,26 +92,32 @@ static int _MMG5_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
     if ( !strcmp(data,"parameters") ) {
       fscanf(in,"%d",&npar);
       if ( !MMGS_Set_iparameter(mesh,met,MMGS_IPARAM_numberOfLocalParam,npar) )
-        exit(EXIT_FAILURE);
+        return 0;
 
       for (i=0; i<mesh->info.npar; i++) {
         fscanf(in,"%d %s ",&ref,buf);
         ret = fscanf(in,"%f %f %f",&fp1,&fp2,&hausd);
+
+        if ( !ret ) {
+          fprintf(stderr,"  %%%% Wrong format: %s\n",buf);
+          return 0;
+        }
+
         for (j=0; j<strlen(buf); j++)  buf[j] = tolower(buf[j]);
 
         if ( !strcmp(buf,"triangles") || !strcmp(buf,"triangle") ) {
           if ( !MMGS_Set_localParameter(mesh,met,MMG5_Triangle,ref,fp1,fp2,hausd) ) {
-            exit(EXIT_FAILURE);
+            return 0;
           }
         }
         /* else if ( !strcmp(buf,"vertices") || !strcmp(buf,"vertex") ) { */
         /*   if ( !MMGS_Set_localParameter(mesh,met,MMG5_Vertex,ref,fp1,fp2,hausd) ) { */
-        /*     exit(EXIT_FAILURE); */
+        /*     return 0; */
         /*   } */
         /* } */
         else {
           fprintf(stdout,"  %%%% Wrong format: %s\n",buf);
-          continue;
+          return 0;
         }
       }
     }
@@ -151,11 +157,17 @@ int _MMGS_writeLocalParam( MMG5_pMesh mesh ) {
 
   npar = _MMG5_countLocalParamAtTri( mesh, &triRefs);
 
-  if ( !npar ) return 0;
+  if ( !npar ) {
+    fclose(out);
+    return 0;
+  }
 
   fprintf(out,"parameters\n %d\n",npar);
 
-  if ( !_MMG5_writeLocalParamAtTri(mesh, triRefs, out) ) return 0;
+  if ( !_MMG5_writeLocalParamAtTri(mesh, triRefs, out) ) {
+    fclose(out);
+    return 0;
+  }
 
   fclose(out);
   fprintf(stdout,"  -- WRITING COMPLETED\n");
@@ -178,6 +190,7 @@ int _MMGS_writeLocalParam( MMG5_pMesh mesh ) {
 static inline
 int _MMGS_defaultOption(MMG5_pMesh mesh,MMG5_pSol met) {
   mytime    ctim[TIMEMAX];
+  double    hsiz;
   char      stim[32];
 
   _MMGS_Set_commonFunc();
@@ -193,10 +206,10 @@ int _MMGS_defaultOption(MMG5_pMesh mesh,MMG5_pSol met) {
   chrono(ON,&(ctim[0]));
 
   if ( mesh->info.npar ) {
-    fprintf(stderr,"\n  ## Error: "
+    fprintf(stderr,"\n  ## Error: %s: "
             "unable to save of a local parameter file with"
             " the default parameters values because local parameters"
-            " are provided.\n");
+            " are provided.\n",__func__);
     _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
   }
 
@@ -206,7 +219,7 @@ int _MMGS_defaultOption(MMG5_pMesh mesh,MMG5_pSol met) {
   chrono(ON,&(ctim[1]));
 
   if ( met->np && (met->np != mesh->np) ) {
-    fprintf(stderr,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
+    fprintf(stderr,"\n  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
     _MMG5_DEL_MEM(mesh,met->m,(met->size*(met->npmax+1))*sizeof(double));
     met->np = 0;
   }
@@ -228,14 +241,22 @@ int _MMGS_defaultOption(MMG5_pMesh mesh,MMG5_pSol met) {
   /* scaling mesh and hmin/hmax computation*/
   if ( !_MMG5_scaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
 
+  /* Specific meshing + hmin/hmax update */
+  if ( mesh->info.hsiz > 0. ) {
+    if ( !MMG5_Compute_constantSize(mesh,met,&hsiz) ) {
+     if ( !_MMG5_unscaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+    }
+  }
+
   /* unscaling mesh */
   if ( !_MMG5_unscaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
 
   /* Save the local parameters file */
   mesh->mark = 0;
   if ( !_MMGS_writeLocalParam(mesh) ) {
-    fprintf(stderr,"  ## Error: Unable to save the local parameters file.\n"
-            "            Exit program.\n");
+    fprintf(stderr,"\n  ## Error: %s: unable to save the local parameters file.\n"
+            "            Exit program.\n",__func__);
      _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
   }
 
@@ -288,11 +309,13 @@ int main(int argc,char *argv[]) {
     ier = MMGS_loadMshMesh(mesh,met,mesh->namein);
     msh = 1;
   }
+  if ( ier<1 )
+    _MMGS_RETURN_AND_FREE(mesh,met,MMG5_STRONGFAILURE);
 
   if ( !msh ) {
     ier = MMGS_loadSol(mesh,met,met->namein);
     if ( ier==-1 ) {
-      fprintf(stderr,"  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
+      fprintf(stderr,"\n  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
       _MMGS_RETURN_AND_FREE(mesh,met,MMG5_STRONGFAILURE);
     }
   }
@@ -321,13 +344,7 @@ int main(int argc,char *argv[]) {
     if ( mesh->info.imprim )
       fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh->nameout);
 
-    if ( !strcmp(&mesh->nameout[strlen(mesh->nameout)-5],".mesh") ||
-         !strcmp(&mesh->nameout[strlen(mesh->nameout)-6],".meshb") )
-      msh = 0;
-
-    else if (!strcmp(&mesh->nameout[strlen(mesh->nameout)-4],".msh") ||
-             !strcmp(&mesh->nameout[strlen(mesh->nameout)-5],".mshb") )
-      msh = 1;
+    MMG5_chooseOutputFormat(mesh,&msh);
 
     if ( !msh )
       ierSave = MMGS_saveMesh(mesh,mesh->nameout);

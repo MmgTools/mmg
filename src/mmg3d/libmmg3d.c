@@ -87,14 +87,17 @@ void _MMG3D_Free_topoTables(MMG5_pMesh mesh) {
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the solution structure.
  *
- * Truncate a scalar metric by hmax and hmin values.
+ * Truncate the metric computed by the DoSol function by hmax and hmin values
+ * (if setted by the user). Set hmin and hmax if they are not setted.
  *
  */
-static inline
-void _MMG3D_scalarSolTruncature(MMG5_pMesh mesh, MMG5_pSol met) {
+void _MMG3D_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
   MMG5_pTetra pt;
   MMG5_pPoint ppt;
-  int         i,k,sethmin,sethmax;
+  double      isqhmin, isqhmax;
+  int         i,k,iadr,sethmin,sethmax;
+
+  assert ( mesh->info.optim || mesh->info.hsiz > 0. );
 
   /* Detect the point used only by prisms */
   if ( mesh->nprism ) {
@@ -108,32 +111,61 @@ void _MMG3D_scalarSolTruncature(MMG5_pMesh mesh, MMG5_pSol met) {
       for (i=0; i<4; i++) {
         mesh->point[pt->v[i]].flag = 0;
       }
-
     }
   }
 
 
   /* If not provided by the user, compute hmin/hmax from the metric computed by
-   * the DoSol function (isotropic metric) */
+   * the DoSol function. */
   sethmin = sethmax = 1;
   if ( mesh->info.hmin < 0 ) {
     sethmin = 0;
-    mesh->info.hmin = FLT_MAX;
-    for (k=1; k<=mesh->np; k++)  {
-      ppt = &mesh->point[k];
-      if ( !MG_VOK(ppt) || ppt->flag ) continue;
-      mesh->info.hmin = MG_MIN(mesh->info.hmin,met->m[k]);
+    if ( met->size == 1 ) {
+      mesh->info.hmin = FLT_MAX;
+      for (k=1; k<=mesh->np; k++)  {
+        ppt = &mesh->point[k];
+        if ( !MG_VOK(ppt) || ppt->flag ) continue;
+        mesh->info.hmin = MG_MIN(mesh->info.hmin,met->m[k]);
+      }
+    }
+    else if ( met->size == 6 ){
+      mesh->info.hmin = 0.;
+      for (k=1; k<=mesh->np; k++)  {
+        ppt = &mesh->point[k];
+        if ( !MG_VOK(ppt) || ppt->flag ) continue;
+        iadr = met->size*k;
+        mesh->info.hmin = MG_MAX(mesh->info.hmin,met->m[iadr]);
+        mesh->info.hmin = MG_MAX(mesh->info.hmin,met->m[iadr+3]);
+        mesh->info.hmin = MG_MAX(mesh->info.hmin,met->m[iadr+5]);
+      }
+      mesh->info.hmin = 1./sqrt(mesh->info.hmin);
     }
   }
+
   if ( mesh->info.hmax < 0 ) {
     sethmax = 1;
-    mesh->info.hmax = 0.;
-    for (k=1; k<=mesh->np; k++)  {
-      ppt = &mesh->point[k];
-      if ( !MG_VOK(ppt) || ppt->flag ) continue;
-      mesh->info.hmax = MG_MAX(mesh->info.hmax,met->m[k]);
+    if ( met->size == 1 ) {
+      mesh->info.hmax = 0.;
+      for (k=1; k<=mesh->np; k++)  {
+        ppt = &mesh->point[k];
+        if ( !MG_VOK(ppt) || ppt->flag ) continue;
+        mesh->info.hmax = MG_MAX(mesh->info.hmax,met->m[k]);
+      }
+    }
+    else if ( met->size == 6 ){
+      mesh->info.hmax = FLT_MAX;
+      for (k=1; k<=mesh->np; k++)  {
+        ppt = &mesh->point[k];
+        if ( !MG_VOK(ppt) || ppt->flag ) continue;
+        iadr = met->size*k;
+        mesh->info.hmax = MG_MIN(mesh->info.hmax,met->m[iadr]);
+        mesh->info.hmax = MG_MIN(mesh->info.hmax,met->m[iadr+3]);
+        mesh->info.hmax = MG_MIN(mesh->info.hmax,met->m[iadr+5]);
+      }
+      mesh->info.hmax = 1./sqrt(mesh->info.hmax);
     }
   }
+
 
   if ( !sethmin ) {
     mesh->info.hmin *=.1;
@@ -153,12 +185,114 @@ void _MMG3D_scalarSolTruncature(MMG5_pMesh mesh, MMG5_pSol met) {
   }
 
   /* vertex size */
-  for (k=1; k<=mesh->np; k++) {
-    ppt = &mesh->point[k];
-    if ( !MG_VOK(ppt) ) continue;
-    met->m[k] = MG_MIN(mesh->info.hmax,MG_MAX(mesh->info.hmin,met->m[k]));
+  if ( met->size == 1 ) {
+    for (k=1; k<=mesh->np; k++) {
+      ppt = &mesh->point[k];
+      if ( !MG_VOK(ppt) ) continue;
+      met->m[k] = MG_MIN(mesh->info.hmax,MG_MAX(mesh->info.hmin,met->m[k]));
+    }
   }
+  else if ( met->size == 6 ) {
+    isqhmin = 1./(mesh->info.hmin*mesh->info.hmin);
+    isqhmax = 1./(mesh->info.hmax*mesh->info.hmax);
+
+    for (k=1; k<=mesh->np; k++) {
+      ppt = &mesh->point[k];
+      if ( !MG_VOK(ppt) ) continue;
+      iadr = 6*k;
+      met->m[iadr]   = MG_MAX(isqhmax,MG_MIN(isqhmin,met->m[iadr]));
+      met->m[iadr+3] = met->m[iadr];
+      met->m[iadr+5] = met->m[iadr];
+    }
+  }
+
   return;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure (unused).
+ * \return -1 if fail, the number of detected ridges otherwise
+ *
+ * Create the boundary entities of the mesh (triangles and edges).
+ *
+ * \warning mesh must be packed and hashed
+ */
+int _MMG3D_bdryBuild(MMG5_pMesh mesh) {
+  MMG5_pTetra pt;
+  MMG5_hgeom  *ph;
+  int         k,i,nr;
+
+
+  /* rebuild triangles*/
+  mesh->nt = 0;
+  if ( !_MMG5_chkBdryTria(mesh) ) {
+    fprintf(stderr,"\n  ## Error: %s: unable to rebuild triangles\n",__func__);
+    return(-1);
+  }
+
+  /* build hash table for edges */
+  if ( mesh->htab.geom )
+    _MMG5_DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(MMG5_hgeom));
+
+  mesh->na = nr = 0;
+  /* in the worst case (all edges are marked), we will have around 1 edge per *
+   * triangle (we count edges only one time) */
+  if ( _MMG5_hNew(mesh,&mesh->htab,mesh->nt,3*(mesh->nt)) ) {
+    for (k=1; k<=mesh->ne; k++) {
+      pt   = &mesh->tetra[k];
+      if ( MG_EOK(pt) &&  pt->xt ) {
+        for (i=0; i<6; i++) {
+          if ( mesh->xtetra[pt->xt].edg[i] ||
+               ( mesh->xtetra[pt->xt].tag[i] & MG_REQ ||
+                 MG_EDG(mesh->xtetra[pt->xt].tag[i])) )
+            if ( !_MMG5_hEdge(mesh,&mesh->htab,pt->v[_MMG5_iare[i][0]],pt->v[_MMG5_iare[i][1]],
+                              mesh->xtetra[pt->xt].edg[i],mesh->xtetra[pt->xt].tag[i]))
+              return -1;
+        }
+      }
+    }
+
+    /* edges + ridges + required edges */
+    for (k=0; k<=mesh->htab.max; k++) {
+      ph = &mesh->htab.geom[k];
+      if ( !(ph->a) )  continue;
+      mesh->na++;
+    }
+    if ( mesh->na ) {
+      _MMG5_ADD_MEM(mesh,(mesh->na+1)*sizeof(MMG5_Edge),"edges",
+                    mesh->na = 0;
+                    printf("  ## Warning: uncomplete mesh\n"));
+    }
+
+    if ( mesh->na ) {
+      _MMG5_SAFE_CALLOC(mesh->edge,mesh->na+1,MMG5_Edge,-1);
+
+      mesh->na = 0;
+      for (k=0; k<=mesh->htab.max; k++) {
+        ph = &mesh->htab.geom[k];
+        if ( !ph->a )  continue;
+        mesh->na++;
+        mesh->edge[mesh->na ].a  = ph->a;
+        mesh->edge[mesh->na ].b  = ph->b;
+        mesh->edge[mesh->na].tag = ( ph->tag | MG_REF ) ;
+        mesh->edge[mesh->na].ref = ph->ref;
+
+        if ( MG_GEO & ph->tag ) nr++;
+      }
+    }
+    _MMG5_DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(MMG5_hgeom));
+  }
+  else
+    mesh->memCur -= (long long)((3*mesh->nt+2)*sizeof(MMG5_hgeom));
+
+  if ( mesh->info.imprim ) {
+    if ( mesh->na )
+      fprintf(stdout,"     NUMBER OF EDGES      %8d   RIDGES  %8d\n",mesh->na,nr);
+    if ( mesh->nt )
+      fprintf(stdout,"     NUMBER OF TRIANGLES  %8d\n",mesh->nt);
+  }
+
+  return nr;
 }
 
 /**
@@ -172,25 +306,36 @@ void _MMG3D_scalarSolTruncature(MMG5_pMesh mesh, MMG5_pSol met) {
  * out of library
  *
  */
-/* static inline */
 int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   MMG5_pTetra   pt,ptnew;
   MMG5_pPrism   pp;
   MMG5_pQuad    pq;
   MMG5_pPoint   ppt,pptnew;
-  MMG5_hgeom   *ph;
   int     np,nc,nr, k,ne,nbl,imet,imetnew,i;
   int     iadr,iadrnew,iadrv,*adjav,*adja,*adjanew,voy;
 
   /* compact vertices */
-  np = nc = nr = 0;
+  if ( !mesh->point ) {
+    fprintf(stderr, "\n  ## Error: %s: points array not allocated.\n",
+            __func__);
+    return 0;
+  }
+  if ( !mesh->tetra ) {
+    fprintf(stderr, "\n  ## Error: %s: tetra array not allocated.\n",
+            __func__);
+    return 0;
+  }
+
+  np = nc = 0;
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
     if ( !MG_VOK(ppt) )  continue;
     ppt->tmp = ++np;
 
-    if ( mesh->info.nosurf && (ppt->tag & MG_NOSURF) )
-        ppt->tag &= ~MG_REQ;
+    if ( ppt->tag & MG_NOSURF ) {
+      ppt->tag &= ~MG_NOSURF;
+      ppt->tag &= ~MG_REQ;
+    }
 
     if ( ppt->tag & MG_CRN )  nc++;
 
@@ -209,21 +354,24 @@ int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
     pt->v[2] = mesh->point[pt->v[2]].tmp;
     pt->v[3] = mesh->point[pt->v[3]].tmp;
     ne++;
+
     if ( k!=nbl ) {
       ptnew = &mesh->tetra[nbl];
       memcpy(ptnew,pt,sizeof(MMG5_Tetra));
 
-      iadr = 4*(k-1) + 1;
-      adja = &mesh->adja[iadr];
-      iadrnew = 4*(nbl-1) + 1;
-      adjanew = &mesh->adja[iadrnew];
-      for(i=0 ; i<4 ; i++) {
-        adjanew[i] = adja[i];
-        if(!adja[i]) continue;
-        iadrv = 4*(adja[i]/4-1) +1;
-        adjav = &mesh->adja[iadrv];
-        voy = i;
-        adjav[adja[i]%4] = 4*nbl + voy;
+      if ( mesh->adja ) {
+        iadr = 4*(k-1) + 1;
+        adja = &mesh->adja[iadr];
+        iadrnew = 4*(nbl-1) + 1;
+        adjanew = &mesh->adja[iadrnew];
+        for(i=0 ; i<4 ; i++) {
+          adjanew[i] = adja[i];
+          if(!adja[i]) continue;
+          iadrv = 4*(adja[i]/4-1) +1;
+          adjav = &mesh->adja[iadrv];
+          voy = i;
+          adjav[adja[i]%4] = 4*nbl + voy;
+        }
       }
     }
     nbl++;
@@ -285,9 +433,21 @@ int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   /*compact vertices*/
   np  = 0;
   nbl = 1;
+  mesh->nc1 = 0;
+
+
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
     if ( !MG_VOK(ppt) )  continue;
+
+    if ( ppt->tag & MG_BDY &&
+         !(ppt->tag & MG_CRN || ppt->tag & MG_NOM || MG_EDG(ppt->tag)) ) {
+      assert ( ppt->xp );
+
+      memcpy(ppt->n,mesh->xpoint[ppt->xp].n1,3*sizeof(double));
+      ++mesh->nc1;
+    }
+
     np++;
     if ( k!=nbl ) {
       pptnew = &mesh->point[nbl];
@@ -297,6 +457,7 @@ int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
     }
     nbl++;
   }
+
   mesh->np = np;
   if ( met && met->m )
     met->np  = np;
@@ -305,94 +466,32 @@ int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
 
   /* create prism adjacency */
   if ( !MMG3D_hashPrism(mesh) ) {
-    fprintf(stderr,"  ## Prism hashing problem. Exit program.\n");
+    fprintf(stderr,"\n  ## Error: %s: prism hashing problem. Exit program.\n",
+            __func__);
     return(0);
   }
 
   /* Remove the MG_REQ tags added by the nosurf option */
-  if ( mesh->info.nosurf ) {
-    for (k=1; k<=mesh->ne; k++) {
-      pt   = &mesh->tetra[k];
-      if ( MG_EOK(pt) &&  pt->xt ) {
+  for (k=1; k<=mesh->ne; k++) {
+    pt   = &mesh->tetra[k];
+    if ( MG_EOK(pt) &&  pt->xt ) {
 
-        for (i=0; i<6; i++) {
-          if ( mesh->xtetra[pt->xt].tag[i] & MG_NOSURF ) {
-            mesh->xtetra[pt->xt].tag[i] &= ~MG_REQ;
-            mesh->xtetra[pt->xt].tag[i] &= ~MG_NOSURF;
-          }
+      for (i=0; i<6; i++) {
+        if ( mesh->xtetra[pt->xt].tag[i] & MG_NOSURF ) {
+          mesh->xtetra[pt->xt].tag[i] &= ~MG_REQ;
+          mesh->xtetra[pt->xt].tag[i] &= ~MG_NOSURF;
         }
       }
     }
   }
 
-  /* rebuild triangles*/
-  mesh->nt = 0;
-  if ( !_MMG5_chkBdryTria(mesh) ) {
-    fprintf(stderr," ## Error: unable to rebuild triangles\n");
-    return(0);
+  if ( mesh->info.imprim ) {
+    fprintf(stdout,"     NUMBER OF VERTICES   %8d   CORNERS %8d\n",mesh->np,nc);
+    fprintf(stdout,"     NUMBER OF TETRAHEDRA %8d\n",mesh->ne);
   }
 
-  /* build hash table for edges */
-  if ( mesh->htab.geom )
-    _MMG5_DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(MMG5_hgeom));
-
-  mesh->na = 0;
-  /* in the worst case (all edges are marked), we will have around 1 edge per *
-   * triangle (we count edges only one time) */
-  mesh->memCur += (long long)((3*mesh->nt+2)*sizeof(MMG5_hgeom));
-  if ( (mesh->memCur) > (mesh->memMax) ) {
-    mesh->memCur -= (long long)((3*mesh->nt+2)*sizeof(MMG5_hgeom));
-    fprintf(stdout,"  ## Warning:");
-    fprintf(stdout," unable to allocate an hash table to store the mesh edges."
-      "\n  ## Warning: uncomplete mesh\n");
-  }
-  else if ( _MMG5_hNew(&mesh->htab,mesh->nt,3*(mesh->nt),0) ) {
-    for (k=1; k<=mesh->ne; k++) {
-      pt   = &mesh->tetra[k];
-      if ( MG_EOK(pt) &&  pt->xt ) {
-        for (i=0; i<6; i++) {
-          if ( mesh->xtetra[pt->xt].edg[i] ||
-               ( mesh->xtetra[pt->xt].tag[i] & MG_REQ ||
-                 MG_EDG(mesh->xtetra[pt->xt].tag[i])) )
-            _MMG5_hEdge(mesh,pt->v[_MMG5_iare[i][0]],pt->v[_MMG5_iare[i][1]],
-                        mesh->xtetra[pt->xt].edg[i],mesh->xtetra[pt->xt].tag[i]);
-        }
-      }
-    }
-
-    /* edges + ridges + required edges */
-    for (k=0; k<=mesh->htab.max; k++) {
-      ph = &mesh->htab.geom[k];
-      if ( !(ph->a) )  continue;
-      mesh->na++;
-    }
-    if ( mesh->na ) {
-      _MMG5_ADD_MEM(mesh,(mesh->na+1)*sizeof(MMG5_Edge),"edges",
-                    mesh->na = 0;
-                    printf("  ## Warning: uncomplete mesh\n")
-        );
-    }
-
-    if ( mesh->na ) {
-      _MMG5_SAFE_CALLOC(mesh->edge,mesh->na+1,MMG5_Edge);
-
-      mesh->na = 0;
-      for (k=0; k<=mesh->htab.max; k++) {
-        ph = &mesh->htab.geom[k];
-        if ( !ph->a )  continue;
-        mesh->na++;
-        mesh->edge[mesh->na ].a  = mesh->point[ph->a].tmp;
-        mesh->edge[mesh->na ].b  = mesh->point[ph->b].tmp;
-        mesh->edge[mesh->na].tag = ( ph->tag | MG_REF ) ;
-        mesh->edge[mesh->na].ref = ph->ref;
-
-        if ( MG_GEO & ph->tag ) nr++;
-      }
-    }
-    _MMG5_DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(MMG5_hgeom));
-  }
-  else
-    mesh->memCur -= (long long)((3*mesh->nt+2)*sizeof(MMG5_hgeom));
+  nr = _MMG3D_bdryBuild(mesh);
+  if ( nr < 0 ) return 0;
 
   for(k=1 ; k<=mesh->np ; k++)
     mesh->point[k].tmp = 0;
@@ -407,18 +506,10 @@ int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
 
   /* to could save the mesh, the adjacency have to be correct */
   if ( mesh->info.ddebug && (!_MMG5_chkmsh(mesh,1,1) ) ) {
-    fprintf(stderr,"  ##  Problem. Invalid mesh.\n");
+    fprintf(stderr,"\n  ##  Warning: %s: invalid mesh.\n",__func__);
     return(0);
   }
 
-  if ( mesh->info.imprim ) {
-    fprintf(stdout,"     NUMBER OF VERTICES   %8d   CORNERS %8d\n",mesh->np,nc);
-    if ( mesh->na )
-      fprintf(stdout,"     NUMBER OF EDGES      %8d   RIDGES  %8d\n",mesh->na,nr);
-    if ( mesh->nt )
-      fprintf(stdout,"     NUMBER OF TRIANGLES  %8d\n",mesh->nt);
-    fprintf(stdout,"     NUMBER OF ELEMENTS   %8d\n",mesh->ne);
-  }
   return(1);
 }
 
@@ -427,7 +518,7 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
   char      stim[32];
 
   if ( mesh->info.imprim ) {
-    fprintf(stdout,"  -- MMG3d, Release %s (%s) \n",MG_VER,MG_REL);
+    fprintf(stdout,"\n  -- MMG3d, Release %s (%s) \n",MG_VER,MG_REL);
     fprintf(stdout,"     %s\n",MG_CPY);
     fprintf(stdout,"     %s %s\n",__DATE__,__TIME__);
   }
@@ -450,19 +541,55 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
 
   /* Check options */
   if ( mesh->info.lag > -1 ) {
-    fprintf(stderr,"  ## Error: lagrangian mode unavailable (MMG3D_IPARAM_lag):\n"
-            "            You must call the MMG3D_mmg3dmov function to move a rigidbody.\n");
+    fprintf(stderr,"\n  ## ERROR: LAGRANGIAN MODE UNAVAILABLE (MMG3D_IPARAM_lag):\n"
+            "            YOU MUST CALL THE MMG3D_MMG3DMOV FUNCTION TO MOVE A RIGIDBODY.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
   else if ( mesh->info.iso ) {
-    fprintf(stderr,"  ## Error: level-set discretisation unavailable"
+    fprintf(stderr,"\n  ## ERROR: LEVEL-SET DISCRETISATION UNAVAILABLE"
             " (MMG3D_IPARAM_iso):\n"
-            "          You must call the MMG3D_mmg3dmov function to use this option.\n");
+            "          YOU MUST CALL THE MMG3D_MMG3DMOV FUNCTION TO USE THIS OPTION.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
   else if ( mesh->info.optimLES && met->size==6 ) {
-    fprintf(stdout,"  ## Error: strong mesh optimization for LES methods"
-            " unavailable (MMG3D_IPARAM_optimLES) with an anisotropic metric.\n");
+    fprintf(stdout,"\n  ## ERROR: STRONG MESH OPTIMIZATION FOR LES METHODS"
+            " UNAVAILABLE (MMG3D_IPARAM_optimLES) WITH AN ANISOTROPIC METRIC.\n");
+    _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+  }
+
+  if ( mesh->info.imprim ) fprintf(stdout,"\n  -- MMG3DLIB: INPUT DATA\n");
+
+  chrono(ON,&(ctim[1]));
+
+  /* check input */
+  if ( met->np && (met->np != mesh->np) ) {
+    fprintf(stdout,"\n  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
+    _MMG5_DEL_MEM(mesh,met->m,(met->size*(met->npmax+1))*sizeof(double));
+    met->np = 0;
+  }
+  else if ( met->size!=1 && met->size!=6 ) {
+    fprintf(stderr,"\n  ## ERROR: WRONG DATA TYPE.\n");
+    _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+  }
+
+  /* specific meshing */
+  if ( met->np ) {
+    if ( mesh->info.optim ) {
+      printf("\n  ## ERROR: MISMATCH OPTIONS: OPTIM OPTION CAN NOT BE USED"
+             " WITH AN INPUT METRIC.\n");
+      _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+    }
+
+    if ( mesh->info.hsiz>0. ) {
+      printf("\n  ## ERROR: MISMATCH OPTIONS: HSIZ OPTION CAN NOT BE USED"
+             " WITH AN INPUT METRIC.\n");
+      _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+    }
+  }
+
+  if ( mesh->info.optim &&  mesh->info.hsiz>0. ) {
+    printf("\n  ## ERROR: MISMATCH OPTIONS: HSIZ AND OPTIM OPTIONS CAN NOT BE USED"
+           " TOGETHER.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
 
@@ -470,22 +597,7 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
   _MMG5_warnScotch(mesh);
 #endif
 
-  if ( mesh->info.imprim ) fprintf(stdout,"\n  -- MMG3DLIB: INPUT DATA\n");
-  /* load data */
-  chrono(ON,&(ctim[1]));
   _MMG5_warnOrientation(mesh);
-
-
-
-  if ( met->np && (met->np != mesh->np) ) {
-    fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
-    _MMG5_DEL_MEM(mesh,met->m,(met->size*(met->npmax+1))*sizeof(double));
-    met->np = 0;
-  }
-  else if ( met->size!=1 && met->size!=6 ) {
-    fprintf(stderr,"  ## ERROR: WRONG DATA TYPE.\n");
-    _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
-  }
 
   chrono(OFF,&(ctim[1]));
   printim(ctim[1].gdif,stim);
@@ -494,8 +606,6 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
 
   /* analysis */
   chrono(ON,&(ctim[2]));
-  MMG3D_setfunc(mesh,met);
-
   if ( mesh->info.imprim ) {
     fprintf(stdout,"\n  %s\n   MODULE MMG3D: IMB-LJLL : %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
     fprintf(stdout,"\n  -- PHASE 1 : ANALYSIS\n");
@@ -504,22 +614,31 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
   /* scaling mesh */
   if ( !_MMG5_scaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
 
-  if ( !_MMG3D_meshQua(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
+  /* specific meshing */
+  if ( mesh->info.optim ) {
+    if ( !MMG3D_doSol(mesh,met) ) {
+      if ( !_MMG5_unscaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+      _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
+    }
+    _MMG3D_solTruncatureForOptim(mesh,met);
+  }
+
+  if ( mesh->info.hsiz > 0. ) {
+    if ( !MMG3D_Set_constantSize(mesh,met) ) {
+     if ( !_MMG5_unscaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+    }
+  }
+
+  MMG3D_setfunc(mesh,met);
+
+  if ( !_MMG3D_tetraQual(mesh,met,0) ) _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
 
   if ( abs(mesh->info.imprim) > 0 ) {
     if ( !_MMG3D_inqua(mesh,met) ) {
       if ( !_MMG5_unscaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
       _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
     }
-  }
-
-  /* specific meshing */
-  if ( mesh->info.optim && !met->np ) {
-    if ( !MMG3D_doSol(mesh,met) ) {
-      if ( !_MMG5_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
-      _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
-    }
-    _MMG3D_scalarSolTruncature(mesh,met);
   }
 
   /* mesh analysis */
@@ -552,7 +671,7 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
 #ifdef PATTERN
   if ( !_MMG5_mmg3d1_pattern(mesh,met) ) {
     if ( !(mesh->adja) && !MMG3D_hashTetra(mesh,1) ) {
-      fprintf(stderr,"  ## Hashing problem. Invalid mesh.\n");
+      fprintf(stderr,"\n  ## Hashing problem. Invalid mesh.\n");
       _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
     }
     if ( !_MMG5_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
@@ -561,7 +680,7 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
 #else
   if ( !_MMG5_mmg3d1_delone(mesh,met) ) {
     if ( (!mesh->adja) && !MMG3D_hashTetra(mesh,1) ) {
-      fprintf(stderr,"  ## Hashing problem. Invalid mesh.\n");
+      fprintf(stderr,"\n  ## Hashing problem. Invalid mesh.\n");
       _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
     }
     if ( !_MMG5_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
@@ -622,14 +741,24 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol met) {
 
   /* Check options */
   if ( mesh->info.lag > -1 ) {
-    fprintf(stderr,"  ## Error: lagrangian mode unavailable (MMG3D_IPARAM_lag):\n"
-            "            You must call the MMG3D_mmg3dmov function to move a rigidbody.\n");
+    fprintf(stderr,"\n  ## ERROR: LAGRANGIAN MODE UNAVAILABLE (MMG3D_IPARAM_lag):\n"
+            "            YOU MUST CALL THE MMG3D_MMG3DMOV FUNCTION TO MOVE A RIGIDBODY.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
   else if ( mesh->info.optimLES ) {
-    fprintf(stdout,"  ## Error: strong mesh optimization for LES methods"
-            " unavailable (MMG3D_IPARAM_optimLES) in isosurface"
-            " discretization mode.\n");
+    fprintf(stdout,"\n  ## ERROR: STRONG MESH OPTIMIZATION FOR LES METHODS"
+            " UNAVAILABLE (MMG3D_IPARAM_optimLES) IN ISOSURFACE"
+            " DISCRETIZATION MODE.\n");
+    _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+  }
+  if ( mesh->info.optim ) {
+    printf("\n  ## ERROR: OPTIM OPTION UNAVAILABLE IN ISOSURFACE"
+           " DISCRETIZATION MODE\n");
+    _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+  }
+  if ( mesh->info.hsiz>0. ) {
+    printf("\n  ## ERROR: HSIZ OPTION UNAVAILABLE IN ISOSURFACE"
+           " DISCRETIZATION MODE.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
 
@@ -643,12 +772,12 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol met) {
   _MMG5_warnOrientation(mesh);
 
   if ( met->np && (met->np != mesh->np) ) {
-    fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
+    fprintf(stdout,"\n  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
     _MMG5_DEL_MEM(mesh,met->m,(met->size*(met->npmax+1))*sizeof(double));
     met->np = 0;
   }
   else if ( met->size!=1 ) {
-    fprintf(stderr,"  ## ERROR: WRONG DATA TYPE.\n");
+    fprintf(stderr,"\n  ## ERROR: WRONG DATA TYPE.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
 
@@ -657,19 +786,19 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( mesh->info.imprim )
     fprintf(stdout,"  --  INPUT DATA COMPLETED.     %s\n",stim);
 
-  /* analysis */
   chrono(ON,&(ctim[2]));
-  MMG3D_setfunc(mesh,met);
 
   if ( mesh->info.imprim ) {
     fprintf(stdout,"\n  %s\n   MODULE MMG3D: IMB-LJLL : %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
-    fprintf(stdout,"\n  -- PHASE 1 : ANALYSIS\n");
+    fprintf(stdout,"\n  -- PHASE 1 : ISOSURFACE DISCRETIZATION\n");
   }
 
- /* scaling mesh */
+  /* scaling mesh */
   if ( !_MMG5_scaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
 
-  if ( !_MMG3D_meshQua(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
+  MMG3D_setfunc(mesh,met);
+
+  if ( !_MMG3D_tetraQual(mesh,met,0) ) _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
 
   if ( abs(mesh->info.imprim) > 0 ) {
     if ( !_MMG3D_inqua(mesh,met) ) {
@@ -685,22 +814,31 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol met) {
   }
   if ( !_MMG3D_mmg3d2(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
 
+  chrono(OFF,&(ctim[2]));
+  printim(ctim[2].gdif,stim);
+  if ( mesh->info.imprim )
+    fprintf(stdout,"  -- PHASE 1 COMPLETED.     %s\n",stim);
+
+  chrono(ON,&(ctim[3]));
+  if ( mesh->info.imprim ) {
+    fprintf(stdout,"\n  -- PHASE 2 : ANALYSIS\n");
+  }
+
   /* mesh analysis */
   if ( !_MMG3D_analys(mesh) ) {
     if ( !_MMG5_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
     _MMG5_RETURN_AND_PACK(mesh,met,NULL,MMG5_LOWFAILURE);
   }
 
-
-  chrono(OFF,&(ctim[2]));
-  printim(ctim[2].gdif,stim);
+  chrono(OFF,&(ctim[3]));
+  printim(ctim[3].gdif,stim);
   if ( mesh->info.imprim )
-    fprintf(stdout,"  -- PHASE 1 COMPLETED.     %s\n",stim);
+    fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
 
   /* mesh adaptation */
-  chrono(ON,&(ctim[3]));
+  chrono(ON,&(ctim[4]));
   if ( mesh->info.imprim ) {
-    fprintf(stdout,"\n  -- PHASE 2 : ISOTROPIC MESHING\n");
+    fprintf(stdout,"\n  -- PHASE 3 : MESH IMPROVEMENT\n");
   }
 
   /* renumerotation if available */
@@ -713,7 +851,7 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol met) {
 #ifdef PATTERN
   if ( !_MMG5_mmg3d1_pattern(mesh,met) ) {
     if ( !(mesh->adja) && !MMG3D_hashTetra(mesh,1) ) {
-      fprintf(stderr,"  ## Hashing problem. Invalid mesh.\n");
+      fprintf(stderr,"\n  ## Hashing problem. Invalid mesh.\n");
       _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
     }
     if ( !_MMG5_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
@@ -722,7 +860,7 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol met) {
 #else
   if ( !_MMG5_mmg3d1_pattern(mesh,met) ) {
     if ( !(mesh->adja) && !MMG3D_hashTetra(mesh,1) ) {
-      fprintf(stderr,"  ## Hashing problem. Invalid mesh.\n");
+      fprintf(stderr,"\n  ## Hashing problem. Invalid mesh.\n");
       _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
     }
     if ( !_MMG5_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
@@ -730,10 +868,10 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 #endif
 
-  chrono(OFF,&(ctim[3]));
-  printim(ctim[3].gdif,stim);
+  chrono(OFF,&(ctim[4]));
+  printim(ctim[4].gdif,stim);
   if ( mesh->info.imprim ) {
-    fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
+    fprintf(stdout,"  -- PHASE 3 COMPLETED.     %s\n",stim);
     fprintf(stdout,"\n  %s\n   END OF MODULE MMG3d: IMB-LJLL \n  %s\n",MG_STR,MG_STR);
   }
 
@@ -781,14 +919,22 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
 
   /* Check options */
   if ( mesh->info.iso ) {
-    fprintf(stderr,"  ## Error: level-set discretisation unavailable"
+    fprintf(stderr,"\n  ## ERROR: LEVEL-SET DISCRETISATION UNAVAILABLE"
             " (MMG3D_IPARAM_iso):\n"
-            "          You must call the MMG3D_mmg3dmov function to use this option.\n");
+            "          YOU MUST CALL THE MMG3D_mmg3dmov FUNCTION TO USE THIS OPTION.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
   else if ( mesh->info.optimLES ) {
-    fprintf(stdout,"  ## Error: strong mesh optimization for LES methods"
-            " unavailable (MMG3D_IPARAM_optimLES) in lagrangian mode.\n");
+    fprintf(stdout,"\n  ## ERROR: STRONG MESH OPTIMIZATION FOR LES METHODS"
+            " UNAVAILABLE (MMG3D_IPARAM_optimLES) IN LAGRANGIAN MODE.\n");
+    _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+  }
+  if ( mesh->info.optim ) {
+    printf("\n  ## ERROR: OPTIM OPTION UNAVAILABLE IN LAGRANGIAN MODE\n");
+    _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+  }
+  if ( mesh->info.hsiz>0. ) {
+    printf("\n  ## ERROR: HSIZ OPTION UNAVAILABLE IN LAGRANGIAN MODE\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
 
@@ -803,7 +949,7 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
 
   if ( mesh->info.lag == -1 ) {
     if ( mesh->info.imprim )
-      fprintf(stdout,"  ## Warning: displacement mode for the rigidbody"
+      fprintf(stdout,"\n  ## Warning: displacement mode for the rigidbody"
               " movement is not set.\n"
               "               Lagrangian displacement computed according"
               " to mode 1.\n");
@@ -811,25 +957,25 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
   }
 
 #ifndef USE_ELAS
-  fprintf(stderr,"  ## Error: you need to compile with the USE_ELAS"
-    " CMake's flag set to ON to use the rigidbody movement library.\n");
+  fprintf(stderr,"\n  ## ERROR: YOU NEED TO COMPILE WITH THE USE_ELAS"
+    " CMake's FLAG SET TO ON TO USE THE RIGIDBODY MOVEMENT LIBRARY.\n");
   _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
 #endif
 
   if ( !disp ) {
-    fprintf(stderr,"  ## Error: in lagrangian mode, a structure of type"
-            " \"MMG5_pSol\" is needed to store the displacement field.\n"
-            "            This structure must be different from the one used"
-            " to store the metric.\n");
+    fprintf(stderr,"\n  ## ERROR: IN LAGRANGIAN MODE, A STRUCTURE OF TYPE"
+            " \"MMG5_pSoL\" IS NEEDED TO STORE THE DISPLACEMENT FIELD.\n"
+            "            THIS STRUCTURE MUST BE DIFFERENT FROM THE ONE USED"
+            " TO STORE THE METRIC.\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
   if (disp->np && (disp->np != mesh->np) ) {
-    fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
+    fprintf(stdout,"\n  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
     _MMG5_DEL_MEM(mesh,disp->m,(disp->size*(disp->npmax+1))*sizeof(double));
     disp->np = 0;
   }
   else if (disp->size!=3) {
-    fprintf(stderr,"  ## ERROR: LAGRANGIAN MOTION OPTION NEED A VECTORIAL DISPLACEMENT\n");
+    fprintf(stderr,"\n  ## ERROR: LAGRANGIAN MOTION OPTION NEED A VECTORIAL DISPLACEMENT\n");
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
 
@@ -840,24 +986,24 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
 
   /* analysis */
   chrono(ON,&(ctim[2]));
-  MMG3D_setfunc(mesh,met);
-
-  if ( !_MMG3D_meshQua(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
-
-  if ( abs(mesh->info.imprim) > 0 ) {
-    if ( !_MMG3D_inqua(mesh,met) ) {
-      _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
-    }
-  }
 
   if ( mesh->info.imprim ) {
     fprintf(stdout,"\n  %s\n   MODULE MMG3D: IMB-LJLL : %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
     fprintf(stdout,"\n  -- PHASE 1 : ANALYSIS\n");
   }
 
- /* scaling mesh */
+  /* scaling mesh */
   if ( !_MMG5_scaleMesh(mesh,disp) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
 
+  MMG3D_setfunc(mesh,met);
+
+  if ( !_MMG3D_tetraQual(mesh,met,0) ) _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
+
+  if ( abs(mesh->info.imprim) > 0 ) {
+    if ( !_MMG3D_inqua(mesh,met) ) {
+      _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
+    }
+  }
 
   /* mesh analysis */
   if ( !_MMG3D_analys(mesh) ) {
@@ -894,14 +1040,12 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
 #endif
   disp->npi = disp->np;
 
-  if ( !met->np ) {
+  if ( mesh->info.optim ) {
     if ( !MMG3D_doSol(mesh,met) ) {
-      if ( !_MMG5_unscaleMesh(mesh,disp) ) {
-        _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
-      }
+      if ( !_MMG5_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
       _MMG5_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE);
     }
-    _MMG3D_scalarSolTruncature(mesh,met);
+    _MMG3D_solTruncatureForOptim(mesh,met);
   }
 
 /* ******************* Add mesh improvement ? *************************** */
@@ -944,14 +1088,4 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
     fprintf(stdout,"\n   MMG3DMOV: ELAPSED TIME  %s\n",stim);
   disp->npi = disp->np;
   _LIBMMG5_RETURN(mesh,met,MMG5_SUCCESS);
-}
-
-/** Old API °°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°*/
-
-int MMG5_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met)
-{
-  printf("  ## MMG5_mmg3dlib: "
-         "MMG5_ API is deprecated (replaced by the MMG3D_ one) and will"
-        " be removed soon\n." );
-  return(MMG3D_mmg3dlib(mesh,met));
 }

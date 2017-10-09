@@ -35,6 +35,26 @@
 
 #include "inlined_functions_3d.h"
 
+int _MMG3D_chk4ridVertices(MMG5_pMesh mesh, MMG5_pTetra pt) {
+  MMG5_pPoint  ppt;
+  int          i;
+  int          n;
+
+  n = 0;
+  for(i=0 ; i<4 ; i++) {
+    ppt = &mesh->point[pt->v[i]];
+    if(!(MG_SIN(ppt->tag) || MG_NOM & ppt->tag) && (ppt->tag & MG_GEO)) continue;
+    n++;
+  }
+
+  if(!n) {
+    //fprintf(stderr,"\n  ## Warning: 4 ridges points... Unable to compute metric.\n");
+    return(0);
+  }
+
+  return 1;
+}
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.
@@ -48,9 +68,10 @@
  */
 inline int _MMG5_moymet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,double *m1) {
   MMG5_pPoint  ppt;
-  double  mm[6],*mp;
-  double  dd;
-  int     i,k,n;
+  double       mm[6],*mp;
+  double       dd;
+  int          i,k,n;
+  static char  mmgWarn=0;
 
   n = 0;
   for (k=0; k<6; ++k) mm[k] = 0.;
@@ -65,7 +86,11 @@ inline int _MMG5_moymet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,double *m1)
   }
 
   if(!n) {
-    // fprintf(stderr,"  ## Warning: 4 ridges points... Unable to compute metric.\n");
+    if ( !mmgWarn ) {
+      mmgWarn=1;
+      fprintf(stderr,"\n  ## Warning: %s: at least 1 tetra with 4 ridges vertices"
+              "... Unable to compute metric.\n",__func__);
+    }
     return(0);
   }
   dd = 1./n;
@@ -98,6 +123,7 @@ static int _MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
   int                lists[MMG3D_LMAX+2],listv[MMG3D_LMAX+2],ilist,ilists,ilistv;
   int                k,iel,idp,ifac,isloc,init_s;
   unsigned char      i,i0,i1,i2;
+  static char        mmgWarn = 0;
 
   pt  = &mesh->tetra[kel];
   idp = pt->v[ip];
@@ -128,9 +154,12 @@ static int _MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
                               listv,&ilistv,lists,&ilists,(p0->tag & MG_NOM));
 
   if ( ilist!=1 ) {
-    fprintf(stderr,"Error; unable to compute the ball af the point %d.\n", idp);
-    fprintf(stderr,"Exit program.\n");
-    exit(EXIT_FAILURE);
+    if ( !mmgWarn ) {
+      fprintf(stderr,"\n  ## Warning: %s: at least 1 metric not computed:"
+              " unable to compute the ball of point\n",__func__);
+      mmgWarn = 1;
+    }
+    return 0;
   }
 
 
@@ -198,7 +227,7 @@ static int _MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
      * p1=mesh->point[pt->v[i1]]: p0 is singular */
     _MMG5_norpts(mesh,pt->v[i0],pt->v[i1],pt->v[i2],n);
 
-    _MMG5_bezierEdge(mesh,idp,pt->v[i1],b0,b1,
+    _MMG5_BezierEdge(mesh,idp,pt->v[i1],b0,b1,
                      MG_EDG(pxt->tag[_MMG5_iarf[ifac][i]]),n);
 
     /* tangent vector */
@@ -310,6 +339,7 @@ static int _MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int kel,
   double         r[3][3],lispoi[3*MMG3D_LMAX+1];
   double         detg,detd;
   int            i,i0,i1,i2,ifac,isloc;
+  static char    mmgWarn = 0;
 
   pt  = &mesh->tetra[kel];
   idp = pt->v[ip];
@@ -371,9 +401,11 @@ static int _MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int kel,
   ier = _MMG5_bouletrid(mesh,kel,iface,ip,&ilist1,list1,&ilist2,list2,
                         &iprid[0],&iprid[1] );
   if ( !ier ) {
-    fprintf(stderr,"%s:%d:Error: unable to compute the two balls at the ridge"
-           " point %d.\n",__FILE__,__LINE__, idp);
-    return(0);
+    if ( !mmgWarn ) {
+      fprintf(stderr,"\n  ## Warning: %s: at least 1 metric not computed:"
+              " unable to compute the ball of point\n",__func__);
+      mmgWarn = 1;
+    }
   }
 
   /* Specific size in direction of t */
@@ -465,8 +497,6 @@ static int _MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int kel,
       if ( pt->v[_MMG5_idir[ifac][i0]]==idp ) break;
     }
     assert(i0!=3);
-    i1  = _MMG5_inxt2[i0];
-    i2  = _MMG5_iprv2[i0];
 
     _MMG5_tet2tri(mesh,iel,ifac,&ptt);
     assert(pt->xt);
@@ -522,6 +552,7 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
   double        ux,uy,uz,det2d,c[3];
   double        tAA[6],tAb[3], hausd;
   unsigned char i1,i2,itri1,itri2,i;
+  static char   mmgWarn0=0,mmgWarn1=0;
 
   ipref[0] = ipref[1] = 0;
   pt  = &mesh->tetra[kel];
@@ -550,10 +581,12 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
   ilist = _MMG5_boulesurfvolp(mesh,kel,ip,iface,listv,&ilistv,lists,&ilists,0);
 
   if ( ilist!=1 ) {
-    fprintf(stderr,"%s:%d:Error: unable to compute the ball af the point %d.\n",
-           __FILE__,__LINE__, idp);
-    fprintf(stderr,"Exit program.\n");
-    exit(EXIT_FAILURE);
+    if ( !mmgWarn0 ) {
+      fprintf(stderr,"\n  ## Warning: %s: at least 1 metric not computed:"
+              " unable to compute the ball of point\n",__func__);
+      mmgWarn0 = 1;
+    }
+    return(0);
   }
 
   /* travel across the ball of ip to find the minimal local params imposed on
@@ -635,9 +668,12 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
         ipref[1] = pt->v[i2];
       }
       else if ( (pt->v[i2] != ipref[0]) && (pt->v[i2] != ipref[1]) ) {
-        fprintf(stderr,"%s:%d:Error: three adjacent ref at a non singular point.\n",
-               __FILE__,__LINE__);
-        exit(EXIT_FAILURE);
+        if ( !mmgWarn1 ) {
+          fprintf(stderr,"\n  ## Warning: %s: at least 1 metric not computed:"
+                  " non singular point at intersection of 3 ref edges.\n",__func__);
+          mmgWarn1 = 1;
+        }
+        return(0);
       }
     }
 
@@ -649,9 +685,12 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
         ipref[1] = pt->v[i1];
       }
       else if ( (pt->v[i1] != ipref[0]) && (pt->v[i1] != ipref[1]) ) {
-        fprintf(stderr,"%s:%d:Error: three adjacent ref at a non singular point.\n",
-               __FILE__,__LINE__);
-        exit(EXIT_FAILURE);
+        if ( !mmgWarn1 ) {
+          fprintf(stderr,"\n  ## Warning: %s: at least 1 metric not computed:"
+                  " non singular point at intersection of 3 ref edges.\n",__func__);
+          mmgWarn1 = 1;
+        }
+        return(0);
       }
     }
 
@@ -674,14 +713,12 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
     det2d = lispoi[3*k+1]*lispoi[3*(k+1)+2] - lispoi[3*k+2]*lispoi[3*(k+1)+1];
     assert(det2d);
     if ( det2d <= 0.0 ) {
-      //fprintf(stderr,"PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
       return(0);
     }
   }
   det2d = lispoi[3*(ilists-1)+1]*lispoi[3*0+2] - lispoi[3*(ilists-1)+2]*lispoi[3*0+1];
   assert(det2d);
   if ( det2d <= 0.0 ) {
-    //fprintf(stderr,"PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
     return(0);
   }
   assert(ipref[0] && ipref[1]);
@@ -792,6 +829,7 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int kel,int iface, int 
   double         det2d,c[3],isqhmin,isqhmax;
   double         tAA[6],tAb[3],hausd;
   unsigned char  i1,i;
+  static char    mmgWarn = 0;
 
   pt  = &mesh->tetra[kel];
   idp = pt->v[ip];
@@ -817,10 +855,13 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int kel,int iface, int 
   ilist = _MMG5_boulesurfvolp(mesh,kel,ip,iface,listv,&ilistv,lists,&ilists,0);
 
   if ( ilist!=1 ) {
-    fprintf(stderr,"%s:%d:Error: unable to compute the ball af the point %d.\n",
-           __FILE__,__LINE__, idp);
-    fprintf(stderr,"Exit program.\n");
-    exit(EXIT_FAILURE);
+    if ( !mmgWarn ) {
+      fprintf(stderr,"\n  ## Warning: %s: at least 1 metric not computed:"
+              " unable to compute the ball of point.\n",
+              __func__);
+      mmgWarn = 1;
+    }
+    return(0);
   }
 
   /* travel across the ball of ip to find the minimal local params imposed on
@@ -909,14 +950,12 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int kel,int iface, int 
     det2d = lispoi[3*k+1]*lispoi[3*(k+1)+2] - lispoi[3*k+2]*lispoi[3*(k+1)+1];
     assert(det2d);
     if ( det2d <= 0.0 ) {
-      //fprintf(stderr,"PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
       return(0);
     }
   }
   det2d = lispoi[3*(ilists-1)+1]*lispoi[3*0+2] - lispoi[3*(ilists-1)+2]*lispoi[3*0+1];
   assert(det2d);
   if ( det2d <= 0.0 ) {
-    //fprintf(stderr,"PROBLEM : BAD PROJECTION OVER TANGENT PLANE %f \n", det2d);
     return(0);
   }
 
@@ -1015,6 +1054,7 @@ int _MMG5_defmetvol(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pPar     par;
   double        v[3][3],lambda[3],isqhmax,isqhmin,*m;
   int           list[MMG3D_LMAX+2],ilist,k,l,i,j,isloc,ip;
+  static char   mmgWarn = 0;
 
   isqhmin = 1./(mesh->info.hmin*mesh->info.hmin);
   isqhmax = 1./(mesh->info.hmax*mesh->info.hmax);
@@ -1025,13 +1065,8 @@ int _MMG5_defmetvol(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
   if ( !met->m ) {
-    met->np    = mesh->np;
-    met->npmax = mesh->npmax;
-    met->size  = 6;
-    met->dim   = 3;
-    _MMG5_ADD_MEM(mesh,(6*(met->npmax+1))*sizeof(double),"solution",return(0));
-    _MMG5_SAFE_MALLOC(met->m,(6*(mesh->npmax+1)),double);
-
+    if ( !MMG3D_Set_solSize(mesh,met,MMG5_Vertex,mesh->np,3) )
+      return 0;
 
     for (k=1; k<=mesh->ne; k++) {
       pt = &mesh->tetra[k];
@@ -1188,13 +1223,23 @@ int _MMG5_defmetvol(MMG5_pMesh mesh,MMG5_pSol met) {
 
       /** Second step: set metric */
       m = &met->m[met->size*ip];
-      _MMG5_eigenv(1,m,lambda,v);
+      if ( !_MMG5_eigenv(1,m,lambda,v) ) {
+        if ( !mmgWarn ) {
+          fprintf(stderr,"\n  ## Warning: %s: Unable to diagonalize at least"
+                  " 1 metric.\n",__func__);
+          mmgWarn = 1;
+        }
+        return 0;
+      }
 
       for (i=0; i<3; i++) {
         if(lambda[i]<=0) {
-          fprintf(stderr,"%s:%d:Error: wrong metric at point %d -- eigenvalues :"
-                  " %e %e %e\n",__FILE__,__LINE__,
-                  ip,lambda[0],lambda[1],lambda[2]);
+          if ( !mmgWarn ) {
+            fprintf(stderr,"\n  ## Warning: %s: at least 1 wrong metric "
+                    "(eigenvalues : %e %e %e).\n",__func__,lambda[0],
+                    lambda[1],lambda[2]);
+            mmgWarn = 1;
+          }
           return(0);
         }
         lambda[i]=MG_MIN(isqhmin,lambda[i]);
@@ -1290,6 +1335,7 @@ int _MMG3D_nosurfsiz_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel, int iploc,
   double        *m,isqhmin,isqhmax,ux,uy,uz,lm,lambda[3],v[3][3];
   int           lists[MMG3D_LMAX+2],listv[MMG3D_LMAX+2],ilists,ilistv;
   int           i,iadr,i0,ip0,ip1,i1,ia,j;
+  static char   mmgWarn=0;
 
   pt    = &mesh->tetra[iel];
   ip0   = pt->v[iploc];
@@ -1325,13 +1371,23 @@ int _MMG3D_nosurfsiz_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel, int iploc,
 
     /* Step 2: size truncature */
     m = &met->m[iadr];
-    _MMG5_eigenv(1,m,lambda,v);
+    if ( !_MMG5_eigenv(1,m,lambda,v) ) {
+      if ( !mmgWarn ) {
+        fprintf(stderr,"\n  ## Warning: %s: Unable to diagonalize at least"
+                " 1 metric.\n",__func__);
+        mmgWarn = 1;
+      }
+      return 0;
+    }
 
     for (i=0; i<3; i++) {
-      if(lambda[i]<=0) {
-        fprintf(stderr,"%s:%d:Error: wrong metric at point %d -- eigenvalues :"
-                " %e %e %e\n",__FILE__,__LINE__,
-                ip0,lambda[0],lambda[1],lambda[2]);
+      if( lambda[i]<=0) {
+        if ( !mmgWarn ) {
+          fprintf(stderr,"\n  ## Warning: %s: at least 1 wrong metric "
+                  "(eigenvalues : %e %e %e).\n",__func__,lambda[0],
+                  lambda[1],lambda[2]);
+          mmgWarn = 1;
+        }
         return(0);
       }
       lambda[i]=MG_MIN(isqhmin,lambda[i]);
@@ -1433,13 +1489,17 @@ int _MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   double        mm[6];
   int           k,l,iploc;
   char          i,ismet;
+  static char   mmgErr = 0;
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
     fprintf(stdout,"  ** Defining anisotropic map\n");
 
   if ( mesh->info.hmax < 0.0 ) {
     //  mesh->info.hmax = 0.5 * mesh->info.delta;
-    fprintf(stderr,"%s:%d:Error: negative hmax value.\n",__FILE__,__LINE__);
+    if ( !mmgErr ) {
+      fprintf(stderr,"\n  ## Error: %s: negative hmax value.\n",__func__);
+      mmgErr = 1;
+    }
     return(0);
   }
 
@@ -1502,8 +1562,12 @@ int _MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
           }
           if ( ismet ) {
             if ( !_MMG3D_intextmet(mesh,met,pt->v[iploc],mm) ) {
-              fprintf(stderr,"%s:%d:Error: unable to intersect metrics"
-                      " at point %d.\n",__FILE__,__LINE__, pt->v[iploc]);
+              if ( !mmgErr ) {
+                 fprintf(stderr,"\n  ## Error: %s: unable to intersect metrics"
+                         " at point %d.\n",__func__,
+                         _MMG3D_indPt(mesh,pt->v[iploc]));
+                 mmgErr = 1;
+              }
               return(0);
             }
           }
@@ -1538,6 +1602,7 @@ int _MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int ia) {
   double         lambda[3],vp[3][3],alpha,beta,mu[3];
   int            ip1,ip2,kmin,i;
   char           i1,i2,ichg;
+  static char    mmgWarn = 0;
 
   i1  = _MMG5_iare[ia][0];
   i2  = _MMG5_iare[ia][1];
@@ -1593,7 +1658,15 @@ int _MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int ia) {
     if( ps1 >= alpha -_MMG5_EPS )
       return(-1);
 
-    _MMG5_eigenv(1,m1,lambda,vp);
+    if ( !_MMG5_eigenv(1,m1,lambda,vp) ) {
+      if ( !mmgWarn ) {
+        fprintf(stderr,"\n  ## Warning: %s: Unable to diagonalize at least"
+                " 1 metric.\n",__func__);
+        mmgWarn = 1;
+      }
+      return -1;
+    }
+
     /* Project the vector t1 along the main directions of the metric */
     c[0] = t[0]*vp[0][0] + t[1]*vp[0][1] + t[2]*vp[0][2];
     c[1] = t[0]*vp[1][0] + t[1]*vp[1][1] + t[2]*vp[1][2];
@@ -1765,7 +1838,6 @@ int _MMG5_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
     fprintf(stdout,"  ** Anisotropic mesh gradation\n");
 
-  mesh->base = 0;
   for (k=1; k<=mesh->np; k++)
     mesh->point[k].flag = mesh->base;
 
@@ -1831,7 +1903,6 @@ int _MMG5_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   }
   while( ++it < maxit && nu > 0 );
 
-  mesh->base = 0;
   for (k=1; k<=mesh->np; k++)
     mesh->point[k].flag = mesh->base;
 

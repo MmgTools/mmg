@@ -52,23 +52,30 @@ int main(int argc,char *argv[]) {
   MMG5_pMesh      mmgMesh;
   MMG5_pSol       mmgSol;
   int             ier;
-  char            *pwd,*inname,*outname;
+  char            *inname,*outname;
 
   fprintf(stdout,"  -- TEST MMG3DLS \n");
 
+  if ( argc != 3 ) {
+    printf(" Usage: %s filein fileout\n",argv[0]);
+    return(1);
+  }
+
   /* Name and path of the mesh files */
-  pwd = getenv("PWD");
-  inname = (char *) calloc(strlen(pwd) + 61, sizeof(char));
+  inname = (char *) calloc(strlen(argv[1]) + 1, sizeof(char));
   if ( inname == NULL ) {
     perror("  ## Memory problem: calloc");
     exit(EXIT_FAILURE);
   }
-  outname = (char *) calloc(strlen(pwd) + 70, sizeof(char));
+  strcpy(inname,argv[1]);
+
+
+  outname = (char *) calloc(strlen(argv[2]) + 1, sizeof(char));
   if ( outname == NULL ) {
     perror("  ## Memory problem: calloc");
     exit(EXIT_FAILURE);
   }
-  sprintf(inname, "%s%s%s", pwd, "/../libexamples/mmg3d/IsosurfDiscretization_example0/", "test");
+  strcpy(outname,argv[2]);
 
   /** 1) Initialisation of mesh and sol structures */
   /* args of InitMesh:
@@ -127,7 +134,6 @@ int main(int argc,char *argv[]) {
     fprintf(stdout,"BAD ENDING OF MMG3DLS\n");
 
   /* (Not mandatory) Automatically save the mesh */
-  sprintf(outname, "%s%s%s", pwd, "/../libexamples/mmg3d/IsosurfDiscretization_example0/", "test.o");
   if ( MMG3D_saveMesh(mmgMesh,outname) != 1 )
     exit(EXIT_FAILURE);
 
@@ -142,6 +148,7 @@ int main(int argc,char *argv[]) {
 
   free(inname);
   inname = NULL;
+
   free(outname);
   outname = NULL;
 

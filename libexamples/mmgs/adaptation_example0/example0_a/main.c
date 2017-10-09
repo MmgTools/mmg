@@ -51,18 +51,30 @@ int main(int argc,char *argv[]) {
   MMG5_pMesh      mmgMesh;
   MMG5_pSol       mmgSol;
   int             ier;
-  char            *pwd,*filename;
+  char            *filename, *fileout;
 
   fprintf(stdout,"  -- TEST MMGSLIB \n");
 
+  if ( argc != 3 ) {
+    printf(" Usage: %s filein fileout\n",argv[0]);
+    return(1);
+  }
+
   /* Name and path of the mesh file */
-  pwd = getenv("PWD");
-  filename = (char *) calloc(strlen(pwd) + 58, sizeof(char));
+  filename = (char *) calloc(strlen(argv[1]) + 1, sizeof(char));
   if ( filename == NULL ) {
     perror("  ## Memory problem: calloc");
     exit(EXIT_FAILURE);
   }
-  sprintf(filename, "%s%s%s", pwd, "/../libexamples/mmgs/adaptation_example0/example0_a/", "cube");
+  strcpy(filename,argv[1]);
+
+
+  fileout = (char *) calloc(strlen(argv[2]) + 1, sizeof(char));
+  if ( fileout == NULL ) {
+    perror("  ## Memory problem: calloc");
+    exit(EXIT_FAILURE);
+  }
+  strcpy(fileout,argv[2]);
 
   /** ------------------------------ STEP   I -------------------------- */
   /** 1) Initialisation of mesh and sol structures */
@@ -113,11 +125,11 @@ int main(int argc,char *argv[]) {
       using the MMGS_getMesh/MMGS_getSol functions */
 
   /** 1) Automatically save the mesh */
-  if ( MMGS_saveMesh(mmgMesh,"cube.o") != 1 )
+  if ( MMGS_saveMesh(mmgMesh,fileout) != 1 )
     exit(EXIT_FAILURE);
 
   /** 2) Automatically save the solution */
-  if ( MMGS_saveSol(mmgMesh,mmgSol,"cube.o") != 1 )
+  if ( MMGS_saveSol(mmgMesh,mmgSol,fileout) != 1 )
     exit(EXIT_FAILURE);
 
   /** 3) Free the MMGS structures */
@@ -127,6 +139,9 @@ int main(int argc,char *argv[]) {
 
   free(filename);
   filename = NULL;
+
+  free(fileout);
+  fileout = NULL;
 
   return(ier);
 }

@@ -52,23 +52,29 @@ int main(int argc,char *argv[]) {
   MMG5_pMesh      mmgMesh;
   MMG5_pSol       mmgSol,mmgDisp;
   int             ier;
-  char            *pwd,*inname,*outname;
+  char            *inname,*outname;
 
   fprintf(stdout,"  -- TEST MMG3DMOV \n");
 
+  if ( argc != 3 ) {
+    printf(" Usage: %s filein fileout \n",argv[0]);
+    return(1);
+  }
+
   /* Name and path of the mesh files */
-  pwd = getenv("PWD");
-  inname = (char *) calloc(strlen(pwd) + 61, sizeof(char));
+  inname = (char *) calloc(strlen(argv[1]) + 1, sizeof(char));
   if ( inname == NULL ) {
     perror("  ## Memory problem: calloc");
     exit(EXIT_FAILURE);
   }
-  outname = (char *) calloc(strlen(pwd) + 70, sizeof(char));
+  strcpy(inname,argv[1]);
+
+  outname = (char *) calloc(strlen(argv[2]) + 1, sizeof(char));
   if ( outname == NULL ) {
     perror("  ## Memory problem: calloc");
     exit(EXIT_FAILURE);
   }
-  sprintf(inname, "%s%s%s", pwd, "/../libexamples/mmg3d/LagrangianMotion_example0/", "tinyBoxt");
+  strcpy(outname,argv[2]);
 
   /** 1) Initialisation of mesh and sol structures */
   /* args of InitMesh:
@@ -98,7 +104,7 @@ int main(int argc,char *argv[]) {
 
   /**------------------- Lagrangian motion option ----------------------------*/
   /* Ask for lagrangian motion (mode 1) */
-  if ( MMG3D_Set_iparameter(mmgMesh,mmgDisp,MMG5_IPARAM_lag, 1) != 1 )
+  if ( MMG3D_Set_iparameter(mmgMesh,mmgDisp,MMG3D_IPARAM_lag, 1) != 1 )
     exit(EXIT_FAILURE);
 
   /** With MMG3D_loadSol function */
@@ -129,12 +135,7 @@ int main(int argc,char *argv[]) {
     fprintf(stdout,"BAD ENDING OF MMG3DMOV\n");
 
   /* (Not mandatory) Automatically save the mesh */
-  sprintf(outname, "%s%s%s", pwd, "/../libexamples/mmg3d/LagrangianMotion_example0/", "tinyBoxt.o");
   if ( MMG3D_saveMesh(mmgMesh,outname) != 1 )
-    exit(EXIT_FAILURE);
-
-  /* (Not mandatory) Automatically save the solution */
-  if ( MMG3D_saveSol(mmgMesh,mmgSol,outname) != 1 )
     exit(EXIT_FAILURE);
 
   /* 9) free the MMG3D5 structures */
@@ -144,6 +145,7 @@ int main(int argc,char *argv[]) {
                  MMG5_ARG_end);
   free(inname);
   inname = NULL;
+
   free(outname);
   outname = NULL;
 

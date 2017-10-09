@@ -58,11 +58,11 @@ int _MMG3D_newPt(MMG5_pMesh mesh,double c[3],int16_t tag) {
       /* reallocation of xpoint table */
       _MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,MMG5_xPoint,
                          "larger xpoint table",
-                         return(0));
+                         return(0),0);
     }
     ppt->xp  = mesh->xp;
   }
-  assert(tag < 127);
+  assert(tag < 24704);
   assert(tag >= 0);
   ppt->n[0]   = 0;
   ppt->n[1]   = 0;
@@ -105,15 +105,23 @@ int _MMG3D_newElt(MMG5_pMesh mesh) {
   return(curiel);
 }
 
-
-void _MMG3D_delElt(MMG5_pMesh mesh,int iel) {
+/**
+ * \param mesh pointer toward the mesh
+ * \param iel index of the element to delete
+ *
+ * \return 1 if success, 0 if fail
+ *
+ * Delete the element \a iel
+ *
+ */
+int _MMG3D_delElt(MMG5_pMesh mesh,int iel) {
   MMG5_pTetra   pt;
   int      iadr;
 
   pt = &mesh->tetra[iel];
   if ( !MG_EOK(pt) ) {
-    fprintf(stderr,"  ## INVALID ELEMENT %d.\n",iel);
-    exit(EXIT_FAILURE);
+    fprintf(stderr,"\n  ## INVALID ELEMENT %d.\n",iel);
+    return(0);
   }
   memset(pt,0,sizeof(MMG5_Tetra));
   pt->v[3] = mesh->nenil;
@@ -124,18 +132,20 @@ void _MMG3D_delElt(MMG5_pMesh mesh,int iel) {
   if ( iel == mesh->ne ) {
     while ( !MG_EOK((&mesh->tetra[mesh->ne])) )  mesh->ne--;
   }
+  return 1;
 }
 
 /** memory repartition for the -m option */
-void _MMG3D_memOption(MMG5_pMesh mesh) {
+int _MMG3D_memOption(MMG5_pMesh mesh) {
   long long  million = 1048576L,memtmp,reservedMem;
+  long       castedVal;
   int        ctri,npask,bytes;
 
   mesh->memMax = _MMG5_memSize();
 
-  mesh->npmax = MG_MAX(1.5*mesh->np,_MMG5_NPMAX);
-  mesh->nemax = MG_MAX(1.5*mesh->ne,_MMG5_NEMAX);
-  mesh->ntmax = MG_MAX(1.5*mesh->nt,_MMG5_NTMAX);
+  mesh->npmax = MG_MAX(1.5*mesh->np,_MMG3D_NPMAX);
+  mesh->nemax = MG_MAX(1.5*mesh->ne,_MMG3D_NEMAX);
+  mesh->ntmax = MG_MAX(1.5*mesh->nt,_MMG3D_NTMAX);
 
   if ( mesh->info.mem <= 0 ) {
     if ( mesh->memMax )
@@ -150,20 +160,20 @@ void _MMG3D_memOption(MMG5_pMesh mesh) {
   else {
     /* memory asked by user if possible, otherwise total physical memory */
     if ( (long long)(mesh->info.mem)*million > mesh->memMax && mesh->memMax ) {
-      fprintf(stdout,"  ## Warning: asking for %d Mo of memory ",mesh->info.mem);
-      fprintf(stdout,"when only %ld available.\n",
-              _MMG5_safeLL2LCast(mesh->memMax/million));
+      fprintf(stderr,"\n  ## Warning: %s: asking for %d Mo of memory ",
+              __func__,mesh->info.mem);
+      castedVal = _MMG5_SAFELL2LCAST(mesh->memMax/million);
+      fprintf(stderr,"when only %ld available.\n",castedVal);
     }
     else {
       mesh->memMax= (long long)(mesh->info.mem)*million;
     }
 
-    /* if asked memory is lower than default _MMG5_NPMAX/_MMG5_NEMAX/_MMG5_NTMAX we take lower values */
+    /* if asked memory is lower than default _MMG3D_NPMAX/_MMG3D_NEMAX/_MMG3D_NTMAX we take lower values */
     ctri = 2;
 
     /* Euler-poincare: ne = 6*np; nt = 2*np; na = np/5 *
-     * point+tria+tets+adja+adjt+sol+item *
-     * warning: we exceed memory in saveMesh when we call _MMG5_hNew */
+     * point+tria+tets+adja+adjt+sol+item */
     bytes = sizeof(MMG5_Point) + sizeof(MMG5_xPoint) +
       6*sizeof(MMG5_Tetra) + ctri*sizeof(MMG5_xTetra) +
       4*6*sizeof(int) + ctri*3*sizeof(int) +
@@ -186,67 +196,81 @@ void _MMG3D_memOption(MMG5_pMesh mesh) {
     /* check if the memory asked is enough to load the mesh*/
     if(mesh->np &&
        (mesh->npmax < mesh->np || mesh->ntmax < mesh->nt || mesh->nemax < mesh->ne)) {
-      memtmp = (mesh->np * bytes + reservedMem)/million;
-      memtmp = MG_MAX(memtmp, (mesh->nt*bytes/ctri + reservedMem)/million );
-      memtmp = MG_MAX(memtmp, (mesh->ne*bytes/6* + reservedMem)/million );
-      mesh->memMax = memtmp+1;
-      fprintf(stderr,"  ## ERROR: asking for %d Mo of memory ",mesh->info.mem);
-      fprintf(stderr,"is not enough to load mesh. You need to ask %d Mo minimum\n",
-              (int)mesh->memMax);
+      memtmp = ((long long)mesh->np * bytes + reservedMem)/million;
+      memtmp = MG_MAX(memtmp, ((long long)mesh->nt*bytes/ctri + reservedMem)/million );
+      memtmp = MG_MAX(memtmp, ((long long)mesh->ne*bytes/6 + reservedMem)/million );
+      mesh->memMax = memtmp*million+1;
+      fprintf(stderr,"\n  ## Error: %s: asking for %d Mo of memory ",
+              __func__,mesh->info.mem);
+      castedVal =  _MMG5_SAFELL2LCAST(mesh->memMax);
+      fprintf(stderr,"is not enough to load mesh. You need to ask %ld Mo minimum\n",
+              castedVal);
+      return 0;
     }
     if(mesh->info.mem*million < reservedMem) {
-      mesh->memMax = reservedMem;
-      fprintf(stderr,"  ## ERROR: asking for %d Mo of memory ",mesh->info.mem);
-      fprintf(stderr,"is not enough to load mesh. You need to ask %d Mo minimum\n",
-              (int)(mesh->memMax/million));
+      mesh->memMax = reservedMem + 1;
+      fprintf(stderr,"\n  ## Error: %s: asking for %d Mo of memory ",
+              __func__,mesh->info.mem);
+      castedVal = _MMG5_SAFELL2LCAST(mesh->memMax);
+      fprintf(stderr,"is not enough to load mesh. You need to ask %ld o minimum\n",
+              castedVal);
+      return 0;
     }
   }
 
-  if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
+  if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug ) {
+    castedVal = _MMG5_SAFELL2LCAST(mesh->memMax/million);
     fprintf(stdout,"  MAXIMUM MEMORY AUTHORIZED (Mo)    %ld\n",
-            _MMG5_safeLL2LCast(mesh->memMax/million));
-
+            castedVal);
+  }
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {
-    fprintf(stdout,"  _MMG5_NPMAX    %d\n",mesh->npmax);
-    fprintf(stdout,"  _MMG5_NTMAX    %d\n",mesh->ntmax);
-    fprintf(stdout,"  _MMG5_NEMAX    %d\n",mesh->nemax);
+    fprintf(stdout,"  _MMG3D_NPMAX    %d\n",mesh->npmax);
+    fprintf(stdout,"  _MMG3D_NTMAX    %d\n",mesh->ntmax);
+    fprintf(stdout,"  _MMG3D_NEMAX    %d\n",mesh->nemax);
   }
 
-  return;
+  return 1;
 }
 
-/** allocate main structure */
+/**
+ * \param mesh pointer toward the mesh
+ *
+ * \return 1 if success, 0 if fail
+ *
+ * allocate main structure
+ *
+ */
 int _MMG3D_zaldy(MMG5_pMesh mesh) {
   int     k;
 
-  _MMG3D_memOption(mesh);
+  if ( !_MMG3D_memOption(mesh) )  return 0;
 
   _MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(MMG5_Point),"initial vertices",
                 fprintf(stderr,"  Exit program.\n");
-                exit(EXIT_FAILURE));
-  _MMG5_SAFE_CALLOC(mesh->point,mesh->npmax+1,MMG5_Point);
+                return 0);
+  _MMG5_SAFE_CALLOC(mesh->point,mesh->npmax+1,MMG5_Point,0);
 
   _MMG5_ADD_MEM(mesh,(mesh->nemax+1)*sizeof(MMG5_Tetra),"initial tetrahedra",
                 fprintf(stderr,"  Exit program.\n");
-                exit(EXIT_FAILURE));
-  _MMG5_SAFE_CALLOC(mesh->tetra,mesh->nemax+1,MMG5_Tetra);
+                return 0);
+  _MMG5_SAFE_CALLOC(mesh->tetra,mesh->nemax+1,MMG5_Tetra,0);
 
   if ( mesh->nt ) {
     _MMG5_ADD_MEM(mesh,(mesh->nt+1)*sizeof(MMG5_Tria),"initial triangles",return(0));
-    _MMG5_SAFE_CALLOC(mesh->tria,mesh->nt+1,MMG5_Tria);
+    _MMG5_SAFE_CALLOC(mesh->tria,mesh->nt+1,MMG5_Tria,0);
     memset(&mesh->tria[0],0,sizeof(MMG5_Tria));
   }
   if ( mesh->na ) {
     _MMG5_ADD_MEM(mesh,(mesh->na+1)*sizeof(MMG5_Edge),"initial edges",return(0));
-    _MMG5_SAFE_CALLOC(mesh->edge,(mesh->na+1),MMG5_Edge);
+    _MMG5_SAFE_CALLOC(mesh->edge,(mesh->na+1),MMG5_Edge,0);
   }
   if ( mesh->nprism ) {
     _MMG5_ADD_MEM(mesh,(mesh->nprism+1)*sizeof(MMG5_Prism),"initial prisms",return(0));
-    _MMG5_SAFE_CALLOC(mesh->prism,(mesh->nprism+1),MMG5_Prism);
+    _MMG5_SAFE_CALLOC(mesh->prism,(mesh->nprism+1),MMG5_Prism,0);
   }
   if ( mesh->nquad ) {
     _MMG5_ADD_MEM(mesh,(mesh->nquad+1)*sizeof(MMG5_Quad),"initial quadrilaterals",return(0));
-    _MMG5_SAFE_CALLOC(mesh->quadra,(mesh->nquad+1),MMG5_Quad);
+    _MMG5_SAFE_CALLOC(mesh->quadra,(mesh->nquad+1),MMG5_Quad,0);
   }
 
 

@@ -146,6 +146,8 @@ int  MMG5_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solin);
 int  MMG5_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solout);
 
 /* deallocations */
+void MMG5_Free_structures(MMG5_pMesh mesh,MMG5_pSol sol);
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.
@@ -159,25 +161,33 @@ int  MMG5_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solout);
  *
  */
 void MMG5_mmgFree_names(MMG5_pMesh mesh, MMG5_pSol met);
+
 /**
  * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the solution structure.
- * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
+ * \param sethmin 1 if hmin is already setted (>0.)
+ * \param sethmax 1 if hmax is already setted (>0.)
  *
- * Write mesh and sol at MSH  file format (.msh extension).
- * Write binary file for .mshb extension.and ASCII for .msh one.
+ * \return 1 if success, 0 if we detect mismatch parameters
  *
- * \remark Fortran interface:
- * >   SUBROUTINE MMG5_SAVEMSHMESH(mesh,sol,filename,strlen,retval)\n
- * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
- * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
- * >     INTEGER, INTENT(IN)            :: strlen\n
- * >     INTEGER, INTENT(OUT)           :: retval\n
- * >   END SUBROUTINE\n
+ * Set default values for hmin and hmax  from the bounding box.
+ *
+ * \Remark not for extern users.
  *
  */
-int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+extern int MMG5_Set_defaultTruncatureSizes(MMG5_pMesh mesh,char sethmin,char sethmax);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric.
+ * \param hsiz computed constant size to impose.
+ *
+ * \return 1 if success, 0 if fail
+ *
+ * Compute the constant size to impose according to hmin and hmax and store it in \a hsiz.
+ * Fill hmin and hamx if they are not setted by the user.
+ *
+ */
+int MMG5_Compute_constantSize(MMG5_pMesh mesh,MMG5_pSol met,double *hsize);
 
 #ifdef __cplusplus
 }

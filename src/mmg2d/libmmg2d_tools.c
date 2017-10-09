@@ -34,34 +34,104 @@
 
 void MMG2D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( met->size == 3 ) {
-    MMG2_length    = long_ani;
-    MMG2_caltri    = caltri_ani;
-    MMG2_caltri_in = caltri_ani_in;
-    MMG2_buckin    = buckin_ani;
-    MMG2_lissmet   = lissmet_ani;
-    MMG2_optlen    = optlen_ani;
-/*    interp     = interp_ani;
- */
+    MMG2D_lencurv  = _MMG2_lencurv_ani;
+    MMG2D_defsiz   = _MMG2_defsiz_ani;
+    MMG2D_gradsiz  = lissmet_ani;
+    MMG2D_caltri   = _MMG2_caltri_ani;
+    MMG2D_intmet   = _MMG2_intmet_ani;
+    //    MMG2_optlen    = optlen_ani;
   }
   else {
-    MMG2_length     = long_iso;
-    MMG2_caltri     = caltri_iso;
-    MMG2_caltri_in  = caltri_iso_in;
-    MMG2_buckin     = buckin_iso;
-    MMG2_lissmet    = lissmet_iso;
-
-    MMG2_optlen     = optlen_iso;
-/*    interp     = interp_iso;
- */
+    MMG2D_lencurv   = _MMG2_lencurv_iso;
+    MMG2D_defsiz    = _MMG2_defsiz_iso;
+    MMG2D_gradsiz   = _MMG2_gradsiz_iso;
+    MMG2D_caltri    = _MMG2_caltri_iso;
+    MMG2D_intmet    = _MMG2_intmet_iso;
   }
-
   return;
+}
+
+/**
+ * \param mesh pointer toward the mesh
+ * \param met pointer toward the metric
+ *
+ * \return 1 if success, 0 if fail
+ *
+ * Read parameter file DEFAULT.mmg2d
+ *
+ */
+int MMG2_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
+  int       ret,i;
+  char     *ptr,data[256];
+  FILE     *in;
+  MMG5_pMat pm;
+  fpos_t    position;
+  
+  /* Check for parameter file */
+  strcpy(data,mesh->namein);
+  ptr = strstr(data,".mesh");
+  if ( ptr ) *ptr = '\0';
+  strcat(data,".mmg2d");
+  in = fopen(data,"rb");
+  
+  if ( !in ) {
+    sprintf(data,"%s","DEFAULT.mmg2d");
+    in = fopen(data,"rb");
+    if ( !in )
+      return(1);
+  }
+  fprintf(stdout,"\n  %%%% %s OPENED\n",data);
+  
+  /* Read parameters */
+  while ( !feof(in) ) {
+    ret = fscanf(in,"%s",data);
+    if ( !ret || feof(in) ) break;
+    for (i=0; i<strlen(data); i++) data[i] = tolower(data[i]);
+    
+    /* Read user defined references for the LS mode */
+    if ( !strcmp(data,"lsreferences") ) {
+      ret = fscanf(in,"%d",&mesh->info.nmat);
+      
+      if ( !ret ) {
+        fprintf(stderr,"  %%%% Wrong format: %d\n",mesh->info.nmat);
+        return 0;
+      }
+
+      if ( mesh->info.nmat ) {
+        _MMG5_SAFE_CALLOC(mesh->info.mat,mesh->info.nmat,MMG5_Mat,0);
+        for (i=0; i<mesh->info.nmat; i++) {
+          pm = &mesh->info.mat[i];
+          fscanf(in,"%d",&pm->ref);
+          fgetpos(in,&position);
+          fscanf(in,"%s",data);
+          if ( !strcmp(data,"nosplit") ) {
+            pm->dospl = 0;
+            pm->rin = pm->ref;
+            pm->rex = pm->ref;
+          }
+          else {
+            fsetpos(in,&position);
+            fscanf(in,"%d",&pm->rin);
+            fscanf(in,"%d",&pm->rex);
+            pm->dospl = 1;
+          }
+        }
+      }
+    }
+    else {
+      fprintf(stderr,"  %%%% Wrong format: %s\n",data);
+      return 0;
+    }
+  }
+  
+  fclose(in);
+  return(1);
 }
 
 int MMG2D_Get_adjaTri(MMG5_pMesh mesh, int kel, int listri[3]) {
 
   if ( ! mesh->adja ) {
-    if (! MMG2_hashel(mesh))
+    if (! MMG2_hashTria(mesh))
       return(0);
   }
 
@@ -104,8 +174,9 @@ int MMG2D_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMG
   nbpoi = 0;
   do {
     if ( nbpoi == MMG2D_LMAX ) {
-      fprintf(stdout,"  ## Warning: unable to compute adjacent vertices of the"
-              " vertex %d:\nthe ball of point contain too many elements.\n",ip);
+      fprintf(stderr,"\n  ## Warning: %s: unable to compute adjacent"
+              " vertices of the vertex %d:\nthe ball of point contain too many"
+              " elements.\n",__func__,ip);
       return(0);
     }
     i1 = _MMG5_inxt2[i];
@@ -124,8 +195,9 @@ int MMG2D_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMG
 
   /* store the last point of the boundary triangle */
   if ( nbpoi == MMG2D_LMAX ) {
-    fprintf(stdout,"  ## Warning: unable to compute adjacent vertices of the"
-            " vertex %d:\nthe ball of point contain too many elements.\n",ip);
+    fprintf(stderr,"\n  ## Warning: %s: unable to compute adjacent vertices of the"
+            " vertex %d:\nthe ball of point contain too many elements.\n",
+            __func__,ip);
     return(0);
   }
   i1 = _MMG5_inxt2[i1];
@@ -142,8 +214,9 @@ int MMG2D_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMG
     if ( k == 0 )  break;
 
     if ( nbpoi == MMG2D_LMAX ) {
-      fprintf(stdout,"  ## Warning: unable to compute adjacent vertices of the"
-              " vertex %d:\nthe ball of point contain too many elements.\n",ip);
+      fprintf(stderr,"\n  ## Warning: %s: unable to compute adjacent vertices of the"
+              " vertex %d:\nthe ball of point contain too many elements.\n",
+              __func__,ip);
       return(0);
     }
     i  = adja[i2] % 3;
@@ -171,6 +244,57 @@ int MMG2D_Get_triFromEdge(MMG5_pMesh mesh, int ked, int *ktri, int *ied)
 
   return 1;
 
+
+}
+
+int MMG2D_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met) {
+  MMG5_pPoint ppt;
+  double      hsiz;
+  int         k,iadr;
+
+  /* Memory alloc */
+  if ( met->size!=1 && met->size!=3 ) {
+    fprintf(stderr,"\n  ## Error: %s: unexpected size of metric: %d.\n",
+            __func__,met->size);
+    return 0;
+  }
+
+  if ( !MMG2D_Set_solSize(mesh,met,MMG5_Vertex,mesh->np,met->size) )
+    return 0;
+
+  if ( !MMG5_Compute_constantSize(mesh,met,&hsiz) )
+    return 0;
+
+  if ( met->size == 1 ) {
+    for (k=1; k<=mesh->np; k++) {
+      ppt = &mesh->point[k];
+      if ( !MG_VOK(ppt) ) continue;
+      met->m[k] = hsiz;
+    }
+  }
+  else {
+    hsiz    = 1./(hsiz*hsiz);
+
+    for (k=1; k<=mesh->np; k++) {
+      ppt = &mesh->point[k];
+      if ( !MG_VOK(ppt) ) continue;
+
+      iadr           = met->size*k;
+      met->m[iadr]   = hsiz;
+      met->m[iadr+2] = hsiz;
+    }
+  }
+  return 1;
+}
+
+
+
+void MMG2D_Reset_verticestags(MMG5_pMesh mesh) {
+  int k;
+
+  for ( k=1; k<=mesh->np;  ++k ) {
+    mesh->point[k].tag = 0;
+  }
 
 }
 

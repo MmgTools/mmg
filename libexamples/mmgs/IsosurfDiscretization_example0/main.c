@@ -52,19 +52,29 @@ int main(int argc,char *argv[]) {
   MMG5_pMesh      mmgMesh;
   MMG5_pSol       mmgSol;
   int             ier;
-  char            *pwd,*inname;
+  char            *inname,*outname;
 
   fprintf(stdout,"  -- TEST MMGSLS \n");
 
+  if ( argc != 3 ) {
+    printf(" Usage: %s filein fileout \n",argv[0]);
+    return(1);
+  }
+
   /* Name and path of the mesh files */
-  pwd = getenv("PWD");
-  inname = (char *) calloc(strlen(pwd) + 61, sizeof(char));
+  inname = (char *) calloc(strlen(argv[1]) + 1, sizeof(char));
   if ( inname == NULL ) {
     perror("  ## Memory problem: calloc");
     exit(EXIT_FAILURE);
   }
+  strcpy(inname,argv[1]);
 
-  sprintf(inname, "%s%s%s", pwd, "/../libexamples/mmgs/IsosurfDiscretization_example0/", "teapot");
+  outname = (char *) calloc(strlen(argv[2]) + 1, sizeof(char));
+  if ( outname == NULL ) {
+    perror("  ## Memory problem: calloc");
+    exit(EXIT_FAILURE);
+  }
+  strcpy(outname,argv[2]);
 
   /** 1) Initialisation of mesh and sol structures */
   /* args of InitMesh:
@@ -126,10 +136,10 @@ int main(int argc,char *argv[]) {
   } else if ( ier == MMG5_LOWFAILURE )
     fprintf(stdout,"BAD ENDING OF MMGSLS\n");
 
-  if ( MMGS_saveMesh(mmgMesh,"teapot.o.meshb") != 1 )
+  if ( MMGS_saveMesh(mmgMesh,outname) != 1 )
     exit(EXIT_FAILURE);
 
-  if ( MMGS_saveSol(mmgMesh,mmgSol,"teapot.o.sol") != 1 )
+  if ( MMGS_saveSol(mmgMesh,mmgSol,outname) != 1 )
     exit(EXIT_FAILURE);
 
   /* 9) free the MMGS5 structures */
@@ -139,6 +149,9 @@ int main(int argc,char *argv[]) {
 
   free(inname);
   inname = NULL;
+
+  free(outname);
+  outname = NULL;
 
   return(ier);
 }

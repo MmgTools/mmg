@@ -41,7 +41,7 @@
 extern "C" {
 #endif
 
-#include "libmmgtypes.h"
+#include "mmg/mmgs/libmmgtypes.h"
 
 /**
  * Maximum array size when storing adjacent points (or ball) of a vertex.
@@ -73,6 +73,7 @@ enum MMGS_Param {
   MMGS_DPARAM_angleDetection,    /*!< [val], Value for angle detection */
   MMGS_DPARAM_hmin,              /*!< [val], Minimal mesh size */
   MMGS_DPARAM_hmax,              /*!< [val], Maximal mesh size */
+  MMGS_DPARAM_hsiz,              /*!< [val], Constant mesh size */
   MMGS_DPARAM_hausd,             /*!< [val], Control global Hausdorff distance (on all the boundary surfaces of the mesh) */
   MMGS_DPARAM_hgrad,             /*!< [val], Control gradation */
   MMGS_DPARAM_ls,                /*!< [val], Value of level-set */
@@ -99,12 +100,14 @@ enum MMGS_Param {
  * Here,\a your_mesh is a \a MMG5_pMesh, \a your_metric and \a your_level_set
  * are \a MMG5_pSol.
  *
+ * \return 1 if success, 0 if fail
+ *
  * MMG structures allocation and initialization.
  *
  * \remark No fortran interface to allow variadic arguments.
  *
  */
-void MMGS_Init_mesh(const int starter,...);
+int MMGS_Init_mesh(const int starter,...);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -989,8 +992,8 @@ int  MMGS_loadMesh(MMG5_pMesh mesh, const char* filename);
  * \param filename name of file.
  * \return 0 if failed, 1 otherwise.
  *
- * Read mesh and sol at MSH file format (.msh extension). We read only
- * low-order points, edges, tria, quad, tetra and prisms.
+ * Read mesh and 0 or 1 data field at MSH file format (.msh extension). We read
+ * only low-order points, edges, tria, quad, tetra and prisms.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_LOADMSHMESH(mesh,sol,filename,strlen,retval)\n
@@ -1002,7 +1005,25 @@ int  MMGS_loadMesh(MMG5_pMesh mesh, const char* filename);
  *
  */
 int MMGS_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
-
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward a list of solution structures.
+ * \param filename name of file.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Read mesh and a list of data at MSH file format (.msh extension). We read only
+ * low-order points, edges, tria, quadra, tetra and prisms.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMGS_LOADMSHMESH_AND_ALLDATA(mesh,sol,filename,strlen,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
+ * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
+ * >     INTEGER, INTENT(IN)            :: strlen\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+int MMGS_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param filename name of file.
@@ -1026,7 +1047,7 @@ int  MMGS_saveMesh(MMG5_pMesh mesh, const char *filename);
  * \param filename name of file.
  * \return 0 if failed, 1 otherwise.
  *
- * Write mesh and sol at MSH  file format (.msh extension).
+ * Write mesh and 0 or 1 data field at MSH  file format (.msh extension).
  * Save file at ASCII format for .msh extension, at binary format for .mshb one.
  *
  * \remark Fortran interface:
@@ -1038,14 +1059,36 @@ int  MMGS_saveMesh(MMG5_pMesh mesh, const char *filename);
  * >   END SUBROUTINE\n
  *
  */
-  int MMGS_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+ int MMGS_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the solution structure.
+ * \param filename name of file.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Write mesh and a list of data fields (that are considered as solutions and
+ * not metrics, thus, we do nothing over the ridge points) at MSH file format
+ * (.msh extension).  Save file at ASCII format for .msh extension, at binary
+ * format for .mshb one.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMGS_SAVEMSHMESH_AND_ALLDATA(mesh,sol,filename,strlen,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
+ * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
+ * >     INTEGER, INTENT(IN)            :: strlen\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+int MMGS_saveMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.
  * \param filename name of file.
  * \return 0 if failed, 1 otherwise.
  *
- * Load metric field.
+ * Load metric field. The solution file (at medit file format) must contains
+ * only 1 solution: the metric.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_LOADSOL(mesh,met,filename,strlen,retval)\n
@@ -1059,11 +1102,29 @@ int  MMGS_saveMesh(MMG5_pMesh mesh, const char *filename);
 int  MMGS_loadSol(MMG5_pMesh mesh,MMG5_pSol met, const char* filename);
 /**
  * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the solutions array
+ * \param filename name of file.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Load 1 or more solutions in a solution file at medit file format.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMGS_LOADALLSOLS(mesh,sol,filename,strlen,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
+ * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
+ * >     INTEGER, INTENT(IN)            :: strlen\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+int  MMGS_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char* filename);
+/**
+ * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.
  * \param filename name of file.
  * \return 0 if failed, 1 otherwise.
  *
- * Write isotropic or anisotropic metric.
+ * Write isotropic or anisotropic metric at medit file format.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SAVESOL(mesh,met,filename,strlen,retval)\n
@@ -1075,6 +1136,24 @@ int  MMGS_loadSol(MMG5_pMesh mesh,MMG5_pSol met, const char* filename);
  *
  */
 int  MMGS_saveSol(MMG5_pMesh mesh, MMG5_pSol met, const char *filename);
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the solutions array
+ * \param filename name of the solution file.
+ * \return 0 or -1 if fail, 1 otherwise.
+ *
+ * Save 1 or more solutions in a solution file at medit file format.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMGS_SAVEALLSOLS(mesh,sol,filename,strlen,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
+ * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
+ * >     INTEGER, INTENT(IN)            :: strlen\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+int MMGS_saveAllSols(MMG5_pMesh  mesh,MMG5_pSol *sol ,const char *filename);
 
 /* deallocations */
 /**
@@ -1094,6 +1173,8 @@ int  MMGS_saveSol(MMG5_pMesh mesh, MMG5_pSol met, const char *filename);
  * Here,\a your_mesh is a \a MMG5_pMesh, \a your_metric and \a your_level_set
  * are \a MMG5_pSol.
  *
+ * \return 0 if fail, 1 if success
+ *
  * Deallocations before return.
  *
  * \remark we pass the structures by reference in order to have argument
@@ -1102,7 +1183,7 @@ int  MMGS_saveSol(MMG5_pMesh mesh, MMG5_pSol met, const char *filename);
  * \remark no Fortran interface to allow variadic args.
  *
  */
-void MMGS_Free_all(const int starter,...);
+int MMGS_Free_all(const int starter,...);
 
 /**
  * \param starter dummy argument used to initialize the variadic argument list.
@@ -1124,6 +1205,8 @@ void MMGS_Free_all(const int starter,...);
  * Here, \a your_mesh is a pointer toward \a MMG5_pMesh and \a your_metric and
  * \a your_level_set a pointer toward \a MMG5_pSol.
  *
+ * \return 0 if fail, 1 if success
+ *
  * Structure deallocations before return.
  *
  * \remark we pass the structures by reference in order to have argument
@@ -1132,7 +1215,7 @@ void MMGS_Free_all(const int starter,...);
  * \remark no Fortran interface to allow variadic args.
  *
  */
-void MMGS_Free_structures(const int starter,...);
+int MMGS_Free_structures(const int starter,...);
 
 /**
  * \param starter dummy argument used to initialize the variadic argument list.
@@ -1151,6 +1234,8 @@ void MMGS_Free_structures(const int starter,...);
  * Here,\a your_mesh is a \a MMG5_pMesh, \a your_metric and \a your_level_set
  * are \a MMG5_pSol.
  *
+ * \return 0 if fail, 1 if success
+ *
  * Structure deallocations before return.
  *
  * \remark we pass the structures by reference in order to have argument
@@ -1159,7 +1244,7 @@ void MMGS_Free_structures(const int starter,...);
  * \remark no Fortran interface to allow variadic args.
  *
  */
-void MMGS_Free_names(const int starter,...);
+int MMGS_Free_names(const int starter,...);
 
 /* library */
 /**
@@ -1215,18 +1300,35 @@ void  MMGS_setfunc(MMG5_pMesh mesh,MMG5_pSol met);
 
 /* Tools for the library */
 /**
+ * \param mesh pointer toward the mesh structure
+ * \param met pointer toward the sol structure
+ * \return 1 if success
+ *
+ * Compute constant size map according to mesh->info.hsiz
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMGS_SET_CONSTANTSIZE(mesh,met,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT)     :: mesh,met\n
+ * >     INTEGER, INTENT(OUT)               :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+int MMGS_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met);
+
+/**
  * \param prog pointer toward the program name.
  *
  * Print help for mmgs options.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMGS_USAGE(prog,strlen)\n
+ * >   SUBROUTINE MMGS_USAGE(prog,strlen,retval)\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: prog\n
  * >     INTEGER, INTENT(IN)            :: strlen\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
  */
-void MMGS_usage(char *prog);
+int MMGS_usage(char *prog);
 /**
  * \param argc number of command line arguments.
  * \param argv command line arguments.
@@ -1247,12 +1349,13 @@ int  MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met);
  * Print the default parameters values.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMGS_DEFAULTVALUES(mesh)\n
+ * >   SUBROUTINE MMGS_DEFAULTVALUES(mesh,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
  */
-void MMGS_defaultValues(MMG5_pMesh mesh);
+int MMGS_defaultValues(MMG5_pMesh mesh);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param info pointer toward the info structure.

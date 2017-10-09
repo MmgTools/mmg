@@ -49,7 +49,7 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   MMG5_pTria     pt,pt0;
   MMG5_pPoint    p0,p1,ppt0;
   _MMG5_Bezier   pb;
-  double         r[3][3],ux,uy,uz,*n,area,lispoi[3*_MMG5_LMAX+1],*m0;//,m[6],mo[6];
+  double         r[3][3],ux,uy,uz,*n,area,lispoi[3*_MMGS_LMAX+1],*m0;//,m[6],mo[6];
   double         gv[2],detloc,step,lambda[3],o[3],no[3],to[3],uv[2];
   double         calold,calnew,caltmp;
   int            k,iel,kel,nump,nbeg,nend;
@@ -125,8 +125,8 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
     if ( !_MMG5_elementWeight(mesh,met,pt,p0,&pb,r,gv) ) {
       if ( !warn ) {
         ++warn;
-        fprintf(stderr,"  ## Warning: unable to compute optimal position for at least"
-               " 1 point.\n" );
+        fprintf(stderr,"\n  ## Warning: %s: unable to compute optimal position for at least"
+                " 1 point.\n",__func__ );
       }
       return(0);
     }
@@ -158,11 +158,9 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   }
 
   /* Sizing of time step : make sure point does not go out corresponding triangle. */
-  iel = list[kel] / 3;
-
   area = - gv[1]*(lispoi[3*(kel+1)+1] - lispoi[3*(kel)+1]) \
     + gv[0]*(lispoi[3*(kel+1)+2] - lispoi[3*(kel)+2]);
-  if ( fabs(area) < _MMG5_EPSD )  return(0);
+  if ( fabs(area) < _MMG5_EPSD2 )  return(0);
   area = 1.0 / area;
   step *= area;
 
@@ -175,7 +173,7 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
 
   /* Computation of the barycentric coordinates of the new point in the corresponding triangle. */
   area = lispoi[3*kel+1]*lispoi[3*(kel+1)+2] - lispoi[3*kel+2]*lispoi[3*(kel+1)+1];
-  if ( area < _MMG5_EPSD )  return(0);
+  if ( area < _MMG5_EPSD2 )  return(0);
   area = 1.0 / area;
   lambda[1] = lispoi[3*(kel+1)+2]*gv[0] - lispoi[3*(kel+1)+1]*gv[1];
   lambda[2] = -lispoi[3*(kel)+2]*gv[0] + lispoi[3*(kel)+1]*gv[1];
@@ -186,8 +184,6 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   /* Step 4 : come back to original problem, and compute patch in triangle iel */
   iel = list[kel] / 3;
   i0  = list[kel] % 3;
-  i1  = _MMG5_inxt2[i0];
-  i2  = _MMG5_inxt2[i1];
   pt  = &mesh->tria[iel];
 
   ier = _MMG5_bezierCP(mesh,pt,&pb,1);
@@ -237,10 +233,15 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
     caltmp = caleltsig_ani(mesh,met,iel);
     calold = MG_MIN(calold,caltmp);
     caltmp = caleltsig_ani(mesh,met,0);
-    if ( caltmp < _MMG5_EPSD )        return(0);
+    if ( caltmp < _MMG5_EPSD2 )  {
+      /* We don't check the input triangle qualities, thus we may have a very
+       * bad triangle in our mesh */
+      return(0);
+    }
     calnew = MG_MIN(calnew,caltmp);
 
-    if ( calold < NULKAL && calnew <= calold )  return(0);
+    if ( calold < _MMG5_EPSOK && calnew <= calold )  return(0);
+    else if (calnew < _MMG5_EPSOK)  return(0);
     else if ( calnew < 0.3*calold )      return(0);
     /* if ( chkedg(mesh,0) )  return(0); */
   }
@@ -263,16 +264,17 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
 int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   MMG5_pTria    pt,pt0;
   MMG5_pPoint   p0,p1,p2,ppt0;
-  MMG5_pxPoint    go;
-  _MMG5_Bezier   b;
-  double  *m0,*m00,step,l1old,l2old,ll1old,ll2old,uv[2],o[3],nn1[3],nn2[3],to[3],mo[6];
-  double   lam0,lam1,lam2,*no1,*no2,*np1,*np2;
-  double   psn11,psn12,ps2,l1new,l2new,dd1,dd2,ddt,calold,calnew;
-  int      it1,it2,ip0,ip1,ip2,k,iel,ier;
-  char     voy1,voy2,isrid,isrid1,isrid2,i0,i1,i2;
-//#warning this step is different than the one used on iso or for int pts in aniso
+  MMG5_pxPoint  go;
+  _MMG5_Bezier  b;
+  double       *m0,*m00,step,l1old,l2old,ll1old,ll2old,uv[2],o[3],nn1[3],nn2[3],to[3],mo[6];
+  double        lam0,lam1,lam2,*no1,*no2,*np1,*np2;
+  double        psn11,psn12,ps2,l1new,l2new,dd1,dd2,ddt,calold,calnew;
+  int           it1,it2,ip0,ip1,ip2,k,iel,ier;
+  char          voy1,voy2,isrid,isrid1,isrid2,i0,i1,i2;
+  static char   mmgWarn0 = 0;
+
   step  = 0.2;
-  isrid = isrid1 = isrid2 = 0;
+  isrid1 = isrid2 = 0;
   it1   = it2 = 0;
   ip1   = ip2 = 0;
   voy1  = voy2 = 0;
@@ -302,7 +304,11 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
         }
       }
       else if ( it1 && it2 && (pt->v[i2] != ip1) && (pt->v[i2] != ip2) ) {
-        fprintf(stderr,"   *** function movridptaniso : 3 ridge edges landing on point %d\n",pt->v[i0]);
+        if ( !mmgWarn0 ) {
+          mmgWarn0 = 1;
+          fprintf(stderr,"\n  ## Warning: %s: at least 1 point at the"
+                  " intersection of 3 ridge edges\n",__func__);
+        }
         return(0);
       }
     }
@@ -323,7 +329,11 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
         }
       }
       else if ( it1 && it2 && (pt->v[i1] != ip1) && (pt->v[i1] != ip2) ) {
-        fprintf(stderr,"   *** function movridptaniso : 3 ridge edges landing on point %d\n",pt->v[i0]);
+        if ( !mmgWarn0 ) {
+          mmgWarn0 = 1;
+          fprintf(stderr,"\n  ## Warning: %s: at least 1 point at the"
+                  " intersection of 3 ridge edges\n",__func__);
+        }
         return(0);
       }
     }
@@ -341,6 +351,9 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
 
   l1old = _MMG5_lenSurfEdg(mesh,met,ip0,ip1,1);
   l2old = _MMG5_lenSurfEdg(mesh,met,ip0,ip2,1);
+
+  if ( (!l1old) || (!l2old) ) return 0;
+
   ll1old = l1old*l1old;
   ll2old = l2old*l2old;
 
@@ -463,7 +476,7 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
       nn2[2] = no2[2]+np2[2];
 
       ps2 = (p2->c[0]-p0->c[0])*nn1[0]+(p2->c[1]-p0->c[1])*nn1[1]+(p2->c[2]-p0->c[2])*nn1[2];
-      if ( ll2old < _MMG5_EPSD )  return(0);
+      if ( ll2old < _MMG5_EPSD2 )  return(0);
       ps2 *= (2.0 / ll2old);
       nn1[0] -= ps2*(p2->c[0]-p0->c[0]);
       nn1[1] -= ps2*(p2->c[1]-p0->c[1]);
@@ -534,7 +547,7 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
       nn2[2] = no2[2]+np1[2];
 
       ps2 = (p2->c[0]-p0->c[0])*nn1[0]+(p2->c[1]-p0->c[1])*nn1[1]+(p2->c[2]-p0->c[2])*nn1[2];
-      if ( ll2old < _MMG5_EPSD )  return(0);
+      if ( ll2old < _MMG5_EPSD2 )  return(0);
       ps2 *= (2.0 / ll2old);
       nn1[0] -= ps2*(p2->c[0]-p0->c[0]);
       nn1[1] -= ps2*(p2->c[1]-p0->c[1]);
@@ -632,7 +645,7 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
       nn2[2] = no2[2]+np2[2];
 
       ps2 = (p1->c[0]-p0->c[0])*nn1[0]+(p1->c[1]-p0->c[1])*nn1[1]+(p1->c[2]-p0->c[2])*nn1[2];
-      if ( ll1old < _MMG5_EPSD )  return(0);
+      if ( ll1old < _MMG5_EPSD2 )  return(0);
       ps2 *= (2.0 / ll1old);
       nn1[0] -= ps2*(p1->c[0]-p0->c[0]);
       nn1[1] -= ps2*(p1->c[1]-p0->c[1]);
@@ -702,7 +715,7 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
       nn2[2] = no2[2]+np1[2];
 
       ps2 = (p1->c[0]-p0->c[0])*nn1[0]+(p1->c[1]-p0->c[1])*nn1[1]+(p1->c[2]-p0->c[2])*nn1[2];
-      if ( ll1old < _MMG5_EPSD )  return(0);
+      if ( ll1old < _MMG5_EPSD2 )  return(0);
       ps2 *= (2.0 / ll1old);
       nn1[0] -= ps2*(p1->c[0]-p0->c[0]);
       nn1[1] -= ps2*(p1->c[1]-p0->c[1]);
@@ -802,6 +815,9 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   /* Check whether proposed move is admissible under consideration of distances */
   l1new = _MMG5_lenSurfEdg(mesh,met,0,ip1,1);
   l2new = _MMG5_lenSurfEdg(mesh,met,0,ip2,1);
+
+  if ( (!l1new) || (!l2new) ) return 0;
+
   if ( fabs(l2new -l1new) >= fabs(l2old -l1old) ) {
     ppt0->tag = 0;
     return(0);

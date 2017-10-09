@@ -48,16 +48,26 @@ int delref(MMG5_pMesh mesh) {
   return(1);
 }
 
-/* Start from triangle start, and pile up triangles by adjacency, till a GEO or REF curve is met ;
-   pass all references of travelled faces to ref ; putreq = 1 if boundary edges met must
-   be set to MG_REQ, 0 otherwise. */
+/**
+ * \param mesh pointer toward the mesh
+ * \param start index of the tetra from which we start
+ * \param ref reference to set
+ * \param putreq 1 if boundary edges must be set to required
+ *
+ * \return 1 if success, 0 if fail
+ *
+ * Start from triangle start, and pile up triangles by adjacency, till a GEO or
+ * REF curve is met ; pass all references of travelled faces to ref ; putreq = 1
+ * if boundary edges met must be set to MG_REQ, 0 otherwise.
+ *
+ */
 int setref(MMG5_pMesh mesh,int start,int ref,int putreq) {
   MMG5_pTria      pt,pt1;
   int        *list,*adja,cur,base,k,iel,jel,ilist;
   char       j,voy;
 
   ilist = cur = 0;
-  _MMG5_SAFE_CALLOC(list,mesh->nt+1,int);
+  _MMG5_SAFE_CALLOC(list,mesh->nt+1,int,0);
   base = ++mesh->base;
 
   /* Pile up triangles from start, till a GEO boundary is met */
@@ -104,7 +114,7 @@ int setref(MMG5_pMesh mesh,int start,int ref,int putreq) {
     pt  = &mesh->tria[iel];
     pt->ref = ref;
   }
-
+  _MMG5_SAFE_FREE(list);
   return(1);
 }
 

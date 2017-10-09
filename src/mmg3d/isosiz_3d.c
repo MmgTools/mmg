@@ -65,7 +65,7 @@ inline double _MMG5_lenedgCoor_iso(double *ca,double *cb,double *ma,double *mb) 
     + (cb[2]-ca[2])*(cb[2]-ca[2]);
   l = sqrt(l);
   r = h2 / h1 - 1.0;
-  len = fabs(r) < _MMG5_EPS ? l / h1 : l / (h2-h1) * log(r+1.0);
+  len = fabs(r) < _MMG5_EPS ? l / h1 : l / (h2-h1) * log1p(r);
 
   return(len);
 }
@@ -79,7 +79,7 @@ inline double _MMG5_lenedgCoor_iso(double *ca,double *cb,double *ma,double *mb) 
  * \param hmin minimal edge size.
  * \param hmax maximal edge size.
  * \param hausd hausdorff value.
- * \return the isotropic size at the point.
+ * \return the isotropic size at the point if success, FLT_MAX if fail.
  *
  * Define isotropic size at regular point nump, whose surfacic ball is provided.
  *
@@ -97,27 +97,36 @@ _MMG5_defsizreg(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,
   double       kappa[2],vp[2][2];
   int          k,na,nb,ntempa,ntempb,iel,ip0;
   char         iface,i,j,i0;
+  static char  mmgWarn0=0,mmgWarn1=0,mmgWarn2=0,mmgWarn3=0;
 
   p0 = &mesh->point[nump];
 
   if ( !p0->xp || MG_EDG(p0->tag) || (p0->tag & MG_NOM) || (p0->tag & MG_REQ))  {
-    fprintf(stderr,"    ## Func. _MMG5_defsizreg : wrong point qualification : xp ? %d\n",p0->xp);
-    return(0);
+    if ( !mmgWarn0 ) {
+      mmgWarn0 = 1;
+      fprintf(stderr,"\n  ## Error: %s: at least 1 wrong point"
+              " qualification : xp ? %d.\n",__func__,p0->xp);
+    }
+    return(FLT_MAX);
   }
   isqhmin = 1.0 / (hmin*hmin);
   isqhmax = 1.0 / (hmax*hmax);
 
   n = &mesh->xpoint[p0->xp].n1[0];
 
-  /* Step 1 : rotation matrix that sends normal n to the third coordinate vector of R^3 */
+  /* Step 1 : rotation matrix that sends normal n to the third coordinate vector
+   * of R^3 */
   if ( !_MMG5_rotmatrix(n,r) ) {
-    fprintf(stderr,"%s:%d: Error: function _MMG5_rotmatrix return 0\n",
-            __FILE__,__LINE__);
-    exit(EXIT_FAILURE);
+    if ( !mmgWarn1 ) {
+      mmgWarn1 = 1;
+      fprintf(stderr,"\n  ## Warning: %s: function _MMG5_rotmatrix return 0.\n",
+              __func__);
+    }
+    return(FLT_MAX);
   }
 
-  /* Step 2 : rotation of the oriented surfacic ball with r : lispoi[k] is the common edge
-     between faces lists[k-1] and lists[k] */
+  /* Step 2 : rotation of the oriented surfacic ball with r : lispoi[k] is the
+     common edge between faces lists[k-1] and lists[k] */
   iel   = lists[0] / 4;
   iface = lists[0] % 4;
   pt    = &mesh->tetra[iel];
@@ -240,9 +249,12 @@ _MMG5_defsizreg(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,
 
     pxt   = &mesh->xtetra[mesh->tetra[iel].xt];
     if ( !_MMG5_bezierCP(mesh,&tt,&b,MG_GET(pxt->ori,iface)) ) {
-      fprintf(stderr,"%s:%d: Error: function _MMG5_bezierCP return 0\n",
-              __FILE__,__LINE__);
-      exit(EXIT_FAILURE);
+      if ( !mmgWarn2 ) {
+        mmgWarn2 = 1;
+        fprintf(stderr,"\n  ## Warning: %s: function _MMG5_bezierCP return 0.\n",
+                __func__);
+      }
+      return(FLT_MAX);
     }
 
     for (i0=0; i0<3; i0++) {
@@ -382,9 +394,12 @@ _MMG5_defsizreg(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,
   /* At this point, intm stands for the integral matrix of Taubin's approach : vp[0] and vp[1]
      are the two pr. directions of curvature, and the two curvatures can be inferred from lambdas*/
   if( !_MMG5_eigensym(intm,kappa,vp) ){
-    fprintf(stderr,"%s:%d: Error: function _MMG5_eigensym return 0\n",
-            __FILE__,__LINE__);
-    exit(EXIT_FAILURE);
+    if ( !mmgWarn3 ) {
+      mmgWarn3 = 1;
+      fprintf(stderr,"\n  # Warning: %s: function _MMG5_eigensym return 0.\n",
+              __func__);
+    }
+    return(FLT_MAX);
   }
 
   /* h computation : h(x) = sqrt( 9*hausd / (2 * max(kappa1(x),kappa2(x)) ) */
@@ -403,7 +418,6 @@ _MMG5_defsizreg(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,
 
   /* Travel surfacic ball one last time and update non manifold point metric */
   for (k=0; k<ilists; k++) {
-    iel = lists[k] / 4;
     iface = lists[k] % 4;
 
     for (j=0; j<3; j++) {
@@ -507,7 +521,7 @@ int _MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
 
   if ( mesh->info.hmax < 0.0 ) {
     //  mesh->info.hmax = 0.5 * mesh->info.delta;
-    fprintf(stderr,"%s:%d:Error: negative hmax value.\n",__FILE__,__LINE__);
+    fprintf(stderr,"\n  ## Error: %s: negative hmax value.\n",__func__);
     return(0);
   }
 
@@ -520,12 +534,11 @@ int _MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   /* alloc structure */
   if ( !met->m ) {
     ismet      = 0;
-    met->np    = mesh->np;
-    met->npmax = mesh->npmax;
-    met->size  = 1;
-    met->dim   = 3;
-    _MMG5_ADD_MEM(mesh,(met->npmax+1)*sizeof(double),"solution",return(0));
-    _MMG5_SAFE_MALLOC(met->m,(mesh->npmax+1),double);
+
+    /* Allocate and store the header informations for each solution */
+    if ( !MMG3D_Set_solSize(mesh,met,MMG5_Vertex,mesh->np,1) ) {
+      return 0;
+    }
 
     /* init constant size */
     for (k=1; k<=mesh->ne; k++) {

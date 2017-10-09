@@ -21,20 +21,30 @@
 int main(int argc,char *argv[]) {
   MMG5_pMesh      mmgMesh;
   MMG5_pSol       mmgSol;
-  char            *pwd,*filename;
-
+  char            *filename, *outname;
   int             k,np,nt,na,ier;
 
   fprintf(stdout,"  -- TEST MMG2DLIB \n");
 
+  if ( argc != 3 ) {
+    printf(" Usage: %s filein  fileout\n",argv[0]);
+    return(1);
+  }
+
   /* Name and path of the mesh file */
-  pwd = getenv("PWD");
-  filename = (char *) calloc(strlen(pwd) + 58, sizeof(char));
+  filename = (char *) calloc(strlen(argv[1]) + 1, sizeof(char));
   if ( filename == NULL ) {
     perror("  ## Memory problem: calloc");
     exit(EXIT_FAILURE);
   }
-  sprintf(filename, "%s%s%s", pwd, "/../libexamples/mmg2d/adaptation_example1/", "dom");
+  strcpy(filename,argv[1]);
+
+  outname = (char *) calloc(strlen(argv[2]) + 1, sizeof(char));
+  if ( outname == NULL ) {
+    perror("  ## Memory problem: calloc");
+    exit(EXIT_FAILURE);
+  }
+  strcpy(outname,argv[2]);
 
   /** ------------------------------ STEP   I -------------------------- */
   /** 1) Initialisation of mesh and sol structures */
@@ -58,10 +68,6 @@ int main(int argc,char *argv[]) {
   /** with MMG2D_loadMesh function */
   if ( MMG2D_loadMesh(mmgMesh,filename) != 1 )  exit(EXIT_FAILURE);
 
-
-  /*save init mesh*/
-  if ( MMG2D_saveMesh(mmgMesh,"init.mesh") != 1 )  exit(EXIT_FAILURE);
-
   /** 3) Build sol in MMG5 format */
   /** Two solutions: just use the MMG2D_loadMet function that will read a .sol(b)
       file formatted or manually set your sol using the MMG2D_Set* functions */
@@ -84,10 +90,6 @@ int main(int argc,char *argv[]) {
   /** 4) (not mandatory): check if the number of given entities match with mesh size */
   if ( MMG2D_Chk_meshData(mmgMesh,mmgSol) != 1 ) exit(EXIT_FAILURE);
 
-
-  /*save init size*/
-  if ( MMG2D_saveSol(mmgMesh,mmgSol,"init") != 1 )  exit(EXIT_FAILURE);
-
   ier = MMG2D_mmg2dlib(mmgMesh,mmgSol);
 
   if ( ier == MMG5_STRONGFAILURE ) {
@@ -97,10 +99,10 @@ int main(int argc,char *argv[]) {
     fprintf(stdout,"BAD ENDING OF MMG2DLIB\n");
 
   /*save result*/
-  if ( MMG2D_saveMesh(mmgMesh,"result.mesh") != 1 )  exit(EXIT_FAILURE);
+  if ( MMG2D_saveMesh(mmgMesh,outname) != 1 )  exit(EXIT_FAILURE);
 
   /*save metric*/
-  if ( MMG2D_saveSol(mmgMesh,mmgSol,"result") != 1 )  exit(EXIT_FAILURE);
+  if ( MMG2D_saveSol(mmgMesh,mmgSol,outname) != 1 )  exit(EXIT_FAILURE);
 
   /** 5) Free the MMG3D5 structures */
   MMG2D_Free_all(MMG5_ARG_start,
@@ -109,6 +111,9 @@ int main(int argc,char *argv[]) {
 
   free(filename);
   filename = NULL;
+
+  free(outname);
+  outname = NULL;
 
   return(0);
 }

@@ -32,42 +32,44 @@ extern "C" {
 #endif
 
 /* numerical accuracy */
-#define ALPHAD    3.464101615137755   /* 6.0 / sqrt(3.0)  */
+#define _MMGS_ALPHAD    3.464101615137755   /* 6.0 / sqrt(3.0)  */
 
-#define LOPTL     1.4
-#define LOPTS     0.71
-#define LLONG     2.0
-#define LSHRT     0.3
+#define _MMGS_LOPTL     1.4
+#define _MMGS_LOPTS     0.71
+#define _MMGS_LLONG     2.0
+#define _MMGS_LSHRT     0.3
 
-#define _MMG5_LMAX  1024
-#define BADKAL      2.e-2
-#define NULKAL      1.e-4
+#define _MMGS_LMAX  1024
+#define _MMGS_BADKAL      2.e-2
+#define _MMGS_NULKAL      1.e-4
 
-#define _MMG5_NPMAX     500000
-#define _MMG5_NTMAX    1000000
-#define _MMG5_XPMAX     500000
+#define _MMGS_NPMAX     500000
+#define _MMGS_NTMAX    1000000
+#define _MMGS_XPMAX     500000
 
 
 #define MS_SIN(tag)      ((tag & MG_CRN) || (tag & MG_REQ) || (tag & MG_NOM))
 
 
 /** Free allocated pointers of mesh and sol structure and return value val */
-#define _MMGS_RETURN_AND_FREE(mesh,met,val)do                 \
-  {                                                           \
-    MMGS_Free_all(MMG5_ARG_start,                             \
-                  MMG5_ARG_ppMesh,&mesh,MMG5_ARG_ppMet,&met,  \
-                  MMG5_ARG_end);                              \
-    return(val);                                              \
+#define _MMGS_RETURN_AND_FREE(mesh,met,val)do                       \
+  {                                                                 \
+    if ( !MMGS_Free_all(MMG5_ARG_start,                             \
+                        MMG5_ARG_ppMesh,&mesh,MMG5_ARG_ppMet,&met,  \
+                        MMG5_ARG_end) ) {                           \
+      return MMG5_LOWFAILURE;                                       \
+    }                                                               \
+    return(val);                                                    \
   }while(0)
 
 /** Reallocation of point table and sol table and creation
     of point ip with coordinates o and tag tag*/
-#define _MMGS_POINT_REALLOC(mesh,sol,ip,wantedGap,law,o,tag ) do        \
+#define _MMGS_POINT_REALLOC(mesh,sol,ip,wantedGap,law,o,tag,retval ) do \
   {                                                                     \
     int klink;                                                          \
                                                                         \
     _MMG5_TAB_RECALLOC(mesh,mesh->point,mesh->npmax,wantedGap,MMG5_Point, \
-                       "larger point table",law);                       \
+                       "larger point table",law,retval);                \
                                                                         \
     mesh->npnil = mesh->np+1;                                           \
     for (klink=mesh->npnil; klink<mesh->npmax-1; klink++)               \
@@ -77,7 +79,8 @@ extern "C" {
     if ( sol->m ) {                                                     \
       _MMG5_ADD_MEM(mesh,(sol->size*(mesh->npmax-sol->npmax))*sizeof(double), \
                     "larger solution",law);                             \
-      _MMG5_SAFE_REALLOC(sol->m,sol->size*(mesh->npmax+1),double,"larger solution"); \
+      _MMG5_SAFE_REALLOC(sol->m,sol->size*(mesh->npmax+1),double,       \
+                         "larger solution",retval);                     \
     }                                                                   \
     sol->npmax = mesh->npmax;                                           \
                                                                         \
@@ -88,13 +91,13 @@ extern "C" {
 
 /** Reallocation of tria table and creation
     of tria jel */
-#define _MMGS_TRIA_REALLOC( mesh,jel,wantedGap,law ) do                 \
+#define _MMGS_TRIA_REALLOC( mesh,jel,wantedGap,law,retval ) do          \
   {                                                                     \
     int klink,oldSiz;                                                   \
                                                                         \
     oldSiz = mesh->ntmax;                                               \
     _MMG5_TAB_RECALLOC(mesh,mesh->tria,mesh->ntmax,wantedGap,MMG5_Tria, \
-                       "larger tria table",law);                        \
+                       "larger tria table",law,retval);                 \
                                                                         \
     mesh->nenil = mesh->nt+1;                                           \
     for (klink=mesh->nenil; klink<mesh->ntmax-1; klink++)               \
@@ -105,7 +108,7 @@ extern "C" {
       _MMG5_ADD_MEM(mesh,3*(mesh->ntmax-oldSiz)*sizeof(int),            \
                     "larger adja table",law);                           \
       _MMG5_SAFE_RECALLOC(mesh->adja,3*mesh->nt+5,3*mesh->ntmax+5,int   \
-                          ,"larger adja table");                        \
+                          ,"larger adja table",retval);                 \
     }                                                                   \
                                                                         \
     /* We try again to add the point */                                 \
@@ -114,10 +117,10 @@ extern "C" {
   }while(0)
 
 /* prototypes */
-void _MMGS_Init_mesh_var( va_list argptr );
-void _MMGS_Free_all_var( va_list argptr );
-void _MMGS_Free_structures_var( va_list argptr );
-void _MMGS_Free_names_var( va_list argptr );
+int  _MMGS_Init_mesh_var( va_list argptr );
+int  _MMGS_Free_all_var( va_list argptr );
+int  _MMGS_Free_structures_var( va_list argptr );
+int  _MMGS_Free_names_var( va_list argptr );
 
 int  _MMGS_zaldy(MMG5_pMesh mesh);
 int  assignEdge(MMG5_pMesh mesh);
@@ -135,7 +138,7 @@ int  bouletrid(MMG5_pMesh mesh,int start,int ip,int *il1,int *l1,int *il2,int *l
 int  _MMGS_newPt(MMG5_pMesh mesh,double c[3],double n[3]);
 void _MMGS_delPt(MMG5_pMesh mesh,int ip);
 int  _MMGS_newElt(MMG5_pMesh mesh);
-void _MMGS_delElt(MMG5_pMesh mesh,int iel);
+int  _MMGS_delElt(MMG5_pMesh mesh,int iel);
 int  chkedg(MMG5_pMesh ,int );
 int  _MMG5_mmgsBezierCP(MMG5_pMesh ,MMG5_Tria*, _MMG5_pBezier, char ori);
 int  _MMGS_bezierInt(_MMG5_pBezier ,double *,double *,double *,double *);
@@ -166,7 +169,7 @@ int  delref(MMG5_pMesh);
 int  chkmet(MMG5_pMesh,MMG5_pSol);
 int  chknor(MMG5_pMesh);
 long long _MMG5_memSize(void);
-void _MMGS_memOption(MMG5_pMesh mesh);
+int _MMGS_memOption(MMG5_pMesh mesh);
 
 #ifdef USE_SCOTCH
 int _MMG5_mmgsRenumbering(int vertBoxNbr, MMG5_pMesh mesh, MMG5_pSol sol);
@@ -211,6 +214,8 @@ static inline
 void _MMGS_Set_commonFunc() {
   _MMG5_bezierCP          = _MMG5_mmgsBezierCP;
   _MMG5_chkmsh            = _MMG5_mmgsChkmsh;
+  _MMG5_indPt             = _MMGS_indPt;
+  _MMG5_indElt            = _MMGS_indElt;
 #ifdef USE_SCOTCH
   _MMG5_renumbering       = _MMG5_mmgsRenumbering;
 #endif

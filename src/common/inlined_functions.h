@@ -44,7 +44,7 @@
  * \param m0 metric at point np0.
  * \param m1 metric at point np1.
  * \param isedg 1 if the edge is a ridge, 0 otherwise.
- * \return length of edge according to the prescribed metric.
+ * \return length of edge according to the prescribed metric, 0 if fail.
  *
  * Compute length of surface edge \f$[np0;np1]\f$ according to the prescribed
  * aniso metrics \a m0 and \a m1.
@@ -55,6 +55,7 @@ double _MMG5_lenEdg(MMG5_pMesh mesh,int np0,int np1,
                     double *m0,double *m1,char isedg) {
   MMG5_pPoint   p0,p1;
   double        gammaprim0[3],gammaprim1[3],t[3],*n1,*n2,ux,uy,uz,ps1,ps2,l0,l1;
+  static char   mmgWarn=0;
 
   p0 = &mesh->point[np0];
   p1 = &mesh->point[np1];
@@ -145,8 +146,10 @@ double _MMG5_lenEdg(MMG5_pMesh mesh,int np0,int np1,
     gammaprim1[2] = - uz - ps1*n1[2];
   }
 
-  /* computation of the length of the two tangent vectors in their respective tangent plane */
-  /* l_ab = int_a^b sqrt(m_ij d_t x_i(t) d_t x_j(t) ) : evaluated by a 2-point quadrature method. */
+  /* computation of the length of the two tangent vectors in their respective
+   * tangent plane */
+  /* l_ab = int_a^b sqrt(m_ij d_t x_i(t) d_t x_j(t) ) : evaluated by a 2-point
+   * quadrature method. */
   l0 = m0[0]*gammaprim0[0]*gammaprim0[0] + m0[3]*gammaprim0[1]*gammaprim0[1] \
     + m0[5]*gammaprim0[2]*gammaprim0[2] \
     + 2.0*m0[1]*gammaprim0[0]*gammaprim0[1]  + 2.0*m0[2]*gammaprim0[0]*gammaprim0[2] \
@@ -157,13 +160,21 @@ double _MMG5_lenEdg(MMG5_pMesh mesh,int np0,int np1,
     +2.0*m1[1]*gammaprim1[0]*gammaprim1[1]  + 2.0*m1[2]*gammaprim1[0]*gammaprim1[2] \
     + 2.0*m1[4]*gammaprim1[1]*gammaprim1[2];
 
-  if(l0 < 0) {
-    printf("%s:%d:Error: negative edge length (%e)\n",__FILE__,__LINE__,l0);
-    exit(EXIT_FAILURE);
+  if( l0 < 0.) {
+    if ( !mmgWarn ) {
+      fprintf(stderr,"  ## Warning: %s: at least 1 negative edge length "
+              "(%e)\n",__func__,l0);
+      mmgWarn = 1;
+    }
+    return(0.);
   }
-  if(l1 < 0) {
-    printf("%s:%d:Error: negative edge length (%e)\n",__FILE__,__LINE__,l1);
-    exit(EXIT_FAILURE);
+  if(l1 < 0.) {
+    if ( !mmgWarn ) {
+      fprintf(stderr,"  ## Warning: %s: at least 1 negative edge length "
+              "(%e)\n",__func__,l1);
+      mmgWarn = 1;
+    }
+    return(0.);
   }
   l0 = 0.5*(sqrt(l0) + sqrt(l1));
 
@@ -176,7 +187,7 @@ double _MMG5_lenEdg(MMG5_pMesh mesh,int np0,int np1,
  * \param np0 index of edge's extremity.
  * \param np1 index of edge's extremity.
  * \param isedg 1 if the edge is a ridge, 0 otherwise.
- * \return length of edge according to the prescribed metric.
+ * \return length of edge according to the prescribed metric, 0 if fail.
  *
  * Compute length of surface edge \f$[i0;i1]\f$ according to the prescribed
  * aniso metric (for special storage of metrics at ridges points). Here the
@@ -187,6 +198,7 @@ static inline
 double _MMG5_lenSurfEdg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,char isedg) {
   MMG5_pPoint   p0,p1;
   double        *m0,*m1,met0[6],met1[6],ux,uy,uz;
+  static char   mmgWarn = 0;
 
   p0 = &mesh->point[np0];
   p1 = &mesh->point[np1];
@@ -201,9 +213,12 @@ double _MMG5_lenSurfEdg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,char i
   }
   else if ( MG_GEO & p0->tag ) {
     if ( !_MMG5_buildridmet(mesh,met,np0,ux,uy,uz,met0) )  {
-      printf("%s:%d:Error: Unable to compute the metric along the ridge.\n "
-             "Exit program.\n",__FILE__,__LINE__);
-      exit(EXIT_FAILURE);
+      if ( !mmgWarn ) {
+        fprintf(stderr,"  ## Warning: %s: a- unable to compute at least 1 ridge"
+                " metric.\n",__func__);
+        mmgWarn = 1;
+      }
+      return 0.;
     }
     m0 = met0;
   }
@@ -216,9 +231,12 @@ double _MMG5_lenSurfEdg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,char i
   }
   else if ( MG_GEO & p1->tag ) {
     if ( !_MMG5_buildridmet(mesh,met,np1,ux,uy,uz,met1) )  {
-      printf("%s:%d:Error: Unable to compute the metric along the ridge.\n "
-             "Exit program.\n",__FILE__,__LINE__);
-      exit(EXIT_FAILURE);
+      if ( !mmgWarn ) {
+        fprintf(stderr,"  ## Warning: %s: b- unable to compute at least 1 ridge"
+                " metric.\n",__func__);
+        mmgWarn = 1;
+      }
+      return 0.;
     }
     m1 = met1;
   }

@@ -273,7 +273,7 @@ int _MMG5_boulenm(MMG5_pMesh mesh,int start,int ip,int iface,
  * \param ip local index of the point in the tetrahedra \a start.
  * \param ng pointer toward the number of ridges.
  * \param nr pointer toward the number of reference edges.
- * \return ns the number of special edges passing through ip.
+ * \return ns the number of special edges passing through ip, -1 if fail.
  *
  * Count the numer of ridges and reference edges incident to
  * the vertex \a ip when ip is non-manifold.
@@ -295,8 +295,8 @@ int _MMG5_boulernm(MMG5_pMesh mesh, int start, int ip, int *ng, int *nr){
   hash.siz  = mesh->np;
   hash.max  = hmax + 1;
   hash.nxt  = hash.siz;
-  _MMG5_ADD_MEM(mesh,(hash.max+1)*sizeof(_MMG5_hedge),"hash table",return(0));
-  _MMG5_SAFE_CALLOC(hash.item,hash.max+1,_MMG5_hedge);
+  _MMG5_ADD_MEM(mesh,(hash.max+1)*sizeof(_MMG5_hedge),"hash table",return(-1));
+  _MMG5_SAFE_CALLOC(hash.item,hash.max+1,_MMG5_hedge,-1);
 
   for (k=hash.siz; k<hash.max; k++)
     hash.item[k].nxt = k+1;
@@ -348,10 +348,10 @@ int _MMG5_boulernm(MMG5_pMesh mesh, int start, int ip, int *ng, int *nr){
 
             if ( hash.nxt >= hash.max-1 ) {
               if ( mesh->info.ddebug )
-                fprintf(stdout,"  ## Memory alloc problem (edge): %d\n",
-                        hash.max);
+                fprintf(stderr,"\n  ## Warning: %s: memory alloc problem (edge):"
+                        " %d\n",__func__,hash.max);
               _MMG5_TAB_RECALLOC(mesh,hash.item,hash.max,0.2,_MMG5_hedge,
-                                 "_MMG5_edge",return(0));
+                                 "_MMG5_edge",return -1,-1);
               /* ph pointer may be false after realloc */
               ph        = &hash.item[hash.nxt];
 
@@ -432,6 +432,7 @@ int _MMG5_boulesurfvolp(MMG5_pMesh mesh,int start,int ip,int iface,
   MMG5_pxTetra pxt;
   int  base,nump,k,k1,*adja,piv,na,nb,adj,cur,nvstart,fstart,aux;
   char iopp,ipiv,i,j,l,ipa,ipb,isface;
+  static char mmgErr0=0, mmgErr1=0;
 
   if ( isnm ) assert(!mesh->adja[4*(start-1)+iface+1]);
 
@@ -455,11 +456,16 @@ int _MMG5_boulesurfvolp(MMG5_pMesh mesh,int start,int ip,int iface,
     lists[(*ilists)] = 4*k+iopp;
     (*ilists)++;
     if ( *ilists >= MMG3D_LMAX ) {
-      fprintf(stderr,"  ## Warning: problem in surface remesh process.");
-      fprintf(stderr," Surface ball of point %d contains too many elts.\n",
-              _MMG3D_indPt(mesh,nump));
-      fprintf(stderr,"  ##          Try to modify the hausdorff number,");
-      fprintf(stderr," or/and the maximum mesh.\n");
+      if ( !mmgErr0 ) {
+        fprintf(stderr,"\n  ## Warning: %s: problem in surface remesh process."
+                " Surface ball of at least 1 point (%d) contains too"
+                " many elts.\n"
+                "  ##          Try to modify the hausdorff number "
+                " or/and the maximum edge size.\n",__func__,
+                _MMG3D_indPt(mesh,nump));
+        mmgErr0 = 1;
+      }
+
       return(-1);
     }
 
@@ -542,11 +548,14 @@ int _MMG5_boulesurfvolp(MMG5_pMesh mesh,int start,int ip,int iface,
 
       /* overflow */
       if ( *ilistv > MMG3D_LMAX-3 ) {
-        fprintf(stderr,"  ## Warning: problem in remesh process.");
-        fprintf(stderr," Volumic ball of point %d contains too many elts.\n",
-                _MMG3D_indPt(mesh,nump));
-        fprintf(stderr,"  ##          Try to modify the hausdorff number,");
-        fprintf(stderr," or/and the maximum mesh.\n");
+        if ( !mmgErr1 ) {
+          fprintf(stderr,"\n  ## Warning: %s: problem in remesh process."
+                  " Volumic ball of point %d contains too many elts.\n",
+                  __func__,_MMG3D_indPt(mesh,nump));
+          fprintf(stderr,"\n  ##          Try to modify the hausdorff number,"
+                  " or/and the maximum mesh.\n");
+          mmgErr1 = 1;
+        }
         return(-1);
       }
       listv[(*ilistv)] = 4*k1+j;
@@ -590,6 +599,7 @@ int _MMG5_bouletrid(MMG5_pMesh mesh,int start,int iface,int ip,int *il1,int *l1,
   int                  idp,na, nb, base, iopp, ipiv, piv, fstart, nvstart, adj;
   int                  i,ifac,idx,idx2,idx_tmp,i1,ipa,ipb, isface;
   double               *n1,*n2,nt[3],ps1,ps2;
+  static char          mmgErr0=0;
 
   pt = &mesh->tetra[start];
   if ( !MG_EOK(pt) )  return(0);
@@ -648,11 +658,14 @@ int _MMG5_bouletrid(MMG5_pMesh mesh,int start,int iface,int ip,int *il1,int *l1,
     lists[ilists] = 4*k+iopp;
     ilists++;
     if ( ilists >= MMG3D_LMAX ) {
-      fprintf(stderr,"  ## Warning: problem in surface remesh process.");
-      fprintf(stderr," Surface ball of point %d contains too many elts.\n",
-              _MMG3D_indPt(mesh,idp));
-      fprintf(stderr,"  ##          Try to modify the hausdorff number,");
-      fprintf(stderr," or/and the maximum mesh.\n");
+      if ( !mmgErr0 ) {
+        fprintf(stderr,"\n  ## Warning: %s: problem in remesh process."
+                " Volumic ball of point %d contains too many elts.\n",
+                __func__,_MMG3D_indPt(mesh,idp));
+        fprintf(stderr,"\n  ##          Try to modify the hausdorff number,"
+                " or/and the maximum mesh.\n");
+        mmgErr0 = 1;
+      }
       return(-1);
     }
 
@@ -867,7 +880,7 @@ _MMG5_settag(MMG5_pMesh mesh,int start,int ia,int16_t tag,int edg) {
       pxt->tag[ia] |= tag;
       /* Remove the potential nosurf tag if initially the edge is
        * really required */
-      if ( (taginit & MG_REQ) && !(taginit & MG_NOSURF) ) {
+      if ( (taginit & MG_REQ) && ( (!(taginit & MG_NOSURF)) || !(tag & MG_NOSURF) ) ) {
         pxt->tag[ia] &= ~MG_NOSURF;
       }
       pxt->edg[ia]  = MG_MAX(pxt->edg[ia],edg);
@@ -891,8 +904,8 @@ _MMG5_settag(MMG5_pMesh mesh,int start,int ia,int16_t tag,int edg) {
         pxt->tag[i] |= tag;
         /* Remove the potential nosurf tag if initially the edge is
          * really required */
-        if ( (taginit & MG_REQ) && !(taginit & MG_NOSURF) ) {
-          pxt->tag[ia] &= ~MG_NOSURF;
+        if ( (taginit & MG_REQ) && ( (!(taginit & MG_NOSURF)) || !(tag & MG_NOSURF) ) ) {
+          pxt->tag[i] &= ~MG_NOSURF;
         }
         pxt->edg[i]  = MG_MAX(pxt->edg[i],edg);
       }
@@ -1061,13 +1074,23 @@ _MMG5_deltag(MMG5_pMesh mesh,int start,int ia,int16_t tag) {
   return(1);
 }
 
-/** Find all tets sharing edge ia of tetra start
-    return 2*ilist if shell is closed, 2*ilist +1 otherwise
-    return 0 if one of the tet of the shell is required */
+/**
+ * \param mesh pointer toward the mesh structure
+ * \param start index of the starting tetra
+ * \param ia index of the edge
+ * \param list list of tetra sharing the edge \a ia
+ *
+ * \return 2*ilist if shell is closed, 2*ilist +1 otherwise, 0 if one of the tet
+ * of the shell is required
+ *
+ * Find all tets sharing edge ia of tetra start.
+ *
+ */
 int _MMG5_coquil(MMG5_pMesh mesh,int start,int ia,int * list) {
-  MMG5_pTetra  pt;
-  int     ilist,*adja,piv,adj,na,nb,ipa,ipb;
-  char    i;
+  MMG5_pTetra pt;
+  int         ilist,*adja,piv,adj,na,nb,ipa,ipb;
+  char        i;
+  static char mmgErr0=0;
 
   assert ( start >= 1 );
   pt = &mesh->tetra[start];
@@ -1098,11 +1121,14 @@ int _MMG5_coquil(MMG5_pMesh mesh,int start,int ia,int * list) {
     ilist++;
     /* overflow */
     if ( ilist > MMG3D_LMAX-3 ) {
-      fprintf(stderr,"  ## Warning: problem in remesh process.");
-      fprintf(stderr," Coquil of edge %d-%d contains too many elts.\n",
-              _MMG3D_indPt(mesh,na),_MMG3D_indPt(mesh,nb));
-      fprintf(stderr,"  ##          Try to modify the hausdorff number,");
-      fprintf(stderr," or/and the maximum mesh.\n");
+      if ( !mmgErr0 ) {
+        fprintf(stderr,"\n  ## Warning: %s: problem in remesh process."
+                " Coquil of edge %d-%d contains too many elts.\n",
+                __func__,_MMG3D_indPt(mesh,na),_MMG3D_indPt(mesh,nb));
+        fprintf(stderr,"\n  ##          Try to modify the hausdorff number,"
+                " or/and the maximum mesh.\n");
+        mmgErr0 = 1;
+      }
       return(-1);
     }
 
@@ -1133,11 +1159,14 @@ int _MMG5_coquil(MMG5_pMesh mesh,int start,int ia,int * list) {
   ilist++;
   /* overflow */
   if ( ilist > MMG3D_LMAX-3 ) {
-    fprintf(stderr,"  ## Warning: problem in remesh process.");
-    fprintf(stderr," Coquil of edge %d-%d contains too many elts.\n",
-            _MMG3D_indPt(mesh,na),_MMG3D_indPt(mesh,nb));
-    fprintf(stderr,"  ##          Try to modify the hausdorff number,");
-    fprintf(stderr," or/and the maximum mesh.\n");
+    if ( !mmgErr0 ) {
+      fprintf(stderr,"\n  ## Warning: %s: problem in remesh process."
+              " Coquil of edge %d-%d contains too many elts.\n",
+              __func__,_MMG3D_indPt(mesh,na),_MMG3D_indPt(mesh,nb));
+      fprintf(stderr,"\n  ##          Try to modify the hausdorff number,"
+              " or/and the maximum mesh.\n");
+      mmgErr0 = 1;
+    }
     return(-1);
   }
 
@@ -1167,11 +1196,14 @@ int _MMG5_coquil(MMG5_pMesh mesh,int start,int ia,int * list) {
     ilist++;
     /* overflow */
     if ( ilist > MMG3D_LMAX-2 ) {
-      fprintf(stderr,"  ## Warning: problem in surface remesh process.");
-      fprintf(stderr," Coquil of edge %d-%d contains too many elts.\n",
-              _MMG3D_indPt(mesh,na),_MMG3D_indPt(mesh,nb));
-      fprintf(stderr,"  ##          Try to modify the hausdorff number,");
-      fprintf(stderr," or/and the maximum mesh.\n");
+      if ( !mmgErr0 ) {
+        fprintf(stderr,"\n  ## Warning: %s: problem in remesh process."
+                " Coquil of edge %d-%d contains too many elts.\n",
+                __func__,_MMG3D_indPt(mesh,na),_MMG3D_indPt(mesh,nb));
+        fprintf(stderr,"\n  ##          Try to modify the hausdorff number,"
+                " or/and the maximum mesh.\n");
+        mmgErr0 = 1;
+      }
       return(-1);
     }
 
@@ -1261,7 +1293,12 @@ int _MMG5_srcbdy(MMG5_pMesh mesh,int start,int ia) {
  void _MMG5_coquilFaceErrorMessage(MMG5_pMesh mesh, int k1, int k2) {
   MMG5_pPoint ppt;
   MMG5_pTetra pt;
-  int    np, ne, k, kel1, kel2;
+  int         np, ne, k, kel1, kel2;
+  static char mmgErr0;
+
+  if ( mmgErr0 ) return;
+
+  mmgErr0 = 1;
 
   np = ne = kel1 = kel2 = 0;
   for (k=1; k<=mesh->np; k++) {
@@ -1277,7 +1314,8 @@ int _MMG5_srcbdy(MMG5_pMesh mesh,int start,int ia) {
     }
   }
 
-  fprintf(stderr,"  ## Error: problem in surface remesh process");
+  fprintf(stderr,"\n  ## Error: %s: at least 1 problem in surface"
+          " remesh process",__func__);
   fprintf(stderr," (potential creation of a lonely boundary face):\n");
 
   if ( kel1 != 0 ) {
@@ -1286,34 +1324,181 @@ int _MMG5_srcbdy(MMG5_pMesh mesh,int start,int ia) {
     fprintf(stderr," %d %d %d %d.\n", mesh->point[pt->v[0]].tmp,
             mesh->point[pt->v[1]].tmp,mesh->point[pt->v[2]].tmp,
             mesh->point[pt->v[3]].tmp);
-    fprintf(stderr,"adjacent tetras %d %d %d %d\n",(&mesh->adja[3*(kel1-1)+1])[0],
+    fprintf(stderr,"            adjacent tetras %d %d %d %d\n",(&mesh->adja[3*(kel1-1)+1])[0],
             (&mesh->adja[3*(kel1-1)+1])[1],(&mesh->adja[3*(kel1-1)+1])[2],
             (&mesh->adja[3*(kel1-1)+1])[3]);
-    fprintf(stderr,"vertex required? %d %d %d %d\n",mesh->point[pt->v[0]].tag & MG_REQ,
+    fprintf(stderr,"            vertex required? %d %d %d %d\n",mesh->point[pt->v[0]].tag & MG_REQ,
             mesh->point[pt->v[1]].tag & MG_REQ,
             mesh->point[pt->v[2]].tag & MG_REQ,mesh->point[pt->v[3]].tag & MG_REQ);
   } else if ( kel2 != 0 ) {
     fprintf(stderr,"            look at elt %d:",kel2);
     mesh->tetra[kel2].ref=5;
-    fprintf(stderr," %d %d %d %d.\n", mesh->point[pt->v[0]].tmp,
+    fprintf(stderr," %d %d %d %d.\n\n", mesh->point[pt->v[0]].tmp,
             mesh->point[pt->v[1]].tmp,mesh->point[pt->v[2]].tmp,
             mesh->point[pt->v[3]].tmp);
   }
-  fprintf(stderr,"  ##        Try to modify the hausdorff number,");
+  fprintf(stderr,"\n  ##        Try to modify the hausdorff number,");
   fprintf(stderr," the maximum mesh size or/and the value of angle detection.\n");
   fprintf(stderr," You can also try to run with -noswap option but probably");
-  fprintf(stderr," the final mesh will have poor quality.\n");
+  fprintf(stderr," the final mesh will have poor quality.\n\n");
 }
 
 /**
  * \param mesh pointer toward the mesh structure.
  * \param start index of the starting tetrahedron.
- * \param ia index of edge whose shell is computed.
+ * \param na global index of the 1st extremity of the edge whose shell is computed
+ * \param nb global index of the  2d extremity of the edge whose shell is computed
+ * \param iface index of the face from which we come.
+ * \param ia index of edge whose shell is computed (in tetra).
+ * \param list pointer toward the list of tetra in the shell (to fill).
+ * \param ilist pointer toward the number of tetra in the shell (to fill).
+ * \param it1 pointer toward the index of the 1st boundary face sharing \a ia
+ * \param it2 pointer toward the index of the 2d boundary face sharing \a ia
+ * (to fill).
+ * \param adj pointer toward the adjacent to treat in the shell (to update)
+ * \param hasadja pointer toward 0 if we don't have adja through iface,
+ * 0 otherwise (to fill)
+ * \param nbdy pointer toward the number of boundaries found minus 1 (to update)
+ * \param silent if 1, print error message for more than 2 boundary triangles
+ * in the shell
+ *
+ * \return -1 if fail, 1 otherwise
+ *
+ * Travel in the shell of the edge until meeting the first tetra or reaching a
+ * tetra without adjacent. Fill \a it2 and \a list.
+ *
+ */
+int _MMG3D_coquilFaceFirstLoop(MMG5_pMesh mesh,int start,int na,int nb,char iface,
+                               char ia,int *list,int *ilist,int *it1,int *it2,
+                               int *piv,int *adj,char *hasadja,int *nbdy,int silent) {
+
+  MMG5_pTetra   pt;
+  MMG5_pxTetra  pxt;
+  int           *adja;
+  int           pradj,pri,ier,ifar_idx,i;
+  static char   mmgErr0 = 0;
+
+  pt = &mesh->tetra[start];
+
+  *ilist = 0;
+
+  *it1 = 0;
+  *it2 = 0;
+
+  /* Ensure that the first boundary face found is ifac (nedded in multidomain case) */
+  ifar_idx = (_MMG5_ifar[ia][0]==iface) ? 1 : 0;
+  assert ( iface == _MMG5_ifar[ia][(ifar_idx+1)%2] );
+
+  (*piv)  = pt->v[_MMG5_ifar[ia][ifar_idx]];
+  *adj    = start;
+  i       = ia;
+
+  pxt = &mesh->xtetra[pt->xt];
+
+  assert ( pxt->ftag[iface] );
+  (*it1) = 4*start + iface;
+
+  adja       = &mesh->adja[4*(start-1)+1];
+  (*hasadja) = (adja[iface] > 0);
+
+  (*nbdy)    = 0;
+
+  do {
+    pradj = (*adj);
+    pri    = i;
+
+    /* travel through new tetra */
+    ier = _MMG5_coquilTravel(mesh,na,nb,adj,piv,&iface,&i);
+
+    /* fill the shell */
+    list[(*ilist)] = 6*pradj +pri;
+    (*ilist)++;
+
+    /* overflow */
+    if ( (*ilist) > MMG3D_LMAX-2 ) {
+      if ( !mmgErr0 ) {
+        fprintf(stderr,"\n  ## Warning: %s: problem in remesh process."
+                " Coquil of edge %d-%d contains too many elts.\n",
+                __func__,_MMG3D_indPt(mesh,na),_MMG3D_indPt(mesh,nb));
+        fprintf(stderr,"\n  ##          Try to modify the hausdorff number,"
+                " or/and the maximum mesh.\n");
+        mmgErr0 = 1;
+      }
+      return(-1);
+    }
+
+    if ( !ier ) continue;
+
+    if ( !(*it2) ) {
+      *it2 = 4*pradj+iface;
+    }
+    else {
+      (*nbdy)++;
+    }
+
+  } while ( (*adj) && ((*adj) != start) );
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param piv global index of the pivot.
+ * \param iface index of the face from which we come.
+ * \param i index of edge whose shell is computed (in tetra).
+ * \param list pointer toward the list of tetra in the shell (to fill).
+ * \param ilist pointer toward the number of tetra in the shell (to fill).
+ * \param it1 pointer toward the index of the 1st boundary face sharing \a ia
+ * \param pradj pointer toward the first tetra of the shell (to fill).
+ * \param adj pointer toward the adjacent to treat in the shell (to update)
+ *
+ * Initialize the travel in the shell of the edge in reverse direction than in
+ * the \a coquilFaceFirstLoop function.
+ *
+ */
+void _MMG3D_coquilFaceSecondLoopInit(MMG5_pMesh mesh,int piv,char *iface,int *i,
+                                     int *list,int *ilist,int *it1,int *pradj,
+                                     int *adj) {
+
+  MMG5_pTetra   pt;
+  MMG5_pxTetra  pxt;
+
+  assert( !(*adj) );
+
+  (*adj)      = list[(*ilist)-1] / 6;
+  (*i)        = list[(*ilist)-1] % 6;
+  (*ilist)     = 0;
+
+  (*pradj) = (*adj);
+  pt       = &mesh->tetra[(*adj)];
+  assert(pt->xt);
+  pxt      = &mesh->xtetra[pt->xt];
+
+  if ( pt->v[ _MMG5_ifar[(*i)][0] ] == piv ) {
+    (*iface) = _MMG5_ifar[(*i)][1];
+  }
+  else {
+    (*iface) = _MMG5_ifar[(*i)][0];
+  }
+
+  assert ( pxt->ftag[(*iface)] );
+
+  *it1 = 4*(*pradj) + (*iface);
+
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param start index of the starting tetrahedron.
+ * \param iface index of the boundary face from which we come.
+ * \param ia index of edge whose shell is computed (in tetra).
  * \param list pointer toward the list of tetra in the shell (to fill).
  * \param it1 pointer toward the index of the first boundary face sharing \a ia
  * (to fill).
  * \param it2 pointer toward the index of the second boundary face sharing \a ia
  * (to fill).
+ * \param silent if 1, print error message for more than 2 boundary triangles
+ * in the shell
  * \return -1 if fail, \f$2*ilist\f$ if shell is closed, \f$2*ilist+1\f$
  * otherwise.
  *
@@ -1323,104 +1508,65 @@ int _MMG5_srcbdy(MMG5_pMesh mesh,int start,int ia) {
  *
  * \warning Don't work if \a ia has only one boundary face in its shell.
  */
-int _MMG5_coquilface(MMG5_pMesh mesh,int start,int ia,int *list,int *it1,
-                     int *it2,int silent) {
+int _MMG5_coquilface(MMG5_pMesh mesh,int start,char iface,int ia,int *list,
+                     int *it1,int *it2, int silent) {
   MMG5_pTetra   pt;
-  MMG5_pxTetra  pxt;
-  int     *adja,piv,adj,na,nb,ilist,pradj,i;
-  char     iface,isbdy;
+  int           piv,adj,na,nb,ilist,pradj,i,ier,nbdy;
+  char          hasadja;
+  static char   mmgErr0=0,mmgErr1=0,mmgWarn0=0;
 
   pt = &mesh->tetra[start];
 
   na   = pt->v[ _MMG5_iare[ia][0] ];
   nb   = pt->v[ _MMG5_iare[ia][1] ];
 
-  ilist = 0;
-  list[ilist] = 6*start+ia;
-  ilist++;
+  /* Travel throug the shell of the edge until reaching a tetra without adjacent
+   * or until reaching the starting tetra */
+  ier = _MMG3D_coquilFaceFirstLoop(mesh,start,na,nb,iface,ia,list,&ilist,it1,it2,
+                                   &piv,&adj,&hasadja,&nbdy,silent);
 
-  *it1 = 0;
-  *it2 = 0;
-
-  adja = &mesh->adja[4*(start-1)+1];
-  adj = adja[_MMG5_ifar[ia][0]] / 4;
-  piv = pt->v[_MMG5_ifar[ia][1]];
-
-  pxt = &mesh->xtetra[pt->xt];
-
-  iface = _MMG5_ifar[ia][1];
-  isbdy = pxt->ftag[iface];
-  if ( isbdy )
-    *it1 = 4*start + iface;
-
-  while ( adj && (adj != start) ) {
-    pradj = adj;
-
-    /* travel through new tetra */
-    if ( _MMG5_coquilTravel(mesh,na,nb,&adj,&piv,&iface,&i) ) {
-      if ( *it1 == 0 )
-        *it1 = 4*pradj+iface;
-      else {
-        if ( *it2 && !silent ) {
-          // Algiane: (commentated assert) for a manifold edge 2 cases :
-          // 1) the shell is open and we have more than 3 tri sharing the edge
-          // (highly non-manifold)
-          // 2) we have a non-manifold shape immersed in a domain (3 triangles
-          // sharing the edge and a closed shell)
-          printf("  ## Warning: you have more than 2 boundaries in the shell of your edge.\n");
-          printf("  Problem may occur during remesh process.\n");
-        }
-        //assert( *it2 == 0 );
-        *it2 = 4*pradj+iface;
-      }
-    }
-
-    /* fill the shell */
-    list[ilist] = 6*pradj +i;
-    (ilist)++;
-    /* overflow */
-    if ( ilist > MMG3D_LMAX-2 ) {
-      fprintf(stderr,"  ## Warning: problem in surface remesh process.");
-      fprintf(stderr," Coquil of edge %d-%d contains too many elts.\n",
-              _MMG3D_indPt(mesh,na),_MMG3D_indPt(mesh,nb));
-      fprintf(stderr,"  ##          Try to modify the hausdorff number,");
-      fprintf(stderr," or/and the maximum mesh.\n");
-      return(-1);
-    }
-  }
+  if ( ier < 0 ) return ier;
 
   /* At this point, the first travel, in one direction, of the shell is
      complete. Now, analyze why the travel ended. */
   if ( adj == start ) {
-    if ( (!(*it1) || !(*it2)) || ((*it1) == (*it2)) ) {
+    if ( !(*it2) ) {
+      if ( !mmgErr0 ) {
+        printf("  ## Error: %s: Wrong boundary tags: Only 1 boundary face found in"
+               " the shell of the edge\n",__func__);
+        mmgErr0 = 1;
+      }
+      return -1;
+    }
+
+    if ( !nbdy ) {
       _MMG5_coquilFaceErrorMessage(mesh, (*it1)/4, (*it2)/4);
       return(-1);
+    } else if ( nbdy > 1 ) {
+      if ( !silent ) {
+        if ( !mmgWarn0 ) {
+          // Algiane: for a manifold edge 2 cases :
+          // 1) the shell is open and we have more than 3 tri sharing the edge
+          // (highly non-manifold)
+          // 2) we have a non-manifold shape immersed in a domain (3 triangles
+          // sharing the edge and a closed shell)
+          printf("  ## Warning: %s: you have %d boundaries in the shell"
+                 " of your edge.\n",__func__,nbdy+1);
+          printf("  Problem may occur during remesh process.\n");
+          mmgWarn0 = 1;
+        }
+      }
     }
-    return(2*ilist);
+
+    return (2*ilist);
   }
 
   /* A boundary has been detected : slightly different configuration */
-  assert(!adj);
-  adj = list[ilist-1] / 6;
-  i   = list[ilist-1] % 6;
-  ilist = 0;
+  if ( !hasadja ) return(2*ilist+1);
 
   /* Start back everything from this tetra adj */
-  pradj = adj;
-  pt = &mesh->tetra[adj];
-  assert(pt->xt);
-  pxt = &mesh->xtetra[pt->xt];
-
-  adja = &mesh->adja[4*(adj-1)+1];
-  if ( pt->v[ _MMG5_ifar[i][0] ] == piv ) {
-    iface = _MMG5_ifar[i][1];
-  }
-  else {
-    iface = _MMG5_ifar[i][0];
-  }
-  isbdy = pxt->ftag[iface];
-  assert(isbdy);
-  *it1 = 4*pradj + iface;
+  _MMG3D_coquilFaceSecondLoopInit(mesh,piv,&iface,&i,list,&ilist,it1,
+                                  &pradj,&adj);
 
   while ( adj ) {
     pradj = adj;
@@ -1430,11 +1576,14 @@ int _MMG5_coquilface(MMG5_pMesh mesh,int start,int ia,int *list,int *it1,
     ilist++;
     /* overflow */
     if ( ilist > MMG3D_LMAX-2 ) {
-      fprintf(stderr,"  ## Warning: problem in surface remesh process.");
-      fprintf(stderr," Coquil of edge %d-%d contains too many elts.\n",
-              _MMG3D_indPt(mesh,na),_MMG3D_indPt(mesh,nb));
-      fprintf(stderr,"  ##          Try to modify the hausdorff number,");
-      fprintf(stderr," or/and the maximum mesh.\n");
+      if ( !mmgErr1 ) {
+        fprintf(stderr,"\n  ## Warning: %s: problem in remesh process."
+                " Coquil of edge %d-%d contains too many elts.\n",
+                __func__,_MMG3D_indPt(mesh,na),_MMG3D_indPt(mesh,nb));
+        fprintf(stderr,"\n  ##          Try to modify the hausdorff number,"
+                " or/and the maximum mesh.\n");
+        mmgErr1 = 1;
+      }
       return(-1);
     }
   }
@@ -1474,12 +1623,30 @@ int16_t _MMG5_coquilTravel(MMG5_pMesh mesh, int na, int nb, int* adj, int *piv,
   int          ipa,ipb,*adja;
   int16_t      isbdy;
 
-    pt = &mesh->tetra[*adj];
-    pxt = 0;
-    if ( pt->xt )
-      pxt = &mesh->xtetra[pt->xt];
+  pt = &mesh->tetra[*adj];
+  pxt = 0;
+  if ( pt->xt )
+    pxt = &mesh->xtetra[pt->xt];
 
-    /* identification of edge number in tetra *adj */
+  /* set new tetra for travel */
+  adja = &mesh->adja[4*(*adj-1)+1];
+  if ( pt->v[ _MMG5_ifar[*i][0] ] == *piv ) {
+    *iface = _MMG5_ifar[*i][0];
+    *adj = adja[ _MMG5_ifar[*i][0] ] / 4;
+    *piv = pt->v[ _MMG5_ifar[*i][1] ];
+  }
+  else {
+    assert(pt->v[ _MMG5_ifar[*i][1] ] == *piv );
+    *iface = _MMG5_ifar[*i][1];
+    *adj = adja[ _MMG5_ifar[*i][1] ] /4;
+    *piv = pt->v[ _MMG5_ifar[*i][0] ];
+  }
+  isbdy = pt->xt ? pxt->ftag[*iface] : 0;
+
+  /* identification of edge number in tetra *adj */
+  if ( *adj ) {
+    pt = &mesh->tetra[*adj];
+
     for (*i=0; *i<6; ++(*i)) {
       ipa = _MMG5_iare[*i][0];
       ipb = _MMG5_iare[*i][1];
@@ -1487,24 +1654,9 @@ int16_t _MMG5_coquilTravel(MMG5_pMesh mesh, int na, int nb, int* adj, int *piv,
            (pt->v[ipa] == nb && pt->v[ipb] == na))  break;
     }
     assert(*i<6);
+  }
 
-    /* set new tetra for travel */
-    adja = &mesh->adja[4*(*adj-1)+1];
-    if ( pt->v[ _MMG5_ifar[*i][0] ] == *piv ) {
-      *iface = _MMG5_ifar[*i][1];
-      *adj = adja[ _MMG5_ifar[*i][0] ] / 4;
-      *piv = pt->v[ *iface ];
-    }
-    else {
-      assert(pt->v[ _MMG5_ifar[*i][1] ] == *piv );
-      *iface = _MMG5_ifar[*i][0];
-      *adj = adja[ _MMG5_ifar[*i][1] ] /4;
-      *piv = pt->v[ *iface ];
-    }
-    isbdy = pt->xt ? pxt->ftag[*iface] : 0;
-
-    return(isbdy);
-
+  return(isbdy);
 }
 
 /**

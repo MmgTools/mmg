@@ -1,8 +1,7 @@
 # Example of basic use of library libmmg3d for a lagrangian motion test case
 
 ## I/ Implementation
-  We read the mesh and displacement in the **_tinyBoxt.mesh_** and **_tinyBoxt.sol_** files and then, we compute the volume displacement. we save results in the **_tinyBoxt.o.mesh/sol_** files.
-
+  We read the mesh and displacement in files and then, we compute the volume displacement.
 
 ## II/ Compilation
   1. Prerequisite: you must have build and install the SUscElas library (https://github.com/SUscTools/SUscElas)
@@ -26,9 +25,3 @@
 > gcc -I$CMAKE_INSTALL_PREFIX/include/mmg/mmg3d main.c -L$CMAKE_INSTALL_PREFIX/lib -lmmg3d
 > export LD_LIBRARY_PATH=$CMAKE_INSTALL_PREFIX/lib:$LD_LIBRARY_PATH
 > ```
-
-## III/ Execution
-Because it contains hard coded paths to the mesh and solution files, the tests must be run from a subdirectory of the root of your **mmg** project.
-
-> Example  
-> Assuming that your **mmg** project is cloned into the **_mmg_** directory (default case), you can run the test from the **_mmg/build/_** or **_mmg/libexamples_** directories but not from the **_mmg/libexamples/mmg3d/_** folder.

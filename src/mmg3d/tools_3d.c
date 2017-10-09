@@ -137,8 +137,7 @@ inline int _MMG5_BezierRidge(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,
 
     p0 = &mesh->point[ip0];  /* Ref point, from which step is counted */
     p1 = &mesh->point[ip1];
-    if ( !p0->xp || !p1->xp )  return(0);
-    else if ( !(MG_GEO & p0->tag) || !(MG_GEO & p1->tag) )  return(0);
+    if ( !(MG_GEO & p0->tag) || !(MG_GEO & p1->tag) )  return(0);
 
     ux = p1->c[0] - p0->c[0];
     uy = p1->c[1] - p0->c[1];
@@ -276,17 +275,36 @@ inline int _MMG5_BezierRidge(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,
         no2[0] *= dd;
         no2[1] *= dd;
         no2[2] *= dd;
+
+        to[0] = no1[1]*no2[2] - no1[2]*no2[1];
+        to[1] = no1[2]*no2[0] - no1[0]*no2[2];
+        to[2] = no1[0]*no2[1] - no1[1]*no2[0];
+    }
+    else {
+      /* Open boundary: tangent interpolation (possibly flip (back) t1) */
+      ps = t0[0]*t1[0] + t0[1]*t1[1] + t0[2]*t1[2];
+      if ( ps < 0.0 ) {
+        t1[0] *= -1.0;
+        t1[1] *= -1.0;
+        t1[2] *= -1.0;
+      }
+      to[0] = (1.0-s)*t0[0] + s*t1[0];
+      to[1] = (1.0-s)*t0[1] + s*t1[1];
+      to[2] = (1.0-s)*t0[2] + s*t1[2];
+
+      /* Projection of the tangent in the tangent plane defined by no */
+      ps = to[0]*no1[0] + to[1]*no1[1] + to[2]*no1[2];
+      to[0] = to[0] -ps*no1[0];
+      to[1] = to[1] -ps*no1[1];
+      to[2] = to[2] -ps*no1[2];
     }
 
-    to[0] = no1[1]*no2[2] - no1[2]*no2[1];
-    to[1] = no1[2]*no2[0] - no1[0]*no2[2];
-    to[2] = no1[0]*no2[1] - no1[1]*no2[0];
     dd = to[0]*to[0] + to[1]*to[1] + to[2]*to[2];
     if ( dd > _MMG5_EPSD2 ) {
-        dd = 1.0/sqrt(dd);
-        to[0] *= dd;
-        to[1] *= dd;
-        to[2] *= dd;
+      dd = 1.0/sqrt(dd);
+      to[0] *= dd;
+      to[1] *= dd;
+      to[2] *= dd;
     }
 
     return(1);
@@ -784,7 +802,7 @@ int _MMG3D_indPt(MMG5_pMesh mesh, int kp) {
     return(0);
 }
 
-/** Debug function (not use in clean code): print mesh->tria structure */
+/** Debug function (not use in clean code): print mesh->tetra structure */
 void _MMG5_printTetra(MMG5_pMesh mesh,char* fileName) {
     MMG5_pTetra  pt;
     MMG5_pxTetra pxt;
@@ -977,9 +995,9 @@ int _MMG3D_localParamNm(MMG5_pMesh mesh,int iel,int iface,int ia,
   MMG5_pxTetra pxt;
   MMG5_pPar    par;
   double       hausd, hmin, hmax;
-  int          l,k,isloc,ifac1,ifac2,ip0,ip1;
+  int          l,k,isloc,ifac1,ifac2;
   int          listv[MMG3D_LMAX+2],ilistv;
-  char         i0,i1;
+  static char  mmgWarn0;
 
 
   hausd = mesh->info.hausd;
@@ -990,13 +1008,16 @@ int _MMG3D_localParamNm(MMG5_pMesh mesh,int iel,int iface,int ia,
   pt = &mesh->tetra[iel];
   pxt = &mesh->xtetra[pt->xt];
 
-  i0 = _MMG5_iare[ia][0];
-  i1 = _MMG5_iare[ia][1];
-  ip0 = pt->v[i0];
-  ip1 = pt->v[i1];
-
   /* local parameters at vertices: useless for now because new points are
    * created without reference (inside the domain) */
+
+  /* int          ip0,ip1; */
+  /* char         i0,i1; */
+  /* i0 = _MMG5_iare[ia][0]; */
+  /* i1 = _MMG5_iare[ia][1]; */
+  /* ip0 = pt->v[i0]; */
+  /* ip1 = pt->v[i1]; */
+
   /* if ( mesh->info.parTyp & MG_Vert ) { */
   /*   p0  = &mesh->point[ip0]; */
   /*   p1  = &mesh->point[ip1]; */
@@ -1048,12 +1069,23 @@ int _MMG3D_localParamNm(MMG5_pMesh mesh,int iel,int iface,int ia,
    * fails because we have more than 2 boundaries in the edge shell
    * (non-manifold domain). In this case, we just take into account 2
    * boundaries of the shell */
-  ilistv = _MMG5_coquilface( mesh,iel, ia,listv,&ifac1,&ifac2,1);
+
+  if ( pxt->tag[ia] & MG_OPNBDY ) {
+    ilistv = 1;
+    ifac1  = ifac2 = 4*iel + iface;
+  }
+  else {
+    ilistv = _MMG5_coquilface( mesh,iel,iface, ia,listv,&ifac1,&ifac2,1);
+  }
   if ( ilistv < 0 )
   {
-    if ( mesh->info.ddebug || mesh->info.imprim>5 )
-      fprintf(stdout, "  ## Warning: unable to take into account local"
-              " parameters at vertices %d and %d.\n",ip0,ip1 );
+    if ( mesh->info.ddebug || mesh->info.imprim>5 ) {
+      if ( !mmgWarn0 ) {
+        mmgWarn0 = 1;
+        fprintf(stderr, "  ## Warning: %s: unable to take into account local"
+                " parameters at at least 1 vertex.\n",__func__ );
+      }
+    }
 
     if ( mesh->info.parTyp & MG_Tria ) {
       for ( l=0; l<mesh->info.npar; ++l) {

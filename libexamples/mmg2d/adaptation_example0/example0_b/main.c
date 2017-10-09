@@ -34,9 +34,31 @@ int main(int argc,char *argv[]) {
   int             np, nt, na, nc, nr, nreq, typEntity, typSol;
   int             ref, Tria[3], Edge[2], *corner, *required, *ridge;
   double          Point[3],Sol;
-
+  char            *fileout,*solout;
 
   fprintf(stdout,"  -- TEST MMG2DLIB \n");
+
+  if ( argc != 2 ) {
+    printf(" Usage: %s fileout\n",argv[0]);
+    return(1);
+  }
+
+  /* Name and path of the mesh file */
+  fileout = (char *) calloc(strlen(argv[1]) + 6, sizeof(char));
+  if ( fileout == NULL ) {
+    perror("  ## Memory problem: calloc");
+    exit(EXIT_FAILURE);
+  }
+  strcpy(fileout,argv[1]);
+  strcat(fileout,".mesh");
+
+  solout = (char *) calloc(strlen(argv[1]) + 5, sizeof(char));
+  if ( solout == NULL ) {
+    perror("  ## Memory problem: calloc");
+    exit(EXIT_FAILURE);
+  }
+  strcpy(solout,argv[1]);
+  strcat(solout,".sol");
 
   /** ------------------------------ STEP   I -------------------------- */
   /** 1) Initialisation of mesh and sol structures */
@@ -102,9 +124,9 @@ int main(int argc,char *argv[]) {
   if ( MMG2D_Chk_meshData(mmgMesh,mmgSol) != 1 ) exit(EXIT_FAILURE);
 
   /*save init mesh*/
-  if ( MMG2D_saveMesh(mmgMesh,"init.mesh") != 1 )
+  if ( MMG2D_saveMesh(mmgMesh,fileout) != 1 )
     exit(EXIT_FAILURE);
-  if ( MMG2D_saveSol(mmgMesh,mmgSol,"init.sol") != 1 )
+  if ( MMG2D_saveSol(mmgMesh,mmgSol,solout) != 1 )
     exit(EXIT_FAILURE);
 
   /** ------------------------------ STEP  II -------------------------- */
@@ -124,10 +146,10 @@ int main(int argc,char *argv[]) {
       using the MMG2D_getMesh/MMG2D_getSol functions */
 
   /** 1) Manually get the mesh (in this example we show how to save the mesh
-      in the result.mesh file) */
+      in an output file) */
 
-  if( !(inm = fopen("result.mesh","w")) ) {
-    fprintf(stderr,"  ** UNABLE TO OPEN result.mesh FILE.\n");
+  if( !(inm = fopen(fileout,"w")) ) {
+    fprintf(stderr,"  ** UNABLE TO OPEN OUTPUT MESH FILE.\n");
     exit(EXIT_FAILURE);
   }
   fprintf(inm,"MeshVersionFormatted 2\n");
@@ -219,9 +241,9 @@ int main(int argc,char *argv[]) {
   ridge    = NULL;
 
   /** 2) Manually get the solution (in this example we show how to save the
-      solution in the mesh.o.sol file) */
-  if( !(inm = fopen("mesh.o.sol","w")) ) {
-    fprintf(stderr,"  ** UNABLE TO OPEN mesh.o.sol FILE.\n");
+      solution in a file) */
+  if( !(inm = fopen(solout,"w")) ) {
+    fprintf(stderr,"  ** UNABLE TO OPEN OUTPUT SOL FILE.\n");
     exit(EXIT_FAILURE);
   }
   fprintf(inm,"MeshVersionFormatted 2\n");
@@ -247,17 +269,23 @@ int main(int argc,char *argv[]) {
 
 
   /*save result*/
-  if ( MMG2D_saveMesh(mmgMesh,"result.mesh") != 1 )
+  if ( MMG2D_saveMesh(mmgMesh,fileout) != 1 )
     exit(EXIT_FAILURE);
 
   /*save metric*/
-  if ( MMG2D_saveSol(mmgMesh,mmgSol,"result") != 1 )
+  if ( MMG2D_saveSol(mmgMesh,mmgSol,solout) != 1 )
     exit(EXIT_FAILURE);
 
   /** 3) Free the MMG2D structures */
   MMG2D_Free_all(MMG5_ARG_start,
                  MMG5_ARG_ppMesh,&mmgMesh,MMG5_ARG_ppMet,&mmgSol,
                  MMG5_ARG_end);
+
+  free(fileout);
+  fileout = NULL;
+
+  free(solout);
+  solout = NULL;
 
   return(0);
 }

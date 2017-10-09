@@ -200,7 +200,8 @@ int _MMG5_boulec(MMG5_pMesh mesh,int *adjt,int start,int ip,double *tt) {
  * \param adjt pointer toward the table of triangle adjacency.
  * \param start index of triangle where we start to work.
  * \param ip index of vertex on which we work.
- * \param list pointer toward the computed list of edges incident to \a ip.
+ * \param list pointer toward the computed list of GEO vertices incident to \a ip.
+ * \param listref pointer toward the corresponding edge references
  * \param ng pointer toward the number of ridges.
  * \param nr pointer toward the number of reference edges.
  * \param lmax maxmum size for the ball of the point \a ip.
@@ -211,7 +212,7 @@ int _MMG5_boulec(MMG5_pMesh mesh,int *adjt,int start,int ip,double *tt) {
  *
  */
 int _MMG5_bouler(MMG5_pMesh mesh,int *adjt,int start,int ip,
-                 int *list,int *ng,int *nr,int lmax) {
+                 int *list,int *listref,int *ng,int *nr,int lmax) {
   MMG5_pTria    pt;
   int           *adja,k,ns;
   char          i,i1,i2;
@@ -233,6 +234,7 @@ int _MMG5_bouler(MMG5_pMesh mesh,int *adjt,int start,int ip,
         *nr = *nr + 1;
       ns++;
       list[ns] = pt->v[i2];
+      listref[ns] = pt->edg[i1];
       if ( ns > lmax-2 )  return(-ns);
     }
     adja = &adjt[3*(k-1)+1];
@@ -258,6 +260,7 @@ int _MMG5_bouler(MMG5_pMesh mesh,int *adjt,int start,int ip,
           *nr = *nr + 1;
         ns++;
         list[ns] = pt->v[i1];
+        listref[ns] = pt->edg[i2];
         if ( ns > lmax-2 )  return(-ns);
       }
       adja = &adjt[3*(k-1)+1];

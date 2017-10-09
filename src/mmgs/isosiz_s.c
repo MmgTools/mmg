@@ -38,8 +38,16 @@
 
 #define MAXLEN   1.0e+3
 
-/* Define isotropic size map at all vertices of the mesh, associated with geometric approx ;
-   by convention, p0->h stores desired length at point p0 */
+/**
+ * \param mesh pointer toward the mesh
+ * \param met pointer toward the metric
+ *
+ * \return 1 if success, 0 if fail
+ *
+ * Define isotropic size map at all vertices of the mesh, associated with
+ * geometric approx ; by convention, p0->h stores desired length at point p0
+ *
+ */
 int _MMGS_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria    pt;
   MMG5_pPoint   p[3];
@@ -56,11 +64,10 @@ int _MMGS_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
 
   /* alloc structure */
   if ( !met->m ) {
-    met->np    = mesh->np;
-    met->npmax = mesh->npmax;
-    met->size  = 1;
-    _MMG5_ADD_MEM(mesh,(met->npmax+1)*sizeof(double),"solution",return(0));
-    _MMG5_SAFE_MALLOC(met->m,mesh->npmax+1,double);
+    /* Allocate and store the header informations for each solution */
+    if ( !MMGS_Set_solSize(mesh,met,MMG5_Vertex,mesh->np,1) ) {
+      return 0;
+    }
 
     /* init constant size */
     for (k=1; k<=mesh->np; k++)
@@ -260,7 +267,6 @@ int gradsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
     fprintf(stdout,"  ** Grading mesh\n");
 
-  mesh->base = 0;
   for (k=1; k<=mesh->np; k++)
     mesh->point[k].flag = mesh->base;
 

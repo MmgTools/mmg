@@ -64,7 +64,7 @@ int _MMG5_intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,
 
   if ( pt->xt ) {
     pxt = &mesh->xtetra[pt->xt];
-    if ( pxt->tag[i] & MG_GEO  ) {
+    if ( pxt->tag[i] & MG_GEO && !(pxt->tag[i] & MG_NOM)  ) {
       ppt = &mesh->point[ip];
       assert(ppt->xp);
       pxp = &mesh->xpoint[ppt->xp];
@@ -204,20 +204,27 @@ static inline int
 _MMG5_intregvolmet(double *ma,double *mb,double *mp,double t) {
   double        dma[6],dmb[6],mai[6],mbi[6],mi[6];
   int           i;
+  static char   mmgWarn=0;
 
   for (i=0; i<6; i++) {
     dma[i] = ma[i];
     dmb[i] = mb[i];
   }
   if ( !_MMG5_invmat(dma,mai) || !_MMG5_invmat(dmb,mbi) ) {
-    fprintf(stderr,"  ## INTERP INVALID METRIC.\n");
+    if ( !mmgWarn ) {
+      mmgWarn = 1;
+      fprintf(stderr,"\n  ## Warning: %s: at least 1 invalid metric.\n",__func__);
+    }
     return(0);
   }
   for (i=0; i<6; i++)
     mi[i] = (1.0-t)*mai[i] + t*mbi[i];
 
   if ( !_MMG5_invmat(mi,mai) ) {
-    fprintf(stderr,"  ## INTERP INVALID METRIC.\n");
+    if ( !mmgWarn ) {
+      mmgWarn = 1;
+      fprintf(stderr,"\n  ## Warning: %s: at least 1 invalid metric.\n",__func__);
+    }
     return(0);
   }
 
@@ -238,13 +245,13 @@ _MMG5_intregvolmet(double *ma,double *mb,double *mp,double t) {
  * parameter \f$ 0 <= s0 <= 1 \f$ from \a p1 result is stored in \a mr. edge
  * \f$ p_1-p_2 \f$ is an internal edge.
  *
- * */
+ */
 int _MMG5_intvolmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,
                     double mr[6]) {
   MMG5_pTetra     pt;
   MMG5_pPoint     pp1,pp2;
   double          m1[6],m2[6];
-  int             ip1,ip2,l;
+  int             ip1,ip2,l,ier;
 
   pt  = &mesh->tetra[k];
 
@@ -254,33 +261,35 @@ int _MMG5_intvolmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,
   pp1 = &mesh->point[ip1];
   pp2 = &mesh->point[ip2];
 
-  // build metric at ma and mb points (Warn for ridge points) mp points and
+  // build metric at ma and mb points
   if ( !(MG_SIN(pp1->tag) || (MG_NOM & pp1->tag)) && (pp1->tag & MG_GEO) ) {
     if (!_MMG5_moymet(mesh,met,pt,m1)) return(0);
   } else {
     for ( l=0; l<6; ++l )
       m1[l] = met->m[6*ip1+l];
-    //printf("\n\nm1 %e %e %e %e %e %e\n",m1[0],m1[1],m1[2],m1[3],m1[4],m1[5]);
   }
   if ( !(MG_SIN(pp2->tag)|| (MG_NOM & pp2->tag)) && (pp2->tag & MG_GEO) ) {
     if (!_MMG5_moymet(mesh,met,pt,m2)) return(0);
   } else {
     for ( l=0; l<6; ++l )
       m2[l] = met->m[6*ip2+l];
-    // printf("m2 %e %e %e %e %e %e\n",m2[0],m2[1],m2[2],m2[3],m2[4],m2[5]);
   }
 
-  _MMG5_intregvolmet(m1,m2,mr,s);
-  if(fabs(mr[5]) < 1e-6) {
-    fprintf(stderr,"%s:%d : Error\n",__FILE__,__LINE__);
-    fprintf(stderr,"pp1 : %d %d \n",MG_SIN(pp1->tag) || (MG_NOM & pp1->tag),pp1->tag & MG_GEO);
-fprintf(stderr,"m1 %e %e %e %e %e %e\n",m1[0],m1[1],m1[2],m1[3],m1[4],m1[5]);
-    fprintf(stderr,"pp2 : %d %d \n",MG_SIN(pp2->tag) || (MG_NOM & pp2->tag),pp2->tag & MG_GEO);
- fprintf(stderr,"m2 %e %e %e %e %e %e\n",m2[0],m2[1],m2[2],m2[3],m2[4],m2[5]);
-    fprintf(stderr,"mr %e %e %e %e %e %e\n",mr[0],mr[1],mr[2],mr[3],mr[4],mr[5]);
-    exit(EXIT_FAILURE);
+  ier = _MMG5_intregvolmet(m1,m2,mr,s);
+  if ( mesh->info.ddebug && ( (!ier) || (fabs(mr[5]) < 1e-6) ) ) {
+    fprintf(stderr,"  ## Error: %s:\n",__func__);
+    fprintf(stderr,"            pp1 : %d %d \n",
+            MG_SIN(pp1->tag) || (MG_NOM & pp1->tag),pp1->tag & MG_GEO);
+    fprintf(stderr,"            m1 %e %e %e %e %e %e\n",
+            m1[0],m1[1],m1[2],m1[3],m1[4],m1[5]);
+    fprintf(stderr,"            pp2 : %d %d \n",
+            MG_SIN(pp2->tag) || (MG_NOM & pp2->tag),pp2->tag & MG_GEO);
+    fprintf(stderr,"            m2 %e %e %e %e %e %e\n",
+            m2[0],m2[1],m2[2],m2[3],m2[4],m2[5]);
+    fprintf(stderr,"            mr %e %e %e %e %e %e\n",
+            mr[0],mr[1],mr[2],mr[3],mr[4],mr[5]);
+    return 0;
   }
- 
 
   return(1);
 }
@@ -328,17 +337,24 @@ int _MMG5_interp4barintern(MMG5_pSol met,int ip,double cb[4],double dm0[6],
                            double dm1[6],double dm2[6],double dm3[6]) {
   double        m0i[6],m1i[6],m2i[6],m3i[6],mi[6];
   int           i;
+  static char   mmgWarn=0;
 
  if ( !_MMG5_invmat(dm0,m0i) || !_MMG5_invmat(dm1,m1i) ||
        !_MMG5_invmat(dm2,m2i) || !_MMG5_invmat(dm3,m3i) ) {
-    fprintf(stderr,"  ## INTERP INVALID METRIC.\n");
+    if ( !mmgWarn ) {
+      mmgWarn = 1;
+      fprintf(stderr,"\n  ## Warning: %s: at least 1 invalid metric.\n",__func__);
+    }
     return(0);
   }
   for (i=0; i<6; i++)
     mi[i] = cb[0]*m0i[i] + cb[1]*m1i[i] + cb[2]*m2i[i] + cb[3]*m3i[i];
 
   if ( !_MMG5_invmat(mi,m0i) ) {
-    fprintf(stderr,"  ## INTERP INVALID METRIC.\n");
+    if ( !mmgWarn ) {
+      mmgWarn = 1;
+      fprintf(stderr,"\n  ## Warning: %s: at least 1 invalid metric.\n",__func__);
+    }
     return(0);
   }
 

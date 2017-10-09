@@ -45,7 +45,7 @@ extern char ddb;
  * \param it2 last element of the open shell.
  * \param typchk type of checking permformed for edge length (hmin or LSHORT
  * criterion).
- * \return 0 if fail, 1 otherwise.
+ * \return -1 if fail, 0 if we can not swap the edge, 1 otherwise.
  *
  * Check whether edge whose shell is provided should be swapped for
  * geometric approximation purposes (the 2 surface triangles are also
@@ -59,10 +59,10 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
   MMG5_pPoint   p0,p1,ppt0;
   MMG5_Tria     tt1,tt2;
   MMG5_pPar     par;
-  double        b0[3],b1[3],v[3],c[3],ux,uy,uz,ps,disnat,dischg;
+  double        b0[3],b1[3],n[3],v[3],c[3],ux,uy,uz,ps,disnat,dischg;
   double        cal1,cal2,calnat,calchg,calold,calnew,caltmp,hausd;
   int           iel,iel1,iel2,np,nq,na1,na2,k,nminus,nplus,isloc,l,info;
-  char          ifa1,ifa2,ia,ip,iq,ia1,ia2,j,isshell;
+  char          ifa1,ifa2,ia,ip,iq,ia1,ia2,j,isshell,ier;
 
   iel = list[0] / 6;
   ia  = list[0] % 6;
@@ -97,6 +97,8 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
   }
   iel1 = it1 / 4;
   ifa1 = it1 % 4;
+
+  assert(it2);
   iel2 = it2 / 4;
   ifa2 = it2 % 4;
   _MMG5_tet2tri(mesh,iel1,ifa1,&tt1);
@@ -123,7 +125,53 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
   _MMG5_norpts(mesh,tt1.v[ia1],tt1.v[_MMG5_inxt2[ia1]],tt2.v[ia2],b0);
   _MMG5_norpts(mesh,tt2.v[ia2],tt2.v[_MMG5_inxt2[ia2]],tt1.v[ia1],b1);
   ps = b0[0]*b1[0] + b0[1]*b1[1] + b0[2]*b1[2];
-  if ( ps < _MMG5_ANGEDG ) return(0);
+
+  /* Here we put ANGEDG because in nr mode the test over dhd may create inverted
+   * tetra */
+  if ( ps < _MMG5_ANGEDG ) {
+    return(0);
+  }
+
+  /* Check normal deviation with neighbours */
+  if ( ! ( ( tt1.tag[_MMG5_iprv2[ia1]] & MG_GEO ) ||
+           ( tt1.tag[_MMG5_iprv2[ia1]] & MG_NOM ) ) ) {
+    ier = _MMG3D_normalAdjaTri(mesh,iel1,ifa1,_MMG5_iprv2[ia1],n);
+    if ( ier < 0 ) return -1;
+    else if ( !ier ) return 0;
+    ps = b0[0]*n[0] + b0[1]*n[1] + b0[2]*n[2];
+
+    if ( ps < mesh->info.dhd )  return(0);
+  }
+
+  if ( !( (tt2.tag[_MMG5_inxt2[ia2]] & MG_GEO ) ||
+          (tt2.tag[_MMG5_inxt2[ia2]] & MG_NOM ) ) ) {
+    ier = _MMG3D_normalAdjaTri(mesh,iel2,ifa2,_MMG5_inxt2[ia2],n);
+    if ( ier<0 ) return -1;
+    else if ( !ier ) return 0;
+    ps = b0[0]*n[0] + b0[1]*n[1] + b0[2]*n[2];
+
+    if ( ps < mesh->info.dhd )  return(0);
+  }
+
+  if ( ! ( (tt1.tag[_MMG5_inxt2[ia1]] & MG_GEO ) ||
+           (tt1.tag[_MMG5_inxt2[ia1]] & MG_NOM ) ) ) {
+    ier = _MMG3D_normalAdjaTri(mesh,iel1,ifa1,_MMG5_inxt2[ia1],n);
+    if ( ier<0 ) return -1;
+    else if ( !ier ) return 0;
+    ps = b1[0]*n[0] + b1[1]*n[1] + b1[2]*n[2];
+
+    if ( ps < mesh->info.dhd )  return(0);
+  }
+
+  if ( ! ( (tt2.tag[_MMG5_iprv2[ia2]] & MG_GEO ) ||
+           (tt2.tag[_MMG5_iprv2[ia2]] & MG_NOM ) ) ) {
+    ier = _MMG3D_normalAdjaTri(mesh,iel2,ifa2,_MMG5_iprv2[ia2],n);
+    if ( ier<0 ) return -1;
+    else if ( !ier ) return 0;
+    ps = b1[0]*n[0] + b1[1]*n[1] + b1[2]*n[2];
+
+    if ( ps < mesh->info.dhd )  return(0);
+  }
 
   /* Compare contributions to Hausdorff distance in both configurations */
   _MMG5_norface(mesh,iel1,ifa1,v);
@@ -357,7 +405,7 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
       calnew = MG_MIN(calnew,caltmp);
     }
   }
-  if ( calold < _MMG5_NULKAL && calnew <= calold )  return(0);
+  if ( calold < _MMG5_EPSOK && calnew <= calold )  return(0);
   else if ( calnew < 0.3 * calold )  return(0);
 
   return(1);
@@ -428,10 +476,11 @@ int _MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,
   nm = _MMG3D_newPt(mesh,c,MG_BDY);
   if ( !nm ) {
     _MMG5_POINT_REALLOC(mesh,met,np,mesh->gap,
-                        printf("  ## Error: unable to allocate a new point\n");
+                        fprintf(stderr,"\n  ## Error: %s: unable to allocate a"
+                               " new point\n",__func__);
                         _MMG5_INCREASE_MEM_MESSAGE();
                         return(-1)
-                        ,c,MG_BDY);
+                        ,c,MG_BDY,-1);
   }
   if ( met->m ) {
     if ( typchk == 1 && (met->size>1) ) {
@@ -442,16 +491,20 @@ int _MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,
     }
   }
 
-  ier = _MMG5_split1b(mesh,met,list,ret,nm,0,typchk-1);
+  ier = _MMG5_split1b(mesh,met,list,ret,nm,0,typchk-1,0);
   /* pointer adress may change if we need to realloc memory during split */
   pt  = &mesh->tetra[iel];
   pt1 = &mesh->tetra[iel1];
 
   if ( ier < 0 ) {
-    fprintf(stdout,"  ## Warning: unable to swap boundary edge.\n");
+    fprintf(stderr,"\n  ## Warning: %s: unable to swap boundary edge.\n",
+      __func__);
     return(-1);
   }
-  else if ( !ier )  return(0);
+  else if ( !ier )  {
+    _MMG3D_delPt(mesh,nm);
+    return(0);
+  }
 
   /* Collapse m on na after taking (new) ball of m */
   memset(list,0,(MMG3D_LMAX+2)*sizeof(int));
@@ -461,7 +514,7 @@ int _MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,
   }
   if ( pt1->v[im] != nm ){
     _MMG3D_delPt(mesh,nm);
-    fprintf(stdout,"%s:%d: Warning pt1->v[im] != nm\n",__FILE__,__LINE__);
+    fprintf(stderr,"\n  # Warning: %s: pt1->v[im] != nm.\n",__func__);
     return(0);
   }
   ilist = _MMG5_boulevolp(mesh,iel1,im,list);
@@ -471,7 +524,8 @@ int _MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,
 
   ier = _MMG5_colver(mesh,met,list,ilist,ipa,typchk);
   if ( ier < 0 ) {
-    fprintf(stdout,"  ## Warning: unable to swap boundary edge.\n");
+    fprintf(stderr,"\n  ## Warning: %s: unable to swap boundary edge.\n",
+      __func__);
     return(-1);
   }
   else if ( ier ) {

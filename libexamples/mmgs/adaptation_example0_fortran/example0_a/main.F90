@@ -17,15 +17,22 @@ PROGRAM main
 
   MMG5_DATA_PTR_T    :: mmgMesh
   MMG5_DATA_PTR_T    :: mmgSol
-  INTEGER            :: ier
-  CHARACTER(len=255) :: pwd
-  CHARACTER(len=300) :: filename
+  INTEGER            :: ier,argc
+  CHARACTER(len=300) :: exec_name,filename,fileout
 
   WRITE(*,*) "  -- TEST MMGSLIB"
 
+  argc =  COMMAND_ARGUMENT_COUNT();
+  CALL get_command_argument(0, exec_name)
+
+  IF ( argc /=2 ) THEN
+     PRINT*," Usage: ",TRIM(exec_name)," input_file_name output_file_name"
+     CALL EXIT(1);
+  ENDIF
+
   ! Name and path of the mesh file
-  CALL getenv("PWD",pwd)
-  WRITE(filename,*) TRIM(pwd),"/../libexamples/mmgs/adaptation_example0_fortran/example0_a/cube"
+  CALL get_command_argument(1, filename)
+  CALL get_command_argument(2, fileout)
 
   !> ------------------------------ STEP   I --------------------------
   !! 1) Initialisation of mesh and sol structures
@@ -85,11 +92,11 @@ PROGRAM main
   !!    using the MMGS_getMesh/MMGS_getSol functions
 
   !> 1) Automatically save the mesh
-  CALL MMGS_saveMesh(mmgMesh,"cube.o.mesh",LEN("cube.o.mesh"),ier)
+  CALL MMGS_saveMesh(mmgMesh,TRIM(ADJUSTL(fileout)),LEN(TRIM(ADJUSTL(fileout))),ier)
   IF ( ier /= 1 ) CALL EXIT(106)
 
   !> 2) Automatically save the solution
-  CALL MMGS_saveSol(mmgMesh,mmgSol,"cube.o.sol",LEN("cube.o.sol"),ier)
+  CALL MMGS_saveSol(mmgMesh,mmgSol,TRIM(ADJUSTL(fileout)),LEN(TRIM(ADJUSTL(fileout))),ier)
   IF ( ier /= 1 ) CALL EXIT(107)
 
   !> 3) Free the MMGS5 structures

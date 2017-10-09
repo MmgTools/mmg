@@ -41,8 +41,8 @@ FIND_PATH(MMG_INCLUDE_DIR
   HINTS ${MMG_INCLUDE_DIR}
   $ENV{MMG_INCLUDE_DIR}
   $ENV{HOME}/include/
-  ${MMG_DIR}/include/
-  $ENV{MMG_DIR}/include/
+  ${MMG_BUILD_DIR}/include/
+  $ENV{MMG_BUILD_DIR}/include/
   PATH_SUFFIXES
   DOC "Directory of mmg Headers")
 
@@ -52,8 +52,8 @@ FIND_LIBRARY(MMG_LIBRARY
   HINTS ${MMG_LIBRARY}
   $ENV{MMG_LIBRARY}
   $ENV{HOME}/lib
-  ${MMG_DIR}/lib
-  $ENV{MMG_DIR}/lib
+  ${MMG_BUILD_DIR}/lib
+  $ENV{MMG_BUILD_DIR}/lib
   DOC "The mmg library"
   )
 
@@ -62,7 +62,7 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(MMG DEFAULT_MSG
   MMG_INCLUDE_DIR MMG_LIBRARY)
 
 IF ( NOT MMG_FOUND )
-   MESSAGE (WARNING "\nMMG not found: you can set the 'MMG_DIR' environment"
-   " variable or the 'MMG_DIR' CMake variable to your MMG directory path"
+   MESSAGE (WARNING "\nMMG not found: you can set the 'MMG_BUILD_DIR' environment"
+   " variable or the 'MMG_BUILD_DIR' CMake variable to your MMG directory path"
    " to help us to fill the MMG library paths.\n" )
 ENDIF ()

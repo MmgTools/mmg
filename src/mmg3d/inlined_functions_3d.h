@@ -107,7 +107,7 @@ inline double _MMG5_lenedg33_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
     return( _MMG5_lenedgCoor_ani(mesh->point[ip1].c,mesh->point[ip2].c,
                                  &met->m[6*ip1],&met->m[6*ip2]) );
   }
-  exit(EXIT_FAILURE);
+  return 0.0;
 }
 
 /**
@@ -212,7 +212,7 @@ inline double _MMG5_lenedg_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
   } else {
     return(_MMG5_lenedgspl_ani(mesh ,met, ia, pt));
   }
-  exit(EXIT_FAILURE);
+  return 0.0;
 }
 
 /**
@@ -305,43 +305,30 @@ inline double _MMG3D_caltetLES_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt)
 
   cal =  V/Vref; //1-Qles in order to have the best quality equal to 1
 
-  if ( cal > 1. ) {
-    fprintf(stderr," ## Warning: unexpected LES quality measure.\n");
-      return(0.0);
-  }
+  /* Prevent calities > 1 due to the machin epsilon */
+  cal = MG_MIN (1., cal);
 
   // the normalization by ALPHAD
   //in order to be coherent with the other quality measure
-  return(cal/_MMG5_ALPHAD);
+  return(cal/_MMG3D_ALPHAD);
 }
 
-
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the meric structure.
- * \param pt pointer toward a tetrahedra.
+ * \param a pointer toward the coor of the first tetra vertex.
+ * \param b pointer toward the coor of the second tetra vertex.
+ * \param c pointer toward the coor of the third tetra vertex.
+ * \param d pointer toward the coor of the fourth tetra vertex.
  * \return The isotropic quality of the tet.
  *
- * Compute the quality of the tet pt with respect to the isotropic metric \a
- * met.
+ * Compute the quality of a tetra given by 4 points a,b,c,d with respect to the
+ * isotropic metric \a met.
  *
  */
 static
-inline double _MMG5_caltet_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra  pt) {
-  double       abx,aby,abz,acx,acy,acz,adx,ady,adz,bcx,bcy,bcz,bdx,bdy,bdz,cdx,cdy,cdz;
+inline double _MMG5_caltet_iso_4pt(double *a, double *b, double *c, double *d) {
+  double       abx,aby,abz,acx,acy,acz,adx,ady,adz,bcx,bcy,bcz,bdx,bdy,bdz;
+  double       cdx,cdy,cdz;
   double       vol,v1,v2,v3,rap;
-  double       *a,*b,*c,*d;
-  int          ia, ib, ic, id;
-
-  ia = pt->v[0];
-  ib = pt->v[1];
-  ic = pt->v[2];
-  id = pt->v[3];
-
-  a = mesh->point[ia].c;
-  b = mesh->point[ib].c;
-  c = mesh->point[ic].c;
-  d = mesh->point[id].c;
 
   /* volume */
   abx = b[0] - a[0];
@@ -388,6 +375,35 @@ inline double _MMG5_caltet_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra  pt) {
 
 /**
  * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param pt pointer toward a tetrahedra.
+ * \return The isotropic quality of the tet.
+ *
+ * Compute the quality of the tet pt with respect to the isotropic metric \a
+ * met.
+ *
+ */
+static
+inline double _MMG5_caltet_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra  pt) {
+  double       *a,*b,*c,*d;
+  int          ia, ib, ic, id;
+
+  ia = pt->v[0];
+  ib = pt->v[1];
+  ic = pt->v[2];
+  id = pt->v[3];
+
+  a = mesh->point[ia].c;
+  b = mesh->point[ib].c;
+  c = mesh->point[ic].c;
+  d = mesh->point[id].c;
+
+  return(_MMG5_caltet_iso_4pt(a,b,c,d));
+
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the meric structure.
  * \param pt pointer toward a tetrahedra.
  * \return The anisotropic quality of the tet or 0.0 if fail.
@@ -410,8 +426,6 @@ inline double _MMG5_caltet_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
   ip[1] = pt->v[1];
   ip[2] = pt->v[2];
   ip[3] = pt->v[3];
-
-  cal = _MMG5_NULKAL;
 
   /* average metric */
   if ( !_MMG5_moymet(mesh,met,pt,&mm[0]) )
@@ -456,8 +470,7 @@ inline double _MMG5_caltet_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
   det = mm[0] * ( mm[3]*mm[5] - mm[4]*mm[4]) \
       - mm[1] * ( mm[1]*mm[5] - mm[2]*mm[4]) \
       + mm[2] * ( mm[1]*mm[4] - mm[2]*mm[3]);
-  if ( det < _MMG5_EPSOK )   {
-    //printf("--- INVALID METRIC : DET  %e\n",det);
+  if ( det < _MMG5_EPSD2 )   {
     return(0.0);
   }
   det = sqrt(det) * vol;
@@ -484,47 +497,6 @@ inline double _MMG5_caltet_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
   cal = det / num;
 
   return(cal);
-}
-
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the meric structure.
- * \return 1 if success, 0 if fail.
- *
- * Compute the quality of the tetras over the mesh.
- *
- */
-static inline
-int _MMG3D_meshQua(MMG5_pMesh mesh, MMG5_pSol met) {
-  MMG5_pTetra pt;
-  double      minqual;
-  int         k,iel;
-
-  minqual = 2./_MMG5_ALPHAD;
-
-  /*compute tet quality*/
-  for (k=1; k<=mesh->ne; k++) {
-    pt = &mesh->tetra[k];
-     if( !MG_EOK(pt) )   continue;
-
-     if ( met->size == 6 && met->m ) {
-       pt->qual = _MMG5_caltet33_ani(mesh,met,pt);
-     }
-     else
-       pt->qual = _MMG5_orcal(mesh,met,k);
-
-    if ( pt->qual < minqual ) {
-      minqual = pt->qual;
-      iel     = k;
-    }
-  }
-
-  if ( minqual == 0.0 ) {
-    fprintf(stderr,"  ## ERROR: TOO BAD QUALITY FOR THE WORST ELEMENT (%d)\n",iel);
-    return(0);
-  }
-
-  return(1);
 }
 
 #endif

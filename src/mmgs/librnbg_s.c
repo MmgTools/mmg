@@ -90,7 +90,7 @@ int _MMG5_mmgsRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
   vertNbr = 0;
 
   _MMG5_ADD_MEM(mesh,(mesh->nt+1)*sizeof(int),"vertOldTab",return(1));
-  _MMG5_SAFE_CALLOC(vertOldTab,mesh->nt+1,int);
+  _MMG5_SAFE_CALLOC(vertOldTab,mesh->nt+1,int,1);
 
   for(triaIdx = 1 ; triaIdx < mesh->nt + 1 ; triaIdx++) {
 
@@ -108,7 +108,7 @@ int _MMG5_mmgsRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
   _MMG5_ADD_MEM(mesh,(vertNbr+2)*sizeof(SCOTCH_Num),"vertTab",
                 _MMG5_DEL_MEM(mesh,vertOldTab,(mesh->ne+1)*sizeof(int));
                 return(1));
-  _MMG5_SAFE_CALLOC(vertTab,vertNbr+2,SCOTCH_Num);
+  _MMG5_SAFE_CALLOC(vertTab,vertNbr+2,SCOTCH_Num,1);
 
   if (!memset(vertTab, ~0, sizeof(SCOTCH_Num)*(vertNbr + 2))) {
     perror("  ## Memory problem: memset");
@@ -126,7 +126,7 @@ int _MMG5_mmgsRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
                 _MMG5_DEL_MEM(mesh,vertOldTab,(mesh->nt+1)*sizeof(int));
                 _MMG5_DEL_MEM(mesh,vertTab,(vertNbr+2)*sizeof(SCOTCH_Num));
                 return(1));
-  _MMG5_SAFE_CALLOC(edgeTab,edgeSiz,SCOTCH_Num);
+  _MMG5_SAFE_CALLOC(edgeTab,edgeSiz,SCOTCH_Num,1);
 
 
   /* Computing the adjacency list for each vertex */
@@ -153,7 +153,7 @@ int _MMG5_mmgsRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
                       _MMG5_DEL_MEM(mesh,vertTab,(vertNbr+2)*sizeof(SCOTCH_Num));
                       return(1));
         edgeSiz *= 1.2;
-        _MMG5_SAFE_REALLOC(edgeTab,edgeSiz,SCOTCH_Num,"scotch table");
+        _MMG5_SAFE_REALLOC(edgeTab,edgeSiz,SCOTCH_Num,"scotch table",1);
       }
 
       edgeTab[edgeNbr++] = vertOldTab[ballTriIdx];
@@ -168,7 +168,8 @@ int _MMG5_mmgsRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
     if (!mesh->tria[triaIdx].v[0]) continue;
     if (vertTab[vertOldTab[triaIdx]] < 0) {
       if(vertOldTab[triaIdx] == vertNbr) {
-        fprintf(stdout,"WARNING graph problem, no renum\n");
+        fprintf(stderr,"  ## Warning: %s: graph error, no renumbering.\n",
+                __func__);
         _MMG5_DEL_MEM(mesh,edgeTab,edgeSiz*sizeof(SCOTCH_Num));
         _MMG5_DEL_MEM(mesh,vertTab,(vertNbr+2)*sizeof(SCOTCH_Num));
         return(1);
@@ -177,7 +178,8 @@ int _MMG5_mmgsRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
         vertTab[vertOldTab[triaIdx]] = vertTab[vertOldTab[triaIdx] + 1];
       else {
         if(vertOldTab[triaIdx]+1 == vertNbr) {
-          fprintf(stdout,"WARNING graph problem, no renum\n");
+          fprintf(stderr,"  ## Warning: %s: graph error, no renumbering.\n",
+                  __func__);
           _MMG5_DEL_MEM(mesh,edgeTab,edgeSiz*sizeof(SCOTCH_Num));
           _MMG5_DEL_MEM(mesh,vertTab,(vertNbr+2)*sizeof(SCOTCH_Num));
           return(1);
@@ -187,7 +189,8 @@ int _MMG5_mmgsRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
           i++;
         } while((vertTab[vertOldTab[triaIdx] + i] < 0) && ((vertOldTab[triaIdx] + i) < vertNbr));
         if(vertOldTab[triaIdx] + i == vertNbr) {
-          fprintf(stdout,"WARNING graph problem, no renum\n");
+          fprintf(stderr,"  ## Warning: %s: graph error, no renumbering.\n",
+                  __func__);
           _MMG5_DEL_MEM(mesh,edgeTab,edgeSiz*sizeof(SCOTCH_Num));
           _MMG5_DEL_MEM(mesh,vertTab,(vertNbr+2)*sizeof(SCOTCH_Num));
           return(1);
@@ -219,7 +222,7 @@ int _MMG5_mmgsRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
                 _MMG5_DEL_MEM(mesh,edgeTab,edgeSiz*sizeof(SCOTCH_Num));
                 if( !_MMGS_hashTria(mesh) ) return(0);
                 return(1));
-  _MMG5_SAFE_CALLOC(permVrtTab,vertNbr+1,SCOTCH_Num);
+  _MMG5_SAFE_CALLOC(permVrtTab,vertNbr+1,SCOTCH_Num,1);
 
   CHECK_SCOTCH(_MMG5_kPartBoxCompute(graf, vertNbr, boxVertNbr, permVrtTab, mesh),
                "boxCompute", 0);
@@ -237,7 +240,7 @@ int _MMG5_mmgsRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
                 _MMG5_DEL_MEM(mesh,edgeTab,edgeSiz*sizeof(SCOTCH_Num));
                 if( !_MMGS_hashTria(mesh) ) return(0);
                 return(1));
-  _MMG5_SAFE_CALLOC(permNodTab,mesh->np+1,int);
+  _MMG5_SAFE_CALLOC(permNodTab,mesh->np+1,int,1);
 
   ntreal = 0;
   npreal = 0;

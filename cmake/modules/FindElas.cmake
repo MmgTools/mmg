@@ -36,7 +36,7 @@ FIND_PATH(ELAS_INCLUDE_DIR
   DOC "Directory of ELAS Header")
 
 # Check for elas library (search in common locations in order to prevent
-# modifications in SUscElas installation)
+# modifications in ELAS installation)
 FIND_LIBRARY(ELAS_LIBRARY
   NAMES Elas Elas${ELAS_LIB_SUFFIX}
   HINTS ${ELAS_LIBRARY}

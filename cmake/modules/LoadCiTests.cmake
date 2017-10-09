@@ -26,12 +26,12 @@ SET ( GET_MMGS_TESTS "FALSE" )
 SET ( GET_MMG3D_TESTS "FALSE" )
 
 # Check if the ci_tests directory exists
-IF ( NOT EXISTS ${CMAKE_SOURCE_DIR}/ci_tests )
+IF ( NOT EXISTS ${CI_DIR} )
 
   # First download of the tests
-  MESSAGE("-- Create the continuous integration directory (ci_tests)"
+  MESSAGE("-- Create the continuous integration directory ${CI_DIR}"
     " and download the test cases. May be very long...")
-  FILE(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/ci_tests)
+  FILE(MAKE_DIRECTORY ${CI_DIR})
 
   SET ( GET_MMG_TESTS "TRUE" )
   SET ( GET_MMG2D_TESTS "TRUE" )
@@ -42,21 +42,21 @@ ELSE ( )
 
   # Check if the tests are up to date
   #--------------> mmg
-  IF ( EXISTS ${CMAKE_SOURCE_DIR}/ci_tests/mmg.version )
-    FILE(MD5 ${CMAKE_SOURCE_DIR}/ci_tests/mmg.version OLD_MMG_MD5)
+  IF ( EXISTS ${CI_DIR}/mmg.version )
+    FILE(MD5 ${CI_DIR}/mmg.version OLD_MMG_MD5)
   ELSE ( )
     SET ( OLD_MMG_MD5 "0" )
   ENDIF ( )
 
   FILE(DOWNLOAD https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmRktsVkFDTGlfdzQ
-    ${CMAKE_SOURCE_DIR}/ci_tests/mmg.version
+    ${CI_DIR}/mmg.version
     STATUS MMG_VERSION_STATUS
     INACTIVITY_TIMEOUT 5)
   LIST(GET MMG_VERSION_STATUS 0 MMG_VERSION_STATUS_0)
   LIST(GET MMG_VERSION_STATUS 1 MMG_VERSION_STATUS_1)
 
   IF ( MMG_VERSION_STATUS_0 MATCHES 0)
-    FILE(MD5 ${CMAKE_SOURCE_DIR}/ci_tests/mmg.version MMG_MD5)
+    FILE(MD5 ${CI_DIR}/mmg.version MMG_MD5)
 
     IF ( NOT (${OLD_MMG_MD5} MATCHES ${MMG_MD5}) )
       SET ( GET_MMG_TESTS "TRUE" )
@@ -66,25 +66,25 @@ ELSE ( )
       " ${MMG_VERSION_STATUS_1}.
  Try to get it at the following link:
         https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmRktsVkFDTGlfdzQ
- then untar it in the project directory (mmg/ by default).")
+ then untar it in the ${CI_DIR} directory.")
   ENDIF()
 
   #--------------> mmg2d
-  IF ( EXISTS ${CMAKE_SOURCE_DIR}/ci_tests/mmg2d.version )
-    FILE(MD5 ${CMAKE_SOURCE_DIR}/ci_tests/mmg2d.version OLD_MMG2D_MD5)
+  IF ( EXISTS ${CI_DIR}/mmg2d.version )
+    FILE(MD5 ${CI_DIR}/mmg2d.version OLD_MMG2D_MD5)
   ELSE ( )
     SET ( OLD_MMG2D_MD5 "0" )
   ENDIF ( )
 
   FILE(DOWNLOAD https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmV3BlUER4M0Z4MGs
-    ${CMAKE_SOURCE_DIR}/ci_tests/mmg2d.version
+    ${CI_DIR}/mmg2d.version
     STATUS MMG2D_VERSION_STATUS
     INACTIVITY_TIMEOUT 5)
   LIST(GET MMG2D_VERSION_STATUS 0 MMG2D_VERSION_STATUS_0)
   LIST(GET MMG2D_VERSION_STATUS 1 MMG2D_VERSION_STATUS_1)
 
   IF ( MMG2D_VERSION_STATUS_0 MATCHES 0)
-    FILE(MD5 ${CMAKE_SOURCE_DIR}/ci_tests/mmg2d.version MMG2D_MD5)
+    FILE(MD5 ${CI_DIR}/mmg2d.version MMG2D_MD5)
 
     IF ( NOT (${OLD_MMG2D_MD5} MATCHES ${MMG2D_MD5}) )
       SET ( GET_MMG2D_TESTS "TRUE" )
@@ -94,25 +94,25 @@ ELSE ( )
       " ${MMG2D_VERSION_STATUS_1}.
  Try to get it at the following link:
         https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmV3BlUER4M0Z4MGs
- then untar it in the project directory (mmg/ by default).")
+ then untar it in the ${CI_DIR} directory.")
   ENDIF()
 
     #--------------> mmgs
-  IF ( EXISTS ${CMAKE_SOURCE_DIR}/ci_tests/mmgs.version )
-    FILE(MD5 ${CMAKE_SOURCE_DIR}/ci_tests/mmgs.version OLD_MMGS_MD5)
+  IF ( EXISTS ${CI_DIR}/mmgs.version )
+    FILE(MD5 ${CI_DIR}/mmgs.version OLD_MMGS_MD5)
   ELSE ( )
     SET ( OLD_MMGS_MD5 "0" )
   ENDIF ( )
 
   FILE(DOWNLOAD https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmSWtGV295a28wU2c
-    ${CMAKE_SOURCE_DIR}/ci_tests/mmgs.version
+    ${CI_DIR}/mmgs.version
     STATUS MMGS_VERSION_STATUS
     INACTIVITY_TIMEOUT 5)
   LIST(GET MMGS_VERSION_STATUS 0 MMGS_VERSION_STATUS_0)
   LIST(GET MMGS_VERSION_STATUS 1 MMGS_VERSION_STATUS_1)
 
   IF ( MMGS_VERSION_STATUS_0 MATCHES 0)
-    FILE(MD5 ${CMAKE_SOURCE_DIR}/ci_tests/mmgs.version MMGS_MD5)
+    FILE(MD5 ${CI_DIR}/mmgs.version MMGS_MD5)
 
     IF ( NOT (${OLD_MMGS_MD5} MATCHES ${MMGS_MD5}) )
       SET ( GET_MMGS_TESTS "TRUE" )
@@ -122,25 +122,25 @@ ELSE ( )
       " ${MMGS_VERSION_STATUS_1}.
  Try to get it at the following link:
        https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmSWtGV295a28wU2c
- then untar it in the project directory (mmg/ by default).")
+ then untar it in the ${CI_DIR} directory.")
   ENDIF()
 
   #--------------> mmg3d
-  IF ( EXISTS ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.version )
-    FILE(MD5 ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.version OLD_MMG3D_MD5)
+  IF ( EXISTS ${CI_DIR}/mmg3d.version )
+    FILE(MD5 ${CI_DIR}/mmg3d.version OLD_MMG3D_MD5)
   ELSE ( )
     SET ( OLD_MMG3D_MD5 "0" )
   ENDIF ( )
 
   FILE(DOWNLOAD https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmSWtGV295a28wU2c
-    ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.version
+    ${CI_DIR}/mmg3d.version
     STATUS MMG3D_VERSION_STATUS
     INACTIVITY_TIMEOUT 5)
   LIST(GET MMG3D_VERSION_STATUS 0 MMG3D_VERSION_STATUS_0)
   LIST(GET MMG3D_VERSION_STATUS 1 MMG3D_VERSION_STATUS_1)
 
   IF ( MMG3D_VERSION_STATUS_0 MATCHES 0)
-    FILE(MD5 ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.version MMG3D_MD5)
+    FILE(MD5 ${CI_DIR}/mmg3d.version MMG3D_MD5)
 
     IF (NOT (${OLD_MMG3D_MD5} MATCHES ${MMG3D_MD5}))
       SET ( GET_MMG3D_TESTS "TRUE" )
@@ -150,7 +150,7 @@ ELSE ( )
       " ${MMG3D_VERSION_STATUS_1}.
  Try to get it at the following link:
         https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmSWtGV295a28wU2c
- then untar it in the project directory (mmg/ by default).")
+ then untar it in the ${CI_DIR} directory.")
   ENDIF()
 
 ENDIF()
@@ -160,28 +160,27 @@ ENDIF()
 IF ( GET_MMG_TESTS MATCHES "TRUE" )
   MESSAGE("-- Download the mmg test cases. May be very long...")
   FILE(DOWNLOAD https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmdXVkS3QzdWEtdFU
-    ${CMAKE_SOURCE_DIR}/ci_tests/mmg.tgz
+    ${CI_DIR}/mmg.tgz
     SHOW_PROGRESS)
-  IF ( NOT EXISTS ${CMAKE_SOURCE_DIR}/ci_tests/mmg.tgz )
+  IF ( NOT EXISTS ${CI_DIR}/mmg.tgz )
     MESSAGE("\n")
     MESSAGE(WARNING "Fail to automatically download the mmg test cases.
 Try to get it at the following link:
        https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmdXVkS3QzdWEtdFU
-then untar it in the project directory (mmg/ by default).")
+then untar it in the ${CI_DIR} directory.")
   ELSE()
     EXECUTE_PROCESS(
       COMMAND ${CMAKE_COMMAND} -E tar xzf
-      ${CMAKE_SOURCE_DIR}/ci_tests/mmg.tgz
-      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/ci_tests/
+      ${CI_DIR}/mmg.tgz
+      WORKING_DIRECTORY ${CI_DIR}/
       )
-    IF ( NOT EXISTS ${CMAKE_SOURCE_DIR}/ci_tests/mmg.tgz )
+    IF ( NOT EXISTS ${CI_DIR}/mmg.tgz )
       MESSAGE("\n")
       MESSAGE(WARNING "Fail to automatically untar the mmg "
         "test cases directory (mmg.tgz).
-Try to untar it by hand in the project directory"
-        " (mmg/ci_tests/ by default).")
+Try to untar it by hand in the ${CI_DIR} directory.")
     ENDIF()
-    FILE(REMOVE ${CMAKE_SOURCE_DIR}/ci_tests/mmg.tgz)
+    FILE(REMOVE ${CI_DIR}/mmg.tgz)
   ENDIF ()
 ENDIF ()
 
@@ -190,28 +189,27 @@ ENDIF ()
 IF ( GET_MMG2D_TESTS MATCHES "TRUE" )
   MESSAGE("-- Download the mmg2d test cases. May be very long...")
   FILE(DOWNLOAD https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmX0hrRWJWTDBETHc
-    ${CMAKE_SOURCE_DIR}/ci_tests/mmg2d.tgz
+    ${CI_DIR}/mmg2d.tgz
     SHOW_PROGRESS)
-  IF ( NOT EXISTS ${CMAKE_SOURCE_DIR}/ci_tests/mmg2d.tgz )
+  IF ( NOT EXISTS ${CI_DIR}/mmg2d.tgz )
     MESSAGE("\n")
     MESSAGE(WARNING "Fail to automatically download the mmg2d test cases.
 Try to get it at the following link:
        https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmX0hrRWJWTDBETHc
-then untar it in the project directory (mmg/ by default).")
+then untar it in the ${CI_DIR} directory.")
   ELSE()
     EXECUTE_PROCESS(
       COMMAND ${CMAKE_COMMAND} -E tar xzf
-      ${CMAKE_SOURCE_DIR}/ci_tests/mmg2d.tgz
-      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/ci_tests/
+      ${CI_DIR}/mmg2d.tgz
+      WORKING_DIRECTORY ${CI_DIR}/
       )
-    IF ( NOT EXISTS ${CMAKE_SOURCE_DIR}/ci_tests/mmg2d.tgz )
+    IF ( NOT EXISTS ${CI_DIR}/mmg2d.tgz )
       MESSAGE("\n")
       MESSAGE(WARNING "Fail to automatically untar the mmg2d "
         "test cases directory (mmg2d.tgz).
-Try to untar it by hand in the project directory"
-        " (mmg/ci_tests/ by default).")
+Try to untar it by hand in the ${CI_DIR} directory.")
     ENDIF()
-    FILE(REMOVE ${CMAKE_SOURCE_DIR}/ci_tests/mmg2d.tgz)
+    FILE(REMOVE ${CI_DIR}/mmg2d.tgz)
   ENDIF ()
 ENDIF ()
 
@@ -219,28 +217,27 @@ ENDIF ()
 IF ( GET_MMGS_TESTS MATCHES "TRUE" )
   MESSAGE("-- Download the mmgs test cases. May be very long...")
   FILE(DOWNLOAD https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmcVdZb1EzaTR3ZlU
-    ${CMAKE_SOURCE_DIR}/ci_tests/mmgs.tgz
+    ${CI_DIR}/mmgs.tgz
     SHOW_PROGRESS)
-  IF ( NOT EXISTS ${CMAKE_SOURCE_DIR}/ci_tests/mmgs.tgz )
+  IF ( NOT EXISTS ${CI_DIR}/mmgs.tgz )
     MESSAGE("\n")
     MESSAGE(WARNING "Fail to automatically download the mmgs test cases.
 Try to get it at the following link:
        https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmcVdZb1EzaTR3ZlU
-then untar it in the project directory (mmg/ by default).")
+then untar it in the ${CI_DIR} directory.")
   ELSE()
     EXECUTE_PROCESS(
       COMMAND ${CMAKE_COMMAND} -E tar xzf
-      ${CMAKE_SOURCE_DIR}/ci_tests/mmgs.tgz
-      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/ci_tests/
+      ${CI_DIR}/mmgs.tgz
+      WORKING_DIRECTORY ${CI_DIR}/
       )
-    IF ( NOT EXISTS ${CMAKE_SOURCE_DIR}/ci_tests/mmgs.tgz )
+    IF ( NOT EXISTS ${CI_DIR}/mmgs.tgz )
       MESSAGE("\n")
       MESSAGE(WARNING "Fail to automatically untar the mmgs "
         "test cases directory (mmgs.tgz).
-Try to untar it by hand in the project directory"
-        " (mmg/ci_tests/ by default).")
+Try to untar it by hand in the ${CI_DIR} directory.")
     ENDIF()
-    FILE(REMOVE ${CMAKE_SOURCE_DIR}/ci_tests/mmgs.tgz)
+    FILE(REMOVE ${CI_DIR}/mmgs.tgz)
   ENDIF ()
 ENDIF ()
 
@@ -272,29 +269,29 @@ SET(ADDRESS
   )
 
 SET(FILENAME
-  ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz.aa
-  ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz.ab
-  ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz.ac
-  ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz.ad
-  ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz.ae
-  ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz.af
-  ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz.ag
-  ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz.ah
-  ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz.ai
-  ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz.aj
-  ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz.ak
-  ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz.al
-  ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz.am
-  ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz.an
-  ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz.ao
-  ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz.ap
-  ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz.aq
-  ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz.ar
-  ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz.as
-  ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz.at
-  ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz.au
-  ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz.av
-  ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d.tgz.aw
+  ${CI_DIR}/mmg3d.tgz.aa
+  ${CI_DIR}/mmg3d.tgz.ab
+  ${CI_DIR}/mmg3d.tgz.ac
+  ${CI_DIR}/mmg3d.tgz.ad
+  ${CI_DIR}/mmg3d.tgz.ae
+  ${CI_DIR}/mmg3d.tgz.af
+  ${CI_DIR}/mmg3d.tgz.ag
+  ${CI_DIR}/mmg3d.tgz.ah
+  ${CI_DIR}/mmg3d.tgz.ai
+  ${CI_DIR}/mmg3d.tgz.aj
+  ${CI_DIR}/mmg3d.tgz.ak
+  ${CI_DIR}/mmg3d.tgz.al
+  ${CI_DIR}/mmg3d.tgz.am
+  ${CI_DIR}/mmg3d.tgz.an
+  ${CI_DIR}/mmg3d.tgz.ao
+  ${CI_DIR}/mmg3d.tgz.ap
+  ${CI_DIR}/mmg3d.tgz.aq
+  ${CI_DIR}/mmg3d.tgz.ar
+  ${CI_DIR}/mmg3d.tgz.as
+  ${CI_DIR}/mmg3d.tgz.at
+  ${CI_DIR}/mmg3d.tgz.au
+  ${CI_DIR}/mmg3d.tgz.av
+  ${CI_DIR}/mmg3d.tgz.aw
   )
 
 
@@ -315,7 +312,7 @@ IF ( GET_MMG3D_TESTS MATCHES "TRUE" )
       MESSAGE(WARNING "Fail to automatically download the mmg3d test cases
 Try to get it at the following link:
        ${ADDRESS_i}
-then untar it in the project directory mmg/ by default).")
+then untar it in the ${CI_DIR} directory.")
       SET ( LOAD_OK 0 )
       BREAK()
     ENDIF()
@@ -326,16 +323,15 @@ then untar it in the project directory mmg/ by default).")
     EXECUTE_PROCESS(
       COMMAND cat ${FILENAME}
       COMMAND tar -xzf -
-      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/ci_tests/
+      WORKING_DIRECTORY ${CI_DIR}/
       TIMEOUT 10000
       )
-    IF ( NOT EXISTS ${CMAKE_SOURCE_DIR}/ci_tests/mmg3d )
+    IF ( NOT EXISTS ${CI_DIR}/mmg3d )
       MESSAGE("\n")
       MESSAGE(WARNING "Fail to automatically untar the mmg3d"
         "test cases directory (mmg3d.tgz.*).
-Try to untar it by hand in the project directory"
-        " (mmg/ci_tests/ by default):
-        cat mmg3d.tgz.* | tar xzvf - ")
+Try to untar it by hand in the ${CI_DIR} directory: "
+        "cat mmg3d.tgz.* | tar xzvf - ")
     ENDIF()
 
     FILE(REMOVE ${FILENAME})

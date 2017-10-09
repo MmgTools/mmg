@@ -61,7 +61,7 @@
  *    - 7: 0 obtuse face, 4 acute face, 0 big edge, 2 small edge.
  *
  */
-int MMG3D_typelt(MMG5_pMesh mesh,int iel,int *item) {
+static int MMG3D_typelt(MMG5_pMesh mesh,int iel,int *item) {
   MMG5_pTetra    pt;
   MMG5_pPoint    pa,pb,pc,pd;
   double    abx,aby,abz,acx,acy,acz,adx,ady,adz,v1,v2,v3,vol;
@@ -172,7 +172,7 @@ int MMG3D_typelt(MMG5_pMesh mesh,int iel,int *item) {
 
   /* small volume: types 1,2,3,4 */
   if ( vol < volchk ) {
-    //puts("volume nul : type 1,2,3,4");
+    // puts("volume nul : type 1,2,3,4");
     ssmall = 0.4 * (s[0]+s[1]+s[2]+s[3]);
     isur   = 0;
     for (i=0; i<4; i++)
@@ -237,11 +237,12 @@ int MMG3D_typelt(MMG5_pMesh mesh,int iel,int *item) {
     //puts("default");
     item[0] = 0;
     return(1);
-  }/*end chkvol*/
+  }/* end chkvol */
 
   dd = rapmin / rapmax;
   /* types 3,6,7 */
-  if ( dd < RAPMAX ) { /*ie une arete 4 fois plus gde qu'une autre*/
+  if ( dd < RAPMAX ) {
+    /* One edge is 4 time smaller than another one */
 
     for (i=0; i<6; i++)  h[i] = sqrt(h[i]);
 
@@ -251,7 +252,8 @@ int MMG3D_typelt(MMG5_pMesh mesh,int iel,int *item) {
         i0 = _MMG5_idir[k][i];
         i1 = _MMG5_idir[k][_MMG5_inxt2[i]];
         i2 = _MMG5_idir[k][_MMG5_inxt2[i+1]];
-        if ( h[i0]+h[i1] < 1.2*h[i2] ) {/*1.4 ie une face obtus*/
+        if ( h[i0]+h[i1] < 1.2*h[i2] ) {
+          /* Obtuse face */
           nobtus++;
           item[0] = i2;
           item[1] = _MMG5_idir[k][_MMG5_inxt2[i+1]];
@@ -273,7 +275,6 @@ int MMG3D_typelt(MMG5_pMesh mesh,int iel,int *item) {
     default:
       item[0] = iarmin;
       item[1] = iarmax;
-      //printf("default obtus %d\n",nobtus);
       return(7);
     }
   }
@@ -286,7 +287,7 @@ int MMG3D_typelt(MMG5_pMesh mesh,int iel,int *item) {
         i0 = _MMG5_idir[k][i];
         i1 = _MMG5_idir[k][_MMG5_inxt2[i]];
         i2 = _MMG5_idir[k][_MMG5_inxt2[i+1]];
-        if ( h[i0]+h[i1] > 1.5*h[i2] )  naigu++;/*1.5*/
+        if ( h[i0]+h[i1] > 1.5*h[i2] )  naigu++;
       }
     }
     switch(naigu){
@@ -298,63 +299,49 @@ int MMG3D_typelt(MMG5_pMesh mesh,int iel,int *item) {
       item[0] = iarmin;
       return(4);
     case 3:
-      /*#warning definir item*/
+      /* Item to define */
       return(5);
     default:
       item[0] = iarmin;
       item[1] = iarmax;
-      //printf("default aigu\n");
       return(7);
     }
   }
   item[0] = 0;
   return(1);
 }
-static inline int _MMG3D_swpItem(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,int k,int iar) {
-  MMG5_pTetra   pt,pt1;
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param octree pointer toward the octree structure.
+ * \param k elt index.
+ * \param iar index of edge to not try to swap.
+ * \return -1 if fail, 0 if we don't swap anything, 1 otherwise.
+ *
+ * Try to swap edge \a iar of tetra \a k.
+ *
+ */
+int _MMG3D_swpItem(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,int k,int iar) {
+  MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
-  int           l,list[MMG3D_LMAX+2],lon,iel,nconf,ier;
-  double        crit;
+  int           list[MMG3D_LMAX+2],lon,nconf,ier;
   double        OCRIT = 1.01;
-  int           nf = 0,j;
 
   ier = 0;
   pt = &mesh->tetra[k];
-  lon = _MMG5_coquil(mesh,k,iar,&list[0]);
-  if(lon%2) return(0);
-  lon = lon/2;
-  if ( lon > 2 ) {
-    crit = pt->qual;
-    for (l=0; l<lon; l++) {
-      iel = list[l] / 6;
-      pt1 = &mesh->tetra[iel];
-      if(pt1->tag & MG_REQ) break;
-      if ( pt1->qual < crit )  crit = pt1->qual;
-      if ( pt1->xt ) {
-        pxt = &mesh->xtetra[pt1->xt];
-        for (j=0; j<4; j++)
-          if ( pxt->ftag[j] & MG_BDY )  nf++;
-      }
-    }
-    if(nf > 1) return(0);//printf("on risque de crreerrrr %d\n",nf);
-    if(l<lon)  {
-      ier = 0;
-    } else {
-      crit *= OCRIT;
-      /* Prevent swap of a ref or tagged edge */
-      if ( pt->xt ) {
-        pxt = &mesh->xtetra[pt->xt];
-        if ( pxt->edg[iar] || pxt->tag[iar] ) return(0);
-      }
+  /* Prevent swap of a ref or tagged edge */
+  if ( pt->xt ) {
+    pxt = &mesh->xtetra[pt->xt];
+    if ( pxt->edg[iar] || pxt->tag[iar] ) return(0);
+  }
 
-      nconf = _MMG5_chkswpgen(mesh,met,k,iar,&lon,list,OCRIT,2);
-      if ( nconf ) {
-        ier = _MMG5_swpgen(mesh,met,nconf,lon,list,octree,2);
-        if ( ier < 0 ) return(-1);
-        else
-          return(ier);
-      }
-    }
+  nconf = _MMG5_chkswpgen(mesh,met,k,iar,&lon,list,OCRIT,2);
+  if ( nconf ) {
+    ier = _MMG5_swpgen(mesh,met,nconf,lon,list,octree,2);
+    if ( ier < 0 ) return(-1);
+    else
+      return(ier);
   }
 
   return(ier);
@@ -399,7 +386,6 @@ int _MMG3D_swpalmostall(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,
  * Try to split edge number \a iar of tetra \a k
  *
  */
-static inline
 int _MMG3D_splitItem(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,
                      int k,int iar,double OCRIT) {
   MMG5_pTetra   pt;
@@ -409,12 +395,15 @@ int _MMG3D_splitItem(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,
 
   ier = 0;
   pt = &mesh->tetra[k];
+
+  if ( mesh->info.noinsert ) return 0;
+
   len = _MMG5_lenedg(mesh,met,iar,pt);
   if(len > LLONG2) {
     ier = _MMG5_splitedg(mesh,met,k,iar,OCRIT);
   }
 
-  if(ier) {
+  if ( ier && !mesh->info.nomove ) {
     for(j=0 ; j<4 ; j++) {
       if(pt->v[j] == ier) break;
     }
@@ -473,44 +462,31 @@ int _MMG3D_splitalmostall(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,
  */
 int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
   MMG5_pTetra    pt;
+  MMG5_pxTetra   pxt;
   double         crit;
-  int            k,ityp,cs[10],ds[10],item[2],*adja,iadr;
+  int            k,ityp,cs[10],ds[10],item[2];
   int            ier,i,nd,ne,npeau;
-  int            it,maxit,ntot;
+  int            it,maxit,ntot,base;
 //  double         OCRIT = 1.01;
-  int ddebug ;
-
-  //printf("on lance anatet4\n");
-  ier = 0;//_MMG5_anatet4(mesh,met,1);
-  if(ier) {
-    printf("on a splitte %d\n",ier);
-    /* memory free */
-    _MMG5_DEL_MEM(mesh,mesh->adja,(4*mesh->nemax+5)*sizeof(int));
-    // Attention, faut-il recalculer la table d'adjacence des prisme ici?
-    if ( !MMG3D_hashTetra(mesh,1) ) {
-      fprintf(stderr,"  ## Hashing problem. Exit program.\n");
-      return(0);
-    }
-  }
+  int            nbdy,nbdy2 ;
 
   ntot = 0;
-  crit = 0.2 / _MMG5_ALPHAD;
+  crit = 0.2 / _MMG3D_ALPHAD;
 
   it = 0;
   maxit = 10;
   do {
     ne = mesh->ne;
+    base = ++mesh->mark;
     nd = 0;
+    nbdy = nbdy2 = 0;
     memset(cs,0,10*sizeof(int));
     memset(ds,0,10*sizeof(int));
 
     for (k=1 ; k<=ne ; k++) {
       pt = &mesh->tetra[k];
-      if(!pt->v[0]) continue;
-      /* if(pt->qual <= 3.117138e-07) {printf("k %d ityp %d %e npeau %d\n",k,ityp,pt->qual,npeau);
-         ddebug = 1;}
-         else*/
-      ddebug = 0;
+      if(!MG_EOK(pt)  || (pt->tag & MG_REQ) ) continue;
+      else if ( pt->mark < base-2 )  continue;
 
       if(pt->qual > crit) continue;
 
@@ -518,96 +494,84 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
       cs[ityp]++;
 
       /*tet with bdry faces*/
-      iadr = 4*(k-1) + 1;
-      adja = &mesh->adja[iadr];
+      pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
+
       /*optim bdry tetra*/
       npeau = 0;
-      for(i=0 ; i<4 ; i++) {
-        if(!adja[i]) npeau++;
-      }
-      if(npeau>1 && !mesh->info.noswap) {
-        if( mesh->info.imprim<-4 ) printf("%d faces de peau!!!! %d (typ %d) %e\n",npeau,k,ityp,pt->qual);
-        /* if ( !_MMG5_split4bar(mesh,met,k,1) ) return(-1); */
-        /* else { */
-        /*   nd++;  */
-        /*   ds[ityp]++; */
-        /*   printf("on a splitte\n"); */
-        /*   continue; */
-        /* } */
-      }
-      if(npeau) {
-        ier = 0;//MMG3D_optbdry(mesh,sol,k);
-        if(ier) {
-          nd++;
-          ds[ityp]++;
+      if ( pxt ) {
+        for(i=0 ; i<4 ; i++) {
+          if ( pxt->ftag[i] & MG_BDY ) npeau++;
+        }
+
+        if(npeau>1) {
+          nbdy++;
           continue;
+        } else if ( npeau ) {
+          nbdy2++;
+
+          ier = MMG3D_optbdry(mesh,met,octree,k);
+          if(ier) {
+            nd++;
+            ds[ityp]++;
+            continue;
+          }
         }
       }
 
       switch(ityp) {
 
       case 1:  /* sliver */
-      case 3:  /* aileron*/
-      case 6:  /* O good face: move away closest vertices */
+      case 3:  /* fin */
+      case 6:  /* no good face: move away closest vertices */
       case 7:
       default:
+
         if(mesh->info.noswap) break;
+
         ier = _MMG3D_swpItem(mesh,met,octree,k,item[0]);
-        if(ddebug) printf("on swp %d ?\n",ier);
+
         if(ier > 0) {
           nd++;
           ds[ityp]++;
           break;
         } else if(!ier) {
-          /*second try to split the biggest edge*/
+          /* second try to split the biggest edge */
           if(!mesh->info.noinsert) {
             /* if(_MMG5_orvolnorm(mesh,k) < 5.e-9) { */
             /*   OCRIT *= 0.5; */
             /* } else */
             /*   OCRIT *= 0.75; */
-            ier = 0;//_MMG3D_splitItem(mesh,met,octree,k,item[0],OCRIT);
-            if(ddebug) printf("on split %d ?\n",ier);
+            ier = _MMG3D_splitItem(mesh,met,octree,k,item[0],1.01);
 
             if(ier) {
               nd++;
               ds[ityp]++;
               break;
             }
-          } /*end noinsert*/
+          } /* end noinsert */
 
           ier = _MMG3D_swpalmostall(mesh,met,octree,k,item[0]);
-          if(ddebug) printf("on swp2 %d ?\n",ier);
 
           if(ier > 0) {
             nd++;
             ds[ityp]++;
             break;
           }
-          ier = 0;//_MMG3D_splitalmostall(mesh,met,octree,k,item[0]);
-          if(ddebug) printf("on split2 %d ?\n",ier);
 
-          if(ier > 0) {
-            nd++;
-            ds[ityp]++;
-            break;
+          if ( !mesh->info.noinsert ) {
+            ier = _MMG3D_splitalmostall(mesh,met,octree,k,item[0]);
+
+            if(ier > 0) {
+              nd++;
+              ds[ityp]++;
+              break;
+            }
           }
         }
-        for(i=0 ; i<4 ; i++) {
-          if(((met->size!=1) && _MMG3D_movv_ani(mesh,met,k,i)) || ((met->size==1) && _MMG3D_movv_iso(mesh,met,k,i))) {
-            nd++;
-            ds[ityp]++;
-            break;
-          }
-        }
-        break;
-      case 2: /*chapeau*/
-        if(((met->size!=1) && _MMG3D_movv_ani(mesh,met,k,item[0])) || ((met->size==1) && _MMG3D_movv_iso(mesh,met,k,item[0]))) {
-          nd++;
-          ds[ityp]++;
-        } else {
+        if ( !mesh->info.nomove ) {
           for(i=0 ; i<4 ; i++) {
-            if(item[0]==i) continue;
-            if(((met->size!=1) && _MMG3D_movv_ani(mesh,met,k,i)) || ((met->size==1) && _MMG3D_movv_iso(mesh,met,k,i))) {
+            if ( ((met->size!=1) && _MMG3D_movv_ani(mesh,met,k,i)) ||
+                 ((met->size==1) && _MMG3D_movv_iso(mesh,met,k,i)) ) {
               nd++;
               ds[ityp]++;
               break;
@@ -615,12 +579,33 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
           }
         }
         break;
-      }/*end switch*/
-    }/*end for k*/
-    /* for (k=0; k<=7; k++)
-       if ( cs[k] )
-       printf("  optim [%d]      = %5d   %5d  %6.2f %%\n",k,cs[k],ds[k],100.0*ds[k]/cs[k]);
-    */
+      case 2: /*chapeau*/
+        if ( !mesh->info.nomove ) {
+          if ( ( (met->size!=1) && _MMG3D_movv_ani(mesh,met,k,item[0])) ||
+               ((met->size==1) && _MMG3D_movv_iso(mesh,met,k,item[0])) ) {
+            nd++;
+            ds[ityp]++;
+          } else {
+            for(i=0 ; i<4 ; i++) {
+              if(item[0]==i) continue;
+              if( ((met->size!=1) && _MMG3D_movv_ani(mesh,met,k,i)) ||
+                  ((met->size==1) && _MMG3D_movv_iso(mesh,met,k,i)) ) {
+                nd++;
+                ds[ityp]++;
+                break;
+              }
+            }
+          }
+        }
+        break;
+      } /* end switch */
+    } /* end for k */
+
+    /* printf("bdry : %d %d\n",nbdy,nbdy2); */
+    /*  for (k=0; k<=7; k++) */
+    /*    if ( cs[k] ) */
+    /*    printf("  optim [%d]      = %5d   %5d  %6.2f %%\n",k,cs[k],ds[k],100.0*ds[k]/cs[k]); */
+
     ntot += nd;
   } while (nd && it++<maxit);
 

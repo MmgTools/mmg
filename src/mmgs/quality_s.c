@@ -82,7 +82,7 @@ inline double caleltsig_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
   pv[2] = abx*acy - aby*acx;
 
   dd   = pv[0]*pv[0] + pv[1]*pv[1] + pv[2]*pv[2];
-  if ( dd < _MMG5_EPSD )  return(0.0);
+  if ( dd < _MMG5_EPSD2 )  return(0.0);
   dd = 1.0 / sqrt(dd);
 
   // If one of the triangle vertex is not REF or GEO, it contains the normal at
@@ -131,7 +131,7 @@ inline double caleltsig_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
   l[2] = _MMG5_lenSurfEdg_ani(mesh,met,ia,ib,( pt->tag[2] & MG_GEO ));
 
   rap = l[0]*l[0] + l[1]*l[1] + l[2]*l[2];
-  if ( rap < _MMG5_EPSD )  return(0.0);
+  if ( rap < _MMG5_EPSD2 )  return(0.0);
   return(anisurf / rap);
 }
 
@@ -173,9 +173,8 @@ inline double caleltsig_iso(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
 
   cal   = pv[0]*pv[0] + pv[1]*pv[1] + pv[2]*pv[2];
   sqcal = sqrt(cal);
-  ps1   = 0.0;
 
-  if ( sqcal < _MMG5_EPSD )  return(0.0);
+  if ( sqcal < _MMG5_EPSD2 )  return(0.0);
   invsqcal = 1.0 / sqcal;
 
   if ( !MG_EDG(pa->tag) ) {
@@ -211,12 +210,12 @@ inline double caleltsig_iso(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
 
   /* if orientation is reversed with regards to orientation of vertex */
   if ( ps1 < 0.0 )  return(-1.0);
-  if ( cal > _MMG5_EPSD ) {
+  if ( cal > _MMG5_EPSD2 ) {
     /* qual = 2.*surf / length */
     rap  = abx*abx + aby*aby + abz*abz;
     rap += acx*acx + acy*acy + acz*acz;
     rap += bcx*bcx + bcy*bcy + bcz*bcz;
-    if ( rap > _MMG5_EPSD )
+    if ( rap > _MMG5_EPSD2 )
       return(sqrt(cal) / rap);
     else
       return(0.0);
@@ -283,10 +282,9 @@ int _MMGS_prilen(MMG5_pMesh mesh, MMG5_pSol met, int metRidTyp) {
   MMG5_pTria      pt;
   _MMG5_Hash      hash;
   double          len,avlen,lmin,lmax;
-  int             k,np,nq,amin,bmin,amax,bmax,ned,hl[9];
+  int             k,np,nq,amin,bmin,amax,bmax,ned,hl[9],nullEdge;
   char            ia,i0,i1,i;
   static double   bd[9]= {0.0, 0.3, 0.6, 0.7071, 0.9, 1.3, 1.4142, 2.0, 5.0};
-  //{0.0, 0.2, 0.5, 0.7071, 0.9, 1.111, 1.4142, 2.0, 5.0};
 
   memset(hl,0,9*sizeof(int));
   ned = 0;
@@ -294,6 +292,7 @@ int _MMGS_prilen(MMG5_pMesh mesh, MMG5_pSol met, int metRidTyp) {
   lmax = 0.0;
   lmin = 1.e30;
   amin = amax = bmin = bmax = 0;
+  nullEdge = 0;
 
   /* Hash all edges in the mesh */
   if ( !_MMG5_hashNew(mesh,&hash,mesh->np,7*mesh->np) )  return(0);
@@ -309,9 +308,9 @@ int _MMGS_prilen(MMG5_pMesh mesh, MMG5_pSol met, int metRidTyp) {
       nq = pt->v[i1];
 
       if(!_MMG5_hashEdge(mesh,&hash,np,nq,0)){
-        fprintf(stderr,"%s:%d: Error: function _MMG5_hashEdge return 0\n",
-                __FILE__,__LINE__);
-        exit(EXIT_FAILURE);
+        fprintf(stderr,"  ## Error: %s: function _MMG5_hashEdge return 0\n",
+                __func__);
+        return 0;
       }
     }
   }
@@ -329,41 +328,47 @@ int _MMGS_prilen(MMG5_pMesh mesh, MMG5_pSol met, int metRidTyp) {
 
       /* Remove edge from hash */
       _MMG5_hashGet(&hash,np,nq);
-      ned ++;
+
       if ( (!metRidTyp) && met->m && met->size>1 ) {
         len = _MMG5_lenSurfEdg33_ani(mesh,met,np,nq,(pt->tag[ia] & MG_GEO));
       }
       else
         len = _MMG5_lenSurfEdg(mesh,met,np,nq,(pt->tag[ia] & MG_GEO));
 
-      avlen += len;
-
-      if( len < lmin ) {
-        lmin = len;
-        amin = np;
-        bmin = nq;
+      if ( !len ) {
+        ++nullEdge;
       }
+      else {
+        ned ++;
+        avlen += len;
 
-      if ( len > lmax ) {
-        lmax = len;
-        amax = np;
-        bmax = nq;
-      }
-
-      /* Locate size of edge among given table */
-      for(i=0; i<8; i++) {
-        if ( bd[i] <= len && len < bd[i+1] ) {
-          hl[i]++;
-          break;
+        if( len < lmin ) {
+          lmin = len;
+          amin = np;
+          bmin = nq;
         }
+
+        if ( len > lmax ) {
+          lmax = len;
+          amax = np;
+          bmax = nq;
+        }
+
+        /* Locate size of edge among given table */
+        for(i=0; i<8; i++) {
+          if ( bd[i] <= len && len < bd[i+1] ) {
+            hl[i]++;
+            break;
+          }
+        }
+        if( i == 8 ) hl[8]++;
       }
-      if( i == 8 ) hl[8]++;
     }
   }
 
   /* Display histogram */
   _MMG5_displayHisto(mesh, ned, &avlen, amin, bmin, lmin,
-                     amax, bmax, lmax, &bd[0], &hl[0]);
+                     amax, bmax, lmax, nullEdge, &bd[0], &hl[0],0);
 
   _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
   return(1);
@@ -400,17 +405,17 @@ int _MMGS_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
     ok++;
 
     if ( met->m && (met->size == 6) ) {
-      rap = ALPHAD * _MMG5_caltri33_ani(mesh,met,pt);
+      rap = _MMGS_ALPHAD * _MMG5_caltri33_ani(mesh,met,pt);
     }
     else
-      rap = ALPHAD * _MMG5_calelt(mesh,NULL,pt);
+      rap = _MMGS_ALPHAD * _MMG5_calelt(mesh,NULL,pt);
 
     if ( rap < rapmin ) {
       rapmin = rap;
       iel    = ok;
     }
     if ( rap > 0.5 )  med++;
-    if ( rap < BADKAL )  mesh->info.badkal = 1;
+    if ( rap < _MMGS_BADKAL )  mesh->info.badkal = 1;
     rapavg += rap;
     rapmax  = MG_MAX(rapmax,rap);
     ir = MG_MIN(4,(int)(5.0*rap));
@@ -421,22 +426,18 @@ int _MMGS_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
   fprintf(stdout,"     BEST   %8.6f  AVRG.   %8.6f  WRST.   %8.6f (%d)\n",
           rapmax,rapavg / (mesh->nt-nex),rapmin,iel);
 
-  if ( abs(mesh->info.imprim) < 4 ){
-    if (rapmin == 0){
-      fprintf(stderr,"  ## WARNING: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
-      return(0);
+  if ( abs(mesh->info.imprim) >= 3 ){
+
+    /* print histo */
+    fprintf(stdout,"     HISTOGRAMM:  %6.2f %% > 0.5\n",100.0*(med/(float)(mesh->nt-nex)));
+    imax = MG_MIN(4,(int)(5.*rapmax));
+    for (i=imax; i>=(int)(5*rapmin); i--) {
+      fprintf(stdout,"     %5.1f < Q < %5.1f   %7d   %6.2f %%\n",
+              i/5.,i/5.+0.2,his[i],100.*(his[i]/(float)(mesh->nt-nex)));
     }
-    return(1);
   }
 
-  /* print histo */
-  fprintf(stdout,"     HISTOGRAMM:  %6.2f %% > 0.5\n",100.0*(med/(float)(mesh->nt-nex)));
-  imax = MG_MIN(4,(int)(5.*rapmax));
-  for (i=imax; i>=(int)(5*rapmin); i--) {
-    fprintf(stdout,"     %5.1f < Q < %5.1f   %7d   %6.2f %%\n",
-            i/5.,i/5.+0.2,his[i],100.*(his[i]/(float)(mesh->nt-nex)));
-  }
-  return(1);
+  return ( _MMG5_minQualCheck(iel,rapmin,_MMGS_ALPHAD) );
 }
 
 /**
@@ -469,14 +470,14 @@ int _MMGS_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
     }
     ok++;
 
-    rap = ALPHAD * _MMG5_calelt(mesh,met,pt);
+    rap = _MMGS_ALPHAD * _MMG5_calelt(mesh,met,pt);
 
     if ( rap < rapmin ) {
       rapmin = rap;
       iel    = ok;
     }
     if ( rap > 0.5 )  med++;
-    if ( rap < BADKAL )  mesh->info.badkal = 1;
+    if ( rap < _MMGS_BADKAL )  mesh->info.badkal = 1;
     rapavg += rap;
     rapmax  = MG_MAX(rapmax,rap);
     ir = MG_MIN(4,(int)(5.0*rap));
@@ -487,22 +488,17 @@ int _MMGS_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
   fprintf(stdout,"     BEST   %8.6f  AVRG.   %8.6f  WRST.   %8.6f (%d)\n",
           rapmax,rapavg / (mesh->nt-nex),rapmin,iel);
 
-  if ( abs(mesh->info.imprim) < 4 ){
-    if (rapmin == 0){
-      fprintf(stderr,"  ## WARNING: TOO BAD QUALITY FOR THE WORST ELEMENT\n");
-      return(0);
+  if ( abs(mesh->info.imprim) >= 3 ){
+    /* print histo */
+    fprintf(stdout,"     HISTOGRAMM:  %6.2f %% > 0.5\n",100.0*(med/(float)(mesh->nt-nex)));
+    imax = MG_MIN(4,(int)(5.*rapmax));
+    for (i=imax; i>=(int)(5*rapmin); i--) {
+      fprintf(stdout,"     %5.1f < Q < %5.1f   %7d   %6.2f %%\n",
+              i/5.,i/5.+0.2,his[i],100.*(his[i]/(float)(mesh->nt-nex)));
     }
-    return(1);
   }
 
-  /* print histo */
-  fprintf(stdout,"     HISTOGRAMM:  %6.2f %% > 0.5\n",100.0*(med/(float)(mesh->nt-nex)));
-  imax = MG_MIN(4,(int)(5.*rapmax));
-  for (i=imax; i>=(int)(5*rapmin); i--) {
-    fprintf(stdout,"     %5.1f < Q < %5.1f   %7d   %6.2f %%\n",
-            i/5.,i/5.+0.2,his[i],100.*(his[i]/(float)(mesh->nt-nex)));
-  }
-  return(1);
+  return ( _MMG5_minQualCheck(iel,rapmin,_MMGS_ALPHAD) );
 }
 
 #define COS145   -0.81915204428899

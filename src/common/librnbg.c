@@ -77,10 +77,14 @@ int _MMG5_kPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr,
   CHECK_SCOTCH(SCOTCH_stratGraphMap(&strat, s), "scotch_stratGraphMap", 0) ;
 
   _MMG5_ADD_MEM(mesh,2*vertNbr*sizeof(SCOTCH_Num),"sortPartTb",return(1));
-  _MMG5_SAFE_CALLOC(sortPartTb,2*vertNbr,SCOTCH_Num);
+  _MMG5_SAFE_CALLOC(sortPartTb,2*vertNbr,SCOTCH_Num,0);
 
   /* Partionning the graph */
-  CHECK_SCOTCH(SCOTCH_graphMap(&graf, &arch, &strat, sortPartTb), "scotch_graphMap", 0);
+  if ( 0!=SCOTCH_graphMap(&graf, &arch, &strat, sortPartTb) ) {
+    perror("scotch_graphMap");
+    _MMG5_DEL_MEM(mesh,sortPartTb,2*vertNbr*sizeof(SCOTCH_Num));
+    return 0;
+  }
 
 
   if ( SCOTCH_6 ) {
@@ -187,13 +191,20 @@ void _MMG5_swapNod(MMG5_pPoint points, double* sols, int* perm,
  **/
 int _MMG5_scotchCall(MMG5_pMesh mesh, MMG5_pSol met)
 {
+
 #ifdef USE_SCOTCH
+  static char mmgWarn  = 0;
+  static char mmgError = 0;
+
   /*check enough vertex to renum*/
   if ( mesh->info.renum && (mesh->np/2. > _MMG5_BOXSIZE) && mesh->np>100000 ) {
 
     if ( (SCOTCH_5 && SCOTCH_6 ) || ( (!SCOTCH_5) && (!SCOTCH_6) ) ) {
-      printf(" ## Error: fail to determine scotch version.\n");
-      printf("           No renumbering.\n");
+      if ( !mmgWarn ) {
+        fprintf(stderr,"\n  ## Warning: %s: fail to determine scotch version."
+                " No renumbering.\n",__func__);
+        mmgWarn = 1;
+      }
       return 1;
     }
 
@@ -202,8 +213,12 @@ int _MMG5_scotchCall(MMG5_pMesh mesh, MMG5_pSol met)
       fprintf(stdout,"  -- RENUMBERING. \n");
 
     if ( !_MMG5_renumbering(_MMG5_BOXSIZE,mesh, met) ) {
-      fprintf(stdout,"  ## Unable to renumbering mesh. \n");
-      fprintf(stdout,"  ## Try to run without renumbering option (-rn 0)\n");
+      if ( !mmgError ) {
+        fprintf(stderr,"\n  ## Error: %s: Unable to renumbering mesh. "
+                "Try to run without renumbering option (-rn 0).\n",
+                __func__);
+        mmgError = 1;
+      }
       return(0);
     }
 
@@ -211,7 +226,10 @@ int _MMG5_scotchCall(MMG5_pMesh mesh, MMG5_pSol met)
       fprintf(stdout,"  -- PHASE RENUMBERING COMPLETED. \n");
     }
 
-    if ( mesh->info.ddebug )  _MMG5_chkmsh(mesh,1,0);
+    if ( mesh->info.ddebug ) {
+      if ( !_MMG5_chkmsh(mesh,1,0) )
+        return 0;
+    }
     /* renumbering end */
   }
   return(1);

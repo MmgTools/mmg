@@ -48,14 +48,15 @@ static inline
 double _MMG5_surf(MMG5_pMesh mesh,double m[3][6],MMG5_pTria ptt) {
   _MMG5_Bezier   b;
   double         surf,dens,J[3][2],mJ[3][2],tJmJ[2][2];
-  char           i;
+  char           i,nullDens;
+  static char    mmgErr=0;
 
   surf = 0.0;
 
   if ( !_MMG5_bezierCP(mesh,ptt,&b,1) ) return(0.0);
 
-
   /* Compute density integrand of volume at the 3 vertices of T */
+  nullDens = 0;
   for (i=0; i<3; i++) {
     if ( i == 0 ) {
       J[0][0] = 3.0*( b.b[7][0] - b.b[0][0] ) ; J[0][1] = 3.0*( b.b[6][0] - b.b[0][0] );
@@ -88,12 +89,21 @@ double _MMG5_surf(MMG5_pMesh mesh,double m[3][6],MMG5_pTria ptt) {
     tJmJ[1][1] = J[0][1]*mJ[0][1] + J[1][1]*mJ[1][1] + J[2][1]*mJ[2][1];
 
     dens = tJmJ[0][0]*tJmJ[1][1] - tJmJ[1][0]*tJmJ[0][1];
-    /* if ( dens < 0.0 ) { */
-    /*   fprintf(stdout,"  ## Density should be positive : %E for elt %d %d %d \n",dens,ptt->v[0],ptt->v[1],ptt->v[2]); */
-    /*   return(0.0); */
-    /* } */
+    if ( dens <= _MMG5_EPSD2 ) {
+#ifndef DNDEBUG
+      if ( !mmgErr ) {
+        fprintf(stderr,"\n  ## Warning: %s: at least 1 negative or null density.\n",
+                __func__);
+        mmgErr = 1;
+      }
+#endif
+      ++nullDens;
+      continue;
+    }
     surf += sqrt(fabs(dens));
   }
+
+  if ( nullDens==3 ) return 0;
 
   surf *= _MMG5_ATHIRD;
   return(surf);
@@ -424,6 +434,7 @@ int _MMG5_solveDefmetregSys( MMG5_pMesh mesh, double r[3][3], double c[3],
                              double isqhmin, double isqhmax, double hausd)
 {
   double intm[3], kappa[2], vp[2][2], b0[3], b1[3], b2[3];
+  static int mmgWarn0=0;
 
   memset(intm,0x0,3*sizeof(double));
 
@@ -442,7 +453,11 @@ int _MMG5_solveDefmetregSys( MMG5_pMesh mesh, double r[3][3], double c[3],
 
   /* solve now (a b c) = tAA^{-1} * tAb */
   if ( !_MMG5_sys33sym(tAA,tAb,c) ) {
-    printf("%s:%d: Warning: unable to solve the system.\n",__FILE__,__LINE__);
+    if ( !mmgWarn0 ) {
+       fprintf(stderr,"\n  ## Warning: %s: unable to solve the system on at"
+               " least 1 point.\n",__func__);
+      mmgWarn0 = 1;
+    }
     return(0);
   }
   intm[0] = 2.0*c[0];
@@ -496,24 +511,6 @@ int _MMG5_solveDefmetregSys( MMG5_pMesh mesh, double r[3][3], double c[3],
 
   m[5] = r[0][2] * b0[2] + r[1][2] * b1[2] + r[2][2] * b2[2];
 
-  /* Security check : normal in the kernel */
-  /*if((fabs(p0->m[0]*n[0] + p0->m[1]*n[1] + p0->m[2]*n[2] ) > 1.0e-4)){
-    printf("VALEUR ETRANGE... %f \n",fabs(p0->m[0]*n[0] + p0->m[1]*n[1] + p0->m[2]*n[2] ));
-    }
-    if((fabs(p0->m[1]*n[0] + p0->m[3]*n[1] + p0->m[4]*n[2] ) > 1.0e-4)){
-    printf("VALEUR ETRANGE... %f \n",fabs(p0->m[1]*n[0] + p0->m[3]*n[1] + p0->m[4]*n[2] ));
-    }
-
-    if((fabs(p0->m[2]*n[0] + p0->m[4]*n[1] + p0->m[5]*n[2] ) > 1.0e-4)){
-    printf("VALEUR ETRANGE... %f \n",fabs(p0->m[2]*n[0] + p0->m[4]*n[1] + p0->m[5]*n[2]));
-    } */
-
-  /*if(ddb) {
-    printf("La matrice %f %f %f\n",p0->m[0],p0->m[1],p0->m[2]);
-    printf("            %f %f %f\n",p0->m[1],p0->m[3],p0->m[4]);
-    printf("            %f %f %f\n",p0->m[2],p0->m[4],p0->m[5]);
-
-    }*/
   return(1);
 }
 
@@ -544,6 +541,7 @@ int _MMG5_solveDefmetrefSys( MMG5_pMesh mesh, MMG5_pPoint p0, int ipref[2],
   double       intm[3], kappa[2], vp[2][2], b0[3], b1[3], b2[3], kappacur;
   double       gammasec[3],tau[2], ux, uy, uz, ps1, l, ll, *t, *t1;
   int          i;
+  static char  mmgWarn=0;
 
   memset(intm,0x0,3*sizeof(double));
 
@@ -561,7 +559,11 @@ int _MMG5_solveDefmetrefSys( MMG5_pMesh mesh, MMG5_pPoint p0, int ipref[2],
 
   /* solve now (a b c) = tAA^{-1} * tAb */
   if ( !_MMG5_sys33sym(tAA,tAb,c) ) {
-    printf("%s:%d: Warning: unable to solve the system.\n",__FILE__,__LINE__);
+    if ( !mmgWarn ) {
+      fprintf(stderr,"\n  ## Warning: %s: unable to solve the system on at"
+              " least 1 point.\n", __func__);
+      mmgWarn = 1;
+    }
     return(0);
   }
   intm[0] = 2.0*c[0];
@@ -726,7 +728,6 @@ double _MMG5_ridSizeInTangentDir(MMG5_pMesh mesh, MMG5_pPoint p0, int idp,
 
   m = isqhmax;
   for (i=0; i<2; i++) {
-    kappacur = 0.0;
     // Remark: bezierEdge don't use n0 in case of a ridge so it's ok to call it
     // with an undefined n0.
     _MMG5_bezierEdge(mesh,idp,iprid[i],b0,b1,1,n0);
@@ -1033,6 +1034,7 @@ int _MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int i)
 
   // edge length in metric mtan1: sqrt(t^(t1) * mtan1 * t1).
   ps1 =  mtan1[0]*t1[0]*t1[0] + 2.0*mtan1[1]*t1[0]*t1[1] + mtan1[2]*t1[1]*t1[1];
+  assert ( ps1  > 0. );
   ps1 = sqrt(ps1);
 
   _MMG5_rmtr(r2,m2,mr2);
@@ -1055,6 +1057,7 @@ int _MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int i)
 
   // edge length: sqrt(t^(t2) * mtan2 * t2)
   ps2 = mtan2[0]*t2[0]*t2[0] + 2.0*mtan2[1]*t2[0]*t2[1] + mtan2[2]*t2[1]*t2[1];
+  assert ( ps2  > 0. );
   ps2 = sqrt(ps2);
 
   /* Metric in p1 has to be changed */

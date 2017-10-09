@@ -43,28 +43,30 @@
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the sol structure.
  *
+ * \return 0 if fail, 1 if success
+ *
  * Allocate the mesh and solutions structures at \a MMGS format.
  *
  */
 static inline
-void _MMGS_Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol) {
+int _MMGS_Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol) {
 
   /* mesh allocation */
   if ( *mesh )  _MMG5_SAFE_FREE(*mesh);
-  _MMG5_SAFE_CALLOC(*mesh,1,MMG5_Mesh);
+  _MMG5_SAFE_CALLOC(*mesh,1,MMG5_Mesh,0);
 
   /* sol allocation */
   if ( !sol ) {
-    fprintf(stderr,"  ## Error: an allocatable solution structure of type \"MMG5_pSol\""
-           " is needed.\n");
+    fprintf(stderr,"\n  ## Error: %s: an allocatable solution structure"
+            " of type \"MMG5_pSol\" is needed.\n",__func__);
     fprintf(stderr,"            Exit program.\n");
-    exit(EXIT_FAILURE);
+    return 0;
   }
 
   if ( *sol )  _MMG5_DEL_MEM(*mesh,*sol,sizeof(MMG5_Sol));
-  _MMG5_SAFE_CALLOC(*sol,1,MMG5_Sol);
+  _MMG5_SAFE_CALLOC(*sol,1,MMG5_Sol,0);
 
-  return;
+  return 1;
 }
 /**
  * \param mesh pointer toward the mesh structure.
@@ -79,8 +81,10 @@ void _MMGS_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol ) {
 
   _MMGS_Set_commonFunc();
 
-  (mesh)->dim  = 3;
-  (mesh)->ver  = 2;
+  (mesh)->dim   = 3;
+  (mesh)->ver   = 2;
+  (mesh)->nsols = 1;
+
   (sol)->dim   = 3;
   (sol)->ver   = 2;
   (sol)->size  = 1;
@@ -107,6 +111,8 @@ void _MMGS_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol ) {
  * metric (and the input one, if provided) and identified by the MMG5_ARG_ppMet
  * keyword).
  *
+ * \return 0 if fail, 1 if success
+ *
  *  To call the \a MMGS_mmgsls function, you must also provide a pointer
  * toward a \a MMG5_pSol structure (that will contain the level-set function and
  * identified by the MMG5_ARG_ppLs keyword).
@@ -114,7 +120,7 @@ void _MMGS_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol ) {
  * Internal function for structure allocations (taking a va_list argument).
  *
  */
-void _MMGS_Init_mesh_var( va_list argptr ) {
+int _MMGS_Init_mesh_var( va_list argptr ) {
   MMG5_pMesh     *mesh;
   MMG5_pSol      *sol;
   int            typArg;
@@ -136,38 +142,39 @@ void _MMGS_Init_mesh_var( va_list argptr ) {
       sol = va_arg(argptr,MMG5_pSol*);
       break;
     default:
-      fprintf(stderr,"  ## Error: MMGS_Init_mesh:\n"
-              " unexpected argument type: %d\n",typArg);
+      fprintf(stderr,"\n  ## Error: %s: MMGS_Init_mesh:\n"
+              " unexpected argument type: %d\n",__func__,typArg);
       fprintf(stderr," Argument type must be one of the following"
               " preprocessor variable: MMG5_ARG_ppMesh, MMG5_ARG_ppMet,"
               " MMG5_ARG_ppLs.\n");
-      exit(EXIT_FAILURE);
+      return 0;
     }
   }
 
   if ( meshCount !=1 ) {
-    fprintf(stderr,"  ## Error: MMGS_Init_mesh:\n"
+    fprintf(stderr,"\n  ## Error: %s: MMGS_Init_mesh:\n"
             " you need to initialize the mesh structure that"
-            " will contain your mesh.\n");
-    exit(EXIT_FAILURE);
+            " will contain your mesh.\n",__func__);
+    return 0;
   }
 
   if ( !sol ) {
-    fprintf(stderr,"  ## Error: MMGS_Init_mesh:\n"
+    fprintf(stderr,"\n  ## Error: %s: MMGS_Init_mesh:\n"
             " you need to initialize a solution structure"
             " (of type MMG5_pSol and indentified by the MMG5_ARG_ppMet or the"
             " MMG5_ARG_ppLs preprocessor variable) that will contain the output"
-            " mesh metric informations, and the input one, if provided.\n.");
-    exit(EXIT_FAILURE);
+            " mesh metric informations, and the input one, if provided.\n.",
+            __func__);
+    return 0;
   }
 
   /* allocations */
-  _MMGS_Alloc_mesh(mesh,sol);
+  if ( !_MMGS_Alloc_mesh(mesh,sol) )  return 0;
 
   /* initialisations */
   _MMGS_Init_woalloc_mesh(*mesh,*sol);
 
-  return;
+  return 1;
 }
 
 /**
@@ -187,22 +194,24 @@ void _MMGS_Init_mesh_var( va_list argptr ) {
  * toward a \a MMG5_pSol structure (that will contain the level-set function and
  * identified by the MMG5_ARG_ppLs keyword).
  *
+ * \return 0 if fail, 1 if success
+ *
  * Internal function for deallocations before return (taking a va_list as
  * argument).
  *
  * \remark we pass the structures by reference in order to have argument
  * compatibility between the library call from a Fortran code and a C code.
  */
-void _MMGS_Free_all_var(va_list argptr)
+int _MMGS_Free_all_var(va_list argptr)
 {
 
   MMG5_pMesh     *mesh;
-  MMG5_pSol      *sol;
+  MMG5_pSol      psl,*sol,*sols;
   int            typArg;
-  int            meshCount;
+  int            meshCount,i;
 
   meshCount = 0;
-  sol = NULL;
+  sol = sols = NULL;
 
   while ( (typArg = va_arg(argptr,int)) != MMG5_ARG_end )
   {
@@ -215,42 +224,57 @@ void _MMGS_Free_all_var(va_list argptr)
     case(MMG5_ARG_ppMet): case(MMG5_ARG_ppLs):
       sol = va_arg(argptr,MMG5_pSol*);
       break;
+    case(MMG5_ARG_ppSols):
+      sols = va_arg(argptr,MMG5_pSol*);
+      break;
     default:
-      fprintf(stderr,"  ## Error: MMGS_Free_all:\n"
-              " unexpected argument type: %d\n",typArg);
+      fprintf(stderr,"\n  ## Error: %s: MMGS_Free_all:\n"
+              " unexpected argument type: %d\n",__func__,typArg);
       fprintf(stderr," Argument type must be one of the following"
               " preprocessor variable: MMG5_ARG_ppMesh, MMG5_ARG_ppMet or "
               "MMG5_ARG_ppLs.\n");
-      exit(EXIT_FAILURE);
+      return 0;
     }
   }
 
   if ( meshCount !=1 ) {
-    fprintf(stderr,"  ## Error: MMGS_Free_all:\n"
+    fprintf(stderr,"\n  ## Error: %s: MMGS_Free_all:\n"
             " you need to provide your mesh structure"
-            " to allow to free the associated memory.\n");
-    exit(EXIT_FAILURE);
+            " to allow to free the associated memory.\n",__func__);
+    return 0;
   }
 
   if ( !sol ) {
-    fprintf(stderr,"  ## Error: MMGS_Free_all:\n"
+    fprintf(stderr,"\n  ## Error: %s: MMGS_Free_all:\n"
             " you need to provide your metric structure"
             " (of type MMG5_pSol and indentified by the MMG5_ARG_ppMet or"
             " the MMG5_ARG_ppLs preprocessor variable)"
-            " to allow to free the associated memory.\n");
+            " to allow to free the associated memory.\n",__func__);
+    return 0;
   }
 
 
-  MMGS_Free_structures(MMG5_ARG_start,
-                        MMG5_ARG_ppMesh, mesh, MMG5_ARG_ppMet, sol,
-                        MMG5_ARG_end);
-
-  _MMG5_SAFE_FREE(*mesh);
+  if ( !MMGS_Free_structures(MMG5_ARG_start,
+                             MMG5_ARG_ppMesh, mesh, MMG5_ARG_ppMet, sol,
+                             MMG5_ARG_end) )
+    return 0;
 
   if ( sol )
     _MMG5_SAFE_FREE(*sol);
 
-  return;
+  if ( sols ) {
+    for ( i=0; i<(*mesh)->nsols; ++i ) {
+      psl = (*sols) + i;
+      if ( psl->m ) {
+        _MMG5_DEL_MEM(*mesh,psl->m,(psl->size*(psl->npmax+1))*sizeof(double));
+      }
+    }
+    _MMG5_DEL_MEM(*mesh,*sols,((*mesh)->nsols)*sizeof(MMG5_Sol));
+  }
+
+  _MMG5_SAFE_FREE(*mesh);
+
+  return 1;
 }
 
 /**
@@ -270,6 +294,8 @@ void _MMGS_Free_all_var(va_list argptr)
  * toward a \a MMG5_pSol structure (that will contain the level-set function and
  * identified by the MMG5_ARG_ppLs keyword).
  *
+ * \return 0 if fail, 1 if success
+ *
  * Internal function for structures deallocations before return (taking a
  * va_list as argument).
  *
@@ -277,7 +303,7 @@ void _MMGS_Free_all_var(va_list argptr)
  * compatibility between the library call from a Fortran code and a C code.
  *
  */
-void _MMGS_Free_structures_var(va_list argptr)
+int _MMGS_Free_structures_var(va_list argptr)
 {
 
   MMG5_pMesh     *mesh;
@@ -300,20 +326,20 @@ void _MMGS_Free_structures_var(va_list argptr)
       sol = va_arg(argptr,MMG5_pSol*);
       break;
     default:
-      fprintf(stderr,"  ## Error: MMGS_Free_structures:\n"
-              " unexpected argument type: %d\n",typArg);
+      fprintf(stderr,"\n  ## Error: %s: MMGS_Free_structures:\n"
+              " unexpected argument type: %d\n",__func__,typArg);
       fprintf(stderr," Argument type must be one of the following"
               " preprocessor variable: MMG5_ARG_ppMesh, MMG5_ARG_ppMet or"
               " MMG5_ARG_ppLs.\n");
-      exit(EXIT_FAILURE);
+      return 0;
     }
   }
 
   if ( meshCount !=1 ) {
-    fprintf(stderr,"  ## Error: MMGS_Free_structures:\n"
+    fprintf(stderr,"\n  ## Error: %s: MMGS_Free_structures:\n"
             " you need to provide your mesh structure"
-            " to allow to free the associated memory.\n");
-    exit(EXIT_FAILURE);
+            " to allow to free the associated memory.\n",__func__);
+    return 0;
   }
 
   MMGS_Free_names(MMG5_ARG_start,
@@ -322,8 +348,7 @@ void _MMGS_Free_structures_var(va_list argptr)
 
  /* mesh */
   assert(mesh && *mesh);
-  if ( (*mesh)->point )
-    _MMG5_DEL_MEM((*mesh),(*mesh)->point,((*mesh)->npmax+1)*sizeof(MMG5_Point));
+  assert(sol  && *sol);
 
   if ( (*mesh)->edge )
     _MMG5_DEL_MEM((*mesh),(*mesh)->edge,((*mesh)->na+1)*sizeof(MMG5_Edge));
@@ -331,24 +356,12 @@ void _MMGS_Free_structures_var(va_list argptr)
   if ( (*mesh)->adja )
     _MMG5_DEL_MEM((*mesh),(*mesh)->adja,(3*(*mesh)->ntmax+5)*sizeof(int));
 
-  if ( (*mesh)->xpoint )
-    _MMG5_DEL_MEM((*mesh),(*mesh)->xpoint,((*mesh)->xpmax+1)*sizeof(MMG5_xPoint));
-
   if ( (*mesh)->tria )
     _MMG5_DEL_MEM((*mesh),(*mesh)->tria,((*mesh)->ntmax+1)*sizeof(MMG5_Tria));
 
-  /* sol */
-  if ( sol && (*sol) && (*sol)->m )
-    _MMG5_DEL_MEM((*mesh),(*sol)->m,((*sol)->size*((*sol)->npmax+1))*sizeof(double));
+  MMG5_Free_structures(*mesh,*sol);
 
-  /* (*mesh)->info */
-  if ( (*mesh)->info.npar && (*mesh)->info.par )
-    _MMG5_DEL_MEM((*mesh),(*mesh)->info.par,(*mesh)->info.npar*sizeof(MMG5_Par));
-
-  if ( (*mesh)->info.imprim>5 || (*mesh)->info.ddebug )
-    printf("  MEMORY USED AT END (bytes) %ld\n",_MMG5_safeLL2LCast((*mesh)->memCur));
-
-  return;
+  return 1;
 }
 
 /**
@@ -369,6 +382,8 @@ void _MMGS_Free_structures_var(va_list argptr)
  * toward a \a MMG5_pSol structure (that will contain the level-set function and
  * identified by the MMG5_ARG_ppLs keyword).
  *
+ * \return 0 if fail, 1 if success
+ *
  * Internal function for name deallocations before return (taking a va_list as
  * argument).
  *
@@ -376,7 +391,7 @@ void _MMGS_Free_structures_var(va_list argptr)
  * compatibility between the library call from a Fortran code and a C code.
  *
  */
-void _MMGS_Free_names_var(va_list argptr)
+int _MMGS_Free_names_var(va_list argptr)
 {
 
   MMG5_pMesh     *mesh;
@@ -399,31 +414,32 @@ void _MMGS_Free_names_var(va_list argptr)
       sol = va_arg(argptr,MMG5_pSol*);
       break;
     default:
-      fprintf(stderr,"  ## Error: MMGS_Free_names:\n"
-              " unexpected argument type: %d\n",typArg);
+      fprintf(stderr,"\n  ## Error: %s: MMGS_Free_names:\n"
+              " unexpected argument type: %d\n",__func__,typArg);
       fprintf(stderr," Argument type must be one of the following"
               " preprocessor variable: MMG5_ARG_ppMesh, MMG5_ARG_ppMet "
               " or MMG5_ARG_ppLs\n");
-      exit(EXIT_FAILURE);
+      return 0;
     }
   }
 
   if ( meshCount !=1 ) {
-    fprintf(stderr,"  ## Error: MMGS_Free_names:\n"
+    fprintf(stderr,"\n  ## Error: %s: MMGS_Free_names:\n"
             " you need to provide your mesh structure"
-            " to allow to free the associated memory.\n");
-    exit(EXIT_FAILURE);
+            " to allow to free the associated memory.\n",__func__);
+    return 0;
   }
   if ( !sol ) {
-    fprintf(stderr,"  ## Error: MMGS_Free_names:\n"
+    fprintf(stderr,"\n  ## Error: %s: MMGS_Free_names:\n"
             " you need to provide your metric structure"
             " (of type MMG5_pSol and indentified by the MMG5_ARG_ppMet or the "
             " MMG5_ARG_ppLs preprocessor variable)"
-            " to allow to free the associated memory.\n");
+            " to allow to free the associated memory.\n",__func__);
   }
 
   /* mesh & met */
+  assert(mesh && *mesh && sol && *sol );
   MMG5_mmgFree_names(*mesh,*sol);
 
-  return;
+  return 1;
 }

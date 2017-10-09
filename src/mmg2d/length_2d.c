@@ -22,8 +22,7 @@
 */
 #include "mmg2d.h"
 
-
-/* compute iso edge length */
+/* Compute isotropic edge length */
 double long_iso(double *ca,double *cb,double *ma,double *mb) {
   double   ha,hb,ux,uy,dd,rap,len;
 
@@ -34,7 +33,7 @@ double long_iso(double *ca,double *cb,double *ma,double *mb) {
   dd = sqrt(ux*ux + uy*uy);
 
   rap = (hb - ha) / ha;
-  if ( fabs(rap) < EPSD )
+  if ( fabs(rap) < _MMG2_EPSD )
     len = dd / ha;
   else
     len = dd * (1.0/ha + 1.0/hb + 8.0 / (ha+hb)) / 6.0;
@@ -58,14 +57,76 @@ double long_ani(double *ca,double *cb,double *ma,double *mb) {
 
   return(len);
 }
+
+/** Calculate length of a curve in the considered isotropic metric */
+double _MMG2_lencurv_iso(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2) {
+  MMG5_pPoint     p1,p2;
+  double          h1,h2,len,l,r;
+  
+  p1 = &mesh->point[ip1];
+  p2 = &mesh->point[ip2];
+  
+  h1 = met->m[ip1];
+  h2 = met->m[ip2];
+  
+  l = (p2->c[0]-p1->c[0])*(p2->c[0]-p1->c[0]) + (p2->c[1]-p1->c[1])*(p2->c[1]-p1->c[1]);
+  l = sqrt(l);
+  r = h2 / h1 - 1.0;
+  len = ( fabs(r) < _MMG5_EPS ) ? ( l/h1 ) : ( l / (h2-h1) * log1p(r) );
+    
+  return(len);
+}
+
+/* Calculate length of a curve in the considered anisotropic metric by using a two-point quadrature formula */
+double _MMG2_lencurv_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2) {
+  MMG5_pPoint      p1,p2;
+  double           len,*m1,*m2,ux,uy,l1,l2;
+  static char      mmgWarn0=0,mmgWarn1=0;
+  
+  p1 = &mesh->point[ip1];
+  p2 = &mesh->point[ip2];
+  
+  m1 = &met->m[3*ip1];
+  m2 = &met->m[3*ip2];
+  
+  ux = p2->c[0] - p1->c[0];
+  uy = p2->c[1] - p1->c[1];
+  
+  l1 = m1[0]*ux*ux + 2.0*m1[1]*ux*uy + m1[2]*uy*uy;
+  l2 = m2[0]*ux*ux + 2.0*m2[1]*ux*uy + m2[2]*uy*uy;
+  
+  if ( l1 < 0.0 ) {
+    if ( !mmgWarn0 ) {
+      mmgWarn0 = 1;
+      fprintf(stderr,"\n  ## Error: %s: at least 1 negative edge length"
+              " (l1: %e).\n",__func__,l1);
+    }
+    return 0.;
+  }
+  if ( l2 < 0.0 ) {
+    if ( !mmgWarn1 ) {
+      mmgWarn1 = 1;
+      fprintf(stderr,"\n  ## Error: %s: at least 1 negative edge length"
+              " (l2: %e)\n",__func__,l2);
+    }
+    return 0.;
+  }
+  
+  l1 = sqrt(l1);
+  l2 = sqrt(l2);
+  
+  len = 0.5*(l1+l2);
+
+  return(len);
+}
+
 /* print histo of edge lengths */
 int MMG2_prilen(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTria       pt;
-  double      lavg,len,ecart,som,lmin,lmax,*ca,*cb,*ma,*mb;
-  int         k,l,navg,ia,ipa,ipb,iamin,ibmin,iamax,ibmax,hl[9];
-  int       iadr;
+  double      lavg,len,ecart,som,lmin,lmax;
+  int         k,l,navg,ia,ipa,ipb,iamin,ibmin,iamax,ibmax,nullEdge,hl[9];
   static double bd[9] = {0.0, 0.3, 0.6, 0.7071, 0.9, 1.3, 1.4142, 2.0, 5.0};
-//{0.0, 0.2, 0.5, 0.7071, 0.9, 1.111, 1.4142, 2.0, 5.0 };
+
   navg  = 0;
   lavg  = 0.0;
   lmin  = 1.e20;
@@ -75,12 +136,13 @@ int MMG2_prilen(MMG5_pMesh mesh,MMG5_pSol sol) {
   ibmin = 0;
   iamax = 0;
   ibmax = 0;
+  nullEdge = 0;
 
   for (k=0; k<9; k++)  hl[k] = 0;
 
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
-    if ( !M_EOK(pt) )  continue;
+    if ( !MG_EOK(pt) )  continue;
 
     for (ia=0; ia<3; ia++) {
       l = (&mesh->adja[3*(k-1)+1])[ia];
@@ -88,15 +150,12 @@ int MMG2_prilen(MMG5_pMesh mesh,MMG5_pSol sol) {
 
       ipa = MMG2_iare[ia][0];
       ipb = MMG2_iare[ia][1];
-      ca  = &mesh->point[pt->v[ipa]].c[0];
-      cb  = &mesh->point[pt->v[ipb]].c[0];
 
-      iadr = pt->v[ipa]*sol->size;
-      ma   = &sol->m[iadr];
-      iadr = pt->v[ipb]*sol->size;
-      mb   = &sol->m[iadr];
+      if ( sol->m )
+        len = MMG2D_lencurv(mesh,sol,pt->v[ipa],pt->v[ipb]);
+      else
+        len = _MMG2_lencurv_iso(mesh,sol,pt->v[ipa],pt->v[ipb]);
 
-      len = MMG2_length(ca,cb,ma,mb);
       navg++;
       ecart = len;
       lavg += len;
@@ -135,7 +194,7 @@ int MMG2_prilen(MMG5_pMesh mesh,MMG5_pSol sol) {
     }
   }
   _MMG5_displayHisto(mesh, navg, &lavg, iamin, ibmin, lmin,
-                     iamax, ibmax, lmax, &bd[0], &hl[0]);
+                     iamax, ibmax, lmax,nullEdge, &bd[0], &hl[0],0);
 
 
   return(1);

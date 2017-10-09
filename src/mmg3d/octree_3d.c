@@ -71,7 +71,7 @@ int _MMG3D_initOctree(MMG5_pMesh mesh,_MMG3D_pOctree* q, int nv)
 
   _MMG5_ADD_MEM(mesh,sizeof(_MMG3D_octree),"octree structure",
                 return 0);
-  _MMG5_SAFE_MALLOC(*q,1, _MMG3D_octree);
+  _MMG5_SAFE_MALLOC(*q,1, _MMG3D_octree,0);
 
 
   // set nv to the next power of 2
@@ -90,7 +90,7 @@ int _MMG3D_initOctree(MMG5_pMesh mesh,_MMG3D_pOctree* q, int nv)
   _MMG5_ADD_MEM(mesh,sizeof(_MMG3D_octree_s),"initial octree cell",
                 return 0);
 
-  _MMG5_SAFE_MALLOC((*q)->q0,1, _MMG3D_octree_s);
+  _MMG5_SAFE_MALLOC((*q)->q0,1, _MMG3D_octree_s,0);
   _MMG3D_initOctree_s((*q)->q0);
 
   for (i=1;i<=mesh->np; ++i)
@@ -119,7 +119,7 @@ void _MMG3D_freeOctree_s(MMG5_pMesh mesh,_MMG3D_octree_s* q, int nv)
 
   dim       = mesh->dim;
   sizBr     = 1<<dim;
-  nbBitsInt = sizeof(int)*8;
+  nbBitsInt = sizeof(int64_t)*8;
   depthMax  = nbBitsInt/dim - 1;
 
   if (q->nbVer>nv && q->depth < depthMax )
@@ -191,10 +191,10 @@ void _MMG3D_freeOctree(MMG5_pMesh mesh,_MMG3D_pOctree *q)
  * Get the integer containing the coordinates
  *
  */
-int _MMG3D_getOctreeCoordinate(_MMG3D_pOctree q, double* ver, int dim)
+int64_t _MMG3D_getOctreeCoordinate(_MMG3D_pOctree q, double* ver, int dim)
 {
-  int s=1<<10;
-  double prec = 1./(1<<30);
+  int64_t s    = 1<<10;
+  double  prec = 1./(1<<30);
   int place = 0;
   int ix = floor((ver[0]-prec)*s);
   int iy = floor((ver[1]-prec)*s);
@@ -202,9 +202,9 @@ int _MMG3D_getOctreeCoordinate(_MMG3D_pOctree q, double* ver, int dim)
   ix = (ix > 0) ? ix:0;
   iy = (iy > 0) ? iy:0;
   iz = (iz > 0) ? iz:0;
-  int i=0;
+  int64_t i=0;
   int j;
-  for(j=9; j>=0; j--)
+  for(j=19; j>=0; j--)
   {
     s=s>>1;
     i += ((ix & s) >> j)<<place;
@@ -323,13 +323,14 @@ void _MMG3D_placeInListDouble(double* distList, double dist, int index, int size
  * Moves other data so nothing is lost. No memory check performed, this
  * function should be called with coherent parameters.
  *
-*/
+ */
 void _MMG3D_placeInListOctree(_MMG3D_octree_s** qlist, _MMG3D_octree_s* q, int index, int size)
 {
   memmove(&(qlist[index+2]),&(qlist[index+1]),(size-(index+1))*sizeof(_MMG3D_octree_s*));
   #ifdef DEBUG
   if (index+2+(size-(index+1)>61 || index+1<0)
-    fprintf(stdout, "Error: in placeInListOctree index too large %i > 61\n", index+2+(size-(index+1));
+    fprintf(stderr, "\n  ## Error: %s: index"
+            " too large %i > 61\n",__func__, index+2+(size-(index+1));
   #endif
   qlist[index+1] = q;
 }
@@ -340,10 +341,10 @@ void _MMG3D_placeInListOctree(_MMG3D_octree_s** qlist, _MMG3D_octree_s* q, int i
  * \param indexMin minimum index of the list.
  * \param indexMax maximum index of the list.
  *
- * Returns the index of the biggest value of disList that is strictly
+ * \return Index of the biggest value of disList that is strictly
  * smaller than dist. Only search in the bounds of indexMin and indexMax.
  *
-*/
+ */
 int _MMG3D_seekIndex (double* distList, double dist, int indexMin, int indexMax)
 {
   int indexMed;
@@ -354,7 +355,8 @@ int _MMG3D_seekIndex (double* distList, double dist, int indexMin, int indexMax)
   {
     #ifdef DEBUG
       if (indexMin >= 60 || indexMax>=60)
-        fprintf(stdout,"Error: in seekIndex, index should not be that large %i %i\n",indexMin, indexMax);
+        fprintf(stderr,"\n  ## Error: %s: index should not be that large %i %i.\n",
+                __func__,indexMin, indexMax);
     #endif
     if (dist > distList[indexMax])
       return indexMax;
@@ -367,7 +369,8 @@ int _MMG3D_seekIndex (double* distList, double dist, int indexMin, int indexMax)
 
     #ifdef DEBUG
       if (indexMed >= 60 || indexMed < 0)
-        fprintf(stdout,"Error: in seekIndex, index should not be that large %i\n",indexMed);
+        fprintf(stderr,"\n  ## Error: %s: index should not be that large %i.\n",
+                __func__,indexMed);
     #endif
 
     if (dist > distList[indexMed])
@@ -481,9 +484,12 @@ int _MMG3D_getListSquareRec(_MMG3D_octree_s* q, double* center, double* rect,
     x = dist[nc-3] - center[0];
     y = dist[nc-2] - center[1];
     z = dist[nc-1] - center[2];
-    //#warning should be replaced with distance in metric?
+
+    // Should be replaced with distance in metric?
     distTemp = x*x+y*y+z*z;
-    //~ #warning anisotropic distance not tested (not so important, this only reorders the cells)
+
+    // Here the anisotropic distance not tested (not so important, this only
+    // reorders the cells)
     //~ distTemp = ani[0]*x*x+ani[3]*y*y+ani[5]*z*z+
                 //~ 2*(ani[1]*x*y+ani[2]*x*z+ani[4]*y*z);
     if (*index > 0)
@@ -516,9 +522,9 @@ int _MMG3D_getListSquareRec(_MMG3D_octree_s* q, double* center, double* rect,
       recCenter[i] = (rect[i]>center[i]);
       recCenter[i+3] = ((rect[i]+rect[i+3])>center[i]);
     }
-    
+
     // three loop describing the 8 branches in binary (k,j,i):(0,0,0),(0,0,1)....(1,1,1)
-    for(i=0;i<2;i++) 
+    for(i=0;i<2;i++)
     {
       for(j=0;j<2;j++)
       {
@@ -531,20 +537,20 @@ int _MMG3D_getListSquareRec(_MMG3D_octree_s* q, double* center, double* rect,
           {
             // set the branch number
             nBranch = i+2*j+4*k;
-            
+
             // set recttemp to the cell size of the branch nBranch
             recttemp[0] = center[0]-l*(1-i);
-            recttemp[1] = center[1]-l*(1-j);  
-            recttemp[2] = center[2]-l*(1-k); 
+            recttemp[1] = center[1]-l*(1-j);
+            recttemp[2] = center[2]-l*(1-k);
             recttemp[3] = recttemp[4] = recttemp[5] = l;
             // intersect the rectangle and the cell and store it in recttemp
             if ( !_MMG3D_intersectRect(rect,recttemp) ) return 0;
-            
+
             // set the new center
             centertemp[0] = center[0]-l/2+i*l;
             centertemp[1] = center[1]-l/2+j*l;
             centertemp[2] = center[2]-l/2+k*l;
-            
+
             // recursive call in the branch
             if ( !_MMG3D_getListSquareRec(&(q->branches[nBranch]),
                                           centertemp, recttemp, qlist, dist,
@@ -592,8 +598,8 @@ int _MMG3D_getListSquare(MMG5_pMesh mesh, double* ani, _MMG3D_pOctree q, double*
 
   _MMG5_ADD_MEM(mesh,q->nc*sizeof(_MMG3D_octree_s*),"octree cell",return -1);
 
-  _MMG5_SAFE_MALLOC(*qlist,index,_MMG3D_octree_s*);
-  _MMG5_SAFE_MALLOC(dist,index+3,double);
+  _MMG5_SAFE_MALLOC(*qlist,index,_MMG3D_octree_s*,-1);
+  _MMG5_SAFE_MALLOC(dist,index+3,double,-1);
 
   // Set the center of the zone search
   dist[q->nc-3] = rect[0]+rect[3]/2;
@@ -653,7 +659,7 @@ int _MMG3D_addOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver,
   int      quadrant,sizBr;
   int      sizeRealloc;
 
-  nbBitsInt = sizeof(int)*8;
+  nbBitsInt = sizeof(int64_t)*8;
   dim       = mesh->dim;
   depthMax  = nbBitsInt/dim - 1; // maximum depth is to allow integer coordinates
   sizBr     = 1<<dim;
@@ -666,7 +672,7 @@ int _MMG3D_addOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver,
       if(q->nbVer == 0)  // first vertex list allocation
       {
         _MMG5_ADD_MEM(mesh,sizeof(int),"octree vertice table", return 0);
-        _MMG5_SAFE_MALLOC(q->v,1,int);
+        _MMG5_SAFE_MALLOC(q->v,1,int,0);
       }
       else if(!(q->nbVer & (q->nbVer - 1))) //is a power of 2 -> reallocation of the vertex list
       {
@@ -674,7 +680,7 @@ int _MMG3D_addOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver,
         sizeRealloc<<=1;
         _MMG5_ADD_MEM(mesh,(sizeRealloc-sizeRealloc/2)*sizeof(int),"octree realloc",
                       return 0);
-        _MMG5_SAFE_REALLOC(q->v,sizeRealloc,int,"octree");
+        _MMG5_SAFE_REALLOC(q->v,sizeRealloc,int,"octree",0);
       }
 
       q->v[q->nbVer] = no;
@@ -686,7 +692,7 @@ int _MMG3D_addOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver,
       /* creation of sub-branch and relocation of vertices in the sub-branches */
       _MMG5_ADD_MEM(mesh,sizBr*sizeof(_MMG3D_octree_s),"octree branches",
                     return 0);
-      _MMG5_SAFE_MALLOC(q->branches,sizBr,_MMG3D_octree_s);
+      _MMG5_SAFE_MALLOC(q->branches,sizBr,_MMG3D_octree_s,0);
 
       for ( i = 0; i<sizBr; i++)
       {
@@ -737,7 +743,7 @@ int _MMG3D_addOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver,
       {
         _MMG5_ADD_MEM(mesh,sizeof(int),"octree vertices table",
                       return 0);
-        _MMG5_SAFE_MALLOC(q->v,1,int);
+        _MMG5_SAFE_MALLOC(q->v,1,int,0);
       }
       else if(!(q->nbVer & (q->nbVer - 1))) //is a power of 2 -> normal reallocation
       {
@@ -745,14 +751,14 @@ int _MMG3D_addOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver,
         sizeRealloc<<=1;
         _MMG5_ADD_MEM(mesh,(sizeRealloc-sizeRealloc/2)*sizeof(int),"octree realloc",
                       return 0);
-        _MMG5_SAFE_REALLOC(q->v,sizeRealloc,int,"octree");
+        _MMG5_SAFE_REALLOC(q->v,sizeRealloc,int,"octree",0);
       }
     }
     else if (q->nbVer%nv == 0) // special reallocation of the vertex list because it is at maximum depth
     {
       _MMG5_ADD_MEM(mesh,nv*sizeof(int),"octree realloc",
                     return 0);
-      _MMG5_SAFE_REALLOC(q->v,q->nbVer+nv,int,"octree");
+      _MMG5_SAFE_REALLOC(q->v,q->nbVer+nv,int,"octree",0);
     }
 
     q->v[q->nbVer] = no;
@@ -782,7 +788,6 @@ int _MMG3D_addOctree(MMG5_pMesh mesh, _MMG3D_pOctree q, const int no)
   {
     return 0;
   }
-  memcpy(&pt, mesh->point[no].c ,dim*sizeof(double));
 
   return 1;
 }
@@ -811,7 +816,7 @@ int _MMG3D_delOctreeVertex(MMG5_pMesh mesh, _MMG3D_octree_s* q, int indNo)
   {
     _MMG5_ADD_MEM(mesh,q->nbVer*sizeof(int),"octree index",
                   return 0);
-    _MMG5_SAFE_MALLOC(vTemp,q->nbVer,int);
+    _MMG5_SAFE_MALLOC(vTemp,q->nbVer,int,0);
     memcpy(vTemp, q->v,q->nbVer*sizeof(int));
     _MMG5_DEL_MEM(mesh,q->v,2*q->nbVer*sizeof(int));
 
@@ -928,7 +933,7 @@ int _MMG3D_delOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver, const 
     --q->nbVer;
     nbVerTemp = q->branches[quadrant].nbVer;
 
-    // #warning calling recursively here is not optimal
+    // warning: calling recursively here is not optimal
     if(!_MMG3D_delOctreeRec(mesh, &(q->branches[quadrant]), ver, no, nv))
       return 0;
 
@@ -936,7 +941,7 @@ int _MMG3D_delOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver, const 
     {
       _MMG5_ADD_MEM(mesh,nv*sizeof(int),"octree vertices table",
                     return 0);
-      _MMG5_SAFE_MALLOC(q->v,nv,int);
+      _MMG5_SAFE_MALLOC(q->v,nv,int,0);
       _MMG3D_mergeBranches(mesh,q,dim,nv);
     }else
     {
@@ -1034,11 +1039,11 @@ void _MMG3D_printArbre(_MMG3D_pOctree q)
   int i;
   for (i = 0; i<sizeof(int)*8/dim; i++)
   {
-    fprintf(stdout,"\n profondeur %i \n", i);
+    fprintf(stdout,"\n depth %i \n", i);
     _MMG3D_printArbreDepth(q->q0, i, q->nv, dim);
 
   }
-  fprintf(stdout,"\n fin \n");
+  fprintf(stdout,"\n end \n");
 }
 
 /**
@@ -1056,11 +1061,11 @@ void _MMG3D_printSubArbre(_MMG3D_octree_s* q, int nv, int dim)
   int i;
   for (i = 0; i<sizeof(int)*8/dim; i++)
   {
-    fprintf(stdout,"\n profondeur %i \n", i);
+    fprintf(stdout,"\n depth %i \n", i);
     _MMG3D_printArbreDepth(q, i, nv, dim);
 
   }
-  fprintf(stdout,"\n fin \n");
+  fprintf(stdout,"\n end \n");
 }
 
 
@@ -1108,6 +1113,9 @@ void _MMG3D_sizeArbreRec(_MMG3D_octree_s* q, int nv, int dim,int* s1, int* s2)
 /**
  * \param q pointer toward the global octree structure
  * \param dim dimension in which we work
+ *
+ * \return the size of the tree or NULL pointer if fail
+ *
  * Print the octree memory size.
  *
  * \warning debug function, not safe
@@ -1116,7 +1124,7 @@ void _MMG3D_sizeArbreRec(_MMG3D_octree_s* q, int nv, int dim,int* s1, int* s2)
 int* _MMG3D_sizeArbre(_MMG3D_pOctree q,int dim)
 {
   int *s;
-  _MMG5_SAFE_MALLOC(s,2, int);
+  _MMG5_SAFE_MALLOC(s,2, int,0);
   s[0] = 0;
   s[1] = 0;
   _MMG3D_sizeArbreRec(q->q0, q->nv, dim, &s[0], &s[1]);
@@ -1174,6 +1182,12 @@ int _MMG3D_sizeArbreLink(_MMG3D_pOctree q)
   return _MMG3D_sizeArbreLinkRec(q->q0, q->nv, dim)+q->q0->nbVer*sizeof(int);
 }
 
+/**
+ * \param q pointer toward the global octree
+ *
+ * ???
+ *
+ */
 static inline
 int NearNeighborSquare(MMG5_pMesh mesh, double* ani, _MMG3D_pOctree q, int no, double l, int dim)
 {
@@ -1186,7 +1200,8 @@ int NearNeighborSquare(MMG5_pMesh mesh, double* ani, _MMG3D_pOctree q, int no, d
   int nmin;
   int i, j;
 
-  _MMG5_SAFE_MALLOC(rect,2*dim,double);
+  nmin = 0;
+  _MMG5_SAFE_MALLOC(rect,2*dim,double,-1);
 
   ppt = &mesh->point[no];
   rect[0] = ppt->c[0]-l;
@@ -1378,7 +1393,6 @@ int _MMG3D_octreein_ani(MMG5_pMesh mesh,MMG5_pSol sol,_MMG3D_pOctree octree,int 
   if (ncells < 0)
   {
     _MMG5_DEL_MEM(mesh,lococ,octree->nc*sizeof(_MMG3D_octree_s*));
-    //~ fprintf(stdout,"too many cells\n");
     return(0);
   }
   /* Check the octree cells */

@@ -57,12 +57,12 @@ int _MMG3D_optlap(MMG5_pMesh mesh,MMG5_pSol sol) {
                 return(0));
   _MMG5_ADD_MEM(mesh,(mesh->np+1)*sizeof(double),"compt",
                 return(0));
-  _MMG5_SAFE_CALLOC(nv, 3*mesh->np+1, double);
-  _MMG5_SAFE_CALLOC(pos, 3*mesh->np+1, double);
-  _MMG5_SAFE_CALLOC(compt, mesh->np+1, int);
+  _MMG5_SAFE_CALLOC(nv, 3*mesh->np+1, double,0);
+  _MMG5_SAFE_CALLOC(pos, 3*mesh->np+1, double,0);
+  _MMG5_SAFE_CALLOC(compt, mesh->np+1, int,0);
 
   it  = 1;
-  declic = 3./_MMG5_ALPHAD;
+  declic = 3./_MMG3D_ALPHAD;
   do {
 
     /*initialisation*/
@@ -213,7 +213,8 @@ int _MMG3D_optlap(MMG5_pMesh mesh,MMG5_pSol sol) {
           vol = (nv[ipt1 + 1] - nv[ipt0 + 1]) * (ay*bz - az*by) \
             + (nv[ipt1 + 2] - nv[ipt0 + 2]) * (az*bx - ax*bz)   \
             + (nv[ipt1 + 3] - nv[ipt0 + 3]) * (ax*by - ay*bx);
-          if(vol < 0) {/*printf("reject1 %e\n",vol);*/break;}
+          if(vol < 0)
+            break;
         }
         if(l<=lon) {
           memcpy(&pos[3*(ipt-1) + 1],ppt->c,3*sizeof(double));
@@ -236,7 +237,8 @@ int _MMG3D_optlap(MMG5_pMesh mesh,MMG5_pSol sol) {
             vol = (nv[ipt1 + 1] - nv[ipt0 + 1]) * (ay*bz - az*by) \
               + (nv[ipt1 + 2] - nv[ipt0 + 2]) * (az*bx - ax*bz)   \
               + (nv[ipt1 + 3] - nv[ipt0 + 3]) * (ax*by - ay*bx);
-            if(vol < 0) {/*printf("reject %e\n",vol);*/break;}
+            if(vol < 0)
+              break;
           }
           if(l<lon) break;
         }

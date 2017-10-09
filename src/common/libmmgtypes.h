@@ -25,6 +25,8 @@
  * Types
  */
 #include <stdint.h>
+#include <stdarg.h>
+
 
 #ifndef _LIBMMGTYPES_H
 #define _LIBMMGTYPES_H
@@ -58,8 +60,6 @@
  *
  */
 #define MG_ISO    10
-
-#include <stdarg.h>
 
 /**
  * \def MMG5_ARG_start
@@ -111,6 +111,16 @@
  */
 #define MMG5_ARG_ppDisp 5
 /**
+ * \def MMG5_ARG_ppSols
+ *
+ * Pointer toward an array of MMG5_Sol structures storing a list of solutions
+ * allocations purposes)
+ *
+ * \remark we cannot use an enum because used in
+ * variadic functions).
+ */
+#define MMG5_ARG_ppSols  6
+/**
  * \def MMG5_ARG_pMesh
  *
  * MMG5_pMesh structure
@@ -118,7 +128,7 @@
  * \remark we cannot use an enum because used in
  * variadic functions).
  */
-#define MMG5_ARG_pMesh  6
+#define MMG5_ARG_pMesh  7
 /**
  * \def MMG5_ARG_pMet
  *
@@ -127,7 +137,7 @@
  * \remark we cannot use an enum because used in
  * variadic functions).
  */
-#define MMG5_ARG_pMet   7
+#define MMG5_ARG_pMet   8
 /**
  * \def MMG5_ARG_pDisp
  *
@@ -136,7 +146,7 @@
  * \remark we cannot use an enum because used in
  * variadic functions).
  */
-#define MMG5_ARG_pDisp  8
+#define MMG5_ARG_pDisp  9
 /**
  * \def MMG5_ARG_end
  *
@@ -146,7 +156,7 @@
  * \remark we cannot use an enum because used in
  * variadic functions).
  */
-#define MMG5_ARG_end    9
+#define MMG5_ARG_end    10
 
 /**
  * \enum MMG5_type
@@ -260,7 +270,7 @@ typedef struct {
   int      flag;
   int16_t  tag[3]; /*!< tag[i] contains the tag associated to the
                      \f$i^{th}\f$ edge of triangle */
-} MMG5_Tria;
+  } MMG5_Tria;
 typedef MMG5_Tria * MMG5_pTria;
 
 
@@ -406,22 +416,36 @@ typedef struct {
                      \f$i^{th}\f$ edge of the prism */
 } MMG5_xPrism;
 typedef MMG5_xPrism * MMG5_pxPrism;
+
+/**
+ * \struc MMG5_Mat
+ * \brief To store user-defined references in the mesh (useful in LS mode)
+ */
+typedef struct {
+  char dospl;
+  int  ref,rin,rex;
+} MMG5_Mat;
+typedef MMG5_Mat * MMG5_pMat;
+
 /**
  * \struct MMG5_Info
  * \brief Store input parameters of the run.
  */
 typedef struct {
   MMG5_pPar     par;
-  double        dhd,hmin,hmax,hgrad,hausd,min[3],max[3],delta,ls;
+  double        dhd,hmin,hmax,hsiz,hgrad,hausd,min[3],max[3],delta,ls;
   int           mem,npar,npari;
+  int           opnbdy;
   int           renum;
   int           octree;
+  int           nmat;
   char          nreg;
   char          imprim,ddebug,badkal,iso,fem,lag;
   char          parTyp; /*!< Contains binary flags to say which kind of local
                           param are setted: if \f$tag = 1+2+4\f$ then the point
                           is \a MG_Vert, MG_Tria and MG_Tetra */
   unsigned char optim, optimLES, noinsert, noswap, nomove, nosurf;
+  MMG5_pMat     mat;
 } MMG5_Info;
 
 /**
@@ -455,6 +479,7 @@ typedef struct {
   int       type; /*!< Type of the mesh */
   int       npi,nti,nai,nei,np,na,nt,ne,npmax,namax,ntmax,nemax,xpmax,xtmax;
   int       nquad,nprism; /* number of quadrangles and prisms */
+  int       nsols; /* number of solutions in the solution file (mshmet/int) */
   int       nc1;
 
   int       base; /*!< Used with \a flag to know if an entity has been
@@ -466,15 +491,15 @@ typedef struct {
   int       nenil; /*!< Index of first unused element */
   int       nanil; /*!< Index of first unused edge (2d only)*/
   int      *adja; /*!< Table of tetrahedron adjacency: if
-                    \f$adja[4*i+1+j]=4*k+l\f$ then the \f$i^{th}\f$ and
+                    \f$adja[4*(i-1)+1+j]=4*k+l\f$ then the \f$i^{th}\f$ and
                     \f$k^th\f$ tetrahedra are adjacent and share their
                     faces \a j and \a l (resp.) */
   int      *adjt; /*!< Table of triangles adjacency: if
-                    \f$adjt[3*i+1+j]=3*k+l\f$ then the \f$i^{th}\f$ and
+                    \f$adjt[3*(i-1)+1+j]=3*k+l\f$ then the \f$i^{th}\f$ and
                     \f$k^th\f$ triangles are adjacent and share their
                     edges \a j and \a l (resp.) */
   int      *adjapr; /*!< Table of prisms adjacency: if
-                    \f$adjapr[5*i+1+j]=5*k+l\f$ then the \f$i^{th}\f$ and
+                    \f$adjapr[5*(i-1)+1+j]=5*k+l\f$ then the \f$i^{th}\f$ and
                     \f$k^th\f$ prism are adjacent and share their
                     faces \a j and \a l (resp.) */
   MMG5_pPoint    point; /*!< Pointer toward the \ref MMG5_Point structure */
@@ -507,6 +532,7 @@ typedef struct {
   int       size; /* Number of solutions per entity */
   int       type; /* Type of the solution (scalar, vectorial of tensorial) */
   double   *m; /*!< Solution values */
+  double    umin,umax; /*!<Min/max values for the solution */
   char     *namein; /*!< Input solution file name */
   char     *nameout; /*!< Output solution file name */
 } MMG5_Sol;

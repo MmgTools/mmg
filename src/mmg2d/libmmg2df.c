@@ -80,11 +80,11 @@ FORTRAN_NAME(MMG2D_MMG2DLS,mmg2d_mmg2dls,(MMG5_pMesh *mesh,MMG5_pSol *met
 /**
  * See \ref MMG2D_mmg2dmov function in \ref mmg2d/libmmg2d.h file.
  */
-FORTRAN_NAME(MMG2D_MMG2DMOV,mmg2d_mmg2dmov,(MMG5_pMesh *mesh,MMG5_pSol *met
-                                            ,int* retval),(mesh,met
+FORTRAN_NAME(MMG2D_MMG2DMOV,mmg2d_mmg2dmov,(MMG5_pMesh *mesh,MMG5_pSol *met,MMG5_pSol *disp
+                                            ,int* retval),(mesh,met,disp
                                                            ,retval)){
 
-  *retval = MMG2D_mmg2dmov(*mesh,*met);
+  *retval = MMG2D_mmg2dmov(*mesh,*met,*disp);
 
   return;
 }

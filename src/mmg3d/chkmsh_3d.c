@@ -55,7 +55,8 @@ void _MMG5_chkvol(MMG5_pMesh mesh) {
     pt = &mesh->tetra[k];
     if ( !MG_EOK(pt) )  continue;
     if ( _MMG5_orvol(mesh->point,pt->v) < _MMG5_NULKAL ) {
-      printf("  tetra %d  volume %e\n",k,_MMG5_orvol(mesh->point,pt->v));
+      fprintf(stderr,"\n  ## Warning: %s: tetra %d volume %e\n",__func__,
+             k,_MMG5_orvol(mesh->point,pt->v));
 #ifdef DEBUG
       ier = 0;
 #endif
@@ -67,6 +68,7 @@ void _MMG5_chkvol(MMG5_pMesh mesh) {
 }
 
 /**
+* \return 0 if fail, 1 otherwise
  *
  * \warning Not used.
  */
@@ -88,8 +90,9 @@ int _MMG5_chkmshsurf(MMG5_pMesh mesh){
       adja1 = &mesh->adjt[3*(k1-1)+1];
 
       if(adja1[voy] / 3 != k){
-        fprintf(stderr,"Wrong adjacency relation for triangles : %d %d \n",k,k1);
-        exit(EXIT_FAILURE);
+        fprintf(stderr,"\n  ## Warning: %s: wrong adjacency relation"
+                " for triangles : %d %d \n",__func__,k,k1);
+        return 0;
       }
     }
   }
@@ -111,6 +114,7 @@ int _MMG5_mmg3dChkmsh(MMG5_pMesh mesh,int severe,int base) {
   int            *adja,*adja1,adj,adj1,k,i,iadr;
   int            iel,a0,a1,a2,b0,b1,b2;
   unsigned char  voy,voy1;
+  static char    mmgErr0=0,mmgErr1=0,mmgErr2=0,mmgErr3=0,mmgErr4=0,mmgErr5=0;
 
   for (k=1; k<=mesh->ne; k++) {
     pt1 = &mesh->tetra[k];
@@ -126,20 +130,35 @@ int _MMG5_mmg3dChkmsh(MMG5_pMesh mesh,int severe,int base) {
       voy = adja[i] % 4;
 
       if ( adj == k ) {
-        fprintf(stderr,"  1. Wrong adjacency %d %d\n",k,adj);
-        fprintf(stderr,"triangle %d: %d %d %d %d\n",k,pt1->v[0],pt1->v[1],pt1->v[2],pt1->v[3]);
-        fprintf(stderr,"adj (%d): %d %d %d %d\n",k,adja[0]/4,adja[1]/4,adja[2]/4,adja[3]/4);
+        if ( !mmgErr0 ) {
+          fprintf(stderr,"\n  ## Error: %s: 1. at least 1 wrong adjacency %d %d\n",
+                  __func__,_MMG3D_indElt(mesh,k),_MMG3D_indElt(mesh,adj));
+          fprintf(stderr,"triangle %d: %d %d %d %d\n",_MMG3D_indElt(mesh,k),
+                  _MMG3D_indPt(mesh,pt1->v[0]),_MMG3D_indPt(mesh,pt1->v[1]),
+                  _MMG3D_indPt(mesh,pt1->v[2]),_MMG3D_indPt(mesh,pt1->v[3]));
+          fprintf(stderr,"adj (%d): %d %d %d %d\n",_MMG3D_indElt(mesh,k),
+                  _MMG3D_indElt(mesh,adja[0]/4),_MMG3D_indElt(mesh,adja[1]/4),
+                  _MMG3D_indElt(mesh,adja[2]/4),_MMG3D_indElt(mesh,adja[3]/4));
+          mmgErr0 = 1;
+        }
         return(0);
       }
       pt2 = &mesh->tetra[adj];
       if ( !MG_EOK(pt2) || pt2->ref < 0 ){
-        fprintf(stderr,"  4. Invalid adjacent %d %d\n",adj,k);
-        fprintf(stderr,"vertices of k   %d: %d %d %d %d\n",k,
-               pt1->v[0],pt1->v[1],pt1->v[2],pt1->v[3]);
-        fprintf(stderr,"vertices of adj %d: %d %d %d %d\n",adj,
-               pt2->v[0],pt2->v[1],pt2->v[2],pt2->v[3]);
-        fprintf(stderr,"adj(%d): %d %d %d %d\n",k,
-               adja[0]/4,adja[1]/4,adja[2]/4,adja[3]/4);
+        if ( !mmgErr1 ) {
+          fprintf(stderr,"\n  ## Error: %s: 4. at least 1 invalid adjacent %d %d\n",
+                  __func__,_MMG3D_indElt(mesh,adj),_MMG3D_indElt(mesh,k));
+          fprintf(stderr,"vertices of k   %d: %d %d %d %d\n",_MMG3D_indElt(mesh,k),
+                  _MMG3D_indPt(mesh,pt1->v[0]),_MMG3D_indPt(mesh,pt1->v[1]),
+                  _MMG3D_indPt(mesh,pt1->v[2]),_MMG3D_indPt(mesh,pt1->v[3]));
+          fprintf(stderr,"vertices of adj %d: %d %d %d %d\n",_MMG3D_indElt(mesh,adj),
+                  _MMG3D_indPt(mesh,pt2->v[0]),_MMG3D_indPt(mesh,pt2->v[1]),
+                  _MMG3D_indPt(mesh,pt2->v[2]),_MMG3D_indPt(mesh,pt2->v[3]));
+          fprintf(stderr,"adj(%d): %d %d %d %d\n",_MMG3D_indElt(mesh,k),
+                  _MMG3D_indElt(mesh,adja[0]/4),_MMG3D_indElt(mesh,adja[1]/4),
+                  _MMG3D_indElt(mesh,adja[2]/4),_MMG3D_indElt(mesh,adja[3]/4));
+          mmgErr1 = 1;
+        }
         return(0);
       }
       iadr  = (adj-1)*4 + 1;
@@ -147,13 +166,23 @@ int _MMG5_mmg3dChkmsh(MMG5_pMesh mesh,int severe,int base) {
       adj1  = adja1[voy] / 4;
       voy1  = adja1[voy] % 4;
       if ( adj1 != k || voy1 != i ) {
-        fprintf(stderr,"  2. Wrong adjacency %d %d\n",k,adj1);
-        fprintf(stderr,"vertices of %d: %d %d %d %d\n",k,
-               pt1->v[0],pt1->v[1],pt1->v[2],pt1->v[3]);
-        fprintf(stderr,"vertices of adj %d: %d %d %d %d\n",adj,
-               pt2->v[0],pt2->v[1],pt2->v[2],pt2->v[3]);
-        fprintf(stderr,"adj(%d): %d %d %d %d\n",k,adja[0]/4,adja[1]/4,adja[2]/4,adja[3]/4);
-        fprintf(stderr,"adj(%d): %d %d %d %d\n",adj,adja1[0]/4,adja1[1]/4,adja1[2]/4,adja1[3]/4);
+        if ( !mmgErr2 ) {
+          fprintf(stderr,"\n  ## Error: %s: 2. at least 1 wrong adjacency %d %d\n",
+                  __func__,_MMG3D_indElt(mesh,k),_MMG3D_indElt(mesh,adj1));
+          fprintf(stderr,"vertices of %d: %d %d %d %d\n",_MMG3D_indElt(mesh,k),
+                  _MMG3D_indPt(mesh,pt1->v[0]),_MMG3D_indPt(mesh,pt1->v[1]),
+                  _MMG3D_indPt(mesh,pt1->v[2]),_MMG3D_indPt(mesh,pt1->v[3]));
+          fprintf(stderr,"vertices of adj %d: %d %d %d %d\n",_MMG3D_indElt(mesh,adj),
+                  _MMG3D_indPt(mesh,pt2->v[0]),_MMG3D_indPt(mesh,pt2->v[1]),
+                  _MMG3D_indPt(mesh,pt2->v[2]),_MMG3D_indPt(mesh,pt2->v[3]));
+          fprintf(stderr,"adj(%d): %d %d %d %d\n",_MMG3D_indElt(mesh,k),
+                  _MMG3D_indElt(mesh,adja[0]/4),_MMG3D_indElt(mesh,adja[1]/4),
+                  _MMG3D_indElt(mesh,adja[2]/4),_MMG3D_indElt(mesh,adja[3]/4));
+          fprintf(stderr,"adj(%d): %d %d %d %d\n",_MMG3D_indElt(mesh,adj),
+                  _MMG3D_indElt(mesh,adja1[0]/4),_MMG3D_indElt(mesh,adja1[1]/4),
+                  _MMG3D_indElt(mesh,adja1[2]/4),_MMG3D_indElt(mesh,adja1[3]/4));
+          mmgErr2 = 1;
+        }
         return(0);
       }
 
@@ -168,10 +197,16 @@ int _MMG5_mmg3dChkmsh(MMG5_pMesh mesh,int severe,int base) {
       if(!(((a0 == b0)&&(a1 == b1)&&(a2 ==b2))||((a0 == b0)&&(a1 == b2)&&(a2 ==b1))\
            || ((a0 == b1)&&(a1 == b0)&&(a2 ==b2)) || ((a0 == b1)&&(a1 == b2)&&(a2 ==b0)) \
            || ((a0 == b2)&&(a1 == b0)&&(a2 ==b1)) || ((a0 == b2)&&(a1 == b1)&&(a2 ==b0)) )){
-        fprintf(stderr,"  ## Warning: Inconsistent faces : tetra %d face %d;"
-               " tetra %d face %i \n",k,i,adj,voy);
-        fprintf(stderr,"Tet 1 : %d %d %d \n",a0,a1,a2);
-        fprintf(stderr,"Tet 2 : %d %d %d \n",b0,b1,b2);
+        if ( !mmgErr3 ) {
+          fprintf(stderr,"\n  ## Warning: %s: Inconsistent faces : tetra %d face %d;"
+                  " tetra %d face %i \n",__func__,_MMG3D_indElt(mesh,k),i,
+                  _MMG3D_indElt(mesh,adj),voy);
+          fprintf(stderr,"Tet 1 : %d %d %d \n",_MMG3D_indPt(mesh,a0),
+                  _MMG3D_indPt(mesh,a1),_MMG3D_indPt(mesh,a2));
+          fprintf(stderr,"Tet 2 : %d %d %d \n",_MMG3D_indPt(mesh,b0),
+                  _MMG3D_indPt(mesh,b1),_MMG3D_indPt(mesh,b2));
+          mmgErr3 = 1;
+        }
         return(0);
       }
     }
@@ -186,13 +221,21 @@ int _MMG5_mmg3dChkmsh(MMG5_pMesh mesh,int severe,int base) {
     for(i=0;i<4;i++){
       if(!adja[i]){
         if(!pt->xt){
-          fprintf(stderr,"Tetra %d : boundary face not tagged : %d \n",k,i);
+          if ( !mmgErr4 ) {
+            mmgErr4 = 1;
+            fprintf(stderr,"\n  ## Error: %s: Tetra %d: boundary face"
+                    " not tagged: %d \n",__func__,_MMG3D_indElt(mesh,k),i);
+          }
           return(0);
         }
         else{
           pxt = &mesh->xtetra[pt->xt];
           if(!(pxt->ftag[i] & MG_BDY)){
-            fprintf(stderr,"Tetra %d : boundary face not tagged : %d \n",k,i);
+            if ( !mmgErr4 ) {
+              mmgErr4 = 1;
+              fprintf(stderr,"\n  ## Error: %s: Tetra %d: boundary face"
+                      " not tagged : %d \n",__func__,_MMG3D_indElt(mesh,k),i);
+            }
             return(0);
           }
         }
@@ -214,19 +257,31 @@ int _MMG5_mmg3dChkmsh(MMG5_pMesh mesh,int severe,int base) {
 
       if(pt->ref != pt1->ref){
         if(!pt->xt){
-          fprintf(stderr,"Tetra %d face %d : common face is a limit of two subdomains"
-                 " and has not xt : %d %d %d  \n",k,i,
-                 pt->v[_MMG5_idir[i][0]],pt->v[_MMG5_idir[i][1]],
-                 pt->v[_MMG5_idir[i][2]]);
+          if ( !mmgErr5 ) {
+            mmgErr5 = 1;
+            fprintf(stderr,"\n  ## Error: %s: Tetra %d face %d: common"
+                    " face is a limit of two subdomains"
+                    " and has not xt : %d %d %d  \n",__func__,
+                    _MMG3D_indElt(mesh,k),i,
+                    _MMG3D_indPt(mesh,pt->v[_MMG5_idir[i][0]]),
+                    _MMG3D_indPt(mesh,pt->v[_MMG5_idir[i][1]]),
+                    _MMG3D_indPt(mesh,pt->v[_MMG5_idir[i][2]]));
+          }
           return(0);
         }
         else{
           pxt = &mesh->xtetra[pt->xt];
           if(!(pxt->ftag[i] & MG_BDY)){
-            fprintf(stderr,"Tetra %d %d : common face is a limit of two subdomains"
-                   " and is not tagged %d %d %d -->%d\n",
-                   k,i,pt->v[_MMG5_idir[i][0]],pt->v[_MMG5_idir[i][1]],
-                   pt->v[_MMG5_idir[i][2]], pxt->ftag[i]);
+            if ( !mmgErr5 ) {
+              mmgErr5 = 1;
+              fprintf(stderr,"\n  ## Error: %s: Tetra %d %d : common"
+                      " face is a limit of two subdomains"
+                      " and is not tagged %d %d %d -->%d\n",__func__,
+                      _MMG3D_indElt(mesh,k),i,
+                       _MMG3D_indElt(mesh,pt->v[_MMG5_idir[i][0]]),
+                      _MMG3D_indPt(mesh,pt->v[_MMG5_idir[i][1]]),
+                      _MMG3D_indPt(mesh,pt->v[_MMG5_idir[i][2]]), pxt->ftag[i]);
+            }
             return(0);
           }
         }
@@ -239,14 +294,17 @@ int _MMG5_mmg3dChkmsh(MMG5_pMesh mesh,int severe,int base) {
 /**
  * Search boundary faces containing point np.
  *
+ * \return 0 if fail, 1 otherwise
+ *
  * \warning Not used.
  **/
 int _MMG5_chkptonbdy(MMG5_pMesh mesh,int np){
   MMG5_pTetra      pt;
   MMG5_pxTetra     pxt;
   MMG5_pPoint      p0;
-  int         k;
-  char        i,j,ip;
+  int              k;
+  char             i,j,ip;
+  static char      mmgWarn0=0,mmgWarn1=0;
 
   for(k=1;k<=mesh->np;k++)
     mesh->point[k].flag = 0;
@@ -261,12 +319,22 @@ int _MMG5_chkptonbdy(MMG5_pMesh mesh,int np){
       if(!(pxt->ftag[i] & MG_BDY)) continue;
       for(j=0; j<3; j++){
         ip = _MMG5_idir[i][j];
-        if(pt->v[ip] == np) printf("Le pt : %d sur la face %d du tetra %d : %d %d %d %d \n",pt->v[ip],i,k,pt->v[0],pt->v[1],pt->v[2],pt->v[3]);
+        if(pt->v[ip] == np) {
+          if ( !mmgWarn0 ) {
+            mmgWarn0 = 1;
+            fprintf(stderr,"\n  ## Error: %s: point %d on face %d of tetra %d :"
+                   " %d %d %d %d \n",__func__, _MMG3D_indPt(mesh,pt->v[ip]),i,
+                   _MMG3D_indElt(mesh,k), _MMG3D_indPt(mesh,pt->v[0]),
+                   _MMG3D_indPt(mesh,pt->v[1]),
+                   _MMG3D_indPt(mesh,pt->v[2]), _MMG3D_indPt(mesh,pt->v[3]));
+          }
+        }
         p0 = &mesh->point[pt->v[ip]];
         p0->flag = 1;
       }
     }
   }
+
 
   /* Make sure that all the remaining points are not tagged BDY */
   for(k=1; k<=mesh->np; k++){
@@ -274,8 +342,12 @@ int _MMG5_chkptonbdy(MMG5_pMesh mesh,int np){
     if(!MG_VOK(p0)) continue;
     if(p0->flag) continue;
     if(p0->tag & MG_BDY){
-      fprintf(stderr,"      Fct. chkptonbdy : point %d tagged bdy while belonging to no BDY face\n",k);
-      exit(EXIT_FAILURE);
+      if ( !mmgWarn1 ) {
+        mmgWarn1 = 1;
+        fprintf(stderr,"\n  ## Error: %s: point %d tagged bdy while belonging to no BDY face\n",
+                __func__,_MMG3D_indPt(mesh,k));
+      }
+      return 0;
     }
   }
 
@@ -291,8 +363,9 @@ int _MMG5_chkptonbdy(MMG5_pMesh mesh,int np){
 int _MMG5_cntbdypt(MMG5_pMesh mesh, int nump){
   MMG5_pTetra  pt;
   MMG5_pxTetra pxt;
-  int k,nf;
-  char i,j,ip;
+  int          k,nf,v0,v1,v2;
+  char         i,j,ip;
+  static char  mmgWarn0 = 0;
 
   nf = 0;
 
@@ -306,7 +379,18 @@ int _MMG5_cntbdypt(MMG5_pMesh mesh, int nump){
       for(j=0; j<3; j++){
         ip = _MMG5_idir[i][j];
         if(pt->v[ip] == nump){
-          printf("La face : %d %d %d \n dans le tetra : %d %d %d %d \n",pt->v[_MMG5_idir[i][0]],pt->v[_MMG5_idir[i][1]],pt->v[_MMG5_idir[i][2]],pt->v[0],pt->v[1],pt->v[2],pt->v[3]);
+          if ( !mmgWarn0 ) {
+            mmgWarn0 = 1;
+            v0 = pt->v[_MMG5_idir[i][0]];
+            v1 = pt->v[_MMG5_idir[i][0]];
+            v2 = pt->v[_MMG5_idir[i][0]];
+
+            fprintf(stderr,"\n  ## Error: %s: face %d %d %d in tetra : %d %d %d %d \n",
+                   __func__,_MMG3D_indPt(mesh,v0),_MMG3D_indPt(mesh,v1),
+                   _MMG3D_indPt(mesh,v2),
+                   _MMG3D_indPt(mesh,pt->v[0]),_MMG3D_indPt(mesh,pt->v[1]),
+                   _MMG3D_indPt(mesh,pt->v[2]),_MMG3D_indPt(mesh,pt->v[3]));
+          }
           nf++;
         }
       }
@@ -396,11 +480,12 @@ int _MMG5_chkfemtopo(MMG5_pMesh mesh) {
  * \warning Not used.
  */
 int srcface(MMG5_pMesh mesh,int n0,int n1,int n2) {
-  MMG5_pTetra    pt;
-  MMG5_pxTetra   pxt;
-  int       k,ip0,ip1,ip2,minn,maxn,sn,mins,maxs,sum,ref;
-  int16_t   tag;
-  char      i;
+  MMG5_pTetra  pt;
+  MMG5_pxTetra pxt;
+  int          k,ip0,ip1,ip2,minn,maxn,sn,mins,maxs,sum,ref;
+  int16_t      tag;
+  char         i;
+  static char  mmgWarn0 = 0;
 
   minn = MG_MIN(n0,MG_MIN(n1,n2));
   maxn = MG_MAX(n0,MG_MAX(n1,n2));
@@ -424,7 +509,12 @@ int srcface(MMG5_pMesh mesh,int n0,int n1,int n2) {
       ref  = pt->xt ? pxt->ref[i] : 0;
 
       if( mins == minn && maxs == maxn && sum == sn ) {
-        printf("Face %d in tetra %d with ref %d : corresponding ref %d , tag : %d\n",i,k,pt->ref,ref,tag);
+        if ( !mmgWarn0 ) {
+          mmgWarn0 = 1;
+          fprintf(stderr,"\n  ## Error: %s: Face %d in tetra %d with ref %d:"
+                  " corresponding ref %d , tag: %d\n",__func__,i,
+                  _MMG3D_indElt(mesh,k),pt->ref,ref,tag);
+        }
       }
     }
   }
