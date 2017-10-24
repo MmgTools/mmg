@@ -95,8 +95,13 @@ MACRO ( ADD_AND_INSTALL_LIBRARY
 
   ADD_LIBRARY ( ${target_name} ${target_type} ${sources} )
 
-  TARGET_INCLUDE_DIRECTORIES ( ${target_name} PRIVATE
-    ${COMMON_BINARY_DIR} ${COMMON_SOURCE_DIR} ${CMAKE_BINARY_DIR}/include )
+  IF ( CMAKE_VERSION VERSION_LESS 2.8.12 )
+    INCLUDE_DIRECTORIES ( ${target_name} PRIVATE
+      ${COMMON_BINARY_DIR} ${COMMON_SOURCE_DIR} ${CMAKE_BINARY_DIR}/include )
+  ELSE ( )
+    TARGET_INCLUDE_DIRECTORIES ( ${target_name} PRIVATE
+      ${COMMON_BINARY_DIR} ${COMMON_SOURCE_DIR} ${CMAKE_BINARY_DIR}/include )
+  ENDIF ( )
 
   SET_TARGET_PROPERTIES ( ${target_name}
     PROPERTIES OUTPUT_NAME ${output_name} )
@@ -140,8 +145,13 @@ MACRO ( ADD_AND_INSTALL_EXECUTABLE
     my_add_link_flags ( ${exec_name} "/SAFESEH:NO")
   ENDIF ( )
 
-  TARGET_INCLUDE_DIRECTORIES ( ${exec_name} PUBLIC
-    ${COMMON_BINARY_DIR} ${COMMON_SOURCE_DIR} ${CMAKE_BINARY_DIR}/include )
+ IF ( CMAKE_VERSION VERSION_LESS 2.8.12 )
+   INCLUDE_DIRECTORIES ( ${exec_name} PUBLIC
+     ${COMMON_BINARY_DIR} ${COMMON_SOURCE_DIR} ${CMAKE_BINARY_DIR}/include )
+ ELSE ( )
+   TARGET_INCLUDE_DIRECTORIES ( ${exec_name} PUBLIC
+     ${COMMON_BINARY_DIR} ${COMMON_SOURCE_DIR} ${CMAKE_BINARY_DIR}/include )
+ ENDIF ( )
 
   TARGET_LINK_LIBRARIES ( ${exec_name} ${LIBRARIES}  )
 
@@ -214,7 +224,11 @@ MACRO ( ADD_LIBRARY_TEST target_name main_path target_dependency lib_name )
   ADD_EXECUTABLE ( ${target_name} ${main_path} )
   ADD_DEPENDENCIES( ${target_name} ${target_dependency} )
 
-  TARGET_INCLUDE_DIRECTORIES ( ${target_name} PUBLIC ${CMAKE_BINARY_DIR}/include )
+  IF ( CMAKE_VERSION VERSION_LESS 2.8.12 )
+    INCLUDE_DIRECTORIES ( ${target_name} PUBLIC ${CMAKE_BINARY_DIR}/include )
+  ELSE ( )
+    TARGET_INCLUDE_DIRECTORIES ( ${target_name} PUBLIC ${CMAKE_BINARY_DIR}/include )
+  ENDIF ( )
 
   IF ( WIN32 AND ((NOT MINGW) AND USE_SCOTCH) )
     MY_ADD_LINK_FLAGS ( ${target_name} "/SAFESEH:NO" )
