@@ -630,7 +630,7 @@ int _MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,char i,
   _MMG5_Bezier   b;
   double         b1[3],b2[3],bn[3],c[3],nt[3],cold[3],nold[3],n[3];
   double         m1old[6],m2old[6],m1[6],m2[6];
-  double         *n1,*n2,step,u,r[3][3],dd;
+  double         *n1,*n2,step,u,r[3][3],dd,ddbn;
   int            ip1,ip2,nstep,l;
   char           i1,i2;
   static int     warn=0;
@@ -652,6 +652,8 @@ int _MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,char i,
   memcpy(b1,&b.b[2*i+3][0],3*sizeof(double));
   memcpy(b2,&b.b[2*i+4][0],3*sizeof(double));
 
+  ddbn = bn[0]*bn[0] + bn[1]*bn[1] + bn[2]*bn[2];
+  
   /* Parallel transport of metric at p1 to point p(s) */
   step = s / nstep;
   cold[0] = p1->c[0];
@@ -662,7 +664,7 @@ int _MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,char i,
   nold[1] = n1[1];
   nold[2] = n1[2];
 
-  if ( MG_SIN(p1->tag) || (p1->tag & MG_NOM)) {
+  if ( MG_SIN(p1->tag) || (p1->tag & MG_NOM) || (ddbn < _MMG5_EPSD) ) {
     memcpy(m1,&met->m[6*ip1],6*sizeof(double));
   }
   else {
@@ -713,7 +715,7 @@ int _MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,char i,
   nold[1] = n2[1];
   nold[2] = n2[2];
 
-  if ( MG_SIN(p2->tag) || (p2->tag & MG_NOM)) {
+  if ( MG_SIN(p2->tag) || (p2->tag & MG_NOM) || (ddbn < _MMG5_EPSD) ) {
     memcpy(m2,&met->m[6*ip2],6*sizeof(double));
 
     /* In this pathological case, n is empty */
