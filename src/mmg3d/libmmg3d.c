@@ -46,7 +46,7 @@
  */
 #define _MMG5_RETURN_AND_PACK(mesh,met,disp,val)do                      \
   {                                                                     \
-    if ( !_MMG3D_packMesh(mesh,met,disp) )  {                           \
+    if ( !MMG3D_packMesh(mesh,met,disp) )  {                            \
       mesh->npi = mesh->np;                                             \
       mesh->nti = mesh->nt;                                             \
       mesh->nai = mesh->na;                                             \
@@ -217,7 +217,7 @@ void _MMG3D_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
  *
  * \warning mesh must be packed and hashed
  */
-int _MMG3D_bdryBuild(MMG5_pMesh mesh) {
+int MMG3D_bdryBuild(MMG5_pMesh mesh) {
   MMG5_pTetra pt;
   MMG5_hgeom  *ph;
   int         k,i,nr;
@@ -297,52 +297,49 @@ int _MMG3D_bdryBuild(MMG5_pMesh mesh) {
 
 /**
  * \param mesh pointer toward the mesh structure (unused).
- * \param met pointer toward the solution (metric or level-set) structure.
- * \param disp pointer toward the solution (displacement) structure.
- * \return 1 if success, 0 if chkmsh fail or if we are unable to build
- * triangles.
+ * \param np pointer toward the number of packed points
+ * \param nc pointer toward the number of packed corners
+ * \return 1 if success, 0 if fail.
  *
- * Pack the sparse mesh and create triangles and edges before getting
- * out of library
+ * Count the number of packed points and store the packed point index in tmp.
  *
  */
-int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
-  MMG5_pTetra   pt,ptnew;
-  MMG5_pPrism   pp;
-  MMG5_pQuad    pq;
-  MMG5_pPoint   ppt,pptnew;
-  int     np,nc,nr, k,ne,nbl,imet,imetnew,i;
-  int     iadr,iadrnew,iadrv,*adjav,*adja,*adjanew,voy;
 
-  /* compact vertices */
-  if ( !mesh->point ) {
-    fprintf(stderr, "\n  ## Error: %s: points array not allocated.\n",
-            __func__);
-    return 0;
-  }
-  if ( !mesh->tetra ) {
-    fprintf(stderr, "\n  ## Error: %s: tetra array not allocated.\n",
-            __func__);
-    return 0;
-  }
+int MMG3D_count_packedPoints(MMG5_pMesh mesh,int *np,int *nc) {
+  MMG5_pPoint   ppt;
+  int           k;
 
-  np = nc = 0;
+  (*np) = (*nc) = 0;
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
     if ( !MG_VOK(ppt) )  continue;
-    ppt->tmp = ++np;
+    ppt->tmp = ++(*np);
 
     if ( ppt->tag & MG_NOSURF ) {
       ppt->tag &= ~MG_NOSURF;
       ppt->tag &= ~MG_REQ;
     }
 
-    if ( ppt->tag & MG_CRN )  nc++;
+    if ( ppt->tag & MG_CRN )  (*nc)++;
 
     ppt->ref = abs(ppt->ref);
   }
+  return 1;
+}
 
-  /* compact tetrahedra */
+/**
+ * \param mesh pointer toward the mesh structure
+ *
+ * \return 1 if success, 0 if fail.
+ *
+ * Pack the sparse tetra and the associated adja array
+ *
+ */
+int MMG3D_pack_tetraAndAdja(MMG5_pMesh mesh) {
+  MMG5_pTetra   pt,ptnew;
+  int           iadr,iadrnew,iadrv,*adjav,*adja,*adjanew,voy;
+  int           ne,nbl,k,i;
+
   ne  = 0;
   nbl = 1;
   for (k=1; k<=mesh->ne; k++) {
@@ -359,26 +356,86 @@ int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
       ptnew = &mesh->tetra[nbl];
       memcpy(ptnew,pt,sizeof(MMG5_Tetra));
 
-      if ( mesh->adja ) {
-        iadr = 4*(k-1) + 1;
-        adja = &mesh->adja[iadr];
-        iadrnew = 4*(nbl-1) + 1;
-        adjanew = &mesh->adja[iadrnew];
-        for(i=0 ; i<4 ; i++) {
-          adjanew[i] = adja[i];
-          if(!adja[i]) continue;
-          iadrv = 4*(adja[i]/4-1) +1;
-          adjav = &mesh->adja[iadrv];
-          voy = i;
-          adjav[adja[i]%4] = 4*nbl + voy;
-        }
+      iadr = 4*(k-1) + 1;
+      adja = &mesh->adja[iadr];
+      iadrnew = 4*(nbl-1) + 1;
+      adjanew = &mesh->adja[iadrnew];
+      for(i=0 ; i<4 ; i++) {
+        adjanew[i] = adja[i];
+        if(!adja[i]) continue;
+        iadrv = 4*(adja[i]/4-1) +1;
+        adjav = &mesh->adja[iadrv];
+        voy = i;
+        adjav[adja[i]%4] = 4*nbl + voy;
       }
     }
     nbl++;
   }
   mesh->ne = ne;
 
-  /* update prisms and quads vertex indices */
+  /* Recreate nil chain */
+  mesh->nenil = mesh->ne + 1;
+  for(k=mesh->nenil; k<mesh->nemax-1; k++)
+    mesh->tetra[k].v[3] = k+1;
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure
+ *
+ * \return 1 if success, 0 if fail.
+ *
+ * Pack the sparse tetra. Doesn't pack the adjacency array.
+ *
+ */
+int MMG3D_pack_tetra(MMG5_pMesh mesh) {
+  MMG5_pTetra   pt,ptnew;
+  int           ne,nbl,k;
+
+  ne  = 0;
+  nbl = 1;
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+    if ( !MG_EOK(pt) )  continue;
+
+    pt->v[0] = mesh->point[pt->v[0]].tmp;
+    pt->v[1] = mesh->point[pt->v[1]].tmp;
+    pt->v[2] = mesh->point[pt->v[2]].tmp;
+    pt->v[3] = mesh->point[pt->v[3]].tmp;
+    ne++;
+
+    if ( k!=nbl ) {
+      ptnew = &mesh->tetra[nbl];
+      memcpy(ptnew,pt,sizeof(MMG5_Tetra));
+    }
+    nbl++;
+  }
+  mesh->ne = ne;
+
+  /* Recreate nil chain */
+  mesh->nenil = mesh->ne + 1;
+  for(k=mesh->nenil; k<mesh->nemax-1; k++)
+    mesh->tetra[k].v[3] = k+1;
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure
+ *
+ * \return 1 if success, 0 if fail.
+ *
+ * Pack prisms and quads
+ *
+ */
+int MMG3D_pack_prismsAndQuads(MMG5_pMesh mesh) {
+  MMG5_pPrism   pp,ppnew;
+  MMG5_pQuad    pq,pqnew;
+  int           k,ne,nbl;
+
+  ne  = 0;
+  nbl = 1;
   for (k=1; k<=mesh->nprism; k++) {
     pp = &mesh->prism[k];
     if ( !MG_EOK(pp) )  continue;
@@ -389,7 +446,18 @@ int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
     pp->v[3] = mesh->point[pp->v[3]].tmp;
     pp->v[4] = mesh->point[pp->v[4]].tmp;
     pp->v[5] = mesh->point[pp->v[5]].tmp;
+    ++ne;
+
+    if ( k!=nbl ) {
+      ppnew = &mesh->prism[nbl];
+      memcpy(ppnew,pp,sizeof(MMG5_Prism));
+    }
+    ++nbl;
   }
+  mesh->nprism = ne;
+
+  ne  = 0;
+  nbl = 1;
   for (k=1; k<=mesh->nquad; k++) {
     pq = &mesh->quadra[k];
     if ( !MG_EOK(pq) )  continue;
@@ -398,43 +466,70 @@ int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
     pq->v[1] = mesh->point[pq->v[1]].tmp;
     pq->v[2] = mesh->point[pq->v[2]].tmp;
     pq->v[3] = mesh->point[pq->v[3]].tmp;
-  }
+    ++ne;
 
-  /* compact metric */
+    if ( k!=nbl ) {
+      pqnew = &mesh->quadra[nbl];
+      memcpy(pqnew,pq,sizeof(MMG5_Quad));
+    }
+    ++nbl;
+  }
+  mesh->nquad = ne;
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure (unused).
+ * \param met pointer toward the solution (metric or level-set) structure.
+ * \return 1 if success, 0 if fail.
+ *
+ * Pack a sparse solution structure.
+ *
+ */
+int MMG3D_pack_sol(MMG5_pMesh mesh,MMG5_pSol sol) {
+  MMG5_pPoint   ppt;
+  int           k,isol,isolnew,i;
+  int           np,nbl;
+
+  np  = 0;
   nbl = 1;
-  if ( met && met->m ) {
+  if ( sol && sol->m ) {
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
       if ( !MG_VOK(ppt) )  continue;
-      imet    = k   * met->size;
-      imetnew = nbl * met->size;
 
-      for (i=0; i<met->size; i++)
-        met->m[imetnew + i] = met->m[imet + i];
+      ++np;
+
+      if ( k!= nbl ) {
+        isol    = k   * sol->size;
+        isolnew = nbl * sol->size;
+
+        for (i=0; i<sol->size; i++)
+          sol->m[isolnew + i] = sol->m[isol + i];
+      }
       ++nbl;
     }
   }
+  sol->np = np;
 
-  /* compact displacement */
-  nbl = 1;
-  if ( disp && disp->m ) {
-    for (k=1; k<=mesh->np; k++) {
-      ppt = &mesh->point[k];
-      if ( !MG_VOK(ppt) )  continue;
-      imet    = k   * disp->size;
-      imetnew = nbl * disp->size;
+  return 1;
+}
 
-      for (i=0; i<disp->size; i++)
-        disp->m[imetnew + i] = disp->m[imet + i];
-      ++nbl;
-    }
-  }
+/**
+ * \param mesh pointer toward the mesh structure (unused).
+ * \return 1 if success, 0 if fail.
+ *
+ * Pack a sparse point array.
+ *
+ */
+int MMG3D_pack_points(MMG5_pMesh mesh) {
+  MMG5_pPoint   ppt,pptnew;
+  int           k,np,nbl;
 
-  /*compact vertices*/
   np  = 0;
   nbl = 1;
   mesh->nc1 = 0;
-
 
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
@@ -457,21 +552,29 @@ int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
     }
     nbl++;
   }
-
   mesh->np = np;
-  if ( met && met->m )
-    met->np  = np;
-  if ( disp && disp->m )
-    disp->np = np;
 
-  /* create prism adjacency */
-  if ( !MMG3D_hashPrism(mesh) ) {
-    fprintf(stderr,"\n  ## Error: %s: prism hashing problem. Exit program.\n",
-            __func__);
-    return(0);
-  }
+  for(k=1 ; k<=mesh->np ; k++)
+    mesh->point[k].tmp = 0;
 
-  /* Remove the MG_REQ tags added by the nosurf option */
+  mesh->npnil = mesh->np + 1;
+  for(k=mesh->npnil; k<mesh->npmax-1; k++)
+    mesh->point[k].tmp  = k+1;
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer towarad the mesh structure.
+ *
+ * Set all boundary triangles to required and add a tag to detect that they are
+ * not realy required.
+ *
+ */
+void MMG3D_unset_reqBoundaries(MMG5_pMesh mesh) {
+  MMG5_pTetra pt;
+  int         k,i;
+
   for (k=1; k<=mesh->ne; k++) {
     pt   = &mesh->tetra[k];
     if ( MG_EOK(pt) &&  pt->xt ) {
@@ -484,25 +587,78 @@ int _MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
       }
     }
   }
+  return;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure (unused).
+ * \param met pointer toward the solution (metric or level-set) structure.
+ * \param disp pointer toward the solution (displacement) structure.
+ * \return 1 if success, 0 if chkmsh fail or if we are unable to build
+ * triangles.
+ *
+ * Pack the sparse mesh and create triangles and edges before getting
+ * out of library
+ *
+ */
+int MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
+  MMG5_pPoint   ppt,pptnew;
+  int           np,nc,nr,k,imet,imetnew,i;
+
+  /* compact vertices */
+  if ( !mesh->point ) {
+    fprintf(stderr, "\n  ## Error: %s: points array not allocated.\n",
+            __func__);
+    return 0;
+  }
+  if ( !mesh->tetra ) {
+    fprintf(stderr, "\n  ## Error: %s: tetra array not allocated.\n",
+            __func__);
+    return 0;
+  }
+
+  /* count the number of packed points and store the packed point index in tmp. */
+  if ( !MMG3D_count_packedPoints(mesh,&np,&nc) ) return 0;
+
+  /* compact tetrahedra */
+  if ( mesh->adja ) {
+    if ( !MMG3D_pack_tetraAndAdja(mesh) ) return 0;
+  }
+  else {
+    if ( !MMG3D_pack_tetra(mesh) ) return 0;
+  }
+
+  /* update prisms and quads vertex indices */
+  if ( !MMG3D_pack_prismsAndQuads(mesh) ) return 0;
+
+  /* compact metric */
+  if ( met && met->m )
+    if ( !MMG3D_pack_sol(mesh,met) ) return 0;
+
+  /* compact displacement */
+  if ( disp && disp->m )
+    if ( !MMG3D_pack_sol(mesh,disp) ) return 0;
+
+  /*compact vertices*/
+  if ( !MMG3D_pack_points(mesh) ) return 0;
+
+  /* create prism adjacency */
+  if ( !MMG3D_hashPrism(mesh) ) {
+    fprintf(stderr,"\n  ## Error: %s: prism hashing problem. Exit program.\n",
+            __func__);
+    return(0);
+  }
+
+  /* Remove the MG_REQ tags added by the nosurf option */
+  MMG3D_unset_reqBoundaries(mesh);
 
   if ( mesh->info.imprim ) {
     fprintf(stdout,"     NUMBER OF VERTICES   %8d   CORNERS %8d\n",mesh->np,nc);
     fprintf(stdout,"     NUMBER OF TETRAHEDRA %8d\n",mesh->ne);
   }
 
-  nr = _MMG3D_bdryBuild(mesh);
+  nr = MMG3D_bdryBuild(mesh);
   if ( nr < 0 ) return 0;
-
-  for(k=1 ; k<=mesh->np ; k++)
-    mesh->point[k].tmp = 0;
-
-  mesh->npnil = mesh->np + 1;
-  for(k=mesh->npnil; k<mesh->npmax-1; k++)
-    mesh->point[k].tmp  = k+1;
-
-  mesh->nenil = mesh->ne + 1;
-  for(k=mesh->nenil; k<mesh->nemax-1; k++)
-    mesh->tetra[k].v[3] = k+1;
 
   /* to could save the mesh, the adjacency have to be correct */
   if ( mesh->info.ddebug && (!_MMG5_chkmsh(mesh,1,1) ) ) {
@@ -707,7 +863,7 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
   chrono(ON,&(ctim[1]));
   if ( mesh->info.imprim )  fprintf(stdout,"\n  -- MESH PACKED UP\n");
   if ( !_MMG5_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
-  if ( !_MMG3D_packMesh(mesh,met,NULL) )     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+  if ( !MMG3D_packMesh(mesh,met,NULL) )     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   chrono(OFF,&(ctim[1]));
 
   chrono(OFF,&ctim[0]);
@@ -884,7 +1040,7 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol met) {
   chrono(ON,&(ctim[1]));
   if ( mesh->info.imprim )  fprintf(stdout,"\n  -- MESH PACKED UP\n");
   if ( !_MMG5_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
-  if ( !_MMG3D_packMesh(mesh,met,NULL) )     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+  if ( !MMG3D_packMesh(mesh,met,NULL) )     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   chrono(OFF,&(ctim[1]));
 
   chrono(OFF,&ctim[0]);
@@ -1075,7 +1231,7 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
     disp->npi = disp->np;
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }
-  if ( !_MMG3D_packMesh(mesh,met,disp) ) {
+  if ( !MMG3D_packMesh(mesh,met,disp) ) {
     disp->npi = disp->np;
     _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
   }

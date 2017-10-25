@@ -265,8 +265,8 @@ void _MMG5_openCoquilTravel(MMG5_pMesh, int, int, int*, int*, char*, int*);
 extern int  _MMG5_settag(MMG5_pMesh,int,int,int16_t,int);
 extern int  _MMG5_deltag(MMG5_pMesh,int,int,int16_t);
 int  _MMG5_setNmTag(MMG5_pMesh mesh, _MMG5_Hash *hash);
-  int  _MMG5_chkcol_int(MMG5_pMesh,MMG5_pSol,int,char,char,int*,int,char);
-  int  _MMG5_chkcol_bdy(MMG5_pMesh,MMG5_pSol,int,char,char,int*,int,int*,int,char);
+int  _MMG5_chkcol_int(MMG5_pMesh,MMG5_pSol,int,char,char,int*,int,char);
+int  _MMG5_chkcol_bdy(MMG5_pMesh,MMG5_pSol,int,char,char,int*,int,int*,int,char);
 int  _MMG5_chkmanicoll(MMG5_pMesh,int,int,int,int,int,char,char);
 int  _MMG5_chkmani(MMG5_pMesh mesh);
 int  _MMG5_colver(MMG5_pMesh,MMG5_pSol,int *,int,char,char);
@@ -372,8 +372,15 @@ int  _MMG5_intregmet(MMG5_pMesh,MMG5_pSol,int,char,double, double*);
 int  _MMG5_intvolmet(MMG5_pMesh,MMG5_pSol,int,char,double, double*);
 int _MMG3D_localParamReg(MMG5_pMesh,int,int*,int,int*,int,double*,double*,double*);
 int _MMG3D_localParamNm(MMG5_pMesh,int,int,int,double*,double*,double*);
-int _MMG3D_packMesh(MMG5_pMesh,MMG5_pSol,MMG5_pSol);
-int _MMG3D_bdryBuild(MMG5_pMesh);
+int  MMG3D_count_packedPoints(MMG5_pMesh mesh,int *np,int *nc);
+int  MMG3D_pack_tetraAndAdja(MMG5_pMesh mesh);
+int  MMG3D_pack_tetra(MMG5_pMesh mesh);
+int  MMG3D_pack_prismsAndQuads(MMG5_pMesh mesh);
+int  MMG3D_pack_sol(MMG5_pMesh mesh,MMG5_pSol sol);
+int  MMG3D_pack_points(MMG5_pMesh mesh);
+void MMG3D_unset_reqBoundaries(MMG5_pMesh mesh);
+int  MMG3D_packMesh(MMG5_pMesh,MMG5_pSol,MMG5_pSol);
+int  MMG3D_bdryBuild(MMG5_pMesh);
 
 /* useful functions to debug */
 int  _MMG3D_indElt(MMG5_pMesh mesh,int kel);

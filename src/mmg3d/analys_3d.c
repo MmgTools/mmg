@@ -42,7 +42,7 @@
  * not realy required.
  *
  */
-static inline void _MMG5_reqBoundaries(MMG5_pMesh mesh) {
+static inline void MMG3D_set_reqBoundaries(MMG5_pMesh mesh) {
   MMG5_pTria     ptt;
   int            k;
 
@@ -80,7 +80,6 @@ static inline void _MMG5_reqBoundaries(MMG5_pMesh mesh) {
       ptt->tag[2] |= MG_NOSURF;
       ptt->tag[2] |= MG_REQ;
     }
-
   }
 
   return;
@@ -680,7 +679,7 @@ int _MMG3D_analys(MMG5_pMesh mesh) {
   _MMG5_freeXPrisms(mesh);
 
   /* Set surface triangles to required in nosurf mode or for parallel boundaries */
-  _MMG5_reqBoundaries(mesh);
+  MMG3D_set_reqBoundaries(mesh);
 
 
   /* create surface adjacency */
