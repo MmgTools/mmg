@@ -1947,6 +1947,7 @@ int _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,char typchk, int patternMode) {
   int     ier,nc,ns,nf,nnc,nns,nnf,it,minit,maxit,lastit;
 
   /* analyze tetras : initial splitting */
+  ns = nc = nf = 0;
   nns = nnc = nnf = it = 0;
   lastit = 0;
   minit = 3;

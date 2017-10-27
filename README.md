@@ -19,11 +19,11 @@ It provides 3 applications and 4 libraries:
       git clone https://github.com/MmgTools/mmg.git
       ```
 
-    The project sources are available under the **_src/_** directory, see:
-      * **_src/mmg2d/_**   for files related to the mmg2d application;
-      * **_src/mmgs/_**   for files related to the mmgs application;
-      * **_src/mmg3d/_**  for files related to the mmg3d application;
-      * **_src/common/_** for files related to the both.
+  The project sources are available under the **_src/_** directory, see:
+   * **_src/mmg2d/_**   for files related to the mmg2d application;
+   * **_src/mmgs/_**   for files related to the mmgs application;
+   * **_src/mmg3d/_**  for files related to the mmg3d application;
+   * **_src/common/_** for files related to the both.
 
   2. Fast compilation (build both **mmg2d**, **mmgs**, **mmg3d**, the mmg2d static library (**libmmg3d.a**), the mmgs static library (**libmmgs.a**), the mmg3d static library (**libmmg3d.a**) and the mmg static library (**libmmg.a**)):  
       ```Shell
@@ -34,10 +34,10 @@ It provides 3 applications and 4 libraries:
       make  
       make install
       ```
-    If the `make install` command fail, try to run the `sudo make install` command.
-    If you don't have root access, please refers to the [Installation] section(https://github.com/MmgTools/Mmg/wiki/Setup-guide#iii-installation) of the [setup guide](https://github.com/MmgTools/Mmg/wiki/Setup-guide#setup-guide).
+  If the `make install` command fail, try to run the `sudo make install` command.
+  If you don't have root access, please refers to the [Installation] section(https://github.com/MmgTools/Mmg/wiki/Setup-guide#iii-installation) of the [setup guide](https://github.com/MmgTools/Mmg/wiki/Setup-guide#setup-guide).
 
-    The **mmg2d**, **mmgs** and **mmg3d** applications are available under the `mmg2d_O3`, `mmgs_O3` and `mmg3d_O3` commands. 
+  The **mmg2d**, **mmgs** and **mmg3d** applications are available under the `mmg2d_O3`, `mmgs_O3` and `mmg3d_O3` commands. 
 
 ## Documentation
 ### Project's web page
