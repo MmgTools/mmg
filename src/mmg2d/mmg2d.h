@@ -60,6 +60,7 @@ extern "C" {
 #define _MMG2_NULKAL    1.e-6
 #define _MMG2_ANGCORN   -1.e-6
 #define _MMG2_SHORTMAX     0x7fff
+#define _MMG2_LPARMAX     200
 
 #define MMG2_LLONG  2.0
 #define MMG2_LSHRT  0.3
@@ -354,7 +355,9 @@ int _MMG2_velextLS(MMG5_pMesh ,MMG5_pSol );
 /* useful functions to debug */
 int  _MMG2D_indElt(MMG5_pMesh mesh,int kel);
 int  _MMG2D_indPt(MMG5_pMesh mesh,int kp);
-
+  
+/* Management of local parameters */
+int MMG2_freeLocalPar(MMG5_pMesh );
 
 /* functions pointers */
 double long_ani(double *ca,double *cb,double *ma,double *mb);

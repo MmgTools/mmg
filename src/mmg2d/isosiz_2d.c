@@ -45,10 +45,11 @@
  */
 int _MMG2_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria       pt;
-  MMG5_pPoint      p1,p2;
+  MMG5_pPoint      p0,p1,p2;
+  MMG5_pPar        ppa;
   double           t1[2],t2[2],b1[2],b2[2],gpp1[2],gpp2[2],pv,M1,M2;
-  double           ps1,ps2,ux,uy,ll,li,lm,hmax,hausd,hmin;
-  int              k,ip1,ip2;
+  double           ps1,ps2,ux,uy,ll,li,lm,hmax,hausd,hmin,lhmax,lhausd;
+  int              k,l,ip,ip1,ip2;
   unsigned char    i,i1,i2;
 
 
@@ -74,13 +75,29 @@ int _MMG2_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
       met->m[k] = hmax;
   }
 
-  /* Only the boundary edges impose a minimal size feature */
+  /* Minimum size feature imposed by the boundary edges */
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) ) continue;
 
     for (i=0; i<3; i++) {
       if ( !MG_EDG(pt->tag[i]) ) continue;
+      
+      lhmax = hmax;
+      lhausd = hausd;
+      
+      /* Retrieve local parameters associated to edge i */
+      if ( mesh->info.npar ) {
+        for (l=0; l<mesh->info.npar; l++) {
+          ppa = &mesh->info.par[l];
+          if ( ppa->elt == MMG5_Edg && ppa->ref == pt->edg[i] ) {
+            lhmax = ppa->hmax < lhmax ? ppa->hmax : lhmax;
+            lhausd = ppa->hausd < lhausd ? ppa->hausd : lhausd;
+            break;
+          }
+        }
+      }
+      
       i1 = _MMG5_inxt2[i];
       i2 = _MMG5_iprv2[i];
       ip1 = pt->v[i1];
@@ -147,13 +164,48 @@ int _MMG2_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
 
       M1 = MG_MAX(M1,M2);
       if ( M1 < _MMG5_EPSD)
-        lm = hmax;
+        lm = lhmax;
       else {
-        lm = 8.0*hausd / M1;
+        lm = 8.0*lhausd / M1;
         lm = sqrt(lm);
       }
       met->m[ip1] = MG_MAX(hmin,MG_MIN(met->m[ip1],lm));
       met->m[ip2] = MG_MAX(hmin,MG_MIN(met->m[ip2],lm));
+    }
+  }
+  
+  /* Without local parameters information, only the boundary edges impose a minimum size feature */
+  if ( mesh->info.npar ) {
+    /* Minimum size feature imposed by triangles */
+    for (k=1; k<=mesh->nt; k++) {
+      pt = &mesh->tria[k];
+      if ( !MG_EOK(pt) ) continue;
+      
+      /* Retrieve local parameters associated to triangle k */
+      for (l=0; l<mesh->info.npar; l++) {
+        ppa = &mesh->info.par[l];
+        if ( ppa->elt == MMG5_Triangle && ppa->ref == pt->ref ) {
+          for (i=0; i<3; i++) {
+            ip = pt->v[i];
+            met->m[ip] = MG_MAX(hmin,MG_MIN(met->m[ip],ppa->hmax));
+          }
+          break;
+        }
+      }
+    }
+    /* Minimum size feature imposed by vertices */
+    for (k=1; k<=mesh->np; k++) {
+      p0 = &mesh->point[k];
+      if ( !MG_VOK(p0) ) continue;
+                                  
+      /* Retrieve local parameters associated to vertex k */
+      for (l=0; l<mesh->info.npar; l++) {
+        ppa = &mesh->info.par[l];
+        if ( ppa->elt == MMG5_Vertex && ppa->ref == p0->ref ) {
+          met->m[k] = MG_MAX(hmin,MG_MIN(met->m[k],ppa->hmax));
+          break;
+        }
+      }
     }
   }
 
