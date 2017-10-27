@@ -176,6 +176,7 @@ enum MMG5_type {
 enum MMG5_entities {
   MMG5_Noentity, /*!< Undefined type (unusable) */
   MMG5_Vertex, /*!< Vertex entity */
+  MMG5_Edg,  /*!< Edge entity */
   MMG5_Triangle, /*!< Triangle entity */
   MMG5_Tetrahedron, /*!< Tetra entity */
 };
@@ -433,7 +434,7 @@ typedef MMG5_Mat * MMG5_pMat;
  */
 typedef struct {
   MMG5_pPar     par;
-  double        dhd,hmin,hmax,hsiz,hgrad,hausd,min[3],max[3],delta,ls;
+  double        dhd,hmin,hmax,hsiz,hgrad,hausd,min[3],max[3],delta,ls,*vpar;
   int           mem,npar,npari;
   int           opnbdy;
   int           renum;
@@ -502,6 +503,7 @@ typedef struct {
                     \f$adjapr[5*(i-1)+1+j]=5*k+l\f$ then the \f$i^{th}\f$ and
                     \f$k^th\f$ prism are adjacent and share their
                     faces \a j and \a l (resp.) */
+  int      *ipar;   /*!< Store indices of the local parameters */
   MMG5_pPoint    point; /*!< Pointer toward the \ref MMG5_Point structure */
   MMG5_pxPoint   xpoint; /*!< Pointer toward the \ref MMG5_xPoint structure */
   MMG5_pTetra    tetra; /*!< Pointer toward the \ref MMG5_Tetra structure */
