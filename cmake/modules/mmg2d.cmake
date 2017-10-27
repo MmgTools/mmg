@@ -122,7 +122,7 @@ SET( mmg2d_headers
   )
 
 # Install header files in /usr/local or equivalent
-INSTALL(FILES ${mmg2d_headers} DESTINATION include/mmg/mmg2d)
+INSTALL(FILES ${mmg2d_headers} DESTINATION include/mmg/mmg2d COMPONENT headers )
 
 COPY_FORTRAN_HEADER_AND_CREATE_TARGET ( ${MMG2D_BINARY_DIR} ${MMG2D_INCLUDE} 2d )
 
