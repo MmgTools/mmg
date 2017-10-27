@@ -459,7 +459,7 @@ int _MMG3D_normalAdjaTri(MMG5_pMesh mesh , int start, char iface, int ia,
 
   /** Store the adjacent boundary triangle (triangle adjacent to \a iface
    * through the edge ia */
-  if ( !_MMG5_coquilface( mesh,start,iface,iedgeOpp,list,&it1,&it2,0) )
+  if ( _MMG5_coquilface( mesh,start,iface,iedgeOpp,list,&it1,&it2,0) <= 0 )
     return -1;
 
   if ( it1/4 != start || it1%4 != iface ) {
