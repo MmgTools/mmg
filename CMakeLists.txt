@@ -46,7 +46,7 @@ MARK_AS_ADVANCED ( CI_DIR )
 ###############################################################################
 SET (CMAKE_RELEASE_VERSION_MAJOR "5" )
 SET (CMAKE_RELEASE_VERSION_MINOR "3" )
-SET (CMAKE_RELEASE_VERSION_PATCH "2" )
+SET (CMAKE_RELEASE_VERSION_PATCH "3" )
 SET (CMAKE_RELEASE_DATE "Apr. 10, 2017" )
 
 SET (CMAKE_RELEASE_VERSION
@@ -564,6 +564,8 @@ ENDIF ( DOXYGEN_FOUND )
 #####
 ###############################################################################
 INCLUDE(InstallRequiredSystemLibraries)
+SET( CPACK_ARCHIVE_COMPONENT_INSTALL ON )
+SET( CPACK_COMPONENT_ALL appli )
 SET( CPACK_SOURCE_GENERATOR TGZ )
 SET( CPACK_GENERATOR TGZ )
 
@@ -587,8 +589,8 @@ SET(CPACK_OUTPUT_FILE_PREFIX "../archives")
 #SET(CPACK_SOURCE_IGNORE_FILES ";src/common/mmgtypes.h$" ${CPACK_SOURCE_IGNORE_FILE})
 #SET(CPACK_SOURCE_IGNORE_FILES ";.\\\\\\\\.#;/\\\\\\\\.git;.~;.#;.-e;.DS_Store"
 #  ${CPACK_SOURCE_IGNORE_FILES})
-#SET(CPACK_SOURCE_IGNORE_FILES ";lib/;bin;archives;def"
-#  ${CPACK_SOURCE_IGNORE_FILES})
+#SET(CPACK_IGNORE_FILES ";lib/;bin;archives;def"
+#  ${CPACK_IGNORE_FILES})
 #SET(CPACK_SOURCE_IGNORE_FILES ";.dir-locals.el;.tm_properties"
 #  ${CPACK_SOURCE_IGNORE_FILES})
 #SET(CPACK_SOURCE_IGNORE_FILES ";libexamples/mmg3d/example0/example0_a/mesh.o.*"

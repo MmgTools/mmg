@@ -112,7 +112,8 @@ MACRO ( ADD_AND_INSTALL_LIBRARY
 
   INSTALL ( TARGETS ${target_name}
     ARCHIVE DESTINATION lib
-    LIBRARY DESTINATION lib )
+    LIBRARY DESTINATION lib
+    COMPONENT lib)
 
 ENDMACRO ( )
 
@@ -155,7 +156,7 @@ MACRO ( ADD_AND_INSTALL_EXECUTABLE
 
   TARGET_LINK_LIBRARIES ( ${exec_name} ${LIBRARIES}  )
 
-  INSTALL(TARGETS ${exec_name} RUNTIME DESTINATION bin)
+  INSTALL(TARGETS ${exec_name} RUNTIME DESTINATION bin COMPONENT appli)
 
   ADD_TARGET_POSTFIX(${exec_name})
 
@@ -235,7 +236,7 @@ MACRO ( ADD_LIBRARY_TEST target_name main_path target_dependency lib_name )
   ENDIF ( )
 
   TARGET_LINK_LIBRARIES ( ${target_name}  ${lib_name} )
-  INSTALL(TARGETS ${target_name} RUNTIME DESTINATION bin )
+  INSTALL(TARGETS ${target_name} RUNTIME DESTINATION bin COMPONENT appli )
 
 ENDMACRO ( )
 
