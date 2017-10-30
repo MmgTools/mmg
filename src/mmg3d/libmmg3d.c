@@ -549,7 +549,7 @@ int MMG3D_update_eltsVertices(MMG5_pMesh mesh) {
  */
 int MMG3D_pack_pointArray(MMG5_pMesh mesh) {
   MMG5_pPoint   ppt,pptnew;
-  int           k,np,nc,nbl;
+  int           k,np,nbl;
 
   nbl       = 1;
   mesh->nc1 = 0;
@@ -647,8 +647,7 @@ void MMG3D_unset_reqBoundaries(MMG5_pMesh mesh) {
  *
  */
 int MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
-  MMG5_pPoint   ppt,pptnew;
-  int           np,nc,nr,k,imet,imetnew,i;
+  int           nc,nr;
 
   /* compact vertices */
   if ( !mesh->point ) {
