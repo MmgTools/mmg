@@ -410,7 +410,7 @@ int MMG2_pack(MMG5_pMesh mesh,MMG5_pSol sol) {
       else if ( iel < k ) {
         pt1 = &mesh->tria[iel];
         if ( pt->ref != pt1->ref ) ++mesh->na;
-        if ( MG_SIN(pt->tag[i]) )  ++mesh->na;
+        else if ( MG_SIN(pt->tag[i]) )  ++mesh->na;
       }
     }
   }
