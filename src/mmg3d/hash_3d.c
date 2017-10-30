@@ -92,7 +92,7 @@ _MMG5_paktet(MMG5_pMesh mesh) {
  *
  *
  **/
-static int _MMG5_hashFace(MMG5_pMesh mesh,_MMG5_Hash *hash,int ia,int ib,int ic,int k) {
+int _MMG5_hashFace(MMG5_pMesh mesh,_MMG5_Hash *hash,int ia,int ib,int ic,int k) {
   _MMG5_hedge     *ph;
   int        key,mins,maxs,sum,j;
 
@@ -140,7 +140,7 @@ static int _MMG5_hashFace(MMG5_pMesh mesh,_MMG5_Hash *hash,int ia,int ib,int ic,
 }
 
 /** return index of triangle ia ib ic */
-static int _MMG5_hashGetFace(_MMG5_Hash *hash,int ia,int ib,int ic) {
+int _MMG5_hashGetFace(_MMG5_Hash *hash,int ia,int ib,int ic) {
   _MMG5_hedge  *ph;
   int     key,mins,maxs,sum;
 
