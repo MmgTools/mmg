@@ -1208,16 +1208,21 @@ int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
     fprintf(stderr,"\n  ## Non orientable implicit surface. Exit program.\n");
     return(0);
   }
-  /**--- stage 1: geometric mesh */
-  if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
-    fprintf(stdout,"  ** GEOMETRIC MESH\n");
-
-  if ( !_MMG5_anatet(mesh,met,1,0) ) {
-    fprintf(stderr,"\n  ## Unable to split mesh. Exiting.\n");
-    if ( octree )
-      /*free octree*/
-      _MMG3D_freeOctree(mesh,&octree);
-    return(0);
+  
+  /**--- stage 1: geometric mesh only in isotropic case */
+  /* because if the aniso metric is not compatible with the geometry, the swaps generate some noise and problems*/
+  
+  if ( met->size==1 ) {
+    if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
+      fprintf(stdout,"  ** GEOMETRIC MESH\n");
+    
+    if ( !_MMG5_anatet(mesh,met,1,0) ) {
+      fprintf(stderr,"\n  ## Unable to split mesh. Exiting.\n");
+      if ( octree )
+        /*free octree*/
+        _MMG3D_freeOctree(mesh,&octree);
+      return(0);
+    }
   }
 
 #ifdef DEBUG
