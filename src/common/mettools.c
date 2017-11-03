@@ -440,29 +440,11 @@ int _MMG5_mmgIntextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6],
   p0 = &mesh->point[np];
   m  = &met->m[6*np];
 
-  /* Case of a singular point : take smallest size prescribed by met, or me in
-   * every direction */
+  /* Case of a singular point : take the physical metric */
   if ( MG_SIN(p0->tag) || (p0->tag & MG_NOM) ) {
-    /* Characteristic polynomial of me */
-    order = _MMG5_eigenv(1,me,lambda,vp);
-    if ( !order ) {
-      if ( !mmgWarn ) {
-        fprintf(stderr,"\n  ## Warning: %s: Unable to diagonalize at least"
-                " 1 metric.\n",__func__);
-        mmgWarn = 1;
-      }
-      return 0;
+    for(i=0	; i<6; i++) {
+      m[i] = me[i];
     }
-
-    hu = m[0];
-    for(i=0; i<3; i++) {
-        hu = MG_MAX(hu,lambda[i]);
-    }
-    hu = MG_MIN(isqhmin,hu);
-    hu = MG_MAX(isqhmax,hu);
-    m[0] = hu;
-    m[3] = hu;
-    m[5] = hu;
   }
   /* Case of a ridge point : take sizes in 3 directions t,n1,u */
   else if ( p0->tag & MG_GEO ) {
