@@ -47,8 +47,7 @@ extern char  ddb;
  * tetra packing.
  *
  */
-static int
-_MMG5_paktet(MMG5_pMesh mesh) {
+int _MMG5_paktet(MMG5_pMesh mesh) {
   MMG5_pTetra   pt,pt1;
   int      k;
 
