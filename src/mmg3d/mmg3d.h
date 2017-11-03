@@ -271,6 +271,7 @@ int  _MMG5_chkmanicoll(MMG5_pMesh,int,int,int,int,int,char,char);
 int  _MMG5_chkmani(MMG5_pMesh mesh);
 int  _MMG5_colver(MMG5_pMesh,MMG5_pSol,int *,int,char,char);
 int  _MMG3D_analys(MMG5_pMesh mesh);
+int  _MMG5_paktet(MMG5_pMesh mesh);
 int  _MMG5_hashFace(MMG5_pMesh,_MMG5_Hash*,int,int,int,int);
 int  _MMG5_hashGetFace(_MMG5_Hash*,int,int,int);
 int  _MMG3D_hashTria(MMG5_pMesh mesh, _MMG5_Hash*);
