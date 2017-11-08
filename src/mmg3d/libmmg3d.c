@@ -525,6 +525,9 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
 
   _MMG3D_Set_commonFunc();
 
+
+  _MMG5_warnOrientation(mesh);
+
   /** Free topologic tables (adja, xpoint, xtetra) resulting from a previous
    * run */
   _MMG3D_Free_topoTables(mesh);
@@ -596,8 +599,6 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
 #ifdef USE_SCOTCH
   _MMG5_warnScotch(mesh);
 #endif
-
-  _MMG5_warnOrientation(mesh);
 
   chrono(OFF,&(ctim[1]));
   printim(ctim[1].gdif,stim);
