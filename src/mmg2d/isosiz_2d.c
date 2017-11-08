@@ -74,7 +74,7 @@ int _MMG2_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
     for (k=1; k<=mesh->np; k++)
       met->m[k] = hmax;
   }
-
+  
   /* Minimum size feature imposed by the boundary edges */
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
@@ -91,8 +91,8 @@ int _MMG2_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
         for (l=0; l<mesh->info.npar; l++) {
           ppa = &mesh->info.par[l];
           if ( ppa->elt == MMG5_Edg && ppa->ref == pt->edg[i] ) {
-            lhmax = ppa->hmax < lhmax ? ppa->hmax : lhmax;
-            lhausd = ppa->hausd < lhausd ? ppa->hausd : lhausd;
+            lhmax = ppa->hmax;
+            lhausd = ppa->hausd;
             break;
           }
         }
@@ -163,11 +163,11 @@ int _MMG2_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
       M2 = fabs(pv)/ps2;
 
       M1 = MG_MAX(M1,M2);
-      if ( M1 < _MMG5_EPSD)
+      if ( M1 < _MMG5_EPSD )
         lm = lhmax;
       else {
         lm = 8.0*lhausd / M1;
-        lm = sqrt(lm);
+        lm = MG_MIN(lhmax,sqrt(lm));
       }
       met->m[ip1] = MG_MAX(hmin,MG_MIN(met->m[ip1],lm));
       met->m[ip2] = MG_MAX(hmin,MG_MIN(met->m[ip2],lm));
