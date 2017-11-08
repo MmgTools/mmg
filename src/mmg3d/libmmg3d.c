@@ -369,9 +369,14 @@ int MMG3D_pack_tetraAndAdja(MMG5_pMesh mesh) {
   mesh->ne = ne;
 
   /* Recreate nil chain */
-  mesh->nenil = mesh->ne + 1;
-  for(k=mesh->nenil; k<mesh->nemax-1; k++)
-    mesh->tetra[k].v[3] = k+1;
+  if ( mesh->ne == mesh->nemax )
+    mesh->nenil = 0;
+  else
+    mesh->nenil = mesh->ne + 1;
+
+  if ( mesh->nenil )
+    for(k=mesh->nenil; k<mesh->nemax-1; k++)
+      mesh->tetra[k].v[3] = k+1;
 
   return 1;
 }
@@ -404,9 +409,14 @@ int MMG3D_pack_tetra(MMG5_pMesh mesh) {
   mesh->ne = ne;
 
   /* Recreate nil chain */
-  mesh->nenil = mesh->ne + 1;
-  for(k=mesh->nenil; k<mesh->nemax-1; k++)
-    mesh->tetra[k].v[3] = k+1;
+  if ( mesh->ne == mesh->nemax )
+    mesh->nenil = 0;
+  else
+    mesh->nenil = mesh->ne + 1;
+
+  if ( mesh->nenil )
+    for(k=mesh->nenil; k<mesh->nemax-1; k++)
+      mesh->tetra[k].v[0] = 0;
 
   return 1;
 }
@@ -580,9 +590,14 @@ int MMG3D_pack_pointArray(MMG5_pMesh mesh) {
   for(k=1 ; k<=mesh->np ; k++)
     mesh->point[k].tmp = 0;
 
-  mesh->npnil = mesh->np + 1;
-  for(k=mesh->npnil; k<mesh->npmax-1; k++)
-    mesh->point[k].tmp  = k+1;
+  if ( mesh->np == mesh->npmax )
+    mesh->npnil = 0;
+  else
+    mesh->npnil = mesh->np + 1;
+
+  if ( mesh->npnil )
+    for(k=mesh->npnil; k<mesh->npmax-1; k++)
+      mesh->point[k].tmp  = k+1;
 
   return 1;
 }
