@@ -503,7 +503,7 @@ int MMG3D_Set_tetrahedron(MMG5_pMesh mesh, int v0, int v1, int v2, int v3, int r
   mesh->point[pt->v[3]].tag &= ~MG_NUL;
 
   vol = _MMG5_orvol(mesh->point,pt->v);
-  if ( vol <= _MMG5_EPSD2 ) {
+  if ( fabs(vol) <= _MMG5_EPSD2 ) {
     fprintf(stderr,"\n  ## Error: %s: tetrahedron %d has volume null.\n",
             __func__,pos);
     for ( ip=0; ip<4; ip++ ) {
