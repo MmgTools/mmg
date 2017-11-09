@@ -166,7 +166,6 @@ int MMG3D_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int
  * Check the input mesh size and assign their values to the mesh.
  *
  */
-static inline
 int MMG3D_setMeshSize_initData(MMG5_pMesh mesh, int np, int ne, int nprism,
                                int nt, int nquad, int na ) {
 
@@ -219,7 +218,6 @@ int MMG3D_setMeshSize_initData(MMG5_pMesh mesh, int np, int ne, int nprism,
  * Allocation of the array fields of the mesh.
  *
  */
-static inline
 int MMG3D_setMeshSize_alloc( MMG5_pMesh mesh ) {
   int k;
 

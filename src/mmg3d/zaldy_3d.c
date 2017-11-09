@@ -144,7 +144,6 @@ int _MMG3D_delElt(MMG5_pMesh mesh,int iel) {
  * nemax and ntmax.
  *
  */
-static inline
 int _MMG3D_memOption_memRepartition(MMG5_pMesh mesh) {
   long long  million = 1048576L,memtmp,reservedMem;
   long       castedVal;
