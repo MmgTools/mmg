@@ -152,9 +152,23 @@ int MMG3D_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int
   return(1);
 }
 
-int MMG3D_Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nprism,
-                       int nt, int nquad, int na ) {
-  int k;
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param np number of vertices.
+ * \param ne number of tetrahedra.
+ * \param nprism number of prisms.
+ * \param nt number of triangles.
+ * \param nquad number of quads.
+ * \param na number of edges.
+ *
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Check the input mesh size and assign their values to the mesh.
+ *
+ */
+static inline
+int MMG3D_setMeshSize_initData(MMG5_pMesh mesh, int np, int ne, int nprism,
+                               int nt, int nquad, int na ) {
 
   if ( ( (mesh->info.imprim > 5) || mesh->info.ddebug ) &&
        ( mesh->point || mesh->tria || mesh->tetra || mesh->edge) )
@@ -194,22 +208,21 @@ int MMG3D_Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nprism,
   mesh->nti = mesh->nt;
   mesh->nai = mesh->na;
 
-  /*tester si -m definie : renvoie 0 si pas ok et met la taille min dans info.mem */
-  if( mesh->info.mem > 0) {
-    if((mesh->npmax < mesh->np || mesh->ntmax < mesh->nt || mesh->nemax < mesh->ne)) {
-      if ( !_MMG3D_memOption(mesh) )  return 0;
-    } else if(mesh->info.mem < 39) {
-      fprintf(stderr,"\n  ## Error: %s: not enough memory  %d\n",__func__,
-              mesh->info.mem);
-      return(0);
-    }
-  } else {
-    mesh->memMax = _MMG5_memSize();
-    mesh->npmax  = MG_MAX(1.5*mesh->np,_MMG3D_NPMAX);
-    mesh->nemax  = MG_MAX(1.5*mesh->ne,_MMG3D_NEMAX);
-    mesh->ntmax  = MG_MAX(1.5*mesh->nt,_MMG3D_NTMAX);
+  return 1;
+}
 
-  }
+/**
+ * \param mesh pointer toward the mesh structure.
+ *
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Allocation of the array fields of the mesh.
+ *
+ */
+static inline
+int MMG3D_setMeshSize_alloc( MMG5_pMesh mesh ) {
+  int k;
+
   _MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(MMG5_Point),"initial vertices",
                 return 0);
   _MMG5_SAFE_CALLOC(mesh->point,mesh->npmax+1,MMG5_Point,0);
@@ -267,6 +280,35 @@ int MMG3D_Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nprism,
     if ( mesh->nprism )
       fprintf(stdout,"     NUMBER OF PRISMS         %8d\n",mesh->nprism);
   }
+  return 1;
+}
+
+int MMG3D_Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nprism,
+                       int nt, int nquad, int na ) {
+
+  /* Check input data and set mesh->ne/na/np/nt to the suitable values */
+  if ( !MMG3D_setMeshSize_initData(mesh,np,ne,nprism,nt,nquad,na) )
+    return 0;
+
+  /* Check the -m option */
+  if( mesh->info.mem > 0) {
+    if((mesh->npmax < mesh->np || mesh->ntmax < mesh->nt || mesh->nemax < mesh->ne)) {
+      if ( !_MMG3D_memOption(mesh) )  return 0;
+    } else if(mesh->info.mem < 39) {
+      fprintf(stderr,"\n  ## Error: %s: not enough memory  %d\n",__func__,
+              mesh->info.mem);
+      return(0);
+    }
+  } else {
+    mesh->memMax = _MMG5_memSize();
+    mesh->npmax  = MG_MAX(1.5*mesh->np,_MMG3D_NPMAX);
+    mesh->nemax  = MG_MAX(1.5*mesh->ne,_MMG3D_NEMAX);
+    mesh->ntmax  = MG_MAX(1.5*mesh->nt,_MMG3D_NTMAX);
+
+  }
+
+  /* Mesh allocation and linkage */
+  if ( !MMG3D_setMeshSize_alloc( mesh ) ) return 0;
 
   return(1);
 }

@@ -135,8 +135,17 @@ int _MMG3D_delElt(MMG5_pMesh mesh,int iel) {
   return 1;
 }
 
-/** memory repartition for the -m option */
-int _MMG3D_memOption(MMG5_pMesh mesh) {
+/**
+ * \param mesh pointer toward the mesh structure
+ *
+ * \return 0 if fail, 1 otherwise
+ *
+ * memory repartition for the -m option with initial values of memMax,npmax,
+ * nemax and ntmax.
+ *
+ */
+static inline
+int _MMG3D_memOption_memRepartition(MMG5_pMesh mesh) {
   long long  million = 1048576L,memtmp,reservedMem;
   long       castedVal;
   int        ctri,npask,bytes;
@@ -230,6 +239,28 @@ int _MMG3D_memOption(MMG5_pMesh mesh) {
   }
 
   return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure
+ *
+ * \return 0 if fail, 1 otherwise
+ *
+ * memory repartition for the -m option
+ *
+ */
+int _MMG3D_memOption(MMG5_pMesh mesh) {
+  long long  million = 1048576L,memtmp,reservedMem;
+  long       castedVal;
+  int        ctri,npask,bytes;
+
+  mesh->memMax = _MMG5_memSize();
+
+  mesh->npmax = MG_MAX(1.5*mesh->np,_MMG3D_NPMAX);
+  mesh->nemax = MG_MAX(1.5*mesh->ne,_MMG3D_NEMAX);
+  mesh->ntmax = MG_MAX(1.5*mesh->nt,_MMG3D_NTMAX);
+
+  return ( _MMG3D_memOption_memRepartition(mesh) );
 }
 
 /**
