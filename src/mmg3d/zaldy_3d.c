@@ -149,12 +149,6 @@ int _MMG3D_memOption_memRepartition(MMG5_pMesh mesh) {
   long       castedVal;
   int        ctri,npask,bytes;
 
-  mesh->memMax = _MMG5_memSize();
-
-  mesh->npmax = MG_MAX(1.5*mesh->np,_MMG3D_NPMAX);
-  mesh->nemax = MG_MAX(1.5*mesh->ne,_MMG3D_NEMAX);
-  mesh->ntmax = MG_MAX(1.5*mesh->nt,_MMG3D_NTMAX);
-
   if ( mesh->info.mem <= 0 ) {
     if ( mesh->memMax )
       /* maximal memory = 50% of total physical memory */
