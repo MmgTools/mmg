@@ -248,17 +248,15 @@ int _MMG3D_memOption(MMG5_pMesh mesh) {
 }
 
 /**
- * \param mesh pointer toward the mesh
+ * \param mesh pointer toward the mesh structure.
  *
- * \return 1 if success, 0 if fail
+ * \return 0 if failed, 1 otherwise.
  *
- * allocate main structure
+ * Allocation of the array fields of the mesh.
  *
  */
-int _MMG3D_zaldy(MMG5_pMesh mesh) {
-  int     k;
-
-  if ( !_MMG3D_memOption(mesh) )  return 0;
+int MMG3D_setMeshSize_alloc( MMG5_pMesh mesh ) {
+  int k;
 
   _MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(MMG5_Point),"initial vertices",
                 fprintf(stderr,"  Exit program.\n");
@@ -270,24 +268,27 @@ int _MMG3D_zaldy(MMG5_pMesh mesh) {
                 return 0);
   _MMG5_SAFE_CALLOC(mesh->tetra,mesh->nemax+1,MMG5_Tetra,0);
 
+  if ( mesh->nprism ) {
+    _MMG5_ADD_MEM(mesh,(mesh->nprism+1)*sizeof(MMG5_Prism),"initial prisms",return(0));
+    _MMG5_SAFE_CALLOC(mesh->prism,(mesh->nprism+1),MMG5_Prism,0);
+  }
+
   if ( mesh->nt ) {
     _MMG5_ADD_MEM(mesh,(mesh->nt+1)*sizeof(MMG5_Tria),"initial triangles",return(0));
     _MMG5_SAFE_CALLOC(mesh->tria,mesh->nt+1,MMG5_Tria,0);
     memset(&mesh->tria[0],0,sizeof(MMG5_Tria));
   }
-  if ( mesh->na ) {
-    _MMG5_ADD_MEM(mesh,(mesh->na+1)*sizeof(MMG5_Edge),"initial edges",return(0));
-    _MMG5_SAFE_CALLOC(mesh->edge,(mesh->na+1),MMG5_Edge,0);
-  }
-  if ( mesh->nprism ) {
-    _MMG5_ADD_MEM(mesh,(mesh->nprism+1)*sizeof(MMG5_Prism),"initial prisms",return(0));
-    _MMG5_SAFE_CALLOC(mesh->prism,(mesh->nprism+1),MMG5_Prism,0);
-  }
+
   if ( mesh->nquad ) {
     _MMG5_ADD_MEM(mesh,(mesh->nquad+1)*sizeof(MMG5_Quad),"initial quadrilaterals",return(0));
     _MMG5_SAFE_CALLOC(mesh->quadra,(mesh->nquad+1),MMG5_Quad,0);
   }
 
+  mesh->namax = mesh->na;
+  if ( mesh->na ) {
+    _MMG5_ADD_MEM(mesh,(mesh->na+1)*sizeof(MMG5_Edge),"initial edges",return(0));
+    _MMG5_SAFE_CALLOC(mesh->edge,(mesh->na+1),MMG5_Edge,0);
+  }
 
   /* keep track of empty links */
   mesh->npnil = mesh->np + 1;
@@ -305,7 +306,23 @@ int _MMG3D_zaldy(MMG5_pMesh mesh) {
   for (k=mesh->nenil; k<mesh->nemax-1; k++)
     mesh->tetra[k].v[3] = k+1;
 
-  return(1);
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh
+ *
+ * \return 1 if success, 0 if fail
+ *
+ * allocate main structure
+ *
+ */
+int _MMG3D_zaldy(MMG5_pMesh mesh) {
+  int     k;
+
+  if ( !_MMG3D_memOption(mesh) )  return 0;
+
+  return ( MMG3D_setMeshSize_alloc(mesh) );
 }
 
 /**
