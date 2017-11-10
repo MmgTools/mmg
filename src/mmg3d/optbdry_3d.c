@@ -48,12 +48,12 @@ int MMG3D_movetetrapoints(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree,in
   MMG5_pPoint   ppt;
   double        *n;
   int           i,j,i0,ier,lists[MMG3D_LMAX+2],listv[MMG3D_LMAX+2],ilists,ilistv;
-  int           improve,internal,nm,maxit,base,ns;
+  int           improve,internal,nm,/*maxit,*/base,ns;
 
   improve = 1;
   internal = 1;
   nm = ns = 0;
-  maxit = 1;
+  // maxit = 1;
   base = mesh->base;
 
   pt = &mesh->tetra[k];
@@ -71,9 +71,9 @@ int MMG3D_movetetrapoints(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree,in
       if ( ppt->flag == base )  continue;
       else if ( MG_SIN(ppt->tag) )  continue;
 
-      if ( maxit != 1 ) {
+      // if ( maxit != 1 )
         ppt->flag = base;
-      }
+
       ier = 0;
       if ( ppt->tag & MG_BDY ) {
         continue;
@@ -129,9 +129,8 @@ int MMG3D_movetetrapoints(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree,in
       }
       if ( ier ) {
         nm++;
-        if(maxit==1){
+        // if(maxit==1)
           ppt->flag = base;
-        }
       }
     }
   }
