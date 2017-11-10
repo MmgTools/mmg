@@ -480,12 +480,12 @@ int _MMG2_grad2met_ani(MMG5_pMesh mesh,MMG5_pSol met,double *m,double *n,double 
   ip[2] = -vp[0][1]*det;
   ip[3] =  vp[0][0]*det;
 
-  if ( ier | 1 ) {
+  if ( ier & 1 ) {
     m[0] = dm[0]*ip[0]*ip[0] + dm[1]*ip[2]*ip[2];
     m[1] = dm[0]*ip[0]*ip[1] + dm[1]*ip[2]*ip[3];
     m[2] = dm[0]*ip[1]*ip[1] + dm[1]*ip[3]*ip[3];
   }
-  if ( ier | 2 ) {
+  if ( ier & 2 ) {
     n[0] = dn[0]*ip[0]*ip[0] + dn[1]*ip[2]*ip[2];
     n[1] = dn[0]*ip[0]*ip[1] + dn[1]*ip[2]*ip[3];
     n[2] = dn[0]*ip[1]*ip[1] + dn[1]*ip[3]*ip[3];
