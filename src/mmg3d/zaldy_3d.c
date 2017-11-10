@@ -153,7 +153,7 @@ int _MMG3D_memOption_memRepartition(MMG5_pMesh mesh) {
   if ( mesh->info.mem <= 0 ) {
     if ( mesh->memMax )
       /* maximal memory = 50% of total physical memory */
-      mesh->memMax = (long long)(mesh->memMax*0.5);
+      mesh->memMax = (long long)(mesh->memMax*_MMG5_MEMPERCENT);
     else {
       /* default value = 800 Mo */
       printf("  Maximum memory set to default value: %d Mo.\n",_MMG5_MEMMAX);
