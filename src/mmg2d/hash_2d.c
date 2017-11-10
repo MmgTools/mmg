@@ -561,15 +561,6 @@ int MMG2_pack(MMG5_pMesh mesh,MMG5_pSol sol) {
     mesh->npnil = 0;
   }
 
-  /*to do only if the edges are packed*/
-  /* if(mesh->na < mesh->namax - 3) { */
-  /*   mesh->nanil = mesh->na + 1; */
-  /*   for (k=mesh->nanil; k<mesh->namax-1; k++) */
-  /*     mesh->edge[k].b = k+1; */
-  /* } else { */
-  /*   mesh->nanil = 0; */
-  /* } */
-
   /* Reset garbage collector */
   if ( mesh->nt < mesh->ntmax - 3 ) {
     mesh->nenil = mesh->nt + 1;

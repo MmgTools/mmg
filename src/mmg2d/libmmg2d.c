@@ -364,7 +364,11 @@ int _MMG2D_restart(MMG5_pMesh mesh){
     _MMG5_ADD_MEM(mesh,(mesh->namax+1)*sizeof(MMG5_Edge),
                   "initial edges",return(0));
     _MMG5_SAFE_CALLOC(mesh->edge,mesh->namax+1,MMG5_Edge,0);
-    mesh->nanil = mesh->na + 1;
+    if ( mesh->na < mesh->namax ) {
+      mesh->nanil = mesh->na + 1;
+    }
+    else
+      mesh->nanil = 0;
   }
 
   return 1;

@@ -739,14 +739,6 @@ int MMG2D_Set_edge(MMG5_pMesh mesh, int v0, int v1, int ref, int pos) {
     return(0);
   }
 
-  if ( pos > mesh->namax ) {
-    fprintf(stderr,"\n  ## Error: %s: unable to allocate a new element.\n",
-            __func__);
-    fprintf(stderr,"    max number of element: %d\n",mesh->namax);
-    _MMG5_INCREASE_MEM_MESSAGE();
-    return(0);
-  }
-
   if ( pos > mesh->na ) {
     fprintf(stderr,"\n  ## Error: %s: attempt to set new edge at position %d.",
             __func__,pos);

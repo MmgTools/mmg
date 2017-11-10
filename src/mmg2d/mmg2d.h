@@ -189,31 +189,10 @@ static const unsigned int MMG2_inxt[5] = {1,2,0,1,2};
    if ( !jel ) {law;}                                                   \
    }while(0)
 
-/** Reallocation of edge table and creation
-    of edge jel */
-#define _MMG2D_EDGE_REALLOC(mesh,jel,wantedGap,law,retval ) do          \
-  {                                                                     \
-    int klink;                                                          \
-                                                                        \
-    _MMG5_TAB_RECALLOC(mesh,mesh->edge,mesh->namax,wantedGap,MMG5_Edge, \
-                       "larger edge table",law,retval);                 \
-                                                                        \
-    mesh->nanil = mesh->na+1;                                           \
-    for (klink=mesh->nanil; klink<mesh->namax-1; klink++)               \
-      mesh->edge[klink].b  = klink+1;                                   \
-                                                                        \
-                                                                        \
-    /* We try again to add the point */                                 \
-    jel = _MMG5_newEdge(mesh);                                          \
-    if ( !jel ) {law;}                                                  \
-  }while(0)
-
-
 /* Prototypes */
 /*zaldy*/
 int _MMG2D_newPt(MMG5_pMesh mesh,double c[2],int16_t tag);
 void _MMG2D_delPt(MMG5_pMesh mesh,int ip) ;
-int _MMG5_newEdge(MMG5_pMesh mesh);
 void _MMG5_delEdge(MMG5_pMesh mesh,int iel);
 int _MMG2D_newElt(MMG5_pMesh mesh);
 int  _MMG2D_delElt(MMG5_pMesh mesh,int iel);

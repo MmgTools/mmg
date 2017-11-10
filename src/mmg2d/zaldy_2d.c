@@ -68,22 +68,6 @@ void _MMG2D_delPt(MMG5_pMesh mesh,int ip) {
   if ( ip == mesh->np )  mesh->np--;
 }
 
-/* Create a new edge in the mesh and return its address */
-int _MMG5_newEdge(MMG5_pMesh mesh) {
-  int     curiel;
-
-  if ( !mesh->nanil ) {
-    return(0);
-  }
-  curiel = mesh->nanil;
-  if ( mesh->nanil > mesh->na )  mesh->na = mesh->nanil;
-  mesh->nanil = mesh->edge[curiel].b;
-  mesh->edge[curiel].b = 0;
-
-  return(curiel);
-}
-
-
 void _MMG5_delEdge(MMG5_pMesh mesh,int iel) {
   MMG5_pEdge    pt;
 
@@ -287,7 +271,7 @@ int MMG2D_setMeshSize_alloc( MMG5_pMesh mesh ) {
   /* keep track of empty links */
   mesh->npnil = mesh->np + 1;
   mesh->nenil = mesh->nt + 1;
-  mesh->nanil = mesh->na + 1;
+  mesh->nanil = 0;
 
   for (k=mesh->npnil; k<mesh->npmax-1; k++) {
     /* Set tangent field of point to 0 */
