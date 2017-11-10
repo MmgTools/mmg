@@ -160,7 +160,7 @@ int MMG5_Set_inputMeshName(MMG5_pMesh mesh, const char* meshin) {
       fprintf(stderr,"              Use of default value \"mesh.mesh\".\n");
     }
   }
-  return(1);
+  return 1;
 }
 
 /**
