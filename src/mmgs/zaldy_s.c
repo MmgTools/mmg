@@ -196,9 +196,6 @@ int _MMGS_memOption_memRepartition(MMG5_pMesh mesh) {
  *
  */
 int _MMGS_memOption(MMG5_pMesh mesh) {
-  long long  million = 1048576L;
-  long       castedVal;
-  int        npask,bytes,memtmp;
 
   mesh->memMax = _MMG5_memSize();
 
@@ -257,7 +254,6 @@ int MMGS_setMeshSize_alloc( MMG5_pMesh mesh ) {
  *
  */
 int _MMGS_zaldy(MMG5_pMesh mesh) {
-  int     k;
 
   if ( !_MMGS_memOption(mesh) )  return 0;
 

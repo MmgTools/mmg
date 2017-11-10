@@ -318,7 +318,6 @@ int MMG3D_setMeshSize_alloc( MMG5_pMesh mesh ) {
  *
  */
 int _MMG3D_zaldy(MMG5_pMesh mesh) {
-  int     k;
 
   if ( !_MMG3D_memOption(mesh) )  return 0;
 

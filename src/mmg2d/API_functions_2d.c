@@ -221,7 +221,6 @@ int MMG2D_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val)
 }
 
 int MMG2D_Set_meshSize(MMG5_pMesh mesh, int np, int nt, int na) {
-  int k;
 
   if ( ( (mesh->info.imprim > 5) || mesh->info.ddebug ) &&
        ( mesh->point || mesh->tria || mesh->edge) )

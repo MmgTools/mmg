@@ -56,7 +56,6 @@ int _MMG2D_newPt(MMG5_pMesh mesh,double c[2],int16_t tag) {
 /* Delete a point in the mesh and update the garbage collector accordingly */
 void _MMG2D_delPt(MMG5_pMesh mesh,int ip) {
   MMG5_pPoint   ppt;
-  MMG5_pxPoint  pxp;
 
   ppt = &mesh->point[ip];
 
@@ -297,7 +296,6 @@ int MMG2D_setMeshSize_alloc( MMG5_pMesh mesh ) {
  *
  */
 int MMG2D_zaldy(MMG5_pMesh mesh) {
-  int     k;
 
   if ( !_MMG2D_memOption(mesh) )  return 0;
 

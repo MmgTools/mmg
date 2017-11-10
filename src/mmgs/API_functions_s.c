@@ -130,7 +130,6 @@ int MMGS_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int 
 }
 
 int MMGS_Set_meshSize(MMG5_pMesh mesh, int np, int nt, int na) {
-  int k;
 
   if ( ( (mesh->info.imprim > 5) || mesh->info.ddebug ) &&
        ( mesh->point || mesh->tria || mesh->edge) )
