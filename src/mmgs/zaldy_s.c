@@ -209,6 +209,46 @@ int _MMGS_memOption(MMG5_pMesh mesh) {
 }
 
 /**
+ * \param mesh pointer toward the mesh structure.
+ *
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Allocation of the array fields of the mesh.
+ *
+ */
+int MMGS_setMeshSize_alloc( MMG5_pMesh mesh ) {
+  int k;
+
+  _MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(MMG5_Point),"initial vertices",
+                fprintf(stderr,"  Exit program.\n");
+                return 0);
+  _MMG5_SAFE_CALLOC(mesh->point,mesh->npmax+1,MMG5_Point,0);
+  _MMG5_ADD_MEM(mesh,(mesh->ntmax+1)*sizeof(MMG5_Tria),"initial triangles",
+                fprintf(stderr,"  Exit program.\n");
+                return 0);
+  _MMG5_SAFE_CALLOC(mesh->tria,mesh->ntmax+1,MMG5_Tria,0);
+
+
+  mesh->namax = mesh->na;
+  if ( mesh->na ) {
+    _MMG5_ADD_MEM(mesh,(mesh->na+1)*sizeof(MMG5_Edge),"initial edges",return(0));
+    _MMG5_SAFE_CALLOC(mesh->edge,(mesh->na+1),MMG5_Edge,0);
+  }
+
+  /* keep track of empty links */
+  mesh->npnil = mesh->np + 1;
+  mesh->nenil = mesh->nt + 1;
+
+  for (k=mesh->npnil; k<mesh->npmax-1; k++)
+    mesh->point[k].tmp  = k+1;
+
+  for (k=mesh->nenil; k<mesh->ntmax-1; k++)
+    mesh->tria[k].v[2] = k+1;
+
+  return 1;
+}
+
+/**
  * \param mesh pointer toward the mesh
  *
  * \return 1 if success, 0 if fail
@@ -221,29 +261,5 @@ int _MMGS_zaldy(MMG5_pMesh mesh) {
 
   if ( !_MMGS_memOption(mesh) )  return 0;
 
-  _MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(MMG5_Point),"initial vertices",
-                fprintf(stderr,"  Exit program.\n");
-                return 0);
-  _MMG5_SAFE_CALLOC(mesh->point,mesh->npmax+1,MMG5_Point,0);
-  _MMG5_ADD_MEM(mesh,(mesh->ntmax+1)*sizeof(MMG5_Tria),"initial triangles",
-                fprintf(stderr,"  Exit program.\n");
-                return 0);
-  _MMG5_SAFE_CALLOC(mesh->tria,mesh->ntmax+1,MMG5_Tria,0);
-
-  if ( mesh->na ) {
-    _MMG5_ADD_MEM(mesh,(mesh->na+1)*sizeof(MMG5_Edge),"initial edges",return(0));
-    _MMG5_SAFE_CALLOC(mesh->edge,(mesh->na+1),MMG5_Edge,0);
-  }
-
-  /* store empty links */
-  mesh->npnil = mesh->np + 1;
-  mesh->nenil = mesh->nt + 1;
-
-  for (k=mesh->npnil; k<mesh->npmax-1; k++)
-    mesh->point[k].tmp  = k+1;
-
-  for (k=mesh->nenil; k<mesh->ntmax-1; k++)
-    mesh->tria[k].v[2] = k+1;
-
-  return(1);
+  return ( MMGS_setMeshSize_alloc(mesh) );
 }
