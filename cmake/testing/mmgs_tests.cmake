@@ -45,6 +45,16 @@ ADD_TEST(NAME mmgs_SphereAni
   ${MMGS_CI_TESTS}/SphereAni/sphere
   -out ${CTEST_OUTPUT_DIR}/mmgs_SphereAni-sphere.d.meshb)
 
+###############################################################################
+#####
+#####         Options
+#####
+###############################################################################
+
+ADD_TEST(NAME mmgs_memOption
+  COMMAND ${EXECUT_MMGS} -v 5 -m 100
+  ${MMGS_CI_TESTS}/Teapot/teapot
+  -out ${CTEST_OUTPUT_DIR}/mmgs_memOption.o.meshb)
 
 ###############################################################################
 #####

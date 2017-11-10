@@ -331,6 +331,16 @@ ADD_TEST(NAME mmg3d_LeakCheck_optLevelSet
   ${MMG3D_CI_TESTS}/LeakCheck_optLevelSet/rect03d
   -out ${CTEST_OUTPUT_DIR}/mmg3d_LeakCheck_optLevelSet-rect03d.o.meshb)
 
+##############################################################################
+#####
+#####         Check Options
+#####
+##############################################################################
+#####
+ADD_TEST(NAME mmg3d_memOption
+  COMMAND ${EXECUT_MMG3D} -v 5 -m 100
+  ${MMG3D_CI_TESTS}/Cube/cube
+  -out ${CTEST_OUTPUT_DIR}/mmg3d_memOption.o.meshb)
 
 ###############################################################################
 #####

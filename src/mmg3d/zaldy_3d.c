@@ -145,9 +145,10 @@ int _MMG3D_delElt(MMG5_pMesh mesh,int iel) {
  *
  */
 int _MMG3D_memOption_memRepartition(MMG5_pMesh mesh) {
-  long long  million = 1048576L,memtmp,reservedMem;
+  long long  million = 1048576L;
+  long long  usedMem,avMem,reservedMem;
   long       castedVal;
-  int        ctri,npask,bytes;
+  int        ctri,npadd,bytes;
 
   if ( mesh->info.mem <= 0 ) {
     if ( mesh->memMax )
@@ -168,57 +169,50 @@ int _MMG3D_memOption_memRepartition(MMG5_pMesh mesh) {
       fprintf(stderr,"when only %ld available.\n",castedVal);
     }
     else {
-      mesh->memMax= (long long)(mesh->info.mem)*million;
-    }
-
-    /* if asked memory is lower than default _MMG3D_NPMAX/_MMG3D_NEMAX/_MMG3D_NTMAX we take lower values */
-    ctri = 2;
-
-    /* Euler-poincare: ne = 6*np; nt = 2*np; na = np/5 *
-     * point+tria+tets+adja+adjt+sol+item */
-    bytes = sizeof(MMG5_Point) + sizeof(MMG5_xPoint) +
-      6*sizeof(MMG5_Tetra) + ctri*sizeof(MMG5_xTetra) +
-      4*6*sizeof(int) + ctri*3*sizeof(int) +
-      sizeof(MMG5_Sol)+4*sizeof(_MMG5_hedge);
-
-#ifdef USE_SCOTCH
-    /* bytes = bytes + vertTab + edgeTab + PermVrtTab *
-     * + vertOldTab + sortPartTab - adja */
-    bytes = bytes + 3*6*sizeof(int);
-#endif
-
-    /* init allocation need 38 Mo*/
-    reservedMem = 38*million +
-      (long long)(mesh->nprism*sizeof(MMG5_Prism)+mesh->nquad*sizeof(MMG5_Quad));
-
-    npask = (int) ( (double)(mesh->info.mem*million-reservedMem)/bytes );
-    mesh->npmax = MG_MIN(npask,mesh->npmax);
-    mesh->ntmax = MG_MIN(ctri*npask,mesh->ntmax);
-    mesh->nemax = MG_MIN(6*npask,mesh->nemax);
-    /* check if the memory asked is enough to load the mesh*/
-    if(mesh->np &&
-       (mesh->npmax < mesh->np || mesh->ntmax < mesh->nt || mesh->nemax < mesh->ne)) {
-      memtmp = ((long long)mesh->np * bytes + reservedMem)/million;
-      memtmp = MG_MAX(memtmp, ((long long)mesh->nt*bytes/ctri + reservedMem)/million );
-      memtmp = MG_MAX(memtmp, ((long long)mesh->ne*bytes/6 + reservedMem)/million );
-      mesh->memMax = memtmp*million+1;
-      fprintf(stderr,"\n  ## Error: %s: asking for %d Mo of memory ",
-              __func__,mesh->info.mem);
-      castedVal =  _MMG5_SAFELL2LCAST(mesh->memMax);
-      fprintf(stderr,"is not enough to load mesh. You need to ask %ld Mo minimum\n",
-              castedVal);
-      return 0;
-    }
-    if(mesh->info.mem*million < reservedMem) {
-      mesh->memMax = reservedMem + 1;
-      fprintf(stderr,"\n  ## Error: %s: asking for %d Mo of memory ",
-              __func__,mesh->info.mem);
-      castedVal = _MMG5_SAFELL2LCAST(mesh->memMax);
-      fprintf(stderr,"is not enough to load mesh. You need to ask %ld o minimum\n",
-              castedVal);
-      return 0;
+      mesh->memMax = (long long)(mesh->info.mem)*million;
     }
   }
+
+  /* init allocation need 38 Mo */
+  reservedMem = 38*million +
+    (long long)(mesh->nprism*sizeof(MMG5_Prism)+mesh->nquad*sizeof(MMG5_Quad));
+
+  /* Compute the needed initial memory */
+  usedMem = reservedMem + (mesh->np+1)*sizeof(MMG5_Point)
+    + (mesh->nt+1)*sizeof(MMG5_Tria) + (mesh->ne+1)*sizeof(MMG5_Tetra)
+    + (3*mesh->nt+1)*sizeof(int)   + (4*mesh->ne+1)*sizeof(int)
+    + (mesh->np+1)*sizeof(double);
+
+  if ( usedMem > mesh->memMax  ) {
+    fprintf(stderr,"\n  ## Error: %s: %lld Mo of memory ",__func__,mesh->memMax/million);
+    castedVal =  _MMG5_SAFELL2LCAST(usedMem/million+1);
+    fprintf(stderr,"is not enough to load mesh. You need to ask %ld Mo minimum\n",
+            castedVal);
+    return 0;
+  }
+
+  ctri = 2;
+  /* Euler-poincare: ne = 6*np; nt = 2*np; na = np/5 *
+   * point+tria+tets+adja+adjt+sol+item */
+  bytes = sizeof(MMG5_Point) + sizeof(MMG5_xPoint) +
+    6*sizeof(MMG5_Tetra) + ctri*sizeof(MMG5_xTetra) +
+    4*6*sizeof(int) + ctri*3*sizeof(int) +
+    sizeof(MMG5_Sol)+4*sizeof(_MMG5_hedge);
+
+#ifdef USE_SCOTCH
+  /* bytes = bytes + vertTab + edgeTab + PermVrtTab *
+   * + vertOldTab + sortPartTab - adja */
+  bytes = bytes + 3*6*sizeof(int);
+#endif
+
+  avMem = mesh->memMax-usedMem;
+
+  npadd = (int) ( (double)avMem/bytes );
+  mesh->npmax = MG_MIN(mesh->npmax,mesh->np+npadd);
+  mesh->ntmax = MG_MIN(mesh->ntmax,ctri*npadd+mesh->nt);
+  mesh->nemax = MG_MIN(mesh->nemax,6*npadd+mesh->ne);
+
+  /* check if the memory asked is enough to load the mesh*/
 
   if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug ) {
     castedVal = _MMG5_SAFELL2LCAST(mesh->memMax/million);
@@ -243,9 +237,6 @@ int _MMG3D_memOption_memRepartition(MMG5_pMesh mesh) {
  *
  */
 int _MMG3D_memOption(MMG5_pMesh mesh) {
-  long long  million = 1048576L,memtmp,reservedMem;
-  long       castedVal;
-  int        ctri,npask,bytes;
 
   mesh->memMax = _MMG5_memSize();
 

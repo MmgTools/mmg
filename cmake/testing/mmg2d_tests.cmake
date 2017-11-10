@@ -32,6 +32,16 @@ ADD_TEST(NAME mmg2d_SimpleCircle
   ${MMG2D_CI_TESTS}/Circle/cercle
   -out ${CTEST_OUTPUT_DIR}/mmg2d_SimpleCircle-cercle.o.meshb)
 
+###############################################################################
+#####
+#####         Options
+#####
+###############################################################################
+
+ADD_TEST(NAME mmg2d_memOption
+  COMMAND ${EXECUT_MMG2D} -v 5 -m 100
+  ${MMG2D_CI_TESTS}/Circle/cercle
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_memOption.o.meshb)
 
 ###############################################################################
 #####

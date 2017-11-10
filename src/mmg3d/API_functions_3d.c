@@ -298,11 +298,7 @@ int MMG3D_Set_meshSize(MMG5_pMesh mesh, int np, int ne, int nprism,
       return(0);
     }
   } else {
-    mesh->memMax = _MMG5_memSize();
-    mesh->npmax  = MG_MAX(1.5*mesh->np,_MMG3D_NPMAX);
-    mesh->nemax  = MG_MAX(1.5*mesh->ne,_MMG3D_NEMAX);
-    mesh->ntmax  = MG_MAX(1.5*mesh->nt,_MMG3D_NTMAX);
-
+    if ( !_MMG3D_memOption(mesh) )  return 0;
   }
 
   /* Mesh allocation and linkage */

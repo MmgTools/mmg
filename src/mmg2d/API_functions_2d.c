@@ -251,10 +251,7 @@ int MMG2D_Set_meshSize(MMG5_pMesh mesh, int np, int nt, int na) {
       return(0);
     }
   } else {
-    mesh->memMax = _MMG5_memSize();
-    mesh->npmax  = MG_MAX(1.5*mesh->np,_MMG2D_NPMAX);
-    mesh->ntmax  = MG_MAX(1.5*mesh->nt,_MMG2D_NEMAX);
-
+    if ( !_MMG2D_memOption(mesh) )  return 0;
   }
   _MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(MMG5_Point),"initial vertices",
                 printf("  Exit program.\n");
