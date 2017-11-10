@@ -259,17 +259,15 @@ int _MMG2D_memOption(MMG5_pMesh mesh) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure
+ * \param mesh pointer toward the mesh structure.
  *
- * \return 0 if fail, 1 otherwise
+ * \return 0 if failed, 1 otherwise.
  *
- * allocate main structure
+ * Allocation of the array fields of the mesh.
  *
  */
-int MMG2D_zaldy(MMG5_pMesh mesh) {
-  int     k;
-
-  if ( !_MMG2D_memOption(mesh) )  return 0;
+int MMG2D_setMeshSize_alloc( MMG5_pMesh mesh ) {
+  int k;
 
   _MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(MMG5_Point),"initial vertices",
                 printf("  Exit program.\n");
@@ -280,6 +278,7 @@ int MMG2D_zaldy(MMG5_pMesh mesh) {
   _MMG5_SAFE_CALLOC(mesh->tria,mesh->ntmax+1,MMG5_Tria,0);
   memset(&mesh->tria[0],0,sizeof(MMG5_Tria));
 
+  mesh->namax = mesh->na;
   if ( mesh->na ) {
     _MMG5_ADD_MEM(mesh,(mesh->namax+1)*sizeof(MMG5_Edge),"initial edges",return(0));
     _MMG5_SAFE_CALLOC(mesh->edge,(mesh->namax+1),MMG5_Edge,0);
@@ -288,7 +287,7 @@ int MMG2D_zaldy(MMG5_pMesh mesh) {
   /* keep track of empty links */
   mesh->npnil = mesh->np + 1;
   mesh->nenil = mesh->nt + 1;
-
+  mesh->nanil = mesh->na + 1;
 
   for (k=mesh->npnil; k<mesh->npmax-1; k++) {
     /* Set tangent field of point to 0 */
@@ -302,5 +301,21 @@ int MMG2D_zaldy(MMG5_pMesh mesh) {
   for (k=mesh->nenil; k<mesh->ntmax-1; k++)
     mesh->tria[k].v[2] = k+1;
 
-  return(1);
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure
+ *
+ * \return 0 if fail, 1 otherwise
+ *
+ * allocate main structure
+ *
+ */
+int MMG2D_zaldy(MMG5_pMesh mesh) {
+  int     k;
+
+  if ( !_MMG2D_memOption(mesh) )  return 0;
+
+  return ( MMG2D_setMeshSize_alloc(mesh) );
 }

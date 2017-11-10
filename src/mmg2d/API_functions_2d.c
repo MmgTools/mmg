@@ -253,46 +253,11 @@ int MMG2D_Set_meshSize(MMG5_pMesh mesh, int np, int nt, int na) {
   } else {
     if ( !_MMG2D_memOption(mesh) )  return 0;
   }
-  _MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(MMG5_Point),"initial vertices",
-                printf("  Exit program.\n");
-                return 0);
-  _MMG5_SAFE_CALLOC(mesh->point,mesh->npmax+1,MMG5_Point,0);
 
-  _MMG5_ADD_MEM(mesh,(mesh->ntmax+1)*sizeof(MMG5_Tria),"initial triangles",return(0));
-  _MMG5_SAFE_CALLOC(mesh->tria,mesh->ntmax+1,MMG5_Tria,0);
+  /* Mesh allocation and linkage */
+  if ( !MMG2D_setMeshSize_alloc( mesh ) ) return 0;
 
-  mesh->namax =  mesh->na;
-  if ( mesh->na ) {
-    _MMG5_ADD_MEM(mesh,(mesh->namax+1)*sizeof(MMG5_Edge),"initial edges",return(0));
-    _MMG5_SAFE_CALLOC(mesh->edge,(mesh->namax+1),MMG5_Edge,0);
-  }
-
-  /* keep track of empty links */
-  mesh->npnil = mesh->np + 1;
-  mesh->nenil = mesh->nt + 1;
-  mesh->nanil = mesh->na + 1;
-
-  for (k=mesh->npnil; k<mesh->npmax-1; k++) {
-    mesh->point[k].tmp  = k+1;
-  }
-  for (k=mesh->nenil; k<mesh->ntmax-1; k++) {
-    mesh->tria[k].v[2] = k+1;
-  }
-
-  if ( !mesh->nt ) {
-    fprintf(stderr,"  ** WARNING NO GIVEN TRIANGLE\n");
-  }
-
-  /* stats */
-  if ( abs(mesh->info.imprim) > 6 ) {
-    fprintf(stdout,"     NUMBER OF VERTICES     %8d\n",mesh->np);
-    if ( mesh->na ) {
-      fprintf(stdout,"     NUMBER OF EDGES        %8d\n",mesh->na);
-    }
-    if ( mesh->nt )
-      fprintf(stdout,"     NUMBER OF TRIANGLES    %8d\n",mesh->nt);
-  }
-  return(1);
+  return 1;
 }
 
 int MMG2D_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int typSol) {

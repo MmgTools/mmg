@@ -221,6 +221,7 @@ int _MMG5_getnElt(MMG5_pMesh mesh,int n);
 int MMG2D_zaldy(MMG5_pMesh mesh);
 long long _MMG5_memSize(void);
 int _MMG2D_memOption(MMG5_pMesh mesh);
+int  MMG2D_setMeshSize_alloc(MMG5_pMesh);
 
 int MMG2_scaleMesh(MMG5_pMesh ,MMG5_pSol );
 int MMG2_unscaleMesh(MMG5_pMesh ,MMG5_pSol );
