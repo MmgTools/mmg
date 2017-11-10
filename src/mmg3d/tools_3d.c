@@ -867,21 +867,6 @@ int _MMG3D_localParamReg(MMG5_pMesh mesh,int ip,int *listv,int ilistv,
   hmax  = mesh->info.hmax;
   isloc = 0;
 
-  /* local parameters at vertex: useless for now because new points are
-   * created without reference (inside the domain) */
-  /* if ( mesh->info.parTyp & MG_Vert ) { */
-  /*   for (l=0; l<mesh->info.npar; l++) { */
-  /*     par = &mesh->info.par[l]; */
-  /*     if ( (par->elt == MMG5_Vertex) && (p0->ref == par->ref ) ) { */
-  /*       hausd   = par->hausd; */
-  /*       hmin    = par->hmin; */
-  /*       hmax    = par->hmax; */
-  /*       isloc   = 1; */
-  /*       break; */
-  /*     } */
-  /*   } */
-  /*  } */
-
   /* travel across the ball of ip to find the minimal local params imposed on
    * tetras */
   if ( mesh->info.parTyp & MG_Tetra ) {
@@ -1007,63 +992,6 @@ int _MMG3D_localParamNm(MMG5_pMesh mesh,int iel,int iface,int ia,
 
   pt = &mesh->tetra[iel];
   pxt = &mesh->xtetra[pt->xt];
-
-  /* local parameters at vertices: useless for now because new points are
-   * created without reference (inside the domain) */
-
-  /* int          ip0,ip1; */
-  /* char         i0,i1; */
-  /* i0 = _MMG5_iare[ia][0]; */
-  /* i1 = _MMG5_iare[ia][1]; */
-  /* ip0 = pt->v[i0]; */
-  /* ip1 = pt->v[i1]; */
-
-  /* if ( mesh->info.parTyp & MG_Vert ) { */
-  /*   p0  = &mesh->point[ip0]; */
-  /*   p1  = &mesh->point[ip1]; */
-  /*   if ( p0->ref == p1->ref ) { */
-  /*     for ( l=0; l<mesh->info.npar; ++l) { */
-  /*       par = &mesh->info.par[l]; */
-  /*       if ( par->elt != MMG5_Vertex || par->ref != p0->ref ) continue; */
-  /*       hausd   = par->hausd; */
-  /*       hmin    = par->hmin; */
-  /*       hmax    = par->hmax; */
-  /*       isloc   = 1; */
-  /*       break; */
-  /*     } */
-
-  /*   } */
-  /*   else { */
-  /*     l = 0; */
-  /*     info = -1000; */
-  /*     do { */
-  /*       if ( isloc )  break; */
-
-  /*       par = &mesh->info.par[l]; */
-  /*       if ( par->elt != MMG5_Vertex ) continue; */
-
-  /*       if (p0->ref != par->ref && p1->ref != par->ref ) continue; */
-
-  /*       hausd   = par->hausd; */
-  /*       hmin    = par->hmin; */
-  /*       hmax    = par->hmax; */
-  /*       isloc   = 1; */
-  /*       info    = par->ref; */
-  /*     } while ( ++l<mesh->info.npar ); */
-
-  /*     for ( ; l<mesh->info.npar; ++l) { */
-  /*       par = &mesh->info.par[l]; */
-  /*       if ( par->elt != MMG5_Vertex || par->ref == info ) continue; */
-
-  /*       if (p0->ref != par->ref && p1->ref != par->ref ) continue; */
-
-  /*       hausd   = MG_MIN(hausd,par->hausd); */
-  /*       hmin    = MG_MAX(hmin,par->hmin); */
-  /*       hmax    = MG_MIN(hmax,par->hmax); */
-  /*       break; */
-  /*     } */
-  /*   } */
-  /* } */
 
   /* Warning : rough eval of the local param at triangles if coquilface
    * fails because we have more than 2 boundaries in the edge shell

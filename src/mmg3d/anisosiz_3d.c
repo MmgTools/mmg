@@ -136,19 +136,6 @@ static int _MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
   isqhmax = mesh->info.hmax;
   isloc   = 0;
 
-  /* if ( mesh->info.parTyp & MG_Vert ) { */
-  /*   for (i=0; i<mesh->info.npar; i++) { */
-  /*     par = &mesh->info.par[i]; */
-  /*     if ( (par->elt == MMG5_Vertex) && (p0->ref == par->ref ) ) { */
-  /*       hausd_v = par->hausd; */
-  /*       isqhmin = par->hmin; */
-  /*       isqhmax = par->hmax; */
-  /*       isloc   = 1; */
-  /*       break; */
-  /*     } */
-  /*   } */
-  /*  } */
-
   if ( mesh->adja[4*(kel-1)+iface+1] ) return(0);
   ilist = _MMG5_boulesurfvolp(mesh,kel,ip,iface,
                               listv,&ilistv,lists,&ilists,(p0->tag & MG_NOM));
@@ -566,18 +553,6 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
   isqhmax = mesh->info.hmax;
   isloc = 0;
 
-  /* if ( mesh->info.parTyp & MG_Vert ) { */
-  /* for (i=0; i<mesh->info.npar; i++) { */
-  /*   par = &mesh->info.par[i]; */
-  /*   if ( (par->elt == MMG5_Vertex) && (p0->ref == par->ref ) ) { */
-  /*     hausd   = par->hausd; */
-  /*     isqhmin = par->hmin; */
-  /*     isqhmax = par->hmax; */
-  /*     isloc = 1; */
-  /*   } */
-  /* } */
-  /* } */
-
   ilist = _MMG5_boulesurfvolp(mesh,kel,ip,iface,listv,&ilistv,lists,&ilists,0);
 
   if ( ilist!=1 ) {
@@ -840,17 +815,6 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int kel,int iface, int 
   isqhmin = mesh->info.hmin;
   isqhmax = mesh->info.hmax;
   isloc     = 0;
-  /* if ( mesh->info.parTyp & MG_Vert ) { */
-  /* for (i=0; i<mesh->info.npar; i++) { */
-  /*   par = &mesh->info.par[i]; */
-  /*   if ( (par->elt == MMG5_Vertex) && (p0->ref == par->ref ) ) { */
-  /*     hausd   = par->hausd; */
-  /*     isqhmin = par->hmin; */
-  /*     isqhmax = par->hmax; */
-  /*     isloc   = 1; */
-  /*   } */
-  /* } */
-  /*  } */
 
   ilist = _MMG5_boulesurfvolp(mesh,kel,ip,iface,listv,&ilistv,lists,&ilists,0);
 
@@ -1085,18 +1049,6 @@ int _MMG5_defmetvol(MMG5_pMesh mesh,MMG5_pSol met) {
           isqhmax = mesh->info.hmax;
           isloc   = 0;
 
-          /* Local parameters at vertex */
-          /* if ( mesh->info.parTyp & MG_Vert ) { */
-             /* for (i=0; i<mesh->info.npar; i++) { */
-          /*   par = &mesh->info.par[i]; */
-          /*   if ( (par->elt == MMG5_Vertex) && (ppt->ref == par->ref ) ) { */
-          /*     isqhmax = par->hmax; */
-          /*     isloc   = 1; */
-          /*     break;       */
-          /*   } */
-          /* } */
-          /* } */
-
           /* Local parameters at tetra */
           if ( mesh->info.parTyp & MG_Tetra ) {
             ilist = _MMG5_boulevolp(mesh,k,l,list);
@@ -1165,19 +1117,6 @@ int _MMG5_defmetvol(MMG5_pMesh mesh,MMG5_pSol met) {
         isqhmin = mesh->info.hmin;
         isqhmax = mesh->info.hmax;
         isloc   = 0;
-
-        /* Local parameters at vertex */
-        /* if ( mesh->info.parTyp & MG_Vert ) { */
-           /* for (i=0; i<mesh->info.npar; i++) { */
-        /*   par = &mesh->info.par[i]; */
-        /*   if ( (par->elt == MMG5_Vertex) && (ppt->ref == par->ref ) ) { */
-        /*     isqhmin = par->hmin; */
-        /*     isqhmax = par->hmax; */
-        /*     isloc   = 1; */
-        /*     break;       */
-        /*   } */
-        /* } */
-        /* } */
 
         /* Local parameters at tetra */
         if ( mesh->info.parTyp & MG_Tetra ) {
