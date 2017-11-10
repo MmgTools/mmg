@@ -434,7 +434,7 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
   if ( mesh->namein == NULL ) {
     fprintf(stdout,"  -- INPUT MESH NAME ?\n");
     fflush(stdin);
-    fscanf(stdin,"%s",namein);
+    fscanf(stdin,"%127s",namein);
     if ( !MMG3D_Set_inputMeshName(mesh,namein) )
       return 0;
   }
@@ -488,7 +488,7 @@ int MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
   /* read parameters */
   while ( !feof(in) ) {
     /* scan line */
-    ret = fscanf(in,"%s",data);
+    ret = fscanf(in,"%255s",data);
     if ( !ret || feof(in) )  break;
     for (i=0; i<strlen(data); i++) data[i] = tolower(data[i]);
 
@@ -499,7 +499,7 @@ int MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
         return 0;
 
       for (i=0; i<mesh->info.npar; i++) {
-        ret = fscanf(in,"%d %s ",&ref,buf);
+        ret = fscanf(in,"%d %255s ",&ref,buf);
         if ( ret )
           ret = fscanf(in,"%f %f %f",&fp1,&fp2,&hausd);
 
