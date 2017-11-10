@@ -166,10 +166,7 @@ int MMGS_Set_meshSize(MMG5_pMesh mesh, int np, int nt, int na) {
       return(0);
     }
   } else {
-    mesh->memMax = _MMG5_memSize();
-    mesh->npmax  = MG_MAX(1.5*mesh->np,_MMGS_NPMAX);
-    mesh->ntmax  = MG_MAX(1.5*mesh->nt,_MMGS_NTMAX);
-
+    if ( !_MMGS_memOption(mesh) )  return 0;
   }
   _MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(MMG5_Point),"initial vertices",
                 fprintf(stderr,"  Exit program.\n");
