@@ -48,7 +48,6 @@ int _MMG2D_newPt(MMG5_pMesh mesh,double c[2],int16_t tag) {
   ppt->tag   &= ~MG_NUL;
   mesh->npnil = ppt->tmp;
   ppt->tmp    = 0;
-  ppt->xp     = 0;
   ppt->tag = tag;
 
   return(curpt);
@@ -60,10 +59,6 @@ void _MMG2D_delPt(MMG5_pMesh mesh,int ip) {
   MMG5_pxPoint  pxp;
 
   ppt = &mesh->point[ip];
-  if ( ppt->xp ) {
-    pxp = &mesh->xpoint[ppt->xp];
-    memset(pxp,0,sizeof(MMG5_xPoint));
-  }
 
   memset(ppt,0,sizeof(MMG5_Point));
   ppt->tag    = MG_NUL;
@@ -259,11 +254,6 @@ int MMG2D_zaldy(MMG5_pMesh mesh) {
                 return 0);
   _MMG5_SAFE_CALLOC(mesh->point,mesh->npmax+1,MMG5_Point,0);
 
-  if ( mesh->xp ) {
-    _MMG5_ADD_MEM(mesh,(mesh->xpmax+1)*sizeof(MMG5_xPoint),"initial xpoint",return(0));
-    _MMG5_SAFE_CALLOC(mesh->xpoint,mesh->xpmax+1,MMG5_xPoint,0);
-    memset(&mesh->xpoint[0],0,sizeof(MMG5_xPoint));
-  }
   _MMG5_ADD_MEM(mesh,(mesh->ntmax+1)*sizeof(MMG5_Tria),"initial triangles",return(0));
   _MMG5_SAFE_CALLOC(mesh->tria,mesh->ntmax+1,MMG5_Tria,0);
   memset(&mesh->tria[0],0,sizeof(MMG5_Tria));
