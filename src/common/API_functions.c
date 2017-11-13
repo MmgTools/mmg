@@ -208,7 +208,7 @@ int MMG5_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solin) {
       strcpy(sol->namein,"mesh.sol");
     }
   }
-  return(1);
+  return 1;
 }
 
 /**
@@ -283,7 +283,7 @@ int MMG5_Set_outputMeshName(MMG5_pMesh mesh, const char* meshout) {
       strcpy(mesh->nameout,"mesh.o.mesh");
     }
   }
-  return(1);
+  return 1;
 }
 
 
@@ -332,10 +332,10 @@ int MMG5_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solout) {
       fprintf(stderr,"\n  ## Error: %s: no name for output mesh. please, use",
               __func__);
       fprintf(stderr," the MMG5_Set_outputMeshName to set the mesh name.\n");
-      return(0);
+      return 0;
     }
   }
-  return(1);
+  return 1;
 }
 
 /**
