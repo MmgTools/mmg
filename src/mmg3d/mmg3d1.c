@@ -1001,7 +1001,7 @@ static int _MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
             break;
           }
         }
-        else if (ilist < 0 ) return(-1);
+        else if (ilist < 0 ) return -1;
       }
       if ( ier ) {
         p1->flag = base;

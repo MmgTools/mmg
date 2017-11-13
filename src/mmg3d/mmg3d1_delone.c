@@ -421,7 +421,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
             continue;
           }
         }
-        else if (ilist < 0 )  return(-1);
+        else if (ilist < 0 )  return -1;
       }
       /* Case of an internal face */
       else {
@@ -732,14 +732,14 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
         ilist = _MMG5_chkcol_bdy(mesh,met,k,i,j,list,ilist,lists,ilists,2);
         if ( ilist > 0 ) {
           ier = _MMG5_colver(mesh,met,list,ilist,i2,2);
-          if ( ier < 0 ) return(-1);
+          if ( ier < 0 ) return -1;
           else if(ier) {
             _MMG3D_delPt(mesh,ier);
             (*nc)++;
             break;
           }
         }
-        else if (ilist < 0 )  return(-1);
+        else if (ilist < 0 )  return -1;
       }
       /* Case of an internal face */
       else {

@@ -358,13 +358,13 @@ static int _MMG5_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
     }
     if ( ilist > 0 ) {
       ier = _MMG5_colver(mesh,met,list,ilist,i2,2);
-      if ( ier < 0 )  return(-1);
+      if ( ier < 0 )  return -1;
       else if ( ier ) {
         _MMG3D_delPt(mesh,ier);
         nc++;
       }
     }
-    else if (ilist < 0 )  return(-1);
+    else if (ilist < 0 )  return -1;
   }
 
   return(nc);

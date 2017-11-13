@@ -166,7 +166,8 @@ int _MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
  * \param lists surfacic ball of p.
  * \param ilists number of elements in the surfacic ball of p.
  *
- * \return 0 if fail, 1 otherwise.
+ * \return 0 if the check of the topology fails, 1 if success, -1 if the
+ * function fails.
  *
  * Topological check on the surface ball of np and nq in collapsing np->nq ;
  *  iface = boundary face on which lie edge iedg - in local face num.  (pq, or
@@ -216,13 +217,7 @@ _MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,char iedg,int *lists,
     adja = &mesh->adja[4*(iel-1)+1];
 
     /* Identification of edge number in tetra iel */
-    for (i=0; i<6; i++) {
-      ipa = _MMG5_iare[i][0];
-      ipb = _MMG5_iare[i][1];
-      if ( ((pt->v[ipa] == numq) && (pt->v[ipb] == nro)) ||
-           ((pt->v[ipa] == nro)  && (pt->v[ipb] == numq))  ) break;
-    }
-    assert(i<6);
+    if ( !MMG3D_findEdge(mesh,pt,iel,numq,nro,1,NULL,&i) ) return -1;
 
     /* set sense of travel */
     if ( pt->v[ _MMG5_ifar[i][0] ] == piv ) {
@@ -292,13 +287,7 @@ _MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,char iedg,int *lists,
     adja = &mesh->adja[4*(iel-1)+1];
 
     /* Identification of edge number in tetra iel */
-    for (i=0; i<6; i++) {
-      ipa = _MMG5_iare[i][0];
-      ipb = _MMG5_iare[i][1];
-      if ( ((pt->v[ipa] == numq) && (pt->v[ipb] == nro)) ||
-           ((pt->v[ipa] == nro) && (pt->v[ipb] == numq))  ) break;
-    }
-    assert(i<6);
+    if ( !MMG3D_findEdge(mesh,pt,iel,numq,nro,1,NULL,&i) ) return -1;
 
     /* set sense of travel */
     if ( pt->v[ _MMG5_ifar[i][0] ] == piv ) {
@@ -424,14 +413,10 @@ int _MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
       if ( nbbdy == 4 )
         return(0);
       else if ( nbbdy == 3 ) {
-        for (ia=0; ia<6; ia++) {
-          i0 = _MMG5_iare[ia][0];
-          i1 = _MMG5_iare[ia][1];
-          if ( ((pt->v[i0] == nump) && (pt->v[i1] == numq)) ||
-               ((pt->v[i0] == numq) && (pt->v[i1] == nump)) )
-            break;
-        }
-        assert(ia < 6);
+
+        /* Identification of edge number in tetra iel */
+        if ( !MMG3D_findEdge(mesh,pt,iel,numq,nump,1,NULL,&ia) ) return -1;
+
         i0 = _MMG5_ifar[ia][0];
         i1 = _MMG5_ifar[ia][1];
         if ( pt->xt && (!(pxt->ftag[i0] & MG_BDY) || !(pxt->ftag[i1] & MG_BDY)) )
@@ -688,10 +673,11 @@ int _MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
   /* Topological check for surface ball */
   else {
     ier = _MMG5_topchkcol_bdy(mesh,k,iface,iedg,lists,ilists);
-    if ( !ier )  return(0);
+    if ( ier<0 ) return -1;
+    else if ( !ier )  return 0;
   }
 
-  return(ilistv);
+  return ilistv;
 }
 
 /**
