@@ -399,14 +399,21 @@ int _MMG5_cntbdypt(MMG5_pMesh mesh, int nump){
   return(nf);
 }
 
-/** Count the number of tetras that have several boundary faces, as well as the number of internal
-    edges connecting points of the boundary */
+/**
+ * \param mesh pointer toward the mesh structure.
+ *
+ * \return 0 if fail, 1 otherwise.
+ *
+ * Count the number of tetras that have several boundary faces, as well as the
+ * number of internal edges connecting points of the boundary.
+ *
+ */
 int _MMG5_chkfemtopo(MMG5_pMesh mesh) {
   MMG5_pTetra      pt,pt1;
   MMG5_pxTetra     pxt;
   MMG5_pPoint      p0,p1;
-  int         k,nf,ntet,ned,np,ischk,ilist,list[MMG3D_LMAX+2],l,np1,npchk,iel;
-  char        i0,j,i,i1,ia;
+  int              k,nf,ntet,ned,np,ischk,ilist,list[MMG3D_LMAX+2],l,np1,npchk,iel;
+  char             i0,j,i,i1,ia,ier;
 
   ntet = ned = 0;
   for(k=1; k<=mesh->np; k++)
@@ -462,14 +469,17 @@ int _MMG5_chkfemtopo(MMG5_pMesh mesh) {
 
           ia = IEDG(i0,i1);
           p1->flag = 2*np + ischk;
-          if ( !_MMG5_srcbdy(mesh,iel,ia) )  ned++;
+
+          ier = _MMG5_srcbdy(mesh,iel,ia);
+          if ( ier<0 ) return 0;
+          else if ( !ier )  ned++;
         }
       }
     }
   }
   if ( mesh->info.imprim && ned )
     printf("  *** %d internal edges connecting boundary points.\n",ned);
-  return(1);
+  return 1;
 }
 
 /**

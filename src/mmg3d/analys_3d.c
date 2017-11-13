@@ -607,7 +607,9 @@ static int _MMG3D_nmgeom(MMG5_pMesh mesh){
         p0->flag = base;
         ier = _MMG5_boulenm(mesh,k,ip,i,n,t);
 
-        if ( !ier ) {
+        if ( ier < 0 )
+          return 0;
+        else if ( !ier ) {
           p0->tag |= MG_REQ;
           p0->tag &= ~MG_NOSURF;
           if ( p0->ref != 0 )

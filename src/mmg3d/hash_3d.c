@@ -600,7 +600,8 @@ int _MMG5_setEdgeNmTag(MMG5_pMesh mesh, _MMG5_Hash *hash) {
               while ( adj ) {
                 pradj = adj;
 
-                _MMG5_openCoquilTravel( mesh, na, nb, &adj, &piv, &iface, &i );
+                if ( _MMG5_openCoquilTravel(mesh,na,nb,&adj,&piv,&iface,&i)<0 )
+                  return 0;;
 
                 /* overflow */
                 if ( ++ilist > MMG3D_LMAX-2 ) {
@@ -613,7 +614,7 @@ int _MMG5_setEdgeNmTag(MMG5_pMesh mesh, _MMG5_Hash *hash) {
                     fprintf(stderr,"\n  ##          Try to modify the hausdorff"
                             " number, or/and the maximum mesh.\n");
                   }
-                  return(0);
+                  return 0;
                 }
 
                 pt = &mesh->tetra[pradj];
@@ -628,7 +629,7 @@ int _MMG5_setEdgeNmTag(MMG5_pMesh mesh, _MMG5_Hash *hash) {
 
               if ( (!it1 || !it2) || (it1 == it2) ) {
                 _MMG5_coquilFaceErrorMessage(mesh, it1/4, it2/4);
-                return(0);
+                return 0;
               }
             }
           }
@@ -1814,8 +1815,10 @@ int _MMG5_bdrySet(MMG5_pMesh mesh) {
               MG_SET(pxt->ori,i);
               for (j=0; j<3; j++) {
                 tag = pxt->ftag[i] | ptt->tag[j];
-                if ( tag )
-                  _MMG5_settag(mesh,k,_MMG5_iarf[i][j],tag,ptt->edg[j]);
+                if ( tag ) {
+                  if ( !_MMG5_settag(mesh,k,_MMG5_iarf[i][j],tag,ptt->edg[j]) )
+                    return 0;
+                }
               }
             }
             else
@@ -1891,8 +1894,10 @@ int _MMG5_bdrySet(MMG5_pMesh mesh) {
           else {
             for (j=0; j<3; j++) {
               tag = pxt->ftag[i] | ptt->tag[j];
-              if ( tag )
-                _MMG5_settag(mesh,k,_MMG5_iarf[i][j],tag,ptt->edg[j]);
+              if ( tag ) {
+                if ( !_MMG5_settag(mesh,k,_MMG5_iarf[i][j],tag,ptt->edg[j]) )
+                  return 0;
+              }
             }
           }
         }
@@ -1902,7 +1907,7 @@ int _MMG5_bdrySet(MMG5_pMesh mesh) {
 
   if ( !mesh->nprism ) {
     _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
-    return(1);
+    return 1;
   }
 
   mesh->xpr     = 0;
@@ -1968,12 +1973,12 @@ int _MMG5_bdryUpdate(MMG5_pMesh mesh) {
   char     i;
 
   if ( !mesh->nt )  return(1);
-  if ( !_MMG5_hashNew(mesh,&hash,0.51*mesh->nt,1.51*mesh->nt) )  return(0);
+  if ( !_MMG5_hashNew(mesh,&hash,0.51*mesh->nt,1.51*mesh->nt) )  return 0;
   for (k=1; k<=mesh->nt; k++) {
     ptt = &mesh->tria[k];
     if ( !_MMG5_hashFace(mesh,&hash,ptt->v[0],ptt->v[1],ptt->v[2],k) ) {
       _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
-      return(0);
+      return 0;
     }
   }
 
@@ -1985,22 +1990,22 @@ int _MMG5_bdryUpdate(MMG5_pMesh mesh) {
       mesh->point[mesh->tetra[k].v[1]].tag |= MG_REQ;
       mesh->point[mesh->tetra[k].v[2]].tag |= MG_REQ;
       mesh->point[mesh->tetra[k].v[3]].tag |= MG_REQ;
-      _MMG5_settag(mesh,k,0,MG_REQ,0);
-      _MMG5_settag(mesh,k,1,MG_REQ,0);
-      _MMG5_settag(mesh,k,2,MG_REQ,0);
-      _MMG5_settag(mesh,k,3,MG_REQ,0);
-      _MMG5_settag(mesh,k,4,MG_REQ,0);
-      _MMG5_settag(mesh,k,5,MG_REQ,0);
+      if ( !_MMG5_settag(mesh,k,0,MG_REQ,0) ) return 0;
+      if ( !_MMG5_settag(mesh,k,1,MG_REQ,0) ) return 0;
+      if ( !_MMG5_settag(mesh,k,2,MG_REQ,0) ) return 0;
+      if ( !_MMG5_settag(mesh,k,3,MG_REQ,0) ) return 0;
+      if ( !_MMG5_settag(mesh,k,4,MG_REQ,0) ) return 0;
+      if ( !_MMG5_settag(mesh,k,5,MG_REQ,0) ) return 0;
       mesh->point[mesh->tetra[k].v[0]].tag &= ~MG_NOSURF;
       mesh->point[mesh->tetra[k].v[1]].tag &= ~MG_NOSURF;
       mesh->point[mesh->tetra[k].v[2]].tag &= ~MG_NOSURF;
       mesh->point[mesh->tetra[k].v[3]].tag &= ~MG_NOSURF;
-      _MMG5_deltag(mesh,k,0,MG_NOSURF);
-      _MMG5_deltag(mesh,k,1,MG_NOSURF);
-      _MMG5_deltag(mesh,k,2,MG_NOSURF);
-      _MMG5_deltag(mesh,k,3,MG_NOSURF);
-      _MMG5_deltag(mesh,k,4,MG_NOSURF);
-      _MMG5_deltag(mesh,k,5,MG_NOSURF);
+      if ( !_MMG5_deltag(mesh,k,0,MG_NOSURF) ) return 0;
+      if ( !_MMG5_deltag(mesh,k,1,MG_NOSURF) ) return 0;
+      if ( !_MMG5_deltag(mesh,k,2,MG_NOSURF) ) return 0;
+      if ( !_MMG5_deltag(mesh,k,3,MG_NOSURF) ) return 0;
+      if ( !_MMG5_deltag(mesh,k,4,MG_NOSURF) ) return 0;
+      if ( !_MMG5_deltag(mesh,k,5,MG_NOSURF) ) return 0;
     }
 
     if ( !pt->xt )  continue;
@@ -2028,14 +2033,16 @@ int _MMG5_bdryUpdate(MMG5_pMesh mesh) {
         }
         for ( j=0; j<3; j++ ) {
           tag = ptt->tag[j];
-          if ( tag || ptt->edg[j] )
-            _MMG5_settag(mesh,k,_MMG5_iarf[i][j],tag,ptt->edg[j]);
+          if ( tag || ptt->edg[j] ) {
+            if ( !_MMG5_settag(mesh,k,_MMG5_iarf[i][j],tag,ptt->edg[j]) )
+              return 0;
+          }
         }
       }
     }
   }
   _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
-  return(1);
+  return 1;
 }
 
 /**

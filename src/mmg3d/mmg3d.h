@@ -261,7 +261,7 @@ void _MMG3D_coquilFaceSecondLoopInit(MMG5_pMesh mesh,int piv,char *iface,int *i,
                                      int *adj);
 void _MMG5_coquilFaceErrorMessage(MMG5_pMesh mesh, int k1, int k2);
 int16_t _MMG5_coquilTravel(MMG5_pMesh, int, int, int*, int*, char*, int*);
-void _MMG5_openCoquilTravel(MMG5_pMesh, int, int, int*, int*, char*, int*);
+int  _MMG5_openCoquilTravel(MMG5_pMesh, int, int, int*, int*, char*, int*);
 extern int  _MMG5_settag(MMG5_pMesh,int,int,int16_t,int);
 extern int  _MMG5_deltag(MMG5_pMesh,int,int,int16_t);
 int  _MMG5_setNmTag(MMG5_pMesh mesh, _MMG5_Hash *hash);

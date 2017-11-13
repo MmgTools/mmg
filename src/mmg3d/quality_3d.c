@@ -594,12 +594,17 @@ int _MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
 }
 
 /**
+ * \param mesh pointer toward the mesh.
+ * \param sol, pointer toward the sol structure.
+ * \param weightelt put weight on elts.
+ * \param npcible estimation of the final number of nodes/
+ *
+ * \return 0 if fail, 1 if success
  *
  * Approximation of the final number of vertex.
  *
  * \warning  call MMG3D_hashTetra(mesh,1) or analysis before using
  *
- * \todo Doxygen documentation
  */
 int _MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcible) {
   MMG5_pTetra pt;
@@ -658,7 +663,7 @@ int _MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcib
       longen = _MMG5_coquil(mesh,k,ia,list);
       lon = longen/2;
       //isbdry = 0;//longen%2;
-      if(!lon) continue;
+      if ( lon<=0 ) return 0;
       /* if ( isbdry )  { */
       /*    assert(longen%2); */
       /*    //printf("_MMG5_coquil %d\n",longen/2); */
@@ -828,5 +833,5 @@ int _MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcib
   free(pdel);
 
   //fclose(inm);
-  return(1);
+  return 1;
 }
