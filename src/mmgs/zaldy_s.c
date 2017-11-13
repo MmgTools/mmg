@@ -172,7 +172,7 @@ int _MMGS_memOption_memSet(MMG5_pMesh mesh) {
 
   /* point+tria+adja */
   bytes = sizeof(MMG5_Point) + sizeof(MMG5_xPoint) +
-    2*sizeof(MMG5_Tria) + 3*sizeof(int) + sizeof(MMG5_Sol);
+    2*sizeof(MMG5_Tria) + 3*sizeof(int);
 
   avMem = mesh->memMax-usedMem;
 
@@ -208,7 +208,7 @@ int _MMGS_memOption(MMG5_pMesh mesh) {
   mesh->npmax = MG_MAX(1.5*mesh->np,_MMGS_NPMAX);
   mesh->ntmax = MG_MAX(1.5*mesh->nt,_MMGS_NTMAX);
 
-  return ( _MMGS_memOption_memRepartition(mesh) );
+  return ( _MMGS_memOption_memSet(mesh) );
 }
 
 /**

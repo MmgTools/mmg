@@ -218,7 +218,7 @@ int _MMG3D_memOption_memRepartition(MMG5_pMesh mesh) {
   bytes = sizeof(MMG5_Point) + sizeof(MMG5_xPoint) +
     6*sizeof(MMG5_Tetra) + ctri*sizeof(MMG5_xTetra) +
     4*6*sizeof(int) + ctri*3*sizeof(int) +
-    sizeof(MMG5_Sol)+4*sizeof(_MMG5_hedge);
+    4*sizeof(_MMG5_hedge);
 
 #ifdef USE_SCOTCH
   /* bytes = bytes + vertTab + edgeTab + PermVrtTab *
@@ -234,7 +234,6 @@ int _MMG3D_memOption_memRepartition(MMG5_pMesh mesh) {
   mesh->nemax = MG_MIN(mesh->nemax,6*npadd+mesh->ne);
 
   /* check if the memory asked is enough to load the mesh*/
-
   if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug ) {
     castedVal = _MMG5_SAFELL2LCAST(mesh->memMax/million);
     fprintf(stdout,"  MAXIMUM MEMORY AUTHORIZED (Mo)    %ld\n",
