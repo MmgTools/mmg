@@ -517,10 +517,10 @@ int _MMG5_setEdgeNmTag(MMG5_pMesh mesh, _MMG5_Hash *hash) {
   MMG5_pTria          ptt;
   _MMG5_hedge         *ph;
   int                 adj,pradj,piv,ilist,list[MMG3D_LMAX+2];
-  int                 k,i,l,i1,i2,na,nb,ia,it1,it2, nr;
+  int                 k,l,i1,i2,na,nb,ia,it1,it2, nr;
   int                 ipa,ipb,nbdy,start;
   unsigned int        key;
-  char                iface,hasadja;
+  char                iface,hasadja,i;
   static char         mmgWarn0=0,mmgWarn1=0;
 
   nr = 0;

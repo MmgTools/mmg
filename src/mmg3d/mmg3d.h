@@ -243,6 +243,7 @@ extern int  _MMG5_BezierEdge(MMG5_pMesh mesh,int ip0, int ip1, double b0[3], dou
 extern int  _MMG5_BezierRidge(MMG5_pMesh mesh,int ip0, int ip1, double s, double *o, double *no1, double *no2, double *to);
 extern int  _MMG5_BezierNom(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,double *no,double *to);
 extern int  _MMG5_norface(MMG5_pMesh mesh ,int k, int iface, double v[3]);
+int  MMG3D_findEdge(MMG5_pMesh,MMG5_pTetra,int,int,int,int,char*,char* );
 int  _MMG5_boulernm (MMG5_pMesh mesh, int start, int ip, int *ng, int *nr);
 int  _MMG5_boulenm(MMG5_pMesh mesh, int start, int ip, int iface, double n[3],double t[3]);
 int  _MMG5_boulevolp(MMG5_pMesh mesh, int start, int ip, int * list);
@@ -256,12 +257,12 @@ int  _MMG5_coquilface(MMG5_pMesh mesh, int start,char iface,int,int*,int*,int*,i
 int _MMG3D_coquilFaceFirstLoop(MMG5_pMesh mesh,int start,int na,int nb,char iface,
                                char ia,int *list,int *ilist,int *it1,int *it2,
                                int *piv,int *adj,char *hasadja,int *nbdy,int silent);
-void _MMG3D_coquilFaceSecondLoopInit(MMG5_pMesh mesh,int piv,char *iface,int *i,
+void _MMG3D_coquilFaceSecondLoopInit(MMG5_pMesh mesh,int piv,char *iface,char *i,
                                      int *list,int *ilist,int *it1,int *pradj,
                                      int *adj);
 void _MMG5_coquilFaceErrorMessage(MMG5_pMesh mesh, int k1, int k2);
-int16_t _MMG5_coquilTravel(MMG5_pMesh, int, int, int*, int*, char*, int*);
-int  _MMG5_openCoquilTravel(MMG5_pMesh, int, int, int*, int*, char*, int*);
+int16_t _MMG5_coquilTravel(MMG5_pMesh,int,int,int*,int*,char*,char*);
+int16_t _MMG5_openCoquilTravel(MMG5_pMesh,int,int,int*,int*,char*,char*);
 extern int  _MMG5_settag(MMG5_pMesh,int,int,int16_t,int);
 extern int  _MMG5_deltag(MMG5_pMesh,int,int,int16_t);
 int  _MMG5_setNmTag(MMG5_pMesh mesh, _MMG5_Hash *hash);
