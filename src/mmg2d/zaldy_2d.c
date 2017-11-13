@@ -143,12 +143,18 @@ int _MMG5_getnElt(MMG5_pMesh mesh,int n) {
  *
  * \return 0 if fail, 1 otherwise
  *
- * memory repartition for the -m option with initial values of memMax,npmax,
- * nemax and ntmax.
+ * Set the memMax value to its "true" value (50% of the RAM or memory asked by
+ * user) and perform memory repartition for the -m option.  If -m is not given,
+ * memMax is the detected RAM. If -m is provided, check the user option and set
+ * memMax to the available RAM if the user ask for too much memory. Last,
+ * perform the memory repartition between the mmg arrays with respect to the
+ * memMax value.
+ *
+ * \remark Here, mesh->npmax/ntmax must be setted.
  *
  */
 static inline
-int _MMG2D_memOption_memRepartition(MMG5_pMesh mesh) {
+int _MMG2D_memOption_memSet(MMG5_pMesh mesh) {
   long long  million = 1048576L;
   long long  usedMem,avMem,reservedMem;
   long       castedVal;

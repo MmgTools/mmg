@@ -140,15 +140,19 @@ int _MMG3D_delElt(MMG5_pMesh mesh,int iel) {
  *
  * \return 0 if fail, 1 otherwise
  *
- * memory repartition for the -m option with initial values of memMax,npmax,
- * nemax and ntmax.
+ * Set the memMax value to its "true" value (50% of the RAM or memory asked by
+ * user) and perform memory repartition for the -m option.  If -m is not given,
+ * memMax is the detected RAM. If -m is provided, check the user option and set
+ * memMax to the available RAM if the user ask for too much memory. Last,
+ * perform the memory repartition between the mmg arrays with respect to the
+ * memMax value.
+ *
+ * \remark Here, mesh->npmax/nemax/ntmax must be setted.
  *
  */
-int _MMG3D_memOption_memRepartition(MMG5_pMesh mesh) {
+int _MMG3D_memOption_memSet(MMG5_pMesh mesh) {
   long long  million = 1048576L;
-  long long  usedMem,avMem,reservedMem;
   long       castedVal;
-  int        ctri,npadd,bytes;
 
   if ( mesh->info.mem <= 0 ) {
     if ( mesh->memMax )
@@ -172,6 +176,23 @@ int _MMG3D_memOption_memRepartition(MMG5_pMesh mesh) {
       mesh->memMax = (long long)(mesh->info.mem)*million;
     }
   }
+
+  return ( _MMG3D_memOption_memRepartition( mesh ) );
+}
+
+/**
+ * \param mesh pointer toward the mesh structure
+ *
+ * \return 0 if fail, 1 otherwise
+ *
+ * memory repartition for the memMax amout of memory available.
+ *
+ */
+int _MMG3D_memOption_memRepartition(MMG5_pMesh mesh) {
+  long long  million = 1048576L;
+  long long  usedMem,avMem,reservedMem;
+  long       castedVal;
+  int        ctri,npadd,bytes;
 
   /* init allocation need 38 Mo */
   reservedMem = 38*million +

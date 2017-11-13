@@ -292,6 +292,7 @@ int  _MMG5_chkfemtopo(MMG5_pMesh mesh);
 int  _MMG5_cntbdypt(MMG5_pMesh mesh, int nump);
 long long _MMG5_memSize(void);
 int  _MMG3D_memOption(MMG5_pMesh mesh);
+int  _MMG3D_memOption_memSet(MMG5_pMesh mesh);
 int  _MMG3D_memOption_memRepartition(MMG5_pMesh mesh);
 int  _MMG5_mmg3d1_pattern(MMG5_pMesh ,MMG5_pSol );
 int  _MMG5_mmg3d1_delone(MMG5_pMesh ,MMG5_pSol );
