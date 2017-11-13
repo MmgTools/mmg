@@ -102,7 +102,7 @@ int _MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,
     calold = MG_MIN(calold, pt->qual);
 
     /* identification of edge number in tetra adj */
-    if ( !MMG3D_findEdge(mesh,pt,iel,na,nb,1,NULL,&i) ) return -1;
+    if ( !MMG3D_findEdge(mesh,pt,adj,na,nb,1,NULL,&i) ) return -1;
 
     list[(*ilist)] = 6*adj +i;
     (*ilist)++;

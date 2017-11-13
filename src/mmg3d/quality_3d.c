@@ -611,7 +611,7 @@ int _MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcib
   double      len;
   int         k,ia,ipa,ipb,lon,l;
   //int   npbdry;
-  int    *pdel,lenint,loc,nedel,longen;
+  int        *pdel,lenint,loc,nedel,longen;
   //int      isbdry;
   double   dned,dnface,dnint/*,dnins*/,w,lenavg,lent[6];
   double   dnpdel,dnadd,leninv,dnaddloc,dnpdelloc;
@@ -663,7 +663,10 @@ int _MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcib
       longen = _MMG5_coquil(mesh,k,ia,list);
       lon = longen/2;
       //isbdry = 0;//longen%2;
-      if ( lon<=0 ) return 0;
+      if ( lon<=0 ) {
+        _MMG5_SAFE_FREE(pdel);
+        return 0;
+      }
       /* if ( isbdry )  { */
       /*    assert(longen%2); */
       /*    //printf("_MMG5_coquil %d\n",longen/2); */
