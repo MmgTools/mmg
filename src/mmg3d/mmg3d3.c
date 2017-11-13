@@ -225,6 +225,8 @@ static int _MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itdeg, 
  * toward the \a NULL pointer otherwise.
  * \param itdeg degraded elements.
  *
+ * \return -1 if fail, he number of swap otherwise.
+ *
  * Internal edge flipping in the Lagrangian mode; only affects tetra marked with it
  *
  */
@@ -233,17 +235,17 @@ int _MMG5_swptetlag(MMG5_pMesh mesh,MMG5_pSol met,double crit,_MMG3D_pOctree oct
   MMG5_pxTetra  pxt;
   int      list[MMG3D_LMAX+2],ilist,k,it,nconf,maxit,ns,nns,ier;
   char     i;
-  
+
   maxit = 2;
   it = nns = 0;
-  
+
   do {
     ns = 0;
     for (k=1; k<=mesh->ne; k++) {
       pt = &mesh->tetra[k];
       if ( !MG_EOK(pt) || (pt->tag & MG_REQ) )  continue;
       if ( pt->mark != itdeg ) continue;
-      
+
       for (i=0; i<6; i++) {
         /* Prevent swap of a ref or tagged edge */
         if ( pt->xt ) {
@@ -252,8 +254,9 @@ int _MMG5_swptetlag(MMG5_pMesh mesh,MMG5_pSol met,double crit,_MMG3D_pOctree oct
         }
 
         nconf = _MMG5_chkswpgen(mesh,met,k,i,&ilist,list,crit,2);
-        
-        if ( nconf ) {
+
+        if ( nconf<0 ) return -1;
+        else if ( nconf ) {
           ier = _MMG5_swpgen(mesh,met,nconf,ilist,list,octree,2);
           if ( ier > 0 )  ns++;
           else if ( ier < 0 ) return(-1);

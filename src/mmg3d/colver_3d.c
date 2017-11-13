@@ -183,7 +183,7 @@ _MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,char iedg,int *lists,
   MMG5_pxTetra  pxt;
   double        n0[3],n1[3],devnew;
   int           nump,numq,piv,iel,jel,jel1,nap,nbp,naq,nbq,nro,adj,*adja;
-  char          ip,iq,ipiv,iopp,i,j,j1,jface,jface1,ipa,ipb,isface;
+  char          ip,iq,ipiv,iopp,i,j,j1,jface,jface1,isface;
 
   pt = &mesh->tetra[k];
   ip = _MMG5_idir[iface][_MMG5_inxt2[iedg]];

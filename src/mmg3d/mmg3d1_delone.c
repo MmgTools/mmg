@@ -878,7 +878,7 @@ _MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree, int* warn) 
       }
       nnf += nf;
       nf += _MMG5_swptet(mesh,met,1.053,0.5/_MMG3D_ALPHAD/*0.0288675*/,octree,2);
-     
+
       if ( nf < 0 ) {
         fprintf(stderr,"\n  ## Error: %s: unable to improve mesh. Exiting.\n",
           __func__);

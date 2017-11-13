@@ -594,6 +594,8 @@ int _MMG5_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree, int typchk
  * \param typchk type of checking permformed for edge length (hmin or LSHORT
  * criterion).
  *
+ * \return -1 if fail, the number of swap otherwise.
+ *
  * Internal edge flipping.
  *
  */
@@ -624,10 +626,11 @@ int _MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double crit,double declic,
         }
 
         nconf = _MMG5_chkswpgen(mesh,met,k,i,&ilist,list,crit,typchk);
-        if ( nconf ) {
+        if ( nconf<0 ) return -1;
+        else if ( nconf ) {
           ier = _MMG5_swpgen(mesh,met,nconf,ilist,list,octree,typchk);
           if ( ier > 0 )  ns++;
-          else if ( ier < 0 ) return(-1);
+          else if ( ier < 0 ) return -1;
           break;
         }
       }
@@ -638,7 +641,7 @@ int _MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double crit,double declic,
   if ( (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) && nns > 0 )
     fprintf(stdout,"     %8d edge swapped\n",nns);
 
-  return(nns);
+  return nns;
 }
 
 /**
