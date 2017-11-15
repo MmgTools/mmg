@@ -99,7 +99,7 @@ void _MMG5_Init_parameters(MMG5_pMesh mesh) {
   mesh->memMax = _MMG5_memSize();
   if ( mesh->memMax ) {
     /* maximal memory = 50% of total physical memory */
-    mesh->memMax = mesh->memMax*_MMG5_MEMPERCENT;;
+    mesh->memMax = mesh->memMax*_MMG5_MEMPERCENT;
   } else {
     /* default value = 800 Mo */
     printf("  Maximum memory set to default value: %d Mo.\n",_MMG5_MEMMAX);
