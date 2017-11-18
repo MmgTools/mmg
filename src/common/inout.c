@@ -1610,12 +1610,12 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename,
     if ( !MG_VOK(ppt) ) continue;
     ++nelts;
 
-    if ( !bin ) fprintf(inm,"%d 15 2 %d 0 %d\n",nelts,abs(ppt->ref),ppt->tmp);
+    if ( !bin ) fprintf(inm,"%d 15 2 %d %d %d\n",nelts,abs(ppt->ref),
+                        abs(ppt->ref),ppt->tmp);
     else {
       fwrite(&nelts,sw,1,inm);
-      word = 0;
-      fwrite(&word,sw,1,inm);
       word = abs(ppt->ref);
+      fwrite(&word,sw,1,inm);
       fwrite(&word,sw,1,inm);
       fwrite(&ppt->tmp,sw,1,inm);
     }
@@ -1636,12 +1636,11 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename,
     ++nelts;
 
     if(!bin)
-      fprintf(inm,"%d 1 2 %d 0 %d %d\n",nelts,pa->ref,
+      fprintf(inm,"%d 1 2 %d %d %d %d\n",nelts,pa->ref,pa->ref,
               mesh->point[pa->a].tmp,mesh->point[pa->b].tmp);
     else {
       fwrite(&nelts,sw,1,inm);
-      word = 0;
-      fwrite(&word,sw,1,inm);
+      fwrite(&pa->ref,sw,1,inm);
       fwrite(&pa->ref,sw,1,inm);
       fwrite(&mesh->point[pa->a].tmp,sw,1,inm);
       fwrite(&mesh->point[pa->b].tmp,sw,1,inm);
@@ -1663,13 +1662,12 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename,
     ++nelts;
 
     if(!bin)
-      fprintf(inm,"%d 2 2 %d 0 %d %d %d\n",nelts,ptt->ref,
+      fprintf(inm,"%d 2 2 %d %d %d %d %d\n",nelts,ptt->ref,ptt->ref,
               mesh->point[ptt->v[0]].tmp,mesh->point[ptt->v[1]].tmp,
               mesh->point[ptt->v[2]].tmp);
     else {
       fwrite(&nelts,sw,1,inm);
-      word = 0;
-      fwrite(&word,sw,1,inm);
+      fwrite(&ptt->ref,sw,1,inm);
       fwrite(&ptt->ref,sw,1,inm);
       fwrite(&mesh->point[ptt->v[0]].tmp,sw,1,inm);
       fwrite(&mesh->point[ptt->v[1]].tmp,sw,1,inm);
@@ -1691,13 +1689,12 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename,
     ++nelts;
 
     if(!bin)
-      fprintf(inm,"%d 3 2 %d 0 %d %d %d %d\n",nelts,pq->ref,
+      fprintf(inm,"%d 3 2 %d %d %d %d %d %d\n",nelts,pq->ref,pq->ref,
               mesh->point[pq->v[0]].tmp,mesh->point[pq->v[1]].tmp,
               mesh->point[pq->v[2]].tmp,mesh->point[pq->v[3]].tmp);
     else {
       fwrite(&nelts,sw,1,inm);
-      word = 0;
-      fwrite(&word,sw,1,inm);
+      fwrite(&pq->ref,sw,1,inm);
       fwrite(&pq->ref,sw,1,inm);
       fwrite(&mesh->point[pq->v[0]].tmp,sw,1,inm);
       fwrite(&mesh->point[pq->v[1]].tmp,sw,1,inm);
@@ -1720,13 +1717,12 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename,
     ++nelts;
 
     if(!bin)
-      fprintf(inm,"%d 4 2 %d 0 %d %d %d %d\n",nelts,pt->ref,
+      fprintf(inm,"%d 4 2 %d %d %d %d %d %d\n",nelts,pt->ref,pt->ref,
               mesh->point[pt->v[0]].tmp,mesh->point[pt->v[1]].tmp,
               mesh->point[pt->v[2]].tmp,mesh->point[pt->v[3]].tmp);
     else {
       fwrite(&nelts,sw,1,inm);
-      word = 0;
-      fwrite(&word,sw,1,inm);
+      fwrite(&pt->ref,sw,1,inm);
       fwrite(&pt->ref,sw,1,inm);
       fwrite(&mesh->point[pt->v[0]].tmp,sw,1,inm);
       fwrite(&mesh->point[pt->v[1]].tmp,sw,1,inm);
@@ -1749,14 +1745,13 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename,
     ++nelts;
 
     if(!bin)
-      fprintf(inm,"%d 6 2 %d 0 %d %d %d %d %d %d\n",nelts,pp->ref,
+      fprintf(inm,"%d 6 2 %d %d %d %d %d %d %d %d\n",nelts,pp->ref,pp->ref,
               mesh->point[pp->v[0]].tmp,mesh->point[pp->v[1]].tmp,
               mesh->point[pp->v[2]].tmp,mesh->point[pp->v[3]].tmp,
               mesh->point[pp->v[4]].tmp,mesh->point[pp->v[5]].tmp);
     else {
       fwrite(&nelts,sw,1,inm);
-      word = 0;
-      fwrite(&word,sw,1,inm);
+      fwrite(&pp->ref,sw,1,inm);
       fwrite(&pp->ref,sw,1,inm);
       fwrite(&mesh->point[pp->v[0]].tmp,sw,1,inm);
       fwrite(&mesh->point[pp->v[1]].tmp,sw,1,inm);
