@@ -201,9 +201,10 @@ ENDIF()
 ############################################################################
 # Find SCOTCH library?
 SET(SCOTCH_DIR "" CACHE PATH "Installation directory for scotch")
-INCLUDE(cmake/modules/FindScotch.cmake)
+LIST(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules)
+FIND_PACKAGE(Scotch)
 
-IF ( SCOTCH_NOTFOUND )
+IF ( NOT SCOTCH_FOUND )
   MESSAGE ( WARNING "Scotch library not found:"
     "Using scotch reduce the execution time of mmg3d "
     "(see https://gforge.inria.fr/frs/?group_id=248 to download it)."
@@ -319,28 +320,11 @@ CMAKE_DEPENDENT_OPTION ( USE_SCOTCH "Use SCOTCH TOOL for renumbering" ON
   "SCOTCH_FOUND;BUILD_MMGS3D" OFF)
 
 IF( USE_SCOTCH )
-
-  SET(CMAKE_REQUIRED_INCLUDES ${SCOTCH_INCLUDE_DIR})
-  SET(CMAKE_REQUIRED_LIBRARIES ${SCOTCH_LIBRARY})
-  SET(CMAKE_REQUIRED_LIBRARIES ${SCOTCHERR_LIBRARY})
-
   SET(CMAKE_C_FLAGS "-DUSE_SCOTCH ${CMAKE_C_FLAGS}")
 
-  IF ( NOT WIN32 )
-    SET(SCOTCH_LINK_FLAGS "-lpthread")
-  ELSE ()
-    # On win32, it is easier to compile scotch without the pthreads so, don't use the -lpthread flag
-
-    # Turn off "Image Has Safe Exception Handlers" linker option (SAFESEH error of visual studio):
-    # see the my_add_link_flags macro.
-    INCLUDE(cmake/config/AddCompileLinkFlags.cmake)
-  ENDIF ()
-
   MESSAGE(STATUS
-    "Compilation with scotch: ${SCOTCH_LIBRARY}")
-  SET( LIBRARIES ${SCOTCH_LINK_FLAGS} ${LIBRARIES})
-  SET( LIBRARIES ${SCOTCHERR_LIBRARY} ${LIBRARIES})
-  SET( LIBRARIES ${SCOTCH_LIBRARY} ${LIBRARIES})
+    "Compilation with scotch: ${SCOTCH_LIBRARIES}")
+  SET( LIBRARIES ${SCOTCH_LIBRARIES} ${LIBRARIES})
 ENDIF()
 
 
@@ -390,7 +374,7 @@ ENDIF ( )
 
 IF( USE_SCOTCH )
   # Include Scotch Dir here to ensure that Mmg doesn't search it's own headers in /usr/local
-  INCLUDE_DIRECTORIES(${SCOTCH_INCLUDE_DIR})
+  INCLUDE_DIRECTORIES(${SCOTCH_INCLUDE_DIRS})
 ENDIF()
 
 ###############################################################################
