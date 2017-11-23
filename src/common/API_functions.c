@@ -346,7 +346,6 @@ int MMG5_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solout) {
  *
  */
 void MMG5_Free_structures(MMG5_pMesh mesh,MMG5_pSol sol){
-  long           castedVal;
 
   if ( mesh->point )
     _MMG5_DEL_MEM(mesh,mesh->point,(mesh->npmax+1)*sizeof(MMG5_Point));
@@ -366,8 +365,7 @@ void MMG5_Free_structures(MMG5_pMesh mesh,MMG5_pSol sol){
     _MMG5_DEL_MEM(mesh,mesh->info.par,mesh->info.npar*sizeof(MMG5_Par));
 
   if ( mesh->info.imprim>5 || mesh->info.ddebug ) {
-    castedVal = _MMG5_SAFELL2LCAST(mesh->memCur);
-    printf("  MEMORY USED AT END (bytes) %ld\n",castedVal);
+    printf("  MEMORY USED AT END (bytes) %lld\n",mesh->memCur);
   }
 
   return;
