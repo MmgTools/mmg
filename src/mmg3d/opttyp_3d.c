@@ -476,8 +476,8 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
   it = 0;
   maxit = 10;
   do {
+    base = mesh->mark;
     ne = mesh->ne;
-    base = ++mesh->mark;
     nd = 0;
     nbdy = nbdy2 = 0;
     memset(cs,0,10*sizeof(int));
