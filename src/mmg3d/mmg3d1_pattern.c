@@ -414,7 +414,7 @@ static int _MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met) {
     else  nc = 0;
 
     if ( !mesh->info.nomove ) {
-      nm = _MMG5_movtet(mesh,met,NULL,1.,1.,1,0,0,0,1);
+      nm = _MMG5_movtet(mesh,met,NULL,1.,1.,1,0,0,0,1,mesh->mark-2);
       if ( nm < 0 ) {
         fprintf(stderr,"\n  ## Error: %s: unable to improve mesh."
                 " Exiting.\n",__func__);
@@ -432,7 +432,7 @@ static int _MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met) {
       }
       nnf += nf;
 
-      nf = _MMG5_swptet(mesh,met,1.053,0.0288675,NULL,2);
+      nf = _MMG5_swptet(mesh,met,1.053,0.0288675,NULL,2,mesh->mark-2);
       if ( nf < 0 ) {
         fprintf(stderr,"\n  ## Error: %s: unable to improve mesh."
                 " Exiting.\n",__func__);
@@ -485,7 +485,7 @@ static int _MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met) {
 /*       nw = 0; */
 
     if ( !mesh->info.nomove ) {
-      nm = _MMG5_movtet(mesh,met,NULL,1.,1.,1,1,1,1,0);
+      nm = _MMG5_movtet(mesh,met,NULL,1.,1.,1,1,1,1,0,mesh->mark-2);
       if ( nm < 0 ) {
         fprintf(stderr,"\n  ## Error: %s: unable to improve mesh.\n",
           __func__);
@@ -504,7 +504,7 @@ static int _MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met) {
       }
       nnf += nf;
 
-      nf = _MMG5_swptet(mesh,met,1.053,0.0288675,NULL,2);
+      nf = _MMG5_swptet(mesh,met,1.053,0.0288675,NULL,2,mesh->mark-2);
       if ( nf < 0 ) {
         fprintf(stderr,"\n  ## Error: %s: Unable to improve mesh."
                 " Exiting.\n",__func__);
@@ -521,7 +521,7 @@ static int _MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met) {
   while( ++it < maxit && /*nw+*/nm+nf > 0 );
 
   if ( !mesh->info.nomove ) {
-    nm = _MMG5_movtet(mesh,met,NULL,1.,1.,1,1,1,1,3);
+    nm = _MMG5_movtet(mesh,met,NULL,1.,1.,1,1,1,1,3,mesh->mark-2);
     if ( nm < 0 ) {
       fprintf(stderr,"\n  ## Error: %s: unable to improve mesh.\n",
               __func__);

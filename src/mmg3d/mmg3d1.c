@@ -592,7 +592,8 @@ int _MMG5_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree, int typchk
  * \param octree pointer toward the octree structure in delaunay mode and
  * toward the \a NULL pointer otherwise
  * \param typchk type of checking permformed for edge length (hmin or LSHORT
- * criterion).
+ * criterion)
+ * \param testmark all the tets with a mark less than testmark will not be treated.
  *
  * \return -1 if fail, the number of swap otherwise.
  *
@@ -600,7 +601,7 @@ int _MMG5_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree, int typchk
  *
  */
 int _MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double crit,double declic,
-                 _MMG3D_pOctree octree,int typchk) {
+                 _MMG3D_pOctree octree,int typchk,int testmark) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
   int      list[MMG3D_LMAX+2],ilist,k,it,nconf,maxit,ns,nns,ier;
@@ -614,7 +615,7 @@ int _MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double crit,double declic,
     for (k=1; k<=mesh->ne; k++) {
       pt = &mesh->tetra[k];
       if ( !MG_EOK(pt) || (pt->tag & MG_REQ) )  continue;
-      else if ( pt->mark < mesh->mark-2 )  continue;
+      else if ( pt->mark < testmark )  continue;
 
       if ( pt->qual > declic/*0.0288675*/ /*0.6/_MMG3D_ALPHAD*/ )  continue;
 
@@ -654,7 +655,8 @@ int _MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double crit,double declic,
  * \param improveSurf forbid surface degradation during the move
  * \param improveVolSurf forbid volume degradation during the surfacic move
  * \param improveVol forbid volume degradation during the move
- * \param maxit maximum number of iteration.
+ * \param maxit maximum number of iteration
+ * \param testmark all the tets with a mark less than testmark will not be treated.
  * \return -1 if failed, number of moved points otherwise.
  *
  * Analyze tetrahedra and move points so as to make mesh more uniform.
@@ -662,7 +664,7 @@ int _MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double crit,double declic,
  */
 int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,
                  double clickSurf,double clickVol,int moveVol, int improveSurf,
-                 int improveVolSurf, int improveVol, int maxit) {
+                 int improveVolSurf, int improveVol, int maxit,int testmark) {
   MMG5_pTetra        pt;
   MMG5_pPoint        ppt;
   MMG5_pxTetra       pxt;
@@ -685,7 +687,7 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,
     for (k=1; k<=mesh->ne; k++) {
       pt = &mesh->tetra[k];
       if ( !MG_EOK(pt) || pt->ref < 0 || (pt->tag & MG_REQ) )   continue;
-      else if ( pt->mark < mesh->mark-2 )  continue;
+      else if ( pt->mark < testmark )  continue;
 
       /* point j on face i */
       for (i=0; i<4; i++) {
@@ -2024,7 +2026,7 @@ int _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,char typchk, int patternMode) {
       }
       nf  += ier;
 
-      ier = _MMG5_swptet(mesh,met,1.1,0.0288675,NULL,typchk);
+      ier = _MMG5_swptet(mesh,met,1.1,0.0288675,NULL,typchk,mesh->mark-2);
       if ( ier < 0 ) {
         fprintf(stderr,"\n  ## Unable to improve mesh. Exiting.\n");
         return(0);

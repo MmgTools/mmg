@@ -359,7 +359,7 @@ int _MMG5_chkptonbdy(MMG5_pMesh,int);
 double _MMG5_orcal_poi(double a[3],double b[3],double c[3],double d[3]);
 int _MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcible);
 /*function for agressive optimization*/
-int MMG3D_opttyp(MMG5_pMesh , MMG5_pSol ,_MMG3D_pOctree );
+  int MMG3D_opttyp(MMG5_pMesh , MMG5_pSol ,_MMG3D_pOctree ,int);
 int _MMG3D_swpItem(MMG5_pMesh ,  MMG5_pSol ,_MMG3D_pOctree ,int ,int );
 int _MMG3D_splitItem(MMG5_pMesh ,  MMG5_pSol ,_MMG3D_pOctree ,int ,int ,double );
 int MMG3D_optbdry(MMG5_pMesh ,MMG5_pSol ,_MMG3D_pOctree ,int );
@@ -430,9 +430,9 @@ char _MMG5_chkedg(MMG5_pMesh mesh,MMG5_Tria *pt,char ori,double,double,int);
 int  _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met, char typchk, int patternMode) ;
 int  _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree,
                   double clickSurf,double clickVol,int moveVol,int improveSurf,int improveVolSurf,
-                  int improveVol,int maxit);
+                  int improveVol,int maxit,int testmark);
 int  _MMG5_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree, int);
-  int  _MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double,double,_MMG3D_pOctree, int);
+  int  _MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double,double,_MMG3D_pOctree, int,int);
 
 /* pointers */
 /* init structures */
