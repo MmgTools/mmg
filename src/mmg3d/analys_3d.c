@@ -392,7 +392,7 @@ static int _MMG5_chkVertexConnectedDomains(MMG5_pMesh mesh){
           if ( mesh->adja[4*(k-1)+1+i] ) continue;
           ier=_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,1);
        } else {
-          ier=_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,1);
+          ier=_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,0);
         }
         if(ilistv != ppt->s) {
           if(!(ppt->tag & MG_REQ) ) {
