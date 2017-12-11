@@ -187,6 +187,8 @@ int _MMGS_simbulgept(MMG5_pMesh mesh,MMG5_pSol met, int k,int i,int ip) {
   kadja = mesh->adja[3*(k-1)+i+1]/3;
   iadja = mesh->adja[3*(k-1)+i+1]%3;
 
+  if ( !kadja ) return 1;
+
   pt = &mesh->tria[kadja];
   memcpy(pt0,pt,sizeof(MMG5_Tria));
   is         = _MMG5_iprv2[iadja];
