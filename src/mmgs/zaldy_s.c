@@ -167,13 +167,16 @@ int _MMGS_memOption_memSet(MMG5_pMesh mesh) {
     return 0;
   }
 
-  /* point+tria+adja */
+  /* point+xpoint+tria+adja+aniso sol */
   bytes = sizeof(MMG5_Point) + sizeof(MMG5_xPoint) +
-    2*sizeof(MMG5_Tria) + 3*sizeof(int);
+    2*sizeof(MMG5_Tria) + 3*sizeof(int) + sizeof(double);
 
   avMem = mesh->memMax-usedMem;
 
-  npadd = (int) ( (double)avMem/bytes );
+  /* If npadd is exactly the maximum memory available, we will use all the
+   * memory and the analysis step will fail. As arrays may be reallocated, we
+   * can have smaller values for xpmax and ntmax (npadd/2). */
+  npadd = (int) ( (double)avMem/(2*bytes) );
   mesh->npmax = MG_MIN(mesh->npmax,mesh->np+npadd);
   mesh->ntmax = MG_MIN(mesh->ntmax,2*npadd+mesh->nt);
 
