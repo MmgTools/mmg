@@ -71,7 +71,7 @@ extern "C" {
 
 /** Maximal memory used if available memory compitation fail. */
 #define _MMG5_MEMMAX  800        /**< Default mem if unable to compute memMax */
-#define _MMG5_BITWIZE_Mo_TO_O 20 /**< Bitwise convertion from Mo to O */
+#define _MMG5_BITWIZE_MB_TO_B 20 /**< Bitwise convertion from Mo to O */
 #define _MMG5_MEMPERCENT 50/100  /**< Percent of RAM used by default */
 
 /* Domain refs in iso mode */
@@ -99,6 +99,8 @@ extern "C" {
 #define A64TH     0.015625
 #define A16TH     0.0625
 #define A32TH     0.03125
+
+#define _MMG5_MEMMIN 38 /**< minimal memory needed to store the mesh/sol names */
 
 /* Variables for option initialization */
 #define _MMG5_NONSET_MEM  -1 /**< mem value for unspecified max memory */

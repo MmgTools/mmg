@@ -101,9 +101,9 @@ void _MMG5_Init_parameters(MMG5_pMesh mesh) {
     /* maximal memory = 50% of total physical memory */
     mesh->memMax = mesh->memMax*_MMG5_MEMPERCENT;
   } else {
-    /* default value = 800 Mo */
-    printf("  Maximum memory set to default value: %d Mo.\n",_MMG5_MEMMAX);
-    mesh->memMax = _MMG5_MEMMAX << _MMG5_BITWIZE_Mo_TO_O;
+    /* default value = 800 MB */
+    printf("  Maximum memory set to default value: %d MB.\n",_MMG5_MEMMAX);
+    mesh->memMax = _MMG5_MEMMAX << _MMG5_BITWIZE_MB_TO_B;
   }
 
 }
@@ -365,7 +365,7 @@ void MMG5_Free_structures(MMG5_pMesh mesh,MMG5_pSol sol){
     _MMG5_DEL_MEM(mesh,mesh->info.par,mesh->info.npar*sizeof(MMG5_Par));
 
   if ( mesh->info.imprim>5 || mesh->info.ddebug ) {
-    printf("  MEMORY USED AT END (bytes) %lld\n",mesh->memCur);
+    printf("  MEMORY USED AT END (Bytes) %lld\n",mesh->memCur);
   }
 
   return;
