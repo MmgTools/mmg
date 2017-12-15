@@ -323,7 +323,7 @@ int MMG2_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   mesh->info.ls    *= dd;
 
   /* de-normalize metric */
-  if ( !sol->np )  return(1);
+  if ( (!sol->np) || (!sol->m) )  return(1);
 
   switch (sol->size) {
   case 1:

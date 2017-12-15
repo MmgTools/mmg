@@ -152,7 +152,7 @@ int _MMGS_memOption_memSet(MMG5_pMesh mesh) {
     }
   }
 
-  /* init allocation need _MMG5_MEMMIN MB */
+  /* init allocation need _MMG5_MEMMIN B */
   reservedMem = _MMG5_MEMMIN;
 
   /* Compute the needed initial memory */

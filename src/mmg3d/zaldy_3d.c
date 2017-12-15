@@ -191,7 +191,7 @@ int _MMG3D_memOption_memRepartition(MMG5_pMesh mesh) {
   long long  usedMem,avMem,reservedMem;
   int        ctri,npadd,bytes;
 
-  /* init allocation need _MMG5_MEMMIN MB */
+  /* init allocation need _MMG5_MEMMIN B */
   reservedMem = _MMG5_MEMMIN +
     (long long)(mesh->nprism*sizeof(MMG5_Prism)+mesh->nquad*sizeof(MMG5_Quad));
 
