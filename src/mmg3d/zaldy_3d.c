@@ -210,11 +210,11 @@ int _MMG3D_memOption_memRepartition(MMG5_pMesh mesh) {
 
   ctri = 2;
   /* Euler-poincare: ne = 6*np; nt = 2*np; na = np/5 *
-   * point+tria+tets+adja+adjt+sol+item */
+   * point+tria+tets+adja+adjt+aniso sol+item */
   bytes = sizeof(MMG5_Point) + sizeof(MMG5_xPoint) +
     6*sizeof(MMG5_Tetra) + ctri*sizeof(MMG5_xTetra) +
     4*6*sizeof(int) + ctri*3*sizeof(int) +
-    4*sizeof(_MMG5_hedge);
+    4*sizeof(_MMG5_hedge)+6*sizeof(double);
 
 #ifdef USE_SCOTCH
   /* bytes = bytes + vertTab + edgeTab + PermVrtTab *
@@ -224,7 +224,10 @@ int _MMG3D_memOption_memRepartition(MMG5_pMesh mesh) {
 
   avMem = mesh->memMax-usedMem;
 
-  npadd = (int) ( (double)avMem/bytes );
+  /* If npadd is exactly the maximum memory available, we will use all the
+   * memory and the analysis step will fail. As arrays may be reallocated, we
+   * can have smaller values for npmax,ntmax and nemax (npadd/2). */
+  npadd = (int) ( (double)avMem/(2*bytes) );
   mesh->npmax = MG_MIN(mesh->npmax,mesh->np+npadd);
   mesh->ntmax = MG_MIN(mesh->ntmax,ctri*npadd+mesh->nt);
   mesh->nemax = MG_MIN(mesh->nemax,6*npadd+mesh->ne);

@@ -169,7 +169,7 @@ int _MMGS_memOption_memSet(MMG5_pMesh mesh) {
 
   /* point+xpoint+tria+adja+aniso sol */
   bytes = sizeof(MMG5_Point) + sizeof(MMG5_xPoint) +
-    2*sizeof(MMG5_Tria) + 3*sizeof(int) + sizeof(double);
+    2*sizeof(MMG5_Tria) + 3*sizeof(int) + 6*sizeof(double);
 
   avMem = mesh->memMax-usedMem;
 

@@ -199,14 +199,17 @@ int _MMG2D_memOption_memSet(MMG5_pMesh mesh) {
   ctri = 2;
 
   /* Euler-poincare: ne = 6*np; nt = 2*np; na = np/5 *
-   * point+tria+edges+adjt+sol */
+   * point+tria+edges+adjt+ aniso sol */
   bytes = sizeof(MMG5_Point) +
     2*sizeof(MMG5_Tria) + 3*2*sizeof(int)
-    + 0.2*sizeof(MMG5_Edge);
+    + 0.2*sizeof(MMG5_Edge) + 3*sizeof(double);
 
   avMem = mesh->memMax-usedMem;
 
-  npadd = (int) ( (double)avMem/bytes );
+  /* If npadd is exactly the maximum memory available, we will use all the
+   * memory and the analysis step will fail. As arrays may be reallocated, we
+   * can have smaller values for npmax and ntmax (npadd/2). */
+  npadd = (int) ( (double)avMem/(2*bytes) );
   mesh->npmax = MG_MIN(mesh->npmax,mesh->np+npadd);
   mesh->ntmax = MG_MIN(mesh->ntmax,ctri*npadd+mesh->nt);
   mesh->namax = MG_MIN(mesh->namax,ctri*npadd+mesh->na);
