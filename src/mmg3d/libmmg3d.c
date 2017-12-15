@@ -620,7 +620,7 @@ int MMG3D_pack_points(MMG5_pMesh mesh) {
   if ( !MMG3D_update_eltsVertices(mesh) ) return -1;
 
   /** Pack the point array */
-  if ( !MMG3D_pack_pointArray(mesh) ) return -1;
+  if ( MMG3D_pack_pointArray(mesh)<0 ) return -1;
 
   return nc;
 }

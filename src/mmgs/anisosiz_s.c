@@ -55,7 +55,7 @@ static int _MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   double             *m,n[3],isqhmin,isqhmax,b0[3],b1[3],ps1,tau[3];
   double             ntau2,gammasec[3];
   double             c[3],kappa,maxkappa,alpha,hausd,hausd_v;
-  int                ilist,list[_MMGS_LMAX+2],k,i,iel,idp,isloc,init_s;
+  int                ilist,list[_MMGS_LMAX+2],k,i,iel,idp,init_s;
   unsigned char      i0,i1,i2;
 
   pt  = &mesh->tria[it];
@@ -67,16 +67,6 @@ static int _MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   hausd_v = mesh->info.hausd;
   isqhmin = mesh->info.hmin;
   isqhmax = mesh->info.hmax;
-  isloc     = 0;
-  /* for (i=0; i<mesh->info.npar; i++) { */
-  /*   par = &mesh->info.par[i]; */
-  /*   if ( (par->elt == MMG5_Vertex) && (p0->ref == par->ref ) ) { */
-  /*     hausd_v = par->hausd; */
-  /*     isqhmin = par->hmin; */
-  /*     isqhmax = par->hmax; */
-  /*     isloc   = 1; */
-  /*   } */
-  /* } */
 
   ilist = boulet(mesh,it,ip,list);
   if ( !ilist )
@@ -125,20 +115,13 @@ static int _MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
     for (i=0; i<mesh->info.npar; i++) {
       par = &mesh->info.par[i];
       if ( (par->elt == MMG5_Triangle) && (pt->ref == par->ref ) ) {
-        if ( !isloc ) {
-          hausd   = par->hausd;
-          if ( !init_s ) {
-            isqhmin = par->hmin;
-            isqhmax = par->hmax;
-            init_s  = 1;
-          }
-          else {
-            isqhmin = MG_MAX(par->hmin,isqhmin);
-            isqhmax = MG_MIN(par->hmax,isqhmax);
-          }
+        hausd   = par->hausd;
+        if ( !init_s ) {
+          isqhmin = par->hmin;
+          isqhmax = par->hmax;
+          init_s  = 1;
         }
         else {
-          hausd   = MG_MIN(par->hausd,hausd);
           isqhmin = MG_MAX(par->hmin,isqhmin);
           isqhmax = MG_MIN(par->hmax,isqhmax);
         }
@@ -203,8 +186,7 @@ static int _MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   isloc   = 0;
   for (k=0; k<mesh->info.npar; k++) {
     par = &mesh->info.par[k];
-    if ( /*( (par->elt == MMG5_Vertex) && (p0->ref == par->ref ) )
-           || */( (par->elt == MMG5_Triangle) && (pt->ref == par->ref ) ) ) {
+    if ( (par->elt == MMG5_Triangle) && (pt->ref == par->ref ) ) {
       if ( !isloc ) {
         isqhmin = par->hmin;
         isqhmax = par->hmax;
@@ -375,22 +357,6 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   idp = pt->v[ip];
   p0  = &mesh->point[idp];
 
-  /* local parameters at vertex: useless for now because new points are created
-   * without reference (inside the domain) */
-  /* hausd   = mesh->info.hausd; */
-  /* isqhmin = mesh->info.hmin; */
-  /* isqhmax = mesh->info.hmax; */
-  /* isloc = 0; */
-  /* for (i=0; i<mesh->info.npar; i++) { */
-  /*   par = &mesh->info.par[i]; */
-  /*   if ( (par->elt == MMG5_Vertex) && (p0->ref == par->ref ) ) { */
-  /*     hausd   = par->hausd; */
-  /*     isqhmin = par->hmin; */
-  /*     isqhmax = par->hmax; */
-  /*     isloc = 1; */
-  /*   } */
-  /* } */
-
   ilist = boulet(mesh,it,ip,list);
   if ( !ilist )
     return(0);
@@ -558,22 +524,6 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   pt  = &mesh->tria[it];
   idp = pt->v[ip];
   p0  = &mesh->point[idp];
-
-  /* local parameters at vertex: useless for now because new points are created
-   * without reference (inside the domain) */
-  /* hausd   = mesh->info.hausd; */
-  /* isqhmin = mesh->info.hmin; */
-  /* isqhmax = mesh->info.hmax; */
-  /* isloc     = 0; */
-  /* for (i=0; i<mesh->info.npar; i++) { */
-  /*   par = &mesh->info.par[i]; */
-  /*   if ( (par->elt == MMG5_Vertex) && (p0->ref == par->ref ) ) { */
-  /*     hausd   = par->hausd; */
-  /*     isqhmin = par->hmin; */
-  /*     isqhmax = par->hmax; */
-  /*     isloc   = 1; */
-  /*   } */
-  /* } */
 
   ilist = boulet(mesh,it,ip,list);
   if ( !ilist )

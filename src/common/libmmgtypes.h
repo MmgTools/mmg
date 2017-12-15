@@ -451,7 +451,7 @@ typedef struct {
 
 /**
  * \struct MMG5_hgeom
- * \brief To store geometric edges.
+ * \brief Cell of the hash table of geom edges.
  */
 typedef struct {
   int     a; /*!< First extremity of edge */
@@ -461,6 +461,10 @@ typedef struct {
   int16_t tag; /*!< tag of edge */
 } MMG5_hgeom;
 
+/**
+ * \struct MMG5_HGeom
+ * \brief Hash table to store geometric edges.
+ */
 typedef struct {
   MMG5_hgeom  *geom;
   int         siz,max,nxt;

@@ -164,7 +164,7 @@ int _MMG5_movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,
 
 
   _MMG5_SAFE_FREE(callist);
-  return(1);
+  return 1;
 }
 
 /**
@@ -346,7 +346,7 @@ int _MMG5_movintptLES_iso(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,
    }
 
    _MMG5_SAFE_FREE(callist);
-   return(1);
+   return 1;
 }
 
 /**
@@ -760,7 +760,7 @@ int _MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
     (&mesh->tetra[listv[l]/4])->mark=mesh->mark;
   }
   _MMG5_SAFE_FREE(callist);
-  return(1);
+  return 1;
 }
 
 /**
@@ -1110,7 +1110,7 @@ int _MMG5_movbdyrefpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
     (&mesh->tetra[listv[l]/4])->mark = mesh->mark;
   }
   _MMG5_SAFE_FREE(callist);
-  return(1);
+  return 1;
 }
 
 
@@ -1460,7 +1460,7 @@ int _MMG5_movbdynompt_iso(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree, 
     (&mesh->tetra[listv[l]/4])->mark = mesh->mark;
   }
   _MMG5_SAFE_FREE(callist);
-  return(1);
+  return 1;
 }
 
 /**
@@ -1813,7 +1813,7 @@ int _MMG5_movbdyridpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
     (&mesh->tetra[listv[l]/4])->mark = mesh->mark;
   }
   _MMG5_SAFE_FREE(callist);
-  return(1);
+  return 1;
 }
 
 
@@ -1912,7 +1912,7 @@ int _MMG3D_movv_ani(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
     pt1->qual = qualtet[l];
     pt1->mark = mesh->mark;
   }
-  return(1);
+  return 1;
 
 }
 
@@ -2032,7 +2032,7 @@ int _MMG3D_movnormal_iso(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
     pt1->qual = qualtet[l];
     pt1->mark = mesh->mark;
   }
-  return(1);
+  return 1;
 
 }
 int _MMG3D_movv_iso(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
@@ -2141,6 +2141,6 @@ int _MMG3D_movv_iso(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
     pt1->qual = qualtet[l];
     pt1->mark = mesh->mark;
   }
-  return(1);
+  return 1;
 
 }

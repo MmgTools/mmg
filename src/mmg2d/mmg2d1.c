@@ -632,12 +632,14 @@ int _MMG2_adptri(MMG5_pMesh mesh,MMG5_pSol met) {
 int _MMG2_adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria         pt;
   double             lmax,len;
-  int                k,ns,ip,ier;
+  int                k,ns,nt,ip,ier;
   char               i,i1,i2,imax;
 
   ns = 0;
-  
-  for (k=1; k<=mesh->nt; k++) {
+
+  /*loop until nt to avoid the split of new triangle*/
+  nt = mesh->nt;
+  for (k=1; k<=nt; k++) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) || pt->ref < 0 ) continue;
 

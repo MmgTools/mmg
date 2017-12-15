@@ -42,8 +42,8 @@
  * \param ilist pointer to store the size of the shell of the edge
  * \param list pointer to store the shell of the edge
  * \param crit improvment coefficient
- * \return 0 if fail, the index of point corresponding to the swapped
- * configuration otherwise (\f$4*k+i\f$).
+ * \return -1 if fail, 0 if we cannot swap, the index of point corresponding to
+ * the swapped configuration otherwise (\f$4*k+i\f$).
  * \param typchk type of checking permformed for edge length (hmin or LSHORT
  * criterion).
  *
@@ -59,7 +59,7 @@ int _MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,
   double         calold,calnew,caltmp;
   int            na,nb,np,adj,piv,npol,refdom,k,l,iel;
   int            *adja,pol[MMG3D_LMAX+2];
-  char           i,ipa,ipb,ip,ier,ifac;
+  char           i,ip,ier,ifac;
 
   pt  = &mesh->tetra[start];
   refdom = pt->ref;
@@ -100,14 +100,10 @@ int _MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,
     }
 
     calold = MG_MIN(calold, pt->qual);
+
     /* identification of edge number in tetra adj */
-    for (i=0; i<6; i++) {
-      ipa = _MMG5_iare[i][0];
-      ipb = _MMG5_iare[i][1];
-      if ( (pt->v[ipa] == na && pt->v[ipb] == nb) ||
-           (pt->v[ipa] == nb && pt->v[ipb] == na))  break;
-    }
-    assert(i<6);
+    if ( !MMG3D_findEdge(mesh,pt,adj,na,nb,1,NULL,&i) ) return -1;
+
     list[(*ilist)] = 6*adj +i;
     (*ilist)++;
     /* overflow */

@@ -158,18 +158,32 @@ int _MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
   return(ilist);
 }
 
-/** Topological check on the surface ball of np and nq in collapsing np->nq ;
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param k index of the starting tetra.
+ * \param iface local index of the starting face in the tetra \a k.
+ * \param ideg local index of the starting edge in the face \a iface.
+ * \param lists surfacic ball of p.
+ * \param ilists number of elements in the surfacic ball of p.
+ *
+ * \return 0 if the check of the topology fails, 1 if success, -1 if the
+ * function fails.
+ *
+ * Topological check on the surface ball of np and nq in collapsing np->nq ;
  *  iface = boundary face on which lie edge iedg - in local face num.  (pq, or
  *  ia in local tet notation). See the Mmg Google
  *  Drive/Documentation/mmg3d/topchkcol_bdy3D.pdf for a picture of the
- *  configuration */
+ *  configuration.
+ *
+ */
 static int
-_MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,char iedg,int *lists,int ilists) {
+_MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,char iedg,int *lists,
+                    int ilists) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
   double        n0[3],n1[3],devnew;
   int           nump,numq,piv,iel,jel,jel1,nap,nbp,naq,nbq,nro,adj,*adja;
-  char          ip,iq,ipiv,iopp,i,j,j1,jface,jface1,ipa,ipb,isface;
+  char          ip,iq,ipiv,iopp,i,j,j1,jface,jface1,isface;
 
   pt = &mesh->tetra[k];
   ip = _MMG5_idir[iface][_MMG5_inxt2[iedg]];
@@ -177,8 +191,9 @@ _MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,char iedg,int *lists,int ili
   nump = pt->v[ip];
   numq = pt->v[iq];
 
-  /* Surface ball has been enumerated as f1,...,f2 - f1,f2 = both triangles of surface shell */
-  /*  Point nap, facing the first vanishing face in surface ball of p */
+  /* Surface ball has been enumerated as f1,...,f2 - f1,f2 = both triangles of
+   * surface shell, point nap, facing the first vanishing face in surface ball
+   * of p */
   nro = pt->v[_MMG5_idir[iface][iedg]];
 
   jel = lists[1] / 4;
@@ -202,13 +217,7 @@ _MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,char iedg,int *lists,int ili
     adja = &mesh->adja[4*(iel-1)+1];
 
     /* Identification of edge number in tetra iel */
-    for (i=0; i<6; i++) {
-      ipa = _MMG5_iare[i][0];
-      ipb = _MMG5_iare[i][1];
-      if ( ((pt->v[ipa] == numq) && (pt->v[ipb] == nro)) ||
-           ((pt->v[ipa] == nro)  && (pt->v[ipb] == numq))  ) break;
-    }
-    assert(i<6);
+    if ( !MMG3D_findEdge(mesh,pt,iel,numq,nro,1,NULL,&i) ) return -1;
 
     /* set sense of travel */
     if ( pt->v[ _MMG5_ifar[i][0] ] == piv ) {
@@ -233,31 +242,29 @@ _MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,char iedg,int *lists,int ili
   while ( adj && ( adj != k ) && !isface );
 
   naq = piv;
-  if ( nap == naq ) {
-    return(0);
-  }
+  if ( nap == naq ) return 0;
 
   if ( !( (pxt->tag[_MMG5_iarf[iface][_MMG5_inxt2[iedg]]] & MG_GEO) ||
           (pxt->tag[_MMG5_iarf[iface][_MMG5_iprv2[iedg]]] & MG_GEO)   ) ) {
 
     /* Check the normal deviation between the boundary faces sharing the edge
      * numq (or nump)-nro */
-    if ( !_MMG5_norpts (mesh,numq,nro,nap,n0) )  return(0);
-    if ( !_MMG5_norface(mesh,iel,iopp    ,n1) )  return(0);
+    if ( !_MMG5_norpts (mesh,numq,nro,nap,n0) )  return 0;
+    if ( !_MMG5_norface(mesh,iel,iopp    ,n1) )  return 0;
 
     devnew = n0[0]*n1[0] + n0[1]*n1[1] + n0[2]*n1[2];
-    if ( devnew < mesh->info.dhd ) return(0);
+    if ( devnew < mesh->info.dhd ) return 0;
   }
 
   /*  Point nbp, facing the second vanishing face in surface ball of p */
-    jel1   = lists[ilists-1] / 4;
-    jface1 = lists[ilists-1] % 4;
-    pt     = &mesh->tetra[jel1];
-    for (j1=0; j1<3; j1++) {
-      i = _MMG5_idir[jface1][j1];
+  jel1   = lists[ilists-1] / 4;
+  jface1 = lists[ilists-1] % 4;
+  pt     = &mesh->tetra[jel1];
+  for (j1=0; j1<3; j1++) {
+    i = _MMG5_idir[jface1][j1];
     if ( pt->v[i] != nump && pt->v[i] != numq )  break;
   }
-    assert(j1<3);
+  assert(j1<3);
 
   nro   = pt->v[i];
   jel   = lists[ilists-2] / 4;
@@ -280,13 +287,7 @@ _MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,char iedg,int *lists,int ili
     adja = &mesh->adja[4*(iel-1)+1];
 
     /* Identification of edge number in tetra iel */
-    for (i=0; i<6; i++) {
-      ipa = _MMG5_iare[i][0];
-      ipb = _MMG5_iare[i][1];
-      if ( ((pt->v[ipa] == numq) && (pt->v[ipb] == nro)) ||
-           ((pt->v[ipa] == nro) && (pt->v[ipb] == numq))  ) break;
-    }
-    assert(i<6);
+    if ( !MMG3D_findEdge(mesh,pt,iel,numq,nro,1,NULL,&i) ) return -1;
 
     /* set sense of travel */
     if ( pt->v[ _MMG5_ifar[i][0] ] == piv ) {
@@ -312,7 +313,7 @@ _MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,char iedg,int *lists,int ili
 
   nbq = piv;
   if ( nbp == nbq ) {
-    return(0);
+    return 0;
   }
 
   pxt      = &mesh->xtetra[mesh->tetra[jel1].xt];
@@ -322,15 +323,14 @@ _MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,char iedg,int *lists,int ili
 
     /* Check the normal deviation between the boundary faces sharing the edge
      * numq (or nump)-nro */
-    if ( !_MMG5_norpts (mesh,nro,numq,nbp,n0) )  return(0);
-    if ( !_MMG5_norface(mesh,iel,iopp    ,n1) )  return(0);
+    if ( !_MMG5_norpts (mesh,nro,numq,nbp,n0) )  return 0;
+    if ( !_MMG5_norface(mesh,iel,iopp    ,n1) )  return 0;
 
     devnew = n0[0]*n1[0] + n0[1]*n1[1] + n0[2]*n1[2];
-    if ( devnew < mesh->info.dhd )  return(0);
+    if ( devnew < mesh->info.dhd )  return 0;
   }
 
-
-  return(1);
+  return 1;
 }
 
 /**
@@ -413,14 +413,10 @@ int _MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
       if ( nbbdy == 4 )
         return(0);
       else if ( nbbdy == 3 ) {
-        for (ia=0; ia<6; ia++) {
-          i0 = _MMG5_iare[ia][0];
-          i1 = _MMG5_iare[ia][1];
-          if ( ((pt->v[i0] == nump) && (pt->v[i1] == numq)) ||
-               ((pt->v[i0] == numq) && (pt->v[i1] == nump)) )
-            break;
-        }
-        assert(ia < 6);
+
+        /* Identification of edge number in tetra iel */
+        if ( !MMG3D_findEdge(mesh,pt,iel,numq,nump,1,NULL,&ia) ) return -1;
+
         i0 = _MMG5_ifar[ia][0];
         i1 = _MMG5_ifar[ia][1];
         if ( pt->xt && (!(pxt->ftag[i0] & MG_BDY) || !(pxt->ftag[i1] & MG_BDY)) )
@@ -677,10 +673,11 @@ int _MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
   /* Topological check for surface ball */
   else {
     ier = _MMG5_topchkcol_bdy(mesh,k,iface,iedg,lists,ilists);
-    if ( !ier )  return(0);
+    if ( ier<0 ) return -1;
+    else if ( !ier )  return 0;
   }
 
-  return(ilistv);
+  return ilistv;
 }
 
 /**

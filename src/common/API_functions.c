@@ -58,7 +58,7 @@ void _MMG5_Init_parameters(MMG5_pMesh mesh) {
   /** MMG*_IPARAM_iso = 0 */
   mesh->info.iso      =  0;  /* [0/1]    ,Turn on/off levelset meshing */
   /** MMG5_IPARAM_mem = -1 */
-  mesh->info.mem      = -1;  /* [n/-1]   ,Set memory size to n Mbytes/keep the default value */
+  mesh->info.mem      = _MMG5_NONSET_MEM;  /* [n/-1]   ,Set memory size to n Mbytes/keep the default value */
   /** MMG5_IPARAM_debug = 0 */
   mesh->info.ddebug   =  0;  /* [0/1]    ,Turn on/off debug mode */
   /** MMG5_IPARAM_npar = 0 */
@@ -76,15 +76,15 @@ void _MMG5_Init_parameters(MMG5_pMesh mesh) {
   /** MMG5_DPARAM_angleDetection = \ref _MMG5_ANGEDG */
   mesh->info.dhd      = _MMG5_ANGEDG;   /* angle detection; */
   /** MMG5_DPARAM_hmin = 0.001 \f$\times\f$ bounding box size; */
-  mesh->info.hmin     = -1.;      /* minimal mesh size; */
+  mesh->info.hmin     = _MMG5_NONSET_HMIN;      /* minimal mesh size; */
   /** MMG5_DPARAM_hmax = double of the bounding box size */
-  mesh->info.hmax     = -1.;      /* maximal mesh size; */
+  mesh->info.hmax     = _MMG5_NONSET_HMAX;      /* maximal mesh size; */
   /** MMG5_DPARAM_hsiz= -1. */
-  mesh->info.hsiz     = -1.;      /* constant mesh size; */
+  mesh->info.hsiz     = _MMG5_NONSET_HSIZ;      /* constant mesh size; */
   /** MMG5_DPARAM_hausd = 0.01 */
-  mesh->info.hausd    = 0.01;     /* control Hausdorff */
+  mesh->info.hausd    = _MMG5_HAUSD;     /* control Hausdorff */
   /** MMG5_DPARAM_hgrad = 1.3 */
-  mesh->info.hgrad    = 0.26236426446;      /* control gradation; */
+  mesh->info.hgrad    = _MMG5_HGRAD;      /* control gradation; */
 
   /* default values for pointers */
   /** MMG5_PPARAM = NULL */
@@ -92,18 +92,18 @@ void _MMG5_Init_parameters(MMG5_pMesh mesh) {
 
   /** MMG3D_IPARAM_lag = -1 used by mmg3d only but need to be negative in the
    * scaleMesh function */
-  mesh->info.lag      = -1;
+  mesh->info.lag      = _MMG5_LAG;
 
   /* initial value for memMax and gap */
-  mesh->gap = 0.2;
+  mesh->gap = _MMG5_GAP;
   mesh->memMax = _MMG5_memSize();
-  if ( mesh->memMax )
+  if ( mesh->memMax ) {
     /* maximal memory = 50% of total physical memory */
-    mesh->memMax = mesh->memMax*50/100;
-  else {
+    mesh->memMax = mesh->memMax*_MMG5_MEMPERCENT;
+  } else {
     /* default value = 800 Mo */
     printf("  Maximum memory set to default value: %d Mo.\n",_MMG5_MEMMAX);
-    mesh->memMax = _MMG5_MEMMAX << 20;
+    mesh->memMax = _MMG5_MEMMAX << _MMG5_BITWIZE_Mo_TO_O;
   }
 
 }
@@ -160,7 +160,7 @@ int MMG5_Set_inputMeshName(MMG5_pMesh mesh, const char* meshin) {
       fprintf(stderr,"              Use of default value \"mesh.mesh\".\n");
     }
   }
-  return(1);
+  return 1;
 }
 
 /**
@@ -208,7 +208,7 @@ int MMG5_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solin) {
       strcpy(sol->namein,"mesh.sol");
     }
   }
-  return(1);
+  return 1;
 }
 
 /**
@@ -283,7 +283,7 @@ int MMG5_Set_outputMeshName(MMG5_pMesh mesh, const char* meshout) {
       strcpy(mesh->nameout,"mesh.o.mesh");
     }
   }
-  return(1);
+  return 1;
 }
 
 
@@ -332,10 +332,10 @@ int MMG5_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solout) {
       fprintf(stderr,"\n  ## Error: %s: no name for output mesh. please, use",
               __func__);
       fprintf(stderr," the MMG5_Set_outputMeshName to set the mesh name.\n");
-      return(0);
+      return 0;
     }
   }
-  return(1);
+  return 1;
 }
 
 /**
@@ -346,7 +346,6 @@ int MMG5_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solout) {
  *
  */
 void MMG5_Free_structures(MMG5_pMesh mesh,MMG5_pSol sol){
-  long           castedVal;
 
   if ( mesh->point )
     _MMG5_DEL_MEM(mesh,mesh->point,(mesh->npmax+1)*sizeof(MMG5_Point));
@@ -366,8 +365,7 @@ void MMG5_Free_structures(MMG5_pMesh mesh,MMG5_pSol sol){
     _MMG5_DEL_MEM(mesh,mesh->info.par,mesh->info.npar*sizeof(MMG5_Par));
 
   if ( mesh->info.imprim>5 || mesh->info.ddebug ) {
-    castedVal = _MMG5_SAFELL2LCAST(mesh->memCur);
-    printf("  MEMORY USED AT END (bytes) %ld\n",castedVal);
+    printf("  MEMORY USED AT END (bytes) %lld\n",mesh->memCur);
   }
 
   return;

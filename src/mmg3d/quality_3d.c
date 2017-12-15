@@ -594,20 +594,25 @@ int _MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
 }
 
 /**
+ * \param mesh pointer toward the mesh.
+ * \param sol, pointer toward the sol structure.
+ * \param weightelt put weight on elts.
+ * \param npcible estimation of the final number of nodes/
+ *
+ * \return 0 if fail, 1 if success
  *
  * Approximation of the final number of vertex.
  *
  * \warning  call MMG3D_hashTetra(mesh,1) or analysis before using
  *
- * \todo Doxygen documentation
  */
 int _MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcible) {
   MMG5_pTetra pt;
   double      len;
   int         k,ia,ipa,ipb,lon,l;
   //int   npbdry;
-  int    *pdel,lenint,loc,nedel,longen;
-  int      isbdry;
+  int        *pdel,lenint,loc,nedel,longen;
+  //int      isbdry;
   double   dned,dnface,dnint/*,dnins*/,w,lenavg,lent[6];
   double   dnpdel,dnadd,leninv,dnaddloc,dnpdelloc;
   int      list[MMG3D_LMAX],ddebug=0,ib,nv;
@@ -657,8 +662,11 @@ int _MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcib
     for (ia=0; ia<6; ia++) {
       longen = _MMG5_coquil(mesh,k,ia,list);
       lon = longen/2;
-      isbdry = 0;//longen%2;
-      if(!lon) continue;
+      //isbdry = 0;//longen%2;
+      if ( lon<=0 ) {
+        _MMG5_SAFE_FREE(pdel);
+        return 0;
+      }
       /* if ( isbdry )  { */
       /*    assert(longen%2); */
       /*    //printf("_MMG5_coquil %d\n",longen/2); */
@@ -695,13 +703,13 @@ int _MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcib
         dnint = (lenint+3)*(lenint+2)*(lenint+1) / 6. - 4 - 4*dnface - 6*dned;
         //nb de point a inserer pour cette arete de ce tetra : on divise par lon
         //dnins = dned*(1./lon) + (dnface/3. + dnint/6.);//(dnface/12. + dnint/6.);
-        if(!isbdry) {
+        //if(!isbdry) {
           //nb points sur l'arete +
           //lon*(2/3 nb point sur la face (ie 1/3 de face et 2 faces adj a l'arete) + 1/6 nb de point interne)
           dnaddloc = dned + lon*(2*dnface/3. + dnint/6.);
-        } else {
-          dnaddloc = 0.5*(dned + lon*(2*dnface/3. + dnint/6.));
-        }
+        //} else {
+        //  dnaddloc = 0.5*(dned + lon*(2*dnface/3. + dnint/6.));
+        //}
         dnaddloc *= 1./lon;
         if(!loc) {
           /*on ne compte les points internes que pour les (tres) bons tetras*/
@@ -726,24 +734,25 @@ int _MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcib
           dnadd += dnaddloc;
         }
       } else if(len > 2.8) {
-        if(!isbdry) {
+        //if(!isbdry) {
           dnaddloc = 2.;
-        } else {
-          dnaddloc = 1;
-        }
+        //} else {
+        //  dnaddloc = 1;
+        //}
         if(!loc){
-          if(!isbdry) {
+         // if(!isbdry) {
             dnadd += 2.;
-          } else {
-            dnadd++;
-          }
+         // } else {
+         //   dnadd++;
+         // }
         }
         //dnins = 2;
       } else if(len > 1.41) {
-        if(!isbdry)
+        //if(!isbdry)
           dnaddloc = 1;
         if(!loc) {
-          if(!isbdry) dnadd += 1.;
+          //if(!isbdry)
+            dnadd += 1.;
         }
         //dnins = 1;
       } else if(len < 0.6) {
@@ -752,21 +761,21 @@ int _MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcib
         leninv = 1./len;
         if(pt->v[ipa]<pt->v[ipb]) {
           if(!pdel[pt->v[ipa]]) {
-            if(!isbdry) {
+           // if(!isbdry) {
               dnpdelloc = (leninv - 1.)/leninv;
-            } else {
-              dnpdelloc = 0.5*(leninv - 1.)/leninv;
-            }
+           // } else {
+           //   dnpdelloc = 0.5*(leninv - 1.)/leninv;
+           // }
             if(!loc) {
               dnpdel+=dnpdelloc;
               pdel[pt->v[ipa]]=1;
             }
           } else if(!pdel[pt->v[ipb]]) {
-            if(!isbdry) {
+           // if(!isbdry) {
               dnpdelloc = (leninv - 1.)/leninv;
-            } else {
-              dnpdelloc = 0.5*(leninv - 1.)/leninv;
-            }
+           // } else {
+           //   dnpdelloc = 0.5*(leninv - 1.)/leninv;
+           // }
             if(!loc) {
               dnpdel +=dnpdelloc;
               pdel[pt->v[ipb]]=1;
@@ -774,21 +783,21 @@ int _MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcib
           }
         } else {
           if(!pdel[pt->v[ipb]]) {
-            if(!isbdry) {
+           // if(!isbdry) {
               dnpdelloc = (leninv - 1.)/leninv;
-            } else {
-              dnpdelloc = 0.5*(leninv - 1.)/leninv;
-            }
+           // } else {
+           //   dnpdelloc = 0.5*(leninv - 1.)/leninv;
+           // }
             if(!loc) {
               dnpdel+=dnpdelloc;
               pdel[pt->v[ipb]]=1;
             }
           } else if(!pdel[pt->v[ipa]]) {
-            if(!isbdry) {
+            // if(!isbdry) {
               dnpdelloc = (leninv - 1.)/leninv;
-            } else {
-              dnpdelloc = 0.5*(leninv - 1.)/leninv;
-            }
+            // } else {
+            //  dnpdelloc = 0.5*(leninv - 1.)/leninv;
+            // }
             if(!loc) {
               dnpdel+=dnpdelloc;
               pdel[pt->v[ipa]]=1;
@@ -827,5 +836,5 @@ int _MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcib
   free(pdel);
 
   //fclose(inm);
-  return(1);
+  return 1;
 }

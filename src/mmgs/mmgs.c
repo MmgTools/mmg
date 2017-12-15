@@ -84,7 +84,7 @@ static int _MMG5_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
   mesh->info.npar = 0;
   while ( !feof(in) ) {
     /* scan line */
-    ret = fscanf(in,"%s",data);
+    ret = fscanf(in,"%255s",data);
     if ( !ret || feof(in) )  break;
     for (i=0; i<strlen(data); i++) data[i] = tolower(data[i]);
 
@@ -95,7 +95,7 @@ static int _MMG5_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
         return 0;
 
       for (i=0; i<mesh->info.npar; i++) {
-        fscanf(in,"%d %s ",&ref,buf);
+        fscanf(in,"%d %255s ",&ref,buf);
         ret = fscanf(in,"%f %f %f",&fp1,&fp2,&hausd);
 
         if ( !ret ) {

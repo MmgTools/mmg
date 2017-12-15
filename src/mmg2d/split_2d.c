@@ -50,10 +50,11 @@ extern unsigned char ddb;
 int _MMG2_chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
   MMG5_pTria           pt,pt1,pt0;
   MMG5_pPoint          p1,p2,ppt;
-  double               mid[2],o[2],no[2],calnew,caltmp,tp,to,t;
+  double               mid[2],o[2],no[2],calnew,caltmp,tp,to,t,calseuil;
   int                  ip,jel,*adja,it,maxit,npinit;
   char                 i1,i2,j,j1,j2,ier,isv;
 
+  calseuil = 1e-4 / _MMG2D_ALPHAD;
   npinit = mesh->np;
 
   pt  = &mesh->tria[k];
@@ -118,8 +119,11 @@ int _MMG2_chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
       calnew = MG_MIN(calnew,caltmp);
     }
 
-    /* Delete point and abort splitting if one of the created triangles is nearly degenerate */
-    if ( calnew < _MMG5_EPSOK ) {
+    /* Delete point and abort splitting if one of the created triangles 
+       has very bad quality. 
+       _MMG5_EPSOK is not sufficient :
+       we created very bad element and was not able to delete them */
+    if ( (calnew < calseuil)  ) {
       _MMG2D_delPt(mesh,ip);
       return(0);
     }

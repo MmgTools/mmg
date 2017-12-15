@@ -337,7 +337,7 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
   if ( mesh->namein == NULL ) {
     fprintf(stdout,"  -- INPUT MESH NAME ?\n");
     fflush(stdin);
-    fscanf(stdin,"%s",namein);
+    fscanf(stdin,"%127s",namein);
     if ( !MMGS_Set_inputMeshName(mesh,namein) )
       return 0;
   }

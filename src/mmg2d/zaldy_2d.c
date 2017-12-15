@@ -143,12 +143,18 @@ int _MMG5_getnElt(MMG5_pMesh mesh,int n) {
  *
  * \return 0 if fail, 1 otherwise
  *
- * memory repartition for the -m option with initial values of memMax,npmax,
- * nemax and ntmax.
+ * Set the memMax value to its "true" value (50% of the RAM or memory asked by
+ * user) and perform memory repartition for the -m option.  If -m is not given,
+ * memMax is the detected RAM. If -m is provided, check the user option and set
+ * memMax to the available RAM if the user ask for too much memory. Last,
+ * perform the memory repartition between the mmg arrays with respect to the
+ * memMax value.
+ *
+ * \remark Here, mesh->npmax/ntmax must be setted.
  *
  */
 static inline
-int _MMG2D_memOption_memRepartition(MMG5_pMesh mesh) {
+int _MMG2D_memOption_memSet(MMG5_pMesh mesh) {
   long long  million = 1048576L;
   long long  usedMem,avMem,reservedMem;
   long       castedVal;
@@ -157,7 +163,7 @@ int _MMG2D_memOption_memRepartition(MMG5_pMesh mesh) {
   if ( mesh->info.mem <= 0 ) {
     if ( mesh->memMax )
       /* maximal memory = 50% of total physical memory */
-      mesh->memMax = (long long)(mesh->memMax*0.5);
+      mesh->memMax = (long long)(mesh->memMax*_MMG5_MEMPERCENT);
     else {
       /* default value = 800 Mo */
       printf("  Maximum memory set to default value: %d Mo.\n",_MMG5_MEMMAX);
@@ -199,7 +205,6 @@ int _MMG2D_memOption_memRepartition(MMG5_pMesh mesh) {
    * point+tria+edges+adjt+sol */
   bytes = sizeof(MMG5_Point) +
     2*sizeof(MMG5_Tria) + 3*2*sizeof(int)
-    + sizeof(MMG5_Sol) /*+ sizeof(Displ)*/
     + 0.2*sizeof(MMG5_Edge);
 
   avMem = mesh->memMax-usedMem;
@@ -238,7 +243,7 @@ int _MMG2D_memOption(MMG5_pMesh mesh) {
   mesh->ntmax = MG_MAX(1.5*mesh->nt,_MMG2D_NEMAX);
   mesh->namax = mesh->na;
 
-  return ( _MMG2D_memOption_memRepartition(mesh) );
+  return ( _MMG2D_memOption_memSet(mesh) );
 }
 
 /**

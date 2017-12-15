@@ -338,6 +338,75 @@ static int _MMG5_setdhd(MMG5_pMesh mesh) {
   return(1);
 }
 
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \return 1.
+ *
+ * check subdomains connected by a vertex and mark these vertex as CRN and REQ.
+ *
+ */
+static int _MMG5_chkVertexConnectedDomains(MMG5_pMesh mesh){
+  MMG5_pTetra  pt;
+  MMG5_pxTetra pxt;
+  MMG5_pPoint  ppt;
+  int          k,lists[MMG3D_LMAX+2],listv[MMG3D_LMAX+2],ilists,ilistv,i0,ier;
+  char         i,j;
+
+  for (k=1; k<=mesh->np; k++) {
+    ppt = &mesh->point[k];
+    ppt->s = 0;
+    ppt->flag = mesh->mark;
+  }
+  ++mesh->mark;
+
+  /*count the number of tet around a point*/
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+    if ( !MG_EOK(pt) )   continue;
+
+    for (i=0; i<4; i++) {
+      mesh->point[pt->v[i]].s++;
+    }
+  }
+
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+    if ( !MG_EOK(pt) )   continue;
+
+    /* point j on face i */
+    for (i=0; i<4; i++) {
+      for (j=0; j<3; j++) {
+        if ( pt->xt ) {
+          pxt = &mesh->xtetra[pt->xt];
+        }
+        else  pxt = 0;
+
+        i0  = _MMG5_idir[i][j];
+        ppt = &mesh->point[pt->v[i0]];
+        if ( !(ppt->tag & MG_BDY) ) continue;
+        if ( ppt->flag == mesh->mark ) continue;
+
+        /* Catch a boundary point by a boundary face */
+        if ( (!pt->xt) || !(MG_BDY & pxt->ftag[i]) )  continue;
+        if( ppt->tag & MG_NOM ){
+          if ( mesh->adja[4*(k-1)+1+i] ) continue;
+          ier=_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,1);
+       } else {
+          ier=_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,0);
+        }
+        if(ilistv != ppt->s) {
+          if(!(ppt->tag & MG_REQ) ) {
+            ppt->tag |= MG_REQ;
+            ppt->tag |= MG_CRN;
+          }
+        }
+        ppt->flag = mesh->mark;
+      }
+    }
+  }
+  return(1);
+}
+
 /** check for singularities */
 static int _MMG5_singul(MMG5_pMesh mesh) {
   MMG5_pTria     pt;
@@ -607,7 +676,9 @@ static int _MMG3D_nmgeom(MMG5_pMesh mesh){
         p0->flag = base;
         ier = _MMG5_boulenm(mesh,k,ip,i,n,t);
 
-        if ( !ier ) {
+        if ( ier < 0 )
+          return 0;
+        else if ( !ier ) {
           p0->tag |= MG_REQ;
           p0->tag &= ~MG_NOSURF;
           if ( p0->ref != 0 )
@@ -750,6 +821,9 @@ int _MMG3D_analys(MMG5_pMesh mesh) {
     _MMG5_DEL_MEM(mesh,mesh->xpoint,(mesh->xpmax+1)*sizeof(MMG5_xPoint));
     return(0);
   }
+
+  /* check subdomains connected by a vertex and mark these vertex as corner and required */
+  _MMG5_chkVertexConnectedDomains(mesh);
 
   /* build hash table for geometric edges */
   if ( !mesh->na && !_MMG5_hGeom(mesh) ) {

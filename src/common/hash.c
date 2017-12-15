@@ -59,7 +59,7 @@ int _MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, _MMG5_Hash *hash, int chkISO) 
   hash->siz  = mesh->np;
   hash->max  = hmax + 1;
   hash->nxt  = hash->siz;
-  _MMG5_ADD_MEM(mesh,(hash->max+1)*sizeof(_MMG5_hedge),"hash table",return(0));
+  _MMG5_ADD_MEM(mesh,(hash->max+1)*sizeof(_MMG5_hedge),"hash table",return 0);
   _MMG5_SAFE_CALLOC(hash->item,hash->max+1,_MMG5_hedge,0);
 
   for (k=hash->siz; k<hash->max; k++)
@@ -145,7 +145,7 @@ int _MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, _MMG5_Hash *hash, int chkISO) 
                       " %d\n",__func__,hash->max);
             }
             _MMG5_TAB_RECALLOC(mesh,hash->item,hash->max,0.2,_MMG5_hedge,
-                               "_MMG5_edge",return(0),0);
+                               "_MMG5_edge",return 0,0);
 
             ph = &hash->item[hash->nxt];
 
@@ -187,7 +187,7 @@ int _MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, _MMG5_Hash *hash, int chkISO) 
     fprintf(stdout,"\n");
   }
   if ( mesh->info.ddebug )  fprintf(stdout,"  h- completed.\n");
-  return(1);
+  return 1;
 }
 
 /**
@@ -211,11 +211,11 @@ int _MMG5_hashEdge(MMG5_pMesh mesh,_MMG5_Hash *hash, int a,int b,int k) {
   ph  = &hash->item[key];
 
   if ( ph->a == ia && ph->b == ib )
-    return(1);
+    return 1;
   else if ( ph->a ) {
     while ( ph->nxt && ph->nxt < hash->max ) {
       ph = &hash->item[ph->nxt];
-      if ( ph->a == ia && ph->b == ib )  return(1);
+      if ( ph->a == ia && ph->b == ib )  return 1;
     }
     ph->nxt   = hash->nxt;
     ph        = &hash->item[hash->nxt];
@@ -226,7 +226,7 @@ int _MMG5_hashEdge(MMG5_pMesh mesh,_MMG5_Hash *hash, int a,int b,int k) {
                 " %d\n",__func__,hash->max);
 
       _MMG5_TAB_RECALLOC(mesh,hash->item,hash->max,0.2,_MMG5_hedge,
-                         "_MMG5_edge",return(0),0);
+                         "_MMG5_edge",return 0,0);
       /* ph pointer may be false after realloc */
       ph        = &hash->item[hash->nxt];
 
@@ -241,7 +241,7 @@ int _MMG5_hashEdge(MMG5_pMesh mesh,_MMG5_Hash *hash, int a,int b,int k) {
   ph->k = k;
   ph->nxt = 0;
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -292,20 +292,20 @@ int _MMG5_hashGet(_MMG5_Hash *hash,int a,int b) {
   _MMG5_hedge  *ph;
   int          key,ia,ib;
 
-  if ( !hash->item ) return(0);
+  if ( !hash->item ) return 0;
 
   ia  = MG_MIN(a,b);
   ib  = MG_MAX(a,b);
   key = (_MMG5_KA*ia + _MMG5_KB*ib) % hash->siz;
   ph  = &hash->item[key];
 
-  if ( !ph->a )  return(0);
+  if ( !ph->a )  return 0;
   if ( ph->a == ia && ph->b == ib )  return(ph->k);
   while ( ph->nxt ) {
     ph = &hash->item[ph->nxt];
     if ( ph->a == ia && ph->b == ib )  return(ph->k);
   }
-  return(0);
+  return 0;
 }
 
 /**
@@ -327,11 +327,11 @@ int _MMG5_hashNew(MMG5_pMesh mesh,_MMG5_Hash *hash,int hsiz,int hmax) {
   hash->nxt  = hash->siz;
 
   _MMG5_ADD_MEM(mesh,(hash->max+1)*sizeof(_MMG5_hedge),"hash table",
-                return(0));
+                return 0);
   _MMG5_SAFE_CALLOC(hash->item,hmax+2,_MMG5_hedge,0);
 
   for (k=hash->siz; k<hash->max; k++)
     hash->item[k].nxt = k+1;
 
-  return(1);
+  return 1;
 }

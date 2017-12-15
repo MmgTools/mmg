@@ -454,13 +454,14 @@ int _MMG3D_splitalmostall(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
  * \param octree pointer toward the octree structure.
+ * \param testmark all the tets with a mark less than testmark will not be treated.
  * \return 0 if fail, number of improved elts otherwise.
  *
  * Travel across the mesh to detect element with very bad quality (less than
  * 0.2) and try to improve them by every means.
  *
  */
-int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
+int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int testmark) {
   MMG5_pTetra    pt;
   MMG5_pxTetra   pxt;
   double         crit;
@@ -472,12 +473,12 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
 
   ntot = 0;
   crit = 0.2 / _MMG3D_ALPHAD;
+  base = testmark;
 
   it = 0;
   maxit = 10;
   do {
     ne = mesh->ne;
-    base = ++mesh->mark;
     nd = 0;
     nbdy = nbdy2 = 0;
     memset(cs,0,10*sizeof(int));
@@ -486,7 +487,7 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
     for (k=1 ; k<=ne ; k++) {
       pt = &mesh->tetra[k];
       if(!MG_EOK(pt)  || (pt->tag & MG_REQ) ) continue;
-      else if ( pt->mark < base-2 )  continue;
+      else if ( pt->mark < base )  continue;
 
       if(pt->qual > crit) continue;
 
@@ -607,6 +608,7 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
     /*    printf("  optim [%d]      = %5d   %5d  %6.2f %%\n",k,cs[k],ds[k],100.0*ds[k]/cs[k]); */
 
     ntot += nd;
+    if(base==-1) base = mesh->mark-1;
   } while (nd && it++<maxit);
 
   return(ntot);

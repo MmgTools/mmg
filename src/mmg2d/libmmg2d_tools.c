@@ -86,7 +86,7 @@ int MMG2_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
   
   /* Read parameters */
   while ( !feof(in) ) {
-    ret = fscanf(in,"%s",data);
+    ret = fscanf(in,"%255s",data);
     if ( !ret || feof(in) ) break;
     for (i=0; i<strlen(data); i++) data[i] = tolower(data[i]);
     
@@ -105,7 +105,7 @@ int MMG2_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
           pm = &mesh->info.mat[i];
           fscanf(in,"%d",&pm->ref);
           fgetpos(in,&position);
-          fscanf(in,"%s",data);
+          fscanf(in,"%255s",data);
           if ( !strcmp(data,"nosplit") ) {
             pm->dospl = 0;
             pm->rin = pm->ref;
@@ -139,7 +139,7 @@ int MMG2_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
         
         for (i=0; i<mesh->info.npar; i++) {
           ppar = &mesh->info.par[i];
-          ret = fscanf(in,"%d %s",&ppar->ref,data);
+          ret = fscanf(in,"%d %255s",&ppar->ref,data);
           if ( ret ) ret = fscanf(in,"%f %f %f",&fp1,&fp2,&fp3);
           
           if ( !ret ) {
