@@ -1365,7 +1365,7 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
 
 
   nn = nt = 0;
-  if ( mesh->xp ) {
+  if ( mesh->xp && mesh->xpoint ) {
     /* Count tangents and normals */
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
