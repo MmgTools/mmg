@@ -438,9 +438,11 @@ int MMG2_pack(MMG5_pMesh mesh,MMG5_pSol sol) {
       /* We have enough memory to allocate the edge table */
       _MMG5_SAFE_CALLOC(mesh->edge,(mesh->namax+1),MMG5_Edge, 0);
 
+      nt = 0;
       for (k=1; k<=mesh->nt; k++) {
         pt = &mesh->tria[k];
         if ( !MG_EOK(pt) ) continue;
+        ++nt;
         adja = &mesh->adja[3*(k-1)+1];
 
         for (i=0; i<3; i++) {
@@ -456,7 +458,7 @@ int MMG2_pack(MMG5_pMesh mesh,MMG5_pSol sol) {
             ped->b = pt->v[i2];
             /* the base field is used to be able to recover the tria (and its face)
              * from which comes a boundary edge */
-            ped->base = 3*k+i;
+            ped->base = 3*nt+i;
             ped->ref = pt->edg[i];
             ped->tag = pt->tag[i];
           }
