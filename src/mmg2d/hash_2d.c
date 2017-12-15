@@ -224,7 +224,7 @@ int MMG2_assignEdge(MMG5_pMesh mesh) {
   hash.siz = mesh->na;
   hash.max = 3*mesh->na+1;
 
-  _MMG5_ADD_MEM(mesh,(hash.max+1)*sizeof(_MMG5_Hash),"hash table",return(0));
+  _MMG5_ADD_MEM(mesh,(hash.max+1)*sizeof(_MMG5_hedge),"hash table",return(0));
   _MMG5_SAFE_CALLOC(hash.item,hash.max+1,_MMG5_hedge,0);
 
   hash.nxt = mesh->na;
