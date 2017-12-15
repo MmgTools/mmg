@@ -98,6 +98,8 @@ extern "C" {
 #define A16TH     0.0625
 #define A32TH     0.03125
 
+#define _MMG5_MEMMIN 38 /**< minimal memory needed to store the mesh/sol names */
+
 /* Macros */
 #define MG_MAX(a,b) (((a) > (b)) ? (a) : (b))
 #define MG_MIN(a,b) (((a) < (b)) ? (a) : (b))

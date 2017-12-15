@@ -162,9 +162,8 @@ int _MMG5_getnElt(MMG5_pMesh mesh,int n) {
 
 /** memory repartition for the -m option */
 int _MMG2D_memOption(MMG5_pMesh mesh) {
-  long long  million = 1048576L;
-  long       castedVal;
-  int        ctri,npask,bytes,memtmp;
+  long long  million = 1048576L,memtmp;
+  int        ctri,npask,bytes;
 
   mesh->memMax = _MMG5_memSize();
 
@@ -178,18 +177,17 @@ int _MMG2D_memOption(MMG5_pMesh mesh) {
       /* maximal memory = 2Go */
       mesh->memMax = 2000*million;
     else {
-      /* default value = 800 Mo */
-      printf(" ## Maximum memory set to default value: %d Mo.\n",_MMG5_MEMMAX);
+      /* default value = 800 MB */
+      printf(" ## Maximum memory set to default value: %d MB.\n",_MMG5_MEMMAX);
       mesh->memMax = _MMG5_MEMMAX*million;
     }
   }
   else {
     /* memory asked by user if possible, otherwise total physical memory */
     if ( (long long)(mesh->info.mem)*million > mesh->memMax && mesh->memMax ) {
-      fprintf(stderr,"\n  ## Warning: %s: asking for %d Mo of memory ",
+      fprintf(stderr,"\n  ## Warning: %s: asking for %d MB of memory ",
               __func__,mesh->info.mem);
-      castedVal = _MMG5_SAFELL2LCAST(mesh->memMax/million);
-      fprintf(stderr,"when only %ld available.\n",castedVal);
+      fprintf(stderr,"when only %lld available.\n",mesh->memMax/million);
     }
     else {
       mesh->memMax= (long long)(mesh->info.mem)*million;
@@ -205,8 +203,10 @@ int _MMG2D_memOption(MMG5_pMesh mesh) {
       + sizeof(MMG5_Sol) /*+ sizeof(Displ)*/
       + 0.2*sizeof(MMG5_Edge);
 
-    /*init allocation need 38Mo*/
-    npask = (int)((double)(mesh->info.mem-38) / bytes * (int)million);
+    /* init allocation need _MMG5_MEMMIN B (for mesh->namein/out and
+     * sol->namein/out */
+    npask = (int)((double)(mesh->info.mem*million-_MMG5_MEMMIN)/(double)bytes);
+
     mesh->npmax = MG_MIN(npask,mesh->npmax);
     mesh->ntmax = MG_MIN(ctri*npask,mesh->ntmax);
     mesh->namax = MG_MIN(ctri*npask,mesh->namax);
@@ -215,29 +215,29 @@ int _MMG2D_memOption(MMG5_pMesh mesh) {
     /*check if the memory asked is enough to load the mesh*/
     if(mesh->np &&
        (mesh->npmax < mesh->np || mesh->ntmax < mesh->nt || mesh->namax < mesh->na) ){
-      memtmp = (long long)mesh->np * bytes /million + 38;
-      memtmp = MG_MAX(memtmp, ((long long)mesh->nt * bytes /(ctri*million) + 38));
-      memtmp = MG_MAX(memtmp, ((long long)mesh->na * bytes /(ctri*million) + 38));
-      mesh->memMax = (long long) memtmp*million+1;
-      fprintf(stderr,"  ## Error: %s: asking for %d Mo of memory ",
+      memtmp = (long long)mesh->np * bytes + _MMG5_MEMMIN;
+      memtmp = MG_MAX(memtmp, ((long long)mesh->nt * bytes /ctri)+_MMG5_MEMMIN);
+      memtmp = MG_MAX(memtmp, ((long long)mesh->na * bytes /ctri)+_MMG5_MEMMIN);
+      mesh->memMax = memtmp+1;
+      fprintf(stderr,"  ## Error: %s: asking for %d MB of memory ",
               __func__,mesh->info.mem);
-      fprintf(stderr,"is not enough to load mesh. You need to ask %d Mo minimum\n",
-              memtmp+1);
+      fprintf(stderr,"is not enough to load mesh. You need to ask %lld MB minimum\n",
+              memtmp/million+1);
       return 0;
     }
-    if(mesh->info.mem < 39) {
-      mesh->memMax = (long long) 38 + 1;
-      fprintf(stderr,"\n  ## Error: %s: asking for %d Mo of memory ",
+    if(mesh->info.mem < _MMG5_MEMMIN + 1) {
+      mesh->memMax =  _MMG5_MEMMIN + 1;
+      fprintf(stderr,"\n  ## Error: %s: asking for %d MB of memory ",
               __func__,mesh->info.mem);
-      fprintf(stderr,"is not enough to load mesh. You need to ask %d o minimum\n",
-              39);
+      fprintf(stderr,"is not enough to load mesh. You need to ask %d B minimum\n",
+              _MMG5_MEMMIN + 1);
       return 0;
     }
   }
 
   if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug ) {
-    castedVal = _MMG5_SAFELL2LCAST(mesh->memMax/million);
-    fprintf(stdout,"  MAXIMUM MEMORY AUTHORIZED (Mo)    %ld\n",castedVal);
+    fprintf(stdout,"  MAXIMUM MEMORY AUTHORIZED (MB)    %lld\n",
+            mesh->memMax/million);
   }
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {
