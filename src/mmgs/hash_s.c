@@ -75,7 +75,6 @@ static int paktri(MMG5_pMesh mesh) {
  */
 int _MMGS_hashTria(MMG5_pMesh mesh) {
   _MMG5_Hash          hash;
-  int                 ier;
 
   if ( mesh->adja )  return(1);
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
@@ -89,10 +88,11 @@ int _MMGS_hashTria(MMG5_pMesh mesh) {
                 return 0);
   _MMG5_SAFE_CALLOC(mesh->adja,3*mesh->ntmax+5,int,0);
 
-  ier = _MMG5_mmgHashTria(mesh, mesh->adja, &hash, 0);
+  if ( !_MMG5_mmgHashTria(mesh, mesh->adja, &hash, 0) ) return 0;
+
   _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
 
-  return(ier);
+  return 1;
 }
 
 /**

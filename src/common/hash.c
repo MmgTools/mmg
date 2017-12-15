@@ -145,7 +145,10 @@ int _MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, _MMG5_Hash *hash, int chkISO) 
                       " %d\n",__func__,hash->max);
             }
             _MMG5_TAB_RECALLOC(mesh,hash->item,hash->max,0.2,_MMG5_hedge,
-                               "_MMG5_edge",return 0,0);
+                               "_MMG5_edge",
+                               _MMG5_DEL_MEM(mesh,hash->item,(hash->max+1)
+                                             *sizeof(_MMG5_hedge));
+                               return 0,0);
 
             ph = &hash->item[hash->nxt];
 
