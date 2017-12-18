@@ -220,7 +220,7 @@ int MMG2_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
         continue;
       } else {
 				if(!_MMG2_delone(mesh,sol,k,list,lon)) {
-			    if(mesh->info.imprim > 4) {
+			    if ( abs(mesh->info.imprim) > 4) {
             nud++;
             if ( !mmgWarn2 ) {
               mmgWarn2 = 1;
@@ -235,16 +235,62 @@ int MMG2_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
       }
     }
 
-    if(mesh->info.imprim > 4)
+    if ( abs(mesh->info.imprim) > 4)
       fprintf(stdout,"     %8d vertex inserted %8d not inserted\n",ns,nu+nud);
     if(mesh->info.imprim < 0)
       fprintf(stdout,"     unable to insert %8d vertex : cavity %8d -- delaunay %8d \n",nu+nud,nu,nud);
   } while (ns && ++iter<maxiter);
 
 	if(abs(nus-ns)) {
-	  fprintf(stderr,"  ## Error: %s: some vertex are not "
+    if ( mesh->info.imprim < 0 ) {
+      fprintf(stderr,"\n  ## Warning: %s: unable to"
+              " insert %8d point with Delaunay \n",__func__,abs(nus-ns));
+      fprintf(stdout,"     try to insert with splitbar\n");
+    }
+    mmgWarn2 = 0;
+    nus = ns = 0;
+    /*try to insert using splitbar*/
+    for(k=1; k<=mesh->np-4; k++) {
+      ppt = &mesh->point[k];
+		  if(ppt->flag != -10) continue;
+			nus++;
+      /* Find the triangle lel of the mesh containing ppt */
+      list[0] = MMG2_findTria(mesh,k);
+
+      /* Exhaustive search if not found */
+      if ( !list[0] ) {
+        if ( mesh->info.ddebug )
+          printf(" ** exhaustive search of point location.\n");
+
+        for(kk=1; kk<=mesh->nt; kk++) {
+          list[0] = MMG2_isInTriangle(mesh,kk,&ppt->c[0]);
+          if ( list[0] ) break;
+        }
+
+        if ( kk>mesh->nt ) {
+          if ( !mmgWarn0 ) {
+            mmgWarn0 = 1;
+            fprintf(stderr,"\n  ## Error: %s: unable to find triangle"
+                    " for at least vertex %8d.\n",__func__,k);
+          }
+          return 0;
+        }
+      }
+      if(!_MMG2_splitbar(mesh,list[0],k)) {
+        if ( !mmgWarn2 ) {
+          mmgWarn2 = 1;
+          if(mesh->info.imprim < 0) fprintf(stderr,"\n  ## Warning: %s: unable to"
+                                            " insert at least 1 point with splitbar (%8d)\n",__func__,k);
+        }
+      } else {
+        ns++;
+      }
+    }
+    if ( abs(nus-ns) ) {
+      fprintf(stderr,"  ## Error: %s: some vertex are not "
             "inserted %d.\n",__func__,abs(nus-ns));
-		return(0);
+      return 0;
+    }
   }
 	return(1);
 }

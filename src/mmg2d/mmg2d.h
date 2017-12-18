@@ -278,6 +278,7 @@ int _MMG2_split3_sim(MMG5_pMesh ,MMG5_pSol ,int ,int vx[3]);
 int _MMG2_split1(MMG5_pMesh ,MMG5_pSol ,int ,int vx[3]);
 int _MMG2_split2(MMG5_pMesh ,MMG5_pSol ,int ,int vx[3]);
 int _MMG2_split3(MMG5_pMesh ,MMG5_pSol ,int ,int vx[3]);
+int _MMG2_splitbar(MMG5_pMesh ,int ,int );
 int  MMG2_assignEdge(MMG5_pMesh );
 int  MMG2_bdryEdge(MMG5_pMesh );
 int _MMG2_setadj(MMG5_pMesh );
