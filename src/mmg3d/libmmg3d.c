@@ -224,7 +224,10 @@ int MMG3D_bdryBuild(MMG5_pMesh mesh) {
 
 
   /* rebuild triangles*/
+  if ( mesh->tria )
+    _MMG5_DEL_MEM(mesh,mesh->tria,(mesh->nt+1)*sizeof(MMG5_Tria));
   mesh->nt = 0;
+
   if ( !_MMG5_chkBdryTria(mesh) ) {
     fprintf(stderr,"\n  ## Error: %s: unable to rebuild triangles\n",__func__);
     return(-1);
@@ -234,7 +237,11 @@ int MMG3D_bdryBuild(MMG5_pMesh mesh) {
   if ( mesh->htab.geom )
     _MMG5_DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(MMG5_hgeom));
 
-  mesh->na = nr = 0;
+  if ( mesh->edge )
+    _MMG5_DEL_MEM(mesh,mesh->edge,(mesh->na+1)*sizeof(MMG5_Edge));
+  mesh->na = 0;
+
+  nr = 0;
   /* in the worst case (all edges are marked), we will have around 1 edge per *
    * triangle (we count edges only one time) */
   if ( _MMG5_hNew(mesh,&mesh->htab,mesh->nt,3*(mesh->nt)) ) {

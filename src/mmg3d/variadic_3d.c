@@ -442,7 +442,7 @@ int _MMG3D_Free_structures_var(va_list argptr)
   if ( (*mesh)->tria )
     _MMG5_DEL_MEM((*mesh),(*mesh)->tria,((*mesh)->nt+1)*sizeof(MMG5_Tria));
 
- if ( (*mesh)->quadra )
+  if ( (*mesh)->quadra )
     _MMG5_DEL_MEM((*mesh),(*mesh)->quadra,((*mesh)->nquad+1)*sizeof(MMG5_Quad));
 
   if ( (*mesh)->xtetra )
