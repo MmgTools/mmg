@@ -64,6 +64,10 @@ else ()
   set(MMG_BUILDDIR_INTERNAL "${MMG_BUILDDIR}")
 endif()
 
+if ( NOT MMG_BUILDDIR AND MMG_BUILDDIR_INTERNAL )
+   SET ( MMG_BUILDDIR "${MMG_BUILDDIR_INTERNAL}" )
+endif ( )
+
 # Looking for include
 # -------------------
 
