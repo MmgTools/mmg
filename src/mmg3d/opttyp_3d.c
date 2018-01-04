@@ -404,6 +404,8 @@ int _MMG3D_splitItem(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,
   }
 
   if ( ier && !mesh->info.nomove ) {
+    /*if there is a reallocation inside splitedg, the pointer is unvalid*/
+    pt = &mesh->tetra[k];
     for(j=0 ; j<4 ; j++) {
       if(pt->v[j] == ier) break;
     }
