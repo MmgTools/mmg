@@ -1712,7 +1712,8 @@ int _MMG5_bdrySet(MMG5_pMesh mesh) {
 
   mesh->xt     = 0;
   mesh->xtmax  = mesh->ntmax + 2*na;
-
+  assert(mesh->xtmax);
+  
   _MMG5_ADD_MEM(mesh,(mesh->xtmax+1)*sizeof(MMG5_xTetra),"boundary tetrahedra",
                 fprintf(stderr,"  Exit program.\n");
                 return 0);
