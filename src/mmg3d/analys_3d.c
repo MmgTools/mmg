@@ -666,6 +666,7 @@ static int _MMG3D_nmgeom(MMG5_pMesh mesh){
   base = ++mesh->base;
   for (k=1; k<=mesh->ne; k++) {
     pt   = &mesh->tetra[k];
+    if( !MG_EOK(pt) ) continue;
     adja = &mesh->adja[4*(k-1)+1];
     for (i=0; i<4; i++) {
       if ( adja[i] ) continue;
