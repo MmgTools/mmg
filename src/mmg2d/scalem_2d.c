@@ -310,6 +310,7 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
 int MMG2_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pPoint     ppt;
   MMG5_Info      *info;
+  MMG5_pPar      ppar;
   double          dd;
   int             i,k,iadr;
 
@@ -331,6 +332,15 @@ int MMG2_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   mesh->info.hausd *= dd;
   mesh->info.hsiz  *= dd;
   mesh->info.ls    *= dd;
+  
+  if ( mesh->info.npar ) {
+    for (i=0; i<mesh->info.npar; i++) {
+      ppar = &mesh->info.par[i];
+      ppar->hmin   *= dd;
+      ppar->hmax   *= dd;
+      ppar->hausd  *= dd;
+    }
+  }
 
   /* de-normalize metric */
   if ( (!sol->np) || (!sol->m) )  return(1);
