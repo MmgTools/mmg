@@ -48,6 +48,7 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   //Displ     pd;
   MMG5_pPoint    ppt;
   MMG5_Info     *info;
+  MMG5_pPar      ppar;
   double         dd,isqhmin,isqhmax;
   double         *m;
   double         lambda[2],v[2][2];
@@ -62,12 +63,21 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   info = &mesh->info;
  
 
-  /* normalize coordinates */
+  /* normalize coordinates and local parameters */
   dd = _MMG2D_PRECI / info->delta;
 
   mesh->info.hausd *= dd;
   mesh->info.hsiz  *= dd;
   mesh->info.ls    *= dd;
+  
+  if ( mesh->info.npar ) {
+    for (i=0; i<mesh->info.npar; i++) {
+      ppar = &mesh->info.par[i];
+      ppar->hmin   *= dd;
+      ppar->hmax   *= dd;
+      ppar->hausd  *= dd;
+    }
+  }
 
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
