@@ -1447,7 +1447,7 @@ int MMG3D_Get_tensorSol(MMG5_pSol met, double *m11,double *m12, double *m13,
   *m12 = met->m[6*met->npi+1];
   *m13 = met->m[6*met->npi+2];
   *m22 = met->m[6*met->npi+3];
-  *m13 = met->m[6*met->npi+4];
+  *m23 = met->m[6*met->npi+4];
   *m33 = met->m[6*met->npi+5];
 
   return(1);
