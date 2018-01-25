@@ -342,15 +342,15 @@ int MMG3D_swap23(MMG5_pMesh mesh,MMG5_pSol met,int k,char metRidTyp) {
   MMG5_pTetra          pt0,pt1,ptnew;
   MMG5_xTetra          xt[3];
   MMG5_pxTetra         pxt0,pxt1;
-  double               vold0,vold,vnew;
+  double               calold0,calold,calnew,calnew0,calnew1,calnew2;
   int                  k1,conf0,conf1,*adja,iel,np,xt1;
   int                  adj0_2,adj0_3,adj1_1,adj1_2,adj1_3;
   char                 j0,j1,i,isxt[3];
   unsigned char        tau0[4],tau1[4];
   const unsigned char *taued0,*taued1;
 
-  pt0   = &mesh->tetra[k];
-  vold0 = _MMG5_orvol(mesh->point,pt0->v);
+  pt0     = &mesh->tetra[k];
+  calold0 = pt0->qual;
 
   assert ( pt0->xt );
 
@@ -467,28 +467,41 @@ int MMG3D_swap23(MMG5_pMesh mesh,MMG5_pSol met,int k,char metRidTyp) {
     }
 
     /* Test volume of the 3 created tets */
-    vold = MG_MIN(vold0,_MMG5_orvol(mesh->point,pt1->v));
+    calold = MG_MIN(calold0,pt1->qual);
 
     ptnew = &mesh->tetra[0];
     memcpy(ptnew,pt0,sizeof(MMG5_Tetra));
     np    = pt1->v[tau1[0]];
 
     ptnew->v[tau0[1]] = np;
-    vnew = _MMG5_orvol(mesh->point,ptnew->v);
-    if ( vnew < _MMG5_EPSD2 ) continue;
-    else if ( vold > _MMG5_NULKAL && vnew < _MMG5_NULKAL ) continue;
+    if ( (!metRidTyp) && met->m && met->size>1 )
+      calnew0 = _MMG5_caltet33_ani(mesh,met,ptnew);
+    else
+      calnew0 = _MMG5_orcal(mesh,met,0);
+    if ( calnew0 < _MMG5_NULKAL ) continue;
 
     ptnew->v[tau0[1]] = pt0->v[tau0[1]];
     ptnew->v[tau0[2]] = np;
-    vnew = _MMG5_orvol(mesh->point,ptnew->v);
-    if ( vnew < _MMG5_EPSD2 ) continue;
-    else if ( vold > _MMG5_NULKAL && vnew < _MMG5_NULKAL ) continue;
+    if ( (!metRidTyp) && met->m && met->size>1 )
+      calnew1 = _MMG5_caltet33_ani(mesh,met,ptnew);
+    else
+      calnew1 = _MMG5_orcal(mesh,met,0);
+    if ( calnew1 < _MMG5_NULKAL ) continue;
 
     ptnew->v[tau0[2]] = pt0->v[tau0[2]];
     ptnew->v[tau0[3]] = np;
-    vnew = _MMG5_orvol(mesh->point,ptnew->v);
-    if ( vnew < _MMG5_EPSD2 ) continue;
-    else if ( vold > _MMG5_NULKAL && vnew < _MMG5_NULKAL ) continue;
+    if ( (!metRidTyp) && met->m && met->size>1 )
+      calnew2 = _MMG5_caltet33_ani(mesh,met,ptnew);
+    else
+      calnew2 = _MMG5_orcal(mesh,met,0);
+    if ( calnew2 < _MMG5_NULKAL ) continue;
+
+    calnew = MG_MIN(calnew0,MG_MIN(calnew1,calnew2));
+
+    if ( calold < _MMG5_EPSOK ) {
+      if ( calnew < calold ) continue;
+    }
+    else if ( calnew <= _MMG5_EPSOK ) continue;
 
     /** Swap */
     xt1 = pt1->xt;
@@ -785,17 +798,10 @@ int MMG3D_swap23(MMG5_pMesh mesh,MMG5_pSol met,int k,char metRidTyp) {
     }
 
     /** Quality Update */
-    if ( (!metRidTyp) && met->m && met->size>1 ) {
-      pt0->qual   = _MMG5_caltet33_ani(mesh,met,pt0);
-      pt1->qual   = _MMG5_caltet33_ani(mesh,met,pt1);
-      ptnew->qual = _MMG5_caltet33_ani(mesh,met,ptnew);
-    }
-    else
-    {
-      pt0->qual   = _MMG5_orcal(mesh,met,k);
-      pt1->qual   = _MMG5_orcal(mesh,met,k1);
-      ptnew->qual = _MMG5_orcal(mesh,met,iel);
-    }
+    pt0->qual   = calnew0;
+    pt1->qual   = calnew1;
+    ptnew->qual = calnew2;
+
     pt0->mark   = mesh->mark;
     pt1->mark   = mesh->mark;
     ptnew->mark = mesh->mark;
