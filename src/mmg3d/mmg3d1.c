@@ -1896,18 +1896,6 @@ static int _MMG5_anatet4(MMG5_pMesh mesh, MMG5_pSol met,int *nf, char typchk) {
         if ( (ppt->tag & MG_BDY) && (!(ppt->tag & MG_PARBDY)) )  nbdy++;
       }
       if ( nbdy == 4 ) {
-        if ( !mesh->info.noswap ) {
-          /* Try to swap first */
-          ier = MMG3D_swap23(mesh,met,k,typchk-1);
-          if ( ier < 0 ) {
-            return -1;
-          }
-          else if ( ier ) {
-            ++(*nf);
-            continue;
-          }
-        }
-
         if ( !mesh->info.noinsert ) {
           ier  = _MMG5_split4bar(mesh,met,k,typchk-1);
           if ( !ier ) return(-1);
@@ -1948,17 +1936,6 @@ static int _MMG5_anatet4rid(MMG5_pMesh mesh, MMG5_pSol met,int *nf, char typchk)
       if ( (ppt->tag & MG_GEO) )  nrid++;
     }
     if ( nrid == 4 ) {
-      if ( !mesh->info.noswap ) {
-        /* Try to swap first */
-        ier = MMG3D_swap23(mesh,met,k,typchk-1);
-        if ( ier < 0 ) {
-          return -1;
-        }
-        else if ( ier ) {
-          ++(*nf);
-          continue;
-        }
-      }
       if ( !mesh->info.noinsert ) {
         ier  = _MMG5_split4bar(mesh,met,k,typchk-1);
         if ( !ier ) return(-1);
