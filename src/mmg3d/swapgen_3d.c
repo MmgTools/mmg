@@ -628,12 +628,12 @@ int MMG3D_swap23(MMG5_pMesh mesh,MMG5_pSol met,int k,char metRidTyp) {
       /* Assignation of the xt fields to the appropriate tets */
       /* xt[0] */
       xt[0].tag[taued0[0]] = 0;
-      xt[0].tag[taued0[3]] = pxt1->tag[taued1[1]];
-      xt[0].tag[taued0[4]] = pxt1->tag[taued1[2]];
+      xt[0].tag[taued0[3]] = pxt1->tag[taued1[2]];
+      xt[0].tag[taued0[4]] = pxt1->tag[taued1[1]];
 
       xt[0].edg[taued0[0]] = 0;
-      xt[0].edg[taued0[3]] =  pxt1->edg[taued1[1]];
-      xt[0].edg[taued0[4]] =  pxt1->edg[taued1[2]];
+      xt[0].edg[taued0[3]] =  pxt1->edg[taued1[2]];
+      xt[0].edg[taued0[4]] =  pxt1->edg[taued1[1]];
 
       xt[0].ref[ tau0[0]] = pxt1->ref[tau1[1]];
       xt[0].ref[ tau0[2]] = 0;
