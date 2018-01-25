@@ -1371,7 +1371,7 @@ static int
 _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   MMG5_pTetra   pt;
   MMG5_pPoint   ppt,p1,p2;
-  MMG5_Tria     ptt;
+  MMG5_Tria     ptt,ptt2;
   MMG5_xTetra  *pxt;
   MMG5_xPoint  *pxp;
   _MMG5_Bezier  pb;
@@ -1562,10 +1562,10 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
 
               /* Compute tangent and normal with respect to the face ifac */
               /* virtual triangle */
-              _MMG5_tet2tri(mesh,k,ifac,&ptt);
+              _MMG5_tet2tri(mesh,k,ifac,&ptt2);
 
               /* geometric support */
-              ier = _MMG5_bezierCP(mesh,&ptt,&pb,MG_GET(pxt->ori,ifac));
+              ier = _MMG5_bezierCP(mesh,&ptt2,&pb,MG_GET(pxt->ori,ifac));
               assert(ier);
 
               ier = _MMG3D_bezierInt(&pb,&uv[j2][0],o,no,to);
@@ -1892,6 +1892,7 @@ static int _MMG5_anatet4(MMG5_pMesh mesh, MMG5_pSol met,int *nf, char typchk) {
       }
     }
   }
+
   if ( (mesh->info.ddebug || abs(mesh->info.imprim) > 5) && ns > 0 )
     fprintf(stdout,"     boundary elements: %7d splitted\n",ns);
   return(ns);
