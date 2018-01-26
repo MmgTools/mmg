@@ -1958,7 +1958,7 @@ int _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,char typchk, int patternMode) {
   nns = nnc = nnf = it = 0;
   lastit = 0;
   minit = 3;
-  maxit = 5;
+  maxit = 6;
   mesh->gap = 0.5;
   do {
     if ( typchk==2 && lastit==1 )  ++mesh->info.fem;
@@ -2044,7 +2044,7 @@ int _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,char typchk, int patternMode) {
 
     if ( it > minit-1 && ( !(ns+nc) || (abs(nc-ns) < 0.1 * MG_MAX(nc,ns)) ) ) {
       ++lastit;
-      if ( it > minit && lastit>=2 ) break;
+      if ( it > minit && lastit>2 ) break;
     }
     else if ( it+2 >= maxit ) {
       /* Last iteration because we reach the maximal number of iter */
@@ -2057,7 +2057,7 @@ int _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,char typchk, int patternMode) {
       ++lastit;
     }
   }
-  while ( ++it < maxit && (ns+nc+nf > 0 || lastit<2) );
+  while ( ++it < maxit && (ns+nc+nf > 0 || lastit<3) );
 
   if ( mesh->info.imprim ) {
     if ( (abs(mesh->info.imprim) < 5 || mesh->info.ddebug ) && nns+nnc > 0 ) {
