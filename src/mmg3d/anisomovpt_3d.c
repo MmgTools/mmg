@@ -61,8 +61,6 @@ int _MMG5_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree, int
   double               vol,totvol,m[6];
   double               calold,calnew,*callist,det;
   int                  k,iel,i0;
-  // Dynamic alloc for windows comptibility
-  _MMG5_SAFE_MALLOC(callist, ilist, double,0);
 
   pt0    = &mesh->tetra[0];
   ppt0   = &mesh->point[0];
@@ -89,14 +87,12 @@ int _MMG5_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree, int
     if ( !_MMG5_moymet(mesh,met,pt,m) ) {
       // _MMG5_moymet must succeed because we have at least 1 point of the tet
       // that is internal.
-      _MMG5_SAFE_FREE(callist);
       return 0;
     }
 
     det = m[0] * ( m[3]*m[5] - m[4]*m[4]) - m[1] * ( m[1]*m[5] - m[2]*m[4])
       + m[2] * ( m[1]*m[4] - m[2]*m[3]);
     if ( det < _MMG5_EPSD2 ) {
-      _MMG5_SAFE_FREE(callist);
       return 0;
     }
 
@@ -110,7 +106,6 @@ int _MMG5_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree, int
     calold = MG_MIN(calold, pt->qual);
   }
   if (totvol < _MMG5_EPSD2) {
-    _MMG5_SAFE_FREE(callist);
     return 0;
   }
 
@@ -120,6 +115,8 @@ int _MMG5_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree, int
   ppt0->c[2] *= totvol;
 
   /* Check new position validity */
+  // Dynamic alloc for windows comptibility
+  _MMG5_SAFE_MALLOC(callist, ilist, double,0);
   calnew = DBL_MAX;
   for (k=0; k<ilist; k++) {
     iel = list[k] / 4;
@@ -204,9 +201,6 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
   unsigned char     i0,iface,i;
   static int        warn = 0;
 
-  // Dynamic alloc for windows comptibility
-  _MMG5_SAFE_MALLOC(callist, ilistv, double,0);
-
   step = 0.1;
   if ( ilists < 2 )      return 0;
 
@@ -222,7 +216,6 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
 
   /** Step 1 : rotation matrix that sends normal n to the third coordinate vector of R^3 */
   if ( !_MMG5_rotmatrix(n,r) ) {
-    _MMG5_SAFE_FREE(callist);
     return 0;
   }
 
@@ -320,13 +313,11 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
   for (k=0; k<ilists-1; k++) {
     det2d = lispoi[3*k+1]*lispoi[3*(k+1)+2] - lispoi[3*k+2]*lispoi[3*(k+1)+1];
     if ( det2d < 0.0 ) {
-      _MMG5_SAFE_FREE(callist);
       return 0;
     }
   }
   det2d = lispoi[3*(ilists-1)+1]*lispoi[3*0+2] - lispoi[3*(ilists-1)+2]*lispoi[3*0+1];
   if ( det2d < 0.0 ) {
-    _MMG5_SAFE_FREE(callist);
     return 0;
   }
 
@@ -344,7 +335,6 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
     _MMG5_tet2tri(mesh,iel,iface,&tt);
 
     if(!_MMG5_bezierCP(mesh,&tt,&pb,MG_GET(pxt->ori,iface))){
-      _MMG5_SAFE_FREE(callist);
       return 0;
     }
 
@@ -356,7 +346,6 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
                 " unable to compute optimal position for at least"
                 " 1 point.\n",__func__);
       }
-      _MMG5_SAFE_FREE(callist);
       return 0;
     }
   }
@@ -374,7 +363,6 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
       }
     }
     if ( k == ilists ) {
-      _MMG5_SAFE_FREE(callist);
       return 0;
     }
   }
@@ -387,7 +375,6 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
       }
     }
     if ( k == -1 ) {
-      _MMG5_SAFE_FREE(callist);
       return 0;
     }
   }
@@ -396,7 +383,6 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
   det2d = -gv[1]*(lispoi[3*(kel+1)+1] - lispoi[3*(kel)+1]) + \
     gv[0]*(lispoi[3*(kel+1)+2] - lispoi[3*(kel)+2]);
   if ( fabs(det2d) < _MMG5_EPSD2 ) {
-    _MMG5_SAFE_FREE(callist);
     return 0;
   }
 
@@ -413,7 +399,6 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
   /* Computation of the barycentric coordinates of the new point in the corresponding triangle. */
   det2d = lispoi[3*kel+1]*lispoi[3*(kel+1)+2] - lispoi[3*kel+2]*lispoi[3*(kel+1)+1];
   if ( det2d < _MMG5_EPSD2 ) {
-    _MMG5_SAFE_FREE(callist);
     return 0;
   }
   det2d = 1.0 / det2d;
@@ -432,7 +417,6 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
   _MMG5_tet2tri(mesh,iel,iface,&tt);
 
   if(!_MMG5_bezierCP(mesh,&tt,&pb,MG_GET(pxt->ori,iface))){
-    _MMG5_SAFE_FREE(callist);
     return 0;
   }
 
@@ -496,7 +480,6 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
     }
   }
   if(!_MMG3D_bezierInt(&pb,uv,o,no,to)){
-    _MMG5_SAFE_FREE(callist);
     return 0;
   }
 
@@ -513,8 +496,7 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
   nxp = mesh->xp + 1;
   if ( nxp > mesh->xpmax ) {
     _MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,MMG5_xPoint,
-                       "larger xpoint table",
-                       _MMG5_SAFE_FREE(callist);return 0;,0);
+                       "larger xpoint table",return 0;,0);
     n = &(mesh->xpoint[p0->xp].n1[0]);
   }
   ppt0->xp = nxp;
@@ -526,7 +508,6 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
 
   // parallel transport of metric at p0 to new point.
   if ( !_MMG5_paratmet(p0->c,n,m0,o,no,&met->m[0]) ) {
-    _MMG5_SAFE_FREE(callist);
     return 0;
   }
 
@@ -563,7 +544,6 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
     if ( caltmp < _MMG5_EPSD2 ) {
       /* We don't check the input triangle qualities, thus we may have a very
        * bad triangle in our mesh */
-      _MMG5_SAFE_FREE(callist);
       return 0;
     }
     calnew = MG_MIN(calnew,caltmp);
@@ -595,24 +575,20 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
 
   }
   if ( calold < _MMG5_EPSOK && calnew <= calold ) {
-    _MMG5_SAFE_FREE(callist);
     return 0;
-  }
-  else if (calnew < _MMG5_EPSOK) {
-    _MMG5_SAFE_FREE(callist);
+  }  else if (calnew < _MMG5_EPSOK) {
     return 0;
   }
   else if (improveSurf && calnew < 1.02*calold) {
-    _MMG5_SAFE_FREE(callist);
     return 0;
   }
   else if ( calnew < 0.3*calold ) {
-    _MMG5_SAFE_FREE(callist);
     return 0;
   }
   memset(pxp,0,sizeof(MMG5_xPoint));
 
   /* Test : check whether all volumes remain positive with new position of the point */
+  _MMG5_SAFE_MALLOC(callist, ilistv, double,0);
   calold = calnew = DBL_MAX;
   for (l=0; l<ilistv; l++) {
     k    = listv[l] / 4;
