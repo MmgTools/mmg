@@ -1396,196 +1396,197 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
     pxt = &mesh->xtetra[pt->xt];
 
     for (i=0; i<4; i++){
-      if ( pxt->ftag[i] & MG_REQ )  continue;
-      if ( pxt->ftag[i] & MG_BDY )  break;
-    }
-    if ( i == 4 )  continue;
+      if ( pxt->ftag[i] & MG_REQ )     continue;
+      if ( !(pxt->ftag[i] & MG_BDY) )  continue;
 
-    /* virtual triangle */
-    _MMG5_tet2tri(mesh,k,i,&ptt);
-    if ( typchk == 1 ) {
-      if ( !MG_GET(pxt->ori,i) ) continue;
+      /* virtual triangle */
+      _MMG5_tet2tri(mesh,k,i,&ptt);
+      if ( typchk == 1 ) {
+        if ( !MG_GET(pxt->ori,i) ) continue;
 
-      /* Local parameters for ptt and k */
-      hmax  = mesh->info.hmax;
-      hausd = mesh->info.hausd;
-      isloc = 0;
+        /* Local parameters for ptt and k */
+        hmax  = mesh->info.hmax;
+        hausd = mesh->info.hausd;
+        isloc = 0;
 
-      if ( mesh->info.parTyp & MG_Tetra ) {
-        for ( l=0; l<mesh->info.npar; ++l ) {
-          par = &mesh->info.par[l];
-
-          if ( par->elt != MMG5_Tetrahedron )  continue;
-          if ( par->ref != pt->ref ) continue;
-
-          hmax = par->hmax;
-          hausd = par->hausd;
-          isloc = 1;
-          break;
-        }
-      }
-      if ( mesh->info.parTyp & MG_Tria ) {
-        if ( isloc ) {
+        if ( mesh->info.parTyp & MG_Tetra ) {
           for ( l=0; l<mesh->info.npar; ++l ) {
             par = &mesh->info.par[l];
 
-            if ( par->elt != MMG5_Triangle )  continue;
-            if ( par->ref != ptt.ref ) continue;
+            if ( par->elt != MMG5_Tetrahedron )  continue;
+            if ( par->ref != pt->ref ) continue;
 
-            hmax = MG_MIN(hmax,par->hmax);
-            hausd = MG_MIN(hausd,par->hausd);
-            break;
-          }
-        }
-        else {
-          for ( l=0; l<mesh->info.npar; ++l ) {
-            par = &mesh->info.par[l];
-
-            if ( par->elt != MMG5_Triangle )  continue;
-            if ( par->ref != ptt.ref ) continue;
-
-            hmax  = par->hmax;
+            hmax = par->hmax;
             hausd = par->hausd;
             isloc = 1;
             break;
           }
         }
-      }
+        if ( mesh->info.parTyp & MG_Tria ) {
+          if ( isloc ) {
+            for ( l=0; l<mesh->info.npar; ++l ) {
+              par = &mesh->info.par[l];
 
-      if ( !_MMG5_chkedg(mesh,&ptt,MG_GET(pxt->ori,i),hmax,hausd,isloc) )
-        continue;
+              if ( par->elt != MMG5_Triangle )  continue;
+              if ( par->ref != ptt.ref ) continue;
 
-      /* put back flag on tetra */
-      for (j=0; j<3; j++){
-        if ( pxt->tag[_MMG5_iarf[i][j]] & MG_REQ )  continue;
-        if ( MG_GET(ptt.flag,j) )  MG_SET(pt->flag,_MMG5_iarf[i][j]);
+              hmax = MG_MIN(hmax,par->hmax);
+              hausd = MG_MIN(hausd,par->hausd);
+              break;
+            }
+          }
+          else {
+            for ( l=0; l<mesh->info.npar; ++l ) {
+              par = &mesh->info.par[l];
+
+              if ( par->elt != MMG5_Triangle )  continue;
+              if ( par->ref != ptt.ref ) continue;
+
+              hmax  = par->hmax;
+              hausd = par->hausd;
+              isloc = 1;
+              break;
+            }
+          }
+        }
+
+        if ( !_MMG5_chkedg(mesh,&ptt,MG_GET(pxt->ori,i),hmax,hausd,isloc) )
+          continue;
+
+        /* put back flag on tetra */
+        for (j=0; j<3; j++){
+          if ( pxt->tag[_MMG5_iarf[i][j]] & MG_REQ )  continue;
+          if ( MG_GET(ptt.flag,j) )  MG_SET(pt->flag,_MMG5_iarf[i][j]);
+        }
       }
-    }
-    else if ( typchk == 2 ) {
+      else if ( typchk == 2 ) {
+        for (j=0; j<3; j++) {
+          ia = _MMG5_iarf[i][j];
+          if ( pxt->tag[ia] & MG_REQ )  continue;
+          i1  = _MMG5_iare[ia][0];
+          i2  = _MMG5_iare[ia][1];
+          ip1 = pt->v[i1];
+          ip2 = pt->v[i2];
+          len = _MMG5_lenedg(mesh,met,ia,pt);
+
+          assert( isfinite(len) && (len!=-len) );
+
+          // Case of an internal tetra with 4 ridges vertices.
+          if ( len == 0 ) continue;
+          if ( len > _MMG3D_LLONG )  MG_SET(pt->flag,ia);
+          /* Treat here the ridges coming from a corner (we can not do that after
+           * because the corner don't have xpoints) */
+          if ( (mesh->point[ip1].tag & MG_CRN) ||  (mesh->point[ip2].tag & MG_CRN) ) {
+            if ( len > _MMG3D_LOPTL )  MG_SET(pt->flag,ia);
+          }
+        }
+      }
+      if ( !pt->flag )  continue;
+      ns++;
+
+      /* geometric support */
+      ier = _MMG5_bezierCP(mesh,&ptt,&pb,MG_GET(pxt->ori,i));
+      assert(ier);
+
+      /* scan edges in face to split */
       for (j=0; j<3; j++) {
         ia = _MMG5_iarf[i][j];
+        if ( !MG_GET(pt->flag,ia) )  continue;
         if ( pxt->tag[ia] & MG_REQ )  continue;
         i1  = _MMG5_iare[ia][0];
         i2  = _MMG5_iare[ia][1];
         ip1 = pt->v[i1];
         ip2 = pt->v[i2];
-        len = _MMG5_lenedg(mesh,met,ia,pt);
+        ip  = _MMG5_hashGet(&hash,ip1,ip2);
+        if ( ip > 0 && !(ptt.tag[j] & MG_GEO) )  continue;
 
-        assert( isfinite(len) && (len!=-len) );
-
-        // Case of an internal tetra with 4 ridges vertices.
-        if ( len == 0 ) continue;
-        if ( len > _MMG3D_LLONG )  MG_SET(pt->flag,ia);
-        /* Treat here the ridges coming from a corner (we can not do that after
-         * because the corner don't have xpoints) */
-        if ( (mesh->point[ip1].tag & MG_CRN) ||  (mesh->point[ip2].tag & MG_CRN) ) {
-          if ( len > _MMG3D_LOPTL )  MG_SET(pt->flag,ia);
-        }
-      }
-    }
-    if ( !pt->flag )  continue;
-    ns++;
-
-    /* geometric support */
-    ier = _MMG5_bezierCP(mesh,&ptt,&pb,MG_GET(pxt->ori,i));
-    assert(ier);
-
-    /* scan edges in face to split */
-    for (j=0; j<3; j++) {
-      ia = _MMG5_iarf[i][j];
-      if ( !MG_GET(pt->flag,ia) )  continue;
-      if ( pxt->tag[ia] & MG_REQ )  continue;
-      i1  = _MMG5_iare[ia][0];
-      i2  = _MMG5_iare[ia][1];
-      ip1 = pt->v[i1];
-      ip2 = pt->v[i2];
-      ip  = _MMG5_hashGet(&hash,ip1,ip2);
-      if ( ip > 0 && !(ptt.tag[j] & MG_GEO) )  continue;
-
-      ier = _MMG3D_bezierInt(&pb,&uv[j][0],o,no,to);
-      assert(ier);
-      /* new point along edge */
-      if ( !ip ) {
-        ip = _MMG3D_newPt(mesh,o,MG_BDY);
+        ier = _MMG3D_bezierInt(&pb,&uv[j][0],o,no,to);
+        assert(ier);
+        /* new point along edge */
         if ( !ip ) {
-          /* reallocation of point table */
-          _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
-                              fprintf(stderr,"\n  ## Error: %s: unable to"
-                                      " allocate a new point.\n",__func__);
-                              _MMG5_INCREASE_MEM_MESSAGE();
-                              _MMG3D_delPatternPts(mesh,hash);return -1;
-                              ,o,MG_BDY,-1);
-          // Now pb->p contain a wrong memory address.
-          pb.p[0] = &mesh->point[ptt.v[0]];
-          pb.p[1] = &mesh->point[ptt.v[1]];
-          pb.p[2] = &mesh->point[ptt.v[2]];
-        }
-        if ( !_MMG5_hashEdge(mesh,&hash,ip1,ip2,ip) )  return(-1);
-        ppt = &mesh->point[ip];
+          ip = _MMG3D_newPt(mesh,o,MG_BDY);
+          if ( !ip ) {
+            /* reallocation of point table */
+            _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
+                                fprintf(stderr,"\n  ## Error: %s: unable to"
+                                        " allocate a new point.\n",__func__);
+                                _MMG5_INCREASE_MEM_MESSAGE();
+                                _MMG3D_delPatternPts(mesh,hash);return -1;
+                                ,o,MG_BDY,-1);
+            // Now pb->p contain a wrong memory address.
+            pb.p[0] = &mesh->point[ptt.v[0]];
+            pb.p[1] = &mesh->point[ptt.v[1]];
+            pb.p[2] = &mesh->point[ptt.v[2]];
+          }
+          if ( !_MMG5_hashEdge(mesh,&hash,ip1,ip2,ip) )  return(-1);
+          ppt = &mesh->point[ip];
 
-        if ( met->m ) {
-          if ( typchk == 1 && (met->size>1) )
-            ier = _MMG3D_intmet33_ani(mesh,met,k,ia,ip,0.5);
+          if ( met->m ) {
+            if ( typchk == 1 && (met->size>1) )
+              ier = _MMG3D_intmet33_ani(mesh,met,k,ia,ip,0.5);
+            else
+              ier = _MMG5_intmet(mesh,met,k,ia,ip,0.5);
+
+            if ( !ier ) {
+              if ( !mmgWarn ) {
+                fprintf(stderr,"\n  ## Error: %s: unable to interpolate at least"
+                        " 1 metric.\n",__func__);
+                mmgWarn = 1;
+              }
+              return(-1);
+            }
+            else if ( ier < 0 ) {
+              _MMG3D_delPt(mesh,ip);
+              continue;
+            }
+          }
+
+          if ( MG_EDG(ptt.tag[j]) || (ptt.tag[j] & MG_NOM) )
+            ppt->ref = ptt.edg[j] ? ptt.edg[j] : ptt.ref;
           else
-            ier = _MMG5_intmet(mesh,met,k,ia,ip,0.5);
+            ppt->ref = ptt.ref;
+          ppt->tag |= ptt.tag[j];
+          pxp = &mesh->xpoint[ppt->xp];
+          memcpy(pxp->n1,no,3*sizeof(double));
+          memcpy(ppt->n,to,3*sizeof(double));
 
-          if ( !ier ) {
-            if ( !mmgWarn ) {
-              fprintf(stderr,"\n  ## Error: %s: unable to interpolate at least"
-                      " 1 metric.\n",__func__);
-              mmgWarn = 1;
-            }
-            return(-1);
-          }
-          else if ( ier < 0 ) {
-            _MMG3D_delPt(mesh,ip);
-            continue;
-          }
-        }
+          if ( mesh->info.fem<typchk ) {
+            if ( MG_EDG(ptt.tag[j]) && !(ptt.tag[j] & MG_NOM) ) {
+              /* Update the second normal and the tangent at point ip if the edge
+               * is shared by 2 faces (if anatet4 is not called, 1 tetra may have
+               * 2 bdry faces) */
+              ifac = (_MMG5_ifar[ia][0] == i)? _MMG5_ifar[ia][1] : _MMG5_ifar[ia][0];
+              if ( pxt->ftag[ifac] & MG_BDY ) {
+                j2   = _MMG5_iarfinv[ifac][ia];
 
-        if ( MG_EDG(ptt.tag[j]) || (ptt.tag[j] & MG_NOM) )
-          ppt->ref = ptt.edg[j] ? ptt.edg[j] : ptt.ref;
-        else
-          ppt->ref = ptt.ref;
-        ppt->tag |= ptt.tag[j];
-        pxp = &mesh->xpoint[ppt->xp];
-        memcpy(pxp->n1,no,3*sizeof(double));
-        memcpy(ppt->n,to,3*sizeof(double));
+                /* Compute tangent and normal with respect to the face ifac */
+                /* virtual triangle */
+                _MMG5_tet2tri(mesh,k,ifac,&ptt2);
 
-        if ( mesh->info.fem<typchk ) {
-          if ( MG_EDG(ptt.tag[j]) && !(ptt.tag[j] & MG_NOM) ) {
-            /* Update the second normal and the tangent at point ip if the edge
-             * is shared by 2 faces */
-            ifac = (_MMG5_ifar[ia][0] == i)? _MMG5_ifar[ia][1] : _MMG5_ifar[ia][0];
-            if ( pxt->ftag[ifac] & MG_BDY ) {
-              j2   = _MMG5_iarfinv[ifac][ia];
+                /* geometric support */
+                ier = _MMG5_bezierCP(mesh,&ptt2,&pb,MG_GET(pxt->ori,ifac));
+                assert(ier);
 
-              /* Compute tangent and normal with respect to the face ifac */
-              /* virtual triangle */
-              _MMG5_tet2tri(mesh,k,ifac,&ptt2);
+                ier = _MMG3D_bezierInt(&pb,&uv[j2][0],o,no,to);
+                assert(ier);
 
-              /* geometric support */
-              ier = _MMG5_bezierCP(mesh,&ptt2,&pb,MG_GET(pxt->ori,ifac));
-              assert(ier);
-
-              ier = _MMG3D_bezierInt(&pb,&uv[j2][0],o,no,to);
-              assert(ier);
-
-              if ( !_MMG3D_storeGeom(ppt,pxp,no) ) continue;
+                if ( !_MMG3D_storeGeom(ppt,pxp,no) ) continue;
+              }
             }
           }
+          nap++;
         }
-        nap++;
-      }
-      else if ( MG_EDG(ptt.tag[j]) && !(ptt.tag[j] & MG_NOM) ) {
-        ppt = &mesh->point[ip];
-        assert(ppt->xp);
-        pxp = &mesh->xpoint[ppt->xp];
+        else if ( MG_EDG(ptt.tag[j]) && !(ptt.tag[j] & MG_NOM) ) {
+          ppt = &mesh->point[ip];
+          assert(ppt->xp);
+          pxp = &mesh->xpoint[ppt->xp];
 
-        if ( !_MMG3D_storeGeom(ppt,pxp,no) ) continue;
+          if ( !_MMG3D_storeGeom(ppt,pxp,no) ) continue;
+        }
       }
     }
   }
+
   if ( !ns ) {
     _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
     return(ns);
