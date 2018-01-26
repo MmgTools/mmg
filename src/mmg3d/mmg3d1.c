@@ -1961,10 +1961,6 @@ int _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,char typchk, int patternMode) {
   maxit = 5;
   mesh->gap = 0.5;
   do {
-    if ( it >= maxit-1 || ns+nc+nf == 0 ) {
-      ++lastit;
-    }
-
     if ( typchk==2 && lastit==1 )  ++mesh->info.fem;
 
     /* memory free */
@@ -2046,12 +2042,22 @@ int _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,char typchk, int patternMode) {
       fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped\n",ns,nc,nf);
     }
 
-    if ( it > minit && ( !(ns+nc) || (abs(nc-ns) < 0.1 * MG_MAX(nc,ns)) ) ) {
-      if ( lastit ) break;
+    if ( it > minit-1 && ( !(ns+nc) || (abs(nc-ns) < 0.1 * MG_MAX(nc,ns)) ) ) {
+      ++lastit;
+      if ( it > minit && lastit>=2 ) break;
+    }
+    else if ( it+2 >= maxit ) {
+      /* Last iteration because we reach the maximal number of iter */
+      ++lastit;
+    }
+    else if ( lastit ) {
+      /* Avoid the incrementation of mesh->info.fem if we have detected a last
+      iteration but anatet4 leads to have nc, nf or ns != 0 so we perform a last
+      iter */
       ++lastit;
     }
   }
-  while ( ++it < maxit && (ns+nc+nf > 0 || !lastit) );
+  while ( ++it < maxit && (ns+nc+nf > 0 || lastit<2) );
 
   if ( mesh->info.imprim ) {
     if ( (abs(mesh->info.imprim) < 5 || mesh->info.ddebug ) && nns+nnc > 0 ) {
