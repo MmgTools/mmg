@@ -232,7 +232,6 @@ void _MMG5_freeXPrisms(MMG5_pMesh mesh);
 extern void _MMG3D_Free_topoTables(MMG5_pMesh mesh);
   char _MMG5_chkedg(MMG5_pMesh mesh,MMG5_pTria pt,char ori,double,double,int);
 int  _MMG5_chkBdryTria(MMG5_pMesh mesh);
-void _MMG5_tet2tri(MMG5_pMesh mesh,int k,char ie,MMG5_Tria *ptt);
 int    _MMG5_mmg3dBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,_MMG5_pBezier pb,char ori);
 extern int    _MMG5_BezierTgt(double c1[3],double c2[3],double n1[3],double n2[3],double t1[3],double t2[3]);
 extern double _MMG5_BezierGeod(double c1[3], double c2[3], double t1[3], double t2[3]);
