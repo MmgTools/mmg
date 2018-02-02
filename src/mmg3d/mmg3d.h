@@ -352,7 +352,7 @@ int  _MMG5_chkswpbdy(MMG5_pMesh, MMG5_pSol,int*, int, int, int,char);
 int  _MMG5_swpbdy(MMG5_pMesh,MMG5_pSol,int*,int,int,_MMG3D_pOctree,char);
 int  _MMG5_swpgen(MMG5_pMesh,MMG5_pSol,int, int, int*,_MMG3D_pOctree,char);
 int  _MMG5_chkswpgen(MMG5_pMesh,MMG5_pSol,int,int,int*,int*,double,char);
-int  MMG3D_swap23(MMG5_pMesh mesh,MMG5_pSol met,int k,char metRidTyp);
+int  MMG3D_swap23(MMG5_pMesh,MMG5_pSol,int,char,int,int,int,int);
 int  _MMG5_srcface(MMG5_pMesh mesh,int n0,int n1,int n2);
 int _MMG5_chkptonbdy(MMG5_pMesh,int);
 double _MMG5_orcal_poi(double a[3],double b[3],double c[3],double d[3]);

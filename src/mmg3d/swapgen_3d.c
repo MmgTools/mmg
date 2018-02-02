@@ -329,6 +329,10 @@ int _MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,int *list,
  * \param met pointer toward the sol structure.
  * \param k index of the tetrahedron with multiple boundary faces (to be swapped).
  * \param metRidTyp metric storage (classic or special)
+ * \param ifac face of the tetra \a k that give the best results for the swap23
+ * \param conf0 detected configuration for the swap23 of the tetra \a k
+ * \param adj neighbour of the tetra k through the face \a ifac (4*k1+ifac1)
+ * \param conf1 detected configuration for the swap23 of the tetra \a adj/4
  * \return -1 if lack of memory, 0 if fail to swap, 1 otherwise.
  *
  * Search an adjacent to the tetra \a k and perform swap 2->3 (the common face
@@ -338,424 +342,340 @@ int _MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,int *list,
  * \remark used in anatet4 to remove the tetra with multiple boundary faces.
  *
  */
-int MMG3D_swap23(MMG5_pMesh mesh,MMG5_pSol met,int k,char metRidTyp) {
+int MMG3D_swap23(MMG5_pMesh mesh,MMG5_pSol met,int k,char metRidTyp,
+                 int ifac,int conf0,int adj,int conf1) {
   MMG5_pTetra          pt0,pt1,ptnew;
   MMG5_xTetra          xt[3];
   MMG5_pxTetra         pxt0,pxt1;
-  double               calold0,calold,calnew,calnew0,calnew1,calnew2;
-  int                  k1,conf0,conf1,*adja,iel,np,xt1;
+  int                  k1,*adja,iel,np,xt1;
   int                  adj0_2,adj0_3,adj1_1,adj1_2,adj1_3;
-  char                 j0,j1,i,isxt[3];
+  char                 j1,i,isxt[3];
   unsigned char        tau0[4],tau1[4];
   const unsigned char *taued0,*taued1;
 
   pt0     = &mesh->tetra[k];
-  calold0 = pt0->qual;
 
   assert ( pt0->xt );
 
   pxt0 = &mesh->xtetra[pt0->xt];
-  for (j0=0; j0<4; j0++) {
-    if ( pxt0->ftag[j0] & MG_BDY ) continue;
 
-    /** Neighbouring element with which we will try to swap */
-    adja = &mesh->adja[4*(k-1)+1];
-    k1   = adja[j0]/4;
-    j1   = adja[j0]%4;
+  assert ( ifac>=0 && adj>0 );
 
-    assert(k1);
+  /** Neighbouring element with which we will try to swap */
+  adja = &mesh->adja[4*(k-1)+1];
+  k1   = adj/4;
+  j1   = adj%4;
 
-    /* Search in which configurations are the tetrahedra (default is case 0-0)
-     *
-     *           3                    2------------- 0
-     *         ,/|`\                  |`\          /|
-     *       ,/  |  `\                |  `\       /.|
-     *     ,/    '.   `\              '.   `\    / |
-     *   ,/       |     `\             |     `\ / .|
-     * ,/         |       `\           |       /\.|
-     * 0-----------'.--------2          '     /  3
-     * `\.         |      ,/            |    / ,/
-     *    `\.      |    ,/              |   /,/
-     *       `\.   '. ,/                '. ,/
-     *          `\. |/                   |/
-     *             `1                    1
-     */
+  assert(k1);
 
-    /* k may be in configuration 0, 3, 6 or 9. Default is case 0 */
-    conf0 = 3*j0;
+  /* Search in which configurations are the tetrahedra (default is case 0-0)
+   *
+   *           3                    2------------- 0
+   *         ,/|`\                  |`\          /|
+   *       ,/  |  `\                |  `\       /.|
+   *     ,/    '.   `\              '.   `\    / |
+   *   ,/       |     `\             |     `\ / .|
+   * ,/         |       `\           |       /\.|
+   * 0-----------'.--------2          '     /  3
+   * `\.         |      ,/            |    / ,/
+   *    `\.      |    ,/              |   /,/
+   *       `\.   '. ,/                '. ,/
+   *          `\. |/                   |/
+   *             `1                    1
+   */
 
-    switch(conf0) {
-    case 0:
-      tau0[0] = 0; tau0[1] = 1; tau0[2] = 2; tau0[3] = 3;
-      taued0 = &MMG5_permedge[0][0];
-      break;
-    case 3:
-      tau0[0] = 1; tau0[1] = 0; tau0[2] = 3; tau0[3] = 2;
-      taued0 = &MMG5_permedge[3][0];
-      break;
-    case 6:
-      tau0[0] = 2; tau0[1] = 0; tau0[2] = 1; tau0[3] = 3;
-      taued0 = &MMG5_permedge[6][0];
-      break;
-    case 9:
-      tau0[0] = 3; tau0[1] = 0; tau0[2] = 2; tau0[3] = 1;
-      taued0 = &MMG5_permedge[9][0];
-      break;
-    }
+  /* k may be in configuration 0, 3, 6 or 9. Default is case 0 */
+  switch(conf0) {
+  case 0:
+    tau0[0] = 0; tau0[1] = 1; tau0[2] = 2; tau0[3] = 3;
+    taued0 = &MMG5_permedge[0][0];
+    break;
+  case 3:
+    tau0[0] = 1; tau0[1] = 0; tau0[2] = 3; tau0[3] = 2;
+    taued0 = &MMG5_permedge[3][0];
+    break;
+  case 6:
+    tau0[0] = 2; tau0[1] = 0; tau0[2] = 1; tau0[3] = 3;
+    taued0 = &MMG5_permedge[6][0];
+    break;
+  case 9:
+    tau0[0] = 3; tau0[1] = 0; tau0[2] = 2; tau0[3] = 1;
+    taued0 = &MMG5_permedge[9][0];
+    break;
+  }
 
-    /* k1 may be in configuration j1, j1+1, j1+2 */
-    pt1 = &mesh->tetra[k1];
+  /* k1 may be in configuration j1, j1+1, j1+2 */
+  pt1 = &mesh->tetra[k1];
 
-    if ( pt1->tag & MG_REQ ) continue;
+  assert(pt0->ref == pt1->ref);
 
-    assert(pt0->ref == pt1->ref);
-    for ( i=0; i<3; ++i )
-      if ( pt0->v[_MMG5_idir[j0][0]] == pt1->v[_MMG5_idir[j1][i]] ) break;
+  switch(conf1) {
+  case 0:
+    tau1[0] = 0; tau1[1] = 1; tau1[2] = 2; tau1[3] = 3;
+    taued1 = &MMG5_permedge[0][0];
+    break;
+  case 1:
+    tau1[0] = 0; tau1[1] = 2; tau1[2] = 3; tau1[3] = 1;
+    taued1 = &MMG5_permedge[1][0];
+    break;
+  case 2:
+    tau1[0] = 0; tau1[1] = 3; tau1[2] = 1; tau1[3] = 2;
+    taued1 = &MMG5_permedge[2][0];
+    break;
+  case 3:
+    tau1[0] = 1; tau1[1] = 0; tau1[2] = 3; tau1[3] = 2;
+    taued1 = &MMG5_permedge[3][0];
+    break;
+  case 4:
+    tau1[0] = 1; tau1[1] = 3; tau1[2] = 2; tau1[3] = 0;
+    taued1 = &MMG5_permedge[5][0];
+    break;
+  case 5:
+    tau1[0] = 1; tau1[1] = 2; tau1[2] = 0; tau1[3] = 3;
+    taued1 = &MMG5_permedge[4][0];
+    break;
+  case 6:
+    tau1[0] = 2; tau1[1] = 0; tau1[2] = 1; tau1[3] = 3;
+    taued1 = &MMG5_permedge[6][0];
+    break;
+  case 7:
+    tau1[0] = 2; tau1[1] = 1; tau1[2] = 3; tau1[3] = 0;
+    taued1 = &MMG5_permedge[7][0];
+    break;
+  case 8:
+    tau1[0] = 2; tau1[1] = 3; tau1[2] = 0; tau1[3] = 1;
+    taued1 = &MMG5_permedge[8][0];
+    break;
+  case 9:
+    tau1[0] = 3; tau1[1] = 0; tau1[2] = 2; tau1[3] = 1;
+    taued1 = &MMG5_permedge[9][0];
+    break;
+  case 10:
+    tau1[0] = 3; tau1[1] = 2; tau1[2] = 1; tau1[3] = 0;
+    taued1 = &MMG5_permedge[11][0];
+    break;
+  case 11:
+    tau1[0] = 3; tau1[1] = 1; tau1[2] = 0; tau1[3] = 2;
+    taued1 = &MMG5_permedge[10][0];
+    break;
+  }
 
-    assert(i<3);
-    conf1 = 3*j1+i;
+  /** Swap */
+  xt1 = pt1->xt;
 
-    switch(conf1) {
-    case 0:
-      tau1[0] = 0; tau1[1] = 1; tau1[2] = 2; tau1[3] = 3;
-      taued1 = &MMG5_permedge[0][0];
-      break;
-    case 1:
-      tau1[0] = 0; tau1[1] = 2; tau1[2] = 3; tau1[3] = 1;
-      taued1 = &MMG5_permedge[1][0];
-      break;
-    case 2:
-      tau1[0] = 0; tau1[1] = 3; tau1[2] = 1; tau1[3] = 2;
-      taued1 = &MMG5_permedge[2][0];
-      break;
-    case 3:
-      tau1[0] = 1; tau1[1] = 0; tau1[2] = 3; tau1[3] = 2;
-      taued1 = &MMG5_permedge[3][0];
-      break;
-    case 4:
-      tau1[0] = 1; tau1[1] = 3; tau1[2] = 2; tau1[3] = 0;
-      taued1 = &MMG5_permedge[5][0];
-      break;
-    case 5:
-      tau1[0] = 1; tau1[1] = 2; tau1[2] = 0; tau1[3] = 3;
-      taued1 = &MMG5_permedge[4][0];
-      break;
-    case 6:
-      tau1[0] = 2; tau1[1] = 0; tau1[2] = 1; tau1[3] = 3;
-      taued1 = &MMG5_permedge[6][0];
-      break;
-    case 7:
-      tau1[0] = 2; tau1[1] = 1; tau1[2] = 3; tau1[3] = 0;
-      taued1 = &MMG5_permedge[7][0];
-      break;
-    case 8:
-      tau1[0] = 2; tau1[1] = 3; tau1[2] = 0; tau1[3] = 1;
-      taued1 = &MMG5_permedge[8][0];
-      break;
-    case 9:
-      tau1[0] = 3; tau1[1] = 0; tau1[2] = 2; tau1[3] = 1;
-      taued1 = &MMG5_permedge[9][0];
-      break;
-    case 10:
-      tau1[0] = 3; tau1[1] = 2; tau1[2] = 1; tau1[3] = 0;
-      taued1 = &MMG5_permedge[11][0];
-      break;
-    case 11:
-      tau1[0] = 3; tau1[1] = 1; tau1[2] = 0; tau1[3] = 2;
-      taued1 = &MMG5_permedge[10][0];
-      break;
-    }
+  np    = pt1->v[tau1[0]];
+  memcpy(pt1,pt0,sizeof(MMG5_Tetra));
 
-    /* Test volume of the 3 created tets */
-    calold = MG_MIN(calold0,pt1->qual);
+  iel = _MMG3D_newElt(mesh);
+  if ( !iel ) {
+    _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
+                        fprintf(stderr,"\n  ## Error: %s: unable to allocate"
+                                " a new element.\n",__func__);
+                        _MMG5_INCREASE_MEM_MESSAGE();
+                        fprintf(stderr,"  Exit program.\n");
+                        return -1,-1);
+  }
+  ptnew = &mesh->tetra[iel];
+  memcpy(ptnew,pt0,sizeof(MMG5_Tetra));
 
-    ptnew = &mesh->tetra[0];
-    memcpy(ptnew,pt0,sizeof(MMG5_Tetra));
-    np    = pt1->v[tau1[0]];
+  /* First tetra: k */
+  pt0->v[tau0[1]] = np;
 
-    ptnew->v[tau0[1]] = np;
-    if ( (!metRidTyp) && met->m && met->size>1 )
-      calnew0 = _MMG5_caltet33_ani(mesh,met,ptnew);
-    else
-      calnew0 = _MMG5_orcal(mesh,met,0);
-    if ( calnew0 < _MMG5_NULKAL ) continue;
+  /* Second tetra: k1 */
+  pt1->v[tau0[2]] = np;
 
-    ptnew->v[tau0[1]] = pt0->v[tau0[1]];
-    ptnew->v[tau0[2]] = np;
-    if ( (!metRidTyp) && met->m && met->size>1 )
-      calnew1 = _MMG5_caltet33_ani(mesh,met,ptnew);
-    else
-      calnew1 = _MMG5_orcal(mesh,met,0);
-    if ( calnew1 < _MMG5_NULKAL ) continue;
+  /* Third tetra: iel */
+  ptnew->v[tau0[3]] = np;
 
-    ptnew->v[tau0[2]] = pt0->v[tau0[2]];
-    ptnew->v[tau0[3]] = np;
-    if ( (!metRidTyp) && met->m && met->size>1 )
-      calnew2 = _MMG5_caltet33_ani(mesh,met,ptnew);
-    else
-      calnew2 = _MMG5_orcal(mesh,met,0);
-    if ( calnew2 < _MMG5_NULKAL ) continue;
+  /* xtetra and adjacency update */
+  pxt0 = &mesh->xtetra[pt0->xt];
+  memcpy(&xt[0],pxt0,sizeof(MMG5_xTetra));
+  memcpy(&xt[1],pxt0,sizeof(MMG5_xTetra));
+  memcpy(&xt[2],pxt0,sizeof(MMG5_xTetra));
 
-    calnew = MG_MIN(calnew0,MG_MIN(calnew1,calnew2));
+  /* Store the old adja */
+  adja = &mesh->adja[4*(k-1) +1];
+  adj0_2 = adja[tau0[2]];
+  adj0_3 = adja[tau0[3]];
 
-    if ( calold < _MMG5_EPSOK ) {
-      if ( calnew < calold ) continue;
-    }
-    else if ( calnew <= _MMG5_EPSOK ) continue;
+  adja = &mesh->adja[4*(k1-1) +1];
+  adj1_1 = adja[tau1[1]];
+  adj1_2 = adja[tau1[2]];
+  adj1_3 = adja[tau1[3]];
 
-    /** Swap */
-    xt1 = pt1->xt;
-    memcpy(pt1,pt0,sizeof(MMG5_Tetra));
+  /* New adja for the new tets */
+  adja = &mesh->adja[4*(k-1) +1];
+  adja[tau0[0]] = adj1_1;
+  adja[tau0[2]] = 4*k1  + tau0[1] ;
+  adja[tau0[3]] = 4*iel + tau0[1] ;
+  if ( adj1_1 )
+    mesh->adja[4*(adj1_1/4-1) + 1 + adj1_1%4] = 4*k + tau0[0];
 
-    iel = _MMG3D_newElt(mesh);
-    if ( !iel ) {
-      _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
-                          fprintf(stderr,"\n  ## Error: %s: unable to allocate"
-                                  " a new element.\n",__func__);
-                          _MMG5_INCREASE_MEM_MESSAGE();
-                          fprintf(stderr,"  Exit program.\n");
-                          return -1,-1);
-    }
-    ptnew = &mesh->tetra[iel];
-    memcpy(ptnew,pt0,sizeof(MMG5_Tetra));
+  adja = &mesh->adja[4*(k1-1) +1];
+  adja[tau0[0]] = adj1_3;
+  adja[tau0[1]] = 4*k   + tau0[2] ;
+  adja[tau0[2]] = adj0_2;
+  adja[tau0[3]] = 4*iel + tau0[2] ;
+  if ( adj1_3 )
+    mesh->adja[4*(adj1_3/4-1) + 1 + adj1_3%4] = 4*k1 + tau0[0];
+  if ( adj0_2 )
+    mesh->adja[4*(adj0_2/4-1) + 1 + adj0_2%4] = 4*k1 + tau0[2];
 
-    /* First tetra: k */
-    pt0->v[tau0[1]] = np;
+  adja = &mesh->adja[4*(iel-1) +1];
+  adja[tau0[0]] = adj1_2;
+  adja[tau0[1]] = 4*k   + tau0[3] ;
+  adja[tau0[2]] = 4*k1  + tau0[3] ;
+  adja[tau0[3]] = adj0_3;
+  if ( adj1_2 )
+    mesh->adja[4*(adj1_2/4-1) + 1 + adj1_2%4] = 4*iel + tau0[0];
+  if ( adj0_3 )
+    mesh->adja[4*(adj0_3/4-1) + 1 + adj0_3%4] = 4*iel + tau0[3];
 
-    /* Second tetra: k1 */
-    pt1->v[tau0[2]] = np;
+  if ( !pt1->xt ) {
+    /* Assignation of the xt fields to the appropriate tets */
+    /* xt[0] */
+    xt[0].tag[taued0[0]] = 0;
+    xt[0].tag[taued0[3]] = 0;
+    xt[0].tag[taued0[4]] = 0;
 
-    /* Third tetra: iel */
-    ptnew->v[tau0[3]] = np;
+    xt[0].edg[taued0[0]] = 0;
+    xt[0].edg[taued0[3]] = 0;
+    xt[0].edg[taued0[4]] = 0;
 
-    /* xtetra and adjacency update */
-    pxt0 = &mesh->xtetra[pt0->xt];
-    memcpy(&xt[0],pxt0,sizeof(MMG5_xTetra));
-    memcpy(&xt[1],pxt0,sizeof(MMG5_xTetra));
-    memcpy(&xt[2],pxt0,sizeof(MMG5_xTetra));
+    xt[0].ref[ tau0[0]] = 0;
+    xt[0].ref[ tau0[2]] = 0;
+    xt[0].ref[ tau0[3]] = 0;
+    xt[0].ftag[tau0[0]] = 0;
+    xt[0].ftag[tau0[2]] = 0;
+    xt[0].ftag[tau0[3]] = 0;
 
-    /* Store the old adja */
-    adja = &mesh->adja[4*(k-1) +1];
-    adj0_2 = adja[tau0[2]];
-    adj0_3 = adja[tau0[3]];
+    MG_SET(xt[0].ori, tau0[0]);
+    MG_SET(xt[0].ori, tau0[2]);
+    MG_SET(xt[0].ori, tau0[3]);
 
-    adja = &mesh->adja[4*(k1-1) +1];
-    adj1_1 = adja[tau1[1]];
-    adj1_2 = adja[tau1[2]];
-    adj1_3 = adja[tau1[3]];
+    /* xt[1] */
+    xt[1].tag[taued0[1]] = 0;
+    xt[1].tag[taued0[3]] = 0;
+    xt[1].tag[taued0[5]] = 0;
 
-    /* New adja for the new tets */
-    adja = &mesh->adja[4*(k-1) +1];
-    adja[tau0[0]] = adj1_1;
-    adja[tau0[2]] = 4*k1  + tau0[1] ;
-    adja[tau0[3]] = 4*iel + tau0[1] ;
-    if ( adj1_1 )
-      mesh->adja[4*(adj1_1/4-1) + 1 + adj1_1%4] = 4*k + tau0[0];
+    xt[1].edg[taued0[1]] = 0;
+    xt[1].edg[taued0[3]] = 0;
+    xt[1].edg[taued0[5]] = 0;
 
-    adja = &mesh->adja[4*(k1-1) +1];
-    adja[tau0[0]] = adj1_3;
-    adja[tau0[1]] = 4*k   + tau0[2] ;
-    adja[tau0[2]] = adj0_2;
-    adja[tau0[3]] = 4*iel + tau0[2] ;
-    if ( adj1_3 )
-      mesh->adja[4*(adj1_3/4-1) + 1 + adj1_3%4] = 4*k1 + tau0[0];
-    if ( adj0_2 )
-      mesh->adja[4*(adj0_2/4-1) + 1 + adj0_2%4] = 4*k1 + tau0[2];
+    xt[1].ref[ tau0[0]] = 0;
+    xt[1].ref[ tau0[1]] = 0;
+    xt[1].ref[ tau0[3]] = 0;
+    xt[1].ftag[tau0[0]] = 0;
+    xt[1].ftag[tau0[1]] = 0;
+    xt[1].ftag[tau0[3]] = 0;
 
-    adja = &mesh->adja[4*(iel-1) +1];
-    adja[tau0[0]] = adj1_2;
-    adja[tau0[1]] = 4*k   + tau0[3] ;
-    adja[tau0[2]] = 4*k1  + tau0[3] ;
-    adja[tau0[3]] = adj0_3;
-    if ( adj1_2 )
-      mesh->adja[4*(adj1_2/4-1) + 1 + adj1_2%4] = 4*iel + tau0[0];
-    if ( adj0_3 )
-      mesh->adja[4*(adj0_3/4-1) + 1 + adj0_3%4] = 4*iel + tau0[3];
+    MG_SET(xt[1].ori, tau0[0]);
+    MG_SET(xt[1].ori, tau0[1]);
+    MG_SET(xt[1].ori, tau0[3]);
 
-    if ( !pt1->xt ) {
-      /* Assignation of the xt fields to the appropriate tets */
-      /* xt[0] */
-      xt[0].tag[taued0[0]] = 0;
-      xt[0].tag[taued0[3]] = 0;
-      xt[0].tag[taued0[4]] = 0;
+    /* xt[2] */
+    xt[1].tag[taued0[2]] = 0;
+    xt[1].tag[taued0[4]] = 0;
+    xt[1].tag[taued0[5]] = 0;
 
-      xt[0].edg[taued0[0]] = 0;
-      xt[0].edg[taued0[3]] = 0;
-      xt[0].edg[taued0[4]] = 0;
+    xt[1].edg[taued0[2]] = 0;
+    xt[1].edg[taued0[4]] = 0;
+    xt[1].edg[taued0[5]] = 0;
 
-      xt[0].ref[ tau0[0]] = 0;
-      xt[0].ref[ tau0[2]] = 0;
-      xt[0].ref[ tau0[3]] = 0;
-      xt[0].ftag[tau0[0]] = 0;
-      xt[0].ftag[tau0[2]] = 0;
-      xt[0].ftag[tau0[3]] = 0;
+    xt[1].ref[ tau0[0]] = 0;
+    xt[1].ref[ tau0[1]] = 0;
+    xt[1].ref[ tau0[2]] = 0;
+    xt[1].ftag[tau0[0]] = 0;
+    xt[1].ftag[tau0[1]] = 0;
+    xt[1].ftag[tau0[2]] = 0;
 
-      MG_SET(xt[0].ori, tau0[0]);
-      MG_SET(xt[0].ori, tau0[2]);
-      MG_SET(xt[0].ori, tau0[3]);
+    MG_SET(xt[1].ori, tau0[0]);
+    MG_SET(xt[1].ori, tau0[1]);
+    MG_SET(xt[1].ori, tau0[2]);
 
-      /* xt[1] */
-      xt[1].tag[taued0[1]] = 0;
-      xt[1].tag[taued0[3]] = 0;
-      xt[1].tag[taued0[5]] = 0;
-
-      xt[1].edg[taued0[1]] = 0;
-      xt[1].edg[taued0[3]] = 0;
-      xt[1].edg[taued0[5]] = 0;
-
-      xt[1].ref[ tau0[0]] = 0;
-      xt[1].ref[ tau0[1]] = 0;
-      xt[1].ref[ tau0[3]] = 0;
-      xt[1].ftag[tau0[0]] = 0;
-      xt[1].ftag[tau0[1]] = 0;
-      xt[1].ftag[tau0[3]] = 0;
-
-      MG_SET(xt[1].ori, tau0[0]);
-      MG_SET(xt[1].ori, tau0[1]);
-      MG_SET(xt[1].ori, tau0[3]);
-
-      /* xt[2] */
-      xt[1].tag[taued0[2]] = 0;
-      xt[1].tag[taued0[4]] = 0;
-      xt[1].tag[taued0[5]] = 0;
-
-      xt[1].edg[taued0[2]] = 0;
-      xt[1].edg[taued0[4]] = 0;
-      xt[1].edg[taued0[5]] = 0;
-
-      xt[1].ref[ tau0[0]] = 0;
-      xt[1].ref[ tau0[1]] = 0;
-      xt[1].ref[ tau0[2]] = 0;
-      xt[1].ftag[tau0[0]] = 0;
-      xt[1].ftag[tau0[1]] = 0;
-      xt[1].ftag[tau0[2]] = 0;
-
-      MG_SET(xt[1].ori, tau0[0]);
-      MG_SET(xt[1].ori, tau0[1]);
-      MG_SET(xt[1].ori, tau0[2]);
-
-     }
-    else {
-      pxt1 = &mesh->xtetra[xt1];
-
-      /* Assignation of the xt fields to the appropriate tets */
-      /* xt[0] */
-      xt[0].tag[taued0[0]] = 0;
-      xt[0].tag[taued0[3]] = pxt1->tag[taued1[2]];
-      xt[0].tag[taued0[4]] = pxt1->tag[taued1[1]];
-
-      xt[0].edg[taued0[0]] = 0;
-      xt[0].edg[taued0[3]] =  pxt1->edg[taued1[2]];
-      xt[0].edg[taued0[4]] =  pxt1->edg[taued1[1]];
-
-      xt[0].ref[ tau0[0]] = pxt1->ref[tau1[1]];
-      xt[0].ref[ tau0[2]] = 0;
-      xt[0].ref[ tau0[3]] = 0;
-      xt[0].ftag[tau0[0]] = pxt1->ftag[tau1[1]];
-      xt[0].ftag[tau0[2]] = 0;
-      xt[0].ftag[tau0[3]] = 0;
-
-      if ( MG_GET(pxt1->ori,tau1[1]) ) MG_SET(xt[0].ori, tau0[0]);
-      MG_SET(xt[0].ori, tau0[2]);
-      MG_SET(xt[0].ori, tau0[3]);
-
-      /* xt[1] */
-      xt[1].tag[taued0[1]] = 0;
-      xt[1].tag[taued0[3]] = pxt1->tag[taued1[0]];
-      xt[1].tag[taued0[5]] = pxt1->tag[taued1[2]];
-
-      xt[1].edg[taued0[1]] = 0;
-      xt[1].edg[taued0[3]] =  pxt1->edg[taued1[0]];
-      xt[1].edg[taued0[5]] =  pxt1->edg[taued1[2]];
-
-      xt[1].ref[ tau0[0]] = pxt1->ref[tau1[3]];
-      xt[1].ref[ tau0[1]] = 0;
-      xt[1].ref[ tau0[3]] = 0;
-      xt[1].ftag[tau0[0]] = pxt1->ftag[tau1[3]];
-      xt[1].ftag[tau0[1]] = 0;
-      xt[1].ftag[tau0[3]] = 0;
-
-      if ( MG_GET(pxt1->ori,tau1[3]) ) MG_SET(xt[1].ori, tau0[0]);
-      MG_SET(xt[1].ori, tau0[1]);
-      MG_SET(xt[1].ori, tau0[3]);
-
-      /* xt[2] */
-      xt[2].tag[taued0[2]] = 0;
-      xt[2].tag[taued0[4]] = pxt1->tag[taued1[0]];
-      xt[2].tag[taued0[5]] = pxt1->tag[taued1[1]];
-
-      xt[2].edg[taued0[2]] = 0;
-      xt[2].edg[taued0[4]] = pxt1->edg[taued1[0]];
-      xt[2].edg[taued0[5]] = pxt1->edg[taued1[1]];
-
-      xt[2].ref[ tau0[0]] = pxt1->ref[tau1[2]];
-      xt[2].ref[ tau0[1]] = 0;
-      xt[2].ref[ tau0[2]] = 0;
-      xt[2].ftag[tau0[0]] = pxt1->ftag[tau1[2]];
-      xt[2].ftag[tau0[1]] = 0;
-      xt[2].ftag[tau0[2]] = 0;
-
-      if ( MG_GET(pxt1->ori,tau1[2]) ) MG_SET(xt[2].ori, tau0[0]);
-      MG_SET(xt[2].ori, tau0[1]);
-      MG_SET(xt[2].ori, tau0[2]);
-    }
+  }
+  else {
+    pxt1 = &mesh->xtetra[xt1];
 
     /* Assignation of the xt fields to the appropriate tets */
-    isxt[0] = isxt[1] = isxt[2] = 0;
-    for (i=0; i<4; i++) {
-      if ( xt[0].ref[i] || xt[0].ftag[i] ) isxt[0] = 1;
-      if ( xt[1].ref[i] || xt[1].ftag[i] ) isxt[1] = 1;
-      if ( xt[2].ref[i] || xt[2].ftag[i] ) isxt[2] = 1;
-    }
+    /* xt[0] */
+    xt[0].tag[taued0[0]] = 0;
+    xt[0].tag[taued0[3]] = pxt1->tag[taued1[2]];
+    xt[0].tag[taued0[4]] = pxt1->tag[taued1[1]];
 
-    assert ( (isxt[0] && isxt[1]) || (isxt[1] && isxt[2]) || (isxt[2] && isxt[0]) );
+    xt[0].edg[taued0[0]] = 0;
+    xt[0].edg[taued0[3]] =  pxt1->edg[taued1[2]];
+    xt[0].edg[taued0[4]] =  pxt1->edg[taued1[1]];
 
-    if ( isxt[0] ) {
-      memcpy(pxt0,&xt[0],sizeof(MMG5_xTetra));
+    xt[0].ref[ tau0[0]] = pxt1->ref[tau1[1]];
+    xt[0].ref[ tau0[2]] = 0;
+    xt[0].ref[ tau0[3]] = 0;
+    xt[0].ftag[tau0[0]] = pxt1->ftag[tau1[1]];
+    xt[0].ftag[tau0[2]] = 0;
+    xt[0].ftag[tau0[3]] = 0;
 
-      if ( xt1 ) {
-        if ( isxt[1] ) {
-          pt1->xt = xt1;
-          memcpy(pxt1,&xt[1],sizeof(MMG5_xTetra));
-          if ( isxt[2] ) {
-            mesh->xt++;
-            if ( mesh->xt > mesh->xtmax ) {
-              /* realloc of xtetras table */
-              _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
-                                 "larger xtetra table",
-                                 mesh->xt--;
-                                 fprintf(stderr,"  Exit program.\n");
-                                 return -1,-1);
-            }
-            ptnew->xt = mesh->xt;
-            pxt0 = &mesh->xtetra[mesh->xt];
-            memcpy(pxt0,&xt[2],sizeof(MMG5_xTetra));
-          }
-          else ptnew->xt = 0;
-        }
-        else {
-          pt1->xt   = 0;
-          ptnew->xt = xt1;
-          memcpy(pxt1,&xt[2],sizeof(MMG5_xTetra));
-        }
-      }
-      else {
-        if ( isxt[1] ) {
-          mesh->xt++;
-          if ( mesh->xt > mesh->xtmax ) {
-            /* realloc of xtetras table */
-            _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
-                               "larger xtetra table",
-                               mesh->xt--;
-                               fprintf(stderr,"  Exit program.\n");
-                               return -1,-1);
-          }
-          pt1->xt = mesh->xt;
-          pxt0 = &mesh->xtetra[mesh->xt];
-          memcpy(pxt0,&xt[1],sizeof(MMG5_xTetra));
-        }
-        else pt1->xt = 0;
+    if ( MG_GET(pxt1->ori,tau1[1]) ) MG_SET(xt[0].ori, tau0[0]);
+    MG_SET(xt[0].ori, tau0[2]);
+    MG_SET(xt[0].ori, tau0[3]);
 
+    /* xt[1] */
+    xt[1].tag[taued0[1]] = 0;
+    xt[1].tag[taued0[3]] = pxt1->tag[taued1[0]];
+    xt[1].tag[taued0[5]] = pxt1->tag[taued1[2]];
+
+    xt[1].edg[taued0[1]] = 0;
+    xt[1].edg[taued0[3]] =  pxt1->edg[taued1[0]];
+    xt[1].edg[taued0[5]] =  pxt1->edg[taued1[2]];
+
+    xt[1].ref[ tau0[0]] = pxt1->ref[tau1[3]];
+    xt[1].ref[ tau0[1]] = 0;
+    xt[1].ref[ tau0[3]] = 0;
+    xt[1].ftag[tau0[0]] = pxt1->ftag[tau1[3]];
+    xt[1].ftag[tau0[1]] = 0;
+    xt[1].ftag[tau0[3]] = 0;
+
+    if ( MG_GET(pxt1->ori,tau1[3]) ) MG_SET(xt[1].ori, tau0[0]);
+    MG_SET(xt[1].ori, tau0[1]);
+    MG_SET(xt[1].ori, tau0[3]);
+
+    /* xt[2] */
+    xt[2].tag[taued0[2]] = 0;
+    xt[2].tag[taued0[4]] = pxt1->tag[taued1[0]];
+    xt[2].tag[taued0[5]] = pxt1->tag[taued1[1]];
+
+    xt[2].edg[taued0[2]] = 0;
+    xt[2].edg[taued0[4]] = pxt1->edg[taued1[0]];
+    xt[2].edg[taued0[5]] = pxt1->edg[taued1[1]];
+
+    xt[2].ref[ tau0[0]] = pxt1->ref[tau1[2]];
+    xt[2].ref[ tau0[1]] = 0;
+    xt[2].ref[ tau0[2]] = 0;
+    xt[2].ftag[tau0[0]] = pxt1->ftag[tau1[2]];
+    xt[2].ftag[tau0[1]] = 0;
+    xt[2].ftag[tau0[2]] = 0;
+
+    if ( MG_GET(pxt1->ori,tau1[2]) ) MG_SET(xt[2].ori, tau0[0]);
+    MG_SET(xt[2].ori, tau0[1]);
+    MG_SET(xt[2].ori, tau0[2]);
+  }
+
+    /* Assignation of the xt fields to the appropriate tets */
+  isxt[0] = isxt[1] = isxt[2] = 0;
+  for (i=0; i<4; i++) {
+    if ( xt[0].ref[i] || xt[0].ftag[i] ) isxt[0] = 1;
+    if ( xt[1].ref[i] || xt[1].ftag[i] ) isxt[1] = 1;
+    if ( xt[2].ref[i] || xt[2].ftag[i] ) isxt[2] = 1;
+  }
+
+  assert ( (isxt[0] && isxt[1]) || (isxt[1] && isxt[2]) || (isxt[2] && isxt[0]) );
+
+  if ( isxt[0] ) {
+    memcpy(pxt0,&xt[0],sizeof(MMG5_xTetra));
+
+    if ( xt1 ) {
+      if ( isxt[1] ) {
+        pt1->xt = xt1;
+        memcpy(pxt1,&xt[1],sizeof(MMG5_xTetra));
         if ( isxt[2] ) {
           mesh->xt++;
           if ( mesh->xt > mesh->xtmax ) {
@@ -772,16 +692,14 @@ int MMG3D_swap23(MMG5_pMesh mesh,MMG5_pSol met,int k,char metRidTyp) {
         }
         else ptnew->xt = 0;
       }
+      else {
+        pt1->xt   = 0;
+        ptnew->xt = xt1;
+        memcpy(pxt1,&xt[2],sizeof(MMG5_xTetra));
+      }
     }
     else {
-      pt0->xt = 0;
-      memcpy(pxt0 ,&xt[2],sizeof(MMG5_xTetra));
-
-      if ( xt1 ) {
-        pt1->xt = xt1;
-        memcpy(pxt1,&xt[1],sizeof(MMG5_xTetra));
-      }
-      else {
+      if ( isxt[1] ) {
         mesh->xt++;
         if ( mesh->xt > mesh->xtmax ) {
           /* realloc of xtetras table */
@@ -795,18 +713,68 @@ int MMG3D_swap23(MMG5_pMesh mesh,MMG5_pSol met,int k,char metRidTyp) {
         pxt0 = &mesh->xtetra[mesh->xt];
         memcpy(pxt0,&xt[1],sizeof(MMG5_xTetra));
       }
+      else pt1->xt = 0;
+
+      if ( isxt[2] ) {
+        mesh->xt++;
+        if ( mesh->xt > mesh->xtmax ) {
+          /* realloc of xtetras table */
+          _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
+                             "larger xtetra table",
+                             mesh->xt--;
+                             fprintf(stderr,"  Exit program.\n");
+                             return -1,-1);
+        }
+        ptnew->xt = mesh->xt;
+        pxt0 = &mesh->xtetra[mesh->xt];
+        memcpy(pxt0,&xt[2],sizeof(MMG5_xTetra));
+      }
+      else ptnew->xt = 0;
     }
-
-    /** Quality Update */
-    pt0->qual   = calnew0;
-    pt1->qual   = calnew1;
-    ptnew->qual = calnew2;
-
-    pt0->mark   = mesh->mark;
-    pt1->mark   = mesh->mark;
-    ptnew->mark = mesh->mark;
-
-    return 1;
   }
-  return 0;
+  else {
+    pt0->xt = 0;
+    memcpy(pxt0 ,&xt[2],sizeof(MMG5_xTetra));
+
+    if ( xt1 ) {
+      pt1->xt = xt1;
+      memcpy(pxt1,&xt[1],sizeof(MMG5_xTetra));
+    }
+    else {
+      mesh->xt++;
+      if ( mesh->xt > mesh->xtmax ) {
+        /* realloc of xtetras table */
+        _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
+                           "larger xtetra table",
+                           mesh->xt--;
+                           fprintf(stderr,"  Exit program.\n");
+                           return -1,-1);
+      }
+      pt1->xt = mesh->xt;
+      pxt0 = &mesh->xtetra[mesh->xt];
+      memcpy(pxt0,&xt[1],sizeof(MMG5_xTetra));
+    }
+  }
+
+  /** Quality Update */
+  if ( (!metRidTyp) && met->m && met->size>1 )
+    pt0->qual   = _MMG5_caltet33_ani(mesh,met,pt0);
+  else
+    pt0->qual   = _MMG5_orcal(mesh,met,k);
+
+  if ( (!metRidTyp) && met->m && met->size>1 )
+    pt1->qual   = _MMG5_caltet33_ani(mesh,met,pt1);
+  else
+    pt1->qual   = _MMG5_orcal(mesh,met,k1);
+
+  if ( (!metRidTyp) && met->m && met->size>1 )
+    ptnew->qual   = _MMG5_caltet33_ani(mesh,met,ptnew);
+  else
+    ptnew->qual   = _MMG5_orcal(mesh,met,iel);
+
+  pt0->mark   = mesh->mark;
+  pt1->mark   = mesh->mark;
+  ptnew->mark = mesh->mark;
+
+  return 1;
 }

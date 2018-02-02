@@ -1841,7 +1841,309 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   return(nap);
 }
 
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param k index of the tetrahedron with multiple boundary faces (to be swapped)
+ * \param metRidTyp metric storage (classic or special)
+ * \param ifac face of the tetra \a k that give the best results for the swap23
+ * \param conf0 detected configuration for the swap23 of the tetra \a k
+ * \param adj neighbour of the tetra k through the face \a ifac (4*k1+ifac1)
+ * \param conf1 detected configuration for the swap23 of the tetra \a adj/4
+ *
+ * \return 0 if failed (too bad quality), the type of operator that creates the
+ * best worst quality otherwise (1 if split4bar, 2 if swap23).
+ *
+ * Simulation of the swap23 and of the split at its barycenter of a tetra when
+ * more than 1 boundary face. The quality of the worst created element is
+ * computed for both operators and we return the identifier of the operator that
+ * give the best results. If the swap23 is choosen, we fill the needed info to
+ * perform it (index of the face and tetra that are choosen to swap) and
+ * configuration of both tetra.
+ *
+ */
 
+static int MMG3D_anatet4_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,char metRidTyp,
+                             int *ifac,int* conf0,int *adj,int *conf1) {
+  MMG5_pTetra          pt,pt1,ptnew;
+  MMG5_pxTetra         pxt0,pxt1;
+  MMG5_pPoint          ppt,ppt0;
+  double               calold0,calold,calnew,calnew0,calnew1,calnew2,calnew3;
+  double               worst_split4bar_cal,worst_swap_cal,cb[4];
+  int                  loc_conf0,loc_conf1,k1,*adja;
+  int                  nbdy,i,j0,j1,np;
+  unsigned char        tau0[4],tau1[4];
+  const unsigned char *taued0,*taued1;
+
+  pt     = &mesh->tetra[k];
+  calold0 = pt->qual;
+
+  assert ( pt->xt );
+
+  pxt0 = &mesh->xtetra[pt->xt];
+
+  ptnew = &mesh->tetra[0];
+
+  /** Step 1: test the split4bar */
+  if ( !mesh->info.noinsert ) {
+    ppt0 = &mesh->point[0];
+    memset(ppt0,0,sizeof(MMG5_Point));
+
+    for (i=0; i<4; i++) {
+      ppt   = &mesh->point[pt->v[i]];
+      ppt0->c[0] += ppt->c[0];
+      ppt0->c[1] += ppt->c[1];
+      ppt0->c[2] += ppt->c[2];
+    }
+    ppt0->c[0] *= 0.25;
+    ppt0->c[1] *= 0.25;
+    ppt0->c[2] *= 0.25;
+
+    cb[0] = 0.25; cb[1] = 0.25;  cb[2] = 0.25;  cb[3] = 0.25;
+
+    if ( met->m ) {
+      if ( !metRidTyp && met->size > 1 )
+        _MMG5_interp4bar33_ani(mesh,met,k,0,cb);
+      else
+        _MMG5_interp4bar(mesh,met,k,0,cb);
+    }
+
+    memcpy(ptnew,pt,sizeof(MMG5_Tetra));
+    ptnew->v[0] = 0;
+    if ( (!metRidTyp) && met->m && met->size>1 )
+      calnew0 = _MMG5_caltet33_ani(mesh,met,ptnew);
+    else
+      calnew0 = _MMG5_orcal(mesh,met,0);
+
+    ptnew->v[0] = pt->v[0];
+    ptnew->v[1] = 0;
+    if ( (!metRidTyp) && met->m && met->size>1 )
+      calnew1 = _MMG5_caltet33_ani(mesh,met,ptnew);
+    else
+      calnew1 = _MMG5_orcal(mesh,met,0);
+
+    ptnew->v[1] = pt->v[1];
+    ptnew->v[2] = 0;
+    if ( (!metRidTyp) && met->m && met->size>1 )
+      calnew2 = _MMG5_caltet33_ani(mesh,met,ptnew);
+    else
+      calnew2 = _MMG5_orcal(mesh,met,0);
+
+    ptnew->v[2] = pt->v[2];
+    ptnew->v[3] = 0;
+    if ( (!metRidTyp) && met->m && met->size>1 )
+      calnew3 = _MMG5_caltet33_ani(mesh,met,ptnew);
+    else
+      calnew3 = _MMG5_orcal(mesh,met,0);
+
+    worst_split4bar_cal = MG_MIN(MG_MIN(calnew0,calnew1),MG_MIN(calnew2,calnew3));
+  }
+  else
+    worst_split4bar_cal = 0.;
+
+  /** Step 2: test the swap23 */
+  if ( !mesh->info.noswap ) {
+    *ifac          = -1;
+    *adj           = -1;
+    worst_swap_cal = 0.;
+
+    for (j0=0; j0<4; j0++) {
+      if ( pxt0->ftag[j0] & MG_BDY ) continue;
+
+      /** Neighbouring element with which we will try to swap */
+      adja = &mesh->adja[4*(k-1)+1];
+      k1   = adja[j0]/4;
+      j1   = adja[j0]%4;
+
+      assert(k1);
+
+      /* Search in which configurations are the tetrahedra (default is case 0-0)
+       *
+       *           3                    2------------- 0
+       *         ,/|`\                  |`\          /|
+       *       ,/  |  `\                |  `\       /.|
+       *     ,/    '.   `\              '.   `\    / |
+       *   ,/       |     `\             |     `\ / .|
+       * ,/         |       `\           |       /\.|
+       * 0-----------'.--------2          '     /  3
+       * `\.         |      ,/            |    / ,/
+       *    `\.      |    ,/              |   /,/
+       *       `\.   '. ,/                '. ,/
+       *          `\. |/                   |/
+       *             `1                    1
+       */
+
+      /* k may be in configuration 0, 3, 6 or 9. Default is case 0 */
+      loc_conf0 = 3*j0;
+
+      switch(loc_conf0) {
+      case 0:
+        tau0[0] = 0; tau0[1] = 1; tau0[2] = 2; tau0[3] = 3;
+        taued0 = &MMG5_permedge[0][0];
+        break;
+      case 3:
+        tau0[0] = 1; tau0[1] = 0; tau0[2] = 3; tau0[3] = 2;
+        taued0 = &MMG5_permedge[3][0];
+        break;
+      case 6:
+        tau0[0] = 2; tau0[1] = 0; tau0[2] = 1; tau0[3] = 3;
+        taued0 = &MMG5_permedge[6][0];
+        break;
+      case 9:
+        tau0[0] = 3; tau0[1] = 0; tau0[2] = 2; tau0[3] = 1;
+        taued0 = &MMG5_permedge[9][0];
+        break;
+      }
+
+      /* k1 may be in configuration j1, j1+1, j1+2 */
+      pt1 = &mesh->tetra[k1];
+
+      if ( pt1->tag & MG_REQ ) continue;
+
+      assert(pt->ref == pt1->ref);
+      for ( i=0; i<3; ++i )
+        if ( pt->v[_MMG5_idir[j0][0]] == pt1->v[_MMG5_idir[j1][i]] ) break;
+
+      assert(i<3);
+      loc_conf1 = 3*j1+i;
+
+      switch(loc_conf1) {
+      case 0:
+        tau1[0] = 0; tau1[1] = 1; tau1[2] = 2; tau1[3] = 3;
+        taued1 = &MMG5_permedge[0][0];
+        break;
+      case 1:
+        tau1[0] = 0; tau1[1] = 2; tau1[2] = 3; tau1[3] = 1;
+        taued1 = &MMG5_permedge[1][0];
+        break;
+      case 2:
+        tau1[0] = 0; tau1[1] = 3; tau1[2] = 1; tau1[3] = 2;
+        taued1 = &MMG5_permedge[2][0];
+        break;
+      case 3:
+        tau1[0] = 1; tau1[1] = 0; tau1[2] = 3; tau1[3] = 2;
+        taued1 = &MMG5_permedge[3][0];
+        break;
+      case 4:
+        tau1[0] = 1; tau1[1] = 3; tau1[2] = 2; tau1[3] = 0;
+        taued1 = &MMG5_permedge[5][0];
+        break;
+      case 5:
+        tau1[0] = 1; tau1[1] = 2; tau1[2] = 0; tau1[3] = 3;
+        taued1 = &MMG5_permedge[4][0];
+        break;
+      case 6:
+        tau1[0] = 2; tau1[1] = 0; tau1[2] = 1; tau1[3] = 3;
+        taued1 = &MMG5_permedge[6][0];
+        break;
+      case 7:
+        tau1[0] = 2; tau1[1] = 1; tau1[2] = 3; tau1[3] = 0;
+        taued1 = &MMG5_permedge[7][0];
+        break;
+      case 8:
+        tau1[0] = 2; tau1[1] = 3; tau1[2] = 0; tau1[3] = 1;
+        taued1 = &MMG5_permedge[8][0];
+        break;
+      case 9:
+        tau1[0] = 3; tau1[1] = 0; tau1[2] = 2; tau1[3] = 1;
+        taued1 = &MMG5_permedge[9][0];
+        break;
+      case 10:
+        tau1[0] = 3; tau1[1] = 2; tau1[2] = 1; tau1[3] = 0;
+        taued1 = &MMG5_permedge[11][0];
+        break;
+      case 11:
+        tau1[0] = 3; tau1[1] = 1; tau1[2] = 0; tau1[3] = 2;
+        taued1 = &MMG5_permedge[10][0];
+        break;
+      }
+
+      /** Do not choose a config that creates a tetra with more than 2 bdries */
+      if ( pt1->xt ) {
+        pxt1 = &mesh->xtetra[pt1->xt];
+
+        nbdy = 0;
+        if ( pxt1->ftag[tau1[1]] ) ++nbdy;
+        if ( pxt0->ftag[tau0[1]] ) ++nbdy;
+        if ( nbdy > 1 ) continue;
+
+        nbdy = 0;
+        if ( pxt1->ftag[tau1[3]] ) ++nbdy;
+        if ( pxt0->ftag[tau0[2]] ) ++nbdy;
+        if ( nbdy > 1 ) continue;
+
+        nbdy = 0;
+        if ( pxt1->ftag[tau1[2]] ) ++nbdy;
+        if ( pxt0->ftag[tau0[3]] ) ++nbdy;
+        if ( nbdy > 1 ) continue;
+
+      }
+
+      /** Test volume of the 3 created tets */
+      calold = MG_MIN(calold0,pt1->qual);
+
+      ptnew = &mesh->tetra[0];
+      memcpy(ptnew,pt,sizeof(MMG5_Tetra));
+      np    = pt1->v[tau1[0]];
+
+      ptnew->v[tau0[1]] = np;
+      if ( (!metRidTyp) && met->m && met->size>1 )
+        calnew0 = _MMG5_caltet33_ani(mesh,met,ptnew);
+      else
+        calnew0 = _MMG5_orcal(mesh,met,0);
+      if ( calnew0 < _MMG5_NULKAL ) continue;
+
+      ptnew->v[tau0[1]] = pt->v[tau0[1]];
+      ptnew->v[tau0[2]] = np;
+      if ( (!metRidTyp) && met->m && met->size>1 )
+        calnew1 = _MMG5_caltet33_ani(mesh,met,ptnew);
+      else
+        calnew1 = _MMG5_orcal(mesh,met,0);
+      if ( calnew1 < _MMG5_NULKAL ) continue;
+
+      ptnew->v[tau0[2]] = pt->v[tau0[2]];
+      ptnew->v[tau0[3]] = np;
+      if ( (!metRidTyp) && met->m && met->size>1 )
+        calnew2 = _MMG5_caltet33_ani(mesh,met,ptnew);
+      else
+        calnew2 = _MMG5_orcal(mesh,met,0);
+      if ( calnew2 < _MMG5_NULKAL ) continue;
+
+      calnew = MG_MIN(calnew0,MG_MIN(calnew1,calnew2));
+
+      if ( calold < _MMG5_EPSOK ) {
+        if ( calnew < calold ) continue;
+      }
+      else if ( calnew <= _MMG5_EPSOK ) continue;
+
+      if ( calnew > worst_swap_cal ) {
+        worst_swap_cal = calnew;
+        *ifac          = j0;
+        *adj           = adja[j0];
+        *conf0         = loc_conf0;
+        *conf1         = loc_conf1;
+      }
+    }
+  }
+  else
+    worst_swap_cal = 0.;
+
+  if ( *ifac < 0 ) {
+    /* No valid config for the swap23 */
+    if ( worst_split4bar_cal < _MMG5_EPSOK ) return 0;
+    return 1;
+  }
+
+  assert ( *adj > 0 );
+  if ( worst_swap_cal < worst_split4bar_cal ) {
+    if ( worst_split4bar_cal < _MMG5_EPSOK ) return 0;
+    return  1;
+  }
+
+  if ( worst_swap_cal < _MMG5_EPSOK ) return 0;
+
+  return 2;
+}
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1857,8 +2159,9 @@ static int _MMG5_anatet4(MMG5_pMesh mesh, MMG5_pSol met,int *nf, char typchk) {
   MMG5_pTetra  pt;
   MMG5_pPoint  ppt;
   MMG5_pxTetra pxt;
-  int          k,ns,ier;
+  int          k,ns,ier,conf0,conf1,adj,ifac,id_op;
   char         nbdy,j;
+  static char mmgWarn=0;
 
   ns = 0;
   for (k=1; k<=mesh->ne; k++) {
@@ -1871,23 +2174,33 @@ static int _MMG5_anatet4(MMG5_pMesh mesh, MMG5_pSol met,int *nf, char typchk) {
         if ( ( pxt->ftag[j] & MG_BDY ) && (!(pxt->ftag[j] & MG_PARBDY)) )  nbdy++;
     }
     if ( nbdy > 1 ) {
-      if ( !mesh->info.noswap ) {
-        /* Try to swap first */
-        ier = MMG3D_swap23(mesh,met,k,typchk-1);
-        if ( ier < 0 ) {
-          return -1;
+      id_op = MMG3D_anatet4_sim(mesh,met,k,typchk-1,&ifac,&conf0,&adj,&conf1);
+      if ( !id_op ) {
+#ifndef NDEBUG
+        if ( !mmgWarn ) {
+          mmgWarn=1;
+          printf("\n  ## Warning: %s: unable to swap or split at least 1 tetra"
+                 " with multiple boundary faces.\n",__func__);
         }
-        else if ( ier ) {
-          ++(*nf);
-          continue;
-        }
+#endif
+        continue;
       }
 
-      if ( !mesh->info.noinsert ) {
-        /* If unable to swap, try to split */
+      if ( id_op==1 ) {
+        /* Split */
         ier  = _MMG5_split4bar(mesh,met,k,typchk-1);
         if ( !ier ) return(-1);
         ns++;
+      }
+      else {
+        assert ( id_op==2 );
+
+        /* Swap */
+        ier = MMG3D_swap23(mesh,met,k,typchk-1,ifac,conf0,adj,conf1);
+        if ( ier < 0 ) {
+          return -1;
+        }
+        else if ( ier ) ++(*nf);
       }
     }
     else {
