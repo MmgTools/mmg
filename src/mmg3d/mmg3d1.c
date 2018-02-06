@@ -1374,7 +1374,7 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   MMG5_Tria     ptt,ptt2;
   MMG5_xTetra  *pxt;
   MMG5_xPoint  *pxp;
-  _MMG5_Bezier  pb;
+  _MMG5_Bezier  pb,pb2;
   _MMG5_Hash    hash;
   MMG5_pPar     par;
   double        o[3],no[3],to[3],dd,len,hmax,hausd;
@@ -1564,10 +1564,10 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
                 _MMG5_tet2tri(mesh,k,ifac,&ptt2);
 
                 /* geometric support */
-                ier = _MMG5_bezierCP(mesh,&ptt2,&pb,MG_GET(pxt->ori,ifac));
+                ier = _MMG5_bezierCP(mesh,&ptt2,&pb2,MG_GET(pxt->ori,ifac));
                 assert(ier);
 
-                ier = _MMG3D_bezierInt(&pb,&uv[j2][0],o,no,to);
+                ier = _MMG3D_bezierInt(&pb2,&uv[j2][0],o,no,to);
                 assert(ier);
 
                 if ( !_MMG3D_storeGeom(ppt,pxp,no) ) continue;
