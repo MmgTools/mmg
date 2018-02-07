@@ -4622,7 +4622,7 @@ int _MMG5_split5(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
     xt[6].tag[taued[0]] = 0;
     xt[6].tag[taued[3]] = 0;  xt[6].tag[taued[4]] = 0;
     xt[6].tag[taued[5]] = 0;  xt[6].edg[taued[0]] = 0;
-    xt[6].edg[taued[1]] = 0;  xt[6].edg[taued[3]] = 0;
+    xt[6].edg[taued[3]] = 0;
     xt[6].edg[taued[4]] = 0;  xt[6].edg[taued[5]] = 0;
     xt[6].ref [ tau[0]] = 0;  xt[6].ref [ tau[2]] = 0;
     xt[6].ftag[ tau[0]] = 0;  xt[6].ftag[ tau[2]] = 0;
