@@ -1170,7 +1170,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
 
     /* String tags: The first one stores the solution name */
     fscanf((*inm),"%d ",&tagNum);
-    fscanf(*inm,"%127s",&chaine[0]);
+    fscanf(*inm,"%127s\n",&chaine[0]);
 
     if ( !MMG5_Set_inputSolName(mesh,psl,chaine) ) {
       if ( !mmgWarn1 ) {
