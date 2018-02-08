@@ -1942,9 +1942,9 @@ static int MMG3D_anatet4_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,char metRidTyp,
     worst_split4bar_cal = 0.;
 
   /** Step 2: test the swap23 */
+  *ifac          = -1;
+  *adj           = -1;
   if ( !mesh->info.noswap ) {
-    *ifac          = -1;
-    *adj           = -1;
     worst_swap_cal = 0.;
 
     for (j0=0; j0<4; j0++) {
