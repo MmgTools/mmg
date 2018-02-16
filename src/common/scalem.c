@@ -309,5 +309,12 @@ int _MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
     }
   }
 
+  /* reset the scaling data to ensure that if we try to unscale again, we will
+   * do nothing */
+  mesh->info.delta = 1.;
+  mesh->info.min[0]= 0.;
+  mesh->info.min[1]= 0.;
+  mesh->info.min[2]= 0.;
+
   return(1);
 }
