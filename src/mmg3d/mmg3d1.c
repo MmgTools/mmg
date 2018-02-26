@@ -2303,7 +2303,8 @@ int _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,char typchk, int patternMode) {
     ns = ier;
 
     /* memory free */
-    _MMG5_DEL_MEM(mesh,mesh->adja,(4*mesh->nemax+5)*sizeof(int));
+    if ( mesh->adja )
+      _MMG5_DEL_MEM(mesh,mesh->adja,(4*mesh->nemax+5)*sizeof(int));
 
     if ( !mesh->info.noinsert ) {
       /* analyze surface tetras */
