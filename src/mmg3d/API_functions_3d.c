@@ -1596,35 +1596,38 @@ int _MMG3D_skipIso(MMG5_pMesh mesh) {
   }
 
   /* Skip edges with MG_ISO refs */
-  k = 1;
-  do {
-    pa = &mesh->edge[k];
-    if ( abs(pa->ref) != MG_ISO ) {
-      pa->ref = abs(pa->ref);
-      continue;
-    }
-    /* here pa is the first edge of mesh->edge that we want to delete */
+  if ( mesh->na ) {
+    k = 1;
     do {
-      pa1 = &mesh->edge[mesh->nai];
-    }
-    while( (abs(pa1->ref) == MG_ISO) && (k <= --mesh->nai) );
+      pa = &mesh->edge[k];
+      if ( abs(pa->ref) != MG_ISO ) {
+        pa->ref = abs(pa->ref);
+        continue;
+      }
+      /* here pa is the first edge of mesh->edge that we want to delete */
+      do {
+        pa1 = &mesh->edge[mesh->nai];
+      }
+      while( (abs(pa1->ref) == MG_ISO) && (k <= --mesh->nai) );
 
-    if ( abs(pa1->ref) != MG_ISO ) {
-      /* pa1 is the last edge of mesh->edge that we want to keep */
-      memcpy(pa,pa1,sizeof(MMG5_Edge));
-      pa1->ref = abs(pa1->ref);
-    }
-  } while( ++k <= mesh->nai );
+      if ( abs(pa1->ref) != MG_ISO ) {
+        /* pa1 is the last edge of mesh->edge that we want to keep */
+        memcpy(pa,pa1,sizeof(MMG5_Edge));
+        pa1->ref = abs(pa1->ref);
+      }
+    } while( ++k <= mesh->nai );
 
-  if ( mesh->nai < mesh->na ) {
-    if( !mesh->nai )
-      _MMG5_DEL_MEM(mesh,mesh->edge,(mesh->nai+1)*sizeof(MMG5_Edge));
-    else {
-      _MMG5_ADD_MEM(mesh,mesh->nai-mesh->na,"Edges",return(0));
-      _MMG5_SAFE_RECALLOC(mesh->edge,mesh->na+1,(mesh->nai+1),MMG5_Edge,"edges",0);
+    if ( mesh->nai < mesh->na ) {
+      if( !mesh->nai )
+        _MMG5_DEL_MEM(mesh,mesh->edge,(mesh->nai+1)*sizeof(MMG5_Edge));
+      else {
+        _MMG5_ADD_MEM(mesh,mesh->nai-mesh->na,"Edges",return(0));
+        _MMG5_SAFE_RECALLOC(mesh->edge,mesh->na+1,(mesh->nai+1),MMG5_Edge,"edges",0);
+      }
+      mesh->na = mesh->nai;
     }
-    mesh->na = mesh->nai;
   }
+  assert ( mesh->nai == mesh->na );
 
   /* delete tetrahedra references */
   for (k=1; k<=mesh->ne; k++) {
