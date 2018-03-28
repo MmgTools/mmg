@@ -74,6 +74,8 @@ int _MMG5_paktet(MMG5_pMesh mesh) {
     for(k=mesh->nenil; k<=mesh->nemax-1; k++){
       mesh->tetra[k].v[3] = k+1;
     }
+
+    mesh->tetra[mesh->nemax].v[3] = 0;
   }
   return 1;
 }
