@@ -12,10 +12,10 @@ MACRO ( GENERATE_FORTRAN_HEADER name
   ADD_CUSTOM_COMMAND (
     OUTPUT ${out_dir}/${out_file}
     COMMAND genheader ${out_dir}/${out_file} ${in_dir}/${in_file} ${include_dir}
-    ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    ${PROJECT_SOURCE_DIR}/scripts/genfort.pl
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
     DEPENDS genheader ${in_dir}/${in_file}
-    ${CMAKE_SOURCE_DIR}/scripts/genfort.pl
+    ${PROJECT_SOURCE_DIR}/scripts/genfort.pl
     COMMENT "Generating Fortran header for ${name}"
     )
 
@@ -42,7 +42,7 @@ MACRO ( COPY_FORTRAN_HEADER
   ADD_CUSTOM_COMMAND (
     OUTPUT  ${out_dir}/${out_file}
     COMMAND ${CMAKE_COMMAND} -E copy  ${in_dir}/${in_file} ${out_dir}/${out_file}
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
     DEPENDS ${file_dependencies} ${in_dir}/${in_file}
     COMMENT "Copying ${in_dir}/${in_file} in ${out_dir}/${out_file}"
     )
@@ -97,10 +97,10 @@ MACRO ( ADD_AND_INSTALL_LIBRARY
 
   IF ( CMAKE_VERSION VERSION_LESS 2.8.12 )
     INCLUDE_DIRECTORIES ( ${target_name} PRIVATE
-      ${COMMON_BINARY_DIR} ${COMMON_SOURCE_DIR} ${CMAKE_BINARY_DIR}/include )
+      ${COMMON_BINARY_DIR} ${COMMON_SOURCE_DIR} ${PROJECT_BINARY_DIR}/include )
   ELSE ( )
     TARGET_INCLUDE_DIRECTORIES ( ${target_name} PRIVATE
-      ${COMMON_BINARY_DIR} ${COMMON_SOURCE_DIR} ${CMAKE_BINARY_DIR}/include )
+      ${COMMON_BINARY_DIR} ${COMMON_SOURCE_DIR} ${PROJECT_BINARY_DIR}/include )
   ENDIF ( )
 
   SET_TARGET_PROPERTIES ( ${target_name}
@@ -148,10 +148,10 @@ MACRO ( ADD_AND_INSTALL_EXECUTABLE
 
  IF ( CMAKE_VERSION VERSION_LESS 2.8.12 )
    INCLUDE_DIRECTORIES ( ${exec_name} PUBLIC
-     ${COMMON_BINARY_DIR} ${COMMON_SOURCE_DIR} ${CMAKE_BINARY_DIR}/include )
+     ${COMMON_BINARY_DIR} ${COMMON_SOURCE_DIR} ${PROJECT_BINARY_DIR}/include )
  ELSE ( )
    TARGET_INCLUDE_DIRECTORIES ( ${exec_name} PUBLIC
-     ${COMMON_BINARY_DIR} ${COMMON_SOURCE_DIR} ${CMAKE_BINARY_DIR}/include )
+     ${COMMON_BINARY_DIR} ${COMMON_SOURCE_DIR} ${PROJECT_BINARY_DIR}/include )
  ENDIF ( )
 
   TARGET_LINK_LIBRARIES ( ${exec_name} ${LIBRARIES}  )
@@ -226,9 +226,9 @@ MACRO ( ADD_LIBRARY_TEST target_name main_path target_dependency lib_name )
   ADD_DEPENDENCIES( ${target_name} ${target_dependency} )
 
   IF ( CMAKE_VERSION VERSION_LESS 2.8.12 )
-    INCLUDE_DIRECTORIES ( ${target_name} PUBLIC ${CMAKE_BINARY_DIR}/include )
+    INCLUDE_DIRECTORIES ( ${target_name} PUBLIC ${PROJECT_BINARY_DIR}/include )
   ELSE ( )
-    TARGET_INCLUDE_DIRECTORIES ( ${target_name} PUBLIC ${CMAKE_BINARY_DIR}/include )
+    TARGET_INCLUDE_DIRECTORIES ( ${target_name} PUBLIC ${PROJECT_BINARY_DIR}/include )
   ENDIF ( )
 
   IF ( WIN32 AND ((NOT MINGW) AND USE_SCOTCH) )

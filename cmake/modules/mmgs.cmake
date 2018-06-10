@@ -26,10 +26,10 @@
 ##
 ## =============================================================================
 
-SET(MMGS_SOURCE_DIR      ${CMAKE_SOURCE_DIR}/src/mmgs)
-SET(MMGS_BINARY_DIR      ${CMAKE_BINARY_DIR}/src/mmgs)
+SET(MMGS_SOURCE_DIR      ${PROJECT_SOURCE_DIR}/src/mmgs)
+SET(MMGS_BINARY_DIR      ${PROJECT_BINARY_DIR}/src/mmgs)
 SET(MMGS_SHRT_INCLUDE    mmg/mmgs )
-SET(MMGS_INCLUDE         ${CMAKE_BINARY_DIR}/include/${MMGS_SHRT_INCLUDE} )
+SET(MMGS_INCLUDE         ${PROJECT_BINARY_DIR}/include/${MMGS_SHRT_INCLUDE} )
 
 FILE(MAKE_DIRECTORY ${MMGS_BINARY_DIR})
 
@@ -140,7 +140,7 @@ IF ( BUILD_TESTING )
   # Add runtime that we want to test for mmgs
   IF( MMGS_CI )
 
-    SET ( CTEST_OUTPUT_DIR ${CMAKE_BINARY_DIR}/TEST_OUTPUTS )
+    SET ( CTEST_OUTPUT_DIR ${PROJECT_BINARY_DIR}/TEST_OUTPUTS )
     FILE ( MAKE_DIRECTORY  ${CTEST_OUTPUT_DIR} )
 
 
@@ -154,19 +154,19 @@ IF ( BUILD_TESTING )
       SET(LIBMMGS_EXEC2   ${EXECUTABLE_OUTPUT_PATH}/libmmgs_example2)
 
       ADD_TEST(NAME libmmgs_example0_a   COMMAND ${LIBMMGS_EXEC0_a}
-        "${CMAKE_SOURCE_DIR}/libexamples/mmgs/adaptation_example0/example0_a/cube.mesh"
+        "${PROJECT_SOURCE_DIR}/libexamples/mmgs/adaptation_example0/example0_a/cube.mesh"
         "${CTEST_OUTPUT_DIR}/libmmgs_Adaptation_0_a-cube.o"
         )
       ADD_TEST(NAME libmmgs_example0_b  COMMAND ${LIBMMGS_EXEC0_b}
         "${CTEST_OUTPUT_DIR}/libmmgs_Adaptation_0_b.o.mesh"
         )
       ADD_TEST(NAME libmmgs_example1   COMMAND ${LIBMMGS_EXEC1}
-        "${CMAKE_SOURCE_DIR}/libexamples/mmgs/adaptation_example1/2spheres"
+        "${PROJECT_SOURCE_DIR}/libexamples/mmgs/adaptation_example1/2spheres"
         "${CTEST_OUTPUT_DIR}/libmmgs_Adaptation_1-2spheres_1.o"
         "${CTEST_OUTPUT_DIR}/libmmgs_Adaptation_1-2spheres_2.o"
         )
       ADD_TEST(NAME libmmgs_example2   COMMAND ${LIBMMGS_EXEC2}
-        "${CMAKE_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_example0/teapot"
+        "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_example0/teapot"
         "${CTEST_OUTPUT_DIR}/libmmgs-IsosurfDiscretization_0-teapot.o"
         )
 
@@ -174,7 +174,7 @@ IF ( BUILD_TESTING )
         SET(LIBMMGS_EXECFORTRAN_a ${EXECUTABLE_OUTPUT_PATH}/libmmgs_fortran_a)
         SET(LIBMMGS_EXECFORTRAN_b ${EXECUTABLE_OUTPUT_PATH}/libmmgs_fortran_b)
         ADD_TEST(NAME libmmgs_fortran_a   COMMAND ${LIBMMGS_EXECFORTRAN_a}
-          "${CMAKE_SOURCE_DIR}/libexamples/mmgs/adaptation_example0_fortran/example0_a/cube.mesh"
+          "${PROJECT_SOURCE_DIR}/libexamples/mmgs/adaptation_example0_fortran/example0_a/cube.mesh"
           "${CTEST_OUTPUT_DIR}/libmmgs-Adaptation_Fortran_0_a-cube.o"
           )
         ADD_TEST(NAME libmmgs_fortran_b   COMMAND ${LIBMMGS_EXECFORTRAN_b}
@@ -185,17 +185,17 @@ IF ( BUILD_TESTING )
     ENDIF()
 
     IF ( ONLY_VERY_SHORT_TESTS )
-      SET ( CTEST_OUTPUT_DIR ${CMAKE_BINARY_DIR}/TEST_OUTPUTS )
+      SET ( CTEST_OUTPUT_DIR ${PROJECT_BINARY_DIR}/TEST_OUTPUTS )
 
       ADD_TEST(NAME mmgs_very_short   COMMAND ${EXECUT_MMGS}
-        "${CMAKE_SOURCE_DIR}/libexamples/mmgs/adaptation_example0/example0_a/cube.mesh"
+        "${PROJECT_SOURCE_DIR}/libexamples/mmgs/adaptation_example0/example0_a/cube.mesh"
         "${CTEST_OUTPUT_DIR}/libmmgs_Adaptation_0_a-cube.o"
         )
 
     ELSE ( )
       # Add mmgs tests
-      INCLUDE( ${CMAKE_SOURCE_DIR}/cmake/testing/mmgs_tests.cmake )
-      INCLUDE( ${CMAKE_SOURCE_DIR}/cmake/testing/mmg_tests.cmake )
+      INCLUDE( ${PROJECT_SOURCE_DIR}/cmake/testing/mmgs_tests.cmake )
+      INCLUDE( ${PROJECT_SOURCE_DIR}/cmake/testing/mmg_tests.cmake )
     ENDIF ( )
 
   ENDIF ( MMGS_CI )
