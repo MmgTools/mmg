@@ -28,14 +28,14 @@ INCLUDE(cmake/modules/macros.cmake)
 PROJECT (mmg)
 
 # Executable path
-SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
-SET(COMMON_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src/common)
-SET(COMMON_BINARY_DIR ${CMAKE_BINARY_DIR}/src/common)
+SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
+SET(COMMON_SOURCE_DIR ${PROJECT_SOURCE_DIR}/src/common)
+SET(COMMON_BINARY_DIR ${PROJECT_BINARY_DIR}/src/common)
 
 FILE(MAKE_DIRECTORY ${COMMON_BINARY_DIR})
 
 # Path toward the continuous integration directory
-SET ( CI_DIR ${CMAKE_SOURCE_DIR}/ci_tests
+SET ( CI_DIR ${PROJECT_SOURCE_DIR}/ci_tests
   CACHE PATH "Path toward the continuous integration directory" )
 MARK_AS_ADVANCED ( CI_DIR )
 
@@ -67,7 +67,7 @@ ENDIF ()
 
 # Create mmgcommon.h file with the good release and architecture infos.
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/src/common/mmgcommon.h.in
-  ${CMAKE_BINARY_DIR}/src/common/mmgcommon.h @ONLY)
+  ${PROJECT_BINARY_DIR}/src/common/mmgcommon.h @ONLY)
 
 ###############################################################################
 #####
@@ -173,7 +173,7 @@ ENDIF()
 #####         Fortran header: libmmgtypesf.h
 #####
 ############################################################################
-ADD_EXECUTABLE(genheader ${CMAKE_SOURCE_DIR}/scripts/genheader.c)
+ADD_EXECUTABLE(genheader ${PROJECT_SOURCE_DIR}/scripts/genheader.c)
 TARGET_LINK_LIBRARIES ( genheader ${LIBRARIES}  )
 GENERATE_FORTRAN_HEADER ( mmg
   ${COMMON_SOURCE_DIR} libmmgtypes.h
@@ -201,7 +201,7 @@ ENDIF()
 ############################################################################
 # Find SCOTCH library?
 SET(SCOTCH_DIR "" CACHE PATH "Installation directory for scotch")
-LIST(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules)
+LIST(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules)
 FIND_PACKAGE(Scotch)
 
 IF ( NOT SCOTCH_FOUND )
@@ -354,7 +354,7 @@ CMAKE_DEPENDENT_OPTION(
 #####         Build Targets and libmmg if needed
 #####
 ###############################################################################
-SET(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib)
+SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 
 IF ( BUILD_MMG2D )
   INCLUDE(cmake/modules/mmg2d.cmake)
@@ -400,7 +400,7 @@ CMAKE_DEPENDENT_OPTION ( COVERAGE "Watch code coverage (Linux only)" OFF
 
 IF( BUILD_TESTING )
 
-  SET ( CTEST_OUTPUT_DIR ${CMAKE_BINARY_DIR}/TEST_OUTPUTS )
+  SET ( CTEST_OUTPUT_DIR ${PROJECT_BINARY_DIR}/TEST_OUTPUTS )
   FILE ( MAKE_DIRECTORY  ${CTEST_OUTPUT_DIR} )
 
   IF ( NOT ONLY_VERY_SHORT_TESTS )
@@ -426,12 +426,12 @@ ENDIF ( )
   IF(APPLE)
     # and errors from the libSystem.B library
     SET(MEMORYCHECK_SUPPRESSIONS_FILE
-      "${CMAKE_SOURCE_DIR}/cmake/Supp/libSystem.supp")
+      "${PROJECT_SOURCE_DIR}/cmake/Supp/libSystem.supp")
   ENDIF(APPLE)
   # Copy config file and custom file in the good directories
-  CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/cmake/config/CTestConfig.cmake
-    ${CMAKE_SOURCE_DIR}/CTestConfig.cmake)
-  CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/cmake/config/CTestCustom.cmake
+  CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/cmake/config/CTestConfig.cmake
+    ${PROJECT_SOURCE_DIR}/CTestConfig.cmake)
+  CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/cmake/config/CTestCustom.cmake
     ./CTestCustom.cmake)
 
   # Max time for test case
@@ -478,7 +478,7 @@ ENDIF ( )
       DESTINATION ${CTEST_OUTPUT_DIR}/AbnormalEnd8/unwrittable.sol)
 
     # Add common tests for mmgs/3d appli
-    INCLUDE( ${CMAKE_SOURCE_DIR}/cmake/testing/mmg_tests.cmake )
+    INCLUDE( ${PROJECT_SOURCE_DIR}/cmake/testing/mmg_tests.cmake )
 
   ENDIF ( )
 
@@ -496,9 +496,9 @@ IF(DOXYGEN_FOUND)
   CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg2d/Doxyfile.in
     ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg2d/Doxyfile @ONLY)
 
-  SET(MMG2DDOC_DIR ${CMAKE_BINARY_DIR}/doc/mmg2d)
-  SET(MMGSDOC_DIR ${CMAKE_BINARY_DIR}/doc/mmgs)
-  SET(MMG3DDOC_DIR ${CMAKE_BINARY_DIR}/doc/mmg3d)
+  SET(MMG2DDOC_DIR ${PROJECT_BINARY_DIR}/doc/mmg2d)
+  SET(MMGSDOC_DIR ${PROJECT_BINARY_DIR}/doc/mmgs)
+  SET(MMG3DDOC_DIR ${PROJECT_BINARY_DIR}/doc/mmg3d)
 
   FILE(MAKE_DIRECTORY ${MMG2DDOC_DIR})
   FILE(MAKE_DIRECTORY ${MMGSDOC_DIR})
@@ -538,7 +538,7 @@ IF(DOXYGEN_FOUND)
 
   ADD_CUSTOM_TARGET(doc DEPENDS mmgs_doc mmg3d_doc mmg2d_doc COMMENT "Generating
     MMG API documentation with Doxygen.  Open up the
-    ${CMAKE_BINARY_DIR}/doc/mmg*/html/index.html file to see it"
+    ${PROJECT_BINARY_DIR}/doc/mmg*/html/index.html file to see it"
     VERBATIM )
 ENDIF ( DOXYGEN_FOUND )
 
@@ -559,8 +559,8 @@ SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "MMG: 2d, surface and 3d remeshers")
 SET(CPACK_PACKAGE_VENDOR "Cécile Dobrzynski, Pascal Frey, Charles Dapogny,"
   " Algiane Froehly")
 SET(CPACK_PACKAGE_CONTACT "contact@mmgtools.org")
-SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_SOURCE_DIR}/README.md")
-SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE")
+SET(CPACK_PACKAGE_DESCRIPTION_FILE "${PROJECT_SOURCE_DIR}/README.md")
+SET(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/LICENSE")
 SET(CPACK_PACKAGE_VERSION ${CMAKE_RELEASE_VERSION})
 SET(CPACK_PACKAGE_VERSION_MAJOR ${CMAKE_RELEASE_VERSION_MAJOR})
 SET(CPACK_PACKAGE_VERSION_MINOR ${CMAKE_RELEASE_VERSION_MINOR})
