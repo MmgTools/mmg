@@ -286,8 +286,8 @@ int _MMG3D_prilen(MMG5_pMesh mesh, MMG5_pSol met, char metRidTyp) {
   }
 
   /* Display histogram */
-  _MMG5_displayHisto(mesh, ned, &avlen, amin, bmin, lmin,
-                     amax, bmax, lmax,nullEdge, &bd[0], &hl[0],1);
+  _MMG5_displayLengthHisto(mesh, ned, &avlen, amin, bmin, lmin,
+			   amax, bmax, lmax,nullEdge, &bd[0], &hl[0],1);
 
   _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
   return(1);

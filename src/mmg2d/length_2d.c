@@ -193,8 +193,8 @@ int MMG2_prilen(MMG5_pMesh mesh,MMG5_pSol sol) {
       else                     hl[8]++;
     }
   }
-  _MMG5_displayHisto(mesh, navg, &lavg, iamin, ibmin, lmin,
-                     iamax, ibmax, lmax,nullEdge, &bd[0], &hl[0],0);
+  _MMG5_displayLengthHisto(mesh, navg, &lavg, iamin, ibmin, lmin,
+			   iamax, ibmax, lmax,nullEdge, &bd[0], &hl[0],0);
 
 
   return(1);

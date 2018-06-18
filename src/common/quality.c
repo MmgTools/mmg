@@ -245,10 +245,10 @@ inline double _MMG5_caltri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
  * Display histogram of edge length.
  *
  */
-void _MMG5_displayHisto(MMG5_pMesh mesh, int ned, double *avlen,
-                        int amin, int bmin, double lmin,
-                        int amax, int bmax, double lmax,
-                        int nullEdge,double *bd, int *hl,char shift)
+void _MMG5_displayLengthHisto(MMG5_pMesh mesh, int ned, double *avlen,
+			      int amin, int bmin, double lmin,
+			      int amax, int bmax, double lmax,
+			      int nullEdge,double *bd, int *hl,char shift)
 {
   double dned;
   int    k;
