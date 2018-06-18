@@ -93,7 +93,9 @@ int _MMG3D_dichoto(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
   int          ia,ib,ier,it,maxit;
   char         i;
 
+  ier = 1;
   pt = &mesh->tetra[k];
+
   /* get point on surface and along segment for edge split */
   for (i=0; i<6; i++) {
     memset(p[i],0,3*sizeof(double));
@@ -1873,7 +1875,6 @@ static int MMG3D_anatet4_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,char metRidTyp,
   int                  loc_conf0,loc_conf1,k1,*adja;
   int                  nbdy,i,j0,j1,np;
   unsigned char        tau0[4],tau1[4];
-  const unsigned char *taued0,*taued1;
 
   pt     = &mesh->tetra[k];
   calold0 = pt->qual;
@@ -1977,22 +1978,17 @@ static int MMG3D_anatet4_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,char metRidTyp,
       loc_conf0 = 3*j0;
 
       switch(loc_conf0) {
-      case 0:
-        tau0[0] = 0; tau0[1] = 1; tau0[2] = 2; tau0[3] = 3;
-        taued0 = &MMG5_permedge[0][0];
-        break;
       case 3:
         tau0[0] = 1; tau0[1] = 0; tau0[2] = 3; tau0[3] = 2;
-        taued0 = &MMG5_permedge[3][0];
         break;
       case 6:
         tau0[0] = 2; tau0[1] = 0; tau0[2] = 1; tau0[3] = 3;
-        taued0 = &MMG5_permedge[6][0];
         break;
       case 9:
         tau0[0] = 3; tau0[1] = 0; tau0[2] = 2; tau0[3] = 1;
-        taued0 = &MMG5_permedge[9][0];
         break;
+      default:
+	tau0[0] = 0; tau0[1] = 1; tau0[2] = 2; tau0[3] = 3;
       }
 
       /* k1 may be in configuration j1, j1+1, j1+2 */
@@ -2008,54 +2004,41 @@ static int MMG3D_anatet4_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,char metRidTyp,
       loc_conf1 = 3*j1+i;
 
       switch(loc_conf1) {
-      case 0:
-        tau1[0] = 0; tau1[1] = 1; tau1[2] = 2; tau1[3] = 3;
-        taued1 = &MMG5_permedge[0][0];
-        break;
       case 1:
         tau1[0] = 0; tau1[1] = 2; tau1[2] = 3; tau1[3] = 1;
-        taued1 = &MMG5_permedge[1][0];
         break;
       case 2:
         tau1[0] = 0; tau1[1] = 3; tau1[2] = 1; tau1[3] = 2;
-        taued1 = &MMG5_permedge[2][0];
         break;
       case 3:
         tau1[0] = 1; tau1[1] = 0; tau1[2] = 3; tau1[3] = 2;
-        taued1 = &MMG5_permedge[3][0];
         break;
       case 4:
         tau1[0] = 1; tau1[1] = 3; tau1[2] = 2; tau1[3] = 0;
-        taued1 = &MMG5_permedge[5][0];
         break;
       case 5:
         tau1[0] = 1; tau1[1] = 2; tau1[2] = 0; tau1[3] = 3;
-        taued1 = &MMG5_permedge[4][0];
         break;
       case 6:
         tau1[0] = 2; tau1[1] = 0; tau1[2] = 1; tau1[3] = 3;
-        taued1 = &MMG5_permedge[6][0];
         break;
       case 7:
         tau1[0] = 2; tau1[1] = 1; tau1[2] = 3; tau1[3] = 0;
-        taued1 = &MMG5_permedge[7][0];
         break;
       case 8:
         tau1[0] = 2; tau1[1] = 3; tau1[2] = 0; tau1[3] = 1;
-        taued1 = &MMG5_permedge[8][0];
         break;
       case 9:
         tau1[0] = 3; tau1[1] = 0; tau1[2] = 2; tau1[3] = 1;
-        taued1 = &MMG5_permedge[9][0];
         break;
       case 10:
         tau1[0] = 3; tau1[1] = 2; tau1[2] = 1; tau1[3] = 0;
-        taued1 = &MMG5_permedge[11][0];
         break;
       case 11:
         tau1[0] = 3; tau1[1] = 1; tau1[2] = 0; tau1[3] = 2;
-        taued1 = &MMG5_permedge[10][0];
         break;
+      default:
+	tau1[0] = 0; tau1[1] = 1; tau1[2] = 2; tau1[3] = 3;
       }
 
       /** Do not choose a config that creates a tetra with more than 2 bdries */
@@ -2161,7 +2144,9 @@ static int _MMG5_anatet4(MMG5_pMesh mesh, MMG5_pSol met,int *nf, char typchk) {
   MMG5_pxTetra pxt;
   int          k,ns,ier,conf0,conf1,adj,ifac,id_op;
   char         nbdy,j;
+#ifndef NDEBUG
   static char mmgWarn=0;
+#endif
 
   ns = 0;
   for (k=1; k<=mesh->ne; k++) {

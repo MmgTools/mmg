@@ -152,6 +152,7 @@ int _MMG3D_Init_mesh_var( va_list argptr ) {
   int            meshCount;
 
   meshCount = 0;
+  mesh = NULL;
   disp = sol = NULL;
 
 
@@ -247,6 +248,7 @@ int _MMG3D_Free_all_var(va_list argptr)
   int            meshCount,i;
 
   meshCount = 0;
+  mesh = NULL;
   disp = sol = sols = NULL;
 
   while ( (typArg = va_arg(argptr,int)) != MMG5_ARG_end )
@@ -366,6 +368,7 @@ int _MMG3D_Free_structures_var(va_list argptr)
   int            meshCount;
 
   meshCount = 0;
+  mesh = NULL;
   disp = sol = NULL;
 
   while ( (typArg = va_arg(argptr,int)) != MMG5_ARG_end )

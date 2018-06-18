@@ -357,6 +357,7 @@ int _MMG3D_simbulgept(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int ip) {
   /** Check the deviation for new triangles */
   /* analyze surfacic ball of p */
   wrongOri = complete = idx = 0;
+  maxs1 = mins1 = sum1 = 0;
   for (k=0; k<ilist; k++) {
     iel = list[k] / 6;
     ie  = list[k] % 6;
