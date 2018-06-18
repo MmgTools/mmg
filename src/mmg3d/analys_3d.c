@@ -725,7 +725,7 @@ int _MMG3D_analys(MMG5_pMesh mesh) {
 
   /**--- stage 1: data structures for surface */
   if ( abs(mesh->info.imprim) > 3 )
-    fprintf(stdout,"  ** SURFACE ANALYSIS\n");
+    fprintf(stdout,"\n  ** SURFACE ANALYSIS\n");
 
   /* create tetra adjacency */
   if ( !MMG3D_hashTetra(mesh,1) ) {
