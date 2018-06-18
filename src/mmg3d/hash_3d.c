@@ -1324,9 +1324,9 @@ int _MMG5_bdryTria(MMG5_pMesh mesh, int ntmesh) {
         ptt->v[0] = ia;
         ptt->v[1] = ib;
         ptt->v[2] = ic;
+        mesh->point[ptt->v[0]].tag |= MG_BDY;
         mesh->point[ptt->v[1]].tag |= MG_BDY;
         mesh->point[ptt->v[2]].tag |= MG_BDY;
-        mesh->point[ptt->v[3]].tag |= MG_BDY;
 
         /* the cc field is used to be able to recover the prism (and its face)
          * from which comes a boundary triangle (when called by packmesh =>
