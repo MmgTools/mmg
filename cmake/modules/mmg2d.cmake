@@ -26,10 +26,10 @@
 ##
 ## =============================================================================
 
-SET(MMG2D_SOURCE_DIR      ${CMAKE_SOURCE_DIR}/src/mmg2d)
-SET(MMG2D_BINARY_DIR      ${CMAKE_BINARY_DIR}/src/mmg2d)
+SET(MMG2D_SOURCE_DIR      ${PROJECT_SOURCE_DIR}/src/mmg2d)
+SET(MMG2D_BINARY_DIR      ${PROJECT_BINARY_DIR}/src/mmg2d)
 SET(MMG2D_SHRT_INCLUDE    mmg/mmg2d )
-SET(MMG2D_INCLUDE         ${CMAKE_BINARY_DIR}/include/${MMG2D_SHRT_INCLUDE} )
+SET(MMG2D_INCLUDE         ${PROJECT_BINARY_DIR}/include/${MMG2D_SHRT_INCLUDE} )
 
 FILE(MAKE_DIRECTORY  ${MMG2D_BINARY_DIR})
 
@@ -168,7 +168,7 @@ IF ( BUILD_TESTING )
   # Add runtime that we want to test for mmg2d
   IF ( MMG2D_CI )
 
-    SET ( CTEST_OUTPUT_DIR ${CMAKE_BINARY_DIR}/TEST_OUTPUTS )
+    SET ( CTEST_OUTPUT_DIR ${PROJECT_BINARY_DIR}/TEST_OUTPUTS )
     FILE ( MAKE_DIRECTORY  ${CTEST_OUTPUT_DIR} )
 
     ADD_EXEC_TO_CI_TESTS ( ${PROJECT_NAME}2d EXECUT_MMG2D )
@@ -180,14 +180,14 @@ IF ( BUILD_TESTING )
       SET(LIBMMG2D_EXEC1 ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_example1 )
 
       ADD_TEST(NAME libmmg2d_example0_a   COMMAND ${LIBMMG2D_EXEC0_a}
-        "${CMAKE_SOURCE_DIR}/libexamples/mmg2d/adaptation_example0/example0_a/init.mesh"
+        "${PROJECT_SOURCE_DIR}/libexamples/mmg2d/adaptation_example0/example0_a/init.mesh"
         "${CTEST_OUTPUT_DIR}/libmmg2d_Adaptation_0_a-init.o"
         )
       ADD_TEST(NAME libmmg2d_example0_b   COMMAND ${LIBMMG2D_EXEC0_b}
         "${CTEST_OUTPUT_DIR}/libmmg2d_Adaptation_0_b.o.mesh"
         )
       ADD_TEST(NAME libmmg2d_example1   COMMAND ${LIBMMG2D_EXEC1}
-        "${CMAKE_SOURCE_DIR}/libexamples/mmg2d/adaptation_example1/dom.mesh"
+        "${PROJECT_SOURCE_DIR}/libexamples/mmg2d/adaptation_example1/dom.mesh"
         "${CTEST_OUTPUT_DIR}/libmmg2d_Adaptation_1-dom.o"
        )
 
@@ -196,7 +196,7 @@ IF ( BUILD_TESTING )
 
         SET(LIBMMG2D_EXECFORTRAN_b ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_fortran_b )
         ADD_TEST(NAME libmmg2d_fortran_a   COMMAND ${LIBMMG2D_EXECFORTRAN_a}
-          "${CMAKE_SOURCE_DIR}/libexamples/mmg2d/adaptation_example0_fortran/example0_a/init.mesh"
+          "${PROJECT_SOURCE_DIR}/libexamples/mmg2d/adaptation_example0_fortran/example0_a/init.mesh"
           "${CTEST_OUTPUT_DIR}/libmmg2d-Adaptation_Fortran_0_a-init.o"
          )
         ADD_TEST(NAME libmmg2d_fortran_b   COMMAND ${LIBMMG2D_EXECFORTRAN_b}
@@ -207,15 +207,15 @@ IF ( BUILD_TESTING )
     ENDIF()
 
     IF ( ONLY_VERY_SHORT_TESTS )
-      SET ( CTEST_OUTPUT_DIR ${CMAKE_BINARY_DIR}/TEST_OUTPUTS )
+      SET ( CTEST_OUTPUT_DIR ${PROJECT_BINARY_DIR}/TEST_OUTPUTS )
 
       ADD_TEST(NAME mmg2d_very_short COMMAND ${EXECUT_MMG2D}
-        "${CMAKE_SOURCE_DIR}/libexamples/mmg2d/adaptation_example0/example0_a/init.mesh"
+        "${PROJECT_SOURCE_DIR}/libexamples/mmg2d/adaptation_example0/example0_a/init.mesh"
         "${CTEST_OUTPUT_DIR}/libmmg2d_Adaptation_0_a-init.o"
         )
     ELSE ( )
       # Add mmg2d tests
-      INCLUDE( ${CMAKE_SOURCE_DIR}/cmake/testing/mmg2d_tests.cmake )
+      INCLUDE( ${PROJECT_SOURCE_DIR}/cmake/testing/mmg2d_tests.cmake )
     ENDIF ( )
 
   ENDIF( MMG2D_CI )

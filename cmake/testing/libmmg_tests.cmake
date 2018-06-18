@@ -32,8 +32,8 @@ SET ( MMG_LIB_TESTS
   )
 
 SET ( MMG_LIB_TESTS_MAIN_PATH
-  ${CMAKE_SOURCE_DIR}/libexamples/mmg/adaptation_example0/main.c
-  ${CMAKE_SOURCE_DIR}/libexamples/mmg/adaptation_example0_cpp/main.cpp
+  ${PROJECT_SOURCE_DIR}/libexamples/mmg/adaptation_example0/main.c
+  ${PROJECT_SOURCE_DIR}/libexamples/mmg/adaptation_example0_cpp/main.cpp
   )
 
 IF ( LIBMMG_STATIC )
@@ -54,7 +54,7 @@ IF (CMAKE_Fortran_COMPILER)
     )
 
   SET ( MMG_LIB_TESTS_MAIN_PATH ${MMG_LIB_TESTS_MAIN_PATH}
-    ${CMAKE_SOURCE_DIR}/libexamples/mmg/adaptation_example0_fortran/main.F90
+    ${PROJECT_SOURCE_DIR}/libexamples/mmg/adaptation_example0_fortran/main.F90
     )
 
 ENDIF (CMAKE_Fortran_COMPILER)
