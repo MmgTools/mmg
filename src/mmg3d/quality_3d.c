@@ -358,41 +358,67 @@ static int _MMG3D_printquaLES(MMG5_pMesh mesh,MMG5_pSol met) {
 
   }
 
+  return MMG3D_displayQualHisto(mesh,met,mesh->ne-nex,rapmax,rapavg,rapmin,iel,good,med,
+				his,0);
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param ne number of used tetra.
+ * \param max maximal quality (normalized).
+ * \param avg average quality (normalized).
+ * \param min minimal quality (normalized).
+ * \param iel index of the worst tetra.
+ * \param good number of good elements.
+ * \param med number of elements with a quality greather than 0.5
+ * \param his pointer toward the mesh histogram.
+ * \param nrid number of tetra with 4 ridge points if we want to warn the user.
+ *
+ * \return 0 if the worst element has a nul quality, 1 otherwise.
+ *
+ * Print histogram of mesh qualities for special storage of metric at ridges.
+ *
+ */
+int MMG3D_displayQualHisto(MMG5_pMesh mesh,MMG5_pSol met,int ne,double max,double avg,
+			   double min,int iel,int good,int med,int his[5],int nrid) {
+  int i,imax;
+
   fprintf(stdout,"\n  -- MESH QUALITY");
-  fprintf(stdout," (LES)");
-  fprintf(stdout,"  %d\n",mesh->ne - nex);
+  if ( mesh->info.optimLES )
+    fprintf(stdout," (LES)");
+  fprintf(stdout,"  %d\n",ne);
 
 #ifndef DEBUG
   fprintf(stdout,"     BEST   %8.6f  AVRG.   %8.6f  WRST.   %8.6f (%d)\n",
-          rapmax,rapavg / (mesh->ne-nex),rapmin,iel);
+          max,avg / ne,min,iel);
 #else
   fprintf(stdout,"     BEST   %e  AVRG.   %e  WRST.   %e (%d)\n => %d %d %d %d\n",
-          rapmax,rapavg / (mesh->ne-nex),rapmin,iel,
+          max,avg / ne,min,iel,
           _MMG3D_indPt(mesh,mesh->tetra[iel].v[0]),_MMG3D_indPt(mesh,mesh->tetra[iel].v[1]),
           _MMG3D_indPt(mesh,mesh->tetra[iel].v[2]),_MMG3D_indPt(mesh,mesh->tetra[iel].v[3]));
 #endif
 
-  /* print histo */
-  fprintf(stdout,"     HISTOGRAMM:");
-  fprintf(stdout,"  %6.2f %% < 0.6\n",100.0*(good/(float)(mesh->ne-nex)));
-  if ( abs(mesh->info.imprim) > 3 ) {
-    fprintf(stdout,"                  %6.2f %% < 0.9\n",100.0*( med/(float)(mesh->ne-nex)));
-    fprintf(stdout,"     %5.2f < Q < %5.2f   %7d   %6.2f %%\n",
-            0.0,0.6,his[0],100.*(his[0]/(float)(mesh->ne-nex)));
-    fprintf(stdout,"     %5.2f < Q < %5.2f   %7d   %6.2f %%\n",
-            0.6,0.9,his[1],100.*(his[1]/(float)(mesh->ne-nex)));
-    fprintf(stdout,"     %5.2f < Q < %5.2f   %7d   %6.2f %%\n",
-            0.9,0.93,his[2],100.*(his[2]/(float)(mesh->ne-nex)));
-    fprintf(stdout,"     %5.2f < Q < %5.2f   %7d   %6.2f %%\n",
-            0.93,0.99,his[3],100.*(his[3]/(float)(mesh->ne-nex)));
-    fprintf(stdout,"     %5.2f < Q           %7d   %6.2f %%\n",
-            0.99,his[4],100.*(his[4]/(float)(mesh->ne-nex)));
+  if ( mesh->info.optimLES )
+    return 1;
+
+  else if ( abs(mesh->info.imprim) >= 3 ){
+    /* print histo */
+    fprintf(stdout,"     HISTOGRAMM:");
+    fprintf(stdout,"  %6.2f %% > 0.12\n",100.0*(good/(float)ne));
+    if ( abs(mesh->info.imprim) > 3 ) {
+      fprintf(stdout,"                  %6.2f %% >  0.5\n",100.0*( med/(float)ne));
+      imax = MG_MIN(4,(int)(5.*max));
+      for (i=imax; i>=(int)(5*min); i--) {
+        fprintf(stdout,"     %5.1f < Q < %5.1f   %7d   %6.2f %%\n",
+                i/5.,i/5.+0.2,his[i],100.*(his[i]/(float)ne));
+      }
+      if ( nrid ) fprintf(stdout,"\n  ## WARNING: %d TETRA WITH 4 RIDGES POINTS\n",nrid);
+    }
   }
 
-  return(1);
+  return _MMG5_minQualCheck(iel,min,_MMG3D_ALPHAD);
 }
-
-
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -408,7 +434,8 @@ int _MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
   int         i,k,iel,ok,ir,imax,nex,his[5];
   static char mmgWarn0 = 0;
 
-  if( mesh->info.optimLES ) return(_MMG3D_printquaLES(mesh,met));
+  if( mesh->info.optimLES )
+    return _MMG3D_printquaLES(mesh,met);
 
   /*compute tet quality*/
   for (k=1; k<=mesh->ne; k++) {
@@ -425,7 +452,8 @@ int _MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
      else // -A option
        pt->qual = _MMG5_caltet_iso(mesh,met,pt);
   }
-  if ( abs(mesh->info.imprim) <= 0 ) return(1);
+  if ( abs(mesh->info.imprim) <= 0 )
+    return 1;
 
   rapmin  = 2.0;
   rapmax  = 0.0;
@@ -460,34 +488,8 @@ int _MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
     his[ir] += 1;
   }
 
-  fprintf(stdout,"\n  -- MESH QUALITY");
-  fprintf(stdout,"  %d\n",mesh->ne - nex);
-
-#ifndef DEBUG
-  fprintf(stdout,"     BEST   %8.6f  AVRG.   %8.6f  WRST.   %8.6f (%d)\n",
-          rapmax,rapavg / (mesh->ne-nex),rapmin,iel);
-#else
-  fprintf(stdout,"     BEST   %e  AVRG.   %e  WRST.   %e (%d)\n => %d %d %d %d\n",
-          rapmax,rapavg / (mesh->ne-nex),rapmin,iel,
-          _MMG3D_indPt(mesh,mesh->tetra[iel].v[0]),_MMG3D_indPt(mesh,mesh->tetra[iel].v[1]),
-          _MMG3D_indPt(mesh,mesh->tetra[iel].v[2]),_MMG3D_indPt(mesh,mesh->tetra[iel].v[3]));
-#endif
-
-  if ( mesh->info.imprim >= 3 ) {
-    /* print histo */
-    fprintf(stdout,"     HISTOGRAMM:");
-    fprintf(stdout,"  %6.2f %% > 0.12\n",100.0*(good/(float)(mesh->ne-nex)));
-    if ( abs(mesh->info.imprim) > 3 ) {
-      fprintf(stdout,"                  %6.2f %% >  0.5\n",100.0*( med/(float)(mesh->ne-nex)));
-      imax = MG_MIN(4,(int)(5.*rapmax));
-      for (i=imax; i>=(int)(5*rapmin); i--) {
-        fprintf(stdout,"     %5.1f < Q < %5.1f   %7d   %6.2f %%\n",
-                i/5.,i/5.+0.2,his[i],100.*(his[i]/(float)(mesh->ne-nex)));
-      }
-    }
-  }
-
-  return ( _MMG5_minQualCheck(iel,rapmin,_MMG3D_ALPHAD) );
+  return MMG3D_displayQualHisto(mesh,met,mesh->ne-nex,rapmax,rapavg,rapmin,iel,good,med,
+				his,0);
 }
 
 /**
@@ -506,7 +508,7 @@ int _MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
   int         i,k,iel,ok,ir,imax,nex,his[5],n,nrid;
   static char mmgWarn0 = 0;
 
-  if( mesh->info.optimLES ) return(_MMG3D_printquaLES(mesh,met));
+  if( mesh->info.optimLES ) return _MMG3D_printquaLES(mesh,met);
 
   /*compute tet quality*/
   for (k=1; k<=mesh->ne; k++) {
@@ -515,7 +517,8 @@ int _MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
     pt->qual = _MMG5_orcal(mesh,met,k);
   }
 
-  if ( abs(mesh->info.imprim) <= 0 ) return(1);
+  if ( abs(mesh->info.imprim) <= 0 )
+    return 1;
 
   rapmin  = 2.0;
   rapmax  = 0.0;
@@ -560,37 +563,10 @@ int _MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
     ir = MG_MIN(4,(int)(5.0*rap));
     his[ir] += 1;
   }
+  nrid = (met->size==6)?nrid:0;
 
-  fprintf(stdout,"\n  -- MESH QUALITY");
-  fprintf(stdout,"  %d\n",mesh->ne - nex);
-
-#ifndef DEBUG
-  fprintf(stdout,"     BEST   %8.6f  AVRG.   %8.6f  WRST.   %8.6f (%d)\n",
-          rapmax,rapavg / (mesh->ne-nex),rapmin,iel);
-#else
-  fprintf(stdout,"     BEST   %e  AVRG.   %e  WRST.   %e (%d)\n => %d %d %d %d\n",
-          rapmax,rapavg / (mesh->ne-nex),rapmin,iel,
-          _MMG3D_indPt(mesh,mesh->tetra[iel].v[0]),_MMG3D_indPt(mesh,mesh->tetra[iel].v[1]),
-          _MMG3D_indPt(mesh,mesh->tetra[iel].v[2]),_MMG3D_indPt(mesh,mesh->tetra[iel].v[3]));
-#endif
-
-  if ( abs(mesh->info.imprim) >= 3 ){
-
-    /* print histo */
-    fprintf(stdout,"     HISTOGRAMM:");
-    fprintf(stdout,"  %6.2f %% > 0.12\n",100.0*(good/(float)(mesh->ne-nex)));
-    if ( abs(mesh->info.imprim) > 3 ) {
-      fprintf(stdout,"                  %6.2f %% >  0.5\n",100.0*( med/(float)(mesh->ne-nex)));
-      imax = MG_MIN(4,(int)(5.*rapmax));
-      for (i=imax; i>=(int)(5*rapmin); i--) {
-        fprintf(stdout,"     %5.1f < Q < %5.1f   %7d   %6.2f %%\n",
-                i/5.,i/5.+0.2,his[i],100.*(his[i]/(float)(mesh->ne-nex)));
-      }
-      if ( met->size==6 && nrid ) fprintf(stdout,"\n  ## WARNING: %d TETRA WITH 4 RIDGES POINTS\n",nrid);
-    }
-  }
-
-  return ( _MMG5_minQualCheck(iel,rapmin,_MMG3D_ALPHAD) );
+  return MMG3D_displayQualHisto(mesh,met,mesh->ne-nex,rapmax,rapavg,rapmin,iel,good,med,
+				his,0);
 }
 
 /**

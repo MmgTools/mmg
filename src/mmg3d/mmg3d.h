@@ -369,6 +369,8 @@ int _MMG5_dichodisp(MMG5_pMesh,double *);
 int _MMG5_lapantilap(MMG5_pMesh,double *);
 int _MMG5_ppgdisp(MMG5_pMesh,double *);
 int _MMG5_denoisbdy(MMG5_pMesh);
+int MMG3D_displayQualHisto(MMG5_pMesh,MMG5_pSol,int,double,double,double,int,int,int,
+                           int his[5],int);
 int  _MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met);
 int  _MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met);
 int  _MMG3D_prilen(MMG5_pMesh mesh,MMG5_pSol met,char);
