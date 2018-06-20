@@ -24,7 +24,20 @@
 
 extern unsigned char ddb;
 
-/* Check whether the validity and the geometry of the mesh are preserved when collapsing edge i (p1->p2)*/
+/**
+ * \param mesh pointer toward the mesh
+ * \param met pointer toward the metric
+ * \param k triangle index
+ * \param i local index of the edge that we want to test in the triangle \a k
+ * \param list edge's shell (to fill)
+ * \param typchk type eof check to perform.
+ *
+ * \return 1 if we must collapse, 0 otherwise
+ *
+ * Check whether the validity and the geometry of the mesh are
+ * preserved when collapsing edge i (p1->p2)
+ *
+ */
 int _MMG2_chkcol(MMG5_pMesh mesh, MMG5_pSol met,int k,char i,int *list,char typchk) {
   MMG5_pTria           pt0,pt,pt1,pt2;
   MMG5_pPoint          ppt,p2;
@@ -47,6 +60,7 @@ int _MMG2_chkcol(MMG5_pMesh mesh, MMG5_pSol met,int k,char i,int *list,char typc
   calold = calnew = DBL_MAX;
   
   /* If typchk == 2, avoid recreating long edges */
+  lon = 0.0;
   if ( typchk == 2 && met->m ) {
     lon = MMG2D_lencurv(mesh,met,ip1,ip2);
     lon = MG_MAX(2.-lon,1.6);

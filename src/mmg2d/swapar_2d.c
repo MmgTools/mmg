@@ -99,6 +99,7 @@ int _MMG2_swapdelone(MMG5_pMesh mesh,MMG5_pSol sol,int k,char i,double crit,int 
 
   /* Update edge references */
   num = pt->edg[i];
+  num = num; // remove set but unused variable warning in release mode
   assert ( !num );
   num1 = pt->edg[i1];
   numa1 = pt1->edg[j1];

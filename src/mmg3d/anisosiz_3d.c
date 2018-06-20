@@ -414,7 +414,7 @@ static int _MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int kel,
 
     /* Apply rotation to the half-ball under consideration */
     i1   = 0;
-    ifac = ifac; // Remove uninitialized warning
+    ifac = -1; // Remove uninitialized warning
     for (k=0; k<ilist; k++) {
       iel  = list[k] / 4;
       ifac = list[k] % 4;

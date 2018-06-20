@@ -37,7 +37,8 @@
 int _MMG2_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list,char improve) {
   MMG5_pTria         pt,pt0;
   MMG5_pPoint        ppt0,p0,p1,p2;
-  double             calold,calnew,area,det,alpha,ps,ps1,ps2,step,sqdetm1,sqdetm2,gr[2],grp[2],*m0,*m1,*m2;
+  double             calold,calnew,area,det,alpha,ps,ps1,ps2,step,sqdetm1,sqdetm2;
+  double             gr[2],grp[2],*m0,*m1,*m2;
   int                k,iel,ip0,ip1,ip2;
   char               i,i1,i2;
   static char        mmgWarn0=0;
@@ -50,6 +51,8 @@ int _MMG2_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list,char im
   
   /* Step 1: Calculation of the gradient of the variance function; store the quality of the previous
      configuration */
+  p0 = p1 = p2 = NULL;
+  m0 = NULL;
   for (k=0; k<ilist; k++) {
     iel = list[k] / 3;
     pt = &mesh->tria[iel];
@@ -92,6 +95,7 @@ int _MMG2_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list,char im
   grp[1] = det*(-m0[1]*gr[0]+m0[0]*gr[1]);
   
   /* Step 2: Identification of the triangle such that gr is comprised in the associated angular sector */
+  ps1 = ps2 = 0.;
   for (k=0; k<ilist; k++) {
     iel = list[k] / 3;
     pt = &mesh->tria[iel];
@@ -134,6 +138,8 @@ int _MMG2_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list,char im
   ppt0->c[1] = p0->c[1] + alpha*step*grp[1];
   
   /* Step 3: Vertex relocation and checks */
+  i  = 0;
+  pt = NULL;
   for (k=0; k<ilist; k++) {
     iel = list[k] / 3;
     i   = list[k] % 3;
