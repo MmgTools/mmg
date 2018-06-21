@@ -150,6 +150,7 @@ int _MMG2D_Init_mesh_var( va_list argptr ) {
   int            meshCount;
 
   meshCount = 0;
+  mesh = NULL;
   disp = sol = NULL;
 
 
@@ -354,6 +355,7 @@ int _MMG2D_Free_structures_var(va_list argptr)
   int            meshCount;
 
   meshCount = 0;
+  mesh = NULL;
   disp = sol = NULL;
 
   while ( (typArg = va_arg(argptr,int          )) != MMG5_ARG_end )

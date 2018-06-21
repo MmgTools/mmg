@@ -98,6 +98,7 @@ int _MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, _MMG5_Hash *hash, int chkISO) 
       }
       /* update info about adjacent */
       ok = 0;
+      ok = ok; // To remove the set but unused gcc warning
       while ( ph->a ) {
         if ( ph->a == ia && ph->b == ib ) {
           jel = ph->k / 3;

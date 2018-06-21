@@ -211,6 +211,7 @@ _MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,char iedg,int *lists,
   /* Unfold shell of (nq,nro), starting from (k,iface), with pivot np */
   adj = k;
   piv = nump;
+  pxt = NULL;
   do {
     iel = adj;
     pt = &mesh->tetra[iel];
@@ -359,7 +360,6 @@ int _MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
                      char typchk) {
   MMG5_pTetra  pt,pt0,pt1;
   MMG5_pxTetra pxt;
-  MMG5_pPoint  p0;
   MMG5_Tria    tt;
   MMG5_pPar    par;
   double       calold,calnew,caltmp,nadja[3],nprvold[3],nprvnew[3],ncurold[3],ncurnew[3];
@@ -368,15 +368,22 @@ int _MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
   int          nr,nbbdy,ndepmin,ndepplus,isloc,iedgeOpp;
   int16_t      tag;
   char         iopp,iopp2,ia,ip,i,iq,i0,i1,ier,isminp,isplp;
+#ifndef NDEBUG
+  MMG5_pPoint  p0;
+#endif
+
   pt   = &mesh->tetra[k];
   pxt  = 0;
   pt0  = &mesh->tetra[0];
   ip   = _MMG5_idir[iface][_MMG5_inxt2[iedg]];
   nump = pt->v[ip];
   numq = pt->v[_MMG5_idir[iface][_MMG5_iprv2[iedg]]];
+
+#ifndef NDEBUG
   p0   = &mesh->point[nump];
   assert(p0->tag & MG_BDY);
   assert(p0->xp);
+#endif
 
   ndepmin = ndepplus = 0;
   isminp  = isplp = 0;

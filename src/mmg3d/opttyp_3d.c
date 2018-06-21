@@ -171,6 +171,7 @@ static int MMG3D_typelt(MMG5_pMesh mesh,int iel,int *item) {
   volchk = EPSVOL * rapmin*rapmin*rapmin;
 
   /* small volume: types 1,2,3,4 */
+  item[0] = item[1] = -1;
   if ( vol < volchk ) {
     // puts("volume nul : type 1,2,3,4");
     ssmall = 0.4 * (s[0]+s[1]+s[2]+s[3]);

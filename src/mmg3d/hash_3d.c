@@ -74,6 +74,8 @@ int _MMG5_paktet(MMG5_pMesh mesh) {
     for(k=mesh->nenil; k<=mesh->nemax-1; k++){
       mesh->tetra[k].v[3] = k+1;
     }
+
+    mesh->tetra[mesh->nemax].v[3] = 0;
   }
   return 1;
 }
@@ -825,7 +827,18 @@ int _MMG5_hashPop(_MMG5_Hash *hash,int a,int b) {
 }
 
 
-/** set tag to edge on geometry */
+/**
+ * \param hash pointer toward the hash table in which edges are stored
+ * \param a first edge extremity
+ * \param b second edge extremity
+ * \param ref reference to assign to the edge
+ * \param tag tag to assign
+ *
+ * \return 0 if the edge is not in the hash table, 1 otherwise
+ *
+ * set tag to edge on geometry
+ *
+ */
 int _MMG5_hTag(MMG5_HGeom *hash,int a,int b,int ref,int16_t tag) {
   MMG5_hgeom  *ph;
   int     key,ia,ib;
@@ -1055,9 +1068,15 @@ int _MMG5_hGeom(MMG5_pMesh mesh) {
         i1 = _MMG5_inxt2[i];
         i2 = _MMG5_iprv2[i];
         /* transfer non manifold tag to edges */
-        if ( pt->tag[i] & MG_NOM )
-          _MMG5_hTag(&mesh->htab,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]);
-
+        if ( pt->tag[i] & MG_NOM ) {
+	  ier = _MMG5_hTag(&mesh->htab,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]);
+          if ( !ier ) {
+	    /* The edge is marked as non manifold but doesn't exist in the mesh */
+	    ier = _MMG5_hEdge(mesh,&mesh->htab,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]);
+	    if ( !ier )
+	      return 0;
+	  }
+	}
         _MMG5_hGet(&mesh->htab,pt->v[i1],pt->v[i2],&edg,&tag);
         pt->edg[i]  = edg;
 
@@ -1322,9 +1341,9 @@ int _MMG5_bdryTria(MMG5_pMesh mesh, int ntmesh) {
         ptt->v[0] = ia;
         ptt->v[1] = ib;
         ptt->v[2] = ic;
+        mesh->point[ptt->v[0]].tag |= MG_BDY;
         mesh->point[ptt->v[1]].tag |= MG_BDY;
         mesh->point[ptt->v[2]].tag |= MG_BDY;
-        mesh->point[ptt->v[3]].tag |= MG_BDY;
 
         /* the cc field is used to be able to recover the prism (and its face)
          * from which comes a boundary triangle (when called by packmesh =>

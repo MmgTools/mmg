@@ -768,6 +768,7 @@ int MMG3D_doSol(MMG5_pMesh mesh,MMG5_pSol met) {
       return 0;
 
     /* edges */
+    dd = 0.;
     for (k=1; k<=mesh->ne; k++) {
         pt = &mesh->tetra[k];
         if ( !MG_EOK(pt) )  continue;

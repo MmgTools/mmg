@@ -554,7 +554,7 @@ int _MMG2_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol){
   MMG5_pTria    pt;
   double        v,v1;
   int           k,ip,ip1,ier,ref,refint,refext;
-  char          i,nmn,npl,nz;
+  char          i,i1,i2,nmn,npl,nz;
 
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
@@ -590,7 +590,7 @@ int _MMG2_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol){
       }
     }
 
-    /* Set MG_ISO ref at ls edges */
+    /* Set MG_ISO ref at ls edges and at the points of these edges */
     if ( nz == 2 ) {
       for (i=0; i<3; i++) {
         ip  = pt->v[_MMG5_inxt2[i]];
@@ -600,6 +600,10 @@ int _MMG2_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol){
         if ( v == 0.0 && v1 == 0.0) {
           pt->edg[i]  = MG_ISO;
           pt->tag[i] |= MG_REF;
+          i1 = _MMG5_inxt2[i];
+          i2 = _MMG5_inxt2[i1];
+          mesh->point[pt->v[i1]].ref = MG_ISO;
+          mesh->point[pt->v[i2]].ref = MG_ISO;
         }
       }
     }

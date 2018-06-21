@@ -1330,11 +1330,14 @@ int _MMG3D_coquilFaceFirstLoop(MMG5_pMesh mesh,int start,int na,int nb,char ifac
                                int *piv,int *adj,char *hasadja,int *nbdy,int silent) {
 
   MMG5_pTetra   pt;
-  MMG5_pxTetra  pxt;
   int           *adja;
   int           pradj,pri,ier,ifar_idx;
   char          i;
   static char   mmgErr0 = 0;
+
+#ifndef NDEBUG
+  MMG5_pxTetra  pxt;
+#endif
 
   pt = &mesh->tetra[start];
 
@@ -1351,9 +1354,11 @@ int _MMG3D_coquilFaceFirstLoop(MMG5_pMesh mesh,int start,int na,int nb,char ifac
   *adj    = start;
   i       = ia;
 
+#ifndef NDEBUG
   pxt = &mesh->xtetra[pt->xt];
-
   assert ( pxt->ftag[iface] );
+#endif
+
   (*it1) = 4*start + iface;
 
   adja       = &mesh->adja[4*(start-1)+1];
@@ -1420,7 +1425,9 @@ void _MMG3D_coquilFaceSecondLoopInit(MMG5_pMesh mesh,int piv,char *iface,
                                      int *pradj,int *adj) {
 
   MMG5_pTetra   pt;
+#ifndef NDEBUG
   MMG5_pxTetra  pxt;
+#endif
 
   assert( !(*adj) );
 
@@ -1430,8 +1437,10 @@ void _MMG3D_coquilFaceSecondLoopInit(MMG5_pMesh mesh,int piv,char *iface,
 
   (*pradj) = (*adj);
   pt       = &mesh->tetra[(*adj)];
+#ifndef NDEBUG
   assert(pt->xt);
   pxt      = &mesh->xtetra[pt->xt];
+#endif
 
   if ( pt->v[ _MMG5_ifar[(*ia)][0] ] == piv ) {
     (*iface) = _MMG5_ifar[(*ia)][1];

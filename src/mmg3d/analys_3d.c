@@ -353,6 +353,7 @@ static int _MMG5_chkVertexConnectedDomains(MMG5_pMesh mesh){
   MMG5_pPoint  ppt;
   int          k,lists[MMG3D_LMAX+2],listv[MMG3D_LMAX+2],ilists,ilistv,i0,ier;
   char         i,j;
+  static char  mmgWarn = 0;
 
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
@@ -393,9 +394,15 @@ static int _MMG5_chkVertexConnectedDomains(MMG5_pMesh mesh){
         if( ppt->tag & MG_NOM ){
           if ( mesh->adja[4*(k-1)+1+i] ) continue;
           ier=_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,1);
-       } else {
+	} else {
           ier=_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,0);
         }
+	if ( ier != 1 && !mmgWarn ) {
+	  mmgWarn = 1;
+	  printf("  ## Warning: %s: unable to check that we don't have"
+		 " non-connected domains.\n",__func__);
+	}
+
         if(ilistv != ppt->s) {
           if(!(ppt->tag & MG_REQ) ) {
             ppt->tag |= MG_REQ;
@@ -725,7 +732,7 @@ int _MMG3D_analys(MMG5_pMesh mesh) {
 
   /**--- stage 1: data structures for surface */
   if ( abs(mesh->info.imprim) > 3 )
-    fprintf(stdout,"  ** SURFACE ANALYSIS\n");
+    fprintf(stdout,"\n  ** SURFACE ANALYSIS\n");
 
   /* create tetra adjacency */
   if ( !MMG3D_hashTetra(mesh,1) ) {

@@ -872,7 +872,7 @@ int MMG2D_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
   long        posnp;
   int         iswp,ier,dim;
   int         j,k,ver,bin,np,nsols,*type;
-  char        data[10];
+  char        data[16];
   static char mmgWarn = 0;
 
   /** Read the file header */

@@ -561,7 +561,7 @@ int MMG3D_swap23(MMG5_pMesh mesh,MMG5_pSol met,int k,char metRidTyp,
   MMG5_pxTetra         pxt0,pxt1;
   int                  k1,*adja,iel,np,xt1;
   int                  adj0_2,adj0_3,adj1_1,adj1_2,adj1_3;
-  char                 j1,i,isxt[3];
+  char                 i,isxt[3];
   unsigned char        tau0[4],tau1[4];
   const unsigned char *taued0,*taued1;
 
@@ -576,7 +576,6 @@ int MMG3D_swap23(MMG5_pMesh mesh,MMG5_pSol met,int k,char metRidTyp,
   /** Neighbouring element with which we will try to swap */
   adja = &mesh->adja[4*(k-1)+1];
   k1   = adj/4;
-  j1   = adj%4;
 
   assert(k1);
 
@@ -598,10 +597,6 @@ int MMG3D_swap23(MMG5_pMesh mesh,MMG5_pSol met,int k,char metRidTyp,
 
   /* k may be in configuration 0, 3, 6 or 9. Default is case 0 */
   switch(conf0) {
-  case 0:
-    tau0[0] = 0; tau0[1] = 1; tau0[2] = 2; tau0[3] = 3;
-    taued0 = &MMG5_permedge[0][0];
-    break;
   case 3:
     tau0[0] = 1; tau0[1] = 0; tau0[2] = 3; tau0[3] = 2;
     taued0 = &MMG5_permedge[3][0];
@@ -614,18 +609,20 @@ int MMG3D_swap23(MMG5_pMesh mesh,MMG5_pSol met,int k,char metRidTyp,
     tau0[0] = 3; tau0[1] = 0; tau0[2] = 2; tau0[3] = 1;
     taued0 = &MMG5_permedge[9][0];
     break;
+  default:
+    assert ( !conf0 );
+
+    tau0[0] = 0; tau0[1] = 1; tau0[2] = 2; tau0[3] = 3;
+    taued0 = &MMG5_permedge[0][0];
+    break;
   }
 
-  /* k1 may be in configuration j1, j1+1, j1+2 */
+  /* k1 may be in configuration adj%4, adj%4+1, adj%4+2. Default case is case 0 */
   pt1 = &mesh->tetra[k1];
 
   assert(pt0->ref == pt1->ref);
 
   switch(conf1) {
-  case 0:
-    tau1[0] = 0; tau1[1] = 1; tau1[2] = 2; tau1[3] = 3;
-    taued1 = &MMG5_permedge[0][0];
-    break;
   case 1:
     tau1[0] = 0; tau1[1] = 2; tau1[2] = 3; tau1[3] = 1;
     taued1 = &MMG5_permedge[1][0];
@@ -669,6 +666,11 @@ int MMG3D_swap23(MMG5_pMesh mesh,MMG5_pSol met,int k,char metRidTyp,
   case 11:
     tau1[0] = 3; tau1[1] = 1; tau1[2] = 0; tau1[3] = 2;
     taued1 = &MMG5_permedge[10][0];
+    break;
+  default:
+    assert(!conf1);
+    tau1[0] = 0; tau1[1] = 1; tau1[2] = 2; tau1[3] = 3;
+    taued1 = &MMG5_permedge[0][0];
     break;
   }
 
@@ -743,6 +745,7 @@ int MMG3D_swap23(MMG5_pMesh mesh,MMG5_pSol met,int k,char metRidTyp,
   if ( adj0_3 )
     mesh->adja[4*(adj0_3/4-1) + 1 + adj0_3%4] = 4*iel + tau0[3];
 
+  pxt1 = NULL;
   if ( !pt1->xt ) {
     /* Assignation of the xt fields to the appropriate tets */
     /* xt[0] */

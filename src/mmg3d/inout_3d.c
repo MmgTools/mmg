@@ -117,7 +117,7 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
   char        *ptr,*data,chaine[128];
 
   posnp = posnt = posne = posncor = 0;
-  posnpreq = posntreq = posnereq = posned = posnedreq = posnr = 0;
+  posnpreq = posntreq = posnereq = posnqreq = posned = posnedreq = posnr = 0;
   posnprism = posnormal= posnc1 = posnq = 0;
   ncor = ned = npreq = ntreq = nqreq = nereq = nedreq = nr = ng = 0;
   bin = 0;
@@ -1824,7 +1824,7 @@ int MMG3D_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
   long        posnp;
   int         iswp,ier,dim;
   int         j,k,ver,bin,np,nsols,*type;
-  char        data[10];
+  char        data[16];
   static char mmgWarn = 0;
 
   /** Read the file header */

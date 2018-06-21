@@ -146,8 +146,11 @@ int _MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
   int           vois[4],iadrold;
   short         i1;
   char          alert;
-  int           tref,isused = 0,ixt,ielnum[3*_MMG3D_LONMAX+1],ll;
+  int           isused = 0,ixt,ielnum[3*_MMG3D_LONMAX+1],ll;
   _MMG5_Hash    hedg;
+#ifndef NDEBUG
+  int tref;
+#endif
 
   base = mesh->base;
   /* external faces */
@@ -321,7 +324,9 @@ int _MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
   }
 
   /* remove old tetra */
+#ifndef NDEBUG
   tref = mesh->tetra[list[0]].ref;
+#endif
   for (k=0; k<ilist; k++) {
     assert(tref==mesh->tetra[list[k]].ref);
     if ( !_MMG3D_delElt(mesh,list[k]) ) return -1;
