@@ -318,9 +318,9 @@ int MMG2_findTria(MMG5_pMesh mesh,int ip) {
  * \return 4 if the edge exist in the mesh, 0 if fail, ??? otherwise
  *
  * Calculate the list of all the triangles intersected by edge (ia,ib), starting
- * from kdep = one triangle in the ball of ia; List lon starts at index 0 and
- * goes to lon-1 and stores 3*k + iare, where iare is one intersected edge;
- * return 4 if edge exists in the mesh
+ * from kdep = one triangle in the ball of ia; \a list starts at index 0 (and
+ * ends at index lon-1). It stores 3*k + iare, where \a k is an intersected tria
+ * and \a iare is an intersected edge.
  *
  */
 int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
@@ -363,10 +363,8 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
     adja = &mesh->adja[iadr];
     ibreak = 0;
     ncompt++;
-    if(pt->v[0]==ib || pt->v[1]==ib || pt->v[2]==ib) {
-      ibreak = 1;
-    }
-    /* Current triangle has one vertex = to the last one of the processed edge */
+
+    /* ib is a vertex of the current triangle */
     if ( pt->v[0] == ib || pt->v[1] == ib || pt->v[2] == ib ) ibreak = 1;
 
     ppt1 = &mesh->point[pt->v[0]];
