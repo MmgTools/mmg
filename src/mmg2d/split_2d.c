@@ -729,7 +729,7 @@ int _MMG2_splitbar(MMG5_pMesh mesh,int k,int ip) {
   ip2 = pt->v[2];
   p2 = &mesh->point[ip2];
 
-  calseuil = _MMG2_EPSD ;
+  calseuil = _MMG5_EPSOK ;
 
   /* Check quality of the three new elements */
   cal = MMG2_quickarea(ppt->c,p1->c,p2->c);

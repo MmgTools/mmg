@@ -282,8 +282,8 @@ int MMG2_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
         if ( !mmgWarn2 ) {
           mmgWarn2 = 1;
           if ( mesh->info.imprim >6 || mesh->info.ddebug )
-	    fprintf(stderr,"\n  ## Warning: %s: unable to"
-		    " insert at least 1 point with splitbar (%d)\n",__func__,k);
+            fprintf(stderr,"\n  ## Warning: %s: unable to"
+                    " insert at least 1 point with splitbar (%d)\n",__func__,k);
         }
       } else {
         ns++;
