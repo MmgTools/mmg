@@ -390,13 +390,12 @@ static int _MMG3D_printquaLES(MMG5_pMesh mesh,MMG5_pSol met) {
 
   MMG3D_computeLESqua(mesh,met,&ne,&rapmax,&rapavg,&rapmin,&iel,&good,&med,his);
 
-  return MMG3D_displayQualHisto(mesh,met,ne,rapmax,rapavg,rapmin,
-				iel,good,med,his,0);
+  return MMG3D_displayQualHisto(ne,rapmax,rapavg,rapmin,
+                                iel,good,med,his,0,mesh->info.optimLES,
+                                mesh->info.imprim);
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
  * \param ne number of used tetra.
  * \param max maximal quality (normalized).
  * \param avg average quality (normalized).
@@ -406,39 +405,35 @@ static int _MMG3D_printquaLES(MMG5_pMesh mesh,MMG5_pSol met) {
  * \param med number of elements with a quality greather than 0.5
  * \param his pointer toward the mesh histogram.
  * \param nrid number of tetra with 4 ridge points if we want to warn the user.
+ * \param optimLES 1 if we work in optimLES mode, 0 otherwise
+ * \param imprim verbosity level
  *
  * \return 0 if the worst element has a nul quality, 1 otherwise.
  *
  * Print histogram of mesh qualities for special storage of metric at ridges.
  *
  */
-int MMG3D_displayQualHisto(MMG5_pMesh mesh,MMG5_pSol met,int ne,double max,double avg,
-			   double min,int iel,int good,int med,int his[5],int nrid) {
+int MMG3D_displayQualHisto(int ne,double max,double avg,double min,int iel,
+                           int good,int med,int his[5],int nrid,int optimLES,
+                           int imprim) {
   int i,imax;
 
   fprintf(stdout,"\n  -- MESH QUALITY");
-  if ( mesh->info.optimLES )
+  if ( optimLES )
     fprintf(stdout," (LES)");
   fprintf(stdout,"  %d\n",ne);
 
-#ifndef DEBUG
   fprintf(stdout,"     BEST   %8.6f  AVRG.   %8.6f  WRST.   %8.6f (%d)\n",
           max,avg / ne,min,iel);
-#else
-  fprintf(stdout,"     BEST   %e  AVRG.   %e  WRST.   %e (%d)\n => %d %d %d %d\n",
-          max,avg / ne,min,iel,
-          _MMG3D_indPt(mesh,mesh->tetra[iel].v[0]),_MMG3D_indPt(mesh,mesh->tetra[iel].v[1]),
-          _MMG3D_indPt(mesh,mesh->tetra[iel].v[2]),_MMG3D_indPt(mesh,mesh->tetra[iel].v[3]));
-#endif
 
-  if ( mesh->info.optimLES )
+  if ( optimLES )
     return 1;
 
-  else if ( abs(mesh->info.imprim) >= 3 ){
+  else if ( abs(imprim) >= 3 ){
     /* print histo */
     fprintf(stdout,"     HISTOGRAMM:");
     fprintf(stdout,"  %6.2f %% > 0.12\n",100.0*((float)good/(float)ne));
-    if ( abs(mesh->info.imprim) > 3 ) {
+    if ( abs(imprim) > 3 ) {
       fprintf(stdout,"                  %6.2f %% >  0.5\n",100.0*( (float)med/(float)ne));
       imax = MG_MIN(4,(int)(5.*max));
       for (i=imax; i>=(int)(5*min); i--) {
@@ -548,13 +543,14 @@ int _MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
     return _MMG3D_printquaLES(mesh,met);
 
   MMG3D_computeInqua(mesh,met,&ne,&rapmax,&rapavg,&rapmin,&iel,&good,&med,
-		     his);
+                     his);
 
   if ( mesh->info.imprim <= 0 )
     return 1;
 
-  return MMG3D_displayQualHisto(mesh,met,ne,rapmax,rapavg,rapmin,
-				iel,good,med,his,0);
+  return MMG3D_displayQualHisto(ne,rapmax,rapavg,rapmin,
+                                iel,good,med,his,0,mesh->info.optimLES,
+                                mesh->info.imprim);
 }
 
 /**
@@ -576,7 +572,7 @@ int _MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
  *
  */
 void MMG3D_computeOutqua(MMG5_pMesh mesh,MMG5_pSol met,int *ne,double *max,double *avg,
-			 double *min,int *iel,int *good,int *med,int his[5],int *nrid) {
+                         double *min,int *iel,int *good,int *med,int his[5],int *nrid) {
   MMG5_pTetra pt;
   MMG5_pPoint ppt;
   double      rap;
@@ -659,13 +655,14 @@ int _MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
     return _MMG3D_printquaLES(mesh,met);
 
   MMG3D_computeOutqua(mesh,met,&ne,&rapmax,&rapavg,&rapmin,&iel,&good,&med,
-		      his,&nrid);
+                      his,&nrid);
 
   if ( mesh->info.imprim <= 0 )
     return 1;
 
-  return MMG3D_displayQualHisto(mesh,met,ne,rapmax,rapavg,rapmin,
-				iel,good,med,his,nrid);
+  return MMG3D_displayQualHisto(ne,rapmax,rapavg,rapmin,
+                                iel,good,med,his,nrid,mesh->info.optimLES,
+                                mesh->info.imprim);
 }
 
 /**

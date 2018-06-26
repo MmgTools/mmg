@@ -369,16 +369,16 @@ int _MMG5_dichodisp(MMG5_pMesh,double *);
 int _MMG5_lapantilap(MMG5_pMesh,double *);
 int _MMG5_ppgdisp(MMG5_pMesh,double *);
 int _MMG5_denoisbdy(MMG5_pMesh);
-int MMG3D_displayQualHisto(MMG5_pMesh,MMG5_pSol,int,double,double,double,int,int,int,
-                           int his[5],int);
+int MMG3D_displayQualHisto(int,double,double,double,int,int,int,
+                           int his[5],int,int,int);
 void MMG3D_computeInqua(MMG5_pMesh,MMG5_pSol,int*,double*,double*,double*,int*,int*,
-			int*,int his[5]);
+                        int*,int his[5]);
 int  _MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met);
 void MMG3D_computeOutqua(MMG5_pMesh,MMG5_pSol,int*,double*,double*,double*,int*,int*,
-			 int*,int his[5],int*);
+                         int*,int his[5],int*);
 int  _MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met);
 void MMG3D_computeLESqua(MMG5_pMesh,MMG5_pSol,int*,double*,double*,double*,int*,int*,
-			 int*,int his[5]);
+                         int*,int his[5]);
 int  _MMG3D_prilen(MMG5_pMesh mesh,MMG5_pSol met,char);
 void _MMG3D_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met);
 void _MMG5_defaultValues(MMG5_pMesh);
