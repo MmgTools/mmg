@@ -579,16 +579,6 @@ void MMG3D_computeOutqua(MMG5_pMesh mesh,MMG5_pSol met,int *ne,double *max,doubl
   int         i,k,ok,ir,nex,n;
   static char mmgWarn0 = 0;
 
-  /*compute tet quality*/
-  for (k=1; k<=mesh->ne; k++) {
-    pt = &mesh->tetra[k];
-     if( !MG_EOK(pt) )   continue;
-     pt->qual = _MMG5_orcal(mesh,met,k);
-  }
-
-  if ( mesh->info.imprim <= 0 )
-    return;
-
   (*min)  = 2.0;
   (*max)  = (*avg) = 0.0;
   (*iel)  = 0;
@@ -607,7 +597,7 @@ void MMG3D_computeOutqua(MMG5_pMesh mesh,MMG5_pSol met,int *ne,double *max,doubl
     if ( (!mmgWarn0) && (_MMG5_orvol(mesh->point,pt->v) < 0.0) ) {
       mmgWarn0 = 1;
       fprintf(stderr,"  ## Warning: %s: at least 1 negative volume\n",
-	      __func__);
+              __func__);
     }
     n = 0;
     for(i=0 ; i<4 ; i++) {
@@ -648,11 +638,22 @@ void MMG3D_computeOutqua(MMG5_pMesh mesh,MMG5_pSol met,int *ne,double *max,doubl
  *
  */
 int _MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
+  MMG5_pTetra pt;
   double      rapmin,rapmax,rapavg;
-  int         med,good,iel,ne,his[5],nrid;
+  int         med,good,iel,ne,his[5],nrid,k;
 
   if( mesh->info.optimLES )
     return _MMG3D_printquaLES(mesh,met);
+
+  /*compute tet quality*/
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+     if( !MG_EOK(pt) )   continue;
+     pt->qual = _MMG5_orcal(mesh,met,k);
+  }
+
+  if ( mesh->info.imprim <= 0 )
+    return 1;
 
   MMG3D_computeOutqua(mesh,met,&ne,&rapmax,&rapavg,&rapmin,&iel,&good,&med,
                       his,&nrid);
