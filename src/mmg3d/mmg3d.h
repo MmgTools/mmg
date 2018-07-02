@@ -371,6 +371,8 @@ int _MMG5_ppgdisp(MMG5_pMesh,double *);
 int _MMG5_denoisbdy(MMG5_pMesh);
 int MMG3D_displayQualHisto(int,double,double,double,int,int,int,
                            int his[5],int,int,int);
+int MMG3D_displayQualHisto_internal(int,double,double,double,int,int,int,
+                                    int his[5],int,int,int);
 void MMG3D_computeInqua(MMG5_pMesh,MMG5_pSol,int*,double*,double*,double*,int*,int*,
                         int*,int his[5]);
 int  _MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met);

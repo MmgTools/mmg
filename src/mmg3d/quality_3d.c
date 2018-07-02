@@ -410,13 +410,13 @@ static int _MMG3D_printquaLES(MMG5_pMesh mesh,MMG5_pSol met) {
  *
  * \return 0 if the worst element has a nul quality, 1 otherwise.
  *
- * Print histogram of mesh qualities for special storage of metric at ridges.
+ * Print the header of the histogram of mesh qualities then call the function
+ * that print the histogram for special metric at ridges.
  *
  */
 int MMG3D_displayQualHisto(int ne,double max,double avg,double min,int iel,
                            int good,int med,int his[5],int nrid,int optimLES,
                            int imprim) {
-  int i,imax;
 
   fprintf(stdout,"\n  -- MESH QUALITY");
   if ( optimLES )
@@ -425,6 +425,34 @@ int MMG3D_displayQualHisto(int ne,double max,double avg,double min,int iel,
 
   fprintf(stdout,"     BEST   %8.6f  AVRG.   %8.6f  WRST.   %8.6f (%d)\n",
           max,avg / ne,min,iel);
+
+  return ( MMG3D_displayQualHisto_internal(ne,max,avg,min,iel,good,med,his,
+                                           nrid,optimLES,imprim) );
+}
+
+/**
+ * \param ne number of used tetra.
+ * \param max maximal quality (normalized).
+ * \param avg average quality (normalized).
+ * \param min minimal quality (normalized).
+ * \param iel index of the worst tetra.
+ * \param good number of good elements.
+ * \param med number of elements with a quality greather than 0.5
+ * \param his pointer toward the mesh histogram.
+ * \param nrid number of tetra with 4 ridge points if we want to warn the user.
+ * \param optimLES 1 if we work in optimLES mode, 0 otherwise
+ * \param imprim verbosity level
+ *
+ * \return 0 if the worst element has a nul quality, 1 otherwise.
+ *
+ * Print histogram of mesh qualities for special storage of metric at ridges.
+ *
+ */
+int MMG3D_displayQualHisto_internal(int ne,double max,double avg,double min,int iel,
+                                    int good,int med,int his[5],int nrid,int optimLES,
+                                    int imprim)
+{
+  int i,imax;
 
   if ( optimLES )
     return 1;
