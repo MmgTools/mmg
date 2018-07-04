@@ -386,6 +386,12 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
     a22 = ppt3->c[1] - ppa->c[1];
     area3 = a11*a22 - a12*a21;
 
+    /** prod1, prod2 and prod3 allow to localize the edge regarding the tria:
+        - if all are >0, the edge doesn't cross the tria (same sign for all areas)
+        - if 1 is 0, the edge pass through 1 of the tria vertices
+        - if 2 are 0, the edge coincide with 1 of the tria edges
+
+    */
     prod1 = area1*area2;
     prod2 = area3*area2;
     prod3 = area3*area1;
@@ -394,6 +400,7 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
     a[1] = area2;
     a[2] = area3;
 
+    /** ia-ib intersect 2 triangle edges => 2 products are <0, 1 is >0 */
     /* Both edges p2p3 and p1p3 in pt have franck intersections with edge (ia - ib) */
     if ( prod1 > 0.0 && ((prod2 < 0.0 || prod3 < 0.0))) { /*le tr est coupe par la droite ia-ib*/
       if ( (iare = MMG2_cutEdge(mesh,pt,ppa,ppb)) ) {
@@ -414,7 +421,7 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
       if ( ibreak ) break;
       continue;
     }
-    
+
     /* Both edges p1p2 and p1p3 in pt have franck intersections with edge (ia - ib) */
     if ( prod2 > 0.0 && ((prod1 < 0.0 || prod3 < 0.0 ))) {
       if ( (iare = MMG2_cutEdge(mesh,pt,ppa,ppb)) ) {
@@ -435,7 +442,7 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
       if ( ibreak ) break;
       continue;
     }
-    
+
     /* Both edges p1p2 and p2p3 in pt have franck intersections with edge (ia - ib) */
     if ( prod3 > 0.0 && ((prod2 < 0.0 || prod1 < 0.0 ))) {
       if ( (iare = MMG2_cutEdge(mesh,pt,ppa,ppb)) ) {
@@ -456,8 +463,8 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
       if( ibreak ) break;
       continue;
     }
-    
-    /* Case where ia is one vertex in pt */
+
+    /* Case where ia or ib is one vertex in pt */
     for(i=0; i<3; i++) {
       iare = 0;
       if ( pt->v[i] == ia || ibreak ) {
@@ -567,13 +574,16 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
 
     if ( ibreak == 1 || ibreak == -10 ) continue;
     if ( ibreak > 1 ) break;
-    
+
     /*a-t-on un pts sur l'arete iaib ?*/
     if (fabs(area1) < EPSNULL || fabs(area2) < EPSNULL || fabs(area3) < EPSNULL) {
       if ( !mmgWarn ) {
         mmgWarn = 1;
         fprintf(stderr,"\n  ## Error: %s: unexpected failure."
-                " Check your initial data and/or report the bug.\n",__func__);
+                " Check your initial data and/or report the bug. lon:%d. %e %e %e\n"
+                " tria %d: %d %d %d,\n",
+                __func__,lon, area1,area2,area3,k,mesh->tria[k].v[0],
+                mesh->tria[k].v[1],mesh->tria[k].v[2]);
       }
       return 0;
     }
