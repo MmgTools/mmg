@@ -512,7 +512,7 @@ int MMG2_pack(MMG5_pMesh mesh,MMG5_pSol sol) {
   mesh->nt = nt;
 
   /* Pack metric map */
-  if ( sol->m ) {
+  if ( sol && sol->m ) {
     nbl = 1;
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
@@ -548,7 +548,7 @@ int MMG2_pack(MMG5_pMesh mesh,MMG5_pSol sol) {
     nbl++;
   }
   mesh->np = np;
-  if ( sol->m ) sol->np  = np;
+  if ( sol && sol->m ) sol->np  = np;
 
   /* Reset ppt->tmp field */
   for(k=1 ; k<=mesh->np ; k++)
