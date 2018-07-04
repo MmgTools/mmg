@@ -381,6 +381,8 @@ void MMG3D_computeOutqua(MMG5_pMesh,MMG5_pSol,int*,double*,double*,double*,int*,
 int  _MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met);
 void MMG3D_computeLESqua(MMG5_pMesh,MMG5_pSol,int*,double*,double*,double*,int*,int*,
                          int*,int his[5]);
+int MMG3D_computePrilen(MMG5_pMesh,MMG5_pSol,double*,double*,double*,int*,int*,int*,
+                        int*,int*,int*,char,double**, int [9] );
 int  _MMG3D_prilen(MMG5_pMesh mesh,MMG5_pSol met,char);
 void _MMG3D_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met);
 void _MMG5_defaultValues(MMG5_pMesh);

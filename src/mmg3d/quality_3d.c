@@ -180,29 +180,44 @@ inline double _MMG5_caltet33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
- * \param metRidTyp Type of storage of ridges metrics: 0 for classic storage,
- * 1 for special storage.
+ * \param avlen average length (to fill).
+ * \param lmin minimal length (to fill).
+ * \param lmax max length (to fill).
+ * \param ned number of edges (to fill).
+ * \param amin (to fill).
+ * \param bmin (to fill).
+ * \param amax (to fill).
+ * \param bmax (to fill).
+ * \param nullEdge (to fill).
+ * \param metRidTyp (to fill).
+ * \param bd_in (to fill).
+ * \param hl (to fill).
+ *
  * \return 0 if fail, 1 otherwise.
  *
- * Compute sizes of edges of the mesh, and displays histo.
+ * Compute the required information to print the length histogram
  *
  */
-int _MMG3D_prilen(MMG5_pMesh mesh, MMG5_pSol met, char metRidTyp) {
+int MMG3D_computePrilen( MMG5_pMesh mesh, MMG5_pSol met, double* avlen,
+  double* lmin, double* lmax, int* ned, int* amin, int* bmin, int* amax,
+  int* bmax, int* nullEdge, char metRidTyp, double** bd_in, int hl[9] )
+{
   MMG5_pTetra     pt;
   MMG5_pPoint     ppt;
   _MMG5_Hash      hash;
-  double          len,avlen,lmin,lmax;
-  int             k,np,nq,amin,bmin,amax,bmax,ned,hl[9],nullEdge,n;
+  double          len;
+  int             k,np,nq,n;
   char            ia,i0,i1,ier,i;
   static double   bd[9]= {0.0, 0.3, 0.6, 0.7071, 0.9, 1.3, 1.4142, 2.0, 5.0};
 
+  *bd_in = bd;
   memset(hl,0,9*sizeof(int));
-  ned = 0;
-  avlen = 0.0;
-  lmax = 0.0;
-  lmin = 1.e30;
-  amin = amax = bmin = bmax = 0;
-  nullEdge = 0;
+  *ned = 0;
+  *avlen = 0.0;
+  *lmax = 0.0;
+  *lmin = 1.e30;
+  *amin = *amax = *bmin = *bmax = 0;
+  *nullEdge = 0;
 
   /* Hash all edges in the mesh */
   if ( !_MMG5_hashNew(mesh,&hash,mesh->np,7*mesh->np) )  return(0);
@@ -255,22 +270,22 @@ int _MMG3D_prilen(MMG5_pMesh mesh, MMG5_pSol met, char metRidTyp) {
 
 
         if ( !len ) {
-          ++nullEdge;
+          ++(*nullEdge);
         }
         else {
-          avlen += len;
-          ned ++;
+          *avlen += len;
+          (*ned)++;
 
-          if( len < lmin ) {
-            lmin = len;
-            amin = np;
-            bmin = nq;
+          if( len < (*lmin) ) {
+            *lmin = len;
+            *amin = np;
+            *bmin = nq;
           }
 
-          if ( len > lmax ) {
-            lmax = len;
-            amax = np;
-            bmax = nq;
+          if ( len > (*lmax) ) {
+            *lmax = len;
+            *amax = np;
+            *bmax = nq;
           }
 
           /* Locate size of edge among given table */
@@ -286,12 +301,36 @@ int _MMG3D_prilen(MMG5_pMesh mesh, MMG5_pSol met, char metRidTyp) {
     }
   }
 
+  _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
+  return 1;
+}
+
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param metRidTyp Type of storage of ridges metrics: 0 for classic storage,
+ * 1 for special storage.
+ * \return 0 if fail, 1 otherwise.
+ *
+ * Compute sizes of edges of the mesh, and displays histo.
+ *
+ */
+int _MMG3D_prilen(MMG5_pMesh mesh, MMG5_pSol met, char metRidTyp) {
+
+  double avlen, lmin, lmax;
+  int    ned, amin, bmin, amax, bmax, nullEdge, hl[9];
+  double *bd;
+
+  if (!MMG3D_computePrilen( mesh, met, &avlen, &lmin, &lmax, &ned, &amin,
+                            &bmin, &amax, &bmax, &nullEdge, metRidTyp, &bd, hl ) )
+    return 0;
+
   /* Display histogram */
   _MMG5_displayLengthHisto(mesh, ned, &avlen, amin, bmin, lmin,
-			   amax, bmax, lmax,nullEdge, &bd[0], &hl[0],1);
+                           amax, bmax, lmax,nullEdge, &bd[0], &hl[0],1);
 
-  _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
-  return(1);
+  return 1;
 }
 
 
