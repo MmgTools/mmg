@@ -31,9 +31,6 @@
  */
 #include "mmg2d.h"
 #define EPST -1e-18
-#define EPSR  1e+18
-#define EPSNULL 1e-12
-#define EPSNULL2 5e-13
 
 /* Calculate the barycentric coordinates of point P(c[0],c[1]) in tria pt and the associated determinant */
 /* l1 = barycentric coordinate with respect to p1, l2 = barycentric coordinate with respect to p2 */
@@ -487,7 +484,7 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
             list[lon++] = 3*k;
             ibreak = 3;
           }
-          else if ( fabs(prod1)<EPSNULL2 && fabs(prod2)<EPSNULL2 && fabs(prod3)<EPSNULL2) {
+          else if ( fabs(prod1)<_MMG5_EPSD2 && fabs(prod2)<_MMG5_EPSD2 && fabs(prod3)<_MMG5_EPSD2) {
             if ( (a[_MMG5_inxt2[i]] < 0.0 && a[_MMG5_iprv2[i]] > 0.0 )
                || (a[_MMG5_inxt2[i]] > 0.0 && a[_MMG5_iprv2[i]] < 0.0 ) ) {
 
@@ -503,7 +500,7 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
             else {
               //calcul de ||iaib|| et de ||ptiib|| avec aire(iaibpti)==0
               niaib = sqrt(a11*a11+a21*a21 );
-              if ( fabs(a[_MMG5_inxt2[i]]) > EPSNULL ) {
+              if ( fabs(a[_MMG5_inxt2[i]]) > _MMG5_EPSD ) {
                 ppt4 = &mesh->point[pt->v[_MMG5_iprv2[i]]];
               }
               else {
@@ -531,7 +528,7 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
                           }
                           ibreak=-10;*/
             break;
-          } /*end if(fabs(prod1)<EPSNULL2 && fabs(prod2)<EPSNULL2 && fabs(prod3)<EPSNULL2)*/
+          } /*end if(fabs(prod1)<_MMG5_EPSD2 && fabs(prod2)<_MMG5_EPSD2 && fabs(prod3)<_MMG5_EPSD2)*/
           else { /*on choisit de passer par l'arete iaPi si aire(iaibPi) >0*/
             assert ( pt->v[i] == ia );
             if ( a[_MMG5_inxt2[i]] > 0.0 )
@@ -576,7 +573,7 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
     if ( ibreak > 1 ) break;
 
     /*a-t-on un pts sur l'arete iaib ?*/
-    if (fabs(area1) < EPSNULL || fabs(area2) < EPSNULL || fabs(area3) < EPSNULL) {
+    if (fabs(area1) < _MMG5_EPSD || fabs(area2) < _MMG5_EPSD || fabs(area3) < _MMG5_EPSD) {
       if ( !mmgWarn ) {
         mmgWarn = 1;
         fprintf(stderr,"\n  ## Error: %s: unexpected failure."
