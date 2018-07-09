@@ -465,8 +465,11 @@ typedef struct _MMG5_dNode_s {
  extern double _MMG5_caltri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
  extern double _MMG5_caltri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
  void          _MMG5_defUninitSize(MMG5_pMesh mesh,MMG5_pSol met, char ismet);
- void          _MMG5_displayLengthHisto(MMG5_pMesh,int, double*, int, int, double, int, int,
-					double,int, double*, int*,char);
+ void          _MMG5_displayLengthHisto(MMG5_pMesh,int,double*,int,int,double,
+                                        int,int,double,int,double*,int*,char);
+ void          _MMG5_displayLengthHisto_internal(MMG5_pMesh,int,int,int,double,
+                                                 int,int,double, int,double*,
+                                                 int*,char,int);
  int           _MMG5_minQualCheck ( int iel, double minqual, double alpha );
  int           _MMG5_elementWeight(MMG5_pMesh,MMG5_pSol,MMG5_pTria,MMG5_pPoint,
                                    _MMG5_Bezier*,double r[3][3],double gv[2]);

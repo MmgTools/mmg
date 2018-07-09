@@ -351,7 +351,7 @@ int _MMG3D_prilen(MMG5_pMesh mesh, MMG5_pSol met, char metRidTyp) {
  *
  */
 void MMG3D_computeLESqua(MMG5_pMesh mesh,MMG5_pSol met,int *ne,double *max,double *avg,
-			 double *min,int *iel,int *good,int *med,int his[5]) {
+                         double *min,int *iel,int *good,int *med,int his[5]) {
   MMG5_pTetra    pt;
   double         rap;
   int            k,ok,nex;

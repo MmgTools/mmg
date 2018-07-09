@@ -246,12 +246,11 @@ inline double _MMG5_caltri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
  *
  */
 void _MMG5_displayLengthHisto(MMG5_pMesh mesh, int ned, double *avlen,
-			      int amin, int bmin, double lmin,
-			      int amax, int bmax, double lmax,
-			      int nullEdge,double *bd, int *hl,char shift)
+                              int amin, int bmin, double lmin,
+                              int amax, int bmax, double lmax,
+                              int nullEdge,double *bd, int *hl,char shift)
 {
   double dned;
-  int    k;
 
   dned     = (double)ned;
   (*avlen) = (*avlen) / dned;
@@ -262,6 +261,40 @@ void _MMG5_displayLengthHisto(MMG5_pMesh mesh, int ned, double *avlen,
           lmin,amin,bmin);
   fprintf(stdout,"     LARGEST  EDGE LENGTH   %12.4f   %6d %6d \n",
           lmax,amax,bmax);
+
+  _MMG5_displayLengthHisto_internal(mesh,ned,amin,bmin,lmin,amax,bmax,
+                                    lmax,nullEdge,bd,hl,shift,
+                                    mesh->info.imprim);
+
+  return;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param ned edges number.
+ * \param amin index of first extremity of the smallest edge.
+ * \param bmin index of second extremity of the smallest edge.
+ * \param lmin smallest edge length.
+ * \param amax index of first extremity of the largest edge.
+ * \param bmax index of second extremity of the largest edge.
+ * \param lmax largest edge length.
+ * \param nullEdge number of edges for which we are unable to compute the length
+ * \param bd pointer toward the table of the quality span.
+ * \param hl pointer toward the table that store the number of edges for eac
+ * \param shift value to shift the target lenght interval
+ * span of quality
+ * \param imprim verbosity level
+ *
+ * Display histogram of edge length without the histo header
+ *
+ */
+void _MMG5_displayLengthHisto_internal(MMG5_pMesh mesh, int ned,int amin,
+                                       int bmin, double lmin,int amax, int bmax,
+                                       double lmax,int nullEdge,double *bd,
+                                       int *hl,char shift,int imprim)
+{
+  int    k;
+
   if ( abs(mesh->info.imprim) < 3 ) return;
 
   if ( hl[2+shift]+hl[3+shift]+hl[4+shift] )
@@ -291,6 +324,7 @@ void _MMG5_displayLengthHisto(MMG5_pMesh mesh, int ned, double *avlen,
               " edges\n",nullEdge);
   }
 }
+
 
 /**
  * \param iel index of the worst tetra of the mesh
