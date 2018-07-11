@@ -22,7 +22,6 @@
 */
 #include "mmg2d.h"
 
-#define  _MMG2_EPSRAD       1.00005
 #define  _MMG2_AREAMIN      1e-15 //1e-20 failed : creation of too bad element
 
 #define KTA     7
@@ -187,7 +186,7 @@ int _MMG2_cavity(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list) {
   mesh->tria[list[0]].base = base;
 
   /* Pile up cavity by adjacency */
-  eps   = _MMG2_EPSRAD*_MMG2_EPSRAD;
+  eps   = 1. + _MMG5_EPSOK;
   ilist = 1;
   ipil  = 0;
 
