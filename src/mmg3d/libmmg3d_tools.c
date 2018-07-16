@@ -381,15 +381,18 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
         break;
       case 'v':
         if ( ++i < argc ) {
-          if ( argv[i][0] == '-' || isdigit(argv[i][0]) ) {
+          if ( isdigit(argv[i][0]) ||
+               (argv[i][0]=='-' && isdigit(argv[i][1])) ) {
             if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_verbose,atoi(argv[i])) )
               return 0;
           }
-          else
+          else {
             i--;
+            fprintf(stderr,"Missing argument option %s\n",argv[i]);
+          }
         }
         else {
-          fprintf(stderr,"Missing argument option %c\n",argv[i-1][1]);
+          fprintf(stderr,"Missing argument option %s\n",argv[i-1]);
           MMG3D_usage(argv[0]);
           return 0;
         }

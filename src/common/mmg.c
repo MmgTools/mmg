@@ -88,7 +88,7 @@ void _MMG5_mmgDefaultValues(MMG5_pMesh mesh) {
   memMax = _MMG5_memSize();
   if ( memMax )
     /* maximal memory = 50% of total physical memory */
-    memMax = memMax*50/104857600L;
+    memMax = memMax*50/(_MMG5_MILLION*100);
   else {
     /* default value = 800 MB */
     memMax = _MMG5_MEMMAX;

@@ -78,6 +78,9 @@ extern "C" {
 #define MG_PLUS    2
 #define MG_MINUS   3
 
+/* million */
+#define _MMG5_MILLION 1048576
+
 /* numerical accuracy */
 #define _MMG5_ANGEDG    0.707106781186548   /*0.573576436351046 */
 #define _MMG5_ANGLIM   -0.999999

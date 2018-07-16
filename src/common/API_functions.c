@@ -45,7 +45,7 @@
 /**
  * \param mesh pointer toward the mesh structure.
  *
- * Initialization of the input parameters (stored in the Info structure).
+ * Initialization of the input parameters.
  *
  */
 void _MMG5_Init_parameters(MMG5_pMesh mesh) {
