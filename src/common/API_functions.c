@@ -482,3 +482,49 @@ int MMG5_Compute_constantSize(MMG5_pMesh mesh,MMG5_pSol met,double *hsiz) {
 
   return 1;
 }
+
+
+const char* MMG5_Get_entitiesName(enum MMG5_entities ent)
+{
+  switch (ent)
+  {
+  case MMG5_Noentity:
+    return "MMG5_Noentity";
+    break;
+  case MMG5_Vertex:
+    return "MMG5_Vertex";
+    break;
+  case MMG5_Edg:
+    return "MMG5_Edg";
+    break;
+  case MMG5_Triangle:
+    return "MMG5_Triangle";
+    break;
+  case MMG5_Tetrahedron:
+    return "MMG5_Tetrahedron";
+    break;
+  default:
+    return"MMG5_Unknown";
+  }
+}
+const char* MMG5_Get_typeName(enum MMG5_type typ)
+{
+  switch (typ)
+  {
+  case MMG5_Notype:
+    return "MMG5_Notype";
+    break;
+  case MMG5_Scalar:
+    return "MMG5_Scalar";
+    break;
+  case MMG5_Vector:
+    return "MMG5_Vector";
+    break;
+  case MMG5_Tensor:
+    return "MMG5_Tensor";
+    break;
+  default:
+    return"MMG5_Unknown";
+  }
+}
+

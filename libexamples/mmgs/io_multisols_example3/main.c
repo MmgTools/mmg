@@ -1,5 +1,5 @@
 /**
- * Example of input output for the mmg2d library for multiple solutions at mesh
+ * Example of input output for the mmgs library for multiple solutions at mesh
  * vertices
  *
  * \author Algiane Froehly (InriaSoft)
@@ -16,11 +16,11 @@
 #include <math.h>
 #include <float.h>
 
-/** Include the mmg2d library hader file */
+/** Include the mmgs library hader file */
 // if the header file is in the "include" directory
-// #include "libmmg2d.h"
-// if the header file is in "include/mmg/mmg2d"
-#include "mmg/mmg2d/libmmg2d.h"
+// #include "libmmgs.h"
+// if the header file is in "include/mmg/mmgs"
+#include "mmg/mmgs/libmmgs.h"
 
 int main(int argc,char *argv[]) {
   MMG5_pMesh      mmgMesh;
@@ -34,7 +34,7 @@ int main(int argc,char *argv[]) {
   /* Filenames */
   char            *filename, *fileout;
 
-  fprintf(stdout,"  -- TEST MMG2DLIB \n");
+  fprintf(stdout,"  -- TEST MMGSLIB \n");
 
   if ( argc != 3 ) {
     printf(" Usage: %s filein fileout\n",argv[0]);
@@ -68,31 +68,31 @@ int main(int argc,char *argv[]) {
   mmgMesh = NULL;
   mmgSol  = NULL;
   tmpSol  = NULL;
-  MMG2D_Init_mesh(MMG5_ARG_start,
+  MMGS_Init_mesh(MMG5_ARG_start,
                   MMG5_ARG_ppMesh,&mmgMesh,MMG5_ARG_ppMet,&mmgSol,
                   MMG5_ARG_end);
 
   /** 2) Build initial mesh and solutions in MMG5 format */
-  /** Two solutions: just use the MMG2D_loadMesh function that will read a .mesh(b)
-      file formatted or manually set your mesh using the MMG2D_Set* functions */
+  /** Two solutions: just use the MMGS_loadMesh function that will read a .mesh(b)
+      file formatted or manually set your mesh using the MMGS_Set* functions */
 
   /** Automatic loading of the mesh and multiple solutions */
-  if ( MMG2D_loadMesh(mmgMesh,filename) != 1 )  exit(EXIT_FAILURE);
+  if ( MMGS_loadMesh(mmgMesh,filename) != 1 )  exit(EXIT_FAILURE);
 
-  if ( MMG2D_loadAllSols(mmgMesh,&mmgSol,filename) != 1 )
+  if ( MMGS_loadAllSols(mmgMesh,&mmgSol,filename) != 1 )
     exit(EXIT_FAILURE);
 
   /** ------------------------------ STEP II --------------------------- */
 
   /** 3) Transfer the solutions in a new solutions array */
   /** a) Get the solutions sizes */
-  if ( MMG2D_Get_allSolsSizes(mmgMesh,&mmgSol,&nsol,typEntity,&np,typSol) != 1 )
+  if ( MMGS_Get_allSolsSizes(mmgMesh,&mmgSol,&nsol,typEntity,&np,typSol) != 1 )
     exit(EXIT_FAILURE);
 
   /** b) Manually set the size of the new solution: give info for the sol
       structure: number of solutions, type of entities on which applied the
       solutions, number of vertices, type of the solution */
-  if ( MMG2D_Set_allSolsSizes(mmgMesh,&tmpSol,nsol,typEntity,np,typSol) != 1 )
+  if ( MMGS_Set_allSolsSizes(mmgMesh,&tmpSol,nsol,typEntity,np,typSol) != 1 )
     exit(EXIT_FAILURE);
 
   /** c) Get each solution and set it in the new structure */
@@ -106,14 +106,15 @@ int main(int argc,char *argv[]) {
     if ( typSol[i] == MMG5_Scalar )
       sols = (double*) calloc(np, sizeof(double));
     else if ( typSol[i] == MMG5_Vector )
-      sols = (double*) calloc(np*2, sizeof(double));
-    else if ( typSol[i] == MMG5_Tensor )
       sols = (double*) calloc(np*3, sizeof(double));
+    else if ( typSol[i] == MMG5_Tensor ) {
+      sols = (double*) calloc(np*6, sizeof(double));
+    }
 
-    if ( MMG2D_Get_ithSols_inAllSols(mmgSol,i,sols) !=1 ) exit(EXIT_FAILURE);
+    if ( MMGS_Get_ithSols_inAllSols(mmgSol,i,sols) !=1 ) exit(EXIT_FAILURE);
 
     /* Set the ith solution in the new structure */
-    if ( MMG2D_Set_ithSols_inAllSols(tmpSol,i,sols) !=1 ) exit(EXIT_FAILURE);
+    if ( MMGS_Set_ithSols_inAllSols(tmpSol,i,sols) !=1 ) exit(EXIT_FAILURE);
 
     free(sols); sols = NULL;
   }
@@ -121,17 +122,17 @@ int main(int argc,char *argv[]) {
 
   /** ------------------------------ STEP III -------------------------- */
   /** Save the new data */
-  /** Use the MMG2D_saveMesh/MMG2D_saveAllSols functions */
+  /** Use the MMGS_saveMesh/MMGS_saveAllSols functions */
   /* save the mesh */
-  if ( MMG2D_saveMesh(mmgMesh,fileout) != 1 )
+  if ( MMGS_saveMesh(mmgMesh,fileout) != 1 )
     exit(EXIT_FAILURE);
 
   /*s ave the solutions array */
-  if ( MMG2D_saveAllSols(mmgMesh,&tmpSol,fileout) != 1 )
+  if ( MMGS_saveAllSols(mmgMesh,&tmpSol,fileout) != 1 )
     exit(EXIT_FAILURE);
 
-  /** 3) Free the MMG2D structures */
-  MMG2D_Free_all(MMG5_ARG_start,
+  /** 3) Free the MMGS structures */
+  MMGS_Free_all(MMG5_ARG_start,
                  MMG5_ARG_ppMesh,&mmgMesh,MMG5_ARG_ppSols,&tmpSol,
                  MMG5_ARG_ppSols,&mmgSol,
                  MMG5_ARG_end);

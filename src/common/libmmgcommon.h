@@ -189,6 +189,27 @@ extern int MMG5_Set_defaultTruncatureSizes(MMG5_pMesh mesh,char sethmin,char set
  */
 int MMG5_Compute_constantSize(MMG5_pMesh mesh,MMG5_pSol met,double *hsize);
 
+/* Enum utilities */
+/**
+ * \param ent MMG5_entities enum
+ *
+ * \return the name of the enum field
+ *
+ * Print the name associated to the \a ent value in the \a MMG5_entities enum.
+ *
+ */
+const char* MMG5_Get_entitiesName(enum MMG5_entities ent);
+
+/**
+ * \param typ MMG5_type enum
+ *
+ * \return the name of the enum field
+ *
+ * Print the name associated to the \a typ value in the \a MMG5_type enum.
+ *
+ */
+const char* MMG5_Get_typeName(enum MMG5_type typ);
+
 #ifdef __cplusplus
 }
 #endif

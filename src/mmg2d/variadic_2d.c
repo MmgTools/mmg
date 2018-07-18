@@ -280,15 +280,6 @@ int _MMG2D_Free_all_var(va_list argptr)
     return 0;
   }
 
-  if ( !sol ) {
-    fprintf(stderr,"\n  ## Error: %s: MMG2D_Free_all:\n"
-            " you need to provide your metric structure"
-            " (of type MMG5_pSol and indentified by the MMG5_ARG_ppMet"
-            " preprocessor variable) to allow to free the associated"
-            " memory.\n",__func__);
-  }
-
-
   if ( !disp )
     ier = MMG2D_Free_structures(MMG5_ARG_start,
                                 MMG5_ARG_ppMesh, mesh, MMG5_ARG_ppMet, sol,
@@ -486,17 +477,14 @@ int _MMG2D_Free_names_var(va_list argptr)
             " to allow to free the associated memory.\n",__func__);
     return 0;
   }
-  if ( !sol ) {
-    fprintf(stderr,"\n  ## Error: %s: MMG2D_Free_names:\n"
-            " you need to provide your metric structure"
-            " (of type MMG5_pSol and indentified by the MMG5_ARG_ppMet"
-            " preprocessor variable) to allow to free the associated memory.\n",
-            __func__);
-    return 0;
-  }
 
   /* mesh & met */
-  MMG5_mmgFree_names(*mesh,*sol);
+  if ( sol ) {
+    MMG5_mmgFree_names(*mesh,*sol);
+  }
+  else {
+    MMG5_mmgFree_names(*mesh,NULL);
+  }
 
   /* disp */
   if ( disp && *disp ) {

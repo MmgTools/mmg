@@ -144,7 +144,16 @@ FORTRAN_NAME(MMGS_SET_SOLSIZE,mmgs_set_solsize,
   *retval = MMGS_Set_solSize(*mesh,*sol,*typEntity,*np,*typSol);
   return;
 }
-
+/**
+ * See \ref MMGS_Set_allSolsSizes function in \ref mmgs/libmmgs.h file.
+ */
+FORTRAN_NAME(MMGS_SET_ALLSOLSSIZES,mmgs_set_allsolssizes,
+             (MMG5_pMesh *mesh, MMG5_pSol *sol,int* nsol,int* typEntity,
+              int* np, int* typSol, int* retval),
+             (mesh, sol, nsol, typEntity, np, typSol, retval)) {
+  *retval = MMGS_Set_allSolsSizes(*mesh,sol,*nsol,typEntity,*np,typSol);
+  return;
+}
 /**
  * See \ref MMGS_Set_meshSize function in \ref mmgs/libmmgs.h file.
  */
@@ -163,6 +172,17 @@ FORTRAN_NAME(MMGS_GET_SOLSIZE,mmgs_get_solsize,
              (mesh,sol,typEntity,np,typSol,retval)) {
 
   *retval = MMGS_Get_solSize(*mesh,*sol,typEntity,np,typSol);
+  return;
+}
+/**
+ * See \ref MMGS_Get_allSolsSizes function in \ref mmgs/libmmgs.h file.
+ */
+FORTRAN_NAME(MMGS_GET_ALLSOLSSIZES,mmgs_get_allsolssizes,
+             (MMG5_pMesh *mesh, MMG5_pSol *sol, int *nsol,int* typEntity,
+              int* np, int* typSol, int* retval),
+             (mesh,sol,nsol,typEntity,np,typSol,retval)) {
+
+  *retval = MMGS_Get_allSolsSizes(*mesh,sol,nsol,typEntity,np,typSol);
   return;
 }
 
@@ -469,6 +489,28 @@ FORTRAN_NAME(MMGS_GET_TENSORSOLS,mmgs_get_tensorsols,
   *retval = MMGS_Get_tensorSols(*met,sols);
   return;
 }
+/**
+ * See \ref MMGS_Set_ithSols_inAllSols function in \ref mmgs/libmmgs.h file.
+ */
+FORTRAN_NAME(MMGS_SET_ITHSOLS_INALLSOLS,mmgs_set_ithsols_inallsols,
+             (MMG5_pSol *sol, int *i,double *s, int* retval),
+             (sol,i,s,retval)) {
+  int idx = *i-1;
+  *retval = MMGS_Set_ithSols_inAllSols(*sol,idx,s);
+  return;
+}
+
+/**
+ * See \ref MMGS_Get_ithSols_inAllSols function in \ref mmgs/libmmgs.h file.
+ */
+FORTRAN_NAME(MMGS_GET_ITHSOLS_INALLSOLS,mmgs_get_ithsols_inallsols,
+             (MMG5_pSol *sol, int* i,double *s, int* retval),
+             (sol,i,s,retval)) {
+  int idx = *i-1;
+  *retval = MMGS_Get_ithSols_inAllSols(*sol,idx,s);
+  return;
+}
+
 /**
  * See \ref MMGS_Chk_meshData function in \ref mmgs/libmmgs.h file.
  */

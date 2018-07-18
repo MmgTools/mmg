@@ -190,11 +190,21 @@ IF ( BUILD_TESTING )
         "${PROJECT_SOURCE_DIR}/libexamples/mmg2d/adaptation_example1/dom.mesh"
         "${CTEST_OUTPUT_DIR}/libmmg2d_Adaptation_1-dom.o"
        )
+      ADD_TEST(NAME libmmg2d_example2   COMMAND ${LIBMMG2D_EXEC2}
+        "${PROJECT_SOURCE_DIR}/libexamples/mmg2d/squareGeneration_example2/carretest.mesh"
+        "${CTEST_OUTPUT_DIR}/libmmg2d_Generation_2-carre.o"
+       )
+      ADD_TEST(NAME libmmg2d_example3   COMMAND ${LIBMMG2D_EXEC3}
+        "${PROJECT_SOURCE_DIR}/libexamples/mmg2d/io_multisols_example3/naca-multiSols.mesh"
+        "${CTEST_OUTPUT_DIR}/libmmg2d_io_3-naca.o"
+       )
 
       IF ( CMAKE_Fortran_COMPILER)
         SET(LIBMMG2D_EXECFORTRAN_a ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_fortran_a )
-
         SET(LIBMMG2D_EXECFORTRAN_b ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_fortran_b )
+        SET(LIBMMG2D_EXECFORTRAN_IO ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_fortran_io )
+
+
         ADD_TEST(NAME libmmg2d_fortran_a   COMMAND ${LIBMMG2D_EXECFORTRAN_a}
           "${PROJECT_SOURCE_DIR}/libexamples/mmg2d/adaptation_example0_fortran/example0_a/init.mesh"
           "${CTEST_OUTPUT_DIR}/libmmg2d-Adaptation_Fortran_0_a-init.o"
@@ -202,6 +212,10 @@ IF ( BUILD_TESTING )
         ADD_TEST(NAME libmmg2d_fortran_b   COMMAND ${LIBMMG2D_EXECFORTRAN_b}
           "${CTEST_OUTPUT_DIR}/libmmg2d_Adaptation_Fortran_0_b.o"
          )
+        ADD_TEST(NAME libmmg2d_fortran_io   COMMAND ${LIBMMG2D_EXECFORTRAN_IO}
+          "${CTEST_OUTPUT_DIR}/libmmg2d_Fortran_io-naca.o"
+         )
+
       ENDIF()
 
     ENDIF()

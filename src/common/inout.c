@@ -2173,11 +2173,21 @@ void MMG5_writeDoubleSol3D(MMG5_pMesh mesh,MMG5_pSol sol,FILE *inm,int bin,
   case 6 :
     /* tensor solution */
     if ( metricData )
+    {
       MMG5_build3DMetric(mesh,sol,pos,dbuf);
+    }
+    else
+    {
+      for (i=0; i<sol->size; i++)
+      {
+        dbuf[i] = sol->m[6*pos+i];
+      }
+    }
 
     tmp = dbuf[2];
     dbuf[2] = dbuf[3];
     dbuf[3] = tmp;
+
     if(!bin) {
       for(i=0; i<sol->size; i++)
         fprintf(inm,"%.15lg  ",dbuf[i]);

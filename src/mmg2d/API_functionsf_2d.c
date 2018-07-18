@@ -164,7 +164,7 @@ FORTRAN_NAME(MMG2D_SET_DPARAMETER,mmg2d_set_dparameter,
 /**
  * See \ref MMG2D_Set_meshSize function in \ref mmg2d/libmmg2d.h file.
  */
-FORTRAN_NAME(MMG2D_SET_MESH_MMG2D_SIZE,mmg2d_set_meshsize,
+FORTRAN_NAME(MMG2D_SET_MESHSIZE,mmg2d_set_meshsize,
              (MMG5_pMesh *mesh, int *np, int *nt, int *na, int *retval),
              (mesh,np,nt,na,retval)) {
   *retval = MMG2D_Set_meshSize(*mesh,*np,*nt,*na);
@@ -173,7 +173,7 @@ FORTRAN_NAME(MMG2D_SET_MESH_MMG2D_SIZE,mmg2d_set_meshsize,
 /**
  * See \ref MMG2D_Set_solSize function in \ref mmg2d/libmmg2d.h file.
  */
-FORTRAN_NAME(MMG2D_SET_SOL_MMG2D_SIZE,mmg2d_set_solsize,
+FORTRAN_NAME(MMG2D_SET_SOLSIZE,mmg2d_set_solsize,
              (MMG5_pMesh *mesh, MMG5_pSol *sol, int* typEntity,
               int* np, int* typSol, int* retval),
              (mesh, sol, typEntity, np, typSol, retval)) {
@@ -181,13 +181,36 @@ FORTRAN_NAME(MMG2D_SET_SOL_MMG2D_SIZE,mmg2d_set_solsize,
   return;
 }
 /**
+ * See \ref MMG2D_Set_allSolsSizes function in \ref mmg2d/libmmg2d.h file.
+ */
+FORTRAN_NAME(MMG2D_SET_ALLSOLSSIZES,mmg2d_set_allsolssizes,
+             (MMG5_pMesh *mesh, MMG5_pSol *sol,int* nsol,int* typEntity,
+              int* np, int* typSol, int* retval),
+             (mesh, sol, nsol, typEntity, np, typSol, retval)) {
+  *retval = MMG2D_Set_allSolsSizes(*mesh,sol,*nsol,typEntity,*np,typSol);
+  return;
+}
+
+/**
  * See \ref MMG2D_Get_solSize function in \ref mmg2d/libmmg2d.h file.
  */
-FORTRAN_NAME(MMG2D_GET_SOL_MMG2D_SIZE,mmg2d_get_solsize,
+FORTRAN_NAME(MMG2D_GET_SOLSIZE,mmg2d_get_solsize,
              (MMG5_pMesh *mesh, MMG5_pSol *sol, int* typEntity, int* np, int* typSol, int* retval),
              (mesh,sol,typEntity,np,typSol,retval)) {
 
   *retval = MMG2D_Get_solSize(*mesh,*sol,typEntity,np,typSol);
+  return;
+}
+
+/**
+ * See \ref MMG2D_Get_allSolsSizes function in \ref mmg2d/libmmg2d.h file.
+ */
+FORTRAN_NAME(MMG2D_GET_ALLSOLSSIZES,mmg2d_get_allsolssizes,
+             (MMG5_pMesh *mesh, MMG5_pSol *sol, int *nsol,int* typEntity,
+              int* np, int* typSol, int* retval),
+             (mesh,sol,nsol,typEntity,np,typSol,retval)) {
+
+  *retval = MMG2D_Get_allSolsSizes(*mesh,sol,nsol,typEntity,np,typSol);
   return;
 }
 
@@ -347,7 +370,7 @@ FORTRAN_NAME(MMG2D_GET_EDGE,mmg2d_get_edge,(MMG5_pMesh *mesh, int* e0, int* e1, 
 /**
  * See \ref MMG2D_Get_meshSize function in \ref mmg2d/libmmg2d.h file.
  */
-FORTRAN_NAME(MMG2D_GET_MESH_MMG2D_SIZE,mmg2d_get_meshsize,
+FORTRAN_NAME(MMG2D_GET_MESHSIZE,mmg2d_get_meshsize,
              (MMG5_pMesh *mesh, int* np, int* nt, int* na, int* retval),
              (mesh,np,nt, na,retval)) {
 
@@ -469,6 +492,27 @@ FORTRAN_NAME(MMG2D_GET_TENSORSOLS,mmg2d_get_tensorsols,
              (MMG5_pSol *met, double* sols, int* retval),
              (met,sols,retval)) {
   *retval = MMG2D_Get_tensorSols(*met,sols);
+  return;
+}
+/**
+ * See \ref MMG2D_Set_ithSols_inAllSols function in \ref mmg2d/libmmg2d.h file.
+ */
+FORTRAN_NAME(MMG2D_SET_ITHSOLS_INALLSOLS,mmg2d_set_ithsols_inallsols,
+             (MMG5_pSol *sol, int *i,double *s, int* retval),
+             (sol,i,s,retval)) {
+  int idx = *i-1;
+  *retval = MMG2D_Set_ithSols_inAllSols(*sol,idx,s);
+  return;
+}
+
+/**
+ * See \ref MMG2D_Get_ithSols_inAllSols function in \ref mmg2d/libmmg2d.h file.
+ */
+FORTRAN_NAME(MMG2D_GET_ITHSOLS_INALLSOLS,mmg2d_get_ithsols_inallsols,
+             (MMG5_pSol *sol, int* i,double *s, int* retval),
+             (sol,i,s,retval)) {
+  int idx = *i-1;
+  *retval = MMG2D_Get_ithSols_inAllSols(*sol,idx,s);
   return;
 }
 

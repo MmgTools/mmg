@@ -128,6 +128,39 @@ int MMGS_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int 
   }
   return(1);
 }
+int MMGS_Set_allSolsSizes(MMG5_pMesh mesh, MMG5_pSol *sol,int nsol,int *typEntity,
+                           int np, int *typSol) {
+  MMG5_pSol psl;
+  int       j;
+
+  if ( ( (mesh->info.imprim > 5) || mesh->info.ddebug ) && mesh->nsols ) {
+    if ( *sol ) {
+      fprintf(stderr,"\n  ## Warning: %s: old solutions array deletion.\n",
+              __func__);
+      _MMG5_DEL_MEM(mesh,*sol,(mesh->nsols)*sizeof(MMG5_Sol));
+    }
+  }
+
+  /** Sol tab allocation */
+  mesh->nsols = nsol;
+
+  _MMG5_ADD_MEM(mesh,nsol*sizeof(MMG5_Sol),"solutions array",
+                return 0);
+  _MMG5_SAFE_CALLOC(*sol,nsol,MMG5_Sol,0);
+
+  for ( j=0; j<nsol; ++j ) {
+    psl = *sol + j;
+    psl->ver = 2;
+
+    if ( !MMGS_Set_solSize(mesh,psl,typEntity[j],mesh->np,typSol[j]) ) {
+      fprintf(stderr,"\n  ## Error: %s: unable to set the size of the"
+              " solution num %d.\n",__func__,j);
+      return 0;
+    }
+  }
+  return 1;
+}
+
 
 int MMGS_Set_meshSize(MMG5_pMesh mesh, int np, int nt, int na) {
 
@@ -199,6 +232,31 @@ int MMGS_Get_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int* typEntity, int* np, in
 
   return(1);
 }
+int MMGS_Get_allSolsSizes(MMG5_pMesh mesh, MMG5_pSol *sol, int *nsol,
+                           int* typEntity, int* np, int* typSol) {
+  MMG5_pSol psl;
+  int       j;
+
+  *nsol = mesh->nsols;
+
+  for ( j=0; j<(*nsol); ++j ) {
+    psl = *sol + j;
+
+    if ( typEntity != NULL )
+      typEntity[j] = MMG5_Vertex;
+
+    if ( typSol != NULL ) {
+      typSol[j]    = psl->type;
+    }
+
+    assert( (!psl->np) || (psl->np == mesh->np));
+  }
+  if ( np != NULL )
+    *np = mesh->np;
+
+  return 1;
+}
+
 
 int MMGS_Get_meshSize(MMG5_pMesh mesh, int* np, int* nt, int* na) {
 
@@ -942,6 +1000,59 @@ int MMGS_Get_tensorSols(MMG5_pSol met, double *sols) {
   return(1);
 }
 
+int  MMGS_Set_ithSols_inAllSols(MMG5_pSol sol,int i, double *s) {
+  MMG5_pSol psl;
+
+  psl = sol + i;
+
+  switch ( psl->type ) {
+  case MMG5_Scalar:
+    return MMGS_Set_scalarSols(psl,s);
+    break;
+
+  case MMG5_Vector:
+    MMGS_Set_vectorSols(psl,s);
+    break;
+
+  case MMG5_Tensor:
+    MMGS_Set_tensorSols(psl,s);
+    break;
+
+  default:
+    fprintf(stderr,"\n  ## Error: %s: unexpected type of solution: %s.\n",
+            __func__,MMG5_Get_typeName(psl->type));
+    return 0;
+  }
+
+  return 1;
+}
+
+int  MMGS_Get_ithSols_inAllSols(MMG5_pSol sol,int i, double *s) {
+  MMG5_pSol psl;
+
+  psl = sol + i;
+
+  switch ( psl->type ) {
+  case MMG5_Scalar:
+    return MMGS_Get_scalarSols(psl,s);
+    break;
+
+  case MMG5_Vector:
+    MMGS_Get_vectorSols(psl,s);
+    break;
+
+  case MMG5_Tensor:
+    MMGS_Get_tensorSols(psl,s);
+    break;
+
+  default:
+    fprintf(stderr,"\n  ## Error: %s: unexpected type of solution: %s\n",
+            __func__,MMG5_Get_typeName(psl->type));
+    return 0;
+  }
+
+  return 1;
+}
 
 int MMGS_Chk_meshData(MMG5_pMesh mesh,MMG5_pSol met) {
 

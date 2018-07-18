@@ -159,6 +159,14 @@
 #define MMG5_ARG_end    10
 
 /**
+ * \def MMG5_NSOL_MAX
+ *
+ * Maximal number of solutions per entity
+ *
+ */
+#define MMG5_NSOL_MAX   100
+
+/**
  * \enum MMG5_type
  * \brief Type of solutions.
  */

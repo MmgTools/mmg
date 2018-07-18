@@ -33,6 +33,7 @@ SET ( MMG3D_LIB_TESTS
   libmmg3d_example2
   libmmg3d_example4
   libmmg3d_example5
+  libmmg3d_example6
   )
 SET ( MMG3D_LIB_TESTS_MAIN_PATH
   ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/adaptation_example0/example0_a/main.c
@@ -41,6 +42,7 @@ SET ( MMG3D_LIB_TESTS_MAIN_PATH
   ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/adaptation_example2/main.c
   ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/LagrangianMotion_example0/main.c
   ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_example0/main.c
+  ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/io_multiSols_example6/main.c
   )
 
 IF ( LIBMMG3D_STATIC )
@@ -59,11 +61,13 @@ IF ( CMAKE_Fortran_COMPILER )
   SET ( MMG3D_LIB_TESTS ${MMG3D_LIB_TESTS}
     libmmg3d_fortran_a
     libmmg3d_fortran_b
+    libmmg3d_fortran_io
     )
 
   SET ( MMG3D_LIB_TESTS_MAIN_PATH ${MMG3D_LIB_TESTS_MAIN_PATH}
     ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/adaptation_example0_fortran/example0_a/main.F90
     ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/adaptation_example0_fortran/example0_b/main.F90
+    ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/io_multisols_example6/main.F90
     )
 
 ENDIF ( CMAKE_Fortran_COMPILER )

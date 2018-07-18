@@ -149,6 +149,17 @@ FORTRAN_NAME(MMG3D_SET_SOLSIZE,mmg3d_set_solsize,
 }
 
 /**
+ * See \ref MMG3D_Set_allSolsSizes function in \ref mmg3d/libmmg3d.h file.
+ */
+FORTRAN_NAME(MMG3D_SET_ALLSOLSSIZES,mmg3d_set_allsolssizes,
+             (MMG5_pMesh *mesh, MMG5_pSol *sol,int* nsol,int* typEntity,
+              int* np, int* typSol, int* retval),
+             (mesh, sol, nsol, typEntity, np, typSol, retval)) {
+  *retval = MMG3D_Set_allSolsSizes(*mesh,sol,*nsol,typEntity,*np,typSol);
+  return;
+}
+
+/**
  * See \ref MMG3D_Set_meshSize function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_SET_MESHSIZE,mmg3d_set_meshsize,
@@ -167,6 +178,18 @@ FORTRAN_NAME(MMG3D_GET_SOLSIZE,mmg3d_get_solsize,
              (mesh,sol,typEntity,np,typSol,retval)) {
 
   *retval = MMG3D_Get_solSize(*mesh,*sol,typEntity,np,typSol);
+  return;
+}
+
+/**
+ * See \ref MMG3D_Get_allSolsSizes function in \ref mmg3d/libmmg3d.h file.
+ */
+FORTRAN_NAME(MMG3D_GET_ALLSOLSSIZES,mmg3d_get_allsolssizes,
+             (MMG5_pMesh *mesh, MMG5_pSol *sol, int *nsol,int* typEntity,
+              int* np, int* typSol, int* retval),
+             (mesh,sol,nsol,typEntity,np,typSol,retval)) {
+
+  *retval = MMG3D_Get_allSolsSizes(*mesh,sol,nsol,typEntity,np,typSol);
   return;
 }
 
@@ -369,7 +392,7 @@ FORTRAN_NAME(MMG3D_SET_QUADRILATERAL,mmg3d_set_quadrilateral,
  */
 FORTRAN_NAME(MMG3D_GET_QUADRILATERAL,mmg3d_get_quadrilateral,
              (MMG5_pMesh *mesh, int* v0, int* v1, int* v2,int *v3,
-               int* ref,int* isRequired, int* retval),
+              int* ref,int* isRequired, int* retval),
              (mesh,v0,v1,v2,v3,ref,isRequired,retval)) {
   *retval = MMG3D_Get_quadrilateral(*mesh,v0,v1,v2,v3,ref,isRequired);
   return;
@@ -410,7 +433,7 @@ FORTRAN_NAME(MMG3D_SET_EDGE,mmg3d_set_edge,
  * See \ref MMG3D_Get_edge function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_GET_EDGE,mmg3d_get_edge,(MMG5_pMesh *mesh, int* e0, int* e1, int* ref
-                                          ,int* isRidge, int* isRequired, int* retval),
+                                            ,int* isRidge, int* isRequired, int* retval),
              (mesh,e0,e1,ref,isRidge,isRequired,retval)) {
   *retval = MMG3D_Get_edge(*mesh,e0,e1,ref,isRidge,isRequired);
   return;
@@ -648,6 +671,27 @@ FORTRAN_NAME(MMG3D_GET_TENSORSOLS,mmg3d_get_tensorsols,
              (MMG5_pSol *met, double* sols, int* retval),
              (met,sols,retval)) {
   *retval = MMG3D_Get_tensorSols(*met,sols);
+  return;
+}
+/**
+ * See \ref MMG3D_Set_ithSols_inAllSols function in \ref mmg3d/libmmg3d.h file.
+ */
+FORTRAN_NAME(MMG3D_SET_ITHSOLS_INALLSOLS,mmg3d_set_ithsols_inallsols,
+             (MMG5_pSol *sol, int *i,double *s, int* retval),
+             (sol,i,s,retval)) {
+  int idx = *i-1;
+  *retval = MMG3D_Set_ithSols_inAllSols(*sol,idx,s);
+  return;
+}
+
+/**
+ * See \ref MMG3D_Get_ithSols_inAllSols function in \ref mmg3d/libmmg3d.h file.
+ */
+FORTRAN_NAME(MMG3D_GET_ITHSOLS_INALLSOLS,mmg3d_get_ithsols_inallsols,
+             (MMG5_pSol *sol, int* i,double *s, int* retval),
+             (sol,i,s,retval)) {
+  int idx = *i-1;
+  *retval = MMG3D_Get_ithSols_inAllSols(*sol,idx,s);
   return;
 }
 

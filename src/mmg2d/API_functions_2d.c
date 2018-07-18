@@ -214,7 +214,7 @@ int MMG2D_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val)
     break;
   default :
     fprintf(stderr,"\n  ## Error: %s: unknown type of parameter\n",
-      __func__);
+            __func__);
     return(0);
   }
   return(1);
@@ -266,7 +266,7 @@ int MMG2D_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int
 
   if ( typEntity != MMG5_Vertex ) {
     fprintf(stderr,"\n  ## Error: %s: mmg2d need a solution imposed on vertices.\n",
-      __func__);
+            __func__);
     return(0);
   }
 
@@ -303,6 +303,39 @@ int MMG2D_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int
   return(1);
 }
 
+int MMG2D_Set_allSolsSizes(MMG5_pMesh mesh, MMG5_pSol *sol,int nsol,int *typEntity,
+                           int np, int *typSol) {
+  MMG5_pSol psl;
+  int       j;
+
+  if ( ( (mesh->info.imprim > 5) || mesh->info.ddebug ) && mesh->nsols ) {
+    if ( *sol ) {
+      fprintf(stderr,"\n  ## Warning: %s: old solutions array deletion.\n",
+              __func__);
+      _MMG5_DEL_MEM(mesh,*sol,(mesh->nsols)*sizeof(MMG5_Sol));
+    }
+  }
+
+  /** Sol tab allocation */
+  mesh->nsols = nsol;
+
+  _MMG5_ADD_MEM(mesh,nsol*sizeof(MMG5_Sol),"solutions array",
+                return 0);
+  _MMG5_SAFE_CALLOC(*sol,nsol,MMG5_Sol,0);
+
+  for ( j=0; j<nsol; ++j ) {
+    psl = *sol + j;
+    psl->ver = 2;
+
+    if ( !MMG2D_Set_solSize(mesh,psl,typEntity[j],mesh->np,typSol[j]) ) {
+      fprintf(stderr,"\n  ## Error: %s: unable to set the size of the"
+              " solution num %d.\n",__func__,j);
+      return 0;
+    }
+  }
+  return 1;
+}
+
 int MMG2D_Get_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int* typEntity, int* np,
                       int* typSol) {
 
@@ -326,6 +359,31 @@ int MMG2D_Get_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int* typEntity, int* np,
     *np = sol->np;
 
   return(1);
+}
+
+int MMG2D_Get_allSolsSizes(MMG5_pMesh mesh, MMG5_pSol *sol, int *nsol,
+                           int* typEntity, int* np, int* typSol) {
+  MMG5_pSol psl;
+  int       j;
+
+  *nsol = mesh->nsols;
+
+  for ( j=0; j<(*nsol); ++j ) {
+    psl = *sol + j;
+
+    if ( typEntity != NULL )
+      typEntity[j] = MMG5_Vertex;
+
+    if ( typSol != NULL ) {
+      typSol[j]    = psl->type;
+    }
+
+    assert( (!psl->np) || (psl->np == mesh->np));
+  }
+  if ( np != NULL )
+    *np = mesh->np;
+
+  return 1;
 }
 
 int MMG2D_Get_meshSize(MMG5_pMesh mesh, int* np, int* nt, int* na) {
@@ -402,19 +460,19 @@ int MMG2D_Set_requiredVertex(MMG5_pMesh mesh, int k) {
 }
 
 int MMG2D_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, int* ref,
-                    int* isCorner, int* isRequired) {
+                     int* isCorner, int* isRequired) {
 
- if ( mesh->npi == mesh->np ) {
-   mesh->npi = 0;
-   if ( mesh->info.ddebug ) {
-    fprintf(stderr,"\n  ## Warning: %s: reset the internal counter of points.\n",
-            __func__);
-    fprintf(stderr,"     You must pass here exactly one time (the first time ");
-    fprintf(stderr,"you call the MMG2D_Get_vertex function).\n");
-    fprintf(stderr,"     If not, the number of call of this function");
-    fprintf(stderr," exceed the number of points: %d\n ",mesh->np);
-   }
- }
+  if ( mesh->npi == mesh->np ) {
+    mesh->npi = 0;
+    if ( mesh->info.ddebug ) {
+      fprintf(stderr,"\n  ## Warning: %s: reset the internal counter of points.\n",
+              __func__);
+      fprintf(stderr,"     You must pass here exactly one time (the first time ");
+      fprintf(stderr,"you call the MMG2D_Get_vertex function).\n");
+      fprintf(stderr,"     If not, the number of call of this function");
+      fprintf(stderr," exceed the number of points: %d\n ",mesh->np);
+    }
+  }
 
   mesh->npi++;
 
@@ -554,7 +612,7 @@ int MMG2D_Set_triangle(MMG5_pMesh mesh, int v0, int v1, int v2, int ref, int pos
     pt->edg[i] = 0;
 
   vol = MMG2_quickarea(mesh->point[pt->v[0]].c,mesh->point[pt->v[1]].c,
-                           mesh->point[pt->v[2]].c);
+                       mesh->point[pt->v[2]].c);
 
   if ( vol == 0.0 ) {
     fprintf(stderr,"\n  ## Error: %s: triangle %d has null area.\n",
@@ -656,48 +714,48 @@ int  MMG2D_Set_triangles(MMG5_pMesh mesh, int *tria, int *refs) {
   mesh->xt = 0;
   for (i=1;i<=mesh->nt;i++)
   {
-      j = (i-1)*3;
-      ptt = &mesh->tria[i];
-      ptt->v[0] = tria[j]  ;
-      ptt->v[1] = tria[j+2];
-      ptt->v[2] = tria[j+1];
-      if ( refs != NULL )
-        ptt->ref  = refs[i-1];
+    j = (i-1)*3;
+    ptt = &mesh->tria[i];
+    ptt->v[0] = tria[j]  ;
+    ptt->v[1] = tria[j+2];
+    ptt->v[2] = tria[j+1];
+    if ( refs != NULL )
+      ptt->ref  = refs[i-1];
 
-      mesh->point[ptt->v[0]].tag &= ~MG_NUL;
-      mesh->point[ptt->v[1]].tag &= ~MG_NUL;
-      mesh->point[ptt->v[2]].tag &= ~MG_NUL;
+    mesh->point[ptt->v[0]].tag &= ~MG_NUL;
+    mesh->point[ptt->v[1]].tag &= ~MG_NUL;
+    mesh->point[ptt->v[2]].tag &= ~MG_NUL;
 
-      for(i=0 ; i<3 ; i++)
-        ptt->edg[i] = 0;
+    for(i=0 ; i<3 ; i++)
+      ptt->edg[i] = 0;
 
-      vol = MMG2_quickarea(mesh->point[ptt->v[0]].c,mesh->point[ptt->v[1]].c,
-                           mesh->point[ptt->v[2]].c);
+    vol = MMG2_quickarea(mesh->point[ptt->v[0]].c,mesh->point[ptt->v[1]].c,
+                         mesh->point[ptt->v[2]].c);
 
-      if ( vol == 0.0 ) {
-        fprintf(stderr,"\n  ## Error: %s: triangle %d has null area.\n",
-                __func__,i);
-        for ( ip=0; ip<3; ip++ ) {
-          ppt = &mesh->point[ptt->v[ip]];
-          for ( j=0; j<3; j++ ) {
-            if ( fabs(ppt->c[j])>0. ) {
-              fprintf(stderr," Check that you don't have a sliver triangle.\n");
-              return(0);
-            }
+    if ( vol == 0.0 ) {
+      fprintf(stderr,"\n  ## Error: %s: triangle %d has null area.\n",
+              __func__,i);
+      for ( ip=0; ip<3; ip++ ) {
+        ppt = &mesh->point[ptt->v[ip]];
+        for ( j=0; j<3; j++ ) {
+          if ( fabs(ppt->c[j])>0. ) {
+            fprintf(stderr," Check that you don't have a sliver triangle.\n");
+            return(0);
           }
         }
       }
-      else if(vol < 0) {
-        tmp = ptt->v[2];
-        ptt->v[2] = ptt->v[1];
-        ptt->v[1] = tmp;
-        /* mesh->xt temporary used to count reoriented tetra */
-        mesh->xt++;
-      }
-      if ( mesh->info.ddebug && mesh->xt > 0 ) {
-        fprintf(stderr,"\n  ## Warning: %s: %d triangles reoriented\n",
-                __func__,mesh->xt);
-      }
+    }
+    else if(vol < 0) {
+      tmp = ptt->v[2];
+      ptt->v[2] = ptt->v[1];
+      ptt->v[1] = tmp;
+      /* mesh->xt temporary used to count reoriented tetra */
+      mesh->xt++;
+    }
+    if ( mesh->info.ddebug && mesh->xt > 0 ) {
+      fprintf(stderr,"\n  ## Warning: %s: %d triangles reoriented\n",
+              __func__,mesh->xt);
+    }
   }
   return 1;
 }
@@ -707,25 +765,25 @@ int  MMG2D_Get_triangles(MMG5_pMesh mesh, int* tria, int* refs,
   MMG5_pTria ptt;
   int        i, j;
 
-   for (i=1;i<=mesh->nt;i++)
-   {
-      j = (i-1)*3;
-      ptt = &mesh->tria[i];
-      tria[j]   = ptt->v[0];
-      tria[j+2] = ptt->v[1];
-      tria[j+1] = ptt->v[2];
+  for (i=1;i<=mesh->nt;i++)
+  {
+    j = (i-1)*3;
+    ptt = &mesh->tria[i];
+    tria[j]   = ptt->v[0];
+    tria[j+2] = ptt->v[1];
+    tria[j+1] = ptt->v[2];
 
-      if ( refs!=NULL )
-        refs[i-1]  = ptt->ref ;
-      if ( areRequired != NULL ) {
-        if ( (ptt->tag[0] & MG_REQ) && (ptt->tag[1] & MG_REQ) &&
-             (ptt->tag[2] & MG_REQ) )
-          areRequired[i-1] = 1;
-        else
-          areRequired[i-1] = 0;
-      }
-   }
-   return 1;
+    if ( refs!=NULL )
+      refs[i-1]  = ptt->ref ;
+    if ( areRequired != NULL ) {
+      if ( (ptt->tag[0] & MG_REQ) && (ptt->tag[1] & MG_REQ) &&
+           (ptt->tag[2] & MG_REQ) )
+        areRequired[i-1] = 1;
+      else
+        areRequired[i-1] = 0;
+    }
+  }
+  return 1;
 }
 
 int MMG2D_Set_edge(MMG5_pMesh mesh, int v0, int v1, int ref, int pos) {
@@ -1153,6 +1211,60 @@ int MMG2D_Get_tensorSols(MMG5_pSol met, double *sols) {
   }
 
   return(1);
+}
+
+int  MMG2D_Set_ithSols_inAllSols(MMG5_pSol sol,int i, double *s) {
+  MMG5_pSol psl;
+
+  psl = sol + i;
+
+  switch ( psl->type ) {
+  case MMG5_Scalar:
+    return MMG2D_Set_scalarSols(psl,s);
+    break;
+
+  case MMG5_Vector:
+    MMG2D_Set_vectorSols(psl,s);
+    break;
+
+  case MMG5_Tensor:
+    MMG2D_Set_tensorSols(psl,s);
+    break;
+
+  default:
+    fprintf(stderr,"\n  ## Error: %s: unexpected type of solution: %s.\n",
+            __func__,MMG5_Get_typeName(psl->type));
+    return 0;
+  }
+
+  return 1;
+}
+
+int  MMG2D_Get_ithSols_inAllSols(MMG5_pSol sol,int i, double *s) {
+  MMG5_pSol psl;
+
+  psl = sol + i;
+
+  switch ( psl->type ) {
+  case MMG5_Scalar:
+    return MMG2D_Get_scalarSols(psl,s);
+    break;
+
+  case MMG5_Vector:
+    MMG2D_Get_vectorSols(psl,s);
+    break;
+
+  case MMG5_Tensor:
+    MMG2D_Get_tensorSols(psl,s);
+    break;
+
+  default:
+    fprintf(stderr,"\n  ## Error: %s: unexpected type of solution: %s\n",
+            __func__,MMG5_Get_typeName(psl->type));
+    return 0;
+  }
+
+  return 1;
 }
 
 int MMG2D_Chk_meshData(MMG5_pMesh mesh,MMG5_pSol met) {

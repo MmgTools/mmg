@@ -286,15 +286,6 @@ int _MMG3D_Free_all_var(va_list argptr)
     return 0;
   }
 
-  if ( !sol ) {
-    fprintf(stderr,"\n  ## Error: %s: MMG3D_Free_all:\n"
-            " you need to provide your metric structure"
-            " (of type MMG5_pSol and indentified by the MMG5_ARG_ppMet or"
-            " MMG5_ARG_ppLs preprocessor variable)"
-            " to allow to free the associated memory.\n",__func__);
-  }
-
-
   if ( !disp ) {
     if ( !MMG3D_Free_structures(MMG5_ARG_start,
                                 MMG5_ARG_ppMesh, mesh, MMG5_ARG_ppMet, sol,
@@ -417,9 +408,8 @@ int _MMG3D_Free_structures_var(va_list argptr)
       return 0;
   }
 
- /* mesh */
+  /* mesh */
   assert(mesh && *mesh);
-  assert(sol  && *sol);
 
   if ( (*mesh)->tetra )
     _MMG5_DEL_MEM((*mesh),(*mesh)->tetra,((*mesh)->nemax+1)*sizeof(MMG5_Tetra));
@@ -458,7 +448,12 @@ int _MMG3D_Free_structures_var(va_list argptr)
   if ( disp && (*disp) && (*disp)->m )
     _MMG5_DEL_MEM((*mesh),(*disp)->m,((*disp)->size*((*disp)->npmax+1))*sizeof(double));
 
-  MMG5_Free_structures(*mesh,*sol);
+  if ( sol ) {
+    MMG5_Free_structures(*mesh,*sol);
+  }
+  else {
+    MMG5_Free_structures(*mesh,NULL);
+  }
 
   return 1;
 }
@@ -535,16 +530,12 @@ int _MMG3D_Free_names_var(va_list argptr)
             " to allow to free the associated memory.\n",__func__);
     return 0;
   }
-  if ( !sol ) {
-    fprintf(stderr,"\n  ## Error: %s: MMG3D_Free_names:\n"
-            " you need to provide your metric structure"
-            " (of type MMG5_pSol and indentified by the MMG5_ARG_ppMet or"
-            " MMG5_ARG_ppLs preprocessor variable)"
-            " to allow to free the associated memory.\n",__func__);
-  }
 
   /* mesh & met */
-  MMG5_mmgFree_names(*mesh,*sol);
+  if (!sol)
+    MMG5_mmgFree_names(*mesh,NULL);
+  else
+    MMG5_mmgFree_names(*mesh,*sol);
 
   /* disp */
   if ( disp && *disp ) {

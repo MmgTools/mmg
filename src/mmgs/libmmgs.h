@@ -229,6 +229,31 @@ int  MMGS_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solout);
 int  MMGS_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int typSol);
 /**
  * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward an allocatable sol structure.
+ * \param nsol number of solutions per entity
+ * \param typEntity Array (of size nsol) listing the type of entities to which
+ *                  apply the solutions (vertices, triangles...).
+ * \param np        number of vertices
+ * \param typSol    Array of size nsol listing the type of the solutions
+ *                  (scalar, vectorial...).
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Set the solution number, dimension and type.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMGS_SET_ALLSOLSSIZES(mesh,sol,nsol,typEntity,np,typSol,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol\n
+ * >     INTEGER, INTENT(IN)           :: nsol,np\n
+ * >     INTEGER, INTENT(IN)           :: typEntity(*),typSol(*)\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int MMGS_Set_allSolsSizes(MMG5_pMesh mesh, MMG5_pSol *sol,int nsol,int *typEntity,
+                             int np, int *typSol);
+
+/**
+ * \param mesh pointer toward the mesh structure.
  * \param np number of vertices.
  * \param nt number of triangles.
  * \param na number of edges.
@@ -576,6 +601,25 @@ int MMGS_Set_tensorSol(MMG5_pSol met, double m11,double m12, double m13,
  *
  */
 int MMGS_Set_tensorSols(MMG5_pSol met, double *sols);
+/**
+ * \param sol pointer toward the array of solutions
+ * \param i position of the solution field that we want to set.
+ * \param s table of the scalar solutions at mesh vertices. s[i-1] is
+ * the solution at vertex i.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Set values of the solution at the ith field of the solution array.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMGS_SET_ITHSOLS_INALLSOLS(sol,i,s,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: sol\n
+ * >     INTEGER, INTENT(IN)           :: i\n
+ * >     REAL(KIND=8), DIMENSION(*),INTENT(OUT) :: s\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int  MMGS_Set_ithSols_inAllSols(MMG5_pSol sol,int i, double* s);
 
 /* check init */
 /**
@@ -698,6 +742,31 @@ int  MMGS_Get_meshSize(MMG5_pMesh mesh, int* np, int* nt, int* na);
  */
 int  MMGS_Get_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int* typEntity, int* np,
                       int* typSol);
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward an array of sol structure.
+ * \param typEntity array of size MMG5_NSOL_MAX to store the type of entities to
+ * which each solution is applied.
+ * \param np pointer toward the number of solutions.
+ * \param typSol array of size MMG5_NSOL_MAX to store type of each solution
+ * (scalar, vector..).
+ *
+ * \return 1.
+ *
+ * Get the solution number, dimension and type.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMGS_GET_ALLSOLSSIZES(mesh,sol,nsol,typEntity,np,typSol,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol\n
+ * >     INTEGER                       :: nsol,np\n
+ * >     INTEGER                       :: typEntity(*),typSol(*)\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int  MMGS_Get_allSolsSizes(MMG5_pMesh mesh, MMG5_pSol* sol,int *nsol,
+                              int* typEntity,int* np,int* typSol);
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \param c0 pointer toward the coordinate of the point along the first dimension.
@@ -951,6 +1020,26 @@ int MMGS_Get_tensorSol(MMG5_pSol met, double *m11,double *m12, double *m13,
  *
  */
 int MMGS_Get_tensorSols(MMG5_pSol met, double *sols);
+/**
+ * \param sol pointer toward the array of solutions
+ * \param i position of the solution field that we want to get.
+ * \param s table of the scalar solutions at mesh vertices. s[i-1] is
+ * the solution at vertex i.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Get values of the solution at the ith field of the solution array.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMGS_GET_ITHSOLS_INALLSOLS(sol,i,s,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: sol\n
+ * >     INTEGER, INTENT(IN)           :: i\n
+ * >     REAL(KIND=8), DIMENSION(*),INTENT(OUT) :: s\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int  MMGS_Get_ithSols_inAllSols(MMG5_pSol sol,int i, double* s);
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \param iparam integer parameter to set (see \a MMGS_Param structure).
