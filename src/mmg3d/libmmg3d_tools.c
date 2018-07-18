@@ -456,7 +456,7 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
       return 0;
   }
 
-  return(1);
+  return 1;
 }
 
 int MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {

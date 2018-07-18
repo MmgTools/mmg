@@ -69,7 +69,7 @@ FORTRAN_NAME(MMG3D_INIT_PARAMETERS,mmg3d_init_parameters,(MMG5_pMesh *mesh),(mes
 }
 
 /**
- * See \ref MMG3D_Set_inputMeshName function in \ref common/libmmgcommon.h file.
+ * See \ref MMG3D_Set_inputMeshName function in \ref mmg3d/libmmg3d.h.
  */
 FORTRAN_NAME(MMG3D_SET_INPUTMESHNAME, mmg3d_set_inputmeshname,
              (MMG5_pMesh *mesh, char* meshin, int *strlen, int* retval),
@@ -86,7 +86,7 @@ FORTRAN_NAME(MMG3D_SET_INPUTMESHNAME, mmg3d_set_inputmeshname,
 }
 
 /**
- * See \ref MMG3D_Set_inputSolName function in \ref common/libmmgcommon.h file.
+ * See \ref MMG3D_Set_inputSolName function in \ref mmg3d/libmmg3d.h.
  */
 FORTRAN_NAME(MMG3D_SET_INPUTSOLNAME, mmg3d_set_inputsolname,
              (MMG5_pMesh *mesh,MMG5_pSol *sol, char* solin, int* strlen, int* retval),
@@ -104,8 +104,7 @@ FORTRAN_NAME(MMG3D_SET_INPUTSOLNAME, mmg3d_set_inputsolname,
 }
 
 /**
- * See \ref MMG3D_Set_outputMeshName function in mmg3d/libmmg3d.h or
- * mmg3d/libmmg3d.h file.
+ * See \ref MMG3D_Set_outputMeshName function in mmg3d/libmmg3d.h.
  */
 FORTRAN_NAME(MMG3D_SET_OUTPUTMESHNAME,mmg3d_set_outputmeshname,
              (MMG5_pMesh *mesh, char* meshout, int* strlen,int* retval),
