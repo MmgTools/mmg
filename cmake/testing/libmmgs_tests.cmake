@@ -39,7 +39,7 @@ SET ( MMGS_LIB_TESTS_MAIN_PATH
   ${PROJECT_SOURCE_DIR}/libexamples/mmgs/adaptation_example0/example0_b/main.c
   ${PROJECT_SOURCE_DIR}/libexamples/mmgs/adaptation_example1/main.c
   ${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_example0/main.c
-  ${PROJECT_SOURCE_DIR}/libexamples/mmgs/io_multiSols_example3/main.c
+  ${PROJECT_SOURCE_DIR}/libexamples/mmgs/io_multisols_example3/main.c
   )
 
 IF ( LIBMMGS_STATIC )

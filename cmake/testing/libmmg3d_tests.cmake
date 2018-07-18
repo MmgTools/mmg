@@ -42,7 +42,7 @@ SET ( MMG3D_LIB_TESTS_MAIN_PATH
   ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/adaptation_example2/main.c
   ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/LagrangianMotion_example0/main.c
   ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_example0/main.c
-  ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/io_multiSols_example6/main.c
+  ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/io_multisols_example6/main.c
   )
 
 IF ( LIBMMG3D_STATIC )
