@@ -252,6 +252,7 @@ IF ( BUILD_TESTING )
           "${CTEST_OUTPUT_DIR}/libmmg3d-Adaptation_Fortran_0_b-cube.o"
           )
         ADD_TEST(NAME libmmg3d_fortran_io   COMMAND ${LIBMMG3D_EXECFORTRAN_IO}
+          "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/io_multisols_example6/torus.mesh"
           "${CTEST_OUTPUT_DIR}/libmmg3d_Fortran_io-torus.o"
          )
 

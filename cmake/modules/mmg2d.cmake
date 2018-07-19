@@ -178,6 +178,9 @@ IF ( BUILD_TESTING )
 
       SET(LIBMMG2D_EXEC0_b ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_example0_b )
       SET(LIBMMG2D_EXEC1 ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_example1 )
+      SET(LIBMMG2D_EXEC2 ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_example2 )
+      SET(LIBMMG2D_EXEC3 ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_example3 )
+
 
       ADD_TEST(NAME libmmg2d_example0_a   COMMAND ${LIBMMG2D_EXEC0_a}
         "${PROJECT_SOURCE_DIR}/libexamples/mmg2d/adaptation_example0/example0_a/init.mesh"
@@ -213,6 +216,7 @@ IF ( BUILD_TESTING )
           "${CTEST_OUTPUT_DIR}/libmmg2d_Adaptation_Fortran_0_b.o"
          )
         ADD_TEST(NAME libmmg2d_fortran_io   COMMAND ${LIBMMG2D_EXECFORTRAN_IO}
+          "${PROJECT_SOURCE_DIR}/libexamples/mmg2d/io_multisols_example3/naca-multiSols.mesh"
           "${CTEST_OUTPUT_DIR}/libmmg2d_Fortran_io-naca.o"
          )
 

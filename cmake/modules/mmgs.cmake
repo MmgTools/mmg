@@ -190,6 +190,7 @@ IF ( BUILD_TESTING )
           "${CTEST_OUTPUT_DIR}/libmmgs_Adaptation_Fortran_0_b.o"
           )
         ADD_TEST(NAME libmmgs_fortran_io   COMMAND ${LIBMMGS_EXECFORTRAN_IO}
+          "${PROJECT_SOURCE_DIR}/libexamples/mmgs/io_multisols_example3/torus.mesh"
           "${CTEST_OUTPUT_DIR}/libmmgs_Fortran_io-torus.o"
          )
 
