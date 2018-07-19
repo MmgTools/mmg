@@ -674,6 +674,17 @@ FORTRAN_NAME(MMG3D_GET_TENSORSOLS,mmg3d_get_tensorsols,
   return;
 }
 /**
+ * See \ref MMG3D_Set_ithSol_inAllSols function in \ref mmg3d/libmmg3d.h file.
+ */
+FORTRAN_NAME(MMG3D_SET_ITHSOL_INALLSOLS,mmg3d_set_ithsol_inallsols,
+             (MMG5_pSol *sol, int *i,double *s,int *pos, int* retval),
+             (sol,i,s,pos,retval)) {
+  int idx = *i-1;
+  *retval = MMG3D_Set_ithSol_inAllSols(*sol,idx,s,*pos);
+  return;
+}
+
+/**
  * See \ref MMG3D_Set_ithSols_inAllSols function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_SET_ITHSOLS_INALLSOLS,mmg3d_set_ithsols_inallsols,
@@ -681,6 +692,16 @@ FORTRAN_NAME(MMG3D_SET_ITHSOLS_INALLSOLS,mmg3d_set_ithsols_inallsols,
              (sol,i,s,retval)) {
   int idx = *i-1;
   *retval = MMG3D_Set_ithSols_inAllSols(*sol,idx,s);
+  return;
+}
+/**
+ * See \ref MMG3D_Get_ithSol_inAllSols function in \ref mmg3d/libmmg3d.h file.
+ */
+FORTRAN_NAME(MMG3D_GET_ITHSOL_INALLSOLS,mmg3d_get_ithsol_inallsols,
+             (MMG5_pSol *sol, int* i,double *s,int *pos, int* retval),
+             (sol,i,s,pos,retval)) {
+  int idx = *i-1;
+  *retval = MMG3D_Get_ithSol_inAllSols(*sol,idx,s,*pos);
   return;
 }
 

@@ -231,16 +231,20 @@ IF ( BUILD_TESTING )
         "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_example0/test"
         "${CTEST_OUTPUT_DIR}/libmmg3d-IsosurfDiscretization_0-test.o"
         )
-      ADD_TEST(NAME libmmg3d_example6   COMMAND ${LIBMMG3D_EXEC6}
+      ADD_TEST(NAME libmmg3d_example6_io_0   COMMAND ${LIBMMG3D_EXEC6}
         "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/io_multisols_example6/torus.mesh"
-        "${CTEST_OUTPUT_DIR}/libmmg3d_io_6-naca.o"
+        "${CTEST_OUTPUT_DIR}/libmmg3d_io_6-naca.o" "0"
+       )
+      ADD_TEST(NAME libmmg3d_example6_io_1   COMMAND ${LIBMMG3D_EXEC6}
+        "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/io_multisols_example6/torus.mesh"
+        "${CTEST_OUTPUT_DIR}/libmmg3d_io_6-naca.o" "1"
        )
 
 
 
       IF ( CMAKE_Fortran_COMPILER)
-        SET(LIBMMG3D_EXECFORTRAN_a ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_fortran_a)
-        SET(LIBMMG3D_EXECFORTRAN_b ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_fortran_b)
+        SET(LIBMMG3D_EXECFORTRAN_a  ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_fortran_a)
+        SET(LIBMMG3D_EXECFORTRAN_b  ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_fortran_b)
         SET(LIBMMG3D_EXECFORTRAN_IO ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_fortran_io)
 
 
@@ -251,9 +255,13 @@ IF ( BUILD_TESTING )
         ADD_TEST(NAME libmmg3d_fortran_b  COMMAND ${LIBMMG3D_EXECFORTRAN_b}
           "${CTEST_OUTPUT_DIR}/libmmg3d-Adaptation_Fortran_0_b-cube.o"
           )
-        ADD_TEST(NAME libmmg3d_fortran_io   COMMAND ${LIBMMG3D_EXECFORTRAN_IO}
+        ADD_TEST(NAME libmmg3d_fortran_io_0   COMMAND ${LIBMMG3D_EXECFORTRAN_IO}
           "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/io_multisols_example6/torus.mesh"
-          "${CTEST_OUTPUT_DIR}/libmmg3d_Fortran_io-torus.o"
+          "${CTEST_OUTPUT_DIR}/libmmg3d_Fortran_io-torus.o" "0"
+          )
+        ADD_TEST(NAME libmmg3d_fortran_io_1   COMMAND ${LIBMMG3D_EXECFORTRAN_IO}
+          "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/io_multisols_example6/torus.mesh"
+          "${CTEST_OUTPUT_DIR}/libmmg3d_Fortran_io-torus.o" "1"
          )
 
       ENDIF()

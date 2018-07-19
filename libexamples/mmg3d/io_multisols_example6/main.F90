@@ -15,13 +15,13 @@ PROGRAM main
 
   MMG5_DATA_PTR_T    :: mmgMesh
   MMG5_DATA_PTR_T    :: mmgSol,tmpSol
-  INTEGER            :: ier,argc,i
+  INTEGER            :: ier,argc,i,j,opt
 
   !! To manually recover the mesh
   INTEGER            :: nsol,np,typEntity(MMG5_NSOL_MAX),typSol(MMG5_NSOL_MAX)
   REAL(KIND=8),DIMENSION(:),ALLOCATABLE :: sols
 
-  CHARACTER(len=300) :: exec_name,filename,fileout
+  CHARACTER(len=300) :: exec_name,filename,fileout,option
 
   PRINT*,"  -- TEST MMG3DLIB"
 
@@ -29,15 +29,20 @@ PROGRAM main
   CALL get_command_argument(0, exec_name)
 
 
-  IF ( argc /=2 ) THEN
-     PRINT*," Usage: ",TRIM(ADJUSTL(exec_name))," input_file_name output_file_name"
+  IF ( argc /=3 ) THEN
+     PRINT*," Usage: ",TRIM(ADJUSTL(exec_name)),&
+          " input_file_name output_file_name io_option"
+     PRINT*,"     io_option = 0 to Get/Set the solution field by field"
+     PRINT*,"     io_option = 1 to Get/Set the solution and vertex by vertex"
      CALL EXIT(1);
   ENDIF
 
   ! Name and path of the mesh file
   CALL get_command_argument(1, filename)
   CALL get_command_argument(2, fileout)
+  CALL get_command_argument(3, option)
 
+  READ(option, '(I2)') opt
 
   !!> ------------------------------ STEP   I --------------------------
   !! 1) Initialisation of mesh and sol structures */
@@ -90,21 +95,41 @@ PROGRAM main
   DO i=1,nsol
     IF ( typEntity(i) /= MMG5_Vertex ) CALL EXIT(106)
 
-    ! Get the ith solution array
-    IF ( typSol(i) == MMG5_Scalar ) THEN
-       ALLOCATE(sols(np))
-    ELSE IF ( typSol(i) == MMG5_Vector ) THEN
-       ALLOCATE(sols(3*np))
-    ELSE IF ( typSol(i) == MMG5_Tensor ) THEN
-       ALLOCATE(sols(6*np))
+    IF ( opt==0 ) THEN
+       ! Get the ith solution array
+       IF ( typSol(i) == MMG5_Scalar ) THEN
+          ALLOCATE(sols(np))
+       ELSE IF ( typSol(i) == MMG5_Vector ) THEN
+          ALLOCATE(sols(3*np))
+       ELSE IF ( typSol(i) == MMG5_Tensor ) THEN
+          ALLOCATE(sols(6*np))
+       ENDIF
+
+       CALL MMG3D_Get_ithSols_inAllSols(mmgSol,i,sols,ier)
+       IF ( ier /= 1 )  CALL EXIT(107)
+
+       ! Set the ith solution in the new structure
+       CALL MMG3D_Set_ithSols_inAllSols(tmpSol,i,sols,ier)
+       IF ( ier /= 1 )  CALL EXIT(108)
+    ELSE
+      IF ( typSol(i) == MMG5_Scalar ) THEN
+          ALLOCATE(sols(1))
+       ELSE IF ( typSol(i) == MMG5_Vector ) THEN
+          ALLOCATE(sols(3))
+       ELSE IF ( typSol(i) == MMG5_Tensor ) THEN
+          ALLOCATE(sols(6))
+       ENDIF
+
+       DO j=1,np
+          ! Get and set the ith solution array vertex by vertex
+          CALL MMG3D_Get_ithSol_inAllSols(mmgSol,i,sols,j,ier)
+          IF ( ier /= 1 )  CALL EXIT(107)
+
+          ! Set the ith solution in the new structure
+          CALL MMG3D_Set_ithSol_inAllSols(tmpSol,i,sols,j,ier)
+          IF ( ier /= 1 )  CALL EXIT(108)
+       ENDDO
     ENDIF
-
-    CALL MMG3D_Get_ithSols_inAllSols(mmgSol,i,sols,ier)
-    IF ( ier /= 1 )  CALL EXIT(107)
-
-    ! Set the ith solution in the new structure
-    CALL MMG3D_Set_ithSols_inAllSols(tmpSol,i,sols,ier)
-    IF ( ier /= 1 )  CALL EXIT(108)
 
     DEALLOCATE(sols)
   ENDDO

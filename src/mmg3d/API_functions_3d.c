@@ -1556,6 +1556,32 @@ int MMG3D_Get_tensorSols(MMG5_pSol met, double *sols) {
   return(1);
 }
 
+int  MMG3D_Set_ithSol_inAllSols(MMG5_pSol sol,int i, double* s,int pos) {
+  MMG5_pSol psl;
+
+  psl = sol + i;
+
+  switch ( psl->type ) {
+  case MMG5_Scalar:
+    return MMG3D_Set_scalarSol(psl,s[0],pos);
+    break;
+
+  case MMG5_Vector:
+    MMG3D_Set_vectorSol(psl,s[0],s[1],s[2],pos);
+    break;
+
+  case MMG5_Tensor:
+    MMG3D_Set_tensorSol(psl,s[0],s[1],s[2],s[3],s[4],s[5],pos);
+    break;
+
+  default:
+    fprintf(stderr,"\n  ## Error: %s: unexpected type of solution: %s.\n",
+            __func__,MMG5_Get_typeName(psl->type));
+    return 0;
+  }
+  return 1;
+}
+
 int  MMG3D_Set_ithSols_inAllSols(MMG5_pSol sol,int i, double *s) {
   MMG5_pSol psl;
 
@@ -1576,6 +1602,35 @@ int  MMG3D_Set_ithSols_inAllSols(MMG5_pSol sol,int i, double *s) {
 
   default:
     fprintf(stderr,"\n  ## Error: %s: unexpected type of solution: %s.\n",
+            __func__,MMG5_Get_typeName(psl->type));
+    return 0;
+  }
+
+  return 1;
+}
+
+int  MMG3D_Get_ithSol_inAllSols(MMG5_pSol sol,int i, double *s,int pos) {
+  MMG5_pSol psl;
+
+  psl = sol + i;
+
+  psl->npi = pos-1;
+
+  switch ( psl->type ) {
+  case MMG5_Scalar:
+    return MMG3D_Get_scalarSol(psl,&s[0]);
+    break;
+
+  case MMG5_Vector:
+    MMG3D_Get_vectorSol(psl,&s[0],&s[1],&s[2]);
+    break;
+
+  case MMG5_Tensor:
+    MMG3D_Get_tensorSol(psl,&s[0],&s[1],&s[2],&s[3],&s[4],&s[5]);
+    break;
+
+  default:
+    fprintf(stderr,"\n  ## Error: %s: unexpected type of solution: %s\n",
             __func__,MMG5_Get_typeName(psl->type));
     return 0;
   }

@@ -861,13 +861,33 @@ extern "C" {
 /**
  * \param sol pointer toward the array of solutions
  * \param i position of the solution field that we want to set.
+ * \param s solution(s) at mesh vertex \a pos.
+ * \param pos index of the vertex on which we set the solution.
+ *
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Set values of the solution at the ith field of the solution array.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_SET_ITHSOL_INALLSOLS(sol,i,s,pos,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: sol\n
+ * >     INTEGER, INTENT(IN)           :: i,pos\n
+ * >     REAL(KIND=8), DIMENSION(*),INTENT(OUT) :: s\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int  MMG3D_Set_ithSol_inAllSols(MMG5_pSol sol,int i, double* s,int pos);
+/**
+ * \param sol pointer toward the array of solutions
+ * \param i position of the solution field that we want to set.
  * \param s table of the solutions at mesh vertices. The solution at vertex \a k
  * is given by s[k-1] for a scalar sol, s[3*(k-1)]\@6 for a vectorial solution
  * and s[6*(k-1)]\@6 for a tensor solution.
  *
  * \return 0 if failed, 1 otherwise.
  *
- * Set values of the solution at the ith field of the solution array.
+ * Get values of the ith field of the solution array at vertex \a pos.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_ITHSOLS_INALLSOLS(sol,i,s,retval)\n
@@ -1466,6 +1486,26 @@ extern "C" {
  *
  */
   int MMG3D_Get_tensorSols(MMG5_pSol met, double *sols);
+/**
+ * \param sol pointer toward the array of solutions
+ * \param i position of the solution field that we want to set.
+ * \param s solution(s) at mesh vertex \a pos.
+ * \param pos index of the vertex on which we get the solution.
+ *
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Get values of the ith field of the solution array at vertex \a pos.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_GET_ITHSOL_INALLSOLS(sol,i,s,pos,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: sol\n
+ * >     INTEGER, INTENT(IN)           :: i,pos\n
+ * >     REAL(KIND=8), DIMENSION(*),INTENT(OUT) :: s\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int  MMG3D_Get_ithSol_inAllSols(MMG5_pSol sol,int i, double* s,int pos);
 /**
  * \param sol pointer toward the array of solutions
  * \param i position of the solution field that we want to get.

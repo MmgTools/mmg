@@ -33,7 +33,7 @@ SET ( MMG3D_LIB_TESTS
   libmmg3d_example2
   libmmg3d_example4
   libmmg3d_example5
-  libmmg3d_example6
+  libmmg3d_example6_io
   )
 SET ( MMG3D_LIB_TESTS_MAIN_PATH
   ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/adaptation_example0/example0_a/main.c
