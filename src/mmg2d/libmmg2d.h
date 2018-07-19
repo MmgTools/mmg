@@ -607,8 +607,10 @@ extern "C" {
 /**
  * \param sol pointer toward the array of solutions
  * \param i position of the solution field that we want to set.
- * \param s table of the scalar solutions at mesh vertices. s[i-1] is
- * the solution at vertex i.
+ * \param s table of the solutions at mesh vertices. The solution at vertex \a k
+ * is given by s[k-1] for a scalar sol, s[2*(k-1)]\@6 for a vectorial solution
+ * and s[3*(k-1)]\@6 for a tensor solution.
+ *
  * \return 0 if failed, 1 otherwise.
  *
  * Set values of the solution at the ith field of the solution array.
@@ -916,8 +918,10 @@ extern "C" {
 /**
  * \param sol pointer toward the array of solutions
  * \param i position of the solution field that we want to get.
- * \param s table of the scalar solutions at mesh vertices. s[i-1] is
- * the solution at vertex i.
+ * \param s table of the solutions at mesh vertices. The solution at vertex \a k
+ * is given by s[k-1] for a scalar sol, s[2*(k-1)]\@6 for a vectorial solution
+ * and s[3*(k-1)]\@6 for a tensor solution.
+ *
  * \return 0 if failed, 1 otherwise.
  *
  * Get values of the solution at the ith field of the solution array.

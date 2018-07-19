@@ -757,7 +757,7 @@ FORTRAN_NAME(MMG3D_SET_LOCALPARAMETER,mmg3d_set_localparameter,
 }
 
 /**
- * See \ref MMG5_Free_all function in \ref mmg3d/libmmg3d.h file.
+ * See \ref MMG3D_Free_all function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_VARIADIC(MMG3D_FREE_ALL,mmg3d_free_all,
                  (const int starter,...),
