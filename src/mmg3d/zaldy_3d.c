@@ -40,7 +40,7 @@ int _MMG3D_newPt(MMG5_pMesh mesh,double c[3],int16_t tag) {
   MMG5_pPoint  ppt;
   int     curpt;
 
-  if ( !mesh->npnil )  return(0);
+  if ( !mesh->npnil )  return 0;
   curpt = mesh->npnil;
   if ( mesh->npnil > mesh->np )  mesh->np = mesh->npnil;
   ppt   = &mesh->point[curpt];
@@ -58,7 +58,7 @@ int _MMG3D_newPt(MMG5_pMesh mesh,double c[3],int16_t tag) {
       /* reallocation of xpoint table */
       _MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,MMG5_xPoint,
                          "larger xpoint table",
-                         return(0),0);
+                         return 0,0);
     }
     ppt->xp  = mesh->xp;
   }
@@ -69,7 +69,7 @@ int _MMG3D_newPt(MMG5_pMesh mesh,double c[3],int16_t tag) {
   ppt->n[2]   = 0;
   ppt->tag    = tag;
   ppt->tagdel = 0;
-  return(curpt);
+  return curpt;
 }
 
 void _MMG3D_delPt(MMG5_pMesh mesh,int ip) {
@@ -94,7 +94,7 @@ void _MMG3D_delPt(MMG5_pMesh mesh,int ip) {
 int _MMG3D_newElt(MMG5_pMesh mesh) {
   int     curiel;
 
-  if ( !mesh->nenil )  return(0);
+  if ( !mesh->nenil )  return 0;
   curiel = mesh->nenil;
 
   if ( mesh->nenil > mesh->ne )  mesh->ne = mesh->nenil;
@@ -102,7 +102,7 @@ int _MMG3D_newElt(MMG5_pMesh mesh) {
   mesh->tetra[curiel].v[3] = 0;
   mesh->tetra[curiel].mark=mesh->mark;
 
-  return(curiel);
+  return curiel;
 }
 
 /**
@@ -121,7 +121,7 @@ int _MMG3D_delElt(MMG5_pMesh mesh,int iel) {
   pt = &mesh->tetra[iel];
   if ( !MG_EOK(pt) ) {
     fprintf(stderr,"\n  ## INVALID ELEMENT %d.\n",iel);
-    return(0);
+    return 0;
   }
   memset(pt,0,sizeof(MMG5_Tetra));
   pt->v[3] = mesh->nenil;
@@ -174,7 +174,7 @@ int _MMG3D_memOption_memSet(MMG5_pMesh mesh) {
     }
   }
 
-  return ( _MMG3D_memOption_memRepartition( mesh ) );
+  return  _MMG3D_memOption_memRepartition( mesh );
 }
 
 /**
@@ -260,7 +260,7 @@ int _MMG3D_memOption(MMG5_pMesh mesh) {
   mesh->nemax = MG_MAX(1.5*mesh->ne,_MMG3D_NEMAX);
   mesh->ntmax = MG_MAX(1.5*mesh->nt,_MMG3D_NTMAX);
 
-  return ( _MMG3D_memOption_memRepartition(mesh) );
+  return  _MMG3D_memOption_memRepartition(mesh);
 }
 
 /**
@@ -285,24 +285,24 @@ int MMG3D_setMeshSize_alloc( MMG5_pMesh mesh ) {
   _MMG5_SAFE_CALLOC(mesh->tetra,mesh->nemax+1,MMG5_Tetra,0);
 
   if ( mesh->nprism ) {
-    _MMG5_ADD_MEM(mesh,(mesh->nprism+1)*sizeof(MMG5_Prism),"initial prisms",return(0));
+    _MMG5_ADD_MEM(mesh,(mesh->nprism+1)*sizeof(MMG5_Prism),"initial prisms",return 0);
     _MMG5_SAFE_CALLOC(mesh->prism,(mesh->nprism+1),MMG5_Prism,0);
   }
 
   if ( mesh->nt ) {
-    _MMG5_ADD_MEM(mesh,(mesh->nt+1)*sizeof(MMG5_Tria),"initial triangles",return(0));
+    _MMG5_ADD_MEM(mesh,(mesh->nt+1)*sizeof(MMG5_Tria),"initial triangles",return 0);
     _MMG5_SAFE_CALLOC(mesh->tria,mesh->nt+1,MMG5_Tria,0);
     memset(&mesh->tria[0],0,sizeof(MMG5_Tria));
   }
 
   if ( mesh->nquad ) {
-    _MMG5_ADD_MEM(mesh,(mesh->nquad+1)*sizeof(MMG5_Quad),"initial quadrilaterals",return(0));
+    _MMG5_ADD_MEM(mesh,(mesh->nquad+1)*sizeof(MMG5_Quad),"initial quadrilaterals",return 0);
     _MMG5_SAFE_CALLOC(mesh->quadra,(mesh->nquad+1),MMG5_Quad,0);
   }
 
   mesh->namax = mesh->na;
   if ( mesh->na ) {
-    _MMG5_ADD_MEM(mesh,(mesh->na+1)*sizeof(MMG5_Edge),"initial edges",return(0));
+    _MMG5_ADD_MEM(mesh,(mesh->na+1)*sizeof(MMG5_Edge),"initial edges",return 0);
     _MMG5_SAFE_CALLOC(mesh->edge,(mesh->na+1),MMG5_Edge,0);
   }
 
@@ -337,7 +337,7 @@ int _MMG3D_zaldy(MMG5_pMesh mesh) {
 
   if ( !_MMG3D_memOption(mesh) )  return 0;
 
-  return ( MMG3D_setMeshSize_alloc(mesh) );
+  return  MMG3D_setMeshSize_alloc(mesh);
 }
 
 /**

@@ -51,7 +51,7 @@ int swapbin(int sbin)
   p[2] = p_in[1];
   p[3] = p_in[0];
 
-  return(inv);
+  return inv;
   /*unsigned char c1, c2, c3, c4;
 
     c1 = sbin & 255;
@@ -72,7 +72,7 @@ float swapf(float sbin)
   p_out[2] = p_in[1];
   p_out[3] = p_in[0];
 
-  return(out);
+  return out;
 }
 double swapd(double sbin)
 {
@@ -86,7 +86,7 @@ double swapd(double sbin)
     p_out[i] = p_in[7-i];
   }
 
-  return(out);
+  return out;
 }
 
 /**
@@ -135,7 +135,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
       if( !(inm = fopen(data,"rb")) ) {
         fprintf(stderr,"  ** %s  NOT FOUND.\n",data);
         _MMG5_SAFE_FREE(data);
-        return(0);
+        return 0;
       }
     }
     else  bin = 1;
@@ -146,7 +146,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
       if( !(inm = fopen(data,"rb")) ) {
         fprintf(stderr,"  ** %s  NOT FOUND.\n",data);
         _MMG5_SAFE_FREE(data);
-        return(0);
+        return 0;
       }
   }
   fprintf(stdout,"  %%%% %s OPENED\n",data);
@@ -162,7 +162,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
         fscanf(inm,"%d",&mesh->dim);
         if(mesh->dim!=3) {
           fprintf(stderr,"BAD DIMENSION : %d\n",mesh->dim);
-          return(0);
+          return 0;
         }
         continue;
       } else if(!strncmp(chaine,"Vertices",strlen("Vertices"))) {
@@ -229,7 +229,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
         mesh->dim = bdim;
         if(bdim!=3) {
           fprintf(stderr,"BAD MESH DIMENSION : %d\n",mesh->dim);
-          return(-1);
+          return -1;
         }
         continue;
       } else if(!mesh->npi && binch==4) {  //Vertices
@@ -333,13 +333,13 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
 
   if ( !mesh->npi || !mesh->nti ) {
     fprintf(stdout,"  ** MISSING DATA\n");
-    return(0);
+    return 0;
   }
   mesh->np = mesh->npi;
   mesh->nt = mesh->nti + 2*nq;
 
   /* mem alloc */
-  if ( !_MMGS_zaldy(mesh) )  return(0);
+  if ( !_MMGS_zaldy(mesh) )  return 0;
 
   /* read vertices */
 
@@ -481,7 +481,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
     rewind(inm);
     fseek(inm,posned,SEEK_SET);
 
-    _MMG5_ADD_MEM(mesh,(mesh->na+1)*sizeof(MMG5_Edge),"initial edges",return(0));
+    _MMG5_ADD_MEM(mesh,(mesh->na+1)*sizeof(MMG5_Edge),"initial edges",return 0);
     _MMG5_SAFE_CALLOC(mesh->edge,mesh->na+1,MMG5_Edge,0);
 
     /* Skip edges with MG_ISO refs */
@@ -667,7 +667,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
       fprintf(stdout,"     NUMBER OF EDGES      %8d  RIDGES %6d\n",mesh->na,nri);
   }
   fclose(inm);
-  return(1);
+  return 1;
 }
 
 int MMGS_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
@@ -686,13 +686,13 @@ int MMGS_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
     fprintf(stderr,"SEVERAL SOLUTION => IGNORED: %d\n",nsols);
     fclose(inm);
     _MMG5_SAFE_FREE(posNodeData);
-    return(-1);
+    return -1;
   }
 
   if ( !_MMGS_zaldy(mesh) ) {
     fclose(inm);
     _MMG5_SAFE_FREE(posNodeData);
-    return(0);
+    return 0;
   }
 
   mesh->ne = mesh->nprism = 0;
@@ -703,21 +703,21 @@ int MMGS_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
     fprintf(stderr," Exit program.\n");
     fclose(inm);
     _MMG5_SAFE_FREE(posNodeData);
-    return(-1);
+    return -1;
   }
 
 
   if (mesh->npmax < mesh->np || mesh->ntmax < mesh->nt ) {
     fclose(inm);
     _MMG5_SAFE_FREE(posNodeData);
-    return(-1);
+    return -1;
   }
 
   ier = MMG5_loadMshMesh_part2( mesh, &sol,&inm,
                                 posNodes,posElts,posNodeData,
                                 bin,iswp,nelts);
   _MMG5_SAFE_FREE(posNodeData);
-  if ( ier < 1 ) return ( ier );
+  if ( ier < 1 ) return  ier;
 
   /* Check the metric type */
   ier = MMG5_chkMetricType(mesh,&sol->type,inm);
@@ -751,7 +751,7 @@ int MMGS_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *file
   if ( !_MMGS_zaldy(mesh) ) {
     fclose(inm);
     _MMG5_SAFE_FREE(posNodeData);
-    return(0);
+    return 0;
   }
 
   mesh->ne = mesh->nprism = 0;
@@ -762,14 +762,14 @@ int MMGS_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *file
     fprintf(stderr," Exit program.\n");
     fclose(inm);
     _MMG5_SAFE_FREE(posNodeData);
-    return(-1);
+    return -1;
   }
 
 
   if (mesh->npmax < mesh->np || mesh->ntmax < mesh->nt ) {
     fclose(inm);
     _MMG5_SAFE_FREE(posNodeData);
-    return(-1);
+    return -1;
   }
 
   ier = MMG5_loadMshMesh_part2( mesh, sol,&inm,
@@ -818,7 +818,7 @@ int MMGS_saveMesh(MMG5_pMesh mesh, const char* filename) {
       if( !(inm = fopen(data,"w")) ) {
         fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",data);
         _MMG5_SAFE_FREE(data);
-        return(0);
+        return 0;
       }
     } else {
       bin = 1;
@@ -831,13 +831,13 @@ int MMGS_saveMesh(MMG5_pMesh mesh, const char* filename) {
       if( !(inm = fopen(data,"wb")) ) {
         fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",data);
         _MMG5_SAFE_FREE(data);
-        return(0);
+        return 0;
       }
     } else {
       if( !(inm = fopen(data,"w")) ) {
         fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",data);
         _MMG5_SAFE_FREE(data);
-        return(0);
+        return 0;
       }
     }
   }
@@ -1217,17 +1217,17 @@ int MMGS_saveMesh(MMG5_pMesh mesh, const char* filename) {
     fwrite(&binch,sw,1,inm);
   }
   fclose(inm);
-  return(1);
+  return 1;
 }
 
 int MMGS_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 
-  return(MMG5_saveMshMesh(mesh,&sol,filename,1));
+  return MMG5_saveMshMesh(mesh,&sol,filename,1);
 }
 
 int MMGS_saveMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename) {
 
-  return(MMG5_saveMshMesh(mesh,sol,filename,0));
+  return MMG5_saveMshMesh(mesh,sol,filename,0);
 }
 
 /**
@@ -1256,7 +1256,7 @@ int MMGS_loadSol(MMG5_pMesh mesh,MMG5_pSol met,const char* filename) {
     fprintf(stderr,"SEVERAL SOLUTION => IGNORED: %d\n",nsols);
     fclose(inm);
     _MMG5_SAFE_FREE(type);
-    return(-1);
+    return -1;
   }
 
   if ( mesh->np != np ) {
@@ -1265,7 +1265,7 @@ int MMGS_loadSol(MMG5_pMesh mesh,MMG5_pSol met,const char* filename) {
             "THE SOLUTION (%d) \n",mesh->np,np);
     fclose(inm);
     _MMG5_SAFE_FREE(type);
-    return(-1);
+    return -1;
   }
 
   ier = MMG5_chkMetricType(mesh,type,inm);
@@ -1303,7 +1303,7 @@ int MMGS_loadSol(MMG5_pMesh mesh,MMG5_pSol met,const char* filename) {
   /* stats */
   MMG5_printMetStats(mesh,met);
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -1335,7 +1335,7 @@ int MMGS_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
             "THE SOLUTION (%d) \n",mesh->np,np);
     fclose(inm);
     _MMG5_SAFE_FREE(type);
-    return(-1);
+    return -1;
   }
 
   /** Sol tab allocation */
@@ -1408,7 +1408,7 @@ int MMGS_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
   /* stats */
   MMG5_printSolStats(mesh,sol);
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -1425,7 +1425,7 @@ int MMGS_saveSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
   MMG5_pPoint  ppt;
   int          binch,bin,ier,k;
 
-  if ( !met->m )  return(-1);
+  if ( !met->m )  return -1;
 
   met->ver = 2;
 
@@ -1450,7 +1450,7 @@ int MMGS_saveSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
     fwrite(&binch,sw,1,inm);
   }
   fclose(inm);
-  return(1);
+  return 1;
 }
 
 /**
@@ -1469,7 +1469,7 @@ int MMGS_saveAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
   int          binch,bin,ier,k,j;
   int          *type,*size;
 
-  if ( !(*sol)[0].m )  return(-1);
+  if ( !(*sol)[0].m )  return -1;
 
   (*sol)[0].ver = 2;
 
@@ -1507,5 +1507,5 @@ int MMGS_saveAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
     fwrite(&binch,sw,1,inm);
   }
   fclose(inm);
-  return(1);
+  return 1;
 }

@@ -161,7 +161,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
         tag |= MG_BDY;
         ilist = _MMG5_coquil(mesh,k,imax,list);
         if ( !ilist )  continue;
-        else if ( ilist<0 ) return(-1);
+        else if ( ilist<0 ) return -1;
         if ( tag & MG_NOM ){
           if( !_MMG5_BezierNom(mesh,ip1,ip2,0.5,o,no1,to) )
             continue;
@@ -233,7 +233,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
         if ( ier < 0 ) {
           fprintf(stderr,"\n  ## Error: %s: unable to split.\n",__func__);
           _MMG3D_delPt(mesh,ip);
-          return(-1);
+          return -1;
         }
         else if ( !ier ) {
           _MMG3D_delPt(mesh,ip);
@@ -276,7 +276,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
         }
         ilist = _MMG5_coquil(mesh,k,imax,list);
         if ( !ilist )    continue;
-        else if ( ilist<0 ) return(-1);
+        else if ( ilist<0 ) return -1;
         o[0] = 0.5*(p0->c[0] + p1->c[0]);
         o[1] = 0.5*(p0->c[1] + p1->c[1]);
         o[2] = 0.5*(p0->c[2] + p1->c[2]);
@@ -301,7 +301,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
         if ( ier < 0 ) {
           fprintf(stderr,"\n  ## Error: %s: unable to split.\n",__func__);
           _MMG3D_delPt(mesh,ip);
-          return(-1);
+          return -1;
         }
         else if ( !ier ) {
           _MMG3D_delPt(mesh,ip);
@@ -320,7 +320,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
       } else {
         ilist = _MMG5_coquil(mesh,k,imax,list);
         if ( !ilist )    continue;
-        else if ( ilist<0 ) return(-1);
+        else if ( ilist<0 ) return -1;
         else if(ilist%2) goto collapse; //bdry edge
         o[0] = 0.5*(p0->c[0] + p1->c[0]);
         o[1] = 0.5*(p0->c[1] + p1->c[1]);
@@ -373,7 +373,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
             }
             else { /*allocation problem ==> saveMesh*/
               _MMG3D_delPt(mesh,ip);
-              return(0);
+              return 0;
             }
           }
         }
@@ -408,13 +408,13 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
 
         if (_MMG5_boulesurfvolp(mesh,k,i1,i,
                                 list,&ilist,lists,&ilists,(p0->tag & MG_NOM)) < 0 )
-          return(-1);
+          return -1;
 
         ilist = _MMG5_chkcol_bdy(mesh,met,k,i,j,list,ilist,lists,ilists,2);
         if ( ilist > 0 ) {
           ier = _MMG5_colver(mesh,met,list,ilist,i2,2);
 
-          if ( ier < 0 ) return(-1);
+          if ( ier < 0 ) return -1;
           else if(ier) {
             _MMG3D_delPt(mesh,ier);
             (*nc)++;
@@ -432,7 +432,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
         if ( ilist > 0 ) {
           ier = _MMG5_colver(mesh,met,list,ilist,i2,2);
           if ( ilist < 0 ) continue;
-          if ( ier < 0 ) return(-1);
+          if ( ier < 0 ) return -1;
           else if(ier) {
             if ( octree )
               _MMG3D_delOctree(mesh, octree, ier);
@@ -441,7 +441,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
             continue;
           }
         }
-        else if (ilist < 0 )  return(-1);
+        else if (ilist < 0 )  return -1;
       }
     } //end if lmin < _MMG3D_LOPTS_MMG5_DEL
 
@@ -485,7 +485,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
           tag |= MG_BDY;
           ilist = _MMG5_coquil(mesh,k,imax,list);
           if ( !ilist )  continue;
-          else if ( ilist<0 ) return(-1);
+          else if ( ilist<0 ) return -1;
           if ( tag & MG_NOM ){
             if( !_MMG5_BezierNom(mesh,ip1,ip2,0.5,o,no1,to) )
               continue;
@@ -553,7 +553,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
 
           if ( ier < 0 ) {
             fprintf(stderr,"\n  ## Error: %s: unable to split.\n",__func__);
-            return(-1);
+            return -1;
           }
           else if ( !ier ) {
             _MMG3D_delPt(mesh,ip);
@@ -599,7 +599,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
           }
           ilist = _MMG5_coquil(mesh,k,imax,list);
           if ( !ilist )    continue;
-          else if ( ilist<0 ) return(-1);
+          else if ( ilist<0 ) return -1;
           o[0] = 0.5*(p0->c[0] + p1->c[0]);
           o[1] = 0.5*(p0->c[1] + p1->c[1]);
           o[2] = 0.5*(p0->c[2] + p1->c[2]);
@@ -624,7 +624,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
           if ( ier < 0 ) {
             fprintf(stderr,"\n  ## Error: %s: unable to split.\n",__func__);
             _MMG3D_delPt(mesh,ip);
-            return(-1);
+            return -1;
           }
           else if ( !ier ) {
             _MMG3D_delPt(mesh,ip);
@@ -641,7 +641,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
         } else {
           ilist = _MMG5_coquil(mesh,k,imax,list);
           if ( !ilist )    continue;
-          else if ( ilist<0 ) return(-1);
+          else if ( ilist<0 ) return -1;
           else if(ilist%2) goto collapse2; //bdry edge
           o[0] = 0.5*(p0->c[0] + p1->c[0]);
           o[1] = 0.5*(p0->c[1] + p1->c[1]);
@@ -692,7 +692,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
               }
               else { /*allocation problem ==> savemesh*/
                 _MMG3D_delPt(mesh,ip);
-                return(0);
+                return 0;
               }
             }
           }
@@ -727,7 +727,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
 
         if (_MMG5_boulesurfvolp(mesh,k,i1,i,
                                 list,&ilist,lists,&ilists,(p0->tag & MG_NOM)) < 0 )
-          return(-1);
+          return -1;
 
         ilist = _MMG5_chkcol_bdy(mesh,met,k,i,j,list,ilist,lists,ilists,2);
         if ( ilist > 0 ) {
@@ -749,7 +749,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
         if ( ilist > 0 ) {
           ier = _MMG5_colver(mesh,met,list,ilist,i2,2);
           if ( ilist < 0 ) continue;
-          if ( ier < 0 ) return(-1);
+          if ( ier < 0 ) return -1;
           else if(ier) {
             if ( octree )
               _MMG3D_delOctree(mesh,octree,ier);
@@ -758,12 +758,12 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
             break;
           }
         }
-        else if (ilist < 0 )  return(-1);
+        else if (ilist < 0 )  return -1;
       }
     }//end for ii
   }
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -794,7 +794,7 @@ _MMG5_optbad(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
       if ( nf < 0 ) {
         fprintf(stderr,"\n  ## Error: %s: unable to improve mesh. Exiting.\n",
                 __func__);
-        return(0);
+        return 0;
       }
       nnf += nf;
 
@@ -802,7 +802,7 @@ _MMG5_optbad(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
       if ( nf < 0 ) {
         fprintf(stderr,"\n  ## Error: %s: unable to improve mesh. Exiting.\n",
           __func__);
-        return(0);
+        return 0;
       }
     }
     else  nf = 0;
@@ -812,7 +812,7 @@ _MMG5_optbad(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
       if ( nm < 0 ) {
         fprintf(stderr,"\n  ## Error: %s: unable to improve mesh.\n",
                 __func__);
-        return(0);
+        return 0;
       }
     }
     else  nm = 0;
@@ -831,7 +831,7 @@ _MMG5_optbad(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
               "        "
               "      %8d swapped, %8d moved, %d iter. \n",nnf,nnm,it);
   }
-  return(1);
+  return 1;
 }
 
 /**
@@ -876,7 +876,7 @@ _MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree, int* warn) 
       if ( nf < 0 ) {
         fprintf(stderr,"\n  ## Error: %s: unable to improve mesh. Exiting.\n",
           __func__);
-        return(0);
+        return 0;
       }
       nnf += nf;
       nf += _MMG5_swptet(mesh,met,1.053,declic,octree,2,mesh->mark-2);
@@ -884,7 +884,7 @@ _MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree, int* warn) 
       if ( nf < 0 ) {
         fprintf(stderr,"\n  ## Error: %s: unable to improve mesh. Exiting.\n",
           __func__);
-        return(0);
+        return 0;
       }
     } else {
       nf = 0;
@@ -897,7 +897,7 @@ _MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree, int* warn) 
 
       if ( nm < 0 ) {
         fprintf(stderr,"\n  ## Error: %s: Unable to improve mesh.\n",__func__);
-        return(0);
+        return 0;
       }
     }
     else  nm = 0;
@@ -944,7 +944,7 @@ _MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree, int* warn) 
     }
   }
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -978,7 +978,7 @@ _MMG5_optetLES(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
       if ( nf < 0 ) {
         fprintf(stderr,"\n  ## Error: %s: unable to improve mesh. Exiting.\n",
           __func__);
-        return(0);
+        return 0;
       }
     }
     else  nf = 0;
@@ -988,7 +988,7 @@ _MMG5_optetLES(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
       if ( nm < 0 ) {
         fprintf(stderr,"\n  ## Error: %s: unable to improve mesh.\n",
           __func__);
-        return(0);
+        return 0;
       }
     }
     else  nm = 0;
@@ -1010,7 +1010,7 @@ _MMG5_optetLES(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
     nm = _MMG5_movtet(mesh,met,octree,1.,1.,1,1,1,1,3,mesh->mark-2);
     if ( nm < 0 ) {
       fprintf(stderr,"\n  ## Error: %s: unable to improve mesh.\n",__func__);
-      return(0);
+      return 0;
     }
   }
   else  nm = 0;
@@ -1028,7 +1028,7 @@ _MMG5_optetLES(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
               "        "
               "      %8d swapped, %8d moved, %d iter. \n",nnf,nnm,it);
   }
-  return(1);
+  return 1;
 }
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1071,7 +1071,7 @@ _MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
       if ( nf < 0 ) {
         fprintf(stderr,"\n  ## Error: %s: unable to improve mesh. Exiting.\n",
           __func__);
-        return(0);
+        return 0;
       }
       nnf += nf;
 
@@ -1079,7 +1079,7 @@ _MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
       if ( nf < 0 ) {
         fprintf(stderr,"\n  ## Error: %s: unable to improve mesh. Exiting.\n",
           __func__);
-        return(0);
+        return 0;
       }
     }
     else  nf = 0;
@@ -1088,7 +1088,7 @@ _MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
       nm = _MMG5_movtet(mesh,met,octree,1.,declic,1,1,1,1,0,mesh->mark-1);
       if ( nm < 0 ) {
         fprintf(stderr,"\n  ## Error: %s: unable to improve mesh.\n",__func__);
-        return(0);
+        return 0;
       }
     }
     else  nm = 0;
@@ -1109,7 +1109,7 @@ _MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
     nm = _MMG5_movtet(mesh,met,octree,1.,1.,1,1,1,1,3,mesh->mark-2);
     if ( nm < 0 ) {
       fprintf(stderr,"\n  ## Error: %s: Unable to improve mesh.\n",__func__);
-      return(0);
+      return 0;
     }
   }
   else  nm = 0;
@@ -1126,7 +1126,7 @@ _MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
               "        "
               "      %8d swapped, %8d moved, %d iter. \n",nnf,nnm,it);
   }
-  return(1);
+  return 1;
 }
 
 /**
@@ -1150,14 +1150,14 @@ _MMG5_adptet_delone(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree) {
     if ( nf < 0 ) {
       fprintf(stderr,"\n  ## Error: %s: unable to improve mesh. Exiting.\n",
               __func__);
-      return(0);
+      return 0;
     }
     nnf = nf;
     nf = _MMG5_swptet(mesh,met,1.053,0.0288675,octree,2,mesh->mark-2);
     if ( nf < 0 ) {
       fprintf(stderr,"\n  ## Error: %s: Unable to improve mesh. Exiting.\n",
               __func__);
-      return(0);
+      return 0;
     }
     nnf+=nf;
   } else  nnf = nf = 0;
@@ -1175,7 +1175,7 @@ _MMG5_adptet_delone(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree) {
   if ( ns < 0 ) {
     fprintf(stderr,"\n  ## Error: %s: unable to complete mesh. Exit program.\n",
       __func__);
-    return(0);
+    return 0;
   }
 
   if ( warn ) {
@@ -1184,20 +1184,20 @@ _MMG5_adptet_delone(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree) {
     fprintf(stderr,"  ## Check the mesh size or ");
     fprintf(stderr,"increase the maximal authorized memory with the -m option.\n");
     fprintf(stderr,"  ## Uncomplete mesh. Exiting\n" );
-    return(0);
+    return 0;
   }
 
   /* renumerotation if available */
   if ( !_MMG5_scotchCall(mesh,met) )
-    return(0);
+    return 0;
 
   if(mesh->info.optimLES) {
-    if(!_MMG5_optetLES(mesh,met,octree)) return(0);
+    if(!_MMG5_optetLES(mesh,met,octree)) return 0;
   }
   else {
-    if(!_MMG5_optet(mesh,met,octree)) return(0);
+    if(!_MMG5_optet(mesh,met,octree)) return 0;
   }
-  return(1);
+  return 1;
 }
 
 /**
@@ -1216,7 +1216,7 @@ int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
 
   if ( mesh->info.iso && !_MMG5_chkmani(mesh) ) {
     fprintf(stderr,"\n  ## Non orientable implicit surface. Exit program.\n");
-    return(0);
+    return 0;
   }
   
   /**--- stage 1: geometric mesh only in isotropic case */
@@ -1231,7 +1231,7 @@ int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
       if ( octree )
         /*free octree*/
         _MMG3D_freeOctree(mesh,&octree);
-      return(0);
+      return 0;
     }
   }
 
@@ -1249,7 +1249,7 @@ int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
     if ( octree )
       /*free octree*/
       _MMG3D_freeOctree(mesh,&octree);
-    return(0);
+    return 0;
   }
 
   if ( mesh->info.hgrad > 0. ) {
@@ -1259,19 +1259,19 @@ int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
       if ( octree )
         /*free octree*/
         _MMG3D_freeOctree(mesh,&octree);
-      return(0);
+      return 0;
     }
   }
 
   /*update quality*/
-  if ( !_MMG3D_tetraQual(mesh,met,1) ) return(0);
+  if ( !_MMG3D_tetraQual(mesh,met,1) ) return 0;
 
   if ( !_MMG5_anatet(mesh,met,2,0) ) {
     fprintf(stderr,"\n  ## Unable to split mesh. Exiting.\n");
     if ( octree )
       /*free octree*/
       _MMG3D_freeOctree(mesh,&octree);
-    return(0);
+    return 0;
   }
 
 #ifdef DEBUG
@@ -1284,7 +1284,7 @@ int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
     if ( octree )
       /*free octree*/
       _MMG3D_freeOctree(mesh,&octree);
-    return(0);
+    return 0;
   }
 
   if ( mesh->info.octree > 0 ) {
@@ -1300,7 +1300,7 @@ int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
     if ( octree )
       /*free octree*/
       _MMG3D_freeOctree(mesh,&octree);
-    return(0);
+    return 0;
   }
 
 #ifdef DEBUG
@@ -1313,7 +1313,7 @@ int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
     if ( octree )
       /*free octree*/
       _MMG3D_freeOctree(mesh,&octree);
-    return(0);
+    return 0;
   }
 
   if ( mesh->info.iso && !_MMG5_chkmani(mesh) ) {
@@ -1321,14 +1321,14 @@ int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
     if ( octree )
       /*free octree*/
       _MMG3D_freeOctree(mesh,&octree);
-    return(0);
+    return 0;
   }
 
   if ( octree )
     /*free octree*/
     _MMG3D_freeOctree(mesh,&octree);
 
-  return(1);
+  return 1;
 }
 
 #endif

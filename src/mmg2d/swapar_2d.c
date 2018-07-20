@@ -44,7 +44,7 @@ int _MMG2_swapdelone(MMG5_pMesh mesh,MMG5_pSol sol,int k,char i,double crit,int 
 
   adja = &mesh->adja[3*(k-1)+1];
   k1  = adja[i] / 3;
-  if ( !k1 ) return(0);
+  if ( !k1 ) return 0;
   
   j    = adja[i] % 3;
   j1    = _MMG5_inxt2[j];
@@ -54,7 +54,7 @@ int _MMG2_swapdelone(MMG5_pMesh mesh,MMG5_pSol sol,int k,char i,double crit,int 
   pt1  = &mesh->tria[k1];
 
   if(pt->ref!=pt1->ref) {
-    return(0);
+    return 0;
   }
 
   area1 = MMG2_quickarea(mesh->point[pt->v[0]].c,mesh->point[pt->v[1]].c,mesh->point[pt->v[2]].c);
@@ -69,18 +69,18 @@ int _MMG2_swapdelone(MMG5_pMesh mesh,MMG5_pSol sol,int k,char i,double crit,int 
   pt0->v[2] = pt1->v[j];
   cal1 = _MMG2_caltri_iso(mesh,sol,pt0);
   arean1 = MMG2_quickarea(mesh->point[pt0->v[0]].c,mesh->point[pt0->v[1]].c,mesh->point[pt0->v[2]].c);
-  if ( cal1 > crit )  return(0);
+  if ( cal1 > crit )  return 0;
 
   pt0->v[0] = pt->v[i];
   pt0->v[1] = pt1->v[j];
   pt0->v[2] = pt->v[i2];
   cal2 = _MMG2_caltri_iso(mesh,sol,pt0);
   arean2 = MMG2_quickarea(mesh->point[pt0->v[0]].c,mesh->point[pt0->v[1]].c,mesh->point[pt0->v[2]].c);
-  if ( cal2 > crit )  return(0);
+  if ( cal2 > crit )  return 0;
 
   if ( arean1 < 0.0 || arean2 < 0.0 || fabs((area1+area2)-(arean1+arean2)) > _MMG2_EPSD ) {
     if(mesh->info.ddebug) printf("  ## Warning: non convex configuration\n");
-    return(0);
+    return 0;
   }
 
   /* Update vertices of both triangles */
@@ -120,7 +120,7 @@ int _MMG2_swapdelone(MMG5_pMesh mesh,MMG5_pSol sol,int k,char i,double crit,int 
   mesh->adja[3*(k1-1)+1+j1] = 3*k+i1;
   pt1->edg[j1] = 0;
   
-  return(1);
+  return 1;
 }
 
 /* Check whether swap of edge i in triangle k is valid, and suitable for the mesh */
@@ -134,14 +134,14 @@ int _MMG2_chkswp(MMG5_pMesh mesh, MMG5_pSol met,int k,char i,char typchk) {
   pt  = &mesh->tria[k];
   i1 = _MMG5_inxt2[i];
   i2 = _MMG5_iprv2[i];
-  if ( MG_EDG(pt->tag[i]) || MG_SIN(pt->tag[i]) )  return(0);
+  if ( MG_EDG(pt->tag[i]) || MG_SIN(pt->tag[i]) )  return 0;
 
   ip = pt->v[i];
   ip1 = pt->v[i1];
   ip2 = pt->v[i2];
   
   adja = &mesh->adja[3*(k-1)+1];
-  if ( !adja[i] )  return(0);
+  if ( !adja[i] )  return 0;
   
   kk = adja[i] / 3;
   ii = adja[i] % 3;
@@ -153,7 +153,7 @@ int _MMG2_chkswp(MMG5_pMesh mesh, MMG5_pSol met,int k,char i,char typchk) {
   
   /* If mesh->info.fem : avoid creating a non BDY edge with BDY endpoints */
   if ( mesh->info.fem ) {
-    if ( (mesh->point[ip].tag & MG_BDY) && (mesh->point[iq].tag & MG_BDY) ) return(0);
+    if ( (mesh->point[ip].tag & MG_BDY) && (mesh->point[iq].tag & MG_BDY) ) return 0;
   }
   
   /* Check length in typchk = 2 mode ; prevent swap if the created edge is
@@ -164,7 +164,7 @@ int _MMG2_chkswp(MMG5_pMesh mesh, MMG5_pSol met,int k,char i,char typchk) {
   /*   lona = MMG2D_lencurv(mesh,met,ip,iq); */
   /*   if ( loni > 1.0 )  loni = MG_MIN(1.0 / loni,MMG2_LSHRT); */
   /*   if ( lona > 1.0 )  lona = 1.0 / lona; */
-  /*   if ( lona < loni )  return(0); */
+  /*   if ( lona < loni )  return 0; */
   /* } */
   
   /* Check qualities: see possible bug in mmgs + correct for metric (use in anisotropic?) */
@@ -213,7 +213,7 @@ int _MMG2_chkswp(MMG5_pMesh mesh, MMG5_pSol met,int k,char i,char typchk) {
     calchg = MG_MIN(cal1,cal2);
   }
   
-  return(calchg > 1.01 * calnat);
+  return calchg > 1.01 * calnat;
 }
 
 /* Effective swap of edge i in triangle k */
@@ -223,7 +223,7 @@ int _MMG2_swapar(MMG5_pMesh mesh,int k,char i) {
   char     i1,i2,j,jj,j2,v11,v21;
   
   pt   = &mesh->tria[k];
-  if ( MG_EDG(pt->tag[i]) || MG_SIN(pt->tag[i]) )  return(0);
+  if ( MG_EDG(pt->tag[i]) || MG_SIN(pt->tag[i]) )  return 0;
   
   adja = &mesh->adja[3*(k-1)+1];
   assert(adja[i]);
@@ -269,7 +269,7 @@ int _MMG2_swapar(MMG5_pMesh mesh,int k,char i) {
     mesh->adja[3*(k11-1)+1+v11] = 3*adj+j;
   mesh->adja[3*(adj-1)+1+j]   = 3*k11+v11;
   
-  return(1);
+  return 1;
 }
 
 

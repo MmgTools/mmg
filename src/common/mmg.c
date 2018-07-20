@@ -127,7 +127,7 @@ int _MMG5_countLocalParamAtTri( MMG5_pMesh mesh,_MMG5_iNode **bdryRefs) {
   if ( ier < 0 ) {
     fprintf(stderr,"\n  ## Error: %s: unable to allocate the first boundary"
            " reference node.\n",__func__);
-    return(0);
+    return 0;
   }
   else {
     assert(ier);
@@ -145,7 +145,7 @@ int _MMG5_countLocalParamAtTri( MMG5_pMesh mesh,_MMG5_iNode **bdryRefs) {
     else if ( ier ) ++npar;
   }
 
-  return(npar);
+  return npar;
 }
 
 /**
@@ -172,7 +172,7 @@ int _MMG5_writeLocalParamAtTri( MMG5_pMesh mesh, _MMG5_iNode *bdryRefs,
 
   _MMG5_Free_ilinkedList(mesh,bdryRefs);
 
-  return(1);
+  return 1;
 }
 
 /**

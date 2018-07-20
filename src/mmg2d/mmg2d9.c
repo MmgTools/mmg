@@ -68,7 +68,7 @@ double _MMG2_estavglen(MMG5_pMesh mesh) {
   dna = 1.0 / dna;
   lent *= dna;
 
-  return(lent);
+  return lent;
 }
 
 /** Compute quality of a triangle from the datum of its 3 vertices */
@@ -85,7 +85,7 @@ inline double _MMG2_caltri_iso_3pt(double *a,double *b,double *c) {
 
   /* orientation */
   area = abx*acy - aby*acx;
-  if ( area <= 0.0 ) return(0.0);
+  if ( area <= 0.0 ) return 0.0;
 
   /* edge lengths */
   h1 = abx*abx + aby*aby;
@@ -95,10 +95,10 @@ inline double _MMG2_caltri_iso_3pt(double *a,double *b,double *c) {
   hm = h1 + h2 + h3;
 
   if ( hm > _MMG2_EPSD ) {
-    return ( area / hm );
+    return  area / hm;
   }
   else {
-    return(0.0);
+    return 0.0;
   }
 }
 
@@ -125,10 +125,10 @@ int _MMG2_chkmovmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t) {
         c[i][j] = ppt->c[j]+tau*v[j];
     }
 
-    if( _MMG2_caltri_iso_3pt(c[0],c[1],c[2]) < _MMG2_NULKAL) return(0);  //     Other criteria : eg. a rate of degradation, etc... ?
+    if( _MMG2_caltri_iso_3pt(c[0],c[1],c[2]) < _MMG2_NULKAL) return 0;  //     Other criteria : eg. a rate of degradation, etc... ?
   }
 
-  return(1);
+  return 1;
 }
 
 /* Return the largest fraction t that makes the motion along disp valid */
@@ -145,7 +145,7 @@ short _MMG2_dikomv(MMG5_pMesh mesh,MMG5_pSol disp) {
 
   /* If full displacement can be achieved */
   if ( _MMG2_chkmovmesh(mesh,disp,tmax) )
-    return(tmax);
+    return tmax;
 
   /* Else, find the largest displacement by dichotomy */
   while( tmin != tmax && it < maxit ) {
@@ -155,9 +155,9 @@ short _MMG2_dikomv(MMG5_pMesh mesh,MMG5_pSol disp) {
     if ( t == tmin ) {
       ier = _MMG2_chkmovmesh(mesh,disp,tmax);
       if ( ier )
-        return(tmax);
+        return tmax;
       else
-        return(tmin);
+        return tmin;
     }
 
     /* General case: check move with t */
@@ -170,7 +170,7 @@ short _MMG2_dikomv(MMG5_pMesh mesh,MMG5_pSol disp) {
     it++;
   }
 
-  return(tmin);
+  return tmin;
 }
 
 /** Perform mesh motion along disp, for a fraction t, and the corresponding updates */
@@ -225,7 +225,7 @@ int _MMG2_dispmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t,int itdeg) {
     }
   }
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -297,7 +297,7 @@ int _MMG2_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itdeg,int *war
 
     /* Lack of memory; abort the routine */
     if ( ip < 0 ){
-      return(ns);
+      return ns;
     }
     else if ( ip > 0 ) {
       ier = _MMG2_split1b(mesh,k,imax,ip);
@@ -305,7 +305,7 @@ int _MMG2_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itdeg,int *war
       /* Lack of memory; abort the routine */
       if ( !ier ) {
         _MMG2D_delPt(mesh,ip);
-        return(ns);
+        return ns;
       }
 
       /* if we realloc memory in split1b pt pointer is not valid aymore. */
@@ -323,7 +323,7 @@ int _MMG2_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itdeg,int *war
     }
   }
 
-  return(ns);
+  return ns;
 }
 
 /**
@@ -386,7 +386,7 @@ static int _MMG2_coleltlag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
     }
   }
 
-  return(nc);
+  return nc;
 }
 
 /**
@@ -429,7 +429,7 @@ int _MMG2_swpmshlag(MMG5_pMesh mesh,MMG5_pSol met,double crit,int itdeg) {
   }
   while ( ++it < maxit && ns > 0 );
 
-  return(nns);
+  return nns;
 }
 /** For debugging purposes: save disp */
 int _MMG2D_saveDisp(MMG5_pMesh mesh,MMG5_pSol disp) {
@@ -455,7 +455,7 @@ int _MMG2D_saveDisp(MMG5_pMesh mesh,MMG5_pSol disp) {
   fprintf(out,"\nEnd");
   fclose(out);
   
-  return(1);
+  return 1;
 }
 /**
  * \param mesh pointer toward the mesh structure.
@@ -511,7 +511,7 @@ int _MMG2_movtrilag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
   }
   while (++it < maxit && nm > 0 );
 
-  return(nnm);
+  return nnm;
 }
 
 /* Lagrangian node displacement;
@@ -554,12 +554,12 @@ int MMG2_mmg2d9(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met) {
     /* Extension of the displacement field */
     if ( !_MMG2_velextLS(mesh,disp) ) {
       fprintf(stderr,"\n  ## Problem in func. _MMG2_velextLS. Exit program.\n");
-      return(0);
+      return 0;
     }
 #else
     fprintf(stderr,"\n  ## Error: %s: you need to compile with the USE_ELAS"
             " CMake's flag set to ON to use the rigidbody movement.\n",__func__);
-    return(0);
+    return 0;
 #endif
     //_MMG2D_saveDisp(mesh,disp);
     /* Sequence of dichotomy loops to find the largest admissible displacements */
@@ -576,7 +576,7 @@ int MMG2_mmg2d9(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met) {
       ier = _MMG2_dispmesh(mesh,disp,t,itdc);
       if ( !ier ) {
         fprintf(stdout,"  ** Impossible motion\n");
-        return(0);
+        return 0;
       }
 
       tau = tau + ((double)t /_MMG2_SHORTMAX)*(1.0-tau);
@@ -595,14 +595,14 @@ int MMG2_mmg2d9(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met) {
             nspl = _MMG2_spllag(mesh,disp,met,itdc,&warn);
             if ( nspl < 0 ) {
               fprintf(stdout,"  ## Problem in spllag. Exiting.\n");
-              return(0);
+              return 0;
             }
 
             /* Collapse of points */
             nc = _MMG2_coleltlag(mesh,met,itdc);
             if ( nc < 0 ) {
               fprintf(stdout,"  ## Problem in coltetlag. Exiting.\n");
-              return(0);
+              return 0;
             }
           }
 
@@ -613,7 +613,7 @@ int MMG2_mmg2d9(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met) {
             ns = _MMG2_swpmshlag(mesh,met,1.1,itdc);
             if ( ns < 0 ) {
               fprintf(stdout,"  ## Problem in swaptetlag. Exiting.\n");
-              return(0);
+              return 0;
             }
           }
           /* Relocate vertices of tetra which have been distorted in the displacement process */
@@ -621,7 +621,7 @@ int MMG2_mmg2d9(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met) {
             nm = _MMG2_movtrilag(mesh,met,itdc);
             if ( nm < 0 ) {
               fprintf(stdout,"  ## Problem in movtetlag. Exiting.\n");
-              return(0);
+              return 0;
             }
           }
 
@@ -662,5 +662,5 @@ int MMG2_mmg2d9(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met) {
   /* Clean memory */
   _MMG5_DEL_MEM(mesh,disp->m,(disp->size*(disp->npmax+1))*sizeof(double));
 
-  return(1);
+  return 1;
 }

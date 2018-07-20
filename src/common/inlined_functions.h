@@ -166,7 +166,7 @@ double _MMG5_lenEdg(MMG5_pMesh mesh,int np0,int np1,
               "(%e)\n",__func__,l0);
       mmgWarn = 1;
     }
-    return(0.);
+    return 0.;
   }
   if(l1 < 0.) {
     if ( !mmgWarn ) {
@@ -174,11 +174,11 @@ double _MMG5_lenEdg(MMG5_pMesh mesh,int np0,int np1,
               "(%e)\n",__func__,l1);
       mmgWarn = 1;
     }
-    return(0.);
+    return 0.;
   }
   l0 = 0.5*(sqrt(l0) + sqrt(l1));
 
-  return(l0);
+  return l0;
 }
 
 /**
@@ -244,7 +244,7 @@ double _MMG5_lenSurfEdg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,char i
     m1 = &met->m[6*np1];
   }
 
-  return(_MMG5_lenEdg(mesh,np0,np1,m0,m1,isedg));
+  return _MMG5_lenEdg(mesh,np0,np1,m0,m1,isedg);
 }
 
 
@@ -269,7 +269,7 @@ double _MMG5_lenSurfEdg33_ani(MMG5_pMesh mesh,MMG5_pSol met,
   m0 = &met->m[6*np0];
   m1 = &met->m[6*np1];
 
-  return(_MMG5_lenEdg(mesh,np0,np1,m0,m1,isedg));
+  return _MMG5_lenEdg(mesh,np0,np1,m0,m1,isedg);
 }
 
 /**
@@ -300,7 +300,7 @@ inline double _MMG5_lenSurfEdg_iso(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2
   r = h2 / h1 - 1.0;
   len = fabs(r) < _MMG5_EPS ? l / h1 : l / (h2-h1) * log(r+1.0);
 
-  return(len);
+  return len;
 }
 
 #endif

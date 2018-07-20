@@ -159,7 +159,7 @@ int* _MMG5_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
   if ( !LS_mesh(lsst,npf,0,ntf,ilist) ) {
     fprintf(stderr,"\n  ## Error: %s: problem in fn LS_mesh. Exiting.\n",
             __func__);
-    return(0);
+    return 0;
   }
 
   /* Set verbosity and debug info */
@@ -179,7 +179,7 @@ int* _MMG5_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
     if ( !LS_addVer(lsst,ip,p0->c,p0->ref) ) {
       fprintf(stderr,"\n  ## Error: %s: problem in fn LS_addVer. Exiting.\n",
         __func__);
-      return(0);
+      return 0;
     }
   }
   
@@ -194,7 +194,7 @@ int* _MMG5_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
     if (!LS_addTet(lsst,k,vper,0) ) {
       fprintf(stderr,"\n  ## Error: %s: problem in fn LS_addTet. Exiting.\n",
         __func__);
-      return(0);
+      return 0;
     }
   }
   
@@ -221,7 +221,7 @@ int* _MMG5_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
         if ( !LS_addTri(lsst,ntf,vper,refdirnh) ) {
           fprintf(stderr,"\n  ## Error: %s: problem in fn LS_addTri. Exiting.\n",
                   __func__);
-          return(0);
+          return 0;
         }
       }
       /* iel has no neighbour through face i within list */
@@ -233,7 +233,7 @@ int* _MMG5_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
         if ( !LS_addTri(lsst,ntf,vper,refdirh) ) {
           fprintf(stderr,"\n  ## Error: %s: problem in fn LS_addTri. Exiting.\n",
             __func__);
-          return(0);
+          return 0;
         }
       }
     }
@@ -246,27 +246,27 @@ int* _MMG5_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
   if ( !LS_setBC(lsst,Dirichlet,refdirnh,'f',LS_tri,NULL) ) {
     fprintf(stderr,"\n  ## Error: %s: problem in fn LS_set BC. Exiting.\n",
       __func__);
-    return(0);
+    return 0;
   }
   
   if ( !LS_setBC(lsst,Dirichlet,refdirh,'v',LS_tri,u) ) {
     fprintf(stderr,"\n  ## Error: %s: problem in fn LS_set BC. Exiting.\n",
             __func__);
-    return(0);
+    return 0;
   }
   
   /* Add materials */
   if ( !LS_setLame(lsst,0,_LS_LAMBDA,_LS_MU) ) {
     fprintf(stderr,"\n  ## Error: %s: problem in fn LS_setLame. Exiting.\n",
             __func__);
-    return(0);
+    return 0;
   }
   
   /* Transfer displacement */
   if ( !LS_newSol(lsst) ) {
     fprintf(stderr,"\n  ## Error: %s: problem in fn LS_newSol. Exiting.\n",
             __func__);
-    return(0);
+    return 0;
   }
   
   for(k=1; k<=mesh->np; k++) {
@@ -276,14 +276,14 @@ int* _MMG5_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
     if ( !LS_addSol(lsst,ip,&disp->m[3*k]) ) {
       fprintf(stderr,"\n  ## Error: %s: problem in fn LS_addSol. Exiting.\n",
         __func__);
-      return(0);
+      return 0;
     }
   }
   
   *npfin = npf;
   free(list);
   free(perm);
-  return(invperm);
+  return invperm;
 }
 
 /** Transfer solution from the submesh to the global mesh */
@@ -306,7 +306,7 @@ int _MMG5_unpackLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int npf,int *invper
       disp->m[3*ip+i] = u[3*(k-1)+i];
   }
 
-  return(1);
+  return 1;
 }
 
 /** Extension of the displacement at the nodes of triangles tagged _MMG5_DISPREF */
@@ -321,21 +321,21 @@ int _MMG5_velextLS(MMG5_pMesh mesh,MMG5_pSol disp) {
   if ( !npf ) {
     fprintf(stderr,"\n  ## Error: %s: problem in fn MMG5_packLS. Exiting.\n",
             __func__);
-    return(0);
+    return 0;
   }
   
   /* Resolution of the elasticity system on the submesh */
   if ( !LS_elastic(lsst) ) {
     fprintf(stderr,"\n  ## Error: %s: Problem in fn elasti1. Exiting.\n",
             __func__);
-    return(0);
+    return 0;
   }
   
   /* Update of the displacement */
   if ( !_MMG5_unpackLS(mesh,disp,lsst,npf,invperm) ) {
     fprintf(stderr,"\n  ## Error: %s: problem in fn _MMG5_unpackLS. Exiting.\n",
             __func__);
-    return(0);
+    return 0;
   }
   
   /* Free memory */
@@ -344,10 +344,10 @@ int _MMG5_velextLS(MMG5_pMesh mesh,MMG5_pSol disp) {
   if ( !LS_stop(lsst) ) {
     fprintf(stderr,"\n  ## Error: %s: problem in fn LS_stop. Exiting.\n",
             __func__);
-    return(0);
+    return 0;
   }
   
-  return(1);
+  return 1;
 }
 
 #endif

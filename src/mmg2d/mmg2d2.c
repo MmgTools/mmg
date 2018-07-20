@@ -89,9 +89,9 @@ int MMG2_removeBBtriangles(MMG5_pMesh mesh) {
   else {
     fprintf(stderr,"\n  ## Error: %s: procedure failed :"
             " %d indetermined triangles.\n",__func__,nd);
-    return(0);
+    return 0;
   }
-  return(1);
+  return 1;
 }
 
 /* Set tag to triangles in the case where there are no constrained edge
@@ -124,7 +124,7 @@ int MMG2_settagtriangles(MMG5_pMesh mesh,MMG5_pSol sol) {
   }
   while (nd && ++iter<maxiter);
 
-  return(1);
+  return 1;
 }
 
 /* Find out whether triangle pt is inside or outside (i.e. contains bb points or not) */
@@ -145,11 +145,11 @@ int MMG2_findtrianglestate(MMG5_pMesh mesh,int k,int ip1,int ip2,int ip3,int ip4
   if ( nb ) {
     pt->base = -base;
     pt->ref = 3;
-    return(-base);
+    return -base;
   }
   else {
     pt->base = base;
-    return(base);
+    return base;
   }
 }
 
@@ -203,7 +203,7 @@ int MMG2_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
             fprintf(stderr,"\n  ## Error: %s: unable to find triangle"
                     " for at least vertex %d.\n",__func__,k);
           }
-          return(0);
+          return 0;
         }
       }
 
@@ -479,7 +479,7 @@ int MMG2_markSD(MMG5_pMesh mesh) {
     }
   }
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -637,7 +637,7 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
   adja[1] = 3*jel + 2;
 
   /* Insertion of vertices in the mesh */
-  if ( !MMG2_insertpointdelone(mesh,sol) ) return(0);
+  if ( !MMG2_insertpointdelone(mesh,sol) ) return 0;
 
   fprintf(stdout,"  -- END OF INSERTION PHASE\n");
 
@@ -645,7 +645,7 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
   if ( !MMG2_bdryenforcement(mesh,sol) ) {
     fprintf(stderr,"\n  ## Error: %s: unable to enforce the boundaries.\n",
       __func__);
-    return(0);
+    return 0;
   }
 
   if(mesh->info.ddebug)
@@ -657,9 +657,9 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
   }
   else {
     /* Tag triangles : in = base ; out = -base ; Undetermined = 0*/
-    if ( !MMG2_settagtriangles(mesh,sol) ) return(0);
-    if ( !MMG2_removeBBtriangles(mesh) ) return(0);
+    if ( !MMG2_settagtriangles(mesh,sol) ) return 0;
+    if ( !MMG2_removeBBtriangles(mesh) ) return 0;
   }
 
-  return(1);
+  return 1;
 }

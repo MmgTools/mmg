@@ -83,13 +83,13 @@ int _MMG5_boulevolp (MMG5_pMesh mesh, int start, int ip, int * list){
         if ( pt1->v[j] == nump )  break;
       assert(j<4);
       /* overflow */
-      if ( ilist > MMG3D_LMAX-3 )  return(0);
+      if ( ilist > MMG3D_LMAX-3 )  return 0;
       list[ilist] = 4*k1+j;
       ilist++;
     }
     cur++;
   }
-  return(ilist);
+  return ilist;
 }
 
 /**
@@ -252,7 +252,7 @@ int _MMG5_boulenm(MMG5_pMesh mesh,int start,int ip,int iface,
   }
   while ( 4*k+iopp != fstart );
 
-  if ( (nr > 0 && nnm > 0) || nnm != 2 )  return(0);
+  if ( (nr > 0 && nnm > 0) || nnm != 2 )  return 0;
 
   dd = n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
   if ( dd > _MMG5_EPSD2 ) {
@@ -262,7 +262,7 @@ int _MMG5_boulenm(MMG5_pMesh mesh,int start,int ip,int iface,
     n[2] *= dd;
   }
   assert( ip0 && ip1 );
-  if ( ip0 == ip1 )  return(0);
+  if ( ip0 == ip1 )  return 0;
 
   p0 = &mesh->point[ip0];
   p1 = &mesh->point[ip1];
@@ -305,7 +305,7 @@ int _MMG5_boulenm(MMG5_pMesh mesh,int start,int ip,int iface,
     t[2] *= dd;
   }
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -336,7 +336,7 @@ int _MMG5_boulernm(MMG5_pMesh mesh, int start, int ip, int *ng, int *nr){
   hash.siz  = mesh->np;
   hash.max  = hmax + 1;
   hash.nxt  = hash.siz;
-  _MMG5_ADD_MEM(mesh,(hash.max+1)*sizeof(_MMG5_hedge),"hash table",return(-1));
+  _MMG5_ADD_MEM(mesh,(hash.max+1)*sizeof(_MMG5_hedge),"hash table",return -1);
   _MMG5_SAFE_CALLOC(hash.item,hash.max+1,_MMG5_hedge,-1);
 
   for (k=hash.siz; k<hash.max; k++)
@@ -430,7 +430,7 @@ int _MMG5_boulernm(MMG5_pMesh mesh, int start, int ip, int *ng, int *nr){
         if ( pt1->v[j] == nump )  break;
       assert(j<4);
       /* overflow */
-      if ( ilist > MMG3D_LMAX-3 )  return(0);
+      if ( ilist > MMG3D_LMAX-3 )  return 0;
       list[ilist] = 4*k1+j;
       ilist++;
     }
@@ -440,7 +440,7 @@ int _MMG5_boulernm(MMG5_pMesh mesh, int start, int ip, int *ng, int *nr){
   /* Free the edge hash table */
   _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
 
-  return(ns);
+  return ns;
 }
 
 /**
@@ -507,7 +507,7 @@ int _MMG5_boulesurfvolp(MMG5_pMesh mesh,int start,int ip,int iface,
         mmgErr0 = 1;
       }
 
-      return(-1);
+      return -1;
     }
 
     aux = nb;
@@ -591,7 +591,7 @@ int _MMG5_boulesurfvolp(MMG5_pMesh mesh,int start,int ip,int iface,
                   " or/and the maximum mesh.\n");
           mmgErr1 = 1;
         }
-        return(-1);
+        return -1;
       }
       listv[(*ilistv)] = 4*k1+j;
       (*ilistv)++;
@@ -599,7 +599,7 @@ int _MMG5_boulesurfvolp(MMG5_pMesh mesh,int start,int ip,int iface,
     cur++;
   }
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -777,7 +777,7 @@ int _MMG5_bouletrid(MMG5_pMesh mesh,int start,int iface,int ip,int *il1,int *l1,
     assert(pt->xt);
     pxt     = &mesh->xtetra[pt->xt];
 
-    if ( (*ilist2) > MMG3D_LMAX-2 )  return(0);
+    if ( (*ilist2) > MMG3D_LMAX-2 )  return 0;
     list2[(*ilist2)] = 4*k+ifac;
     (*ilist2)++;
 
@@ -803,7 +803,7 @@ int _MMG5_bouletrid(MMG5_pMesh mesh,int start,int iface,int ip,int *il1,int *l1,
     assert(pt->xt);
     pxt     = &mesh->xtetra[pt->xt];
 
-    if ( (*ilist1) > MMG3D_LMAX-2 )  return(0);
+    if ( (*ilist1) > MMG3D_LMAX-2 )  return 0;
     list1[(*ilist1)] = 4*k+ifac;
     (*ilist1)++;
 
@@ -1072,7 +1072,7 @@ int _MMG5_coquil(MMG5_pMesh mesh,int start,int ia,int * list) {
 
   while ( adj && (adj != start) ) {
     pt = &mesh->tetra[adj];
-    if ( pt->tag & MG_REQ )  return(0);
+    if ( pt->tag & MG_REQ )  return 0;
 
     /* identification of edge number in tetra adj */
     if ( !MMG3D_findEdge(mesh,pt,adj,na,nb,0,&mmgErr1,&i) ) return -1;
@@ -1107,7 +1107,7 @@ int _MMG5_coquil(MMG5_pMesh mesh,int start,int ia,int * list) {
 
   /* At this point, the first travel, in one direction, of the shell is
      complete. Now, analyze why the travel ended. */
-  if ( adj == start )  return(2*ilist);
+  if ( adj == start )  return 2*ilist;
   assert(!adj); // a boundary has been detected
 
   adj = list[ilist-1] / 6;
@@ -1143,7 +1143,7 @@ int _MMG5_coquil(MMG5_pMesh mesh,int start,int ia,int * list) {
   while ( adj ) {
     adj /= 4;
     pt = &mesh->tetra[adj];
-    if ( pt->tag & MG_REQ )  return(0);
+    if ( pt->tag & MG_REQ )  return 0;
 
     /* identification of edge number in tetra adj */
     if ( !MMG3D_findEdge(mesh,pt,adj,na,nb,0,&mmgErr1,&i) ) return -1;
@@ -1160,7 +1160,7 @@ int _MMG5_coquil(MMG5_pMesh mesh,int start,int ia,int * list) {
                 " or/and the maximum mesh.\n");
         mmgErr0 = 1;
       }
-      return(-1);
+      return -1;
     }
 
     /* set new triangle for travel */
@@ -1175,7 +1175,7 @@ int _MMG5_coquil(MMG5_pMesh mesh,int start,int ia,int * list) {
     }
   }
   assert(!adj);
-  return( 2*ilist+1 );
+  return  2*ilist+1 ;
 }
 
 /**
@@ -1509,7 +1509,7 @@ int _MMG5_coquilface(MMG5_pMesh mesh,int start,char iface,int ia,int *list,
 
     if ( !nbdy ) {
       _MMG5_coquilFaceErrorMessage(mesh, (*it1)/4, (*it2)/4);
-      return(-1);
+      return -1;
     } else if ( nbdy > 1 ) {
       if ( !silent ) {
         if ( !mmgWarn0 ) {
@@ -1530,7 +1530,7 @@ int _MMG5_coquilface(MMG5_pMesh mesh,int start,char iface,int ia,int *list,
   }
 
   /* A boundary has been detected : slightly different configuration */
-  if ( !hasadja ) return(2*ilist+1);
+  if ( !hasadja ) return 2*ilist+1;
 
   /* Start back everything from this tetra adj */
   _MMG3D_coquilFaceSecondLoopInit(mesh,piv,&iface,&i,list,&ilist,it1,
@@ -1565,7 +1565,7 @@ int _MMG5_coquilface(MMG5_pMesh mesh,int start,char iface,int ia,int *list,
     _MMG5_coquilFaceErrorMessage(mesh, (*it1)/4, (*it2)/4);
     return -1;
   }
-  return ( 2*ilist+1 );
+  return  2*ilist+1;
 }
 
 /**

@@ -180,10 +180,10 @@ int _MMG2_movedgpt(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list, char impro
     calnew = MG_MIN(MMG2D_caltri(mesh,met,pt0),calnew);
   }
   
-  if ( calold < _MMG2_NULKAL && calnew <= calold ) return(0);
-  else if ( calnew < _MMG2_NULKAL ) return(0);
-  else if ( improve && calnew < 1.02 * calold ) return(0);
-  else if ( calnew < 0.3 * calold ) return(0);
+  if ( calold < _MMG2_NULKAL && calnew <= calold ) return 0;
+  else if ( calnew < _MMG2_NULKAL ) return 0;
+  else if ( improve && calnew < 1.02 * calold ) return 0;
+  else if ( calnew < 0.3 * calold ) return 0;
   
   /* Update of the coordinates and normal of the point */
   p0 = &mesh->point[pt->v[i]];
@@ -193,7 +193,7 @@ int _MMG2_movedgpt(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list, char impro
   p0->n[0] = no[0];
   p0->n[1] = no[1];
   
-  return(1);
+  return 1;
 }
 
 /**
@@ -248,7 +248,7 @@ int _MMG2_movintpt(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list,char improv
     calold = MG_MIN(_MMG2_caltri_iso(mesh,NULL,pt),calold);
   }
   
-  if ( volbal < _MMG5_EPSD ) return(0);
+  if ( volbal < _MMG5_EPSD ) return 0;
   volbal = 1.0 / volbal;
   b[0] *= volbal;
   b[1] *= volbal;
@@ -267,10 +267,10 @@ int _MMG2_movintpt(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list,char improv
     calnew = MG_MIN(_MMG2_caltri_iso(mesh,NULL,pt0),calnew);
   }
     
-  if (calold < _MMG2_NULKAL && calnew <= calold) return(0);
-  else if (calnew < _MMG2_NULKAL) return(0);
-  else if ( improve && calnew < 1.02 * calold ) return(0);
-  else if ( calnew < 0.3 * calold ) return(0);
+  if (calold < _MMG2_NULKAL && calnew <= calold) return 0;
+  else if (calnew < _MMG2_NULKAL) return 0;
+  else if ( improve && calnew < 1.02 * calold ) return 0;
+  else if ( calnew < 0.3 * calold ) return 0;
   
   /* Update of the coordinates of the point */
   pt = &mesh->tria[list[0]/3];
@@ -279,5 +279,5 @@ int _MMG2_movintpt(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list,char improv
   p0->c[0] = b[0];
   p0->c[1] = b[1];
   
-  return(1);
+  return 1;
 }

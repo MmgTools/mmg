@@ -88,7 +88,7 @@ int _MMG2_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list,char im
   
   /* Preconditionning of the gradient gr = M^{-1}gr */
   det = m0[0]*m0[2]-m0[1]*m0[1];
-  if ( det < _MMG5_EPSD ) return(0);
+  if ( det < _MMG5_EPSD ) return 0;
   det = 1.0 / det;
   
   grp[0] = det*(m0[2]*gr[0]-m0[1]*gr[1]);
@@ -131,7 +131,7 @@ int _MMG2_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list,char im
      the new point is inside the triangle */
   det = (p1->c[0]-p0->c[0])*(p2->c[1]-p0->c[1]) - (p1->c[1]-p0->c[1])*(p2->c[0]-p0->c[0]);
   ps = ps1+ps2;
-  if ( ps < _MMG5_EPSD ) return(0);
+  if ( ps < _MMG5_EPSD ) return 0;
   alpha = det / ps;
   
   ppt0->c[0] = p0->c[0] + alpha*step*grp[0];
@@ -150,15 +150,15 @@ int _MMG2_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list,char im
     calnew = MG_MIN(MMG2D_caltri(mesh,met,pt0),calnew);
   }
   
-  if (calold < _MMG2_NULKAL && calnew <= calold) return(0);
-  else if (calnew < _MMG2_NULKAL) return(0);
-  else if ( improve && calnew < 1.02 * calold ) return(0);
-  else if ( calnew < 0.3 * calold ) return(0);
+  if (calold < _MMG2_NULKAL && calnew <= calold) return 0;
+  else if (calnew < _MMG2_NULKAL) return 0;
+  else if ( improve && calnew < 1.02 * calold ) return 0;
+  else if ( calnew < 0.3 * calold ) return 0;
   
   /* Update of the coordinates of the point */
   p0 = &mesh->point[pt->v[i]];
   p0->c[0] = ppt0->c[0];
   p0->c[1] = ppt0->c[1];
   
-  return(1);
+  return 1;
 }

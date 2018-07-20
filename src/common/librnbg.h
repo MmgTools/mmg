@@ -46,7 +46,7 @@
 
 #define SCOTCH_6 !strcmp(TOSTRING(SCOTCH_VERSION),"6")
 
-#define CHECK_SCOTCH(t,m,e) if(0!=t){perror(m);return(e);}
+#define CHECK_SCOTCH(t,m,e) if(0!=t){perror(m);return e;}
 
 typedef struct MeshGraphHash_ {
   int vertNum;

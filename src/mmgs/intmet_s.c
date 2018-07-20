@@ -59,7 +59,7 @@ int intregmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,double mr[6]) 
 
   pt  = &mesh->tria[k];
 
-  return(_MMG5_interpreg_ani(mesh,met,pt,i,s,mr));
+  return _MMG5_interpreg_ani(mesh,met,pt,i,s,mr);
 }
 
 /**
@@ -85,7 +85,7 @@ int intmet_iso(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s) {
   ip1 = pt->v[i1];
   ip2 = pt->v[i2];
   met->m[ip] = s * (met->m[ip1] + met->m[ip2]);
-  return(1);
+  return 1;
 }
 
 /**
@@ -119,12 +119,12 @@ int intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s) {
     ppt = &mesh->point[ip];
     assert(ppt->xp);
     go = &mesh->xpoint[ppt->xp];
-    return(_MMG5_intridmet(mesh,met,ip1,ip2,s,go->n1,m));
+    return _MMG5_intridmet(mesh,met,ip1,ip2,s,go->n1,m);
   }
   else {
-    return(intregmet(mesh,met,k,i,s,m));
+    return intregmet(mesh,met,k,i,s,m);
   }
-  return(1);
+  return 1;
 }
 
 /**
@@ -155,5 +155,5 @@ int _MMGS_intmet33_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double 
   n   = &met->m[6*ip2];
   mr  = &met->m[6*ip];
 
-  return(_MMG5_mmgIntmet33_ani(m,n,mr,s));
+  return _MMG5_mmgIntmet33_ani(m,n,mr,s);
 }

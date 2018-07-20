@@ -54,7 +54,7 @@
 /*   det = m[0]*m[2] - m[1]*m[1]; */
 /*   if ( fabs(det) < _MMG5_EPS*_MMG5_EPS ) { */
 /*     fprintf(stderr,"\n  ## Error: %s: null metric det : %E \n",__func__,det); */
-/*     return(0); */
+/*     return 0; */
 /*   } */
 /*   det = 1.0 / det; */
 
@@ -70,7 +70,7 @@
   /* if ( lambda[0] < 0.0 ) { */
   /*   fprintf(stderr,"\n  ## Error: %s: Les valeurs propres : %f \n", */
   /*            __func__,lambda[0]); */
-  /*   return(0); */
+  /*   return 0; */
   /* } */
 
 /*   /\** First case : matrices m and n are homothetic = n = lambda0*m *\/ */
@@ -81,13 +81,13 @@
 /*       mr[0] = m[0]; */
 /*       mr[1] = m[1]; */
 /*       mr[2] = m[2]; */
-/*       return(1); */
+/*       return 1; */
 /*     } */
 /*     dd = lambda[0] / dd; */
 /*     mr[0] = dd * m[0]; */
 /*     mr[1] = dd * m[1]; */
 /*     mr[2] = dd * m[2]; */
-/*     return(1); */
+/*     return 1; */
 /*   } */
 
 /*   /\** Second case : both eigenvalues of imn are distinct ; theory says qf */
@@ -147,7 +147,7 @@
 
 /*     /\* Intersected metric = tP^-1 diag(d0,d1)P^-1, P = (vp0, vp1) stored in columns *\/ */
 /*     det = vp0[0]*vp1[1] - vp0[1]*vp1[0]; */
-/*     if ( fabs(det) < _MMG5_EPS )  return(0); */
+/*     if ( fabs(det) < _MMG5_EPS )  return 0; */
 /*     det = 1.0 / det; */
 
 /*     ip[0] =  vp1[1]*det; */
@@ -160,7 +160,7 @@
 /*     mr[2] = d0*ip[1]*ip[1] + d1*ip[3]*ip[3]; */
 /*   } */
 
-/*   return(1); */
+/*   return 1; */
 /* } */
 
 /**
@@ -190,11 +190,11 @@ int _MMG5_mmgIntmet33_ani(double *m,double *n,double *mr,double s) {
               " 1 metric.\n",__func__);
       mmgWarn = 1;
     }
-    return(0);
+    return 0;
   }
 
   for (i=0; i<3; i++) {
-    if ( lambda[i] < _MMG5_EPSD ) return(0);
+    if ( lambda[i] < _MMG5_EPSD ) return 0;
     lambda[i] = sqrt(lambda[i]);
     lambda[i] = 1.0 / lambda[i];
   }
@@ -236,7 +236,7 @@ int _MMG5_mmgIntmet33_ani(double *m,double *n,double *mr,double s) {
               " 1 metric.\n",__func__);
       mmgWarn = 1;
     }
-    return(0);
+    return 0;
   }
 
   /* P = is * (vp) */
@@ -253,14 +253,14 @@ int _MMG5_mmgIntmet33_ani(double *m,double *n,double *mr,double s) {
   /* At this point, theory states that ^tPMP = I, {^t}PNP=\Lambda */
   /* Linear interpolation between sizes */
   for(i=0; i<3; i++) {
-    if ( lambda[i] < 0.0 ) return(0);
+    if ( lambda[i] < 0.0 ) return 0;
     dd = s*sqrt(lambda[i]) + (1.0-s);
     dd = dd*dd;
-    if ( dd < _MMG5_EPSD )  return(0);
+    if ( dd < _MMG5_EPSD )  return 0;
     mu[i] = lambda[i]/dd;
   }
 
-  if ( !_MMG5_invmatg(P,mt) )  return(0);
+  if ( !_MMG5_invmatg(P,mt) )  return 0;
 
   /* Resulting matrix = ^tP^{-1} diag(mu) P^{-1} */
   mr[0] = mu[0]*mt[0]*mt[0] + mu[1]*mt[3]*mt[3] + mu[2]*mt[6]*mt[6];
@@ -270,7 +270,7 @@ int _MMG5_mmgIntmet33_ani(double *m,double *n,double *mr,double s) {
   mr[4] = mu[0]*mt[1]*mt[2] + mu[1]*mt[4]*mt[5] + mu[2]*mt[7]*mt[8];
   mr[5] = mu[0]*mt[2]*mt[2] + mu[1]*mt[5]*mt[5] + mu[2]*mt[8]*mt[8];
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -591,7 +591,7 @@ int _MMG5_intridmet(MMG5_pMesh mesh,MMG5_pSol met,int ip1, int ip2,double s,
   }
   mr[5] = 0.0;
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -608,7 +608,7 @@ int _MMG5_interp_iso(double *ma,double *mb,double *mp,double t) {
 
   *mp = (1.0-t)*(*ma) + t*(*mb);
 
-  return(1);
+  return 1;
 
 }
 
@@ -644,7 +644,7 @@ int _MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,char i,
   p1  = &mesh->point[ip1];
   p2  = &mesh->point[ip2];
 
-  if ( !_MMG5_bezierCP(mesh,pt,&b,1) )  return(0);
+  if ( !_MMG5_bezierCP(mesh,pt,&b,1) )  return 0;
 
   n1 = &b.n[i1][0];
   n2 = &b.n[i2][0];
@@ -670,7 +670,7 @@ int _MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,char i,
   else {
     if ( MG_GEO & p1->tag ) {
       _MMG5_nortri(mesh,pt,nt);
-      if ( !_MMG5_buildridmetnor(mesh,met,pt->v[i1],nt,m1) )  return(0);
+      if ( !_MMG5_buildridmetnor(mesh,met,pt->v[i1],nt,m1) )  return 0;
     }
     else {
       memcpy(m1,&met->m[6*ip1],6*sizeof(double));
@@ -691,13 +691,13 @@ int _MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,char i,
       n[1] = (1.0-u)*(1.0-u)*n1[1] + 2.0*u*(1.0-u)*bn[1] + u*u*n2[1];
       n[2] = (1.0-u)*(1.0-u)*n1[2] + 2.0*u*(1.0-u)*bn[2] + u*u*n2[2];
       dd   = n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
-      if ( dd < _MMG5_EPSD )  return(0);
+      if ( dd < _MMG5_EPSD )  return 0;
       dd = 1.0 / sqrt(dd);
       n[0] *= dd;
       n[1] *= dd;
       n[2] *= dd;
 
-      if ( !_MMG5_paratmet(cold,nold,m1old,c,n,m1) )  return(0);
+      if ( !_MMG5_paratmet(cold,nold,m1old,c,n,m1) )  return 0;
 
       memcpy(cold,c,3*sizeof(double));
       memcpy(nold,n,3*sizeof(double));
@@ -725,7 +725,7 @@ int _MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,char i,
   else {
     if ( p2->tag & MG_GEO ) {
       _MMG5_nortri(mesh,pt,nt);
-      if ( !_MMG5_buildridmetnor(mesh,met,pt->v[i2],nt,m2))  return(0);
+      if ( !_MMG5_buildridmetnor(mesh,met,pt->v[i2],nt,m2))  return 0;
     }
     else {
       memcpy(m2,&met->m[6*ip2],6*sizeof(double));
@@ -746,13 +746,13 @@ int _MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,char i,
       n[1] = (1.0-u)*(1.0-u)*n1[1] + 2.0*u*(1.0-u)*bn[1] + u*u*n2[1];
       n[2] = (1.0-u)*(1.0-u)*n1[2] + 2.0*u*(1.0-u)*bn[2] + u*u*n2[2];
       dd = n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
-      if ( dd < _MMG5_EPSD )  return(0);
+      if ( dd < _MMG5_EPSD )  return 0;
       dd = 1.0 / sqrt(dd);
       n[0] *= dd;
       n[1] *= dd;
       n[2] *= dd;
 
-      if ( !_MMG5_paratmet(cold,nold,m2old,c,n,m2) )  return(0);
+      if ( !_MMG5_paratmet(cold,nold,m2old,c,n,m2) )  return 0;
 
       memcpy(cold,c,3*sizeof(double));
       memcpy(nold,n,3*sizeof(double));
@@ -763,7 +763,7 @@ int _MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,char i,
      transported metric tensors from p1 and p2 to p(s) */
 
   /* Rotate both matrices to the tangent plane */
-  if ( !_MMG5_rotmatrix(n,r) )  return(0);
+  if ( !_MMG5_rotmatrix(n,r) )  return 0;
   _MMG5_rmtr(r,m1,m1old);
   _MMG5_rmtr(r,m2,m2old);
 
@@ -774,7 +774,7 @@ int _MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,char i,
       fprintf(stderr,"\n  ## Warning: %s: at least 1 impossible metric"
               " interpolation.\n", __func__);
     }
-    return(0);
+    return 0;
   }
 
   /* End rotating back tangent metric into canonical basis of R^3 : mr =
@@ -799,6 +799,6 @@ int _MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,char i,
 
   memcpy(mr,m1old,6*sizeof(double));
 
-  return(1);
+  return 1;
 
 }

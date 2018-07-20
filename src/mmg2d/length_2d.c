@@ -38,7 +38,7 @@ double long_iso(double *ca,double *cb,double *ma,double *mb) {
   else
     len = dd * (1.0/ha + 1.0/hb + 8.0 / (ha+hb)) / 6.0;
 
-  return(len);
+  return len;
 }
 
 
@@ -55,7 +55,7 @@ double long_ani(double *ca,double *cb,double *ma,double *mb) {
 
   len = (sqrt(dd1)+sqrt(dd2)+4.0*sqrt(0.5*(dd1+dd2))) / 6.0;
 
-  return(len);
+  return len;
 }
 
 /** Calculate length of a curve in the considered isotropic metric */
@@ -74,7 +74,7 @@ double _MMG2_lencurv_iso(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2) {
   r = h2 / h1 - 1.0;
   len = ( fabs(r) < _MMG5_EPS ) ? ( l/h1 ) : ( l / (h2-h1) * log1p(r) );
     
-  return(len);
+  return len;
 }
 
 /* Calculate length of a curve in the considered anisotropic metric by using a two-point quadrature formula */
@@ -117,7 +117,7 @@ double _MMG2_lencurv_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2) {
   
   len = 0.5*(l1+l2);
 
-  return(len);
+  return len;
 }
 
 /* print histo of edge lengths */
@@ -197,5 +197,5 @@ int MMG2_prilen(MMG5_pMesh mesh,MMG5_pSol sol) {
 			   iamax, ibmax, lmax,nullEdge, &bd[0], &hl[0],0);
 
 
-  return(1);
+  return 1;
 }

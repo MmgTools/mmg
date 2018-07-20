@@ -162,7 +162,7 @@ int _MMG5_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree, int
   }
 
   _MMG5_SAFE_FREE(callist);
-  return(1);
+  return 1;
 }
 
 /**

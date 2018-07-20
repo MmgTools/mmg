@@ -78,7 +78,7 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
   if ( pt->xt ) {
     pxt = &mesh->xtetra[pt->xt];
     if ( (pxt->edg[ia]>0) || MG_EDG(pxt->tag[ia]) || (pxt->tag[ia] & MG_REQ) ||
-         (pxt->tag[ia] & MG_NOM) )  return(0);
+         (pxt->tag[ia] & MG_NOM) )  return 0;
   }
 
   /* No swap when either internal or external component has only 1 element */
@@ -93,7 +93,7 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
       else
         nplus++;
     }
-    if ( nplus == 1 || nminus == 1 )  return(0);
+    if ( nplus == 1 || nminus == 1 )  return 0;
   }
   iel1 = it1 / 4;
   ifa1 = it1 % 4;
@@ -129,7 +129,7 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
   /* Here we put ANGEDG because in nr mode the test over dhd may create inverted
    * tetra */
   if ( ps < _MMG5_ANGEDG ) {
-    return(0);
+    return 0;
   }
 
   /* Check normal deviation with neighbours */
@@ -140,7 +140,7 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
     else if ( !ier ) return 0;
     ps = b0[0]*n[0] + b0[1]*n[1] + b0[2]*n[2];
 
-    if ( ps < mesh->info.dhd )  return(0);
+    if ( ps < mesh->info.dhd )  return 0;
   }
 
   if ( !( (tt2.tag[_MMG5_inxt2[ia2]] & MG_GEO ) ||
@@ -150,7 +150,7 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
     else if ( !ier ) return 0;
     ps = b0[0]*n[0] + b0[1]*n[1] + b0[2]*n[2];
 
-    if ( ps < mesh->info.dhd )  return(0);
+    if ( ps < mesh->info.dhd )  return 0;
   }
 
   if ( ! ( (tt1.tag[_MMG5_inxt2[ia1]] & MG_GEO ) ||
@@ -160,7 +160,7 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
     else if ( !ier ) return 0;
     ps = b1[0]*n[0] + b1[1]*n[1] + b1[2]*n[2];
 
-    if ( ps < mesh->info.dhd )  return(0);
+    if ( ps < mesh->info.dhd )  return 0;
   }
 
   if ( ! ( (tt2.tag[_MMG5_iprv2[ia2]] & MG_GEO ) ||
@@ -170,7 +170,7 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
     else if ( !ier ) return 0;
     ps = b1[0]*n[0] + b1[1]*n[1] + b1[2]*n[2];
 
-    if ( ps < mesh->info.dhd )  return(0);
+    if ( ps < mesh->info.dhd )  return 0;
   }
 
   /* Compare contributions to Hausdorff distance in both configurations */
@@ -298,7 +298,7 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
   dischg = MG_MAX(dischg,c[0]*c[0] + c[1]*c[1] + c[2]*c[2]);
   dischg = MG_MAX(dischg,hausd * hausd);
 
-  if ( dischg > disnat )   return(0);
+  if ( dischg > disnat )   return 0;
 
   if ( typchk==1 && met->size > 1 && met->m ) {
     cal1 = _MMG5_caltri33_ani(mesh,met,&tt1);
@@ -325,7 +325,7 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
   }
 
   calchg = MG_MIN(cal1,cal2);
-  if ( calchg < 1.01 * calnat )  return(0);
+  if ( calchg < 1.01 * calnat )  return 0;
 
   /* Check mechanical validity of forthcoming operations */
   p0 = &mesh->point[np];
@@ -337,11 +337,11 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
   if ( met->m ) {
     if ( typchk == 1 && (met->size>1) ) {
       if ( _MMG3D_intmet33_ani(mesh,met,list[0]/6,list[0]%6,0,0.5) <= 0 )
-        return(0);
+        return 0;
     }
     else {
       if ( _MMG5_intmet(mesh,met,list[0]/6,list[0]%6,0,0.5) <= 0 )
-        return(0);
+        return 0;
     }
   }
 
@@ -372,7 +372,7 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
       caltmp = _MMG5_orcal(mesh,met,0);
 
 
-    if ( caltmp < _MMG5_NULKAL )  return(0);
+    if ( caltmp < _MMG5_NULKAL )  return 0;
 
     if ( !isshell ) {
       pt0->v[ip] = na1;
@@ -392,7 +392,7 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
     else
       caltmp = _MMG5_orcal(mesh,met,0);
 
-    if ( caltmp < _MMG5_NULKAL )  return(0);
+    if ( caltmp < _MMG5_NULKAL )  return 0;
 
     if ( !isshell ) {
       pt0->v[iq] = na1;
@@ -405,10 +405,10 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
       calnew = MG_MIN(calnew,caltmp);
     }
   }
-  if ( calold < _MMG5_EPSOK && calnew <= calold )  return(0);
-  else if ( calnew < 0.3 * calold )  return(0);
+  if ( calold < _MMG5_EPSOK && calnew <= calold )  return 0;
+  else if ( calnew < 0.3 * calold )  return 0;
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -479,15 +479,15 @@ int _MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,
                         fprintf(stderr,"\n  ## Error: %s: unable to allocate a"
                                " new point\n",__func__);
                         _MMG5_INCREASE_MEM_MESSAGE();
-                        return(-1)
+                        return -1
                         ,c,MG_BDY,-1);
   }
   if ( met->m ) {
     if ( typchk == 1 && (met->size>1) ) {
-      if ( _MMG3D_intmet33_ani(mesh,met,iel,ia,nm,0.5)<=0 )  return(0);
+      if ( _MMG3D_intmet33_ani(mesh,met,iel,ia,nm,0.5)<=0 )  return 0;
     }
     else {
-      if ( _MMG5_intmet(mesh,met,iel,ia,nm,0.5)<=0 )  return(0);
+      if ( _MMG5_intmet(mesh,met,iel,ia,nm,0.5)<=0 )  return 0;
     }
   }
 
@@ -499,11 +499,11 @@ int _MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,
   if ( ier < 0 ) {
     fprintf(stderr,"\n  ## Warning: %s: unable to swap boundary edge.\n",
       __func__);
-    return(-1);
+    return -1;
   }
   else if ( !ier )  {
     _MMG3D_delPt(mesh,nm);
-    return(0);
+    return 0;
   }
 
   /* Collapse m on na after taking (new) ball of m */
@@ -515,7 +515,7 @@ int _MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,
   if ( pt1->v[im] != nm ){
     _MMG3D_delPt(mesh,nm);
     fprintf(stderr,"\n  # Warning: %s: pt1->v[im] != nm.\n",__func__);
-    return(0);
+    return 0;
   }
   ilist = _MMG5_boulevolp(mesh,iel1,im,list);
 
@@ -526,14 +526,14 @@ int _MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,
   if ( ier < 0 ) {
     fprintf(stderr,"\n  ## Warning: %s: unable to swap boundary edge.\n",
       __func__);
-    return(-1);
+    return -1;
   }
   else if ( ier ) {
     _MMG3D_delPt(mesh,ier);
     ier = 1;
   }
 
-  return(ier);
+  return ier;
 }
 
 /**

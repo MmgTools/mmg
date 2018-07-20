@@ -39,7 +39,7 @@ int _MMG2D_newPt(MMG5_pMesh mesh,double c[2],int16_t tag) {
   MMG5_pPoint  ppt;
   int     curpt;
 
-  if ( !mesh->npnil )  return(0);
+  if ( !mesh->npnil )  return 0;
 
   curpt = mesh->npnil;
   if ( mesh->npnil > mesh->np )  mesh->np = mesh->npnil;
@@ -50,7 +50,7 @@ int _MMG2D_newPt(MMG5_pMesh mesh,double c[2],int16_t tag) {
   ppt->tmp    = 0;
   ppt->tag = tag;
 
-  return(curpt);
+  return curpt;
 }
 
 /* Delete a point in the mesh and update the garbage collector accordingly */
@@ -86,7 +86,7 @@ int _MMG2D_newElt(MMG5_pMesh mesh) {
   int     curiel;
 
   if ( !mesh->nenil ) {
-    return(0);
+    return 0;
   }
   curiel = mesh->nenil;
   if ( mesh->nenil > mesh->nt )  mesh->nt = mesh->nenil;
@@ -98,7 +98,7 @@ int _MMG2D_newElt(MMG5_pMesh mesh) {
   mesh->tria[curiel].edg[1] = 0;
   mesh->tria[curiel].edg[2] = 0;
 
-  return(curiel);
+  return curiel;
 }
 
 /* Delete a triangle in the mesh and update the garbage collector accordingly */
@@ -128,14 +128,14 @@ int _MMG2D_delElt(MMG5_pMesh mesh,int iel) {
 int _MMG5_getnElt(MMG5_pMesh mesh,int n) {
   int     curiel;
 
-  if ( !mesh->nenil )  return(0);
+  if ( !mesh->nenil )  return 0;
   curiel = mesh->nenil;
   do {
     curiel = mesh->tria[curiel].v[2];
   }
   while (--n);
 
-  return(n == 0);
+  return n == 0;
 }
 
 /**
@@ -243,7 +243,7 @@ int _MMG2D_memOption(MMG5_pMesh mesh) {
   mesh->ntmax = MG_MAX(1.5*mesh->nt,_MMG2D_NEMAX);
   mesh->namax = mesh->na;
 
-  return ( _MMG2D_memOption_memSet(mesh) );
+  return  _MMG2D_memOption_memSet(mesh);
 }
 
 /**
@@ -262,13 +262,13 @@ int MMG2D_setMeshSize_alloc( MMG5_pMesh mesh ) {
                 return 0);
   _MMG5_SAFE_CALLOC(mesh->point,mesh->npmax+1,MMG5_Point,0);
 
-  _MMG5_ADD_MEM(mesh,(mesh->ntmax+1)*sizeof(MMG5_Tria),"initial triangles",return(0));
+  _MMG5_ADD_MEM(mesh,(mesh->ntmax+1)*sizeof(MMG5_Tria),"initial triangles",return 0);
   _MMG5_SAFE_CALLOC(mesh->tria,mesh->ntmax+1,MMG5_Tria,0);
   memset(&mesh->tria[0],0,sizeof(MMG5_Tria));
 
   mesh->namax = mesh->na;
   if ( mesh->na ) {
-    _MMG5_ADD_MEM(mesh,(mesh->namax+1)*sizeof(MMG5_Edge),"initial edges",return(0));
+    _MMG5_ADD_MEM(mesh,(mesh->namax+1)*sizeof(MMG5_Edge),"initial edges",return 0);
     _MMG5_SAFE_CALLOC(mesh->edge,(mesh->namax+1),MMG5_Edge,0);
   }
 
@@ -304,5 +304,5 @@ int MMG2D_zaldy(MMG5_pMesh mesh) {
 
   if ( !_MMG2D_memOption(mesh) )  return 0;
 
-  return ( MMG2D_setMeshSize_alloc(mesh) );
+  return  MMG2D_setMeshSize_alloc(mesh);
 }

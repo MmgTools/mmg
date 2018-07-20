@@ -192,5 +192,5 @@ int MMG2_optlap(MMG5_pMesh mesh,MMG5_pSol sol) {
   free(cnew);
   free(cini);
   free(ncount);
-  return(1);
+  return 1;
 }

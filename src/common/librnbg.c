@@ -76,7 +76,7 @@ int _MMG5_kPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr,
   sprintf(s, "m{vert=%d,low=r{job=t,map=t,poli=S,sep=m{vert=80,low=h{pass=10}f{bal=0.0005,move=80},asc=f{bal=0.005,move=80}}}}", vertNbr / boxVertNbr);
   CHECK_SCOTCH(SCOTCH_stratGraphMap(&strat, s), "scotch_stratGraphMap", 0) ;
 
-  _MMG5_ADD_MEM(mesh,2*vertNbr*sizeof(SCOTCH_Num),"sortPartTb",return(1));
+  _MMG5_ADD_MEM(mesh,2*vertNbr*sizeof(SCOTCH_Num),"sortPartTb",return 1);
   _MMG5_SAFE_CALLOC(sortPartTb,2*vertNbr,SCOTCH_Num,0);
 
   /* Partionning the graph */
@@ -219,7 +219,7 @@ int _MMG5_scotchCall(MMG5_pMesh mesh, MMG5_pSol met)
                 __func__);
         mmgError = 1;
       }
-      return(0);
+      return 0;
     }
 
     if ( mesh->info.imprim > 5) {
@@ -232,8 +232,8 @@ int _MMG5_scotchCall(MMG5_pMesh mesh, MMG5_pSol met)
     }
     /* renumbering end */
   }
-  return(1);
+  return 1;
 #else
-  return(1);
+  return 1;
 #endif
 }

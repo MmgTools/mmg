@@ -72,7 +72,7 @@ int _MMG5_countLocalParamAtTet( MMG5_pMesh mesh,_MMG5_iNode **bdyRefs) {
   if ( ier < 0 ) {
     fprintf(stderr,"\n  ## Error: %s: unable to allocate the first boundary"
            " reference node.\n",__func__);
-    return(0);
+    return 0;
   }
   else {
     assert(ier);
@@ -90,7 +90,7 @@ int _MMG5_countLocalParamAtTet( MMG5_pMesh mesh,_MMG5_iNode **bdyRefs) {
     else if ( ier ) ++npar;
   }
 
-  return(npar);
+  return npar;
 }
 
 /**
@@ -116,7 +116,7 @@ int _MMG5_writeLocalParamAtTet( MMG5_pMesh mesh, _MMG5_iNode *bdryRefs,
 
   _MMG5_Free_ilinkedList(mesh,bdryRefs);
 
-  return(1);
+  return 1;
 }
 
 
@@ -143,7 +143,7 @@ int _MMG3D_writeLocalParam( MMG5_pMesh mesh ) {
 
   if ( !(out = fopen(data,"wb")) ) {
     fprintf(stderr,"\n  ** UNABLE TO OPEN %s.\n",data);
-    return(0);
+    return 0;
   }
 
   fprintf(stdout,"\n  %%%% %s OPENED\n",data);
@@ -177,7 +177,7 @@ int _MMG3D_writeLocalParam( MMG5_pMesh mesh ) {
   fclose(out);
   fprintf(stdout,"  -- WRITING COMPLETED\n");
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -320,7 +320,7 @@ int main(int argc,char *argv[]) {
                          MMG5_ARG_ppMesh,&mesh,MMG5_ARG_ppMet,&met,
                          MMG5_ARG_ppDisp,&disp,
                          MMG5_ARG_end) )
-    return(MMG5_STRONGFAILURE);
+    return MMG5_STRONGFAILURE;
 
 
   /* Set default metric size */
@@ -328,7 +328,7 @@ int main(int argc,char *argv[]) {
     _MMG5_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
 
   /* command line */
-  if ( !MMG3D_parsar(argc,argv,mesh,met) )  return(MMG5_STRONGFAILURE);
+  if ( !MMG3D_parsar(argc,argv,mesh,met) )  return MMG5_STRONGFAILURE;
 
   /* load data */
   fprintf(stdout,"\n  -- INPUT DATA\n");

@@ -70,7 +70,7 @@ static int _MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
 
   ilist = boulet(mesh,it,ip,list);
   if ( !ilist )
-    return(0);
+    return 0;
 
   maxkappa = 0.0;
   for (k=0; k<ilist; k++) {
@@ -141,7 +141,7 @@ static int _MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   memset(m,0,6*sizeof(double));
   m[0] = m[3] = m[5] = alpha;
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -221,7 +221,7 @@ static int _MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
       fprintf(stderr,"\n  ## Error: %s: unable to compute the two balls at at"
               " least 1 ridge point.\n",__func__);
     }
-    return(0);
+    return 0;
   }
 
   /* Specific size in direction of t */
@@ -326,7 +326,7 @@ static int _MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
                     _MMG5_ridSizeInNormalDir(mesh,i0,bcu,&b,isqhmin,isqhmax));
   }
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -359,7 +359,7 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
 
   ilist = boulet(mesh,it,ip,list);
   if ( !ilist )
-    return(0);
+    return 0;
 
   /* Computation of the rotation matrix T_p0 S -> [z = 0] */
   n  = &mesh->xpoint[p0->xp].n1[0];
@@ -432,12 +432,12 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   for (k=0; k<ilist-1; k++) {
     det2d = lispoi[3*k+1]*lispoi[3*(k+1)+2] - lispoi[3*k+2]*lispoi[3*(k+1)+1];
     if ( det2d < 0.0 ) {
-      return(0);
+      return 0;
     }
   }
   det2d = lispoi[3*(ilist-1)+1]*lispoi[3*0+2] - lispoi[3*(ilist-1)+2]*lispoi[3*0+1];
   if ( det2d < 0.0 ) {
-    return(0);
+    return 0;
   }
   assert(ipref[0] && ipref[1]);
 
@@ -495,8 +495,8 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   isqhmin = 1.0 / (isqhmin*isqhmin);
   isqhmax = 1.0 / (isqhmax*isqhmax);
 
-  return( _MMG5_solveDefmetrefSys(mesh,p0,ipref,r,c,tAA,tAb,m,
-                                  isqhmin,isqhmax,hausd) );
+  return _MMG5_solveDefmetrefSys(mesh,p0,ipref,r,c,tAA,tAb,m,
+                                 isqhmin,isqhmax,hausd);
 }
 
 /**
@@ -527,13 +527,13 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
 
   ilist = boulet(mesh,it,ip,list);
   if ( !ilist )
-    return(0);
+    return 0;
 
   /* Computation of the rotation matrix T_p0 S -> [z = 0] */
   n  = &p0->n[0];
   assert ( n[0]*n[0] + n[1]*n[1] + n[2]*n[2] > _MMG5_EPSD2 );
 
-  if ( !_MMG5_rotmatrix(n,r) ) return(0);
+  if ( !_MMG5_rotmatrix(n,r) ) return 0;
   m = &met->m[6*idp];
 
   /* Apply rotation \circ translation to the whole ball */
@@ -562,12 +562,12 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   for (k=0; k<ilist-1; k++) {
     det2d = lispoi[3*k+1]*lispoi[3*(k+1)+2] - lispoi[3*k+2]*lispoi[3*(k+1)+1];
     if ( det2d <= 0.0 ) {
-      return(0);
+      return 0;
     }
   }
   det2d = lispoi[3*(ilist-1)+1]*lispoi[3*0+2] - lispoi[3*(ilist-1)+2]*lispoi[3*0+1];
   if ( det2d <= 0.0 ) {
-    return(0);
+    return 0;
   }
 
   /* At this point, lispoi contains all the points of the ball of p0, rotated
@@ -658,7 +658,7 @@ int _MMGS_intextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6]) {
      n = &p0->n[0];
    }
 
-  return(_MMG5_mmgIntextmet(mesh,met,np,me,n));
+  return _MMG5_mmgIntextmet(mesh,met,np,me,n);
 
 }
 
@@ -688,7 +688,7 @@ int _MMGS_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
       fprintf(stderr,"\n  ## Error: %s: negative hmax value.\n",__func__);
       mmgErr = 1;
     }
-    return(0);
+    return 0;
   }
 
   if ( met->m )
@@ -738,7 +738,7 @@ int _MMGS_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
                     _MMGS_indPt(mesh,pt->v[i]));
             mmgErr = 1;
           }
-          return(0);
+          return 0;
         }
       }
       ppt->flag = 1;
@@ -748,7 +748,7 @@ int _MMGS_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   /* search for unintialized metric */
   _MMG5_defUninitSize(mesh,met,ismet);
 
-  return(1);
+  return 1;
 }
 
 
@@ -825,5 +825,5 @@ int gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( abs(mesh->info.imprim) > 4 )
     fprintf(stdout,"     gradation: %7d updated, %d iter.\n",nup,it);
 
-  return(1);
+  return 1;
 }

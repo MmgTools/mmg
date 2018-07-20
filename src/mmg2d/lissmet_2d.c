@@ -180,5 +180,5 @@ int lissmet_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
     fprintf(stdout,"    gradation: %7d updated, %d iter\n",ncor,itour);
   }
 
-  return(1);
+  return 1;
 }

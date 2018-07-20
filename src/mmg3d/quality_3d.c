@@ -70,7 +70,7 @@ int _MMG3D_tetraQual(MMG5_pMesh mesh, MMG5_pSol met,char metRidTyp) {
     }
   }
 
-  return ( _MMG5_minQualCheck(iel,minqual,_MMG3D_ALPHAD) );
+  return  _MMG5_minQualCheck(iel,minqual,_MMG3D_ALPHAD);
 }
 
 /**
@@ -143,13 +143,13 @@ inline double _MMG5_caltet33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
   v2  = acz*adx - acx*adz;
   v3  = acx*ady - acy*adx;
   vol = abx * v1 + aby * v2 + abz * v3;
-  if ( vol <= 0. )  return(0.0);
+  if ( vol <= 0. )  return 0.0;
 
   det = mm[0] * ( mm[3]*mm[5] - mm[4]*mm[4]) \
       - mm[1] * ( mm[1]*mm[5] - mm[2]*mm[4]) \
       + mm[2] * ( mm[1]*mm[4] - mm[2]*mm[3]);
   if ( det < _MMG5_EPSD2 )   {
-    return(0.0);
+    return 0.0;
   }
   det = sqrt(det) * vol;
 
@@ -173,7 +173,7 @@ inline double _MMG5_caltet33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
 
   cal = det / num;
 
-  return(cal);
+  return cal;
 }
 
 
@@ -220,7 +220,7 @@ int MMG3D_computePrilen( MMG5_pMesh mesh, MMG5_pSol met, double* avlen,
   *nullEdge = 0;
 
   /* Hash all edges in the mesh */
-  if ( !_MMG5_hashNew(mesh,&hash,mesh->np,7*mesh->np) )  return(0);
+  if ( !_MMG5_hashNew(mesh,&hash,mesh->np,7*mesh->np) )  return 0;
 
   for(k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];

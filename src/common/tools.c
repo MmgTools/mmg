@@ -53,10 +53,10 @@ int _MMG5_devangle(double* n1, double *n2, double crit)
   dev = n1[0]*n2[0] + n1[1]*n2[1] + n1[2]*n2[2];
 
   if ( dev < crit ) {
-    return(0);
+    return 0;
   }
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -92,7 +92,7 @@ inline int _MMG5_nonUnitNorPts(MMG5_pMesh mesh,
   n[1] = abz*acx - abx*acz;
   n[2] = abx*acy - aby*acx;
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -113,7 +113,7 @@ inline double _MMG5_nonorsurf(MMG5_pMesh mesh,MMG5_pTria pt) {
 
   _MMG5_nonUnitNorPts(mesh,ip1,ip2,ip3,n);
 
-  return(n[0]*n[0] + n[1]*n[1] + n[2]*n[2]);
+  return n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
 }
 /**
  * \param mesh pointer toward the mesh stucture.
@@ -133,14 +133,14 @@ inline int _MMG5_norpts(MMG5_pMesh mesh,int ip1,int ip2, int ip3,double *n) {
 
   det  = n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
 
-  if ( det < _MMG5_EPSD2 )  return(0);
+  if ( det < _MMG5_EPSD2 )  return 0;
 
   dd = 1.0 / sqrt(det);
   n[0] *= dd;
   n[1] *= dd;
   n[2] *= dd;
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -154,7 +154,7 @@ inline int _MMG5_norpts(MMG5_pMesh mesh,int ip1,int ip2, int ip3,double *n) {
  */
 inline int _MMG5_nortri(MMG5_pMesh mesh,MMG5_pTria pt,double *n) {
 
-  return(_MMG5_norpts(mesh,pt->v[0],pt->v[1],pt->v[2],n));
+  return _MMG5_norpts(mesh,pt->v[0],pt->v[1],pt->v[2],n);
 
 }
 
@@ -181,7 +181,7 @@ inline int _MMG5_rmtr(double r[3][3],double m[6], double mr[6]){
   mr[4] = r[1][0]*n[0][2] + r[1][1]*n[1][2] + r[1][2]*n[2][2];
   mr[5] = r[2][0]*n[0][2] + r[2][1]*n[1][2] + r[2][2]*n[2][2];
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -229,7 +229,7 @@ inline int _MMG5_rotmatrix(double n[3],double r[3][3]) {
     r[2][1] = n[1]*sinalpha/l;
     r[2][2] = cosalpha;
   }
-  return(1);
+  return 1;
 }
 
 /**
@@ -254,7 +254,7 @@ int _MMG5_invmat(double *m,double *mi) {
     mi[3]  = 1./m[3];
     mi[5]  = 1./m[5];
     mi[1] = mi[2] = mi[4] = 0.0;
-    return(1);
+    return 1;
   }
 
   /* check ill-conditionned matrix */
@@ -264,13 +264,13 @@ int _MMG5_invmat(double *m,double *mi) {
     if ( maxx < vmin )  vmin = maxx;
     else if ( maxx > vmax )  vmax = maxx;
   }
-  if ( vmax == 0.0 )  return(0);
+  if ( vmax == 0.0 )  return 0;
   /* compute sub-dets */
   aa  = m[3]*m[5] - m[4]*m[4];
   bb  = m[4]*m[2] - m[1]*m[5];
   cc  = m[1]*m[4] - m[2]*m[3];
   det = m[0]*aa + m[1]*bb + m[2]*cc;
-  if ( fabs(det) < _MMG5_EPSD2 )  return(0);
+  if ( fabs(det) < _MMG5_EPSD2 )  return 0;
   det = 1.0 / det;
 
   mi[0] = aa*det;
@@ -280,7 +280,7 @@ int _MMG5_invmat(double *m,double *mi) {
   mi[4] = (m[1]*m[2] - m[0]*m[4])*det;
   mi[5] = (m[0]*m[3] - m[1]*m[1])*det;
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -301,14 +301,14 @@ int _MMG5_invmatg(double m[9],double mi[9]) {
     if ( maxx < vmin )  vmin = maxx;
     else if ( maxx > vmax )  vmax = maxx;
   }
-  if ( vmax == 0.0 )  return(0);
+  if ( vmax == 0.0 )  return 0;
 
   /* compute sub-dets */
   aa = m[4]*m[8] - m[5]*m[7];
   bb = m[5]*m[6] - m[3]*m[8];
   cc = m[3]*m[7] - m[4]*m[6];
   det = m[0]*aa + m[1]*bb + m[2]*cc;
-  if ( fabs(det) < _MMG5_EPSD )  return(0);
+  if ( fabs(det) < _MMG5_EPSD )  return 0;
   det = 1.0 / det;
 
   mi[0] = aa*det;
@@ -321,7 +321,7 @@ int _MMG5_invmatg(double m[9],double mi[9]) {
   mi[5] = (m[2]*m[3] - m[0]*m[5])*det;
   mi[8] = (m[0]*m[4] - m[1]*m[3])*det;
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -346,7 +346,7 @@ inline int _MMG5_sys33sym(double a[6], double b[3], double r[3]){
   }
 
   if(m < _MMG5_EPSD) {
-    return(0);
+    return 0;
   }
 
   m = 1.0/m;
@@ -359,7 +359,7 @@ inline int _MMG5_sys33sym(double a[6], double b[3], double r[3]){
     + as[2]*(as[1]*as[4]-as[2]*as[3]);
 
   if(fabs(det) < _MMG5_EPSD)
-    return(0);
+    return 0;
 
   det = 1.0/det;
 
@@ -378,7 +378,7 @@ inline int _MMG5_sys33sym(double a[6], double b[3], double r[3]){
   r[1]*=(det*m);
   r[2]*=(det*m);
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -423,7 +423,7 @@ long long _MMG5_memSize (void) {
 
   size = sizeof(mem);
   if ( sysctlbyname("hw.memsize",&mem,&size,NULL,0) == -1)
-    return(0);
+    return 0;
 
 #elif defined(__unix__) || defined(__unix) || defined(unix)
   mem = ((long long)sysconf(_SC_PHYS_PAGES))*
@@ -434,15 +434,15 @@ long long _MMG5_memSize (void) {
   GlobalMemoryStatusEx(&status);
   // status.ullTotalPhys is an unsigned long long: we must check that it fits inside a long long
   mem = status.ullTotalPhys & LLONG_MAX;
-  if (mem == status.ullTotalPhys) return(mem);
-  else return(LLONG_MAX);
+  if (mem == status.ullTotalPhys) return mem;
+  else return LLONG_MAX;
 #else
   fprintf(stderr,"\n  ## Warning: %s: unknown system, recover of maximal memory"
           " not available.\n",__func__);
-  return(0);
+  return 0;
 #endif
 
-  return(mem);
+  return mem;
 }
 
 /**
@@ -457,11 +457,11 @@ inline
 int _MMG5_Alloc_inode( MMG5_pMesh mesh, _MMG5_iNode **node ) {
 
   _MMG5_ADD_MEM(mesh,sizeof(_MMG5_iNode),"boundary reference node",
-                return(0););
+                return 0;);
 
   _MMG5_SAFE_MALLOC(*node,1,_MMG5_iNode,0);
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -487,7 +487,7 @@ int _MMG5_Add_inode( MMG5_pMesh mesh, _MMG5_iNode **liLi, int val ) {
   if ( cur ) {
     if ( val < (*liLi)->val ) {
       /* Add a value at the list head */
-      if ( !_MMG5_Alloc_inode(mesh,&newNode) ) return(-1);
+      if ( !_MMG5_Alloc_inode(mesh,&newNode) ) return -1;
 
       newNode->val = val;
       newNode->nxt = (*liLi);
@@ -497,21 +497,21 @@ int _MMG5_Add_inode( MMG5_pMesh mesh, _MMG5_iNode **liLi, int val ) {
       return 1;
 
     }
-    else if (val == (*liLi)->val ) return(0);
+    else if (val == (*liLi)->val ) return 0;
 
     while ( cur->nxt && ( val >= (cur->nxt)->val) )
       cur = cur->nxt;
 
-    if ( val == cur->val ) return(0);
+    if ( val == cur->val ) return 0;
 
-    if ( !_MMG5_Alloc_inode(mesh,&newNode) ) return(-1);
+    if ( !_MMG5_Alloc_inode(mesh,&newNode) ) return -1;
 
     newNode->val = val;
     newNode->nxt = cur->nxt;
     cur->nxt = newNode;
   }
   else {
-    if ( !_MMG5_Alloc_inode(mesh,&newNode) ) return(-1);
+    if ( !_MMG5_Alloc_inode(mesh,&newNode) ) return -1;
 
     newNode->val = val;
     newNode->nxt = NULL;
@@ -519,7 +519,7 @@ int _MMG5_Add_inode( MMG5_pMesh mesh, _MMG5_iNode **liLi, int val ) {
     *liLi = newNode;
   }
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -555,11 +555,11 @@ inline
 int _MMG5_Alloc_dnode( MMG5_pMesh mesh, _MMG5_dNode **node ) {
 
   _MMG5_ADD_MEM(mesh,sizeof(_MMG5_dNode),"node for hausdorff eval",
-                return(0););
+                return 0;);
 
   _MMG5_SAFE_MALLOC(*node,1,_MMG5_dNode,0);
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -587,7 +587,7 @@ int _MMG5_Add_dnode( MMG5_pMesh mesh, _MMG5_dNode **liLi, int k, double val ) {
   if ( cur ) {
     if ( val < (*liLi)->val ) {
       /* Add a value at the list head */
-      if ( !_MMG5_Alloc_dnode(mesh,&newNode) ) return(-1);
+      if ( !_MMG5_Alloc_dnode(mesh,&newNode) ) return -1;
 
       newNode->val = val;
       newNode->nxt = (*liLi);
@@ -597,21 +597,21 @@ int _MMG5_Add_dnode( MMG5_pMesh mesh, _MMG5_dNode **liLi, int k, double val ) {
       return 1;
 
     }
-    else if (val == (*liLi)->val ) return(0);
+    else if (val == (*liLi)->val ) return 0;
 
     while ( cur->nxt && ( val >= (cur->nxt)->val) )
       cur = cur->nxt;
 
-    if ( val == cur->val ) return(0);
+    if ( val == cur->val ) return 0;
 
-    if ( !_MMG5_Alloc_dnode(mesh,&newNode) ) return(-1);
+    if ( !_MMG5_Alloc_dnode(mesh,&newNode) ) return -1;
 
     newNode->val = val;
     newNode->nxt = cur->nxt;
     cur->nxt = newNode;
   }
   else {
-    if ( !_MMG5_Alloc_dnode(mesh,&newNode) ) return(-1);
+    if ( !_MMG5_Alloc_dnode(mesh,&newNode) ) return -1;
 
     newNode->val = val;
     newNode->nxt = NULL;
@@ -619,7 +619,7 @@ int _MMG5_Add_dnode( MMG5_pMesh mesh, _MMG5_dNode **liLi, int k, double val ) {
     *liLi = newNode;
   }
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -651,7 +651,7 @@ inline double _MMG5_det3pt1vec(double c0[3],double c1[3],double c2[3],double v[3
     m20 = c1[2] - c0[2] ; m21 = c2[2] - c0[2];
     det = v[0]*(m10*m21 - m20*m11) -v[1]*(m00*m21-m20*m01) + v[2]*(m00*m11-m10*m01);
 
-    return(det);
+    return det;
 }
 
 /** Compute 3 * 3 determinant : det(c1-c0,c2-c0,c3-c0) */
@@ -662,7 +662,7 @@ inline double _MMG5_det4pt(double c0[3],double c1[3],double c2[3],double c3[3]) 
   m[1] = c3[1] - c0[1];
   m[2] = c3[2] - c0[2];
 
-  return( _MMG5_det3pt1vec(c0,c1,c2,m) );
+  return  _MMG5_det3pt1vec(c0,c1,c2,m) ;
 }
 
 /**
@@ -682,7 +682,7 @@ inline double _MMG5_orvol(MMG5_pPoint point,int *v) {
     p2 = &point[v[2]];
     p3 = &point[v[3]];
 
-    return(_MMG5_det4pt(p0->c,p1->c,p2->c,p3->c));
+    return _MMG5_det4pt(p0->c,p1->c,p2->c,p3->c);
 }
 
 
@@ -708,6 +708,6 @@ double MMG2_quickarea(double a[2],double b[2],double c[2]) {
   /* orientation */
   aire = abx*acy - aby*acx;
 
-  return(aire);
+  return aire;
 }
 

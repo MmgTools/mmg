@@ -97,11 +97,11 @@ int _MMG5_elementWeight(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pTria pt,
 
     /* Take metric at control point */
     if ( !(MG_GEO & pt->tag[i2]) ) {
-      if ( !_MMG5_interpreg_ani(mesh,met,pt,i2,0.5,m) )  return(0);
+      if ( !_MMG5_interpreg_ani(mesh,met,pt,i2,0.5,m) )  return 0;
     }
     else {
-      if ( !_MMG5_nortri(mesh,pt,no) )  return(0);
-      if ( !_MMG5_intridmet(mesh,met,pt->v[i0],pt->v[i1],0.5,no,mo) )  return(0);
+      if ( !_MMG5_nortri(mesh,pt,no) )  return 0;
+      if ( !_MMG5_intridmet(mesh,met,pt->v[i0],pt->v[i1],0.5,no,mo) )  return 0;
 
       p1 = &mesh->point[pt->v[i0]];
       p2 = &mesh->point[pt->v[i1]];
@@ -111,7 +111,7 @@ int _MMG5_elementWeight(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pTria pt,
       to[2] = p2->c[2] - p1->c[2];
 
       ll = to[0]*to[0] + to[1]*to[1] + to[2]*to[2];
-      if ( ll < _MMG5_EPSD )  return(0);
+      if ( ll < _MMG5_EPSD )  return 0;
       ll = 1.0 / sqrt(ll);
       to[0] *= ll;
       to[1] *= ll;
@@ -120,7 +120,7 @@ int _MMG5_elementWeight(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pTria pt,
       if ( ( MG_SIN(p1->tag) || (p1->tag & MG_NOM) )
            && ( MG_SIN(p2->tag) || (p2->tag & MG_NOM) ) ) {
              if ( !_MMG5_buildridmetfic(mesh,to,no,mo[0],mo[0],mo[0],m) )
-               return(0);
+               return 0;
       }
       else if ( !(MG_SIN(p1->tag) || (p1->tag & MG_NOM)) ) {
         n1 = &mesh->xpoint[p1->xp].n1[0];
@@ -128,10 +128,10 @@ int _MMG5_elementWeight(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pTria pt,
         ps1 = n1[0]*no[0] + n1[1]*no[1] + n1[2]*no[2];
         ps2 = n2[0]*no[0] + n2[1]*no[1] + n2[2]*no[2];
         if ( fabs(ps1) > fabs(ps2) ) {
-          if ( !_MMG5_buildridmetfic(mesh,to,no,mo[0],mo[1],mo[3],m) )  return(0);
+          if ( !_MMG5_buildridmetfic(mesh,to,no,mo[0],mo[1],mo[3],m) )  return 0;
         }
         else {
-          if ( !_MMG5_buildridmetfic(mesh,to,no,mo[0],mo[2],mo[4],m) )  return(0);
+          if ( !_MMG5_buildridmetfic(mesh,to,no,mo[0],mo[2],mo[4],m) )  return 0;
         }
       }
       else {
@@ -141,10 +141,10 @@ int _MMG5_elementWeight(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pTria pt,
         ps1 = n1[0]*no[0] + n1[1]*no[1] + n1[2]*no[2];
         ps2 = n2[0]*no[0] + n2[1]*no[1] + n2[2]*no[2];
         if ( fabs(ps1) > fabs(ps2) ) {
-          if ( !_MMG5_buildridmetfic(mesh,to,no,mo[0],mo[1],mo[3],m) )  return(0);
+          if ( !_MMG5_buildridmetfic(mesh,to,no,mo[0],mo[1],mo[3],m) )  return 0;
         }
         else {
-          if ( !_MMG5_buildridmetfic(mesh,to,no,mo[0],mo[2],mo[4],m) )  return(0);
+          if ( !_MMG5_buildridmetfic(mesh,to,no,mo[0],mo[2],mo[4],m) )  return 0;
         }
       }
     }
@@ -197,5 +197,5 @@ int _MMG5_elementWeight(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pTria pt,
 
   if ( nullDens==3 ) return 0;
 
-  return(1);
+  return 1;
 }

@@ -86,7 +86,7 @@ int MMG3D_movetetrapoints(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree,in
           else if ( ier>0 )
             ier = _MMG5_movbdynompt(mesh,met,octree,listv,ilistv,lists,ilists,improve);
           else
-            return(-1);
+            return -1;
         }
         else if ( ppt->tag & MG_GEO ) {
           ier=_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,0);
@@ -94,7 +94,7 @@ int MMG3D_movetetrapoints(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree,in
           else if ( ier>0 )
             ier = _MMG5_movbdyridpt(mesh,met,octree,listv,ilistv,lists,ilists,improve);
           else
-            return(-1);
+            return -1;
         }
         else if ( ppt->tag & MG_REF ) {
           ier=_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,0);
@@ -103,14 +103,14 @@ int MMG3D_movetetrapoints(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree,in
           else if ( ier>0 )
             ier = _MMG5_movbdyrefpt(mesh,met,octree,listv,ilistv,lists,ilists,improve);
           else
-            return(-1);
+            return -1;
         }
         else {
           ier=_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,0);
           if ( !ier )
             continue;
           else if ( ier<0 )
-            return(-1);
+            return -1;
 
           n = &(mesh->xpoint[ppt->xp].n1[0]);
           if ( !MG_GET(pxt->ori,i) ) {
@@ -135,9 +135,9 @@ int MMG3D_movetetrapoints(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree,in
     }
   }
   if(nm)
-    return(1);
+    return 1;
   else
-    return(0);
+    return 0;
 
 }
 
@@ -183,14 +183,14 @@ int _MMG3D_coledges(MMG5_pMesh mesh,MMG5_pSol met,int k,int i) {
       if ( ilistcol > 0 ) {
         ier = _MMG5_colver(mesh,met,listcol,ilistcol,iq,2);
         if ( ilistcol < 0 ) continue;
-        if ( ier < 0 ) return(-1);
+        if ( ier < 0 ) return -1;
         else if(ier) {
           _MMG3D_delPt(mesh,ier);
-          return(1);
+          return 1;
         }
       }
     }
-    return(0);
+    return 0;
 }
 
 /**
@@ -210,17 +210,17 @@ int _MMG3D_deletePoint(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,
   int         il,ilist,iel,ip,list[MMG3D_LMAX+2];
 
   ilist = _MMG5_boulevolp(mesh,k,i,list);
-  if (ilist > 30 ) return(0);
+  if (ilist > 30 ) return 0;
 
   for(il = 0 ; il<ilist ; il++) {
     iel = list[il] / 4;
     ip  = list[il] % 4;
     if( _MMG3D_coledges(mesh,met,iel,ip) ) {
-      return(1);
+      return 1;
     }
   }
 
-  return(0);
+  return 0;
 }
 
 /**
@@ -254,7 +254,7 @@ int MMG3D_optbdry(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree,int k) {
   ipb = pt->v[ib];
 
   /*check that the vertex is not a boundary one*/
-  if ( mesh->point[ipb].tag & MG_BDY ) return(0);
+  if ( mesh->point[ipb].tag & MG_BDY ) return 0;
 
   /* try to move the vertex in order to improve the quality*/
   ier = 0;
@@ -272,12 +272,12 @@ int MMG3D_optbdry(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree,int k) {
   if(!mesh->info.noinsert) {
     /*try to remove the non-bdry vertex*/
     ier = _MMG3D_coledges(mesh,met,k,ib);
-    if(ier) return(1);
+    if(ier) return 1;
 
     /* try to remove the non-bdry vertex : with all the edges containing the
      * vertex */
     ier = _MMG3D_deletePoint(mesh,met,octree,k,i);
-    if(ier) return(1);
+    if(ier) return 1;
   }
 
 
@@ -287,7 +287,7 @@ int MMG3D_optbdry(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree,int k) {
       iedg  = _MMG5_arpt[i][ied];
       ier = _MMG3D_swpItem(mesh,met,octree,k,iedg);
       if(ier) {
-        return(1);
+        return 1;
       }
     }
     /*try to swap the bdry edges*/
@@ -302,7 +302,7 @@ int MMG3D_optbdry(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree,int k) {
 
       ret = _MMG5_coquilface(mesh,k,i,ia,list,&it1,&it2,0);
       ilist = ret / 2;
-      if ( ret < 0 )  return(-1);
+      if ( ret < 0 )  return -1;
       /* CAUTION: trigger collapse with 2 elements */
       if ( ilist <= 1 )  continue;
       ier = _MMG5_chkswpbdy(mesh,met,list,ilist,it1,it2,2);
@@ -310,15 +310,15 @@ int MMG3D_optbdry(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree,int k) {
         return -1;
       else if ( ier ) {
         ier = _MMG5_swpbdy(mesh,met,list,ret,it1,octree,2);
-        if ( ier < 0 )  return(-1);
+        if ( ier < 0 )  return -1;
         else if(ier) {
-          return(1);
+          return 1;
         }
       }
     }
   }
 
 
-  return(imove);
+  return imove;
 
 }

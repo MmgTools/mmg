@@ -67,14 +67,14 @@ int _MMG2_chkcol(MMG5_pMesh mesh, MMG5_pSol met,int k,char i,int *list,char typc
   }
   
   /* Avoid collapsing a boundary point over a regular one (leads to boundary degeneration) */
-  if ( MG_EDG(mesh->point[ip1].tag) && !MG_EDG(mesh->point[ip2].tag) ) return(0);
+  if ( MG_EDG(mesh->point[ip1].tag) && !MG_EDG(mesh->point[ip2].tag) ) return 0;
   
   /* Avoid subdivising one ref. component consisting of only one layer of elements */
-  if ( MG_EDG(mesh->point[ip1].tag) && (pt->tag[i1]||pt->tag[i2]) ) return(0);
+  if ( MG_EDG(mesh->point[ip1].tag) && (pt->tag[i1]||pt->tag[i2]) ) return 0;
 
   /* Avoid closing one ref. component consisting of only one element (maybe
    * redondant with previous test)*/
-  if ( MG_EDG(pt->tag[i1]) && MG_EDG(pt->tag[i2]) ) return(0);
+  if ( MG_EDG(pt->tag[i1]) && MG_EDG(pt->tag[i2]) ) return 0;
 
   jel = adja[i] / 3;
   if ( jel ) {
@@ -83,14 +83,14 @@ int _MMG2_chkcol(MMG5_pMesh mesh, MMG5_pSol met,int k,char i,int *list,char typc
     j = adja[i] % 3;
     jj = _MMG5_inxt2[j];
     j2 = _MMG5_iprv2[j];
-    if ( MG_EDG(pt1->tag[jj]) && MG_EDG(pt1->tag[j2]) ) return(0);
+    if ( MG_EDG(pt1->tag[jj]) && MG_EDG(pt1->tag[j2]) ) return 0;
   }
   
   /* collect all triangles around vertex i1 
    simplification w.r.to the surface case: no need to use spacial ball boulechknm (impossible situation in 2d) */
   ilist = _MMG2_boulet(mesh,k,i1,list);
   if ( ilist <= 0 )
-    return(0);
+    return 0;
   
   /* Avoid collapsing a "void triangle" */
   if ( open ) {
@@ -113,7 +113,7 @@ int _MMG2_chkcol(MMG5_pMesh mesh, MMG5_pSol met,int k,char i,int *list,char typc
     }
     j = _MMG5_iprv2[j];
     
-    if ( ipb == pt1->v[j] ) return(0);
+    if ( ipb == pt1->v[j] ) return 0;
   }
   
   /* Avoid creating edges with two BDY endpoints, which are not themselves BDY */
@@ -128,7 +128,7 @@ int _MMG2_chkcol(MMG5_pMesh mesh, MMG5_pSol met,int k,char i,int *list,char typc
         j2 = _MMG5_iprv2[j];
         pt1 = &mesh->tria[jel];
         p2 = &mesh->point[pt1->v[j2]];
-        if ( (p2->tag & MG_BDY) && !(pt1->tag[jj] & MG_BDY) ) return(0);
+        if ( (p2->tag & MG_BDY) && !(pt1->tag[jj] & MG_BDY) ) return 0;
       }
     }
   }
@@ -138,9 +138,9 @@ int _MMG2_chkcol(MMG5_pMesh mesh, MMG5_pSol met,int k,char i,int *list,char typc
     /* Useless test I believe */
     /*if ( MG_EDG(pt->tag[i2]) ) {
       jel = list[1] / 3;
-      if ( ! jel ) return(0);
+      if ( ! jel ) return 0;
       pt1 = &mesh->tria[jel];
-      if ( abs(pt->ref) != abs(pt1->ref) )  return(0);
+      if ( abs(pt->ref) != abs(pt1->ref) )  return 0;
     }*/
 
     /* Travel the ball of i1 (but for the two elements 0 and ilist-1 (the last one in the case of
@@ -159,7 +159,7 @@ int _MMG2_chkcol(MMG5_pMesh mesh, MMG5_pSol met,int k,char i,int *list,char typc
       if ( typchk == 2 && met->m && !MG_EDG(mesh->point[ip2].tag) ) {
         ip1 = pt1->v[j2];
         len = MMG2D_lencurv(mesh,met,ip1,ip2);
-        if ( len > lon )  return(0);
+        if ( len > lon )  return 0;
       }
     
       /* Check that the newly created triangles will not have to be split again */
@@ -169,13 +169,13 @@ int _MMG2_chkcol(MMG5_pMesh mesh, MMG5_pSol met,int k,char i,int *list,char typc
       else if ( l == ilist-2 && !open ) {
         ll = list[ilist-1+open] / 3;
 
-        if ( ll > mesh->nt )  return(0);
+        if ( ll > mesh->nt )  return 0;
         lj = list[ilist-1+open] % 3;
         pt0->tag[jj] |= mesh->tria[ll].tag[lj];
       }
       
       if ( typchk == 1 )
-        if ( _MMG2_chkedg(mesh,0) )  return(0);
+        if ( _MMG2_chkedg(mesh,0) )  return 0;
       
       
       /* Check quality and volume inversion */
@@ -191,20 +191,20 @@ int _MMG2_chkcol(MMG5_pMesh mesh, MMG5_pSol met,int k,char i,int *list,char typc
       else
         caltmp = _MMG2D_ALPHAD*_MMG2_caltri_iso(mesh,NULL,pt0);
       
-      if ( caltmp < _MMG2_NULKAL )  return(0);
+      if ( caltmp < _MMG2_NULKAL )  return 0;
       calnew = MG_MIN(calnew,caltmp);
-      if ( calold < _MMG2_NULKAL && calnew <= calold )  return(0);
-      else if ( calnew < _MMG2_NULKAL || calnew < 0.001*calold )  return(0);
+      if ( calold < _MMG2_NULKAL && calnew <= calold )  return 0;
+      else if ( calnew < _MMG2_NULKAL || calnew < 0.001*calold )  return 0;
     }
   }
   
   /* Specific test: no collapse if any interior edge is EDG */
   else if ( ilist == 3 ) {
     ppt = &mesh->point[pt->v[i1]];
-    if ( MG_SIN(ppt->tag) )  return(0);
-    else if ( MG_EDG(pt->tag[i2]) && !MG_EDG(pt->tag[i]) )  return(0);
-    else if ( !MG_EDG(pt->tag[i2]) && MG_EDG(pt->tag[i]) )  return(0); // What is the use of that?
-    else if ( MG_EDG(pt->tag[i2]) && MG_EDG(pt->tag[i]) && MG_EDG(pt->tag[i1]) )  return(0);
+    if ( MG_SIN(ppt->tag) )  return 0;
+    else if ( MG_EDG(pt->tag[i2]) && !MG_EDG(pt->tag[i]) )  return 0;
+    else if ( !MG_EDG(pt->tag[i2]) && MG_EDG(pt->tag[i]) )  return 0; // What is the use of that?
+    else if ( MG_EDG(pt->tag[i2]) && MG_EDG(pt->tag[i]) && MG_EDG(pt->tag[i1]) )  return 0;
     
     /* Check geometric approximation */
     jel = list[1] / 3;
@@ -223,15 +223,15 @@ int _MMG2_chkcol(MMG5_pMesh mesh, MMG5_pSol met,int k,char i,int *list,char typc
     pt0->tag[j2] |= pt1->tag[_MMG5_inxt2[j]];
 
     if ( typchk == 1 )
-      if ( _MMG2_chkedg(mesh,0) )  return(0);
+      if ( _MMG2_chkedg(mesh,0) )  return 0;
 
   }
   
   /* Particular case when there are two triangles in the ball of the collapsed point ip1 */
   else {
     assert ( ilist == 2 );  // Not necessarily! Check for that case too!
-    if ( ilist !=2 ) return(0);
-    if ( !open )  return(0);
+    if ( ilist !=2 ) return 0;
+    if ( !open )  return 0;
     
     jel = list[1] / 3;
     j   = list[1] % 3;
@@ -241,12 +241,12 @@ int _MMG2_chkcol(MMG5_pMesh mesh, MMG5_pSol met,int k,char i,int *list,char typc
     kel = adja[j] / 3;
     voy = adja[j] % 3;
     pt2 = &mesh->tria[kel];
-    if ( pt2->v[voy] == ip2 ) return(0);
+    if ( pt2->v[voy] == ip2 ) return 0;
     
     jj  = _MMG5_inxt2[j];
     pt1 = &mesh->tria[jel];
-    if ( abs(pt->ref) != abs(pt1->ref) )  return(0);
-    else if ( !(pt1->tag[jj] & MG_GEO) )  return(0);
+    if ( abs(pt->ref) != abs(pt1->ref) )  return 0;
+    else if ( !(pt1->tag[jj] & MG_GEO) )  return 0;
 
     /* Check quality and geometric approximation: elements with two trias in the
      * ball should be removed */
@@ -256,14 +256,14 @@ int _MMG2_chkcol(MMG5_pMesh mesh, MMG5_pSol met,int k,char i,int *list,char typc
     
     calold = _MMG2D_ALPHAD*_MMG2_caltri_iso(mesh,NULL,pt1);
     calnew = _MMG2D_ALPHAD*_MMG2_caltri_iso(mesh,NULL,pt0);
-    if ( calnew < _MMG2_NULKAL )  return(0);
-    if ( calold < _MMG2_NULKAL && calnew <= calold )  return(0);
+    if ( calnew < _MMG2_NULKAL )  return 0;
+    if ( calold < _MMG2_NULKAL && calnew <= calold )  return 0;
     
     if ( typchk == 1 )
-      if ( _MMG2_chkedg(mesh,0) )  return(0);
+      if ( _MMG2_chkedg(mesh,0) )  return 0;
   }
   
-  return(ilist);
+  return ilist;
 }
 
 /* Perform effective collapse of edge i in tria k, i1->i2 */
@@ -348,7 +348,7 @@ int _MMG2_colver(MMG5_pMesh mesh,int ilist,int *list) {
   _MMG2D_delElt(mesh,list[0] / 3);
   if ( !open )  _MMG2D_delElt(mesh,list[ilist-1] / 3);
   
-  return(1);
+  return 1;
 }
 
 /* Perform effective collapse of edge i in tria k, i1->i2 
@@ -410,7 +410,7 @@ int _MMG2_colver3(MMG5_pMesh mesh,int *list) {
   _MMG2D_delElt(mesh,iel);
   _MMG2D_delElt(mesh,kel);
   
-  return(1);
+  return 1;
 }
 
 /* Perform effective collapse of edge i in tria k, i1->i2
@@ -452,5 +452,5 @@ int _MMG2_colver2(MMG5_pMesh mesh,int *list) {
   _MMG2D_delPt(mesh,ip1);
   _MMG2D_delElt(mesh,iel);
   
-  return(1);
+  return 1;
 }

@@ -74,7 +74,7 @@ static int MMG3D_typelt(MMG5_pMesh mesh,int iel,int *item) {
   double    RAPMAX = 0.25;
 
   pt = &mesh->tetra[iel];
-  if ( !pt->v[0] )  return(-1);
+  if ( !pt->v[0] )  return -1;
 
   ia = pt->v[0];
   ib = pt->v[1];
@@ -200,12 +200,12 @@ static int MMG3D_typelt(MMG5_pMesh mesh,int iel,int *item) {
       dd = surmin / surmax;
       if ( dd < RAPMAX ) {
         item[1] = _MMG5_isar[iarmax][0];
-        return(3);
+        return 3;
       }
       else {
         item[0] = isurmax;
         item[1] = isurmin;
-        return(2);
+        return 2;
       }
     }
 
@@ -220,24 +220,24 @@ static int MMG3D_typelt(MMG5_pMesh mesh,int iel,int *item) {
       item[0] = 0; //iarmin;
       // Changed by 0 because we overflow idir
       item[1] = 0; //_MMG5_idir[iarmin][0];
-      if ( dd < 0.01 )  return(4);
+      if ( dd < 0.01 )  return 4;
       if ( s[0]+s[1] > ssmall ) {
         item[0] = 0;
-        return(1);
+        return 1;
       }
       if ( s[0]+s[2] > ssmall ) {
         item[0] = 1;
-        return(1);
+        return 1;
       }
       if ( s[0]+s[3] > ssmall ) {
         item[0] = 2;
-        return(1);
+        return 1;
       }
     }
 
     //puts("default");
     item[0] = 0;
-    return(1);
+    return 1;
   }/* end chkvol */
 
   dd = rapmin / rapmax;
@@ -268,15 +268,15 @@ static int MMG3D_typelt(MMG5_pMesh mesh,int iel,int *item) {
     case 1:
       item[0] = iarmax;
       item[1] = _MMG5_isar[iarmax][0];
-      return(3);
+      return 3;
     case 2:
       item[0] = iarmin;
       item[1] = iarmax;
-      return(6);
+      return 6;
     default:
       item[0] = iarmin;
       item[1] = iarmax;
-      return(7);
+      return 7;
     }
   }
 
@@ -298,18 +298,18 @@ static int MMG3D_typelt(MMG5_pMesh mesh,int iel,int *item) {
       break;
     case 2:
       item[0] = iarmin;
-      return(4);
+      return 4;
     case 3:
       /* Item to define */
-      return(5);
+      return 5;
     default:
       item[0] = iarmin;
       item[1] = iarmax;
-      return(7);
+      return 7;
     }
   }
   item[0] = 0;
-  return(1);
+  return 1;
 }
 
 /**
@@ -334,18 +334,18 @@ int _MMG3D_swpItem(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,int k,i
   /* Prevent swap of a ref or tagged edge */
   if ( pt->xt ) {
     pxt = &mesh->xtetra[pt->xt];
-    if ( pxt->edg[iar] || pxt->tag[iar] ) return(0);
+    if ( pxt->edg[iar] || pxt->tag[iar] ) return 0;
   }
 
   nconf = _MMG5_chkswpgen(mesh,met,k,iar,&lon,list,OCRIT,2);
   if ( nconf ) {
     ier = _MMG5_swpgen(mesh,met,nconf,lon,list,octree,2);
-    if ( ier < 0 ) return(-1);
+    if ( ier < 0 ) return -1;
     else
-      return(ier);
+      return ier;
   }
 
-  return(ier);
+  return ier;
 }
 
 /**
@@ -368,11 +368,11 @@ int _MMG3D_swpalmostall(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,
   for(i=0 ; i<6 ; i++) {
     if(i==iar) continue;
     ier = _MMG3D_swpItem(mesh,met,octree,k,i);
-    if ( ier < 0 ) return(-1);
+    if ( ier < 0 ) return -1;
     else if(ier)
-      return(ier);
+      return ier;
   }
-  return(ier);
+  return ier;
 }
 
 /**
@@ -417,7 +417,7 @@ int _MMG3D_splitItem(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,
       ier = _MMG3D_movv_iso(mesh,met,k,j);
 
   }
-  return(ier);
+  return ier;
 }
 
 /**
@@ -447,10 +447,10 @@ int _MMG3D_splitalmostall(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,
   for(i=0 ; i<6 ; i++) {
     if(i==iar) continue;
     ier = _MMG3D_splitItem(mesh,met,octree,k,i,OCRIT);
-    if(ier) return(ier);
+    if(ier) return ier;
   }
 
-  return(ier);
+  return ier;
 }
 
 /**
@@ -614,5 +614,5 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int testma
     if(base==-1) base = mesh->mark-1;
   } while (nd && it++<maxit);
 
-  return(ntot);
+  return ntot;
 }

@@ -81,7 +81,7 @@ int _MMG5_hashEdgeDelone(MMG5_pMesh mesh,_MMG5_Hash *hash,int iel,int i,int *v) 
       iadr = (jel-1)*4 + 1;
       adja = &mesh->adja[iadr];
       adja[j] = iel*4 + i;
-      return(1);
+      return 1;
     }
     else {
       while ( ha->nxt && ha->nxt < hash->max ) {
@@ -96,7 +96,7 @@ int _MMG5_hashEdgeDelone(MMG5_pMesh mesh,_MMG5_Hash *hash,int iel,int i,int *v) 
           iadr = (jel-1)*4 + 1;
           adja = &mesh->adja[iadr];
           adja[j] = iel*4 + i;
-          return(1);
+          return 1;
         }
       }
     }
@@ -113,7 +113,7 @@ int _MMG5_hashEdgeDelone(MMG5_pMesh mesh,_MMG5_Hash *hash,int iel,int i,int *v) 
                          return 0;,0);
       for (j=hash->nxt; j<hash->max; j++)  hash->item[j].nxt = j+1;
     }
-    return(1);
+    return 1;
   }
 
   /* insert */
@@ -122,7 +122,7 @@ int _MMG5_hashEdgeDelone(MMG5_pMesh mesh,_MMG5_Hash *hash,int iel,int i,int *v) 
   ha->k = iel*4 + i;
   ha->nxt = 0;
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -195,12 +195,12 @@ int _MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
       ppt->tagdel &= ~MG_NOM;
     }
   }
-  if ( alert )  {return(0);}
+  if ( alert )  {return 0;}
   /* hash table params */
-  if ( size > 3*_MMG3D_LONMAX )  return(0);
+  if ( size > 3*_MMG3D_LONMAX )  return 0;
   if ( !_MMG5_hashNew(mesh,&hedg,size,3*size) ) { /*3*size suffit */
     fprintf(stderr,"\n  ## Error: %s: unable to complete mesh.\n",__func__);
-    return(-1);
+    return -1;
   }
 
   /*tetra allocation : we create "size" tetra*/
@@ -335,7 +335,7 @@ int _MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
   // ppt = &mesh->point[ip];
   // ppt->flag = mesh->flag;
   _MMG5_DEL_MEM(mesh,hedg.item,(hedg.max+1)*sizeof(_MMG5_hedge));
-  return(1);
+  return 1;
 }
 
 /**
@@ -362,7 +362,7 @@ static int _MMG5_correction_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip,int* list,
   int           vois[4];
 
   ppt  = &mesh->point[ip];
-  if ( ppt->tag & MG_NUL )  return(ilist);
+  if ( ppt->tag & MG_NUL )  return ilist;
   base = mesh->base;
   lon  = ilist;
   eps  = _MMG3D_EPSCON;
@@ -445,7 +445,7 @@ static int _MMG5_correction_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip,int* list,
       }
       if ( i < 4 || pt->tag & MG_REQ ) {
         if ( ipil <= nedep )   {
-          return(0);
+          return 0;
         }
         /* remove iel from list */
         pt->flag = base-1;
@@ -459,7 +459,7 @@ static int _MMG5_correction_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip,int* list,
   }
   while ( ncor > 0 && lon >= nedep );
 
-  return(lon);
+  return lon;
 }
 
 
@@ -486,7 +486,7 @@ _MMG5_correction_iso(MMG5_pMesh mesh,int ip,int *list,int ilist,int nedep,double
   int              vois[4];
 
   ppt  = &mesh->point[ip];
-  if ( ppt->tag & MG_NUL )  return(ilist);
+  if ( ppt->tag & MG_NUL )  return ilist;
   base = mesh->base;
   lon  = ilist;
   eps  = _MMG3D_EPSCON;
@@ -545,7 +545,7 @@ _MMG5_correction_iso(MMG5_pMesh mesh,int ip,int *list,int ilist,int nedep,double
       }
       if ( i < 4 ||  pt->tag & MG_REQ ) {
         if ( ipil <= nedep )  {
-          return(0);
+          return 0;
         }
 
         /* remove iel from list */
@@ -561,7 +561,7 @@ _MMG5_correction_iso(MMG5_pMesh mesh,int ip,int *list,int ilist,int nedep,double
   }
   while ( ncor > 0 && lon >= nedep );
 
-  return(lon);
+  return lon;
 }
 
 
@@ -587,9 +587,9 @@ int _MMG5_cavity_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel,int ip,int* list,int 
   int       *adja,*adjb,k,adj,adi,voy,i,j,ia,ilist,ipil,jel,iadr,base;
   int       vois[4],l,isreq,tref;
 
-  if ( lon < 1 )  return(0);
+  if ( lon < 1 )  return 0;
   ppt = &mesh->point[ip];
-  if ( ppt->tag & MG_NUL )  return(0);
+  if ( ppt->tag & MG_NUL )  return 0;
   base  = ++mesh->base;
 
   isreq = 0;
@@ -600,7 +600,7 @@ int _MMG5_cavity_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel,int ip,int* list,int 
 
     if ( !mesh->info.opnbdy ) {
       if ( tref != mesh->tetra[list[k]/6].ref ) {
-        return(0);
+        return 0;
       }
     }
     else {
@@ -609,7 +609,7 @@ int _MMG5_cavity_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel,int ip,int* list,int 
         l  = list[k]%6;
         if ( (mesh->xtetra[pt->xt].ftag[_MMG5_ifar[l][0]] & MG_BDY) ||
              (mesh->xtetra[pt->xt].ftag[_MMG5_ifar[l][1]] & MG_BDY) )
-          return(0);
+          return 0;
       }
     }
   }
@@ -703,7 +703,7 @@ int _MMG5_cavity_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel,int ip,int* list,int 
         list[ilist++] = adj;
       }
     }
-    if ( ilist > _MMG3D_LONMAX - 3 )  return(-1);
+    if ( ilist > _MMG3D_LONMAX - 3 )  return -1;
     ++ipil;
   }
   while ( ipil < ilist );
@@ -720,7 +720,7 @@ int _MMG5_cavity_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel,int ip,int* list,int 
   /*   if(MMG_cas>20) MMG_npres++; */
   /* } */
 
-  return(ilist);
+  return ilist;
 }
 
 
@@ -746,9 +746,9 @@ int _MMG5_cavity_iso(MMG5_pMesh mesh,MMG5_pSol sol,int iel,int ip,int *list,int 
   int              vois[4],l;
   int              tref,isreq;
 
-  if ( lon < 1 )  return(0);
+  if ( lon < 1 )  return 0;
   ppt = &mesh->point[ip];
-  if ( ppt->tag & MG_NUL )  return(0);
+  if ( ppt->tag & MG_NUL )  return 0;
   base  = ++mesh->base;
 
   isreq = 0;
@@ -759,7 +759,7 @@ int _MMG5_cavity_iso(MMG5_pMesh mesh,MMG5_pSol sol,int iel,int ip,int *list,int 
 
     if ( !mesh->info.opnbdy ) {
       if ( tref != mesh->tetra[list[k]/6].ref ) {
-        return(0);
+        return 0;
       }
     }
     else {
@@ -768,7 +768,7 @@ int _MMG5_cavity_iso(MMG5_pMesh mesh,MMG5_pSol sol,int iel,int ip,int *list,int 
         l  = list[k]%6;
         if ( (mesh->xtetra[pt->xt].ftag[_MMG5_ifar[l][0]] & MG_BDY) ||
              (mesh->xtetra[pt->xt].ftag[_MMG5_ifar[l][1]] & MG_BDY) )
-          return(0);
+          return 0;
       }
     }
   }
@@ -837,7 +837,7 @@ int _MMG5_cavity_iso(MMG5_pMesh mesh,MMG5_pSol sol,int iel,int ip,int *list,int 
         list[ilist++] = adj;
       }
     }
-    if ( ilist > _MMG3D_LONMAX - 3 ) return(-1);
+    if ( ilist > _MMG3D_LONMAX - 3 ) return -1;
 
     ++ipil;
   }
@@ -854,7 +854,7 @@ int _MMG5_cavity_iso(MMG5_pMesh mesh,MMG5_pSol sol,int iel,int ip,int *list,int 
   /*   MMG_npuiss++; */
   /*   if(MMG_cas>20) MMG_npres++; */
   /* } */
-  return(ilist);
+  return ilist;
 }
 
 #endif

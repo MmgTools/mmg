@@ -50,7 +50,7 @@ _MMG5_invsl(double A[3][3],double b[3],double r[3]) {
   detA = A[0][0]*(A[1][1]*A[2][2] - A[2][1]*A[1][2]) \
     - A[0][1]*(A[1][0]*A[2][2] - A[2][0]*A[1][2]) \
     + A[0][2]*(A[1][0]*A[2][1] - A[2][0]*A[1][1]);
-  if ( detA < _MMG5_EPSD )  return(0);
+  if ( detA < _MMG5_EPSD )  return 0;
   detA = 1.0 / detA;
 
   r[0] =  b[0]*(A[1][1]*A[2][2] - A[2][1]*A[1][2]) \
@@ -69,7 +69,7 @@ _MMG5_invsl(double A[3][3],double b[3],double r[3]) {
   r[1] *= detA;
   r[2] *= detA;
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -97,7 +97,7 @@ _MMG5_ismaniball(MMG5_pMesh mesh,MMG5_pSol sol,int k,int indp) {
 
   pt = &mesh->tetra[k];
   np = pt->v[indp];
-  if ( fabs(sol->m[np]-mesh->info.ls) > _MMG5_EPSD2 )  return(1);
+  if ( fabs(sol->m[np]-mesh->info.ls) > _MMG5_EPSD2 )  return 1;
 
   memset(bdy,0,(MMG3D_LMAX+1)*sizeof(int));
   memset(list,0,(MMG3D_LMAX+1)*sizeof(int));
@@ -113,7 +113,7 @@ _MMG5_ismaniball(MMG5_pMesh mesh,MMG5_pSol sol,int k,int indp) {
       fprintf(stderr,"\n  ## Warning: %s:  at least 1 tetra with 4 null"
               " values.\n",__func__);
     }
-    return(0);
+    return 0;
   }
 
   v = sol->m[pt->v[ip]]-mesh->info.ls;
@@ -241,7 +241,7 @@ _MMG5_ismaniball(MMG5_pMesh mesh,MMG5_pSol sol,int k,int indp) {
 
   /* Invalid configuration has been created */
   if ( !res )
-    return(0);
+    return 0;
 
   /* Reset the current part of the ball, and start back the process with the other sign */
   iel = res / 4;
@@ -312,7 +312,7 @@ _MMG5_ismaniball(MMG5_pMesh mesh,MMG5_pSol sol,int k,int indp) {
           nopp++;
 
         if ( ( nzeros == 2 && nsame == 1 ) || ( nsame >= 1 && nopp >= 1 ) )  {
-          if ( pt1->flag < base - 1 ) return(0);
+          if ( pt1->flag < base - 1 ) return 0;
         }
 
         if ( pt1->flag == base ) continue;
@@ -333,10 +333,10 @@ _MMG5_ismaniball(MMG5_pMesh mesh,MMG5_pSol sol,int k,int indp) {
   for (l=0; l<ibdy; l++) {
     iel = bdy[l] / 4;
     pt = &mesh->tetra[iel];
-    if ( pt->flag != base ) return(0);
+    if ( pt->flag != base ) return 0;
   }
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -359,7 +359,7 @@ static int _MMG3D_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol,double *tmp) {
   if ( !MMG3D_hashTetra(mesh,1) ) {
     fprintf(stderr,"\n  ## Error: %s: hashing problem (1). Exit program.\n",
       __func__);
-    return(0);
+    return 0;
   }
 
   /* Reset point flags */
@@ -408,7 +408,7 @@ static int _MMG3D_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol,double *tmp) {
   /* memory free */
   _MMG5_DEL_MEM(mesh,mesh->adja,(4*mesh->nemax+5)*sizeof(int));
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -463,7 +463,7 @@ static int _MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol/*,double *tmp*/){
       }
     }
   }
-  if ( ! nb )  return(1);
+  if ( ! nb )  return 1;
 
   /* Store gradients of level set function at those points */
   /* Commented because unused */
@@ -515,7 +515,7 @@ static int _MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol/*,double *tmp*/){
   /* } */
 
   /* Create intersection points at 0 isovalue and set flags to tetras */
-  if ( !_MMG5_hashNew(mesh,&hash,nb,7*nb) ) return(0);
+  if ( !_MMG5_hashNew(mesh,&hash,nb,7*nb) ) return 0;
   /* Hash all boundary and required edges, and put ip = -1 in hash structure */
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
@@ -527,7 +527,7 @@ static int _MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol/*,double *tmp*/){
         ip0 = pt->v[_MMG5_iare[ia][0]];
         ip1 = pt->v[_MMG5_iare[ia][1]];
         np  = -1;
-        if ( !_MMG5_hashEdge(mesh,&hash,ip0,ip1,np) )  return(-1);
+        if ( !_MMG5_hashEdge(mesh,&hash,ip0,ip1,np) )  return -1;
       }
       continue;
     }
@@ -541,7 +541,7 @@ static int _MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol/*,double *tmp*/){
           ip0 = pt->v[_MMG5_idir[ia][_MMG5_inxt2[j]]];
           ip1 = pt->v[_MMG5_idir[ia][_MMG5_iprv2[j]]];
           np  = -1;
-          if ( !_MMG5_hashEdge(mesh,&hash,ip0,ip1,np) )  return(-1);
+          if ( !_MMG5_hashEdge(mesh,&hash,ip0,ip1,np) )  return -1;
         }
       }
     }
@@ -603,7 +603,7 @@ static int _MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol/*,double *tmp*/){
                             fprintf(stderr,"\n  ## Error: %s: unable to"
                                     " allocate a new point\n",__func__);
                             _MMG5_INCREASE_MEM_MESSAGE();
-                            return(0)
+                            return 0
                             ,c,0,0);
       }
       sol->m[np] = mesh->info.ls;
@@ -667,7 +667,7 @@ static int _MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol/*,double *tmp*/){
     fprintf(stdout,"     %7d splitted\n",ns);
 
   _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
-  return(ns);
+  return ns;
 }
 
 
@@ -708,7 +708,7 @@ static int _MMG3D_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol) {
       pt->ref = MG_MINUS;
     }
   }
-  return(1);
+  return 1;
 }
 
 /**
@@ -817,11 +817,11 @@ int _MMG5_chkmaniball(MMG5_pMesh mesh, int start, char ip){
     if( pt->ref == ref ) {
       fprintf(stderr,"   *** Topological problem:");
       fprintf(stderr," non manifold surface at point %d \n",nump);
-      return(0);
+      return 0;
     }
   }
 
-  return(1);
+  return 1;
 }
 
 /** Check whether implicit surface enclosed in volume is orientable */
@@ -859,7 +859,7 @@ int _MMG5_chkmani(MMG5_pMesh mesh){
         fprintf(stderr,"\n  ## Warning: %s: at least 1 tetra with 4 boundary"
                 " faces.\n",__func__);
       }
-      //return(0);
+      //return 0;
     }
   }
 
@@ -879,14 +879,14 @@ int _MMG5_chkmani(MMG5_pMesh mesh){
         ip = _MMG5_idir[i][j];
 
         if(!_MMG5_chkmaniball(mesh,k,ip))
-          return(0);
+          return 0;
       }
     }
   }
 
   if ( mesh->info.imprim || mesh->info.ddebug )
     fprintf(stdout,"  *** Manifold implicit surface.\n");
-  return(1);
+  return 1;
 }
 
 /**
@@ -949,7 +949,7 @@ int _MMG5_chkmani2(MMG5_pMesh mesh,MMG5_pSol sol) {
     }
   }
   if ( mesh->info.ddebug )  fprintf(stdout,"  *** Manifold implicit surface.\n");
-  return(1);
+  return 1;
 }
 
 /**
@@ -1085,9 +1085,9 @@ int _MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int n
   }
   else {
     if ( ismin && ispl )
-      return(0);
+      return 0;
     else
-      return(1);
+      return 1;
   }
 
 
@@ -1254,9 +1254,9 @@ int _MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int n
   }
   else {
     if ( ismin && ispl )
-      return(0);
+      return 0;
     else
-      return(1);
+      return 1;
   }
 
   while ( cur < ilist ) {
@@ -1434,7 +1434,7 @@ int _MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int n
           fprintf(stderr,"\n  ## Warning: %s: we should rarely passed here. "
                   "tetra %d =  %d %d %d %d, ref = %d.",__func__,
                   jel,pt1->v[0],pt1->v[1],pt1->v[2],pt1->v[3],pt1->ref);
-          return(0);
+          return 0;
         }
 
         list[ilist] = -(4*jel+indp);
@@ -1475,7 +1475,7 @@ int _MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int n
           fprintf(stderr,"\n  ## Warning: %s: we should rarely passed here. "
                   "tetra %d =  %d %d %d %d, ref = %d\n",__func__,
                   jel,pt1->v[0],pt1->v[1],pt1->v[2],pt1->v[3],pt1->ref);
-          return(0);
+          return 0;
         }
 
         list[ilist] = 4*jel+indq;
@@ -1486,7 +1486,7 @@ int _MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int n
     cur++;
   }
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -1506,7 +1506,7 @@ int _MMG3D_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol) {
   if ( mesh->nprism || mesh->nquad ) {
     fprintf(stderr,"\n  ## Error: Isosurface extraction not available with"
             " hybrid meshes. Exit program.\n");
-    return(0);
+    return 0;
   }
 
   _MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(double),"temporary table",
@@ -1517,40 +1517,40 @@ int _MMG3D_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol) {
   /* Snap values of level set function if need be, then discretize it */
   if ( !_MMG3D_snpval_ls(mesh,sol,tmp) ) {
     fprintf(stderr,"\n  ## Problem with implicit function. Exit program.\n");
-    return(0);
+    return 0;
   }
   _MMG5_DEL_MEM(mesh,tmp,(mesh->npmax+1)*sizeof(double));
 
   if ( !MMG3D_hashTetra(mesh,1) ) {
     fprintf(stderr,"\n  ## Hashing problem. Exit program.\n");
-    return(0);
+    return 0;
   }
 
   /* compatibility triangle orientation w/r tetras */
   if ( !_MMG5_bdryPerm(mesh) ) {
     fprintf(stderr,"\n  ## Boundary orientation problem. Exit program.\n");
-    return(0);
+    return 0;
   }
 
   if ( !_MMG5_chkBdryTria(mesh) ) {
     fprintf(stderr,"\n  ## Boundary problem. Exit program.\n");
-    return(0);
+    return 0;
   }
 
   /* build hash table for initial edges */
   if ( !_MMG5_hGeom(mesh) ) {
     fprintf(stderr,"\n  ## Hashing problem (0). Exit program.\n");
-    return(0);
+    return 0;
   }
 
   if ( !_MMG5_bdrySet(mesh) ) {
     fprintf(stderr,"\n  ## Problem in setting boundary. Exit program.\n");
-    return(0);
+    return 0;
   }
 
   if ( !_MMG3D_cuttet_ls(mesh,sol/*,tmp*/) ) {
     fprintf(stderr,"\n  ## Problem in discretizing implicit function. Exit program.\n");
-    return(0);
+    return 0;
   }
 
   _MMG5_DEL_MEM(mesh,mesh->adja,(4*mesh->nemax+5)*sizeof(int));
@@ -1560,11 +1560,11 @@ int _MMG3D_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   if ( !_MMG3D_setref_ls(mesh,sol) ) {
     fprintf(stderr,"\n  ## Problem in setting references. Exit program.\n");
-    return(0);
+    return 0;
   }
 
   /* Clean memory */
   _MMG5_DEL_MEM(mesh,sol->m,(sol->size*(sol->npmax+1))*sizeof(double));
 
-  return(1);
+  return 1;
 }

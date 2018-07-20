@@ -36,7 +36,7 @@ int MMG2_hashNew(HashTable *hash,int hsize,int hmax) {
   for (k=hash->size; k<hash->nxtmax; k++)
     hash->item[k].nxt = k+1;
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -53,8 +53,8 @@ int MMG2_hashTria(MMG5_pMesh mesh) {
   unsigned char   i,ii,i1,i2;
   unsigned int    key;
 
-  if ( mesh->adja )  return(1);
-  if ( !mesh->nt )  return(0);
+  if ( mesh->adja )  return 1;
+  if ( !mesh->nt )  return 0;
 
   /* memory alloc */
   _MMG5_SAFE_CALLOC(hcode,mesh->nt+1,int,0);
@@ -146,7 +146,7 @@ int MMG2_hashTria(MMG5_pMesh mesh) {
   }
   _MMG5_SAFE_FREE(hcode);
 
-  return(1);
+  return 1;
 }
 
 /*hash edge :
@@ -172,13 +172,13 @@ int MMG2_hashEdge(pHashTable edgeTable,int iel,int ia, int ib) {
   if ( ha->min ) {
     /* edge exist*/
     if ( ha->min == mins && ha->max == maxs ) {
-      return(ha->iel);
+      return ha->iel;
     }
     else {
       while ( ha->nxt && ha->nxt < edgeTable->nxtmax ) {
         ha = &edgeTable->item[ha->nxt];
         if ( ha->min == mins && ha->max == maxs )
-          return(ha->iel);
+          return ha->iel;
       }
       ha->nxt = edgeTable->hnxt;
       ha      = &edgeTable->item[edgeTable->hnxt];
@@ -189,7 +189,7 @@ int MMG2_hashEdge(pHashTable edgeTable,int iel,int ia, int ib) {
           fprintf(stderr,"\n  ## Error: %s: memory alloc problem (edge): %d.\n",
                   __func__,edgeTable->nxtmax);
         }
-        return(0);
+        return 0;
       }
     }
   }
@@ -199,7 +199,7 @@ int MMG2_hashEdge(pHashTable edgeTable,int iel,int ia, int ib) {
   ha->iel = iel;
   ha->nxt = 0;
 
-  return(0);
+  return 0;
 
 }
 
@@ -218,13 +218,13 @@ int MMG2_assignEdge(MMG5_pMesh mesh) {
   int             k,ia;
   char            i,i1,i2;
 
-  if ( !mesh->na ) return(1);
+  if ( !mesh->na ) return 1;
 
   /* Temporarily allocate a hash structure for storing edges */
   hash.siz = mesh->na;
   hash.max = 3*mesh->na+1;
 
-  _MMG5_ADD_MEM(mesh,(hash.max+1)*sizeof(_MMG5_hedge),"hash table",return(0));
+  _MMG5_ADD_MEM(mesh,(hash.max+1)*sizeof(_MMG5_hedge),"hash table",return 0);
   _MMG5_SAFE_CALLOC(hash.item,hash.max+1,_MMG5_hedge,0);
 
   hash.nxt = mesh->na;
@@ -258,7 +258,7 @@ int MMG2_assignEdge(MMG5_pMesh mesh) {
   _MMG5_DEL_MEM(mesh,mesh->edge,(mesh->na+1)*sizeof(MMG5_Edge));
   mesh->na = 0;
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -299,7 +299,7 @@ int MMG2_bdryEdge(MMG5_pMesh mesh) {
   }
 
   /* Second step: Create edge mesh and store the corresponding edges */
-  _MMG5_ADD_MEM(mesh,(natmp+1)*sizeof(MMG5_Edge),"edges",return(0));
+  _MMG5_ADD_MEM(mesh,(natmp+1)*sizeof(MMG5_Edge),"edges",return 0);
   _MMG5_SAFE_CALLOC(mesh->edge,natmp+1,MMG5_Edge,0);
 
   for (k=1; k<=mesh->nt; k++) {
@@ -338,7 +338,7 @@ int MMG2_bdryEdge(MMG5_pMesh mesh) {
     p0->tag |= MG_BDY;
   }
 
-  return(1);
+  return 1;
 }
 
 
@@ -363,7 +363,7 @@ int MMG2_pack(MMG5_pMesh mesh,MMG5_pSol sol) {
   if ( !MMG2_hashTria(mesh) ) {
     fprintf(stderr,"\n  ## Warning: %s: hashing problem. Exit program.\n",
             __func__);
-    return(0);
+    return 0;
   }
 
   /* Pack vertex indices */
@@ -583,7 +583,7 @@ int MMG2_pack(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   if ( memWarn ) return 0;
 
-  return(1);
+  return 1;
 }
 
 /*

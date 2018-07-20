@@ -49,8 +49,8 @@ int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,char typchk) {
   pt  = &mesh->tria[k];
   i1 = _MMG5_inxt2[i];
   i2 = _MMG5_iprv2[i];
-  if ( MG_EDG(pt->tag[i]) || MS_SIN(pt->tag[i]) )  return(0);
-  else if ( MS_SIN(pt->tag[i1]) )  return(0);
+  if ( MG_EDG(pt->tag[i]) || MS_SIN(pt->tag[i]) )  return 0;
+  else if ( MS_SIN(pt->tag[i1]) )  return 0;
 
   ip0  = pt->v[i];
   ip1  = pt->v[i1];
@@ -60,13 +60,13 @@ int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,char typchk) {
   p[2] = &mesh->point[ip2];
 
   adja = &mesh->adja[3*(k-1)+1];
-  if ( !adja[i] )  return(0);
+  if ( !adja[i] )  return 0;
 
   kk = adja[i] / 3;
   ii = adja[i] % 3;
   jj = _MMG5_inxt2[ii];
   pt1 = &mesh->tria[kk];
-  if ( MS_SIN(pt1->tag[jj]) )  return(0);
+  if ( MS_SIN(pt1->tag[jj]) )  return 0;
 
   iq = pt1->v[ii];
   q  = &mesh->point[iq];
@@ -98,14 +98,14 @@ int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,char typchk) {
     lona = _MMG5_lenSurfEdg(mesh,met,ip0,iq,0);
     if ( loni > 1.0 )  loni = MG_MIN(1.0 / loni,_MMGS_LSHRT);
     if ( lona > 1.0 )  lona = 1.0 / lona;
-    if ( lona < loni || !loni )  return(0);
+    if ( lona < loni || !loni )  return 0;
   }
 
   /* check non convexity */
   _MMG5_norpts(mesh,ip0,ip1,iq,c1);
   _MMG5_norpts(mesh,ip0,iq,ip2,c2);
   ps = c1[0]*c2[0] + c1[1]*c2[1] + c1[2]*c2[2];
-  if ( ps < _MMG5_ANGEDG )   return(0);
+  if ( ps < _MMG5_ANGEDG )   return 0;
 
   /* normal recovery at points p[0],p[1],p[2],q */
   for (j=0; j<3; j++) {
@@ -151,7 +151,7 @@ int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,char typchk) {
   uz = p[2]->c[2] - p[1]->c[2];
 
   ll = ux*ux + uy*uy + uz*uz;
-  if ( ll < _MMG5_EPS )  return(0); /* no change for short edge */
+  if ( ll < _MMG5_EPS )  return 0; /* no change for short edge */
 
   n1 = np[1];
   n2 = np[2];
@@ -191,7 +191,7 @@ int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,char typchk) {
   uz = q->c[2] - p[0]->c[2];
 
   ll = ux*ux + uy*uy + uz*uz;
-  if ( ll < _MMG5_EPS )  return(0);
+  if ( ll < _MMG5_EPS )  return 0;
 
   n1 = np[0];
   n2 = nq;
@@ -225,7 +225,7 @@ int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,char typchk) {
   coschg = coschg < _MMG5_EPS ? 0.0 : coschg;
 
   /* swap if Hausdorff contribution of the swapped edge is less than existing one */
-  if ( coschg > hausd*hausd )  return(0);
+  if ( coschg > hausd*hausd )  return 0;
 
   if ( typchk == 2 && met->m ) {
     /* initial quality */
@@ -275,12 +275,12 @@ int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,char typchk) {
 
   /* if the quality is very bad, don't degrade it, even to improve the surface
    * approx. */
-  if ( calchg < _MMG5_EPS && calnat >= calchg ) return(0);
+  if ( calchg < _MMG5_EPS && calnat >= calchg ) return 0;
 
   /* else we can degrade the quality to improve the surface approx. */
-  if ( coschg < hausd*hausd && cosnat > hausd*hausd )  return(1);
+  if ( coschg < hausd*hausd && cosnat > hausd*hausd )  return 1;
 
-  return(calchg > 1.01 * calnat);
+  return calchg > 1.01 * calnat;
 }
 
 /**
@@ -299,7 +299,7 @@ int swapar(MMG5_pMesh mesh,int k,int i) {
   char     i1,i2,j,jj,j2,v11,v21;
 
   pt   = &mesh->tria[k];
-  if ( MG_EDG(pt->tag[i]) || MS_SIN(pt->tag[i]) )  return(0);
+  if ( MG_EDG(pt->tag[i]) || MS_SIN(pt->tag[i]) )  return 0;
 
   adja = &mesh->adja[3*(k-1)+1];
   assert(adja[i]);
@@ -315,13 +315,13 @@ int swapar(MMG5_pMesh mesh,int k,int i) {
   /* update structure */
   k11 = adja[i1] / 3;
   v11 = adja[i1] % 3;
-  if ( k11 < 1 )  return(0);
+  if ( k11 < 1 )  return 0;
   adja = &mesh->adja[3*(adj-1)+1];
   jj  = _MMG5_inxt2[j];
   j2  = _MMG5_iprv2[j];
   k21 = adja[jj] / 3;
   v21 = adja[jj] % 3;
-  if ( k21 < 1 )  return(0);
+  if ( k21 < 1 )  return 0;
 
   pt->v[i2]  = pt1->v[j];
   pt1->v[j2] = pt->v[i];
@@ -346,7 +346,7 @@ int swapar(MMG5_pMesh mesh,int k,int i) {
   mesh->adja[3*(k11-1)+1+v11] = 3*adj+j;
   mesh->adja[3*(adj-1)+1+j]   = 3*k11+v11;
 
-  return(1);
+  return 1;
 }
 
 
@@ -359,7 +359,7 @@ int litswp(MMG5_pMesh mesh,int k,char i,double kali) {
 
   pt0 = &mesh->tria[0];
   pt  = &mesh->tria[k];
-  if ( !MG_EOK(pt) || MG_EDG(pt->tag[i]) )  return(0);
+  if ( !MG_EOK(pt) || MG_EDG(pt->tag[i]) )  return 0;
 
   i1 = _MMG5_inxt2[i];
   i2 = _MMG5_iprv2[i];
@@ -371,14 +371,14 @@ int litswp(MMG5_pMesh mesh,int k,char i,double kali) {
   kk  = adja[i] / 3;
   ii  = adja[i] % 3;
   pt1 = &mesh->tria[kk];
-  if ( MS_SIN(pt1->tag[ii]) )  return(0);
+  if ( MS_SIN(pt1->tag[ii]) )  return 0;
   id = pt1->v[ii];
 
   /* check non convexity */
   _MMG5_norpts(mesh,ia,ib,id,n1);
   _MMG5_norpts(mesh,ia,id,ic,n2);
   ps = n1[0]*n2[0] + n1[1]*n2[1] + n1[2]*n2[2];
-  if ( ps < _MMG5_ANGEDG )  return(0);
+  if ( ps < _MMG5_ANGEDG )  return 0;
 
   /* check quality */
   pt0->v[0] = id;  pt0->v[1] = ic;  pt0->v[2] = ib;
@@ -391,9 +391,9 @@ int litswp(MMG5_pMesh mesh,int k,char i,double kali) {
   kalf = MG_MIN(kalf,kalt);
   if ( kalf > 1.02 * kali ) {
     swapar(mesh,k,i);
-    return(1);
+    return 1;
   }
-  return(0);
+  return 0;
 }
 
 
@@ -422,5 +422,5 @@ int swpedg(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char typchk) {
   }
   while ( k < ilist );
 
-  return(ns);
+  return ns;
 }

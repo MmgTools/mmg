@@ -80,7 +80,7 @@ int MMG2_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
     sprintf(data,"%s","DEFAULT.mmg2d");
     in = fopen(data,"rb");
     if ( !in )
-      return(1);
+      return 1;
   }
   fprintf(stdout,"\n  %%%% %s OPENED\n",data);
   
@@ -178,7 +178,7 @@ int MMG2_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
   }
   
   fclose(in);
-  return(1);
+  return 1;
 }
 
 /* Free the structure dedicated to the management of multiple local parameters */
@@ -187,21 +187,21 @@ int MMG2_freeLocalPar(MMG5_pMesh mesh) {
   free(mesh->info.par);
   mesh->info.npar = 0;
   
-  return(1);
+  return 1;
 }
 
 int MMG2D_Get_adjaTri(MMG5_pMesh mesh, int kel, int listri[3]) {
 
   if ( ! mesh->adja ) {
     if (! MMG2_hashTria(mesh))
-      return(0);
+      return 0;
   }
 
   listri[0] = mesh->adja[3*(kel-1)+1]/3;
   listri[1] = mesh->adja[3*(kel-1)+2]/3;
   listri[2] = mesh->adja[3*(kel-1)+3]/3;
 
-  return(1);
+  return 1;
 }
 
 inline
@@ -239,7 +239,7 @@ int MMG2D_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMG
       fprintf(stderr,"\n  ## Warning: %s: unable to compute adjacent"
               " vertices of the vertex %d:\nthe ball of point contain too many"
               " elements.\n",__func__,ip);
-      return(0);
+      return 0;
     }
     i1 = _MMG5_inxt2[i];
     lispoi[nbpoi] = mesh->tria[k].v[i1];
@@ -253,14 +253,14 @@ int MMG2D_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMG
   }
   while ( k && k != start );
 
-  if ( k > 0 ) return(nbpoi);
+  if ( k > 0 ) return nbpoi;
 
   /* store the last point of the boundary triangle */
   if ( nbpoi == MMG2D_LMAX ) {
     fprintf(stderr,"\n  ## Warning: %s: unable to compute adjacent vertices of the"
             " vertex %d:\nthe ball of point contain too many elements.\n",
             __func__,ip);
-    return(0);
+    return 0;
   }
   i1 = _MMG5_inxt2[i1];
   lispoi[nbpoi] = mesh->tria[prevk].v[i1];
@@ -279,7 +279,7 @@ int MMG2D_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMG
       fprintf(stderr,"\n  ## Warning: %s: unable to compute adjacent vertices of the"
               " vertex %d:\nthe ball of point contain too many elements.\n",
               __func__,ip);
-      return(0);
+      return 0;
     }
     i  = adja[i2] % 3;
     lispoi[nbpoi] = mesh->tria[k].v[i];
@@ -298,7 +298,7 @@ int MMG2D_Get_triFromEdge(MMG5_pMesh mesh, int ked, int *ktri, int *ied)
 
   val = mesh->edge[ked].base;
 
-  if ( !val ) return(0);
+  if ( !val ) return 0;
 
   *ktri = val/3;
 

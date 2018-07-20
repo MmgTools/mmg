@@ -50,7 +50,7 @@ static int _MMG5_swapbin(int sbin)
   p[2] = p_in[1];
   p[3] = p_in[0];
 
-  return(inv);
+  return inv;
   /*unsigned char c1, c2, c3, c4;
 
     c1 = sbin & 255;
@@ -71,7 +71,7 @@ static float _MMG5_swapf(float sbin)
   p_out[2] = p_in[1];
   p_out[3] = p_in[0];
 
-  return(out);
+  return out;
 }
 static double _MMG5_swapd(double sbin)
 {
@@ -85,7 +85,7 @@ static double _MMG5_swapd(double sbin)
     p_out[i] = p_in[7-i];
   }
 
-  return(out);
+  return out;
 }
 
 static
@@ -281,7 +281,7 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,const char *filename,
         fprintf(stderr,"  ** %s  NOT FOUND.\n",data);
         _MMG5_SAFE_FREE(data);
         _MMG5_SAFE_FREE(*posNodeData);
-        return(0);
+        return 0;
       }
     }
   }
@@ -290,7 +290,7 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,const char *filename,
       fprintf(stderr,"  ** %s  NOT FOUND.\n",data);
       _MMG5_SAFE_FREE(data);
       _MMG5_SAFE_FREE(*posNodeData);
-      return(0);
+      return 0;
     }
   }
   fprintf(stdout,"  %%%% %s OPENED\n",data);
@@ -444,7 +444,7 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,const char *filename,
     fprintf(stderr,"     Exit program.\n");
     fclose(*inm);
     _MMG5_SAFE_FREE(*posNodeData);
-    return(-1);
+    return -1;
   }
 
   /* memory allocation */
@@ -461,7 +461,7 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,const char *filename,
     fprintf(stderr,"     Exit program.\n");
     fclose(*inm);
     _MMG5_SAFE_FREE(*posNodeData);
-    return(-1);
+    return -1;
   }
   mesh->nsols = *nsols;
   return 1;
@@ -584,7 +584,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
         if ( ina_t ) _MMG5_SAFE_FREE(ina_t);
         if ( ina_a ) _MMG5_SAFE_FREE(ina_a);
         fclose(*inm);
-        return(-1);
+        return -1;
       }
       fscanf((*inm),"%d %d ",&ref,&i);
       for ( l=2; l<tagNum; ++l ) {
@@ -711,7 +711,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
           if ( ina_t ) _MMG5_SAFE_FREE(ina_t);
           if ( ina_a ) _MMG5_SAFE_FREE(ina_a);
           fclose(*inm);
-          return(-1);
+          return -1;
         }
 
         for ( idx=0; idx<num; ++idx ) {
@@ -774,7 +774,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
           if ( ina_t ) _MMG5_SAFE_FREE(ina_t);
           if ( ina_a ) _MMG5_SAFE_FREE(ina_a);
           fclose(*inm);
-          return(-1);
+          return -1;
         }
 
         for ( idx=0; idx<num; ++idx ) {
@@ -832,7 +832,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
           if ( ina_t ) _MMG5_SAFE_FREE(ina_t);
           if ( ina_a ) _MMG5_SAFE_FREE(ina_a);
           fclose(*inm);
-          return(-1);
+          return -1;
         }
 
         for ( idx=0; idx<num; ++idx ) {
@@ -873,7 +873,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
           if ( ina_t ) _MMG5_SAFE_FREE(ina_t);
           if ( ina_a ) _MMG5_SAFE_FREE(ina_a);
           fclose(*inm);
-          return(-1);
+          return -1;
         }
 
         for ( idx=0; idx<num; ++idx ) {
@@ -922,7 +922,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
           if ( ina_t ) _MMG5_SAFE_FREE(ina_t);
           if ( ina_a ) _MMG5_SAFE_FREE(ina_a);
           fclose(*inm);
-          return(-1);
+          return -1;
         }
 
         for ( idx=0; idx<num; ++idx ) {
@@ -972,7 +972,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
           if ( ina_t ) _MMG5_SAFE_FREE(ina_t);
           if ( ina_a ) _MMG5_SAFE_FREE(ina_a);
           fclose(*inm);
-          return(-1);
+          return -1;
         }
 
         for ( idx=0; idx<num; ++idx ) {
@@ -1001,7 +1001,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
         if ( ina_t ) _MMG5_SAFE_FREE(ina_t);
         if ( ina_a ) _MMG5_SAFE_FREE(ina_a);
         fclose(*inm);
-        return(-1);
+        return -1;
       }
     }
   }
@@ -1196,7 +1196,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
       fprintf(stderr,"   Error: %s: node data: Expected at least 3 tags (%d given).\n",
               __func__,tagNum);
       fclose(*inm);
-      return(-1);
+      return -1;
     }
 
     fscanf((*inm),"%d ",&i); //time step;
@@ -1212,7 +1212,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
               "THE MESH (%d) DIFFERS FROM THE NUMBER OF VERTICES IN "
               "THE SOLUTION (%d) \n",mesh->np,psl->np);
       fclose(*inm);
-      return(-1);
+      return -1;
     }
 
     if ( typ == 1 ) {
@@ -1230,7 +1230,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
     else {
       fprintf(stderr,"  ** DATA TYPE IGNORED %d \n",typ);
       fclose(*inm);
-      return(-1);
+      return -1;
     }
 
     /* mem alloc */
@@ -1397,7 +1397,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
 
   fclose((*inm));
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -1499,7 +1499,7 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename,
       if( !(inm = fopen(data,"wb")) ) {
         fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",data);
         _MMG5_SAFE_FREE(data);
-        return(0);
+        return 0;
       }
     }
     else bin=1;
@@ -1510,7 +1510,7 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename,
     if( !(inm = fopen(data,"wb")) ) {
       fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",data);
       _MMG5_SAFE_FREE(data);
-      return(0);
+      return 0;
     }
   }
 
@@ -1900,7 +1900,7 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename,
   }
   fclose(inm);
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -1952,7 +1952,7 @@ int MMG5_loadSolHeader( const char *filename,int meshDim,FILE **inm,int *ver,
       if (!(*inm = fopen(data,"rb"))  ) {
         fprintf(stderr,"  ** %s  NOT FOUND. USE DEFAULT METRIC.\n",data);
         _MMG5_SAFE_FREE(data);
-        return(0);
+        return 0;
       }
     } else {
       *bin = 1;
@@ -1965,7 +1965,7 @@ int MMG5_loadSolHeader( const char *filename,int meshDim,FILE **inm,int *ver,
     if (!(*inm = fopen(data,"rb")) ) {
       fprintf(stderr,"  ** %s  NOT FOUND. USE DEFAULT METRIC.\n",data);
       _MMG5_SAFE_FREE(data);
-      return(0);
+      return 0;
     }
   }
   fprintf(stdout,"  %%%% %s OPENED\n",data);
@@ -1980,7 +1980,7 @@ int MMG5_loadSolHeader( const char *filename,int meshDim,FILE **inm,int *ver,
         if ( *dim!=meshDim ) {
           fprintf(stderr,"BAD SOL DIMENSION: %d\n",*dim);
           fclose(*inm);
-          return(-1);
+          return -1;
         }
         continue;
       } else if(!strncmp(chaine,"SolAtVertices",strlen("SolAtVertices"))) {
@@ -2016,7 +2016,7 @@ int MMG5_loadSolHeader( const char *filename,int meshDim,FILE **inm,int *ver,
           fprintf(stderr,"BAD SOL DIMENSION: %d\n",*dim);
           printf("  Exit program.\n");
           fclose(*inm);
-          return(-1);
+          return -1;
         }
         continue;
       } else if(binch==62) {  //SolAtVertices
@@ -2238,7 +2238,7 @@ int MMG5_saveSolHeader( MMG5_pMesh mesh,const char *filename,
     if( !(*inm = fopen(data,"wb")) ) {
       fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",data);
       _MMG5_SAFE_FREE(data);
-      return(0);
+      return 0;
     }
   }
   else
@@ -2255,7 +2255,7 @@ int MMG5_saveSolHeader( MMG5_pMesh mesh,const char *filename,
       if (!(*inm = fopen(data,"wb")) ) {
         fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",data);
         _MMG5_SAFE_FREE(data);
-        return(0);
+        return 0;
       }
       else *bin = 1;
     }
@@ -2337,7 +2337,7 @@ int MMG5_chkMetricType(MMG5_pMesh mesh,int *type, FILE *inm) {
       fprintf(stderr,"  ** DATA TYPE IGNORED %d \n",type[0]);
       _MMG5_SAFE_FREE(type);
       fclose(inm);
-      return(-1);
+      return -1;
     }
   }
   else {
@@ -2346,7 +2346,7 @@ int MMG5_chkMetricType(MMG5_pMesh mesh,int *type, FILE *inm) {
               type[0]);
       _MMG5_SAFE_FREE(type);
       fclose(inm);
-      return(-1);
+      return -1;
     }
   }
   return 1;

@@ -91,10 +91,10 @@ int _MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,
     if ( adj ==start ) break;
 
     pt = &mesh->tetra[adj];
-    if ( pt->tag & MG_REQ ) return(0);
+    if ( pt->tag & MG_REQ ) return 0;
 
     /* Edge is on a boundary between two different domains */
-    if ( pt->ref != refdom )  return(0);
+    if ( pt->ref != refdom )  return 0;
     else if ( mesh->info.opnbdy ) {
       if ( pt->xt && (mesh->xtetra[pt->xt].ftag[ifac] & MG_BDY) ) return 0;
     }
@@ -107,7 +107,7 @@ int _MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,
     list[(*ilist)] = 6*adj +i;
     (*ilist)++;
     /* overflow */
-    if ( (*ilist) > MMG3D_LMAX-3 )  return(0);
+    if ( (*ilist) > MMG3D_LMAX-3 )  return 0;
 
     /* set new triangle for travel */
     adja = &mesh->adja[4*(adj-1)+1];
@@ -130,10 +130,10 @@ int _MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,
   //CECILE : je vois pas pourquoi ca ameliore de faire ce test
   //plus rapide mais du coup on elimine des swap...
   //4/01/14 commentaire
-  // if ( calold*_MMG3D_ALPHAD > 0.5 )  return(0);
+  // if ( calold*_MMG3D_ALPHAD > 0.5 )  return 0;
 
   /* Prevent swap of an external boundary edge */
-  if ( !adj ) return(0);
+  if ( !adj ) return 0;
 
   assert(npol == (*ilist)); // du coup, apres on pourra virer npol
 
@@ -222,9 +222,9 @@ int _MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,
       ier = (calnew > crit*calold);
       if ( !ier )  break;
     }
-    if ( ier )  return(pol[k]);
+    if ( ier )  return pol[k];
   }
-  return(0);
+  return 0;
 }
 
 /**
@@ -272,15 +272,15 @@ int _MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,int *list,
                         fprintf(stderr,"\n  ## Error: %s: unable to allocate"
                                 " a new point\n",__func__);
                         _MMG5_INCREASE_MEM_MESSAGE();
-                        return(-1)
+                        return -1
                         ,m,0,-1);
   }
   if ( met->m ) {
     if ( typchk == 1 && (met->size>1) ) {
-      if ( _MMG3D_intmet33_ani(mesh,met,iel,ia,np,0.5)<=0 )  return(0);
+      if ( _MMG3D_intmet33_ani(mesh,met,iel,ia,np,0.5)<=0 )  return 0;
     }
     else {
-      if ( _MMG5_intmet(mesh,met,iel,ia,np,0.5)<=0 ) return(0);
+      if ( _MMG5_intmet(mesh,met,iel,ia,np,0.5)<=0 ) return 0;
     }
   }
 
@@ -293,11 +293,11 @@ int _MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,int *list,
   if ( ier < 0 ) {
     fprintf(stderr,"\n  ## Warning: %s: unable to swap internal edge.\n",
       __func__);
-    return(-1);
+    return -1;
   }
   else if ( !ier )  {
     _MMG3D_delPt(mesh,np);
-    return(0);
+    return 0;
   }
 
   /** Second step : collapse of np towards enhancing configuration */
@@ -317,9 +317,9 @@ int _MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,int *list,
   if ( ier < 0 ) {
     fprintf(stderr,"\n  ## Warning: %s: unable to swap internal edge.\n",
       __func__);
-    return(-1);
+    return -1;
   }
   else if ( ier ) _MMG3D_delPt(mesh,ier);
 
-  return(1);
+  return 1;
 }

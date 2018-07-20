@@ -67,7 +67,7 @@ inline double _MMG5_lenedgCoor_iso(double *ca,double *cb,double *ma,double *mb) 
   r = h2 / h1 - 1.0;
   len = fabs(r) < _MMG5_EPS ? l / h1 : l / (h2-h1) * log1p(r);
 
-  return(len);
+  return len;
 }
 
 /**
@@ -107,7 +107,7 @@ _MMG5_defsizreg(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,
       fprintf(stderr,"\n  ## Error: %s: at least 1 wrong point"
               " qualification : xp ? %d.\n",__func__,p0->xp);
     }
-    return(FLT_MAX);
+    return FLT_MAX;
   }
   isqhmin = 1.0 / (hmin*hmin);
   isqhmax = 1.0 / (hmax*hmax);
@@ -122,7 +122,7 @@ _MMG5_defsizreg(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,
       fprintf(stderr,"\n  ## Warning: %s: function _MMG5_rotmatrix return 0.\n",
               __func__);
     }
-    return(FLT_MAX);
+    return FLT_MAX;
   }
 
   /* Step 2 : rotation of the oriented surfacic ball with r : lispoi[k] is the
@@ -225,15 +225,15 @@ _MMG5_defsizreg(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,
 
   /* At this point, lispoi contains the oriented surface ball of point p0, that has been rotated
      through r, with the convention that triangle l has edges lispoi[l]; lispoi[l+1] */
-  if ( lmax/lmin > 4.0*hmax*hmax/(hmin*hmin) )  return(hmax);
+  if ( lmax/lmin > 4.0*hmax*hmax/(hmin*hmin) )  return hmax;
 
   /* Check all projections over tangent plane. */
   for (k=0; k<ilists-1; k++) {
     det2d = lispoi[3*k+1]*lispoi[3*(k+1)+2] - lispoi[3*k+2]*lispoi[3*(k+1)+1];
-    if ( det2d < 0.0 )  return(hmax);
+    if ( det2d < 0.0 )  return hmax;
   }
   det2d = lispoi[3*(ilists-1)+1]*lispoi[3*0+2] - lispoi[3*(ilists-1)+2]*lispoi[3*0+1];
-  if ( det2d < 0.0 )    return(hmax);
+  if ( det2d < 0.0 )    return hmax;
 
   /* Reconstitution of the curvature tensor at p0 in the tangent plane,
      with a quadric fitting approach */
@@ -254,7 +254,7 @@ _MMG5_defsizreg(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,
         fprintf(stderr,"\n  ## Warning: %s: function _MMG5_bezierCP return 0.\n",
                 __func__);
       }
-      return(FLT_MAX);
+      return FLT_MAX;
     }
 
     for (i0=0; i0<3; i0++) {
@@ -385,7 +385,7 @@ _MMG5_defsizreg(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,
   }
 
   /* solve now (a b c) = tAA^{-1} * tAb */
-  if ( !_MMG5_sys33sym(tAA,tAb,c) )  return(hmax);
+  if ( !_MMG5_sys33sym(tAA,tAb,c) )  return hmax;
 
   intm[0] = 2.0*c[0];
   intm[1] = c[2];
@@ -399,7 +399,7 @@ _MMG5_defsizreg(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,
       fprintf(stderr,"\n  # Warning: %s: function _MMG5_eigensym return 0.\n",
               __func__);
     }
-    return(FLT_MAX);
+    return FLT_MAX;
   }
 
   /* h computation : h(x) = sqrt( 9*hausd / (2 * max(kappa1(x),kappa2(x)) ) */
@@ -440,7 +440,7 @@ _MMG5_defsizreg(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,
       met->m[ip0] = MG_MIN(met->m[ip0],hnm);
     }
   }
-  return(h);
+  return h;
 }
 
 /**
@@ -491,7 +491,7 @@ double _MMG5_meansizreg_iso(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,
   }
   len /=ilists;
 
-  return(MG_MIN(hmax,MG_MAX(hmin,len)));
+  return MG_MIN(hmax,MG_MAX(hmin,len));
 }
 
 /**
@@ -522,7 +522,7 @@ int _MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( mesh->info.hmax < 0.0 ) {
     //  mesh->info.hmax = 0.5 * mesh->info.delta;
     fprintf(stderr,"\n  ## Error: %s: negative hmax value.\n",__func__);
-    return(0);
+    return 0;
   }
 
   for (k=1; k<=mesh->np; k++) {
@@ -719,7 +719,7 @@ int _MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
   /** 2) size at regular surface points */
-  if ( mesh->info.nosurf && ismet ) return(1);
+  if ( mesh->info.nosurf && ismet ) return 1;
 
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
@@ -892,7 +892,7 @@ int _MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
     }
   }
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -967,5 +967,5 @@ int _MMG5_gradsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
 
   if ( abs(mesh->info.imprim) > 4 )
     fprintf(stdout,"     gradation: %7d updated, %d iter.\n",nup,it);
-  return(1);
+  return 1;
 }

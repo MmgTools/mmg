@@ -125,7 +125,7 @@ int _MMG2_chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
        we created very bad element and was not able to delete them */
     if ( (calnew < calseuil)  ) {
       _MMG2D_delPt(mesh,ip);
-      return(0);
+      return 0;
     }
   }
   /* Otherwise, the new point is inserted on the underlying curve to the edge;
@@ -212,14 +212,14 @@ int _MMG2_chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
     /* No satisfying position has been found */
     else {
       _MMG2D_delPt(mesh,ip);
-      return(0);
+      return 0;
     }
   }
 
   /* Interpolate metric at ip, if any */
   MMG2D_intmet(mesh,met,k,i,ip,0.5);
 
-  return(ip);
+  return ip;
 }
 
 /**
@@ -321,7 +321,7 @@ int _MMG2_split1b(MMG5_pMesh mesh,int k,char i,int ip) {
     mesh->adja[3*(kel-1)+1+j] = 3*iel+i;
   }
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -359,14 +359,14 @@ int _MMG2_split1_sim(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
 
   pt0->v[tau[2]] = vx[tau[0]];
   cal = _MMG2_quickcal(mesh,pt0);
-  if ( cal < _MMG5_EPSD )  return(0);
+  if ( cal < _MMG5_EPSD )  return 0;
 
   pt0->v[tau[2]] = pt->v[tau[2]];
   pt0->v[tau[1]] = vx[tau[0]];
   cal = _MMG2_quickcal(mesh,pt0);
-  if ( cal < _MMG5_EPSD )  return(0);
+  if ( cal < _MMG5_EPSD )  return 0;
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -432,7 +432,7 @@ int _MMG2_split1(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
   pt1->tag[tau[2]] = MG_NOTAG;
   pt1->edg[tau[2]] = 0;
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -470,18 +470,18 @@ int _MMG2_split2_sim(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
 
   pt0->v[tau[1]] = vx[tau[2]] ; pt0->v[tau[2]] = vx[tau[1]];
   cal = _MMG2_quickcal(mesh,pt0);
-  if ( cal < _MMG5_EPSD )  return(0);
+  if ( cal < _MMG5_EPSD )  return 0;
 
   pt0->v[tau[1]] = pt->v[tau[1]] ; pt0->v[tau[2]] = pt->v[tau[2]];
   pt0->v[tau[0]] = vx[tau[2]];
   cal = _MMG2_quickcal(mesh,pt0);
-  if ( cal < _MMG5_EPSD )  return(0);
+  if ( cal < _MMG5_EPSD )  return 0;
 
   pt0->v[tau[0]] = vx[tau[1]] ; pt0->v[tau[1]] = vx[tau[2]];
   cal = _MMG2_quickcal(mesh,pt0);
-  if ( cal < _MMG5_EPSD )  return(0);
+  if ( cal < _MMG5_EPSD )  return 0;
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -568,7 +568,7 @@ int _MMG2_split2(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
   pt2->tag[tau[0]] = MG_NOTAG;   pt2->tag[tau[2]] = MG_NOTAG;
   pt2->edg[tau[0]] = MG_NOTAG;   pt2->edg[tau[2]] = MG_NOTAG;
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -592,21 +592,21 @@ int _MMG2_split3_sim(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
 
   pt0->v[1] = vx[2] ; pt0->v[2] = vx[1];
   cal = _MMG2_quickcal(mesh,pt0);
-  if ( cal < _MMG5_EPSD )  return(0);
+  if ( cal < _MMG5_EPSD )  return 0;
 
   pt0->v[0] = vx[2] ; pt0->v[1] = pt->v[1]; pt0->v[2] = vx[0];
   cal = _MMG2_quickcal(mesh,pt0);
-  if ( cal < _MMG5_EPSD )  return(0);
+  if ( cal < _MMG5_EPSD )  return 0;
 
   pt0->v[0] = vx[1] ; pt0->v[1] = vx[0]; pt0->v[2] = pt->v[2];
   cal = _MMG2_quickcal(mesh,pt0);
-  if ( cal < _MMG5_EPSD )  return(0);
+  if ( cal < _MMG5_EPSD )  return 0;
 
   pt0->v[1] = vx[2]; pt0->v[2] = vx[0];
   cal = _MMG2_quickcal(mesh,pt0);
-  if ( cal < _MMG5_EPSD )  return(0);
+  if ( cal < _MMG5_EPSD )  return 0;
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -734,17 +734,17 @@ int _MMG2_splitbar(MMG5_pMesh mesh,int k,int ip) {
   /* Check quality of the three new elements */
   cal = MMG2_quickarea(ppt->c,p1->c,p2->c);
   if ( (cal < calseuil)  ) {
-     return(0);
+     return 0;
   }
 
   cal = MMG2_quickarea(p0->c,ppt->c,p2->c);
   if ( (cal < calseuil)  ) {
-      return(0);
+      return 0;
   }
   pt0->v[0] = ip0;
   cal = MMG2_quickarea(p0->c,p1->c,ppt->c);
   if ( (cal < calseuil)  ) {
-      return(0);
+      return 0;
   }
 
   iel1 = _MMG2D_newElt(mesh);

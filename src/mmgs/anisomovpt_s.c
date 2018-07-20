@@ -75,11 +75,11 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
 
   pt   = &mesh->tria[iel];
   nend = pt->v[i2];
-  if ( nbeg != nend )  return(0);
+  if ( nbeg != nend )  return 0;
 
   /** Step 1 : Rotation matrix that sends normal at p0 to e_z */
   n = &(p0->n[0]);
-  if ( !_MMG5_rotmatrix(n,r) )  return(0);
+  if ( !_MMG5_rotmatrix(n,r) )  return 0;
 
   /* Apply rotation \circ translation to the whole ball */
   for (k=0; k<ilist; k++) {
@@ -106,10 +106,10 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   /* Check all projections over tangent plane. */
   for (k=0; k<ilist-1; k++) {
     area = lispoi[3*k+1]*lispoi[3*(k+1)+2] - lispoi[3*k+2]*lispoi[3*(k+1)+1];
-    if ( area < 0.0 )  return(0);
+    if ( area < 0.0 )  return 0;
   }
   area = lispoi[3*(ilist-1)+1]*lispoi[3*0+2] - lispoi[3*(ilist-1)+2]*lispoi[3*0+1];
-  if ( area < 0.0 )  return(0);
+  if ( area < 0.0 )  return 0;
 
   /** Step 2 : Compute gradient towards optimal position = centre of mass of the
      ball, projected to tangent plane */
@@ -119,7 +119,7 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   for (k=0; k<ilist; k++) {
     iel = list[k] / 3;
     pt = &mesh->tria[iel];
-    if ( !_MMG5_bezierCP(mesh,pt,&pb,1) )  return(0);
+    if ( !_MMG5_bezierCP(mesh,pt,&pb,1) )  return 0;
 
     /* Compute integral of sqrt(T^J(xi)  M(P(xi)) J(xi)) * P(xi) over the triangle */
     if ( !_MMG5_elementWeight(mesh,met,pt,p0,&pb,r,gv) ) {
@@ -128,7 +128,7 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
         fprintf(stderr,"\n  ## Warning: %s: unable to compute optimal position for at least"
                 " 1 point.\n",__func__ );
       }
-      return(0);
+      return 0;
     }
   }
 
@@ -144,7 +144,7 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
         break;
       }
     }
-    if ( k == ilist )  return(0);
+    if ( k == ilist )  return 0;
   }
   else {
     for (k=ilist-1; k>=0; k--) {
@@ -154,13 +154,13 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
         break;
       }
     }
-    if ( k == -1 )  return(0);
+    if ( k == -1 )  return 0;
   }
 
   /* Sizing of time step : make sure point does not go out corresponding triangle. */
   area = - gv[1]*(lispoi[3*(kel+1)+1] - lispoi[3*(kel)+1]) \
     + gv[0]*(lispoi[3*(kel+1)+2] - lispoi[3*(kel)+2]);
-  if ( fabs(area) < _MMG5_EPSD2 )  return(0);
+  if ( fabs(area) < _MMG5_EPSD2 )  return 0;
   area = 1.0 / area;
   step *= area;
 
@@ -173,7 +173,7 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
 
   /* Computation of the barycentric coordinates of the new point in the corresponding triangle. */
   area = lispoi[3*kel+1]*lispoi[3*(kel+1)+2] - lispoi[3*kel+2]*lispoi[3*(kel+1)+1];
-  if ( area < _MMG5_EPSD2 )  return(0);
+  if ( area < _MMG5_EPSD2 )  return 0;
   area = 1.0 / area;
   lambda[1] = lispoi[3*(kel+1)+2]*gv[0] - lispoi[3*(kel+1)+1]*gv[1];
   lambda[2] = -lispoi[3*(kel)+2]*gv[0] + lispoi[3*(kel)+1]*gv[1];
@@ -236,14 +236,14 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
     if ( caltmp < _MMG5_EPSD2 )  {
       /* We don't check the input triangle qualities, thus we may have a very
        * bad triangle in our mesh */
-      return(0);
+      return 0;
     }
     calnew = MG_MIN(calnew,caltmp);
 
-    if ( calold < _MMG5_EPSOK && calnew <= calold )  return(0);
-    else if (calnew < _MMG5_EPSOK)  return(0);
-    else if ( calnew < 0.3*calold )      return(0);
-    /* if ( chkedg(mesh,0) )  return(0); */
+    if ( calold < _MMG5_EPSOK && calnew <= calold )  return 0;
+    else if (calnew < _MMG5_EPSOK)  return 0;
+    else if ( calnew < 0.3*calold )      return 0;
+    /* if ( chkedg(mesh,0) )  return 0; */
   }
 
   /* Finally, update coordinates and normals of point, if new position is accepted :*/
@@ -257,7 +257,7 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
 
   memcpy(m0,&met->m[0],6*sizeof(double));
 
-  return(1);
+  return 1;
 }
 
 /* Compute movement of a ref, or ridge point whose ball is passed */
@@ -309,7 +309,7 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
           fprintf(stderr,"\n  ## Warning: %s: at least 1 point at the"
                   " intersection of 3 ridge edges\n",__func__);
         }
-        return(0);
+        return 0;
       }
     }
 
@@ -334,7 +334,7 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
           fprintf(stderr,"\n  ## Warning: %s: at least 1 point at the"
                   " intersection of 3 ridge edges\n",__func__);
         }
-        return(0);
+        return 0;
       }
     }
   }
@@ -476,7 +476,7 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
       nn2[2] = no2[2]+np2[2];
 
       ps2 = (p2->c[0]-p0->c[0])*nn1[0]+(p2->c[1]-p0->c[1])*nn1[1]+(p2->c[2]-p0->c[2])*nn1[2];
-      if ( ll2old < _MMG5_EPSD2 )  return(0);
+      if ( ll2old < _MMG5_EPSD2 )  return 0;
       ps2 *= (2.0 / ll2old);
       nn1[0] -= ps2*(p2->c[0]-p0->c[0]);
       nn1[1] -= ps2*(p2->c[1]-p0->c[1]);
@@ -490,7 +490,7 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
 
       dd1 = nn1[0]*nn1[0] + nn1[1]*nn1[1] + nn1[2]*nn1[2];
       dd2 = nn2[0]*nn2[0] + nn2[1]*nn2[1] + nn2[2]*nn2[2];
-      if ( (dd1 < _MMG5_EPSD2) || (dd2<_MMG5_EPSD2) )  return(0);
+      if ( (dd1 < _MMG5_EPSD2) || (dd2<_MMG5_EPSD2) )  return 0;
       dd1 = 1.0 / sqrt(dd1);
       nn1[0] = dd1*nn1[0];
       nn1[1] = dd1*nn1[1];
@@ -519,7 +519,7 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
       dd1 = nn1[0]*nn1[0] + nn1[1]*nn1[1] + nn1[2]*nn1[2];
       dd2 = nn2[0]*nn2[0] + nn2[1]*nn2[1] + nn2[2]*nn2[2];
 
-      if ( (dd1 < _MMG5_EPSD2) || (dd2<_MMG5_EPSD2) || (ddt < _MMG5_EPSD2) )  return(0);
+      if ( (dd1 < _MMG5_EPSD2) || (dd2<_MMG5_EPSD2) || (ddt < _MMG5_EPSD2) )  return 0;
       dd1 = 1.0 / sqrt(dd1);
       nn1[0] = dd1*nn1[0];
       nn1[1] = dd1*nn1[1];
@@ -547,7 +547,7 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
       nn2[2] = no2[2]+np1[2];
 
       ps2 = (p2->c[0]-p0->c[0])*nn1[0]+(p2->c[1]-p0->c[1])*nn1[1]+(p2->c[2]-p0->c[2])*nn1[2];
-      if ( ll2old < _MMG5_EPSD2 )  return(0);
+      if ( ll2old < _MMG5_EPSD2 )  return 0;
       ps2 *= (2.0 / ll2old);
       nn1[0] -= ps2*(p2->c[0]-p0->c[0]);
       nn1[1] -= ps2*(p2->c[1]-p0->c[1]);
@@ -562,7 +562,7 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
       dd1 = nn1[0]*nn1[0] + nn1[1]*nn1[1] + nn1[2]*nn1[2];
       dd2 = nn2[0]*nn2[0] + nn2[1]*nn2[1] + nn2[2]*nn2[2];
 
-      if (( dd1 < _MMG5_EPSD2 ) || (dd2<_MMG5_EPSD2) )  return(0);
+      if (( dd1 < _MMG5_EPSD2 ) || (dd2<_MMG5_EPSD2) )  return 0;
       dd1 = 1.0 / sqrt(dd1);
       nn1[0] = dd1*nn1[0];
       nn1[1] = dd1*nn1[1];
@@ -591,7 +591,7 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
       dd2 = nn2[0]*nn2[0] + nn2[1]*nn2[1] + nn2[2]*nn2[2];
       ddt = to[0]*to[0] + to[1]*to[1] + to[2]*to[2];
 
-      if ( (dd1 < _MMG5_EPSD2) || (dd2<_MMG5_EPSD2) || (ddt < _MMG5_EPSD2) )  return(0);
+      if ( (dd1 < _MMG5_EPSD2) || (dd2<_MMG5_EPSD2) || (ddt < _MMG5_EPSD2) )  return 0;
       dd1 = 1.0 / sqrt(dd1);
       nn1[0] = dd1*nn1[0];
       nn1[1] = dd1*nn1[1];
@@ -615,7 +615,7 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
         return 0;
     }
     else {
-      if ( !_MMG5_paratmet(p0->c,p0->n,m0,o,nn1,mo) )  return(0);
+      if ( !_MMG5_paratmet(p0->c,p0->n,m0,o,nn1,mo) )  return 0;
     }
   }
 
@@ -645,7 +645,7 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
       nn2[2] = no2[2]+np2[2];
 
       ps2 = (p1->c[0]-p0->c[0])*nn1[0]+(p1->c[1]-p0->c[1])*nn1[1]+(p1->c[2]-p0->c[2])*nn1[2];
-      if ( ll1old < _MMG5_EPSD2 )  return(0);
+      if ( ll1old < _MMG5_EPSD2 )  return 0;
       ps2 *= (2.0 / ll1old);
       nn1[0] -= ps2*(p1->c[0]-p0->c[0]);
       nn1[1] -= ps2*(p1->c[1]-p0->c[1]);
@@ -660,7 +660,7 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
       dd1 = nn1[0]*nn1[0] + nn1[1]*nn1[1] + nn1[2]*nn1[2];
       dd2 = nn2[0]*nn2[0] + nn2[1]*nn2[1] + nn2[2]*nn2[2];
 
-      if ( (dd1 < _MMG5_EPSD2 ) || (dd2<_MMG5_EPSD2) )  return(0);
+      if ( (dd1 < _MMG5_EPSD2 ) || (dd2<_MMG5_EPSD2) )  return 0;
       dd1 = 1.0 / sqrt(dd1);
       nn1[0] = dd1*nn1[0];
       nn1[1] = dd1*nn1[1];
@@ -688,7 +688,7 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
       dd2 = nn2[0]*nn2[0] + nn2[1]*nn2[1] + nn2[2]*nn2[2];
       ddt = to[0]*to[0] + to[1]*to[1] + to[2]*to[2];
 
-      if ( (dd1 < _MMG5_EPSD2) || (dd2<_MMG5_EPSD2) || (ddt < _MMG5_EPSD2) )  return(0);
+      if ( (dd1 < _MMG5_EPSD2) || (dd2<_MMG5_EPSD2) || (ddt < _MMG5_EPSD2) )  return 0;
       dd1 = 1.0 / sqrt(dd1);
       nn1[0] = dd1*nn1[0];
       nn1[1] = dd1*nn1[1];
@@ -715,7 +715,7 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
       nn2[2] = no2[2]+np1[2];
 
       ps2 = (p1->c[0]-p0->c[0])*nn1[0]+(p1->c[1]-p0->c[1])*nn1[1]+(p1->c[2]-p0->c[2])*nn1[2];
-      if ( ll1old < _MMG5_EPSD2 )  return(0);
+      if ( ll1old < _MMG5_EPSD2 )  return 0;
       ps2 *= (2.0 / ll1old);
       nn1[0] -= ps2*(p1->c[0]-p0->c[0]);
       nn1[1] -= ps2*(p1->c[1]-p0->c[1]);
@@ -730,7 +730,7 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
       dd1 = nn1[0]*nn1[0] + nn1[1]*nn1[1] + nn1[2]*nn1[2];
       dd2 = nn2[0]*nn2[0] + nn2[1]*nn2[1] + nn2[2]*nn2[2];
 
-      if ( (dd1 < _MMG5_EPSD2) || (dd2<_MMG5_EPSD2) )  return(0);
+      if ( (dd1 < _MMG5_EPSD2) || (dd2<_MMG5_EPSD2) )  return 0;
       dd1 = 1.0 / sqrt(dd1);
       nn1[0] = dd1*nn1[0];
       nn1[1] = dd1*nn1[1];
@@ -758,7 +758,7 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
       dd2 = nn2[0]*nn2[0] + nn2[1]*nn2[1] + nn2[2]*nn2[2];
       ddt = to[0]*to[0] + to[1]*to[1] + to[2]*to[2];
 
-      if ( (dd1 < _MMG5_EPSD2) || (dd2<_MMG5_EPSD2) || (ddt < _MMG5_EPSD2) )  return(0);
+      if ( (dd1 < _MMG5_EPSD2) || (dd2<_MMG5_EPSD2) || (ddt < _MMG5_EPSD2) )  return 0;
       dd1 = 1.0 / sqrt(dd1);
       nn1[0] = dd1*nn1[0];
       nn1[1] = dd1*nn1[1];
@@ -781,7 +781,7 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
                       mesh->tria[it1].v[_MMG5_iprv2[voy1]],(1.0-step),nn1,mo);
     }
     else {
-      if ( !_MMG5_paratmet(p0->c,p0->n,m0,o,nn1,mo) )  return(0);
+      if ( !_MMG5_paratmet(p0->c,p0->n,m0,o,nn1,mo) )  return 0;
     }
   }
 
@@ -820,7 +820,7 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
 
   if ( fabs(l2new -l1new) >= fabs(l2old -l1old) ) {
     ppt0->tag = 0;
-    return(0);
+    return 0;
   }
 
   for (k=0; k<ilist; k++) {
@@ -835,13 +835,13 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
     calnew = caleltsig_ani(mesh,met,0);
     if ( (calnew < 0.001) && (calnew<calold) ) {
       ppt0->tag = 0;
-      return(0);
+      return 0;
     }
     else if ( calnew < 0.3*calold ) {
       ppt0->tag = 0;
-      return(0);
+      return 0;
     }
-    /* if ( chkedg(mesh,0) )  return(0);*/
+    /* if ( chkedg(mesh,0) )  return 0;*/
   }
 
   /* Coordinates, normals, tangents update */
@@ -864,5 +864,5 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   p0->n[2] = to[2];
   memcpy(m0,mo,6*sizeof(double));
 
-  return(1);
+  return 1;
 }

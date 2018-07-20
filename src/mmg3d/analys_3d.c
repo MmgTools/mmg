@@ -188,7 +188,7 @@ static int _MMG5_setadj(MMG5_pMesh mesh){
             fprintf(stderr,"\n  ## Error: %s: Triangle orientation problem (1):"
                     " Moebius strip?\n",__func__);
             _MMG5_SAFE_FREE(pile);
-            return(0);
+            return 0;
           }
           /* flip orientation */
           else {
@@ -276,7 +276,7 @@ static int _MMG5_setadj(MMG5_pMesh mesh){
   }
 
   _MMG5_SAFE_FREE(pile);
-  return(1);
+  return 1;
 }
 
 /** check for ridges: dihedral angle */
@@ -337,7 +337,7 @@ static int _MMG5_setdhd(MMG5_pMesh mesh) {
   if ( abs(mesh->info.imprim) > 3 && nr > 0 )
     fprintf(stdout,"     %d ridges, %d edges updated\n",nr,ne);
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -413,7 +413,7 @@ static int _MMG5_chkVertexConnectedDomains(MMG5_pMesh mesh){
       }
     }
   }
-  return(1);
+  return 1;
 }
 
 /** check for singularities */
@@ -485,7 +485,7 @@ static int _MMG5_singul(MMG5_pMesh mesh) {
 
   if ( abs(mesh->info.imprim) > 3 && nre > 0 )
     fprintf(stdout,"     %d corners, %d singular points detected\n",nc,nre);
-  return(1);
+  return 1;
 }
 
 /** compute normals at C1 vertices, for C0: tangents */
@@ -504,7 +504,7 @@ static int _MMG5_norver(MMG5_pMesh mesh) {
               " and normals of mesh. mesh->xpoint must be freed to enforce"
               " analysis.\n",__func__);
     }
-    return(1);
+    return 1;
   }
 
   /* identify boundary points */
@@ -537,7 +537,7 @@ static int _MMG5_norver(MMG5_pMesh mesh) {
   /* memory to store normals for boundary points */
   mesh->xpmax  = MG_MAX( (long long)(1.5*mesh->xp),mesh->npmax);
 
-  _MMG5_ADD_MEM(mesh,(mesh->xpmax+1)*sizeof(MMG5_xPoint),"boundary points",return(0));
+  _MMG5_ADD_MEM(mesh,(mesh->xpmax+1)*sizeof(MMG5_xPoint),"boundary points",return 0);
   _MMG5_SAFE_CALLOC(mesh->xpoint,mesh->xpmax+1,MMG5_xPoint,0);
 
   /* compute normals + tangents */
@@ -569,7 +569,7 @@ static int _MMG5_norver(MMG5_pMesh mesh) {
         if(mesh->xp > mesh->xpmax){
           _MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,MMG5_xPoint,
                              "larger xpoint table",
-                             mesh->xp--;return(0);,0);
+                             mesh->xp--;return 0;,0);
         }
         ppt->xp = mesh->xp;
         pxp = &mesh->xpoint[ppt->xp];
@@ -649,7 +649,7 @@ static int _MMG5_norver(MMG5_pMesh mesh) {
       fprintf(stdout,"     %d input normals ignored\n",nnr);
     fprintf(stdout,"     %d normals,  %d tangents updated  (%d failed)\n",nn,nt,nf);
   }
-  return(1);
+  return 1;
 }
 
 /**
@@ -737,24 +737,24 @@ int _MMG3D_analys(MMG5_pMesh mesh) {
   /* create tetra adjacency */
   if ( !MMG3D_hashTetra(mesh,1) ) {
     fprintf(stderr,"\n  ## Hashing problem (1). Exit program.\n");
-    return(0);
+    return 0;
   }
 
   /* create prism adjacency */
   if ( !MMG3D_hashPrism(mesh) ) {
     fprintf(stderr,"\n  ## Prism hashing problem. Exit program.\n");
-    return(0);
+    return 0;
   }
   /* compatibility triangle orientation w/r tetras */
   if ( !_MMG5_bdryPerm(mesh) ) {
     fprintf(stderr,"\n  ## Boundary orientation problem. Exit program.\n");
-    return(0);
+    return 0;
   }
 
   /* identify surface mesh */
   if ( !_MMG5_chkBdryTria(mesh) ) {
     fprintf(stderr,"\n  ## Boundary problem. Exit program.\n");
-    return(0);
+    return 0;
   }
   _MMG5_freeXTets(mesh);
   _MMG5_freeXPrisms(mesh);
@@ -767,7 +767,7 @@ int _MMG3D_analys(MMG5_pMesh mesh) {
   if ( !_MMG3D_hashTria(mesh,&hash) ) {
     _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
     fprintf(stderr,"\n  ## Hashing problem (2). Exit program.\n");
-    return(0);
+    return 0;
   }
 
   /* build hash table for geometric edges */
@@ -775,7 +775,7 @@ int _MMG3D_analys(MMG5_pMesh mesh) {
     fprintf(stderr,"\n  ## Hashing problem (0). Exit program.\n");
     _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
     _MMG5_DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(MMG5_hgeom));
-    return(0);
+    return 0;
   }
 
   /**--- stage 2: surface analysis */
@@ -786,21 +786,21 @@ int _MMG3D_analys(MMG5_pMesh mesh) {
   if ( !_MMG5_setadj(mesh) ) {
     fprintf(stderr,"\n  ## Topology problem. Exit program.\n");
     _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
-    return(0);
+    return 0;
   }
 
   /* check for ridges */
   if ( mesh->info.dhd > _MMG5_ANGLIM && !_MMG5_setdhd(mesh) ) {
     fprintf(stderr,"\n  ## Geometry problem. Exit program.\n");
     _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
-    return(0);
+    return 0;
   }
 
   /* identify singularities */
   if ( !_MMG5_singul(mesh) ) {
     fprintf(stderr,"\n  ## MMG5_Singularity problem. Exit program.\n");
     _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
-    return(0);
+    return 0;
   }
 
   if ( abs(mesh->info.imprim) > 3 || mesh->info.ddebug )
@@ -810,7 +810,7 @@ int _MMG3D_analys(MMG5_pMesh mesh) {
   if ( !_MMG5_norver(mesh) ) {
     fprintf(stderr,"\n  ## Normal problem. Exit program.\n");
     _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
-    return(0);
+    return 0;
   }
 
   /* set bdry entities to tetra */
@@ -818,7 +818,7 @@ int _MMG3D_analys(MMG5_pMesh mesh) {
     fprintf(stderr,"\n  ## Boundary problem. Exit program.\n");
     _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
     _MMG5_DEL_MEM(mesh,mesh->xpoint,(mesh->xpmax+1)*sizeof(MMG5_xPoint));
-    return(0);
+    return 0;
   }
 
   /* set non-manifold edges sharing non-intersecting multidomains as required */
@@ -829,7 +829,7 @@ int _MMG3D_analys(MMG5_pMesh mesh) {
     fprintf(stderr,"\n  ## Non-manifold topology problem. Exit program.\n");
     _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
     _MMG5_DEL_MEM(mesh,mesh->xpoint,(mesh->xpmax+1)*sizeof(MMG5_xPoint));
-    return(0);
+    return 0;
   }
 
   /* check subdomains connected by a vertex and mark these vertex as corner and required */
@@ -840,14 +840,14 @@ int _MMG3D_analys(MMG5_pMesh mesh) {
     fprintf(stderr,"\n  ## Hashing problem (0). Exit program.\n");
     _MMG5_DEL_MEM(mesh,mesh->xpoint,(mesh->xpmax+1)*sizeof(MMG5_xPoint));
     _MMG5_DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(MMG5_hgeom));
-    return(0);
+    return 0;
   }
 
   /* Update edges tags and references for xtetras */
   if ( !_MMG5_bdryUpdate(mesh) ) {
     fprintf(stderr,"\n  ## Boundary problem. Exit program.\n");
     _MMG5_DEL_MEM(mesh,mesh->xpoint,(mesh->xpmax+1)*sizeof(MMG5_xPoint));
-    return(0);
+    return 0;
   }
 
   /* define geometry for non manifold points */
@@ -861,5 +861,5 @@ int _MMG3D_analys(MMG5_pMesh mesh) {
 
   if ( mesh->nprism ) _MMG5_DEL_MEM(mesh,mesh->adjapr,(5*mesh->nprism+6)*sizeof(int));
 
-  return(1);
+  return 1;
 }

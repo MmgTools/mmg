@@ -61,10 +61,10 @@ inline int _MMG5_norface(MMG5_pMesh mesh,int k,int iface,double n[3]) {
 
   pt = &mesh->tetra[k];
 
-  return( _MMG5_norpts(mesh,
-                       pt->v[_MMG5_idir[iface][0]],
-                       pt->v[_MMG5_idir[iface][1]],
-                       pt->v[_MMG5_idir[iface][2]],n) );
+  return _MMG5_norpts(mesh,
+                      pt->v[_MMG5_idir[iface][0]],
+                      pt->v[_MMG5_idir[iface][1]],
+                      pt->v[_MMG5_idir[iface][2]],n);
 }
 
 /** If need be, invert the travelling sense of surfacic ball so that it is travelled in
@@ -78,9 +78,9 @@ inline int _MMG5_directsurfball(MMG5_pMesh mesh, int ip, int *list, int ilist, d
     iel   = list[0] / 4;
     iface = list[0] % 4;
 
-    if ( !_MMG5_norface(mesh,iel,iface,nt) ) return(0);
+    if ( !_MMG5_norface(mesh,iel,iface,nt) ) return 0;
     ps = nt[0]*n[0] +  nt[1]*n[1] +  nt[2]*n[2];
-    if ( ps > 0.0 )  return(1);
+    if ( ps > 0.0 )  return 1;
 
     for (j=1; j<=(ilist-1)/2; j++) {
         aux = list[j];
@@ -88,7 +88,7 @@ inline int _MMG5_directsurfball(MMG5_pMesh mesh, int ip, int *list, int ilist, d
         list[ilist -j] = aux;
     }
 
-    return(2);
+    return 2;
 }
 
 /** If need be, reorder the surfacic ball of point ip, so that its first element has
@@ -112,7 +112,7 @@ int _MMG5_startedgsurfball(MMG5_pMesh mesh,int nump,int numq,int *list,int ilist
     ipt = _MMG5_inxt2[ipt];         // next index in this face
     ipt = _MMG5_idir[iface][ipt];  // index of this point in local num of tetra
 
-    if(pt->v[ipt] == numq) return(1);
+    if(pt->v[ipt] == numq) return 1;
 
     else{
         ipt = _MMG5_idir[iface][_MMG5_iprv2[_MMG5_idirinv[iface][ip]]];
@@ -125,7 +125,7 @@ int _MMG5_startedgsurfball(MMG5_pMesh mesh,int nump,int numq,int *list,int ilist
         list[ilist-1] = tmp;
     }
 
-    return(2);
+    return 2;
 }
 
 /** Compute point located at parameter value step from point ip0, as well as interpolate
@@ -137,13 +137,13 @@ inline int _MMG5_BezierRidge(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,
 
     p0 = &mesh->point[ip0];  /* Ref point, from which step is counted */
     p1 = &mesh->point[ip1];
-    if ( !(MG_GEO & p0->tag) || !(MG_GEO & p1->tag) )  return(0);
+    if ( !(MG_GEO & p0->tag) || !(MG_GEO & p1->tag) )  return 0;
 
     ux = p1->c[0] - p0->c[0];
     uy = p1->c[1] - p0->c[1];
     uz = p1->c[2] - p0->c[2];
     ll = ux*ux + uy*uy + uz*uz;
-    if ( ll < _MMG5_EPSD2 )  return(0);
+    if ( ll < _MMG5_EPSD2 )  return 0;
     il = 1.0 / sqrt(ll);
 
     if ( MG_SIN(p0->tag) ) {
@@ -195,7 +195,7 @@ inline int _MMG5_BezierRidge(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,
 
     if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
         memcpy(to,t0,3*sizeof(double));
-        return(1);
+        return 1;
     }
     else if ( MG_SIN(p0->tag) ) {
         memcpy(n11,&(mesh->xpoint[p1->xp].n1[0]),3*sizeof(double));
@@ -307,7 +307,7 @@ inline int _MMG5_BezierRidge(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,
       to[2] *= dd;
     }
 
-    return(1);
+    return 1;
 }
 
 /** Compute point located at parameter value step from point ip0, as well as interpolate
@@ -324,7 +324,7 @@ inline int _MMG5_BezierRef(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,do
     uy = p1->c[1] - p0->c[1];
     uz = p1->c[2] - p0->c[2];
     ll = ux*ux + uy*uy + uz*uz;
-    if ( ll < _MMG5_EPSD2 )  return(0);
+    if ( ll < _MMG5_EPSD2 )  return 0;
     il = 1.0 / sqrt(ll);
     assert( (MG_REF & p0->tag) && (MG_REF & p1->tag) );
 
@@ -380,7 +380,7 @@ inline int _MMG5_BezierRef(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,do
     /* Coordinates of the new tangent and normal */
     if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
         memcpy(to,t0,3*sizeof(double));
-        return(1);
+        return 1;
     }
     else if ( MG_SIN(p0->tag) ) {
         memcpy(n11,&(mesh->xpoint[p1->xp].n1[0]),3*sizeof(double));
@@ -462,7 +462,7 @@ inline int _MMG5_BezierRef(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,do
         to[2] *= dd;
     }
 
-    return(1);
+    return 1;
 }
 
 /** Compute point located at parameter value step from point ip0, as well as interpolate
@@ -480,7 +480,7 @@ inline int _MMG5_BezierNom(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,do
     uz = p1->c[2] - p0->c[2];
     ll = ux*ux + uy*uy + uz*uz;
 
-    if(ll < _MMG5_EPSD2) return(0);
+    if(ll < _MMG5_EPSD2) return 0;
     il = 1.0 / sqrt(ll);
 
     assert(( p0->tag & MG_NOM ) && ( p1->tag & MG_NOM ));
@@ -537,7 +537,7 @@ inline int _MMG5_BezierNom(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,do
     /* Coordinates of the new tangent and normal */
     if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {  // function should not be used in that case
         memcpy(to,t0,3*sizeof(double));
-        return(1);
+        return 1;
     }
     else if ( MG_SIN(p0->tag) ) {
         memcpy(n1,&(mesh->xpoint[p1->xp].n1[0]),3*sizeof(double));
@@ -604,7 +604,7 @@ inline int _MMG5_BezierNom(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,do
         to[2] *= dd;
     }
 
-    return(1);
+    return 1;
 }
 
 /** Compute point located at parameter value step from point ip0, as well as interpolate
@@ -629,7 +629,7 @@ inline int _MMG5_BezierReg(MMG5_pMesh mesh,int ip0, int ip1, double s, double v[
         o[2] = 0.5*( p0->c[2] + p1->c[2] );
 
         memcpy(no,v,3*sizeof(double));
-        return(1);
+        return 1;
     }
 
     il = 1.0 /sqrt(ll);
@@ -767,7 +767,7 @@ inline int _MMG5_BezierReg(MMG5_pMesh mesh,int ip0, int ip1, double s, double v[
     o[2] = (1.0-s)*(1.0-s)*(1.0-s)*p0->c[2] + 3.0*s*(1.0-s)*(1.0-s)*b0[2] + \
         3.0*s*s*(1.0-s)*b1[2] + s*s*s*p1->c[2];
 
-    return(1);
+    return 1;
 }
 
 /** find the element number in packed numerotation */
@@ -780,10 +780,10 @@ int _MMG3D_indElt(MMG5_pMesh mesh, int kel) {
         pt = &mesh->tetra[k];
         if ( MG_EOK(pt) ) {
             ne++;
-            if ( k == kel )  return(ne);
+            if ( k == kel )  return ne;
         }
     }
-    return(0);
+    return 0;
 }
 
 /** find the point number in packed numerotation */
@@ -796,10 +796,10 @@ int _MMG3D_indPt(MMG5_pMesh mesh, int kp) {
         ppt = &mesh->point[k];
         if ( MG_VOK(ppt) ) {
             np++;
-            if ( k == kp )  return(np);
+            if ( k == kp )  return np;
         }
     }
-    return(0);
+    return 0;
 }
 
 /** Debug function (not use in clean code): print mesh->tetra structure */

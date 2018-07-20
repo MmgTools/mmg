@@ -76,7 +76,7 @@ static int _MMG5_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( !in ) {
     sprintf(data,"%s","DEFAULT.mmgs");
     in = fopen(data,"rb");
-    if ( !in )  return(1);
+    if ( !in )  return 1;
   }
   fprintf(stdout,"\n  %%%% %s OPENED\n",data);
 
@@ -123,7 +123,7 @@ static int _MMG5_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
     }
   }
   fclose(in);
-  return(1);
+  return 1;
 }
 
 /**
@@ -149,7 +149,7 @@ int _MMGS_writeLocalParam( MMG5_pMesh mesh ) {
   /** Save the local parameters file */
   if ( !(out = fopen(data,"wb")) ) {
     fprintf(stderr,"\n  ** UNABLE TO OPEN %s.\n",data);
-    return(0);
+    return 0;
   }
 
   fprintf(stdout,"\n  %%%% %s OPENED\n",data);
@@ -172,7 +172,7 @@ int _MMGS_writeLocalParam( MMG5_pMesh mesh ) {
   fclose(out);
   fprintf(stdout,"  -- WRITING COMPLETED\n");
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -296,7 +296,7 @@ int main(int argc,char *argv[]) {
                   MMG5_ARG_end);
 
   /* command line */
-  if ( !MMGS_parsar(argc,argv,mesh,met) )  return(MMG5_STRONGFAILURE);
+  if ( !MMGS_parsar(argc,argv,mesh,met) )  return MMG5_STRONGFAILURE;
 
   /* load data */
   fprintf(stdout,"\n  -- INPUT DATA\n");
@@ -365,5 +365,5 @@ int main(int argc,char *argv[]) {
   /* free mem */
   _MMGS_RETURN_AND_FREE(mesh,met,ier);
 
-  return(0);
+  return 0;
 }

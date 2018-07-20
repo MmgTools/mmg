@@ -69,7 +69,7 @@ _MMG5_buildridmetfic(MMG5_pMesh mesh,double t[3],double n[3],double dtan,
   m[4] = dtan*r[1][0]*r[2][0] + dv*r[1][1]*r[2][1] + dn*r[1][2]*r[2][2];
   m[5] = dtan*r[2][0]*r[2][0] + dv*r[2][1]*r[2][1] + dn*r[2][2]*r[2][2];
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -100,7 +100,7 @@ int _MMG5_intmetsavedir(MMG5_pMesh mesh, double *m,double *n,double *mr) {
   mr[1] = lambda[0]*vp[0][0]*vp[0][1] + lambda[1]*vp[1][0]*vp[1][1];
   mr[2] = lambda[0]*vp[0][1]*vp[0][1] + lambda[1]*vp[1][1]*vp[1][1];
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -125,7 +125,7 @@ int _MMG5_buildridmet(MMG5_pMesh mesh,MMG5_pSol met,int np0,
   double       ps1,ps2,*n1,*n2,*t,*m,dv,dn,u[3],r[3][3];
 
   p0 = &mesh->point[np0];
-  if ( !(MG_GEO & p0->tag) )  return(0);
+  if ( !(MG_GEO & p0->tag) )  return 0;
   m = &met->m[6*np0];
   t = &p0->n[0];
   go = &mesh->xpoint[p0->xp];
@@ -162,7 +162,7 @@ int _MMG5_buildridmet(MMG5_pMesh mesh,MMG5_pSol met,int np0,
   mr[3] = m[0]*r[1][0]*r[1][0] + dv*r[1][1]*r[1][1] + dn*r[1][2]*r[1][2];
   mr[4] = m[0]*r[1][0]*r[2][0] + dv*r[1][1]*r[2][1] + dn*r[1][2]*r[2][2];
   mr[5] = m[0]*r[2][0]*r[2][0] + dv*r[2][1]*r[2][1] + dn*r[2][2]*r[2][2];
-  return(1);
+  return 1;
 }
 
 /**
@@ -182,7 +182,7 @@ int _MMG5_buildridmetnor(MMG5_pMesh mesh,MMG5_pSol met,int np0,double nt[3],doub
   double       ps1,ps2,*n1,*n2,*t,*m,dv,dn,u[3],r[3][3];
 
   p0 = &mesh->point[np0];
-  if ( !(MG_GEO & p0->tag) )  return(0);
+  if ( !(MG_GEO & p0->tag) )  return 0;
   m = &met->m[6*np0];
   t = &p0->n[0];
   go = &mesh->xpoint[p0->xp];
@@ -220,7 +220,7 @@ int _MMG5_buildridmetnor(MMG5_pMesh mesh,MMG5_pSol met,int np0,double nt[3],doub
   mr[4] = m[0]*r[1][0]*r[2][0] + dv*r[1][1]*r[2][1] + dn*r[1][2]*r[2][2];
   mr[5] = m[0]*r[2][0]*r[2][0] + dv*r[2][1]*r[2][1] + dn*r[2][2]*r[2][2];
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -249,7 +249,7 @@ int _MMG5_intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr) {
       fprintf(stderr,"\n  ## Warning: %s: null metric det : %E \n",__func__,det);
       mmgWarn = 1;
     }
-    return(0);
+    return 0;
   }
   det = 1.0 / det;
 
@@ -268,7 +268,7 @@ int _MMG5_intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr) {
               __func__,lambda[0]);
       mmgWarn1 = 1;
     }
-    return(0);
+    return 0;
   }
 
   /* First case : matrices m and n are homothetic : n = lambda0*m */
@@ -307,7 +307,7 @@ int _MMG5_intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr) {
           vp0[1] = m[1];
           vnorm  = sqrt(vp0[0]*vp0[0] + vp0[1]*vp0[1]);
 
-          if ( vnorm < _MMG5_EPS ) return(0);
+          if ( vnorm < _MMG5_EPS ) return 0;
         }
 
         vnorm   = 1.0 / vnorm;
@@ -323,7 +323,7 @@ int _MMG5_intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr) {
           vp1[1] = m[1];
           vnorm  = sqrt(vp1[0]*vp1[0] + vp1[1]*vp1[1]);
 
-          if ( vnorm < _MMG5_EPS ) return(0);
+          if ( vnorm < _MMG5_EPS ) return 0;
         }
 
         vnorm   = 1.0 / vnorm;
@@ -342,7 +342,7 @@ int _MMG5_intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr) {
     mr[1] = dn[0]*vp0[0]*vp0[1] + dn[1]*vp1[0]*vp1[1];
     mr[2] = dn[0]*vp0[1]*vp0[1] + dn[1]*vp1[1]*vp1[1];
 
-    return(1);
+    return 1;
   }
 
   /* Second case : both eigenvalues of imn are distinct ; theory says qf associated to m and n
@@ -394,7 +394,7 @@ int _MMG5_intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr) {
 
     /* Intersected metric = tP^-1 diag(d0,d1)P^-1, P = (vp0, vp1) stored in columns */
     det = vp0[0]*vp1[1] - vp0[1]*vp1[0];
-    if ( fabs(det) < _MMG5_EPS )  return(0);
+    if ( fabs(det) < _MMG5_EPS )  return 0;
     det = 1.0 / det;
 
     ip[0] =  vp1[1]*det;
@@ -406,7 +406,7 @@ int _MMG5_intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr) {
     mr[1] = d0*ip[0]*ip[1] + d1*ip[2]*ip[3];
     mr[2] = d0*ip[1]*ip[1] + d1*ip[3]*ip[3];
   }
-  return(1);
+  return 1;
 }
 
 /**
@@ -547,7 +547,7 @@ int _MMG5_mmgIntextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6],
       m[4] = me[4];
       m[5] = me[5];
 
-      return(0);
+      return 0;
     }
 
     /* Back to the canonical basis of \mathbb{R}^3 : me = ^tR*mr*R : mtan and
@@ -596,7 +596,7 @@ int _MMG5_mmgIntextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6],
         m[3] = me[3];
         m[4] = me[4];
         m[5] = me[5];
-        return(0);
+        return 0;
       }
       lambda[i]=MG_MIN(isqhmin,lambda[i]);
       lambda[i]=MG_MAX(isqhmax,lambda[i]);
@@ -616,7 +616,7 @@ int _MMG5_mmgIntextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6],
       + vp[2][2]*vp[2][2]*lambda[2];
   }
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -636,7 +636,7 @@ int _MMG5_paratmet(double c0[3],double n0[3],double m[6],double c1[3],double n1[
   double  r[3][3],mrot[6],mtan[3],lambda[2],vp[2][2],u[3],ps,ll;
 
   /* Take the induced metric tensor in the tangent plane by change of basis : R * M * {^t}R*/
-  if ( !_MMG5_rotmatrix(n0,r) )  return(0);
+  if ( !_MMG5_rotmatrix(n0,r) )  return 0;
   _MMG5_rmtr(r,m,mrot);
   mtan[0] = mrot[0];
   mtan[1] = mrot[1];
@@ -656,7 +656,7 @@ int _MMG5_paratmet(double c0[3],double n0[3],double m[6],double c1[3],double n1[
   u[1] -= ps*n1[1];
   u[2] -= ps*n1[2];
   ll = u[0]*u[0] + u[1]*u[1] + u[2]*u[2];
-  if ( ll < _MMG5_EPSD )  return(0);
+  if ( ll < _MMG5_EPSD )  return 0;
   ll = 1.0 / sqrt(ll);
   u[0] *= ll;
   u[1] *= ll;
@@ -673,7 +673,7 @@ int _MMG5_paratmet(double c0[3],double n0[3],double m[6],double c1[3],double n1[
   r[2][1] = n1[0]*u[1] - n1[1]*u[0];
 
   ll = r[0][1]*r[0][1] + r[1][1]*r[1][1] + r[2][1]*r[2][1];
-  if ( ll < _MMG5_EPSD )  return(0);
+  if ( ll < _MMG5_EPSD )  return 0;
   ll = 1.0 / sqrt(ll);
   r[0][1] *= ll;
   r[1][1] *= ll;
@@ -702,5 +702,5 @@ int _MMG5_paratmet(double c0[3],double n0[3],double m[6],double c1[3],double n1[
   mt[5] = lambda[0]*r[2][0]*r[2][0] + lambda[1]*r[2][1]*r[2][1]
     + mrot[5]*r[2][2]*r[2][2];
 
-  return(1);
+  return 1;
 }

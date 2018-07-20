@@ -35,7 +35,7 @@ static int _MMG2_correction_iso(MMG5_pMesh mesh,int ip,int *list,int ilist,int n
   int             *adja,i,ipil,iel,lon,iadr,adj,ib,ic,base,ncor,nei[3];
 
   ppt  = &mesh->point[ip];
-  if ( !MG_VOK(ppt) )  return(ilist);
+  if ( !MG_VOK(ppt) )  return ilist;
   base = mesh->base;
   lon  = ilist;
   do {
@@ -87,7 +87,7 @@ static int _MMG2_correction_iso(MMG5_pMesh mesh,int ip,int *list,int ilist,int n
     }
   }
   while ( ncor > 0 && lon >= nedep );
-  return(lon);
+  return lon;
 }
 
 /* Hashing routine for maintaining adjacencies during Delaunization; hash mesh edge v[0],v[1] (face i of iel) */
@@ -122,7 +122,7 @@ int _MMG2_hashEdgeDelone(MMG5_pMesh mesh,HashTable *hash,int iel,int i,int *v) {
       iadr = (jel-1)*3 + 1;
       adja = &mesh->adja[iadr];
       adja[j] = iel*3 + i;
-      return(1);
+      return 1;
     }
     else {
       while ( ha->nxt && ha->nxt < hash->nxtmax ) {
@@ -137,7 +137,7 @@ int _MMG2_hashEdgeDelone(MMG5_pMesh mesh,HashTable *hash,int iel,int i,int *v) {
           iadr = 3*(jel-1) + 1;
           adja = &mesh->adja[iadr];
           adja[j] = 3*iel+i;
-          return(1);
+          return 1;
         }
       }
     }
@@ -156,9 +156,9 @@ int _MMG2_hashEdgeDelone(MMG5_pMesh mesh,HashTable *hash,int iel,int i,int *v) {
           fprintf(stderr,"\n  ## Warning: %s: overflow.\n",__func__);
         }
       }
-      return(0);
+      return 0;
     }
-    return(1);
+    return 1;
   }
 
   /* If ha->man does not exist, insert it in the hash table */
@@ -167,7 +167,7 @@ int _MMG2_hashEdgeDelone(MMG5_pMesh mesh,HashTable *hash,int iel,int i,int *v) {
   ha->iel = 3*iel+i;
   ha->nxt = 0;
 
-  return(1);
+  return 1;
 }
 
 /**  Create the cavity point ip, starting from triangle list[0];
@@ -249,7 +249,7 @@ int _MMG2_cavity(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list) {
         }
       }
     }
-    if ( ilist > MMG2_LONMAX - 3 ) return(-1);
+    if ( ilist > MMG2_LONMAX - 3 ) return -1;
 
     ++ipil;
   }
@@ -257,7 +257,7 @@ int _MMG2_cavity(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list) {
 
   ilist = _MMG2_correction_iso(mesh,ip,list,ilist,1);
   //if ( isreq ) ilist = -fabs(ilist);
-  return(ilist);
+  return ilist;
 }
 
 /* Insertion in point ip in the cavity described by list */
@@ -321,13 +321,13 @@ int _MMG2_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
       ppt->tagdel = 0;
     }
   }
-  if ( alert )  return(0);
+  if ( alert )  return 0;
   
   /* Hash table parameters */
-  if ( size >= 3*MMG2_LONMAX )  return(0);
+  if ( size >= 3*MMG2_LONMAX )  return 0;
   if ( !MMG2_hashNew(&hedg,size,3*size) ) { /*3*size is enough */
     fprintf(stderr,"\n  ## Warning: %s: unable to complete mesh.\n",__func__);
-    return(-1);
+    return -1;
   }
 
   /* Allocate memory for "size" new triangles */
@@ -339,7 +339,7 @@ int _MMG2_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
                           fprintf(stderr,"\n  ## Error: %s: unable to allocate"
                                  " a new element.\n",__func__);
                           _MMG5_INCREASE_MEM_MESSAGE();
-                          printf("  Exit program.\n");return(-1);,
+                          printf("  Exit program.\n");return -1;,
                           -1);
     }
   }
@@ -411,5 +411,5 @@ int _MMG2_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
   //ppt = &mesh->point[ip];
   //  ppt->flag = mesh->flag;
   _MMG5_SAFE_FREE(hedg.item);
-  return(1);
+  return 1;
 }

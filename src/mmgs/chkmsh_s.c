@@ -77,7 +77,7 @@ int _MMG5_mmgsChkmsh(MMG5_pMesh mesh,int severe,int base) {
                 fprintf(stderr,"tag (%d): %d %d %d \n",_MMGS_indElt(mesh,k),
                         pt1->tag[0],pt1->tag[1],pt1->tag[2]);
               }
-              return(0);
+              return 0;
             }
             if ( adj == k ) {
               if ( !mmgErr1 ) {
@@ -92,7 +92,7 @@ int _MMG5_mmgsChkmsh(MMG5_pMesh mesh,int severe,int base) {
                         _MMGS_indElt(mesh,adja[0]/3),_MMGS_indElt(mesh,adja[1]/3),
                         _MMGS_indElt(mesh,adja[2]/3));
               }
-              return(0);
+              return 0;
             }
             pt2 = &mesh->tria[adj];
             if ( !MG_EOK(pt2) ) {
@@ -108,14 +108,14 @@ int _MMG5_mmgsChkmsh(MMG5_pMesh mesh,int severe,int base) {
                         _MMGS_indElt(mesh,adj),_MMGS_indPt(mesh,pt2->v[0]),
                         _MMGS_indPt(mesh,pt2->v[1]),_MMGS_indPt(mesh,pt2->v[2]));
               }
-              return(0);
+              return 0;
             }
             if ( (pt1->tag[i] != pt2->tag[voy]) || (pt1->edg[i] != pt2->edg[voy] ) ) {
                 fprintf(stderr,"\n  ## Error: %s: 3. at least 1 wrong"
                         " tag/ref (%d %d)"
                         "  %d - %d\n",__func__,_MMGS_indElt(mesh,k),
                         _MMGS_indElt(mesh,adj),pt1->tag[i],pt2->tag[voy]);
-                return(0);
+                return 0;
             }
             adjb = &mesh->adja[3*(adj-1)+1];
             adj1 = adjb[voy] / 3;
@@ -140,7 +140,7 @@ int _MMG5_mmgsChkmsh(MMG5_pMesh mesh,int severe,int base) {
                         _MMGS_indElt(mesh,adjb[0]/3),_MMGS_indElt(mesh,adjb[1]/3),
                         _MMGS_indElt(mesh,adjb[2]/3));
               }
-              return(0);
+              return 0;
             }
             if ( !MS_SIN(pt1->tag[i]) ) {
                 j1 = _MMG5_inxt2[voy];
@@ -152,13 +152,13 @@ int _MMG5_mmgsChkmsh(MMG5_pMesh mesh,int severe,int base) {
                             " orientation (%d %d).\n",__func__,_MMGS_indElt(mesh,k),
                             _MMGS_indElt(mesh,adj));
                   }
-                  return(0);
+                  return 0;
                 }
             }
         }
     }
 
-    if ( !severe )  return(1);
+    if ( !severe )  return 1;
 
     for (k=1; k<=mesh->nt; k++) {
         pt1 = &mesh->tria[k];
@@ -179,7 +179,7 @@ int _MMG5_mmgsChkmsh(MMG5_pMesh mesh,int severe,int base) {
                 fprintf(stderr,"%d %d %d\n",_MMGS_indPt(mesh,pt1->v[0]),
                         _MMGS_indPt(mesh,pt1->v[1]),_MMGS_indPt(mesh,pt1->v[2]));
               }
-              return(0);
+              return 0;
             }
             else if ( MS_SIN(ppt->tag) )  continue;
 
@@ -196,7 +196,7 @@ int _MMG5_mmgsChkmsh(MMG5_pMesh mesh,int severe,int base) {
                             " ball (%d, %d).\n",__func__,_MMGS_indPt(mesh,ip),
                             _MMGS_indPt(mesh,pt2->v[nk]));
                   }
-                  return(0);
+                  return 0;
                 }
             }
             len = 0;
@@ -221,7 +221,7 @@ int _MMG5_mmgsChkmsh(MMG5_pMesh mesh,int severe,int base) {
         }
     }
 
-    return(1);
+    return 1;
 }
 
 /**
@@ -260,7 +260,7 @@ int chkeigen(MMG5_pMesh mesh,MMG5_pSol met,int k,double lambda[3]) {
         else
             n = &p0->n[0];
 
-        if ( !_MMG5_rotmatrix(n,r) )  return(0);
+        if ( !_MMG5_rotmatrix(n,r) )  return 0;
         _MMG5_rmtr(r,m,mr);
         mtan[0] = mr[0];
         mtan[1] = mr[1];
@@ -277,7 +277,7 @@ int chkeigen(MMG5_pMesh mesh,MMG5_pSol met,int k,double lambda[3]) {
         }
     }
 
-    return(1);
+    return 1;
 }
 
 /**
@@ -353,7 +353,7 @@ int chkmet(MMG5_pMesh mesh,MMG5_pSol met) {
             }
 
             /* Recovery of the eigenvalues of m */
-            if ( !_MMG5_rotmatrix(n,r) )  return(0);
+            if ( !_MMG5_rotmatrix(n,r) )  return 0;
             _MMG5_rmtr(r,m,mr);
             mtan[0] = mr[0];
             mtan[1] = mr[1];
@@ -388,7 +388,7 @@ int chkmet(MMG5_pMesh mesh,MMG5_pSol met) {
 
     printf(" *** admissible metric.\n");
 
-    return(1);
+    return 1;
 }
 
 /**
@@ -519,5 +519,5 @@ int chknor(MMG5_pMesh mesh) {
 
     printf(" *** admissible normals.\n");
 
-    return(1);
+    return 1;
 }

@@ -92,7 +92,7 @@ int _MMG5_cenrad_iso(MMG5_pMesh mesh,double *ct,double *c,double *rad) {
   uz = n1[1]*n2[2] - n1[2]*n2[1];
 
   dd = n1[0]*ux + n2[0]*uy + n3[0]*uz;
-  if(fabs((dd))<1e-12)  return(0);
+  if(fabs((dd))<1e-12)  return 0;
   dd = 0.5 / dd;
 
   cc1 = ux*pl1 + uy*pl2 + uz*pl3;
@@ -112,7 +112,7 @@ int _MMG5_cenrad_iso(MMG5_pMesh mesh,double *ct,double *c,double *rad) {
     + (c[1] - c4[1]) * (c[1] - c4[1]) \
     + (c[2] - c4[2]) * (c[2] - c4[2]);
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -189,5 +189,5 @@ int _MMG5_cenrad_ani(MMG5_pMesh mesh,double *ct,double *m,double *c,double *rad)
   *rad =      m[0]*ux*ux + m[3]*uy*uy + m[5]*uz*uz \
     + 2.0*(m[1]*ux*uy + m[2]*ux*uz + m[4]*uy*uz);
 
-  return(1);
+  return 1;
 }

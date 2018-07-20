@@ -161,7 +161,7 @@ int* _MMG2_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
     fprintf(stdout,"  ## Problem in function LS_mesh. Exiting.\n");
     free(perm);
     free(list);
-    return(0);
+    return 0;
   }
   
   /* Set verbosity and debug info */
@@ -183,7 +183,7 @@ int* _MMG2_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
       fprintf(stdout,"  ## Problem in fn LS_addVer. Exiting.\n");
       free(perm);
       free(list);
-      return(0);
+      return 0;
     }
   }
   
@@ -199,7 +199,7 @@ int* _MMG2_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
       fprintf(stdout,"  ## Problem in fn LS_addTet. Exiting.\n");
       free(perm);
       free(list);
-      return(0);
+      return 0;
     }
   }
   
@@ -226,7 +226,7 @@ int* _MMG2_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
           fprintf(stdout,"  ## Problem in fn LS_addEdg. Exiting.\n");
           free(perm);
           free(list);
-          return(0);
+          return 0;
         }
       }
       /* iel has no neighbour through face i within the list */
@@ -239,7 +239,7 @@ int* _MMG2_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
           fprintf(stdout,"  ## Problem in fn LS_addEdg. Exiting.\n");
           free(perm);
           free(list);
-          return(0);
+          return 0;
         }
       }
     }
@@ -253,20 +253,20 @@ int* _MMG2_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
     fprintf(stdout,"  ## Problem in fn LS_set BC. Exiting.\n");
     free(perm);
     free(list);
-    return(0);
+    return 0;
     }*/
   if ( !LS_setBC(lsst,Dirichlet,refdirnh,'f',LS_edg,NULL) ) {
     fprintf(stdout,"  ## Problem in fn LS_set BC. Exiting.\n");
     free(perm);
     free(list);
-    return(0);
+    return 0;
   }
   
   if ( !LS_setBC(lsst,Dirichlet,refdirh,'v',LS_edg,u) ) {
     fprintf(stdout,"  ## Problem in fn LS_set BC. Exiting.\n");
     free(perm);
     free(list);
-    return(0);
+    return 0;
   }
   
   /* Add materials */
@@ -274,7 +274,7 @@ int* _MMG2_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
     fprintf(stdout,"  ## Problem in fn LS_setLame. Exiting.\n");
     free(perm);
     free(list);
-    return(0);
+    return 0;
   }
   
   /* Transfer displacement */
@@ -282,7 +282,7 @@ int* _MMG2_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
     fprintf(stdout,"  ## Problem in fn LS_CreaSol. Exiting.\n");
     free(perm);
     free(list);
-    return(0);
+    return 0;
   }
   
   for(k=1; k<=mesh->np; k++) {
@@ -290,14 +290,14 @@ int* _MMG2_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
     if ( !ip ) continue;
     if ( !LS_addSol(lsst,ip,&disp->m[2*k]) ) {
       fprintf(stdout,"  ## Problem in fn LS_addSol. Exiting.\n");
-      return(0);
+      return 0;
     }
   }
   
   *npfin = npf;
   free(perm);
   free(list);
-  return(invperm);
+  return invperm;
 }
 
 /** Transfer solution from the submesh to the global mesh */
@@ -319,7 +319,7 @@ int _MMG2_unpackLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int npf,int *invper
       disp->m[2*ip+i] = u[2*(k-1)+i];
   }
   
-  return(1);
+  return 1;
 }
 
 /** Extension of the displacement at the nodes of edges tagged _MMG2_DISPREF */
@@ -335,19 +335,19 @@ int _MMG2_velextLS(MMG5_pMesh mesh,MMG5_pSol disp) {
   
   if ( !npf ) {
     fprintf(stdout,"  ## Problem in fn MMG2_packLS. Exiting.\n");
-    return(0);
+    return 0;
   }
   
   /* Resolution of the elasticity system on the submesh */
   if ( !LS_elastic(lsst) ) {
     fprintf(stdout,"  ## Problem in function elasti1. Exiting.\n");
-    return(0);
+    return 0;
   }
   
     /* Update of the displacement */
   if ( !_MMG2_unpackLS(mesh,disp,lsst,npf,invperm) ) {
     fprintf(stdout,"  ## Problem in fn _MMG2_unpackLS. Exiting.\n");
-    return(0);
+    return 0;
   }
   
   /* Memory release */
@@ -356,10 +356,10 @@ int _MMG2_velextLS(MMG5_pMesh mesh,MMG5_pSol disp) {
   /* Release of the Lsst structure */
   if ( !LS_stop(lsst) ) {
     fprintf(stdout,"  ## Problem in fn LS_stop. Exiting.\n");
-    return(0);
+    return 0;
   }
 
-  return(1);
+  return 1;
 }
 
 #endif

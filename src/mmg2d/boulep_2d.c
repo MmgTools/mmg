@@ -36,12 +36,12 @@ int MMG2_boulep(MMG5_pMesh mesh, int ifirst, int iploc, int * list) {
   MMG5_pPoint ppt;
   int    ip,voy,ilist,iel,*adja,i,iadr;
 
-  if ( ifirst < 1 ) return(0);
+  if ( ifirst < 1 ) return 0;
   pt = &mesh->tria[ifirst];
-  if ( !MG_EOK(pt) ) return(0);
+  if ( !MG_EOK(pt) ) return 0;
   ip = pt->v[iploc];
   ppt = &mesh->point[ip];
-  if ( !MG_VOK(ppt) ) return(0);
+  if ( !MG_VOK(ppt) ) return 0;
 
   /* init list */
   ilist       = 1;
@@ -54,7 +54,7 @@ int MMG2_boulep(MMG5_pMesh mesh, int ifirst, int iploc, int * list) {
   i    = inxt[voy];
 
   while ( iel && (iel != ifirst) && mesh->tria[iel].v[0]){
-    if(ilist==MMG2D_LMAX-1) return(0);
+    if(ilist==MMG2D_LMAX-1) return 0;
     list[++ilist] = 3*iel + i;
     assert( ip==(&mesh->tria[iel])->v[i] );
     iadr = 3*(iel-1) + 1;
@@ -72,7 +72,7 @@ int MMG2_boulep(MMG5_pMesh mesh, int ifirst, int iploc, int * list) {
     i    = iprev[voy];
 
     while ( iel && (iel != ifirst) && mesh->tria[iel].v[0]) {
-      if(ilist==MMG2D_LMAX-1) return(0);
+      if(ilist==MMG2D_LMAX-1) return 0;
       list[++ilist] = 3*iel + i;
       assert( ip==(&mesh->tria[iel])->v[i] );
       iadr = 3*(iel-1) + 1;
@@ -85,7 +85,7 @@ int MMG2_boulep(MMG5_pMesh mesh, int ifirst, int iploc, int * list) {
     }
   }
 
-  return(ilist);
+  return ilist;
 }
 
 /* Travel the ball of point ip in triangle start, which is assumed to lie 
@@ -114,7 +114,7 @@ int _MMG2_boulen(MMG5_pMesh mesh, int start,char ip, int *pleft, int *pright, do
   }
   while ( kk && (kk != start) && (mesh->tria[kk].ref == refs) );
   
-  if ( kk == start ) return(0);
+  if ( kk == start ) return 0;
   
   /* Calculation of the first normal vector */
   pt = &mesh->tria[k];
@@ -185,7 +185,7 @@ int _MMG2_boulen(MMG5_pMesh mesh, int start,char ip, int *pleft, int *pright, do
     nn[1] *= dd;
   }
   
-  return(1);
+  return 1;
 }
 
 /**
@@ -209,7 +209,7 @@ int _MMG2_boulet(MMG5_pMesh mesh,int start,char ip,int *list) {
   k = start;
   i = ip;
   do {
-    if ( ilist > MMG2_LONMAX-2 )  return(-ilist);
+    if ( ilist > MMG2_LONMAX-2 )  return -ilist;
     list[ilist] = 3*k + i;
     ++ilist;
     
@@ -220,7 +220,7 @@ int _MMG2_boulet(MMG5_pMesh mesh,int start,char ip,int *list) {
     i  = _MMG5_inxt2[i];
   }
   while ( k && k != start );
-  if ( k > 0 )  return(ilist);
+  if ( k > 0 )  return ilist;
   
   /* check if boundary hit */
   k = start;
@@ -233,13 +233,13 @@ int _MMG2_boulet(MMG5_pMesh mesh,int start,char ip,int *list) {
     i  = adja[i2] % 3;
     i  = _MMG5_iprv2[i];
     
-    if ( ilist > MMG2_LONMAX-2 )  return(-ilist);
+    if ( ilist > MMG2_LONMAX-2 )  return -ilist;
     list[ilist] = 3*k + i;
     ilist++;
   }
   while ( k );
   
-  return(ilist);
+  return ilist;
 }
 
 /**
@@ -308,7 +308,7 @@ int _MMG2_bouleendp(MMG5_pMesh mesh,int start,char ip,int *ip1,int *ip2) {
     i  = _MMG5_inxt2[i];
   }
   while ( k && k != start );
-  if ( k > 0 ) return(1);
+  if ( k > 0 ) return 1;
   
   /* Travel the ball in the reverse sense when a boundary is hit, starting from the neighbor of k */
   k = start;
@@ -319,7 +319,7 @@ int _MMG2_bouleendp(MMG5_pMesh mesh,int start,char ip,int *ip1,int *ip2) {
   i = adja[i2] % 3;
   i = _MMG5_iprv2[i];
   
-  if ( !k ) return(1);
+  if ( !k ) return 1;
   
   do {
     pt = &mesh->tria[k];
@@ -367,6 +367,6 @@ int _MMG2_bouleendp(MMG5_pMesh mesh,int start,char ip,int *ip1,int *ip2) {
   }
   while ( k );
   
-  return(1);
+  return 1;
 }
 

@@ -180,5 +180,5 @@ int MMG2D_doSol(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   if ( mesh->info.imprim < -4 )
     fprintf(stdout,"   HMAX %f\n",mesh->info.hmax);
-  return(1);
+  return 1;
 }

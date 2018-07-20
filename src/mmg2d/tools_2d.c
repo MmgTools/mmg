@@ -51,10 +51,10 @@ int _MMG2D_indElt(MMG5_pMesh mesh, int kel) {
         pt = &mesh->tria[k];
         if ( MG_EOK(pt) ) {
             ne++;
-            if ( k == kel )  return(ne);
+            if ( k == kel )  return ne;
         }
     }
-    return(0);
+    return 0;
 }
 
 /**
@@ -75,8 +75,8 @@ int _MMG2D_indPt(MMG5_pMesh mesh, int kp) {
         ppt = &mesh->point[k];
         if ( MG_VOK(ppt) ) {
             np++;
-            if ( k == kp )  return(np);
+            if ( k == kp )  return np;
         }
     }
-    return(0);
+    return 0;
 }

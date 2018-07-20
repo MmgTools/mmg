@@ -49,7 +49,7 @@ int _MMG3D_chk4ridVertices(MMG5_pMesh mesh, MMG5_pTetra pt) {
 
   if(!n) {
     //fprintf(stderr,"\n  ## Warning: 4 ridges points... Unable to compute metric.\n");
-    return(0);
+    return 0;
   }
 
   return 1;
@@ -91,11 +91,11 @@ inline int _MMG5_moymet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,double *m1)
       fprintf(stderr,"\n  ## Warning: %s: at least 1 tetra with 4 ridges vertices"
               "... Unable to compute metric.\n",__func__);
     }
-    return(0);
+    return 0;
   }
   dd = 1./n;
   for (k=0; k<6; ++k) m1[k] = mm[k]*dd;
-  return(n);
+  return n;
 }
 
 /**
@@ -136,7 +136,7 @@ static int _MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
   isqhmax = mesh->info.hmax;
   isloc   = 0;
 
-  if ( mesh->adja[4*(kel-1)+iface+1] ) return(0);
+  if ( mesh->adja[4*(kel-1)+iface+1] ) return 0;
   ilist = _MMG5_boulesurfvolp(mesh,kel,ip,iface,
                               listv,&ilistv,lists,&ilists,(p0->tag & MG_NOM));
 
@@ -290,7 +290,7 @@ static int _MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
   memset(m,0,6*sizeof(double));
   m[0] = m[3] = m[5] = alpha;
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -510,7 +510,7 @@ static int _MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int kel,
                     _MMG5_ridSizeInNormalDir(mesh,i0,bcu,&b,isqhmin,isqhmax));
   }
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -562,7 +562,7 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
               " unable to compute the ball of point\n",__func__);
       mmgWarn0 = 1;
     }
-    return(0);
+    return 0;
   }
 
   /* travel across the ball of ip to find the minimal local params imposed on
@@ -649,7 +649,7 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
                   " non singular point at intersection of 3 ref edges.\n",__func__);
           mmgWarn1 = 1;
         }
-        return(0);
+        return 0;
       }
     }
 
@@ -666,7 +666,7 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
                   " non singular point at intersection of 3 ref edges.\n",__func__);
           mmgWarn1 = 1;
         }
-        return(0);
+        return 0;
       }
     }
 
@@ -689,13 +689,13 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
     det2d = lispoi[3*k+1]*lispoi[3*(k+1)+2] - lispoi[3*k+2]*lispoi[3*(k+1)+1];
     assert(det2d);
     if ( det2d <= 0.0 ) {
-      return(0);
+      return 0;
     }
   }
   det2d = lispoi[3*(ilists-1)+1]*lispoi[3*0+2] - lispoi[3*(ilists-1)+2]*lispoi[3*0+1];
   assert(det2d);
   if ( det2d <= 0.0 ) {
-    return(0);
+    return 0;
   }
   assert(ipref[0] && ipref[1]);
 
@@ -774,8 +774,8 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
   isqhmax = 1.0 / (isqhmax*isqhmax);
 
   /* Solve tAA * tmp_m = tAb and fill m with tmp_m (after rotation) */
-  return(_MMG5_solveDefmetrefSys( mesh, p0, ipref, r, c, tAA, tAb, m,
-                                  isqhmin, isqhmax, hausd));
+  return _MMG5_solveDefmetrefSys( mesh, p0, ipref, r, c, tAA, tAb, m,
+                                  isqhmin, isqhmax, hausd);
 }
 
 /**
@@ -826,7 +826,7 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int kel,int iface, int 
               __func__);
       mmgWarn = 1;
     }
-    return(0);
+    return 0;
   }
 
   /* travel across the ball of ip to find the minimal local params imposed on
@@ -915,13 +915,13 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int kel,int iface, int 
     det2d = lispoi[3*k+1]*lispoi[3*(k+1)+2] - lispoi[3*k+2]*lispoi[3*(k+1)+1];
     assert(det2d);
     if ( det2d <= 0.0 ) {
-      return(0);
+      return 0;
     }
   }
   det2d = lispoi[3*(ilists-1)+1]*lispoi[3*0+2] - lispoi[3*(ilists-1)+2]*lispoi[3*0+1];
   assert(det2d);
   if ( det2d <= 0.0 ) {
-    return(0);
+    return 0;
   }
 
   /* At this point, lispoi contains all the points of the ball of p0, rotated
@@ -998,8 +998,8 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int kel,int iface, int 
   isqhmax = 1.0 / (isqhmax*isqhmax);
 
   /* Solve tAA * tmp_m = tAb and fill m with tmp_m (after rotation) */
-  return(_MMG5_solveDefmetregSys( mesh,r, c, tAA, tAb, m, isqhmin, isqhmax,
-                                  hausd));
+  return _MMG5_solveDefmetregSys( mesh,r, c, tAA, tAb, m, isqhmin, isqhmax,
+                                  hausd);
 }
 
 /**
@@ -1099,7 +1099,7 @@ int _MMG5_defmetvol(MMG5_pMesh mesh,MMG5_pSol met) {
         ppt->flag = 1;
       }
     }
-    return(1);
+    return 1;
   }
 
   /** 2. A metric is provided: truncate it by hmax/hmin */
@@ -1180,7 +1180,7 @@ int _MMG5_defmetvol(MMG5_pMesh mesh,MMG5_pSol met) {
                     lambda[1],lambda[2]);
             mmgWarn = 1;
           }
-          return(0);
+          return 0;
         }
         lambda[i]=MG_MIN(isqhmin,lambda[i]);
         lambda[i]=MG_MAX(isqhmax,lambda[i]);
@@ -1201,7 +1201,7 @@ int _MMG5_defmetvol(MMG5_pMesh mesh,MMG5_pSol met) {
     }
   }
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -1242,7 +1242,7 @@ int _MMG3D_intextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6]) {
      n = &go->n1[0];
    }
 
-  return(_MMG5_mmgIntextmet(mesh,met,np,me,n));
+  return _MMG5_mmgIntextmet(mesh,met,np,me,n);
 
 }
 
@@ -1284,7 +1284,7 @@ int _MMG3D_nosurfsiz_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel, int iploc,
 
   if ( ismet ) {
 
-    if ( ppt->flag ) return(1);
+    if ( ppt->flag ) return 1;
 
     /** A metric is provided: metric truncature */
     /* Step 1: recover the local hmin and hmax values */
@@ -1328,7 +1328,7 @@ int _MMG3D_nosurfsiz_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel, int iploc,
                   lambda[1],lambda[2]);
           mmgWarn = 1;
         }
-        return(0);
+        return 0;
       }
       lambda[i]=MG_MIN(isqhmin,lambda[i]);
       lambda[i]=MG_MAX(isqhmax,lambda[i]);
@@ -1353,13 +1353,13 @@ int _MMG3D_nosurfsiz_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel, int iploc,
      * the length of edges passing through the point */
     if ( !(ppt->tag & MG_NOM) ) {
 
-      if ( ppt->flag ) return(1);
+      if ( ppt->flag ) return 1;
 
       /* First step: search for local parameters */
       // To improve: compute the volume and surface ball af the non-manifold
       // point to apply local parameters
       if ( _MMG5_boulesurfvolp(mesh,iel,iploc,iface,listv,&ilistv,lists,&ilists,0) !=1 )
-        return(0);
+        return 0;
 
       if ( !_MMG3D_localParamReg(mesh,ip0,listv,ilistv,lists,ilists,
                                  NULL,&isqhmin,&isqhmax) ) {
@@ -1383,7 +1383,7 @@ int _MMG3D_nosurfsiz_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel, int iploc,
       ip1 = pt->v[i1];
       p0  = &mesh->point[ip0];
       p1  = &mesh->point[ip1];
-      if ( !MG_EDG(mesh->xtetra[pt->xt].tag[ia]) ) return(0);
+      if ( !MG_EDG(mesh->xtetra[pt->xt].tag[ia]) ) return 0;
 
       /** First step: search for local parameters */
       if ( !_MMG3D_localParamNm(mesh,iel,iface,ia,NULL,&isqhmin,&isqhmax) ) {
@@ -1408,7 +1408,7 @@ int _MMG3D_nosurfsiz_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel, int iploc,
     }
   }
 
-  return(1);
+  return 1;
 
 }
 
@@ -1440,7 +1440,7 @@ int _MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
       fprintf(stderr,"\n  ## Error: %s: negative hmax value.\n",__func__);
       mmgErr = 1;
     }
-    return(0);
+    return 0;
   }
 
   if ( met->m )
@@ -1455,7 +1455,7 @@ int _MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
     _MMG5_lenSurfEdg     = _MMG5_lenSurfEdg_ani;
   }
 
-  if ( !_MMG5_defmetvol(mesh,met) )  return(0);
+  if ( !_MMG5_defmetvol(mesh,met) )  return 0;
 
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
@@ -1508,7 +1508,7 @@ int _MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
                          _MMG3D_indPt(mesh,pt->v[iploc]));
                  mmgErr = 1;
               }
-              return(0);
+              return 0;
             }
           }
         }
@@ -1520,7 +1520,7 @@ int _MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   /* search for unintialized metric */
   _MMG5_defUninitSize(mesh,met,ismet);
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -1562,7 +1562,7 @@ int _MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int ia) {
   if ( (!( MG_SIN(p1->tag) || (p1->tag & MG_NOM) )) &&  p1->tag & MG_GEO ) {
     /* Recover normal and metric associated to p1 */
     if( !_MMG5_buildridmet(mesh,met,ip1,ux,uy,uz,m1) )
-      return(-1);
+      return -1;
   }
   else
     memcpy(m1,mm1,6*sizeof(double));
@@ -1570,7 +1570,7 @@ int _MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int ia) {
   if ( (!( MG_SIN(p2->tag) || (p2->tag & MG_NOM) )) && p2->tag & MG_GEO ) {
     /* Recover normal and metric associated to p2 */
     if( !_MMG5_buildridmet(mesh,met,ip2,ux,uy,uz,m2) )
-      return(-1);
+      return -1;
   }
   else
     memcpy(m2,mm2,6*sizeof(double));
@@ -1596,7 +1596,7 @@ int _MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int ia) {
     /* compute alpha = h2 + hgrad*l */
     alpha = ps2 /(1.0+mesh->info.hgrad*l*ps2);
     if( ps1 >= alpha -_MMG5_EPS )
-      return(-1);
+      return -1;
 
     if ( !_MMG5_eigenv(1,m1,lambda,vp) ) {
       if ( !mmgWarn ) {
@@ -1679,13 +1679,13 @@ int _MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int ia) {
 
       memcpy(mm1,m1,6*sizeof(double));
     }
-    return(i1);
+    return i1;
   }
   /* Metric in p2 has to be changed */
   else{
     alpha = ps1 /(1.0+mesh->info.hgrad*l*ps1);
     if( ps2 >= alpha - _MMG5_EPS)
-      return(-1);
+      return -1;
 
     _MMG5_eigenv(1,m2,lambda,vp);
 
@@ -1751,7 +1751,7 @@ int _MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int ia) {
       m2[5] = mu[0]*vp[0][2]*vp[0][2] + mu[1]*vp[1][2]*vp[1][2] + vp[2][2]*vp[2][2]*mu[2];
       memcpy(mm2,m2,6*sizeof(double));
     }
-    return(i2);
+    return i2;
   }
 }
 
@@ -1889,5 +1889,5 @@ int _MMG5_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
               "    volume gradation:  %7d updated, %d iter\n",nup,it,nupv,itv);
     }
   }
-  return(1);
+  return 1;
 }

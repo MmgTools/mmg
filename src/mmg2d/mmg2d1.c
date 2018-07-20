@@ -56,20 +56,20 @@ int _MMG2_anatri(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
       ns = _MMG2_anaelt(mesh,met,typchk);
       if ( ns < 0 ) {
         fprintf(stderr,"  ## Unable to complete surface mesh. Exit program.\n");
-        return(0);
+        return 0;
       }
 
       /* Recreate adjacencies */
       if ( !MMG2_hashTria(mesh) ) {
         fprintf(stdout,"  ## Hashing problem. Exit program.\n");
-        return(0);
+        return 0;
       }
       
       /* Collapse short edges */
       nc = _MMG2_colelt(mesh,met,typchk);
       if ( nc < 0 ) {
         fprintf(stderr,"  ## Unable to collapse mesh. Exiting.\n");
-        return(0);
+        return 0;
       }
     
     }
@@ -83,7 +83,7 @@ int _MMG2_anatri(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
       nsw = _MMG2_swpmsh(mesh,met,typchk);
       if ( nsw < 0 ) {
         fprintf(stderr,"  ## Unable to improve mesh. Exiting.\n");
-        return(0);
+        return 0;
       }
     }
     else nsw = 0;
@@ -102,7 +102,7 @@ int _MMG2_anatri(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
     if ( (abs(mesh->info.imprim) < 5 || mesh->info.ddebug ) && nns+nnc > 0 )
       fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %d iter.\n",nns,nnc,nnsw,it);
   }
-  return(1);
+  return 1;
 }
 
 /* Travel triangles and split long edges according to patterns */
@@ -119,7 +119,7 @@ int _MMG2_anaelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
   ns = 0;
   npinit = mesh->np;
 
-  if ( !_MMG5_hashNew(mesh,&hash,mesh->np,3*mesh->np) ) return(0);
+  if ( !_MMG5_hashNew(mesh,&hash,mesh->np,3*mesh->np) ) return 0;
 
   /* Step 1: travel mesh, check edges, and tag those to be split; create the new vertices in hash */
   for (k=1; k<=mesh->nt; k++) {
@@ -202,7 +202,7 @@ int _MMG2_anaelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
   }
   if ( !ns ) {
     _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
-    return(ns);
+    return ns;
   }
 
   /* Step 2: Make flags at triangles consistent between themselves (check if adjacent triangle is split) */
@@ -341,7 +341,7 @@ int _MMG2_anaelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
     fprintf(stdout,"     %7d splitted\n",ns);
   _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
 
-  return(ns);
+  return ns;
 }
 
 /**
@@ -426,7 +426,7 @@ int _MMG2_dichoto(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
       }
     }
   }
-  return(1);
+  return 1;
 }
 
 /* Travel triangles and collapse short edges */
@@ -500,7 +500,7 @@ int _MMG2_colelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
   if ( nc > 0 && (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) )
     fprintf(stdout,"     %8d vertices removed\n",nc);
 
-  return(nc);
+  return nc;
 }
 
 /* Travel triangles and swap edges to improve quality */
@@ -533,7 +533,7 @@ int _MMG2_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
   if ( (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) && nns > 0 )
     fprintf(stdout,"     %8d edge swapped\n",nns);
 
-  return(nns);
+  return nns;
 }
 
 
@@ -552,14 +552,14 @@ int _MMG2_adptri(MMG5_pMesh mesh,MMG5_pSol met) {
       if ( ns < 0 ) {
         fprintf(stderr,"  ## Problem in function adpspl."
                 " Unable to complete mesh. Exit program.\n");
-        return(0);
+        return 0;
       }
       
       nc = _MMG2_adpcol(mesh,met);
       if ( nc < 0 ) {
         fprintf(stderr,"  ## Problem in function adpcol."
                 " Unable to complete mesh. Exit program.\n");
-        return(0);
+        return 0;
       }
     }
     else {
@@ -572,7 +572,7 @@ int _MMG2_adptri(MMG5_pMesh mesh,MMG5_pSol met) {
       if ( nsw < 0 ) {
         fprintf(stderr,"  ## Problem in function swpmsh."
                 " Unable to complete mesh. Exit program.\n");
-        return(0);
+        return 0;
       }
     }
     else
@@ -583,7 +583,7 @@ int _MMG2_adptri(MMG5_pMesh mesh,MMG5_pSol met) {
       if ( nm < 0 ) {
         fprintf(stderr,"  ## Problem in function movtri. "
                 "Unable to complete mesh. Exit program.\n");
-        return(0);
+        return 0;
       }
     }
     else
@@ -607,7 +607,7 @@ int _MMG2_adptri(MMG5_pMesh mesh,MMG5_pSol met) {
     if ( nm < 0 ) {
       fprintf(stderr,"  ## Problem in function movtri. Unable to complete mesh."
               " Exit program.\n");
-      return(0);
+      return 0;
     }
     nnm += nm;
   }
@@ -616,7 +616,7 @@ int _MMG2_adptri(MMG5_pMesh mesh,MMG5_pSol met) {
     if ( abs(mesh->info.imprim) < 5 && (nnc > 0 || nns > 0) )
       fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %8d moved, %d iter. \n",nns,nnc,nnsw,nnm,it);
   }
-  return(1);
+  return 1;
 }
 
 /**
@@ -666,7 +666,7 @@ int _MMG2_adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
 
     /* Lack of memory; abort the routine */
     if ( ip < 0 ){
-      return(ns);
+      return ns;
     }
     else if ( ip > 0 ) {
       
@@ -675,13 +675,13 @@ int _MMG2_adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
       /* Lack of memory; abort the routine */
       if ( !ier ) {
         _MMG2D_delPt(mesh,ip);
-        return(ns);
+        return ns;
       }
       ns += ier;
     }
   }
 
-  return(ns);
+  return ns;
 }
 
 /* Analysis and collapse routine for edges in the final step of the algorithm */
@@ -738,7 +738,7 @@ int _MMG2_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
     }
   }
 
-  return(nc);
+  return nc;
 }
 
 /* Analyze points to relocate them according to a quality criterion */
@@ -792,7 +792,7 @@ int _MMG2_movtri(MMG5_pMesh mesh,MMG5_pSol met,int maxit,char improve) {
   if ( (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) && nnm > 0 )
     fprintf(stdout,"     %8d vertices moved, %d iter.\n",nnm,it);
 
-  return(nnm);
+  return nnm;
 }
 
 /**
@@ -811,7 +811,7 @@ int MMG2_mmg2d1n(MMG5_pMesh mesh,MMG5_pSol met) {
   
   if ( !_MMG2_anatri(mesh,met,1) ) {
     fprintf(stderr,"  ## Unable to split mesh-> Exiting.\n");
-    return(0);
+    return 0;
   }
   
   /* Stage 2: creation of a computational mesh */
@@ -820,27 +820,27 @@ int MMG2_mmg2d1n(MMG5_pMesh mesh,MMG5_pSol met) {
 
   if ( !MMG2D_defsiz(mesh,met) ) {
     fprintf(stderr,"  ## Metric undefined. Exit program.\n");
-    return(0);
+    return 0;
   }
 
   if ( mesh->info.hgrad > 0. ) {
     if ( mesh->info.imprim )   fprintf(stdout,"\n  -- GRADATION : %8f\n",mesh->info.hgrad);
     if (!MMG2D_gradsiz(mesh,met) ) {
       fprintf(stderr,"  ## Gradation problem. Exit program.\n");
-      return(0);
+      return 0;
     }
   }
   
   if ( !_MMG2_anatri(mesh,met,2) ) {
     fprintf(stderr,"  ## Unable to proceed adaptation. Exit program.\n");
-    return(0);
+    return 0;
   }
   
   /* Stage 3: fine mesh improvements */
   if ( !_MMG2_adptri(mesh,met) ) {
     fprintf(stderr,"  ## Unable to make fine improvements. Exit program.\n");
-    return(0);
+    return 0;
   }
 
-  return(1);
+  return 1;
 }

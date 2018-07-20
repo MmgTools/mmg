@@ -51,7 +51,7 @@
       mesh->nai = mesh->na;                                             \
       mesh->nei = mesh->ne;                                             \
       met->npi  = met->np;                                              \
-      return(MMG5_LOWFAILURE);                                          \
+      return MMG5_LOWFAILURE;                                          \
     }                                                                   \
     _LIBMMG5_RETURN(mesh,met,val);                                      \
   }while(0)
@@ -232,7 +232,7 @@ int _MMGS_packMesh(MMG5_pMesh mesh,MMG5_pSol met) {
   /* to could save the mesh, the adjacency have to be correct */
   if ( mesh->info.ddebug && (!_MMG5_chkmsh(mesh,1,1) ) ) {
     fprintf(stderr,"\n  ##  Warning: %s: invalid mesh.\n",__func__);
-    return(0);
+    return 0;
   }
 
   if ( mesh->info.imprim ) {
@@ -242,7 +242,7 @@ int _MMGS_packMesh(MMG5_pMesh mesh,MMG5_pSol met) {
     if ( mesh->na )
       fprintf(stdout,"     NUMBER OF EDGES      %8d   RIDGES  %8d\n",mesh->na,nr);
   }
-  return(1);
+  return 1;
 }
 
 int MMGS_mmgsls(MMG5_pMesh mesh,MMG5_pSol met)

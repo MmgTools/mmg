@@ -97,7 +97,7 @@ int MMG3D_Get_adjaTet(MMG5_pMesh mesh, int kel, int listet[4]) {
 
   if ( ! mesh->adja ) {
     if (! MMG3D_hashTetra(mesh, 0))
-      return(0);
+      return 0;
   }
 
   idx = 4*(kel-1);
@@ -106,7 +106,7 @@ int MMG3D_Get_adjaTet(MMG5_pMesh mesh, int kel, int listet[4]) {
   listet[2] = mesh->adja[idx+3]/4;
   listet[3] = mesh->adja[idx+4]/4;
 
-  return(1);
+  return 1;
 }
 
 int MMG3D_usage(char *prog) {
@@ -481,7 +481,7 @@ int MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
         sprintf(data,"%s","DEFAULT.mmg3d5");
         in = fopen(data,"rb");
         if ( !in ) {
-          return(1);
+          return 1;
         }
       }
     }
@@ -536,7 +536,7 @@ int MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
     }
   }
   fclose(in);
-  return(1);
+  return 1;
 }
 
 int MMG3D_stockOptions(MMG5_pMesh mesh, MMG5_Info *info) {
@@ -545,11 +545,11 @@ int MMG3D_stockOptions(MMG5_pMesh mesh, MMG5_Info *info) {
   _MMG3D_memOption(mesh);
   if( mesh->info.mem > 0) {
     if((mesh->npmax < mesh->np || mesh->ntmax < mesh->nt || mesh->nemax < mesh->ne)) {
-      return(0);
+      return 0;
     } else if(mesh->info.mem < 39)
-      return(0);
+      return 0;
   }
-  return(1);
+  return 1;
 }
 
 void MMG3D_destockOptions(MMG5_pMesh mesh, MMG5_Info *info) {
@@ -679,7 +679,7 @@ int MMG3D_Get_tetFromTria(MMG5_pMesh mesh, int ktri, int *ktet, int *iface)
 
   val = mesh->tria[ktri].cc;
 
-  if ( !val ) return(0);
+  if ( !val ) return 0;
 
   *ktet = val/4;
 
@@ -697,7 +697,7 @@ int MMG3D_searchlen(MMG5_pMesh mesh, MMG5_pSol met, double lmin,
   char            ia,i0,i1,ier;
 
   /* Hash all edges in the mesh */
-  if ( !_MMG5_hashNew(mesh,&hash,mesh->np,7*mesh->np) )  return(0);
+  if ( !_MMG5_hashNew(mesh,&hash,mesh->np,7*mesh->np) )  return 0;
 
   for(k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
@@ -746,7 +746,7 @@ int MMG3D_searchlen(MMG5_pMesh mesh, MMG5_pSol met, double lmin,
     }
   }
   _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
-  return(1);
+  return 1;
 }
 
 int MMG3D_doSol(MMG5_pMesh mesh,MMG5_pSol met) {
@@ -878,7 +878,7 @@ int MMG3D_doSol(MMG5_pMesh mesh,MMG5_pSol met) {
     }
 
     _MMG5_SAFE_FREE(mark);
-    return(1);
+    return 1;
 }
 
 int MMG3D_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met) {

@@ -190,7 +190,7 @@ int _MMG2_setadj(MMG5_pMesh mesh) {
   }
 
   _MMG5_SAFE_FREE(pile);
-  return(1);
+  return 1;
 }
 
 /* Identify singularities in the mesh */
@@ -289,7 +289,7 @@ int _MMG2_singul(MMG5_pMesh mesh) {
   if ( abs(mesh->info.imprim) > 3 && nc+nre+nm > 0 )
     fprintf(stdout,"     %d corners, %d singular points and %d non manifold points detected\n",nc,nre,nm);
 
-  return(1);
+  return 1;
 }
 
 /* Calculate normal vectors at vertices of the mesh */
@@ -319,7 +319,7 @@ int _MMG2_norver(MMG5_pMesh mesh) {
           fprintf(stderr,"\n  ## Error: %s: Impossible to"
                   " calculate normal vector at vertex %d.\n",
                   __func__,_MMG2D_indPt(mesh,pt->v[i]));
-          return(0);
+          return 0;
         }
         nn++;
 
@@ -341,7 +341,7 @@ int _MMG2_norver(MMG5_pMesh mesh) {
           fprintf(stderr,"\n  ## Error: %s: Impossible to"
                   " calculate normal vector at vertex %d.\n",
                   __func__,_MMG2D_indPt(mesh,pt->v[i]));
-          return(0);
+          return 0;
         }
         nn++;
 
@@ -363,7 +363,7 @@ int _MMG2_norver(MMG5_pMesh mesh) {
   if ( abs(mesh->info.imprim) > 3 && nn > 0 )
     fprintf(stdout,"     %d calculated normal vectors\n",nn);
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -613,7 +613,7 @@ int _MMG2_regnor(MMG5_pMesh mesh) {
     fprintf(stdout,"     %d normals regularized: %.3e\n",nn,res);
 
   _MMG5_SAFE_FREE(tmp);
-  return(1);
+  return 1;
 }
 
 /** preprocessing stage: mesh analysis */
@@ -621,38 +621,38 @@ int _MMG2_analys(MMG5_pMesh mesh) {
   /* Transfer the boundary edge references to the triangles, if it has not been already done (option 1) */
   if ( !MMG2_assignEdge(mesh) ) {
      fprintf(stderr,"\n  ## Problem in setting boundary. Exit program.\n");
-    return(0);
+    return 0;
   }
 
   /* Creation of adjacency relations in the mesh */
   if ( !MMG2_hashTria(mesh) ) {
      fprintf(stderr,"\n  ## Hashing problem. Exit program.\n");
-    return(0);
+    return 0;
   }
 
   /* Set tags to triangles from geometric configuration */
   if ( !_MMG2_setadj(mesh) ) {
     fprintf(stderr,"\n  ## Problem in function setadj. Exit program.\n");
-    return(0);
+    return 0;
   }
 
   /* Identify singularities in the mesh */
   if ( !_MMG2_singul(mesh) ) {
      fprintf(stderr,"\n  ## Problem in identifying singularities. Exit program.\n");
-    return(0);
+    return 0;
   }
 
   /* Define normal vectors at vertices on curves */
   if ( !_MMG2_norver(mesh) ) {
      fprintf(stderr,"\n  ## Problem in calculating normal vectors. Exit program.\n");
-    return(0);
+    return 0;
   }
 
   /* Regularize normal vector field with a Laplacian / anti-laplacian smoothing */
   /*if ( !_MMG2_regnor(mesh) ) {
       fprintf(stderr,"\n  ## Problem in regularizing normal vectors. Exit program.\n");
-      return(0);
+      return 0;
   }*/
 
-  return(1);
+  return 1;
 }

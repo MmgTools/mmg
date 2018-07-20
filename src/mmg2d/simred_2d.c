@@ -51,7 +51,7 @@ int _MMG2_invmat(double *m,double *minv) {
     minv[1] = - det * m[1];
     minv[2] = det * m[0];
   }
-  return(1);
+  return 1;
 }
 
 /* Simultaneous reduction of matrices m1, m2; result is stored in m */
@@ -64,9 +64,9 @@ int simred(double *m1,double *m2,double *m) {
     m[0] = M_MAX(m1[0],m2[0]);
     m[2] = M_MAX(m1[2],m2[2]);
     m[1] = 0.0;
-    return(1);
+    return 1;
   }
-  if ( !_MMG2_invmat(m1,m1i) )  return(0);
+  if ( !_MMG2_invmat(m1,m1i) )  return 0;
 
   /* n = (m1)^-1*m2 : stocke en ligne*/
   n[0] = m1i[0]*m2[0] + m1i[1]*m2[1];
@@ -79,12 +79,12 @@ int simred(double *m1,double *m2,double *m) {
   if ( fabs(lambda[0]-lambda[1]) < _MMG2_EPSD ) {
     m[0] = m[2] = lambda[0];
     m[1] = 0.0;
-    return(1);
+    return 1;
   }
   else {
     /* matrix of passage */
     det = pp[0][0]*pp[1][1]-pp[1][0]*pp[0][1];
-    if(fabs(det) < _MMG2_EPSD) return(0);
+    if(fabs(det) < _MMG2_EPSD) return 0;
 
     det = 1./det;
     pi[0] = det*pp[1][1];
@@ -121,10 +121,10 @@ int simred(double *m1,double *m2,double *m) {
     /*     fprintf(stderr,"  %.6f %.6f %.6f\n", */
     /*             m[0],m[1],m[2]); */
     /*     fprintf(stderr,"  Lambda %f %f \n",lambda[0],lambda[1]); */
-    /*     return(0); */
+    /*     return 0; */
     /*   } */
     /* } */
 
-    return(1);
+    return 1;
   }
 }

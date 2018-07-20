@@ -59,7 +59,7 @@ extern "C" {
                         MMG5_ARG_end) ) {                           \
       return MMG5_LOWFAILURE;                                       \
     }                                                               \
-    return(val);                                                    \
+    return val;                                                    \
   }while(0)
 
 /** Reallocation of point table and sol table and creation

@@ -304,10 +304,10 @@ int _MMG5_hashGet(_MMG5_Hash *hash,int a,int b) {
   ph  = &hash->item[key];
 
   if ( !ph->a )  return 0;
-  if ( ph->a == ia && ph->b == ib )  return(ph->k);
+  if ( ph->a == ia && ph->b == ib )  return ph->k;
   while ( ph->nxt ) {
     ph = &hash->item[ph->nxt];
-    if ( ph->a == ia && ph->b == ib )  return(ph->k);
+    if ( ph->a == ia && ph->b == ib )  return ph->k;
   }
   return 0;
 }

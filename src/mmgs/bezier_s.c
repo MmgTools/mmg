@@ -190,7 +190,7 @@ int _MMG5_mmgsBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,_MMG5_pBezier pb,
     pb->b[9][2] += 0.25 * (pb->b[2*i+3][2] + pb->b[2*i+4][2]);
   }
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -356,5 +356,5 @@ int _MMGS_bezierInt(_MMG5_pBezier pb,double uv[2],double o[3],double no[3],doubl
     to[2] *= dd;
   }
 
-  return(1);
+  return 1;
 }

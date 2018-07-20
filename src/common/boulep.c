@@ -54,7 +54,7 @@ int _MMG5_boulen(MMG5_pMesh mesh,int *adjt,int start,int ip,double *nn) {
   char          i,i1,i2;
 
   pt = &mesh->tria[start];
-  if ( !MG_EOK(pt) )  return(0);
+  if ( !MG_EOK(pt) )  return 0;
   nn[0] = nn[1] = nn[2] = 0.0;
 
   /* store neighbors */
@@ -106,10 +106,10 @@ int _MMG5_boulen(MMG5_pMesh mesh,int *adjt,int start,int ip,double *nn) {
     nn[0] *= dd;
     nn[1] *= dd;
     nn[2] *= dd;
-    return(1);
+    return 1;
   }
 
-  return(0);
+  return 0;
 }
 
 /**
@@ -131,9 +131,9 @@ int _MMG5_boulec(MMG5_pMesh mesh,int *adjt,int start,int ip,double *tt) {
   char          i,i1,i2;
 
   pt = &mesh->tria[start];
-  if ( !MG_EOK(pt) )       return(0);
+  if ( !MG_EOK(pt) )       return 0;
   p0 = &mesh->point[pt->v[ip]];
-  if ( !MG_EDG(p0->tag) )  return(0);
+  if ( !MG_EDG(p0->tag) )  return 0;
 
   /* check other triangle vertices */
   k  = start;
@@ -176,7 +176,7 @@ int _MMG5_boulec(MMG5_pMesh mesh,int *adjt,int start,int ip,double *tt) {
   }
 
   if ( !p1 || !p2 )
-    return(0);
+    return 0;
   else if ( p1 == p2 )
     p2 = p0;
 
@@ -192,7 +192,7 @@ int _MMG5_boulec(MMG5_pMesh mesh,int *adjt,int start,int ip,double *tt) {
     tt[2] *= dd;
   }
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -218,7 +218,7 @@ int _MMG5_bouler(MMG5_pMesh mesh,int *adjt,int start,int ip,
   char          i,i1,i2;
 
   pt  = &mesh->tria[start];
-  if ( !MG_EOK(pt) )  return(0);
+  if ( !MG_EOK(pt) )  return 0;
 
   /* check other triangle vertices */
   k  = start;
@@ -235,7 +235,7 @@ int _MMG5_bouler(MMG5_pMesh mesh,int *adjt,int start,int ip,
       ns++;
       list[ns] = pt->v[i2];
       listref[ns] = pt->edg[i1];
-      if ( ns > lmax-2 )  return(-ns);
+      if ( ns > lmax-2 )  return -ns;
     }
     adja = &adjt[3*(k-1)+1];
     k  = adja[i1] / 3;
@@ -261,7 +261,7 @@ int _MMG5_bouler(MMG5_pMesh mesh,int *adjt,int start,int ip,
         ns++;
         list[ns] = pt->v[i1];
         listref[ns] = pt->edg[i2];
-        if ( ns > lmax-2 )  return(-ns);
+        if ( ns > lmax-2 )  return -ns;
       }
       adja = &adjt[3*(k-1)+1];
       k = adja[i2] / 3;
@@ -270,5 +270,5 @@ int _MMG5_bouler(MMG5_pMesh mesh,int *adjt,int start,int ip,
     }
     while ( k && k != start );
   }
-  return(ns);
+  return ns;
 }

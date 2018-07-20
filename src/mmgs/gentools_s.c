@@ -45,7 +45,7 @@ int delref(MMG5_pMesh mesh) {
     pt->ref = 0;
   }
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -115,7 +115,7 @@ int setref(MMG5_pMesh mesh,int start,int ref,int putreq) {
     pt->ref = ref;
   }
   _MMG5_SAFE_FREE(list);
-  return(1);
+  return 1;
 }
 
 /** find the element number in packed numerotation */
@@ -128,10 +128,10 @@ int _MMGS_indElt(MMG5_pMesh mesh, int kel) {
     pt = &mesh->tria[k];
     if ( MG_EOK(pt) ) {
       ne++;
-      if ( k == kel )  return(ne);
+      if ( k == kel )  return ne;
     }
   }
-  return(0);
+  return 0;
 }
 
 /** find the point number in packed numerotation */
@@ -144,8 +144,8 @@ int _MMGS_indPt(MMG5_pMesh mesh, int kp) {
     ppt = &mesh->point[k];
     if ( MG_VOK(ppt) ) {
       np++;
-      if ( k == kp )  return(np);
+      if ( k == kp )  return np;
     }
   }
-  return(0);
+  return 0;
 }

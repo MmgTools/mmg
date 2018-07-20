@@ -228,7 +228,7 @@ static int setadj(MMG5_pMesh mesh){
   }
 
   _MMG5_SAFE_FREE(pile);
-  return(1);
+  return 1;
 }
 
 /* Detect non manifold points */
@@ -409,7 +409,7 @@ static void nmpoints(MMG5_pMesh mesh) {
 /*   if ( abs(mesh->info.imprim) > 4 ) */
 /*     fprintf(stdout,"     %d bad elements improved\n",ndd); */
 
-/*   return(1); */
+/*   return 1; */
 /* } */
 
 
@@ -454,7 +454,7 @@ static int setdhd(MMG5_pMesh mesh) {
   if ( abs(mesh->info.imprim) > 4 && nr > 0 )
     fprintf(stdout,"     %d ridges updated\n",nr);
 
-  return(1);
+  return 1;
 }
 
 /** check for singularities */
@@ -543,7 +543,7 @@ static int _MMG5_singul(MMG5_pMesh mesh) {
 
   if ( abs(mesh->info.imprim) > 3 && nre > 0 )
     fprintf(stdout,"     %d corners, %d singular points detected\n",nc,nre);
-  return(1);
+  return 1;
 }
 
 
@@ -598,7 +598,7 @@ static int norver(MMG5_pMesh mesh) {
   mesh->xpmax = MG_MAX(1.5*xp,_MMGS_XPMAX);
   /* no need to have more xpoint than point */
   mesh->xpmax = MG_MIN(mesh->npmax,mesh->xpmax);
-  _MMG5_ADD_MEM(mesh,(mesh->xpmax+1)*sizeof(MMG5_xPoint),"boundary points",return(0));
+  _MMG5_ADD_MEM(mesh,(mesh->xpmax+1)*sizeof(MMG5_xPoint),"boundary points",return 0);
   _MMG5_SAFE_CALLOC(mesh->xpoint,mesh->xpmax+1,MMG5_xPoint,0);
 
   if ( xp ) {
@@ -623,7 +623,7 @@ static int norver(MMG5_pMesh mesh) {
           _MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,MMG5_xPoint,
                              "larger xpoint table",
                              mesh->xp--;
-                             return(0),0);
+                             return 0,0);
         }
         ppt->xp = mesh->xp;
         go = &mesh->xpoint[mesh->xp];
@@ -683,7 +683,7 @@ static int norver(MMG5_pMesh mesh) {
     fprintf(stdout,"     %d normals,  %d tangents updated  (%d failed)\n",nn,nt,nf);
   }
 
-  return(1);
+  return 1;
 }
 
 /* regularization procedure for derivatives, dual Laplacian */
@@ -811,7 +811,7 @@ static int regnor(MMG5_pMesh mesh) {
     fprintf(stdout,"     %d normals regularized: %.3e\n",nn,res);
 
   _MMG5_SAFE_FREE(tabl);
-  return(1);
+  return 1;
 }
 
 
@@ -821,25 +821,25 @@ int _MMGS_analys(MMG5_pMesh mesh) {
   /* set tria edges tags */
   if ( !assignEdge(mesh) ) {
     fprintf(stderr,"\n  ## Analysis problem. Exit program.\n");
-    return(0);
+    return 0;
   }
 
   /* create adjacency */
   if ( !_MMGS_hashTria(mesh) ) {
     fprintf(stderr,"\n  ## Hashing problem. Exit program.\n");
-    return(0);
+    return 0;
   }
 
   /* delete badly shaped elts */
   /*if ( mesh->info.badkal && !delbad(mesh) ) {
     fprintf(stderr,"\n  ## Geometry trouble. Exit program.\n");
-    return(0);
+    return 0;
     }*/
 
   /* identify connexity */
   if ( !setadj(mesh) ) {
     fprintf(stderr,"\n  ## Topology problem. Exit program.\n");
-    return(0);
+    return 0;
   }
 
   /* check for nomanifold point */
@@ -848,28 +848,28 @@ int _MMGS_analys(MMG5_pMesh mesh) {
   /* check for ridges */
   if ( mesh->info.dhd > _MMG5_ANGLIM && !setdhd(mesh) ) {
     fprintf(stderr,"\n  ## Geometry problem. Exit program.\n");
-    return(0);
+    return 0;
   }
 
   /* identify singularities */
   if ( !_MMG5_singul(mesh) ) {
     fprintf(stderr,"\n  ## Singularity problem. Exit program.\n");
-    return(0);
+    return 0;
   }
 
   /* define normals */
   if ( !mesh->xp ) {
     if ( !norver(mesh) ) {
       fprintf(stderr,"\n  ## Normal problem. Exit program.\n");
-      return(0);
+      return 0;
     }
     /* regularize normals */
     if ( mesh->info.nreg && !regnor(mesh) ) {
       fprintf(stderr,"\n  ## Normal regularization problem. Exit program.\n");
-      return(0);
+      return 0;
     }
   }
 
-  return(1);
+  return 1;
 }
 

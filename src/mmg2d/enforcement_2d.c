@@ -88,7 +88,7 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
                 "(point %d of triangle %d).\n",__func__,
                 _MMG2D_indPt(mesh, mesh->tria[kdep].v[j]),_MMG2D_indElt(mesh,kdep));
       }
-      return(0);
+      return 0;
     }
     
     for (l=0; l<lon; l++) {
@@ -142,7 +142,7 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
                   __func__);
           mmgWarn2=1;
         }
-        return(0);
+        return 0;
       }
       
       /* Failure */
@@ -294,5 +294,5 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
 /*     }           */
 /*   } while(ndel); */
 
-  return(1);
+  return 1;
 }

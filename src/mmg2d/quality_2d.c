@@ -51,7 +51,7 @@ double _MMG2_quickcal(MMG5_pMesh mesh, MMG5_pTria pt) {
   p2 = &mesh->point[pt->v[2]];
   
   cal = MMG2_quickarea(p0->c,p1->c,p2->c);
-  return(cal);
+  return cal;
 }
 
 /* Compute quality of the triangle pt when the supplied metric is isotropic; 
@@ -73,7 +73,7 @@ double _MMG2_caltri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt) {
 
   /* orientation */
   area = abx*acy - aby*acx;
-  if ( area <= 0.0 ) return(0.0);
+  if ( area <= 0.0 ) return 0.0;
 
   /* edge lengths */
   h1 = abx*abx + aby*aby;
@@ -83,10 +83,10 @@ double _MMG2_caltri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt) {
   hm = h1 + h2 + h3;
 
   if ( hm > _MMG2_EPSD ) {
-    return ( area / hm );
+    return  area / hm;
   }
   else {
-    return(0.0);
+    return 0.0;
   }
 }
 
@@ -118,7 +118,7 @@ double _MMG2_caltri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt) {
   bcx = c[0] - b[0];
   bcy = c[1] - b[1];
   area = abx*acy - aby*acx;
-  if ( area <= 0.0 ) return(0.0);
+  if ( area <= 0.0 ) return 0.0;
 
   for (i=0; i<3; i++)  m[i] = (ma[i]+mb[i]+mc[i]) / 3.0;
 
@@ -137,7 +137,7 @@ double _MMG2_caltri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt) {
 
   /* Quality measure = (Vol_M(T) / (l(ab)^2+l(ac)^2+l(bc)^2)) */
   if ( hm > _MMG2_EPSD ) {
-    return ( aream/hm );
+    return  aream/hm;
   }
   else {
     return (0.0);
@@ -234,5 +234,5 @@ int MMG2_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
     }
   }
 
-  return ( _MMG5_minQualCheck(iel,rapmin,_MMG2D_ALPHAD) );
+  return  _MMG5_minQualCheck(iel,rapmin,_MMG2D_ALPHAD);
 }

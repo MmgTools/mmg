@@ -67,7 +67,7 @@ int _MMG2_cenrad_iso(MMG5_pMesh mesh,double *ct,double *c,double *rad) {
 
   /* center = intersection of 3 mediatrice */
   dd = n1[0]*n2[1] - n2[0]*n1[1] ;
-  if(fabs((dd))<1e-12)  return(0);
+  if(fabs((dd))<1e-12)  return 0;
   dd = 1./dd;
 
   cc1 = n2[1]*pl1 - n1[1]*pl2;
@@ -84,5 +84,5 @@ int _MMG2_cenrad_iso(MMG5_pMesh mesh,double *ct,double *c,double *rad) {
   /*     + (c[1] - c2[1]) * (c[1] - c2[1]), (c[0] - c3[0]) * (c[0] - c3[0]) \ */
   /*     + (c[1] - c3[1]) * (c[1] - c3[1])); */
 
-  return(1);
+  return 1;
 }

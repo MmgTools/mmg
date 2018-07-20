@@ -422,7 +422,7 @@ int _MMG3D_intersectRect(double *rectin, double *rectinout)
   rectinout[4] = rectinout[4] - rectinout[1];
   rectinout[5] = rectinout[5] - rectinout[2];
 
-  if ( rectinout[3]<=0 || rectinout[4]<=0 || rectinout[5]<=0 ) return(0);
+  if ( rectinout[3]<=0 || rectinout[4]<=0 || rectinout[5]<=0 ) return 0;
 
   return 1;
 }
@@ -1295,7 +1295,7 @@ int _MMG3D_octreein_iso(MMG5_pMesh mesh,MMG5_pSol sol,_MMG3D_pOctree octree,int 
   {
 
     _MMG5_DEL_MEM(mesh,lococ,octree->nc*sizeof(_MMG3D_octree_s*));
-    return(0);
+    return 0;
   }
   /* Check the octree cells */
   for ( i=0; i<ncells; ++i )
@@ -1318,12 +1318,12 @@ int _MMG3D_octreein_iso(MMG5_pMesh mesh,MMG5_pSol sol,_MMG3D_pOctree octree,int 
       if ( d2 < hp1 || d2 < hpi2*hpi2 )
       {
         _MMG5_DEL_MEM(mesh,lococ,octree->nc*sizeof(_MMG3D_octree_s*));
-        return(0);
+        return 0;
       }
     }
   }
   _MMG5_DEL_MEM(mesh,lococ,octree->nc*sizeof(_MMG3D_octree_s*));
-  return(1);
+  return 1;
 }
 
 /**
@@ -1362,14 +1362,14 @@ int _MMG3D_octreein_ani(MMG5_pMesh mesh,MMG5_pSol sol,_MMG3D_pOctree octree,int 
     - ma[1] * (ma[1]*ma[5] - ma[2]*ma[4])
     + ma[2] * (ma[1]*ma[4] - ma[3]*ma[2]);
 
-  if ( det <= 0. ) return(1);
+  if ( det <= 0. ) return 1;
 
   det = 1.0 / det;
   m1 = ma[3]*ma[5] - ma[4]*ma[4];
   m2 = ma[0]*ma[5] - ma[2]*ma[2];
   m3 = ma[0]*ma[3] - ma[1]*ma[1];
 
-  if ( m1<=0. || m2<=0. || m3<=0.) return(1);
+  if ( m1<=0. || m2<=0. || m3<=0.) return 1;
 
    dx = lmax * sqrt(m1 * det) ;
    dy = lmax * sqrt(m2 * det) ;
@@ -1393,7 +1393,7 @@ int _MMG3D_octreein_ani(MMG5_pMesh mesh,MMG5_pSol sol,_MMG3D_pOctree octree,int 
   if (ncells < 0)
   {
     _MMG5_DEL_MEM(mesh,lococ,octree->nc*sizeof(_MMG3D_octree_s*));
-    return(0);
+    return 0;
   }
   /* Check the octree cells */
   for ( i=0; i<ncells; ++i )
@@ -1422,12 +1422,12 @@ int _MMG3D_octreein_ani(MMG5_pMesh mesh,MMG5_pSol sol,_MMG3D_pOctree octree,int 
           + 2.0*(mb[1]*ux*uy + mb[2]*ux*uz + mb[4]*uy*uz);
         if ( d2 < dmi ) {
           _MMG5_DEL_MEM(mesh,lococ,octree->nc*sizeof(_MMG3D_octree_s*));
-          return(0);
+          return 0;
         }
       }
     }
   }
 
   _MMG5_DEL_MEM(mesh,lococ,octree->nc*sizeof(_MMG3D_octree_s*));
-  return(1);
+  return 1;
 }

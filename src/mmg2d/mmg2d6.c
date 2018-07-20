@@ -50,11 +50,11 @@ int _MMG2_isSplit(MMG5_pMesh mesh,int ref,int *refint,int *refext) {
   for (k=0; k<mesh->info.nmat; k++) {
     pm = &mesh->info.mat[k];
     if ( pm->ref == ref ) {
-      if ( !pm->dospl ) return(0);
+      if ( !pm->dospl ) return 0;
       else {
         *refint = pm->rin;
         *refext = pm->rex;
-        return(1);
+        return 1;
       }
     }
   }
@@ -62,7 +62,7 @@ int _MMG2_isSplit(MMG5_pMesh mesh,int ref,int *refint,int *refext) {
   /* Default case: split with references MG_MINUS, MG_PLUS */
   *refint = MG_MINUS;
   *refext = MG_PLUS;
-  return(1);
+  return 1;
   
 }
 
@@ -73,10 +73,10 @@ int _MMG2_getIniRef(MMG5_pMesh mesh,int ref) {
     
   for (k=0; k<mesh->info.nmat; k++) {
     pm = &mesh->info.mat[k];
-    if ( pm->ref == ref && !pm->dospl ) return(pm->ref);
-    if ( ref == pm->rin || ref == pm->rex ) return(pm->ref);
+    if ( pm->ref == ref && !pm->dospl ) return pm->ref;
+    if ( ref == pm->rin || ref == pm->rex ) return pm->ref;
   }
-  return(ref);
+  return ref;
 }
 
 /* Reset MG_ISO vertex and edge references to 0 */
@@ -105,7 +105,7 @@ int _MMG2_resetRef(MMG5_pMesh mesh) {
     pt->ref = ref;
   }
   
-  return(1);
+  return 1;
 }
 
 /* Check whether snapping the value of vertex i of k to 0 exactly leads to a non manifold situation
@@ -174,9 +174,9 @@ int _MMG2_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, int start, char istart) {
               "(point %d in tri %d).\n",__func__,_MMG2D_indElt(mesh,start),
               _MMG2D_indPt(mesh,mesh->tria[start].v[istart]));
     }
-    return(0);
+    return 0;
   }
-  return(1);
+  return 1;
 }
 
 /* Snap values of sol very close to 0 to 0 exactly (to avoid very small triangles in cutting) */
@@ -265,7 +265,7 @@ int _MMG2_snapval(MMG5_pMesh mesh, MMG5_pSol sol, double *tmp) {
   if ( (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) && ns+nc > 0 )
     fprintf(stdout,"     %8d points snapped, %d corrected\n",ns,nc);
 
-  return(1);
+  return 1;
 }
 
 /* Check whether the ball of vertex i in tria start is manifold;
@@ -316,8 +316,8 @@ int _MMG2_chkmaniball(MMG5_pMesh mesh, int start, char istart) {
     }
     while ( k && ( mesh->tria[k].ref != refstart ) );
 
-    if ( k == 0 ) return(1);
-    else          return(0);
+    if ( k == 0 ) return 1;
+    else          return 0;
 
   }
 
@@ -334,9 +334,9 @@ int _MMG2_chkmaniball(MMG5_pMesh mesh, int start, char istart) {
 
   /* At least 3 boundary segments meeting at p */
   if ( k != start )
-    return(0);
+    return 0;
 
-  return(1);
+  return 1;
 }
 
 /* Check whether the resulting two subdomains occupying mesh are manifold */
@@ -371,7 +371,7 @@ int _MMG2_chkmanimesh(MMG5_pMesh mesh) {
         fprintf(stderr,"\n  ## Warning: %s: at least 1 triangle with 3 boundary"
                 " edges.\n",__func__);
       }
-      /* return(0); */
+      /* return 0; */
     }
   }
 
@@ -392,13 +392,13 @@ int _MMG2_chkmanimesh(MMG5_pMesh mesh) {
 
       i1 = _MMG5_inxt2[i];
       if ( !_MMG2_chkmaniball(mesh,k,i1) )
-        return(0);
+        return 0;
     }
   }
 
   if ( mesh->info.imprim || mesh->info.ddebug )
     fprintf(stdout,"  *** Manifold implicit surface.\n");
-  return(1);
+  return 1;
 }
 
 /**
@@ -450,10 +450,10 @@ int _MMG2_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol){
       }
     }
   }
-  if ( !nb ) return(1);
+  if ( !nb ) return 1;
 
   /* Create the intersection points between the edges in the mesh and the 0 level set */
-  if ( !_MMG5_hashNew(mesh,&hash,nb,2*nb) ) return(0);
+  if ( !_MMG5_hashNew(mesh,&hash,nb,2*nb) ) return 0;
 
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
@@ -492,7 +492,7 @@ int _MMG2_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol){
       if ( !np ) {
         fprintf(stderr,"\n  ## Error: %s: Insufficient memory; abort\n",
           __func__);
-        return(0);
+        return 0;
       }
       sol->m[np] = 0.0;
       _MMG5_hashEdge(mesh,&hash,ip0,ip1,np);
@@ -545,7 +545,7 @@ int _MMG2_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol){
     fprintf(stdout,"     %7d splitted\n",ns);
 
   _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
-  return(ns);
+  return ns;
 
 }
 
@@ -610,7 +610,7 @@ int _MMG2_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol){
 
   }
 
-  return(1);
+  return 1;
 }
 
 /* Main function of the -ls mode */
@@ -634,7 +634,7 @@ int MMG2_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol) {
   /* Snap values of the level set function which are very close to 0 to 0 exactly */
   if ( !_MMG2_snapval(mesh,sol,tmp) ) {
     fprintf(stderr,"\n  ## Wrong input implicit function. Exit program.\n");
-    return(0);
+    return 0;
   }
 
   _MMG5_DEL_MEM(mesh,tmp,(mesh->npmax+1)*sizeof(double));
@@ -642,7 +642,7 @@ int MMG2_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol) {
   /* Creation of adjacency relations in the mesh */
   if ( !MMG2_hashTria(mesh) ) {
     fprintf(stderr,"\n  ## Hashing problem. Exit program.\n");
-    return(0);
+    return 0;
   }
 
   /* No need to keep adjacencies from now on */
@@ -651,37 +651,37 @@ int MMG2_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol) {
   /* Transfer the boundary edge references to the triangles */
   if ( !MMG2_assignEdge(mesh) ) {
     fprintf(stderr,"\n  ## Problem in setting boundary. Exit program.\n");
-    return(0);
+    return 0;
   }
   
   /* Reset the MG_ISO field everywhere it appears */
   if ( !_MMG2_resetRef(mesh) ) {
     fprintf(stderr,"\n  ## Problem in resetting references. Exit program.\n");
-    return(0);
+    return 0;
   }
 
   /* Effective splitting of the crossed triangles */
   if ( !_MMG2_cuttri_ls(mesh,sol) ) {
     fprintf(stderr,"\n  ## Problem in cutting triangles. Exit program.\n");
-    return(0);
+    return 0;
   }
 
   /* Set references on the interior / exterior triangles*/
   if ( !_MMG2_setref_ls(mesh,sol) ) {
     fprintf(stderr,"\n  ## Problem in setting references. Exit program.\n");
-    return(0);
+    return 0;
   }
 
   /* Creation of adjacency relations in the mesh */
   if ( !MMG2_hashTria(mesh) ) {
     fprintf(stderr,"\n  ## Hashing problem. Exit program.\n");
-    return(0);
+    return 0;
   }
   
   /* Check that the resulting mesh is manifold */
   if ( !_MMG2_chkmanimesh(mesh) ) {
     fprintf(stderr,"\n  ## No manifold resulting situation. Exit program.\n");
-    return(0);
+    return 0;
   }
 
   /* Clean memory */
@@ -691,5 +691,5 @@ int MMG2_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol) {
   if ( mesh->info.mat )
     free( mesh->info.mat );
 
-  return(1);
+  return 1;
 }

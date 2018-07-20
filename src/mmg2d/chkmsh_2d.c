@@ -65,7 +65,7 @@ int _MMG5_mmg2dChkmsh(MMG5_pMesh mesh, int severe,int base) {
           fprintf(stderr,"adj of %d: %d %d %d \n",
                   k,adja[0]/3,adja[1]/3,adja[2]/3);
         }
-        return(0);
+        return 0;
       }
       pt2 = &mesh->tria[adj];
       if ( !MG_EOK(pt2) ) {
@@ -83,7 +83,7 @@ int _MMG5_mmg2dChkmsh(MMG5_pMesh mesh, int severe,int base) {
                   _MMG2D_indElt(mesh,adja[0]/3),_MMG2D_indElt(mesh,adja[1]/3),
                   _MMG2D_indElt(mesh,adja[2]/3));
         }
-        return(0);
+        return 0;
       }
       iadr  = (adj-1)*3 + 1;
       adja1 = &mesh->adja[iadr];
@@ -108,7 +108,7 @@ int _MMG5_mmg2dChkmsh(MMG5_pMesh mesh, int severe,int base) {
                   _MMG2D_indElt(mesh,adja1[1]/3),_MMG2D_indElt(mesh,adja1[2]/3),
                   _MMG2D_indElt(mesh,adja1[3]/3));
         }
-        return(0);
+        return 0;
       }
 
       /*chk edge*/
@@ -125,14 +125,14 @@ int _MMG5_mmg2dChkmsh(MMG5_pMesh mesh, int severe,int base) {
                     _MMG2D_indPt(mesh,pt1->v[2]));
           }
           fprintf(stderr,"edge %d : %d %d\n",i,ped->a,ped->b);
-          return(0);
+          return 0;
         }
       }
 
     }
   }
 
-  if ( !severe )  return(1);
+  if ( !severe )  return 1;
 
   _MMG5_SAFE_CALLOC(list,MMG2D_LMAX,int,0);
 
@@ -157,7 +157,7 @@ int _MMG5_mmg2dChkmsh(MMG5_pMesh mesh, int severe,int base) {
                   _MMG2D_indPt(mesh,pt1->v[1]),_MMG2D_indPt(mesh,pt1->v[2]));
         }
         _MMG5_SAFE_FREE(list);
-        return(0);
+        return 0;
       }
       lon = MMG2_boulep(mesh,k,i,list);
       for (l=1; l<=lon; l++) {
@@ -171,7 +171,7 @@ int _MMG5_mmg2dChkmsh(MMG5_pMesh mesh, int severe,int base) {
                     __func__,_MMG2D_indPt(mesh,ip),_MMG2D_indPt(mesh,pt2->v[nk]));
           }
           _MMG5_SAFE_FREE(list);
-          return(0);
+          return 0;
         }
       }
       if ( lon < 1 )  continue;
@@ -192,12 +192,12 @@ int _MMG5_mmg2dChkmsh(MMG5_pMesh mesh, int severe,int base) {
                   __func__,_MMG2D_indPt(mesh,pt1->v[i]),lon,len);
         }
         _MMG5_SAFE_FREE(list);
-        return(0);
+        return 0;
       }
     }
   }
   _MMG5_SAFE_FREE(list);
-  return(1);
+  return 1;
 }
 
 /* Check of adjacency relations and edge tags */
@@ -228,7 +228,7 @@ int _MMG2_chkmsh(MMG5_pMesh mesh) {
                     " (edge %d in tria %d.)\n",
                     __func__,i,_MMG2D_indElt(mesh,k));
           }
-          return(0);
+          return 0;
         }
       }
       else {
@@ -240,7 +240,7 @@ int _MMG2_chkmsh(MMG5_pMesh mesh) {
                     " (%d %d).\n",__func__,_MMG2D_indElt(mesh,k),
                     _MMG2D_indElt(mesh,jel));
          }
-          return(0);
+          return 0;
         }
       }
     }
@@ -262,7 +262,7 @@ int _MMG2_chkmsh(MMG5_pMesh mesh) {
                     " (triangle %d: edge %d, vertex %d)\n",__func__,
                     _MMG2D_indElt(mesh,k),i,_MMG2D_indPt(mesh,pt->v[i1]));
          }
-          return(0);
+          return 0;
         }
         if ( !(mesh->point[pt->v[i2]].tag & MG_GEO) && !( MG_SIN(mesh->point[pt->v[i2]].tag) )) {
           if ( !mmgErr2 ) {
@@ -271,7 +271,7 @@ int _MMG2_chkmsh(MMG5_pMesh mesh) {
                     " (triangle %d: edge %d, vertex %d)\n",__func__,
                     _MMG2D_indElt(mesh,k),i,_MMG2D_indPt(mesh,pt->v[i2]));
           }
-          return(0);
+          return 0;
         }
       }
 
@@ -283,7 +283,7 @@ int _MMG2_chkmsh(MMG5_pMesh mesh) {
                     " (triangle %d: edge %d, vertex %d)\n",__func__,
                     _MMG2D_indElt(mesh,k),i,_MMG2D_indPt(mesh,pt->v[i1]));
           }
-          return(0);
+          return 0;
         }
         if ( !(mesh->point[pt->v[i2]].tag & MG_REF) && !( MG_SIN(mesh->point[pt->v[i2]].tag)) ) {
           if ( !mmgErr3 ) {
@@ -292,7 +292,7 @@ int _MMG2_chkmsh(MMG5_pMesh mesh) {
                     " (triangle %d: edge %d, vertex %d)\n",__func__,
                     _MMG2D_indElt(mesh,k),i,_MMG2D_indPt(mesh,pt->v[i2]));
           }
-          return(0);
+          return 0;
         }
       }
 
@@ -318,7 +318,7 @@ int _MMG2_chkmsh(MMG5_pMesh mesh) {
                   " while it has a neighbour (%d %d).\n",__func__,
                   _MMG2D_indPt(mesh,pt->v[i1]),_MMG2D_indPt(mesh,pt->v[i2]));
         }
-        return(0);
+        return 0;
       }
 
       if ( pt->tag[i] & MG_REF ) {
@@ -335,15 +335,15 @@ int _MMG2_chkmsh(MMG5_pMesh mesh) {
             fprintf(stderr,"Saving mesh...\n");
             if ( !MMG2_hashTria(mesh) ) {
               fprintf(stdout,"  ## Hashing problem. Exit program.\n");
-              return(0);
+              return 0;
             }
 
             MMG2_bdryEdge(mesh);
             _MMG2_savemesh_db(mesh,mesh->nameout,0);
-            return(0);
+            return 0;
           }
 
-          return(0);
+          return 0;
         }
       }
     }
@@ -366,7 +366,7 @@ int _MMG2_chkmsh(MMG5_pMesh mesh) {
                     " %d, but not MG_BDY\n",__func__,_MMG2D_indPt(mesh,pt->v[i1]),
                     _MMG2D_indPt(mesh,pt->v[i2]),pt->tag[i]);
           }
-          return(0);
+          return 0;
         }
         
         p1 = &mesh->point[pt->v[i1]];
@@ -380,7 +380,7 @@ int _MMG2_chkmsh(MMG5_pMesh mesh) {
                     _MMG2D_indPt(mesh,pt->v[i1]),_MMG2D_indPt(mesh,pt->v[i2]),
                     pt->tag[i],_MMG2D_indPt(mesh,pt->v[i1]));
           }
-          return(0);
+          return 0;
         }
         
         if ( !(p2->tag & MG_BDY) ) {
@@ -391,13 +391,13 @@ int _MMG2_chkmsh(MMG5_pMesh mesh) {
                     _MMG2D_indPt(mesh,pt->v[i1]),_MMG2D_indPt(mesh,pt->v[i2]),
                     pt->tag[i],_MMG2D_indPt(mesh,pt->v[i2]));
           }
-          return(0);
+          return 0;
         }
       }
     }
   }
   
-  return(1);
+  return 1;
 }
 
 /* Check orientation of elements in the mesh */
@@ -417,8 +417,8 @@ int _MMG2_chkor(MMG5_pMesh mesh) {
     
     det = (p1->c[0]-p0->c[0])*(p2->c[1]-p0->c[1]) - (p1->c[1]-p0->c[1])*(p2->c[0]-p0->c[0]);
 
-    if ( det <= 0.0 ) return(0);
+    if ( det <= 0.0 ) return 0;
   }
   
-  return(1);
+  return 1;
 }

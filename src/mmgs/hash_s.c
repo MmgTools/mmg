@@ -76,7 +76,7 @@ static int paktri(MMG5_pMesh mesh) {
 int _MMGS_hashTria(MMG5_pMesh mesh) {
   _MMG5_Hash          hash;
 
-  if ( mesh->adja )  return(1);
+  if ( mesh->adja )  return 1;
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
     fprintf(stdout,"  ** SETTING STRUCTURE\n");
 
@@ -116,12 +116,12 @@ int assignEdge(MMG5_pMesh mesh) {
   int         k,ia;
   char        i,i1,i2;
 
-  if ( !mesh->na ) return(1);
+  if ( !mesh->na ) return 1;
 
   /* adjust hash table params */
   hash.siz  = mesh->na;
   hash.max  = 3*mesh->na+1;
-  _MMG5_ADD_MEM(mesh,(hash.max+1)*sizeof(_MMG5_Hash),"hash table",return(0));
+  _MMG5_ADD_MEM(mesh,(hash.max+1)*sizeof(_MMG5_Hash),"hash table",return 0);
   _MMG5_SAFE_CALLOC(hash.item,hash.max+1,_MMG5_hedge,0);
 
   hash.nxt  = mesh->na;
@@ -154,5 +154,5 @@ int assignEdge(MMG5_pMesh mesh) {
   _MMG5_DEL_MEM(mesh,mesh->edge,(mesh->na+1)*sizeof(MMG5_Edge));
   mesh->na = 0;
 
-  return(1);
+  return 1;
 }

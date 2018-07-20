@@ -108,7 +108,7 @@ int _MMG2_chkedg(MMG5_pMesh mesh, int k) {
     }
   }
   
-  return(pt->flag);
+  return pt->flag;
 }
 
 
@@ -121,7 +121,7 @@ int _MMG2_bezierCurv(MMG5_pMesh mesh,int k,char i,double s,double *o,double *no)
   char               i1,i2;
   
   pt = &mesh->tria[k];
-  if ( !MG_EOK(pt) ) return(0);
+  if ( !MG_EOK(pt) ) return 0;
   
   i1 = _MMG5_inxt2[i];
   i2 = _MMG5_iprv2[i];
@@ -133,14 +133,14 @@ int _MMG2_bezierCurv(MMG5_pMesh mesh,int k,char i,double s,double *o,double *no)
     o[0] = (1-s)*p1->c[0]+s*p2->c[0];
     o[1] = (1-s)*p1->c[1]+s*p2->c[1];
     memset(no,0,2*sizeof(double));
-    return(1);
+    return 1;
   }
   
   ux = p2->c[0] - p1->c[0];
   uy = p2->c[1] - p1->c[1];
   ll = ux*ux + uy*uy;
   
-  if ( ll < _MMG5_EPSD ) return(0);
+  if ( ll < _MMG5_EPSD ) return 0;
   
   /* Recover normal and tangent vectors */
   if ( MG_SIN(p1->tag) || (p1->tag & MG_NOM) ) {
@@ -220,5 +220,5 @@ int _MMG2_bezierCurv(MMG5_pMesh mesh,int k,char i,double s,double *o,double *no)
   no[0] = (1.0-s)*(1.0-s)*n1[0] + 2*(1.0-s)*s*bn[0] + s*s*n2[0];
   no[1] = (1.0-s)*(1.0-s)*n1[1] + 2*(1.0-s)*s*bn[1] + s*s*n2[1];
   
-  return(1);
+  return 1;
 }

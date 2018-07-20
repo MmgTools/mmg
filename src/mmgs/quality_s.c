@@ -82,7 +82,7 @@ inline double caleltsig_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
   pv[2] = abx*acy - aby*acx;
 
   dd   = pv[0]*pv[0] + pv[1]*pv[1] + pv[2]*pv[2];
-  if ( dd < _MMG5_EPSD2 )  return(0.0);
+  if ( dd < _MMG5_EPSD2 )  return 0.0;
   dd = 1.0 / sqrt(dd);
 
   // If one of the triangle vertex is not REF or GEO, it contains the normal at
@@ -121,18 +121,18 @@ inline double caleltsig_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
   }
 
   /* if orientation is reversed with regards to orientation of vertices */
-  if ( ps1 < 0.0 )  return(-1.0);
+  if ( ps1 < 0.0 )  return -1.0;
 
   anisurf = _MMG5_surftri_ani(mesh,met,pt);
-  if ( anisurf == 0.0 )  return(-1.0);
+  if ( anisurf == 0.0 )  return -1.0;
 
   l[0] = _MMG5_lenSurfEdg_ani(mesh,met,ib,ic,( pt->tag[0] & MG_GEO ));
   l[1] = _MMG5_lenSurfEdg_ani(mesh,met,ia,ic,( pt->tag[1] & MG_GEO ));
   l[2] = _MMG5_lenSurfEdg_ani(mesh,met,ia,ib,( pt->tag[2] & MG_GEO ));
 
   rap = l[0]*l[0] + l[1]*l[1] + l[2]*l[2];
-  if ( rap < _MMG5_EPSD2 )  return(0.0);
-  return(anisurf / rap);
+  if ( rap < _MMG5_EPSD2 )  return 0.0;
+  return anisurf / rap;
 }
 
 /* Same quality function but puts a sign according to deviation to normal to vertices */
@@ -174,7 +174,7 @@ inline double caleltsig_iso(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
   cal   = pv[0]*pv[0] + pv[1]*pv[1] + pv[2]*pv[2];
   sqcal = sqrt(cal);
 
-  if ( sqcal < _MMG5_EPSD2 )  return(0.0);
+  if ( sqcal < _MMG5_EPSD2 )  return 0.0;
   invsqcal = 1.0 / sqcal;
 
   if ( !MG_EDG(pa->tag) ) {
@@ -209,19 +209,19 @@ inline double caleltsig_iso(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
   }
 
   /* if orientation is reversed with regards to orientation of vertex */
-  if ( ps1 < 0.0 )  return(-1.0);
+  if ( ps1 < 0.0 )  return -1.0;
   if ( cal > _MMG5_EPSD2 ) {
     /* qual = 2.*surf / length */
     rap  = abx*abx + aby*aby + abz*abz;
     rap += acx*acx + acy*acy + acz*acz;
     rap += bcx*bcx + bcy*bcy + bcz*bcz;
     if ( rap > _MMG5_EPSD2 )
-      return(sqrt(cal) / rap);
+      return sqrt(cal) / rap;
     else
-      return(0.0);
+      return 0.0;
   }
   else
-    return(0.0);
+    return 0.0;
 }
 
 
@@ -245,7 +245,7 @@ inline double incircle(MMG5_pPoint p0,MMG5_pPoint p1,MMG5_pPoint p2,double *o) {
            + (p2->c[2]-o[2])*(p2->c[2]-o[2]));
   rr = MG_MAX(rr,r);
 
-  return(rr);
+  return rr;
 }
 
 inline double diamelt(MMG5_pPoint p0,MMG5_pPoint p1,MMG5_pPoint p2) {
@@ -265,7 +265,7 @@ inline double diamelt(MMG5_pPoint p0,MMG5_pPoint p1,MMG5_pPoint p2) {
     + (p2->c[2]-p1->c[2])*(p2->c[2]-p1->c[2]);
   di = MG_MAX(di,dd);
 
-  return(di);
+  return di;
 }
 
 /**
@@ -295,7 +295,7 @@ int _MMGS_prilen(MMG5_pMesh mesh, MMG5_pSol met, int metRidTyp) {
   nullEdge = 0;
 
   /* Hash all edges in the mesh */
-  if ( !_MMG5_hashNew(mesh,&hash,mesh->np,7*mesh->np) )  return(0);
+  if ( !_MMG5_hashNew(mesh,&hash,mesh->np,7*mesh->np) )  return 0;
 
   for(k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
@@ -371,7 +371,7 @@ int _MMGS_prilen(MMG5_pMesh mesh, MMG5_pSol met, int metRidTyp) {
 			   amax, bmax, lmax, nullEdge, &bd[0], &hl[0],0);
 
   _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
-  return(1);
+  return 1;
 }
 
 /**
@@ -437,7 +437,7 @@ int _MMGS_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
     }
   }
 
-  return ( _MMG5_minQualCheck(iel,rapmin,_MMGS_ALPHAD) );
+  return  _MMG5_minQualCheck(iel,rapmin,_MMGS_ALPHAD);
 }
 
 /**
@@ -498,7 +498,7 @@ int _MMGS_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
     }
   }
 
-  return ( _MMG5_minQualCheck(iel,rapmin,_MMGS_ALPHAD) );
+  return  _MMG5_minQualCheck(iel,rapmin,_MMGS_ALPHAD);
 }
 
 #define COS145   -0.81915204428899
@@ -536,24 +536,24 @@ char typelt(MMG5_pPoint p[3],char *ia) {
     hma = h3;
 
   /* needle */
-  if ( hmi < 0.01 * hma )  return(1);
+  if ( hmi < 0.01 * hma )  return 1;
 
   /* check obtuse angle */
   dd = (ux*vx + uy*vy + uz*vz) / sqrt(h1*h2);
   if ( dd < COS145 ) {
     *ia = 0;
-    return(2);
+    return 2;
   }
   dd = (vx*wx + vy*wy + vz*wz) / sqrt(h2*h3);
   if ( dd < COS145 ) {
     *ia = 2;
-    return(2);
+    return 2;
   }
   dd = -(ux*wx + uy*wy + uz*wz) / sqrt(h1*h3);
   if ( dd < COS145 ) {
     *ia = 1;
-    return(2);
+    return 2;
   }
 
-  return(0);
+  return 0;
 }

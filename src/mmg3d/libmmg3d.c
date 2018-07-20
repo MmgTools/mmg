@@ -52,7 +52,7 @@
       mesh->nai = mesh->na;                                             \
       mesh->nei = mesh->ne;                                             \
       met->npi  = met->np;                                              \
-      return(MMG5_LOWFAILURE);                                          \
+      return MMG5_LOWFAILURE;                                          \
     }                                                                   \
     _LIBMMG5_RETURN(mesh,met,val);                                      \
   }while(0)
@@ -230,7 +230,7 @@ int MMG3D_bdryBuild(MMG5_pMesh mesh) {
 
   if ( !_MMG5_chkBdryTria(mesh) ) {
     fprintf(stderr,"\n  ## Error: %s: unable to rebuild triangles\n",__func__);
-    return(-1);
+    return -1;
   }
 
   /* build hash table for edges */
@@ -713,7 +713,7 @@ int MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   if ( !MMG3D_hashPrism(mesh) ) {
     fprintf(stderr,"\n  ## Error: %s: prism hashing problem. Exit program.\n",
             __func__);
-    return(0);
+    return 0;
   }
 
   /* Remove the MG_REQ tags added by the nosurf option */
@@ -730,10 +730,10 @@ int MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   /* to could save the mesh, the adjacency have to be correct */
   if ( mesh->info.ddebug && (!_MMG5_chkmsh(mesh,1,1) ) ) {
     fprintf(stderr,"\n  ##  Warning: %s: invalid mesh.\n",__func__);
-    return(0);
+    return 0;
   }
 
-  return(1);
+  return 1;
 }
 
 int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {

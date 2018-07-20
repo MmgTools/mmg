@@ -59,7 +59,7 @@ int _MMG2_defaultmet_2d(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
   m[1] = 0.0;
   m[2] = isqhmax;
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -245,7 +245,7 @@ int _MMG2_defmetbdy_2d(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
   m[1] = n[0]*n[1]*(sqhmax-lm);
   m[2] = lm*n[0]*n[0] + sqhmax*n[1]*n[1];
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -317,7 +317,7 @@ int _MMG2_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
     }
   }
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -354,7 +354,7 @@ int _MMG2_grad2met_ani(MMG5_pMesh mesh,MMG5_pSol met,double *m,double *n,double 
       fprintf(stderr,"\n  ## Warning: %s: at least 1 null metric det : %E \n",
               __func__,det);
     }
-    return(0);
+    return 0;
   }
   det = 1.0 / det;
 
@@ -373,7 +373,7 @@ int _MMG2_grad2met_ani(MMG5_pMesh mesh,MMG5_pSol met,double *m,double *n,double 
       fprintf(stderr,"\n  ## Warning: %s: at least 1 metric with a "
               "negative eigenvalue: %f \n",__func__,lambda[0]);
     }
-    return(0);
+    return 0;
   }
 
   /* First case : matrices m and n are homothetic: n = lambda0*m */
@@ -472,7 +472,7 @@ int _MMG2_grad2met_ani(MMG5_pMesh mesh,MMG5_pSol met,double *m,double *n,double 
 
   /* Update of the metrics = tP^-1 diag(d0,d1)P^-1, P = (vp[0], vp[1]) stored in columns */
   det = vp[0][0]*vp[1][1] - vp[0][1]*vp[1][0];
-  if ( fabs(det) < _MMG5_EPS )  return(0);
+  if ( fabs(det) < _MMG5_EPS )  return 0;
   det = 1.0 / det;
 
   ip[0] =  vp[1][1]*det;
@@ -491,7 +491,7 @@ int _MMG2_grad2met_ani(MMG5_pMesh mesh,MMG5_pSol met,double *m,double *n,double 
     n[2] = dn[0]*ip[1]*ip[1] + dn[1]*ip[3]*ip[3];
   }
 
-  return(ier);
+  return ier;
 
 }
 
@@ -567,6 +567,6 @@ int _MMG2_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   while ( ++it < maxit && nu > 0 );
 
   if ( abs(mesh->info.imprim) > 4 )  fprintf(stdout,"     gradation: %7d updated, %d iter.\n",nup,it);
-  return(1);
+  return 1;
 
 }

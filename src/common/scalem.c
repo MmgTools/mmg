@@ -70,10 +70,10 @@ int _MMG5_boundingBox(MMG5_pMesh mesh) {
     fprintf(stderr,"\n  ## Error: %s: unable to scale mesh:"
             " Check that your mesh contains non-zero points and "
             "valid elements.\n",__func__);
-    return(0);
+    return 0;
   }
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -96,7 +96,7 @@ int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
 
 
   /* compute bounding box */
-  if ( ! _MMG5_boundingBox(mesh) ) return(0);
+  if ( ! _MMG5_boundingBox(mesh) ) return 0;
 
   /* normalize coordinates */
   dd = 1.0 / mesh->info.delta;
@@ -161,7 +161,7 @@ int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
         if ( (!mesh->info.iso) && met->m[k] <= 0) {
           fprintf(stderr,"\n  ## Error: %s: at least 1 wrong metric"
                   " (point %d).\n",__func__,k);
-          return(0);
+          return 0;
         }
       }
 
@@ -211,7 +211,7 @@ int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
         if ( !_MMG5_eigenv(1,m,lambda,v) ) {
           fprintf(stderr,"\n  ## Error: %s: unable to diagonalize at least"
                   " 1 metric (point %d).\n",__func__,k);
-          return(0);
+          return 0;
         }
         for (i=0; i<3; i++) {
           if(lambda[i]<=0) {
@@ -220,7 +220,7 @@ int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
                     "            metric tensor: %e %e %e %e %e %e.\n",
                     __func__,k,lambda[0],lambda[1],lambda[2],
                               m[0],m[1],m[2],m[3],m[4],m[5]);
-            return(0);
+            return 0;
           }
           if ( !sethmin )
             mesh->info.hmin = MG_MIN(mesh->info.hmin,1./sqrt(lambda[i]));
@@ -247,7 +247,7 @@ int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
     }
   }
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -316,5 +316,5 @@ int _MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
   mesh->info.min[1]= 0.;
   mesh->info.min[2]= 0.;
 
-  return(1);
+  return 1;
 }

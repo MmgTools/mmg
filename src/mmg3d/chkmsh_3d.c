@@ -96,7 +96,7 @@ int _MMG5_chkmshsurf(MMG5_pMesh mesh){
       }
     }
   }
-  return(1);
+  return 1;
 }
 
 /**
@@ -141,7 +141,7 @@ int _MMG5_mmg3dChkmsh(MMG5_pMesh mesh,int severe,int base) {
                   _MMG3D_indElt(mesh,adja[2]/4),_MMG3D_indElt(mesh,adja[3]/4));
           mmgErr0 = 1;
         }
-        return(0);
+        return 0;
       }
       pt2 = &mesh->tetra[adj];
       if ( !MG_EOK(pt2) || pt2->ref < 0 ){
@@ -159,7 +159,7 @@ int _MMG5_mmg3dChkmsh(MMG5_pMesh mesh,int severe,int base) {
                   _MMG3D_indElt(mesh,adja[2]/4),_MMG3D_indElt(mesh,adja[3]/4));
           mmgErr1 = 1;
         }
-        return(0);
+        return 0;
       }
       iadr  = (adj-1)*4 + 1;
       adja1 = &mesh->adja[iadr];
@@ -183,7 +183,7 @@ int _MMG5_mmg3dChkmsh(MMG5_pMesh mesh,int severe,int base) {
                   _MMG3D_indElt(mesh,adja1[2]/4),_MMG3D_indElt(mesh,adja1[3]/4));
           mmgErr2 = 1;
         }
-        return(0);
+        return 0;
       }
 
       a0 = pt1->v[_MMG5_idir[i][0]];
@@ -207,7 +207,7 @@ int _MMG5_mmg3dChkmsh(MMG5_pMesh mesh,int severe,int base) {
                   _MMG3D_indPt(mesh,b1),_MMG3D_indPt(mesh,b2));
           mmgErr3 = 1;
         }
-        return(0);
+        return 0;
       }
     }
   }
@@ -226,7 +226,7 @@ int _MMG5_mmg3dChkmsh(MMG5_pMesh mesh,int severe,int base) {
             fprintf(stderr,"\n  ## Error: %s: Tetra %d: boundary face"
                     " not tagged: %d \n",__func__,_MMG3D_indElt(mesh,k),i);
           }
-          return(0);
+          return 0;
         }
         else{
           pxt = &mesh->xtetra[pt->xt];
@@ -236,7 +236,7 @@ int _MMG5_mmg3dChkmsh(MMG5_pMesh mesh,int severe,int base) {
               fprintf(stderr,"\n  ## Error: %s: Tetra %d: boundary face"
                       " not tagged : %d \n",__func__,_MMG3D_indElt(mesh,k),i);
             }
-            return(0);
+            return 0;
           }
         }
       }
@@ -267,7 +267,7 @@ int _MMG5_mmg3dChkmsh(MMG5_pMesh mesh,int severe,int base) {
                     _MMG3D_indPt(mesh,pt->v[_MMG5_idir[i][1]]),
                     _MMG3D_indPt(mesh,pt->v[_MMG5_idir[i][2]]));
           }
-          return(0);
+          return 0;
         }
         else{
           pxt = &mesh->xtetra[pt->xt];
@@ -282,13 +282,13 @@ int _MMG5_mmg3dChkmsh(MMG5_pMesh mesh,int severe,int base) {
                       _MMG3D_indPt(mesh,pt->v[_MMG5_idir[i][1]]),
                       _MMG3D_indPt(mesh,pt->v[_MMG5_idir[i][2]]), pxt->ftag[i]);
             }
-            return(0);
+            return 0;
           }
         }
       }
     }
   }
-  return(1);
+  return 1;
 }
 
 /**
@@ -351,7 +351,7 @@ int _MMG5_chkptonbdy(MMG5_pMesh mesh,int np){
     }
   }
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -396,7 +396,7 @@ int _MMG5_cntbdypt(MMG5_pMesh mesh, int nump){
       }
     }
   }
-  return(nf);
+  return nf;
 }
 
 /**
@@ -530,5 +530,5 @@ int srcface(MMG5_pMesh mesh,int n0,int n1,int n2) {
   }
 
 
-  return(1);
+  return 1;
 }

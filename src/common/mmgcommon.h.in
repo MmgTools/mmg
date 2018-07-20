@@ -167,7 +167,7 @@ extern "C" {
     mesh->nai = mesh->na;                        \
     mesh->nei = mesh->ne;                        \
     met->npi  = met->np;                         \
-    return(val);                                 \
+    return val;                                 \
   }while(0)
 
 /* Macros for memory management */

@@ -53,7 +53,7 @@ double _MMG5_surf(MMG5_pMesh mesh,double m[3][6],MMG5_pTria ptt) {
 
   surf = 0.0;
 
-  if ( !_MMG5_bezierCP(mesh,ptt,&b,1) ) return(0.0);
+  if ( !_MMG5_bezierCP(mesh,ptt,&b,1) ) return 0.0;
 
   /* Compute density integrand of volume at the 3 vertices of T */
   nullDens = 0;
@@ -106,7 +106,7 @@ double _MMG5_surf(MMG5_pMesh mesh,double m[3][6],MMG5_pTria ptt) {
   if ( nullDens==3 ) return 0;
 
   surf *= _MMG5_ATHIRD;
-  return(surf);
+  return surf;
 }
 
 /**
@@ -143,13 +143,13 @@ double _MMG5_surftri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
       ux = 0.5*(p[i1]->c[0]+p[i2]->c[0]) - p[i]->c[0];
       uy = 0.5*(p[i1]->c[1]+p[i2]->c[1]) - p[i]->c[1];
       uz = 0.5*(p[i1]->c[2]+p[i2]->c[2]) - p[i]->c[2];
-      if ( !_MMG5_buildridmet(mesh,met,np[i],ux,uy,uz,&m[i][0]) )  return(0.0);
+      if ( !_MMG5_buildridmet(mesh,met,np[i],ux,uy,uz,&m[i][0]) )  return 0.0;
     }
     else {
       memcpy(&m[i][0],&met->m[6*np[i]],6*sizeof(double));
     }
   }
-  return(_MMG5_surf(mesh,m,ptt));
+  return _MMG5_surf(mesh,m,ptt);
 
 }
 
@@ -205,11 +205,11 @@ double _MMG5_surftri33_ani(MMG5_pMesh mesh,MMG5_pTria ptt,
 
   surf = dens[0]*dens[2]-dens[1]*dens[1];
 
-  if ( surf < _MMG5_EPSD ) return(0.0);
+  if ( surf < _MMG5_EPSD ) return 0.0;
 
   surf = sqrt(surf);
 
-  return(surf);
+  return surf;
 }
 
 /**
@@ -448,7 +448,7 @@ int _MMG5_solveDefmetregSys( MMG5_pMesh mesh, double r[3][3], double c[3],
     m[3] = isqhmax;
     m[4] = 0;
     m[5] = isqhmax;
-    return(1);
+    return 1;
   }
 
   /* solve now (a b c) = tAA^{-1} * tAb */
@@ -458,7 +458,7 @@ int _MMG5_solveDefmetregSys( MMG5_pMesh mesh, double r[3][3], double c[3],
                " least 1 point.\n",__func__);
       mmgWarn0 = 1;
     }
-    return(0);
+    return 0;
   }
   intm[0] = 2.0*c[0];
   intm[1] = c[2];
@@ -511,7 +511,7 @@ int _MMG5_solveDefmetregSys( MMG5_pMesh mesh, double r[3][3], double c[3],
 
   m[5] = r[0][2] * b0[2] + r[1][2] * b1[2] + r[2][2] * b2[2];
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -554,7 +554,7 @@ int _MMG5_solveDefmetrefSys( MMG5_pMesh mesh, MMG5_pPoint p0, int ipref[2],
     m[3] = isqhmax;
     m[4] = 0;
     m[5] = isqhmax;
-    return(1);
+    return 1;
   }
 
   /* solve now (a b c) = tAA^{-1} * tAb */
@@ -564,7 +564,7 @@ int _MMG5_solveDefmetrefSys( MMG5_pMesh mesh, MMG5_pPoint p0, int ipref[2],
               " least 1 point.\n", __func__);
       mmgWarn = 1;
     }
-    return(0);
+    return 0;
   }
   intm[0] = 2.0*c[0];
   intm[1] = c[2];
@@ -703,7 +703,7 @@ int _MMG5_solveDefmetrefSys( MMG5_pMesh mesh, MMG5_pPoint p0, int ipref[2],
 
   m[5] = r[0][2] * b0[2] + r[1][2] * b1[2] + r[2][2] * b2[2];
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -758,7 +758,7 @@ double _MMG5_ridSizeInTangentDir(MMG5_pMesh mesh, MMG5_pPoint p0, int idp,
     kappacur = MG_MAX(kappacur,isqhmax);
     m = MG_MAX(m,kappacur);
   }
-  return(m);
+  return m;
 }
 
 /**
@@ -862,7 +862,7 @@ double _MMG5_ridSizeInNormalDir(MMG5_pMesh mesh,int i0,double* bcu,
   tau[1] = Jacb[1][0]*lambda[0] + Jacb[1][1]*lambda[1];
   tau[2] = Jacb[2][0]*lambda[0] + Jacb[2][1]*lambda[1];
   ll = tau[0]*tau[0] + tau[1]*tau[1] + tau[2]*tau[2];
-  if ( ll < _MMG5_EPSD )  return(0);
+  if ( ll < _MMG5_EPSD )  return 0;
 
   l = 1.0 / sqrt(ll);
   tau[0] *= l;
@@ -883,7 +883,7 @@ double _MMG5_ridSizeInNormalDir(MMG5_pMesh mesh,int i0,double* bcu,
   kappacur = MG_MIN(kappacur,isqhmin);
   kappacur = MG_MAX(kappacur,isqhmax);
 
-  return(kappacur);
+  return kappacur;
 }
 
 /**
@@ -928,7 +928,7 @@ int _MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int i)
   mm2 = &met->m[6*np2];
 
   if( !_MMG5_nortri(mesh,pt,nt) )
-    return(-1);
+    return -1;
 
   /* Recover normal and metric associated to p1 */
   if( MG_SIN(p1->tag) || (MG_NOM & p1->tag)){
@@ -947,7 +947,7 @@ int _MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int i)
       memcpy(n1,nn1,3*sizeof(double));
 
     if( !_MMG5_buildridmet(mesh,met,np1,ux,uy,uz,m1) )
-      return(-1);
+      return -1;
   }
   else if( ( MG_REF & p1->tag ) ){
     memcpy(n1,&(mesh->xpoint[p1->xp].n1[0]),3*sizeof(double));
@@ -975,7 +975,7 @@ int _MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int i)
       memcpy(n2,nn1,3*sizeof(double));
 
     if( !_MMG5_buildridmet(mesh,met,np2,ux,uy,uz,m2) )
-      return(-1);
+      return -1;
   }
   else if( (MG_REF & p2->tag) ){
     memcpy(n2,&(mesh->xpoint[p2->xp].n1[0]),3*sizeof(double));
@@ -1026,7 +1026,7 @@ int _MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int i)
   // Here we work in the tangent plane (thus in 2d)
   dd = t1[0]*t1[0] + t1[1]*t1[1];
   if(dd < _MMG5_EPSD2)
-    return(-1);
+    return -1;
 
   dd = 1.0/sqrt(dd);
   t1[0] *= dd;
@@ -1049,7 +1049,7 @@ int _MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int i)
 
   dd = t2[0]*t2[0] + t2[1]*t2[1];
   if(dd < _MMG5_EPSD2)
-    return(-1);
+    return -1;
 
   dd = 1.0/sqrt(dd);
   t2[0] *= dd;
@@ -1065,7 +1065,7 @@ int _MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int i)
     /* compute alpha = h2 + hgrad*l */
     alpha = ps2 /(1.0+mesh->info.hgrad*l*ps2);
     if( ps1 >= alpha -_MMG5_EPS )
-      return(-1);
+      return -1;
 
     _MMG5_eigensym(mtan1,lambda,vp);
     /* Project the vector t1 along the main directions of the metric */
@@ -1160,13 +1160,13 @@ int _MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int i)
 
       memcpy(mm1,m1,6*sizeof(double));
     }
-    return(i1);
+    return i1;
   }
   /* Metric in p2 has to be changed */
   else{
     alpha = ps1 /(1.0+mesh->info.hgrad*l*ps1);
     if( ps2 >= alpha - _MMG5_EPS)
-      return(-1);
+      return -1;
 
     _MMG5_eigensym(mtan2,lambda,vp);
 
@@ -1250,6 +1250,6 @@ int _MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int i)
 
       memcpy(mm2,m2,6*sizeof(double));
     }
-    return(i2);
+    return i2;
   }
 }

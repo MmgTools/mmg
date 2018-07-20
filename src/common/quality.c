@@ -60,7 +60,7 @@ double _MMG5_caltri33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt) {
 
   /* 2*area */
   anisurf  = _MMG5_surftri33_ani(mesh,pt,ma,mb,mc);
-  if ( anisurf <= _MMG5_EPSD2 ) return(0.0);
+  if ( anisurf <= _MMG5_EPSD2 ) return 0.0;
 
   dd  = 1.0 / 3.0;
   for (i=0; i<6; i++)
@@ -94,10 +94,10 @@ double _MMG5_caltri33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt) {
 
   /* quality = 2*area/length */
   if ( rap > _MMG5_EPSD2 ) {
-    return( anisurf / rap);
+    return  anisurf / rap;
   }
   else
-    return(0.0);
+    return 0.0;
 }
 
 /**
@@ -140,7 +140,7 @@ inline double _MMG5_caltri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
       abx = 0.5*(p[i1]->c[0]+p[i2]->c[0]) - p[i]->c[0];
       aby = 0.5*(p[i1]->c[1]+p[i2]->c[1]) - p[i]->c[1];
       abz = 0.5*(p[i1]->c[2]+p[i2]->c[2]) - p[i]->c[2];
-      if ( !_MMG5_buildridmet(mesh,met,np[i],abx,aby,abz,&m[0]) )  return(0.0);
+      if ( !_MMG5_buildridmet(mesh,met,np[i],abx,aby,abz,&m[0]) )  return 0.0;
     }
     else {
       memcpy(&m[0],&met->m[6*np[i]],6*sizeof(double));
@@ -176,7 +176,7 @@ inline double _MMG5_caltri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
 
   rap = l0 + l1 + l2;
 
-  if ( rap < _MMG5_EPSD2 ) return(0.0);
+  if ( rap < _MMG5_EPSD2 ) return 0.0;
 
   /* quality = 2*area/length */
   return (anisurf / rap);
@@ -214,16 +214,16 @@ inline double _MMG5_caltri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
   cal += (abz*acx - abx*acz) * (abz*acx - abx*acz);
   cal += (abx*acy - aby*acx) * (abx*acy - aby*acx);
 
-  if ( cal < _MMG5_EPSD2 )  return(0.0);
+  if ( cal < _MMG5_EPSD2 )  return 0.0;
 
   /* qual = 2.*surf / length */
   rap  = abx*abx + aby*aby + abz*abz;
   rap += acx*acx + acy*acy + acz*acz;
   rap += bcx*bcx + bcy*bcy + bcz*bcz;
 
-  if ( rap < _MMG5_EPSD2 )  return(0.0);
+  if ( rap < _MMG5_EPSD2 )  return 0.0;
 
-  return(sqrt(cal) / rap);
+  return sqrt(cal) / rap;
 }
 
 /**
@@ -346,12 +346,12 @@ int _MMG5_minQualCheck ( int iel, double minqual, double alpha )
   if ( minqualOnAlpha < _MMG5_NULKAL ) {
     fprintf(stderr,"\n  ## Error: %s: too bad quality for the worst element: "
             "(elt %d -> %15e)\n",__func__,iel,minqual);
-    return(0);
+    return 0;
   }
   else if ( minqualOnAlpha < _MMG5_EPSOK ) {
     fprintf(stderr,"\n  ## Warning: %s: very bad quality for the worst element: "
             "(elt %d -> %15e)\n",__func__,iel,minqual);
   }
 
-  return(1);
+  return 1;
 }

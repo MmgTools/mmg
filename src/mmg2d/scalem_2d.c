@@ -58,7 +58,7 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   // pd  = mesh->disp;
   /* compute bounding box */
-  if ( ! _MMG5_boundingBox(mesh) ) return(0);
+  if ( ! _MMG5_boundingBox(mesh) ) return 0;
 
   info = &mesh->info;
  
@@ -119,7 +119,7 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
     sethmax = 1;
   }
 
-  if ( !sol->np )  return(1);
+  if ( !sol->np )  return 1;
 
   /* metric truncature and normalization and default values for hmin/hmax if not
    * provided by the user ( 0.1 \times the minimum of the metric sizes for hmin
@@ -136,7 +136,7 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
           fprintf(stderr,"\n  ## Error: %s: at least 1 wrong metric.\n",
                   __func__);
         }
-        return(0);
+        return 0;
       }
     }
 
@@ -205,7 +205,7 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
             fprintf(stderr,"\n  ## Error: %s: at least 1 wrong metric.\n",
                     __func__);
           }
-          return(0);
+          return 0;
         }
         for (i=0; i<2; i++) {
           if(lambda[i]<=0) {
@@ -215,7 +215,7 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
                       " (eigenvalue : %e %e -- det %e\n",__func__,lambda[0],
                       lambda[1],m[0]*m[2]-m[1]*m[1]);
             }
-            return(0);
+            return 0;
           }
           mesh->info.hmin = MG_MIN(mesh->info.hmin,1./sqrt(lambda[i]));
         }
@@ -234,7 +234,7 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
             fprintf(stderr,"\n  ## Error: %s: at least 1 wrong metric.\n",
                     __func__);
           }
-          return(0);
+          return 0;
         }
         for (i=0; i<2; i++) {
           if(lambda[i]<=0) {
@@ -244,7 +244,7 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
                       " (eigenvalue : %e %e -- det %e\n",__func__,lambda[0],
                       lambda[1],m[0]*m[2]-m[1]*m[1]);
             }
-            return(0);
+            return 0;
           }
           mesh->info.hmax = MG_MAX(mesh->info.hmax,1./sqrt(lambda[i]));
         }
@@ -282,7 +282,7 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
           fprintf(stderr,"\n  ## Error: %s: at least 1 wrong metric.\n",
                   __func__);
         }
-        return(0);
+        return 0;
       }
       for (i=0; i<2; i++) {
         if(lambda[i]<=0) {
@@ -292,7 +292,7 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
                     " (eigenvalue : %e %e -- det %e\n",__func__,lambda[0],
                     lambda[1],m[0]*m[2]-m[1]*m[1]);
           }
-          return(0);
+          return 0;
         }
         lambda[i]=MG_MIN(isqhmin,lambda[i]);
         lambda[i]=MG_MAX(isqhmax,lambda[i]);
@@ -303,7 +303,7 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
     }
     break;
   }
-  return(1);
+  return 1;
 }
 
 /* Unscale mesh coordinates */
@@ -343,7 +343,7 @@ int MMG2_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   }
 
   /* de-normalize metric */
-  if ( (!sol->np) || (!sol->m) )  return(1);
+  if ( (!sol->np) || (!sol->m) )  return 1;
 
   switch (sol->size) {
   case 1:
@@ -372,5 +372,5 @@ int MMG2_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
     break;
   }
 
-  return(1);
+  return 1;
 }

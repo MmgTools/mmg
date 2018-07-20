@@ -60,5 +60,5 @@ double _MMG5_surftri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
   n[2] = abx*acy - aby*acx;
   det  = n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
 
-  return( 0.5*sqrt(det) );
+  return  0.5*sqrt(det) ;
 }

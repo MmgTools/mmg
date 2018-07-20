@@ -252,7 +252,7 @@ int _MMGS_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
       }
     }
   }
-  return(1);
+  return 1;
 }
 
 
@@ -319,6 +319,6 @@ int gradsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   while ( ++it < maxit && nu > 0 );
 
   if ( abs(mesh->info.imprim) > 4 )  fprintf(stdout,"     gradation: %7d updated, %d iter.\n",nup,it);
-  return(1);
+  return 1;
 }
 

@@ -75,7 +75,7 @@ _MMG5_BezierTgt(double c1[3],double c2[3],double n1[3],double n2[3],double t1[3]
 
   dd = t1[0]*t1[0] + t1[1]*t1[1] + t1[2]*t1[2];
   if ( dd < _MMG5_EPSD )
-    return(0);
+    return 0;
   else{
     dd = 1.0 / sqrt(dd);
     t1[0] *= dd;
@@ -85,7 +85,7 @@ _MMG5_BezierTgt(double c1[3],double c2[3],double n1[3],double n2[3],double t1[3]
 
   dd = t2[0]*t2[0] + t2[1]*t2[1] + t2[2]*t2[2];
   if ( dd < _MMG5_EPSD )
-    return(0);
+    return 0;
   else{
     dd = 1.0 / sqrt(dd);
     t2[0] *= dd;
@@ -93,7 +93,7 @@ _MMG5_BezierTgt(double c1[3],double c2[3],double n1[3],double n2[3],double t1[3]
     t2[2] *= dd;
   }
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -130,7 +130,7 @@ _MMG5_BezierGeod(double c1[3],double c2[3],double t1[3],double t2[3]) {
   /* alpha = ps + sqrt(ps*ps + ll*nt2); */
   /* alpha *= (6.0 / nt2); */
 
-  return(_MMG5_ATHIRD*sqrt(ll));
+  return _MMG5_ATHIRD*sqrt(ll);
 }
 
 /**
@@ -156,7 +156,7 @@ _MMG5_BezierEdge(MMG5_pMesh mesh,int ip0,int ip1,double b0[3],double b1[3],char 
 
   p0 = &mesh->point[ip0];
   p1 = &mesh->point[ip1];
-  if ( !(p0->tag & MG_BDY) || !(p1->tag & MG_BDY) )  return(0);
+  if ( !(p0->tag & MG_BDY) || !(p1->tag & MG_BDY) )  return 0;
 
   if ( !MG_SIN(p0->tag) ) {
     assert(p0->xp);
@@ -186,7 +186,7 @@ _MMG5_BezierEdge(MMG5_pMesh mesh,int ip0,int ip1,double b0[3],double b1[3],char 
     b1[1] = p1->c[1] - _MMG5_ATHIRD*uy;
     b1[2] = p1->c[2] - _MMG5_ATHIRD*uz;
 
-    return(1);
+    return 1;
   }
   il = 1.0 / sqrt(ll);
 
@@ -305,7 +305,7 @@ _MMG5_BezierEdge(MMG5_pMesh mesh,int ip0,int ip1,double b0[3],double b1[3],char 
   b1[1] = p1->c[1] + alpha * t1[1];
   b1[2] = p1->c[2] + alpha * t1[2];
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -530,7 +530,7 @@ int _MMG5_mmg3dBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,_MMG5_pBezier pb,char ori)
     pb->b[9][2] += 0.25 * (pb->b[2*i+3][2] + pb->b[2*i+4][2]);
   }
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -695,5 +695,5 @@ int _MMG3D_bezierInt(_MMG5_pBezier pb,double uv[2],double o[3],double no[3],doub
     to[2] *= dd;
   }
 
-  return(1);
+  return 1;
 }
