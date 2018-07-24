@@ -91,7 +91,7 @@ void _MMG2D_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol disp) {
 
   (mesh)->dim   = 2;
   (mesh)->ver   = 2;
-  (mesh)->nsols = 1;
+  (mesh)->nsols = 0;
 
   (sol)->dim  = 2;
   (sol)->ver  = 2;

@@ -167,7 +167,7 @@ extern "C" {
     mesh->nai = mesh->na;                        \
     mesh->nei = mesh->ne;                        \
     met->npi  = met->np;                         \
-    return val;                                 \
+    return val;                                  \
   }while(0)
 
 /* Macros for memory management */
@@ -530,8 +530,9 @@ typedef struct _MMG5_dNode_s {
 
  int            MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
                                        const long posNodes,const long posElts,
-                                       const long *posNodeData,const int bin,const int iswp,
-                                       const int nelts);
+                                       const long *posNodeData,const int bin,
+                                       const int iswp,const int nelts,
+                                       const int nsols);
 int             MMG5_saveMshMesh(MMG5_pMesh,MMG5_pSol*,const char*,const int);
 int             MMG5_loadSolHeader(const char*,int,FILE**,int*,int*,int*,int*,
                                    int*,int*,int**,long*);

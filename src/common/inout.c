@@ -463,7 +463,7 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,const char *filename,
     _MMG5_SAFE_FREE(*posNodeData);
     return -1;
   }
-  mesh->nsols = *nsols;
+
   return 1;
 }
 
@@ -477,6 +477,7 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,const char *filename,
  * \param posNodeData position of solution data in file
  * \param bin 1 if binary format
  * \param nelts number of elements in file
+ * \param nsols number of silutions in file
  * \return 1 if success, 0 if fail.
  *
  * End to read mesh and solution array at MSH file format after the
@@ -486,7 +487,7 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,const char *filename,
 int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
                            const long posNodes,const long posElts,
                            const long *posNodeData,const int bin,const int iswp,
-                           const int nelts) {
+                           const int nelts,const int nsols) {
   MMG5_pTetra pt;
   MMG5_pPrism pp;
   MMG5_pTria  ptt;
@@ -1156,7 +1157,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
   psl->dim = mesh->dim;
   psl->type = 1;
 
-  for ( isol=0; isol < mesh->nsols; ++isol ) {
+  for ( isol=0; isol < nsols; ++isol ) {
     assert ( posNodeData[isol] );
 
     rewind((*inm));
@@ -1479,7 +1480,7 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename,
   MMG5_pSol   psl;
   double      dbuf[6];
   int         bin,k,i,typ,nelts,word, header[3],iadr;
-  int         nq,ne,npr,np,nt,na,isol;
+  int         nq,ne,npr,np,nt,na,isol,nsols;
   char        *ptr,*data;
   static char mmgWarn = 0;
 
@@ -1781,7 +1782,9 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename,
   }
 
   /** Write solution */
-  for ( isol=0; isol<mesh->nsols; ++isol) {
+  (metricData==1)? nsols = 1 : mesh->nsols;
+
+  for ( isol=0; isol<nsols; ++isol) {
     psl = *sol + isol;
 
     if ( !psl->m ) {
@@ -1852,7 +1855,7 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename,
 
         if ( psl->dim == 3 ) {
           if ( metricData ) {
-            assert(mesh->nsols==1);
+            assert(!mesh->nsols);
             MMG5_build3DMetric(mesh,psl,k,dbuf);
           }
           else {

@@ -298,7 +298,8 @@ int MMG3D_Get_allSolsSizes(MMG5_pMesh mesh, MMG5_pSol *sol, int *nsol,
   MMG5_pSol psl;
   int       j;
 
-  *nsol = mesh->nsols;
+  if ( nsol != NULL )
+    *nsol = mesh->nsols;
 
   for ( j=0; j<(*nsol); ++j ) {
     psl = *sol + j;

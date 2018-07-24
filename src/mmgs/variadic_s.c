@@ -83,7 +83,7 @@ void _MMGS_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol ) {
 
   (mesh)->dim   = 3;
   (mesh)->ver   = 2;
-  (mesh)->nsols = 1;
+  (mesh)->nsols = 0;
 
   (sol)->dim   = 3;
   (sol)->ver   = 2;

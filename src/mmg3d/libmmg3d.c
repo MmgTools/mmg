@@ -52,7 +52,7 @@
       mesh->nai = mesh->na;                                             \
       mesh->nei = mesh->ne;                                             \
       met->npi  = met->np;                                              \
-      return MMG5_LOWFAILURE;                                          \
+      return MMG5_STRONGFAILURE;                                        \
     }                                                                   \
     _LIBMMG5_RETURN(mesh,met,val);                                      \
   }while(0)

@@ -990,15 +990,12 @@ int MMG3D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 
   ier =  MMG5_loadMshMesh_part2( mesh, &sol,&inm,
                                  posNodes,posElts,posNodeData,
-                                 bin,iswp,nelts);
+                                 bin,iswp,nelts,nsols);
   _MMG5_SAFE_FREE(posNodeData);
   if ( ier < 1 ) return  ier;
 
   /* Check the metric type */
   ier = MMG5_chkMetricType(mesh,&sol->type,inm);
-
-  /* No metric in the input file but we will automatically compute it */
-  if ( !mesh->nsols ) mesh->nsols=1;
 
   return ier;
 }
@@ -1017,6 +1014,7 @@ int MMG3D_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
                                &bin,&iswp,&nelts,&nsols);
   if ( ier < 1 ) return (ier);
 
+  mesh->nsols = nsols;
   if ( *sol )  _MMG5_DEL_MEM(mesh,*sol,(mesh->nsols)*sizeof(MMG5_Sol));
 
   _MMG5_ADD_MEM(mesh,nsols*sizeof(MMG5_Sol),"solutions array",
@@ -1048,7 +1046,7 @@ int MMG3D_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
 
   ier =  MMG5_loadMshMesh_part2( mesh, sol,&inm,
                                  posNodes,posElts,posNodeData,
-                                 bin,iswp,nelts);
+                                 bin,iswp,nelts,nsols);
   _MMG5_SAFE_FREE(posNodeData);
   if ( ier < 1 ) return  ier;
 
