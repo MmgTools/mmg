@@ -171,9 +171,13 @@ IF ( BUILD_TESTING )
         "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_example0/teapot"
         "${CTEST_OUTPUT_DIR}/libmmgs-IsosurfDiscretization_0-teapot.o"
         )
-      ADD_TEST(NAME libmmgs_example3   COMMAND ${LIBMMGS_EXEC3}
+      ADD_TEST(NAME libmmgs_example3_io_0   COMMAND ${LIBMMGS_EXEC3}
         "${PROJECT_SOURCE_DIR}/libexamples/mmgs/io_multisols_example3/torus.mesh"
-        "${CTEST_OUTPUT_DIR}/libmmgs_io_3-naca.o"
+        "${CTEST_OUTPUT_DIR}/libmmgs_io_3-naca.o" "0"
+       )
+      ADD_TEST(NAME libmmgs_example3_io_1   COMMAND ${LIBMMGS_EXEC3}
+        "${PROJECT_SOURCE_DIR}/libexamples/mmgs/io_multisols_example3/torus.mesh"
+        "${CTEST_OUTPUT_DIR}/libmmgs_io_3-naca.o" "1"
        )
 
 
@@ -189,9 +193,13 @@ IF ( BUILD_TESTING )
         ADD_TEST(NAME libmmgs_fortran_b   COMMAND ${LIBMMGS_EXECFORTRAN_b}
           "${CTEST_OUTPUT_DIR}/libmmgs_Adaptation_Fortran_0_b.o"
           )
-        ADD_TEST(NAME libmmgs_fortran_io   COMMAND ${LIBMMGS_EXECFORTRAN_IO}
+        ADD_TEST(NAME libmmgs_fortran_io_0   COMMAND ${LIBMMGS_EXECFORTRAN_IO}
           "${PROJECT_SOURCE_DIR}/libexamples/mmgs/io_multisols_example3/torus.mesh"
-          "${CTEST_OUTPUT_DIR}/libmmgs_Fortran_io-torus.o"
+          "${CTEST_OUTPUT_DIR}/libmmgs_Fortran_io-torus.o" "0"
+         )
+        ADD_TEST(NAME libmmgs_fortran_io_1   COMMAND ${LIBMMGS_EXECFORTRAN_IO}
+          "${PROJECT_SOURCE_DIR}/libexamples/mmgs/io_multisols_example3/torus.mesh"
+          "${CTEST_OUTPUT_DIR}/libmmgs_Fortran_io-torus.o" "1"
          )
 
       ENDIF()

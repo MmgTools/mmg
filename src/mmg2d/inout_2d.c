@@ -890,7 +890,7 @@ int MMG2D_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
   /** Sol tab allocation */
   mesh->nsols = nsols;
 
-  if ( nsols > MMG5_NSOL_MAX ) {
+  if ( nsols > MMG5_NSOLS_MAX ) {
     fprintf(stderr,"\n  ## Error: %s: unexpected number of data (%d).\n",
             __func__,nsols);
     _MMG5_SAFE_FREE(type);

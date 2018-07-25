@@ -28,7 +28,7 @@ int main(int argc,char *argv[]) {
   int             i,j,opt;
 
   /* To manually recover the mesh */
-  int             nsol,np,typEntity[MMG5_NSOL_MAX],typSol[MMG5_NSOL_MAX];
+  int             nsol,np,typSol[MMG5_NSOLS_MAX];
   double          *sols;
 
   /* Filenames */
@@ -90,52 +90,50 @@ int main(int argc,char *argv[]) {
 
   /** 3) Transfer the solutions in a new solutions array */
   /** a) Get the solutions sizes */
-  if ( MMG3D_Get_allSolsSizes(mmgMesh,&mmgSol,&nsol,typEntity,&np,typSol) != 1 )
+  if ( MMG3D_Get_solsAtVerticesSize(mmgMesh,&mmgSol,&nsol,&np,typSol) != 1 )
     exit(EXIT_FAILURE);
 
   /** b) Manually set the size of the new solution: give info for the sol
       structure: number of solutions, type of entities on which applied the
       solutions, number of vertices, type of the solution */
-  if ( MMG3D_Set_allSolsSizes(mmgMesh,&tmpSol,nsol,typEntity,np,typSol) != 1 )
+  if ( MMG3D_Set_solsAtVerticesSize(mmgMesh,&tmpSol,nsol,np,typSol) != 1 )
     exit(EXIT_FAILURE);
 
   /** c) Get each solution and set it in the new structure */
 
   /** b) give solutions values and positions */
   /* Get the entire field of a given solution */
-  for ( i=0; i<nsol; ++i ) {
-    assert ( typEntity[i] == MMG5_Vertex );
-
+  for ( i=1; i<=nsol; ++i ) {
     if ( !opt ) {
       /* Get the ith solution array */
-      if ( typSol[i] == MMG5_Scalar )
+      if ( typSol[i-1] == MMG5_Scalar )
         sols = (double*) calloc(np, sizeof(double));
-      else if ( typSol[i] == MMG5_Vector )
+      else if ( typSol[i-1] == MMG5_Vector )
         sols = (double*) calloc(np*3, sizeof(double));
-      else if ( typSol[i] == MMG5_Tensor ) {
+      else if ( typSol[i-1] == MMG5_Tensor ) {
         sols = (double*) calloc(np*6, sizeof(double));
       }
 
-      if ( MMG3D_Get_ithSols_inAllSols(mmgSol,i,sols) !=1 ) exit(EXIT_FAILURE);
+      if ( MMG3D_Get_ithSols_inSolsAtVertices(mmgSol,i,sols) !=1 ) exit(EXIT_FAILURE);
 
       /* Set the ith solution in the new structure */
-      if ( MMG3D_Set_ithSols_inAllSols(tmpSol,i,sols) !=1 ) exit(EXIT_FAILURE);
+      if ( MMG3D_Set_ithSols_inSolsAtVertices(tmpSol,i,sols) !=1 ) exit(EXIT_FAILURE);
     }
     else {
       /* Get the ith solution array vertex by vertex */
-      if ( typSol[i] == MMG5_Scalar )
+      if ( typSol[i-1] == MMG5_Scalar )
         sols = (double*) calloc(1, sizeof(double));
-      else if ( typSol[i] == MMG5_Vector )
+      else if ( typSol[i-1] == MMG5_Vector )
         sols = (double*) calloc(3, sizeof(double));
-      else if ( typSol[i] == MMG5_Tensor ) {
+      else if ( typSol[i-1] == MMG5_Tensor ) {
         sols = (double*) calloc(6, sizeof(double));
       }
 
       for ( j=1; j<=np; ++j ) {
-        if ( MMG3D_Get_ithSol_inAllSols(mmgSol,i,sols,j) !=1 ) exit(EXIT_FAILURE);
+        if ( MMG3D_Get_ithSol_inSolsAtVertices(mmgSol,i,sols,j) !=1 ) exit(EXIT_FAILURE);
 
         /* Set the ith solution vertex by vertex in the new structure */
-        if ( MMG3D_Set_ithSol_inAllSols(tmpSol,i,sols,j) !=1 ) exit(EXIT_FAILURE);
+        if ( MMG3D_Set_ithSol_inSolsAtVertices(tmpSol,i,sols,j) !=1 ) exit(EXIT_FAILURE);
       }
     }
 

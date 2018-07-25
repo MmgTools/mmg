@@ -181,13 +181,13 @@ FORTRAN_NAME(MMG2D_SET_SOLSIZE,mmg2d_set_solsize,
   return;
 }
 /**
- * See \ref MMG2D_Set_allSolsSizes function in \ref mmg2d/libmmg2d.h file.
+ * See \ref MMG2D_Set_solsAtVerticesSize function in \ref mmg2d/libmmg2d.h file.
  */
-FORTRAN_NAME(MMG2D_SET_ALLSOLSSIZES,mmg2d_set_allsolssizes,
-             (MMG5_pMesh *mesh, MMG5_pSol *sol,int* nsol,int* typEntity,
-              int* np, int* typSol, int* retval),
-             (mesh, sol, nsol, typEntity, np, typSol, retval)) {
-  *retval = MMG2D_Set_allSolsSizes(*mesh,sol,*nsol,typEntity,*np,typSol);
+FORTRAN_NAME(MMG2D_SET_SOLSATVERTICESSIZE,mmg2d_set_solsatverticessize,
+             (MMG5_pMesh *mesh, MMG5_pSol *sol,int* nsols,
+              int* nentities, int* typSol, int* retval),
+             (mesh, sol, nsols, nentities, typSol, retval)) {
+  *retval = MMG2D_Set_solsAtVerticesSize(*mesh,sol,*nsols,*nentities,typSol);
   return;
 }
 
@@ -203,14 +203,14 @@ FORTRAN_NAME(MMG2D_GET_SOLSIZE,mmg2d_get_solsize,
 }
 
 /**
- * See \ref MMG2D_Get_allSolsSizes function in \ref mmg2d/libmmg2d.h file.
+ * See \ref MMG2D_Get_solsAtVerticesSize function in \ref mmg2d/libmmg2d.h file.
  */
-FORTRAN_NAME(MMG2D_GET_ALLSOLSSIZES,mmg2d_get_allsolssizes,
-             (MMG5_pMesh *mesh, MMG5_pSol *sol, int *nsol,int* typEntity,
-              int* np, int* typSol, int* retval),
-             (mesh,sol,nsol,typEntity,np,typSol,retval)) {
+FORTRAN_NAME(MMG2D_GET_SOLSATVERTICESSIZE,mmg2d_get_solsatverticessize,
+             (MMG5_pMesh *mesh, MMG5_pSol *sol, int *nsols,
+              int* nentities, int* typSol, int* retval),
+             (mesh,sol,nsols,nentities,typSol,retval)) {
 
-  *retval = MMG2D_Get_allSolsSizes(*mesh,sol,nsol,typEntity,np,typSol);
+  *retval = MMG2D_Get_solsAtVerticesSize(*mesh,sol,nsols,nentities,typSol);
   return;
 }
 
@@ -495,24 +495,43 @@ FORTRAN_NAME(MMG2D_GET_TENSORSOLS,mmg2d_get_tensorsols,
   return;
 }
 /**
- * See \ref MMG2D_Set_ithSols_inAllSols function in \ref mmg2d/libmmg2d.h file.
+ * See \ref MMG2D_Set_ithSol_solsAtVertices function in \ref mmg2d/libmmg2d.h file.
  */
-FORTRAN_NAME(MMG2D_SET_ITHSOLS_INALLSOLS,mmg2d_set_ithsols_inallsols,
-             (MMG5_pSol *sol, int *i,double *s, int* retval),
-             (sol,i,s,retval)) {
-  int idx = *i-1;
-  *retval = MMG2D_Set_ithSols_inAllSols(*sol,idx,s);
+FORTRAN_NAME(MMG2D_SET_ITHSOL_INSOLSATVERTICES,mmg2d_set_ithsol_insolsatvertices,
+             (MMG5_pSol *sol, int *i,double *s,int *pos, int* retval),
+             (sol,i,s,pos,retval)) {
+  *retval = MMG2D_Set_ithSol_inSolsAtVertices(*sol,*i,s,*pos);
   return;
 }
 
 /**
- * See \ref MMG2D_Get_ithSols_inAllSols function in \ref mmg2d/libmmg2d.h file.
+ * See \ref MMG2D_Get_ithSol_inSolsAtVertices function in \ref mmg2d/libmmg2d.h file.
  */
-FORTRAN_NAME(MMG2D_GET_ITHSOLS_INALLSOLS,mmg2d_get_ithsols_inallsols,
+FORTRAN_NAME(MMG2D_GET_ITHSOL_INSOLSATVERTICES,mmg2d_get_ithsol_insolsatvertices,
+             (MMG5_pSol *sol, int* i,double *s,int *pos, int* retval),
+             (sol,i,s,pos,retval)) {
+  *retval = MMG2D_Get_ithSol_inSolsAtVertices(*sol,*i,s,*pos);
+  return;
+}
+
+
+/**
+ * See \ref MMG2D_Set_ithSols_inSolsAtVertices function in \ref mmg2d/libmmg2d.h file.
+ */
+FORTRAN_NAME(MMG2D_SET_ITHSOLS_INSOLSATVERTICES,mmg2d_set_ithsols_insolsatvertices,
+             (MMG5_pSol *sol, int *i,double *s, int* retval),
+             (sol,i,s,retval)) {
+  *retval = MMG2D_Set_ithSols_inSolsAtVertices(*sol,*i,s);
+  return;
+}
+
+/**
+ * See \ref MMG2D_Get_ithSols_inSolsAtVertices function in \ref mmg2d/libmmg2d.h file.
+ */
+FORTRAN_NAME(MMG2D_GET_ITHSOLS_INSOLSATVERTICES,mmg2d_get_ithsols_insolsatvertices,
              (MMG5_pSol *sol, int* i,double *s, int* retval),
              (sol,i,s,retval)) {
-  int idx = *i-1;
-  *retval = MMG2D_Get_ithSols_inAllSols(*sol,idx,s);
+  *retval = MMG2D_Get_ithSols_inSolsAtVertices(*sol,*i,s);
   return;
 }
 

@@ -18,7 +18,7 @@ PROGRAM main
   INTEGER            :: ier,argc,i,j,opt
 
   !! To manually recover the mesh
-  INTEGER            :: nsol,np,typEntity(MMG5_NSOL_MAX),typSol(MMG5_NSOL_MAX)
+  INTEGER            :: nsol,np,typSol(MMG5_NSOLS_MAX)
   REAL(KIND=8),DIMENSION(:),ALLOCATABLE :: sols
 
   CHARACTER(len=300) :: exec_name,filename,fileout,option
@@ -79,13 +79,13 @@ PROGRAM main
 
   !!> 3) Transfer the solutions in a new solutions array
   !! a) Get the solutions sizes
-  CALL MMG3D_Get_allSolsSizes(mmgMesh,mmgSol,nsol,typEntity,np,typSol,ier)
+  CALL MMG3D_Get_solsAtVerticesSize(mmgMesh,mmgSol,nsol,np,typSol,ier)
   IF ( ier /= 1 )  CALL EXIT(104)
 
   !!> b) Manually set the size of the new solution: give info for the sol
   !! structure: number of solutions, type of entities on which applied the
   !! solutions, number of vertices, type of the solution */
-  CALL MMG3D_Set_allSolsSizes(mmgMesh,tmpSol,nsol,typEntity,np,typSol,ier)
+  CALL MMG3D_Set_solsAtVerticesSize(mmgMesh,tmpSol,nsol,np,typSol,ier)
   IF ( ier /= 1 )  CALL EXIT(105)
 
   !!> c) Get each solution and set it in the new structure
@@ -93,7 +93,6 @@ PROGRAM main
   !!> b) give solutions values and positions
   !! Get the entire field of a given solution
   DO i=1,nsol
-    IF ( typEntity(i) /= MMG5_Vertex ) CALL EXIT(106)
 
     IF ( opt==0 ) THEN
        ! Get the ith solution array
@@ -105,11 +104,11 @@ PROGRAM main
           ALLOCATE(sols(6*np))
        ENDIF
 
-       CALL MMG3D_Get_ithSols_inAllSols(mmgSol,i,sols,ier)
+       CALL MMG3D_Get_ithSols_inSolsAtVertices(mmgSol,i,sols,ier)
        IF ( ier /= 1 )  CALL EXIT(107)
 
        ! Set the ith solution in the new structure
-       CALL MMG3D_Set_ithSols_inAllSols(tmpSol,i,sols,ier)
+       CALL MMG3D_Set_ithSols_inSolsAtVertices(tmpSol,i,sols,ier)
        IF ( ier /= 1 )  CALL EXIT(108)
     ELSE
       IF ( typSol(i) == MMG5_Scalar ) THEN
@@ -122,11 +121,11 @@ PROGRAM main
 
        DO j=1,np
           ! Get and set the ith solution array vertex by vertex
-          CALL MMG3D_Get_ithSol_inAllSols(mmgSol,i,sols,j,ier)
+          CALL MMG3D_Get_ithSol_inSolsAtVertices(mmgSol,i,sols,j,ier)
           IF ( ier /= 1 )  CALL EXIT(107)
 
           ! Set the ith solution in the new structure
-          CALL MMG3D_Set_ithSol_inAllSols(tmpSol,i,sols,j,ier)
+          CALL MMG3D_Set_ithSol_inSolsAtVertices(tmpSol,i,sols,j,ier)
           IF ( ier /= 1 )  CALL EXIT(108)
        ENDDO
     ENDIF

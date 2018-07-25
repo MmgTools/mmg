@@ -287,10 +287,8 @@ extern "C" {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward an allocatable sol structure.
- * \param nsol number of solutions per entity
- * \param typEntity Array (of size nsol) listing the type of entities to which
- *                  apply the solutions (vertices, triangles...).
- * \param np        number of vertices
+ * \param nsols number of solutions per entity
+ * \param nentities number of entities
  * \param typSol    Array of size nsol listing the type of the solutions
  *                  (scalar, vectorial...).
  * \return 0 if failed, 1 otherwise.
@@ -298,17 +296,16 @@ extern "C" {
  * Set the solution number, dimension and type.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG2D_SET_ALLSOLSSIZES(mesh,sol,nsol,typEntity,np,typSol,retval)\n
+ * >   SUBROUTINE MMG2D_SET_SOLSATVERTICESSIZE(mesh,sol,nsols,nentities,typSol,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol\n
- * >     INTEGER, INTENT(IN)           :: nsol,np\n
- * >     INTEGER, INTENT(IN)           :: typEntity(*),typSol(*)\n
+ * >     INTEGER, INTENT(IN)           :: nsols,nentities\n
+ * >     INTEGER, INTENT(IN)           :: typSol(*)\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_Set_allSolsSizes(MMG5_pMesh mesh, MMG5_pSol *sol,int nsol,int *typEntity,
-                             int np, int *typSol);
-
+  int MMG2D_Set_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol *sol,int nsols,
+                                   int nentities, int *typSol);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param c0 coordinate of the point along the first dimension.
@@ -607,16 +604,36 @@ extern "C" {
 /**
  * \param sol pointer toward the array of solutions
  * \param i position of the solution field that we want to set.
- * \param s table of the solutions at mesh vertices. The solution at vertex \a k
- * is given by s[k-1] for a scalar sol, s[2*(k-1)]\@6 for a vectorial solution
- * and s[3*(k-1)]\@6 for a tensor solution.
+ * \param s solution(s) at mesh vertex \a pos.
+ * \param pos index of the vertex on which we set the solution.
  *
  * \return 0 if failed, 1 otherwise.
  *
  * Set values of the solution at the ith field of the solution array.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG2D_SET_ITHSOLS_INALLSOLS(sol,i,s,retval)\n
+ * >   SUBROUTINE MMG2D_SET_ITHSOL_INSOLSATVERTICES(sol,i,s,pos,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: sol\n
+ * >     INTEGER, INTENT(IN)           :: i,pos\n
+ * >     REAL(KIND=8), DIMENSION(*),INTENT(OUT) :: s\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int  MMG2D_Set_ithSol_inSolsAtVertices(MMG5_pSol sol,int i, double* s,int pos);
+/**
+ * \param sol pointer toward the array of solutions
+ * \param i position of the solution field that we want to set.
+ * \param s table of the solutions at mesh vertices. The solution at vertex \a k
+ * is given by s[k-1] for a scalar sol, s[2*(k-1)]\@2 for a vectorial solution
+ * and s[3*(k-1)]\@3 for a tensor solution.
+ *
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Set values of the solution at the ith field of the solution array.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG2D_SET_ITHSOLS_INSOLSATVERTICES(sol,i,s,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: sol\n
  * >     INTEGER, INTENT(IN)           :: i\n
  * >     REAL(KIND=8), DIMENSION(*),INTENT(OUT) :: s\n
@@ -624,7 +641,7 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG2D_Set_ithSols_inAllSols(MMG5_pSol sol,int i, double* s);
+  int  MMG2D_Set_ithSols_inSolsAtVertices(MMG5_pSol sol,int i, double* s);
 
 /** recover datas */
 /**
@@ -668,9 +685,7 @@ extern "C" {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward an array of sol structure.
- * \param typEntity array of size MMG5_NSOL_MAX to store the type of entities to
- * which each solution is applied.
- * \param np pointer toward the number of solutions.
+ * \param nentities pointer toward the number of entities.
  * \param typSol array of size MMG5_NSOL_MAX to store type of each solution
  * (scalar, vector..).
  *
@@ -679,16 +694,16 @@ extern "C" {
  * Get the solution number, dimension and type.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG2D_GET_ALLSOLSSIZES(mesh,sol,nsol,typEntity,np,typSol,retval)\n
+ * >   SUBROUTINE MMG2D_GET_SOLSATVERTICESSIZE(mesh,sol,nsols,nentities,typSol,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol\n
- * >     INTEGER                       :: nsol,np\n
- * >     INTEGER                       :: typEntity(*),typSol(*)\n
+ * >     INTEGER                       :: nsol,nentities\n
+ * >     INTEGER                       :: typSol(*)\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG2D_Get_allSolsSizes(MMG5_pMesh mesh, MMG5_pSol* sol,int *nsol,
-                              int* typEntity,int* np,int* typSol);
+  int  MMG2D_Get_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol* sol,int *nsols,
+                                    int* nentities,int* typSol);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param c0 pointer toward the coordinate of the point along the first dimension.
@@ -917,17 +932,37 @@ extern "C" {
   int MMG2D_Get_tensorSols(MMG5_pSol met, double *sols);
 /**
  * \param sol pointer toward the array of solutions
+ * \param i position of the solution field that we want to set.
+ * \param s solution(s) at mesh vertex \a pos.
+ * \param pos index of the vertex on which we get the solution.
+ *
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Get values of the ith field of the solution array at vertex \a pos.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG2D_GET_ITHSOL_INSOLSATVERTICES(sol,i,s,pos,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: sol\n
+ * >     INTEGER, INTENT(IN)           :: i,pos\n
+ * >     REAL(KIND=8), DIMENSION(*),INTENT(OUT) :: s\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int  MMG2D_Get_ithSol_inSolsAtVertices(MMG5_pSol sol,int i, double* s,int pos);
+/**
+ * \param sol pointer toward the array of solutions
  * \param i position of the solution field that we want to get.
  * \param s table of the solutions at mesh vertices. The solution at vertex \a k
- * is given by s[k-1] for a scalar sol, s[2*(k-1)]\@6 for a vectorial solution
- * and s[3*(k-1)]\@6 for a tensor solution.
+ * is given by s[k-1] for a scalar sol, s[2*(k-1)]\@2 for a vectorial solution
+ * and s[3*(k-1)]\@3 for a tensor solution.
  *
  * \return 0 if failed, 1 otherwise.
  *
  * Get values of the solution at the ith field of the solution array.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG2D_GET_ITHSOLS_INALLSOLS(sol,i,s,retval)\n
+ * >   SUBROUTINE MMG2D_GET_ITHSOLS_INSOLSATVERTICES(sol,i,s,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: sol\n
  * >     INTEGER, INTENT(IN)           :: i\n
  * >     REAL(KIND=8), DIMENSION(*),INTENT(OUT) :: s\n
@@ -935,7 +970,8 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG2D_Get_ithSols_inAllSols(MMG5_pSol sol,int i, double* s);
+  int  MMG2D_Get_ithSols_inSolsAtVertices(MMG5_pSol sol,int i, double* s);
+
 
 /**
  * \param mesh pointer toward the mesh structure.

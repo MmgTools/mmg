@@ -128,8 +128,9 @@ int MMGS_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int 
   }
   return 1;
 }
-int MMGS_Set_allSolsSizes(MMG5_pMesh mesh, MMG5_pSol *sol,int nsol,int *typEntity,
-                           int np, int *typSol) {
+
+int MMGS_Set_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol *sol,int nsols,
+                                 int nentities, int *typSol) {
   MMG5_pSol psl;
   int       j;
 
@@ -142,17 +143,17 @@ int MMGS_Set_allSolsSizes(MMG5_pMesh mesh, MMG5_pSol *sol,int nsol,int *typEntit
   }
 
   /** Sol tab allocation */
-  mesh->nsols = nsol;
+  mesh->nsols = nsols;
 
-  _MMG5_ADD_MEM(mesh,nsol*sizeof(MMG5_Sol),"solutions array",
+  _MMG5_ADD_MEM(mesh,nsols*sizeof(MMG5_Sol),"solutions array",
                 return 0);
-  _MMG5_SAFE_CALLOC(*sol,nsol,MMG5_Sol,0);
+  _MMG5_SAFE_CALLOC(*sol,nsols,MMG5_Sol,0);
 
-  for ( j=0; j<nsol; ++j ) {
+  for ( j=0; j<nsols; ++j ) {
     psl = *sol + j;
     psl->ver = 2;
 
-    if ( !MMGS_Set_solSize(mesh,psl,typEntity[j],mesh->np,typSol[j]) ) {
+    if ( !MMGS_Set_solSize(mesh,psl,MMG5_Vertex,mesh->np,typSol[j]) ) {
       fprintf(stderr,"\n  ## Error: %s: unable to set the size of the"
               " solution num %d.\n",__func__,j);
       return 0;
@@ -160,7 +161,6 @@ int MMGS_Set_allSolsSizes(MMG5_pMesh mesh, MMG5_pSol *sol,int nsol,int *typEntit
   }
   return 1;
 }
-
 
 int MMGS_Set_meshSize(MMG5_pMesh mesh, int np, int nt, int na) {
 
@@ -232,18 +232,17 @@ int MMGS_Get_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int* typEntity, int* np, in
 
   return 1;
 }
-int MMGS_Get_allSolsSizes(MMG5_pMesh mesh, MMG5_pSol *sol, int *nsol,
-                           int* typEntity, int* np, int* typSol) {
+
+int MMGS_Get_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol *sol, int *nsols,
+                                 int* np, int* typSol) {
   MMG5_pSol psl;
   int       j;
 
-  *nsol = mesh->nsols;
+  if ( nsols != NULL )
+    *nsols = mesh->nsols;
 
-  for ( j=0; j<(*nsol); ++j ) {
+  for ( j=0; j<(*nsols); ++j ) {
     psl = *sol + j;
-
-    if ( typEntity != NULL )
-      typEntity[j] = MMG5_Vertex;
 
     if ( typSol != NULL ) {
       typSol[j]    = psl->type;
@@ -256,7 +255,6 @@ int MMGS_Get_allSolsSizes(MMG5_pMesh mesh, MMG5_pSol *sol, int *nsol,
 
   return 1;
 }
-
 
 int MMGS_Get_meshSize(MMG5_pMesh mesh, int* np, int* nt, int* na) {
 
@@ -1000,10 +998,68 @@ int MMGS_Get_tensorSols(MMG5_pSol met, double *sols) {
   return 1;
 }
 
-int  MMGS_Set_ithSols_inAllSols(MMG5_pSol sol,int i, double *s) {
+int  MMGS_Set_ithSol_inSolsAtVertices(MMG5_pSol sol,int i, double* s,int pos) {
   MMG5_pSol psl;
 
-  psl = sol + i;
+  /* Warning: users give indices from 1 to nsols */
+  psl = sol + (i-1);
+
+  switch ( psl->type ) {
+  case MMG5_Scalar:
+    return MMGS_Set_scalarSol(psl,s[0],pos);
+    break;
+
+  case MMG5_Vector:
+    MMGS_Set_vectorSol(psl,s[0],s[1],s[2],pos);
+    break;
+
+  case MMG5_Tensor:
+    MMGS_Set_tensorSol(psl,s[0],s[1],s[2],s[3],s[4],s[5],pos);
+    break;
+
+  default:
+    fprintf(stderr,"\n  ## Error: %s: unexpected type of solution: %s.\n",
+            __func__,MMG5_Get_typeName(psl->type));
+    return 0;
+  }
+  return 1;
+}
+
+int  MMGS_Get_ithSol_inSolsAtVertices(MMG5_pSol sol,int i, double *s,int pos) {
+  MMG5_pSol psl;
+
+  /* Warning: users give indices from 1 to nsols */
+  psl = sol + (i-1);
+
+  psl->npi = pos-1;
+
+  switch ( psl->type ) {
+  case MMG5_Scalar:
+    return MMGS_Get_scalarSol(psl,&s[0]);
+    break;
+
+  case MMG5_Vector:
+    MMGS_Get_vectorSol(psl,&s[0],&s[1],&s[2]);
+    break;
+
+  case MMG5_Tensor:
+    MMGS_Get_tensorSol(psl,&s[0],&s[1],&s[2],&s[3],&s[4],&s[5]);
+    break;
+
+  default:
+    fprintf(stderr,"\n  ## Error: %s: unexpected type of solution: %s\n",
+            __func__,MMG5_Get_typeName(psl->type));
+    return 0;
+  }
+
+  return 1;
+}
+
+int  MMGS_Set_ithSols_inSolsAtVertices(MMG5_pSol sol,int i, double *s) {
+  MMG5_pSol psl;
+
+  /* Warning: users give indices from 1 to nsols */
+  psl = sol + (i-1);
 
   switch ( psl->type ) {
   case MMG5_Scalar:
@@ -1027,10 +1083,11 @@ int  MMGS_Set_ithSols_inAllSols(MMG5_pSol sol,int i, double *s) {
   return 1;
 }
 
-int  MMGS_Get_ithSols_inAllSols(MMG5_pSol sol,int i, double *s) {
+int  MMGS_Get_ithSols_inSolsAtVertices(MMG5_pSol sol,int i, double *s) {
   MMG5_pSol psl;
 
-  psl = sol + i;
+  /* Warning: users give indices from 1 to nsols */
+  psl = sol + (i-1);
 
   switch ( psl->type ) {
   case MMG5_Scalar:
@@ -1053,6 +1110,7 @@ int  MMGS_Get_ithSols_inAllSols(MMG5_pSol sol,int i, double *s) {
 
   return 1;
 }
+
 
 int MMGS_Chk_meshData(MMG5_pMesh mesh,MMG5_pSol met) {
 

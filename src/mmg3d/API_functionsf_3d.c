@@ -149,13 +149,13 @@ FORTRAN_NAME(MMG3D_SET_SOLSIZE,mmg3d_set_solsize,
 }
 
 /**
- * See \ref MMG3D_Set_allSolsSizes function in \ref mmg3d/libmmg3d.h file.
+ * See \ref MMG3D_Set_solAtVerticesSize function in \ref mmg3d/libmmg3d.h file.
  */
-FORTRAN_NAME(MMG3D_SET_ALLSOLSSIZES,mmg3d_set_allsolssizes,
-             (MMG5_pMesh *mesh, MMG5_pSol *sol,int* nsol,int* typEntity,
-              int* np, int* typSol, int* retval),
-             (mesh, sol, nsol, typEntity, np, typSol, retval)) {
-  *retval = MMG3D_Set_allSolsSizes(*mesh,sol,*nsol,typEntity,*np,typSol);
+FORTRAN_NAME(MMG3D_SET_SOLSATVERTICESSIZE,mmg3d_set_solsatverticessize,
+             (MMG5_pMesh *mesh, MMG5_pSol *sol,int* nsols,
+              int* nentities, int* typSol, int* retval),
+             (mesh, sol, nsols, nentities, typSol, retval)) {
+  *retval = MMG3D_Set_solsAtVerticesSize(*mesh,sol,*nsols,*nentities,typSol);
   return;
 }
 
@@ -182,14 +182,14 @@ FORTRAN_NAME(MMG3D_GET_SOLSIZE,mmg3d_get_solsize,
 }
 
 /**
- * See \ref MMG3D_Get_allSolsSizes function in \ref mmg3d/libmmg3d.h file.
+ * See \ref MMG3D_Get_solsatverticessize function in \ref mmg3d/libmmg3d.h file.
  */
-FORTRAN_NAME(MMG3D_GET_ALLSOLSSIZES,mmg3d_get_allsolssizes,
-             (MMG5_pMesh *mesh, MMG5_pSol *sol, int *nsol,int* typEntity,
-              int* np, int* typSol, int* retval),
-             (mesh,sol,nsol,typEntity,np,typSol,retval)) {
+FORTRAN_NAME(MMG3D_GET_SOLSATVERTICESSIZE,mmg3d_get_solsatverticessize,
+             (MMG5_pMesh *mesh, MMG5_pSol *sol, int *nsols,
+              int* nentities, int* typSol, int* retval),
+             (mesh,sol,nsols,nentities,typSol,retval)) {
 
-  *retval = MMG3D_Get_allSolsSizes(*mesh,sol,nsol,typEntity,np,typSol);
+  *retval = MMG3D_Get_solsAtVerticesSize(*mesh,sol,nsols,nentities,typSol);
   return;
 }
 
@@ -674,45 +674,39 @@ FORTRAN_NAME(MMG3D_GET_TENSORSOLS,mmg3d_get_tensorsols,
   return;
 }
 /**
- * See \ref MMG3D_Set_ithSol_inAllSols function in \ref mmg3d/libmmg3d.h file.
+ * See \ref MMG3D_Set_ithSol_solsAtVertices function in \ref mmg3d/libmmg3d.h file.
  */
-FORTRAN_NAME(MMG3D_SET_ITHSOL_INALLSOLS,mmg3d_set_ithsol_inallsols,
+FORTRAN_NAME(MMG3D_SET_ITHSOL_INSOLSATVERTICES,mmg3d_set_ithsol_insolsatvertices,
              (MMG5_pSol *sol, int *i,double *s,int *pos, int* retval),
              (sol,i,s,pos,retval)) {
-  int idx = *i-1;
-  *retval = MMG3D_Set_ithSol_inAllSols(*sol,idx,s,*pos);
-  return;
-}
-
-/**
- * See \ref MMG3D_Set_ithSols_inAllSols function in \ref mmg3d/libmmg3d.h file.
- */
-FORTRAN_NAME(MMG3D_SET_ITHSOLS_INALLSOLS,mmg3d_set_ithsols_inallsols,
-             (MMG5_pSol *sol, int *i,double *s, int* retval),
-             (sol,i,s,retval)) {
-  int idx = *i-1;
-  *retval = MMG3D_Set_ithSols_inAllSols(*sol,idx,s);
+  *retval = MMG3D_Set_ithSol_inSolsAtVertices(*sol,*i,s,*pos);
   return;
 }
 /**
- * See \ref MMG3D_Get_ithSol_inAllSols function in \ref mmg3d/libmmg3d.h file.
+ * See \ref MMG3D_Get_ithSol_inSolsAtVertices function in \ref mmg3d/libmmg3d.h file.
  */
-FORTRAN_NAME(MMG3D_GET_ITHSOL_INALLSOLS,mmg3d_get_ithsol_inallsols,
+FORTRAN_NAME(MMG3D_GET_ITHSOL_INSOLSATVERTICES,mmg3d_get_ithsol_insolsatvertices,
              (MMG5_pSol *sol, int* i,double *s,int *pos, int* retval),
              (sol,i,s,pos,retval)) {
-  int idx = *i-1;
-  *retval = MMG3D_Get_ithSol_inAllSols(*sol,idx,s,*pos);
+  *retval = MMG3D_Get_ithSol_inSolsAtVertices(*sol,*i,s,*pos);
   return;
 }
-
 /**
- * See \ref MMG3D_Get_ithSols_inAllSols function in \ref mmg3d/libmmg3d.h file.
+ * See \ref MMG3D_Set_ithSols_inSolsAtVertices function in \ref mmg3d/libmmg3d.h file.
  */
-FORTRAN_NAME(MMG3D_GET_ITHSOLS_INALLSOLS,mmg3d_get_ithsols_inallsols,
+FORTRAN_NAME(MMG3D_SET_ITHSOLS_INSOLSATVERTICES,mmg3d_set_ithsols_insolsatvertices,
+             (MMG5_pSol *sol, int *i,double *s, int* retval),
+             (sol,i,s,retval)) {
+  *retval = MMG3D_Set_ithSols_inSolsAtVertices(*sol,*i,s);
+  return;
+}
+/**
+ * See \ref MMG3D_Get_ithSols_inSolsAtVertices function in \ref mmg3d/libmmg3d.h file.
+ */
+FORTRAN_NAME(MMG3D_GET_ITHSOLS_INSOLSATVERTICES,mmg3d_get_ithsols_insolsatvertices,
              (MMG5_pSol *sol, int* i,double *s, int* retval),
              (sol,i,s,retval)) {
-  int idx = *i-1;
-  *retval = MMG3D_Get_ithSols_inAllSols(*sol,idx,s);
+  *retval = MMG3D_Get_ithSols_inSolsAtVertices(*sol,*i,s);
   return;
 }
 

@@ -240,8 +240,6 @@ IF ( BUILD_TESTING )
         "${CTEST_OUTPUT_DIR}/libmmg3d_io_6-naca.o" "1"
        )
 
-
-
       IF ( CMAKE_Fortran_COMPILER)
         SET(LIBMMG3D_EXECFORTRAN_a  ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_fortran_a)
         SET(LIBMMG3D_EXECFORTRAN_b  ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_fortran_b)
