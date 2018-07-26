@@ -305,6 +305,26 @@ FORTRAN_NAME(MMGS_GET_EDGE,mmgs_get_edge,(MMG5_pMesh *mesh, int* e0, int* e1, in
   *retval = MMGS_Get_edge(*mesh,e0,e1,ref,isRidge,isRequired);
   return;
 }
+/**
+ * See \ref MMGS_Set_edges function in \ref mmgs/libmmgs.h file.
+ */
+FORTRAN_NAME(MMGS_SET_EDGES,mmgs_set_edges,
+             (MMG5_pMesh *mesh, int *edges, int *refs, int* retval),
+             (mesh,edges,refs,retval)){
+  *retval = MMGS_Set_edges(*mesh,edges,refs);
+  return;
+}
+
+/**
+ * See \ref MMGS_Get_edges function in \ref mmgs/libmmgs.h file.
+ */
+FORTRAN_NAME(MMGS_GET_EDGES,mmgs_get_edges,(MMG5_pMesh *mesh, int* edges,
+                                              int* refs,int* areRidges,
+                                              int* areRequired, int* retval),
+             (mesh,edges,refs,areRidges,areRequired,retval)) {
+  *retval = MMGS_Get_edges(*mesh,edges,refs,areRidges,areRequired);
+  return;
+}
 
 /**
  * See \ref MMGS_Set_corner function in \ref mmgs/libmmgs.h file.

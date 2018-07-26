@@ -438,6 +438,26 @@ FORTRAN_NAME(MMG3D_GET_EDGE,mmg3d_get_edge,(MMG5_pMesh *mesh, int* e0, int* e1, 
   *retval = MMG3D_Get_edge(*mesh,e0,e1,ref,isRidge,isRequired);
   return;
 }
+/**
+ * See \ref MMG3D_Set_edges function in \ref mmg3d/libmmg3d.h file.
+ */
+FORTRAN_NAME(MMG3D_SET_EDGES,mmg3d_set_edges,
+             (MMG5_pMesh *mesh, int *edges, int *refs, int* retval),
+             (mesh,edges,refs,retval)){
+  *retval = MMG3D_Set_edges(*mesh,edges,refs);
+  return;
+}
+
+/**
+ * See \ref MMG3D_Get_edges function in \ref mmg3d/libmmg3d.h file.
+ */
+FORTRAN_NAME(MMG3D_GET_EDGES,mmg3d_get_edges,(MMG5_pMesh *mesh, int* edges,
+                                              int* refs,int* areRidges,
+                                              int* areRequired, int* retval),
+             (mesh,edges,refs,areRidges,areRequired,retval)) {
+  *retval = MMG3D_Get_edges(*mesh,edges,refs,areRidges,areRequired);
+  return;
+}
 
 /**
  * See \ref MMG3D_Set_corner function in \ref mmg3d/libmmg3d.h file.

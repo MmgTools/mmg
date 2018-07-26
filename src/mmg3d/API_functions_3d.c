@@ -896,10 +896,10 @@ int MMG3D_Get_triangle(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* ref
 
   return 1;
 }
-
 int  MMG3D_Set_triangles(MMG5_pMesh mesh, int *tria, int *refs) {
+
   MMG5_pTria ptt;
-  int         i, j;
+  int        i, j;
 
   for (i=1;i<=mesh->nt;i++)
   {
@@ -1129,6 +1129,53 @@ int MMG3D_Get_edge(MMG5_pMesh mesh, int* e0, int* e1, int* ref
       *isRequired = 1;
     else
       *isRequired = 0;
+  }
+
+  return 1;
+}
+
+int MMG3D_Set_edges(MMG5_pMesh mesh, int *edges, int *refs) {
+  int i,j;
+
+  for (i=1;i<=mesh->na;i++)
+  {
+    j = (i-1)*2;
+
+    mesh->edge[i].a    = edges[j];
+    mesh->edge[i].b    = edges[j+1];
+    if ( refs != NULL )
+      mesh->edge[i].ref  = refs[i];
+    mesh->edge[i].tag |= MG_REF;
+  }
+
+  return 1;
+}
+
+int MMG3D_Get_edges(MMG5_pMesh mesh, int* edges,int *refs,int* areRidges,int* areRequired) {
+  int i,j;
+
+  for (i=1;i<=mesh->na;i++)
+  {
+    j = (i-1)*2;
+    edges[j]   = mesh->edge[j].a;
+    edges[j+1] = mesh->edge[j].b;
+
+    if ( refs!=NULL )
+      refs[i-1] = mesh->edge[i].ref;
+
+    if ( areRidges != NULL ) {
+      if ( mesh->edge[i].tag & MG_GEO )
+        areRidges[i-1] = 1;
+      else
+        areRidges[i-1] = 0;
+    }
+
+    if ( areRequired != NULL ) {
+      if ( mesh->edge[i].tag & MG_REQ )
+        areRequired[i-1] = 1;
+      else
+        areRequired[i-1] = 0;
+    }
   }
 
   return 1;

@@ -368,6 +368,27 @@ FORTRAN_NAME(MMG2D_GET_EDGE,mmg2d_get_edge,(MMG5_pMesh *mesh, int* e0, int* e1, 
   return;
 }
 /**
+ * See \ref MMG2D_Set_edges function in \ref mmg2d/libmmg2d.h file.
+ */
+FORTRAN_NAME(MMG2D_SET_EDGES,mmg2d_set_edges,
+             (MMG5_pMesh *mesh, int *edges, int *refs, int* retval),
+             (mesh,edges,refs,retval)){
+  *retval = MMG2D_Set_edges(*mesh,edges,refs);
+  return;
+}
+
+/**
+ * See \ref MMG2D_Get_edges function in \ref mmg2d/libmmg2d.h file.
+ */
+FORTRAN_NAME(MMG2D_GET_EDGES,mmg2d_get_edges,(MMG5_pMesh *mesh, int* edges,
+                                              int* refs,int* areRidges,
+                                              int* areRequired, int* retval),
+             (mesh,edges,refs,areRidges,areRequired,retval)) {
+  *retval = MMG2D_Get_edges(*mesh,edges,refs,areRidges,areRequired);
+  return;
+}
+
+/**
  * See \ref MMG2D_Get_meshSize function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_GET_MESHSIZE,mmg2d_get_meshsize,

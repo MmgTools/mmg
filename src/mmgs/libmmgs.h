@@ -461,6 +461,47 @@ int  MMGS_Set_requiredEdge(MMG5_pMesh mesh, int k);
 
 /**
  * \param mesh pointer toward the mesh structure.
+ * \param edges pointer toward the array of edges.
+ * Vertices of the \f$i^{th}\f$ edge are stored in edge[(i-1)*2]\@2.
+ * \param refs edges references. refs[i-1] is the ref of the \f$i^{th}\f$ edge.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Set vertices and references of the mesh edges.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMGS_SET_EDGES(mesh,edges,refs,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * >     INTEGER, INTENT(IN)           :: edges(*),refs(*)\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int MMGS_Set_edges(MMG5_pMesh mesh, int *edges, int* refs);
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param edges pointer toward the array of edges.
+ * Vertices of the \f$i^{th}\f$ edge are stored in edge[(i-1)*2]\@2.
+ * \param refs edges references. refs[i-1] is the ref of the \f$i^{th}\f$ edge.
+ * \param areRidges 1 if the edge is a ridge, 0 otherwise.
+ * \param areRequired 1 if the edge is required, 0 otherwise.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Get vertices and references of the mesh edges.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMGS_GET_EDGES(mesh,edges,refs,areRidges,areRequired,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * >     INTEGER, INTENT(IN)           :: edges(*)\n
+ * >     INTEGER, INTENT(OUT)          :: refs(*),areRequired(*),areRidges(*)\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int MMGS_Get_edges(MMG5_pMesh mesh,int *edges,int* refs,
+                     int *areRidges,int *areRequired);
+
+/**
+ * \param mesh pointer toward the mesh structure.
  * \param k point index
  * \param n0 x componant of the normal at point \a k.
  * \param n1 y componant of the normal at point \a k.
