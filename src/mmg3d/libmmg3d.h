@@ -2156,6 +2156,24 @@ extern "C" {
  */
   int MMG3D_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met);
 
+/**
+ * \param mesh pointer toward the mesh structure
+ * \param met pointer toward the sol structure
+ * \return 1 if success
+ *
+ * Switch the m22 and m23 value of the metric to allow to pass from the API
+ * storage to the medit one.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_SWITCH_METRICSTORAGE(mesh,met,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT)     :: mesh,met\n
+ * >     INTEGER, INTENT(OUT)               :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+int MMG3D_switch_metricStorage(MMG5_pMesh mesh, MMG5_pSol met);
+
+
 /** To associate function pointers without calling MMG3D_mmg3dlib */
 /**
  * \param mesh pointer toward the mesh structure (unused).

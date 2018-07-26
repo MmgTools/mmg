@@ -1018,3 +1018,15 @@ FORTRAN_NAME(MMG3D_SAVEALLSOLS,mmg3d_saveallsols,
 
   return;
 }
+
+/**
+ * See \ref MMG3D_switch_metricStorage function in \ref mmg3d/libmmg3d.h file.
+ */
+FORTRAN_NAME(MMG3D_SWITCH_METRIC_STORAGE,mmg3d_swith_metricstorage,
+             (MMG5_pMesh *mesh,MMG5_pSol *met,int* retval),
+             (mesh,met,retval)){
+
+  *retval = MMG3D_switch_metricStorage(*mesh,*met);
+
+  return;
+}

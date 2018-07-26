@@ -39,7 +39,8 @@ int main(int argc,char *argv[]) {
   if ( argc != 4 ) {
     printf(" Usage: %s filein fileout io_option\n",argv[0]);
     printf("     io_option = 0 to Get/Set the solution field by field\n");
-    printf("     io_option = 1 to Get/Set the solution and vertex by vertex\n");
+    printf("     io_option = 1 to Get/Set the solution field by field"
+           " and vertex by vertex\n");
     return(1);
   }
 

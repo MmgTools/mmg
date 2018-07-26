@@ -224,7 +224,7 @@ int main(int argc,char *argv[]) {
     perror("  ## Memory problem: calloc");
     exit(EXIT_FAILURE);
   }
-  /* Table to know if a coponant is corner and/or required */
+  /* Table to know if an edge delimits a sharp angle */
   ridge = (int*)calloc(na+1 ,sizeof(int));
   if ( !ridge ) {
     perror("  ## Memory problem: calloc");

@@ -33,7 +33,8 @@ PROGRAM main
      PRINT*," Usage: ",TRIM(ADJUSTL(exec_name)),&
           " input_file_name output_file_name io_option"
      PRINT*,"     io_option = 0 to Get/Set the solution field by field"
-     PRINT*,"     io_option = 1 to Get/Set the solution and vertex by vertex"
+     PRINT*,"     io_option = 1 to Get/Set the solution field by field &
+          & and vertex by vertex"
      CALL EXIT(1);
   ENDIF
 
