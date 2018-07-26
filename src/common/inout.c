@@ -2193,7 +2193,7 @@ void MMG5_writeDoubleSol3D(MMG5_pMesh mesh,MMG5_pSol sol,FILE *inm,int bin,
 
     if(!bin) {
       for(i=0; i<sol->size; i++)
-        fprintf(inm,"%.15lg  ",dbuf[i]);
+        fprintf(inm," %.15lg",dbuf[i]);
     } else {
       for(i=0; i<sol->size; i++)
         fwrite((unsigned char*)&dbuf[i],sd,1,inm);
