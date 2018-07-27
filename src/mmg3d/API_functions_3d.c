@@ -660,8 +660,8 @@ int  MMG3D_Get_tetrahedra(MMG5_pMesh mesh, int *tetra, int *refs, int * areRequi
     j = (i-1)*4;
     pt = &mesh->tetra[i];
     tetra[j]   = pt->v[0];
-    tetra[j+2] = pt->v[1];
-    tetra[j+1] = pt->v[2];
+    tetra[j+1] = pt->v[1];
+    tetra[j+2] = pt->v[2];
     tetra[j+3] = pt->v[3];
     if ( refs!=NULL )
       refs[i-1]  = pt->ref ;
@@ -923,8 +923,8 @@ int  MMG3D_Get_triangles(MMG5_pMesh mesh, int *tria, int *refs, int *areRequired
     j = (i-1)*3;
     ptt = &mesh->tria[i];
     tria[j]   = ptt->v[0];
-    tria[j+2] = ptt->v[1];
-    tria[j+1] = ptt->v[2];
+    tria[j+1] = ptt->v[1];
+    tria[j+2] = ptt->v[2];
 
     if ( refs!=NULL )
       refs[i-1]  = ptt->ref ;

@@ -767,8 +767,8 @@ int  MMG2D_Get_triangles(MMG5_pMesh mesh, int* tria, int* refs,
     j = (i-1)*3;
     ptt = &mesh->tria[i];
     tria[j]   = ptt->v[0];
-    tria[j+2] = ptt->v[1];
-    tria[j+1] = ptt->v[2];
+    tria[j+1] = ptt->v[1];
+    tria[j+2] = ptt->v[2];
 
     if ( refs!=NULL )
       refs[i-1]  = ptt->ref ;
