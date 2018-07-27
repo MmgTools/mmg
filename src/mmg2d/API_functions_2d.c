@@ -931,8 +931,8 @@ int MMG2D_Get_edges(MMG5_pMesh mesh, int* edges,int *refs,int* areRidges,int* ar
   for (i=1;i<=mesh->na;i++)
   {
     j = (i-1)*2;
-    edges[j]   = mesh->edge[j].a;
-    edges[j+1] = mesh->edge[j].b;
+    edges[j]   = mesh->edge[i].a;
+    edges[j+1] = mesh->edge[i].b;
 
     if ( refs!=NULL )
       refs[i-1] = mesh->edge[i].ref;
