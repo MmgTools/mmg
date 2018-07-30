@@ -688,6 +688,8 @@ int MMG3D_swap23(MMG5_pMesh mesh,MMG5_pSol met,int k,char metRidTyp,
                         _MMG5_INCREASE_MEM_MESSAGE();
                         fprintf(stderr,"  Exit program.\n");
                         return -1,-1);
+    pt0 = &mesh->tetra[k];
+    pt1 = &mesh->tetra[k1];
   }
   ptnew = &mesh->tetra[iel];
   memcpy(ptnew,pt0,sizeof(MMG5_Tetra));
