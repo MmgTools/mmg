@@ -194,5 +194,7 @@ void MMG5_chooseOutputFormat(MMG5_pMesh mesh, int *msh) {
   else if ( ( len>3 && !strcmp(&mesh->nameout[len-4],".msh") ) ||
             ( len>4 && !strcmp(&mesh->nameout[len-5],".mshb") ))
     *msh = 1;
+  else
+    *msh = 0;
 
 }
