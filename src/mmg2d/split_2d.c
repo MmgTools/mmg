@@ -716,7 +716,7 @@ int _MMG2_splitbar(MMG5_pMesh mesh,int k,int ip) {
   MMG5_pPoint        p0,p1,p2,ppt;
   int                *adja,iel1,iel2,jel0,jel1,jel2;
   int                ip0,ip1,ip2;
-  char               j1,j2,j0;
+  char               j2,j0;
   double             cal,calseuil;
 
   pt  = &mesh->tria[k];
@@ -769,7 +769,9 @@ int _MMG2_splitbar(MMG5_pMesh mesh,int k,int ip) {
   jel0  = adja[0] / 3;
   j0    = adja[0] % 3;
   jel1  = adja[1] / 3;
-  j1    = adja[1] % 3;
+#ifndef NDEBUG
+  char j1    = adja[1] % 3;
+#endif
   jel2  = adja[2] / 3;
   j2    = adja[2] % 3;
 
@@ -795,11 +797,12 @@ int _MMG2_splitbar(MMG5_pMesh mesh,int k,int ip) {
   pt2->edg[0] = 0;
 
   /* Update external adjacencies */
-  j1 = j1; // To remove the set but unused variable warning in release mode
+#ifndef NDEBUG
   assert(mesh->adja[3*(k-1)+1+1] == 3*jel1+j1);
   if ( jel1 ) {
     assert(mesh->adja[3*(jel1-1)+1+j1] == 3*k+1);
   }
+#endif
 
   mesh->adja[3*(iel1-1)+1+2] = 3*jel2+j2;
   if ( jel2 )

@@ -1782,7 +1782,7 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename,
   }
 
   /** Write solution */
-  (metricData==1)? nsols = 1 : mesh->nsols;
+  nsols = (metricData==1)? 1 : mesh->nsols;
 
   for ( isol=0; isol<nsols; ++isol) {
     psl = *sol + isol;

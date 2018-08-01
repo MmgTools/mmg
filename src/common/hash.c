@@ -51,7 +51,7 @@ int _MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, _MMG5_Hash *hash, int chkISO) 
   MMG5_pTria     pt,pt1;
   _MMG5_hedge    *ph;
   int            *adja,k,kk,jel,lel,hmax,dup,nmf,ia,ib;
-  char           i,i1,i2,j,l,ok;
+  char           i,i1,i2,j,l;
   unsigned int   key;
 
   /* adjust hash table params */
@@ -97,8 +97,9 @@ int _MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, _MMG5_Hash *hash, int chkISO) 
         continue;
       }
       /* update info about adjacent */
-      ok = 0;
-      ok = ok; // To remove the set but unused gcc warning
+#ifndef NDEBUG
+      char ok = 0;
+#endif
       while ( ph->a ) {
         if ( ph->a == ia && ph->b == ib ) {
           jel = ph->k / 3;
@@ -132,7 +133,9 @@ int _MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, _MMG5_Hash *hash, int chkISO) 
             nmf++;
             ++ph->s;
           }
+#ifndef NDEBUG
           ok = 1;
+#endif
           break;
         }
         else if ( !ph->nxt ) {
@@ -163,7 +166,9 @@ int _MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, _MMG5_Hash *hash, int chkISO) 
           ph->k = 3*k + i;
           ph->nxt = 0;
           ++ph->s;
+#ifndef NDEBUG
           ok = 1;
+#endif
           break;
         }
         else

@@ -39,7 +39,7 @@
 int _MMG2_swapdelone(MMG5_pMesh mesh,MMG5_pSol sol,int k,char i,double crit,int *list) {
   MMG5_pTria         pt,pt1,pt0;
   double             cal1,cal2,area1,area2,arean1,arean2;
-  int                *adja,*adja1,k1,k2,k3,vo2,vo3,num,num1,numa1;
+  int                *adja,*adja1,k1,k2,k3,vo2,vo3,num1,numa1;
   char               i1,i2,j,j1,j2;
 
   adja = &mesh->adja[3*(k-1)+1];
@@ -98,9 +98,10 @@ int _MMG2_swapdelone(MMG5_pMesh mesh,MMG5_pSol sol,int k,char i,double crit,int 
   list[2] = k1;
 
   /* Update edge references */
-  num = pt->edg[i];
-  num = num; // remove set but unused variable warning in release mode
+#ifndef NDEBUG
+  int num = pt->edg[i];
   assert ( !num );
+#endif
   num1 = pt->edg[i1];
   numa1 = pt1->edg[j1];
 
