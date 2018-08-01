@@ -152,7 +152,8 @@ static const unsigned int MMG2_inxt[5] = {1,2,0,1,2};
     if ( sol->m ) {                                                     \
       _MMG5_ADD_MEM(mesh,(sol->size*(mesh->npmax-sol->npmax))*sizeof(double), \
                     "larger solution",law);                             \
-      _MMG5_SAFE_REALLOC(sol->m,sol->size*(mesh->npmax+1),              \
+      _MMG5_SAFE_REALLOC(sol->m,sol->size*(sol->npmax+1),               \
+                         sol->size*(mesh->npmax+1),                     \
                          double,"larger solution",retval);              \
     }                                                                   \
     sol->npmax = mesh->npmax;                                           \

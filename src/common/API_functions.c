@@ -187,13 +187,14 @@ int MMG5_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solin) {
   }
   else {
     if ( strlen(mesh->namein) ) {
-      _MMG5_SAFE_CALLOC(sol->namein,strlen(mesh->namein)+1,char,0);
+      int mesh_len = strlen(mesh->namein)+1;
+      _MMG5_SAFE_CALLOC(sol->namein,mesh_len,char,0);
       strcpy(sol->namein,mesh->namein);
       ptr = strstr(sol->namein,".mesh");
       if ( ptr ) {
         /* the sol file is renamed with the meshfile without extension */
         *ptr = '\0';
-        _MMG5_SAFE_REALLOC(sol->namein,(strlen(sol->namein)+1),char,
+        _MMG5_SAFE_REALLOC(sol->namein,mesh_len,(strlen(sol->namein)+1),char,
                            "input sol name",0);
       }
       _MMG5_ADD_MEM(mesh,(strlen(sol->namein)+1)*sizeof(char),"input sol name",
@@ -298,6 +299,7 @@ int MMG5_Set_outputMeshName(MMG5_pMesh mesh, const char* meshout) {
  */
 int MMG5_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solout) {
   char *ptr;
+  int oldsize;
 
   if ( sol->nameout )
     _MMG5_DEL_MEM(mesh,sol->nameout,(strlen(sol->nameout)+1)*sizeof(char));
@@ -312,10 +314,14 @@ int MMG5_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solout) {
   else {
     if ( strlen(mesh->nameout) ) {
       ptr = strstr(mesh->nameout,".mesh");
-      if ( ptr )
+      if ( ptr ) {
         _MMG5_SAFE_CALLOC(sol->nameout,strlen(mesh->nameout)+1,char,0);
-      else
-        _MMG5_SAFE_CALLOC(sol->nameout,strlen(mesh->nameout)+5,char,0);
+        oldsize = strlen(mesh->nameout)+1;
+      }
+      else {
+        _MMG5_SAFE_CALLOC(sol->nameout,strlen(mesh->nameout)+6,char,0);
+        oldsize = strlen(mesh->nameout)+6;
+      }
       strcpy(sol->nameout,mesh->nameout);
       ptr = strstr(sol->nameout,".mesh");
       if ( ptr )
@@ -325,7 +331,7 @@ int MMG5_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solout) {
       _MMG5_ADD_MEM(mesh,(strlen(sol->nameout)+1)*sizeof(char),"output sol name",
                     fprintf(stderr,"  Exit program.\n");
                     return 0);
-      _MMG5_SAFE_REALLOC(sol->nameout,(strlen(sol->nameout)+1),char,
+      _MMG5_SAFE_REALLOC(sol->nameout,oldsize,(strlen(sol->nameout)+1),char,
                          "output sol name",0);
     }
     else {

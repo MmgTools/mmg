@@ -723,6 +723,7 @@ int _MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,cha
     perror("  ## Memory problem: malloc");
     return 0;
   }
+
   _MMG5_SAFE_CALLOC(p0_c, ilist, int,-1);
   _MMG5_SAFE_CALLOC(p1_c, ilist, int,-1);
 
@@ -812,7 +813,8 @@ int _MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,cha
     voy  = adja[ip] % 4;
     pt = &mesh->tetra[jel];
     if (pt->v[voy] == nq) {
-      _MMG5_SAFE_FREE(ind); _MMG5_SAFE_FREE(p0_c); _MMG5_SAFE_FREE(p1_c);
+      free(ind);ind=NULL;
+      _MMG5_SAFE_FREE(p0_c); _MMG5_SAFE_FREE(p1_c);
       return 0;
     }
   }
@@ -1049,7 +1051,7 @@ int _MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,cha
               _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                  "larger xtetra table",
                                  mesh->xt--;
-                                 _MMG5_SAFE_FREE(ind);_MMG5_SAFE_FREE(p0_c);
+                                 free(ind);ind=0;_MMG5_SAFE_FREE(p0_c);
                                  _MMG5_SAFE_FREE(p1_c);return -1;,-1);
             }
             pt1->xt = mesh->xt;
@@ -1153,7 +1155,7 @@ int _MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,cha
       }
     }
     if ( !_MMG3D_delElt(mesh,iel) ) {
-      _MMG5_SAFE_FREE(ind); _MMG5_SAFE_FREE(p0_c); _MMG5_SAFE_FREE(p1_c);
+      free(ind);ind=0; _MMG5_SAFE_FREE(p0_c); _MMG5_SAFE_FREE(p1_c);
       return -1;
     }
   }
@@ -1172,6 +1174,6 @@ int _MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,cha
     pt->mark=mesh->mark;
   }
 
-  _MMG5_SAFE_FREE(ind); _MMG5_SAFE_FREE(p0_c); _MMG5_SAFE_FREE(p1_c);
+  free(ind);ind=0; _MMG5_SAFE_FREE(p0_c); _MMG5_SAFE_FREE(p1_c);
   return np;
 }

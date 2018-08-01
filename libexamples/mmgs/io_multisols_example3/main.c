@@ -24,7 +24,7 @@
 
 int main(int argc,char *argv[]) {
   MMG5_pMesh      mmgMesh;
-  MMG5_pSol       mmgSol,tmpSol;
+  MMG5_pSol       mmgSol,mmgMet,tmpSol;
   int             i,j,opt;
 
   /* To manually recover the mesh */
@@ -72,10 +72,11 @@ int main(int argc,char *argv[]) {
    * &mmgSol: pointer toward your MMG5_pSol (that store your metric) */
 
   mmgMesh = NULL;
+  mmgMet  = NULL;
   mmgSol  = NULL;
   tmpSol  = NULL;
   MMGS_Init_mesh(MMG5_ARG_start,
-                  MMG5_ARG_ppMesh,&mmgMesh,MMG5_ARG_ppMet,&mmgSol,
+                  MMG5_ARG_ppMesh,&mmgMesh,MMG5_ARG_ppMet,&mmgMet,
                   MMG5_ARG_end);
 
   /** 2) Build initial mesh and solutions in MMG5 format */

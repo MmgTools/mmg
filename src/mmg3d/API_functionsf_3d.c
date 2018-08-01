@@ -76,7 +76,7 @@ FORTRAN_NAME(MMG3D_SET_INPUTMESHNAME, mmg3d_set_inputmeshname,
              (mesh,meshin,strlen,retval)) {
   char *tmp = NULL;
 
-  tmp = (char*)malloc((*strlen+1)*sizeof(char));
+  _MMG5_SAFE_MALLOC(tmp,*strlen+1,char,);
   strncpy(tmp,meshin,*strlen);
   tmp[*strlen] = '\0';
   *retval = MMG3D_Set_inputMeshName(*mesh,tmp);
@@ -94,7 +94,7 @@ FORTRAN_NAME(MMG3D_SET_INPUTSOLNAME, mmg3d_set_inputsolname,
 
   char *tmp = NULL;
 
-  tmp = (char*)malloc((*strlen+1)*sizeof(char));
+  _MMG5_SAFE_MALLOC(tmp,*strlen+1,char,);
   strncpy(tmp,solin,*strlen);
   tmp[*strlen] = '\0';
   *retval = MMG3D_Set_inputSolName(*mesh,*sol,tmp);
@@ -111,7 +111,7 @@ FORTRAN_NAME(MMG3D_SET_OUTPUTMESHNAME,mmg3d_set_outputmeshname,
              (mesh,meshout,strlen,retval)){
   char *tmp = NULL;
 
-  tmp = (char*)malloc((*strlen+1)*sizeof(char));
+  _MMG5_SAFE_MALLOC(tmp,*strlen+1,char,);
   strncpy(tmp,meshout,*strlen);
   tmp[*strlen] = '\0';
   *retval = MMG3D_Set_outputMeshName(*mesh, tmp);
@@ -128,7 +128,7 @@ FORTRAN_NAME(MMG3D_SET_OUTPUTSOLNAME,mmg3d_set_outputsolname,
              (mesh,sol,solout,strlen,retval)){
   char *tmp = NULL;
 
-  tmp = (char*)malloc((*strlen+1)*sizeof(char));
+  _MMG5_SAFE_MALLOC(tmp,*strlen+1,char,);
   strncpy(tmp,solout,*strlen);
   tmp[*strlen] = '\0';
   *retval = MMG3D_Set_outputSolName(*mesh,*sol,tmp);
@@ -855,7 +855,7 @@ FORTRAN_NAME(MMG3D_LOADMESH,mmg3d_loadmesh,
              (mesh,filename,strlen, retval)){
   char *tmp = NULL;
 
-  tmp = (char*)malloc((*strlen+1)*sizeof(char));
+  _MMG5_SAFE_MALLOC(tmp,*strlen+1,char,);
   strncpy(tmp,filename,*strlen);
   tmp[*strlen] = '\0';
 
@@ -874,7 +874,7 @@ FORTRAN_NAME(MMG3D_LOADMSHMESH,mmg3d_loadmshmesh,
              (mesh,sol,filename,strlen, retval)){
   char *tmp = NULL;
 
-  tmp = (char*)malloc((*strlen+1)*sizeof(char));
+  _MMG5_SAFE_MALLOC(tmp,*strlen+1,char,);
   strncpy(tmp,filename,*strlen);
   tmp[*strlen] = '\0';
 
@@ -893,7 +893,7 @@ FORTRAN_NAME(MMG3D_LOADMSHMESH_AND_ALLDATA,mmg3d_loadmshmesh_and_alldata,
              (mesh,sol,filename,strlen, retval)){
   char *tmp = NULL;
 
-  tmp = (char*)malloc((*strlen+1)*sizeof(char));
+  _MMG5_SAFE_MALLOC(tmp,*strlen+1,char,);
   strncpy(tmp,filename,*strlen);
   tmp[*strlen] = '\0';
 
@@ -912,7 +912,7 @@ FORTRAN_NAME(MMG3D_SAVEMESH,mmg3d_savemesh,
              (mesh,filename,strlen, retval)){
   char *tmp = NULL;
 
-  tmp = (char*)malloc((*strlen+1)*sizeof(char));
+  _MMG5_SAFE_MALLOC(tmp,*strlen+1,char,);
   strncpy(tmp,filename,*strlen);
   tmp[*strlen] = '\0';
 
@@ -932,7 +932,7 @@ FORTRAN_NAME(MMG3D_SAVEMSHMESH,mmg3d_savemshmesh,
              (mesh,sol,filename,strlen,retval)){
   char *tmp = NULL;
 
-  tmp = (char*)malloc((*strlen+1)*sizeof(char));
+  _MMG5_SAFE_MALLOC(tmp,*strlen+1,char,);
   strncpy(tmp,filename,*strlen);
   tmp[*strlen] = '\0';
 
@@ -952,7 +952,7 @@ FORTRAN_NAME(MMG3D_SAVEMSHMESH_AND_ALLDATA,mmg3d_savemshmesh_and_alldata,
              (mesh,sol,filename,strlen,retval)){
   char *tmp = NULL;
 
-  tmp = (char*)malloc((*strlen+1)*sizeof(char));
+  _MMG5_SAFE_MALLOC(tmp,*strlen+1,char,);
   strncpy(tmp,filename,*strlen);
   tmp[*strlen] = '\0';
 
@@ -971,7 +971,7 @@ FORTRAN_NAME(MMG3D_LOADSOL,mmg3d_loadsol,
              (mesh,met,filename,strlen,retval)){
   char *tmp = NULL;
 
-  tmp = (char*)malloc((*strlen+1)*sizeof(char));
+  _MMG5_SAFE_MALLOC(tmp,*strlen+1,char,);
   strncpy(tmp,filename,*strlen);
   tmp[*strlen] = '\0';
 
@@ -990,7 +990,7 @@ FORTRAN_NAME(MMG3D_LOADALLSOLS,mmg3d_loadallsols,
              (mesh,sol,filename,strlen,retval)){
   char *tmp = NULL;
 
-  tmp = (char*)malloc((*strlen+1)*sizeof(char));
+  _MMG5_SAFE_MALLOC(tmp,*strlen+1,char,);
   strncpy(tmp,filename,*strlen);
   tmp[*strlen] = '\0';
 
@@ -1009,7 +1009,7 @@ FORTRAN_NAME(MMG3D_SAVESOL,mmg3d_savesol,
              (mesh,met,filename,strlen,retval)){
   char *tmp = NULL;
 
-  tmp = (char*)malloc((*strlen+1)*sizeof(char));
+  _MMG5_SAFE_MALLOC(tmp,*strlen+1,char,);
   strncpy(tmp,filename,*strlen);
   tmp[*strlen] = '\0';
 
@@ -1028,7 +1028,7 @@ FORTRAN_NAME(MMG3D_SAVEALLSOLS,mmg3d_saveallsols,
              (mesh,sol,filename,strlen,retval)){
   char *tmp = NULL;
 
-  tmp = (char*)malloc((*strlen+1)*sizeof(char));
+  _MMG5_SAFE_MALLOC(tmp,*strlen+1,char,);
   strncpy(tmp,filename,*strlen);
   tmp[*strlen] = '\0';
 

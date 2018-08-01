@@ -72,7 +72,7 @@ FORTRAN_NAME(MMGS_SET_INPUTMESHNAME, mmgs_set_inputmeshname,
              (mesh,meshin,strlen,retval)) {
   char *tmp = NULL;
 
-  tmp = (char*)malloc((*strlen+1)*sizeof(char));
+  _MMG5_SAFE_MALLOC(tmp,*strlen+1,char,);
   strncpy(tmp,meshin,*strlen);
   tmp[*strlen] = '\0';
   *retval = MMGS_Set_inputMeshName(*mesh,tmp);
@@ -90,7 +90,7 @@ FORTRAN_NAME(MMGS_SET_INPUTSOLNAME, mmgs_set_inputsolname,
 
   char *tmp = NULL;
 
-  tmp = (char*)malloc((*strlen+1)*sizeof(char));
+  _MMG5_SAFE_MALLOC(tmp,*strlen+1,char,);
   strncpy(tmp,solin,*strlen);
   tmp[*strlen] = '\0';
   *retval = MMGS_Set_inputSolName(*mesh,*sol,tmp);
@@ -108,7 +108,7 @@ FORTRAN_NAME(MMGS_SET_OUTPUTMESHNAME,mmgs_set_outputmeshname,
              (mesh,meshout,strlen,retval)){
   char *tmp = NULL;
 
-  tmp = (char*)malloc((*strlen+1)*sizeof(char));
+  _MMG5_SAFE_MALLOC(tmp,*strlen+1,char,);
   strncpy(tmp,meshout,*strlen);
   tmp[*strlen] = '\0';
   *retval = MMGS_Set_outputMeshName(*mesh, tmp);
@@ -125,7 +125,7 @@ FORTRAN_NAME(MMGS_SET_OUTPUTSOLNAME,mmgs_set_outputsolname,
              (mesh,sol,solout,strlen,retval)){
   char *tmp = NULL;
 
-  tmp = (char*)malloc((*strlen+1)*sizeof(char));
+  _MMG5_SAFE_MALLOC(tmp,*strlen+1,char,);
   strncpy(tmp,solout,*strlen);
   tmp[*strlen] = '\0';
   *retval = MMGS_Set_outputSolName(*mesh,*sol,tmp);
@@ -667,7 +667,7 @@ FORTRAN_NAME(MMGS_LOADMESH,mmgs_loadmesh,
 
   char *tmp = NULL;
 
-  tmp = (char*)malloc((*strlen+1)*sizeof(char));
+  _MMG5_SAFE_MALLOC(tmp,*strlen+1,char,);
   strncpy(tmp,meshin,*strlen);
   tmp[*strlen] = '\0';
 
@@ -685,7 +685,7 @@ FORTRAN_NAME(MMGS_LOADMSHMESH,mmgs_loadmshmesh,
              (mesh,sol,filename,strlen, retval)){
   char *tmp = NULL;
 
-  tmp = (char*)malloc((*strlen+1)*sizeof(char));
+  _MMG5_SAFE_MALLOC(tmp,*strlen+1,char,);
   strncpy(tmp,filename,*strlen);
   tmp[*strlen] = '\0';
 
@@ -704,7 +704,7 @@ FORTRAN_NAME(MMGS_LOADMSHMESH_AND_ALLDATA,mmgs_loadmshmesh_and_alldata,
              (mesh,sol,filename,strlen, retval)){
   char *tmp = NULL;
 
-  tmp = (char*)malloc((*strlen+1)*sizeof(char));
+  _MMG5_SAFE_MALLOC(tmp,*strlen+1,char,);
   strncpy(tmp,filename,*strlen);
   tmp[*strlen] = '\0';
 
@@ -724,7 +724,7 @@ FORTRAN_NAME(MMGS_LOADSOL,mmgs_loadsol,
 
   char *tmp = NULL;
 
-  tmp = (char*)malloc((*strlen+1)*sizeof(char));
+  _MMG5_SAFE_MALLOC(tmp,*strlen+1,char,);
   strncpy(tmp,meshin,*strlen);
   tmp[*strlen] = '\0';
 
@@ -744,7 +744,7 @@ FORTRAN_NAME(MMGS_LOADALLSOLS,mmgs_loadallsols,
 
   char *tmp = NULL;
 
-  tmp = (char*)malloc((*strlen+1)*sizeof(char));
+  _MMG5_SAFE_MALLOC(tmp,*strlen+1,char,);
   strncpy(tmp,meshin,*strlen);
   tmp[*strlen] = '\0';
 
@@ -762,7 +762,7 @@ FORTRAN_NAME(MMGS_SAVEMESH,mmgs_savemesh,
              (mesh,meshin,strlen,retval)){
   char *tmp = NULL;
 
-  tmp = (char*)malloc((*strlen+1)*sizeof(char));
+  _MMG5_SAFE_MALLOC(tmp,*strlen+1,char,);
   strncpy(tmp,meshin,*strlen);
   tmp[*strlen] = '\0';
 
@@ -781,7 +781,7 @@ FORTRAN_NAME(MMGS_SAVEMSHMESH,mmgs_savemshmesh,
              (mesh,sol,filename,strlen,retval)){
   char *tmp = NULL;
 
-  tmp = (char*)malloc((*strlen+1)*sizeof(char));
+  _MMG5_SAFE_MALLOC(tmp,*strlen+1,char,);
   strncpy(tmp,filename,*strlen);
   tmp[*strlen] = '\0';
 
@@ -801,7 +801,7 @@ FORTRAN_NAME(MMGS_SAVESOL,mmgs_savesol,
 
   char *tmp = NULL;
 
-  tmp = (char*)malloc((*strlen+1)*sizeof(char));
+  _MMG5_SAFE_MALLOC(tmp,*strlen+1,char,);
   strncpy(tmp,meshin,*strlen);
   tmp[*strlen] = '\0';
 
@@ -821,7 +821,7 @@ FORTRAN_NAME(MMGS_SAVEMSHMESH_AND_ALLDATA,mmgs_savemshmesh_and_alldata,
              (mesh,sol,filename,strlen,retval)){
   char *tmp = NULL;
 
-  tmp = (char*)malloc((*strlen+1)*sizeof(char));
+  _MMG5_SAFE_MALLOC(tmp,*strlen+1,char,);
   strncpy(tmp,filename,*strlen);
   tmp[*strlen] = '\0';
 
@@ -841,7 +841,7 @@ FORTRAN_NAME(MMGS_SAVEALLSOLS,mmgs_saveallsols,
 
   char *tmp = NULL;
 
-  tmp = (char*)malloc((*strlen+1)*sizeof(char));
+  _MMG5_SAFE_MALLOC(tmp,*strlen+1,char,);
   strncpy(tmp,meshin,*strlen);
   tmp[*strlen] = '\0';
 

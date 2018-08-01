@@ -14,7 +14,7 @@ PROGRAM main
 #include "mmg/mmg3d/libmmg3df.h"
 
   MMG5_DATA_PTR_T    :: mmgMesh
-  MMG5_DATA_PTR_T    :: mmgSol,tmpSol
+  MMG5_DATA_PTR_T    :: mmgSol,mmgMet,tmpSol
   INTEGER            :: ier,argc,i,j,opt
 
   !! To manually recover the mesh
@@ -56,10 +56,11 @@ PROGRAM main
 
   mmgMesh = 0
   mmgSol  = 0
+  mmgMet  = 0
   tmpSol  = 0
 
   CALL MMG3D_Init_mesh(MMG5_ARG_start, &
-       MMG5_ARG_ppMesh,mmgMesh,MMG5_ARG_ppMet,mmgSol, &
+       MMG5_ARG_ppMesh,mmgMesh,MMG5_ARG_ppMet,mmgMet, &
        MMG5_ARG_end);
 
 

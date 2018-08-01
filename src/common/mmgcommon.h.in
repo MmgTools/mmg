@@ -186,12 +186,78 @@ extern "C" {
     }                                                                   \
   }while(0)
 
+#ifdef CHECK_ALLOC
+static inline
+void * mycalloc(size_t c, size_t s) {
+  char *ptr;
+  ptr = calloc(c*s+sizeof(size_t),1);
+  if (ptr == NULL)
+    return NULL;
+  else {
+    *((size_t*)ptr)=c*s;
+    ptr+=sizeof(size_t);
+    return (void*)ptr;
+  }
+}
+
+static inline
+void * mymalloc(size_t s) {
+  char *ptr;
+  ptr = malloc(s+sizeof(size_t));
+  if (ptr == NULL)
+    return NULL;
+  else {
+    *((size_t*)ptr)=s;
+    ptr+=sizeof(size_t);
+    return (void*)ptr;
+  }
+}
+
+static inline
+void * myrealloc(void * ptr_in, size_t s, size_t oldsize) {
+  char *ptr;
+  char *ptr_in_c = (char*)ptr_in;
+  ptr_in_c -= sizeof(size_t);
+  if (oldsize != *((size_t*)ptr_in_c)) {
+    fprintf(stderr, "Error freed memory mismatch\n");
+    assert(0);
+  }
+  ptr = realloc(ptr_in_c, s+sizeof(size_t));
+  if (ptr == NULL)
+    return NULL;
+  else {
+    *((size_t*)ptr)=s;
+    ptr+=sizeof(size_t);
+    return (void*)ptr;
+  }
+}
+
+static inline
+void myfree(void *ptr, size_t s) {
+  char * ptr_c = (char*)ptr;
+  ptr_c = ptr_c-sizeof(size_t);
+  if (s != -1 && s != *((size_t*)ptr_c)) {
+    fprintf(stderr, "Error freed memory mismatch\n");
+    assert(0);
+  }
+  free(ptr_c);
+}
+
+#else
+#define mycalloc(count,size) calloc(count,size)
+#define mymalloc(size) malloc(size)
+#define myfree(ptr,s) free(ptr);
+#define myrealloc(ptr,s,oldsize) realloc(ptr,s);
+#endif
+
+
 /** Free pointer ptr of mesh structure and compute the new used memory.
     size is the size of the pointer */
 #define _MMG5_DEL_MEM(mesh,ptr,size) do         \
   {                                             \
-    (mesh)->memCur -= (long long)(size);        \
-    free(ptr);                                  \
+    long long size_to_free = (long long)(size); \
+    (mesh)->memCur -= size_to_free;             \
+    myfree(ptr,size_to_free);                   \
     ptr = NULL;                                 \
   }while(0)
 
@@ -206,24 +272,25 @@ extern "C" {
 /** Safe deallocation */
 #define _MMG5_SAFE_FREE(ptr) do                 \
   {                                             \
-    free(ptr);                                  \
+    myfree(ptr,-1);                             \
     ptr = NULL;                                 \
   }while(0)
 
 /** Safe allocation with calloc */
-#define _MMG5_SAFE_CALLOC(ptr,size,type,retval) do  \
-  {                                                 \
-    ptr = (type *)calloc((size),sizeof(type));      \
-    if ( !ptr ) {                                   \
-      perror("  ## Memory problem: calloc");        \
-      return retval;                                \
-    }                                               \
+#define _MMG5_SAFE_CALLOC(ptr,size,type,retval) do    \
+  {                                                   \
+    ptr = (type*)mycalloc(size,sizeof(type));         \
+    if ( !ptr ) {                                     \
+      perror("  ## Memory problem: calloc");          \
+      return retval;                                  \
+    }                                                 \
   }while(0)
 
 /** Safe allocation with malloc */
-#define _MMG5_SAFE_MALLOC(ptr,size,type,retval) do  \
-  {                                                 \
-    ptr = (type *)malloc((size)*sizeof(type));      \
+#define _MMG5_SAFE_MALLOC(ptr,size,type,retval) do    \
+  {                                                   \
+    long long size_to_allocate = (size)*sizeof(type); \
+    ptr = (type*)mymalloc(size_to_allocate);          \
     if ( !ptr ) {                                   \
       perror("  ## Memory problem: malloc");        \
       return retval;                                \
@@ -231,25 +298,30 @@ extern "C" {
   }while(0)
 
 /** Safe reallocation */
-#define _MMG5_SAFE_REALLOC(ptr,size,type,message,retval) do \
-  {                                                         \
-    type* tmp;                                              \
-    tmp = (type *)realloc((ptr),(size)*sizeof(type));       \
-    if ( !tmp ) {                                           \
-      _MMG5_SAFE_FREE(ptr);                                 \
-      perror(" ## Memory problem: realloc");                \
-      return retval;                                        \
-    }                                                       \
-                                                            \
-    (ptr) = tmp;                                            \
+#define _MMG5_SAFE_REALLOC(ptr,prevSize,newSize,type,message,retval) do \
+  {                                                                     \
+    type* tmp;                                                          \
+    long long size_to_allocate = (long long)(newSize)*sizeof(type);     \
+                                                                        \
+    tmp = (type *)myrealloc((ptr),size_to_allocate,                     \
+                            (long long)(prevSize)*sizeof(type));        \
+    if ( !tmp ) {                                                       \
+      _MMG5_SAFE_FREE(ptr);                                             \
+      perror(" ## Memory problem: realloc");                            \
+      return retval;                                                    \
+    }                                                                   \
+                                                                        \
+    (ptr) = tmp;                                                        \
   }while(0)
 
 /** safe reallocation with memset at 0 for the new values of tab */
 #define _MMG5_SAFE_RECALLOC(ptr,prevSize,newSize,type,message,retval) do \
   {                                                                     \
     type* tmp;                                                          \
+    long long size_to_allocate = (long long)(newSize)*sizeof(type);     \
                                                                         \
-    tmp = (type *)realloc((ptr),(newSize)*sizeof(type));                \
+    tmp = (type *)myrealloc((ptr),size_to_allocate,                     \
+                            (long long)(prevSize)*sizeof(type));        \
     if ( !tmp ) {                                                       \
       _MMG5_SAFE_FREE(ptr);                                             \
       perror(" ## Memory problem: realloc");                            \

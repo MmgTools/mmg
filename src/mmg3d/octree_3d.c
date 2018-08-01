@@ -596,10 +596,11 @@ int _MMG3D_getListSquare(MMG5_pMesh mesh, double* ani, _MMG3D_pOctree q, double*
   //the center of the rectangle)
   index = q->nc-3;
 
-  _MMG5_ADD_MEM(mesh,q->nc*sizeof(_MMG3D_octree_s*),"octree cell",return -1);
-
+  _MMG5_ADD_MEM(mesh,index*sizeof(_MMG3D_octree_s*),"octree cell",return -1);
   _MMG5_SAFE_MALLOC(*qlist,index,_MMG3D_octree_s*,-1);
-  _MMG5_SAFE_MALLOC(dist,index+3,double,-1);
+
+  _MMG5_ADD_MEM(mesh,q->nc*sizeof(double),"dist array",return -1);
+  _MMG5_SAFE_MALLOC(dist,q->nc,double,-1);
 
   // Set the center of the zone search
   dist[q->nc-3] = rect[0]+rect[3]/2;
@@ -629,11 +630,11 @@ int _MMG3D_getListSquare(MMG5_pMesh mesh, double* ani, _MMG3D_pOctree q, double*
 
   if (index>q->nc-4)
   {
-    _MMG5_SAFE_FREE(dist);
+    _MMG5_DEL_MEM(mesh,dist,q->nc*sizeof(double));
     return -1;
   }
 
-  _MMG5_SAFE_FREE(dist);
+  _MMG5_DEL_MEM(mesh,dist,q->nc*sizeof(double));
 
   return index;
 }
@@ -680,7 +681,7 @@ int _MMG3D_addOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver,
         sizeRealloc<<=1;
         _MMG5_ADD_MEM(mesh,(sizeRealloc-sizeRealloc/2)*sizeof(int),"octree realloc",
                       return 0);
-        _MMG5_SAFE_REALLOC(q->v,sizeRealloc,int,"octree",0);
+        _MMG5_SAFE_REALLOC(q->v,q->nbVer,sizeRealloc,int,"octree",0);
       }
 
       q->v[q->nbVer] = no;
@@ -748,17 +749,17 @@ int _MMG3D_addOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver,
       else if(!(q->nbVer & (q->nbVer - 1))) //is a power of 2 -> normal reallocation
       {
         sizeRealloc = q->nbVer;
-        sizeRealloc<<=1;
+        sizeRealloc <<= 1;
         _MMG5_ADD_MEM(mesh,(sizeRealloc-sizeRealloc/2)*sizeof(int),"octree realloc",
                       return 0);
-        _MMG5_SAFE_REALLOC(q->v,sizeRealloc,int,"octree",0);
+        _MMG5_SAFE_REALLOC(q->v,q->nbVer,sizeRealloc,int,"octree",0);
       }
     }
     else if (q->nbVer%nv == 0) // special reallocation of the vertex list because it is at maximum depth
     {
       _MMG5_ADD_MEM(mesh,nv*sizeof(int),"octree realloc",
                     return 0);
-      _MMG5_SAFE_REALLOC(q->v,q->nbVer+nv,int,"octree",0);
+      _MMG5_SAFE_REALLOC(q->v,q->nbVer,q->nbVer+nv,int,"octree",0);
     }
 
     q->v[q->nbVer] = no;
@@ -1294,7 +1295,7 @@ int _MMG3D_octreein_iso(MMG5_pMesh mesh,MMG5_pSol sol,_MMG3D_pOctree octree,int 
   if (ncells < 0)
   {
 
-    _MMG5_DEL_MEM(mesh,lococ,octree->nc*sizeof(_MMG3D_octree_s*));
+    _MMG5_DEL_MEM(mesh,lococ,(octree->nc-3)*sizeof(_MMG3D_octree_s*));
     return 0;
   }
   /* Check the octree cells */
@@ -1317,12 +1318,12 @@ int _MMG3D_octreein_iso(MMG5_pMesh mesh,MMG5_pSol sol,_MMG3D_pOctree octree,int 
 
       if ( d2 < hp1 || d2 < hpi2*hpi2 )
       {
-        _MMG5_DEL_MEM(mesh,lococ,octree->nc*sizeof(_MMG3D_octree_s*));
+        _MMG5_DEL_MEM(mesh,lococ,(octree->nc-3)*sizeof(_MMG3D_octree_s*));
         return 0;
       }
     }
   }
-  _MMG5_DEL_MEM(mesh,lococ,octree->nc*sizeof(_MMG3D_octree_s*));
+  _MMG5_DEL_MEM(mesh,lococ,(octree->nc-3)*sizeof(_MMG3D_octree_s*));
   return 1;
 }
 
@@ -1392,7 +1393,7 @@ int _MMG3D_octreein_ani(MMG5_pMesh mesh,MMG5_pSol sol,_MMG3D_pOctree octree,int 
   ncells = _MMG3D_getListSquare(mesh,ma,octree, methalo, &lococ);
   if (ncells < 0)
   {
-    _MMG5_DEL_MEM(mesh,lococ,octree->nc*sizeof(_MMG3D_octree_s*));
+    _MMG5_DEL_MEM(mesh,lococ,(octree->nc-3)*sizeof(_MMG3D_octree_s*));
     return 0;
   }
   /* Check the octree cells */
@@ -1411,7 +1412,7 @@ int _MMG3D_octreein_ani(MMG5_pMesh mesh,MMG5_pSol sol,_MMG3D_pOctree octree,int 
         + 2.0*(ma[1]*ux*uy + ma[2]*ux*uz + ma[4]*uy*uz);
       if ( d2 < dmi )
       {
-        _MMG5_DEL_MEM(mesh,lococ,octree->nc*sizeof(_MMG3D_octree_s*));
+        _MMG5_DEL_MEM(mesh,lococ,(octree->nc-3)*sizeof(_MMG3D_octree_s*));
         return 0;
       }
       else
@@ -1421,13 +1422,13 @@ int _MMG3D_octreein_ani(MMG5_pMesh mesh,MMG5_pSol sol,_MMG3D_pOctree octree,int 
         d2   = mb[0]*ux*ux + mb[3]*uy*uy + mb[5]*uz*uz
           + 2.0*(mb[1]*ux*uy + mb[2]*ux*uz + mb[4]*uy*uz);
         if ( d2 < dmi ) {
-          _MMG5_DEL_MEM(mesh,lococ,octree->nc*sizeof(_MMG3D_octree_s*));
+          _MMG5_DEL_MEM(mesh,lococ,(octree->nc-3)*sizeof(_MMG3D_octree_s*));
           return 0;
         }
       }
     }
   }
 
-  _MMG5_DEL_MEM(mesh,lococ,octree->nc*sizeof(_MMG3D_octree_s*));
+  _MMG5_DEL_MEM(mesh,lococ,(octree->nc-3)*sizeof(_MMG3D_octree_s*));
   return 1;
 }

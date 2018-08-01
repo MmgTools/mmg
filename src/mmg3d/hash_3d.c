@@ -1009,7 +1009,7 @@ int _MMG5_hNew(MMG5_pMesh mesh,MMG5_HGeom *hash,int hsiz,int hmax) {
   hash->nxt  = hash->siz;
 
   _MMG5_ADD_MEM(mesh,(hash->max+1)*sizeof(MMG5_hgeom),"Edge hash table",return 0);
-  hash->geom = (MMG5_hgeom*)calloc(hash->max+1,sizeof(MMG5_hgeom));
+  _MMG5_SAFE_CALLOC(hash->geom,(hash->max+1),MMG5_hgeom,0);
 
   if ( !hash->geom ) {
     perror("  ## Memory problem: calloc");
@@ -1643,9 +1643,8 @@ int _MMG5_chkBdryTria(MMG5_pMesh mesh) {
       fprintf(stderr,"\n  ## Warning: %s: %d extra boundaries provided."
               " Ignored\n",__func__,nbl);
       _MMG5_ADD_MEM(mesh,(-nbl)*sizeof(MMG5_Tria),"triangles",return 0);
+      _MMG5_SAFE_REALLOC(mesh->tria,mesh->nt+1,nt+1,MMG5_Tria,"triangles",0);
       mesh->nt = nt;
-      _MMG5_SAFE_REALLOC(mesh->tria,mesh->nt+1,MMG5_Tria,"triangles",0);
-
     }
     _MMG5_DEL_MEM(mesh,hashElt.item,(hashElt.max+1)*sizeof(_MMG5_hedge));
     _MMG5_DEL_MEM(mesh,hashTri.item,(hashTri.max+1)*sizeof(_MMG5_hedge));
@@ -1732,7 +1731,7 @@ int _MMG5_bdrySet(MMG5_pMesh mesh) {
   mesh->xt     = 0;
   mesh->xtmax  = mesh->ntmax + 2*na;
   assert(mesh->xtmax);
-  
+
   _MMG5_ADD_MEM(mesh,(mesh->xtmax+1)*sizeof(MMG5_xTetra),"boundary tetrahedra",
                 fprintf(stderr,"  Exit program.\n");
                 return 0);

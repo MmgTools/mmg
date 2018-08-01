@@ -689,7 +689,7 @@ int MMG2_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol) {
   sol->np = 0;
   
   if ( mesh->info.mat )
-    free( mesh->info.mat );
+    _MMG5_SAFE_FREE( mesh->info.mat );
 
   return 1;
 }

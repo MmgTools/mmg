@@ -148,12 +148,13 @@ int _MMG5_mmgsRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
 
       /* Testing if edgeTab memory is enough */
       if (edgeNbr >= edgeSiz) {
+        int oldsize = edgeSiz;
         _MMG5_ADD_MEM(mesh,0.2*sizeof(SCOTCH_Num),"edgeTab",
                       _MMG5_DEL_MEM(mesh,vertOldTab,(mesh->ne+1)*sizeof(int));
                       _MMG5_DEL_MEM(mesh,vertTab,(vertNbr+2)*sizeof(SCOTCH_Num));
                       return 1);
         edgeSiz *= 1.2;
-        _MMG5_SAFE_REALLOC(edgeTab,edgeSiz,SCOTCH_Num,"scotch table",1);
+        _MMG5_SAFE_REALLOC(edgeTab,oldsize,edgeSiz,SCOTCH_Num,"scotch table",1);
       }
 
       edgeTab[edgeNbr++] = vertOldTab[ballTriIdx];
