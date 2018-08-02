@@ -834,8 +834,7 @@ int _MMG5_bouletrid(MMG5_pMesh mesh,int start,int iface,int ip,int *il1,int *l1,
  * travelling its shell.
  *
  */
-inline int
-_MMG5_settag(MMG5_pMesh mesh,int start,int ia,int16_t tag,int edg) {
+int _MMG5_settag(MMG5_pMesh mesh,int start,int ia,int16_t tag,int edg) {
   MMG5_pTetra        pt;
   MMG5_pxTetra       pxt;
   int                na,nb,*adja,adj,piv;
@@ -953,8 +952,7 @@ _MMG5_settag(MMG5_pMesh mesh,int start,int ia,int16_t tag,int edg) {
  * shell.
  *
  */
-inline int
-_MMG5_deltag(MMG5_pMesh mesh,int start,int ia,int16_t tag) {
+int _MMG5_deltag(MMG5_pMesh mesh,int start,int ia,int16_t tag) {
   MMG5_pTetra        pt;
   MMG5_pxTetra       pxt;
   int                na,nb,*adja,adj,piv;

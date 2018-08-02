@@ -692,5 +692,14 @@ int _MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met) {
 
   return 1;
 }
+#else
+/**
+ *
+ * Hack to avoid to have an empty translation unit (forbidden by ISO C)
+ *
+ */
+void MMG3D_unused_function(void) {
+  return;
+}
 
 #endif

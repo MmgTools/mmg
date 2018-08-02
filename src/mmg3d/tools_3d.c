@@ -56,7 +56,7 @@ inline void _MMG5_nsort(int n,double *val,char *perm){
 
 
 /** Compute normal to face iface of tetra k, exterior to tetra k */
-inline int _MMG5_norface(MMG5_pMesh mesh,int k,int iface,double n[3]) {
+int _MMG5_norface(MMG5_pMesh mesh,int k,int iface,double n[3]) {
   MMG5_pTetra     pt;
 
   pt = &mesh->tetra[k];
