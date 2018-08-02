@@ -112,7 +112,7 @@ double _MMG5_caltri33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt) {
  * \warning The quality is computed as if the triangle is a "straight" triangle.
  *
  */
-inline double _MMG5_caltri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
+double _MMG5_caltri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
   MMG5_pPoint   p[3];
   double        rap,anisurf,l0,l1,l2,m[6],mm[6];
   double        abx,aby,abz,acx,acy,acz,bcy,bcx,bcz;

@@ -1491,7 +1491,6 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  extern
   int MMG2D_Get_adjaVertices(MMG5_pMesh mesh, int ip, int lispoi[MMG2D_LMAX]);
 
 /**

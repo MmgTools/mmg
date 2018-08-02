@@ -453,7 +453,7 @@ long long _MMG5_memSize (void) {
  * Node allocation.
  *
  */
-inline
+static inline
 int _MMG5_Alloc_inode( MMG5_pMesh mesh, _MMG5_iNode **node ) {
 
   _MMG5_ADD_MEM(mesh,sizeof(_MMG5_iNode),"boundary reference node",
@@ -476,7 +476,6 @@ int _MMG5_Alloc_inode( MMG5_pMesh mesh, _MMG5_iNode **node ) {
  * exists.
  *
  */
-inline
 int _MMG5_Add_inode( MMG5_pMesh mesh, _MMG5_iNode **liLi, int val ) {
   _MMG5_iNode  *newNode, *cur;
 
@@ -529,7 +528,6 @@ int _MMG5_Add_inode( MMG5_pMesh mesh, _MMG5_iNode **liLi, int val ) {
  * Free the memory used by the linked list whose root is \a liLi.
  *
  */
-inline
 void _MMG5_Free_ilinkedList( MMG5_pMesh mesh, _MMG5_iNode *liLi ) {
   _MMG5_iNode *cur,*nxt;
 
@@ -551,7 +549,7 @@ void _MMG5_Free_ilinkedList( MMG5_pMesh mesh, _MMG5_iNode *liLi ) {
  * Node allocation.
  *
  */
-inline
+static inline
 int _MMG5_Alloc_dnode( MMG5_pMesh mesh, _MMG5_dNode **node ) {
 
   _MMG5_ADD_MEM(mesh,sizeof(_MMG5_dNode),"node for hausdorff eval",
@@ -576,7 +574,6 @@ int _MMG5_Alloc_dnode( MMG5_pMesh mesh, _MMG5_dNode **node ) {
  * exists.
  *
  */
-inline
 int _MMG5_Add_dnode( MMG5_pMesh mesh, _MMG5_dNode **liLi, int k, double val ) {
   _MMG5_dNode  *newNode, *cur;
 
@@ -629,7 +626,6 @@ int _MMG5_Add_dnode( MMG5_pMesh mesh, _MMG5_dNode **liLi, int k, double val ) {
  * Free the memory used by the linked list whose root is \a liLi.
  *
  */
-inline
 void _MMG5_Free_dlinkedList( MMG5_pMesh mesh, _MMG5_dNode *liLi ) {
   _MMG5_dNode *cur,*nxt;
 

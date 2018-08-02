@@ -1597,7 +1597,6 @@ int MMGS_Get_adjaTri(MMG5_pMesh mesh, int kel, int listri[3]);
  * >   END SUBROUTINE\n
  *
  */
-extern
 int MMGS_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMGS_LMAX]);
 
 #ifdef __cplusplus

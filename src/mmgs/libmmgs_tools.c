@@ -391,7 +391,6 @@ int MMGS_Get_adjaTri(MMG5_pMesh mesh, int kel, int listri[3]) {
   return 1;
 }
 
-inline
 int MMGS_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMGS_LMAX])
 {
   MMG5_pTria pt;

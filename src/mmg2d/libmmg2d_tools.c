@@ -204,7 +204,6 @@ int MMG2D_Get_adjaTri(MMG5_pMesh mesh, int kel, int listri[3]) {
   return 1;
 }
 
-inline
 int MMG2D_Get_adjaVertices(MMG5_pMesh mesh, int ip, int lispoi[MMG2D_LMAX])
 {
   int start;
@@ -217,7 +216,6 @@ int MMG2D_Get_adjaVertices(MMG5_pMesh mesh, int ip, int lispoi[MMG2D_LMAX])
   return MMG2D_Get_adjaVerticesFast(mesh,ip,start,lispoi);
 }
 
-inline
 int MMG2D_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMG2D_LMAX])
 {
   MMG5_pTria pt;

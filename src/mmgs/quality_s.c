@@ -49,7 +49,7 @@ extern char  ddb;
  * to normal to vertices.
  *
  */
-inline double caleltsig_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
+double caleltsig_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
   MMG5_pTria    pt;
   MMG5_pPoint   pa,pb,pc;
   double        ps1,ps2,abx,aby,abz,acx,acy,acz,dd,rap,anisurf;
@@ -136,7 +136,7 @@ inline double caleltsig_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
 }
 
 /* Same quality function but puts a sign according to deviation to normal to vertices */
-inline double caleltsig_iso(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
+double caleltsig_iso(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
   MMG5_pTria     pt;
   MMG5_pPoint    pa,pb,pc;
   double   *a,*b,*c,cal,abx,aby,abz,acx,acy,acz,bcx,bcy,bcz,rap;
