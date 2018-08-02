@@ -61,7 +61,7 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   if ( ! _MMG5_boundingBox(mesh) ) return 0;
 
   info = &mesh->info;
- 
+
 
   /* normalize coordinates and local parameters */
   dd = _MMG2D_PRECI / info->delta;
@@ -69,7 +69,7 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   mesh->info.hausd *= dd;
   mesh->info.hsiz  *= dd;
   mesh->info.ls    *= dd;
-  
+
   if ( mesh->info.npar ) {
     for (i=0; i<mesh->info.npar; i++) {
       ppar = &mesh->info.par[i];
@@ -332,7 +332,7 @@ int MMG2_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   mesh->info.hausd *= dd;
   mesh->info.hsiz  *= dd;
   mesh->info.ls    *= dd;
-  
+
   if ( mesh->info.npar ) {
     for (i=0; i<mesh->info.npar; i++) {
       ppar = &mesh->info.par[i];

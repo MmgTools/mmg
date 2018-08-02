@@ -50,7 +50,7 @@ static int _MMG2_correction_iso(MMG5_pMesh mesh,int ip,int *list,int ilist,int n
       nei[1]  = adja[1] /3;
       nei[2]  = adja[2] /3;
       pt   = &mesh->tria[iel];
-      
+
       for (i=0; i<3; i++) {
         adj = nei[i];
         /* Consider only the external faces of the cavity */
@@ -73,7 +73,7 @@ static int _MMG2_correction_iso(MMG5_pMesh mesh,int ip,int *list,int ilist,int n
         if ( dd < _MMG2_AREAMIN )  break;
 
       }
-      
+
       /* Remove triangle iel from the cavity if it leads to a degenerate triangle after insertion of ppt */
       if ( i < 3 /*||  pt->tag & MG_REQ*/ ) {
         /* remove iel from list */
@@ -105,7 +105,7 @@ int _MMG2_hashEdgeDelone(MMG5_pMesh mesh,HashTable *hash,int iel,int i,int *v) {
     mins = v[1];
     maxs = v[0];
   }
-  
+
   key = KTA*mins + KTB*maxs;
   key = key % hash->size;
   ha  = &hash->item[key];
@@ -274,7 +274,7 @@ int _MMG2_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
   /* Reset tagdel field */
   for (k=1; k<=mesh->np; k++)
     mesh->point[k].tagdel = 0;
-  
+
   /* Triangles in the cavity are those s.t. pt->base == base */
   base = mesh->base;
   /* Count the number of external faces in the cavity, and tag the corresponding vertices */
@@ -299,7 +299,7 @@ int _MMG2_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
       }
     }
   }
-  
+
   /* Check for an isolated vertex (the cavity should ne contain any internal vertex) */
   alert = 0;
   for (k=0; k<ilist; k++) {
@@ -322,7 +322,7 @@ int _MMG2_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
     }
   }
   if ( alert )  return 0;
-  
+
   /* Hash table parameters */
   if ( size >= 3*MMG2_LONMAX )  return 0;
   if ( !MMG2_hashNew(&hedg,size,3*size) ) { /*3*size is enough */

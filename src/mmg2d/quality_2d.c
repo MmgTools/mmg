@@ -45,16 +45,16 @@
 double _MMG2_quickcal(MMG5_pMesh mesh, MMG5_pTria pt) {
   MMG5_pPoint        p0,p1,p2;
   double             cal;
-  
+
   p0 = &mesh->point[pt->v[0]];
   p1 = &mesh->point[pt->v[1]];
   p2 = &mesh->point[pt->v[2]];
-  
+
   cal = MMG2_quickarea(p0->c,p1->c,p2->c);
   return cal;
 }
 
-/* Compute quality of the triangle pt when the supplied metric is isotropic; 
+/* Compute quality of the triangle pt when the supplied metric is isotropic;
    return 0 in the case that the triangle has inverted orientation */
 double _MMG2_caltri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt) {
   double    abx,aby,acx,acy,bcx,bcy;
@@ -101,11 +101,11 @@ double _MMG2_caltri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt) {
   ipa = pt->v[0];
   ipb = pt->v[1];
   ipc = pt->v[2];
-  
+
   a  = mesh->point[ipa].c;
   b  = mesh->point[ipb].c;
   c  = mesh->point[ipc].c;
-  
+
   ma = &met->m[3*ipa];
   mb = &met->m[3*ipb];
   mc = &met->m[3*ipc];

@@ -348,17 +348,17 @@ int _MMG2_chkmsh(MMG5_pMesh mesh) {
       }
     }
   }
-  
+
   /* Check consistency between REF, GEO and BDY tags between edges and points */
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) ) continue;
-    
+
     for (i=0; i<3; i++) {
       if ( pt->tag[i] & MG_GEO || pt->tag[i] & MG_REF ) {
         i1 = _MMG5_inxt2[i];
         i2 = _MMG5_iprv2[i];
-        
+
         if ( !(pt->tag[i] & MG_BDY) ) {
           if ( !mmgErr6 ) {
             mmgErr6 = 1;
@@ -368,10 +368,10 @@ int _MMG2_chkmsh(MMG5_pMesh mesh) {
           }
           return 0;
         }
-        
+
         p1 = &mesh->point[pt->v[i1]];
         p2 = &mesh->point[pt->v[i2]];
-        
+
         if ( !(p1->tag & MG_BDY) ) {
           if ( !mmgErr6 ) {
             mmgErr6 = 1;
@@ -382,7 +382,7 @@ int _MMG2_chkmsh(MMG5_pMesh mesh) {
           }
           return 0;
         }
-        
+
         if ( !(p2->tag & MG_BDY) ) {
           if ( !mmgErr6 ) {
             mmgErr6 = 1;
@@ -396,7 +396,7 @@ int _MMG2_chkmsh(MMG5_pMesh mesh) {
       }
     }
   }
-  
+
   return 1;
 }
 
@@ -406,19 +406,19 @@ int _MMG2_chkor(MMG5_pMesh mesh) {
   MMG5_pPoint       p0,p1,p2;
   double            det;
   int               k;
-  
+
   for (k=1; k<=mesh->np; k++) {
     pt = &mesh->tria[k];
     if ( !pt->v[0] ) continue;
-    
+
     p0 = &mesh->point[pt->v[0]];
     p1 = &mesh->point[pt->v[1]];
     p2 = &mesh->point[pt->v[2]];
-    
+
     det = (p1->c[0]-p0->c[0])*(p2->c[1]-p0->c[1]) - (p1->c[1]-p0->c[1])*(p2->c[0]-p0->c[0]);
 
     if ( det <= 0.0 ) return 0;
   }
-  
+
   return 1;
 }

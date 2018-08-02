@@ -1546,13 +1546,13 @@ int _MMG2_savemesh_db(MMG5_pMesh mesh,char *filename,char pack) {
   MMG5_pPoint        ppt,p0,p1,p2;
   int                k,np,nt,nc;
   FILE               *out;
-  
+
   out = fopen(filename,"w");
-  
+
   np = nt = 0;
   /* Write Header */
   fprintf(out,"MeshVersionFormatted %d\n\nDimension %d\n\n",1,2);
-  
+
   /* Print vertices */
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
@@ -1565,7 +1565,7 @@ int _MMG2_savemesh_db(MMG5_pMesh mesh,char *filename,char pack) {
       ppt->tmp = np;
     }
   }
-  
+
   fprintf(out,"Vertices\n %d\n\n",np);
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
@@ -1578,7 +1578,7 @@ int _MMG2_savemesh_db(MMG5_pMesh mesh,char *filename,char pack) {
     pt = &mesh->tria[k];
     if ( MG_EOK(pt) ) nt++;
   }
-  
+
   fprintf(out,"Triangles\n %d\n\n",nt);
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
@@ -1589,7 +1589,7 @@ int _MMG2_savemesh_db(MMG5_pMesh mesh,char *filename,char pack) {
       fprintf(out,"%d %d %d %d\n",p0->tmp,p1->tmp,p2->tmp,pt->ref);
     }
   }
-  
+
   /* Print Edges */
   if ( mesh->na ) {
     fprintf(out,"Edges\n %d\n\n",mesh->na);
@@ -1601,14 +1601,14 @@ int _MMG2_savemesh_db(MMG5_pMesh mesh,char *filename,char pack) {
       else        fprintf(out,"%d %d %d\n",pa->a,pa->b,pa->ref);
     }
   }
-  
+
   /* Print corners */
   nc = 0;
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
     if ( MG_VOK(ppt) && ppt->tag & MG_CRN ) nc++;
   }
-  
+
   if ( nc ) {
     fprintf(out,"Corners\n %d\n\n",nc);
     for (k=1; k<=mesh->np; k++) {
@@ -1619,12 +1619,12 @@ int _MMG2_savemesh_db(MMG5_pMesh mesh,char *filename,char pack) {
       }
     }
   }
-  
+
   /* End keyword */
   fprintf(out,"End\n");
 
   fclose(out);
-  
+
   return 1;
 }
 
@@ -1634,7 +1634,7 @@ int _MMG2_savemet_db(MMG5_pMesh mesh,MMG5_pSol met,char *filename,char pack) {
   int                k,np;
   char               *ptr,typ=0,*data;
   FILE               *out;
-  
+
   if ( met->size == 1 ) typ =1;
   else if ( met->size == 3 ) typ = 3;
 
@@ -1643,7 +1643,7 @@ int _MMG2_savemet_db(MMG5_pMesh mesh,MMG5_pSol met,char *filename,char pack) {
   ptr = strstr(data,".mesh");
   if ( ptr )
     *ptr = '\0';
-  
+
   strcat(data,".sol");
   out = fopen(data,"w");
 
@@ -1652,7 +1652,7 @@ int _MMG2_savemet_db(MMG5_pMesh mesh,MMG5_pSol met,char *filename,char pack) {
   np = 0;
   for (k=1; k<=mesh->np; k++)
     mesh->point[k].tmp = 0;
-  
+
   /* Write Header */
   fprintf(out,"MeshVersionFormatted %d\n\nDimension %d\n\n",1,2);
 
@@ -1668,7 +1668,7 @@ int _MMG2_savemet_db(MMG5_pMesh mesh,MMG5_pSol met,char *filename,char pack) {
       ppt->tmp = np;
     }
   }
-  
+
   fprintf(out,"SolAtVertices\n %d\n%d %d\n\n",np,1,typ);
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
@@ -1679,12 +1679,12 @@ int _MMG2_savemet_db(MMG5_pMesh mesh,MMG5_pSol met,char *filename,char pack) {
         fprintf(out,"%f %f %f\n",met->m[3*k+0],met->m[3*k+1],met->m[3*k+2]);
     }
   }
-  
+
   /* End keyword */
   fprintf(out,"End\n");
-  
+
   fclose(out);
-  
+
   return 1;
 }
 
@@ -1700,7 +1700,7 @@ int _MMG2_savenor_db(MMG5_pMesh mesh,char *filename,char pack) {
   ptr = strstr(data,".mesh");
   if ( ptr )
     *ptr = '\0';
-  
+
   strcat(data,".nor.sol");
   out = fopen(data,"w");
 
@@ -1709,10 +1709,10 @@ int _MMG2_savenor_db(MMG5_pMesh mesh,char *filename,char pack) {
   np = 0;
   for (k=1; k<=mesh->np; k++)
     mesh->point[k].tmp = 0;
-  
+
   /* Write Header */
   fprintf(out,"MeshVersionFormatted %d\n\nDimension %d\n\n",1,2);
-  
+
   /* Pack vertices or not for writing */
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
@@ -1725,7 +1725,7 @@ int _MMG2_savenor_db(MMG5_pMesh mesh,char *filename,char pack) {
       ppt->tmp = np;
     }
   }
-  
+
   fprintf(out,"SolAtVertices\n %d\n%d %d\n\n",np,1,2);
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
@@ -1734,12 +1734,12 @@ int _MMG2_savenor_db(MMG5_pMesh mesh,char *filename,char pack) {
       else fprintf(out,"%f %f\n",0.0,0.0);
     }
   }
-  
+
   /* End keyword */
   fprintf(out,"End\n");
-  
+
   fclose(out);
-  
+
   return 1;
 }
 
@@ -1755,7 +1755,7 @@ int _MMG2_savedisp_db(MMG5_pMesh mesh,MMG5_pSol disp,char *filename,char pack) {
   ptr = strstr(data,".sol");
   if ( ptr )
     *ptr = '\0';
-  
+
   strcat(data,".disp.sol");
   out = fopen(data,"w");
   _MMG5_SAFE_FREE(data);
@@ -1763,10 +1763,10 @@ int _MMG2_savedisp_db(MMG5_pMesh mesh,MMG5_pSol disp,char *filename,char pack) {
   np = 0;
   for (k=1; k<=mesh->np; k++)
     mesh->point[k].tmp = 0;
-  
+
   /* Write Header */
   fprintf(out,"MeshVersionFormatted %d\n\nDimension %d\n\n",1,2);
-  
+
   /* Pack vertices or not for writing */
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
@@ -1779,19 +1779,19 @@ int _MMG2_savedisp_db(MMG5_pMesh mesh,MMG5_pSol disp,char *filename,char pack) {
       ppt->tmp = np;
     }
   }
-  
+
   fprintf(out,"SolAtVertices\n %d\n%d %d\n\n",np,1,2);
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
     if ( ( pack && MG_VOK(ppt) ) || !pack )
       fprintf(out,"%f %f\n",disp->m[2*(k-1)+1],disp->m[2*(k-1)+2]);
   }
-  
+
   /* End keyword */
   fprintf(out,"End\n");
-  
+
   fclose(out);
-  
+
   return 1;
 }
 

@@ -175,7 +175,7 @@ int MMG2_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
   }
   iter = 0;
   maxiter = 10;
-  
+
 	do {
     ns = nus = 0;
     nu = nud = 0;
@@ -355,7 +355,7 @@ int MMG2_markSD(MMG5_pMesh mesh) {
         ped0 = pt->v[i1];
         ped1 = pt->v[i2];
 
-/* WARNING: exhaustive search among edges, to be optimized with a hashing structure */
+        /* WARNING: exhaustive search among edges, to be optimized with a hashing structure */
         for(l=1; l<=mesh->na; l++) {
           ped = &mesh->edge[l];
           if( ( ped->a == ped0 && ped->b == ped1 ) || ( ped->b == ped0 && ped->a == ped1 ) ) break;
@@ -397,7 +397,7 @@ int MMG2_markSD(MMG5_pMesh mesh) {
     for(k=1; k<=nt; k++) {
       pt = &mesh->tria[k];
       if ( !MG_EOK(pt) ) continue;
- 
+
       if ( pt->ref != 1 ) continue;
       /*update adjacencies*/
       iadr = 3*(k-1)+1;

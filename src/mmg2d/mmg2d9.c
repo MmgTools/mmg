@@ -436,25 +436,25 @@ int _MMG2D_saveDisp(MMG5_pMesh mesh,MMG5_pSol disp) {
   FILE        *out;
   int         k;
   char        data[256],*ptr;
-  
+
   strcpy(data,"disp.sol");
   ptr = strstr(data,".sol");
   if(ptr) *ptr = '\0';
   strcat(data,"disp.sol");
-  
+
   out = fopen(data,"w");
   printf("save disp\n");
   fprintf(out,"MeshVersionFormatted 1\n\nDimension\n%d\n\n",disp->dim);
   fprintf(out,"SolAtVertices\n%d\n 1 2\n",disp->np);
-  
+
   /* Print solutions */
   for(k=1; k<= disp->np; k++) {
     fprintf(out,"%f %f\n",disp->m[2*k+0],disp->m[2*k+1]);
   }
-  
+
   fprintf(out,"\nEnd");
   fclose(out);
-  
+
   return 1;
 }
 /**

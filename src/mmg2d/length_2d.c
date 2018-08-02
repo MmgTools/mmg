@@ -62,18 +62,18 @@ double long_ani(double *ca,double *cb,double *ma,double *mb) {
 double _MMG2_lencurv_iso(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2) {
   MMG5_pPoint     p1,p2;
   double          h1,h2,len,l,r;
-  
+
   p1 = &mesh->point[ip1];
   p2 = &mesh->point[ip2];
-  
+
   h1 = met->m[ip1];
   h2 = met->m[ip2];
-  
+
   l = (p2->c[0]-p1->c[0])*(p2->c[0]-p1->c[0]) + (p2->c[1]-p1->c[1])*(p2->c[1]-p1->c[1]);
   l = sqrt(l);
   r = h2 / h1 - 1.0;
   len = ( fabs(r) < _MMG5_EPS ) ? ( l/h1 ) : ( l / (h2-h1) * log1p(r) );
-    
+
   return len;
 }
 
@@ -82,19 +82,19 @@ double _MMG2_lencurv_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2) {
   MMG5_pPoint      p1,p2;
   double           len,*m1,*m2,ux,uy,l1,l2;
   static char      mmgWarn0=0,mmgWarn1=0;
-  
+
   p1 = &mesh->point[ip1];
   p2 = &mesh->point[ip2];
-  
+
   m1 = &met->m[3*ip1];
   m2 = &met->m[3*ip2];
-  
+
   ux = p2->c[0] - p1->c[0];
   uy = p2->c[1] - p1->c[1];
-  
+
   l1 = m1[0]*ux*ux + 2.0*m1[1]*ux*uy + m1[2]*uy*uy;
   l2 = m2[0]*ux*ux + 2.0*m2[1]*ux*uy + m2[2]*uy*uy;
-  
+
   if ( l1 < 0.0 ) {
     if ( !mmgWarn0 ) {
       mmgWarn0 = 1;
@@ -111,10 +111,10 @@ double _MMG2_lencurv_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2) {
     }
     return 0.;
   }
-  
+
   l1 = sqrt(l1);
   l2 = sqrt(l2);
-  
+
   len = 0.5*(l1+l2);
 
   return len;

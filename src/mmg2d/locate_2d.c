@@ -42,7 +42,7 @@ int MMG2_coorbary(MMG5_pMesh mesh,MMG5_pTria pt,double c[2],double* det,double* 
   p1 = &mesh->point[pt->v[0]];
   p2 = &mesh->point[pt->v[1]];
   p3 = &mesh->point[pt->v[2]];
-  
+
   /* Calculate det (p2-p1,p3-p1) */
   *det = (p2->c[0]-p1->c[0])*(p3->c[1]-p1->c[1]) - (p2->c[1]-p1->c[1])*(p3->c[0]-p1->c[0]);
   if ( *det < _MMG5_EPSD ) {
@@ -61,7 +61,7 @@ int MMG2_coorbary(MMG5_pMesh mesh,MMG5_pTria pt,double c[2],double* det,double* 
   b3 *= (*det);
   *l1 = 1.0 - (b2+b3);
   *l2 = b2;
-  
+
   return 1;
 }
 
@@ -77,13 +77,13 @@ int MMG2_isInTriangle(MMG5_pMesh mesh,int k,double c[2]) {
   ier = MMG2_coorbary(mesh,pt,&c[0],&det,&l1,&l2);
   if ( !ier )
     return 0;
-  
+
   l3 = 1.0 - (l1+l2);
   if ( l3>EPST && l1>EPST && l2>EPST) return k;
   else return 0;
 }
 
-/* Check whether edge ppa-ppb crosses triangles pt (in the sense that two edges of this triangle 
+/* Check whether edge ppa-ppb crosses triangles pt (in the sense that two edges of this triangle
  are crossed by (ppa-ppb), or only one, and ppa or ppb is a vertex of pt; if at least one edge
  is crossed by ia-ib, return i+1, where i is the index of one of the crossed edges */
 int MMG2_cutEdge(MMG5_pMesh mesh,MMG5_pTria pt,MMG5_pPoint ppa,MMG5_pPoint ppb) {
@@ -94,11 +94,11 @@ int MMG2_cutEdge(MMG5_pMesh mesh,MMG5_pTria pt,MMG5_pPoint ppa,MMG5_pPoint ppb) 
   ier = MMG2_coorbary(mesh,pt,ppa->c,&det,&la[0],&la[1]);
   if ( !ier ) return 0;
   la[2] = 1.0-(la[0]+la[1]);
-  
+
   ier = MMG2_coorbary(mesh,pt,ppb->c,&det,&lb[0],&lb[1]);
   if ( !ier ) return 0;
   lb[2] = 1.0-(lb[0]+lb[1]);
-  
+
   /* Check whether ppa or ppb is a vertex of pt */
   for (i=0; i<3; i++) {
     if ( fabs(la[i]-1.0) < 1.0e-12 ) {
@@ -123,7 +123,7 @@ int MMG2_cutEdge(MMG5_pMesh mesh,MMG5_pTria pt,MMG5_pPoint ppa,MMG5_pPoint ppb) 
   return 0;
 }
 
-/* Return i+1>0 if Edge ia-ib intersects triangle k at edge i, 0 if 
+/* Return i+1>0 if Edge ia-ib intersects triangle k at edge i, 0 if
    it does not intersect k, and return -3 if edge ia-ib is one edge of k*/
 int MMG2_cutEdgeTriangle(MMG5_pMesh mesh,int k,int ia,int ib) {
   MMG5_pTria   pt;
@@ -148,7 +148,7 @@ int MMG2_cutEdgeTriangle(MMG5_pMesh mesh,int k,int ia,int ib) {
   /* Calculation of the areas ia,ib,pi*/
   a11 = ppb->c[0] - ppa->c[0];
   a21 = ppb->c[1] - ppa->c[1];
-  
+
   a12 = p1->c[0] - ppa->c[0];
   a22 = p1->c[1] - ppa->c[1];
   area1 = a11*a22 - a12*a21;
@@ -178,14 +178,14 @@ int MMG2_cutEdgeTriangle(MMG5_pMesh mesh,int k,int ia,int ib) {
       return iare;
     }
   }
-  
+
   /* Both edges corresponding to prod1 and prod2 are cut by edge ia,ib */
   if ( prod3 > 0 && ((prod2 < 0 || prod1 < 0))) {
     if ( (iare = MMG2_cutEdge(mesh,pt,ppa,ppb)) ) {
       return iare;
     }
   }
-  
+
   /* Case where one vertex of pt is ia */
   for(i=0; i<3; i++){
     if ( pt->v[i] == ia || ibreak ) {
@@ -601,7 +601,7 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
 
   }
   while ( ncompt < mesh->nt );
-  
+
   assert ( ibreak );
   lon = ( ibreak == 4 ) ? 4 : ((-1)*lon);
   return lon;

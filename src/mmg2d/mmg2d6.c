@@ -45,7 +45,7 @@
 int _MMG2_isSplit(MMG5_pMesh mesh,int ref,int *refint,int *refext) {
   MMG5_pMat    pm;
   int          k;
-  
+
   /* Check in the info->mat table if reference ref is supplied by the user */
   for (k=0; k<mesh->info.nmat; k++) {
     pm = &mesh->info.mat[k];
@@ -58,19 +58,19 @@ int _MMG2_isSplit(MMG5_pMesh mesh,int ref,int *refint,int *refext) {
       }
     }
   }
-  
+
   /* Default case: split with references MG_MINUS, MG_PLUS */
   *refint = MG_MINUS;
   *refext = MG_PLUS;
   return 1;
-  
+
 }
 
 /* Retrieve the initial domain reference associated to the (split) reference ref */
 int _MMG2_getIniRef(MMG5_pMesh mesh,int ref) {
   MMG5_pMat     pm;
   int           k;
-    
+
   for (k=0; k<mesh->info.nmat; k++) {
     pm = &mesh->info.mat[k];
     if ( pm->ref == ref && !pm->dospl ) return pm->ref;
@@ -85,18 +85,18 @@ int _MMG2_resetRef(MMG5_pMesh mesh) {
   MMG5_pPoint     p0;
   int             k,ref;
   char            i;
-  
+
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !pt->v[0] ) continue;
-    
+
     for (i=0; i<3; i++) {
       p0 = &mesh->point[pt->v[i]];
       if ( pt->edg[i] == MG_ISO ) pt->edg[i] = 0;
       if ( p0->ref == MG_ISO ) p0->ref = 0;
     }
   }
-  
+
   /* Reset the triangle references to their initial distribution */
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
@@ -104,7 +104,7 @@ int _MMG2_resetRef(MMG5_pMesh mesh) {
     ref = _MMG2_getIniRef(mesh,pt->ref);
     pt->ref = ref;
   }
-  
+
   return 1;
 }
 
@@ -133,7 +133,7 @@ int _MMG2_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, int start, char istart) {
     pt = &mesh->tria[k];
     ip1 = pt->v[i1];
     ip2 = pt->v[i];
-    
+
     v1 = sol->m[ip1];
     v2 = sol->m[ip2];
 
@@ -157,7 +157,7 @@ int _MMG2_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, int start, char istart) {
     pt = &mesh->tria[k];
     ip1 = pt->v[i1];
     ip2 = pt->v[i];
-    
+
     v1 = sol->m[ip1];
     v2 = sol->m[ip2];
 
@@ -213,7 +213,7 @@ int _MMG2_snapval(MMG5_pMesh mesh, MMG5_pSol sol, double *tmp) {
       ip = pt->v[i];
       ip1 = pt->v[_MMG5_inxt2[i]];
       ip2 = pt->v[_MMG5_iprv2[i]];
-      
+
       p0 = &mesh->point[ip];
       v1 = sol->m[ip1];
       v2 = sol->m[ip2];
@@ -228,7 +228,7 @@ int _MMG2_snapval(MMG5_pMesh mesh, MMG5_pSol sol, double *tmp) {
       }
     }
   }
-  
+
   /* Check that the ls function does not show isolated spots with 0 values (without sign changes) */
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
@@ -252,16 +252,16 @@ int _MMG2_snapval(MMG5_pMesh mesh, MMG5_pSol sol, double *tmp) {
         if ( sol->m[ip2] >= _MMG5_EPS ) npl = 1;
         else if ( sol->m[ip2] <= -_MMG5_EPS ) nmn = 1;
       }
-      
+
       if ( npl == 1 && nmn == 0 )
         sol->m[ip] = 100.0*_MMG5_EPS;
       else if ( npl == 0 && nmn == 1 )
         sol->m[ip] = 100.0*_MMG5_EPS;
     }
-    
+
   }
-  
-  
+
+
   if ( (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) && ns+nc > 0 )
     fprintf(stdout,"     %8d points snapped, %d corrected\n",ns,nc);
 
@@ -471,7 +471,7 @@ int _MMG2_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol){
 
       np = _MMG5_hashGet(&hash,ip0,ip1);
       if ( np ) continue;
-      
+
       if ( !_MMG2_isSplit(mesh,pt->ref,&refint,&refext) ) continue;
 
       v0 = sol->m[ip0];
@@ -565,7 +565,7 @@ int _MMG2_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol){
     for (i=0; i<3; i++) {
       ip = pt->v[i];
       v = sol->m[ip];
- 
+
       if ( v > 0.0 )
         npl++;
       else if ( v < 0.0 )
@@ -617,10 +617,10 @@ int _MMG2_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol){
 int MMG2_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol) {
   double *tmp;
   int k;
-  
+
   if ( abs(mesh->info.imprim) > 3 )
     fprintf(stdout,"  ** ISOSURFACE EXTRACTION\n");
-  
+
   /* Work only with the 0 level set */
   for (k=1; k<= sol->np; k++)
     sol->m[k] -= mesh->info.ls;
@@ -653,7 +653,7 @@ int MMG2_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol) {
     fprintf(stderr,"\n  ## Problem in setting boundary. Exit program.\n");
     return 0;
   }
-  
+
   /* Reset the MG_ISO field everywhere it appears */
   if ( !_MMG2_resetRef(mesh) ) {
     fprintf(stderr,"\n  ## Problem in resetting references. Exit program.\n");
@@ -677,7 +677,7 @@ int MMG2_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol) {
     fprintf(stderr,"\n  ## Hashing problem. Exit program.\n");
     return 0;
   }
-  
+
   /* Check that the resulting mesh is manifold */
   if ( !_MMG2_chkmanimesh(mesh) ) {
     fprintf(stderr,"\n  ## No manifold resulting situation. Exit program.\n");
@@ -687,7 +687,7 @@ int MMG2_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol) {
   /* Clean memory */
   _MMG5_DEL_MEM(mesh,sol->m,(sol->size*(sol->npmax+1))*sizeof(double));
   sol->np = 0;
-  
+
   if ( mesh->info.mat )
     _MMG5_SAFE_FREE( mesh->info.mat );
 

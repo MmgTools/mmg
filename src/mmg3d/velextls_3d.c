@@ -53,7 +53,7 @@ int* _MMG5_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
   int            k,n,ip,iel,jel,nlay,npf,ntf,ilist,ilisto,ilistck,vper[4],*list,*perm,*invperm,*adja;
   int            refdirh,refdirnh;
   char           i,j,jface;
-  
+
   nlay = 20;
   refdirh = 0;
   refdirnh = 1;
@@ -63,22 +63,22 @@ int* _MMG5_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
   list = (int*)calloc(mesh->ne+1,sizeof(int));
   perm = (int*)calloc(mesh->np+1,sizeof(int));
   ilist = ilisto = ilistck = 0;
-  
+
   for (k=1; k<=mesh->ne; k++)
     mesh->tetra[k].mark = 0;      // A faire fusionner avec celui de mmg3d3.c
-  
+
   /* Step 1: pile all the tetras containing a triangle with ref DISPREF */
   for(k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
     if ( !MG_EOK(pt) || !pt->xt ) continue;
     pxt = &mesh->xtetra[pt->xt];
-    
+
     for(i=0; i<4; i++) {
       if ( (pxt->ftag[i] & MG_BDY) && (pxt->ref[i] == _MMG5_DISPREF) ) {
         ilist++;
         list[ilist] = k;
         MG_SET(pt->mark,0);
-        
+
         for(j=0; j<4; j++) {
           ip = pt->v[j];
           if ( !perm[ip] ) {
@@ -90,17 +90,17 @@ int* _MMG5_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
       }
     }
   }
-  
+
   /* Step 2: create a layer around these tetras */
   for(n=0; n<nlay; n++) {
     ilistck = ilisto;
     ilisto = ilist;
-    
+
     for(k=ilistck+1; k<=ilisto; k++) {
       iel = list[k];
       pt = &mesh->tetra[iel];
       adja = &mesh->adja[4*(iel-1)+1];
-      
+
       for(i=0; i<4; i++) {
         jel = adja[i] / 4;
         if ( !jel ) continue;
@@ -110,7 +110,7 @@ int* _MMG5_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
           assert( ilist <= mesh->ne );
           MG_SET(pt1->mark,0);
           list[ilist] = jel;
-          
+
           for(j=0; j<4; j++) {
             ip = pt1->v[j];
             if ( !perm[ip] ) {
@@ -122,11 +122,11 @@ int* _MMG5_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
       }
     }
   }
-    
+
   /* Creation of the inverse permutation table */
   invperm = (int*)calloc(npf+1,sizeof(int));
-  
-  /* Step 3: count of the surface triangles in the new mesh 
+
+  /* Step 3: count of the surface triangles in the new mesh
      Code for pt->mark : if MG_GET(pt->mark,0) = in the list
                          if !MG_GET(pt->mark,0) = not in the list
                          if MG_GET(pt->mark, i+1) : face i has a boundary triangle which has already been counted */
@@ -135,16 +135,16 @@ int* _MMG5_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
     pt = &mesh->tetra[iel];
     adja = &mesh->adja[4*(iel-1)+1];
     if (pt->xt) pxt = &mesh->xtetra[pt->xt];
-    
+
     for(i=0; i<4; i++) {
       jel = adja[i] / 4;
       jface = adja[i] % 4;
-      
+
       /* Face i carries a non homogeneous Dirichlet BC */
       if ( pt->xt && (pxt->ftag[i] & MG_BDY) && (pxt->ref[i] == _MMG5_DISPREF) ) {
         /* If this triangle has not been taken into account */
         if ( MG_GET(pt->mark,i+1) ) continue;
-        
+
         ntf++;
         if ( !jel ) continue;
         pt1 = &mesh->tetra[jel];
@@ -154,7 +154,7 @@ int* _MMG5_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
       else if ( !jel || ( !mesh->tetra[jel].mark ) ) ntf++;
     }
   }
-  
+
   /* Step 4: creation of the mesh for elasticity */
   if ( !LS_mesh(lsst,npf,0,ntf,ilist) ) {
     fprintf(stderr,"\n  ## Error: %s: problem in fn LS_mesh. Exiting.\n",
@@ -167,13 +167,13 @@ int* _MMG5_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
     LS_setPar(lsst,0,0);
   else
     LS_setPar(lsst,1,0);
-  
+
   /* Step 5: fill the LS mesh */
   /* Add vertices */
   for(k=1; k<=mesh->np; k++) {
     ip = perm[k];
     if ( !ip ) continue;
-    
+
     p0 = &mesh->point[k];
     invperm[ip] = k;
     if ( !LS_addVer(lsst,ip,p0->c,p0->ref) ) {
@@ -182,22 +182,22 @@ int* _MMG5_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
       return 0;
     }
   }
-  
+
   /* Add tetrahedra */
   for(k=1; k<=ilist; k++) {
     iel = list[k];
     pt = &mesh->tetra[iel];
-    
+
     for(i=0; i<4; i++)
       vper[i] = perm[pt->v[i]];
-    
+
     if (!LS_addTet(lsst,k,vper,0) ) {
       fprintf(stderr,"\n  ## Error: %s: problem in fn LS_addTet. Exiting.\n",
         __func__);
       return 0;
     }
   }
-  
+
   /* Add surface triangles */
   ntf = 0;
   for(k=1; k<=ilist; k++) {
@@ -205,11 +205,11 @@ int* _MMG5_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
     pt = &mesh->tetra[iel];
     adja = &mesh->adja[4*(iel-1)+1];
     if (pt->xt) pxt = &mesh->xtetra[pt->xt];
-    
+
     for(i=0; i<4; i++) {
       jel = adja[i] / 4;
       jface = adja[i] % 4;
-      
+
       /* Face i carries a non homogeneous Dirichlet BC */
       if ( pt->xt && (pxt->ftag[i] & MG_BDY) && (pxt->ref[i] == _MMG5_DISPREF) ) {
         /* If this triangle has not been taken into account */
@@ -217,7 +217,7 @@ int* _MMG5_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
         ntf++;
         for (j=0; j<3; j++)
           vper[j] = perm[pt->v[_MMG5_idir[i][j]]];
-        
+
         if ( !LS_addTri(lsst,ntf,vper,refdirnh) ) {
           fprintf(stderr,"\n  ## Error: %s: problem in fn LS_addTri. Exiting.\n",
                   __func__);
@@ -229,7 +229,7 @@ int* _MMG5_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
         ntf++;
         for (j=0; j<3; j++)
           vper[j] = perm[pt->v[_MMG5_idir[i][j]]];
-        
+
         if ( !LS_addTri(lsst,ntf,vper,refdirh) ) {
           fprintf(stderr,"\n  ## Error: %s: problem in fn LS_addTri. Exiting.\n",
             __func__);
@@ -241,45 +241,45 @@ int* _MMG5_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
 
   if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && (ilist+npf+ntf > 0) )
        printf("Number of packed tetra %d, points %d, triangles %d\n",ilist,npf,ntf);
-  
+
   /* Add boundary conditions */
   if ( !LS_setBC(lsst,Dirichlet,refdirnh,'f',LS_tri,NULL) ) {
     fprintf(stderr,"\n  ## Error: %s: problem in fn LS_set BC. Exiting.\n",
       __func__);
     return 0;
   }
-  
+
   if ( !LS_setBC(lsst,Dirichlet,refdirh,'v',LS_tri,u) ) {
     fprintf(stderr,"\n  ## Error: %s: problem in fn LS_set BC. Exiting.\n",
             __func__);
     return 0;
   }
-  
+
   /* Add materials */
   if ( !LS_setLame(lsst,0,_LS_LAMBDA,_LS_MU) ) {
     fprintf(stderr,"\n  ## Error: %s: problem in fn LS_setLame. Exiting.\n",
             __func__);
     return 0;
   }
-  
+
   /* Transfer displacement */
   if ( !LS_newSol(lsst) ) {
     fprintf(stderr,"\n  ## Error: %s: problem in fn LS_newSol. Exiting.\n",
             __func__);
     return 0;
   }
-  
+
   for(k=1; k<=mesh->np; k++) {
     ip = perm[k];
     if ( !ip ) continue;
-    
+
     if ( !LS_addSol(lsst,ip,&disp->m[3*k]) ) {
       fprintf(stderr,"\n  ## Error: %s: problem in fn LS_addSol. Exiting.\n",
         __func__);
       return 0;
     }
   }
-  
+
   *npfin = npf;
   free(list);
   free(perm);
@@ -291,17 +291,17 @@ int _MMG5_unpackLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int npf,int *invper
   double     *u;
   int        k,ip;
   char       i;
-  
+
   u = LS_getSol(lsst);
-  
+
   for(k=1; k<=mesh->np; k++) {
     for(i=0; i<3; i++)
       disp->m[3*k+i] = 0.0;
   }
-  
+
   for(k=1; k<=npf; k++) {
     ip = invperm[k];
-    
+
     for(i=0; i<3; i++)
       disp->m[3*ip+i] = u[3*(k-1)+i];
   }
@@ -313,40 +313,40 @@ int _MMG5_unpackLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int npf,int *invper
 int _MMG5_velextLS(MMG5_pMesh mesh,MMG5_pSol disp) {
   LSst        *lsst;
   int         npf,*invperm;
-  
+
   /* Creation of the data structure for the submesh */
   lsst = LS_init(mesh->dim,mesh->ver,P1,1);
   invperm = _MMG5_packLS(mesh,disp,lsst,&npf);
-  
+
   if ( !npf ) {
     fprintf(stderr,"\n  ## Error: %s: problem in fn MMG5_packLS. Exiting.\n",
             __func__);
     return 0;
   }
-  
+
   /* Resolution of the elasticity system on the submesh */
   if ( !LS_elastic(lsst) ) {
     fprintf(stderr,"\n  ## Error: %s: Problem in fn elasti1. Exiting.\n",
             __func__);
     return 0;
   }
-  
+
   /* Update of the displacement */
   if ( !_MMG5_unpackLS(mesh,disp,lsst,npf,invperm) ) {
     fprintf(stderr,"\n  ## Error: %s: problem in fn _MMG5_unpackLS. Exiting.\n",
             __func__);
     return 0;
   }
-  
+
   /* Free memory */
   free(invperm);
-  
+
   if ( !LS_stop(lsst) ) {
     fprintf(stderr,"\n  ## Error: %s: problem in fn LS_stop. Exiting.\n",
             __func__);
     return 0;
   }
-  
+
   return 1;
 }
 #else

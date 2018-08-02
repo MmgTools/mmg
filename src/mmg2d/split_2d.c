@@ -66,7 +66,7 @@ int _MMG2_chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
   p2 = &mesh->point[pt->v[i2]];
 
   adja = &mesh->adja[3*(k-1)+1];
-  
+
   jel  = adja[i] / 3;
   j    = adja[i] % 3;
   j1   = _MMG5_inxt2[j];
@@ -94,12 +94,12 @@ int _MMG2_chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
     ppt = &mesh->point[ip];
     if ( pt->tag[i] ) ppt->tag = pt->tag[i];
     if ( pt->edg[i] ) ppt->ref = pt->edg[i];
-    
+
     /* Check quality of the four new elements */
     calnew = DBL_MAX;
     memcpy(pt0,pt,sizeof(MMG5_Tria));
     pt0->v[i2] = ip;
-    
+
     caltmp = _MMG2D_ALPHAD*MMG2D_caltri(mesh,met,pt0);
     calnew = MG_MIN(calnew,caltmp);
 
@@ -119,8 +119,8 @@ int _MMG2_chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
       calnew = MG_MIN(calnew,caltmp);
     }
 
-    /* Delete point and abort splitting if one of the created triangles 
-       has very bad quality. 
+    /* Delete point and abort splitting if one of the created triangles
+       has very bad quality.
        _MMG5_EPSOK is not sufficient :
        we created very bad element and was not able to delete them */
     if ( (calnew < calseuil)  ) {
@@ -186,7 +186,7 @@ int _MMG2_chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
         caltmp = _MMG2D_ALPHAD*MMG2D_caltri(mesh,met,pt0);
         calnew = MG_MIN(calnew,caltmp);
       }
-      
+
       ier = ( calnew > _MMG5_EPSOK );
       if ( ier ) {
         isv = 1;
@@ -203,7 +203,7 @@ int _MMG2_chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
         t = 0.5*(to+tp);
     }
     while ( ++it < maxit );
-    
+
     /* One satisfying position has been found: to */
     if ( isv ) {
       ppt->c[0] = mid[0] + to*(o[0] - mid[0]);

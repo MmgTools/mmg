@@ -209,7 +209,7 @@ int _MMG2_singul(MMG5_pMesh mesh) {
 
     for (i=0; i<3; i++) {
       ppt = &mesh->point[pt->v[i]];
-      
+
       if ( ppt->s ) continue;
       ppt->s = 1;
       if ( !MG_VOK(ppt) || MG_SIN(ppt->tag) )  continue;
@@ -261,7 +261,7 @@ int _MMG2_singul(MMG5_pMesh mesh) {
           vy = p2->c[1] - ppt->c[1];
           vz = p2->c[2] - ppt->c[2];
           dd = (ux*ux + uy*uy + uz*uz) * (vx*vx + vy*vy + vz*vz);
-          
+
           /* If both edges carry different refs, tag vertex as singular */
           if ( listref[1] != listref[2] ) {
             ppt->tag |= MG_CRN;

@@ -44,20 +44,20 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
   static char     mmgWarn8=0;
 
   nex = 0;
-  
+
   /* Associate seed to each point in the mesh */
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
     if ( MG_VOK(ppt) ) ppt->s = 0;
   }
-  
+
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) ) continue;
     for (i=0; i<3; i++)
       mesh->point[pt->v[i]].s = k;
   }
-  
+
   /* Check for the existing edges in the mesh */
   /* No command for identifying whether an edge is valid or not? */
   for(k=1; k<=mesh->na; k++) {
@@ -67,20 +67,20 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
       nex++;
       continue;
     }
-    
+
     ppt = &mesh->point[ped->a];
     kdep = ppt->s;
     pt = &mesh->tria[kdep];
-    
+
     if ( pt->v[0] == ped->a )
       j=0;
     else if ( pt->v[1] == ped->a )
       j=1;
     else
       j=2;
-    
+
     lon = _MMG2_boulet(mesh,kdep,j,list);
-    
+
     if ( lon <= 0 ) {
       if ( !mmgWarn0 ) {
         mmgWarn0=1;
@@ -90,14 +90,14 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
       }
       return 0;
     }
-    
+
     for (l=0; l<lon; l++) {
       iel = list[l] / 3;
       pt  = &mesh->tria[iel];
       i = list[l] % 3;
       i1 = _MMG5_inxt2[i];
       i2 = _MMG5_iprv2[i];
-      
+
       if ( pt->v[i1] == ped->b ) {
         ped->base = -1;
         nex++;
@@ -109,7 +109,7 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
         break;
       }
     }
-    
+
     if ( l >= lon ) {
       if ( (mesh->info.imprim > 5) && (!mmgWarn1) ) {
         mmgWarn1 = 1;
@@ -119,19 +119,19 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
       ped->base = kdep;
     }
   }
-    
+
   /** Now treat the missing edges */
   if ( nex != mesh->na ) {
     if(mesh->info.imprim > 5)
       printf(" ** number of missing edges : %d\n",mesh->na-nex);
-    
+
     for (kk=1; kk<=mesh->na; kk++) {
       ped = &mesh->edge[kk];
       if ( !ped->a || ped->base < 0 ) continue;
       ia = ped->a;
       ib = ped->b;
       kdep = ped->base;
-      
+
       if(mesh->info.ddebug)
         printf("\n  -- edge enforcement %d %d\n",ia,ib);
 
@@ -144,7 +144,7 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
         }
         return 0;
       }
-      
+
       /* Failure */
       if ( !( lon < 0 || lon == 4 ) ) {
         if ( mesh->info.ddebug && (!mmgWarn3) ) {
@@ -181,12 +181,12 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
       /* Randomly swap edges in the list, while... */
       ilon = lon;
       srand(time(NULL));
-      
+
       while ( ilon > 0 ) {
         rnd = ( rand() % lon );
         k   = list[rnd] / 3;
 
-        /* Check for triangle k in the pipe until one triangle with base+1 is met (indicating that it is 
+        /* Check for triangle k in the pipe until one triangle with base+1 is met (indicating that it is
            crossed by the considered edge) */
         l = 0;
         while ( l++ < lon ) {
@@ -194,20 +194,20 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
           if ( pt->base == mesh->base+1 ) break;
           k = list[(++rnd)%lon] / 3;
         }
-        
+
         assert ( l <= lon );
         idep = list[rnd] % 3;
         // if(mesh->info.ddebug) printf("i= %d < %d ? on demarre avec %d\n",i,lon+1,k);
         adja = &mesh->adja[3*(k-1)+1];
-        
+
         for (i=0; i<3; i++) {
           ir = (idep+i) % 3;
-          
+
           /* Check the adjacent triangle in the pipe */
           adj = adja[ir] / 3;
           pt1 = &mesh->tria[adj];
           if ( pt1->base != (mesh->base+1) ) continue;
-          
+
           /* Swap edge ir in triangle k, corresponding to a situation where both triangles are to base+1 */
           if ( !_MMG2_swapdelone(mesh,sol,k,ir,1e+4,list2) ) {
             if ( mesh->info.ddebug && (!mmgWarn7) ) {
@@ -217,7 +217,7 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
             }
             continue;
           }
-          
+
           /* Is new triangle intersected by ia-ib ?? */
           for (ied=1; ied<3; ied++) {
             iare = MMG2_cutEdgeTriangle(mesh,list2[ied],ia,ib);
