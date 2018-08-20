@@ -522,7 +522,8 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
   _MMG5_tet2tri(mesh,k,iface,&tt);
   for( i=0 ; i<3 ; i++ )
     if ( tt.v[i] == n0 )      break;
-  assert(i<3);
+  assert ( i<3 );
+  if ( i>=3 ) return 0;
   tt.v[i] = 0;
 
   if ( !_MMG5_nortri(mesh, &tt, nprev) ) return 0;
@@ -537,7 +538,9 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
 
     for( i=0 ; i<3 ; i++ )
       if ( tt.v[i] == n0 )      break;
-    assert(i<3);
+
+    assert ( i<3 );
+    if ( i>=3 ) return 0;
     tt.v[i] = 0;
 
     caltmp = _MMG5_caltri(mesh,met,&tt);
@@ -880,7 +883,9 @@ int _MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
   _MMG5_tet2tri(mesh,iel,iface,&tt);
   for( i=0 ; i<3 ; i++ )
     if ( tt.v[i] == ip0 )      break;
-  assert(i<3);
+
+  assert ( i<3 );
+  if ( i>=3 ) return 0;
   tt.v[i] = 0;
 
   if ( !_MMG5_nortri(mesh, &tt, nprev) ) return 0;
@@ -895,8 +900,9 @@ int _MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
 
     for( i=0 ; i<3 ; i++ )
       if ( tt.v[i] == ip0 )      break;
-    assert(i<3);
 
+    assert ( i<3 );
+    if ( i>=3 ) return 0;
     tt.v[i] = 0;
 
     caltmp = _MMG5_caltri(mesh,met,&tt);
@@ -1224,8 +1230,9 @@ int _MMG5_movbdynompt_ani(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree, 
   _MMG5_tet2tri(mesh,iel,iface,&tt);
   for( i=0 ; i<3 ; i++ )
     if ( tt.v[i] == ip0 )      break;
-  assert(i<3);
 
+  assert ( i<3 );
+  if ( i>=3 ) return 0;
   tt.v[i] = 0;
 
   if ( !_MMG5_nortri(mesh, &tt, nprev) ) return 0;
@@ -1241,9 +1248,11 @@ int _MMG5_movbdynompt_ani(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree, 
 
     for( i=0 ; i<3 ; i++ )
       if ( tt.v[i] == ip0 )      break;
-    assert(i<3);
 
+    assert ( i<3 );
+    if ( i>=3 ) return 0;
     tt.v[i] = 0;
+
     caltmp = _MMG5_caltri(mesh,met,&tt);
     if ( caltmp < _MMG5_EPSD2 ) {
       /* We don't check the input triangle qualities, thus we may have a very
@@ -1578,7 +1587,7 @@ int _MMG5_movbdyridpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
     if ( tt.v[i] == ip0 )      break;
   }
   assert(i<3);
-
+  if ( i>=3 ) return 0;
   tt.v[i] = 0;
 
   if ( !_MMG5_nortri(mesh, &tt, nprev) ) return 0;
@@ -1595,7 +1604,7 @@ int _MMG5_movbdyridpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
       if ( tt.v[i] == ip0 )      break;
     }
     assert(i<3);
-
+    if ( i>=3 ) return 0;
     tt.v[i] = 0;
 
     caltmp = _MMG5_caltri(mesh,met,&tt);

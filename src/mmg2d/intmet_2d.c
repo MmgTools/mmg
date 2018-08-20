@@ -37,8 +37,8 @@
    ip = index of the new point */
 int _MMG2_intmet_iso(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s) {
   MMG5_pTria  pt;
-  int    ip1,ip2;
-  char   i1,i2;
+  int         ip1,ip2;
+  char        i1,i2;
 
   pt  = &mesh->tria[k];
   i1  = _MMG5_inxt2[i];

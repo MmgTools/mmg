@@ -1190,7 +1190,8 @@ int _MMG3D_sizeArbreLink(_MMG3D_pOctree q)
  *
  */
 static inline
-int NearNeighborSquare(MMG5_pMesh mesh, double* ani, _MMG3D_pOctree q, int no, double l, int dim)
+int _MMG3D_NearNeighborSquare(MMG5_pMesh mesh, double* ani, _MMG3D_pOctree q,
+                              int no, double l, int dim)
 {
   MMG5_pPoint   ppt,ppt1;
   _MMG3D_octree_s** qlist;
