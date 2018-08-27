@@ -1592,9 +1592,7 @@ int16_t _MMG5_coquilTravel(MMG5_pMesh mesh, int na, int nb, int* adj, int *piv,
   int16_t      isbdy;
 
   pt = &mesh->tetra[*adj];
-  pxt = 0;
-  if ( pt->xt )
-    pxt = &mesh->xtetra[pt->xt];
+  pxt = &mesh->xtetra[pt->xt];
 
   /* set new tetra for travel */
   adja = &mesh->adja[4*(*adj-1)+1];

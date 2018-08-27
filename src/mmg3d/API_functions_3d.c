@@ -301,7 +301,7 @@ int MMG3D_Get_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol *sol, int *nsols,
   if ( nsols != NULL )
     *nsols = mesh->nsols;
 
-  for ( j=0; j<(*nsols); ++j ) {
+  for ( j=0; j<mesh->nsols; ++j ) {
     psl = *sol + j;
 
     if ( typSol != NULL ) {
