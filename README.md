@@ -1,4 +1,5 @@
-# mmg - Surface and volume remeshers
+
+# mmg - Surface and volume remeshers [![Build Status](https://ci.inria.fr/mmg/buildStatus/icon?job=Mmg-multiConf)](https://ci.inria.fr/mmg/job/Mmg-multiConf/)
 mmg is an open source software for bidimensional and tridimensional surface and volume remeshing.
 
 It provides 3 applications and 4 libraries:

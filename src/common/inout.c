@@ -611,6 +611,9 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
             ina_a[na+nbl_a]=na;
           }
           else {
+            /* Skip this edge but advance the file pointer */
+            pa = &mesh->edge[0];
+            fscanf((*inm),"%d %d ",&pa->a,&pa->b);
             ++nbl_a;
           }
         }
@@ -632,6 +635,9 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
             ina_t[nt+nbl_t]=nt;
           }
           else {
+            /* Skip this triangle but advance the file pointer */
+            ptt = &mesh->tria[0];
+            fscanf((*inm),"%d %d %d",&ptt->v[0],&ptt->v[1],&ptt->v[2]);
             ++nbl_t;
           }
         }
@@ -753,6 +759,10 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
               ina_a[na+nbl_a]=na;
             }
             else {
+              /* Skip this edge but advance the file pointer */
+              pa = &mesh->edge[0];
+              fread(&pa->a,sw,1,(*inm));
+              fread(&pa->b,sw,1,(*inm));
               ++nbl_a;
             }
           }
@@ -812,6 +822,10 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
               ina_t[nt+nbl_t]=nt;
             }
             else {
+              /* Skip this triangle but advance the file pointer */
+              for ( i=0; i<3 ; ++i ) {
+                fread(&l,sw,1,(*inm));
+              }
               ++nbl_t;
             }
           }
