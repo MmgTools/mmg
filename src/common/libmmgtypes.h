@@ -478,6 +478,27 @@ typedef struct {
   int         siz,max,nxt;
 } MMG5_HGeom;
 
+
+/**
+ * \struct _MMG5_hedge
+ * \brief Used to hash edges (memory economy compared to \ref MMG5_hgeom).
+ */
+typedef struct {
+  int   a,b,nxt;
+  int   k; /*!< k = point along edge a b or triangle index */
+  int   s;
+} _MMG5_hedge;
+
+/**
+ * \struct _MMG5_Hash
+ * \brief Identic as \ref MMG5_HGeom but use \ref _MMG5_hedge to store edges
+ * instead of \ref MMG5_hgeom (memory economy).
+ */
+typedef struct {
+  int     siz,max,nxt;
+  _MMG5_hedge  *item;
+} _MMG5_Hash;
+
 /**
  * \struct MMG5_Mesh
  * \brief MMG mesh structure.
