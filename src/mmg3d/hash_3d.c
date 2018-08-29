@@ -30,7 +30,6 @@
  * \author Algiane Froehly (Inria/UBordeaux)
  * \version 5
  * \copyright GNU Lesser General Public License.
- * \todo doxygen documentation.
  */
 
 #include "mmg3d.h"
