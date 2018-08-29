@@ -209,7 +209,7 @@ int MMG3D_hashTetra(MMG5_pMesh mesh, int pack) {
 
   /* init */
   if ( mesh->info.ddebug )  fprintf(stdout,"  h- stage 1: init\n");
-  inival = 2147483647;
+  inival = INT_MAX;
   iadr   = 0;
   for (k=0; k<=mesh->ne; k++)
     hcode[k] = -inival;
@@ -327,7 +327,7 @@ int MMG3D_hashPrism(MMG5_pMesh mesh) {
 
   /* init */
   if ( mesh->info.ddebug )  fprintf(stdout,"  h- stage 1: init\n");
-  inival = 2147483647;
+  inival = INT_MAX;
   iadr   = 0;
   for (k=0; k<=mesh->nprism; k++)
     hcode[k] = -inival;

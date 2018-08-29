@@ -69,7 +69,7 @@ int MMG2_hashTria(MMG5_pMesh mesh) {
   hsize = mesh->nt;
 
   /* init */
-  inival = 2147483647;
+  inival = INT_MAX;
   for (k=0; k<=mesh->nt; k++)
     hcode[k] = -inival;
 
