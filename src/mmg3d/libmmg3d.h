@@ -1582,6 +1582,57 @@ extern "C" {
  */
   int MMG3D_Get_iparameter(MMG5_pMesh mesh, int iparam);
 
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param v0 first vertex of tetrahedron.
+ * \param v1 second vertex of tetrahedron.
+ * \param v2 third vertex of tetrahedron.
+ * \param v3 fourth vertex of tetrahedron.
+ * \param ref tetrahedron reference.
+ *
+ * \return 0 if unable to create the tetra, the index of the new tetra if the
+ * new tetra has strictly positive area, -the index of the new tetra if it has a
+ * zero area or if it has been reorientated.
+ *
+ * Add a tetrahedra of vertices \a v0, \a v1,\a v2,\a v3 and reference
+ * \a ref at the first available position of the mesh.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_ADD_TETRAHEDRON(mesh,v0,v1,v2,v3,ref,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * >     INTEGER, INTENT(IN)           :: v0,v1,v2,v3,ref\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int  MMG3D_Add_tetrahedron(MMG5_pMesh mesh, int v0, int v1,
+                             int v2, int v3, int ref);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param c0 x coor of the new point
+ * \param c1 y coor of the new point
+ * \param c2 z coor of the new point
+ * \param ref point reference.
+ *
+ * \return 0 if unable to create the point, the index of the new point
+ * otherwise.
+ *
+ * Add a point of coor \a c0 \a c1 \a c2  and reference
+ * \a ref at the first available position of the mesh.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_ADD_VERTEX(mesh,c0,c1,c2,ref,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * >     REAL(KIND=8), INTENT(IN)      :: c0,c1,c2\n
+ * >     INTEGER, INTENT(IN)           :: ref\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int  MMG3D_Add_vertex(MMG5_pMesh mesh, double c0, double c1,
+                        double c2, int ref);
+
 /* input/output functions */
 /**
  * \param mesh pointer toward the mesh structure.

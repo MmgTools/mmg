@@ -751,6 +751,28 @@ FORTRAN_NAME(MMG3D_CHK_MESHDATA,mmg3d_chk_meshdata,
 }
 
 /**
+ * See \ref MMG3D_Add_tetrahedron function in \ref mmg3d/libmmg3d.h file.
+ */
+FORTRAN_NAME(MMG3D_ADD_TETRAHEDRON,mmg3d_add_tetrahedron,
+             (MMG5_pMesh *mesh, int *v0, int *v1, int *v2, int *v3, int *ref,
+              int* retval),
+             (mesh,v0,v1,v2,v3,ref,retval)){
+  *retval = MMG3D_Add_tetrahedron(*mesh,*v0,*v1,*v2,*v3,*ref);
+  return;
+}
+
+/**
+ * See \ref MMG3D_Add_vertex function in \ref mmg3d/libmmg3d.h file.
+ */
+FORTRAN_NAME(MMG3D_ADD_VERTEX,mmg3d_add_vertex,
+             (MMG5_pMesh *mesh, double *c0, double *c1, double *c2, int *ref,
+              int* retval),
+             (mesh,c0,c1,c2,ref,retval)){
+  *retval = MMG3D_Add_vertex(*mesh,*c0,*c1,*c2,*ref);
+  return;
+}
+
+/**
  * See \ref MMG3D_Set_iparameter function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_SET_IPARAMETER,mmg3d_set_iparameter,

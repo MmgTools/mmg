@@ -1852,6 +1852,112 @@ int _MMG3D_skipIso(MMG5_pMesh mesh) {
   return 1;
 }
 
+int MMG3D_Add_tetrahedron(MMG5_pMesh mesh, int v0, int v1, int v2, int v3, int ref) {
+  MMG5_pTetra pt;
+  MMG5_pPoint ppt;
+  double vol;
+  int    aux,j,ip,iel,vv[4];
+
+  vv[0] = v0;
+  vv[1] = v1;
+  vv[2] = v2;
+  vv[3] = v3;
+
+  for ( j=0; j<4; ++j ) {
+    if ( vv[j] > mesh->np ) {
+      fprintf(stderr,"\n  ## Error: %s: vertex %d doesn't exist in the mesh.\n",
+              __func__,vv[j]);
+      fprintf(stderr,"    Use the MMG3D_Add_vertex function to add it.\n");
+      return 0;
+    }
+  }
+
+  iel = _MMG3D_newElt(mesh);
+  if ( !iel ) {
+    _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
+                        fprintf(stderr,"\n  ## Error: %s: unable to allocate"
+                                " a new element.\n",__func__);
+                        _MMG5_INCREASE_MEM_MESSAGE();
+                        fprintf(stderr,"  Exit program.\n");
+                        return 0,0);
+  }
+
+  pt = &mesh->tetra[iel];
+  pt->v[0] = v0;
+  pt->v[1] = v1;
+  pt->v[2] = v2;
+  pt->v[3] = v3;
+  pt->ref  = abs(ref);
+
+  mesh->point[pt->v[0]].tag &= ~MG_NUL;
+  mesh->point[pt->v[1]].tag &= ~MG_NUL;
+  mesh->point[pt->v[2]].tag &= ~MG_NUL;
+  mesh->point[pt->v[3]].tag &= ~MG_NUL;
+
+  vol = _MMG5_orvol(mesh->point,pt->v);
+  if ( fabs(vol) <= _MMG5_EPSD2 ) {
+    fprintf(stderr,"\n  ## Error: %s: tetrahedron %d: null volume.\n",
+            __func__,iel);
+    for ( ip=0; ip<4; ip++ ) {
+      ppt = &mesh->point[pt->v[ip]];
+      for ( j=0; j<3; j++ ) {
+        if ( fabs(ppt->c[j])>0. ) {
+          fprintf(stderr," Check that you don't have a sliver tetrahedron.\n");
+          return -iel;
+        }
+      }
+    }
+    fprintf(stderr,"  All vertices have zero coordinates.");
+    fprintf(stderr," Check that you have set the vertices before the tetrahedra.\n");
+    return -iel;
+  }
+  else if ( vol < 0.0 ) {
+    /* Possibly switch 2 vertices number so that each tet is positively oriented */
+    aux = pt->v[2];
+    pt->v[2] = pt->v[3];
+    pt->v[3] = aux;
+    /* mesh->xt temporary used to count reoriented tetra */
+    mesh->xt++;
+
+    return -iel;
+  }
+
+  return iel;
+}
+
+int MMG3D_Add_vertex(MMG5_pMesh mesh,double c0,double c1,double c2,int ref) {
+  double c[3];
+  int    ip,klink;
+
+  c[0] = c0;
+  c[1] = c1;
+  c[2] = c2;
+
+  ip = _MMG3D_newPt(mesh,c,0);
+  if ( !ip ) {
+    _MMG5_TAB_RECALLOC(mesh,mesh->point,mesh->npmax,mesh->gap,MMG5_Point,
+                       "larger point table",
+                       fprintf(stderr,"\n  ## Error: %s: unable to allocate"
+                               " a new point\n",__func__);
+                       _MMG5_INCREASE_MEM_MESSAGE();,
+                       0);
+
+    mesh->npnil = mesh->np+1;
+    for (klink=mesh->npnil; klink<mesh->npmax-1; klink++)
+      mesh->point[klink].tmp  = klink+1;
+
+    /* We try again to add the point */
+    ip = _MMG3D_newPt(mesh,c,0);
+    if ( !ip ) {
+      fprintf(stderr,"\n  ## Error: %s: unable to allocate"
+              " a new point\n",__func__);
+      _MMG5_INCREASE_MEM_MESSAGE();
+      return 0;
+    }
+  }
+  return ip;
+}
+
 int MMG3D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam,int val){
   int k;
 
