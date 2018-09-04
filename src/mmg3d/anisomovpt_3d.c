@@ -62,6 +62,14 @@ int _MMG5_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree, int
   double               calold,calnew,*callist,det;
   int                  k,iel,i0;
 
+  assert ( ilist > 0 );
+  if ( ilist <= 0 ) {
+    fprintf(stderr,"\n  ## Error: %s:"
+            " volumic ball has null or negative size (%d)\n",
+            __func__,ilist);
+    return 0;
+  }
+
   pt0    = &mesh->tetra[0];
   ppt0   = &mesh->point[0];
   memset(ppt0,0,sizeof(MMG5_Point));

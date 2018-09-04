@@ -640,12 +640,14 @@ int _MMG5_bouletrid(MMG5_pMesh mesh,int start,int iface,int ip,int *il1,int *l1,
   pt = &mesh->tetra[start];
   if ( !MG_EOK(pt) )  return 0;
 
+#ifndef NDEBUG
   assert(pt->xt);
   pxt = &mesh->xtetra[pt->xt];
   // We must call this function on a well orientated boundary face (to build the
   // direct surfacic ball).
   assert(pxt->ftag[iface] & MG_BDY);
   assert( MG_GET(pxt->ori,iface) );
+#endif
 
   idp = pt->v[ip];
   k = start;
