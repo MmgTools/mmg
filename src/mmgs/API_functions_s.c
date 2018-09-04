@@ -238,10 +238,16 @@ int MMGS_Get_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol *sol, int *nsols,
   MMG5_pSol psl;
   int       j;
 
+  if ( !mesh ) {
+    fprintf(stderr,"\n  ## Error: %s: your mesh structure must be allocated"
+            " and filled\n",__func__);
+    return 0;
+  }
+
   if ( nsols != NULL )
     *nsols = mesh->nsols;
 
-  for ( j=0; j<(*nsols); ++j ) {
+  for ( j=0; j<mesh->nsols; ++j ) {
     psl = *sol + j;
 
     if ( typSol != NULL ) {
