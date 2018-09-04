@@ -482,7 +482,9 @@ int _MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
     /* retrieve vertex in tetra */
     for (ip=0; ip<4; ip++)
       if ( pt->v[ip] == nump )  break;
+
     assert(ip<4);
+    if ( ip==4 ) return 0;
 
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     pt0->v[ip] = numq;
@@ -567,7 +569,10 @@ int _MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
       for (i=0; i<3; i++) {
         if ( tt.v[i] == nump )  break;
       }
+
       assert(i<3);
+      if ( i==3 ) return 0;
+
       /* Index of the third point of the first collapsed triangle */
       i  = _MMG5_inxt2[i];
       ia = _MMG5_inxt2[i];
@@ -590,6 +595,8 @@ int _MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
       if ( tt.v[i] == nump )  break;
     }
     assert(i<3);
+    if ( i==3 ) return 0;
+
     tt.v[i] = numq;
 
     /* Local parameters for tt and iel */

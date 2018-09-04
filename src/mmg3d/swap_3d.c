@@ -108,6 +108,8 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
     if ( (tt1.v[ia1] != np) && (tt1.v[ia1] != nq) )  break;
   }
   assert( ia1 < 3 );
+  if ( ia1==3 ) return 0;
+
   assert( (tt1.v[_MMG5_inxt2[ia1]] == np && tt1.v[_MMG5_iprv2[ia1]] == nq) ||
           (tt1.v[_MMG5_inxt2[ia1]] == nq && tt1.v[_MMG5_iprv2[ia1]] == np) );
   na1 = tt1.v[ia1];
@@ -117,6 +119,8 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
   }
 
   assert ( ia2 < 3 );
+  if ( ia2 ==3 ) return 0;
+
   assert ( (tt2.v[_MMG5_inxt2[ia2]] == np && tt2.v[_MMG5_iprv2[ia2]] == nq) ||
            (tt2.v[_MMG5_inxt2[ia2]] == nq && tt2.v[_MMG5_iprv2[ia2]] == np) );
   na2 = tt2.v[ia2];

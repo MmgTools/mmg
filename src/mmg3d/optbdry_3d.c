@@ -250,6 +250,9 @@ int MMG3D_optbdry(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree,int k) {
   for(i=0 ; i<4 ; i++)
     if ( pxt->ftag[i] & MG_BDY ) break;
 
+  assert ( i< 4 );
+  if ( i== 4 ) return 0;
+
   ib  = i;
   ipb = pt->v[ib];
 

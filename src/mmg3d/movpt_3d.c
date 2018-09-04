@@ -684,6 +684,8 @@ int _MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
     for( i=0 ; i<3 ; i++ )
       if ( tt.v[i] == n0 )      break;
     assert(i<3);
+    if ( i==3 ) return 0;
+
     tt.v[i] = 0;
 
     caltmp = _MMG5_caltri(mesh,met,&tt);
@@ -993,6 +995,7 @@ int _MMG5_movbdyrefpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
     for( i=0 ; i<3 ; i++ )
       if ( tt.v[i] == ip0 )      break;
     assert(i<3);
+    if ( i==3 ) return 0;
 
     tt.v[i] = 0;
 
@@ -1344,6 +1347,7 @@ int _MMG5_movbdynompt_iso(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree, 
     for( i=0 ; i<3 ; i++ )
       if ( tt.v[i] == ip0 )      break;
     assert(i<3);
+    if ( i==3 ) return 0;
 
     tt.v[i] = 0;
 
@@ -1696,6 +1700,7 @@ int _MMG5_movbdyridpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
       if ( tt.v[i] == ip0 )      break;
     }
     assert(i<3);
+    return 0;
 
     tt.v[i] = 0;
 
