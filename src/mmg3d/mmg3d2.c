@@ -536,13 +536,15 @@ static int _MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol/*,double *tmp*/){
 
     pxt = &mesh->xtetra[pt->xt];
     for (ia=0; ia<4; ia++) {
-      if ( pxt->ftag[ia] & MG_BDY ) {
-        for (j=0; j<3; j++) {
-          ip0 = pt->v[_MMG5_idir[ia][_MMG5_inxt2[j]]];
-          ip1 = pt->v[_MMG5_idir[ia][_MMG5_iprv2[j]]];
-          np  = -1;
-          if ( !_MMG5_hashEdge(mesh,&hash,ip0,ip1,np) )  return -1;
-        }
+      if ( !(pxt->ftag[ia] & MG_BDY) ) continue;
+
+      for (j=0; j<3; j++) {
+        if ( !(pxt->tag[ _MMG5_iarf[ia][j] ] & MG_REQ) ) continue;
+
+        ip0 = pt->v[_MMG5_idir[ia][_MMG5_inxt2[j]]];
+        ip1 = pt->v[_MMG5_idir[ia][_MMG5_iprv2[j]]];
+        np  = -1;
+        if ( !_MMG5_hashEdge(mesh,&hash,ip0,ip1,np) )  return -1;
       }
     }
   }
@@ -609,7 +611,7 @@ static int _MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol/*,double *tmp*/){
       sol->m[np] = mesh->info.ls;
 
       if ( npneg ) {
-        /* We split a required edges */
+        /* We split a required edge */
         if ( !mmgWarn ) {
           mmgWarn = 1;
           fprintf(stderr,"  ## Warning: %s: the level-set intersect at least"
