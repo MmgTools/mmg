@@ -415,8 +415,8 @@ void _MMG5_printTria(MMG5_pMesh mesh,char* fileName) {
  * Compute the available memory size of the computer.
  *
  */
-long long _MMG5_memSize (void) {
-  long long mem;
+size_t _MMG5_memSize (void) {
+  size_t mem;
 
 #if (defined(__APPLE__) && defined(__MACH__))
   size_t size;
@@ -426,16 +426,18 @@ long long _MMG5_memSize (void) {
     return 0;
 
 #elif defined(__unix__) || defined(__unix) || defined(unix)
-  mem = ((long long)sysconf(_SC_PHYS_PAGES))*
-    ((long long)sysconf(_SC_PAGE_SIZE));
+  mem = sysconf(_SC_PHYS_PAGES) * sysconf(_SC_PAGE_SIZE);
+
 #elif defined(_WIN16) || defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__TOS_WIN__) || defined(__WINDOWS__)
   MEMORYSTATUSEX status;
+
   status.dwLength = sizeof(status);
   GlobalMemoryStatusEx(&status);
-  // status.ullTotalPhys is an unsigned long long: we must check that it fits inside a long long
-  mem = status.ullTotalPhys & LLONG_MAX;
+  // status.ullTotalPhys is an unsigned long long: check that it fits in a size_t
+  mem = status.ullTotalPhys & SIZE_MAX;
   if (mem == status.ullTotalPhys) return mem;
-  else return LLONG_MAX;
+  else return SIZE_MAX;
+
 #else
   fprintf(stderr,"\n  ## Warning: %s: unknown system, recover of maximal memory"
           " not available.\n",__func__);

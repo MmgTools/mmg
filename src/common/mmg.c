@@ -84,7 +84,7 @@ void _MMG5_mmgDefaultValues(MMG5_pMesh mesh) {
   fprintf(stdout,"\n** Generic options :\n");
   fprintf(stdout,"verbosity                 (-v)      : %d\n",
           mesh->info.imprim);
-  fprintf(stdout,"maximal memory size       (-m)      : %lld MB\n",
+  fprintf(stdout,"maximal memory size       (-m)      : %zu MB\n",
           mesh->memMax/_MMG5_MILLION);
 
 

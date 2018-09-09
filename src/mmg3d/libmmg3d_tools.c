@@ -924,12 +924,14 @@ int MMG3D_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met) {
 }
 
 int MMG3D_switch_metricStorage(MMG5_pMesh mesh, MMG5_pSol met) {
+  int    k;
+  double tmp;
 
   if ( met->size!=6 ) { return 1; }
 
-  for ( int k=1; k<=met->np; ++k ) {
+  for ( k=1; k<=met->np; ++k ) {
 
-    double tmp = met->m[6*k+2];
+    tmp = met->m[6*k+2];
 
     met->m[6*k+2] = met->m[6*k+3];
     met->m[6*k+3] = tmp;

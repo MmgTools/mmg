@@ -155,7 +155,7 @@ int _MMG3D_memOption_memSet(MMG5_pMesh mesh) {
   if ( mesh->info.mem <= 0 ) {
     if ( mesh->memMax )
       /* maximal memory = 50% of total physical memory */
-      mesh->memMax = (long long)(mesh->memMax*_MMG5_MEMPERCENT);
+      mesh->memMax = mesh->memMax*_MMG5_MEMPERCENT;
     else {
       /* default value = 800 MB */
       printf("  Maximum memory set to default value: %d MB.\n",_MMG5_MEMMAX);
@@ -164,13 +164,13 @@ int _MMG3D_memOption_memSet(MMG5_pMesh mesh) {
   }
   else {
     /* memory asked by user if possible, otherwise total physical memory */
-    if ( (long long)(mesh->info.mem)*_MMG5_MILLION > mesh->memMax && mesh->memMax ) {
+    if ( mesh->info.mem*_MMG5_MILLION > mesh->memMax && mesh->memMax ) {
       fprintf(stderr,"\n  ## Warning: %s: asking for %d MB of memory ",
               __func__,mesh->info.mem);
-      fprintf(stderr,"when only %lld available.\n",mesh->memMax/_MMG5_MILLION);
+      fprintf(stderr,"when only %zu available.\n",mesh->memMax/_MMG5_MILLION);
     }
     else {
-      mesh->memMax = (long long)(mesh->info.mem)*_MMG5_MILLION;
+      mesh->memMax = mesh->info.mem*_MMG5_MILLION;
     }
   }
 
@@ -186,12 +186,12 @@ int _MMG3D_memOption_memSet(MMG5_pMesh mesh) {
  *
  */
 int _MMG3D_memOption_memRepartition(MMG5_pMesh mesh) {
-  long long  usedMem,avMem,reservedMem;
+  size_t     usedMem,avMem,reservedMem;
   int        ctri,npadd,bytes;
 
   /* init allocation need _MMG5_MEMMIN B */
   reservedMem = _MMG5_MEMMIN +
-    (long long)(mesh->nprism*sizeof(MMG5_Prism)+mesh->nquad*sizeof(MMG5_Quad));
+    (mesh->nprism*sizeof(MMG5_Prism)+mesh->nquad*sizeof(MMG5_Quad));
 
   /* Compute the needed initial memory */
   usedMem = reservedMem + (mesh->np+1)*sizeof(MMG5_Point)
@@ -200,8 +200,8 @@ int _MMG3D_memOption_memRepartition(MMG5_pMesh mesh) {
     + (mesh->np+1)*sizeof(double);
 
   if ( usedMem > mesh->memMax  ) {
-    fprintf(stderr,"\n  ## Error: %s: %lld MB of memory ",__func__,mesh->memMax/_MMG5_MILLION);
-    fprintf(stderr,"is not enough to load mesh. You need to ask %lld MB minimum\n",
+    fprintf(stderr,"\n  ## Error: %s: %zu MB of memory ",__func__,mesh->memMax/_MMG5_MILLION);
+    fprintf(stderr,"is not enough to load mesh. You need to ask %zu MB minimum\n",
             usedMem/_MMG5_MILLION+1);
     return 0;
   }
@@ -225,14 +225,14 @@ int _MMG3D_memOption_memRepartition(MMG5_pMesh mesh) {
   /* If npadd is exactly the maximum memory available, we will use all the
    * memory and the analysis step will fail. As arrays may be reallocated, we
    * can have smaller values for npmax,ntmax and nemax (npadd/2). */
-  npadd = (int) ( (double)avMem/(2*bytes) );
+  npadd = avMem/(double)(2*bytes);
   mesh->npmax = MG_MIN(mesh->npmax,mesh->np+npadd);
   mesh->ntmax = MG_MIN(mesh->ntmax,ctri*npadd+mesh->nt);
   mesh->nemax = MG_MIN(mesh->nemax,6*npadd+mesh->ne);
 
   /* check if the memory asked is enough to load the mesh*/
   if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug ) {
-    fprintf(stdout,"  MAXIMUM MEMORY AUTHORIZED (MB)    %lld\n",
+    fprintf(stdout,"  MAXIMUM MEMORY AUTHORIZED (MB)    %zu\n",
             mesh->memMax/_MMG5_MILLION);
   }
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {

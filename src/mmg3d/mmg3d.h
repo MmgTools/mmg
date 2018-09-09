@@ -57,17 +57,19 @@ extern "C" {
       mesh->point[klink].tmp  = klink+1;                                \
                                                                         \
     /* solution */                                                      \
-    if ( sol->m ) {                                                     \
-      _MMG5_ADD_MEM(mesh,(sol->size*(mesh->npmax-sol->npmax))*sizeof(double), \
-                    "larger solution",law);                             \
-      _MMG5_SAFE_REALLOC(sol->m,sol->size*(sol->npmax+1),              \
-                         sol->size*(mesh->npmax+1),                     \
-                         double,"larger solution",retval);              \
+    if ( sol ) {                                                        \
+      if ( sol->m ) {                                                   \
+        _MMG5_ADD_MEM(mesh,(sol->size*(mesh->npmax-sol->npmax))*sizeof(double), \
+                      "larger solution",law);                           \
+        _MMG5_SAFE_REALLOC(sol->m,sol->size*(sol->npmax+1),             \
+                           sol->size*(mesh->npmax+1),                   \
+                           double,"larger solution",retval);            \
+      }                                                                 \
+      sol->npmax = mesh->npmax;                                         \
     }                                                                   \
-    sol->npmax = mesh->npmax;                                           \
                                                                         \
     /* We try again to add the point */                                 \
-    ip = _MMG3D_newPt(mesh,o,tag);                                       \
+    ip = _MMG3D_newPt(mesh,o,tag);                                      \
     if ( !ip ) {law;}                                                   \
   }while(0)
 
@@ -290,7 +292,7 @@ int  _MMG5_bdryUpdate(MMG5_pMesh );
 int  _MMG5_bdryPerm(MMG5_pMesh );
 int  _MMG5_chkfemtopo(MMG5_pMesh mesh);
 int  _MMG5_cntbdypt(MMG5_pMesh mesh, int nump);
-long long _MMG5_memSize(void);
+size_t _MMG5_memSize(void);
 int  _MMG3D_memOption(MMG5_pMesh mesh);
 int  _MMG3D_memOption_memSet(MMG5_pMesh mesh);
 int  _MMG3D_memOption_memRepartition(MMG5_pMesh mesh);

@@ -175,13 +175,12 @@ extern "C" {
     Execute the command law if lack of memory. */
 #define _MMG5_CHK_MEM(mesh,size,string,law) do                          \
   {                                                                     \
-    if ( ((mesh)->memCur) > ((mesh)->memMax) ||                         \
-         ((mesh)->memCur < 0 )) {                                       \
+    if ( (mesh)->memCur > (mesh)->memMax ) {                            \
       fprintf(stderr,"  ## Error:");                                    \
       fprintf(stderr," unable to allocate %s.\n",string);               \
       fprintf(stderr,"  ## Check the mesh size or ");                   \
       fprintf(stderr,"increase maximal authorized memory with the -m option.\n"); \
-      (mesh)->memCur -= (long long)(size);                              \
+      (mesh)->memCur -= (size);                                         \
       law;                                                              \
     }                                                                   \
   }while(0)
@@ -255,7 +254,7 @@ void myfree(void *ptr, size_t s) {
     size is the size of the pointer */
 #define _MMG5_DEL_MEM(mesh,ptr,size) do         \
   {                                             \
-    long long size_to_free = (long long)(size); \
+    size_t size_to_free = (size);               \
     (mesh)->memCur -= size_to_free;             \
     myfree(ptr,size_to_free);                   \
     ptr = NULL;                                 \
@@ -265,7 +264,7 @@ void myfree(void *ptr, size_t s) {
     the maximum authorizied memory memMax. */
 #define _MMG5_ADD_MEM(mesh,size,message,law) do \
   {                                             \
-    (mesh)->memCur += (long long)(size);        \
+    (mesh)->memCur += (size);                   \
     _MMG5_CHK_MEM(mesh,size,message,law);       \
   }while(0)
 
@@ -289,7 +288,7 @@ void myfree(void *ptr, size_t s) {
 /** Safe allocation with malloc */
 #define _MMG5_SAFE_MALLOC(ptr,size,type,retval) do    \
   {                                                   \
-    long long size_to_allocate = (size)*sizeof(type); \
+    size_t size_to_allocate = (size)*sizeof(type);    \
     ptr = (type*)mymalloc(size_to_allocate);          \
     if ( !ptr ) {                                   \
       perror("  ## Memory problem: malloc");        \
@@ -301,10 +300,9 @@ void myfree(void *ptr, size_t s) {
 #define _MMG5_SAFE_REALLOC(ptr,prevSize,newSize,type,message,retval) do \
   {                                                                     \
     type* tmp;                                                          \
-    long long size_to_allocate = (long long)(newSize)*sizeof(type);     \
+    size_t size_to_allocate = (newSize)*sizeof(type);                   \
                                                                         \
-    tmp = (type *)myrealloc((ptr),size_to_allocate,                     \
-                            (long long)(prevSize)*sizeof(type));        \
+    tmp = (type *)myrealloc((ptr),size_to_allocate,(prevSize)*sizeof(type)); \
     if ( !tmp ) {                                                       \
       _MMG5_SAFE_FREE(ptr);                                             \
       perror(" ## Memory problem: realloc");                            \
@@ -318,10 +316,9 @@ void myfree(void *ptr, size_t s) {
 #define _MMG5_SAFE_RECALLOC(ptr,prevSize,newSize,type,message,retval) do \
   {                                                                     \
     type* tmp;                                                          \
-    long long size_to_allocate = (long long)(newSize)*sizeof(type);     \
+    size_t size_to_allocate = (newSize)*sizeof(type);                   \
                                                                         \
-    tmp = (type *)myrealloc((ptr),size_to_allocate,                     \
-                            (long long)(prevSize)*sizeof(type));        \
+    tmp = (type *)myrealloc((ptr),size_to_allocate,(prevSize)*sizeof(type)); \
     if ( !tmp ) {                                                       \
       _MMG5_SAFE_FREE(ptr);                                             \
       perror(" ## Memory problem: realloc");                            \
@@ -342,8 +339,9 @@ void myfree(void *ptr, size_t s) {
   {                                                                     \
     int gap;                                                            \
                                                                         \
-    if ( (mesh->memMax-mesh->memCur) <                                  \
-         (long long) (wantedGap*initSize*sizeof(type)) ) {              \
+    assert ( mesh->memCur < mesh->memMax );                             \
+                                                                        \
+    if ( mesh->memMax < mesh->memCur + (wantedGap*initSize*sizeof(type)) ) { \
       gap = (int)((mesh->memMax-mesh->memCur)/sizeof(type));            \
       if(gap<1) {                                                       \
         fprintf(stderr,"  ## Error:");                                  \
@@ -538,7 +536,7 @@ typedef struct _MMG5_dNode_s {
  int           _MMG5_intridmet(MMG5_pMesh,MMG5_pSol,int,int,double,double*,double*);
  int           _MMG5_mmgIntmet33_ani(double*,double*,double*,double);
  int           _MMG5_mmgIntextmet(MMG5_pMesh,MMG5_pSol,int,double *,double *);
- long long     _MMG5_memSize(void);
+ size_t        _MMG5_memSize(void);
  void          _MMG5_mmgDefaultValues(MMG5_pMesh mesh);
  int           _MMG5_mmgHashTria(MMG5_pMesh mesh, int *adja, _MMG5_Hash*, int chkISO);
  void          _MMG5_mmgInit_parameters(MMG5_pMesh mesh);

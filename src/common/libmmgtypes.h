@@ -26,7 +26,7 @@
  */
 #include <stdint.h>
 #include <stdarg.h>
-
+#include <stddef.h>
 
 #ifndef _LIBMMGTYPES_H
 #define _LIBMMGTYPES_H
@@ -505,8 +505,8 @@ typedef struct {
  * \todo try to remove nc1;
  */
 typedef struct {
-  long long memMax; /*!< Maximum memory available */
-  long long memCur; /*!< Current memory used */
+  size_t    memMax; /*!< Maximum memory available */
+  size_t    memCur; /*!< Current memory used */
   double    gap; /*!< Gap for table reallocation */
   int       ver; /*!< Version of the mesh file */
   int       dim; /*!< Dimension of the mesh */

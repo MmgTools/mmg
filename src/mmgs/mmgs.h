@@ -169,7 +169,7 @@ int  setref(MMG5_pMesh,int,int,int);
 int  delref(MMG5_pMesh);
 int  chkmet(MMG5_pMesh,MMG5_pSol);
 int  chknor(MMG5_pMesh);
-long long _MMG5_memSize(void);
+size_t _MMG5_memSize(void);
 int _MMGS_memOption(MMG5_pMesh mesh);
 int MMGS_setMeshSize_alloc( MMG5_pMesh mesh );
 

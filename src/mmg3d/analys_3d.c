@@ -825,12 +825,12 @@ int _MMG3D_analys(MMG5_pMesh mesh) {
   if ( abs(mesh->info.imprim) > 5  || mesh->info.ddebug )
     fprintf(stdout,"  ** UPDATING TOPOLOGY AT NON-MANIFOLD POINTS\n");
 
-  if ( !_MMG5_setNmTag(mesh,&hash) ) {
-    fprintf(stderr,"\n  ## Non-manifold topology problem. Exit program.\n");
-    _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
-    _MMG5_DEL_MEM(mesh,mesh->xpoint,(mesh->xpmax+1)*sizeof(MMG5_xPoint));
-    return 0;
-  }
+  /* if ( !_MMG5_setNmTag(mesh,&hash) ) { */
+  /*   fprintf(stderr,"\n  ## Non-manifold topology problem. Exit program.\n"); */
+  /*   _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge)); */
+  /*   _MMG5_DEL_MEM(mesh,mesh->xpoint,(mesh->xpmax+1)*sizeof(MMG5_xPoint)); */
+  /*   return 0; */
+  /* } */
 
   /* check subdomains connected by a vertex and mark these vertex as corner and required */
   _MMG5_chkVertexConnectedDomains(mesh);
