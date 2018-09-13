@@ -337,11 +337,14 @@ void myfree(void *ptr, size_t s) {
     if reallocation failed. Memset to 0 for the new values of table. */
 #define _MMG5_TAB_RECALLOC(mesh,ptr,initSize,wantedGap,type,message,law,retval) do \
   {                                                                     \
-    int gap;                                                            \
+    int    gap;                                                         \
                                                                         \
     assert ( mesh->memCur < mesh->memMax );                             \
                                                                         \
-    if ( mesh->memMax < mesh->memCur + (wantedGap*initSize*sizeof(type)) ) { \
+    gap = (int)(wantedGap * initSize);                                  \
+    if ( !gap ) gap     = 1;                                            \
+                                                                        \
+    if ( mesh->memMax < mesh->memCur + gap*sizeof(type) ) {             \
       gap = (int)((mesh->memMax-mesh->memCur)/sizeof(type));            \
       if(gap<1) {                                                       \
         fprintf(stderr,"  ## Error:");                                  \
@@ -351,8 +354,6 @@ void myfree(void *ptr, size_t s) {
         law;                                                            \
       }                                                                 \
     }                                                                   \
-    else                                                                \
-      gap = (int)(wantedGap*initSize);                                  \
                                                                         \
     _MMG5_ADD_MEM(mesh,gap*sizeof(type),message,law);                   \
     _MMG5_SAFE_RECALLOC((ptr),initSize+1,initSize+gap+1,type,message,retval); \
