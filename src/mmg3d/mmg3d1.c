@@ -2162,7 +2162,7 @@ static int _MMG5_anatet4(MMG5_pMesh mesh, MMG5_pSol met,int *nf, char typchk) {
       id_op = MMG3D_anatet4_sim(mesh,met,k,typchk-1,&ifac,&conf0,&adj,&conf1);
       if ( !id_op ) {
 #ifndef NDEBUG
-        if ( !mmgWarn ) {
+        if ( (!(mesh->info.noswap && mesh->info.noinsert)) && !mmgWarn ) {
           mmgWarn=1;
           printf("\n  ## Warning: %s: unable to swap or split at least 1 tetra"
                  " with multiple boundary faces.\n",__func__);
