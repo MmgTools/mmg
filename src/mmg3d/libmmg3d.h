@@ -1973,7 +1973,7 @@ int MMG3D_Get_adjaTet(MMG5_pMesh mesh,int kel, int listet[4]);
  * >   END SUBROUTINE\n
  *
  */
-double (*MMG3D_lenedgCoor)(double *ca,double *cb,double *sa,double *sb);
+extern double (*MMG3D_lenedgCoor)(double *ca,double *cb,double *sa,double *sb);
 
 /**
  * \param mesh pointer toward the mesh structure.
