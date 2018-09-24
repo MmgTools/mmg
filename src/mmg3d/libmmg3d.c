@@ -41,6 +41,9 @@
 
 #include "inlined_functions_3d.h"
 
+/* Declared in the header, but need to define in at most one compilation unit */
+double (*MMG3D_lenedgCoor)(double *ca,double *cb,double *sa,double *sb);
+
 /**
  * Pack the mesh \a mesh and its associated metric \a met and return \a val.
  */
