@@ -2284,20 +2284,23 @@ int MMG3D_switch_metricStorage(MMG5_pMesh mesh, MMG5_pSol met);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param ktri index of the boundary triangle.
- * \param ktet pointer toward the index of the tetra (filled by the function)
- * \param iface pointer toward the index of the face of the tetra \a ktet
- * that correspond to the boundary tria \a ktri.
+ * \param ktet pointer toward an array of size 2 or an integer that will
+ * contain the indices of the tetra (filled by the function)
+ * \param iface pointer toward an array of size 2that will contains the indices
+ * of the faces of the tetras \a ktet[i] that correspond to the boundary tria
+ * \a ktri.
  * \return 0 if fail, 1 otherwise
  *
- * Fill \a ktet by the index of the tetra to which belong a boundary triangle
- * and \a iface by the index ofthe face of the tetra that correspond to the
+ * Fill \a ktet by the indices of the tetra to which belong a boundary triangle
+ * and \a iface by the indices of the faces of the tetras that correspond to the
  * triangle.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_GET_TETFROMTRIA(mesh,ktri,ktet,iface,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(IN)              :: mesh\n
  * >     INTEGER, INTENT(IN)                      :: ktri\n
- * >     INTEGER, INTENT(OUT)                     :: ktet,iface,retval\n
+ * >     INTEGER, DIMENSION(*), INTENT(OUT)       :: ktet,iface
+ * >     INTEGER, INTENT(OUT)                     :: retval\n
  * >   END SUBROUTINE\n
  *
  */

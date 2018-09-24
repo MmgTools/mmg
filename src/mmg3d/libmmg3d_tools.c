@@ -676,6 +676,10 @@ void MMG3D_searchqua(MMG5_pMesh mesh,MMG5_pSol met,double critmin, int *eltab,
 int MMG3D_Get_tetFromTria(MMG5_pMesh mesh, int ktri, int *ktet, int *iface)
 {
   int val;
+  int itet;
+#ifndef NDEBUG
+  int ia0,ib0,ic0,ia1,ib1,ic1;
+#endif
 
   val = mesh->tria[ktri].cc;
 
@@ -684,6 +688,32 @@ int MMG3D_Get_tetFromTria(MMG5_pMesh mesh, int ktri, int *ktet, int *iface)
   *ktet = val/4;
 
   *iface = val%4;
+
+  if ( !mesh->adja ) {
+    if (!MMG3D_hashTetra(mesh, 0) )
+      return 0;
+  }
+
+  itet = mesh->adja[4*(*ktet-1) + *iface + 1 ];
+
+  if ( itet ) {
+    ktet[1]  = itet/4;
+    iface[1] = itet%4;
+
+#ifndef NDEBUG
+    ia0 = mesh->tetra[ktet[0]].v[_MMG5_idir[iface[0]][0]];
+    ib0 = mesh->tetra[ktet[0]].v[_MMG5_idir[iface[0]][1]];
+    ic0 = mesh->tetra[ktet[0]].v[_MMG5_idir[iface[0]][2]];
+
+    ia1 = mesh->tetra[ktet[1]].v[_MMG5_idir[iface[1]][0]];
+    ib1 = mesh->tetra[ktet[1]].v[_MMG5_idir[iface[1]][1]];
+    ic1 = mesh->tetra[ktet[1]].v[_MMG5_idir[iface[1]][2]];
+
+    assert ( ( (ia0 == ia1) && ((ib0 == ic1) && (ic0 == ib1 )) ) ||
+             ( (ia0 == ib1) && ((ib0 == ia1) && (ic0 == ic1 )) ) ||
+             ( (ia0 == ic1) && ((ib0 == ib1) && (ic0 == ia1 )) ) );
+#endif
+  }
 
   return 1;
 }
