@@ -257,8 +257,6 @@ int main(int argc,char *argv[]) {
   nreq = 0;
   fprintf(inm,"\nTriangles\n%d\n",nt);
   for(k=1; k<=nt; k++) {
-    ktet[0]  = ktet[1]  = 0;
-    iface[0] = iface[1] = 0;
     /** d) Triangles recovering */
     if ( MMG3D_Get_triangle(mmgMesh,&(Tria[0]),&(Tria[1]),&(Tria[2]),
                             &ref,&(required[k])) != 1 )
@@ -274,6 +272,9 @@ int main(int argc,char *argv[]) {
   /* Facultative step : if you want to know with which tetrahedra a triangle is
    * connected */
   for(k=1; k<=nt; k++) {
+    ktet[0]  = ktet[1]  = 0;
+    iface[0] = iface[1] = 0;
+
     if (! MMG3D_Get_tetFromTria(mmgMesh,k,ktet,iface) ) {
       printf("Get tet from tria fail.\n");
       return 0;

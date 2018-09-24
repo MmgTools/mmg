@@ -2299,7 +2299,7 @@ int MMG3D_switch_metricStorage(MMG5_pMesh mesh, MMG5_pSol met);
  * >   SUBROUTINE MMG3D_GET_TETFROMTRIA(mesh,ktri,ktet,iface,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(IN)              :: mesh\n
  * >     INTEGER, INTENT(IN)                      :: ktri\n
- * >     INTEGER, DIMENSION(*), INTENT(OUT)       :: ktet,iface
+ * >     INTEGER, DIMENSION(*), INTENT(OUT)       :: ktet,iface\n
  * >     INTEGER, INTENT(OUT)                     :: retval\n
  * >   END SUBROUTINE\n
  *

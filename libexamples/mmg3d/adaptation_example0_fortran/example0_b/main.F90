@@ -26,6 +26,7 @@ PROGRAM main
   DOUBLE PRECISION :: Point(3),Sol
   INTEGER, DIMENSION(:), ALLOCATABLE :: corner, required, ridge
   CHARACTER(LEN=31) :: FMT="(E14.8,1X,E14.8,1X,E14.8,1X,I3)"
+  INTEGER,DIMENSION(2) :: ktet,iface
 
   PRINT*,"  -- TEST MMG3DLIB"
 
@@ -277,6 +278,21 @@ PROGRAM main
     IF ( required(k)/=0 ) WRITE(inm,*) k
   ENDDO
   WRITE(inm,*)
+
+  !> Facultative step : if you want to know with which tetrahedra a triangle is
+  ! connected
+  DO k=1,nt
+     ktet(:)  = 0
+     iface(:) = 0
+     CALL MMG3D_Get_tetFromTria(mmgMesh,k,ktet,iface,ier)
+     IF ( ier == 0 ) THEN
+        PRINT*, "Get tet from tria fail.\n"
+        CALL EXIT(110)
+     ENDIF
+     PRINT*, "Tria ",k," is connected with tet ",ktet(1)," (face ",iface(1),&
+          &") and ",ktet(2)," (face ",iface(2),") "
+  ENDDO
+
 
   nreq = 0;nr = 0;
   WRITE(inm,*) "Edges"
