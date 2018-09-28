@@ -238,11 +238,7 @@ ENDFUNCTION()
 OPTION(BUILD_SHARED_LIBS "Build shared libraries" OFF)
 INVERT_BOOL("BUILD_STATIC_LIBS" ${BUILD_SHARED_LIBS})
 
-OPTION(CHECK_ALLOC "Check that deallocation size matches allocation size (calloc less efficient)" OFF)
-IF ( CHECK_ALLOC )
-  ADD_DEFINITIONS ( -DCHECK_ALLOC )
-ENDIF ( CHECK_ALLOC )
-MARK_AS_ADVANCED ( CHECK_ALLOC )
+ADD_DEFINITIONS ( -DCHECK_ALLOC )
 
 #------------------------------- mmg2d
 CMAKE_DEPENDENT_OPTION ( LIBMMG2D_STATIC "Compile the mmg2d static library" ${BUILD_STATIC_LIBS}

@@ -185,7 +185,6 @@ extern "C" {
     }                                                                   \
   }while(0)
 
-#ifdef CHECK_ALLOC
 static inline
 void * mycalloc(size_t c, size_t s) {
   char *ptr;
@@ -241,14 +240,6 @@ void myfree(void *ptr, size_t s) {
   }
   free(ptr_c);
 }
-
-#else
-#define mycalloc(count,size) calloc(count,size)
-#define mymalloc(size) malloc(size)
-#define myfree(ptr,s) free(ptr);
-#define myrealloc(ptr,s,oldsize) realloc(ptr,s);
-#endif
-
 
 /** Free pointer ptr of mesh structure and compute the new used memory.
     size is the size of the pointer */
