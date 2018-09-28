@@ -231,23 +231,23 @@ void * myrealloc(void * ptr_in, size_t s, size_t oldsize) {
 }
 
 static inline
-void myfree(void *ptr, size_t s) {
+size_t myfree(void *ptr) {
+  size_t s;
   char * ptr_c = (char*)ptr;
+
   ptr_c = ptr_c-sizeof(size_t);
-  if (s != -1 && s != *((size_t*)ptr_c)) {
-    fprintf(stderr, "myfree: Error: freed memory mismatch\n");
-    assert(0);
-  }
+  s = *((size_t*)ptr_c);
   free(ptr_c);
+
+  return s;
 }
 
 /** Free pointer ptr of mesh structure and compute the new used memory.
     size is the size of the pointer */
 #define _MMG5_DEL_MEM(mesh,ptr,size) do         \
   {                                             \
-    size_t size_to_free = (size);               \
+    size_t size_to_free = myfree(ptr);          \
     (mesh)->memCur -= size_to_free;             \
-    myfree(ptr,size_to_free);                   \
     ptr = NULL;                                 \
   }while(0)
 
@@ -262,7 +262,7 @@ void myfree(void *ptr, size_t s) {
 /** Safe deallocation */
 #define _MMG5_SAFE_FREE(ptr) do                 \
   {                                             \
-    myfree(ptr,-1);                             \
+    myfree(ptr);                                \
     ptr = NULL;                                 \
   }while(0)
 
