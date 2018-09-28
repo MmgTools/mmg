@@ -125,11 +125,11 @@ int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
   case MMG2D_IPARAM_angle :
     /* free table that may contains old ridges */
     if ( mesh->htab.geom )
-      _MMG5_DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(MMG5_hgeom));
+      _MMG5_DEL_MEM(mesh,mesh->htab.geom);
     if ( mesh->xpoint )
-      _MMG5_DEL_MEM(mesh,mesh->xpoint,(mesh->xpmax+1)*sizeof(MMG5_xPoint));
+      _MMG5_DEL_MEM(mesh,mesh->xpoint);
     if ( mesh->xtetra )
-      _MMG5_DEL_MEM(mesh,mesh->xtetra,(mesh->xtmax+1)*sizeof(MMG5_xTetra));
+      _MMG5_DEL_MEM(mesh,mesh->xtetra);
     if ( !val )
       mesh->info.dhd    = -1.;
     else {
@@ -227,11 +227,11 @@ int MMG2D_Set_meshSize(MMG5_pMesh mesh, int np, int nt, int na) {
     fprintf(stderr,"\n  ## Warning: %s: old mesh deletion.\n",__func__);
 
   if ( mesh->point )
-    _MMG5_DEL_MEM(mesh,mesh->point,(mesh->npmax+1)*sizeof(MMG5_Point));
+    _MMG5_DEL_MEM(mesh,mesh->point);
   if ( mesh->tria )
-    _MMG5_DEL_MEM(mesh,mesh->tria,(mesh->ntmax+1)*sizeof(MMG5_Tria));
+    _MMG5_DEL_MEM(mesh,mesh->tria);
   if ( mesh->edge )
-    _MMG5_DEL_MEM(mesh,mesh->edge,(mesh->namax+1)*sizeof(MMG5_Edge));
+    _MMG5_DEL_MEM(mesh,mesh->edge);
 
   mesh->np  = np;
   mesh->nt  = nt;
@@ -292,7 +292,7 @@ int MMG2D_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int
     sol->np  = np;
     sol->npi = np;
     if ( sol->m )
-      _MMG5_DEL_MEM(mesh,sol->m,(sol->size*(sol->npmax+1))*sizeof(double));
+      _MMG5_DEL_MEM(mesh,sol->m);
 
     sol->npmax = mesh->npmax;
     _MMG5_ADD_MEM(mesh,(sol->size*(sol->npmax+1))*sizeof(double),"initial solution",
@@ -312,7 +312,7 @@ int MMG2D_Set_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol *sol,int nsols,
     if ( *sol ) {
       fprintf(stderr,"\n  ## Warning: %s: old solutions array deletion.\n",
               __func__);
-      _MMG5_DEL_MEM(mesh,*sol,(mesh->nsols)*sizeof(MMG5_Sol));
+      _MMG5_DEL_MEM(mesh,*sol);
     }
   }
 

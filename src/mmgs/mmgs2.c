@@ -203,8 +203,8 @@ int _MMGS_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
     fprintf(stdout,"     %8d points snapped, %d corrected\n",ns,nc);
 
   /* memory free */
-  _MMG5_DEL_MEM(mesh,mesh->adja,(3*mesh->ntmax+5)*sizeof(int));
-  _MMG5_DEL_MEM(mesh,tmp,(mesh->npmax+1)*sizeof(double));
+  _MMG5_DEL_MEM(mesh,mesh->adja);
+  _MMG5_DEL_MEM(mesh,tmp);
 
   return 1;
 }
@@ -509,7 +509,7 @@ static int _MMGS_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol){
   if ( (mesh->info.ddebug || abs(mesh->info.imprim) > 5) && ns > 0 )
     fprintf(stdout,"     %7d splitted\n",ns);
 
-  _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
+  _MMG5_DEL_MEM(mesh,hash.item);
   return ns;
 }
 
@@ -597,7 +597,7 @@ int _MMGS_mmgs2(MMG5_pMesh mesh,MMG5_pSol sol) {
     return 0;
   }
 
-  _MMG5_DEL_MEM(mesh,mesh->adja,(3*mesh->ntmax+5)*sizeof(int));
+  _MMG5_DEL_MEM(mesh,mesh->adja);
 
   if ( !_MMGS_cuttri_ls(mesh,sol) ) {
     fprintf(stderr,"\n  ## Problem in discretizing implicit function. Exit program.\n");
@@ -622,7 +622,7 @@ int _MMGS_mmgs2(MMG5_pMesh mesh,MMG5_pSol sol) {
   }
 
   /* Clean memory */
-  _MMG5_DEL_MEM(mesh,sol->m,(sol->size*(sol->npmax+1))*sizeof(double));
+  _MMG5_DEL_MEM(mesh,sol->m);
 
   return 1;
 }

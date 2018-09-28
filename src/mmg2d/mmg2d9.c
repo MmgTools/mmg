@@ -660,7 +660,7 @@ int MMG2_mmg2d9(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met) {
   mesh->info.hmax = hmaxtmp;
 
   /* Clean memory */
-  _MMG5_DEL_MEM(mesh,disp->m,(disp->size*(disp->npmax+1))*sizeof(double));
+  _MMG5_DEL_MEM(mesh,disp->m);
 
   return 1;
 }

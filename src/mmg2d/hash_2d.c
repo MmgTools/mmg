@@ -254,8 +254,8 @@ int MMG2_assignEdge(MMG5_pMesh mesh) {
   }
 
   /* Delete the hash for edges */
-  _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
-  _MMG5_DEL_MEM(mesh,mesh->edge,(mesh->na+1)*sizeof(MMG5_Edge));
+  _MMG5_DEL_MEM(mesh,hash.item);
+  _MMG5_DEL_MEM(mesh,mesh->edge);
   mesh->na = 0;
 
   return 1;
@@ -388,7 +388,7 @@ int MMG2_pack(MMG5_pMesh mesh,MMG5_pSol sol) {
   if ( mesh->edge ) {
     fprintf(stderr,"\n  ## Warning: %s: unexpected edge table..."
             " Ignored data.\n",__func__);
-    _MMG5_DEL_MEM(mesh,mesh->edge,(mesh->na+1)*sizeof(MMG5_Edge));
+    _MMG5_DEL_MEM(mesh,mesh->edge);
     mesh->na = 0;
   }
 

@@ -63,7 +63,7 @@ int _MMGS_Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol) {
     return 0;
   }
 
-  if ( *sol )  _MMG5_DEL_MEM(*mesh,*sol,sizeof(MMG5_Sol));
+  if ( *sol )  _MMG5_DEL_MEM(*mesh,*sol);
   _MMG5_SAFE_CALLOC(*sol,1,MMG5_Sol,0);
 
   return 1;
@@ -256,10 +256,10 @@ int _MMGS_Free_all_var(va_list argptr)
     for ( i=0; i<(*mesh)->nsols; ++i ) {
       psl = (*sols) + i;
       if ( psl->m ) {
-        _MMG5_DEL_MEM(*mesh,psl->m,(psl->size*(psl->npmax+1))*sizeof(double));
+        _MMG5_DEL_MEM(*mesh,psl->m);
       }
     }
-    _MMG5_DEL_MEM(*mesh,*sols,((*mesh)->nsols)*sizeof(MMG5_Sol));
+    _MMG5_DEL_MEM(*mesh,*sols);
   }
 
   _MMG5_SAFE_FREE(*mesh);
@@ -340,13 +340,13 @@ int _MMGS_Free_structures_var(va_list argptr)
   assert(mesh && *mesh);
 
   if ( (*mesh)->edge )
-    _MMG5_DEL_MEM((*mesh),(*mesh)->edge,((*mesh)->na+1)*sizeof(MMG5_Edge));
+    _MMG5_DEL_MEM((*mesh),(*mesh)->edge);
 
   if ( (*mesh)->adja )
-    _MMG5_DEL_MEM((*mesh),(*mesh)->adja,(3*(*mesh)->ntmax+5)*sizeof(int));
+    _MMG5_DEL_MEM((*mesh),(*mesh)->adja);
 
   if ( (*mesh)->tria )
-    _MMG5_DEL_MEM((*mesh),(*mesh)->tria,((*mesh)->ntmax+1)*sizeof(MMG5_Tria));
+    _MMG5_DEL_MEM((*mesh),(*mesh)->tria);
 
   if ( sol ) {
     MMG5_Free_structures(*mesh,*sol);

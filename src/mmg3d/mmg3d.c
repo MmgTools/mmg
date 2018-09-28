@@ -225,7 +225,7 @@ int _MMG3D_defaultOption(MMG5_pMesh mesh,MMG5_pSol met) {
 
   if ( met->np && (met->np != mesh->np) ) {
     fprintf(stderr,"\n  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
-    _MMG5_DEL_MEM(mesh,met->m,(met->size*(met->npmax+1))*sizeof(double));
+    _MMG5_DEL_MEM(mesh,met->m);
     met->np = 0;
   }
 

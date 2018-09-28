@@ -128,7 +128,7 @@ void _MMG3D_freeOctree_s(MMG5_pMesh mesh,_MMG3D_octree_s* q, int nv)
     {
       _MMG3D_freeOctree_s(mesh,&(q->branches[i]), nv);
     }
-    _MMG5_DEL_MEM(mesh,q->branches,sizBr*sizeof(_MMG3D_octree_s));
+    _MMG5_DEL_MEM(mesh,q->branches);
     q->branches = NULL;
   }
   else if (q->nbVer>0)
@@ -144,7 +144,7 @@ void _MMG3D_freeOctree_s(MMG5_pMesh mesh,_MMG3D_octree_s* q, int nv)
       nvTemp |= nvTemp >> 16;
       nvTemp++;
 
-      _MMG5_DEL_MEM(mesh,q->v,nvTemp*sizeof(int));
+      _MMG5_DEL_MEM(mesh,q->v);
       q->v = NULL;
       q->nbVer = 0;
     }else
@@ -158,7 +158,7 @@ void _MMG3D_freeOctree_s(MMG5_pMesh mesh,_MMG3D_octree_s* q, int nv)
         sizTab = nv * ((int)(q->nbVer/nv) + sizTab);
       }
       assert(q->v);
-      _MMG5_DEL_MEM(mesh,q->v,sizTab*sizeof(int));
+      _MMG5_DEL_MEM(mesh,q->v);
       q->v = NULL;
       q->nbVer = 0;
     }
@@ -175,9 +175,9 @@ void _MMG3D_freeOctree_s(MMG5_pMesh mesh,_MMG3D_octree_s* q, int nv)
 void _MMG3D_freeOctree(MMG5_pMesh mesh,_MMG3D_pOctree *q)
 {
   _MMG3D_freeOctree_s(mesh,(*q)->q0, (*q)->nv);
-  _MMG5_DEL_MEM(mesh,(*q)->q0,sizeof(_MMG3D_octree_s));
+  _MMG5_DEL_MEM(mesh,(*q)->q0);
   (*q)->q0 = NULL;
-  _MMG5_DEL_MEM(mesh,*q,sizeof(_MMG3D_octree));
+  _MMG5_DEL_MEM(mesh,*q);
   *q = NULL;
 }
 
@@ -630,11 +630,11 @@ int _MMG3D_getListSquare(MMG5_pMesh mesh, double* ani, _MMG3D_pOctree q, double*
 
   if (index>q->nc-4)
   {
-    _MMG5_DEL_MEM(mesh,dist,q->nc*sizeof(double));
+    _MMG5_DEL_MEM(mesh,dist);
     return -1;
   }
 
-  _MMG5_DEL_MEM(mesh,dist,q->nc*sizeof(double));
+  _MMG5_DEL_MEM(mesh,dist);
 
   return index;
 }
@@ -720,7 +720,7 @@ int _MMG3D_addOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver,
       if (!_MMG3D_addOctreeRec(mesh, q, ver, no, nv))
         return 0;
       q->nbVer--;
-      _MMG5_DEL_MEM(mesh,q->v,nv*sizeof(int));
+      _MMG5_DEL_MEM(mesh,q->v);
 
     }else // Recursive call in the corresponding sub cell
     {
@@ -819,7 +819,7 @@ int _MMG3D_delOctreeVertex(MMG5_pMesh mesh, _MMG3D_octree_s* q, int indNo)
                   return 0);
     _MMG5_SAFE_MALLOC(vTemp,q->nbVer,int,0);
     memcpy(vTemp, q->v,q->nbVer*sizeof(int));
-    _MMG5_DEL_MEM(mesh,q->v,2*q->nbVer*sizeof(int));
+    _MMG5_DEL_MEM(mesh,q->v);
 
     q->v = vTemp;
   }
@@ -882,7 +882,7 @@ void _MMG3D_mergeBranches(MMG5_pMesh mesh,_MMG3D_octree_s* q, int dim, int nv)
     _MMG3D_mergeBranchesRec(q, &(q->branches[i]), dim, nv, &index);
     _MMG3D_freeOctree_s(mesh,&(q->branches[i]), nv);
   }
-  _MMG5_DEL_MEM(mesh,q->branches,sizBr*sizeof(_MMG3D_octree_s));
+  _MMG5_DEL_MEM(mesh,q->branches);
 }
 
 /**
@@ -916,7 +916,7 @@ int _MMG3D_delOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver, const 
           return 0;
         if ( q->nbVer == 0)
         {
-          _MMG5_DEL_MEM(mesh,q->v,sizeof(int));
+          _MMG5_DEL_MEM(mesh,q->v);
         }
         break;
       }
@@ -1296,7 +1296,7 @@ int _MMG3D_octreein_iso(MMG5_pMesh mesh,MMG5_pSol sol,_MMG3D_pOctree octree,int 
   if (ncells < 0)
   {
 
-    _MMG5_DEL_MEM(mesh,lococ,(octree->nc-3)*sizeof(_MMG3D_octree_s*));
+    _MMG5_DEL_MEM(mesh,lococ);
     return 0;
   }
   /* Check the octree cells */
@@ -1319,12 +1319,12 @@ int _MMG3D_octreein_iso(MMG5_pMesh mesh,MMG5_pSol sol,_MMG3D_pOctree octree,int 
 
       if ( d2 < hp1 || d2 < hpi2*hpi2 )
       {
-        _MMG5_DEL_MEM(mesh,lococ,(octree->nc-3)*sizeof(_MMG3D_octree_s*));
+        _MMG5_DEL_MEM(mesh,lococ);
         return 0;
       }
     }
   }
-  _MMG5_DEL_MEM(mesh,lococ,(octree->nc-3)*sizeof(_MMG3D_octree_s*));
+  _MMG5_DEL_MEM(mesh,lococ);
   return 1;
 }
 
@@ -1394,7 +1394,7 @@ int _MMG3D_octreein_ani(MMG5_pMesh mesh,MMG5_pSol sol,_MMG3D_pOctree octree,int 
   ncells = _MMG3D_getListSquare(mesh,ma,octree, methalo, &lococ);
   if (ncells < 0)
   {
-    _MMG5_DEL_MEM(mesh,lococ,(octree->nc-3)*sizeof(_MMG3D_octree_s*));
+    _MMG5_DEL_MEM(mesh,lococ);
     return 0;
   }
   /* Check the octree cells */
@@ -1413,7 +1413,7 @@ int _MMG3D_octreein_ani(MMG5_pMesh mesh,MMG5_pSol sol,_MMG3D_pOctree octree,int 
         + 2.0*(ma[1]*ux*uy + ma[2]*ux*uz + ma[4]*uy*uz);
       if ( d2 < dmi )
       {
-        _MMG5_DEL_MEM(mesh,lococ,(octree->nc-3)*sizeof(_MMG3D_octree_s*));
+        _MMG5_DEL_MEM(mesh,lococ);
         return 0;
       }
       else
@@ -1423,13 +1423,13 @@ int _MMG3D_octreein_ani(MMG5_pMesh mesh,MMG5_pSol sol,_MMG3D_pOctree octree,int 
         d2   = mb[0]*ux*ux + mb[3]*uy*uy + mb[5]*uz*uz
           + 2.0*(mb[1]*ux*uy + mb[2]*ux*uz + mb[4]*uy*uz);
         if ( d2 < dmi ) {
-          _MMG5_DEL_MEM(mesh,lococ,(octree->nc-3)*sizeof(_MMG3D_octree_s*));
+          _MMG5_DEL_MEM(mesh,lococ);
           return 0;
         }
       }
     }
   }
 
-  _MMG5_DEL_MEM(mesh,lococ,(octree->nc-3)*sizeof(_MMG3D_octree_s*));
+  _MMG5_DEL_MEM(mesh,lococ);
   return 1;
 }

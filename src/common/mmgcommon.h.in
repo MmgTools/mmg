@@ -242,9 +242,8 @@ size_t myfree(void *ptr) {
   return s;
 }
 
-/** Free pointer ptr of mesh structure and compute the new used memory.
-    size is the size of the pointer */
-#define _MMG5_DEL_MEM(mesh,ptr,size) do         \
+/** Free pointer ptr of mesh structure and compute the new used memory. */
+#define _MMG5_DEL_MEM(mesh,ptr) do              \
   {                                             \
     size_t size_to_free = myfree(ptr);          \
     (mesh)->memCur -= size_to_free;             \

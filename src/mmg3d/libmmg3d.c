@@ -66,17 +66,17 @@ void _MMG3D_Free_topoTables(MMG5_pMesh mesh) {
 
   mesh->xp = 0;
   if ( mesh->adja )
-    _MMG5_DEL_MEM(mesh,mesh->adja,(4*mesh->nemax+5)*sizeof(int));
+    _MMG5_DEL_MEM(mesh,mesh->adja);
 
   _MMG5_freeXTets(mesh);
 
   if ( mesh->adjapr )
-    _MMG5_DEL_MEM(mesh,mesh->adjapr,(5*mesh->nprism+6)*sizeof(int));
+    _MMG5_DEL_MEM(mesh,mesh->adjapr);
 
   _MMG5_freeXPrisms(mesh);
 
   if ( mesh->xpoint )
-    _MMG5_DEL_MEM(mesh,mesh->xpoint,(mesh->xpmax+1)*sizeof(MMG5_xPoint));
+    _MMG5_DEL_MEM(mesh,mesh->xpoint);
 
   for(k=1; k <=mesh->np; k++) {
     mesh->point[k].xp = 0;
@@ -227,7 +227,7 @@ int MMG3D_bdryBuild(MMG5_pMesh mesh) {
 
   /* rebuild triangles*/
   if ( mesh->tria )
-    _MMG5_DEL_MEM(mesh,mesh->tria,(mesh->nt+1)*sizeof(MMG5_Tria));
+    _MMG5_DEL_MEM(mesh,mesh->tria);
   mesh->nt = 0;
 
   if ( !_MMG5_chkBdryTria(mesh) ) {
@@ -237,10 +237,10 @@ int MMG3D_bdryBuild(MMG5_pMesh mesh) {
 
   /* build hash table for edges */
   if ( mesh->htab.geom )
-    _MMG5_DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(MMG5_hgeom));
+    _MMG5_DEL_MEM(mesh,mesh->htab.geom);
 
   if ( mesh->edge )
-    _MMG5_DEL_MEM(mesh,mesh->edge,(mesh->na+1)*sizeof(MMG5_Edge));
+    _MMG5_DEL_MEM(mesh,mesh->edge);
   mesh->na = 0;
 
   nr = 0;
@@ -289,7 +289,7 @@ int MMG3D_bdryBuild(MMG5_pMesh mesh) {
         if ( MG_GEO & ph->tag ) nr++;
       }
     }
-    _MMG5_DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(MMG5_hgeom));
+    _MMG5_DEL_MEM(mesh,mesh->htab.geom);
   }
   else
     mesh->memCur -= (long long)((3*mesh->nt+2)*sizeof(MMG5_hgeom));
@@ -792,7 +792,7 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
   /* check input */
   if ( met->np && (met->np != mesh->np) ) {
     fprintf(stdout,"\n  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
-    _MMG5_DEL_MEM(mesh,met->m,(met->size*(met->npmax+1))*sizeof(double));
+    _MMG5_DEL_MEM(mesh,met->m);
     met->np = 0;
   }
   else if ( met->size!=1 && met->size!=6 ) {
@@ -999,7 +999,7 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol met) {
 
   if ( met->np && (met->np != mesh->np) ) {
     fprintf(stdout,"\n  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
-    _MMG5_DEL_MEM(mesh,met->m,(met->size*(met->npmax+1))*sizeof(double));
+    _MMG5_DEL_MEM(mesh,met->m);
     met->np = 0;
   }
   else if ( met->size!=1 ) {
@@ -1197,7 +1197,7 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
   }
   if (disp->np && (disp->np != mesh->np) ) {
     fprintf(stdout,"\n  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
-    _MMG5_DEL_MEM(mesh,disp->m,(disp->size*(disp->npmax+1))*sizeof(double));
+    _MMG5_DEL_MEM(mesh,disp->m);
     disp->np = 0;
   }
   else if (disp->size!=3) {

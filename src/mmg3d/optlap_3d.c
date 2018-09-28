@@ -267,8 +267,8 @@ int _MMG3D_optlap(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   } while(it++ < maxiter);
 
-  _MMG5_DEL_MEM(mesh,nv,(3*mesh->np+1)*sizeof(double));
-  _MMG5_DEL_MEM(mesh,pos,(3*mesh->np+1)*sizeof(double));
-  _MMG5_DEL_MEM(mesh,compt,(mesh->np+1)*sizeof(double));
+  _MMG5_DEL_MEM(mesh,nv);
+  _MMG5_DEL_MEM(mesh,pos);
+  _MMG5_DEL_MEM(mesh,compt);
   return 1;
 }

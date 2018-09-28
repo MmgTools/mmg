@@ -535,7 +535,7 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         }
       }
       if( !mesh->nt )
-        _MMG5_DEL_MEM(mesh,mesh->tria,(nt+1)*sizeof(MMG5_Tria));
+        _MMG5_DEL_MEM(mesh,mesh->tria);
 
       else if ( mesh->nt < nt ) {
         _MMG5_ADD_MEM(mesh,(mesh->nt-nt)*sizeof(MMG5_Tria),"triangles",
@@ -677,7 +677,7 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
     }
     if ( mesh->info.iso ) {
       if( !mesh->na )
-        _MMG5_DEL_MEM(mesh,mesh->edge,(na+1)*sizeof(MMG5_Edge));
+        _MMG5_DEL_MEM(mesh,mesh->edge);
       else if ( mesh->na < na ) {
         _MMG5_ADD_MEM(mesh,(mesh->na-na)*sizeof(MMG5_Edge),"edges",
                       fprintf(stderr,"  Exit program.\n");
@@ -1015,7 +1015,7 @@ int MMG3D_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
   if ( ier < 1 ) return (ier);
 
   mesh->nsols = nsols;
-  if ( *sol )  _MMG5_DEL_MEM(mesh,*sol,(mesh->nsols)*sizeof(MMG5_Sol));
+  if ( *sol )  _MMG5_DEL_MEM(mesh,*sol);
 
   _MMG5_ADD_MEM(mesh,nsols*sizeof(MMG5_Sol),"solutions array",
                 printf("  Exit program.\n"); fclose(inm);
@@ -1850,7 +1850,7 @@ int MMG3D_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
     return -1;
   }
 
-  if ( *sol )  _MMG5_DEL_MEM(mesh,*sol,(mesh->nsols)*sizeof(MMG5_Sol));
+  if ( *sol )  _MMG5_DEL_MEM(mesh,*sol);
 
   _MMG5_ADD_MEM(mesh,nsols*sizeof(MMG5_Sol),"solutions array",
                 printf("  Exit program.\n"); fclose(inm);

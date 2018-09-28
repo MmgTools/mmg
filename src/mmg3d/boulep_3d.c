@@ -438,7 +438,7 @@ int _MMG5_boulernm(MMG5_pMesh mesh, int start, int ip, int *ng, int *nr){
   }
 
   /* Free the edge hash table */
-  _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
+  _MMG5_DEL_MEM(mesh,hash.item);
 
   return ns;
 }

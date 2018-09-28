@@ -509,7 +509,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
         }
       }
       if( !mesh->na )
-        _MMG5_DEL_MEM(mesh,mesh->edge,(mesh->na+1)*sizeof(MMG5_Edge));
+        _MMG5_DEL_MEM(mesh,mesh->edge);
 
       else if ( mesh->na < na ) {
         _MMG5_ADD_MEM(mesh,(mesh->na-na)*sizeof(MMG5_Edge),"edges",
@@ -739,7 +739,7 @@ int MMGS_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *file
   if ( ier < 1 )  return (ier);
 
   mesh->nsols = nsols;
-  if ( *sol )  _MMG5_DEL_MEM(mesh,*sol,(mesh->nsols)*sizeof(MMG5_Sol));
+  if ( *sol )  _MMG5_DEL_MEM(mesh,*sol);
   _MMG5_ADD_MEM(mesh,nsols*sizeof(MMG5_Sol),"solutions array",
                 printf("  Exit program.\n"); fclose(inm);
                 _MMG5_SAFE_FREE(posNodeData);
@@ -1347,7 +1347,7 @@ int MMGS_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
     return -1;
   }
 
-  if ( *sol )  _MMG5_DEL_MEM(mesh,*sol,(mesh->nsols)*sizeof(MMG5_Sol));
+  if ( *sol )  _MMG5_DEL_MEM(mesh,*sol);
   _MMG5_ADD_MEM(mesh,nsols*sizeof(MMG5_Sol),"solutions array",
                 printf("  Exit program.\n"); fclose(inm);
                 _MMG5_SAFE_FREE(type);

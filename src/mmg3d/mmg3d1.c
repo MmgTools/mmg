@@ -1055,7 +1055,7 @@ int _MMG3D_delPatternPts(MMG5_pMesh mesh,_MMG5_Hash hash)
                     " along edge %d %d.\n", __func__,
                     _MMG3D_indPt(mesh,pt->v[i]),
                     _MMG3D_indPt(mesh,pt->v[j]));
-            _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
+            _MMG5_DEL_MEM(mesh,hash.item);
             return 0;
           }
         }
@@ -1224,7 +1224,7 @@ _MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
     }
   }
   if ( !nap )  {
-    _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
+    _MMG5_DEL_MEM(mesh,hash.item);
     return 0;
   }
 
@@ -1240,7 +1240,7 @@ split:
              " Volumic patterns skipped.\n",__func__);
    }
 
-   _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
+   _MMG5_DEL_MEM(mesh,hash.item);
    return 0;
  }
 
@@ -1318,7 +1318,7 @@ split:
   if ( (mesh->info.ddebug || abs(mesh->info.imprim) > 5) && ns > 0 )
     fprintf(stdout,"     %7d splitted\n",nap);
 
-  _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
+  _MMG5_DEL_MEM(mesh,hash.item);
   if ( memlack )  return -1;
   return nap;
 }
@@ -1590,7 +1590,7 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   }
 
   if ( !ns ) {
-    _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
+    _MMG5_DEL_MEM(mesh,hash.item);
     return ns;
   }
 
@@ -1746,7 +1746,7 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
                           " idx along edge %d %d.\n",
                          __func__,_MMG3D_indPt(mesh,pt->v[_MMG5_iare[ia][0]]),
                          _MMG3D_indPt(mesh,pt->v[_MMG5_iare[ia][1]]));
-                  _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
+                  _MMG5_DEL_MEM(mesh,hash.item);
                   return -1;
                 }
                 _MMG3D_delPt(mesh,vx[ia]);
@@ -1839,7 +1839,7 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   if ( (mesh->info.ddebug || abs(mesh->info.imprim) > 5) && ns > 0 )
     fprintf(stdout,"       %7d elements splitted\n",nap);
 
-  _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
+  _MMG5_DEL_MEM(mesh,hash.item);
   return nap;
 }
 
@@ -2289,7 +2289,7 @@ int _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,char typchk, int patternMode) {
 
     /* memory free */
     if ( mesh->adja )
-      _MMG5_DEL_MEM(mesh,mesh->adja,(4*mesh->nemax+5)*sizeof(int));
+      _MMG5_DEL_MEM(mesh,mesh->adja);
 
     if ( !mesh->info.noinsert ) {
       /* analyze surface tetras */

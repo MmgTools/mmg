@@ -49,7 +49,7 @@ int _MMG2_anatri(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
 
     if ( !mesh->info.noinsert ) {
       /* Memory free */
-      _MMG5_DEL_MEM(mesh,mesh->adja,(3*mesh->ntmax+5)*sizeof(int));
+      _MMG5_DEL_MEM(mesh,mesh->adja);
       mesh->adja = 0;
 
       /* Split long edges according to patterns */
@@ -201,7 +201,7 @@ int _MMG2_anaelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
     }
   }
   if ( !ns ) {
-    _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
+    _MMG5_DEL_MEM(mesh,hash.item);
     return ns;
   }
 
@@ -339,7 +339,7 @@ int _MMG2_anaelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
   }
   if ( (mesh->info.ddebug || abs(mesh->info.imprim) > 5) && ns > 0 )
     fprintf(stdout,"     %7d splitted\n",ns);
-  _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
+  _MMG5_DEL_MEM(mesh,hash.item);
 
   return ns;
 }

@@ -679,7 +679,7 @@ int MMG2D_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
   if ( ier < 1 )  return (ier);
 
   mesh->nsols = nsols;
-  if ( *sol )  _MMG5_DEL_MEM(mesh,*sol,(mesh->nsols)*sizeof(MMG5_Sol));
+  if ( *sol )  _MMG5_DEL_MEM(mesh,*sol);
 
   _MMG5_ADD_MEM(mesh,nsols*sizeof(MMG5_Sol),"solutions array",
                 printf("  Exit program.\n"); fclose(inm);
@@ -898,7 +898,7 @@ int MMG2D_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
     return -1;
   }
 
-  if ( *sol )  _MMG5_DEL_MEM(mesh,*sol,(mesh->nsols)*sizeof(MMG5_Sol));
+  if ( *sol )  _MMG5_DEL_MEM(mesh,*sol);
 
   _MMG5_ADD_MEM(mesh,nsols*sizeof(MMG5_Sol),"solutions array",
                 printf("  Exit program.\n"); fclose(inm);

@@ -1025,7 +1025,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
   if ( mesh->dim==3 && mesh->info.iso ) {
     if ( mesh->nt ) {
       if( !nt )
-        _MMG5_DEL_MEM(mesh,mesh->tria,(mesh->nt+1)*sizeof(MMG5_Tria));
+        _MMG5_DEL_MEM(mesh,mesh->tria);
 
       else if ( nt < mesh->nt ) {
         _MMG5_ADD_MEM(mesh,(nt-mesh->nt)*sizeof(MMG5_Tria),"triangles",
@@ -1041,7 +1041,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
     }
     if ( mesh->na ) {
       if( !na )
-        _MMG5_DEL_MEM(mesh,mesh->edge,(mesh->na+1)*sizeof(MMG5_Edge));
+        _MMG5_DEL_MEM(mesh,mesh->edge);
       else if ( na < mesh->na ) {
         _MMG5_ADD_MEM(mesh,(na-mesh->na)*sizeof(MMG5_Edge),"edges",
                       fprintf(stderr,"  Exit program.\n");
@@ -1249,7 +1249,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
     }
 
     /* mem alloc */
-    if ( psl->m )  _MMG5_DEL_MEM(mesh,psl->m,(psl->size*(psl->npmax+1))*sizeof(double));
+    if ( psl->m )  _MMG5_DEL_MEM(mesh,psl->m);
     psl->npmax = mesh->npmax;
 
     _MMG5_ADD_MEM(mesh,(psl->size*(psl->npmax+1))*sizeof(double),"initial solution",

@@ -142,7 +142,7 @@ int MMG3D_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int
     sol->np  = np;
     sol->npi = np;
     if ( sol->m )
-      _MMG5_DEL_MEM(mesh,sol->m,(sol->size*(sol->npmax+1))*sizeof(double));
+      _MMG5_DEL_MEM(mesh,sol->m);
 
     sol->npmax = mesh->npmax;
     _MMG5_ADD_MEM(mesh,(sol->size*(sol->npmax+1))*sizeof(double),"initial solution",
@@ -161,7 +161,7 @@ int MMG3D_Set_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol *sol,int nsols,
     if ( *sol ) {
       fprintf(stderr,"\n  ## Warning: %s: old solutions array deletion.\n",
               __func__);
-      _MMG5_DEL_MEM(mesh,*sol,(mesh->nsols)*sizeof(MMG5_Sol));
+      _MMG5_DEL_MEM(mesh,*sol);
     }
   }
 
@@ -216,17 +216,17 @@ int MMG3D_setMeshSize_initData(MMG5_pMesh mesh, int np, int ne, int nprism,
     fprintf(stderr,"     Your mesh don't contains tetrahedra.\n");
   }
   if ( mesh->point )
-    _MMG5_DEL_MEM(mesh,mesh->point,(mesh->npmax+1)*sizeof(MMG5_Point));
+    _MMG5_DEL_MEM(mesh,mesh->point);
   if ( mesh->tetra )
-    _MMG5_DEL_MEM(mesh,mesh->tetra,(mesh->nemax+1)*sizeof(MMG5_Tetra));
+    _MMG5_DEL_MEM(mesh,mesh->tetra);
   if ( mesh->prism )
-    _MMG5_DEL_MEM(mesh,mesh->prism,(mesh->nprism+1)*sizeof(MMG5_Prism));
+    _MMG5_DEL_MEM(mesh,mesh->prism);
   if ( mesh->tria )
-    _MMG5_DEL_MEM(mesh,mesh->tria,(mesh->nt+1)*sizeof(MMG5_Tria));
+    _MMG5_DEL_MEM(mesh,mesh->tria);
   if ( mesh->quadra )
-    _MMG5_DEL_MEM(mesh,mesh->quadra,(mesh->nquad+1)*sizeof(MMG5_Quad));
+    _MMG5_DEL_MEM(mesh,mesh->quadra);
   if ( mesh->edge )
-    _MMG5_DEL_MEM(mesh,mesh->edge,(mesh->na+1)*sizeof(MMG5_Edge));
+    _MMG5_DEL_MEM(mesh,mesh->edge);
 
   mesh->np  = np;
   mesh->ne  = ne;
@@ -1809,7 +1809,7 @@ int _MMG3D_skipIso(MMG5_pMesh mesh) {
 
   if ( mesh->nti < mesh->nt ) {
     if( !mesh->nti )
-      _MMG5_DEL_MEM(mesh,mesh->tria,(mesh->nt+1)*sizeof(MMG5_Tria));
+      _MMG5_DEL_MEM(mesh,mesh->tria);
     else {
       _MMG5_ADD_MEM(mesh,mesh->nti-mesh->nt,"triangles",return 0);
       _MMG5_SAFE_RECALLOC(mesh->tria,mesh->nt+1,(mesh->nti+1),MMG5_Tria,"triangles",0);
@@ -1841,7 +1841,7 @@ int _MMG3D_skipIso(MMG5_pMesh mesh) {
 
     if ( mesh->nai < mesh->na ) {
       if( !mesh->nai )
-        _MMG5_DEL_MEM(mesh,mesh->edge,(mesh->nai+1)*sizeof(MMG5_Edge));
+        _MMG5_DEL_MEM(mesh,mesh->edge);
       else {
         _MMG5_ADD_MEM(mesh,mesh->nai-mesh->na,"Edges",return 0);
         _MMG5_SAFE_RECALLOC(mesh->edge,mesh->na+1,(mesh->nai+1),MMG5_Edge,"edges",0);
@@ -1993,11 +1993,11 @@ int MMG3D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam,int val){
   case MMG3D_IPARAM_angle :
     /* free table that may contains old ridges */
     if ( mesh->htab.geom )
-      _MMG5_DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(MMG5_hgeom));
+      _MMG5_DEL_MEM(mesh,mesh->htab.geom);
     if ( mesh->xpoint )
-      _MMG5_DEL_MEM(mesh,mesh->xpoint,(mesh->xpmax+1)*sizeof(MMG5_xPoint));
+      _MMG5_DEL_MEM(mesh,mesh->xpoint);
     if ( mesh->xtetra )
-      _MMG5_DEL_MEM(mesh,mesh->xtetra,(mesh->xtmax+1)*sizeof(MMG5_xTetra));
+      _MMG5_DEL_MEM(mesh,mesh->xtetra);
     if ( !val )
       mesh->info.dhd    = -1.;
     else {
@@ -2052,7 +2052,7 @@ int MMG3D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam,int val){
     break;
   case MMG3D_IPARAM_numberOfLocalParam :
     if ( mesh->info.par ) {
-      _MMG5_DEL_MEM(mesh,mesh->info.par,mesh->info.npar*sizeof(MMG5_Par));
+      _MMG5_DEL_MEM(mesh,mesh->info.par);
       if ( (mesh->info.imprim > 5) || mesh->info.ddebug )
         fprintf(stderr,"\n  ## Warning: %s: new local parameter values\n",__func__);
     }

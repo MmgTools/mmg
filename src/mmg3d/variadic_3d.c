@@ -66,13 +66,13 @@ int _MMG3D_Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol, MMG5_pSol *disp
     return 0;
   }
 
-  if ( *sol )  _MMG5_DEL_MEM(*mesh,*sol,sizeof(MMG5_Sol));
+  if ( *sol )  _MMG5_DEL_MEM(*mesh,*sol);
   _MMG5_SAFE_CALLOC(*sol,1,MMG5_Sol,0);
 
   /* displacement allocation */
   if ( disp ) {
     if ( *disp )
-      _MMG5_DEL_MEM(*mesh,*disp,sizeof(MMG5_Sol));
+      _MMG5_DEL_MEM(*mesh,*disp);
     _MMG5_SAFE_CALLOC(*disp,1,MMG5_Sol,0);
   }
 
@@ -309,10 +309,10 @@ int _MMG3D_Free_all_var(va_list argptr)
     for ( i=0; i<(*mesh)->nsols; ++i ) {
       psl = (*sols) + i;
       if ( psl->m ) {
-        _MMG5_DEL_MEM(*mesh,psl->m,(psl->size*(psl->npmax+1))*sizeof(double));
+        _MMG5_DEL_MEM(*mesh,psl->m);
       }
     }
-    _MMG5_DEL_MEM(*mesh,*sols,((*mesh)->nsols)*sizeof(MMG5_Sol));
+    _MMG5_DEL_MEM(*mesh,*sols);
   }
 
   _MMG5_SAFE_FREE(*mesh);
@@ -412,41 +412,41 @@ int _MMG3D_Free_structures_var(va_list argptr)
   assert(mesh && *mesh);
 
   if ( (*mesh)->tetra )
-    _MMG5_DEL_MEM((*mesh),(*mesh)->tetra,((*mesh)->nemax+1)*sizeof(MMG5_Tetra));
+    _MMG5_DEL_MEM((*mesh),(*mesh)->tetra);
 
   if ( (*mesh)->prism )
-    _MMG5_DEL_MEM((*mesh),(*mesh)->prism,((*mesh)->nprism+1)*sizeof(MMG5_Prism));
+    _MMG5_DEL_MEM((*mesh),(*mesh)->prism);
 
   if ( (*mesh)->edge )
-    _MMG5_DEL_MEM((*mesh),(*mesh)->edge,((*mesh)->na+1)*sizeof(MMG5_Edge));
+    _MMG5_DEL_MEM((*mesh),(*mesh)->edge);
 
   if ( (*mesh)->adjt )
-    _MMG5_DEL_MEM(*mesh,(*mesh)->adjt,(3*(*mesh)->nt+4)*sizeof(int));
+    _MMG5_DEL_MEM(*mesh,(*mesh)->adjt);
 
   if ( (*mesh)->adja )
-    _MMG5_DEL_MEM((*mesh),(*mesh)->adja,(4*(*mesh)->nemax+5)*sizeof(int));
+    _MMG5_DEL_MEM((*mesh),(*mesh)->adja);
 
   if ( (*mesh)->adjapr )
-    _MMG5_DEL_MEM((*mesh),(*mesh)->adjapr,(5*(*mesh)->nprism+6)*sizeof(int));
+    _MMG5_DEL_MEM((*mesh),(*mesh)->adjapr);
 
   if ( (*mesh)->htab.geom )
-    _MMG5_DEL_MEM((*mesh),(*mesh)->htab.geom,((*mesh)->htab.max+1)*sizeof(MMG5_hgeom));
+    _MMG5_DEL_MEM((*mesh),(*mesh)->htab.geom);
 
   if ( (*mesh)->tria )
-    _MMG5_DEL_MEM((*mesh),(*mesh)->tria,((*mesh)->nt+1)*sizeof(MMG5_Tria));
+    _MMG5_DEL_MEM((*mesh),(*mesh)->tria);
 
   if ( (*mesh)->quadra )
-    _MMG5_DEL_MEM((*mesh),(*mesh)->quadra,((*mesh)->nquad+1)*sizeof(MMG5_Quad));
+    _MMG5_DEL_MEM((*mesh),(*mesh)->quadra);
 
   if ( (*mesh)->xtetra )
-    _MMG5_DEL_MEM((*mesh),(*mesh)->xtetra,((*mesh)->xtmax+1)*sizeof(MMG5_xTetra));
+    _MMG5_DEL_MEM((*mesh),(*mesh)->xtetra);
 
   if ( (*mesh)->xprism )
-    _MMG5_DEL_MEM((*mesh),(*mesh)->xprism,((*mesh)->xpr+1)*sizeof(MMG5_xPrism));
+    _MMG5_DEL_MEM((*mesh),(*mesh)->xprism);
 
   /* disp */
   if ( disp && (*disp) && (*disp)->m )
-    _MMG5_DEL_MEM((*mesh),(*disp)->m,((*disp)->size*((*disp)->npmax+1))*sizeof(double));
+    _MMG5_DEL_MEM((*mesh),(*disp)->m);
 
   if ( sol ) {
     MMG5_Free_structures(*mesh,*sol);
@@ -540,11 +540,11 @@ int _MMG3D_Free_names_var(va_list argptr)
   /* disp */
   if ( disp && *disp ) {
     if ( (*disp)->namein ) {
-      _MMG5_DEL_MEM(*mesh,(*disp)->namein,(strlen((*disp)->namein)+1)*sizeof(char));
+      _MMG5_DEL_MEM(*mesh,(*disp)->namein);
     }
 
     if ( (*disp)->nameout ) {
-      _MMG5_DEL_MEM(*mesh,(*disp)->nameout,(strlen((*disp)->nameout)+1)*sizeof(char));
+      _MMG5_DEL_MEM(*mesh,(*disp)->nameout);
     }
   }
 

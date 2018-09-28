@@ -361,10 +361,10 @@ void MMG2D_Reset_verticestags(MMG5_pMesh mesh) {
 void MMG2D_Free_triangles(MMG5_pMesh mesh) {
 
   if ( mesh->adja )
-    _MMG5_DEL_MEM(mesh,mesh->adja,(3*mesh->ntmax+5)*sizeof(int));
+    _MMG5_DEL_MEM(mesh,mesh->adja);
 
   if ( mesh->tria )
-    _MMG5_DEL_MEM(mesh,mesh->tria,(mesh->ntmax+1)*sizeof(MMG5_Tria));
+    _MMG5_DEL_MEM(mesh,mesh->tria);
 
   mesh->nt = 0;
   mesh->nti = 0;
@@ -376,10 +376,10 @@ void MMG2D_Free_triangles(MMG5_pMesh mesh) {
 void MMG2D_Free_edges(MMG5_pMesh mesh) {
 
   if ( mesh->edge )
-    _MMG5_DEL_MEM(mesh,mesh->edge,(mesh->namax+1)*sizeof(MMG5_Edge));
+    _MMG5_DEL_MEM(mesh,mesh->edge);
 
   if ( mesh->xpoint )
-    _MMG5_DEL_MEM(mesh,mesh->xpoint,(mesh->xpmax+1)*sizeof(MMG5_xPoint));
+    _MMG5_DEL_MEM(mesh,mesh->xpoint);
 
   mesh->na = 0;
   mesh->nai = 0;
@@ -394,7 +394,7 @@ void MMG2D_Free_solutions(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   /* sol */
   if ( sol && sol->m )
-    _MMG5_DEL_MEM(mesh,sol->m,(sol->size*(sol->npmax+1))*sizeof(double));
+    _MMG5_DEL_MEM(mesh,sol->m);
 
   return;
 }

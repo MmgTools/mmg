@@ -544,7 +544,7 @@ int _MMG2_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol){
   if ( (mesh->info.ddebug || abs(mesh->info.imprim) > 5) && ns > 0 )
     fprintf(stdout,"     %7d splitted\n",ns);
 
-  _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
+  _MMG5_DEL_MEM(mesh,hash.item);
   return ns;
 
 }
@@ -637,7 +637,7 @@ int MMG2_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol) {
     return 0;
   }
 
-  _MMG5_DEL_MEM(mesh,tmp,(mesh->npmax+1)*sizeof(double));
+  _MMG5_DEL_MEM(mesh,tmp);
 
   /* Creation of adjacency relations in the mesh */
   if ( !MMG2_hashTria(mesh) ) {
@@ -646,7 +646,7 @@ int MMG2_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol) {
   }
 
   /* No need to keep adjacencies from now on */
-  _MMG5_DEL_MEM(mesh,mesh->adja,(3*mesh->ntmax+5)*sizeof(int));
+  _MMG5_DEL_MEM(mesh,mesh->adja);
 
   /* Transfer the boundary edge references to the triangles */
   if ( !MMG2_assignEdge(mesh) ) {
@@ -685,7 +685,7 @@ int MMG2_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol) {
   }
 
   /* Clean memory */
-  _MMG5_DEL_MEM(mesh,sol->m,(sol->size*(sol->npmax+1))*sizeof(double));
+  _MMG5_DEL_MEM(mesh,sol->m);
   sol->np = 0;
 
   if ( mesh->info.mat )

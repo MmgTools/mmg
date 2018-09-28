@@ -118,7 +118,7 @@ int MMGS_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int 
     sol->np  = np;
     sol->npi = np;
     if ( sol->m )
-      _MMG5_DEL_MEM(mesh,sol->m,(sol->size*(sol->npmax+1))*sizeof(double));
+      _MMG5_DEL_MEM(mesh,sol->m);
 
     sol->npmax = mesh->npmax;
     _MMG5_ADD_MEM(mesh,(sol->size*(sol->npmax+1))*sizeof(double),"initial solution",
@@ -138,7 +138,7 @@ int MMGS_Set_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol *sol,int nsols,
     if ( *sol ) {
       fprintf(stderr,"\n  ## Warning: %s: old solutions array deletion.\n",
               __func__);
-      _MMG5_DEL_MEM(mesh,*sol,(mesh->nsols)*sizeof(MMG5_Sol));
+      _MMG5_DEL_MEM(mesh,*sol);
     }
   }
 
@@ -182,11 +182,11 @@ int MMGS_Set_meshSize(MMG5_pMesh mesh, int np, int nt, int na) {
   }
 
   if ( mesh->point )
-    _MMG5_DEL_MEM(mesh,mesh->point,(mesh->npmax+1)*sizeof(MMG5_Point));
+    _MMG5_DEL_MEM(mesh,mesh->point);
   if ( mesh->tria )
-    _MMG5_DEL_MEM(mesh,mesh->tria,(mesh->nt+1)*sizeof(MMG5_Tria));
+    _MMG5_DEL_MEM(mesh,mesh->tria);
   if ( mesh->edge )
-    _MMG5_DEL_MEM(mesh,mesh->edge,(mesh->na+1)*sizeof(MMG5_Edge));
+    _MMG5_DEL_MEM(mesh,mesh->edge);
 
   /*tester si -m defini : renvoie 0 si pas ok et met la taille min dans info.mem */
   if( mesh->info.mem > 0) {
@@ -1233,7 +1233,7 @@ int MMGS_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
     break;
   case MMGS_IPARAM_angle :
     if ( mesh->xpoint )
-      _MMG5_DEL_MEM(mesh,mesh->xpoint,(mesh->xpmax+1)*sizeof(MMG5_xPoint));
+      _MMG5_DEL_MEM(mesh,mesh->xpoint);
     if ( !val )
       mesh->info.dhd    = -1.;
     else {
@@ -1265,7 +1265,7 @@ int MMGS_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
     break;
   case MMGS_IPARAM_numberOfLocalParam :
     if ( mesh->info.par ) {
-      _MMG5_DEL_MEM(mesh,mesh->info.par,mesh->info.npar*sizeof(MMG5_Par));
+      _MMG5_DEL_MEM(mesh,mesh->info.par);
       if ( (mesh->info.imprim > 5) || mesh->info.ddebug )
         fprintf(stderr,"\n  ## Warning: %s: new local parameter values\n",__func__);
     }

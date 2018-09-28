@@ -355,7 +355,7 @@ void _MMG5_freeXTets(MMG5_pMesh mesh) {
     pt->xt = 0;
   }
   if ( mesh->xtetra )
-    _MMG5_DEL_MEM(mesh,mesh->xtetra,(mesh->xtmax+1)*sizeof(MMG5_xTetra));
+    _MMG5_DEL_MEM(mesh,mesh->xtetra);
   mesh->xt = 0;
 }
 
@@ -374,6 +374,6 @@ void _MMG5_freeXPrisms(MMG5_pMesh mesh) {
     pp->xpr = 0;
   }
   if ( mesh->xprism )
-    _MMG5_DEL_MEM(mesh,mesh->xprism,(mesh->xpr+1)*sizeof(MMG5_xPrism));
+    _MMG5_DEL_MEM(mesh,mesh->xprism);
   mesh->xpr = 0;
 }

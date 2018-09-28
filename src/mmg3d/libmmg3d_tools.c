@@ -613,7 +613,7 @@ int MMG3D_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,double critmin, double lmin,
 
   if ( met->np && (met->np != mesh->np) ) {
     fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
-    _MMG5_DEL_MEM(mesh,met->m,(met->size*(met->npmax+1))*sizeof(double));
+    _MMG5_DEL_MEM(mesh,met->m);
     met->np = 0;
   }
   else if ( met->size!=1 && met->size!=6 ) {
@@ -775,7 +775,7 @@ int MMG3D_searchlen(MMG5_pMesh mesh, MMG5_pSol met, double lmin,
       }
     }
   }
-  _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
+  _MMG5_DEL_MEM(mesh,hash.item);
   return 1;
 }
 

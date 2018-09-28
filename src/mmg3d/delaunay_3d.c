@@ -334,7 +334,7 @@ int _MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
 
   // ppt = &mesh->point[ip];
   // ppt->flag = mesh->flag;
-  _MMG5_DEL_MEM(mesh,hedg.item,(hedg.max+1)*sizeof(_MMG5_hedge));
+  _MMG5_DEL_MEM(mesh,hedg.item);
   return 1;
 }
 

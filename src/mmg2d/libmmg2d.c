@@ -629,7 +629,7 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol)
     _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
   } else if ( sol->np && (sol->np != mesh->np) ) {
     fprintf(stdout,"\n  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
-    _MMG5_DEL_MEM(mesh,sol->m,(sol->size*(sol->npmax+1))*sizeof(double));
+    _MMG5_DEL_MEM(mesh,sol->m);
     sol->np = 0;
   }
 
@@ -789,7 +789,7 @@ int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   }
   else if ( disp->np && (disp->np != mesh->np) ) {
     fprintf(stdout,"\n  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
-    _MMG5_DEL_MEM(mesh,disp->m,(disp->size*(disp->npmax+1))*sizeof(double));
+    _MMG5_DEL_MEM(mesh,disp->m);
     disp->np = 0;
   }
 

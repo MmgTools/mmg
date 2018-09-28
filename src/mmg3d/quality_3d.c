@@ -301,7 +301,7 @@ int MMG3D_computePrilen( MMG5_pMesh mesh, MMG5_pSol met, double* avlen,
     }
   }
 
-  _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
+  _MMG5_DEL_MEM(mesh,hash.item);
   return 1;
 }
 

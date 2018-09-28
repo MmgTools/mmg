@@ -63,10 +63,10 @@ void _MMGS_Free_topoTables(MMG5_pMesh mesh) {
 
   mesh->xp = 0;
   if ( mesh->adja )
-    _MMG5_DEL_MEM(mesh,mesh->adja,(3*mesh->ntmax+5)*sizeof(int));
+    _MMG5_DEL_MEM(mesh,mesh->adja);
 
   if ( mesh->xpoint )
-    _MMG5_DEL_MEM(mesh,mesh->xpoint,(mesh->xpmax+1)*sizeof(MMG5_xPoint));
+    _MMG5_DEL_MEM(mesh,mesh->xpoint);
 
   for(k=1; k <=mesh->np; k++) {
     mesh->point[k].xp = 0;
@@ -183,7 +183,7 @@ int _MMGS_packMesh(MMG5_pMesh mesh,MMG5_pSol met) {
   /* memory alloc */
   mesh->na = 0;
   if ( mesh->edge ) {
-    _MMG5_DEL_MEM(mesh,mesh->edge,(mesh->na+1)*sizeof(MMG5_Edge));
+    _MMG5_DEL_MEM(mesh,mesh->edge);
     _MMG5_SAFE_FREE(mesh->edge);
   }
 
@@ -281,7 +281,7 @@ int MMGS_mmgsls(MMG5_pMesh mesh,MMG5_pSol met)
 
   if ( met->np && (met->np != mesh->np) ) {
     fprintf(stderr,"\n  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
-    _MMG5_DEL_MEM(mesh,met->m,(met->size*(met->npmax+1))*sizeof(double));
+    _MMG5_DEL_MEM(mesh,met->m);
     met->np = 0;
   }
   else if ( met->size!=1 ) {
@@ -441,7 +441,7 @@ int MMGS_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
 
   if ( met->np && (met->np != mesh->np) ) {
     fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
-    _MMG5_DEL_MEM(mesh,met->m,(met->size*(met->npmax+1))*sizeof(double));
+    _MMG5_DEL_MEM(mesh,met->m);
     met->np = 0;
   }
   else if ( met->size!=1 && met->size!=6 ) {

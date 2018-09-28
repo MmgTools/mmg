@@ -406,7 +406,7 @@ static int _MMG3D_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol,double *tmp) {
     fprintf(stdout,"     %8d points snapped, %d corrected\n",ns,nc);
 
   /* memory free */
-  _MMG5_DEL_MEM(mesh,mesh->adja,(4*mesh->nemax+5)*sizeof(int));
+  _MMG5_DEL_MEM(mesh,mesh->adja);
 
   return 1;
 }
@@ -668,7 +668,7 @@ static int _MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol/*,double *tmp*/){
   if ( (mesh->info.ddebug || abs(mesh->info.imprim) > 5) && ns > 0 )
     fprintf(stdout,"     %7d splitted\n",ns);
 
-  _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
+  _MMG5_DEL_MEM(mesh,hash.item);
   return ns;
 }
 
@@ -1521,7 +1521,7 @@ int _MMG3D_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol) {
     fprintf(stderr,"\n  ## Problem with implicit function. Exit program.\n");
     return 0;
   }
-  _MMG5_DEL_MEM(mesh,tmp,(mesh->npmax+1)*sizeof(double));
+  _MMG5_DEL_MEM(mesh,tmp);
 
   if ( !MMG3D_hashTetra(mesh,1) ) {
     fprintf(stderr,"\n  ## Hashing problem. Exit program.\n");
@@ -1555,8 +1555,8 @@ int _MMG3D_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol) {
     return 0;
   }
 
-  _MMG5_DEL_MEM(mesh,mesh->adja,(4*mesh->nemax+5)*sizeof(int));
-  _MMG5_DEL_MEM(mesh,mesh->tria,(mesh->nt+1)*sizeof(MMG5_Tria));
+  _MMG5_DEL_MEM(mesh,mesh->adja);
+  _MMG5_DEL_MEM(mesh,mesh->tria);
 
   mesh->nt = 0;
 
@@ -1566,7 +1566,7 @@ int _MMG3D_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol) {
   }
 
   /* Clean memory */
-  _MMG5_DEL_MEM(mesh,sol->m,(sol->size*(sol->npmax+1))*sizeof(double));
+  _MMG5_DEL_MEM(mesh,sol->m);
 
   return 1;
 }

@@ -765,7 +765,7 @@ int _MMG3D_analys(MMG5_pMesh mesh) {
 
   /* create surface adjacency */
   if ( !_MMG3D_hashTria(mesh,&hash) ) {
-    _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
+    _MMG5_DEL_MEM(mesh,hash.item);
     fprintf(stderr,"\n  ## Hashing problem (2). Exit program.\n");
     return 0;
   }
@@ -773,8 +773,8 @@ int _MMG3D_analys(MMG5_pMesh mesh) {
   /* build hash table for geometric edges */
   if ( !_MMG5_hGeom(mesh) ) {
     fprintf(stderr,"\n  ## Hashing problem (0). Exit program.\n");
-    _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
-    _MMG5_DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(MMG5_hgeom));
+    _MMG5_DEL_MEM(mesh,hash.item);
+    _MMG5_DEL_MEM(mesh,mesh->htab.geom);
     return 0;
   }
 
@@ -785,21 +785,21 @@ int _MMG3D_analys(MMG5_pMesh mesh) {
   /* identify connexity */
   if ( !_MMG5_setadj(mesh) ) {
     fprintf(stderr,"\n  ## Topology problem. Exit program.\n");
-    _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
+    _MMG5_DEL_MEM(mesh,hash.item);
     return 0;
   }
 
   /* check for ridges */
   if ( mesh->info.dhd > _MMG5_ANGLIM && !_MMG5_setdhd(mesh) ) {
     fprintf(stderr,"\n  ## Geometry problem. Exit program.\n");
-    _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
+    _MMG5_DEL_MEM(mesh,hash.item);
     return 0;
   }
 
   /* identify singularities */
   if ( !_MMG5_singul(mesh) ) {
     fprintf(stderr,"\n  ## MMG5_Singularity problem. Exit program.\n");
-    _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
+    _MMG5_DEL_MEM(mesh,hash.item);
     return 0;
   }
 
@@ -809,15 +809,15 @@ int _MMG3D_analys(MMG5_pMesh mesh) {
   /* define (and regularize) normals */
   if ( !_MMG5_norver(mesh) ) {
     fprintf(stderr,"\n  ## Normal problem. Exit program.\n");
-    _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
+    _MMG5_DEL_MEM(mesh,hash.item);
     return 0;
   }
 
   /* set bdry entities to tetra */
   if ( !_MMG5_bdrySet(mesh) ) {
     fprintf(stderr,"\n  ## Boundary problem. Exit program.\n");
-    _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
-    _MMG5_DEL_MEM(mesh,mesh->xpoint,(mesh->xpmax+1)*sizeof(MMG5_xPoint));
+    _MMG5_DEL_MEM(mesh,hash.item);
+    _MMG5_DEL_MEM(mesh,mesh->xpoint);
     return 0;
   }
 
@@ -827,8 +827,8 @@ int _MMG3D_analys(MMG5_pMesh mesh) {
 
   /* if ( !_MMG5_setNmTag(mesh,&hash) ) { */
   /*   fprintf(stderr,"\n  ## Non-manifold topology problem. Exit program.\n"); */
-  /*   _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge)); */
-  /*   _MMG5_DEL_MEM(mesh,mesh->xpoint,(mesh->xpmax+1)*sizeof(MMG5_xPoint)); */
+  /*   _MMG5_DEL_MEM(mesh,hash.item); */
+  /*   _MMG5_DEL_MEM(mesh,mesh->xpoint); */
   /*   return 0; */
   /* } */
 
@@ -838,15 +838,15 @@ int _MMG3D_analys(MMG5_pMesh mesh) {
   /* build hash table for geometric edges */
   if ( !mesh->na && !_MMG5_hGeom(mesh) ) {
     fprintf(stderr,"\n  ## Hashing problem (0). Exit program.\n");
-    _MMG5_DEL_MEM(mesh,mesh->xpoint,(mesh->xpmax+1)*sizeof(MMG5_xPoint));
-    _MMG5_DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(MMG5_hgeom));
+    _MMG5_DEL_MEM(mesh,mesh->xpoint);
+    _MMG5_DEL_MEM(mesh,mesh->htab.geom);
     return 0;
   }
 
   /* Update edges tags and references for xtetras */
   if ( !_MMG5_bdryUpdate(mesh) ) {
     fprintf(stderr,"\n  ## Boundary problem. Exit program.\n");
-    _MMG5_DEL_MEM(mesh,mesh->xpoint,(mesh->xpmax+1)*sizeof(MMG5_xPoint));
+    _MMG5_DEL_MEM(mesh,mesh->xpoint);
     return 0;
   }
 
@@ -854,12 +854,12 @@ int _MMG3D_analys(MMG5_pMesh mesh) {
   if ( !_MMG3D_nmgeom(mesh) ) return 0;
 
   /* release memory */
-  _MMG5_DEL_MEM(mesh,mesh->htab.geom,(mesh->htab.max+1)*sizeof(MMG5_hgeom));
-  _MMG5_DEL_MEM(mesh,mesh->adjt,(3*mesh->nt+4)*sizeof(int));
-  _MMG5_DEL_MEM(mesh,mesh->tria,(mesh->nt+1)*sizeof(MMG5_Tria));
+  _MMG5_DEL_MEM(mesh,mesh->htab.geom);
+  _MMG5_DEL_MEM(mesh,mesh->adjt);
+  _MMG5_DEL_MEM(mesh,mesh->tria);
   mesh->nt = 0;
 
-  if ( mesh->nprism ) _MMG5_DEL_MEM(mesh,mesh->adjapr,(5*mesh->nprism+6)*sizeof(int));
+  if ( mesh->nprism ) _MMG5_DEL_MEM(mesh,mesh->adjapr);
 
   return 1;
 }

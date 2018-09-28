@@ -139,7 +139,7 @@ void MMG5_Init_fileNames(MMG5_pMesh mesh,MMG5_pSol sol
 int MMG5_Set_inputMeshName(MMG5_pMesh mesh, const char* meshin) {
 
   if ( mesh->namein ){
-    _MMG5_DEL_MEM(mesh,mesh->namein,(strlen(mesh->namein)+1)*sizeof(char));
+    _MMG5_DEL_MEM(mesh,mesh->namein);
   }
 
   if ( strlen(meshin) ) {
@@ -176,7 +176,7 @@ int MMG5_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solin) {
   char *ptr;
 
   if ( sol->namein )
-    _MMG5_DEL_MEM(mesh,sol->namein,(strlen(sol->namein)+1)*sizeof(char));
+    _MMG5_DEL_MEM(mesh,sol->namein);
 
   if ( strlen(solin) ) {
     _MMG5_ADD_MEM(mesh,(strlen(solin)+1)*sizeof(char),"input sol name",
@@ -226,7 +226,7 @@ int MMG5_Set_outputMeshName(MMG5_pMesh mesh, const char* meshout) {
   ptrMed = ptrGmsh = NULL;
 
   if ( mesh->nameout )
-    _MMG5_DEL_MEM(mesh,mesh->nameout,(strlen(mesh->nameout)+1)*sizeof(char));
+    _MMG5_DEL_MEM(mesh,mesh->nameout);
 
   if ( strlen(meshout) ) {
     _MMG5_ADD_MEM(mesh,(strlen(meshout)+1)*sizeof(char),"output mesh name",
@@ -302,7 +302,7 @@ int MMG5_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solout) {
   int oldsize;
 
   if ( sol->nameout )
-    _MMG5_DEL_MEM(mesh,sol->nameout,(strlen(sol->nameout)+1)*sizeof(char));
+    _MMG5_DEL_MEM(mesh,sol->nameout);
 
   if ( strlen(solout) ) {
     _MMG5_ADD_MEM(mesh,(strlen(solout)+1)*sizeof(char),"output sol name",
@@ -354,21 +354,21 @@ int MMG5_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solout) {
 void MMG5_Free_structures(MMG5_pMesh mesh,MMG5_pSol sol){
 
   if ( mesh->point )
-    _MMG5_DEL_MEM(mesh,mesh->point,(mesh->npmax+1)*sizeof(MMG5_Point));
+    _MMG5_DEL_MEM(mesh,mesh->point);
 
   if ( mesh->xpoint )
-    _MMG5_DEL_MEM(mesh,mesh->xpoint,(mesh->xpmax+1)*sizeof(MMG5_xPoint));
+    _MMG5_DEL_MEM(mesh,mesh->xpoint);
 
   if ( mesh->edge )
-    _MMG5_DEL_MEM(mesh,mesh->edge,(mesh->na+1)*sizeof(MMG5_Edge));
+    _MMG5_DEL_MEM(mesh,mesh->edge);
 
   /* sol */
   if ( sol && sol->m )
-    _MMG5_DEL_MEM(mesh,sol->m,(sol->size*(sol->npmax+1))*sizeof(double));
+    _MMG5_DEL_MEM(mesh,sol->m);
 
   /* mesh->info */
   if ( mesh->info.npar && mesh->info.par )
-    _MMG5_DEL_MEM(mesh,mesh->info.par,mesh->info.npar*sizeof(MMG5_Par));
+    _MMG5_DEL_MEM(mesh,mesh->info.par);
 
   if ( mesh->info.imprim>5 || mesh->info.ddebug ) {
     printf("  MEMORY USED AT END (Bytes) %zu\n",mesh->memCur);
@@ -388,21 +388,21 @@ void MMG5_mmgFree_names(MMG5_pMesh mesh,MMG5_pSol met){
 
   /* mesh */
   if ( mesh->nameout ) {
-    _MMG5_DEL_MEM(mesh,mesh->nameout,(strlen(mesh->nameout)+1)*sizeof(char));
+    _MMG5_DEL_MEM(mesh,mesh->nameout);
   }
 
   if ( mesh->namein ) {
-    _MMG5_DEL_MEM(mesh,mesh->namein,(strlen(mesh->namein)+1)*sizeof(char));
+    _MMG5_DEL_MEM(mesh,mesh->namein);
   }
 
   /* met */
   if ( met ) {
     if ( met->namein ) {
-      _MMG5_DEL_MEM(mesh,met->namein,(strlen(met->namein)+1)*sizeof(char));
+      _MMG5_DEL_MEM(mesh,met->namein);
     }
 
     if ( met->nameout ) {
-      _MMG5_DEL_MEM(mesh,met->nameout,(strlen(met->nameout)+1)*sizeof(char));
+      _MMG5_DEL_MEM(mesh,met->nameout);
     }
   }
 }

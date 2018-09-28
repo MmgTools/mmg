@@ -501,7 +501,7 @@ int _MMGS_delPatternPts(MMG5_pMesh mesh,_MMG5_Hash hash)
                   " along edge %d %d.\n", __func__,
                   _MMGS_indPt(mesh,pt->v[i1]),
                   _MMGS_indPt(mesh,pt->v[i2]));
-          _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
+          _MMG5_DEL_MEM(mesh,hash.item);
           return 0;
         }
       }
@@ -670,7 +670,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
     }
   }
   if ( !ns ) {
-    _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
+    _MMG5_DEL_MEM(mesh,hash.item);
     return ns;
   }
 
@@ -799,7 +799,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
                         " idx along edge %d %d.\n",
                         __func__,_MMGS_indPt(mesh,pt->v[_MMG5_iprv2[i]]),
                         _MMGS_indPt(mesh,pt->v[_MMG5_inxt2[i]]));
-                _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
+                _MMG5_DEL_MEM(mesh,hash.item);
                 return -1;
               }
               _MMGS_delPt(mesh,vx[i]);
@@ -859,7 +859,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   }
   if ( (mesh->info.ddebug || abs(mesh->info.imprim) > 5) && ns > 0 )
     fprintf(stdout,"     %7d splitted\n",ns);
-  _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
+  _MMG5_DEL_MEM(mesh,hash.item);
 
   return ns;
 }
@@ -1290,7 +1290,7 @@ static int anatri(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   do {
     if ( !mesh->info.noinsert ) {
       /* memory free */
-      _MMG5_DEL_MEM(mesh,mesh->adja,(3*mesh->ntmax+5)*sizeof(int));
+      _MMG5_DEL_MEM(mesh,mesh->adja);
       mesh->adja = 0;
 
       /* analyze surface */

@@ -538,7 +538,7 @@ void _MMG5_Free_ilinkedList( MMG5_pMesh mesh, _MMG5_iNode *liLi ) {
     nxt = cur;
     cur = cur->nxt;
 
-    _MMG5_DEL_MEM(mesh,nxt,sizeof(_MMG5_iNode));
+    _MMG5_DEL_MEM(mesh,nxt);
   }
 }
 
@@ -636,7 +636,7 @@ void _MMG5_Free_dlinkedList( MMG5_pMesh mesh, _MMG5_dNode *liLi ) {
     nxt = cur;
     cur = cur->nxt;
 
-    _MMG5_DEL_MEM(mesh,nxt,sizeof(_MMG5_dNode));
+    _MMG5_DEL_MEM(mesh,nxt);
   }
 }
 

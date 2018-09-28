@@ -90,7 +90,7 @@ int _MMGS_hashTria(MMG5_pMesh mesh) {
 
   if ( !_MMG5_mmgHashTria(mesh, mesh->adja, &hash, 0) ) return 0;
 
-  _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
+  _MMG5_DEL_MEM(mesh,hash.item);
 
   return 1;
 }
@@ -150,8 +150,8 @@ int assignEdge(MMG5_pMesh mesh) {
   }
 
   /* reset edge structure */
-  _MMG5_DEL_MEM(mesh,hash.item,(hash.max+1)*sizeof(_MMG5_hedge));
-  _MMG5_DEL_MEM(mesh,mesh->edge,(mesh->na+1)*sizeof(MMG5_Edge));
+  _MMG5_DEL_MEM(mesh,hash.item);
+  _MMG5_DEL_MEM(mesh,mesh->edge);
   mesh->na = 0;
 
   return 1;
