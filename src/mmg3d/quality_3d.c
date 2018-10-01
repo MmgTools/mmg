@@ -358,9 +358,11 @@ static int _MMG3D_printquaLES(MMG5_pMesh mesh,MMG5_pSol met) {
 
   }
 
-  fprintf(stdout,"\n  -- MESH QUALITY");
-  fprintf(stdout," (LES)");
-  fprintf(stdout,"  %d\n",mesh->ne - nex);
+  if ( mesh->info.imprim > 0 ) {
+    fprintf(stdout,"\n  -- MESH QUALITY");
+    fprintf(stdout," (LES)");
+    fprintf(stdout,"  %d\n",mesh->ne - nex);
+  }
 
 #ifndef DEBUG
   fprintf(stdout,"     BEST   %8.6f  AVRG.   %8.6f  WRST.   %8.6f (%d)\n",
@@ -460,18 +462,20 @@ int _MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
     his[ir] += 1;
   }
 
-  fprintf(stdout,"\n  -- MESH QUALITY");
-  fprintf(stdout,"  %d\n",mesh->ne - nex);
+  if ( mesh->info.imprim > 0 ) {
+    fprintf(stdout,"\n  -- MESH QUALITY");
+    fprintf(stdout,"  %d\n",mesh->ne - nex);
 
 #ifndef DEBUG
-  fprintf(stdout,"     BEST   %8.6f  AVRG.   %8.6f  WRST.   %8.6f (%d)\n",
-          rapmax,rapavg / (mesh->ne-nex),rapmin,iel);
+    fprintf(stdout,"     BEST   %8.6f  AVRG.   %8.6f  WRST.   %8.6f (%d)\n",
+           rapmax,rapavg / (mesh->ne-nex),rapmin,iel);
 #else
-  fprintf(stdout,"     BEST   %e  AVRG.   %e  WRST.   %e (%d)\n => %d %d %d %d\n",
-          rapmax,rapavg / (mesh->ne-nex),rapmin,iel,
-          _MMG3D_indPt(mesh,mesh->tetra[iel].v[0]),_MMG3D_indPt(mesh,mesh->tetra[iel].v[1]),
-          _MMG3D_indPt(mesh,mesh->tetra[iel].v[2]),_MMG3D_indPt(mesh,mesh->tetra[iel].v[3]));
+    fprintf(stdout,"     BEST   %e  AVRG.   %e  WRST.   %e (%d)\n => %d %d %d %d\n",
+            rapmax,rapavg / (mesh->ne-nex),rapmin,iel,
+            _MMG3D_indPt(mesh,mesh->tetra[iel].v[0]),_MMG3D_indPt(mesh,mesh->tetra[iel].v[1]),
+            _MMG3D_indPt(mesh,mesh->tetra[iel].v[2]),_MMG3D_indPt(mesh,mesh->tetra[iel].v[3]));
 #endif
+  }
 
   if ( mesh->info.imprim >= 3 ) {
     /* print histo */
@@ -561,18 +565,20 @@ int _MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
     his[ir] += 1;
   }
 
-  fprintf(stdout,"\n  -- MESH QUALITY");
-  fprintf(stdout,"  %d\n",mesh->ne - nex);
+  if ( mesh->info.imprim > 0 ) {
+    fprintf(stdout,"\n  -- MESH QUALITY");
+    fprintf(stdout,"  %d\n",mesh->ne - nex);
 
 #ifndef DEBUG
-  fprintf(stdout,"     BEST   %8.6f  AVRG.   %8.6f  WRST.   %8.6f (%d)\n",
-          rapmax,rapavg / (mesh->ne-nex),rapmin,iel);
+    fprintf(stdout,"     BEST   %8.6f  AVRG.   %8.6f  WRST.   %8.6f (%d)\n",
+            rapmax,rapavg / (mesh->ne-nex),rapmin,iel);
 #else
-  fprintf(stdout,"     BEST   %e  AVRG.   %e  WRST.   %e (%d)\n => %d %d %d %d\n",
-          rapmax,rapavg / (mesh->ne-nex),rapmin,iel,
-          _MMG3D_indPt(mesh,mesh->tetra[iel].v[0]),_MMG3D_indPt(mesh,mesh->tetra[iel].v[1]),
-          _MMG3D_indPt(mesh,mesh->tetra[iel].v[2]),_MMG3D_indPt(mesh,mesh->tetra[iel].v[3]));
+    fprintf(stdout,"     BEST   %e  AVRG.   %e  WRST.   %e (%d)\n => %d %d %d %d\n",
+            rapmax,rapavg / (mesh->ne-nex),rapmin,iel,
+           _MMG3D_indPt(mesh,mesh->tetra[iel].v[0]),_MMG3D_indPt(mesh,mesh->tetra[iel].v[1]),
+           _MMG3D_indPt(mesh,mesh->tetra[iel].v[2]),_MMG3D_indPt(mesh,mesh->tetra[iel].v[3]));
 #endif
+  }
 
   if ( abs(mesh->info.imprim) >= 3 ){
 

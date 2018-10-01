@@ -422,9 +422,11 @@ int _MMGS_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
     his[ir] += 1;
   }
 
-  fprintf(stdout,"\n  -- MESH QUALITY   %d\n",mesh->nt - nex);
-  fprintf(stdout,"     BEST   %8.6f  AVRG.   %8.6f  WRST.   %8.6f (%d)\n",
-          rapmax,rapavg / (mesh->nt-nex),rapmin,iel);
+  if ( mesh->info.imprim > 0 ) {
+    fprintf(stdout,"\n  -- MESH QUALITY   %d\n",mesh->nt - nex);
+    fprintf(stdout,"     BEST   %8.6f  AVRG.   %8.6f  WRST.   %8.6f (%d)\n",
+            rapmax,rapavg / (mesh->nt-nex),rapmin,iel);
+  }
 
   if ( abs(mesh->info.imprim) >= 3 ){
 
@@ -484,9 +486,11 @@ int _MMGS_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
     his[ir] += 1;
   }
 
-  fprintf(stdout,"\n  -- MESH QUALITY   %d\n",mesh->nt - nex);
-  fprintf(stdout,"     BEST   %8.6f  AVRG.   %8.6f  WRST.   %8.6f (%d)\n",
-          rapmax,rapavg / (mesh->nt-nex),rapmin,iel);
+  if ( mesh->info.imprim > 0 ) {
+    fprintf(stdout,"\n  -- MESH QUALITY   %d\n",mesh->nt - nex);
+    fprintf(stdout,"     BEST   %8.6f  AVRG.   %8.6f  WRST.   %8.6f (%d)\n",
+            rapmax,rapavg / (mesh->nt-nex),rapmin,iel);
+  }
 
   if ( abs(mesh->info.imprim) >= 3 ){
     /* print histo */
