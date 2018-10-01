@@ -250,9 +250,11 @@ int MMGS_mmgsls(MMG5_pMesh mesh,MMG5_pSol met)
   mytime    ctim[TIMEMAX];
   char      stim[32];
 
-  fprintf(stdout,"  -- MMGS, Release %s (%s) \n",MG_VER,MG_REL);
-  fprintf(stdout,"     %s\n",MG_CPY);
-  fprintf(stdout,"     %s %s\n",__DATE__,__TIME__);
+  if ( mesh->info.imprim ) {
+    fprintf(stdout,"  -- MMGS, Release %s (%s) \n",MG_VER,MG_REL);
+    fprintf(stdout,"     %s\n",MG_CPY);
+    fprintf(stdout,"     %s %s\n",__DATE__,__TIME__);
+  }
 
   _MMGS_Set_commonFunc();
 
@@ -402,9 +404,11 @@ int MMGS_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
   mytime    ctim[TIMEMAX];
   char      stim[32];
 
-  fprintf(stdout,"  -- MMGS, Release %s (%s) \n",MG_VER,MG_REL);
-  fprintf(stdout,"     %s\n",MG_CPY);
-  fprintf(stdout,"     %s %s\n",__DATE__,__TIME__);
+  if ( mesh->info.imprim ) {
+    fprintf(stdout,"  -- MMGS, Release %s (%s) \n",MG_VER,MG_REL);
+    fprintf(stdout,"     %s\n",MG_CPY);
+    fprintf(stdout,"     %s %s\n",__DATE__,__TIME__);
+  }
 
   _MMGS_Set_commonFunc();
 
