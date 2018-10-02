@@ -1284,7 +1284,7 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
     _MMG5_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE);
   }
 
-  if ( mesh->info.imprim > 1 && !mesh->info.iso )
+  if ( mesh->info.imprim > 1 && (!mesh->info.iso) && met->m )
     _MMG3D_prilen(mesh,met,1);
 
   chrono(ON,&(ctim[1]));
