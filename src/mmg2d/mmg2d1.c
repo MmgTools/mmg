@@ -98,7 +98,7 @@ int _MMG2_anatri(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   }
   while ( ++it < maxit && ns+nc+nsw >0 );
 
-  if ( mesh->info.imprim ) {
+  if ( mesh->info.imprim > 0 ) {
     if ( (abs(mesh->info.imprim) < 5 || mesh->info.ddebug ) && nns+nnc > 0 )
       fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %d iter.\n",nns,nnc,nnsw,it);
   }
@@ -612,7 +612,7 @@ int _MMG2_adptri(MMG5_pMesh mesh,MMG5_pSol met) {
     nnm += nm;
   }
 
-  if ( mesh->info.imprim ) {
+  if ( mesh->info.imprim > 0 ) {
     if ( abs(mesh->info.imprim) < 5 && (nnc > 0 || nns > 0) )
       fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %8d moved, %d iter. \n",nns,nnc,nnsw,nnm,it);
   }
@@ -824,7 +824,7 @@ int MMG2_mmg2d1n(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
   if ( mesh->info.hgrad > 0. ) {
-    if ( mesh->info.imprim )   fprintf(stdout,"\n  -- GRADATION : %8f\n",mesh->info.hgrad);
+    if ( mesh->info.imprim > 0 )   fprintf(stdout,"\n  -- GRADATION : %8f\n",mesh->info.hgrad);
     if (!MMG2D_gradsiz(mesh,met) ) {
       fprintf(stderr,"  ## Gradation problem. Exit program.\n");
       return 0;

@@ -165,10 +165,7 @@ int* _MMG2_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
   }
   
   /* Set verbosity and debug info */
-  if ( !mesh->info.imprim )
-    LS_setPar(lsst,0,0);
-  else
-    LS_setPar(lsst,1,0);
+  LS_setPar(lsst, (mesh->info.imprim > 0),0);
   
   /* Step 5: fill the LS mesh */
   /* Add vertices, and fill in table invperm on the fly */

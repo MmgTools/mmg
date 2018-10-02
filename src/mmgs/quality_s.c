@@ -426,7 +426,7 @@ int _MMGS_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
   fprintf(stdout,"     BEST   %8.6f  AVRG.   %8.6f  WRST.   %8.6f (%d)\n",
           rapmax,rapavg / (mesh->nt-nex),rapmin,iel);
 
-  if ( abs(mesh->info.imprim) >= 3 ){
+  if ( mesh->info.imprim >= 3 ){
 
     /* print histo */
     fprintf(stdout,"     HISTOGRAMM:  %6.2f %% > 0.5\n",100.0*(med/(float)(mesh->nt-nex)));
@@ -453,6 +453,8 @@ int _MMGS_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria    pt;
   double        rap,rapmin,rapmax,rapavg,med;
   int           i,k,iel,ok,ir,imax,nex,his[5];
+
+  if ( mesh->info.imprim <= 0 ) return 1;
 
   rapmin  = 1.0;
   rapmax  = 0.0;
@@ -488,7 +490,7 @@ int _MMGS_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
   fprintf(stdout,"     BEST   %8.6f  AVRG.   %8.6f  WRST.   %8.6f (%d)\n",
           rapmax,rapavg / (mesh->nt-nex),rapmin,iel);
 
-  if ( abs(mesh->info.imprim) >= 3 ){
+  if ( mesh->info.imprim >= 3 ){
     /* print histo */
     fprintf(stdout,"     HISTOGRAMM:  %6.2f %% > 0.5\n",100.0*(med/(float)(mesh->nt-nex)));
     imax = MG_MIN(4,(int)(5.*rapmax));

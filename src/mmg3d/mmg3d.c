@@ -219,7 +219,8 @@ int _MMG3D_defaultOption(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
 
-  if ( mesh->info.imprim ) fprintf(stdout,"\n  -- INPUT DATA\n");
+  if ( mesh->info.imprim > 0 ) fprintf(stdout,"\n  -- INPUT DATA\n");
+
   /* load data */
   chrono(ON,&(ctim[1]));
 
@@ -231,14 +232,14 @@ int _MMG3D_defaultOption(MMG5_pMesh mesh,MMG5_pSol met) {
 
   chrono(OFF,&(ctim[1]));
   printim(ctim[1].gdif,stim);
-  if ( mesh->info.imprim )
+  if ( mesh->info.imprim > 0 )
     fprintf(stdout,"  --  INPUT DATA COMPLETED.     %s\n",stim);
 
   /* analysis */
   chrono(ON,&(ctim[2]));
   MMG3D_setfunc(mesh,met);
 
-  if ( mesh->info.imprim ) {
+  if ( mesh->info.imprim > 0 ) {
     fprintf(stdout,"\n  %s\n   MODULE MMG3D: IMB-LJLL : %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
     fprintf(stdout,"\n  -- DEFAULT PARAMETERS COMPUTATION\n");
   }
@@ -294,12 +295,13 @@ int main(int argc,char *argv[]) {
   int             ier,ierSave,msh;
   char            stim[32];
 
-  fprintf(stdout,"  -- MMG3d, Release %s (%s) \n",MG_VER,MG_REL);
+  fprintf(stdout,"  -- MMG3D, Release %s (%s) \n",MG_VER,MG_REL);
   fprintf(stdout,"     %s\n",MG_CPY);
   fprintf(stdout,"     %s %s\n",__DATE__,__TIME__);
 
   _MMG3D_Set_commonFunc();
 
+  /* Print timer at exit */
   atexit(_MMG5_endcod);
 
   tminit(MMG5_ctim,TIMEMAX);
@@ -331,7 +333,8 @@ int main(int argc,char *argv[]) {
   if ( !MMG3D_parsar(argc,argv,mesh,met) )  return MMG5_STRONGFAILURE;
 
   /* load data */
-  fprintf(stdout,"\n  -- INPUT DATA\n");
+  if ( mesh->info.imprim >= 0 )
+    fprintf(stdout,"\n  -- INPUT DATA\n");
   chrono(ON,&MMG5_ctim[1]);
 
   /* read mesh file */
@@ -392,8 +395,10 @@ int main(int argc,char *argv[]) {
   }
 
   chrono(OFF,&MMG5_ctim[1]);
-  printim(MMG5_ctim[1].gdif,stim);
-  fprintf(stdout,"  -- DATA READING COMPLETED.     %s\n",stim);
+  if ( mesh->info.imprim >= 0 ) {
+    printim(MMG5_ctim[1].gdif,stim);
+    fprintf(stdout,"  -- DATA READING COMPLETED.     %s\n",stim);
+  }
 
   if ( mesh->mark ) {
     /* Save a local parameters file containing the default parameters */
@@ -413,7 +418,7 @@ int main(int argc,char *argv[]) {
   if ( ier != MMG5_STRONGFAILURE ) {
     /** Save files at medit or Gmsh format */
     chrono(ON,&MMG5_ctim[1]);
-    if ( mesh->info.imprim )
+    if ( mesh->info.imprim > 0 )
       fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh->nameout);
 
     MMG5_chooseOutputFormat(mesh,&msh);
@@ -430,7 +435,7 @@ int main(int argc,char *argv[]) {
       _MMG5_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
 
     chrono(OFF,&MMG5_ctim[1]);
-    if ( mesh->info.imprim )
+    if ( mesh->info.imprim > 0 )
       fprintf(stdout,"  -- WRITING COMPLETED\n");
   }
 

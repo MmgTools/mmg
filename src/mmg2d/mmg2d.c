@@ -255,7 +255,7 @@ int _MMG2D_defaultOption(MMG5_pMesh mesh,MMG5_pSol met, double qdegrad[2]) {
   }
 
 
-  if ( mesh->info.imprim ) fprintf(stdout,"\n  -- INPUT DATA\n");
+  if ( mesh->info.imprim > 0 ) fprintf(stdout,"\n  -- INPUT DATA\n");
   /* load data */
   chrono(ON,&(ctim[1]));
 
@@ -267,7 +267,7 @@ int _MMG2D_defaultOption(MMG5_pMesh mesh,MMG5_pSol met, double qdegrad[2]) {
 
   chrono(OFF,&(ctim[1]));
   printim(ctim[1].gdif,stim);
-  if ( mesh->info.imprim )
+  if ( mesh->info.imprim > 0 )
     fprintf(stdout,"  --  INPUT DATA COMPLETED.     %s\n",stim);
 
   /* analysis */
@@ -275,7 +275,7 @@ int _MMG2D_defaultOption(MMG5_pMesh mesh,MMG5_pSol met, double qdegrad[2]) {
   MMG2D_setfunc(mesh,met);
   _MMG2D_Set_commonFunc();
 
-  if ( mesh->info.imprim ) {
+  if ( mesh->info.imprim > 0 ) {
     fprintf(stdout,"\n  %s\n   MODULE MMG2D: IMB-LJLL : %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
     fprintf(stdout,"\n  -- DEFAULT PARAMETERS COMPUTATION\n");
   }
@@ -614,10 +614,14 @@ int main(int argc,char *argv[]) {
   int           ier,ierSave,msh;
   char          stim[32];
 
-  msh = 0;
+  fprintf(stdout,"  -- MMG2D, Release %s (%s) \n",MG_VER,MG_REL);
+  fprintf(stdout,"     %s\n",MG_CPY);
+  fprintf(stdout,"     %s %s\n",__DATE__,__TIME__);
 
-  /* interrupts */
+  /* Print timer at exit */
   atexit(_MMG5_endcod);
+
+  msh = 0;
 
   _MMG2D_Set_commonFunc();
   tminit(MMG5_ctim,TIMEMAX);
@@ -652,7 +656,8 @@ int main(int argc,char *argv[]) {
   if ( !parsar(argc,argv,mesh,met,qdegrad) )  return MMG5_STRONGFAILURE;
 
   /* load data */
-  fprintf(stdout,"\n  -- INPUT DATA\n");
+  if ( mesh->info.imprim >= 0 )
+    fprintf(stdout,"\n  -- INPUT DATA\n");
   chrono(ON,&MMG5_ctim[1]);
 
   /* read mesh file */
@@ -704,8 +709,10 @@ int main(int argc,char *argv[]) {
   }
 
   chrono(OFF,&MMG5_ctim[1]);
-  printim(MMG5_ctim[1].gdif,stim);
-  fprintf(stdout,"  -- DATA READING COMPLETED.     %s\n",stim);
+  if ( mesh->info.imprim >= 0 ) {
+    printim(MMG5_ctim[1].gdif,stim);
+    fprintf(stdout,"  -- DATA READING COMPLETED.     %s\n",stim);
+  }
 
   if ( mesh->mark ) {
     /* Save a local parameters file containing the default parameters */
@@ -731,7 +738,7 @@ int main(int argc,char *argv[]) {
 
   if ( ier != MMG5_STRONGFAILURE ) {
     chrono(ON,&MMG5_ctim[1]);
-    if ( mesh->info.imprim )
+    if ( mesh->info.imprim > 0 )
       fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh->nameout);
 
     MMG5_chooseOutputFormat(mesh,&msh);
@@ -748,12 +755,9 @@ int main(int argc,char *argv[]) {
       MMG2D_saveSol(mesh,met,mesh->nameout);
 
     chrono(OFF,&MMG5_ctim[1]);
-    if ( mesh->info.imprim ) fprintf(stdout,"  -- WRITING COMPLETED\n");
+    if ( mesh->info.imprim > 0 ) fprintf(stdout,"  -- WRITING COMPLETED\n");
   }
 
   /* free mem */
-  chrono(OFF,&MMG5_ctim[0]);
-  printim(MMG5_ctim[0].gdif,stim);
-  fprintf(stdout,"\n   MMG2D: ELAPSED TIME  %s\n",stim);
   _MMG2D_RETURN_AND_FREE(mesh,met,disp,ier);
 }

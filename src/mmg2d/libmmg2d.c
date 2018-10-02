@@ -143,13 +143,15 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
   mytime    ctim[TIMEMAX];
   char      stim[32];
 
-  fprintf(stdout,"  -- MMG2D, Release %s (%s) \n",MG_VER,MG_REL);
-  fprintf(stdout,"     %s\n",MG_CPY);
-  fprintf(stdout,"     %s %s\n",__DATE__,__TIME__);
+  if ( mesh->info.imprim >= 0 ) {
+    fprintf(stdout,"\n  %s\n   MODULE MMG2D: %s (%s)\n  %s\n",
+            MG_STR,MG_VER,MG_REL,MG_STR);
+  }
 
   /*uncomment to callback*/
   //MMG2D_callbackinsert = titi;
-  /* interrupts */
+
+ /* interrupts */
   signal(SIGABRT,_MMG2_excfun);
   signal(SIGFPE,_MMG2_excfun);
   signal(SIGILL,_MMG2_excfun);
@@ -182,7 +184,7 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
   }
 
 
-  if ( mesh->info.imprim ) fprintf(stdout,"\n  -- MMG2DLIB: INPUT DATA\n");
+  if ( mesh->info.imprim > 0 ) fprintf(stdout,"\n  -- MMG2DLIB: INPUT DATA\n");
 
   /* Check input */
   chrono(ON,&(ctim[1]));
@@ -220,15 +222,13 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
   chrono(OFF,&(ctim[1]));
   printim(ctim[1].gdif,stim);
 
-  if ( mesh->info.imprim )
+  if ( mesh->info.imprim > 0 )
     fprintf(stdout,"  --  INPUT DATA COMPLETED.     %s\n",stim);
 
   /* Set function pointers */
   MMG2D_setfunc(mesh,sol);
   _MMG2D_Set_commonFunc();
 
-  fprintf(stdout,"\n  %s\n   MODULE MMG2D-IMB/LJLL : %s (%s) %s\n  %s\n",
-          MG_STR,MG_VER,MG_REL,sol->size == 1 ? "ISO" : "ANISO",MG_STR);
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {
     fprintf(stdout,"  MAXIMUM NUMBER OF POINTS    (NPMAX) : %8d\n",mesh->npmax);
     fprintf(stdout,"  MAXIMUM NUMBER OF TRIANGLES (NTMAX) : %8d\n",mesh->ntmax);
@@ -236,7 +236,7 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
 
   /* Data analysis */
   chrono(ON,&ctim[2]);
-  if ( mesh->info.imprim )   fprintf(stdout,"\n  -- PHASE 1 : DATA ANALYSIS\n");
+  if ( mesh->info.imprim > 0 )   fprintf(stdout,"\n  -- PHASE 1 : DATA ANALYSIS\n");
 
 
   /* Scale input mesh */
@@ -265,7 +265,7 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
   if ( mesh->info.ddebug && !_MMG5_chkmsh(mesh,1,0) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
 
   /* Print initial quality history */
-  if ( abs(mesh->info.imprim) > 0 ) {
+  if ( mesh->info.imprim > 0  ||  mesh->info.imprim < -1 ) {
     if ( !MMG2_outqua(mesh,sol) ) {
       if ( !MMG2_unscaleMesh(mesh,sol) ) _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
       _LIBMMG5_RETURN(mesh,sol,MMG5_LOWFAILURE);
@@ -282,13 +282,13 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
 
   chrono(OFF,&(ctim[2]));
   printim(ctim[2].gdif,stim);
-  if ( mesh->info.imprim )
+  if ( mesh->info.imprim > 0 )
     fprintf(stdout,"  -- PHASE 1 COMPLETED.     %s\n",stim);
 
   /* remeshing */
   chrono(ON,&ctim[3]);
 
-  if ( mesh->info.imprim )
+  if ( mesh->info.imprim > 0 )
     fprintf(stdout,"\n  -- PHASE 2 : %s MESHING\n",sol->size < 3 ? "ISOTROPIC" : "ANISOTROPIC");
 
   /* Mesh improvement */
@@ -299,13 +299,12 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
 
   chrono(OFF,&(ctim[3]));
   printim(ctim[3].gdif,stim);
-  if ( mesh->info.imprim ) {
+  if ( mesh->info.imprim > 0 ) {
     fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
-    fprintf(stdout,"\n  %s\n   END OF MODULE MMG2D: IMB-LJLL \n  %s\n",MG_STR,MG_STR);
   }
 
   /* Print output quality history */
-   if ( !MMG2_outqua(mesh,sol) ) {
+  if ( !MMG2_outqua(mesh,sol) ) {
      if ( !MMG2_unscaleMesh(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
      _MMG2D_RETURN_AND_PACK(mesh,sol,MMG5_LOWFAILURE);
    }
@@ -316,7 +315,7 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
   }
 
   chrono(ON,&(ctim[1]));
-  if ( mesh->info.imprim )  fprintf(stdout,"\n  -- MESH PACKED UP\n");
+  if ( mesh->info.imprim > 0 )  fprintf(stdout,"\n  -- MESH PACKED UP\n");
 
   /* Unscale mesh */
   if ( !MMG2_unscaleMesh(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
@@ -326,8 +325,10 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
 
   chrono(OFF,&ctim[0]);
   printim(ctim[0].gdif,stim);
-  if ( mesh->info.imprim )
+  if ( mesh->info.imprim >= 0 ) {
     fprintf(stdout,"\n   MMG2DLIB: ELAPSED TIME  %s\n",stim);
+    fprintf(stdout,"\n  %s\n   END OF MODULE MMG2D\n  %s\n\n",MG_STR,MG_STR);
+  }
   _LIBMMG5_RETURN(mesh,sol,MMG5_SUCCESS);
 
 }
@@ -379,9 +380,10 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   mytime    ctim[TIMEMAX];
   char      stim[32];
 
-  fprintf(stdout,"  -- MMG2D, Release %s (%s) \n",MG_VER,MG_REL);
-  fprintf(stdout,"     %s\n",MG_CPY);
-  fprintf(stdout,"     %s %s\n",__DATE__,__TIME__);
+  if ( mesh->info.imprim >= 0 ) {
+    fprintf(stdout,"\n  %s\n   MODULE MMG2D: %s (%s)\n  %s\n",
+            MG_STR,MG_VER,MG_REL,MG_STR);
+  }
 
   /*uncomment for callback*/
   //MMG2D_callbackinsert = titi;
@@ -437,7 +439,7 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol) {
     _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
   }
 
-  if ( mesh->info.imprim ) fprintf(stdout,"\n  -- MMG2DMESH: INPUT DATA\n");
+  if ( mesh->info.imprim > 0 ) fprintf(stdout,"\n  -- MMG2DMESH: INPUT DATA\n");
 
   /* Check input */
   chrono(ON,&(ctim[1]));
@@ -452,15 +454,13 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   chrono(OFF,&(ctim[1]));
   printim(ctim[1].gdif,stim);
-  if ( mesh->info.imprim )
+  if ( mesh->info.imprim > 0 )
     fprintf(stdout,"  --  INPUT DATA COMPLETED.     %s\n",stim);
 
   /* Create function pointers */
   MMG2D_setfunc(mesh,sol);
   _MMG2D_Set_commonFunc();
 
-  fprintf(stdout,"\n  %s\n   MODULE MMG2D-IMB/LJLL : %s (%s) %s\n  %s\n",
-          MG_STR,MG_VER,MG_REL,sol->size == 1 ? "ISO" : "ANISO",MG_STR);
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {
     fprintf(stdout,"  MAXIMUM NUMBER OF POINTS    (NPMAX) : %8d\n",mesh->npmax);
     fprintf(stdout,"  MAXIMUM NUMBER OF TRIANGLES (NTMAX) : %8d\n",mesh->ntmax);
@@ -473,7 +473,7 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol) {
     _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
   }
 
-  if ( mesh->info.imprim )   fprintf(stdout,"\n  -- PHASE 1 : MESH GENERATION\n");
+  if ( mesh->info.imprim > 0 )   fprintf(stdout,"\n  -- PHASE 1 : MESH GENERATION\n");
 
   if ( !MMG2_scaleMesh(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
 
@@ -494,12 +494,12 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   chrono(OFF,&(ctim[2]));
   printim(ctim[2].gdif,stim);
-  if ( mesh->info.imprim )
+  if ( mesh->info.imprim > 0 )
     fprintf(stdout,"  -- PHASE 1 COMPLETED.     %s\n",stim);
 
   /* remeshing */
   chrono(ON,&ctim[3]);
-  if ( mesh->info.imprim ) {
+  if ( mesh->info.imprim > 0 ) {
     fprintf(stdout,"\n  -- PHASE 2 : ANALYSIS\n");
   }
 
@@ -534,12 +534,14 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   chrono(OFF,&(ctim[3]));
   printim(ctim[3].gdif,stim);
-  if ( mesh->info.imprim )
+  if ( mesh->info.imprim > 0 )
     fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
 
   /* Mesh improvement - call new version of mmg2d1 */
   chrono(ON,&(ctim[4]));
-  fprintf(stdout,"\n  -- PHASE 3 : MESH IMPROVEMENT\n");
+  if ( mesh->info.imprim > 0 )
+    fprintf(stdout,"\n  -- PHASE 3 : MESH IMPROVEMENT (%s)\n",
+            sol->size < 3 ? "ISOTROPIC" : "ANISOTROPIC");
 
   if ( !MMG2_mmg2d1n(mesh,sol) ) {
     if ( !MMG2_unscaleMesh(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
@@ -548,9 +550,8 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   chrono(OFF,&(ctim[4]));
   printim(ctim[4].gdif,stim);
-  if ( mesh->info.imprim ) {
+  if ( mesh->info.imprim > 0 ) {
     fprintf(stdout,"  -- PHASE 3 COMPLETED.     %s\n",stim);
-    fprintf(stdout,"\n  %s\n   END OF MODULE MMG2D: IMB-LJLL \n  %s\n",MG_STR,MG_STR);
   }
 
   /* Unscale mesh */
@@ -567,7 +568,7 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   }
 
   chrono(ON,&(ctim[1]));
-  if ( mesh->info.imprim )  fprintf(stdout,"\n  -- MESH PACKED UP\n");
+  if ( mesh->info.imprim > 0 )  fprintf(stdout,"\n  -- MESH PACKED UP\n");
 
   if (!MMG2_pack(mesh,sol) ) _LIBMMG5_RETURN(mesh,sol,MMG5_LOWFAILURE);
 
@@ -575,8 +576,11 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   chrono(OFF,&ctim[0]);
   printim(ctim[0].gdif,stim);
-  if ( mesh->info.imprim )
+  if ( mesh->info.imprim >= 0 ) {
     fprintf(stdout,"\n   MMG2DMESH: ELAPSED TIME  %s\n",stim);
+    fprintf(stdout,"\n  %s\n   END OF MODULE MMG2D\n  %s\n\n",MG_STR,MG_STR);
+  }
+
   _LIBMMG5_RETURN(mesh,sol,MMG5_SUCCESS);
 
 }
@@ -586,9 +590,9 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol)
   mytime    ctim[TIMEMAX];
   char      stim[32];
 
-  fprintf(stdout,"  -- MMG2D, Release %s (%s) \n",MG_VER,MG_REL);
-  fprintf(stdout,"     %s\n",MG_CPY);
-  fprintf(stdout,"     %s %s\n",__DATE__,__TIME__);
+  if ( mesh->info.imprim >= 0 ) {
+    fprintf(stdout,"\n  %s\n   MODULE MMG2D: %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
+  }
 
   /*uncomment for callback*/
   //MMG2D_callbackinsert = titi;
@@ -612,7 +616,7 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol)
   }
 
   /* Check input */
-  if ( mesh->info.imprim ) fprintf(stdout,"\n  -- MMG2DLS: INPUT DATA\n");
+  if ( mesh->info.imprim > 0 ) fprintf(stdout,"\n  -- MMG2DLS: INPUT DATA\n");
   chrono(ON,&(ctim[1]));
 
   sol->ver  = mesh->ver;
@@ -646,7 +650,7 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol)
 
   chrono(OFF,&(ctim[1]));
   printim(ctim[1].gdif,stim);
-  if ( mesh->info.imprim )
+  if ( mesh->info.imprim > 0 )
     fprintf(stdout,"  --  INPUT DATA COMPLETED.     %s\n",stim);
 
   chrono(ON,&ctim[2]);
@@ -655,10 +659,9 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol)
   MMG2D_setfunc(mesh,sol);
   _MMG2D_Set_commonFunc();
 
-  if ( mesh->info.imprim ) {
-    fprintf(stdout,"\n  %s\n   MODULE MMG2D: IMB-LJLL : %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
+  if ( mesh->info.imprim > 0 )
     fprintf(stdout,"\n  -- PHASE 1 : ISOSURFACE DISCRETIZATION\n");
-  }
+
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {
     fprintf(stdout,"  MAXIMUM NUMBER OF POINTS    (NPMAX) : %8d\n",mesh->npmax);
@@ -672,7 +675,7 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol)
   if ( mesh->info.ddebug && !_MMG5_chkmsh(mesh,1,0) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
 
   /* Print initial quality */
-  if ( abs(mesh->info.imprim) > 0 ) {
+  if ( mesh->info.imprim > 0  ||  mesh->info.imprim < -1 ) {
     if ( !MMG2_outqua(mesh,sol) ) {
       if ( !MMG2_unscaleMesh(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
       _MMG2D_RETURN_AND_PACK(mesh,sol,MMG5_LOWFAILURE);
@@ -685,11 +688,11 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol)
 
   chrono(OFF,&(ctim[2]));
   printim(ctim[2].gdif,stim);
-  if ( mesh->info.imprim )
+  if ( mesh->info.imprim > 0 )
     fprintf(stdout,"  -- PHASE 1 COMPLETED.     %s\n",stim);
 
   chrono(ON,&(ctim[3]));
-  if ( mesh->info.imprim ) {
+  if ( mesh->info.imprim > 0 ) {
     fprintf(stdout,"\n  -- PHASE 2 : ANALYSIS\n");
   }
 
@@ -701,12 +704,12 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol)
 
   chrono(OFF,&(ctim[3]));
   printim(ctim[3].gdif,stim);
-  if ( mesh->info.imprim )
+  if ( mesh->info.imprim > 0 )
     fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
 
   /* Mesh improvement - call new version of mmg2d1 */
   chrono(ON,&ctim[4]);
-  if ( mesh->info.imprim ) {
+  if ( mesh->info.imprim > 0 ) {
     fprintf(stdout,"\n  -- PHASE 3 : MESH IMPROVEMENT\n");
   }
 
@@ -718,9 +721,8 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol)
   /* End of mmg2dls */
   chrono(OFF,&(ctim[4]));
   printim(ctim[4].gdif,stim);
-  if ( mesh->info.imprim ) {
+  if ( mesh->info.imprim > 0 ) {
     fprintf(stdout,"  -- PHASE 3 COMPLETED.     %s\n",stim);
-    fprintf(stdout,"\n  %s\n   END OF MODULE MMG2D: IMB-LJLL \n  %s\n",MG_STR,MG_STR);
   }
 
   /* Unscale mesh */
@@ -732,7 +734,7 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol)
   }
 
   chrono(ON,&(ctim[1]));
-  if ( mesh->info.imprim )  fprintf(stdout,"\n  -- MESH PACKED UP\n");
+  if ( mesh->info.imprim > 0 )  fprintf(stdout,"\n  -- MESH PACKED UP\n");
 
   /* Pack mesh */
   if (!MMG2_pack(mesh,sol) ) _LIBMMG5_RETURN(mesh,sol,MMG5_LOWFAILURE);
@@ -741,8 +743,10 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol)
 
   chrono(OFF,&ctim[0]);
   printim(ctim[0].gdif,stim);
-  if ( mesh->info.imprim )
+  if ( mesh->info.imprim >= 0 ) {
     fprintf(stdout,"\n   MMG2DLS: ELAPSED TIME  %s\n",stim);
+    fprintf(stdout,"\n  %s\n   END OF MODULE MMG2D\n  %s\n\n",MG_STR,MG_STR);
+  }
   _LIBMMG5_RETURN(mesh,sol,MMG5_SUCCESS);
 
 }
@@ -751,9 +755,10 @@ int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   mytime    ctim[TIMEMAX];
   char      stim[32];
 
-  fprintf(stdout,"  -- MMG2D, Release %s (%s) \n",MG_VER,MG_REL);
-  fprintf(stdout,"     %s\n",MG_CPY);
-  fprintf(stdout,"     %s %s\n",__DATE__,__TIME__);
+  if ( mesh->info.imprim >= 0 ) {
+    fprintf(stdout,"\n  %s\n   MODULE MMG2D : %s (%s)\n  %s\n",
+            MG_STR,MG_VER,MG_REL,MG_STR);
+  }
 
   /*uncomment for callback*/
   //MMG2D_callbackinsert = titi;
@@ -770,7 +775,7 @@ int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   chrono(ON,&(ctim[0]));
 
   /* Check data compatibility */
-  if ( mesh->info.imprim ) fprintf(stdout,"\n  -- MMG2DMOV: INPUT DATA\n");
+  if ( mesh->info.imprim > 0 ) fprintf(stdout,"\n  -- MMG2DMOV: INPUT DATA\n");
   chrono(ON,&(ctim[1]));
 
   disp->ver  = mesh->ver;
@@ -806,7 +811,7 @@ int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
 
   chrono(OFF,&(ctim[1]));
   printim(ctim[1].gdif,stim);
-  if ( mesh->info.imprim )
+  if ( mesh->info.imprim > 0 )
     fprintf(stdout,"  --  INPUT DATA COMPLETED.     %s\n",stim);
 
   /* Set pointers */
@@ -815,9 +820,7 @@ int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
 
   chrono(ON,&ctim[2]);
 
-  if ( mesh->info.imprim ) {
-    fprintf(stdout,"\n  %s\n   MODULE MMGS: IMB-LJLL : %s (%s)\n  %s\n",
-            MG_STR,MG_VER,MG_REL,MG_STR);
+  if ( mesh->info.imprim > 0 ) {
     fprintf(stdout,"\n  -- PHASE 1 : ANALYSIS\n");
   }
 
@@ -833,7 +836,7 @@ int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   if ( mesh->info.ddebug && !_MMG5_chkmsh(mesh,1,0) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
 
   /* Print initial quality */
-  if ( abs(mesh->info.imprim) > 0 ) {
+  if ( mesh->info.imprim > 0  ||  mesh->info.imprim < -1 ) {
     if ( !MMG2_outqua(mesh,met) ) {
       if ( !MMG2_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
       _MMG2D_RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
@@ -846,12 +849,12 @@ int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
 
   chrono(OFF,&(ctim[2]));
   printim(ctim[2].gdif,stim);
-  if ( mesh->info.imprim )
+  if ( mesh->info.imprim > 0 )
     fprintf(stdout,"  -- PHASE 1 COMPLETED.     %s\n",stim);
 
   /* Lagrangian motion */
   chrono(ON,&(ctim[3]));
-  if ( mesh->info.imprim ) {
+  if ( mesh->info.imprim > 0 ) {
     fprintf(stdout,"\n  -- PHASE 2 : LAGRANGIAN MOTION\n");
   }
 
@@ -872,9 +875,8 @@ int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
 
   chrono(OFF,&(ctim[3]));
   printim(ctim[3].gdif,stim);
-  if ( mesh->info.imprim ) {
+  if ( mesh->info.imprim > 0 ) {
     fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
-    fprintf(stdout,"\n  %s\n   END OF MODULE MMG2D: IMB-LJLL \n  %s\n",MG_STR,MG_STR);
   }
 
   /* Unscale mesh */
@@ -886,7 +888,7 @@ int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   }
 
   chrono(ON,&(ctim[1]));
-  if ( mesh->info.imprim )  fprintf(stdout,"\n  -- MESH PACKED UP\n");
+  if ( mesh->info.imprim > 0 )  fprintf(stdout,"\n  -- MESH PACKED UP\n");
 
   /* Pack mesh */
   if (!MMG2_pack(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
@@ -895,8 +897,10 @@ int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
 
   chrono(OFF,&ctim[0]);
   printim(ctim[0].gdif,stim);
-  if ( mesh->info.imprim )
+  if ( mesh->info.imprim >= 0 ) {
     fprintf(stdout,"\n   MMG2DMOV: ELAPSED TIME  %s\n",stim);
+    fprintf(stdout,"\n  %s\n   END OF MODULE MMG2D\n  %s\n\n",MG_STR,MG_STR);
+  }
 
   _LIBMMG5_RETURN(mesh,met,MMG5_SUCCESS);
 }

@@ -215,8 +215,8 @@ int MMG2_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
         if ( !mmgWarn1 ) {
           mmgWarn1 = 1;
           if ( mesh->info.imprim > 6 || mesh->info.ddebug )
-	    fprintf(stderr,"\n  ## Warning: %s: unable to insert "
-		    "at least 1 vertex. (%d)\n",__func__,k);
+	          fprintf(stderr,"\n  ## Warning: %s: unable to insert "
+		          "at least 1 vertex. (%d)\n",__func__,k);
         }
         continue;
       } else {
@@ -226,8 +226,8 @@ int MMG2_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
             if ( !mmgWarn2 ) {
               mmgWarn2 = 1;
               if(mesh->info.imprim > 6 || mesh->info.ddebug)
-		fprintf(stderr,"\n  ## Warning: %s: unable to"
-			" insert at least 1 point with Delaunay (%d)\n",__func__,k);
+	             	fprintf(stderr,"\n  ## Warning: %s: unable to"
+			            " insert at least 1 point with Delaunay (%d)\n",__func__,k);
             }
           }
         } else {
@@ -239,7 +239,7 @@ int MMG2_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
 
     if ( abs(mesh->info.imprim) > 4)
       fprintf(stdout,"     %8d vertex inserted %8d not inserted\n",ns,nu+nud);
-    if(mesh->info.imprim >6 || mesh->info.ddebug )
+    if ( mesh->info.imprim >6 || mesh->info.ddebug )
       fprintf(stdout,"     unable to insert %8d vertex : cavity %8d -- delaunay %8d \n",nu+nud,nu,nud);
   } while (ns && ++iter<maxiter);
 
@@ -379,8 +379,10 @@ int MMG2_markSD(MMG5_pMesh mesh) {
   }
   while ( kinit );
 
-  /* nref - 1 subdomains because Bounding Box triangles have been counted */
-  fprintf(stdout," %8d SUB-DOMAINS\n",nref-1);
+  if ( mesh->info.imprim > 0  ) {
+    /* nref - 1 subdomains because Bounding Box triangles have been counted */
+    fprintf(stdout,"     %8d sub-domains\n",nref-1);
+  }
 
   _MMG5_SAFE_FREE(list);
 
@@ -639,7 +641,8 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
   /* Insertion of vertices in the mesh */
   if ( !MMG2_insertpointdelone(mesh,sol) ) return 0;
 
-  fprintf(stdout,"  -- END OF INSERTION PHASE\n");
+  if ( mesh->info.imprim > 0 )
+    fprintf(stdout,"     Insertion succeed\n");
 
   /* Enforcement of the boundary edges */
   if ( !MMG2_bdryenforcement(mesh,sol) ) {

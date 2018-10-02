@@ -82,8 +82,9 @@ int MMG2_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
     if ( !in )
       return 1;
   }
-  fprintf(stdout,"\n  %%%% %s OPENED\n",data);
-
+  if ( mesh->info.imprim >= 0 )
+    fprintf(stdout,"\n  %%%% %s OPENED\n",data);
+  
   /* Read parameters */
   while ( !feof(in) ) {
     ret = fscanf(in,"%255s",data);

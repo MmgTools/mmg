@@ -65,34 +65,34 @@ extern "C" {
  * MMG3D_DPARAM asked for real values.
  *
  */
-  enum MMG3D_Param {
-    MMG3D_IPARAM_verbose,           /*!< [-10..10], Tune level of verbosity */
-    MMG3D_IPARAM_mem,               /*!< [n/-1], Set memory size to n Mbytes or keep the default value */
-    MMG3D_IPARAM_debug,             /*!< [1/0], Turn on/off debug mode */
-    MMG3D_IPARAM_angle,             /*!< [1/0], Turn on/off angle detection */
-    MMG3D_IPARAM_iso,               /*!< [1/0], Level-set meshing */
-    MMG3D_IPARAM_nofem,             /*!< [1/0], Generate a non finite element mesh */
-    MMG3D_IPARAM_opnbdy,            /*!< [1/0], Preserve triangles at interface of 2 domains with same reference */
-    MMG3D_IPARAM_lag,               /*!< [-1/0/1/2], Lagrangian option */
-    MMG3D_IPARAM_optim,             /*!< [1/0], Optimize mesh keeping its initial edge sizes */
-    MMG3D_IPARAM_optimLES,          /*!< [1/0], Strong mesh optimization for Les computations */
-    MMG3D_IPARAM_noinsert,          /*!< [1/0], Avoid/allow point insertion */
-    MMG3D_IPARAM_noswap,            /*!< [1/0], Avoid/allow edge or face flipping */
-    MMG3D_IPARAM_nomove,            /*!< [1/0], Avoid/allow point relocation */
-    MMG3D_IPARAM_nosurf,            /*!< [1/0], Avoid/allow surface modifications */
-    MMG3D_IPARAM_numberOfLocalParam,/*!< [n], Number of local parameters */
-    MMG3D_IPARAM_renum,             /*!< [1/0], Turn on/off point relocation with Scotch */
-    MMG3D_IPARAM_anisosize,         /*!< [1/0], Turn on/off anisotropic metric creation when no metric is provided */
-    MMG3D_IPARAM_octree,            /*!< [n], Specify the max number of points per octree cell (DELAUNAY) */
-    MMG3D_DPARAM_angleDetection,    /*!< [val], Value for angle detection */
-    MMG3D_DPARAM_hmin,              /*!< [val], Minimal mesh size */
-    MMG3D_DPARAM_hmax,              /*!< [val], Maximal mesh size */
-    MMG3D_DPARAM_hsiz,              /*!< [val], Constant mesh size */
-    MMG3D_DPARAM_hausd,             /*!< [val], Control global Hausdorff distance (on all the boundary surfaces of the mesh) */
-    MMG3D_DPARAM_hgrad,             /*!< [val], Control gradation */
-    MMG3D_DPARAM_ls,                /*!< [val], Value of level-set */
-    MMG3D_PARAM_size,               /*!< [n], Number of parameters */
-  };
+enum MMG3D_Param {
+  MMG3D_IPARAM_verbose,           /*!< [-1..10], Tune level of verbosity */
+  MMG3D_IPARAM_mem,               /*!< [n/-1], Set memory size to n Mbytes or keep the default value */
+  MMG3D_IPARAM_debug,             /*!< [1/0], Turn on/off debug mode */
+  MMG3D_IPARAM_angle,             /*!< [1/0], Turn on/off angle detection */
+  MMG3D_IPARAM_iso,               /*!< [1/0], Level-set meshing */
+  MMG3D_IPARAM_nofem,             /*!< [1/0], Generate a non finite element mesh */
+  MMG3D_IPARAM_opnbdy,            /*!< [1/0], Preserve triangles at interface of 2 domains with same reference */
+  MMG3D_IPARAM_lag,               /*!< [-1/0/1/2], Lagrangian option */
+  MMG3D_IPARAM_optim,             /*!< [1/0], Optimize mesh keeping its initial edge sizes */
+  MMG3D_IPARAM_optimLES,          /*!< [1/0], Strong mesh optimization for Les computations */
+  MMG3D_IPARAM_noinsert,          /*!< [1/0], Avoid/allow point insertion */
+  MMG3D_IPARAM_noswap,            /*!< [1/0], Avoid/allow edge or face flipping */
+  MMG3D_IPARAM_nomove,            /*!< [1/0], Avoid/allow point relocation */
+  MMG3D_IPARAM_nosurf,            /*!< [1/0], Avoid/allow surface modifications */
+  MMG3D_IPARAM_numberOfLocalParam,/*!< [n], Number of local parameters */
+  MMG3D_IPARAM_renum,             /*!< [1/0], Turn on/off point relocation with Scotch */
+  MMG3D_IPARAM_anisosize,         /*!< [1/0], Turn on/off anisotropic metric creation when no metric is provided */
+  MMG3D_IPARAM_octree,            /*!< [n], Specify the max number of points per octree cell (DELAUNAY) */
+  MMG3D_DPARAM_angleDetection,    /*!< [val], Value for angle detection */
+  MMG3D_DPARAM_hmin,              /*!< [val], Minimal mesh size */
+  MMG3D_DPARAM_hmax,              /*!< [val], Maximal mesh size */
+  MMG3D_DPARAM_hsiz,              /*!< [val], Constant mesh size */
+  MMG3D_DPARAM_hausd,             /*!< [val], Control global Hausdorff distance (on all the boundary surfaces of the mesh) */
+  MMG3D_DPARAM_hgrad,             /*!< [val], Control gradation */
+  MMG3D_DPARAM_ls,                /*!< [val], Value of level-set */
+  MMG3D_PARAM_size,               /*!< [n], Number of parameters */
+};
 
 /*--------------------------- functions header ---------------------------*/
 /* Initialization functions */

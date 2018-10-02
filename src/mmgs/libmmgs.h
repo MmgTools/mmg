@@ -58,7 +58,7 @@ extern "C" {
  *
  */
 enum MMGS_Param {
-  MMGS_IPARAM_verbose,           /*!< [-10..10], Tune level of verbosity */
+  MMGS_IPARAM_verbose,           /*!< [-1..10], Tune level of verbosity */
   MMGS_IPARAM_mem,               /*!< [n/-1], Set memory size to n Mbytes or keep the default value */
   MMGS_IPARAM_debug,             /*!< [1/0], Turn on/off debug mode */
   MMGS_IPARAM_angle,             /*!< [1/0], Turn on/off angle detection */

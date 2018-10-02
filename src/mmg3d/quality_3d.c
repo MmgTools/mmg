@@ -365,7 +365,7 @@ void MMG3D_computeLESqua(MMG5_pMesh mesh,MMG5_pSol met,int *ne,double *max,doubl
      pt->qual = _MMG5_orcal(mesh,met,k);
   }
 
-  if ( abs(mesh->info.imprim) <= 0 )
+  if ( mesh->info.imprim <= 0 )
     return;
 
   (*min)  = (*avg) = 0.0;
@@ -428,6 +428,8 @@ static int _MMG3D_printquaLES(MMG5_pMesh mesh,MMG5_pSol met) {
   int            med,good,iel,ne,his[5];
 
   MMG3D_computeLESqua(mesh,met,&ne,&rapmax,&rapavg,&rapmin,&iel,&good,&med,his);
+
+  if ( mesh->info.imprim <= 0 ) return 1;
 
   return MMG3D_displayQualHisto(ne,rapmax,rapavg,rapmin,
                                 iel,good,med,his,0,mesh->info.optimLES,
@@ -552,8 +554,7 @@ void MMG3D_computeInqua(MMG5_pMesh mesh,MMG5_pSol met,int *ne,double *max,double
      else // -A option
        pt->qual = _MMG5_caltet_iso(mesh,met,pt);
   }
-  if ( mesh->info.imprim <= 0 )
-    return;
+  if ( mesh->info.imprim <= 0 ) return;
 
   (*min)  = 2.0;
   (*max)  = (*avg) = 0.0;
@@ -724,9 +725,6 @@ int _MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
 
   MMG3D_computeOutqua(mesh,met,&ne,&rapmax,&rapavg,&rapmin,&iel,&good,&med,
                       his,&nrid);
-
-  if ( mesh->info.imprim <= 0 )
-    return 1;
 
   return MMG3D_displayQualHisto(ne,rapmax,rapavg,rapmin,
                                 iel,good,med,his,nrid,mesh->info.optimLES,

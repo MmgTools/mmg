@@ -156,7 +156,9 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
     }
   }
 
-  fprintf(stdout,"  %%%% %s OPENED\n",data);
+  if ( mesh->info.imprim >= 0 ) {
+    fprintf(stdout,"  %%%% %s OPENED\n",data);
+  }
   _MMG5_SAFE_FREE(data);
 
   if (!bin) {
@@ -1116,7 +1118,8 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
       }
     }
   }
-  fprintf(stdout,"  %%%% %s OPENED\n",data);
+  if ( mesh->info.imprim >= 0 )
+    fprintf(stdout,"  %%%% %s OPENED\n",data);
   _MMG5_SAFE_FREE(data);
 
   /*entete fichier*/
@@ -1749,7 +1752,7 @@ int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
 
   /** Read the file header */
   ier =  MMG5_loadSolHeader(filename,3,&inm,&ver,&bin,&iswp,&np,&dim,&nsols,
-                             &type,&posnp);
+                             &type,&posnp,mesh->info.imprim);
   if ( ier < 1 ) return ier;
 
   if ( nsols!=1 ) {
@@ -1827,7 +1830,7 @@ int MMG3D_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
 
   /** Read the file header */
   ier =  MMG5_loadSolHeader(filename,3,&inm,&ver,&bin,&iswp,&np,&dim,&nsols,
-                            &type,&posnp);
+                            &type,&posnp,mesh->info.imprim);
   if ( ier < 1 ) return ier;
 
   if ( mesh->np != np ) {

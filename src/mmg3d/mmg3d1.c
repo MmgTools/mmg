@@ -2371,7 +2371,7 @@ int _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,char typchk, int patternMode) {
   }
   while ( ++it < maxit && (ns+nc+nf > 0 || lastit<3) );
 
-  if ( mesh->info.imprim ) {
+  if ( mesh->info.imprim > 0 ) {
     if ( (abs(mesh->info.imprim) < 5 || mesh->info.ddebug ) && nns+nnc > 0 ) {
 #ifndef PATTERN
       fprintf(stdout,"                   ");

@@ -486,7 +486,8 @@ int MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
       }
     }
   }
-  fprintf(stdout,"\n  %%%% %s OPENED\n",data);
+  if ( mesh->info.imprim >= 0 )
+    fprintf(stdout,"\n  %%%% %s OPENED\n",data);
 
   /* read parameters */
   while ( !feof(in) ) {
@@ -565,12 +566,6 @@ int MMG3D_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,double critmin, double lmin,
   int       ier;
   char      stim[32];
 
-  if ( mesh->info.imprim ) {
-    fprintf(stdout,"  -- MMG3d, Release %s (%s) \n",MG_VER,MG_REL);
-    fprintf(stdout,"     %s\n",MG_CPY);
-    fprintf(stdout,"     %s %s\n",__DATE__,__TIME__);
-  }
-
   _MMG3D_Set_commonFunc();
 
   /** Free topologic tables (adja, xpoint, xtetra) resulting from a previous
@@ -604,7 +599,7 @@ int MMG3D_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,double critmin, double lmin,
   _MMG5_warnScotch(mesh);
 #endif
 
-  if ( mesh->info.imprim ) fprintf(stdout,"\n  -- MMG3DLIB: INPUT DATA\n");
+  if ( mesh->info.imprim > 0 ) fprintf(stdout,"\n  -- MMG3DLIB: INPUT DATA\n");
   /* load data */
   chrono(ON,&(ctim[1]));
   _MMG5_warnOrientation(mesh);
@@ -623,14 +618,14 @@ int MMG3D_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,double critmin, double lmin,
 
   chrono(OFF,&(ctim[1]));
   printim(ctim[1].gdif,stim);
-  if ( mesh->info.imprim )
+  if ( mesh->info.imprim > 0 )
     fprintf(stdout,"  --  INPUT DATA COMPLETED.     %s\n",stim);
 
   /* analysis */
   chrono(ON,&(ctim[2]));
   MMG3D_setfunc(mesh,met);
 
-  if ( mesh->info.imprim ) {
+  if ( mesh->info.imprim > 0 ) {
     fprintf(stdout,"\n  %s\n   MODULE MMG3D: IMB-LJLL : %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
     fprintf(stdout,"\n  -- PHASE 1 : ANALYSIS\n");
   }

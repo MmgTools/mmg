@@ -573,7 +573,7 @@ int MMG2_pack(MMG5_pMesh mesh,MMG5_pSol sol) {
     mesh->nenil = 0;
   }
 
-  if ( mesh->info.imprim ) {
+  if ( mesh->info.imprim > 0 ) {
     fprintf(stdout,"     NUMBER OF VERTICES   %8d   CORNERS %8d\n",mesh->np,nc);
     fprintf(stdout,"     NUMBER OF TRIANGLES  %8d\n",mesh->nt);
 
