@@ -46,7 +46,7 @@ void _MMG5_mmgUsage(char *prog) {
 
   fprintf(stdout,"\n** Generic options :\n");
   fprintf(stdout,"-h        Print this message\n");
-  fprintf(stdout,"-v [n]    Tune level of verbosity, [-10..10]\n");
+  fprintf(stdout,"-v [n]    Tune level of verbosity, [-1..10]\n");
   fprintf(stdout,"-m [n]    Set maximal memory size to n Mbytes\n");
   fprintf(stdout,"-d        Turn on debug mode\n");
   fprintf(stdout,"-val      Print the default parameters values\n");

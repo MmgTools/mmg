@@ -55,7 +55,7 @@ extern "C" {
  *
  */
 enum MMG2D_Param {
-  MMG2D_IPARAM_verbose,           /*!< [-10..10], Tune level of verbosity */
+  MMG2D_IPARAM_verbose,           /*!< [-1..10], Tune level of verbosity */
   MMG2D_IPARAM_mem,               /*!< [n/-1], Set memory size to n Mbytes or keep the default value */
   MMG2D_IPARAM_debug,             /*!< [1/0], Turn on/off debug mode */
   MMG2D_IPARAM_angle,             /*!< [1/0], Turn on/off angle detection */
