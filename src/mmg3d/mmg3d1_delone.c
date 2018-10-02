@@ -825,7 +825,7 @@ _MMG5_optbad(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
   }
   while( ++it < maxit && nw+nm+nf > 0 );
 
-  if ( mesh->info.imprim ) {
+  if ( mesh->info.imprim > 0 ) {
     if ( abs(mesh->info.imprim) < 5 && (nnf > 0 || nnm > 0) )
       fprintf(stdout,"                                                 "
               "        "
@@ -935,7 +935,7 @@ _MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree, int* warn) 
   }
   while( ++it < maxit && (noptim || nc+ns > 0) );
 
-  if ( mesh->info.imprim ) {
+  if ( mesh->info.imprim > 0 ) {
     if ( (abs(mesh->info.imprim) < 5) && ( nnc || nns ) ) {
       fprintf(stdout,"     %8d filtered, %8d splitted, %8d collapsed,"
               " %8d swapped, %8d moved, %d iter.\n",nfilt,nns,nnc,nnf,nnm, it);
@@ -1020,7 +1020,7 @@ _MMG5_optetLES(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
   }
 
 
-  if ( mesh->info.imprim ) {
+  if ( mesh->info.imprim > 0 ) {
     if ( abs(mesh->info.imprim) < 5 && (nnf > 0 || nnm > 0) )
       fprintf(stdout,"                                                 "
               "        "
@@ -1110,7 +1110,7 @@ _MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
     fprintf(stdout,"     %8d moved\n",nm);
   }
 
-  if ( mesh->info.imprim ) {
+  if ( mesh->info.imprim > 0 ) {
     if ( abs(mesh->info.imprim) < 5 && (nnf > 0 || nnm > 0) )
       fprintf(stdout,"                                                 "
               "        "
@@ -1238,7 +1238,7 @@ int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
   if ( mesh->info.hgrad > 0. ) {
-    if ( mesh->info.imprim )   fprintf(stdout,"\n  -- GRADATION : %8f\n",exp(mesh->info.hgrad));
+    if ( mesh->info.imprim > 0 )   fprintf(stdout,"\n  -- GRADATION : %8f\n",exp(mesh->info.hgrad));
     if ( !_MMG5_gradsiz(mesh,met) ) {
       fprintf(stderr,"\n  ## Gradation problem. Exit program.\n");
       if ( octree )

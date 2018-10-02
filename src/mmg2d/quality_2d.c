@@ -170,7 +170,7 @@ int MMG2_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
     else
       pt->qual = MMG2D_caltri(mesh,met,pt);
   }
-  if ( abs(mesh->info.imprim) <= 0 ) return 1;
+  if ( mesh->info.imprim <= 0 ) return 1;
 
   rapmin  = 2.0;
   rapmax  = 0.0;

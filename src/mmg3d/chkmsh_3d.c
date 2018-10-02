@@ -425,7 +425,7 @@ int _MMG5_chkfemtopo(MMG5_pMesh mesh) {
     }
     if ( nf >= 2 )  ntet++;
   }
-  if ( mesh->info.imprim && ntet )
+  if ( mesh->info.imprim > 0 && ntet )
     printf("  *** %d tetras with at least 2 boundary faces.\n",ntet);
 
   /* Count internal edges connecting two points of the boundary */
@@ -467,7 +467,7 @@ int _MMG5_chkfemtopo(MMG5_pMesh mesh) {
       }
     }
   }
-  if ( mesh->info.imprim && ned )
+  if ( mesh->info.imprim > 0 && ned )
     printf("  *** %d internal edges connecting boundary points.\n",ned);
   return(1);
 }

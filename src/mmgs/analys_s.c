@@ -402,7 +402,7 @@ static void nmpoints(MMG5_pMesh mesh) {
 /*       } */
 /*     } */
 /*     ndd += nd; */
-/*     if ( nd && (mesh->info.ddebug || mesh->info.imprim < 0) )  fprintf(stdout,"     %d improved\n",nd); */
+/*     if ( nd && (mesh->info.ddebug || mesh->info.imprim < -1) )  fprintf(stdout,"     %d improved\n",nd); */
 /*   } */
 /*   while ( nd > 0 && ++it < 5 ); */
 
@@ -791,7 +791,7 @@ static int regnor(MMG5_pMesh mesh) {
 
     if ( it == 1 )  res0 = res;
     if ( res0 > _MMG5_EPSD )  res  = res / res0;
-    if ( mesh->info.imprim < 0 || mesh->info.ddebug ) {
+    if ( mesh->info.imprim < -1 || mesh->info.ddebug ) {
       fprintf(stdout,"     iter %5d  res %.3E\r",it,res); 
       fflush(stdout);
     }
@@ -803,7 +803,7 @@ static int regnor(MMG5_pMesh mesh) {
     mesh->point[k].s = 0;
   }
 
-  if ( mesh->info.imprim < 0 || mesh->info.ddebug )  fprintf(stdout,"\n");
+  if ( mesh->info.imprim < -1 || mesh->info.ddebug )  fprintf(stdout,"\n");
 
   if ( abs(mesh->info.imprim) > 4 )
     fprintf(stdout,"     %d normals regularized: %.3e\n",nn,res);

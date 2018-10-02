@@ -214,7 +214,7 @@ int MMG2_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
         nu++;
         if ( !mmgWarn1 ) {
           mmgWarn1 = 1;
-          if(mesh->info.imprim < 0) fprintf(stderr,"\n  ## Warning: %s: unable to insert "
+          if(mesh->info.imprim < -1) fprintf(stderr,"\n  ## Warning: %s: unable to insert "
                                             "at least 1 vertex. (%8d)\n",__func__,k);
         }
         continue;
@@ -224,8 +224,8 @@ int MMG2_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
             nud++;
             if ( !mmgWarn2 ) {
               mmgWarn2 = 1;
-              if(mesh->info.imprim < 0) fprintf(stderr,"\n  ## Warning: %s: unable to"
-                                                " insert at least 1 point with Delaunay (%8d)\n",__func__,k);
+              if(mesh->info.imprim < -1) fprintf(stderr,"\n  ## Warning: %s: unable to"
+                                                 " insert at least 1 point with Delaunay (%8d)\n",__func__,k);
             }
           }
         } else {
@@ -237,12 +237,12 @@ int MMG2_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
 
     if ( abs(mesh->info.imprim) > 4)
       fprintf(stdout,"     %8d vertex inserted %8d not inserted\n",ns,nu+nud);
-    if(mesh->info.imprim < 0)
+    if(mesh->info.imprim < -1)
       fprintf(stdout,"     unable to insert %8d vertex : cavity %8d -- delaunay %8d \n",nu+nud,nu,nud);
   } while (ns && ++iter<maxiter);
 
 	if(abs(nus-ns)) {
-    if ( mesh->info.imprim < 0 ) {
+    if ( mesh->info.imprim < -1 ) {
       fprintf(stderr,"\n  ## Warning: %s: unable to"
               " insert %8d point with Delaunay \n",__func__,abs(nus-ns));
       fprintf(stdout,"     try to insert with splitbar\n");
@@ -279,7 +279,7 @@ int MMG2_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
       if(!_MMG2_splitbar(mesh,list[0],k)) {
         if ( !mmgWarn2 ) {
           mmgWarn2 = 1;
-          if(mesh->info.imprim < 0) fprintf(stderr,"\n  ## Warning: %s: unable to"
+          if(mesh->info.imprim < -1) fprintf(stderr,"\n  ## Warning: %s: unable to"
                                             " insert at least 1 point with splitbar (%8d)\n",__func__,k);
         }
       } else {
@@ -376,8 +376,10 @@ int MMG2_markSD(MMG5_pMesh mesh) {
   }
   while ( kinit );
 
-  /* nref - 1 subdomains because Bounding Box triangles have been counted */
-  fprintf(stdout," %8d SUB-DOMAINS\n",nref-1);
+  if ( mesh->info.imprim > 0  ) {
+    /* nref - 1 subdomains because Bounding Box triangles have been counted */
+    fprintf(stdout,"     %8d sub-domains\n",nref-1);
+  }
 
   _MMG5_SAFE_FREE(list);
 
@@ -636,7 +638,8 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
   /* Insertion of vertices in the mesh */
   if ( !MMG2_insertpointdelone(mesh,sol) ) return(0);
 
-  fprintf(stdout,"  -- END OF INSERTION PHASE\n");
+  if ( mesh->info.imprim > 0 )
+    fprintf(stdout,"     Insertion succeed\n");
 
   /* Enforcement of the boundary edges */
   if ( !MMG2_bdryenforcement(mesh,sol) ) {

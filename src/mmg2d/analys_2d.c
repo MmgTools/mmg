@@ -607,7 +607,7 @@ int _MMG2_regnor(MMG5_pMesh mesh) {
     ppt->s = 0;
   }
 
-  if ( mesh->info.imprim < 0 || mesh->info.ddebug )  fprintf(stdout,"\n");
+  if ( mesh->info.imprim < -1 || mesh->info.ddebug )  fprintf(stdout,"\n");
 
   if ( abs(mesh->info.imprim) > 4 )
     fprintf(stdout,"     %d normals regularized: %.3e\n",nn,res);

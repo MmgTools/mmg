@@ -314,7 +314,7 @@ static int _MMG3D_printquaLES(MMG5_pMesh mesh,MMG5_pSol met) {
 
      pt->qual = _MMG5_orcal(mesh,met,k);
   }
-  if ( abs(mesh->info.imprim) <= 0 ) return(1);
+  if ( mesh->info.imprim <= 0 ) return 1;
 
   rapmin  = 0.0;
   rapmax  = 1.0;
@@ -425,7 +425,7 @@ int _MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
      else // -A option
        pt->qual = _MMG5_caltet_iso(mesh,met,pt);
   }
-  if ( abs(mesh->info.imprim) <= 0 ) return(1);
+  if ( mesh->info.imprim <= 0 ) return 1;
 
   rapmin  = 2.0;
   rapmax  = 0.0;
@@ -515,7 +515,7 @@ int _MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
     pt->qual = _MMG5_orcal(mesh,met,k);
   }
 
-  if ( abs(mesh->info.imprim) <= 0 ) return(1);
+  if ( mesh->info.imprim <= 0 ) return 1;
 
   rapmin  = 2.0;
   rapmax  = 0.0;
@@ -574,12 +574,12 @@ int _MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
           _MMG3D_indPt(mesh,mesh->tetra[iel].v[2]),_MMG3D_indPt(mesh,mesh->tetra[iel].v[3]));
 #endif
 
-  if ( abs(mesh->info.imprim) >= 3 ){
+  if ( mesh->info.imprim >= 3 ){
 
     /* print histo */
     fprintf(stdout,"     HISTOGRAMM:");
     fprintf(stdout,"  %6.2f %% > 0.12\n",100.0*(good/(float)(mesh->ne-nex)));
-    if ( abs(mesh->info.imprim) > 3 ) {
+    if ( mesh->info.imprim > 3 ) {
       fprintf(stdout,"                  %6.2f %% >  0.5\n",100.0*( med/(float)(mesh->ne-nex)));
       imax = MG_MIN(4,(int)(5.*rapmax));
       for (i=imax; i>=(int)(5*rapmin); i--) {
@@ -821,7 +821,7 @@ int _MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcib
   nptot += (long) dnadd - (long) dnpdel;
   *npcible = nptot;
   fprintf(stdout,"  ** ESTIMATION OF THE FINAL NUMBER OF NODES : %ld   \n",nptot);
-  if(mesh->info.imprim > 6)
+  if ( mesh->info.imprim > 6 )
     fprintf(stdout,"  **  %lf ADD DEL %lf\n",dnadd,dnpdel);
 
   free(pdel);

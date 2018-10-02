@@ -293,7 +293,9 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,const char *filename,
       return(0);
     }
   }
-  fprintf(stdout,"  %%%% %s OPENED\n",data);
+
+  if ( mesh->info.imprim >= 0 )
+    fprintf(stdout,"  %%%% %s OPENED\n",data);
   _MMG5_SAFE_FREE(data);
 
 
@@ -1528,7 +1530,8 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename,
     }
   }
 
-  fprintf(stdout,"  %%%% %s OPENED\n",data);
+  if ( mesh->info.imprim >= 0 )
+    fprintf(stdout,"  %%%% %s OPENED\n",data);
   _MMG5_SAFE_FREE(data);
 
   /* Entete fichier*/
@@ -1929,6 +1932,7 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename,
  * \param nsols number of solutions of different types in the file
  * \param type type of solutions
  * \param posnp pointer toward the position of the point list in the file
+ * \param imprim verbosity
  *
  * \return -1 data invalid or we fail, 0 no file, 1 ok.
  *
@@ -1937,7 +1941,7 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename,
  */
 int MMG5_loadSolHeader( const char *filename,int meshDim,FILE **inm,int *ver,
                         int *bin,int *iswp,int *np,int *dim,int *nsols,int **type,
-                        long *posnp) {
+                        long *posnp, int imprim) {
   int         binch,bdim;
   int         bpos,i;
   char        *ptr,*data,chaine[128];
@@ -1964,7 +1968,8 @@ int MMG5_loadSolHeader( const char *filename,int meshDim,FILE **inm,int *ver,
       *ptr = '\0';
       strcat(data,".sol");
       if (!(*inm = fopen(data,"rb"))  ) {
-        fprintf(stderr,"  ** %s  NOT FOUND. USE DEFAULT METRIC.\n",data);
+        if ( imprim >= 0 )
+          fprintf(stderr,"  ** %s  NOT FOUND. USE DEFAULT METRIC.\n",data);
         _MMG5_SAFE_FREE(data);
         return(0);
       }
@@ -1977,12 +1982,14 @@ int MMG5_loadSolHeader( const char *filename,int meshDim,FILE **inm,int *ver,
     if ( ptr )  *bin = 1;
 
     if (!(*inm = fopen(data,"rb")) ) {
-      fprintf(stderr,"  ** %s  NOT FOUND. USE DEFAULT METRIC.\n",data);
+      if ( imprim >= 0 )
+        fprintf(stderr,"  ** %s  NOT FOUND. USE DEFAULT METRIC.\n",data);
       _MMG5_SAFE_FREE(data);
       return(0);
     }
   }
-  fprintf(stdout,"  %%%% %s OPENED\n",data);
+  if ( imprim >= 0 )
+    fprintf(stdout,"  %%%% %s OPENED\n",data);
   _MMG5_SAFE_FREE(data);
 
   /* read solution or metric */
@@ -2265,7 +2272,8 @@ int MMG5_saveSolHeader( MMG5_pMesh mesh,const char *filename,
     }
   }
 
-  fprintf(stdout,"  %%%% %s OPENED\n",data);
+  if ( mesh->info.imprim >= 0 )
+    fprintf(stdout,"  %%%% %s OPENED\n",data);
   _MMG5_SAFE_FREE(data);
 
   /*entete fichier*/

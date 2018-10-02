@@ -124,7 +124,8 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
       return(0);
     }
   }
-  fprintf(stdout,"  %%%% %s OPENED\n",data);
+  if ( mesh->info.imprim >= 0 )
+    fprintf(stdout,"  %%%% %s OPENED\n",data);
   _MMG5_SAFE_FREE(data);
 
   if (!bin) {
@@ -307,9 +308,6 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
   if ( !mesh->np  ) {
     fprintf(stdout,"  ** MISSING DATA : no point\n");
     return(0);
-  }
-  if (!mesh->nt) {
-    fprintf(stdout,"  **WARNING NO GIVEN TRIANGLE\n");
   }
 
   mesh->npi  = mesh->np;
@@ -798,7 +796,7 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 
   /** Read the file header */
   ier =  MMG5_loadSolHeader(filename,2,&inm,&ver,&bin,&iswp,&np,&dim,&nsols,
-                             &type,&posnp);
+                             &type,&posnp,mesh->info.imprim);
 
   if ( ier < 1 ) return ier;
 
@@ -877,7 +875,7 @@ int MMG2D_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
 
   /** Read the file header */
   ier =  MMG5_loadSolHeader(filename,2,&inm,&ver,&bin,&iswp,&np,&dim,&nsols,
-                            &type,&posnp);
+                            &type,&posnp,mesh->info.imprim);
   if ( ier < 1 ) return ier;
 
   if ( mesh->np != np ) {
@@ -1005,7 +1003,9 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
       return(0);
     }
   }
-  fprintf(stdout,"  %%%% %s OPENED\n",data);
+
+  if ( mesh->info.imprim >= 0 )
+    fprintf(stdout,"  %%%% %s OPENED\n",data);
   _MMG5_SAFE_FREE(data);
 
   /* Write header */
