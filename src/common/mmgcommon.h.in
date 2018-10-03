@@ -324,7 +324,7 @@ size_t myfree(void *ptr) {
 /** Reallocation of ptr of type type at size (initSize+wantedGap*initSize)
     if possible or at maximum available size if not. Execute the command law
     if reallocation failed. Memset to 0 for the new values of table. */
-#define _MMG5_TAB_RECALLOC(mesh,ptr,initSize,wantedGap,type,message,law,retval) do \
+#define _MMG5_TAB_RECALLOC(mesh,ptr,initSize,wantedGap,type,message,law) do \
   {                                                                     \
     int    gap;                                                         \
                                                                         \
@@ -345,7 +345,7 @@ size_t myfree(void *ptr) {
     }                                                                   \
                                                                         \
     _MMG5_ADD_MEM(mesh,gap*sizeof(type),message,law);                   \
-    _MMG5_SAFE_RECALLOC((ptr),initSize+1,initSize+gap+1,type,message,return retval); \
+    _MMG5_SAFE_RECALLOC((ptr),initSize+1,initSize+gap+1,type,message,law); \
     initSize = initSize+gap;                                            \
   }while(0);
 

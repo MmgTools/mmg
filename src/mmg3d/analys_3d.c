@@ -569,7 +569,7 @@ static int _MMG5_norver(MMG5_pMesh mesh) {
         if(mesh->xp > mesh->xpmax){
           _MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,MMG5_xPoint,
                              "larger xpoint table",
-                             mesh->xp--;return 0;,0);
+                             mesh->xp--;return 0;);
         }
         ppt->xp = mesh->xp;
         pxp = &mesh->xpoint[ppt->xp];
@@ -590,7 +590,7 @@ static int _MMG5_norver(MMG5_pMesh mesh) {
       if(mesh->xp > mesh->xpmax){
         _MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,MMG5_xPoint,
                            "larger xpoint table",
-                           mesh->xp--;return 0;,0);
+                           mesh->xp--;return 0;);
       }
       ppt->xp = mesh->xp;
       pxp = &mesh->xpoint[ppt->xp];
@@ -703,8 +703,7 @@ static int _MMG3D_nmgeom(MMG5_pMesh mesh){
               _MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,MMG5_xPoint,
                                  "larger xpoint table",
                                  mesh->xp--;
-                                 fprintf(stderr,"  Exit program.\n");return 0;,
-                                 0);
+                                 fprintf(stderr,"  Exit program.\n");return 0;);
             }
             p0->xp = mesh->xp;
           }

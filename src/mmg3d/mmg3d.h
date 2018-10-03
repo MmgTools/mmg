@@ -50,7 +50,7 @@ extern "C" {
     int klink;                                                          \
                                                                         \
     _MMG5_TAB_RECALLOC(mesh,mesh->point,mesh->npmax,wantedGap,MMG5_Point, \
-                       "larger point table",law,retval);                \
+                       "larger point table",law);                       \
                                                                         \
     mesh->npnil = mesh->np+1;                                           \
     for (klink=mesh->npnil; klink<mesh->npmax-1; klink++)               \
@@ -82,7 +82,7 @@ extern "C" {
                                                                         \
     oldSiz = mesh->nemax;                                               \
     _MMG5_TAB_RECALLOC(mesh,mesh->tetra,mesh->nemax,wantedGap,MMG5_Tetra, \
-                       "larger tetra table",law,retval);                \
+                       "larger tetra table",law);                       \
                                                                         \
     mesh->nenil = mesh->ne+1;                                           \
     for (klink=mesh->nenil; klink<mesh->nemax-1; klink++)               \

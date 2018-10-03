@@ -1059,7 +1059,7 @@ int _MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,cha
                                  "larger xtetra table",
                                  mesh->xt--;
                                  free(ind);ind=0;_MMG5_SAFE_FREE(p0_c);
-                                 _MMG5_SAFE_FREE(p1_c);return -1;,-1);
+                                 _MMG5_SAFE_FREE(p1_c);return -1;);
             }
             pt1->xt = mesh->xt;
             pxt = &mesh->xtetra[pt1->xt];

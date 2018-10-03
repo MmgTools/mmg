@@ -151,7 +151,7 @@ int _MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, _MMG5_Hash *hash, int chkISO) 
             _MMG5_TAB_RECALLOC(mesh,hash->item,hash->max,0.2,_MMG5_hedge,
                                "_MMG5_edge",
                                _MMG5_DEL_MEM(mesh,hash->item);
-                               return 0,0);
+                               return 0);
 
             ph = &hash->item[hash->nxt];
 
@@ -234,7 +234,7 @@ int _MMG5_hashEdge(MMG5_pMesh mesh,_MMG5_Hash *hash, int a,int b,int k) {
                 " %d\n",__func__,hash->max);
 
       _MMG5_TAB_RECALLOC(mesh,hash->item,hash->max,0.2,_MMG5_hedge,
-                         "_MMG5_edge",return 0,0);
+                         "_MMG5_edge",return 0);
       /* ph pointer may be false after realloc */
       ph        = &hash->item[hash->nxt];
 

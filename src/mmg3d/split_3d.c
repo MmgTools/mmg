@@ -216,7 +216,7 @@ nextstep1:
                            "larger xtetra table",
                            mesh->xt--;
                            fprintf(stderr,"  Exit program.\n");
-                           return 0,0);
+                           return 0);
         pxt0 = &mesh->xtetra[pt->xt];
       }
       pt1->xt = mesh->xt;
@@ -742,7 +742,7 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
           _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                              "larger xtetra table",
                              mesh->xt--;
-                             return -1,-1);
+                             return -1);
         }
         pt1->xt = mesh->xt;
         pxt0 = &mesh->xtetra[pt->xt];
@@ -878,7 +878,7 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
           _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                              "larger xtetra table",
                              mesh->xt--;
-                             return -1,-1);
+                             return -1);
         }
         pt1->xt = mesh->xt;
         pxt0 = &mesh->xtetra[pt->xt];
@@ -1380,7 +1380,7 @@ int _MMG5_split2sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp)
                                "larger xtetra table",
                                mesh->xt--;
                                fprintf(stderr,"  Exit program.\n");
-                               return 0,0);
+                               return 0);
           }
           pt[i]->xt = mesh->xt;
           pxt0 = &mesh->xtetra[mesh->xt];
@@ -1407,7 +1407,7 @@ int _MMG5_split2sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp)
                                  "larger xtetra table",
                                  mesh->xt--;
                                  fprintf(stderr,"  Exit program.\n");
-                                 return 0,0);
+                                 return 0);
             }
             pt[i]->xt = mesh->xt;
             pxt0 = &mesh->xtetra[mesh->xt];
@@ -1649,7 +1649,7 @@ int _MMG5_split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
                                "larger xtetra table",
                                mesh->xt--;
                                fprintf(stderr,"  Exit program.\n");
-                               return 0,0);
+                               return 0);
           }
           pt[i]->xt = mesh->xt;
           pxt0 = &mesh->xtetra[mesh->xt];
@@ -1678,7 +1678,7 @@ int _MMG5_split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
                                  "larger xtetra table",
                                  mesh->xt--;
                                  fprintf(stderr,"  Exit program.\n");
-                                 return 0,0);
+                                 return 0);
             }
             pt[i]->xt = mesh->xt;
             pxt0 = &mesh->xtetra[mesh->xt];
@@ -1927,7 +1927,7 @@ int _MMG5_split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
                                "larger xtetra table",
                                mesh->xt--;
                                fprintf(stderr,"  Exit program.\n");
-                               return 0,0);
+                               return 0);
           }
           pt[i]->xt = mesh->xt;
           pxt0 = &mesh->xtetra[mesh->xt];
@@ -1954,7 +1954,7 @@ int _MMG5_split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
                                  "larger xtetra table",
                                  mesh->xt--;
                                  fprintf(stderr,"  Exit program.\n");
-                                 return 0,0);
+                                 return 0);
             }
             pt[i]->xt = mesh->xt;
             pxt0 = &mesh->xtetra[mesh->xt];
@@ -2472,7 +2472,7 @@ int _MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTy
                                "larger xtetra table",
                                mesh->xt--;
                                fprintf(stderr,"  Exit program.\n");
-                               return 0,0);
+                               return 0);
           }
           pt[i]->xt = mesh->xt;
           pxt0 = &mesh->xtetra[mesh->xt];
@@ -2499,7 +2499,7 @@ int _MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTy
                                  "larger xtetra table",
                                  mesh->xt--;
                                  fprintf(stderr,"  Exit program.\n");
-                                 return 0,0);
+                                 return 0);
             }
             pt[i]->xt = mesh->xt;
             pxt0 = &mesh->xtetra[mesh->xt];
@@ -3148,7 +3148,7 @@ int _MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],char metRidT
                                  "larger xtetra table",
                                  mesh->xt--;
                                  fprintf(stderr,"  Exit program.\n");
-                                 return 0,0);
+                                 return 0);
             }
             pt[i]->xt = mesh->xt;
             pxt0 = &mesh->xtetra[mesh->xt];
@@ -3176,7 +3176,7 @@ int _MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],char metRidT
                                    "larger xtetra table",
                                    mesh->xt--;
                                    fprintf(stderr,"  Exit program.\n");
-                                   return 0,0);
+                                   return 0);
               }
               pt[i]->xt = mesh->xt;
               pxt0 = &mesh->xtetra[mesh->xt];
@@ -3214,7 +3214,7 @@ int _MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],char metRidT
                                  "larger xtetra table",
                                  mesh->xt--;
                                  fprintf(stderr,"  Exit program.\n");
-                                 return 0,0);
+                                 return 0);
             }
             pt[i]->xt = mesh->xt;
             pxt0 = &mesh->xtetra[mesh->xt];
@@ -3242,7 +3242,7 @@ int _MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],char metRidT
                                    "larger xtetra table",
                                    mesh->xt--;
                                    fprintf(stderr,"  Exit program.\n");
-                                   return 0,0);
+                                   return 0);
               }
               pt[i]->xt = mesh->xt;
               pxt0 = &mesh->xtetra[mesh->xt];
@@ -3488,7 +3488,7 @@ int _MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k,char metRidTyp) {
             _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                "larger xtetra table",
                                mesh->xt--;
-                               return 0,0);
+                               return 0);
           }
           pt[i]->xt = mesh->xt;
           pxt0 = &mesh->xtetra[mesh->xt];
@@ -3516,7 +3516,7 @@ int _MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k,char metRidTyp) {
               _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                  "larger xtetra table",
                                  mesh->xt--;
-                                 return 0,0);
+                                 return 0);
             }
             pt[i]->xt = mesh->xt;
             pxt0 = &mesh->xtetra[mesh->xt];
@@ -3914,7 +3914,7 @@ int _MMG5_split4sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp)
                                "larger xtetra table",
                                mesh->xt--;
                                fprintf(stderr,"  Exit program.\n");
-                               return 0,0);
+                               return 0);
           }
           pt[i]->xt = mesh->xt;
           pxt0 = &mesh->xtetra[mesh->xt];
@@ -3942,7 +3942,7 @@ int _MMG5_split4sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp)
                                  "larger xtetra table",
                                  mesh->xt--;
                                  fprintf(stderr,"  Exit program.\n");
-                                 return 0,0);
+                                 return 0);
             }
             pt[i]->xt = mesh->xt;
             pxt0 = &mesh->xtetra[mesh->xt];
@@ -4305,7 +4305,7 @@ int _MMG5_split4op(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp)
                                "larger xtetra table",
                                mesh->xt--;
                                fprintf(stderr,"  Exit program.\n");
-                               return 0,0);
+                               return 0);
           }
           pt[i]->xt = mesh->xt;
           pxt0 = &mesh->xtetra[mesh->xt];
@@ -4333,7 +4333,7 @@ int _MMG5_split4op(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp)
                                  "larger xtetra table",
                                  mesh->xt--;
                                  fprintf(stderr,"  Exit program.\n");
-                                 return 0,0);
+                                 return 0);
             }
             pt[i]->xt = mesh->xt;
             pxt0 = &mesh->xtetra[mesh->xt];
@@ -4684,7 +4684,7 @@ int _MMG5_split5(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
                                "larger xtetra table",
                                mesh->xt--;
                                fprintf(stderr,"  Exit program.\n");
-                               return 0,0);
+                               return 0);
           }
           pt[i]->xt = mesh->xt;
           pxt0 = &mesh->xtetra[mesh->xt];
@@ -4712,7 +4712,7 @@ int _MMG5_split5(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
                                  "larger xtetra table",
                                  mesh->xt--;
                                  fprintf(stderr,"  Exit program.\n");
-                                 return 0,0);
+                                 return 0);
             }
             pt[i]->xt = mesh->xt;
             pxt0 = &mesh->xtetra[mesh->xt];
@@ -4904,7 +4904,7 @@ int _MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
                              "larger xtetra table",
                              mesh->xt--;
                              fprintf(stderr,"  Exit program.\n");
-                             return 0,0);
+                             return 0);
         }
         pt[1]->xt = mesh->xt;
         pxt = &mesh->xtetra[pt[1]->xt];
@@ -4944,7 +4944,7 @@ int _MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
                              "larger xtetra table",
                              mesh->xt--;
                              fprintf(stderr,"  Exit program.\n");
-                             return 0,0);
+                             return 0);
         }
         pt[2]->xt = mesh->xt;
         pxt = &mesh->xtetra[pt[2]->xt];
@@ -4985,7 +4985,7 @@ int _MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
                              "larger xtetra table",
                              mesh->xt--;
                              fprintf(stderr,"  Exit program.\n");
-                             return 0,0);
+                             return 0);
         }
         pt[3]->xt = mesh->xt;
         pxt = &mesh->xtetra[pt[3]->xt];
@@ -5029,7 +5029,7 @@ int _MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
                              "larger xtetra table",
                              mesh->xt--;
                              fprintf(stderr,"  Exit program.\n");
-                             return 0,0);
+                             return 0);
         }
         pt[4]->xt = mesh->xt;
         pxt = &mesh->xtetra[pt[4]->xt];
@@ -5073,7 +5073,7 @@ int _MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
                              "larger xtetra table",
                              mesh->xt--;
                              fprintf(stderr,"  Exit program.\n");
-                             return 0,0);
+                             return 0);
         }
         pt[5]->xt = mesh->xt;
         pxt = &mesh->xtetra[pt[5]->xt];
@@ -5117,7 +5117,7 @@ int _MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
                              "larger xtetra table",
                              mesh->xt--;
                              fprintf(stderr,"  Exit program.\n");
-                             return 0,0);
+                             return 0);
         }
         pt[6]->xt = mesh->xt;
         pxt = &mesh->xtetra[pt[6]->xt];
@@ -5161,7 +5161,7 @@ int _MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
                              "larger xtetra table",
                              mesh->xt--;
                              fprintf(stderr,"  Exit program.\n");
-                             return 0,0);
+                             return 0);
         }
         pt[7]->xt = mesh->xt;
         pxt = &mesh->xtetra[pt[7]->xt];

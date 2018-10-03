@@ -905,7 +905,7 @@ int MMG3D_swap23(MMG5_pMesh mesh,MMG5_pSol met,int k,char metRidTyp,
                                "larger xtetra table",
                                mesh->xt--;
                                fprintf(stderr,"  Exit program.\n");
-                               return -1,-1);
+                               return -1);
           }
           ptnew->xt = mesh->xt;
           pxt0 = &mesh->xtetra[mesh->xt];
@@ -928,7 +928,7 @@ int MMG3D_swap23(MMG5_pMesh mesh,MMG5_pSol met,int k,char metRidTyp,
                              "larger xtetra table",
                              mesh->xt--;
                              fprintf(stderr,"  Exit program.\n");
-                             return -1,-1);
+                             return -1);
         }
         pt1->xt = mesh->xt;
         pxt0 = &mesh->xtetra[mesh->xt];
@@ -944,7 +944,7 @@ int MMG3D_swap23(MMG5_pMesh mesh,MMG5_pSol met,int k,char metRidTyp,
                              "larger xtetra table",
                              mesh->xt--;
                              fprintf(stderr,"  Exit program.\n");
-                             return -1,-1);
+                             return -1);
         }
         ptnew->xt = mesh->xt;
         pxt0 = &mesh->xtetra[mesh->xt];
@@ -969,7 +969,7 @@ int MMG3D_swap23(MMG5_pMesh mesh,MMG5_pSol met,int k,char metRidTyp,
                            "larger xtetra table",
                            mesh->xt--;
                            fprintf(stderr,"  Exit program.\n");
-                           return -1,-1);
+                           return -1);
       }
       pt1->xt = mesh->xt;
       pxt0 = &mesh->xtetra[mesh->xt];

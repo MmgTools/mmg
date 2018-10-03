@@ -604,7 +604,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
             /* reallocation of xpoint table */
             _MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,MMG5_xPoint,
                                "larger xpoint table",
-                               return -1,-1);
+                               return -1);
           }
           ppt->xp  = mesh->xp;
           ppt->tag = pt->tag[i];

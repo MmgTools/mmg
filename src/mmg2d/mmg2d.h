@@ -142,7 +142,7 @@ static const unsigned int MMG2_inxt[5] = {1,2,0,1,2};
     int klink;                                                          \
                                                                         \
     _MMG5_TAB_RECALLOC(mesh,mesh->point,mesh->npmax,wantedGap,MMG5_Point, \
-                       "larger point table",law,retval);                \
+                       "larger point table",law);                       \
                                                                         \
     mesh->npnil = mesh->np+1;                                           \
     for (klink=mesh->npnil; klink<mesh->npmax-1; klink++)               \
@@ -171,7 +171,7 @@ static const unsigned int MMG2_inxt[5] = {1,2,0,1,2};
                                                                         \
    oldSiz = mesh->ntmax;                                                \
    _MMG5_TAB_RECALLOC(mesh,mesh->tria,mesh->ntmax,wantedGap,MMG5_Tria,  \
-                      "larger tria table",law,retval);                  \
+                      "larger tria table",law);                         \
                                                                         \
    mesh->nenil = mesh->nt+1;                                            \
    for (klink=mesh->nenil; klink<mesh->ntmax-1; klink++)                \

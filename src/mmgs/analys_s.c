@@ -623,7 +623,7 @@ static int norver(MMG5_pMesh mesh) {
           _MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,MMG5_xPoint,
                              "larger xpoint table",
                              mesh->xp--;
-                             return 0,0);
+                             return 0);
         }
         ppt->xp = mesh->xp;
         go = &mesh->xpoint[mesh->xp];

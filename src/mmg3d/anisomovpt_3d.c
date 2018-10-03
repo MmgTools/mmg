@@ -504,7 +504,7 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
   nxp = mesh->xp + 1;
   if ( nxp > mesh->xpmax ) {
     _MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,MMG5_xPoint,
-                       "larger xpoint table",return 0;,0);
+                       "larger xpoint table",return 0;);
     n = &(mesh->xpoint[p0->xp].n1[0]);
   }
   ppt0->xp = nxp;
@@ -853,7 +853,7 @@ int _MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
   nxp = mesh->xp + 1;
   if ( nxp > mesh->xpmax ) {
     _MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,MMG5_xPoint,
-                       "larger xpoint table",return 0;,0);
+                       "larger xpoint table",return 0;);
   }
   ppt0->xp = nxp;
   pxp = &mesh->xpoint[nxp];
@@ -1200,7 +1200,7 @@ int _MMG5_movbdynompt_ani(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree, 
   nxp = mesh->xp + 1;
   if ( nxp > mesh->xpmax ) {
     _MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,MMG5_xPoint,
-                       "larger xpoint table",return 0;,0);
+                       "larger xpoint table",return 0;);
   }
   ppt0->xp = nxp;
   pxp = &mesh->xpoint[nxp];
@@ -1552,7 +1552,7 @@ int _MMG5_movbdyridpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
   nxp = mesh->xp+1;
   if ( nxp > mesh->xpmax ) {
     _MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,MMG5_xPoint,
-                       "larger xpoint table",return 0;,0);
+                       "larger xpoint table",return 0;);
   }
   ppt0->xp = nxp;
   pxp = &mesh->xpoint[nxp];

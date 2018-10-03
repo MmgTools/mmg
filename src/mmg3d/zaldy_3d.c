@@ -58,7 +58,7 @@ int _MMG3D_newPt(MMG5_pMesh mesh,double c[3],int16_t tag) {
       /* reallocation of xpoint table */
       _MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,MMG5_xPoint,
                          "larger xpoint table",
-                         return 0,0);
+                         return 0);
     }
     ppt->xp  = mesh->xp;
   }
