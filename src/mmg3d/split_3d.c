@@ -3318,12 +3318,12 @@ int _MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k,char metRidTyp) {
   cb[0] = 0.25; cb[1] = 0.25;  cb[2] = 0.25;  cb[3] = 0.25;
   ib = _MMG3D_newPt(mesh,o,0);
   if ( !ib ) {
-    _MMG5_POINT_REALLOC(mesh,met,ib,mesh->gap,
-                        fprintf(stderr,"\n  ## Error: %s: unable to allocate"
-                                " a new point\n",__func__);
-                        _MMG5_INCREASE_MEM_MESSAGE();
-                        return 0
-                        ,o,0,0);
+    _MMG3D_POINT_REALLOC(mesh,met,ib,mesh->gap,
+                         fprintf(stderr,"\n  ## Error: %s: unable to allocate"
+                                 " a new point\n",__func__);
+                         _MMG5_INCREASE_MEM_MESSAGE();
+                         return 0
+                         ,o,0);
   }
   if ( met->m ) {
     if ( !metRidTyp && met->size > 1 )
@@ -5290,10 +5290,10 @@ int _MMG5_splitedg(MMG5_pMesh mesh, MMG5_pSol met,int iel, int iar, double crit)
 
   if ( !ip )  {
     /* reallocation of point table */
-    _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
-                        warn=1;
-                        break
-                        ,o,MG_NOTAG,-1);
+    _MMG3D_POINT_REALLOC(mesh,met,ip,mesh->gap,
+                         warn=1;
+                         break
+                         ,o,MG_NOTAG);
   }
 
   if ( warn ) {

@@ -479,12 +479,12 @@ int _MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,
   c[2] = 0.5*( p0->c[2] + p1->c[2]);
   nm = _MMG3D_newPt(mesh,c,MG_BDY);
   if ( !nm ) {
-    _MMG5_POINT_REALLOC(mesh,met,nm,mesh->gap,
-                        fprintf(stderr,"\n  ## Error: %s: unable to allocate a"
-                               " new point\n",__func__);
-                        _MMG5_INCREASE_MEM_MESSAGE();
-                        return -1
-                        ,c,MG_BDY,-1);
+    _MMG3D_POINT_REALLOC(mesh,met,nm,mesh->gap,
+                         fprintf(stderr,"\n  ## Error: %s: unable to allocate a"
+                                 " new point\n",__func__);
+                         _MMG5_INCREASE_MEM_MESSAGE();
+                         return -1
+                         ,c,MG_BDY);
   }
   if ( met->m ) {
     if ( typchk == 1 && (met->size>1) ) {

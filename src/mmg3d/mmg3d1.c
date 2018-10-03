@@ -1192,13 +1192,13 @@ _MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         if ( !ip ) {
           /* reallocation of point table */
 
-          _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
-                              fprintf(stderr,"\n  ## Warning: %s: unable to"
-                                      " allocate a new point\n",__func__);
-                              _MMG5_INCREASE_MEM_MESSAGE();
-                              memlack=1;
-                              goto split
-                              ,o,0,-1);
+          _MMG3D_POINT_REALLOC(mesh,met,ip,mesh->gap,
+                               fprintf(stderr,"\n  ## Warning: %s: unable to"
+                                       " allocate a new point\n",__func__);
+                               _MMG5_INCREASE_MEM_MESSAGE();
+                               memlack=1;
+                               goto split
+                               ,o,0);
         }
 
         if ( met->m ) {
@@ -1509,12 +1509,12 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           ip = _MMG3D_newPt(mesh,o,MG_BDY);
           if ( !ip ) {
             /* reallocation of point table */
-            _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
-                                fprintf(stderr,"\n  ## Error: %s: unable to"
-                                        " allocate a new point.\n",__func__);
-                                _MMG5_INCREASE_MEM_MESSAGE();
-                                _MMG3D_delPatternPts(mesh,hash);return -1;
-                                ,o,MG_BDY,-1);
+            _MMG3D_POINT_REALLOC(mesh,met,ip,mesh->gap,
+                                 fprintf(stderr,"\n  ## Error: %s: unable to"
+                                         " allocate a new point.\n",__func__);
+                                 _MMG5_INCREASE_MEM_MESSAGE();
+                                 _MMG3D_delPatternPts(mesh,hash);return -1;
+                                 ,o,MG_BDY);
             // Now pb->p contain a wrong memory address.
             pb.p[0] = &mesh->point[ptt.v[0]];
             pb.p[1] = &mesh->point[ptt.v[1]];

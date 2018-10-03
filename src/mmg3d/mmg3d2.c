@@ -601,12 +601,12 @@ static int _MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol/*,double *tmp*/){
 
       np = _MMG3D_newPt(mesh,c,0);
       if ( !np ) {
-        _MMG5_POINT_REALLOC(mesh,sol,np,0.2,
-                            fprintf(stderr,"\n  ## Error: %s: unable to"
-                                    " allocate a new point\n",__func__);
-                            _MMG5_INCREASE_MEM_MESSAGE();
-                            return 0
-                            ,c,0,0);
+        _MMG3D_POINT_REALLOC(mesh,sol,np,0.2,
+                             fprintf(stderr,"\n  ## Error: %s: unable to"
+                                     " allocate a new point\n",__func__);
+                             _MMG5_INCREASE_MEM_MESSAGE();
+                             return 0
+                             ,c,0);
       }
       sol->m[np] = mesh->info.ls;
 

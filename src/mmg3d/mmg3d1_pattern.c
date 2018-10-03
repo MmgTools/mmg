@@ -161,10 +161,10 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
       ip = _MMG3D_newPt(mesh,o,tag);
       if ( !ip ) {
         /* reallocation of point table */
-        _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
+        _MMG3D_POINT_REALLOC(mesh,met,ip,mesh->gap,
                             *warn=1;
                             break
-                            ,o,tag,-1);
+                            ,o,tag);
       }
       if ( met->m ) {
         ier = _MMG5_intmet(mesh,met,k,imax,ip,0.5);
@@ -234,10 +234,10 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
 
       if ( !ip )  {
         /* reallocation of point table */
-        _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
-                            *warn=1;
-                            break
-                            ,o,MG_NOTAG,-1);
+        _MMG3D_POINT_REALLOC(mesh,met,ip,mesh->gap,
+                             *warn=1;
+                             break
+                             ,o,MG_NOTAG);
       }
       if ( met->m ) {
         ier = _MMG5_intmet(mesh,met,k,imax,ip,0.5);

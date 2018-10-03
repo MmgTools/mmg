@@ -205,10 +205,10 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
         ip = _MMG3D_newPt(mesh,o,tag);
         if ( !ip ) {
           /* reallocation of point table */
-          _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
-                              *warn=1;
-                              goto collapse,
-                              o,tag,-1);
+          _MMG3D_POINT_REALLOC(mesh,met,ip,mesh->gap,
+                               *warn=1;
+                               goto collapse,
+                               o,tag);
         }
         if ( met->m ) {
           if ( _MMG5_intmet(mesh,met,k,imax,ip,0.5) <=0 ) {
@@ -284,10 +284,10 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
 
         if ( !ip )  {
           /* reallocation of point table */
-          _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
-                              *warn=1;
-                              goto collapse,
-                              o,MG_NOTAG,-1);
+          _MMG3D_POINT_REALLOC(mesh,met,ip,mesh->gap,
+                               *warn=1;
+                               goto collapse,
+                               o,MG_NOTAG);
         }
         if ( met->m ) {
           if ( _MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
@@ -329,10 +329,10 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
 
         if ( !ip )  {
           /* reallocation of point table */
-          _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
-                              *warn=1;
-                              goto collapse,
-                              o,MG_NOTAG,-1);
+          _MMG3D_POINT_REALLOC(mesh,met,ip,mesh->gap,
+                               *warn=1;
+                               goto collapse,
+                               o,MG_NOTAG);
         }
         if ( met->m ) {
           if ( _MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
@@ -529,10 +529,10 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
           ip = _MMG3D_newPt(mesh,o,tag);
           if ( !ip ){
             /* reallocation of point table */
-            _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
-                                *warn=1;
-                                goto collapse2//break
-                                ,o,tag,-1);
+            _MMG3D_POINT_REALLOC(mesh,met,ip,mesh->gap,
+                                 *warn=1;
+                                 goto collapse2//break
+                                 ,o,tag);
           }
           if ( met->m ) {
             if ( _MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
@@ -607,10 +607,10 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
 
           if ( !ip )  {
             /* reallocation of point table */
-            _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
-                                *warn=1;
-                                goto collapse2
-                                ,o,MG_NOTAG,-1);
+            _MMG3D_POINT_REALLOC(mesh,met,ip,mesh->gap,
+                                 *warn=1;
+                                 goto collapse2
+                                 ,o,MG_NOTAG);
           }
           if ( met->m ) {
             if ( _MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
@@ -650,10 +650,10 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
 
           if ( !ip )  {
             /* reallocation of point table */
-            _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
-                                *warn=1;
-                                goto collapse2,
-                                o,MG_NOTAG,-1);
+            _MMG3D_POINT_REALLOC(mesh,met,ip,mesh->gap,
+                                 *warn=1;
+                                 goto collapse2,
+                                 o,MG_NOTAG);
           }
           if ( met->m ) {
             if ( _MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
