@@ -83,22 +83,21 @@ void MMG2D_Init_parameters(MMG5_pMesh mesh) {
   _MMG5_Init_parameters(mesh);
 
   /* default values for integers */
-  /* MMG2D_IPARAM_lag = -1 */
   mesh->info.lag      = -1;
-  /* MMG2D_IPARAM_optim = 0 */
   mesh->info.optim    =  0;
-  /* MMG2D_IPARAM_nosurf = 0 */
-  mesh->info.nosurf   =  0;  /* [0/1]    ,avoid/allow surface modifications */
-
-  mesh->info.renum    = 0;   /* [0]    , Turn on/off the renumbering using SCOTCH; */
+  /* [0/1]    ,avoid/allow surface modifications */
+  mesh->info.nosurf   =  0;
+  /* [0]    , Turn on/off the renumbering using SCOTCH; */
+  mesh->info.renum    = 0;
   mesh->info.nreg     = 0;
   /* default values for doubles */
-  mesh->info.ls       = 0.0;      /* level set value */
-  mesh->info.hgrad    = 1.3;      /* control gradation; */
+  /* level set value */
+  mesh->info.ls       = 0.0;
+  /* control gradation; */
+  mesh->info.hgrad    = 1.3;
 
   mesh->info.dhd  = _MMG5_ANGEDG;
 
-  //mesh->info.imprim = -7;
   mesh->info.octree = 64;
 }
 

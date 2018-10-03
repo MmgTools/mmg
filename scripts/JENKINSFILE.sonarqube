@@ -38,7 +38,7 @@ node('mmg-sonnar-new') {
         python /builds/sonar/lcov-to-cobertura-xml-1.6/lcov_cobertura/lcov_cobertura.py mmg.lcov --output mmg-coverage.xml
         export CPPCHECK_INCLUDES="-IbuildPatternON/include -IbuildPatternOFF/include"
         export SOURCES_TO_ANALYZE="./src"
-        cppcheck  -v -f --language=c --platform=unix64 --enable=all --xml --xml-version=2 --suppress=missingIncludeSystem ${CPPCHECK_INCLUDES} ${SOURCES_TO_ANALYZE} 2> mmg-cppcheck.xml
+        cppcheck  -v -f --language=c --platform=unix64 --check-config --enable=all --xml --xml-version=2 --suppress=missingIncludeSystem ${CPPCHECK_INCLUDES} ${SOURCES_TO_ANALYZE} 2> mmg-cppcheck.xml
         /usr/local/bin/rats -w 3 --xml ${SOURCES_TO_ANALYZE} > mmg-rats.xml
         export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/
         export SONAR_SCANNER_OPTS="-Xms512m -Xmx1024m"

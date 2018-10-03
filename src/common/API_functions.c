@@ -53,44 +53,44 @@ void _MMG5_Init_parameters(MMG5_pMesh mesh) {
   memset(&mesh->info,0, sizeof(MMG5_Info));
 
   /* default values for integers */
-  /** MMG5_IPARAM_verbose = 1 */
-  mesh->info.imprim   =  1;  /* [-1..10], Tune level of imprim */
-  /** MMG*_IPARAM_iso = 0 */
-  mesh->info.iso      =  0;  /* [0/1]    ,Turn on/off levelset meshing */
-  /** MMG5_IPARAM_mem = -1 */
-  mesh->info.mem      = _MMG5_NONSET_MEM;  /* [n/-1]   ,Set memory size to n Mbytes/keep the default value */
-  /** MMG5_IPARAM_debug = 0 */
-  mesh->info.ddebug   =  0;  /* [0/1]    ,Turn on/off debug mode */
-  /** MMG5_IPARAM_npar = 0 */
-  mesh->info.npar     =  0;  /* [n]      ,number of local parameters */
-  /** MMG5_IPARAM_noinsert = 0 */
-  mesh->info.noinsert =  0;  /* [0/1]    ,avoid/allow point insertion/deletion */
-  /** MMG5_IPARAM_noswap = 0 */
-  mesh->info.noswap   =  0;  /* [0/1]    ,avoid/allow edge or face flipping */
-  /** MMG5_IPARAM_nomove = 0 */
-  mesh->info.nomove   =  0;  /* [0/1]    ,avoid/allow point relocation */
-  /** MMG5_IPARAM nmat = 0 */
-  mesh->info.nmat = 0;  /* [n]    ,number of user-defined references */
+  /* [-1..10], Tune level of imprim */
+  mesh->info.imprim   =  1;
+  /* [0/1]    ,Turn on/off levelset meshing */
+  mesh->info.iso      =  0;
+  /* [n/-1]   ,Set memory size to n Mbytes/keep the default value */
+  mesh->info.mem      = _MMG5_NONSET_MEM;
+  /* [0/1]    ,Turn on/off debug mode */
+  mesh->info.ddebug   =  0;
+  /* [n]      ,number of local parameters */
+  mesh->info.npar     =  0;
+  /* [0/1]    ,avoid/allow point insertion/deletion */
+  mesh->info.noinsert =  0;
+  /* [0/1]    ,avoid/allow edge or face flipping */
+  mesh->info.noswap   =  0;
+  /* [0/1]    ,avoid/allow point relocation */
+  mesh->info.nomove   =  0;
+  /* [n]    ,number of user-defined references */
+  mesh->info.nmat = 0;
 
   /* default values for doubles */
-  /** MMG5_DPARAM_angleDetection = \ref _MMG5_ANGEDG */
-  mesh->info.dhd      = _MMG5_ANGEDG;   /* angle detection; */
-  /** MMG5_DPARAM_hmin = 0.001 \f$\times\f$ bounding box size; */
-  mesh->info.hmin     = _MMG5_NONSET_HMIN;      /* minimal mesh size; */
-  /** MMG5_DPARAM_hmax = double of the bounding box size */
-  mesh->info.hmax     = _MMG5_NONSET_HMAX;      /* maximal mesh size; */
-  /** MMG5_DPARAM_hsiz= -1. */
-  mesh->info.hsiz     = _MMG5_NONSET_HSIZ;      /* constant mesh size; */
-  /** MMG5_DPARAM_hausd = 0.01 */
-  mesh->info.hausd    = _MMG5_HAUSD;     /* control Hausdorff */
-  /** MMG5_DPARAM_hgrad = 1.3 */
-  mesh->info.hgrad    = _MMG5_HGRAD;      /* control gradation; */
+  /* angle detection; */
+  mesh->info.dhd      = _MMG5_ANGEDG;
+  /* minimal mesh size; */
+  mesh->info.hmin     = _MMG5_NONSET_HMIN;
+  /* maximal mesh size; */
+  mesh->info.hmax     = _MMG5_NONSET_HMAX;
+  /* constant mesh size; */
+  mesh->info.hsiz     = _MMG5_NONSET_HSIZ;
+  /* control Hausdorff */
+  mesh->info.hausd    = _MMG5_HAUSD;
+  /* control gradation; */
+  mesh->info.hgrad    = _MMG5_HGRAD;
 
   /* default values for pointers */
-  /** MMG5_PPARAM = NULL */
-  mesh->info.mat = NULL;  /* list of user-defined references */
+  /* list of user-defined references */
+  mesh->info.mat = NULL;
 
-  /** MMG3D_IPARAM_lag = -1 used by mmg3d only but need to be negative in the
+  /** MMG3D_IPARAM_lag is used by mmg3d only but need to be negative in the
    * scaleMesh function */
   mesh->info.lag      = _MMG5_LAG;
 

@@ -80,8 +80,8 @@ void MMGS_Init_parameters(MMG5_pMesh mesh) {
 
   /* Init common parameters for mmgs and mmgs. */
   _MMG5_Init_parameters(mesh);
-
-  mesh->info.renum    = 0;   /* [0/1], Turn off/on the renumbering using SCOTCH; */
+  /* [0/1], Turn off/on the renumbering using SCOTCH; */
+  mesh->info.renum    = 0;
 
 }
 

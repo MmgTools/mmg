@@ -83,28 +83,25 @@ void MMG3D_Init_parameters(MMG5_pMesh mesh) {
   _MMG5_Init_parameters(mesh);
 
   /* default values for integers */
-  /* MMG3D_IPARAM_lag = -1 */
   mesh->info.lag      = -1;
-  /* MMG3D_IPARAM_nofem = 0 */
   mesh->info.fem      = 1;
-  /* MMG3D_IPARAM_optim = 0 */
   mesh->info.optim    =  0;
-  /* MMG3D_IPARAM_optimLES = 0 */
   mesh->info.optimLES  =  0;
-  /* MMG3D_IPARAM_nosurf = 0 */
-  mesh->info.nosurf   =  0;  /* [0/1]    ,avoid/allow surface modifications */
+  /* [0/1]    ,avoid/allow surface modifications */
+  mesh->info.nosurf   =  0;
 #ifdef USE_SCOTCH
-  mesh->info.renum    = 1;   /* [1/0]    , Turn on/off the renumbering using SCOTCH; */
+   /* [1/0]    , Turn on/off the renumbering using SCOTCH; */
+  mesh->info.renum    = 1;
 #else
-  mesh->info.renum    = 0;   /* [0]    , Turn on/off the renumbering using SCOTCH; */
+   /* [0]    , Turn on/off the renumbering using SCOTCH; */
+  mesh->info.renum    = 0;
 #endif
 
   /* default values for doubles */
-  mesh->info.ls       = 0.0;      /* level set value */
-
+  /* level set value */
+  mesh->info.ls       = 0.0;
 
 #ifndef PATTERN
-  /* MMG3D_IPARAM_octree = 64 */
   mesh->info.octree = 32;
 #endif
 }
