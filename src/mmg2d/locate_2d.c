@@ -213,14 +213,14 @@ int MMG2_cutEdgeTriangle(MMG5_pMesh mesh,int k,int ia,int ib) {
 /** Return the index of one triangle containing ip */
 int MMG2_findTria(MMG5_pMesh mesh,int ip) {
   MMG5_pTria  pt,pt1;
-  int         find,iel,base,iadr,*adja,iter,ier;
+  int         iel,base,iadr,*adja,iter,ier;
   int         mvDir[3],jel,i;
   double      l1,l2,l3,det,eps;
   static char mmgWarn0 = 0;
 
   ++mesh->base;
   base = ++mesh->base;
-  find = iter = 0;
+  iter = 0;
   iel  = 1;
   do {
     mvDir[0] = mvDir[1] = mvDir[2] = 0;
@@ -265,7 +265,6 @@ int MMG2_findTria(MMG5_pMesh mesh,int ip) {
 
     /*if all the barycentric coordinates are positive, we find the triangle*/
     if(!mvDir[0] && !mvDir[1] && !mvDir[2]) {
-      find = 1;
       break;
     }
 
@@ -300,7 +299,7 @@ int MMG2_findTria(MMG5_pMesh mesh,int ip) {
     if (iel == 0) {
       iter = mesh->nt+1;
     }
-  } while (!find && (iter<=mesh->nt));
+  } while ( iter<=mesh->nt );
 
   return iel;
 }
