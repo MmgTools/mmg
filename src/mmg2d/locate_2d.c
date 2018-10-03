@@ -49,7 +49,7 @@ int MMG2_coorbary(MMG5_pMesh mesh,MMG5_pTria pt,double c[2],double* det,double* 
     if ( !mmgWarn0 ) {
       mmgWarn0 = 1;
       fprintf(stderr,"\n  ## Warning: %s: at least 1 flat triangle. abort.\n",
-        __func__);
+              __func__);
     }
     return 0;
   }
@@ -84,8 +84,8 @@ int MMG2_isInTriangle(MMG5_pMesh mesh,int k,double c[2]) {
 }
 
 /* Check whether edge ppa-ppb crosses triangles pt (in the sense that two edges of this triangle
- are crossed by (ppa-ppb), or only one, and ppa or ppb is a vertex of pt; if at least one edge
- is crossed by ia-ib, return i+1, where i is the index of one of the crossed edges */
+   are crossed by (ppa-ppb), or only one, and ppa or ppb is a vertex of pt; if at least one edge
+   is crossed by ia-ib, return i+1, where i is the index of one of the crossed edges */
 int MMG2_cutEdge(MMG5_pMesh mesh,MMG5_pTria pt,MMG5_pPoint ppa,MMG5_pPoint ppb) {
   double      la[3],lb[3],det;
   int         icompt,ireturn;
@@ -286,12 +286,12 @@ int MMG2_findTria(MMG5_pMesh mesh,int ip) {
     /*second, the optimal move is not possible, so try to move in one direction*/
     if(i==3) {
       for(i=0;i<3; i++) {
-      	if (mvDir[i]) continue;
-      	jel = adja[i]/3;
-      	if (!jel) continue;
-      	pt1 = &mesh->tria[jel];
-      	if(pt1->base == mesh->base) continue;
-      	iel = jel;
+        if (mvDir[i]) continue;
+        jel = adja[i]/3;
+        if (!jel) continue;
+        pt1 = &mesh->tria[jel];
+        if(pt1->base == mesh->base) continue;
+        iel = jel;
         break;
       }
     }
@@ -343,7 +343,7 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
   if ( !ivert ) {
 
     if ( !(k = MMG2_findTria(mesh,ia) ) ) {
-       return 0;
+      return 0;
     }
     *kdep = k;
   }
@@ -486,7 +486,7 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
           }
           else if ( fabs(prod1)<_MMG5_EPSD2 && fabs(prod2)<_MMG5_EPSD2 && fabs(prod3)<_MMG5_EPSD2) {
             if ( (a[_MMG5_inxt2[i]] < 0.0 && a[_MMG5_iprv2[i]] > 0.0 )
-               || (a[_MMG5_inxt2[i]] > 0.0 && a[_MMG5_iprv2[i]] < 0.0 ) ) {
+                 || (a[_MMG5_inxt2[i]] > 0.0 && a[_MMG5_iprv2[i]] < 0.0 ) ) {
 
               pt->base = mesh->base+1;
               list[lon++] = 3*k;
