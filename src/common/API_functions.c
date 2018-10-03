@@ -186,7 +186,7 @@ int MMG5_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solin) {
     strcpy(sol->namein,solin);
   }
   else {
-    if ( strlen(mesh->namein) ) {
+    if ( mesh->namein && strlen(mesh->namein) ) {
       int mesh_len = strlen(mesh->namein)+1;
       _MMG5_SAFE_CALLOC(sol->namein,mesh_len,char,0);
       strcpy(sol->namein,mesh->namein);
