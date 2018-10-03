@@ -685,7 +685,8 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
                       fprintf(stderr,"  Exit program.\n");
                       _MMG5_SAFE_FREE(ina);
                       return -1);
-        _MMG5_SAFE_RECALLOC(mesh->edge,na+1,(mesh->na+1),MMG5_Edge,"edges",return -1);
+        _MMG5_SAFE_RECALLOC(mesh->edge,na+1,(mesh->na+1),MMG5_Edge,"edges",
+                            _MMG5_SAFE_FREE(ina);return -1);
       }
     }
 
@@ -1979,7 +1980,7 @@ int MMG3D_saveAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
   (*sol)[0].ver = 2;
 
   _MMG5_SAFE_CALLOC(type,mesh->nsols,int,return 0);
-  _MMG5_SAFE_CALLOC(size,mesh->nsols,int,return 0);
+  _MMG5_SAFE_CALLOC(size,mesh->nsols,int,_MMG5_SAFE_FREE(type);return 0);
   for (k=0; k<mesh->nsols; ++k ) {
     type[k] = (*sol)[k].type;
     size[k] = (*sol)[k].size;

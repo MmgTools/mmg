@@ -55,7 +55,7 @@ int _MMG5_paktet(MMG5_pMesh mesh) {
     pt = &mesh->tetra[k];
     if ( !MG_EOK(pt) ) {
       pt1 = &mesh->tetra[mesh->ne];
-      assert(MG_EOK(pt1));
+      assert( pt && pt1 && MG_EOK(pt1) );
       memcpy(pt,pt1,sizeof(MMG5_Tetra));
       if ( !_MMG3D_delElt(mesh,mesh->ne) )  return 0;
     }

@@ -294,7 +294,6 @@ int MMG3D_optbdry(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree,int k) {
       }
     }
     /*try to swap the bdry edges*/
-    ier = 0;
     for (j=0; j<3; j++) {
       ia  = _MMG5_iarf[i][j];
 

@@ -865,8 +865,7 @@ void _MMG3D_mergeBranches(MMG5_pMesh mesh,_MMG3D_octree_s* q, int dim, int nv)
 {
   int index;
   int i;
-  int sizBr;
-  sizBr = 1<<dim;
+
   index = 0;
   assert(q->v);
   assert(q->branches);
