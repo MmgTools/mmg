@@ -759,7 +759,7 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,
                * compatible with the triangle (MG_GET(ori,i)) we know that we
                * are well orientated. Morever, may introduce numerical errors
                * with wrinkled surfaces. */
-                // if ( !_MMG5_directsurfball(mesh, pt->v[i0],lists,ilists,n) )  continue;
+              // if ( !_MMG5_directsurfball(mesh, pt->v[i0],lists,ilists,n) )  continue;
               // }
               if ( !MG_GET(pxt->ori,i) ) {
                 if ( !_MMG5_directsurfball(mesh,pt->v[i0],lists,ilists,n) )
@@ -1194,7 +1194,7 @@ _MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
 
           _MMG5_POINT_REALLOC(mesh,met,ip,mesh->gap,
                               fprintf(stderr,"\n  ## Warning: %s: unable to"
-                                     " allocate a new point\n",__func__);
+                                      " allocate a new point\n",__func__);
                               _MMG5_INCREASE_MEM_MESSAGE();
                               memlack=1;
                               goto split
@@ -1230,19 +1230,19 @@ _MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
 
   /** 3. check and split */
 split:
- if ( mincal < _MMG5_EPS ) {
-   /* Delete the useless added points */
-   if ( !_MMG3D_delPatternPts(mesh,hash) ) return -1;
+  if ( mincal < _MMG5_EPS ) {
+    /* Delete the useless added points */
+    if ( !_MMG3D_delPatternPts(mesh,hash) ) return -1;
 
-   /* Avoid the creation of bad quality elements */
-   if ( mesh->info.imprim > 5 || mesh->info.ddebug ) {
-     fprintf(stderr,"\n  ## Warning: %s: too bad quality for the worst element."
-             " Volumic patterns skipped.\n",__func__);
-   }
+    /* Avoid the creation of bad quality elements */
+    if ( mesh->info.imprim > 5 || mesh->info.ddebug ) {
+      fprintf(stderr,"\n  ## Warning: %s: too bad quality for the worst element."
+              " Volumic patterns skipped.\n",__func__);
+    }
 
-   _MMG5_DEL_MEM(mesh,hash.item);
-   return 0;
- }
+    _MMG5_DEL_MEM(mesh,hash.item);
+    return 0;
+  }
 
   ns = 0;
   ne = mesh->ne;
@@ -1733,7 +1733,7 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
             if ( !mmgWarn2 ) {
               fprintf(stderr,"\n  ## Warning: %s: surfacic pattern: unable to find"
                       " a valid split for at least 1 point. Point(s) deletion.",
-                     __func__ );
+                      __func__ );
               mmgWarn2 = 1;
             }
           }
@@ -1744,8 +1744,8 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
                                        pt->v[_MMG5_iare[ia][1]],-1) ) {
                   fprintf(stderr,"\n  ## Error: %s: unable to delete point"
                           " idx along edge %d %d.\n",
-                         __func__,_MMG3D_indPt(mesh,pt->v[_MMG5_iare[ia][0]]),
-                         _MMG3D_indPt(mesh,pt->v[_MMG5_iare[ia][1]]));
+                          __func__,_MMG3D_indPt(mesh,pt->v[_MMG5_iare[ia][0]]),
+                          _MMG3D_indPt(mesh,pt->v[_MMG5_iare[ia][1]]));
                   _MMG5_DEL_MEM(mesh,hash.item);
                   return -1;
                 }
@@ -1781,7 +1781,7 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         }
       }
     }
-   switch (pt->flag) {
+    switch (pt->flag) {
     case 1: case 2: case 4: case 8: case 16: case 32: /* 1 edge split */
       if ( ! _MMG5_split1(mesh,met,k,vx,typchk-1) ) return -1;
       ns++;
@@ -1988,7 +1988,7 @@ static int MMG3D_anatet4_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,char metRidTyp,
         tau0[0] = 3; tau0[1] = 0; tau0[2] = 2; tau0[3] = 1;
         break;
       default:
-	tau0[0] = 0; tau0[1] = 1; tau0[2] = 2; tau0[3] = 3;
+        tau0[0] = 0; tau0[1] = 1; tau0[2] = 2; tau0[3] = 3;
       }
 
       /* k1 may be in configuration j1, j1+1, j1+2 */
@@ -2038,7 +2038,7 @@ static int MMG3D_anatet4_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,char metRidTyp,
         tau1[0] = 3; tau1[1] = 1; tau1[2] = 0; tau1[3] = 2;
         break;
       default:
-	tau1[0] = 0; tau1[1] = 1; tau1[2] = 2; tau1[3] = 3;
+        tau1[0] = 0; tau1[1] = 1; tau1[2] = 2; tau1[3] = 3;
       }
 
       /** Do not choose a config that creates a tetra with more than 2 bdries */
@@ -2364,8 +2364,8 @@ int _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,char typchk, int patternMode) {
     }
     else if ( lastit ) {
       /* Avoid the incrementation of mesh->info.fem if we have detected a last
-      iteration but anatet4 leads to have nc, nf or ns != 0 so we perform a last
-      iter */
+         iteration but anatet4 leads to have nc, nf or ns != 0 so we perform a last
+         iter */
       ++lastit;
     }
   }
