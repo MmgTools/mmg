@@ -164,10 +164,10 @@ enum MMG3D_Param {
  * Set the name of input mesh.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG3D_SET_INPUTMESHNAME(mesh,meshin,strlen,retval)\n
+ * >   SUBROUTINE MMG3D_SET_INPUTMESHNAME(mesh,meshin,strlen0,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: meshin\n
- * >     INTEGER, INTENT(IN)            :: strlen\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -181,10 +181,10 @@ enum MMG3D_Param {
  * Set the name of output mesh file.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG3D_SET_OUTPUTMESHNAME(mesh,meshout,strlen,retval)\n
+ * >   SUBROUTINE MMG3D_SET_OUTPUTMESHNAME(mesh,meshout,strlen0,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: meshout\n
- * >     INTEGER, INTENT(IN)            :: strlen\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -199,10 +199,10 @@ enum MMG3D_Param {
  * Set the name of input solution file.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG3D_SET_INPUTSOLNAME(mesh,sol,solin,strlen,retval)\n
+ * >   SUBROUTINE MMG3D_SET_INPUTSOLNAME(mesh,sol,solin,strlen0,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: solin\n
- * >     INTEGER, INTENT(IN)            :: strlen\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -218,10 +218,10 @@ enum MMG3D_Param {
  *  Set the name of output solution file.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG3D_SET_OUTPUTSOLNAME(mesh,sol,solout,strlen,retval)\n
+ * >   SUBROUTINE MMG3D_SET_OUTPUTSOLNAME(mesh,sol,solout,strlen0,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: solout\n
- * >     INTEGER, INTENT(IN)            :: strlen\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -1642,10 +1642,10 @@ enum MMG3D_Param {
  * Read mesh data.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG3D_LOADMESH(mesh,filename,strlen,retval)\n
+ * >   SUBROUTINE MMG3D_LOADMESH(mesh,filename,strlen0,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
- * >     INTEGER, INTENT(IN)            :: strlen\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -1661,10 +1661,10 @@ enum MMG3D_Param {
  * low-order points, edges, tria, quadra, tetra and prisms.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG3D_LOADMSHMESH(mesh,sol,filename,strlen,retval)\n
+ * >   SUBROUTINE MMG3D_LOADMSHMESH(mesh,sol,filename,strlen0,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
- * >     INTEGER, INTENT(IN)            :: strlen\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -1680,10 +1680,10 @@ enum MMG3D_Param {
  * low-order points, edges, tria, quadra, tetra and prisms.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG3D_LOADMSHMESH_AND_ALLDATA(mesh,sol,filename,strlen,retval)\n
+ * >   SUBROUTINE MMG3D_LOADMSHMESH_AND_ALLDATA(mesh,sol,filename,strlen0,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
- * >     INTEGER, INTENT(IN)            :: strlen\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -1698,10 +1698,10 @@ enum MMG3D_Param {
  * Save mesh data.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG3D_SAVEMESH(mesh,filename,strlen,retval)\n
+ * >   SUBROUTINE MMG3D_SAVEMESH(mesh,filename,strlen0,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
- * >     INTEGER, INTENT(IN)            :: strlen\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -1717,10 +1717,10 @@ enum MMG3D_Param {
  * file for .mshb extension and ASCII for .msh one.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG3D_SAVEMSHMESH(mesh,sol,filename,strlen,retval)\n
+ * >   SUBROUTINE MMG3D_SAVEMSHMESH(mesh,sol,filename,strlen0,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
- * >     INTEGER, INTENT(IN)            :: strlen\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -1738,10 +1738,10 @@ enum MMG3D_Param {
  * format for .mshb one.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG3D_SAVEMSHMESH_AND_ALLDATA(mesh,sol,filename,strlen,retval)\n
+ * >   SUBROUTINE MMG3D_SAVEMSHMESH_AND_ALLDATA(mesh,sol,filename,strlen0,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
- * >     INTEGER, INTENT(IN)            :: strlen\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -1757,10 +1757,10 @@ enum MMG3D_Param {
  * metric
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG3D_LOADSOL(mesh,met,filename,strlen,retval)\n
+ * >   SUBROUTINE MMG3D_LOADSOL(mesh,met,filename,strlen0,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,met\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
- * >     INTEGER, INTENT(IN)            :: strlen\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -1775,10 +1775,10 @@ enum MMG3D_Param {
  * Load 1 or more solutions in a solution file at medit file format.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG3D_LOADALLSOLS(mesh,sol,filename,strlen,retval)\n
+ * >   SUBROUTINE MMG3D_LOADALLSOLS(mesh,sol,filename,strlen0,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
- * >     INTEGER, INTENT(IN)            :: strlen\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -1794,10 +1794,10 @@ enum MMG3D_Param {
  * Write isotropic or anisotropic metric.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG3D_SAVESOL(mesh,met,filename,strlen,retval)\n
+ * >   SUBROUTINE MMG3D_SAVESOL(mesh,met,filename,strlen0,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,met\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
- * >     INTEGER, INTENT(IN)            :: strlen\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -1812,10 +1812,10 @@ enum MMG3D_Param {
  * Save 1 or more solutions at medit solution file format
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG3D_SAVEALLSOLS(mesh,sol,filename,strlen,retval)\n
+ * >   SUBROUTINE MMG3D_SAVEALLSOLS(mesh,sol,filename,strlen0,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
- * >     INTEGER, INTENT(IN)            :: strlen\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -2037,9 +2037,9 @@ enum MMG3D_Param {
  * Print help for mmg3d options.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG3D_USAGE(prog,strlen,retval)\n
+ * >   SUBROUTINE MMG3D_USAGE(prog,strlen0,retval)\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: prog\n
- * >     INTEGER, INTENT(IN)            :: strlen\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *

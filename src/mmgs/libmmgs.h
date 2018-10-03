@@ -144,10 +144,10 @@ void  MMGS_Init_parameters(MMG5_pMesh mesh);
  * Set the name of input mesh.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMGS_SET_INPUTMESHNAME(mesh,meshin,strlen,retval)\n
+ * >   SUBROUTINE MMGS_SET_INPUTMESHNAME(mesh,meshin,strlen0,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: meshin\n
- * >     INTEGER, INTENT(IN)            :: strlen\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -161,10 +161,10 @@ int  MMGS_Set_inputMeshName(MMG5_pMesh mesh, const char* meshin);
  * Set the name of output mesh file.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMGS_SET_OUTPUTMESHNAME(mesh,meshout,strlen,retval)\n
+ * >   SUBROUTINE MMGS_SET_OUTPUTMESHNAME(mesh,meshout,strlen0,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: meshout\n
- * >     INTEGER, INTENT(IN)            :: strlen\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -179,10 +179,10 @@ int  MMGS_Set_outputMeshName(MMG5_pMesh mesh, const char* meshout);
  * Set the name of input solution file.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMGS_SET_INPUTSOLNAME(mesh,sol,solin,strlen,retval)\n
+ * >   SUBROUTINE MMGS_SET_INPUTSOLNAME(mesh,sol,solin,strlen0,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: solin\n
- * >     INTEGER, INTENT(IN)            :: strlen\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -197,10 +197,10 @@ int  MMGS_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solin);
  *  Set the name of output solution file.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMGS_SET_OUTPUTSOLNAME(mesh,sol,solout,strlen,retval)\n
+ * >   SUBROUTINE MMGS_SET_OUTPUTSOLNAME(mesh,sol,solout,strlen0,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: solout\n
- * >     INTEGER, INTENT(IN)            :: strlen\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -1145,10 +1145,10 @@ int MMGS_Get_iparameter(MMG5_pMesh mesh, int iparam);
  * Read mesh data.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMGS_LOADMESH(mesh,filename,strlen,retval)\n
+ * >   SUBROUTINE MMGS_LOADMESH(mesh,filename,strlen0,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
- * >     INTEGER, INTENT(IN)            :: strlen\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -1164,10 +1164,10 @@ int  MMGS_loadMesh(MMG5_pMesh mesh, const char* filename);
  * only low-order points, edges, tria, quad, tetra and prisms.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMGS_LOADMSHMESH(mesh,sol,filename,strlen,retval)\n
+ * >   SUBROUTINE MMGS_LOADMSHMESH(mesh,sol,filename,strlen0,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
- * >     INTEGER, INTENT(IN)            :: strlen\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -1183,10 +1183,10 @@ int MMGS_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
  * low-order points, edges, tria, quadra, tetra and prisms.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMGS_LOADMSHMESH_AND_ALLDATA(mesh,sol,filename,strlen,retval)\n
+ * >   SUBROUTINE MMGS_LOADMSHMESH_AND_ALLDATA(mesh,sol,filename,strlen0,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
- * >     INTEGER, INTENT(IN)            :: strlen\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -1200,10 +1200,10 @@ int MMGS_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *file
  * Save mesh data.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMGS_SAVEMESH(mesh,filename,strlen,retval)\n
+ * >   SUBROUTINE MMGS_SAVEMESH(mesh,filename,strlen0,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
- * >     INTEGER, INTENT(IN)            :: strlen\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -1219,10 +1219,10 @@ int  MMGS_saveMesh(MMG5_pMesh mesh, const char *filename);
  * Save file at ASCII format for .msh extension, at binary format for .mshb one.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMGS_SAVEMSHMESH(mesh,sol,filename,strlen,retval)\n
+ * >   SUBROUTINE MMGS_SAVEMSHMESH(mesh,sol,filename,strlen0,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
- * >     INTEGER, INTENT(IN)            :: strlen\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -1240,10 +1240,10 @@ int  MMGS_saveMesh(MMG5_pMesh mesh, const char *filename);
  * format for .mshb one.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMGS_SAVEMSHMESH_AND_ALLDATA(mesh,sol,filename,strlen,retval)\n
+ * >   SUBROUTINE MMGS_SAVEMSHMESH_AND_ALLDATA(mesh,sol,filename,strlen0,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
- * >     INTEGER, INTENT(IN)            :: strlen\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -1259,10 +1259,10 @@ int MMGS_saveMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *file
  * only 1 solution: the metric.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMGS_LOADSOL(mesh,met,filename,strlen,retval)\n
+ * >   SUBROUTINE MMGS_LOADSOL(mesh,met,filename,strlen0,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,met\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
- * >     INTEGER, INTENT(IN)            :: strlen\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -1277,10 +1277,10 @@ int  MMGS_loadSol(MMG5_pMesh mesh,MMG5_pSol met, const char* filename);
  * Load 1 or more solutions in a solution file at medit file format.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMGS_LOADALLSOLS(mesh,sol,filename,strlen,retval)\n
+ * >   SUBROUTINE MMGS_LOADALLSOLS(mesh,sol,filename,strlen0,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
- * >     INTEGER, INTENT(IN)            :: strlen\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -1295,10 +1295,10 @@ int  MMGS_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char* filename);
  * Write isotropic or anisotropic metric at medit file format.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMGS_SAVESOL(mesh,met,filename,strlen,retval)\n
+ * >   SUBROUTINE MMGS_SAVESOL(mesh,met,filename,strlen0,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,met\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
- * >     INTEGER, INTENT(IN)            :: strlen\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -1313,10 +1313,10 @@ int  MMGS_saveSol(MMG5_pMesh mesh, MMG5_pSol met, const char *filename);
  * Save 1 or more solutions in a solution file at medit file format.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMGS_SAVEALLSOLS(mesh,sol,filename,strlen,retval)\n
+ * >   SUBROUTINE MMGS_SAVEALLSOLS(mesh,sol,filename,strlen0,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
- * >     INTEGER, INTENT(IN)            :: strlen\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -1489,9 +1489,9 @@ int MMGS_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met);
  * Print help for mmgs options.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMGS_USAGE(prog,strlen,retval)\n
+ * >   SUBROUTINE MMGS_USAGE(prog,strlen0,retval)\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: prog\n
- * >     INTEGER, INTENT(IN)            :: strlen\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *

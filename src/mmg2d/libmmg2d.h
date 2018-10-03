@@ -142,10 +142,10 @@ extern "C" {
  * Set the name of input mesh.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG2D_SET_INPUTMESHNAME(mesh,meshin,strlen,retval)\n
+ * >   SUBROUTINE MMG2D_SET_INPUTMESHNAME(mesh,meshin,strlen0,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: meshin\n
- * >     INTEGER, INTENT(IN)            :: strlen\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -159,10 +159,10 @@ extern "C" {
  * Set the name of output mesh file.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG2D_SET_OUTPUTMESHNAME(mesh,meshout,strlen,retval)\n
+ * >   SUBROUTINE MMG2D_SET_OUTPUTMESHNAME(mesh,meshout,strlen0,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: meshout\n
- * >     INTEGER, INTENT(IN)            :: strlen\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -177,10 +177,10 @@ extern "C" {
  * Set the name of input solution file.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG2D_SET_INPUTSOLNAME(mesh,sol,solin,strlen,retval)\n
+ * >   SUBROUTINE MMG2D_SET_INPUTSOLNAME(mesh,sol,solin,strlen0,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: solin\n
- * >     INTEGER, INTENT(IN)            :: strlen\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -195,10 +195,10 @@ extern "C" {
  *  Set the name of output solution file.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG2D_SET_OUTPUTSOLNAME(mesh,sol,solout,strlen,retval)\n
+ * >   SUBROUTINE MMG2D_SET_OUTPUTSOLNAME(mesh,sol,solout,strlen0,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: solout\n
- * >     INTEGER, INTENT(IN)            :: strlen\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -1142,10 +1142,10 @@ extern "C" {
  * Read mesh data.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG2D_LOADMESH(mesh,filename,strlen,retval)\n
+ * >   SUBROUTINE MMG2D_LOADMESH(mesh,filename,strlen0,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
- * >     INTEGER, INTENT(IN)            :: strlen\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -1161,10 +1161,10 @@ extern "C" {
  * low-order points, edges, tria, quadra, tetra and prisms.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG2D_LOADMSHMESH(mesh,sol,filename,strlen,retval)\n
+ * >   SUBROUTINE MMG2D_LOADMSHMESH(mesh,sol,filename,strlen0,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
- * >     INTEGER, INTENT(IN)            :: strlen\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -1180,10 +1180,10 @@ extern "C" {
  * low-order points, edges, tria, quadra, tetra and prisms.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG2D_LOADMSHMESH_AND_ALLDATA(mesh,sol,filename,strlen,retval)\n
+ * >   SUBROUTINE MMG2D_LOADMSHMESH_AND_ALLDATA(mesh,sol,filename,strlen0,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
- * >     INTEGER, INTENT(IN)            :: strlen\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -1200,10 +1200,10 @@ extern "C" {
  * the metric.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG2D_LOADSOL(mesh,sol,filename,strlen,retval)\n
+ * >   SUBROUTINE MMG2D_LOADSOL(mesh,sol,filename,strlen0,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
- * >     INTEGER, INTENT(IN)            :: strlen\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -1218,10 +1218,10 @@ extern "C" {
  * Load 1 or more solutions in a solution file at medit file format
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG2D_LOADALLSOLS(mesh,sol,filename,strlen,retval)\n
+ * >   SUBROUTINE MMG2D_LOADALLSOLS(mesh,sol,filename,strlen0,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
- * >     INTEGER, INTENT(IN)            :: strlen\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -1238,10 +1238,10 @@ extern "C" {
  * Save mesh data.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG2D_SAVEMESH(mesh,filename,strlen,retval)\n
+ * >   SUBROUTINE MMG2D_SAVEMESH(mesh,filename,strlen0,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
- * >     INTEGER, INTENT(IN)            :: strlen\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -1257,10 +1257,10 @@ extern "C" {
  * ASCII format for .msh extension, at binary format for .msh one.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG2D_SAVEMSHMESH(mesh,sol,filename,strlen,retval)\n
+ * >   SUBROUTINE MMG2D_SAVEMSHMESH(mesh,sol,filename,strlen0,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
- * >     INTEGER, INTENT(IN)            :: strlen\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -1276,10 +1276,10 @@ extern "C" {
  * Save file at ASCII format for .msh extension, at binary format for .mshb one.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG2D_SAVEMSHMESH_AND_ALLDATA(mesh,sol,filename,strlen,retval)\n
+ * >   SUBROUTINE MMG2D_SAVEMSHMESH_AND_ALLDATA(mesh,sol,filename,strlen0,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
- * >     INTEGER, INTENT(IN)            :: strlen\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -1294,10 +1294,10 @@ extern "C" {
  * Save metric field at medit solution file format.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG2D_SAVESOL(mesh,sol,filename,strlen,retval)\n
+ * >   SUBROUTINE MMG2D_SAVESOL(mesh,sol,filename,strlen0,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
- * >     INTEGER, INTENT(IN)            :: strlen\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -1312,10 +1312,10 @@ extern "C" {
  * Save 1 or more solutions in a solution file at medit file format.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG2D_SAVEALLSOLS(mesh,sol,filename,strlen,retval)\n
+ * >   SUBROUTINE MMG2D_SAVEALLSOLS(mesh,sol,filename,strlen0,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
- * >     INTEGER, INTENT(IN)            :: strlen\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *

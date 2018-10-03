@@ -32,11 +32,6 @@
  * This helps deciding if a position is too close to other nodes to refine
  * with an insertion of a new node.
  *
- * commande test : ctest -D Experimental -VV avec tunel ssh ouvert
- * ssh : ssh -f -L 2000:vulcain.bordeaux.inria.fr:80 jmercat@vulcain.bordeaux.inria.fr sleep <temps voulu>
- *
- *se connecter : localhost:2000/CDash
-
  */
 
 #include "mmg3d.h"

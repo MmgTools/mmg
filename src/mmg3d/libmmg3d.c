@@ -507,8 +507,8 @@ int MMG3D_pack_sol(MMG5_pMesh mesh,MMG5_pSol sol) {
       }
       ++nbl;
     }
+    sol->np = np;
   }
-  sol->np = np;
 
   return 1;
 }
