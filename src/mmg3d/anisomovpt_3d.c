@@ -124,7 +124,7 @@ int _MMG5_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree, int
 
   /* Check new position validity */
   // Dynamic alloc for windows comptibility
-  _MMG5_SAFE_MALLOC(callist, ilist, double,0);
+  _MMG5_SAFE_MALLOC(callist, ilist, double,return 0);
   calnew = DBL_MAX;
   for (k=0; k<ilist; k++) {
     iel = list[k] / 4;
@@ -599,7 +599,7 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
   memset(pxp,0,sizeof(MMG5_xPoint));
 
   /* Test : check whether all volumes remain positive with new position of the point */
-  _MMG5_SAFE_MALLOC(callist, ilistv, double,0);
+  _MMG5_SAFE_MALLOC(callist, ilistv, double,return 0);
   calold = calnew = DBL_MAX;
   for (l=0; l<ilistv; l++) {
     k    = listv[l] / 4;
@@ -952,7 +952,7 @@ int _MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
 
   /* Test : check whether all volumes remain positive with new position of the point */
   // Dynamic allocations for windows compatibility
-  _MMG5_SAFE_MALLOC(callist, ilistv, double,0);
+  _MMG5_SAFE_MALLOC(callist, ilistv, double,return 0);
 
   calold = calnew = DBL_MAX;
   for( l=0 ; l<ilistv ; l++ ){
@@ -1301,7 +1301,7 @@ int _MMG5_movbdynompt_ani(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree, 
 
   /* Test : check whether all volumes remain positive with new position of the point */
   // Dynamic allocations for windows compatibility
-  _MMG5_SAFE_MALLOC(callist, ilistv, double,0);
+  _MMG5_SAFE_MALLOC(callist, ilistv, double,return 0);
 
   calold = calnew = DBL_MAX;
   for( l=0 ; l<ilistv ; l++ ){
@@ -1655,7 +1655,7 @@ int _MMG5_movbdyridpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
 
   /* Test : check whether all volumes remain positive with new position of the point */
   // Dynamic allocations for windows compatibility
-  _MMG5_SAFE_MALLOC(callist, ilistv, double,0);
+  _MMG5_SAFE_MALLOC(callist, ilistv, double,return 0);
 
   calold = calnew = DBL_MAX;
   for (l=0; l<ilistv; l++) {

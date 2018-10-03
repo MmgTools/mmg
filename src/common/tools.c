@@ -461,7 +461,7 @@ int _MMG5_Alloc_inode( MMG5_pMesh mesh, _MMG5_iNode **node ) {
   _MMG5_ADD_MEM(mesh,sizeof(_MMG5_iNode),"boundary reference node",
                 return 0;);
 
-  _MMG5_SAFE_MALLOC(*node,1,_MMG5_iNode,0);
+  _MMG5_SAFE_MALLOC(*node,1,_MMG5_iNode,return 0);
 
   return 1;
 }
@@ -557,7 +557,7 @@ int _MMG5_Alloc_dnode( MMG5_pMesh mesh, _MMG5_dNode **node ) {
   _MMG5_ADD_MEM(mesh,sizeof(_MMG5_dNode),"node for hausdorff eval",
                 return 0;);
 
-  _MMG5_SAFE_MALLOC(*node,1,_MMG5_dNode,0);
+  _MMG5_SAFE_MALLOC(*node,1,_MMG5_dNode,return 0);
 
   return 1;
 }

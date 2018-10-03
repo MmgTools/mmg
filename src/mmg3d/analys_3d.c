@@ -102,7 +102,7 @@ static int _MMG5_setadj(MMG5_pMesh mesh){
 
   nvf = nf = ncc = ned = 0;
 
-  _MMG5_SAFE_MALLOC(pile,mesh->nt+1,int,0);
+  _MMG5_SAFE_MALLOC(pile,mesh->nt+1,int,return 0);
 
   pile[1] = 1;
   ipil    = 1;

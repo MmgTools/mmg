@@ -54,7 +54,7 @@ int _MMG2_setadj(MMG5_pMesh mesh) {
   if ( abs(mesh->info.imprim) > 5  || mesh->info.ddebug )
     fprintf(stdout,"  ** SETTING TOPOLOGY\n");
 
-  _MMG5_SAFE_MALLOC(pile,mesh->nt+1,int,0);
+  _MMG5_SAFE_MALLOC(pile,mesh->nt+1,int,return 0);
 
   /* Initialization of the pile */
   ncc = 1;

@@ -83,7 +83,7 @@ FORTRAN_NAME(MMG2D_SET_INPUTMESHNAME, mmg2d_set_inputmeshname,
 
   assert ( strlen(meshin) == *strlen0 );
 
-  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,);
+  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
   strncpy(tmp,meshin,*strlen0);
   tmp[*strlen0] = '\0';
   *retval = MMG2D_Set_inputMeshName(*mesh,tmp);
@@ -103,7 +103,7 @@ FORTRAN_NAME(MMG2D_SET_INPUTSOLNAME, mmg2d_set_inputsolname,
 
   assert ( strlen(solin) == *strlen0 );
 
-  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,);
+  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
   strncpy(tmp,solin,*strlen0);
   tmp[*strlen0] = '\0';
   *retval = MMG2D_Set_inputSolName(*mesh,*sol,tmp);
@@ -123,7 +123,7 @@ FORTRAN_NAME(MMG2D_SET_OUTPUTMESHNAME,mmg2d_set_outputmeshname,
 
   assert ( strlen(meshout) == *strlen0 );
 
-  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,);
+  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
   strncpy(tmp,meshout,*strlen0);
   tmp[*strlen0] = '\0';
   *retval = MMG2D_Set_outputMeshName(*mesh, tmp);
@@ -142,7 +142,7 @@ FORTRAN_NAME(MMG2D_SET_OUTPUTSOLNAME,mmg2d_set_outputsolname,
 
   assert ( strlen(solout) == *strlen0 );
 
-  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,);
+  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
   strncpy(tmp,solout,*strlen0);
   tmp[*strlen0] = '\0';
   *retval = MMG2D_Set_outputSolName(*mesh,*sol,tmp);
@@ -640,7 +640,7 @@ FORTRAN_NAME(MMG2D_LOADMESH,mmg2d_loadmesh,(MMG5_pMesh *mesh,char* meshin,int* s
 
   assert ( strlen(meshin) == *strlen0 );
 
-  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,);
+  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
   strncpy(tmp,meshin,*strlen0);
   tmp[*strlen0] = '\0';
 
@@ -660,7 +660,7 @@ FORTRAN_NAME(MMG2D_LOADMSHMESH,mmg2d_loadmshmesh,
 
   assert ( strlen(filename) == *strlen0 );
 
-  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,);
+  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
   strncpy(tmp,filename,*strlen0);
   tmp[*strlen0] = '\0';
 
@@ -679,7 +679,7 @@ FORTRAN_NAME(MMG2D_LOADMSHMESH_AND_ALLDATA,mmg2d_loadmshmesh_and_alldata,
              (mesh,sol,filename,strlen0, retval)){
   char *tmp = NULL;
 
-  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,);
+  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
   strncpy(tmp,filename,*strlen0);
   tmp[*strlen0] = '\0';
 
@@ -699,7 +699,7 @@ FORTRAN_NAME(MMG2D_SAVEMESH,mmg2d_savemesh,(MMG5_pMesh *mesh,char *meshin,int *s
 
   assert ( strlen(meshin) == *strlen0 );
 
-  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,);
+  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
   strncpy(tmp,meshin,*strlen0);
   tmp[*strlen0] = '\0';
   *retval = MMG2D_saveMesh(*mesh,tmp);
@@ -719,7 +719,7 @@ FORTRAN_NAME(MMG2D_SAVEMSHMESH,mmg2d_savemshmesh,
 
   assert ( strlen(filename) == *strlen0 );
 
-  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,);
+  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
   strncpy(tmp,filename,*strlen0);
   tmp[*strlen0] = '\0';
 
@@ -741,7 +741,7 @@ FORTRAN_NAME(MMG2D_SAVEMSHMESH_AND_ALLDATA,mmg2d_savemshmesh_and_alldata,
 
   assert ( strlen(filename) == *strlen0 );
 
-  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,);
+  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
   strncpy(tmp,filename,*strlen0);
   tmp[*strlen0] = '\0';
 
@@ -762,7 +762,7 @@ FORTRAN_NAME(MMG2D_LOADSOL,mmg2d_loadsol,
 
   assert ( strlen(meshin) == *strlen0 );
 
-  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,);
+  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
   strncpy(tmp,meshin,*strlen0);
   tmp[*strlen0] = '\0';
 
@@ -782,7 +782,7 @@ FORTRAN_NAME(MMG2D_LOADALLSOLS,mmg2d_loadallsols,
 
   assert ( strlen(meshin) == *strlen0 );
 
-  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,);
+  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
   strncpy(tmp,meshin,*strlen0);
   tmp[*strlen0] = '\0';
 
@@ -803,7 +803,7 @@ FORTRAN_NAME(MMG2D_SAVESOL,mmg2d_savesol,(MMG5_pMesh *mesh,MMG5_pSol *met,
 
   assert ( strlen(meshin) == *strlen0 );
 
-  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,);
+  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
   strncpy(tmp,meshin,*strlen0);
   tmp[*strlen0] = '\0';
 
@@ -823,7 +823,7 @@ FORTRAN_NAME(MMG2D_SAVEALLSOLS,mmg2d_saveallsols,(MMG5_pMesh *mesh,MMG5_pSol *so
 
   assert ( strlen(meshin) == *strlen0 );
 
-  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,);
+  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
   strncpy(tmp,meshin,*strlen0);
   tmp[*strlen0] = '\0';
 

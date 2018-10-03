@@ -74,7 +74,7 @@ FORTRAN_NAME(MMGS_SET_INPUTMESHNAME, mmgs_set_inputmeshname,
 
   assert ( strlen(meshin) == *strlen0 );
 
-  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,);
+  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
   strncpy(tmp,meshin,*strlen0);
   tmp[*strlen0] = '\0';
   *retval = MMGS_Set_inputMeshName(*mesh,tmp);
@@ -94,7 +94,7 @@ FORTRAN_NAME(MMGS_SET_INPUTSOLNAME, mmgs_set_inputsolname,
 
   assert ( strlen(solin) == *strlen0 );
 
-  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,);
+  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
   strncpy(tmp,solin,*strlen0);
   tmp[*strlen0] = '\0';
   *retval = MMGS_Set_inputSolName(*mesh,*sol,tmp);
@@ -114,7 +114,7 @@ FORTRAN_NAME(MMGS_SET_OUTPUTMESHNAME,mmgs_set_outputmeshname,
 
   assert ( strlen(meshout) == *strlen0 );
 
-  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,);
+  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
   strncpy(tmp,meshout,*strlen0);
   tmp[*strlen0] = '\0';
   *retval = MMGS_Set_outputMeshName(*mesh, tmp);
@@ -133,7 +133,7 @@ FORTRAN_NAME(MMGS_SET_OUTPUTSOLNAME,mmgs_set_outputsolname,
 
   assert ( strlen(solout) == *strlen0 );
 
-  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,);
+  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
   strncpy(tmp,solout,*strlen0);
   tmp[*strlen0] = '\0';
   *retval = MMGS_Set_outputSolName(*mesh,*sol,tmp);
@@ -677,7 +677,7 @@ FORTRAN_NAME(MMGS_LOADMESH,mmgs_loadmesh,
 
   assert ( strlen(meshin) == *strlen0 );
 
-  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,);
+  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
   strncpy(tmp,meshin,*strlen0);
   tmp[*strlen0] = '\0';
 
@@ -697,7 +697,7 @@ FORTRAN_NAME(MMGS_LOADMSHMESH,mmgs_loadmshmesh,
 
   assert ( strlen(filename) == *strlen0 );
 
-  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,);
+  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
   strncpy(tmp,filename,*strlen0);
   tmp[*strlen0] = '\0';
 
@@ -718,7 +718,7 @@ FORTRAN_NAME(MMGS_LOADMSHMESH_AND_ALLDATA,mmgs_loadmshmesh_and_alldata,
 
   assert ( strlen(filename) == *strlen0 );
 
-  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,);
+  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
   strncpy(tmp,filename,*strlen0);
   tmp[*strlen0] = '\0';
 
@@ -740,7 +740,7 @@ FORTRAN_NAME(MMGS_LOADSOL,mmgs_loadsol,
 
   assert ( strlen(meshin) == *strlen0 );
 
-  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,);
+  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
   strncpy(tmp,meshin,*strlen0);
   tmp[*strlen0] = '\0';
 
@@ -762,7 +762,7 @@ FORTRAN_NAME(MMGS_LOADALLSOLS,mmgs_loadallsols,
 
   assert ( strlen(meshin) == *strlen0 );
 
-  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,);
+  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
   strncpy(tmp,meshin,*strlen0);
   tmp[*strlen0] = '\0';
 
@@ -782,7 +782,7 @@ FORTRAN_NAME(MMGS_SAVEMESH,mmgs_savemesh,
 
   assert ( strlen(meshin) == *strlen0 );
 
-  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,);
+  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
   strncpy(tmp,meshin,*strlen0);
   tmp[*strlen0] = '\0';
 
@@ -803,7 +803,7 @@ FORTRAN_NAME(MMGS_SAVEMSHMESH,mmgs_savemshmesh,
 
   assert ( strlen(filename) == *strlen0 );
 
-  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,);
+  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
   strncpy(tmp,filename,*strlen0);
   tmp[*strlen0] = '\0';
 
@@ -825,7 +825,7 @@ FORTRAN_NAME(MMGS_SAVESOL,mmgs_savesol,
 
   assert ( strlen(meshin) == *strlen0 );
 
-  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,);
+  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
   strncpy(tmp,meshin,*strlen0);
   tmp[*strlen0] = '\0';
 
@@ -837,9 +837,9 @@ FORTRAN_NAME(MMGS_SAVESOL,mmgs_savesol,
 }
 
 /**
- * See \ref MMGS_saveMshMesh function in \ref mmgs/libmmgs.h file.
+ * See \ref MMGS_saveAllSols function in \ref mmgs/libmmgs.h file.
  */
-FORTRAN_NAME(MMGS_SAVEMSHMESH_AND_ALLDATA,mmgs_savemshmesh_and_alldata,
+FORTRAN_NAME(MMGS_SAVEALLSOLS,mmgs_saveallsols,
              (MMG5_pMesh *mesh, MMG5_pSol *sol,char* filename, int *strlen0,
               int* retval),
              (mesh,sol,filename,strlen0,retval)){
@@ -847,30 +847,8 @@ FORTRAN_NAME(MMGS_SAVEMSHMESH_AND_ALLDATA,mmgs_savemshmesh_and_alldata,
 
   assert ( strlen(filename) == *strlen0 );
 
-  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,);
+  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
   strncpy(tmp,filename,*strlen0);
-  tmp[*strlen0] = '\0';
-
-  *retval = MMGS_saveMshMesh_and_allData(*mesh,sol,tmp);
-
-  _MMG5_SAFE_FREE(tmp);
-
-  return;
-}
-
-/**
- * See \ref MMGS_saveAllSols function in \ref mmgs/libmmgs.h file.
- */
-FORTRAN_NAME(MMGS_SAVEALLSOLS,mmgs_saveallsols,
-             (MMG5_pMesh *mesh,MMG5_pSol *sol,char *meshin,int *strlen0,int* retval),
-             (mesh,sol,meshin,strlen0,retval)){
-
-  char *tmp = NULL;
-
-  assert ( strlen(meshin) == *strlen0 );
-
-  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,);
-  strncpy(tmp,meshin,*strlen0);
   tmp[*strlen0] = '\0';
 
   *retval = MMGS_saveAllSols(*mesh,sol,tmp);

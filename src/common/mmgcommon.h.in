@@ -275,13 +275,13 @@ size_t myfree(void *ptr) {
   }while(0)
 
 /** Safe allocation with malloc */
-#define _MMG5_SAFE_MALLOC(ptr,size,type,retval) do    \
+#define _MMG5_SAFE_MALLOC(ptr,size,type,law) do    \
   {                                                   \
     size_t size_to_allocate = (size)*sizeof(type);    \
     ptr = (type*)mymalloc(size_to_allocate);          \
     if ( !ptr ) {                                   \
       perror("  ## Memory problem: malloc");        \
-      return retval;                                \
+      law;                                          \
     }                                               \
   }while(0)
 

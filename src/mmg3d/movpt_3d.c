@@ -63,7 +63,7 @@ int _MMG5_movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,
   int                  k,iel,i0;
 
   // Dynamic alloc for windows comptibility
-  _MMG5_SAFE_MALLOC(callist, ilist, double,0);
+  _MMG5_SAFE_MALLOC(callist, ilist, double,return 0);
 
   pt0    = &mesh->tetra[0];
   ppt0   = &mesh->point[0];
@@ -199,7 +199,7 @@ int _MMG5_movintptLES_iso(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,
   int                  k,iel,ifac,iter,maxtou;
 
   // Dynamic alloc for windows comptibility
-  _MMG5_SAFE_MALLOC(callist, ilist, double,0);
+  _MMG5_SAFE_MALLOC(callist, ilist, double,return 0);
 
   pt0    = &mesh->tetra[0];
   ppt0   = &mesh->point[0];
@@ -705,7 +705,7 @@ int _MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
   /* Test : check whether all volumes remain positive with new position of the point */
 
   // Dynamic allocations for windows compatibility
-  _MMG5_SAFE_MALLOC(callist, ilistv, double,0);
+  _MMG5_SAFE_MALLOC(callist, ilistv, double,return 0);
 
   calold = calnew = DBL_MAX;
 
@@ -1064,7 +1064,7 @@ int _MMG5_movbdyrefpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
 
   /* Test : check whether all volumes remain positive with new position of the point */
   // Dynamic allocations for windows compatibility
-  _MMG5_SAFE_MALLOC(callist, ilistv, double,0);
+  _MMG5_SAFE_MALLOC(callist, ilistv, double,return 0);
 
   calold = calnew = DBL_MAX;
   for( l=0 ; l<ilistv ; l++ ){
@@ -1416,7 +1416,7 @@ int _MMG5_movbdynompt_iso(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree, 
 
   /* Test : check whether all volumes remain positive with new position of the point */
   // Dynamic allocations for windows compatibility
-  _MMG5_SAFE_MALLOC(callist, ilistv, double,0);
+  _MMG5_SAFE_MALLOC(callist, ilistv, double,return 0);
 
   calold = calnew = DBL_MAX;
   for( l=0 ; l<ilistv ; l++ ){
@@ -1765,7 +1765,7 @@ int _MMG5_movbdyridpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
 
   /* Test : check whether all volumes remain positive with new position of the point */
   // Dynamic allocations for windows compatibility
-  _MMG5_SAFE_MALLOC(callist, ilistv, double,0);
+  _MMG5_SAFE_MALLOC(callist, ilistv, double,return 0);
 
   calold = calnew = DBL_MAX;
   for (l=0; l<ilistv; l++) {
