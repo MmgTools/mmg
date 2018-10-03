@@ -714,7 +714,7 @@ int _MMG2_split3(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
 int _MMG2_splitbar(MMG5_pMesh mesh,int k,int ip) {
   MMG5_pTria         pt,pt0,pt1,pt2;
   MMG5_pPoint        p0,p1,p2,ppt;
-  int                *adja,iel1,iel2,jel0,jel1,jel2;
+  int                *adja,iel1,iel2,jel0,jel2;
   int                ip0,ip1,ip2;
   char               j2,j0;
   double             cal,calseuil;
@@ -768,9 +768,9 @@ int _MMG2_splitbar(MMG5_pMesh mesh,int k,int ip) {
   adja = &mesh->adja[3*(k-1)+1];
   jel0  = adja[0] / 3;
   j0    = adja[0] % 3;
-  jel1  = adja[1] / 3;
-#ifndef NDEBUG
-  char j1    = adja[1] % 3;
+ #ifndef NDEBUG
+  char jel1 = adja[1] / 3;
+  char j1   = adja[1] % 3;
 #endif
   jel2  = adja[2] / 3;
   j2    = adja[2] % 3;
