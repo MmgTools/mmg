@@ -73,17 +73,17 @@ void _MMG5_Init_parameters(MMG5_pMesh mesh) {
   mesh->info.nmat = 0;
 
   /* default values for doubles */
-  /* angle detection; */
+  /* angle detection */
   mesh->info.dhd      = _MMG5_ANGEDG;
-  /* minimal mesh size; */
+  /* minimal mesh size */
   mesh->info.hmin     = _MMG5_NONSET_HMIN;
-  /* maximal mesh size; */
+  /* maximal mesh size */
   mesh->info.hmax     = _MMG5_NONSET_HMAX;
-  /* constant mesh size; */
+  /* constant mesh size */
   mesh->info.hsiz     = _MMG5_NONSET_HSIZ;
   /* control Hausdorff */
   mesh->info.hausd    = _MMG5_HAUSD;
-  /* control gradation; */
+  /* control gradation */
   mesh->info.hgrad    = _MMG5_HGRAD;
 
   /* default values for pointers */
