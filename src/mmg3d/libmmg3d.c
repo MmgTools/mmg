@@ -274,7 +274,7 @@ int MMG3D_bdryBuild(MMG5_pMesh mesh) {
     }
 
     if ( mesh->na ) {
-      _MMG5_SAFE_CALLOC(mesh->edge,mesh->na+1,MMG5_Edge,-1);
+      _MMG5_SAFE_CALLOC(mesh->edge,mesh->na+1,MMG5_Edge,return -1);
 
       mesh->na = 0;
       for (k=0; k<=mesh->htab.max; k++) {

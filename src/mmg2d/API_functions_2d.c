@@ -297,7 +297,7 @@ int MMG2D_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int
     _MMG5_ADD_MEM(mesh,(sol->size*(sol->npmax+1))*sizeof(double),"initial solution",
                   printf("  Exit program.\n");
                   return 0);
-    _MMG5_SAFE_CALLOC(sol->m,(sol->size*(sol->npmax+1)),double,0);
+    _MMG5_SAFE_CALLOC(sol->m,(sol->size*(sol->npmax+1)),double,return 0);
   }
   return 1;
 }
@@ -320,7 +320,7 @@ int MMG2D_Set_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol *sol,int nsols,
 
   _MMG5_ADD_MEM(mesh,nsols*sizeof(MMG5_Sol),"solutions array",
                 return 0);
-  _MMG5_SAFE_CALLOC(*sol,nsols,MMG5_Sol,0);
+  _MMG5_SAFE_CALLOC(*sol,nsols,MMG5_Sol,return 0);
 
   for ( j=0; j<nsols; ++j ) {
     psl = *sol + j;

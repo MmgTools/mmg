@@ -195,7 +195,7 @@ int _MMGS_packMesh(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
   if ( na ) {
-    _MMG5_SAFE_CALLOC(mesh->edge,na+1,MMG5_Edge,0);
+    _MMG5_SAFE_CALLOC(mesh->edge,na+1,MMG5_Edge,return 0);
     for (k=1; k<=mesh->nt; k++) {
       pt = &mesh->tria[k];
       if ( MG_EOK(pt) ) {

@@ -75,10 +75,10 @@ int* _MMG5_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
   *npfin = 0;
 
   _MMG5_ADD_MEM(mesh,(mesh->ne+1)*sizeof(int),"element list",return NULL);
-  _MMG5_SAFE_CALLOC(list,mesh->ne+1,int,NULL);
+  _MMG5_SAFE_CALLOC(list,mesh->ne+1,int,return NULL);
 
   _MMG5_ADD_MEM(mesh,(mesh->np+1)*sizeof(int),"point permutation",return NULL);
-  _MMG5_SAFE_CALLOC(perm,mesh->np+1,int,NULL);
+  _MMG5_SAFE_CALLOC(perm,mesh->np+1,int,return NULL);
 
   ilist = ilisto = ilistck = 0;
 
@@ -154,7 +154,10 @@ int* _MMG5_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
                   _MMG5_DEL_MEM ( mesh,list );
                   _MMG5_DEL_MEM ( mesh,perm );
                   return NULL );
-  _MMG5_SAFE_CALLOC ( invperm,(npf+1),int,NULL );
+  _MMG5_SAFE_CALLOC ( invperm,(npf+1),int,
+                      _MMG5_DEL_MEM ( mesh,list );
+                      _MMG5_DEL_MEM ( mesh,perm );
+                      return NULL );
 
   /* Step 3: count of the surface triangles in the new mesh
      Code for pt->mark : if MG_GET(pt->mark,0) = in the list

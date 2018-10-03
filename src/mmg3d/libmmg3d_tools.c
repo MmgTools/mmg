@@ -781,7 +781,7 @@ int MMG3D_doSol(MMG5_pMesh mesh,MMG5_pSol met) {
     int          i,k,iadr,ia,ib,ipa,ipb,type;
     int         *mark;
 
-    _MMG5_SAFE_CALLOC(mark,mesh->np+1,int,0);
+    _MMG5_SAFE_CALLOC(mark,mesh->np+1,int,return 0);
 
     /* Memory alloc */
     if ( met->size==1 ) type=1;

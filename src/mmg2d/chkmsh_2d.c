@@ -134,7 +134,7 @@ int _MMG5_mmg2dChkmsh(MMG5_pMesh mesh, int severe,int base) {
 
   if ( !severe )  return 1;
 
-  _MMG5_SAFE_CALLOC(list,MMG2D_LMAX,int,0);
+  _MMG5_SAFE_CALLOC(list,MMG2D_LMAX,int,return 0);
 
   for (k=1; k<=mesh->nt; k++) {
     pt1 = &mesh->tria[k];

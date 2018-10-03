@@ -265,12 +265,12 @@ size_t myfree(void *ptr) {
   }while(0)
 
 /** Safe allocation with calloc */
-#define _MMG5_SAFE_CALLOC(ptr,size,type,retval) do    \
+#define _MMG5_SAFE_CALLOC(ptr,size,type,law) do    \
   {                                                   \
     ptr = (type*)mycalloc(size,sizeof(type));         \
     if ( !ptr ) {                                     \
       perror("  ## Memory problem: calloc");          \
-      return retval;                                  \
+      law;                                            \
     }                                                 \
   }while(0)
 

@@ -53,7 +53,7 @@ int _MMG2D_Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol, MMG5_pSol *disp) {
 
   /* mesh allocation */
   if ( *mesh )  _MMG5_SAFE_FREE(*mesh);
-  _MMG5_SAFE_CALLOC(*mesh,1,MMG5_Mesh,0);
+  _MMG5_SAFE_CALLOC(*mesh,1,MMG5_Mesh,return 0);
 
   /* sol allocation */
   if ( !sol ) {
@@ -64,13 +64,13 @@ int _MMG2D_Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol, MMG5_pSol *disp) {
   }
 
   if ( *sol )  _MMG5_DEL_MEM(*mesh,*sol);
-  _MMG5_SAFE_CALLOC(*sol,1,MMG5_Sol,0);
+  _MMG5_SAFE_CALLOC(*sol,1,MMG5_Sol,return 0);
 
   /* Displacement allocation */
   if ( disp ) {
     if ( *disp )
       _MMG5_DEL_MEM(*mesh,*disp);
-    _MMG5_SAFE_CALLOC(*disp,1,MMG5_Sol,0);
+    _MMG5_SAFE_CALLOC(*disp,1,MMG5_Sol,return 0);
   }
 
   return 1;

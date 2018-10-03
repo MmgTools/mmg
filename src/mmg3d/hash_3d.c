@@ -201,8 +201,8 @@ int MMG3D_hashTetra(MMG5_pMesh mesh, int pack) {
   _MMG5_ADD_MEM(mesh,(4*mesh->nemax+5)*sizeof(int),"adjacency table",
                 fprintf(stderr,"  Exit program.\n");
                 return 0);
-  _MMG5_SAFE_CALLOC(mesh->adja,4*mesh->nemax+5,int,0);
-  _MMG5_SAFE_CALLOC(hcode,mesh->ne+5,int,0);
+  _MMG5_SAFE_CALLOC(mesh->adja,4*mesh->nemax+5,int,return 0);
+  _MMG5_SAFE_CALLOC(hcode,mesh->ne+5,int,return 0);
 
   link  = mesh->adja;
   hsize = mesh->ne;
@@ -319,8 +319,8 @@ int MMG3D_hashPrism(MMG5_pMesh mesh) {
   _MMG5_ADD_MEM(mesh,(5*mesh->nprism+6)*sizeof(int),"prism adjacency table",
                 printf("  Exit program.\n");
                 return 0);
-  _MMG5_SAFE_CALLOC(mesh->adjapr,5*mesh->nprism+6,int,0);
-  _MMG5_SAFE_CALLOC(hcode,mesh->nprism+6,int,0);
+  _MMG5_SAFE_CALLOC(mesh->adjapr,5*mesh->nprism+6,int,return 0);
+  _MMG5_SAFE_CALLOC(hcode,mesh->nprism+6,int,return 0);
 
   link  = mesh->adjapr;
   hsize = mesh->nprism;
@@ -768,7 +768,7 @@ int _MMG5_setNmTag(MMG5_pMesh mesh, _MMG5_Hash *hash) {
 int _MMG3D_hashTria(MMG5_pMesh mesh, _MMG5_Hash *hash) {
 
   _MMG5_ADD_MEM(mesh,(3*mesh->nt+4)*sizeof(int),"surfacic adjacency table",return 0);
-  _MMG5_SAFE_CALLOC(mesh->adjt,3*mesh->nt+4,int,0);
+  _MMG5_SAFE_CALLOC(mesh->adjt,3*mesh->nt+4,int,return 0);
 
   return  _MMG5_mmgHashTria(mesh, mesh->adjt, hash, mesh->info.iso) ;
 }
@@ -1008,7 +1008,7 @@ int _MMG5_hNew(MMG5_pMesh mesh,MMG5_HGeom *hash,int hsiz,int hmax) {
   hash->nxt  = hash->siz;
 
   _MMG5_ADD_MEM(mesh,(hash->max+1)*sizeof(MMG5_hgeom),"Edge hash table",return 0);
-  _MMG5_SAFE_CALLOC(hash->geom,(hash->max+1),MMG5_hgeom,0);
+  _MMG5_SAFE_CALLOC(hash->geom,(hash->max+1),MMG5_hgeom,return 0);
 
   if ( !hash->geom ) {
     perror("  ## Memory problem: calloc");
@@ -1669,7 +1669,7 @@ int _MMG5_chkBdryTria(MMG5_pMesh mesh) {
   nbl = 0;
   if ( !mesh->nt ) {
     _MMG5_ADD_MEM(mesh,(ntmesh+1)*sizeof(MMG5_Tria),"triangles",return 0);
-    _MMG5_SAFE_CALLOC(mesh->tria,ntmesh+1,MMG5_Tria,0);
+    _MMG5_SAFE_CALLOC(mesh->tria,ntmesh+1,MMG5_Tria,return 0);
   }
   else {
     assert((!mesh->nprism && ntmesh>mesh->nt)||(mesh->nprism && ntmesh>=mesh->nt));
@@ -1734,7 +1734,7 @@ int _MMG5_bdrySet(MMG5_pMesh mesh) {
   _MMG5_ADD_MEM(mesh,(mesh->xtmax+1)*sizeof(MMG5_xTetra),"boundary tetrahedra",
                 fprintf(stderr,"  Exit program.\n");
                 return 0);
-  _MMG5_SAFE_CALLOC(mesh->xtetra,mesh->xtmax+1,MMG5_xTetra,0);
+  _MMG5_SAFE_CALLOC(mesh->xtetra,mesh->xtmax+1,MMG5_xTetra,return 0);
 
   /* assign references to tetras faces */
   if ( !mesh->info.opnbdy ) {
@@ -1932,7 +1932,7 @@ int _MMG5_bdrySet(MMG5_pMesh mesh) {
   _MMG5_ADD_MEM(mesh,(mesh->nprism+1)*sizeof(MMG5_xPrism),"boundary prisms",
                 fprintf(stderr,"  Exit program.\n");
                 return 0);
-  _MMG5_SAFE_CALLOC(mesh->xprism,mesh->nprism+1,MMG5_xPrism,0);
+  _MMG5_SAFE_CALLOC(mesh->xprism,mesh->nprism+1,MMG5_xPrism,return 0);
 
   /* assign references to prism faces */
   for (k=1; k<=mesh->nprism; k++) {

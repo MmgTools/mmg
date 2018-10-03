@@ -60,7 +60,7 @@ int _MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, _MMG5_Hash *hash, int chkISO) 
   hash->max  = hmax + 1;
   hash->nxt  = hash->siz;
   _MMG5_ADD_MEM(mesh,(hash->max+1)*sizeof(_MMG5_hedge),"hash table",return 0);
-  _MMG5_SAFE_CALLOC(hash->item,hash->max+1,_MMG5_hedge,0);
+  _MMG5_SAFE_CALLOC(hash->item,hash->max+1,_MMG5_hedge,return 0);
 
   for (k=hash->siz; k<hash->max; k++)
     hash->item[k].nxt = k+1;
@@ -336,7 +336,7 @@ int _MMG5_hashNew(MMG5_pMesh mesh,_MMG5_Hash *hash,int hsiz,int hmax) {
 
   _MMG5_ADD_MEM(mesh,(hash->max+1)*sizeof(_MMG5_hedge),"hash table",
                 return 0);
-  _MMG5_SAFE_CALLOC(hash->item,(hash->max+1),_MMG5_hedge,0);
+  _MMG5_SAFE_CALLOC(hash->item,(hash->max+1),_MMG5_hedge,return 0);
 
   for (k=hash->siz; k<hash->max; k++)
     hash->item[k].nxt = k+1;

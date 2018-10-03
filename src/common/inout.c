@@ -260,13 +260,13 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,const char *filename,
   mesh->np = mesh->nt = mesh->ne = 0;
   nt = na = nq = ne = npr = np = 0;
 
-  _MMG5_SAFE_CALLOC(data,strlen(filename)+7,char,0);
+  _MMG5_SAFE_CALLOC(data,strlen(filename)+7,char,return 0);
 
   /* Allocation of the posNodeData array: we assume that we have less than 20
    * solutions in the file (for a greater number of sol, posNoteData is
    * reallocated) */
   initPosNodeDataSize = posNodeDataSize = 20;
-  _MMG5_SAFE_CALLOC(*posNodeData,posNodeDataSize,long,0);
+  _MMG5_SAFE_CALLOC(*posNodeData,posNodeDataSize,long,return 0);
 
   strcpy(data,filename);
   ptr = strstr(data,".msh");
@@ -570,10 +570,10 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
   /* Skip triangles and edges with MG_ISO refs */
   if( mesh->info.iso ) {
     if ( mesh->nt ) {
-      _MMG5_SAFE_CALLOC(ina_t,mesh->nt+1,int,0);
+      _MMG5_SAFE_CALLOC(ina_t,mesh->nt+1,int,return 0);
     }
     if ( mesh->na ) {
-      _MMG5_SAFE_CALLOC(ina_a,mesh->na+1,int,0);
+      _MMG5_SAFE_CALLOC(ina_a,mesh->na+1,int,return 0);
     }
   }
 
@@ -1258,7 +1258,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
                   fprintf(stderr,"  Exit program.\n");
                   fclose(*inm);
                   return 0);
-    _MMG5_SAFE_CALLOC(psl->m,psl->size*(psl->npmax+1),double,0);
+    _MMG5_SAFE_CALLOC(psl->m,psl->size*(psl->npmax+1),double,return 0);
 
     /* isotropic solution */
     if ( psl->size == 1 ) {
@@ -1502,7 +1502,7 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename,
 
   bin = 0;
 
-  _MMG5_SAFE_CALLOC(data,strlen(filename)+7,char,0);
+  _MMG5_SAFE_CALLOC(data,strlen(filename)+7,char,return 0);
   strcpy(data,filename);
 
   ptr = strstr(data,".msh");
@@ -1954,7 +1954,7 @@ int MMG5_loadSolHeader( const char *filename,int meshDim,FILE **inm,int *ver,
   *iswp  = 0;
   *ver   = 0;
 
-  _MMG5_SAFE_CALLOC(data,strlen(filename)+6,char,-1);
+  _MMG5_SAFE_CALLOC(data,strlen(filename)+6,char,return -1);
   strcpy(data,filename);
 
   ptr = strstr(data,".mesh");
@@ -2010,7 +2010,7 @@ int MMG5_loadSolHeader( const char *filename,int meshDim,FILE **inm,int *ver,
       } else if(!strncmp(chaine,"SolAtVertices",strlen("SolAtVertices"))) {
         fscanf(*inm,"%d",np);
         fscanf(*inm,"%d",nsols);
-        _MMG5_SAFE_CALLOC(*type,*nsols,int,-1);
+        _MMG5_SAFE_CALLOC(*type,*nsols,int,return -1);
         for ( i=0; i<*nsols; ++i ) {
           fscanf(*inm,"%d",&((*type)[i]));
         }
@@ -2051,7 +2051,7 @@ int MMG5_loadSolHeader( const char *filename,int meshDim,FILE **inm,int *ver,
         fread(nsols,sw,1,*inm); //nb sol
         if ( *iswp ) *nsols =_MMG5_swapbin(*nsols);
 
-        _MMG5_SAFE_CALLOC(*type,*nsols,int,-1); //typSol
+        _MMG5_SAFE_CALLOC(*type,*nsols,int,return -1); //typSol
         for ( i=0; i<*nsols; ++i ) {
           fread(&((*type)[i]),sw,1,*inm);
           if ( *iswp ) (*type)[i]=_MMG5_swapbin((*type)[i]);
@@ -2250,7 +2250,7 @@ int MMG5_saveSolHeader( MMG5_pMesh mesh,const char *filename,
 
   *bin = 0;
 
-  _MMG5_SAFE_CALLOC(data,strlen(filename)+6,char,0);
+  _MMG5_SAFE_CALLOC(data,strlen(filename)+6,char,return 0);
   strcpy(data,filename);
   ptr = strstr(data,".sol");
   if ( ptr ) {

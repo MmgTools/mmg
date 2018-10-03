@@ -146,14 +146,14 @@ int MMG5_Set_inputMeshName(MMG5_pMesh mesh, const char* meshin) {
     _MMG5_ADD_MEM(mesh,(strlen(meshin)+1)*sizeof(char),"input mesh name",
                   fprintf(stderr,"  Exit program.\n");
                   return 0);
-    _MMG5_SAFE_CALLOC(mesh->namein,strlen(meshin)+1,char,0);
+    _MMG5_SAFE_CALLOC(mesh->namein,strlen(meshin)+1,char,return 0);
     strcpy(mesh->namein,meshin);
   }
   else {
     _MMG5_ADD_MEM(mesh,10*sizeof(char),"input mesh name",
                   fprintf(stderr,"  Exit program.\n");
                   return 0);
-    _MMG5_SAFE_CALLOC(mesh->namein,10,char,0);
+    _MMG5_SAFE_CALLOC(mesh->namein,10,char,return 0);
     strcpy(mesh->namein,"mesh.mesh");
     if ( (mesh->info.imprim > 5) || mesh->info.ddebug ) {
       fprintf(stderr,"\n  ## Warning: %s: no name given for input mesh.\n",__func__);
@@ -182,13 +182,13 @@ int MMG5_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solin) {
     _MMG5_ADD_MEM(mesh,(strlen(solin)+1)*sizeof(char),"input sol name",
                   fprintf(stderr,"  Exit program.\n");
                   return 0);
-    _MMG5_SAFE_CALLOC(sol->namein,strlen(solin)+1,char,0);
+    _MMG5_SAFE_CALLOC(sol->namein,strlen(solin)+1,char,return 0);
     strcpy(sol->namein,solin);
   }
   else {
     if ( mesh->namein && strlen(mesh->namein) ) {
       int mesh_len = strlen(mesh->namein)+1;
-      _MMG5_SAFE_CALLOC(sol->namein,mesh_len,char,0);
+      _MMG5_SAFE_CALLOC(sol->namein,mesh_len,char,return 0);
       strcpy(sol->namein,mesh->namein);
       ptr = strstr(sol->namein,".mesh");
       if ( ptr ) {
@@ -205,7 +205,7 @@ int MMG5_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solin) {
       _MMG5_ADD_MEM(mesh,9*sizeof(char),"input sol name",
                     fprintf(stderr,"  Exit program.\n");
                     return 0);
-      _MMG5_SAFE_CALLOC(sol->namein,9,char,0);
+      _MMG5_SAFE_CALLOC(sol->namein,9,char,return 0);
       strcpy(sol->namein,"mesh.sol");
     }
   }
@@ -232,7 +232,7 @@ int MMG5_Set_outputMeshName(MMG5_pMesh mesh, const char* meshout) {
     _MMG5_ADD_MEM(mesh,(strlen(meshout)+1)*sizeof(char),"output mesh name",
                   fprintf(stderr,"  Exit program.\n");
                   return 0);
-    _MMG5_SAFE_CALLOC(mesh->nameout,strlen(meshout)+1,char,0);
+    _MMG5_SAFE_CALLOC(mesh->nameout,strlen(meshout)+1,char,return 0);
     strcpy(mesh->nameout,meshout);
   }
   else {
@@ -240,7 +240,7 @@ int MMG5_Set_outputMeshName(MMG5_pMesh mesh, const char* meshout) {
       _MMG5_ADD_MEM(mesh,(strlen(mesh->namein)+3)*sizeof(char),"output mesh name",
                     fprintf(stderr,"  Exit program.\n");
                     return 0);
-      _MMG5_SAFE_CALLOC(mesh->nameout,strlen(mesh->namein)+3,char,0);
+      _MMG5_SAFE_CALLOC(mesh->nameout,strlen(mesh->namein)+3,char,return 0);
       strcpy(mesh->nameout,mesh->namein);
 
       /* medit format? */
@@ -275,7 +275,7 @@ int MMG5_Set_outputMeshName(MMG5_pMesh mesh, const char* meshout) {
       _MMG5_ADD_MEM(mesh,12*sizeof(char),"output mesh name",
                     fprintf(stderr,"  Exit program.\n");
                     return 0);
-      _MMG5_SAFE_CALLOC(mesh->nameout,12,char,0);
+      _MMG5_SAFE_CALLOC(mesh->nameout,12,char,return 0);
       if ( (mesh->info.imprim > 5) || mesh->info.ddebug ) {
         fprintf(stderr,"\n  ## Warning: %s: no name given for output mesh.\n",
                 __func__);
@@ -308,18 +308,18 @@ int MMG5_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solout) {
     _MMG5_ADD_MEM(mesh,(strlen(solout)+1)*sizeof(char),"output sol name",
                   fprintf(stderr,"  Exit program.\n");
                   return 0);
-    _MMG5_SAFE_CALLOC(sol->nameout,strlen(solout)+1,char,0);
+    _MMG5_SAFE_CALLOC(sol->nameout,strlen(solout)+1,char,return 0);
     strcpy(sol->nameout,solout);
   }
   else {
     if ( strlen(mesh->nameout) ) {
       ptr = strstr(mesh->nameout,".mesh");
       if ( ptr ) {
-        _MMG5_SAFE_CALLOC(sol->nameout,strlen(mesh->nameout)+1,char,0);
+        _MMG5_SAFE_CALLOC(sol->nameout,strlen(mesh->nameout)+1,char,return 0);
         oldsize = strlen(mesh->nameout)+1;
       }
       else {
-        _MMG5_SAFE_CALLOC(sol->nameout,strlen(mesh->nameout)+6,char,0);
+        _MMG5_SAFE_CALLOC(sol->nameout,strlen(mesh->nameout)+6,char,return 0);
         oldsize = strlen(mesh->nameout)+6;
       }
       strcpy(sol->nameout,mesh->nameout);

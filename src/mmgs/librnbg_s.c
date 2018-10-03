@@ -90,7 +90,7 @@ int _MMG5_mmgsRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
   vertNbr = 0;
 
   _MMG5_ADD_MEM(mesh,(mesh->nt+1)*sizeof(int),"vertOldTab",return 1);
-  _MMG5_SAFE_CALLOC(vertOldTab,mesh->nt+1,int,1);
+  _MMG5_SAFE_CALLOC(vertOldTab,mesh->nt+1,int,return 1);
 
   for(triaIdx = 1 ; triaIdx < mesh->nt + 1 ; triaIdx++) {
 
@@ -108,7 +108,7 @@ int _MMG5_mmgsRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
   _MMG5_ADD_MEM(mesh,(vertNbr+2)*sizeof(SCOTCH_Num),"vertTab",
                 _MMG5_DEL_MEM(mesh,vertOldTab);
                 return 1);
-  _MMG5_SAFE_CALLOC(vertTab,vertNbr+2,SCOTCH_Num,1);
+  _MMG5_SAFE_CALLOC(vertTab,vertNbr+2,SCOTCH_Num,return 1);
 
   if (!memset(vertTab, ~0, sizeof(SCOTCH_Num)*(vertNbr + 2))) {
     perror("  ## Memory problem: memset");
@@ -126,7 +126,7 @@ int _MMG5_mmgsRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
                 _MMG5_DEL_MEM(mesh,vertOldTab);
                 _MMG5_DEL_MEM(mesh,vertTab);
                 return 1);
-  _MMG5_SAFE_CALLOC(edgeTab,edgeSiz,SCOTCH_Num,1);
+  _MMG5_SAFE_CALLOC(edgeTab,edgeSiz,SCOTCH_Num,return 1);
 
 
   /* Computing the adjacency list for each vertex */
@@ -223,7 +223,7 @@ int _MMG5_mmgsRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
                 _MMG5_DEL_MEM(mesh,edgeTab);
                 if( !_MMGS_hashTria(mesh) ) return 0;
                 return 1);
-  _MMG5_SAFE_CALLOC(permVrtTab,vertNbr+1,SCOTCH_Num,1);
+  _MMG5_SAFE_CALLOC(permVrtTab,vertNbr+1,SCOTCH_Num,return 1);
 
   CHECK_SCOTCH(_MMG5_kPartBoxCompute(graf, vertNbr, boxVertNbr, permVrtTab, mesh),
                "boxCompute", 0);
@@ -241,7 +241,7 @@ int _MMG5_mmgsRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
                 _MMG5_DEL_MEM(mesh,edgeTab);
                 if( !_MMGS_hashTria(mesh) ) return 0;
                 return 1);
-  _MMG5_SAFE_CALLOC(permNodTab,mesh->np+1,int,1);
+  _MMG5_SAFE_CALLOC(permNodTab,mesh->np+1,int,return 1);
 
   ntreal = 0;
   npreal = 0;

@@ -318,7 +318,7 @@ int MMG2_markSD(MMG5_pMesh mesh) {
   for(k=1 ; k<=mesh->nt ; k++)
     mesh->tria[k].flag = mesh->mark;
 
-  _MMG5_SAFE_CALLOC(list,mesh->nt,int,0);
+  _MMG5_SAFE_CALLOC(list,mesh->nt,int,return 0);
   kinit = 0;
   nref  = 0;
   ip1   =  mesh->np;
@@ -516,7 +516,7 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
   /* This part seems useless */
   /* Deal with periodic vertices */
   if ( mesh->info.renum == -10 ) {
-    _MMG5_SAFE_CALLOC(numper,mesh->np+1,int,0);
+    _MMG5_SAFE_CALLOC(numper,mesh->np+1,int,return 0);
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
       for (kk=k; kk<=mesh->np; kk++) {

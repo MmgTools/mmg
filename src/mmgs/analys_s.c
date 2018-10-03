@@ -599,7 +599,7 @@ static int norver(MMG5_pMesh mesh) {
   /* no need to have more xpoint than point */
   mesh->xpmax = MG_MIN(mesh->npmax,mesh->xpmax);
   _MMG5_ADD_MEM(mesh,(mesh->xpmax+1)*sizeof(MMG5_xPoint),"boundary points",return 0);
-  _MMG5_SAFE_CALLOC(mesh->xpoint,mesh->xpmax+1,MMG5_xPoint,0);
+  _MMG5_SAFE_CALLOC(mesh->xpoint,mesh->xpmax+1,MMG5_xPoint,return 0);
 
   if ( xp ) {
     /* 2. process C0 vertices on curves, tangents */
@@ -704,7 +704,7 @@ static int regnor(MMG5_pMesh mesh) {
   }
 
   /* allocate memory for normals */
-  _MMG5_SAFE_CALLOC(tabl,3*mesh->np+1,double,0);
+  _MMG5_SAFE_CALLOC(tabl,3*mesh->np+1,double,return 0);
 
   it   = 0;
   nit  = 2;

@@ -96,7 +96,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
   mesh->np = mesh->nt = mesh->na = mesh->xp = 0;
   nq = 0;
 
-  _MMG5_SAFE_CALLOC(data,strlen(filename)+7,char,0);
+  _MMG5_SAFE_CALLOC(data,strlen(filename)+7,char,return 0);
   strcpy(data,filename);
   ptr = strstr(data,".mesh");
   if ( !ptr ) {
@@ -683,7 +683,7 @@ int MMG2D_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
                 printf("  Exit program.\n"); fclose(inm);
                 _MMG5_SAFE_FREE(posNodeData);
                 return -1);
-  _MMG5_SAFE_CALLOC(*sol,nsols,MMG5_Sol,-1);
+  _MMG5_SAFE_CALLOC(*sol,nsols,MMG5_Sol,return -1);
 
   if ( !MMG2D_zaldy(mesh) ) {
     fclose(inm);
@@ -902,7 +902,7 @@ int MMG2D_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
                 printf("  Exit program.\n"); fclose(inm);
                 _MMG5_SAFE_FREE(type);
                 return -1);
-  _MMG5_SAFE_CALLOC(*sol,nsols,MMG5_Sol,-1);
+  _MMG5_SAFE_CALLOC(*sol,nsols,MMG5_Sol,return -1);
 
   for ( j=0; j<nsols; ++j) {
     psl = *sol+j;
@@ -973,7 +973,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
   bin = 0;
 
   /* Name of file */
-  _MMG5_SAFE_CALLOC(data,strlen(filename)+7,char,0);
+  _MMG5_SAFE_CALLOC(data,strlen(filename)+7,char,return 0);
   strcpy(data,filename);
   ptr = strstr(data,".mesh");
   if ( !ptr ) {
@@ -1498,8 +1498,8 @@ int MMG2D_saveAllSols(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename) {
 
   if ( !(*sol)[0].np )  return 1;
 
-  _MMG5_SAFE_CALLOC(type,mesh->nsols,int,0);
-  _MMG5_SAFE_CALLOC(size,mesh->nsols,int,0);
+  _MMG5_SAFE_CALLOC(type,mesh->nsols,int,return 0);
+  _MMG5_SAFE_CALLOC(size,mesh->nsols,int,return 0);
 
   for (k=0; k<mesh->nsols; ++k ) {
     (*sol)[k].ver = 2;
@@ -1638,7 +1638,7 @@ int _MMG2_savemet_db(MMG5_pMesh mesh,MMG5_pSol met,char *filename,char pack) {
   if ( met->size == 1 ) typ =1;
   else if ( met->size == 3 ) typ = 3;
 
-  _MMG5_SAFE_CALLOC(data,strlen(filename)+6,char,0);
+  _MMG5_SAFE_CALLOC(data,strlen(filename)+6,char,return 0);
   strcpy(data,filename);
   ptr = strstr(data,".mesh");
   if ( ptr )
@@ -1695,7 +1695,7 @@ int _MMG2_savenor_db(MMG5_pMesh mesh,char *filename,char pack) {
   char               *ptr,*data;
   FILE               *out;
 
-  _MMG5_SAFE_CALLOC(data,strlen(filename)+6,char,0);
+  _MMG5_SAFE_CALLOC(data,strlen(filename)+6,char,return 0);
   strcpy(data,filename);
   ptr = strstr(data,".mesh");
   if ( ptr )
@@ -1750,7 +1750,7 @@ int _MMG2_savedisp_db(MMG5_pMesh mesh,MMG5_pSol disp,char *filename,char pack) {
   char               *ptr,*data;
   FILE               *out;
 
-  _MMG5_SAFE_CALLOC(data,strlen(filename)+6,char,0);
+  _MMG5_SAFE_CALLOC(data,strlen(filename)+6,char,return 0);
   strcpy(data,filename);
   ptr = strstr(data,".sol");
   if ( ptr )

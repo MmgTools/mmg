@@ -390,7 +390,7 @@ int _MMG2_regnor(MMG5_pMesh mesh) {
   lm2 = 0.399;
 
   /* Temporary table for normal vectors */
-  _MMG5_SAFE_CALLOC(tmp,2*mesh->np+1,double,0);
+  _MMG5_SAFE_CALLOC(tmp,2*mesh->np+1,double,return 0);
 
   /* Allocate a seed to each point */
   for (k=1; k<=mesh->nt; k++) {

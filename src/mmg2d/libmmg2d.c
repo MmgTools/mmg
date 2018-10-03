@@ -353,7 +353,7 @@ int _MMG2D_restart(MMG5_pMesh mesh){
      * using the MMG2D_Free_triangles function we need to reallocate it */
     _MMG5_ADD_MEM(mesh,(mesh->ntmax+1)*sizeof(MMG5_Tria),
                   "initial triangles",return 0);
-    _MMG5_SAFE_CALLOC(mesh->tria,mesh->ntmax+1,MMG5_Tria,0);
+    _MMG5_SAFE_CALLOC(mesh->tria,mesh->ntmax+1,MMG5_Tria,return 0);
     mesh->nenil = mesh->nt + 1;
     for ( k=mesh->nenil; k<mesh->ntmax-1; k++) {
       mesh->tria[k].v[2] = k+1;
@@ -364,7 +364,7 @@ int _MMG2D_restart(MMG5_pMesh mesh){
      * using the MMG2D_Free_triangles function we need to reallocate it */
     _MMG5_ADD_MEM(mesh,(mesh->namax+1)*sizeof(MMG5_Edge),
                   "initial edges",return 0);
-    _MMG5_SAFE_CALLOC(mesh->edge,mesh->namax+1,MMG5_Edge,0);
+    _MMG5_SAFE_CALLOC(mesh->edge,mesh->namax+1,MMG5_Edge,return 0);
     if ( mesh->na < mesh->namax ) {
       mesh->nanil = mesh->na + 1;
     }
@@ -483,7 +483,7 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   _MMG5_ADD_MEM(mesh,(3*mesh->ntmax+5)*sizeof(int),"adjacency table",
                 printf("  Exit program.\n");
                 return MMG5_STRONGFAILURE);
-  _MMG5_SAFE_CALLOC(mesh->adja,3*mesh->ntmax+5,int,MMG5_STRONGFAILURE);
+  _MMG5_SAFE_CALLOC(mesh->adja,3*mesh->ntmax+5,int,return MMG5_STRONGFAILURE);
 
   /* Delaunay triangulation of the set of points contained in the mesh,
    * enforcing the edges of the mesh */

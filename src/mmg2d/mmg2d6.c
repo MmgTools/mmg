@@ -629,7 +629,7 @@ int MMG2_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol) {
   _MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(double),"temporary table",
                 printf("  Exit program.\n");
                 return 0);
-  _MMG5_SAFE_CALLOC(tmp,mesh->npmax+1,double,0);
+  _MMG5_SAFE_CALLOC(tmp,mesh->npmax+1,double,return 0);
 
   /* Snap values of the level set function which are very close to 0 to 0 exactly */
   if ( !_MMG2_snapval(mesh,sol,tmp) ) {

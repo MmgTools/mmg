@@ -53,7 +53,7 @@ int _MMGS_Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol) {
 
   /* mesh allocation */
   if ( *mesh )  _MMG5_SAFE_FREE(*mesh);
-  _MMG5_SAFE_CALLOC(*mesh,1,MMG5_Mesh,0);
+  _MMG5_SAFE_CALLOC(*mesh,1,MMG5_Mesh,return 0);
 
   /* sol allocation */
   if ( !sol ) {
@@ -64,7 +64,7 @@ int _MMGS_Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol) {
   }
 
   if ( *sol )  _MMG5_DEL_MEM(*mesh,*sol);
-  _MMG5_SAFE_CALLOC(*sol,1,MMG5_Sol,0);
+  _MMG5_SAFE_CALLOC(*sol,1,MMG5_Sol,return 0);
 
   return 1;
 }

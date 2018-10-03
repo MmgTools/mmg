@@ -600,7 +600,7 @@ int _MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
     if ( j < ilist )  return 0;
   }
 
-  _MMG5_SAFE_CALLOC(newtet,ilist,int,-1);
+  _MMG5_SAFE_CALLOC(newtet,ilist,int,return -1);
 
   iel = list[0] / 6;
   ie  = list[0] % 6;

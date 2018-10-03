@@ -31,7 +31,7 @@ int MMG2_hashNew(HashTable *hash,int hsize,int hmax) {
   hash->size  = hsize;
   hash->nxtmax =hmax+1;
   hash->hnxt  = hsize;
-  _MMG5_SAFE_CALLOC(hash->item,hash->nxtmax,Hedge,0);
+  _MMG5_SAFE_CALLOC(hash->item,hash->nxtmax,Hedge,return 0);
 
   for (k=hash->size; k<hash->nxtmax; k++)
     hash->item[k].nxt = k+1;
@@ -57,13 +57,13 @@ int MMG2_hashTria(MMG5_pMesh mesh) {
   if ( !mesh->nt )  return 0;
 
   /* memory alloc */
-  _MMG5_SAFE_CALLOC(hcode,mesh->nt+1,int,0);
+  _MMG5_SAFE_CALLOC(hcode,mesh->nt+1,int,return 0);
 
   /* memory alloc */
   _MMG5_ADD_MEM(mesh,(3*mesh->ntmax+5)*sizeof(int),"adjacency table",
                 printf("  Exit program.\n");
                 return 0;);
-  _MMG5_SAFE_CALLOC(mesh->adja,3*mesh->ntmax+5,int,0);
+  _MMG5_SAFE_CALLOC(mesh->adja,3*mesh->ntmax+5,int,return 0);
 
   link  = mesh->adja;
   hsize = mesh->nt;
@@ -225,7 +225,7 @@ int MMG2_assignEdge(MMG5_pMesh mesh) {
   hash.max = 3*mesh->na+1;
 
   _MMG5_ADD_MEM(mesh,(hash.max+1)*sizeof(_MMG5_hedge),"hash table",return 0);
-  _MMG5_SAFE_CALLOC(hash.item,hash.max+1,_MMG5_hedge,0);
+  _MMG5_SAFE_CALLOC(hash.item,hash.max+1,_MMG5_hedge,return 0);
 
   hash.nxt = mesh->na;
 
@@ -300,7 +300,7 @@ int MMG2_bdryEdge(MMG5_pMesh mesh) {
 
   /* Second step: Create edge mesh and store the corresponding edges */
   _MMG5_ADD_MEM(mesh,(natmp+1)*sizeof(MMG5_Edge),"edges",return 0);
-  _MMG5_SAFE_CALLOC(mesh->edge,natmp+1,MMG5_Edge,0);
+  _MMG5_SAFE_CALLOC(mesh->edge,natmp+1,MMG5_Edge,return 0);
 
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
@@ -436,7 +436,7 @@ int MMG2_pack(MMG5_pMesh mesh,MMG5_pSol sol) {
       mesh->na = 0;
     else {
       /* We have enough memory to allocate the edge table */
-      _MMG5_SAFE_CALLOC(mesh->edge,(mesh->namax+1),MMG5_Edge, 0);
+      _MMG5_SAFE_CALLOC(mesh->edge,(mesh->namax+1),MMG5_Edge, return 0);
 
       nt = 0;
       for (k=1; k<=mesh->nt; k++) {

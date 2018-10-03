@@ -120,7 +120,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
   iswp = 0;
   mesh->np = mesh->nt = mesh->nti = mesh->npi = 0;
 
-  _MMG5_SAFE_CALLOC(data,strlen(filename)+7,char,0);
+  _MMG5_SAFE_CALLOC(data,strlen(filename)+7,char,return 0);
 
   strcpy(data,filename);
   ptr = strstr(data,".mesh");
@@ -484,12 +484,12 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
     fseek(inm,posned,SEEK_SET);
 
     _MMG5_ADD_MEM(mesh,(mesh->na+1)*sizeof(MMG5_Edge),"initial edges",return 0);
-    _MMG5_SAFE_CALLOC(mesh->edge,mesh->na+1,MMG5_Edge,0);
+    _MMG5_SAFE_CALLOC(mesh->edge,mesh->na+1,MMG5_Edge,return 0);
 
     /* Skip edges with MG_ISO refs */
     if( mesh->info.iso ) {
       mesh->na = 0;
-      _MMG5_SAFE_CALLOC(ina,na+1,int,0);
+      _MMG5_SAFE_CALLOC(ina,na+1,int,return 0);
 
       for (k=1; k<=na; k++) {
         if (!bin)
@@ -604,7 +604,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
   }
 
   if ( ng > 0 ) {
-    _MMG5_SAFE_CALLOC(norm,3*ng+1,double,0);
+    _MMG5_SAFE_CALLOC(norm,3*ng+1,double,return 0);
 
     rewind(inm);
     fseek(inm,posnormal,SEEK_SET);
@@ -746,7 +746,7 @@ int MMGS_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *file
                 printf("  Exit program.\n"); fclose(inm);
                 _MMG5_SAFE_FREE(posNodeData);
                 return -1);
-  _MMG5_SAFE_CALLOC(*sol,nsols,MMG5_Sol,-1);
+  _MMG5_SAFE_CALLOC(*sol,nsols,MMG5_Sol,return -1);
 
   if ( !_MMGS_zaldy(mesh) ) {
     fclose(inm);
@@ -805,7 +805,7 @@ int MMGS_saveMesh(MMG5_pMesh mesh, const char* filename) {
 
   bin = 0;
 
-  _MMG5_SAFE_CALLOC(data,strlen(filename)+7,char,0);
+  _MMG5_SAFE_CALLOC(data,strlen(filename)+7,char,return 0);
 
   strcpy(data,filename);
   ptr = strstr(data,".mesh");
@@ -1355,7 +1355,7 @@ int MMGS_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
                 printf("  Exit program.\n"); fclose(inm);
                 _MMG5_SAFE_FREE(type);
                 return -1);
-  _MMG5_SAFE_CALLOC(*sol,nsols,MMG5_Sol,-1);
+  _MMG5_SAFE_CALLOC(*sol,nsols,MMG5_Sol,return -1);
 
   for ( j=0; j<nsols; ++j ) {
     psl = *sol + j;
@@ -1474,8 +1474,8 @@ int MMGS_saveAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
 
   (*sol)[0].ver = 2;
 
-  _MMG5_SAFE_CALLOC(type,mesh->nsols,int,0);
-  _MMG5_SAFE_CALLOC(size,mesh->nsols,int,0);
+  _MMG5_SAFE_CALLOC(type,mesh->nsols,int,return 0);
+  _MMG5_SAFE_CALLOC(size,mesh->nsols,int,return 0);
   for (k=0; k<mesh->nsols; ++k ) {
     type[k] = (*sol)[k].type;
     size[k] = (*sol)[k].size;

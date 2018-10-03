@@ -337,7 +337,7 @@ int _MMG5_boulernm(MMG5_pMesh mesh, int start, int ip, int *ng, int *nr){
   hash.max  = hmax + 1;
   hash.nxt  = hash.siz;
   _MMG5_ADD_MEM(mesh,(hash.max+1)*sizeof(_MMG5_hedge),"hash table",return -1);
-  _MMG5_SAFE_CALLOC(hash.item,hash.max+1,_MMG5_hedge,-1);
+  _MMG5_SAFE_CALLOC(hash.item,hash.max+1,_MMG5_hedge,return -1);
 
   for (k=hash.siz; k<hash.max; k++)
     hash.item[k].nxt = k+1;

@@ -731,8 +731,8 @@ int _MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,cha
     return 0;
   }
 
-  _MMG5_SAFE_CALLOC(p0_c, ilist, int,-1);
-  _MMG5_SAFE_CALLOC(p1_c, ilist, int,-1);
+  _MMG5_SAFE_CALLOC(p0_c, ilist, int,return -1);
+  _MMG5_SAFE_CALLOC(p1_c, ilist, int,return -1);
 
   iel = list[0] / 4;
   ip  = list[0] % 4;

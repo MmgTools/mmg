@@ -101,7 +101,7 @@ int MMG2_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
       }
 
       if ( mesh->info.nmat ) {
-        _MMG5_SAFE_CALLOC(mesh->info.mat,mesh->info.nmat,MMG5_Mat,0);
+        _MMG5_SAFE_CALLOC(mesh->info.mat,mesh->info.nmat,MMG5_Mat,return 0);
         for (i=0; i<mesh->info.nmat; i++) {
           pm = &mesh->info.mat[i];
           fscanf(in,"%d",&pm->ref);
@@ -136,7 +136,7 @@ int MMG2_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
 
       /* Allocate memory and fill the info->par table (adding one, corresponding to the command line data) */
       if ( mesh->info.npar ) {
-        _MMG5_SAFE_CALLOC(mesh->info.par,mesh->info.npar,MMG5_Par,0);
+        _MMG5_SAFE_CALLOC(mesh->info.par,mesh->info.npar,MMG5_Par,return 0);
 
         for (i=0; i<mesh->info.npar; i++) {
           ppar = &mesh->info.par[i];

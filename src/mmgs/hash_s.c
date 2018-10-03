@@ -86,7 +86,7 @@ int _MMGS_hashTria(MMG5_pMesh mesh) {
   _MMG5_ADD_MEM(mesh,(3*mesh->ntmax+5)*sizeof(int),"adjacency table",
                 fprintf(stderr,"  Exit program.\n");
                 return 0);
-  _MMG5_SAFE_CALLOC(mesh->adja,3*mesh->ntmax+5,int,0);
+  _MMG5_SAFE_CALLOC(mesh->adja,3*mesh->ntmax+5,int,return 0);
 
   if ( !_MMG5_mmgHashTria(mesh, mesh->adja, &hash, 0) ) return 0;
 
@@ -122,7 +122,7 @@ int assignEdge(MMG5_pMesh mesh) {
   hash.siz  = mesh->na;
   hash.max  = 3*mesh->na+1;
   _MMG5_ADD_MEM(mesh,(hash.max+1)*sizeof(_MMG5_Hash),"hash table",return 0);
-  _MMG5_SAFE_CALLOC(hash.item,hash.max+1,_MMG5_hedge,0);
+  _MMG5_SAFE_CALLOC(hash.item,hash.max+1,_MMG5_hedge,return 0);
 
   hash.nxt  = mesh->na;
   for (k=mesh->na; k<hash.max; k++)
