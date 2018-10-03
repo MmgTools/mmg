@@ -209,14 +209,14 @@ int _MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
     ielnum[k] = _MMG3D_newElt(mesh);
 
     if ( !ielnum[k] ) {
-      _MMG5_TETRA_REALLOC(mesh,ielnum[k],mesh->gap,
+      _MMG3D_TETRA_REALLOC(mesh,ielnum[k],mesh->gap,
                           fprintf(stderr,"\n  ## Error: %s: unable to allocate a"
                                   " new element.\n",__func__);
                           for(ll=1 ; ll<k ; ll++) {
                             mesh->tetra[ielnum[ll]].v[0] = 1;
                             if ( !_MMG3D_delElt(mesh,ielnum[ll]) )  return -1;
                           }
-                          return -1;,-1);
+                          return -1);
     }
   }
 

@@ -1879,12 +1879,12 @@ int MMG3D_Add_tetrahedron(MMG5_pMesh mesh, int v0, int v1, int v2, int v3, int r
 
   iel = _MMG3D_newElt(mesh);
   if ( !iel ) {
-    _MMG5_TETRA_REALLOC(mesh,iel,mesh->gap,
+    _MMG3D_TETRA_REALLOC(mesh,iel,mesh->gap,
                         fprintf(stderr,"\n  ## Error: %s: unable to allocate"
                                 " a new element.\n",__func__);
                         _MMG5_INCREASE_MEM_MESSAGE();
                         fprintf(stderr,"  Exit program.\n");
-                        return 0,0);
+                        return 0);
   }
 
   pt = &mesh->tetra[iel];

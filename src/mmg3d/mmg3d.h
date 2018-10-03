@@ -76,7 +76,7 @@ extern "C" {
 
 /** Reallocation of tetra table and creation
     of tetra jel */
-#define _MMG5_TETRA_REALLOC(mesh,jel,wantedGap,law,retval) do           \
+#define _MMG3D_TETRA_REALLOC(mesh,jel,wantedGap,law ) do                \
   {                                                                     \
     int klink,oldSiz;                                                   \
                                                                         \
@@ -93,7 +93,7 @@ extern "C" {
       _MMG5_ADD_MEM(mesh,4*(mesh->nemax-oldSiz)*sizeof(int),            \
                     "larger adja table",law);                           \
       _MMG5_SAFE_RECALLOC(mesh->adja,4*oldSiz+5,4*mesh->nemax+5,int     \
-                          ,"larger adja table",return retval);          \
+                          ,"larger adja table",law);                    \
     }                                                                   \
                                                                         \
     /* We try again to add the point */                                 \
