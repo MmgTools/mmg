@@ -117,7 +117,7 @@ int _MMGS_split1(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,int *vx) {
                                " a new element.\n",__func__);
                        _MMG5_INCREASE_MEM_MESSAGE();
                        fprintf(stderr,"  Exit program.\n");
-                       return 0,0 );
+                       return 0);
   }
 
   pt  = &mesh->tria[k];
@@ -230,7 +230,7 @@ int split1b(MMG5_pMesh mesh,int k,char i,int ip) {
   if ( !iel )  {
     _MMGS_TRIA_REALLOC(mesh,iel,mesh->gap,
                        _MMG5_INCREASE_MEM_MESSAGE();
-                       return 0,0);
+                       return 0);
   }
   pt = &mesh->tria[k];
   pt->flag = 0;
@@ -288,7 +288,7 @@ int split1b(MMG5_pMesh mesh,int k,char i,int ip) {
       _MMGS_TRIA_REALLOC(mesh,kel,mesh->gap,
                          _MMG5_INCREASE_MEM_MESSAGE();
                          if ( !_MMGS_delElt(mesh,iel) )  return 0;
-                         return 0,0);
+                         return 0);
     }
     pt  = &mesh->tria[jel];
     pt1 = &mesh->tria[kel];
@@ -425,7 +425,7 @@ int _MMGS_split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
                                " a new element.\n",__func__);
                        _MMG5_INCREASE_MEM_MESSAGE();
                        fprintf(stderr,"  Exit program.\n");
-                       return 0,0);
+                       return 0);
   }
   jel = _MMGS_newElt(mesh);
   if ( !jel ) {
@@ -434,7 +434,7 @@ int _MMGS_split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
                                " a new element.\n",__func__);
                        _MMG5_INCREASE_MEM_MESSAGE();
                        fprintf(stderr,"  Exit program.\n");
-                       return 0,0);
+                       return 0);
   }
 
   pt  = &mesh->tria[k];
@@ -585,7 +585,7 @@ int _MMGS_split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
                                " a new element.\n",__func__);
                        _MMG5_INCREASE_MEM_MESSAGE();
                        fprintf(stderr,"  Exit program.\n");
-                       return 0;, 0);
+                       return 0);
   }
   jel = _MMGS_newElt(mesh);
   if ( !jel ) {
@@ -594,7 +594,7 @@ int _MMGS_split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
                                " a new element.\n",__func__);
                        _MMG5_INCREASE_MEM_MESSAGE();
                        fprintf(stderr,"  Exit program.\n");
-                       return 0;, 0);
+                       return 0);
   }
   kel = _MMGS_newElt(mesh);
   if ( !kel ) {
@@ -603,7 +603,7 @@ int _MMGS_split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
                                " a new element.\n",__func__);
                        _MMG5_INCREASE_MEM_MESSAGE();
                        fprintf(stderr,"  Exit program.\n");
-                       return 0;, 0);
+                       return 0);
   }
 
   pt  = &mesh->tria[k];
