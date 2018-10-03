@@ -64,7 +64,7 @@ extern "C" {
 
 /** Reallocation of point table and sol table and creation
     of point ip with coordinates o and tag tag*/
-#define _MMGS_POINT_REALLOC(mesh,sol,ip,wantedGap,law,o,tag,retval ) do \
+#define _MMGS_POINT_REALLOC(mesh,sol,ip,wantedGap,law,o,tag ) do        \
   {                                                                     \
     int klink;                                                          \
                                                                         \
@@ -81,7 +81,7 @@ extern "C" {
                     "larger solution",law);                             \
       _MMG5_SAFE_REALLOC(sol->m,sol->size*(sol->npmax+1),               \
                          sol->size*(mesh->npmax+1),double,              \
-                         "larger solution",return retval);              \
+                         "larger solution",law);                        \
     }                                                                   \
     sol->npmax = mesh->npmax;                                           \
                                                                         \

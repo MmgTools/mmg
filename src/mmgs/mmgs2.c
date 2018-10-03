@@ -452,7 +452,7 @@ static int _MMGS_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol){
                                     " allocate a new point\n",__func__);
                             _MMG5_INCREASE_MEM_MESSAGE();
                             return 0
-                            ,c,NULL,0);
+                            ,c,NULL);
       }
       sol->m[np] = mesh->info.ls;
       _MMG5_hashEdge(mesh,&hash,ip0,ip1,np);

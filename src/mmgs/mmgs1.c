@@ -586,7 +586,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
                               _MMG5_INCREASE_MEM_MESSAGE();
                               _MMGS_delPatternPts( mesh, hash);
                               return -1
-                              ,o,MG_EDG(pt->tag[i]) ? to : no,-1);
+                              ,o,MG_EDG(pt->tag[i]) ? to : no);
           // Now pb->p contain a wrong memory address.
           pb.p[0] = &mesh->point[pt->v[0]];
           pb.p[1] = &mesh->point[pt->v[1]];
@@ -916,7 +916,7 @@ int chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,int i) {
     _MMGS_POINT_REALLOC(mesh,met,ip,mesh->gap,
                         _MMG5_INCREASE_MEM_MESSAGE();
                         return -1
-                        ,o,MG_EDG(pt->tag[i]) ? to : no,-1);
+                        ,o,MG_EDG(pt->tag[i]) ? to : no);
   }
 
   if ( MG_EDG(pt->tag[i]) ) {
