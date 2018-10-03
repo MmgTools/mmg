@@ -606,8 +606,7 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
                        fprintf(stderr,"\n  ## Error: %s: unable to allocate a"
                                " new element.\n",__func__);
                        _MMG5_INCREASE_MEM_MESSAGE();
-                       printf("  Exit program.\n");return 0;,
-                       0);
+                       printf("  Exit program.\n");return 0);
   }
   pt       = &mesh->tria[jel];
   pt->v[0] = ip1;
@@ -621,8 +620,7 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
                        fprintf(stderr,"\n  ## Error: %s: unable to allocate"
                                " a new element.\n",__func__);
                        _MMG5_INCREASE_MEM_MESSAGE();
-                       printf("  Exit program.\n");return 0;,
-                       0);
+                       printf("  Exit program.\n");return 0);
   }
   pt   = &mesh->tria[kel];
   pt->v[0] = ip1;

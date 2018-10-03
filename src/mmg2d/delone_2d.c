@@ -339,8 +339,7 @@ int _MMG2_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
                           fprintf(stderr,"\n  ## Error: %s: unable to allocate"
                                  " a new element.\n",__func__);
                           _MMG5_INCREASE_MEM_MESSAGE();
-                          printf("  Exit program.\n");return -1;,
-                          -1);
+                          printf("  Exit program.\n");return -1);
     }
   }
 

@@ -244,7 +244,7 @@ int _MMG2_split1b(MMG5_pMesh mesh,int k,char i,int ip) {
     _MMG2D_TRIA_REALLOC(mesh,iel,mesh->gap,
                         printf("  ## Error: unable to allocate a new element.\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
-                        printf("  Exit program.\n");return 0;,0);
+                        printf("  Exit program.\n");return 0);
   }
 
   pt = &mesh->tria[k];
@@ -286,7 +286,7 @@ int _MMG2_split1b(MMG5_pMesh mesh,int k,char i,int ip) {
       _MMG2D_TRIA_REALLOC(mesh,kel,mesh->gap,
                           printf("  ## Error: unable to allocate a new element.\n");
                           _MMG5_INCREASE_MEM_MESSAGE();
-                          printf("  Exit program.\n");return 0;,0);
+                          printf("  Exit program.\n");return 0);
     }
 
     pt  = &mesh->tria[jel];
@@ -414,7 +414,7 @@ int _MMG2_split1(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
     _MMG2D_TRIA_REALLOC(mesh,iel,mesh->gap,
                         printf("  ## Error: unable to allocate a new element.\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
-                        printf("  Exit program.\n");return 0;,0);
+                        printf("  Exit program.\n");return 0);
     pt = &mesh->tria[k];
   }
   pt1 = &mesh->tria[iel];
@@ -533,7 +533,7 @@ int _MMG2_split2(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
     _MMG2D_TRIA_REALLOC(mesh,iel,mesh->gap,
                         printf("  ## Error: unable to allocate a new element.\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
-                        printf("  Exit program.\n");return 0;,0);
+                        printf("  Exit program.\n");return 0);
     pt = &mesh->tria[k];
   }
 
@@ -542,7 +542,7 @@ int _MMG2_split2(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
     _MMG2D_TRIA_REALLOC(mesh,jel,mesh->gap,
                         printf("  ## Error: unable to allocate a new element.\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
-                        printf("  Exit program.\n");return 0;,0);
+                        printf("  Exit program.\n");return 0);
     pt = &mesh->tria[k];
   }
 
@@ -647,7 +647,7 @@ int _MMG2_split3(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
     _MMG2D_TRIA_REALLOC(mesh,iel,mesh->gap,
                         printf("  ## Error: unable to allocate a new element.\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
-                        printf("  Exit program.\n");return 0;,0);
+                        printf("  Exit program.\n");return 0);
 
     pt = &mesh->tria[k];
   }
@@ -658,7 +658,7 @@ int _MMG2_split3(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
     _MMG2D_TRIA_REALLOC(mesh,jel,mesh->gap,
                         printf("  ## Error: unable to allocate a new element.\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
-                        printf("  Exit program.\n");return 0;,0);
+                        printf("  Exit program.\n");return 0);
     pt = &mesh->tria[k];
   }
 
@@ -668,7 +668,7 @@ int _MMG2_split3(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
     _MMG2D_TRIA_REALLOC(mesh,kel,mesh->gap,
                         printf("  ## Error: unable to allocate a new element.\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
-                        printf("  Exit program.\n");return 0;,0);
+                        printf("  Exit program.\n");return 0);
     pt = &mesh->tria[k];
   }
 
@@ -752,14 +752,14 @@ int _MMG2_splitbar(MMG5_pMesh mesh,int k,int ip) {
     _MMG2D_TRIA_REALLOC(mesh,iel1,mesh->gap,
                         printf("  ## Error: unable to allocate a new element.\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
-                        printf("  Exit program.\n");return 0;,0);
+                        printf("  Exit program.\n");return 0);
   }
   iel2 = _MMG2D_newElt(mesh);
   if ( !iel2 ) {
     _MMG2D_TRIA_REALLOC(mesh,iel2,mesh->gap,
                         printf("  ## Error: unable to allocate a new element.\n");
                         _MMG5_INCREASE_MEM_MESSAGE();
-                        printf("  Exit program.\n");return 0;,0);
+                        printf("  Exit program.\n");return 0);
   }
 
   pt->flag = 0;

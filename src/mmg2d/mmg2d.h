@@ -165,7 +165,7 @@ static const unsigned int MMG2_inxt[5] = {1,2,0,1,2};
 
 /** Reallocation of tria table and creation
     of tria jel */
-#define _MMG2D_TRIA_REALLOC(mesh,jel,wantedGap,law,retval ) do          \
+#define _MMG2D_TRIA_REALLOC(mesh,jel,wantedGap,law ) do                 \
   {                                                                     \
    int klink,oldSiz;                                                    \
                                                                         \
@@ -182,7 +182,7 @@ static const unsigned int MMG2_inxt[5] = {1,2,0,1,2};
      _MMG5_ADD_MEM(mesh,3*(mesh->ntmax-oldSiz)*sizeof(int),             \
                    "larger adja table",law);                            \
      _MMG5_SAFE_RECALLOC(mesh->adja,3*oldSiz+5,3*mesh->ntmax+5,int      \
-                         ,"larger adja table",return retval);           \
+                         ,"larger adja table",law);                     \
    }                                                                    \
                                                                         \
    /* We try again to add the point */                                  \
