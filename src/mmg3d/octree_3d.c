@@ -676,7 +676,7 @@ int _MMG3D_addOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver,
         sizeRealloc<<=1;
         _MMG5_ADD_MEM(mesh,(sizeRealloc-sizeRealloc/2)*sizeof(int),"octree realloc",
                       return 0);
-        _MMG5_SAFE_REALLOC(q->v,q->nbVer,sizeRealloc,int,"octree",0);
+        _MMG5_SAFE_REALLOC(q->v,q->nbVer,sizeRealloc,int,"octree",return 0);
       }
 
       q->v[q->nbVer] = no;
@@ -747,14 +747,14 @@ int _MMG3D_addOctreeRec(MMG5_pMesh mesh, _MMG3D_octree_s* q, double* ver,
         sizeRealloc <<= 1;
         _MMG5_ADD_MEM(mesh,(sizeRealloc-sizeRealloc/2)*sizeof(int),"octree realloc",
                       return 0);
-        _MMG5_SAFE_REALLOC(q->v,q->nbVer,sizeRealloc,int,"octree",0);
+        _MMG5_SAFE_REALLOC(q->v,q->nbVer,sizeRealloc,int,"octree",return 0);
       }
     }
     else if (q->nbVer%nv == 0) // special reallocation of the vertex list because it is at maximum depth
     {
       _MMG5_ADD_MEM(mesh,nv*sizeof(int),"octree realloc",
                     return 0);
-      _MMG5_SAFE_REALLOC(q->v,q->nbVer,q->nbVer+nv,int,"octree",0);
+      _MMG5_SAFE_REALLOC(q->v,q->nbVer,q->nbVer+nv,int,"octree",return 0);
     }
 
     q->v[q->nbVer] = no;

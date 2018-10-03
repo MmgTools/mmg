@@ -81,7 +81,7 @@ extern "C" {
                     "larger solution",law);                             \
       _MMG5_SAFE_REALLOC(sol->m,sol->size*(sol->npmax+1),               \
                          sol->size*(mesh->npmax+1),double,              \
-                         "larger solution",retval);                     \
+                         "larger solution",return retval);              \
     }                                                                   \
     sol->npmax = mesh->npmax;                                           \
                                                                         \

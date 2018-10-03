@@ -286,7 +286,7 @@ size_t myfree(void *ptr) {
   }while(0)
 
 /** Safe reallocation */
-#define _MMG5_SAFE_REALLOC(ptr,prevSize,newSize,type,message,retval) do \
+#define _MMG5_SAFE_REALLOC(ptr,prevSize,newSize,type,message,law) do    \
   {                                                                     \
     type* tmp;                                                          \
     size_t size_to_allocate = (newSize)*sizeof(type);                   \
@@ -295,7 +295,7 @@ size_t myfree(void *ptr) {
     if ( !tmp ) {                                                       \
       _MMG5_SAFE_FREE(ptr);                                             \
       perror(" ## Memory problem: realloc");                            \
-      return retval;                                                    \
+      law;                                                              \
     }                                                                   \
                                                                         \
     (ptr) = tmp;                                                        \

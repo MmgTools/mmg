@@ -1642,7 +1642,7 @@ int _MMG5_chkBdryTria(MMG5_pMesh mesh) {
       fprintf(stderr,"\n  ## Warning: %s: %d extra boundaries provided."
               " Ignored\n",__func__,nbl);
       _MMG5_ADD_MEM(mesh,(-nbl)*sizeof(MMG5_Tria),"triangles",return 0);
-      _MMG5_SAFE_REALLOC(mesh->tria,mesh->nt+1,nt+1,MMG5_Tria,"triangles",0);
+      _MMG5_SAFE_REALLOC(mesh->tria,mesh->nt+1,nt+1,MMG5_Tria,"triangles",return 0);
       mesh->nt = nt;
     }
     _MMG5_DEL_MEM(mesh,hashElt.item);
