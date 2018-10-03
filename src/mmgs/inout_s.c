@@ -518,7 +518,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
                       fprintf(stderr,"  Exit program.\n");
                       _MMG5_SAFE_FREE(ina);
                       return 0);
-        _MMG5_SAFE_RECALLOC(mesh->edge,na+1,(mesh->na+1),MMG5_Edge,"Edges",0);
+        _MMG5_SAFE_RECALLOC(mesh->edge,na+1,(mesh->na+1),MMG5_Edge,"Edges",return 0);
       }
     }
     else {

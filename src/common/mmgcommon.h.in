@@ -302,7 +302,7 @@ size_t myfree(void *ptr) {
   }while(0)
 
 /** safe reallocation with memset at 0 for the new values of tab */
-#define _MMG5_SAFE_RECALLOC(ptr,prevSize,newSize,type,message,retval) do \
+#define _MMG5_SAFE_RECALLOC(ptr,prevSize,newSize,type,message,law) do \
   {                                                                     \
     type* tmp;                                                          \
     size_t size_to_allocate = (newSize)*sizeof(type);                   \
@@ -311,7 +311,7 @@ size_t myfree(void *ptr) {
     if ( !tmp ) {                                                       \
       _MMG5_SAFE_FREE(ptr);                                             \
       perror(" ## Memory problem: realloc");                            \
-      return retval;                                                    \
+      law;                                                              \
     }                                                                   \
                                                                         \
     (ptr) = tmp;                                                        \
@@ -345,7 +345,7 @@ size_t myfree(void *ptr) {
     }                                                                   \
                                                                         \
     _MMG5_ADD_MEM(mesh,gap*sizeof(type),message,law);                   \
-    _MMG5_SAFE_RECALLOC((ptr),initSize+1,initSize+gap+1,type,message,retval); \
+    _MMG5_SAFE_RECALLOC((ptr),initSize+1,initSize+gap+1,type,message,return retval); \
     initSize = initSize+gap;                                            \
   }while(0);
 

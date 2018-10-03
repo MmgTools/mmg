@@ -544,7 +544,7 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
                       fprintf(stderr,"  Exit program.\n");
                       return -1);
         _MMG5_SAFE_RECALLOC(mesh->tria,nt+1,(mesh->nt+1),MMG5_Tria,
-                            "triangles",-1);
+                            "triangles",return -1);
       }
     }
     else {
@@ -685,7 +685,7 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
                       fprintf(stderr,"  Exit program.\n");
                       _MMG5_SAFE_FREE(ina);
                       return -1);
-        _MMG5_SAFE_RECALLOC(mesh->edge,na+1,(mesh->na+1),MMG5_Edge,"edges",-1);
+        _MMG5_SAFE_RECALLOC(mesh->edge,na+1,(mesh->na+1),MMG5_Edge,"edges",return -1);
       }
     }
 

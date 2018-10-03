@@ -347,7 +347,7 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,const char *filename,
       if ( ++(*nsols) == posNodeDataSize ) {
         _MMG5_SAFE_RECALLOC(*posNodeData,*nsols,
                             posNodeDataSize+initPosNodeDataSize,
-                            long,"posNodeData",0);
+                            long,"posNodeData",return 0);
         posNodeDataSize += initPosNodeDataSize;
       }
 
@@ -1036,7 +1036,8 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
                       if ( ina_t ) _MMG5_SAFE_FREE(ina_t);
                       if ( ina_a ) _MMG5_SAFE_FREE(ina_a);
                       return 0);
-        _MMG5_SAFE_RECALLOC(mesh->tria,mesh->nt+1,(nt+1),MMG5_Tria,"triangles",0);
+        _MMG5_SAFE_RECALLOC(mesh->tria,mesh->nt+1,(nt+1),MMG5_Tria,"triangles",
+                            return 0);
       }
       _MMG5_SAFE_FREE(ina_t);
       mesh->nt = nt;
@@ -1051,7 +1052,8 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
                       if ( ina_t ) _MMG5_SAFE_FREE(ina_t);
                       if ( ina_a ) _MMG5_SAFE_FREE(ina_a);
                       return 0);
-        _MMG5_SAFE_RECALLOC(mesh->edge,mesh->na+1,(na+1),MMG5_Edge,"edges",0);
+        _MMG5_SAFE_RECALLOC(mesh->edge,mesh->na+1,(na+1),MMG5_Edge,"edges",
+                            return 0);
       }
       _MMG5_SAFE_FREE(ina_a);
       mesh->na = na;

@@ -1675,7 +1675,7 @@ int _MMG5_chkBdryTria(MMG5_pMesh mesh) {
     assert((!mesh->nprism && ntmesh>mesh->nt)||(mesh->nprism && ntmesh>=mesh->nt));
     if ( ntmesh > mesh->nt ) {
       _MMG5_ADD_MEM(mesh,(ntmesh-mesh->nt)*sizeof(MMG5_Tria),"triangles",return 0);
-      _MMG5_SAFE_RECALLOC(mesh->tria,mesh->nt+1,ntmesh+1,MMG5_Tria,"triangles",0);
+      _MMG5_SAFE_RECALLOC(mesh->tria,mesh->nt+1,ntmesh+1,MMG5_Tria,"triangles",return 0);
       nbl = ntmesh-mesh->nt;
     }
   }
@@ -1973,7 +1973,7 @@ int _MMG5_bdrySet(MMG5_pMesh mesh) {
                 fprintf(stderr,"  Exit program.\n");
                 return 0);
   _MMG5_SAFE_RECALLOC(mesh->xprism,mesh->nprism+1,mesh->xpr+1,MMG5_xPrism,
-                      "boundary prisms",0);
+                      "boundary prisms",return 0);
 
   _MMG5_DEL_MEM(mesh,hash.item);
   return 1;

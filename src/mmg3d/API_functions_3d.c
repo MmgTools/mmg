@@ -1809,7 +1809,8 @@ int _MMG3D_skipIso(MMG5_pMesh mesh) {
       _MMG5_DEL_MEM(mesh,mesh->tria);
     else {
       _MMG5_ADD_MEM(mesh,mesh->nti-mesh->nt,"triangles",return 0);
-      _MMG5_SAFE_RECALLOC(mesh->tria,mesh->nt+1,(mesh->nti+1),MMG5_Tria,"triangles",0);
+      _MMG5_SAFE_RECALLOC(mesh->tria,mesh->nt+1,(mesh->nti+1),MMG5_Tria,
+                          "triangles",return 0);
     }
     mesh->nt = mesh->nti;
   }
@@ -1841,7 +1842,8 @@ int _MMG3D_skipIso(MMG5_pMesh mesh) {
         _MMG5_DEL_MEM(mesh,mesh->edge);
       else {
         _MMG5_ADD_MEM(mesh,mesh->nai-mesh->na,"Edges",return 0);
-        _MMG5_SAFE_RECALLOC(mesh->edge,mesh->na+1,(mesh->nai+1),MMG5_Edge,"edges",0);
+        _MMG5_SAFE_RECALLOC(mesh->edge,mesh->na+1,(mesh->nai+1),MMG5_Edge,
+                            "edges",return 0);
       }
       mesh->na = mesh->nai;
     }

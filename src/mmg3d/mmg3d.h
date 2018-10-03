@@ -93,7 +93,7 @@ extern "C" {
       _MMG5_ADD_MEM(mesh,4*(mesh->nemax-oldSiz)*sizeof(int),            \
                     "larger adja table",law);                           \
       _MMG5_SAFE_RECALLOC(mesh->adja,4*oldSiz+5,4*mesh->nemax+5,int     \
-                          ,"larger adja table",retval);                 \
+                          ,"larger adja table",return retval);          \
     }                                                                   \
                                                                         \
     /* We try again to add the point */                                 \
