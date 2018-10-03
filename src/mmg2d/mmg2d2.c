@@ -552,7 +552,7 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
                          fprintf(stderr,"\n  ## Error: %s: unable to allocate"
                                  " a new point.\n",__func__);
                          _MMG5_INCREASE_MEM_MESSAGE();return 0;,
-                         c,0,0);
+                         c,0);
   }
 
   /* Top left corner */
@@ -565,7 +565,7 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
                          fprintf(stderr,"\n  ## Error: %s: unable to allocate"
                                  " a new point.\n",__func__);
                          _MMG5_INCREASE_MEM_MESSAGE();return 0;,
-                         c,0,0);
+                         c,0);
   }
 
   /* Bottom right corner */
@@ -578,7 +578,7 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
                          fprintf(stderr,"\n  ## Error: %s: unable to allocate a "
                                  " new point.\n",__func__);
                          _MMG5_INCREASE_MEM_MESSAGE(); return 0;,
-                         c,0,0);
+                         c,0);
   }
 
   /* Top right corner */
@@ -591,7 +591,7 @@ int MMG2_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
                          fprintf(stderr,"\n  ## Error: %s: unable to allocate a"
                                  " new point.\n",__func__);
                          _MMG5_INCREASE_MEM_MESSAGE(); return 0;,
-                         c,0,0);
+                         c,0);
   }
 
   assert ( ip1 == mesh->np-3 );

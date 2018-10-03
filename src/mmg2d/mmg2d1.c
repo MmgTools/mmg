@@ -184,7 +184,7 @@ int _MMG2_anaelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
                             do {
                               _MMG2D_delPt(mesh,mesh->np);
                             } while ( mesh->np>npinit );return -1;,
-                            o,pt->tag[i],-1);
+                            o,pt->tag[i]);
       }
       ppt = &mesh->point[ip];
       if ( MG_EDG(pt->tag[i]) ) {

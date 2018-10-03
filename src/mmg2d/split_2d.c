@@ -87,7 +87,7 @@ int _MMG2_chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
                            do {
                              _MMG2D_delPt(mesh,mesh->np);
                            } while ( mesh->np>npinit );return -1;,
-                           mid,pt->tag[i],-1);
+                           mid,pt->tag[i]);
 
     }
 
@@ -143,7 +143,7 @@ int _MMG2_chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
                            do {
                              _MMG2D_delPt(mesh,mesh->np);
                            } while ( mesh->np>npinit ); return -1;,
-                           o,pt->tag[i],-1);
+                           o,pt->tag[i]);
     }
 
     ppt = &mesh->point[ip];
