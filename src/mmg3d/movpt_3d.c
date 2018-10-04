@@ -1700,7 +1700,6 @@ int _MMG5_movbdyridpt_iso(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
       if ( tt.v[i] == ip0 )      break;
     }
     assert(i<3);
-    return 0;
 
     tt.v[i] = 0;
 
