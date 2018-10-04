@@ -183,6 +183,7 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
       sol->m[2*k]   *= dd;
       sol->m[2*k+1] *= dd;
     }
+    break;
   case 3:
     dd = 1.0 / (dd*dd);
     /* Normalization */
