@@ -236,7 +236,7 @@ int MMG5_Set_outputMeshName(MMG5_pMesh mesh, const char* meshout) {
     strcpy(mesh->nameout,meshout);
   }
   else {
-    if ( strlen(mesh->namein) ) {
+    if ( mesh->namein && strlen(mesh->namein) ) {
       _MMG5_ADD_MEM(mesh,(strlen(mesh->namein)+3)*sizeof(char),"output mesh name",
                     fprintf(stderr,"  Exit program.\n");
                     return 0);

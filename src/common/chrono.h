@@ -21,8 +21,8 @@
 ** =============================================================================
 */
 
-#ifndef _CHRONO_H
-#define _CHRONO_H
+#ifndef CHRONO_H
+#define CHRONO_H
 
 #include <time.h>
 #include "mmgcommon.h"
