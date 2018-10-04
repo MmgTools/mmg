@@ -61,8 +61,11 @@ int* _MMG2_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
   nef        = 0;
   u[0]       = u[1] = 0.0;
   ilist      = ilisto = ilistck = 0;
-  list       = (int*)calloc(mesh->nt+1,sizeof(int));
-  perm       = (int*)calloc(mesh->np+1,sizeof(int));
+  _MMG5_ADD_MEM(mesh,(mesh->nt+1)*sizeof(int),"element list",return NULL);
+  _MMG5_SAFE_CALLOC(list,mesh->nt+1,int,return NULL);
+
+  _MMG5_ADD_MEM(mesh,(mesh->np+1)*sizeof(int),"point permutation",return NULL);
+  _MMG5_SAFE_CALLOC(perm,mesh->np+1,int,return NULL);
 
   
   /* Reset flag field at triangles */
@@ -91,7 +94,7 @@ int* _MMG2_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
       }
     }
   }
-  
+
   /* Step 2: Create a hull of nlay layers around these triangles */
   for (n=0; n<nlay; n++) {
     ilistck = ilisto;
@@ -123,9 +126,24 @@ int* _MMG2_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
       }
     }
   }
-  
+  if ( !npf ) {
+    fprintf(stderr,
+            "\n  ## Error: %s: no triangle with reference %d in the mesh.\n"
+            "              Nothing to move.\n",__func__,_MMG2_DISPREF);
+    _MMG5_DEL_MEM ( mesh,list );
+    _MMG5_DEL_MEM ( mesh,perm );
+    return NULL;
+  }
+
   /* Creation of the inverse permutation table */
-  invperm = (int*)calloc(npf+1,sizeof(int));
+  _MMG5_ADD_MEM ( mesh,(npf+1)*sizeof(int),"permutation table",
+                  _MMG5_DEL_MEM ( mesh,list );
+                  _MMG5_DEL_MEM ( mesh,perm );
+                  return NULL );
+  _MMG5_SAFE_CALLOC ( invperm,(npf+1),int,
+                      _MMG5_DEL_MEM ( mesh,list );
+                      _MMG5_DEL_MEM ( mesh,perm );
+                      return NULL );
   
   /* Step 3: count of the surface triangles in the new mesh
    Code for pt->flag : if pt->flag = 1 -> in the list

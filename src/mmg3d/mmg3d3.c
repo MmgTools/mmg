@@ -562,6 +562,8 @@ int _MMG5_saveDisp(MMG5_pMesh mesh,MMG5_pSol disp) {
  * \param disp displacement structure
  * \param met metric structure
  *
+ * \return 0 if fail, 1 if success
+ *
  * Lagrangian node displacement and meshing.
  * Code for options: info.lag >= 0 -> displacement,
  *                   info.lag > 0  -> displacement+remeshing with swap and moves
