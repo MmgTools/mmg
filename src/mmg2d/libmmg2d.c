@@ -834,8 +834,8 @@ int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   /* Print initial quality */
   if ( mesh->info.imprim > 0  ||  mesh->info.imprim < -1 ) {
     if ( !MMG2_outqua(mesh,met) ) {
-      if ( !MMG2_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
-      _MMG2D_RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
+      if ( !MMG2_unscaleMesh(mesh,disp) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+      _MMG2D_RETURN_AND_PACK(mesh,disp,MMG5_LOWFAILURE);
     }
   }
 
