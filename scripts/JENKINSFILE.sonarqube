@@ -14,7 +14,7 @@ node('mmg-sonnar-new') {
         rm -rf *
         export CFLAGS="-O0 -g -fPIC --coverage -Wall -Wunused-parameter -Wundef -Wno-long-long -Wsign-compare -Wmissing-prototypes -Wstrict-prototypes -Wcomment -pedantic -fdiagnostics-show-option"
         export LDFLAGS="--coverage"
-        cmake .. -DCMAKE_BUILD_TYPE=Debug -DPATTERN='''+list[i]+'''-DCHECK_ALLOC=ON -DBUILD_TESTING=ON -DCMAKE_C_FLAGS="$CFLAGS" -DCMAKE_EXE_LINKER_FLAGS="$LDFLAGS" -DCMAKE_INSTALL_PREFIX=$PWD/../install -DBUILD_TESTING=ON -DLONG_TESTS=OFF -DRUN_AGAIN=ON -DLIBMMG2D_STATIC=ON -DLIBMMG3D_STATIC=ON -DLIBMMG_STATIC=ON -DLIBMMG2D_STATIC=ON -DLIBMMGS_STATIC=ON -DTEST_LIBMMG=ON -DTEST_LIBMMG2D=ON -DTEST_LIBMMG3D=ON -DTEST_LIBMMGS=ON -DSCOTCH_DIR=/home/ci/scotch_6.0.4 -DSCOTCHERR_LIBRARY=/home/ci/scotch_6.0.4/lib/libscotcherr.a -DSCOTCH_LIBRARY=/home/ci/scotch_6.0.4/lib/libscotch.a -DSCOTCH_INCLUDE_DIR=/home/ci/scotch_6.0.4/include/ -DUSE_SCOTCH=ON -DELAS_DIR=/home/ci/LinearElasticity -DUSE_ELAS=ON
+        cmake .. -DCMAKE_BUILD_TYPE=Debug -DPATTERN='''+list[i]+''' -DBUILD_TESTING=ON -DCMAKE_C_FLAGS="$CFLAGS" -DCMAKE_EXE_LINKER_FLAGS="$LDFLAGS" -DCMAKE_INSTALL_PREFIX=$PWD/../install -DBUILD_TESTING=ON -DLONG_TESTS=OFF -DRUN_AGAIN=ON -DLIBMMG2D_STATIC=ON -DLIBMMG3D_STATIC=ON -DLIBMMG_STATIC=ON -DLIBMMG2D_STATIC=ON -DLIBMMGS_STATIC=ON -DTEST_LIBMMG=ON -DTEST_LIBMMG2D=ON -DTEST_LIBMMG3D=ON -DTEST_LIBMMGS=ON -DSCOTCH_DIR=/home/ci/scotch_6.0.6 -DSCOTCH_LIBRARIES=/builds/scotch_6.0.6/lib/libscotch.a -DUSE_SCOTCH=ON -DELAS_DIR=/home/ci/LinearElasticity -DUSE_ELAS=ON
         make clean
         scan-build -plist --intercept-first --analyze-headers -o analyzer_reports make 2>&1 |tee mmg-build.log
         make install |tee -a mmg-build.log
@@ -37,7 +37,7 @@ node('mmg-sonnar-new') {
         sh '''#!/bin/bash -l
         lcov -a buildPatternON/mmg-patternON.lcov -a buildPatternOFF/mmg-patternOFF.lcov -o mmg.lcov
         python /builds/sonar/lcov-to-cobertura-xml-1.6/lcov_cobertura/lcov_cobertura.py mmg.lcov --output mmg-coverage.xml
-        export CPPCHECK_INCLUDES="-IbuildPatternON/include -IbuildPatternOFF/include"
+        export CPPCHECK_INCLUDES="-IbuildPatternON/include -IbuildPatternOFF/include -IbuildPatternON/src/common -IbuildPatternOFF/src/common"
         export SOURCES_TO_ANALYZE="./src"
         cppcheck  -v -f --language=c --platform=unix64 --check-config --enable=all --xml --xml-version=2 --suppress=missingIncludeSystem ${CPPCHECK_INCLUDES} ${SOURCES_TO_ANALYZE} 2> mmg-cppcheck.xml
         /usr/local/bin/rats -w 3 --xml ${SOURCES_TO_ANALYZE} > mmg-rats.xml
