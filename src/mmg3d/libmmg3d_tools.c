@@ -118,7 +118,11 @@ int MMG3D_usage(char *prog) {
           " two domains of the same reference.\n");
 
 #ifdef USE_ELAS
-  fprintf(stdout,"-lag [0/1/2] Lagrangian mesh displacement according to mode 0/1/2\n");
+  fprintf(stdout,"-lag [n] Lagrangian mesh displacement according to mode [0/1/2]\n");
+  fprintf(stdout,"             0: displacement\n");
+  fprintf(stdout,"             1: displacement + remeshing (swap and move)\n");
+  fprintf(stdout,"             2: displacement + remeshing (split, collapse,"
+          " swap and move)\n");
 #endif
 #ifndef PATTERN
   fprintf(stdout,"-octree val  Specify the max number of points per octree cell \n");

@@ -557,7 +557,17 @@ int _MMG5_saveDisp(MMG5_pMesh mesh,MMG5_pSol disp) {
   return 1;
 }
 
-/** Lagrangian node displacement and meshing */
+/**
+ * \param mesh mesh structure
+ * \param disp displacement structure
+ * \param met metric structure
+ *
+ * Lagrangian node displacement and meshing.
+ * Code for options: info.lag >= 0 -> displacement,
+ *                   info.lag > 0  -> displacement+remeshing with swap and moves
+ *                   info.lag > 1  -> displacement+remeshing with split+collapse+swap+move
+ *
+ */
 int _MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met) {
   double  avlen,tau;
   int     itdc,itmn,maxitmn,maxitdc,nspl,ns,nm,nc,iit,k,warn;

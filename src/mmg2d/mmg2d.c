@@ -39,10 +39,13 @@ static void _MMG5_endcod() {
 static int MMG2D_usage(char *name) {
   _MMG5_mmgUsage(name);
 
-  fprintf(stdout,"-lag [0/1/2]    Lagrangian mesh displacement according to mode 0/1/2\n");
-  fprintf(stdout,"-mov filedep    (with -lag option)\n");
-  fprintf(stdout,"-nsd val        only if no given triangle, save the subdomain nb (0==all subdomain)\n");
-  fprintf(stdout,"-msh val        read and write to gmsh visu if val = 1 (out) if val=2 (in and out)\n");
+  fprintf(stdout,"-lag [n]     Lagrangian mesh displacement according to mode [0/1/2]\n");
+  fprintf(stdout,"             0: displacement\n");
+  fprintf(stdout,"             1: displacement + remeshing (swap and move)\n");
+  fprintf(stdout,"             2: displacement + remeshing (split, collapse,"
+          " swap and move)\n");
+  fprintf(stdout,"-nsd val     only if no given triangle, save the subdomain number val (0==all subdomain)\n");
+  fprintf(stdout,"-msh val     read and write to gmsh visu if val = 1 (out) if val=2 (in and out)\n");
   fprintf(stdout,"-degrad Qw Qdeg (with -lag option) : threshold for optimization\n");
 
   /* fprintf(stdout,"-per          obsolete : to deal with periodic mesh on a square\n");*/
@@ -63,13 +66,12 @@ static int MMG2D_usage(char *name) {
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param qdegrad optimization thresholds.
  * \return 0 if fail, 1 if success.
  *
  * Print the default parameters values.
  *
  */
-static inline int _MMG5_defaultValues(MMG5_pMesh mesh, double qdegrad[2]) {
+static inline int _MMG5_defaultValues(MMG5_pMesh mesh) {
   double hgradexp;
 
   hgradexp = mesh->info.hgrad;
@@ -79,8 +81,6 @@ static inline int _MMG5_defaultValues(MMG5_pMesh mesh, double qdegrad[2]) {
 
   mesh->info.hgrad = hgradexp;
 
-  fprintf(stdout,"Optimization threshold "
-          "   (-degrad) : %e %e\n",qdegrad[0],qdegrad[1]);
   fprintf(stdout,"\n\n");
 
   return 1;
@@ -220,7 +220,7 @@ int _MMG2D_writeLocalParam( MMG5_pMesh mesh ) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward a sol structure (metric).
- * \param qdegrad optimization thresholds.
+ *
  * \return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if failed
  * but a conform mesh is saved and \ref MMG5_STRONGFAILURE if failed and we
  * can't save the mesh.
@@ -231,7 +231,7 @@ int _MMG2D_writeLocalParam( MMG5_pMesh mesh ) {
  *
  */
 static inline
-int _MMG2D_defaultOption(MMG5_pMesh mesh,MMG5_pSol met, double qdegrad[2]) {
+int _MMG2D_defaultOption(MMG5_pMesh mesh,MMG5_pSol met) {
   mytime    ctim[TIMEMAX];
   double    hsiz;
   char      stim[32];
@@ -314,14 +314,14 @@ int _MMG2D_defaultOption(MMG5_pMesh mesh,MMG5_pSol met, double qdegrad[2]) {
 }
 
 
-int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,double *qdegrad) {
+int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
   int     i;
   char    namein[128];
 
   /* First step: search if user want to see the default parameters values. */
   for ( i=1; i< argc; ++i ) {
     if ( !strcmp(argv[i],"-val") ) {
-      _MMG5_defaultValues(mesh,qdegrad);
+      _MMG5_defaultValues(mesh);
       return 0;
     }
   }
@@ -348,11 +348,6 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,double *qdegrad) 
       case 'd':
         if ( !strcmp(argv[i],"-default") ) {
           mesh->mark=1;
-        }
-        else if ( !strcmp(argv[i],"-degrad") ) {
-          ++i;
-          qdegrad[0] = atof(argv[i++])/_MMG2D_ALPHA;
-          qdegrad[1] = atof(argv[i]);
         } else {  /* debug */
           if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_debug,1) )
             return 0;
@@ -610,7 +605,6 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,double *qdegrad) 
 int main(int argc,char *argv[]) {
   MMG5_pMesh    mesh;
   MMG5_pSol     met,disp;
-  double        qdegrad[2];
   int           ier,ierSave,msh;
   char          stim[32];
 
@@ -645,15 +639,12 @@ int main(int argc,char *argv[]) {
                          MMG5_ARG_end) )
     return MMG5_STRONGFAILURE;
 
-  qdegrad[0] = 10./_MMG2D_ALPHA;
-  qdegrad[1] = 1.3;
-
   /* Set default metric size */
   if ( !MMG2D_Set_solSize(mesh,met,MMG5_Vertex,0,MMG5_Scalar) )
     _MMG2D_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
 
   /* Read command line */
-  if ( !parsar(argc,argv,mesh,met,qdegrad) )  return MMG5_STRONGFAILURE;
+  if ( !parsar(argc,argv,mesh,met) )  return MMG5_STRONGFAILURE;
 
   /* load data */
   if ( mesh->info.imprim >= 0 )
@@ -716,7 +707,7 @@ int main(int argc,char *argv[]) {
 
   if ( mesh->mark ) {
     /* Save a local parameters file containing the default parameters */
-    ier = _MMG2D_defaultOption(mesh,met,qdegrad);
+    ier = _MMG2D_defaultOption(mesh,met);
     _MMG2D_RETURN_AND_FREE(mesh,met,disp,ier);
   }
   /* Lagrangian mode */
