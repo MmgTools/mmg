@@ -139,3 +139,27 @@ ADD_TEST(NAME mmg2d_LSMultiMat
   COMMAND ${EXECUT_MMG2D} -v 5 -ls -hmin 0.005 -hmax 0.1 -hausd 0.001 -hgrad 1.3
   ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat
   ${CTEST_OUTPUT_DIR}/mmg2d_LSMultiMat.o.meshb)
+
+###############################################################################
+#####
+#####         Check Lagrangian motion option
+#####
+###############################################################################
+#####
+IF ( USE_ELAS )
+  ADD_TEST(NAME mmg2d_LagMotion0_circle
+    COMMAND ${EXECUT_MMG2D} -v 5  -lag 0
+    -in ${MMG2D_CI_TESTS}/LagMotion_circle/circle
+    -out ${CTEST_OUTPUT_DIR}/mmg2d_LagMotion0_circle-circle.o.meshb
+    )
+  ADD_TEST(NAME mmg2d_LagMotion1_circle
+    COMMAND ${EXECUT_MMG2D} -v 5  -lag 1
+    -in ${MMG2D_CI_TESTS}/LagMotion_circle/circle
+    -out ${CTEST_OUTPUT_DIR}/mmg2d_LagMotion1_circle-circle.o.meshb
+    )
+  ADD_TEST(NAME mmg2d_LagMotion2_circle
+    COMMAND ${EXECUT_MMG2D} -v 5  -lag 2
+    -in ${MMG2D_CI_TESTS}/LagMotion_circle/circle
+    -out ${CTEST_OUTPUT_DIR}/mmg2d_LagMotion2_circle-circle.o.meshb
+    )
+ENDIF()
