@@ -742,6 +742,12 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
   mytime    ctim[TIMEMAX];
   char      stim[32];
 
+  /** In debug mode, check that all structures are allocated */
+  assert ( mesh );
+  assert ( met );
+  assert ( mesh->point );
+  assert ( mesh->tetra );
+
   if ( mesh->info.imprim >= 0 ) {
     fprintf(stdout,"\n  %s\n   MODULE MMG3D: %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
   }
