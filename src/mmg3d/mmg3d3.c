@@ -104,6 +104,7 @@ inline int _MMG5_intdispvol(double *v1, double *v2, double *vp, double t) {
  */
 static int _MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itdeg, int* warn) {
   MMG5_pTetra  pt;
+  MMG5_pxTetra pxt;
   MMG5_pPoint  p0,p1;
   double       len,lmax,o[3],hma2;
   double      *m1,*m2,*mp;
@@ -116,7 +117,9 @@ static int _MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itdeg, 
   hma2 = mesh->info.hmax*mesh->info.hmax;
 
   for (k=1; k<=mesh->ne; k++) {
-    pt = &mesh->tetra[k];
+    pt  = &mesh->tetra[k];
+    pxt = pt->xt ? &mesh->xtetra[pt->xt] : NULL;
+
     if ( !MG_EOK(pt) || (pt->tag & MG_REQ) )   continue;
     if ( pt->mark != itdeg ) continue;
 
@@ -131,7 +134,8 @@ static int _MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itdeg, 
       p0 = &mesh->point[ip1];
       p1 = &mesh->point[ip2];
 
-      if ( (p0->tag & MG_BDY) && (p1->tag & MG_BDY) )  continue;
+      /* Skip the non-internal edges */
+      if ( pxt && (pxt->tag[i] & MG_BDY) )  continue;
 
       len = (p1->c[0]-p0->c[0])*(p1->c[0]-p0->c[0])
         + (p1->c[1]-p0->c[1])*(p1->c[1]-p0->c[1])
@@ -162,10 +166,15 @@ static int _MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itdeg, 
     p1 = &mesh->point[ip2];
 
     /* Deal only with internal faces */
-    assert( (p0->tag & MG_BDY) && (p1->tag & MG_BDY) );
+#ifndef NDEBUG
+    if ( pxt ) {
+      assert( !(pxt->tag[imax] & MG_BDY) ); }
+#endif
     ilist = _MMG5_coquil(mesh,k,imax,list);
+
     if ( !ilist ) continue;
     else if ( ilist<0 ) return -1;
+
     o[0] = 0.5*(p0->c[0] + p1->c[0]);
     o[1] = 0.5*(p0->c[1] + p1->c[1]);
     o[2] = 0.5*(p0->c[2] + p1->c[2]);
