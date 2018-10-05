@@ -67,7 +67,6 @@ int _MMG3D_optlap(MMG5_pMesh mesh,MMG5_pSol sol) {
 
     /*initialisation*/
     for(i = 1 ; i<=mesh->np ; i++) {
-      ppt          = &mesh->point[i];
       compt[i] = 0;
       pos[3*(i-1) + 1 + 0] = 0.;
       pos[3*(i-1) + 1 + 1] = 0.;
@@ -155,7 +154,6 @@ int _MMG3D_optlap(MMG5_pMesh mesh,MMG5_pSol sol) {
 
     res= 0.;
     for(i=1 ; i<=mesh->np ; i++) {
-      ppt           = &mesh->point[i];
       if(compt[i]) {
         dd            = 1./(double) compt[i];
         pos[3*(i-1) + 1 + 0] *= dd;

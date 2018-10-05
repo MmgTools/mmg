@@ -50,7 +50,7 @@ int MMG3D_movetetrapoints(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree,in
   int           i,j,i0,ier,lists[MMG3D_LMAX+2],listv[MMG3D_LMAX+2],ilists,ilistv;
   int           improve,internal,nm,/*maxit,*/base,ns;
 
-  improve = 1;
+  // improve = 1;
   internal = 1;
   nm = ns = 0;
   // maxit = 1;
@@ -76,51 +76,53 @@ int MMG3D_movetetrapoints(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree,in
 
       ier = 0;
       if ( ppt->tag & MG_BDY ) {
-        continue;
-        /* Catch a boundary point by a boundary face */
-        if ( !pt->xt || !(MG_BDY & pxt->ftag[i]) )  continue;
-        else if( ppt->tag & MG_NOM ){
-          if( mesh->adja[4*(k-1)+1+i] ) continue;
-          ier=_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,1);
-          if( !ier )  continue;
-          else if ( ier>0 )
-            ier = _MMG5_movbdynompt(mesh,met,octree,listv,ilistv,lists,ilists,improve);
-          else
-            return -1;
-        }
-        else if ( ppt->tag & MG_GEO ) {
-          ier=_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,0);
-          if ( !ier )  continue;
-          else if ( ier>0 )
-            ier = _MMG5_movbdyridpt(mesh,met,octree,listv,ilistv,lists,ilists,improve);
-          else
-            return -1;
-        }
-        else if ( ppt->tag & MG_REF ) {
-          ier=_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,0);
-          if ( !ier )
-            continue;
-          else if ( ier>0 )
-            ier = _MMG5_movbdyrefpt(mesh,met,octree,listv,ilistv,lists,ilists,improve);
-          else
-            return -1;
-        }
-        else {
-          ier=_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,0);
-          if ( !ier )
-            continue;
-          else if ( ier<0 )
-            return -1;
 
-          n = &(mesh->xpoint[ppt->xp].n1[0]);
-          if ( !MG_GET(pxt->ori,i) ) {
-            if ( !_MMG5_directsurfball(mesh,pt->v[i0],lists,ilists,n) )
-              continue;
-          }
-//#warning CECILE a modifier pour opttyp
-          ier = _MMG5_movbdyregpt(mesh,met, octree, listv,ilistv,lists,ilists,improve,improve);
-          if ( ier )  ns++;
-        }
+        continue;
+
+        /*        /\* Catch a boundary point by a boundary face *\/ */
+/*         if ( !pt->xt || !(MG_BDY & pxt->ftag[i]) )  continue; */
+/*         else if( ppt->tag & MG_NOM ){ */
+/*           if( mesh->adja[4*(k-1)+1+i] ) continue; */
+/*           ier=_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,1); */
+/*           if( !ier )  continue; */
+/*           else if ( ier>0 ) */
+/*             ier = _MMG5_movbdynompt(mesh,met,octree,listv,ilistv,lists,ilists,improve); */
+/*           else */
+/*             return -1; */
+/*         } */
+/*         else if ( ppt->tag & MG_GEO ) { */
+/*           ier=_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,0); */
+/*           if ( !ier )  continue; */
+/*           else if ( ier>0 ) */
+/*             ier = _MMG5_movbdyridpt(mesh,met,octree,listv,ilistv,lists,ilists,improve); */
+/*           else */
+/*             return -1; */
+/*         } */
+/*         else if ( ppt->tag & MG_REF ) { */
+/*           ier=_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,0); */
+/*           if ( !ier ) */
+/*             continue; */
+/*           else if ( ier>0 ) */
+/*             ier = _MMG5_movbdyrefpt(mesh,met,octree,listv,ilistv,lists,ilists,improve); */
+/*           else */
+/*             return -1; */
+/*         } */
+/*         else { */
+/*           ier=_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,0); */
+/*           if ( !ier ) */
+/*             continue; */
+/*           else if ( ier<0 ) */
+/*             return -1; */
+
+/*           n = &(mesh->xpoint[ppt->xp].n1[0]); */
+/*           if ( !MG_GET(pxt->ori,i) ) { */
+/*             if ( !_MMG5_directsurfball(mesh,pt->v[i0],lists,ilists,n) ) */
+/*               continue; */
+/*           } */
+/* //#warning CECILE a modifier pour opttyp */
+/*           ier = _MMG5_movbdyregpt(mesh,met, octree, listv,ilistv,lists,ilists,improve,improve); */
+/*           if ( ier )  ns++; */
+/*         } */
       }
       else if ( internal ) {
         ilistv = _MMG5_boulevolp(mesh,k,i0,listv);
