@@ -701,6 +701,7 @@ static int _MMG3D_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol) {
         nz ++;
     }
     assert(nz < 4);
+
     if ( npls ) {
       assert(!nmns);
       pt->ref = MG_PLUS;
