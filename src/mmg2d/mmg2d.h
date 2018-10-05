@@ -285,7 +285,7 @@ int  MMG2_bdryEdge(MMG5_pMesh );
 int _MMG2_setadj(MMG5_pMesh );
 int _MMG2_singul(MMG5_pMesh,int );
 int _MMG2_analys(MMG5_pMesh );
-int _MMG2_norver(MMG5_pMesh );
+int _MMG2_norver(MMG5_pMesh,int );
 int _MMG2_regnor(MMG5_pMesh );
 int _MMG2_boulen(MMG5_pMesh , int ,char ,int *,int *,double *);
 int MMG2_mmg2d1n(MMG5_pMesh ,MMG5_pSol );

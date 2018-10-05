@@ -678,7 +678,7 @@ int MMG2_mmg2d9(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met) {
     }
 
     /* Define normal vectors at vertices on curves */
-    if ( !_MMG2_norver(mesh) ) {
+    if ( !_MMG2_norver(mesh,MMG5_DISPREF) ) {
       fprintf(stderr,"\n  ## Problem in calculating normal vectors. Exit program.\n");
       return 0;
     }

@@ -194,8 +194,9 @@ int _MMG2_setadj(MMG5_pMesh mesh) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure \param ref reference of the
- * boundary to analyze (analyze all the boundaries if MMG5_UNSET)
+ * \param mesh pointer toward the mesh structure
+ * \param ref reference of the boundary to analyze (analyze all the boundaries
+ * if MMG5_UNSET)
  *
  * \return 1 if success, 0 if fail.
  *
@@ -325,8 +326,17 @@ int _MMG2_singul(MMG5_pMesh mesh, int ref ) {
   return 1;
 }
 
-/* Calculate normal vectors at vertices of the mesh */
-int _MMG2_norver(MMG5_pMesh mesh) {
+/**
+ * \param mesh pointer toward the mesh structure
+ * \param ref reference of the boundary to analyze (analyze all the boundaries
+ * if MMG5_UNSET)
+ *
+ * \return 1 if success, 0 if fail.
+ *
+ * Calculate normal vectors at vertices of the mesh.
+ *
+ */
+int _MMG2_norver(MMG5_pMesh mesh, int ref) {
   MMG5_pTria       pt,pt1;
   MMG5_pPoint      ppt;
   int              k,kk,nn,pleft,pright;
@@ -334,9 +344,31 @@ int _MMG2_norver(MMG5_pMesh mesh) {
 
   nn = 0;
 
-  /* reset the ppt->s tag */
-  for (k=1; k<=mesh->np; ++k) {
-    mesh->point[k].s = 0;
+  if ( ref == MMG5_UNSET ) {
+    /* reset the ppt->s tag */
+    for (k=1; k<=mesh->np; ++k) {
+      mesh->point[k].s = 0;
+    }
+  }
+  else {
+    /** Mark the points that we don't want to analyze */
+    /* First: mark all the points */
+    for ( k=1; k<=mesh->np; ++k ) {
+      mesh->point[k].s = 1;
+    }
+    /* Second: if the point belongs to a boundary edge of reference ref, remove
+     * the mark */
+    for ( k=1; k<=mesh->nt; ++k ) {
+      pt = &mesh->tria[k];
+
+      for (i=0; i<3; i++) {
+        if ( !MG_EDG(pt->tag[i]) ) continue;
+        if ( pt->edg[i] != ref )   continue;
+
+        mesh->point[pt->v[_MMG5_iprv2[i]]].s = 0;
+        mesh->point[pt->v[_MMG5_inxt2[i]]].s = 0;
+      }
+    }
   }
 
   /* Normal computation */
@@ -671,7 +703,7 @@ int _MMG2_analys(MMG5_pMesh mesh) {
   }
 
   /* Define normal vectors at vertices on curves */
-  if ( !_MMG2_norver(mesh) ) {
+  if ( !_MMG2_norver(mesh,MMG5_UNSET) ) {
      fprintf(stderr,"\n  ## Problem in calculating normal vectors. Exit program.\n");
     return 0;
   }
