@@ -419,11 +419,23 @@ ADD_TEST(NAME mmg3d_OpnBdy_ref_island
 ###############################################################################
 #####
 IF ( USE_ELAS )
+  ADD_TEST(NAME mmg3d_LagMotion0_tinyBoxt
+    COMMAND ${EXECUT_MMG3D} -v 5  -lag 0
+    -in ${MMG3D_CI_TESTS}/LagMotion1_tinyBoxt/tinyBoxt
+    -sol ${MMG3D_CI_TESTS}/LagMotion1_tinyBoxt/tinyBoxt.sol
+    -out ${CTEST_OUTPUT_DIR}/mmg3d_LagMotion0_tinyBoxt-tinyBoxt.o.meshb
+    )
   ADD_TEST(NAME mmg3d_LagMotion1_tinyBoxt
     COMMAND ${EXECUT_MMG3D} -v 5  -lag 1
     -in ${MMG3D_CI_TESTS}/LagMotion1_tinyBoxt/tinyBoxt
     -sol ${MMG3D_CI_TESTS}/LagMotion1_tinyBoxt/tinyBoxt.sol
     -out ${CTEST_OUTPUT_DIR}/mmg3d_LagMotion1_tinyBoxt-tinyBoxt.o.meshb
+    )
+  ADD_TEST(NAME mmg3d_LagMotion2_tinyBoxt
+    COMMAND ${EXECUT_MMG3D} -v 5  -lag 2
+    -in ${MMG3D_CI_TESTS}/LagMotion1_tinyBoxt/tinyBoxt
+    -sol ${MMG3D_CI_TESTS}/LagMotion1_tinyBoxt/tinyBoxt.sol
+    -out ${CTEST_OUTPUT_DIR}/mmg3d_LagMotion2_tinyBoxt-tinyBoxt.o.meshb
     )
 ENDIF()
 
@@ -482,11 +494,23 @@ IF ( LONG_TESTS )
   ###############################################################################
   #####
   IF ( USE_ELAS )
+    ADD_TEST(NAME mmg3d_LagMotion0_boxt
+      COMMAND ${EXECUT_MMG3D} -v 5  -lag 0
+      -in ${MMG3D_CI_TESTS}/LagMotion1_boxt/boxt
+      -sol ${MMG3D_CI_TESTS}/LagMotion1_boxt/boxt.sol
+      -out ${CTEST_OUTPUT_DIR}/mmg3d_LagMotion0_boxt-boxt.o.meshb
+      )
     ADD_TEST(NAME mmg3d_LagMotion1_boxt
       COMMAND ${EXECUT_MMG3D} -v 5  -lag 1
       -in ${MMG3D_CI_TESTS}/LagMotion1_boxt/boxt
       -sol ${MMG3D_CI_TESTS}/LagMotion1_boxt/boxt.sol
       -out ${CTEST_OUTPUT_DIR}/mmg3d_LagMotion1_boxt-boxt.o.meshb
+      )
+    ADD_TEST(NAME mmg3d_LagMotion2_boxt
+      COMMAND ${EXECUT_MMG3D} -v 5  -lag 2
+      -in ${MMG3D_CI_TESTS}/LagMotion1_boxt/boxt
+      -sol ${MMG3D_CI_TESTS}/LagMotion1_boxt/boxt.sol
+      -out ${CTEST_OUTPUT_DIR}/mmg3d_LagMotion2_boxt-boxt.o.meshb
       )
   ENDIF()
 
