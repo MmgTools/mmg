@@ -216,8 +216,9 @@ int _MMG2_chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
     }
   }
 
-  /* Interpolate metric at ip, if any */
-  MMG2D_intmet(mesh,met,k,i,ip,0.5);
+  if ( met->m )
+    /* Interpolate metric at ip, if any */
+    MMG2D_intmet(mesh,met,k,i,ip,0.5);
 
   return ip;
 }

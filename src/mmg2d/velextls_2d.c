@@ -35,7 +35,6 @@
 
 #ifdef USE_ELAS
 
-#define _MMG2_DISPREF   10
 #define _LS_LAMBDA      10.0e5
 #define _LS_MU          8.2e5
 
@@ -78,7 +77,7 @@ int* _MMG2_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
     if ( !MG_EOK(pt) ) continue;
 
     for (i=0; i<3; i++) {
-      if ( pt->edg[i] == _MMG2_DISPREF ) {
+      if ( pt->edg[i] == MMG5_DISPREF ) {
         ilist++;
         list[ilist] = k;
         MG_SET(pt->flag,0);
@@ -129,7 +128,7 @@ int* _MMG2_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
   if ( !npf ) {
     fprintf(stderr,
             "\n  ## Error: %s: no triangle with reference %d in the mesh.\n"
-            "              Nothing to move.\n",__func__,_MMG2_DISPREF);
+            "              Nothing to move.\n",__func__,MMG5_DISPREF);
     _MMG5_DEL_MEM ( mesh,list );
     _MMG5_DEL_MEM ( mesh,perm );
     return NULL;
@@ -159,7 +158,7 @@ int* _MMG2_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
       jedg  = adja[i] % 3;
 
       /* Face i carries a non homogeneous Dirichlet BC */
-      if ( pt->edg[i] == _MMG2_DISPREF ) {
+      if ( pt->edg[i] == MMG5_DISPREF ) {
 
         /* If this triangle has not been taken into account */
         if ( MG_GET(pt->flag,i+1) ) continue;
@@ -229,7 +228,7 @@ int* _MMG2_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
       jel  = adja[i] / 3;
 
       /* Case where face i carries a non homogeneous Dirichlet BC */
-      if ( pt->edg[i] == _MMG2_DISPREF ) {
+      if ( pt->edg[i] == MMG5_DISPREF ) {
         /* If this triangle has not been taken into account */
         if ( MG_GET(pt->flag,i+1) ) continue;
         nef ++;
@@ -337,7 +336,7 @@ int _MMG2_unpackLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int npf,int *invper
   return 1;
 }
 
-/** Extension of the displacement at the nodes of edges tagged _MMG2_DISPREF */
+/** Extension of the displacement at the nodes of edges tagged MMG5_DISPREF */
 int _MMG2_velextLS(MMG5_pMesh mesh,MMG5_pSol disp) {
   LSst       *lsst;
   int        npf,*invperm;

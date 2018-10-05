@@ -37,7 +37,6 @@
 #include "mmg3d.h"
 #include "ls_calls.h"
 #define _MMG5_DEGTOL    0.75
-#define _MMG5_DISPREF   10
 #define _LS_LAMBDA      10.0e5
 #define _LS_MU          8.2e5
 
@@ -92,7 +91,7 @@ int* _MMG5_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
     pxt = &mesh->xtetra[pt->xt];
 
     for(i=0; i<4; i++) {
-      if ( (pxt->ftag[i] & MG_BDY) && (pxt->ref[i] == _MMG5_DISPREF) ) {
+      if ( (pxt->ftag[i] & MG_BDY) && (pxt->ref[i] == MMG5_DISPREF) ) {
         ilist++;
         list[ilist] = k;
         MG_SET(pt->mark,0);
@@ -111,7 +110,7 @@ int* _MMG5_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
   if ( !npf ) {
     fprintf(stderr,
             "\n  ## Error: %s: no triangle with reference %d in the mesh.\n"
-            "              Nothing to move.\n",__func__,_MMG5_DISPREF);
+            "              Nothing to move.\n",__func__,MMG5_DISPREF);
     _MMG5_DEL_MEM ( mesh,list );
     _MMG5_DEL_MEM ( mesh,perm );
     return NULL;
@@ -174,7 +173,7 @@ int* _MMG5_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
       jface = adja[i] % 4;
 
       /* Face i carries a non homogeneous Dirichlet BC */
-      if ( pt->xt && (pxt->ftag[i] & MG_BDY) && (pxt->ref[i] == _MMG5_DISPREF) ) {
+      if ( pt->xt && (pxt->ftag[i] & MG_BDY) && (pxt->ref[i] == MMG5_DISPREF) ) {
         /* If this triangle has not been taken into account */
         if ( MG_GET(pt->mark,i+1) ) continue;
 
@@ -250,7 +249,7 @@ int* _MMG5_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
       jface = adja[i] % 4;
 
       /* Face i carries a non homogeneous Dirichlet BC */
-      if ( pt->xt && (pxt->ftag[i] & MG_BDY) && (pxt->ref[i] == _MMG5_DISPREF) ) {
+      if ( pt->xt && (pxt->ftag[i] & MG_BDY) && (pxt->ref[i] == MMG5_DISPREF) ) {
         /* If this triangle has not been taken into account */
         if ( MG_GET(pt->mark,i+1) ) continue;
         ntf++;
@@ -388,7 +387,7 @@ int _MMG5_unpackLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int npf,int *invper
  *
  * \return 0 if fail, 1 if success.
  *
- * Extension of the displacement at the nodes of triangles tagged _MMG5_DISPREF
+ * Extension of the displacement at the nodes of triangles tagged MMG5_DISPREF
  *
  */
 int _MMG5_velextLS(MMG5_pMesh mesh,MMG5_pSol disp) {

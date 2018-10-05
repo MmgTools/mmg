@@ -78,6 +78,12 @@ extern "C" {
 #define MG_PLUS    2
 #define MG_MINUS   3
 
+/* Macro for unset or unititialized mark */
+#define MMG5_UNSET -1
+
+/* reference of the boundary that moves in lagrangian mode */
+#define MMG5_DISPREF 0
+
 /* million */
 #define _MMG5_MILLION 1048576
 
