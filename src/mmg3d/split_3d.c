@@ -5148,7 +5148,6 @@ int _MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
     pt[7]->xt = 0;
     if ( isxt ) {
       if ( !isxt0 ) {
-        isxt0 = 1;
         pt[7]->xt = nxt0;
         pxt = &mesh->xtetra[pt[7]->xt];
         memcpy(pxt,&xt,sizeof(MMG5_xTetra));

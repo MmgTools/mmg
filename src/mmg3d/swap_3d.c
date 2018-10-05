@@ -497,7 +497,6 @@ int _MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,
 
   ier = _MMG5_split1b(mesh,met,list,ret,nm,0,typchk-1,0);
   /* pointer adress may change if we need to realloc memory during split */
-  pt  = &mesh->tetra[iel];
   pt1 = &mesh->tetra[iel1];
 
   if ( ier < 0 ) {
@@ -572,13 +571,9 @@ int MMG3D_swap23(MMG5_pMesh mesh,MMG5_pSol met,int k,char metRidTyp,
   pt0     = &mesh->tetra[k];
 
   assert ( pt0->xt );
-
-  pxt0 = &mesh->xtetra[pt0->xt];
-
   assert ( ifac>=0 && adj>0 );
 
   /** Neighbouring element with which we will try to swap */
-  adja = &mesh->adja[4*(k-1)+1];
   k1   = adj/4;
 
   assert(k1);
