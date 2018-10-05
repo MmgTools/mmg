@@ -405,12 +405,6 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
           if ( ++i < argc && isdigit(argv[i][0]) ) {
             if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_lag,atoi(argv[i])) )
               return 0;
-
-            /* No connectivity changes unless lag >= 2 */
-            if ( atoi(argv[i]) < 2 ) {
-              if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_noinsert,1) )
-                return 0;
-            }
           }
           else if ( i == argc ) {
             fprintf(stderr,"Missing argument option %s\n",argv[i-1]);

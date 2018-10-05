@@ -145,6 +145,11 @@ int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
     if ( val < 0 || val > 2 )
       return 0;
     mesh->info.lag = val;
+    /* No connectivity changes unless lag >= 2 */
+    if ( val < 2 ) {
+      if ( !MMG2D_Set_iparameter(mesh,sol,MMG2D_IPARAM_noinsert,1) )
+        return 0;
+    }
     break;
   case MMG2D_IPARAM_msh :
     mesh->info.nreg = val;
