@@ -5285,14 +5285,14 @@ int _MMG5_splitedg(MMG5_pMesh mesh, MMG5_pSol met,int iel, int iar, double crit)
   o[1] = 0.5*(p0->c[1] + p1->c[1]);
   o[2] = 0.5*(p0->c[2] + p1->c[2]);
 
-  ip = _MMG3D_newPt(mesh,o,MG_NOTAG);
+  ip = _MMG3D_newPt(mesh,o,tag);
 
   if ( !ip )  {
     /* reallocation of point table */
     _MMG3D_POINT_REALLOC(mesh,met,ip,mesh->gap,
                          warn=1;
                          break
-                         ,o,MG_NOTAG);
+                         ,o,tag);
   }
 
   if ( warn ) {
