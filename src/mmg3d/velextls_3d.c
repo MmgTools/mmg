@@ -37,7 +37,7 @@
 #include "mmg3d.h"
 #include "ls_calls.h"
 #define _MMG5_DEGTOL    0.75
-#define _MMG5_DISPREF   0
+#define _MMG5_DISPREF   10
 #define _LS_LAMBDA      10.0e5
 #define _LS_MU          8.2e5
 

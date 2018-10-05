@@ -203,6 +203,7 @@ int _MMG2_singul(MMG5_pMesh mesh) {
 
   nre = nc = nm = 0;
 
+  /** Singularity identification */
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( ! MG_EOK(pt) ) continue;
@@ -212,69 +213,71 @@ int _MMG2_singul(MMG5_pMesh mesh) {
 
       if ( ppt->s ) continue;
       ppt->s = 1;
-      if ( !MG_VOK(ppt) || MG_SIN(ppt->tag) )  continue;
-      else if ( MG_EDG(ppt->tag) ) {
-        ns = _MMG5_bouler(mesh,mesh->adja,k,i,list,listref,&ng,&nr,MMG2_LONMAX);
 
-        if ( !ns )  continue;
-        if ( (ng+nr) > 2 ) {
-          /* Previous classification may be subject to discussion, and may depend on the user's need */
+      if ( !MG_VOK(ppt) || MG_SIN(ppt->tag) )  continue;
+
+      if ( !MG_EDG(ppt->tag) ) continue;
+
+      ns = _MMG5_bouler(mesh,mesh->adja,k,i,list,listref,&ng,&nr,MMG2_LONMAX);
+
+      if ( !ns )  continue;
+      if ( (ng+nr) > 2 ) {
+        /* Previous classification may be subject to discussion, and may depend on the user's need */
+        ppt->tag |= MG_NOM;
+        nm++;
+        /* Two ridge curves and one ref curve: non manifold situation */
+        /*if ( ng == 2 && nr == 1 ) {
           ppt->tag |= MG_NOM;
           nm++;
-          /* Two ridge curves and one ref curve: non manifold situation */
-          /*if ( ng == 2 && nr == 1 ) {
-            ppt->tag |= MG_NOM;
-            nm++;
           }
           else {
-            ppt->tag |= MG_CRN + MG_REQ;
-            nre++;
-            nc++;
+          ppt->tag |= MG_CRN + MG_REQ;
+          nre++;
+          nc++;
           }*/
-        }
-        /* One ridge curve and one ref curve meeting at a point */
-        else if ( (ng == 1) && (nr == 1) ) {
-          ppt->tag |= MG_REQ;
-          nre++;
-        }
-        /* Evanescent ridge */
-        else if ( ng == 1 && !nr ){
-          ppt->tag |= MG_CRN + MG_REQ;
-          nre++;
-          nc++;
-        }
-        /* Evanescent ref curve */
-        else if ( nr == 1 && !ng ){
-          ppt->tag |= MG_CRN + MG_REQ;
-          nre++;
-          nc++;
-        }
-        /* Check ridge angle */
-        else {
-          assert ( ng == 2 || nr == 2 );
-          p1 = &mesh->point[list[1]];
-          p2 = &mesh->point[list[2]];
-          ux = p1->c[0] - ppt->c[0];
-          uy = p1->c[1] - ppt->c[1];
-          uz = p1->c[2] - ppt->c[2];
-          vx = p2->c[0] - ppt->c[0];
-          vy = p2->c[1] - ppt->c[1];
-          vz = p2->c[2] - ppt->c[2];
-          dd = (ux*ux + uy*uy + uz*uz) * (vx*vx + vy*vy + vz*vz);
+      }
+      /* One ridge curve and one ref curve meeting at a point */
+      else if ( (ng == 1) && (nr == 1) ) {
+        ppt->tag |= MG_REQ;
+        nre++;
+      }
+      /* Evanescent ridge */
+      else if ( ng == 1 && !nr ){
+        ppt->tag |= MG_CRN + MG_REQ;
+        nre++;
+        nc++;
+      }
+      /* Evanescent ref curve */
+      else if ( nr == 1 && !ng ){
+        ppt->tag |= MG_CRN + MG_REQ;
+        nre++;
+        nc++;
+      }
+      /* Check ridge angle */
+      else {
+        assert ( ng == 2 || nr == 2 );
+        p1 = &mesh->point[list[1]];
+        p2 = &mesh->point[list[2]];
+        ux = p1->c[0] - ppt->c[0];
+        uy = p1->c[1] - ppt->c[1];
+        uz = p1->c[2] - ppt->c[2];
+        vx = p2->c[0] - ppt->c[0];
+        vy = p2->c[1] - ppt->c[1];
+        vz = p2->c[2] - ppt->c[2];
+        dd = (ux*ux + uy*uy + uz*uz) * (vx*vx + vy*vy + vz*vz);
 
-          /* If both edges carry different refs, tag vertex as singular */
-          if ( listref[1] != listref[2] ) {
+        /* If both edges carry different refs, tag vertex as singular */
+        if ( listref[1] != listref[2] ) {
+          ppt->tag |= MG_CRN;
+          nc++;
+        }
+
+        /* Check angle */
+        if ( fabs(dd) > _MMG5_EPSD ) {
+          dd = (ux*vx + uy*vy + uz*vz) / sqrt(dd);
+          if ( dd > -mesh->info.dhd ) {
             ppt->tag |= MG_CRN;
             nc++;
-          }
-
-          /* Check angle */
-          if ( fabs(dd) > _MMG5_EPSD ) {
-            dd = (ux*vx + uy*vy + uz*vz) / sqrt(dd);
-            if ( dd > -mesh->info.dhd ) {
-              ppt->tag |= MG_CRN;
-              nc++;
-            }
           }
         }
       }
