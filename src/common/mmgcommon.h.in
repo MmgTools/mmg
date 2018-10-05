@@ -60,7 +60,7 @@ extern "C" {
 
 #define MG_VER   "@CMAKE_RELEASE_VERSION@"
 #define MG_REL   "@CMAKE_RELEASE_DATE@"
-#define MG_CPY   "Copyright (c) IMB-LJLL, 2004-"
+#define MG_CPY   "Copyright (c) Bdx INP/CNRS/Inria/UPMC, 2004-"
 #define MG_STR   "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"
 
 /** Check if \a a and \a b have the same sign */
