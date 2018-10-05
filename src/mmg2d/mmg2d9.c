@@ -668,6 +668,22 @@ int MMG2_mmg2d9(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met) {
   mesh->info.hmin = hmintmp;
   mesh->info.hmax = hmaxtmp;
 
+  /* If mesh optim with insertion and collapse, perform a new analysis of the
+   * _MMG2_DISPREF boundary */
+  if ( mesh->info.lag >= 2 ) {
+    /* Identify singularities in the mesh */
+    if ( !_MMG2_singul(mesh,MMG5_DISPREF) ) {
+      fprintf(stderr,"\n  ## Problem in identifying singularities. Exit program.\n");
+      return 0;
+    }
+
+    /* Define normal vectors at vertices on curves */
+    if ( !_MMG2_norver(mesh) ) {
+      fprintf(stderr,"\n  ## Problem in calculating normal vectors. Exit program.\n");
+      return 0;
+    }
+  }
+
   /* Clean memory */
   _MMG5_DEL_MEM(mesh,disp->m);
 

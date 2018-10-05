@@ -193,8 +193,16 @@ int _MMG2_setadj(MMG5_pMesh mesh) {
   return 1;
 }
 
-/* Identify singularities in the mesh */
-int _MMG2_singul(MMG5_pMesh mesh) {
+/**
+ * \param mesh pointer toward the mesh structure \param ref reference of the
+ * boundary to analyze (analyze all the boundaries if MMG5_UNSET)
+ *
+ * \return 1 if success, 0 if fail.
+ *
+ * Identify singularities in the mesh.
+ *
+ */
+int _MMG2_singul(MMG5_pMesh mesh, int ref ) {
   MMG5_pTria          pt;
   MMG5_pPoint         ppt,p1,p2;
   double              ux,uy,uz,vx,vy,vz,dd;
@@ -203,9 +211,31 @@ int _MMG2_singul(MMG5_pMesh mesh) {
 
   nre = nc = nm = 0;
 
-  /* reset the ppt->s tag */
-  for (k=1; k<=mesh->np; ++k) {
-    mesh->point[k].s = 0;
+  if ( ref == MMG5_UNSET ) {
+    /* reset the ppt->s tag */
+    for (k=1; k<=mesh->np; ++k) {
+      mesh->point[k].s = 0;
+    }
+  }
+  else {
+    /** Mark the points that we don't want to analyze */
+    /* First: mark all the points */
+    for ( k=1; k<=mesh->np; ++k ) {
+      mesh->point[k].s = 1;
+    }
+    /* Second: if the point belongs to a boundary edge of reference ref, remove
+     * the mark */
+    for ( k=1; k<=mesh->nt; ++k ) {
+      pt = &mesh->tria[k];
+
+      for (i=0; i<3; i++) {
+        if ( !MG_EDG(pt->tag[i]) ) continue;
+        if ( pt->edg[i] != ref )   continue;
+
+        mesh->point[pt->v[_MMG5_iprv2[i]]].s = 0;
+        mesh->point[pt->v[_MMG5_inxt2[i]]].s = 0;
+      }
+    }
   }
 
   /** Singularity identification */
@@ -635,7 +665,7 @@ int _MMG2_analys(MMG5_pMesh mesh) {
   }
 
   /* Identify singularities in the mesh */
-  if ( !_MMG2_singul(mesh) ) {
+  if ( !_MMG2_singul(mesh,MMG5_UNSET) ) {
      fprintf(stderr,"\n  ## Problem in identifying singularities. Exit program.\n");
     return 0;
   }
