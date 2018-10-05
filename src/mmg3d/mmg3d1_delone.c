@@ -1162,10 +1162,10 @@ _MMG5_adptet_delone(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree) {
     nnf+=nf;
   } else  nnf = nf = 0;
 
-#ifdef DEBUG
-  fprintf(stdout,"$$$$$$$$$$$$$$$$$$ INITIAL SWAP %7d\n",nnf);
-  _MMG3D_outqua(mesh,met);
-#endif
+  if ( mesh->info.ddebug ) {
+    fprintf(stdout," ------------- Delaunay: INITIAL SWAP %7d\n",nnf);
+    _MMG3D_outqua(mesh,met);
+  }
 
   /* Iterative mesh modifications */
   warn = 0;
@@ -1235,10 +1235,6 @@ int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
     }
   }
 
-#ifdef DEBUG
-  _MMG3D_inqua(mesh,met0);
-#endif
-
   /**--- stage 2: computational mesh */
   if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
     fprintf(stdout,"  ** COMPUTATIONAL MESH\n");
@@ -1274,11 +1270,6 @@ int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
     return 0;
   }
 
-#ifdef DEBUG
-  puts("---------------------------Fin anatet---------------------");
-  _MMG3D_outqua(mesh,met);
-#endif
-
   /* renumerotation if available */
   if ( !_MMG5_scotchCall(mesh,met) ) {
     if ( octree )
@@ -1303,10 +1294,6 @@ int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
     return 0;
   }
 
-#ifdef DEBUG
-  puts("---------------------Fin adptet-----------------");
-  _MMG3D_outqua(mesh,met);
-#endif
   /* in test phase: check if no element with 2 bdry faces */
   if ( !_MMG5_chkfemtopo(mesh) ) {
     fprintf(stderr,"\n  ## Topology of mesh unsuited for fem computations. Exit program.\n");
