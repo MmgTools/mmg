@@ -56,13 +56,13 @@ int _MMG3D_tetraQual(MMG5_pMesh mesh, MMG5_pSol met,char metRidTyp) {
   iel = 1;
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
-     if( !MG_EOK(pt) )   continue;
+    if( !MG_EOK(pt) )   continue;
 
-     if ( !metRidTyp && met->size == 6 && met->m ) {
-       pt->qual = _MMG5_caltet33_ani(mesh,met,pt);
-     }
-     else
-       pt->qual = _MMG5_orcal(mesh,met,k);
+    if ( !metRidTyp && met->size == 6 && met->m ) {
+      pt->qual = _MMG5_caltet33_ani(mesh,met,pt);
+    }
+    else
+      pt->qual = _MMG5_orcal(mesh,met,k);
 
     if ( pt->qual < minqual ) {
       minqual = pt->qual;
@@ -102,8 +102,6 @@ inline double _MMG5_caltet33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
   iad1  = met->size * ip[1];
   iad2  = met->size * ip[2];
   iad3  = met->size * ip[3];
-
-  cal = _MMG5_NULKAL;
 
   /* average metric */
   for (k=0; k<6; k++)
@@ -146,8 +144,8 @@ inline double _MMG5_caltet33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
   if ( vol <= 0. )  return 0.0;
 
   det = mm[0] * ( mm[3]*mm[5] - mm[4]*mm[4]) \
-      - mm[1] * ( mm[1]*mm[5] - mm[2]*mm[4]) \
-      + mm[2] * ( mm[1]*mm[4] - mm[2]*mm[3]);
+    - mm[1] * ( mm[1]*mm[5] - mm[2]*mm[4]) \
+    + mm[2] * ( mm[1]*mm[4] - mm[2]*mm[3]);
   if ( det < _MMG5_EPSD2 )   {
     return 0.0;
   }
@@ -199,8 +197,8 @@ inline double _MMG5_caltet33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
  *
  */
 int MMG3D_computePrilen( MMG5_pMesh mesh, MMG5_pSol met, double* avlen,
-  double* lmin, double* lmax, int* ned, int* amin, int* bmin, int* amax,
-  int* bmax, int* nullEdge, char metRidTyp, double** bd_in, int hl[9] )
+                         double* lmin, double* lmax, int* ned, int* amin, int* bmin, int* amax,
+                         int* bmax, int* nullEdge, char metRidTyp, double** bd_in, int hl[9] )
 {
   MMG5_pTetra     pt;
   MMG5_pPoint     ppt;
@@ -360,9 +358,9 @@ void MMG3D_computeLESqua(MMG5_pMesh mesh,MMG5_pSol met,int *ne,double *max,doubl
   /*compute tet quality*/
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
-     if( !MG_EOK(pt) )   continue;
+    if( !MG_EOK(pt) )   continue;
 
-     pt->qual = _MMG5_orcal(mesh,met,k);
+    pt->qual = _MMG5_orcal(mesh,met,k);
   }
 
   if ( mesh->info.imprim <= 0 )
@@ -386,7 +384,7 @@ void MMG3D_computeLESqua(MMG5_pMesh mesh,MMG5_pSol met,int *ne,double *max,doubl
     if ( (!mmgWarn0) && (_MMG5_orvol(mesh->point,pt->v) < 0.0) ) {
       mmgWarn0 = 1;
       fprintf(stderr,"  ## Warning: %s: at least 1 negative volume.\n",
-	      __func__);
+              __func__);
     }
     rap = 1 - _MMG3D_ALPHAD * pt->qual;
     if ( rap > (*min) ) {
@@ -533,7 +531,7 @@ int MMG3D_displayQualHisto_internal(int ne,double max,double avg,double min,int 
  *
  */
 void MMG3D_computeInqua(MMG5_pMesh mesh,MMG5_pSol met,int *ne,double *max,double *avg,
-			double *min,int *iel,int *good,int *med,int his[5]) {
+                        double *min,int *iel,int *good,int *med,int his[5]) {
   MMG5_pTetra pt;
   double      rap;
   int         k,ok,ir,nex;
@@ -542,17 +540,17 @@ void MMG3D_computeInqua(MMG5_pMesh mesh,MMG5_pSol met,int *ne,double *max,double
   /*compute tet quality*/
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
-     if( !MG_EOK(pt) )   continue;
+    if( !MG_EOK(pt) )   continue;
 
-     if ( met->m ) {
-       if ( met->size == 6) {
-         pt->qual = _MMG5_caltet33_ani(mesh,met,pt);
-       }
-       else
-         pt->qual = _MMG5_orcal(mesh,met,k);
-     }
-     else // -A option
-       pt->qual = _MMG5_caltet_iso(mesh,met,pt);
+    if ( met->m ) {
+      if ( met->size == 6) {
+        pt->qual = _MMG5_caltet33_ani(mesh,met,pt);
+      }
+      else
+        pt->qual = _MMG5_orcal(mesh,met,k);
+    }
+    else // -A option
+      pt->qual = _MMG5_caltet_iso(mesh,met,pt);
   }
   if ( mesh->info.imprim <= 0 ) return;
 
@@ -574,7 +572,7 @@ void MMG3D_computeInqua(MMG5_pMesh mesh,MMG5_pSol met,int *ne,double *max,double
     if ( (!mmgWarn0) && (_MMG5_orvol(mesh->point,pt->v) < 0.0) ) {
       mmgWarn0 = 1;
       fprintf(stderr,"  ## Warning: %s: at least 1 negative volume\n",
-	      __func__);
+              __func__);
     }
     rap = _MMG3D_ALPHAD * pt->qual;
     if ( rap < (*min) ) {
@@ -716,8 +714,8 @@ int _MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
   /*compute tet quality*/
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
-     if( !MG_EOK(pt) )   continue;
-     pt->qual = _MMG5_orcal(mesh,met,k);
+    if( !MG_EOK(pt) )   continue;
+    pt->qual = _MMG5_orcal(mesh,met,k);
   }
 
   if ( mesh->info.imprim <= 0 )
@@ -822,7 +820,7 @@ int _MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcib
       }
 
       dnaddloc = 0;
-      dnpdelloc = 0;
+      //dnpdelloc = 0;
 
       len = lent[ia];
 
@@ -842,9 +840,9 @@ int _MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcib
         //nb de point a inserer pour cette arete de ce tetra : on divise par lon
         //dnins = dned*(1./lon) + (dnface/3. + dnint/6.);//(dnface/12. + dnint/6.);
         //if(!isbdry) {
-          //nb points sur l'arete +
-          //lon*(2/3 nb point sur la face (ie 1/3 de face et 2 faces adj a l'arete) + 1/6 nb de point interne)
-          dnaddloc = dned + lon*(2*dnface/3. + dnint/6.);
+        //nb points sur l'arete +
+        //lon*(2/3 nb point sur la face (ie 1/3 de face et 2 faces adj a l'arete) + 1/6 nb de point interne)
+        dnaddloc = dned + lon*(2*dnface/3. + dnint/6.);
         //} else {
         //  dnaddloc = 0.5*(dned + lon*(2*dnface/3. + dnint/6.));
         //}
@@ -873,24 +871,24 @@ int _MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcib
         }
       } else if(len > 2.8) {
         //if(!isbdry) {
-          dnaddloc = 2.;
+        dnaddloc = 2.;
         //} else {
         //  dnaddloc = 1;
         //}
         if(!loc){
-         // if(!isbdry) {
-            dnadd += 2.;
-         // } else {
-         //   dnadd++;
-         // }
+          // if(!isbdry) {
+          dnadd += 2.;
+          // } else {
+          //   dnadd++;
+          // }
         }
         //dnins = 2;
       } else if(len > 1.41) {
         //if(!isbdry)
-          dnaddloc = 1;
+        dnaddloc = 1;
         if(!loc) {
           //if(!isbdry)
-            dnadd += 1.;
+          dnadd += 1.;
         }
         //dnins = 1;
       } else if(len < 0.6) {
@@ -899,21 +897,21 @@ int _MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcib
         leninv = 1./len;
         if(pt->v[ipa]<pt->v[ipb]) {
           if(!pdel[pt->v[ipa]]) {
-           // if(!isbdry) {
-              dnpdelloc = (leninv - 1.)/leninv;
-           // } else {
-           //   dnpdelloc = 0.5*(leninv - 1.)/leninv;
-           // }
+            // if(!isbdry) {
+            dnpdelloc = (leninv - 1.)/leninv;
+            // } else {
+            //   dnpdelloc = 0.5*(leninv - 1.)/leninv;
+            // }
             if(!loc) {
               dnpdel+=dnpdelloc;
               pdel[pt->v[ipa]]=1;
             }
           } else if(!pdel[pt->v[ipb]]) {
-           // if(!isbdry) {
-              dnpdelloc = (leninv - 1.)/leninv;
-           // } else {
-           //   dnpdelloc = 0.5*(leninv - 1.)/leninv;
-           // }
+            // if(!isbdry) {
+            dnpdelloc = (leninv - 1.)/leninv;
+            // } else {
+            //   dnpdelloc = 0.5*(leninv - 1.)/leninv;
+            // }
             if(!loc) {
               dnpdel +=dnpdelloc;
               pdel[pt->v[ipb]]=1;
@@ -921,18 +919,18 @@ int _MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcib
           }
         } else {
           if(!pdel[pt->v[ipb]]) {
-           // if(!isbdry) {
-              dnpdelloc = (leninv - 1.)/leninv;
-           // } else {
-           //   dnpdelloc = 0.5*(leninv - 1.)/leninv;
-           // }
+            // if(!isbdry) {
+            dnpdelloc = (leninv - 1.)/leninv;
+            // } else {
+            //   dnpdelloc = 0.5*(leninv - 1.)/leninv;
+            // }
             if(!loc) {
               dnpdel+=dnpdelloc;
               pdel[pt->v[ipb]]=1;
             }
           } else if(!pdel[pt->v[ipa]]) {
             // if(!isbdry) {
-              dnpdelloc = (leninv - 1.)/leninv;
+            dnpdelloc = (leninv - 1.)/leninv;
             // } else {
             //  dnpdelloc = 0.5*(leninv - 1.)/leninv;
             // }
