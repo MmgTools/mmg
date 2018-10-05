@@ -39,11 +39,13 @@ static void _MMG5_endcod() {
 static int MMG2D_usage(char *name) {
   _MMG5_mmgUsage(name);
 
-  fprintf(stdout,"-lag [n]     Lagrangian mesh displacement according to mode [0/1/2]\n");
+#ifdef USE_ELAS
+  fprintf(stdout,"-lag [n] Lagrangian mesh displacement according to mode [0/1/2]\n");
   fprintf(stdout,"             0: displacement\n");
   fprintf(stdout,"             1: displacement + remeshing (swap and move)\n");
   fprintf(stdout,"             2: displacement + remeshing (split, collapse,"
           " swap and move)\n");
+#endif
   fprintf(stdout,"-nsd val     only if no given triangle, save the subdomain number val (0==all subdomain)\n");
   fprintf(stdout,"-msh val     read and write to gmsh visu if val = 1 (out) if val=2 (in and out)\n");
   fprintf(stdout,"-degrad Qw Qdeg (with -lag option) : threshold for optimization\n");

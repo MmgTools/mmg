@@ -142,6 +142,7 @@ int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
     mesh->info.iso      = val;
     break;
   case MMG2D_IPARAM_lag :
+#ifdef USE_ELAS
     if ( val < 0 || val > 2 )
       return 0;
     mesh->info.lag = val;
@@ -150,6 +151,13 @@ int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
       if ( !MMG2D_Set_iparameter(mesh,sol,MMG2D_IPARAM_noinsert,1) )
         return 0;
     }
+#else
+    fprintf(stderr,"\n  ## Error: %s"
+            " \"lagrangian motion\" option unavailable (-lag):\n"
+            " set the USE_ELAS CMake's flag to ON when compiling the mmg3d"
+            " library to enable this feature.\n",__func__);
+    return 0;
+#endif
     break;
   case MMG2D_IPARAM_msh :
     mesh->info.nreg = val;
