@@ -72,7 +72,7 @@ int MMG3D_movetetrapoints(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree,in
       else if ( MG_SIN(ppt->tag) )  continue;
 
       // if ( maxit != 1 )
-        ppt->flag = base;
+      ppt->flag = base;
 
       ier = 0;
       if ( ppt->tag & MG_BDY ) {
@@ -132,7 +132,7 @@ int MMG3D_movetetrapoints(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree,in
       if ( ier ) {
         nm++;
         // if(maxit==1)
-          ppt->flag = base;
+        ppt->flag = base;
       }
     }
   }
@@ -163,36 +163,36 @@ int _MMG3D_coledges(MMG5_pMesh mesh,MMG5_pSol met,int k,int i) {
 
   pt = &mesh->tetra[k];
 
-   /*3 possibilities to remove the vertex ib*/
-    for(ied = 0 ; ied<3 ;ied++) {
-      iedg  = _MMG5_arpt[i][ied];
-      len =  _MMG5_lenedg(mesh,met,iedg,pt);
+  /*3 possibilities to remove the vertex ib*/
+  for(ied = 0 ; ied<3 ;ied++) {
+    iedg  = _MMG5_arpt[i][ied];
+    len =  _MMG5_lenedg(mesh,met,iedg,pt);
 
-      if(len > 1.1) continue;
-      iface = _MMG5_ifar[iedg][0];
+    if(len > 1.1) continue;
+    iface = _MMG5_ifar[iedg][0];
+    ief   = _MMG5_iarfinv[iface][iedg];
+    iq    = _MMG5_idir[iface][_MMG5_iprv2[ief]];
+    if(iq==i) {
+      iface = _MMG5_ifar[iedg][1];
       ief   = _MMG5_iarfinv[iface][iedg];
       iq    = _MMG5_idir[iface][_MMG5_iprv2[ief]];
-      if(iq==i) {
-        iface = _MMG5_ifar[iedg][1];
-        ief   = _MMG5_iarfinv[iface][iedg];
-        iq    = _MMG5_idir[iface][_MMG5_iprv2[ief]];
-      }
-      i1    = _MMG5_idir[iface][_MMG5_inxt2[ief]];
+    }
+    i1    = _MMG5_idir[iface][_MMG5_inxt2[ief]];
 
-      ilistcol = _MMG5_boulevolp(mesh,k,i1,listcol);
+    ilistcol = _MMG5_boulevolp(mesh,k,i1,listcol);
 
-      ilistcol = _MMG5_chkcol_int(mesh,met,k,iface,ief,listcol,ilistcol,2);
-      if ( ilistcol > 0 ) {
-        ier = _MMG5_colver(mesh,met,listcol,ilistcol,iq,2);
-        if ( ilistcol < 0 ) continue;
-        if ( ier < 0 ) return -1;
-        else if(ier) {
-          _MMG3D_delPt(mesh,ier);
-          return 1;
-        }
+    ilistcol = _MMG5_chkcol_int(mesh,met,k,iface,ief,listcol,ilistcol,2);
+    if ( ilistcol > 0 ) {
+      ier = _MMG5_colver(mesh,met,listcol,ilistcol,iq,2);
+      if ( ilistcol < 0 ) continue;
+      if ( ier < 0 ) return -1;
+      else if(ier) {
+        _MMG3D_delPt(mesh,ier);
+        return 1;
       }
     }
-    return 0;
+  }
+  return 0;
 }
 
 /**

@@ -110,7 +110,7 @@ int _MMG3D_initOctree(MMG5_pMesh mesh,_MMG3D_pOctree* q, int nv)
  */
 void _MMG3D_freeOctree_s(MMG5_pMesh mesh,_MMG3D_octree_s* q, int nv)
 {
-  int nbBitsInt,depthMax,dim,i,sizTab,sizBr,nvTemp;
+  int nbBitsInt,depthMax,dim,i,sizBr,nvTemp;
 
   dim       = mesh->dim;
   sizBr     = 1<<dim;
@@ -144,14 +144,6 @@ void _MMG3D_freeOctree_s(MMG5_pMesh mesh,_MMG3D_octree_s* q, int nv)
       q->nbVer = 0;
     }else
     {
-      if ( q->depth != depthMax )
-      {
-        sizTab = nv;
-      }else
-      {
-        sizTab = (q->nbVer%nv != 0)? 1 : 0;
-        sizTab = nv * ((int)(q->nbVer/nv) + sizTab);
-      }
       assert(q->v);
       _MMG5_DEL_MEM(mesh,q->v);
       q->v = NULL;
