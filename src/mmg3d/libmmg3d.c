@@ -579,10 +579,11 @@ int MMG3D_pack_pointArray(MMG5_pMesh mesh) {
 
     if ( ppt->tag & MG_BDY &&
          !(ppt->tag & MG_CRN || ppt->tag & MG_NOM || MG_EDG(ppt->tag)) ) {
-      assert ( ppt->xp );
 
-      memcpy(ppt->n,mesh->xpoint[ppt->xp].n1,3*sizeof(double));
-      ++mesh->nc1;
+      if ( ppt->xp ) {
+        memcpy(ppt->n,mesh->xpoint[ppt->xp].n1,3*sizeof(double));
+        ++mesh->nc1;
+      }
     }
 
     np++;
