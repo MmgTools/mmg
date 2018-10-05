@@ -203,6 +203,11 @@ int _MMG2_singul(MMG5_pMesh mesh) {
 
   nre = nc = nm = 0;
 
+  /* reset the ppt->s tag */
+  for (k=1; k<=mesh->np; ++k) {
+    mesh->point[k].s = 0;
+  }
+
   /** Singularity identification */
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
@@ -284,11 +289,6 @@ int _MMG2_singul(MMG5_pMesh mesh) {
     }
   }
 
-  /* reset the ppt->s tag */
-  for (k=1; k<=mesh->np; ++k) {
-    mesh->point[k].s = 0;
-  }
-
   if ( abs(mesh->info.imprim) > 3 && nc+nre+nm > 0 )
     fprintf(stdout,"     %d corners, %d singular points and %d non manifold points detected\n",nc,nre,nm);
 
@@ -304,6 +304,12 @@ int _MMG2_norver(MMG5_pMesh mesh) {
 
   nn = 0;
 
+  /* reset the ppt->s tag */
+  for (k=1; k<=mesh->np; ++k) {
+    mesh->point[k].s = 0;
+  }
+
+  /* Normal computation */
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) ) continue;
@@ -356,11 +362,6 @@ int _MMG2_norver(MMG5_pMesh mesh) {
       }
       while ( !ppt->s && !MG_SIN(ppt->tag) && !(ppt->tag & MG_NOM) );
     }
-  }
-
-  /* reset the ppt->s tag */
-  for (k=1; k<=mesh->np; ++k) {
-    mesh->point[k].s = 0;
   }
 
   if ( abs(mesh->info.imprim) > 3 && nn > 0 )
@@ -603,12 +604,6 @@ int _MMG2_regnor(MMG5_pMesh mesh) {
     if ( res0 > _MMG5_EPSD ) res = res / res0;
   }
   while ( ++it < maxit && res > _MMG5_EPS );
-
-  /* reset the ppt->s tag */
-  for (k=1; k<=mesh->np; ++k) {
-    ppt = &mesh->point[k];
-    ppt->s = 0;
-  }
 
   if ( mesh->info.imprim < -1 || mesh->info.ddebug )  fprintf(stdout,"\n");
 

@@ -123,7 +123,6 @@ int* _MMG5_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
 
     for(k=ilistck+1; k<=ilisto; k++) {
       iel = list[k];
-      pt = &mesh->tetra[iel];
       adja = &mesh->adja[4*(iel-1)+1];
 
       for(i=0; i<4; i++) {
@@ -246,7 +245,6 @@ int* _MMG5_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
 
     for(i=0; i<4; i++) {
       jel = adja[i] / 4;
-      jface = adja[i] % 4;
 
       /* Face i carries a non homogeneous Dirichlet BC */
       if ( pt->xt && (pxt->ftag[i] & MG_BDY) && (pxt->ref[i] == MMG5_DISPREF) ) {
