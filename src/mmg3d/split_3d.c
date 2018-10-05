@@ -137,7 +137,7 @@ int _MMG5_split1(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
 
   pt1 = &mesh->tetra[iel];
   pt1 = memcpy(pt1,pt,sizeof(MMG5_Tetra));
-  pxt0 = 0;
+  pxt0 = NULL;
   if ( pt->xt ) {
     pxt0 = &mesh->xtetra[pt->xt];
     memcpy(&xt,pxt0,sizeof(MMG5_xTetra));
@@ -220,6 +220,8 @@ nextstep1:
         pxt0 = &mesh->xtetra[pt->xt];
       }
       pt1->xt = mesh->xt;
+
+      assert ( pxt0 );
       memcpy(pxt0,&xt,sizeof(MMG5_xTetra));
       pxt0 = &mesh->xtetra[mesh->xt];
       memcpy(pxt0,&xt1,sizeof(MMG5_xTetra));
