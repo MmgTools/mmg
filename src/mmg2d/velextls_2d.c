@@ -382,8 +382,14 @@ int _MMG2_velextLS(MMG5_pMesh mesh,MMG5_pSol disp) {
  * Hack to avoid to have an empty translation unit (forbidden by ISO C)
  *
  */
+#ifdef _WIN32
+void MMG2D_unused_function(void) {
+  return;
+}
+#else
 void __attribute__((unused)) MMG2D_unused_function(void) {
   return;
 }
+#endif
 
 #endif
