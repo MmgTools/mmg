@@ -531,6 +531,9 @@ int _MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
   /** 1) Size at internal points */
+  hmax = DBL_MAX;
+  hmin = 0.;
+
   /* alloc structure */
   if ( !met->m ) {
     ismet      = 0;
