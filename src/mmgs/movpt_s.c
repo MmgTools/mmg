@@ -150,6 +150,7 @@ int movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   gv[1] =  r[1][0]*GV[0] + r[1][1]*GV[1] + r[1][2]*GV[2];
 
   /* Apply rotation \circ translation to the whole ball */
+  assert ( ilist );
   for (k=0; k<ilist; k++) {
     iel = list[k] / 3;
     i0  = list[k] % 3;

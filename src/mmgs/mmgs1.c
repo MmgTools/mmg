@@ -80,6 +80,7 @@ int _MMGS_dichoto(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
   it = 0;
   tp = 1.0;
   to = 0.0;
+  j  = 10;
   do {
     /* compute new position */
     t = 0.5 * (tp + to);
@@ -123,6 +124,7 @@ int _MMGS_dichoto(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
   }
 
   /* For very ill-shaped elements we can have no valid position */
+  assert ( j< 10 );
   switch (pt->flag) {
   case 1: case 2: case 4:
     ier = _MMGS_split1_sim(mesh,met,k,j,vx);

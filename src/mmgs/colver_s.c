@@ -88,6 +88,7 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
     }
 
     /* analyze ball */
+    assert ( ilist-1+open > 1 );
     for (l=1; l<ilist-1+open; l++) {
       jel = list[l] / 3;
       j   = list[l] % 3;
@@ -480,6 +481,7 @@ int litcol(MMG5_pMesh mesh,int k,char i,double kali) {
     if ( abs(pt->ref) != abs(pt1->ref) )  return 0;
 
     /* analyze ball */
+    assert ( ilist-1+open > 1 );
     for (l=1; l<ilist-1+open; l++) {
       jel = list[l] / 3;
       j   = list[l] % 3;
