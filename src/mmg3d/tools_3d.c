@@ -622,6 +622,9 @@ inline int _MMG5_BezierReg(MMG5_pMesh mesh,int ip0, int ip1, double s, double v[
 
     ll = ux*ux + uy*uy + uz*uz;
 
+    np0[0] = np0[1] = np0[2] = 0;
+    np1[0] = np1[1] = np1[2] = 0;
+
     /* Pathological case : don't move in that case ! */
     if(((MG_SIN(p0->tag)||(p0->tag & MG_NOM)) && (MG_SIN(p1->tag) || (p1->tag & MG_NOM)))||(ll<_MMG5_EPSD)){
         o[0] = 0.5*( p0->c[0] + p1->c[0] );

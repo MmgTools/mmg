@@ -158,6 +158,11 @@ _MMG5_BezierEdge(MMG5_pMesh mesh,int ip0,int ip1,double b0[3],double b1[3],char 
   p1 = &mesh->point[ip1];
   if ( !(p0->tag & MG_BDY) || !(p1->tag & MG_BDY) )  return 0;
 
+  np0[0] = np0[1] = np0[2] = 0;
+  np1[0] = np1[1] = np1[2] = 0;
+  n1[0]  = n1[1]  = n1[2]  = 0;
+  n2[0]  = n2[1]  = n2[2]  = 0;
+
   if ( !MG_SIN(p0->tag) ) {
     assert(p0->xp);
     pxp0 = &mesh->xpoint[p0->xp];

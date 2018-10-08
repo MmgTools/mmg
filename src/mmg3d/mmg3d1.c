@@ -321,6 +321,9 @@ char _MMG5_chkedg(MMG5_pMesh mesh,MMG5_Tria *pt,char ori, double hmax,
   p[2] = &mesh->point[ic];
   pt->flag = 0;
 
+  n1[0]  = n1[1]  = n1[2]  = 0;
+  n2[0]  = n2[1]  = n2[2]  = 0;
+
   /* normal recovery */
   for (i=0; i<3; i++) {
     if ( MG_SIN(p[i]->tag) ) {
