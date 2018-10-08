@@ -293,49 +293,50 @@ int MMG5_check_accuracy(double mat[6],double lambda[3], double v[3][3],
       m[k++] = lambda[0]*v[i][0]*v[j][0]
         + lambda[1]*v[i][1]*v[j][1]
         + lambda[2]*v[i][2]*v[j][2];
-      err = fabs(mat[0]-m[0]);
-      for (i=1; i<6; i++)
-        if ( fabs(m[i]-mat[i]) > err )  err = fabs(m[i]-mat[i]);
-
-      if ( err > 1.e03*maxm ) {
-        fprintf(stderr,"\n  ## Error: %s:\nProbleme eigenv3: err= %f\n",__func__,err*maxm);
-        fprintf(stderr,"\n  ## Error: %s:mat depart :\n",__func__);
-        fprintf(stderr,"\n  ## Error: %s:%13.6f  %13.6f  %13.6f\n",__func__,mat[0],mat[1],mat[2]);
-        fprintf(stderr,"\n  ## Error: %s:%13.6f  %13.6f  %13.6f\n",__func__,mat[1],mat[3],mat[4]);
-        fprintf(stderr,"\n  ## Error: %s:%13.6f  %13.6f  %13.6f\n",__func__,mat[2],mat[4],mat[5]);
-        fprintf(stderr,"\n  ## Error: %s:mat finale :\n",__func__);
-        fprintf(stderr,"\n  ## Error: %s:%13.6f  %13.6f  %13.6f\n",__func__,m[0],m[1],m[2]);
-        fprintf(stderr,"\n  ## Error: %s:%13.6f  %13.6f  %13.6f\n",__func__,m[1],m[3],m[4]);
-        fprintf(stderr,"\n  ## Error: %s:%13.6f  %13.6f  %13.6f\n",__func__,m[2],m[4],m[5]);
-        fprintf(stderr,"\n  ## Error: %s:lambda : %f %f %f\n",__func__,lambda[0],lambda[1],lambda[2]);
-        fprintf(stderr,"\n  ## Error: %s: ordre %d\n",__func__,order);
-        fprintf(stderr,"\n  ## Error: %s:\nOrtho:\n",__func__);
-        fprintf(stderr,"\n  ## Error: %s:v1.v2 = %.14f\n",__func__,
-                v[0][0]*v[1][0]+v[0][1]*v[1][1]+ v[0][2]*v[1][2]);
-        fprintf(stderr,"\n  ## Error: %s:v1.v3 = %.14f\n",__func__,
-                v[0][0]*v[2][0]+v[0][1]*v[2][1]+ v[0][2]*v[2][2]);
-        fprintf(stderr,"\n  ## Error: %s:v2.v3 = %.14f\n",__func__,
-                v[1][0]*v[2][0]+v[1][1]*v[2][1]+ v[1][2]*v[2][2]);
-
-        fprintf(stderr,"\n  ## Error: %s:Consistency\n",__func__);
-        for (i=0; i<3; i++) {
-          tmpx = v[0][i]*m[0] + v[1][i]*m[1]
-            + v[2][i]*m[2] - lambda[i]*v[0][i];
-          tmpy = v[0][i]*m[1] + v[1][i]*m[3]
-            + v[2][i]*m[4] - lambda[i]*v[1][i];
-          tmpz = v[0][i]*m[2] + v[1][i]*m[4]
-            + v[2][i]*m[5] - lambda[i]*v[2][i];
-          fprintf(stderr,"\n  ## Error: %s: Av %d - lambda %d *v %d = %f %f %f\n",
-                  __func__,i,i,i,tmpx,tmpy,tmpz);
-
-          fprintf(stderr,"\n  ## Error: %s:w1 %f %f %f\n",__func__,w1[0],w1[1],w1[2]);
-          fprintf(stderr,"\n  ## Error: %s:w2 %f %f %f\n",__func__,w2[0],w2[1],w2[2]);
-          fprintf(stderr,"\n  ## Error: %s:w3 %f %f %f\n",__func__,w3[0],w3[1],w3[2]);
-        }
-        return 1;
-      }
     }
   }
+  err = fabs(mat[0]-m[0]);
+  for (i=1; i<6; i++)
+    if ( fabs(m[i]-mat[i]) > err )  err = fabs(m[i]-mat[i]);
+
+  if ( err > 1.e03*maxm ) {
+    fprintf(stderr,"\n  ## Error: %s:\nProbleme eigenv3: err= %f\n",__func__,err*maxm);
+    fprintf(stderr,"\n  ## Error: %s:mat depart :\n",__func__);
+    fprintf(stderr,"\n  ## Error: %s:%13.6f  %13.6f  %13.6f\n",__func__,mat[0],mat[1],mat[2]);
+    fprintf(stderr,"\n  ## Error: %s:%13.6f  %13.6f  %13.6f\n",__func__,mat[1],mat[3],mat[4]);
+    fprintf(stderr,"\n  ## Error: %s:%13.6f  %13.6f  %13.6f\n",__func__,mat[2],mat[4],mat[5]);
+    fprintf(stderr,"\n  ## Error: %s:mat finale :\n",__func__);
+    fprintf(stderr,"\n  ## Error: %s:%13.6f  %13.6f  %13.6f\n",__func__,m[0],m[1],m[2]);
+    fprintf(stderr,"\n  ## Error: %s:%13.6f  %13.6f  %13.6f\n",__func__,m[1],m[3],m[4]);
+    fprintf(stderr,"\n  ## Error: %s:%13.6f  %13.6f  %13.6f\n",__func__,m[2],m[4],m[5]);
+    fprintf(stderr,"\n  ## Error: %s:lambda : %f %f %f\n",__func__,lambda[0],lambda[1],lambda[2]);
+    fprintf(stderr,"\n  ## Error: %s: ordre %d\n",__func__,order);
+    fprintf(stderr,"\n  ## Error: %s:\nOrtho:\n",__func__);
+    fprintf(stderr,"\n  ## Error: %s:v1.v2 = %.14f\n",__func__,
+            v[0][0]*v[1][0]+v[0][1]*v[1][1]+ v[0][2]*v[1][2]);
+    fprintf(stderr,"\n  ## Error: %s:v1.v3 = %.14f\n",__func__,
+            v[0][0]*v[2][0]+v[0][1]*v[2][1]+ v[0][2]*v[2][2]);
+    fprintf(stderr,"\n  ## Error: %s:v2.v3 = %.14f\n",__func__,
+            v[1][0]*v[2][0]+v[1][1]*v[2][1]+ v[1][2]*v[2][2]);
+
+    fprintf(stderr,"\n  ## Error: %s:Consistency\n",__func__);
+    for (i=0; i<3; i++) {
+      tmpx = v[0][i]*m[0] + v[1][i]*m[1]
+        + v[2][i]*m[2] - lambda[i]*v[0][i];
+      tmpy = v[0][i]*m[1] + v[1][i]*m[3]
+        + v[2][i]*m[4] - lambda[i]*v[1][i];
+      tmpz = v[0][i]*m[2] + v[1][i]*m[4]
+        + v[2][i]*m[5] - lambda[i]*v[2][i];
+      fprintf(stderr,"\n  ## Error: %s: Av %d - lambda %d *v %d = %f %f %f\n",
+              __func__,i,i,i,tmpx,tmpy,tmpz);
+
+      fprintf(stderr,"\n  ## Error: %s:w1 %f %f %f\n",__func__,w1[0],w1[1],w1[2]);
+      fprintf(stderr,"\n  ## Error: %s:w2 %f %f %f\n",__func__,w2[0],w2[1],w2[2]);
+      fprintf(stderr,"\n  ## Error: %s:w3 %f %f %f\n",__func__,w3[0],w3[1],w3[2]);
+    }
+    return 0;
+  }
+
   return 1;
 }
 
