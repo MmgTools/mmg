@@ -308,7 +308,7 @@ int _MMG2_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
     for (i=0; i<3; i++) {
       ppt = &mesh->point[ pt1->v[i] ];
       if ( !ppt->tagdel ) {
-			 alert = 1;
+        alert = 1;
       }
     }
   }
@@ -360,6 +360,7 @@ int _MMG2_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
 
       /* Catch the associated external face */
       if ( (!jel) || (mesh->tria[jel].base != base) ) {
+        assert ( size <= ielnum[0] );
         iel = ielnum[size++];
         assert(iel);
 

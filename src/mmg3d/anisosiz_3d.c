@@ -680,6 +680,7 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int
   }
 
   /* list goes modulo ilist */
+  assert ( ilists >= 1 );
   lispoi[3*ilists+1] =  lispoi[1];
   lispoi[3*ilists+2] =  lispoi[2];
   lispoi[3*ilists+3] =  lispoi[3];
