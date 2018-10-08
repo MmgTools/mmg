@@ -82,6 +82,7 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   if ( !_MMG5_rotmatrix(n,r) )  return 0;
 
   /* Apply rotation \circ translation to the whole ball */
+  assert ( ilist );
   for (k=0; k<ilist; k++) {
     iel = list[k] / 3;
     i0  = list[k] % 3;

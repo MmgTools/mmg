@@ -956,6 +956,13 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol met) {
     fprintf(stdout,"\n  %s\n   MODULE MMG3D: %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
   }
 
+  /** In debug mode, check that all structures are allocated */
+  assert ( mesh );
+  assert ( met );
+  assert ( mesh->point );
+  assert ( mesh->tetra );
+
+
   _MMG3D_Set_commonFunc();
 
   signal(SIGABRT,_MMG5_excfun);
@@ -1131,6 +1138,12 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
   if ( mesh->info.imprim >= 0 ) {
     fprintf(stdout,"\n  %s\n   MODULE MMG3D: %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
   }
+
+  /** In debug mode, check that all structures are allocated */
+  assert ( mesh );
+  assert ( met );
+  assert ( mesh->point );
+  assert ( mesh->tetra );
 
   _MMG3D_Set_commonFunc();
 

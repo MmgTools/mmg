@@ -51,7 +51,7 @@
       mesh->nai = mesh->na;                                             \
       mesh->nei = mesh->ne;                                             \
       met->npi  = met->np;                                              \
-      return MMG5_LOWFAILURE;                                          \
+      return MMG5_LOWFAILURE;                                           \
     }                                                                   \
     _LIBMMG5_RETURN(mesh,met,val);                                      \
   }while(0)
@@ -254,6 +254,12 @@ int MMGS_mmgsls(MMG5_pMesh mesh,MMG5_pSol met)
     fprintf(stdout,"\n  %s\n   MODULE MMGS: %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
   }
 
+  /** In debug mode, check that all structures are allocated */
+  assert ( mesh );
+  assert ( met );
+  assert ( mesh->point );
+  assert ( mesh->tria );
+
   _MMGS_Set_commonFunc();
 
   /** Free topologic tables (adja, xpoint, xtetra) resulting from a previous
@@ -402,6 +408,12 @@ int MMGS_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
 {
   mytime    ctim[TIMEMAX];
   char      stim[32];
+
+  /** In debug mode, check that all structures are allocated */
+  assert ( mesh );
+  assert ( met );
+  assert ( mesh->point );
+  assert ( mesh->tria );
 
   if ( mesh->info.imprim >= 0 ) {
     fprintf(stdout,"\n  %s\n   MODULE MMGS: %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);

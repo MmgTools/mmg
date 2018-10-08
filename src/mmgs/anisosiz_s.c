@@ -369,6 +369,7 @@ static int _MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   m = &met->m[6*idp];
 
   /* Apply rotation \circ translation to the whole ball */
+  assert ( ilist );
   for (k=0; k<ilist; k++) {
     iel = list[k] / 3;
     i0  = list[k] % 3;
@@ -537,6 +538,7 @@ static int _MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   m = &met->m[6*idp];
 
   /* Apply rotation \circ translation to the whole ball */
+  assert ( ilist );
   for (k=0; k<ilist; k++) {
     iel = list[k] / 3;
     i0  = list[k] % 3;

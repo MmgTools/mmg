@@ -100,6 +100,7 @@ int _MMG5_movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,
 
   /* Check new position validity */
   calnew = DBL_MAX;
+  assert ( ilist );
   for (k=0; k<ilist; k++) {
     iel = list[k] / 4;
     i0  = list[k] % 4;
@@ -208,6 +209,7 @@ int _MMG5_movintptLES_iso(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,
   /* Coordinates of optimal point */
   calold = DBL_MAX;
   totvol = 0.0;
+  assert ( ilist );
   for (k=0; k<ilist; k++) {
     iel  = list[k] / 4;
     ifac = list[k] % 4;
