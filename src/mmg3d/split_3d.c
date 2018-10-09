@@ -5290,6 +5290,7 @@ int _MMG5_splitedg(MMG5_pMesh mesh, MMG5_pSol met,int iel, int iar, double crit)
   ip = _MMG3D_newPt(mesh,o,tag);
 
   if ( !ip )  {
+    assert ( mesh );
     /* reallocation of point table */
     _MMG3D_POINT_REALLOC(mesh,met,ip,mesh->gap,
                          warn=1;

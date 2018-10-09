@@ -100,6 +100,7 @@ int _MMG5_movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,
 
   /* Check new position validity */
   calnew = DBL_MAX;
+  i0 = -1;
   assert ( ilist );
   for (k=0; k<ilist; k++) {
     iel = list[k] / 4;
@@ -151,6 +152,7 @@ int _MMG5_movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,
   }
 
   /* update position */
+  assert ( i0 >=0 );
   if ( octree )
     _MMG3D_moveOctree(mesh, octree, pt->v[i0], ppt0->c, p0->c);
 

@@ -321,8 +321,7 @@ char _MMG5_chkedg(MMG5_pMesh mesh,MMG5_Tria *pt,char ori, double hmax,
   p[2] = &mesh->point[ic];
   pt->flag = 0;
 
-  n1[0]  = n1[1]  = n1[2]  = 0;
-  n2[0]  = n2[1]  = n2[2]  = 0;
+  n1 = n2 = NULL;
 
   /* normal recovery */
   for (i=0; i<3; i++) {
@@ -1204,6 +1203,7 @@ _MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
                                ,o,0);
         }
 
+        assert ( met );
         if ( met->m ) {
           if ( typchk == 1 && (met->size>1) )
             ier = _MMG3D_intmet33_ani(mesh,met,k,i,ip,0.5);
@@ -1526,6 +1526,7 @@ _MMG5_anatets(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           if ( !_MMG5_hashEdge(mesh,&hash,ip1,ip2,ip) )  return -1;
           ppt = &mesh->point[ip];
 
+          assert ( met );
           if ( met->m ) {
             if ( typchk == 1 && (met->size>1) )
               ier = _MMG3D_intmet33_ani(mesh,met,k,ia,ip,0.5);

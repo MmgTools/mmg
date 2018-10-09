@@ -275,6 +275,7 @@ int _MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,int *list,
                          return -1
                          ,m,0);
   }
+  assert ( met );
   if ( met->m ) {
     if ( typchk == 1 && (met->size>1) ) {
       if ( _MMG3D_intmet33_ani(mesh,met,iel,ia,np,0.5)<=0 )  return 0;

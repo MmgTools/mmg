@@ -486,6 +486,7 @@ int _MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,
                          return -1
                          ,c,MG_BDY);
   }
+  assert ( met );
   if ( met->m ) {
     if ( typchk == 1 && (met->size>1) ) {
       if ( _MMG3D_intmet33_ani(mesh,met,iel,ia,nm,0.5)<=0 )  return 0;
