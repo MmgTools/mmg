@@ -465,7 +465,7 @@ int litcol(MMG5_pMesh mesh,int k,char i,double kali) {
   i2  = _MMG5_iprv2[i];
   ip2 = pt->v[i2];
 
-  n00old[0] = n0o0ld[1] = n00old[2] = 0.;
+  n00old[0] = n00old[1] = n00old[2] = 0.;
   n0old[0]  = n0old[1]  = n0old[2]  = 0.;
   n1old[0]  = n1old[1]  = n1old[2]  = 0.;
 
