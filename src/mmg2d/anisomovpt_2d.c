@@ -53,6 +53,7 @@ int _MMG2_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list,char im
      configuration */
   p0 = p1 = p2 = NULL;
   m0 = NULL;
+  assert ( ilist );
   for (k=0; k<ilist; k++) {
     iel = list[k] / 3;
     pt = &mesh->tria[iel];

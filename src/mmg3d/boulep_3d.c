@@ -1277,6 +1277,7 @@ int _MMG5_srcbdy(MMG5_pMesh mesh,int start,int ia) {
 
   if ( kel1 != 0 ) {
     pt = &mesh->tetra[k1];
+    assert ( pt );
     fprintf(stderr,"            look at elt %d:",kel1);
     fprintf(stderr," %d %d %d %d.\n", mesh->point[pt->v[0]].tmp,
             mesh->point[pt->v[1]].tmp,mesh->point[pt->v[2]].tmp,

@@ -74,7 +74,6 @@ int _MMG5_movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,
   totvol = 0.0;
   for (k=0; k<ilist; k++) {
     iel = list[k] / 4;
-    i0  = list[k] % 4;
     pt = &mesh->tetra[iel];
     p0 = &mesh->point[pt->v[0]];
     p1 = &mesh->point[pt->v[1]];

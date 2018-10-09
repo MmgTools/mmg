@@ -148,6 +148,11 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
             MG_STR,MG_VER,MG_REL,MG_STR);
   }
 
+  assert ( mesh );
+  assert ( sol );
+  assert ( mesh->point );
+  assert ( mesh->tria );
+
   /*uncomment to callback*/
   //MMG2D_callbackinsert = titi;
 
@@ -385,6 +390,10 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol) {
             MG_STR,MG_VER,MG_REL,MG_STR);
   }
 
+  assert ( mesh );
+  assert ( sol );
+  assert ( mesh->point );
+
   /*uncomment for callback*/
   //MMG2D_callbackinsert = titi;
 
@@ -594,6 +603,11 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol)
     fprintf(stdout,"\n  %s\n   MODULE MMG2D: %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
   }
 
+  assert ( mesh );
+  assert ( sol );
+  assert ( mesh->point );
+  assert ( mesh->tria );
+
   /*uncomment for callback*/
   //MMG2D_callbackinsert = titi;
 
@@ -759,6 +773,12 @@ int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
     fprintf(stdout,"\n  %s\n   MODULE MMG2D : %s (%s)\n  %s\n",
             MG_STR,MG_VER,MG_REL,MG_STR);
   }
+
+  assert ( mesh );
+  assert ( disp );
+  assert ( met );
+  assert ( mesh->point );
+  assert ( mesh->tria );
 
   /*uncomment for callback*/
   //MMG2D_callbackinsert = titi;
