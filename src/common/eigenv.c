@@ -37,6 +37,7 @@
 #include <string.h>
 #include <math.h>
 #include <assert.h>
+#include <stdlib.h>
 
 #include "eigenv.h"
 
@@ -356,7 +357,7 @@ int _MMG5_eigenv(int symmat,double *mat,double lambda[3],double v[3][3]) {
   double    a11,a12,a13,a21,a22,a23,a31,a32,a33;
   double    aa,bb,cc,dd,ee,ii,vx1[3],vx2[3],vx3[3],dd1,dd2,dd3;
   double    maxd,maxm,valm,p[4],w1[3],w2[3],w3[3];
-  int       k,n,ddebug=0;
+  int       k,n;
 
   /* default */
   memcpy(v,Id,9*sizeof(double));
@@ -610,7 +611,7 @@ int _MMG5_eigenv(int symmat,double *mat,double lambda[3],double v[3][3]) {
   lambda[2] *= maxm;
 
   /* check accuracy */
-  if ( ddebug && symmat ) {
+  if ( getenv("MMG_EIGENV_DDEBUG") && symmat ) {
     if ( !MMG5_check_accuracy ( mat, lambda, v, w1, w2, w3, maxm, n, symmat ) )
       return 0;
   }
