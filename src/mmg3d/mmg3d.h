@@ -102,13 +102,19 @@ extern "C" {
   }while(0)
 
 /* numerical accuracy */
-#define _MMG3D_ALPHAD    20.7846096908265    //0.04811252243247      /* 12*sqrt(3) */
-#define _MMG3D_LLONG     2.5//2.0   // 1.414213562373
-#define _MMG3D_LSHRT     0.3  // 0.707106781186
+#define _MMG3D_ALPHAD    20.7846096908265 /* 12*sqrt(3) */
+#define _MMG3D_LLONG     2.5
+#define _MMG3D_LSHRT     0.3
 #define _MMG3D_LOPTL     1.3
 #define _MMG3D_LOPTS     0.6
 
+#define MMG3D_SWAP06       0.0288675 /* 0.6/_MMG3D_ALPHAD */
+#define MMG3D_SSWAPIMPROVE 1.053
+#define MMG3D_LSWAPIMPROVE 1.1
+
 #define _MMG3D_BADKAL    0.2
+#define MMG3D_MAXKAL     1.
+
 
 #define _MMG3D_NPMAX  1000000 //200000
 #define _MMG3D_NAMAX   200000 //40000

@@ -664,7 +664,7 @@ int _MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met) {
           /* Swap of edges in tetra that have resulted distorted from the process */
           /* I do not know whether it is safe to put NULL in metric here (a
            * priori ok, since there is no vertex creation or suppression) */
-          ns = _MMG5_swptetlag(mesh,met,1.1,NULL,itdc);
+          ns = _MMG5_swptetlag(mesh,met,MMG3D_LSWAPIMPROVE,NULL,itdc);
           if ( ns < 0 ) {
             fprintf(stderr,"\n  ## Problem in swaptetlag. Exiting.\n");
             return 0;

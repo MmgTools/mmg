@@ -621,7 +621,7 @@ int _MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double crit,double declic,
       if ( !MG_EOK(pt) || (pt->tag & MG_REQ) )  continue;
       else if ( pt->mark < testmark )  continue;
 
-      if ( pt->qual > declic/*0.0288675*/ /*0.6/_MMG3D_ALPHAD*/ )  continue;
+      if ( pt->qual > declic )  continue;
 
       for (i=0; i<6; i++) {
         /* Prevent swap of a ref or tagged edge */
@@ -2339,7 +2339,7 @@ int _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,char typchk, int patternMode) {
       }
       nf  += ier;
 
-      ier = _MMG5_swptet(mesh,met,1.1,0.0288675,NULL,typchk,mesh->mark-2);
+      ier = _MMG5_swptet(mesh,met,MMG3D_LSWAPIMPROVE,MMG3D_SWAP06,NULL,typchk,mesh->mark-2);
       if ( ier < 0 ) {
         fprintf(stderr,"\n  ## Unable to improve mesh. Exiting.\n");
         return 0;

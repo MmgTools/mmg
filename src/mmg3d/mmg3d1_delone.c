@@ -777,8 +777,8 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int ne,
  */
 static int
 _MMG5_optbad(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
-  int it,nnm,nnf,maxit,nm,nf,nw;
-  double crit;
+  int           it,nnm,nnf,maxit,nm,nf,nw;
+  double        crit;
 
   /* shape optim */
   it = nnm = nnf = 0;
@@ -798,7 +798,7 @@ _MMG5_optbad(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
       }
       nnf += nf;
 
-      nf += _MMG5_swptet(mesh,met,crit,0.0288675,octree,2,mesh->mark-1);
+      nf += _MMG5_swptet(mesh,met,crit,MMG3D_SWAP06,octree,2,mesh->mark-1);
       if ( nf < 0 ) {
         fprintf(stderr,"\n  ## Error: %s: unable to improve mesh. Exiting.\n",
           __func__);
@@ -808,7 +808,11 @@ _MMG5_optbad(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
     else  nf = 0;
 
     if ( !mesh->info.nomove ) {
-      nm = _MMG5_movtet(mesh,met,octree,1.,1.,1,1,1,1,0,mesh->mark-1);
+      /* move for tria with qual<1., tetra with qual<1, internal move
+       * allowed, surface degradation forbidden, volume degradation during the
+       * surface move forbidden and volume degradation during volumic move
+       * forbidden. Perform 1 iter max (0). */
+      nm = _MMG5_movtet(mesh,met,octree,MMG3D_MAXKAL,MMG3D_MAXKAL,1,1,1,1,0,mesh->mark-1);
       if ( nm < 0 ) {
         fprintf(stderr,"\n  ## Error: %s: unable to improve mesh.\n",
                 __func__);
@@ -879,7 +883,7 @@ _MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree, int* warn) 
         return 0;
       }
       nnf += nf;
-      nf += _MMG5_swptet(mesh,met,1.053,declic,octree,2,mesh->mark-2);
+      nf += _MMG5_swptet(mesh,met,MMG3D_SSWAPIMPROVE,declic,octree,2,mesh->mark-2);
 
       if ( nf < 0 ) {
         fprintf(stderr,"\n  ## Error: %s: unable to improve mesh. Exiting.\n",
@@ -892,7 +896,10 @@ _MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree, int* warn) 
 
 
     if ( !mesh->info.nomove ) {
-      /*perform only boundary moves critSurf,critVol, moveVol?, improveSurf, improveSurfVol,improveVol, maxiter*/
+      /* move for tria with qual<declicsurf, tetra with qual<declic, internal
+       * move allowed, surface degradation forbidden, volume degradation during
+       * the surface move authorized and volume degradation during volumic move
+       * forbidden. Perform 2 iter max (1). */
       nm = _MMG5_movtet(mesh,met,octree,declicsurf,declic,1,1,0,1,1,mesh->mark-2);
 
       if ( nm < 0 ) {
@@ -974,7 +981,7 @@ _MMG5_optetLES(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
       nw = 0;
     /* badly shaped process */
     if ( !mesh->info.noswap ) {
-      nf = _MMG5_swptet(mesh,met,declic,0.0288675,octree,2,mesh->mark-2);
+      nf = _MMG5_swptet(mesh,met,declic,MMG3D_SWAP06,octree,2,mesh->mark-2);
       if ( nf < 0 ) {
         fprintf(stderr,"\n  ## Error: %s: unable to improve mesh. Exiting.\n",
           __func__);
@@ -984,7 +991,11 @@ _MMG5_optetLES(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
     else  nf = 0;
 
     if ( !mesh->info.nomove ) {
-      nm = _MMG5_movtet(mesh,met,octree,1.,1.,1,1,1,1,3,mesh->mark-2);
+      /* move for tria with qual<1, tetra with qual<1, internal
+       * move allowed, surface degradation forbidden, volume degradation during
+       * the surface move forbidden and volume degradation during volumic move
+       * forbidden. Perform 4 iter max (3). */
+      nm = _MMG5_movtet(mesh,met,octree,MMG3D_MAXKAL,MMG3D_MAXKAL,1,1,1,1,3,mesh->mark-2);
       if ( nm < 0 ) {
         fprintf(stderr,"\n  ## Error: %s: unable to improve mesh.\n",
           __func__);
@@ -1007,7 +1018,11 @@ _MMG5_optetLES(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
   while( ++it < maxit && nw+nm+nf > 0 );
 
   if ( !mesh->info.nomove ) {
-    nm = _MMG5_movtet(mesh,met,octree,1.,1.,1,1,1,1,3,mesh->mark-2);
+    /* move for tria with qual<declicsurf, tetra with qual<declic, internal
+     * move allowed, surface degradation forbidden, volume degradation during
+       * the surface move authorized and volume degradation during volumic move
+       * forbidden. Perform 4 iter max (3). */
+    nm = _MMG5_movtet(mesh,met,octree,MMG3D_MAXKAL,MMG3D_MAXKAL,1,1,1,1,3,mesh->mark-2);
     if ( nm < 0 ) {
       fprintf(stderr,"\n  ## Error: %s: unable to improve mesh.\n",__func__);
       return 0;
@@ -1047,8 +1062,8 @@ _MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
 
   /* shape optim */
   it = nnm = nnf = 0;
-  maxit = 10;
-  crit = 1.053;
+  maxit  = 10;
+  crit   = MMG3D_SSWAPIMPROVE;
   declic = 0.7/_MMG3D_ALPHAD;
   /*mark reinitialization in order to see at least one time each tetra*/
   for (k=1; k<=mesh->ne; k++) {
@@ -1085,7 +1100,11 @@ _MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
     else  nf = 0;
 
     if ( !mesh->info.nomove ) {
-      nm = _MMG5_movtet(mesh,met,octree,1.,declic,1,1,1,1,0,mesh->mark-1);
+      /* move for tria with qual<1., tetra with qual<declic, internal move
+       * allowed, surface degradation forbidden, volume degradation during the
+       * surface move forbidden and volume degradation during volumic move
+       * authorized. Perform 1 iter max (0). */
+      nm = _MMG5_movtet(mesh,met,octree,MMG3D_MAXKAL,declic,1,1,1,1,0,mesh->mark-1);
       if ( nm < 0 ) {
         fprintf(stderr,"\n  ## Error: %s: unable to improve mesh.\n",__func__);
         return 0;
@@ -1106,7 +1125,10 @@ _MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree) {
   while( ++it < maxit && nw+nm+nf > 0 );
 
   if ( !mesh->info.nomove ) {
-    nm = _MMG5_movtet(mesh,met,octree,1.,1.,1,1,1,1,3,mesh->mark-2);
+    /* move for tria with qual<1., tetra with qual<1., internal move allowed,
+     * surface degradation forbidden, volume degradation during the surface and
+     * volume move forbidden. Perform 4 iter max. */
+    nm = _MMG5_movtet(mesh,met,octree,MMG3D_MAXKAL,MMG3D_MAXKAL,1,1,1,1,3,mesh->mark-2);
     if ( nm < 0 ) {
       fprintf(stderr,"\n  ## Error: %s: Unable to improve mesh.\n",__func__);
       return 0;
@@ -1153,7 +1175,7 @@ _MMG5_adptet_delone(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree) {
       return 0;
     }
     nnf = nf;
-    nf = _MMG5_swptet(mesh,met,1.053,0.0288675,octree,2,mesh->mark-2);
+    nf = _MMG5_swptet(mesh,met,MMG3D_SSWAPIMPROVE,MMG3D_SWAP06,octree,2,mesh->mark-2);
     if ( nf < 0 ) {
       fprintf(stderr,"\n  ## Error: %s: Unable to improve mesh. Exiting.\n",
               __func__);
@@ -1218,14 +1240,14 @@ int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
     fprintf(stderr,"\n  ## Non orientable implicit surface. Exit program.\n");
     return 0;
   }
-  
+
   /**--- stage 1: geometric mesh only in isotropic case */
   /* because if the aniso metric is not compatible with the geometry, the swaps generate some noise and problems*/
-  
+
   if ( met->size==1 ) {
     if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
       fprintf(stdout,"  ** GEOMETRIC MESH\n");
-    
+
     if ( !_MMG5_anatet(mesh,met,1,0) ) {
       fprintf(stderr,"\n  ## Unable to split mesh. Exiting.\n");
       if ( octree )
