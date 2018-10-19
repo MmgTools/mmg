@@ -315,7 +315,7 @@ static int MMG3D_typelt(MMG5_pMesh mesh,int iel,int *item) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
- * \param octree pointer toward the octree structure.
+ * \param PROctree pointer toward the PROctree structure.
  * \param k elt index.
  * \param iar index of edge to not try to swap.
  * \return -1 if fail, 0 if we don't swap anything, 1 otherwise.
@@ -323,7 +323,7 @@ static int MMG3D_typelt(MMG5_pMesh mesh,int iel,int *item) {
  * Try to swap edge \a iar of tetra \a k.
  *
  */
-int _MMG3D_swpItem(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,int k,int iar) {
+int _MMG3D_swpItem(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pPROctree PROctree,int k,int iar) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
   int           list[MMG3D_LMAX+2],lon,nconf,ier;
@@ -339,7 +339,7 @@ int _MMG3D_swpItem(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,int k,i
 
   nconf = _MMG5_chkswpgen(mesh,met,k,iar,&lon,list,OCRIT,2);
   if ( nconf ) {
-    ier = _MMG5_swpgen(mesh,met,nconf,lon,list,octree,2);
+    ier = _MMG5_swpgen(mesh,met,nconf,lon,list,PROctree,2);
     if ( ier < 0 ) return -1;
     else
       return ier;
@@ -351,7 +351,7 @@ int _MMG3D_swpItem(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,int k,i
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
- * \param octree pointer toward the octree structure.
+ * \param PROctree pointer toward the PROctree structure.
  * \param k elt index.
  * \param iar index of edge to not try to swap.
  * \return -1 if fail, 0 if we don't swap anything, 1 otherwise.
@@ -360,14 +360,14 @@ int _MMG3D_swpItem(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,int k,i
  *
  */
 static inline
-int _MMG3D_swpalmostall(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,
+int _MMG3D_swpalmostall(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pPROctree PROctree,
                         int k,int iar) {
   int           i,ier;
 
   ier = 0;
   for(i=0 ; i<6 ; i++) {
     if(i==iar) continue;
-    ier = _MMG3D_swpItem(mesh,met,octree,k,i);
+    ier = _MMG3D_swpItem(mesh,met,PROctree,k,i);
     if ( ier < 0 ) return -1;
     else if(ier)
       return ier;
@@ -378,7 +378,7 @@ int _MMG3D_swpalmostall(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
- * \param octree pointer toward the octree structure.
+ * \param PROctree pointer toward the PROctree structure.
  * \param k elt index.
  * \param iar index of edge to split.
  * \param OCRIT quality threshold.
@@ -387,7 +387,7 @@ int _MMG3D_swpalmostall(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,
  * Try to split edge number \a iar of tetra \a k
  *
  */
-int _MMG3D_splitItem(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,
+int _MMG3D_splitItem(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pPROctree PROctree,
                      int k,int iar,double OCRIT) {
   MMG5_pTetra   pt;
   double        len;
@@ -423,7 +423,7 @@ int _MMG3D_splitItem(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
- * \param octree pointer toward the octree structure.
+ * \param PROctree pointer toward the PROctree structure.
  * \param k elt index.
  * \param iar index of edge to not split.
  * \return 1 if success, 0 otherwise
@@ -432,7 +432,7 @@ int _MMG3D_splitItem(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,
  *
  */
 static inline
-int _MMG3D_splitalmostall(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,
+int _MMG3D_splitalmostall(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pPROctree PROctree,
                           int k,int iar) {
   int           i,ier;
   double        OCRIT=1.01;
@@ -446,7 +446,7 @@ int _MMG3D_splitalmostall(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,
 
   for(i=0 ; i<6 ; i++) {
     if(i==iar) continue;
-    ier = _MMG3D_splitItem(mesh,met,octree,k,i,OCRIT);
+    ier = _MMG3D_splitItem(mesh,met,PROctree,k,i,OCRIT);
     if(ier) return ier;
   }
 
@@ -456,7 +456,7 @@ int _MMG3D_splitalmostall(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
- * \param octree pointer toward the octree structure.
+ * \param PROctree pointer toward the PROctree structure.
  * \param testmark all the tets with a mark less than testmark will not be treated.
  * \return 0 if fail, number of improved elts otherwise.
  *
@@ -464,7 +464,7 @@ int _MMG3D_splitalmostall(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pOctree octree,
  * 0.2) and try to improve them by every means.
  *
  */
-int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int testmark) {
+int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pPROctree PROctree,int testmark) {
   MMG5_pTetra    pt;
   MMG5_pxTetra   pxt;
   double         crit;
@@ -513,7 +513,7 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int testma
         } else if ( npeau ) {
           nbdy2++;
 
-          ier = MMG3D_optbdry(mesh,met,octree,k);
+          ier = MMG3D_optbdry(mesh,met,PROctree,k);
           if(ier) {
             nd++;
             ds[ityp]++;
@@ -532,7 +532,7 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int testma
 
         if(mesh->info.noswap) break;
 
-        ier = _MMG3D_swpItem(mesh,met,octree,k,item[0]);
+        ier = _MMG3D_swpItem(mesh,met,PROctree,k,item[0]);
 
         if(ier > 0) {
           nd++;
@@ -545,7 +545,7 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int testma
             /*   OCRIT *= 0.5; */
             /* } else */
             /*   OCRIT *= 0.75; */
-            ier = _MMG3D_splitItem(mesh,met,octree,k,item[0],1.01);
+            ier = _MMG3D_splitItem(mesh,met,PROctree,k,item[0],1.01);
 
             if(ier) {
               nd++;
@@ -554,7 +554,7 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int testma
             }
           } /* end noinsert */
 
-          ier = _MMG3D_swpalmostall(mesh,met,octree,k,item[0]);
+          ier = _MMG3D_swpalmostall(mesh,met,PROctree,k,item[0]);
 
           if(ier > 0) {
             nd++;
@@ -563,7 +563,7 @@ int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pOctree octree,int testma
           }
 
           if ( !mesh->info.noinsert ) {
-            ier = _MMG3D_splitalmostall(mesh,met,octree,k,item[0]);
+            ier = _MMG3D_splitalmostall(mesh,met,PROctree,k,item[0]);
 
             if(ier > 0) {
               nd++;

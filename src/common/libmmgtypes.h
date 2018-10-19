@@ -446,7 +446,7 @@ typedef struct {
   int           mem,npar,npari;
   int           opnbdy;
   int           renum;
-  int           octree;
+  int           PROctree;
   int           nmat;
   char          nreg;
   char          imprim,ddebug,badkal,iso,fem,lag;

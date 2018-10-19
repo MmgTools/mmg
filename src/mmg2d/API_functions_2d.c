@@ -98,7 +98,7 @@ void MMG2D_Init_parameters(MMG5_pMesh mesh) {
 
   mesh->info.dhd  = _MMG5_ANGEDG;
 
-  mesh->info.octree = 64;
+  mesh->info.PROctree = 64;
 }
 
 int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){

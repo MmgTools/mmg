@@ -422,7 +422,7 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
  * \param ret dobble of the number of tetrahedra in the shell
  * \param it1 boundary face carrying the beforehand tested terminal
  * point for collapse
- * \param octree pointer toward the octree structure in Delaunay mode,
+ * \param PROctree pointer toward the PROctree structure in Delaunay mode,
  * NULL pointer in pattern mode.
  * \param typchk type of checking permformed for edge length (hmin or LSHORT
  * criterion).
@@ -432,7 +432,7 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
  *
  */
 int _MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,
-                 _MMG3D_pOctree octree, char typchk) {
+                 _MMG3D_pPROctree PROctree, char typchk) {
   MMG5_pTetra   pt,pt1;
   MMG5_pPoint   p0,p1;
   int           iel,iel1,ilist,np,nq,nm;

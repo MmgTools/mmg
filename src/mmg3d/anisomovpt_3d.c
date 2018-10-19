@@ -38,7 +38,7 @@
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
- * \param octree pointer toward the octree structure.
+ * \param PROctree pointer toward the PROctree structure.
  * \param list pointer toward the volumic ball of the point.
  * \param ilist size of the volumic ball.
  * \param improve force the new minimum element quality to be greater or equal
@@ -52,7 +52,7 @@
  * \remark we don't check if we break the hausdorff criterion.
  *
  */
-int _MMG5_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree, int *list,int ilist,
+int _MMG5_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pPROctree PROctree, int *list,int ilist,
                        int improve) {
 
 
@@ -157,8 +157,8 @@ int _MMG5_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree, int
   }
 
   /* update position */
-  if ( octree )
-    _MMG3D_moveOctree(mesh, octree, pt->v[i0], ppt0->c, p0->c);
+  if ( PROctree )
+    _MMG3D_movePROctree(mesh, PROctree, pt->v[i0], ppt0->c, p0->c);
 
   p0 = &mesh->point[pt->v[i0]];
   p0->c[0] = ppt0->c[0];
@@ -176,7 +176,7 @@ int _MMG5_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree, int
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
- * \param octree pointer toward the octree structure.
+ * \param PROctree pointer toward the PROctree structure.
  * \param listv pointer toward the volumic ball of the point.
  * \param ilistv size of the volumic ball.
  * \param lists pointer toward the surfacic ball of the point.
@@ -192,7 +192,7 @@ int _MMG5_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree, int
  * Move boundary regular point, whose volumic and surfacic balls are passed.
  *
  */
-int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree, int *listv,
+int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pPROctree PROctree, int *listv,
                           int ilistv,int *lists,int ilists,
                           int improveSurf, int improveVol) {
   MMG5_pTetra       pt,pt0;
@@ -635,8 +635,8 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
   }
 
   /* When all tests have been carried out, update coordinates, normals and metrics*/
-  if ( octree )
-    _MMG3D_moveOctree(mesh, octree, n0, o, p0->c);
+  if ( PROctree )
+    _MMG3D_movePROctree(mesh, PROctree, n0, o, p0->c);
 
   p0->c[0] = o[0];
   p0->c[1] = o[1];
@@ -660,7 +660,7 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
- * \param octree pointer toward the octree structure.
+ * \param PROctree pointer toward the PROctree structure.
  * \param listv pointer toward the volumic ball of the point.
  * \param ilistv size of the volumic ball.
  * \param lists pointer toward the surfacic ball of the point.
@@ -675,7 +675,7 @@ int _MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
  * Move boundary reference point, whose volumic and surfacic balls are passed.
  *
  */
-int _MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree, int *listv,
+int _MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pPROctree PROctree, int *listv,
                           int ilistv, int *lists, int ilists,
                           int improve){
   MMG5_pTetra           pt,pt0;
@@ -980,8 +980,8 @@ int _MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
   }
 
   /* Update coordinates, normals, for new point */
-  if ( octree )
-    _MMG3D_moveOctree(mesh, octree, ip0, o, p0->c);
+  if ( PROctree )
+    _MMG3D_movePROctree(mesh, PROctree, ip0, o, p0->c);
 
   p0->c[0] = o[0];
   p0->c[1] = o[1];
@@ -1010,7 +1010,7 @@ int _MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
- * \param octree pointer toward the octree structure.
+ * \param PROctree pointer toward the PROctree structure.
  * \param listv pointer toward the volumic ball of the point.
  * \param ilistv size of the volumic ball.
  * \param lists pointer toward the surfacic ball of the point.
@@ -1025,7 +1025,7 @@ int _MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
  * \remark we don't check if we break the hausdorff criterion.
  *
  */
-int _MMG5_movbdynompt_ani(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree, int *listv,
+int _MMG5_movbdynompt_ani(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pPROctree PROctree, int *listv,
                           int ilistv, int *lists, int ilists,
                           int improve){
   MMG5_pTetra       pt,pt0;
@@ -1329,8 +1329,8 @@ int _MMG5_movbdynompt_ani(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree, 
   }
 
   /* Update coordinates, normals, for new point */
-  if ( octree )
-    _MMG3D_moveOctree(mesh, octree, ip0, o, p0->c);
+  if ( PROctree )
+    _MMG3D_movePROctree(mesh, PROctree, ip0, o, p0->c);
 
   p0->c[0] = o[0];
   p0->c[1] = o[1];
@@ -1359,7 +1359,7 @@ int _MMG5_movbdynompt_ani(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree, 
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
- * \param octree pointer toward the octree structure.
+ * \param PROctree pointer toward the PROctree structure.
  * \param listv pointer toward the volumic ball of the point.
  * \param ilistv size of the volumic ball.
  * \param lists pointer toward the surfacic ball of the point.
@@ -1372,7 +1372,7 @@ int _MMG5_movbdynompt_ani(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree, 
  * Move boundary ridge point, whose volumic and surfacic balls are passed.
  *
  */
-int _MMG5_movbdyridpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree, int *listv,
+int _MMG5_movbdyridpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pPROctree PROctree, int *listv,
                           int ilistv,int *lists,int ilists,
                           int improve) {
   MMG5_pTetra          pt,pt0;
@@ -1683,8 +1683,8 @@ int _MMG5_movbdyridpt_ani(MMG5_pMesh mesh, MMG5_pSol met, _MMG3D_pOctree octree,
   }
 
   /* Update coordinates, normals, for new point */
-  if ( octree )
-    _MMG3D_moveOctree(mesh, octree, ip0, o, p0->c);
+  if ( PROctree )
+    _MMG3D_movePROctree(mesh, PROctree, ip0, o, p0->c);
 
   p0->c[0] = o[0];
   p0->c[1] = o[1];

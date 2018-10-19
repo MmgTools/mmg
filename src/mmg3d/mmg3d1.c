@@ -526,7 +526,7 @@ char _MMG5_chkedg(MMG5_pMesh mesh,MMG5_Tria *pt,char ori, double hmax,
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
- * \param octree pointer toward the octree structure (only for delaunay).
+ * \param PROctree pointer toward the PROctree structure (only for delaunay).
  * \param typchk type of checking permformed for edge length (hmin or LSHORT
  * criterion).
  * \return -1 if failed and swap number otherwise.
@@ -535,7 +535,7 @@ char _MMG5_chkedg(MMG5_pMesh mesh,MMG5_Tria *pt,char ori, double hmax,
  * approximation.
  *
  */
-int _MMG5_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree, int typchk) {
+int _MMG5_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pPROctree PROctree, int typchk) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
   int      k,it,list[MMG3D_LMAX+2],ilist,ret,it1,it2,ns,nns,maxit;
@@ -571,7 +571,7 @@ int _MMG5_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree, int typchk
           if ( ier <  0 )
             return -1;
           else if ( ier ) {
-            ier = _MMG5_swpbdy(mesh,met,list,ret,it1,octree,typchk);
+            ier = _MMG5_swpbdy(mesh,met,list,ret,it1,PROctree,typchk);
             if ( ier > 0 )  ns++;
             else if ( ier < 0 )  return -1;
             break;
@@ -593,7 +593,7 @@ int _MMG5_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree, int typchk
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
  * \param crit coefficient of quality improvment.
- * \param octree pointer toward the octree structure in delaunay mode and
+ * \param PROctree pointer toward the PROctree structure in delaunay mode and
  * toward the \a NULL pointer otherwise
  * \param typchk type of checking permformed for edge length (hmin or LSHORT
  * criterion)
@@ -605,7 +605,7 @@ int _MMG5_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree, int typchk
  *
  */
 int _MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double crit,double declic,
-                 _MMG3D_pOctree octree,int typchk,int testmark) {
+                 _MMG3D_pPROctree PROctree,int typchk,int testmark) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
   int      list[MMG3D_LMAX+2],ilist,k,it,nconf,maxit,ns,nns,ier;
@@ -633,7 +633,7 @@ int _MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double crit,double declic,
         nconf = _MMG5_chkswpgen(mesh,met,k,i,&ilist,list,crit,typchk);
         if ( nconf<0 ) return -1;
         else if ( nconf ) {
-          ier = _MMG5_swpgen(mesh,met,nconf,ilist,list,octree,typchk);
+          ier = _MMG5_swpgen(mesh,met,nconf,ilist,list,PROctree,typchk);
           if ( ier > 0 )  ns++;
           else if ( ier < 0 ) return -1;
           break;
@@ -652,7 +652,7 @@ int _MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double crit,double declic,
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
- * \param octree pointer toward the octree structure.
+ * \param PROctree pointer toward the PROctree structure.
  * \param clickSurf triangle quality threshold under which we want to move
  * \param clickVol  tetra    quality threshold under which we want to move
  * \param moveVol internal move
@@ -666,7 +666,7 @@ int _MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double crit,double declic,
  * Analyze tetrahedra and move points so as to make mesh more uniform.
  *
  */
-int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,
+int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pPROctree PROctree,
                  double clickSurf,double clickVol,int moveVol, int improveSurf,
                  int improveVolSurf, int improveVol, int maxit,int testmark) {
   MMG5_pTetra        pt;
@@ -727,7 +727,7 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,
               ier=_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,1);
               if( !ier )  continue;
               else if ( ier>0 )
-                ier = _MMG5_movbdynompt(mesh,met,octree,listv,ilistv,lists,ilists,improveVolSurf);
+                ier = _MMG5_movbdynompt(mesh,met,PROctree,listv,ilistv,lists,ilists,improveVolSurf);
               else
                 return -1;
             }
@@ -735,7 +735,7 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,
               ier=_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,0);
               if ( !ier )  continue;
               else if ( ier>0 )
-                ier = _MMG5_movbdyridpt(mesh,met,octree,listv,ilistv,lists,ilists,improveVolSurf);
+                ier = _MMG5_movbdyridpt(mesh,met,PROctree,listv,ilistv,lists,ilists,improveVolSurf);
               else
                 return -1;
             }
@@ -744,7 +744,7 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,
               if ( !ier )
                 continue;
               else if ( ier>0 )
-                ier = _MMG5_movbdyrefpt(mesh,met,octree,listv,ilistv,lists,ilists,improveVolSurf);
+                ier = _MMG5_movbdyrefpt(mesh,met,PROctree,listv,ilistv,lists,ilists,improveVolSurf);
               else
                 return -1;
             }
@@ -767,7 +767,7 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,
                 if ( !_MMG5_directsurfball(mesh,pt->v[i0],lists,ilists,n) )
                   continue;
               }
-              ier = _MMG5_movbdyregpt(mesh,met,octree,listv,ilistv,
+              ier = _MMG5_movbdyregpt(mesh,met,PROctree,listv,ilistv,
                                       lists,ilists,improveSurf,improveVolSurf);
               if (ier < 0 ) return -1;
               else if ( ier )  ns++;
@@ -776,7 +776,7 @@ int _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, _MMG3D_pOctree octree,
           else if ( moveVol && (pt->qual < clickVol) ) {
             ilistv = _MMG5_boulevolp(mesh,k,i0,listv);
             if ( !ilistv )  continue;
-            ier = _MMG5_movintpt(mesh,met,octree,listv,ilistv,improveVol);
+            ier = _MMG5_movintpt(mesh,met,PROctree,listv,ilistv,improveVol);
           }
           if ( ier ) {
             nm++;

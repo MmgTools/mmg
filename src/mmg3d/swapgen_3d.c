@@ -234,7 +234,7 @@ int _MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,
  * \param ilist number of tetrahedra in the shell of the edge that we want
  *  to swap.
  * \param list pointer toward the shell of the edge that we want to swap.
- * \param octree pointer toward the octree structure in Delaunay mode,
+ * \param PROctree pointer toward the PROctree structure in Delaunay mode,
  * NULL pointer in pattern mode.
  * \param typchk type of checking permformed for edge length (hmin or LSHORT
  * criterion).
@@ -244,7 +244,7 @@ int _MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,
  *
  */
 int _MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,int *list,
-                 _MMG3D_pOctree octree, char typchk) {
+                 _MMG3D_pPROctree PROctree, char typchk) {
   MMG5_pTetra    pt;
   MMG5_pPoint    p0,p1;
   int       iel,na,nb,np,nball,ret,start;

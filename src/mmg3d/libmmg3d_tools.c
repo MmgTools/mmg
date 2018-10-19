@@ -57,7 +57,7 @@ void MMG3D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
     _MMG5_gradsiz         = _MMG5_gradsiz_iso;
 #ifndef PATTERN
     _MMG5_cavity          = _MMG5_cavity_iso;
-    _MMG3D_octreein       = _MMG3D_octreein_iso;
+    _MMG3D_PROctreein       = _MMG3D_PROctreein_iso;
 #endif
   }
   else if ( met->size == 6 ) {
@@ -87,7 +87,7 @@ void MMG3D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
     _MMG5_gradsiz        = _MMG5_gradsiz_ani;
 #ifndef PATTERN
     _MMG5_cavity         = _MMG5_cavity_ani;
-    _MMG3D_octreein      = _MMG3D_octreein_ani;
+    _MMG3D_PROctreein      = _MMG3D_PROctreein_ani;
 #endif
   }
 }
@@ -150,7 +150,7 @@ int MMG3D_defaultValues(MMG5_pMesh mesh) {
 
 #ifndef PATTERN
   fprintf(stdout,"Max number of point per octree cell (-octree) : %d\n",
-          mesh->info.octree);
+          mesh->info.PROctree);
 #endif
 #ifdef USE_SCOTCH
   fprintf(stdout,"SCOTCH renumbering                  : enabled\n");

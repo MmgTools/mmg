@@ -172,55 +172,55 @@ static const unsigned char MMG5_permedge[12][6] = {
   {5,1,3,2,4,0}, {2,5,4,1,0,3}, {4,2,5,0,3,1}, {5,4,2,3,1,0} };
 
 /**
- * Octree cell.
+ * PROctree cell.
  */
-typedef struct _MMG3D_octree_s
+typedef struct _MMG3D_PROctree_s
 {
-  struct _MMG3D_octree_s* branches; /*!< pointer toward the subtrees of the current octree */
+  struct _MMG3D_PROctree_s* branches; /*!< pointer toward the subtrees of the current PROctree */
   int* v;      /*!< vertex index */
   int  nbVer;  /*!< number of vertices in the sub tree */
   int  depth; /*!< sub tree depth */
-} _MMG3D_octree_s;
+} _MMG3D_PROctree_s;
 
 /**
- * Octree global structure (enriched by global variables).
+ * PROctree global structure (enriched by global variables).
  */
 typedef struct
 {
-  int nv;  /*!< Max number of points per octree cell */
-  int nc; /*!< Max number of cells listed per local search in the octree (-3)*/
-  _MMG3D_octree_s* q0; /*!<  Pointer toward the first octree cell */
-} _MMG3D_octree;
-typedef _MMG3D_octree * _MMG3D_pOctree;
+  int nv;  /*!< Max number of points per PROctree cell */
+  int nc; /*!< Max number of cells listed per local search in the PROctree (-3)*/
+  _MMG3D_PROctree_s* q0; /*!<  Pointer toward the first PROctree cell */
+} _MMG3D_PROctree;
+typedef _MMG3D_PROctree * _MMG3D_pPROctree;
 
 
-/* octree */
-void _MMG3D_initOctree_s( _MMG3D_octree_s* q);
-int _MMG3D_initOctree(MMG5_pMesh,_MMG3D_pOctree* q, int nv);
-void _MMG3D_freeOctree_s(MMG5_pMesh,_MMG3D_octree_s* q, int nv);
-void _MMG3D_freeOctree(MMG5_pMesh,_MMG3D_octree** q);
+/* PROctree */
+void _MMG3D_initPROctree_s( _MMG3D_PROctree_s* q);
+int _MMG3D_initPROctree(MMG5_pMesh,_MMG3D_pPROctree* q, int nv);
+void _MMG3D_freePROctree_s(MMG5_pMesh,_MMG3D_PROctree_s* q, int nv);
+void _MMG3D_freePROctree(MMG5_pMesh,_MMG3D_PROctree** q);
 int _MMG3D_isCellIncluded(double* cellCenter, double l, double* zoneCenter, double l0);
 void _MMG3D_placeInListDouble(double*, double, int, int);
-void _MMG3D_placeInListOctree(_MMG3D_octree_s**, _MMG3D_octree_s*, int, int);
+void _MMG3D_placeInListPROctree(_MMG3D_PROctree_s**, _MMG3D_PROctree_s*, int, int);
 int _MMG3D_seekIndex (double* distList, double dist, int indexMin, int indexMax);
 int _MMG3D_intersectRect(double *rectin, double *rectinout);
-int _MMG3D_getListSquareRec(_MMG3D_octree_s*,double*,double*,
-                            _MMG3D_octree_s***,double*,double*,double, int, int, int*);
-int  _MMG3D_getListSquare(MMG5_pMesh,double*,_MMG3D_octree*,double*,_MMG3D_octree_s***);
-int _MMG3D_addOctreeRec(MMG5_pMesh,_MMG3D_octree_s*,double*, const int, int);
-int _MMG3D_addOctree(MMG5_pMesh mesh, _MMG3D_octree* q, const int no);
-int _MMG3D_delOctreeVertex(MMG5_pMesh,_MMG3D_octree_s* q, int no);
-int _MMG3D_moveOctree(MMG5_pMesh, _MMG3D_pOctree,int, double*, double*);
-void _MMG3D_mergeBranchesRec(_MMG3D_octree_s*, _MMG3D_octree_s*, int, int , int*);
-void _MMG3D_mergeBranches(MMG5_pMesh mesh,_MMG3D_octree_s* q, int dim, int nv);
-int _MMG3D_delOctreeRec(MMG5_pMesh,_MMG3D_octree_s*,double*, const int,const int);
-int _MMG3D_delOctree(MMG5_pMesh mesh, _MMG3D_pOctree q, const int no);
-void _MMG3D_printArbreDepth(_MMG3D_octree_s* q, int depth, int nv, int dim);
-void _MMG3D_printArbre(_MMG3D_octree* q);
-void  _MMG3D_sizeArbreRec(_MMG3D_octree_s* q, int nv, int dim, int*,int*);
-int*  _MMG3D_sizeArbre(_MMG3D_octree* q, int dim);
-int  _MMG3D_octreein_iso(MMG5_pMesh,MMG5_pSol,_MMG3D_pOctree,int,double);
-int  _MMG3D_octreein_ani(MMG5_pMesh,MMG5_pSol,_MMG3D_pOctree,int,double);
+int _MMG3D_getListSquareRec(_MMG3D_PROctree_s*,double*,double*,
+                            _MMG3D_PROctree_s***,double*,double*,double, int, int, int*);
+int  _MMG3D_getListSquare(MMG5_pMesh,double*,_MMG3D_PROctree*,double*,_MMG3D_PROctree_s***);
+int _MMG3D_addPROctreeRec(MMG5_pMesh,_MMG3D_PROctree_s*,double*, const int, int);
+int _MMG3D_addPROctree(MMG5_pMesh mesh, _MMG3D_PROctree* q, const int no);
+int _MMG3D_delPROctreeVertex(MMG5_pMesh,_MMG3D_PROctree_s* q, int no);
+int _MMG3D_movePROctree(MMG5_pMesh, _MMG3D_pPROctree,int, double*, double*);
+void _MMG3D_mergeBranchesRec(_MMG3D_PROctree_s*, _MMG3D_PROctree_s*, int, int , int*);
+void _MMG3D_mergeBranches(MMG5_pMesh mesh,_MMG3D_PROctree_s* q, int dim, int nv);
+int _MMG3D_delPROctreeRec(MMG5_pMesh,_MMG3D_PROctree_s*,double*, const int,const int);
+int _MMG3D_delPROctree(MMG5_pMesh mesh, _MMG3D_pPROctree q, const int no);
+void _MMG3D_printArbreDepth(_MMG3D_PROctree_s* q, int depth, int nv, int dim);
+void _MMG3D_printArbre(_MMG3D_PROctree* q);
+void  _MMG3D_sizeArbreRec(_MMG3D_PROctree_s* q, int nv, int dim, int*,int*);
+int*  _MMG3D_sizeArbre(_MMG3D_PROctree* q, int dim);
+int  _MMG3D_PROctreein_iso(MMG5_pMesh,MMG5_pSol,_MMG3D_pPROctree,int,double);
+int  _MMG3D_PROctreein_ani(MMG5_pMesh,MMG5_pSol,_MMG3D_pPROctree,int,double);
 
 /* prototypes */
 int  _MMG3D_tetraQual(MMG5_pMesh mesh, MMG5_pSol met,char metRidTyp);
@@ -334,32 +334,32 @@ int  _MMG5_split4bar(MMG5_pMesh mesh,MMG5_pSol met,int k,char);
 int  _MMG3D_simbulgept(MMG5_pMesh mesh,MMG5_pSol met, int *list, int ilist,int);
 void _MMG5_nsort(int ,double *,char *);
 int    _MMG3D_optlap(MMG5_pMesh ,MMG5_pSol );
-int    _MMG5_movintpt_iso(MMG5_pMesh ,MMG5_pSol,_MMG3D_pOctree, int *, int , int);
+int    _MMG5_movintpt_iso(MMG5_pMesh ,MMG5_pSol,_MMG3D_pPROctree, int *, int , int);
 int    _MMG3D_movnormal_iso(MMG5_pMesh ,MMG5_pSol ,int ,int );
-int    _MMG5_movintptLES_iso(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree,int *,int,int);
-int    _MMG5_movintpt_ani(MMG5_pMesh ,MMG5_pSol,_MMG3D_pOctree,int *,int ,int);
-int    _MMG5_movbdyregpt_iso(MMG5_pMesh, MMG5_pSol,_MMG3D_pOctree,
+int    _MMG5_movintptLES_iso(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pPROctree,int *,int,int);
+int    _MMG5_movintpt_ani(MMG5_pMesh ,MMG5_pSol,_MMG3D_pPROctree,int *,int ,int);
+int    _MMG5_movbdyregpt_iso(MMG5_pMesh, MMG5_pSol,_MMG3D_pPROctree,
                              int*, int, int*, int, int ,int);
-int    _MMG5_movbdyregpt_ani(MMG5_pMesh, MMG5_pSol,_MMG3D_pOctree,
+int    _MMG5_movbdyregpt_ani(MMG5_pMesh, MMG5_pSol,_MMG3D_pPROctree,
                              int*, int, int*, int, int ,int);
-int    _MMG5_movbdyrefpt_iso(MMG5_pMesh, MMG5_pSol,_MMG3D_pOctree, int*, int,
+int    _MMG5_movbdyrefpt_iso(MMG5_pMesh, MMG5_pSol,_MMG3D_pPROctree, int*, int,
                              int*, int ,int);
-int    _MMG5_movbdyrefpt_ani(MMG5_pMesh, MMG5_pSol,_MMG3D_pOctree, int*, int,
+int    _MMG5_movbdyrefpt_ani(MMG5_pMesh, MMG5_pSol,_MMG3D_pPROctree, int*, int,
                              int*, int ,int);
-int    _MMG5_movbdynompt_iso(MMG5_pMesh, MMG5_pSol,_MMG3D_pOctree, int*, int,
+int    _MMG5_movbdynompt_iso(MMG5_pMesh, MMG5_pSol,_MMG3D_pPROctree, int*, int,
                              int*, int ,int);
-int    _MMG5_movbdynompt_ani(MMG5_pMesh, MMG5_pSol,_MMG3D_pOctree, int*, int,
+int    _MMG5_movbdynompt_ani(MMG5_pMesh, MMG5_pSol,_MMG3D_pPROctree, int*, int,
                              int*, int ,int);
-int    _MMG5_movbdyridpt_iso(MMG5_pMesh, MMG5_pSol,_MMG3D_pOctree, int*, int,
+int    _MMG5_movbdyridpt_iso(MMG5_pMesh, MMG5_pSol,_MMG3D_pPROctree, int*, int,
                              int*, int ,int);
-int    _MMG5_movbdyridpt_ani(MMG5_pMesh, MMG5_pSol,_MMG3D_pOctree, int*, int,
+int    _MMG5_movbdyridpt_ani(MMG5_pMesh, MMG5_pSol,_MMG3D_pPROctree, int*, int,
                              int*, int ,int);
 int    _MMG3D_movv_ani(MMG5_pMesh ,MMG5_pSol ,int ,int );
 int    _MMG3D_movv_iso(MMG5_pMesh ,MMG5_pSol ,int ,int );
 int  _MMG3D_normalAdjaTri(MMG5_pMesh,int,char,int,double n[3]);
 int  _MMG5_chkswpbdy(MMG5_pMesh, MMG5_pSol,int*, int, int, int,char);
-int  _MMG5_swpbdy(MMG5_pMesh,MMG5_pSol,int*,int,int,_MMG3D_pOctree,char);
-int  _MMG5_swpgen(MMG5_pMesh,MMG5_pSol,int, int, int*,_MMG3D_pOctree,char);
+int  _MMG5_swpbdy(MMG5_pMesh,MMG5_pSol,int*,int,int,_MMG3D_pPROctree,char);
+int  _MMG5_swpgen(MMG5_pMesh,MMG5_pSol,int, int, int*,_MMG3D_pPROctree,char);
 int  _MMG5_chkswpgen(MMG5_pMesh,MMG5_pSol,int,int,int*,int*,double,char);
 int  MMG3D_swap23(MMG5_pMesh,MMG5_pSol,int,char,int,int,int,int);
 int  _MMG5_srcface(MMG5_pMesh mesh,int n0,int n1,int n2);
@@ -367,11 +367,11 @@ int _MMG5_chkptonbdy(MMG5_pMesh,int);
 double _MMG5_orcal_poi(double a[3],double b[3],double c[3],double d[3]);
 int _MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcible);
 /*function for agressive optimization*/
-  int MMG3D_opttyp(MMG5_pMesh , MMG5_pSol ,_MMG3D_pOctree ,int);
-int _MMG3D_swpItem(MMG5_pMesh ,  MMG5_pSol ,_MMG3D_pOctree ,int ,int );
-int _MMG3D_splitItem(MMG5_pMesh ,  MMG5_pSol ,_MMG3D_pOctree ,int ,int ,double );
-int MMG3D_optbdry(MMG5_pMesh ,MMG5_pSol ,_MMG3D_pOctree ,int );
-int MMG3D_movetetrapoints(MMG5_pMesh ,MMG5_pSol ,_MMG3D_pOctree ,int ) ;
+  int MMG3D_opttyp(MMG5_pMesh , MMG5_pSol ,_MMG3D_pPROctree ,int);
+int _MMG3D_swpItem(MMG5_pMesh ,  MMG5_pSol ,_MMG3D_pPROctree ,int ,int );
+int _MMG3D_splitItem(MMG5_pMesh ,  MMG5_pSol ,_MMG3D_pPROctree ,int ,int ,double );
+int MMG3D_optbdry(MMG5_pMesh ,MMG5_pSol ,_MMG3D_pPROctree ,int );
+int MMG3D_movetetrapoints(MMG5_pMesh ,MMG5_pSol ,_MMG3D_pPROctree ,int ) ;
 
 int _MMG5_trydisp(MMG5_pMesh,double *,short);
 int _MMG5_dichodisp(MMG5_pMesh,double *);
@@ -448,11 +448,11 @@ int  _MMG3D_dichoto(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx);
 int  _MMG3D_dichoto1b(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int);
 char _MMG5_chkedg(MMG5_pMesh mesh,MMG5_Tria *pt,char ori,double,double,int);
 int  _MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met, char typchk, int patternMode) ;
-int  _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree,
+int  _MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pPROctree PROctree,
                   double clickSurf,double clickVol,int moveVol,int improveSurf,int improveVolSurf,
                   int improveVol,int maxit,int testmark);
-int  _MMG5_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pOctree octree, int);
-  int  _MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double,double,_MMG3D_pOctree, int,int);
+int  _MMG5_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pPROctree PROctree, int);
+  int  _MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double,double,_MMG3D_pPROctree, int,int);
 
 /* pointers */
 /* init structures */
@@ -483,13 +483,13 @@ int    (*_MMG5_defsiz)(MMG5_pMesh ,MMG5_pSol );
 int    (*_MMG5_gradsiz)(MMG5_pMesh ,MMG5_pSol );
 int    (*_MMG5_intmet)(MMG5_pMesh,MMG5_pSol,int,char,int, double);
 int    (*_MMG5_interp4bar)(MMG5_pMesh,MMG5_pSol,int,int,double *);
-int    (*_MMG5_movintpt)(MMG5_pMesh ,MMG5_pSol, _MMG3D_pOctree ,int *, int , int );
-int    (*_MMG5_movbdyregpt)(MMG5_pMesh, MMG5_pSol, _MMG3D_pOctree ,int*, int, int*, int, int ,int);
-int    (*_MMG5_movbdyrefpt)(MMG5_pMesh, MMG5_pSol, _MMG3D_pOctree ,int*, int, int*, int ,int);
-int    (*_MMG5_movbdynompt)(MMG5_pMesh, MMG5_pSol, _MMG3D_pOctree ,int*, int, int*, int ,int);
-int    (*_MMG5_movbdyridpt)(MMG5_pMesh, MMG5_pSol, _MMG3D_pOctree ,int*, int, int*, int ,int);
+int    (*_MMG5_movintpt)(MMG5_pMesh ,MMG5_pSol, _MMG3D_pPROctree ,int *, int , int );
+int    (*_MMG5_movbdyregpt)(MMG5_pMesh, MMG5_pSol, _MMG3D_pPROctree ,int*, int, int*, int, int ,int);
+int    (*_MMG5_movbdyrefpt)(MMG5_pMesh, MMG5_pSol, _MMG3D_pPROctree ,int*, int, int*, int ,int);
+int    (*_MMG5_movbdynompt)(MMG5_pMesh, MMG5_pSol, _MMG3D_pPROctree ,int*, int, int*, int ,int);
+int    (*_MMG5_movbdyridpt)(MMG5_pMesh, MMG5_pSol, _MMG3D_pPROctree ,int*, int, int*, int ,int);
   int    (*_MMG5_cavity)(MMG5_pMesh ,MMG5_pSol ,int ,int ,int *,int ,double);
-  int    (*_MMG3D_octreein)(MMG5_pMesh ,MMG5_pSol ,_MMG3D_pOctree ,int,double );
+  int    (*_MMG3D_PROctreein)(MMG5_pMesh ,MMG5_pSol ,_MMG3D_pPROctree ,int,double );
 
 /**
  * \param mesh pointer toward the mesh structure.
