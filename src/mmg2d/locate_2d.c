@@ -34,7 +34,7 @@
 
 /* Calculate the barycentric coordinates of point P(c[0],c[1]) in tria pt and the associated determinant */
 /* l1 = barycentric coordinate with respect to p1, l2 = barycentric coordinate with respect to p2 */
-int MMG2_coorbary(MMG5_pMesh mesh,MMG5_pTria pt,double c[2],double* det,double* l1,double* l2) {
+int MMG2D_coorbary(MMG5_pMesh mesh,MMG5_pTria pt,double c[2],double* det,double* l1,double* l2) {
   MMG5_pPoint      p1,p2,p3;
   double           b2,b3;
   static char      mmgWarn0=0;
@@ -45,7 +45,7 @@ int MMG2_coorbary(MMG5_pMesh mesh,MMG5_pTria pt,double c[2],double* det,double* 
 
   /* Calculate det (p2-p1,p3-p1) */
   *det = (p2->c[0]-p1->c[0])*(p3->c[1]-p1->c[1]) - (p2->c[1]-p1->c[1])*(p3->c[0]-p1->c[0]);
-  if ( *det < _MMG5_EPSD ) {
+  if ( *det < MMG5_EPSD ) {
     if ( !mmgWarn0 ) {
       mmgWarn0 = 1;
       fprintf(stderr,"\n  ## Warning: %s: at least 1 flat triangle. abort.\n",
@@ -66,7 +66,7 @@ int MMG2_coorbary(MMG5_pMesh mesh,MMG5_pTria pt,double c[2],double* det,double* 
 }
 
 /** Check whether c lies in triangle k; return k if so, 0 otherwise */
-int MMG2_isInTriangle(MMG5_pMesh mesh,int k,double c[2]) {
+int MMG2D_isInTriangle(MMG5_pMesh mesh,int k,double c[2]) {
   MMG5_pTria      pt;
   double          det,l1,l2,l3;
   char            ier;
@@ -74,7 +74,7 @@ int MMG2_isInTriangle(MMG5_pMesh mesh,int k,double c[2]) {
   pt = &mesh->tria[k];
   if ( !MG_EOK(pt) ) return 0;
 
-  ier = MMG2_coorbary(mesh,pt,&c[0],&det,&l1,&l2);
+  ier = MMG2D_coorbary(mesh,pt,&c[0],&det,&l1,&l2);
   if ( !ier )
     return 0;
 
@@ -86,16 +86,16 @@ int MMG2_isInTriangle(MMG5_pMesh mesh,int k,double c[2]) {
 /* Check whether edge ppa-ppb crosses triangles pt (in the sense that two edges of this triangle
    are crossed by (ppa-ppb), or only one, and ppa or ppb is a vertex of pt; if at least one edge
    is crossed by ia-ib, return i+1, where i is the index of one of the crossed edges */
-int MMG2_cutEdge(MMG5_pMesh mesh,MMG5_pTria pt,MMG5_pPoint ppa,MMG5_pPoint ppb) {
+int MMG2D_cutEdge(MMG5_pMesh mesh,MMG5_pTria pt,MMG5_pPoint ppa,MMG5_pPoint ppb) {
   double      la[3],lb[3],det;
   int         icompt,ireturn;
   char        ier,i;
 
-  ier = MMG2_coorbary(mesh,pt,ppa->c,&det,&la[0],&la[1]);
+  ier = MMG2D_coorbary(mesh,pt,ppa->c,&det,&la[0],&la[1]);
   if ( !ier ) return 0;
   la[2] = 1.0-(la[0]+la[1]);
 
-  ier = MMG2_coorbary(mesh,pt,ppb->c,&det,&lb[0],&lb[1]);
+  ier = MMG2D_coorbary(mesh,pt,ppb->c,&det,&lb[0],&lb[1]);
   if ( !ier ) return 0;
   lb[2] = 1.0-(lb[0]+lb[1]);
 
@@ -125,7 +125,7 @@ int MMG2_cutEdge(MMG5_pMesh mesh,MMG5_pTria pt,MMG5_pPoint ppa,MMG5_pPoint ppb) 
 
 /* Return i+1>0 if Edge ia-ib intersects triangle k at edge i, 0 if
    it does not intersect k, and return -3 if edge ia-ib is one edge of k*/
-int MMG2_cutEdgeTriangle(MMG5_pMesh mesh,int k,int ia,int ib) {
+int MMG2D_cutEdgeTriangle(MMG5_pMesh mesh,int k,int ia,int ib) {
   MMG5_pTria   pt;
   MMG5_pPoint  p1,p2,p3,ppa,ppb;
   double       a11,a21,a12,a22,area1,area2,area3,prod1,prod2,prod3;
@@ -167,21 +167,21 @@ int MMG2_cutEdgeTriangle(MMG5_pMesh mesh,int k,int ia,int ib) {
 
   /* Both edges p2p3 and p1p3 corresponding to prod2 and prod3 are cut by edge ia,ib */
   if ( prod1 > 0 && ((prod2 < 0 || prod3 < 0))) {
-    if ( (iare = MMG2_cutEdge(mesh,pt,ppa,ppb)) ) {
+    if ( (iare = MMG2D_cutEdge(mesh,pt,ppa,ppb)) ) {
       return iare;
     }
   }
 
   /* Both edges corresponding to prod1 and prod3 are cut by edge ia,ib */
   if ( prod2 > 0 && ((prod1 < 0 || prod3 < 0))) {
-    if ( (iare = MMG2_cutEdge(mesh,pt,ppa,ppb)) ) {
+    if ( (iare = MMG2D_cutEdge(mesh,pt,ppa,ppb)) ) {
       return iare;
     }
   }
 
   /* Both edges corresponding to prod1 and prod2 are cut by edge ia,ib */
   if ( prod3 > 0 && ((prod2 < 0 || prod1 < 0))) {
-    if ( (iare = MMG2_cutEdge(mesh,pt,ppa,ppb)) ) {
+    if ( (iare = MMG2D_cutEdge(mesh,pt,ppa,ppb)) ) {
       return iare;
     }
   }
@@ -191,7 +191,7 @@ int MMG2_cutEdgeTriangle(MMG5_pMesh mesh,int k,int ia,int ib) {
     if ( pt->v[i] == ia || ibreak ) {
       /* One vertex is ia, and the opposite edge is frankly crossed */
       if ( (prod1 < 0) || (prod2 < 0) || (prod3 < 0) ) {
-        if ( (iare = MMG2_cutEdge(mesh,pt,ppa,ppb)) ) {
+        if ( (iare = MMG2D_cutEdge(mesh,pt,ppa,ppb)) ) {
           return iare;
         }
       }
@@ -211,7 +211,7 @@ int MMG2_cutEdgeTriangle(MMG5_pMesh mesh,int k,int ia,int ib) {
 }
 
 /** Return the index of one triangle containing ip */
-int MMG2_findTria(MMG5_pMesh mesh,int ip) {
+int MMG2D_findTria(MMG5_pMesh mesh,int ip) {
   MMG5_pTria  pt,pt1;
   int         iel,base,iadr,*adja,iter,ier;
   int         mvDir[3],jel,i;
@@ -248,12 +248,12 @@ int MMG2_findTria(MMG5_pMesh mesh,int ip) {
     adja = &mesh->adja[iadr];
 
     /*compute the barycentric coordinates*/
-    ier = MMG2_coorbary(mesh,pt,mesh->point[ip].c,&det,&l1,&l2);
+    ier = MMG2D_coorbary(mesh,pt,mesh->point[ip].c,&det,&l1,&l2);
     if ( !ier ) return 0;
 
     l3 = 1-l1-l2;
     /*warning -1e12 is too strict*/
-    eps = (-1e-9)*_MMG2_quickcal(mesh,pt);
+    eps = (-1e-9)*MMG2D_quickcal(mesh,pt);
 
     /*find in which direction we can move*/
     if (l1<eps)
@@ -319,7 +319,7 @@ int MMG2_findTria(MMG5_pMesh mesh,int ip) {
  * and \a iare is an intersected edge.
  *
  */
-int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
+int MMG2D_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
   MMG5_pTria         pt;
   MMG5_pPoint        ppt1,ppt2,ppt3,ppt4,ppa,ppb;
   double             a[3],a11,a21,a12,a22,area1,area2,area3,prod1,prod2,prod3;
@@ -341,7 +341,7 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
 
   if ( !ivert ) {
 
-    if ( !(k = MMG2_findTria(mesh,ia) ) ) {
+    if ( !(k = MMG2D_findTria(mesh,ia) ) ) {
       return 0;
     }
     *kdep = k;
@@ -399,7 +399,7 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
     /** ia-ib intersect 2 triangle edges => 2 products are <0, 1 is >0 */
     /* Both edges p2p3 and p1p3 in pt have franck intersections with edge (ia - ib) */
     if ( prod1 > 0.0 && ((prod2 < 0.0 || prod3 < 0.0))) { /*le tr est coupe par la droite ia-ib*/
-      if ( (iare = MMG2_cutEdge(mesh,pt,ppa,ppb)) ) {
+      if ( (iare = MMG2D_cutEdge(mesh,pt,ppa,ppb)) ) {
         pt->base = mesh->base+1;
         list[lon++] = 3*k + iare-1;
       }
@@ -420,7 +420,7 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
 
     /* Both edges p1p2 and p1p3 in pt have franck intersections with edge (ia - ib) */
     if ( prod2 > 0.0 && ((prod1 < 0.0 || prod3 < 0.0 ))) {
-      if ( (iare = MMG2_cutEdge(mesh,pt,ppa,ppb)) ) {
+      if ( (iare = MMG2D_cutEdge(mesh,pt,ppa,ppb)) ) {
         pt->base = mesh->base+1;
         list[lon++] = 3*k + iare-1;
       }
@@ -441,7 +441,7 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
 
     /* Both edges p1p2 and p2p3 in pt have franck intersections with edge (ia - ib) */
     if ( prod3 > 0.0 && ((prod2 < 0.0 || prod1 < 0.0 ))) {
-      if ( (iare = MMG2_cutEdge(mesh,pt,ppa,ppb)) ) {
+      if ( (iare = MMG2D_cutEdge(mesh,pt,ppa,ppb)) ) {
         pt->base = mesh->base+1;
         list[lon++] = 3*k + iare-1;
       }
@@ -465,7 +465,7 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
       iare = 0;
       if ( pt->v[i] == ia || ibreak ) {
         if ( (prod1 < 0.0) || (prod2 < 0.0) || (prod3 < 0.0) ) {
-          if ( (iare = MMG2_cutEdge(mesh,pt,ppa,ppb)) ) {
+          if ( (iare = MMG2D_cutEdge(mesh,pt,ppa,ppb)) ) {
             pt->base = mesh->base+1;
             list[lon++] = 3*k + iare-1;
           }
@@ -483,27 +483,27 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
             list[lon++] = 3*k;
             ibreak = 3;
           }
-          else if ( fabs(prod1)<_MMG5_EPSD2 && fabs(prod2)<_MMG5_EPSD2 && fabs(prod3)<_MMG5_EPSD2) {
-            if ( (a[_MMG5_inxt2[i]] < 0.0 && a[_MMG5_iprv2[i]] > 0.0 )
-                 || (a[_MMG5_inxt2[i]] > 0.0 && a[_MMG5_iprv2[i]] < 0.0 ) ) {
+          else if ( fabs(prod1)<MMG5_EPSD2 && fabs(prod2)<MMG5_EPSD2 && fabs(prod3)<MMG5_EPSD2) {
+            if ( (a[MMG5_inxt2[i]] < 0.0 && a[MMG5_iprv2[i]] > 0.0 )
+                 || (a[MMG5_inxt2[i]] > 0.0 && a[MMG5_iprv2[i]] < 0.0 ) ) {
 
               pt->base = mesh->base+1;
               list[lon++] = 3*k;
               ibreak = 3;
             }
-            else if ( a[_MMG5_inxt2[i]] > 0.0 && a[_MMG5_iprv2[i]] > 0.0 ){
-              k = adja[_MMG5_iprv2[i]] / 3;
+            else if ( a[MMG5_inxt2[i]] > 0.0 && a[MMG5_iprv2[i]] > 0.0 ){
+              k = adja[MMG5_iprv2[i]] / 3;
               //ibreak = 1;
               break;
             }
             else {
               //calcul de ||iaib|| et de ||ptiib|| avec aire(iaibpti)==0
               niaib = sqrt(a11*a11+a21*a21 );
-              if ( fabs(a[_MMG5_inxt2[i]]) > _MMG5_EPSD ) {
-                ppt4 = &mesh->point[pt->v[_MMG5_iprv2[i]]];
+              if ( fabs(a[MMG5_inxt2[i]]) > MMG5_EPSD ) {
+                ppt4 = &mesh->point[pt->v[MMG5_iprv2[i]]];
               }
               else {
-                ppt4 = &mesh->point[pt->v[_MMG5_inxt2[i]]];
+                ppt4 = &mesh->point[pt->v[MMG5_inxt2[i]]];
               }
               npti = sqrt((ppb->c[0]-ppt4->c[0])*(ppb->c[0]-ppt4->c[0])+
                           (ppb->c[1]-ppt4->c[1])*(ppb->c[1]-ppt4->c[1]));
@@ -513,7 +513,7 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
                 list[lon++] = 3*k;
                 // ibreak = 3;
               }
-              k = adja [_MMG5_inxt2[i]] / 3;
+              k = adja [MMG5_inxt2[i]] / 3;
               //ibreak = 1;
               break;
             }
@@ -527,13 +527,13 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
                           }
                           ibreak=-10;*/
             break;
-          } /*end if(fabs(prod1)<_MMG5_EPSD2 && fabs(prod2)<_MMG5_EPSD2 && fabs(prod3)<_MMG5_EPSD2)*/
+          } /*end if(fabs(prod1)<MMG5_EPSD2 && fabs(prod2)<MMG5_EPSD2 && fabs(prod3)<MMG5_EPSD2)*/
           else { /*on choisit de passer par l'arete iaPi si aire(iaibPi) >0*/
             assert ( pt->v[i] == ia );
-            if ( a[_MMG5_inxt2[i]] > 0.0 )
-              iare = _MMG5_iprv2[i];
+            if ( a[MMG5_inxt2[i]] > 0.0 )
+              iare = MMG5_iprv2[i];
             else
-              iare = _MMG5_inxt2[i];
+              iare = MMG5_inxt2[i];
 
             k = adja[iare] / 3;
             ibreak = 1;
@@ -572,7 +572,7 @@ int MMG2_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
     if ( ibreak > 1 ) break;
 
     /*a-t-on un pts sur l'arete iaib ?*/
-    if (fabs(area1) < _MMG5_EPSD || fabs(area2) < _MMG5_EPSD || fabs(area3) < _MMG5_EPSD) {
+    if (fabs(area1) < MMG5_EPSD || fabs(area2) < MMG5_EPSD || fabs(area3) < MMG5_EPSD) {
       if ( !mmgWarn ) {
         mmgWarn = 1;
         fprintf(stderr,"\n  ## Error: %s: unexpected failure."

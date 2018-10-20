@@ -42,8 +42,8 @@
  * \include libexamples/mmg3d/LagrangianMotion_example0/main.c
  */
 
-#ifndef _MMG3DLIB_H
-#define _MMG3DLIB_H
+#ifndef MMG3DLIB_H
+#define MMG3DLIB_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -2083,7 +2083,7 @@ enum MMG3D_Param {
  * \param lmax maximum ede length.
  * \param eltab table of invalid elements.
  * \param metRidTyp Type of storage of ridges metrics: 0 for classic storage
- * (before the _MMG5_defsiz call), 1 for special storage (after this call).
+ * (before the MMG5_defsiz call), 1 for special storage (after this call).
  *
  * Search invalid elements (in term of quality or edge length).
  *
@@ -2106,7 +2106,7 @@ enum MMG3D_Param {
  * \param critmin minimum quality for elements.
  * \param eltab pointer toward the table of invalid elements.
  * \param metRidTyp Type of storage of ridges metrics: 0 for classic storage
- * (before the _MMG5_defsiz call), 1 for special storage (after this call).
+ * (before the MMG5_defsiz call), 1 for special storage (after this call).
  *
  * Store elements which have worse quality than \a critmin in \a eltab,
  * \a eltab is allocated and could contain \a mesh->ne elements.
@@ -2129,7 +2129,7 @@ enum MMG3D_Param {
  * \param lmax maximum ede length.
  * \param eltab table of invalid elements.
  * \param metRidTyp Type of storage of ridges metrics: 0 for classic storage
- * (before the _MMG5_defsiz call), 1 for special storage (after this call).
+ * (before the MMG5_defsiz call), 1 for special storage (after this call).
  *
  * \return 1 if success, 0 otherwise.
  *

@@ -25,7 +25,7 @@
 // extern char ddb;
 
 /* Check if triangle k should be split based on geometric and rough edge length considerations */
-int _MMG2_chkedg(MMG5_pMesh mesh, int k) {
+int MMG2D_chkedg(MMG5_pMesh mesh, int k) {
   MMG5_pTria        pt;
   MMG5_pPoint       p1,p2;
   double            hausd,hmax,ps,cosn,ux,uy,ll,li,t1[2],t2[2];
@@ -37,8 +37,8 @@ int _MMG2_chkedg(MMG5_pMesh mesh, int k) {
 
   /* Analyze the three edges of k */
   for (i=0; i<3; i++) {
-    i1 = _MMG5_inxt2[i];
-    i2 = _MMG5_iprv2[i];
+    i1 = MMG5_inxt2[i];
+    i2 = MMG5_iprv2[i];
 
     p1 = &mesh->point[pt->v[i1]];
     p2 = &mesh->point[pt->v[i2]];
@@ -54,7 +54,7 @@ int _MMG2_chkedg(MMG5_pMesh mesh, int k) {
       continue;
     }
     /* Do not split very short edges */
-    else if ( ll < _MMG5_EPSD ) continue;
+    else if ( ll < MMG5_EPSD ) continue;
 
     /* Split non geometric edges connecting two parts of the border */
     else if ( !MG_EDG(pt->tag[i]) && p1->tag > MG_NOTAG && p2->tag > MG_NOTAG ) {
@@ -114,7 +114,7 @@ int _MMG2_chkedg(MMG5_pMesh mesh, int k) {
 
 /* Calculate coordinates o[2] and interpolated normal vector no[2] of a new point
  situated at parametric distance s from i1 = inxt2[i] */
-int _MMG2_bezierCurv(MMG5_pMesh mesh,int k,char i,double s,double *o,double *no) {
+int MMG2D_bezierCurv(MMG5_pMesh mesh,int k,char i,double s,double *o,double *no) {
   MMG5_pTria         pt;
   MMG5_pPoint        p1,p2;
   double             b1[2],b2[2],t1[2],t2[2],n1[2],n2[2],bn[2],ux,uy,ll,li,ps;
@@ -123,8 +123,8 @@ int _MMG2_bezierCurv(MMG5_pMesh mesh,int k,char i,double s,double *o,double *no)
   pt = &mesh->tria[k];
   if ( !MG_EOK(pt) ) return 0;
 
-  i1 = _MMG5_inxt2[i];
-  i2 = _MMG5_iprv2[i];
+  i1 = MMG5_inxt2[i];
+  i2 = MMG5_iprv2[i];
   p1 = &mesh->point[pt->v[i1]];
   p2 = &mesh->point[pt->v[i2]];
 
@@ -140,7 +140,7 @@ int _MMG2_bezierCurv(MMG5_pMesh mesh,int k,char i,double s,double *o,double *no)
   uy = p2->c[1] - p1->c[1];
   ll = ux*ux + uy*uy;
 
-  if ( ll < _MMG5_EPSD ) return 0;
+  if ( ll < MMG5_EPSD ) return 0;
 
   /* Recover normal and tangent vectors */
   if ( MG_SIN(p1->tag) || (p1->tag & MG_NOM) ) {
@@ -194,12 +194,12 @@ int _MMG2_bezierCurv(MMG5_pMesh mesh,int k,char i,double s,double *o,double *no)
 
   /* Calculation of control points */
   ps = ux*t1[0]+uy*t1[1];
-  b1[0] = p1->c[0] + _MMG5_ATHIRD*ps*t1[0];
-  b1[1] = p1->c[1] + _MMG5_ATHIRD*ps*t1[1];
+  b1[0] = p1->c[0] + MMG5_ATHIRD*ps*t1[0];
+  b1[1] = p1->c[1] + MMG5_ATHIRD*ps*t1[1];
 
   ps = ux*t2[0]+uy*t2[1];
-  b2[0] = p2->c[0] - _MMG5_ATHIRD*ps*t2[0];
-  b2[1] = p2->c[1] - _MMG5_ATHIRD*ps*t2[1];
+  b2[0] = p2->c[0] - MMG5_ATHIRD*ps*t2[0];
+  b2[1] = p2->c[1] - MMG5_ATHIRD*ps*t2[1];
 
   ps = ux*(n1[0]+n2[0]) + uy*(n1[1]+n2[1]);
   ps = 2.0*ps/ll;
@@ -207,7 +207,7 @@ int _MMG2_bezierCurv(MMG5_pMesh mesh,int k,char i,double s,double *o,double *no)
   bn[0] = n1[0]+n2[0] - ps*ux;
   bn[1] = n1[1]+n2[1] - ps*uy;
   ps = bn[0]*bn[0] + bn[1]*bn[1];
-  if ( ps > _MMG5_EPSD2 ) {
+  if ( ps > MMG5_EPSD2 ) {
     ps = 1.0 / sqrt(ps);
     bn[0] *= ps;
     bn[1] *= ps;

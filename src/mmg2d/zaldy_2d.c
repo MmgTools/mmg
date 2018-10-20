@@ -35,7 +35,7 @@
 
 
 /* Create a new vertex in the mesh, and return its number */
-int _MMG2D_newPt(MMG5_pMesh mesh,double c[2],int16_t tag) {
+int MMG2D_newPt(MMG5_pMesh mesh,double c[2],int16_t tag) {
   MMG5_pPoint  ppt;
   int     curpt;
 
@@ -54,7 +54,7 @@ int _MMG2D_newPt(MMG5_pMesh mesh,double c[2],int16_t tag) {
 }
 
 /* Delete a point in the mesh and update the garbage collector accordingly */
-void _MMG2D_delPt(MMG5_pMesh mesh,int ip) {
+void MMG2D_delPt(MMG5_pMesh mesh,int ip) {
   MMG5_pPoint   ppt;
 
   ppt = &mesh->point[ip];
@@ -67,7 +67,7 @@ void _MMG2D_delPt(MMG5_pMesh mesh,int ip) {
   if ( ip == mesh->np )  mesh->np--;
 }
 
-void _MMG5_delEdge(MMG5_pMesh mesh,int iel) {
+void MMG5_delEdge(MMG5_pMesh mesh,int iel) {
   MMG5_pEdge    pt;
 
   pt = &mesh->edge[iel];
@@ -82,7 +82,7 @@ void _MMG5_delEdge(MMG5_pMesh mesh,int iel) {
 }
 
 /* Create a new triangle in the mesh and return its address */
-int _MMG2D_newElt(MMG5_pMesh mesh) {
+int MMG2D_newElt(MMG5_pMesh mesh) {
   int     curiel;
 
   if ( !mesh->nenil ) {
@@ -102,7 +102,7 @@ int _MMG2D_newElt(MMG5_pMesh mesh) {
 }
 
 /* Delete a triangle in the mesh and update the garbage collector accordingly */
-int _MMG2D_delElt(MMG5_pMesh mesh,int iel) {
+int MMG2D_delElt(MMG5_pMesh mesh,int iel) {
   MMG5_pTria    pt;
   int      iadr;
 
@@ -125,7 +125,7 @@ int _MMG2D_delElt(MMG5_pMesh mesh,int iel) {
 
 
 /* check if n elets available */
-int _MMG5_getnElt(MMG5_pMesh mesh,int n) {
+int MMG5_getnElt(MMG5_pMesh mesh,int n) {
   int     curiel;
 
   if ( !mesh->nenil )  return 0;
@@ -154,34 +154,34 @@ int _MMG5_getnElt(MMG5_pMesh mesh,int n) {
  *
  */
 static inline
-int _MMG2D_memOption_memSet(MMG5_pMesh mesh) {
+int MMG2D_memOption_memSet(MMG5_pMesh mesh) {
   size_t   usedMem,avMem,reservedMem;
   int      ctri,npadd,bytes;
 
   if ( mesh->info.mem <= 0 ) {
     if ( mesh->memMax )
       /* maximal memory = 50% of total physical memory */
-      mesh->memMax = mesh->memMax*_MMG5_MEMPERCENT;
+      mesh->memMax = mesh->memMax*MMG5_MEMPERCENT;
     else {
       /* default value = 800 MB */
-      printf("  Maximum memory set to default value: %d MB.\n",_MMG5_MEMMAX);
-      mesh->memMax = _MMG5_MEMMAX*_MMG5_MILLION;
+      printf("  Maximum memory set to default value: %d MB.\n",MMG5_MEMMAX);
+      mesh->memMax = MMG5_MEMMAX*MMG5_MILLION;
     }
   }
   else {
     /* memory asked by user if possible, otherwise total physical memory */
-    if ( (size_t)mesh->info.mem*_MMG5_MILLION > mesh->memMax && mesh->memMax ) {
+    if ( (size_t)mesh->info.mem*MMG5_MILLION > mesh->memMax && mesh->memMax ) {
       fprintf(stderr,"\n  ## Warning: %s: asking for %d MB of memory ",
               __func__,mesh->info.mem);
-      fprintf(stderr,"when only %zu available.\n",mesh->memMax/_MMG5_MILLION);
+      fprintf(stderr,"when only %zu available.\n",mesh->memMax/MMG5_MILLION);
     }
     else {
-      mesh->memMax= (size_t)mesh->info.mem*_MMG5_MILLION;
+      mesh->memMax= (size_t)mesh->info.mem*MMG5_MILLION;
     }
   }
 
-  /* init allocation need _MMG5_MEMMIN B */
-  reservedMem = _MMG5_MEMMIN;
+  /* init allocation need MMG5_MEMMIN B */
+  reservedMem = MMG5_MEMMIN;
 
   /* Compute the needed initial memory */
   usedMem = reservedMem + (mesh->np+1)*sizeof(MMG5_Point)
@@ -190,9 +190,9 @@ int _MMG2D_memOption_memSet(MMG5_pMesh mesh) {
 
   if ( usedMem > mesh->memMax  ) {
     fprintf(stderr,"\n  ## Error: %s: %zu MB of memory ",__func__,
-            mesh->memMax/_MMG5_MILLION);
+            mesh->memMax/MMG5_MILLION);
     fprintf(stderr,"is not enough to load mesh. You need to ask %zu MB minimum\n",
-            usedMem/_MMG5_MILLION+1);
+            usedMem/MMG5_MILLION+1);
     return 0;
   }
 
@@ -216,12 +216,12 @@ int _MMG2D_memOption_memSet(MMG5_pMesh mesh) {
 
   if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug ) {
     fprintf(stdout,"  MAXIMUM MEMORY AUTHORIZED (MB)    %zu\n",
-            mesh->memMax/_MMG5_MILLION);
+            mesh->memMax/MMG5_MILLION);
   }
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {
-    fprintf(stdout,"  _MMG2D_NPMAX    %d\n",mesh->npmax);
-    fprintf(stdout,"  _MMG2D_NTMAX    %d\n",mesh->ntmax);
+    fprintf(stdout,"  MMG2D_NPMAX    %d\n",mesh->npmax);
+    fprintf(stdout,"  MMG2D_NTMAX    %d\n",mesh->ntmax);
   }
 
   return 1;
@@ -235,15 +235,15 @@ int _MMG2D_memOption_memSet(MMG5_pMesh mesh) {
  * memory repartition for the -m option
  *
  */
-int _MMG2D_memOption(MMG5_pMesh mesh) {
+int MMG2D_memOption(MMG5_pMesh mesh) {
 
-  mesh->memMax = _MMG5_memSize();
+  mesh->memMax = MMG5_memSize();
 
-  mesh->npmax = MG_MAX(1.5*mesh->np,_MMG2D_NPMAX);
-  mesh->ntmax = MG_MAX(1.5*mesh->nt,_MMG2D_NEMAX);
+  mesh->npmax = MG_MAX(1.5*mesh->np,MMG2D_NPMAX);
+  mesh->ntmax = MG_MAX(1.5*mesh->nt,MMG2D_NEMAX);
   mesh->namax = mesh->na;
 
-  return  _MMG2D_memOption_memSet(mesh);
+  return  MMG2D_memOption_memSet(mesh);
 }
 
 /**
@@ -257,19 +257,19 @@ int _MMG2D_memOption(MMG5_pMesh mesh) {
 int MMG2D_setMeshSize_alloc( MMG5_pMesh mesh ) {
   int k;
 
-  _MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(MMG5_Point),"initial vertices",
+  MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(MMG5_Point),"initial vertices",
                 printf("  Exit program.\n");
                 return 0);
-  _MMG5_SAFE_CALLOC(mesh->point,mesh->npmax+1,MMG5_Point,return 0);
+  MMG5_SAFE_CALLOC(mesh->point,mesh->npmax+1,MMG5_Point,return 0);
 
-  _MMG5_ADD_MEM(mesh,(mesh->ntmax+1)*sizeof(MMG5_Tria),"initial triangles",return 0);
-  _MMG5_SAFE_CALLOC(mesh->tria,mesh->ntmax+1,MMG5_Tria,return 0);
+  MMG5_ADD_MEM(mesh,(mesh->ntmax+1)*sizeof(MMG5_Tria),"initial triangles",return 0);
+  MMG5_SAFE_CALLOC(mesh->tria,mesh->ntmax+1,MMG5_Tria,return 0);
   memset(&mesh->tria[0],0,sizeof(MMG5_Tria));
 
   mesh->namax = mesh->na;
   if ( mesh->na ) {
-    _MMG5_ADD_MEM(mesh,(mesh->namax+1)*sizeof(MMG5_Edge),"initial edges",return 0);
-    _MMG5_SAFE_CALLOC(mesh->edge,(mesh->namax+1),MMG5_Edge,return 0);
+    MMG5_ADD_MEM(mesh,(mesh->namax+1)*sizeof(MMG5_Edge),"initial edges",return 0);
+    MMG5_SAFE_CALLOC(mesh->edge,(mesh->namax+1),MMG5_Edge,return 0);
   }
 
   /* keep track of empty links */
@@ -302,7 +302,7 @@ int MMG2D_setMeshSize_alloc( MMG5_pMesh mesh ) {
  */
 int MMG2D_zaldy(MMG5_pMesh mesh) {
 
-  if ( !_MMG2D_memOption(mesh) )  return 0;
+  if ( !MMG2D_memOption(mesh) )  return 0;
 
   return  MMG2D_setMeshSize_alloc(mesh);
 }

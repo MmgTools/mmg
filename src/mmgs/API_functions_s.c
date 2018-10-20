@@ -45,7 +45,7 @@ int MMGS_Init_mesh(const int starter,...) {
 
   va_start(argptr, starter);
 
-  ier = _MMGS_Init_mesh_var(argptr);
+  ier = MMGS_Init_mesh_var(argptr);
 
   va_end(argptr);
 
@@ -79,7 +79,7 @@ int MMGS_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solout) {
 void MMGS_Init_parameters(MMG5_pMesh mesh) {
 
   /* Init common parameters for mmgs and mmgs. */
-  _MMG5_Init_parameters(mesh);
+  MMG5_Init_parameters(mesh);
   /* [0/1], Turn off/on the renumbering using SCOTCH; */
   mesh->info.renum    = 0;
 
@@ -118,13 +118,13 @@ int MMGS_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int 
     sol->np  = np;
     sol->npi = np;
     if ( sol->m )
-      _MMG5_DEL_MEM(mesh,sol->m);
+      MMG5_DEL_MEM(mesh,sol->m);
 
     sol->npmax = mesh->npmax;
-    _MMG5_ADD_MEM(mesh,(sol->size*(sol->npmax+1))*sizeof(double),"initial solution",
+    MMG5_ADD_MEM(mesh,(sol->size*(sol->npmax+1))*sizeof(double),"initial solution",
                   fprintf(stderr,"  Exit program.\n");
                   return 0);
-    _MMG5_SAFE_CALLOC(sol->m,(sol->size*(sol->npmax+1)),double,return 0);
+    MMG5_SAFE_CALLOC(sol->m,(sol->size*(sol->npmax+1)),double,return 0);
   }
   return 1;
 }
@@ -138,16 +138,16 @@ int MMGS_Set_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol *sol,int nsols,
     if ( *sol ) {
       fprintf(stderr,"\n  ## Warning: %s: old solutions array deletion.\n",
               __func__);
-      _MMG5_DEL_MEM(mesh,*sol);
+      MMG5_DEL_MEM(mesh,*sol);
     }
   }
 
   /** Sol tab allocation */
   mesh->nsols = nsols;
 
-  _MMG5_ADD_MEM(mesh,nsols*sizeof(MMG5_Sol),"solutions array",
+  MMG5_ADD_MEM(mesh,nsols*sizeof(MMG5_Sol),"solutions array",
                 return 0);
-  _MMG5_SAFE_CALLOC(*sol,nsols,MMG5_Sol,return 0);
+  MMG5_SAFE_CALLOC(*sol,nsols,MMG5_Sol,return 0);
 
   for ( j=0; j<nsols; ++j ) {
     psl = *sol + j;
@@ -182,23 +182,23 @@ int MMGS_Set_meshSize(MMG5_pMesh mesh, int np, int nt, int na) {
   }
 
   if ( mesh->point )
-    _MMG5_DEL_MEM(mesh,mesh->point);
+    MMG5_DEL_MEM(mesh,mesh->point);
   if ( mesh->tria )
-    _MMG5_DEL_MEM(mesh,mesh->tria);
+    MMG5_DEL_MEM(mesh,mesh->tria);
   if ( mesh->edge )
-    _MMG5_DEL_MEM(mesh,mesh->edge);
+    MMG5_DEL_MEM(mesh,mesh->edge);
 
   /*tester si -m defini : renvoie 0 si pas ok et met la taille min dans info.mem */
   if( mesh->info.mem > 0) {
     if ( mesh->npmax < mesh->np || mesh->ntmax < mesh->nt) {
-      if ( !_MMGS_memOption(mesh) )  return 0;
+      if ( !MMGS_memOption(mesh) )  return 0;
     } else if(mesh->info.mem < 39) {
       fprintf(stderr,"\n  ## Error: %s: not enough memory  %d\n",
               __func__,mesh->info.mem);
       return 0;
     }
   } else {
-    if ( !_MMGS_memOption(mesh) )  return 0;
+    if ( !MMGS_memOption(mesh) )  return 0;
   }
 
   /* Mesh allocation and linkage */
@@ -286,7 +286,7 @@ int MMGS_Set_vertex(MMG5_pMesh mesh, double c0, double c1, double c2, int ref, i
   if ( pos > mesh->npmax ) {
     fprintf(stderr,"\n  ## Error: %s: unable to allocate a new point.\n",__func__);
     fprintf(stderr,"    max number of points: %d\n",mesh->npmax);
-    _MMG5_INCREASE_MEM_MESSAGE();
+    MMG5_INCREASE_MEM_MESSAGE();
     return 0;
   }
 
@@ -433,7 +433,7 @@ int MMGS_Set_triangle(MMG5_pMesh mesh, int v0, int v1, int v2, int ref,int pos) 
     fprintf(stderr,"\n  ## Error: %s: unable to allocate a new triangle.\n",
             __func__);
     fprintf(stderr,"    max number of triangle: %d\n",mesh->ntmax);
-    _MMG5_INCREASE_MEM_MESSAGE();
+    MMG5_INCREASE_MEM_MESSAGE();
     return 0;
   }
 
@@ -561,7 +561,7 @@ int MMGS_Set_edge(MMG5_pMesh mesh, int v0, int v1, int ref, int pos) {
     fprintf(stderr,"\n  ## Error: %s: unable to allocate a new edge.\n",
             __func__);
     fprintf(stderr,"    max number of edge: %d\n",mesh->namax);
-    _MMG5_INCREASE_MEM_MESSAGE();
+    MMG5_INCREASE_MEM_MESSAGE();
     return 0;
   }
   if ( pos > mesh->na ) {
@@ -1226,21 +1226,21 @@ int MMGS_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
     }
     else
       mesh->info.mem      = val;
-    if ( !_MMGS_memOption(mesh) ) return 0;
+    if ( !MMGS_memOption(mesh) ) return 0;
     break;
   case MMGS_IPARAM_debug :
     mesh->info.ddebug   = val;
     break;
   case MMGS_IPARAM_angle :
     if ( mesh->xpoint )
-      _MMG5_DEL_MEM(mesh,mesh->xpoint);
+      MMG5_DEL_MEM(mesh,mesh->xpoint);
     if ( !val )
       mesh->info.dhd    = -1.;
     else {
       if ( (mesh->info.imprim > 5) || mesh->info.ddebug )
         fprintf(stderr,"\n  ## Warning: %s: angle detection parameter set"
                 " to default value\n",__func__);
-      mesh->info.dhd    = _MMG5_ANGEDG;
+      mesh->info.dhd    = MMG5_ANGEDG;
     }
     break;
   case MMGS_IPARAM_iso :
@@ -1265,7 +1265,7 @@ int MMGS_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
     break;
   case MMGS_IPARAM_numberOfLocalParam :
     if ( mesh->info.par ) {
-      _MMG5_DEL_MEM(mesh,mesh->info.par);
+      MMG5_DEL_MEM(mesh,mesh->info.par);
       if ( (mesh->info.imprim > 5) || mesh->info.ddebug )
         fprintf(stderr,"\n  ## Warning: %s: new local parameter values\n",__func__);
     }
@@ -1273,10 +1273,10 @@ int MMGS_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
     mesh->info.npari  = 0;
     mesh->info.parTyp = 0;
 
-    _MMG5_ADD_MEM(mesh,mesh->info.npar*sizeof(MMG5_Par),"parameters",
+    MMG5_ADD_MEM(mesh,mesh->info.npar*sizeof(MMG5_Par),"parameters",
                   fprintf(stderr,"  Exit program.\n");
                   return 0);
-    _MMG5_SAFE_CALLOC(mesh->info.par,mesh->info.npar,MMG5_Par,return 0);
+    MMG5_SAFE_CALLOC(mesh->info.par,mesh->info.npar,MMG5_Par,return 0);
 
     for (k=0; k<mesh->info.npar; k++) {
       mesh->info.par[k].elt   = MMG5_Noentity;
@@ -1467,7 +1467,7 @@ int MMGS_Free_all(const int starter,...)
 
   va_start(argptr, starter);
 
-  ier = _MMGS_Free_all_var(argptr);
+  ier = MMGS_Free_all_var(argptr);
 
   va_end(argptr);
 
@@ -1481,7 +1481,7 @@ int MMGS_Free_structures(const int starter,...)
 
   va_start(argptr, starter);
 
-  ier = _MMGS_Free_structures_var(argptr);
+  ier = MMGS_Free_structures_var(argptr);
 
   va_end(argptr);
 
@@ -1495,7 +1495,7 @@ int MMGS_Free_names(const int starter,...)
 
   va_start(argptr, starter);
 
-  ier = _MMGS_Free_names_var(argptr);
+  ier = MMGS_Free_names_var(argptr);
 
   va_end(argptr);
 

@@ -45,10 +45,10 @@
  * \return -1 if failed.
  * \return number of new points.
  *
- * Split edges of length bigger than _MMG3D_LOPTL.
+ * Split edges of length bigger than MMG3D_LOPTL.
  *
  */
-static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
+static int MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
  MMG5_pTetra  pt;
  MMG5_pxTetra pxt;
  MMG5_Tria    ptt;
@@ -77,7 +77,7 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
     imax = -1; lmax = 0.0;
     for (i=0; i<6; i++) {
       if ( pt->xt && (pxt->tag[i] & MG_REQ) )  continue;
-      len = _MMG5_lenedg(mesh,met,i,pt);
+      len = MMG5_lenedg(mesh,met,i,pt);
 
       if ( len > lmax ) {
         lmax = len;
@@ -93,15 +93,15 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
       }
       continue;
     }
-    if ( lmax < _MMG3D_LOPTL )  continue;
+    if ( lmax < MMG3D_LOPTL )  continue;
 
     /* proceed edges according to lengths */
-    ifa0 = _MMG5_ifar[imax][0];
-    ifa1 = _MMG5_ifar[imax][1];
+    ifa0 = MMG5_ifar[imax][0];
+    ifa1 = MMG5_ifar[imax][1];
     i  = (pt->xt && (pxt->ftag[ifa1] & MG_BDY)) ? ifa1 : ifa0;
-    j  = _MMG5_iarfinv[i][imax];
-    i1 = _MMG5_idir[i][_MMG5_inxt2[j]];
-    i2 = _MMG5_idir[i][_MMG5_iprv2[j]];
+    j  = MMG5_iarfinv[i][imax];
+    i1 = MMG5_idir[i][MMG5_inxt2[j]];
+    i2 = MMG5_idir[i][MMG5_iprv2[j]];
     ip1 = pt->v[i1];
     ip2 = pt->v[i2];
     p0  = &mesh->point[ip1];
@@ -110,20 +110,20 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
     /* Case of a boundary face */
     if ( pt->xt && (pxt->ftag[i] & MG_BDY) ) {
       if ( !(MG_GET(pxt->ori,i)) ) continue;
-      ref = pxt->edg[_MMG5_iarf[i][j]];
-      tag = pxt->tag[_MMG5_iarf[i][j]];
+      ref = pxt->edg[MMG5_iarf[i][j]];
+      tag = pxt->tag[MMG5_iarf[i][j]];
       if ( tag & MG_REQ )  continue;
       tag |= MG_BDY;
-      ilist = _MMG5_coquil(mesh,k,imax,list);
+      ilist = MMG5_coquil(mesh,k,imax,list);
       if ( !ilist )  continue;
       else if ( ilist < 0 )
         return -1;
       if ( tag & MG_NOM ){
-        if( !_MMG5_BezierNom(mesh,ip1,ip2,0.5,o,no1,to) )
+        if( !MMG5_BezierNom(mesh,ip1,ip2,0.5,o,no1,to) )
           continue;
         else if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
-          _MMG5_tet2tri(mesh,k,i,&ptt);
-          _MMG5_nortri(mesh,&ptt,no1);
+          MMG5_tet2tri(mesh,k,i,&ptt);
+          MMG5_nortri(mesh,&ptt,no1);
           if ( !MG_GET(pxt->ori,i) ) {
             no1[0] *= -1.0;
             no1[1] *= -1.0;
@@ -132,16 +132,16 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
         }
       }
       else if ( tag & MG_GEO ) {
-        if ( !_MMG5_BezierRidge(mesh,ip1,ip2,0.5,o,no1,no2,to) )
+        if ( !MMG5_BezierRidge(mesh,ip1,ip2,0.5,o,no1,no2,to) )
           continue;
         if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
-          _MMG5_tet2tri(mesh,k,i,&ptt);
-          _MMG5_nortri(mesh,&ptt,no1);
+          MMG5_tet2tri(mesh,k,i,&ptt);
+          MMG5_nortri(mesh,&ptt,no1);
           no2[0] = to[1]*no1[2] - to[2]*no1[1];
           no2[1] = to[2]*no1[0] - to[0]*no1[2];
           no2[2] = to[0]*no1[1] - to[1]*no1[0];
           dd = no2[0]*no2[0] + no2[1]*no2[1] + no2[2]*no2[2];
-          if ( dd > _MMG5_EPSD2 ) {
+          if ( dd > MMG5_EPSD2 ) {
             dd = 1.0 / sqrt(dd);
             no2[0] *= dd;
             no2[1] *= dd;
@@ -150,40 +150,40 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
         }
       }
       else if ( tag & MG_REF ) {
-        if ( !_MMG5_BezierRef(mesh,ip1,ip2,0.5,o,no1,to) )
+        if ( !MMG5_BezierRef(mesh,ip1,ip2,0.5,o,no1,to) )
           continue;
       }
       else {
-        if ( !_MMG5_norface(mesh,k,i,v) )  continue;
-        if ( !_MMG5_BezierReg(mesh,ip1,ip2,0.5,v,o,no1) )
+        if ( !MMG5_norface(mesh,k,i,v) )  continue;
+        if ( !MMG5_BezierReg(mesh,ip1,ip2,0.5,v,o,no1) )
           continue;
       }
-      ip = _MMG3D_newPt(mesh,o,tag);
+      ip = MMG3D_newPt(mesh,o,tag);
       if ( !ip ) {
         /* reallocation of point table */
-        _MMG3D_POINT_REALLOC(mesh,met,ip,mesh->gap,
+        MMG3D_POINT_REALLOC(mesh,met,ip,mesh->gap,
                             *warn=1;
                             break
                             ,o,tag);
       }
       if ( met->m ) {
-        ier = _MMG5_intmet(mesh,met,k,imax,ip,0.5);
+        ier = MMG5_intmet(mesh,met,k,imax,ip,0.5);
         if ( !ier ) {
-          _MMG3D_delPt(mesh,ip);
+          MMG3D_delPt(mesh,ip);
           return -1;
         }
         else if (ier < 0) {
-          _MMG3D_delPt(mesh,ip);
+          MMG3D_delPt(mesh,ip);
           continue;
         }
       }
-      ier = _MMG3D_simbulgept(mesh,met,list,ilist,ip);
+      ier = MMG3D_simbulgept(mesh,met,list,ilist,ip);
       if ( !ier ) {
-        ier = _MMG3D_dichoto1b(mesh,met,list,ilist,ip);
+        ier = MMG3D_dichoto1b(mesh,met,list,ilist,ip);
       }
-      if ( ier ) ier = _MMG5_split1b(mesh,met,list,ilist,ip,1,1,chkRidTet);
+      if ( ier ) ier = MMG5_split1b(mesh,met,list,ilist,ip,1,1,chkRidTet);
 
-      /* if we realloc memory in _MMG5_split1b pt and pxt pointers are not valid */
+      /* if we realloc memory in MMG5_split1b pt and pxt pointers are not valid */
       pt = &mesh->tetra[k];
       pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
 
@@ -192,7 +192,7 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
         return -1;
       }
       else if ( !ier ) {
-        _MMG3D_delPt(mesh,ip);
+        MMG3D_delPt(mesh,ip);
         continue;
       }
       ns++;
@@ -223,43 +223,43 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
     /* Case of an internal face */
     else {
       if ( (p0->tag & MG_BDY) && (p1->tag & MG_BDY) ) continue;
-      ilist = _MMG5_coquil(mesh,k,imax,list);
+      ilist = MMG5_coquil(mesh,k,imax,list);
       if ( !ilist ) continue;
       else if ( ilist<0 ) return -1;
       o[0] = 0.5*(p0->c[0] + p1->c[0]);
       o[1] = 0.5*(p0->c[1] + p1->c[1]);
       o[2] = 0.5*(p0->c[2] + p1->c[2]);
 
-      ip = _MMG3D_newPt(mesh,o,MG_NOTAG);
+      ip = MMG3D_newPt(mesh,o,MG_NOTAG);
 
       if ( !ip )  {
         /* reallocation of point table */
-        _MMG3D_POINT_REALLOC(mesh,met,ip,mesh->gap,
+        MMG3D_POINT_REALLOC(mesh,met,ip,mesh->gap,
                              *warn=1;
                              break
                              ,o,MG_NOTAG);
       }
       if ( met->m ) {
-        ier = _MMG5_intmet(mesh,met,k,imax,ip,0.5);
+        ier = MMG5_intmet(mesh,met,k,imax,ip,0.5);
         if ( !ier ) {
-          _MMG3D_delPt(mesh,ip);
+          MMG3D_delPt(mesh,ip);
           return -1;
         }
         else if (ier < 0 ) {
-          _MMG3D_delPt(mesh,ip);
+          MMG3D_delPt(mesh,ip);
           continue;
         }
       }
-      ier = _MMG3D_simbulgept(mesh,met,list,ilist,ip);
+      ier = MMG3D_simbulgept(mesh,met,list,ilist,ip);
       if ( ier )
-        ier = _MMG5_split1b(mesh,met,list,ilist,ip,1,1,0);
+        ier = MMG5_split1b(mesh,met,list,ilist,ip,1,1,0);
 
       if ( ier < 0 ) {
         fprintf(stderr,"\n  ## Error: %s: unable to split.\n",__func__);
         return -1;
       }
       else if ( !ier ) {
-        _MMG3D_delPt(mesh,ip);
+        MMG3D_delPt(mesh,ip);
       }
       else {
        ns++;
@@ -277,10 +277,10 @@ static int _MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
  * \return -1 if failed.
  * \return number of deleted points.
  *
- * Collapse edges of length smaller than _MMG3D_LOPTS.
+ * Collapse edges of length smaller than MMG3D_LOPTS.
  *
  */
-static int _MMG5_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
+static int MMG5_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTetra     pt;
   MMG5_pxTetra    pxt;
   MMG5_pPoint     p0,p1;
@@ -301,7 +301,7 @@ static int _MMG5_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
     imin = -1; lmin = DBL_MAX;
     for (i=0; i<6; i++) {
       if ( pt->xt && (pxt->tag[i] & MG_REQ) )  continue;
-      len = _MMG5_lenedg(mesh,met,i,pt);
+      len = MMG5_lenedg(mesh,met,i,pt);
 
       if ( len < lmin ) {
         lmin = len;
@@ -317,17 +317,17 @@ static int _MMG5_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
       }
       continue;
     }
-    if ( lmin > _MMG3D_LOPTS )  continue;
+    if ( lmin > MMG3D_LOPTS )  continue;
 
     // Case of an internal tetra with 4 ridges vertices.
     if ( lmin == 0 ) continue;
 
-    ifa0 = _MMG5_ifar[imin][0];
-    ifa1 = _MMG5_ifar[imin][1];
+    ifa0 = MMG5_ifar[imin][0];
+    ifa1 = MMG5_ifar[imin][1];
     i  =  (pt->xt && (pxt->ftag[ifa1] & MG_BDY)) ? ifa1 : ifa0;
-    j  = _MMG5_iarfinv[i][imin];
-    i1 = _MMG5_idir[i][_MMG5_inxt2[j]];
-    i2 = _MMG5_idir[i][_MMG5_iprv2[j]];
+    j  = MMG5_iarfinv[i][imin];
+    i1 = MMG5_idir[i][MMG5_inxt2[j]];
+    i2 = MMG5_idir[i][MMG5_iprv2[j]];
     ip = pt->v[i1];
     iq = pt->v[i2];
     p0 = &mesh->point[ip];
@@ -338,29 +338,29 @@ static int _MMG5_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
     /* Case of a boundary face */
     ilist = 0;
     if ( pt->xt && (pxt->ftag[i] & MG_BDY) ) {
-      tag = pxt->tag[_MMG5_iarf[i][j]];
+      tag = pxt->tag[MMG5_iarf[i][j]];
       if ( tag & MG_REQ )  continue;
       tag |= MG_BDY;
       if ( p0->tag > tag )   continue;
       if ( ( tag & MG_NOM ) && (mesh->adja[4*(k-1)+1+i]) ) continue;
 
-      if (_MMG5_boulesurfvolp(mesh,k,i1,i,
+      if (MMG5_boulesurfvolp(mesh,k,i1,i,
                               list,&ilist,lists,&ilists,(p0->tag & MG_NOM)) < 0 )
         return -1;
 
-      ilist = _MMG5_chkcol_bdy(mesh,met,k,i,j,list,ilist,lists,ilists,2);
+      ilist = MMG5_chkcol_bdy(mesh,met,k,i,j,list,ilist,lists,ilists,2);
     }
     /* Case of an internal face */
     else {
       if ( p0->tag & MG_BDY )  continue;
-      ilist = _MMG5_boulevolp(mesh,k,i1,list);
-      ilist = _MMG5_chkcol_int(mesh,met,k,i,j,list,ilist,2);
+      ilist = MMG5_boulevolp(mesh,k,i1,list);
+      ilist = MMG5_chkcol_int(mesh,met,k,i,j,list,ilist,2);
     }
     if ( ilist > 0 ) {
-      ier = _MMG5_colver(mesh,met,list,ilist,i2,2);
+      ier = MMG5_colver(mesh,met,list,ilist,i2,2);
       if ( ier < 0 )  return -1;
       else if ( ier ) {
-        _MMG3D_delPt(mesh,ier);
+        MMG3D_delPt(mesh,ier);
         nc++;
       }
     }
@@ -379,7 +379,7 @@ static int _MMG5_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
  * prescribed metric.
  *
  */
-static int _MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met) {
+static int MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met) {
   int      it1,it,nnc,nns,nnf,nnm,maxit,nc,ns,nf,nm;
   int      warn;//,nw;
   double   maxgap;
@@ -390,7 +390,7 @@ static int _MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met) {
   mesh->gap = maxgap = 0.5;
   do {
     if ( !mesh->info.noinsert ) {
-      ns = _MMG5_adpspl(mesh,met,&warn);
+      ns = MMG5_adpspl(mesh,met,&warn);
       if ( ns < 0 ) {
         fprintf(stderr,"\n  ## Error: %s: unable to complete mesh."
                 " Exit program.\n",__func__);
@@ -400,11 +400,11 @@ static int _MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met) {
     else  ns = 0;
 
     /* renumbering if available and needed */
-    if ( it==1 && !_MMG5_scotchCall(mesh,met) )
+    if ( it==1 && !MMG5_scotchCall(mesh,met) )
       return 0;
 
     if ( !mesh->info.noinsert ) {
-      nc = _MMG5_adpcol(mesh,met);
+      nc = MMG5_adpcol(mesh,met);
       if ( nc < 0 ) {
         fprintf(stderr,"\n  ## Error: %s: unable to complete mesh."
                 " Exit program.\n",__func__);
@@ -414,7 +414,7 @@ static int _MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met) {
     else  nc = 0;
 
     if ( !mesh->info.nomove ) {
-      nm = _MMG5_movtet(mesh,met,NULL,MMG3D_MAXKAL,MMG3D_MAXKAL,1,0,0,0,1,mesh->mark-2);
+      nm = MMG5_movtet(mesh,met,NULL,MMG3D_MAXKAL,MMG3D_MAXKAL,1,0,0,0,1,mesh->mark-2);
       if ( nm < 0 ) {
         fprintf(stderr,"\n  ## Error: %s: unable to improve mesh."
                 " Exiting.\n",__func__);
@@ -424,7 +424,7 @@ static int _MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met) {
     else  nm = 0;
 
     if ( !mesh->info.noswap ) {
-      nf = _MMG5_swpmsh(mesh,met,NULL,2);
+      nf = MMG5_swpmsh(mesh,met,NULL,2);
       if ( nf < 0 ) {
         fprintf(stderr,"\n  ## Error: %s: unable to improve mesh."
                 " Exiting.\n",__func__);
@@ -432,7 +432,7 @@ static int _MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met) {
       }
       nnf += nf;
 
-      nf = _MMG5_swptet(mesh,met,MMG3D_SSWAPIMPROVE,MMG3D_SWAP06,NULL,2,mesh->mark-2);
+      nf = MMG5_swptet(mesh,met,MMG3D_SSWAPIMPROVE,MMG3D_SWAP06,NULL,2,mesh->mark-2);
       if ( nf < 0 ) {
         fprintf(stderr,"\n  ## Error: %s: unable to improve mesh."
                 " Exiting.\n",__func__);
@@ -460,8 +460,8 @@ static int _MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met) {
 
   if ( warn ) {
     fprintf(stderr,"\n  ## Error: %s: unable to allocate a new point in last"
-            " call of _MMG5_adpspl.\n",__func__);
-    _MMG5_INCREASE_MEM_MESSAGE();
+            " call of MMG5_adpspl.\n",__func__);
+    MMG5_INCREASE_MEM_MESSAGE();
 
     fprintf(stderr,"\n  ## Error: %s: uncomplete mesh."
             " Exiting\n",__func__ );
@@ -469,7 +469,7 @@ static int _MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
   /* renumbering if available */
-  if ( !_MMG5_scotchCall(mesh,met) )
+  if ( !MMG5_scotchCall(mesh,met) )
     return 0;
 
   /*shape optim*/
@@ -485,7 +485,7 @@ static int _MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met) {
 /*       nw = 0; */
 
     if ( !mesh->info.nomove ) {
-      nm = _MMG5_movtet(mesh,met,NULL,MMG3D_MAXKAL,MMG3D_MAXKAL,1,1,1,1,0,mesh->mark-2);
+      nm = MMG5_movtet(mesh,met,NULL,MMG3D_MAXKAL,MMG3D_MAXKAL,1,1,1,1,0,mesh->mark-2);
       if ( nm < 0 ) {
         fprintf(stderr,"\n  ## Error: %s: unable to improve mesh.\n",
           __func__);
@@ -496,7 +496,7 @@ static int _MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met) {
     else  nm = 0;
 
     if ( !mesh->info.noswap ) {
-      nf = _MMG5_swpmsh(mesh,met,NULL,2);
+      nf = MMG5_swpmsh(mesh,met,NULL,2);
       if ( nf < 0 ) {
         fprintf(stderr,"\n  ## Error: %s: unable to improve mesh."
                 " Exiting.\n",__func__);
@@ -504,7 +504,7 @@ static int _MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met) {
       }
       nnf += nf;
 
-      nf = _MMG5_swptet(mesh,met,MMG3D_SSWAPIMPROVE,MMG3D_SWAP06,NULL,2,mesh->mark-2);
+      nf = MMG5_swptet(mesh,met,MMG3D_SSWAPIMPROVE,MMG3D_SWAP06,NULL,2,mesh->mark-2);
       if ( nf < 0 ) {
         fprintf(stderr,"\n  ## Error: %s: Unable to improve mesh."
                 " Exiting.\n",__func__);
@@ -521,7 +521,7 @@ static int _MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met) {
   while( ++it < maxit && /*nw+*/nm+nf > 0 );
 
   if ( !mesh->info.nomove ) {
-    nm = _MMG5_movtet(mesh,met,NULL,MMG3D_MAXKAL,MMG3D_MAXKAL,1,1,1,1,3,mesh->mark-2);
+    nm = MMG5_movtet(mesh,met,NULL,MMG3D_MAXKAL,MMG3D_MAXKAL,1,1,1,1,3,mesh->mark-2);
     if ( nm < 0 ) {
       fprintf(stderr,"\n  ## Error: %s: unable to improve mesh.\n",
               __func__);
@@ -553,12 +553,12 @@ static int _MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met) {
  * Main adaptation routine.
  *
  */
-int _MMG5_mmg3d1_pattern(MMG5_pMesh mesh,MMG5_pSol met) {
+int MMG5_mmg3d1_pattern(MMG5_pMesh mesh,MMG5_pSol met) {
 
   if ( abs(mesh->info.imprim) > 4 )
     fprintf(stdout,"  ** MESH ANALYSIS\n");
 
-  if ( mesh->info.iso && !_MMG5_chkmani(mesh) ) {
+  if ( mesh->info.iso && !MMG5_chkmani(mesh) ) {
     fprintf(stderr,"\n  ## Non orientable implicit surface. Exit program.\n");
     return 0;
   }
@@ -567,13 +567,13 @@ int _MMG5_mmg3d1_pattern(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
     fprintf(stdout,"  ** GEOMETRIC MESH\n");
 
-  if ( !_MMG5_anatet(mesh,met,1,1) ) {
+  if ( !MMG5_anatet(mesh,met,1,1) ) {
     fprintf(stderr,"\n  ## Unable to split mesh. Exiting.\n");
     return 0;
   }
 
   /* renumbering if available */
-  if ( !_MMG5_scotchCall(mesh,met) )
+  if ( !MMG5_scotchCall(mesh,met) )
     return 0;
 
   /**--- Stage 2: computational mesh */
@@ -581,51 +581,51 @@ int _MMG5_mmg3d1_pattern(MMG5_pMesh mesh,MMG5_pSol met) {
     fprintf(stdout,"  ** COMPUTATIONAL MESH\n");
 
   /* define metric map */
-  if ( !_MMG5_defsiz(mesh,met) ) {
+  if ( !MMG5_defsiz(mesh,met) ) {
     fprintf(stderr,"\n  ## Metric undefined. Exit program.\n");
     return 0;
   }
 
   if ( mesh->info.hgrad > 0. ) {
     if ( mesh->info.imprim > 0 )   fprintf(stdout,"\n  -- GRADATION : %8f\n",exp(mesh->info.hgrad));
-    if ( !_MMG5_gradsiz(mesh,met) ) {
+    if ( !MMG5_gradsiz(mesh,met) ) {
       fprintf(stderr,"\n  ## Gradation problem. Exit program.\n");
       return 0;
     }
   }
 
   /*update quality*/
-  if ( !_MMG3D_tetraQual(mesh,met,1) ) return 0;
+  if ( !MMG3D_tetraQual(mesh,met,1) ) return 0;
 
-  if ( !_MMG5_anatet(mesh,met,2,1) ) {
+  if ( !MMG5_anatet(mesh,met,2,1) ) {
     fprintf(stderr,"\n  ## Unable to split mesh. Exiting.\n");
     return 0;
   }
 
   /* renumbering if available */
-  if ( !_MMG5_scotchCall(mesh,met) )
+  if ( !MMG5_scotchCall(mesh,met) )
     return 0;
 
 #ifdef DEBUG
   puts("---------------------------Fin anatet---------------------");
-  _MMG3D_outqua(mesh,met,mesh->info.optimLES);
+  MMG3D_outqua(mesh,met,mesh->info.optimLES);
 #endif
-  if ( !_MMG5_adptet(mesh,met) ) {
+  if ( !MMG5_adptet(mesh,met) ) {
     fprintf(stderr,"\n  ## Unable to adapt. Exit program.\n");
     return 0;
   }
 
 #ifdef DEBUG
   puts("---------------------Fin adptet-----------------");
-  _MMG3D_outqua(mesh,met,mesh->info.optimLES);
+  MMG3D_outqua(mesh,met,mesh->info.optimLES);
 #endif
   /* in test phase: check if no element with 2 bdry faces */
-  if ( !_MMG5_chkfemtopo(mesh) ) {
+  if ( !MMG5_chkfemtopo(mesh) ) {
     fprintf(stderr,"\n  ## Topology of mesh unsuited for fem computations. Exit program.\n");
     return 0;
   }
 
-  if ( mesh->info.iso && !_MMG5_chkmani(mesh) ) {
+  if ( mesh->info.iso && !MMG5_chkmani(mesh) ) {
     fprintf(stderr,"\n  ## Non orientable implicit surface. Exit program.\n");
     return 0;
   }

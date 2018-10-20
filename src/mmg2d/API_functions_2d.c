@@ -46,7 +46,7 @@ int MMG2D_Init_mesh(const int starter,...) {
 
   va_start(argptr, starter);
 
-  ier = _MMG2D_Init_mesh_var(argptr);
+  ier = MMG2D_Init_mesh_var(argptr);
 
   va_end(argptr);
 
@@ -80,7 +80,7 @@ int MMG2D_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solout) {
 void MMG2D_Init_parameters(MMG5_pMesh mesh) {
 
   /* Init common parameters for mmg2d, mmgs and mmg2d. */
-  _MMG5_Init_parameters(mesh);
+  MMG5_Init_parameters(mesh);
 
   /* default values for integers */
   mesh->info.lag      = -1;
@@ -96,7 +96,7 @@ void MMG2D_Init_parameters(MMG5_pMesh mesh) {
   /* control gradation; */
   mesh->info.hgrad    = 1.3;
 
-  mesh->info.dhd  = _MMG5_ANGEDG;
+  mesh->info.dhd  = MMG5_ANGEDG;
 
   mesh->info.PROctree = 64;
 }
@@ -116,7 +116,7 @@ int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
     }
     else
       mesh->info.mem      = val;
-    if ( !_MMG2D_memOption(mesh) ) return 0;
+    if ( !MMG2D_memOption(mesh) ) return 0;
     break;
   case MMG2D_IPARAM_debug :
     mesh->info.ddebug   = val;
@@ -124,18 +124,18 @@ int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
   case MMG2D_IPARAM_angle :
     /* free table that may contains old ridges */
     if ( mesh->htab.geom )
-      _MMG5_DEL_MEM(mesh,mesh->htab.geom);
+      MMG5_DEL_MEM(mesh,mesh->htab.geom);
     if ( mesh->xpoint )
-      _MMG5_DEL_MEM(mesh,mesh->xpoint);
+      MMG5_DEL_MEM(mesh,mesh->xpoint);
     if ( mesh->xtetra )
-      _MMG5_DEL_MEM(mesh,mesh->xtetra);
+      MMG5_DEL_MEM(mesh,mesh->xtetra);
     if ( !val )
       mesh->info.dhd    = -1.;
     else {
       if ( (mesh->info.imprim > 5) || mesh->info.ddebug )
         fprintf(stderr,"\n  ## Warning: %s: angle detection parameter"
                 " set to default value\n",__func__);
-      mesh->info.dhd    = _MMG5_ANGEDG;
+      mesh->info.dhd    = MMG5_ANGEDG;
     }
     break;
   case MMG2D_IPARAM_iso :
@@ -239,11 +239,11 @@ int MMG2D_Set_meshSize(MMG5_pMesh mesh, int np, int nt, int na) {
     fprintf(stderr,"\n  ## Warning: %s: old mesh deletion.\n",__func__);
 
   if ( mesh->point )
-    _MMG5_DEL_MEM(mesh,mesh->point);
+    MMG5_DEL_MEM(mesh,mesh->point);
   if ( mesh->tria )
-    _MMG5_DEL_MEM(mesh,mesh->tria);
+    MMG5_DEL_MEM(mesh,mesh->tria);
   if ( mesh->edge )
-    _MMG5_DEL_MEM(mesh,mesh->edge);
+    MMG5_DEL_MEM(mesh,mesh->edge);
 
   mesh->np  = np;
   mesh->nt  = nt;
@@ -255,14 +255,14 @@ int MMG2D_Set_meshSize(MMG5_pMesh mesh, int np, int nt, int na) {
   /*tester si -m definie : renvoie 0 si pas ok et met la taille min dans info.mem */
   if( mesh->info.mem > 0) {
     if((mesh->npmax < mesh->np || mesh->ntmax < mesh->nt || mesh->namax < mesh->na) ) {
-      if ( !_MMG2D_memOption(mesh) )  return 0;
+      if ( !MMG2D_memOption(mesh) )  return 0;
     } else if(mesh->info.mem < 39) {
       fprintf(stderr,"\n  ## Error: %s: not enough memory (%d).\n",
               __func__,mesh->info.mem);
       return 0;
     }
   } else {
-    if ( !_MMG2D_memOption(mesh) )  return 0;
+    if ( !MMG2D_memOption(mesh) )  return 0;
   }
 
   /* Mesh allocation and linkage */
@@ -304,13 +304,13 @@ int MMG2D_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int
     sol->np  = np;
     sol->npi = np;
     if ( sol->m )
-      _MMG5_DEL_MEM(mesh,sol->m);
+      MMG5_DEL_MEM(mesh,sol->m);
 
     sol->npmax = mesh->npmax;
-    _MMG5_ADD_MEM(mesh,(sol->size*(sol->npmax+1))*sizeof(double),"initial solution",
+    MMG5_ADD_MEM(mesh,(sol->size*(sol->npmax+1))*sizeof(double),"initial solution",
                   printf("  Exit program.\n");
                   return 0);
-    _MMG5_SAFE_CALLOC(sol->m,(sol->size*(sol->npmax+1)),double,return 0);
+    MMG5_SAFE_CALLOC(sol->m,(sol->size*(sol->npmax+1)),double,return 0);
   }
   return 1;
 }
@@ -324,16 +324,16 @@ int MMG2D_Set_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol *sol,int nsols,
     if ( *sol ) {
       fprintf(stderr,"\n  ## Warning: %s: old solutions array deletion.\n",
               __func__);
-      _MMG5_DEL_MEM(mesh,*sol);
+      MMG5_DEL_MEM(mesh,*sol);
     }
   }
 
   /** Sol tab allocation */
   mesh->nsols = nsols;
 
-  _MMG5_ADD_MEM(mesh,nsols*sizeof(MMG5_Sol),"solutions array",
+  MMG5_ADD_MEM(mesh,nsols*sizeof(MMG5_Sol),"solutions array",
                 return 0);
-  _MMG5_SAFE_CALLOC(*sol,nsols,MMG5_Sol,return 0);
+  MMG5_SAFE_CALLOC(*sol,nsols,MMG5_Sol,return 0);
 
   for ( j=0; j<nsols; ++j ) {
     psl = *sol + j;
@@ -436,7 +436,7 @@ int MMG2D_Set_vertex(MMG5_pMesh mesh, double c0, double c1, int ref, int pos) {
     fprintf(stderr,"\n  ## Error: %s: unable to allocate a new point.\n",
             __func__);
     fprintf(stderr,"    max number of points: %d\n",mesh->npmax);
-    _MMG5_INCREASE_MEM_MESSAGE();
+    MMG5_INCREASE_MEM_MESSAGE();
     return 0;
   }
 
@@ -601,7 +601,7 @@ int MMG2D_Set_triangle(MMG5_pMesh mesh, int v0, int v1, int v2, int ref, int pos
     fprintf(stderr,"  ## Error: %s: unable to allocate a new element.\n",
             __func__);
     fprintf(stderr,"    max number of element: %d\n",mesh->ntmax);
-    _MMG5_INCREASE_MEM_MESSAGE();
+    MMG5_INCREASE_MEM_MESSAGE();
     return 0;
   }
 
@@ -627,7 +627,7 @@ int MMG2D_Set_triangle(MMG5_pMesh mesh, int v0, int v1, int v2, int ref, int pos
   for(i=0 ; i<3 ; i++)
     pt->edg[i] = 0;
 
-  vol = MMG2_quickarea(mesh->point[pt->v[0]].c,mesh->point[pt->v[1]].c,
+  vol = MMG2D_quickarea(mesh->point[pt->v[0]].c,mesh->point[pt->v[1]].c,
                        mesh->point[pt->v[2]].c);
 
   if ( vol == 0.0 ) {
@@ -745,7 +745,7 @@ int  MMG2D_Set_triangles(MMG5_pMesh mesh, int *tria, int *refs) {
     for(i=0 ; i<3 ; i++)
       ptt->edg[i] = 0;
 
-    vol = MMG2_quickarea(mesh->point[ptt->v[0]].c,mesh->point[ptt->v[1]].c,
+    vol = MMG2D_quickarea(mesh->point[ptt->v[0]].c,mesh->point[ptt->v[1]].c,
                          mesh->point[ptt->v[2]].c);
 
     if ( vol == 0.0 ) {
@@ -1443,7 +1443,7 @@ int MMG2D_Free_all(const int starter,...)
 
   va_start(argptr, starter);
 
-  ier = _MMG2D_Free_all_var(argptr);
+  ier = MMG2D_Free_all_var(argptr);
 
   va_end(argptr);
 
@@ -1458,7 +1458,7 @@ int MMG2D_Free_structures(const int starter,...)
 
   va_start(argptr, starter);
 
-  ier = _MMG2D_Free_structures_var(argptr);
+  ier = MMG2D_Free_structures_var(argptr);
 
   va_end(argptr);
 
@@ -1472,7 +1472,7 @@ int MMG2D_Free_names(const int starter,...)
 
   va_start(argptr, starter);
 
-  ier = _MMG2D_Free_names_var(argptr);
+  ier = MMG2D_Free_names_var(argptr);
 
   va_end(argptr);
 

@@ -32,8 +32,8 @@
 ! * name and the opening brace (it creates errors under windows)
 ! */
 
-#ifndef _MMGFLIB_H
-#define _MMGFLIB_H
+#ifndef MMGFLIB_H
+#define MMGFLIB_H
 
 #include "mmg/mmg2d/libmmg2df.h"
 #include "mmg/mmgs/libmmgsf.h"

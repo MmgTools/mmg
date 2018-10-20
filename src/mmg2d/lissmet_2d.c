@@ -65,7 +65,7 @@ int lissmet_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
   edgeTable.size  = mesh->ntmax;
   edgeTable.nxtmax = 3*mesh->ntmax+1;
   edgeTable.hnxt  = mesh->ntmax;
-  _MMG5_SAFE_CALLOC(edgeTable.item,edgeTable.nxtmax,Hedge,return 0);
+  MMG5_SAFE_CALLOC(edgeTable.item,edgeTable.nxtmax,Hedge,return 0);
 
   memset(edgeTable.item,0,edgeTable.nxtmax*sizeof(Hedge));
   for (k=edgeTable.size; k<edgeTable.nxtmax; k++)
@@ -76,7 +76,7 @@ int lissmet_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
   for(k=1 ; k<=mesh->nt ; k++) {
     pt = &mesh->tria[k];
     for(i=0 ; i<3 ; i++)
-      MMG2_hashEdge(&edgeTable,k,pt->v[MMG2_iare[i][0]],pt->v[MMG2_iare[i][1]]);
+      MMG2D_hashEdge(&edgeTable,k,pt->v[MMG2D_iare[i][0]],pt->v[MMG2D_iare[i][1]]);
   }
 
   /* reset color */
@@ -113,12 +113,12 @@ int lissmet_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
         d1 = ma[0]*ux*ux + ma[2]*uy*uy + 2.0*ma[1]*ux*uy;
         assert(d1 >=0);
         if ( d1 < 0.0 )  d1 = 0.0;
-        dd1 = M_MAX(_MMG2_EPSD,sqrt(d1));
+        dd1 = M_MAX(MMG2D_EPSD,sqrt(d1));
 
         d2 = mb[0]*ux*ux + mb[2]*uy*uy+ 2.0*mb[1]*ux*uy;
         assert(d2 >=0);
         if ( d2 < 0.0 )  d2 = 0.0;
-        dd2 = M_MAX(_MMG2_EPSD,sqrt(d2));
+        dd2 = M_MAX(MMG2D_EPSD,sqrt(d2));
 
         /* swap vertices */
         if ( dd1 > dd2 ) {
@@ -133,7 +133,7 @@ int lissmet_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
         }
         rap = dd2 / dd1;
         dh = rap - 1.0;
-        if ( fabs(dh) > _MMG2_EPSD ) {
+        if ( fabs(dh) > MMG2D_EPSD ) {
           // Edge length in the metric
           tail = (dd1+dd2+4*sqrt(0.5*(d1+d2))) / 6.0;
           coef = log(rap) / tail;
@@ -153,13 +153,13 @@ int lissmet_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
               mb1[i] = coef * mb[i];
             }
 
-            if ( _MMG5_intersecmet22(mesh,ma,mb1,m) ) {
+            if ( MMG5_intersecmet22(mesh,ma,mb1,m) ) {
               for (i=0; i<3; i++)  ma[i] = m[i];
             }
             else {
               for (i=0; i<3; i++)  ma[i]  = SQRT3DIV2 * (ma[i]+mb1[i]);
             }
-            if ( _MMG5_intersecmet22(mesh,ma1,mb,m) ) {
+            if ( MMG5_intersecmet22(mesh,ma1,mb,m) ) {
               for (i=0; i<3; i++)  mb[i] = m[i];
             }
             else {
@@ -174,7 +174,7 @@ int lissmet_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
     }
     ncor += nc;
   } while ( nc && ++itour < maxtou );
-  _MMG5_SAFE_FREE(edgeTable.item);
+  MMG5_SAFE_FREE(edgeTable.item);
 
   if ( abs(mesh->info.imprim) > 3 ) {
     fprintf(stdout,"    gradation: %7d updated, %d iter\n",ncor,itour);

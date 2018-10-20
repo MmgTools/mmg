@@ -65,7 +65,7 @@ FORTRAN_NAME(MMG3D_USAGE,mmg3d_usage,
   strncpy(tmp,prog,*strlen);
   tmp[*strlen] = '\0';
   MMG3D_usage(tmp);
-  _MMG5_SAFE_FREE(tmp);
+  MMG5_SAFE_FREE(tmp);
 
   return;
 }

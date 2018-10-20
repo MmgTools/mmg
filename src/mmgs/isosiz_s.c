@@ -48,7 +48,7 @@
  * geometric approx ; by convention, p0->h stores desired length at point p0
  *
  */
-int _MMGS_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
+int MMGS_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria    pt;
   MMG5_pPoint   p[3];
   MMG5_pPar     par;
@@ -85,10 +85,10 @@ int _MMGS_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
     /* normal recovery */
     for (i=0; i<3; i++) {
       if ( MS_SIN(p[i]->tag) ) {
-        _MMG5_nortri(mesh,pt,n[i]);
+        MMG5_nortri(mesh,pt,n[i]);
       }
       else if ( MG_EDG(p[i]->tag) ) {
-        _MMG5_nortri(mesh,pt,nt);
+        MMG5_nortri(mesh,pt,nt);
         n1  = &mesh->xpoint[p[i]->xp].n1[0];
         n2  = &mesh->xpoint[p[i]->xp].n2[0];
         ps  = n1[0]*nt[0] + n1[1]*nt[1] + n1[2]*nt[2];
@@ -104,8 +104,8 @@ int _MMGS_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
     }
 
     for (i=0; i<3; i++) {
-      i1  = _MMG5_inxt2[i];
-      i2  = _MMG5_iprv2[i];
+      i1  = MMG5_inxt2[i];
+      i2  = MMG5_iprv2[i];
       ip1 = pt->v[i1];
       ip2 = pt->v[i2];
 
@@ -138,7 +138,7 @@ int _MMGS_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
       uz = p[i2]->c[2] - p[i1]->c[2];
       ll = ux*ux + uy*uy + uz*uz;
 
-      if ( ll < _MMG5_EPSD )  continue;
+      if ( ll < MMG5_EPSD )  continue;
 
       if ( MG_EDG(pt->tag[i]) ) {
         if ( MS_SIN(p[i1]->tag) ) {
@@ -185,7 +185,7 @@ int _MMGS_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
         M2 = 6.0 * sqrt(M2);
         M1 = MG_MAX(M1,M2);
 
-        if ( M1 < _MMG5_EPSD )
+        if ( M1 < MMG5_EPSD )
           lm = MAXLEN;
         else {
           lm = (16.0*ll*hausd) / (3.0*M1);
@@ -220,7 +220,7 @@ int _MMGS_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
         M2 = 6.0 * sqrt(M2);
         M1 = MG_MAX(M1,M2);
 
-        if ( M1 < _MMG5_EPSD )
+        if ( M1 < MMG5_EPSD )
           lm = MAXLEN;
         else {
           lm = (16.0*ll*hausd) / (3.0*M1);
@@ -280,8 +280,8 @@ int gradsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
       if ( !MG_EOK(pt) )  continue;
 
       for (i=0; i<3; i++) {
-        i1  = _MMG5_inxt2[i];
-        i2  = _MMG5_iprv2[i];
+        i1  = MMG5_inxt2[i];
+        i2  = MMG5_iprv2[i];
         ip1 = pt->v[i1];
         ip2 = pt->v[i2];
         p1 = &mesh->point[ip1];
@@ -295,7 +295,7 @@ int gradsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
         h1 = met->m[ip1];
         h2 = met->m[ip2];
         if ( h1 < h2 ) {
-          if ( h1 < _MMG5_EPSD )  continue;
+          if ( h1 < MMG5_EPSD )  continue;
           hn  = h1 + mesh->info.hgrad*ll;
           if ( h2 > hn ) {
             met->m[ip2] = hn;
@@ -304,7 +304,7 @@ int gradsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
           }
         }
         else {
-          if ( h2 < _MMG5_EPSD )  continue;
+          if ( h2 < MMG5_EPSD )  continue;
           hn = h2 + mesh->info.hgrad*ll;
           if ( h1 > hn ) {
             met->m[ip1] = hn;

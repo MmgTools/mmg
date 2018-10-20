@@ -51,12 +51,12 @@
  *
  */
 static inline
-int _MMG3D_Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol, MMG5_pSol *disp
+int MMG3D_Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol, MMG5_pSol *disp
   ) {
 
   /* mesh allocation */
-  if ( *mesh )  _MMG5_SAFE_FREE(*mesh);
-  _MMG5_SAFE_CALLOC(*mesh,1,MMG5_Mesh,return 0);
+  if ( *mesh )  MMG5_SAFE_FREE(*mesh);
+  MMG5_SAFE_CALLOC(*mesh,1,MMG5_Mesh,return 0);
 
   /* sol allocation */
   if ( !sol ) {
@@ -66,14 +66,14 @@ int _MMG3D_Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol, MMG5_pSol *disp
     return 0;
   }
 
-  if ( *sol )  _MMG5_DEL_MEM(*mesh,*sol);
-  _MMG5_SAFE_CALLOC(*sol,1,MMG5_Sol,return 0);
+  if ( *sol )  MMG5_DEL_MEM(*mesh,*sol);
+  MMG5_SAFE_CALLOC(*sol,1,MMG5_Sol,return 0);
 
   /* displacement allocation */
   if ( disp ) {
     if ( *disp )
-      _MMG5_DEL_MEM(*mesh,*disp);
-    _MMG5_SAFE_CALLOC(*disp,1,MMG5_Sol,return 0);
+      MMG5_DEL_MEM(*mesh,*disp);
+    MMG5_SAFE_CALLOC(*disp,1,MMG5_Sol,return 0);
   }
 
   return 1;
@@ -88,10 +88,10 @@ int _MMG3D_Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol, MMG5_pSol *disp
  *
  */
 static inline
-void _MMG3D_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol disp
+void MMG3D_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol disp
   ) {
 
-  _MMG3D_Set_commonFunc();
+  MMG3D_Set_commonFunc();
 
   (mesh)->dim   = 3;
   (mesh)->ver   = 2;
@@ -145,7 +145,7 @@ void _MMG3D_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol disp
  * Internal function for structure allocations (taking a va_list argument).
  *
  */
-int _MMG3D_Init_mesh_var( va_list argptr ) {
+int MMG3D_Init_mesh_var( va_list argptr ) {
   MMG5_pMesh     *mesh;
   MMG5_pSol      *sol,*disp;
   int            typArg;
@@ -199,13 +199,13 @@ int _MMG3D_Init_mesh_var( va_list argptr ) {
   }
 
   /* allocations */
-  if ( !_MMG3D_Alloc_mesh(mesh,sol,disp) ) return 0;
+  if ( !MMG3D_Alloc_mesh(mesh,sol,disp) ) return 0;
 
   /* initialisations */
   if ( disp )
-    _MMG3D_Init_woalloc_mesh(*mesh,*sol,*disp);
+    MMG3D_Init_woalloc_mesh(*mesh,*sol,*disp);
   else
-    _MMG3D_Init_woalloc_mesh(*mesh,*sol,NULL);
+    MMG3D_Init_woalloc_mesh(*mesh,*sol,NULL);
 
   return 1;
 }
@@ -239,7 +239,7 @@ int _MMG3D_Init_mesh_var( va_list argptr ) {
  * \remark we pass the structures by reference in order to have argument
  * compatibility between the library call from a Fortran code and a C code.
  */
-int _MMG3D_Free_all_var(va_list argptr)
+int MMG3D_Free_all_var(va_list argptr)
 {
 
   MMG5_pMesh     *mesh;
@@ -300,22 +300,22 @@ int _MMG3D_Free_all_var(va_list argptr)
   }
 
   if ( sol )
-    _MMG5_SAFE_FREE(*sol);
+    MMG5_SAFE_FREE(*sol);
 
   if ( disp )
-    _MMG5_SAFE_FREE(*disp);
+    MMG5_SAFE_FREE(*disp);
 
   if ( sols ) {
     for ( i=0; i<(*mesh)->nsols; ++i ) {
       psl = (*sols) + i;
       if ( psl->m ) {
-        _MMG5_DEL_MEM(*mesh,psl->m);
+        MMG5_DEL_MEM(*mesh,psl->m);
       }
     }
-    _MMG5_DEL_MEM(*mesh,*sols);
+    MMG5_DEL_MEM(*mesh,*sols);
   }
 
-  _MMG5_SAFE_FREE(*mesh);
+  MMG5_SAFE_FREE(*mesh);
 
   return 1;
 }
@@ -350,7 +350,7 @@ int _MMG3D_Free_all_var(va_list argptr)
  * compatibility between the library call from a Fortran code and a C code.
  *
  */
-int _MMG3D_Free_structures_var(va_list argptr)
+int MMG3D_Free_structures_var(va_list argptr)
 {
 
   MMG5_pMesh     *mesh;
@@ -412,41 +412,41 @@ int _MMG3D_Free_structures_var(va_list argptr)
   assert(mesh && *mesh);
 
   if ( (*mesh)->tetra )
-    _MMG5_DEL_MEM((*mesh),(*mesh)->tetra);
+    MMG5_DEL_MEM((*mesh),(*mesh)->tetra);
 
   if ( (*mesh)->prism )
-    _MMG5_DEL_MEM((*mesh),(*mesh)->prism);
+    MMG5_DEL_MEM((*mesh),(*mesh)->prism);
 
   if ( (*mesh)->edge )
-    _MMG5_DEL_MEM((*mesh),(*mesh)->edge);
+    MMG5_DEL_MEM((*mesh),(*mesh)->edge);
 
   if ( (*mesh)->adjt )
-    _MMG5_DEL_MEM(*mesh,(*mesh)->adjt);
+    MMG5_DEL_MEM(*mesh,(*mesh)->adjt);
 
   if ( (*mesh)->adja )
-    _MMG5_DEL_MEM((*mesh),(*mesh)->adja);
+    MMG5_DEL_MEM((*mesh),(*mesh)->adja);
 
   if ( (*mesh)->adjapr )
-    _MMG5_DEL_MEM((*mesh),(*mesh)->adjapr);
+    MMG5_DEL_MEM((*mesh),(*mesh)->adjapr);
 
   if ( (*mesh)->htab.geom )
-    _MMG5_DEL_MEM((*mesh),(*mesh)->htab.geom);
+    MMG5_DEL_MEM((*mesh),(*mesh)->htab.geom);
 
   if ( (*mesh)->tria )
-    _MMG5_DEL_MEM((*mesh),(*mesh)->tria);
+    MMG5_DEL_MEM((*mesh),(*mesh)->tria);
 
   if ( (*mesh)->quadra )
-    _MMG5_DEL_MEM((*mesh),(*mesh)->quadra);
+    MMG5_DEL_MEM((*mesh),(*mesh)->quadra);
 
   if ( (*mesh)->xtetra )
-    _MMG5_DEL_MEM((*mesh),(*mesh)->xtetra);
+    MMG5_DEL_MEM((*mesh),(*mesh)->xtetra);
 
   if ( (*mesh)->xprism )
-    _MMG5_DEL_MEM((*mesh),(*mesh)->xprism);
+    MMG5_DEL_MEM((*mesh),(*mesh)->xprism);
 
   /* disp */
   if ( disp && (*disp) && (*disp)->m )
-    _MMG5_DEL_MEM((*mesh),(*disp)->m);
+    MMG5_DEL_MEM((*mesh),(*disp)->m);
 
   if ( sol ) {
     MMG5_Free_structures(*mesh,*sol);
@@ -488,7 +488,7 @@ int _MMG3D_Free_structures_var(va_list argptr)
  * compatibility between the library call from a Fortran code and a C code.
  *
  */
-int _MMG3D_Free_names_var(va_list argptr)
+int MMG3D_Free_names_var(va_list argptr)
 {
 
   MMG5_pMesh     *mesh;
@@ -540,11 +540,11 @@ int _MMG3D_Free_names_var(va_list argptr)
   /* disp */
   if ( disp && *disp ) {
     if ( (*disp)->namein ) {
-      _MMG5_DEL_MEM(*mesh,(*disp)->namein);
+      MMG5_DEL_MEM(*mesh,(*disp)->namein);
     }
 
     if ( (*disp)->nameout ) {
-      _MMG5_DEL_MEM(*mesh,(*disp)->nameout);
+      MMG5_DEL_MEM(*mesh,(*disp)->nameout);
     }
   }
 

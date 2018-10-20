@@ -54,8 +54,8 @@ typedef struct MeshGraphHash_ {
 } MeshGraphHash;
 
 int    _SCOTCHintSort2asc1(SCOTCH_Num * sortPartTb, int vertNbr);
-int    _MMG5_kPartBoxCompute(SCOTCH_Graph, int, int, SCOTCH_Num*,MMG5_pMesh);
-void   _MMG5_swapNod(MMG5_pPoint, double*, int*, int, int, int);
+int    MMG5_kPartBoxCompute(SCOTCH_Graph, int, int, SCOTCH_Num*,MMG5_pMesh);
+void   MMG5_swapNod(MMG5_pPoint, double*, int*, int, int, int);
 
 #endif /* __RENUM__ */
 #endif

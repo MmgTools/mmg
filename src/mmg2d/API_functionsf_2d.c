@@ -48,7 +48,7 @@ FORTRAN_VARIADIC ( MMG2D_INIT_MESH, mmg2d_init_mesh,
 
                    va_start(argptr, starter);
 
-                   ier = _MMG2D_Init_mesh_var(argptr);
+                   ier = MMG2D_Init_mesh_var(argptr);
 
                    va_end(argptr);
 
@@ -81,11 +81,11 @@ FORTRAN_NAME(MMG2D_SET_INPUTMESHNAME, mmg2d_set_inputmeshname,
              (mesh,meshin,strlen0,retval)) {
   char *tmp = NULL;
 
-  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
+  MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
   strncpy(tmp,meshin,*strlen0);
   tmp[*strlen0] = '\0';
   *retval = MMG2D_Set_inputMeshName(*mesh,tmp);
-  _MMG5_SAFE_FREE(tmp);
+  MMG5_SAFE_FREE(tmp);
 
   return;
 }
@@ -99,11 +99,11 @@ FORTRAN_NAME(MMG2D_SET_INPUTSOLNAME, mmg2d_set_inputsolname,
 
   char *tmp = NULL;
 
-  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
+  MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
   strncpy(tmp,solin,*strlen0);
   tmp[*strlen0] = '\0';
   *retval = MMG2D_Set_inputSolName(*mesh,*sol,tmp);
-  _MMG5_SAFE_FREE(tmp);
+  MMG5_SAFE_FREE(tmp);
 
   return;
 }
@@ -117,11 +117,11 @@ FORTRAN_NAME(MMG2D_SET_OUTPUTMESHNAME,mmg2d_set_outputmeshname,
              (mesh,meshout,strlen0,retval)){
   char *tmp = NULL;
 
-  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
+  MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
   strncpy(tmp,meshout,*strlen0);
   tmp[*strlen0] = '\0';
   *retval = MMG2D_Set_outputMeshName(*mesh, tmp);
-  _MMG5_SAFE_FREE(tmp);
+  MMG5_SAFE_FREE(tmp);
 
   return;
 }
@@ -134,11 +134,11 @@ FORTRAN_NAME(MMG2D_SET_OUTPUTSOLNAME,mmg2d_set_outputsolname,
              (mesh,sol,solout,strlen0,retval)){
   char *tmp = NULL;
 
-  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
+  MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
   strncpy(tmp,solout,*strlen0);
   tmp[*strlen0] = '\0';
   *retval = MMG2D_Set_outputSolName(*mesh,*sol,tmp);
-  _MMG5_SAFE_FREE(tmp);
+  MMG5_SAFE_FREE(tmp);
 
   return;
 }
@@ -576,7 +576,7 @@ FORTRAN_VARIADIC(MMG2D_FREE_ALL,mmg2d_free_all,
 
                  va_start(argptr, starter);
 
-                 ier = _MMG2D_Free_all_var(argptr);
+                 ier = MMG2D_Free_all_var(argptr);
 
                  va_end(argptr);
 
@@ -595,7 +595,7 @@ FORTRAN_VARIADIC(MMG2D_FREE_STRUCTURES,mmg2d_free_structures,
 
                  va_start(argptr, starter);
 
-                 ier = _MMG2D_Free_structures_var(argptr);
+                 ier = MMG2D_Free_structures_var(argptr);
 
                  va_end(argptr);
 
@@ -614,7 +614,7 @@ FORTRAN_VARIADIC(MMG2D_FREE_NAMES,mmg2d_free_names,
 
                  va_start(argptr, starter);
 
-                 ier = _MMG2D_Free_names_var(argptr);
+                 ier = MMG2D_Free_names_var(argptr);
 
                  va_end(argptr);
 
@@ -630,12 +630,12 @@ FORTRAN_NAME(MMG2D_LOADMESH,mmg2d_loadmesh,(MMG5_pMesh *mesh,char* meshin,int* s
 
   char *tmp = NULL;
 
-  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
+  MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
   strncpy(tmp,meshin,*strlen0);
   tmp[*strlen0] = '\0';
 
   *retval = MMG2D_loadMesh(*mesh,tmp);
-  _MMG5_SAFE_FREE(tmp);
+  MMG5_SAFE_FREE(tmp);
 
   return;
 }
@@ -648,13 +648,13 @@ FORTRAN_NAME(MMG2D_LOADMSHMESH,mmg2d_loadmshmesh,
              (mesh,sol,filename,strlen0, retval)){
   char *tmp = NULL;
 
-  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
+  MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
   strncpy(tmp,filename,*strlen0);
   tmp[*strlen0] = '\0';
 
   *retval = MMG2D_loadMshMesh(*mesh,*sol,tmp);
 
-  _MMG5_SAFE_FREE(tmp);
+  MMG5_SAFE_FREE(tmp);
 
   return;
 }
@@ -667,13 +667,13 @@ FORTRAN_NAME(MMG2D_LOADMSHMESH_AND_ALLDATA,mmg2d_loadmshmesh_and_alldata,
              (mesh,sol,filename,strlen0, retval)){
   char *tmp = NULL;
 
-  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
+  MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
   strncpy(tmp,filename,*strlen0);
   tmp[*strlen0] = '\0';
 
   *retval = MMG2D_loadMshMesh_and_allData(*mesh,sol,tmp);
 
-  _MMG5_SAFE_FREE(tmp);
+  MMG5_SAFE_FREE(tmp);
 
   return;
 }
@@ -685,11 +685,11 @@ FORTRAN_NAME(MMG2D_SAVEMESH,mmg2d_savemesh,(MMG5_pMesh *mesh,char *meshin,int *s
              (mesh,meshin,strlen0,retval)){
   char *tmp = NULL;
 
-  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
+  MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
   strncpy(tmp,meshin,*strlen0);
   tmp[*strlen0] = '\0';
   *retval = MMG2D_saveMesh(*mesh,tmp);
-  _MMG5_SAFE_FREE(tmp);
+  MMG5_SAFE_FREE(tmp);
 
   return;
 }
@@ -703,13 +703,13 @@ FORTRAN_NAME(MMG2D_SAVEMSHMESH,mmg2d_savemshmesh,
              (mesh,sol,filename,strlen0,retval)){
   char *tmp = NULL;
 
-  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
+  MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
   strncpy(tmp,filename,*strlen0);
   tmp[*strlen0] = '\0';
 
   *retval = MMG2D_saveMshMesh(*mesh,*sol,tmp);
 
-  _MMG5_SAFE_FREE(tmp);
+  MMG5_SAFE_FREE(tmp);
 
   return;
 }
@@ -723,13 +723,13 @@ FORTRAN_NAME(MMG2D_SAVEMSHMESH_AND_ALLDATA,mmg2d_savemshmesh_and_alldata,
              (mesh,sol,filename,strlen0,retval)){
   char *tmp = NULL;
 
-  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
+  MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
   strncpy(tmp,filename,*strlen0);
   tmp[*strlen0] = '\0';
 
   *retval = MMG2D_saveMshMesh_and_allData(*mesh,sol,tmp);
 
-  _MMG5_SAFE_FREE(tmp);
+  MMG5_SAFE_FREE(tmp);
 
   return;
 }
@@ -742,12 +742,12 @@ FORTRAN_NAME(MMG2D_LOADSOL,mmg2d_loadsol,
              (mesh,met,meshin,strlen0,retval)){
   char *tmp = NULL;
 
-  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
+  MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
   strncpy(tmp,meshin,*strlen0);
   tmp[*strlen0] = '\0';
 
   *retval = MMG2D_loadSol(*mesh,*met,tmp);
-  _MMG5_SAFE_FREE(tmp);
+  MMG5_SAFE_FREE(tmp);
 
   return;
 }
@@ -760,12 +760,12 @@ FORTRAN_NAME(MMG2D_LOADALLSOLS,mmg2d_loadallsols,
              (mesh,sol,meshin,strlen0,retval)){
   char *tmp = NULL;
 
-  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
+  MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
   strncpy(tmp,meshin,*strlen0);
   tmp[*strlen0] = '\0';
 
   *retval = MMG2D_loadAllSols(*mesh,sol,tmp);
-  _MMG5_SAFE_FREE(tmp);
+  MMG5_SAFE_FREE(tmp);
 
   return;
 }
@@ -779,12 +779,12 @@ FORTRAN_NAME(MMG2D_SAVESOL,mmg2d_savesol,(MMG5_pMesh *mesh,MMG5_pSol *met,
              (mesh,met,meshin,strlen0,retval)){
   char *tmp = NULL;
 
-  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
+  MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
   strncpy(tmp,meshin,*strlen0);
   tmp[*strlen0] = '\0';
 
   *retval = MMG2D_saveSol(*mesh,*met,tmp);
-  _MMG5_SAFE_FREE(tmp);
+  MMG5_SAFE_FREE(tmp);
 
   return;
 }
@@ -797,12 +797,12 @@ FORTRAN_NAME(MMG2D_SAVEALLSOLS,mmg2d_saveallsols,(MMG5_pMesh *mesh,MMG5_pSol *so
              (mesh,sol,meshin,strlen0,retval)){
   char *tmp = NULL;
 
-  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
+  MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
   strncpy(tmp,meshin,*strlen0);
   tmp[*strlen0] = '\0';
 
   *retval = MMG2D_saveAllSols(*mesh,sol,tmp);
-  _MMG5_SAFE_FREE(tmp);
+  MMG5_SAFE_FREE(tmp);
 
   return;
 }

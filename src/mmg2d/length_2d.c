@@ -33,7 +33,7 @@ double long_iso(double *ca,double *cb,double *ma,double *mb) {
   dd = sqrt(ux*ux + uy*uy);
 
   rap = (hb - ha) / ha;
-  if ( fabs(rap) < _MMG2_EPSD )
+  if ( fabs(rap) < MMG2D_EPSD )
     len = dd / ha;
   else
     len = dd * (1.0/ha + 1.0/hb + 8.0 / (ha+hb)) / 6.0;
@@ -59,7 +59,7 @@ double long_ani(double *ca,double *cb,double *ma,double *mb) {
 }
 
 /** Calculate length of a curve in the considered isotropic metric */
-double _MMG2_lencurv_iso(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2) {
+double MMG2D_lencurv_iso(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2) {
   MMG5_pPoint     p1,p2;
   double          h1,h2,len,l,r;
 
@@ -72,13 +72,13 @@ double _MMG2_lencurv_iso(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2) {
   l = (p2->c[0]-p1->c[0])*(p2->c[0]-p1->c[0]) + (p2->c[1]-p1->c[1])*(p2->c[1]-p1->c[1]);
   l = sqrt(l);
   r = h2 / h1 - 1.0;
-  len = ( fabs(r) < _MMG5_EPS ) ? ( l/h1 ) : ( l / (h2-h1) * log1p(r) );
+  len = ( fabs(r) < MMG5_EPS ) ? ( l/h1 ) : ( l / (h2-h1) * log1p(r) );
 
   return len;
 }
 
 /* Calculate length of a curve in the considered anisotropic metric by using a two-point quadrature formula */
-double _MMG2_lencurv_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2) {
+double MMG2D_lencurv_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2) {
   MMG5_pPoint      p1,p2;
   double           len,*m1,*m2,ux,uy,l1,l2;
   static char      mmgWarn0=0,mmgWarn1=0;
@@ -121,7 +121,7 @@ double _MMG2_lencurv_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2) {
 }
 
 /* print histo of edge lengths */
-int MMG2_prilen(MMG5_pMesh mesh,MMG5_pSol sol) {
+int MMG2D_prilen(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTria       pt;
   double      lavg,len,ecart,som,lmin,lmax;
   int         k,l,navg,ia,ipa,ipb,iamin,ibmin,iamax,ibmax,nullEdge,hl[9];
@@ -148,13 +148,13 @@ int MMG2_prilen(MMG5_pMesh mesh,MMG5_pSol sol) {
       l = (&mesh->adja[3*(k-1)+1])[ia];
       if ( l < 3*k )  continue;
 
-      ipa = MMG2_iare[ia][0];
-      ipb = MMG2_iare[ia][1];
+      ipa = MMG2D_iare[ia][0];
+      ipb = MMG2D_iare[ia][1];
 
       if ( sol->m )
         len = MMG2D_lencurv(mesh,sol,pt->v[ipa],pt->v[ipb]);
       else
-        len = _MMG2_lencurv_iso(mesh,sol,pt->v[ipa],pt->v[ipb]);
+        len = MMG2D_lencurv_iso(mesh,sol,pt->v[ipa],pt->v[ipb]);
 
       navg++;
       ecart = len;
@@ -193,7 +193,7 @@ int MMG2_prilen(MMG5_pMesh mesh,MMG5_pSol sol) {
       else                     hl[8]++;
     }
   }
-  _MMG5_displayLengthHisto(mesh, navg, &lavg, iamin, ibmin, lmin,
+  MMG5_displayLengthHisto(mesh, navg, &lavg, iamin, ibmin, lmin,
 			   iamax, ibmax, lmax,nullEdge, &bd[0], &hl[0],0);
 
 

@@ -44,7 +44,7 @@
  * Impose default metric (isotropic, with size hmax) at vertex i in triangle k.
  *
  */
-int _MMG2_defaultmet_2d(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
+int MMG2D_defaultmet_2d(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
   MMG5_pTria       pt;
   double           *m,isqhmax;
   int              ip;
@@ -74,12 +74,12 @@ int _MMG2_defaultmet_2d(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
  * account of geometric approximation of the corresponding curve
  *
  */
-int _MMG2_defmetbdy_2d(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
+int MMG2D_defmetbdy_2d(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
   MMG5_pTria      pt;
   MMG5_pPoint     p0,p1,p2;
   double          hausd,sqhmin,sqhmax,ux,uy,ll,li,ps1,ps2,lm,ltmp,pv,M1,M2,t1[2],t2[2],b1[2],b2[2],*n,*m;
   double          gpp1[2],gpp2[2];
-  int             ilist,iel,ip,ip1,ip2,it[2],l,list[MMG2_LONMAX+2];
+  int             ilist,iel,ip,ip1,ip2,it[2],l,list[MMG2D_LONMAX+2];
   char            i0,i1,i2,j;
   static char     mmgWarn0=0,mmgWarn1=0;
 
@@ -93,7 +93,7 @@ int _MMG2_defmetbdy_2d(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
   m = &met->m[3*ip];
 
   ip1 = ip2 = 0;
-  ilist = _MMG2_boulet(mesh,k,i,list);
+  ilist = MMG2D_boulet(mesh,k,i,list);
 
   /* Recover the two boundary edges meeting at ip */
   for (l=0; l<ilist; l++) {
@@ -101,8 +101,8 @@ int _MMG2_defmetbdy_2d(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
     pt = &mesh->tria[iel];
 
     i0 = list[l] % 3;
-    i1 = _MMG5_inxt2[i0];
-    i2 = _MMG5_iprv2[i0];
+    i1 = MMG5_inxt2[i0];
+    i2 = MMG5_iprv2[i0];
 
     if ( MG_EDG(pt->tag[i1]) ) {
       if ( ip1 == 0 ) {
@@ -164,8 +164,8 @@ int _MMG2_defmetbdy_2d(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
     iel = it[j] / 3;
     pt = &mesh->tria[iel];
     i0 = it[j] % 3;
-    i1 = _MMG5_inxt2[i0];
-    i2 = _MMG5_iprv2[i0];
+    i1 = MMG5_inxt2[i0];
+    i2 = MMG5_iprv2[i0];
     ip1 = pt->v[i1];
     ip2 = pt->v[i2];
 
@@ -175,7 +175,7 @@ int _MMG2_defmetbdy_2d(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
     ux = p2->c[0] - p1->c[0];
     uy = p2->c[1] - p1->c[1];
     ll = ux*ux + uy*uy;
-    if ( ll < _MMG5_EPSD ) continue;
+    if ( ll < MMG5_EPSD ) continue;
     li = 1.0 / sqrt(ll);
 
     /* Tangent vector at p1 */
@@ -200,17 +200,17 @@ int _MMG2_defmetbdy_2d(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
 
     /* Calculation of the two Bezier coefficients along the boundary curve */
     ps1   = ux*t1[0] + uy*t1[1];
-    b1[0] = p1->c[0] + _MMG5_ATHIRD*ps1*t1[0];
-    b1[1] = p1->c[1] + _MMG5_ATHIRD*ps1*t1[1];
+    b1[0] = p1->c[0] + MMG5_ATHIRD*ps1*t1[0];
+    b1[1] = p1->c[1] + MMG5_ATHIRD*ps1*t1[1];
 
     ps2   = ux*t2[0] + uy*t2[1];
-    b2[0] = p2->c[0] - _MMG5_ATHIRD*ps2*t2[0];
-    b2[1] = p2->c[1] - _MMG5_ATHIRD*ps2*t2[1];
+    b2[0] = p2->c[0] - MMG5_ATHIRD*ps2*t2[0];
+    b2[1] = p2->c[1] - MMG5_ATHIRD*ps2*t2[1];
 
     ps1 *= ps1;
     ps2 *= ps2;
 
-    if ( ps1 < _MMG5_EPSD || ps2 < _MMG5_EPSD ) continue;
+    if ( ps1 < MMG5_EPSD || ps2 < MMG5_EPSD ) continue;
 
     /* \gamma^{\prime\prime}(0); \gamma^\prime(0) = ps*t1 by construction */
     gpp1[0] = 6.0*(p1->c[0] - 2.0*b1[0] + b2[0]);
@@ -229,7 +229,7 @@ int _MMG2_defmetbdy_2d(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
     M2 = fabs(pv)/ps2;
 
     M1 = MG_MAX(M1,M2);
-    if ( M1 < _MMG5_EPSD) continue;
+    if ( M1 < MMG5_EPSD) continue;
     else {
       ltmp = 8.0*hausd / M1;
       lm = MG_MAX(sqhmin,MG_MIN(ltmp,lm));
@@ -257,7 +257,7 @@ int _MMG2_defmetbdy_2d(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
  * Definition of an anisotropic metric tensor field based on the geometry of the
  * domain; this tensor field is intersected by a user-defined tensor field
  */
-int _MMG2_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
+int MMG2D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria     pt;
   MMG5_pPoint    ppt;
   double         mm[3],mr[3];
@@ -299,18 +299,18 @@ int _MMG2_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
       /* Calculation of a metric tensor depending on the anisotropic features of the mesh */
       /* At a singular point, an isotropic metric with size hmax is defined */
       if ( MG_SIN(ppt->tag) || ppt->tag & MG_NOM ) {
-        if ( _MMG2_defaultmet_2d(mesh,met,k,i) ) isdef = 1;
+        if ( MMG2D_defaultmet_2d(mesh,met,k,i) ) isdef = 1;
       }
       else if ( MG_EDG(ppt->tag) ) {
-        if ( _MMG2_defmetbdy_2d(mesh,met,k,i) ) isdef = 1;
+        if ( MMG2D_defmetbdy_2d(mesh,met,k,i) ) isdef = 1;
       }
 
       /* If ppt is an interior point, or if it is a boundary point and the special definition of
        a metric tensor has failed, define a default isotropic metric at ppt */
-      if ( !isdef ) _MMG2_defaultmet_2d(mesh,met,k,i);
+      if ( !isdef ) MMG2D_defaultmet_2d(mesh,met,k,i);
 
       /* If a metric is supplied by the user, intersect it with the geometric one */
-      if ( ismet && _MMG5_intersecmet22(mesh,&met->m[3*ip],mm,mr) )
+      if ( ismet && MMG5_intersecmet22(mesh,&met->m[3*ip],mm,mr) )
         memcpy(&met->m[3*ip],mr,3*sizeof(double));
 
       ppt->flag = 1;
@@ -337,7 +337,7 @@ int _MMG2_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
  * Ref : https://www.rocq.inria.fr/gamma/Frederic.Alauzet/cours/cea2010_V2.pdf
  *
  */
-int _MMG2_grad2met_ani(MMG5_pMesh mesh,MMG5_pSol met,double *m,double *n,double difsiz) {
+int MMG2D_grad2met_ani(MMG5_pMesh mesh,MMG5_pSol met,double *m,double *n,double difsiz) {
   double       det,dd,sqDelta,trimn,vnorm,hm,hn,lambda[2],dm[2],dn[2],imn[4];
   double       vp[2][2],ip[4];
   char         ier;
@@ -348,7 +348,7 @@ int _MMG2_grad2met_ani(MMG5_pMesh mesh,MMG5_pSol met,double *m,double *n,double 
   /* Simultaneous reduction of m1 and m2 */
   /* Compute imn = M^{-1}N */
   det = m[0]*m[2] - m[1]*m[1];
-  if ( fabs(det) < _MMG5_EPS*_MMG5_EPS ) {
+  if ( fabs(det) < MMG5_EPS*MMG5_EPS ) {
     if ( !mmgWarn0 ) {
       mmgWarn0 = 1;
       fprintf(stderr,"\n  ## Warning: %s: at least 1 null metric det : %E \n",
@@ -377,10 +377,10 @@ int _MMG2_grad2met_ani(MMG5_pMesh mesh,MMG5_pSol met,double *m,double *n,double 
   }
 
   /* First case : matrices m and n are homothetic: n = lambda0*m */
-  if ( sqDelta < _MMG5_EPS ) {
+  if ( sqDelta < MMG5_EPS ) {
 
     /* Subcase where m is diaonal */
-    if ( fabs(m[1]) < _MMG5_EPS ) {
+    if ( fabs(m[1]) < MMG5_EPS ) {
       dm[0]   = m[0];
       dm[1]   = m[2];
       vp[0][0] = 1;
@@ -390,7 +390,7 @@ int _MMG2_grad2met_ani(MMG5_pMesh mesh,MMG5_pSol met,double *m,double *n,double 
     }
     /* Subcase where m is not diagonal; dd,trimn,... are reused */
     else
-      _MMG5_eigensym(m,dm,vp);
+      MMG5_eigensym(m,dm,vp);
 
     /* Eigenvalues of metric n */
     dn[0] = lambda[0]*dm[0];
@@ -407,7 +407,7 @@ int _MMG2_grad2met_ani(MMG5_pMesh mesh,MMG5_pSol met,double *m,double *n,double 
     vp[0][1] = (lambda[0] - imn[0]);
     vnorm  = sqrt(vp[0][0]*vp[0][0] + vp[0][1]*vp[0][1]);
 
-    if ( vnorm < _MMG5_EPS ) {
+    if ( vnorm < MMG5_EPS ) {
       vp[0][0] = (lambda[0] - imn[3]);
       vp[0][1] = imn[2];
       vnorm  = sqrt(vp[0][0]*vp[0][0] + vp[0][1]*vp[0][1]);
@@ -421,7 +421,7 @@ int _MMG2_grad2met_ani(MMG5_pMesh mesh,MMG5_pSol met,double *m,double *n,double 
     vp[1][1] = (lambda[1] - imn[0]);
     vnorm  = sqrt(vp[1][0]*vp[1][0] + vp[1][1]*vp[1][1]);
 
-    if ( vnorm < _MMG5_EPS ) {
+    if ( vnorm < MMG5_EPS ) {
       vp[1][0] = (lambda[1] - imn[3]);
       vp[1][1] = imn[2];
       vnorm  = sqrt(vp[1][0]*vp[1][0] + vp[1][1]*vp[1][1]);
@@ -439,7 +439,7 @@ int _MMG2_grad2met_ani(MMG5_pMesh mesh,MMG5_pSol met,double *m,double *n,double 
   }
 
   /* Gradation of sizes = 1/sqrt(eigenv of the tensors) in the first direction */
-  assert ( dm[0] > _MMG5_EPS && dn[0] > _MMG5_EPS );
+  assert ( dm[0] > MMG5_EPS && dn[0] > MMG5_EPS );
   hm = 1.0 / sqrt(dm[0]);
   hn = 1.0 / sqrt(dn[0]);
 
@@ -455,7 +455,7 @@ int _MMG2_grad2met_ani(MMG5_pMesh mesh,MMG5_pSol met,double *m,double *n,double 
   }
 
   /* Gradation of sizes = 1/sqrt(eigenv of the tensors) in the second direction */
-  assert ( dm[1] > _MMG5_EPS && dn[1] > _MMG5_EPS );
+  assert ( dm[1] > MMG5_EPS && dn[1] > MMG5_EPS );
   hm = 1.0 / sqrt(dm[1]);
   hn = 1.0 / sqrt(dn[1]);
 
@@ -472,7 +472,7 @@ int _MMG2_grad2met_ani(MMG5_pMesh mesh,MMG5_pSol met,double *m,double *n,double 
 
   /* Update of the metrics = tP^-1 diag(d0,d1)P^-1, P = (vp[0], vp[1]) stored in columns */
   det = vp[0][0]*vp[1][1] - vp[0][1]*vp[1][0];
-  if ( fabs(det) < _MMG5_EPS )  return 0;
+  if ( fabs(det) < MMG5_EPS )  return 0;
   det = 1.0 / det;
 
   ip[0] =  vp[1][1]*det;
@@ -504,7 +504,7 @@ int _MMG2_grad2met_ani(MMG5_pMesh mesh,MMG5_pSol met,double *m,double *n,double 
  * Anisotropic mesh gradation routine
  *
  */
-int _MMG2_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
+int MMG2D_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria        pt;
   MMG5_pPoint       p1,p2;
   double            hgrad,ll,*m1,*m2,difsiz;
@@ -530,8 +530,8 @@ int _MMG2_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
       if ( !MG_EOK(pt) )  continue;
 
       for (i=0; i<3; i++) {
-        i1  = _MMG5_inxt2[i];
-        i2  = _MMG5_iprv2[i];
+        i1  = MMG5_inxt2[i];
+        i2  = MMG5_iprv2[i];
         ip1 = pt->v[i1];
         ip2 = pt->v[i2];
         p1 = &mesh->point[ip1];
@@ -550,7 +550,7 @@ int _MMG2_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
 
         /* bit 0 of ier = 0 if metric m1 is untouched, 1 otherwise; bit 1 of
          * ier = 0 if metric m2 is untouched, 1 otherwise*/
-        ier = _MMG2_grad2met_ani(mesh,met,m1,m2,difsiz);
+        ier = MMG2D_grad2met_ani(mesh,met,m1,m2,difsiz);
 
         if ( ier & 1 ) {
           p1->flag = mesh->base;

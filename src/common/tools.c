@@ -46,7 +46,7 @@
  * criterion. If yes, return 1, 0 otherwise (ridge creation).
  *
  */
-int _MMG5_devangle(double* n1, double *n2, double crit)
+int MMG5_devangle(double* n1, double *n2, double crit)
 {
   double dev;
 
@@ -70,7 +70,7 @@ int _MMG5_devangle(double* n1, double *n2, double crit)
  * Compute non-normalized face normal given three points on the surface.
  *
  */
-inline int _MMG5_nonUnitNorPts(MMG5_pMesh mesh,
+inline int MMG5_nonUnitNorPts(MMG5_pMesh mesh,
                                 int ip1,int ip2, int ip3,double *n) {
   MMG5_pPoint   p1,p2,p3;
   double        abx,aby,abz,acx,acy,acz;
@@ -103,7 +103,7 @@ inline int _MMG5_nonUnitNorPts(MMG5_pMesh mesh,
  * Compute non-oriented surface area of a triangle.
  *
  */
-inline double _MMG5_nonorsurf(MMG5_pMesh mesh,MMG5_pTria pt) {
+inline double MMG5_nonorsurf(MMG5_pMesh mesh,MMG5_pTria pt) {
   double   n[3];
   int      ip1, ip2, ip3;
 
@@ -111,7 +111,7 @@ inline double _MMG5_nonorsurf(MMG5_pMesh mesh,MMG5_pTria pt) {
   ip2 = pt->v[1];
   ip3 = pt->v[2];
 
-  _MMG5_nonUnitNorPts(mesh,ip1,ip2,ip3,n);
+  MMG5_nonUnitNorPts(mesh,ip1,ip2,ip3,n);
 
   return n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
 }
@@ -126,14 +126,14 @@ inline double _MMG5_nonorsurf(MMG5_pMesh mesh,MMG5_pTria pt) {
  * Compute normalized face normal given three points on the surface.
  *
  */
-inline int _MMG5_norpts(MMG5_pMesh mesh,int ip1,int ip2, int ip3,double *n) {
+inline int MMG5_norpts(MMG5_pMesh mesh,int ip1,int ip2, int ip3,double *n) {
   double   dd,det;
 
-  _MMG5_nonUnitNorPts(mesh,ip1,ip2,ip3,n);
+  MMG5_nonUnitNorPts(mesh,ip1,ip2,ip3,n);
 
   det  = n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
 
-  if ( det < _MMG5_EPSD2 )  return 0;
+  if ( det < MMG5_EPSD2 )  return 0;
 
   dd = 1.0 / sqrt(det);
   n[0] *= dd;
@@ -152,14 +152,14 @@ inline int _MMG5_norpts(MMG5_pMesh mesh,int ip1,int ip2, int ip3,double *n) {
  * Compute triangle normal.
  *
  */
-inline int _MMG5_nortri(MMG5_pMesh mesh,MMG5_pTria pt,double *n) {
+inline int MMG5_nortri(MMG5_pMesh mesh,MMG5_pTria pt,double *n) {
 
-  return _MMG5_norpts(mesh,pt->v[0],pt->v[1],pt->v[2],n);
+  return MMG5_norpts(mesh,pt->v[0],pt->v[1],pt->v[2],n);
 
 }
 
 /* Compute product R*M*tR when M is symmetric */
-inline int _MMG5_rmtr(double r[3][3],double m[6], double mr[6]){
+inline int MMG5_rmtr(double r[3][3],double m[6], double mr[6]){
   double n[3][3];
 
   n[0][0] = m[0]*r[0][0] + m[1]*r[0][1] + m[2]*r[0][2];
@@ -193,7 +193,7 @@ inline int _MMG5_rmtr(double r[3][3],double m[6], double mr[6]){
  * canonical basis.
  *
  */
-inline int _MMG5_rotmatrix(double n[3],double r[3][3]) {
+inline int MMG5_rotmatrix(double n[3],double r[3][3]) {
   double aa,bb,ab,ll,l,cosalpha,sinalpha;
 
   aa = n[0]*n[0];
@@ -204,7 +204,7 @@ inline int _MMG5_rotmatrix(double n[3],double r[3][3]) {
   sinalpha = sqrt(1.0- MG_MIN(1.0,cosalpha*cosalpha));
 
   /* No rotation needed in this case */
-  if ( ll < _MMG5_EPS ) {
+  if ( ll < MMG5_EPS ) {
     if ( n[2] > 0.0 ) {
       r[0][0] = 1.0 ; r[0][1] = 0.0 ; r[0][2] = 0.0;
       r[1][0] = 0.0 ; r[1][1] = 1.0 ; r[1][2] = 0.0;
@@ -239,7 +239,7 @@ inline int _MMG5_rotmatrix(double n[3],double r[3][3]) {
  * Invert \a m (3x3 symetric matrix) and store the result on \a mi
  *
  */
-int _MMG5_invmat(double *m,double *mi) {
+int MMG5_invmat(double *m,double *mi) {
   double  aa,bb,cc,det,vmin,vmax,maxx;
   int     k;
 
@@ -249,7 +249,7 @@ int _MMG5_invmat(double *m,double *mi) {
   if( maxx > vmax ) vmax = maxx;
   maxx = fabs(m[4]);
   if( maxx > vmax ) vmax = maxx;
-  if ( vmax < _MMG5_EPS ) {
+  if ( vmax < MMG5_EPS ) {
     mi[0]  = 1./m[0];
     mi[3]  = 1./m[3];
     mi[5]  = 1./m[5];
@@ -270,7 +270,7 @@ int _MMG5_invmat(double *m,double *mi) {
   bb  = m[4]*m[2] - m[1]*m[5];
   cc  = m[1]*m[4] - m[2]*m[3];
   det = m[0]*aa + m[1]*bb + m[2]*cc;
-  if ( fabs(det) < _MMG5_EPSD2 )  return 0;
+  if ( fabs(det) < MMG5_EPSD2 )  return 0;
   det = 1.0 / det;
 
   mi[0] = aa*det;
@@ -290,7 +290,7 @@ int _MMG5_invmat(double *m,double *mi) {
  * Invert 3x3 non-symmetric matrix.
  *
  */
-int _MMG5_invmatg(double m[9],double mi[9]) {
+int MMG5_invmatg(double m[9],double mi[9]) {
   double  aa,bb,cc,det,vmin,vmax,maxx;
   int     k;
 
@@ -308,7 +308,7 @@ int _MMG5_invmatg(double m[9],double mi[9]) {
   bb = m[5]*m[6] - m[3]*m[8];
   cc = m[3]*m[7] - m[4]*m[6];
   det = m[0]*aa + m[1]*bb + m[2]*cc;
-  if ( fabs(det) < _MMG5_EPSD )  return 0;
+  if ( fabs(det) < MMG5_EPSD )  return 0;
   det = 1.0 / det;
 
   mi[0] = aa*det;
@@ -333,7 +333,7 @@ int _MMG5_invmatg(double m[9],double mi[9]) {
  * Solve \f$ 3\times 3\f$ symmetric system \f$ A . r = b \f$.
  *
  */
-inline int _MMG5_sys33sym(double a[6], double b[3], double r[3]){
+inline int MMG5_sys33sym(double a[6], double b[3], double r[3]){
   double ia[6],as[6],det,m;
   int    i;
 
@@ -345,7 +345,7 @@ inline int _MMG5_sys33sym(double a[6], double b[3], double r[3]){
     }
   }
 
-  if(m < _MMG5_EPSD) {
+  if(m < MMG5_EPSD) {
     return 0;
   }
 
@@ -358,7 +358,7 @@ inline int _MMG5_sys33sym(double a[6], double b[3], double r[3]){
   det = as[0]*(as[3]*as[5]-as[4]*as[4]) - as[1]*(as[1]*as[5]-as[2]*as[4]) \
     + as[2]*(as[1]*as[4]-as[2]*as[3]);
 
-  if(fabs(det) < _MMG5_EPSD)
+  if(fabs(det) < MMG5_EPSD)
     return 0;
 
   det = 1.0/det;
@@ -388,7 +388,7 @@ inline int _MMG5_sys33sym(double a[6], double b[3], double r[3]){
  * Debug function (not use in clean code): write mesh->tria structure in file.
  *
  */
-void _MMG5_printTria(MMG5_pMesh mesh,char* fileName) {
+void MMG5_printTria(MMG5_pMesh mesh,char* fileName) {
   MMG5_pTria ptt;
   int   k;
   FILE  *inm;
@@ -415,7 +415,7 @@ void _MMG5_printTria(MMG5_pMesh mesh,char* fileName) {
  * Compute the available memory size of the computer.
  *
  */
-size_t _MMG5_memSize (void) {
+size_t MMG5_memSize (void) {
   size_t mem;
 
 #if (defined(__APPLE__) && defined(__MACH__))
@@ -449,19 +449,19 @@ size_t _MMG5_memSize (void) {
 
 /**
  * \param mesh pointer toward the mesh structure (for count of used memory).
- * \param node pointer toward a _MMG5_iNode (cell for linked list)
+ * \param node pointer toward a MMG5_iNode (cell for linked list)
  * \return 1 if we can alloc the node \a node, 0 otherwise.
  *
  * Node allocation.
  *
  */
 static inline
-int _MMG5_Alloc_inode( MMG5_pMesh mesh, _MMG5_iNode **node ) {
+int MMG5_Alloc_inode( MMG5_pMesh mesh, MMG5_iNode **node ) {
 
-  _MMG5_ADD_MEM(mesh,sizeof(_MMG5_iNode),"boundary reference node",
+  MMG5_ADD_MEM(mesh,sizeof(MMG5_iNode),"boundary reference node",
                 return 0;);
 
-  _MMG5_SAFE_MALLOC(*node,1,_MMG5_iNode,return 0);
+  MMG5_SAFE_MALLOC(*node,1,MMG5_iNode,return 0);
 
   return 1;
 }
@@ -478,8 +478,8 @@ int _MMG5_Alloc_inode( MMG5_pMesh mesh, _MMG5_iNode **node ) {
  * exists.
  *
  */
-int _MMG5_Add_inode( MMG5_pMesh mesh, _MMG5_iNode **liLi, int val ) {
-  _MMG5_iNode  *newNode, *cur;
+int MMG5_Add_inode( MMG5_pMesh mesh, MMG5_iNode **liLi, int val ) {
+  MMG5_iNode  *newNode, *cur;
 
   cur = *liLi;
 
@@ -488,7 +488,7 @@ int _MMG5_Add_inode( MMG5_pMesh mesh, _MMG5_iNode **liLi, int val ) {
   if ( cur ) {
     if ( val < (*liLi)->val ) {
       /* Add a value at the list head */
-      if ( !_MMG5_Alloc_inode(mesh,&newNode) ) return -1;
+      if ( !MMG5_Alloc_inode(mesh,&newNode) ) return -1;
 
       newNode->val = val;
       newNode->nxt = (*liLi);
@@ -505,14 +505,14 @@ int _MMG5_Add_inode( MMG5_pMesh mesh, _MMG5_iNode **liLi, int val ) {
 
     if ( val == cur->val ) return 0;
 
-    if ( !_MMG5_Alloc_inode(mesh,&newNode) ) return -1;
+    if ( !MMG5_Alloc_inode(mesh,&newNode) ) return -1;
 
     newNode->val = val;
     newNode->nxt = cur->nxt;
     cur->nxt = newNode;
   }
   else {
-    if ( !_MMG5_Alloc_inode(mesh,&newNode) ) return -1;
+    if ( !MMG5_Alloc_inode(mesh,&newNode) ) return -1;
 
     newNode->val = val;
     newNode->nxt = NULL;
@@ -530,34 +530,34 @@ int _MMG5_Add_inode( MMG5_pMesh mesh, _MMG5_iNode **liLi, int val ) {
  * Free the memory used by the linked list whose root is \a liLi.
  *
  */
-void _MMG5_Free_ilinkedList( MMG5_pMesh mesh, _MMG5_iNode *liLi ) {
-  _MMG5_iNode *cur,*nxt;
+void MMG5_Free_ilinkedList( MMG5_pMesh mesh, MMG5_iNode *liLi ) {
+  MMG5_iNode *cur,*nxt;
 
   cur = liLi;
   while (cur) {
     nxt = cur;
     cur = cur->nxt;
 
-    _MMG5_DEL_MEM(mesh,nxt);
+    MMG5_DEL_MEM(mesh,nxt);
   }
 }
 
 
 /**
  * \param mesh pointer toward the mesh structure (for count of used memory).
- * \param node pointer toward a _MMG5_dNode (cell for linked list)
+ * \param node pointer toward a MMG5_dNode (cell for linked list)
  * \return 1 if we can alloc the node \a node, 0 otherwise.
  *
  * Node allocation.
  *
  */
 static inline
-int _MMG5_Alloc_dnode( MMG5_pMesh mesh, _MMG5_dNode **node ) {
+int MMG5_Alloc_dnode( MMG5_pMesh mesh, MMG5_dNode **node ) {
 
-  _MMG5_ADD_MEM(mesh,sizeof(_MMG5_dNode),"node for hausdorff eval",
+  MMG5_ADD_MEM(mesh,sizeof(MMG5_dNode),"node for hausdorff eval",
                 return 0;);
 
-  _MMG5_SAFE_MALLOC(*node,1,_MMG5_dNode,return 0);
+  MMG5_SAFE_MALLOC(*node,1,MMG5_dNode,return 0);
 
   return 1;
 }
@@ -576,8 +576,8 @@ int _MMG5_Alloc_dnode( MMG5_pMesh mesh, _MMG5_dNode **node ) {
  * exists.
  *
  */
-int _MMG5_Add_dnode( MMG5_pMesh mesh, _MMG5_dNode **liLi, int k, double val ) {
-  _MMG5_dNode  *newNode, *cur;
+int MMG5_Add_dnode( MMG5_pMesh mesh, MMG5_dNode **liLi, int k, double val ) {
+  MMG5_dNode  *newNode, *cur;
 
   cur = *liLi;
 
@@ -586,7 +586,7 @@ int _MMG5_Add_dnode( MMG5_pMesh mesh, _MMG5_dNode **liLi, int k, double val ) {
   if ( cur ) {
     if ( val < (*liLi)->val ) {
       /* Add a value at the list head */
-      if ( !_MMG5_Alloc_dnode(mesh,&newNode) ) return -1;
+      if ( !MMG5_Alloc_dnode(mesh,&newNode) ) return -1;
 
       newNode->val = val;
       newNode->nxt = (*liLi);
@@ -603,14 +603,14 @@ int _MMG5_Add_dnode( MMG5_pMesh mesh, _MMG5_dNode **liLi, int k, double val ) {
 
     if ( val == cur->val ) return 0;
 
-    if ( !_MMG5_Alloc_dnode(mesh,&newNode) ) return -1;
+    if ( !MMG5_Alloc_dnode(mesh,&newNode) ) return -1;
 
     newNode->val = val;
     newNode->nxt = cur->nxt;
     cur->nxt = newNode;
   }
   else {
-    if ( !_MMG5_Alloc_dnode(mesh,&newNode) ) return -1;
+    if ( !MMG5_Alloc_dnode(mesh,&newNode) ) return -1;
 
     newNode->val = val;
     newNode->nxt = NULL;
@@ -628,20 +628,20 @@ int _MMG5_Add_dnode( MMG5_pMesh mesh, _MMG5_dNode **liLi, int k, double val ) {
  * Free the memory used by the linked list whose root is \a liLi.
  *
  */
-void _MMG5_Free_dlinkedList( MMG5_pMesh mesh, _MMG5_dNode *liLi ) {
-  _MMG5_dNode *cur,*nxt;
+void MMG5_Free_dlinkedList( MMG5_pMesh mesh, MMG5_dNode *liLi ) {
+  MMG5_dNode *cur,*nxt;
 
   cur = liLi;
   while (cur) {
     nxt = cur;
     cur = cur->nxt;
 
-    _MMG5_DEL_MEM(mesh,nxt);
+    MMG5_DEL_MEM(mesh,nxt);
   }
 }
 
 /** Compute 3 * 3 determinant : det(c1-c0,c2-c0,v) */
-inline double _MMG5_det3pt1vec(double c0[3],double c1[3],double c2[3],double v[3]) {
+inline double MMG5_det3pt1vec(double c0[3],double c1[3],double c2[3],double v[3]) {
     double m00,m10,m20,m01,m11,m21,det;
 
     m00 = c1[0] - c0[0] ; m01 = c2[0] - c0[0];
@@ -653,14 +653,14 @@ inline double _MMG5_det3pt1vec(double c0[3],double c1[3],double c2[3],double v[3
 }
 
 /** Compute 3 * 3 determinant : det(c1-c0,c2-c0,c3-c0) */
-inline double _MMG5_det4pt(double c0[3],double c1[3],double c2[3],double c3[3]) {
+inline double MMG5_det4pt(double c0[3],double c1[3],double c2[3],double c3[3]) {
   double m[3];
 
   m[0] = c3[0] - c0[0];
   m[1] = c3[1] - c0[1];
   m[2] = c3[2] - c0[2];
 
-  return  _MMG5_det3pt1vec(c0,c1,c2,m) ;
+  return  MMG5_det3pt1vec(c0,c1,c2,m) ;
 }
 
 /**
@@ -672,7 +672,7 @@ inline double _MMG5_det4pt(double c0[3],double c1[3],double c2[3],double c3[3]) 
  * Compute oriented volume of a tetrahedron
  *
  */
-inline double _MMG5_orvol(MMG5_pPoint point,int *v) {
+inline double MMG5_orvol(MMG5_pPoint point,int *v) {
     MMG5_pPoint  p0,p1,p2,p3;
 
     p0 = &point[v[0]];
@@ -680,7 +680,7 @@ inline double _MMG5_orvol(MMG5_pPoint point,int *v) {
     p2 = &point[v[2]];
     p3 = &point[v[3]];
 
-    return _MMG5_det4pt(p0->c,p1->c,p2->c,p3->c);
+    return MMG5_det4pt(p0->c,p1->c,p2->c,p3->c);
 }
 
 
@@ -692,7 +692,7 @@ inline double _MMG5_orvol(MMG5_pPoint point,int *v) {
  * Compute tria area.
  *
  */
-double MMG2_quickarea(double a[2],double b[2],double c[2]) {
+double MMG2D_quickarea(double a[2],double b[2],double c[2]) {
   double     abx,aby,acx,acy;//,bcx,bcy;
   double     aire;
 

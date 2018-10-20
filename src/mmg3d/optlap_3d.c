@@ -39,7 +39,7 @@
  *
  **/
 
-int _MMG3D_optlap(MMG5_pMesh mesh,MMG5_pSol sol) {
+int MMG3D_optlap(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTetra    pt,pt1;
   MMG5_pPoint    ppt,pptb,ppta;
 
@@ -51,18 +51,18 @@ int _MMG3D_optlap(MMG5_pMesh mesh,MMG5_pSol sol) {
   double LMU      = 0.331;
 
   maxiter = 3;
-  _MMG5_ADD_MEM(mesh,(3*mesh->np+1)*sizeof(double),"nv",
+  MMG5_ADD_MEM(mesh,(3*mesh->np+1)*sizeof(double),"nv",
                 return 0);
-  _MMG5_ADD_MEM(mesh,(3*mesh->np+1)*sizeof(double),"pos",
+  MMG5_ADD_MEM(mesh,(3*mesh->np+1)*sizeof(double),"pos",
                 return 0);
-  _MMG5_ADD_MEM(mesh,(mesh->np+1)*sizeof(double),"compt",
+  MMG5_ADD_MEM(mesh,(mesh->np+1)*sizeof(double),"compt",
                 return 0);
-  _MMG5_SAFE_CALLOC(nv, 3*mesh->np+1, double,return 0);
-  _MMG5_SAFE_CALLOC(pos, 3*mesh->np+1, double,return 0);
-  _MMG5_SAFE_CALLOC(compt, mesh->np+1, int,return 0);
+  MMG5_SAFE_CALLOC(nv, 3*mesh->np+1, double,return 0);
+  MMG5_SAFE_CALLOC(pos, 3*mesh->np+1, double,return 0);
+  MMG5_SAFE_CALLOC(compt, mesh->np+1, int,return 0);
 
   it  = 1;
-  declic = 3./_MMG3D_ALPHAD;
+  declic = 3./MMG3D_ALPHAD;
   do {
 
     /*initialisation*/
@@ -80,10 +80,10 @@ int _MMG3D_optlap(MMG5_pMesh mesh,MMG5_pSol sol) {
       if (pt->qual > declic) continue;
 
       for(i=0 ; i<6 ; i++) {
-        ipta   = pt->v[_MMG5_iare[i][0]];
+        ipta   = pt->v[MMG5_iare[i][0]];
         ppta   = &mesh->point[ipta];
 
-        iptb   = pt->v[_MMG5_iare[i][1]];
+        iptb   = pt->v[MMG5_iare[i][1]];
         pptb   = &mesh->point[iptb];
 
         if(!(ppta->tag & MG_BDY)) {
@@ -131,10 +131,10 @@ int _MMG3D_optlap(MMG5_pMesh mesh,MMG5_pSol sol) {
       if (pt->qual > declic) continue;
 
       for(i=0 ; i<6 ; i++) {
-        ipta   = pt->v[_MMG5_iare[i][0]];
+        ipta   = pt->v[MMG5_iare[i][0]];
         ppta   = &mesh->point[ipta];
 
-        iptb   = pt->v[_MMG5_iare[i][1]];
+        iptb   = pt->v[MMG5_iare[i][1]];
         pptb   = &mesh->point[iptb];
 
         if(!(ppta->tag & MG_BDY)) {
@@ -191,7 +191,7 @@ int _MMG3D_optlap(MMG5_pMesh mesh,MMG5_pSol sol) {
         if(ppt->tag & MG_BDY) continue;
         //if(ppt->tmp) continue;
         //ppt->tmp = 1;
-        lon =_MMG5_boulevolp(mesh,k,i,&list[0]);
+        lon =MMG5_boulevolp(mesh,k,i,&list[0]);
         for (l=0; l<lon; l++) {
           iel    = list[l] /4;
           pt1    = &mesh->tetra[iel];
@@ -254,7 +254,7 @@ int _MMG3D_optlap(MMG5_pMesh mesh,MMG5_pSol sol) {
       for(k=1 ; k<=mesh->ne ; k++) {
         pt = &mesh->tetra[k];
         if(!pt->v[0]) continue;
-        pt->qual = _MMG5_caltet(mesh,sol,pt);
+        pt->qual = MMG5_caltet(mesh,sol,pt);
       }
       if( mesh->info.imprim > 5) fprintf(stdout,"              LAPLACIAN : %8f\n",res);
     } else {
@@ -265,8 +265,8 @@ int _MMG3D_optlap(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   } while(it++ < maxiter);
 
-  _MMG5_DEL_MEM(mesh,nv);
-  _MMG5_DEL_MEM(mesh,pos);
-  _MMG5_DEL_MEM(mesh,compt);
+  MMG5_DEL_MEM(mesh,nv);
+  MMG5_DEL_MEM(mesh,pos);
+  MMG5_DEL_MEM(mesh,compt);
   return 1;
 }

@@ -40,8 +40,8 @@
 
 char  ddb;
 
-#define _MMG3D_LOPTL_MMG5_DEL     1.41
-#define _MMG3D_LOPTS_MMG5_DEL     0.6
+#define MMG3D_LOPTLMMG5_DEL     1.41
+#define MMG3D_LOPTSMMG5_DEL     0.6
 
 /* Decomment this part to debug */
 //int MMG_npuiss,MMG_nvol,MMG_npres,MMG_npd;
@@ -61,12 +61,12 @@ char  ddb;
  * \return -1 if fail and we don't save the mesh, 0 if fail but we try to save
  * the mesh, 1 otherwise.
  *
- * \a adpsplcol loop: split edges longer than \ref _MMG3D_LOPTL_MMG5_DEL and
- * collapse edges shorter than \ref _MMG3D_LOPTS_MMG5_DEL.
+ * \a adpsplcol loop: split edges longer than \ref MMG3D_LOPTLMMG5_DEL and
+ * collapse edges shorter than \ref MMG3D_LOPTSMMG5_DEL.
  *
  */
 static inline int
-_MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pPROctree PROctree,int ne,
+MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree,int ne,
                  int* ifilt,int* ns,int* nc,int* warn,int it) {
   MMG5_pTetra  pt;
   MMG5_pxTetra pxt;
@@ -105,7 +105,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pPROctree PROctree,int ne
     imin = -1; lmin = DBL_MAX;
     for (ii=0; ii<6; ii++) {
       if ( pt->xt && (pxt->tag[ii] & MG_REQ) )  continue;
-      len = _MMG5_lenedg(mesh,met,ii,pt);
+      len = MMG5_lenedg(mesh,met,ii,pt);
 
       if ( len > lmax ) {
         lmax = len;
@@ -139,14 +139,14 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pPROctree PROctree,int ne
       continue;
     }
 
-    if ( lmax >= _MMG3D_LOPTL_MMG5_DEL )  {
+    if ( lmax >= MMG3D_LOPTLMMG5_DEL )  {
       /* proceed edges according to lengths */
-      ifa0 = _MMG5_ifar[imax][0];
-      ifa1 = _MMG5_ifar[imax][1];
+      ifa0 = MMG5_ifar[imax][0];
+      ifa1 = MMG5_ifar[imax][1];
       i  = (pt->xt && (pxt->ftag[ifa1] & MG_BDY)) ? ifa1 : ifa0;
-      j  = _MMG5_iarfinv[i][imax];
-      i1 = _MMG5_idir[i][_MMG5_inxt2[j]];
-      i2 = _MMG5_idir[i][_MMG5_iprv2[j]];
+      j  = MMG5_iarfinv[i][imax];
+      i1 = MMG5_idir[i][MMG5_inxt2[j]];
+      i2 = MMG5_idir[i][MMG5_iprv2[j]];
       ip1 = pt->v[i1];
       ip2 = pt->v[i2];
       p0  = &mesh->point[ip1];
@@ -155,19 +155,19 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pPROctree PROctree,int ne
       /* Case of a boundary face */
       if ( pt->xt && (pxt->ftag[i] & MG_BDY) ) {
         if ( !(MG_GET(pxt->ori,i)) ) continue;
-        ref = pxt->edg[_MMG5_iarf[i][j]];
-        tag = pxt->tag[_MMG5_iarf[i][j]];
+        ref = pxt->edg[MMG5_iarf[i][j]];
+        tag = pxt->tag[MMG5_iarf[i][j]];
         if ( tag & MG_REQ )  continue;
         tag |= MG_BDY;
-        ilist = _MMG5_coquil(mesh,k,imax,list);
+        ilist = MMG5_coquil(mesh,k,imax,list);
         if ( !ilist )  continue;
         else if ( ilist<0 ) return -1;
         if ( tag & MG_NOM ){
-          if( !_MMG5_BezierNom(mesh,ip1,ip2,0.5,o,no1,to) )
+          if( !MMG5_BezierNom(mesh,ip1,ip2,0.5,o,no1,to) )
             continue;
           else if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
-            _MMG5_tet2tri(mesh,k,i,&ptt);
-            _MMG5_nortri(mesh,&ptt,no1);
+            MMG5_tet2tri(mesh,k,i,&ptt);
+            MMG5_nortri(mesh,&ptt,no1);
             if ( !MG_GET(pxt->ori,i) ) {
               no1[0] *= -1.0;
               no1[1] *= -1.0;
@@ -176,16 +176,16 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pPROctree PROctree,int ne
           }
         }
         else if ( tag & MG_GEO ) {
-          if ( !_MMG5_BezierRidge(mesh,ip1,ip2,0.5,o,no1,no2,to) )
+          if ( !MMG5_BezierRidge(mesh,ip1,ip2,0.5,o,no1,no2,to) )
             continue;
           if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
-            _MMG5_tet2tri(mesh,k,i,&ptt);
-            _MMG5_nortri(mesh,&ptt,no1);
+            MMG5_tet2tri(mesh,k,i,&ptt);
+            MMG5_nortri(mesh,&ptt,no1);
             no2[0] = to[1]*no1[2] - to[2]*no1[1];
             no2[1] = to[2]*no1[0] - to[0]*no1[2];
             no2[2] = to[0]*no1[1] - to[1]*no1[0];
             dd = no2[0]*no2[0] + no2[1]*no2[1] + no2[2]*no2[2];
-            if ( dd > _MMG5_EPSD2 ) {
+            if ( dd > MMG5_EPSD2 ) {
               dd = 1.0 / sqrt(dd);
               no2[0] *= dd;
               no2[1] *= dd;
@@ -194,49 +194,49 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pPROctree PROctree,int ne
           }
         }
         else if ( tag & MG_REF ) {
-          if ( !_MMG5_BezierRef(mesh,ip1,ip2,0.5,o,no1,to) )
+          if ( !MMG5_BezierRef(mesh,ip1,ip2,0.5,o,no1,to) )
             goto collapse;
         }
         else {
-          if ( !_MMG5_norface(mesh,k,i,v) )  goto collapse;
-          if ( !_MMG5_BezierReg(mesh,ip1,ip2,0.5,v,o,no1) ) goto collapse;
+          if ( !MMG5_norface(mesh,k,i,v) )  goto collapse;
+          if ( !MMG5_BezierReg(mesh,ip1,ip2,0.5,v,o,no1) ) goto collapse;
 
         }
-        ip = _MMG3D_newPt(mesh,o,tag);
+        ip = MMG3D_newPt(mesh,o,tag);
         if ( !ip ) {
           /* reallocation of point table */
-          _MMG3D_POINT_REALLOC(mesh,met,ip,mesh->gap,
+          MMG3D_POINT_REALLOC(mesh,met,ip,mesh->gap,
                                *warn=1;
                                goto collapse,
                                o,tag);
         }
         if ( met->m ) {
-          if ( _MMG5_intmet(mesh,met,k,imax,ip,0.5) <=0 ) {
-            _MMG3D_delPt(mesh,ip);
+          if ( MMG5_intmet(mesh,met,k,imax,ip,0.5) <=0 ) {
+            MMG3D_delPt(mesh,ip);
             goto collapse;
           }
         }
-        ier = _MMG3D_simbulgept(mesh,met,list,ilist,ip);
+        ier = MMG3D_simbulgept(mesh,met,list,ilist,ip);
         if ( !ier ) {
-          _MMG3D_dichoto1b(mesh,met,list,ilist,ip);
+          MMG3D_dichoto1b(mesh,met,list,ilist,ip);
         }
         /* We can create element with 0 qualities at machine epsilon even when ip
            is the mid edge point */
-        ier = _MMG3D_simbulgept(mesh,met,list,ilist,ip);
+        ier = MMG3D_simbulgept(mesh,met,list,ilist,ip);
         if ( ier )
-          ier = _MMG5_split1b(mesh,met,list,ilist,ip,1,1,chkRidTet);
+          ier = MMG5_split1b(mesh,met,list,ilist,ip,1,1,chkRidTet);
 
-        /* if we realloc memory in _MMG5_split1b pt and pxt pointers are not valid */
+        /* if we realloc memory in MMG5_split1b pt and pxt pointers are not valid */
         pt = &mesh->tetra[k];
         pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
 
         if ( ier < 0 ) {
           fprintf(stderr,"\n  ## Error: %s: unable to split.\n",__func__);
-          _MMG3D_delPt(mesh,ip);
+          MMG3D_delPt(mesh,ip);
           return -1;
         }
         else if ( !ier ) {
-          _MMG3D_delPt(mesh,ip);
+          MMG3D_delPt(mesh,ip);
           goto collapse;
         } else {
           (*ns)++;
@@ -274,42 +274,42 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pPROctree PROctree,int ne
            * here, we create a boundary point but without the suitable tag */
           continue;
         }
-        ilist = _MMG5_coquil(mesh,k,imax,list);
+        ilist = MMG5_coquil(mesh,k,imax,list);
         if ( !ilist )    continue;
         else if ( ilist<0 ) return -1;
         o[0] = 0.5*(p0->c[0] + p1->c[0]);
         o[1] = 0.5*(p0->c[1] + p1->c[1]);
         o[2] = 0.5*(p0->c[2] + p1->c[2]);
-        ip = _MMG3D_newPt(mesh,o,MG_NOTAG);
+        ip = MMG3D_newPt(mesh,o,MG_NOTAG);
 
         if ( !ip )  {
           /* reallocation of point table */
-          _MMG3D_POINT_REALLOC(mesh,met,ip,mesh->gap,
+          MMG3D_POINT_REALLOC(mesh,met,ip,mesh->gap,
                                *warn=1;
                                goto collapse,
                                o,MG_NOTAG);
         }
         if ( met->m ) {
-          if ( _MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
-            _MMG3D_delPt(mesh,ip);
+          if ( MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
+            MMG3D_delPt(mesh,ip);
             goto collapse;
           }
         }
-        ier = _MMG3D_simbulgept(mesh,met,list,ilist,ip);
+        ier = MMG3D_simbulgept(mesh,met,list,ilist,ip);
         if ( ier )
-          ier = _MMG5_split1b(mesh,met,list,ilist,ip,1,1,0);
+          ier = MMG5_split1b(mesh,met,list,ilist,ip,1,1,0);
         if ( ier < 0 ) {
           fprintf(stderr,"\n  ## Error: %s: unable to split.\n",__func__);
-          _MMG3D_delPt(mesh,ip);
+          MMG3D_delPt(mesh,ip);
           return -1;
         }
         else if ( !ier ) {
-          _MMG3D_delPt(mesh,ip);
+          MMG3D_delPt(mesh,ip);
           goto collapse;
         }
         else {
           if ( PROctree ) {
-            _MMG3D_addPROctree(mesh,PROctree,ip);
+            MMG3D_addPROctree(mesh,PROctree,ip);
           }
 
           (*ns)++;
@@ -318,25 +318,25 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pPROctree PROctree,int ne
 
         /* Case of an internal face */
       } else {
-        ilist = _MMG5_coquil(mesh,k,imax,list);
+        ilist = MMG5_coquil(mesh,k,imax,list);
         if ( !ilist )    continue;
         else if ( ilist<0 ) return -1;
         else if(ilist%2) goto collapse; //bdry edge
         o[0] = 0.5*(p0->c[0] + p1->c[0]);
         o[1] = 0.5*(p0->c[1] + p1->c[1]);
         o[2] = 0.5*(p0->c[2] + p1->c[2]);
-        ip = _MMG3D_newPt(mesh,o,MG_NOTAG);
+        ip = MMG3D_newPt(mesh,o,MG_NOTAG);
 
         if ( !ip )  {
           /* reallocation of point table */
-          _MMG3D_POINT_REALLOC(mesh,met,ip,mesh->gap,
+          MMG3D_POINT_REALLOC(mesh,met,ip,mesh->gap,
                                *warn=1;
                                goto collapse,
                                o,MG_NOTAG);
         }
         if ( met->m ) {
-          if ( _MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
-            _MMG3D_delPt(mesh,ip);
+          if ( MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
+            MMG3D_delPt(mesh,ip);
             goto collapse;
           };
         }
@@ -347,32 +347,32 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pPROctree PROctree,int ne
         }
         else lfilt = 0.2;
 
-        if ( PROctree && !_MMG3D_PROctreein(mesh,met,PROctree,ip,lfilt) ) {
-          _MMG3D_delPt(mesh,ip);
+        if ( PROctree && !MMG3D_PROctreein(mesh,met,PROctree,ip,lfilt) ) {
+          MMG3D_delPt(mesh,ip);
           (*ifilt)++;
           goto collapse;
         } else {
-          lon = _MMG5_cavity(mesh,met,k,ip,list,ilist/2,volmin);
+          lon = MMG5_cavity(mesh,met,k,ip,list,ilist/2,volmin);
           if ( lon < 1 ) {
             // MMG_npd++; // decomment to debug
-            _MMG3D_delPt(mesh,ip);
+            MMG3D_delPt(mesh,ip);
             goto collapse;
           } else {
-            ret = _MMG5_delone(mesh,met,ip,list,lon);
+            ret = MMG5_delone(mesh,met,ip,list,lon);
             if ( ret > 0 ) {
               if ( PROctree ) {
-                _MMG3D_addPROctree(mesh,PROctree,ip);
+                MMG3D_addPROctree(mesh,PROctree,ip);
               }
               (*ns)++;
               continue;
             }
             else if ( ret == 0 ) {
               // MMG_npd++; // decomment to debug
-              _MMG3D_delPt(mesh,ip);
+              MMG3D_delPt(mesh,ip);
               goto collapse;//continue;
             }
             else { /*allocation problem ==> saveMesh*/
-              _MMG3D_delPt(mesh,ip);
+              MMG3D_delPt(mesh,ip);
               return 0;
             }
           }
@@ -380,16 +380,16 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pPROctree PROctree,int ne
       }
     }
   collapse:
-    if(lmin <= _MMG3D_LOPTS_MMG5_DEL) {
+    if(lmin <= MMG3D_LOPTSMMG5_DEL) {
       // Case of an internal tetra with 4 ridges vertices.
       if ( lmin == 0 ) continue;
 
-      ifa0 = _MMG5_ifar[imin][0];
-      ifa1 = _MMG5_ifar[imin][1];
+      ifa0 = MMG5_ifar[imin][0];
+      ifa1 = MMG5_ifar[imin][1];
       i  =  (pt->xt && (pxt->ftag[ifa1] & MG_BDY)) ? ifa1 : ifa0;
-      j  = _MMG5_iarfinv[i][imin];
-      i1 = _MMG5_idir[i][_MMG5_inxt2[j]];
-      i2 = _MMG5_idir[i][_MMG5_iprv2[j]];
+      j  = MMG5_iarfinv[i][imin];
+      i1 = MMG5_idir[i][MMG5_inxt2[j]];
+      i2 = MMG5_idir[i][MMG5_iprv2[j]];
       ip = pt->v[i1];
       iq = pt->v[i2];
       p0 = &mesh->point[ip];
@@ -400,23 +400,23 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pPROctree PROctree,int ne
       /* Case of a boundary face */
       ilist = 0;
       if ( pt->xt && (pxt->ftag[i] & MG_BDY) ) {
-        tag = pxt->tag[_MMG5_iarf[i][j]];
+        tag = pxt->tag[MMG5_iarf[i][j]];
         if ( tag & MG_REQ )  continue;
         tag |= MG_BDY;
         if ( p0->tag > tag )   continue;
         if ( ( tag & MG_NOM ) && (mesh->adja[4*(k-1)+1+i]) ) continue;
 
-        if (_MMG5_boulesurfvolp(mesh,k,i1,i,
+        if (MMG5_boulesurfvolp(mesh,k,i1,i,
                                 list,&ilist,lists,&ilists,(p0->tag & MG_NOM)) < 0 )
           return -1;
 
-        ilist = _MMG5_chkcol_bdy(mesh,met,k,i,j,list,ilist,lists,ilists,2);
+        ilist = MMG5_chkcol_bdy(mesh,met,k,i,j,list,ilist,lists,ilists,2);
         if ( ilist > 0 ) {
-          ier = _MMG5_colver(mesh,met,list,ilist,i2,2);
+          ier = MMG5_colver(mesh,met,list,ilist,i2,2);
 
           if ( ier < 0 ) return -1;
           else if(ier) {
-            _MMG3D_delPt(mesh,ier);
+            MMG3D_delPt(mesh,ier);
             (*nc)++;
             continue;
           }
@@ -425,25 +425,25 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pPROctree PROctree,int ne
       }
       /* Case of an internal face */
       else {
-        ilist = _MMG5_boulevolp(mesh,k,i1,list);
+        ilist = MMG5_boulevolp(mesh,k,i1,list);
 
         if ( p0->tag & MG_BDY )  continue;
-        ilist = _MMG5_chkcol_int(mesh,met,k,i,j,list,ilist,2);
+        ilist = MMG5_chkcol_int(mesh,met,k,i,j,list,ilist,2);
         if ( ilist > 0 ) {
-          ier = _MMG5_colver(mesh,met,list,ilist,i2,2);
+          ier = MMG5_colver(mesh,met,list,ilist,i2,2);
           if ( ilist < 0 ) continue;
           if ( ier < 0 ) return -1;
           else if(ier) {
             if ( PROctree )
-              _MMG3D_delPROctree(mesh, PROctree, ier);
-            _MMG3D_delPt(mesh,ier);
+              MMG3D_delPROctree(mesh, PROctree, ier);
+            MMG3D_delPt(mesh,ier);
             (*nc)++;
             continue;
           }
         }
         else if (ilist < 0 )  return -1;
       }
-    } //end if lmin < _MMG3D_LOPTS_MMG5_DEL
+    } //end if lmin < MMG3D_LOPTSMMG5_DEL
 
     /* 2) longest and shortest edges are stucked => try the other edges */
     imaxtet = imax;
@@ -454,23 +454,23 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pPROctree PROctree,int ne
 
     for (ii=0; ii<6; ii++) {
       if ( pt->xt && (pxt->tag[ii] & MG_REQ) )  continue;
-      if ( (ii==imintet) && (lmintet < _MMG3D_LOPTS_MMG5_DEL)) continue;
-      if ( (ii==imaxtet) && (lmaxtet > _MMG3D_LOPTL_MMG5_DEL) ) continue;
+      if ( (ii==imintet) && (lmintet < MMG3D_LOPTSMMG5_DEL)) continue;
+      if ( (ii==imaxtet) && (lmaxtet > MMG3D_LOPTLMMG5_DEL) ) continue;
 
-      len = _MMG5_lenedg(mesh,met,ii,pt);
+      len = MMG5_lenedg(mesh,met,ii,pt);
 
       imax = ii;
       lmax = len;
       imin = ii;
       lmin = len;
-      if ( lmax >= _MMG3D_LOPTL_MMG5_DEL )  {
+      if ( lmax >= MMG3D_LOPTLMMG5_DEL )  {
         /* proceed edges according to lengths */
-        ifa0 = _MMG5_ifar[imax][0];
-        ifa1 = _MMG5_ifar[imax][1];
+        ifa0 = MMG5_ifar[imax][0];
+        ifa1 = MMG5_ifar[imax][1];
         i  = (pt->xt && (pxt->ftag[ifa1] & MG_BDY)) ? ifa1 : ifa0;
-        j  = _MMG5_iarfinv[i][imax];
-        i1 = _MMG5_idir[i][_MMG5_inxt2[j]];
-        i2 = _MMG5_idir[i][_MMG5_iprv2[j]];
+        j  = MMG5_iarfinv[i][imax];
+        i1 = MMG5_idir[i][MMG5_inxt2[j]];
+        i2 = MMG5_idir[i][MMG5_iprv2[j]];
         ip1 = pt->v[i1];
         ip2 = pt->v[i2];
         p0  = &mesh->point[ip1];
@@ -479,19 +479,19 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pPROctree PROctree,int ne
         /* Case of a boundary face */
         if ( pt->xt && (pxt->ftag[i] & MG_BDY) ) {
           if ( !(MG_GET(pxt->ori,i)) ) continue;
-          ref = pxt->edg[_MMG5_iarf[i][j]];
-          tag = pxt->tag[_MMG5_iarf[i][j]];
+          ref = pxt->edg[MMG5_iarf[i][j]];
+          tag = pxt->tag[MMG5_iarf[i][j]];
           if ( tag & MG_REQ )  continue;
           tag |= MG_BDY;
-          ilist = _MMG5_coquil(mesh,k,imax,list);
+          ilist = MMG5_coquil(mesh,k,imax,list);
           if ( !ilist )  continue;
           else if ( ilist<0 ) return -1;
           if ( tag & MG_NOM ){
-            if( !_MMG5_BezierNom(mesh,ip1,ip2,0.5,o,no1,to) )
+            if( !MMG5_BezierNom(mesh,ip1,ip2,0.5,o,no1,to) )
               continue;
             else if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
-              _MMG5_tet2tri(mesh,k,i,&ptt);
-              _MMG5_nortri(mesh,&ptt,no1);
+              MMG5_tet2tri(mesh,k,i,&ptt);
+              MMG5_nortri(mesh,&ptt,no1);
               if ( !MG_GET(pxt->ori,i) ) {
                 no1[0] *= -1.0;
                 no1[1] *= -1.0;
@@ -500,16 +500,16 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pPROctree PROctree,int ne
             }
           }
           else if ( tag & MG_GEO ) {
-            if ( !_MMG5_BezierRidge(mesh,ip1,ip2,0.5,o,no1,no2,to) )
+            if ( !MMG5_BezierRidge(mesh,ip1,ip2,0.5,o,no1,no2,to) )
               continue;
             if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
-              _MMG5_tet2tri(mesh,k,i,&ptt);
-              _MMG5_nortri(mesh,&ptt,no1);
+              MMG5_tet2tri(mesh,k,i,&ptt);
+              MMG5_nortri(mesh,&ptt,no1);
               no2[0] = to[1]*no1[2] - to[2]*no1[1];
               no2[1] = to[2]*no1[0] - to[0]*no1[2];
               no2[2] = to[0]*no1[1] - to[1]*no1[0];
               dd = no2[0]*no2[0] + no2[1]*no2[1] + no2[2]*no2[2];
-              if ( dd > _MMG5_EPSD2 ) {
+              if ( dd > MMG5_EPSD2 ) {
                 dd = 1.0 / sqrt(dd);
                 no2[0] *= dd;
                 no2[1] *= dd;
@@ -518,36 +518,36 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pPROctree PROctree,int ne
             }
           }
           else if ( tag & MG_REF ) {
-            if ( !_MMG5_BezierRef(mesh,ip1,ip2,0.5,o,no1,to) )
+            if ( !MMG5_BezierRef(mesh,ip1,ip2,0.5,o,no1,to) )
               goto collapse2;
           }
           else {
-            if ( !_MMG5_norface(mesh,k,i,v) )  goto collapse2;
-            if ( !_MMG5_BezierReg(mesh,ip1,ip2,0.5,v,o,no1) ) goto collapse2;
+            if ( !MMG5_norface(mesh,k,i,v) )  goto collapse2;
+            if ( !MMG5_BezierReg(mesh,ip1,ip2,0.5,v,o,no1) ) goto collapse2;
 
           }
-          ip = _MMG3D_newPt(mesh,o,tag);
+          ip = MMG3D_newPt(mesh,o,tag);
           if ( !ip ){
             /* reallocation of point table */
-            _MMG3D_POINT_REALLOC(mesh,met,ip,mesh->gap,
+            MMG3D_POINT_REALLOC(mesh,met,ip,mesh->gap,
                                  *warn=1;
                                  goto collapse2//break
                                  ,o,tag);
           }
           if ( met->m ) {
-            if ( _MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
-              _MMG3D_delPt(mesh,ip);
+            if ( MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
+              MMG3D_delPt(mesh,ip);
               goto collapse2;
             }
           }
-          ier = _MMG3D_simbulgept(mesh,met,list,ilist,ip);
+          ier = MMG3D_simbulgept(mesh,met,list,ilist,ip);
           if ( !ier ) {
-            ier = _MMG3D_dichoto1b(mesh,met,list,ilist,ip);
+            ier = MMG3D_dichoto1b(mesh,met,list,ilist,ip);
           }
           if ( ier )
-            ier = _MMG5_split1b(mesh,met,list,ilist,ip,1,1,chkRidTet);
+            ier = MMG5_split1b(mesh,met,list,ilist,ip,1,1,chkRidTet);
 
-          /* if we realloc memory in _MMG5_split1b pt and pxt pointers are not valid */
+          /* if we realloc memory in MMG5_split1b pt and pxt pointers are not valid */
           pt = &mesh->tetra[k];
           pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
 
@@ -556,12 +556,12 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pPROctree PROctree,int ne
             return -1;
           }
           else if ( !ier ) {
-            _MMG3D_delPt(mesh,ip);
+            MMG3D_delPt(mesh,ip);
             goto collapse2;//continue;
           } else {
             (*ns)++;
             //~ if ( PROctree )
-              //~ _MMG3D_addPROctree(mesh,PROctree,ip);
+              //~ MMG3D_addPROctree(mesh,PROctree,ip);
 
             ppt = &mesh->point[ip];
 
@@ -597,67 +597,67 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pPROctree PROctree,int ne
              * here, we create a boundary point but without the suitable tag */
             continue;
           }
-          ilist = _MMG5_coquil(mesh,k,imax,list);
+          ilist = MMG5_coquil(mesh,k,imax,list);
           if ( !ilist )    continue;
           else if ( ilist<0 ) return -1;
           o[0] = 0.5*(p0->c[0] + p1->c[0]);
           o[1] = 0.5*(p0->c[1] + p1->c[1]);
           o[2] = 0.5*(p0->c[2] + p1->c[2]);
-          ip = _MMG3D_newPt(mesh,o,MG_NOTAG);
+          ip = MMG3D_newPt(mesh,o,MG_NOTAG);
 
           if ( !ip )  {
             /* reallocation of point table */
-            _MMG3D_POINT_REALLOC(mesh,met,ip,mesh->gap,
+            MMG3D_POINT_REALLOC(mesh,met,ip,mesh->gap,
                                  *warn=1;
                                  goto collapse2
                                  ,o,MG_NOTAG);
           }
           if ( met->m ) {
-            if ( _MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
-              _MMG3D_delPt(mesh,ip);
+            if ( MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
+              MMG3D_delPt(mesh,ip);
               goto collapse2;
             }
           }
-          ier = _MMG3D_simbulgept(mesh,met,list,ilist,ip);
+          ier = MMG3D_simbulgept(mesh,met,list,ilist,ip);
           if ( ier )
-            ier = _MMG5_split1b(mesh,met,list,ilist,ip,1,1,0);
+            ier = MMG5_split1b(mesh,met,list,ilist,ip,1,1,0);
           if ( ier < 0 ) {
             fprintf(stderr,"\n  ## Error: %s: unable to split.\n",__func__);
-            _MMG3D_delPt(mesh,ip);
+            MMG3D_delPt(mesh,ip);
             return -1;
           }
           else if ( !ier ) {
-            _MMG3D_delPt(mesh,ip);
+            MMG3D_delPt(mesh,ip);
             goto collapse2;
           }
           else {
             if ( PROctree )
-              _MMG3D_addPROctree(mesh,PROctree,ip);
+              MMG3D_addPROctree(mesh,PROctree,ip);
             (*ns)++;
             break;//imax continue;
           }
 
           /* Case of an internal face */
         } else {
-          ilist = _MMG5_coquil(mesh,k,imax,list);
+          ilist = MMG5_coquil(mesh,k,imax,list);
           if ( !ilist )    continue;
           else if ( ilist<0 ) return -1;
           else if(ilist%2) goto collapse2; //bdry edge
           o[0] = 0.5*(p0->c[0] + p1->c[0]);
           o[1] = 0.5*(p0->c[1] + p1->c[1]);
           o[2] = 0.5*(p0->c[2] + p1->c[2]);
-          ip = _MMG3D_newPt(mesh,o,MG_NOTAG);
+          ip = MMG3D_newPt(mesh,o,MG_NOTAG);
 
           if ( !ip )  {
             /* reallocation of point table */
-            _MMG3D_POINT_REALLOC(mesh,met,ip,mesh->gap,
+            MMG3D_POINT_REALLOC(mesh,met,ip,mesh->gap,
                                  *warn=1;
                                  goto collapse2,
                                  o,MG_NOTAG);
           }
           if ( met->m ) {
-            if ( _MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
-              _MMG3D_delPt(mesh,ip);
+            if ( MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
+              MMG3D_delPt(mesh,ip);
               goto collapse2;
             }
           }
@@ -667,31 +667,31 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pPROctree PROctree,int ne
           }
           else lfilt = 0.2;
 
-          if (  /*it &&*/  PROctree && !_MMG3D_PROctreein(mesh,met,PROctree,ip,lfilt) ) {
-            _MMG3D_delPt(mesh,ip);
+          if (  /*it &&*/  PROctree && !MMG3D_PROctreein(mesh,met,PROctree,ip,lfilt) ) {
+            MMG3D_delPt(mesh,ip);
             (*ifilt)++;
             goto collapse2;
           } else {
-            lon = _MMG5_cavity(mesh,met,k,ip,list,ilist/2,volmin);
+            lon = MMG5_cavity(mesh,met,k,ip,list,ilist/2,volmin);
             if ( lon < 1 ) {
               // MMG_npd++; // decomment to debug
-              _MMG3D_delPt(mesh,ip);
+              MMG3D_delPt(mesh,ip);
               goto collapse2;
             } else {
-              ret = _MMG5_delone(mesh,met,ip,list,lon);
+              ret = MMG5_delone(mesh,met,ip,list,lon);
               if ( ret > 0 ) {
                 if ( PROctree )
-                  _MMG3D_addPROctree(mesh,PROctree,ip);
+                  MMG3D_addPROctree(mesh,PROctree,ip);
                 (*ns)++;
                 break;//imax continue;
               }
               else if ( ret == 0 ) {
                 // MMG_npd++; // decomment to debug
-                _MMG3D_delPt(mesh,ip);
+                MMG3D_delPt(mesh,ip);
                 goto collapse2;//continue;
               }
               else { /*allocation problem ==> savemesh*/
-                _MMG3D_delPt(mesh,ip);
+                MMG3D_delPt(mesh,ip);
                 return 0;
               }
             }
@@ -699,16 +699,16 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pPROctree PROctree,int ne
         }
       }
     collapse2:
-      if(lmin > _MMG3D_LOPTS_MMG5_DEL) continue;
+      if(lmin > MMG3D_LOPTSMMG5_DEL) continue;
       // Case of an internal tetra with 4 ridges vertices.
       if ( lmin == 0 ) continue;
 
-      ifa0 = _MMG5_ifar[imin][0];
-      ifa1 = _MMG5_ifar[imin][1];
+      ifa0 = MMG5_ifar[imin][0];
+      ifa1 = MMG5_ifar[imin][1];
       i  =  (pt->xt && (pxt->ftag[ifa1] & MG_BDY)) ? ifa1 : ifa0;
-      j  = _MMG5_iarfinv[i][imin];
-      i1 = _MMG5_idir[i][_MMG5_inxt2[j]];
-      i2 = _MMG5_idir[i][_MMG5_iprv2[j]];
+      j  = MMG5_iarfinv[i][imin];
+      i1 = MMG5_idir[i][MMG5_inxt2[j]];
+      i2 = MMG5_idir[i][MMG5_iprv2[j]];
       ip = pt->v[i1];
       iq = pt->v[i2];
       p0 = &mesh->point[ip];
@@ -719,22 +719,22 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pPROctree PROctree,int ne
       /* Case of a boundary face */
       ilist = 0;
       if ( pt->xt && (pxt->ftag[i] & MG_BDY) ) {
-        tag = pxt->tag[_MMG5_iarf[i][j]];
+        tag = pxt->tag[MMG5_iarf[i][j]];
         if ( tag & MG_REQ )  continue;
         tag |= MG_BDY;
         if ( p0->tag > tag )   continue;
         if ( ( tag & MG_NOM ) && (mesh->adja[4*(k-1)+1+i]) ) continue;
 
-        if (_MMG5_boulesurfvolp(mesh,k,i1,i,
+        if (MMG5_boulesurfvolp(mesh,k,i1,i,
                                 list,&ilist,lists,&ilists,(p0->tag & MG_NOM)) < 0 )
           return -1;
 
-        ilist = _MMG5_chkcol_bdy(mesh,met,k,i,j,list,ilist,lists,ilists,2);
+        ilist = MMG5_chkcol_bdy(mesh,met,k,i,j,list,ilist,lists,ilists,2);
         if ( ilist > 0 ) {
-          ier = _MMG5_colver(mesh,met,list,ilist,i2,2);
+          ier = MMG5_colver(mesh,met,list,ilist,i2,2);
           if ( ier < 0 ) return -1;
           else if(ier) {
-            _MMG3D_delPt(mesh,ier);
+            MMG3D_delPt(mesh,ier);
             (*nc)++;
             break;
           }
@@ -744,16 +744,16 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pPROctree PROctree,int ne
       /* Case of an internal face */
       else {
         if ( p0->tag & MG_BDY )  continue;
-        ilist = _MMG5_boulevolp(mesh,k,i1,list);
-        ilist = _MMG5_chkcol_int(mesh,met,k,i,j,list,ilist,2);
+        ilist = MMG5_boulevolp(mesh,k,i1,list);
+        ilist = MMG5_chkcol_int(mesh,met,k,i,j,list,ilist,2);
         if ( ilist > 0 ) {
-          ier = _MMG5_colver(mesh,met,list,ilist,i2,2);
+          ier = MMG5_colver(mesh,met,list,ilist,i2,2);
           if ( ilist < 0 ) continue;
           if ( ier < 0 ) return -1;
           else if(ier) {
             if ( PROctree )
-              _MMG3D_delPROctree(mesh,PROctree,ier);
-            _MMG3D_delPt(mesh,ier);
+              MMG3D_delPROctree(mesh,PROctree,ier);
+            MMG3D_delPt(mesh,ier);
             (*nc)++;
             break;
           }
@@ -776,7 +776,7 @@ _MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pPROctree PROctree,int ne
  *
  */
 static int
-_MMG5_optbad(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pPROctree PROctree) {
+MMG5_optbad(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree) {
   int           it,nnm,nnf,maxit,nm,nf,nw;
   double        crit;
 
@@ -790,7 +790,7 @@ _MMG5_optbad(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pPROctree PROctree) {
     nw = MMG3D_opttyp(mesh,met,PROctree,-1);
     /* badly shaped process */
     if ( !mesh->info.noswap ) {
-      nf = _MMG5_swpmsh(mesh,met,PROctree,2);
+      nf = MMG5_swpmsh(mesh,met,PROctree,2);
       if ( nf < 0 ) {
         fprintf(stderr,"\n  ## Error: %s: unable to improve mesh. Exiting.\n",
                 __func__);
@@ -798,7 +798,7 @@ _MMG5_optbad(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pPROctree PROctree) {
       }
       nnf += nf;
 
-      nf += _MMG5_swptet(mesh,met,crit,MMG3D_SWAP06,PROctree,2,mesh->mark-1);
+      nf += MMG5_swptet(mesh,met,crit,MMG3D_SWAP06,PROctree,2,mesh->mark-1);
       if ( nf < 0 ) {
         fprintf(stderr,"\n  ## Error: %s: unable to improve mesh. Exiting.\n",
           __func__);
@@ -812,7 +812,7 @@ _MMG5_optbad(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pPROctree PROctree) {
        * allowed, surface degradation forbidden, volume degradation during the
        * surface move forbidden and volume degradation during volumic move
        * forbidden. Perform 1 iter max (0). */
-      nm = _MMG5_movtet(mesh,met,PROctree,MMG3D_MAXKAL,MMG3D_MAXKAL,1,1,1,1,0,mesh->mark-1);
+      nm = MMG5_movtet(mesh,met,PROctree,MMG3D_MAXKAL,MMG3D_MAXKAL,1,1,1,1,0,mesh->mark-1);
       if ( nm < 0 ) {
         fprintf(stderr,"\n  ## Error: %s: unable to improve mesh.\n",
                 __func__);
@@ -846,12 +846,12 @@ _MMG5_optbad(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pPROctree PROctree) {
  * \return -1 if fail and we dont try to end the remesh process,
  * 0 if fail but we try to end the remesh process and 1 if success.
  *
- * Split edges longer than \ref _MMG3D_LOPTL_MMG5_DEL and collapse edges shorter
- * than \ref _MMG3D_LOPTS_MMG5_DEL.
+ * Split edges longer than \ref MMG3D_LOPTLMMG5_DEL and collapse edges shorter
+ * than \ref MMG3D_LOPTSMMG5_DEL.
  *
  */
 static int
-_MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pPROctree PROctree, int* warn) {
+MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree PROctree, int* warn) {
   int        nfilt,ifilt,ne,ier;
   int        ns,nc,it,nnc,nns,nnf,nnm,maxit,nf,nm,noptim;
   double     maxgap,dd,declic,declicsurf;
@@ -861,7 +861,7 @@ _MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pPROctree PROctree, int* wa
   noptim = 0;
   maxit = 50;
   mesh->gap = maxgap = 0.5;
-  declic = 0.5/_MMG3D_ALPHAD;
+  declic = 0.5/MMG3D_ALPHAD;
   declicsurf = 1./3.46;
   // MMG_npuiss = MMG_nvol = MMG_npres = MMG_npd = 0; // decomment to debug
   do {
@@ -870,20 +870,20 @@ _MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pPROctree PROctree, int* wa
       ns = nc = 0;
       ifilt = 0;
       ne = mesh->ne;
-      ier = _MMG5_boucle_for(mesh,met,PROctree,ne,&ifilt,&ns,&nc,warn,it);
+      ier = MMG5_boucle_for(mesh,met,PROctree,ne,&ifilt,&ns,&nc,warn,it);
       if ( ier<=0 ) return -1;
     } /* End conditional loop on mesh->info.noinsert */
     else  ns = nc = ifilt = 0;
 
     if ( !mesh->info.noswap ) {
-      nf = _MMG5_swpmsh(mesh,met,PROctree,2);
+      nf = MMG5_swpmsh(mesh,met,PROctree,2);
       if ( nf < 0 ) {
         fprintf(stderr,"\n  ## Error: %s: unable to improve mesh. Exiting.\n",
           __func__);
         return 0;
       }
       nnf += nf;
-      nf += _MMG5_swptet(mesh,met,MMG3D_SSWAPIMPROVE,declic,PROctree,2,mesh->mark-2);
+      nf += MMG5_swptet(mesh,met,MMG3D_SSWAPIMPROVE,declic,PROctree,2,mesh->mark-2);
 
       if ( nf < 0 ) {
         fprintf(stderr,"\n  ## Error: %s: unable to improve mesh. Exiting.\n",
@@ -900,7 +900,7 @@ _MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pPROctree PROctree, int* wa
        * move allowed, surface degradation forbidden, volume degradation during
        * the surface move authorized and volume degradation during volumic move
        * forbidden. Perform 2 iter max (1). */
-      nm = _MMG5_movtet(mesh,met,PROctree,declicsurf,declic,1,1,0,1,1,mesh->mark-2);
+      nm = MMG5_movtet(mesh,met,PROctree,declicsurf,declic,1,1,0,1,1,mesh->mark-2);
 
       if ( nm < 0 ) {
         fprintf(stderr,"\n  ## Error: %s: Unable to improve mesh.\n",__func__);
@@ -930,7 +930,7 @@ _MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pPROctree PROctree, int* wa
     /*optimization*/
     dd = abs(nc-ns);
     if ( !noptim && (it==5 || ((dd < 5) || (dd < 0.05*MG_MAX(nc,ns)) || !(ns+nc))) ) {
-      _MMG5_optbad(mesh,met,PROctree);
+      MMG5_optbad(mesh,met,PROctree);
       noptim = 1;
     }
 
@@ -964,7 +964,7 @@ _MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pPROctree PROctree, int* wa
  *
  */
 static int
-_MMG5_optetLES(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pPROctree PROctree) {
+MMG5_optetLES(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree) {
   int it,nnm,nnf,maxit,nm,nf,nw;
   double declic;
 
@@ -981,7 +981,7 @@ _MMG5_optetLES(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pPROctree PROctree) {
       nw = 0;
     /* badly shaped process */
     if ( !mesh->info.noswap ) {
-      nf = _MMG5_swptet(mesh,met,declic,MMG3D_SWAP06,PROctree,2,mesh->mark-2);
+      nf = MMG5_swptet(mesh,met,declic,MMG3D_SWAP06,PROctree,2,mesh->mark-2);
       if ( nf < 0 ) {
         fprintf(stderr,"\n  ## Error: %s: unable to improve mesh. Exiting.\n",
           __func__);
@@ -995,7 +995,7 @@ _MMG5_optetLES(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pPROctree PROctree) {
        * move allowed, surface degradation forbidden, volume degradation during
        * the surface move forbidden and volume degradation during volumic move
        * forbidden. Perform 4 iter max (3). */
-      nm = _MMG5_movtet(mesh,met,PROctree,MMG3D_MAXKAL,MMG3D_MAXKAL,1,1,1,1,3,mesh->mark-2);
+      nm = MMG5_movtet(mesh,met,PROctree,MMG3D_MAXKAL,MMG3D_MAXKAL,1,1,1,1,3,mesh->mark-2);
       if ( nm < 0 ) {
         fprintf(stderr,"\n  ## Error: %s: unable to improve mesh.\n",
           __func__);
@@ -1007,7 +1007,7 @@ _MMG5_optetLES(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pPROctree PROctree) {
 
 //be careful, this procedure can degrade the worst elt
     if ( !mesh->info.nomove && (it==2)) {
-      _MMG3D_optlap(mesh,met);
+      MMG3D_optlap(mesh,met);
     }
 
     if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && nw+nf+nm > 0 ){
@@ -1022,7 +1022,7 @@ _MMG5_optetLES(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pPROctree PROctree) {
      * move allowed, surface degradation forbidden, volume degradation during
        * the surface move authorized and volume degradation during volumic move
        * forbidden. Perform 4 iter max (3). */
-    nm = _MMG5_movtet(mesh,met,PROctree,MMG3D_MAXKAL,MMG3D_MAXKAL,1,1,1,1,3,mesh->mark-2);
+    nm = MMG5_movtet(mesh,met,PROctree,MMG3D_MAXKAL,MMG3D_MAXKAL,1,1,1,1,3,mesh->mark-2);
     if ( nm < 0 ) {
       fprintf(stderr,"\n  ## Error: %s: unable to improve mesh.\n",__func__);
       return 0;
@@ -1055,7 +1055,7 @@ _MMG5_optetLES(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pPROctree PROctree) {
  *
  */
 static int
-_MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pPROctree PROctree) {
+MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree) {
   MMG5_pTetra   pt;
   int           it,nnm,nnf,maxit,nm,nf,nw,k;
   double        crit,declic;
@@ -1064,7 +1064,7 @@ _MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pPROctree PROctree) {
   it = nnm = nnf = 0;
   maxit  = 10;
   crit   = MMG3D_SSWAPIMPROVE;
-  declic = 0.7/_MMG3D_ALPHAD;
+  declic = 0.7/MMG3D_ALPHAD;
   /*mark reinitialization in order to see at least one time each tetra*/
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
@@ -1082,7 +1082,7 @@ _MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pPROctree PROctree) {
       nw = 0;
     /* badly shaped process */
     if ( !mesh->info.noswap ) {
-      nf = _MMG5_swpmsh(mesh,met,PROctree,2);
+      nf = MMG5_swpmsh(mesh,met,PROctree,2);
       if ( nf < 0 ) {
         fprintf(stderr,"\n  ## Error: %s: unable to improve mesh. Exiting.\n",
           __func__);
@@ -1090,7 +1090,7 @@ _MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pPROctree PROctree) {
       }
       nnf += nf;
 
-      nf += _MMG5_swptet(mesh,met,crit,declic,PROctree,2,mesh->mark-1);
+      nf += MMG5_swptet(mesh,met,crit,declic,PROctree,2,mesh->mark-1);
       if ( nf < 0 ) {
         fprintf(stderr,"\n  ## Error: %s: unable to improve mesh. Exiting.\n",
           __func__);
@@ -1104,7 +1104,7 @@ _MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pPROctree PROctree) {
        * allowed, surface degradation forbidden, volume degradation during the
        * surface move forbidden and volume degradation during volumic move
        * authorized. Perform 1 iter max (0). */
-      nm = _MMG5_movtet(mesh,met,PROctree,MMG3D_MAXKAL,declic,1,1,1,1,0,mesh->mark-1);
+      nm = MMG5_movtet(mesh,met,PROctree,MMG3D_MAXKAL,declic,1,1,1,1,0,mesh->mark-1);
       if ( nm < 0 ) {
         fprintf(stderr,"\n  ## Error: %s: unable to improve mesh.\n",__func__);
         return 0;
@@ -1128,7 +1128,7 @@ _MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pPROctree PROctree) {
     /* move for tria with qual<1., tetra with qual<1., internal move allowed,
      * surface degradation forbidden, volume degradation during the surface and
      * volume move forbidden. Perform 4 iter max. */
-    nm = _MMG5_movtet(mesh,met,PROctree,MMG3D_MAXKAL,MMG3D_MAXKAL,1,1,1,1,3,mesh->mark-2);
+    nm = MMG5_movtet(mesh,met,PROctree,MMG3D_MAXKAL,MMG3D_MAXKAL,1,1,1,1,3,mesh->mark-2);
     if ( nm < 0 ) {
       fprintf(stderr,"\n  ## Error: %s: Unable to improve mesh.\n",__func__);
       return 0;
@@ -1162,20 +1162,20 @@ _MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,_MMG3D_pPROctree PROctree) {
  *
  */
 static int
-_MMG5_adptet_delone(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pPROctree PROctree) {
+MMG5_adptet_delone(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree PROctree) {
   int      nnf,ns,nf;
   int      warn;
 
   /*initial swap*/
   if ( !mesh->info.noswap ) {
-    nf = _MMG5_swpmsh(mesh,met,PROctree,2);
+    nf = MMG5_swpmsh(mesh,met,PROctree,2);
     if ( nf < 0 ) {
       fprintf(stderr,"\n  ## Error: %s: unable to improve mesh. Exiting.\n",
               __func__);
       return 0;
     }
     nnf = nf;
-    nf = _MMG5_swptet(mesh,met,MMG3D_SSWAPIMPROVE,MMG3D_SWAP06,PROctree,2,mesh->mark-2);
+    nf = MMG5_swptet(mesh,met,MMG3D_SSWAPIMPROVE,MMG3D_SWAP06,PROctree,2,mesh->mark-2);
     if ( nf < 0 ) {
       fprintf(stderr,"\n  ## Error: %s: Unable to improve mesh. Exiting.\n",
               __func__);
@@ -1186,13 +1186,13 @@ _MMG5_adptet_delone(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pPROctree PROctree) {
 
   if ( mesh->info.ddebug ) {
     fprintf(stdout," ------------- Delaunay: INITIAL SWAP %7d\n",nnf);
-    _MMG3D_outqua(mesh,met);
+    MMG3D_outqua(mesh,met);
   }
 
   /* Iterative mesh modifications */
   warn = 0;
 
-  ns = _MMG5_adpsplcol(mesh,met,PROctree,&warn);
+  ns = MMG5_adpsplcol(mesh,met,PROctree,&warn);
 
   if ( ns < 0 ) {
     fprintf(stderr,"\n  ## Error: %s: unable to complete mesh. Exit program.\n",
@@ -1210,14 +1210,14 @@ _MMG5_adptet_delone(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pPROctree PROctree) {
   }
 
   /* renumerotation if available */
-  if ( !_MMG5_scotchCall(mesh,met) )
+  if ( !MMG5_scotchCall(mesh,met) )
     return 0;
 
   if(mesh->info.optimLES) {
-    if(!_MMG5_optetLES(mesh,met,PROctree)) return 0;
+    if(!MMG5_optetLES(mesh,met,PROctree)) return 0;
   }
   else {
-    if(!_MMG5_optet(mesh,met,PROctree)) return 0;
+    if(!MMG5_optet(mesh,met,PROctree)) return 0;
   }
   return 1;
 }
@@ -1230,13 +1230,13 @@ _MMG5_adptet_delone(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pPROctree PROctree) {
  * Main adaptation routine.
  *
  */
-int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
-  _MMG3D_pPROctree PROctree = NULL;
+int MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
+  MMG3D_pPROctree PROctree = NULL;
 
   if ( abs(mesh->info.imprim) > 4 )
     fprintf(stdout,"  ** MESH ANALYSIS\n");
 
-  if ( mesh->info.iso && !_MMG5_chkmani(mesh) ) {
+  if ( mesh->info.iso && !MMG5_chkmani(mesh) ) {
     fprintf(stderr,"\n  ## Non orientable implicit surface. Exit program.\n");
     return 0;
   }
@@ -1248,11 +1248,11 @@ int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
     if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
       fprintf(stdout,"  ** GEOMETRIC MESH\n");
 
-    if ( !_MMG5_anatet(mesh,met,1,0) ) {
+    if ( !MMG5_anatet(mesh,met,1,0) ) {
       fprintf(stderr,"\n  ## Unable to split mesh. Exiting.\n");
       if ( PROctree )
         /*free PROctree*/
-        _MMG3D_freePROctree(mesh,&PROctree);
+        MMG3D_freePROctree(mesh,&PROctree);
       return 0;
     }
   }
@@ -1262,80 +1262,80 @@ int _MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
     fprintf(stdout,"  ** COMPUTATIONAL MESH\n");
 
   /* define metric map */
-  if ( !_MMG5_defsiz(mesh,met) ) {
+  if ( !MMG5_defsiz(mesh,met) ) {
     fprintf(stderr,"\n  ## Metric undefined. Exit program.\n");
     if ( PROctree )
       /*free PROctree*/
-      _MMG3D_freePROctree(mesh,&PROctree);
+      MMG3D_freePROctree(mesh,&PROctree);
     return 0;
   }
 
   if ( mesh->info.hgrad > 0. ) {
     if ( mesh->info.imprim > 0 )   fprintf(stdout,"\n  -- GRADATION : %8f\n",exp(mesh->info.hgrad));
-    if ( !_MMG5_gradsiz(mesh,met) ) {
+    if ( !MMG5_gradsiz(mesh,met) ) {
       fprintf(stderr,"\n  ## Gradation problem. Exit program.\n");
       if ( PROctree )
         /*free PROctree*/
-        _MMG3D_freePROctree(mesh,&PROctree);
+        MMG3D_freePROctree(mesh,&PROctree);
       return 0;
     }
   }
 
   /*update quality*/
-  if ( !_MMG3D_tetraQual(mesh,met,1) ) return 0;
+  if ( !MMG3D_tetraQual(mesh,met,1) ) return 0;
 
-  if ( !_MMG5_anatet(mesh,met,2,0) ) {
+  if ( !MMG5_anatet(mesh,met,2,0) ) {
     fprintf(stderr,"\n  ## Unable to split mesh. Exiting.\n");
     if ( PROctree )
       /*free PROctree*/
-      _MMG3D_freePROctree(mesh,&PROctree);
+      MMG3D_freePROctree(mesh,&PROctree);
     return 0;
   }
 
   /* renumerotation if available */
-  if ( !_MMG5_scotchCall(mesh,met) ) {
+  if ( !MMG5_scotchCall(mesh,met) ) {
     if ( PROctree )
       /*free PROctree*/
-      _MMG3D_freePROctree(mesh,&PROctree);
+      MMG3D_freePROctree(mesh,&PROctree);
     return 0;
   }
 
   if ( mesh->info.PROctree > 0 ) {
-    if ( !_MMG3D_initPROctree(mesh,&PROctree,mesh->info.PROctree) ) {
+    if ( !MMG3D_initPROctree(mesh,&PROctree,mesh->info.PROctree) ) {
       if ( PROctree )
         /*free PROctree*/
-        _MMG3D_freePROctree(mesh,&PROctree);
+        MMG3D_freePROctree(mesh,&PROctree);
     }
   }
 
-  if ( !_MMG5_adptet_delone(mesh,met,PROctree) ) {
+  if ( !MMG5_adptet_delone(mesh,met,PROctree) ) {
     fprintf(stderr,"\n  ## Unable to adapt. Exit program.\n");
     if ( PROctree )
       /*free PROctree*/
-      _MMG3D_freePROctree(mesh,&PROctree);
+      MMG3D_freePROctree(mesh,&PROctree);
     return 0;
   }
 
   /* in test phase: check if no element with 2 bdry faces */
-  if ( !_MMG5_chkfemtopo(mesh) ) {
+  if ( !MMG5_chkfemtopo(mesh) ) {
     fprintf(stderr,"\n  ## Topology of mesh unsuited for fem computations. Exit program.\n");
     if ( PROctree )
       /*free PROctree*/
-      _MMG3D_freePROctree(mesh,&PROctree);
+      MMG3D_freePROctree(mesh,&PROctree);
     return 0;
   }
 
-  if ( mesh->info.iso && !_MMG5_chkmani(mesh) ) {
+  if ( mesh->info.iso && !MMG5_chkmani(mesh) ) {
     fprintf(stderr,"\n  ## Non orientable implicit surface. Exit program.\n");
     if ( PROctree )
       /*free PROctree*/
-      _MMG3D_freePROctree(mesh,&PROctree);
+      MMG3D_freePROctree(mesh,&PROctree);
     return 0;
   }
 
   if ( PROctree )
     /*free PROctree*/
-    _MMG3D_freePROctree(mesh,&PROctree);
+    MMG3D_freePROctree(mesh,&PROctree);
 
   return 1;
 }

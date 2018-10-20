@@ -39,12 +39,12 @@
 #include "ls_calls.h"
 #include "inlined_functions_3d.h"
 
-#define _MMG5_DEGTOL  1.e-1
+#define MMG5_DEGTOL  1.e-1
 
 extern char  ddb;
 
 /** Calculate an estimate of the average (isotropic) length of edges in the mesh */
-double _MMG5_estavglen(MMG5_pMesh mesh) {
+double MMG5_estavglen(MMG5_pMesh mesh) {
   MMG5_pTetra    pt;
   MMG5_pPoint    p1,p2;
   int       k,na;
@@ -57,8 +57,8 @@ double _MMG5_estavglen(MMG5_pMesh mesh) {
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
     for (i=0; i<6; i++) {
-      i1 = _MMG5_iare[i][0];
-      i2 = _MMG5_iare[i][1];
+      i1 = MMG5_iare[i][0];
+      i2 = MMG5_iare[i][1];
 
       p1 = &mesh->point[pt->v[i1]];
       p2 = &mesh->point[pt->v[i2]];
@@ -81,7 +81,7 @@ double _MMG5_estavglen(MMG5_pMesh mesh) {
 
 /** Interpolate displacement between v1 and v2 at intermediate position 0<=t<=1 */
 static
-inline int _MMG5_intdispvol(double *v1, double *v2, double *vp, double t) {
+inline int MMG5_intdispvol(double *v1, double *v2, double *vp, double t) {
   char i;
 
   for(i=0; i<3; i++)
@@ -99,10 +99,10 @@ inline int _MMG5_intdispvol(double *v1, double *v2, double *vp, double t) {
  * \return -1 if failed.
  * \return number of new points.
  *
- * Split edges of length bigger than _MMG3D_LOPTL, in the Lagrangian mode.
+ * Split edges of length bigger than MMG3D_LOPTL, in the Lagrangian mode.
  *
  */
-static int _MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itdeg, int* warn) {
+static int MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itdeg, int* warn) {
   MMG5_pTetra  pt;
   MMG5_pxTetra pxt;
   MMG5_pPoint  p0,p1;
@@ -127,8 +127,8 @@ static int _MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itdeg, 
     imax = -1;
     lmax = 0.0;
     for (i=0; i<6; i++) {
-      i1  = _MMG5_iare[i][0];
-      i2  = _MMG5_iare[i][1];
+      i1  = MMG5_iare[i][0];
+      i2  = MMG5_iare[i][1];
       ip1 = pt->v[i1];
       ip2 = pt->v[i2];
       p0 = &mesh->point[ip1];
@@ -158,8 +158,8 @@ static int _MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itdeg, 
     if ( lmax < hma2 )  continue;
 
     /* proceed edges according to lengths */
-    i1  = _MMG5_iare[imax][0];
-    i2  = _MMG5_iare[imax][1];
+    i1  = MMG5_iare[imax][0];
+    i2  = MMG5_iare[imax][1];
     ip1 = pt->v[i1];
     ip2 = pt->v[i2];
     p0 = &mesh->point[ip1];
@@ -170,7 +170,7 @@ static int _MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itdeg, 
     if ( pxt ) {
       assert( !(pxt->tag[imax] & MG_BDY) ); }
 #endif
-    ilist = _MMG5_coquil(mesh,k,imax,list);
+    ilist = MMG5_coquil(mesh,k,imax,list);
 
     if ( !ilist ) continue;
     else if ( ilist<0 ) return -1;
@@ -179,17 +179,17 @@ static int _MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itdeg, 
     o[1] = 0.5*(p0->c[1] + p1->c[1]);
     o[2] = 0.5*(p0->c[2] + p1->c[2]);
 
-    ip = _MMG3D_newPt(mesh,o,MG_NOTAG);
+    ip = MMG3D_newPt(mesh,o,MG_NOTAG);
 
     if ( !ip )  {
       /* reallocation of point table */
-      _MMG3D_POINT_REALLOC(mesh,met,ip,mesh->gap,*warn=1;break,o,MG_NOTAG);
+      MMG3D_POINT_REALLOC(mesh,met,ip,mesh->gap,*warn=1;break,o,MG_NOTAG);
     }
 
     /* Interpolation of metric, if any */
     if ( met->m ) {
-      if ( !_MMG5_intmet(mesh,met,k,imax,ip,0.5) ) {
-        _MMG3D_delPt(mesh,ip);
+      if ( !MMG5_intmet(mesh,met,k,imax,ip,0.5) ) {
+        MMG3D_delPt(mesh,ip);
         return -1;
       }
     }
@@ -203,20 +203,20 @@ static int _MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itdeg, 
       iadr = disp->size*ip;
       mp = &disp->m[iadr];
 
-      if ( !_MMG5_intdispvol(m1,m2,mp,0.5) ) {
-        _MMG3D_delPt(mesh,ip);
+      if ( !MMG5_intdispvol(m1,m2,mp,0.5) ) {
+        MMG3D_delPt(mesh,ip);
         return -1;
       }
     }
 
     /* Il y a un check sur la taille des arêtes ici aussi ! */
-    ier = _MMG5_split1b(mesh,met,list,ilist,ip,1,1,0);
+    ier = MMG5_split1b(mesh,met,list,ilist,ip,1,1,0);
     if ( ier < 0 ) {
       fprintf(stderr,"\n  ## Error: %s: unable to split.\n",__func__);
       return -1;
     }
     else if ( !ier ) {
-      _MMG3D_delPt(mesh,ip);
+      MMG3D_delPt(mesh,ip);
     }
     else {
       ns++;
@@ -239,7 +239,7 @@ static int _MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itdeg, 
  * Internal edge flipping in the Lagrangian mode; only affects tetra marked with it
  *
  */
-int _MMG5_swptetlag(MMG5_pMesh mesh,MMG5_pSol met,double crit,_MMG3D_pPROctree PROctree,int itdeg) {
+int MMG5_swptetlag(MMG5_pMesh mesh,MMG5_pSol met,double crit,MMG3D_pPROctree PROctree,int itdeg) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
   int      list[MMG3D_LMAX+2],ilist,k,it,nconf,maxit,ns,nns,ier;
@@ -262,11 +262,11 @@ int _MMG5_swptetlag(MMG5_pMesh mesh,MMG5_pSol met,double crit,_MMG3D_pPROctree P
           if ( pxt->edg[i] || pxt->tag[i] ) continue;
         }
 
-        nconf = _MMG5_chkswpgen(mesh,met,k,i,&ilist,list,crit,2);
+        nconf = MMG5_chkswpgen(mesh,met,k,i,&ilist,list,crit,2);
 
         if ( nconf<0 ) return -1;
         else if ( nconf ) {
-          ier = _MMG5_swpgen(mesh,met,nconf,ilist,list,PROctree,2);
+          ier = MMG5_swpgen(mesh,met,nconf,ilist,list,PROctree,2);
           if ( ier > 0 )  ns++;
           else if ( ier < 0 ) return -1;
           break;
@@ -288,7 +288,7 @@ int _MMG5_swptetlag(MMG5_pMesh mesh,MMG5_pSol met,double crit,_MMG3D_pPROctree P
  * Analyze tetrahedra marked with it and move internal points so as to make mesh more uniform.
  *
  */
-int _MMG5_movtetlag(MMG5_pMesh mesh,MMG5_pSol met, int itdeg) {
+int MMG5_movtetlag(MMG5_pMesh mesh,MMG5_pSol met, int itdeg) {
   MMG5_pTetra        pt;
   MMG5_pPoint        ppt;
   int           k,ier,nm,nnm,listv[MMG3D_LMAX+2],ilistv,it;
@@ -316,10 +316,10 @@ int _MMG5_movtetlag(MMG5_pMesh mesh,MMG5_pSol met, int itdeg) {
         if ( ppt->flag == base )  continue;
         else if ( ppt->tag & MG_BDY ) continue;
 
-        ilistv = _MMG5_boulevolp(mesh,k,i,listv);
+        ilistv = MMG5_boulevolp(mesh,k,i,listv);
         if ( !ilistv )  continue;
 
-        ier = _MMG5_movintpt_iso(mesh,met, NULL, listv,ilistv,0);
+        ier = MMG5_movintpt_iso(mesh,met, NULL, listv,ilistv,0);
 
         if ( ier ) {
           nm++;
@@ -346,7 +346,7 @@ int _MMG5_movtetlag(MMG5_pMesh mesh,MMG5_pSol met, int itdeg) {
  * Attempt to collapse small internal edges in the Lagrangian mode; only affects tetras marked with it.
  *
  */
-static int _MMG5_coltetlag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
+static int MMG5_coltetlag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
   MMG5_pTetra     pt;
   MMG5_pPoint     p0,p1;
   double     ll,ux,uy,uz,hmi2;
@@ -370,8 +370,8 @@ static int _MMG5_coltetlag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
     for (i=0; i<4; i++) {
       ier = 0;
       for (j=0; j<3; j++) {
-        ip = _MMG5_idir[i][_MMG5_inxt2[j]];
-        iq = _MMG5_idir[i][_MMG5_iprv2[j]];
+        ip = MMG5_idir[i][MMG5_inxt2[j]];
+        iq = MMG5_idir[i][MMG5_iprv2[j]];
 
         p0 = &mesh->point[pt->v[ip]];
         p1 = &mesh->point[pt->v[iq]];
@@ -388,14 +388,14 @@ static int _MMG5_coltetlag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
         if ( ll > hmi2 )  continue;
 
         isnm = 0;
-        ilist = _MMG5_boulevolp(mesh,k,ip,list);
-        ilist = _MMG5_chkcol_int(mesh,met,k,i,j,list,ilist,2);
+        ilist = MMG5_boulevolp(mesh,k,ip,list);
+        ilist = MMG5_chkcol_int(mesh,met,k,i,j,list,ilist,2);
 
         if ( ilist > 0 ) {
-          ier = _MMG5_colver(mesh,met,list,ilist,iq,2);
+          ier = MMG5_colver(mesh,met,list,ilist,iq,2);
           if ( ier < 0 ) return -1;
           else if ( ier ) {
-            _MMG3D_delPt(mesh,ier);
+            MMG3D_delPt(mesh,ier);
             break;
           }
         }
@@ -414,7 +414,7 @@ static int _MMG5_coltetlag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
 }
 
 /** Check if moving mesh with disp for a fraction t yields a valid mesh */
-int _MMG5_chkmovmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t) {
+int MMG5_chkmovmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t) {
   MMG5_pTetra  pt;
   MMG5_pPoint  ppt;
   double       *v,c[4][3],tau;
@@ -422,7 +422,7 @@ int _MMG5_chkmovmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t) {
   char         i,j;
 
   /* Pseudo time-step = fraction of disp to perform */
-  tau = (double)t / _MMG3D_SHORTMAX;
+  tau = (double)t / MMG3D_SHORTMAX;
 
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
@@ -436,14 +436,14 @@ int _MMG5_chkmovmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t) {
         c[i][j] = ppt->c[j]+tau*v[j];
     }
 
-    if( _MMG5_caltet_iso_4pt(c[0],c[1],c[2],c[3]) < _MMG5_EPSOK) return 0;  //     Other criteria : eg. a rate of degradation, etc... ?
+    if( MMG5_caltet_iso_4pt(c[0],c[1],c[2],c[3]) < MMG5_EPSOK) return 0;  //     Other criteria : eg. a rate of degradation, etc... ?
   }
 
   return 1;
 }
 
 /** Return the largest fraction t that makes the motion along disp valid */
-short _MMG5_dikomv(MMG5_pMesh mesh,MMG5_pSol disp) {
+short MMG5_dikomv(MMG5_pMesh mesh,MMG5_pSol disp) {
   int     it,maxit;
   short   t,tmin,tmax;
   char    ier;
@@ -452,10 +452,10 @@ short _MMG5_dikomv(MMG5_pMesh mesh,MMG5_pSol disp) {
   it = 0;
 
   tmin = 0;
-  tmax = _MMG3D_SHORTMAX;
+  tmax = MMG3D_SHORTMAX;
 
   /* If full displacement can be achieved */
-  if ( _MMG5_chkmovmesh(mesh,disp,tmax) )
+  if ( MMG5_chkmovmesh(mesh,disp,tmax) )
     return tmax;
 
   /* Else, find the largest displacement by dichotomy */
@@ -464,7 +464,7 @@ short _MMG5_dikomv(MMG5_pMesh mesh,MMG5_pSol disp) {
 
     /* Case that tmax = tmin +1 : check move with tmax */
     if ( t == tmin ) {
-      ier = _MMG5_chkmovmesh(mesh,disp,tmax);
+      ier = MMG5_chkmovmesh(mesh,disp,tmax);
       if ( ier )
         return tmax;
       else
@@ -472,7 +472,7 @@ short _MMG5_dikomv(MMG5_pMesh mesh,MMG5_pSol disp) {
     }
 
     /* General case: check move with t */
-    ier = _MMG5_chkmovmesh(mesh,disp,t);
+    ier = MMG5_chkmovmesh(mesh,disp,t);
     if ( ier )
       tmin = t;
     else
@@ -485,14 +485,14 @@ short _MMG5_dikomv(MMG5_pMesh mesh,MMG5_pSol disp) {
 }
 
 /** Perform mesh motion along disp, for a fraction t, and the corresponding updates */
-int _MMG5_dispmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t,int itdeg) {
+int MMG5_dispmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t,int itdeg) {
   MMG5_pTetra   pt;
   MMG5_pPoint   ppt;
   double        *v,tau,ctau,c[4][3],ocal,ncal;
   int           k,np;
   char          i,j;
 
-  tau = (double)t /_MMG3D_SHORTMAX;
+  tau = (double)t /MMG3D_SHORTMAX;
   ctau = 1.0 - tau;
 
   /* Identify elements which are very distorted in the process */
@@ -507,7 +507,7 @@ int _MMG5_dispmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t,int itdeg) {
         c[i][j] = ppt->c[j];
     }
 
-    ocal = _MMG5_caltet_iso_4pt(c[0],c[1],c[2],c[3]);
+    ocal = MMG5_caltet_iso_4pt(c[0],c[1],c[2],c[3]);
 
     for (i=0; i<4; i++) {
       np = pt->v[i];
@@ -516,9 +516,9 @@ int _MMG5_dispmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t,int itdeg) {
         c[i][j] += tau*v[j];
     }
 
-    ncal = _MMG5_caltet_iso_4pt(c[0],c[1],c[2],c[3]);
+    ncal = MMG5_caltet_iso_4pt(c[0],c[1],c[2],c[3]);
 
-    if ( ncal < _MMG5_DEGTOL*ocal )
+    if ( ncal < MMG5_DEGTOL*ocal )
       pt->mark = itdeg;
 
   }
@@ -540,7 +540,7 @@ int _MMG5_dispmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t,int itdeg) {
 }
 
 /** For debugging purposes: save disp */
-int _MMG5_saveDisp(MMG5_pMesh mesh,MMG5_pSol disp) {
+int MMG5_saveDisp(MMG5_pMesh mesh,MMG5_pSol disp) {
   FILE        *out;
   int         k;
   char        data[256],*ptr;
@@ -579,7 +579,7 @@ int _MMG5_saveDisp(MMG5_pMesh mesh,MMG5_pSol disp) {
  *                   info.lag > 1  -> displacement+remeshing with split+collapse+swap+move
  *
  */
-int _MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met) {
+int MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met) {
   double  avlen,tau;
   int     itdc,itmn,maxitmn,maxitdc,nspl,ns,nm,nc,iit,k,warn;
   int     nns,nnm,nnc,nnspl,nnns,nnnm,nnnc,nnnspl;
@@ -601,9 +601,9 @@ int _MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met) {
     mesh->tetra[k].mark = 0;
 
   /* Estimates of the minimum and maximum edge lengths in the mesh */
-  avlen = _MMG5_estavglen(mesh);
-  mesh->info.hmax = _MMG3D_LLONG*avlen;
-  mesh->info.hmin = _MMG3D_LOPTS*avlen;
+  avlen = MMG5_estavglen(mesh);
+  mesh->info.hmax = MMG3D_LLONG*avlen;
+  mesh->info.hmin = MMG3D_LOPTS*avlen;
 
   //printf("Average length: %f ; proceed with hmin = %f, hmax = %f\n",avlen,mesh->info.hmin,mesh->info.hmax);
 
@@ -611,31 +611,31 @@ int _MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met) {
     nnnspl = nnnc = nnns = nnnm = 0;
 
     /* Extension of the velocity field */
-    if ( !_MMG5_velextLS(mesh,disp) ) {
-      fprintf(stderr,"\n  ## Problem in func. _MMG5_packLS. Exit program.\n");
+    if ( !MMG5_velextLS(mesh,disp) ) {
+      fprintf(stderr,"\n  ## Problem in func. MMG5_packLS. Exit program.\n");
       return 0;
     }
 
-    //_MMG5_saveDisp(mesh,disp);
+    //MMG5_saveDisp(mesh,disp);
 
     /* Dichotomy loop */
     for (itdc=0; itdc<maxitdc; itdc++) {
       nnspl = nnc = nns = nnm = 0;
 
-      t = _MMG5_dikomv(mesh,disp);
+      t = MMG5_dikomv(mesh,disp);
       if ( t == 0 ) {
         if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
           fprintf(stderr,"\n   *** Stop: impossible to proceed further\n");
         break;
       }
 
-      ier = _MMG5_dispmesh(mesh,disp,t,itdc);
+      ier = MMG5_dispmesh(mesh,disp,t,itdc);
       if ( !ier ) {
         fprintf(stderr,"\n  ** Impossible motion\n");
         return 0;
       }
 
-      tau = tau + ((double)t /_MMG3D_SHORTMAX)*(1.0-tau);
+      tau = tau + ((double)t /MMG3D_SHORTMAX)*(1.0-tau);
       if ( (abs(mesh->info.imprim) > 3 ) || mesh->info.ddebug )
         printf("   ---> Realized displacement: %f\n",tau);
 
@@ -647,14 +647,14 @@ int _MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met) {
 
           if ( mesh->info.lag > 1 ) {
             /* Split of points */
-            nspl = _MMG5_spllag(mesh,disp,met,itdc,&warn);
+            nspl = MMG5_spllag(mesh,disp,met,itdc,&warn);
             if ( nspl < 0 ) {
               fprintf(stderr,"\n  ## Problem in spllag. Exiting.\n");
               return 0;
             }
 
             /* Collapse of points */
-            nc = _MMG5_coltetlag(mesh,met,itdc);
+            nc = MMG5_coltetlag(mesh,met,itdc);
             if ( nc < 0 ) {
               fprintf(stderr,"\n  ## Problem in coltetlag. Exiting.\n");
               return 0;
@@ -664,14 +664,14 @@ int _MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met) {
           /* Swap of edges in tetra that have resulted distorted from the process */
           /* I do not know whether it is safe to put NULL in metric here (a
            * priori ok, since there is no vertex creation or suppression) */
-          ns = _MMG5_swptetlag(mesh,met,MMG3D_LSWAPIMPROVE,NULL,itdc);
+          ns = MMG5_swptetlag(mesh,met,MMG3D_LSWAPIMPROVE,NULL,itdc);
           if ( ns < 0 ) {
             fprintf(stderr,"\n  ## Problem in swaptetlag. Exiting.\n");
             return 0;
           }
 
           /* Relocate vertices of tetra which have been distorted in the displacement process */
-          nm = _MMG5_movtetlag(mesh,met,itdc);
+          nm = MMG5_movtetlag(mesh,met,itdc);
           if ( nm < 0 ) {
             fprintf(stderr,"\n  ## Problem in movtetlag. Exiting.\n");
             return 0;
@@ -696,7 +696,7 @@ int _MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met) {
       nnnc   += nnc;
       nnns   += nns;
 
-      if ( t == _MMG3D_SHORTMAX ) break;
+      if ( t == MMG3D_SHORTMAX ) break;
     }
     if ( mesh->info.imprim > 0 && abs(mesh->info.imprim) < 4 ) {
       printf("   ---> Realized displacement: %f\n",tau);
@@ -705,11 +705,11 @@ int _MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met) {
                " swapped, %d vertices moved.\n",nnnspl,nnnc,nnns,nnnm);
     }
 
-    if ( t == _MMG3D_SHORTMAX ) break;
+    if ( t == MMG3D_SHORTMAX ) break;
   }
   /* Clean memory */
   /* Doing this, memcur of mesh is decreased by size of displacement */
-  _MMG5_DEL_MEM(mesh,disp->m);
+  MMG5_DEL_MEM(mesh,disp->m);
 
   return 1;
 }

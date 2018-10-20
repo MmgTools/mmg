@@ -52,7 +52,7 @@
  * configuration. The shell of edge is built during the process.
  *
  */
-int _MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,
+int MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,
                     int *ilist,int *list,double crit,char typchk) {
   MMG5_pTetra    pt,pt0;
   MMG5_pPoint    p0;
@@ -65,8 +65,8 @@ int _MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,
   refdom = pt->ref;
 
   pt0 = &mesh->tetra[0];
-  na  = pt->v[_MMG5_iare[ia][0]];
-  nb  = pt->v[_MMG5_iare[ia][1]];
+  na  = pt->v[MMG5_iare[ia][0]];
+  nb  = pt->v[MMG5_iare[ia][1]];
   calold = pt->qual;
 
   /* Store shell of ia in list, and associated pseudo polygon in pol */
@@ -75,15 +75,15 @@ int _MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,
   list[(*ilist)] = 6*start+ia;
   (*ilist)++;
   adja = &mesh->adja[4*(start-1)+1];
-  adj  = adja[_MMG5_ifar[ia][0]];      // start travelling by face (ia,0)
+  adj  = adja[MMG5_ifar[ia][0]];      // start travelling by face (ia,0)
   ifac = adj%4;
-  piv  = pt->v[_MMG5_ifar[ia][1]];
-  pol[npol] = 4*start + _MMG5_ifar[ia][1];
+  piv  = pt->v[MMG5_ifar[ia][1]];
+  pol[npol] = 4*start + MMG5_ifar[ia][1];
   npol++;
 
   /* Edge is on a boundary between two different domains */
   if ( mesh->info.opnbdy )
-    if ( pt->xt && (mesh->xtetra[pt->xt].ftag[_MMG5_ifar[ia][1]] & MG_BDY) )
+    if ( pt->xt && (mesh->xtetra[pt->xt].ftag[MMG5_ifar[ia][1]] & MG_BDY) )
       return 0;
 
   while ( adj ) {
@@ -111,18 +111,18 @@ int _MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,
 
     /* set new triangle for travel */
     adja = &mesh->adja[4*(adj-1)+1];
-    if ( pt->v[ _MMG5_ifar[i][0] ] == piv ) {
-      pol[npol] = 4*adj + _MMG5_ifar[i][1];
+    if ( pt->v[ MMG5_ifar[i][0] ] == piv ) {
+      pol[npol] = 4*adj + MMG5_ifar[i][1];
       npol++;
-      adj = adja[ _MMG5_ifar[i][0] ];
-      piv = pt->v[ _MMG5_ifar[i][1] ];
+      adj = adja[ MMG5_ifar[i][0] ];
+      piv = pt->v[ MMG5_ifar[i][1] ];
     }
     else {
-      assert(pt->v[ _MMG5_ifar[i][1] ] == piv);
-      pol[npol] = 4*adj + _MMG5_ifar[i][0];
+      assert(pt->v[ MMG5_ifar[i][1] ] == piv);
+      pol[npol] = 4*adj + MMG5_ifar[i][0];
       npol++;
-      adj = adja[ _MMG5_ifar[i][1] ];
-      piv = pt->v[ _MMG5_ifar[i][0] ];
+      adj = adja[ MMG5_ifar[i][1] ];
+      piv = pt->v[ MMG5_ifar[i][0] ];
     }
     ifac = adj%4;
   }
@@ -130,7 +130,7 @@ int _MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,
   //CECILE : je vois pas pourquoi ca ameliore de faire ce test
   //plus rapide mais du coup on elimine des swap...
   //4/01/14 commentaire
-  // if ( calold*_MMG3D_ALPHAD > 0.5 )  return 0;
+  // if ( calold*MMG3D_ALPHAD > 0.5 )  return 0;
 
   /* Prevent swap of an external boundary edge */
   if ( !adj ) return 0;
@@ -183,10 +183,10 @@ int _MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,
 
       /* Prevent from creating a tetra with 4 bdy vertices */
       if ( mesh->point[np].tag & MG_BDY ) {
-        if ( ( mesh->point[pt->v[_MMG5_ifar[i][0]]].tag & MG_BDY ) &&
-             ( mesh->point[pt->v[_MMG5_ifar[i][1]]].tag & MG_BDY ) ) {
-          if ( ( mesh->point[pt->v[_MMG5_iare[i][0]]].tag & MG_BDY ) ||
-               ( mesh->point[pt->v[_MMG5_iare[i][1]]].tag & MG_BDY ) ) {
+        if ( ( mesh->point[pt->v[MMG5_ifar[i][0]]].tag & MG_BDY ) &&
+             ( mesh->point[pt->v[MMG5_ifar[i][1]]].tag & MG_BDY ) ) {
+          if ( ( mesh->point[pt->v[MMG5_iare[i][0]]].tag & MG_BDY ) ||
+               ( mesh->point[pt->v[MMG5_iare[i][1]]].tag & MG_BDY ) ) {
             ier = 0;
             break;
           }
@@ -195,13 +195,13 @@ int _MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,
 
       /* First tetra obtained from iel */
       memcpy(pt0,pt,sizeof(MMG5_Tetra));
-      pt0->v[_MMG5_iare[i][0]] = np;
+      pt0->v[MMG5_iare[i][0]] = np;
 
 
       if ( typchk==1 && met->size > 1 && met->m )
-        caltmp = _MMG5_caltet33_ani(mesh,met,pt0);
+        caltmp = MMG5_caltet33_ani(mesh,met,pt0);
       else
-        caltmp = _MMG5_orcal(mesh,met,0);
+        caltmp = MMG5_orcal(mesh,met,0);
 
       calnew = MG_MIN(calnew,caltmp);
 
@@ -210,12 +210,12 @@ int _MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,
 
       /* Second tetra obtained from iel */
       memcpy(pt0,pt,sizeof(MMG5_Tetra));
-      pt0->v[_MMG5_iare[i][1]] = np;
+      pt0->v[MMG5_iare[i][1]] = np;
 
       if ( typchk==1 && met->size > 1 && met->m )
-        caltmp = _MMG5_caltet33_ani(mesh,met,pt0);
+        caltmp = MMG5_caltet33_ani(mesh,met,pt0);
       else
-        caltmp = _MMG5_orcal(mesh,met,0);
+        caltmp = MMG5_orcal(mesh,met,0);
 
       calnew = MG_MIN(calnew,caltmp);
 
@@ -243,8 +243,8 @@ int _MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,
  * Perform swap of edge whose shell is passed according to configuration nconf.
  *
  */
-int _MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,int *list,
-                 _MMG3D_pPROctree PROctree, char typchk) {
+int MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,int *list,
+                 MMG3D_pPROctree PROctree, char typchk) {
   MMG5_pTetra    pt;
   MMG5_pPoint    p0,p1;
   int       iel,na,nb,np,nball,ret,start;
@@ -256,8 +256,8 @@ int _MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,int *list,
   ia  = list[0] % 6;
 
   pt = &mesh->tetra[iel];
-  na = pt->v[_MMG5_iare[ia][0]];
-  nb = pt->v[_MMG5_iare[ia][1]];
+  na = pt->v[MMG5_iare[ia][0]];
+  nb = pt->v[MMG5_iare[ia][1]];
   p0 = &mesh->point[na];
   p1 = &mesh->point[nb];
 
@@ -266,28 +266,28 @@ int _MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,int *list,
   m[1] = 0.5*(p0->c[1] + p1->c[1]);
   m[2] = 0.5*(p0->c[2] + p1->c[2]);
 
-  np  = _MMG3D_newPt(mesh,m,0);
+  np  = MMG3D_newPt(mesh,m,0);
   if(!np){
-    _MMG3D_POINT_REALLOC(mesh,met,np,mesh->gap,
+    MMG3D_POINT_REALLOC(mesh,met,np,mesh->gap,
                          fprintf(stderr,"\n  ## Error: %s: unable to allocate"
                                  " a new point\n",__func__);
-                         _MMG5_INCREASE_MEM_MESSAGE();
+                         MMG5_INCREASE_MEM_MESSAGE();
                          return -1
                          ,m,0);
   }
   assert ( met );
   if ( met->m ) {
     if ( typchk == 1 && (met->size>1) ) {
-      if ( _MMG3D_intmet33_ani(mesh,met,iel,ia,np,0.5)<=0 )  return 0;
+      if ( MMG3D_intmet33_ani(mesh,met,iel,ia,np,0.5)<=0 )  return 0;
     }
     else {
-      if ( _MMG5_intmet(mesh,met,iel,ia,np,0.5)<=0 ) return 0;
+      if ( MMG5_intmet(mesh,met,iel,ia,np,0.5)<=0 ) return 0;
     }
   }
 
   /** First step : split of edge (na,nb) */
   ret = 2*ilist + 0;
-  ier = _MMG5_split1b(mesh,met,list,ret,np,0,typchk-1,0);
+  ier = MMG5_split1b(mesh,met,list,ret,np,0,typchk-1,0);
 
   if ( ier < 0 ) {
     fprintf(stderr,"\n  ## Warning: %s: unable to swap internal edge.\n",
@@ -295,7 +295,7 @@ int _MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,int *list,
     return -1;
   }
   else if ( !ier )  {
-    _MMG3D_delPt(mesh,np);
+    MMG3D_delPt(mesh,np);
     return 0;
   }
 
@@ -310,15 +310,15 @@ int _MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,int *list,
   assert(ip<4);
 
   memset(list,0,(MMG3D_LMAX+2)*sizeof(int));
-  nball = _MMG5_boulevolp(mesh,start,ip,list);
+  nball = MMG5_boulevolp(mesh,start,ip,list);
 
-  ier = _MMG5_colver(mesh,met,list,nball,iq,typchk);
+  ier = MMG5_colver(mesh,met,list,nball,iq,typchk);
   if ( ier < 0 ) {
     fprintf(stderr,"\n  ## Warning: %s: unable to swap internal edge.\n",
       __func__);
     return -1;
   }
-  else if ( ier ) _MMG3D_delPt(mesh,ier);
+  else if ( ier ) MMG3D_delPt(mesh,ier);
 
   return 1;
 }

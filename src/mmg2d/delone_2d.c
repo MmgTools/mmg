@@ -22,13 +22,13 @@
 */
 #include "mmg2d.h"
 
-#define  _MMG2_AREAMIN      1e-15 //1e-20 failed : creation of too bad element
+#define  MMG2D_AREAMIN      1e-15 //1e-20 failed : creation of too bad element
 
 #define KTA     7
 #define KTB    11
 
 /* Cavity correction for quality */
-static int _MMG2_correction_iso(MMG5_pMesh mesh,int ip,int *list,int ilist,int nedep) {
+static int MMG2D_correction_iso(MMG5_pMesh mesh,int ip,int *list,int ilist,int nedep) {
   MMG5_pTria      pt;
   MMG5_pPoint     ppt,p1,p2;
   double           dd,ux,uy,vx,vy;
@@ -56,8 +56,8 @@ static int _MMG2_correction_iso(MMG5_pMesh mesh,int ip,int *list,int ilist,int n
         /* Consider only the external faces of the cavity */
         if ( adj && mesh->tria[adj].base == base )  continue;
 
-        ib = pt->v[ _MMG5_inxt2[i] ];
-        ic = pt->v[ _MMG5_iprv2[i] ];
+        ib = pt->v[ MMG5_inxt2[i] ];
+        ic = pt->v[ MMG5_iprv2[i] ];
 
         p1 = &mesh->point[ib];
         p2 = &mesh->point[ic];
@@ -70,7 +70,7 @@ static int _MMG2_correction_iso(MMG5_pMesh mesh,int ip,int *list,int ilist,int n
 
         /* area PBC */
         dd =  ux*vy - uy*vx;
-        if ( dd < _MMG2_AREAMIN )  break;
+        if ( dd < MMG2D_AREAMIN )  break;
 
       }
 
@@ -91,7 +91,7 @@ static int _MMG2_correction_iso(MMG5_pMesh mesh,int ip,int *list,int ilist,int n
 }
 
 /* Hashing routine for maintaining adjacencies during Delaunization; hash mesh edge v[0],v[1] (face i of iel) */
-int _MMG2_hashEdgeDelone(MMG5_pMesh mesh,HashTable *hash,int iel,int i,int *v) {
+int MMG2D_hashEdgeDelone(MMG5_pMesh mesh,HashTable *hash,int iel,int i,int *v) {
   int             *adja,iadr,jel,j,key,mins,maxs;
   Hedge           *ha;
   static char     mmgWarn0=0;
@@ -172,7 +172,7 @@ int _MMG2_hashEdgeDelone(MMG5_pMesh mesh,HashTable *hash,int iel,int i,int *v) {
 
 /**  Create the cavity point ip, starting from triangle list[0];
      Return a negative value for ilist if one of the triangles of the cavity is required */
-int _MMG2_cavity(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list) {
+int MMG2D_cavity(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list) {
   MMG5_pTria      pt,pt1,ptc;
   MMG5_pPoint     ppt;
   double          c[2],crit,dd,eps,rad,ct[6];
@@ -186,7 +186,7 @@ int _MMG2_cavity(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list) {
   mesh->tria[list[0]].base = base;
 
   /* Pile up cavity by adjacency */
-  eps   = 1. + _MMG5_EPSOK;
+  eps   = 1. + MMG5_EPSOK;
   ilist = 1;
   ipil  = 0;
 
@@ -213,7 +213,7 @@ int _MMG2_cavity(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list) {
         memcpy(&ct[l],mesh->point[pt->v[j]].c,2*sizeof(double));
       }
 
-      if ( !_MMG2_cenrad_iso(mesh,ct,c,&rad) )  continue;
+      if ( !MMG2D_cenrad_iso(mesh,ct,c,&rad) )  continue;
       crit = eps * rad;
 
       /* Delaunay criterion */
@@ -249,23 +249,23 @@ int _MMG2_cavity(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list) {
         }
       }
     }
-    if ( ilist > MMG2_LONMAX - 3 ) return -1;
+    if ( ilist > MMG2D_LONMAX - 3 ) return -1;
 
     ++ipil;
   }
   while ( ipil < ilist );
 
-  ilist = _MMG2_correction_iso(mesh,ip,list,ilist,1);
+  ilist = MMG2D_correction_iso(mesh,ip,list,ilist,1);
   //if ( isreq ) ilist = -fabs(ilist);
   return ilist;
 }
 
 /* Insertion in point ip in the cavity described by list */
-int _MMG2_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
+int MMG2D_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
   MMG5_pTria      pt,pt1;
   MMG5_pPoint     ppt;
   int             *adja,*adjb,i,j,k,iel,jel,old,v[2],iadr,base,size,nei[3],iadrold;
-  int             tref,ielnum[3*MMG2_LONMAX+1];
+  int             tref,ielnum[3*MMG2D_LONMAX+1];
   short           i1;
   char            alert;
   HashTable       hedg;
@@ -291,7 +291,7 @@ int _MMG2_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
       jel = nei[i];
       if ( (!jel) || (mesh->tria[jel].base != base) ) {
         for (j=0; j<2; j++) {
-          i1  = MMG2_iare[i][j];
+          i1  = MMG2D_iare[i][j];
           ppt = &mesh->point[ pt1->v[i1] ];
           ppt->tagdel = 1;
         }
@@ -324,8 +324,8 @@ int _MMG2_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
   if ( alert )  return 0;
 
   /* Hash table parameters */
-  if ( size >= 3*MMG2_LONMAX )  return 0;
-  if ( !MMG2_hashNew(&hedg,size,3*size) ) { /*3*size is enough */
+  if ( size >= 3*MMG2D_LONMAX )  return 0;
+  if ( !MMG2D_hashNew(&hedg,size,3*size) ) { /*3*size is enough */
     fprintf(stderr,"\n  ## Warning: %s: unable to complete mesh.\n",__func__);
     return -1;
   }
@@ -333,12 +333,12 @@ int _MMG2_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
   /* Allocate memory for "size" new triangles */
   ielnum[0] = size;
   for (k=1; k<=size; k++) {
-    ielnum[k] = _MMG2D_newElt(mesh);
+    ielnum[k] = MMG2D_newElt(mesh);
     if ( !ielnum[k] ) {
-      _MMG2D_TRIA_REALLOC(mesh,ielnum[k],mesh->gap,
+      MMG2D_TRIA_REALLOC(mesh,ielnum[k],mesh->gap,
                           fprintf(stderr,"\n  ## Error: %s: unable to allocate"
                                  " a new element.\n",__func__);
-                          _MMG5_INCREASE_MEM_MESSAGE();
+                          MMG5_INCREASE_MEM_MESSAGE();
                           printf("  Exit program.\n");return -1);
     }
   }
@@ -367,10 +367,10 @@ int _MMG2_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
         pt1 = &mesh->tria[iel];
         memcpy(pt1,pt,sizeof(MMG5_Tria));
         pt1->v[i] = ip;
-        pt1->qual = _MMG2_caltri_iso(mesh,sol,pt1);
+        pt1->qual = MMG2D_caltri_iso(mesh,sol,pt1);
         pt1->ref = pt->ref;
 
-        if ( (!mmgWarn0) && (pt1->qual < _MMG2_AREAMIN) ) {
+        if ( (!mmgWarn0) && (pt1->qual < MMG2D_AREAMIN) ) {
           mmgWarn0 = 1;
           fprintf(stderr,"  ## Warning: %s: creation of a very bad element.\n",
                   __func__);
@@ -389,9 +389,9 @@ int _MMG2_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
         /* Update adjacency via the internal faces */
         for (j=0; j<3; j++) {
           if ( j != i ) {
-            v[0] = pt1->v[ _MMG5_inxt2[j] ];
-            v[1] = pt1->v[ _MMG5_iprv2[j] ];
-            _MMG2_hashEdgeDelone(mesh,&hedg,iel,j,v);
+            v[0] = pt1->v[ MMG5_inxt2[j] ];
+            v[1] = pt1->v[ MMG5_iprv2[j] ];
+            MMG2D_hashEdgeDelone(mesh,&hedg,iel,j,v);
           }
         }
       }
@@ -405,11 +405,11 @@ int _MMG2_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
       mmgWarn1 = 1;
       fprintf(stderr,"\n  ## Warning: %s: sud-domain ignored.\n",__func__);
     }
-    _MMG2D_delElt(mesh,list[k]);
+    MMG2D_delElt(mesh,list[k]);
   }
 
   //ppt = &mesh->point[ip];
   //  ppt->flag = mesh->flag;
-  _MMG5_SAFE_FREE(hedg.item);
+  MMG5_SAFE_FREE(hedg.item);
   return 1;
 }

@@ -52,7 +52,7 @@ extern char ddb;
  * provided).
  *
  */
-int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
+int MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
                     int it1,int it2,char typchk) {
   MMG5_pTetra   pt,pt0;
   MMG5_pxTetra  pxt;
@@ -71,8 +71,8 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
   ppt0= &mesh->point[0];
   memset(ppt0,0,sizeof(MMG5_Point));
 
-  np = pt->v[_MMG5_iare[ia][0]];
-  nq = pt->v[_MMG5_iare[ia][1]];
+  np = pt->v[MMG5_iare[ia][0]];
+  nq = pt->v[MMG5_iare[ia][1]];
 
   /* No swap of geometric edge */
   if ( pt->xt ) {
@@ -101,8 +101,8 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
   assert(it2);
   iel2 = it2 / 4;
   ifa2 = it2 % 4;
-  _MMG5_tet2tri(mesh,iel1,ifa1,&tt1);
-  _MMG5_tet2tri(mesh,iel2,ifa2,&tt2);
+  MMG5_tet2tri(mesh,iel1,ifa1,&tt1);
+  MMG5_tet2tri(mesh,iel2,ifa2,&tt2);
 
   for (ia1=0; ia1<3; ia1++) {
     if ( (tt1.v[ia1] != np) && (tt1.v[ia1] != nq) )  break;
@@ -110,8 +110,8 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
   assert( ia1 < 3 );
   if ( ia1==3 ) return 0;
 
-  assert( (tt1.v[_MMG5_inxt2[ia1]] == np && tt1.v[_MMG5_iprv2[ia1]] == nq) ||
-          (tt1.v[_MMG5_inxt2[ia1]] == nq && tt1.v[_MMG5_iprv2[ia1]] == np) );
+  assert( (tt1.v[MMG5_inxt2[ia1]] == np && tt1.v[MMG5_iprv2[ia1]] == nq) ||
+          (tt1.v[MMG5_inxt2[ia1]] == nq && tt1.v[MMG5_iprv2[ia1]] == np) );
   na1 = tt1.v[ia1];
 
   for (ia2=0; ia2<3; ia2++) {
@@ -121,25 +121,25 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
   assert ( ia2 < 3 );
   if ( ia2 ==3 ) return 0;
 
-  assert ( (tt2.v[_MMG5_inxt2[ia2]] == np && tt2.v[_MMG5_iprv2[ia2]] == nq) ||
-           (tt2.v[_MMG5_inxt2[ia2]] == nq && tt2.v[_MMG5_iprv2[ia2]] == np) );
+  assert ( (tt2.v[MMG5_inxt2[ia2]] == np && tt2.v[MMG5_iprv2[ia2]] == nq) ||
+           (tt2.v[MMG5_inxt2[ia2]] == nq && tt2.v[MMG5_iprv2[ia2]] == np) );
   na2 = tt2.v[ia2];
 
   /* Check non convexity (temporarily use b0,b1)*/
-  _MMG5_norpts(mesh,tt1.v[ia1],tt1.v[_MMG5_inxt2[ia1]],tt2.v[ia2],b0);
-  _MMG5_norpts(mesh,tt2.v[ia2],tt2.v[_MMG5_inxt2[ia2]],tt1.v[ia1],b1);
+  MMG5_norpts(mesh,tt1.v[ia1],tt1.v[MMG5_inxt2[ia1]],tt2.v[ia2],b0);
+  MMG5_norpts(mesh,tt2.v[ia2],tt2.v[MMG5_inxt2[ia2]],tt1.v[ia1],b1);
   ps = b0[0]*b1[0] + b0[1]*b1[1] + b0[2]*b1[2];
 
   /* Here we put ANGEDG because in nr mode the test over dhd may create inverted
    * tetra */
-  if ( ps < _MMG5_ANGEDG ) {
+  if ( ps < MMG5_ANGEDG ) {
     return 0;
   }
 
   /* Check normal deviation with neighbours */
-  if ( ! ( ( tt1.tag[_MMG5_iprv2[ia1]] & MG_GEO ) ||
-           ( tt1.tag[_MMG5_iprv2[ia1]] & MG_NOM ) ) ) {
-    ier = _MMG3D_normalAdjaTri(mesh,iel1,ifa1,_MMG5_iprv2[ia1],n);
+  if ( ! ( ( tt1.tag[MMG5_iprv2[ia1]] & MG_GEO ) ||
+           ( tt1.tag[MMG5_iprv2[ia1]] & MG_NOM ) ) ) {
+    ier = MMG3D_normalAdjaTri(mesh,iel1,ifa1,MMG5_iprv2[ia1],n);
     if ( ier < 0 ) return -1;
     else if ( !ier ) return 0;
     ps = b0[0]*n[0] + b0[1]*n[1] + b0[2]*n[2];
@@ -147,9 +147,9 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
     if ( ps < mesh->info.dhd )  return 0;
   }
 
-  if ( !( (tt2.tag[_MMG5_inxt2[ia2]] & MG_GEO ) ||
-          (tt2.tag[_MMG5_inxt2[ia2]] & MG_NOM ) ) ) {
-    ier = _MMG3D_normalAdjaTri(mesh,iel2,ifa2,_MMG5_inxt2[ia2],n);
+  if ( !( (tt2.tag[MMG5_inxt2[ia2]] & MG_GEO ) ||
+          (tt2.tag[MMG5_inxt2[ia2]] & MG_NOM ) ) ) {
+    ier = MMG3D_normalAdjaTri(mesh,iel2,ifa2,MMG5_inxt2[ia2],n);
     if ( ier<0 ) return -1;
     else if ( !ier ) return 0;
     ps = b0[0]*n[0] + b0[1]*n[1] + b0[2]*n[2];
@@ -157,9 +157,9 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
     if ( ps < mesh->info.dhd )  return 0;
   }
 
-  if ( ! ( (tt1.tag[_MMG5_inxt2[ia1]] & MG_GEO ) ||
-           (tt1.tag[_MMG5_inxt2[ia1]] & MG_NOM ) ) ) {
-    ier = _MMG3D_normalAdjaTri(mesh,iel1,ifa1,_MMG5_inxt2[ia1],n);
+  if ( ! ( (tt1.tag[MMG5_inxt2[ia1]] & MG_GEO ) ||
+           (tt1.tag[MMG5_inxt2[ia1]] & MG_NOM ) ) ) {
+    ier = MMG3D_normalAdjaTri(mesh,iel1,ifa1,MMG5_inxt2[ia1],n);
     if ( ier<0 ) return -1;
     else if ( !ier ) return 0;
     ps = b1[0]*n[0] + b1[1]*n[1] + b1[2]*n[2];
@@ -167,9 +167,9 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
     if ( ps < mesh->info.dhd )  return 0;
   }
 
-  if ( ! ( (tt2.tag[_MMG5_iprv2[ia2]] & MG_GEO ) ||
-           (tt2.tag[_MMG5_iprv2[ia2]] & MG_NOM ) ) ) {
-    ier = _MMG3D_normalAdjaTri(mesh,iel2,ifa2,_MMG5_iprv2[ia2],n);
+  if ( ! ( (tt2.tag[MMG5_iprv2[ia2]] & MG_GEO ) ||
+           (tt2.tag[MMG5_iprv2[ia2]] & MG_NOM ) ) ) {
+    ier = MMG3D_normalAdjaTri(mesh,iel2,ifa2,MMG5_iprv2[ia2],n);
     if ( ier<0 ) return -1;
     else if ( !ier ) return 0;
     ps = b1[0]*n[0] + b1[1]*n[1] + b1[2]*n[2];
@@ -178,7 +178,7 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
   }
 
   /* Compare contributions to Hausdorff distance in both configurations */
-  _MMG5_norface(mesh,iel1,ifa1,v);
+  MMG5_norface(mesh,iel1,ifa1,v);
 
   p0 = &mesh->point[np];
   p1 = &mesh->point[nq];
@@ -263,16 +263,16 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
   uy = p1->c[1] - p0->c[1];
   uz = p1->c[2] - p0->c[2];
 
-  _MMG5_BezierEdge(mesh,np,nq,b0,b1,0,v);
-  c[0] = b0[0] - (p0->c[0] + _MMG5_ATHIRD*ux);
-  c[1] = b0[1] - (p0->c[1] + _MMG5_ATHIRD*uy);
-  c[2] = b0[2] - (p0->c[2] + _MMG5_ATHIRD*uz);
+  MMG5_BezierEdge(mesh,np,nq,b0,b1,0,v);
+  c[0] = b0[0] - (p0->c[0] + MMG5_ATHIRD*ux);
+  c[1] = b0[1] - (p0->c[1] + MMG5_ATHIRD*uy);
+  c[2] = b0[2] - (p0->c[2] + MMG5_ATHIRD*uz);
 
   disnat = c[0]*c[0] + c[1]*c[1] + c[2]*c[2];
 
-  c[0] = b1[0] - (p1->c[0] - _MMG5_ATHIRD*ux);
-  c[1] = b1[1] - (p1->c[1] - _MMG5_ATHIRD*uy);
-  c[2] = b1[2] - (p1->c[2] - _MMG5_ATHIRD*uz);
+  c[0] = b1[0] - (p1->c[0] - MMG5_ATHIRD*ux);
+  c[1] = b1[1] - (p1->c[1] - MMG5_ATHIRD*uy);
+  c[2] = b1[2] - (p1->c[2] - MMG5_ATHIRD*uz);
 
   disnat = MG_MAX(disnat, c[0]*c[0] + c[1]*c[1] + c[2]*c[2]);
 
@@ -288,16 +288,16 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
 
   /* local param at vertices */
   // hausd = min (hausd_ref, hausd_na1,hausd_na2)
-  _MMG5_BezierEdge(mesh,na1,na2,b0,b1,0,v);
-  c[0] = b0[0] - (p0->c[0] + _MMG5_ATHIRD*ux);
-  c[1] = b0[1] - (p0->c[1] + _MMG5_ATHIRD*uy);
-  c[2] = b0[2] - (p0->c[2] + _MMG5_ATHIRD*uz);
+  MMG5_BezierEdge(mesh,na1,na2,b0,b1,0,v);
+  c[0] = b0[0] - (p0->c[0] + MMG5_ATHIRD*ux);
+  c[1] = b0[1] - (p0->c[1] + MMG5_ATHIRD*uy);
+  c[2] = b0[2] - (p0->c[2] + MMG5_ATHIRD*uz);
 
   dischg = c[0]*c[0] + c[1]*c[1] + c[2]*c[2];
 
-  c[0] = b1[0] - (p1->c[0] - _MMG5_ATHIRD*ux);
-  c[1] = b1[1] - (p1->c[1] - _MMG5_ATHIRD*uy);
-  c[2] = b1[2] - (p1->c[2] - _MMG5_ATHIRD*uz);
+  c[0] = b1[0] - (p1->c[0] - MMG5_ATHIRD*ux);
+  c[1] = b1[1] - (p1->c[1] - MMG5_ATHIRD*uy);
+  c[2] = b1[2] - (p1->c[2] - MMG5_ATHIRD*uz);
 
   dischg = MG_MAX(dischg,c[0]*c[0] + c[1]*c[1] + c[2]*c[2]);
   dischg = MG_MAX(dischg,hausd * hausd);
@@ -305,12 +305,12 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
   if ( dischg > disnat )   return 0;
 
   if ( typchk==1 && met->size > 1 && met->m ) {
-    cal1 = _MMG5_caltri33_ani(mesh,met,&tt1);
-    cal2 = _MMG5_caltri33_ani(mesh,met,&tt2);
+    cal1 = MMG5_caltri33_ani(mesh,met,&tt1);
+    cal2 = MMG5_caltri33_ani(mesh,met,&tt2);
   }
   else {
-    cal1 = _MMG5_caltri(mesh,met,&tt1);
-    cal2 = _MMG5_caltri(mesh,met,&tt2);
+    cal1 = MMG5_caltri(mesh,met,&tt1);
+    cal2 = MMG5_caltri(mesh,met,&tt2);
   }
 
   calnat = MG_MIN(cal1,cal2);
@@ -320,12 +320,12 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
   }
 
   if ( typchk==1 && met->size > 1 && met->m ) {
-    cal1 = _MMG5_caltri33_ani(mesh,met,&tt1);
-    cal2 = _MMG5_caltri33_ani(mesh,met,&tt2);
+    cal1 = MMG5_caltri33_ani(mesh,met,&tt1);
+    cal2 = MMG5_caltri33_ani(mesh,met,&tt2);
   }
   else {
-    cal1 = _MMG5_caltri(mesh,met,&tt1);
-    cal2 = _MMG5_caltri(mesh,met,&tt2);
+    cal1 = MMG5_caltri(mesh,met,&tt1);
+    cal2 = MMG5_caltri(mesh,met,&tt2);
   }
 
   calchg = MG_MIN(cal1,cal2);
@@ -340,11 +340,11 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
 
   if ( met->m ) {
     if ( typchk == 1 && (met->size>1) ) {
-      if ( _MMG3D_intmet33_ani(mesh,met,list[0]/6,list[0]%6,0,0.5) <= 0 )
+      if ( MMG3D_intmet33_ani(mesh,met,list[0]/6,list[0]%6,0,0.5) <= 0 )
         return 0;
     }
     else {
-      if ( _MMG5_intmet(mesh,met,list[0]/6,list[0]%6,0,0.5) <= 0 )
+      if ( MMG5_intmet(mesh,met,list[0]/6,list[0]%6,0,0.5) <= 0 )
         return 0;
     }
   }
@@ -371,20 +371,20 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
     pt0->v[ip] = 0;
 
     if ( typchk==1 && met->size > 1 && met->m )
-      caltmp = _MMG5_caltet33_ani(mesh,met,pt0);
+      caltmp = MMG5_caltet33_ani(mesh,met,pt0);
     else
-      caltmp = _MMG5_orcal(mesh,met,0);
+      caltmp = MMG5_orcal(mesh,met,0);
 
 
-    if ( caltmp < _MMG5_NULKAL )  return 0;
+    if ( caltmp < MMG5_NULKAL )  return 0;
 
     if ( !isshell ) {
       pt0->v[ip] = na1;
 
       if ( typchk==1 && met->size > 1 && met->m )
-        caltmp = _MMG5_caltet33_ani(mesh,met,pt0);
+        caltmp = MMG5_caltet33_ani(mesh,met,pt0);
       else
-        caltmp = _MMG5_orcal(mesh,met,0);
+        caltmp = MMG5_orcal(mesh,met,0);
 
       calnew = MG_MIN(calnew,caltmp);
     }
@@ -392,24 +392,24 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
     pt0->v[iq] = 0;
 
     if ( typchk==1 && met->size > 1 && met->m )
-      caltmp = _MMG5_caltet33_ani(mesh,met,pt0);
+      caltmp = MMG5_caltet33_ani(mesh,met,pt0);
     else
-      caltmp = _MMG5_orcal(mesh,met,0);
+      caltmp = MMG5_orcal(mesh,met,0);
 
-    if ( caltmp < _MMG5_NULKAL )  return 0;
+    if ( caltmp < MMG5_NULKAL )  return 0;
 
     if ( !isshell ) {
       pt0->v[iq] = na1;
 
       if ( typchk==1 && met->size > 1 && met->m )
-        caltmp = _MMG5_caltet33_ani(mesh,met,pt0);
+        caltmp = MMG5_caltet33_ani(mesh,met,pt0);
       else
-        caltmp = _MMG5_orcal(mesh,met,0);
+        caltmp = MMG5_orcal(mesh,met,0);
 
       calnew = MG_MIN(calnew,caltmp);
     }
   }
-  if ( calold < _MMG5_EPSOK && calnew <= calold )  return 0;
+  if ( calold < MMG5_EPSOK && calnew <= calold )  return 0;
   else if ( calnew < 0.3 * calold )  return 0;
 
   return 1;
@@ -431,8 +431,8 @@ int _MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
  * Swap boundary edge whose shell is provided.
  *
  */
-int _MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,
-                 _MMG3D_pPROctree PROctree, char typchk) {
+int MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,
+                 MMG3D_pPROctree PROctree, char typchk) {
   MMG5_pTetra   pt,pt1;
   MMG5_pPoint   p0,p1;
   int           iel,iel1,ilist,np,nq,nm;
@@ -447,8 +447,8 @@ int _MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,
   ia  = list[0] % 6;
   pt  = &mesh->tetra[iel];
 
-  np = pt->v[_MMG5_iare[ia][0]];
-  nq = pt->v[_MMG5_iare[ia][1]];
+  np = pt->v[MMG5_iare[ia][0]];
+  nq = pt->v[MMG5_iare[ia][1]];
 #ifndef NDEBUG
   na = 0;
 #endif
@@ -457,13 +457,13 @@ int _MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,
   p1 = &mesh->point[nq];
 
   /* search for na = the point on quadrangle surfacic configuration on which collapse
-     validity has been checked in _MMG5_chkswpbdy */
+     validity has been checked in MMG5_chkswpbdy */
   iel1 = it1 / 4;
   iface1 = it1 % 4;
   pt1 = &mesh->tetra[iel1];
 
   for (j=0; j<3;j++) {
-    ipa = _MMG5_idir[iface1][j];
+    ipa = MMG5_idir[iface1][j];
     if ( (pt1->v[ipa] != np)&&(pt1->v[ipa] != nq) ) {
 #ifndef NDEBUG
       na = pt1->v[ipa];
@@ -477,26 +477,26 @@ int _MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,
   c[0] = 0.5*( p0->c[0] + p1->c[0]);
   c[1] = 0.5*( p0->c[1] + p1->c[1]);
   c[2] = 0.5*( p0->c[2] + p1->c[2]);
-  nm = _MMG3D_newPt(mesh,c,MG_BDY);
+  nm = MMG3D_newPt(mesh,c,MG_BDY);
   if ( !nm ) {
-    _MMG3D_POINT_REALLOC(mesh,met,nm,mesh->gap,
+    MMG3D_POINT_REALLOC(mesh,met,nm,mesh->gap,
                          fprintf(stderr,"\n  ## Error: %s: unable to allocate a"
                                  " new point\n",__func__);
-                         _MMG5_INCREASE_MEM_MESSAGE();
+                         MMG5_INCREASE_MEM_MESSAGE();
                          return -1
                          ,c,MG_BDY);
   }
   assert ( met );
   if ( met->m ) {
     if ( typchk == 1 && (met->size>1) ) {
-      if ( _MMG3D_intmet33_ani(mesh,met,iel,ia,nm,0.5)<=0 )  return 0;
+      if ( MMG3D_intmet33_ani(mesh,met,iel,ia,nm,0.5)<=0 )  return 0;
     }
     else {
-      if ( _MMG5_intmet(mesh,met,iel,ia,nm,0.5)<=0 )  return 0;
+      if ( MMG5_intmet(mesh,met,iel,ia,nm,0.5)<=0 )  return 0;
     }
   }
 
-  ier = _MMG5_split1b(mesh,met,list,ret,nm,0,typchk-1,0);
+  ier = MMG5_split1b(mesh,met,list,ret,nm,0,typchk-1,0);
   /* pointer adress may change if we need to realloc memory during split */
   pt1 = &mesh->tetra[iel1];
 
@@ -506,34 +506,34 @@ int _MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,
     return -1;
   }
   else if ( !ier )  {
-    _MMG3D_delPt(mesh,nm);
+    MMG3D_delPt(mesh,nm);
     return 0;
   }
 
   /* Collapse m on na after taking (new) ball of m */
   memset(list,0,(MMG3D_LMAX+2)*sizeof(int));
   for (j=0; j<3; j++) {
-    im = _MMG5_idir[iface1][j];
+    im = MMG5_idir[iface1][j];
     if ( pt1->v[im] == nm )  break;
   }
   if ( pt1->v[im] != nm ){
-    _MMG3D_delPt(mesh,nm);
+    MMG3D_delPt(mesh,nm);
     fprintf(stderr,"\n  # Warning: %s: pt1->v[im] != nm.\n",__func__);
     return 0;
   }
-  ilist = _MMG5_boulevolp(mesh,iel1,im,list);
+  ilist = MMG5_boulevolp(mesh,iel1,im,list);
 
   assert(list[0]/4 == iel1);
   assert(pt1->v[ipa] == na);
 
-  ier = _MMG5_colver(mesh,met,list,ilist,ipa,typchk);
+  ier = MMG5_colver(mesh,met,list,ilist,ipa,typchk);
   if ( ier < 0 ) {
     fprintf(stderr,"\n  ## Warning: %s: unable to swap boundary edge.\n",
       __func__);
     return -1;
   }
   else if ( ier ) {
-    _MMG3D_delPt(mesh,ier);
+    MMG3D_delPt(mesh,ier);
     ier = 1;
   }
 
@@ -680,12 +680,12 @@ int MMG3D_swap23(MMG5_pMesh mesh,MMG5_pSol met,int k,char metRidTyp,
   np    = pt1->v[tau1[0]];
   memcpy(pt1,pt0,sizeof(MMG5_Tetra));
 
-  iel = _MMG3D_newElt(mesh);
+  iel = MMG3D_newElt(mesh);
   if ( !iel ) {
-    _MMG3D_TETRA_REALLOC(mesh,iel,mesh->gap,
+    MMG3D_TETRA_REALLOC(mesh,iel,mesh->gap,
                         fprintf(stderr,"\n  ## Error: %s: unable to allocate"
                                 " a new element.\n",__func__);
-                        _MMG5_INCREASE_MEM_MESSAGE();
+                        MMG5_INCREASE_MEM_MESSAGE();
                         fprintf(stderr,"  Exit program.\n");
                         return -1);
     pt0 = &mesh->tetra[k];
@@ -897,7 +897,7 @@ int MMG3D_swap23(MMG5_pMesh mesh,MMG5_pSol met,int k,char metRidTyp,
           mesh->xt++;
           if ( mesh->xt > mesh->xtmax ) {
             /* realloc of xtetras table */
-            _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
+            MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                "larger xtetra table",
                                mesh->xt--;
                                fprintf(stderr,"  Exit program.\n");
@@ -920,7 +920,7 @@ int MMG3D_swap23(MMG5_pMesh mesh,MMG5_pSol met,int k,char metRidTyp,
         mesh->xt++;
         if ( mesh->xt > mesh->xtmax ) {
           /* realloc of xtetras table */
-          _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
+          MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                              "larger xtetra table",
                              mesh->xt--;
                              fprintf(stderr,"  Exit program.\n");
@@ -936,7 +936,7 @@ int MMG3D_swap23(MMG5_pMesh mesh,MMG5_pSol met,int k,char metRidTyp,
         mesh->xt++;
         if ( mesh->xt > mesh->xtmax ) {
           /* realloc of xtetras table */
-          _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
+          MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                              "larger xtetra table",
                              mesh->xt--;
                              fprintf(stderr,"  Exit program.\n");
@@ -961,7 +961,7 @@ int MMG3D_swap23(MMG5_pMesh mesh,MMG5_pSol met,int k,char metRidTyp,
       mesh->xt++;
       if ( mesh->xt > mesh->xtmax ) {
         /* realloc of xtetras table */
-        _MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
+        MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                            "larger xtetra table",
                            mesh->xt--;
                            fprintf(stderr,"  Exit program.\n");
@@ -975,19 +975,19 @@ int MMG3D_swap23(MMG5_pMesh mesh,MMG5_pSol met,int k,char metRidTyp,
 
   /** Quality Update */
   if ( (!metRidTyp) && met->m && met->size>1 )
-    pt0->qual   = _MMG5_caltet33_ani(mesh,met,pt0);
+    pt0->qual   = MMG5_caltet33_ani(mesh,met,pt0);
   else
-    pt0->qual   = _MMG5_orcal(mesh,met,k);
+    pt0->qual   = MMG5_orcal(mesh,met,k);
 
   if ( (!metRidTyp) && met->m && met->size>1 )
-    pt1->qual   = _MMG5_caltet33_ani(mesh,met,pt1);
+    pt1->qual   = MMG5_caltet33_ani(mesh,met,pt1);
   else
-    pt1->qual   = _MMG5_orcal(mesh,met,k1);
+    pt1->qual   = MMG5_orcal(mesh,met,k1);
 
   if ( (!metRidTyp) && met->m && met->size>1 )
-    ptnew->qual   = _MMG5_caltet33_ani(mesh,met,ptnew);
+    ptnew->qual   = MMG5_caltet33_ani(mesh,met,ptnew);
   else
-    ptnew->qual   = _MMG5_orcal(mesh,met,iel);
+    ptnew->qual   = MMG5_orcal(mesh,met,iel);
 
   pt0->mark   = mesh->mark;
   pt1->mark   = mesh->mark;

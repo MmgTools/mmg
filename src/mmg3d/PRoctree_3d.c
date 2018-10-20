@@ -43,7 +43,7 @@
  * Initialisation of the PROctree cell.
  *
  */
-void _MMG3D_initPROctree_s( _MMG3D_PROctree_s* q)
+void MMG3D_initPROctree_s( MMG3D_PROctree_s* q)
 {
   q->nbVer = 0;
   q->depth = 0;
@@ -60,13 +60,13 @@ void _MMG3D_initPROctree_s( _MMG3D_PROctree_s* q)
  * Initialisation of the PROctree cell.
  *
  */
-int _MMG3D_initPROctree(MMG5_pMesh mesh,_MMG3D_pPROctree* q, int nv)
+int MMG3D_initPROctree(MMG5_pMesh mesh,MMG3D_pPROctree* q, int nv)
 {
   int i;
 
-  _MMG5_ADD_MEM(mesh,sizeof(_MMG3D_PROctree),"PROctree structure",
+  MMG5_ADD_MEM(mesh,sizeof(MMG3D_PROctree),"PROctree structure",
                 return 0);
-  _MMG5_SAFE_MALLOC(*q,1, _MMG3D_PROctree, return 0);
+  MMG5_SAFE_MALLOC(*q,1, MMG3D_PROctree, return 0);
 
 
   // set nv to the next power of 2
@@ -82,18 +82,18 @@ int _MMG3D_initPROctree(MMG5_pMesh mesh,_MMG3D_pPROctree* q, int nv)
   // Number maximum of cells listed for the zone search
   (*q)->nc = MG_MAX(2048/nv,16);
 
-  _MMG5_ADD_MEM(mesh,sizeof(_MMG3D_PROctree_s),"initial PROctree cell",
+  MMG5_ADD_MEM(mesh,sizeof(MMG3D_PROctree_s),"initial PROctree cell",
                 return 0);
 
-  _MMG5_SAFE_MALLOC((*q)->q0,1, _MMG3D_PROctree_s, return 0);
-  _MMG3D_initPROctree_s((*q)->q0);
+  MMG5_SAFE_MALLOC((*q)->q0,1, MMG3D_PROctree_s, return 0);
+  MMG3D_initPROctree_s((*q)->q0);
 
   for (i=1;i<=mesh->np; ++i)
   {
     if ( !MG_VOK(&mesh->point[i]) )  continue;
     if (mesh->point[i].tag & MG_BDY) continue;
 
-    if(!_MMG3D_addPROctree(mesh, (*q), i))
+    if(!MMG3D_addPROctree(mesh, (*q), i))
       return 0;
 
   }
@@ -108,7 +108,7 @@ int _MMG3D_initPROctree(MMG5_pMesh mesh,_MMG3D_pPROctree* q, int nv)
  * Free the PROctree cell.
  *
  */
-void _MMG3D_freePROctree_s(MMG5_pMesh mesh,_MMG3D_PROctree_s* q, int nv)
+void MMG3D_freePROctree_s(MMG5_pMesh mesh,MMG3D_PROctree_s* q, int nv)
 {
   int nbBitsInt,depthMax,dim,i,sizBr,nvTemp;
 
@@ -121,9 +121,9 @@ void _MMG3D_freePROctree_s(MMG5_pMesh mesh,_MMG3D_PROctree_s* q, int nv)
   {
     for ( i = 0; i<sizBr; i++)
     {
-      _MMG3D_freePROctree_s(mesh,&(q->branches[i]), nv);
+      MMG3D_freePROctree_s(mesh,&(q->branches[i]), nv);
     }
-    _MMG5_DEL_MEM(mesh,q->branches);
+    MMG5_DEL_MEM(mesh,q->branches);
     q->branches = NULL;
   }
   else if (q->nbVer>0)
@@ -139,13 +139,13 @@ void _MMG3D_freePROctree_s(MMG5_pMesh mesh,_MMG3D_PROctree_s* q, int nv)
       nvTemp |= nvTemp >> 16;
       nvTemp++;
 
-      _MMG5_DEL_MEM(mesh,q->v);
+      MMG5_DEL_MEM(mesh,q->v);
       q->v = NULL;
       q->nbVer = 0;
     }else
     {
       assert(q->v);
-      _MMG5_DEL_MEM(mesh,q->v);
+      MMG5_DEL_MEM(mesh,q->v);
       q->v = NULL;
       q->nbVer = 0;
     }
@@ -159,12 +159,12 @@ void _MMG3D_freePROctree_s(MMG5_pMesh mesh,_MMG3D_PROctree_s* q, int nv)
  * Free the global PROctree structure.
  *
  */
-void _MMG3D_freePROctree(MMG5_pMesh mesh,_MMG3D_pPROctree *q)
+void MMG3D_freePROctree(MMG5_pMesh mesh,MMG3D_pPROctree *q)
 {
-  _MMG3D_freePROctree_s(mesh,(*q)->q0, (*q)->nv);
-  _MMG5_DEL_MEM(mesh,(*q)->q0);
+  MMG3D_freePROctree_s(mesh,(*q)->q0, (*q)->nv);
+  MMG5_DEL_MEM(mesh,(*q)->q0);
   (*q)->q0 = NULL;
-  _MMG5_DEL_MEM(mesh,*q);
+  MMG5_DEL_MEM(mesh,*q);
   *q = NULL;
 }
 
@@ -178,7 +178,7 @@ void _MMG3D_freePROctree(MMG5_pMesh mesh,_MMG3D_pPROctree *q)
  * Get the integer containing the coordinates
  *
  */
-int64_t _MMG3D_getPROctreeCoordinate(_MMG3D_pPROctree q, double* ver, int dim)
+int64_t MMG3D_getPROctreeCoordinate(MMG3D_pPROctree q, double* ver, int dim)
 {
   int64_t s    = 1<<10;
   double  prec = 1./(1<<30);
@@ -220,7 +220,7 @@ int64_t _MMG3D_getPROctreeCoordinate(_MMG3D_pPROctree q, double* ver, int dim)
  * into the PROctree. (ie: one move at a time in the mesh and the PROctree)
  *
  */
-int _MMG3D_movePROctree(MMG5_pMesh mesh, _MMG3D_pPROctree q, int no, double* newVer, double* oldVer)
+int MMG3D_movePROctree(MMG5_pMesh mesh, MMG3D_pPROctree q, int no, double* newVer, double* oldVer)
 {
   int oldCoor, newCoor;
   double pt[3];
@@ -229,9 +229,9 @@ int _MMG3D_movePROctree(MMG5_pMesh mesh, _MMG3D_pPROctree q, int no, double* new
   dim = mesh->dim;
 
   memcpy(&pt, oldVer ,dim*sizeof(double));
-  oldCoor = _MMG3D_getPROctreeCoordinate(q, oldVer, dim);
+  oldCoor = MMG3D_getPROctreeCoordinate(q, oldVer, dim);
   memcpy(&pt, newVer ,dim*sizeof(double));
-  newCoor = _MMG3D_getPROctreeCoordinate(q, mesh->point[no].c, dim);
+  newCoor = MMG3D_getPROctreeCoordinate(q, mesh->point[no].c, dim);
 
   if (newCoor == oldCoor) {
     return 1;
@@ -240,12 +240,12 @@ int _MMG3D_movePROctree(MMG5_pMesh mesh, _MMG3D_pPROctree q, int no, double* new
   {
     /* delPROctree */
     memcpy(&pt, oldVer ,dim*sizeof(double));
-    if (!_MMG3D_delPROctreeRec(mesh, q->q0, pt , no, q->nv))
+    if (!MMG3D_delPROctreeRec(mesh, q->q0, pt , no, q->nv))
       return 0;
 
     /* addPROctree */
     memcpy(&pt, newVer ,dim*sizeof(double));
-    if(!_MMG3D_addPROctreeRec(mesh, q->q0, pt , no, q->nv))
+    if(!MMG3D_addPROctreeRec(mesh, q->q0, pt , no, q->nv))
       return 0;
   }
   return 1;
@@ -260,7 +260,7 @@ int _MMG3D_movePROctree(MMG5_pMesh mesh, _MMG3D_pPROctree q, int no, double* new
  * \return wether the cell is included in the search zone.
  *
  */
-int _MMG3D_isCellIncluded(double* cellCenter, double l, double* zoneCenter, double l0)
+int MMG3D_isCellIncluded(double* cellCenter, double l, double* zoneCenter, double l0)
 {
   double x,y,z,r1;//r2,rmax;
 
@@ -293,7 +293,7 @@ int _MMG3D_isCellIncluded(double* cellCenter, double l, double* zoneCenter, doub
  * function should be called with coherent parameters.
  *
 */
-void _MMG3D_placeInListDouble(double* distList, double dist, int index, int size)
+void MMG3D_placeInListDouble(double* distList, double dist, int index, int size)
 {
   memmove(&(distList[index+2]),&(distList[index+1]),(size-(index+1))*sizeof(double));
   distList[index+1] = dist;
@@ -311,9 +311,9 @@ void _MMG3D_placeInListDouble(double* distList, double dist, int index, int size
  * function should be called with coherent parameters.
  *
  */
-void _MMG3D_placeInListPROctree(_MMG3D_PROctree_s** qlist, _MMG3D_PROctree_s* q, int index, int size)
+void MMG3D_placeInListPROctree(MMG3D_PROctree_s** qlist, MMG3D_PROctree_s* q, int index, int size)
 {
-  memmove(&(qlist[index+2]),&(qlist[index+1]),(size-(index+1))*sizeof(_MMG3D_PROctree_s*));
+  memmove(&(qlist[index+2]),&(qlist[index+1]),(size-(index+1))*sizeof(MMG3D_PROctree_s*));
   #ifdef DEBUG
   if (index+2+(size-(index+1)>61 || index+1<0)
     fprintf(stderr, "\n  ## Error: %s: index"
@@ -332,12 +332,12 @@ void _MMG3D_placeInListPROctree(_MMG3D_PROctree_s** qlist, _MMG3D_PROctree_s* q,
  * smaller than dist. Only search in the bounds of indexMin and indexMax.
  *
  */
-int _MMG3D_seekIndex (double* distList, double dist, int indexMin, int indexMax)
+int MMG3D_seekIndex (double* distList, double dist, int indexMin, int indexMax)
 {
   int indexMed;
 
   if (indexMin > indexMax)
-    _MMG3D_seekIndex(distList, dist, indexMax, indexMin);
+    MMG3D_seekIndex(distList, dist, indexMax, indexMin);
   else if (indexMax - indexMin <2)
   {
     #ifdef DEBUG
@@ -361,9 +361,9 @@ int _MMG3D_seekIndex (double* distList, double dist, int indexMin, int indexMax)
     #endif
 
     if (dist > distList[indexMed])
-      _MMG3D_seekIndex(distList, dist, indexMed, indexMax);
+      MMG3D_seekIndex(distList, dist, indexMed, indexMax);
     else
-      _MMG3D_seekIndex(distList, dist, indexMin, indexMed);
+      MMG3D_seekIndex(distList, dist, indexMin, indexMed);
   }
   return 1;
 }
@@ -380,7 +380,7 @@ int _MMG3D_seekIndex (double* distList, double dist, int indexMin, int indexMax)
  *  Rectangles are defined by: the coordinates of the lower left corner
  * of the rectange and the length of the rectangle in each dimension.
 */
-int _MMG3D_intersectRect(double *rectin, double *rectinout)
+int MMG3D_intersectRect(double *rectin, double *rectinout)
 {
   double rect1Temp[6], rect2Temp[6];
 
@@ -438,8 +438,8 @@ int _MMG3D_intersectRect(double *rectin, double *rectinout)
  * \a rect. To avoid counting of the cells, a maximum is set.
  *
  */
-int _MMG3D_getListSquareRec(_MMG3D_PROctree_s* q, double* center, double* rect,
-                            _MMG3D_PROctree_s*** qlist, double* dist, double* ani, double l0, int nc, int dim, int* index)
+int MMG3D_getListSquareRec(MMG3D_PROctree_s* q, double* center, double* rect,
+                            MMG3D_PROctree_s*** qlist, double* dist, double* ani, double l0, int nc, int dim, int* index)
 {
   double recttemp[6];
   double centertemp[3];
@@ -456,7 +456,7 @@ int _MMG3D_getListSquareRec(_MMG3D_PROctree_s* q, double* center, double* rect,
   // check if the current cell is included in the search zone, can avoid
   // the loop over the vertices. Never occured in tests unless nc==4, in that
   // case, there is no gain in computing time.
-  //~ if (q->nbVer>0 && _MMG3D_isCellIncluded(center, l, &(dist[nc-3]), l0))
+  //~ if (q->nbVer>0 && MMG3D_isCellIncluded(center, l, &(dist[nc-3]), l0))
   //~ {
     //~ (*index)=nc-3;
     //~ fprintf(stdout,"Included cell found\n");
@@ -481,11 +481,11 @@ int _MMG3D_getListSquareRec(_MMG3D_PROctree_s* q, double* center, double* rect,
                 //~ 2*(ani[1]*x*y+ani[2]*x*z+ani[4]*y*z);
     if (*index > 0)
     {
-      indexTemp = _MMG3D_seekIndex(dist,distTemp,0, *index-1);
+      indexTemp = MMG3D_seekIndex(dist,distTemp,0, *index-1);
       if (indexTemp+1<*index)
       {
-        _MMG3D_placeInListDouble(dist, distTemp, indexTemp, *index);
-        _MMG3D_placeInListPROctree((*qlist), q, indexTemp, *index);
+        MMG3D_placeInListDouble(dist, distTemp, indexTemp, *index);
+        MMG3D_placeInListPROctree((*qlist), q, indexTemp, *index);
       }else
       {
         dist[*index]=distTemp;
@@ -531,7 +531,7 @@ int _MMG3D_getListSquareRec(_MMG3D_PROctree_s* q, double* center, double* rect,
             recttemp[2] = center[2]-l*(1-k);
             recttemp[3] = recttemp[4] = recttemp[5] = l;
             // intersect the rectangle and the cell and store it in recttemp
-            if ( !_MMG3D_intersectRect(rect,recttemp) ) return 0;
+            if ( !MMG3D_intersectRect(rect,recttemp) ) return 0;
 
             // set the new center
             centertemp[0] = center[0]-l/2+i*l;
@@ -539,7 +539,7 @@ int _MMG3D_getListSquareRec(_MMG3D_PROctree_s* q, double* center, double* rect,
             centertemp[2] = center[2]-l/2+k*l;
 
             // recursive call in the branch
-            if ( !_MMG3D_getListSquareRec(&(q->branches[nBranch]),
+            if ( !MMG3D_getListSquareRec(&(q->branches[nBranch]),
                                           centertemp, recttemp, qlist, dist,
                                           ani, l0, nc, dim, index) )
               return 0;
@@ -566,8 +566,8 @@ int _MMG3D_getListSquareRec(_MMG3D_PROctree_s* q, double* center, double* rect,
  * List the number of PROctree cells that intersect the rectangle \a rect.
  *
  */
-int _MMG3D_getListSquare(MMG5_pMesh mesh, double* ani, _MMG3D_pPROctree q, double* rect,
-                         _MMG3D_PROctree_s*** qlist)
+int MMG3D_getListSquare(MMG5_pMesh mesh, double* ani, MMG3D_pPROctree q, double* rect,
+                         MMG3D_PROctree_s*** qlist)
 {
   double rect2[6], center[3], *dist;
   double l0;
@@ -583,11 +583,11 @@ int _MMG3D_getListSquare(MMG5_pMesh mesh, double* ani, _MMG3D_pPROctree q, doubl
   //the center of the rectangle)
   index = q->nc-3;
 
-  _MMG5_ADD_MEM(mesh,index*sizeof(_MMG3D_PROctree_s*),"PROctree cell",return -1);
-  _MMG5_SAFE_MALLOC(*qlist,index,_MMG3D_PROctree_s*, return -1);
+  MMG5_ADD_MEM(mesh,index*sizeof(MMG3D_PROctree_s*),"PROctree cell",return -1);
+  MMG5_SAFE_MALLOC(*qlist,index,MMG3D_PROctree_s*, return -1);
 
-  _MMG5_ADD_MEM(mesh,q->nc*sizeof(double),"dist array",return -1);
-  _MMG5_SAFE_MALLOC(dist,q->nc,double,return -1);
+  MMG5_ADD_MEM(mesh,q->nc*sizeof(double),"dist array",return -1);
+  MMG5_SAFE_MALLOC(dist,q->nc,double,return -1);
 
   // Set the center of the zone search
   dist[q->nc-3] = rect[0]+rect[3]/2;
@@ -610,18 +610,18 @@ int _MMG3D_getListSquare(MMG5_pMesh mesh, double* ani, _MMG3D_pPROctree q, doubl
   // Avoid modification of input parameter rect
   memcpy(&rect2, rect, sizeof(double)*dim*2);
 
-  if ( !_MMG3D_getListSquareRec(q->q0, center, rect2, qlist, dist, ani, l0,
+  if ( !MMG3D_getListSquareRec(q->q0, center, rect2, qlist, dist, ani, l0,
                                 q->nc, dim, &index) )
     return -1;
 
 
   if (index>q->nc-4)
   {
-    _MMG5_DEL_MEM(mesh,dist);
+    MMG5_DEL_MEM(mesh,dist);
     return -1;
   }
 
-  _MMG5_DEL_MEM(mesh,dist);
+  MMG5_DEL_MEM(mesh,dist);
 
   return index;
 }
@@ -639,7 +639,7 @@ int _MMG3D_getListSquare(MMG5_pMesh mesh, double* ani, _MMG3D_pPROctree q, doubl
  * coordinates are scaled such as the quadrant is the [0;1]x[0;1]x[0;1] box.
  *
  */
-int _MMG3D_addPROctreeRec(MMG5_pMesh mesh, _MMG3D_PROctree_s* q, double* ver,
+int MMG3D_addPROctreeRec(MMG5_pMesh mesh, MMG3D_PROctree_s* q, double* ver,
                          const int no, int nv)
 {
   double   pt[3];
@@ -659,16 +659,16 @@ int _MMG3D_addPROctreeRec(MMG5_pMesh mesh, _MMG3D_PROctree_s* q, double* ver,
 
       if(q->nbVer == 0)  // first vertex list allocation
       {
-        _MMG5_ADD_MEM(mesh,sizeof(int),"PROctree vertice table", return 0);
-        _MMG5_SAFE_MALLOC(q->v,1,int,return 0);
+        MMG5_ADD_MEM(mesh,sizeof(int),"PROctree vertice table", return 0);
+        MMG5_SAFE_MALLOC(q->v,1,int,return 0);
       }
       else if(!(q->nbVer & (q->nbVer - 1))) //is a power of 2 -> reallocation of the vertex list
       {
         sizeRealloc = q->nbVer;
         sizeRealloc<<=1;
-        _MMG5_ADD_MEM(mesh,(sizeRealloc-sizeRealloc/2)*sizeof(int),"PROctree realloc",
+        MMG5_ADD_MEM(mesh,(sizeRealloc-sizeRealloc/2)*sizeof(int),"PROctree realloc",
                       return 0);
-        _MMG5_SAFE_REALLOC(q->v,q->nbVer,sizeRealloc,int,"PROctree",return 0);
+        MMG5_SAFE_REALLOC(q->v,q->nbVer,sizeRealloc,int,"PROctree",return 0);
       }
 
       q->v[q->nbVer] = no;
@@ -678,13 +678,13 @@ int _MMG3D_addPROctreeRec(MMG5_pMesh mesh, _MMG3D_PROctree_s* q, double* ver,
     else if (q->nbVer == nv && q->branches==NULL)  //vertex list at maximum -> cell subdivision
     {
       /* creation of sub-branch and relocation of vertices in the sub-branches */
-      _MMG5_ADD_MEM(mesh,sizBr*sizeof(_MMG3D_PROctree_s),"PROctree branches",
+      MMG5_ADD_MEM(mesh,sizBr*sizeof(MMG3D_PROctree_s),"PROctree branches",
                     return 0);
-      _MMG5_SAFE_MALLOC(q->branches,sizBr,_MMG3D_PROctree_s,return 0);
+      MMG5_SAFE_MALLOC(q->branches,sizBr,MMG3D_PROctree_s,return 0);
 
       for ( i = 0; i<sizBr; i++)
       {
-        _MMG3D_initPROctree_s(&(q->branches[i]));
+        MMG3D_initPROctree_s(&(q->branches[i]));
         q->branches[i].depth = q->depth+1;
       }
       q->nbVer++;
@@ -700,14 +700,14 @@ int _MMG3D_addPROctreeRec(MMG5_pMesh mesh, _MMG3D_PROctree_s* q, double* ver,
             pt[k] *= 2;
           }
         }
-        if (!_MMG3D_addPROctreeRec(mesh, q, pt, q->v[i],nv))
+        if (!MMG3D_addPROctreeRec(mesh, q, pt, q->v[i],nv))
           return 0;
         q->nbVer--;
       }
-      if (!_MMG3D_addPROctreeRec(mesh, q, ver, no, nv))
+      if (!MMG3D_addPROctreeRec(mesh, q, ver, no, nv))
         return 0;
       q->nbVer--;
-      _MMG5_DEL_MEM(mesh,q->v);
+      MMG5_DEL_MEM(mesh,q->v);
 
     }else // Recursive call in the corresponding sub cell
     {
@@ -720,7 +720,7 @@ int _MMG3D_addPROctreeRec(MMG5_pMesh mesh, _MMG3D_PROctree_s* q, double* ver,
       }
 
       q->nbVer++;
-      if (!_MMG3D_addPROctreeRec(mesh, &(q->branches[quadrant]), ver, no, nv))
+      if (!MMG3D_addPROctreeRec(mesh, &(q->branches[quadrant]), ver, no, nv))
         return 0;
     }
   }else // maximum PROctree depth reached
@@ -729,24 +729,24 @@ int _MMG3D_addPROctreeRec(MMG5_pMesh mesh, _MMG3D_PROctree_s* q, double* ver,
     {
       if(q->nbVer == 0) // first allocation
       {
-        _MMG5_ADD_MEM(mesh,sizeof(int),"PROctree vertices table",
+        MMG5_ADD_MEM(mesh,sizeof(int),"PROctree vertices table",
                       return 0);
-        _MMG5_SAFE_MALLOC(q->v,1,int,return 0);
+        MMG5_SAFE_MALLOC(q->v,1,int,return 0);
       }
       else if(!(q->nbVer & (q->nbVer - 1))) //is a power of 2 -> normal reallocation
       {
         sizeRealloc = q->nbVer;
         sizeRealloc <<= 1;
-        _MMG5_ADD_MEM(mesh,(sizeRealloc-sizeRealloc/2)*sizeof(int),"PROctree realloc",
+        MMG5_ADD_MEM(mesh,(sizeRealloc-sizeRealloc/2)*sizeof(int),"PROctree realloc",
                       return 0);
-        _MMG5_SAFE_REALLOC(q->v,q->nbVer,sizeRealloc,int,"PROctree",return 0);
+        MMG5_SAFE_REALLOC(q->v,q->nbVer,sizeRealloc,int,"PROctree",return 0);
       }
     }
     else if (q->nbVer%nv == 0) // special reallocation of the vertex list because it is at maximum depth
     {
-      _MMG5_ADD_MEM(mesh,nv*sizeof(int),"PROctree realloc",
+      MMG5_ADD_MEM(mesh,nv*sizeof(int),"PROctree realloc",
                     return 0);
-      _MMG5_SAFE_REALLOC(q->v,q->nbVer,q->nbVer+nv,int,"PROctree",return 0);
+      MMG5_SAFE_REALLOC(q->v,q->nbVer,q->nbVer+nv,int,"PROctree",return 0);
     }
 
     q->v[q->nbVer] = no;
@@ -764,7 +764,7 @@ int _MMG3D_addPROctreeRec(MMG5_pMesh mesh, _MMG3D_PROctree_s* q, double* ver,
  * Add the vertex of index \a no to the PROctree.
  *
  */
-int _MMG3D_addPROctree(MMG5_pMesh mesh, _MMG3D_pPROctree q, const int no)
+int MMG3D_addPROctree(MMG5_pMesh mesh, MMG3D_pPROctree q, const int no)
 {
   double pt[3];
   int    dim;
@@ -772,7 +772,7 @@ int _MMG3D_addPROctree(MMG5_pMesh mesh, _MMG3D_pPROctree q, const int no)
   dim = mesh->dim;
   assert(no<=mesh->np);
   memcpy(&pt, mesh->point[no].c ,dim*sizeof(double));
-  if (!_MMG3D_addPROctreeRec(mesh, q->q0, pt , no, q->nv))
+  if (!MMG3D_addPROctreeRec(mesh, q->q0, pt , no, q->nv))
   {
     return 0;
   }
@@ -789,7 +789,7 @@ int _MMG3D_addPROctree(MMG5_pMesh mesh, _MMG3D_pPROctree q, const int no)
  * the cells if necessary.
  *
  */
-int _MMG3D_delPROctreeVertex(MMG5_pMesh mesh, _MMG3D_PROctree_s* q, int indNo)
+int MMG3D_delPROctreeVertex(MMG5_pMesh mesh, MMG3D_PROctree_s* q, int indNo)
 {
   int i;
   int* vTemp;
@@ -802,11 +802,11 @@ int _MMG3D_delPROctreeVertex(MMG5_pMesh mesh, _MMG3D_PROctree_s* q, int indNo)
   --(q->nbVer);
   if (!(q->nbVer & (q->nbVer - 1)) && q->nbVer > 0) // is a power of 2
   {
-    _MMG5_ADD_MEM(mesh,q->nbVer*sizeof(int),"PROctree index",
+    MMG5_ADD_MEM(mesh,q->nbVer*sizeof(int),"PROctree index",
                   return 0);
-    _MMG5_SAFE_MALLOC(vTemp,q->nbVer,int,return 0);
+    MMG5_SAFE_MALLOC(vTemp,q->nbVer,int,return 0);
     memcpy(vTemp, q->v,q->nbVer*sizeof(int));
-    _MMG5_DEL_MEM(mesh,q->v);
+    MMG5_DEL_MEM(mesh,q->v);
 
     q->v = vTemp;
   }
@@ -824,7 +824,7 @@ int _MMG3D_delPROctreeVertex(MMG5_pMesh mesh, _MMG3D_PROctree_s* q, int indNo)
  * contain no more than nv vertices.
  *
  */
-void _MMG3D_mergeBranchesRec(_MMG3D_PROctree_s* q0, _MMG3D_PROctree_s* q, int dim, int nv, int* index)
+void MMG3D_mergeBranchesRec(MMG3D_PROctree_s* q0, MMG3D_PROctree_s* q, int dim, int nv, int* index)
 {
   int i;
 
@@ -840,7 +840,7 @@ void _MMG3D_mergeBranchesRec(_MMG3D_PROctree_s* q0, _MMG3D_PROctree_s* q, int di
   }else if (q->branches != NULL)
   {
     for (i = 0; i<(1<<dim); ++i)
-      _MMG3D_mergeBranchesRec(q0, &(q->branches[i]), dim, nv, index);
+      MMG3D_mergeBranchesRec(q0, &(q->branches[i]), dim, nv, index);
   }
 }
 
@@ -853,7 +853,7 @@ void _MMG3D_mergeBranchesRec(_MMG3D_PROctree_s* q0, _MMG3D_PROctree_s* q, int di
  * Merge branches that have a parent counting less than nv vertices.
  *
  */
-void _MMG3D_mergeBranches(MMG5_pMesh mesh,_MMG3D_PROctree_s* q, int dim, int nv)
+void MMG3D_mergeBranches(MMG5_pMesh mesh,MMG3D_PROctree_s* q, int dim, int nv)
 {
   int index;
   int i;
@@ -865,10 +865,10 @@ void _MMG3D_mergeBranches(MMG5_pMesh mesh,_MMG3D_PROctree_s* q, int dim, int nv)
 
   for (i = 0; i<(1<<dim); ++i)
   {
-    _MMG3D_mergeBranchesRec(q, &(q->branches[i]), dim, nv, &index);
-    _MMG3D_freePROctree_s(mesh,&(q->branches[i]), nv);
+    MMG3D_mergeBranchesRec(q, &(q->branches[i]), dim, nv, &index);
+    MMG3D_freePROctree_s(mesh,&(q->branches[i]), nv);
   }
-  _MMG5_DEL_MEM(mesh,q->branches);
+  MMG5_DEL_MEM(mesh,q->branches);
 }
 
 /**
@@ -885,7 +885,7 @@ void _MMG3D_mergeBranches(MMG5_pMesh mesh,_MMG3D_PROctree_s* q, int dim, int nv)
  * quadrant is the [0;1]x[0;1]x[0;1] box.
  *
  */
-int _MMG3D_delPROctreeRec(MMG5_pMesh mesh, _MMG3D_PROctree_s* q, double* ver, const int no, const int nv)
+int MMG3D_delPROctreeRec(MMG5_pMesh mesh, MMG3D_PROctree_s* q, double* ver, const int no, const int nv)
 {
   int i;
   int quadrant;
@@ -898,11 +898,11 @@ int _MMG3D_delPROctreeRec(MMG5_pMesh mesh, _MMG3D_PROctree_s* q, double* ver, co
     {
       if (q->v[i] == no)
       {
-        if (!_MMG3D_delPROctreeVertex(mesh, q, i))
+        if (!MMG3D_delPROctreeVertex(mesh, q, i))
           return 0;
         if ( q->nbVer == 0)
         {
-          _MMG5_DEL_MEM(mesh,q->v);
+          MMG5_DEL_MEM(mesh,q->v);
         }
         break;
       }
@@ -921,15 +921,15 @@ int _MMG3D_delPROctreeRec(MMG5_pMesh mesh, _MMG3D_PROctree_s* q, double* ver, co
     nbVerTemp = q->branches[quadrant].nbVer;
 
     // warning: calling recursively here is not optimal
-    if(!_MMG3D_delPROctreeRec(mesh, &(q->branches[quadrant]), ver, no, nv))
+    if(!MMG3D_delPROctreeRec(mesh, &(q->branches[quadrant]), ver, no, nv))
       return 0;
 
     if (nbVerTemp > q->branches[quadrant].nbVer)
     {
-      _MMG5_ADD_MEM(mesh,nv*sizeof(int),"PROctree vertices table",
+      MMG5_ADD_MEM(mesh,nv*sizeof(int),"PROctree vertices table",
                     return 0);
-      _MMG5_SAFE_MALLOC(q->v,nv,int,return 0);
-      _MMG3D_mergeBranches(mesh,q,dim,nv);
+      MMG5_SAFE_MALLOC(q->v,nv,int,return 0);
+      MMG3D_mergeBranches(mesh,q,dim,nv);
     }else
     {
       ++q->nbVer;
@@ -947,7 +947,7 @@ int _MMG3D_delPROctreeRec(MMG5_pMesh mesh, _MMG3D_PROctree_s* q, double* ver, co
 
     --q->nbVer;
     nbVerTemp = q->branches[quadrant].nbVer;
-    if(!_MMG3D_delPROctreeRec(mesh, &(q->branches[quadrant]), ver, no, nv))
+    if(!MMG3D_delPROctreeRec(mesh, &(q->branches[quadrant]), ver, no, nv))
       return 0;
     if (nbVerTemp <= q->branches[quadrant].nbVer) // test if deletion worked
     {
@@ -966,7 +966,7 @@ int _MMG3D_delPROctreeRec(MMG5_pMesh mesh, _MMG3D_PROctree_s* q, double* ver, co
  * Delete the vertex \a no from the PROctree structure.
  *
  */
-int _MMG3D_delPROctree(MMG5_pMesh mesh, _MMG3D_pPROctree q, const int no)
+int MMG3D_delPROctree(MMG5_pMesh mesh, MMG3D_pPROctree q, const int no)
 {
   double pt[3];
   int    dim;
@@ -976,7 +976,7 @@ int _MMG3D_delPROctree(MMG5_pMesh mesh, _MMG3D_pPROctree q, const int no)
   assert(MG_VOK(&mesh->point[no]));
 
   memcpy(&pt, mesh->point[no].c ,dim*sizeof(double));
-  if(!_MMG3D_delPROctreeRec(mesh, q->q0, pt , no, q->nv))
+  if(!MMG3D_delPROctreeRec(mesh, q->q0, pt , no, q->nv))
   {
     return 0;
   }
@@ -994,7 +994,7 @@ int _MMG3D_delPROctree(MMG5_pMesh mesh, _MMG3D_pPROctree q, const int no)
  *
  * \warning debug function, not safe
  */
-void _MMG3D_printArbreDepth(_MMG3D_PROctree_s* q, int depth, int nv, int dim)
+void MMG3D_printArbreDepth(MMG3D_PROctree_s* q, int depth, int nv, int dim)
 {
   int i;
   if ( q->depth < depth && q->nbVer > nv)
@@ -1002,7 +1002,7 @@ void _MMG3D_printArbreDepth(_MMG3D_PROctree_s* q, int depth, int nv, int dim)
 
     for (i = 0; i < (1<<dim); i++)
     {
-      _MMG3D_printArbreDepth(&(q->branches[i]),depth, nv, dim);
+      MMG3D_printArbreDepth(&(q->branches[i]),depth, nv, dim);
     }
   }else if (q->depth == depth)
   {
@@ -1018,7 +1018,7 @@ void _MMG3D_printArbreDepth(_MMG3D_PROctree_s* q, int depth, int nv, int dim)
  * \warning debug function, not safe
  *
  */
-void _MMG3D_printArbre(_MMG3D_pPROctree q)
+void MMG3D_printArbre(MMG3D_pPROctree q)
 {
   int dim;
 
@@ -1027,7 +1027,7 @@ void _MMG3D_printArbre(_MMG3D_pPROctree q)
   for (i = 0; i<sizeof(int)*8/dim; i++)
   {
     fprintf(stdout,"\n depth %i \n", i);
-    _MMG3D_printArbreDepth(q->q0, i, q->nv, dim);
+    MMG3D_printArbreDepth(q->q0, i, q->nv, dim);
 
   }
   fprintf(stdout,"\n end \n");
@@ -1043,13 +1043,13 @@ void _MMG3D_printArbre(_MMG3D_pPROctree q)
  * \warning debug function, not safe
  *
  */
-void _MMG3D_printSubArbre(_MMG3D_PROctree_s* q, int nv, int dim)
+void MMG3D_printSubArbre(MMG3D_PROctree_s* q, int nv, int dim)
 {
   int i;
   for (i = 0; i<sizeof(int)*8/dim; i++)
   {
     fprintf(stdout,"\n depth %i \n", i);
-    _MMG3D_printArbreDepth(q, i, nv, dim);
+    MMG3D_printArbreDepth(q, i, nv, dim);
 
   }
   fprintf(stdout,"\n end \n");
@@ -1066,7 +1066,7 @@ void _MMG3D_printSubArbre(_MMG3D_PROctree_s* q, int nv, int dim)
  *
  * \warning debug function, not safe
  */
-void _MMG3D_sizeArbreRec(_MMG3D_PROctree_s* q, int nv, int dim,int* s1, int* s2)
+void MMG3D_sizeArbreRec(MMG3D_PROctree_s* q, int nv, int dim,int* s1, int* s2)
 {
   int i;
   int nVer;
@@ -1074,8 +1074,8 @@ void _MMG3D_sizeArbreRec(_MMG3D_PROctree_s* q, int nv, int dim,int* s1, int* s2)
   {
     for (i= 0; i <(1<<dim); i++)
     {
-      _MMG3D_sizeArbreRec(&(q->branches[i]),nv,dim, s1, s2);
-      (*s1) += sizeof(_MMG3D_PROctree_s)+(1<<dim)*sizeof(_MMG3D_PROctree_s*);
+      MMG3D_sizeArbreRec(&(q->branches[i]),nv,dim, s1, s2);
+      (*s1) += sizeof(MMG3D_PROctree_s)+(1<<dim)*sizeof(MMG3D_PROctree_s*);
     }
   }else if(q->v != NULL)
   {
@@ -1090,10 +1090,10 @@ void _MMG3D_sizeArbreRec(_MMG3D_PROctree_s* q, int nv, int dim,int* s1, int* s2)
     nVer++;
     nVer = (nVer < nv) ? nVer : ((q->nbVer-0.1)/nv+1)*nv;
     (*s2) += nVer*sizeof(int);
-    (*s1) += sizeof(_MMG3D_PROctree_s);
+    (*s1) += sizeof(MMG3D_PROctree_s);
   }else
   {
-    (*s1) += sizeof(_MMG3D_PROctree_s);
+    (*s1) += sizeof(MMG3D_PROctree_s);
   }
 }
 
@@ -1108,13 +1108,13 @@ void _MMG3D_sizeArbreRec(_MMG3D_PROctree_s* q, int nv, int dim,int* s1, int* s2)
  * \warning debug function, not safe
  *
  */
-int* _MMG3D_sizeArbre(_MMG3D_pPROctree q,int dim)
+int* MMG3D_sizeArbre(MMG3D_pPROctree q,int dim)
 {
   int *s;
-  _MMG5_SAFE_MALLOC(s,2, int,return 0);
+  MMG5_SAFE_MALLOC(s,2, int,return 0);
   s[0] = 0;
   s[1] = 0;
-  _MMG3D_sizeArbreRec(q->q0, q->nv, dim, &s[0], &s[1]);
+  MMG3D_sizeArbreRec(q->q0, q->nv, dim, &s[0], &s[1]);
   return s;
 }
 
@@ -1129,7 +1129,7 @@ int* _MMG3D_sizeArbre(_MMG3D_pPROctree q,int dim)
  * \warning debug function, not safe
  */
 static inline
-int _MMG3D_sizeArbreLinkRec(_MMG3D_PROctree_s* q, int nv, int dim)
+int MMG3D_sizeArbreLinkRec(MMG3D_PROctree_s* q, int nv, int dim)
 {
   int sizeBranches,i;
 
@@ -1140,16 +1140,16 @@ int _MMG3D_sizeArbreLinkRec(_MMG3D_PROctree_s* q, int nv, int dim)
 
     for (i= 0; i <(1<<dim); i++)
     {
-      sizeBranches += _MMG3D_sizeArbreLinkRec(&(q->branches[i]), nv, dim)
-        +sizeof(_MMG3D_PROctree_s)+(1<<dim)*sizeof(_MMG3D_PROctree_s*);
+      sizeBranches += MMG3D_sizeArbreLinkRec(&(q->branches[i]), nv, dim)
+        +sizeof(MMG3D_PROctree_s)+(1<<dim)*sizeof(MMG3D_PROctree_s*);
     }
     return sizeBranches;
   }else if(q->v != NULL)
   {
-    return sizeof(int)+sizeof(_MMG3D_PROctree_s);
+    return sizeof(int)+sizeof(MMG3D_PROctree_s);
   }else
   {
-    return sizeof(_MMG3D_PROctree_s);
+    return sizeof(MMG3D_PROctree_s);
   }
 }
 
@@ -1161,12 +1161,12 @@ int _MMG3D_sizeArbreLinkRec(_MMG3D_PROctree_s* q, int nv, int dim)
  * \warning debug function, not safe
  */
 static inline
-int _MMG3D_sizeArbreLink(_MMG3D_pPROctree q)
+int MMG3D_sizeArbreLink(MMG3D_pPROctree q)
 {
   int dim;
 
   dim = 3;
-  return _MMG3D_sizeArbreLinkRec(q->q0, q->nv, dim)+q->q0->nbVer*sizeof(int);
+  return MMG3D_sizeArbreLinkRec(q->q0, q->nv, dim)+q->q0->nbVer*sizeof(int);
 }
 
 /**
@@ -1176,11 +1176,11 @@ int _MMG3D_sizeArbreLink(_MMG3D_pPROctree q)
  *
  */
 static inline
-int _MMG3D_NearNeighborSquare(MMG5_pMesh mesh, double* ani, _MMG3D_pPROctree q,
+int MMG3D_NearNeighborSquare(MMG5_pMesh mesh, double* ani, MMG3D_pPROctree q,
                               int no, double l, int dim)
 {
   MMG5_pPoint   ppt,ppt1;
-  _MMG3D_PROctree_s** qlist;
+  MMG3D_PROctree_s** qlist;
   int ns,nver;
   double *rect;
   double lmin =10;
@@ -1189,7 +1189,7 @@ int _MMG3D_NearNeighborSquare(MMG5_pMesh mesh, double* ani, _MMG3D_pPROctree q,
   int i, j;
 
   nmin = 0;
-  _MMG5_SAFE_MALLOC(rect,2*dim,double,return -1);
+  MMG5_SAFE_MALLOC(rect,2*dim,double,return -1);
 
   ppt = &mesh->point[no];
   rect[0] = ppt->c[0]-l;
@@ -1199,7 +1199,7 @@ int _MMG3D_NearNeighborSquare(MMG5_pMesh mesh, double* ani, _MMG3D_pPROctree q,
   rect[4] = 2*l;
   rect[5] = 2*l;
   qlist = NULL;
-  ns = _MMG3D_getListSquare(mesh, ani, q, rect, &qlist);
+  ns = MMG3D_getListSquare(mesh, ani, q, rect, &qlist);
 
 
   for (i = 0; i < ns; i++)
@@ -1225,8 +1225,8 @@ int _MMG3D_NearNeighborSquare(MMG5_pMesh mesh, double* ani, _MMG3D_pPROctree q,
     }
   }
 
-  _MMG5_SAFE_FREE(qlist);
-  _MMG5_SAFE_FREE(rect);
+  MMG5_SAFE_FREE(qlist);
+  MMG5_SAFE_FREE(rect);
 
   if (sqrt(lmin)<l)
     return nmin;
@@ -1247,9 +1247,9 @@ int _MMG3D_NearNeighborSquare(MMG5_pMesh mesh, double* ani, _MMG3D_pPROctree q,
  * metric).
  *
  */
-int _MMG3D_PROctreein_iso(MMG5_pMesh mesh,MMG5_pSol sol,_MMG3D_pPROctree PROctree,int ip,double lmax) {
+int MMG3D_PROctreein_iso(MMG5_pMesh mesh,MMG5_pSol sol,MMG3D_pPROctree PROctree,int ip,double lmax) {
   MMG5_pPoint     ppt,pp1;
-  _MMG3D_PROctree_s **lococ;
+  MMG3D_PROctree_s **lococ;
   double          d2,ux,uy,uz,hpi,hp1,hpi2,methalo[6];
   int             ip1,i,j;
   int             ncells;
@@ -1278,11 +1278,11 @@ int _MMG3D_PROctreein_iso(MMG5_pMesh mesh,MMG5_pSol sol,_MMG3D_pPROctree PROctre
   methalo[2] = ppt->c[2] - hpi;
   methalo[3] = methalo[4] = methalo[5] = 2.*hpi;
 
-  ncells = _MMG3D_getListSquare(mesh, ani, PROctree, methalo, &lococ);
+  ncells = MMG3D_getListSquare(mesh, ani, PROctree, methalo, &lococ);
   if (ncells < 0)
   {
 
-    _MMG5_DEL_MEM(mesh,lococ);
+    MMG5_DEL_MEM(mesh,lococ);
     return 0;
   }
   /* Check the PROctree cells */
@@ -1305,12 +1305,12 @@ int _MMG3D_PROctreein_iso(MMG5_pMesh mesh,MMG5_pSol sol,_MMG3D_pPROctree PROctre
 
       if ( d2 < hp1 || d2 < hpi2*hpi2 )
       {
-        _MMG5_DEL_MEM(mesh,lococ);
+        MMG5_DEL_MEM(mesh,lococ);
         return 0;
       }
     }
   }
-  _MMG5_DEL_MEM(mesh,lococ);
+  MMG5_DEL_MEM(mesh,lococ);
   return 1;
 }
 
@@ -1326,9 +1326,9 @@ int _MMG3D_PROctreein_iso(MMG5_pMesh mesh,MMG5_pSol sol,_MMG3D_pPROctree PROctre
  * anisotropic metric).
  *
  */
-int _MMG3D_PROctreein_ani(MMG5_pMesh mesh,MMG5_pSol sol,_MMG3D_pPROctree PROctree,int ip,double lmax) {
+int MMG3D_PROctreein_ani(MMG5_pMesh mesh,MMG5_pSol sol,MMG3D_pPROctree PROctree,int ip,double lmax) {
   MMG5_pPoint     ppt,pp1;
-  _MMG3D_PROctree_s **lococ;
+  MMG3D_PROctree_s **lococ;
   double          d2,ux,uy,uz,methalo[6];
   double          det,dmi, *ma, *mb,m1,m2,m3,dx,dy,dz;
   int             iadr,ip1,i,j;
@@ -1377,10 +1377,10 @@ int _MMG3D_PROctreein_ani(MMG5_pMesh mesh,MMG5_pSol sol,_MMG3D_pPROctree PROctre
   methalo[5] = 2*dz;
 
   // this function allocates lococ, it has to be deleted after the call
-  ncells = _MMG3D_getListSquare(mesh,ma,PROctree, methalo, &lococ);
+  ncells = MMG3D_getListSquare(mesh,ma,PROctree, methalo, &lococ);
   if (ncells < 0)
   {
-    _MMG5_DEL_MEM(mesh,lococ);
+    MMG5_DEL_MEM(mesh,lococ);
     return 0;
   }
   /* Check the PROctree cells */
@@ -1399,7 +1399,7 @@ int _MMG3D_PROctreein_ani(MMG5_pMesh mesh,MMG5_pSol sol,_MMG3D_pPROctree PROctre
         + 2.0*(ma[1]*ux*uy + ma[2]*ux*uz + ma[4]*uy*uz);
       if ( d2 < dmi )
       {
-        _MMG5_DEL_MEM(mesh,lococ);
+        MMG5_DEL_MEM(mesh,lococ);
         return 0;
       }
       else
@@ -1409,13 +1409,13 @@ int _MMG3D_PROctreein_ani(MMG5_pMesh mesh,MMG5_pSol sol,_MMG3D_pPROctree PROctre
         d2   = mb[0]*ux*ux + mb[3]*uy*uy + mb[5]*uz*uz
           + 2.0*(mb[1]*ux*uy + mb[2]*ux*uz + mb[4]*uy*uz);
         if ( d2 < dmi ) {
-          _MMG5_DEL_MEM(mesh,lococ);
+          MMG5_DEL_MEM(mesh,lococ);
           return 0;
         }
       }
     }
   }
 
-  _MMG5_DEL_MEM(mesh,lococ);
+  MMG5_DEL_MEM(mesh,lococ);
   return 1;
 }

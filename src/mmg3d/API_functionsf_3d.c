@@ -50,7 +50,7 @@ FORTRAN_VARIADIC ( MMG3D_INIT_MESH, mmg3d_init_mesh,
 
                    va_start(argptr, starter);
 
-                   ier = _MMG3D_Init_mesh_var(argptr);
+                   ier = MMG3D_Init_mesh_var(argptr);
 
                    va_end(argptr);
 
@@ -75,11 +75,11 @@ FORTRAN_NAME(MMG3D_SET_INPUTMESHNAME, mmg3d_set_inputmeshname,
              (mesh,meshin,strlen0,retval)) {
   char *tmp = NULL;
 
-  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
+  MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
   strncpy(tmp,meshin,*strlen0);
   tmp[*strlen0] = '\0';
   *retval = MMG3D_Set_inputMeshName(*mesh,tmp);
-  _MMG5_SAFE_FREE(tmp);
+  MMG5_SAFE_FREE(tmp);
 
   return;
 }
@@ -93,11 +93,11 @@ FORTRAN_NAME(MMG3D_SET_INPUTSOLNAME, mmg3d_set_inputsolname,
 
   char *tmp = NULL;
 
-  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
+  MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
   strncpy(tmp,solin,*strlen0);
   tmp[*strlen0] = '\0';
   *retval = MMG3D_Set_inputSolName(*mesh,*sol,tmp);
-  _MMG5_SAFE_FREE(tmp);
+  MMG5_SAFE_FREE(tmp);
 
   return;
 }
@@ -110,11 +110,11 @@ FORTRAN_NAME(MMG3D_SET_OUTPUTMESHNAME,mmg3d_set_outputmeshname,
              (mesh,meshout,strlen0,retval)){
   char *tmp = NULL;
 
-  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
+  MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
   strncpy(tmp,meshout,*strlen0);
   tmp[*strlen0] = '\0';
   *retval = MMG3D_Set_outputMeshName(*mesh, tmp);
-  _MMG5_SAFE_FREE(tmp);
+  MMG5_SAFE_FREE(tmp);
 
   return;
 }
@@ -127,11 +127,11 @@ FORTRAN_NAME(MMG3D_SET_OUTPUTSOLNAME,mmg3d_set_outputsolname,
              (mesh,sol,solout,strlen0,retval)){
   char *tmp = NULL;
 
-  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
+  MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
   strncpy(tmp,solout,*strlen0);
   tmp[*strlen0] = '\0';
   *retval = MMG3D_Set_outputSolName(*mesh,*sol,tmp);
-  _MMG5_SAFE_FREE(tmp);
+  MMG5_SAFE_FREE(tmp);
 
   return;
 }
@@ -822,7 +822,7 @@ FORTRAN_VARIADIC(MMG3D_FREE_ALL,mmg3d_free_all,
 
                  va_start(argptr, starter);
 
-                 ier = _MMG3D_Free_all_var(argptr);
+                 ier = MMG3D_Free_all_var(argptr);
 
                  va_end(argptr);
 
@@ -840,7 +840,7 @@ FORTRAN_VARIADIC(MMG3D_FREE_STRUCTURES,mmg3d_free_structures,
 
                  va_start(argptr, starter);
 
-                 ier = _MMG3D_Free_structures_var(argptr);
+                 ier = MMG3D_Free_structures_var(argptr);
 
                  va_end(argptr);
 
@@ -859,7 +859,7 @@ FORTRAN_VARIADIC(MMG3D_FREE_NAMES,mmg3d_free_names,
 
                  va_start(argptr, starter);
 
-                 ier = _MMG3D_Free_names_var(argptr);
+                 ier = MMG3D_Free_names_var(argptr);
 
                  va_end(argptr);
 
@@ -876,13 +876,13 @@ FORTRAN_NAME(MMG3D_LOADMESH,mmg3d_loadmesh,
              (mesh,filename,strlen0, retval)){
   char *tmp = NULL;
 
-  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
+  MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
   strncpy(tmp,filename,*strlen0);
   tmp[*strlen0] = '\0';
 
   *retval = MMG3D_loadMesh(*mesh,tmp);
 
-  _MMG5_SAFE_FREE(tmp);
+  MMG5_SAFE_FREE(tmp);
 
   return;
 }
@@ -895,13 +895,13 @@ FORTRAN_NAME(MMG3D_LOADMSHMESH,mmg3d_loadmshmesh,
              (mesh,sol,filename,strlen0, retval)){
   char *tmp = NULL;
 
-  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
+  MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
   strncpy(tmp,filename,*strlen0);
   tmp[*strlen0] = '\0';
 
   *retval = MMG3D_loadMshMesh(*mesh,*sol,tmp);
 
-  _MMG5_SAFE_FREE(tmp);
+  MMG5_SAFE_FREE(tmp);
 
   return;
 }
@@ -914,13 +914,13 @@ FORTRAN_NAME(MMG3D_LOADMSHMESH_AND_ALLDATA,mmg3d_loadmshmesh_and_alldata,
              (mesh,sol,filename,strlen0, retval)){
   char *tmp = NULL;
 
-  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
+  MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
   strncpy(tmp,filename,*strlen0);
   tmp[*strlen0] = '\0';
 
   *retval = MMG3D_loadMshMesh_and_allData(*mesh,sol,tmp);
 
-  _MMG5_SAFE_FREE(tmp);
+  MMG5_SAFE_FREE(tmp);
 
   return;
 }
@@ -933,13 +933,13 @@ FORTRAN_NAME(MMG3D_SAVEMESH,mmg3d_savemesh,
              (mesh,filename,strlen0, retval)){
   char *tmp = NULL;
 
-  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
+  MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
   strncpy(tmp,filename,*strlen0);
   tmp[*strlen0] = '\0';
 
   *retval = MMG3D_saveMesh(*mesh,tmp);
 
-  _MMG5_SAFE_FREE(tmp);
+  MMG5_SAFE_FREE(tmp);
 
   return;
 }
@@ -953,13 +953,13 @@ FORTRAN_NAME(MMG3D_SAVEMSHMESH,mmg3d_savemshmesh,
              (mesh,sol,filename,strlen0,retval)){
   char *tmp = NULL;
 
-  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
+  MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
   strncpy(tmp,filename,*strlen0);
   tmp[*strlen0] = '\0';
 
   *retval = MMG3D_saveMshMesh(*mesh,*sol,tmp);
 
-  _MMG5_SAFE_FREE(tmp);
+  MMG5_SAFE_FREE(tmp);
 
   return;
 }
@@ -973,13 +973,13 @@ FORTRAN_NAME(MMG3D_SAVEMSHMESH_AND_ALLDATA,mmg3d_savemshmesh_and_alldata,
              (mesh,sol,filename,strlen0,retval)){
   char *tmp = NULL;
 
-  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
+  MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
   strncpy(tmp,filename,*strlen0);
   tmp[*strlen0] = '\0';
 
   *retval = MMG3D_saveMshMesh_and_allData(*mesh,sol,tmp);
 
-  _MMG5_SAFE_FREE(tmp);
+  MMG5_SAFE_FREE(tmp);
 
   return;
 }
@@ -992,13 +992,13 @@ FORTRAN_NAME(MMG3D_LOADSOL,mmg3d_loadsol,
              (mesh,met,filename,strlen0,retval)){
   char *tmp = NULL;
 
-  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
+  MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
   strncpy(tmp,filename,*strlen0);
   tmp[*strlen0] = '\0';
 
   *retval = MMG3D_loadSol(*mesh,*met,tmp);
 
-  _MMG5_SAFE_FREE(tmp);
+  MMG5_SAFE_FREE(tmp);
 
   return;
 }
@@ -1011,13 +1011,13 @@ FORTRAN_NAME(MMG3D_LOADALLSOLS,mmg3d_loadallsols,
              (mesh,sol,filename,strlen0,retval)){
   char *tmp = NULL;
 
-  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
+  MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
   strncpy(tmp,filename,*strlen0);
   tmp[*strlen0] = '\0';
 
   *retval = MMG3D_loadAllSols(*mesh,sol,tmp);
 
-  _MMG5_SAFE_FREE(tmp);
+  MMG5_SAFE_FREE(tmp);
 
   return;
 }
@@ -1030,13 +1030,13 @@ FORTRAN_NAME(MMG3D_SAVESOL,mmg3d_savesol,
              (mesh,met,filename,strlen0,retval)){
   char *tmp = NULL;
 
-  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
+  MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
   strncpy(tmp,filename,*strlen0);
   tmp[*strlen0] = '\0';
 
   *retval = MMG3D_saveSol(*mesh,*met,tmp);
 
-  _MMG5_SAFE_FREE(tmp);
+  MMG5_SAFE_FREE(tmp);
 
   return;
 }
@@ -1049,13 +1049,13 @@ FORTRAN_NAME(MMG3D_SAVEALLSOLS,mmg3d_saveallsols,
              (mesh,sol,filename,strlen0,retval)){
   char *tmp = NULL;
 
-  _MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
+  MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
   strncpy(tmp,filename,*strlen0);
   tmp[*strlen0] = '\0';
 
   *retval = MMG3D_saveAllSols(*mesh,sol,tmp);
 
-  _MMG5_SAFE_FREE(tmp);
+  MMG5_SAFE_FREE(tmp);
 
   return;
 }

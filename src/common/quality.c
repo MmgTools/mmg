@@ -44,7 +44,7 @@
  * an anisotropic metric and a classic storage of the ridges metrics.
  *
  */
-double _MMG5_caltri33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt) {
+double MMG5_caltri33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt) {
   double   anisurf,dd,abx,aby,abz,acx,acy,acz,bcx,bcy,bcz;
   double  *a,*b,*c,*ma,*mb,*mc,m[6],l0,l1,l2,rap;
   int      ia,ib,ic;
@@ -59,8 +59,8 @@ double _MMG5_caltri33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt) {
   mc = &met->m[6*ic];
 
   /* 2*area */
-  anisurf  = _MMG5_surftri33_ani(mesh,pt,ma,mb,mc);
-  if ( anisurf <= _MMG5_EPSD2 ) return 0.0;
+  anisurf  = MMG5_surftri33_ani(mesh,pt,ma,mb,mc);
+  if ( anisurf <= MMG5_EPSD2 ) return 0.0;
 
   dd  = 1.0 / 3.0;
   for (i=0; i<6; i++)
@@ -93,7 +93,7 @@ double _MMG5_caltri33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt) {
   rap = l0 + l1 + l2;
 
   /* quality = 2*area/length */
-  if ( rap > _MMG5_EPSD2 ) {
+  if ( rap > MMG5_EPSD2 ) {
     return  anisurf / rap;
   }
   else
@@ -112,7 +112,7 @@ double _MMG5_caltri33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt) {
  * \warning The quality is computed as if the triangle is a "straight" triangle.
  *
  */
-double _MMG5_caltri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
+double MMG5_caltri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
   MMG5_pPoint   p[3];
   double        rap,anisurf,l0,l1,l2,m[6],mm[6];
   double        abx,aby,abz,acx,acy,acz,bcy,bcx,bcz;
@@ -135,23 +135,23 @@ double _MMG5_caltri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
       memcpy(&m[0],&met->m[6*np[i]],6*sizeof(double));
     }
     else if ( p[i]->tag & MG_GEO ) {
-      i1 = _MMG5_inxt2[i];
-      i2 = _MMG5_iprv2[i];
+      i1 = MMG5_inxt2[i];
+      i2 = MMG5_iprv2[i];
       abx = 0.5*(p[i1]->c[0]+p[i2]->c[0]) - p[i]->c[0];
       aby = 0.5*(p[i1]->c[1]+p[i2]->c[1]) - p[i]->c[1];
       abz = 0.5*(p[i1]->c[2]+p[i2]->c[2]) - p[i]->c[2];
-      if ( !_MMG5_buildridmet(mesh,met,np[i],abx,aby,abz,&m[0]) )  return 0.0;
+      if ( !MMG5_buildridmet(mesh,met,np[i],abx,aby,abz,&m[0]) )  return 0.0;
     }
     else {
       memcpy(&m[0],&met->m[6*np[i]],6*sizeof(double));
     }
 
     for ( j=0; j<6; ++j) {
-      mm[j] += _MMG5_ATHIRD*m[j];
+      mm[j] += MMG5_ATHIRD*m[j];
     }
   }
 
-  anisurf = _MMG5_surftri33_ani(mesh,ptt,mm,mm,mm);
+  anisurf = MMG5_surftri33_ani(mesh,ptt,mm,mm,mm);
 
   /* length */
   abx = p[1]->c[0] - p[0]->c[0];
@@ -176,7 +176,7 @@ double _MMG5_caltri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
 
   rap = l0 + l1 + l2;
 
-  if ( rap < _MMG5_EPSD2 ) return 0.0;
+  if ( rap < MMG5_EPSD2 ) return 0.0;
 
   /* quality = 2*area/length */
   return (anisurf / rap);
@@ -192,7 +192,7 @@ double _MMG5_caltri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
  * an isotropic metric.
  *
  */
-inline double _MMG5_caltri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
+inline double MMG5_caltri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
   double   *a,*b,*c,cal,abx,aby,abz,acx,acy,acz,bcx,bcy,bcz,rap;
 
   a = &mesh->point[ptt->v[0]].c[0];
@@ -214,14 +214,14 @@ inline double _MMG5_caltri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
   cal += (abz*acx - abx*acz) * (abz*acx - abx*acz);
   cal += (abx*acy - aby*acx) * (abx*acy - aby*acx);
 
-  if ( cal < _MMG5_EPSD2 )  return 0.0;
+  if ( cal < MMG5_EPSD2 )  return 0.0;
 
   /* qual = 2.*surf / length */
   rap  = abx*abx + aby*aby + abz*abz;
   rap += acx*acx + acy*acy + acz*acz;
   rap += bcx*bcx + bcy*bcy + bcz*bcz;
 
-  if ( rap < _MMG5_EPSD2 )  return 0.0;
+  if ( rap < MMG5_EPSD2 )  return 0.0;
 
   return sqrt(cal) / rap;
 }
@@ -245,7 +245,7 @@ inline double _MMG5_caltri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
  * Display histogram of edge length.
  *
  */
-void _MMG5_displayLengthHisto(MMG5_pMesh mesh, int ned, double *avlen,
+void MMG5_displayLengthHisto(MMG5_pMesh mesh, int ned, double *avlen,
                               int amin, int bmin, double lmin,
                               int amax, int bmax, double lmax,
                               int nullEdge,double *bd, int *hl,char shift)
@@ -262,7 +262,7 @@ void _MMG5_displayLengthHisto(MMG5_pMesh mesh, int ned, double *avlen,
   fprintf(stdout,"     LARGEST  EDGE LENGTH   %12.4f   %6d %6d \n",
           lmax,amax,bmax);
 
-  _MMG5_displayLengthHisto_internal(mesh,ned,amin,bmin,lmin,amax,bmax,
+  MMG5_displayLengthHisto_internal(mesh,ned,amin,bmin,lmin,amax,bmax,
                                     lmax,nullEdge,bd,hl,shift,
                                     mesh->info.imprim);
 
@@ -288,7 +288,7 @@ void _MMG5_displayLengthHisto(MMG5_pMesh mesh, int ned, double *avlen,
  * Display histogram of edge length without the histo header
  *
  */
-void _MMG5_displayLengthHisto_internal(MMG5_pMesh mesh, int ned,int amin,
+void MMG5_displayLengthHisto_internal(MMG5_pMesh mesh, int ned,int amin,
                                        int bmin, double lmin,int amax, int bmax,
                                        double lmax,int nullEdge,double *bd,
                                        int *hl,char shift,int imprim)
@@ -331,24 +331,24 @@ void _MMG5_displayLengthHisto_internal(MMG5_pMesh mesh, int ned,int amin,
  * \param minqual quality of the worst tetra of the mesh (normalized by \a alpha)
  * \param alpha normalisation parameter for the quality
  *
- * \return 1 if success, 0 if fail (the quality is lower than _MMG5_NULKAL).
+ * \return 1 if success, 0 if fail (the quality is lower than MMG5_NULKAL).
  *
  * Print warning or error messages depending on the quality of the worst tetra
  * of the mesh.
  *
  */
-int _MMG5_minQualCheck ( int iel, double minqual, double alpha )
+int MMG5_minQualCheck ( int iel, double minqual, double alpha )
 {
   double minqualOnAlpha;
 
   minqualOnAlpha = minqual/alpha;
 
-  if ( minqualOnAlpha < _MMG5_NULKAL ) {
+  if ( minqualOnAlpha < MMG5_NULKAL ) {
     fprintf(stderr,"\n  ## Error: %s: too bad quality for the worst element: "
             "(elt %d -> %15e)\n",__func__,iel,minqual);
     return 0;
   }
-  else if ( minqualOnAlpha < _MMG5_EPSOK ) {
+  else if ( minqualOnAlpha < MMG5_EPSOK ) {
     fprintf(stderr,"\n  ## Warning: %s: very bad quality for the worst element: "
             "(elt %d -> %15e)\n",__func__,iel,minqual);
   }

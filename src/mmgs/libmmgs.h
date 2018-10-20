@@ -33,8 +33,8 @@
  *
  */
 
-#ifndef _MMGSLIB_H
-#define _MMGSLIB_H
+#ifndef MMGSLIB_H
+#define MMGSLIB_H
 
 
 #ifdef __cplusplus

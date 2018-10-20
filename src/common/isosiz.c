@@ -39,7 +39,7 @@
  * the isotropic metric \a met.
  *
  */
-double _MMG5_surftri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
+double MMG5_surftri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
   double   *a,*b,*c,abx,aby,abz,acx,acy,acz,det,n[3];
 
   a = mesh->point[ptt->v[0]].c;

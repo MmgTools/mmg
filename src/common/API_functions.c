@@ -48,7 +48,7 @@
  * Initialization of the input parameters.
  *
  */
-void _MMG5_Init_parameters(MMG5_pMesh mesh) {
+void MMG5_Init_parameters(MMG5_pMesh mesh) {
 
   memset(&mesh->info,0, sizeof(MMG5_Info));
 
@@ -58,7 +58,7 @@ void _MMG5_Init_parameters(MMG5_pMesh mesh) {
   /* [0/1]    ,Turn on/off levelset meshing */
   mesh->info.iso      =  0;
   /* [n/-1]   ,Set memory size to n Mbytes/keep the default value */
-  mesh->info.mem      = _MMG5_NONSET_MEM;
+  mesh->info.mem      = MMG5_NONSET_MEM;
   /* [0/1]    ,Turn on/off debug mode */
   mesh->info.ddebug   =  0;
   /* [n]      ,number of local parameters */
@@ -74,17 +74,17 @@ void _MMG5_Init_parameters(MMG5_pMesh mesh) {
 
   /* default values for doubles */
   /* angle detection */
-  mesh->info.dhd      = _MMG5_ANGEDG;
+  mesh->info.dhd      = MMG5_ANGEDG;
   /* minimal mesh size */
-  mesh->info.hmin     = _MMG5_NONSET_HMIN;
+  mesh->info.hmin     = MMG5_NONSET_HMIN;
   /* maximal mesh size */
-  mesh->info.hmax     = _MMG5_NONSET_HMAX;
+  mesh->info.hmax     = MMG5_NONSET_HMAX;
   /* constant mesh size */
-  mesh->info.hsiz     = _MMG5_NONSET_HSIZ;
+  mesh->info.hsiz     = MMG5_NONSET_HSIZ;
   /* control Hausdorff */
-  mesh->info.hausd    = _MMG5_HAUSD;
+  mesh->info.hausd    = MMG5_HAUSD;
   /* control gradation */
-  mesh->info.hgrad    = _MMG5_HGRAD;
+  mesh->info.hgrad    = MMG5_HGRAD;
 
   /* default values for pointers */
   /* list of user-defined references */
@@ -92,18 +92,18 @@ void _MMG5_Init_parameters(MMG5_pMesh mesh) {
 
   /** MMG3D_IPARAM_lag is used by mmg3d only but need to be negative in the
    * scaleMesh function */
-  mesh->info.lag      = _MMG5_LAG;
+  mesh->info.lag      = MMG5_LAG;
 
   /* initial value for memMax and gap */
-  mesh->gap = _MMG5_GAP;
-  mesh->memMax = _MMG5_memSize();
+  mesh->gap = MMG5_GAP;
+  mesh->memMax = MMG5_memSize();
   if ( mesh->memMax ) {
     /* maximal memory = 50% of total physical memory */
-    mesh->memMax = mesh->memMax*_MMG5_MEMPERCENT;
+    mesh->memMax = mesh->memMax*MMG5_MEMPERCENT;
   } else {
     /* default value = 800 MB */
-    printf("  Maximum memory set to default value: %d MB.\n",_MMG5_MEMMAX);
-    mesh->memMax = _MMG5_MEMMAX << _MMG5_BITWIZE_MB_TO_B;
+    printf("  Maximum memory set to default value: %d MB.\n",MMG5_MEMMAX);
+    mesh->memMax = MMG5_MEMMAX << MMG5_BITWIZE_MB_TO_B;
   }
 
 }
@@ -139,21 +139,21 @@ void MMG5_Init_fileNames(MMG5_pMesh mesh,MMG5_pSol sol
 int MMG5_Set_inputMeshName(MMG5_pMesh mesh, const char* meshin) {
 
   if ( mesh->namein ){
-    _MMG5_DEL_MEM(mesh,mesh->namein);
+    MMG5_DEL_MEM(mesh,mesh->namein);
   }
 
   if ( strlen(meshin) ) {
-    _MMG5_ADD_MEM(mesh,(strlen(meshin)+1)*sizeof(char),"input mesh name",
+    MMG5_ADD_MEM(mesh,(strlen(meshin)+1)*sizeof(char),"input mesh name",
                   fprintf(stderr,"  Exit program.\n");
                   return 0);
-    _MMG5_SAFE_CALLOC(mesh->namein,strlen(meshin)+1,char,return 0);
+    MMG5_SAFE_CALLOC(mesh->namein,strlen(meshin)+1,char,return 0);
     strcpy(mesh->namein,meshin);
   }
   else {
-    _MMG5_ADD_MEM(mesh,10*sizeof(char),"input mesh name",
+    MMG5_ADD_MEM(mesh,10*sizeof(char),"input mesh name",
                   fprintf(stderr,"  Exit program.\n");
                   return 0);
-    _MMG5_SAFE_CALLOC(mesh->namein,10,char,return 0);
+    MMG5_SAFE_CALLOC(mesh->namein,10,char,return 0);
     strcpy(mesh->namein,"mesh.mesh");
     if ( (mesh->info.imprim > 5) || mesh->info.ddebug ) {
       fprintf(stderr,"\n  ## Warning: %s: no name given for input mesh.\n",__func__);
@@ -176,36 +176,36 @@ int MMG5_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solin) {
   char *ptr;
 
   if ( sol->namein )
-    _MMG5_DEL_MEM(mesh,sol->namein);
+    MMG5_DEL_MEM(mesh,sol->namein);
 
   if ( strlen(solin) ) {
-    _MMG5_ADD_MEM(mesh,(strlen(solin)+1)*sizeof(char),"input sol name",
+    MMG5_ADD_MEM(mesh,(strlen(solin)+1)*sizeof(char),"input sol name",
                   fprintf(stderr,"  Exit program.\n");
                   return 0);
-    _MMG5_SAFE_CALLOC(sol->namein,strlen(solin)+1,char,return 0);
+    MMG5_SAFE_CALLOC(sol->namein,strlen(solin)+1,char,return 0);
     strcpy(sol->namein,solin);
   }
   else {
     if ( mesh->namein && strlen(mesh->namein) ) {
       int mesh_len = strlen(mesh->namein)+1;
-      _MMG5_SAFE_CALLOC(sol->namein,mesh_len,char,return 0);
+      MMG5_SAFE_CALLOC(sol->namein,mesh_len,char,return 0);
       strcpy(sol->namein,mesh->namein);
       ptr = strstr(sol->namein,".mesh");
       if ( ptr ) {
         /* the sol file is renamed with the meshfile without extension */
         *ptr = '\0';
-        _MMG5_SAFE_REALLOC(sol->namein,mesh_len,(strlen(sol->namein)+1),char,
+        MMG5_SAFE_REALLOC(sol->namein,mesh_len,(strlen(sol->namein)+1),char,
                            "input sol name",return 0);
       }
-      _MMG5_ADD_MEM(mesh,(strlen(sol->namein)+1)*sizeof(char),"input sol name",
+      MMG5_ADD_MEM(mesh,(strlen(sol->namein)+1)*sizeof(char),"input sol name",
                     fprintf(stderr,"  Exit program.\n");
                     return 0);
     }
     else {
-      _MMG5_ADD_MEM(mesh,9*sizeof(char),"input sol name",
+      MMG5_ADD_MEM(mesh,9*sizeof(char),"input sol name",
                     fprintf(stderr,"  Exit program.\n");
                     return 0);
-      _MMG5_SAFE_CALLOC(sol->namein,9,char,return 0);
+      MMG5_SAFE_CALLOC(sol->namein,9,char,return 0);
       strcpy(sol->namein,"mesh.sol");
     }
   }
@@ -226,21 +226,21 @@ int MMG5_Set_outputMeshName(MMG5_pMesh mesh, const char* meshout) {
   ptrMed = ptrGmsh = NULL;
 
   if ( mesh->nameout )
-    _MMG5_DEL_MEM(mesh,mesh->nameout);
+    MMG5_DEL_MEM(mesh,mesh->nameout);
 
   if ( strlen(meshout) ) {
-    _MMG5_ADD_MEM(mesh,(strlen(meshout)+1)*sizeof(char),"output mesh name",
+    MMG5_ADD_MEM(mesh,(strlen(meshout)+1)*sizeof(char),"output mesh name",
                   fprintf(stderr,"  Exit program.\n");
                   return 0);
-    _MMG5_SAFE_CALLOC(mesh->nameout,strlen(meshout)+1,char,return 0);
+    MMG5_SAFE_CALLOC(mesh->nameout,strlen(meshout)+1,char,return 0);
     strcpy(mesh->nameout,meshout);
   }
   else {
     if ( mesh->namein && strlen(mesh->namein) ) {
-      _MMG5_ADD_MEM(mesh,(strlen(mesh->namein)+3)*sizeof(char),"output mesh name",
+      MMG5_ADD_MEM(mesh,(strlen(mesh->namein)+3)*sizeof(char),"output mesh name",
                     fprintf(stderr,"  Exit program.\n");
                     return 0);
-      _MMG5_SAFE_CALLOC(mesh->nameout,strlen(mesh->namein)+3,char,return 0);
+      MMG5_SAFE_CALLOC(mesh->nameout,strlen(mesh->namein)+3,char,return 0);
       strcpy(mesh->nameout,mesh->namein);
 
       /* medit format? */
@@ -272,10 +272,10 @@ int MMG5_Set_outputMeshName(MMG5_pMesh mesh, const char* meshout) {
 
     }
     else {
-      _MMG5_ADD_MEM(mesh,12*sizeof(char),"output mesh name",
+      MMG5_ADD_MEM(mesh,12*sizeof(char),"output mesh name",
                     fprintf(stderr,"  Exit program.\n");
                     return 0);
-      _MMG5_SAFE_CALLOC(mesh->nameout,12,char,return 0);
+      MMG5_SAFE_CALLOC(mesh->nameout,12,char,return 0);
       if ( (mesh->info.imprim > 5) || mesh->info.ddebug ) {
         fprintf(stderr,"\n  ## Warning: %s: no name given for output mesh.\n",
                 __func__);
@@ -302,24 +302,24 @@ int MMG5_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solout) {
   int oldsize;
 
   if ( sol->nameout )
-    _MMG5_DEL_MEM(mesh,sol->nameout);
+    MMG5_DEL_MEM(mesh,sol->nameout);
 
   if ( strlen(solout) ) {
-    _MMG5_ADD_MEM(mesh,(strlen(solout)+1)*sizeof(char),"output sol name",
+    MMG5_ADD_MEM(mesh,(strlen(solout)+1)*sizeof(char),"output sol name",
                   fprintf(stderr,"  Exit program.\n");
                   return 0);
-    _MMG5_SAFE_CALLOC(sol->nameout,strlen(solout)+1,char,return 0);
+    MMG5_SAFE_CALLOC(sol->nameout,strlen(solout)+1,char,return 0);
     strcpy(sol->nameout,solout);
   }
   else {
     if ( strlen(mesh->nameout) ) {
       ptr = strstr(mesh->nameout,".mesh");
       if ( ptr ) {
-        _MMG5_SAFE_CALLOC(sol->nameout,strlen(mesh->nameout)+1,char,return 0);
+        MMG5_SAFE_CALLOC(sol->nameout,strlen(mesh->nameout)+1,char,return 0);
         oldsize = strlen(mesh->nameout)+1;
       }
       else {
-        _MMG5_SAFE_CALLOC(sol->nameout,strlen(mesh->nameout)+6,char,return 0);
+        MMG5_SAFE_CALLOC(sol->nameout,strlen(mesh->nameout)+6,char,return 0);
         oldsize = strlen(mesh->nameout)+6;
       }
       strcpy(sol->nameout,mesh->nameout);
@@ -328,10 +328,10 @@ int MMG5_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solout) {
         /* the sol file is renamed with the meshfile without extension */
         *ptr = '\0';
       strcat(sol->nameout,".sol");
-      _MMG5_ADD_MEM(mesh,(strlen(sol->nameout)+1)*sizeof(char),"output sol name",
+      MMG5_ADD_MEM(mesh,(strlen(sol->nameout)+1)*sizeof(char),"output sol name",
                     fprintf(stderr,"  Exit program.\n");
                     return 0);
-      _MMG5_SAFE_REALLOC(sol->nameout,oldsize,(strlen(sol->nameout)+1),char,
+      MMG5_SAFE_REALLOC(sol->nameout,oldsize,(strlen(sol->nameout)+1),char,
                          "output sol name",return 0);
     }
     else {
@@ -354,21 +354,21 @@ int MMG5_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solout) {
 void MMG5_Free_structures(MMG5_pMesh mesh,MMG5_pSol sol){
 
   if ( mesh->point )
-    _MMG5_DEL_MEM(mesh,mesh->point);
+    MMG5_DEL_MEM(mesh,mesh->point);
 
   if ( mesh->xpoint )
-    _MMG5_DEL_MEM(mesh,mesh->xpoint);
+    MMG5_DEL_MEM(mesh,mesh->xpoint);
 
   if ( mesh->edge )
-    _MMG5_DEL_MEM(mesh,mesh->edge);
+    MMG5_DEL_MEM(mesh,mesh->edge);
 
   /* sol */
   if ( sol && sol->m )
-    _MMG5_DEL_MEM(mesh,sol->m);
+    MMG5_DEL_MEM(mesh,sol->m);
 
   /* mesh->info */
   if ( mesh->info.npar && mesh->info.par )
-    _MMG5_DEL_MEM(mesh,mesh->info.par);
+    MMG5_DEL_MEM(mesh,mesh->info.par);
 
   if ( mesh->info.imprim>5 || mesh->info.ddebug ) {
     printf("  MEMORY USED AT END (Bytes) %zu\n",mesh->memCur);
@@ -388,21 +388,21 @@ void MMG5_mmgFree_names(MMG5_pMesh mesh,MMG5_pSol met){
 
   /* mesh */
   if ( mesh->nameout ) {
-    _MMG5_DEL_MEM(mesh,mesh->nameout);
+    MMG5_DEL_MEM(mesh,mesh->nameout);
   }
 
   if ( mesh->namein ) {
-    _MMG5_DEL_MEM(mesh,mesh->namein);
+    MMG5_DEL_MEM(mesh,mesh->namein);
   }
 
   /* met */
   if ( met ) {
     if ( met->namein ) {
-      _MMG5_DEL_MEM(mesh,met->namein);
+      MMG5_DEL_MEM(mesh,met->namein);
     }
 
     if ( met->nameout ) {
-      _MMG5_DEL_MEM(mesh,met->nameout);
+      MMG5_DEL_MEM(mesh,met->nameout);
     }
   }
 }

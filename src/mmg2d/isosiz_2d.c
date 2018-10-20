@@ -43,7 +43,7 @@
  * curvature of the external and internal curves present in the mesh
  *
  */
-int _MMG2_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
+int MMG2D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria       pt;
   MMG5_pPoint      p0,p1,p2;
   MMG5_pPar        ppa;
@@ -98,8 +98,8 @@ int _MMG2_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
         }
       }
 
-      i1 = _MMG5_inxt2[i];
-      i2 = _MMG5_iprv2[i];
+      i1 = MMG5_inxt2[i];
+      i2 = MMG5_iprv2[i];
       ip1 = pt->v[i1];
       ip2 = pt->v[i2];
 
@@ -109,7 +109,7 @@ int _MMG2_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
       ux = p2->c[0] - p1->c[0];
       uy = p2->c[1] - p1->c[1];
       ll = ux*ux + uy*uy;
-      if ( ll < _MMG5_EPSD ) continue;
+      if ( ll < MMG5_EPSD ) continue;
       li = 1.0 / sqrt(ll);
 
       /* Recovery of the two tangent vectors associated to points p1,p2; they need not be oriented in the same fashion */
@@ -134,17 +134,17 @@ int _MMG2_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
 
       /* Calculation of the two Bezier coefficients along the curve */
       ps1   = ux*t1[0] + uy*t1[1];
-      b1[0] = p1->c[0] + _MMG5_ATHIRD*ps1*t1[0];
-      b1[1] = p1->c[1] + _MMG5_ATHIRD*ps1*t1[1];
+      b1[0] = p1->c[0] + MMG5_ATHIRD*ps1*t1[0];
+      b1[1] = p1->c[1] + MMG5_ATHIRD*ps1*t1[1];
 
       ps2   = ux*t2[0]+uy*t2[1];
-      b2[0] = p2->c[0] - _MMG5_ATHIRD*ps2*t2[0];
-      b2[1] = p2->c[1] - _MMG5_ATHIRD*ps2*t2[1];
+      b2[0] = p2->c[0] - MMG5_ATHIRD*ps2*t2[0];
+      b2[1] = p2->c[1] - MMG5_ATHIRD*ps2*t2[1];
 
       ps1 *= ps1;
       ps2 *= ps2;
 
-      if ( ps1 < _MMG5_EPSD || ps2 < _MMG5_EPSD ) continue;
+      if ( ps1 < MMG5_EPSD || ps2 < MMG5_EPSD ) continue;
 
       /* \gamma^{\prime\prime}(0); \gamma^\prime(0) = ps*t1 by construction */
       gpp1[0] = 6.0*(p1->c[0] - 2.0*b1[0] + b2[0]);
@@ -163,7 +163,7 @@ int _MMG2_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
       M2 = fabs(pv)/ps2;
 
       M1 = MG_MAX(M1,M2);
-      if ( M1 < _MMG5_EPSD )
+      if ( M1 < MMG5_EPSD )
         lm = lhmax;
       else {
         lm = 8.0*lhausd / M1;
@@ -221,7 +221,7 @@ int _MMG2_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
  * Isotropic mesh gradation routine
  *
  */
-int _MMG2_gradsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
+int MMG2D_gradsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria        pt;
   MMG5_pPoint       p1,p2;
   double            hgrad,ll,h1,h2,hn;
@@ -247,8 +247,8 @@ int _MMG2_gradsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
       if ( !MG_EOK(pt) )  continue;
 
       for (i=0; i<3; i++) {
-        i1  = _MMG5_inxt2[i];
-        i2  = _MMG5_iprv2[i];
+        i1  = MMG5_inxt2[i];
+        i2  = MMG5_iprv2[i];
         ip1 = pt->v[i1];
         ip2 = pt->v[i2];
         p1 = &mesh->point[ip1];
@@ -261,7 +261,7 @@ int _MMG2_gradsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
         h1 = met->m[ip1];
         h2 = met->m[ip2];
         if ( h1 < h2 ) {
-          if ( h1 < _MMG5_EPSD )  continue;
+          if ( h1 < MMG5_EPSD )  continue;
           hn  = h1 + hgrad*ll;
           if ( h2 > hn ) {
             met->m[ip2] = hn;
@@ -270,7 +270,7 @@ int _MMG2_gradsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
           }
         }
         else {
-          if ( h2 < _MMG5_EPSD )  continue;
+          if ( h2 < MMG5_EPSD )  continue;
           hn = h2 + hgrad*ll;
           if ( h1 > hn ) {
             met->m[ip1] = hn;

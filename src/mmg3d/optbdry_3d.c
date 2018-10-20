@@ -42,7 +42,7 @@
  * Try to move the vertices of the tetra \a k to improve its quality.
  *
  */
-int MMG3D_movetetrapoints(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pPROctree PROctree,int k) {
+int MMG3D_movetetrapoints(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree PROctree,int k) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
   MMG5_pPoint   ppt;
@@ -63,10 +63,10 @@ int MMG3D_movetetrapoints(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pPROctree PROctre
     for (j=0; j<3; j++) {
       if ( pt->xt ) {
         pxt = &mesh->xtetra[pt->xt];
-        if ( pxt->tag[_MMG5_iarf[i][j]] & MG_REQ )  continue;
+        if ( pxt->tag[MMG5_iarf[i][j]] & MG_REQ )  continue;
       }
       else  pxt = 0;
-      i0  = _MMG5_idir[i][j];
+      i0  = MMG5_idir[i][j];
       ppt = &mesh->point[pt->v[i0]];
       if ( ppt->flag == base )  continue;
       else if ( MG_SIN(ppt->tag) )  continue;
@@ -83,32 +83,32 @@ int MMG3D_movetetrapoints(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pPROctree PROctre
 /*         if ( !pt->xt || !(MG_BDY & pxt->ftag[i]) )  continue; */
 /*         else if( ppt->tag & MG_NOM ){ */
 /*           if( mesh->adja[4*(k-1)+1+i] ) continue; */
-/*           ier=_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,1); */
+/*           ier=MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,1); */
 /*           if( !ier )  continue; */
 /*           else if ( ier>0 ) */
-/*             ier = _MMG5_movbdynompt(mesh,met,PROctree,listv,ilistv,lists,ilists,improve); */
+/*             ier = MMG5_movbdynompt(mesh,met,PROctree,listv,ilistv,lists,ilists,improve); */
 /*           else */
 /*             return -1; */
 /*         } */
 /*         else if ( ppt->tag & MG_GEO ) { */
-/*           ier=_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,0); */
+/*           ier=MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,0); */
 /*           if ( !ier )  continue; */
 /*           else if ( ier>0 ) */
-/*             ier = _MMG5_movbdyridpt(mesh,met,PROctree,listv,ilistv,lists,ilists,improve); */
+/*             ier = MMG5_movbdyridpt(mesh,met,PROctree,listv,ilistv,lists,ilists,improve); */
 /*           else */
 /*             return -1; */
 /*         } */
 /*         else if ( ppt->tag & MG_REF ) { */
-/*           ier=_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,0); */
+/*           ier=MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,0); */
 /*           if ( !ier ) */
 /*             continue; */
 /*           else if ( ier>0 ) */
-/*             ier = _MMG5_movbdyrefpt(mesh,met,PROctree,listv,ilistv,lists,ilists,improve); */
+/*             ier = MMG5_movbdyrefpt(mesh,met,PROctree,listv,ilistv,lists,ilists,improve); */
 /*           else */
 /*             return -1; */
 /*         } */
 /*         else { */
-/*           ier=_MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,0); */
+/*           ier=MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,0); */
 /*           if ( !ier ) */
 /*             continue; */
 /*           else if ( ier<0 ) */
@@ -116,18 +116,18 @@ int MMG3D_movetetrapoints(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pPROctree PROctre
 
 /*           n = &(mesh->xpoint[ppt->xp].n1[0]); */
 /*           if ( !MG_GET(pxt->ori,i) ) { */
-/*             if ( !_MMG5_directsurfball(mesh,pt->v[i0],lists,ilists,n) ) */
+/*             if ( !MMG5_directsurfball(mesh,pt->v[i0],lists,ilists,n) ) */
 /*               continue; */
 /*           } */
 /* //#warning CECILE a modifier pour opttyp */
-/*           ier = _MMG5_movbdyregpt(mesh,met, PROctree, listv,ilistv,lists,ilists,improve,improve); */
+/*           ier = MMG5_movbdyregpt(mesh,met, PROctree, listv,ilistv,lists,ilists,improve,improve); */
 /*           if ( ier )  ns++; */
 /*         } */
       }
       else if ( internal ) {
-        ilistv = _MMG5_boulevolp(mesh,k,i0,listv);
+        ilistv = MMG5_boulevolp(mesh,k,i0,listv);
         if ( !ilistv )  continue;
-        ier =  _MMG3D_movnormal_iso(mesh,met,k,i0);
+        ier =  MMG3D_movnormal_iso(mesh,met,k,i0);
       }
       if ( ier ) {
         nm++;
@@ -154,7 +154,7 @@ int MMG3D_movetetrapoints(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pPROctree PROctre
  * Try to remove point i of tet k, try the three edges of k containing i.
  *
  */
-int _MMG3D_coledges(MMG5_pMesh mesh,MMG5_pSol met,int k,int i) {
+int MMG3D_coledges(MMG5_pMesh mesh,MMG5_pSol met,int k,int i) {
   MMG5_pTetra pt;
   double      len;
   int         ied,iedg,iq,i1,ilistcol,listcol[MMG3D_LMAX+2];
@@ -165,29 +165,29 @@ int _MMG3D_coledges(MMG5_pMesh mesh,MMG5_pSol met,int k,int i) {
 
   /*3 possibilities to remove the vertex ib*/
   for(ied = 0 ; ied<3 ;ied++) {
-    iedg  = _MMG5_arpt[i][ied];
-    len =  _MMG5_lenedg(mesh,met,iedg,pt);
+    iedg  = MMG5_arpt[i][ied];
+    len =  MMG5_lenedg(mesh,met,iedg,pt);
 
     if(len > 1.1) continue;
-    iface = _MMG5_ifar[iedg][0];
-    ief   = _MMG5_iarfinv[iface][iedg];
-    iq    = _MMG5_idir[iface][_MMG5_iprv2[ief]];
+    iface = MMG5_ifar[iedg][0];
+    ief   = MMG5_iarfinv[iface][iedg];
+    iq    = MMG5_idir[iface][MMG5_iprv2[ief]];
     if(iq==i) {
-      iface = _MMG5_ifar[iedg][1];
-      ief   = _MMG5_iarfinv[iface][iedg];
-      iq    = _MMG5_idir[iface][_MMG5_iprv2[ief]];
+      iface = MMG5_ifar[iedg][1];
+      ief   = MMG5_iarfinv[iface][iedg];
+      iq    = MMG5_idir[iface][MMG5_iprv2[ief]];
     }
-    i1    = _MMG5_idir[iface][_MMG5_inxt2[ief]];
+    i1    = MMG5_idir[iface][MMG5_inxt2[ief]];
 
-    ilistcol = _MMG5_boulevolp(mesh,k,i1,listcol);
+    ilistcol = MMG5_boulevolp(mesh,k,i1,listcol);
 
-    ilistcol = _MMG5_chkcol_int(mesh,met,k,iface,ief,listcol,ilistcol,2);
+    ilistcol = MMG5_chkcol_int(mesh,met,k,iface,ief,listcol,ilistcol,2);
     if ( ilistcol > 0 ) {
-      ier = _MMG5_colver(mesh,met,listcol,ilistcol,iq,2);
+      ier = MMG5_colver(mesh,met,listcol,ilistcol,iq,2);
       if ( ilistcol < 0 ) continue;
       if ( ier < 0 ) return -1;
       else if(ier) {
-        _MMG3D_delPt(mesh,ier);
+        MMG3D_delPt(mesh,ier);
         return 1;
       }
     }
@@ -207,17 +207,17 @@ int _MMG3D_coledges(MMG5_pMesh mesh,MMG5_pSol met,int k,int i) {
  * Try to delete the point i of tet k. Try all the edges containing i.
  *
  */
-int _MMG3D_deletePoint(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pPROctree PROctree,
+int MMG3D_deletePoint(MMG5_pMesh mesh,  MMG5_pSol met,MMG3D_pPROctree PROctree,
                        int k,int i) {
   int         il,ilist,iel,ip,list[MMG3D_LMAX+2];
 
-  ilist = _MMG5_boulevolp(mesh,k,i,list);
+  ilist = MMG5_boulevolp(mesh,k,i,list);
   if (ilist > 30 ) return 0;
 
   for(il = 0 ; il<ilist ; il++) {
     iel = list[il] / 4;
     ip  = list[il] % 4;
-    if( _MMG3D_coledges(mesh,met,iel,ip) ) {
+    if( MMG3D_coledges(mesh,met,iel,ip) ) {
       return 1;
     }
   }
@@ -236,7 +236,7 @@ int _MMG3D_deletePoint(MMG5_pMesh mesh,  MMG5_pSol met,_MMG3D_pPROctree PROctree
  * Try to optimize the tetra k. This tetra has a face on the boundary.
  *
  */
-int MMG3D_optbdry(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pPROctree PROctree,int k) {
+int MMG3D_optbdry(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree PROctree,int k) {
   MMG5_pTetra  pt;
   MMG5_pxTetra pxt;
   int          ib,i,j,ipb,list[MMG3D_LMAX+2];
@@ -276,12 +276,12 @@ int MMG3D_optbdry(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pPROctree PROctree,int k)
 
   if(!mesh->info.noinsert) {
     /*try to remove the non-bdry vertex*/
-    ier = _MMG3D_coledges(mesh,met,k,ib);
+    ier = MMG3D_coledges(mesh,met,k,ib);
     if(ier) return 1;
 
     /* try to remove the non-bdry vertex : with all the edges containing the
      * vertex */
-    ier = _MMG3D_deletePoint(mesh,met,PROctree,k,i);
+    ier = MMG3D_deletePoint(mesh,met,PROctree,k,i);
     if(ier) return 1;
   }
 
@@ -289,31 +289,31 @@ int MMG3D_optbdry(MMG5_pMesh mesh,MMG5_pSol met,_MMG3D_pPROctree PROctree,int k)
   /*try to swap the 3 internal edges*/
   if(!mesh->info.noswap) {
     for(ied = 0 ; ied<3 ;ied++) {
-      iedg  = _MMG5_arpt[i][ied];
-      ier = _MMG3D_swpItem(mesh,met,PROctree,k,iedg);
+      iedg  = MMG5_arpt[i][ied];
+      ier = MMG3D_swpItem(mesh,met,PROctree,k,iedg);
       if(ier) {
         return 1;
       }
     }
     /*try to swap the bdry edges*/
     for (j=0; j<3; j++) {
-      ia  = _MMG5_iarf[i][j];
+      ia  = MMG5_iarf[i][j];
 
       /* No swap of geometric edge */
       if ( MG_EDG(pxt->tag[ia]) || (pxt->tag[ia] & MG_REQ) ||
            (pxt->tag[ia] & MG_NOM) )
         continue;
 
-      ret = _MMG5_coquilface(mesh,k,i,ia,list,&it1,&it2,0);
+      ret = MMG5_coquilface(mesh,k,i,ia,list,&it1,&it2,0);
       ilist = ret / 2;
       if ( ret < 0 )  return -1;
       /* CAUTION: trigger collapse with 2 elements */
       if ( ilist <= 1 )  continue;
-      ier = _MMG5_chkswpbdy(mesh,met,list,ilist,it1,it2,2);
+      ier = MMG5_chkswpbdy(mesh,met,list,ilist,it1,it2,2);
       if ( ier <  0 )
         return -1;
       else if ( ier ) {
-        ier = _MMG5_swpbdy(mesh,met,list,ret,it1,PROctree,2);
+        ier = MMG5_swpbdy(mesh,met,list,ret,it1,PROctree,2);
         if ( ier < 0 )  return -1;
         else if(ier) {
           return 1;

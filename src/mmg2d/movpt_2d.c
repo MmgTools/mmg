@@ -49,7 +49,7 @@
  * isotropic and anisotropic case
  *
  */
-int _MMG2_movedgpt(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list, char improve) {
+int MMG2D_movedgpt(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list, char improve) {
   MMG5_pTria         pt,pt0;
   MMG5_pPoint        p0,p1,p2,ppt;
   double             step,ll1,ll2,o[2],no[2],calold,calnew;
@@ -66,8 +66,8 @@ int _MMG2_movedgpt(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list, char impro
   for (k=0; k<ilist; k++) {
     iel = list[k] / 3;
     i   = list[k] % 3;
-    i1 = _MMG5_inxt2[i];
-    i2 = _MMG5_iprv2[i];
+    i1 = MMG5_inxt2[i];
+    i2 = MMG5_iprv2[i];
 
     pt = &mesh->tria[iel];
     calold = MG_MIN(MMG2D_caltri(mesh,met,pt),calold);
@@ -133,8 +133,8 @@ int _MMG2_movedgpt(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list, char impro
   /* Calculate length of both edges */
   /* Anisotropic case: ll1 and ll2 = anisotropic edge lengths */
   if ( met->m && met->size == 3 ) {
-    ll1 = _MMG2_lencurv_ani(mesh,met,ip0,ip1);
-    ll2 = _MMG2_lencurv_ani(mesh,met,ip0,ip2);
+    ll1 = MMG2D_lencurv_ani(mesh,met,ip0,ip1);
+    ll2 = MMG2D_lencurv_ani(mesh,met,ip0,ip2);
   }
   /* In all the remaining cases, ll1 and ll2 = squared edge lengths;
      inconsistency between both cases is not problematic since these values serve only for comparison */
@@ -154,14 +154,14 @@ int _MMG2_movedgpt(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list, char impro
     i   = it2 % 3;
   }
 
-  i1 = _MMG5_inxt2[i];
+  i1 = MMG5_inxt2[i];
 
   pt = &mesh->tria[iel];
 
   /* step = distance of the relocated position from ip0
      bezierCurv = distance s from inxt2[i] */
-  if ( pt->v[i1] == ip0 ) _MMG2_bezierCurv(mesh,iel,i,step,o,no);
-  else _MMG2_bezierCurv(mesh,iel,i,1.0-step,o,no);
+  if ( pt->v[i1] == ip0 ) MMG2D_bezierCurv(mesh,iel,i,step,o,no);
+  else MMG2D_bezierCurv(mesh,iel,i,1.0-step,o,no);
 
   /* Evaluate resulting configuration */
   ppt = &mesh->point[0];
@@ -180,8 +180,8 @@ int _MMG2_movedgpt(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list, char impro
     calnew = MG_MIN(MMG2D_caltri(mesh,met,pt0),calnew);
   }
 
-  if ( calold < _MMG2_NULKAL && calnew <= calold ) return 0;
-  else if ( calnew < _MMG2_NULKAL ) return 0;
+  if ( calold < MMG2D_NULKAL && calnew <= calold ) return 0;
+  else if ( calnew < MMG2D_NULKAL ) return 0;
   else if ( improve && calnew < 1.02 * calold ) return 0;
   else if ( calnew < 0.3 * calold ) return 0;
 
@@ -209,7 +209,7 @@ int _MMG2_movedgpt(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list, char impro
  * Relocate internal vertex whose ball is passed.
  *
  */
-int _MMG2_movintpt(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list,char improve) {
+int MMG2D_movintpt(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list,char improve) {
   MMG5_pTria        pt,pt0;
   MMG5_pPoint       p0,p1,p2,ppt0;
   double            calold,calnew,vol,volbal,b[2];
@@ -227,8 +227,8 @@ int _MMG2_movintpt(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list,char improv
   for (k=0; k<ilist; k++) {
     iel = list[k] / 3;
     i   = list[k] % 3;
-    i1 = _MMG5_inxt2[i];
-    i2 = _MMG5_iprv2[i];
+    i1 = MMG5_inxt2[i];
+    i2 = MMG5_iprv2[i];
 
     pt = &mesh->tria[iel];
 
@@ -241,14 +241,14 @@ int _MMG2_movintpt(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list,char improv
     volbal += vol;
 
     /* Add coordinates of the centre of mass of iel, weighted by its volume */
-    b[0] += _MMG5_ATHIRD*vol*(p0->c[0]+p1->c[0]+p2->c[0]);
-    b[1] += _MMG5_ATHIRD*vol*(p0->c[1]+p1->c[1]+p2->c[1]);
+    b[0] += MMG5_ATHIRD*vol*(p0->c[0]+p1->c[0]+p2->c[0]);
+    b[1] += MMG5_ATHIRD*vol*(p0->c[1]+p1->c[1]+p2->c[1]);
 
     /* Quality of pt */
-    calold = MG_MIN(_MMG2_caltri_iso(mesh,NULL,pt),calold);
+    calold = MG_MIN(MMG2D_caltri_iso(mesh,NULL,pt),calold);
   }
 
-  if ( volbal < _MMG5_EPSD ) return 0;
+  if ( volbal < MMG5_EPSD ) return 0;
   volbal = 1.0 / volbal;
   b[0] *= volbal;
   b[1] *= volbal;
@@ -264,11 +264,11 @@ int _MMG2_movintpt(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list,char improv
     memcpy(pt0,pt,sizeof(MMG5_Tria));
     pt0->v[i] = 0;
 
-    calnew = MG_MIN(_MMG2_caltri_iso(mesh,NULL,pt0),calnew);
+    calnew = MG_MIN(MMG2D_caltri_iso(mesh,NULL,pt0),calnew);
   }
 
-  if (calold < _MMG2_NULKAL && calnew <= calold) return 0;
-  else if (calnew < _MMG2_NULKAL) return 0;
+  if (calold < MMG2D_NULKAL && calnew <= calold) return 0;
+  else if (calnew < MMG2D_NULKAL) return 0;
   else if ( improve && calnew < 1.02 * calold ) return 0;
   else if ( calnew < 0.3 * calold ) return 0;
 

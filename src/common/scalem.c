@@ -39,10 +39,10 @@
  * \return 1 if success, 0 if fail (computed bounding box too small).
  *
  * Compute the mesh bounding box and fill the \a min, \a max and \a delta fields
- * of the \a _MMG5_info structure.
+ * of the \a MMG5_info structure.
  *
  */
-int _MMG5_boundingBox(MMG5_pMesh mesh) {
+int MMG5_boundingBox(MMG5_pMesh mesh) {
   MMG5_pPoint    ppt;
   int            k,i;
   double         dd;
@@ -66,7 +66,7 @@ int _MMG5_boundingBox(MMG5_pMesh mesh) {
     dd = mesh->info.max[i] - mesh->info.min[i];
     if ( dd > mesh->info.delta )  mesh->info.delta = dd;
   }
-  if ( mesh->info.delta < _MMG5_EPSD ) {
+  if ( mesh->info.delta < MMG5_EPSD ) {
     fprintf(stderr,"\n  ## Error: %s: unable to scale mesh:"
             " Check that your mesh contains non-zero points and "
             "valid elements.\n",__func__);
@@ -86,7 +86,7 @@ int _MMG5_boundingBox(MMG5_pMesh mesh) {
  * Compute a default value for the hmin/hmax parameters if needed.
  *
  */
-int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
+int MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pPoint    ppt;
   double         dd,d1;
   int            k,i,sethmin,sethmax;
@@ -96,7 +96,7 @@ int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
 
 
   /* compute bounding box */
-  if ( ! _MMG5_boundingBox(mesh) ) return 0;
+  if ( ! MMG5_boundingBox(mesh) ) return 0;
 
   /* normalize coordinates */
   dd = 1.0 / mesh->info.delta;
@@ -208,7 +208,7 @@ int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
         m    = &met->m[6*k];
 
         /* Check the input metric */
-        if ( !_MMG5_eigenv(1,m,lambda,v) ) {
+        if ( !MMG5_eigenv(1,m,lambda,v) ) {
           fprintf(stderr,"\n  ## Error: %s: unable to diagonalize at least"
                   " 1 metric (point %d).\n",__func__,k);
           return 0;
@@ -258,7 +258,7 @@ int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
  * Unscale the mesh and the size informations to their initial sizes.
  *
  */
-int _MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
+int MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pPoint     ppt;
   double          dd;
   int             k,i;

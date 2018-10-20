@@ -38,9 +38,9 @@
 
 void MMGS_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( met->size < 6 ) {
-    _MMG5_calelt      = _MMG5_caltri_iso;
-    _MMG5_lenSurfEdg  = _MMG5_lenSurfEdg_iso;
-    _MMG5_defsiz      = _MMGS_defsiz_iso;
+    MMG5_calelt      = MMG5_caltri_iso;
+    MMG5_lenSurfEdg  = MMG5_lenSurfEdg_iso;
+    MMG5_defsiz      = MMGS_defsiz_iso;
     gradsiz           = gradsiz_iso;
     intmet            = intmet_iso;
     movintpt          = movintpt_iso;
@@ -48,14 +48,14 @@ void MMGS_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
   }
   else {
     if ( !met->m ) {
-      _MMG5_calelt     = _MMG5_caltri_iso;
-      _MMG5_lenSurfEdg = _MMG5_lenSurfEdg_iso;
+      MMG5_calelt     = MMG5_caltri_iso;
+      MMG5_lenSurfEdg = MMG5_lenSurfEdg_iso;
     }
     else {
-      _MMG5_calelt     = _MMG5_caltri_ani;
-      _MMG5_lenSurfEdg = _MMG5_lenSurfEdg_ani;
+      MMG5_calelt     = MMG5_caltri_ani;
+      MMG5_lenSurfEdg = MMG5_lenSurfEdg_ani;
     }
-    _MMG5_defsiz  = _MMGS_defsiz_ani;
+    MMG5_defsiz  = MMGS_defsiz_ani;
     gradsiz       = gradsiz_ani;
     intmet        = intmet_ani;
     movintpt      = movintpt_ani;
@@ -64,7 +64,7 @@ void MMGS_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
 }
 
 int MMGS_usage(char *prog) {
-  _MMG5_mmgUsage(prog);
+  MMG5_mmgUsage(prog);
 
   fprintf(stdout,"-A           enable anisotropy (without metric file).\n");
   fprintf(stdout,"-keep-ref    preserve initial domain references in level-set mode.\n");
@@ -79,7 +79,7 @@ int MMGS_usage(char *prog) {
 
 int MMGS_defaultValues(MMG5_pMesh mesh) {
 
-  _MMG5_mmgDefaultValues(mesh);
+  MMG5_mmgDefaultValues(mesh);
 #ifdef USE_SCOTCH
   fprintf(stdout,"SCOTCH renumbering                  : enabled\n");
 #else
@@ -361,7 +361,7 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
 int MMGS_stockOptions(MMG5_pMesh mesh, MMG5_Info *info) {
 
   memcpy(&mesh->info,info,sizeof(MMG5_Info));
-  _MMGS_memOption(mesh);
+  MMGS_memOption(mesh);
   if( mesh->info.mem > 0) {
     if ( mesh->npmax < mesh->np || mesh->ntmax < mesh->nt ) {
       return 0;
@@ -380,7 +380,7 @@ void MMGS_destockOptions(MMG5_pMesh mesh, MMG5_Info *info) {
 int MMGS_Get_adjaTri(MMG5_pMesh mesh, int kel, int listri[3]) {
 
   if ( ! mesh->adja ) {
-    if (! _MMGS_hashTria(mesh))
+    if (! MMGS_hashTria(mesh))
       return 0;
   }
 
@@ -414,7 +414,7 @@ int MMGS_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMGS
               " elements.\n",__func__,ip);
       return 0;
     }
-    i1 = _MMG5_inxt2[i];
+    i1 = MMG5_inxt2[i];
     lispoi[nbpoi] = mesh->tria[k].v[i1];
     ++nbpoi;
 
@@ -422,7 +422,7 @@ int MMGS_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMGS
     prevk = k;
     k  = adja[i1] / 3;
     i  = adja[i1] % 3;
-    i  = _MMG5_inxt2[i];
+    i  = MMG5_inxt2[i];
   }
   while ( k && k != start );
 
@@ -435,7 +435,7 @@ int MMGS_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMGS
             __func__,ip);
     return 0;
   }
-  i1 = _MMG5_inxt2[i1];
+  i1 = MMG5_inxt2[i1];
   lispoi[nbpoi] = mesh->tria[prevk].v[i1];
   ++nbpoi;
 
@@ -444,7 +444,7 @@ int MMGS_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMGS
   i = iploc;
   do {
     adja = &mesh->adja[3*(k-1)+1];
-    i2 = _MMG5_iprv2[i];
+    i2 = MMG5_iprv2[i];
     k  = adja[i2] / 3;
     if ( k == 0 )  break;
 
@@ -458,7 +458,7 @@ int MMGS_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMGS
     lispoi[nbpoi] = mesh->tria[k].v[i];
     ++nbpoi;
 
-    i  = _MMG5_iprv2[i];
+    i  = MMG5_iprv2[i];
   }
   while ( k );
 

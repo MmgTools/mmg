@@ -60,15 +60,15 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
 
   pt0 = &mesh->tria[0];
   pt  = &mesh->tria[k];
-  i1  = _MMG5_inxt2[i];
-  i2  = _MMG5_iprv2[i];
+  i1  = MMG5_inxt2[i];
+  i2  = MMG5_iprv2[i];
   ip1 = pt->v[i1];
   ip2 = pt->v[i2];
   if ( typchk == 2 && met->m ) {
-    lon = _MMG5_lenSurfEdg(mesh,met,ip1,ip2,0);
+    lon = MMG5_lenSurfEdg(mesh,met,ip1,ip2,0);
     if ( !lon ) return 0;
-    lon = MG_MIN(lon,_MMGS_LSHRT);
-    lon = MG_MAX(1.0/lon,_MMGS_LLONG);
+    lon = MG_MIN(lon,MMGS_LSHRT);
+    lon = MG_MAX(1.0/lon,MMGS_LLONG);
   }
 
   /* collect all triangles around vertex i1 */
@@ -92,22 +92,22 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
     for (l=1; l<ilist-1+open; l++) {
       jel = list[l] / 3;
       j   = list[l] % 3;
-      jj  = _MMG5_inxt2[j];
-      j2  = _MMG5_iprv2[j];
+      jj  = MMG5_inxt2[j];
+      j2  = MMG5_iprv2[j];
       pt1 = &mesh->tria[jel];
 
       /* check length */
       if ( typchk == 2 && met->m && !MG_EDG(mesh->point[ip2].tag) ) {
         ip1 = pt1->v[j2];
-        len = _MMG5_lenSurfEdg(mesh,met,ip1,ip2,0);
+        len = MMG5_lenSurfEdg(mesh,met,ip1,ip2,0);
         if ( len > lon || !len )  return 0;
       }
 
       /* check normal flipping */
-      if ( !_MMG5_nortri(mesh,pt1,n1old) )  return 0;
+      if ( !MMG5_nortri(mesh,pt1,n1old) )  return 0;
       memcpy(pt0,pt1,sizeof(MMG5_Tria));
       pt0->v[j] = ip2;
-      if ( !_MMG5_nortri(mesh,pt0,n1new) )  return 0;
+      if ( !MMG5_nortri(mesh,pt0,n1new) )  return 0;
 
       ps = n1new[0]*n1old[0] + n1new[1]*n1old[1]  + n1new[2]*n1old[2];
       if ( ps < 0.0 )  return 0;
@@ -123,10 +123,10 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
         if ( l > 1 ) {
           cosnold = n0old[0]*n1old[0] + n0old[1]*n1old[1] + n0old[2]*n1old[2];
           cosnnew = n0new[0]*n1new[0] + n0new[1]*n1new[1] + n0new[2]*n1new[2];
-          if ( cosnold < _MMG5_ANGEDG ) {
+          if ( cosnold < MMG5_ANGEDG ) {
             if ( cosnnew < cosnold )  return 0;
           }
-          else if ( cosnnew < _MMG5_ANGEDG )  return 0;
+          else if ( cosnnew < MMG5_ANGEDG )  return 0;
         }
       }
 
@@ -149,10 +149,10 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
 
       /* check quality */
       if ( typchk == 2 && met->m )
-        kal = _MMGS_ALPHAD*_MMG5_calelt(mesh,met,pt0);
+        kal = MMGS_ALPHAD*MMG5_calelt(mesh,met,pt0);
       else
-        kal = _MMGS_ALPHAD*_MMG5_caltri_iso(mesh,NULL,pt0);
-      if ( kal < _MMGS_NULKAL )  return 0;
+        kal = MMGS_ALPHAD*MMG5_caltri_iso(mesh,NULL,pt0);
+      if ( kal < MMGS_NULKAL )  return 0;
 
       memcpy(n0old,n1old,3*sizeof(double));
       memcpy(n0new,n1new,3*sizeof(double));
@@ -162,15 +162,15 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
     if ( !open && !(pt->tag[i] & MG_GEO) ) {
       cosnold = n00old[0]*n1old[0] + n00old[1]*n1old[1] + n00old[2]*n1old[2];
       cosnnew = n00new[0]*n1new[0] + n00new[1]*n1new[1] + n00new[2]*n1new[2];
-      if ( cosnold < _MMG5_ANGEDG ) {
+      if ( cosnold < MMG5_ANGEDG ) {
         if ( cosnnew < cosnold )  return 0;
       }
-      else if ( cosnnew < _MMG5_ANGEDG )  return 0;
+      else if ( cosnnew < MMG5_ANGEDG )  return 0;
 
       /* other checks for reference collapse */
       jel = list[ilist-1] / 3;
       j   = list[ilist-1] % 3;
-      j   = _MMG5_iprv2[j];
+      j   = MMG5_iprv2[j];
       pt  = &mesh->tria[jel];
       if ( MG_EDG(pt->tag[j]) ) {
         jel = list[ilist-2] / 3;
@@ -192,8 +192,8 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
     /* Check geometric approximation */
     jel = list[1] / 3;
     j   = list[1] % 3;
-    jj  = _MMG5_inxt2[j];
-    j2  = _MMG5_iprv2[j];
+    jj  = MMG5_inxt2[j];
+    j2  = MMG5_iprv2[j];
     pt0 = &mesh->tria[0];
     pt1 = &mesh->tria[jel];
     memcpy(pt0,pt1,sizeof(MMG5_Tria));
@@ -203,15 +203,15 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
     j   = list[2] % 3;
     pt1 = &mesh->tria[jel];
     pt0->tag[jj] |= pt1->tag[j];
-    pt0->tag[j2] |= pt1->tag[_MMG5_inxt2[j]];
+    pt0->tag[j2] |= pt1->tag[MMG5_inxt2[j]];
     if ( chkedg(mesh,0) )  return 0;
 
     /* check quality */
     if ( typchk == 2 && met->m )
-      kal = _MMGS_ALPHAD*_MMG5_calelt(mesh,met,pt0);
+      kal = MMGS_ALPHAD*MMG5_calelt(mesh,met,pt0);
     else
-      kal = _MMGS_ALPHAD*_MMG5_caltri_iso(mesh,NULL,pt0);
-    if ( kal < _MMGS_NULKAL )  return 0;
+      kal = MMGS_ALPHAD*MMG5_caltri_iso(mesh,NULL,pt0);
+    if ( kal < MMGS_NULKAL )  return 0;
   }
 
   /* for specific configurations along open ridge */
@@ -229,7 +229,7 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
 
     if ( pt2->v[voy] == ip2) return 0;
 
-    jj  = _MMG5_inxt2[j];
+    jj  = MMG5_inxt2[j];
     pt1 = &mesh->tria[jel];
     if ( abs(pt->ref) != abs(pt1->ref) )  return 0;
     else if ( !(pt1->tag[jj] & MG_GEO) )  return 0;
@@ -239,7 +239,7 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
     if ( p2->tag > p1->tag || p2->ref != p1->ref )  return 0;
 
     /* Check geometric approximation */
-    j2  = _MMG5_iprv2[j];
+    j2  = MMG5_iprv2[j];
     pt0 = &mesh->tria[0];
     memcpy(pt0,pt,sizeof(MMG5_Tria));
     pt0->v[i1] = pt1->v[j2];
@@ -248,10 +248,10 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
 
     /* check quality */
     if ( typchk == 2 && met->m )
-      kal = _MMGS_ALPHAD*_MMG5_calelt(mesh,met,pt0);
+      kal = MMGS_ALPHAD*MMG5_calelt(mesh,met,pt0);
     else
-      kal = _MMGS_ALPHAD*_MMG5_caltri_iso(mesh,NULL,pt0);
-    if ( kal < _MMGS_NULKAL )  return 0;
+      kal = MMGS_ALPHAD*MMG5_caltri_iso(mesh,NULL,pt0);
+    if ( kal < MMGS_NULKAL )  return 0;
 
   }
 
@@ -266,8 +266,8 @@ int colver(MMG5_pMesh mesh,int *list,int ilist) {
 
   iel = list[0] / 3;
   i1  = list[0] % 3;
-  i   = _MMG5_iprv2[i1];
-  i2  = _MMG5_inxt2[i1];
+  i   = MMG5_iprv2[i1];
+  i2  = MMG5_inxt2[i1];
   pt  = &mesh->tria[iel];
   ip1 = pt->v[i1];
   ip2 = pt->v[i2];
@@ -288,7 +288,7 @@ int colver(MMG5_pMesh mesh,int *list,int ilist) {
   /* update adjacent with 1st elt */
   jel = list[1] / 3;
   jj  = list[1] % 3;
-  j   = _MMG5_iprv2[jj];
+  j   = MMG5_iprv2[jj];
   pt1 = &mesh->tria[jel];
   pt1->tag[j] |= pt->tag[i1];
   pt1->edg[j] = MG_MAX(pt->edg[i1],pt1->edg[j]);
@@ -312,7 +312,7 @@ int colver(MMG5_pMesh mesh,int *list,int ilist) {
 
     jel = list[ilist-2] / 3;
     jj  = list[ilist-2] % 3;
-    j   = _MMG5_inxt2[jj];
+    j   = MMG5_inxt2[jj];
     pt1 = &mesh->tria[jel];
     pt1->tag[j] |= pt->tag[i1];
     pt1->edg[j] = MG_MAX(pt->edg[i1],pt1->edg[j]);
@@ -330,10 +330,10 @@ int colver(MMG5_pMesh mesh,int *list,int ilist) {
       mesh->adja[3*(jel-1)+1+j] = 0;
   }
 
-  _MMGS_delPt(mesh,ip1);
-  if ( !_MMGS_delElt(mesh,list[0] / 3) ) return 0;
+  MMGS_delPt(mesh,ip1);
+  if ( !MMGS_delElt(mesh,list[0] / 3) ) return 0;
   if ( !open ) {
-    if ( !_MMGS_delElt(mesh,list[ilist-1] / 3) )  return 0;
+    if ( !MMGS_delElt(mesh,list[ilist-1] / 3) )  return 0;
   }
 
   return 1;
@@ -357,14 +357,14 @@ int colver3(MMG5_pMesh mesh,int* list) {
   /* update of new point for triangle list[0] */
   iel = list[0] / 3;
   i   = list[0] % 3;
-  i1  = _MMG5_inxt2[i];
+  i1  = MMG5_inxt2[i];
   pt  = &mesh->tria[iel];
   ip  = pt->v[i];
 
   jel = list[1] / 3;
   j   = list[1] % 3;
-  j1  = _MMG5_inxt2[j];
-  j2  = _MMG5_iprv2[j];
+  j1  = MMG5_inxt2[j];
+  j2  = MMG5_iprv2[j];
   pt1 = &mesh->tria[jel];
 
   kel = list[2] / 3;
@@ -403,9 +403,9 @@ int colver3(MMG5_pMesh mesh,int* list) {
   }
 
   /* remove vertex + elements */
-  _MMGS_delPt(mesh,ip);
-  if ( !_MMGS_delElt(mesh,iel) ) return 0;
-  if ( !_MMGS_delElt(mesh,kel) ) return 0;
+  MMGS_delPt(mesh,ip);
+  if ( !MMGS_delElt(mesh,iel) ) return 0;
+  if ( !MMGS_delElt(mesh,kel) ) return 0;
 
   return 1;
 }
@@ -420,13 +420,13 @@ int colver2(MMG5_pMesh mesh,int* list) {
   /* update of new point for triangle list[0] */
   iel = list[0] / 3;
   i1  = list[0] % 3;
-  i2  = _MMG5_inxt2[i1];
+  i2  = MMG5_inxt2[i1];
   pt  = &mesh->tria[iel];
   ip  = pt->v[i1];
 
   jel = list[1] / 3;
   j2  = list[1] % 3;
-  jj  = _MMG5_iprv2[j2];
+  jj  = MMG5_iprv2[j2];
   pt1 = &mesh->tria[jel];
 
   /* update info */
@@ -445,8 +445,8 @@ int colver2(MMG5_pMesh mesh,int* list) {
     mesh->adja[3*(kel-1)+1+k] = 3*iel + i2;
 
   /* remove vertex + element */
-  _MMGS_delPt(mesh,ip);
-  if ( !_MMGS_delElt(mesh,jel) ) return 0;
+  MMGS_delPt(mesh,ip);
+  if ( !MMGS_delElt(mesh,jel) ) return 0;
 
   return 1;
 }
@@ -456,13 +456,13 @@ int litcol(MMG5_pMesh mesh,int k,char i,double kali) {
   MMG5_pTria     pt,pt0,pt1;
   MMG5_pPoint    p1,p2;
   double         kal,ps,cosnold,cosnnew,n0old[3],n0new[3],n1old[3],n1new[3],n00old[3],n00new[3];
-  int            *adja,list[_MMGS_LMAX+2],jel,ip2,l,ilist;
+  int            *adja,list[MMGS_LMAX+2],jel,ip2,l,ilist;
   char           i1,i2,j,jj,j2,open;
 
   pt0 = &mesh->tria[0];
   pt  = &mesh->tria[k];
-  i1  = _MMG5_inxt2[i];
-  i2  = _MMG5_iprv2[i];
+  i1  = MMG5_inxt2[i];
+  i2  = MMG5_iprv2[i];
   ip2 = pt->v[i2];
 
 #ifndef NDEBUG
@@ -494,14 +494,14 @@ int litcol(MMG5_pMesh mesh,int k,char i,double kali) {
     for (l=1; l<ilist-1+open; l++) {
       jel = list[l] / 3;
       j   = list[l] % 3;
-      j2  = _MMG5_iprv2[j];
+      j2  = MMG5_iprv2[j];
       pt1 = &mesh->tria[jel];
 
       /* check normal flipping */
-      if ( !_MMG5_nortri(mesh,pt1,n1old) )  return 0;
+      if ( !MMG5_nortri(mesh,pt1,n1old) )  return 0;
       memcpy(pt0,pt1,sizeof(MMG5_Tria));
       pt0->v[j] = ip2;
-      if ( !_MMG5_nortri(mesh,pt0,n1new) )  return 0;
+      if ( !MMG5_nortri(mesh,pt0,n1new) )  return 0;
       ps = n1new[0]*n1old[0] + n1new[1]*n1old[1]  + n1new[2]*n1old[2];
       if ( ps < 0.0 )  return 0;
 
@@ -516,28 +516,28 @@ int litcol(MMG5_pMesh mesh,int k,char i,double kali) {
         if ( l > 1 ) {
           cosnold = n0old[0]*n1old[0] + n0old[1]*n1old[1] + n0old[2]*n1old[2];
           cosnnew = n0new[0]*n1new[0] + n0new[1]*n1new[1] + n0new[2]*n1new[2];
-          if ( cosnold < _MMG5_ANGEDG ) {
+          if ( cosnold < MMG5_ANGEDG ) {
             if ( cosnnew < MG_MIN(0.0,cosnold) )  return 0;
           }
-          else if ( cosnnew < _MMG5_ANGEDG )  return 0;
+          else if ( cosnnew < MMG5_ANGEDG )  return 0;
         }
 
         memcpy(n0old,n1old,3*sizeof(double));
         memcpy(n0new,n1new,3*sizeof(double));
       }
       /* check quality */
-      kal = _MMGS_ALPHAD*_MMG5_caltri_iso(mesh,NULL,pt0);
-      if ( kal < _MMGS_NULKAL )  return 0;
+      kal = MMGS_ALPHAD*MMG5_caltri_iso(mesh,NULL,pt0);
+      if ( kal < MMGS_NULKAL )  return 0;
     }
 
     /* check angle between 1st and last triangles */
     if ( !open ) {
       cosnold = n00old[0]*n1old[0] + n00old[1]*n1old[1] + n00old[2]*n1old[2];
       cosnnew = n00new[0]*n1new[0] + n00new[1]*n1new[1] + n00new[2]*n1new[2];
-      if ( cosnold < _MMG5_ANGEDG ) {
+      if ( cosnold < MMG5_ANGEDG ) {
         if ( cosnnew < MG_MIN(0.0,cosnold) )  return 0;
       }
-      else if ( cosnnew < _MMG5_ANGEDG )  return 0;
+      else if ( cosnnew < MMG5_ANGEDG )  return 0;
 
       /* other reference checks */
       jel = list[ilist-1] / 3;
@@ -566,7 +566,7 @@ int litcol(MMG5_pMesh mesh,int k,char i,double kali) {
     if ( !open )  return 0;
     jel = list[1] / 3;
     j   = list[1] % 3;
-    jj  = _MMG5_inxt2[j];
+    jj  = MMG5_inxt2[j];
     pt1 = &mesh->tria[jel];
     if ( abs(pt->ref) != abs(pt1->ref) )  return 0;
     else if ( !(pt1->tag[jj] & MG_GEO) )  return 0;

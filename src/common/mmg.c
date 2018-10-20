@@ -41,7 +41,7 @@
  * Print help for common options of mmg3d and mmgs.
  *
  */
-void _MMG5_mmgUsage(char *prog) {
+void MMG5_mmgUsage(char *prog) {
   fprintf(stdout,"\nUsage: %s [-v [n]] [opts..] filein [fileout]\n",prog);
 
   fprintf(stdout,"\n** Generic options :\n");
@@ -77,7 +77,7 @@ void _MMG5_mmgUsage(char *prog) {
  * Print the default parameters values.
  *
  */
-void _MMG5_mmgDefaultValues(MMG5_pMesh mesh) {
+void MMG5_mmgDefaultValues(MMG5_pMesh mesh) {
 
   fprintf(stdout,"\nDefault parameters values:\n");
 
@@ -85,7 +85,7 @@ void _MMG5_mmgDefaultValues(MMG5_pMesh mesh) {
   fprintf(stdout,"verbosity                 (-v)      : %d\n",
           mesh->info.imprim);
   fprintf(stdout,"maximal memory size       (-m)      : %zu MB\n",
-          mesh->memMax/_MMG5_MILLION);
+          mesh->memMax/MMG5_MILLION);
 
 
   fprintf(stdout,"\n**  Parameters\n");
@@ -114,7 +114,7 @@ void _MMG5_mmgDefaultValues(MMG5_pMesh mesh) {
  *
  */
 inline
-int _MMG5_countLocalParamAtTri( MMG5_pMesh mesh,_MMG5_iNode **bdryRefs) {
+int MMG5_countLocalParamAtTri( MMG5_pMesh mesh,MMG5_iNode **bdryRefs) {
   int         npar,k,ier;
 
   /** Count the number of different boundary references and list it */
@@ -123,7 +123,7 @@ int _MMG5_countLocalParamAtTri( MMG5_pMesh mesh,_MMG5_iNode **bdryRefs) {
   k = mesh->nt? mesh->tria[1].ref : 0;
 
   /* Try to alloc the first node */
-  ier = _MMG5_Add_inode( mesh, bdryRefs, k );
+  ier = MMG5_Add_inode( mesh, bdryRefs, k );
   if ( ier < 0 ) {
     fprintf(stderr,"\n  ## Error: %s: unable to allocate the first boundary"
            " reference node.\n",__func__);
@@ -135,7 +135,7 @@ int _MMG5_countLocalParamAtTri( MMG5_pMesh mesh,_MMG5_iNode **bdryRefs) {
   }
 
   for ( k=1; k<=mesh->nt; ++k ) {
-    ier = _MMG5_Add_inode( mesh, bdryRefs, mesh->tria[k].ref );
+    ier = MMG5_Add_inode( mesh, bdryRefs, mesh->tria[k].ref );
 
     if ( ier < 0 ) {
       printf("  ## Warning: %s: unable to list the tria references."
@@ -159,9 +159,9 @@ int _MMG5_countLocalParamAtTri( MMG5_pMesh mesh,_MMG5_iNode **bdryRefs) {
  *
  */
 inline
-int _MMG5_writeLocalParamAtTri( MMG5_pMesh mesh, _MMG5_iNode *bdryRefs,
+int MMG5_writeLocalParamAtTri( MMG5_pMesh mesh, MMG5_iNode *bdryRefs,
                                 FILE *out ) {
-  _MMG5_iNode *cur;
+  MMG5_iNode *cur;
 
   cur = bdryRefs;
   while( cur ) {
@@ -170,7 +170,7 @@ int _MMG5_writeLocalParamAtTri( MMG5_pMesh mesh, _MMG5_iNode *bdryRefs,
     cur = cur->nxt;
   }
 
-  _MMG5_Free_ilinkedList(mesh,bdryRefs);
+  MMG5_Free_ilinkedList(mesh,bdryRefs);
 
   return 1;
 }

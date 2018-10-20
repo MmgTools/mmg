@@ -44,7 +44,7 @@
  * Truncate the metric sizes between hmin/hmax
  *
  */
-int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
+int MMG2D_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   //Displ     pd;
   MMG5_pPoint    ppt;
   MMG5_Info     *info;
@@ -58,13 +58,13 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   // pd  = mesh->disp;
   /* compute bounding box */
-  if ( ! _MMG5_boundingBox(mesh) ) return 0;
+  if ( ! MMG5_boundingBox(mesh) ) return 0;
 
   info = &mesh->info;
 
 
   /* normalize coordinates and local parameters */
-  dd = _MMG2D_PRECI / info->delta;
+  dd = MMG2D_PRECI / info->delta;
 
   mesh->info.hausd *= dd;
   mesh->info.hsiz  *= dd;
@@ -200,7 +200,7 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
         m    = &sol->m[iadr];
 
         /* Check the input metric */
-        if ( !_MMG5_eigensym(m,lambda,v) ) {
+        if ( !MMG5_eigensym(m,lambda,v) ) {
           if ( !mmgWarn0 ) {
             mmgWarn0 = 1;
             fprintf(stderr,"\n  ## Error: %s: at least 1 wrong metric.\n",
@@ -229,7 +229,7 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
         m    = &sol->m[iadr];
 
         /* Check the input metric */
-        if ( !_MMG5_eigensym(m,lambda,v) ) {
+        if ( !MMG5_eigensym(m,lambda,v) ) {
           if ( !mmgWarn0 ) {
             mmgWarn0 = 1;
             fprintf(stderr,"\n  ## Error: %s: at least 1 wrong metric.\n",
@@ -277,7 +277,7 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
 
       m    = &sol->m[iadr];
       /* Check the input metric */
-      if ( !_MMG5_eigensym(m,lambda,v) ) {
+      if ( !MMG5_eigensym(m,lambda,v) ) {
         if ( !mmgWarn0 ) {
           mmgWarn0 = 1;
           fprintf(stderr,"\n  ## Error: %s: at least 1 wrong metric.\n",
@@ -308,7 +308,7 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
 }
 
 /* Unscale mesh coordinates */
-int MMG2_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
+int MMG2D_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pPoint     ppt;
   MMG5_Info      *info;
   MMG5_pPar      ppar;
@@ -318,7 +318,7 @@ int MMG2_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   info = &mesh->info;
 
   /* de-normalize coordinates */
-  dd = info->delta / (double)_MMG2D_PRECI;
+  dd = info->delta / (double)MMG2D_PRECI;
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
     if ( !MG_VOK(ppt) )  continue;

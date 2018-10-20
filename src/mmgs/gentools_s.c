@@ -67,7 +67,7 @@ int setref(MMG5_pMesh mesh,int start,int ref,int putreq) {
   char       j,voy;
 
   ilist = cur = 0;
-  _MMG5_SAFE_CALLOC(list,mesh->nt+1,int,return 0);
+  MMG5_SAFE_CALLOC(list,mesh->nt+1,int,return 0);
   base = ++mesh->base;
 
   /* Pile up triangles from start, till a GEO boundary is met */
@@ -114,12 +114,12 @@ int setref(MMG5_pMesh mesh,int start,int ref,int putreq) {
     pt  = &mesh->tria[iel];
     pt->ref = ref;
   }
-  _MMG5_SAFE_FREE(list);
+  MMG5_SAFE_FREE(list);
   return 1;
 }
 
 /** find the element number in packed numerotation */
-int _MMGS_indElt(MMG5_pMesh mesh, int kel) {
+int MMGS_indElt(MMG5_pMesh mesh, int kel) {
   MMG5_pTria pt;
   int    ne, k;
 
@@ -135,7 +135,7 @@ int _MMGS_indElt(MMG5_pMesh mesh, int kel) {
 }
 
 /** find the point number in packed numerotation */
-int _MMGS_indPt(MMG5_pMesh mesh, int kp) {
+int MMGS_indPt(MMG5_pMesh mesh, int kp) {
   MMG5_pPoint ppt;
   int         np, k;
 

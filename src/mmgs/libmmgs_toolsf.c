@@ -65,7 +65,7 @@ FORTRAN_NAME(MMGS_USAGE,mmgs_usage,
   strncpy(tmp,prog,*strlen);
   tmp[*strlen] = '\0';
   *retval = MMGS_usage(tmp);
-  _MMG5_SAFE_FREE(tmp);
+  MMG5_SAFE_FREE(tmp);
 
   return;
 }

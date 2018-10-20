@@ -40,7 +40,7 @@ mytime         MMG5_ctim[TIMEMAX];
 /**
  * Print elapsed time at end of process.
  */
-static void _MMG5_endcod() {
+static void MMG5_endcod() {
   char   stim[32];
 
   chrono(OFF,&MMG5_ctim[0]);
@@ -59,7 +59,7 @@ static void _MMG5_endcod() {
  *
  */
 static inline
-int _MMG5_countLocalParamAtTet( MMG5_pMesh mesh,_MMG5_iNode **bdyRefs) {
+int MMG5_countLocalParamAtTet( MMG5_pMesh mesh,MMG5_iNode **bdyRefs) {
   int         npar,k,ier;
 
   /** Count the number of different boundary references and list it */
@@ -68,7 +68,7 @@ int _MMG5_countLocalParamAtTet( MMG5_pMesh mesh,_MMG5_iNode **bdyRefs) {
   k = mesh->ne? mesh->tetra[1].ref : 0;
 
   /* Try to alloc the first node */
-  ier = _MMG5_Add_inode( mesh, bdyRefs, k );
+  ier = MMG5_Add_inode( mesh, bdyRefs, k );
   if ( ier < 0 ) {
     fprintf(stderr,"\n  ## Error: %s: unable to allocate the first boundary"
            " reference node.\n",__func__);
@@ -80,7 +80,7 @@ int _MMG5_countLocalParamAtTet( MMG5_pMesh mesh,_MMG5_iNode **bdyRefs) {
   }
 
   for ( k=1; k<=mesh->ne; ++k ) {
-    ier = _MMG5_Add_inode( mesh, bdyRefs, mesh->tetra[k].ref );
+    ier = MMG5_Add_inode( mesh, bdyRefs, mesh->tetra[k].ref );
 
     if ( ier < 0 ) {
       fprintf(stderr, "\n  ## Warning: %s: unable to list the tetra references.\n"
@@ -103,9 +103,9 @@ int _MMG5_countLocalParamAtTet( MMG5_pMesh mesh,_MMG5_iNode **bdyRefs) {
  *
  */
 static inline
-int _MMG5_writeLocalParamAtTet( MMG5_pMesh mesh, _MMG5_iNode *bdryRefs,
+int MMG5_writeLocalParamAtTet( MMG5_pMesh mesh, MMG5_iNode *bdryRefs,
                                 FILE *out ) {
-  _MMG5_iNode *cur;
+  MMG5_iNode *cur;
 
   cur = bdryRefs;
   while( cur ) {
@@ -114,7 +114,7 @@ int _MMG5_writeLocalParamAtTet( MMG5_pMesh mesh, _MMG5_iNode *bdryRefs,
     cur = cur->nxt;
   }
 
-  _MMG5_Free_ilinkedList(mesh,bdryRefs);
+  MMG5_Free_ilinkedList(mesh,bdryRefs);
 
   return 1;
 }
@@ -129,8 +129,8 @@ int _MMG5_writeLocalParamAtTet( MMG5_pMesh mesh, _MMG5_iNode *bdryRefs,
  *
  */
 static inline
-int _MMG3D_writeLocalParam( MMG5_pMesh mesh ) {
-  _MMG5_iNode  *triRefs,*tetRefs;
+int MMG3D_writeLocalParam( MMG5_pMesh mesh ) {
+  MMG5_iNode  *triRefs,*tetRefs;
   int          nparTri,nparTet;
   char         *ptr,data[128];
   FILE         *out;
@@ -148,13 +148,13 @@ int _MMG3D_writeLocalParam( MMG5_pMesh mesh ) {
 
   fprintf(stdout,"\n  %%%% %s OPENED\n",data);
 
-  nparTri = _MMG5_countLocalParamAtTri( mesh, &triRefs);
+  nparTri = MMG5_countLocalParamAtTri( mesh, &triRefs);
   if ( !nparTri ) {
     fclose(out);
     return 0;
   }
 
-  nparTet = _MMG5_countLocalParamAtTet( mesh, &tetRefs);
+  nparTet = MMG5_countLocalParamAtTet( mesh, &tetRefs);
   if ( !nparTet ) {
     fclose(out);
     return 0;
@@ -163,13 +163,13 @@ int _MMG3D_writeLocalParam( MMG5_pMesh mesh ) {
   fprintf(out,"parameters\n %d\n",nparTri+nparTet);
 
   /** Write local param at triangles */
-  if (! _MMG5_writeLocalParamAtTri(mesh,triRefs,out) ) {
+  if (! MMG5_writeLocalParamAtTri(mesh,triRefs,out) ) {
     fclose(out);
     return 0;
   }
 
   /** Write local param at tetra */
-  if (! _MMG5_writeLocalParamAtTet(mesh,tetRefs,out) ) {
+  if (! MMG5_writeLocalParamAtTet(mesh,tetRefs,out) ) {
     fclose(out);
     return 0;
   }
@@ -193,19 +193,19 @@ int _MMG3D_writeLocalParam( MMG5_pMesh mesh ) {
  *
  */
 static inline
-int _MMG3D_defaultOption(MMG5_pMesh mesh,MMG5_pSol met) {
+int MMG3D_defaultOption(MMG5_pMesh mesh,MMG5_pSol met) {
   mytime    ctim[TIMEMAX];
   double    hsiz;
   char      stim[32];
 
-  _MMG3D_Set_commonFunc();
+  MMG3D_Set_commonFunc();
 
-  signal(SIGABRT,_MMG5_excfun);
-  signal(SIGFPE,_MMG5_excfun);
-  signal(SIGILL,_MMG5_excfun);
-  signal(SIGSEGV,_MMG5_excfun);
-  signal(SIGTERM,_MMG5_excfun);
-  signal(SIGINT,_MMG5_excfun);
+  signal(SIGABRT,MMG5_excfun);
+  signal(SIGFPE,MMG5_excfun);
+  signal(SIGILL,MMG5_excfun);
+  signal(SIGSEGV,MMG5_excfun);
+  signal(SIGTERM,MMG5_excfun);
+  signal(SIGINT,MMG5_excfun);
 
   tminit(ctim,TIMEMAX);
   chrono(ON,&(ctim[0]));
@@ -226,7 +226,7 @@ int _MMG3D_defaultOption(MMG5_pMesh mesh,MMG5_pSol met) {
 
   if ( met->np && (met->np != mesh->np) ) {
     fprintf(stderr,"\n  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
-    _MMG5_DEL_MEM(mesh,met->m);
+    MMG5_DEL_MEM(mesh,met->m);
     met->np = 0;
   }
 
@@ -245,30 +245,30 @@ int _MMG3D_defaultOption(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
   /* scaling mesh + hmin/hmax computation*/
-  if ( !_MMG5_scaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+  if ( !MMG5_scaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
 
   /* specific meshing + hmin/hmax update */
   if ( mesh->info.optim ) {
     if ( !MMG3D_doSol(mesh,met) ) {
-      if ( !_MMG5_unscaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+      if ( !MMG5_unscaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
       _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
     }
-    _MMG3D_solTruncatureForOptim(mesh,met);
+    MMG3D_solTruncatureForOptim(mesh,met);
   }
 
   if ( mesh->info.hsiz > 0. ) {
     if ( !MMG5_Compute_constantSize(mesh,met,&hsiz) ) {
-     if ( !_MMG5_unscaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+     if ( !MMG5_unscaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
      _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
     }
   }
 
   /* unscaling mesh */
-  if ( !_MMG5_unscaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+  if ( !MMG5_unscaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
 
   /* Save the local parameters file */
   mesh->mark = 0;
-  if ( !_MMG3D_writeLocalParam(mesh) ) {
+  if ( !MMG3D_writeLocalParam(mesh) ) {
     fprintf(stderr,"\n  ## Error: %s: Unable to save the local parameters file.\n"
             "            Exit program.\n",__func__);
      _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
@@ -299,10 +299,10 @@ int main(int argc,char *argv[]) {
   fprintf(stdout,"     %s\n",MG_CPY);
   fprintf(stdout,"     %s %s\n",__DATE__,__TIME__);
 
-  _MMG3D_Set_commonFunc();
+  MMG3D_Set_commonFunc();
 
   /* Print timer at exit */
-  atexit(_MMG5_endcod);
+  atexit(MMG5_endcod);
 
   tminit(MMG5_ctim,TIMEMAX);
   chrono(ON,&MMG5_ctim[0]);
@@ -327,7 +327,7 @@ int main(int argc,char *argv[]) {
 
   /* Set default metric size */
   if ( !MMG3D_Set_solSize(mesh,met,MMG5_Vertex,0,MMG5_Scalar) )
-    _MMG5_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
+    MMG5_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
 
   /* command line */
   if ( !MMG3D_parsar(argc,argv,mesh,met) )  return MMG5_STRONGFAILURE;
@@ -348,25 +348,25 @@ int main(int argc,char *argv[]) {
     msh = 1;
   }
   if ( ier<1 )
-    _MMG5_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
+    MMG5_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
 
   /* read displacement if any */
   if ( mesh->info.lag > -1 ) {
     if ( !msh && !MMG3D_Set_solSize(mesh,disp,MMG5_Vertex,0,MMG5_Vector) )
-      _MMG5_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
+      MMG5_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
 
     if ( !MMG3D_Set_inputSolName(mesh,disp,met->namein) )
-      _MMG5_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
+      MMG5_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
 
     if ( !msh ) {
       ier = MMG3D_loadSol(mesh,disp,disp->namein);
       if ( ier == 0 ) {
         fprintf(stderr,"\n  ## ERROR: NO DISPLACEMENT FOUND.\n");
-        _MMG5_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
+        MMG5_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
       }
       else if ( ier == -1 ) {
         fprintf(stderr,"\n  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
-        _MMG5_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
+        MMG5_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
       }
     }
   }
@@ -377,21 +377,21 @@ int main(int argc,char *argv[]) {
 
       if ( ier == -1 ) {
         fprintf(stderr,"\n  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
-        _MMG5_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
+        MMG5_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
       }
       if ( mesh->info.iso && !ier ) {
         fprintf(stderr,"\n  ## ERROR: NO ISOVALUE DATA.\n");
-        _MMG5_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
+        MMG5_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
       }
     }
     else {
       if ( mesh->info.iso && met->m==0 ) {
         fprintf(stderr,"\n  ## ERROR: NO ISOVALUE DATA.\n");
-        _MMG5_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
+        MMG5_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
       }
     }
     if ( !MMG3D_parsop(mesh,met) )
-      _MMG5_RETURN_AND_FREE(mesh,met,disp,MMG5_LOWFAILURE);
+      MMG5_RETURN_AND_FREE(mesh,met,disp,MMG5_LOWFAILURE);
   }
 
   chrono(OFF,&MMG5_ctim[1]);
@@ -402,8 +402,8 @@ int main(int argc,char *argv[]) {
 
   if ( mesh->mark ) {
     /* Save a local parameters file containing the default parameters */
-    ier = _MMG3D_defaultOption(mesh,met);
-    _MMG5_RETURN_AND_FREE(mesh,met,disp,ier);
+    ier = MMG3D_defaultOption(mesh,met);
+    MMG5_RETURN_AND_FREE(mesh,met,disp,ier);
   }
   else if ( mesh->info.lag > -1 ) {
     ier = MMG3D_mmg3dmov(mesh,met,disp);
@@ -429,10 +429,10 @@ int main(int argc,char *argv[]) {
       ierSave = MMG3D_saveMshMesh(mesh,met,mesh->nameout);
 
     if ( !ierSave )
-      _MMG5_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
+      MMG5_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
 
     if ( !msh && !MMG3D_saveSol(mesh,met,met->nameout) )
-      _MMG5_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
+      MMG5_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
 
     chrono(OFF,&MMG5_ctim[1]);
     if ( mesh->info.imprim > 0 )
@@ -440,5 +440,5 @@ int main(int argc,char *argv[]) {
   }
 
   /* free mem */
-  _MMG5_RETURN_AND_FREE(mesh,met,disp,ier);
+  MMG5_RETURN_AND_FREE(mesh,met,disp,ier);
 }

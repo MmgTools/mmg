@@ -53,7 +53,7 @@ static int paktri(MMG5_pMesh mesh) {
       pt1 = &mesh->tria[mesh->nt];
       assert ( pt && pt1 );
       memcpy(pt,pt1,sizeof(MMG5_Tria));
-      if ( !_MMGS_delElt(mesh,mesh->nt) )  return 0;
+      if ( !MMGS_delElt(mesh,mesh->nt) )  return 0;
     }
   }
   while ( ++k < mesh->nt );
@@ -74,8 +74,8 @@ static int paktri(MMG5_pMesh mesh) {
  * Create adjacency table.
  *
  */
-int _MMGS_hashTria(MMG5_pMesh mesh) {
-  _MMG5_Hash          hash;
+int MMGS_hashTria(MMG5_pMesh mesh) {
+  MMG5_Hash          hash;
 
   if ( mesh->adja )  return 1;
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
@@ -84,14 +84,14 @@ int _MMGS_hashTria(MMG5_pMesh mesh) {
   /* tassage */
   if ( !paktri(mesh) )  return 0;
 
-  _MMG5_ADD_MEM(mesh,(3*mesh->ntmax+5)*sizeof(int),"adjacency table",
+  MMG5_ADD_MEM(mesh,(3*mesh->ntmax+5)*sizeof(int),"adjacency table",
                 fprintf(stderr,"  Exit program.\n");
                 return 0);
-  _MMG5_SAFE_CALLOC(mesh->adja,3*mesh->ntmax+5,int,return 0);
+  MMG5_SAFE_CALLOC(mesh->adja,3*mesh->ntmax+5,int,return 0);
 
-  if ( !_MMG5_mmgHashTria(mesh, mesh->adja, &hash, 0) ) return 0;
+  if ( !MMG5_mmgHashTria(mesh, mesh->adja, &hash, 0) ) return 0;
 
-  _MMG5_DEL_MEM(mesh,hash.item);
+  MMG5_DEL_MEM(mesh,hash.item);
 
   return 1;
 }
@@ -111,7 +111,7 @@ int _MMGS_hashTria(MMG5_pMesh mesh) {
  *
  */
 int assignEdge(MMG5_pMesh mesh) {
-  _MMG5_Hash  hash;
+  MMG5_Hash  hash;
   MMG5_pTria  pt;
   MMG5_pEdge  pa;
   int         k,ia;
@@ -122,8 +122,8 @@ int assignEdge(MMG5_pMesh mesh) {
   /* adjust hash table params */
   hash.siz  = mesh->na;
   hash.max  = 3*mesh->na+1;
-  _MMG5_ADD_MEM(mesh,(hash.max+1)*sizeof(_MMG5_Hash),"hash table",return 0);
-  _MMG5_SAFE_CALLOC(hash.item,hash.max+1,_MMG5_hedge,return 0);
+  MMG5_ADD_MEM(mesh,(hash.max+1)*sizeof(MMG5_Hash),"hash table",return 0);
+  MMG5_SAFE_CALLOC(hash.item,hash.max+1,MMG5_hedge,return 0);
 
   hash.nxt  = mesh->na;
   for (k=mesh->na; k<hash.max; k++)
@@ -131,7 +131,7 @@ int assignEdge(MMG5_pMesh mesh) {
 
   /* hash mesh edges */
   for (k=1; k<=mesh->na; k++)
-    _MMG5_hashEdge(mesh,&hash,mesh->edge[k].a,mesh->edge[k].b,k);
+    MMG5_hashEdge(mesh,&hash,mesh->edge[k].a,mesh->edge[k].b,k);
 
   /* set references to triangles */
   for (k=1; k<=mesh->nt; k++) {
@@ -139,10 +139,10 @@ int assignEdge(MMG5_pMesh mesh) {
     if ( !MG_EOK(pt) )  continue;
 
     for (i=0; i<3; i++) {
-      i1 = _MMG5_inxt2[i];
-      ia = _MMG5_hashGet(&hash,pt->v[i],pt->v[i1]);
+      i1 = MMG5_inxt2[i];
+      ia = MMG5_hashGet(&hash,pt->v[i],pt->v[i1]);
       if ( ia ) {
-        i2 = _MMG5_inxt2[i1];
+        i2 = MMG5_inxt2[i1];
         pa = &mesh->edge[ia];
         pt->edg[i2] = pa->ref;
         pt->tag[i2] = pa->tag;
@@ -151,8 +151,8 @@ int assignEdge(MMG5_pMesh mesh) {
   }
 
   /* reset edge structure */
-  _MMG5_DEL_MEM(mesh,hash.item);
-  _MMG5_DEL_MEM(mesh,mesh->edge);
+  MMG5_DEL_MEM(mesh,hash.item);
+  MMG5_DEL_MEM(mesh,mesh->edge);
   mesh->na = 0;
 
   return 1;

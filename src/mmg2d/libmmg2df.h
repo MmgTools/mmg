@@ -48,8 +48,8 @@
 !  */
 
 
-#ifndef _MMG2DLIB_H
-#define _MMG2DLIB_H
+#ifndef MMG2DLIB_H
+#define MMG2DLIB_H
 
 ! #ifdef __cplusplus
 ! extern "C" {

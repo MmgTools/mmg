@@ -51,7 +51,7 @@
  *
  */
 static int
-_MMGS_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, int start, char istart) {
+MMGS_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, int start, char istart) {
   MMG5_pTria       pt;
   double           v1, v2;
   int              *adja,k,ip1,ip2,end1;
@@ -59,7 +59,7 @@ _MMGS_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, int start, char istart) {
   static char      mmgWarn=0;
 
   k = start;
-  i = _MMG5_inxt2[istart];
+  i = MMG5_inxt2[istart];
 
   /* First loop: stop if an external boundary, or a change in signs (or a 0) is
      met recall that MG_SMGSGN(a,b) = 1 provided a*b >0 */
@@ -67,7 +67,7 @@ _MMGS_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, int start, char istart) {
     adja = &mesh->adja[3*(k-1)+1];
     k = adja[i] / 3;
     i1 = adja[i] % 3;
-    i = _MMG5_iprv2[i1];
+    i = MMG5_iprv2[i1];
 
     if ( k==0 ) break;
 
@@ -86,14 +86,14 @@ _MMGS_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, int start, char istart) {
 
   end1 = k;
   k = start;
-  i = _MMG5_iprv2[istart];
+  i = MMG5_iprv2[istart];
 
   /* Second loop: same travel in the opposite sense */
   do{
     adja = &mesh->adja[3*(k-1)+1];
     k = adja[i] / 3;
     i1 = adja[i] % 3;
-    i = _MMG5_inxt2[i1];
+    i = MMG5_inxt2[i1];
 
     if ( k==0 ) break;
 
@@ -136,20 +136,20 @@ _MMGS_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, int start, char istart) {
  *
  */
 static
-int _MMGS_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
+int MMGS_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTria    pt;
   MMG5_pPoint   p0;
   double        *tmp,v1,v2;
   int           k,nc,ns,ip,ip1,ip2;
   char          i;
 
-  _MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(double),"temporary table",
+  MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(double),"temporary table",
                 fprintf(stderr,"  Exit program.\n");
                 return 0);
-  _MMG5_SAFE_CALLOC(tmp,mesh->npmax+1,double,return 0);
+  MMG5_SAFE_CALLOC(tmp,mesh->npmax+1,double,return 0);
 
   /* create tetra adjacency */
-  if ( !_MMGS_hashTria(mesh) ) {
+  if ( !MMGS_hashTria(mesh) ) {
     fprintf(stderr,"\n  ## Error: %s: hashing problem (1). Exit program.\n",
             __func__);
     return 0;
@@ -164,13 +164,13 @@ int _MMGS_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
   for (k=1; k<=mesh->np; k++) {
     p0 = &mesh->point[k];
     if ( !MG_VOK(p0) ) continue;
-    if ( fabs(sol->m[k]-mesh->info.ls) < _MMG5_EPS ) {
+    if ( fabs(sol->m[k]-mesh->info.ls) < MMG5_EPS ) {
       if ( mesh->info.ddebug )
         fprintf(stderr,"  ## Warning: %s: snapping value %d; "
                 "previous value : %E\n",__func__,k,fabs(sol->m[k]));
 
-      tmp[k] = ( fabs(sol->m[k]-mesh->info.ls) < _MMG5_EPSD ) ?
-        (mesh->info.ls-100.0*_MMG5_EPS) : sol->m[k];
+      tmp[k] = ( fabs(sol->m[k]-mesh->info.ls) < MMG5_EPSD ) ?
+        (mesh->info.ls-100.0*MMG5_EPS) : sol->m[k];
       p0->flag = 1;
       sol->m[k] = mesh->info.ls;
       ns++;
@@ -183,14 +183,14 @@ int _MMGS_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
     if ( !MG_EOK(pt) ) continue;
     for (i=0; i<3; i++) {
       ip = pt->v[i];
-      ip1 = pt->v[_MMG5_inxt2[i]];
-      ip2 = pt->v[_MMG5_iprv2[i]];
+      ip1 = pt->v[MMG5_inxt2[i]];
+      ip2 = pt->v[MMG5_iprv2[i]];
 
       p0 = &mesh->point[ip];
       v1 = sol->m[ip1]-mesh->info.ls;
       v2 = sol->m[ip2]-mesh->info.ls;
       if ( p0->flag && !(MG_SMSGN(v1,v2)) ) {
-        if ( !_MMGS_ismaniball(mesh,sol,k,i) ) {
+        if ( !MMGS_ismaniball(mesh,sol,k,i) ) {
           sol->m[ip] = tmp[ip];
           nc++;
         }
@@ -203,8 +203,8 @@ int _MMGS_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
     fprintf(stdout,"     %8d points snapped, %d corrected\n",ns,nc);
 
   /* memory free */
-  _MMG5_DEL_MEM(mesh,mesh->adja);
-  _MMG5_DEL_MEM(mesh,tmp);
+  MMG5_DEL_MEM(mesh,mesh->adja);
+  MMG5_DEL_MEM(mesh,tmp);
 
   return 1;
 }
@@ -220,7 +220,7 @@ int _MMGS_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
  * \warning i inxt[i] is one edge of the implicit boundary.
  *
  */
-int _MMGS_chkmaniball(MMG5_pMesh mesh, int start, char istart) {
+int MMGS_chkmaniball(MMG5_pMesh mesh, int start, char istart) {
   MMG5_pTria         pt;
   int                *adja,k;
   char               i,i1;
@@ -229,20 +229,20 @@ int _MMGS_chkmaniball(MMG5_pMesh mesh, int start, char istart) {
   k = start;
   i = istart;
 
-  i1 = _MMG5_iprv2[i];
+  i1 = MMG5_iprv2[i];
   assert( MG_EDG(pt->tag[i1]) && (pt->edg[i1]==MG_ISO) );
 
   /* First travel, while another part of the implicit boundary is not met */
   do {
     adja = &mesh->adja[3*(k-1)+1];
-    i1 = _MMG5_inxt2[i];
+    i1 = MMG5_inxt2[i];
 
     k = adja[i1] / 3;
     i = adja[i1] % 3;
 
     if ( !k || mesh->tria[k].edg[i]==MG_ISO ) break;
 
-    i = _MMG5_inxt2[i];
+    i = MMG5_inxt2[i];
   }
   while ( k!=start );
 
@@ -255,25 +255,25 @@ int _MMGS_chkmaniball(MMG5_pMesh mesh, int start, char istart) {
     i = istart;
 
     adja = &mesh->adja[3*(k-1)+1];
-    i1 = _MMG5_iprv2[i];
+    i1 = MMG5_iprv2[i];
     k = adja[i1] / 3;
 
     /* Check of the way the point is caught (the left-hand edge is not an external edge) */
     assert ( k );
 
     i = adja[i1] % 3;
-    i = _MMG5_iprv2[i];
+    i = MMG5_iprv2[i];
 
     do {
       adja = &mesh->adja[3*(k-1)+1];
-      i1 = _MMG5_iprv2[i];
+      i1 = MMG5_iprv2[i];
 
       k = adja[i1] / 3;
       i = adja[i1] % 3;
 
       if ( (!k) || mesh->tria[k].edg[i]==MG_ISO ) break;
 
-      i = _MMG5_iprv2[i];
+      i = MMG5_iprv2[i];
     }
     while ( k!=start );
 
@@ -283,17 +283,17 @@ int _MMGS_chkmaniball(MMG5_pMesh mesh, int start, char istart) {
   }
 
   /* General case: go on travelling until another implicit boundary is met */
-  i = _MMG5_inxt2[i];
+  i = MMG5_inxt2[i];
   do {
     adja = &mesh->adja[3*(k-1)+1];
-    i1 = _MMG5_inxt2[i];
+    i1 = MMG5_inxt2[i];
 
     k = adja[i1] / 3;
     i = adja[i1] % 3;
 
     if ( (!k) || mesh->tria[k].edg[i]==MG_ISO ) break;
 
-    i = _MMG5_inxt2[i];
+    i = MMG5_inxt2[i];
   }
   while ( k!=start );
 
@@ -312,7 +312,7 @@ int _MMGS_chkmaniball(MMG5_pMesh mesh, int start, char istart) {
  *
  */
 static
-int _MMGS_chkmanimesh(MMG5_pMesh mesh) {
+int MMGS_chkmanimesh(MMG5_pMesh mesh) {
   MMG5_pTria      pt;
   int             *adja,k,cnt,iel;
   char            i,i1;
@@ -360,8 +360,8 @@ int _MMGS_chkmanimesh(MMG5_pMesh mesh) {
 
       if ( (!iel) || (pt->edg[i] != MG_ISO) ) continue;
 
-      i1 = _MMG5_inxt2[i];
-      if ( !_MMGS_chkmaniball(mesh,k,i1) )
+      i1 = MMG5_inxt2[i];
+      if ( !MMGS_chkmaniball(mesh,k,i1) )
         return 0;
     }
   }
@@ -381,10 +381,10 @@ int _MMGS_chkmanimesh(MMG5_pMesh mesh) {
  * once values of sol have been snapped/checked
  *
  */
-static int _MMGS_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol){
+static int MMGS_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol){
   MMG5_pTria   pt;
   MMG5_pPoint  p0,p1;
-  _MMG5_Hash   hash;
+  MMG5_Hash   hash;
   double       c[3],v0,v1,s;
   int          vx[3],nb,k,ip0,ip1,np,ns,nt,ier;
   char         ia;
@@ -397,14 +397,14 @@ static int _MMGS_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol){
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     for (ia=0; ia<3; ia++) {
-      ip0 = pt->v[_MMG5_inxt2[ia]];
-      ip1 = pt->v[_MMG5_iprv2[ia]];
+      ip0 = pt->v[MMG5_inxt2[ia]];
+      ip1 = pt->v[MMG5_iprv2[ia]];
       p0  = &mesh->point[ip0];
       p1  = &mesh->point[ip1];
       if ( p0->flag && p1->flag )  continue;
       v0  = sol->m[ip0]-mesh->info.ls;
       v1  = sol->m[ip1]-mesh->info.ls;
-      if ( fabs(v0) > _MMG5_EPSD2 && fabs(v1) > _MMG5_EPSD2 && v0*v1 < 0.0 ) {
+      if ( fabs(v0) > MMG5_EPSD2 && fabs(v1) > MMG5_EPSD2 && v0*v1 < 0.0 ) {
         if ( !p0->flag ) {
           p0->flag = nb;
           nb++;
@@ -419,43 +419,43 @@ static int _MMGS_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol){
   if ( ! nb )  return 1;
 
   /* Create intersection points at 0 isovalue and set flags to trias */
-  if ( !_MMG5_hashNew(mesh,&hash,nb,3*nb) ) return 0;
+  if ( !MMG5_hashNew(mesh,&hash,nb,3*nb) ) return 0;
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) )  continue;
 
     for (ia=0; ia<3; ia++) {
-      ip0 = pt->v[_MMG5_inxt2[ia]];
-      ip1 = pt->v[_MMG5_iprv2[ia]];
-      np  = _MMG5_hashGet(&hash,ip0,ip1);
+      ip0 = pt->v[MMG5_inxt2[ia]];
+      ip1 = pt->v[MMG5_iprv2[ia]];
+      np  = MMG5_hashGet(&hash,ip0,ip1);
       if ( np )  continue;
 
       p0 = &mesh->point[ip0];
       p1 = &mesh->point[ip1];
       v0 = sol->m[ip0]-mesh->info.ls;
       v1 = sol->m[ip1]-mesh->info.ls;
-      if ( fabs(v0) < _MMG5_EPSD2 || fabs(v1) < _MMG5_EPSD2 )  continue;
+      if ( fabs(v0) < MMG5_EPSD2 || fabs(v1) < MMG5_EPSD2 )  continue;
       else if ( MG_SMSGN(v0,v1) )  continue;
       else if ( !p0->flag || !p1->flag )  continue;
 
       s = v0 / (v0-v1);
 
-      s = MG_MAX(MG_MIN(s,1.0-_MMG5_EPS),_MMG5_EPS);
+      s = MG_MAX(MG_MIN(s,1.0-MMG5_EPS),MMG5_EPS);
       c[0] = p0->c[0] + s*(p1->c[0]-p0->c[0]);
       c[1] = p0->c[1] + s*(p1->c[1]-p0->c[1]);
       c[2] = p0->c[2] + s*(p1->c[2]-p0->c[2]);
 
-      np = _MMGS_newPt(mesh,c,NULL);
+      np = MMGS_newPt(mesh,c,NULL);
       if ( !np ) {
-        _MMGS_POINT_REALLOC(mesh,sol,np,0.2,
+        MMGS_POINT_REALLOC(mesh,sol,np,0.2,
                             fprintf(stderr,"\n  ## Error: %s: unable to"
                                     " allocate a new point\n",__func__);
-                            _MMG5_INCREASE_MEM_MESSAGE();
+                            MMG5_INCREASE_MEM_MESSAGE();
                             return 0
                             ,c,NULL);
       }
       sol->m[np] = mesh->info.ls;
-      _MMG5_hashEdge(mesh,&hash,ip0,ip1,np);
+      MMG5_hashEdge(mesh,&hash,ip0,ip1,np);
     }
   }
 
@@ -469,34 +469,34 @@ static int _MMGS_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol){
     pt->flag = 0;
     memset(vx,0,3*sizeof(int));
     for (ia=0; ia<3; ia++) {
-      vx[ia] = _MMG5_hashGet(&hash,pt->v[_MMG5_inxt2[ia]],pt->v[_MMG5_iprv2[ia]]);
+      vx[ia] = MMG5_hashGet(&hash,pt->v[MMG5_inxt2[ia]],pt->v[MMG5_iprv2[ia]]);
       if ( vx[ia] ) {
         MG_SET(pt->flag,ia);
       }
     }
     switch (pt->flag) {
     case 1: /* 1 edge split */
-      ier = _MMGS_split1(mesh,sol,k,0,vx);
+      ier = MMGS_split1(mesh,sol,k,0,vx);
       ns++;
       break;
 
     case 2: /* 1 edge split */
-      ier = _MMGS_split1(mesh,sol,k,1,vx);
+      ier = MMGS_split1(mesh,sol,k,1,vx);
       ns++;
       break;
 
     case 4: /* 1 edge split */
-      ier = _MMGS_split1(mesh,sol,k,2,vx);
+      ier = MMGS_split1(mesh,sol,k,2,vx);
       ns++;
       break;
 
     case 3: case 5: case 6: /* 2 edges split */
-      ier = _MMGS_split2(mesh,sol,k,vx);
+      ier = MMGS_split2(mesh,sol,k,vx);
       ns++;
       break;
 
     case 7: /* 3 edges splitted */
-      ier =_MMGS_split3(mesh,sol,k,vx);
+      ier =MMGS_split3(mesh,sol,k,vx);
       ns++;
       break;
 
@@ -509,7 +509,7 @@ static int _MMGS_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol){
   if ( (mesh->info.ddebug || abs(mesh->info.imprim) > 5) && ns > 0 )
     fprintf(stdout,"     %7d splitted\n",ns);
 
-  _MMG5_DEL_MEM(mesh,hash.item);
+  MMG5_DEL_MEM(mesh,hash.item);
   return ns;
 }
 
@@ -521,7 +521,7 @@ static int _MMGS_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol){
  * Set references to tris according to the sign of the level set function.
  *
  */
-static int _MMGS_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol) {
+static int MMGS_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol) {
   MMG5_pTria   pt;
   double       v,v1;
   int          k,ip,ip1;
@@ -557,8 +557,8 @@ static int _MMGS_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol) {
     // Set MG_ISO ref at ls edges
     if ( nz == 2 ) {
       for (i=0; i<3; i++) {
-        ip  = pt->v[_MMG5_inxt2[i]];
-        ip1 = pt->v[_MMG5_iprv2[i]];
+        ip  = pt->v[MMG5_inxt2[i]];
+        ip1 = pt->v[MMG5_iprv2[i]];
         v   = sol->m[ip] -mesh->info.ls;
         v1  = sol->m[ip1]-mesh->info.ls;
         if ( v == 0.0 && v1 == 0.0) {
@@ -580,49 +580,49 @@ static int _MMGS_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol) {
  * Create implicit surface in mesh.
  *
  */
-int _MMGS_mmgs2(MMG5_pMesh mesh,MMG5_pSol sol) {
+int MMGS_mmgs2(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   if ( abs(mesh->info.imprim) > 3 )
     fprintf(stdout,"  ** ISOSURFACE EXTRACTION\n");
 
   /* Snap values of level set function if need be, then discretize it */
-  if ( !_MMGS_snpval_ls(mesh,sol) ) {
+  if ( !MMGS_snpval_ls(mesh,sol) ) {
     fprintf(stderr,"\n  ## Problem with implicit function. Exit program.\n");
     return 0;
   }
 
   /* Check the initial mesh adjacencies */
-  if ( !_MMGS_hashTria(mesh) ) {
+  if ( !MMGS_hashTria(mesh) ) {
     fprintf(stderr,"\n  ## Hashing problem. Exit program.\n");
     return 0;
   }
 
-  _MMG5_DEL_MEM(mesh,mesh->adja);
+  MMG5_DEL_MEM(mesh,mesh->adja);
 
-  if ( !_MMGS_cuttri_ls(mesh,sol) ) {
+  if ( !MMGS_cuttri_ls(mesh,sol) ) {
     fprintf(stderr,"\n  ## Problem in discretizing implicit function. Exit program.\n");
     return 0;
   }
 
-  if ( !_MMGS_setref_ls(mesh,sol) ) {
+  if ( !MMGS_setref_ls(mesh,sol) ) {
     fprintf(stderr,"\n  ## Problem in setting references. Exit program.\n");
     return 0;
   }
 
   /* Creation of adjacency relations in the mesh */
-  if ( !_MMGS_hashTria(mesh) ) {
+  if ( !MMGS_hashTria(mesh) ) {
     fprintf(stderr,"\n  ## Hashing problem. Exit program.\n");
     return 0;
   }
 
   /* Check that the resulting mesh is manifold */
-  if ( !_MMGS_chkmanimesh(mesh) ) {
+  if ( !MMGS_chkmanimesh(mesh) ) {
     fprintf(stderr,"\n  ## No manifold resulting situation. Exit program.\n");
     return 0;
   }
 
   /* Clean memory */
-  _MMG5_DEL_MEM(mesh,sol->m);
+  MMG5_DEL_MEM(mesh,sol->m);
 
   return 1;
 }

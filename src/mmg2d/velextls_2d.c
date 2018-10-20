@@ -45,7 +45,7 @@
     invperm stores the permutation [ new pt nb -> old pt nb ] (for unpacking purposes)
     Return: npf = number of vertices in the packed mesh.
 */
-int* _MMG2_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
+int* MMG2D_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
   MMG5_pTria      pt,pt1;
   MMG5_pPoint     p0;
   double          u[2];
@@ -60,11 +60,11 @@ int* _MMG2_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
   nef        = 0;
   u[0]       = u[1] = 0.0;
   ilist      = ilisto = ilistck = 0;
-  _MMG5_ADD_MEM(mesh,(mesh->nt+1)*sizeof(int),"element list",return NULL);
-  _MMG5_SAFE_CALLOC(list,mesh->nt+1,int,return NULL);
+  MMG5_ADD_MEM(mesh,(mesh->nt+1)*sizeof(int),"element list",return NULL);
+  MMG5_SAFE_CALLOC(list,mesh->nt+1,int,return NULL);
 
-  _MMG5_ADD_MEM(mesh,(mesh->np+1)*sizeof(int),"point permutation",return NULL);
-  _MMG5_SAFE_CALLOC(perm,mesh->np+1,int,return NULL);
+  MMG5_ADD_MEM(mesh,(mesh->np+1)*sizeof(int),"point permutation",return NULL);
+  MMG5_SAFE_CALLOC(perm,mesh->np+1,int,return NULL);
 
 
   /* Reset flag field at triangles */
@@ -129,19 +129,19 @@ int* _MMG2_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
     fprintf(stderr,
             "\n  ## Error: %s: no triangle with reference %d in the mesh.\n"
             "              Nothing to move.\n",__func__,MMG5_DISPREF);
-    _MMG5_DEL_MEM ( mesh,list );
-    _MMG5_DEL_MEM ( mesh,perm );
+    MMG5_DEL_MEM ( mesh,list );
+    MMG5_DEL_MEM ( mesh,perm );
     return NULL;
   }
 
   /* Creation of the inverse permutation table */
-  _MMG5_ADD_MEM ( mesh,(npf+1)*sizeof(int),"permutation table",
-                  _MMG5_DEL_MEM ( mesh,list );
-                  _MMG5_DEL_MEM ( mesh,perm );
+  MMG5_ADD_MEM ( mesh,(npf+1)*sizeof(int),"permutation table",
+                  MMG5_DEL_MEM ( mesh,list );
+                  MMG5_DEL_MEM ( mesh,perm );
                   return NULL );
-  _MMG5_SAFE_CALLOC ( invperm,(npf+1),int,
-                      _MMG5_DEL_MEM ( mesh,list );
-                      _MMG5_DEL_MEM ( mesh,perm );
+  MMG5_SAFE_CALLOC ( invperm,(npf+1),int,
+                      MMG5_DEL_MEM ( mesh,list );
+                      MMG5_DEL_MEM ( mesh,perm );
                       return NULL );
 
   /* Step 3: count of the surface triangles in the new mesh
@@ -176,8 +176,8 @@ int* _MMG2_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
   /* Step 4: creation of the mesh for elasticity */
   if ( !LS_mesh(lsst,npf,nef,ilist,0) ) {
     fprintf(stdout,"  ## Problem in function LS_mesh. Exiting.\n");
-    _MMG5_DEL_MEM ( mesh,list );
-    _MMG5_DEL_MEM ( mesh,perm );
+    MMG5_DEL_MEM ( mesh,list );
+    MMG5_DEL_MEM ( mesh,perm );
     return 0;
   }
 
@@ -195,8 +195,8 @@ int* _MMG2_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
 
     if ( !LS_addVer(lsst,ip,p0->c,p0->ref) ) {
       fprintf(stdout,"  ## Problem in fn LS_addVer. Exiting.\n");
-      _MMG5_DEL_MEM ( mesh,list );
-      _MMG5_DEL_MEM ( mesh,perm );
+      MMG5_DEL_MEM ( mesh,list );
+      MMG5_DEL_MEM ( mesh,perm );
       return 0;
     }
   }
@@ -211,8 +211,8 @@ int* _MMG2_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
 
     if (!LS_addTri(lsst,k,vper,0) ) {
       fprintf(stdout,"  ## Problem in fn LS_addTet. Exiting.\n");
-      _MMG5_DEL_MEM ( mesh,list );
-      _MMG5_DEL_MEM ( mesh,perm );
+      MMG5_DEL_MEM ( mesh,list );
+      MMG5_DEL_MEM ( mesh,perm );
       return 0;
     }
   }
@@ -233,26 +233,26 @@ int* _MMG2_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
         if ( MG_GET(pt->flag,i+1) ) continue;
         nef ++;
 
-        vper[0] = perm[pt->v[_MMG5_inxt2[i]]];
-        vper[1] = perm[pt->v[_MMG5_iprv2[i]]];
+        vper[0] = perm[pt->v[MMG5_inxt2[i]]];
+        vper[1] = perm[pt->v[MMG5_iprv2[i]]];
 
         if ( !LS_addEdg(lsst,nef,vper,refdirnh) ) {
           fprintf(stdout,"  ## Problem in fn LS_addEdg. Exiting.\n");
-          _MMG5_DEL_MEM ( mesh,list );
-          _MMG5_DEL_MEM ( mesh,perm );
+          MMG5_DEL_MEM ( mesh,list );
+          MMG5_DEL_MEM ( mesh,perm );
           return 0;
         }
       }
       /* iel has no neighbour through face i within the list */
       else if ( !jel || !MG_GET(mesh->tria[jel].flag,0) ) {
         nef++;
-        vper[0] = perm[pt->v[_MMG5_inxt2[i]]];
-        vper[1] = perm[pt->v[_MMG5_iprv2[i]]];
+        vper[0] = perm[pt->v[MMG5_inxt2[i]]];
+        vper[1] = perm[pt->v[MMG5_iprv2[i]]];
 
         if ( !LS_addEdg(lsst,nef,vper,refdirh) ) {
           fprintf(stdout,"  ## Problem in fn LS_addEdg. Exiting.\n");
-          _MMG5_DEL_MEM ( mesh,list );
-          _MMG5_DEL_MEM ( mesh,perm );
+          MMG5_DEL_MEM ( mesh,list );
+          MMG5_DEL_MEM ( mesh,perm );
           return 0;
         }
       }
@@ -265,37 +265,37 @@ int* _MMG2_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
   /* Add boundary conditions */
   /*if ( !LS_setBC(lsst,Dirichlet,refdirnh,'v',LS_edg,v) ) {
     fprintf(stdout,"  ## Problem in fn LS_set BC. Exiting.\n");
-    _MMG5_DEL_MEM ( mesh,list );
-    _MMG5_DEL_MEM ( mesh,perm );
+    MMG5_DEL_MEM ( mesh,list );
+    MMG5_DEL_MEM ( mesh,perm );
     return 0;
     }*/
   if ( !LS_setBC(lsst,Dirichlet,refdirnh,'f',LS_edg,NULL) ) {
     fprintf(stdout,"  ## Problem in fn LS_set BC. Exiting.\n");
-    _MMG5_DEL_MEM ( mesh,list );
-    _MMG5_DEL_MEM ( mesh,perm );
+    MMG5_DEL_MEM ( mesh,list );
+    MMG5_DEL_MEM ( mesh,perm );
     return 0;
   }
 
   if ( !LS_setBC(lsst,Dirichlet,refdirh,'v',LS_edg,u) ) {
     fprintf(stdout,"  ## Problem in fn LS_set BC. Exiting.\n");
-    _MMG5_DEL_MEM ( mesh,list );
-    _MMG5_DEL_MEM ( mesh,perm );
+    MMG5_DEL_MEM ( mesh,list );
+    MMG5_DEL_MEM ( mesh,perm );
     return 0;
   }
 
   /* Add materials */
   if ( !LS_setLame(lsst,0,_LS_LAMBDA,_LS_MU) ) {
     fprintf(stdout,"  ## Problem in fn LS_setLame. Exiting.\n");
-    _MMG5_DEL_MEM ( mesh,list );
-    _MMG5_DEL_MEM ( mesh,perm );
+    MMG5_DEL_MEM ( mesh,list );
+    MMG5_DEL_MEM ( mesh,perm );
     return 0;
   }
 
   /* Transfer displacement */
   if ( !LS_newSol(lsst) ) {
     fprintf(stdout,"  ## Problem in fn LS_CreaSol. Exiting.\n");
-    _MMG5_DEL_MEM ( mesh,list );
-    _MMG5_DEL_MEM ( mesh,perm );
+    MMG5_DEL_MEM ( mesh,list );
+    MMG5_DEL_MEM ( mesh,perm );
     return 0;
   }
 
@@ -309,13 +309,13 @@ int* _MMG2_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
   }
 
   *npfin = npf;
-  _MMG5_DEL_MEM ( mesh,list );
-  _MMG5_DEL_MEM ( mesh,perm );
+  MMG5_DEL_MEM ( mesh,list );
+  MMG5_DEL_MEM ( mesh,perm );
   return invperm;
 }
 
 /** Transfer solution from the submesh to the global mesh */
-int _MMG2_unpackLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int npf,int *invperm) {
+int MMG2D_unpackLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int npf,int *invperm) {
   double      *u;
   int         k,ip;
   char        i;
@@ -337,7 +337,7 @@ int _MMG2_unpackLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int npf,int *invper
 }
 
 /** Extension of the displacement at the nodes of edges tagged MMG5_DISPREF */
-int _MMG2_velextLS(MMG5_pMesh mesh,MMG5_pSol disp) {
+int MMG2D_velextLS(MMG5_pMesh mesh,MMG5_pSol disp) {
   LSst       *lsst;
   int        npf,*invperm;
 
@@ -345,10 +345,10 @@ int _MMG2_velextLS(MMG5_pMesh mesh,MMG5_pSol disp) {
   lsst = LS_init(mesh->dim,mesh->ver,P1,1);
 
   /* Creation of the submesh */
-  invperm = _MMG2_packLS(mesh,disp,lsst,&npf);
+  invperm = MMG2D_packLS(mesh,disp,lsst,&npf);
 
   if ( !npf ) {
-    fprintf(stdout,"  ## Problem in fn MMG2_packLS. Exiting.\n");
+    fprintf(stdout,"  ## Problem in fn MMG2D_packLS. Exiting.\n");
     return 0;
   }
 
@@ -359,13 +359,13 @@ int _MMG2_velextLS(MMG5_pMesh mesh,MMG5_pSol disp) {
   }
 
   /* Update of the displacement */
-  if ( !_MMG2_unpackLS(mesh,disp,lsst,npf,invperm) ) {
-    fprintf(stdout,"  ## Problem in fn _MMG2_unpackLS. Exiting.\n");
+  if ( !MMG2D_unpackLS(mesh,disp,lsst,npf,invperm) ) {
+    fprintf(stdout,"  ## Problem in fn MMG2D_unpackLS. Exiting.\n");
     return 0;
   }
 
   /* Memory release */
-  _MMG5_DEL_MEM ( mesh,invperm );
+  MMG5_DEL_MEM ( mesh,invperm );
 
   /* Release of the Lsst structure */
   if ( !LS_stop(lsst) ) {

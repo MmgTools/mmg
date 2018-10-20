@@ -42,7 +42,7 @@
  * Compute radius (squared) and center of circumscribing circle to the element.
  *
  */
-int _MMG5_cenrad_iso(MMG5_pMesh mesh,double *ct,double *c,double *rad) {
+int MMG5_cenrad_iso(MMG5_pMesh mesh,double *ct,double *c,double *rad) {
   double      dd,ux,uy,uz,n1[3],n2[3],n3[3],*c1,*c2,*c3,*c4,pl1,pl2,pl3;
   double      cc1,cc2,cc3;
 
@@ -127,7 +127,7 @@ int _MMG5_cenrad_iso(MMG5_pMesh mesh,double *ct,double *c,double *rad) {
  * for an anisotropic metric \a m.
  *
  */
-int _MMG5_cenrad_ani(MMG5_pMesh mesh,double *ct,double *m,double *c,double *rad) {
+int MMG5_cenrad_ani(MMG5_pMesh mesh,double *ct,double *m,double *c,double *rad) {
   double      d1,d2,d3,det,dd,ux,uy,uz,vx,vy,vz,wx,wy,wz;
   double      ax,ay,az,bx,by,bz,cx,cy,cz;
 

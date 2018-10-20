@@ -353,7 +353,7 @@ int MMG5_check_accuracy(double mat[6],double lambda[3], double v[3][3],
  * \remark the i^{th} eigenvector is stored in v[i][.].
  *
  */
-int _MMG5_eigenv(int symmat,double *mat,double lambda[3],double v[3][3]) {
+int MMG5_eigenv(int symmat,double *mat,double lambda[3],double v[3][3]) {
   double    a11,a12,a13,a21,a22,a23,a31,a32,a33;
   double    aa,bb,cc,dd,ee,ii,vx1[3],vx2[3],vx3[3],dd1,dd2,dd3;
   double    maxd,maxm,valm,p[4],w1[3],w2[3],w3[3];
@@ -628,7 +628,7 @@ int _MMG5_eigenv(int symmat,double *mat,double lambda[3],double v[3][3]) {
  *
  * \warning not used for now
  */
-int _MMG5_eigen2(double *mm,double *lambda,double vp[2][2]) {
+int MMG5_eigen2(double *mm,double *lambda,double vp[2][2]) {
   double   m[3],dd,a1,xn,ddeltb,rr1,rr2,ux,uy;
 
   /* normalize */
@@ -743,7 +743,7 @@ vect:
  * Compute eigenelements of a symetric matrix m. Eigenvectors are orthogonal.
  *
  */
-inline int _MMG5_eigensym(double m[3],double lambda[2],double vp[2][2]) {
+inline int MMG5_eigensym(double m[3],double lambda[2],double vp[2][2]) {
   double   sqDelta,dd,trm,vnorm;
 
   dd  = m[0]-m[2];
@@ -752,7 +752,7 @@ inline int _MMG5_eigensym(double m[3],double lambda[2],double vp[2][2]) {
   lambda[0] = 0.5*(trm - sqDelta);
 
   /* Case when m = lambda[0]*I */
-  if ( sqDelta < _MMG5_EPS ) {
+  if ( sqDelta < MMG5_EPS ) {
     lambda[1] = lambda[0];
     vp[0][0] = 1.0;
     vp[0][1] = 0.0;
@@ -765,12 +765,12 @@ inline int _MMG5_eigensym(double m[3],double lambda[2],double vp[2][2]) {
   vp[0][1] = (lambda[0] - m[0]);
   vnorm = sqrt(vp[0][0]*vp[0][0] + vp[0][1]*vp[0][1]);
 
-  if ( vnorm < _MMG5_EPS ) {
+  if ( vnorm < MMG5_EPS ) {
     vp[0][0] = (lambda[0] - m[2]);
     vp[0][1] = m[1];
     vnorm = sqrt(vp[0][0]*vp[0][0] + vp[0][1]*vp[0][1]);
   }
-  assert(vnorm > _MMG5_EPSD);
+  assert(vnorm > MMG5_EPSD);
 
   vnorm = 1.0/vnorm;
   vp[0][0] *= vnorm;

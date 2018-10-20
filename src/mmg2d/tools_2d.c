@@ -42,7 +42,7 @@
  * find the element index in packed numerotation
  *
  */
-int _MMG2D_indElt(MMG5_pMesh mesh, int kel) {
+int MMG2D_indElt(MMG5_pMesh mesh, int kel) {
     MMG5_pTria pt;
     int        ne, k;
 
@@ -66,7 +66,7 @@ int _MMG2D_indElt(MMG5_pMesh mesh, int kel) {
  * find the point index in packed numerotation
  *
  */
-int _MMG2D_indPt(MMG5_pMesh mesh, int kp) {
+int MMG2D_indPt(MMG5_pMesh mesh, int kp) {
     MMG5_pPoint ppt;
     int         np, k;
 

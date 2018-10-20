@@ -32,8 +32,8 @@
  * name and the opening brace (it creates errors under windows)
  */
 
-#ifndef _MMGLIBCOMMON_H
-#define _MMGLIBCOMMON_H
+#ifndef MMGLIBCOMMON_H
+#define MMGLIBCOMMON_H
 
 #include <stdarg.h>
 
@@ -71,7 +71,7 @@ void  MMG5_Init_fileNames(MMG5_pMesh mesh, MMG5_pSol sol);
  * >   END SUBROUTINE\n
  *
  */
-void  (_MMG5_Init_parameters)(MMG5_pMesh mesh);
+void  (MMG5_Init_parameters)(MMG5_pMesh mesh);
 
 /* init file names */
 /**
@@ -155,7 +155,7 @@ void MMG5_Free_structures(MMG5_pMesh mesh,MMG5_pSol sol);
  * File name deallocations before return.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG5_SET_MMGFREE_NAMES(mesh,met)\n
+ * >   SUBROUTINE MMG5_SETMMGFREE_NAMES(mesh,met)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,met\n
  * >   END SUBROUTINE\n
  *

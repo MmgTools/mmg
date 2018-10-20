@@ -39,7 +39,7 @@
  * Compute radius and center of circumscribing circle to the element.
  *
  */
-int _MMG2_cenrad_iso(MMG5_pMesh mesh,double *ct,double *c,double *rad) {
+int MMG2D_cenrad_iso(MMG5_pMesh mesh,double *ct,double *c,double *rad) {
   double      dd,ux,uy,n1[2],n2[2],*c1,*c2,*c3,pl1,pl2;
   double      cc1,cc2;
 
