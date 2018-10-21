@@ -1,5 +1,18 @@
 
-# mmg - Surface and volume remeshers [![Build Status](https://ci.inria.fr/mmg/buildStatus/icon?job=Mmg-multiConf)](https://ci.inria.fr/mmg/job/Mmg-multiConf/)
+# mmg - Surface and volume remeshers 
+[![Build Status](https://ci.inria.fr/mmg/buildStatus/icon?job=Mmg-multiConf)](https://ci.inria.fr/mmg/job/Mmg-multiConf/)[![Quality Gate](https://sonarqube.bordeaux.inria.fr/sonarqube/api/badges/gate?key=cardamom%3Ammg%3Agithub%3Adevelop)](https://sonarqube.bordeaux.inria.fr/sonarqube/dashboard?id=cardamom%3Ammg%3Agithub%3Adevelop)
+
+[![Vulnerabilities](https://sonarqube.bordeaux.inria.fr/sonarqube/api/badges/measure?key=cardamom%3Ammg%3Agithub%3Adevelop&metric=vulnerabilities)](https://sonarqube.bordeaux.inria.fr/sonarqube/component_measures?id=cardamom%3Ammg%3Agithub%3Adevelop&metric=vulnerabilities)[![Potential Bugs](https://sonarqube.bordeaux.inria.fr/sonarqube/api/badges/measure?key=cardamom%3Ammg%3Agithub%3Adevelop&metric=bugs)](https://sonarqube.bordeaux.inria.fr/sonarqube/component_measures?id=cardamom%3Ammg%3Agithub%3Adevelop&metric=bugs)[![Coverage](https://sonarqube.bordeaux.inria.fr/sonarqube/api/badges/measure?key=cardamom%3Ammg%3Agithub%3Adevelop&metric=coverage)](https://sonarqube.bordeaux.inria.fr/sonarqube/component_measures?id=cardamom%3Ammg%3Agithub%3Adevelop&metric=coverage)
+
+[![New Vulnerabilities](https://sonarqube.bordeaux.inria.fr/sonarqube/api/badges/measure?key=cardamom%3Ammg%3Agithub%3Adevelop&metric=new_vulnerabilities)](https://sonarqube.bordeaux.inria.fr/sonarqube/component_measures?id=cardamom%3Ammg%3Agithub%3Adevelop&metric=new_vulnerabilities)[![New Potential Bugs](https://sonarqube.bordeaux.inria.fr/sonarqube/api/badges/measure?key=cardamom%3Ammg%3Agithub%3Adevelop&metric=new_bugs)](https://sonarqube.bordeaux.inria.fr/sonarqube/component_measures?id=cardamom%3Ammg%3Agithub%3Adevelop&metric=new_bugs)
+
+
+
+
+
+
+
+
 mmg is an open source software for bidimensional and tridimensional surface and volume remeshing.
 
 It provides 3 applications and 4 libraries:
