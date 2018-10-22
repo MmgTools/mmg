@@ -172,7 +172,9 @@ static const unsigned char MMG5_permedge[12][6] = {
   {5,1,3,2,4,0}, {2,5,4,1,0,3}, {4,2,5,0,3,1}, {5,4,2,3,1,0} };
 
 /**
- * PROctree cell.
+ * PROctree cell: cellule for point region octree (to speed-up the research of
+ * the closest point to another one).
+ *
  */
 typedef struct MMG3D_PROctree_s
 {
@@ -183,7 +185,8 @@ typedef struct MMG3D_PROctree_s
 } MMG3D_PROctree_s;
 
 /**
- * PROctree global structure (enriched by global variables).
+ * PROctree global structure (enriched by global variables) for point region
+ * octree (to speed-up the research of the closest point to another one).
  */
 typedef struct
 {
