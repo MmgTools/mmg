@@ -28,7 +28,7 @@
  * \version 1
  * \copyright GNU Lesser General Public License.
  *
- * An PROctree of the nodes is created and used for local neighbor search.
+ * An Octree of the nodes is created and used for local neighbor search.
  * This helps deciding if a position is too close to other nodes to refine
  * with an insertion of a new node.
  *

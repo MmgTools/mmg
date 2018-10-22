@@ -454,6 +454,7 @@ typedef struct {
                           param are setted: if \f$tag = 1+2+4\f$ then the point
                           is \a MG_Vert, MG_Tria and MG_Tetra */
   unsigned char optim, optimLES, noinsert, noswap, nomove, nosurf;
+  unsigned char grid; /*!< 1 if the starting mesh is a grid */
   MMG5_pMat     mat;
 } MMG5_Info;
 

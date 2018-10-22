@@ -130,7 +130,9 @@ int MMG3D_usage(char *prog) {
 #ifdef USE_SCOTCH
   fprintf(stdout,"-rn [n]      Turn on or off the renumbering using SCOTCH [1/0] \n");
 #endif
+  fprintf(stdout,"-grid        read input data from a grid (ls mode only) \n");
   fprintf(stdout,"\n");
+
 
   fprintf(stdout,"-nofem       do not force Mmg to create a finite element mesh \n");
   fprintf(stdout,"-optim       mesh optimization\n");
@@ -202,6 +204,17 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
           if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_debug,1) ) {
             return 0;
           }
+        }
+        break;
+      case 'g':
+        if ( !strcmp(argv[i],"-grid") ) {
+          if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_grid,1) ) {
+            return 0;
+          }
+        }
+        else {
+          MMG3D_usage(argv[0]);
+          return 0;
         }
         break;
       case 'h':

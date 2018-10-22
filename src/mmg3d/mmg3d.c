@@ -339,13 +339,19 @@ int main(int argc,char *argv[]) {
 
   /* read mesh file */
   msh = 0;
-  ier = MMG3D_loadMesh(mesh,mesh->namein);
-  if ( !ier ) {
-    if ( mesh->info.lag > -1 )
-      ier = MMG3D_loadMshMesh(mesh,disp,mesh->namein);
-    else
-      ier = MMG3D_loadMshMesh(mesh,met,mesh->namein);
+  if ( mesh->info.grid ) {
+    ier = MMG3D_loadVTKGrid(mesh,mesh->namein);
     msh = 1;
+  }
+  else {
+    ier = MMG3D_loadMesh(mesh,mesh->namein);
+    if ( !ier ) {
+      if ( mesh->info.lag > -1 )
+        ier = MMG3D_loadMshMesh(mesh,disp,mesh->namein);
+      else
+        ier = MMG3D_loadMshMesh(mesh,met,mesh->namein);
+      msh = 1;
+    }
   }
   if ( ier<1 )
     MMG5_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
@@ -413,6 +419,11 @@ int main(int argc,char *argv[]) {
   }
   else {
     ier = MMG3D_mmg3dlib(mesh,met);
+  }
+
+  if ( mesh->info.grid ) {
+    /* msh has been set to 1 to avoid the research of a .sol file. Reset it */
+    msh = 0;
   }
 
   if ( ier != MMG5_STRONGFAILURE ) {

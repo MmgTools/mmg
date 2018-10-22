@@ -1056,6 +1056,37 @@ int MMG3D_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
   return ier;
 }
 
+int MMG3D_loadVTKGrid(MMG5_pMesh mesh,const char *filename) {
+  FILE*       inm;
+  char        *data,chaine[128],*ptr;
+
+  MMG5_SAFE_CALLOC(data,strlen(filename)+5,char,return -1);
+
+  strcpy(data,filename);
+  ptr = strstr(data,".vtk");
+
+  if ( !ptr ) {
+    /* data contains the filename without extension */
+    strcat(data,".vtk");
+  }
+
+  if( !(inm = fopen(data,"rb")) ) {
+    fprintf(stderr,"  ** %s  NOT FOUND.\n",data);
+    MMG5_SAFE_FREE(data);
+    return 0;
+  }
+
+  if ( mesh->info.imprim >= 0 ) {
+    fprintf(stdout,"  %%%% %s OPENED\n",data);
+  }
+  MMG5_SAFE_FREE(data);
+
+  printf ( " %s:%s: TO IMPLEMENT\n",__FILE__,__func__ ); return 0;
+
+  fclose(inm);
+
+  return 1;
+}
 
 /**
  * \param mesh pointer toward the mesh structure.

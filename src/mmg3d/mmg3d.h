@@ -171,6 +171,46 @@ static const unsigned char MMG5_permedge[12][6] = {
   {3,0,4,1,5,2}, {4,3,0,5,2,1}, {1,3,5,0,2,4}, {3,5,1,4,0,2},
   {5,1,3,2,4,0}, {2,5,4,1,0,3}, {4,2,5,0,3,1}, {5,4,2,3,1,0} };
 
+
+#define MMG3D_SIZE_OCTREESONS 8
+
+/**
+ *
+ * MOctree cell: cellule for mesh generation from an octree
+ *
+ */
+typedef struct MMG3D_MOctree_s
+{
+  struct MMG3D_MOctree_s* father; /*!< pointer toward the father of the current cell */
+  struct MMG3D_MOctree_s* sons[MMG3D_SIZE_OCTREESONS]; /*!< pointer toward the subtrees of the current cell */
+  int    fll_ip; /*!< index of the front-lower-left vertex of the octree cell */
+  int    depth; /*!< sub tree depth */
+  int8_t leaf; /*!< 1 if the cell is a leaf, 0 otherwise */
+  int8_t split_ls; /*!< 1 if the level-set split this cell */
+} MMG3D_MOctree_s;
+
+/**
+ * MOctree global structure (enriched by global variables) for mesh generation
+ * from an octree
+ */
+typedef struct
+{
+  int depth_max; /*!< Max depth of the octree */
+  MMG3D_MOctree_s* root; /*!<  Pointer toward the first MOctree cell */
+
+} MMG3D_MOctree;
+typedef MMG3D_MOctree * MMG3D_pMOctree;
+
+/* MOctree prototypes */
+int  MMG3D_init_MOctree    ( MMG5_pMesh mesh, MMG3D_pMOctree* q, int depth_max );
+int  MMG3D_init_MOctree_s  ( MMG5_pMesh mesh, MMG3D_MOctree_s* q );
+int  MMG3D_split_MOctree_s ( MMG5_pMesh mesh, MMG3D_MOctree_s* q );
+
+int  MMG3D_free_MOctree    ( MMG3D_pMOctree** q );
+int  MMG3D_free_MOctree_s  ( MMG3D_MOctree_s* q );
+int  MMG3D_merge_MOctree_s ( MMG3D_MOctree_s* q );
+
+
 /**
  * PROctree cell: cellule for point region octree (to speed-up the research of
  * the closest point to another one).
@@ -197,7 +237,7 @@ typedef struct
 typedef MMG3D_PROctree * MMG3D_pPROctree;
 
 
-/* PROctree */
+/* PROctree prototypes */
 void MMG3D_initPROctree_s( MMG3D_PROctree_s* q);
 int MMG3D_initPROctree(MMG5_pMesh,MMG3D_pPROctree* q, int nv);
 void MMG3D_freePROctree_s(MMG5_pMesh,MMG3D_PROctree_s* q, int nv);

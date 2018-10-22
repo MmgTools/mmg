@@ -84,6 +84,7 @@ enum MMG3D_Param {
   MMG3D_IPARAM_renum,             /*!< [1/0], Turn on/off point relocation with Scotch */
   MMG3D_IPARAM_anisosize,         /*!< [1/0], Turn on/off anisotropic metric creation when no metric is provided */
   MMG3D_IPARAM_octree,            /*!< [n], Specify the max number of points per PROctree cell (DELAUNAY) */
+  MMG3D_IPARAM_grid,              /*!< [1/0], 1 if the starting mesh is a grid (ls mode only */
   MMG3D_DPARAM_angleDetection,    /*!< [val], Value for angle detection */
   MMG3D_DPARAM_hmin,              /*!< [val], Minimal mesh size */
   MMG3D_DPARAM_hmax,              /*!< [val], Maximal mesh size */
@@ -1689,6 +1690,24 @@ enum MMG3D_Param {
  *
  */
   int MMG3D_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param filename name of file.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Read VTK grid.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_LOADMESH(mesh,filename,strlen0,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh\n
+ * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+int MMG3D_loadVTKGrid(MMG5_pMesh mesh,const char *filename);
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \param filename pointer toward the name of file.

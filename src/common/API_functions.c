@@ -94,6 +94,10 @@ void MMG5_Init_parameters(MMG5_pMesh mesh) {
    * scaleMesh function */
   mesh->info.lag      = MMG5_LAG;
 
+ /** MMG3D_IPARAM_grid is used by mmg3d only: 0 if we have a classic tetrahedral
+  * mesh, 1 if we start from a structured grid */
+  mesh->info.grid     = 0;
+
   /* initial value for memMax and gap */
   mesh->gap = MMG5_GAP;
   mesh->memMax = MMG5_memSize();

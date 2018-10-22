@@ -47,7 +47,7 @@ double (*MMG3D_lenedgCoor)(double *ca,double *cb,double *sa,double *sb);
 /**
  * Pack the mesh \a mesh and its associated metric \a met and return \a val.
  */
-#define MMG5_RETURN_AND_PACK(mesh,met,disp,val)do                      \
+#define MMG5_RETURN_AND_PACK(mesh,met,disp,val) do                      \
   {                                                                     \
     if ( !MMG3D_packMesh(mesh,met,disp) )  {                            \
       mesh->npi = mesh->np;                                             \
