@@ -1692,26 +1692,28 @@ enum MMG3D_Param {
   int MMG3D_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
 /**
  * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the solution structure.
  * \param filename name of file.
  * \return 0 if failed, 1 otherwise.
  *
  * Read VTK grid.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG3D_LOADMESH(mesh,filename,strlen0,retval)\n
- * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh\n
+ * >   SUBROUTINE MMG3D_LOADVTKGRID(mesh,sol,filename,strlen0,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
  * >     INTEGER, INTENT(IN)            :: strlen0\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
  */
-int MMG3D_loadVTKGrid(MMG5_pMesh mesh,const char *filename);
+
+int MMG3D_loadVTKGrid(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
 
 /**
  * \param mesh pointer toward the mesh structure.
  * \param filename pointer toward the name of file.
-
+ *
  * \return 0 if failed, 1 otherwise.
  *
  * Save mesh data.

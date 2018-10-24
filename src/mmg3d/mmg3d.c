@@ -340,7 +340,7 @@ int main(int argc,char *argv[]) {
   /* read mesh file */
   msh = 0;
   if ( mesh->info.grid ) {
-    ier = MMG3D_loadVTKGrid(mesh,mesh->namein);
+    ier = MMG3D_loadVTKGrid(mesh,met,mesh->namein);
     msh = 1;
   }
   else {

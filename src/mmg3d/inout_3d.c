@@ -1056,9 +1056,14 @@ int MMG3D_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
   return ier;
 }
 
-int MMG3D_loadVTKGrid(MMG5_pMesh mesh,const char *filename) {
+int MMG3D_loadVTKGrid(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
+  double      ver,xaxis[3],yaxis[3],delta[3],v[3];
   FILE*       inm;
-  char        *data,chaine[128],*ptr;
+  long long   pos,solpos;
+  size_t      len,buflen=128;
+  int         ncells[3],i;
+  int8_t      bin,writingMode,dataStruct,bounds,spacing,origin,pointData,eltTyp,lookupTable;
+  char        *data,chaine[128],*ptr,dataStructType[128];
 
   MMG5_SAFE_CALLOC(data,strlen(filename)+5,char,return -1);
 
@@ -1081,9 +1086,281 @@ int MMG3D_loadVTKGrid(MMG5_pMesh mesh,const char *filename) {
   }
   MMG5_SAFE_FREE(data);
 
-  printf ( " %s:%s: TO IMPLEMENT\n",__FILE__,__func__ ); return 0;
+  /** Init variables */
+  writingMode = dataStruct = bounds = spacing = origin = pointData = eltTyp = lookupTable = 0;
 
-  fclose(inm);
+  /* Default values */
+  sol->ver = mesh->ver = 2;
+  sol->dim = mesh->dim = 3;
+
+  bin      = 0;
+  ver      = 0.0;
+  xaxis[0] = 1.0;
+  xaxis[1] = 0.0;
+  xaxis[2] = 0.0;
+  yaxis[0] = 0.0;
+  yaxis[1] = 1.0;
+  yaxis[2] = 0.0;
+  delta[0] = 0.0;
+  delta[1] = 0.0;
+  delta[2] = 0.0;
+
+  /** Parse VTK file */
+  /* Parse the header line */
+  ptr = chaine;
+  len = getline(&ptr,&buflen,inm);
+  if ( strncmp(chaine,"# vtk DataFile Version",strlen("# vtk DataFile Version")) ) {
+    fprintf(stderr,"  ## Error: %s: Unrecognize VTK header. Expected header is "
+            "'# vtk DataFile Version x.0'\n",__func__);
+    fprintf(stderr," Exit program.\n");
+    fclose(inm);
+    return -1;
+  }
+  else {
+    assert(isdigit(ptr[len-4]));
+    ver = atof(&ptr[len-4]);
+  }
+
+  /* Parse the other lines */
+  strcpy(chaine,"D");
+  while ( fscanf(inm,"%127s",&chaine[0])!=EOF &&
+           ! ( writingMode && dataStruct && bounds && spacing && origin &&
+               pointData   && eltTyp && lookupTable ) ) {
+    //printf("chaine %s\n",chaine);
+    if(!strncmp(chaine,"# vtk DataFile Version",strlen("# vtk DataFile Version"))) {
+
+      fscanf(inm,"%lf",&ver);
+      continue;
+    } else if(!strncmp(chaine,"X_AXIS:",strlen("X_AXIS"))) {
+      fscanf(inm,"%lf %lf %lf",&xaxis[0],&xaxis[1],&xaxis[2]);
+      continue;
+    } else if(!strncmp(chaine,"Y_AXIS:",strlen("Y_AXIS"))) {
+      fscanf(inm,"%lf %lf %lf",&yaxis[0],&yaxis[1],&yaxis[2]);
+      continue;
+    }
+      else if(!strncmp(chaine,"Z_AXIS:",strlen("Z_AXIS"))) {
+        fprintf(stdout,"  ## Warning: %s: Z_AXIS keyword ignored.\n",__func__);
+        continue;
+    } else if(!strncmp(chaine,"ASCII",strlen("ASCII"))) {
+      bin = 0;
+      if ( writingMode ) {
+        fprintf(stdout,"  ## Warning: %s: the writing mode has already been set.\n"
+                " The last definition of the writing mode (ASCII) will be used.\n",__func__);
+      }
+      writingMode = 1;
+      continue;
+    } else if(!strncmp(chaine,"BINARY",strlen("BINARY"))) {
+      bin = 1;
+      if ( writingMode ) {
+        fprintf(stdout,"  ## Warning: %s: the writing mode has already been set.\n"
+                " The last definition of the writing mode (BINARY) will be used.\n",__func__);
+      }
+      writingMode = 1;
+      continue;
+    } else if(!strncmp(chaine,"DATASET",strlen("DATASET"))) {
+      fscanf(inm,"%127s",&dataStructType[0]);
+      if ( dataStruct ) {
+        fprintf(stdout,"  ## Warning: %s: the data structure has already been set.\n"
+                " The last definition of the data structure (%s) will be used.\n",
+                __func__,dataStructType);
+      }
+      dataStruct = 1;
+      continue;
+    } else if(!strncmp(chaine,"DIMENSIONS",strlen("DIMENSIONS"))) {
+      fscanf(inm,"%d %d %d",&ncells[0],&ncells[1],&ncells[2]);
+      if ( bounds ) {
+        fprintf(stdout,"  ## Warning: %s: the data dimensions have already been set.\n"
+                " The last definition of the data dimensions (%d %d %d) will be used.\n",
+                __func__,ncells[0],ncells[1],ncells[2]);
+      }
+      bounds = 1;
+      continue;
+    } else if(!strncmp(chaine,"SPACING",strlen("SPACING"))) {
+      fscanf(inm,"%lf %lf %lf",&delta[0],&delta[1],&delta[2]);
+      if ( spacing ) {
+        fprintf(stdout,"  ## Warning: %s: the data spacing has already been set.\n"
+                " The last definition of the data spacing (%lf %lf %lf) will be used.\n",
+                __func__,delta[0],delta[1],delta[2]);
+      }
+      spacing = 1;
+      continue;
+    } else if(!strncmp(chaine,"ORIGIN",strlen("ORIGIN"))) {
+      fscanf(inm,"%lf %lf %lf",&mesh->info.min[0],&mesh->info.min[1],&mesh->info.min[2]);
+      if ( origin ) {
+        fprintf(stdout,"  ## Warning: %s: the data spacing has already been set.\n"
+                " The last definition of the data spacing (%lf %lf %lf) will be used.\n",
+                __func__,mesh->info.min[0],mesh->info.min[1],mesh->info.min[2]);
+      }
+      origin = 1;
+      continue;
+    } else if(!strncmp(chaine,"POINT_DATA",strlen("POINT_DATA"))) {
+      fscanf(inm,"%d",&sol->np);
+      if ( pointData ) {
+        fprintf(stdout,"  ## Warning: %s: the number of data has already been set.\n"
+                " The last definition of the number of data (%d) will be used.\n",
+                __func__,sol->np);
+      }
+      pointData = 1;
+      continue;
+    }
+    else if(!strncmp(chaine,"SCALARS",strlen("SCALARS"))) {
+      fscanf(inm,"%127s",&chaine[0]);
+      if ( strncmp(chaine,"scalars",strlen("scalars")) ) {
+        fprintf(stderr,"  ## Error: %s: the element type %s is not supported.\n"
+                "Please, use scalars elements.\n",__func__,chaine);
+        fprintf(stderr," Exit program.\n");
+        fclose(inm);
+        return -1;
+      }
+      fscanf(inm,"%127s",&chaine[0]);
+      if ( strncmp(chaine,"float",strlen("float")) &&
+           strncmp(chaine,"double",strlen("double")) ) {
+        fprintf(stderr,"  ## Error: %s: the data type %s is not supported.\n"
+                "Please, use float or double data.\n",__func__,chaine);
+        fprintf(stderr," Exit program.\n");
+        fclose(inm);
+        return -1;
+      }
+      if ( eltTyp ) {
+        fprintf(stdout,"  ## Warning: %s: the element type has already been set.\n"
+                " The last definition of the element type (scalars %s) will be used.\n",
+                __func__,chaine);
+      }
+      eltTyp = 1;
+
+      fgetpos(inm, &pos);
+      fscanf(inm,"%127s",&chaine[0]);
+      if ( isdigit(chaine[0]) ) {
+        if ( atoi(&chaine[0]) != 1 ) {
+          fprintf(stderr,"  ## Error: %s: More than 1 data per cell is not supported.\n",
+                  __func__);
+          fprintf(stderr," Exit program.\n");
+          fclose(inm);
+          return -1;
+        }
+      }
+      fsetpos(inm, &pos);
+
+      continue;
+    }
+    else if(!strncmp(chaine,"LOOKUP_TABLE",strlen("LOOKUP_TABLE"))) {
+      fscanf(inm,"%127s",&chaine[0]);
+      if ( strncmp(chaine,"default",strlen("default")) ) {
+        fprintf(stderr,"  ## Error: %s: the lookup table type %s is not supported.\n"
+                "Please, use the default lookup table type.\n",__func__,chaine);
+        fprintf(stderr," Exit program.\n");
+        fclose(inm);
+        return -1;
+      }
+      if ( lookupTable ) {
+        fprintf(stdout,"  ## Warning: %s: the lookup table has already been set.\n"
+                " The last definition of the lookup table (%s) will be used.\n",
+                __func__,chaine);
+      }
+      lookupTable = 1;
+      fgetpos(inm, &solpos);
+      continue;
+    }
+  }
+
+  /** Treat input data */
+  if ( (!pointData) || (!dataStruct) || (!bounds) ) {
+    fprintf(stderr,"  ** MISSING DATA.\n");
+    fprintf(stderr," Check that your mesh contains data structure type (DATASET),"
+            " data dimensions (DIMENSIONS) and point data (POINT_DATA).\n");
+    fprintf(stderr," Exit program.\n");
+    fclose(inm);
+    return -1;
+  }
+
+  mesh->np = ncells[0]*ncells[1]*ncells[2];
+  if ( mesh->np != sol->np ) {
+    fprintf(stderr,"  ** MISMATCHES DATA: THE NUMBER OF CELLS IN THE GRID"
+            " ([%dx%dx%d]) DIFFERS FROM THE NUMBER OF DATA (%d)\n",
+            ncells[0],ncells[1],ncells[2],sol->np);
+    fclose(inm);
+    return -1;
+  }
+
+  /* Computation of the scaling info */
+  /* For now, deal only with the canonical basis (see later if it is useful to
+   * trat the other cases */
+  if ( (fabs(xaxis[0] - 1.) > MMG5_EPSD) || (fabs(xaxis[1]) > MMG5_EPSD) ||
+       (fabs(xaxis[2]) > MMG5_EPSD) ||
+       (fabs(yaxis[1] - 1.) > MMG5_EPSD) || (fabs(yaxis[0]) > MMG5_EPSD) ||
+       (fabs(yaxis[2]) > MMG5_EPSD) ) {
+    fprintf(stderr,"\n  ## Error: %s: use of the non canonical coordinate system "
+            "not yet implementd.\n",__func__);
+    fclose(inm);
+    return -1;
+  }
+
+  /* Check that the axis are orthonormalized */
+  if ( fabs(xaxis[0]*yaxis[0] + xaxis[1]*yaxis[1] + xaxis[2]*yaxis[2]) > MMG5_EPSD ) {
+    fprintf(stderr,"\n  ## Error: %s: non-orthogonal coordinate system "
+            "((%e,%e,%e);(%e,%e,%e)).\n",
+            __func__,xaxis[0],xaxis[1],xaxis[2],yaxis[0],yaxis[1],yaxis[2]);
+    return -1;
+
+  }
+
+  if ( (fabs(xaxis[1]*yaxis[2] - xaxis[2]*yaxis[1]) > MMG5_EPSD) ||
+       (fabs(xaxis[2]*yaxis[0] - xaxis[0]*yaxis[2]) > MMG5_EPSD) ||
+       (fabs(xaxis[0]*yaxis[1] - xaxis[1]*yaxis[0] -1.0) > MMG5_EPSD) ) {
+    fprintf(stderr,"\n  ## Error: %s: non-orthonormal coordinate system"
+            " ((%e,%e,%e);(%e,%e,%e)).\n",
+            __func__,xaxis[0],xaxis[1],xaxis[2],yaxis[0],yaxis[1],yaxis[2]);
+    fclose(inm);
+    return -1;
+  }
+
+  /* Bounding box in the (xaxis,yaxis) basis */
+  for ( i=0; i<mesh->dim; ++i ) {
+    v[i] =  ncells[i] * delta[i];
+  }
+
+  /* Bounding box in the canonical basis */
+  mesh->info.delta = 0.0;
+  for ( i=0; i<mesh->dim; ++i ) {
+    delta[i] = xaxis[i]*v[0] + yaxis[i]*v[1];
+    mesh->info.max[i] = mesh->info.min[i] + delta[i];
+
+    if ( delta[i] > mesh->info.delta ) {
+      mesh->info.delta = delta[i];
+    }
+  }
+  if ( mesh->info.delta < MMG5_EPSD ) {
+    fprintf(stderr,"\n  ## Error: %s: unable to scale mesh:"
+            " Check that your mesh contains non-zero points and "
+            "valid elements.\n",__func__);
+    fclose(inm);
+    return -1;
+  }
+
+  /** Memory allocations */
+  mesh->memMax = MMG5_memSize();
+
+  mesh->npi   = mesh->np;
+  mesh->npmax = mesh->np+1;
+  mesh->nemax = MMG3D_NEMAX;
+  mesh->nemax = MMG3D_NTMAX;
+
+  if ( (!MMG3D_memOption_memRepartition(mesh)) || (! MMG3D_setMeshSize_alloc( mesh )) ) {
+    fclose(inm);
+    return 0;
+  }
+
+  /* Allocate and store the header informations for each solution */
+  if ( !MMG3D_Set_solSize(mesh,sol,MMG5_Vertex,mesh->np,MMG5_Scalar) ) {
+    fclose(inm);
+    return -1;
+  }
+
+  /** Read the input solutions */
+  fsetpos(inm, &solpos);
+  for ( i=1; i<=mesh->np; ++i ) {
+    fscanf(inm,"%lf",&sol->m[i]);
+  }
 
   return 1;
 }

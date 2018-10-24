@@ -929,15 +929,15 @@ FORTRAN_NAME(MMG3D_LOADMSHMESH_AND_ALLDATA,mmg3d_loadmshmesh_and_alldata,
  * See \ref MMG3D_loadVTKGrid function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_LOADVTKGRID,mmg3d_loadvtkgrid,
-             (MMG5_pMesh *mesh,char* filename, int *strlen0,int* retval),
-             (mesh,filename,strlen0, retval)){
+             (MMG5_pMesh *mesh,MMG5_pSol *sol,char* filename, int *strlen0,int* retval),
+             (mesh,sol,filename,strlen0, retval)){
   char *tmp = NULL;
 
   MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
   strncpy(tmp,filename,*strlen0);
   tmp[*strlen0] = '\0';
 
-  *retval = MMG3D_loadVTKGrid(*mesh,tmp);
+  *retval = MMG3D_loadVTKGrid(*mesh,*sol,tmp);
 
   MMG5_SAFE_FREE(tmp);
 

@@ -182,7 +182,7 @@ static const unsigned char MMG5_permedge[12][6] = {
 typedef struct MMG3D_MOctree_s
 {
   struct MMG3D_MOctree_s* father; /*!< pointer toward the father of the current cell */
-  struct MMG3D_MOctree_s* sons[MMG3D_SIZE_OCTREESONS]; /*!< pointer toward the subtrees of the current cell */
+  struct MMG3D_MOctree_s* sons; /*!< pointer toward the subtrees of the current cell */
   int    fll_ip; /*!< index of the front-lower-left vertex of the octree cell */
   int    depth; /*!< sub tree depth */
   int8_t leaf; /*!< 1 if the cell is a leaf, 0 otherwise */
