@@ -138,7 +138,7 @@ int MMG3D_convert_grid2tetmesh(MMG5_pMesh mesh, MMG5_pSol sol) {
 
   /* Conversion of the grid into an octree */
   if ( !MMG3D_convert_grid2smallOctree(mesh,sol) ) {
-    fprintf(stderr,"\n  ## Octree coarsening problem. Exit program.\n");
+    fprintf(stderr,"\n  ## Octree initialization problem. Exit program.\n");
     return 0;
   }
 
