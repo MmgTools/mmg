@@ -341,7 +341,15 @@ int main(int argc,char *argv[]) {
   msh = 0;
   if ( mesh->info.grid ) {
     ier = MMG3D_loadVTKGrid(mesh,met,mesh->namein);
+    if ( ier<1 )
+      MMG5_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
+
     msh = 1;
+
+    if ( !MMG3D_convert_grid2tetmesh(mesh,met) ) {
+      MMG5_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
+    }
+
   }
   else {
     ier = MMG3D_loadMesh(mesh,mesh->namein);

@@ -1057,11 +1057,11 @@ int MMG3D_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
 }
 
 int MMG3D_loadVTKGrid(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
-  double      ver,xaxis[3],yaxis[3],delta[3],v[3];
+  double      ver,xaxis[3],yaxis[3],v[3];
   FILE*       inm;
   long long   pos,solpos;
   size_t      len,buflen=128;
-  int         ncells[3],i;
+  int         i;
   int8_t      bin,writingMode,dataStruct,bounds,spacing,origin,pointData,eltTyp,lookupTable;
   char        *data,chaine[128],*ptr,dataStructType[128];
 
@@ -1101,9 +1101,6 @@ int MMG3D_loadVTKGrid(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   yaxis[0] = 0.0;
   yaxis[1] = 1.0;
   yaxis[2] = 0.0;
-  delta[0] = 0.0;
-  delta[1] = 0.0;
-  delta[2] = 0.0;
 
   /** Parse VTK file */
   /* Parse the header line */
@@ -1167,20 +1164,20 @@ int MMG3D_loadVTKGrid(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
       dataStruct = 1;
       continue;
     } else if(!strncmp(chaine,"DIMENSIONS",strlen("DIMENSIONS"))) {
-      fscanf(inm,"%d %d %d",&ncells[0],&ncells[1],&ncells[2]);
+      fscanf(inm,"%d %d %d",&mesh->freeint[0],&mesh->freeint[1],&mesh->freeint[2]);
       if ( bounds ) {
         fprintf(stdout,"  ## Warning: %s: the data dimensions have already been set.\n"
                 " The last definition of the data dimensions (%d %d %d) will be used.\n",
-                __func__,ncells[0],ncells[1],ncells[2]);
+                __func__,mesh->freeint[0],mesh->freeint[1],mesh->freeint[2]);
       }
       bounds = 1;
       continue;
     } else if(!strncmp(chaine,"SPACING",strlen("SPACING"))) {
-      fscanf(inm,"%lf %lf %lf",&delta[0],&delta[1],&delta[2]);
+      fscanf(inm,"%lf %lf %lf",&mesh->info.max[0],&mesh->info.max[1],&mesh->info.max[2]);
       if ( spacing ) {
         fprintf(stdout,"  ## Warning: %s: the data spacing has already been set.\n"
                 " The last definition of the data spacing (%lf %lf %lf) will be used.\n",
-                __func__,delta[0],delta[1],delta[2]);
+                __func__,mesh->info.max[0],mesh->info.max[1],mesh->info.max[2]);
       }
       spacing = 1;
       continue;
@@ -1273,11 +1270,11 @@ int MMG3D_loadVTKGrid(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
     return -1;
   }
 
-  mesh->np = ncells[0]*ncells[1]*ncells[2];
+  mesh->np = mesh->freeint[0]*mesh->freeint[1]*mesh->freeint[2];
   if ( mesh->np != sol->np ) {
     fprintf(stderr,"  ** MISMATCHES DATA: THE NUMBER OF CELLS IN THE GRID"
             " ([%dx%dx%d]) DIFFERS FROM THE NUMBER OF DATA (%d)\n",
-            ncells[0],ncells[1],ncells[2],sol->np);
+            mesh->freeint[0],mesh->freeint[1],mesh->freeint[2],sol->np);
     fclose(inm);
     return -1;
   }
@@ -1310,29 +1307,6 @@ int MMG3D_loadVTKGrid(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
     fprintf(stderr,"\n  ## Error: %s: non-orthonormal coordinate system"
             " ((%e,%e,%e);(%e,%e,%e)).\n",
             __func__,xaxis[0],xaxis[1],xaxis[2],yaxis[0],yaxis[1],yaxis[2]);
-    fclose(inm);
-    return -1;
-  }
-
-  /* Bounding box in the (xaxis,yaxis) basis */
-  for ( i=0; i<mesh->dim; ++i ) {
-    v[i] =  ncells[i] * delta[i];
-  }
-
-  /* Bounding box in the canonical basis */
-  mesh->info.delta = 0.0;
-  for ( i=0; i<mesh->dim; ++i ) {
-    delta[i] = xaxis[i]*v[0] + yaxis[i]*v[1];
-    mesh->info.max[i] = mesh->info.min[i] + delta[i];
-
-    if ( delta[i] > mesh->info.delta ) {
-      mesh->info.delta = delta[i];
-    }
-  }
-  if ( mesh->info.delta < MMG5_EPSD ) {
-    fprintf(stderr,"\n  ## Error: %s: unable to scale mesh:"
-            " Check that your mesh contains non-zero points and "
-            "valid elements.\n",__func__);
     fclose(inm);
     return -1;
   }

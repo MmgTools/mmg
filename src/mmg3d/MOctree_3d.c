@@ -23,7 +23,7 @@
 
 /**
  * \file MOctree_3d.c
- * \brief Tools for local search around coordinates based on MOctree.
+ * \brief Tools to manage an octree mesh.
  * \author Juliette Busquet (Enseirb-Matmeca)
  * \author Antoine Huc (Enseirb-Matmeca)
  * \author Fanny Kuhn (Enseirb-Matmeca)
@@ -50,7 +50,7 @@
  * Allocate and init an MOctree structure.
  *
  */
-int MMG3D_init_MOctree  ( MMG5_pMesh mesh, MMG3D_pMOctree* q, int depth_max ) {
+int MMG3D_init_MOctree  ( MMG5_pMesh mesh, MMG5_pMOctree* q, int depth_max ) {
 
   printf ( " %s:%s: TO IMPLEMENT\n",__FILE__,__func__ ); return 0;
 
@@ -66,7 +66,7 @@ int MMG3D_init_MOctree  ( MMG5_pMesh mesh, MMG3D_pMOctree* q, int depth_max ) {
  * Allocate and init an MOctree Cell
  *
  */
-int MMG3D_init_MOctree_s( MMG5_pMesh mesh, MMG3D_MOctree_s* q ) {
+int MMG3D_init_MOctree_s( MMG5_pMesh mesh, MMG5_MOctree_s* q ) {
 
   printf ( " %s:%s: TO IMPLEMENT\n",__FILE__,__func__ ); return 0;
 
@@ -83,7 +83,7 @@ int MMG3D_init_MOctree_s( MMG5_pMesh mesh, MMG3D_MOctree_s* q ) {
  * \ref q must be a leaf.
  *
  */
-int  MMG3D_split_MOctree_s ( MMG5_pMesh mesh, MMG3D_MOctree_s* q ) {
+int  MMG3D_split_MOctree_s ( MMG5_pMesh mesh, MMG5_MOctree_s* q ) {
 
   printf ( " %s:%s: TO IMPLEMENT\n",__FILE__,__func__ ); return 0;
 
@@ -98,7 +98,7 @@ int  MMG3D_split_MOctree_s ( MMG5_pMesh mesh, MMG3D_MOctree_s* q ) {
  * Free a MOctree.
  *
  */
-int MMG3D_free_MOctree  ( MMG3D_pMOctree** q ) {
+int MMG3D_free_MOctree  ( MMG5_pMOctree** q ) {
 
   printf ( " %s:%s: TO IMPLEMENT\n",__FILE__,__func__ ); return 0;
 
@@ -113,7 +113,7 @@ int MMG3D_free_MOctree  ( MMG3D_pMOctree** q ) {
  * Free a MOctree cell.
  *
  */
-int MMG3D_free_MOctree_s( MMG3D_MOctree_s* q ) {
+int MMG3D_free_MOctree_s( MMG5_MOctree_s* q ) {
   int i;
 
   printf ( " %s:%s: TO IMPLEMENT\n",__FILE__,__func__ ); return 0;
@@ -130,7 +130,7 @@ int MMG3D_free_MOctree_s( MMG3D_MOctree_s* q ) {
  * \ref q, all sons being leafs).
  *
  */
-int  MMG3D_merge_MOctree_s ( MMG3D_MOctree_s* q ) {
+int  MMG3D_merge_MOctree_s ( MMG5_MOctree_s* q ) {
 
   printf ( " %s:%s: TO IMPLEMENT\n",__FILE__,__func__ ); return 0;
 
