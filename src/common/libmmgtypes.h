@@ -509,8 +509,9 @@ typedef struct MMG5_MOctree_s
 {
   struct MMG5_MOctree_s* father; /*!< pointer toward the father of the current cell */
   struct MMG5_MOctree_s* sons; /*!< pointer toward the subtrees of the current cell */
-  int    fll_ip; /*!< index of the front-lower-left vertex of the octree cell */
+  int    blf_ip; /*!< index of the bottom left front vertex of the octree cell */
   int    depth; /*!< sub tree depth */
+  int8_t nsons; /*!< number of sons */
   int8_t leaf; /*!< 1 if the cell is a leaf, 0 otherwise */
   int8_t split_ls; /*!< 1 if the level-set split this cell */
 } MMG5_MOctree_s;
@@ -521,7 +522,7 @@ typedef struct MMG5_MOctree_s
  */
 typedef struct
 {
-  int depth_max; /*!< Max depth of the octree */
+  double          length[3]; /*!< length of the octree in each direction */
   MMG5_MOctree_s* root; /*!<  Pointer toward the first MOctree cell */
 
 } MMG5_MOctree;

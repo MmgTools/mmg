@@ -44,15 +44,23 @@
 /**
  * \param mesh pointer toward a MMG5 mesh
  * \param q pointer toward the MOctree cell
+ * \param ip index of the bottom-left-front corner of the root cell
+ * \param length length of the octree in each direction
  *
  * \return 1 if success, 0 if fail.
  *
  * Allocate and init an MOctree structure.
  *
  */
-int MMG3D_init_MOctree  ( MMG5_pMesh mesh, MMG5_pMOctree* q, int depth_max ) {
+int MMG3D_init_MOctree  ( MMG5_pMesh mesh, MMG5_pMOctree q, int ip, double length[3] ) {
 
-  printf ( " %s:%s: TO IMPLEMENT\n",__FILE__,__func__ ); return 0;
+  /** Check that we have enough memory to allocate a new cell */
+  MMG5_ADD_MEM(mesh,sizeof(MMG5_MOctree_s),"initial MOctree cell",
+               return 0);
+
+  /** New cell allocation */
+  MMG5_SAFE_MALLOC( q->root,1, MMG5_MOctree_s, return 0);
+  MMG3D_init_MOctree_s( mesh,q->root,ip,1,1);
 
   return 1;
 }
@@ -60,15 +68,26 @@ int MMG3D_init_MOctree  ( MMG5_pMesh mesh, MMG5_pMOctree* q, int depth_max ) {
 /**
  * \param mesh pointer toward a MMG5 mesh
  * \param q pointer toward the MOctree cell
+ * \param ip index of the bottom-left-front corner of the cell
+ * \param depth cell's depth
+ * \param split_ls 1 if the cell is intersected by the level-set
  *
  * \return 1 if success, 0 if fail.
  *
  * Allocate and init an MOctree Cell
  *
  */
-int MMG3D_init_MOctree_s( MMG5_pMesh mesh, MMG5_MOctree_s* q ) {
+int MMG3D_init_MOctree_s( MMG5_pMesh mesh, MMG5_MOctree_s* q,int ip, int depth,int8_t split_ls ) {
 
-  printf ( " %s:%s: TO IMPLEMENT\n",__FILE__,__func__ ); return 0;
+  q->father = NULL;
+  q->sons   = NULL;
+  q->nsons  = 0;
+
+  q->blf_ip = ip;
+  q->depth  = depth;
+
+  q->split_ls  = split_ls;
+  q->leaf = 1;
 
   return 1;
 }

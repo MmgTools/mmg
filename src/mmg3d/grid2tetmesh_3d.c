@@ -53,18 +53,39 @@
  * \remark for now, we suppose that the grid is aligned with the canonical
  * directions
  */
+
 static inline
 int MMG3D_convert_grid2smallOctree(MMG5_pMesh mesh, MMG5_pSol sol) {
+  MMG5_MOctree_s *po;
+  double         length[3];
+  int            i,ip;
 
+  /** Step 1: Allocation and initialization of the octree root */
+  /* Creation of the bottom-left-front corner of the root cell (grid origin) and
+   * computation of the octree length */
+  ip = 1;
+  for ( i=0; i<3; ++i ) {
+    mesh->point[ip].c[i] = mesh->info.min[i];
+    // Remark : the level-set value associated to th point ip is stored in sol->m[ip].
+    // It implies that you don't have the choice for the point numbering,
+    // it will be in the same order than in the VTK file
 
-  //if ( !MMG3D_initMOctree(mesh,mesh->octree,) ) return 0;
+    length[i] = mesh->info.max[i] * (double)mesh->freeint[i];
+  }
 
+  /* Computation of the octree length */
+  /* Octree cell initialization */
+  if ( !MMG3D_init_MOctree(mesh,mesh->octree,ip,length) ) return 0;
+  po = mesh->octree->root;
 
+  /** Step 2: Octree subdivision until reaching the grid size */
   printf ( " %s:%s: TO IMPLEMENT\n",__FILE__,__func__ ); return 0;
+
+
+
 
   return 1;
 }
-
 
 /**
  * \param mesh pointer toward a mesh structure.
