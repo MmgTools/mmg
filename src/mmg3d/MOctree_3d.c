@@ -60,7 +60,8 @@ int MMG3D_init_MOctree  ( MMG5_pMesh mesh, MMG5_pMOctree q, int ip, double lengt
 
   /** New cell allocation */
   MMG5_SAFE_MALLOC( q->root,1, MMG5_MOctree_s, return 0);
-  MMG3D_init_MOctree_s( mesh,q->root,ip,1,1);
+  MMG3D_init_MOctree_s( mesh,q->root,ip,0,1);
+  q->root->nsons = 8;
 
   return 1;
 }
@@ -102,10 +103,22 @@ int MMG3D_init_MOctree_s( MMG5_pMesh mesh, MMG5_MOctree_s* q,int ip, int depth,i
  * \ref q must be a leaf.
  *
  */
-int  MMG3D_split_MOctree_s ( MMG5_pMesh mesh, MMG5_MOctree_s* q ) {
+int  MMG3D_split_MOctree_s ( MMG5_pMesh mesh, MMG5_MOctree_s* q, int depth_max) {
 
-  printf ( " %s:%s: TO IMPLEMENT\n",__FILE__,__func__ ); return 0;
+  MMG5_MOctree_s tabsons[q->nsons];
+  q->sons = &tabsons;
 
+  for(int i=0; i<q->nsons; i++)
+  {
+    MMG3MMG3D_init_MOctree_s(mesh, &tabsons[i], ip, q->depth + 1, split_ls);
+    tabsons[i].father = q;
+    if(tabsons[i].depth < depth_max)
+    {
+      tabsons[i].nsons = 8;
+      tabsons[i].leaf=0;
+      MMG3MMG3D_split_MOctree_s(mesh, tabsons[i], depth_max);
+    }
+  }
   return 1;
 }
 
