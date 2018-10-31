@@ -58,11 +58,14 @@ static inline
 int MMG3D_convert_grid2smallOctree(MMG5_pMesh mesh, MMG5_pSol sol) {
   MMG5_MOctree_s *po;
   double         length[3];
-  int            i,ip;
+  int            i,ip,depth_max;
 
   /** Step 1: Allocation and initialization of the octree root */
   /* Creation of the bottom-left-front corner of the root cell (grid origin) and
    * computation of the octree length */
+
+  //  /!!!!!!!!!! IL FAUT LIRE LE DEPTH MAX!!!!!!!!!!!!!!!!
+  depth_max=6;
   ip = 1;
   for ( i=0; i<3; ++i ) {
     mesh->point[ip].c[i] = mesh->info.min[i];
@@ -76,11 +79,9 @@ int MMG3D_convert_grid2smallOctree(MMG5_pMesh mesh, MMG5_pSol sol) {
   /* Computation of the octree length */
   /* Octree cell initialization */
   //if ( !MMG3D_init_MOctree(mesh,mesh->octree,ip,length) ) return 0;
-  //if ( !MMG3D_init_MOctree(mesh,mesh->octree,ip,0,1) ) return 0;
-  MMG3D_init_MOctree(mesh,mesh->octree,ip,0,1);
+  MMG3D_init_MOctree(mesh,mesh->octree,ip,length);
   po = mesh->octree->root;
   po->leaf=0;
-  //  /!!!!!!!!!! IL FAUT LIRE LE DEPTH MAX!!!!!!!!!!!!!!!!
   MMG3D_split_MOctree_s (mesh, po, depth_max);
 
   /** Step 2: Octree subdivision until reaching the grid size */

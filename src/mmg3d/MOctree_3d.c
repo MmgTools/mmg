@@ -105,18 +105,20 @@ int MMG3D_init_MOctree_s( MMG5_pMesh mesh, MMG5_MOctree_s* q,int ip, int depth,i
  */
 int  MMG3D_split_MOctree_s ( MMG5_pMesh mesh, MMG5_MOctree_s* q, int depth_max) {
 
+  int ip;
   MMG5_MOctree_s tabsons[q->nsons];
   q->sons = &tabsons;
 
   for(int i=0; i<q->nsons; i++)
   {
-    MMG3MMG3D_init_MOctree_s(mesh, &tabsons[i], ip, q->depth + 1, split_ls);
+    ip = q->blf_ip * 8 + i;
+    MMG3D_init_MOctree_s(mesh, &tabsons[i], ip, q->depth + 1, 2);
     tabsons[i].father = q;
     if(tabsons[i].depth < depth_max)
     {
       tabsons[i].nsons = 8;
       tabsons[i].leaf=0;
-      MMG3MMG3D_split_MOctree_s(mesh, tabsons[i], depth_max);
+      MMG3D_split_MOctree_s(mesh, &tabsons[i], depth_max);
     }
   }
   return 1;
