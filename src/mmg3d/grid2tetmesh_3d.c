@@ -86,10 +86,6 @@ int MMG3D_convert_grid2smallOctree(MMG5_pMesh mesh, MMG5_pSol sol) {
 
   /** Step 2: Octree subdivision until reaching the grid size */
 
-  printf ( " %s:%s: TO IMPLEMENT\n",__FILE__,__func__ ); return 0;
-
-
-
 
   return 1;
 }
