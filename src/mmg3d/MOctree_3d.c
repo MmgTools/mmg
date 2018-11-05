@@ -54,13 +54,18 @@
  */
 int MMG3D_init_MOctree  ( MMG5_pMesh mesh, MMG5_pMOctree q, int ip, double length[3] ) {
 
+  q->length[0] = length[0];
+  q->length[1] = length[1];
+  q->length[2] = length[2];
+
+
   /** Check that we have enough memory to allocate a new cell */
   MMG5_ADD_MEM(mesh,sizeof(MMG5_MOctree_s),"initial MOctree cell",
                return 0);
 
   /** New cell allocation */
   MMG5_SAFE_MALLOC( q->root,1, MMG5_MOctree_s, return 0);
-  MMG3D_init_MOctree_s( mesh,q->root,ip,0,1);
+  MMG3D_init_MOctree_s( mesh,q->root,ip,0,0);
   q->root->nsons = 8;
 
   return 1;
@@ -115,7 +120,7 @@ int  MMG3D_split_MOctree_s ( MMG5_pMesh mesh, MMG5_MOctree_s* q, int depth_max) 
   for(int i=0; i<q->nsons; i++)
   {
     ip = q->blf_ip * 8 + i;
-    MMG3D_init_MOctree_s(mesh, &tabsons[i], ip, q->depth + 1, 2);
+    MMG3D_init_MOctree_s(mesh, &tabsons[i], ip, q->depth + 1, 0);
     tabsons[i].father = q;
     if(tabsons[i].depth < depth_max)
     {
@@ -167,6 +172,48 @@ int  MMG3D_merge_MOctree_s ( MMG5_MOctree_s* q ) {
   MMG3D_free_MOctree_s(q->sons);
   q->nsons = 0;
   q->leaf = 1;
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward a MMG5 mesh
+ * \param q pointer toward the MOctree cell
+ *
+ * \return 1 if success, 0 if fail.
+ *
+ * Set the parameter split_ls of a cell to 1 if the level-set intersect the cell for every cell of the octree max.
+ *
+ */
+int  MMG3D_set_splitls_MOctree ( MMG5_pMesh mesh, MMG5_MOctree_s* q, MMG5_pSol sol, int depth_max) {
+
+  double dx = mesh->info.max[0];
+  double dy = mesh->info.max[1];
+  double dz = mesh->info.max[2];
+  double max_distance = sqrt((dx/2.)*(dx/2.)+(dy/2.)*(dy/2.)+(dx/2.)*(dz/2.));
+
+  if(q->depth == depth_max)
+  {
+    if(sol->m[q->blf_ip] <= max_distance)
+    {
+      q->split_ls=1;
+      if(q->depth != 0)
+      {
+        q->father->split_ls=1;
+      }
+    }
+    else
+    {
+      q->split_ls=0;
+    }
+  }
+  else
+  {
+    for(int i=0; i < q->nsons; i++)
+    {
+        MMG3D_set_splitls_MOctree(mesh, &q->sons[i], sol, depth_max);
+    }
+  }
 
   return 1;
 }

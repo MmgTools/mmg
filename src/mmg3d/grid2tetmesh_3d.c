@@ -83,10 +83,10 @@ int MMG3D_convert_grid2smallOctree(MMG5_pMesh mesh, MMG5_pSol sol) {
   po->leaf=0;
 
   /** Step 2: Octree subdivision until reaching the grid size */
-  MMG3D_split_MOctree_s (mesh, po, depth_max) );
+  MMG3D_split_MOctree_s (mesh, po, depth_max);
 
   /** Step 3: Giving the right split_ls to all the cells*/
-  
+  MMG3D_set_splitls_MOctree (mesh, po, sol, depth_max);
 
   return 1;
 }
@@ -102,9 +102,6 @@ int MMG3D_convert_grid2smallOctree(MMG5_pMesh mesh, MMG5_pSol sol) {
  */
 static inline
 int MMG3D_coarsen_octree(MMG5_pMesh mesh, MMG5_pSol sol) {
-
-  printf ( " %s:%s: TO IMPLEMENT\n",__FILE__,__func__ ); return 0;
-
   return 1;
 }
 
