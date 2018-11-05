@@ -89,7 +89,7 @@ int MMG3D_init_MOctree_s( MMG5_pMesh mesh, MMG5_MOctree_s* q,int ip, int depth,i
 
   q->split_ls  = split_ls;
   q->leaf = 1;
-  q->coordoct=[0,0,0];
+  q->coordoct[0]=(0.,0.,0.);
   return 1;
 }
 
@@ -111,49 +111,55 @@ int  MMG3D_split_MOctree_s ( MMG5_pMesh mesh, MMG5_MOctree_s* q, int depth_max) 
   //MMG5_SAFE_MALLOC(q->sons,1, MMG5_MOctree_s*(q->nsons), return 0); cette écriture ne marche pas, où est la définition de cette fonction ?
   q->sons = malloc(sizeof(MMG5_MOctree_s)*(q->nsons));
   q->sons = &tabsons[0];
-
-  for(int i=0; i<q->nsons; i++)
+  int i;
+  for(i=0; i<q->nsons; i++)
   {
 
     MMG3D_init_MOctree_s(mesh, &tabsons[i], ip, q->depth + 1, 0);
     tabsons[i].father = q;
     //calculus of octree coordinates and ip
-    if(i==0)
+
+    tabsons[i].coordoct[0]=q->coordoct[0];
+    tabsons[i].coordoct[1]=q->coordoct[1];
+    tabsons[i].coordoct[2]=q->coordoct[2];
+
+    if(i==1)
     {
-      tabsons[i].coordoct=q.coordoct;
-    }
-    else if(i==1)
-    {
-      tabsons[i].coordoct=q.coordoct+(2^(depth_max)/2^(tabsons[i]->depth))*[1,0,0];
+      tabsons[i].coordoct[0]+=(2^(depth_max)/2^(tabsons[i].depth));
     }
     else if(i==2)
     {
-      tabsons[i].coordoct=q.coordoct+(2^(depth_max)/2^(tabsons[i]->depth))*[0,0,1];
+      tabsons[i].coordoct[2]+=(2^(depth_max)/2^(tabsons[i].depth));
     }
     else if(i==3)
     {
-      tabsons[i].coordoct=q.coordoct+(2^(depth_max)/2^(tabsons[i]->depth))*[1,0,1];
+      tabsons[i].coordoct[0]+=(2^(depth_max)/2^(tabsons[i].depth));
+      tabsons[i].coordoct[2]+=(2^(depth_max)/2^(tabsons[i].depth));
     }
     else if(i==4)
     {
-      tabsons[i].coordoct=q.coordoct+(2^(depth_max)/2^(tabsons[i]->depth))*[0,1,0];
+      tabsons[i].coordoct[1]+=(2^(depth_max)/2^(tabsons[i].depth));
     }
     else if(i==5)
     {
-      tabsons[i].coordoct=q.coordoct+(2^(depth_max)/2^(tabsons[i]->depth))*[1,1,0];
+      tabsons[i].coordoct[0]+=(2^(depth_max)/2^(tabsons[i].depth));
+      tabsons[i].coordoct[1]+=(2^(depth_max)/2^(tabsons[i].depth));
     }
     else if(i==6)
     {
-      tabsons[i].coordoct=q.coordoct+(2^(depth_max)/2^(tabsons[i]->depth))*[0,1,1];
+      tabsons[i].coordoct[1]+=(2^(depth_max)/2^(tabsons[i].depth));
+      tabsons[i].coordoct[2]+=(2^(depth_max)/2^(tabsons[i].depth));
     }
     else if(i==7)
     {
-      tabsons[i].coordoct=q.coordoct+(2^(depth_max)/2^(tabsons[i]->depth))*[1,1,1];
+      tabsons[i].coordoct[0]+=(2^(depth_max)/2^(tabsons[i].depth));
+      tabsons[i].coordoct[1]+=(2^(depth_max)/2^(tabsons[i].depth));
+      tabsons[i].coordoct[2]+=(2^(depth_max)/2^(tabsons[i].depth));
     }
 
     /*calculus of ip*/
-    tabsons[i]->blf_ip=tabsons[i].coordoct[2]*2^(2*depth_max)+tabsons[i].coordoct[1]*2^(depth_max)+tabsons[i].coordoct[0]+1;
-  
+    tabsons[i].blf_ip=tabsons[i].coordoct[2]*pow(2,2*depth_max)+tabsons[i].coordoct[1]*pow(2,depth_max)+tabsons[i].coordoct[0]+1;
+
     if(tabsons[i].depth < depth_max)
     {
       tabsons[i].nsons = 8;
