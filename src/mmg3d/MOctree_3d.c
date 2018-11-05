@@ -101,6 +101,8 @@ int MMG3D_init_MOctree_s( MMG5_pMesh mesh, MMG5_MOctree_s* q,int ip, int depth,i
 /**
  * \param mesh pointer toward a MMG5 mesh
  * \param q pointer toward the MOctree cell
+ * \param depth_max the depth maximum of the octree.
+
  *
  * \return 1 if success, 0 if fail.
  *
