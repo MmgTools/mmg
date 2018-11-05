@@ -107,7 +107,7 @@ int  MMG3D_split_MOctree_s ( MMG5_pMesh mesh, MMG5_MOctree_s* q, int depth_max) 
 
   int ip;
   MMG5_MOctree_s tabsons[q->nsons];
-  q->sons = &tabsons;
+  q->sons = &tabsons[0];
 
   for(int i=0; i<q->nsons; i++)
   {
