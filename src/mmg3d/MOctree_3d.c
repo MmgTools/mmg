@@ -106,7 +106,10 @@ int MMG3D_init_MOctree_s( MMG5_pMesh mesh, MMG5_MOctree_s* q,int ip, int depth,i
 int  MMG3D_split_MOctree_s ( MMG5_pMesh mesh, MMG5_MOctree_s* q, int depth_max) {
 
   int ip;
+  q->leaf=0;
   MMG5_MOctree_s tabsons[q->nsons];
+  //MMG5_SAFE_MALLOC(q->sons,1, MMG5_MOctree_s*(q->nsons), return 0); cette écriture ne marche pas, où est la définition de cette fonction ?
+  q->sons = malloc(sizeof(MMG5_MOctree_s)*(q->nsons));
   q->sons = &tabsons[0];
 
   for(int i=0; i<q->nsons; i++)
@@ -117,7 +120,6 @@ int  MMG3D_split_MOctree_s ( MMG5_pMesh mesh, MMG5_MOctree_s* q, int depth_max) 
     if(tabsons[i].depth < depth_max)
     {
       tabsons[i].nsons = 8;
-      tabsons[i].leaf=0;
       MMG3D_split_MOctree_s(mesh, &tabsons[i], depth_max);
     }
   }
@@ -133,9 +135,8 @@ int  MMG3D_split_MOctree_s ( MMG5_pMesh mesh, MMG5_MOctree_s* q, int depth_max) 
  *
  */
 int MMG3D_free_MOctree  ( MMG5_pMOctree** q ) {
-
-  printf ( " %s:%s: TO IMPLEMENT\n",__FILE__,__func__ ); return 0;
-
+  free(*q);
+  free(q);
   return 1;
 }
 
@@ -148,10 +149,7 @@ int MMG3D_free_MOctree  ( MMG5_pMOctree** q ) {
  *
  */
 int MMG3D_free_MOctree_s( MMG5_MOctree_s* q ) {
-  int i;
-
-  printf ( " %s:%s: TO IMPLEMENT\n",__FILE__,__func__ ); return 0;
-
+  free(q);
   return 1;
 }
 
@@ -166,7 +164,9 @@ int MMG3D_free_MOctree_s( MMG5_MOctree_s* q ) {
  */
 int  MMG3D_merge_MOctree_s ( MMG5_MOctree_s* q ) {
 
-  printf ( " %s:%s: TO IMPLEMENT\n",__FILE__,__func__ ); return 0;
+  MMG3D_free_MOctree_s(q->sons);
+  q->nsons = 0;
+  q->leaf = 1;
 
   return 1;
 }
