@@ -120,7 +120,7 @@ int MMG3D_balance_octree(MMG5_MOctree_s* q, int depth_max) {
 static inline
 int MMG3D_build_coarsen_octree(MMG5_MOctree_s* q, int depth_max) {
 
-  if(q->depth == depth_max - 1) //pères des leafs
+  if(q->sons[0].leaf == 1) //pères des leafs
   {
     if(q->split_ls == 0)
     {

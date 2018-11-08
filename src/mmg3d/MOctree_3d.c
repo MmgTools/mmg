@@ -229,34 +229,24 @@ int  MMG3D_merge_MOctree_s ( MMG5_MOctree_s* q ) {
  * Set the parameter split_ls of a cell to 1 if the level-set intersect the cell for every cell of the octree max.
  *
  */
-int  MMG3D_set_splitls_MOctree ( MMG5_pMesh mesh, MMG5_MOctree_s* q, MMG5_pSol sol, int depth_max) {
+int  MMG3D_set_splitls_MOctree ( MMG5_pMesh mesh, MMG5_MOctree_s* q, MMG5_pSol sol) {
 
   double dx = mesh->info.max[0];
   double dy = mesh->info.max[1];
   double dz = mesh->info.max[2];
   double max_distance = sqrt((dx/2.)*(dx/2.)+(dy/2.)*(dy/2.)+(dx/2.)*(dz/2.));
 
-  if(q->depth == depth_max)
+  if(sol->m[q->blf_ip] <= max_distance)
   {
-    if(sol->m[q->blf_ip] <= max_distance)
+    q->split_ls=1;
+    if(q->depth != 0)
     {
-      q->split_ls=1;
-      if(q->depth != 0)
-      {
-        q->father->split_ls=1;
-      }
-    }
-    else
-    {
-      q->split_ls=0;
+      q->father->split_ls=1;
     }
   }
   else
   {
-    for(int i=0; i < q->nsons; i++)
-    {
-        MMG3D_set_splitls_MOctree(mesh, &q->sons[i], sol, depth_max);
-    }
+    q->split_ls=0;
   }
 
   return 1;
