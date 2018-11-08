@@ -94,7 +94,34 @@ int MMG3D_init_MOctree_s( MMG5_pMesh mesh, MMG5_MOctree_s* q,int ip, int depth,i
 
   q->split_ls  = split_ls;
   q->leaf = 0;
-  q->coordoct[0]=(0.,0.,0.);
+  q->coordoct=(0,0,0);
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward a MMG5 mesh
+ * \param q pointer toward the MOctree cell
+ *
+ * \return 1 if success, 0 if fail.
+ *
+ * Set the parameter split_ls of a cell to 1 if the level-set intersect the cell for every cell of the octree max.
+ *
+ */
+int  MMG3D_set_splitls_MOctree ( MMG5_pMesh mesh, MMG5_MOctree_s* q, MMG5_pSol sol, double max_distance) {
+
+  if(sol->m[q->blf_ip] <= max_distance)
+  {
+    q->split_ls=1;
+    if(q->depth != 0)
+    {
+      q->father->split_ls=1;
+    }
+  }
+  else
+  {
+    q->split_ls=0;
+  }
+
   return 1;
 }
 
@@ -110,7 +137,7 @@ int MMG3D_init_MOctree_s( MMG5_pMesh mesh, MMG5_MOctree_s* q,int ip, int depth,i
  * \ref q must be a leaf.
  *
  */
-int  MMG3D_split_MOctree_s ( MMG5_pMesh mesh, MMG5_MOctree_s* q, int depth_max) {
+int  MMG3D_split_MOctree_s ( MMG5_pMesh mesh, MMG5_MOctree_s* q, int depth_max, MMG5_pSol sol, double max_distance) {
 
   int ip;
   MMG5_MOctree_s tabsons[q->nsons];
@@ -167,12 +194,13 @@ int  MMG3D_split_MOctree_s ( MMG5_pMesh mesh, MMG5_MOctree_s* q, int depth_max) 
     if(tabsons[i].depth < depth_max)
     {
       tabsons[i].nsons = 8;
-      MMG3D_split_MOctree_s(mesh, &tabsons[i], depth_max);
+      MMG3D_split_MOctree_s(mesh, &tabsons[i], depth_max, sol, max_distance);
     }
     else{
       /*calculus of ip for leaves*/
       tabsons[i].blf_ip=tabsons[i].coordoct[2]*pow(2,2*depth_max)+tabsons[i].coordoct[1]*pow(2,depth_max)+tabsons[i].coordoct[0]+1;
       tabsons[i].leaf=1;
+      MMG3D_set_splitls_MOctree (mesh, &tabsons[i], sol, max_distance);
     }
   }
   return 1;
@@ -219,38 +247,6 @@ int  MMG3D_merge_MOctree_s ( MMG5_MOctree_s* q ) {
   MMG3D_free_MOctree_s(q->sons);
   q->nsons = 0;
   q->leaf = 1;
-
-  return 1;
-}
-
-/**
- * \param mesh pointer toward a MMG5 mesh
- * \param q pointer toward the MOctree cell
- *
- * \return 1 if success, 0 if fail.
- *
- * Set the parameter split_ls of a cell to 1 if the level-set intersect the cell for every cell of the octree max.
- *
- */
-int  MMG3D_set_splitls_MOctree ( MMG5_pMesh mesh, MMG5_MOctree_s* q, MMG5_pSol sol) {
-
-  double dx = mesh->info.max[0];
-  double dy = mesh->info.max[1];
-  double dz = mesh->info.max[2];
-  double max_distance = sqrt((dx/2.)*(dx/2.)+(dy/2.)*(dy/2.)+(dx/2.)*(dz/2.));
-
-  if(sol->m[q->blf_ip] <= max_distance)
-  {
-    q->split_ls=1;
-    if(q->depth != 0)
-    {
-      q->father->split_ls=1;
-    }
-  }
-  else
-  {
-    q->split_ls=0;
-  }
 
   return 1;
 }

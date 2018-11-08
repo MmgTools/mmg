@@ -83,10 +83,13 @@ int MMG3D_convert_grid2smallOctree(MMG5_pMesh mesh, MMG5_pSol sol) {
   po->leaf=0;
 
   /** Step 2: Octree subdivision until reaching the grid size */
-  MMG3D_split_MOctree_s (mesh, po, depth_max);
 
-  /** Step 3: Giving the right split_ls parameter to all the cells*/
-  MMG3D_set_splitls_MOctree (mesh, po, sol, depth_max);
+  double dx = mesh->info.max[0];
+  double dy = mesh->info.max[1];
+  double dz = mesh->info.max[2];
+  double max_distance = sqrt((dx/2.)*(dx/2.)+(dy/2.)*(dy/2.)+(dx/2.)*(dz/2.));
+
+  MMG3D_split_MOctree_s (mesh, po, depth_max, sol, max_distance);
 
   return 1;
 }
