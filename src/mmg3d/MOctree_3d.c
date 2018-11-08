@@ -65,8 +65,8 @@ int MMG3D_init_MOctree  ( MMG5_pMesh mesh, MMG5_pMOctree q, int ip, double lengt
 
   /** New cell allocation */
   MMG5_SAFE_MALLOC( q->root,1, MMG5_MOctree_s, return 0);
-  MMG3D_init_MOctree_s( mesh,q->root,ip,0,0);
-  q->root->nsons = 8;
+  MMG3D_init_MOctree_s( mesh,q->root,ip,1,0);
+  q->root->nsons = 0;
 
   return 1;
 }
@@ -142,67 +142,62 @@ int  MMG3D_set_splitls_MOctree ( MMG5_pMesh mesh, MMG5_MOctree_s* q, MMG5_pSol s
 int  MMG3D_split_MOctree_s ( MMG5_pMesh mesh, MMG5_MOctree_s* q, int depth_max, MMG5_pSol sol, double max_distance) {
 
   int ip;
-  MMG5_MOctree_s tabsons[q->nsons];
-  //MMG5_SAFE_MALLOC(q->sons,1, MMG5_MOctree_s*(q->nsons), return 0); cette écriture ne marche pas, où est la définition de cette fonction ?
-  q->sons = malloc(sizeof(MMG5_MOctree_s)*(q->nsons));
-  q->sons = &tabsons[0];
   int i;
+  MMG5_SAFE_MALLOC(q->sons,q->nsons, MMG5_MOctree_s, return 0);
   for(i=0; i<q->nsons; i++)
   {
-    MMG3D_init_MOctree_s(mesh, &tabsons[i], 0, q->depth + 1, 0);
-    tabsons[i].father = q;
+    MMG3D_init_MOctree_s(mesh, &q->sons[i], 0, q->depth + 1, 0);
+    q->sons[i].father = q;
     //calculus of octree coordinates and ip
 
-    tabsons[i].coordoct[0]=q->coordoct[0];
-    tabsons[i].coordoct[1]=q->coordoct[1];
-    tabsons[i].coordoct[2]=q->coordoct[2];
-
+    q->sons[i].coordoct[0]=q->coordoct[0];
+    q->sons[i].coordoct[1]=q->coordoct[1];
+    q->sons[i].coordoct[2]=q->coordoct[2];
+    int power = (2^(depth_max)/2^(q->sons[i].depth));
     if(i==1)
     {
-      tabsons[i].coordoct[0]+=(2^(depth_max)/2^(tabsons[i].depth));
+      q->sons[i].coordoct[0]+=power;
     }
     else if(i==2)
     {
-      tabsons[i].coordoct[2]+=(2^(depth_max)/2^(tabsons[i].depth));
+      q->sons[i].coordoct[2]+=power;
     }
     else if(i==3)
     {
-      tabsons[i].coordoct[0]+=(2^(depth_max)/2^(tabsons[i].depth));
-      tabsons[i].coordoct[2]+=(2^(depth_max)/2^(tabsons[i].depth));
+      q->sons[i].coordoct[0]+=power;
+      q->sons[i].coordoct[2]+=power;
     }
     else if(i==4)
     {
-      tabsons[i].coordoct[1]+=(2^(depth_max)/2^(tabsons[i].depth));
+      q->sons[i].coordoct[1]+=power;
     }
     else if(i==5)
     {
-      tabsons[i].coordoct[0]+=(2^(depth_max)/2^(tabsons[i].depth));
-      tabsons[i].coordoct[1]+=(2^(depth_max)/2^(tabsons[i].depth));
+      q->sons[i].coordoct[0]+=power;
+      q->sons[i].coordoct[1]+=power;
     }
     else if(i==6)
     {
-      tabsons[i].coordoct[1]+=(2^(depth_max)/2^(tabsons[i].depth));
-      tabsons[i].coordoct[2]+=(2^(depth_max)/2^(tabsons[i].depth));
+      q->sons[i].coordoct[1]+=power;
+      q->sons[i].coordoct[2]+=power;
     }
     else if(i==7)
     {
-      tabsons[i].coordoct[0]+=(2^(depth_max)/2^(tabsons[i].depth));
-      tabsons[i].coordoct[1]+=(2^(depth_max)/2^(tabsons[i].depth));
-      tabsons[i].coordoct[2]+=(2^(depth_max)/2^(tabsons[i].depth));
+      q->sons[i].coordoct[0]+=power;
+      q->sons[i].coordoct[1]+=power;
+      q->sons[i].coordoct[2]+=power;
     }
 
-
-
-    if(tabsons[i].depth < depth_max)
+    if(q->sons[i].depth < depth_max)
     {
-      tabsons[i].nsons = 8;
-      MMG3D_split_MOctree_s(mesh, &tabsons[i], depth_max, sol, max_distance);
+      q->sons[i].nsons = 8;
+      MMG3D_split_MOctree_s(mesh, &q->sons[i], depth_max, sol, max_distance);
     }
     else{
       /*calculus of ip for leaves*/
-      tabsons[i].blf_ip=tabsons[i].coordoct[2]*pow(2,2*depth_max)+tabsons[i].coordoct[1]*pow(2,depth_max)+tabsons[i].coordoct[0]+1;
-      tabsons[i].leaf=1;
-      MMG3D_set_splitls_MOctree (mesh, &tabsons[i], sol, max_distance);
+      q->sons[i].blf_ip=q->sons[i].coordoct[2]*pow(2,2*depth_max)+q->sons[i].coordoct[1]*pow(2,depth_max)+q->sons[i].coordoct[0]+1;
+      q->sons[i].leaf=1;
+      MMG3D_set_splitls_MOctree (mesh, &q->sons[i], sol, max_distance);
     }
   }
   return 1;
@@ -216,9 +211,8 @@ int  MMG3D_split_MOctree_s ( MMG5_pMesh mesh, MMG5_MOctree_s* q, int depth_max, 
  * Free a MOctree.
  *
  */
-int MMG3D_free_MOctree  ( MMG5_pMOctree** q ) {
-  free(*q);
-  free(q);
+int MMG3D_free_MOctree  ( MMG5_pMOctree** q, MMG5_pMesh mesh) {
+  MMG5_DEL_MEM(mesh,*q);
   return 1;
 }
 
@@ -230,8 +224,8 @@ int MMG3D_free_MOctree  ( MMG5_pMOctree** q ) {
  * Free a MOctree cell.
  *
  */
-int MMG3D_free_MOctree_s( MMG5_MOctree_s* q ) {
-  free(q);
+int MMG3D_free_MOctree_s( MMG5_MOctree_s* q, MMG5_pMesh mesh) {
+  MMG5_DEL_MEM(mesh,q);
   return 1;
 }
 
@@ -244,11 +238,12 @@ int MMG3D_free_MOctree_s( MMG5_MOctree_s* q ) {
  * \ref q, all sons being leafs).
  *
  */
-int  MMG3D_merge_MOctree_s ( MMG5_MOctree_s* q ) {
+int  MMG3D_merge_MOctree_s ( MMG5_MOctree_s* q, MMG5_pMesh mesh) {
 
-  MMG3D_free_MOctree_s(q->sons);
   q->nsons = 0;
   q->leaf = 1;
+  q->blf_ip=q->sons[0].blf_ip;//récupérer la ls à l'origine de la cellule
+  MMG3D_free_MOctree_s(q->sons, mesh);
 
   return 1;
 }
