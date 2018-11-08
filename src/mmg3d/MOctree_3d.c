@@ -93,7 +93,7 @@ int MMG3D_init_MOctree_s( MMG5_pMesh mesh, MMG5_MOctree_s* q,int ip, int depth,i
   q->depth  = depth;
 
   q->split_ls  = split_ls;
-  q->leaf = 1;
+  q->leaf = 0;
   q->coordoct[0]=(0.,0.,0.);
   return 1;
 }
@@ -113,7 +113,6 @@ int MMG3D_init_MOctree_s( MMG5_pMesh mesh, MMG5_MOctree_s* q,int ip, int depth,i
 int  MMG3D_split_MOctree_s ( MMG5_pMesh mesh, MMG5_MOctree_s* q, int depth_max) {
 
   int ip;
-  q->leaf=0;
   MMG5_MOctree_s tabsons[q->nsons];
   //MMG5_SAFE_MALLOC(q->sons,1, MMG5_MOctree_s*(q->nsons), return 0); cette écriture ne marche pas, où est la définition de cette fonction ?
   q->sons = malloc(sizeof(MMG5_MOctree_s)*(q->nsons));
@@ -121,7 +120,7 @@ int  MMG3D_split_MOctree_s ( MMG5_pMesh mesh, MMG5_MOctree_s* q, int depth_max) 
   int i;
   for(i=0; i<q->nsons; i++)
   {
-    MMG3D_init_MOctree_s(mesh, &tabsons[i], ip, q->depth + 1, 0);
+    MMG3D_init_MOctree_s(mesh, &tabsons[i], 0, q->depth + 1, 0);
     tabsons[i].father = q;
     //calculus of octree coordinates and ip
 
@@ -163,13 +162,17 @@ int  MMG3D_split_MOctree_s ( MMG5_pMesh mesh, MMG5_MOctree_s* q, int depth_max) 
       tabsons[i].coordoct[2]+=(2^(depth_max)/2^(tabsons[i].depth));
     }
 
-    /*calculus of ip*/
-    tabsons[i].blf_ip=tabsons[i].coordoct[2]*pow(2,2*depth_max)+tabsons[i].coordoct[1]*pow(2,depth_max)+tabsons[i].coordoct[0]+1;
+
 
     if(tabsons[i].depth < depth_max)
     {
       tabsons[i].nsons = 8;
       MMG3D_split_MOctree_s(mesh, &tabsons[i], depth_max);
+    }
+    else{
+      /*calculus of ip for leaves*/
+      tabsons[i].blf_ip=tabsons[i].coordoct[2]*pow(2,2*depth_max)+tabsons[i].coordoct[1]*pow(2,depth_max)+tabsons[i].coordoct[0]+1;
+      tabsons[i].leaf=1;
     }
   }
   return 1;
