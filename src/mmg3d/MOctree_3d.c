@@ -94,7 +94,9 @@ int MMG3D_init_MOctree_s( MMG5_pMesh mesh, MMG5_MOctree_s* q,int ip, int depth,i
 
   q->split_ls  = split_ls;
   q->leaf = 0;
-  q->coordoct=(0,0,0);
+  q->coordoct[0]=0;
+  q->coordoct[1]=0;
+  q->coordoct[2]=0;
   return 1;
 }
 
