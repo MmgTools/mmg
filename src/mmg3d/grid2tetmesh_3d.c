@@ -85,11 +85,58 @@ int MMG3D_convert_grid2smallOctree(MMG5_pMesh mesh, MMG5_pSol sol) {
   /** Step 2: Octree subdivision until reaching the grid size */
   MMG3D_split_MOctree_s (mesh, po, depth_max);
 
-  /** Step 3: Giving the right split_ls to all the cells*/
-
+  /** Step 3: Giving the right split_ls parameter to all the cells*/
+  MMG3D_set_splitls_MOctree (mesh, po, sol, depth_max);
 
   return 1;
 }
+
+/**
+ * \param q pointer toward the MOctree cell
+ * \param depth_max the depth maximum of the octree.
+ *
+ * \return 1 if success, 0 if fail.
+ *
+ * Balance an unbalanced octree in order that 2 adjacent cells have at most 1
+ * level of depth of difference (2:1 balancing).
+ *
+ */
+static inline
+int MMG3D_balance_octree(MMG5_MOctree_s* q, int depth_max) {
+
+  return 1;
+}
+
+
+/**
+* \param q pointer toward the MOctree cell
+ * \param depth_max the depth maximum of the octree.
+ *
+ * \return 1 if success, 0 if fail.
+ *
+ * Build the coarse octree from the initial octree.
+ *
+ */
+static inline
+int MMG3D_build_coarsen_octree(MMG5_MOctree_s* q, int depth_max) {
+
+  if(q->depth == depth_max - 1) //pères des leafs
+  {
+    if(q->split_ls == 0)
+    {
+      if(MMG3D_balance_octree(q, depth_max))
+      {
+        MMG3D_merge_MOctree_s (q);
+      }
+    }
+  }
+  else
+  {
+    MMG3D_build_coarsen_octree(q->sons, depth_max);
+  }
+  return 1;
+}
+
 
 /**
  * \param mesh pointer toward a mesh structure.
@@ -102,27 +149,12 @@ int MMG3D_convert_grid2smallOctree(MMG5_pMesh mesh, MMG5_pSol sol) {
  */
 static inline
 int MMG3D_coarsen_octree(MMG5_pMesh mesh, MMG5_pSol sol) {
+  MMG5_MOctree_s *po;
+  po=mesh->octree->root;
 
-  printf ( " %s:%s: TO IMPLEMENT\n",__FILE__,__func__ ); return 0;
+  int depth_max=6;
 
-  return 1;
-}
-
-/**
- * \param mesh pointer toward a mesh structure.
- * \param sol pointer toward a solution structure that contains the solution at
- * grid centroids at the beginning and at mesh nodes at the end.
- *
- * \return 1 if success, 0 if fail.
- *
- * Balance an unbalanced octree in order that 2 adjacent cells have at most 1
- * level of depth of difference (2:1 balancing).
- *
- */
-static inline
-int MMG3D_balance_octree(MMG5_pMesh mesh, MMG5_pSol sol) {
-
-  printf ( " %s:%s: TO IMPLEMENT\n",__FILE__,__func__ ); return 0;
+  MMG3D_build_coarsen_octree(po, depth_max);
 
   return 1;
 }
@@ -173,11 +205,11 @@ int MMG3D_convert_grid2tetmesh(MMG5_pMesh mesh, MMG5_pSol sol) {
     return 0;
   }
 
-  /* Octree balancing */
-  if ( !MMG3D_balance_octree(mesh,sol) ) {
-    fprintf(stderr,"\n  ## Octree balancing problem. Exit program.\n");
-    return 0;
-  }
+  // /* Octree balancing */
+  // if ( !MMG3D_balance_octree(mesh,sol) ) {
+  //   fprintf(stderr,"\n  ## Octree balancing problem. Exit program.\n");
+  //   return 0;
+  // }
 
   /**--- stage 2: Tetrahedralization */
   if ( abs(mesh->info.imprim) > 3 )
