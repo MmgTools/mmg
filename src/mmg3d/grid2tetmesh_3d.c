@@ -58,14 +58,13 @@ static inline
 int MMG3D_convert_grid2smallOctree(MMG5_pMesh mesh, MMG5_pSol sol) {
   MMG5_MOctree_s *po;
   double         length[3];
-  int            i,ip,depth_max;
+  int            i,ip,depth_int,depth_max,max_dim,j;
 
   /** Step 1: Allocation and initialization of the octree root */
   /* Creation of the bottom-left-front corner of the root cell (grid origin) and
    * computation of the octree length */
 
-  //  /!!!!!!!!!! IL FAUT LIRE LE DEPTH MAX!!!!!!!!!!!!!!!!
-  depth_max=6;
+  max_dim=0;
   ip = 1;
   for ( i=0; i<3; ++i ) {
     mesh->point[ip].c[i] = mesh->info.min[i];
@@ -74,6 +73,22 @@ int MMG3D_convert_grid2smallOctree(MMG5_pMesh mesh, MMG5_pSol sol) {
     // it will be in the same order than in the VTK file
 
     length[i] = mesh->info.max[i] * (double)mesh->freeint[i];
+    if(max_dim < mesh->freeint[i])
+    {
+      max_dim = mesh->freeint[i];
+    }
+  }
+
+  depth_int=log(max_dim)/log(2);
+  j=floor(depth_int)-depth_int;
+  if(j==0)
+  {
+    depth_max = depth_int;
+  }
+  else
+  {
+    max_dim=exp(log(2)*(floor(depth_int)+1)); //redimensionne la grille si elle n'est pas d'une puissance de 2
+    depth_max=floor(depth_int)+1;
   }
 
   /* Computation of the octree length */
@@ -81,6 +96,10 @@ int MMG3D_convert_grid2smallOctree(MMG5_pMesh mesh, MMG5_pSol sol) {
   MMG3D_init_MOctree(mesh,mesh->octree,ip,length)
   po = mesh->octree->root;
   po->leaf=0;
+  if(po->depth != depth_max)
+  {
+    po->nsons = 8;
+  }
 
   /** Step 2: Octree subdivision until reaching the grid size */
 
@@ -121,22 +140,46 @@ int MMG3D_balance_octree(MMG5_MOctree_s* q, int depth_max) {
  *
  */
 static inline
-int MMG3D_build_coarsen_octree(MMG5_MOctree_s* q, int depth_max) {
-
-  if(q->sons[0].leaf == 1) //pères des leafs
+int MMG3D_build_coarsen_octree(MMG5_pMesh mesh, MMG5_MOctree_s* q, int depth_max) {
+  int i,leaf_sum;
+  leaf_sum=0;
+  for(i=0; i<q->nsons; i++)
   {
+    leaf_sum += q->sons[i].leaf;
+  }
+
+  if(leaf_sum != q->nsons) // si je ne suis pas un  père QUE de leafs (anciennes et nouvelles)
+  {
+    for(i=0; i<q->nsons; i++)
+    {
+      if(q->sons[i].leaf != 1)//si je ne suis pas une leaf
+      {
+        MMG3D_build_coarsen_octree(mesh, &q->sons[i], depth_max);
+      }
+    }
+  }
+  if(leaf_sum == q->nsons) // si je suis un père de leafs (anciennes et nouvelles)
+  {
+    // crée le split_ls du père
+    i=0;
+    while(q->sons[i].split_ls==0)
+    {
+      i++;
+    }
+    if(i!=q->nsons-1)
+    {
+      q->split_ls=1; // vérifie si au moins un fils possède la LS
+    }
+
     if(q->split_ls == 0)
     {
       if(MMG3D_balance_octree(q, depth_max))
       {
-        MMG3D_merge_MOctree_s (q);
+        MMG3D_merge_MOctree_s (q, mesh);
       }
     }
   }
-  else
-  {
-    MMG3D_build_coarsen_octree(q->sons, depth_max);
-  }
+  leaf_sum=0;
   return 1;
 }
 
@@ -157,7 +200,7 @@ int MMG3D_coarsen_octree(MMG5_pMesh mesh, MMG5_pSol sol) {
 
   int depth_max=6;
 
-  MMG3D_build_coarsen_octree(po, depth_max);
+  MMG3D_build_coarsen_octree(mesh, po, depth_max);
 
   return 1;
 }
