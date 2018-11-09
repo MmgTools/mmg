@@ -43,7 +43,7 @@
 
 /**
  * \param mesh pointer toward a MMG5 mesh
- * \param q pointer toward the MOctree cell
+ * \param q pointer toward the MOctree root
  * \param ip index of the bottom-left-front corner of the root cell
  * \param length length of the octree in each direction
  * \param depth_max maximal depth of the octree
@@ -53,25 +53,31 @@
  * Allocate and init an MOctree structure.
  *
  */
-int MMG3D_init_MOctree  ( MMG5_pMesh mesh, MMG5_pMOctree q, int ip,
+int MMG3D_init_MOctree  ( MMG5_pMesh mesh, MMG5_pMOctree *q, int ip,
                           double length[3],int depth_max ) {
 
-  q->length[0] = length[0];
-  q->length[1] = length[1];
-  q->length[2] = length[2];
 
-  q->depth_max = depth_max;
+  /** Root allocation */
+  MMG5_ADD_MEM(mesh,sizeof(MMG5_MOctree),"MOctree root",
+               return 0);
+  MMG5_SAFE_MALLOC( *q,1, MMG5_MOctree, return 0);
 
-  q->nspan_at_depth_max = 2^depth_max;
+  (*q)->length[0] = length[0];
+  (*q)->length[1] = length[1];
+  (*q)->length[2] = length[2];
+
+  (*q)->depth_max = depth_max;
+
+  (*q)->nspan_at_depth_max = 2^depth_max;
 
   /** Check that we have enough memory to allocate a new cell */
   MMG5_ADD_MEM(mesh,sizeof(MMG5_MOctree_s),"initial MOctree cell",
                return 0);
 
   /** New cell allocation */
-  MMG5_SAFE_MALLOC( q->root,1, MMG5_MOctree_s, return 0);
-  MMG3D_init_MOctree_s( mesh,q->root,ip,1,0);
-  q->root->nsons = 0;
+  MMG5_SAFE_MALLOC( (*q)->root,1, MMG5_MOctree_s, return 0);
+  MMG3D_init_MOctree_s( mesh,(*q)->root,ip,1,0);
+  (*q)->root->nsons = 0;
 
   return 1;
 }
