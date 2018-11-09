@@ -92,7 +92,7 @@ int MMG3D_convert_grid2smallOctree(MMG5_pMesh mesh, MMG5_pSol sol) {
 
   /* Computation of the octree length */
   /* Octree cell initialization */
-  if ( !MMG3D_init_MOctree(mesh,mesh->octree,ip,length) ) return 0;
+  if ( !MMG3D_init_MOctree(mesh,mesh->octree,ip,length,depth_max) ) return 0;
   po = mesh->octree->root;
   po->leaf=0;
   if(po->depth != depth_max)
@@ -107,7 +107,7 @@ int MMG3D_convert_grid2smallOctree(MMG5_pMesh mesh, MMG5_pSol sol) {
   double dz = mesh->info.max[2];
   double max_distance = sqrt((dx/2.)*(dx/2.)+(dy/2.)*(dy/2.)+(dx/2.)*(dz/2.));
 
-  MMG3D_split_MOctree_s (mesh, po, depth_max, sol, max_distance);
+  MMG3D_split_MOctree_s (mesh, po, sol, max_distance);
 
   return 1;
 }
@@ -250,11 +250,11 @@ int MMG3D_convert_grid2tetmesh(MMG5_pMesh mesh, MMG5_pSol sol) {
     return 0;
   }
 
-  // /* Octree balancing */
-  // if ( !MMG3D_balance_octree(mesh,sol) ) {
-  //   fprintf(stderr,"\n  ## Octree balancing problem. Exit program.\n");
-  //   return 0;
-  // }
+  /* Octree balancing */
+  if ( !MMG3D_balance_octree(mesh,sol) ) {
+    fprintf(stderr,"\n  ## Octree balancing problem. Exit program.\n");
+    return 0;
+  }
 
   /**--- stage 2: Tetrahedralization */
   if ( abs(mesh->info.imprim) > 3 )
