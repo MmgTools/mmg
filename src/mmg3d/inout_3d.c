@@ -1060,7 +1060,7 @@ int MMG3D_loadVTKGrid(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   FILE*       inm;
   MMG5_pPoint ppt;
   double      ver,xaxis[3],yaxis[3],v[3];
-  double      x,y,z;
+  double      x,y,z,x_min,y_min,z_min;
   long long   pos,solpos;
   size_t      len,buflen=128;
   int         i,j,k,ip;
@@ -1281,6 +1281,13 @@ int MMG3D_loadVTKGrid(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
     return -1;
   }
 
+  if ( mesh->freeint[0]<=1 || mesh->freeint[1]<=1 || mesh->freeint[2]<=1 ) {
+    fprintf(stderr,"  ** ERROR: WE MUST HAVE AT LEAST 2 CELLS IN EACH DIRECTION"
+            " TO WORK ON THE DUAL GRID.\n");
+    fclose(inm);
+    return -1;
+  }
+
   /* Computation of the scaling info */
   /* For now, deal only with the canonical basis (see later if it is useful to
    * trat the other cases */
@@ -1327,12 +1334,15 @@ int MMG3D_loadVTKGrid(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   }
 
   /* Points creations */
-  z = mesh->info.min[2];
+  z = mesh->info.min[2] + 0.5*mesh->info.max[2];
+  y_min =  mesh->info.min[1] + 0.5*mesh->info.max[1];
+  x_min =  mesh->info.min[0] + 0.5*mesh->info.max[0];
+
   for ( k=0; k<mesh->freeint[2]; ++k ) {
-    y = mesh->info.min[1];
+    y = y_min;
 
     for ( j=0; j<mesh->freeint[1]; ++j ) {
-      x = mesh->info.min[0];
+      x = x_min;
 
       for ( i=0; i<mesh->freeint[0]; ++i ) {
         ip = k*mesh->freeint[1]*mesh->freeint[0]+j*mesh->freeint[0]+i+1;
@@ -1376,7 +1386,7 @@ int MMG3D_saveVTKOctree(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   FILE             *inm;
   MMG5_MOctree_s   *q;
   MMG5_pPoint       ppt;
-  int               k,np,nc;
+  int               k,np,nc,ier,span;
   char             *data,chaine[128],*ptr;
   static const int  cell_type = 12,nvert_cell=8;
 
@@ -1414,23 +1424,34 @@ int MMG3D_saveVTKOctree(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 
   /* Header */
   fprintf(inm,"%s\n","# vtk DataFile Version 2.0");
-  fprintf(inm,"%s\n\n",filename);
+  fprintf(inm,"%s\n\n",mesh->namein);
   fprintf(inm,"%s\n\n","ASCII");
   fprintf(inm,"%s\n\n","DATASET UNSTRUCTURED_GRID");
 
   /** Step 1: count the number of used points */
   /* Mark all the points as unused */
   for ( k=1; k<=mesh->np; ++k ) {
-    mesh->point[k].tag &= ~MG_NUL;
+    mesh->point[k].tag = MG_NUL;
   }
 
   /* Process the octree and mark the points that are at leaf corners as used
    * (count the number of cells in the same time) */
   q = mesh->octree->root;
 
-  if ( !MMG3D_mark_MOctreeCellCorners(mesh,q,&np,&nc) ) {
+  span = mesh->octree->nspan_at_depth_max;
+  np = nc = 0;
+  ier = MMG3D_mark_MOctreeCellCorners(mesh,q,&span,&np,&nc);
+  if ( !ier ) {
     fprintf(stderr,"\n  ## Error: %s: unable to mark the octree cell corners as"
             " used.\n",__func__);
+    return 0;
+  }
+  if ( !np ) {
+    fprintf(stderr,"\n  ## Error: %s: no used points in the octree\n",__func__);
+    return 0;
+  }
+  if ( !nc ) {
+    fprintf(stderr,"\n  ## Error: %s: no leaf cell in the octree\n",__func__);
     return 0;
   }
 
@@ -1440,31 +1461,31 @@ int MMG3D_saveVTKOctree(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   np = 0;
   for ( k=1; k<=mesh->np; ++k ) {
     ppt = &mesh->point[k];
-    ppt->tmp = ++np;
     if ( MG_VOK(ppt) ) {
+      ppt->tmp = np++;
       fprintf(inm,"%.15lg %.15lg %.15lg\n",ppt->c[0],ppt->c[1],ppt->c[2]);
     }
   }
 
   /** Step 3: Process the octree and save the octree leafs as hexahedron */
-  fprintf(inm,"%s %d %d\n","CELLS",nc,(nvert_cell+1)*nc);
+  fprintf(inm,"\n%s %d %d\n","CELLS",nc,(nvert_cell+1)*nc);
   q = mesh->octree->root;
-
-  if ( !MMG3D_write_MOctreeCell(mesh,q,inm) ) {
+  span = mesh->octree->nspan_at_depth_max;
+  if ( !MMG3D_write_MOctreeCell(mesh,q,&span,inm) ) {
     fprintf(stderr,"\n  ## Error: %s: unable to save the octree cells.\n",
             __func__);
     return 0;
   }
 
-  fprintf(inm,"%s %d\n","CELL_TYPES",nc);
+  fprintf(inm,"\n%s %d\n","CELL_TYPES",nc);
   for ( k=0; k<nc; ++k ) {
     fprintf(inm,"%d\n",cell_type);
   }
 
   /** Step 4: save the levelset values at points */
-  fprintf(inm,"%s %d\n","POINT_DATA",np);
-  fprintf(inm,"%s\n","SCALARS distance double 1");
-  fprintf(inm,"%s\n","LOOKUP_TABLE default");
+  fprintf(inm,"\n%s %d\n","POINT_DATA",np);
+  fprintf(inm,"\n%s\n","SCALARS distance double 1");
+  fprintf(inm,"\n%s\n","LOOKUP_TABLE default");
 
   for ( k=1; k<=mesh->np; ++k ) {
     ppt = &mesh->point[k];

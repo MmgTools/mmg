@@ -68,7 +68,7 @@ int MMG3D_init_MOctree  ( MMG5_pMesh mesh, MMG5_pMOctree *q, int ip,
 
   (*q)->depth_max = depth_max;
 
-  (*q)->nspan_at_depth_max = 2^depth_max;
+  (*q)->nspan_at_depth_max = pow(2,depth_max);
 
   /** Check that we have enough memory to allocate a new cell */
   MMG5_ADD_MEM(mesh,sizeof(MMG5_MOctree_s),"initial MOctree cell",
@@ -306,6 +306,7 @@ int MMG3D_get_MOctreeCornerIndices ( MMG5_pMesh mesh, MMG5_MOctree_s *q,int span
 /**
  * \param mesh pointer toward the mesh
  * \param q pointer toward the MOctree cell
+ * \param span span between a corner and the other corner in one given direction
  * \param np pointer toward the number of used points (to fill)
  * \param nc pointer toward the number of cell leafs (to fill)
  *
@@ -315,14 +316,13 @@ int MMG3D_get_MOctreeCornerIndices ( MMG5_pMesh mesh, MMG5_MOctree_s *q,int span
  * leafs. Count the number of use points and the number of leafs.
  *
  */
-int  MMG3D_mark_MOctreeCellCorners ( MMG5_pMesh mesh, MMG5_MOctree_s* q,int *np,int *nc ) {
+int  MMG3D_mark_MOctreeCellCorners ( MMG5_pMesh mesh, MMG5_MOctree_s* q,int *span,int *np,int *nc ) {
   MMG5_pPoint ppt;
   int         i,ip[8];
-  int         span = mesh->octree->nspan_at_depth_max;
 
   if ( q->leaf ) {
 
-    if ( !MMG3D_get_MOctreeCornerIndices ( mesh,q,span,ip,ip+1,ip+2,ip+3,ip+4,ip+5,ip+6,ip+7 ) ) {
+    if ( !MMG3D_get_MOctreeCornerIndices ( mesh,q,*span,ip,ip+1,ip+2,ip+3,ip+4,ip+5,ip+6,ip+7 ) ) {
       fprintf(stderr,"\n  ## Error: %s: unable to compute the indices of the"
               " corners of the octree cell.\n",__func__);
       return 0;
@@ -338,10 +338,10 @@ int  MMG3D_mark_MOctreeCellCorners ( MMG5_pMesh mesh, MMG5_MOctree_s* q,int *np,
     ++(*nc);
   }
   else {
-    span /= 2;
+    (*span) /= 2;
 
     for ( i=0; i<q->nsons; ++i ) {
-      if ( !MMG3D_mark_MOctreeCellCorners ( mesh,&q->sons[i],np,nc ) ) return 0;
+      if ( !MMG3D_mark_MOctreeCellCorners ( mesh,&q->sons[i],span,np,nc ) ) return 0;
     }
   }
 
@@ -352,6 +352,7 @@ int  MMG3D_mark_MOctreeCellCorners ( MMG5_pMesh mesh, MMG5_MOctree_s* q,int *np,
 /**
  * \param mesh pointer toward the mesh
  * \param q pointer toward the MOctree cell
+ * \param span span between a corner and the other corner in one given direction
  * \param inm pointer toward the file in which we save the octree cells
  *
  * \return 1 if success, 0 if fail.
@@ -359,14 +360,13 @@ int  MMG3D_mark_MOctreeCellCorners ( MMG5_pMesh mesh, MMG5_MOctree_s* q,int *np,
  * Write the hexahedron associated to the octree leafs.
  *
  */
-int  MMG3D_write_MOctreeCell ( MMG5_pMesh mesh, MMG5_MOctree_s* q, FILE *inm ) {
+int  MMG3D_write_MOctreeCell ( MMG5_pMesh mesh, MMG5_MOctree_s* q,int *span,FILE *inm ) {
   int i,ip0,ip1,ip2,ip3,ip4,ip5,ip6,ip7;
-  int span = mesh->octree->nspan_at_depth_max;
   static int nvert = 8;
 
   if ( q->leaf ) {
 
-    if ( !MMG3D_get_MOctreeCornerIndices ( mesh,q,span,&ip0,&ip1,&ip2,&ip3,
+    if ( !MMG3D_get_MOctreeCornerIndices ( mesh,q,*span,&ip0,&ip1,&ip2,&ip3,
                                            &ip4,&ip5,&ip6,&ip7 ) ) {
       fprintf(stderr,"\n  ## Error: %s: unable to compute the indices of the"
               " corners of the octree cell.\n",__func__);
@@ -379,10 +379,10 @@ int  MMG3D_write_MOctreeCell ( MMG5_pMesh mesh, MMG5_MOctree_s* q, FILE *inm ) {
             mesh->point[ip7].tmp);
   }
   else {
-    span /= 2;
+    (*span) /= 2;
 
     for ( i=0; i<q->nsons; ++i ) {
-      if ( !MMG3D_write_MOctreeCell ( mesh,&q->sons[i],inm ) ) {
+      if ( !MMG3D_write_MOctreeCell ( mesh,&q->sons[i],span,inm ) ) {
         return 0;
       }
     }
