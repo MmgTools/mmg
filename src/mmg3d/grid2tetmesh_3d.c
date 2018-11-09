@@ -251,10 +251,10 @@ int MMG3D_convert_grid2tetmesh(MMG5_pMesh mesh, MMG5_pSol sol) {
   }
 
   /* Octree balancing */
-  if ( !MMG3D_balance_octree(mesh,sol) ) {
-    fprintf(stderr,"\n  ## Octree balancing problem. Exit program.\n");
-    return 0;
-  }
+  /* if ( !MMG3D_balance_octree(mesh,sol) ) { */
+  /*   fprintf(stderr,"\n  ## Octree balancing problem. Exit program.\n"); */
+  /*   return 0; */
+  /* } */
 
   /**--- stage 2: Tetrahedralization */
   if ( abs(mesh->info.imprim) > 3 )
