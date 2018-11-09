@@ -76,7 +76,7 @@ int MMG3D_init_MOctree  ( MMG5_pMesh mesh, MMG5_pMOctree *q, int ip,
 
   /** New cell allocation */
   MMG5_SAFE_MALLOC( (*q)->root,1, MMG5_MOctree_s, return 0);
-  MMG3D_init_MOctree_s( mesh,(*q)->root,ip,1,0);
+  MMG3D_init_MOctree_s( mesh,(*q)->root,ip,0,0);
   (*q)->root->nsons = 0;
 
   return 1;
@@ -301,7 +301,7 @@ int MMG3D_get_MOctreeCornerIndices ( MMG5_pMesh mesh, MMG5_MOctree_s *q,int span
   *ip6 = q->blf_ip + span_z + span_y + span;
   *ip7 = q->blf_ip + span_z + span_y;
 
-return 1;
+  return 1;
 }
 /**
  * \param mesh pointer toward the mesh
