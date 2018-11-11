@@ -79,16 +79,16 @@ int MMG3D_convert_grid2smallOctree(MMG5_pMesh mesh, MMG5_pSol sol) {
     }
   }
 
-  depth_int=log(max_dim)/log(2);
-  if(floor(depth_int)-depth_int==0)
-  {
-    depth_max = depth_int;
-  }
-  else
-  {
-    max_dim=exp(log(2)*(floor(depth_int)+1)); //redimensionne la grille si elle n'est pas d'une puissance de 2
-    depth_max=floor(depth_int)+1;
-  }
+  // set max dim to the next power of 2
+  max_dim--;
+  max_dim |= max_dim >> 1;
+  max_dim |= max_dim >> 2;
+  max_dim |= max_dim >> 4;
+  max_dim |= max_dim >> 8;
+  max_dim |= max_dim >> 16;
+  max_dim++;
+
+  depth_max=log(max_dim)/log(2);
 
   /* Computation of the octree length */
   /* Octree cell initialization */
