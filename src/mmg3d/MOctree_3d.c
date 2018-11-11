@@ -114,10 +114,10 @@ int  MMG3D_set_splitls_MOctree ( MMG5_pMesh mesh, MMG5_MOctree_s* q, MMG5_pSol s
   if(sol->m[q->blf_ip] <= max_distance)
   {
     q->split_ls=1;
-    if(q->depth != 0)
-    {
-      q->father->split_ls=1;
-    }
+    // if(q->depth != 0)
+    // {
+    //   q->father->split_ls=1;
+    // }
   }
   else
   {
@@ -140,6 +140,10 @@ int  MMG3D_set_splitls_MOctree ( MMG5_pMesh mesh, MMG5_MOctree_s* q, MMG5_pSol s
  *
  */
 int  MMG3D_split_MOctree_s ( MMG5_pMesh mesh, MMG5_MOctree_s* q, int depth_max, MMG5_pSol sol, double max_distance) {
+
+  // double dx = mesh->info.max[0];
+  // double dy = mesh->info.max[1];
+  // double dz = mesh->info.max[2];
 
   int ip;
   int i;
@@ -195,7 +199,9 @@ int  MMG3D_split_MOctree_s ( MMG5_pMesh mesh, MMG5_MOctree_s* q, int depth_max, 
     }
     else{
       /*calculus of ip for leaves*/
-      q->sons[i].blf_ip=q->sons[i].coordoct[2]*pow(2,2*depth_max)+q->sons[i].coordoct[1]*pow(2,depth_max)+q->sons[i].coordoct[0]+1;
+      q->sons[i].blf_ip=q->sons[i].coordoct[2]*pow(2,2*(depth_max-1))+q->sons[i].coordoct[1]*pow(2,depth_max-1)+q->sons[i].coordoct[0]+1;
+      //moins couteux ?
+      //q->sons[i].blf_ip=q->sons[i].coordoct[2]*dx*dy+q->sons[i].coordoct[1]*dx+q->sons[i].coordoct[0]+1;
       q->sons[i].leaf=1;
       MMG3D_set_splitls_MOctree (mesh, &q->sons[i], sol, max_distance);
     }
