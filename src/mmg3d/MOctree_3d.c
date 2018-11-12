@@ -121,18 +121,63 @@ int MMG3D_init_MOctree_s( MMG5_pMesh mesh, MMG5_MOctree_s* q,int ip, int depth,i
  *
  */
 int  MMG3D_set_splitls_MOctree ( MMG5_pMesh mesh, MMG5_MOctree_s* q, MMG5_pSol sol, double max_distance) {
+  int ip;
+  int FDL,FDR,BDL,BDR,FUL,FUR,BUL,BUR;// ip of the 8 vertices of an octree cell
+  ip=q->blf_ip;
 
-  if(sol->m[q->blf_ip] <= max_distance)
+  FDL=ip; // Front Down Left corner
+  FDR=FDL+1;
+  BDL=ip+mesh->freeint[0];
+  BDR=BDL+1;
+  FUL=ip+mesh->freeint[0]*mesh->freeint[1];
+  FUR=FUL+1;
+  BUL=ip+mesh->freeint[0]*(1+mesh->freeint[1]);
+  BUR=BUL+1;
+
+  if(sol->m[FDL]*sol->m[FDR]<0)
   {
     q->split_ls=1;
-    if(q->depth != 0)
-    {
-      q->father->split_ls=1;
-    }
+  }
+  else if(sol->m[FDR]*sol->m[BDL]<0)
+  {
+    q->split_ls=1;
+  }
+  else if(sol->m[BDL]*sol->m[BDR]<0)
+  {
+    q->split_ls=1;
+  }
+  else if(sol->m[BDR]*sol->m[FUL]<0)
+  {
+    q->split_ls=1;
+  }
+  else if(sol->m[FUL]*sol->m[FUR]<0)
+  {
+    q->split_ls=1;
+  }
+  else if(sol->m[FUR]*sol->m[BUL]<0)
+  {
+    q->split_ls=1;
+  }
+  else if(sol->m[BUL]*sol->m[BUR]<0)
+  {
+    q->split_ls=1;
   }
   else
   {
     q->split_ls=0;
+  }
+
+  if(q->split_ls==1) // if distance=0, we keep the level set of all the vertices
+  {
+    MMG5_SAFE_MALLOC(q->ipvertices,8,int,return 0); // table with the 8 ip vertices of the octree cell
+    q->ipvertices[0]=FDL;
+    q->ipvertices[1]=FDR;
+    q->ipvertices[2]=BDL;
+    q->ipvertices[3]=BDR;
+    q->ipvertices[4]=FUL;
+    q->ipvertices[5]=FUR;
+    q->ipvertices[6]=BUL;
+    q->ipvertices[5]=BUR;
   }
 
   return 1;
@@ -164,9 +209,7 @@ int  MMG3D_split_MOctree_s ( MMG5_pMesh mesh,MMG5_MOctree_s* q,MMG5_pSol sol,dou
     q->sons[i].coordoct[0]=q->coordoct[0];
     q->sons[i].coordoct[1]=q->coordoct[1];
     q->sons[i].coordoct[2]=q->coordoct[2];
-
-    power = (nspan_at_depth_max/2^(q->sons[i].depth));
-
+    int power = pow(2,depth_max)/pow(2,q->sons[i].depth);
     if(i==1)
     {
       q->sons[i].coordoct[0]+=power;
@@ -208,7 +251,9 @@ int  MMG3D_split_MOctree_s ( MMG5_pMesh mesh,MMG5_MOctree_s* q,MMG5_pSol sol,dou
     }
     else{
       /*calculus of ip for leaves*/
-      q->sons[i].blf_ip=q->sons[i].coordoct[2]*pow(2,2*depth_max)+q->sons[i].coordoct[1]*pow(2,depth_max)+q->sons[i].coordoct[0]+1;
+      q->sons[i].blf_ip=q->sons[i].coordoct[2]*pow(2,2*(depth_max-1))+q->sons[i].coordoct[1]*pow(2,depth_max-1)+q->sons[i].coordoct[0]+1;
+      //moins couteux ?
+      //q->sons[i].blf_ip=q->sons[i].coordoct[2]*dx*dy+q->sons[i].coordoct[1]*dx+q->sons[i].coordoct[0]+1;
       q->sons[i].leaf=1;
       MMG3D_set_splitls_MOctree (mesh, &q->sons[i], sol, max_distance);
     }
