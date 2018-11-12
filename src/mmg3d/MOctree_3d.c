@@ -134,31 +134,9 @@ int  MMG3D_set_splitls_MOctree ( MMG5_pMesh mesh, MMG5_MOctree_s* q, MMG5_pSol s
   BUL=ip+mesh->freeint[0]*(1+mesh->freeint[1]);
   BUR=BUL+1;
 
-  if(sol->m[FDL]*sol->m[FDR]<0)
-  {
-    q->split_ls=1;
-  }
-  else if(sol->m[FDR]*sol->m[BDL]<0)
-  {
-    q->split_ls=1;
-  }
-  else if(sol->m[BDL]*sol->m[BDR]<0)
-  {
-    q->split_ls=1;
-  }
-  else if(sol->m[BDR]*sol->m[FUL]<0)
-  {
-    q->split_ls=1;
-  }
-  else if(sol->m[FUL]*sol->m[FUR]<0)
-  {
-    q->split_ls=1;
-  }
-  else if(sol->m[FUR]*sol->m[BUL]<0)
-  {
-    q->split_ls=1;
-  }
-  else if(sol->m[BUL]*sol->m[BUR]<0)
+  if(sol->m[FDL]*sol->m[FDR]<0 || sol->m[FDR]*sol->m[BDL]<0 ||\
+     sol->m[BDL]*sol->m[BDR]<0 || sol->m[BDR]*sol->m[FUL]<0 ||\
+     sol->m[FUL]*sol->m[FUR]<0 || sol->m[FUR]*sol->m[BUL]<0 || (sol->m[BUL]*sol->m[BUR]<0))
   {
     q->split_ls=1;
   }
