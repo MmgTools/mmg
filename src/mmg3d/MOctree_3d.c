@@ -120,7 +120,7 @@ int MMG3D_init_MOctree_s( MMG5_pMesh mesh, MMG5_MOctree_s* q,int ip, int depth,i
  * Set the parameter split_ls of a cell to 1 if the level-set intersect the cell for every cell of the octree max.
  *
  */
-int  MMG3D_set_splitls_MOctree ( MMG5_pMesh mesh, MMG5_MOctree_s* q, MMG5_pSol sol, double max_distance) {
+int  MMG3D_set_splitls_MOctree ( MMG5_pMesh mesh, MMG5_MOctree_s* q, MMG5_pSol sol) {
   int ip;
   int FDL,FDR,BDL,BDR,FUL,FUR,BUL,BUR;// ip of the 8 vertices of an octree cell
   ip=q->blf_ip;
@@ -193,7 +193,7 @@ int  MMG3D_set_splitls_MOctree ( MMG5_pMesh mesh, MMG5_MOctree_s* q, MMG5_pSol s
  * \ref q must be a leaf.
  *
  */
-int  MMG3D_split_MOctree_s ( MMG5_pMesh mesh,MMG5_MOctree_s* q,MMG5_pSol sol,double max_distance) {
+int  MMG3D_split_MOctree_s ( MMG5_pMesh mesh,MMG5_MOctree_s* q,MMG5_pSol sol) {
   int ip,i,power;
 
   int depth_max = mesh->octree->depth_max;
@@ -247,15 +247,15 @@ int  MMG3D_split_MOctree_s ( MMG5_pMesh mesh,MMG5_MOctree_s* q,MMG5_pSol sol,dou
     if(q->sons[i].depth < depth_max)
     {
       q->sons[i].nsons = 8;
-      MMG3D_split_MOctree_s(mesh, &q->sons[i], sol, max_distance);
+      MMG3D_split_MOctree_s(mesh, &q->sons[i], sol);
     }
     else{
       /*calculus of ip for leaves*/
-      q->sons[i].blf_ip=q->sons[i].coordoct[2]*pow(2,2*(depth_max-1))+q->sons[i].coordoct[1]*pow(2,depth_max-1)+q->sons[i].coordoct[0]+1;
+      q->sons[i].blf_ip=q->sons[i].coordoct[2]*pow(2,2*depth_max)+q->sons[i].coordoct[1]*pow(2,depth_max)+q->sons[i].coordoct[0]+1;
       //moins couteux ?
       //q->sons[i].blf_ip=q->sons[i].coordoct[2]*dx*dy+q->sons[i].coordoct[1]*dx+q->sons[i].coordoct[0]+1;
       q->sons[i].leaf=1;
-      MMG3D_set_splitls_MOctree (mesh, &q->sons[i], sol, max_distance);
+      MMG3D_set_splitls_MOctree (mesh, &q->sons[i], sol);
     }
   }
   return 1;

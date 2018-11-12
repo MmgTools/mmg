@@ -103,13 +103,7 @@ int MMG3D_convert_grid2smallOctree(MMG5_pMesh mesh, MMG5_pSol sol) {
   }
 
   /** Step 2: Octree subdivision until reaching the grid size */
-
-  double dx = mesh->info.max[0];
-  double dy = mesh->info.max[1];
-  double dz = mesh->info.max[2];
-  double max_distance = sqrt((dx/2.)*(dx/2.)+(dy/2.)*(dy/2.)+(dx/2.)*(dz/2.));
-
-  MMG3D_split_MOctree_s (mesh, po, sol, max_distance);
+  MMG3D_split_MOctree_s (mesh, po, sol);
 
   return 1;
 }
@@ -401,18 +395,14 @@ int MMG3D_convert_grid2tetmesh(MMG5_pMesh mesh, MMG5_pSol sol) {
     return 0;
   }
 
+  MMG3D_saveVTKOctree(mesh,sol,mesh->nameout);
+
   /* Creation of the coarse octree */
   if ( !MMG3D_coarsen_octree(mesh,sol) ) {
     fprintf(stderr,"\n  ## Octree coarsening problem. Exit program.\n");
     return 0;
   }
-  //
-  // /* Octree balancing */
-  // if ( !MMG3D_balance_octree(mesh,sol) ) {
-  //   fprintf(stderr,"\n  ## Octree balancing problem. Exit program.\n");
-  //   return 0;
-  // }
-  //
+
   /**--- stage 2: Tetrahedralization */
   if ( abs(mesh->info.imprim) > 3 )
     fprintf(stdout,"\n  ** OCTREE TETRAHEDRALIZATION\n");
