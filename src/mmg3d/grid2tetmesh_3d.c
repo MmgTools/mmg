@@ -113,6 +113,160 @@ int MMG3D_convert_grid2smallOctree(MMG5_pMesh mesh, MMG5_pSol sol) {
 }
 
 /**
+ * \param q pointer toward the MOctree cell
+ * \param depth_max the depth maximum of the octree.
+ *
+ * \return 1 if success, 0 if fail.
+ *
+ * Balance an unbalanced octree in order that 2 adjacent cells have at most 1
+ * level of depth of difference (2:1 balancing).
+ *
+ */
+static inline
+int MMG3D_balance_octree(MMG5_pMesh mesh, MMG5_MOctree_s* q, int depth_max) {
+
+  int x = q->coordoct[0];
+  int y = q->coordoct[1];
+  int z = q->coordoct[2];
+  int depth;
+  int nb_cells;
+  int father_id;
+  MMG5_MOctree_s* p = mesh->octree->root;
+  int neighboors_tab[18][3];
+
+  // int case_nb = 0;
+  // if((x == 0) || (x == pow(2,depth_max-1)))
+  // {
+  //   case_nb++;
+  // }
+  // if((y == 0) || (y == pow(2,depth_max-1)))
+  // {
+  //   case_nb++;
+  // }
+  // if((z == 0) || (z == pow(2,depth_max-1)))
+  // {
+  //   case_nb++;
+  // }
+  // if(x != octree_size)
+  // {
+  //   if(y != octree_size)
+  //   {
+  //     if(z != octree_size)
+  //     {
+  //       neighboors_tab[0][0] = x;
+  //       neighboors_tab[0][1] = y+1;
+  //       neighboors_tab[0][2] = z+1;
+  //     }
+  //   }
+  // }
+  //
+
+  //CREATION DU TABLEAU DE VOISINS
+  int i,j,k,tab_id;
+  tab_id=0;
+  for(k = z-1 ; k <= z+1 ; k++)
+  {
+    for(j = y-1 ; j <= y+1 ; j++)
+    {
+      for(i = x-1 ; i <= x+1 ; i++)
+      {
+        if((i!=j || i!=k || j!=k) && (i==x || j==y || k==z))
+        {
+          neighboors_tab[tab_id][0] = i;
+          neighboors_tab[tab_id][1] = j;
+          neighboors_tab[tab_id][2] = k;
+          tab_id++;
+        }
+      }
+    }
+  }
+
+  int octree_size = pow(2,depth_max-1);
+
+  for(i = 0 ; i < 18 ; i++)
+  {
+    x = neighboors_tab[i][0];
+    y = neighboors_tab[i][1];
+    z = neighboors_tab[i][2];
+
+    //VERIFICATION QUE LE VOISIN APPARTIENT BIEN A LA GRILLE
+    if(x >= 0 && x < octree_size && y >= 0 && y < octree_size && z >= 0 && z < octree_size)
+    {
+      depth = 2;
+      while((p->leaf != 1) && (depth <= depth_max))
+      {
+        nb_cells = pow(2,depth_max-depth);
+        if(x < nb_cells)
+        {
+          if(y < nb_cells)
+          {
+            if(z < nb_cells)
+            {
+              father_id = 0;
+            }
+            else
+            {
+              father_id = 2;
+              z -= nb_cells;
+            }
+          }
+          else
+          {
+            if(z < nb_cells)
+            {
+              father_id = 4;
+            }
+            else
+            {
+              father_id = 6;
+              z -= nb_cells;
+            }
+            y -= nb_cells;
+          }
+        }
+        else
+        {
+          if(y < nb_cells)
+          {
+            if(z < nb_cells)
+            {
+              father_id = 1;
+            }
+            else
+            {
+              father_id = 3;
+              z -= nb_cells;
+            }
+          }
+          else
+          {
+            if(z < nb_cells)
+            {
+              father_id = 5;
+            }
+            else
+            {
+              father_id = 7;
+              z -= nb_cells;
+            }
+            y -= nb_cells;
+          }
+          x -= nb_cells;
+        }
+        p = &p->sons[father_id];
+        depth++;
+      }
+      if(q->depth - p->depth > 0)//si la différence entre les depths est déjà supérieure à 0 pas de merge
+      {
+        return 0;
+      }
+    }
+  }
+  return 1;
+}
+
+
+/**
 * \param q pointer toward the MOctree cell
  * \param depth_max the depth maximum of the octree.
  *
@@ -155,7 +309,10 @@ int MMG3D_build_coarsen_octree(MMG5_pMesh mesh, MMG5_MOctree_s* q, int depth_max
 
     if(q->split_ls == 0)
     {
-      MMG3D_merge_MOctree_s (q, mesh);
+      if(MMG3D_balance_octree(mesh,q,depth_max))
+      {
+        MMG3D_merge_MOctree_s (q, mesh);
+      }
     }
   }
   leaf_sum=0;
@@ -177,7 +334,7 @@ int MMG3D_coarsen_octree(MMG5_pMesh mesh, MMG5_pSol sol) {
   MMG5_MOctree_s *po;
   po=mesh->octree->root;
 
-  int i, depth_max, depth_int;
+  int i, depth_max;
   int max_dim=0;
   for ( i=0; i<3; ++i ) {
     if(max_dim < mesh->freeint[i])
@@ -185,49 +342,19 @@ int MMG3D_coarsen_octree(MMG5_pMesh mesh, MMG5_pSol sol) {
       max_dim = mesh->freeint[i];
     }
   }
-  depth_int=log(max_dim)/log(2);
-  if(floor(depth_int)-depth_int==0)
-  {
-    depth_max = depth_int;
-  }
-  else
-  {
-    depth_max=floor(depth_int)+1;
-  }
+  // set max dim to the next power of 2
+  max_dim--;
+  max_dim |= max_dim >> 1;
+  max_dim |= max_dim >> 2;
+  max_dim |= max_dim >> 4;
+  max_dim |= max_dim >> 8;
+  max_dim |= max_dim >> 16;
+  max_dim++;
+
+  depth_max=log(max_dim)/log(2);
 
   MMG3D_build_coarsen_octree(mesh, po, depth_max);
 
-  return 1;
-}
-
-/**
- * \param q pointer toward the MOctree cell
- * \param depth_max the depth maximum of the octree.
- *
- * \return 1 if success, 0 if fail.
- *
- * Balance an unbalanced octree in order that 2 adjacent cells have at most 1
- * level of depth of difference (2:1 balancing).
- *
- */
-static inline
-int MMG3D_balance_octree(MMG5_pMesh mesh, MMG5_pSol sol/*,MMG5_MOctree_s* q, int depth_max*/) {
-  // MMG5_MOctree_s* p;
-  // int i;
-  // p=NULL;
-  //
-  // if(q->leaf == 1)//si je ne suis pas la root et que je suis une feuille
-  // {
-  //   //FIND VOISINS p pointe vers un tableau de pointeurs sur les voisins
-  //   //find_neighboors(q,p);
-  //   for(i=0; i<sizeof(p); i++)
-  //   {
-  //     if(p[i].depth > q->depth + 1 )
-  //     {
-  //       MMG3D_split_MOctree_s (mesh, q, p[i].depth - 1, sol, max_distance);
-  //     }
-  //   }
-  // }
   return 1;
 }
 
@@ -277,13 +404,13 @@ int MMG3D_convert_grid2tetmesh(MMG5_pMesh mesh, MMG5_pSol sol) {
     fprintf(stderr,"\n  ## Octree coarsening problem. Exit program.\n");
     return 0;
   }
-
-  /* Octree balancing */
-  if ( !MMG3D_balance_octree(mesh,sol) ) {
-    fprintf(stderr,"\n  ## Octree balancing problem. Exit program.\n");
-    return 0;
-  }
-
+  //
+  // /* Octree balancing */
+  // if ( !MMG3D_balance_octree(mesh,sol) ) {
+  //   fprintf(stderr,"\n  ## Octree balancing problem. Exit program.\n");
+  //   return 0;
+  // }
+  //
   /**--- stage 2: Tetrahedralization */
   if ( abs(mesh->info.imprim) > 3 )
     fprintf(stdout,"\n  ** OCTREE TETRAHEDRALIZATION\n");
