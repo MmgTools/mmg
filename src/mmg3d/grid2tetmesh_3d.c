@@ -90,11 +90,7 @@ int MMG3D_convert_grid2smallOctree(MMG5_pMesh mesh, MMG5_pSol sol) {
 
   /* Computation of the octree length */
   /* Octree cell initialization */
-<<<<<<< HEAD
-  MMG3D_init_MOctree(mesh,mesh->octree,ip,length)
-=======
   if ( !MMG3D_init_MOctree(mesh,&mesh->octree,ip,length,depth_max) ) return 0;
->>>>>>> 0dcdf4be7d7294e560df9f0a20e3d85a8a457afe
   po = mesh->octree->root;
 
   if(po->depth != depth_max)
