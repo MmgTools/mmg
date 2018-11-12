@@ -127,44 +127,18 @@ int MMG3D_balance_octree(MMG5_pMesh mesh, MMG5_MOctree_s* q, int depth_max) {
   int depth;
   int nb_cells;
   int father_id;
-  MMG5_MOctree_s* p = mesh->octree->root;
+  MMG5_MOctree_s* p;
   int neighboors_tab[18][3];
-
-  // int case_nb = 0;
-  // if((x == 0) || (x == pow(2,depth_max-1)))
-  // {
-  //   case_nb++;
-  // }
-  // if((y == 0) || (y == pow(2,depth_max-1)))
-  // {
-  //   case_nb++;
-  // }
-  // if((z == 0) || (z == pow(2,depth_max-1)))
-  // {
-  //   case_nb++;
-  // }
-  // if(x != octree_size)
-  // {
-  //   if(y != octree_size)
-  //   {
-  //     if(z != octree_size)
-  //     {
-  //       neighboors_tab[0][0] = x;
-  //       neighboors_tab[0][1] = y+1;
-  //       neighboors_tab[0][2] = z+1;
-  //     }
-  //   }
-  // }
-  //
 
   //CREATION DU TABLEAU DE VOISINS
   int i,j,k,tab_id;
   tab_id=0;
-  for(k = z-1 ; k <= z+1 ; k++)
+  int neighboor_span = pow(2,depth_max-q->depth);
+  for(k = z-neighboor_span ; k <= z+neighboor_span ; k++)
   {
-    for(j = y-1 ; j <= y+1 ; j++)
+    for(j = y-neighboor_span ; j <= y+neighboor_span ; j++)
     {
-      for(i = x-1 ; i <= x+1 ; i++)
+      for(i = x-neighboor_span ; i <= x+neighboor_span ; i++)
       {
         if((i!=j || i!=k || j!=k) && (i==x || j==y || k==z))
         {
@@ -177,10 +151,12 @@ int MMG3D_balance_octree(MMG5_pMesh mesh, MMG5_MOctree_s* q, int depth_max) {
     }
   }
 
-  int octree_size = pow(2,depth_max-1);
+  int octree_size = pow(2,depth_max);
 
   for(i = 0 ; i < 18 ; i++)
   {
+    p = mesh->octree->root;
+
     x = neighboors_tab[i][0];
     y = neighboors_tab[i][1];
     z = neighboors_tab[i][2];
@@ -188,7 +164,7 @@ int MMG3D_balance_octree(MMG5_pMesh mesh, MMG5_MOctree_s* q, int depth_max) {
     //VERIFICATION QUE LE VOISIN APPARTIENT BIEN A LA GRILLE
     if(x >= 0 && x < octree_size && y >= 0 && y < octree_size && z >= 0 && z < octree_size)
     {
-      depth = 2;
+      depth = 1;
       while((p->leaf != 1) && (depth <= depth_max))
       {
         nb_cells = pow(2,depth_max-depth);
@@ -252,9 +228,20 @@ int MMG3D_balance_octree(MMG5_pMesh mesh, MMG5_MOctree_s* q, int depth_max) {
         p = &p->sons[father_id];
         depth++;
       }
-      if(q->depth - p->depth > 0)//si la différence entre les depths est déjà supérieure à 0 pas de merge
+      int tmp,tmp_sum;
+      tmp_sum = 0;
+      if(q->depth==p->depth)//si le voisin est à la même profondeur
       {
-        return 0;
+        if(p->leaf != 1)//s'il n'est pas une leaf
+        {
+          for(tmp = 0; tmp < p->nsons; tmp++)
+          {
+            if(p->sons[i].leaf != 1)//et si au moins un de ses enfants n'est pas une leaf
+            {
+              return 0;
+            }
+          }
+        }
       }
     }
   }

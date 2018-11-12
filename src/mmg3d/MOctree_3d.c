@@ -155,7 +155,7 @@ int  MMG3D_set_splitls_MOctree ( MMG5_pMesh mesh, MMG5_MOctree_s* q, MMG5_pSol s
     q->ipvertices[4]=FUL;
     q->ipvertices[5]=FUR;
     q->ipvertices[6]=BUL;
-    q->ipvertices[5]=BUR;
+    q->ipvertices[7]=BUR;
   }
 
   return 1;
