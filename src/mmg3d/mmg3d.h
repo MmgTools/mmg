@@ -175,15 +175,18 @@ static const unsigned char MMG5_permedge[12][6] = {
 #define MMG3D_SIZE_OCTREESONS 8
 
 /* MOctree prototypes */
-int  MMG3D_init_MOctree    ( MMG5_pMesh mesh, MMG5_pMOctree q, int ip, double length[3] );
+int  MMG3D_init_MOctree    ( MMG5_pMesh,MMG5_pMOctree*,int, double length[3],int );
 int  MMG3D_init_MOctree_s  ( MMG5_pMesh mesh, MMG5_MOctree_s* q, int ip, int depth, int8_t split_ls );
-int  MMG3D_split_MOctree_s ( MMG5_pMesh mesh, MMG5_MOctree_s* q, int depth_max, MMG5_pSol sol, double max_distance);
+int  MMG3D_split_MOctree_s ( MMG5_pMesh mesh, MMG5_MOctree_s* q, MMG5_pSol sol, double max_distance);
 int  MMG3D_set_splitls_MOctree ( MMG5_pMesh mesh, MMG5_MOctree_s* q, MMG5_pSol sol, double max_distance);
 
 int  MMG3D_free_MOctree    ( MMG5_pMOctree** q, MMG5_pMesh mesh);
 int  MMG3D_free_MOctree_s  ( MMG5_MOctree_s* q, MMG5_pMesh mesh);
 int  MMG3D_merge_MOctree_s ( MMG5_MOctree_s* q, MMG5_pMesh mesh);
 int  MMG3D_convert_grid2tetmesh(MMG5_pMesh mesh, MMG5_pSol sol);
+int  MMG3D_mark_MOctreeCellCorners ( MMG5_pMesh mesh, MMG5_MOctree_s* q,int*,int *np,int *nc );
+int  MMG3D_write_MOctreeCell ( MMG5_pMesh mesh, MMG5_MOctree_s* q,int*, FILE *inm );
+
 
 /**
  * PROctree cell: cellule for point region octree (to speed-up the research of
@@ -470,6 +473,7 @@ int  MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree PROctree,
                   int improveVol,int maxit,int testmark);
 int  MMG5_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree PROctree, int);
   int  MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double,double,MMG3D_pPROctree, int,int);
+int MMG3D_saveVTKOctree(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
 
 /* pointers */
 /* init structures */
