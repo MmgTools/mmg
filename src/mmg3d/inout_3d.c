@@ -1006,8 +1006,8 @@ int MMG3D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 
 int MMG3D_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename) {
   FILE*       inm;
-  int         ier;
   long        posNodes,posElts,*posNodeData;
+  int         ier;
   int         bin,iswp,nelts,nsols;
 
   mesh->dim = 3;
@@ -1057,11 +1057,13 @@ int MMG3D_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
 }
 
 int MMG3D_loadVTKGrid(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
-  double      ver,xaxis[3],yaxis[3],v[3];
   FILE*       inm;
+  MMG5_pPoint ppt;
+  double      ver,xaxis[3],yaxis[3],v[3];
+  double      x,y,z,x_min,y_min,z_min;
   long long   pos,solpos;
   size_t      len,buflen=128;
-  int         i;
+  int         i,j,k,ip;
   int8_t      bin,writingMode,dataStruct,bounds,spacing,origin,pointData,eltTyp,lookupTable;
   char        *data,chaine[128],*ptr,dataStructType[128];
 
@@ -1279,6 +1281,13 @@ int MMG3D_loadVTKGrid(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
     return -1;
   }
 
+  if ( mesh->freeint[0]<=1 || mesh->freeint[1]<=1 || mesh->freeint[2]<=1 ) {
+    fprintf(stderr,"  ** ERROR: WE MUST HAVE AT LEAST 2 CELLS IN EACH DIRECTION"
+            " TO WORK ON THE DUAL GRID.\n");
+    fclose(inm);
+    return -1;
+  }
+
   /* Computation of the scaling info */
   /* For now, deal only with the canonical basis (see later if it is useful to
    * trat the other cases */
@@ -1324,6 +1333,30 @@ int MMG3D_loadVTKGrid(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
     return 0;
   }
 
+  /* Points creations */
+  z = mesh->info.min[2] + 0.5*mesh->info.max[2];
+  y_min =  mesh->info.min[1] + 0.5*mesh->info.max[1];
+  x_min =  mesh->info.min[0] + 0.5*mesh->info.max[0];
+
+  for ( k=0; k<mesh->freeint[2]; ++k ) {
+    y = y_min;
+
+    for ( j=0; j<mesh->freeint[1]; ++j ) {
+      x = x_min;
+
+      for ( i=0; i<mesh->freeint[0]; ++i ) {
+        ip = k*mesh->freeint[1]*mesh->freeint[0]+j*mesh->freeint[0]+i+1;
+        ppt = &mesh->point[ip];
+        ppt->c[0] = x;
+        ppt->c[1] = y;
+        ppt->c[2] = z;
+        x +=  mesh->info.max[0];
+      }
+      y += mesh->info.max[1];
+    }
+    z += mesh->info.max[2];
+  }
+
   /* Allocate and store the header informations for each solution */
   if ( !MMG3D_Set_solSize(mesh,sol,MMG5_Vertex,mesh->np,MMG5_Scalar) ) {
     fclose(inm);
@@ -1335,6 +1368,134 @@ int MMG3D_loadVTKGrid(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   for ( i=1; i<=mesh->np; ++i ) {
     fscanf(inm,"%lf",&sol->m[i]);
   }
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param filename pointer toward the name of file.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Save an octree as an unstructured grid at vtk file format (.vtk extension)
+ *
+ * \warning For debug purposes only, really inefficient, each at the intersection of multiple
+ *
+ */
+int MMG3D_saveVTKOctree(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
+  FILE             *inm;
+  MMG5_MOctree_s   *q;
+  MMG5_pPoint       ppt;
+  int               k,np,nc,ier,span;
+  char             *data,chaine[128],*ptr;
+  static const int  cell_type = 12,nvert_cell=8;
+
+  MMG5_SAFE_CALLOC(data,strlen(filename)+7,char,return 0);
+
+  strcpy(data,filename);
+  ptr = strstr(data,".vtk");
+  if ( !ptr ) {
+    /* missing .vtk extension */
+    strcat(data,".vtk");
+  }
+  else {
+    ptr = strstr(data,".vtk.o.vtk");
+    if ( !ptr ) {
+      /* User hasn't provided an output file name */
+      ptr = strstr(data,".vtk.o");
+      if ( ptr ) {
+        /* Default output filename: remove it and rename the output .o.vtk */
+        *ptr = '\0';
+        strcat(data,".o.vtk");
+      }
+    }
+  }
+
+  if( !(inm = fopen(data,"w")) ) {
+    fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",data);
+    MMG5_SAFE_FREE(data);
+    return 0;
+  }
+
+  if ( mesh->info.imprim >= 0 )
+    fprintf(stdout,"  %%%% %s OPENED\n",data);
+
+  MMG5_SAFE_FREE(data);
+
+  /* Header */
+  fprintf(inm,"%s\n","# vtk DataFile Version 2.0");
+  fprintf(inm,"%s\n\n",mesh->namein);
+  fprintf(inm,"%s\n\n","ASCII");
+  fprintf(inm,"%s\n\n","DATASET UNSTRUCTURED_GRID");
+
+  /** Step 1: count the number of used points */
+  /* Mark all the points as unused */
+  for ( k=1; k<=mesh->np; ++k ) {
+    mesh->point[k].tag = MG_NUL;
+  }
+
+  /* Process the octree and mark the points that are at leaf corners as used
+   * (count the number of cells in the same time) */
+  q = mesh->octree->root;
+
+  span = mesh->octree->nspan_at_depth_max;
+  np = nc = 0;
+  ier = MMG3D_mark_MOctreeCellCorners(mesh,q,&span,&np,&nc);
+  if ( !ier ) {
+    fprintf(stderr,"\n  ## Error: %s: unable to mark the octree cell corners as"
+            " used.\n",__func__);
+    return 0;
+  }
+  if ( !np ) {
+    fprintf(stderr,"\n  ## Error: %s: no used points in the octree\n",__func__);
+    return 0;
+  }
+  if ( !nc ) {
+    fprintf(stderr,"\n  ## Error: %s: no leaf cell in the octree\n",__func__);
+    return 0;
+  }
+
+  /** Step 2: save this points and store their pack index */
+  fprintf(inm,"%s %d %s\n","POINTS",np,"double");
+
+  np = 0;
+  for ( k=1; k<=mesh->np; ++k ) {
+    ppt = &mesh->point[k];
+    if ( MG_VOK(ppt) ) {
+      ppt->tmp = np++;
+      fprintf(inm,"%.15lg %.15lg %.15lg\n",ppt->c[0],ppt->c[1],ppt->c[2]);
+    }
+  }
+
+  /** Step 3: Process the octree and save the octree leafs as hexahedron */
+  fprintf(inm,"\n%s %d %d\n","CELLS",nc,(nvert_cell+1)*nc);
+  q = mesh->octree->root;
+  span = mesh->octree->nspan_at_depth_max;
+  if ( !MMG3D_write_MOctreeCell(mesh,q,&span,inm) ) {
+    fprintf(stderr,"\n  ## Error: %s: unable to save the octree cells.\n",
+            __func__);
+    return 0;
+  }
+
+  fprintf(inm,"\n%s %d\n","CELL_TYPES",nc);
+  for ( k=0; k<nc; ++k ) {
+    fprintf(inm,"%d\n",cell_type);
+  }
+
+  /** Step 4: save the levelset values at points */
+  fprintf(inm,"\n%s %d\n","POINT_DATA",np);
+  fprintf(inm,"\n%s\n","SCALARS distance double 1");
+  fprintf(inm,"\n%s\n","LOOKUP_TABLE default");
+
+  for ( k=1; k<=mesh->np; ++k ) {
+    ppt = &mesh->point[k];
+    if ( MG_VOK(ppt) ) {
+      fprintf(inm,"%.15lg\n",sol->m[k]);
+    }
+  }
+
+
+  fclose(inm);
 
   return 1;
 }
