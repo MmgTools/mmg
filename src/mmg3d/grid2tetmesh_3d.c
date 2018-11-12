@@ -67,19 +67,17 @@ int MMG3D_convert_grid2smallOctree(MMG5_pMesh mesh, MMG5_pSol sol) {
   max_dim=0;
   ip = 1;
   for ( i=0; i<3; ++i ) {
-    mesh->point[ip].c[i] = mesh->info.min[i];
-    // Remark : the level-set value associated to th point ip is stored in sol->m[ip].
-    // It implies that you don't have the choice for the point numbering,
-    // it will be in the same order than in the VTK file
-
     length[i] = mesh->info.max[i] * (double)mesh->freeint[i];
     if(max_dim < mesh->freeint[i])
     {
       max_dim = mesh->freeint[i];
     }
   }
+  /* Begin to work on the dual grid => we will have one cellule less in each
+   * direction */
+  max_dim--;
 
-  // set max dim to the next power of 2
+  /* set max dim to the next power of 2 */
   max_dim--;
   max_dim |= max_dim >> 1;
   max_dim |= max_dim >> 2;
@@ -92,12 +90,16 @@ int MMG3D_convert_grid2smallOctree(MMG5_pMesh mesh, MMG5_pSol sol) {
 
   /* Computation of the octree length */
   /* Octree cell initialization */
-  if ( !MMG3D_init_MOctree(mesh,mesh->octree,ip,length) ) return 0;
+  if ( !MMG3D_init_MOctree(mesh,&mesh->octree,ip,length,depth_max) ) return 0;
   po = mesh->octree->root;
-  po->leaf=0;
+
   if(po->depth != depth_max)
   {
     po->nsons = 8;
+  }
+  else {
+    po->nsons = 0;
+    po->leaf=1;
   }
 
   /** Step 2: Octree subdivision until reaching the grid size */
@@ -107,7 +109,7 @@ int MMG3D_convert_grid2smallOctree(MMG5_pMesh mesh, MMG5_pSol sol) {
   double dz = mesh->info.max[2];
   double max_distance = sqrt((dx/2.)*(dx/2.)+(dy/2.)*(dy/2.)+(dx/2.)*(dz/2.));
 
-  MMG3D_split_MOctree_s (mesh, po, depth_max, sol, max_distance);
+  MMG3D_split_MOctree_s (mesh, po, sol, max_distance);
 
   return 1;
 }
