@@ -330,7 +330,7 @@ inline double MMG5_caltet_iso_4pt(double *a, double *b, double *c, double *d) {
   double       cdx,cdy,cdz;
   double       vol,v1,v2,v3,rap;
 
-  /* volume */
+  /* volume: (ac^ad).ab/6. Note that here we compute 6*vol. */
   abx = b[0] - a[0];
   aby = b[1] - a[1];
   abz = b[2] - a[2];
@@ -368,7 +368,7 @@ inline double MMG5_caltet_iso_4pt(double *a, double *b, double *c, double *d) {
   rap += cdx*cdx + cdy*cdy + cdz*cdz;
   if ( rap < MMG5_EPSD2 )  return 0.0;
 
-  /* quality = vol / len^3/2 */
+  /* quality = 6*vol / len^3/2. Q = 1/(12 sqrt(3)) for the regular tetra of length 1. */
   rap = rap * sqrt(rap);
   return vol / rap;
 }

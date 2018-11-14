@@ -437,7 +437,7 @@ int MMGS_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
     }
   }
 
-  return  MMG5_minQualCheck(iel,rapmin,MMGS_ALPHAD);
+  return  MMG5_minQualCheck(iel,rapmin,1.);
 }
 
 /**
@@ -500,7 +500,7 @@ int MMGS_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
     }
   }
 
-  return  MMG5_minQualCheck(iel,rapmin,MMGS_ALPHAD);
+  return  MMG5_minQualCheck(iel,rapmin,1.);
 }
 
 #define COS145   -0.81915204428899
