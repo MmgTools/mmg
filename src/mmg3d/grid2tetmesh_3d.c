@@ -103,7 +103,9 @@ int MMG3D_convert_grid2smallOctree(MMG5_pMesh mesh, MMG5_pSol sol) {
   }
 
   /** Step 2: Octree subdivision until reaching the grid size */
-  MMG3D_split_MOctree_s (mesh, po, sol);
+  int span = mesh->octree->nspan_at_depth_max;
+
+  MMG3D_split_MOctree_s (mesh, po, sol, &span);
 
   return 1;
 }
@@ -260,45 +262,52 @@ int MMG3D_balance_octree(MMG5_pMesh mesh, MMG5_MOctree_s* q, int depth_max) {
  */
 static inline
 int MMG3D_build_coarsen_octree(MMG5_pMesh mesh, MMG5_MOctree_s* q, int depth_max) {
-  int i,leaf_sum;
-  leaf_sum=0;
-  for(i=0; i<q->nsons; i++)
+  int tmp;
+  if(q->leaf != 1)
   {
-    leaf_sum += q->sons[i].leaf;
-  }
-
-  if(leaf_sum != q->nsons) // si je ne suis pas un  père QUE de leafs (anciennes et nouvelles)
-  {
+    int i,leaf_sum;
+    leaf_sum=0;
     for(i=0; i<q->nsons; i++)
     {
-      if(q->sons[i].leaf != 1)//si je ne suis pas une leaf
-      {
-        MMG3D_build_coarsen_octree(mesh, &q->sons[i], depth_max);
-      }
-    }
-  }
-  if(leaf_sum == q->nsons) // si je suis un père de leafs (anciennes et nouvelles)
-  {
-    // crée le split_ls du père
-    i=0;
-    while(q->sons[i].split_ls==0)
-    {
-      i++;
-    }
-    if(i!=q->nsons-1)
-    {
-      q->split_ls=1; // vérifie si au moins un fils possède la LS
+      leaf_sum += q->sons[i].leaf;
     }
 
-    if(q->split_ls == 0)
+    if(leaf_sum != q->nsons) // si je ne suis pas un  père QUE de leafs (anciennes et nouvelles)
     {
-      if(MMG3D_balance_octree(mesh,q,depth_max))
+      for(i=0; i<q->nsons; i++)
       {
-        MMG3D_merge_MOctree_s (q, mesh);
+        if(q->sons[i].leaf != 1)//si je ne suis pas une leaf
+        {
+          MMG3D_build_coarsen_octree(mesh, &q->sons[i], depth_max);
+        }
       }
     }
+    if(leaf_sum == q->nsons) // si je suis un père de leafs (anciennes et nouvelles)
+    {
+      // crée le split_ls du père
+      tmp=0;
+      for(i=0; i<q->nsons; i++)
+      {
+        if(q->sons[i].split_ls==0)
+        {
+          tmp++;
+        }
+      }
+      if(tmp!=q->nsons)
+      {
+        q->split_ls=1; // vérifie si au moins un fils possède la LS
+      }
+
+      if(q->split_ls == 0)
+      {
+        // if(MMG3D_balance_octree(mesh,q,depth_max))
+        // {
+        MMG3D_merge_MOctree_s (q, mesh);
+        // }
+      }
+    }
+    leaf_sum=0;
   }
-  leaf_sum=0;
   return 1;
 }
 

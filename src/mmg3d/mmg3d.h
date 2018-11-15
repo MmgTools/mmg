@@ -177,7 +177,7 @@ static const unsigned char MMG5_permedge[12][6] = {
 /* MOctree prototypes */
 int  MMG3D_init_MOctree    ( MMG5_pMesh,MMG5_pMOctree*,int, double length[3],int );
 int  MMG3D_init_MOctree_s  ( MMG5_pMesh mesh, MMG5_MOctree_s* q, int ip, int depth, int8_t split_ls );
-int  MMG3D_split_MOctree_s ( MMG5_pMesh mesh, MMG5_MOctree_s* q, MMG5_pSol sol);
+int  MMG3D_split_MOctree_s ( MMG5_pMesh mesh, MMG5_MOctree_s* q, MMG5_pSol sol, int* span);
 int  MMG3D_set_splitls_MOctree ( MMG5_pMesh mesh, MMG5_MOctree_s* q, MMG5_pSol sol);
 
 int  MMG3D_free_MOctree    ( MMG5_pMOctree** q, MMG5_pMesh mesh);
