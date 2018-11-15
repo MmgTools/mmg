@@ -611,8 +611,10 @@ int MMG3D_getListSquare(MMG5_pMesh mesh, double* ani, MMG3D_pPROctree q, double*
   memcpy(&rect2, rect, sizeof(double)*dim*2);
 
   if ( !MMG3D_getListSquareRec(q->q0, center, rect2, qlist, dist, ani, l0,
-                                q->nc, dim, &index) )
+                                q->nc, dim, &index) ) {
+    MMG5_DEL_MEM(mesh,dist);
     return -1;
+  }
 
 
   if (index>q->nc-4)
