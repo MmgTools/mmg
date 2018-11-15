@@ -429,11 +429,6 @@ static int MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol/*,double *tmp*/){
   int           vx[6],nb,k,ip0,ip1,np,ns,ne,ier;
   char          ia,j,npneg;
   static char   mmgWarn = 0;
-  /* Commented because unused */
-  /*MMG5_pPoint  p[4];*/
-  /*double   *grad,A[3][3],b[3],*g0,*g1,area,a,d,dd,s1,s2;*/
-  /*int       ip[4],ng*/
-  /*char    i,ier;*/
 
   /* reset point flags and h */
   for (k=1; k<=mesh->np; k++)
@@ -464,55 +459,6 @@ static int MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol/*,double *tmp*/){
     }
   }
   if ( ! nb )  return 1;
-
-  /* Store gradients of level set function at those points */
-  /* Commented because unused */
-  /* grad = (double*)calloc(3*nb+1,sizeof(double)); */
-  /* assert(grad); */
-
-  /* for (k=1; k<=mesh->ne; k++) { */
-  /*   pt = &mesh->tetra[k]; */
-  /*   ia = 0; */
-  /*   for (i=0; i<4; i++) { */
-  /*     ip[i] = pt->v[i]; */
-  /*     p[i]  = &mesh->point[ip[i]]; */
-  /*     if ( p[i]->flag == 0 )  ia++; */
-  /*   } */
-  /*   if ( ia == 4 )  continue; */
-
-  /*   A[0][0] = p[1]->c[0] - p[0]->c[0];  A[0][1] = p[1]->c[1] - p[0]->c[1];  A[0][2] = p[1]->c[2] - p[0]->c[2]; */
-  /*   A[1][0] = p[2]->c[0] - p[0]->c[0];  A[1][1] = p[2]->c[1] - p[0]->c[1];  A[1][2] = p[2]->c[2] - p[0]->c[2]; */
-  /*   A[2][0] = p[3]->c[0] - p[0]->c[0];  A[2][1] = p[3]->c[1] - p[0]->c[1];  A[2][2] = p[3]->c[2] - p[0]->c[2]; */
-
-  /*   b[0] = sol->m[ip[1]] - sol->m[ip[0]]; */
-  /*   b[1] = sol->m[ip[2]] - sol->m[ip[0]]; */
-  /*   b[2] = sol->m[ip[3]] - sol->m[ip[0]]; */
-
-  /*   area = MMG5_det4pt(p[0]->c,p[1]->c,p[2]->c,p[3]->c); */
-  /*   ier  = MMG5_invsl(A,b,c); */
-  /*   if ( !ier )  continue; */
-
-  /*   for (i=0; i<4; i++) { */
-  /*     if ( p[i]->flag ) { */
-  /*       ng = p[i]->flag; */
-  /*       tmp[ip[i]] += fabs(area); */
-  /*       grad[3*(ng-1)+1] += (area*c[0]); */
-  /*       grad[3*(ng-1)+2] += (area*c[1]); */
-  /*       grad[3*(ng-1)+3] += (area*c[2]); */
-  /*     } */
-  /*   } */
-  /* } */
-  /* for (k=1; k<=mesh->np; k++) { */
-  /*   p0 = &mesh->point[k]; */
-  /*   if ( p0->flag ) { */
-  /*     area = MG_MAX(MMG5_EPSD2,tmp[k]); */
-  /*     area = 1.0 / area; */
-  /*     ng   = p0->flag; */
-  /*     grad[3*(ng-1)+1] *= area; */
-  /*     grad[3*(ng-1)+2] *= area; */
-  /*     grad[3*(ng-1)+3] *= area; */
-  /*   } */
-  /* } */
 
   /* Create intersection points at 0 isovalue and set flags to tetras */
   if ( !MMG5_hashNew(mesh,&hash,nb,7*nb) ) return 0;
