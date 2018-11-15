@@ -420,11 +420,11 @@ static int MMG3D_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol,double *tmp) {
  * once values of sol have been snapped/checked
  *
  */
-static int MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol/*,double *tmp*/){
+static int MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol){
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
   MMG5_pPoint   p0,p1;
-  MMG5_Hash    hash;
+  MMG5_Hash     hash;
   double        c[3],v0,v1,s;
   int           vx[6],nb,k,ip0,ip1,np,ns,ne,ier;
   char          ia,j,npneg;
@@ -517,27 +517,6 @@ static int MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol/*,double *tmp*/){
 
       npneg = (np<0);
 
-      /* g0 = &grad[3*(p0->flag -1)+1]; */
-      /* g1 = &grad[3*(p1->flag -1)+1]; */
-      /* a = 0.5 * ((g1[0]-g0[0])*(p1->c[0]-p0->c[0]) + (g1[1]-g0[1])*(p1->c[1]-p0->c[1]) \ */
-      /*            + (g1[2]-g0[2])*(p1->c[2]-p0->c[2])); */
-      /* d  = v1 - v0 - a; */
-      /* dd = d*d - 4.0*a*v0; */
-      /* dd = MG_MAX(MMG5_EPSD2,dd); */
-      /* dd = sqrt(dd); */
-      /* if ( fabs(a) < MMG5_EPSD2 ) */
-      /*   s = v0 / (v0-v1); */
-      /* else { */
-      /*   s1 = 0.5*( dd -d) / a; */
-      /*   s2 = 0.5*(-dd -d) / a; */
-      /*   if ( s1 > 0.0 && s1 < 1.0 ) */
-      /*     s = s1; */
-      /*   else if (s2 > 0.0 && s2 < 1.0) */
-      /*     s = s2; */
-      /*   else */
-      /*     s = MG_MIN(fabs(s1),fabs(s1-1.0)) < MG_MIN(fabs(s2),fabs(s2-1.0)) ? s1 : s2 ; */
-      /* } */
-      // IMPORTANT A REGARDER
       s = v0 / (v0-v1);
 
       s = MG_MAX(MG_MIN(s,1.0-MMG5_EPS),MMG5_EPS);
@@ -1497,7 +1476,7 @@ int MMG3D_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol) {
     return 0;
   }
 
-  if ( !MMG3D_cuttet_ls(mesh,sol/*,tmp*/) ) {
+  if ( !MMG3D_cuttet_ls(mesh,sol) ) {
     fprintf(stderr,"\n  ## Problem in discretizing implicit function. Exit program.\n");
     return 0;
   }
