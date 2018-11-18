@@ -248,10 +248,12 @@ int  MMG3D_set_splitls_MOctree ( MMG5_pMesh mesh, MMG5_MOctree_s* q, MMG5_pSol s
    else{
      /*calculus of ip for leaves*/
      //q->sons[i].blf_ip=q->sons[i].coordoct[2]*pow(2,2*depth_max)+q->sons[i].coordoct[1]*pow(2,depth_max)+q->sons[i].coordoct[0]+1;
+     //moins couteux ?
+     //q->sons[i].blf_ip=q->sons[i].coordoct[2]*dx*dy+q->sons[i].coordoct[1]*dx+q->sons[i].coordoct[0]+1;
      q->leaf=1;
      MMG3D_set_splitls_MOctree (mesh, q, sol);
    }
-
+   
    return 1;
  }
 
