@@ -204,13 +204,13 @@ int  MMG3D_set_splitls_MOctree ( MMG5_pMesh mesh, MMG5_MOctree_s* q, MMG5_pSol s
          MMG3D_init_MOctree_s(mesh, &q->sons[i], q->blf_ip + (*span), q->depth + 1, 0);
          q->sons[i].coordoct[0]+=power;
        }
-       else if(i==2)
+       else if(i==3)
        {
          MMG3D_init_MOctree_s(mesh, &q->sons[i], q->blf_ip + span_y + (*span), q->depth + 1, 0);
          q->sons[i].coordoct[0]+=power;
          q->sons[i].coordoct[1]+=power;
        }
-       else if(i==3)
+       else if(i==2)
        {
          MMG3D_init_MOctree_s(mesh, &q->sons[i], q->blf_ip + span_y, q->depth + 1, 0);
          q->sons[i].coordoct[1]+=power;
@@ -226,14 +226,14 @@ int  MMG3D_set_splitls_MOctree ( MMG5_pMesh mesh, MMG5_MOctree_s* q, MMG5_pSol s
          q->sons[i].coordoct[0]+=power;
          q->sons[i].coordoct[2]+=power;
        }
-       else if(i==6)
+       else if(i==7)
        {
          MMG3D_init_MOctree_s(mesh, &q->sons[i], q->blf_ip + span_z + span_y + (*span), q->depth + 1, 0);
          q->sons[i].coordoct[0]+=power;
          q->sons[i].coordoct[1]+=power;
          q->sons[i].coordoct[2]+=power;
        }
-       else if(i==7)
+       else if(i==6)
        {
          MMG3D_init_MOctree_s(mesh, &q->sons[i], q->blf_ip + span_z + span_y, q->depth + 1, 0);
          q->sons[i].coordoct[1]+=power;
@@ -253,7 +253,7 @@ int  MMG3D_set_splitls_MOctree ( MMG5_pMesh mesh, MMG5_MOctree_s* q, MMG5_pSol s
      q->leaf=1;
      MMG3D_set_splitls_MOctree (mesh, q, sol);
    }
-   
+
    return 1;
  }
 
