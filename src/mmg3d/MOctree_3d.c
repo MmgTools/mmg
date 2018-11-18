@@ -112,6 +112,47 @@ int MMG3D_init_MOctree_s( MMG5_pMesh mesh, MMG5_MOctree_s* q,int ip, int depth,i
 }
 
 /**
+ * \param mesh pointer toward the mesh
+ * \param q pointer toward the MOctree cell
+ * \param span span between a corner and the other corner in one given direction
+ * \param ip0 pointer toward the index of the bottom left front corner of the cell (to fill)
+ * \param ip1 pointer toward the index of the bottom right front corner of the cell (to fill)
+ * \param ip2 pointer toward the index of the bottom left back corner of the cell (to fill)
+ * \param ip3 pointer toward the index of the bottom right back corner of the cell (to fill)
+ * \param ip4 pointer toward the index of the top left front corner of the cell (to fill)
+ * \param ip5 pointer toward the index of the top right front corner of the cell (to fill)
+ * \param ip6 pointer toward the index of the top left back corner of the cell (to fill)
+ * \param ip7 pointer toward the index of the top right back corner of the cell (to fill)
+ *
+ * \return 1 if success, 0 if fail.
+ *
+ * Compute the indices of the corners of the octree cell (vertices are numbering
+ * as in the initial grid)
+ *
+ */
+int MMG3D_get_MOctreeCornerIndices ( MMG5_pMesh mesh, MMG5_MOctree_s *q,int span ,int *ip0,
+                                     int *ip1, int *ip2,int *ip3,int *ip4,int *ip5,
+                                     int *ip6,int *ip7 ) {
+
+  int span_y,span_z;
+  int ncells_x  = mesh->freeint[0];
+  int ncells_xy = mesh->freeint[0]*mesh->freeint[1];
+
+  span_y = span*ncells_x;
+  span_z = span*ncells_xy;
+
+  *ip0 = q->blf_ip;
+  *ip1 = q->blf_ip + span;
+  *ip2 = q->blf_ip + span_y;
+  *ip3 = q->blf_ip + span_y + span;
+  *ip4 = q->blf_ip + span_z;
+  *ip5 = q->blf_ip + span_z + span;
+  *ip6 = q->blf_ip + span_z + span_y;
+  *ip7 = q->blf_ip + span_z + span_y + span;
+
+  return 1;
+}
+/**
  * \param mesh pointer toward a MMG5 mesh
  * \param q pointer toward the MOctree cell
  *
@@ -120,42 +161,20 @@ int MMG3D_init_MOctree_s( MMG5_pMesh mesh, MMG5_MOctree_s* q,int ip, int depth,i
  * Set the parameter split_ls of a cell to 1 if the level-set intersect the cell for every cell of the octree max.
  *
  */
-int  MMG3D_set_splitls_MOctree ( MMG5_pMesh mesh, MMG5_MOctree_s* q, MMG5_pSol sol) {
-  int ip;
-  int FDL,FDR,BDL,BDR,FUL,FUR,BUL,BUR;// ip of the 8 vertices of an octree cell
-  ip=q->blf_ip;
-
-  FDL=ip; // Front Down Left corner
-  FDR=FDL+1;
-  BDL=ip+mesh->freeint[0];
-  BDR=BDL+1;
-  FUL=ip+mesh->freeint[0]*mesh->freeint[1];
-  FUR=FUL+1;
-  BUL=ip+mesh->freeint[0]*(1+mesh->freeint[1]);
-  BUR=BUL+1;
-
-  if(sol->m[FDL]*sol->m[FDR]<0 || sol->m[FDR]*sol->m[BDL]<0 ||\
-     sol->m[BDL]*sol->m[BDR]<0 || sol->m[BDR]*sol->m[FUL]<0 ||\
-     sol->m[FUL]*sol->m[FUR]<0 || sol->m[FUR]*sol->m[BUL]<0 || (sol->m[BUL]*sol->m[BUR]<0))
+int  MMG3D_set_splitls_MOctree ( MMG5_pMesh mesh, MMG5_MOctree_s* q, MMG5_pSol sol, int*span) {
+  int *ip0, *ip1, *ip2, *ip3, *ip4, *ip5, *ip6, *ip7, *ip8;
+  MMG3D_get_MOctreeCornerIndices (mesh, q ,*span, ip0,ip1,ip2, ip3, ip4, ip5, ip6, ip7 );
+  double test;
+  test= sol->m[*ip0];
+  if(test*sol->m[*ip1]<0 || test*sol->m[*ip2]<0 ||\
+     test*sol->m[*ip3]<0 || test*sol->m[*ip4]<0 ||\
+     test*sol->m[*ip5]<0 || test*sol->m[*ip6]<0 || test*sol->m[*ip7]<0)
   {
     q->split_ls=1;
   }
   else
   {
     q->split_ls=0;
-  }
-
-  if(q->split_ls==1) // if distance=0, we keep the level set of all the vertices
-  {
-    MMG5_SAFE_MALLOC(q->ipvertices,8,int,return 0); // table with the 8 ip vertices of the octree cell
-    q->ipvertices[0]=FDL;
-    q->ipvertices[1]=FDR;
-    q->ipvertices[2]=BDR;
-    q->ipvertices[3]=BDL;
-    q->ipvertices[4]=FUL;
-    q->ipvertices[5]=FUR;
-    q->ipvertices[6]=BUR;
-    q->ipvertices[7]=BUL;
   }
 
   return 1;
@@ -190,10 +209,10 @@ int  MMG3D_set_splitls_MOctree ( MMG5_pMesh mesh, MMG5_MOctree_s* q, MMG5_pSol s
        span_y = (*span)*ncells_x;
        span_z = (*span)*ncells_xy;
 
-       q->sons[i].coordoct[0]=q->coordoct[0];
-       q->sons[i].coordoct[1]=q->coordoct[1];
-       q->sons[i].coordoct[2]=q->coordoct[2];
-       int power = pow(2,depth_max)/pow(2,q->sons[i].depth);
+      //  q->sons[i].coordoct[0]=q->coordoct[0];
+      //  q->sons[i].coordoct[1]=q->coordoct[1];
+      //  q->sons[i].coordoct[2]=q->coordoct[2];
+      //  int power = pow(2,depth_max)/pow(2,q->sons[i].depth);
 
        if(i==0)
        {
@@ -202,42 +221,42 @@ int  MMG3D_set_splitls_MOctree ( MMG5_pMesh mesh, MMG5_MOctree_s* q, MMG5_pSol s
        else if(i==1)
        {
          MMG3D_init_MOctree_s(mesh, &q->sons[i], q->blf_ip + (*span), q->depth + 1, 0);
-         q->sons[i].coordoct[0]+=power;
+        //  q->sons[i].coordoct[0]+=power;
        }
        else if(i==3)
        {
          MMG3D_init_MOctree_s(mesh, &q->sons[i], q->blf_ip + span_y + (*span), q->depth + 1, 0);
-         q->sons[i].coordoct[0]+=power;
-         q->sons[i].coordoct[1]+=power;
+        //  q->sons[i].coordoct[0]+=power;
+        //  q->sons[i].coordoct[1]+=power;
        }
        else if(i==2)
        {
          MMG3D_init_MOctree_s(mesh, &q->sons[i], q->blf_ip + span_y, q->depth + 1, 0);
-         q->sons[i].coordoct[1]+=power;
+        //  q->sons[i].coordoct[1]+=power;
        }
        else if(i==4)
        {
          MMG3D_init_MOctree_s(mesh, &q->sons[i], q->blf_ip + span_z, q->depth + 1, 0);
-         q->sons[i].coordoct[2]+=power;
+        //  q->sons[i].coordoct[2]+=power;
        }
        else if(i==5)
        {
          MMG3D_init_MOctree_s(mesh, &q->sons[i], q->blf_ip + span_z + (*span), q->depth + 1, 0);
-         q->sons[i].coordoct[0]+=power;
-         q->sons[i].coordoct[2]+=power;
+        //  q->sons[i].coordoct[0]+=power;
+        //  q->sons[i].coordoct[2]+=power;
        }
        else if(i==7)
        {
          MMG3D_init_MOctree_s(mesh, &q->sons[i], q->blf_ip + span_z + span_y + (*span), q->depth + 1, 0);
-         q->sons[i].coordoct[0]+=power;
-         q->sons[i].coordoct[1]+=power;
-         q->sons[i].coordoct[2]+=power;
+        //  q->sons[i].coordoct[0]+=power;
+        //  q->sons[i].coordoct[1]+=power;
+        //  q->sons[i].coordoct[2]+=power;
        }
        else if(i==6)
        {
          MMG3D_init_MOctree_s(mesh, &q->sons[i], q->blf_ip + span_z + span_y, q->depth + 1, 0);
-         q->sons[i].coordoct[1]+=power;
-         q->sons[i].coordoct[2]+=power;
+        //  q->sons[i].coordoct[1]+=power;
+        //  q->sons[i].coordoct[2]+=power;
        }
 
        q->sons[i].father = q;
@@ -251,7 +270,7 @@ int  MMG3D_set_splitls_MOctree ( MMG5_pMesh mesh, MMG5_MOctree_s* q, MMG5_pSol s
      //moins couteux ?
      //q->sons[i].blf_ip=q->sons[i].coordoct[2]*dx*dy+q->sons[i].coordoct[1]*dx+q->sons[i].coordoct[0]+1;
      q->leaf=1;
-     MMG3D_set_splitls_MOctree (mesh, q, sol);
+     MMG3D_set_splitls_MOctree (mesh, q, sol, span);
    }
 
    return 1;
@@ -303,47 +322,7 @@ int  MMG3D_merge_MOctree_s ( MMG5_MOctree_s* q, MMG5_pMesh mesh) {
   return 1;
 }
 
-/**
- * \param mesh pointer toward the mesh
- * \param q pointer toward the MOctree cell
- * \param span span between a corner and the other corner in one given direction
- * \param ip0 pointer toward the index of the bottom left front corner of the cell (to fill)
- * \param ip1 pointer toward the index of the bottom right front corner of the cell (to fill)
- * \param ip2 pointer toward the index of the bottom right back corner of the cell (to fill)
- * \param ip3 pointer toward the index of the bottom left back corner of the cell (to fill)
- * \param ip4 pointer toward the index of the top left front corner of the cell (to fill)
- * \param ip5 pointer toward the index of the top right front corner of the cell (to fill)
- * \param ip6 pointer toward the index of the top right back corner of the cell (to fill)
- * \param ip7 pointer toward the index of the top left back corner of the cell (to fill)
- *
- * \return 1 if success, 0 if fail.
- *
- * Compute the indices of the corners of the octree cell (vertices are numbering
- * as in the initial grid)
- *
- */
-int MMG3D_get_MOctreeCornerIndices ( MMG5_pMesh mesh, MMG5_MOctree_s *q,int span,int *ip0,
-                                     int *ip1, int *ip2,int *ip3,int *ip4,int *ip5,
-                                     int *ip6,int *ip7 ) {
 
-  int span_y,span_z;
-  int ncells_x  = mesh->freeint[0];
-  int ncells_xy = mesh->freeint[0]*mesh->freeint[1];
-
-  span_y = span*ncells_x;
-  span_z = span*ncells_xy;
-
-  *ip0 = q->blf_ip;
-  *ip1 = q->blf_ip + span;
-  *ip2 = q->blf_ip + span_y + span;
-  *ip3 = q->blf_ip + span_y;
-  *ip4 = q->blf_ip + span_z;
-  *ip5 = q->blf_ip + span_z + span;
-  *ip6 = q->blf_ip + span_z + span_y + span;
-  *ip7 = q->blf_ip + span_z + span_y;
-
-  return 1;
-}
 /**
  * \param mesh pointer toward the mesh
  * \param q pointer toward the MOctree cell
