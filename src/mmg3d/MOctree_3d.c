@@ -68,7 +68,7 @@ int MMG3D_init_MOctree  ( MMG5_pMesh mesh, MMG5_pMOctree *q, int ip,
 
   (*q)->depth_max = depth_max;
 
-  (*q)->nspan_at_depth_max = pow(2,depth_max);
+  (*q)->nspan_at_root = pow(2,depth_max);
 
   /** Check that we have enough memory to allocate a new cell */
   MMG5_ADD_MEM(mesh,sizeof(MMG5_MOctree_s),"initial MOctree cell",

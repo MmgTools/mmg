@@ -103,7 +103,7 @@ int MMG3D_convert_grid2smallOctree(MMG5_pMesh mesh, MMG5_pSol sol) {
   }
 
   /** Step 2: Octree subdivision until reaching the grid size */
-  int span = mesh->octree->nspan_at_depth_max;
+  int span = mesh->octree->nspan_at_root;
 
   MMG3D_split_MOctree_s (mesh, po, sol, &span);
 

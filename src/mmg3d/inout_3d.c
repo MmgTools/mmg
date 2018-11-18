@@ -1438,7 +1438,7 @@ int MMG3D_saveVTKOctree(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
    * (count the number of cells in the same time) */
   q = mesh->octree->root;
 
-  span = mesh->octree->nspan_at_depth_max;
+  span = mesh->octree->nspan_at_root;
   np = nc = 0;
   ier = MMG3D_mark_MOctreeCellCorners(mesh,q,&span,&np,&nc);
   if ( !ier ) {
@@ -1470,7 +1470,7 @@ int MMG3D_saveVTKOctree(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   /** Step 3: Process the octree and save the octree leafs as hexahedron */
   fprintf(inm,"\n%s %d %d\n","CELLS",nc,(nvert_cell+1)*nc);
   q = mesh->octree->root;
-  span = mesh->octree->nspan_at_depth_max;
+  span = mesh->octree->nspan_at_root;
   if ( !MMG3D_write_MOctreeCell(mesh,q,&span,inm) ) {
     fprintf(stderr,"\n  ## Error: %s: unable to save the octree cells.\n",
             __func__);

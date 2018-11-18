@@ -527,7 +527,7 @@ typedef struct
   double          length[3]; /*!< length of the octree in each direction */
   MMG5_MOctree_s* root; /*!<  Pointer toward the first MOctree cell */
   int             depth_max; /*!< Maximal depth of the octree */
-  int             nspan_at_depth_max; /*!< Number of span at maximal depth */
+  int             nspan_at_root; /*!< Number of span at root */
 } MMG5_MOctree;
 typedef MMG5_MOctree * MMG5_pMOctree;
 
