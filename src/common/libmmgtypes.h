@@ -515,7 +515,6 @@ typedef struct MMG5_MOctree_s
   int8_t leaf; /*!< 1 if the cell is a leaf, 0 otherwise */
   int8_t split_ls; /*!< 1 if the level-set split this cell */
   int coordoct[3]; /*<coordinates of the bottom right hand front corner of the octree */
-  int* ipvertices; /*<ip of the 8 vertives of the octree cell>*/
 } MMG5_MOctree_s;
 
 /**
@@ -527,7 +526,7 @@ typedef struct
   double          length[3]; /*!< length of the octree in each direction */
   MMG5_MOctree_s* root; /*!<  Pointer toward the first MOctree cell */
   int             depth_max; /*!< Maximal depth of the octree */
-  int             nspan_at_depth_max; /*!< Number of span at maximal depth */
+  int             nspan_at_root; /*!< Number of span at root */
 } MMG5_MOctree;
 typedef MMG5_MOctree * MMG5_pMOctree;
 
