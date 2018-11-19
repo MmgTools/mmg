@@ -311,6 +311,61 @@ int MMG3D_build_coarsen_octree(MMG5_pMesh mesh, MMG5_MOctree_s* q, int depth_max
   return 1;
 }
 
+static inline
+int MMG3D_build_coarsen_octree_first_time(MMG5_pMesh mesh, MMG5_MOctree_s* q, int depth_max) {
+  if (q->depth != depth_max-1)
+  {
+    for (int i=0; i< q->nsons; i++)
+    {
+      MMG3D_build_coarsen_octree_first_time(mesh, &q->sons[i],depth_max);
+    }
+  }
+  else
+  {
+    int sum_ls;
+    sum_ls=0;
+    for(i=0; i<q->nsons; i++)
+    {
+      sum_ls += q->sons[i].split_ls;
+    }
+    if (sum_ls==0)
+    {
+      MMG3D_merge_MOctree_s (q, mesh);
+    }
+  }
+}
+
+static inline
+int MMG3D_build_coarsen_octree_fanny(MMG5_pMesh mesh, MMG5_MOctree_s* q, int depth_max, int depth) {
+  // descendre à depth_max -2 la premiere fois qu'on appelle cette fonction puis depth_max-3 etc
+  if (q->depth != depth)
+  {
+    for (int i=0; i< q->nsons; i++)
+    {
+      MMG3D_build_coarsen_octree_fanny(mesh, &q->sons[i], depth_max, depth);
+    }
+  }
+  else
+  {
+    for (int i=0; i< q->nsons; i++)
+    {
+      char Direction [20];
+      MMG5_MOctree_s* Neighbour;
+      MMG3D_init_MOctree_s(mesh, Neighbour, 0, 0, 0 ) // peut être changer l'initialisation pour les voisins j'ai mis 0 par défaut.
+      //il y a 18 directions = 18 voisins
+      //appeler fonction de Antoine pour les voisins, ça nous sort le pointeur sur le voisin en question
+      if(Neighbour->leaf==0)
+      {
+        //on passe à une autre cellule qu'on veut merge
+      }
+    }
+    // if (sum_ls==0)
+    // {
+    //   MMG3D_merge_MOctree_s (q, mesh);
+    // }
+  }
+}
+
 
 /**
  * \param mesh pointer toward a mesh structure.
