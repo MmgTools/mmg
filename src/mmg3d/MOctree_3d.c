@@ -170,74 +170,73 @@ int  MMG3D_set_splitls_MOctree ( MMG5_pMesh mesh, MMG5_MOctree_s* q, MMG5_pSol s
      {
        MMG3D_init_MOctree_s(mesh, &q->sons[i], 0, q->depth + 1, 0);
        //calculus of octree coordinates and ip
-       int span_y,span_z;
        int power = pow(2,depth_max-(q->depth+1));
-       //int ncells_x  = (mesh->freeint[0]-1)/power + 1;
-       int ncells_x = pow(2,q->depth+1) + 1;
-       int ncells_y = pow(2,q->depth+1) + 1;
-       int ncells_z = pow(2,q->depth+1) + 1;
-       if(ncells_x > mesh->freeint[0])
-       {
-         ncells_x = mesh->freeint[0];
-       }
-       if(ncells_y > mesh->freeint[1])
-       {
-         ncells_y = mesh->freeint[1];
-       }
-       if(ncells_z > mesh->freeint[2])
-       {
-         ncells_z = mesh->freeint[2];
-       }
+       int span_y,span_z;
+       // int ncells_x = pow(2,q->depth) + 1;
+       // int ncells_y = pow(2,q->depth) + 1;
+       // int ncells_z = pow(2,q->depth) + 1;
+       // if(ncells_x > mesh->freeint[0])
+       // {
+       //   ncells_x = mesh->freeint[0];
+       // }
+       // if(ncells_y > mesh->freeint[1])
+       // {
+       //   ncells_y = mesh->freeint[1];
+       // }
+       // if(ncells_z > mesh->freeint[2])
+       // {
+       //   ncells_z = mesh->freeint[2];
+       // }
+       //
+       // int ncells_xy = ncells_x * ncells_y;
 
-       int ncells_xy = ncells_x * ncells_y;
-
-       span_y = ncells_x;
-       span_z = ncells_xy;
+       // span_y = mesh->freeint[0];
+       // span_z = mesh->freeint[0]*mesh->freeint[1];
 
        q->sons[i].coordoct[0]=q->coordoct[0];
        q->sons[i].coordoct[1]=q->coordoct[1];
        q->sons[i].coordoct[2]=q->coordoct[2];
 
-       if(i==0)
+       // if(i == 0)
+       // {
+       //   q->sons[i].blf_ip = q->coordoct[0] + q->coordoct[1]*span_y + q->coordoct[2]*span_z + 1;
+       // }
+       if(i==1)
        {
-         q->sons[i].blf_ip = q->coordoct[0]/power + q->coordoct[1]/power*span_y + q->coordoct[2]/power*span_z + 1;
-       }
-       else if(i==1)
-       {
-         q->sons[i].blf_ip = q->sons[0].blf_ip + 1;
+         // q->sons[i].blf_ip = q->sons[0].blf_ip + power;
          q->sons[i].coordoct[0]+=power;
        }
        else if(i==2)
        {
-         q->sons[i].blf_ip = q->sons[0].blf_ip + span_y;
+         // q->sons[i].blf_ip = q->sons[0].blf_ip + span_y;
          q->sons[i].coordoct[1]+=power;
        }
        else if(i==3)
        {
-         q->sons[i].blf_ip = q->sons[0].blf_ip + span_y + 1;
+         // q->sons[i].blf_ip = q->sons[0].blf_ip + span_y + power;
          q->sons[i].coordoct[0]+=power;
          q->sons[i].coordoct[1]+=power;
        }
        else if(i==4)
        {
-         q->sons[i].blf_ip = q->sons[0].blf_ip + span_z;
+         // q->sons[i].blf_ip = q->sons[0].blf_ip + span_z;
          q->sons[i].coordoct[2]+=power;
        }
        else if(i==5)
        {
-         q->sons[i].blf_ip = q->sons[0].blf_ip + span_z + 1;
+         // q->sons[i].blf_ip = q->sons[0].blf_ip + span_z + power;
          q->sons[i].coordoct[0]+=power;
          q->sons[i].coordoct[2]+=power;
        }
        else if(i==6)
        {
-         q->sons[i].blf_ip = q->sons[0].blf_ip + span_z + span_y;
+         // q->sons[i].blf_ip = q->sons[0].blf_ip + span_z + span_y;
          q->sons[i].coordoct[1]+=power;
          q->sons[i].coordoct[2]+=power;
        }
        else if(i==7)
        {
-         q->sons[i].blf_ip = q->sons[0].blf_ip + span_z + span_y + 1;
+         // q->sons[i].blf_ip = q->sons[0].blf_ip + span_z + span_y + power;
          q->sons[i].coordoct[0]+=power;
          q->sons[i].coordoct[1]+=power;
          q->sons[i].coordoct[2]+=power;
@@ -250,7 +249,65 @@ int  MMG3D_set_splitls_MOctree ( MMG5_pMesh mesh, MMG5_MOctree_s* q, MMG5_pSol s
    }
    else{
      /*calculus of ip for leaves*/
-     //q->blf_ip=q->coordoct[2]*(pow(2,2*depth_max)+1)+q->coordoct[1]*(pow(2,depth_max)+1)+q->coordoct[0]+1;
+     int span_y,span_z;
+     int power = pow(2,depth_max-(q->depth));
+     //int ncells_x  = (mesh->freeint[0]-1)/power + 1;
+     int ncells_x = mesh->freeint[0];
+     int ncells_y = mesh->freeint[1];
+     int ncells_z = mesh->freeint[2];
+     // if(ncells_x > mesh->freeint[0])
+     // {
+     //   ncells_x = mesh->freeint[0];
+     // }
+     // if(ncells_y > mesh->freeint[1])
+     // {
+     //   ncells_y = mesh->freeint[1];
+     // }
+     // if(ncells_z > mesh->freeint[2])
+     // {
+     //   ncells_z = mesh->freeint[2];
+     // }
+
+     int ncells_xy = ncells_x * ncells_y;
+
+     span_y = ncells_x;
+     span_z = ncells_xy;
+
+
+     // if(i==0)
+     // {
+     //   q->blf_ip = q->coordoct[0] + q->coordoct[1]*span_y + q->coordoct[2]*span_z + 1;
+     // }
+     // else if(i==1)
+     // {
+     //   q->blf_ip = q->father->sons[0].blf_ip + 1;
+     // }
+     // else if(i==2)
+     // {
+     //   q->blf_ip = q->father->sons[0].blf_ip + span_y;
+     // }
+     // else if(i==3)
+     // {
+     //   q->blf_ip = q->father->sons[0].blf_ip + span_y + 1;
+     // }
+     // else if(i==4)
+     // {
+     //   q->blf_ip = q->father->sons[0].blf_ip + span_z;
+     // }
+     // else if(i==5)
+     // {
+     //   q->blf_ip = q->father->sons[0].blf_ip + span_z + 1;
+     // }
+     // else if(i==6)
+     // {
+     //   q->blf_ip = q->father->sons[0].blf_ip + span_z + span_y;
+     // }
+     // else if(i==7)
+     // {
+     //   q->blf_ip = q->father->sons[0].blf_ip + span_z + span_y + 1;
+     // }
+
+     q->blf_ip=q->coordoct[2]*ncells_xy+q->coordoct[1]*ncells_x+q->coordoct[0]+1;
      //moins couteux ?
      //q->sons[i].blf_ip=q->sons[i].coordoct[2]*dx*dy+q->sons[i].coordoct[1]*dx+q->sons[i].coordoct[0]+1;
      q->leaf=1;
@@ -300,7 +357,7 @@ int  MMG3D_merge_MOctree_s ( MMG5_MOctree_s* q, MMG5_pMesh mesh) {
 
   q->nsons = 0;
   q->leaf = 1;
-  q->blf_ip=q->sons[0].blf_ip;//récupérer la ls à l'origine de la cellule
+  q->blf_ip = q->sons[0].blf_ip;
   MMG3D_free_MOctree_s(q->sons, mesh);
 
   return 1;
@@ -333,8 +390,8 @@ int MMG3D_get_MOctreeCornerIndices ( MMG5_pMesh mesh, MMG5_MOctree_s *q,int span
   int ncells_x  = mesh->freeint[0];
   int ncells_xy = mesh->freeint[0]*mesh->freeint[1];
 
-  span_y = ncells_x;
-  span_z = ncells_xy;
+  span_y = span*ncells_x;
+  span_z = span*ncells_xy;
 
   *ip0 = q->blf_ip;
   *ip1 = q->blf_ip + span ;

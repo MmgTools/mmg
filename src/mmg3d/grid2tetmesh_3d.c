@@ -105,7 +105,7 @@ int MMG3D_convert_grid2smallOctree(MMG5_pMesh mesh, MMG5_pSol sol) {
   /** Step 2: Octree subdivision until reaching the grid size */
   int span = mesh->octree->nspan_at_root;
 
-  MMG3D_split_MOctree_s (mesh, po, sol, &span);
+  MMG3D_split_MOctree_s (mesh, po, sol);
 
   return 1;
 }
@@ -331,7 +331,7 @@ int MMG3D_build_coarsen_octree_first_time(MMG5_pMesh mesh, MMG5_MOctree_s* q, in
       MMG3D_build_coarsen_octree_first_time(mesh, &q->sons[i],depth_max);
     }
   }
-  else
+  else if (q->depth == depth_max-1)
   {
     int sum_ls;
     sum_ls=0;
@@ -438,7 +438,12 @@ int MMG3D_coarsen_octree(MMG5_pMesh mesh, MMG5_pSol sol) {
       max_dim = mesh->freeint[i];
     }
   }
-  // set max dim to the next power of 2
+
+  /* Begin to work on the dual grid => we will have one cellule less in each
+   * direction */
+  max_dim--;
+
+  /* set max dim to the next power of 2 */
   max_dim--;
   max_dim |= max_dim >> 1;
   max_dim |= max_dim >> 2;
@@ -448,12 +453,13 @@ int MMG3D_coarsen_octree(MMG5_pMesh mesh, MMG5_pSol sol) {
   max_dim++;
 
   depth_max=log(max_dim)/log(2);
+
   MMG3D_build_coarsen_octree_first_time(mesh, po, depth_max);
-  int depth;
-  for (depth=depth_max-2; depth>=0; depth --)
-  {
-    MMG3D_build_coarsen_octree(mesh, po, depth_max, depth);
-  }
+  // int depth;
+  // for (depth=depth_max-2; depth>=0; depth --)
+  // {
+  //   MMG3D_build_coarsen_octree(mesh, po, depth_max, depth);
+  // }
 
   return 1;
 }
@@ -499,13 +505,14 @@ int MMG3D_convert_grid2tetmesh(MMG5_pMesh mesh, MMG5_pSol sol) {
     return 0;
   }
 
-  MMG3D_saveVTKOctree(mesh,sol,mesh->nameout);
 
   /* Creation of the coarse octree */
   if ( !MMG3D_coarsen_octree(mesh,sol) ) {
     fprintf(stderr,"\n  ## Octree coarsening problem. Exit program.\n");
     return 0;
   }
+
+  MMG3D_saveVTKOctree(mesh,sol,mesh->nameout);
 
   /**--- stage 2: Tetrahedralization */
   if ( abs(mesh->info.imprim) > 3 )
