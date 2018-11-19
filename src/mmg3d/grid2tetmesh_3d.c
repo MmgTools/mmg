@@ -311,11 +311,13 @@ int MMG3D_build_coarsen_octree(MMG5_pMesh mesh, MMG5_MOctree_s* q, int depth_max
   return 1;
 }
 
+
 static inline
 int MMG3D_build_coarsen_octree_first_time(MMG5_pMesh mesh, MMG5_MOctree_s* q, int depth_max) {
-  if (q->depth != depth_max-1)
+  int i;
+  if (q->depth < depth_max-1)
   {
-    for (int i=0; i< q->nsons; i++)
+        for (i=0; i< q->nsons; i++)
     {
       MMG3D_build_coarsen_octree_first_time(mesh, &q->sons[i],depth_max);
     }
@@ -333,36 +335,66 @@ int MMG3D_build_coarsen_octree_first_time(MMG5_pMesh mesh, MMG5_MOctree_s* q, in
       MMG3D_merge_MOctree_s (q, mesh);
     }
   }
+  return 1;
 }
 
 static inline
 int MMG3D_build_coarsen_octree_fanny(MMG5_pMesh mesh, MMG5_MOctree_s* q, int depth_max, int depth) {
   // descendre à depth_max -2 la premiere fois qu'on appelle cette fonction puis depth_max-3 etc
-  if (q->depth != depth)
+  int i;
+  if (q->depth < depth)
   {
-    for (int i=0; i< q->nsons; i++)
+    for (i=0; i< q->nsons; i++)
     {
       MMG3D_build_coarsen_octree_fanny(mesh, &q->sons[i], depth_max, depth);
     }
   }
   else
   {
-    for (int i=0; i< q->nsons; i++)
+    MMG5_MOctree_s* Neighbour; // ce voisin va pointer tour à tour sur le voisin qu'on cherche
+    MMG3D_init_MOctree_s(mesh, Neighbour, 0, 0, 0 ); // peut être changer l'initialisation pour les voisins j'ai mis 0 par défaut.
+    char Direction [][11]={"UP","DOWN","LEFT","RIGHT","BACK","FRONT","UPLEFT","UPRIGHT","DOWNLEFT","DOWNRIGHT","UPFRONT","UPBACK","DOWNFRONT","DOWNBACK","LEFTFRONT","LEFTBACK","RIGHTFRONT","RIGHTBACK"};
+    // Direction[0]="UP";
+    // Direction[1]="DOWN";
+    // Direction[2]="LEFT";
+    // Direction[3]="RIGHT";
+    // Direction[4]="BACK";
+    // Direction[5]="FRONT";
+    // Direction[6]="UPLEFT";
+    // Direction[7]="UPRIGHT";
+    // Direction[8]="DOWNLEFT";
+    // Direction[9]="DOWNRIGHT";
+    // Direction[10]="UPFRONT";
+    // Direction[11]="UPBACK";
+    // Direction[12]="DOWNFRONT";
+    // Direction[13]="DOWNBACK";
+    // Direction[14]="LEFTFRONT";
+    // Direction[15]="LEFTBACK";
+    // Direction[16]="RIGHTFRONT";
+    // Direction[17]="RIGHTBACK";
+
+    int sum_leaf;
+    sum_leaf=0;
+    for(i=0; i<q->nsons; i++)
     {
-      char Direction [20];
-      MMG5_MOctree_s* Neighbour;
-      MMG3D_init_MOctree_s(mesh, Neighbour, 0, 0, 0 ) // peut être changer l'initialisation pour les voisins j'ai mis 0 par défaut.
-      //il y a 18 directions = 18 voisins
-      //appeler fonction de Antoine pour les voisins, ça nous sort le pointeur sur le voisin en question
-      if(Neighbour->leaf==0)
-      {
-        //on passe à une autre cellule qu'on veut merge
-      }
+      sum_leaf += q->sons[i].leaf;
     }
-    // if (sum_ls==0)
-    // {
-    //   MMG3D_merge_MOctree_s (q, mesh);
-    // }
+
+    if (sum_leaf==8)
+    {
+      int dir;
+      for (dir=0; dir<18; dir++)
+      {
+        //il y a 18 directions = 18 voisins
+        MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(mesh , &q->sons[i], Direction[dir], &Neighbour);
+        if(Neighbour->leaf==0)
+        {
+          return 1;
+        }
+      }
+      MMG3D_merge_MOctree_s (q, mesh);
+    }
+    return 1;
   }
 }
 
