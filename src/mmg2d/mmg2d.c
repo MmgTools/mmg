@@ -508,6 +508,9 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
           mesh->info.renum = -10;
         }
         break;
+      case 'r':
+          if ( !strcmp(argv[i],"-rmc") )
+            mesh->info.rmc = 1;
       case 's':
         if ( !strcmp(argv[i],"-sol") ) {
           if ( ++i < argc && isascii(argv[i][0]) && argv[i][0]!='-' ) {
