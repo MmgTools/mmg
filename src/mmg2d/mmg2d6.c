@@ -407,6 +407,20 @@ int MMG2D_chkmanimesh(MMG5_pMesh mesh) {
  *
  * \return 1 if success, 0 otherwise
  *
+ * Removal of small parasitic components (bubbles of material, etc) with volume less than 
+ * VOLFRAC * volume of the mesh.
+ *
+ */
+int MMG2D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
+  return(1);
+}
+
+/**
+ * \param mesh pointer toward the mesh
+ * \param sol pointer toward the level-set
+ *
+ * \return 1 if success, 0 otherwise
+ *
  * Effective discretization of the 0 level set encoded in sol in the mesh
  *
  */
@@ -634,6 +648,12 @@ int MMG2D_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol) {
   /* Snap values of the level set function which are very close to 0 to 0 exactly */
   if ( !MMG2D_snapval(mesh,sol,tmp) ) {
     fprintf(stderr,"\n  ## Wrong input implicit function. Exit program.\n");
+    return 0;
+  }
+  
+  /* Removal of small parasitic components */
+  if ( mesh->info.rmc && !MMG2D_rmc(mesh,sol) ) {
+    fprintf(stderr,"\n  ## Error in removing small parasitic components. Exit program.\n");
     return 0;
   }
 

@@ -271,6 +271,7 @@ int MMG2D_chkmanimesh(MMG5_pMesh );
 int MMG2D_hashTria(MMG5_pMesh );
 int MMG2D_resetRef(MMG5_pMesh );
 int MMG2D_cuttri_ls(MMG5_pMesh ,MMG5_pSol );
+int MMG2D_rmc(MMG5_pMesh ,MMG5_pSol );
 int MMG2D_setref_ls(MMG5_pMesh ,MMG5_pSol );
 int MMG2D_split1_sim(MMG5_pMesh ,MMG5_pSol ,int ,int vx[3]);
 int MMG2D_split2_sim(MMG5_pMesh ,MMG5_pSol ,int ,int vx[3]);
