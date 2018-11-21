@@ -109,7 +109,7 @@ int MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
 
   mesh->info.hausd *= dd;
   mesh->info.ls    *= dd;
-  mesh->info.hsiz  *=dd;
+  mesh->info.hsiz  *= dd;
 
   /* normalize local parameters */
   for (k=0; k<mesh->info.npar; k++) {
