@@ -61,6 +61,7 @@ extern "C" {
 #define MMG2D_ANGCORN   -1.e-6
 #define MMG2D_SHORTMAX     0x7fff
 #define MMG2D_LPARMAX     200
+#define MMG2D_VOLFRAC     1.e-5
 
 #define MMG2D_LLONG  2.0
 #define MMG2D_LSHRT  0.3
@@ -262,6 +263,8 @@ int MMG2D_delone(MMG5_pMesh ,MMG5_pSol ,int ,int *,int );
 int MMG2D_cenrad_iso(MMG5_pMesh ,double *,double *,double *);
 
 /* Adds Charles */
+double MMG2D_voltri(MMG5_pMesh ,int ,int ,int );
+double MMG2D_vfrac(MMG5_pMesh ,MMG5_pSol ,int ,int );
 int MMG2D_getIniRef(MMG5_pMesh ,int );
 int MMG2D_isSplit(MMG5_pMesh ,int ,int *,int *);
 int MMG2D_parsop(MMG5_pMesh ,MMG5_pSol );
