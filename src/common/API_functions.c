@@ -412,18 +412,18 @@ int MMG5_Set_defaultTruncatureSizes(MMG5_pMesh mesh,char sethmin,char sethmax) {
 
   if ( !sethmin ) {
     if ( sethmax ) {
-      mesh->info.hmin  = MG_MIN(0.001,0.001 * mesh->info.hmax);
+      mesh->info.hmin  = MG_MIN ( MMG5_HMINCOE, MMG5_HMINCOE * mesh->info.hmax);
     } else {
-      mesh->info.hmin  = 0.001;
+      mesh->info.hmin  = MMG5_HMINCOE;
     }
   }
 
   if ( !sethmax ) {
     if ( sethmin ) {
-      mesh->info.hmax = MG_MAX(2.,100. * mesh->info.hmin);
+      mesh->info.hmax = MG_MAX ( MMG5_HMAXCOE, 1./MMG5_HMINCOE * mesh->info.hmin);
     }
     else {
-      mesh->info.hmax  = 2.;
+      mesh->info.hmax  = MMG5_HMAXCOE;
     }
   }
 

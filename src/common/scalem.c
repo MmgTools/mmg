@@ -151,9 +151,8 @@ int MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
     sethmax = 1;
   }
 
-
-  /* normalize sizes and if not provided by user, compute hmin/hmax */
   if ( met->m ) {
+    /* normalize sizes and if not provided by user, compute hmin/hmax */
     if ( met->size == 1 ) {
       for (k=1; k<=mesh->np; k++) {
         met->m[k] *= dd;

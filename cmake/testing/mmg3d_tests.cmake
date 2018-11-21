@@ -342,6 +342,32 @@ ADD_TEST(NAME mmg3d_memOption
   ${MMG3D_CI_TESTS}/Cube/cube
   -out ${CTEST_OUTPUT_DIR}/mmg3d_memOption.o.meshb)
 
+ADD_TEST(NAME mmg3d_hsizOption
+  COMMAND ${EXECUT_MMG3D} -v 5 -hsiz 0.1
+  ${MMG3D_CI_TESTS}/Cube/cube
+  -out ${CTEST_OUTPUT_DIR}/mmg3d_hsiz.o.meshb)
+
+ADD_TEST(NAME mmg3d_hsizAndNosurfOption
+  COMMAND ${EXECUT_MMG3D} -v 5 -hsiz 0.1 -nosurf
+  ${MMG3D_CI_TESTS}/Cube/cube
+  -out ${CTEST_OUTPUT_DIR}/mmg3d_hsizNosurf.o.meshb)
+
+ADD_TEST(NAME mmg3d_hsizHmax
+  COMMAND ${EXECUT_MMG3D} -v 5 -hsiz 0.1 -hmax 0.05
+  ${MMG3D_CI_TESTS}/Cube/cube
+  -out ${CTEST_OUTPUT_DIR}/mmg3d_hsizHmax.o.meshb)
+SET(passRegex "Mismatched options")
+SET_PROPERTY(TEST mmg3d_hsizHmax
+  PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}")
+
+ADD_TEST(NAME mmg3d_hsizHmin
+  COMMAND ${EXECUT_MMG3D} -v 5 -hsiz 0.1 -hmin 0.2
+  ${MMG3D_CI_TESTS}/Cube/cube
+  -out ${CTEST_OUTPUT_DIR}/mmg3d_hsizHmin.o.meshb)
+SET_PROPERTY(TEST mmg3d_hsizHmin
+  PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}")
+
+
 ###############################################################################
 #####
 #####         Check Boundaries
