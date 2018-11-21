@@ -639,7 +639,10 @@ int MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
 
     if ( pt->tag & MG_REQ ) {
       for ( i=0; i<6; i++ ) {
-        if ( !MMG3D_compute_metricAtReqEdge(mesh,met,&hash,pt,i) ) return 0;
+        if ( !MMG3D_compute_metricAtReqEdge(mesh,met,&hash,pt,i) ) {
+          MMG5_DEL_MEM(mesh,hash.item);
+          return 0;
+        }
       }
     }
     else {
@@ -649,7 +652,10 @@ int MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
       for ( i=0; i<6; i++ ) {
         if ( (pxt->tag[i] & MG_REQ) || (pxt->tag[i] & MG_NOSURF) ||
              (pxt->tag[i] & MG_PARBDY) ) {
-          if ( !MMG3D_compute_metricAtReqEdge(mesh,met,&hash,pt,i) ) return 0;
+          if ( !MMG3D_compute_metricAtReqEdge(mesh,met,&hash,pt,i) ) {
+            MMG5_DEL_MEM(mesh,hash.item);
+            return 0;
+          }
         }
       }
     }
@@ -666,6 +672,7 @@ int MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
     met->m[k] /= p0->s;
     p0->flag = 3;
   }
+  MMG5_DEL_MEM(mesh,hash.item);
 
 
   /** Step 2: size at non required internal points */
