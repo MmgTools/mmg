@@ -43,6 +43,46 @@ ADD_TEST(NAME mmg2d_memOption
   ${MMG2D_CI_TESTS}/Circle/cercle
   -out ${CTEST_OUTPUT_DIR}/mmg2d_memOption.o.meshb)
 
+ADD_TEST(NAME mmg2d_hsizOption
+  COMMAND ${EXECUT_MMG2D} -v 5 -hsiz 0.1 -sol 2
+  ${MMG2D_CI_TESTS}/Circle/cercle
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_hsiz-circle.o.meshb)
+
+ADD_TEST(NAME mmg2d_hsizAndNosurfOption
+  COMMAND ${EXECUT_MMG2D} -v 5 -hsiz 0.1 -sol 2 -nosurf
+  ${MMG2D_CI_TESTS}/Circle/cercle
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_hsizNosurf-circle.o.meshb)
+
+ADD_TEST(NAME mmg2d_hsizAndNosurfOption2
+  COMMAND ${EXECUT_MMG2D} -v 5 -hsiz 0.1 -sol 2 -nosurf -msh 2
+  ${MMG2D_CI_TESTS}/2squares/2squares
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_hsizNosurf-2squares.o.meshb)
+
+ADD_TEST(NAME mmg2d_hsizHmax
+  COMMAND ${EXECUT_MMG2D} -v 5 -hsiz 0.1 -sol 2 -hmax 0.05
+  ${MMG2D_CI_TESTS}/Circle/cercle
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_hsizHmax-circle.o.meshb)
+SET(passRegex "Mismatched options")
+SET_PROPERTY(TEST mmg2d_hsizHmax
+  PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}")
+
+ADD_TEST(NAME mmg2d_hsizHmin
+  COMMAND ${EXECUT_MMG2D} -v 5 -hsiz 0.1 -sol 2 -hmin 0.2
+  ${MMG2D_CI_TESTS}/Circle/cercle
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_hsizHmin-circle.o.meshb)
+SET_PROPERTY(TEST mmg2d_hsizHmax
+  PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}")
+
+ADD_TEST(NAME mmg2d_reqEntities-ref
+  COMMAND ${EXECUT_MMG2D} -v 5 -hsiz 0.02
+  ${MMG2D_CI_TESTS}/Disk_ReqEntities/disk.mesh
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_reqEntities-ref.o.meshb)
+
+ADD_TEST(NAME mmg2d_reqEntities-unref
+  COMMAND ${EXECUT_MMG2D} -v 5 -hsiz 0.1
+  ${MMG2D_CI_TESTS}/Disk_ReqEntities/disk-tiny.mesh
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_reqEntities-unref.o.meshb)
+
 ###############################################################################
 #####
 #####         Input/Output
