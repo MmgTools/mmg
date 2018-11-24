@@ -48,10 +48,20 @@ ADD_TEST(NAME mmg2d_hsizOption
   ${MMG2D_CI_TESTS}/Circle/cercle
   -out ${CTEST_OUTPUT_DIR}/mmg2d_hsiz-circle.o.meshb)
 
+ADD_TEST(NAME mmg2d_hsizAni
+  COMMAND ${EXECUT_MMG2D} -v 5 -hsiz 0.1 -sol 2 -A
+  ${MMG2D_CI_TESTS}/Circle/cercle
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_hsizAni-circle.o.meshb)
+
 ADD_TEST(NAME mmg2d_hsizAndNosurfOption
   COMMAND ${EXECUT_MMG2D} -v 5 -hsiz 0.1 -sol 2 -nosurf
   ${MMG2D_CI_TESTS}/Circle/cercle
   -out ${CTEST_OUTPUT_DIR}/mmg2d_hsizNosurf-circle.o.meshb)
+
+ADD_TEST(NAME mmg2d_hsizAndNosurfAni
+  COMMAND ${EXECUT_MMG2D} -v 5 -hsiz 0.1 -sol 2 -nosurf -A
+  ${MMG2D_CI_TESTS}/Circle/cercle
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_hsizNosurfAni-circle.o.meshb)
 
 ADD_TEST(NAME mmg2d_hsizAndNosurfOption2
   COMMAND ${EXECUT_MMG2D} -v 5 -hsiz 0.1 -sol 2 -nosurf -msh 2
@@ -70,7 +80,8 @@ ADD_TEST(NAME mmg2d_hsizHmin
   COMMAND ${EXECUT_MMG2D} -v 5 -hsiz 0.1 -sol 2 -hmin 0.2
   ${MMG2D_CI_TESTS}/Circle/cercle
   -out ${CTEST_OUTPUT_DIR}/mmg2d_hsizHmin-circle.o.meshb)
-SET_PROPERTY(TEST mmg2d_hsizHmax
+SET(passRegex "Mismatched options")
+SET_PROPERTY(TEST mmg2d_hsizHmin
   PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}")
 
 ADD_TEST(NAME mmg2d_reqEntities-ref
@@ -78,10 +89,20 @@ ADD_TEST(NAME mmg2d_reqEntities-ref
   ${MMG2D_CI_TESTS}/Disk_ReqEntities/disk.mesh
   -out ${CTEST_OUTPUT_DIR}/mmg2d_reqEntities-ref.o.meshb)
 
+ADD_TEST(NAME mmg2d_reqEntitiesAni-ref
+  COMMAND ${EXECUT_MMG2D} -v 5 -hsiz 0.02 -A
+  ${MMG2D_CI_TESTS}/Disk_ReqEntities/disk.mesh
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_reqEntitiesAni-ref.o.meshb)
+
 ADD_TEST(NAME mmg2d_reqEntities-unref
   COMMAND ${EXECUT_MMG2D} -v 5 -hsiz 0.1
   ${MMG2D_CI_TESTS}/Disk_ReqEntities/disk-tiny.mesh
   -out ${CTEST_OUTPUT_DIR}/mmg2d_reqEntities-unref.o.meshb)
+
+ADD_TEST(NAME mmg2d_reqEntitiesAni-unref
+  COMMAND ${EXECUT_MMG2D} -v 5 -hsiz 0.1 -A
+  ${MMG2D_CI_TESTS}/Disk_ReqEntities/disk-tiny.mesh
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_reqEntitiesAni-unref.o.meshb)
 
 ###############################################################################
 #####
@@ -157,6 +178,11 @@ ADD_TEST(NAME mmg2d_SquareGeneration
 
 ADD_TEST(NAME mmg2d_NacaGeneration
   COMMAND ${EXECUT_MMG2D} -v 5 -hausd 0.001
+  ${MMG2D_CI_TESTS}/NacaGeneration/naca
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_NacaGeneration-naca.o.meshb)
+
+ADD_TEST(NAME mmg2d_NacaGenerationAni
+  COMMAND ${EXECUT_MMG2D} -v 5 -hausd 0.001 -A
   ${MMG2D_CI_TESTS}/NacaGeneration/naca
   -out ${CTEST_OUTPUT_DIR}/mmg2d_NacaGeneration-naca.o.meshb)
 
