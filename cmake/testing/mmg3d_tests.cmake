@@ -342,6 +342,17 @@ ADD_TEST(NAME mmg3d_memOption
   ${MMG3D_CI_TESTS}/Cube/cube
   -out ${CTEST_OUTPUT_DIR}/mmg3d_memOption.o.meshb)
 
+ADD_TEST(NAME mmg3d_hsizAndNosurfOption
+  COMMAND ${EXECUT_MMG3D} -v 5 -hsiz 0.1 -nosurf
+  ${MMG3D_CI_TESTS}/Cube/cube
+  -out ${CTEST_OUTPUT_DIR}/mmg3d_hsizNosurf.o.meshb)
+
+ADD_TEST(NAME mmg3d_hsizAndNosurfAni
+  COMMAND ${EXECUT_MMG3D} -v 5 -hsiz 0.1 -nosurf -A
+  ${MMG3D_CI_TESTS}/Cube/cube
+  -out ${CTEST_OUTPUT_DIR}/mmg3d_hsizNosurfAni.o.meshb)
+
+
 ###############################################################################
 #####
 #####         Check Boundaries
