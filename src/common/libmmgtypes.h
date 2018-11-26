@@ -513,6 +513,7 @@ typedef struct MMG5_MOctree_s
   int    depth; /*!< depth of the cell in the octree */
   int8_t nsons; /*!< number of sons */
   int8_t leaf; /*!< 1 if the cell is a leaf, 0 otherwise */
+  int8_t ghost; /*!< 1 if the cell is a ghost, 0 otherwise */
   int8_t split_ls; /*!< 1 if the level-set split this cell */
   int coordoct[3]; /*<coordinates of the bottom right hand front corner of the octree */
 } MMG5_MOctree_s;

@@ -162,6 +162,9 @@ int  MMG3D_set_splitls_MOctree ( MMG5_pMesh mesh, MMG5_MOctree_s* q, MMG5_pSol s
    int ip,i,power,blf_ip_first_son;
 
    int depth_max = mesh->octree->depth_max;
+   int ncells_x = mesh->freeint[0];
+   int ncells_y = mesh->freeint[1];
+   int ncells_z = mesh->freeint[2];
 
    if(q->depth < depth_max)
    {
@@ -171,72 +174,40 @@ int  MMG3D_set_splitls_MOctree ( MMG5_pMesh mesh, MMG5_MOctree_s* q, MMG5_pSol s
        MMG3D_init_MOctree_s(mesh, &q->sons[i], 0, q->depth + 1, 0);
        //calculus of octree coordinates and ip
        int power = pow(2,depth_max-(q->depth+1));
-       int span_y,span_z;
-       // int ncells_x = pow(2,q->depth) + 1;
-       // int ncells_y = pow(2,q->depth) + 1;
-       // int ncells_z = pow(2,q->depth) + 1;
-       // if(ncells_x > mesh->freeint[0])
-       // {
-       //   ncells_x = mesh->freeint[0];
-       // }
-       // if(ncells_y > mesh->freeint[1])
-       // {
-       //   ncells_y = mesh->freeint[1];
-       // }
-       // if(ncells_z > mesh->freeint[2])
-       // {
-       //   ncells_z = mesh->freeint[2];
-       // }
-       //
-       // int ncells_xy = ncells_x * ncells_y;
-
-       // span_y = mesh->freeint[0];
-       // span_z = mesh->freeint[0]*mesh->freeint[1];
 
        q->sons[i].coordoct[0]=q->coordoct[0];
        q->sons[i].coordoct[1]=q->coordoct[1];
        q->sons[i].coordoct[2]=q->coordoct[2];
 
-       // if(i == 0)
-       // {
-       //   q->sons[i].blf_ip = q->coordoct[0] + q->coordoct[1]*span_y + q->coordoct[2]*span_z + 1;
-       // }
        if(i==1)
        {
-         // q->sons[i].blf_ip = q->sons[0].blf_ip + power;
          q->sons[i].coordoct[0]+=power;
        }
        else if(i==2)
        {
-         // q->sons[i].blf_ip = q->sons[0].blf_ip + span_y;
          q->sons[i].coordoct[1]+=power;
        }
        else if(i==3)
        {
-         // q->sons[i].blf_ip = q->sons[0].blf_ip + span_y + power;
          q->sons[i].coordoct[0]+=power;
          q->sons[i].coordoct[1]+=power;
        }
        else if(i==4)
        {
-         // q->sons[i].blf_ip = q->sons[0].blf_ip + span_z;
          q->sons[i].coordoct[2]+=power;
        }
        else if(i==5)
        {
-         // q->sons[i].blf_ip = q->sons[0].blf_ip + span_z + power;
          q->sons[i].coordoct[0]+=power;
          q->sons[i].coordoct[2]+=power;
        }
        else if(i==6)
        {
-         // q->sons[i].blf_ip = q->sons[0].blf_ip + span_z + span_y;
          q->sons[i].coordoct[1]+=power;
          q->sons[i].coordoct[2]+=power;
        }
        else if(i==7)
        {
-         // q->sons[i].blf_ip = q->sons[0].blf_ip + span_z + span_y + power;
          q->sons[i].coordoct[0]+=power;
          q->sons[i].coordoct[1]+=power;
          q->sons[i].coordoct[2]+=power;
@@ -244,6 +215,14 @@ int  MMG3D_set_splitls_MOctree ( MMG5_pMesh mesh, MMG5_MOctree_s* q, MMG5_pSol s
 
        q->sons[i].father = q;
        q->sons[i].nsons = 8;
+       if(q->sons[i].coordoct[0] < ncells_x -1 && q->sons[i].coordoct[1] < ncells_y-1 && q->sons[i].coordoct[2] < ncells_z-1)
+       {
+         q->sons[i].ghost = 0;
+       }
+       else
+       {
+         q->sons[i].ghost = 1;
+       }
        MMG3D_split_MOctree_s(mesh, &q->sons[i], sol);
      }
    }
@@ -251,67 +230,19 @@ int  MMG3D_set_splitls_MOctree ( MMG5_pMesh mesh, MMG5_MOctree_s* q, MMG5_pSol s
      /*calculus of ip for leaves*/
      int span_y,span_z;
      int power = pow(2,depth_max-(q->depth));
-     //int ncells_x  = (mesh->freeint[0]-1)/power + 1;
-     int ncells_x = mesh->freeint[0];
-     int ncells_y = mesh->freeint[1];
-     int ncells_z = mesh->freeint[2];
-     // if(ncells_x > mesh->freeint[0])
-     // {
-     //   ncells_x = mesh->freeint[0];
-     // }
-     // if(ncells_y > mesh->freeint[1])
-     // {
-     //   ncells_y = mesh->freeint[1];
-     // }
-     // if(ncells_z > mesh->freeint[2])
-     // {
-     //   ncells_z = mesh->freeint[2];
-     // }
-
      int ncells_xy = ncells_x * ncells_y;
 
      span_y = ncells_x;
      span_z = ncells_xy;
-
-
-     // if(i==0)
-     // {
-     //   q->blf_ip = q->coordoct[0] + q->coordoct[1]*span_y + q->coordoct[2]*span_z + 1;
-     // }
-     // else if(i==1)
-     // {
-     //   q->blf_ip = q->father->sons[0].blf_ip + 1;
-     // }
-     // else if(i==2)
-     // {
-     //   q->blf_ip = q->father->sons[0].blf_ip + span_y;
-     // }
-     // else if(i==3)
-     // {
-     //   q->blf_ip = q->father->sons[0].blf_ip + span_y + 1;
-     // }
-     // else if(i==4)
-     // {
-     //   q->blf_ip = q->father->sons[0].blf_ip + span_z;
-     // }
-     // else if(i==5)
-     // {
-     //   q->blf_ip = q->father->sons[0].blf_ip + span_z + 1;
-     // }
-     // else if(i==6)
-     // {
-     //   q->blf_ip = q->father->sons[0].blf_ip + span_z + span_y;
-     // }
-     // else if(i==7)
-     // {
-     //   q->blf_ip = q->father->sons[0].blf_ip + span_z + span_y + 1;
-     // }
-
-     q->blf_ip=q->coordoct[2]*ncells_xy+q->coordoct[1]*ncells_x+q->coordoct[0]+1;
-     //moins couteux ?
-     //q->sons[i].blf_ip=q->sons[i].coordoct[2]*dx*dy+q->sons[i].coordoct[1]*dx+q->sons[i].coordoct[0]+1;
+     if(q->ghost == 0)
+     {
+       q->blf_ip=q->coordoct[2]*ncells_xy+q->coordoct[1]*ncells_x+q->coordoct[0]+1;
+       if(q->coordoct[0] < ncells_x-1 && q->coordoct[1] < ncells_y-1 && q->coordoct[2] < ncells_z-1)
+       {
+         MMG3D_set_splitls_MOctree (mesh, q, sol);
+       }
+     }
      q->leaf=1;
-     MMG3D_set_splitls_MOctree (mesh, q, sol);
    }
 
    return 1;
@@ -420,8 +351,11 @@ int MMG3D_get_MOctreeCornerIndices ( MMG5_pMesh mesh, MMG5_MOctree_s *q,int span
 int  MMG3D_mark_MOctreeCellCorners ( MMG5_pMesh mesh, MMG5_MOctree_s* q,int span,int *np,int *nc ) {
   MMG5_pPoint ppt;
   int         i,ip[8];
+  int ncells_x = mesh->freeint[0];
+  int ncells_y = mesh->freeint[1];
+  int ncells_z = mesh->freeint[2];
 
-  if ( q->leaf ) {
+  if ( q->leaf && q->ghost == 0) {
 
     if ( !MMG3D_get_MOctreeCornerIndices ( mesh,q,span,ip,ip+1,ip+2,ip+3,ip+4,ip+5,ip+6,ip+7 ) ) {
       fprintf(stderr,"\n  ## Error: %s: unable to compute the indices of the"

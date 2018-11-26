@@ -453,7 +453,6 @@ int MMG3D_coarsen_octree(MMG5_pMesh mesh, MMG5_pSol sol) {
   max_dim++;
 
   depth_max=log(max_dim)/log(2);
-
   MMG3D_build_coarsen_octree_first_time(mesh, po, depth_max);
   // int depth;
   // for (depth=depth_max-2; depth>=0; depth --)
@@ -505,6 +504,7 @@ int MMG3D_convert_grid2tetmesh(MMG5_pMesh mesh, MMG5_pSol sol) {
     return 0;
   }
 
+  MMG3D_saveVTKOctree(mesh,sol,mesh->nameout);
 
   /* Creation of the coarse octree */
   if ( !MMG3D_coarsen_octree(mesh,sol) ) {
@@ -512,7 +512,6 @@ int MMG3D_convert_grid2tetmesh(MMG5_pMesh mesh, MMG5_pSol sol) {
     return 0;
   }
 
-  MMG3D_saveVTKOctree(mesh,sol,mesh->nameout);
 
   /**--- stage 2: Tetrahedralization */
   if ( abs(mesh->info.imprim) > 3 )
