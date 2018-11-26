@@ -244,18 +244,18 @@ int MMG3D_build_coarsen_octree(MMG5_pMesh mesh, MMG5_MOctree_s* q, int depth_max
       for(i=0; i<q->nsons; i++)
       {
         int dir;
-        for (dir=0; dir<18; dir++)
+        for (dir=0; dir<6; dir++)
         {
           MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(mesh , &q->sons[i], dir, Neighbour);
-          if(Neighbour->leaf==0 && Neighbour!=NULL)
+          if(Neighbour->leaf==0 && Neighbour->depth!=0)
           {
             return 1;
           }
-        }        
+        }
       }
       MMG3D_merge_MOctree_s (q, mesh);
+      return 1;
     }
-    return 1;
   }
 }
 
