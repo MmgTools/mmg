@@ -111,147 +111,6 @@ int MMG3D_convert_grid2smallOctree(MMG5_pMesh mesh, MMG5_pSol sol) {
 }
 
 /**
- * \param q pointer toward the MOctree cell
- * \param depth_max the depth maximum of the octree.
- *
- * \return 1 if success, 0 if fail.
- *
- * Balance an unbalanced octree in order that 2 adjacent cells have at most 1
- * level of depth of difference (2:1 balancing).
- *
- */
-// static inline
-// int MMG3D_balance_octree(MMG5_pMesh mesh, MMG5_MOctree_s* q, int depth_max) {
-//
-//   int x = q->coordoct[0];
-//   int y = q->coordoct[1];
-//   int z = q->coordoct[2];
-//   int depth;
-//   int nb_cells;
-//   int father_id;
-//   MMG5_MOctree_s* p;
-//   int neighboors_tab[18][3];
-//
-//   //CREATION DU TABLEAU DE VOISINS
-//   int i,j,k,tab_id;
-//   tab_id=0;
-//   int neighboor_span = pow(2,depth_max-q->depth);
-//   for(k = z-neighboor_span ; k <= z+neighboor_span ; k++)
-//   {
-//     for(j = y-neighboor_span ; j <= y+neighboor_span ; j++)
-//     {
-//       for(i = x-neighboor_span ; i <= x+neighboor_span ; i++)
-//       {
-//         if((i!=j || i!=k || j!=k) && (i==x || j==y || k==z))
-//         {
-//           neighboors_tab[tab_id][0] = i;
-//           neighboors_tab[tab_id][1] = j;
-//           neighboors_tab[tab_id][2] = k;
-//           tab_id++;
-//         }
-//       }
-//     }
-//   }
-//
-//   int octree_size = pow(2,depth_max);
-//
-//   for(i = 0 ; i < 18 ; i++)
-//   {
-//     p = mesh->octree->root;
-//
-//     x = neighboors_tab[i][0];
-//     y = neighboors_tab[i][1];
-//     z = neighboors_tab[i][2];
-//
-//     //VERIFICATION QUE LE VOISIN APPARTIENT BIEN A LA GRILLE
-//     if(x >= 0 && x < octree_size && y >= 0 && y < octree_size && z >= 0 && z < octree_size)
-//     {
-//       depth = 1;
-//       while((p->leaf != 1) && (depth <= depth_max))
-//       {
-//         nb_cells = pow(2,depth_max-depth);
-//         if(x < nb_cells)
-//         {
-//           if(y < nb_cells)
-//           {
-//             if(z < nb_cells)
-//             {
-//               father_id = 0;
-//             }
-//             else
-//             {
-//               father_id = 2;
-//               z -= nb_cells;
-//             }
-//           }
-//           else
-//           {
-//             if(z < nb_cells)
-//             {
-//               father_id = 4;
-//             }
-//             else
-//             {
-//               father_id = 6;
-//               z -= nb_cells;
-//             }
-//             y -= nb_cells;
-//           }
-//         }
-//         else
-//         {
-//           if(y < nb_cells)
-//           {
-//             if(z < nb_cells)
-//             {
-//               father_id = 1;
-//             }
-//             else
-//             {
-//               father_id = 3;
-//               z -= nb_cells;
-//             }
-//           }
-//           else
-//           {
-//             if(z < nb_cells)
-//             {
-//               father_id = 5;
-//             }
-//             else
-//             {
-//               father_id = 7;
-//               z -= nb_cells;
-//             }
-//             y -= nb_cells;
-//           }
-//           x -= nb_cells;
-//         }
-//         p = &p->sons[father_id];
-//         depth++;
-//       }
-//       int tmp,tmp_sum;
-//       tmp_sum = 0;
-//       if(q->depth==p->depth)//si le voisin est à la même profondeur
-//       {
-//         if(p->leaf != 1)//s'il n'est pas une leaf
-//         {
-//           for(tmp = 0; tmp < p->nsons; tmp++)
-//           {
-//             if(p->sons[i].leaf != 1)//et si au moins un de ses enfants n'est pas une leaf
-//             {
-//               return 0;
-//             }
-//           }
-//         }
-//       }
-//     }
-//   }
-//   return 1;
-// }
-
-
-/**
 * \param q pointer toward the MOctree cell
  * \param depth_max the depth maximum of the octree.
  *
@@ -370,26 +229,8 @@ int MMG3D_build_coarsen_octree(MMG5_pMesh mesh, MMG5_MOctree_s* q, int depth_max
   else
   {
     MMG5_MOctree_s* Neighbour; // ce voisin va pointer tour à tour sur le voisin qu'on cherche
+    MMG5_SAFE_MALLOC(Neighbour,1, MMG5_MOctree_s, return 0);
     MMG3D_init_MOctree_s(mesh, Neighbour, 0, 0, 0 ); // peut être changer l'initialisation pour les voisins j'ai mis 0 par défaut.
-    char Direction [][11]={"UP","DOWN","LEFT","RIGHT","BACK","FRONT","UPLEFT","UPRIGHT","DOWNLEFT","DOWNRIGHT","UPFRONT","UPBACK","DOWNFRONT","DOWNBACK","LEFTFRONT","LEFTBACK","RIGHTFRONT","RIGHTBACK"};
-    // Direction[0]="UP";
-    // Direction[1]="DOWN";
-    // Direction[2]="LEFT";
-    // Direction[3]="RIGHT";
-    // Direction[4]="BACK";
-    // Direction[5]="FRONT";
-    // Direction[6]="UPLEFT";
-    // Direction[7]="UPRIGHT";
-    // Direction[8]="DOWNLEFT";
-    // Direction[9]="DOWNRIGHT";
-    // Direction[10]="UPFRONT";
-    // Direction[11]="UPBACK";
-    // Direction[12]="DOWNFRONT";
-    // Direction[13]="DOWNBACK";
-    // Direction[14]="LEFTFRONT";
-    // Direction[15]="LEFTBACK";
-    // Direction[16]="RIGHTFRONT";
-    // Direction[17]="RIGHTBACK";
 
     int sum_leaf;
     sum_leaf=0;
@@ -400,14 +241,17 @@ int MMG3D_build_coarsen_octree(MMG5_pMesh mesh, MMG5_MOctree_s* q, int depth_max
 
     if (sum_leaf==8)
     {
-      int dir;
-      for (dir=0; dir<18; dir++)
+      for(i=0; i<q->nsons; i++)
       {
-        MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(mesh , &q->sons[i], Direction[dir], &Neighbour);
-        if(Neighbour->leaf==0)
+        int dir;
+        for (dir=0; dir<18; dir++)
         {
-          return 1;
-        }
+          MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(mesh , &q->sons[i], dir, Neighbour);
+          if(Neighbour->leaf==0 && Neighbour!=NULL)
+          {
+            return 1;
+          }
+        }        
       }
       MMG3D_merge_MOctree_s (q, mesh);
     }
@@ -454,11 +298,11 @@ int MMG3D_coarsen_octree(MMG5_pMesh mesh, MMG5_pSol sol) {
 
   depth_max=log(max_dim)/log(2);
   MMG3D_build_coarsen_octree_first_time(mesh, po, depth_max);
-  // int depth;
-  // for (depth=depth_max-2; depth>=0; depth --)
-  // {
-  //   MMG3D_build_coarsen_octree(mesh, po, depth_max, depth);
-  // }
+  int depth;
+  for (depth=depth_max-2; depth>=0; depth --)
+  {
+    MMG3D_build_coarsen_octree(mesh, po, depth_max, depth);
+  }
 
   return 1;
 }
@@ -504,13 +348,13 @@ int MMG3D_convert_grid2tetmesh(MMG5_pMesh mesh, MMG5_pSol sol) {
     return 0;
   }
 
-  MMG3D_saveVTKOctree(mesh,sol,mesh->nameout);
 
   /* Creation of the coarse octree */
   if ( !MMG3D_coarsen_octree(mesh,sol) ) {
     fprintf(stderr,"\n  ## Octree coarsening problem. Exit program.\n");
     return 0;
   }
+  MMG3D_saveVTKOctree(mesh,sol,mesh->nameout);
 
 
   /**--- stage 2: Tetrahedralization */
