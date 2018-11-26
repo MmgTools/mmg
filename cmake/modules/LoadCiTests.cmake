@@ -159,15 +159,14 @@ ENDIF()
 #--------------> mmg
 IF ( GET_MMG_TESTS MATCHES "TRUE" )
   MESSAGE("-- Download the mmg test cases. May be very long...")
-  FILE(DOWNLOAD https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmdXVkS3QzdWEtdFU
+  FILE(DOWNLOAD https://drive.google.com/uc?export=download&id=1Kd2aow6nfBI1i5dSN6lXMxaDKLrtpd6r
     ${CI_DIR}/mmg.tgz
     SHOW_PROGRESS)
   IF ( NOT EXISTS ${CI_DIR}/mmg.tgz )
     MESSAGE("\n")
     MESSAGE(WARNING "Fail to automatically download the mmg test cases.
 Try to get it at the following link:
-       https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmdXVkS3QzdWEtdFU
-then untar it in the ${CI_DIR} directory.")
+       https://drive.google.com/uc?export=download&id=1Kd2aow6nfBI1i5dSN6lXMxaDKLrtpd6r then untar it in the ${CI_DIR} directory.")
   ELSE()
     EXECUTE_PROCESS(
       COMMAND ${CMAKE_COMMAND} -E tar xzf
@@ -188,14 +187,14 @@ ENDIF ()
 #--------------> mmg2d
 IF ( GET_MMG2D_TESTS MATCHES "TRUE" )
   MESSAGE("-- Download the mmg2d test cases. May be very long...")
-  FILE(DOWNLOAD https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmX0hrRWJWTDBETHc
+  FILE(DOWNLOAD https://drive.google.com/uc?export=download&id=1Lnvh7AldwEXS7WRa1VxsRqI7Xu7CgJNj
     ${CI_DIR}/mmg2d.tgz
     SHOW_PROGRESS)
   IF ( NOT EXISTS ${CI_DIR}/mmg2d.tgz )
     MESSAGE("\n")
     MESSAGE(WARNING "Fail to automatically download the mmg2d test cases.
 Try to get it at the following link:
-       https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmX0hrRWJWTDBETHc
+       https://drive.google.com/uc?export=download&id=1Lnvh7AldwEXS7WRa1VxsRqI7Xu7CgJNj
 then untar it in the ${CI_DIR} directory.")
   ELSE()
     EXECUTE_PROCESS(
@@ -244,28 +243,18 @@ ENDIF ()
 #--------------> mmg3d
 SET(ADDRESS
   https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmWGxhMnAzMGFrNTg
-  https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmclVnbTRqUXVfNUE
-  https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmdWNLTFh1THl1U0k
-  https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmX1d2WGJkaHUxV1E
-  https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmbmY1R0EyelhETW8
-  https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmd3lnTTZQRTZxLW8
-  https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmRHk0ZTREdzJpYXc
-  https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmd09YVmtEcXZIWFU
-  https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmLTFXUGhGTVY2dEE
-  https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmUGI3UU1UMExJTTQ
-  https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmSWZJTEt1aGVCZDA
-  https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmLUZqNjhwajBKZWM
-  https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmZG9lUTdGa1d5ZjA
-  https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmU2l0N0N4X0lyRkE
-  https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmcmVnY2NsSzBxVkk
-  https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmRWIxRS1yMUJyZkk
-  https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmM05MVEhvZzdHckE
-  https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmbFhOaE5UVlNQOFk
-  https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmLWp4SFpyN3c4d0U
-  https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmZm0tODJtRXM2eHc
-  https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmZ29NVVpyRlFob1k
-  https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmd0lmd1pHR1VKUlU
-  https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmY0VWR2pCbXRWLWM
+  https://drive.google.com/uc?export=download&id=18mhsX8pETqMp2H96dJ0ONFY7YjXdc_Aw
+  https://drive.google.com/uc?export=download&id=1rhJ5JRexW0QjGCPRKkKxaGTg7b9Nv4-6
+  https://drive.google.com/uc?export=download&id=1tXUHLCabYRjPi8XyBEbV8ZnUm5mbZnOR
+  https://drive.google.com/uc?export=download&id=1wBYaiLACKbqWvnFq9irvN64PB2udGmLP
+  https://drive.google.com/uc?export=download&id=1ehTYq14Q183II24O7ebkgl5YH892w8YS
+  https://drive.google.com/uc?export=download&id=1Gwwdp9zziu2__4rReD22mHrhTvEfZIFk
+  https://drive.google.com/uc?export=download&id=15111WFeK9u0g5mB0FGuVT5EvtVLLlVFM
+  https://drive.google.com/uc?export=download&id=1zeWyOo8sZWT5NWbvC1-a-dG8qudOWynF
+  https://drive.google.com/uc?export=download&id=1I8jfpXbyqAj2kA8HGatcBHriePEYa0bp
+  https://drive.google.com/uc?export=download&id=1bZ1wSlsxzp6gRO9IivVUFWEtSjaLJb2-
+  https://drive.google.com/uc?export=download&id=1dWKEbUNTsihOdfO2Qqtf6hoCxK-mfF_x
+  https://drive.google.com/uc?export=download&id=1qZnwZZNtJQpBzc0J9osJAYLW6AXYVknC
   )
 
 SET(FILENAME
@@ -282,16 +271,6 @@ SET(FILENAME
   ${CI_DIR}/mmg3d.tgz.ak
   ${CI_DIR}/mmg3d.tgz.al
   ${CI_DIR}/mmg3d.tgz.am
-  ${CI_DIR}/mmg3d.tgz.an
-  ${CI_DIR}/mmg3d.tgz.ao
-  ${CI_DIR}/mmg3d.tgz.ap
-  ${CI_DIR}/mmg3d.tgz.aq
-  ${CI_DIR}/mmg3d.tgz.ar
-  ${CI_DIR}/mmg3d.tgz.as
-  ${CI_DIR}/mmg3d.tgz.at
-  ${CI_DIR}/mmg3d.tgz.au
-  ${CI_DIR}/mmg3d.tgz.av
-  ${CI_DIR}/mmg3d.tgz.aw
   )
 
 
@@ -300,7 +279,7 @@ IF ( GET_MMG3D_TESTS MATCHES "TRUE" )
 
   SET(LOAD_OK 1)
 
-  FOREACH( i RANGE 0 22)
+  FOREACH( i RANGE 0 12)
     LIST(GET ADDRESS  ${i} ADDRESS_i)
     LIST(GET FILENAME ${i} FILENAME_i)
 
