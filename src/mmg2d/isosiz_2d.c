@@ -62,6 +62,64 @@ int MMG2D_sum_reqEdgeLengthsAtPoint(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,
 /**
  * \param mesh pointer toward the mesh
  * \param met pointer toward the metric
+ * \param ismet 1 if we have a metric provided by the user.
+ *
+ * \return 0 if fail, 1 otherwise
+ *
+ * Compute the metric at points on trequired adges as the mean of the lengths of
+ * the required eges to which belongs the point. The processeed points are
+ * marked with flag 3.
+ *
+ */
+int MMG2D_set_metricAtPointsOnReqEdges ( MMG5_pMesh mesh,MMG5_pSol met,int8_t ismet ) {
+  MMG5_pTria pt;
+  int        k,i,iadj;
+
+  /* Reset the tria flag */
+  for ( k=1; k<=mesh->nt; k++ ) {
+    mesh->tria[k].flag = 0;
+  }
+
+  /* Reset the input metric at required edges extremities */
+  if ( !MMG5_reset_metricAtReqEdges_surf (mesh, met, ismet ) ) {
+    return 0;
+  }
+
+  /* Process the required edges and add the edge length to the metric of the
+   * edge extremities */
+  for ( k=1; k<=mesh->nt; k++ ) {
+    pt = &mesh->tria[k];
+    if ( !MG_EOK(pt) )  continue;
+
+    /* Mark the tria as proceeded */
+    pt->flag = 1;
+    for ( i=0; i<3; i++ ) {
+      if ( (pt->tag[i] & MG_REQ) || (pt->tag[i] & MG_NOSURF) ||
+           (pt->tag[i] & MG_PARBDY) ) {
+
+        /* Check if the edge has been proceeded by the neighbour triangle */
+        iadj = mesh->adja[3*k+i+1];
+        if ( iadj && mesh->tria[iadj/3].flag ) continue;
+
+        if ( !MMG2D_sum_reqEdgeLengthsAtPoint(mesh,met,pt,i) ) {
+          return 0;
+        }
+      }
+    }
+  }
+
+  /* Travel the points and compute the metric of the points belonging to
+   * required edges as the mean of the required edges length */
+  if ( !MMG5_compute_meanMetricAtMarkedPoints ( mesh,met ) ) {
+    return 0;
+  }
+
+return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh
+ * \param met pointer toward the metric
  *
  * \return 0 if fail, 1 otherwise
  *
@@ -110,42 +168,7 @@ int MMG2D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   /** Step 1: Set metric at points belonging to a required edge: compute the
    * metric as the mean of the length of the required eges passing through the
    * point */
-  /* Reset the tria flag */
-  for ( k=1; k<=mesh->nt; k++ ) {
-    mesh->tria[k].flag = 0;
-  }
-
-  /* Reset the input metric at required edges extremities */
-  if ( !MMG5_reset_metricAtReqEdges_surf (mesh, met, ismet ) ) {
-    return 0;
-  }
-
-  /* Process the required edges and add the edge length to the metric of the
-   * edge extremities */
-  for ( k=1; k<=mesh->nt; k++ ) {
-    pt = &mesh->tria[k];
-    if ( !MG_EOK(pt) )  continue;
-
-    /* Mark the tria as proceeded */
-    pt->flag = 1;
-    for ( i=0; i<3; i++ ) {
-      if ( (pt->tag[i] & MG_REQ) || (pt->tag[i] & MG_NOSURF) ||
-           (pt->tag[i] & MG_PARBDY) ) {
-
-        /* Check if the edge has been proceeded by the neighbour triangle */
-        iadj = mesh->adja[3*k+i+1];
-        if ( iadj && mesh->tria[iadj/3].flag ) continue;
-
-        if ( !MMG2D_sum_reqEdgeLengthsAtPoint(mesh,met,pt,i) ) {
-          return 0;
-        }
-      }
-    }
-  }
-
-  /* Travel the points and compute the metric of the points belonging to
-   * required edges as the mean of the required edges length */
-  if ( !MMG5_compute_meanMetricAtMarkedPoints ( mesh,met ) ) {
+  if ( !MMG2D_set_metricAtPointsOnReqEdges ( mesh,met,ismet ) ) {
     return 0;
   }
 

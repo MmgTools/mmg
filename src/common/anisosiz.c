@@ -1268,6 +1268,7 @@ int MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int i)
  */
 int MMG5_compute_meanMetricAtMarkedPoints_ani ( MMG5_pMesh mesh,MMG5_pSol met ) {
   MMG5_pPoint p0;
+  double      lm;
   int         k,iadr;
 
   for ( k=1; k<=mesh->np; k++ ) {
@@ -1277,9 +1278,13 @@ int MMG5_compute_meanMetricAtMarkedPoints_ani ( MMG5_pMesh mesh,MMG5_pSol met ) 
     if ( !p0->s ) continue;
 
     iadr = met->size*k;
-    met->m[iadr] /= p0->s;
+    lm   = p0->s/met->m[iadr];
+    met->m[iadr] = lm*lm;
 
-    if ( mesh->dim==2 || !MG_RID(p0->tag) ) {
+    if ( mesh->dim==2 ) {
+      met->m[iadr+2] = met->m[iadr];
+    }
+    else if ( !MG_RID(p0->tag) ) {
       /* Classic metric */
       met->m[iadr+3] = met->m[iadr+5] = met->m[iadr];
     }
