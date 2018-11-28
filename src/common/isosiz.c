@@ -77,7 +77,7 @@ double MMG5_surftri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
 int MMG5_defsiz_startingMessage (MMG5_pMesh mesh,MMG5_pSol met,const char * funcname ) {
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
-    fprintf(stdout,"  ** Defining %stropic map\n",(met->size>2)?"iso":"aniso");
+    fprintf(stdout,"  ** Defining %stropic map\n",(met->size==1)?"iso":"aniso");
 
   if ( mesh->info.hmax < 0.0 ) {
     fprintf(stderr,"\n  ## Error: %s: negative hmax value.\n",funcname);
