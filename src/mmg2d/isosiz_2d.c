@@ -321,7 +321,7 @@ int MMG2D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
       for (l=0; l<mesh->info.npar; l++) {
         ppa = &mesh->info.par[l];
         if ( ppa->elt == MMG5_Vertex && ppa->ref == p0->ref ) {
-          if ( mesh->point[ip].flag < 3 ) {
+          if ( mesh->point[k].flag < 3 ) {
             met->m[k] = MG_MAX(hmin,MG_MIN(met->m[k],ppa->hmax));
           }
           break;
