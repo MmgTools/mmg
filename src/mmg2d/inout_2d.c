@@ -1446,13 +1446,20 @@ int MMG2D_saveSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   FILE*        inm;
   MMG5_pPoint  ppt;
   int          k,ier;
-  int          binch,bin;
+  int          binch,bin,dim;
 
   if ( !sol->np )  return 1;
 
   sol->ver = 2;
 
-  ier = MMG5_saveSolHeader( mesh,filename,&inm,sol->ver,&bin,mesh->np,sol->dim,
+  if ( sol->dim==2 && mesh->info.nreg ) {
+    dim = 3;
+  }
+  else {
+    dim = 2;
+  }
+
+  ier = MMG5_saveSolHeader( mesh,filename,&inm,sol->ver,&bin,mesh->np,dim,
                             1,&sol->type,&sol->size);
 
   if ( ier < 1 ) return ier;

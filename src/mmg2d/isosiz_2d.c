@@ -291,7 +291,8 @@ int MMG2D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
   /** If local parameters are provided : size truncation on the entire mesh */
-  /* Without local parameters information, only the boundary edges impose a minimum size feature */
+  /* Without local parameters information, only the boundary edges impose a
+   * minimum size feature */
   if ( mesh->info.npar ) {
     /* Minimum size feature imposed by triangles */
     for (k=1; k<=mesh->nt; k++) {
