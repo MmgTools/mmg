@@ -80,12 +80,7 @@ int MMG2D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   int8_t           ismet;
   unsigned char    i,i1,i2;
 
-
-  if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
-    fprintf(stdout,"  ** Defining isotropic map\n");
-
-  if ( mesh->info.hmax < 0.0 ) {
-    fprintf(stderr,"\n  ## Error: %s: negative hmax value.\n",__func__);
+  if ( !MMG5_defsiz_startingMessage (mesh,met,__func__) ) {
     return 0;
   }
 

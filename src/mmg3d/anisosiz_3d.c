@@ -1433,15 +1433,7 @@ int MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   char          i,ismet;
   static char   mmgErr = 0;
 
-  if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
-    fprintf(stdout,"  ** Defining anisotropic map\n");
-
-  if ( mesh->info.hmax < 0.0 ) {
-    //  mesh->info.hmax = 0.5 * mesh->info.delta;
-    if ( !mmgErr ) {
-      fprintf(stderr,"\n  ## Error: %s: negative hmax value.\n",__func__);
-      mmgErr = 1;
-    }
+  if ( !MMG5_defsiz_startingMessage (mesh,met,__func__) ) {
     return 0;
   }
 

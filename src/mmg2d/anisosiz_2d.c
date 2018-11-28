@@ -262,13 +262,18 @@ int MMG2D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pPoint    ppt;
   double         mm[3],mr[3];
   int            k,ip;
-  char           ismet,isdef,i;
+  int8_t         ismet;
+  char           isdef,i;
 
+  if ( !MMG5_defsiz_startingMessage (mesh,met,__func__) ) {
+    return 0;
+  }
 
-  if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
-    fprintf(stdout,"  ** Defining isotropic map\n");
-
-  if ( mesh->info.hmax < 0.0 )  mesh->info.hmax = 0.5 * mesh->info.delta;
+  for (k=1; k<=mesh->np; k++) {
+    ppt = &mesh->point[k];
+    ppt->flag = 0;
+    ppt->s    = 0;
+  }
 
   /* Allocate the structure */
   if ( met->m )

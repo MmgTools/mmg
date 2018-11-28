@@ -118,8 +118,8 @@ int MMG5_compute_metricAtReqEdge ( MMG5_pMesh mesh,MMG5_pSol met,int ip0,int ip1
 
   /* Add the length to the point's metric and increment the number of
    * times the point has been seen */
-  met->m[ip0] += len;
-  met->m[ip1] += len;
+  met->m[met->size*ip0] += len;
+  met->m[met->size*ip1] += len;
   ++p0->s;
   ++p1->s;
 
