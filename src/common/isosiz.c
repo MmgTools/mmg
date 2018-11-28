@@ -168,7 +168,7 @@ int MMG5_compute_meanMetricAtMarkedPoints_iso ( MMG5_pMesh mesh,MMG5_pSol met ) 
  */
 int MMG5_reset_metricAtReqEdges_surf ( MMG5_pMesh mesh,MMG5_pSol met,int8_t ismet ) {
   MMG5_pTria  pt;
-  int         k,i,j,ip0,ip1;
+  int         k,i,j,ip0,ip1,iad0,iad1;
 
   if ( ismet ) {
     for ( k=1; k<=mesh->nt; k++ ) {
@@ -181,11 +181,13 @@ int MMG5_reset_metricAtReqEdges_surf ( MMG5_pMesh mesh,MMG5_pSol met,int8_t isme
 
           ip0 = pt->v[MMG5_iprv2[i]];
           ip1 = pt->v[MMG5_inxt2[i]];
+          iad0 = met->size*ip0;
+          iad1 = met->size*ip1;
 
           for ( j=0; j<met->size; ++j ) {
 
-            met->m[ met->size*ip0 + j ] = 0.;
-            met->m[ met->size*ip1 + j ] = 0.;
+            met->m[ iad0 + j ] = 0.;
+            met->m[ iad1 + j ] = 0.;
           }
         }
       }

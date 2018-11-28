@@ -529,59 +529,22 @@ int MMG3D_sum_reqEdgeLengthsAtPoint(MMG5_pMesh mesh,MMG5_pSol met,MMG5_Hash *has
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \return 0 if fail, 1 otherwise.
+ * \param mesh pointer toward the mesh
+ * \param met pointer toward the metric
+ * \param ismet 1 if we have a metric provided by the user.
  *
- * Define isotropic size map at all boundary vertices of the mesh, associated
- * with geometric approx, and prescribe hmax at the internal vertices Field h of
- * Point is used, to store the prescribed size (not inverse, squared,...)
+ * \return 0 if fail, 1 otherwise
+ *
+ * Compute the metric at points on trequired adges as the mean of the lengths of
+ * the required eges to which belongs the point. The processeed points are
+ * marked with flag 3.
  *
  */
-int MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
-  MMG5_pTetra    pt,ptloc;
-  MMG5_pPrism    pp;
-  MMG5_pxTetra   pxt;
-  MMG5_pPoint    p0,p1;
-  MMG5_Hash      hash;
-  double         hp,v[3],b0[3],b1[3],b0p0[3],b1b0[3],p1b1[3],hausd,hmin,hmax;
-  double         secder0[3],secder1[3],kappa,tau[3],gammasec[3],ntau2,intau,ps,lm;
-  int            lists[MMG3D_LMAX+2],listv[MMG3D_LMAX+2],ilists,ilistv,k,ip0,ip1,l;
-  int            kk,isloc;
-  int8_t         ismet;
-  char           i,j,ia,ised,i0,i1;
-  MMG5_pPar      par;
-
-  if ( !MMG5_defsiz_startingMessage (mesh,met,__func__) ) {
-    return 0;
-  }
-
-  for (k=1; k<=mesh->np; k++) {
-    p0 = &mesh->point[k];
-    p0->flag = 0;
-    p0->s    = 0;
-  }
-
-  /** 1) Size at internal points */
-  hmax = DBL_MAX;
-  hmin = 0.;
-
-  /* alloc structure */
-  if ( !met->m ) {
-    ismet      = 0;
-
-    /* Allocate and store the header informations for each solution */
-    if ( !MMG3D_Set_solSize(mesh,met,MMG5_Vertex,mesh->np,1) ) {
-      return 0;
-    }
-  }
-  else {
-    ismet = 1;
-  }
-
-  /** Step 1: Set metric at points belonging to a required edge: compute the
-   * metric as the mean of the length of the required eges passing through the
-   * point */
+int MMG3D_set_metricAtPointsOnReqEdges ( MMG5_pMesh mesh,MMG5_pSol met,int8_t ismet ) {
+  MMG5_pTetra  pt;
+  MMG5_pxTetra pxt;
+  MMG5_Hash    hash;
+  int          k,i,j,ip0,ip1,iad0,iad1;
 
   /* Reset the input metric at required edges extremities */
   if ( ismet ) {
@@ -591,8 +554,14 @@ int MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
 
       if ( pt->tag & MG_REQ ) {
         for ( i=0; i<6; i++ ) {
-          met->m[pt->v[MMG5_iare[i][0]]] = 0.;
-          met->m[pt->v[MMG5_iare[i][1]]] = 0.;
+          ip0 = pt->v[MMG5_iare[i][0]];
+          ip1 = pt->v[MMG5_iare[i][1]];
+          iad0 = met->size*ip0;
+          iad1 = met->size*ip1;
+          for ( j=0; j<met->size; ++j ) {
+            met->m[iad0+j] = 0.;
+            met->m[iad1+j] = 0.;
+          }
         }
       }
       else {
@@ -602,8 +571,14 @@ int MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
         for ( i=0; i<6; i++ ) {
           if ( (pxt->tag[i] & MG_REQ) || (pxt->tag[i] & MG_NOSURF) ||
                (pxt->tag[i] & MG_PARBDY) ) {
-            met->m[pt->v[MMG5_iare[i][0]]] = 0.;
-            met->m[pt->v[MMG5_iare[i][1]]] = 0.;
+            ip0 = pt->v[MMG5_iare[i][0]];
+            ip1 = pt->v[MMG5_iare[i][1]];
+            iad0 = met->size*ip0;
+            iad1 = met->size*ip1;
+            for ( j=0; j<met->size; ++j ) {
+              met->m[iad0+j] = 0.;
+              met->m[iad1+j] = 0.;
+            }
           }
         }
       }
@@ -646,6 +621,66 @@ int MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   /* Travel the points and compute the metric of the points belonging to
    * required edges as the mean of the required edges length */
   if ( !MMG5_compute_meanMetricAtMarkedPoints ( mesh,met ) ) {
+    return 0;
+  }
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \return 0 if fail, 1 otherwise.
+ *
+ * Define isotropic size map at all boundary vertices of the mesh, associated
+ * with geometric approx, and prescribe hmax at the internal vertices Field h of
+ * Point is used, to store the prescribed size (not inverse, squared,...)
+ *
+ */
+int MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
+  MMG5_pTetra    pt,ptloc;
+  MMG5_pPrism    pp;
+  MMG5_pxTetra   pxt;
+  MMG5_pPoint    p0,p1;
+  double         hp,v[3],b0[3],b1[3],b0p0[3],b1b0[3],p1b1[3],hausd,hmin,hmax;
+  double         secder0[3],secder1[3],kappa,tau[3],gammasec[3],ntau2,intau,ps,lm;
+  int            lists[MMG3D_LMAX+2],listv[MMG3D_LMAX+2],ilists,ilistv,k,ip0,ip1,l;
+  int            kk,isloc;
+  int8_t         ismet;
+  char           i,j,ia,ised,i0,i1;
+  MMG5_pPar      par;
+
+  if ( !MMG5_defsiz_startingMessage (mesh,met,__func__) ) {
+    return 0;
+  }
+
+  for (k=1; k<=mesh->np; k++) {
+    p0 = &mesh->point[k];
+    p0->flag = 0;
+    p0->s    = 0;
+  }
+
+  /** 1) Size at internal points */
+  hmax = DBL_MAX;
+  hmin = 0.;
+
+  /* alloc structure */
+  if ( !met->m ) {
+    ismet      = 0;
+
+    /* Allocate and store the header informations for each solution */
+    if ( !MMG3D_Set_solSize(mesh,met,MMG5_Vertex,mesh->np,1) ) {
+      return 0;
+    }
+  }
+  else {
+    ismet = 1;
+  }
+
+  /** Step 1: Set metric at points belonging to a required edge: compute the
+   * metric as the mean of the length of the required eges passing through the
+   * point */
+  if ( !MMG3D_set_metricAtPointsOnReqEdges ( mesh,met,ismet ) ) {
     return 0;
   }
 

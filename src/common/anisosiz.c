@@ -230,7 +230,7 @@ void MMG5_defUninitSize(MMG5_pMesh mesh,MMG5_pSol met,char ismet)
   isqhmax = 1.0 / (mesh->info.hmax*mesh->info.hmax);
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
-    if ( !MG_VOK(ppt) || ppt->flag == 1 )  continue;
+    if ( !MG_VOK(ppt) || ppt->flag > 0 )  continue;
 
     m = &met->m[6*k];
     if(ismet) {
@@ -262,7 +262,7 @@ void MMG5_defUninitSize(MMG5_pMesh mesh,MMG5_pSol met,char ismet)
       m[4] = isqhmax*(r[0][1]*r[0][2]+r[1][1]*r[1][2]+r[2][1]*r[2][2]);
       m[5] = isqhmax*(r[0][2]*r[0][2]+r[1][2]*r[1][2]+r[2][2]*r[2][2]);
     }
-    ppt->flag = 1;
+    ppt->flag = 2;
   }
 }
 
