@@ -685,6 +685,12 @@ int MMGS_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
     return 0;
   }
 
+  for (k=1; k<=mesh->np; k++) {
+    ppt = &mesh->point[k];
+    ppt->flag = 0;
+    ppt->s    = 0;
+  }
+
   if ( met->m )
     ismet = 1;
   else {
@@ -695,11 +701,6 @@ int MMGS_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
 
      if ( !MMGS_Set_solSize(mesh,met,MMG5_Vertex,mesh->np,3) )
        return 0;
-  }
-
-  for (k=1; k<=mesh->np; k++) {
-    ppt = &mesh->point[k];
-    ppt->flag = 0;
   }
 
   for (k=1; k<=mesh->nt; k++) {
