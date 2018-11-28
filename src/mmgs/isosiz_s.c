@@ -39,6 +39,41 @@
 #define MAXLEN   1.0e+3
 
 /**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param hash edge hashtable.
+ * \param pt tria to process.
+ * \param i index of the edge of the tria \a pt that we process.
+ *
+ * \return 1 if success, 0 if fail.
+ *
+ * If the edge \a i of the tria \a pt is seen for the first time, compute its
+ * euclidean length, add this length to the metric of the edge extremities and
+ * increment the count of times we have processed this extremities.
+ *
+ */
+static inline
+int MMGS_compute_metricAtReqEdge(MMG5_pMesh mesh,MMG5_pSol met,MMG5_Hash *hash,
+                                  MMG5_pTria pt,char i) {
+  int         ip0,ip1;
+
+  ip0 = pt->v[MMG5_inxt2[i]];
+  ip1 = pt->v[MMG5_iprv2[i]];
+
+  /* Check if the edge is already treated */
+  if ( MMG5_hashGet(hash,ip0,ip1) ) return 1;
+
+  /* Mark the edge as treated */
+  if ( !MMG5_hashEdge(mesh,hash,ip0,ip1,1) ) return 0;
+
+  if ( !MMG5_compute_metricAtReqEdge(mesh,met,ip0,ip1) )
+    return 0;
+
+  return 1;
+}
+
+
+/**
  * \param mesh pointer toward the mesh
  * \param met pointer toward the metric
  *
@@ -49,31 +84,90 @@
  *
  */
 int MMGS_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
-  MMG5_pTria    pt;
-  MMG5_pPoint   p[3];
-  MMG5_pPar     par;
-  double   n[3][3],t[3][3],nt[3],c1[3],c2[3],*n1,*n2,*t1,*t2;
-  double   ps,ps2,ux,uy,uz,ll,l,lm,dd,M1,M2,hausd,hmin,hmax;
-  int      k,j,ip1,ip2,isloc;
-  char     i,i1,i2;
+  MMG5_pTria  pt;
+  MMG5_pPoint p[3],p0;
+  MMG5_pPar   par;
+  MMG5_Hash   hash;
+  double      n[3][3],t[3][3],nt[3],c1[3],c2[3],*n1,*n2,*t1,*t2;
+  double      ps,ps2,ux,uy,uz,ll,l,lm,dd,M1,M2,hausd,hmin,hmax;
+  int         k,j,ip1,ip2,isloc;
+  int8_t      ismet;
+  char        i,i1,i2;
 
-  if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
-    fprintf(stdout,"  ** Defining isotropic map\n");
+  if ( !MMG5_defsiz_startingMessage (mesh,met,__func__) ) {
+    return 0;
+  }
 
-  if ( mesh->info.hmax < 0.0 )  mesh->info.hmax = 0.5 * mesh->info.delta;
+  for (k=1; k<=mesh->np; k++) {
+    p0 = &mesh->point[k];
+    p0->flag = 0;
+    p0->s    = 0;
+  }
 
   /* alloc structure */
   if ( !met->m ) {
+    ismet      = 0;
+
     /* Allocate and store the header informations for each solution */
     if ( !MMGS_Set_solSize(mesh,met,MMG5_Vertex,mesh->np,1) ) {
       return 0;
     }
-
-    /* init constant size */
-    for (k=1; k<=mesh->np; k++)
-      met->m[k] = mesh->info.hmax;
+  }
+  else {
+    ismet = 1;
   }
 
+  /** Step 1: Set metric at points belonging to a required edge: compute the
+   * metric as the mean of the length of the required eges passing through the
+   * point */
+
+  /* Reset the input metric at required edges extremities */
+  if ( !MMG5_reset_metricAtReqEdges_surf (mesh, met, ismet ) ) {
+    return 0;
+  }
+
+  /* Process the required edges and add the edge length to the metric of the
+   * edge extremities */
+  if ( !MMG5_hashNew(mesh,&hash,mesh->np,7*mesh->np) )  return 0;
+
+  for ( k=1; k<=mesh->nt; k++ ) {
+    pt = &mesh->tria[k];
+    if ( !MG_EOK(pt) )  continue;
+
+    for ( i=0; i<3; i++ ) {
+      if ( (pt->tag[i] & MG_REQ) || (pt->tag[i] & MG_NOSURF) ||
+           (pt->tag[i] & MG_PARBDY) ) {
+
+        /* Check if the edge has been proceeded by the neighbour triangle */
+        if ( !MMGS_compute_metricAtReqEdge(mesh,met,&hash,pt,i) ) {
+          MMG5_DEL_MEM(mesh,hash.item);
+          return 0;
+        }
+      }
+    }
+  }
+  MMG5_DEL_MEM(mesh,hash.item);
+
+  /* Travel the points and compute the metric of the points belonging to
+   * required edges as the mean of the required edges length */
+  if ( !MMG5_compute_meanMetricAtMarkedPoints ( mesh,met ) ) {
+    return 0;
+  }
+
+  /** Step 2: size at non required internal points */
+  if ( !ismet ) {
+
+    /* init constant size */
+    for (k=1; k<=mesh->np; k++) {
+      if ( mesh->point[k].flag ) {
+        continue;
+      }
+      met->m[k] = mesh->info.hmax;
+      mesh->point[k].flag = 1;
+    }
+  }
+
+  /** Step 3: Minimum size feature imposed by the hausdorff distance */
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) )  continue;
@@ -191,8 +285,12 @@ int MMGS_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
           lm = (16.0*ll*hausd) / (3.0*M1);
           lm = sqrt(lm);
         }
-        met->m[ip1] = MG_MAX(hmin,MG_MIN(met->m[ip1],lm));
-        met->m[ip2] = MG_MAX(hmin,MG_MIN(met->m[ip2],lm));
+        if ( mesh->point[ip1].flag < 3 ) {
+          met->m[ip1] = MG_MAX(hmin,MG_MIN(met->m[ip1],lm));
+        }
+        if ( mesh->point[ip2].flag < 3 ) {
+          met->m[ip2] = MG_MAX(hmin,MG_MIN(met->m[ip2],lm));
+        }
       }
       else {
         n1 = n[i1];
@@ -226,8 +324,12 @@ int MMGS_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
           lm = (16.0*ll*hausd) / (3.0*M1);
           lm = sqrt(lm);
         }
-        met->m[ip1] = MG_MAX(hmin,MG_MIN(met->m[ip1],lm));
-        met->m[ip2] = MG_MAX(hmin,MG_MIN(met->m[ip2],lm));
+        if ( mesh->point[ip1].flag < 3 ) {
+          met->m[ip1] = MG_MAX(hmin,MG_MIN(met->m[ip1],lm));
+        }
+        if ( mesh->point[ip2].flag < 3 ) {
+          met->m[ip2] = MG_MAX(hmin,MG_MIN(met->m[ip2],lm));
+        }
       }
     }
   }
@@ -246,9 +348,15 @@ int MMGS_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
       for (k=1; k<=mesh->nt; k++) {
         pt = &mesh->tria[k];
         if ( !MG_EOK(pt) || pt->ref != par->ref )  continue;
-        met->m[pt->v[0]] = MG_MAX(par->hmin,MG_MIN(met->m[pt->v[0]],par->hmax));
-        met->m[pt->v[1]] = MG_MAX(par->hmin,MG_MIN(met->m[pt->v[1]],par->hmax));
-        met->m[pt->v[2]] = MG_MAX(par->hmin,MG_MIN(met->m[pt->v[2]],par->hmax));
+        if ( mesh->point[pt->v[0]].flag < 3 ) {
+          met->m[pt->v[0]] = MG_MAX(par->hmin,MG_MIN(met->m[pt->v[0]],par->hmax));
+        }
+        if ( mesh->point[pt->v[1]].flag < 3 ) {
+          met->m[pt->v[1]] = MG_MAX(par->hmin,MG_MIN(met->m[pt->v[1]],par->hmax));
+        }
+        if ( mesh->point[pt->v[2]].flag < 3 ) {
+          met->m[pt->v[2]] = MG_MAX(par->hmin,MG_MIN(met->m[pt->v[2]],par->hmax));
+        }
       }
     }
   }

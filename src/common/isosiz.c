@@ -62,3 +62,129 @@ double MMG5_surftri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
 
   return  0.5*sqrt(det) ;
 }
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param funcname name of the calling function
+ *
+ * \return 1 if success, 0 if fail.
+ *
+ * Print that we enter in the defsiz function in high verbosity level and check
+ * the hmax value.
+ *
+ */
+int MMG5_defsiz_startingMessage (MMG5_pMesh mesh,MMG5_pSol met,const char * funcname ) {
+
+  if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
+    fprintf(stdout,"  ** Defining %stropic map\n",(met->size>2)?"iso":"aniso");
+
+  if ( mesh->info.hmax < 0.0 ) {
+    fprintf(stderr,"\n  ## Error: %s: negative hmax value.\n",funcname);
+    return 0;
+  }
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param ip0 index of the first edge extremity
+ * \param ip1 index of the second edge extremity
+ *
+ * \return 1 if success, 0 if fail.
+ *
+ * Compute the euclidean length of the edge \a ip0 \a ip1,
+ * add this length to the metric of the edge extremities and
+ * increment the count of times we have processed this extremities.
+ *
+ */
+int MMG5_compute_metricAtReqEdge ( MMG5_pMesh mesh,MMG5_pSol met,int ip0,int ip1 ) {
+  MMG5_pPoint p0,p1;
+  int         j;
+  double      len,dist;
+
+  /* Compute the euclidean edge length */
+  p0 = &mesh->point[ip0];
+  p1 = &mesh->point[ip1];
+
+  len = 0.;
+  for ( j=0; j<mesh->dim; ++j ) {
+    dist = p1->c[j]-p0->c[j];
+    len += dist*dist;
+  }
+  len = sqrt(len);
+
+  /* Add the length to the point's metric and increment the number of
+   * times the point has been seen */
+  met->m[ip0] += len;
+  met->m[ip1] += len;
+  ++p0->s;
+  ++p1->s;
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ *
+ * \return 1 if success, 0 if fail.
+ *
+ * Compute the mean metric at mesh points with a non-nul \a s field. At the
+ * beginning, the metric of a given point contains the sum of n metrics and the
+ * \a s field of the point the number of metrics summed in the point. Set the
+ * flag of the processed points to 3.
+ *
+ */
+int MMG5_compute_meanMetricAtMarkedPoints ( MMG5_pMesh mesh,MMG5_pSol met ) {
+  MMG5_pPoint p0;
+  int         k;
+
+  for ( k=1; k<=mesh->np; k++ ) {
+    p0 = &mesh->point[k];
+    if ( !MG_VOK(p0) )  continue;
+
+    if ( !p0->s ) continue;
+
+    met->m[k] /= p0->s;
+    p0->flag = 3;
+  }
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param ismet 1 if the user has given an input metric (so we need to reset it)
+ *
+ * \return 1 if success, 0 if fail.
+ *
+ * For a triangle mesh, process the triangles and set to 0 the metrics at points
+ * that are at the extremities of a required edge.
+ *
+ */
+int MMG5_reset_metricAtReqEdges_surf ( MMG5_pMesh mesh,MMG5_pSol met,int8_t ismet ) {
+  MMG5_pPoint p0;
+  MMG5_pTria  pt;
+  int         k,i;
+
+  if ( ismet ) {
+    for ( k=1; k<=mesh->nt; k++ ) {
+      pt = &mesh->tria[k];
+      if ( !MG_EOK(pt) )  continue;
+
+      for ( i=0; i<3; ++i ) {
+        if ( (pt->tag[i] & MG_REQ) || (pt->tag[i] & MG_NOSURF) ||
+             (pt->tag[i] & MG_PARBDY) ) {
+          met->m[pt->v[MMG5_iprv2[i]]] = 0.;
+          met->m[pt->v[MMG5_inxt2[i]]] = 0.;
+        }
+      }
+    }
+  }
+
+  return 1;
+}

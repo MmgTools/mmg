@@ -34,6 +34,33 @@
 #include "mmg2d.h"
 
 /**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param pt tetra to process.
+ * \param i index of the edge of the tetra \a pt that we process.
+ *
+ * \return 1 if success, 0 if fail.
+ *
+ * Compute the euclidean length of the edge \a i of the tria \a pt, add this
+ * length to the metric of the edge extremities and increment the count of times
+ * we have processed this extremities.
+ *
+ */
+static inline
+int MMG2D_compute_metricAtReqEdge(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,char i) {
+  int         ip0,ip1;
+
+  ip0 = pt->v[MMG5_iprv2[i]];
+  ip1 = pt->v[MMG5_inxt2[i]];
+
+  if ( !MMG5_compute_metricAtReqEdge(mesh,met,ip0,ip1) )
+    return 0;
+
+  return 1;
+}
+
+
+/**
  * \param mesh pointer toward the mesh
  * \param met pointer toward the metric
  *
@@ -49,39 +76,114 @@ int MMG2D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pPar        ppa;
   double           t1[2],t2[2],b1[2],b2[2],gpp1[2],gpp2[2],pv,M1,M2;
   double           ps1,ps2,ux,uy,ll,li,lm,hmax,hausd,hmin,lhmax,lhausd;
-  int              k,l,ip,ip1,ip2;
+  int              k,l,ip,ip1,ip2,iadj;
+  int8_t           ismet;
   unsigned char    i,i1,i2;
 
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
     fprintf(stdout,"  ** Defining isotropic map\n");
 
-  if ( mesh->info.hmax < 0.0 )  mesh->info.hmax = 0.5 * mesh->info.delta;
+  if ( mesh->info.hmax < 0.0 ) {
+    fprintf(stderr,"\n  ## Error: %s: negative hmax value.\n",__func__);
+    return 0;
+  }
 
+  for (k=1; k<=mesh->np; k++) {
+    p0 = &mesh->point[k];
+    p0->flag = 0;
+    p0->s    = 0;
+  }
+
+  /** 1) Size at internal points */
   hmax = mesh->info.hmax;
   hausd = mesh->info.hausd;
   hmin = mesh->info.hmin;
 
   /* Allocate the structure */
   if ( !met->np ) {
+    ismet = 0;
 
     /* Allocate and store the header informations for each solution */
     if ( !MMG2D_Set_solSize(mesh,met,MMG5_Vertex,mesh->np,1) ) {
       return 0;
     }
-
-    /* Initialize metric with a constant size in the case met->np = 0 (meaning that no metric was supplied) */
-    for (k=1; k<=mesh->np; k++)
-      met->m[k] = hmax;
+  }
+  else {
+    ismet = 1;
   }
 
-  /* Minimum size feature imposed by the boundary edges */
-  for (k=1; k<=mesh->nt; k++) {
+  /** Step 1: Set metric at points belonging to a required edge: compute the
+   * metric as the mean of the length of the required eges passing through the
+   * point */
+  /* Reset the tria flag */
+  for ( k=1; k<=mesh->nt; k++ ) {
+    mesh->tria[k].flag = 0;
+  }
+
+  /* Reset the input metric at required edges extremities */
+  if ( !MMG5_reset_metricAtReqEdges_surf (mesh, met, ismet ) ) {
+    return 0;
+  }
+
+  /* Process the required edges and add the edge length to the metric of the
+   * edge extremities */
+  for ( k=1; k<=mesh->nt; k++ ) {
+    pt = &mesh->tria[k];
+    if ( !MG_EOK(pt) )  continue;
+
+    /* Mark the tria as proceeded */
+    pt->flag = 1;
+    for ( i=0; i<3; i++ ) {
+      if ( (pt->tag[i] & MG_REQ) || (pt->tag[i] & MG_NOSURF) ||
+           (pt->tag[i] & MG_PARBDY) ) {
+
+        /* Check if the edge has been proceeded by the neighbour triangle */
+        iadj = mesh->adja[3*k+i+1];
+        if ( iadj && mesh->tria[iadj/3].flag ) continue;
+
+        if ( !MMG2D_compute_metricAtReqEdge(mesh,met,pt,i) ) {
+          return 0;
+        }
+      }
+    }
+  }
+
+  /* Travel the points and compute the metric of the points belonging to
+   * required edges as the mean of the required edges length */
+  if ( !MMG5_compute_meanMetricAtMarkedPoints ( mesh,met ) ) {
+    return 0;
+  }
+
+  /** Step 2: size at non required internal points */
+  if ( !ismet ) {
+    /* Initialize metric with a constant size */
+    for ( k=1; k<=mesh->np; k++ ) {
+      if ( mesh->point[k].flag ) {
+        continue;
+      }
+      met->m[k] = hmax;
+      mesh->point[k].flag = 1;
+    }
+  }
+
+  /** Step 3: Minimum size feature imposed by the boundary edges */
+  for ( k=1; k<=mesh->nt; k++ ) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) ) continue;
 
-    for (i=0; i<3; i++) {
+    for ( i=0; i<3; i++ ) {
       if ( !MG_EDG(pt->tag[i]) ) continue;
+
+      i1 = MMG5_inxt2[i];
+      i2 = MMG5_iprv2[i];
+      ip1 = pt->v[i1];
+      ip2 = pt->v[i2];
+
+      p1 = &mesh->point[ip1];
+      p2 = &mesh->point[ip2];
+
+      if ( p1->flag>1 && p2->flag>1 ) continue;
 
       lhmax = hmax;
       lhausd = hausd;
@@ -98,13 +200,6 @@ int MMG2D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
         }
       }
 
-      i1 = MMG5_inxt2[i];
-      i2 = MMG5_iprv2[i];
-      ip1 = pt->v[i1];
-      ip2 = pt->v[i2];
-
-      p1 = &mesh->point[ip1];
-      p2 = &mesh->point[ip2];
 
       ux = p2->c[0] - p1->c[0];
       uy = p2->c[1] - p1->c[1];
@@ -169,11 +264,16 @@ int MMG2D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
         lm = 8.0*lhausd / M1;
         lm = MG_MIN(lhmax,sqrt(lm));
       }
-      met->m[ip1] = MG_MAX(hmin,MG_MIN(met->m[ip1],lm));
-      met->m[ip2] = MG_MAX(hmin,MG_MIN(met->m[ip2],lm));
+      if ( p1->flag < 3 ) {
+        met->m[ip1] = MG_MAX(hmin,MG_MIN(met->m[ip1],lm));
+      }
+      if ( p2->flag < 3 ) {
+        met->m[ip2] = MG_MAX(hmin,MG_MIN(met->m[ip2],lm));
+      }
     }
   }
 
+  /** If local parameters are provided : size truncation on the entire mesh */
   /* Without local parameters information, only the boundary edges impose a minimum size feature */
   if ( mesh->info.npar ) {
     /* Minimum size feature imposed by triangles */

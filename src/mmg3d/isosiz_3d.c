@@ -511,9 +511,7 @@ double MMG5_meansizreg_iso(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,
 static inline
 int MMG3D_compute_metricAtReqEdge(MMG5_pMesh mesh,MMG5_pSol met,MMG5_Hash *hash,
                                   MMG5_pTetra pt,char i) {
-  MMG5_pPoint p0,p1;
-  int         ip0,ip1,j;
-  double      len,dist;
+  int         ip0,ip1;
 
   ip0 = pt->v[MMG5_iare[i][0]];
   ip1 = pt->v[MMG5_iare[i][1]];
@@ -524,23 +522,8 @@ int MMG3D_compute_metricAtReqEdge(MMG5_pMesh mesh,MMG5_pSol met,MMG5_Hash *hash,
   /* Mark the edge as treated */
   if ( !MMG5_hashEdge(mesh,hash,ip0,ip1,1) ) return 0;
 
-  /* Compute the euclidean edge length */
-  p0 = &mesh->point[ip0];
-  p1 = &mesh->point[ip1];
-
-  len = 0.;
-  for ( j=0; j<3; ++j ) {
-    dist = p1->c[j]-p0->c[j];
-    len += dist*dist;
-  }
-  len = sqrt(len);
-
-  /* Add the length to the point's metric and increment the number of
-   * times the point has been seen */
-  met->m[ip0] += len;
-  met->m[ip1] += len;
-  ++p0->s;
-  ++p1->s;
+  if ( !MMG5_compute_metricAtReqEdge(mesh,met,ip0,ip1) )
+    return 0;
 
   return 1;
 }
@@ -564,7 +547,8 @@ int MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   double         hp,v[3],b0[3],b1[3],b0p0[3],b1b0[3],p1b1[3],hausd,hmin,hmax;
   double         secder0[3],secder1[3],kappa,tau[3],gammasec[3],ntau2,intau,ps,lm;
   int            lists[MMG3D_LMAX+2],listv[MMG3D_LMAX+2],ilists,ilistv,k,ip0,ip1,l;
-  int            kk,isloc,ismet;
+  int            kk,isloc;
+  int8_t         ismet;
   char           i,j,ia,ised,i0,i1;
   MMG5_pPar      par;
 
@@ -572,7 +556,6 @@ int MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
     fprintf(stdout,"  ** Defining isotropic map\n");
 
   if ( mesh->info.hmax < 0.0 ) {
-    //  mesh->info.hmax = 0.5 * mesh->info.delta;
     fprintf(stderr,"\n  ## Error: %s: negative hmax value.\n",__func__);
     return 0;
   }
@@ -596,7 +579,9 @@ int MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
       return 0;
     }
   }
-  else ismet = 1;
+  else {
+    ismet = 1;
+  }
 
   /** Step 1: Set metric at points belonging to a required edge: compute the
    * metric as the mean of the length of the required eges passing through the
@@ -660,20 +645,13 @@ int MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
       }
     }
   }
+  MMG5_DEL_MEM(mesh,hash.item);
 
   /* Travel the points and compute the metric of the points belonging to
    * required edges as the mean of the required edges length */
-  for ( k=1; k<=mesh->np; k++ ) {
-    p0 = &mesh->point[k];
-    if ( !MG_VOK(p0) )  continue;
-
-    if ( !p0->s ) continue;
-
-    met->m[k] /= p0->s;
-    p0->flag = 3;
+  if ( !MMG5_compute_meanMetricAtMarkedPoints ( mesh,met ) ) {
+    return 0;
   }
-  MMG5_DEL_MEM(mesh,hash.item);
-
 
   /** Step 2: size at non required internal points */
   if ( !ismet ) {
@@ -695,6 +673,7 @@ int MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
         /* Local param at vertex */
         if ( mesh->info.parTyp & MG_Vert ) {
           for (l=0; l<mesh->info.npar; l++) {
+
             par = &mesh->info.par[l];
             if ( (par->elt == MMG5_Vertex) && (p0->ref == par->ref ) ) {
               hmax = par->hmax;

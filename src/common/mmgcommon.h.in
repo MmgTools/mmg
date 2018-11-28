@@ -592,6 +592,11 @@ void            MMG5_printMetStats(MMG5_pMesh mesh,MMG5_pSol met);
 void            MMG5_printSolStats(MMG5_pMesh mesh,MMG5_pSol *sol);
 void            MMG5_chooseOutputFormat(MMG5_pMesh mesh, int *msh);
 
+int MMG5_defsiz_startingMessage (MMG5_pMesh,MMG5_pSol,const char * funcname );
+int MMG5_compute_metricAtReqEdge ( MMG5_pMesh,MMG5_pSol,int ip0,int ip1 );
+int MMG5_compute_meanMetricAtMarkedPoints ( MMG5_pMesh mesh,MMG5_pSol met);
+int MMG5_reset_metricAtReqEdges_surf ( MMG5_pMesh,MMG5_pSol,int8_t);
+
 /* function pointers */
 int    (*MMG5_chkmsh)(MMG5_pMesh,int,int);
 int    (*MMG5_bezierCP)(MMG5_pMesh ,MMG5_Tria *,MMG5_pBezier ,char );
