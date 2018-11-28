@@ -40,6 +40,7 @@ void MMGS_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( met->size < 6 ) {
     MMG5_calelt      = MMG5_caltri_iso;
     MMG5_lenSurfEdg  = MMG5_lenSurfEdg_iso;
+    MMG5_compute_meanMetricAtMarkedPoints = MMG5_compute_meanMetricAtMarkedPoints_iso;
     MMG5_defsiz      = MMGS_defsiz_iso;
     gradsiz           = gradsiz_iso;
     intmet            = intmet_iso;
@@ -55,6 +56,7 @@ void MMGS_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
       MMG5_calelt     = MMG5_caltri_ani;
       MMG5_lenSurfEdg = MMG5_lenSurfEdg_ani;
     }
+    MMG5_compute_meanMetricAtMarkedPoints = MMG5_compute_meanMetricAtMarkedPoints_ani;
     MMG5_defsiz  = MMGS_defsiz_ani;
     gradsiz       = gradsiz_ani;
     intmet        = intmet_ani;

@@ -261,7 +261,7 @@ int MMG2D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria     pt;
   MMG5_pPoint    ppt;
   double         mm[3],mr[3];
-  int            k,ip;
+  int            k,ip,iadj;
   int8_t         ismet;
   char           isdef,i;
 

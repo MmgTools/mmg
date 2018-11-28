@@ -53,6 +53,7 @@ void MMG3D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
     MMG5_movbdynompt     = MMG5_movbdynompt_iso;
     MMG5_movbdyridpt     = MMG5_movbdyridpt_iso;
     MMG5_interp4bar      = MMG5_interp4bar_iso;
+    MMG5_compute_meanMetricAtMarkedPoints = MMG5_compute_meanMetricAtMarkedPoints_iso;
     MMG5_defsiz          = MMG3D_defsiz_iso;
     MMG5_gradsiz         = MMG5_gradsiz_iso;
 #ifndef PATTERN
@@ -78,11 +79,12 @@ void MMG3D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
     MMG5_intmet         = MMG5_intmet_ani;
     MMG5_lenedgspl      = MMG5_lenedg_ani;
     MMG5_movintpt       = MMG5_movintpt_ani;
-   MMG5_movbdyregpt     = MMG5_movbdyregpt_ani;
-   MMG5_movbdyrefpt     = MMG5_movbdyrefpt_ani;
-   MMG5_movbdynompt     = MMG5_movbdynompt_ani;
-   MMG5_movbdyridpt     = MMG5_movbdyridpt_ani;
+    MMG5_movbdyregpt     = MMG5_movbdyregpt_ani;
+    MMG5_movbdyrefpt     = MMG5_movbdyrefpt_ani;
+    MMG5_movbdynompt     = MMG5_movbdynompt_ani;
+    MMG5_movbdyridpt     = MMG5_movbdyridpt_ani;
     MMG5_interp4bar     = MMG5_interp4bar_ani;
+    MMG5_compute_meanMetricAtMarkedPoints = MMG5_compute_meanMetricAtMarkedPoints_ani;
     MMG5_defsiz         = MMG3D_defsiz_ani;
     MMG5_gradsiz        = MMG5_gradsiz_ani;
 #ifndef PATTERN

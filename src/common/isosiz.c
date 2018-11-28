@@ -100,7 +100,7 @@ int MMG5_defsiz_startingMessage (MMG5_pMesh mesh,MMG5_pSol met,const char * func
  * increment the count of times we have processed this extremities.
  *
  */
-int MMG5_compute_metricAtReqEdge ( MMG5_pMesh mesh,MMG5_pSol met,int ip0,int ip1 ) {
+int MMG5_sum_reqEdgeLengthsAtPoint ( MMG5_pMesh mesh,MMG5_pSol met,int ip0,int ip1 ) {
   MMG5_pPoint p0,p1;
   int         j;
   double      len,dist;
@@ -138,7 +138,7 @@ int MMG5_compute_metricAtReqEdge ( MMG5_pMesh mesh,MMG5_pSol met,int ip0,int ip1
  * flag of the processed points to 3.
  *
  */
-int MMG5_compute_meanMetricAtMarkedPoints ( MMG5_pMesh mesh,MMG5_pSol met ) {
+int MMG5_compute_meanMetricAtMarkedPoints_iso ( MMG5_pMesh mesh,MMG5_pSol met ) {
   MMG5_pPoint p0;
   int         k;
 
@@ -169,7 +169,7 @@ int MMG5_compute_meanMetricAtMarkedPoints ( MMG5_pMesh mesh,MMG5_pSol met ) {
 int MMG5_reset_metricAtReqEdges_surf ( MMG5_pMesh mesh,MMG5_pSol met,int8_t ismet ) {
   MMG5_pPoint p0;
   MMG5_pTria  pt;
-  int         k,i;
+  int         k,i,j,ip0,ip1;
 
   if ( ismet ) {
     for ( k=1; k<=mesh->nt; k++ ) {
@@ -179,8 +179,15 @@ int MMG5_reset_metricAtReqEdges_surf ( MMG5_pMesh mesh,MMG5_pSol met,int8_t isme
       for ( i=0; i<3; ++i ) {
         if ( (pt->tag[i] & MG_REQ) || (pt->tag[i] & MG_NOSURF) ||
              (pt->tag[i] & MG_PARBDY) ) {
-          met->m[pt->v[MMG5_iprv2[i]]] = 0.;
-          met->m[pt->v[MMG5_inxt2[i]]] = 0.;
+
+          ip0 = pt->v[MMG5_iprv2[i]];
+          ip1 = pt->v[MMG5_inxt2[i]];
+
+          for ( j=0; j<met->size; ++j ) {
+
+            met->m[ met->size*ip0 + j ] = 0.;
+            met->m[ met->size*ip1 + j ] = 0.;
+          }
         }
       }
     }

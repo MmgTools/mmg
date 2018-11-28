@@ -150,6 +150,8 @@ extern "C" {
 
 #define MG_EDG(tag) ((tag & MG_GEO) || (tag & MG_REF)) /**< Edge or Ridge */
 #define MG_SIN(tag) ((tag & MG_CRN) || (tag & MG_REQ)) /**< Corner or Required */
+#define MG_RID(tag) ((!( MG_SIN(tag)||(tag & MG_NOM))) &&  tag & MG_GEO ) /**< Non-singular ridge point (so ridge metric in aniso mode) */
+
 
 #define MG_SET(flag,bit) ((flag) |= (1 << (bit)))  /**< bit number bit is set to 1 */
 #define MG_CLR(flag,bit) ((flag) &= ~(1 << (bit))) /**< bit number bit is set to 0 */
@@ -593,14 +595,18 @@ void            MMG5_printSolStats(MMG5_pMesh mesh,MMG5_pSol *sol);
 void            MMG5_chooseOutputFormat(MMG5_pMesh mesh, int *msh);
 
 int MMG5_defsiz_startingMessage (MMG5_pMesh,MMG5_pSol,const char * funcname );
-int MMG5_compute_metricAtReqEdge ( MMG5_pMesh,MMG5_pSol,int ip0,int ip1 );
-int MMG5_compute_meanMetricAtMarkedPoints ( MMG5_pMesh mesh,MMG5_pSol met);
+int MMG5_sum_reqEdgeLengthsAtPoint ( MMG5_pMesh,MMG5_pSol,int ip0,int ip1 );
+int MMG5_compute_meanMetricAtMarkedPoints_iso ( MMG5_pMesh mesh,MMG5_pSol met);
+int MMG5_compute_meanMetricAtMarkedPoints_ani ( MMG5_pMesh mesh,MMG5_pSol met);
+
 int MMG5_reset_metricAtReqEdges_surf ( MMG5_pMesh,MMG5_pSol,int8_t);
 
 /* function pointers */
 int    (*MMG5_chkmsh)(MMG5_pMesh,int,int);
 int    (*MMG5_bezierCP)(MMG5_pMesh ,MMG5_Tria *,MMG5_pBezier ,char );
 double (*MMG5_lenSurfEdg)(MMG5_pMesh mesh,MMG5_pSol sol ,int ,int, char );
+int    (*MMG5_compute_meanMetricAtMarkedPoints)( MMG5_pMesh,MMG5_pSol);
+
 
 /* useful functions to debug */
 int  (*MMG5_indElt)(MMG5_pMesh mesh,int kel);

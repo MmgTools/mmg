@@ -1253,3 +1253,44 @@ int MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int i)
     return i2;
   }
 }
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ *
+ * \return 1 if success, 0 if fail.
+ *
+ * Compute the mean metric at mesh points with a non-nul \a s field. At the
+ * beginning, for a given point \a ip, \f$ met->m[met->size * ip] \f$ contains
+ * the sum of n metrics and the \a s field of \a ip contains the number of
+ * metrics summed in the point. Set the flag of the processed points to 3.
+ *
+ */
+int MMG5_compute_meanMetricAtMarkedPoints_ani ( MMG5_pMesh mesh,MMG5_pSol met ) {
+  MMG5_pPoint p0;
+  int         k,iadr;
+
+  for ( k=1; k<=mesh->np; k++ ) {
+    p0 = &mesh->point[k];
+    if ( !MG_VOK(p0) )  continue;
+
+    if ( !p0->s ) continue;
+
+    iadr = met->size*k;
+    met->m[iadr] /= p0->s;
+
+    if ( mesh->dim==2 || !MG_RID(p0->tag) ) {
+      /* Classic metric */
+      met->m[iadr+3] = met->m[iadr+5] = met->m[iadr];
+    }
+    else {
+      /* Ridge metric */
+      met->m[iadr+2] = met->m[iadr+1] = met->m[iadr];
+      met->m[iadr+4] = met->m[iadr+3] = met->m[iadr];
+    }
+
+    p0->flag = 3;
+  }
+
+  return 1;
+}

@@ -35,6 +35,7 @@
 void MMG2D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( met->size == 3 ) {
     MMG2D_lencurv  = MMG2D_lencurv_ani;
+    MMG5_compute_meanMetricAtMarkedPoints = MMG5_compute_meanMetricAtMarkedPoints_ani;
     MMG2D_defsiz   = MMG2D_defsiz_ani;
     MMG2D_gradsiz  = lissmet_ani;
     MMG2D_caltri   = MMG2D_caltri_ani;
@@ -43,6 +44,7 @@ void MMG2D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
   }
   else {
     MMG2D_lencurv   = MMG2D_lencurv_iso;
+    MMG5_compute_meanMetricAtMarkedPoints = MMG5_compute_meanMetricAtMarkedPoints_iso;
     MMG2D_defsiz    = MMG2D_defsiz_iso;
     MMG2D_gradsiz   = MMG2D_gradsiz_iso;
     MMG2D_caltri    = MMG2D_caltri_iso;

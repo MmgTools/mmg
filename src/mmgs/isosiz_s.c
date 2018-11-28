@@ -53,7 +53,7 @@
  *
  */
 static inline
-int MMGS_compute_metricAtReqEdge(MMG5_pMesh mesh,MMG5_pSol met,MMG5_Hash *hash,
+int MMGS_sum_reqEdgeLengthsAtPoint(MMG5_pMesh mesh,MMG5_pSol met,MMG5_Hash *hash,
                                   MMG5_pTria pt,char i) {
   int         ip0,ip1;
 
@@ -66,7 +66,7 @@ int MMGS_compute_metricAtReqEdge(MMG5_pMesh mesh,MMG5_pSol met,MMG5_Hash *hash,
   /* Mark the edge as treated */
   if ( !MMG5_hashEdge(mesh,hash,ip0,ip1,1) ) return 0;
 
-  if ( !MMG5_compute_metricAtReqEdge(mesh,met,ip0,ip1) )
+  if ( !MMG5_sum_reqEdgeLengthsAtPoint(mesh,met,ip0,ip1) )
     return 0;
 
   return 1;
@@ -139,7 +139,7 @@ int MMGS_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
            (pt->tag[i] & MG_PARBDY) ) {
 
         /* Check if the edge has been proceeded by the neighbour triangle */
-        if ( !MMGS_compute_metricAtReqEdge(mesh,met,&hash,pt,i) ) {
+        if ( !MMGS_sum_reqEdgeLengthsAtPoint(mesh,met,&hash,pt,i) ) {
           MMG5_DEL_MEM(mesh,hash.item);
           return 0;
         }

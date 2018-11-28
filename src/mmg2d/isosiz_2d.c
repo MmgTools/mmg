@@ -46,14 +46,13 @@
  * we have processed this extremities.
  *
  */
-static inline
-int MMG2D_compute_metricAtReqEdge(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,char i) {
+int MMG2D_sum_reqEdgeLengthsAtPoint(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,char i) {
   int         ip0,ip1;
 
   ip0 = pt->v[MMG5_iprv2[i]];
   ip1 = pt->v[MMG5_inxt2[i]];
 
-  if ( !MMG5_compute_metricAtReqEdge(mesh,met,ip0,ip1) )
+  if ( !MMG5_sum_reqEdgeLengthsAtPoint(mesh,met,ip0,ip1) )
     return 0;
 
   return 1;
@@ -137,7 +136,7 @@ int MMG2D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
         iadj = mesh->adja[3*k+i+1];
         if ( iadj && mesh->tria[iadj/3].flag ) continue;
 
-        if ( !MMG2D_compute_metricAtReqEdge(mesh,met,pt,i) ) {
+        if ( !MMG2D_sum_reqEdgeLengthsAtPoint(mesh,met,pt,i) ) {
           return 0;
         }
       }

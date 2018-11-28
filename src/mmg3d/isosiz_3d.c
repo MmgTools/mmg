@@ -509,7 +509,7 @@ double MMG5_meansizreg_iso(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,
  *
  */
 static inline
-int MMG3D_compute_metricAtReqEdge(MMG5_pMesh mesh,MMG5_pSol met,MMG5_Hash *hash,
+int MMG3D_sum_reqEdgeLengthsAtPoint(MMG5_pMesh mesh,MMG5_pSol met,MMG5_Hash *hash,
                                   MMG5_pTetra pt,char i) {
   int         ip0,ip1;
 
@@ -522,7 +522,7 @@ int MMG3D_compute_metricAtReqEdge(MMG5_pMesh mesh,MMG5_pSol met,MMG5_Hash *hash,
   /* Mark the edge as treated */
   if ( !MMG5_hashEdge(mesh,hash,ip0,ip1,1) ) return 0;
 
-  if ( !MMG5_compute_metricAtReqEdge(mesh,met,ip0,ip1) )
+  if ( !MMG5_sum_reqEdgeLengthsAtPoint(mesh,met,ip0,ip1) )
     return 0;
 
   return 1;
@@ -620,7 +620,7 @@ int MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
 
     if ( pt->tag & MG_REQ ) {
       for ( i=0; i<6; i++ ) {
-        if ( !MMG3D_compute_metricAtReqEdge(mesh,met,&hash,pt,i) ) {
+        if ( !MMG3D_sum_reqEdgeLengthsAtPoint(mesh,met,&hash,pt,i) ) {
           MMG5_DEL_MEM(mesh,hash.item);
           return 0;
         }
@@ -633,7 +633,7 @@ int MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
       for ( i=0; i<6; i++ ) {
         if ( (pxt->tag[i] & MG_REQ) || (pxt->tag[i] & MG_NOSURF) ||
              (pxt->tag[i] & MG_PARBDY) ) {
-          if ( !MMG3D_compute_metricAtReqEdge(mesh,met,&hash,pt,i) ) {
+          if ( !MMG3D_sum_reqEdgeLengthsAtPoint(mesh,met,&hash,pt,i) ) {
             MMG5_DEL_MEM(mesh,hash.item);
             return 0;
           }
