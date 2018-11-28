@@ -455,8 +455,6 @@ size_t MMG5_memSize (void) {
  *
  */
 void MMG5_memOption_memSet(MMG5_pMesh mesh) {
-  size_t   usedMem,avMem,reservedMem;
-  int      ctri,npadd,bytes;
 
   if ( mesh->info.mem <= 0 ) {
     if ( mesh->memMax )

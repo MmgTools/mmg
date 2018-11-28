@@ -72,6 +72,58 @@ int MMGS_sum_reqEdgeLengthsAtPoint(MMG5_pMesh mesh,MMG5_pSol met,MMG5_Hash *hash
   return 1;
 }
 
+/**
+ * \param mesh pointer toward the mesh
+ * \param met pointer toward the metric
+ * \param ismet 1 if we have a metric provided by the user.
+ *
+ * \return 0 if fail, 1 otherwise
+ *
+ * Compute the metric at points on trequired adges as the mean of the lengths of
+ * the required eges to which belongs the point. The processeed points are
+ * marked with flag 3.
+ *
+ */
+int MMGS_set_metricAtPointsOnReqEdges ( MMG5_pMesh mesh,MMG5_pSol met,int8_t ismet ) {
+  MMG5_pTria pt;
+  MMG5_Hash  hash;
+  int        k,i;
+
+  /* Reset the input metric at required edges extremities */
+  if ( !MMG5_reset_metricAtReqEdges_surf (mesh, met, ismet ) ) {
+    return 0;
+  }
+
+  /* Process the required edges and add the edge length to the metric of the
+   * edge extremities */
+  if ( !MMG5_hashNew(mesh,&hash,mesh->np,7*mesh->np) )  return 0;
+
+  for ( k=1; k<=mesh->nt; k++ ) {
+    pt = &mesh->tria[k];
+    if ( !MG_EOK(pt) )  continue;
+
+    for ( i=0; i<3; i++ ) {
+      if ( (pt->tag[i] & MG_REQ) || (pt->tag[i] & MG_NOSURF) ||
+           (pt->tag[i] & MG_PARBDY) ) {
+
+        /* Check if the edge has been proceeded by the neighbour triangle */
+        if ( !MMGS_sum_reqEdgeLengthsAtPoint(mesh,met,&hash,pt,i) ) {
+          MMG5_DEL_MEM(mesh,hash.item);
+          return 0;
+        }
+      }
+    }
+  }
+  MMG5_DEL_MEM(mesh,hash.item);
+
+  /* Travel the points and compute the metric of the points belonging to
+   * required edges as the mean of the required edges length */
+  if ( !MMG5_compute_meanMetricAtMarkedPoints ( mesh,met ) ) {
+    return 0;
+  }
+
+  return 1;
+}
 
 /**
  * \param mesh pointer toward the mesh
@@ -87,7 +139,6 @@ int MMGS_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria  pt;
   MMG5_pPoint p[3],p0;
   MMG5_pPar   par;
-  MMG5_Hash   hash;
   double      n[3][3],t[3][3],nt[3],c1[3],c2[3],*n1,*n2,*t1,*t2;
   double      ps,ps2,ux,uy,uz,ll,l,lm,dd,M1,M2,hausd,hmin,hmax;
   int         k,j,ip1,ip2,isloc;
@@ -120,37 +171,7 @@ int MMGS_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   /** Step 1: Set metric at points belonging to a required edge: compute the
    * metric as the mean of the length of the required eges passing through the
    * point */
-
-  /* Reset the input metric at required edges extremities */
-  if ( !MMG5_reset_metricAtReqEdges_surf (mesh, met, ismet ) ) {
-    return 0;
-  }
-
-  /* Process the required edges and add the edge length to the metric of the
-   * edge extremities */
-  if ( !MMG5_hashNew(mesh,&hash,mesh->np,7*mesh->np) )  return 0;
-
-  for ( k=1; k<=mesh->nt; k++ ) {
-    pt = &mesh->tria[k];
-    if ( !MG_EOK(pt) )  continue;
-
-    for ( i=0; i<3; i++ ) {
-      if ( (pt->tag[i] & MG_REQ) || (pt->tag[i] & MG_NOSURF) ||
-           (pt->tag[i] & MG_PARBDY) ) {
-
-        /* Check if the edge has been proceeded by the neighbour triangle */
-        if ( !MMGS_sum_reqEdgeLengthsAtPoint(mesh,met,&hash,pt,i) ) {
-          MMG5_DEL_MEM(mesh,hash.item);
-          return 0;
-        }
-      }
-    }
-  }
-  MMG5_DEL_MEM(mesh,hash.item);
-
-  /* Travel the points and compute the metric of the points belonging to
-   * required edges as the mean of the required edges length */
-  if ( !MMG5_compute_meanMetricAtMarkedPoints ( mesh,met ) ) {
+  if ( !MMGS_set_metricAtPointsOnReqEdges ( mesh,met,ismet ) ) {
     return 0;
   }
 

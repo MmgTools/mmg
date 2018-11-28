@@ -133,7 +133,7 @@ int MMG2D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pPar        ppa;
   double           t1[2],t2[2],b1[2],b2[2],gpp1[2],gpp2[2],pv,M1,M2;
   double           ps1,ps2,ux,uy,ll,li,lm,hmax,hausd,hmin,lhmax,lhausd;
-  int              k,l,ip,ip1,ip2,iadj;
+  int              k,l,ip,ip1,ip2;
   int8_t           ismet;
   unsigned char    i,i1,i2;
 
