@@ -122,6 +122,7 @@ extern "C" {
 #define MMG5_GAP        0.2 /**< gap value for reallocation */
 #define MMG5_HMINCOE  0.001 /**< coefficient to compute the default hmin value */
 #define MMG5_HMAXCOE      2 /**< coefficient to compute the default hmax value */
+#define MMG5_HMINMAXGAP   5 /**< imposed gap between hmin and hmax if hmax<hmin */
 
 /* Macros */
 #define MG_MAX(a,b) (((a) > (b)) ? (a) : (b))

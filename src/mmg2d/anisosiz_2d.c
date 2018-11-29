@@ -41,7 +41,9 @@
  *
  * \return 0 if fail, 1 if success
  *
- * Impose default metric (isotropic, with size hmax) at vertex i in triangle k.
+ * Impose default metric (isotropic, with size hmax) at vertex i in triangle k
+ * (don't take into account the local parameters). Set the point flag to 1 to be
+ * able to truncate it with the local params later.
  *
  */
 int MMG2D_defaultmet_2d(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
@@ -50,6 +52,7 @@ int MMG2D_defaultmet_2d(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
   int              ip;
 
   isqhmax = mesh->info.hmax;
+
   isqhmax = 1.0 / (isqhmax*isqhmax);
   pt = &mesh->tria[k];
   ip = pt->v[i];
@@ -58,6 +61,8 @@ int MMG2D_defaultmet_2d(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
   m[0] = isqhmax;
   m[1] = 0.0;
   m[2] = isqhmax;
+
+  mesh->point[ip].flag = 1;
 
   return 1;
 }
@@ -71,20 +76,25 @@ int MMG2D_defaultmet_2d(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
  * \return 1 if success, 0 if fail
  *
  * Calculate anisotropic metric tensor at (boundary) vertex i in triangle k on
- * account of geometric approximation of the corresponding curve
+ * account of geometric approximation of the corresponding curve (taking into
+ * account the local parameters). Set the point flag to 2 to ignore it whem
+ * imposing the local parameters later.
  *
  */
 int MMG2D_defmetbdy_2d(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
   MMG5_pTria      pt;
   MMG5_pPoint     p0,p1,p2;
-  double          hausd,sqhmin,sqhmax,ux,uy,ll,li,ps1,ps2,lm,ltmp,pv,M1,M2,t1[2],t2[2],b1[2],b2[2],*n,*m;
+  MMG5_pPar       ppa;
+  double          hausd,hmin,hmax,sqhmin,sqhmax,ux,uy,ll,li,ps1,ps2,lm,ltmp,pv;
+  double          M1,M2,t1[2],t2[2],b1[2],b2[2],*n,*m;
   double          gpp1[2],gpp2[2];
   int             ilist,iel,ip,ip1,ip2,it[2],l,list[MMG2D_LONMAX+2];
+  int8_t          isloc,hausdloc;
   char            i0,i1,i2,j;
-  static char     mmgWarn0=0,mmgWarn1=0;
+  static int8_t   mmgWarn0=0,mmgWarn1=0,mmgWarn2=0;
 
-  sqhmin   = mesh->info.hmin*mesh->info.hmin;
-  sqhmax   = mesh->info.hmax*mesh->info.hmax;
+  hmin   = mesh->info.hmin;
+  hmax   = mesh->info.hmax;
   hausd  = mesh->info.hausd;
 
   pt = &mesh->tria[k];
@@ -94,6 +104,93 @@ int MMG2D_defmetbdy_2d(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
 
   ip1 = ip2 = 0;
   ilist = MMG2D_boulet(mesh,k,i,list);
+
+  /* Local parameters if needed: note that the hausdorff param is only looked if
+   * imposed on an edge */
+  isloc = 0;
+  hausdloc = 0;
+  if ( mesh->info.npar ) {
+    /* Minimum size feature imposed by triangles */
+    for (k=0; k<ilist; k++) {
+      iel = list[k]/3;
+      pt = &mesh->tria[iel];
+      assert ( MG_EOK(pt) );
+
+      /* Retrieve local parameters associated to triangle k */
+      for (l=0; l<mesh->info.npar; l++) {
+        ppa = &mesh->info.par[l];
+        if ( ppa->elt == MMG5_Triangle && ppa->ref == pt->ref ) {
+          if ( !isloc ) {
+            hmin = ppa->hmin;
+            hmax = ppa->hmax;
+            isloc = 1;
+          }
+          else {
+            hmin  = MG_MAX ( hmin, ppa->hmin );
+            hmax  = MG_MIN ( hmax, ppa->hmax );
+          }
+          break;
+        }
+      }
+      /* Minimum size feature imposed by the boundary edge */
+      for ( i=0; i<3; i++ ) {
+        if ( !MG_EDG(pt->tag[i]) ) continue;
+
+        if ( mesh->info.npar ) {
+          for (l=0; l<mesh->info.npar; l++) {
+            ppa = &mesh->info.par[l];
+            if ( ppa->elt == MMG5_Edg && ppa->ref == pt->edg[i] ) {
+              if ( !hausdloc ) {
+                hausd = ppa->hausd;
+                hausdloc = 1;
+              }
+              else {
+                hausd = MG_MIN(hausd,ppa->hausd);
+              }
+              if ( !isloc ) {
+                hmax = ppa->hmax;
+                hmin = ppa->hmin;
+              }
+              else {
+                hmin  = MG_MAX ( hmin, ppa->hmin );
+                hmax  = MG_MIN ( hmax, ppa->hmax );
+              }
+              break;
+            }
+          }
+        }
+      }
+    }
+
+    /* Minimum size feature imposed by the vertex */
+    for (l=0; l<mesh->info.npar; l++) {
+      ppa = &mesh->info.par[l];
+      if ( ppa->elt == MMG5_Vertex && ppa->ref == p0->ref ) {
+        if ( !isloc ) {
+          hmin = ppa->hmin;
+          hmax = ppa->hmax;
+          isloc = 1;
+        }
+        else {
+          hmin  = MG_MAX ( hmin, ppa->hmin );
+          hmax  = MG_MIN ( hmax, ppa->hmax );
+        }
+        break;
+      }
+    }
+  }
+
+  if ( hmin > hmax ) {
+    if ( !mmgWarn2 ) {
+      assert ( isloc && "Non compatible local parameters" );
+      fprintf(stderr,"\n  ## Warning: %s: Non compatible local parameters:\n"
+              " hmin (%.15lg) > hmax (%.15lg).\nhmax ignored.",__func__,hmin,hmax);
+      hmax = MMG5_HMINMAXGAP*hmin;
+    }
+    mmgWarn2 = 1;
+  }
+  sqhmin   = hmin*hmin;
+  sqhmax   = hmax*hmax;
 
   /* Recover the two boundary edges meeting at ip */
   for (l=0; l<ilist; l++) {
@@ -245,6 +342,8 @@ int MMG2D_defmetbdy_2d(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
   m[1] = n[0]*n[1]*(sqhmax-lm);
   m[2] = lm*n[0]*n[0] + sqhmax*n[1]*n[1];
 
+  p0->flag = 2;
+
   return 1;
 }
 
@@ -260,8 +359,9 @@ int MMG2D_defmetbdy_2d(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
 int MMG2D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria     pt;
   MMG5_pPoint    ppt;
-  double         mm[3],mr[3];
-  int            k,ip;
+  MMG5_pPar      ppa;
+  double         mm[3],mr[3],isqhmax;
+  int            k,l,ip;
   int8_t         ismet;
   char           isdef,i;
 
@@ -308,21 +408,71 @@ int MMG2D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
       /* Calculation of a metric tensor depending on the anisotropic features of the mesh */
       /* At a singular point, an isotropic metric with size hmax is defined */
       if ( MG_SIN(ppt->tag) || ppt->tag & MG_NOM ) {
+        /* Set the point flag to 1 */
         if ( MMG2D_defaultmet_2d(mesh,met,k,i) ) isdef = 1;
       }
       else if ( MG_EDG(ppt->tag) ) {
+        /* Set the point flag to 2 */
         if ( MMG2D_defmetbdy_2d(mesh,met,k,i) ) isdef = 1;
       }
 
       /* If ppt is an interior point, or if it is a boundary point and the special definition of
        a metric tensor has failed, define a default isotropic metric at ppt */
-      if ( !isdef ) MMG2D_defaultmet_2d(mesh,met,k,i);
+      if ( !isdef ) {
+        MMG2D_defaultmet_2d(mesh,met,k,i);
+      }
 
       /* If a metric is supplied by the user, intersect it with the geometric one */
       if ( ismet && MMG5_intersecmet22(mesh,&met->m[3*ip],mm,mr) )
         memcpy(&met->m[3*ip],mr,3*sizeof(double));
+    }
+  }
 
-      ppt->flag = 1;
+  /** For points with flag 1 (metrec computed by defaultmet_2d), truncation by
+   * the local parameters */
+  if ( mesh->info.npar ) {
+    /* Minimum size feature imposed by triangles */
+    for (k=1; k<=mesh->nt; k++) {
+      pt = &mesh->tria[k];
+      if ( !MG_EOK(pt) ) continue;
+
+      /* Retrieve local parameters associated to triangle k */
+      for (l=0; l<mesh->info.npar; l++) {
+        ppa = &mesh->info.par[l];
+        if ( ppa->elt == MMG5_Triangle && ppa->ref == pt->ref ) {
+          for (i=0; i<3; i++) {
+            ip = pt->v[i];
+            if ( mesh->point[ip].flag > 1 ) continue;
+
+            isqhmax = 1./(ppa->hmax*ppa->hmax);
+            mm[0] = mm[2] = isqhmax;
+
+            if ( MMG5_intersecmet22(mesh,&met->m[3*ip],mm,mr) ) {
+              memcpy(&met->m[3*ip],mr,3*sizeof(double));
+            }
+          }
+          break;
+        }
+      }
+    }
+    /* Minimum size feature imposed by vertices */
+    for (k=1; k<=mesh->np; k++) {
+      ppt = &mesh->point[k];
+      if ( (!MG_VOK(ppt)) || ppt->flag > 1 ) continue;
+
+      /* Retrieve local parameters associated to vertex k */
+      for (l=0; l<mesh->info.npar; l++) {
+        ppa = &mesh->info.par[l];
+        if ( ppa->elt == MMG5_Vertex && ppa->ref == ppt->ref ) {
+          isqhmax = 1./(ppa->hmax*ppa->hmax);
+          mm[ip] = mm[ip+2] = isqhmax;
+
+          if ( MMG5_intersecmet22(mesh,&met->m[3*ip],mm,mr) ) {
+            memcpy(&met->m[3*ip],mr,3*sizeof(double));
+          }
+          break;
+        }
+      }
     }
   }
 

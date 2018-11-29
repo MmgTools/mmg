@@ -290,7 +290,7 @@ int MMG2D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
     }
   }
 
-  /** If local parameters are provided : size truncation on the entire mesh */
+  /** If local parameters are provided: size truncation on the entire mesh */
   /* Without local parameters information, only the boundary edges impose a
    * minimum size feature */
   if ( mesh->info.npar ) {
@@ -316,15 +316,13 @@ int MMG2D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
     /* Minimum size feature imposed by vertices */
     for (k=1; k<=mesh->np; k++) {
       p0 = &mesh->point[k];
-      if ( !MG_VOK(p0) ) continue;
+      if ( (!MG_VOK(p0)) || p0->flag == 3 ) continue;
 
       /* Retrieve local parameters associated to vertex k */
       for (l=0; l<mesh->info.npar; l++) {
         ppa = &mesh->info.par[l];
         if ( ppa->elt == MMG5_Vertex && ppa->ref == p0->ref ) {
-          if ( mesh->point[k].flag < 3 ) {
-            met->m[k] = MG_MAX(hmin,MG_MIN(met->m[k],ppa->hmax));
-          }
+          met->m[k] = MG_MAX(hmin,MG_MIN(met->m[k],ppa->hmax));
           break;
         }
       }
