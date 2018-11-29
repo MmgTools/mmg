@@ -370,22 +370,24 @@ int  MMG3D_mark_MOctreeCellCorners ( MMG5_pMesh mesh, MMG5_MOctree_s* q,int span
   int ncells_y = mesh->freeint[1];
   int ncells_z = mesh->freeint[2];
 
-  if ( q->leaf==1 && q->coordoct[0] < ncells_x-1 && q->coordoct[1] < ncells_y-1 && q->coordoct[2] < ncells_z-1) {
-
-    if ( !MMG3D_get_MOctreeCornerIndices ( mesh,q,span,ip,ip+1,ip+2,ip+3,ip+4,ip+5,ip+6,ip+7 ) ) {
-      fprintf(stderr,"\n  ## Error: %s: unable to compute the indices of the"
-              " corners of the octree cell.\n",__func__);
-      return 0;
-    }
-
-    for ( i=0; i<8; ++i ) {
-      ppt = &mesh->point[ip[i]];
-      if ( !MG_VOK(ppt) ) {
-        ++(*np);
-        ppt->tag &= ~MG_NUL;
+  if ( q->leaf==1) {
+    if(q->coordoct[0] < ncells_x-1 && q->coordoct[1] < ncells_y-1 && q->coordoct[2] < ncells_z-1)
+    {
+      if ( !MMG3D_get_MOctreeCornerIndices ( mesh,q,span,ip,ip+1,ip+2,ip+3,ip+4,ip+5,ip+6,ip+7 ) ) {
+        fprintf(stderr,"\n  ## Error: %s: unable to compute the indices of the"
+        " corners of the octree cell.\n",__func__);
+        return 0;
       }
+
+      for ( i=0; i<8; ++i ) {
+        ppt = &mesh->point[ip[i]];
+        if ( !MG_VOK(ppt) ) {
+          ++(*np);
+          ppt->tag &= ~MG_NUL;
+        }
+      }
+      ++(*nc);
     }
-    ++(*nc);
   }
   else {
     span /= 2;
@@ -417,20 +419,21 @@ int  MMG3D_write_MOctreeCell ( MMG5_pMesh mesh, MMG5_MOctree_s* q,int span,FILE 
   int ncells_y = mesh->freeint[1];
   int ncells_z = mesh->freeint[2];
 
-  if ( q->leaf==1 && q->coordoct[0] < ncells_x-1 && q->coordoct[1] < ncells_y-1 && q->coordoct[2] < ncells_z-1) {
+  if ( q->leaf==1) {
+    if(q->coordoct[0] < ncells_x-1 && q->coordoct[1] < ncells_y-1 && q->coordoct[2] < ncells_z-1){
+      if ( !MMG3D_get_MOctreeCornerIndices ( mesh,q,span,&ip0,&ip1,&ip2,&ip3,
+        &ip4,&ip5,&ip6,&ip7 ) ) {
+          fprintf(stderr,"\n  ## Error: %s: unable to compute the indices of the"
+          " corners of the octree cell.\n",__func__);
+          return 0;
+        }
 
-    if ( !MMG3D_get_MOctreeCornerIndices ( mesh,q,span,&ip0,&ip1,&ip2,&ip3,
-                                           &ip4,&ip5,&ip6,&ip7 ) ) {
-      fprintf(stderr,"\n  ## Error: %s: unable to compute the indices of the"
-              " corners of the octree cell.\n",__func__);
-      return 0;
+        fprintf(inm,"%d %d %d %d %d %d %d %d %d\n",nvert,mesh->point[ip0].tmp,
+        mesh->point[ip1].tmp,mesh->point[ip2].tmp,mesh->point[ip3].tmp,
+        mesh->point[ip4].tmp,mesh->point[ip5].tmp,mesh->point[ip6].tmp,
+        mesh->point[ip7].tmp);
+      }
     }
-
-    fprintf(inm,"%d %d %d %d %d %d %d %d %d\n",nvert,mesh->point[ip0].tmp,
-            mesh->point[ip1].tmp,mesh->point[ip2].tmp,mesh->point[ip3].tmp,
-            mesh->point[ip4].tmp,mesh->point[ip5].tmp,mesh->point[ip6].tmp,
-            mesh->point[ip7].tmp);
-  }
   else {
     span /= 2;
 

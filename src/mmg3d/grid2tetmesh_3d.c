@@ -354,8 +354,8 @@ int MMG3D_convert_grid2tetmesh(MMG5_pMesh mesh, MMG5_pSol sol) {
     fprintf(stderr,"\n  ## Octree coarsening problem. Exit program.\n");
     return 0;
   }
-  MMG3D_saveVTKOctree(mesh,sol,mesh->nameout);
 
+  MMG3D_saveVTKOctree(mesh,sol,mesh->nameout);
 
   /**--- stage 2: Tetrahedralization */
   if ( abs(mesh->info.imprim) > 3 )
