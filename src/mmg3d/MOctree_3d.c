@@ -237,7 +237,7 @@ int  MMG3D_set_splitls_MOctree ( MMG5_pMesh mesh, MMG5_MOctree_s* q, MMG5_pSol s
      if(q->ghost == 0)
      {
        q->blf_ip=q->coordoct[2]*ncells_xy+q->coordoct[1]*ncells_x+q->coordoct[0]+1;
-       if(q->coordoct[0] < ncells_x && q->coordoct[1] < ncells_y && q->coordoct[2] < ncells_z)
+       if(q->coordoct[0] < ncells_x-1 && q->coordoct[1] < ncells_y-1 && q->coordoct[2] < ncells_z-1)
        {
          MMG3D_set_splitls_MOctree (mesh, q, sol);
        }
