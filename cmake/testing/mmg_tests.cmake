@@ -199,6 +199,23 @@ ADD_TEST(NAME mmg_CommandLineAni_${SHRT_EXEC}
   ${MMG_CI_TESTS}/TorusholesAni_chocCyl/torusholesTiny
   -out ${CTEST_OUTPUT_DIR}/mmg_CommandLineAni_${SHRT_EXEC}.o.meshb)
 
+  ##############################################################################
+  #####
+  #####         Various test cases
+  #####
+  ##############################################################################
+  #####
+
+  # Lot of reference edges, ridges, corners and singularities
+  ADD_TEST(NAME mmg_SurfEdges_${SHRT_EXEC}
+    COMMAND ${EXEC} -v 5 -hausd 0.1 -A
+    ${MMG_CI_TESTS}/SurfEdges_house/housebad.meshb
+    -out ${CTEST_OUTPUT_DIR}/mmg_SurfEdgesAni_${SHRT_EXEC}.o.meshb)
+
+  ADD_TEST(NAME mmg_SurfEdgesAni_${SHRT_EXEC}
+    COMMAND ${EXEC} -v 5 -hausd 0.1
+    ${MMG_CI_TESTS}/SurfEdges_house/housebad.meshb
+    -out ${CTEST_OUTPUT_DIR}/mmg_SurfEdges_${SHRT_EXEC}.o.meshb)
 
 
 ENDFOREACH(EXEC)
