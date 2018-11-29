@@ -319,11 +319,26 @@ int MMG3D_get_MOctreeCornerIndices ( MMG5_pMesh mesh, MMG5_MOctree_s *q,int span
 
   int span_y,span_z;
   int ncells_x  = mesh->freeint[0];
-  int ncells_xy = mesh->freeint[0]*mesh->freeint[1];
+  int ncells_y  = mesh->freeint[1];
+  int ncells_z  = mesh->freeint[2];
+  int ncells_xy = ncells_x*ncells_y;
+  int ncells_xyz= ncells_x*ncells_y*ncells_z;
 
   span_y = span*ncells_x;
   span_z = span*ncells_xy;
 
+  if (q->coordoct[0]+1 +span > ncells_x)
+  {
+    span = ncells_x-(q->coordoct[0]+1);
+  }
+  if ((q->coordoct[1]+1)*ncells_x + span_y > ncells_xy)
+  {
+    span_y = ncells_xy-(q->coordoct[1]+1)*ncells_x;
+  }
+  if ((q->coordoct[2]+1)*ncells_xy + span_z > ncells_xyz)
+  {
+    span_z = ncells_xyz-(q->coordoct[2]+1)*ncells_xy;
+  }
   *ip0 = q->blf_ip;
   *ip1 = q->blf_ip + span ;
   *ip2 = q->blf_ip + span_y + span;
@@ -398,8 +413,11 @@ int  MMG3D_mark_MOctreeCellCorners ( MMG5_pMesh mesh, MMG5_MOctree_s* q,int span
 int  MMG3D_write_MOctreeCell ( MMG5_pMesh mesh, MMG5_MOctree_s* q,int span,FILE *inm ) {
   int i,ip0,ip1,ip2,ip3,ip4,ip5,ip6,ip7;
   static int nvert = 8;
+  int ncells_x = mesh->freeint[0];
+  int ncells_y = mesh->freeint[1];
+  int ncells_z = mesh->freeint[2];
 
-  if ( q->leaf ) {
+  if ( q->leaf==1 && q->coordoct[0] < ncells_x-1 && q->coordoct[1] < ncells_y-1 && q->coordoct[2] < ncells_z-1) {
 
     if ( !MMG3D_get_MOctreeCornerIndices ( mesh,q,span,&ip0,&ip1,&ip2,&ip3,
                                            &ip4,&ip5,&ip6,&ip7 ) ) {
@@ -433,7 +451,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
   MMG5_SAFE_MALLOC(Temp_Neighbour,1, MMG5_MOctree_s, return 0);
   MMG3D_init_MOctree_s(mesh, Temp_Neighbour, 0, 0, 0 ); // peut être changer l'initialisation pour les voisins j'ai mis 0 par défaut.
 
-  if(dir == 0)
+  if(dir == 0) //UP
   {
     if (q==mesh->octree->root) // q is root = q has no neighbour
     {
@@ -468,7 +486,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
     }
   }
 
-  if(dir == 1)
+  if(dir == 1) //DOWN
   {
     if (q==mesh->octree->root) // q is root = q has no neighbour
     {
@@ -503,7 +521,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
     }
   }
 
-  if(dir == 2)
+  if(dir == 2) //LEFT
   {
     if (q==mesh->octree->root) // q is root = q has no neighbour
     {
@@ -539,7 +557,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
   }
 
 
-  if(dir == 3)
+  if(dir == 3) //RIGHT
   {
     if (q==mesh->octree->root) // q is root = q has no neighbour
     {
@@ -574,7 +592,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
     }
   }
 
-  if(dir == 4)
+  if(dir == 4) //BACK
   {
     if (q==mesh->octree->root) // q is root = q has no neighbour
     {
@@ -611,7 +629,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
 
 
 
-  if(dir == 5)
+  if(dir == 5) //FRONT
   {
     if (q==mesh->octree->root) // q is root = q has no neighbour
     {
@@ -648,7 +666,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
 
 
 
-  if(dir == 6)
+  if(dir == 6) //UPLEFT
   {
     if (q==mesh->octree->root) // q is root = q has no neighbour
     {
@@ -692,13 +710,13 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
           *Neighbour=*Temp_Neighbour;
           return 1;
         }
-        *Neighbour=Temp_Neighbour->sons[i-2];
+        *Neighbour=Temp_Neighbour->sons[i-3];
         return 1;
       }
     }
   }
 
-  if(dir == 7)
+  if(dir == 7) //UPRIGHT
   {
     if (q==mesh->octree->root) // q is root = q has no neighbour
     {
@@ -748,7 +766,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
     }
   }
 
-  if(dir == 8)
+  if(dir == 8) ///DOWNLEFT
   {
     if (q==mesh->octree->root) // q is root = q has no neighbour
     {
@@ -775,7 +793,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
       }
       else if((i==1 || i==3 )  && q==&q->father->sons[i])
       {
-        MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(mesh,q->father,0,Temp_Neighbour);
+        MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(mesh,q->father,1,Temp_Neighbour);
         if(Temp_Neighbour->depth==0 || Temp_Neighbour->leaf==1)
         {
           *Neighbour=*Temp_Neighbour;
@@ -799,7 +817,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
   }
 
 
-  if(dir == 9)
+  if(dir == 9) //DOWNRIGHT
   {
     if (q==mesh->octree->root) // q is root = q has no neighbour
     {
@@ -850,7 +868,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
   }
 
 
-  if(dir == 10)
+  if(dir == 10) //UPFRONT
   {
     if (q==mesh->octree->root) // q is root = q has no neighbour
     {
@@ -866,7 +884,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
       }
       else if((i==0 || i==1 )  && q==&q->father->sons[i])
       {
-        MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(mesh,q->father,6,Temp_Neighbour);
+        MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(mesh,q->father,5,Temp_Neighbour);
         if(Temp_Neighbour->depth==0 || Temp_Neighbour->leaf==1)
         {
           *Neighbour=*Temp_Neighbour;
@@ -901,7 +919,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
   }
 
 
-  if(dir == 11)
+  if(dir == 11) //UPBACK
   {
     if (q==mesh->octree->root) // q is root = q has no neighbour
     {
@@ -953,7 +971,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
 
 
 
-  if(dir == 12)
+  if(dir == 12) //DOWNFRONT
   {
     if (q==mesh->octree->root) // q is root = q has no neighbour
     {
@@ -991,7 +1009,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
       }
       else if((i==0 || i==1 )  && q==&q->father->sons[i])
       {
-        MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(mesh,q->father, 10,Temp_Neighbour);
+        MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(mesh,q->father, 12,Temp_Neighbour);
         if(Temp_Neighbour->depth==0 || Temp_Neighbour->leaf==1)
         {
           *Neighbour=*Temp_Neighbour;
@@ -1004,7 +1022,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
   }
 
 
-  if(dir == 13)
+  if(dir == 13) //DOWNBACK
   {
     if (q==mesh->octree->root) // q is root = q has no neighbour
     {
@@ -1042,7 +1060,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
       }
       else if((i==2 || i==3 )  && q==&q->father->sons[i])
       {
-        MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(mesh,q->father, 10,Temp_Neighbour);
+        MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(mesh,q->father, 13,Temp_Neighbour);
         if(Temp_Neighbour->depth==0 || Temp_Neighbour->leaf==1)
         {
           *Neighbour=*Temp_Neighbour;
@@ -1055,7 +1073,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
   }
 
 
-  if(dir == 14)
+  if(dir == 14) //LEFTFRONT
   {
     if (q==mesh->octree->root) // q is root = q has no neighbour
     {
@@ -1106,7 +1124,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
   }
 
 
-  if(dir == 15)
+  if(dir == 15) //LEFTBACK
   {
     if (q==mesh->octree->root) // q is root = q has no neighbour
     {
@@ -1157,7 +1175,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
   }
 
 
-  if(dir == 16)
+  if(dir == 16) //RIGHTFRONT
   {
     if (q==mesh->octree->root) // q is root = q has no neighbour
     {
@@ -1208,7 +1226,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
   }
 
 
-  if(dir == 17)
+  if(dir == 17) //RIGHTBACK
   {
     if (q==mesh->octree->root) // q is root = q has no neighbour
     {
