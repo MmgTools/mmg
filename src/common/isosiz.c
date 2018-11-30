@@ -196,3 +196,33 @@ int MMG5_reset_metricAtReqEdges_surf ( MMG5_pMesh mesh,MMG5_pSol met,int8_t isme
 
   return 1;
 }
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ *
+ * Set the s field of the points that belongs to a required edge to 1, set it to
+ * 0 otherwise.
+ *
+ */
+void MMG5_mark_pointsOnReqEdge_fromTria (  MMG5_pMesh mesh ) {
+  MMG5_pTria  pt;
+  MMG5_pPoint ppt;
+  int         k;
+  int8_t      i;
+
+  for ( k=1; k<=mesh->np; k++ ) {
+    ppt = &mesh->point[k];
+    ppt->s = 0;
+  }
+
+  /* Mark the points that belongs to a required edge */
+  for ( k=1; k<=mesh->nt; k++ ) {
+    pt = &mesh->tria[k];
+    for ( i=0; i<3; ++i ) {
+      if ( pt->tag[i] & MG_REQ ) {
+        mesh->point[pt->v[MMG5_inxt2[i]]].s = 1;
+        mesh->point[pt->v[MMG5_iprv2[i]]].s = 1;
+      }
+    }
+  }
+}

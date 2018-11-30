@@ -831,6 +831,17 @@ int MMG2D_mmg2d1n(MMG5_pMesh mesh,MMG5_pSol met) {
     }
   }
 
+  if ( mesh->info.hgradreq > 0. ) {
+    if ( mesh->info.imprim > 5 ) {
+      fprintf(stdout,"\n  -- GRADATION (REQUIRED POINTS) : %8f\n",mesh->info.hgradreq);
+    }
+
+    if ( !MMG2D_gradsizreq(mesh,met) ) {
+      fprintf(stderr,"  ## Gradation on required points fail. Exit program.\n");
+      return 0;
+    }
+  }
+
   if ( !MMG2D_anatri(mesh,met,2) ) {
     fprintf(stderr,"  ## Unable to proceed adaptation. Exit program.\n");
     return 0;

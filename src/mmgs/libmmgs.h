@@ -76,6 +76,7 @@ enum MMGS_Param {
   MMGS_DPARAM_hsiz,              /*!< [val], Constant mesh size */
   MMGS_DPARAM_hausd,             /*!< [val], Control global Hausdorff distance (on all the boundary surfaces of the mesh) */
   MMGS_DPARAM_hgrad,             /*!< [val], Control gradation */
+  MMGS_DPARAM_hgradreq,          /*!< [val], Control gradation on required entites (advanced usage) */
   MMGS_DPARAM_ls,                /*!< [val], Value of level-set */
   MMGS_PARAM_size,               /*!< [n], Number of parameters */
 };

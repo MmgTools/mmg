@@ -85,6 +85,8 @@ void MMG5_Init_parameters(MMG5_pMesh mesh) {
   mesh->info.hausd    = MMG5_HAUSD;
   /* control gradation */
   mesh->info.hgrad    = MMG5_HGRAD;
+  /* control gradation on required entities */
+  mesh->info.hgradreq = MMG5_HGRAD;
 
   /* default values for pointers */
   /* list of user-defined references */

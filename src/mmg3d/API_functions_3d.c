@@ -83,26 +83,26 @@ void MMG3D_Init_parameters(MMG5_pMesh mesh) {
   MMG5_Init_parameters(mesh);
 
   /* default values for integers */
-  mesh->info.lag      = -1;
-  mesh->info.fem      = 1;
-  mesh->info.optim    =  0;
-  mesh->info.optimLES  =  0;
+  mesh->info.lag      = MMG5_LAG;
+  mesh->info.fem      = MMG5_ON;
+  mesh->info.optim    = MMG5_OFF;
+  mesh->info.optimLES = MMG5_OFF;
   /* [0/1]    ,avoid/allow surface modifications */
-  mesh->info.nosurf   =  0;
+  mesh->info.nosurf   =  MMG5_OFF;
 #ifdef USE_SCOTCH
-   /* [1/0]    , Turn on/off the renumbering using SCOTCH; */
-  mesh->info.renum    = 1;
+   /* [1/0]    , Turn on/off the renumbering using SCOTCH */
+  mesh->info.renum    = MMG5_ON;
 #else
-   /* [0]    , Turn on/off the renumbering using SCOTCH; */
-  mesh->info.renum    = 0;
+   /* [0]    , Turn on/off the renumbering using SCOTCH */
+  mesh->info.renum    = MMG5_OFF;
 #endif
 
   /* default values for doubles */
   /* level set value */
-  mesh->info.ls       = 0.0;
+  mesh->info.ls       = MMG5_LS;
 
 #ifndef PATTERN
-  mesh->info.PROctree = 32;
+  mesh->info.PROctree = MMG5_PROCTREE;
 #endif
 }
 
@@ -2173,10 +2173,21 @@ int MMG3D_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val)
     break;
   case MMG3D_DPARAM_hgrad :
     mesh->info.hgrad    = val;
-    if ( mesh->info.hgrad < 0.0 )
-      mesh->info.hgrad = -1.0;
-    else
+    if ( mesh->info.hgrad < 0.0 ) {
+      mesh->info.hgrad = MMG5_NOHGRAD;
+    }
+    else {
       mesh->info.hgrad = log(mesh->info.hgrad);
+    }
+    break;
+  case MMG3D_DPARAM_hgradreq :
+    mesh->info.hgradreq    = val;
+    if ( mesh->info.hgradreq < 0.0 ) {
+      mesh->info.hgradreq = MMG5_NOHGRAD;
+    }
+    else {
+      mesh->info.hgradreq = log(mesh->info.hgradreq);
+    }
     break;
   case MMG3D_DPARAM_hausd :
     if ( val <=0 ) {

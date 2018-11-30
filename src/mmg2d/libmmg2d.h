@@ -74,6 +74,7 @@ extern "C" {
     MMG2D_DPARAM_hsiz,              /*!< [val], Constant mesh size */
     MMG2D_DPARAM_hausd,             /*!< [val], Control global Hausdorff distance (on all the boundary surfaces of the mesh) */
     MMG2D_DPARAM_hgrad,             /*!< [val], Control gradation */
+    MMG2D_DPARAM_hgradreq,          /*!< [val], Control gradation on required entites (advanced usage) */
     MMG2D_DPARAM_ls,                /*!< [val], Value of level-set (not use for now) */
   };
 

@@ -1373,6 +1373,13 @@ int MMGS_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val){
     else
       mesh->info.hgrad = log(mesh->info.hgrad);
     break;
+  case MMGS_DPARAM_hgradreq :
+    mesh->info.hgradreq    = val;
+    if ( mesh->info.hgradreq < 0.0 )
+      mesh->info.hgradreq = -1.0;
+    else
+      mesh->info.hgradreq = log(mesh->info.hgradreq);
+    break;
   case MMGS_DPARAM_hausd :
     if ( val <=0 ) {
       fprintf(stderr,"\n  ## Error: %s: hausdorff number must be strictly"

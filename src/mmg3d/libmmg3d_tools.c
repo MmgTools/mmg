@@ -228,6 +228,11 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
                                     atof(argv[i])) )
             return 0;
         }
+        else if ( !strcmp(argv[i],"-hgradreq") && ++i <= argc ) {
+          if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_hgradreq,
+                                    atof(argv[i])) )
+            return 0;
+        }
         else if ( !strcmp(argv[i],"-hgrad") && ++i <= argc ) {
           if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_hgrad,
                                     atof(argv[i])) )

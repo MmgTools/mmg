@@ -351,24 +351,14 @@ int MMG2D_gradsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   unsigned char     i,i1,i2;
 
 
-  if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
+  if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {
     fprintf(stdout,"  ** Grading mesh\n");
-
-  for (k=1; k<=mesh->np; k++) {
-    p1 = &mesh->point[k];
-    p1->flag = mesh->base;
-    p1->s = 0;
   }
 
-  /* Mark the edges that belongs to a required edge */
-  for (k=1; k<=mesh->nt; k++) {
-    pt = &mesh->tria[k];
-    for ( i=0; i<3; ++i ) {
-      if ( pt->tag[i] & MG_REQ ) {
-        mesh->point[MMG5_inxt2[i]].s = 1;
-        mesh->point[MMG5_iprv2[i]].s = 1;
-      }
-    }
+  MMG5_mark_pointsOnReqEdge_fromTria ( mesh );
+
+  for ( k=1; k<=mesh->np; k++ ) {
+    mesh->point[k].flag = mesh->base;
   }
 
 
@@ -444,26 +434,31 @@ int MMG2D_gradsizreq_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria        pt;
   MMG5_pPoint       p1,p2;
   double            hgrad,ll,h1,h2,hn;
-  int               k,it,ip1,ip2,maxit,nup,nu;
+  int               k,it,ip1,ip2,ipmaster,ipslave,maxit,nup,nu;
   unsigned char     i,i1,i2;
 
 
-  if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
-    fprintf(stdout,"  ** Grading mesh\n");
+  if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {
+    fprintf(stdout,"  ** Grading required entities\n");
+  }
 
-  for (k=1; k<=mesh->np; k++)
-    mesh->point[k].flag = mesh->base;
+  if ( mesh->info.hgrad < 0. ) {
+    /** Mark the edges belonging to a required entity */
+    MMG5_mark_pointsOnReqEdge_fromTria ( mesh );
+  }
 
-  hgrad = log(mesh->info.hgrad);
+  /** Update the sizes and mark the treated points */
+  hgrad = mesh->info.hgradreq;
   it = nup = 0;
   maxit = 100;
 
   do {
-    mesh->base++;
     nu = 0;
     for (k=1; k<=mesh->nt; k++) {
       pt = &mesh->tria[k];
-      if ( !MG_EOK(pt) )  continue;
+      if ( !MG_EOK(pt) ) {
+        continue;
+      }
 
       for (i=0; i<3; i++) {
         i1  = MMG5_inxt2[i];
@@ -472,33 +467,48 @@ int MMG2D_gradsizreq_iso(MMG5_pMesh mesh,MMG5_pSol met) {
         ip2 = pt->v[i2];
         p1 = &mesh->point[ip1];
         p2 = &mesh->point[ip2];
-        if ( p1->flag < mesh->base-1 && p2->flag < mesh->base-1 )  continue;
 
-        if ( p1->tag & MG_REQ || p2->tag & MG_REQ ) continue;
+        if ( (!p1->s) && (!p2->s) ) {
+          /* No size to propagate */
+          continue;
+        }
+        else if ( p1->s && p2->s ) {
+          /* Point already treated */
+          continue;
+        }
+        else if ( p1->s ) {
+          ipmaster = ip1;
+          ipslave  = ip2;
+        }
+        else {
+          assert ( p2->s );
+          ipmaster = ip2;
+          ipslave  = ip1;
+        }
 
         ll = (p2->c[0]-p1->c[0])*(p2->c[0]-p1->c[0]) + (p2->c[1]-p1->c[1])*(p2->c[1]-p1->c[1]);
         ll = sqrt(ll);
 
-        h1 = met->m[ip1];
-        h2 = met->m[ip2];
+        h1 = met->m[ipmaster];
+        h2 = met->m[ipslave];
         if ( h1 < h2 ) {
-          if ( h1 < MMG5_EPSD )  continue;
+          if ( h1 < MMG5_EPSD ) {
+            continue;
+          }
           hn  = h1 + hgrad*ll;
-          if ( h2 > hn ) {
-            met->m[ip2] = hn;
-            p2->flag    = mesh->base;
-            nu++;
+          if ( h2 <= hn ) {
+            continue;
           }
         }
         else {
-          if ( h2 < MMG5_EPSD )  continue;
-          hn = h2 + hgrad*ll;
-          if ( h1 > hn ) {
-            met->m[ip1] = hn;
-            p1->flag    = mesh->base;
-            nu++;
+          hn = h1 - hgrad*ll;
+          if ( h2 >= hn ) {
+            continue;
           }
         }
+        met->m[ipslave]           = hn;
+        mesh->point[ipslave].s    = 1;
+        nu++;
       }
     }
     nup += nu;
@@ -506,7 +516,7 @@ int MMG2D_gradsizreq_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   while ( ++it < maxit && nu > 0 );
 
   if ( abs(mesh->info.imprim) > 4 )
-    fprintf(stdout,"     gradation: %7d updated, %d iter.\n",nup,it);
+    fprintf(stdout,"     gradation (required points): %7d updated, %d iter.\n",nup,it);
 
   return 1;
 }

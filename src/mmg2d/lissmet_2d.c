@@ -181,3 +181,18 @@ int lissmet_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   return 1;
 }
+
+/**
+ * \param mesh pointer toward the mesh
+ * \param sol pointer toward the metric
+ *
+ * \return 0 if fail, 1 if success
+ *
+ * Anisotropic gradation (h-gradation procedure) for required entities. See:
+ * http://www.ann.jussieu.fr/frey/publications/ijnme4398.pdf
+ *
+ */
+int lissmetreq_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
+
+  return 1;
+}

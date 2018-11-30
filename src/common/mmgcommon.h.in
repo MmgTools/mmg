@@ -606,7 +606,8 @@ int MMG5_sum_reqEdgeLengthsAtPoint ( MMG5_pMesh,MMG5_pSol,int ip0,int ip1 );
 int MMG5_compute_meanMetricAtMarkedPoints_iso ( MMG5_pMesh mesh,MMG5_pSol met);
 int MMG5_compute_meanMetricAtMarkedPoints_ani ( MMG5_pMesh mesh,MMG5_pSol met);
 
-int MMG5_reset_metricAtReqEdges_surf ( MMG5_pMesh,MMG5_pSol,int8_t);
+int  MMG5_reset_metricAtReqEdges_surf ( MMG5_pMesh,MMG5_pSol,int8_t);
+void MMG5_mark_pointsOnReqEdge_fromTria (  MMG5_pMesh mesh );
 
 /* function pointers */
 int    (*MMG5_chkmsh)(MMG5_pMesh,int,int);
