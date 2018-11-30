@@ -82,7 +82,7 @@ extern "C" {
 #define MMG5_UNSET -1
 
 /* reference of the boundary that moves in lagrangian mode */
-#define MMG5_DISPREF 0
+#define MMG5_DISPREF 10
 
 /* million */
 #define MMG5_MILLION 1048576
