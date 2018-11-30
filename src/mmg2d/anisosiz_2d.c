@@ -480,156 +480,86 @@ int MMG2D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
 }
 
 /**
- * \param mesh pointer toward the mesh
- * \param met pointer toward the metric
- * \param m frist metric
- * \param n second metric
+ * \param dm eigenvalues of the first matrix
+ * \param dn eigenvalues of the second matrix
  * \param difsiz maximal size gap authorized by the gradation.
+ * \param dir direction in which the sizes are graded.
+ * \param ier flag of the modified eigenvalue: (ier & 1) if dm is altered, and (ier & 2) if dn is altered.
  *
- * \return 0 if fail or we don't need to modify the sizes. ier, where (ier & 1)
- * if metric m is altered, and (ier & 2) if metric n is altered.
- *
- * Perform simultaneous reduction of matrices m1 and m2, and truncate
- * characteristic sizes so that the difference between two corresponding sizes
- * is less than difsiz.
- *
- * Ref : https://www.rocq.inria.fr/gamma/Frederic.Alauzet/cours/cea2010_V2.pdf
+ *  Gradation of sizes = 1/sqrt(eigenv of the tensors) in the \a idir direction.
  *
  */
-int MMG2D_grad2met_ani(MMG5_pMesh mesh,MMG5_pSol met,double *m,double *n,double difsiz) {
-  double       det,dd,sqDelta,trimn,vnorm,hm,hn,lambda[2],dm[2],dn[2],imn[4];
-  double       vp[2][2],ip[4];
-  char         ier;
-  static char  mmgWarn0=0;
-
-  ier = 0;
-
-  /* Simultaneous reduction of m1 and m2 */
-  /* Compute imn = M^{-1}N */
-  det = m[0]*m[2] - m[1]*m[1];
-  if ( fabs(det) < MMG5_EPS*MMG5_EPS ) {
-    if ( !mmgWarn0 ) {
-      mmgWarn0 = 1;
-      fprintf(stderr,"\n  ## Warning: %s: at least 1 null metric det : %E \n",
-              __func__,det);
-    }
-    return 0;
-  }
-  det = 1.0 / det;
-
-  imn[0] = det * ( m[2]*n[0] - m[1]*n[1]);
-  imn[1] = det * ( m[2]*n[1] - m[1]*n[2]);
-  imn[2] = det * (-m[1]*n[0] + m[0]*n[1]);
-  imn[3] = det * (-m[1]*n[1] + m[0]*n[2]);
-  dd = imn[0] - imn[3];
-  sqDelta = sqrt(fabs(dd*dd + 4.0*imn[1]*imn[2]));
-  trimn = imn[0] + imn[3];
-
-  lambda[0] = 0.5 * (trimn - sqDelta);
-  if ( lambda[0] < 0.0 ) {
-    if ( !mmgWarn0 ) {
-      mmgWarn0 = 1;
-      fprintf(stderr,"\n  ## Warning: %s: at least 1 metric with a "
-              "negative eigenvalue: %f \n",__func__,lambda[0]);
-    }
-    return 0;
-  }
-
-  /* First case : matrices m and n are homothetic: n = lambda0*m */
-  if ( sqDelta < MMG5_EPS ) {
-
-    /* Subcase where m is diaonal */
-    if ( fabs(m[1]) < MMG5_EPS ) {
-      dm[0]   = m[0];
-      dm[1]   = m[2];
-      vp[0][0] = 1;
-      vp[0][1] = 0;
-      vp[1][0] = 0;
-      vp[1][1] = 1;
-    }
-    /* Subcase where m is not diagonal; dd,trimn,... are reused */
-    else
-      MMG5_eigensym(m,dm,vp);
-
-    /* Eigenvalues of metric n */
-    dn[0] = lambda[0]*dm[0];
-    dn[1] = lambda[0]*dm[1];
-
-  }
-  /* Second case: both eigenvalues of imn are distinct ; theory says qf associated to m and n
-   are diagonalizable in basis (vp[0], vp[1]) - the coreduction basis */
-  else {
-    lambda[1] = 0.5 * (trimn + sqDelta);
-    assert(lambda[1] >= 0.0);
-
-    vp[0][0] = imn[1];
-    vp[0][1] = (lambda[0] - imn[0]);
-    vnorm  = sqrt(vp[0][0]*vp[0][0] + vp[0][1]*vp[0][1]);
-
-    if ( vnorm < MMG5_EPS ) {
-      vp[0][0] = (lambda[0] - imn[3]);
-      vp[0][1] = imn[2];
-      vnorm  = sqrt(vp[0][0]*vp[0][0] + vp[0][1]*vp[0][1]);
-    }
-
-    vnorm   = 1.0 / vnorm;
-    vp[0][0] *= vnorm;
-    vp[0][1] *= vnorm;
-
-    vp[1][0] = imn[1];
-    vp[1][1] = (lambda[1] - imn[0]);
-    vnorm  = sqrt(vp[1][0]*vp[1][0] + vp[1][1]*vp[1][1]);
-
-    if ( vnorm < MMG5_EPS ) {
-      vp[1][0] = (lambda[1] - imn[3]);
-      vp[1][1] = imn[2];
-      vnorm  = sqrt(vp[1][0]*vp[1][0] + vp[1][1]*vp[1][1]);
-    }
-
-    vnorm   = 1.0 / vnorm;
-    vp[1][0] *= vnorm;
-    vp[1][1] *= vnorm;
-
-    /* Compute diagonal values in simultaneous reduction basis */
-    dm[0] = m[0]*vp[0][0]*vp[0][0] + 2.0*m[1]*vp[0][0]*vp[0][1] + m[2]*vp[0][1]*vp[0][1];
-    dm[1] = m[0]*vp[1][0]*vp[1][0] + 2.0*m[1]*vp[1][0]*vp[1][1] + m[2]*vp[1][1]*vp[1][1];
-    dn[0] = n[0]*vp[0][0]*vp[0][0] + 2.0*n[1]*vp[0][0]*vp[0][1] + n[2]*vp[0][1]*vp[0][1];
-    dn[1] = n[0]*vp[1][0]*vp[1][0] + 2.0*n[1]*vp[1][0]*vp[1][1] + n[2]*vp[1][1]*vp[1][1];
-  }
+static inline
+void MMG2D_gradEigenv(double dm[2],double dn[2],double difsiz,int8_t dir,int8_t *ier) {
+  double hm,hn;
 
   /* Gradation of sizes = 1/sqrt(eigenv of the tensors) in the first direction */
-  assert ( dm[0] > MMG5_EPS && dn[0] > MMG5_EPS );
-  hm = 1.0 / sqrt(dm[0]);
-  hn = 1.0 / sqrt(dn[0]);
+  hm = 1.0 / sqrt(dm[dir]);
+  hn = 1.0 / sqrt(dn[dir]);
 
   if ( hn > hm+difsiz ) {
     hn = hm+difsiz;
-    dn[0] = 1.0 / (hn*hn);
-    ier = ier | 2;
+    dn[dir] = 1.0 / (hn*hn);
+    (*ier) = (*ier) | 2;
   }
   else if ( hm > hn+difsiz ) {
     hm = hn+difsiz;
-    dm[0] = 1.0 / (hm*hm);
-    ier = ier | 1;
+    dm[dir] = 1.0 / (hm*hm);
+    (*ier) = (*ier) | 1;
   }
+}
 
-  /* Gradation of sizes = 1/sqrt(eigenv of the tensors) in the second direction */
-  assert ( dm[1] > MMG5_EPS && dn[1] > MMG5_EPS );
-  hm = 1.0 / sqrt(dm[1]);
-  hn = 1.0 / sqrt(dn[1]);
+/**
+ * \param dm eigenvalues of the first matrix
+ * \param dn eigenvalues of the second matrix
+ * \param difsiz maximal size gap authorized by the gradation.
+ * \param dir direction in which the sizes are graded.
+ * \param ier 2 if dn has been updated, 0 otherwise.
+ *
+ *  Gradation of size dn = 1/sqrt(eigenv of the tensor) for required points in
+ *  the \a idir direction.
+ *
+ */
+static inline
+void MMG2D_gradEigenvreq(double dm[2],double dn[2],double difsiz,int8_t dir,int8_t *ier) {
+  double hm,hn;
+
+  hm = 1.0 / sqrt(dm[dir]);
+  hn = 1.0 / sqrt(dn[dir]);
 
   if ( hn > hm+difsiz ) {
+    /* Decrease the size in \a ipslave */
     hn = hm+difsiz;
-    dn[1] = 1.0 / (hn*hn);
-    ier = ier | 2;
+    dn[dir] = 1.0 / (hn*hn);
+    (*ier) = 2;
   }
-  else if ( hm > hn+difsiz ) {
-    hm = hn+difsiz;
-    dm[1] = 1.0 / (hm*hm);
-    ier = ier | 1;
+  else if ( hn < hm-difsiz ) {
+    /* Increase the size in \a ipslave */
+    hn = hm-difsiz;
+    dn[dir] = 1.0 / (hn*hn);
+    (*ier) = 2;
   }
+}
 
-  /* Update of the metrics = tP^-1 diag(d0,d1)P^-1, P = (vp[0], vp[1]) stored in columns */
+/**
+ * \param m first matrix
+ * \param n second matrix
+ * \param dm eigenvalues of m in the coreduction basis
+ * \param dn eigenvalues of n in the coreduction basis
+ * \param vp coreduction basis
+ * \param ier flag of the updated sizes: (ier & 1) if we dm has been modified, (ier & 2) if dn has been modified.
+ *
+ * \return 0 if fail, 1 otherwise
+ *
+ * Update of the metrics = tP^-1 diag(d0,d1)P^-1, P = (vp[0], vp[1]) stored in
+ * columns
+ *
+ */
+static inline
+int MMG2D_updatemet_ani(double *m,double *n,double dm[2],double dn[2],
+                         double vp[2][2],int8_t ier ) {
+  double det,ip[4];
+
   det = vp[0][0]*vp[1][1] - vp[0][1]*vp[1][0];
   if ( fabs(det) < MMG5_EPS )  return 0;
   det = 1.0 / det;
@@ -649,10 +579,114 @@ int MMG2D_grad2met_ani(MMG5_pMesh mesh,MMG5_pSol met,double *m,double *n,double 
     n[1] = dn[0]*ip[0]*ip[1] + dn[1]*ip[2]*ip[3];
     n[2] = dn[0]*ip[1]*ip[1] + dn[1]*ip[3]*ip[3];
   }
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh
+ * \param met pointer toward the metric
+ * \param ip1 first edge extremity
+ * \param ip2 second edge extremity
+ * \param difsiz maximal size gap authorized by the gradation.
+ *
+ * \return 0 if fail or we don't need to modify the sizes. ier, where (ier & 1)
+ * if metric of \a ip1 is altered, and (ier & 2) if metric of \a ip2 is altered.
+ *
+ * Perform simultaneous reduction of metrics at ip1 points and ip2, and truncate
+ * characteristic sizes so that the difference between two corresponding sizes
+ * is less than difsiz.
+ *
+ * Ref : https://www.rocq.inria.fr/gamma/Frederic.Alauzet/cours/cea2010_V2.pdf
+ *
+ */
+int MMG2D_grad2met_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2,double difsiz) {
+  double       dm[2],dn[2];
+  double       vp[2][2],*m,*n;
+  int8_t       ier;
+
+  ier = 0;
+
+  m = &met->m[met->size*ip1];
+  n = &met->m[met->size*ip2];
+
+  /* Simultaneous reduction of m1 and m2 */
+  if ( !MMG2D_simred(mesh,m,n,dm,dn,vp) ) {
+    return 0;
+  }
+
+  /* Gradation of sizes = 1/sqrt(eigenv of the tensors) in the first direction */
+  MMG2D_gradEigenv(dm,dn,difsiz,0,&ier);
+
+  /* Gradation of sizes = 1/sqrt(eigenv of the tensors) in the second direction */
+  MMG2D_gradEigenv(dm,dn,difsiz,1,&ier);
+
+  if ( !ier ) {
+    return 0;
+  }
+
+  /* Update of the metrics = tP^-1 diag(d0,d1)P^-1, P = (vp[0], vp[1]) stored in
+   * columns */
+  if ( !MMG2D_updatemet_ani(m,n,dm,dn,vp,ier ) ) {
+    return 0;
+  }
 
   return ier;
 
 }
+
+/**
+ * \param mesh pointer toward the mesh
+ * \param met pointer toward the metric
+ * \param ipmaster edge extremity that cannot be modified
+ * \param ipslave edge extremity to modify to respect the gradation.
+ * \param difsiz maximal size gap authorized by the gradation.
+ *
+ * \return 0 if fail or we don't need to update the size of \a ipslave, 1 if
+ * its size has been updated.
+ *
+ * Perform simultaneous reduction of metrics at ipmaster points and ipslave, and
+ * modify the characteristic size of \a ipslave so that the difference between
+ * the two sizes is less than difsiz.
+ *
+ * Ref : https://www.rocq.inria.fr/gamma/Frederic.Alauzet/cours/cea2010_V2.pdf
+ *
+ */
+static inline
+int MMG2D_grad2metreq_ani(MMG5_pMesh mesh,MMG5_pSol met,int ipmaster,int ipslave,double difsiz) {
+  double       dm[2],dn[2];
+  double       vp[2][2],*m,*n;
+  int8_t       ier;
+
+  ier = 0;
+
+  m = &met->m[met->size*ipmaster];
+  n = &met->m[met->size*ipslave];
+
+  /* Simultaneous reduction of m1 and m2 */
+  if ( !MMG2D_simred(mesh,m,n,dm,dn,vp) ) {
+    return 0;
+  }
+
+  /* Gradation of sizes = 1/sqrt(eigenv of the tensors) in the first direction */
+  MMG2D_gradEigenvreq(dm,dn,difsiz,0,&ier);
+
+  /* Gradation of sizes = 1/sqrt(eigenv of the tensors) in the second direction */
+  MMG2D_gradEigenvreq(dm,dn,difsiz,1,&ier);
+
+  if ( !ier ) {
+    return 0;
+  }
+
+  /* Update of the metrics = tP^-1 diag(d0,d1)P^-1, P = (vp[0], vp[1]) stored in
+   * columns */
+  if ( !MMG2D_updatemet_ani(m,n,dm,dn,vp,ier ) ) {
+    return 0;
+  }
+
+  return ier;
+
+}
+
 
 /**
  * \param mesh pointer toward the mesh
@@ -666,7 +700,7 @@ int MMG2D_grad2met_ani(MMG5_pMesh mesh,MMG5_pSol met,double *m,double *n,double 
 int MMG2D_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria        pt;
   MMG5_pPoint       p1,p2;
-  double            hgrad,ll,*m1,*m2,difsiz;
+  double            hgrad,ll,difsiz;
   int               k,it,ip1,ip2,maxit,nup,nu;
   char              i,i1,i2,ier;
 
@@ -674,8 +708,12 @@ int MMG2D_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
     fprintf(stdout,"  ** Grading mesh\n");
 
-  for (k=1; k<=mesh->np; k++)
+  /** Mark the edges belonging to a required entity */
+  MMG5_mark_pointsOnReqEdge_fromTria ( mesh );
+
+  for (k=1; k<=mesh->np; k++) {
     mesh->point[k].flag = mesh->base;
+  }
 
   hgrad = mesh->info.hgrad;
   it = nup = 0;
@@ -704,12 +742,9 @@ int MMG2D_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
         /* Maximum allowed difference between the prescribed sizes in p1 and p2 */
         difsiz = ll*hgrad;
 
-        m1 = &met->m[3*ip1];
-        m2 = &met->m[3*ip2];
-
-        /* bit 0 of ier = 0 if metric m1 is untouched, 1 otherwise; bit 1 of
-         * ier = 0 if metric m2 is untouched, 1 otherwise*/
-        ier = MMG2D_grad2met_ani(mesh,met,m1,m2,difsiz);
+        /* bit 0 of ier = 0 if metric at point ip1 is untouched, 1 otherwise;
+         * bit 1 of ier = 0 if metric at point ip2 is untouched, 1 otherwise */
+        ier = MMG2D_grad2met_ani(mesh,met,ip1,ip2,difsiz);
 
         if ( ier & 1 ) {
           p1->flag = mesh->base;
@@ -728,4 +763,93 @@ int MMG2D_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( abs(mesh->info.imprim) > 4 )  fprintf(stdout,"     gradation: %7d updated, %d iter.\n",nup,it);
   return 1;
 
+}
+
+/**
+ * \param mesh pointer toward the mesh
+ * \param met pointer toward the metric
+ *
+ * \return 0 if fail, 1 if success
+ *
+ * Anisotropic gradation on required points.
+ *
+ */
+int MMG2D_gradsizreq_ani(MMG5_pMesh mesh,MMG5_pSol met) {
+  MMG5_pTria        pt;
+  MMG5_pPoint       p1,p2;
+  double            hgrad,ll,difsiz;
+  int               k,it,ip1,ip2,ipslave,ipmaster,maxit,nup,nu;
+  int8_t            ier;
+  char              i,i1,i2;
+
+
+  if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {
+    fprintf(stdout,"  ** Grading required points.\n");
+  }
+
+  if ( mesh->info.hgrad < 0. ) {
+    /** Mark the edges belonging to a required entity */
+    MMG5_mark_pointsOnReqEdge_fromTria ( mesh );
+  }
+
+  hgrad = mesh->info.hgrad;
+  it = nup = 0;
+  maxit = 100;
+
+  do {
+    nu = 0;
+    for (k=1; k<=mesh->nt; k++) {
+      pt = &mesh->tria[k];
+      if ( !MG_EOK(pt) )  continue;
+
+      for (i=0; i<3; i++) {
+        i1  = MMG5_inxt2[i];
+        i2  = MMG5_iprv2[i];
+        ip1 = pt->v[i1];
+        ip2 = pt->v[i2];
+        p1 = &mesh->point[ip1];
+        p2 = &mesh->point[ip2];
+
+        if ( (!p1->s) && (!p2->s) ) {
+          /* No size to propagate */
+          continue;
+        }
+        else if ( p1->s && p2->s ) {
+          /* Point already treated */
+          continue;
+        }
+        else if ( p1->s ) {
+          ipmaster = ip1;
+          ipslave  = ip2;
+        }
+        else {
+          assert ( p2->s );
+          ipmaster = ip2;
+          ipslave  = ip1;
+        }
+
+        ll = (p2->c[0]-p1->c[0])*(p2->c[0]-p1->c[0])
+          + (p2->c[1]-p1->c[1])*(p2->c[1]-p1->c[1]);
+        ll = sqrt(ll);
+
+        /* Maximum allowed difference between the prescribed sizes in p1 and p2 */
+        difsiz = ll*hgrad;
+
+        /* Impose the gradation to ipslave from ipmaster */
+        ier = MMG2D_grad2metreq_ani(mesh,met,ipmaster,ipslave,difsiz);
+
+        if ( ier ) {
+          mesh->point[ipslave].s = 1;
+          nu++;
+        }
+      }
+    }
+    nup += nu;
+  }
+  while ( ++it < maxit && nu > 0 );
+
+  if ( abs(mesh->info.imprim) > 4 ) {
+    fprintf(stdout,"     gradation (required points): %7d updated, %d iter.\n",nup,it);
+  }
+  return 1;
 }

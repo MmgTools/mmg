@@ -439,7 +439,7 @@ int MMG2D_gradsizreq_iso(MMG5_pMesh mesh,MMG5_pSol met) {
 
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {
-    fprintf(stdout,"  ** Grading required entities\n");
+    fprintf(stdout,"  ** Grading required points.\n");
   }
 
   if ( mesh->info.hgrad < 0. ) {

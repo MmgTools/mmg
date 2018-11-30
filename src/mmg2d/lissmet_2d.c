@@ -40,7 +40,8 @@
  * \return 0 if fail, 1 if success
  *
  * Anisotropic gradation (h-gradation procedure). See:
- * http://www.ann.jussieu.fr/frey/publications/ijnme4398.pdf
+ * http://www.ljll.math.upmc.fr/frey/publications/ijnme4398.pdf
+ * Skip edges with a required extremity (treated in lissmetreq_ani).
  *
  */
 int lissmet_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
@@ -53,29 +54,42 @@ int lissmet_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
   int            i,nc,k,itour,maxtou,ncor,a,b,iadr;
   double         SQRT3DIV2=0.8660254037844386;
 
+  if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {
+    fprintf(stdout,"  ** Grading mesh\n");
+  }
+
+  MMG5_mark_pointsOnReqEdge_fromTria ( mesh );
+
   logh   = mesh->info.hgrad;
   logs   = 0.001 + logh;
   maxtou = 100;
   ncor   = 0;
   itour  = 0;
 
-  /*alloc hashtable*/
-  //#warning revoir le dimensionnement!!!!
+  /* alloc hashtable */
   edgeTable.size  = mesh->ntmax;
   edgeTable.nxtmax = 3*mesh->ntmax+1;
   edgeTable.hnxt  = mesh->ntmax;
   MMG5_SAFE_CALLOC(edgeTable.item,edgeTable.nxtmax,Hedge,return 0);
 
   memset(edgeTable.item,0,edgeTable.nxtmax*sizeof(Hedge));
+
   for (k=edgeTable.size; k<edgeTable.nxtmax; k++)
     edgeTable.item[k].nxt = k+1;
 
-  /*build edge table*/
-  //#warning optimiser!
+  /* build edge table */
   for(k=1 ; k<=mesh->nt ; k++) {
     pt = &mesh->tria[k];
-    for(i=0 ; i<3 ; i++)
+    for(i=0 ; i<3 ; i++) {
+      a = pt->v[MMG2D_iare[i][0]];
+      b = pt->v[MMG2D_iare[i][1]];
+
+      /* Skip edges with a required vertex */
+      if ( mesh->point[a].s || mesh->point[b].s ) {
+        continue;
+      }
       MMG2D_hashEdge(&edgeTable,k,pt->v[MMG2D_iare[i][0]],pt->v[MMG2D_iare[i][1]]);
+    }
   }
 
   /* reset color */
@@ -178,21 +192,6 @@ int lissmet_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
   if ( abs(mesh->info.imprim) > 3 ) {
     fprintf(stdout,"    gradation: %7d updated, %d iter\n",ncor,itour);
   }
-
-  return 1;
-}
-
-/**
- * \param mesh pointer toward the mesh
- * \param sol pointer toward the metric
- *
- * \return 0 if fail, 1 if success
- *
- * Anisotropic gradation (h-gradation procedure) for required entities. See:
- * http://www.ann.jussieu.fr/frey/publications/ijnme4398.pdf
- *
- */
-int lissmetreq_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   return 1;
 }
