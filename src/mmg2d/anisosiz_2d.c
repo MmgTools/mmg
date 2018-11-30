@@ -468,7 +468,7 @@ int MMG2D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
           mm[0] = mm[2] = isqhmax;
 
           if ( MMG5_intersecmet22(mesh,&met->m[3*k],mm,mr) ) {
-            memcpy(&met->m[3*ip],mr,3*sizeof(double));
+            memcpy(&met->m[3*k],mr,3*sizeof(double));
           }
           break;
         }
