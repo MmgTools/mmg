@@ -83,22 +83,19 @@ void MMG2D_Init_parameters(MMG5_pMesh mesh) {
   MMG5_Init_parameters(mesh);
 
   /* default values for integers */
-  mesh->info.lag      = -1;
-  mesh->info.optim    =  0;
+  mesh->info.lag      = MMG5_LAG;
+  mesh->info.optim    = MMG5_OFF;
   /* [0/1]    ,avoid/allow surface modifications */
-  mesh->info.nosurf   =  0;
-  /* [0]    , Turn on/off the renumbering using SCOTCH; */
-  mesh->info.renum    = 0;
-  mesh->info.nreg     = 0;
+  mesh->info.nosurf   =  MMG5_OFF;
+  /* [0]    , Turn on/off the renumbering using SCOTCH */
+  mesh->info.renum    = MMG5_OFF;
+  mesh->info.nreg     = MMG5_OFF;
   /* default values for doubles */
   /* level set value */
-  mesh->info.ls       = 0.0;
-  /* control gradation; */
-  mesh->info.hgrad    = 1.3;
+  mesh->info.ls       = MMG5_LS;
 
-  mesh->info.dhd  = MMG5_ANGEDG;
-
-  mesh->info.PROctree = 64;
+  /* Ridge detection */
+  mesh->info.dhd      = MMG5_ANGEDG;
 }
 
 int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
@@ -130,7 +127,7 @@ int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
     if ( mesh->xtetra )
       MMG5_DEL_MEM(mesh,mesh->xtetra);
     if ( !val )
-      mesh->info.dhd    = -1.;
+      mesh->info.dhd    = MMG5_NR;
     else {
       if ( (mesh->info.imprim > 5) || mesh->info.ddebug )
         fprintf(stderr,"\n  ## Warning: %s: angle detection parameter"
@@ -185,7 +182,7 @@ int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
     return 0;
   }
   /* other options */
-  mesh->info.fem      = 0;
+  mesh->info.fem      = MMG5_OFF;
   return 1;
 }
 
@@ -209,8 +206,12 @@ int MMG2D_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val)
     break;
   case MMG2D_DPARAM_hgrad :
     mesh->info.hgrad    = val;
-    if ( mesh->info.hgrad < 0.0 )
-      mesh->info.hgrad = -1.0;
+    if ( mesh->info.hgrad < 0.0 ) {
+      mesh->info.hgrad = MMG5_NOHGRAD;
+    }
+    else {
+      mesh->info.hgrad = log(mesh->info.hgrad);
+    }
     break;
   case MMG2D_DPARAM_hausd :
     if ( val <=0 ) {

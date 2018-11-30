@@ -76,12 +76,7 @@ static int MMG2D_usage(char *name) {
 static inline int MMG5_defaultValues(MMG5_pMesh mesh) {
   double hgradexp;
 
-  hgradexp = mesh->info.hgrad;
-  mesh->info.hgrad = log(hgradexp);
-
   MMG5_mmgDefaultValues(mesh);
-
-  mesh->info.hgrad = hgradexp;
 
   fprintf(stdout,"\n\n");
 

@@ -372,7 +372,7 @@ int MMG2D_gradsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
 
-  hgrad = log(mesh->info.hgrad);
+  hgrad = mesh->info.hgrad;
   it = nup = 0;
   maxit = 100;
 

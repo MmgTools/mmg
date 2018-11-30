@@ -118,7 +118,13 @@ extern "C" {
 #define MMG5_NONSET_HSIZ -1 /**< hsiz value for unspecified hsiz map */
 #define MMG5_HAUSD     0.01 /**< default value for hausdorff param */
 #define MMG5_HGRAD     0.26236426446 /**< default value for gradation */
+#define MMG5_NOHGRAD     -1 /**< disable gradation */
 #define MMG5_LAG         -1 /**< default value for lagrangian option */
+#define MMG5_NR          -1 /**< no ridge detection */
+#define MMG5_LS         0.0 /**< default level-set to discretize */
+#define MMG5_PROCTREE    32 /**< default size of the PROctree */
+#define MMG5_OFF          0 /**< 0 */
+#define MMG5_ON           1 /**< 1 */
 #define MMG5_GAP        0.2 /**< gap value for reallocation */
 #define MMG5_HMINCOE  0.001 /**< coefficient to compute the default hmin value */
 #define MMG5_HMAXCOE      2 /**< coefficient to compute the default hmax value */

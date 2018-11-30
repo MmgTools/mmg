@@ -585,16 +585,3 @@ int MMG2D_pack(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   return 1;
 }
-
-/*
- opt[0] = option
- opt[1] = ddebug
- opt[2] = noswap
- opt[3] = noinsert
- opt[4] = nomove
- opt[5] = imprim
- opt[6] = nr
-
- optdbl[0] = hgrad
- optdbl[1] =ar
- */
