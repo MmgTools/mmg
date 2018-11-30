@@ -497,12 +497,12 @@ void MMG2D_gradEigenv(double dm[2],double dn[2],double difsiz,int8_t dir,int8_t 
   hm = 1.0 / sqrt(dm[dir]);
   hn = 1.0 / sqrt(dn[dir]);
 
-  if ( hn > hm+difsiz ) {
+  if ( hn > hm + difsiz + MMG5_EPSOK ) {
     hn = hm+difsiz;
     dn[dir] = 1.0 / (hn*hn);
     (*ier) = (*ier) | 2;
   }
-  else if ( hm > hn+difsiz ) {
+  else if ( hm > hn + difsiz + MMG5_EPSOK ) {
     hm = hn+difsiz;
     dm[dir] = 1.0 / (hm*hm);
     (*ier) = (*ier) | 1;
@@ -527,13 +527,13 @@ void MMG2D_gradEigenvreq(double dm[2],double dn[2],double difsiz,int8_t dir,int8
   hm = 1.0 / sqrt(dm[dir]);
   hn = 1.0 / sqrt(dn[dir]);
 
-  if ( hn > hm+difsiz ) {
+  if ( hn > hm + difsiz + MMG5_EPSOK ) {
     /* Decrease the size in \a ipslave */
     hn = hm+difsiz;
     dn[dir] = 1.0 / (hn*hn);
     (*ier) = 2;
   }
-  else if ( hn < hm-difsiz ) {
+  else if ( hn + MMG5_EPSOK < hm - difsiz ) {
     /* Increase the size in \a ipslave */
     hn = hm-difsiz;
     dn[dir] = 1.0 / (hn*hn);
@@ -760,7 +760,10 @@ int MMG2D_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   }
   while ( ++it < maxit && nu > 0 );
 
-  if ( abs(mesh->info.imprim) > 4 )  fprintf(stdout,"     gradation: %7d updated, %d iter.\n",nup,it);
+  if ( abs(mesh->info.imprim) > 4 ) {
+    fprintf(stdout,"     gradation: %7d updated, %d iter.\n",nup,it);
+  }
+
   return 1;
 
 }
