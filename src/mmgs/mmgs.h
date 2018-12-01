@@ -190,7 +190,6 @@ double caleltsig_iso(MMG5_pMesh mesh,MMG5_pSol met,int iel);
 int    MMGS_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met);
 int    MMGS_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met);
 void   MMG5_defaultValues(MMG5_pMesh);
-int    gradsiz_iso(MMG5_pMesh mesh,MMG5_pSol met);
 int    gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met);
 int    intmet_iso(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s);
 int    intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s);
@@ -203,8 +202,8 @@ int    MMGS_prilen(MMG5_pMesh mesh,MMG5_pSol met,int);
 int    MMGS_set_metricAtPointsOnReqEdges ( MMG5_pMesh,MMG5_pSol,int8_t);
 
 double (*MMG5_calelt)(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
-int    (*MMG5_defsiz)(MMG5_pMesh mesh,MMG5_pSol met);
-int    (*gradsiz)(MMG5_pMesh mesh,MMG5_pSol met);
+int    (*MMGS_defsiz)(MMG5_pMesh mesh,MMG5_pSol met);
+int    (*MMGS_gradsiz)(MMG5_pMesh mesh,MMG5_pSol met);
 int    (*intmet)(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s);
 int    (*movridpt)(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist);
 int    (*movintpt)(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist);

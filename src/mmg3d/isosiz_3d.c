@@ -1018,7 +1018,7 @@ int MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
  * Enforce mesh gradation by truncating size map.
  *
  */
-int MMG5_gradsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
+int MMG3D_gradsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTetra    pt;
   MMG5_pPoint    p0,p1;
   double    l,hn;

@@ -1262,7 +1262,7 @@ int MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
     fprintf(stdout,"  ** COMPUTATIONAL MESH\n");
 
   /* define metric map */
-  if ( !MMG5_defsiz(mesh,met) ) {
+  if ( !MMG3D_defsiz(mesh,met) ) {
     fprintf(stderr,"\n  ## Metric undefined. Exit program.\n");
     if ( PROctree )
       /*free PROctree*/
@@ -1272,7 +1272,7 @@ int MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
 
   if ( mesh->info.hgrad > 0. ) {
     if ( mesh->info.imprim > 0 )   fprintf(stdout,"\n  -- GRADATION : %8f\n",exp(mesh->info.hgrad));
-    if ( !MMG5_gradsiz(mesh,met) ) {
+    if ( !MMG3D_gradsiz(mesh,met) ) {
       fprintf(stderr,"\n  ## Gradation problem. Exit program.\n");
       if ( PROctree )
         /*free PROctree*/

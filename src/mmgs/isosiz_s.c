@@ -231,9 +231,7 @@ int MMGS_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
       isloc = 0;
       for (j=0; j<mesh->info.npar; j++) {
         par = &mesh->info.par[j];
-        if ( /*( (par->elt == MMG5_Vertex) &&
-               ( (p[i1]->ref == par->ref ) || (p[i2]->ref == par->ref) ))
-               ||*/ ( (par->elt == MMG5_Triangle) && (pt->ref == par->ref ) ) ) {
+        if ( (par->elt == MMG5_Triangle) && (pt->ref == par->ref ) ) {
           if ( !isloc ) {
             hausd = par->hausd;
             hmin  = par->hmin;
@@ -358,14 +356,7 @@ int MMGS_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   /* take local parameters */
   for (j=0; j<mesh->info.npar; j++) {
     par = &mesh->info.par[j];
-    /* if ( par->elt == MMG5_Vertex ) { */
-    /*   for (k=1; k<=mesh->np; k++) { */
-    /*     ppt = &mesh->point[k]; */
-    /*     if ( !MG_VOK(ppt) || ppt->ref != par->ref )  continue; */
-    /*     met->m[k] = MG_MAX(par->hmin,MG_MIN(met->m[k],par->hmax)); */
-    /*   } */
-    /* } */
-    /* else */ if ( par->elt == MMG5_Triangle ) {
+    if ( par->elt == MMG5_Triangle ) {
       for (k=1; k<=mesh->nt; k++) {
         pt = &mesh->tria[k];
         if ( !MG_EOK(pt) || pt->ref != par->ref )  continue;
@@ -383,71 +374,3 @@ int MMGS_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   }
   return 1;
 }
-
-
-/** Enforces mesh gradations by truncating size map */
-int gradsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
-  MMG5_pTria    pt;
-  MMG5_pPoint   p1,p2;
-  double   ll,hn,h1,h2;
-  int      k,nu,nup,it,maxit,ip1,ip2;
-  char     i,i1,i2;
-
-  if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
-    fprintf(stdout,"  ** Grading mesh\n");
-
-  for (k=1; k<=mesh->np; k++)
-    mesh->point[k].flag = mesh->base;
-
-  it = nup = 0;
-  maxit = 100;
-  do {
-    mesh->base++;
-    nu = 0;
-    for (k=1; k<=mesh->nt; k++) {
-      pt = &mesh->tria[k];
-      if ( !MG_EOK(pt) )  continue;
-
-      for (i=0; i<3; i++) {
-        i1  = MMG5_inxt2[i];
-        i2  = MMG5_iprv2[i];
-        ip1 = pt->v[i1];
-        ip2 = pt->v[i2];
-        p1 = &mesh->point[ip1];
-        p2 = &mesh->point[ip2];
-        if ( p1->flag < mesh->base-1 && p2->flag < mesh->base-1 )  continue;
-
-        ll = (p2->c[0]-p1->c[0])*(p2->c[0]-p1->c[0]) + (p2->c[1]-p1->c[1])*(p2->c[1]-p1->c[1]) \
-          + (p2->c[2]-p1->c[2])*(p2->c[2]-p1->c[2]);
-        ll = sqrt(ll);
-
-        h1 = met->m[ip1];
-        h2 = met->m[ip2];
-        if ( h1 < h2 ) {
-          if ( h1 < MMG5_EPSD )  continue;
-          hn  = h1 + mesh->info.hgrad*ll;
-          if ( h2 > hn ) {
-            met->m[ip2] = hn;
-            p2->flag    = mesh->base;
-            nu++;
-          }
-        }
-        else {
-          if ( h2 < MMG5_EPSD )  continue;
-          hn = h2 + mesh->info.hgrad*ll;
-          if ( h1 > hn ) {
-            met->m[ip1] = hn;
-            p1->flag    = mesh->base;
-            nu++;
-          }
-        }
-      }
-    }
-    nup += nu;
-  }
-  while ( ++it < maxit && nu > 0 );
-
-  if ( abs(mesh->info.imprim) > 4 )  fprintf(stdout,"     gradation: %7d updated, %d iter.\n",nup,it);
-  return 1;
-}
-

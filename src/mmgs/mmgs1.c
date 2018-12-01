@@ -1369,13 +1369,13 @@ int MMG5_mmgs1(MMG5_pMesh mesh,MMG5_pSol met) {
     fprintf(stdout,"  ** COMPUTATIONAL MESH\n");
 
   /* define metric map */
-  if ( !MMG5_defsiz(mesh,met) ) {
+  if ( !MMGS_defsiz(mesh,met) ) {
     fprintf(stderr,"\n  ## Metric undefined. Exit program.\n");
     return 0;
   }
   if ( mesh->info.hgrad > 0. ) {
     if ( mesh->info.imprim > 0 )   fprintf(stdout,"\n  -- GRADATION : %8f\n",exp(mesh->info.hgrad));
-    if (!gradsiz(mesh,met) ) {
+    if (!MMGS_gradsiz(mesh,met) ) {
       fprintf(stderr,"\n  ## Gradation problem. Exit program.\n");
       return 0;
     }

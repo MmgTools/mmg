@@ -44,7 +44,7 @@ void MMG3D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
     }
     MMG5_caltri          = MMG5_caltri_iso;
     MMG5_lenedg          = MMG5_lenedg_iso;
-    MMG3D_lenedgCoor      = MMG5_lenedgCoor_iso;
+    MMG3D_lenedgCoor     = MMG5_lenedgCoor_iso;
     MMG5_lenSurfEdg      = MMG5_lenSurfEdg_iso;
     MMG5_intmet          = MMG5_intmet_iso;
     MMG5_lenedgspl       = MMG5_lenedg_iso;
@@ -54,11 +54,11 @@ void MMG3D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
     MMG5_movbdyridpt     = MMG5_movbdyridpt_iso;
     MMG5_interp4bar      = MMG5_interp4bar_iso;
     MMG5_compute_meanMetricAtMarkedPoints = MMG5_compute_meanMetricAtMarkedPoints_iso;
-    MMG5_defsiz          = MMG3D_defsiz_iso;
-    MMG5_gradsiz         = MMG5_gradsiz_iso;
+    MMG3D_defsiz         = MMG3D_defsiz_iso;
+    MMG3D_gradsiz        = MMG3D_gradsiz_iso;
 #ifndef PATTERN
     MMG5_cavity          = MMG5_cavity_iso;
-    MMG3D_PROctreein       = MMG3D_PROctreein_iso;
+    MMG3D_PROctreein     = MMG3D_PROctreein_iso;
 #endif
   }
   else if ( met->size == 6 ) {
@@ -83,10 +83,10 @@ void MMG3D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
     MMG5_movbdyrefpt     = MMG5_movbdyrefpt_ani;
     MMG5_movbdynompt     = MMG5_movbdynompt_ani;
     MMG5_movbdyridpt     = MMG5_movbdyridpt_ani;
-    MMG5_interp4bar     = MMG5_interp4bar_ani;
+    MMG5_interp4bar      = MMG5_interp4bar_ani;
     MMG5_compute_meanMetricAtMarkedPoints = MMG5_compute_meanMetricAtMarkedPoints_ani;
-    MMG5_defsiz         = MMG3D_defsiz_ani;
-    MMG5_gradsiz        = MMG5_gradsiz_ani;
+    MMG3D_defsiz         = MMG3D_defsiz_ani;
+    MMG3D_gradsiz        = MMG3D_gradsiz_ani;
 #ifndef PATTERN
     MMG5_cavity         = MMG5_cavity_ani;
     MMG3D_PROctreein      = MMG3D_PROctreein_ani;

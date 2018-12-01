@@ -346,9 +346,8 @@ static int MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int kel,
       if ( isloc )  break;
 
       par = &mesh->info.par[i];
-      if ( /*( (par->elt != MMG5_Vertex) || (p0->ref != par->ref ) ) && */
-        ( (par->elt != MMG5_Triangle)    || (pxt->ref[iface] != par->ref ) ) &&
-        ( (par->elt != MMG5_Tetrahedron) || (pt->ref != par->ref )         ) )
+      if ( ( (par->elt != MMG5_Triangle)    || (pxt->ref[iface] != par->ref ) ) &&
+           ( (par->elt != MMG5_Tetrahedron) || (pt->ref != par->ref )         ) )
         continue;
 
       isqhmin = par->hmin;
@@ -359,9 +358,8 @@ static int MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int kel,
     for ( ; i<mesh->info.npar; ++i) {
       par = &mesh->info.par[i];
 
-      if ( /*( (par->elt != MMG5_Vertex) || (p0->ref != par->ref ) ) && */
-        ( (par->elt != MMG5_Triangle)    || (pxt->ref[iface] != par->ref ) ) &&
-        ( (par->elt != MMG5_Tetrahedron) || (pt->ref != par->ref )         ) )
+      if ( ( (par->elt != MMG5_Triangle)    || (pxt->ref[iface] != par->ref ) ) &&
+           ( (par->elt != MMG5_Tetrahedron) || (pt->ref != par->ref )         ) )
         continue;
 
       isqhmin = MG_MAX(isqhmin,par->hmin);
@@ -1596,7 +1594,7 @@ int MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int ia) {
  * Enforces mesh gradation by truncating metric field.
  *
  */
-int MMG5_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
+int MMG3D_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
   MMG5_Tria     ptt;
