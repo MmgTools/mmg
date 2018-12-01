@@ -220,8 +220,8 @@ void MMG5_mark_pointsOnReqEdge_fromTria (  MMG5_pMesh mesh ) {
     pt = &mesh->tria[k];
     for ( i=0; i<3; ++i ) {
       if ( pt->tag[i] & MG_REQ ) {
-        mesh->point[pt->v[MMG5_inxt2[i]]].s = 1;
-        mesh->point[pt->v[MMG5_iprv2[i]]].s = 1;
+        mesh->point[pt->v[MMG5_inxt2[i]]].s = mesh->nt+2;
+        mesh->point[pt->v[MMG5_iprv2[i]]].s = mesh->nt+2;
       }
     }
   }

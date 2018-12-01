@@ -718,7 +718,6 @@ int MMG2D_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   hgrad = mesh->info.hgrad;
   it = nup = 0;
   maxit = 100;
-
   do {
     mesh->base++;
     nu = 0;
@@ -745,7 +744,6 @@ int MMG2D_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
         /* bit 0 of ier = 0 if metric at point ip1 is untouched, 1 otherwise;
          * bit 1 of ier = 0 if metric at point ip2 is untouched, 1 otherwise */
         ier = MMG2D_grad2met_ani(mesh,met,ip1,ip2,difsiz);
-
         if ( ier & 1 ) {
           p1->flag = mesh->base;
           nu++;
@@ -813,20 +811,16 @@ int MMG2D_gradsizreq_ani(MMG5_pMesh mesh,MMG5_pSol met) {
         p1 = &mesh->point[ip1];
         p2 = &mesh->point[ip2];
 
-        if ( (!p1->s) && (!p2->s) ) {
+        if ( abs ( p1->s - p2->s ) < 2 ) {
           /* No size to propagate */
           continue;
         }
-        else if ( p1->s && p2->s ) {
-          /* Point already treated */
-          continue;
-        }
-        else if ( p1->s ) {
+        else if ( p1->s > p2->s ) {
           ipmaster = ip1;
           ipslave  = ip2;
         }
         else {
-          assert ( p2->s );
+          assert ( p2->s > p1->s );
           ipmaster = ip2;
           ipslave  = ip1;
         }
@@ -842,7 +836,7 @@ int MMG2D_gradsizreq_ani(MMG5_pMesh mesh,MMG5_pSol met) {
         ier = MMG2D_grad2metreq_ani(mesh,met,ipmaster,ipslave,difsiz);
 
         if ( ier ) {
-          mesh->point[ipslave].s = 1;
+          mesh->point[ipslave].s = mesh->point[ipmaster].s - 1;
           nu++;
         }
       }

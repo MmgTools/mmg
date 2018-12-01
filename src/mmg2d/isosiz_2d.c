@@ -468,20 +468,16 @@ int MMG2D_gradsizreq_iso(MMG5_pMesh mesh,MMG5_pSol met) {
         p1 = &mesh->point[ip1];
         p2 = &mesh->point[ip2];
 
-        if ( (!p1->s) && (!p2->s) ) {
+        if ( abs ( p1->s - p2->s ) < 2 ) {
           /* No size to propagate */
           continue;
         }
-        else if ( p1->s && p2->s ) {
-          /* Point already treated */
-          continue;
-        }
-        else if ( p1->s ) {
+        else if ( p1->s > p2->s ) {
           ipmaster = ip1;
           ipslave  = ip2;
         }
         else {
-          assert ( p2->s );
+          assert ( p2->s > p1->s );
           ipmaster = ip2;
           ipslave  = ip1;
         }
@@ -507,7 +503,7 @@ int MMG2D_gradsizreq_iso(MMG5_pMesh mesh,MMG5_pSol met) {
           }
         }
         met->m[ipslave]           = hn;
-        mesh->point[ipslave].s    = 1;
+        mesh->point[ipslave].s    = mesh->point[ipmaster].s - 1;
         nu++;
       }
     }
