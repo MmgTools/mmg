@@ -189,8 +189,8 @@ int lissmet_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
   } while ( nc && ++itour < maxtou );
   MMG5_SAFE_FREE(edgeTable.item);
 
-  if ( abs(mesh->info.imprim) > 3 ) {
-    fprintf(stdout,"    gradation: %7d updated, %d iter\n",ncor,itour);
+  if ( abs(mesh->info.imprim) > 3 && ncor ) {
+    fprintf(stdout,"     gradation: %7d updated, %d iter.\n",ncor,itour);
   }
 
   return 1;

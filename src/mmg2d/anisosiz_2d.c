@@ -850,7 +850,7 @@ int MMG2D_gradsizreq_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   while ( ++it < maxit && nu > 0 );
 
   if ( abs(mesh->info.imprim) > 4 ) {
-    fprintf(stdout,"     gradation (required points): %7d updated, %d iter.\n",nup,it);
+    fprintf(stdout,"     gradation (required): %7d updated, %d iter.\n",nup,it);
   }
   return nup;
 }

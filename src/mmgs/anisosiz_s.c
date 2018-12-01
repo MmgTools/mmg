@@ -810,6 +810,9 @@ int MMGS_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
         p2 = &mesh->point[pt->v[i2]];
 
         if ( p1->flag < mesh->base-1 && p2->flag < mesh->base-1 )  continue;
+        /* Skip points belonging to a required edge */
+        if ( p1->s || p2->s ) continue;
+
         ier = MMG5_grad2metSurf(mesh,met,pt,i);
         if ( ier == i1 ) {
           p1->flag = mesh->base;

@@ -1374,18 +1374,17 @@ int MMG5_mmgs1(MMG5_pMesh mesh,MMG5_pSol met) {
     return 0;
   }
   if ( mesh->info.hgrad > 0. ) {
-    if ( mesh->info.imprim > 0 )   fprintf(stdout,"\n  -- GRADATION : %8f\n",exp(mesh->info.hgrad));
+    if ( mesh->info.imprim > 0 ) {
+      fprintf(stdout,"\n  -- GRADATION : %8f (%8f)\n",exp(mesh->info.hgrad),
+        exp(mesh->info.hgradreq));
+    }
     if (!MMGS_gradsiz(mesh,met) ) {
       fprintf(stderr,"\n  ## Gradation problem. Exit program.\n");
       return 0;
     }
   }
   if ( mesh->info.hgradreq > 0. ) {
-    if ( !MMGS_gradsizreq(mesh,met) ) {
-      if ( mesh->info.imprim > 5 ) {
-        fprintf(stdout,"\n  -- GRADATION (REQUIRED POINTS) : %8f\n",mesh->info.hgradreq);
-      }
-    }
+    MMGS_gradsizreq(mesh,met);
   }
 
   if ( !anatri(mesh,met,2) ) {
