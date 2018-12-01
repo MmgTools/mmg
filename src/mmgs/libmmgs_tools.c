@@ -43,6 +43,7 @@ void MMGS_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
     MMG5_compute_meanMetricAtMarkedPoints = MMG5_compute_meanMetricAtMarkedPoints_iso;
     MMGS_defsiz      = MMGS_defsiz_iso;
     MMGS_gradsiz     = MMG5_gradsiz_iso;
+    MMGS_gradsizreq  = MMG5_gradsizreq_iso;
     intmet           = intmet_iso;
     movintpt         = movintpt_iso;
     movridpt         = movridpt_iso;
@@ -57,9 +58,10 @@ void MMGS_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
       MMG5_lenSurfEdg = MMG5_lenSurfEdg_ani;
     }
     MMG5_compute_meanMetricAtMarkedPoints = MMG5_compute_meanMetricAtMarkedPoints_ani;
-    MMGS_defsiz   = MMGS_defsiz_ani;
-    MMGS_gradsiz  = gradsiz_ani;
-    intmet        = intmet_ani;
+    MMGS_defsiz      = MMGS_defsiz_ani;
+    MMGS_gradsiz     = MMGS_gradsiz_ani;
+    MMGS_gradsizreq  = MMGS_gradsizreq_ani;
+   intmet        = intmet_ani;
     movintpt      = movintpt_ani;
     movridpt      = movridpt_ani;
   }

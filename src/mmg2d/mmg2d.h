@@ -295,7 +295,6 @@ int MMG2D_defsiz_ani(MMG5_pMesh ,MMG5_pSol );
 int MMG2D_defmetbdy_2d(MMG5_pMesh ,MMG5_pSol ,int ,char );
 int MMG2D_defaultmet_2d(MMG5_pMesh ,MMG5_pSol ,int ,char );
 int MMG2D_grad2met_ani(MMG5_pMesh ,MMG5_pSol ,int,int,double );
-int MMG2D_gradsizreq_iso(MMG5_pMesh ,MMG5_pSol );
 int MMG2D_gradsiz_ani(MMG5_pMesh ,MMG5_pSol );
 int MMG2D_gradsizreq_ani(MMG5_pMesh ,MMG5_pSol );
 int MMG2D_anaelt(MMG5_pMesh ,MMG5_pSol ,int );

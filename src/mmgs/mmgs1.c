@@ -1380,6 +1380,13 @@ int MMG5_mmgs1(MMG5_pMesh mesh,MMG5_pSol met) {
       return 0;
     }
   }
+  if ( mesh->info.hgradreq > 0. ) {
+    if ( !MMGS_gradsizreq(mesh,met) ) {
+      if ( mesh->info.imprim > 5 ) {
+        fprintf(stdout,"\n  -- GRADATION (REQUIRED POINTS) : %8f\n",mesh->info.hgradreq);
+      }
+    }
+  }
 
   if ( !anatri(mesh,met,2) ) {
     fprintf(stderr,"\n  ## Unable to proceed adaptation. Exit program.\n");

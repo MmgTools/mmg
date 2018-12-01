@@ -764,7 +764,7 @@ int MMGS_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
  * Enforces mesh gradation by truncating metric field.
  *
  */
-int gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
+int MMGS_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria   pt;
   MMG5_pPoint  p1,p2;
   double  *m,mv;
@@ -827,6 +827,21 @@ int gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
 
   if ( abs(mesh->info.imprim) > 4 )
     fprintf(stdout,"     gradation: %7d updated, %d iter.\n",nup,it);
+
+  return 1;
+}
+
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \return 1
+ *
+ *
+ * Enforces mesh gradation (on required entities) by truncating metric field.
+ *
+ */
+int MMGS_gradsizreq_ani(MMG5_pMesh mesh,MMG5_pSol met) {
 
   return 1;
 }

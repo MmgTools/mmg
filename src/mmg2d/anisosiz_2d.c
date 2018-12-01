@@ -770,7 +770,7 @@ int MMG2D_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
  * \param mesh pointer toward the mesh
  * \param met pointer toward the metric
  *
- * \return 0 if fail, 1 if success
+ * \return the number of updated metrics
  *
  * Anisotropic gradation on required points.
  *
@@ -848,5 +848,5 @@ int MMG2D_gradsizreq_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( abs(mesh->info.imprim) > 4 ) {
     fprintf(stdout,"     gradation (required points): %7d updated, %d iter.\n",nup,it);
   }
-  return 1;
+  return nup;
 }
