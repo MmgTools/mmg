@@ -732,7 +732,11 @@ int MMG2D_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
         ip2 = pt->v[i2];
         p1 = &mesh->point[ip1];
         p2 = &mesh->point[ip2];
+
         if ( p1->flag < mesh->base-1 && p2->flag < mesh->base-1 )  continue;
+
+        /* Skip points belonging to a required edge */
+        if ( p1->s || p2->s ) continue;
 
         ll = (p2->c[0]-p1->c[0])*(p2->c[0]-p1->c[0])
           + (p2->c[1]-p1->c[1])*(p2->c[1]-p1->c[1]);
