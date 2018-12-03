@@ -525,7 +525,8 @@ void MMG3D_Set_commonFunc() {
   MMG5_chkmsh            = MMG5_mmg3dChkmsh;
   MMG5_indPt             = MMG3D_indPt;
   MMG5_indElt            = MMG3D_indElt;
-
+  MMG5_grad2met_ani      = MMG5_grad2metSurf;
+  MMG5_grad2metreq_ani   = MMG5_grad2metSurfreq;
 #ifdef USE_SCOTCH
   MMG5_renumbering       = MMG5_mmg3dRenumbering;
 #endif

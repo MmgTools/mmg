@@ -890,32 +890,29 @@ double MMG5_ridSizeInNormalDir(MMG5_pMesh mesh,int i0,double* bcu,
  * \param mesh pointer toward the mesh.
  * \param met pointer toward the metric structure.
  * \param pt pointer toward a triangle.
- * \param i edge index in triangle \a pt.
+ * \param np1 global index of the first extremity of the edge.
+ * \param np2 global index of the second extremity of the edge.
  * \return -1 if no gradation is needed, else index of graded point.
  *
- * Enforces gradation of metric in one extremity of edge \a i in tria \a pt
- * with respect to the other, along the direction of the associated support
- * curve first, then along the normal direction.
+ * Enforces gradation of metric in one extremity of edge \$f[ np1; np2]\$f in
+ * tria \a pt with respect to the other, along the direction of the associated
+ * support curve first, then along the normal direction.
  *
  * \warning The gradation along the direction normal to the surface is made in
  * an "isotropic way".
  *
  */
-int MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int i)
+int MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int np1,
+                      int np2)
 {
-  MMG5_pPoint   p1,p2;
-  double   *mm1,*mm2,*nn1,*nn2,ps1,ps2,ux,uy,uz,m1[6],m2[6],n1[3],n2[3],nt[3];
-  double   r1[3][3],r2[3][3],t1[2],t2[2],c[3],mtan1[3],mtan2[3],mr1[6],mr2[6];
-  double   mtmp[3][3],val;
-  double   /*,l1,l2*/l,dd;
-  double   lambda[2],vp[2][2],alpha,beta,mu[3];
-  int      np1,np2,kmin,idx;
-  char     i1,i2,ichg;
-
-  i1 = MMG5_inxt2[i];
-  i2 = MMG5_iprv2[i];
-  np1 = pt->v[i1];
-  np2 = pt->v[i2];
+  MMG5_pPoint  p1,p2;
+  double      *mm1,*mm2,*nn1,*nn2,ps1,ps2,ux,uy,uz,m1[6],m2[6],n1[3],n2[3],nt[3];
+  double       r1[3][3],r2[3][3],t1[2],t2[2],c[3],mtan1[3],mtan2[3],mr1[6],mr2[6];
+  double       mtmp[3][3],val;
+  double       /*,l1,l2*/l,dd;
+  double       lambda[2],vp[2][2],alpha,beta,mu[3];
+  int          kmin,idx;
+  char         ichg;
 
   p1 = &mesh->point[np1];
   p2 = &mesh->point[np2];
@@ -1160,7 +1157,7 @@ int MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int i)
 
       memcpy(mm1,m1,6*sizeof(double));
     }
-    return i1;
+    return np1;
   }
   /* Metric in p2 has to be changed */
   else{
@@ -1250,8 +1247,33 @@ int MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int i)
 
       memcpy(mm2,m2,6*sizeof(double));
     }
-    return i2;
+    return np2;
   }
+}
+
+/**
+ * \param mesh pointer toward the mesh.
+ * \param met pointer toward the metric structure.
+ * \param pt pointer toward the processed triangle.
+ * \param npmaster edge extremity that cannot be modified
+ * \param npslave edge extremity to modify to respect the gradation.
+ *
+ * \return -1 if no gradation is needed, else index of graded point.
+ *
+ * Enforces gradation of metric of the extremity ±a npslave of edge \$f[
+ * npmaster; npslave]\$f in tria \a pt with respect to the other, along the
+ * direction of the associated support curve first, then along the normal
+ * direction.
+ *
+ * \warning The gradation along the direction normal to the surface is made in
+ * an "isotropic way".
+ *
+ */
+int MMG5_grad2metSurfreq(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int np1,
+                         int np2)
+{
+
+  return 1;
 }
 
 /**

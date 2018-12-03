@@ -585,29 +585,40 @@ int MMG2D_updatemet_ani(double *m,double *n,double dm[2],double dn[2],
 /**
  * \param mesh pointer toward the mesh
  * \param met pointer toward the metric
- * \param ip1 first edge extremity
- * \param ip2 second edge extremity
- * \param difsiz maximal size gap authorized by the gradation.
+ * \param pt pointer toward the processed triangle.
+ * \param np1 first edge extremity (global index)
+ * \param np2 second edge extremity (global index)
  *
  * \return 0 if fail or we don't need to modify the sizes. ier, where (ier & 1)
  * if metric of \a ip1 is altered, and (ier & 2) if metric of \a ip2 is altered.
  *
  * Perform simultaneous reduction of metrics at ip1 points and ip2, and truncate
  * characteristic sizes so that the difference between two corresponding sizes
- * is less than difsiz.
+ * respect the maximal gradation.
  *
  * Ref : https://www.rocq.inria.fr/gamma/Frederic.Alauzet/cours/cea2010_V2.pdf
  *
  */
-int MMG2D_grad2met_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2,double difsiz) {
+int MMG2D_grad2met_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,int np1,int np2) {
+  MMG5_pPoint  p1,p2;
   double       dm[2],dn[2];
-  double       vp[2][2],*m,*n;
+  double       vp[2][2],*m,*n,ll,difsiz;
   int8_t       ier;
 
   ier = 0;
 
-  m = &met->m[met->size*ip1];
-  n = &met->m[met->size*ip2];
+  p1 = &mesh->point[np1];
+  p2 = &mesh->point[np2];
+
+  /* Maximum allowed difference between the prescribed sizes in p1 and p2 */
+  ll = (p2->c[0]-p1->c[0])*(p2->c[0]-p1->c[0])
+    + (p2->c[1]-p1->c[1])*(p2->c[1]-p1->c[1]);
+  ll = sqrt(ll);
+
+  difsiz = ll*mesh->info.hgrad;
+
+  m = &met->m[met->size*np1];
+  n = &met->m[met->size*np2];
 
   /* Simultaneous reduction of m1 and m2 */
   if ( !MMG2D_simred(mesh,m,n,dm,dn,vp) ) {
@@ -637,30 +648,41 @@ int MMG2D_grad2met_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2,double difs
 /**
  * \param mesh pointer toward the mesh
  * \param met pointer toward the metric
- * \param ipmaster edge extremity that cannot be modified
- * \param ipslave edge extremity to modify to respect the gradation.
- * \param difsiz maximal size gap authorized by the gradation.
+ * \param pt pointer toward the processed tria.
+ * \param npmaster edge extremity that cannot be modified
+ * \param npslave edge extremity to modify to respect the gradation.
  *
  * \return 0 if fail or we don't need to update the size of \a ipslave, 1 if
  * its size has been updated.
  *
- * Perform simultaneous reduction of metrics at ipmaster points and ipslave, and
- * modify the characteristic size of \a ipslave so that the difference between
- * the two sizes is less than difsiz.
+ * Perform simultaneous reduction of metrics at \a npmaster points and \a
+ * npslave, and modify the characteristic size of \a npslave so that the
+ * difference between the two sizes respect the maximal gradation
  *
  * Ref : https://www.rocq.inria.fr/gamma/Frederic.Alauzet/cours/cea2010_V2.pdf
  *
  */
-static inline
-int MMG2D_grad2metreq_ani(MMG5_pMesh mesh,MMG5_pSol met,int ipmaster,int ipslave,double difsiz) {
+int MMG2D_grad2metreq_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,
+                          int npmaster,int npslave) {
+  MMG5_pPoint  p2,p1;
   double       dm[2],dn[2];
-  double       vp[2][2],*m,*n;
+  double       vp[2][2],*m,*n,ll,difsiz;
   int8_t       ier;
 
   ier = 0;
 
-  m = &met->m[met->size*ipmaster];
-  n = &met->m[met->size*ipslave];
+  p1 = &mesh->point[npmaster];
+  p2 = &mesh->point[npslave];
+
+  /* Maximum allowed difference between the prescribed sizes in p1 and p2 */
+  ll = (p2->c[0]-p1->c[0])*(p2->c[0]-p1->c[0])
+    + (p2->c[1]-p1->c[1])*(p2->c[1]-p1->c[1]);
+  ll = sqrt(ll);
+
+  difsiz = ll*mesh->info.hgrad;
+
+  m = &met->m[met->size*npmaster];
+  n = &met->m[met->size*npslave];
 
   /* Simultaneous reduction of m1 and m2 */
   if ( !MMG2D_simred(mesh,m,n,dm,dn,vp) ) {
@@ -700,9 +722,8 @@ int MMG2D_grad2metreq_ani(MMG5_pMesh mesh,MMG5_pSol met,int ipmaster,int ipslave
 int MMG2D_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria        pt;
   MMG5_pPoint       p1,p2;
-  double            hgrad,ll,difsiz;
-  int               k,it,ip1,ip2,maxit,nup,nu;
-  char              i,i1,i2,ier;
+  int               k,it,maxit,nup,nu,np1,np2,ier;
+  char              i;
 
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
@@ -715,7 +736,6 @@ int MMG2D_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
     mesh->point[k].flag = mesh->base;
   }
 
-  hgrad = mesh->info.hgrad;
   it = nup = 0;
   maxit = 100;
   do {
@@ -726,28 +746,19 @@ int MMG2D_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
       if ( !MG_EOK(pt) )  continue;
 
       for (i=0; i<3; i++) {
-        i1  = MMG5_inxt2[i];
-        i2  = MMG5_iprv2[i];
-        ip1 = pt->v[i1];
-        ip2 = pt->v[i2];
-        p1 = &mesh->point[ip1];
-        p2 = &mesh->point[ip2];
+        np1  = pt->v[MMG5_inxt2[i]];
+        np2  = pt->v[MMG5_iprv2[i]];
+        p1   = &mesh->point[np1];
+        p2   = &mesh->point[np2];
 
         if ( p1->flag < mesh->base-1 && p2->flag < mesh->base-1 )  continue;
 
         /* Skip points belonging to a required edge */
         if ( p1->s || p2->s ) continue;
 
-        ll = (p2->c[0]-p1->c[0])*(p2->c[0]-p1->c[0])
-          + (p2->c[1]-p1->c[1])*(p2->c[1]-p1->c[1]);
-        ll = sqrt(ll);
-
-        /* Maximum allowed difference between the prescribed sizes in p1 and p2 */
-        difsiz = ll*hgrad;
-
         /* bit 0 of ier = 0 if metric at point ip1 is untouched, 1 otherwise;
          * bit 1 of ier = 0 if metric at point ip2 is untouched, 1 otherwise */
-        ier = MMG2D_grad2met_ani(mesh,met,ip1,ip2,difsiz);
+        ier = MMG5_grad2metreq_ani(mesh,met,pt,np1,np2);
         if ( ier & 1 ) {
           p1->flag = mesh->base;
           nu++;
@@ -782,10 +793,8 @@ int MMG2D_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
 int MMG2D_gradsizreq_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria        pt;
   MMG5_pPoint       p1,p2;
-  double            hgrad,ll,difsiz;
-  int               k,it,ip1,ip2,ipslave,ipmaster,maxit,nup,nu;
-  int8_t            ier;
-  char              i,i1,i2;
+  int               k,it,np1,np2,npslave,npmaster,maxit,nup,nu,ier;
+  char              i;
 
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {
@@ -797,7 +806,6 @@ int MMG2D_gradsizreq_ani(MMG5_pMesh mesh,MMG5_pSol met) {
     MMG5_mark_pointsOnReqEdge_fromTria ( mesh );
   }
 
-  hgrad = mesh->info.hgrad;
   it = nup = 0;
   maxit = 100;
 
@@ -808,39 +816,30 @@ int MMG2D_gradsizreq_ani(MMG5_pMesh mesh,MMG5_pSol met) {
       if ( !MG_EOK(pt) )  continue;
 
       for (i=0; i<3; i++) {
-        i1  = MMG5_inxt2[i];
-        i2  = MMG5_iprv2[i];
-        ip1 = pt->v[i1];
-        ip2 = pt->v[i2];
-        p1 = &mesh->point[ip1];
-        p2 = &mesh->point[ip2];
+        np1 = pt->v[MMG5_inxt2[i]];
+        np2 = pt->v[MMG5_iprv2[i]];
+        p1 = &mesh->point[np1];
+        p2 = &mesh->point[np2];
 
         if ( abs ( p1->s - p2->s ) < 2 ) {
           /* No size to propagate */
           continue;
         }
         else if ( p1->s > p2->s ) {
-          ipmaster = ip1;
-          ipslave  = ip2;
+          npmaster = np1;
+          npslave  = np2;
         }
         else {
           assert ( p2->s > p1->s );
-          ipmaster = ip2;
-          ipslave  = ip1;
+          npmaster = np2;
+          npslave  = np1;
         }
 
-        ll = (p2->c[0]-p1->c[0])*(p2->c[0]-p1->c[0])
-          + (p2->c[1]-p1->c[1])*(p2->c[1]-p1->c[1]);
-        ll = sqrt(ll);
-
-        /* Maximum allowed difference between the prescribed sizes in p1 and p2 */
-        difsiz = ll*hgrad;
-
-        /* Impose the gradation to ipslave from ipmaster */
-        ier = MMG2D_grad2metreq_ani(mesh,met,ipmaster,ipslave,difsiz);
+        /* Impose the gradation to npslave from npmaster */
+        ier = MMG2D_grad2metreq_ani(mesh,met,pt,npmaster,npslave);
 
         if ( ier ) {
-          mesh->point[ipslave].s = mesh->point[ipmaster].s - 1;
+          mesh->point[npslave].s = mesh->point[npmaster].s - 1;
           nu++;
         }
       }

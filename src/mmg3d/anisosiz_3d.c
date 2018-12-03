@@ -1356,7 +1356,9 @@ int MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
  * \param mesh pointer toward the mesh.
  * \param met pointer toward the metric structure.
  * \param pt pointer toward a tetra.
- * \param ia edge index in tetra \a pt.
+ * \param np1 global index of the first edge extremity.
+ * \param np2 global index of the second edge extremity.
+ *
  * \return -1 if no gradation is needed, else index of graded point.
  *
  * Enforces gradation of metric in one extremity of edge \a ia in tetra \a pt
@@ -1364,25 +1366,20 @@ int MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
  *
  */
 static inline
-int MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int ia) {
+int MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int np1,int np2) {
   MMG5_pPoint    p1,p2;
   double         *mm1,*mm2,m1[6],m2[6],ps1,ps2,ux,uy,uz;
   double         c[5],l,val,t[3];
   double         lambda[3],vp[3][3],alpha,beta,mu[3];
-  int            ip1,ip2,kmin,i;
-  char           i1,i2,ichg;
+  int            kmin,i;
+  char           ichg;
   static char    mmgWarn = 0;
 
-  i1  = MMG5_iare[ia][0];
-  i2  = MMG5_iare[ia][1];
-  ip1 = pt->v[i1];
-  ip2 = pt->v[i2];
+  p1  = &mesh->point[np1];
+  p2  = &mesh->point[np2];
 
-  p1  = &mesh->point[ip1];
-  p2  = &mesh->point[ip2];
-
-  mm1  = &met->m[6*ip1];
-  mm2  = &met->m[6*ip2];
+  mm1  = &met->m[6*np1];
+  mm2  = &met->m[6*np2];
 
   ux = p2->c[0] - p1->c[0];
   uy = p2->c[1] - p1->c[1];
@@ -1390,7 +1387,7 @@ int MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int ia) {
 
   if ( (!( MG_SIN(p1->tag) || (p1->tag & MG_NOM) )) &&  p1->tag & MG_GEO ) {
     /* Recover normal and metric associated to p1 */
-    if( !MMG5_buildridmet(mesh,met,ip1,ux,uy,uz,m1) )
+    if( !MMG5_buildridmet(mesh,met,np1,ux,uy,uz,m1) )
       return -1;
   }
   else
@@ -1398,7 +1395,7 @@ int MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int ia) {
 
   if ( (!( MG_SIN(p2->tag) || (p2->tag & MG_NOM) )) && p2->tag & MG_GEO ) {
     /* Recover normal and metric associated to p2 */
-    if( !MMG5_buildridmet(mesh,met,ip2,ux,uy,uz,m2) )
+    if( !MMG5_buildridmet(mesh,met,np2,ux,uy,uz,m2) )
       return -1;
   }
   else
@@ -1508,7 +1505,7 @@ int MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int ia) {
 
       memcpy(mm1,m1,6*sizeof(double));
     }
-    return i1;
+    return np1;
   }
   /* Metric in p2 has to be changed */
   else{
@@ -1580,7 +1577,7 @@ int MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int ia) {
       m2[5] = mu[0]*vp[0][2]*vp[0][2] + mu[1]*vp[1][2]*vp[1][2] + vp[2][2]*vp[2][2]*mu[2];
       memcpy(mm2,m2,6*sizeof(double));
     }
-    return i2;
+    return np2;
   }
 }
 
@@ -1601,8 +1598,7 @@ int MMG3D_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pPoint   p0,p1;
   double        *m,mv;
   int           k,it,itv,nup,nu,nupv,maxit;
-  int           i,j,ip0,ip1;
-  char          ier,i0,i1;
+  int           i,j,np0,np1,ier;
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
     fprintf(stdout,"  ** Anisotropic mesh gradation\n");
@@ -1643,21 +1639,19 @@ int MMG3D_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
             /* virtual triangle */
             MMG5_tet2tri(mesh,k,i,&ptt);
             for (j=0; j<3; j++) {
-              i0  = MMG5_inxt2[j];
-              i1  = MMG5_iprv2[j];
-              ip0 = ptt.v[i0];
-              ip1 = ptt.v[i1];
-              p0  = &mesh->point[ip0];
-              p1  = &mesh->point[ip1];
+              np0 = ptt.v[MMG5_inxt2[j]];
+              np1 = ptt.v[MMG5_iprv2[j]];
+              p0  = &mesh->point[np0];
+              p1  = &mesh->point[np1];
               if ( (p0->flag < mesh->base-1) && (p1->flag < mesh->base-1) )
                 continue;
               /* gradation along the tangent plane */
-              ier = MMG5_grad2metSurf(mesh,met,&ptt,j);
-              if ( ier == i0 ) {
+              ier = MMG5_grad2metSurf(mesh,met,&ptt,np0,np1);
+              if ( ier == np0 ) {
                 p0->flag = mesh->base;
                 nu++;
               }
-              else if ( ier == i1 ) {
+              else if ( ier == np1 ) {
                 p1->flag = mesh->base;
                 nu++;
               }
@@ -1686,20 +1680,18 @@ int MMG3D_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
       if ( !MG_EOK(pt) )  continue;
       for (i=0; i<4; i++) {
         /* Gradation along a volume edge */
-        i0  = MMG5_iare[i][0];
-        i1  = MMG5_iare[i][1];
-        ip0 = pt->v[i0];
-        ip1 = pt->v[i1];
-        p0  = &mesh->point[ip0];
-        p1  = &mesh->point[ip1];
+        np0  = pt->v[MMG5_iare[i][0]];
+        np1  = pt->v[MMG5_iare[i][1]];
+        p0  = &mesh->point[np0];
+        p1  = &mesh->point[np1];
         if ( p0->flag < mesh->base-1 && p1->flag < mesh->base-1 )  continue;
 
-        ier = MMG5_grad2metVol(mesh,met,pt,i);
-        if ( ier == i0 ) {
+        ier = MMG5_grad2metVol(mesh,met,pt,np0,np1);
+        if ( ier == np0 ) {
           p0->flag = mesh->base;
           nu++;
         }
-        else if ( ier == i1 ) {
+        else if ( ier == np1 ) {
           p1->flag = mesh->base;
           nu++;
         }
