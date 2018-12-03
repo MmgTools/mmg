@@ -729,53 +729,7 @@ int MMG2D_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
     fprintf(stdout,"  ** Grading mesh\n");
 
-  /** Mark the edges belonging to a required entity */
-  MMG5_mark_pointsOnReqEdge_fromTria ( mesh );
-
-  for (k=1; k<=mesh->np; k++) {
-    mesh->point[k].flag = mesh->base;
-  }
-
-  it = nup = 0;
-  maxit = 100;
-  do {
-    mesh->base++;
-    nu = 0;
-    for (k=1; k<=mesh->nt; k++) {
-      pt = &mesh->tria[k];
-      if ( !MG_EOK(pt) )  continue;
-
-      for (i=0; i<3; i++) {
-        np1  = pt->v[MMG5_inxt2[i]];
-        np2  = pt->v[MMG5_iprv2[i]];
-        p1   = &mesh->point[np1];
-        p2   = &mesh->point[np2];
-
-        if ( p1->flag < mesh->base-1 && p2->flag < mesh->base-1 )  continue;
-
-        /* Skip points belonging to a required edge */
-        if ( p1->s || p2->s ) continue;
-
-        /* bit 0 of ier = 0 if metric at point ip1 is untouched, 1 otherwise;
-         * bit 1 of ier = 0 if metric at point ip2 is untouched, 1 otherwise */
-        ier = MMG5_grad2metreq_ani(mesh,met,pt,np1,np2);
-        if ( ier & 1 ) {
-          p1->flag = mesh->base;
-          nu++;
-        }
-        if ( ier & 2 ) {
-          p2->flag = mesh->base;
-          nu++;
-        }
-      }
-    }
-    nup += nu;
-  }
-  while ( ++it < maxit && nu > 0 );
-
-  if ( abs(mesh->info.imprim) > 4 ) {
-    fprintf(stdout,"     gradation: %7d updated, %d iter.\n",nup,it);
-  }
+  nup = MMG5_gradsiz_ani(mesh,met,&it);
 
   return 1;
 
@@ -836,7 +790,7 @@ int MMG2D_gradsizreq_ani(MMG5_pMesh mesh,MMG5_pSol met) {
         }
 
         /* Impose the gradation to npslave from npmaster */
-        ier = MMG2D_grad2metreq_ani(mesh,met,pt,npmaster,npslave);
+        ier = MMG5_grad2metreq_ani(mesh,met,pt,npmaster,npslave);
 
         if ( ier ) {
           mesh->point[npslave].s = mesh->point[npmaster].s - 1;

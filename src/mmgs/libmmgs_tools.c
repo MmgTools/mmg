@@ -60,7 +60,7 @@ void MMGS_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
     MMG5_compute_meanMetricAtMarkedPoints = MMG5_compute_meanMetricAtMarkedPoints_ani;
     MMGS_defsiz      = MMGS_defsiz_ani;
     MMGS_gradsiz     = MMGS_gradsiz_ani;
-    MMGS_gradsizreq  = MMGS_gradsizreq_ani;
+    MMGS_gradsizreq  = MMG5_gradsizreq_ani;
     intmet        = intmet_ani;
     movintpt      = movintpt_ani;
     movridpt      = movridpt_ani;

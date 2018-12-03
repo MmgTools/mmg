@@ -1321,3 +1321,81 @@ int MMG5_compute_meanMetricAtMarkedPoints_ani ( MMG5_pMesh mesh,MMG5_pSol met ) 
 
   return 1;
 }
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param it number of performed iteration (to fill)
+ *
+ * \return nup, the number of points updated.
+ *
+ *
+ * Standard gradation procedure.
+ *
+ */
+int MMG5_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met,int *it) {
+  MMG5_pTria   pt;
+  MMG5_pPoint  p1,p2;
+  int          k,nup,nu,maxit,np1,np2,ier;
+  char         i;
+
+  /** Mark the edges belonging to a required entity */
+  //MMG5_mark_pointsOnReqEdge_fromTria ( mesh );
+
+  for (k=1; k<=mesh->np; k++)
+    mesh->point[k].flag = mesh->base;
+
+  (*it) = nup = 0;
+  maxit = 100;
+  do {
+    mesh->base++;
+    nu = 0;
+    for (k=1; k<=mesh->nt; k++) {
+      pt = &mesh->tria[k];
+      if ( !MG_EOK(pt) )  continue;
+
+      for (i=0; i<3; i++) {
+        np1 = pt->v[MMG5_inxt2[i]];
+        np2 = pt->v[MMG5_iprv2[i]];
+        p1 = &mesh->point[np1];
+        p2 = &mesh->point[np2];
+
+        if ( p1->flag < mesh->base-1 && p2->flag < mesh->base-1 )  continue;
+        /* Skip points belonging to a required edge */
+        //if ( p1->s || p2->s ) continue;
+
+        ier = MMG5_grad2met_ani(mesh,met,pt,np1,np2);
+        if ( ier == np1 ) {
+          p1->flag = mesh->base;
+          nu++;
+        }
+        else if ( ier == np2 ) {
+          p2->flag = mesh->base;
+          nu++;
+        }
+      }
+    }
+    nup += nu;
+  }
+  while( ++(*it) < maxit && nu > 0 );
+
+  if ( abs(mesh->info.imprim) > 4 )
+    fprintf(stdout,"     gradation: %7d updated, %d iter.\n",nup,(*it));
+
+  return nup;
+}
+
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \return 1
+ *
+ *
+ * Enforces mesh gradation (on required entities) by truncating metric field.
+ *
+ */
+int MMG5_gradsizreq_ani(MMG5_pMesh mesh,MMG5_pSol met) {
+
+  return 1;
+}
