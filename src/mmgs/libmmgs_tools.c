@@ -61,7 +61,7 @@ void MMGS_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
     MMGS_defsiz      = MMGS_defsiz_ani;
     MMGS_gradsiz     = MMGS_gradsiz_ani;
     MMGS_gradsizreq  = MMGS_gradsizreq_ani;
-   intmet        = intmet_ani;
+    intmet        = intmet_ani;
     movintpt      = movintpt_ani;
     movridpt      = movridpt_ani;
   }
