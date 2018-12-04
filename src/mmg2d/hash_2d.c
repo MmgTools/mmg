@@ -451,7 +451,7 @@ int MMG2D_pack(MMG5_pMesh mesh,MMG5_pSol sol) {
           iel = adja[i] / 3;
           pt1 = &mesh->tria[iel];
           if ( !iel ||
-               ( iel < k && ((pt->ref != pt1->ref) || MG_SIN(pt->tag[i])) ) ) {
+               ((pt->ref > pt1->ref) || MG_SIN(pt->tag[i]) ) ) {
             ++ned;
             ped = &mesh->edge[ned];
             ped->a = pt->v[i1];
