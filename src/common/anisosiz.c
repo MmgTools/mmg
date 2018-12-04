@@ -988,25 +988,6 @@ int MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int np1,
   MMG5_rotmatrix(n2,r2);
 
   /* Geodesic length of support curve to edge i */
-
-  // Commentated because the next line overwrite it... to check!
-  /* ps1 = ux*n1[0] + uy*n1[1] + uz*n1[2]; */
-  /* t1[0] = ux - ps1*n1[0]; */
-  /* t1[1] = uy - ps1*n1[1]; */
-  /* t1[2] = uz - ps1*n1[2]; */
-
-  /* // warning : t2 seems to be wrong calculated */
-  /* ps2 = - (ux*n2[0] + uy*n2[1] + uz*n2[2]); */
-  /* t2[0] = -ux - ps1*n2[0]; */
-  /* t2[1] = -uy - ps1*n2[1]; */
-  /* t2[2] = -uz - ps1*n2[2]; */
-
-  /* l1 = m1[0]*t1[0]*t1[0] + m1[3]*t1[1]*t1[1] + m1[5]*t1[2]*t1[2] \ */
-  /*   + 2.0 * ( m1[1]*t1[0]*t1[1] + m1[2]*t1[0]*t1[2] + m1[4]*t1[1]*t1[2] ) ; */
-  /* l2 = m2[0]*t2[0]*t2[0] + m2[3]*t2[1]*t2[1] + m2[5]*t2[2]*t2[2] \ */
-  /*   + 2.0 * ( m2[1]*t2[0]*t2[1] + m2[2]*t2[0]*t2[2] + m2[4]*t2[1]*t2[2] ) ; */
-  /* l = 0.5* ( sqrt(l1) + sqrt(l2) ) ; */
-
   l = sqrt(ux*ux+uy*uy+uz*uz);
 
   /* Characteristic sizes in direction of support curve */
@@ -1020,7 +1001,7 @@ int MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int np1,
   c[1] = r1[1][0]*ux + r1[1][1]*uy + r1[1][2]*uz;
 
   memcpy(t1,c,2*sizeof(double));
-  // Here we work in the tangent plane (thus in 2d)
+  /* Here we work in the tangent plane (thus in 2d) */
   dd = t1[0]*t1[0] + t1[1]*t1[1];
   if(dd < MMG5_EPSD2)
     return -1;
@@ -1029,7 +1010,7 @@ int MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int np1,
   t1[0] *= dd;
   t1[1] *= dd;
 
-  // edge length in metric mtan1: sqrt(t^(t1) * mtan1 * t1).
+  /* edge length in metric mtan1: sqrt(t^(t1) * mtan1 * t1). */
   ps1 =  mtan1[0]*t1[0]*t1[0] + 2.0*mtan1[1]*t1[0]*t1[1] + mtan1[2]*t1[1]*t1[1];
   assert ( ps1  > 0. );
   ps1 = sqrt(ps1);
@@ -1052,22 +1033,23 @@ int MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int np1,
   t2[0] *= dd;
   t2[1] *= dd;
 
-  // edge length: sqrt(t^(t2) * mtan2 * t2)
+  /* edge length: sqrt(t^(t2) * mtan2 * t2) */
   ps2 = mtan2[0]*t2[0]*t2[0] + 2.0*mtan2[1]*t2[0]*t2[1] + mtan2[2]*t2[1]*t2[1];
   assert ( ps2  > 0. );
   ps2 = sqrt(ps2);
 
-  /* Metric in p1 has to be changed */
+  /* Metric in p1 has to be changed ( M1 > M2 ) */
   if( ps2 > ps1 ){
     /* compute alpha = h2 + hgrad*l */
     alpha = ps2 /(1.0+mesh->info.hgrad*l*ps2);
-    if( ps1 >= alpha -MMG5_EPS )
+    if( ps1 >= alpha - MMG5_EPS ) {
+      /* No need to graduate: l_{M2+hgrad*l} < l_{M1} => M2+hgrad*l > M1 */
       return -1;
-
+    }
     MMG5_eigensym(mtan1,lambda,vp);
     /* Project the vector t1 along the main directions of the metric */
-    // Remark: along the third direction mr1 is already diagonal,
-    // thus vp[2][.] =( 0 0 1) and vp[.][2] = 0.
+    /* Remark: along the third direction mr1 is already diagonal,
+     * thus vp[2][.] =( 0 0 1) and vp[.][2] = 0. */
     c[0] = t1[0]*vp[0][0] + t1[1]*vp[0][1] ;
     c[1] = t1[0]*vp[1][0] + t1[1]*vp[1][1] ;
 
@@ -1085,7 +1067,7 @@ int MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int np1,
     }
     assert(c[ichg]*c[ichg] > MMG5_EPS );
    /* Compute beta coef such as lambda_1 = beta*lambda_1 => h1 = h2 + hgrad*l
-    * (see p317 of Charles Dapogny Thesis). */
+    * with h1 = 1/ps1 and h2 = 1/ps2 (see p317 of Charles Dapogny Thesis). */
     beta = (alpha*alpha - ps1*ps1)/(c[ichg]*c[ichg]);
 
     /* Metric update */
@@ -1106,7 +1088,7 @@ int MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int np1,
       c[1] = fabs(mm1[1]-lambda[ichg]);
       c[2] = fabs(mm1[2]-lambda[ichg]);
 
-      // Find index of the minimum value of c
+      /* Find index of the minimum value of c */
       kmin = 0;
       val = fabs(c[kmin]);
       for (idx = 1; idx<3; ++idx) {
@@ -1132,8 +1114,8 @@ int MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int np1,
       mtan1[2] = mu[0]*vp[0][1]*vp[0][1] + mu[1]*vp[1][1]*vp[1][1];
 
       /* Return in initial basis */
-      // Because of the rotation, we know that:
-      // mr.[2] = mr.[4]= 0
+      /* Because of the rotation, we know that:
+       * mr.[2] = mr.[4]= 0 */
       mtmp[0][0] = mtan1[0]*r1[0][0] + mtan1[1]*r1[1][0];
       mtmp[0][1] = mtan1[0]*r1[0][1] + mtan1[1]*r1[1][1];
       mtmp[0][2] = mtan1[0]*r1[0][2] + mtan1[1]*r1[1][2];
@@ -1159,12 +1141,13 @@ int MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int np1,
     }
     return np1;
   }
-  /* Metric in p2 has to be changed */
+  /* Metric in p2 has to be changed ( M2 > M1 ) */
   else{
     alpha = ps1 /(1.0+mesh->info.hgrad*l*ps1);
-    if( ps2 >= alpha - MMG5_EPS)
+    if( ps2 >= alpha - MMG5_EPS) {
+      /* No need to graduate: l_{M1+hgrad*l} < l_{M2} => M1+hgrad*l > M2 */
       return -1;
-
+    }
     MMG5_eigensym(mtan2,lambda,vp);
 
     c[0] = t2[0]*vp[0][0] + t2[1]*vp[0][1] ;
@@ -1182,7 +1165,7 @@ int MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int np1,
     }
     assert(c[ichg]*c[ichg] > MMG5_EPS );
 
-   /* Compute beta coef such as lambda_1 = beta*lambda_1 => h1 = h2 + hgrad*l
+   /* Compute beta coef such as lambda_2new = beta*lambda_2 => h2 = h1 + hgrad*l
     * (see p317 of Charles Dapogny Thesis). */
     beta = (alpha*alpha - ps2*ps2)/(c[ichg]*c[ichg]);
 
@@ -1258,7 +1241,7 @@ int MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int np1,
  * \param npmaster edge extremity that cannot be modified
  * \param npslave edge extremity to modify to respect the gradation.
  *
- * \return -1 if no gradation is needed, else index of graded point.
+ * \return 0 if no gradation is needed, 1 otherwise.
  *
  * Enforces gradation of metric of the extremity ±a npslave of edge \$f[
  * npmaster; npslave]\$f in tria \a pt with respect to the other, along the
@@ -1269,10 +1252,275 @@ int MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int np1,
  * an "isotropic way".
  *
  */
-int MMG5_grad2metSurfreq(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int np1,
-                         int np2)
+int MMG5_grad2metSurfreq(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int npmaster,
+                         int npslave)
 {
 
+  MMG5_pPoint  p1,p2;
+  double      *mm1,*mm2,*nn1,*nn2,ps1,ps2,ux,uy,uz,m1[6],m2[6],n1[3],n2[3],nt[3];
+  double       r1[3][3],r2[3][3],t1[2],t2[2],c[3],mtan1[3],mtan2[3],mr1[6],mr2[6];
+  double       mtmp[3][3],val;
+  double       l,dd;
+  double       lambda[2],vp[2][2],alpha,beta,mu[3];
+  int          kmin,idx;
+  char         ichg;
+
+  p1 = &mesh->point[npmaster];
+  p2 = &mesh->point[npslave];
+
+  ux = p2->c[0] - p1->c[0];
+  uy = p2->c[1] - p1->c[1];
+  uz = p2->c[2] - p1->c[2];
+
+  mm1 = &met->m[6*npmaster];
+  mm2 = &met->m[6*npslave];
+
+  if( !MMG5_nortri(mesh,pt,nt) )
+    return 0;
+
+  if ( npslave ==58913 ) {
+
+    printf("nt %.15lg %.15lg %.15lg\n",nt[0],nt[1],nt[2]);
+  }
+
+  /* Recover normal and metric associated to p1 */
+  if( MG_SIN(p1->tag) || (MG_NOM & p1->tag)){
+    memcpy(n1,nt,3*sizeof(double));
+    memcpy(m1,mm1,6*sizeof(double));
+  }
+  else if( MG_GEO & p1->tag ){
+    nn1 = &mesh->xpoint[p1->xp].n1[0];
+    nn2 = &mesh->xpoint[p1->xp].n2[0];
+    ps1 = nt[0]*nn1[0] + nt[1]*nn1[1] + nt[2]*nn1[2];
+    ps2 = nt[0]*nn2[0] + nt[1]*nn2[1] + nt[2]*nn2[2];
+
+    if( fabs(ps1) < fabs(ps2))
+      memcpy(n1,nn2,3*sizeof(double));
+    else
+      memcpy(n1,nn1,3*sizeof(double));
+
+    if( !MMG5_buildridmet(mesh,met,npmaster,ux,uy,uz,m1) )
+      return 0;
+  }
+  else if( ( MG_REF & p1->tag ) ){
+    memcpy(n1,&(mesh->xpoint[p1->xp].n1[0]),3*sizeof(double));
+    memcpy(m1,mm1,6*sizeof(double));
+  }
+  else{
+    memcpy(n1,p1->n,3*sizeof(double));
+    memcpy(m1,mm1,6*sizeof(double));
+  }
+
+  /* Recover normal and metric associated to p2 */
+  if ( MG_SIN(p2->tag) || (MG_NOM & p2->tag)) {
+    memcpy(n2,nt,3*sizeof(double));
+    memcpy(m2,mm2,6*sizeof(double));
+  }
+  else if ( MG_GEO & p2->tag ) {
+    nn1 = &mesh->xpoint[p2->xp].n1[0];
+    nn2 = &mesh->xpoint[p2->xp].n2[0];
+    ps1 = nt[0]*nn1[0] + nt[1]*nn1[1] + nt[2]*nn1[2];
+    ps2 = nt[0]*nn2[0] + nt[1]*nn2[1] + nt[2]*nn2[2];
+
+    if( fabs(ps1) < fabs(ps2))
+      memcpy(n2,nn2,3*sizeof(double));
+    else
+      memcpy(n2,nn1,3*sizeof(double));
+
+    if( !MMG5_buildridmet(mesh,met,npslave,ux,uy,uz,m2) )
+      return 0;
+  }
+  else if( (MG_REF & p2->tag) ){
+    memcpy(n2,&(mesh->xpoint[p2->xp].n1[0]),3*sizeof(double));
+    memcpy(m2,mm2,6*sizeof(double));
+  }
+  else{
+    memcpy(n2,p2->n,3*sizeof(double));
+    memcpy(m2,mm2,6*sizeof(double));
+  }
+
+  /* Rotation matrices mapping n1/n2 to e_3 */
+  MMG5_rotmatrix(n1,r1);
+  MMG5_rotmatrix(n2,r2);
+
+  /* Geodesic length of support curve to edge i */
+  l = sqrt(ux*ux+uy*uy+uz*uz);
+
+  /* Characteristic sizes in direction of support curve */
+  MMG5_rmtr(r1,m1,mr1);
+
+  if ( npslave ==58913 ) {
+
+    printf("mr1 %.15lg %.15lg %.15lg\n",mtan1[0],mtan1[1],mtan1[2]);
+  }
+
+
+  mtan1[0] = mr1[0];
+  mtan1[1] = mr1[1];
+  mtan1[2] = mr1[3];
+
+  c[0] = r1[0][0]*ux + r1[0][1]*uy + r1[0][2]*uz;
+  c[1] = r1[1][0]*ux + r1[1][1]*uy + r1[1][2]*uz;
+
+  memcpy(t1,c,2*sizeof(double));
+  /* Here we work in the tangent plane (thus in 2d) */
+  dd = t1[0]*t1[0] + t1[1]*t1[1];
+  if(dd < MMG5_EPSD2)
+    return 0;
+
+  dd = 1.0/sqrt(dd);
+  t1[0] *= dd;
+  t1[1] *= dd;
+
+  /* edge length in metric mtan1: sqrt(t^(t1) * mtan1 * t1). */
+  ps1 =  mtan1[0]*t1[0]*t1[0] + 2.0*mtan1[1]*t1[0]*t1[1] + mtan1[2]*t1[1]*t1[1];
+  assert ( ps1  > 0. );
+  ps1 = sqrt(ps1);
+
+  MMG5_rmtr(r2,m2,mr2);
+
+  mtan2[0] = mr2[0];
+  mtan2[1] = mr2[1];
+  mtan2[2] = mr2[3];
+
+  if ( npslave ==58913 ) {
+
+    printf("mr2 %.15lg %.15lg %.15lg\n",mtan2[0],mtan2[1],mtan2[2]);
+  }
+
+
+  c[0] = - ( r2[0][0]*ux + r2[0][1]*uy + r2[0][2]*uz );
+  c[1] = - ( r2[1][0]*ux + r2[1][1]*uy + r2[1][2]*uz );
+  memcpy(t2,c,2*sizeof(double));
+
+  dd = t2[0]*t2[0] + t2[1]*t2[1];
+  if(dd < MMG5_EPSD2)
+    return 0;
+
+  dd = 1.0/sqrt(dd);
+  t2[0] *= dd;
+  t2[1] *= dd;
+
+  /* edge length: sqrt(t^(t2) * mtan2 * t2) */
+  ps2 = mtan2[0]*t2[0]*t2[0] + 2.0*mtan2[1]*t2[0]*t2[1] + mtan2[2]*t2[1]*t2[1];
+  assert ( ps2  > 0. );
+  ps2 = sqrt(ps2);
+
+  /* Impose a larger metric in p2 ( M1 > M2 ) */
+  if( ps2 > ps1 ){
+    /* compute alpha = h1 - hgrad*l */
+    alpha = ps1 /(1.0-mesh->info.hgrad*l*ps1);
+    if( ps2 <= alpha + MMG5_EPS ) {
+      /* No need to graduate: l_{M1-hgrad*l} > l_{M2} => M1-hgrad*l < M2 */
+      return 0;
+    }
+  }
+  /* Impose a smaller metric in p2 */
+  else{
+    alpha = ps1 /(1.0+mesh->info.hgrad*l*ps1);
+    if( ps2 >= alpha - MMG5_EPS ) {
+      /* No need to graduate: l_{M1-hgrad*l} < l_{M2} => M1-hgrad*l > M2 */
+      return 0;
+    }
+  }
+
+  MMG5_eigensym(mtan2,lambda,vp);
+
+  c[0] = t2[0]*vp[0][0] + t2[1]*vp[0][1] ;
+  c[1] = t2[0]*vp[1][0] + t2[1]*vp[1][1] ;
+
+  if ( npslave ==58913 ) {
+
+    printf("c %.15lg %.15lg \n",c[0],c[1]);
+  }
+
+  /* Detect which of the main directions of the metric is closest to our edge
+   * direction. */
+  ichg = 0;
+  val  = fabs(c[ichg]);
+  for (idx = 1; idx<2; ++idx) {
+    if ( fabs(c[idx]) > val ) {
+      val = fabs(c[idx]);
+      ichg = idx;
+    }
+  }
+  assert(c[ichg]*c[ichg] > MMG5_EPS );
+
+  /* Compute beta coef such as lambda_1 = beta + lambda_1 => h1 = h2 + hgrad*l
+   * (see p317 of Charles Dapogny Thesis). */
+  beta = (alpha*alpha - ps2*ps2)/(c[ichg]*c[ichg]);
+
+  /* Metric update: update the metric eigenvalue associated to the main metric
+   * direction which is closest to our edge direction (because this is the
+   * one that is the more influent on our edge length). */
+  if( MG_SIN(p2->tag) || (MG_NOM & p2->tag)){
+    /* lambda_new = 0.5 lambda_1 + 0.5 beta lambda_1: here we choose to not
+     * respect the gradation in order to restric the influence of the singular
+     * points. */
+    mm2[0] += 0.5*beta;
+    mm2[3] += 0.5*beta;
+    mm2[5] += 0.5*beta;
+    assert ( mm2[0]>0. && mm2[3]>0. && mm2[5]>0. );
+  }
+  else if( p2->tag & MG_GEO ){
+    c[0] = fabs(mm2[0]-lambda[ichg]);
+    c[1] = fabs(mm2[1]-lambda[ichg]);
+    c[2] = fabs(mm2[2]-lambda[ichg]);
+
+    kmin = 0;
+    val = fabs(c[kmin]);
+    for (idx = 1; idx<3; ++idx) {
+      if ( fabs(c[idx]) < val ) {
+        val = fabs(c[idx]);
+        kmin = idx;
+      }
+    }
+    mm2[kmin] += beta;
+    assert ( mm2[kmin]>0 );
+  }
+  else{
+    mu[0] = lambda[0];
+    mu[1] = lambda[1];
+    mu[2] = mr2[5];
+
+    if ( npslave ==58913 ) {
+
+      printf("ichg %d %.15lg  %.15lg \n",ichg,mu[ichg],beta);
+    }
+
+
+    mu[ichg] += beta;
+    assert ( mu[ichg]>0 );
+
+
+    mtan2[0] = mu[0]*vp[0][0]*vp[0][0] + mu[1]*vp[1][0]*vp[1][0];
+    mtan2[1] = mu[0]*vp[0][0]*vp[0][1] + mu[1]*vp[1][0]*vp[1][1];
+    mtan2[2] = mu[0]*vp[0][1]*vp[0][1] + mu[1]*vp[1][1]*vp[1][1];
+
+    /* Return in initial basis */
+    mtmp[0][0] = mtan2[0]*r2[0][0] + mtan2[1]*r2[1][0];
+    mtmp[0][1] = mtan2[0]*r2[0][1] + mtan2[1]*r2[1][1];
+    mtmp[0][2] = mtan2[0]*r2[0][2] + mtan2[1]*r2[1][2];
+
+    mtmp[1][0] = mtan2[1]*r2[0][0] + mtan2[2]*r2[1][0];
+    mtmp[1][1] = mtan2[1]*r2[0][1] + mtan2[2]*r2[1][1];
+    mtmp[1][2] = mtan2[1]*r2[0][2] + mtan2[2]*r2[1][2];
+
+    mtmp[2][0] =  mr2[5]*r2[2][0];
+    mtmp[2][1] =  mr2[5]*r2[2][1];
+    mtmp[2][2] =  mr2[5]*r2[2][2];
+
+    m2[0] = r2[0][0]*mtmp[0][0] + r2[1][0]*mtmp[1][0] + r2[2][0]*mtmp[2][0];
+    m2[1] = r2[0][0]*mtmp[0][1] + r2[1][0]*mtmp[1][1] + r2[2][0]*mtmp[2][1];
+    m2[2] = r2[0][0]*mtmp[0][2] + r2[1][0]*mtmp[1][2] + r2[2][0]*mtmp[2][2];
+
+    m2[3] = r2[0][1]*mtmp[0][1] + r2[1][1]*mtmp[1][1] + r2[2][1]*mtmp[2][1];
+    m2[4] = r2[0][1]*mtmp[0][2] + r2[1][1]*mtmp[1][2] + r2[2][1]*mtmp[2][2];
+
+    m2[5] = r2[0][2]*mtmp[0][2] + r2[1][2]*mtmp[1][2] + r2[2][2]*mtmp[2][2];
+
+    memcpy(mm2,m2,6*sizeof(double));
+  }
   return 1;
 }
 
@@ -1340,7 +1588,7 @@ int MMG5_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met,int *it) {
   char         i;
 
   /** Mark the edges belonging to a required entity */
-  //MMG5_mark_pointsOnReqEdge_fromTria ( mesh );
+  MMG5_mark_pointsOnReqEdge_fromTria ( mesh );
 
   for (k=1; k<=mesh->np; k++)
     mesh->point[k].flag = mesh->base;
@@ -1362,7 +1610,7 @@ int MMG5_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met,int *it) {
 
         if ( p1->flag < mesh->base-1 && p2->flag < mesh->base-1 )  continue;
         /* Skip points belonging to a required edge */
-        //if ( p1->s || p2->s ) continue;
+        if ( p1->s || p2->s ) continue;
 
         ier = MMG5_grad2met_ani(mesh,met,pt,np1,np2);
         if ( ier == np1 ) {
