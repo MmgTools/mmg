@@ -140,7 +140,7 @@ int MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
 
   /* Warning: we don't want to compute hmin/hmax from the level-set or the
    * displacement! */
-  if ( mesh->info.iso || (mesh->info.lag>-1) || (!met->m && ((!mesh->info.optim) && (!mesh->info.hsiz)) ) ) {
+  if ( mesh->info.iso || (mesh->info.lag>-1) || (!met->m && !mesh->info.optim) ) {
     /* Set default values to hmin/hmax from the bounding box if not provided by
      * the user */
     if ( !MMG5_Set_defaultTruncatureSizes(mesh,sethmin,sethmax) ) {
