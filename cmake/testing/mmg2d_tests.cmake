@@ -105,9 +105,14 @@ ADD_TEST(NAME mmg2d_reqEntitiesAni-unref
   -out ${CTEST_OUTPUT_DIR}/mmg2d_reqEntitiesAni-unref.o.meshb)
 
 ADD_TEST(NAME mmg2d_locParam
-  COMMAND ${EXECUT_MMG2D} -v 5 -msh 2
+  COMMAND ${EXECUT_MMG2D} -v 5
   ${MMG2D_CI_TESTS}/LocParams/circle2refs.mesh
-  -out ${CTEST_OUTPUT_DIR}/circle2refs.o.meshb)
+  -out ${CTEST_OUTPUT_DIR}/locParams.o.meshb)
+
+ADD_TEST(NAME mmg2d_locParam_ani
+  COMMAND ${EXECUT_MMG2D} -v 5 -A
+  ${MMG2D_CI_TESTS}/LocParams/circle2refs.mesh
+  -out ${CTEST_OUTPUT_DIR}/locParams-ani.o.meshb)
 
 ###############################################################################
 #####

@@ -76,7 +76,7 @@ ELSE ( )
     SET ( OLD_MMG2D_MD5 "0" )
   ENDIF ( )
 
-  FILE(DOWNLOAD https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmV3BlUER4M0Z4MGs
+  FILE(DOWNLOAD https://drive.google.com/uc?export=download&id=1Lnvh7AldwEXS7WRa1VxsRqI7Xu7CgJNj
     ${CI_DIR}/mmg2d.version
     STATUS MMG2D_VERSION_STATUS
     INACTIVITY_TIMEOUT 5)
