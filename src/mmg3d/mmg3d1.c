@@ -756,13 +756,10 @@ int MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree,
                 return -1;
 
               n = &(mesh->xpoint[ppt->xp].n1[0]);
-              // if ( MG_GET(pxt->ori,i) ) {
-              /* Useless because if the orientation of the tetra face is
-               * compatible with the triangle (MG_GET(ori,i)) we know that we
-               * are well orientated. Morever, may introduce numerical errors
-               * with wrinkled surfaces. */
-              // if ( !MMG5_directsurfball(mesh, pt->v[i0],lists,ilists,n) )  continue;
-              // }
+
+              /* If the orientation of the tetra face is
+               * compatible with the triangle (MG_GET(ori,i)), we know that we
+               * are well orientated. */
               if ( !MG_GET(pxt->ori,i) ) {
                 if ( !MMG5_directsurfball(mesh,pt->v[i0],lists,ilists,n) )
                   continue;
