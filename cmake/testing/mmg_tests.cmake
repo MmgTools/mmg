@@ -125,6 +125,21 @@ FOREACH(EXEC ${LISTEXEC_MMG})
    )
 
 
+ ADD_TEST(NAME mmg_HausdLoc_2SpheresAni${SHRT_EXEC}
+   COMMAND ${EXEC} -v 5 -hgrad 2 -A
+   ${MMG_CI_TESTS}/HausdLoc_2Spheres/2spheres
+   ${CTEST_OUTPUT_DIR}/mmg_HausdLoc_2SpheresAni${SHRT_EXEC}-2spheres.o.meshb
+   -hgrad 2
+   )
+ #####
+ ADD_TEST(NAME mmg_hminmaxLoc_2SpheresAni${SHRT_EXEC}
+   COMMAND ${EXEC} -v 5 -hgrad 2 -A
+   ${MMG_CI_TESTS}/HausdLoc_2Spheres/2spheres
+   ${CTEST_OUTPUT_DIR}/mmg_HausdLoc_2SpheresAni${SHRT_EXEC}-2spheres.o.meshb
+   -hgrad 2
+   )
+
+
  ##############################################################################
  #####
  #####         Check Precision

@@ -474,6 +474,18 @@ ADD_TEST(NAME mmg3d_OptimAni_Sphere
 ###############################################################################
 #####
 
+ADD_TEST(NAME mmg3d_OptLs_plane_p
+  COMMAND ${EXECUT_MMG3D} -v 5 -ls
+  ${MMG3D_CI_TESTS}/OptLs_plane/plane
+  -sol ${MMG3D_CI_TESTS}/OptLs_plane/p.sol
+  mmg3d_OptLs_plane-p.o.meshb)
+
+ADD_TEST(NAME mmg3d_OptLs_plane_m
+  COMMAND ${EXECUT_MMG3D} -v 5 -ls
+  ${MMG3D_CI_TESTS}/OptLs_plane/plane
+  -sol ${MMG3D_CI_TESTS}/OptLs_plane/m.sol
+  mmg3d_OptLs_plane-m.o.meshb)
+
 IF ( LONG_TESTS )
   # Test the Ls option
   ADD_TEST(NAME mmg3d_OptLs_cube303d_hminMax_hgrad1.2_hausd0.005
