@@ -2291,26 +2291,31 @@ int MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,char typchk, int patternMode) {
     if ( mesh->adja )
       MMG5_DEL_MEM(mesh,mesh->adja);
 
-    if ( !mesh->info.noinsert ) {
-      /* analyze surface tetras */
-      ier = MMG5_anatets(mesh,met,typchk);
+    if ( met->size==1 ) {
+      /* only in isotropic case : because if the aniso metric is not compatible
+       * with the geometry, the surface operators may create spurious ridges */
 
-      if ( ier < 0 ) {
-        fprintf(stderr,"\n  ## Unable to complete surface mesh. Exit program.\n");
-        return 0;
-      }
-      ns += ier;
-      if ( patternMode ) {
-        /* analyze internal tetras */
-        ier = MMG5_anatetv(mesh,met,typchk);
+      if ( !mesh->info.noinsert ) {
+        /* analyze surface tetras */
+        ier = MMG5_anatets(mesh,met,typchk);
+
         if ( ier < 0 ) {
-          fprintf(stderr,"\n  ## Unable to complete volume mesh. Exit program.\n");
+          fprintf(stderr,"\n  ## Unable to complete surface mesh. Exit program.\n");
           return 0;
         }
         ns += ier;
+        if ( patternMode ) {
+          /* analyze internal tetras */
+          ier = MMG5_anatetv(mesh,met,typchk);
+          if ( ier < 0 ) {
+            fprintf(stderr,"\n  ## Unable to complete volume mesh. Exit program.\n");
+            return 0;
+          }
+          ns += ier;
+        }
       }
+      else  ns = 0;
     }
-    else  ns = 0;
 
     if ( !MMG3D_hashTetra(mesh,1) ) {
       fprintf(stderr,"\n  ## Hashing problem. Exit program.\n");

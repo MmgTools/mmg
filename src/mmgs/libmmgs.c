@@ -161,7 +161,7 @@ int MMGS_packMesh(MMG5_pMesh mesh,MMG5_pSol met) {
     }
   }
 
-  /*compact vertices*/
+  /* compact vertices */
   np  = 0;
   nbl = 1;
   for (k=1; k<=mesh->np; k++) {
