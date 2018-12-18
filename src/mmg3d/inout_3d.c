@@ -1208,7 +1208,7 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
       ppt = &mesh->point[k];
       if ( MG_VOK(ppt) && ppt->tag & MG_CRN ) {
         if(!bin) {
-          fprintf(inm,"%d \n",ppt->tmp);
+          fprintf(inm,"%d\n",ppt->tmp);
         } else {
           fwrite(&ppt->tmp,sw,1,inm);
         }
@@ -1231,7 +1231,7 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
       ppt = &mesh->point[k];
       if ( MG_VOK(ppt) && ppt->tag & MG_REQ ) {
         if(!bin) {
-          fprintf(inm,"%d \n",ppt->tmp);
+          fprintf(inm,"%d\n",ppt->tmp);
         } else {
           fwrite(&ppt->tmp,sw,1,inm);
         }
@@ -1313,7 +1313,7 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
       ne++;
       if ( pt->tag & MG_REQ ) {
         if(!bin) {
-          fprintf(inm,"%d \n",ne);
+          fprintf(inm,"%d\n",ne);
         } else {
           fwrite(&ne,sw,1,inm);
         }
@@ -1498,7 +1498,7 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
     if(!bin) {
       strcpy(&chaine[0],"\n\nTriangles\n");
       fprintf(inm,"%s",chaine);
-      fprintf(inm,"%d \n",mesh->nt);
+      fprintf(inm,"%d\n",mesh->nt);
     } else {
       binch = 6; //Triangles
       fwrite(&binch,sw,1,inm);
@@ -1525,7 +1525,7 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
       if(!bin) {
         strcpy(&chaine[0],"\n\nRequiredTriangles\n");
         fprintf(inm,"%s",chaine);
-        fprintf(inm,"%d \n",ntreq);
+        fprintf(inm,"%d\n",ntreq);
       } else {
         binch = 17; //ReqTriangles
         fwrite(&binch,sw,1,inm);
@@ -1538,7 +1538,7 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
         if ( (ptt->tag[0] & MG_REQ) && (ptt->tag[1] & MG_REQ)
              && ptt->tag[2] & MG_REQ ) {
           if(!bin) {
-            fprintf(inm,"%d \n",k);
+            fprintf(inm,"%d\n",k);
           } else {
             fwrite(&k,sw,1,inm);
           }
@@ -1569,7 +1569,7 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
     if(!bin) {
       strcpy(&chaine[0],"\n\nQuadrilaterals\n");
       fprintf(inm,"%s",chaine);
-      fprintf(inm,"%d \n",nq);
+      fprintf(inm,"%d\n",nq);
     } else {
       binch = 7; //Quadrilaterals
       fwrite(&binch,sw,1,inm);
@@ -1597,7 +1597,7 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
       if(!bin) {
         strcpy(&chaine[0],"\n\nRequiredQuadrilaterals\n");
         fprintf(inm,"%s",chaine);
-        fprintf(inm,"%d \n",nqreq);
+        fprintf(inm,"%d\n",nqreq);
       } else {
         binch = 18; //ReqQuad
         fwrite(&binch,sw,1,inm);
@@ -1610,7 +1610,7 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
         if ( (pq->tag[0] & MG_REQ) && (pq->tag[1] & MG_REQ)
              && pq->tag[2] & MG_REQ && pq->tag[3] & MG_REQ ) {
           if(!bin) {
-            fprintf(inm,"%d \n",k);
+            fprintf(inm,"%d\n",k);
           } else {
             fwrite(&k,sw,1,inm);
           }
@@ -1634,7 +1634,7 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
     }
     for (k=1; k<=mesh->na; k++) {
       if(!bin) {
-        fprintf(inm,"%d %d %d \n",mesh->point[mesh->edge[k].a].tmp,
+        fprintf(inm,"%d %d %d\n",mesh->point[mesh->edge[k].a].tmp,
                 mesh->point[mesh->edge[k].b].tmp,mesh->edge[k].ref);
       } else {
         fwrite(&mesh->point[mesh->edge[k].a].tmp,sw,1,inm);
@@ -1662,7 +1662,7 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
         na++;
         if ( mesh->edge[k].tag & MG_GEO ) {
           if(!bin) {
-            fprintf(inm,"%d \n",na);
+            fprintf(inm,"%d\n",na);
           } else {
             fwrite(&na,sw,1,inm);
           }
@@ -1687,7 +1687,7 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
         na++;
         if (  mesh->edge[k].tag & MG_REQ ) {
           if(!bin) {
-            fprintf(inm,"%d \n",na);
+            fprintf(inm,"%d\n",na);
           } else {
             fwrite(&na,sw,1,inm);
           }
