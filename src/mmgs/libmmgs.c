@@ -139,7 +139,18 @@ int MMGS_packMesh(MMG5_pMesh mesh,MMG5_pSol met) {
       adja = &mesh->adja[3*(k-1)+1];
       jel  = adja[i] / 3;
 
-      if ( jel && jel <= k ) continue;
+      assert ( jel != k );
+      if ( jel ) {
+        /* If we have an adjacent, treat the edge either from the tria with
+         * higher ref or, if both tria have the same references, from the tria
+         * with higher index */
+        if ( mesh->tria[jel].ref < mesh->tria[k].ref ) {
+          continue;
+        }
+        else if ( (mesh->tria[jel].ref == mesh->tria[k].ref) && (k < jel)  ) {
+          continue;
+        }
+      }
       ++na;
     }
 
@@ -204,7 +215,18 @@ int MMGS_packMesh(MMG5_pMesh mesh,MMG5_pSol met) {
 
           adja = &mesh->adja[3*(k-1)+1];
           jel  = adja[i] / 3;
-          if ( jel && jel <= k ) continue;
+          if ( jel ) {
+            /* If we have an adjacent, treat the edge either from the tria with
+             * higher ref or, if both tria have the same references, from the tria
+             * with higher index */
+            if ( mesh->tria[jel].ref < mesh->tria[k].ref ) {
+              continue;
+            }
+            else if ( (mesh->tria[jel].ref == mesh->tria[k].ref) && (k < jel)  ) {
+              continue;
+            }
+          }
+
           i1 = MMG5_inxt2[i];
           i2 = MMG5_inxt2[i1];
           mesh->na++;
