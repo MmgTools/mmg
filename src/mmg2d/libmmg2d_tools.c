@@ -297,15 +297,57 @@ int MMG2D_Get_triFromEdge(MMG5_pMesh mesh, int ked, int *ktri, int *ied)
 
   val = mesh->edge[ked].base;
 
-  if ( !val ) return 0;
+  if ( !val ) {
+    fprintf(stderr,"  ## Error: %s: the main fonction of the Mmg library must be"
+            " called before this function.\n",__func__);
+    return 0;
+  }
 
   *ktri = val/3;
 
   *ied = val%3;
 
   return 1;
+}
 
+int MMG2D_Get_trisFromEdge(MMG5_pMesh mesh, int ked, int ktri[2], int ied[2])
+{
+  int ier,itri;
+#ifndef NDEBUG
+  int ia0,ib0,ia1,ib1;
+#endif
 
+  ktri[0]  =  ktri[1] = 0;
+  ied[0]   =  ied[1]  = 0;
+
+  ier = MMG2D_Get_triFromEdge(mesh, ked, ktri, ied);
+
+  if ( !ier ) return 0;
+
+  if ( !mesh->adja ) {
+    if (!MMG2D_hashTria(mesh) )
+      return 0;
+  }
+
+  itri = mesh->adja[3*(*ktri-1) + *ied + 1 ];
+
+  if ( itri ) {
+    ktri[1]  = itri/3;
+    ied[1]   = itri%3;
+
+#ifndef NDEBUG
+    ia0 = mesh->tria[ktri[0]].v[MMG5_inxt2[ied[0]]];
+    ib0 = mesh->tria[ktri[0]].v[MMG5_iprv2[ied[0]]];
+
+    ia1 = mesh->tria[ktri[1]].v[MMG5_inxt2[ied[1]]];
+    ib1 = mesh->tria[ktri[1]].v[MMG5_iprv2[ied[1]]];
+
+    assert ( ( (ia0 == ia1) && (ib0 == ib1) ) ||
+             ( (ia0 == ib1) && (ib0 == ia1) ) );
+#endif
+  }
+
+  return 1;
 }
 
 int MMG2D_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met) {
