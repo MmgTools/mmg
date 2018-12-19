@@ -682,7 +682,11 @@ int MMG3D_Get_tetFromTria(MMG5_pMesh mesh, int ktri, int *ktet, int *iface)
 
   val = mesh->tria[ktri].cc;
 
-  if ( !val ) return 0;
+  if ( !val ) {
+    fprintf(stderr,"  ## Error: the main fonction of the Mmg library must be"
+            " called before this function.\n");
+    return 0;
+  }
 
   *ktet = val/4;
 
