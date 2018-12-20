@@ -136,6 +136,7 @@ FILE(INSTALL  ${mmg2d_headers} DESTINATION ${MMG2D_INCLUDE}
 #####         Compile program to test library
 #####
 ############################################################################
+SET(MMG2D_CI_TESTS ${CI_DIR}/mmg2d )
 
 IF ( TEST_LIBMMG2D )
   INCLUDE(cmake/testing/libmmg2d_tests.cmake)
@@ -160,7 +161,6 @@ IF ( BUILD_TESTING )
   ##-------------------------------------------------------------------##
   ##------- Set the continuous integration options --------------------##
   ##-------------------------------------------------------------------##
-  SET(MMG2D_CI_TESTS ${CI_DIR}/mmg2d )
 
   ##-------------------------------------------------------------------##
   ##--------------------------- Add tests and configure it ------------##
@@ -180,6 +180,7 @@ IF ( BUILD_TESTING )
       SET(LIBMMG2D_EXEC1 ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_example1 )
       SET(LIBMMG2D_EXEC2 ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_example2 )
       SET(LIBMMG2D_EXEC3 ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_example3 )
+      SET(TEST_API2D_EXEC0 ${EXECUTABLE_OUTPUT_PATH}/test_api2d_0)
 
 
       ADD_TEST(NAME libmmg2d_example0_a   COMMAND ${LIBMMG2D_EXEC0_a}
@@ -205,11 +206,17 @@ IF ( BUILD_TESTING )
         "${PROJECT_SOURCE_DIR}/libexamples/mmg2d/io_multisols_example3/naca-multiSols.mesh"
         "${CTEST_OUTPUT_DIR}/libmmg2d_io_3-naca.o" "1"
        )
+      ADD_TEST(NAME test_api2d_0   COMMAND ${TEST_API2D_EXEC0}
+        "${MMG2D_CI_TESTS}/API_tests/2dom.mesh"
+        "${CTEST_OUTPUT_DIR}/test_API2d.o"
+       )
+
 
       IF ( CMAKE_Fortran_COMPILER)
         SET(LIBMMG2D_EXECFORTRAN_a ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_fortran_a )
         SET(LIBMMG2D_EXECFORTRAN_b ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_fortran_b )
         SET(LIBMMG2D_EXECFORTRAN_IO ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_fortran_io )
+        SET(TEST_API2D_FORTRAN_EXEC0 ${EXECUTABLE_OUTPUT_PATH}/test_api2d_fortran_0)
 
 
         ADD_TEST(NAME libmmg2d_fortran_a   COMMAND ${LIBMMG2D_EXECFORTRAN_a}
@@ -226,7 +233,11 @@ IF ( BUILD_TESTING )
         ADD_TEST(NAME libmmg2d_fortran_io_1   COMMAND ${LIBMMG2D_EXECFORTRAN_IO}
           "${PROJECT_SOURCE_DIR}/libexamples/mmg2d/io_multisols_example3/naca-multiSols.mesh"
           "${CTEST_OUTPUT_DIR}/libmmg2d_Fortran_io-naca.o" "1"
-         )
+          )
+        ADD_TEST(NAME test_api2d_fortran_0   COMMAND ${TEST_API2D_FORTRAN_EXEC0}
+          "${MMG2D_CI_TESTS}/API_tests/2dom.mesh"
+          "${CTEST_OUTPUT_DIR}/test_API2d.o"
+          )
 
       ENDIF()
 
