@@ -328,7 +328,7 @@ void MMG5_displayLengthHisto_internal(MMG5_pMesh mesh, int ned,int amin,
 
 /**
  * \param iel index of the worst tetra of the mesh
- * \param minqual quality of the worst tetra of the mesh (normalized by \a alpha)
+ * \param minqual quality of the worst tetra of the mesh (will be normalized by \a alpha)
  * \param alpha normalisation parameter for the quality
  *
  * \return 1 if success, 0 if fail (the quality is lower than MMG5_NULKAL).
@@ -339,16 +339,16 @@ void MMG5_displayLengthHisto_internal(MMG5_pMesh mesh, int ned,int amin,
  */
 int MMG5_minQualCheck ( int iel, double minqual, double alpha )
 {
-  double minqualOnAlpha;
+  double minqualAlpha;
 
-  minqualOnAlpha = minqual/alpha;
+  minqualAlpha = minqual*alpha;
 
-  if ( minqualOnAlpha < MMG5_NULKAL ) {
+  if ( minqualAlpha < MMG5_NULKAL ) {
     fprintf(stderr,"\n  ## Error: %s: too bad quality for the worst element: "
             "(elt %d -> %15e)\n",__func__,iel,minqual);
     return 0;
   }
-  else if ( minqualOnAlpha < MMG5_EPSOK ) {
+  else if ( minqualAlpha < MMG5_EPSOK ) {
     fprintf(stderr,"\n  ## Warning: %s: very bad quality for the worst element: "
             "(elt %d -> %15e)\n",__func__,iel,minqual);
   }

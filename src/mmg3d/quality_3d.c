@@ -70,6 +70,8 @@ int MMG3D_tetraQual(MMG5_pMesh mesh, MMG5_pSol met,char metRidTyp) {
     }
   }
 
+  /* Here the quality is not normalized by alpha, thus we need to
+   * normalized it */
   return  MMG5_minQualCheck(iel,minqual,MMG3D_ALPHAD);
 }
 
@@ -511,7 +513,7 @@ int MMG3D_displayQualHisto_internal(int ne,double max,double avg,double min,int 
     }
   }
 
-  return MMG5_minQualCheck(iel,min,MMG3D_ALPHAD);
+  return MMG5_minQualCheck(iel,min,1.);
 }
 
 /**
