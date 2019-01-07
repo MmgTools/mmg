@@ -159,8 +159,7 @@ int  MMG3D_set_splitls_MOctree ( MMG5_pMesh mesh, MMG5_MOctree_s* q, MMG5_pSol s
  *
  */
  int  MMG3D_split_MOctree_s ( MMG5_pMesh mesh,MMG5_MOctree_s* q,MMG5_pSol sol) {
-   int ip,i,power,blf_ip_first_son;
-
+   int i;
    int depth_max = mesh->octree->depth_max;
    int ncells_x = mesh->freeint[0];
    int ncells_y = mesh->freeint[1];
@@ -229,7 +228,6 @@ int  MMG3D_set_splitls_MOctree ( MMG5_pMesh mesh, MMG5_MOctree_s* q, MMG5_pSol s
    else{
      /*calculus of ip for leaves*/
      int span_y,span_z;
-     int power = pow(2,depth_max-(q->depth));
      int ncells_xy = ncells_x * ncells_y;
 
      span_y = ncells_x;
@@ -481,7 +479,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
     //q is guaranted to be a North child
     for (i=0; i<8; i++)
     {
-      if((i==4 || i==5 || i==6 || i==7) && q==&q->father->sons[i]) // Is q a south child child?
+      if((i==4 || i==5 || i==6 || i==7) && q==&q->father->sons[i]) // Which north child is q?
       {
         *Neighbour=Temp_Neighbour->sons[i-4];
         return 1;
@@ -1278,4 +1276,5 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
       }
     }
   }
+  return 0;
 }
