@@ -1059,8 +1059,8 @@ int MMG3D_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
 int MMG3D_loadVTKGrid(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   FILE*       inm;
   MMG5_pPoint ppt;
-  double      ver,xaxis[3],yaxis[3],v[3];
-  double      x,y,z,x_min,y_min,z_min;
+  double      ver,xaxis[3],yaxis[3];
+  double      x,y,z,x_min,y_min;
   long long   pos,solpos;
   size_t      len,buflen=128;
   int         i,j,k,ip;
@@ -1387,7 +1387,7 @@ int MMG3D_saveVTKOctree(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   MMG5_MOctree_s   *q;
   MMG5_pPoint       ppt;
   int               k,np,nc,ier,span;
-  char             *data,chaine[128],*ptr;
+  char             *data,*ptr;
   static const int  cell_type = 12,nvert_cell=8;
 
   MMG5_SAFE_CALLOC(data,strlen(filename)+7,char,return 0);
