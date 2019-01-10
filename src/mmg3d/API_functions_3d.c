@@ -84,7 +84,7 @@ void MMG3D_Init_parameters(MMG5_pMesh mesh) {
 
   /* default values for integers */
   mesh->info.lag      = -1;
-  mesh->info.fem      = 1;
+  mesh->info.fem      = MMG5_FEM;
   mesh->info.optim    =  0;
   mesh->info.optimLES  =  0;
   /* [0/1]    ,avoid/allow surface modifications */
