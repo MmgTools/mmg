@@ -46,16 +46,16 @@ int MMG5_cenrad_iso(MMG5_pMesh mesh,double *ct,double *c,double *rad) {
   double      dd,ux,uy,uz,n1[3],n2[3],n3[3],*c1,*c2,*c3,*c4,pl1,pl2,pl3;
   double      cc1,cc2,cc3;
 
-  c1 = &ct[0];
-  c2 = &ct[3];
-  c3 = &ct[6];
-  c4 = &ct[9];
+  c1 = &ct[0]; //pointe sur le point 0 du voisin
+  c2 = &ct[3]; //pointe sur le point 1 du voisin
+  c3 = &ct[6]; //pointe sur le point 2 du voisin
+  c4 = &ct[9]; //pointe sur le point 3 du voisin
 
-  ux = c4[0] - c1[0];
-  uy = c4[1] - c1[1];
-  uz = c4[2] - c1[2];
+  ux = c4[0] - c1[0]; // x3 - x0
+  uy = c4[1] - c1[1]; // y3 - y0
+  uz = c4[2] - c1[2]; // z3 - z0
 
-  dd = 1.0 / sqrt(ux*ux + uy*uy + uz*uz);
+  dd = 1.0 / sqrt(ux*ux + uy*uy + uz*uz); //on normalise
   n1[0] = ux*dd;
   n1[1] = uy*dd;
   n1[2] = uz*dd;
@@ -64,9 +64,9 @@ int MMG5_cenrad_iso(MMG5_pMesh mesh,double *ct,double *c,double *rad) {
   pl1 = n1[0]*(c4[0]+c1[0]) \
     + n1[1]*(c4[1]+c1[1]) + n1[2]*(c4[2]+c1[2]);
 
-  ux = c4[0] - c2[0];
-  uy = c4[1] - c2[1];
-  uz = c4[2] - c2[2];
+  ux = c4[0] - c2[0]; // x3 - x1
+  uy = c4[1] - c2[1]; // y3 - y1
+  uz = c4[2] - c2[2]; // z3 - z1
 
   dd = 1.0 / sqrt(ux*ux + uy*uy + uz*uz);
   n2[0] = ux*dd;
@@ -86,6 +86,9 @@ int MMG5_cenrad_iso(MMG5_pMesh mesh,double *ct,double *c,double *rad) {
   pl3 = n3[0]*(c4[0]+c3[0]) \
     + n3[1]*(c4[1]+c3[1]) + n3[2]*(c4[2]+c3[2]);
 
+
+  // idée des calculs précédents : trouver les plans passant par le milieu des arêtes jointes à 3 et dont les vecteurs normaux sont le long des arêtes
+  // en trouvant leur intersection on trouve le centre
   /* center = intersection of 3 planes */
   ux = n2[1]*n3[2] - n2[2]*n3[1];
   uy = n1[2]*n3[1] - n1[1]*n3[2];
@@ -171,7 +174,7 @@ int MMG5_cenrad_ani(MMG5_pMesh mesh,double *ct,double *m,double *c,double *rad) 
   cz = m[2]*wx + m[4]*wy + m[5]*wz;
 
   /* center */
-  c[0] = d1 *(by*cz - bz*cy) - d2 * (ay*cz - az*cy) + d3 * (ay*bz - az*by); 
+  c[0] = d1 *(by*cz - bz*cy) - d2 * (ay*cz - az*cy) + d3 * (ay*bz - az*by);
   c[1] = d1 *(bz*cx - bx*cz) - d2 * (az*cx - ax*cz) + d3 * (az*bx - ax*bz);
   c[2] = d1 *(bx*cy - by*cx) - d2 * (ax*cy - ay*cx) + d3 * (ax*by - ay*bx);
 

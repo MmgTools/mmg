@@ -57,7 +57,7 @@ int MMG5_hashEdgeDelone(MMG5_pMesh mesh,MMG5_Hash *hash,int iel,int i,int *v) {
   MMG5_hedge     *ha;
 
   /* compute key */
-  if ( v[0] < v[1] ) {
+  if ( v[0] < v[1] ) { // v[0] = index vertice 0 du tétra, v[1] = index vertice 1 du tétra
     mins = v[0];
     maxs = v[1];
   }
@@ -746,85 +746,88 @@ int MMG5_cavity_iso(MMG5_pMesh mesh,MMG5_pSol sol,int iel,int ip,int *list,int l
   int              vois[4],l;
   int              tref,isreq;
 
+  //remarque : les éléments de la liste sont construits avec 6*L+I où L est l'indice du tétra et I l'indice local de l'arête dans le tétra
   if ( lon < 1 )  return 0;
   ppt = &mesh->point[ip];
   if ( ppt->tag & MG_NUL )  return 0;
-  base  = ++mesh->base;
+  base  = ++mesh->base; // permet de savoir si un tétra est dans la cavité du point
 
   isreq = 0;
 
-  tref = mesh->tetra[list[0]/6].ref;
+  tref = mesh->tetra[list[0]/6].ref; // récupère la référence du premier tétra dans la coquille
   for (k=0; k<lon; k++) {
-    mesh->tetra[list[k]/6].flag = base;
+    mesh->tetra[list[k]/6].flag = base; //permet de savoir qu'on est passé à l'étape suivante sur ce tétra
 
-    if ( !mesh->info.opnbdy ) {
+    if ( !mesh->info.opnbdy ) { // ????????????
       if ( tref != mesh->tetra[list[k]/6].ref ) {
         return 0;
       }
     }
     else {
-      pt = &mesh->tetra[list[k]/6];
-      if ( pt->xt ) {
-        l  = list[k]%6;
-        if ( (mesh->xtetra[pt->xt].ftag[MMG5_ifar[l][0]] & MG_BDY) ||
-             (mesh->xtetra[pt->xt].ftag[MMG5_ifar[l][1]] & MG_BDY) )
+      pt = &mesh->tetra[list[k]/6]; // pointe sur kième élément de la liste, soit le tétra de référence list[k]/6
+      if ( pt->xt ) { // chope l'index de la surface du tétra
+        l  = list[k]%6; //indice local de l'arête dans le tétra k
+        if ( (mesh->xtetra[pt->xt].ftag[MMG5_ifar[l][0]] & MG_BDY) || //ftag contient les tags associés à la face i du tétra
+             (mesh->xtetra[pt->xt].ftag[MMG5_ifar[l][1]] & MG_BDY) ) // regarde les tags des faces partageant l'arête dans le tétra (MMG5_ifar)
           return 0;
       }
     }
   }
 
   for (k=0; k<lon; k++)
-    list[k] = list[k] / 6;
+    list[k] = list[k] / 6; // tous les éléments de la liste deviennent les références des tétras
 
   /* grow cavity by adjacency */
   eps   = MMG3D_EPSRAD*MMG3D_EPSRAD;
-  ilist = lon;
+  ilist = lon; // il y a autant de tétras dans la liste que d'éléments dans la cavité du point ip
   ipil  = 0;
 
   do {
-    jel  = list[ipil];
+    jel  = list[ipil]; //récupère la référence du tétra ipil
     iadr = (jel-1)*4 + 1;
-    adja = &mesh->adja[iadr];
-    vois[0]  = adja[0];
-    vois[1]  = adja[1];
-    vois[2]  = adja[2];
-    vois[3]  = adja[3];
+    adja = &mesh->adja[iadr]; // on récupère le tétra adjacent par la première face du tétra --> si on connait l'adjacence par la première face, on retrouve les autres faces
+    vois[0]  = adja[0]; // adjacent face 0
+    vois[1]  = adja[1]; // adjacent face 1
+    vois[2]  = adja[2]; // adjacent face 2
+    vois[3]  = adja[3]; // adjacent face 3
 
     for (i=0; i<4; i++) {
-      adj = vois[i];
+      adj = vois[i]; // indice du tétra adjacent par la face i
       if ( !adj )  continue;
 
-      adj >>= 2;
-      voy = vois[i] % 4;
-      pt  = &mesh->tetra[adj];
+      adj >>= 2; // équivaut à diviser par 4 --> récupère l'indice du tétra voisin i
+      voy = vois[i] % 4; // récupère l'indice de la face du tétra voisin i par laquelle il est adjacent
+      pt  = &mesh->tetra[adj]; // pointe sur le tétra voisin i
       /* boundary face */
-      if ( pt->flag == base )  continue;
-      if ( pt->xt && (mesh->xtetra[pt->xt].ftag[voy] & MG_BDY) ) continue;
+      if ( pt->flag == base )  continue; // si on est bien à l'étape suivante avec ce tétra voisin i, on continue
+      if ( pt->xt && (mesh->xtetra[pt->xt].ftag[voy] & MG_BDY) ) continue; // regarde les tags de la face du tétra voisin i par laquelle l'adjacence se fait
 
       for (j=0,l=0; j<4; j++,l+=3) {
-        memcpy(&ct[l],mesh->point[pt->v[j]].c,3*sizeof(double));
+        memcpy(&ct[l],mesh->point[pt->v[j]].c,3*sizeof(double)); // copie les coordonnées des 4 points du voisin i dans ct (taille 12 = 4 points * 3 coords)
       }
+      //rappel : mesh->point[].c --> coordonnée d'un point
+      //rappel : pt->v[j] --> point j du tétra
 
-      if ( !MMG5_cenrad_iso(mesh,ct,c,&ray) )  continue;
+      if ( !MMG5_cenrad_iso(mesh,ct,c,&ray) )  continue; // on cherche le centre et le rayon du cercle du tétra voisin i
       crit = eps * ray;
 
       /* Delaunay criterion */
       dd = (ppt->c[0] - c[0]) * (ppt->c[0] - c[0]) \
         + (ppt->c[1] - c[1]) * (ppt->c[1] - c[1]) \
         + (ppt->c[2] - c[2]) * (ppt->c[2] - c[2]);
-      if ( dd > crit )  continue;
+      if ( dd > crit )  continue; // vérifie si les coordonnées du point à ajouter sont dans le cercle du tétra voisin i, si ce n'est pas le cas on continue
 
       /* lost face(s) */
-      iadr = (adj-1)*4 + 1;
+      iadr = (adj-1)*4 + 1; // regarde les voisins du tétra voisin i
       adjb = &mesh->adja[iadr];
 
       for (j=0; j<4; j++) {
-        if ( j == voy )  continue;
+        if ( j == voy )  continue; // si on est sur la face par laquelle le tétra voisin est voisin au tétra de base alors on continue
         adi = adjb[j];
-        if ( !adi )  continue;
+        if ( !adi )  continue; // si adi existe, il correspond à notre tétra de base donc il n'y a pas eu de problème de tétra perdu
 
-        adi >>= 2;
-        assert(adi !=jel);
+        adi >>= 2; //adi est l'indice du tétra de base
+        assert(adi !=jel); //vérifie la remarque précédente
 
         pt1 = &mesh->tetra[adi];
         if ( pt1->flag == base )
@@ -837,9 +840,9 @@ int MMG5_cavity_iso(MMG5_pMesh mesh,MMG5_pSol sol,int iel,int ip,int *list,int l
         list[ilist++] = adj;
       }
     }
-    if ( ilist > MMG3D_LONMAX - 3 ) return -1;
+    if ( ilist > MMG3D_LONMAX - 3 ) return -1; //pas faire attention
 
-    ++ipil;
+    ++ipil; // va chercher le tétra suivant dans list[]
   }
   while ( ipil < ilist );
 

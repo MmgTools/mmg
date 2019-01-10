@@ -215,7 +215,7 @@ int  MMG3D_set_splitls_MOctree ( MMG5_pMesh mesh, MMG5_MOctree_s* q, MMG5_pSol s
 
        q->sons[i].father = q;
        q->sons[i].nsons = 8;
-       if(q->sons[i].coordoct[0] < ncells_x && q->sons[i].coordoct[1] < ncells_y && q->sons[i].coordoct[2] < ncells_z)
+       if(q->sons[i].coordoct[0] < ncells_x-1 && q->sons[i].coordoct[1] < ncells_y-1 && q->sons[i].coordoct[2] < ncells_z-1)
        {
          q->sons[i].ghost = 0;
        }
@@ -284,13 +284,45 @@ int MMG3D_free_MOctree_s( MMG5_MOctree_s* q, MMG5_pMesh mesh) {
  * \ref q, all sons being leafs).
  *
  */
-int  MMG3D_merge_MOctree_s ( MMG5_MOctree_s* q, MMG5_pMesh mesh) {
+int  MMG3D_merge_MOctree_s ( MMG5_MOctree_s* q, MMG5_pMesh mesh, int *compteur) {
 
+  // int span = pow(2,depth_max-(q->depth+1));
+  int ncells_x = mesh->freeint[0];
+  int ncells_y = mesh->freeint[1];
+  int ncells_z = mesh->freeint[2];
+  int ncells_xy = ncells_x * ncells_y;
+  int ip;
+  // int i,j,ip0,ip1,ip2,ip3,ip4,ip5,ip6,ip7;
+  // int ip[8];
+
+
+  // fprintf(stderr,"\n  ## La fonction merge va supprimer le point : %d\n", q->sons[7].blf_ip);
   q->nsons = 0;
   q->leaf = 1;
   q->blf_ip = q->sons[0].blf_ip;
+  // if(q->sons[7].coordoct[0] < ncells_x-1 && q->sons[7].coordoct[1] < ncells_y-1 && q->sons[7].coordoct[2] < ncells_z-1)
+  // {
+  //   for(i=0 ; i < 8 ; i++)
+  //   {
+  //     MMG3D_get_MOctreeCornerIndices (mesh,q->sons[i],span,&ip[0],&ip[1],&ip[2],&ip[3],&ip[4],&ip[5],&ip[6],&ip[7]);
+  //     for(j=0 ; j<8 ; j++)
+  //     {
+  //       if( i!=j && !(mesh->point[ip[j]].tag & MG_NUL) )
+  //       {
+  //         MMG3D_delPt(mesh,ip[j]);
+  //       }
+  //     }
+  //   }
+  //   *compteur = *compteur + 1;
+  // }
+  // else if(q->sons[7].coordoct[0] > ncells_x-1 && q->sons[7].coordoct[1] > ncells_y-1 && q->sons[7].coordoct[2] > ncells_z-1 && q->sons[0].coordoct[0] < ncells_x-1 && q->sons[0].coordoct[1] < ncells_y-1 && q->sons[0].coordoct[2] < ncells_z-1)
+  // {
+  //   ip = q->sons[7].coordoct[2]*ncells_xy+q->sons[7].coordoct[1]*ncells_x+q->sons[7].coordoct[0]+1;
+  //   // fprintf(stderr,"\n  ## Point supprimé par le merge : %d\n", ip);
+  //   MMG3D_delPt(mesh,ip);
+  //   *compteur = *compteur + 1;
+  // }
   MMG3D_free_MOctree_s(q->sons, mesh);
-
   return 1;
 }
 
@@ -432,6 +464,15 @@ int  MMG3D_write_MOctreeCell ( MMG5_pMesh mesh, MMG5_MOctree_s* q,int span,FILE 
         mesh->point[ip1].tmp,mesh->point[ip2].tmp,mesh->point[ip3].tmp,
         mesh->point[ip4].tmp,mesh->point[ip5].tmp,mesh->point[ip6].tmp,
         mesh->point[ip7].tmp);
+
+        mesh->point[ip0].ref=22;
+        mesh->point[ip1].ref=22;
+        mesh->point[ip2].ref=22;
+        mesh->point[ip3].ref=22;
+        mesh->point[ip4].ref=22;
+        mesh->point[ip5].ref=22;
+        mesh->point[ip6].ref=22;
+        mesh->point[ip7].ref=22;
       }
     }
   else {
@@ -446,6 +487,19 @@ int  MMG3D_write_MOctreeCell ( MMG5_pMesh mesh, MMG5_MOctree_s* q,int span,FILE 
 
   return 1;
 }
+
+
+/**
+ * \param mesh pointer toward the mesh
+ * \param q pointer toward the MOctree cell
+ * \param dir direction to find the neighbour
+ * \param Neighbour pointer toward the neighbour cell
+ *
+ * \return 1 if success, 0 if fail.
+ *
+ * Find the neighbours of a cell.
+ *
+ */
 
 int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s* q, int dir, MMG5_MOctree_s* Neighbour)
 {
@@ -1278,4 +1332,147 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
       }
     }
   }
+}
+
+/**
+ * \param mesh pointer toward the mesh
+ *
+ *
+ * Delete unused points of the coarse grid.
+ *
+ */
+void  MMG3D_del_UnusedPoints ( MMG5_pMesh mesh) {
+  int i;
+
+  for(i=0 ; i<mesh->np ; i++)
+  {
+    if(mesh->point[i].ref != 22)
+    {
+      MMG3D_delPt(mesh,i);
+    }
+    else
+    {
+      mesh->point[i].ref = 0;
+    }
+  }
+}
+
+
+/**
+ * \param mesh pointer toward the mesh
+ * \param ip_bb_pt_list pointer toward the list of index of the bounding box points
+ * \param ip_bb_elt_list pointer toward the list of index of the bounding box elements
+ *
+ *
+ * Create the points of the bounding box and its 5 tetrahedrons. The bounding box is 3/2 times bigger than the
+ * initial grid.
+ *
+ */
+void  MMG3D_build_bounding_box ( MMG5_pMesh mesh, int* ip_bb_pt_list, int* ip_bb_elt_list) {
+  double         c[3],o[3];
+  double origin_x = mesh->info.max[0];
+  double origin_y = mesh->info.max[1];
+  double origin_z = mesh->info.max[2];
+  double coordmax_x = (mesh->info.max[0] * (double)mesh->freeint[0])*1.5 + origin_x;
+  double coordmax_y = (mesh->info.max[1] * (double)mesh->freeint[1])*1.5 + origin_y;
+  double coordmax_z = (mesh->info.max[2] * (double)mesh->freeint[2])*1.5 + origin_z;
+
+  c[0] = origin_x;
+  c[1] = origin_x;
+  c[2] = origin_x;
+
+  //point 0
+  o[0] = c[0];
+  o[1] = c[1];
+  o[2] = c[2];
+  *(ip_bb_pt_list+0) = MMG3D_newPt(mesh,o,MG_NOTAG);
+
+  //point 1
+  o[0] = c[0];
+  o[1] = c[1];
+  o[2] = c[2];
+  o[0] += coordmax_x;
+  *(ip_bb_pt_list+1) = MMG3D_newPt(mesh,o,MG_NOTAG);
+
+  //point 2
+  o[0] = c[0];
+  o[1] = c[1];
+  o[2] = c[2];
+  o[1] += coordmax_y;
+  *(ip_bb_pt_list+2) = MMG3D_newPt(mesh,o,MG_NOTAG);
+
+  //point 3
+  o[0] = c[0];
+  o[1] = c[1];
+  o[2] = c[2];
+  o[0] += coordmax_x;
+  o[1] += coordmax_y;
+  *(ip_bb_pt_list+3) = MMG3D_newPt(mesh,o,MG_NOTAG);
+
+  //point 4
+  o[0] = c[0];
+  o[1] = c[1];
+  o[2] = c[2];
+  o[2] += coordmax_z;
+  *(ip_bb_pt_list+4) = MMG3D_newPt(mesh,o,MG_NOTAG);
+
+  //point 5
+  o[0] = c[0];
+  o[1] = c[1];
+  o[2] = c[2];
+  o[0] += coordmax_x;
+  o[2] += coordmax_z;
+  *(ip_bb_pt_list+5) = MMG3D_newPt(mesh,o,MG_NOTAG);
+
+  //point 6
+  o[0] = c[0];
+  o[1] = c[1];
+  o[2] = c[2];
+  o[1] += coordmax_y;
+  o[2] += coordmax_z;
+  *(ip_bb_pt_list+6) = MMG3D_newPt(mesh,o,MG_NOTAG);
+
+  //point 7
+  o[0] = c[0];
+  o[1] = c[1];
+  o[2] = c[2];
+  o[0] += coordmax_x;
+  o[1] += coordmax_y;
+  o[2] += coordmax_z;
+  *(ip_bb_pt_list+7) = MMG3D_newPt(mesh,o,MG_NOTAG);
+
+  //tetra 0
+  *(ip_bb_elt_list+0) = MMG3D_newElt(mesh);
+  mesh->tetra[*(ip_bb_elt_list+0)].v[0] = *(ip_bb_pt_list+0);
+  mesh->tetra[*(ip_bb_elt_list+0)].v[1] = *(ip_bb_pt_list+1);
+  mesh->tetra[*(ip_bb_elt_list+0)].v[2] = *(ip_bb_pt_list+3);
+  mesh->tetra[*(ip_bb_elt_list+0)].v[3] = *(ip_bb_pt_list+5);
+
+  //tetra 1
+  *(ip_bb_elt_list+1) = MMG3D_newElt(mesh);
+  mesh->tetra[*(ip_bb_elt_list+1)].v[0] = *(ip_bb_pt_list+0);
+  mesh->tetra[*(ip_bb_elt_list+1)].v[1] = *(ip_bb_pt_list+5);
+  mesh->tetra[*(ip_bb_elt_list+1)].v[2] = *(ip_bb_pt_list+6);
+  mesh->tetra[*(ip_bb_elt_list+1)].v[3] = *(ip_bb_pt_list+4);
+
+  //tetra 2
+  *(ip_bb_elt_list+2) = MMG3D_newElt(mesh);
+  mesh->tetra[*(ip_bb_elt_list+2)].v[0] = *(ip_bb_pt_list+6);
+  mesh->tetra[*(ip_bb_elt_list+2)].v[1] = *(ip_bb_pt_list+5);
+  mesh->tetra[*(ip_bb_elt_list+2)].v[2] = *(ip_bb_pt_list+3);
+  mesh->tetra[*(ip_bb_elt_list+2)].v[3] = *(ip_bb_pt_list+7);
+
+  //tetra 3
+  *(ip_bb_elt_list+3) = MMG3D_newElt(mesh);
+  mesh->tetra[*(ip_bb_elt_list+3)].v[0] = *(ip_bb_pt_list+0);
+  mesh->tetra[*(ip_bb_elt_list+3)].v[1] = *(ip_bb_pt_list+3);
+  mesh->tetra[*(ip_bb_elt_list+3)].v[2] = *(ip_bb_pt_list+2);
+  mesh->tetra[*(ip_bb_elt_list+3)].v[3] = *(ip_bb_pt_list+6);
+
+  //tetra 4
+  *(ip_bb_elt_list+4) = MMG3D_newElt(mesh);
+  mesh->tetra[*(ip_bb_elt_list+4)].v[0] = *(ip_bb_pt_list+0);
+  mesh->tetra[*(ip_bb_elt_list+4)].v[1] = *(ip_bb_pt_list+5);
+  mesh->tetra[*(ip_bb_elt_list+4)].v[2] = *(ip_bb_pt_list+3);
+  mesh->tetra[*(ip_bb_elt_list+4)].v[3] = *(ip_bb_pt_list+6);
 }

@@ -1334,9 +1334,9 @@ int MMG3D_loadVTKGrid(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   }
 
   /* Points creations */
-  z = mesh->info.min[2] + 0.5*mesh->info.max[2];
-  y_min =  mesh->info.min[1] + 0.5*mesh->info.max[1];
-  x_min =  mesh->info.min[0] + 0.5*mesh->info.max[0];
+  z = mesh->info.min[2]; //+ 0.5*mesh->info.max[2];
+  y_min =  mesh->info.min[1]; //+ 0.5*mesh->info.max[1];
+  x_min =  mesh->info.min[0]; //+ 0.5*mesh->info.max[0];
 
   for ( k=0; k<mesh->freeint[2]; ++k ) {
     y = y_min;

@@ -112,67 +112,6 @@ int MMG3D_convert_grid2smallOctree(MMG5_pMesh mesh, MMG5_pSol sol) {
 
 /**
 * \param q pointer toward the MOctree cell
- * \param depth_max the depth maximum of the octree.
- *
- * \return 1 if success, 0 if fail.
- *
- * Build the coarse octree from the initial octree.
- *
- */
-// static inline
-// int MMG3D_build_coarsen_octree(MMG5_pMesh mesh, MMG5_MOctree_s* q, int depth_max) {
-//   int tmp;
-//   if(q->leaf != 1)
-//   {
-//     int i,leaf_sum;
-//     leaf_sum=0;
-//     for(i=0; i<q->nsons; i++)
-//     {
-//       leaf_sum += q->sons[i].leaf;
-//     }
-//
-//     if(leaf_sum != q->nsons) // si je ne suis pas un  père QUE de leafs (anciennes et nouvelles)
-//     {
-//       for(i=0; i<q->nsons; i++)
-//       {
-//         if(q->sons[i].leaf != 1)//si je ne suis pas une leaf
-//         {
-//           MMG3D_build_coarsen_octree(mesh, &q->sons[i], depth_max);
-//         }
-//       }
-//     }
-//     if(leaf_sum == q->nsons) // si je suis un père de leafs (anciennes et nouvelles)
-//     {
-//       // crée le split_ls du père
-//       tmp=0;
-//       for(i=0; i<q->nsons; i++)
-//       {
-//         if(q->sons[i].split_ls==0)
-//         {
-//           tmp++;
-//         }
-//       }
-//       if(tmp!=q->nsons)
-//       {
-//         q->split_ls=1; // vérifie si au moins un fils possède la LS
-//       }
-//
-//       if(q->split_ls == 0)
-//       {
-//         // if(MMG3D_balance_octree(mesh,q,depth_max))
-//         // {
-//         MMG3D_merge_MOctree_s (q, mesh);
-//         // }
-//       }
-//     }
-//     leaf_sum=0;
-//   }
-//   return 1;
-//}
-
-
-/**
-* \param q pointer toward the MOctree cell
  *\param depth_max the depth maximum of the octree.
  *
  * \return 1 if success, 0 if fail.
@@ -181,13 +120,13 @@ int MMG3D_convert_grid2smallOctree(MMG5_pMesh mesh, MMG5_pSol sol) {
  *
  */
 static inline
-int MMG3D_build_coarsen_octree_first_time(MMG5_pMesh mesh, MMG5_MOctree_s* q, int depth_max) {
+int MMG3D_build_coarsen_octree_first_time(MMG5_pMesh mesh, MMG5_MOctree_s* q, int depth_max, int* compteur) {
   int i;
   if (q->depth < depth_max-1)
   {
         for (i=0; i< q->nsons; i++)
     {
-      MMG3D_build_coarsen_octree_first_time(mesh, &q->sons[i],depth_max);
+      MMG3D_build_coarsen_octree_first_time(mesh, &q->sons[i],depth_max, compteur);
     }
   }
   else if (q->depth == depth_max-1)
@@ -200,7 +139,7 @@ int MMG3D_build_coarsen_octree_first_time(MMG5_pMesh mesh, MMG5_MOctree_s* q, in
     }
     if (sum_ls==0)
     {
-      MMG3D_merge_MOctree_s (q, mesh);
+      MMG3D_merge_MOctree_s (q, mesh, compteur);
     }
   }
   return 1;
@@ -216,14 +155,14 @@ int MMG3D_build_coarsen_octree_first_time(MMG5_pMesh mesh, MMG5_MOctree_s* q, in
  *
  */
 static inline
-int MMG3D_build_coarsen_octree(MMG5_pMesh mesh, MMG5_MOctree_s* q, int depth_max, int depth) {
+int MMG3D_build_coarsen_octree(MMG5_pMesh mesh, MMG5_MOctree_s* q, int depth_max, int depth, int* compteur) {
   // descendre à depth_max -2 la premiere fois qu'on appelle cette fonction puis depth_max-3 etc
   int i;
   if (q->depth < depth)
   {
     for (i=0; i< q->nsons; i++)
     {
-      MMG3D_build_coarsen_octree(mesh, &q->sons[i], depth_max, depth);
+      MMG3D_build_coarsen_octree(mesh, &q->sons[i], depth_max, depth, compteur);
     }
   }
   else
@@ -253,7 +192,7 @@ int MMG3D_build_coarsen_octree(MMG5_pMesh mesh, MMG5_MOctree_s* q, int depth_max
           }
         }
       }
-      MMG3D_merge_MOctree_s (q, mesh);
+      MMG3D_merge_MOctree_s (q, mesh, compteur);
       return 1;
     }
   }
@@ -297,12 +236,18 @@ int MMG3D_coarsen_octree(MMG5_pMesh mesh, MMG5_pSol sol) {
   max_dim++;
 
   depth_max=log(max_dim)/log(2);
-  MMG3D_build_coarsen_octree_first_time(mesh, po, depth_max);
+  int *compteur;
+  int nb;
+  nb = 0;
+  compteur = &nb;
+  MMG3D_build_coarsen_octree_first_time(mesh, po, depth_max, compteur);
   int depth;
   for (depth=depth_max-2; depth>=0; depth --)
   {
-    MMG3D_build_coarsen_octree(mesh, po, depth_max, depth);
+    MMG3D_build_coarsen_octree(mesh, po, depth_max, depth, compteur);
   }
+
+  fprintf(stderr,"\n  ## Le nombre de points supprimés : %d\n", *compteur);
 
   return 1;
 }
@@ -321,6 +266,14 @@ static inline
 int MMG3D_convert_octree2tetmesh(MMG5_pMesh mesh, MMG5_pSol sol) {
 
   printf ( " %s:%s: TO IMPLEMENT\n",__FILE__,__func__ ); return 0;
+
+  MMG3D_del_UnusedPoints (mesh);
+  int* ip_bb_pt_list[8];
+  int* ip_bb_elt_list[5];
+
+  MMG3D_build_bounding_box (mesh, ip_bb_pt_list, ip_bb_elt_list);
+  
+
 
   return 1;
 }
@@ -348,12 +301,18 @@ int MMG3D_convert_grid2tetmesh(MMG5_pMesh mesh, MMG5_pSol sol) {
     return 0;
   }
 
+  fprintf(stderr,"\n  ## np avant merge : %d\n", mesh->np);
+
 
   /* Creation of the coarse octree */
   if ( !MMG3D_coarsen_octree(mesh,sol) ) {
     fprintf(stderr,"\n  ## Octree coarsening problem. Exit program.\n");
     return 0;
   }
+
+  fprintf(stderr,"\n  ## np après merge : %d\n", mesh->np);
+
+  fprintf(stderr,"\n  ## Les indices des 3 derniers points supprimés sont : %d, %d, %d\n\n", mesh->npnil, mesh->point[mesh->npnil].tmp, mesh->point[mesh->point[mesh->npnil].tmp].tmp);
 
   MMG3D_saveVTKOctree(mesh,sol,mesh->nameout);
 
