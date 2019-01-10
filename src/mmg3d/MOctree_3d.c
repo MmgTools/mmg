@@ -1475,3 +1475,89 @@ void  MMG3D_build_bounding_box ( MMG5_pMesh mesh, int* ip_bb_pt_list, int* ip_bb
   mesh->tetra[*(ip_bb_elt_list+4)].v[2] = *(ip_bb_pt_list+3);
   mesh->tetra[*(ip_bb_elt_list+4)].v[3] = *(ip_bb_pt_list+6);
 }
+
+/**
+* \param mesh pointer toward the mesh structure.
+* \param iel tetra index.
+* \param ip point local index in \a iel.
+*
+* Finds if point ip is located in tetra iel by computing its barycentric values in tetra iel.
+*
+*/
+
+int MMG5_intetra(MMG5_pMesh mesh,int iel,int ip) {
+ double bary[4],A[3],B[3],C[3],D[3],P[3],vol;
+ int i;
+ for (i=0; i<3;i++)
+ {
+   A[i]=mesh->point[mesh->tetra[iel].v[0]].c[i];
+   B[i]=mesh->point[mesh->tetra[iel].v[1]].c[i];
+   C[i]=mesh->point[mesh->tetra[iel].v[2]].c[i];
+   D[i]=mesh->point[mesh->tetra[iel].v[3]].c[i];
+   P[i]=mesh->point[ip].c[i];
+ }
+ vol=(A[0]-D[0])*(B[1]-D[1])*(C[2]-D[2])+(B[0]-D[0])*(C[1]-D[1])*(A[2]-D[2])
+ +(C[0]-D[0])*(A[1]-D[1])*(B[2]-D[2])-(C[0]-D[0])*(B[1]-D[1])*(A[2]-D[2])
+ -(A[0]-D[0])*(C[1]-D[1])*(B[2]-D[2])-(B[0]-D[0])*(A[1]-D[1])*(C[2]-D[2]);
+
+ bary[0]=((P[0]-D[0])*(B[1]-D[1])*(C[2]-D[2])+(B[0]-D[0])*(C[1]-D[1])*(P[2]-D[2])
+ +(C[0]-D[0])*(P[1]-D[1])*(B[2]-D[2])-(C[0]-D[0])*(B[1]-D[1])*(P[2]-D[2])
+ -(P[0]-D[0])*(C[1]-D[1])*(B[2]-D[2])-(B[0]-D[0])*(P[1]-D[1])*(C[2]-D[2]))/vol;
+ if(bary[0]<0)
+ {
+   return 0;
+ }
+
+ bary[1]=((A[0]-D[0])*(P[1]-D[1])*(C[2]-D[2])+(P[0]-D[0])*(C[1]-D[1])*(A[2]-D[2])
+ +(C[0]-D[0])*(A[1]-D[1])*(P[2]-D[2])-(C[0]-D[0])*(P[1]-D[1])*(A[2]-D[2])
+ -(A[0]-D[0])*(C[1]-D[1])*(P[2]-D[2])-(P[0]-D[0])*(A[1]-D[1])*(C[2]-D[2]))/vol;
+ if(bary[1]<0)
+ {
+   return 0;
+ }
+
+ bary[2]=((A[0]-D[0])*(B[1]-D[1])*(P[2]-D[2])+(B[0]-D[0])*(P[1]-D[1])*(A[2]-D[2])
+ +(P[0]-D[0])*(A[1]-D[1])*(B[2]-D[2])-(P[0]-D[0])*(B[1]-D[1])*(A[2]-D[2])
+ -(A[0]-D[0])*(P[1]-D[1])*(B[2]-D[2])-(B[0]-D[0])*(A[1]-D[1])*(P[2]-D[2]))/vol;
+ if(bary[2]<0)
+ {
+   return 0;
+ }
+
+ bary[3]=1-bary[0]-bary[1]-bary[2];
+ if(bary[3]<0)
+ {
+   return 0;
+ }
+return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh
+ *
+ *
+ * Add the boundary points to the mesh (delaunay).
+ *
+ */
+void  MMG3D_add_Boundary ( MMG5_pMesh mesh, MMG5_pSol sol) {
+
+  int i,j;
+  i=0;
+  int* list_ip;
+  int* list_cavity;
+  //APPEL FONCTION DE Fanny(list_ip)
+
+  while(*(list_ip+i) < 2*mesh->freeint[0]*mesh->freeint[1]*mesh->freeint[2]-1)
+  {
+    j=0;
+    while(j<mesh->ne && !(MMG5_intetra(mesh,j,*(list_ip+i))))
+    {
+      j++;
+    }
+    *(list_cavity)=j;
+    MMG5_cavity_iso(mesh,sol,0,*(list_ip+i),list_cavity,1,1e-15);
+
+    i++;
+  }
+
+}

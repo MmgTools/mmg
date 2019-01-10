@@ -1241,16 +1241,20 @@ int MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
     return 0;
   }
 
-  /**--- stage 1: geometric mesh  */
-  if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
-    fprintf(stdout,"  ** GEOMETRIC MESH\n");
+  /**--- stage 1: geometric mesh only in isotropic case */
+  /* because if the aniso metric is not compatible with the geometry, the swaps generate some noise and problems*/
 
-  if ( !MMG5_anatet(mesh,met,1,0) ) {
-    fprintf(stderr,"\n  ## Unable to split mesh. Exiting.\n");
-    if ( PROctree )
-      /*free PROctree*/
-      MMG3D_freePROctree(mesh,&PROctree);
-    return 0;
+  if ( met->size==1 ) {
+    if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
+      fprintf(stdout,"  ** GEOMETRIC MESH\n");
+
+    if ( !MMG5_anatet(mesh,met,1,0) ) {
+      fprintf(stderr,"\n  ## Unable to split mesh. Exiting.\n");
+      if ( PROctree )
+        /*free PROctree*/
+        MMG3D_freePROctree(mesh,&PROctree);
+      return 0;
+    }
   }
 
   /**--- stage 2: computational mesh */

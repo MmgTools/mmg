@@ -189,6 +189,9 @@ int  MMG3D_write_MOctreeCell ( MMG5_pMesh mesh, MMG5_MOctree_s* q,int span, FILE
 int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s* q, int dir, MMG5_MOctree_s* Neighbour);
 void  MMG3D_del_UnusedPoints ( MMG5_pMesh mesh);
 void  MMG3D_build_bounding_box ( MMG5_pMesh mesh, int* ip_bb_pt_list, int* ip_bb_elt_list);
+int MMG5_intetra(MMG5_pMesh mesh,int iel,int ip);
+void  MMG3D_add_Boundary ( MMG5_pMesh mesh, MMG5_pSol sol);
+
 
 
 
