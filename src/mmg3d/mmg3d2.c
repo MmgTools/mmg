@@ -420,20 +420,15 @@ static int MMG3D_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol,double *tmp) {
  * once values of sol have been snapped/checked
  *
  */
-static int MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol/*,double *tmp*/){
+static int MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol){
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
   MMG5_pPoint   p0,p1;
-  MMG5_Hash    hash;
+  MMG5_Hash     hash;
   double        c[3],v0,v1,s;
   int           vx[6],nb,k,ip0,ip1,np,ns,ne,ier;
   char          ia,j,npneg;
   static char   mmgWarn = 0;
-  /* Commented because unused */
-  /*MMG5_pPoint  p[4];*/
-  /*double   *grad,A[3][3],b[3],*g0,*g1,area,a,d,dd,s1,s2;*/
-  /*int       ip[4],ng*/
-  /*char    i,ier;*/
 
   /* reset point flags and h */
   for (k=1; k<=mesh->np; k++)
@@ -464,55 +459,6 @@ static int MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol/*,double *tmp*/){
     }
   }
   if ( ! nb )  return 1;
-
-  /* Store gradients of level set function at those points */
-  /* Commented because unused */
-  /* grad = (double*)calloc(3*nb+1,sizeof(double)); */
-  /* assert(grad); */
-
-  /* for (k=1; k<=mesh->ne; k++) { */
-  /*   pt = &mesh->tetra[k]; */
-  /*   ia = 0; */
-  /*   for (i=0; i<4; i++) { */
-  /*     ip[i] = pt->v[i]; */
-  /*     p[i]  = &mesh->point[ip[i]]; */
-  /*     if ( p[i]->flag == 0 )  ia++; */
-  /*   } */
-  /*   if ( ia == 4 )  continue; */
-
-  /*   A[0][0] = p[1]->c[0] - p[0]->c[0];  A[0][1] = p[1]->c[1] - p[0]->c[1];  A[0][2] = p[1]->c[2] - p[0]->c[2]; */
-  /*   A[1][0] = p[2]->c[0] - p[0]->c[0];  A[1][1] = p[2]->c[1] - p[0]->c[1];  A[1][2] = p[2]->c[2] - p[0]->c[2]; */
-  /*   A[2][0] = p[3]->c[0] - p[0]->c[0];  A[2][1] = p[3]->c[1] - p[0]->c[1];  A[2][2] = p[3]->c[2] - p[0]->c[2]; */
-
-  /*   b[0] = sol->m[ip[1]] - sol->m[ip[0]]; */
-  /*   b[1] = sol->m[ip[2]] - sol->m[ip[0]]; */
-  /*   b[2] = sol->m[ip[3]] - sol->m[ip[0]]; */
-
-  /*   area = MMG5_det4pt(p[0]->c,p[1]->c,p[2]->c,p[3]->c); */
-  /*   ier  = MMG5_invsl(A,b,c); */
-  /*   if ( !ier )  continue; */
-
-  /*   for (i=0; i<4; i++) { */
-  /*     if ( p[i]->flag ) { */
-  /*       ng = p[i]->flag; */
-  /*       tmp[ip[i]] += fabs(area); */
-  /*       grad[3*(ng-1)+1] += (area*c[0]); */
-  /*       grad[3*(ng-1)+2] += (area*c[1]); */
-  /*       grad[3*(ng-1)+3] += (area*c[2]); */
-  /*     } */
-  /*   } */
-  /* } */
-  /* for (k=1; k<=mesh->np; k++) { */
-  /*   p0 = &mesh->point[k]; */
-  /*   if ( p0->flag ) { */
-  /*     area = MG_MAX(MMG5_EPSD2,tmp[k]); */
-  /*     area = 1.0 / area; */
-  /*     ng   = p0->flag; */
-  /*     grad[3*(ng-1)+1] *= area; */
-  /*     grad[3*(ng-1)+2] *= area; */
-  /*     grad[3*(ng-1)+3] *= area; */
-  /*   } */
-  /* } */
 
   /* Create intersection points at 0 isovalue and set flags to tetras */
   if ( !MMG5_hashNew(mesh,&hash,nb,7*nb) ) return 0;
@@ -571,27 +517,6 @@ static int MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol/*,double *tmp*/){
 
       npneg = (np<0);
 
-      /* g0 = &grad[3*(p0->flag -1)+1]; */
-      /* g1 = &grad[3*(p1->flag -1)+1]; */
-      /* a = 0.5 * ((g1[0]-g0[0])*(p1->c[0]-p0->c[0]) + (g1[1]-g0[1])*(p1->c[1]-p0->c[1]) \ */
-      /*            + (g1[2]-g0[2])*(p1->c[2]-p0->c[2])); */
-      /* d  = v1 - v0 - a; */
-      /* dd = d*d - 4.0*a*v0; */
-      /* dd = MG_MAX(MMG5_EPSD2,dd); */
-      /* dd = sqrt(dd); */
-      /* if ( fabs(a) < MMG5_EPSD2 ) */
-      /*   s = v0 / (v0-v1); */
-      /* else { */
-      /*   s1 = 0.5*( dd -d) / a; */
-      /*   s2 = 0.5*(-dd -d) / a; */
-      /*   if ( s1 > 0.0 && s1 < 1.0 ) */
-      /*     s = s1; */
-      /*   else if (s2 > 0.0 && s2 < 1.0) */
-      /*     s = s2; */
-      /*   else */
-      /*     s = MG_MIN(fabs(s1),fabs(s1-1.0)) < MG_MIN(fabs(s2),fabs(s2-1.0)) ? s1 : s2 ; */
-      /* } */
-      // IMPORTANT A REGARDER
       s = v0 / (v0-v1);
 
       s = MG_MAX(MG_MIN(s,1.0-MMG5_EPS),MMG5_EPS);
@@ -1551,7 +1476,7 @@ int MMG3D_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol) {
     return 0;
   }
 
-  if ( !MMG3D_cuttet_ls(mesh,sol/*,tmp*/) ) {
+  if ( !MMG3D_cuttet_ls(mesh,sol) ) {
     fprintf(stderr,"\n  ## Problem in discretizing implicit function. Exit program.\n");
     return 0;
   }

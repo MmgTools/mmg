@@ -166,7 +166,7 @@ int MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
     vois[3]  = adja[3] >> 2;
     for (i=0; i<4; i++) {
       jel = vois[i];
-      if ( !jel || mesh->tetra[jel].flag != base ) {
+      if ( (!jel) || mesh->tetra[jel].flag != base ) {
         for (j=0; j<3; j++) {
           i1  = MMG5_idir[i][j];
           ppt = &mesh->point[ pt1->v[i1] ];
