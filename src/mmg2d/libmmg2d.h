@@ -1538,6 +1538,30 @@ extern "C" {
  */
   int MMG2D_Get_triFromEdge(MMG5_pMesh mesh, int ked, int *ktri, int *ied);
 /**
+ * \param mesh pointer toward the mesh structure.
+ * \param ked index of the boundary edge.
+ * \param ktri pointer toward an array of size 2 to fill by the indices of the
+ * triangles that share the edge \a ked (filled by the function).
+ * \param ied pointer toward an array of size two to fill by the indices of the
+ * edge in each triangle.
+ *
+ * \return 0 if fail, 1 otherwise
+ *
+ * Fill \a ktri by the indices of the triangles to which belong a boundary edge
+ * and \a ied by the indices of the matching edge in each triangle. If \a ked
+ * belongs to one triangle only, ktri[1] = ied[1] = 0.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG2D_GET_TRISFROMEDGE(mesh,ked,ktri,ied,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(IN)              :: mesh\n
+ * >     INTEGER, INTENT(IN)                      :: ked\n
+ * >     INTEGER, DIMENSION(2),INTENT(OUT)        :: ktri,ied\n
+ * >     INTEGER, INTENT(OUT)                     :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int MMG2D_Get_trisFromEdge(MMG5_pMesh mesh, int ked, int ktri[2], int ied[2]);
+/**
  * \param mesh pointer toward the mesh structure
  *
  * Reset the vertices tag (be careful all the tags are deleted).

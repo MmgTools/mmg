@@ -1066,7 +1066,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
       ref = ppt->ref;
       if ( mesh->info.nreg ) {
         if ( !bin )
-          fprintf(inm,"%.15lg %.15lg 0. %d\n",ppt->c[0],ppt->c[1],ref);
+          fprintf(inm,"%.15lg %.15lg 0 %d\n",ppt->c[0],ppt->c[1],ref);
         else {
           dblb = 0.;
           fwrite((unsigned char*)&ppt->c[0],sd,1,inm);
@@ -1206,7 +1206,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
         ne++;
         if (  mesh->edge[k].tag & MG_REQ ) {
           if(!bin) {
-            fprintf(inm,"%d \n",ne);
+            fprintf(inm,"%d\n",ne);
           } else {
             fwrite(&ne,sw,1,inm);
           }
@@ -1260,7 +1260,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
       if(!bin) {
         strcpy(&chaine[0],"\n\nRequiredTriangles\n");
         fprintf(inm,"%s",chaine);
-        fprintf(inm,"%d \n",nereq);
+        fprintf(inm,"%d\n",nereq);
       } else {
         binch = 17; //ReqTriangles
         fwrite(&binch,sw,1,inm);
@@ -1276,7 +1276,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
         if ( (pt->tag[0] & MG_REQ) && (pt->tag[1] & MG_REQ)
              && pt->tag[2] & MG_REQ ) {
           if(!bin) {
-            fprintf(inm,"%d \n",ne);
+            fprintf(inm,"%d\n",ne);
           } else {
             fwrite(&ne,sw,1,inm);
           }
@@ -1367,7 +1367,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
   /*     if(ppt->tag & MG_CRN) continue; */
 
   /*     if(!bin) { */
-  /*       fprintf(inm,"%d %d \n",ppt->tmp,nn++); */
+  /*       fprintf(inm,"%d %d\n",ppt->tmp,nn++); */
   /*     } */
   /*     else { */
   /*       fwrite(&ppt->tmp,sw,1,inm); */

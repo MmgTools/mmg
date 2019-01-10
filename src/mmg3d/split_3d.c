@@ -354,6 +354,10 @@ int MMG3D_simbulgept(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int ip) {
     if ( caltmp < MMG5_EPSOK )  return 0;
     calnew = MG_MIN(calnew,caltmp);
   }
+  if ( calnew <= MMG5_EPSOK ) {
+    return 0;
+  }
+
   /* if ( calnew < 0.3*calold )  return 0;*/
 
   /** Check the deviation for new triangles */

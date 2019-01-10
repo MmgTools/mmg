@@ -295,7 +295,7 @@ int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,char typchk) {
  */
 int swapar(MMG5_pMesh mesh,int k,int i) {
   MMG5_pTria    pt,pt1;
-  int     *adja,adj,k11,k21;
+  int     *adja,adj,k11,k21,ip1,ip2,i2save,j2save;
   char     i1,i2,j,jj,j2,v11,v21;
 
   pt   = &mesh->tria[k];
@@ -316,15 +316,35 @@ int swapar(MMG5_pMesh mesh,int k,int i) {
   k11 = adja[i1] / 3;
   v11 = adja[i1] % 3;
   if ( k11 < 1 )  return 0;
+  ip1 = mesh->tria[k11].v[v11];
+
   adja = &mesh->adja[3*(adj-1)+1];
   jj  = MMG5_inxt2[j];
   j2  = MMG5_iprv2[j];
   k21 = adja[jj] / 3;
   v21 = adja[jj] % 3;
   if ( k21 < 1 )  return 0;
+  ip2 = mesh->tria[k21].v[v21];
 
+  i2save = pt->v[i2];
   pt->v[i2]  = pt1->v[j];
+  j2save = pt1->v[j2];
   pt1->v[j2] = pt->v[i];
+
+  /* Check that the edge swap doesn't create a lost face. Revert the swap in
+   * this case */
+  if ( pt->v[i] == ip2 ) {
+    pt->v[i2]  = i2save;
+    pt1->v[j2] = j2save;
+    return 0;
+  }
+
+  if ( pt1->v[j] == ip1 ) {
+    pt->v[i2]  = i2save;
+    pt1->v[j2] = j2save;
+    return 0;
+  }
+
 
   /* update info */
   pt->tag[i] = pt1->tag[jj];

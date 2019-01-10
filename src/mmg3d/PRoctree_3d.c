@@ -611,8 +611,10 @@ int MMG3D_getListSquare(MMG5_pMesh mesh, double* ani, MMG3D_pPROctree q, double*
   memcpy(&rect2, rect, sizeof(double)*dim*2);
 
   if ( !MMG3D_getListSquareRec(q->q0, center, rect2, qlist, dist, ani, l0,
-                                q->nc, dim, &index) )
+                                q->nc, dim, &index) ) {
+    MMG5_DEL_MEM(mesh,dist);
     return -1;
+  }
 
 
   if (index>q->nc-4)
@@ -1117,123 +1119,6 @@ int* MMG3D_sizeArbre(MMG3D_pPROctree q,int dim)
   MMG3D_sizeArbreRec(q->q0, q->nv, dim, &s[0], &s[1]);
   return s;
 }
-
-
-/**
- * \param q pointer toward an PROctree cell
- * \param nv number of vertices in the subtree
- * \param dim dimension in which we work
- *
- * Print the memory size of the PROctree for point stored with a linked list.
- *
- * \warning debug function, not safe
- */
-static inline
-int MMG3D_sizeArbreLinkRec(MMG3D_PROctree_s* q, int nv, int dim)
-{
-  int sizeBranches,i;
-
-  sizeBranches = 0;
-
-  if (q->branches != NULL)
-  {
-
-    for (i= 0; i <(1<<dim); i++)
-    {
-      sizeBranches += MMG3D_sizeArbreLinkRec(&(q->branches[i]), nv, dim)
-        +sizeof(MMG3D_PROctree_s)+(1<<dim)*sizeof(MMG3D_PROctree_s*);
-    }
-    return sizeBranches;
-  }else if(q->v != NULL)
-  {
-    return sizeof(int)+sizeof(MMG3D_PROctree_s);
-  }else
-  {
-    return sizeof(MMG3D_PROctree_s);
-  }
-}
-
-/**
- * \param q pointer toward the global PROctree
- *
- * Print the memory size of the PROctree for point stored with a linked list.
- *
- * \warning debug function, not safe
- */
-static inline
-int MMG3D_sizeArbreLink(MMG3D_pPROctree q)
-{
-  int dim;
-
-  dim = 3;
-  return MMG3D_sizeArbreLinkRec(q->q0, q->nv, dim)+q->q0->nbVer*sizeof(int);
-}
-
-/**
- * \param q pointer toward the global PROctree
- *
- * ???
- *
- */
-static inline
-int MMG3D_NearNeighborSquare(MMG5_pMesh mesh, double* ani, MMG3D_pPROctree q,
-                              int no, double l, int dim)
-{
-  MMG5_pPoint   ppt,ppt1;
-  MMG3D_PROctree_s** qlist;
-  int ns,nver;
-  double *rect;
-  double lmin =10;
-  double x,y,z;
-  int nmin;
-  int i, j;
-
-  nmin = 0;
-  MMG5_SAFE_MALLOC(rect,2*dim,double,return -1);
-
-  ppt = &mesh->point[no];
-  rect[0] = ppt->c[0]-l;
-  rect[1] = ppt->c[1]-l;
-  rect[2] = ppt->c[2]-l;
-  rect[3] = 2*l;
-  rect[4] = 2*l;
-  rect[5] = 2*l;
-  qlist = NULL;
-  ns = MMG3D_getListSquare(mesh, ani, q, rect, &qlist);
-
-
-  for (i = 0; i < ns; i++)
-  {
-    for (j = 0; j<qlist[i]->nbVer; j++)
-    {
-      nver = qlist[i]->v[j];
-      if(nver != no)
-      {
-        ppt  = &mesh->point[nver];
-        ppt1 = &mesh->point[no];
-
-        x = ppt->c[0] - ppt1->c[0];
-        y = ppt->c[1] - ppt1->c[1];
-        z = ppt->c[2] - ppt1->c[2];
-        x = x*x+y*y+z*z;
-        if(lmin>x)
-        {
-          lmin = x;
-          nmin = nver;
-        }
-      }
-    }
-  }
-
-  MMG5_SAFE_FREE(qlist);
-  MMG5_SAFE_FREE(rect);
-
-  if (sqrt(lmin)<l)
-    return nmin;
-  else
-    return -1;
-}
-
 
 /**
  * \param mesh pointer toward the mesh structure.

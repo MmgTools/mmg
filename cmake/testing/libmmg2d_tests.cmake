@@ -33,6 +33,7 @@ SET ( MMG2D_LIB_TESTS
   libmmg2d_example1
   libmmg2d_example2
   libmmg2d_example3
+  test_api2d_0
   )
 SET ( MMG2D_LIB_TESTS_MAIN_PATH
   ${PROJECT_SOURCE_DIR}/libexamples/mmg2d/adaptation_example0/example0_a/main.c
@@ -40,6 +41,7 @@ SET ( MMG2D_LIB_TESTS_MAIN_PATH
   ${PROJECT_SOURCE_DIR}/libexamples/mmg2d/adaptation_example1/main.c
   ${PROJECT_SOURCE_DIR}/libexamples/mmg2d/squareGeneration_example2/main.c
   ${PROJECT_SOURCE_DIR}/libexamples/mmg2d/io_multisols_example3/main.c
+  ${MMG2D_CI_TESTS}/API_tests/2d.c
   )
 
 IF ( LIBMMG2D_STATIC )
@@ -59,12 +61,14 @@ IF ( CMAKE_Fortran_COMPILER )
     libmmg2d_fortran_a
     libmmg2d_fortran_b
     libmmg2d_fortran_io
+    test_api2d_fortran_0
     )
 
   SET ( MMG2D_LIB_TESTS_MAIN_PATH ${MMG2D_LIB_TESTS_MAIN_PATH}
     ${PROJECT_SOURCE_DIR}/libexamples/mmg2d/adaptation_example0_fortran/example0_a/main.F90
     ${PROJECT_SOURCE_DIR}/libexamples/mmg2d/adaptation_example0_fortran/example0_b/main.F90
     ${PROJECT_SOURCE_DIR}/libexamples/mmg2d/io_multisols_example3/main.F90
+    ${MMG2D_CI_TESTS}/API_tests/2d.F90
     )
 
 ENDIF ( CMAKE_Fortran_COMPILER )

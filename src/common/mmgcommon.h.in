@@ -82,7 +82,7 @@ extern "C" {
 #define MMG5_UNSET -1
 
 /* reference of the boundary that moves in lagrangian mode */
-#define MMG5_DISPREF 0
+#define MMG5_DISPREF 10
 
 /* million */
 #define MMG5_MILLION 1048576
@@ -135,6 +135,7 @@ extern "C" {
 #define  MG_CRN       (1 << 5)        /**< 32  corner         */
 #define  MG_NOSURF    (1 << 6)        /**< 64  freezed boundary */
 #define  MG_OPNBDY    (1 << 7)        /**< 128 open boundary */
+#define  MG_PARBDYBDY (1 << 12)       /**< 4096 parallel boundary over a boundary */
 #define  MG_PARBDY    (1 << 13)       /**< 8192 parallel boundary */
 #define  MG_NUL       (1 << 14)       /**< 16384 vertex removed */
 
@@ -533,6 +534,7 @@ typedef struct MMG5_dNode_s {
  int           MMG5_mmgIntmet33_ani(double*,double*,double*,double);
  int           MMG5_mmgIntextmet(MMG5_pMesh,MMG5_pSol,int,double *,double *);
  size_t        MMG5_memSize(void);
+ void          MMG5_memOption_memSet(MMG5_pMesh mesh);
  void          MMG5_mmgDefaultValues(MMG5_pMesh mesh);
  int           MMG5_mmgHashTria(MMG5_pMesh mesh, int *adja, MMG5_Hash*, int chkISO);
  void          MMG5_mmgInit_parameters(MMG5_pMesh mesh);

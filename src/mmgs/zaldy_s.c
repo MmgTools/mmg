@@ -129,27 +129,7 @@ int MMGS_memOption_memSet(MMG5_pMesh mesh) {
   size_t     usedMem,avMem,reservedMem;
   int        npadd,bytes;
 
-  if ( mesh->info.mem <= 0 ) {
-    if ( mesh->memMax )
-      /* maximal memory = 50% of total physical memory */
-      mesh->memMax = mesh->memMax*MMG5_MEMPERCENT;
-    else {
-      /* default value = 800 MB */
-      printf("  Maximum memory set to default value: %d MB.\n",MMG5_MEMMAX);
-      mesh->memMax = MMG5_MEMMAX*MMG5_MILLION;
-    }
-  }
-  else {
-    /* memory asked by user if possible, otherwise total physical memory */
-    if ( (size_t)mesh->info.mem*MMG5_MILLION > mesh->memMax && mesh->memMax ) {
-      fprintf(stderr,"\n  ## Warning: %s: asking for %d MB of memory ",
-              __func__,mesh->info.mem);
-      fprintf(stderr,"when only %zu available.\n",mesh->memMax/MMG5_MILLION);
-    }
-    else {
-      mesh->memMax= mesh->info.mem*MMG5_MILLION;
-    }
-  }
+  MMG5_memOption_memSet(mesh);
 
   /* init allocation need MMG5_MEMMIN B */
   reservedMem = MMG5_MEMMIN;
