@@ -282,44 +282,11 @@ int MMG3D_free_MOctree_s( MMG5_MOctree_s* q, MMG5_pMesh mesh) {
  * \ref q, all sons being leafs).
  *
  */
-int  MMG3D_merge_MOctree_s ( MMG5_MOctree_s* q, MMG5_pMesh mesh, int *compteur) {
+int  MMG3D_merge_MOctree_s ( MMG5_MOctree_s* q, MMG5_pMesh mesh) {
 
-  // int span = pow(2,depth_max-(q->depth+1));
-  int ncells_x = mesh->freeint[0];
-  int ncells_y = mesh->freeint[1];
-  int ncells_z = mesh->freeint[2];
-  int ncells_xy = ncells_x * ncells_y;
-  int ip;
-  // int i,j,ip0,ip1,ip2,ip3,ip4,ip5,ip6,ip7;
-  // int ip[8];
-
-
-  // fprintf(stderr,"\n  ## La fonction merge va supprimer le point : %d\n", q->sons[7].blf_ip);
   q->nsons = 0;
   q->leaf = 1;
   q->blf_ip = q->sons[0].blf_ip;
-  // if(q->sons[7].coordoct[0] < ncells_x-1 && q->sons[7].coordoct[1] < ncells_y-1 && q->sons[7].coordoct[2] < ncells_z-1)
-  // {
-  //   for(i=0 ; i < 8 ; i++)
-  //   {
-  //     MMG3D_get_MOctreeCornerIndices (mesh,q->sons[i],span,&ip[0],&ip[1],&ip[2],&ip[3],&ip[4],&ip[5],&ip[6],&ip[7]);
-  //     for(j=0 ; j<8 ; j++)
-  //     {
-  //       if( i!=j && !(mesh->point[ip[j]].tag & MG_NUL) )
-  //       {
-  //         MMG3D_delPt(mesh,ip[j]);
-  //       }
-  //     }
-  //   }
-  //   *compteur = *compteur + 1;
-  // }
-  // else if(q->sons[7].coordoct[0] > ncells_x-1 && q->sons[7].coordoct[1] > ncells_y-1 && q->sons[7].coordoct[2] > ncells_z-1 && q->sons[0].coordoct[0] < ncells_x-1 && q->sons[0].coordoct[1] < ncells_y-1 && q->sons[0].coordoct[2] < ncells_z-1)
-  // {
-  //   ip = q->sons[7].coordoct[2]*ncells_xy+q->sons[7].coordoct[1]*ncells_x+q->sons[7].coordoct[0]+1;
-  //   // fprintf(stderr,"\n  ## Point supprimé par le merge : %d\n", ip);
-  //   MMG3D_delPt(mesh,ip);
-  //   *compteur = *compteur + 1;
-  // }
   MMG3D_free_MOctree_s(q->sons, mesh);
   return 1;
 }

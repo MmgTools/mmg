@@ -182,7 +182,7 @@ int  MMG3D_set_splitls_MOctree ( MMG5_pMesh mesh, MMG5_MOctree_s* q, MMG5_pSol s
 
 int  MMG3D_free_MOctree    ( MMG5_pMOctree** q, MMG5_pMesh mesh);
 int  MMG3D_free_MOctree_s  ( MMG5_MOctree_s* q, MMG5_pMesh mesh);
-int  MMG3D_merge_MOctree_s ( MMG5_MOctree_s* q, MMG5_pMesh mesh, int* compteur);
+int  MMG3D_merge_MOctree_s ( MMG5_MOctree_s* q, MMG5_pMesh mesh);
 int  MMG3D_convert_grid2tetmesh(MMG5_pMesh mesh, MMG5_pSol sol);
 int  MMG3D_mark_MOctreeCellCorners ( MMG5_pMesh mesh, MMG5_MOctree_s* q,int span,int *np,int *nc );
 int  MMG3D_write_MOctreeCell ( MMG5_pMesh mesh, MMG5_MOctree_s* q,int span, FILE *inm );
