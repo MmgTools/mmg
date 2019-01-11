@@ -1506,13 +1506,13 @@ return 1;
  * Add the boundary points to the mesh (delaunay).
  *
  */
-void  MMG3D_add_Boundary ( MMG5_pMesh mesh, MMG5_pSol sol) {
+void  MMG3D_add_Boundary ( MMG5_pMesh mesh, MMG5_pSol sol, int depth_max) {
 
   int i,j;
   i=0;
   int* list_ip;
   int* list_cavity;
-  //APPEL FONCTION DE Fanny(list_ip)
+  MMG3D_build_borders(mesh,list_ip,depth_max);
 
   while(*(list_ip+i) < 2*mesh->freeint[0]*mesh->freeint[1]*mesh->freeint[2]-1)
   {
@@ -1526,9 +1526,21 @@ void  MMG3D_add_Boundary ( MMG5_pMesh mesh, MMG5_pSol sol) {
 
     i++;
   }
-
 }
 
+/**
+ * \param mesh pointer toward the mesh
+ * \param q pointer toward the MOctree cell
+ * \param face_border the number of the treated face
+ * \param depth_max the maximum depth of the octree
+ * \param listip pointer toward a list of the boundary points indexes
+ * \param i pointer toward the index of the next ip to add in listip
+ *
+ *
+ * Find the boundary points of a face and create a list which contains their ip.
+ * \return 1 if success, 0 if fail.
+ *
+ */
 int MMG3D_borders_delaunay( MMG5_pMesh mesh, MMG5_MOctree_s* q, int face_border, int depth_max, int *listip, int* i)
 {
   //  face_border=1 for the front face
@@ -1830,6 +1842,16 @@ int MMG3D_borders_delaunay( MMG5_pMesh mesh, MMG5_MOctree_s* q, int face_border,
   return 1;
 }
 
+/**
+ * \param mesh pointer toward the mesh
+ * \param listip pointer toward a list of the boundary points indexes
+ * \param i pointer toward the index of the next ip to add in listip
+ *
+ *
+ * Find the boundary points of the whole grid and create a list which contains their ip.
+ * \return 1 if success, 0 if fail.
+ *
+ */
 int MMG3D_build_borders(MMG5_pMesh mesh, int* listip, int depth_max)
 {
   MMG5_MOctree_s *po;
@@ -1839,7 +1861,6 @@ int MMG3D_build_borders(MMG5_pMesh mesh, int* listip, int depth_max)
   listip=(int*)malloc(list_size*sizeof(int));
   int init_list;
   init_list=2*mesh->freeint[0]*mesh->freeint[1]*mesh->freeint[2];
-//  printf("valeur de p avant initialisation = %ld\n",listip);
   for (k=0; k<list_size;k++)
   {
     *(listip+k)=init_list;
@@ -1857,5 +1878,4 @@ int MMG3D_build_borders(MMG5_pMesh mesh, int* listip, int depth_max)
   }
 
   return 1;
-  //faudrait mettre les points dans le mesh directement
 }
