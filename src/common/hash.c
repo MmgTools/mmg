@@ -124,9 +124,13 @@ int MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, MMG5_Hash *hash, int chkISO) {
               adjt[3*(lel-1)+1+l] = 0;
               adja[i] = 3*jel+j;
               adjt[3*(jel-1)+1+j] = 3*k + i;
+              (mesh->tria[jel]).tag[j] |= MG_GEO + MG_NOM;
               (mesh->tria[lel]).tag[l] |= MG_GEO + MG_NOM;
             }
             else {
+              lel = adjt[3*(jel-1)+1+j]/3;
+              l   = adjt[3*(jel-1)+1+j]%3;
+              (mesh->tria[lel]).tag[l] |= MG_GEO + MG_NOM;
               pt1->tag[j] |= MG_GEO + MG_NOM;
             }
             pt->tag[i] |= MG_GEO + MG_NOM;

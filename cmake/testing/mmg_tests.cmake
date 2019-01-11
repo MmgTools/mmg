@@ -125,6 +125,21 @@ FOREACH(EXEC ${LISTEXEC_MMG})
    )
 
 
+ ADD_TEST(NAME mmg_HausdLoc_2SpheresAni${SHRT_EXEC}
+   COMMAND ${EXEC} -v 5 -hgrad 2 -A
+   ${MMG_CI_TESTS}/HausdLoc_2Spheres/2spheres
+   ${CTEST_OUTPUT_DIR}/mmg_HausdLoc_2SpheresAni${SHRT_EXEC}-2spheres.o.meshb
+   -hgrad 2
+   )
+ #####
+ ADD_TEST(NAME mmg_hminmaxLoc_2SpheresAni${SHRT_EXEC}
+   COMMAND ${EXEC} -v 5 -hgrad 2 -A
+   ${MMG_CI_TESTS}/HausdLoc_2Spheres/2spheres
+   ${CTEST_OUTPUT_DIR}/mmg_HausdLoc_2SpheresAni${SHRT_EXEC}-2spheres.o.meshb
+   -hgrad 2
+   )
+
+
  ##############################################################################
  #####
  #####         Check Precision
@@ -169,12 +184,12 @@ SET(passRegex "Mismatched options")
 SET_PROPERTY(TEST mmg_hsizHmax_${SHRT_EXEC}
   PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}")
 
-ADD_TEST(NAME mmg_hsizHmin_${SHRT_EXEC}
-  COMMAND ${EXEC} -v 5 -hsiz 0.1 -hmin 0.2
-  ${MMG_CI_TESTS}/Cube/cube
-  -out ${CTEST_OUTPUT_DIR}/mmg_hsizHmin_${SHRT_EXEC}.o.meshb)
-SET_PROPERTY(TEST mmg_hsizHmin_${SHRT_EXEC}
-  PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}")
+#ADD_TEST(NAME mmg_hsizHmin_${SHRT_EXEC}
+#  COMMAND ${EXEC} -v 5 -hsiz 0.1 -hmin 0.2
+#  ${MMG_CI_TESTS}/Cube/cube
+#  -out ${CTEST_OUTPUT_DIR}/mmg_hsizHmin_${SHRT_EXEC}.o.meshb)
+#SET_PROPERTY(TEST mmg_hsizHmin_${SHRT_EXEC}
+#  PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}")
 
 # Required entities
 ADD_TEST(NAME mmg_MultiDom_Ellipse_ReqEntities_${SHRT_EXEC}

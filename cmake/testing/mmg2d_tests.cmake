@@ -196,6 +196,17 @@ ADD_TEST(NAME mmg2d_NacaGenerationAni
   ${MMG2D_CI_TESTS}/NacaGeneration/naca
   -out ${CTEST_OUTPUT_DIR}/mmg2d_NacaGeneration-naca.o.meshb)
 
+# non convex test cases
+ADD_TEST(NAME mmg2d_ACDCGeneration
+  COMMAND ${EXECUT_MMG2D} -v 5
+  ${MMG2D_CI_TESTS}/ACDCGeneration/acdcBdy.mesh
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_ACDCGeneration.o.meshb)
+
+ADD_TEST(NAME mmg2d_GaronneGeneration
+  COMMAND ${EXECUT_MMG2D} -v 5
+  ${MMG2D_CI_TESTS}/GaronneGeneration/GaronneEdges.mesh
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_GaronneGeneration.o.meshb)
+
 ###############################################################################
 #####
 #####         Implicit domain discretization

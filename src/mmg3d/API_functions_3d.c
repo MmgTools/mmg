@@ -84,7 +84,7 @@ void MMG3D_Init_parameters(MMG5_pMesh mesh) {
 
   /* default values for integers */
   mesh->info.lag      = MMG5_LAG;
-  mesh->info.fem      = MMG5_ON;
+  mesh->info.fem      = MMG5_FEM;
   mesh->info.optim    = MMG5_OFF;
   mesh->info.optimLES = MMG5_OFF;
   /* [0/1]    ,avoid/allow surface modifications */
@@ -2173,21 +2173,10 @@ int MMG3D_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val)
     break;
   case MMG3D_DPARAM_hgrad :
     mesh->info.hgrad    = val;
-    if ( mesh->info.hgrad < 0.0 ) {
-      mesh->info.hgrad = MMG5_NOHGRAD;
-    }
-    else {
+    if ( mesh->info.hgrad < 0.0 )
+      mesh->info.hgrad = -1.0;
+    else
       mesh->info.hgrad = log(mesh->info.hgrad);
-    }
-    break;
-  case MMG3D_DPARAM_hgradreq :
-    mesh->info.hgradreq    = val;
-    if ( mesh->info.hgradreq < 0.0 ) {
-      mesh->info.hgradreq = MMG5_NOHGRAD;
-    }
-    else {
-      mesh->info.hgradreq = log(mesh->info.hgradreq);
-    }
     break;
   case MMG3D_DPARAM_hausd :
     if ( val <=0 ) {

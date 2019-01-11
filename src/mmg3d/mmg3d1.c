@@ -756,13 +756,10 @@ int MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree,
                 return -1;
 
               n = &(mesh->xpoint[ppt->xp].n1[0]);
-              // if ( MG_GET(pxt->ori,i) ) {
-              /* Useless because if the orientation of the tetra face is
-               * compatible with the triangle (MG_GET(ori,i)) we know that we
-               * are well orientated. Morever, may introduce numerical errors
-               * with wrinkled surfaces. */
-              // if ( !MMG5_directsurfball(mesh, pt->v[i0],lists,ilists,n) )  continue;
-              // }
+
+              /* If the orientation of the tetra face is
+               * compatible with the triangle (MG_GET(ori,i)), we know that we
+               * are well orientated. */
               if ( !MG_GET(pxt->ori,i) ) {
                 if ( !MMG5_directsurfball(mesh,pt->v[i0],lists,ilists,n) )
                   continue;
@@ -2294,26 +2291,31 @@ int MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,char typchk, int patternMode) {
     if ( mesh->adja )
       MMG5_DEL_MEM(mesh,mesh->adja);
 
-    if ( !mesh->info.noinsert ) {
-      /* analyze surface tetras */
-      ier = MMG5_anatets(mesh,met,typchk);
+    if ( met->size==1 ) {
+      /* only in isotropic case : because if the aniso metric is not compatible
+       * with the geometry, the surface operators may create spurious ridges */
 
-      if ( ier < 0 ) {
-        fprintf(stderr,"\n  ## Unable to complete surface mesh. Exit program.\n");
-        return 0;
-      }
-      ns += ier;
-      if ( patternMode ) {
-        /* analyze internal tetras */
-        ier = MMG5_anatetv(mesh,met,typchk);
+      if ( !mesh->info.noinsert ) {
+        /* analyze surface tetras */
+        ier = MMG5_anatets(mesh,met,typchk);
+
         if ( ier < 0 ) {
-          fprintf(stderr,"\n  ## Unable to complete volume mesh. Exit program.\n");
+          fprintf(stderr,"\n  ## Unable to complete surface mesh. Exit program.\n");
           return 0;
         }
         ns += ier;
+        if ( patternMode ) {
+          /* analyze internal tetras */
+          ier = MMG5_anatetv(mesh,met,typchk);
+          if ( ier < 0 ) {
+            fprintf(stderr,"\n  ## Unable to complete volume mesh. Exit program.\n");
+            return 0;
+          }
+          ns += ier;
+        }
       }
+      else  ns = 0;
     }
-    else  ns = 0;
 
     if ( !MMG3D_hashTetra(mesh,1) ) {
       fprintf(stderr,"\n  ## Hashing problem. Exit program.\n");

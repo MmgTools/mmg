@@ -83,9 +83,10 @@ int MMG2D_isInTriangle(MMG5_pMesh mesh,int k,double c[2]) {
   else return 0;
 }
 
-/* Check whether edge ppa-ppb crosses triangles pt (in the sense that two edges of this triangle
-   are crossed by (ppa-ppb), or only one, and ppa or ppb is a vertex of pt; if at least one edge
-   is crossed by ia-ib, return i+1, where i is the index of one of the crossed edges */
+/* Check whether edge ppa-ppb crosses triangles pt (in the sense that two edges
+   of this triangle are crossed by (ppa-ppb), or only one, and ppa or ppb is a
+   vertex of pt; if at least one edge is crossed by ia-ib, return i+1, where i
+   is the index of one of the crossed edges */
 int MMG2D_cutEdge(MMG5_pMesh mesh,MMG5_pTria pt,MMG5_pPoint ppa,MMG5_pPoint ppb) {
   double      la[3],lb[3],det;
   int         icompt,ireturn;
@@ -384,8 +385,9 @@ int MMG2D_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
 
     /** prod1, prod2 and prod3 allow to localize the edge regarding the tria:
         - if all are >0, the edge doesn't cross the tria (same sign for all areas)
-        - if 1 is 0, the edge pass through 1 of the tria vertices
-        - if 2 are 0, the edge coincide with 1 of the tria edges
+        - if 2 are negative and 1 is positive, the edge intersect 2 triangle edges
+        - if 2 are 0, the edge pass through 1 of the tria vertices
+        - if 3 are 0, the edge coincide with 1 of the tria edges
 
     */
     prod1 = area1*area2;

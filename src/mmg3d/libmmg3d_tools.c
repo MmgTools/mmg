@@ -679,21 +679,39 @@ void MMG3D_searchqua(MMG5_pMesh mesh,MMG5_pSol met,double critmin, int *eltab,
   return;
 }
 
-int MMG3D_Get_tetFromTria(MMG5_pMesh mesh, int ktri, int *ktet, int *iface)
-{
+int MMG3D_Get_tetFromTria(MMG5_pMesh mesh, int ktri, int *ktet, int *iface) {
   int val;
+
+  val = mesh->tria[ktri].cc;
+
+  if ( !val ) {
+    fprintf(stderr,"  ## Error: %s: the main fonction of the Mmg library must be"
+            " called before this function.\n",__func__);
+    return 0;
+  }
+
+  *ktet = val/4;
+
+  *iface = val%4;
+
+  return 1;
+}
+
+
+int MMG3D_Get_tetsFromTria(MMG5_pMesh mesh, int ktri, int ktet[2], int iface[2])
+{
+  int ier;
   int itet;
 #ifndef NDEBUG
   int ia0,ib0,ic0,ia1,ib1,ic1;
 #endif
 
-  val = mesh->tria[ktri].cc;
+  ktet[0]  =  ktet[1] = 0;
+  iface[0] = iface[1] = 0;
 
-  if ( !val ) return 0;
+  ier = MMG3D_Get_tetFromTria(mesh,ktri,ktet,iface);
 
-  *ktet = val/4;
-
-  *iface = val%4;
+  if ( !ier ) return 0;
 
   if ( !mesh->adja ) {
     if (!MMG3D_hashTetra(mesh, 0) )
@@ -723,6 +741,7 @@ int MMG3D_Get_tetFromTria(MMG5_pMesh mesh, int ktri, int *ktet, int *iface)
 
   return 1;
 }
+
 
 int MMG3D_searchlen(MMG5_pMesh mesh, MMG5_pSol met, double lmin,
                    double lmax, int *eltab,char metRidTyp) {
