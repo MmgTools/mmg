@@ -1776,7 +1776,7 @@ int MMG3D_borders_delaunay( MMG5_pMesh mesh, MMG5_MOctree_s* q, int face_border,
       MMG3D_borders_delaunay( mesh, &q->sons[7], face_border, depth_max, listip, i);
     }
 
-    else
+    else if (q->leaf==1)
     {
       int span = pow(2,depth_max-(q->depth));
       if(q->coordoct[0] < ncells_x-1 && q->coordoct[1] < ncells_y-1 && q->coordoct[2] < ncells_z-1)

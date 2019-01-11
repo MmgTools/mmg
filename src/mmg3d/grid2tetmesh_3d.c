@@ -245,8 +245,6 @@ int MMG3D_coarsen_octree(MMG5_pMesh mesh, MMG5_pSol sol) {
     MMG3D_build_coarsen_octree(mesh, po, depth_max, depth, compteur);
   }
 
-  fprintf(stderr,"\n  ## Le nombre de points supprimés : %d\n", *compteur);
-
   return 1;
 }
 
@@ -262,6 +260,8 @@ int MMG3D_coarsen_octree(MMG5_pMesh mesh, MMG5_pSol sol) {
  */
 static inline
 int MMG3D_convert_octree2tetmesh(MMG5_pMesh mesh, MMG5_pSol sol) {
+  
+  MMG3D_del_UnusedPoints (mesh);
   int i, depth_max;
   int max_dim=0;
   for ( i=0; i<3; ++i ) {
@@ -288,16 +288,16 @@ int MMG3D_convert_octree2tetmesh(MMG5_pMesh mesh, MMG5_pSol sol) {
 
   int* listip= NULL;
 
-  MMG3D_build_borders(mesh,&listip, depth_max);
+  MMG3D_build_borders(mesh, listip, depth_max);
 
   //printf ( " %s:%s: TO IMPLEMENT\n",__FILE__,__func__ ); return 0;
   free(listip);
 
-  MMG3D_del_UnusedPoints (mesh);
-  int* ip_bb_pt_list[8];
-  int* ip_bb_elt_list[5];
 
-  MMG3D_build_bounding_box (mesh, ip_bb_pt_list, ip_bb_elt_list);
+  // int* ip_bb_pt_list[8];
+  // int* ip_bb_elt_list[5];
+  //
+  // MMG3D_build_bounding_box (mesh, ip_bb_pt_list, ip_bb_elt_list);
   return 1;
 }
 
@@ -324,18 +324,12 @@ int MMG3D_convert_grid2tetmesh(MMG5_pMesh mesh, MMG5_pSol sol) {
     return 0;
   }
 
-  fprintf(stderr,"\n  ## np avant merge : %d\n", mesh->np);
-
 
   /* Creation of the coarse octree */
   if ( !MMG3D_coarsen_octree(mesh,sol) ) {
     fprintf(stderr,"\n  ## Octree coarsening problem. Exit program.\n");
     return 0;
   }
-
-  fprintf(stderr,"\n  ## np après merge : %d\n", mesh->np);
-
-  fprintf(stderr,"\n  ## Les indices des 3 derniers points supprimés sont : %d, %d, %d\n\n", mesh->npnil, mesh->point[mesh->npnil].tmp, mesh->point[mesh->point[mesh->npnil].tmp].tmp);
 
   MMG3D_saveVTKOctree(mesh,sol,mesh->nameout);
 
