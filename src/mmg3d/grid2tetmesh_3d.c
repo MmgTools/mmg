@@ -256,17 +256,42 @@ int MMG3D_coarsen_octree(MMG5_pMesh mesh, MMG5_pSol sol) {
  */
 static inline
 int MMG3D_convert_octree2tetmesh(MMG5_pMesh mesh, MMG5_pSol sol) {
+  int i, depth_max;
+  int max_dim=0;
+  for ( i=0; i<3; ++i ) {
+    if(max_dim < mesh->freeint[i])
+    {
+      max_dim = mesh->freeint[i];
+    }
+  }
 
-  printf ( " %s:%s: TO IMPLEMENT\n",__FILE__,__func__ ); return 0;
+  /* Begin to work on the dual grid => we will have one cellule less in each
+   * direction */
+  max_dim--;
+
+  /* set max dim to the next power of 2 */
+  max_dim--;
+  max_dim |= max_dim >> 1;
+  max_dim |= max_dim >> 2;
+  max_dim |= max_dim >> 4;
+  max_dim |= max_dim >> 8;
+  max_dim |= max_dim >> 16;
+  max_dim++;
+
+  depth_max=log(max_dim)/log(2);
+
+  int* listip= NULL;
+
+  MMG3D_build_borders(mesh,&listip, depth_max);
+
+  //printf ( " %s:%s: TO IMPLEMENT\n",__FILE__,__func__ ); return 0;
+  free(listip);
 
   MMG3D_del_UnusedPoints (mesh);
   int* ip_bb_pt_list[8];
   int* ip_bb_elt_list[5];
 
   MMG3D_build_bounding_box (mesh, ip_bb_pt_list, ip_bb_elt_list);
-
-
-
   return 1;
 }
 
