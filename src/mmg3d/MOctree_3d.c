@@ -217,6 +217,7 @@ int  MMG3D_set_splitls_MOctree ( MMG5_pMesh mesh, MMG5_MOctree_s* q, MMG5_pSol s
        if(q->sons[i].coordoct[0] < ncells_x-1 && q->sons[i].coordoct[1] < ncells_y-1 && q->sons[i].coordoct[2] < ncells_z-1)
        {
          q->sons[i].ghost = 0;
+         q->blf_ip=q->coordoct[2]*ncells_x*ncells_y+q->coordoct[1]*ncells_x+q->coordoct[0]+1;
        }
        else
        {
@@ -297,7 +298,6 @@ int  MMG3D_merge_MOctree_s ( MMG5_MOctree_s* q, MMG5_pMesh mesh, int *compteur) 
   // fprintf(stderr,"\n  ## La fonction merge va supprimer le point : %d\n", q->sons[7].blf_ip);
   q->nsons = 0;
   q->leaf = 1;
-  q->blf_ip = q->sons[0].blf_ip;
   // if(q->sons[7].coordoct[0] < ncells_x-1 && q->sons[7].coordoct[1] < ncells_y-1 && q->sons[7].coordoct[2] < ncells_z-1)
   // {
   //   for(i=0 ; i < 8 ; i++)
@@ -463,14 +463,14 @@ int  MMG3D_write_MOctreeCell ( MMG5_pMesh mesh, MMG5_MOctree_s* q,int span,FILE 
         mesh->point[ip4].tmp,mesh->point[ip5].tmp,mesh->point[ip6].tmp,
         mesh->point[ip7].tmp);
 
-        mesh->point[ip0].s=22;
-        mesh->point[ip1].s=22;
-        mesh->point[ip2].s=22;
-        mesh->point[ip3].s=22;
-        mesh->point[ip4].s=22;
-        mesh->point[ip5].s=22;
-        mesh->point[ip6].s=22;
-        mesh->point[ip7].s=22;
+        mesh->point[ip0].ref=22;
+        mesh->point[ip1].ref=22;
+        mesh->point[ip2].ref=22;
+        mesh->point[ip3].ref=22;
+        mesh->point[ip4].ref=22;
+        mesh->point[ip5].ref=22;
+        mesh->point[ip6].ref=22;
+        mesh->point[ip7].ref=22;
       }
     }
   else {
@@ -1343,11 +1343,15 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
 void  MMG3D_del_UnusedPoints ( MMG5_pMesh mesh) {
   int i;
 
-  for(i=1 ; i<=mesh->np ; i++)
+  for(i=0 ; i<mesh->np ; i++)
   {
-    if(mesh->point[i].s != 22)
+    if(mesh->point[i].ref != 22)
     {
       MMG3D_delPt(mesh,i);
+    }
+    else
+    {
+      mesh->point[i].ref = 0;
     }
   }
 }
@@ -1576,10 +1580,73 @@ int MMG3D_borders_delaunay( MMG5_pMesh mesh, MMG5_MOctree_s* q, int face_border,
   {
     if (q->leaf!=1)
     {
-      MMG3D_borders_delaunay( mesh, &q->sons[0], face_border, depth_max, listip, i);
-      MMG3D_borders_delaunay( mesh, &q->sons[1], face_border, depth_max, listip, i);
-      MMG3D_borders_delaunay( mesh, &q->sons[4], face_border, depth_max, listip, i);
-      MMG3D_borders_delaunay( mesh, &q->sons[5], face_border, depth_max, listip, i);
+
+      if(q->sons[0].blf_ip==0)
+      {
+        if(q->sons[2].blf_ip!=0)
+        {
+        MMG3D_borders_delaunay( mesh, &q->sons[2], face_border, depth_max, listip, i);
+        }
+        else
+        {
+          return 1;
+        }
+      }
+      else
+      {
+        MMG3D_borders_delaunay( mesh, &q->sons[0], face_border, depth_max, listip, i);
+      }
+
+
+      if(q->sons[1].blf_ip==0)
+      {
+        if(q->sons[3].blf_ip!=0)
+        {
+          MMG3D_borders_delaunay( mesh, &q->sons[3], face_border, depth_max, listip, i);
+        }
+        else
+        {
+          return 1;
+        }
+      }
+      else
+      {
+        MMG3D_borders_delaunay( mesh, &q->sons[1], face_border, depth_max, listip, i);
+      }
+
+
+      if(q->sons[4].blf_ip==0)
+      {
+        if(q->sons[6].blf_ip!=0)
+        {
+        MMG3D_borders_delaunay( mesh, &q->sons[6], face_border, depth_max, listip, i);
+        }
+        else
+        {
+          return 1;
+        }
+      }
+      else
+      {
+        MMG3D_borders_delaunay( mesh, &q->sons[4], face_border, depth_max, listip, i);
+      }
+
+      if(q->sons[5].blf_ip==0)
+      {
+        if(q->sons[7].blf_ip!=0)
+        {
+          MMG3D_borders_delaunay( mesh, &q->sons[7], face_border, depth_max, listip, i);
+        }
+        else
+        {
+          return 1;
+        }
+      }
+      else
+      {
+        MMG3D_borders_delaunay( mesh, &q->sons[5], face_border, depth_max, listip, i);
+      }
+
     }
 
     else
@@ -1593,6 +1660,7 @@ int MMG3D_borders_delaunay( MMG5_pMesh mesh, MMG5_MOctree_s* q, int face_border,
           return 0;
         }
       }
+      printf("FACE 1 %d %d %d %d %d %d %d %d %d\n", q->blf_ip, *ip, *(ip+1), *(ip+2), *(ip+3), *(ip+4), *(ip+5), *(ip+6), *(ip+7));
       if(mesh->point[ip[0]].ref!=33)
       {
         mesh->point[ip[0]].ref=33;
@@ -1624,24 +1692,87 @@ int MMG3D_borders_delaunay( MMG5_pMesh mesh, MMG5_MOctree_s* q, int face_border,
   {
     if (q->leaf!=1)
     {
-      MMG3D_borders_delaunay( mesh, &q->sons[2], face_border, depth_max, listip, i);
-      MMG3D_borders_delaunay( mesh, &q->sons[3], face_border, depth_max, listip, i);
-      MMG3D_borders_delaunay( mesh, &q->sons[6], face_border, depth_max, listip, i);
-      MMG3D_borders_delaunay( mesh, &q->sons[7], face_border, depth_max, listip, i);
+
+      if(q->sons[2].blf_ip==0)
+      {
+        if(q->sons[0].blf_ip!=0)
+        {
+        MMG3D_borders_delaunay( mesh, &q->sons[0], face_border, depth_max, listip, i);
+        }
+        else
+        {
+          return 1;
+        }
+      }
+      else
+      {
+        MMG3D_borders_delaunay( mesh, &q->sons[2], face_border, depth_max, listip, i);
+      }
+
+
+      if(q->sons[3].blf_ip==0)
+      {
+        if(q->sons[1].blf_ip!=0)
+        {
+          MMG3D_borders_delaunay( mesh, &q->sons[1], face_border, depth_max, listip, i);
+        }
+        else
+        {
+          return 1;
+        }
+      }
+      else
+      {
+        MMG3D_borders_delaunay( mesh, &q->sons[3], face_border, depth_max, listip, i);
+      }
+
+
+      if(q->sons[6].blf_ip==0)
+      {
+        if(q->sons[4].blf_ip!=0)
+        {
+        MMG3D_borders_delaunay( mesh, &q->sons[4], face_border, depth_max, listip, i);
+        }
+        else
+        {
+          return 1;
+        }
+      }
+      else
+      {
+        MMG3D_borders_delaunay( mesh, &q->sons[6], face_border, depth_max, listip, i);
+      }
+
+      if(q->sons[7].blf_ip==0)
+      {
+        if(q->sons[5].blf_ip!=0)
+        {
+          MMG3D_borders_delaunay( mesh, &q->sons[5], face_border, depth_max, listip, i);
+        }
+        else
+        {
+          return 1;
+        }
+      }
+      else
+      {
+        MMG3D_borders_delaunay( mesh, &q->sons[7], face_border, depth_max, listip, i);
+      }
+
     }
 
     else
     {
       int span = pow(2,depth_max-(q->depth));
-      // if(q->coordoct[0] < ncells_x-1 && q->coordoct[1] < ncells_y-1 && q->coordoct[2] < ncells_z-1)
-      // {
-        MMG3D_get_MOctreeCornerIndices ( mesh,q,span,ip,ip+1,ip+2,ip+3,ip+4,ip+5,ip+6,ip+7 );
-        // if ( !MMG3D_get_MOctreeCornerIndices ( mesh,q,span,ip,ip+1,ip+2,ip+3,ip+4,ip+5,ip+6,ip+7 ) ) {
-        //   fprintf(stderr,"\n  ## Error: %s: unable to compute the indices of the"
-        //   " corners of the octree cell.\n",__func__);
-        //   return 0;
-        // }
-    //  }
+      if(q->coordoct[0] < ncells_x-1 && q->coordoct[1] < ncells_y-1 && q->coordoct[2] < ncells_z-1)
+      {
+        if ( !MMG3D_get_MOctreeCornerIndices ( mesh,q,span,ip,ip+1,ip+2,ip+3,ip+4,ip+5,ip+6,ip+7 ) ) {
+          fprintf(stderr,"\n  ## Error: %s: unable to compute the indices of the"
+          " corners of the octree cell.\n",__func__);
+          return 0;
+        }
+      }
+        printf("FACE 2 %d %d %d %d %d %d %d %d %d\n", q->blf_ip, *ip, *(ip+1), *(ip+2), *(ip+3), *(ip+4), *(ip+5), *(ip+6), *(ip+7));
       if(mesh->point[ip[2]].ref!=33)
       {
         mesh->point[ip[2]].ref=33;
@@ -1673,24 +1804,87 @@ int MMG3D_borders_delaunay( MMG5_pMesh mesh, MMG5_MOctree_s* q, int face_border,
   {
     if (q->leaf!=1)
     {
-      MMG3D_borders_delaunay( mesh, &q->sons[0], face_border, depth_max, listip, i);
-      MMG3D_borders_delaunay( mesh, &q->sons[2], face_border, depth_max, listip, i);
-      MMG3D_borders_delaunay( mesh, &q->sons[4], face_border, depth_max, listip, i);
-      MMG3D_borders_delaunay( mesh, &q->sons[6], face_border, depth_max, listip, i);
+
+      if(q->sons[0].blf_ip==0)
+      {
+        if(q->sons[1].blf_ip!=0)
+        {
+        MMG3D_borders_delaunay( mesh, &q->sons[1], face_border, depth_max, listip, i);
+        }
+        else
+        {
+          return 1;
+        }
+      }
+      else
+      {
+        MMG3D_borders_delaunay( mesh, &q->sons[0], face_border, depth_max, listip, i);
+      }
+
+
+      if(q->sons[2].blf_ip==0)
+      {
+        if(q->sons[3].blf_ip!=0)
+        {
+          MMG3D_borders_delaunay( mesh, &q->sons[3], face_border, depth_max, listip, i);
+        }
+        else
+        {
+          return 1;
+        }
+      }
+      else
+      {
+        MMG3D_borders_delaunay( mesh, &q->sons[2], face_border, depth_max, listip, i);
+      }
+
+
+      if(q->sons[4].blf_ip==0)
+      {
+        if(q->sons[5].blf_ip!=0)
+        {
+        MMG3D_borders_delaunay( mesh, &q->sons[5], face_border, depth_max, listip, i);
+        }
+        else
+        {
+          return 1;
+        }
+      }
+      else
+      {
+        MMG3D_borders_delaunay( mesh, &q->sons[4], face_border, depth_max, listip, i);
+      }
+
+      if(q->sons[6].blf_ip==0)
+      {
+        if(q->sons[7].blf_ip!=0)
+        {
+          MMG3D_borders_delaunay( mesh, &q->sons[7], face_border, depth_max, listip, i);
+        }
+        else
+        {
+          return 1;
+        }
+      }
+      else
+      {
+        MMG3D_borders_delaunay( mesh, &q->sons[6], face_border, depth_max, listip, i);
+      }
+
     }
 
     else
     {
       int span = pow(2,depth_max-(q->depth));
-      // if(q->coordoct[0] < ncells_x-1 && q->coordoct[1] < ncells_y-1 && q->coordoct[2] < ncells_z-1)
-      // {
-        MMG3D_get_MOctreeCornerIndices ( mesh,q,span,ip,ip+1,ip+2,ip+3,ip+4,ip+5,ip+6,ip+7 );
-        // if ( !MMG3D_get_MOctreeCornerIndices ( mesh,q,span,ip,ip+1,ip+2,ip+3,ip+4,ip+5,ip+6,ip+7 ) ) {
-        //   fprintf(stderr,"\n  ## Error: %s: unable to compute the indices of the"
-        //   " corners of the octree cell.\n",__func__);
-        //   return 0;
-        // }
-    //  }
+      if(q->coordoct[0] < ncells_x-1 && q->coordoct[1] < ncells_y-1 && q->coordoct[2] < ncells_z-1)
+      {
+        if ( !MMG3D_get_MOctreeCornerIndices ( mesh,q,span,ip,ip+1,ip+2,ip+3,ip+4,ip+5,ip+6,ip+7 ) ) {
+          fprintf(stderr,"\n  ## Error: %s: unable to compute the indices of the"
+          " corners of the octree cell.\n",__func__);
+          return 0;
+        }
+      }
+        printf("FACE 3 %d %d %d %d %d %d %d %d %d\n", q->blf_ip, *ip, *(ip+1), *(ip+2), *(ip+3), *(ip+4), *(ip+5), *(ip+6), *(ip+7));
       if(mesh->point[ip[0]].ref!=33)
       {
         mesh->point[ip[0]].ref=33;
@@ -1721,24 +1915,86 @@ int MMG3D_borders_delaunay( MMG5_pMesh mesh, MMG5_MOctree_s* q, int face_border,
   {
     if (q->leaf!=1)
     {
-      MMG3D_borders_delaunay( mesh, &q->sons[1], face_border, depth_max, listip, i);
-      MMG3D_borders_delaunay( mesh, &q->sons[3], face_border, depth_max, listip, i);
-      MMG3D_borders_delaunay( mesh, &q->sons[5], face_border, depth_max, listip, i);
-      MMG3D_borders_delaunay( mesh, &q->sons[7], face_border, depth_max, listip, i);
+      if(q->sons[1].blf_ip==0)
+      {
+        if(q->sons[0].blf_ip!=0)
+        {
+        MMG3D_borders_delaunay( mesh, &q->sons[0], face_border, depth_max, listip, i);
+        }
+        else
+        {
+          return 1;
+        }
+      }
+      else
+      {
+        MMG3D_borders_delaunay( mesh, &q->sons[1], face_border, depth_max, listip, i);
+      }
+
+
+      if(q->sons[3].blf_ip==0)
+      {
+        if(q->sons[2].blf_ip!=0)
+        {
+          MMG3D_borders_delaunay( mesh, &q->sons[2], face_border, depth_max, listip, i);
+        }
+        else
+        {
+          return 1;
+        }
+      }
+      else
+      {
+        MMG3D_borders_delaunay( mesh, &q->sons[3], face_border, depth_max, listip, i);
+      }
+
+
+      if(q->sons[5].blf_ip==0)
+      {
+        if(q->sons[4].blf_ip!=0)
+        {
+        MMG3D_borders_delaunay( mesh, &q->sons[4], face_border, depth_max, listip, i);
+        }
+        else
+        {
+          return 1;
+        }
+      }
+      else
+      {
+        MMG3D_borders_delaunay( mesh, &q->sons[5], face_border, depth_max, listip, i);
+      }
+
+      if(q->sons[7].blf_ip==0)
+      {
+        if(q->sons[6].blf_ip!=0)
+        {
+          MMG3D_borders_delaunay( mesh, &q->sons[6], face_border, depth_max, listip, i);
+        }
+        else
+        {
+          return 1;
+        }
+      }
+      else
+      {
+        MMG3D_borders_delaunay( mesh, &q->sons[7], face_border, depth_max, listip, i);
+      }
+
     }
 
     else
     {
       int span = pow(2,depth_max-(q->depth));
-      // if(q->coordoct[0] < ncells_x-1 && q->coordoct[1] < ncells_y-1 && q->coordoct[2] < ncells_z-1)
-      // {
-        MMG3D_get_MOctreeCornerIndices ( mesh,q,span,ip,ip+1,ip+2,ip+3,ip+4,ip+5,ip+6,ip+7 );
-        // if ( !MMG3D_get_MOctreeCornerIndices ( mesh,q,span,ip,ip+1,ip+2,ip+3,ip+4,ip+5,ip+6,ip+7 ) ) {
-        //   fprintf(stderr,"\n  ## Error: %s: unable to compute the indices of the"
-        //   " corners of the octree cell.\n",__func__);
-        //   return 0;
-        // }
-    //  }
+      if(q->coordoct[0] < ncells_x-1 && q->coordoct[1] < ncells_y-1 && q->coordoct[2] < ncells_z-1)
+      {
+        if ( !MMG3D_get_MOctreeCornerIndices ( mesh,q,span,ip,ip+1,ip+2,ip+3,ip+4,ip+5,ip+6,ip+7 ) ) {
+          fprintf(stderr,"\n  ## Error: %s: unable to compute the indices of the"
+          " corners of the octree cell.\n",__func__);
+          return 0;
+        }
+      }
+        printf("FACE 4 %d %d %d %d %d %d %d %d %d\n", q->blf_ip, *ip, *(ip+1), *(ip+2), *(ip+3), *(ip+4), *(ip+5), *(ip+6), *(ip+7));
       if(mesh->point[ip[2]].ref!=33)
       {
         mesh->point[ip[2]].ref=33;
@@ -1769,24 +2025,87 @@ int MMG3D_borders_delaunay( MMG5_pMesh mesh, MMG5_MOctree_s* q, int face_border,
   {
     if (q->leaf!=1)
     {
-      MMG3D_borders_delaunay( mesh, &q->sons[4], face_border, depth_max, listip, i);
-      MMG3D_borders_delaunay( mesh, &q->sons[5], face_border, depth_max, listip, i);
-      MMG3D_borders_delaunay( mesh, &q->sons[6], face_border, depth_max, listip, i);
-      MMG3D_borders_delaunay( mesh, &q->sons[7], face_border, depth_max, listip, i);
+
+      if(q->sons[4].blf_ip==0)
+      {
+        if(q->sons[0].blf_ip!=0)
+        {
+          MMG3D_borders_delaunay( mesh, &q->sons[0], face_border, depth_max, listip, i);
+        }
+        else
+        {
+          return 1;
+        }
+      }
+      else
+      {
+        MMG3D_borders_delaunay( mesh, &q->sons[4], face_border, depth_max, listip, i);
+      }
+
+
+      if(q->sons[5].blf_ip==0)
+      {
+        if(q->sons[1].blf_ip!=0)
+        {
+          MMG3D_borders_delaunay( mesh, &q->sons[1], face_border, depth_max, listip, i);
+        }
+        else
+        {
+          return 1;
+        }
+      }
+      else
+      {
+        MMG3D_borders_delaunay( mesh, &q->sons[5], face_border, depth_max, listip, i);
+      }
+
+
+      if(q->sons[6].blf_ip==0)
+      {
+        if(q->sons[2].blf_ip!=0)
+        {
+        MMG3D_borders_delaunay( mesh, &q->sons[2], face_border, depth_max, listip, i);
+        }
+        else
+        {
+          return 1;
+        }
+      }
+      else
+      {
+        MMG3D_borders_delaunay( mesh, &q->sons[6], face_border, depth_max, listip, i);
+      }
+
+      if(q->sons[7].blf_ip==0)
+      {
+        if(q->sons[3].blf_ip!=0)
+        {
+          MMG3D_borders_delaunay( mesh, &q->sons[3], face_border, depth_max, listip, i);
+        }
+        else
+        {
+          return 1;
+        }
+      }
+      else
+      {
+        MMG3D_borders_delaunay( mesh, &q->sons[7], face_border, depth_max, listip, i);
+      }
+
     }
 
-    else if (q->leaf==1)
+    else
     {
       int span = pow(2,depth_max-(q->depth));
-      // if(q->coordoct[0] < ncells_x-1 && q->coordoct[1] < ncells_y-1 && q->coordoct[2] < ncells_z-1)
-      // {
-        MMG3D_get_MOctreeCornerIndices ( mesh,q,span,ip,ip+1,ip+2,ip+3,ip+4,ip+5,ip+6,ip+7 );
-        // if ( !MMG3D_get_MOctreeCornerIndices ( mesh,q,span,ip,ip+1,ip+2,ip+3,ip+4,ip+5,ip+6,ip+7 ) ) {
-        //   fprintf(stderr,"\n  ## Error: %s: unable to compute the indices of the"
-        //   " corners of the octree cell.\n",__func__);
-        //   return 0;
-        // }
-    //  }
+      if(q->coordoct[0] < ncells_x-1 && q->coordoct[1] < ncells_y-1 && q->coordoct[2] < ncells_z-1)
+      {
+        if ( !MMG3D_get_MOctreeCornerIndices ( mesh,q,span,ip,ip+1,ip+2,ip+3,ip+4,ip+5,ip+6,ip+7 ) ) {
+          fprintf(stderr,"\n  ## Error: %s: unable to compute the indices of the"
+          " corners of the octree cell.\n",__func__);
+          return 0;
+        }
+      }
+        printf("FACE 5 %d %d %d %d %d %d %d %d %d\n", q->blf_ip, *ip, *(ip+1), *(ip+2), *(ip+3), *(ip+4), *(ip+5), *(ip+6), *(ip+7));
       if(mesh->point[ip[6]].ref!=33)
       {
         mesh->point[ip[6]].ref=33;
@@ -1817,24 +2136,87 @@ int MMG3D_borders_delaunay( MMG5_pMesh mesh, MMG5_MOctree_s* q, int face_border,
   {
     if (q->leaf!=1)
     {
-      MMG3D_borders_delaunay( mesh, &q->sons[0], face_border, depth_max, listip, i);
-      MMG3D_borders_delaunay( mesh, &q->sons[1], face_border, depth_max, listip, i);
-      MMG3D_borders_delaunay( mesh, &q->sons[2], face_border, depth_max, listip, i);
-      MMG3D_borders_delaunay( mesh, &q->sons[3], face_border, depth_max, listip, i);
+
+      if(q->sons[0].blf_ip==0)
+      {
+        if(q->sons[4].blf_ip!=0)
+        {
+        MMG3D_borders_delaunay( mesh, &q->sons[4], face_border, depth_max, listip, i);
+        }
+        else
+        {
+          return 1;
+        }
+      }
+      else
+      {
+        MMG3D_borders_delaunay( mesh, &q->sons[0], face_border, depth_max, listip, i);
+      }
+
+
+      if(q->sons[1].blf_ip==0)
+      {
+        if(q->sons[5].blf_ip!=0)
+        {
+          MMG3D_borders_delaunay( mesh, &q->sons[5], face_border, depth_max, listip, i);
+        }
+        else
+        {
+          return 1;
+        }
+      }
+      else
+      {
+        MMG3D_borders_delaunay( mesh, &q->sons[1], face_border, depth_max, listip, i);
+      }
+
+
+      if(q->sons[2].blf_ip==0)
+      {
+        if(q->sons[6].blf_ip!=0)
+        {
+        MMG3D_borders_delaunay( mesh, &q->sons[6], face_border, depth_max, listip, i);
+        }
+        else
+        {
+          return 1;
+        }
+      }
+      else
+      {
+        MMG3D_borders_delaunay( mesh, &q->sons[2], face_border, depth_max, listip, i);
+      }
+
+      if(q->sons[3].blf_ip==0)
+      {
+        if(q->sons[7].blf_ip!=0)
+        {
+          MMG3D_borders_delaunay( mesh, &q->sons[7], face_border, depth_max, listip, i);
+        }
+        else
+        {
+          return 1;
+        }
+      }
+      else
+      {
+        MMG3D_borders_delaunay( mesh, &q->sons[3], face_border, depth_max, listip, i);
+      }
+
     }
 
     else
     {
       int span = pow(2,depth_max-(q->depth));
-      // if(q->coordoct[0] < ncells_x-1 && q->coordoct[1] < ncells_y-1 && q->coordoct[2] < ncells_z-1)
-      // {
-        MMG3D_get_MOctreeCornerIndices ( mesh,q,span,ip,ip+1,ip+2,ip+3,ip+4,ip+5,ip+6,ip+7 );
-        // if ( !MMG3D_get_MOctreeCornerIndices ( mesh,q,span,ip,ip+1,ip+2,ip+3,ip+4,ip+5,ip+6,ip+7 ) ) {
-        //   fprintf(stderr,"\n  ## Error: %s: unable to compute the indices of the"
-        //   " corners of the octree cell.\n",__func__);
-        //   return 0;
-        // }
-    //  }
+      if(q->coordoct[0] < ncells_x-1 && q->coordoct[1] < ncells_y-1 && q->coordoct[2] < ncells_z-1)
+      {
+        if ( !MMG3D_get_MOctreeCornerIndices ( mesh,q,span,ip,ip+1,ip+2,ip+3,ip+4,ip+5,ip+6,ip+7 ) ) {
+          fprintf(stderr,"\n  ## Error: %s: unable to compute the indices of the"
+          " corners of the octree cell.\n",__func__);
+          return 0;
+        }
+      }
+        printf("FACE 6 %d %d %d %d %d %d %d %d %d\n", q->blf_ip, *ip, *(ip+1), *(ip+2), *(ip+3), *(ip+4), *(ip+5), *(ip+6), *(ip+7));
       if(mesh->point[ip[0]].ref!=33)
       {
         mesh->point[ip[0]].ref=33;
@@ -1867,17 +2249,6 @@ int MMG3D_borders_delaunay( MMG5_pMesh mesh, MMG5_MOctree_s* q, int face_border,
 int MMG3D_build_borders(MMG5_pMesh mesh, int* listip, int depth_max)
 {
   MMG5_MOctree_s *po;
-  int list_size;
-  int k;
-  list_size= 2*mesh->freeint[0]*mesh->freeint[1]+2*mesh->freeint[0]*mesh->freeint[2]+2*mesh->freeint[1]*mesh->freeint[2];
-  listip=(int*)malloc(list_size*sizeof(int));
-  int init_list;
-  init_list=2*mesh->freeint[0]*mesh->freeint[1]*mesh->freeint[2];
-//  printf("valeur de p avant initialisation = %ld\n",listip);
-  for (k=0; k<list_size;k++)
-  {
-    *(listip+k)=init_list;
-  }
 
   po=mesh->octree->root;
   int p;
@@ -1891,5 +2262,4 @@ int MMG3D_build_borders(MMG5_pMesh mesh, int* listip, int depth_max)
   }
 
   return 1;
-  //faudrait mettre les points dans le mesh directement
 }

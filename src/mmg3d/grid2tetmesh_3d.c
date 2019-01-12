@@ -245,6 +245,8 @@ int MMG3D_coarsen_octree(MMG5_pMesh mesh, MMG5_pSol sol) {
     MMG3D_build_coarsen_octree(mesh, po, depth_max, depth, compteur);
   }
 
+  fprintf(stderr,"\n  ## Le nombre de points supprimés : %d\n", *compteur);
+
   return 1;
 }
 
@@ -261,44 +263,56 @@ int MMG3D_coarsen_octree(MMG5_pMesh mesh, MMG5_pSol sol) {
 static inline
 int MMG3D_convert_octree2tetmesh(MMG5_pMesh mesh, MMG5_pSol sol) {
 
-  // //MMG3D_del_UnusedPoints (mesh);
-  // //mesh->point;
-  // int i, depth_max;
-  // int max_dim=0;
-  // for ( i=0; i<3; ++i ) {
-  //   if(max_dim < mesh->freeint[i])
-  //   {
-  //     max_dim = mesh->freeint[i];
-  //   }
-  // }
-  //
-  // /* Begin to work on the dual grid => we will have one cellule less in each
-  //  * direction */
-  // max_dim--;
-  //
-  // /* set max dim to the next power of 2 */
-  // max_dim--;
-  // max_dim |= max_dim >> 1;
-  // max_dim |= max_dim >> 2;
-  // max_dim |= max_dim >> 4;
-  // max_dim |= max_dim >> 8;
-  // max_dim |= max_dim >> 16;
-  // max_dim++;
-  //
-  // depth_max=log(max_dim)/log(2);
-  //
-  // int* listip= NULL;
-  //
-  // //MMG3D_build_borders(mesh, listip, depth_max);
-  //
-  // //printf ( " %s:%s: TO IMPLEMENT\n",__FILE__,__func__ ); return 0;
-  // free(listip);
-  //
+  MMG3D_del_UnusedPoints (mesh);
 
-  // int* ip_bb_pt_list[8];
-  // int* ip_bb_elt_list[5];
-  //
-  // MMG3D_build_bounding_box (mesh, ip_bb_pt_list, ip_bb_elt_list);
+  int i, depth_max;
+  int max_dim=0;
+  for ( i=0; i<3; ++i ) {
+    if(max_dim < mesh->freeint[i])
+    {
+      max_dim = mesh->freeint[i];
+    }
+  }
+
+  /* Begin to work on the dual grid => we will have one cellule less in each
+   * direction */
+  max_dim--;
+
+  /* set max dim to the next power of 2 */
+  max_dim--;
+  max_dim |= max_dim >> 1;
+  max_dim |= max_dim >> 2;
+  max_dim |= max_dim >> 4;
+  max_dim |= max_dim >> 8;
+  max_dim |= max_dim >> 16;
+  max_dim++;
+
+  depth_max=log(max_dim)/log(2);
+
+  int* listip= NULL;
+  int list_size;
+  int k;
+  list_size= 2*mesh->freeint[0]*mesh->freeint[1]+2*mesh->freeint[0]*mesh->freeint[2]+2*mesh->freeint[1]*mesh->freeint[2];
+  listip=(int*)malloc(list_size*sizeof(int));
+  int init_list;
+  init_list=2*mesh->freeint[0]*mesh->freeint[1]*mesh->freeint[2];
+  //  printf("valeur de p avant initialisation = %ld\n",listip);
+  for (k=0; k<list_size;k++)
+  {
+    *(listip+k)=init_list;
+  }
+
+  MMG3D_build_borders(mesh,listip, depth_max);
+
+  int* ip_bb_pt_list=NULL;
+  ip_bb_pt_list=(int*)malloc(8*sizeof(int));
+  int* ip_bb_elt_list=NULL;
+  ip_bb_elt_list=(int*)malloc(5*sizeof(int));
+  MMG3D_build_bounding_box (mesh, ip_bb_pt_list, ip_bb_elt_list);
+
+  free(listip);
+  free(ip_bb_pt_list);
+  free(ip_bb_elt_list);
   return 1;
 }
 
@@ -324,7 +338,6 @@ int MMG3D_convert_grid2tetmesh(MMG5_pMesh mesh, MMG5_pSol sol) {
     fprintf(stderr,"\n  ## Octree initialization problem. Exit program.\n");
     return 0;
   }
-
 
   /* Creation of the coarse octree */
   if ( !MMG3D_coarsen_octree(mesh,sol) ) {
