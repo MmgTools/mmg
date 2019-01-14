@@ -1499,34 +1499,6 @@ int MMG5_intetra(MMG5_pMesh mesh,int iel,int ip) {
 return 1;
 }
 
-/**
- * \param mesh pointer toward the mesh
- *
- *
- * Add the boundary points to the mesh (delaunay).
- *
- */
-void  MMG3D_add_Boundary ( MMG5_pMesh mesh, MMG5_pSol sol, int depth_max) {
-
-  int i,j;
-  i=0;
-  int* list_ip;
-  int* list_cavity;
-  MMG3D_build_borders(mesh,list_ip,depth_max);
-
-  while(*(list_ip+i) < 2*mesh->freeint[0]*mesh->freeint[1]*mesh->freeint[2]-1)
-  {
-    j=0;
-    while(j<mesh->ne && !(MMG5_intetra(mesh,j,*(list_ip+i))))
-    {
-      j++;
-    }
-    *(list_cavity)=j;
-    MMG5_cavity_iso(mesh,sol,0,*(list_ip+i),list_cavity,1,1e-15);
-
-    i++;
-  }
-}
 
 /**
  * \param mesh pointer toward the mesh
@@ -1878,4 +1850,33 @@ int MMG3D_build_borders(MMG5_pMesh mesh, int* listip, int depth_max)
   }
 
   return 1;
+}
+
+/**
+* \param mesh pointer toward the mesh
+*
+*
+* Add the boundary points to the mesh (delaunay).
+*
+*/
+void  MMG3D_add_Boundary ( MMG5_pMesh mesh, MMG5_pSol sol, int depth_max) {
+
+  int i,j;
+  i=0;
+  int* list_ip;
+  int* list_cavity;
+  MMG3D_build_borders(mesh,list_ip,depth_max);
+
+  while(*(list_ip+i) < 2*mesh->freeint[0]*mesh->freeint[1]*mesh->freeint[2]-1)
+  {
+    j=0;
+    while(j<mesh->ne && !(MMG5_intetra(mesh,j,*(list_ip+i))))
+    {
+      j++;
+    }
+    *(list_cavity)=j;
+    MMG5_cavity_iso(mesh,sol,0,*(list_ip+i),list_cavity,1,1e-15);
+
+    i++;
+  }
 }
