@@ -442,7 +442,7 @@ typedef MMG5_Mat * MMG5_pMat;
  */
 typedef struct {
   MMG5_pPar     par;
-  double        dhd,hmin,hmax,hsiz,hgrad,hausd,min[3],max[3],delta,ls,*vpar;
+  double        dhd,hmin,hmax,hsiz,hgrad,hausd,min[3],max[3],delta,ls;
   int           mem,npar,npari;
   int           opnbdy;
   int           renum;
