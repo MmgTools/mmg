@@ -2236,20 +2236,37 @@ void  MMG3D_add_Boundary ( MMG5_pMesh mesh, MMG5_pSol sol, int depth_max) {
 
   int i,j;
   i=0;
-  int* list_ip;
-  int* list_cavity;
-  MMG3D_build_borders(mesh,list_ip,depth_max);
+  int* list_cavity = NULL;
 
-  while(*(list_ip+i) < 2*mesh->freeint[0]*mesh->freeint[1]*mesh->freeint[2]-1)
+  int* listip= NULL;
+  int list_size;
+  int k;
+  list_size= 2*mesh->freeint[0]*mesh->freeint[1]+2*mesh->freeint[0]*mesh->freeint[2]+2*mesh->freeint[1]*mesh->freeint[2];
+  listip=(int*)malloc(list_size*sizeof(int));
+  int init_list;
+  init_list=2*mesh->freeint[0]*mesh->freeint[1]*mesh->freeint[2];
+  //  printf("valeur de p avant initialisation = %ld\n",listip);
+  for (k=0; k<list_size;k++)
+  {
+    *(listip+k)=init_list;
+  }
+
+  MMG3D_build_borders(mesh,listip, depth_max);
+
+  while(*(listip+i) < 2*mesh->freeint[0]*mesh->freeint[1]*mesh->freeint[2]-1)
   {
     j=0;
-    while(j<mesh->ne && !(MMG5_intetra(mesh,j,*(list_ip+i))))
+    while(j<mesh->ne && !(MMG5_intetra(mesh,j,*(listip+i))))
     {
       j++;
     }
     *(list_cavity)=j;
-    MMG5_cavity_iso(mesh,sol,0,*(list_ip+i),list_cavity,1,1e-15);
+    MMG5_cavity_iso(mesh,sol,0,*(listip+i),list_cavity,1,1e-15);
 
     i++;
   }
+
+
+  free(listip);
+
 }

@@ -283,28 +283,12 @@ int MMG3D_convert_octree2tetmesh(MMG5_pMesh mesh, MMG5_pSol sol) {
 
   depth_max=log(max_dim)/log(2);
 
-  int* listip= NULL;
-  int list_size;
-  int k;
-  list_size= 2*mesh->freeint[0]*mesh->freeint[1]+2*mesh->freeint[0]*mesh->freeint[2]+2*mesh->freeint[1]*mesh->freeint[2];
-  listip=(int*)malloc(list_size*sizeof(int));
-  int init_list;
-  init_list=2*mesh->freeint[0]*mesh->freeint[1]*mesh->freeint[2];
-  //  printf("valeur de p avant initialisation = %ld\n",listip);
-  for (k=0; k<list_size;k++)
-  {
-    *(listip+k)=init_list;
-  }
-
-  MMG3D_build_borders(mesh,listip, depth_max);
-
   int* ip_bb_pt_list=NULL;
   ip_bb_pt_list=(int*)malloc(8*sizeof(int));
   int* ip_bb_elt_list=NULL;
   ip_bb_elt_list=(int*)malloc(5*sizeof(int));
   MMG3D_build_bounding_box (mesh, ip_bb_pt_list, ip_bb_elt_list);
 
-  free(listip);
   free(ip_bb_pt_list);
   free(ip_bb_elt_list);
   return 1;
