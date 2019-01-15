@@ -42,7 +42,8 @@
 #include "mmg3d.h"
 
 #define MMG3D_EPSRAD       1.00005
-
+#define MMG3D_EPSCON       1e-5 //5.0e-4
+#define MMG3D_LONMAX       4096
 /**
  * \param mesh pointer toward a MMG5 mesh
  * \param q pointer toward the MOctree root
@@ -2238,7 +2239,7 @@ int  MMG3D_add_Boundary ( MMG5_pMesh mesh, MMG5_pSol sol, int depth_max) {
       return 0;
     }
     ilist=MMG3D_cavity_MOctree(mesh, j, *(listip+i), list_cavity);
-    MMG5_delone(mesh, sol, *(listip+i), list_cavity, ilist);
+    MMG5_delone_MOctree(mesh, sol, *(listip+i), list_cavity, ilist);
     mesh->point[*(listip+i)].ref=44;
     i++;
   }
@@ -2247,7 +2248,7 @@ int  MMG3D_add_Boundary ( MMG5_pMesh mesh, MMG5_pSol sol, int depth_max) {
   return 1;
 }
 
-int MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
+int MMG5_delone_MOctree(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
   MMG5_pPoint   ppt;
   MMG5_pTetra   pt,pt1;
   MMG5_xTetra   xt;
