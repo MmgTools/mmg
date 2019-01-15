@@ -1524,16 +1524,11 @@ int MMG3D_borders_delaunay( MMG5_pMesh mesh, MMG5_MOctree_s* q, int face_border,
   {
     if (q->leaf!=1)
     {
-
       if(q->sons[0].blf_ip==0)
       {
         if(q->sons[2].blf_ip!=0)
         {
         MMG3D_borders_delaunay( mesh, &q->sons[2], face_border, depth_max, listip, i);
-        }
-        else
-        {
-          return 1;
         }
       }
       else
@@ -1548,10 +1543,6 @@ int MMG3D_borders_delaunay( MMG5_pMesh mesh, MMG5_MOctree_s* q, int face_border,
         {
           MMG3D_borders_delaunay( mesh, &q->sons[3], face_border, depth_max, listip, i);
         }
-        else
-        {
-          return 1;
-        }
       }
       else
       {
@@ -1565,10 +1556,6 @@ int MMG3D_borders_delaunay( MMG5_pMesh mesh, MMG5_MOctree_s* q, int face_border,
         {
         MMG3D_borders_delaunay( mesh, &q->sons[6], face_border, depth_max, listip, i);
         }
-        else
-        {
-          return 1;
-        }
       }
       else
       {
@@ -1580,10 +1567,6 @@ int MMG3D_borders_delaunay( MMG5_pMesh mesh, MMG5_MOctree_s* q, int face_border,
         if(q->sons[7].blf_ip!=0)
         {
           MMG3D_borders_delaunay( mesh, &q->sons[7], face_border, depth_max, listip, i);
-        }
-        else
-        {
-          return 1;
         }
       }
       else
@@ -1604,7 +1587,7 @@ int MMG3D_borders_delaunay( MMG5_pMesh mesh, MMG5_MOctree_s* q, int face_border,
           return 0;
         }
       }
-      printf("FACE 1 %d %d %d %d %d %d %d %d %d\n", q->blf_ip, *ip, *(ip+1), *(ip+2), *(ip+3), *(ip+4), *(ip+5), *(ip+6), *(ip+7));
+  //    printf("FACE 1 %d %d %d %d %d %d %d %d %d\n", q->blf_ip, *ip, *(ip+1), *(ip+2), *(ip+3), *(ip+4), *(ip+5), *(ip+6), *(ip+7));
       if(mesh->point[ip[0]].ref!=33)
       {
         mesh->point[ip[0]].ref=33;
@@ -1643,10 +1626,6 @@ int MMG3D_borders_delaunay( MMG5_pMesh mesh, MMG5_MOctree_s* q, int face_border,
         {
         MMG3D_borders_delaunay( mesh, &q->sons[0], face_border, depth_max, listip, i);
         }
-        else
-        {
-          return 1;
-        }
       }
       else
       {
@@ -1659,10 +1638,6 @@ int MMG3D_borders_delaunay( MMG5_pMesh mesh, MMG5_MOctree_s* q, int face_border,
         if(q->sons[1].blf_ip!=0)
         {
           MMG3D_borders_delaunay( mesh, &q->sons[1], face_border, depth_max, listip, i);
-        }
-        else
-        {
-          return 1;
         }
       }
       else
@@ -1677,10 +1652,6 @@ int MMG3D_borders_delaunay( MMG5_pMesh mesh, MMG5_MOctree_s* q, int face_border,
         {
         MMG3D_borders_delaunay( mesh, &q->sons[4], face_border, depth_max, listip, i);
         }
-        else
-        {
-          return 1;
-        }
       }
       else
       {
@@ -1692,10 +1663,6 @@ int MMG3D_borders_delaunay( MMG5_pMesh mesh, MMG5_MOctree_s* q, int face_border,
         if(q->sons[5].blf_ip!=0)
         {
           MMG3D_borders_delaunay( mesh, &q->sons[5], face_border, depth_max, listip, i);
-        }
-        else
-        {
-          return 1;
         }
       }
       else
@@ -1716,7 +1683,7 @@ int MMG3D_borders_delaunay( MMG5_pMesh mesh, MMG5_MOctree_s* q, int face_border,
           return 0;
         }
       }
-        printf("FACE 2 %d %d %d %d %d %d %d %d %d\n", q->blf_ip, *ip, *(ip+1), *(ip+2), *(ip+3), *(ip+4), *(ip+5), *(ip+6), *(ip+7));
+    //  printf("FACE 2 %d %d %d %d %d %d %d %d %d\n", q->blf_ip, *ip, *(ip+1), *(ip+2), *(ip+3), *(ip+4), *(ip+5), *(ip+6), *(ip+7));
       if(mesh->point[ip[2]].ref!=33)
       {
         mesh->point[ip[2]].ref=33;
@@ -1755,10 +1722,6 @@ int MMG3D_borders_delaunay( MMG5_pMesh mesh, MMG5_MOctree_s* q, int face_border,
         {
         MMG3D_borders_delaunay( mesh, &q->sons[1], face_border, depth_max, listip, i);
         }
-        else
-        {
-          return 1;
-        }
       }
       else
       {
@@ -1771,10 +1734,6 @@ int MMG3D_borders_delaunay( MMG5_pMesh mesh, MMG5_MOctree_s* q, int face_border,
         if(q->sons[3].blf_ip!=0)
         {
           MMG3D_borders_delaunay( mesh, &q->sons[3], face_border, depth_max, listip, i);
-        }
-        else
-        {
-          return 1;
         }
       }
       else
@@ -1789,10 +1748,6 @@ int MMG3D_borders_delaunay( MMG5_pMesh mesh, MMG5_MOctree_s* q, int face_border,
         {
         MMG3D_borders_delaunay( mesh, &q->sons[5], face_border, depth_max, listip, i);
         }
-        else
-        {
-          return 1;
-        }
       }
       else
       {
@@ -1804,10 +1759,6 @@ int MMG3D_borders_delaunay( MMG5_pMesh mesh, MMG5_MOctree_s* q, int face_border,
         if(q->sons[7].blf_ip!=0)
         {
           MMG3D_borders_delaunay( mesh, &q->sons[7], face_border, depth_max, listip, i);
-        }
-        else
-        {
-          return 1;
         }
       }
       else
@@ -1828,7 +1779,7 @@ int MMG3D_borders_delaunay( MMG5_pMesh mesh, MMG5_MOctree_s* q, int face_border,
           return 0;
         }
       }
-        printf("FACE 3 %d %d %d %d %d %d %d %d %d\n", q->blf_ip, *ip, *(ip+1), *(ip+2), *(ip+3), *(ip+4), *(ip+5), *(ip+6), *(ip+7));
+    //  printf("FACE 3 %d %d %d %d %d %d %d %d %d\n", q->blf_ip, *ip, *(ip+1), *(ip+2), *(ip+3), *(ip+4), *(ip+5), *(ip+6), *(ip+7));
       if(mesh->point[ip[0]].ref!=33)
       {
         mesh->point[ip[0]].ref=33;
@@ -1865,10 +1816,6 @@ int MMG3D_borders_delaunay( MMG5_pMesh mesh, MMG5_MOctree_s* q, int face_border,
         {
         MMG3D_borders_delaunay( mesh, &q->sons[0], face_border, depth_max, listip, i);
         }
-        else
-        {
-          return 1;
-        }
       }
       else
       {
@@ -1881,10 +1828,6 @@ int MMG3D_borders_delaunay( MMG5_pMesh mesh, MMG5_MOctree_s* q, int face_border,
         if(q->sons[2].blf_ip!=0)
         {
           MMG3D_borders_delaunay( mesh, &q->sons[2], face_border, depth_max, listip, i);
-        }
-        else
-        {
-          return 1;
         }
       }
       else
@@ -1899,10 +1842,6 @@ int MMG3D_borders_delaunay( MMG5_pMesh mesh, MMG5_MOctree_s* q, int face_border,
         {
         MMG3D_borders_delaunay( mesh, &q->sons[4], face_border, depth_max, listip, i);
         }
-        else
-        {
-          return 1;
-        }
       }
       else
       {
@@ -1914,10 +1853,6 @@ int MMG3D_borders_delaunay( MMG5_pMesh mesh, MMG5_MOctree_s* q, int face_border,
         if(q->sons[6].blf_ip!=0)
         {
           MMG3D_borders_delaunay( mesh, &q->sons[6], face_border, depth_max, listip, i);
-        }
-        else
-        {
-          return 1;
         }
       }
       else
@@ -1938,7 +1873,7 @@ int MMG3D_borders_delaunay( MMG5_pMesh mesh, MMG5_MOctree_s* q, int face_border,
           return 0;
         }
       }
-        printf("FACE 4 %d %d %d %d %d %d %d %d %d\n", q->blf_ip, *ip, *(ip+1), *(ip+2), *(ip+3), *(ip+4), *(ip+5), *(ip+6), *(ip+7));
+  //    printf("FACE 4 %d %d %d %d %d %d %d %d %d\n", q->blf_ip, *ip, *(ip+1), *(ip+2), *(ip+3), *(ip+4), *(ip+5), *(ip+6), *(ip+7));
       if(mesh->point[ip[2]].ref!=33)
       {
         mesh->point[ip[2]].ref=33;
@@ -1969,16 +1904,11 @@ int MMG3D_borders_delaunay( MMG5_pMesh mesh, MMG5_MOctree_s* q, int face_border,
   {
     if (q->leaf!=1)
     {
-
       if(q->sons[4].blf_ip==0)
       {
         if(q->sons[0].blf_ip!=0)
         {
           MMG3D_borders_delaunay( mesh, &q->sons[0], face_border, depth_max, listip, i);
-        }
-        else
-        {
-          return 1;
         }
       }
       else
@@ -1993,16 +1923,11 @@ int MMG3D_borders_delaunay( MMG5_pMesh mesh, MMG5_MOctree_s* q, int face_border,
         {
           MMG3D_borders_delaunay( mesh, &q->sons[1], face_border, depth_max, listip, i);
         }
-        else
-        {
-          return 1;
-        }
       }
       else
       {
         MMG3D_borders_delaunay( mesh, &q->sons[5], face_border, depth_max, listip, i);
       }
-
 
       if(q->sons[6].blf_ip==0)
       {
@@ -2010,25 +1935,18 @@ int MMG3D_borders_delaunay( MMG5_pMesh mesh, MMG5_MOctree_s* q, int face_border,
         {
         MMG3D_borders_delaunay( mesh, &q->sons[2], face_border, depth_max, listip, i);
         }
-        else
-        {
-          return 1;
-        }
       }
       else
       {
         MMG3D_borders_delaunay( mesh, &q->sons[6], face_border, depth_max, listip, i);
       }
 
+
       if(q->sons[7].blf_ip==0)
       {
         if(q->sons[3].blf_ip!=0)
         {
           MMG3D_borders_delaunay( mesh, &q->sons[3], face_border, depth_max, listip, i);
-        }
-        else
-        {
-          return 1;
         }
       }
       else
@@ -2049,7 +1967,7 @@ int MMG3D_borders_delaunay( MMG5_pMesh mesh, MMG5_MOctree_s* q, int face_border,
           return 0;
         }
       }
-        printf("FACE 5 %d %d %d %d %d %d %d %d %d\n", q->blf_ip, *ip, *(ip+1), *(ip+2), *(ip+3), *(ip+4), *(ip+5), *(ip+6), *(ip+7));
+    //    printf("FACE 5 %d %d %d %d %d %d %d %d %d\n", q->blf_ip, *ip, *(ip+1), *(ip+2), *(ip+3), *(ip+4), *(ip+5), *(ip+6), *(ip+7));
       if(mesh->point[ip[6]].ref!=33)
       {
         mesh->point[ip[6]].ref=33;
@@ -2087,10 +2005,6 @@ int MMG3D_borders_delaunay( MMG5_pMesh mesh, MMG5_MOctree_s* q, int face_border,
         {
         MMG3D_borders_delaunay( mesh, &q->sons[4], face_border, depth_max, listip, i);
         }
-        else
-        {
-          return 1;
-        }
       }
       else
       {
@@ -2103,10 +2017,6 @@ int MMG3D_borders_delaunay( MMG5_pMesh mesh, MMG5_MOctree_s* q, int face_border,
         if(q->sons[5].blf_ip!=0)
         {
           MMG3D_borders_delaunay( mesh, &q->sons[5], face_border, depth_max, listip, i);
-        }
-        else
-        {
-          return 1;
         }
       }
       else
@@ -2121,10 +2031,6 @@ int MMG3D_borders_delaunay( MMG5_pMesh mesh, MMG5_MOctree_s* q, int face_border,
         {
         MMG3D_borders_delaunay( mesh, &q->sons[6], face_border, depth_max, listip, i);
         }
-        else
-        {
-          return 1;
-        }
       }
       else
       {
@@ -2136,10 +2042,6 @@ int MMG3D_borders_delaunay( MMG5_pMesh mesh, MMG5_MOctree_s* q, int face_border,
         if(q->sons[7].blf_ip!=0)
         {
           MMG3D_borders_delaunay( mesh, &q->sons[7], face_border, depth_max, listip, i);
-        }
-        else
-        {
-          return 1;
         }
       }
       else
@@ -2160,7 +2062,7 @@ int MMG3D_borders_delaunay( MMG5_pMesh mesh, MMG5_MOctree_s* q, int face_border,
           return 0;
         }
       }
-        printf("FACE 6 %d %d %d %d %d %d %d %d %d\n", q->blf_ip, *ip, *(ip+1), *(ip+2), *(ip+3), *(ip+4), *(ip+5), *(ip+6), *(ip+7));
+//      printf("FACE 6 %d %d %d %d %d %d %d %d %d\n", q->blf_ip, *ip, *(ip+1), *(ip+2), *(ip+3), *(ip+4), *(ip+5), *(ip+6), *(ip+7));
       if(mesh->point[ip[0]].ref!=33)
       {
         mesh->point[ip[0]].ref=33;
