@@ -2120,7 +2120,16 @@ int MMG3D_build_borders(MMG5_pMesh mesh, int* listip, int depth_max)
   return 1;
 }
 
-
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param iel tetra index.
+ * \param ip point local index in \a iel.
+ * \param list pointer toward the list of tetra in the shell of edge where
+ * ip will be inserted.
+ *
+ * Mark elements in cavity, update the list of tetra in the cavity and return size of the list of tetra in the cavity.
+ *
+ */
 int MMG3D_cavity_MOctree(MMG5_pMesh mesh ,int iel,int ip,int *list)
 {
   MMG5_pPoint      ppt;
@@ -2197,8 +2206,7 @@ int MMG3D_cavity_MOctree(MMG5_pMesh mesh ,int iel,int ip,int *list)
 */
 int  MMG3D_add_Boundary ( MMG5_pMesh mesh, MMG5_pSol sol, int depth_max) {
 
-  int i,j;
-  i=0;
+  int i,j,ilist;
   int* list_cavity = NULL;
   int* listip= NULL;
   int list_size;
@@ -2214,11 +2222,9 @@ int  MMG3D_add_Boundary ( MMG5_pMesh mesh, MMG5_pSol sol, int depth_max) {
     *(listip+k)=init_list;
   }
 
-  fprintf(stdout,"\n  ** nombre de tétra : %d\n", mesh->ne);
-
   MMG3D_build_borders(mesh,listip, depth_max);
 
-  /* */
+  i=0;
   while(*(listip+i) < 2*mesh->freeint[0]*mesh->freeint[1]*mesh->freeint[2]-1)
   {
     j=1;
@@ -2231,11 +2237,215 @@ int  MMG3D_add_Boundary ( MMG5_pMesh mesh, MMG5_pSol sol, int depth_max) {
       fprintf(stdout,"\n  ** Le point d'ip %d n'appartient à aucun tétraèdre.\n", *(listip+i));
       return 0;
     }
-    MMG3D_cavity_MOctree(mesh, j, *(listip+i), list_cavity);
-
+    ilist=MMG3D_cavity_MOctree(mesh, j, *(listip+i), list_cavity);
+    MMG5_delone(mesh, sol, *(listip+i), list_cavity, ilist);
+    mesh->point[*(listip+i)].ref=44;
     i++;
   }
   free(listip);
 
+  return 1;
+}
+
+int MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
+  MMG5_pPoint   ppt;
+  MMG5_pTetra   pt,pt1;
+  MMG5_xTetra   xt;
+  MMG5_pxTetra  pxt0;
+  int          *adja,*adjb,i,j,k,l,m,iel,jel,old,v[3],iadr,base,size;
+  int           vois[4],iadrold;
+  short         i1;
+  char          alert;
+  int           isused = 0,ixt,ielnum[3*MMG3D_LONMAX+1],ll;
+  MMG5_Hash    hedg;
+#ifndef NDEBUG
+  int tref;
+#endif
+
+  base = mesh->base;
+  /* external faces */
+  size = 0;
+  for (k=0; k<ilist; k++) { //on parcourt tous les tétras dans la cavité
+    old  = list[k]; //on prend le tétra k dans la liste
+    pt1  = &mesh->tetra[old];
+    iadr = (old-1)*4 + 1;
+    adja = &mesh->adja[iadr]; // on récupère les adja du tétra considéré
+    vois[0]  = adja[0] >> 2;
+    vois[1]  = adja[1] >> 2;
+    vois[2]  = adja[2] >> 2;
+    vois[3]  = adja[3] >> 2;
+    for (i=0; i<4; i++) {
+      jel = vois[i];
+      if ( (!jel) || mesh->tetra[jel].flag != base ) { //si l'adja n'existe pas ou n'a pas été traité
+        for (j=0; j<3; j++) {
+          i1  = MMG5_idir[i][j]; // idir[i]: vertices of face opposite to vertex i MMG5_idir[4][3] = { {1,2,3}, {0,3,2}, {0,1,3}, {0,2,1} };
+          ppt = &mesh->point[ pt1->v[i1] ];
+          ppt->tagdel |= MG_NOM;
+        }
+        size++;
+      }
+    }
+  }
+  /* check isolated vertex */
+  alert = 0;
+  for (k=0; k<ilist; k++) {
+    old  = list[k];
+    pt1  = &mesh->tetra[old];
+    for (i=0; i<4; i++) {
+      ppt = &mesh->point[ pt1->v[i] ];
+      if ( !(ppt->tagdel & MG_NOM) )  alert = 1;
+    }
+  }
+  /* reset tag */
+  for (k=0; k<ilist; k++) {
+    old  = list[k];
+    pt1  = &mesh->tetra[old];
+    for (i=0; i<4; i++) {
+      ppt = &mesh->point[ pt1->v[i] ];
+      ppt->tagdel &= ~MG_NOM;
+    }
+  }
+  if ( alert )  {return 0;}
+  /* hash table params */
+  if ( size > 3*MMG3D_LONMAX )  return 0;
+  if ( !MMG5_hashNew(mesh,&hedg,size,3*size) ) { /*3*size suffit */
+    fprintf(stderr,"\n  ## Error: %s: unable to complete mesh.\n",__func__);
+    return -1;
+  }
+
+  /*tetra allocation : we create "size" tetra*/
+  ielnum[0] = size;
+  for (k=1 ; k<=size ; k++) {
+    ielnum[k] = MMG3D_newElt(mesh); //newElt renvoie l'indice du dernier tétra créé
+
+    if ( !ielnum[k] ) {
+      MMG3D_TETRA_REALLOC(mesh,ielnum[k],mesh->gap,
+                          fprintf(stderr,"\n  ## Error: %s: unable to allocate a"
+                                  " new element.\n",__func__);
+                          for(ll=1 ; ll<k ; ll++) {
+                            mesh->tetra[ielnum[ll]].v[0] = 1;
+                            if ( !MMG3D_delElt(mesh,ielnum[ll]) )  return -1;
+                          }
+                          return -1);
+    }
+  }
+
+  size = 1;
+  for (k=0; k<ilist; k++) {
+    old  = list[k];
+
+    iadrold = (old-1)*4 + 1;
+    adja = &mesh->adja[iadrold];
+    vois[0]  = adja[0];
+    vois[1]  = adja[1];
+    vois[2]  = adja[2];
+    vois[3]  = adja[3];
+
+    pt   = &mesh->tetra[old];
+    if(pt->xt) {
+      pxt0 = &mesh->xtetra[pt->xt];
+      memcpy(&xt,pxt0,sizeof(MMG5_xTetra));
+      isused=0;
+      ixt = 1;
+    } else {
+      ixt = 0;
+    }
+
+    for (i=0; i<4; i++) {
+      jel = vois[i] /4;
+      j   = vois[i] % 4;
+
+      /* external face */
+      if ( !jel || (mesh->tetra[jel].flag != base) ) {
+        iel = ielnum[size++];
+        assert(iel);
+
+        pt1 = &mesh->tetra[iel];
+        memcpy(pt1,pt,sizeof(MMG5_Tetra));
+        pt1->v[i]
+
+        = ip;
+        //pt1->qual = MMG5_orcal(mesh,sol,iel);
+        pt1->ref = mesh->tetra[old].ref;
+        pt1->mark = mesh->mark;
+        iadr = (iel-1)*4 + 1;
+        adjb = &mesh->adja[iadr];
+        adjb[i] = adja[i];
+
+        if(ixt) {
+          if( xt.ref[i] || xt.ftag[i]) {
+            if(!isused) {
+              pt1->xt = pt->xt;
+              pt->xt = 0;
+              pxt0 = &mesh->xtetra[pt1->xt];
+              memset(pxt0,0,sizeof(MMG5_xTetra));
+              pxt0->ref[i]   = xt.ref[i] ; pxt0->ftag[i]  = xt.ftag[i];
+              pxt0->edg[MMG5_iarf[i][0]] = xt.edg[MMG5_iarf[i][0]];
+              pxt0->edg[MMG5_iarf[i][1]] = xt.edg[MMG5_iarf[i][1]];
+              pxt0->edg[MMG5_iarf[i][2]] = xt.edg[MMG5_iarf[i][2]];
+              pxt0->tag[MMG5_iarf[i][0]] = xt.tag[MMG5_iarf[i][0]];
+              pxt0->tag[MMG5_iarf[i][1]] = xt.tag[MMG5_iarf[i][1]];
+              pxt0->tag[MMG5_iarf[i][2]] = xt.tag[MMG5_iarf[i][2]];
+              pxt0->ori = xt.ori;
+              isused=1;
+            } else {
+              mesh->xt++;
+              if ( mesh->xt > mesh->xtmax ) {
+                MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
+                                   "larger xtetra table",
+                                   mesh->xt--;
+                                   fprintf(stderr,"  Exit program.\n"); return -1;);
+              }
+              pt1->xt = mesh->xt;
+              pxt0 = &mesh->xtetra[pt1->xt];
+              pxt0->ref[i]   = xt.ref[i] ; pxt0->ftag[i]  = xt.ftag[i];
+              pxt0->edg[MMG5_iarf[i][0]] = xt.edg[MMG5_iarf[i][0]];
+              pxt0->edg[MMG5_iarf[i][1]] = xt.edg[MMG5_iarf[i][1]];
+              pxt0->edg[MMG5_iarf[i][2]] = xt.edg[MMG5_iarf[i][2]];
+              pxt0->tag[MMG5_iarf[i][0]] = xt.tag[MMG5_iarf[i][0]];
+              pxt0->tag[MMG5_iarf[i][1]] = xt.tag[MMG5_iarf[i][1]];
+              pxt0->tag[MMG5_iarf[i][2]] = xt.tag[MMG5_iarf[i][2]];
+              pxt0->ori = xt.ori;
+            }
+          }
+          else {
+            pt1->xt = 0;
+          }
+        }
+
+        if ( jel ) {
+          iadr = (jel-1)*4 + 1;
+          adjb = &mesh->adja[iadr];
+          adjb[j] = iel*4 + i;
+        }
+
+        /* internal faces (p1,p2,ip) */
+        for (j=0; j<4; j++) {
+          if ( j != i ) {
+            m = 0;
+            for (l=0; l<3; l++)
+              if ( pt1->v[ MMG5_idir[j][l] ] != ip ) {
+                v[m] = pt1->v[ MMG5_idir[j][l] ];
+                m++;
+              }
+            MMG5_hashEdgeDelone(mesh,&hedg,iel,j,v);
+          }
+        }
+      }
+    }
+  }
+
+  /* remove old tetra */
+#ifndef NDEBUG
+  tref = mesh->tetra[list[0]].ref;
+#endif
+  for (k=0; k<ilist; k++) {
+    assert(tref==mesh->tetra[list[k]].ref);
+    if ( !MMG3D_delElt(mesh,list[k]) ) return -1;
+  }
+
+  // ppt = &mesh->point[ip];
+  // ppt->flag = mesh->flag;
+  MMG5_DEL_MEM(mesh,hedg.item);
   return 1;
 }
