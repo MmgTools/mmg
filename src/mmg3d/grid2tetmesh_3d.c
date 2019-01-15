@@ -288,6 +288,9 @@ int MMG3D_convert_octree2tetmesh(MMG5_pMesh mesh, MMG5_pSol sol) {
   int* ip_bb_elt_list=NULL;
   ip_bb_elt_list=(int*)malloc(5*sizeof(int));
   MMG3D_build_bounding_box (mesh, ip_bb_pt_list, ip_bb_elt_list);
+  mesh->ntmax = MMG3D_NTMAX;
+  MMG3D_analys(mesh);
+  MMG3D_add_Boundary (mesh, sol, depth_max);
 
   free(ip_bb_pt_list);
   free(ip_bb_elt_list);

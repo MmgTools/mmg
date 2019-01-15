@@ -1336,75 +1336,66 @@ void  MMG3D_del_UnusedPoints ( MMG5_pMesh mesh) {
  */
 void  MMG3D_build_bounding_box ( MMG5_pMesh mesh, int* ip_bb_pt_list, int* ip_bb_elt_list) {
   double         c[3],o[3];
-  double origin_x = mesh->info.max[0];
-  double origin_y = mesh->info.max[1];
-  double origin_z = mesh->info.max[2];
-  double coordmax_x = (mesh->info.max[0] * (double)mesh->freeint[0])*1.5 + origin_x;
-  double coordmax_y = (mesh->info.max[1] * (double)mesh->freeint[1])*1.5 + origin_y;
-  double coordmax_z = (mesh->info.max[2] * (double)mesh->freeint[2])*1.5 + origin_z;
+  double origin_x = mesh->info.min[0];
+  double origin_y = mesh->info.min[1];
+  double origin_z = mesh->info.min[2];
+  double a1 = (mesh->info.max[0] * (double)mesh->freeint[0])*0.5;
+  double b1 = (mesh->info.max[1] * (double)mesh->freeint[1])*0.5;
+  double c1 = (mesh->info.max[2] * (double)mesh->freeint[2])*0.5;
+  double a2 = (mesh->info.max[0] * (double)mesh->freeint[0])*1.5;
+  double b2 = (mesh->info.max[1] * (double)mesh->freeint[1])*1.5;
+  double c2 = (mesh->info.max[2] * (double)mesh->freeint[2])*1.5;
 
   c[0] = origin_x;
-  c[1] = origin_x;
-  c[2] = origin_x;
+  c[1] = origin_y;
+  c[2] = origin_z;
 
   //point 0
-  o[0] = c[0];
-  o[1] = c[1];
-  o[2] = c[2];
+  o[0] = c[0]-a1;
+  o[1] = c[1]-b1;
+  o[2] = c[2]-c1;
   *(ip_bb_pt_list+0) = MMG3D_newPt(mesh,o,MG_NOTAG);
 
   //point 1
-  o[0] = c[0];
-  o[1] = c[1];
-  o[2] = c[2];
-  o[0] += coordmax_x;
+  o[0] = c[0]+a2;
+  o[1] = c[1]-b1;
+  o[2] = c[2]-c1;
   *(ip_bb_pt_list+1) = MMG3D_newPt(mesh,o,MG_NOTAG);
 
   //point 2
-  o[0] = c[0];
-  o[1] = c[1];
-  o[2] = c[2];
-  o[1] += coordmax_y;
+  o[0] = c[0]-a1;
+  o[1] = c[1]+b2;
+  o[2] = c[2]-c1;
   *(ip_bb_pt_list+2) = MMG3D_newPt(mesh,o,MG_NOTAG);
 
   //point 3
-  o[0] = c[0];
-  o[1] = c[1];
-  o[2] = c[2];
-  o[0] += coordmax_x;
-  o[1] += coordmax_y;
+  o[0] = c[0]+a2;
+  o[1] = c[1]+b2;
+  o[2] = c[2]-c1;
   *(ip_bb_pt_list+3) = MMG3D_newPt(mesh,o,MG_NOTAG);
 
   //point 4
-  o[0] = c[0];
-  o[1] = c[1];
-  o[2] = c[2];
-  o[2] += coordmax_z;
+  o[0] = c[0]-a1;
+  o[1] = c[1]-b1;
+  o[2] = c[2]+c2;
   *(ip_bb_pt_list+4) = MMG3D_newPt(mesh,o,MG_NOTAG);
 
   //point 5
-  o[0] = c[0];
-  o[1] = c[1];
-  o[2] = c[2];
-  o[0] += coordmax_x;
-  o[2] += coordmax_z;
+  o[0] = c[0]+a2;
+  o[1] = c[1]-b1;
+  o[2] = c[2]+c2;
   *(ip_bb_pt_list+5) = MMG3D_newPt(mesh,o,MG_NOTAG);
 
   //point 6
-  o[0] = c[0];
-  o[1] = c[1];
-  o[2] = c[2];
-  o[1] += coordmax_y;
-  o[2] += coordmax_z;
+  o[0] = c[0]-a1;
+  o[1] = c[1]+b2;
+  o[2] = c[2]+c2;
   *(ip_bb_pt_list+6) = MMG3D_newPt(mesh,o,MG_NOTAG);
 
   //point 7
-  o[0] = c[0];
-  o[1] = c[1];
-  o[2] = c[2];
-  o[0] += coordmax_x;
-  o[1] += coordmax_y;
-  o[2] += coordmax_z;
+  o[0] = c[0]+a2;
+  o[1] = c[1]+b2;
+  o[2] = c[2]+c2;
   *(ip_bb_pt_list+7) = MMG3D_newPt(mesh,o,MG_NOTAG);
 
   //tetra 0
@@ -1470,7 +1461,7 @@ int MMG5_intetra(MMG5_pMesh mesh,int iel,int ip) {
  bary[0]=((P[0]-D[0])*(B[1]-D[1])*(C[2]-D[2])+(B[0]-D[0])*(C[1]-D[1])*(P[2]-D[2])
  +(C[0]-D[0])*(P[1]-D[1])*(B[2]-D[2])-(C[0]-D[0])*(B[1]-D[1])*(P[2]-D[2])
  -(P[0]-D[0])*(C[1]-D[1])*(B[2]-D[2])-(B[0]-D[0])*(P[1]-D[1])*(C[2]-D[2]))/vol;
- if(bary[0]<0)
+ if(bary[0]<0 || bary[0]>1)
  {
    return 0;
  }
@@ -1478,7 +1469,7 @@ int MMG5_intetra(MMG5_pMesh mesh,int iel,int ip) {
  bary[1]=((A[0]-D[0])*(P[1]-D[1])*(C[2]-D[2])+(P[0]-D[0])*(C[1]-D[1])*(A[2]-D[2])
  +(C[0]-D[0])*(A[1]-D[1])*(P[2]-D[2])-(C[0]-D[0])*(P[1]-D[1])*(A[2]-D[2])
  -(A[0]-D[0])*(C[1]-D[1])*(P[2]-D[2])-(P[0]-D[0])*(A[1]-D[1])*(C[2]-D[2]))/vol;
- if(bary[1]<0)
+ if(bary[1]<0 || bary[1]>1)
  {
    return 0;
  }
@@ -1486,13 +1477,13 @@ int MMG5_intetra(MMG5_pMesh mesh,int iel,int ip) {
  bary[2]=((A[0]-D[0])*(B[1]-D[1])*(P[2]-D[2])+(B[0]-D[0])*(P[1]-D[1])*(A[2]-D[2])
  +(P[0]-D[0])*(A[1]-D[1])*(B[2]-D[2])-(P[0]-D[0])*(B[1]-D[1])*(A[2]-D[2])
  -(A[0]-D[0])*(P[1]-D[1])*(B[2]-D[2])-(B[0]-D[0])*(A[1]-D[1])*(P[2]-D[2]))/vol;
- if(bary[2]<0)
+ if(bary[2]<0 || bary[2]>1)
  {
    return 0;
  }
 
  bary[3]=1-bary[0]-bary[1]-bary[2];
- if(bary[3]<0)
+ if(bary[3]<0 || bary[3]>1)
  {
    return 0;
  }
@@ -2237,7 +2228,7 @@ void  MMG3D_add_Boundary ( MMG5_pMesh mesh, MMG5_pSol sol, int depth_max) {
   int i,j;
   i=0;
   int* list_cavity = NULL;
-
+  list_cavity=(int*)malloc(1*sizeof(int));
   int* listip= NULL;
   int list_size;
   int k;
@@ -2255,12 +2246,13 @@ void  MMG3D_add_Boundary ( MMG5_pMesh mesh, MMG5_pSol sol, int depth_max) {
 
   while(*(listip+i) < 2*mesh->freeint[0]*mesh->freeint[1]*mesh->freeint[2]-1)
   {
-    j=0;
-    while(j<mesh->ne && !(MMG5_intetra(mesh,j,*(listip+i))))
+    j=1;
+    while(j<mesh->ne && MMG5_intetra(mesh,j,*(listip+i))==0)
     {
       j++;
     }
-    *(list_cavity)=j;
+
+    *list_cavity=j;
     MMG5_cavity_iso(mesh,sol,0,*(listip+i),list_cavity,1,1e-15);
 
     i++;
