@@ -41,6 +41,8 @@
 
 #include "mmg3d.h"
 
+#define MMG3D_EPSRAD       1.00005
+
 /**
  * \param mesh pointer toward a MMG5 mesh
  * \param q pointer toward the MOctree root
@@ -1443,7 +1445,7 @@ void  MMG3D_build_bounding_box ( MMG5_pMesh mesh, int* ip_bb_pt_list, int* ip_bb
 *
 */
 
-int MMG5_intetra(MMG5_pMesh mesh,int iel,int ip) {
+int MMG3D_intetra(MMG5_pMesh mesh,int iel,int ip) {
  double bary[4],A[3],B[3],C[3],D[3],P[3],vol;
  int i;
  for (i=0; i<3;i++)
@@ -2216,6 +2218,74 @@ int MMG3D_build_borders(MMG5_pMesh mesh, int* listip, int depth_max)
   return 1;
 }
 
+
+int MMG3D_cavity_MOctree(MMG5_pMesh mesh ,int iel,int ip,int *list)
+{
+  MMG5_pPoint      ppt;
+  MMG5_pTetra      tet,tet1,tetadj;
+  double           c[3],crit,dd,eps,ray,ct[12];
+  int             *adja,*adjb,k,adj,adi,voy,i,j,ilist,ipil,jel,iadr,base;
+  int              vois[4],l;
+  int              tref,isreq;
+  int              lon=1;
+
+  *list=iel;
+  ilist=0;
+  mesh->base++;
+  ppt = &mesh->point[ip];
+  tet=&mesh->tetra[iel];
+  i=0;
+  eps   = MMG3D_EPSRAD*MMG3D_EPSRAD;
+  ipil=0;
+
+  do {
+    tet1=&mesh->tetra[list[ipil]];
+    if(tet1->flag!=base)
+    {
+      tet1->flag=base;
+      iadr = (list[i]-1)*4 + 1;
+      adja = &mesh->adja[iadr]; // on récupère le tétra adjacent par la première face du tétra --> si on connait l'adjacence par la première face, on retrouve les autres faces
+      vois[0]  = adja[0]; // adjacent face 0
+      vois[1]  = adja[1]; // adjacent face 1
+      vois[2]  = adja[2]; // adjacent face 2
+      vois[3]  = adja[3]; // adjacent face 3
+      for (i=0; i<4; i++)
+      {
+        adj = vois[i]; // indice du tétra adjacent par la face i
+        if ( !adj )  continue;
+
+        adj >>= 2; // équivaut à diviser par 4 --> récupère l'indice du tétra voisin i
+        tetadj  = &mesh->tetra[adj]; // pointe sur le tétra voisin i
+        if ( tetadj->flag == base )  continue; // si on est bien à l'étape suivante avec ce tétra voisin i, on continue
+
+        for (j=0,l=0; j<4; j++,l+=3)
+        {
+          memcpy(&ct[l],mesh->point[tetadj->v[j]].c,3*sizeof(double)); // copie les coordonnées des 4 points du voisin i dans ct (taille 12 = 4 points * 3 coords)
+        }
+
+        if ( !MMG5_cenrad_iso(mesh,ct,c,&ray) )  continue; // on cherche le centre et le rayon du cercle du tétra voisin i
+        crit = eps * ray;
+
+        /* Delaunay criterion */
+        dd = (ppt->c[0] - c[0]) * (ppt->c[0] - c[0]) \
+        + (ppt->c[1] - c[1]) * (ppt->c[1] - c[1]) \
+        + (ppt->c[2] - c[2]) * (ppt->c[2] - c[2]);
+        if ( dd > crit )  continue; // vérifie si les coordonnées du point à ajouter sont dans le cercle du tétra voisin i, si ce n'est pas le cas on continue
+
+        /*store tetra*/
+        tetadj->flag = base;
+        list[ilist++] = adj;
+      }
+    }
+    ipil++;
+  }
+  while ( ipil < ilist );
+
+  return ilist;
+}
+
+
+
 /**
 * \param mesh pointer toward the mesh
 *
@@ -2223,16 +2293,16 @@ int MMG3D_build_borders(MMG5_pMesh mesh, int* listip, int depth_max)
 * Add the boundary points to the mesh (delaunay).
 *
 */
-void  MMG3D_add_Boundary ( MMG5_pMesh mesh, MMG5_pSol sol, int depth_max) {
+int  MMG3D_add_Boundary ( MMG5_pMesh mesh, MMG5_pSol sol, int depth_max) {
 
   int i,j;
   i=0;
   int* list_cavity = NULL;
-  list_cavity=(int*)malloc(1*sizeof(int));
   int* listip= NULL;
   int list_size;
   int k;
   list_size= 2*mesh->freeint[0]*mesh->freeint[1]+2*mesh->freeint[0]*mesh->freeint[2]+2*mesh->freeint[1]*mesh->freeint[2];
+  list_cavity=(int*)malloc(list_size*sizeof(int));
   listip=(int*)malloc(list_size*sizeof(int));
   int init_list;
   init_list=2*mesh->freeint[0]*mesh->freeint[1]*mesh->freeint[2];
@@ -2242,23 +2312,28 @@ void  MMG3D_add_Boundary ( MMG5_pMesh mesh, MMG5_pSol sol, int depth_max) {
     *(listip+k)=init_list;
   }
 
+  fprintf(stdout,"\n  ** nombre de tétra : %d\n", mesh->ne);
+
   MMG3D_build_borders(mesh,listip, depth_max);
 
+  /* */
   while(*(listip+i) < 2*mesh->freeint[0]*mesh->freeint[1]*mesh->freeint[2]-1)
   {
     j=1;
-    while(j<mesh->ne && MMG5_intetra(mesh,j,*(listip+i))==0)
+    while(j <= mesh->ne && MMG3D_intetra(mesh,j,*(listip+i))==0)
     {
       j++;
     }
-
-    *list_cavity=j;
-    MMG5_cavity_iso(mesh,sol,0,*(listip+i),list_cavity,1,1e-15);
+    if(j > mesh->ne)
+    {
+      fprintf(stdout,"\n  ** Le point d'ip %d n'appartient à aucun tétraèdre.\n", *(listip+i));
+      return 0;
+    }
+    MMG3D_cavity_MOctree(mesh, j, *(listip+i), list_cavity);
 
     i++;
   }
-
-
   free(listip);
 
+  return 1;
 }
