@@ -1338,67 +1338,60 @@ void  MMG3D_del_UnusedPoints ( MMG5_pMesh mesh) {
  *
  */
 void  MMG3D_build_bounding_box ( MMG5_pMesh mesh, int* ip_bb_pt_list, int* ip_bb_elt_list) {
-  double         c[3],o[3];
+  double         o[3];
   double origin_x = mesh->info.min[0];
   double origin_y = mesh->info.min[1];
   double origin_z = mesh->info.min[2];
-  double a1 = (mesh->info.max[0] * (double)mesh->freeint[0])*0.5;
-  double b1 = (mesh->info.max[1] * (double)mesh->freeint[1])*0.5;
-  double c1 = (mesh->info.max[2] * (double)mesh->freeint[2])*0.5;
-  double a2 = (mesh->info.max[0] * (double)mesh->freeint[0])*1.5;
-  double b2 = (mesh->info.max[1] * (double)mesh->freeint[1])*1.5;
-  double c2 = (mesh->info.max[2] * (double)mesh->freeint[2])*1.5;
-
-  c[0] = origin_x;
-  c[1] = origin_y;
-  c[2] = origin_z;
+  double a = mesh->info.max[0] * (double)mesh->freeint[0];
+  double b = mesh->info.max[1] * (double)mesh->freeint[1];
+  double c = mesh->info.max[2] * (double)mesh->freeint[2];
 
   //point 0
-  o[0] = c[0]-a1;
-  o[1] = c[1]-b1;
-  o[2] = c[2]-c1;
+  o[0] = origin_x-a*0.5;
+  o[1] = origin_y-b*0.5;
+  o[2] = origin_z-c*0.5;
   *(ip_bb_pt_list+0) = MMG3D_newPt(mesh,o,MG_NOTAG);
 
   //point 1
-  o[0] = c[0]+a2;
-  o[1] = c[1]-b1;
-  o[2] = c[2]-c1;
+  o[0] = origin_x+a*1.5;
+  o[1] = origin_y-b*0.5;
+  o[2] = origin_z-c*0.5;
   *(ip_bb_pt_list+1) = MMG3D_newPt(mesh,o,MG_NOTAG);
 
   //point 2
-  o[0] = c[0]-a1;
-  o[1] = c[1]+b2;
-  o[2] = c[2]-c1;
+  o[0] = origin_x-a*0.5;
+  o[1] = origin_y+b*1.5;
+  o[2] = origin_z-c*0.5;
   *(ip_bb_pt_list+2) = MMG3D_newPt(mesh,o,MG_NOTAG);
 
   //point 3
-  o[0] = c[0]+a2;
-  o[1] = c[1]+b2;
-  o[2] = c[2]-c1;
+  o[0] = origin_x+a*1.5;
+  o[1] = origin_y+b*1.5;
+  o[2] = origin_z-c*0.5;
   *(ip_bb_pt_list+3) = MMG3D_newPt(mesh,o,MG_NOTAG);
 
   //point 4
-  o[0] = c[0]-a1;
-  o[1] = c[1]-b1;
-  o[2] = c[2]+c2;
+  o[0] = origin_x-a*0.5;
+  o[1] = origin_y-b*0.5;
+  o[2] = origin_z+c*1.5;
   *(ip_bb_pt_list+4) = MMG3D_newPt(mesh,o,MG_NOTAG);
 
   //point 5
-  o[0] = c[0]+a2;
-  o[1] = c[1]-b1;
-  o[2] = c[2]+c2;
+  o[0] = origin_x+a*1.5;
+  o[1] = origin_y-b*0.5;
+  o[2] = origin_z+c*1.5;
   *(ip_bb_pt_list+5) = MMG3D_newPt(mesh,o,MG_NOTAG);
 
   //point 6
-  o[0] = c[0]-a1;
-  o[1] = c[1]+b2;
-  o[2] = c[2]+c2;
+  o[0] = origin_x-a*0.5;
+  o[1] = origin_y+b*1.5;
+  o[2] = origin_z+c*1.5;
   *(ip_bb_pt_list+6) = MMG3D_newPt(mesh,o,MG_NOTAG);
 
   //point 7
-  o[0] = c[0]+a2;
-  o[1] = c[1]+b2;
-  o[2] = c[2]+c2;
+  o[0] = origin_x+a*1.5;
+  o[1] = origin_y+b*1.5;
+  o[2] = origin_z+c*1.5;
   *(ip_bb_pt_list+7) = MMG3D_newPt(mesh,o,MG_NOTAG);
 
   //tetra 0
