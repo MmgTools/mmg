@@ -155,20 +155,20 @@ int MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
   base = mesh->base;
   /* external faces */
   size = 0;
-  for (k=0; k<ilist; k++) { //on parcourt tous les tétras dans la cavité
-    old  = list[k]; //on prend le tétra k dans la liste
+  for (k=0; k<ilist; k++) {
+    old  = list[k];
     pt1  = &mesh->tetra[old];
     iadr = (old-1)*4 + 1;
-    adja = &mesh->adja[iadr]; // on récupère les adja du tétra considéré
+    adja = &mesh->adja[iadr];
     vois[0]  = adja[0] >> 2;
     vois[1]  = adja[1] >> 2;
     vois[2]  = adja[2] >> 2;
     vois[3]  = adja[3] >> 2;
     for (i=0; i<4; i++) {
       jel = vois[i];
-      if ( (!jel) || mesh->tetra[jel].flag != base ) { //si l'adja n'existe pas ou n'a pas été traité
+      if ( (!jel) || mesh->tetra[jel].flag != base ) {
         for (j=0; j<3; j++) {
-          i1  = MMG5_idir[i][j]; // idir[i]: vertices of face opposite to vertex i MMG5_idir[4][3] = { {1,2,3}, {0,3,2}, {0,1,3}, {0,2,1} };
+          i1  = MMG5_idir[i][j];
           ppt = &mesh->point[ pt1->v[i1] ];
           ppt->tagdel |= MG_NOM;
         }
@@ -845,7 +845,6 @@ int MMG5_cavity_iso(MMG5_pMesh mesh,MMG5_pSol sol,int iel,int ip,int *list,int l
     ++ipil; // va chercher le tétra suivant dans list[]
   }
   while ( ipil < ilist );
-
 
   /* global overflow: obsolete avec la reallocation */
   ilist = MMG5_correction_iso(mesh,ip,list,ilist,lon,volmin);
