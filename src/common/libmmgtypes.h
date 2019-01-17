@@ -453,7 +453,7 @@ typedef struct {
   char          parTyp; /*!< Contains binary flags to say which kind of local
                           param are setted: if \f$tag = 1+2+4\f$ then the point
                           is \a MG_Vert, MG_Tria and MG_Tetra */
-  unsigned char optim, optimLES, noinsert, noswap, nomove, nosurf;
+  unsigned char optim, optimLES, noinsert, noswap, nomove, nosurf, inputMet;
   MMG5_pMat     mat;
 } MMG5_Info;
 

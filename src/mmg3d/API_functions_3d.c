@@ -136,6 +136,8 @@ int MMG3D_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int
 
   sol->dim = 3;
   if ( np ) {
+    mesh->info.inputMet = 1;
+
     sol->np  = np;
     sol->npi = np;
     if ( sol->m )
