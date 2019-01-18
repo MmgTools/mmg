@@ -84,7 +84,7 @@ void MMG3D_Init_parameters(MMG5_pMesh mesh) {
 
   /* default values for integers */
   mesh->info.lag      = -1;
-  mesh->info.fem      = 1;
+  mesh->info.fem      = MMG5_FEM;
   mesh->info.optim    =  0;
   mesh->info.optimLES  =  0;
   /* [0/1]    ,avoid/allow surface modifications */
@@ -136,6 +136,8 @@ int MMG3D_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int
 
   sol->dim = 3;
   if ( np ) {
+    mesh->info.inputMet = 1;
+
     sol->np  = np;
     sol->npi = np;
     if ( sol->m )

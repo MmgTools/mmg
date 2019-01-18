@@ -120,7 +120,7 @@ extern "C" {
 #define MMG5_HGRAD     0.26236426446 /**< default value for gradation */
 #define MMG5_LAG         -1 /**< default value for lagrangian option */
 #define MMG5_GAP        0.2 /**< gap value for reallocation */
-
+#define MMG5_FEM          1 /**< defaut value for FEM mode */
 /* Macros */
 #define MG_MAX(a,b) (((a) > (b)) ? (a) : (b))
 #define MG_MIN(a,b) (((a) < (b)) ? (a) : (b))
