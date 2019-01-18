@@ -204,7 +204,7 @@ ADD_TEST(NAME mmg2d_ACDCGeneration
 
 ADD_TEST(NAME mmg2d_GaronneGeneration
   COMMAND ${EXECUT_MMG2D} -v 5
-  ${MMG2D_CI_TESTS}/GaronneGeneration/GaronneEdges.mesh
+  ${MMG2D_CI_TESTS}/GaronneGeneration/garonneEdges.mesh
   -out ${CTEST_OUTPUT_DIR}/mmg2d_GaronneGeneration.o.meshb)
 
 ###############################################################################

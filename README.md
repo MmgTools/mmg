@@ -16,9 +16,9 @@
 mmg is an open source software for bidimensional and tridimensional surface and volume remeshing.
 
 It provides 3 applications and 4 libraries:
-  * the **mmg2d** application and library: adaptation and optimization of a bidimensionnal triangulation;
+  * the **mmg2d** application and library: mesh generation from a set of edges, adaptation and optimization of a bidimensionnal triangulation and isovalue discretization;
   * the **mmgs** application and library: adaptation and optimization of a surface triangulation and isovalue discretization;
-  * the **mmg3d** application and library: adaptation and optimization of a tetrahedral mesh and implicit domain meshing;
+  * the **mmg3d** application and library: adaptation and optimization of a tetrahedral mesh, isovalue discretization and lagrangian movement;
   * the **mmg** library gathering the **mmg2d**, **mmgs** and **mmg3d** libraries.
 
 [//]: # ( comment )

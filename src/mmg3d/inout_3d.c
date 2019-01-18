@@ -1272,6 +1272,8 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
 
+    if ( !MG_EOK(pt) ) { continue; }
+
     /* Tag the tetra vertices to detect points belonging to prisms only (because
      * we don't know the normals/tangents at this points, thus we don't want to
      * save it). */
@@ -1280,17 +1282,15 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
     mesh->point[pt->v[2]].flag = 1;
     mesh->point[pt->v[3]].flag = 1;
 
-    if ( MG_EOK(pt) ) {
-      if(!bin) {
-        fprintf(inm,"%d %d %d %d %d\n",mesh->point[pt->v[0]].tmp,mesh->point[pt->v[1]].tmp
-                ,mesh->point[pt->v[2]].tmp,mesh->point[pt->v[3]].tmp,pt->ref);
-      } else {
-        fwrite(&mesh->point[pt->v[0]].tmp,sw,1,inm);
-        fwrite(&mesh->point[pt->v[1]].tmp,sw,1,inm);
-        fwrite(&mesh->point[pt->v[2]].tmp,sw,1,inm);
-        fwrite(&mesh->point[pt->v[3]].tmp,sw,1,inm);
-        fwrite(&pt->ref,sw,1,inm);
-      }
+    if(!bin) {
+      fprintf(inm,"%d %d %d %d %d\n",mesh->point[pt->v[0]].tmp,mesh->point[pt->v[1]].tmp
+              ,mesh->point[pt->v[2]].tmp,mesh->point[pt->v[3]].tmp,pt->ref);
+    } else {
+      fwrite(&mesh->point[pt->v[0]].tmp,sw,1,inm);
+      fwrite(&mesh->point[pt->v[1]].tmp,sw,1,inm);
+      fwrite(&mesh->point[pt->v[2]].tmp,sw,1,inm);
+      fwrite(&mesh->point[pt->v[3]].tmp,sw,1,inm);
+      fwrite(&pt->ref,sw,1,inm);
     }
   }
 
@@ -1802,6 +1802,8 @@ int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
       MMG5_readDoubleSol3D(met,inm,bin,iswp,k);
     }
   }
+
+  mesh->info.inputMet = 1;
 
   fclose(inm);
 

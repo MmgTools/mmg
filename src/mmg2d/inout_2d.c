@@ -845,6 +845,8 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
     }
   }
 
+  mesh->info.inputMet = 1;
+
   fclose(inm);
 
   /* stats */
