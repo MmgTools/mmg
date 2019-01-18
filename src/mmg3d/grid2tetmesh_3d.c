@@ -287,10 +287,23 @@ int MMG3D_convert_octree2tetmesh(MMG5_pMesh mesh, MMG5_pSol sol) {
   ip_bb_pt_list=(int*)malloc(8*sizeof(int));
   int* ip_bb_elt_list=NULL;
   ip_bb_elt_list=(int*)malloc(5*sizeof(int));
+
+  if ( mesh->info.imprim > 4 ) {
+    printf("  ** BOUNDING BOX GENERATION \n");
+  }
+
   MMG3D_build_bounding_box (mesh, ip_bb_pt_list, ip_bb_elt_list);
   mesh->ntmax = MMG3D_NTMAX;
+
   MMG3D_analys(mesh);
+
+  if ( mesh->info.imprim > 4 ) {
+    printf("  ** MESH GENERATION \n");
+  }
+
   MMG3D_add_Boundary (mesh, sol, depth_max);
+
+  mesh->mark = 0;
 
   free(ip_bb_pt_list);
   free(ip_bb_elt_list);

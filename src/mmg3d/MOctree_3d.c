@@ -2204,7 +2204,7 @@ int  MMG3D_add_Boundary ( MMG5_pMesh mesh, MMG5_pSol sol, int depth_max) {
   int* list_cavity = NULL;
   int* listip= NULL;
   int list_size;
-  int k;
+  int k,ier;
   list_size= 2*mesh->freeint[0]*mesh->freeint[1]+2*mesh->freeint[0]*mesh->freeint[2]+2*mesh->freeint[1]*mesh->freeint[2];
   list_cavity=(int*)malloc(list_size*sizeof(int));
   listip=(int*)malloc(list_size*sizeof(int));
@@ -2231,8 +2231,19 @@ int  MMG3D_add_Boundary ( MMG5_pMesh mesh, MMG5_pSol sol, int depth_max) {
       fprintf(stdout,"\n  ** Le point d'ip %d n'appartient à aucun tétraèdre.\n", *(listip+i));
       return 0;
     }
+
     ilist=MMG3D_cavity_MOctree(mesh, j, *(listip+i), list_cavity);
-    MMG5_delone_MOctree(mesh, sol, *(listip+i), list_cavity, ilist);
+    if ( ilist <= 0 ) {
+      printf("  ## Error: %s: unable to compute the cavity of point %d.\n",__func__,*(listip+i));
+      return 0;
+    }
+
+    ier = MMG5_delone_MOctree(mesh, sol, *(listip+i), list_cavity, ilist);
+    if ( ier <= 0 ) {
+      printf("  ## Error: %s: unable to insert point %d.\n",__func__,*(listip+i));
+      return 0;
+    }
+
     mesh->point[*(listip+i)].ref=44;
     i++;
   }
@@ -2356,9 +2367,8 @@ int MMG5_delone_MOctree(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist
 
         pt1 = &mesh->tetra[iel];
         memcpy(pt1,pt,sizeof(MMG5_Tetra));
-        pt1->v[i]
+        pt1->v[i] = ip;
 
-        = ip;
         //pt1->qual = MMG5_orcal(mesh,sol,iel);
         pt1->ref = mesh->tetra[old].ref;
         pt1->mark = mesh->mark;
