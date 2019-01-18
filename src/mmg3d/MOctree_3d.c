@@ -2136,7 +2136,7 @@ int MMG3D_cavity_MOctree(MMG5_pMesh mesh ,int iel,int ip,int *list)
 
   *list=iel;
   ilist=0;
-  mesh->base++;
+  base = ++mesh->base;
   ppt = &mesh->point[ip];
   tet=&mesh->tetra[iel];
   i=0;
@@ -2256,7 +2256,7 @@ int MMG5_delone_MOctree(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist
   int tref;
 #endif
 
-  base = mesh->base;
+  base = ++mesh->base;
   /* external faces */
   size = 0;
   for (k=0; k<ilist; k++) { //on parcourt tous les tétras dans la cavité
