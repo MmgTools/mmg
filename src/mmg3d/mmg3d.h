@@ -182,17 +182,20 @@ int  MMG3D_set_splitls_MOctree ( MMG5_pMesh mesh, MMG5_MOctree_s* q, MMG5_pSol s
 
 int  MMG3D_free_MOctree    ( MMG5_pMOctree** q, MMG5_pMesh mesh);
 int  MMG3D_free_MOctree_s  ( MMG5_MOctree_s* q, MMG5_pMesh mesh);
-int  MMG3D_merge_MOctree_s ( MMG5_MOctree_s* q, MMG5_pMesh mesh, int* compteur);
+int  MMG3D_merge_MOctree_s ( MMG5_MOctree_s* q, MMG5_pMesh mesh);
 int  MMG3D_convert_grid2tetmesh(MMG5_pMesh mesh, MMG5_pSol sol);
 int  MMG3D_mark_MOctreeCellCorners ( MMG5_pMesh mesh, MMG5_MOctree_s* q,int span,int *np,int *nc );
 int  MMG3D_write_MOctreeCell ( MMG5_pMesh mesh, MMG5_MOctree_s* q,int span, FILE *inm );
 int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s* q, int dir, MMG5_MOctree_s* Neighbour);
 void  MMG3D_del_UnusedPoints ( MMG5_pMesh mesh);
 void  MMG3D_build_bounding_box ( MMG5_pMesh mesh, int* ip_bb_pt_list, int* ip_bb_elt_list);
-int MMG5_intetra(MMG5_pMesh mesh,int iel,int ip);
-void  MMG3D_add_Boundary ( MMG5_pMesh mesh, MMG5_pSol sol);
+int MMG3D_intetra(MMG5_pMesh mesh,int iel,int ip);
+int MMG3D_cavity_MOctree(MMG5_pMesh mesh ,int iel,int ip,int *list);
+int  MMG3D_add_Boundary ( MMG5_pMesh mesh, MMG5_pSol sol, int depth_max);
 int MMG3D_build_borders(MMG5_pMesh mesh, int* listip, int depth_max);
 int MMG3D_borders_delaunay( MMG5_pMesh mesh, MMG5_MOctree_s* q, int face_border, int depth_max, int *listip, int* i);
+int MMG5_delone_MOctree(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist);
+
 
 
 

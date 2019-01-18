@@ -206,7 +206,7 @@ int MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
   /*tetra allocation : we create "size" tetra*/
   ielnum[0] = size;
   for (k=1 ; k<=size ; k++) {
-    ielnum[k] = MMG3D_newElt(mesh);
+    ielnum[k] = MMG3D_newElt(mesh); //newElt renvoie l'indice du dernier tétra créé
 
     if ( !ielnum[k] ) {
       MMG3D_TETRA_REALLOC(mesh,ielnum[k],mesh->gap,
