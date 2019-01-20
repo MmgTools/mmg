@@ -89,7 +89,7 @@ int _MMG5_interpmet22(MMG5_pMesh mesh,double *m,double *n,double s,double *mr) {
   /* First case : matrices m and n are homothetic: n = lambda0*m */
   if ( sqDelta < _MMG5_EPS ) {
     /* Diagonalize m and truncate eigenvalues : trimn, det, etc... are reused */
-    if ( fabs(m[1]) < _MMG5_EPS ) {
+    if ( fabs(m[1]) <= MMG5_EPS || fabs(n[1]) <= MMG5_EPS ) {
       dm[0]   = m[0];
       dm[1]   = m[2];
       vp0[0] = 1;
@@ -100,8 +100,7 @@ int _MMG5_interpmet22(MMG5_pMesh mesh,double *m,double *n,double s,double *mr) {
     else {
       dd    = m[0] - m[2];
       trimn = m[0] + m[2];
-      
-      sqDelta = sqrt(fabs(dd*dd +4*0*m[1]*m[1]));
+      sqDelta = sqrt(fabs(dd*dd +4.0*m[1]*m[1]));
       dm[0]   = 0.5 * (trimn + sqDelta);
       dm[1]   = 0.5 * (trimn - sqDelta);
       
