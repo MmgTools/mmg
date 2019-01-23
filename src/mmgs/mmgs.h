@@ -200,7 +200,7 @@ int    movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist);
 int    movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist);
 int    movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist);
 int    MMGS_prilen(MMG5_pMesh mesh,MMG5_pSol met,int);
-int    MMGS_set_metricAtPointsOnReqEdges ( MMG5_pMesh,MMG5_pSol,int8_t);
+int    MMGS_set_metricAtPointsOnReqEdges ( MMG5_pMesh,MMG5_pSol );
 
 double (*MMG5_calelt)(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
 int    (*MMGS_defsiz)(MMG5_pMesh mesh,MMG5_pSol met);

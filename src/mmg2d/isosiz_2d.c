@@ -62,7 +62,6 @@ int MMG2D_sum_reqEdgeLengthsAtPoint(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,
 /**
  * \param mesh pointer toward the mesh
  * \param met pointer toward the metric
- * \param ismet 1 if we have a metric provided by the user.
  *
  * \return 0 if fail, 1 otherwise
  *
@@ -71,7 +70,7 @@ int MMG2D_sum_reqEdgeLengthsAtPoint(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,
  * marked with flag 3.
  *
  */
-int MMG2D_set_metricAtPointsOnReqEdges ( MMG5_pMesh mesh,MMG5_pSol met,int8_t ismet ) {
+int MMG2D_set_metricAtPointsOnReqEdges ( MMG5_pMesh mesh,MMG5_pSol met ) {
   MMG5_pTria pt;
   int        k,i,iadj;
 
@@ -81,7 +80,7 @@ int MMG2D_set_metricAtPointsOnReqEdges ( MMG5_pMesh mesh,MMG5_pSol met,int8_t is
   }
 
   /* Reset the input metric at required edges extremities */
-  if ( !MMG5_reset_metricAtReqEdges_surf (mesh, met, ismet ) ) {
+  if ( !MMG5_reset_metricAtReqEdges_surf (mesh, met ) ) {
     return 0;
   }
 
@@ -134,7 +133,6 @@ int MMG2D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   double           t1[2],t2[2],b1[2],b2[2],gpp1[2],gpp2[2],pv,M1,M2;
   double           ps1,ps2,ux,uy,ll,li,lm,hmax,hausd,hmin,lhmax,lhausd;
   int              k,l,ip,ip1,ip2;
-  int8_t           ismet;
   unsigned char    i,i1,i2;
 
   if ( !MMG5_defsiz_startingMessage (mesh,met,__func__) ) {
@@ -154,26 +152,29 @@ int MMG2D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
 
   /* Allocate the structure */
   if ( !met->np ) {
-    ismet = 0;
 
     /* Allocate and store the header informations for each solution */
     if ( !MMG2D_Set_solSize(mesh,met,MMG5_Vertex,mesh->np,1) ) {
       return 0;
+
+    /* Set_solSize modify the value of the inputMet field => we need to reset it */
+    mesh->info.inputMet = 0;
+
     }
   }
   else {
-    ismet = 1;
+    assert ( mesh->info.inputMet );
   }
 
   /** Step 1: Set metric at points belonging to a required edge: compute the
    * metric as the mean of the length of the required eges passing through the
    * point */
-  if ( !MMG2D_set_metricAtPointsOnReqEdges ( mesh,met,ismet ) ) {
+  if ( !MMG2D_set_metricAtPointsOnReqEdges ( mesh,met ) ) {
     return 0;
   }
 
   /** Step 2: size at non required internal points */
-  if ( !ismet ) {
+  if ( !mesh->info.inputMet ) {
     /* Initialize metric with a constant size */
     for ( k=1; k<=mesh->np; k++ ) {
       if ( mesh->point[k].flag ) {

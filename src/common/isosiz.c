@@ -158,7 +158,6 @@ int MMG5_compute_meanMetricAtMarkedPoints_iso ( MMG5_pMesh mesh,MMG5_pSol met ) 
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
- * \param ismet 1 if the user has given an input metric (so we need to reset it)
  *
  * \return 1 if success, 0 if fail.
  *
@@ -166,9 +165,10 @@ int MMG5_compute_meanMetricAtMarkedPoints_iso ( MMG5_pMesh mesh,MMG5_pSol met ) 
  * that are at the extremities of a required edge.
  *
  */
-int MMG5_reset_metricAtReqEdges_surf ( MMG5_pMesh mesh,MMG5_pSol met,int8_t ismet ) {
+int MMG5_reset_metricAtReqEdges_surf ( MMG5_pMesh mesh,MMG5_pSol met ) {
   MMG5_pTria  pt;
   int         k,i,j,ip0,ip1,iad0,iad1;
+  int8_t      ismet = mesh->info.inputMet;
 
   if ( ismet ) {
     for ( k=1; k<=mesh->nt; k++ ) {

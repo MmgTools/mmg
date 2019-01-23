@@ -1005,7 +1005,6 @@ static int MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int kel,int iface, int i
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
- * \param ismet 1 if the user has provided a metric.
  * \return 1 if success, 0 otherwise.
  *
  * Define metric map at a non-boundary vertex of the mesh.
@@ -1014,16 +1013,19 @@ static int MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int kel,int iface, int i
  *
  */
 static inline
-int MMG5_defmetvol(MMG5_pMesh mesh,MMG5_pSol met, int8_t ismet) {
+int MMG5_defmetvol(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTetra   pt,ptloc;
   MMG5_pPoint   ppt;
   MMG5_pPar     par;
   double        v[3][3],lambda[3],isqhmax,isqhmin,*m;
   int           list[MMG3D_LMAX+2],ilist,k,l,i,j,isloc,ip;
+  int8_t        ismet;
   static char   mmgWarn = 0;
 
   isqhmin = 1./(mesh->info.hmin*mesh->info.hmin);
   isqhmax = 1./(mesh->info.hmax*mesh->info.hmax);
+
+  ismet = mesh->info.inputMet;
 
   if ( !ismet ) {
 
@@ -1255,7 +1257,7 @@ int MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pPoint   ppt;
   double        mm[6];
   int           k,l,iploc;
-  char          i,ismet;
+  char          i;
   static char   mmgErr = 0;
 
   if ( !MMG5_defsiz_startingMessage (mesh,met,__func__) ) {
@@ -1268,15 +1270,17 @@ int MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
     ppt->s    = 0;
   }
 
-  if ( met->m )
-    ismet = 1;
+  if ( met->m ) {
+   assert ( mesh->info.inputMet );
+  }
   else {
-    ismet = 0;
-
     /* Allocate and store the header informations for each solution */
     if ( !MMG3D_Set_solSize(mesh,met,MMG5_Vertex,mesh->np,3) ) {
       return 0;
     }
+
+    /* Set_solSize modify the value of the inputMet field => we need to reset it */
+    mesh->info.inputMet = 0;
 
     MMG5_caltet         = MMG5_caltet_ani;
     MMG5_caltri         = MMG5_caltri_ani;
@@ -1288,12 +1292,12 @@ int MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   /** Step 1: Set metric at points belonging to a required edge: compute the
    * metric as the mean of the length of the required eges passing through the
    * point */
-  if ( !MMG3D_set_metricAtPointsOnReqEdges ( mesh,met,ismet ) ) {
+  if ( !MMG3D_set_metricAtPointsOnReqEdges ( mesh,met ) ) {
     return 0;
   }
 
   /* Step 2: metric definition at internal points */
-  if ( !MMG5_defmetvol(mesh,met,ismet) )  return 0;
+  if ( !MMG5_defmetvol(mesh,met) )  return 0;
 
   /* Step 3: metric definition at boundary points */
   for (k=1; k<=mesh->ne; k++) {
@@ -1317,7 +1321,7 @@ int MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
 
         if ( ppt->flag > 1 ) continue;
 
-        if ( ismet )  memcpy(mm,&met->m[6*(pt->v[iploc])],6*sizeof(double));
+        if ( mesh->info.inputMet )  memcpy(mm,&met->m[6*(pt->v[iploc])],6*sizeof(double));
 
         if ( (MG_SIN(ppt->tag) || (ppt->tag & MG_NOM) ) ) {
           if ( !MMG5_defmetsin(mesh,met,k,l,iploc) )  continue;
@@ -1330,7 +1334,7 @@ int MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
         } else {
           if ( !MMG5_defmetreg(mesh,met,k,l,iploc) )  continue;
         }
-        if ( ismet ) {
+        if ( mesh->info.inputMet ) {
           if ( !MMG3D_intextmet(mesh,met,pt->v[iploc],mm) ) {
             if ( !mmgErr ) {
               fprintf(stderr,"\n  ## Error: %s: unable to intersect metrics"
@@ -1347,7 +1351,7 @@ int MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
   /* search for unintialized metric */
-  MMG5_defUninitSize(mesh,met,ismet);
+  MMG5_defUninitSize(mesh,met);
 
   return 1;
 }
