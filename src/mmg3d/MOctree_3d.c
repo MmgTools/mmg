@@ -238,11 +238,9 @@ int  MMG3D_set_splitls_MOctree ( MMG5_pMesh mesh, MMG5_MOctree_s* q, MMG5_pSol s
      span_z = ncells_xy;
      if(q->ghost == 0)
      {
-       q->blf_ip=q->coordoct[2]*ncells_xy+q->coordoct[1]*ncells_x+q->coordoct[0]+1;
-       if(q->coordoct[0] < ncells_x-1 && q->coordoct[1] < ncells_y-1 && q->coordoct[2] < ncells_z-1)
-       {
-         MMG3D_set_splitls_MOctree (mesh, q, sol);
-       }
+       q->blf_ip=q->coordoct[2]*ncells_xy+q->coordoct[1]*ncells_x+q->coordoct[0]+1;       if(q->coordoct[0] < ncells_x-1 && q->coordoct[1] < ncells_y-1 && q->coordoct[2] < ncells_z-1)
+       MMG3D_set_splitls_MOctree (mesh, q, sol);
+  
      }
      q->leaf=1;
    }
@@ -2134,8 +2132,8 @@ int MMG3D_cavity_MOctree(MMG5_pMesh mesh ,int iel,int ip,int *list)
   int              tref,isreq;
   int              lon=1;
 
-  *list=iel;
-  ilist=0;
+  list[0]=iel;
+  ilist=1;
   base = ++mesh->base;
   ppt = &mesh->point[ip];
   tet=&mesh->tetra[iel];
@@ -2179,7 +2177,8 @@ int MMG3D_cavity_MOctree(MMG5_pMesh mesh ,int iel,int ip,int *list)
 
         /*store tetra*/
         tetadj->flag = base;
-        list[ilist++] = adj;
+        list[ilist] = adj;
+        ilist++;
       }
     }
     ipil++;
