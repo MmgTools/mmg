@@ -542,6 +542,8 @@ int MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
     if ( !MMG3D_Set_solSize(mesh,met,MMG5_Vertex,mesh->np,1) ) {
       return 0;
     }
+    /* Set_solSize modify the value of the inputMet field => we need to reset it */
+    mesh->info.inputMet = 0;
 
     /* init constant size */
     for (k=1; k<=mesh->ne; k++) {
