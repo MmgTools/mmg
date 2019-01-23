@@ -240,7 +240,7 @@ int  MMG3D_set_splitls_MOctree ( MMG5_pMesh mesh, MMG5_MOctree_s* q, MMG5_pSol s
      {
        q->blf_ip=q->coordoct[2]*ncells_xy+q->coordoct[1]*ncells_x+q->coordoct[0]+1;       if(q->coordoct[0] < ncells_x-1 && q->coordoct[1] < ncells_y-1 && q->coordoct[2] < ncells_z-1)
        MMG3D_set_splitls_MOctree (mesh, q, sol);
-  
+
      }
      q->leaf=1;
    }
@@ -2137,7 +2137,6 @@ int MMG3D_cavity_MOctree(MMG5_pMesh mesh ,int iel,int ip,int *list)
   base = ++mesh->base;
   ppt = &mesh->point[ip];
   tet=&mesh->tetra[iel];
-  i=0;
   eps   = MMG3D_EPSRAD*MMG3D_EPSRAD;
   ipil=0;
 
@@ -2146,7 +2145,7 @@ int MMG3D_cavity_MOctree(MMG5_pMesh mesh ,int iel,int ip,int *list)
     if(tet1->flag!=base)
     {
       tet1->flag=base;
-      iadr = (list[i]-1)*4 + 1;
+      iadr = (list[ipil]-1)*4 + 1;
       adja = &mesh->adja[iadr]; // on récupère le tétra adjacent par la première face du tétra --> si on connait l'adjacence par la première face, on retrouve les autres faces
       vois[0]  = adja[0]; // adjacent face 0
       vois[1]  = adja[1]; // adjacent face 1
