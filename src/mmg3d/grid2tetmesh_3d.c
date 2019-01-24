@@ -257,10 +257,17 @@ int MMG3D_coarsen_octree(MMG5_pMesh mesh, MMG5_pSol sol) {
  */
 static inline
 int MMG3D_convert_octree2tetmesh(MMG5_pMesh mesh, MMG5_pSol sol) {
-int ier;
-
   int i, depth_max;
   int max_dim=0;
+  int ip_bb_pt_list[8],ip_bb_elt_list[5];
+  int ier;
+
+  /* Mark all the points as unused */
+  for ( i=1; i<=mesh->np; ++i ) {
+    mesh->point[i].tag = MG_NUL;
+  }
+
+  /* Get the maximal dimension */
   for ( i=0; i<3; ++i ) {
     if(max_dim < mesh->freeint[i])
     {
@@ -282,11 +289,6 @@ int ier;
   max_dim++;
 
   depth_max=log(max_dim)/log(2);
-
-  int* ip_bb_pt_list=NULL;
-  ip_bb_pt_list=(int*)malloc(8*sizeof(int));
-  int* ip_bb_elt_list=NULL;
-  ip_bb_elt_list=(int*)malloc(5*sizeof(int));
 
   if ( mesh->info.imprim > 4 ) {
     printf("  ** BOUNDING BOX GENERATION \n");
@@ -312,8 +314,6 @@ int ier;
   mesh->mark = 0;
   MMG5_freeXTets(mesh);
 
-  free(ip_bb_pt_list);
-  free(ip_bb_elt_list);
   return 1;
 }
 
@@ -345,8 +345,6 @@ int MMG3D_convert_grid2tetmesh(MMG5_pMesh mesh, MMG5_pSol sol) {
     fprintf(stderr,"\n  ## Octree coarsening problem. Exit program.\n");
     return 0;
   }
-
-  MMG3D_saveVTKOctree(mesh,sol,mesh->nameout);
 
   /**--- stage 2: Tetrahedralization */
   if ( abs(mesh->info.imprim) > 3 )
