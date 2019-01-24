@@ -107,6 +107,8 @@ int MMG3D_locatePoint( MMG5_pMesh mesh, MMG5_pPoint ppt ) {
   int            *adja,iel,ip,idxTet,step,closestTet;
   double         vol,eps,closestDist;
 
+  eps = MMG5_EPS;
+
   idxTet = 1;
 
   step = 0;
@@ -116,9 +118,10 @@ int MMG3D_locatePoint( MMG5_pMesh mesh, MMG5_pPoint ppt ) {
 
     /** Get tetra */
     ptr = &mesh->tetra[idxTet];
+    if ( !MG_EOK(ptr) ) continue;
+
     adja = &mesh->adja[4*(idxTet-1)+1];
     vol = MMG5_orvol( mesh->point, ptr->v );
-    eps = MMG5_EPS;
 
     /** Mark tetra */
     ptr->flag = mesh->base;
@@ -162,9 +165,11 @@ int MMG3D_locatePoint( MMG5_pMesh mesh, MMG5_pPoint ppt ) {
 
       /** Get tetra */
       ptr = &mesh->tetra[idxTet];
+
+      if ( !MG_EOK(ptr) ) continue;
+
       adja = &mesh->adja[4*(idxTet-1)+1];
       vol = MMG5_orvol( mesh->point, ptr->v );
-      eps = MMG5_EPS;
 
       /** Mark tetra */
       ptr->flag = mesh->base;

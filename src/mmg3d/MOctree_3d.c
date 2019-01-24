@@ -2210,7 +2210,7 @@ int  MMG3D_add_Boundary ( MMG5_pMesh mesh, MMG5_pSol sol, int depth_max) {
     /** Locate point in the mesh */
     j = MMG3D_locatePoint( mesh, &mesh->point[*(listip+i)] );
 
-    if ( ier <= 0 ) {
+    if ( j <= 0 ) {
       fprintf(stderr,"\n  ## Error: %s: Point %d not found.\n", __func__,*(listip+i));
       return 0;
     }
@@ -2299,9 +2299,15 @@ int MMG5_delone_MOctree(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist
       ppt->tagdel &= ~MG_NOM;
     }
   }
-  if ( alert )  { return 0; }
+  if ( alert )  {
+    fprintf(stderr,"\n  ## Error: %s: isolated vertex.\n",__func__);
+    return 0;
+  }
   /* hash table params */
-  if ( size > 3*MMG3D_LONMAX )  return 0;
+  if ( size > 3*MMG3D_LONMAX ) {
+    fprintf(stderr,"\n  ## Error: %s: hashtable overflow.\n",__func__);
+    return 0;
+  }
   if ( !MMG5_hashNew(mesh,&hedg,size,3*size) ) { /*3*size suffit */
     fprintf(stderr,"\n  ## Error: %s: unable to complete mesh.\n",__func__);
     return -1;
