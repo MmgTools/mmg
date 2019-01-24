@@ -2203,11 +2203,15 @@ int  MMG3D_add_Boundary ( MMG5_pMesh mesh, MMG5_pSol sol, int depth_max) {
   int* listip= NULL;
   int list_size;
   int k,ier;
-  list_size= 2*mesh->freeint[0]*mesh->freeint[1]+2*mesh->freeint[0]*mesh->freeint[2]+2*mesh->freeint[1]*mesh->freeint[2];
-  list_cavity=(int*)malloc(list_size*sizeof(int));
-  listip=(int*)malloc(list_size*sizeof(int));
   int init_list;
-  init_list=2*mesh->freeint[0]*mesh->freeint[1]*mesh->freeint[2];
+
+  list_size = 2*mesh->freeint[0]*mesh->freeint[1]+2*mesh->freeint[0]*mesh->freeint[2]+2*mesh->freeint[1]*mesh->freeint[2];
+
+  MMG5_SAFE_CALLOC ( list_cavity,list_size,int,return 0 );
+  MMG5_SAFE_CALLOC ( listip    ,list_size,int,return 0 );
+
+  init_list = 2*mesh->freeint[0]*mesh->freeint[1]*mesh->freeint[2];
+
   //  printf("valeur de p avant initialisation = %ld\n",listip);
   for (k=0; k<list_size;k++)
   {
@@ -2245,7 +2249,9 @@ int  MMG3D_add_Boundary ( MMG5_pMesh mesh, MMG5_pSol sol, int depth_max) {
     mesh->point[*(listip+i)].ref=44;
     i++;
   }
-  free(listip);
+
+  MMG5_DEL_MEM ( mesh, listip );
+  MMG5_DEL_MEM ( mesh, list_cavity );
 
   return 1;
 }
