@@ -1474,63 +1474,6 @@ int  MMG3D_build_bounding_box ( MMG5_pMesh mesh, MMG5_pSol sol,
 }
 
 /**
-* \param mesh pointer toward the mesh structure.
-* \param iel tetra index.
-* \param ip point local index in \a iel.
-*
-* Finds if point ip is located in tetra iel by computing its barycentric values in tetra iel.
-*
-*/
-
-int MMG3D_intetra(MMG5_pMesh mesh,int iel,int ip) {
- double bary[4],A[3],B[3],C[3],D[3],P[3],vol;
- int i;
- for (i=0; i<3;i++)
- {
-   A[i]=mesh->point[mesh->tetra[iel].v[0]].c[i];
-   B[i]=mesh->point[mesh->tetra[iel].v[1]].c[i];
-   C[i]=mesh->point[mesh->tetra[iel].v[2]].c[i];
-   D[i]=mesh->point[mesh->tetra[iel].v[3]].c[i];
-   P[i]=mesh->point[ip].c[i];
- }
- vol=(A[0]-D[0])*(B[1]-D[1])*(C[2]-D[2])+(B[0]-D[0])*(C[1]-D[1])*(A[2]-D[2])
- +(C[0]-D[0])*(A[1]-D[1])*(B[2]-D[2])-(C[0]-D[0])*(B[1]-D[1])*(A[2]-D[2])
- -(A[0]-D[0])*(C[1]-D[1])*(B[2]-D[2])-(B[0]-D[0])*(A[1]-D[1])*(C[2]-D[2]);
-
- bary[0]=((P[0]-D[0])*(B[1]-D[1])*(C[2]-D[2])+(B[0]-D[0])*(C[1]-D[1])*(P[2]-D[2])
- +(C[0]-D[0])*(P[1]-D[1])*(B[2]-D[2])-(C[0]-D[0])*(B[1]-D[1])*(P[2]-D[2])
- -(P[0]-D[0])*(C[1]-D[1])*(B[2]-D[2])-(B[0]-D[0])*(P[1]-D[1])*(C[2]-D[2]))/vol;
- if(bary[0]<0 || bary[0]>1)
- {
-   return 0;
- }
-
- bary[1]=((A[0]-D[0])*(P[1]-D[1])*(C[2]-D[2])+(P[0]-D[0])*(C[1]-D[1])*(A[2]-D[2])
- +(C[0]-D[0])*(A[1]-D[1])*(P[2]-D[2])-(C[0]-D[0])*(P[1]-D[1])*(A[2]-D[2])
- -(A[0]-D[0])*(C[1]-D[1])*(P[2]-D[2])-(P[0]-D[0])*(A[1]-D[1])*(C[2]-D[2]))/vol;
- if(bary[1]<0 || bary[1]>1)
- {
-   return 0;
- }
-
- bary[2]=((A[0]-D[0])*(B[1]-D[1])*(P[2]-D[2])+(B[0]-D[0])*(P[1]-D[1])*(A[2]-D[2])
- +(P[0]-D[0])*(A[1]-D[1])*(B[2]-D[2])-(P[0]-D[0])*(B[1]-D[1])*(A[2]-D[2])
- -(A[0]-D[0])*(P[1]-D[1])*(B[2]-D[2])-(B[0]-D[0])*(A[1]-D[1])*(P[2]-D[2]))/vol;
- if(bary[2]<0 || bary[2]>1)
- {
-   return 0;
- }
-
- bary[3]=1-bary[0]-bary[1]-bary[2];
- if(bary[3]<0 || bary[3]>1)
- {
-   return 0;
- }
-return 1;
-}
-
-
-/**
  * \param mesh pointer toward the mesh
  * \param q pointer toward the MOctree cell
  * \param face_border the number of the treated face
@@ -2256,7 +2199,6 @@ int  MMG3D_add_Boundary ( MMG5_pMesh mesh, MMG5_pSol sol, int depth_max) {
 
   init_list = 2*mesh->freeint[0]*mesh->freeint[1]*mesh->freeint[2];
 
-  //  printf("valeur de p avant initialisation = %ld\n",listip);
   for (k=0; k<list_size;k++)
   {
     *(listip+k)=init_list;
@@ -2267,14 +2209,11 @@ int  MMG3D_add_Boundary ( MMG5_pMesh mesh, MMG5_pSol sol, int depth_max) {
   i=0;
   while(*(listip+i) < 2*mesh->freeint[0]*mesh->freeint[1]*mesh->freeint[2]-1)
   {
-    j=1;
-    while(j <= mesh->ne && MMG3D_intetra(mesh,j,*(listip+i))==0)
-    {
-      j++;
-    }
-    if(j > mesh->ne)
-    {
-      fprintf(stdout,"\n  ** Le point d'ip %d n'appartient à aucun tétraèdre.\n", *(listip+i));
+    /** Locate point in the mesh */
+    j = MMG3D_locatePoint( mesh, &mesh->point[*(listip+i)] );
+
+    if ( ier <= 0 ) {
+      fprintf(stderr,"\n  ## Error: %s: Point %d not found.\n", __func__,*(listip+i));
       return 0;
     }
 

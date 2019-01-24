@@ -1324,7 +1324,9 @@ int MMG3D_loadVTKGrid(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   mesh->memMax = MMG5_memSize();
 
   mesh->npi   = mesh->np;
-  mesh->npmax = mesh->np+1;
+  /* Set npmax to the number of points in the grid + 8 points for the mesh
+   * bounding box (mesh generation step) */
+  mesh->npmax = mesh->np+9;
   mesh->nemax = MMG3D_NEMAX;
   mesh->nemax = MMG3D_NTMAX;
 
