@@ -303,7 +303,9 @@ int MMG3D_convert_octree2tetmesh(MMG5_pMesh mesh, MMG5_pSol sol) {
 
   MMG3D_add_Boundary (mesh, sol, depth_max);
 
+  /* Reset mesh informations */
   mesh->mark = 0;
+  MMG5_freeXTets(mesh);
 
   free(ip_bb_pt_list);
   free(ip_bb_elt_list);
