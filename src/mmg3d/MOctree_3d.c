@@ -1425,6 +1425,7 @@ void  MMG3D_build_bounding_box ( MMG5_pMesh mesh, int* ip_bb_pt_list, int* ip_bb
   mesh->tetra[*(ip_bb_elt_list+4)].v[1] = *(ip_bb_pt_list+5);
   mesh->tetra[*(ip_bb_elt_list+4)].v[2] = *(ip_bb_pt_list+3);
   mesh->tetra[*(ip_bb_elt_list+4)].v[3] = *(ip_bb_pt_list+6);
+
 }
 
 /**
@@ -2096,13 +2097,11 @@ int MMG3D_borders_delaunay( MMG5_pMesh mesh, MMG5_MOctree_s* q, int face_border,
 int MMG3D_build_borders(MMG5_pMesh mesh, int* listip, int depth_max)
 {
   MMG5_MOctree_s *po;
+  int p, *i, j;
 
   po=mesh->octree->root;
-  int p;
-  int *i;
   p=0;
   i=&p;
-  int j;
   for (j=1; j<=6;j++)
   {
     MMG3D_borders_delaunay( mesh, po,j, depth_max, listip, i);
@@ -2435,11 +2434,12 @@ int MMG5_delone_MOctree(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist
         for (j=0; j<4; j++) {
           if ( j != i ) {
             m = 0;
-            for (l=0; l<3; l++)
+            for (l=0; l<3; l++) {
               if ( pt1->v[ MMG5_idir[j][l] ] != ip ) {
                 v[m] = pt1->v[ MMG5_idir[j][l] ];
                 m++;
               }
+            }
             MMG5_hashEdgeDelone(mesh,&hedg,iel,j,v);
           }
         }
