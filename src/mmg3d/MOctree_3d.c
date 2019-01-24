@@ -240,7 +240,6 @@ int  MMG3D_set_splitls_MOctree ( MMG5_pMesh mesh, MMG5_MOctree_s* q, MMG5_pSol s
      {
        q->blf_ip=q->coordoct[2]*ncells_xy+q->coordoct[1]*ncells_x+q->coordoct[0]+1;       if(q->coordoct[0] < ncells_x-1 && q->coordoct[1] < ncells_y-1 && q->coordoct[2] < ncells_z-1)
        MMG3D_set_splitls_MOctree (mesh, q, sol);
-  
      }
      q->leaf=1;
    }
@@ -2266,7 +2265,7 @@ int MMG5_delone_MOctree(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist
   int tref;
 #endif
 
-  base = ++mesh->base;
+  base = mesh->base;
   /* external faces */
   size = 0;
   for (k=0; k<ilist; k++) { //on parcourt tous les tétras dans la cavité
@@ -2297,7 +2296,11 @@ int MMG5_delone_MOctree(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist
     pt1  = &mesh->tetra[old];
     for (i=0; i<4; i++) {
       ppt = &mesh->point[ pt1->v[i] ];
-      if ( !(ppt->tagdel & MG_NOM) )  alert = 1;
+      if ( !(ppt->tagdel & MG_NOM) )
+      {
+        alert = 1;
+      }
+
     }
   }
   /* reset tag */
