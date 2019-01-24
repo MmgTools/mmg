@@ -519,6 +519,17 @@ typedef struct MMG5_MOctree_s
 } MMG5_MOctree_s;
 
 /**
+ * \struct PMMG_baryCoord
+ *
+ * \brief Struct containing the index and value of a barycentric coordinate
+ *
+ */
+typedef struct {
+  int    idx; /*!< direction */
+  double val; /*!< coordinate value */
+} MMG5_baryCoord;
+
+/**
  * MOctree global structure (enriched by global variables) for mesh generation
  * from an octree
  */

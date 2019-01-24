@@ -44,6 +44,7 @@
 #define MMG3D_EPSRAD       1.00005
 #define MMG3D_EPSCON       1e-5 //5.0e-4
 #define MMG3D_LONMAX       4096
+
 /**
  * \param mesh pointer toward a MMG5 mesh
  * \param q pointer toward the MOctree root
@@ -1300,41 +1301,20 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
   return 0;
 }
 
-/**
- * \param mesh pointer toward the mesh
- *
- *
- * Delete unused points of the coarse grid.
- *
- */
-void  MMG3D_del_UnusedPoints ( MMG5_pMesh mesh) {
-  int i;
-
-  for(i=0 ; i<mesh->np ; i++)
-  {
-    if(mesh->point[i].ref != 22)
-    {
-      MMG3D_delPt(mesh,i);
-    }
-    else
-    {
-      mesh->point[i].ref = 0;
-    }
-  }
-}
-
 
 /**
  * \param mesh pointer toward the mesh
  * \param ip_bb_pt_list pointer toward the list of index of the bounding box points
  * \param ip_bb_elt_list pointer toward the list of index of the bounding box elements
  *
+ * \return 1 if success, 0 if fail
  *
  * Create the points of the bounding box and its 5 tetrahedrons. The bounding box is 3/2 times bigger than the
  * initial grid.
  *
  */
-void  MMG3D_build_bounding_box ( MMG5_pMesh mesh, int* ip_bb_pt_list, int* ip_bb_elt_list) {
+int  MMG3D_build_bounding_box ( MMG5_pMesh mesh, MMG5_pSol sol,
+                                 int* ip_bb_pt_list, int* ip_bb_elt_list) {
   double         o[3];
   double origin_x = mesh->info.min[0];
   double origin_y = mesh->info.min[1];
@@ -1347,59 +1327,96 @@ void  MMG3D_build_bounding_box ( MMG5_pMesh mesh, int* ip_bb_pt_list, int* ip_bb
   o[0] = origin_x-a*0.5;
   o[1] = origin_y-b*0.5;
   o[2] = origin_z-c*0.5;
+
   *(ip_bb_pt_list+0) = MMG3D_newPt(mesh,o,MG_NOTAG);
+  assert (ip_bb_pt_list[0]);
 
   //point 1
   o[0] = origin_x+a*1.5;
   o[1] = origin_y-b*0.5;
   o[2] = origin_z-c*0.5;
+
   *(ip_bb_pt_list+1) = MMG3D_newPt(mesh,o,MG_NOTAG);
+  assert (ip_bb_pt_list[1]);
 
   //point 2
   o[0] = origin_x-a*0.5;
   o[1] = origin_y+b*1.5;
   o[2] = origin_z-c*0.5;
+
   *(ip_bb_pt_list+2) = MMG3D_newPt(mesh,o,MG_NOTAG);
+  assert (ip_bb_pt_list[2]);
 
   //point 3
   o[0] = origin_x+a*1.5;
   o[1] = origin_y+b*1.5;
   o[2] = origin_z-c*0.5;
+
   *(ip_bb_pt_list+3) = MMG3D_newPt(mesh,o,MG_NOTAG);
+  assert (ip_bb_pt_list[3]);
 
   //point 4
   o[0] = origin_x-a*0.5;
   o[1] = origin_y-b*0.5;
   o[2] = origin_z+c*1.5;
+
   *(ip_bb_pt_list+4) = MMG3D_newPt(mesh,o,MG_NOTAG);
+  assert (ip_bb_pt_list[4]);
 
   //point 5
   o[0] = origin_x+a*1.5;
   o[1] = origin_y-b*0.5;
   o[2] = origin_z+c*1.5;
+
   *(ip_bb_pt_list+5) = MMG3D_newPt(mesh,o,MG_NOTAG);
+  assert (ip_bb_pt_list[5]);
 
   //point 6
   o[0] = origin_x-a*0.5;
   o[1] = origin_y+b*1.5;
   o[2] = origin_z+c*1.5;
+
   *(ip_bb_pt_list+6) = MMG3D_newPt(mesh,o,MG_NOTAG);
+  assert (ip_bb_pt_list[6]);
+
 
   //point 7
   o[0] = origin_x+a*1.5;
   o[1] = origin_y+b*1.5;
   o[2] = origin_z+c*1.5;
+
   *(ip_bb_pt_list+7) = MMG3D_newPt(mesh,o,MG_NOTAG);
+  assert (ip_bb_pt_list[7]);
 
   //tetra 0
   *(ip_bb_elt_list+0) = MMG3D_newElt(mesh);
+  if ( !ip_bb_elt_list[0] ) {
+    MMG3D_TETRA_REALLOC(mesh,ip_bb_elt_list[0],mesh->gap,
+                        fprintf(stderr,"\n  ## Error: %s: unable to allocate"
+                                " a new element.\n",__func__);
+                        MMG5_INCREASE_MEM_MESSAGE();
+                        fprintf(stderr,"  Exit program.\n");
+                        return 0);
+  }
+
+
   mesh->tetra[*(ip_bb_elt_list+0)].v[0] = *(ip_bb_pt_list+0);
   mesh->tetra[*(ip_bb_elt_list+0)].v[1] = *(ip_bb_pt_list+1);
   mesh->tetra[*(ip_bb_elt_list+0)].v[2] = *(ip_bb_pt_list+3);
   mesh->tetra[*(ip_bb_elt_list+0)].v[3] = *(ip_bb_pt_list+5);
 
+
   //tetra 1
   *(ip_bb_elt_list+1) = MMG3D_newElt(mesh);
+  if ( !ip_bb_elt_list[4] ) {
+    MMG3D_TETRA_REALLOC(mesh,ip_bb_elt_list[4],mesh->gap,
+                        fprintf(stderr,"\n  ## Error: %s: unable to allocate"
+                                " a new element.\n",__func__);
+                        MMG5_INCREASE_MEM_MESSAGE();
+                        fprintf(stderr,"  Exit program.\n");
+                        return 0);
+  }
+
   mesh->tetra[*(ip_bb_elt_list+1)].v[0] = *(ip_bb_pt_list+0);
   mesh->tetra[*(ip_bb_elt_list+1)].v[1] = *(ip_bb_pt_list+5);
   mesh->tetra[*(ip_bb_elt_list+1)].v[2] = *(ip_bb_pt_list+6);
@@ -1407,6 +1424,15 @@ void  MMG3D_build_bounding_box ( MMG5_pMesh mesh, int* ip_bb_pt_list, int* ip_bb
 
   //tetra 2
   *(ip_bb_elt_list+2) = MMG3D_newElt(mesh);
+  if ( !ip_bb_elt_list[4] ) {
+    MMG3D_TETRA_REALLOC(mesh,ip_bb_elt_list[4],mesh->gap,
+                        fprintf(stderr,"\n  ## Error: %s: unable to allocate"
+                                " a new element.\n",__func__);
+                        MMG5_INCREASE_MEM_MESSAGE();
+                        fprintf(stderr,"  Exit program.\n");
+                        return 0);
+  }
+
   mesh->tetra[*(ip_bb_elt_list+2)].v[0] = *(ip_bb_pt_list+6);
   mesh->tetra[*(ip_bb_elt_list+2)].v[1] = *(ip_bb_pt_list+5);
   mesh->tetra[*(ip_bb_elt_list+2)].v[2] = *(ip_bb_pt_list+3);
@@ -1414,6 +1440,15 @@ void  MMG3D_build_bounding_box ( MMG5_pMesh mesh, int* ip_bb_pt_list, int* ip_bb
 
   //tetra 3
   *(ip_bb_elt_list+3) = MMG3D_newElt(mesh);
+  if ( !ip_bb_elt_list[4] ) {
+    MMG3D_TETRA_REALLOC(mesh,ip_bb_elt_list[4],mesh->gap,
+                        fprintf(stderr,"\n  ## Error: %s: unable to allocate"
+                                " a new element.\n",__func__);
+                        MMG5_INCREASE_MEM_MESSAGE();
+                        fprintf(stderr,"  Exit program.\n");
+                        return 0);
+  }
+
   mesh->tetra[*(ip_bb_elt_list+3)].v[0] = *(ip_bb_pt_list+0);
   mesh->tetra[*(ip_bb_elt_list+3)].v[1] = *(ip_bb_pt_list+3);
   mesh->tetra[*(ip_bb_elt_list+3)].v[2] = *(ip_bb_pt_list+2);
@@ -1421,11 +1456,21 @@ void  MMG3D_build_bounding_box ( MMG5_pMesh mesh, int* ip_bb_pt_list, int* ip_bb
 
   //tetra 4
   *(ip_bb_elt_list+4) = MMG3D_newElt(mesh);
+  if ( !ip_bb_elt_list[4] ) {
+    MMG3D_TETRA_REALLOC(mesh,ip_bb_elt_list[4],mesh->gap,
+                        fprintf(stderr,"\n  ## Error: %s: unable to allocate"
+                                " a new element.\n",__func__);
+                        MMG5_INCREASE_MEM_MESSAGE();
+                        fprintf(stderr,"  Exit program.\n");
+                        return 0);
+  }
+
   mesh->tetra[*(ip_bb_elt_list+4)].v[0] = *(ip_bb_pt_list+0);
   mesh->tetra[*(ip_bb_elt_list+4)].v[1] = *(ip_bb_pt_list+5);
   mesh->tetra[*(ip_bb_elt_list+4)].v[2] = *(ip_bb_pt_list+3);
   mesh->tetra[*(ip_bb_elt_list+4)].v[3] = *(ip_bb_pt_list+6);
 
+  return 1;
 }
 
 /**
@@ -2457,5 +2502,9 @@ int MMG5_delone_MOctree(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist
   }
 
   MMG5_DEL_MEM(mesh,hedg.item);
+
+  /* Mark the vertex ip as used */
+  mesh->point[ip].tag &= ~MG_NUL;
+
   return 1;
 }

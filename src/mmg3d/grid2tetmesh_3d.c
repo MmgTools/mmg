@@ -194,6 +194,7 @@ int MMG3D_build_coarsen_octree(MMG5_pMesh mesh, MMG5_MOctree_s* q, int depth_max
       return 1;
     }
   }
+  return 0;
 }
 
 
@@ -256,8 +257,7 @@ int MMG3D_coarsen_octree(MMG5_pMesh mesh, MMG5_pSol sol) {
  */
 static inline
 int MMG3D_convert_octree2tetmesh(MMG5_pMesh mesh, MMG5_pSol sol) {
-
-  MMG3D_del_UnusedPoints (mesh);
+int ier;
 
   int i, depth_max;
   int max_dim=0;
@@ -292,10 +292,15 @@ int MMG3D_convert_octree2tetmesh(MMG5_pMesh mesh, MMG5_pSol sol) {
     printf("  ** BOUNDING BOX GENERATION \n");
   }
 
-  MMG3D_build_bounding_box (mesh, ip_bb_pt_list, ip_bb_elt_list);
+  ier = MMG3D_build_bounding_box (mesh,sol, ip_bb_pt_list, ip_bb_elt_list);
+  if ( !ier ) {
+    fprintf (stderr,"\n  ## Warning: %s: unable to create the mesh bounding box.\n",__func__);
+    return 0;
+  }
+
   mesh->ntmax = MMG3D_NTMAX;
 
-  MMG3D_analys(mesh);
+  if ( !MMG3D_analys(mesh) ) return 0;
 
   if ( mesh->info.imprim > 4 ) {
     printf("  ** MESH GENERATION \n");
