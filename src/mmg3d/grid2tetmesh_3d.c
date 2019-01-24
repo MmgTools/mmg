@@ -245,6 +245,74 @@ int MMG3D_coarsen_octree(MMG5_pMesh mesh, MMG5_pSol sol) {
   return 1;
 }
 
+/**
+ * \param mesh pointer toward a mesh structure.
+ *
+ * \return 1 if success, 0 if fail.
+ *
+ * Delete the bounding box created for the delaunay mesh generation
+ *
+ */
+static inline
+int MMG3D_delete_bounding_box ( MMG5_pMesh mesh ) {
+  MMG5_pTetra pt;
+  int ip[8];
+  int k,i,j,iel,ifac,base;
+
+  /** Step 1: if a tetra has at least 1 vertex of the bounding box, it must be
+   * removed */
+  for ( i=0; i<8; ++i ) {
+    ip[i] = (mesh->np-i);
+  }
+
+  base = ++mesh->base;
+  for ( k=1; k<=mesh->ne; k++ ) {
+    pt = &mesh->tetra[k];
+    if ( !MG_EOK(pt) )  continue;
+
+    /* Mark the tetra with 1 bb vertex */
+    for ( i=0; i<8; ++i ) {
+      for ( j=0; j<4; ++j ) {
+        if ( pt->v[j] == ip[i] ) {
+          pt->flag = -base;
+          break;
+        }
+      }
+      if ( j != 4 ) break;
+    }
+  }
+
+  /** Step 2: delete the BB tetra and update the adja array */
+  for ( k=1; k<=mesh->ne; ++k ) {
+    pt = &mesh->tetra[k];
+
+    if ( !MG_EOK(pt) ) continue;
+
+    if ( pt->flag != -base ) continue;
+
+    for ( i=0; i<4; ++i ) {
+      iel  = mesh->adja[ 4*(k-1) + 1 + i ];
+
+      if ( !iel ) continue;
+
+      ifac = iel % 4;
+      iel /= 4;
+
+      mesh->adja[ 4*(iel-1) + 1 + ifac ] = 0;
+      mesh->adja[ 4*(k-1) + 1 + i ] = 0;
+
+    }
+    MMG3D_delElt ( mesh, k );
+  }
+
+
+  /** Step 3: delete the BB points */
+  for ( i=0; i<8; ++i ) {
+    MMG3D_delPt ( mesh,ip[i] );
+  }
+
+  return 1;
+}
 
 /**
  * \param mesh pointer toward a mesh structure.
@@ -310,9 +378,17 @@ int MMG3D_convert_octree2tetmesh(MMG5_pMesh mesh, MMG5_pSol sol) {
 
   MMG3D_add_Boundary (mesh, sol, depth_max);
 
+  /* Delete the mesh bounding box */
+  if ( !MMG3D_delete_bounding_box (mesh) ) {
+    fprintf (stderr,"\n  ## Warning: %s: unable to delete the mesh bounding box.\n",__func__);
+    return 0;
+  }
+
   /* Reset mesh informations */
   mesh->mark = 0;
   MMG5_freeXTets(mesh);
+
+  sol->np = mesh->np;
 
   return 1;
 }

@@ -2247,7 +2247,7 @@ int MMG5_delone_MOctree(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist
   short         i1;
   char          alert;
   int           isused = 0,ixt,ielnum[3*MMG3D_LONMAX+1],ll;
-  MMG5_Hash    hedg;
+  MMG5_Hash     hedg;
 #ifndef NDEBUG
   int tref;
 #endif
