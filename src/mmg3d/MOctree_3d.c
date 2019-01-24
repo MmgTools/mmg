@@ -2113,10 +2113,8 @@ int MMG3D_cavity_MOctree(MMG5_pMesh mesh ,int iel,int ip,int *list)
   MMG5_pPoint      ppt;
   MMG5_pTetra      tet,tet1,tetadj;
   double           c[3],crit,dd,eps,ray,ct[12];
-  int             *adja,*adjb,k,adj,adi,voy,i,j,ilist,ipil,jel,iadr,base;
+  int             *adja,adj,i,j,ilist,ipil,iadr,base;
   int              vois[4],l;
-  int              tref,isreq;
-  int              lon=1;
 
   list[0]=iel;
   ilist=1;
