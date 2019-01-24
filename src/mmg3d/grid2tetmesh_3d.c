@@ -379,10 +379,10 @@ int MMG3D_convert_octree2tetmesh(MMG5_pMesh mesh, MMG5_pSol sol) {
   MMG3D_add_Boundary (mesh, sol, depth_max);
 
   /* Delete the mesh bounding box */
-  if ( !MMG3D_delete_bounding_box (mesh) ) {
-    fprintf (stderr,"\n  ## Warning: %s: unable to delete the mesh bounding box.\n",__func__);
-    return 0;
-  }
+  /* if ( !MMG3D_delete_bounding_box (mesh) ) { */
+  /*   fprintf (stderr,"\n  ## Warning: %s: unable to delete the mesh bounding box.\n",__func__); */
+  /*   return 0; */
+  /* } */
 
   /* Reset mesh informations */
   mesh->mark = 0;
