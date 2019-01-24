@@ -2312,7 +2312,7 @@ int MMG5_delone_MOctree(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist
       ppt->tagdel &= ~MG_NOM;
     }
   }
-  if ( alert )  {return 0;}
+  if ( alert )  { return 0; }
   /* hash table params */
   if ( size > 3*MMG3D_LONMAX )  return 0;
   if ( !MMG5_hashNew(mesh,&hedg,size,3*size) ) { /*3*size suffit */
@@ -2450,8 +2450,6 @@ int MMG5_delone_MOctree(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist
     if ( !MMG3D_delElt(mesh,list[k]) ) return -1;
   }
 
-  // ppt = &mesh->point[ip];
-  // ppt->flag = mesh->flag;
   MMG5_DEL_MEM(mesh,hedg.item);
   return 1;
 }
