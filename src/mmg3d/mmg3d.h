@@ -386,13 +386,13 @@ int MMG3D_displayQualHisto(int,double,double,double,int,int,int,
 int MMG3D_displayQualHisto_internal(int,double,double,double,int,int,int,
                                     int his[5],int,int,int);
 void MMG3D_computeInqua(MMG5_pMesh,MMG5_pSol,int*,double*,double*,double*,int*,int*,
-                        int*,int his[5]);
+                        int*,int his[5],int);
 int  MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met);
 void MMG3D_computeOutqua(MMG5_pMesh,MMG5_pSol,int*,double*,double*,double*,int*,int*,
-                         int*,int his[5],int*);
+                         int*,int his[5],int*,int);
 int  MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met);
 void MMG3D_computeLESqua(MMG5_pMesh,MMG5_pSol,int*,double*,double*,double*,int*,int*,
-                         int*,int his[5]);
+                         int*,int his[5],int);
 int MMG3D_computePrilen(MMG5_pMesh,MMG5_pSol,double*,double*,double*,int*,int*,int*,
                         int*,int*,int*,char,double**, int [9] );
 int  MMG3D_prilen(MMG5_pMesh mesh,MMG5_pSol met,char);
