@@ -416,27 +416,6 @@ void MMG3D_computeLESqua(MMG5_pMesh mesh,MMG5_pSol met,int *ne,double *max,doubl
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \return 0 if the worst element has a nul quality, 1 otherwise.
- *
- * Print histogram of LES mesh qualities for classic storage of metric at ridges.
- *
- */
-static int MMG3D_printquaLES(MMG5_pMesh mesh,MMG5_pSol met) {
-  double         rapmin,rapmax,rapavg;
-  int            med,good,iel,ne,his[5];
-
-  MMG3D_computeLESqua(mesh,met,&ne,&rapmax,&rapavg,&rapmin,&iel,&good,&med,his);
-
-  if ( mesh->info.imprim <= 0 ) return 1;
-
-  return MMG3D_displayQualHisto(ne,rapmax,rapavg,rapmin,
-                                iel,good,med,his,0,mesh->info.optimLES,
-                                mesh->info.imprim);
-}
-
-/**
  * \param ne number of used tetra.
  * \param max maximal quality (normalized).
  * \param avg average quality (normalized).
@@ -607,11 +586,13 @@ int MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
   double      rapmin,rapmax,rapavg;
   int         med,good,iel,ne,his[5];
 
-  if( mesh->info.optimLES )
-    return MMG3D_printquaLES(mesh,met);
-
-  MMG3D_computeInqua(mesh,met,&ne,&rapmax,&rapavg,&rapmin,&iel,&good,&med,
-                     his);
+  if( mesh->info.optimLES ) {
+    MMG3D_computeLESqua(mesh,met,&ne,&rapmax,&rapavg,&rapmin,&iel,&good,&med,his);
+  }
+  else {
+    MMG3D_computeInqua(mesh,met,&ne,&rapmax,&rapavg,&rapmin,&iel,&good,&med,
+                       his);
+  }
 
   if ( mesh->info.imprim <= 0 )
     return 1;
@@ -646,6 +627,16 @@ void MMG3D_computeOutqua(MMG5_pMesh mesh,MMG5_pSol met,int *ne,double *max,doubl
   double      rap;
   int         i,k,ok,ir,nex,n;
   static char mmgWarn0 = 0;
+
+  /*compute tet quality*/
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+    if( !MG_EOK(pt) )   continue;
+    pt->qual = MMG5_orcal(mesh,met,k);
+  }
+
+  if ( mesh->info.imprim <= 0 )
+    return;
 
   (*min)  = 2.0;
   (*max)  = (*avg) = 0.0;
@@ -710,21 +701,17 @@ int MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
   double      rapmin,rapmax,rapavg;
   int         med,good,iel,ne,his[5],nrid,k;
 
-  if( mesh->info.optimLES )
-    return MMG3D_printquaLES(mesh,met);
-
-  /*compute tet quality*/
-  for (k=1; k<=mesh->ne; k++) {
-    pt = &mesh->tetra[k];
-    if( !MG_EOK(pt) )   continue;
-    pt->qual = MMG5_orcal(mesh,met,k);
+  nrid = 0;
+  if( mesh->info.optimLES ) {
+    MMG3D_computeLESqua(mesh,met,&ne,&rapmax,&rapavg,&rapmin,&iel,&good,&med,his);
+  }
+  else {
+    MMG3D_computeOutqua(mesh,met,&ne,&rapmax,&rapavg,&rapmin,&iel,&good,&med,
+                        his,&nrid);
   }
 
   if ( mesh->info.imprim <= 0 )
     return 1;
-
-  MMG3D_computeOutqua(mesh,met,&ne,&rapmax,&rapavg,&rapmin,&iel,&good,&med,
-                      his,&nrid);
 
   return MMG3D_displayQualHisto(ne,rapmax,rapavg,rapmin,
                                 iel,good,med,his,nrid,mesh->info.optimLES,
