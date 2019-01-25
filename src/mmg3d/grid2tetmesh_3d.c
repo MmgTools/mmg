@@ -540,6 +540,10 @@ int MMG3D_convert_grid2tetmesh(MMG5_pMesh mesh, MMG5_pSol sol) {
     return 0;
   }
 
+  if ( !MMG3D_saveVTKOctree(mesh,sol,mesh->nameout) ) {
+    fprintf(stderr,"\n  ## Warning: unable to save the coarsen octree\n");
+  }
+
   /**--- stage 2: Tetrahedralization */
   if ( abs(mesh->info.imprim) > 3 )
     fprintf(stdout,"\n  ** OCTREE TETRAHEDRALIZATION\n");
