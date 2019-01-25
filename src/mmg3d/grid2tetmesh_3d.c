@@ -465,7 +465,7 @@ int MMG3D_convert_octree2tetmesh_with_tetgen(MMG5_pMesh mesh, MMG5_pSol sol) {
   fclose(inm);
 
   /* run tetgen on the .node file */
-  sprintf(command, "%s -BANEF -g %s", TETGEN, tetgenfile);
+  sprintf(command, "%s -BANEF -Q -g %s", TETGEN, tetgenfile);
   ier = system(command);
   if ( ier != 0 ) {
     printf("  ## Error:%s: Tetgen error.\n",__func__);
