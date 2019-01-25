@@ -408,8 +408,8 @@ int MMG3D_convert_octree2tetmesh_with_tetgen(MMG5_pMesh mesh, MMG5_pSol sol) {
   MMG5_pPoint      ppt;
   int              i,ier,span,np,nc;
   FILE             *inm;
-  char             *filename="tmp_tetgen.node";
-  char             command[256];
+  char             *filename="tmp_tetgen";
+  char             tetgenfile[256],command[256];
 
   /* Mark all the points as unused */
   for ( i=1; i<=mesh->np; ++i ) {
@@ -429,8 +429,9 @@ int MMG3D_convert_octree2tetmesh_with_tetgen(MMG5_pMesh mesh, MMG5_pSol sol) {
   }
 
   /* Save the points in a .node file */
-  if( !(inm = fopen(filename,"w")) ) {
-    fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",filename);
+  sprintf(tetgenfile, "%s%s",filename,".node");
+  if( !(inm = fopen(tetgenfile,"w")) ) {
+    fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",tetgenfile);
     return 0;
   }
 
@@ -447,7 +448,7 @@ int MMG3D_convert_octree2tetmesh_with_tetgen(MMG5_pMesh mesh, MMG5_pSol sol) {
   fclose(inm);
 
   /* run tetgen on the .node file */
-  sprintf(command, "%s -BANEF -g %s", TETGEN, filename);
+  sprintf(command, "%s -BANEF -g %s", TETGEN, tetgenfile);
   ier = system(command);
   if ( ier != 0 ) {
     printf("  ## Error:%s: Tetgen error.\n",__func__);
@@ -468,6 +469,11 @@ int MMG3D_convert_octree2tetmesh_with_tetgen(MMG5_pMesh mesh, MMG5_pSol sol) {
   assert ( !mesh->xtetra );
   assert ( !mesh->xpoint );
   assert ( !mesh->tria );
+
+  /* Read the tetgen mesh */
+  sprintf(tetgenfile, "%s%s",filename,".1.mesh");
+  ier = MMG3D_loadMesh ( mesh,tetgenfile );
+  if ( ier<= 0 ) return 0;
 
   sol->np = mesh->np;
 
