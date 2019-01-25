@@ -416,7 +416,7 @@ int MMG3D_convert_octree2tetmesh_with_tetgen(MMG5_pMesh mesh, MMG5_pSol sol) {
     mesh->point[i].tag = MG_NUL;
   }
 
-  /* Mark the octree points as used */
+  /* Mark the octree points as used and pack the mesh vertices */
   q = mesh->octree->root;
 
   span = mesh->octree->nspan_at_root;
@@ -427,6 +427,23 @@ int MMG3D_convert_octree2tetmesh_with_tetgen(MMG5_pMesh mesh, MMG5_pSol sol) {
             " used.\n",__func__);
     return 0;
   }
+
+  /* compact metric */
+  if ( sol && sol->m ) {
+    if ( !MMG3D_pack_sol(mesh,sol) ) {
+      fprintf(stderr,"\n  ## Error: %s: unable to pack the solution.\n",__func__);
+      return 0;
+    }
+  }
+
+  nc = MMG3D_pack_points(mesh);
+  if ( nc<0 ) {
+    fprintf(stderr,"\n  ## Error: %s: unable to pack the mesh vertices.\n",__func__);
+    return 0;
+  }
+
+  /* MMG3D_saveMesh(mesh,"tt.mesh"); */
+  /* MMG3D_saveSol(mesh,sol,"tt.sol"); */
 
   /* Save the points in a .node file */
   sprintf(tetgenfile, "%s%s",filename,".node");
@@ -475,7 +492,20 @@ int MMG3D_convert_octree2tetmesh_with_tetgen(MMG5_pMesh mesh, MMG5_pSol sol) {
   ier = MMG3D_loadMesh ( mesh,tetgenfile );
   if ( ier<= 0 ) return 0;
 
-  sol->np = mesh->np;
+
+  /* Clean the tetgen mesh */
+  /* Remove spurious triangles */
+  if ( mesh->tria ) {
+    MMG5_DEL_MEM(mesh,mesh->tria);
+    mesh->nt = 0;
+  }
+  /* Remove spurious tags on mesh vertices */
+  for ( i=1; i<=mesh->np; ++i ) {
+    ppt = &mesh->point[i];
+    if ( !MG_VOK(ppt) ) continue;
+
+    ppt->tag = MG_NOTAG;
+  }
 
   return 1;
 }
