@@ -1262,6 +1262,14 @@ int MMG3D_loadVTKGrid(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
     }
   }
 
+  if ( bin ) {
+    fprintf(stderr,"  ** WRONG INPUT.\n");
+    fprintf(stderr," Binary VTK file not supported.\n");
+    fprintf(stderr," Exit program.\n");
+    fclose(inm);
+    return -1;
+  }
+
   /** Treat input data */
   if ( (!pointData) || (!dataStruct) || (!bounds) ) {
     fprintf(stderr,"  ** MISSING DATA.\n");
