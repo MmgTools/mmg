@@ -456,7 +456,18 @@ int MMG3D_convert_octree2tetmesh_with_tetgen(MMG5_pMesh mesh, MMG5_pSol sol) {
 
   /* Reset mesh informations */
   mesh->mark = 0;
-  MMG5_freeXTets(mesh);
+
+  if ( mesh->tetra ) {
+    MMG5_DEL_MEM(mesh,mesh->tetra);
+    mesh->ne = 0;
+  }
+  if ( mesh->point ) {
+    MMG5_DEL_MEM(mesh,mesh->point);
+    mesh->np = 0;
+  }
+  assert ( !mesh->xtetra );
+  assert ( !mesh->xpoint );
+  assert ( !mesh->tria );
 
   sol->np = mesh->np;
 
@@ -497,7 +508,7 @@ int MMG3D_convert_grid2tetmesh(MMG5_pMesh mesh, MMG5_pSol sol) {
   if ( abs(mesh->info.imprim) > 3 )
     fprintf(stdout,"\n  ** OCTREE TETRAHEDRALIZATION\n");
 
-  if ( !TETGEN ) {
+  if ( !strcmp(TETGEN,"TETGEN_EXEC-NOTFOUND" ) ) {
     if ( !MMG3D_convert_octree2tetmesh(mesh,sol) ) {
       fprintf(stderr,"\n  ## Octree tetrahedralization problem. Exit program.\n");
       return 0;
