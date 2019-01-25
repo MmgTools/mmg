@@ -327,6 +327,22 @@ IF( USE_SCOTCH )
   SET( LIBRARIES ${SCOTCH_LIBRARIES} ${LIBRARIES})
 ENDIF()
 
+# add tetgen executable?
+SET(TETGEN_DIR "" CACHE PATH "Installation directory for Tetgen")
+INCLUDE(cmake/modules/FindTetgen.cmake)
+
+# add Scotch library?
+CMAKE_DEPENDENT_OPTION ( USE_SCOTCH "Use SCOTCH TOOL for renumbering" ON
+  "SCOTCH_FOUND;BUILD_MMGS3D" OFF)
+
+IF( USE_SCOTCH )
+  SET(CMAKE_C_FLAGS "-DUSE_SCOTCH ${CMAKE_C_FLAGS}")
+
+  MESSAGE(STATUS
+    "Compilation with scotch: ${SCOTCH_LIBRARIES}")
+  SET( LIBRARIES ${SCOTCH_LIBRARIES} ${LIBRARIES})
+ENDIF()
+
 
 #---------------------------- mmg library gathering mmg2d, mmgs and mmg3d libs
 CMAKE_DEPENDENT_OPTION ( LIBMMG_STATIC

@@ -379,10 +379,10 @@ int MMG3D_convert_octree2tetmesh(MMG5_pMesh mesh, MMG5_pSol sol) {
   MMG3D_add_Boundary (mesh, sol, depth_max);
 
   /* Delete the mesh bounding box */
-  /* if ( !MMG3D_delete_bounding_box (mesh) ) { */
-  /*   fprintf (stderr,"\n  ## Warning: %s: unable to delete the mesh bounding box.\n",__func__); */
-  /*   return 0; */
-  /* } */
+  if ( !MMG3D_delete_bounding_box (mesh) ) {
+    fprintf (stderr,"\n  ## Warning: %s: unable to delete the mesh bounding box.\n",__func__);
+    return 0;
+  }
 
   /* Reset mesh informations */
   mesh->mark = 0;
@@ -392,6 +392,77 @@ int MMG3D_convert_octree2tetmesh(MMG5_pMesh mesh, MMG5_pSol sol) {
 
   return 1;
 }
+
+/**
+ * \param mesh pointer toward a mesh structure.
+ * \param sol pointer toward a solution structure.
+ *
+ * \return 1 if success, 0 if fail.
+ *
+ * Convert a balanced octree (2:1) into a tetrahedral mesh using tetgen.
+ *
+ */
+static inline
+int MMG3D_convert_octree2tetmesh_with_tetgen(MMG5_pMesh mesh, MMG5_pSol sol) {
+  MMG5_MOctree_s   *q;
+  MMG5_pPoint      ppt;
+  int              i,ier,span,np,nc;
+  FILE             *inm;
+  char             *filename="tmp_tetgen.node";
+  char             command[256];
+
+  /* Mark all the points as unused */
+  for ( i=1; i<=mesh->np; ++i ) {
+    mesh->point[i].tag = MG_NUL;
+  }
+
+  /* Mark the octree points as used */
+  q = mesh->octree->root;
+
+  span = mesh->octree->nspan_at_root;
+  np = nc = 0;
+  ier = MMG3D_mark_MOctreeCellCorners(mesh,q,span,&np,&nc);
+  if ( !ier ) {
+    fprintf(stderr,"\n  ## Error: %s: unable to mark the octree cell corners as"
+            " used.\n",__func__);
+    return 0;
+  }
+
+  /* Save the points in a .node file */
+  if( !(inm = fopen(filename,"w")) ) {
+    fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",filename);
+    return 0;
+  }
+
+  /* .node file : np points, in dim mesh->dim, without attribute and without markers */
+  fprintf(inm,"%d %d %d %d\n",np,mesh->dim, 0, 0);
+  np = 0;
+  for ( i=1; i<=mesh->np; ++i ) {
+    ppt = &mesh->point[i];
+    if ( MG_VOK(ppt) ) {
+      ppt->tmp = np++;
+      fprintf(inm," %d %.15lg %.15lg %.15lg\n",ppt->tmp, ppt->c[0],ppt->c[1],ppt->c[2]);
+    }
+  }
+  fclose(inm);
+
+  /* run tetgen on the .node file */
+  sprintf(command, "%s -BANEF -g %s", TETGEN, filename);
+  ier = system(command);
+  if ( ier != 0 ) {
+    printf("  ## Error:%s: Tetgen error.\n",__func__);
+    return 0;
+  }
+
+  /* Reset mesh informations */
+  mesh->mark = 0;
+  MMG5_freeXTets(mesh);
+
+  sol->np = mesh->np;
+
+  return 1;
+}
+
 
 /**
  * \param mesh pointer toward a mesh structure.
@@ -426,9 +497,17 @@ int MMG3D_convert_grid2tetmesh(MMG5_pMesh mesh, MMG5_pSol sol) {
   if ( abs(mesh->info.imprim) > 3 )
     fprintf(stdout,"\n  ** OCTREE TETRAHEDRALIZATION\n");
 
-  if ( !MMG3D_convert_octree2tetmesh(mesh,sol) ) {
-    fprintf(stderr,"\n  ## Octree tetrahedralization problem. Exit program.\n");
-    return 0;
+  if ( !TETGEN ) {
+    if ( !MMG3D_convert_octree2tetmesh(mesh,sol) ) {
+      fprintf(stderr,"\n  ## Octree tetrahedralization problem. Exit program.\n");
+      return 0;
+    }
+  }
+  else {
+    if ( !MMG3D_convert_octree2tetmesh_with_tetgen(mesh,sol) ) {
+      fprintf(stderr,"\n  ## Octree tetrahedralization using tetgen problem. Exit program.\n");
+      return 0;
+    }
   }
 
   return 1;
