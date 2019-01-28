@@ -186,11 +186,13 @@ int MMG3D_build_coarsen_octree(MMG5_pMesh mesh, MMG5_MOctree_s* q, int depth_max
           MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(mesh , &q->sons[i], dir, Neighbour);
           if(Neighbour->leaf==0 && Neighbour->depth!=0)
           {
+            MMG5_DEL_MEM (mesh,Neighbour);
             return 1;
           }
         }
       }
       MMG3D_merge_MOctree_s (q, mesh);
+      MMG5_DEL_MEM (mesh,Neighbour);
       return 1;
     }
   }
