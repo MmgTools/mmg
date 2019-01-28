@@ -173,6 +173,8 @@ int  MMG3D_set_splitls_MOctree ( MMG5_pMesh mesh, MMG5_MOctree_s* q, MMG5_pSol s
 
    if(q->depth < depth_max)
    {
+     MMG5_ADD_MEM(mesh,q->nsons*sizeof(MMG5_MOctree_s),"MOctree sons",
+                  return 0);
      MMG5_SAFE_MALLOC(q->sons,q->nsons, MMG5_MOctree_s, return 0);
      for(i=0; i<q->nsons; i++)
      {
@@ -467,6 +469,8 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
 {
   int i;
   MMG5_MOctree_s* Temp_Neighbour;
+  MMG5_ADD_MEM(mesh,sizeof(MMG5_MOctree_s),"MOctree sons",
+               return 0);
   MMG5_SAFE_MALLOC(Temp_Neighbour,1, MMG5_MOctree_s, return 0);
   MMG3D_init_MOctree_s(mesh, Temp_Neighbour, 0, 0, 0 );
 
@@ -476,6 +480,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
     if (q==mesh->octree->root)
     {
       *Neighbour=*mesh->octree->root;
+      MMG5_DEL_MEM ( mesh, Temp_Neighbour );
       return 1;
     }
 
@@ -484,6 +489,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
       if(q==&q->father->sons[i])
       {
         *Neighbour=q->father->sons[i+4];
+        MMG5_DEL_MEM ( mesh, Temp_Neighbour );
         return 1;
       }
     }
@@ -492,6 +498,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
     if(Temp_Neighbour->depth==0 || Temp_Neighbour->leaf==1)
     {
       *Neighbour=*Temp_Neighbour;
+      MMG5_DEL_MEM ( mesh, Temp_Neighbour );
       return 1;
     }
 
@@ -500,6 +507,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
       if( q==&q->father->sons[i])
       {
         *Neighbour=Temp_Neighbour->sons[i-4];
+        MMG5_DEL_MEM ( mesh, Temp_Neighbour );
         return 1;
       }
     }
@@ -511,6 +519,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
     if (q==mesh->octree->root) // q is root = q has no neighbour
     {
       *Neighbour=*mesh->octree->root;
+      MMG5_DEL_MEM ( mesh, Temp_Neighbour );
       return 1;
     }
 
@@ -519,6 +528,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
       if(q==&q->father->sons[i])
       {
         *Neighbour=q->father->sons[i-4];
+        MMG5_DEL_MEM ( mesh, Temp_Neighbour );
         return 1;
       }
     }
@@ -527,6 +537,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
     if(Temp_Neighbour->depth==0 || Temp_Neighbour->leaf==1)
     {
       *Neighbour=*Temp_Neighbour;
+      MMG5_DEL_MEM ( mesh, Temp_Neighbour );
       return 1;
     }
 
@@ -536,6 +547,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
       if(q==&q->father->sons[i])
       {
         *Neighbour=Temp_Neighbour->sons[i+4];
+        MMG5_DEL_MEM ( mesh, Temp_Neighbour );
         return 1;
       }
     }
@@ -546,6 +558,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
     if (q==mesh->octree->root) // q is root = q has no neighbour
     {
       *Neighbour=*mesh->octree->root;
+      MMG5_DEL_MEM ( mesh, Temp_Neighbour );
       return 1;
     }
 
@@ -554,6 +567,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
       if( q==&q->father->sons[i])
       {
         *Neighbour=q->father->sons[i-1];
+        MMG5_DEL_MEM ( mesh, Temp_Neighbour );
         return 1;
       }
     }
@@ -562,6 +576,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
     if(Temp_Neighbour->depth==0 || Temp_Neighbour->leaf==1)
     {
       *Neighbour=*Temp_Neighbour;
+      MMG5_DEL_MEM ( mesh, Temp_Neighbour );
       return 1;
     }
 
@@ -571,6 +586,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
       if(q==&q->father->sons[i])
       {
         *Neighbour=Temp_Neighbour->sons[i+1];
+        MMG5_DEL_MEM ( mesh, Temp_Neighbour );
         return 1;
       }
     }
@@ -582,6 +598,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
     if (q==mesh->octree->root)
     {
       *Neighbour=*mesh->octree->root;
+      MMG5_DEL_MEM ( mesh, Temp_Neighbour );
       return 1;
     }
 
@@ -590,6 +607,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
       if( q==&q->father->sons[i])
       {
         *Neighbour=q->father->sons[i+1];
+        MMG5_DEL_MEM ( mesh, Temp_Neighbour );
         return 1;
       }
     }
@@ -598,6 +616,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
     if(Temp_Neighbour->depth==0 || Temp_Neighbour->leaf==1)
     {
       *Neighbour=*Temp_Neighbour;
+      MMG5_DEL_MEM ( mesh, Temp_Neighbour );
       return 1;
     }
 
@@ -607,6 +626,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
       if(q==&q->father->sons[i])
       {
         *Neighbour=Temp_Neighbour->sons[i-1];
+        MMG5_DEL_MEM ( mesh, Temp_Neighbour );
         return 1;
       }
     }
@@ -618,6 +638,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
     if (q==mesh->octree->root)
     {
       *Neighbour=*mesh->octree->root;
+      MMG5_DEL_MEM ( mesh, Temp_Neighbour );
       return 1;
     }
 
@@ -626,6 +647,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
       if((i==0 || i==1 || i==4 || i==5) && q==&q->father->sons[i])
       {
         *Neighbour=q->father->sons[i+2];
+        MMG5_DEL_MEM ( mesh, Temp_Neighbour );
         return 1;
       }
     }
@@ -634,6 +656,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
     if(Temp_Neighbour->depth==0 || Temp_Neighbour->leaf==1)
     {
       *Neighbour=*Temp_Neighbour;
+      MMG5_DEL_MEM ( mesh, Temp_Neighbour );
       return 1;
     }
 
@@ -643,6 +666,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
       if((i==2 || i==3 || i==6 || i==7)  && q==&q->father->sons[i])
       {
         *Neighbour=Temp_Neighbour->sons[i-2];
+        MMG5_DEL_MEM ( mesh, Temp_Neighbour );
         return 1;
       }
     }
@@ -655,6 +679,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
     if (q==mesh->octree->root)
     {
       *Neighbour=*mesh->octree->root;
+      MMG5_DEL_MEM ( mesh, Temp_Neighbour );
       return 1;
     }
 
@@ -663,6 +688,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
       if((i==2 || i==3 || i==6 || i==7)  && q==&q->father->sons[i])
       {
         *Neighbour=q->father->sons[i-2];
+        MMG5_DEL_MEM ( mesh, Temp_Neighbour );
         return 1;
       }
     }
@@ -671,6 +697,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
     if(Temp_Neighbour->depth==0 || Temp_Neighbour->leaf==1)
     {
       *Neighbour=*Temp_Neighbour;
+      MMG5_DEL_MEM ( mesh, Temp_Neighbour );
       return 1;
     }
 
@@ -680,6 +707,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
       if((i==0 || i==1 || i==4 || i==5) && q==&q->father->sons[i])
       {
         *Neighbour=Temp_Neighbour->sons[i+2];
+        MMG5_DEL_MEM ( mesh, Temp_Neighbour );
         return 1;
       }
     }
@@ -692,6 +720,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
     if (q==mesh->octree->root)
     {
       *Neighbour=*mesh->octree->root;
+      MMG5_DEL_MEM ( mesh, Temp_Neighbour );
       return 1;
     }
 
@@ -707,9 +736,11 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
         if(Temp_Neighbour->depth==0 || Temp_Neighbour->leaf==1)
         {
           *Neighbour=*Temp_Neighbour;
+          MMG5_DEL_MEM ( mesh, Temp_Neighbour );
           return 1;
         }
         *Neighbour=Temp_Neighbour->sons[i+5];
+        MMG5_DEL_MEM ( mesh, Temp_Neighbour );
         return 1;
       }
       else if((i==5 || i==7 )  && q==&q->father->sons[i])
@@ -718,9 +749,11 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
         if(Temp_Neighbour->depth==0 || Temp_Neighbour->leaf==1)
         {
           *Neighbour=*Temp_Neighbour;
+          MMG5_DEL_MEM ( mesh, Temp_Neighbour );
           return 1;
         }
         *Neighbour=Temp_Neighbour->sons[i-5];
+        MMG5_DEL_MEM ( mesh, Temp_Neighbour );
         return 1;
       }
       else if((i==4 || i==6 )  && q==&q->father->sons[i])
@@ -729,9 +762,11 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
         if(Temp_Neighbour->depth==0 || Temp_Neighbour->leaf==1)
         {
           *Neighbour=*Temp_Neighbour;
+          MMG5_DEL_MEM ( mesh, Temp_Neighbour );
           return 1;
         }
         *Neighbour=Temp_Neighbour->sons[i-3];
+        MMG5_DEL_MEM ( mesh, Temp_Neighbour );
         return 1;
       }
     }
@@ -743,6 +778,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
     if (q==mesh->octree->root)
     {
       *Neighbour=*mesh->octree->root;
+      MMG5_DEL_MEM ( mesh, Temp_Neighbour );
       return 1;
     }
 
@@ -758,9 +794,11 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
         if(Temp_Neighbour->depth==0 || Temp_Neighbour->leaf==1)
         {
           *Neighbour=*Temp_Neighbour;
+          MMG5_DEL_MEM ( mesh, Temp_Neighbour );
           return 1;
         }
         *Neighbour=Temp_Neighbour->sons[i+3];
+        MMG5_DEL_MEM ( mesh, Temp_Neighbour );
         return 1;
       }
       else if((i==4 || i==6 )  && q==&q->father->sons[i])
@@ -769,9 +807,11 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
         if(Temp_Neighbour->depth==0 || Temp_Neighbour->leaf==1)
         {
           *Neighbour=*Temp_Neighbour;
+          MMG5_DEL_MEM ( mesh, Temp_Neighbour );
           return 1;
         }
         *Neighbour=Temp_Neighbour->sons[i-3];
+        MMG5_DEL_MEM ( mesh, Temp_Neighbour );
         return 1;
       }
       else if((i==5 || i==7 )  && q==&q->father->sons[i])
@@ -780,9 +820,11 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
         if(Temp_Neighbour->depth==0 || Temp_Neighbour->leaf==1)
         {
           *Neighbour=*Temp_Neighbour;
+          MMG5_DEL_MEM ( mesh, Temp_Neighbour );
           return 1;
         }
         *Neighbour=Temp_Neighbour->sons[i-5];
+        MMG5_DEL_MEM ( mesh, Temp_Neighbour );
         return 1;
       }
     }
@@ -794,6 +836,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
     if (q==mesh->octree->root)
     {
       *Neighbour=*mesh->octree->root;
+      MMG5_DEL_MEM ( mesh, Temp_Neighbour );
       return 1;
     }
 
@@ -809,9 +852,11 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
         if(Temp_Neighbour->depth==0 || Temp_Neighbour->leaf==1)
         {
           *Neighbour=*Temp_Neighbour;
+          MMG5_DEL_MEM ( mesh, Temp_Neighbour );
           return 1;
         }
         *Neighbour=Temp_Neighbour->sons[i-3];
+        MMG5_DEL_MEM ( mesh, Temp_Neighbour );
         return 1;
       }
       else if((i==1 || i==3 )  && q==&q->father->sons[i])
@@ -820,9 +865,11 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
         if(Temp_Neighbour->depth==0 || Temp_Neighbour->leaf==1)
         {
           *Neighbour=*Temp_Neighbour;
+          MMG5_DEL_MEM ( mesh, Temp_Neighbour );
           return 1;
         }
         *Neighbour=Temp_Neighbour->sons[i+3];
+        MMG5_DEL_MEM ( mesh, Temp_Neighbour );
         return 1;
       }
       else if((i==0 || i==2 )  && q==&q->father->sons[i])
@@ -831,9 +878,11 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
         if(Temp_Neighbour->depth==0 || Temp_Neighbour->leaf==1)
         {
           *Neighbour=*Temp_Neighbour;
+          MMG5_DEL_MEM ( mesh, Temp_Neighbour );
           return 1;
         }
         *Neighbour=Temp_Neighbour->sons[i+5];
+        MMG5_DEL_MEM ( mesh, Temp_Neighbour );
         return 1;
       }
     }
@@ -845,6 +894,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
     if (q==mesh->octree->root)
     {
       *Neighbour=*mesh->octree->root;
+      MMG5_DEL_MEM ( mesh, Temp_Neighbour );
       return 1;
     }
 
@@ -860,9 +910,11 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
         if(Temp_Neighbour->depth==0 || Temp_Neighbour->leaf==1)
         {
           *Neighbour=*Temp_Neighbour;
+          MMG5_DEL_MEM ( mesh, Temp_Neighbour );
           return 1;
         }
         *Neighbour=Temp_Neighbour->sons[i-5];
+        MMG5_DEL_MEM ( mesh, Temp_Neighbour );
         return 1;
       }
       else if((i==0 || i==2 )  && q==&q->father->sons[i])
@@ -871,9 +923,11 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
         if(Temp_Neighbour->depth==0 || Temp_Neighbour->leaf==1)
         {
           *Neighbour=*Temp_Neighbour;
+          MMG5_DEL_MEM ( mesh, Temp_Neighbour );
           return 1;
         }
         *Neighbour=Temp_Neighbour->sons[i+5];
+        MMG5_DEL_MEM ( mesh, Temp_Neighbour );
         return 1;
       }
       else if((i==1 || i==3 )  && q==&q->father->sons[i])
@@ -882,9 +936,11 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
         if(Temp_Neighbour->depth==0 || Temp_Neighbour->leaf==1)
         {
           *Neighbour=*Temp_Neighbour;
+          MMG5_DEL_MEM ( mesh, Temp_Neighbour );
           return 1;
         }
         *Neighbour=Temp_Neighbour->sons[i+3];
+        MMG5_DEL_MEM ( mesh, Temp_Neighbour );
         return 1;
       }
     }
@@ -896,6 +952,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
     if (q==mesh->octree->root)
     {
       *Neighbour=*mesh->octree->root;
+      MMG5_DEL_MEM ( mesh, Temp_Neighbour );
       return 1;
     }
 
@@ -911,9 +968,11 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
         if(Temp_Neighbour->depth==0 || Temp_Neighbour->leaf==1)
         {
           *Neighbour=*Temp_Neighbour;
+          MMG5_DEL_MEM ( mesh, Temp_Neighbour );
           return 1;
         }
         *Neighbour=Temp_Neighbour->sons[i+6];
+        MMG5_DEL_MEM ( mesh, Temp_Neighbour );
         return 1;
       }
       else if((i==6 || i==7 )  && q==&q->father->sons[i])
@@ -922,9 +981,11 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
         if(Temp_Neighbour->depth==0 || Temp_Neighbour->leaf==1)
         {
           *Neighbour=*Temp_Neighbour;
+          MMG5_DEL_MEM ( mesh, Temp_Neighbour );
           return 1;
         }
         *Neighbour=Temp_Neighbour->sons[i-6];
+        MMG5_DEL_MEM ( mesh, Temp_Neighbour );
         return 1;
       }
       else if((i==4 || i==5 )  && q==&q->father->sons[i])
@@ -933,9 +994,11 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
         if(Temp_Neighbour->depth==0 || Temp_Neighbour->leaf==1)
         {
           *Neighbour=*Temp_Neighbour;
+          MMG5_DEL_MEM ( mesh, Temp_Neighbour );
           return 1;
         }
         *Neighbour=Temp_Neighbour->sons[i-2];
+        MMG5_DEL_MEM ( mesh, Temp_Neighbour );
         return 1;
       }
     }
@@ -947,6 +1010,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
     if (q==mesh->octree->root)
     {
       *Neighbour=*mesh->octree->root;
+      MMG5_DEL_MEM ( mesh, Temp_Neighbour );
       return 1;
     }
 
@@ -962,9 +1026,11 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
         if(Temp_Neighbour->depth==0 || Temp_Neighbour->leaf==1)
         {
           *Neighbour=*Temp_Neighbour;
+          MMG5_DEL_MEM ( mesh, Temp_Neighbour );
           return 1;
         }
         *Neighbour=Temp_Neighbour->sons[i+2];
+        MMG5_DEL_MEM ( mesh, Temp_Neighbour );
         return 1;
       }
       else if((i==4 || i==5 )  && q==&q->father->sons[i])
@@ -973,9 +1039,11 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
         if(Temp_Neighbour->depth==0 || Temp_Neighbour->leaf==1)
         {
           *Neighbour=*Temp_Neighbour;
+          MMG5_DEL_MEM ( mesh, Temp_Neighbour );
           return 1;
         }
         *Neighbour=Temp_Neighbour->sons[i-2];
+        MMG5_DEL_MEM ( mesh, Temp_Neighbour );
         return 1;
       }
       else if((i==6 || i==7 )  && q==&q->father->sons[i])
@@ -984,9 +1052,11 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
         if(Temp_Neighbour->depth==0 || Temp_Neighbour->leaf==1)
         {
           *Neighbour=*Temp_Neighbour;
+          MMG5_DEL_MEM ( mesh, Temp_Neighbour );
           return 1;
         }
         *Neighbour=Temp_Neighbour->sons[i-6];
+        MMG5_DEL_MEM ( mesh, Temp_Neighbour );
         return 1;
       }
     }
@@ -999,6 +1069,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
     if (q==mesh->octree->root)
     {
       *Neighbour=*mesh->octree->root;
+      MMG5_DEL_MEM ( mesh, Temp_Neighbour );
       return 1;
     }
 
@@ -1014,9 +1085,11 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
         if(Temp_Neighbour->depth==0 || Temp_Neighbour->leaf==1)
         {
           *Neighbour=*Temp_Neighbour;
+          MMG5_DEL_MEM ( mesh, Temp_Neighbour );
           return 1;
         }
         *Neighbour=Temp_Neighbour->sons[i-2];
+        MMG5_DEL_MEM ( mesh, Temp_Neighbour );
         return 1;
       }
       else if((i==2 || i==3 )  && q==&q->father->sons[i])
@@ -1025,9 +1098,11 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
         if(Temp_Neighbour->depth==0 || Temp_Neighbour->leaf==1)
         {
           *Neighbour=*Temp_Neighbour;
+          MMG5_DEL_MEM ( mesh, Temp_Neighbour );
           return 1;
         }
         *Neighbour=Temp_Neighbour->sons[i+2];
+        MMG5_DEL_MEM ( mesh, Temp_Neighbour );
         return 1;
       }
       else if((i==0 || i==1 )  && q==&q->father->sons[i])
@@ -1036,9 +1111,11 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
         if(Temp_Neighbour->depth==0 || Temp_Neighbour->leaf==1)
         {
           *Neighbour=*Temp_Neighbour;
+          MMG5_DEL_MEM ( mesh, Temp_Neighbour );
           return 1;
         }
         *Neighbour=Temp_Neighbour->sons[i+6];
+        MMG5_DEL_MEM ( mesh, Temp_Neighbour );
         return 1;
       }
     }
@@ -1050,6 +1127,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
     if (q==mesh->octree->root)
     {
       *Neighbour=*mesh->octree->root;
+      MMG5_DEL_MEM ( mesh, Temp_Neighbour );
       return 1;
     }
 
@@ -1065,9 +1143,11 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
         if(Temp_Neighbour->depth==0 || Temp_Neighbour->leaf==1)
         {
           *Neighbour=*Temp_Neighbour;
+          MMG5_DEL_MEM ( mesh, Temp_Neighbour );
           return 1;
         }
         *Neighbour=Temp_Neighbour->sons[i-6];
+        MMG5_DEL_MEM ( mesh, Temp_Neighbour );
         return 1;
       }
       else if((i==0 || i==1 )  && q==&q->father->sons[i])
@@ -1076,9 +1156,11 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
         if(Temp_Neighbour->depth==0 || Temp_Neighbour->leaf==1)
         {
           *Neighbour=*Temp_Neighbour;
+          MMG5_DEL_MEM ( mesh, Temp_Neighbour );
           return 1;
         }
         *Neighbour=Temp_Neighbour->sons[i+6];
+        MMG5_DEL_MEM ( mesh, Temp_Neighbour );
         return 1;
       }
       else if((i==2 || i==3 )  && q==&q->father->sons[i])
@@ -1087,9 +1169,11 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
         if(Temp_Neighbour->depth==0 || Temp_Neighbour->leaf==1)
         {
           *Neighbour=*Temp_Neighbour;
+          MMG5_DEL_MEM ( mesh, Temp_Neighbour );
           return 1;
         }
         *Neighbour=Temp_Neighbour->sons[i+2];
+        MMG5_DEL_MEM ( mesh, Temp_Neighbour );
         return 1;
       }
     }
@@ -1101,6 +1185,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
     if (q==mesh->octree->root)
     {
       *Neighbour=*mesh->octree->root;
+      MMG5_DEL_MEM ( mesh, Temp_Neighbour );
       return 1;
     }
 
@@ -1116,9 +1201,11 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
         if(Temp_Neighbour->depth==0 || Temp_Neighbour->leaf==1)
         {
           *Neighbour=*Temp_Neighbour;
+          MMG5_DEL_MEM ( mesh, Temp_Neighbour );
           return 1;
         }
         *Neighbour=Temp_Neighbour->sons[i+1];
+        MMG5_DEL_MEM ( mesh, Temp_Neighbour );
         return 1;
       }
       else if((i==2 || i==6 )  && q==&q->father->sons[i])
@@ -1127,9 +1214,11 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
         if(Temp_Neighbour->depth==0 || Temp_Neighbour->leaf==1)
         {
           *Neighbour=*Temp_Neighbour;
+          MMG5_DEL_MEM ( mesh, Temp_Neighbour );
           return 1;
         }
         *Neighbour=Temp_Neighbour->sons[i-1];
+        MMG5_DEL_MEM ( mesh, Temp_Neighbour );
         return 1;
       }
       else if((i==0 || i==4 )  && q==&q->father->sons[i])
@@ -1138,9 +1227,11 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
         if(Temp_Neighbour->depth==0 || Temp_Neighbour->leaf==1)
         {
           *Neighbour=*Temp_Neighbour;
+          MMG5_DEL_MEM ( mesh, Temp_Neighbour );
           return 1;
         }
         *Neighbour=Temp_Neighbour->sons[i+3];
+        MMG5_DEL_MEM ( mesh, Temp_Neighbour );
         return 1;
       }
     }
@@ -1152,6 +1243,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
     if (q==mesh->octree->root)
     {
       *Neighbour=*mesh->octree->root;
+      MMG5_DEL_MEM ( mesh, Temp_Neighbour );
       return 1;
     }
 
@@ -1167,9 +1259,11 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
         if(Temp_Neighbour->depth==0 || Temp_Neighbour->leaf==1)
         {
           *Neighbour=*Temp_Neighbour;
+          MMG5_DEL_MEM ( mesh, Temp_Neighbour );
           return 1;
         }
         *Neighbour=Temp_Neighbour->sons[i-3];
+        MMG5_DEL_MEM ( mesh, Temp_Neighbour );
         return 1;
       }
       else if((i==0 || i==4 )  && q==&q->father->sons[i])
@@ -1178,9 +1272,11 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
         if(Temp_Neighbour->depth==0 || Temp_Neighbour->leaf==1)
         {
           *Neighbour=*Temp_Neighbour;
+          MMG5_DEL_MEM ( mesh, Temp_Neighbour );
           return 1;
         }
         *Neighbour=Temp_Neighbour->sons[i+3];
+        MMG5_DEL_MEM ( mesh, Temp_Neighbour );
         return 1;
       }
       else if((i==2 || i==6 )  && q==&q->father->sons[i])
@@ -1189,9 +1285,11 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
         if(Temp_Neighbour->depth==0 || Temp_Neighbour->leaf==1)
         {
           *Neighbour=*Temp_Neighbour;
+          MMG5_DEL_MEM ( mesh, Temp_Neighbour );
           return 1;
         }
         *Neighbour=Temp_Neighbour->sons[i-1];
+        MMG5_DEL_MEM ( mesh, Temp_Neighbour );
         return 1;
       }
     }
@@ -1203,6 +1301,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
     if (q==mesh->octree->root)
     {
       *Neighbour=*mesh->octree->root;
+      MMG5_DEL_MEM ( mesh, Temp_Neighbour );
       return 1;
     }
 
@@ -1218,9 +1317,11 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
         if(Temp_Neighbour->depth==0 || Temp_Neighbour->leaf==1)
         {
           *Neighbour=*Temp_Neighbour;
+          MMG5_DEL_MEM ( mesh, Temp_Neighbour );
           return 1;
         }
         *Neighbour=Temp_Neighbour->sons[i+3];
+        MMG5_DEL_MEM ( mesh, Temp_Neighbour );
         return 1;
       }
       else if((i==3 || i==7 )  && q==&q->father->sons[i])
@@ -1229,9 +1330,11 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
         if(Temp_Neighbour->depth==0 || Temp_Neighbour->leaf==1)
         {
           *Neighbour=*Temp_Neighbour;
+          MMG5_DEL_MEM ( mesh, Temp_Neighbour );
           return 1;
         }
         *Neighbour=Temp_Neighbour->sons[i-3];
+        MMG5_DEL_MEM ( mesh, Temp_Neighbour );
         return 1;
       }
       else if((i==1 || i==5 )  && q==&q->father->sons[i])
@@ -1240,9 +1343,11 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
         if(Temp_Neighbour->depth==0 || Temp_Neighbour->leaf==1)
         {
           *Neighbour=*Temp_Neighbour;
+          MMG5_DEL_MEM ( mesh, Temp_Neighbour );
           return 1;
         }
         *Neighbour=Temp_Neighbour->sons[i+1];
+        MMG5_DEL_MEM ( mesh, Temp_Neighbour );
         return 1;
       }
     }
@@ -1254,6 +1359,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
     if (q==mesh->octree->root)
     {
       *Neighbour=*mesh->octree->root;
+      MMG5_DEL_MEM ( mesh, Temp_Neighbour );
       return 1;
     }
 
@@ -1269,9 +1375,11 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
         if(Temp_Neighbour->depth==0 || Temp_Neighbour->leaf==1)
         {
           *Neighbour=*Temp_Neighbour;
+          MMG5_DEL_MEM ( mesh, Temp_Neighbour );
           return 1;
         }
         *Neighbour=Temp_Neighbour->sons[i-1];
+        MMG5_DEL_MEM ( mesh, Temp_Neighbour );
         return 1;
       }
       else if((i==1 || i==5 )  && q==&q->father->sons[i])
@@ -1280,9 +1388,11 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
         if(Temp_Neighbour->depth==0 || Temp_Neighbour->leaf==1)
         {
           *Neighbour=*Temp_Neighbour;
+          MMG5_DEL_MEM ( mesh, Temp_Neighbour );
           return 1;
         }
         *Neighbour=Temp_Neighbour->sons[i+1];
+        MMG5_DEL_MEM ( mesh, Temp_Neighbour );
         return 1;
       }
       else if((i==3 || i==7 )  && q==&q->father->sons[i])
@@ -1291,13 +1401,17 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
         if(Temp_Neighbour->depth==0 || Temp_Neighbour->leaf==1)
         {
           *Neighbour=*Temp_Neighbour;
+          MMG5_DEL_MEM ( mesh, Temp_Neighbour );
           return 1;
         }
         *Neighbour=Temp_Neighbour->sons[i-3];
+        MMG5_DEL_MEM ( mesh, Temp_Neighbour );
         return 1;
       }
     }
   }
+  MMG5_DEL_MEM ( mesh, Temp_Neighbour );
+
   return 0;
 }
 
