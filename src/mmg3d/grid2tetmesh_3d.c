@@ -342,9 +342,7 @@ int MMG3D_convert_octree2tetmesh(MMG5_pMesh mesh, MMG5_pSol sol) {
       max_dim = mesh->freeint[i];
     }
   }
-
-  /* Begin to work on the dual grid => we will have one cellule less in each
-   * direction */
+  
   max_dim--;
 
   /* set max dim to the next power of 2 */

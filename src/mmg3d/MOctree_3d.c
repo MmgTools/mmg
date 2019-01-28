@@ -234,7 +234,7 @@ int  MMG3D_set_splitls_MOctree ( MMG5_pMesh mesh, MMG5_MOctree_s* q, MMG5_pSol s
      }
    }
    else{
-     /*calculus of ip for non ghost leaves*/
+     /*calculus of ip and set split_ls for non ghost leaves*/
      int span_y,span_z;
      int ncells_xy = ncells_x * ncells_y;
 
@@ -435,15 +435,6 @@ int  MMG3D_write_MOctreeCell ( MMG5_pMesh mesh, MMG5_MOctree_s* q,int span,FILE 
         mesh->point[ip4].tmp,mesh->point[ip5].tmp,mesh->point[ip6].tmp,
         mesh->point[ip7].tmp);
 
-        /* Tag the points that will be used in the final mesh after merging*/
-        mesh->point[ip0].ref=22;
-        mesh->point[ip1].ref=22;
-        mesh->point[ip2].ref=22;
-        mesh->point[ip3].ref=22;
-        mesh->point[ip4].ref=22;
-        mesh->point[ip5].ref=22;
-        mesh->point[ip6].ref=22;
-        mesh->point[ip7].ref=22;
       }
     }
   else {
@@ -2132,21 +2123,12 @@ int MMG3D_cavity_MOctree(MMG5_pMesh mesh ,int iel,int ip,int *list)
     if(tet1->flag!=base)
     {
       tet1->flag=base;
-<<<<<<< HEAD
-      iadr = (list[ipil]-1)*4 + 1;
-      adja = &mesh->adja[iadr]; // on récupère le tétra adjacent par la première face du tétra --> si on connait l'adjacence par la première face, on retrouve les autres faces
-      vois[0]  = adja[0]; // adjacent face 0
-      vois[1]  = adja[1]; // adjacent face 1
-      vois[2]  = adja[2]; // adjacent face 2
-      vois[3]  = adja[3]; // adjacent face 3
-=======
       iadr = (list[i]-1)*4 + 1;
       adja = &mesh->adja[iadr];
       vois[0]  = adja[0];
       vois[1]  = adja[1];
       vois[2]  = adja[2];
       vois[3]  = adja[3];
->>>>>>> 8dbc6d7c038d2ee9ce854cd7ccfa31b32bf2f471
       for (i=0; i<4; i++)
       {
         adj = vois[i];
