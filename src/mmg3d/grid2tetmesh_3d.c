@@ -108,8 +108,9 @@ int MMG3D_convert_grid2smallOctree(MMG5_pMesh mesh, MMG5_pSol sol) {
   return 1;
 }
 
-/**
-* \param q pointer toward the MOctree cell
+/*
+ *\param mesh toward the mesh structure
+ *\param q pointer toward the MOctree cell
  *\param depth_max the depth maximum of the octree.
  *
  * \return 1 if success, 0 if fail.
@@ -154,7 +155,6 @@ int MMG3D_build_coarsen_octree_first_time(MMG5_pMesh mesh, MMG5_MOctree_s* q, in
  */
 static inline
 int MMG3D_build_coarsen_octree(MMG5_pMesh mesh, MMG5_MOctree_s* q, int depth_max, int depth) {
-  // descendre à depth_max -2 la premiere fois qu'on appelle cette fonction puis depth_max-3 etc
   int i;
   if (q->depth < depth)
   {
@@ -165,9 +165,9 @@ int MMG3D_build_coarsen_octree(MMG5_pMesh mesh, MMG5_MOctree_s* q, int depth_max
   }
   else
   {
-    MMG5_MOctree_s* Neighbour; // ce voisin va pointer tour à tour sur le voisin qu'on cherche
+    MMG5_MOctree_s* Neighbour;
     MMG5_SAFE_MALLOC(Neighbour,1, MMG5_MOctree_s, return 0);
-    MMG3D_init_MOctree_s(mesh, Neighbour, 0, 0, 0 ); // peut être changer l'initialisation pour les voisins j'ai mis 0 par défaut.
+    MMG3D_init_MOctree_s(mesh, Neighbour, 0, 0, 0 );
 
     int sum_leaf;
     sum_leaf=0;
