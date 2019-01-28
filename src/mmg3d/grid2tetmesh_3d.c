@@ -108,8 +108,9 @@ int MMG3D_convert_grid2smallOctree(MMG5_pMesh mesh, MMG5_pSol sol) {
   return 1;
 }
 
-/**
-* \param q pointer toward the MOctree cell
+/*
+ *\param mesh toward the mesh structure
+ *\param q pointer toward the MOctree cell
  *\param depth_max the depth maximum of the octree.
  *
  * \return 1 if success, 0 if fail.
@@ -154,7 +155,6 @@ int MMG3D_build_coarsen_octree_first_time(MMG5_pMesh mesh, MMG5_MOctree_s* q, in
  */
 static inline
 int MMG3D_build_coarsen_octree(MMG5_pMesh mesh, MMG5_MOctree_s* q, int depth_max, int depth) {
-  // descendre à depth_max -2 la premiere fois qu'on appelle cette fonction puis depth_max-3 etc
   int i;
   if (q->depth < depth)
   {
@@ -165,9 +165,9 @@ int MMG3D_build_coarsen_octree(MMG5_pMesh mesh, MMG5_MOctree_s* q, int depth_max
   }
   else
   {
-    MMG5_MOctree_s* Neighbour; // ce voisin va pointer tour à tour sur le voisin qu'on cherche
+    MMG5_MOctree_s* Neighbour;
     MMG5_SAFE_MALLOC(Neighbour,1, MMG5_MOctree_s, return 0);
-    MMG3D_init_MOctree_s(mesh, Neighbour, 0, 0, 0 ); // peut être changer l'initialisation pour les voisins j'ai mis 0 par défaut.
+    MMG3D_init_MOctree_s(mesh, Neighbour, 0, 0, 0 );
 
     int sum_leaf;
     sum_leaf=0;
@@ -194,6 +194,7 @@ int MMG3D_build_coarsen_octree(MMG5_pMesh mesh, MMG5_MOctree_s* q, int depth_max
       return 1;
     }
   }
+  return 0;
 }
 
 
@@ -244,6 +245,74 @@ int MMG3D_coarsen_octree(MMG5_pMesh mesh, MMG5_pSol sol) {
   return 1;
 }
 
+/**
+ * \param mesh pointer toward a mesh structure.
+ *
+ * \return 1 if success, 0 if fail.
+ *
+ * Delete the bounding box created for the delaunay mesh generation
+ *
+ */
+static inline
+int MMG3D_delete_bounding_box ( MMG5_pMesh mesh ) {
+  MMG5_pTetra pt;
+  int ip[8];
+  int k,i,j,iel,ifac,base;
+
+  /** Step 1: if a tetra has at least 1 vertex of the bounding box, it must be
+   * removed */
+  for ( i=0; i<8; ++i ) {
+    ip[i] = (mesh->np-i);
+  }
+
+  base = ++mesh->base;
+  for ( k=1; k<=mesh->ne; k++ ) {
+    pt = &mesh->tetra[k];
+    if ( !MG_EOK(pt) )  continue;
+
+    /* Mark the tetra with 1 bb vertex */
+    for ( i=0; i<8; ++i ) {
+      for ( j=0; j<4; ++j ) {
+        if ( pt->v[j] == ip[i] ) {
+          pt->flag = -base;
+          break;
+        }
+      }
+      if ( j != 4 ) break;
+    }
+  }
+
+  /** Step 2: delete the BB tetra and update the adja array */
+  for ( k=1; k<=mesh->ne; ++k ) {
+    pt = &mesh->tetra[k];
+
+    if ( !MG_EOK(pt) ) continue;
+
+    if ( pt->flag != -base ) continue;
+
+    for ( i=0; i<4; ++i ) {
+      iel  = mesh->adja[ 4*(k-1) + 1 + i ];
+
+      if ( !iel ) continue;
+
+      ifac = iel % 4;
+      iel /= 4;
+
+      mesh->adja[ 4*(iel-1) + 1 + ifac ] = 0;
+      mesh->adja[ 4*(k-1) + 1 + i ] = 0;
+
+    }
+    MMG3D_delElt ( mesh, k );
+  }
+
+
+  /** Step 3: delete the BB points */
+  for ( i=0; i<8; ++i ) {
+    MMG3D_delPt ( mesh,ip[i] );
+  }
+
+  return 1;
+}
 
 /**
  * \param mesh pointer toward a mesh structure.
@@ -256,11 +325,17 @@ int MMG3D_coarsen_octree(MMG5_pMesh mesh, MMG5_pSol sol) {
  */
 static inline
 int MMG3D_convert_octree2tetmesh(MMG5_pMesh mesh, MMG5_pSol sol) {
-
-  MMG3D_del_UnusedPoints (mesh);
-
   int i, depth_max;
   int max_dim=0;
+  int ip_bb_pt_list[8],ip_bb_elt_list[5];
+  int ier;
+
+  /* Mark all the points as unused */
+  for ( i=1; i<=mesh->np; ++i ) {
+    mesh->point[i].tag = MG_NUL;
+  }
+
+  /* Get the maximal dimension */
   for ( i=0; i<3; ++i ) {
     if(max_dim < mesh->freeint[i])
     {
@@ -283,19 +358,19 @@ int MMG3D_convert_octree2tetmesh(MMG5_pMesh mesh, MMG5_pSol sol) {
 
   depth_max=log(max_dim)/log(2);
 
-  int* ip_bb_pt_list=NULL;
-  ip_bb_pt_list=(int*)malloc(8*sizeof(int));
-  int* ip_bb_elt_list=NULL;
-  ip_bb_elt_list=(int*)malloc(5*sizeof(int));
-
   if ( mesh->info.imprim > 4 ) {
     printf("  ** BOUNDING BOX GENERATION \n");
   }
 
-  MMG3D_build_bounding_box (mesh, ip_bb_pt_list, ip_bb_elt_list);
+  ier = MMG3D_build_bounding_box (mesh,sol, ip_bb_pt_list, ip_bb_elt_list);
+  if ( !ier ) {
+    fprintf (stderr,"\n  ## Warning: %s: unable to create the mesh bounding box.\n",__func__);
+    return 0;
+  }
+
   mesh->ntmax = MMG3D_NTMAX;
 
-  MMG3D_analys(mesh);
+  if ( !MMG3D_analys(mesh) ) return 0;
 
   if ( mesh->info.imprim > 4 ) {
     printf("  ** MESH GENERATION \n");
@@ -303,14 +378,139 @@ int MMG3D_convert_octree2tetmesh(MMG5_pMesh mesh, MMG5_pSol sol) {
 
   MMG3D_add_Boundary (mesh, sol, depth_max);
 
+  /* Delete the mesh bounding box */
+  if ( !MMG3D_delete_bounding_box (mesh) ) {
+    fprintf (stderr,"\n  ## Warning: %s: unable to delete the mesh bounding box.\n",__func__);
+    return 0;
+  }
+
   /* Reset mesh informations */
   mesh->mark = 0;
   MMG5_freeXTets(mesh);
 
-  free(ip_bb_pt_list);
-  free(ip_bb_elt_list);
+  sol->np = mesh->np;
+
   return 1;
 }
+
+/**
+ * \param mesh pointer toward a mesh structure.
+ * \param sol pointer toward a solution structure.
+ *
+ * \return 1 if success, 0 if fail.
+ *
+ * Convert a balanced octree (2:1) into a tetrahedral mesh using tetgen.
+ *
+ */
+static inline
+int MMG3D_convert_octree2tetmesh_with_tetgen(MMG5_pMesh mesh, MMG5_pSol sol) {
+  MMG5_MOctree_s   *q;
+  MMG5_pPoint      ppt;
+  int              i,ier,span,np,nc;
+  FILE             *inm;
+  char             *filename="tmp_tetgen";
+  char             tetgenfile[256],command[256];
+
+  /* Mark all the points as unused */
+  for ( i=1; i<=mesh->np; ++i ) {
+    mesh->point[i].tag = MG_NUL;
+  }
+
+  /* Mark the octree points as used and pack the mesh vertices */
+  q = mesh->octree->root;
+
+  span = mesh->octree->nspan_at_root;
+  np = nc = 0;
+  ier = MMG3D_mark_MOctreeCellCorners(mesh,q,span,&np,&nc);
+  if ( !ier ) {
+    fprintf(stderr,"\n  ## Error: %s: unable to mark the octree cell corners as"
+            " used.\n",__func__);
+    return 0;
+  }
+
+  /* compact metric */
+  if ( sol && sol->m ) {
+    if ( !MMG3D_pack_sol(mesh,sol) ) {
+      fprintf(stderr,"\n  ## Error: %s: unable to pack the solution.\n",__func__);
+      return 0;
+    }
+  }
+
+  nc = MMG3D_pack_points(mesh);
+  if ( nc<0 ) {
+    fprintf(stderr,"\n  ## Error: %s: unable to pack the mesh vertices.\n",__func__);
+    return 0;
+  }
+
+  /* MMG3D_saveMesh(mesh,"tt.mesh"); */
+  /* MMG3D_saveSol(mesh,sol,"tt.sol"); */
+
+  /* Save the points in a .node file */
+  sprintf(tetgenfile, "%s%s",filename,".node");
+  if( !(inm = fopen(tetgenfile,"w")) ) {
+    fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",tetgenfile);
+    return 0;
+  }
+
+  /* .node file : np points, in dim mesh->dim, without attribute and without markers */
+  fprintf(inm,"%d %d %d %d\n",np,mesh->dim, 0, 0);
+  np = 0;
+  for ( i=1; i<=mesh->np; ++i ) {
+    ppt = &mesh->point[i];
+    if ( MG_VOK(ppt) ) {
+      ppt->tmp = np++;
+      fprintf(inm," %d %.15lg %.15lg %.15lg\n",ppt->tmp, ppt->c[0],ppt->c[1],ppt->c[2]);
+    }
+  }
+  fclose(inm);
+
+  /* run tetgen on the .node file */
+  sprintf(command, "%s -BANEF -Q -g %s", TETGEN, tetgenfile);
+  ier = system(command);
+  if ( ier != 0 ) {
+    printf("  ## Error:%s: Tetgen error.\n",__func__);
+    return 0;
+  }
+  MMG3D_saveSol(mesh,sol,"tmp_tetgen.1.sol");
+
+  /* Reset mesh informations */
+  mesh->mark = 0;
+
+  if ( mesh->tetra ) {
+    MMG5_DEL_MEM(mesh,mesh->tetra);
+    mesh->ne = 0;
+  }
+  if ( mesh->point ) {
+    MMG5_DEL_MEM(mesh,mesh->point);
+    mesh->np = 0;
+  }
+  assert ( !mesh->xtetra );
+  assert ( !mesh->xpoint );
+  assert ( !mesh->tria );
+
+  /* Read the tetgen mesh */
+  sprintf(tetgenfile, "%s%s",filename,".1.mesh");
+  ier = MMG3D_loadMesh ( mesh,tetgenfile );
+  if ( ier<= 0 ) return 0;
+
+
+  /* Clean the tetgen mesh */
+  /* Remove spurious triangles */
+  if ( mesh->tria ) {
+    MMG5_DEL_MEM(mesh,mesh->tria);
+    mesh->nt = 0;
+  }
+  /* Remove spurious tags on mesh vertices */
+  for ( i=1; i<=mesh->np; ++i ) {
+    ppt = &mesh->point[i];
+    if ( !MG_VOK(ppt) ) continue;
+
+    ppt->tag = MG_NOTAG;
+  }
+
+  return 1;
+}
+
 
 /**
  * \param mesh pointer toward a mesh structure.
@@ -341,15 +541,25 @@ int MMG3D_convert_grid2tetmesh(MMG5_pMesh mesh, MMG5_pSol sol) {
     return 0;
   }
 
-  MMG3D_saveVTKOctree(mesh,sol,mesh->nameout);
+  if ( !MMG3D_saveVTKOctree(mesh,sol,mesh->nameout) ) {
+    fprintf(stderr,"\n  ## Warning: unable to save the coarsen octree\n");
+  }
 
   /**--- stage 2: Tetrahedralization */
   if ( abs(mesh->info.imprim) > 3 )
     fprintf(stdout,"\n  ** OCTREE TETRAHEDRALIZATION\n");
 
-  if ( !MMG3D_convert_octree2tetmesh(mesh,sol) ) {
-    fprintf(stderr,"\n  ## Octree tetrahedralization problem. Exit program.\n");
-    return 0;
+  if ( !strcmp(TETGEN,"TETGEN_EXEC-NOTFOUND" ) ) {
+    if ( !MMG3D_convert_octree2tetmesh(mesh,sol) ) {
+      fprintf(stderr,"\n  ## Octree tetrahedralization problem. Exit program.\n");
+      return 0;
+    }
+  }
+  else {
+    if ( !MMG3D_convert_octree2tetmesh_with_tetgen(mesh,sol) ) {
+      fprintf(stderr,"\n  ## Octree tetrahedralization using tetgen problem. Exit program.\n");
+      return 0;
+    }
   }
 
   return 1;

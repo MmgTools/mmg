@@ -63,6 +63,8 @@ extern "C" {
 #define MG_CPY   "Copyright (c) Bdx INP/CNRS/Inria/UPMC, 2004-"
 #define MG_STR   "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"
 
+#define TETGEN   "@TETGEN_EXEC@"
+
 /** Check if \a a and \a b have the same sign */
 #define MG_SMSGN(a,b)  (((double)(a)*(double)(b) > (0.0)) ? (1) : (0))
 

@@ -1262,6 +1262,14 @@ int MMG3D_loadVTKGrid(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
     }
   }
 
+  if ( bin ) {
+    fprintf(stderr,"  ** WRONG INPUT.\n");
+    fprintf(stderr," Binary VTK file not supported.\n");
+    fprintf(stderr," Exit program.\n");
+    fclose(inm);
+    return -1;
+  }
+
   /** Treat input data */
   if ( (!pointData) || (!dataStruct) || (!bounds) ) {
     fprintf(stderr,"  ** MISSING DATA.\n");
@@ -1321,10 +1329,10 @@ int MMG3D_loadVTKGrid(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   }
 
   /** Memory allocations */
-  mesh->memMax = MMG5_memSize();
-
   mesh->npi   = mesh->np;
-  mesh->npmax = mesh->np+1;
+  /* Set npmax to the number of points in the grid + 8 points for the mesh
+   * bounding box (mesh generation step) */
+  mesh->npmax = mesh->np+9;
   mesh->nemax = MMG3D_NEMAX;
   mesh->nemax = MMG3D_NTMAX;
 
