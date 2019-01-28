@@ -471,6 +471,7 @@ int MMG3D_convert_octree2tetmesh_with_tetgen(MMG5_pMesh mesh, MMG5_pSol sol) {
     printf("  ## Error:%s: Tetgen error.\n",__func__);
     return 0;
   }
+  MMG3D_saveSol(mesh,sol,"tmp_tetgen.1.sol");
 
   /* Reset mesh informations */
   mesh->mark = 0;

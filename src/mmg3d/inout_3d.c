@@ -1329,7 +1329,6 @@ int MMG3D_loadVTKGrid(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   }
 
   /** Memory allocations */
-
   mesh->npi   = mesh->np;
   /* Set npmax to the number of points in the grid + 8 points for the mesh
    * bounding box (mesh generation step) */
