@@ -262,8 +262,8 @@ int  MMG3D_set_splitls_MOctree ( MMG5_pMesh mesh, MMG5_MOctree_s* q, MMG5_pSol s
  * Free a MOctree.
  *
  */
-int MMG3D_free_MOctree  ( MMG5_pMOctree** q, MMG5_pMesh mesh) {
-  MMG5_DEL_MEM(mesh,*q);
+int MMG3D_free_MOctree  ( MMG5_pMOctree* q, MMG5_pMesh mesh) {
+  MMG5_DEL_MEM(mesh,q);
   return 1;
 }
 
@@ -454,7 +454,7 @@ int  MMG3D_write_MOctreeCell ( MMG5_pMesh mesh, MMG5_MOctree_s* q,int span,FILE 
 
 
 /**
- * \param mesh pointer toward the mesh
+ * \param mesh pointer toward the mesh structure
  * \param q pointer toward the MOctree cell
  * \param dir direction to find the neighbour
  * \param Neighbour pointer toward the neighbour cell
@@ -469,7 +469,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
 {
   int i;
   MMG5_MOctree_s* Temp_Neighbour;
-  MMG5_ADD_MEM(mesh,sizeof(MMG5_MOctree_s),"MOctree sons",
+  MMG5_ADD_MEM(mesh,sizeof(MMG5_MOctree_s),"MOctree Temp_Neighbour",
                return 0);
   MMG5_SAFE_MALLOC(Temp_Neighbour,1, MMG5_MOctree_s, return 0);
   MMG3D_init_MOctree_s(mesh, Temp_Neighbour, 0, 0, 0 );
@@ -516,7 +516,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
 /*DOWN*/
   if(dir == 1)
   {
-    if (q==mesh->octree->root) // q is root = q has no neighbour
+    if (q==mesh->octree->root)
     {
       *Neighbour=*mesh->octree->root;
       MMG5_DEL_MEM ( mesh, Temp_Neighbour );
@@ -553,9 +553,10 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
     }
   }
 
-  if(dir == 2) //LEFT
+  /*LEFT*/
+  if(dir == 2)
   {
-    if (q==mesh->octree->root) // q is root = q has no neighbour
+    if (q==mesh->octree->root)
     {
       *Neighbour=*mesh->octree->root;
       MMG5_DEL_MEM ( mesh, Temp_Neighbour );
@@ -673,7 +674,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
   }
 
 
-/*FRONT*/
+  /*FRONT*/
   if(dir == 5)
   {
     if (q==mesh->octree->root)
@@ -1295,7 +1296,7 @@ int MMG3D_find_Neighbour_of_Bigger_or_Equal_Size(MMG5_pMesh mesh, MMG5_MOctree_s
     }
   }
 
-/*RIGHTFRONT*/
+  /*RIGHTFRONT*/
   if(dir == 16)
   {
     if (q==mesh->octree->root)
@@ -1505,7 +1506,7 @@ int  MMG3D_build_bounding_box ( MMG5_pMesh mesh, MMG5_pSol sol,
   assert (ip_bb_pt_list[7]);
 
 
-/*Creation of the 5 tetrahedra inside the bounding box*/
+  /*Creation of the 5 tetrahedra inside the bounding box*/
   *(ip_bb_elt_list+0) = MMG3D_newElt(mesh);
   if ( !ip_bb_elt_list[0] ) {
     MMG3D_TETRA_REALLOC(mesh,ip_bb_elt_list[0],mesh->gap,
@@ -1585,7 +1586,7 @@ int  MMG3D_build_bounding_box ( MMG5_pMesh mesh, MMG5_pSol sol,
 }
 
 /**
- * \param mesh pointer toward the mesh
+ * \param mesh pointer toward the mesh structure
  * \param q pointer toward the MOctree cell
  * \param face_border the number of the treated face
  * \param depth_max the maximum depth of the octree
@@ -2282,7 +2283,7 @@ int MMG3D_cavity_MOctree(MMG5_pMesh mesh ,int iel,int ip,int *list)
 
 
 /**
-* \param mesh pointer toward the mesh
+* \param mesh pointer toward the mesh structure
 * \param sol toward the solution structure
 * \param depth_max maximum depth of the octree
 *
@@ -2336,6 +2337,7 @@ int  MMG3D_add_Boundary ( MMG5_pMesh mesh, MMG5_pSol sol, int depth_max) {
       return 0;
     }
 
+    /*tag to know if the point has been inserted in the mesh*/
     mesh->point[*(listip+i)].ref=44;
     i++;
   }

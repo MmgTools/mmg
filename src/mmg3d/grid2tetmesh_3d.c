@@ -108,7 +108,7 @@ int MMG3D_convert_grid2smallOctree(MMG5_pMesh mesh, MMG5_pSol sol) {
   return 1;
 }
 
-/*
+/**
  *\param mesh toward the mesh structure
  *\param q pointer toward the MOctree cell
  *\param depth_max the depth maximum of the octree.
@@ -145,7 +145,7 @@ int MMG3D_build_coarsen_octree_first_time(MMG5_pMesh mesh, MMG5_MOctree_s* q, in
 }
 
 /**
-* \param q pointer toward the MOctree cell
+ *\param q pointer toward the MOctree cell
  *\param depth_max the depth maximum of the octree.
  *\param depth  the depth of the parent that we want to see if we can merge his sons.
  * \return 1 if success, 0 if fail.
@@ -166,6 +166,8 @@ int MMG3D_build_coarsen_octree(MMG5_pMesh mesh, MMG5_MOctree_s* q, int depth_max
   else
   {
     MMG5_MOctree_s* Neighbour;
+    MMG5_ADD_MEM(mesh,sizeof(MMG5_MOctree_s),"MOctree neighbour",
+                 return 0);
     MMG5_SAFE_MALLOC(Neighbour,1, MMG5_MOctree_s, return 0);
     MMG3D_init_MOctree_s(mesh, Neighbour, 0, 0, 0 );
 
@@ -195,6 +197,10 @@ int MMG3D_build_coarsen_octree(MMG5_pMesh mesh, MMG5_MOctree_s* q, int depth_max
       MMG5_DEL_MEM (mesh,Neighbour);
       return 1;
     }
+    else
+    {
+      MMG5_DEL_MEM (mesh,Neighbour);
+    }
   }
   return 0;
 }
@@ -223,8 +229,6 @@ int MMG3D_coarsen_octree(MMG5_pMesh mesh, MMG5_pSol sol) {
     }
   }
 
-  /* Begin to work on the dual grid => we will have one cellule less in each
-   * direction */
   max_dim--;
 
   /* set max dim to the next power of 2 */
@@ -344,7 +348,7 @@ int MMG3D_convert_octree2tetmesh(MMG5_pMesh mesh, MMG5_pSol sol) {
       max_dim = mesh->freeint[i];
     }
   }
-  
+
   max_dim--;
 
   /* set max dim to the next power of 2 */
@@ -391,6 +395,80 @@ int MMG3D_convert_octree2tetmesh(MMG5_pMesh mesh, MMG5_pSol sol) {
   sol->np = mesh->np;
 
   return 1;
+}
+
+/**
+ * \param mesh pointer toward a mesh structure.
+ * \param q pointer toward to the MOctree cell
+ * \param depth_max maximum depth of the octree
+ * \param depth depth of the octree to reach
+ *
+ *
+ * \return 1 if success, 0 if fail.
+ *
+ * Delete the octree cells at depth
+ *
+ */
+static inline
+int MMG3D_delete_MOCtree(MMG5_pMesh mesh, MMG5_MOctree_s* q, int depth_max, int depth) {
+  int i;
+  if (q->depth < depth)
+  {
+    for (i=0; i< q->nsons; i++)
+    {
+      MMG3D_delete_MOCtree(mesh, &q->sons[i], depth_max, depth);
+    }
+  }
+  else
+  {
+    MMG3D_free_MOctree_s(q,mesh);
+  }
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward a mesh structure.
+ *
+ * \return 1 if success, 0 if fail.
+ *
+ * Delete the octree and free memory
+ *
+ */
+static inline
+int MMG3D_delete_octree ( MMG5_pMesh mesh ) {
+  MMG5_MOctree_s *po;
+  po=mesh->octree->root;
+
+  int i, depth_max;
+  int max_dim=0;
+  for ( i=0; i<3; ++i ) {
+    if(max_dim < mesh->freeint[i])
+    {
+      max_dim = mesh->freeint[i];
+    }
+  }
+
+  max_dim--;
+
+  /* set max dim to the next power of 2 */
+  max_dim--;
+  max_dim |= max_dim >> 1;
+  max_dim |= max_dim >> 2;
+  max_dim |= max_dim >> 4;
+  max_dim |= max_dim >> 8;
+  max_dim |= max_dim >> 16;
+  max_dim++;
+
+  depth_max=log(max_dim)/log(2);
+  int depth;
+  for (depth=depth_max-2; depth>=0; depth --)
+  {
+    MMG3D_delete_MOCtree(mesh,po, depth_max, depth);
+  }
+  MMG3D_free_MOctree_s( po, mesh);
+  MMG3D_free_MOctree( &mesh->octree,mesh);
+  return 1;
+
 }
 
 /**
@@ -519,7 +597,7 @@ int MMG3D_convert_octree2tetmesh_with_tetgen(MMG5_pMesh mesh, MMG5_pSol sol) {
  *
  * \return 1 if success, 0 if fail.
  *
- * Convert a strcutured grid into an octree, then transform this octree into a
+ * Convert a structured grid into an octree, then transform this octree into a
  * tetrahedral mesh.
  *
  */
@@ -561,6 +639,6 @@ int MMG3D_convert_grid2tetmesh(MMG5_pMesh mesh, MMG5_pSol sol) {
       return 0;
     }
   }
-
+  MMG3D_delete_octree (mesh);
   return 1;
 }
