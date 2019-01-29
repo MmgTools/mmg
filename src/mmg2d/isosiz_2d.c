@@ -97,7 +97,7 @@ int MMG2D_set_metricAtPointsOnReqEdges ( MMG5_pMesh mesh,MMG5_pSol met ) {
            (pt->tag[i] & MG_PARBDY) ) {
 
         /* Check if the edge has been proceeded by the neighbour triangle */
-        iadj = mesh->adja[3*k+i+1];
+        iadj = mesh->adja[3*(k-1)+i+1];
         if ( iadj && mesh->tria[iadj/3].flag ) continue;
 
         if ( !MMG2D_sum_reqEdgeLengthsAtPoint(mesh,met,pt,i) ) {
@@ -192,6 +192,7 @@ int MMG2D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
     if ( !MG_EOK(pt) ) continue;
 
     for ( i=0; i<3; i++ ) {
+
       if ( !MG_EDG(pt->tag[i]) ) continue;
 
       i1 = MMG5_inxt2[i];
@@ -284,6 +285,7 @@ int MMG2D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
         lm = 8.0*lhausd / M1;
         lm = MG_MIN(lhmax,sqrt(lm));
       }
+
       if ( p1->flag < 3 ) {
         met->m[ip1] = MG_MAX(hmin,MG_MIN(met->m[ip1],lm));
       }
