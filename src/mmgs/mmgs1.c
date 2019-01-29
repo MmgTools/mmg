@@ -1373,6 +1373,7 @@ int MMG5_mmgs1(MMG5_pMesh mesh,MMG5_pSol met) {
     fprintf(stderr,"\n  ## Metric undefined. Exit program.\n");
     return 0;
   }
+
   if ( mesh->info.hgrad > 0. ) {
     if ( mesh->info.imprim > 0 ) {
       fprintf(stdout,"\n  -- GRADATION : %8f (%8f)\n",exp(mesh->info.hgrad),

@@ -1280,11 +1280,6 @@ int MMG5_grad2metSurfreq(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int npma
   if( !MMG5_nortri(mesh,pt,nt) )
     return 0;
 
-  if ( npslave ==58913 ) {
-
-    printf("nt %.15lg %.15lg %.15lg\n",nt[0],nt[1],nt[2]);
-  }
-
   /* Recover normal and metric associated to p1 */
   if( MG_SIN(p1->tag) || (MG_NOM & p1->tag)){
     memcpy(n1,nt,3*sizeof(double));
@@ -1351,12 +1346,6 @@ int MMG5_grad2metSurfreq(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int npma
   /* Characteristic sizes in direction of support curve */
   MMG5_rmtr(r1,m1,mr1);
 
-  if ( npslave ==58913 ) {
-
-    printf("mr1 %.15lg %.15lg %.15lg\n",mtan1[0],mtan1[1],mtan1[2]);
-  }
-
-
   mtan1[0] = mr1[0];
   mtan1[1] = mr1[1];
   mtan1[2] = mr1[3];
@@ -1385,12 +1374,6 @@ int MMG5_grad2metSurfreq(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int npma
   mtan2[1] = mr2[1];
   mtan2[2] = mr2[3];
 
-  if ( npslave ==58913 ) {
-
-    printf("mr2 %.15lg %.15lg %.15lg\n",mtan2[0],mtan2[1],mtan2[2]);
-  }
-
-
   c[0] = - ( r2[0][0]*ux + r2[0][1]*uy + r2[0][2]*uz );
   c[1] = - ( r2[1][0]*ux + r2[1][1]*uy + r2[1][2]*uz );
   memcpy(t2,c,2*sizeof(double));
@@ -1418,7 +1401,7 @@ int MMG5_grad2metSurfreq(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int npma
     }
   }
   /* Impose a smaller metric in p2 */
-  else{
+  else {
     alpha = ps1 /(1.0+mesh->info.hgrad*l*ps1);
     if( ps2 >= alpha - MMG5_EPS ) {
       /* No need to graduate: l_{M1-hgrad*l} < l_{M2} => M1-hgrad*l > M2 */
@@ -1430,11 +1413,6 @@ int MMG5_grad2metSurfreq(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int npma
 
   c[0] = t2[0]*vp[0][0] + t2[1]*vp[0][1] ;
   c[1] = t2[0]*vp[1][0] + t2[1]*vp[1][1] ;
-
-  if ( npslave ==58913 ) {
-
-    printf("c %.15lg %.15lg \n",c[0],c[1]);
-  }
 
   /* Detect which of the main directions of the metric is closest to our edge
    * direction. */
@@ -1484,12 +1462,6 @@ int MMG5_grad2metSurfreq(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int npma
     mu[0] = lambda[0];
     mu[1] = lambda[1];
     mu[2] = mr2[5];
-
-    if ( npslave ==58913 ) {
-
-      printf("ichg %d %.15lg  %.15lg \n",ichg,mu[ichg],beta);
-    }
-
 
     mu[ichg] += beta;
     assert ( mu[ichg]>0 );
@@ -1658,7 +1630,8 @@ int MMG5_gradsizreq_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
   if ( mesh->info.hgrad < 0. ) {
-    /** Mark the edges belonging to a required entity */
+    /** Mark the edges belonging to a required entity (already done if the
+     * classic gradation is enabled) */
     MMG5_mark_pointsOnReqEdge_fromTria ( mesh );
   }
 

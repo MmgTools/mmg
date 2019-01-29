@@ -107,7 +107,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
   long         posnp,posnt,posne,posncor,posnq,posned,posnr;
   long         posnpreq,posnormal,posnc1;
   int         i,k,ia,nq,nri,ip,idn,ng,npreq;
-  int         ncor,bin,iswp,nedreq,posnedreq,bdim,binch,bpos;
+  int         ncor,bin,iswp,nedreq,ntreq,posnedreq,bdim,binch,bpos;
   int         na,*ina,a,b,ref;
   char        *ptr,*data,chaine[128];
 
@@ -115,7 +115,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
   posnp = posnt = posne = posncor = posnq = 0;
   posned = posnr = posnpreq = posnc1 = npreq = 0;
   posnedreq = posnormal = 0;
-  ncor = nri = ng = nedreq = nq = 0;
+  ncor = nri = ng = nedreq = nq = ntreq = 0;
   bin = 0;
   iswp = 0;
   mesh->np = mesh->nt = mesh->nti = mesh->npi = 0;
@@ -178,6 +178,12 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
       } else if(!strncmp(chaine,"Triangles",strlen("Triangles"))) {
         fscanf(inm,"%d",&mesh->nti);
         posnt = ftell(inm);
+        continue;
+      }
+      else if(!strncmp(chaine,"RequiredTriangles",strlen("RequiredTriangles"))) {
+        fscanf(inm,"%d",&ntreq);
+        fprintf(stderr,"\n  ## Warning: %s: required triangles not yet implementd in mmgs.\n"
+                " %d required triangle(s) ignored.\n",__func__,ntreq);
         continue;
       } else if(!strncmp(chaine,"Quadrilaterals",strlen("Quadrilaterals"))) {
         fscanf(inm,"%d",&nq);
