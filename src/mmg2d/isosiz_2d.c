@@ -139,6 +139,9 @@ int MMG2D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
     return 0;
   }
 
+  /* Reset the s and flag field : s is used to count the number of req edges to
+   * which a req point belongs and flag is used to differenciate the point not
+   * yet treated, the points with a required metric and the classical points */
   for (k=1; k<=mesh->np; k++) {
     p0 = &mesh->point[k];
     p0->flag = 0;

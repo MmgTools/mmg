@@ -1691,7 +1691,9 @@ int MMG5_gradsizreq_ani(MMG5_pMesh mesh,MMG5_pSol met) {
           npslave  = np1;
         }
 
-        /* Impose the gradation to npslave from npmaster */
+        /* Impose the gradation to npslave from npmaster: coming from mmgs,
+         * MMG5_grad2metreq_ani is a pointer toward MMG5_grad2metSurfreq,
+         * comming from mmg2d, it is a pointer toward MMG2D_grad2metreq_ani */
         ier = MMG5_grad2metreq_ani(mesh,met,pt,npmaster,npslave);
 
         if ( ier ) {
