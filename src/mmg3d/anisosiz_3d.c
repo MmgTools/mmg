@@ -1270,10 +1270,7 @@ int MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
     ppt->s    = 0;
   }
 
-  if ( met->m ) {
-   assert ( mesh->info.inputMet );
-  }
-  else {
+  if ( !met->m ) {
     /* Allocate and store the header informations for each solution */
     if ( !MMG3D_Set_solSize(mesh,met,MMG5_Vertex,mesh->np,3) ) {
       return 0;
