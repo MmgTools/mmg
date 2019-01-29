@@ -123,7 +123,7 @@ int MMG3D_build_coarsen_octree_first_time(MMG5_pMesh mesh, MMG5_MOctree_s* q, in
   int i;
   if (q->depth < depth_max-1)
   {
-        for (i=0; i< q->nsons; i++)
+    for (i=0; i< q->nsons; i++)
     {
       MMG3D_build_coarsen_octree_first_time(mesh, &q->sons[i],depth_max);
     }
@@ -320,6 +320,65 @@ int MMG3D_delete_bounding_box ( MMG5_pMesh mesh ) {
   return 1;
 }
 
+
+/**
+ * \param mesh pointer toward a mesh structure.
+ * \param q pointer toward to the MOctree cell
+ * \param depth_max maximum depth of the octree
+ * \param depth depth of the octree to reach
+ *
+ *
+ * \return 1 if success, 0 if fail.
+ *
+ * Delete the octree cells at depth
+ *
+ */
+static inline
+int MMG3D_delete_MOctree(MMG5_pMesh mesh, MMG5_MOctree_s* q) {
+  int i;
+
+#ifndef NDEBUG
+  /* Security check */
+  if ( q->nsons ) {
+    assert ( q->sons );
+  }
+  if ( q->sons ) {
+    assert ( q->nsons );
+  }
+#endif
+
+  /* Free the subcell */
+  for ( i=0; i<q->nsons; i++ ) {
+    if ( q->sons[i].nsons )  {
+      MMG3D_delete_MOctree(mesh, &q->sons[i]);
+    }
+  }
+
+  /* Free our sons */
+  MMG3D_free_MOctree_s ( q, mesh );
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward a mesh structure.
+ *
+ * \return 1 if success, 0 if fail.
+ *
+ * Delete the octree and free memory
+ *
+ */
+static inline
+int MMG3D_delete_octree ( MMG5_pMesh mesh ) {
+
+  MMG3D_delete_MOctree(mesh,mesh->octree->root);
+
+  MMG3D_free_MOctree( &mesh->octree,mesh);
+
+  return 1;
+
+}
+
 /**
  * \param mesh pointer toward a mesh structure.
  * \param sol pointer toward a solution structure.
@@ -389,86 +448,14 @@ int MMG3D_convert_octree2tetmesh(MMG5_pMesh mesh, MMG5_pSol sol) {
   }
 
   /* Reset mesh informations */
+  MMG3D_delete_octree (mesh);
+
   mesh->mark = 0;
   MMG5_freeXTets(mesh);
 
   sol->np = mesh->np;
 
   return 1;
-}
-
-/**
- * \param mesh pointer toward a mesh structure.
- * \param q pointer toward to the MOctree cell
- * \param depth_max maximum depth of the octree
- * \param depth depth of the octree to reach
- *
- *
- * \return 1 if success, 0 if fail.
- *
- * Delete the octree cells at depth
- *
- */
-static inline
-int MMG3D_delete_MOCtree(MMG5_pMesh mesh, MMG5_MOctree_s* q, int depth_max, int depth) {
-  int i;
-  if (q->depth < depth)
-  {
-    for (i=0; i< q->nsons; i++)
-    {
-      MMG3D_delete_MOCtree(mesh, &q->sons[i], depth_max, depth);
-    }
-  }
-  else
-  {
-    MMG3D_free_MOctree_s(q,mesh);
-  }
-  return 1;
-}
-
-/**
- * \param mesh pointer toward a mesh structure.
- *
- * \return 1 if success, 0 if fail.
- *
- * Delete the octree and free memory
- *
- */
-static inline
-int MMG3D_delete_octree ( MMG5_pMesh mesh ) {
-  MMG5_MOctree_s *po;
-  po=mesh->octree->root;
-
-  int i, depth_max;
-  int max_dim=0;
-  for ( i=0; i<3; ++i ) {
-    if(max_dim < mesh->freeint[i])
-    {
-      max_dim = mesh->freeint[i];
-    }
-  }
-
-  max_dim--;
-
-  /* set max dim to the next power of 2 */
-  max_dim--;
-  max_dim |= max_dim >> 1;
-  max_dim |= max_dim >> 2;
-  max_dim |= max_dim >> 4;
-  max_dim |= max_dim >> 8;
-  max_dim |= max_dim >> 16;
-  max_dim++;
-
-  depth_max=log(max_dim)/log(2);
-  int depth;
-  for (depth=depth_max-2; depth>=0; depth --)
-  {
-    MMG3D_delete_MOCtree(mesh,po, depth_max, depth);
-  }
-  MMG3D_free_MOctree_s( po, mesh);
-  MMG3D_free_MOctree( &mesh->octree,mesh);
-  return 1;
-
 }
 
 /**
@@ -505,6 +492,7 @@ int MMG3D_convert_octree2tetmesh_with_tetgen(MMG5_pMesh mesh, MMG5_pSol sol) {
             " used.\n",__func__);
     return 0;
   }
+  MMG3D_delete_octree (mesh);
 
   /* compact metric */
   if ( sol && sol->m ) {
@@ -589,6 +577,23 @@ int MMG3D_convert_octree2tetmesh_with_tetgen(MMG5_pMesh mesh, MMG5_pSol sol) {
   return 1;
 }
 
+static inline int MMG3D_check_octreeSons ( MMG5_MOctree_s *q ) {
+  int i;
+
+  /* Security check */
+  if ( q->nsons ) {
+    assert ( q->sons );
+  }
+  if ( q->sons ) {
+    assert ( q->nsons );
+  }
+
+  for ( i=0; i<q->nsons; ++i ) {
+    MMG3D_check_octreeSons (  &q->sons[i] );
+  }
+
+  return 1;
+}
 
 /**
  * \param mesh pointer toward a mesh structure.
@@ -613,11 +618,19 @@ int MMG3D_convert_grid2tetmesh(MMG5_pMesh mesh, MMG5_pSol sol) {
     return 0;
   }
 
+#ifndef NDEBUG
+  MMG3D_check_octreeSons ( mesh->octree->root );
+#endif
+
   /* Creation of the coarse octree */
   if ( !MMG3D_coarsen_octree(mesh,sol) ) {
     fprintf(stderr,"\n  ## Octree coarsening problem. Exit program.\n");
     return 0;
   }
+
+#ifndef NDEBUG
+  MMG3D_check_octreeSons ( mesh->octree->root );
+#endif
 
   if ( !MMG3D_saveVTKOctree(mesh,sol,mesh->nameout) ) {
     fprintf(stderr,"\n  ## Warning: unable to save the coarsen octree\n");
@@ -639,6 +652,5 @@ int MMG3D_convert_grid2tetmesh(MMG5_pMesh mesh, MMG5_pSol sol) {
       return 0;
     }
   }
-  MMG3D_delete_octree (mesh);
   return 1;
 }

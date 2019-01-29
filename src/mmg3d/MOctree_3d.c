@@ -173,6 +173,7 @@ int  MMG3D_set_splitls_MOctree ( MMG5_pMesh mesh, MMG5_MOctree_s* q, MMG5_pSol s
 
    if(q->depth < depth_max)
    {
+     q->nsons = 8;
      MMG5_ADD_MEM(mesh,q->nsons*sizeof(MMG5_MOctree_s),"MOctree sons",
                   return 0);
      MMG5_SAFE_MALLOC(q->sons,q->nsons, MMG5_MOctree_s, return 0);
@@ -222,7 +223,6 @@ int  MMG3D_set_splitls_MOctree ( MMG5_pMesh mesh, MMG5_MOctree_s* q, MMG5_pSol s
        }
 
        q->sons[i].father = q;
-       q->sons[i].nsons = 8;
        if(q->sons[i].coordoct[0] < ncells_x-1 && q->sons[i].coordoct[1] < ncells_y-1 && q->sons[i].coordoct[2] < ncells_z-1)
        {
          q->sons[i].ghost = 0;
@@ -244,8 +244,10 @@ int  MMG3D_set_splitls_MOctree ( MMG5_pMesh mesh, MMG5_MOctree_s* q, MMG5_pSol s
      span_z = ncells_xy;
      if(q->ghost == 0)
      {
-       q->blf_ip=q->coordoct[2]*ncells_xy+q->coordoct[1]*ncells_x+q->coordoct[0]+1;       if(q->coordoct[0] < ncells_x-1 && q->coordoct[1] < ncells_y-1 && q->coordoct[2] < ncells_z-1)
-       MMG3D_set_splitls_MOctree (mesh, q, sol);
+       q->blf_ip=q->coordoct[2]*ncells_xy+q->coordoct[1]*ncells_x+q->coordoct[0]+1;
+
+       if ( q->coordoct[0] < ncells_x-1 && q->coordoct[1] < ncells_y-1 && q->coordoct[2] < ncells_z-1 )
+         MMG3D_set_splitls_MOctree (mesh, q, sol);
      }
      q->leaf=1;
    }
@@ -263,7 +265,11 @@ int  MMG3D_set_splitls_MOctree ( MMG5_pMesh mesh, MMG5_MOctree_s* q, MMG5_pSol s
  *
  */
 int MMG3D_free_MOctree  ( MMG5_pMOctree* q, MMG5_pMesh mesh) {
-  MMG5_DEL_MEM(mesh,q);
+
+  MMG5_DEL_MEM(mesh,(*q)->root);
+
+  MMG5_DEL_MEM(mesh,(*q));
+
   return 1;
 }
 
@@ -273,11 +279,14 @@ int MMG3D_free_MOctree  ( MMG5_pMOctree* q, MMG5_pMesh mesh) {
  *
  * \return 1 if success, 0 if fail.
  *
- * Free a MOctree cell.
+ * Free a MOctree cell: desallocate the cell sons
  *
  */
 int MMG3D_free_MOctree_s( MMG5_MOctree_s* q, MMG5_pMesh mesh) {
-  MMG5_DEL_MEM(mesh,q);
+
+  MMG5_DEL_MEM(mesh,q->sons);
+  q->nsons = 0;
+
   return 1;
 }
 
@@ -293,9 +302,9 @@ int MMG3D_free_MOctree_s( MMG5_MOctree_s* q, MMG5_pMesh mesh) {
  */
 int  MMG3D_merge_MOctree_s ( MMG5_MOctree_s* q, MMG5_pMesh mesh) {
 
-  q->nsons = 0;
   q->leaf = 1;
-  MMG3D_free_MOctree_s(q->sons, mesh);
+  MMG3D_free_MOctree_s(q, mesh);
+
   return 1;
 }
 
