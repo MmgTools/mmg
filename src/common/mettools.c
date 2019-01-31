@@ -189,6 +189,7 @@ int MMG5_buildridmetnor(MMG5_pMesh mesh,MMG5_pSol met,int np0,double nt[3],doubl
   MMG5_pPoint  p0;
   MMG5_pxPoint go;
   double       ps1,ps2,*n1,*n2,*t,*m,dv,dn,u[3],r[3][3];
+  int          ier = 0;
 
   p0 = &mesh->point[np0];
   if ( !(MG_GEO & p0->tag) )  return 0;
@@ -207,10 +208,12 @@ int MMG5_buildridmetnor(MMG5_pMesh mesh,MMG5_pSol met,int np0,double nt[3],doubl
     n1 = &go->n2[0];
     dv = m[2];
     dn = m[4];
+    ier = 2;
   }
   else{
     dv = m[1];
     dn = m[3];
+    ier = 1;
   }
 
   u[0] = n1[1]*t[2] - n1[2]*t[1];
@@ -230,7 +233,7 @@ int MMG5_buildridmetnor(MMG5_pMesh mesh,MMG5_pSol met,int np0,double nt[3],doubl
   mr[4] = m[0]*r[1][0]*r[2][0] + dv*r[1][1]*r[2][1] + dn*r[1][2]*r[2][2];
   mr[5] = m[0]*r[2][0]*r[2][0] + dv*r[2][1]*r[2][1] + dn*r[2][2]*r[2][2];
 
-  return 1;
+  return ier;
 }
 
 /**
