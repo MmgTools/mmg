@@ -675,6 +675,13 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
           memmove(&mesh->edge[mesh->na],&mesh->edge[k],sizeof(MMG5_Edge));
           ina[k] = mesh->na;
         }
+        else {
+          /* Remove MG_REQ and MG_CRN tags on ISO edges */
+          if ( MG_REQ & pa->a ) { pa->a &= ~MG_REQ; }
+          if ( MG_REQ & pa->b ) { pa->b &= ~MG_REQ; }
+          if ( MG_CRN & pa->a ) { pa->a &= ~MG_CRN; }
+          if ( MG_CRN & pa->b ) { pa->b &= ~MG_CRN; }
+        }
       }
     }
     if ( mesh->info.iso ) {
