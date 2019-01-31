@@ -773,6 +773,9 @@ int MMGS_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
     fprintf(stdout,"  ** Anisotropic mesh gradation\n");
 
   /* First step : make ridges iso in each apairing direction */
+  // remark ALGIANE: a mettre à plat : on veut vraiment faire ça ? Pour une demi
+  // sphère, on n'a pas envie de garder une métrique "infinie du coté du plan et
+  // petite dans la direction de la sphère?? "
   for (k=1; k<= mesh->np; k++) {
     p1 = &mesh->point[k];
     if ( !MG_VOK(p1) ) continue;

@@ -204,7 +204,9 @@ int MMGS_dichoto1b(MMG5_pMesh mesh, MMG5_pSol met, int iel, int ia, int ip) {
   return  MMGS_simbulgept(mesh,met,iel,ia,ip) ;
 }
 
-/* check if edge need to be split and return a binary coding the numbers of the edges of tria iel that should be split according to a hausdorff distance criterion */
+/* check if edge need to be split and return a binary coding the numbers of the
+ * edges of tria iel that should be split according to a hausdorff distance
+ * criterion */
 int chkedg(MMG5_pMesh mesh,int iel) {
   MMG5_pTria    pt;
   MMG5_pPoint   p[3];

@@ -117,6 +117,11 @@ int MMG5_intmetsavedir(MMG5_pMesh mesh, double *m,double *n,double *mr) {
  * Build metric tensor at ridge point p0, when computations with respect to p1
  * are to be held.
  *
+ * \remark ALGIANE: a mettre à plat : si p0-p1 est une ridge, on peut
+ * reconstruire la mauvaise métrique non? Est-ce qu'il ne vaut mieux pas passer
+ * la normale au triangle d'où l'on vient en argument pour le choix de la
+ * métrique à reconstruire?
+ *
  */
 int MMG5_buildridmet(MMG5_pMesh mesh,MMG5_pSol met,int np0,
                       double ux,double uy,double uz,double mr[6]) {
@@ -151,7 +156,8 @@ int MMG5_buildridmet(MMG5_pMesh mesh,MMG5_pSol met,int np0,
   u[1] = n1[2]*t[0] - n1[0]*t[2];
   u[2] = n1[0]*t[1] - n1[1]*t[0];
 
-  /* If u = n1 ^ t, matrix of the desired metric in (t,u,n1) = diag(m[0],dv,dn)*/
+  /* If u = n1 ^ t, matrix of the desired metric in (t,u,n1) =
+   * diag(m[0],dv,dn). Now, compute the metric in the canonical basis. */
   r[0][0] = t[0];  r[0][1] = u[0];  r[0][2] = n1[0];
   r[1][0] = t[1];  r[1][1] = u[1];  r[1][2] = n1[1];
   r[2][0] = t[2];  r[2][1] = u[2];  r[2][2] = n1[2];
@@ -171,6 +177,9 @@ int MMG5_buildridmet(MMG5_pMesh mesh,MMG5_pSol met,int np0,
  * \param np0 index of edge's extremity.
  * \param nt normal direction at the ridge point.
  * \param mr computed metric tensor.
+ *
+ * \return 0 if fail, 1 if the metric is build with respect to n1, 2 if it is
+ * build with respect to n2.
  *
  * Build metric tensor at ridge point \a p0, when the 'good' normal direction is
  * given by \a nt.
@@ -208,7 +217,8 @@ int MMG5_buildridmetnor(MMG5_pMesh mesh,MMG5_pSol met,int np0,double nt[3],doubl
   u[1] = n1[2]*t[0] - n1[0]*t[2];
   u[2] = n1[0]*t[1] - n1[1]*t[0];
 
-  /* If u = n1 ^ t, matrix of the desired metric in (t,u,n1) = diag(m[0],dv,0)*/
+  /* If u = n1 ^ t, matrix of the desired metric in (t,u,n1) = diag(m[0],dv,0).
+     Now, compute the metric in the canonical basis.*/
   r[0][0] = t[0];  r[0][1] = u[0];  r[0][2] = n1[0];
   r[1][0] = t[1];  r[1][1] = u[1];  r[1][2] = n1[1];
   r[2][0] = t[2];  r[2][1] = u[2];  r[2][2] = n1[2];

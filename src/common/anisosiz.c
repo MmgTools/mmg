@@ -903,6 +903,10 @@ double MMG5_ridSizeInNormalDir(MMG5_pMesh mesh,int i0,double* bcu,
  * \warning The gradation along the direction normal to the surface is made in
  * an "isotropic way".
  *
+ * \remark ALGIANE: a mettre à plat : dans le cas d'une métrique très aniso avec
+ * la grande taille quasiment dans la direction de l'arête on se retrouve à
+ * modifier la grande taille uniquement (car proche de l'arête) sauf que cette
+ * modification n'a quasi pas d'influence sur le calcul de la longueur d'arête.
  */
 int MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int np1,
                       int np2)

@@ -512,8 +512,8 @@ void MMG2D_gradEigenv(double dm[2],double dn[2],double difsiz,int8_t dir,int8_t 
 }
 
 /**
- * \param dm eigenvalues of the first matrix
- * \param dn eigenvalues of the second matrix
+ * \param dm eigenvalues of the first matrix (not modified)
+ * \param dn eigenvalues of the second matrix (modified)
  * \param difsiz maximal size gap authorized by the gradation.
  * \param dir direction in which the sizes are graded.
  * \param ier 2 if dn has been updated, 0 otherwise.
