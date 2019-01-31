@@ -1240,6 +1240,188 @@ int MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int np1,
   }
 }
 
+
+/**
+ * \param mesh pointer toward the mesh
+ * \param m first matrix
+ * \param n second matrix
+ * \param dm eigenvalues of m in the coreduction basis (to fill)
+ * \param dn eigenvalues of n in the coreduction basis (to fill)
+ * \param vp coreduction basis (to fill)
+ *
+ * \return 0 if fail 1 otherwise.
+ *
+ * Perform simultaneous reduction of matrices \a m and \a n.
+ *
+ */
+int MMG5_simred(MMG5_pMesh mesh,double *m,double *n,double dm[2],
+                 double dn[2],double vp[2][2] ) {
+
+  double       det,dd,sqDelta,trimn,vnorm,lambda[2],imn[4];
+  static char  mmgWarn0=0;
+
+  /* Compute imn = M^{-1}N */
+  det = m[0]*m[2] - m[1]*m[1];
+  if ( fabs(det) < MMG5_EPS*MMG5_EPS ) {
+    if ( !mmgWarn0 ) {
+      mmgWarn0 = 1;
+      fprintf(stderr,"\n  ## Warning: %s: at least 1 null metric det : %E \n",
+              __func__,det);
+    }
+    return 0;
+  }
+  det = 1.0 / det;
+
+  imn[0] = det * ( m[2]*n[0] - m[1]*n[1]);
+  imn[1] = det * ( m[2]*n[1] - m[1]*n[2]);
+  imn[2] = det * (-m[1]*n[0] + m[0]*n[1]);
+  imn[3] = det * (-m[1]*n[1] + m[0]*n[2]);
+  dd = imn[0] - imn[3];
+  sqDelta = sqrt(fabs(dd*dd + 4.0*imn[1]*imn[2]));
+  trimn = imn[0] + imn[3];
+
+  lambda[0] = 0.5 * (trimn - sqDelta);
+  if ( lambda[0] < 0.0 ) {
+    if ( !mmgWarn0 ) {
+      mmgWarn0 = 1;
+      fprintf(stderr,"\n  ## Warning: %s: at least 1 metric with a "
+              "negative eigenvalue: %f \n",__func__,lambda[0]);
+    }
+    return 0;
+  }
+
+  /* First case : matrices m and n are homothetic: n = lambda0*m */
+  if ( sqDelta < MMG5_EPS ) {
+
+    /* Subcase where m is diaonal */
+    if ( fabs(m[1]) < MMG5_EPS ) {
+      dm[0]   = m[0];
+      dm[1]   = m[2];
+      vp[0][0] = 1;
+      vp[0][1] = 0;
+      vp[1][0] = 0;
+      vp[1][1] = 1;
+    }
+    /* Subcase where m is not diagonal; dd,trimn,... are reused */
+    else
+      MMG5_eigensym(m,dm,vp);
+
+    /* Eigenvalues of metric n */
+    dn[0] = lambda[0]*dm[0];
+    dn[1] = lambda[0]*dm[1];
+
+  }
+  /* Second case: both eigenvalues of imn are distinct ; theory says qf associated to m and n
+   are diagonalizable in basis (vp[0], vp[1]) - the coreduction basis */
+  else {
+    lambda[1] = 0.5 * (trimn + sqDelta);
+    assert(lambda[1] >= 0.0);
+
+    vp[0][0] = imn[1];
+    vp[0][1] = (lambda[0] - imn[0]);
+    vnorm  = sqrt(vp[0][0]*vp[0][0] + vp[0][1]*vp[0][1]);
+
+    if ( vnorm < MMG5_EPS ) {
+      vp[0][0] = (lambda[0] - imn[3]);
+      vp[0][1] = imn[2];
+      vnorm  = sqrt(vp[0][0]*vp[0][0] + vp[0][1]*vp[0][1]);
+    }
+
+    vnorm   = 1.0 / vnorm;
+    vp[0][0] *= vnorm;
+    vp[0][1] *= vnorm;
+
+    vp[1][0] = imn[1];
+    vp[1][1] = (lambda[1] - imn[0]);
+    vnorm  = sqrt(vp[1][0]*vp[1][0] + vp[1][1]*vp[1][1]);
+
+    if ( vnorm < MMG5_EPS ) {
+      vp[1][0] = (lambda[1] - imn[3]);
+      vp[1][1] = imn[2];
+      vnorm  = sqrt(vp[1][0]*vp[1][0] + vp[1][1]*vp[1][1]);
+    }
+
+    vnorm   = 1.0 / vnorm;
+    vp[1][0] *= vnorm;
+    vp[1][1] *= vnorm;
+
+    /* Compute diagonal values in simultaneous reduction basis */
+    dm[0] = m[0]*vp[0][0]*vp[0][0] + 2.0*m[1]*vp[0][0]*vp[0][1] + m[2]*vp[0][1]*vp[0][1];
+    dm[1] = m[0]*vp[1][0]*vp[1][0] + 2.0*m[1]*vp[1][0]*vp[1][1] + m[2]*vp[1][1]*vp[1][1];
+    dn[0] = n[0]*vp[0][0]*vp[0][0] + 2.0*n[1]*vp[0][0]*vp[0][1] + n[2]*vp[0][1]*vp[0][1];
+    dn[1] = n[0]*vp[1][0]*vp[1][0] + 2.0*n[1]*vp[1][0]*vp[1][1] + n[2]*vp[1][1]*vp[1][1];
+  }
+
+  assert ( dm[0] >= MMG5_EPSD2 &&  dm[1] >= MMG5_EPSD2 && "positive eigenvalue" );
+  assert ( dn[0] >= MMG5_EPSD2 &&  dn[1] >= MMG5_EPSD2 && "positive eigenvalue" );
+
+  if ( dm[0] < MMG5_EPSOK || dn[0] < MMG5_EPSOK ) { return 0; }
+  if ( dm[1] < MMG5_EPSOK || dn[1] < MMG5_EPSOK ) { return 0; }
+
+  return 1;
+}
+
+/**
+ * \param dm eigenvalues of the first matrix (not modified)
+ * \param dn eigenvalues of the second matrix (modified)
+ * \param difsiz maximal size gap authorized by the gradation.
+ * \param dir direction in which the sizes are graded.
+ * \param ier 2 if dn has been updated, 0 otherwise.
+ *
+ *  Gradation of size dn = 1/sqrt(eigenv of the tensor) for required points in
+ *  the \a idir direction.
+ *
+ */
+void MMG5_gradEigenvreq(double dm[2],double dn[2],double difsiz,int8_t dir,int8_t *ier) {
+  double hm,hn;
+
+  hm = 1.0 / sqrt(dm[dir]);
+  hn = 1.0 / sqrt(dn[dir]);
+
+  if ( hn > hm + difsiz + MMG5_EPSOK ) {
+    /* Decrease the size in \a ipslave */
+    hn = hm+difsiz;
+    dn[dir] = 1.0 / (hn*hn);
+    (*ier) = 2;
+  }
+  else if ( hn + MMG5_EPSOK < hm - difsiz ) {
+    /* Increase the size in \a ipslave */
+    hn = hm-difsiz;
+    dn[dir] = 1.0 / (hn*hn);
+    (*ier) = 2;
+  }
+}
+
+/**
+ * \param n  matrix to update
+ * \param dn eigenvalues of n in the coreduction basis
+ * \param vp coreduction basis
+ *
+ * \return 0 if fail, 1 otherwise
+ *
+ * Update of the metric n = tP^-1 diag(dn0,dn1)P^-1, P = (vp[0], vp[1]) stored in
+ * columns
+ *
+ */
+int MMG5_updatemetreq_ani(double *n,double dn[2],double vp[2][2]) {
+  double det,ip[4];
+
+  det = vp[0][0]*vp[1][1] - vp[0][1]*vp[1][0];
+  if ( fabs(det) < MMG5_EPS )  return 0;
+  det = 1.0 / det;
+
+  ip[0] =  vp[1][1]*det;
+  ip[1] = -vp[1][0]*det;
+  ip[2] = -vp[0][1]*det;
+  ip[3] =  vp[0][0]*det;
+
+  n[0] = dn[0]*ip[0]*ip[0] + dn[1]*ip[2]*ip[2];
+  n[1] = dn[0]*ip[0]*ip[1] + dn[1]*ip[2]*ip[3];
+  n[2] = dn[0]*ip[1]*ip[1] + dn[1]*ip[3]*ip[3];
+
+  return 1;
+}
+
 /**
  * \param mesh pointer toward the mesh.
  * \param met pointer toward the metric structure.

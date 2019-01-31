@@ -623,7 +623,7 @@ int MMG2D_grad2met_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,int np1,int n
   n = &met->m[met->size*np2];
 
   /* Simultaneous reduction of m1 and m2 */
-  if ( !MMG2D_simred(mesh,m,n,dm,dn,vp) ) {
+  if ( !MMG5_simred(mesh,m,n,dm,dn,vp) ) {
     return 0;
   }
 
@@ -667,7 +667,7 @@ int MMG2D_grad2met_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,int np1,int n
 int MMG2D_grad2metreq_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,
                           int npmaster,int npslave) {
   MMG5_pPoint  p2,p1;
-  double       dm[2],dn[2];
+  double       ux,uy,dm[2],dn[2];
   double       vp[2][2],*m,*n,ll,difsiz;
   int8_t       ier;
 
@@ -677,25 +677,27 @@ int MMG2D_grad2metreq_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,
   p2 = &mesh->point[npslave];
 
   /* Maximum allowed difference between the prescribed sizes in p1 and p2 */
-  ll = (p2->c[0]-p1->c[0])*(p2->c[0]-p1->c[0])
-    + (p2->c[1]-p1->c[1])*(p2->c[1]-p1->c[1]);
+  ux = p2->c[0]-p1->c[0];
+  uy = p2->c[1]-p1->c[1];
+
+  ll = ux*ux + uy*uy;
   ll = sqrt(ll);
 
-  difsiz = ll*mesh->info.hgrad;
+  difsiz = ll*mesh->info.hgradreq;
 
   m = &met->m[met->size*npmaster];
   n = &met->m[met->size*npslave];
 
   /* Simultaneous reduction of m1 and m2 */
-  if ( !MMG2D_simred(mesh,m,n,dm,dn,vp) ) {
+  if ( !MMG5_simred(mesh,m,n,dm,dn,vp) ) {
     return 0;
   }
 
   /* Gradation of sizes = 1/sqrt(eigenv of the tensors) in the first direction */
-  MMG2D_gradEigenvreq(dm,dn,difsiz,0,&ier);
+  MMG5_gradEigenvreq(dm,dn,difsiz,0,&ier);
 
   /* Gradation of sizes = 1/sqrt(eigenv of the tensors) in the second direction */
-  MMG2D_gradEigenvreq(dm,dn,difsiz,1,&ier);
+  MMG5_gradEigenvreq(dm,dn,difsiz,1,&ier);
 
   if ( !ier ) {
     return 0;
@@ -703,7 +705,7 @@ int MMG2D_grad2metreq_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,
 
   /* Update of the metrics = tP^-1 diag(d0,d1)P^-1, P = (vp[0], vp[1]) stored in
    * columns */
-  if ( !MMG2D_updatemet_ani(m,n,dm,dn,vp,ier ) ) {
+  if ( !MMG5_updatemetreq_ani(n,dn,vp ) ) {
     return 0;
   }
 

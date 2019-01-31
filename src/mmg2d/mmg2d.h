@@ -333,7 +333,6 @@ int MMG2D_chkor(MMG5_pMesh );
 int MMG2D_savenor_db(MMG5_pMesh ,char *,char );
 int MMG2D_savedisp_db(MMG5_pMesh mesh,MMG5_pSol ,char *,char );
 int MMG2D_velextLS(MMG5_pMesh ,MMG5_pSol );
-int MMG2D_simred(MMG5_pMesh,double*,double*,double dm[2],double dn[2],double vp[2][2]);
 
 /* useful functions to debug */
 int  MMG2D_indElt(MMG5_pMesh mesh,int kel);
