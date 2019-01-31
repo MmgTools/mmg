@@ -177,18 +177,20 @@ int MMG5_buildridmet(MMG5_pMesh mesh,MMG5_pSol met,int np0,
  * \param np0 index of edge's extremity.
  * \param nt normal direction at the ridge point.
  * \param mr computed metric tensor.
+ * \param r basis in which the metric is diagonal
  *
  * \return 0 if fail, 1 if the metric is build with respect to n1, 2 if it is
  * build with respect to n2.
  *
  * Build metric tensor at ridge point \a p0, when the 'good' normal direction is
- * given by \a nt.
+ * given by \a nt and store the basis vectors in \a r.
  *
  */
-int MMG5_buildridmetnor(MMG5_pMesh mesh,MMG5_pSol met,int np0,double nt[3],double mr[6]) {
+int MMG5_buildridmetnor(MMG5_pMesh mesh,MMG5_pSol met,int np0,double nt[3],
+                        double mr[6],double r[3][3] ) {
   MMG5_pPoint  p0;
   MMG5_pxPoint go;
-  double       ps1,ps2,*n1,*n2,*t,*m,dv,dn,u[3],r[3][3];
+  double       ps1,ps2,*n1,*n2,*t,*m,dv,dn,u[3];
   int          ier = 0;
 
   p0 = &mesh->point[np0];

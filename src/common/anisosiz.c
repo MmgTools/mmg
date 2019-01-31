@@ -1447,10 +1447,11 @@ int MMG5_grad2metSurfreq(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int npma
   MMG5_pPoint  p1,p2;
   double      *mm1,*mm2,*nn1,*nn2,ps1,ps2,ux,uy,uz,m1[6],m2[6],n1[3],n2[3],nt[3];
   double       r1[3][3],r2[3][3],t1[2],t2[2],c[3],mtan1[3],mtan2[3],mr1[6],mr2[6];
-  double       mtmp[3][3],val;
-  double       l,dd;
+  double       mtmp[3][3],val,rbasis1[3][3],rbasis2[3][3];
+  double       l,dd,difsiz,rmet3D[6];
   double       lambda[2],vp[2][2],alpha,beta,mu[3];
-  int          kmin,idx;
+  int          kmin,idx,cfg_m1,cfg_m2;
+  int8_t       ier;
   char         ichg;
 
   p1 = &mesh->point[npmaster];
@@ -1462,6 +1463,9 @@ int MMG5_grad2metSurfreq(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int npma
 
   mm1 = &met->m[6*npmaster];
   mm2 = &met->m[6*npslave];
+
+  cfg_m1 = cfg_m2 = 0;
+  ier = 0;
 
   if( !MMG5_nortri(mesh,pt,nt) )
     return 0;
@@ -1482,8 +1486,8 @@ int MMG5_grad2metSurfreq(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int npma
     else
       memcpy(n1,nn1,3*sizeof(double));
 
-    if( !MMG5_buildridmet(mesh,met,npmaster,ux,uy,uz,m1) )
-      return 0;
+    cfg_m1 = MMG5_buildridmetnor(mesh,met,npmaster,nt,m1,rbasis1);
+    if( !cfg_m1 ) { return 0; }
   }
   else if( ( MG_REF & p1->tag ) ){
     memcpy(n1,&(mesh->xpoint[p1->xp].n1[0]),3*sizeof(double));
@@ -1510,8 +1514,8 @@ int MMG5_grad2metSurfreq(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int npma
     else
       memcpy(n2,nn1,3*sizeof(double));
 
-    if( !MMG5_buildridmet(mesh,met,npslave,ux,uy,uz,m2) )
-      return 0;
+    cfg_m2 = MMG5_buildridmetnor(mesh,met,npslave,nt,m2,rbasis2);
+    if( !cfg_m2 ) { return 0; }
   }
   else if( (MG_REF & p2->tag) ){
     memcpy(n2,&(mesh->xpoint[p2->xp].n1[0]),3*sizeof(double));
@@ -1539,6 +1543,16 @@ int MMG5_grad2metSurfreq(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int npma
   c[0] = r1[0][0]*ux + r1[0][1]*uy + r1[0][2]*uz;
   c[1] = r1[1][0]*ux + r1[1][1]*uy + r1[1][2]*uz;
 
+  MMG5_rmtr(r2,m2,mr2);
+
+  mtan2[0] = mr2[0];
+  mtan2[1] = mr2[1];
+  mtan2[2] = mr2[3];
+
+  difsiz = mesh->info.hgradreq*l;
+
+#ifndef NDEBUG
+  /* Verification */
   memcpy(t1,c,2*sizeof(double));
   /* Here we work in the tangent plane (thus in 2d) */
   dd = t1[0]*t1[0] + t1[1]*t1[1];
@@ -1554,14 +1568,6 @@ int MMG5_grad2metSurfreq(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int npma
   assert ( ps1  > 0. );
   ps1 = sqrt(ps1);
 
-  MMG5_rmtr(r2,m2,mr2);
-
-  mtan2[0] = mr2[0];
-  mtan2[1] = mr2[1];
-  mtan2[2] = mr2[3];
-
-  c[0] = - ( r2[0][0]*ux + r2[0][1]*uy + r2[0][2]*uz );
-  c[1] = - ( r2[1][0]*ux + r2[1][1]*uy + r2[1][2]*uz );
   memcpy(t2,c,2*sizeof(double));
 
   dd = t2[0]*t2[0] + t2[1]*t2[1];
@@ -1576,86 +1582,116 @@ int MMG5_grad2metSurfreq(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int npma
   ps2 = mtan2[0]*t2[0]*t2[0] + 2.0*mtan2[1]*t2[0]*t2[1] + mtan2[2]*t2[1]*t2[1];
   assert ( ps2  > 0. );
   ps2 = sqrt(ps2);
-
-  /* Impose a larger metric in p2 ( M1 > M2 ) */
-  if( ps2 > ps1 ){
-    /* compute alpha = h1 - hgrad*l */
-    alpha = ps1 /(1.0-mesh->info.hgrad*l*ps1);
-    if( ps2 <= alpha + MMG5_EPS ) {
-      /* No need to graduate: l_{M1-hgrad*l} > l_{M2} => M1-hgrad*l < M2 */
-      return 0;
+  int cfg = 0;
+  if( ps2 < ps1 ){
+    /* Impose a smaller metric in p2 */
+    alpha = ps1 /(1.0+difsiz*ps1);
+    if( ps2 < alpha - MMG5_EPS ) {
+      /* Need to graduate */
+      cfg = 1;
     }
   }
-  /* Impose a smaller metric in p2 */
   else {
-    alpha = ps1 /(1.0+mesh->info.hgrad*l*ps1);
-    if( ps2 >= alpha - MMG5_EPS ) {
-      /* No need to graduate: l_{M1-hgrad*l} < l_{M2} => M1-hgrad*l > M2 */
-      return 0;
+    /* Impose a larger metric in p2 ( M1 > M2 ) */
+    /* compute alpha = h1 - hgrad*l */
+    alpha = ps1 /(1.0-difsiz*ps1);
+    if( ps2 > alpha + MMG5_EPS ) {
+      /* Need to graduate: l_{M1-hgrad*l} < l_{M2} => M1-hgrad*l > M2 */
+      cfg = 2;
     }
   }
+#endif
 
-  MMG5_eigensym(mtan2,lambda,vp);
-
-  c[0] = t2[0]*vp[0][0] + t2[1]*vp[0][1] ;
-  c[1] = t2[0]*vp[1][0] + t2[1]*vp[1][1] ;
-
-  /* Detect which of the main directions of the metric is closest to our edge
-   * direction. */
-  ichg = 0;
-  val  = fabs(c[ichg]);
-  for (idx = 1; idx<2; ++idx) {
-    if ( fabs(c[idx]) > val ) {
-      val = fabs(c[idx]);
-      ichg = idx;
-    }
+  /* Simultaneous reduction of mtan1 and mtan2 */
+  if ( !MMG5_simred(mesh,mtan1,mtan2,lambda,mu,vp) ) {
+    return 0;
   }
-  assert(c[ichg]*c[ichg] > MMG5_EPS );
 
-  /* Compute beta coef such as lambda_1 = beta + lambda_1 => h1 = h2 + hgrad*l
-   * (see p317 of Charles Dapogny Thesis). */
-  beta = (alpha*alpha - ps2*ps2)/(c[ichg]*c[ichg]);
+  /* Gradation of sizes = 1/sqrt(eigenv of the tensors) in the first direction */
+  MMG5_gradEigenvreq(lambda,mu,difsiz,0,&ier);
 
-  /* Metric update: update the metric eigenvalue associated to the main metric
-   * direction which is closest to our edge direction (because this is the
-   * one that is the more influent on our edge length). */
+  /* Gradation of sizes = 1/sqrt(eigenv of the tensors) in the second direction */
+  MMG5_gradEigenvreq(lambda,mu,difsiz,1,&ier);
+
+  if ( !ier ) {
+    return 0;
+  }
+
+  /* Metric update using the simultaneous reduction technique */
   if( MG_SIN(p2->tag) || (MG_NOM & p2->tag)){
-    /* lambda_new = 0.5 lambda_1 + 0.5 beta lambda_1: here we choose to not
-     * respect the gradation in order to restric the influence of the singular
-     * points. */
+    /* We choose to not respect the gradation in order to restrict the influence
+     * of the singular points. Thus:
+     * lambda_new = = 0.5 lambda_1 + 0.5 lambda_new = lambda_1 + 0.5 beta.
+     * with beta the smallest variation of the eigenvalues (lambda_new-lambda_1). */
+    assert ( fabs(mm2[0]-mm2[3]) < MMG5_EPSOK && fabs(mm2[3]-mm2[5]) < MMG5_EPSOK
+             && "iso metric?" );
+
+    beta = mu[0] - mm2[0];
+
+    if ( fabs(beta) < fabs(mm2[0]-mu[1]) ) {
+      beta = mu[1] - mm2[0];
+    }
     mm2[0] += 0.5*beta;
     mm2[3] += 0.5*beta;
     mm2[5] += 0.5*beta;
     assert ( mm2[0]>0. && mm2[3]>0. && mm2[5]>0. );
   }
-  else if( p2->tag & MG_GEO ){
-    c[0] = fabs(mm2[0]-lambda[ichg]);
-    c[1] = fabs(mm2[1]-lambda[ichg]);
-    c[2] = fabs(mm2[2]-lambda[ichg]);
+  else if ( p2->tag & MG_GEO ){
+    if ( !MMG5_updatemetreq_ani(mtan2,mu,vp) ) { return 0; }
 
-    kmin = 0;
-    val = fabs(c[kmin]);
-    for (idx = 1; idx<3; ++idx) {
-      if ( fabs(c[idx]) < val ) {
-        val = fabs(c[idx]);
-        kmin = idx;
-      }
-    }
-    mm2[kmin] += beta;
-    assert ( mm2[kmin]>0 );
+    /* Here mtan2 contains the gradated metric it the coreduction basis: compute
+     * the sizes in the directions (t,u=t^n,n): Computation in 3D but it is
+     * maybe more efficient to work in the tangent plane (but we need to compute
+     * the basis of the ridge metric in the tangent plane) */
+    rmet3D[0] = mtan2[0];
+    rmet3D[1] = mtan2[1];
+    rmet3D[2] = 0;
+    rmet3D[3] = mtan2[2];
+    rmet3D[4] = 0;
+    rmet3D[5] = mr2[5];
+
+    mu[0] = rmet3D[0]*rbasis2[0][0]*rbasis2[0][0] + rmet3D[1]*rbasis2[1][0]*rbasis2[0][0]
+      + rmet3D[2]*rbasis2[2][0]*rbasis2[0][0] + rmet3D[1]*rbasis2[0][0]*rbasis2[1][0]
+      + rmet3D[3]*rbasis2[1][0]*rbasis2[1][0] + rmet3D[4]*rbasis2[2][0]*rbasis2[1][0]
+      + rmet3D[2]*rbasis2[0][0]*rbasis2[2][0] + rmet3D[4]*rbasis2[1][0]*rbasis2[2][0]
+      + rmet3D[5]*rbasis2[2][0]*rbasis2[2][0];
+
+    /* h = 1/sqrt(t_e M e) */
+    assert ( mu[0] > MMG5_EPSD2 );
+
+    mu[1] = rmet3D[0]*rbasis2[0][1]*rbasis2[0][1] + rmet3D[1]*rbasis2[1][1]*rbasis2[0][1]
+      + rmet3D[2]*rbasis2[2][1]*rbasis2[0][1] + rmet3D[1]*rbasis2[0][1]*rbasis2[1][1]
+      + rmet3D[3]*rbasis2[1][1]*rbasis2[1][1] + rmet3D[4]*rbasis2[2][1]*rbasis2[1][1]
+      + rmet3D[2]*rbasis2[0][1]*rbasis2[2][1] + rmet3D[4]*rbasis2[1][1]*rbasis2[2][1]
+      + rmet3D[5]*rbasis2[2][1]*rbasis2[2][1];
+
+    /* h = 1/sqrt(t_e M e) */
+    assert ( mu[1] > MMG5_EPSD2 );
+
+    /* Update the ridge metric */
+    mm2[0] =  mu[0];
+
+    assert ( cfg_m2 );
+    mm2[cfg_m2] = mu[1];
+    p2->ref =1;
+
   }
   else{
-    mu[0] = lambda[0];
-    mu[1] = lambda[1];
+    /* Update of the metrics */
     mu[2] = mr2[5];
 
-    mu[ichg] += beta;
-    assert ( mu[ichg]>0 );
+    if ( !MMG5_updatemetreq_ani(mtan2,mu,vp) ) { return 0; }
 
+#ifndef NDEBUG
+    double ps2new;
+    ps2new = mtan2[0]*t2[0]*t2[0] + 2.0*mtan2[1]*t2[0]*t2[1] + mtan2[2]*t2[1]*t2[1];
+    assert ( ps2new  > 0. );
+    ps2new = sqrt(ps2new);
 
-    mtan2[0] = mu[0]*vp[0][0]*vp[0][0] + mu[1]*vp[1][0]*vp[1][0];
-    mtan2[1] = mu[0]*vp[0][0]*vp[0][1] + mu[1]*vp[1][0]*vp[1][1];
-    mtan2[2] = mu[0]*vp[0][1]*vp[0][1] + mu[1]*vp[1][1]*vp[1][1];
+    //printf("FIN : %d:  l_init %.15lg l_corr %.15lg l_ideal %.15lg l_voisin %.15lg \n",cfg,ps2,ps2new,alpha,ps1);
+    assert ( ((cfg==2 &&  ps2new < ps2) || (cfg==1 &&  ps2new > ps2 ) || !cfg ) && "gradation improvement");
+
+#endif
 
     /* Return in initial basis */
     mtmp[0][0] = mtan2[0]*r2[0][0] + mtan2[1]*r2[1][0];
@@ -1679,8 +1715,19 @@ int MMG5_grad2metSurfreq(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int npma
 
     m2[5] = r2[0][2]*mtmp[0][2] + r2[1][2]*mtmp[1][2] + r2[2][2]*mtmp[2][2];
 
+#ifndef NDEBUG
+    /* Check the validity of the output metric */
+    ier = MMG5_eigenv(1,m2,mu, r2);
+
+    assert ( ier );
+    assert ( mu[0] > 0.);
+    assert ( mu[1] > 0.);
+    assert ( mu[2] > 0.);
+#endif
+
     memcpy(mm2,m2,6*sizeof(double));
   }
+
   return 1;
 }
 
