@@ -1604,9 +1604,6 @@ int MMG3D_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
     fprintf(stdout,"  ** Anisotropic mesh gradation\n");
 
-  for (k=1; k<=mesh->np; k++)
-    mesh->point[k].flag = mesh->base;
-
   /* First step : make ridges iso in each apairing direction */
   for (k=1; k<= mesh->np; k++) {
     p1 = &mesh->point[k];
@@ -1622,6 +1619,12 @@ int MMG3D_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
     m[3] = mv;
     m[4] = mv;
   }
+
+  /** Mark the edges belonging to a required entity */
+  MMG3D_mark_pointsOnReqEdge_fromTetra ( mesh );
+
+  for (k=1; k<=mesh->np; k++)
+    mesh->point[k].flag = mesh->base;
 
   it = nup = 0;
   maxit = 100;
@@ -1646,6 +1649,10 @@ int MMG3D_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
               p1  = &mesh->point[np1];
               if ( (p0->flag < mesh->base-1) && (p1->flag < mesh->base-1) )
                 continue;
+
+              /* Skip points belonging to a required edge */
+              if ( p0->s || p1->s ) continue;
+
               /* gradation along the tangent plane */
               ier = MMG5_grad2metSurf(mesh,met,&ptt,np0,np1);
               if ( ier == np0 ) {
@@ -1658,7 +1665,6 @@ int MMG3D_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
               }
             }
           }
-
           else continue;
         }
       }
@@ -1686,6 +1692,9 @@ int MMG3D_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
         p0  = &mesh->point[np0];
         p1  = &mesh->point[np1];
         if ( p0->flag < mesh->base-1 && p1->flag < mesh->base-1 )  continue;
+
+        /* Skip points belonging to a required edge */
+        if ( p0->s || p1->s ) continue;
 
         ier = MMG5_grad2metVol(mesh,met,pt,np0,np1);
         if ( ier == np0 ) {
@@ -1723,6 +1732,127 @@ int MMG3D_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
  *
  */
 int MMG3D_gradsizreq_ani(MMG5_pMesh mesh,MMG5_pSol met) {
+  MMG5_pTetra   pt;
+  MMG5_pxTetra  pxt;
+  MMG5_Tria     ptt;
+  MMG5_pPoint   p0,p1;
+  double        *m,mv;
+  int           k,it,itv,nup,nu,nupv,maxit;
+  int           i,j,np0,np1,npmaster,npslave,ier;
+
+  if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {
+    fprintf(stdout,"  ** Grading required points.\n");
+  }
+
+  if ( mesh->info.hgrad < 0. ) {
+    /** Mark the edges belonging to a required entity (already done if the
+     * classic gradation is enabled) */
+    MMG3D_mark_pointsOnReqEdge_fromTetra ( mesh );
+  }
+
+  it = nup = 0;
+  maxit = 100;
+  do {
+    nu = 0;
+    for (k=1; k<=mesh->ne; k++) {
+      pt = &mesh->tetra[k];
+      if ( !MG_EOK(pt) )  continue;
+      pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
+
+      if ( pxt ) {
+        for (i=0; i<4; i++) {
+          if ( pxt->ftag[i] & MG_BDY) {
+            /* Gradation along a surface edge */
+            /* virtual triangle */
+            MMG5_tet2tri(mesh,k,i,&ptt);
+            for (j=0; j<3; j++) {
+              np0 = ptt.v[MMG5_inxt2[j]];
+              np1 = ptt.v[MMG5_iprv2[j]];
+              p0  = &mesh->point[np0];
+              p1  = &mesh->point[np1];
+
+              if ( abs ( p0->s - p1->s ) < 2 ) {
+                /* No size to propagate */
+                continue;
+              }
+              else if ( p0->s > p1->s ) {
+                npmaster = np0;
+                npslave  = np1;
+              }
+              else {
+                assert ( p1->s > p0->s );
+                npmaster = np1;
+                npslave  = np0;
+              }
+
+              /* Impose the gradation to npslave from npmaster */
+              /* gradation along the tangent plane */
+              ier = MMG5_grad2metSurfreq(mesh,met,&ptt,npmaster,npslave);
+              if ( ier ) {
+                mesh->point[npslave].s = mesh->point[npmaster].s - 1;
+                nu++;
+              }
+            }
+          }
+
+          else continue;
+        }
+      }
+    }
+    nup += nu;
+  }
+  while( ++it < maxit && nu > 0 );
+
+  nupv = itv = 0;
+  maxit = 500;
+
+  do {
+    nu = 0;
+    for (k=1; k<=mesh->ne; k++) {
+      pt = &mesh->tetra[k];
+      if ( !MG_EOK(pt) )  continue;
+      for (i=0; i<4; i++) {
+        /* Gradation along a volume edge */
+        np0  = pt->v[MMG5_iare[i][0]];
+        np1  = pt->v[MMG5_iare[i][1]];
+        p0  = &mesh->point[np0];
+        p1  = &mesh->point[np1];
+
+        if ( abs ( p0->s - p1->s ) < 2 ) {
+          /* No size to propagate */
+          continue;
+        }
+        else if ( p0->s > p1->s ) {
+          npmaster = np0;
+          npslave  = np1;
+        }
+        else {
+          assert ( p1->s > p0->s );
+          npmaster = np1;
+          npslave  = np0;
+        }
+
+        /* Impose the gradation to npslave from npmaster */
+        ier = 0;// MMG5_grad2metVol(mesh,met,pt,np0,np1);
+        if ( ier ) {
+          mesh->point[npslave].s = mesh->point[npmaster].s - 1;
+          nu++;
+        }
+      }
+    }
+    nupv += nu;
+  }
+  while( ++itv < maxit && nu > 0 );
+
+  if ( abs(mesh->info.imprim) > 3 ) {
+    if ( abs(mesh->info.imprim) < 5 && !mesh->info.ddebug ) {
+      fprintf(stdout,"    gradation: %7d updated, %d iter\n",nup+nupv,it+itv);
+    }
+    else {
+      fprintf(stdout,"    surface gradation: %7d updated, %d iter\n"
+              "    volume gradation:  %7d updated, %d iter\n",nup,it,nupv,itv);
+    }
+  }
 
   return 1;
 }

@@ -1015,7 +1015,6 @@ int MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
  * 0 otherwise.
  *
  */
-static inline
 void MMG3D_mark_pointsOnReqEdge_fromTetra (  MMG5_pMesh mesh ) {
   MMG5_pTetra  pt;
   MMG5_pxTetra pxt;
