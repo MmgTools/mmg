@@ -1450,7 +1450,7 @@ int MMG5_grad2metSurfreq(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int npma
   double       mtmp[3][3],val,rbasis1[3][3],rbasis2[3][3];
   double       l,dd,difsiz,rmet3D[6];
   double       lambda[2],vp[2][2],alpha,beta,mu[3];
-  int          kmin,idx,cfg_m1,cfg_m2;
+  int          kmin,idx,cfg_m2;
   int8_t       ier;
   char         ichg;
 
@@ -1464,7 +1464,7 @@ int MMG5_grad2metSurfreq(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int npma
   mm1 = &met->m[6*npmaster];
   mm2 = &met->m[6*npslave];
 
-  cfg_m1 = cfg_m2 = 0;
+  cfg_m2 = 0;
   ier = 0;
 
   if( !MMG5_nortri(mesh,pt,nt) )
@@ -1486,8 +1486,7 @@ int MMG5_grad2metSurfreq(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int npma
     else
       memcpy(n1,nn1,3*sizeof(double));
 
-    cfg_m1 = MMG5_buildridmetnor(mesh,met,npmaster,nt,m1,rbasis1);
-    if( !cfg_m1 ) { return 0; }
+    if( !MMG5_buildridmetnor(mesh,met,npmaster,nt,m1,rbasis1) ) { return 0; }
   }
   else if( ( MG_REF & p1->tag ) ){
     memcpy(n1,&(mesh->xpoint[p1->xp].n1[0]),3*sizeof(double));

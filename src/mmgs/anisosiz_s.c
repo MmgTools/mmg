@@ -792,7 +792,7 @@ int MMGS_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
   /* Second step : standard gradation procedure */
-  nup = MMG5_gradsiz_ani(mesh,met,&it);
+  MMG5_gradsiz_ani(mesh,met,&it);
 
   return 1;
 }
