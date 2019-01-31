@@ -89,6 +89,32 @@ int MMG5_defsiz_startingMessage (MMG5_pMesh mesh,MMG5_pSol met,const char * func
 
 /**
  * \param mesh pointer toward the mesh structure.
+ *
+ * Print gradation values (depending on the verbosity).
+ *
+ */
+void MMG5_gradation_info ( MMG5_pMesh mesh ) {
+
+  if ( mesh->info.imprim > 0 ) {
+    if ( mesh->info.hgrad > 0. ) {
+      fprintf(stdout,"\n  -- GRADATION : %8f ",
+              exp(mesh->info.hgrad) );
+      if ( mesh->info.hgradreq > 0. ) {
+        fprintf(stdout,"(%8f)",exp(mesh->info.hgradreq));
+      }
+      fprintf(stdout,"\n");
+    }
+    else {
+      if ( mesh->info.hgradreq > 0. ) {
+        fprintf(stdout,"\n  -- GRADATION : DISABLED (%8f)\n",exp(mesh->info.hgradreq));
+      }
+    }
+  }
+  return;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
  * \param ip0 index of the first edge extremity
  * \param ip1 index of the second edge extremity
