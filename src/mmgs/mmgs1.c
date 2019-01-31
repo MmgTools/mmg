@@ -538,10 +538,11 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   ns = 0;
   s  = 0.5;
   for (k=1; k<=mesh->nt; k++) {
-
     pt = &mesh->tria[k];
+
     if ( !MG_EOK(pt) || pt->ref < 0 )  continue;
-    if ( MS_SIN(pt->tag[0]) || MS_SIN(pt->tag[1]) || MS_SIN(pt->tag[2]) )  continue;
+    /* Required triangle */
+    if ( MS_SIN(pt->tag[0]) && MS_SIN(pt->tag[1]) && MS_SIN(pt->tag[2]) )  continue;
 
     /* check element cut */
     pt->flag = 0;
@@ -1384,6 +1385,7 @@ int MMG5_mmgs1(MMG5_pMesh mesh,MMG5_pSol met) {
       return 0;
     }
   }
+
   if ( mesh->info.hgradreq > 0. ) {
     MMGS_gradsizreq(mesh,met);
   }
