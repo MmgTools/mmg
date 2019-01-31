@@ -244,10 +244,12 @@ void MMG5_mark_pointsOnReqEdge_fromTria (  MMG5_pMesh mesh ) {
   /* Mark the points that belongs to a required edge */
   for ( k=1; k<=mesh->nt; k++ ) {
     pt = &mesh->tria[k];
+    if ( !MG_EOK(pt) ) { continue; }
+
     for ( i=0; i<3; ++i ) {
       if ( pt->tag[i] & MG_REQ ) {
-        mesh->point[pt->v[MMG5_inxt2[i]]].s = mesh->nt+2;
-        mesh->point[pt->v[MMG5_iprv2[i]]].s = mesh->nt+2;
+        mesh->point[pt->v[MMG5_inxt2[i]]].s = 3*mesh->nt+2;
+        mesh->point[pt->v[MMG5_iprv2[i]]].s = 3*mesh->nt+2;
       }
     }
   }
@@ -357,7 +359,7 @@ int MMG5_gradsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
 int MMG5_gradsizreq_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria        pt;
   MMG5_pPoint       p1,p2;
-  double            hgrad,ll,h1,h2,hn;
+  double            hgrad,ll,h1,h2,hn,ux,uy;
   int               k,it,ip1,ip2,ipmaster,ipslave,maxit,nup,nu;
   unsigned char     i,i1,i2;
 
@@ -406,7 +408,9 @@ int MMG5_gradsizreq_iso(MMG5_pMesh mesh,MMG5_pSol met) {
           ipslave  = ip1;
         }
 
-        ll = (p2->c[0]-p1->c[0])*(p2->c[0]-p1->c[0]) + (p2->c[1]-p1->c[1])*(p2->c[1]-p1->c[1]);
+        ux = p2->c[0]-p1->c[0];
+        uy = p2->c[1]-p1->c[1];
+        ll = ux*ux + uy*uy;
         ll = sqrt(ll);
 
         h1 = met->m[ipmaster];

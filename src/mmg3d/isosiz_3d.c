@@ -1010,6 +1010,41 @@ int MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
 
 /**
  * \param mesh pointer toward the mesh structure.
+ *
+ * Set the s field of the points that belongs to a required edge to 1, set it to
+ * 0 otherwise.
+ *
+ */
+static inline
+void MMG3D_mark_pointsOnReqEdge_fromTetra (  MMG5_pMesh mesh ) {
+  MMG5_pTetra  pt;
+  MMG5_pxTetra pxt;
+  MMG5_pPoint  ppt;
+  int          k;
+  int8_t       i,j;
+
+  for ( k=1; k<=mesh->np; k++ ) {
+    ppt = &mesh->point[k];
+    ppt->s = 0;
+  }
+
+  /* Mark the points that belongs to a required edge */
+  for ( k=1; k<=mesh->ne; k++ ) {
+    pt = &mesh->tetra[k];
+    if ( (!MG_EOK(pt)) || !pt->xt ) { continue; }
+
+    pxt = &mesh->xtetra[pt->xt];
+    for (i=0; i<6; i++) {
+      if ( pxt->tag[i] & MG_REQ ) {
+        mesh->point[pt->v[MMG5_iare[i][0]]].s = 4*mesh->ne+3;
+        mesh->point[pt->v[MMG5_iare[i][1]]].s = 4*mesh->ne+3;
+      }
+    }
+  }
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
  * \return 0 if fail, 1 otherwise.
  *
@@ -1019,15 +1054,18 @@ int MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
 int MMG3D_gradsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTetra    pt;
   MMG5_pPoint    p0,p1;
-  double    l,hn;
-  int       ip0,ip1,it,maxit,nu,nup,k;
-  char      i,j,ia,i0,i1;
+  double         l,hn,ux,uy,uz;
+  int            ip0,ip1,it,maxit,nu,nup,k;
+  char           i,j,ia,i0,i1;
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
     fprintf(stdout,"  ** Grading mesh\n");
 
-  for (k=1; k<=mesh->np; k++)
+  MMG3D_mark_pointsOnReqEdge_fromTetra ( mesh );
+
+  for (k=1; k<=mesh->np; k++) {
     mesh->point[k].flag = mesh->base;
+  }
 
   it = nup = 0;
   maxit = 100;
@@ -1049,8 +1087,14 @@ int MMG3D_gradsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
           p1  = &mesh->point[ip1];
           if ( p0->flag < mesh->base-1 && p1->flag < mesh->base-1 )  continue;
 
-          l = (p1->c[0]-p0->c[0])*(p1->c[0]-p0->c[0]) + (p1->c[1]-p0->c[1])*(p1->c[1]-p0->c[1])\
-            + (p1->c[2]-p0->c[2])*(p1->c[2]-p0->c[2]);
+          /* Skip points belonging to a required edge */
+          if ( p0->s || p1->s ) continue;
+
+          ux = p1->c[0]-p0->c[0];
+          uy = p1->c[1]-p0->c[1];
+          uz = p1->c[2]-p0->c[2];
+
+          l = ux*ux + uy*uy + uz*uz;
           l = sqrt(l);
 
           if ( met->m[ip0] < met->m[ip1] ) {
@@ -1092,6 +1136,95 @@ int MMG3D_gradsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
  *
  */
 int MMG3D_gradsizreq_iso(MMG5_pMesh mesh,MMG5_pSol met) {
+  MMG5_pTetra    pt;
+  MMG5_pPoint    p0,p1;
+  double         hgrad,ll,h0,h1,hn,ux,uy,uz;
+  int            ip0,ip1,ipslave,ipmaster,it,maxit,nu,nup,k;
+  char           i,j,ia,i0,i1;
 
-  return 1;
+  if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {
+    fprintf(stdout,"  ** Grading required points.\n");
+  }
+
+  if ( mesh->info.hgrad < 0. ) {
+    /** Mark the edges belonging to a required entity */
+    MMG3D_mark_pointsOnReqEdge_fromTetra ( mesh );
+  }
+
+  /** Update the sizes and mark the treated points */
+  hgrad = mesh->info.hgradreq;
+  it = nup = 0;
+  maxit = 100;
+
+  do {
+    nu = 0;
+    for (k=1; k<=mesh->ne; k++) {
+      pt = &mesh->tetra[k];
+      if ( !MG_EOK(pt) ) {
+        continue;
+      }
+
+      for (i=0; i<4; i++) {
+        for (j=0; j<3; j++) {
+          ia  = MMG5_iarf[i][j];
+          i0  = MMG5_iare[ia][0];
+          i1  = MMG5_iare[ia][1];
+          ip0 = pt->v[i0];
+          ip1 = pt->v[i1];
+          p0  = &mesh->point[ip0];
+          p1  = &mesh->point[ip1];
+
+          if ( abs ( p0->s - p1->s ) < 2 ) {
+            /* No size to propagate */
+            continue;
+          }
+          else if ( p0->s > p1->s ) {
+            ipmaster = ip0;
+            ipslave  = ip1;
+          }
+          else {
+            assert ( p1->s > p0->s );
+            ipmaster = ip1;
+            ipslave  = ip0;
+          }
+
+          ux = p1->c[0]-p0->c[0];
+          uy = p1->c[1]-p0->c[1];
+          uz = p1->c[2]-p0->c[2];
+
+          ll = ux*ux + uy*uy + uz*uz;
+          ll = sqrt(ll);
+
+          h0 = met->m[ipmaster];
+          h1 = met->m[ipslave];
+          if ( h0 < h1 ) {
+            if ( h0 < MMG5_EPSD ) {
+              continue;
+            }
+            hn  = h0 + hgrad*ll;
+            if ( h1 <= hn ) {
+              continue;
+            }
+          }
+          else {
+            hn = h0 - hgrad*ll;
+            if ( h1 >= hn ) {
+              continue;
+            }
+          }
+          met->m[ipslave]           = hn;
+          mesh->point[ipslave].s    = mesh->point[ipmaster].s - 1;
+          nu++;
+        }
+      }
+    }
+    nup += nu;
+  }
+  while ( ++it < maxit && nu > 0 );
+
+  if ( abs(mesh->info.imprim) > 4 && nup ) {
+    fprintf(stdout,"     gradation (required): %7d updated, %d iter.\n",nup,it);
+  }
+
+  return nup;
 }
