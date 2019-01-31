@@ -586,12 +586,16 @@ int MMG5_mmg3d1_pattern(MMG5_pMesh mesh,MMG5_pSol met) {
     return 0;
   }
 
+  MMG5_gradation_info(mesh);
+
   if ( mesh->info.hgrad > 0. ) {
-    if ( mesh->info.imprim > 0 )   fprintf(stdout,"\n  -- GRADATION : %8f\n",exp(mesh->info.hgrad));
     if ( !MMG3D_gradsiz(mesh,met) ) {
       fprintf(stderr,"\n  ## Gradation problem. Exit program.\n");
       return 0;
     }
+  }
+  if ( mesh->info.hgradreq > 0. ) {
+    MMG3D_gradsizreq(mesh,met);
   }
 
   /*update quality*/

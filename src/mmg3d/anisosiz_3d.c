@@ -1713,3 +1713,16 @@ int MMG3D_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   }
   return 1;
 }
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \return 0 if fail, 1 otherwise.
+ *
+ * Enforce mesh gradation by truncating size map.
+ *
+ */
+int MMG3D_gradsizreq_ani(MMG5_pMesh mesh,MMG5_pSol met) {
+
+  return 1;
+}

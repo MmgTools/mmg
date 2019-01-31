@@ -56,6 +56,8 @@ void MMG3D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
     MMG5_compute_meanMetricAtMarkedPoints = MMG5_compute_meanMetricAtMarkedPoints_iso;
     MMG3D_defsiz         = MMG3D_defsiz_iso;
     MMG3D_gradsiz        = MMG3D_gradsiz_iso;
+    MMG3D_gradsizreq     = MMG3D_gradsizreq_iso;
+
 #ifndef PATTERN
     MMG5_cavity          = MMG5_cavity_iso;
     MMG3D_PROctreein     = MMG3D_PROctreein_iso;
@@ -87,6 +89,7 @@ void MMG3D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
     MMG5_compute_meanMetricAtMarkedPoints = MMG5_compute_meanMetricAtMarkedPoints_ani;
     MMG3D_defsiz         = MMG3D_defsiz_ani;
     MMG3D_gradsiz        = MMG3D_gradsiz_ani;
+    MMG3D_gradsizreq     = MMG3D_gradsizreq_ani;
 #ifndef PATTERN
     MMG5_cavity         = MMG5_cavity_ani;
     MMG3D_PROctreein      = MMG3D_PROctreein_ani;
