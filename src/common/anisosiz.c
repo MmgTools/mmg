@@ -1684,17 +1684,6 @@ int MMG5_grad2metSurfreq(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int npma
 
     if ( !MMG5_updatemetreq_ani(mtan2,mu,vp) ) { return 0; }
 
-#ifndef NDEBUG
-    double ps2new;
-    ps2new = mtan2[0]*t2[0]*t2[0] + 2.0*mtan2[1]*t2[0]*t2[1] + mtan2[2]*t2[1]*t2[1];
-    assert ( ps2new  > 0. );
-    ps2new = sqrt(ps2new);
-
-    //printf("FIN : %d:  l_init %.15lg l_corr %.15lg l_ideal %.15lg l_voisin %.15lg \n",cfg,ps2,ps2new,alpha,ps1);
-    assert ( ((cfg==2 &&  ps2new < ps2) || (cfg==1 &&  ps2new > ps2 ) || !cfg ) && "gradation improvement");
-
-#endif
-
     /* Return in initial basis */
     mtmp[0][0] = mtan2[0]*r2[0][0] + mtan2[1]*r2[1][0];
     mtmp[0][1] = mtan2[0]*r2[0][1] + mtan2[1]*r2[1][1];
