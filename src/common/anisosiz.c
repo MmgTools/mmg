@@ -1488,11 +1488,13 @@ int MMG5_grad2metSurfreq(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int npma
 
     if( !MMG5_buildridmetnor(mesh,met,npmaster,nt,m1,rbasis1) ) { return 0; }
   }
-  else if( ( MG_REF & p1->tag ) ){
+  else if( ( MG_REF & p1->tag ) || (MG_BDY & p1->tag) ){
+    // if MG_BDY, we are in mmg3d: the normal is stored in the xPoint
     memcpy(n1,&(mesh->xpoint[p1->xp].n1[0]),3*sizeof(double));
     memcpy(m1,mm1,6*sizeof(double));
   }
   else{
+    // mmgs only
     memcpy(n1,p1->n,3*sizeof(double));
     memcpy(m1,mm1,6*sizeof(double));
   }
@@ -1516,11 +1518,13 @@ int MMG5_grad2metSurfreq(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int npma
     cfg_m2 = MMG5_buildridmetnor(mesh,met,npslave,nt,m2,rbasis2);
     if( !cfg_m2 ) { return 0; }
   }
-  else if( (MG_REF & p2->tag) ){
+  else if( (MG_REF & p2->tag) || (MG_BDY & p2->tag) ){
+    // if MG_BDY, we are in mmg3d: the normal is stored in the xPoint
     memcpy(n2,&(mesh->xpoint[p2->xp].n1[0]),3*sizeof(double));
     memcpy(m2,mm2,6*sizeof(double));
   }
   else{
+   //mmgs Only
     memcpy(n2,p2->n,3*sizeof(double));
     memcpy(m2,mm2,6*sizeof(double));
   }

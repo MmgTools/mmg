@@ -1836,6 +1836,7 @@ int MMG3D_gradsizreq_ani(MMG5_pMesh mesh,MMG5_pSol met) {
         ier = 0;// MMG5_grad2metVol(mesh,met,pt,np0,np1);
         if ( ier ) {
           mesh->point[npslave].s = mesh->point[npmaster].s - 1;
+
           nu++;
         }
       }
