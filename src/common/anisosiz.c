@@ -1676,7 +1676,6 @@ int MMG5_grad2metSurfreq(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int npma
 
     assert ( cfg_m2 );
     mm2[cfg_m2] = mu[1];
-    p2->ref =1;
 
   }
   else{
