@@ -425,28 +425,28 @@ int MMG5_invmat33(double m[3][3],double mi[3][3]) {
 
   /* Check results */
 #ifndef NDEBUG
-  double id[3][3];
+  double res[3][3];
 
-  id[0][0] = m[0][0] * mi[0][0] + m[0][1] * mi[1][0] + m[0][2] * mi[2][0];
-  id[0][1] = m[0][0] * mi[0][1] + m[0][1] * mi[1][1] + m[0][2] * mi[2][1];
-  id[0][2] = m[0][0] * mi[0][2] + m[0][1] * mi[1][2] + m[0][2] * mi[2][2];
+  res[0][0] = m[0][0] * mi[0][0] + m[0][1] * mi[1][0] + m[0][2] * mi[2][0];
+  res[0][1] = m[0][0] * mi[0][1] + m[0][1] * mi[1][1] + m[0][2] * mi[2][1];
+  res[0][2] = m[0][0] * mi[0][2] + m[0][1] * mi[1][2] + m[0][2] * mi[2][2];
 
-  id[1][0] = m[1][0] * mi[0][0] + m[1][1] * mi[1][0] + m[1][2] * mi[2][0];
-  id[1][1] = m[1][0] * mi[0][1] + m[1][1] * mi[1][1] + m[1][2] * mi[2][1];
-  id[1][2] = m[1][0] * mi[0][2] + m[1][1] * mi[1][2] + m[1][2] * mi[2][2];
+  res[1][0] = m[1][0] * mi[0][0] + m[1][1] * mi[1][0] + m[1][2] * mi[2][0];
+  res[1][1] = m[1][0] * mi[0][1] + m[1][1] * mi[1][1] + m[1][2] * mi[2][1];
+  res[1][2] = m[1][0] * mi[0][2] + m[1][1] * mi[1][2] + m[1][2] * mi[2][2];
 
-  id[2][0] = m[2][0] * mi[0][0] + m[2][1] * mi[1][0] + m[2][2] * mi[2][0];
-  id[2][1] = m[2][0] * mi[0][1] + m[2][1] * mi[1][1] + m[2][2] * mi[2][1];
-  id[2][2] = m[2][0] * mi[0][2] + m[2][1] * mi[1][2] + m[2][2] * mi[2][2];
+  res[2][0] = m[2][0] * mi[0][0] + m[2][1] * mi[1][0] + m[2][2] * mi[2][0];
+  res[2][1] = m[2][0] * mi[0][1] + m[2][1] * mi[1][1] + m[2][2] * mi[2][1];
+  res[2][2] = m[2][0] * mi[0][2] + m[2][1] * mi[1][2] + m[2][2] * mi[2][2];
 
 
-  assert ( ( fabs(id[0][0]-1.) < MMG5_EPSOK ) &&
-           ( fabs(id[1][1]-1.) < MMG5_EPSOK ) &&
-           ( fabs(id[2][2]-1.) < MMG5_EPSOK ) &&
-           ( fabs(id[0][1]) < MMG5_EPSOK ) && ( fabs(id[0][2]) < MMG5_EPSOK ) &&
-           ( fabs(id[1][2]) < MMG5_EPSOK ) &&
-           ( fabs(id[1][0]) < MMG5_EPSOK ) && ( fabs(id[2][0]) < MMG5_EPSOK ) &&
-           ( fabs(id[2][1]) < MMG5_EPSOK ) && "Matrix inversion" );
+  assert ( ( fabs(res[0][0]-1.) < MMG5_EPSOK ) &&
+           ( fabs(res[1][1]-1.) < MMG5_EPSOK ) &&
+           ( fabs(res[2][2]-1.) < MMG5_EPSOK ) &&
+           ( fabs(res[0][1]) < MMG5_EPSOK ) && ( fabs(res[0][2]) < MMG5_EPSOK ) &&
+           ( fabs(res[1][2]) < MMG5_EPSOK ) &&
+           ( fabs(res[1][0]) < MMG5_EPSOK ) && ( fabs(res[2][0]) < MMG5_EPSOK ) &&
+           ( fabs(res[2][1]) < MMG5_EPSOK ) && "Matrix inversion" );
 
 #endif
 
