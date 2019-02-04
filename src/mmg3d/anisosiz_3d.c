@@ -1585,6 +1585,280 @@ int MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int np1,int np
 
 
 /**
+ * \param mesh pointer toward the mesh
+ * \param m first matrix
+ * \param n second matrix
+ * \param dm eigenvalues of m in the coreduction basis (to fill)
+ * \param dn eigenvalues of n in the coreduction basis (to fill)
+ * \param vp coreduction basis (to fill)
+ *
+ * \return 0 if fail 1 otherwise.
+ *
+ * Perform simultaneous reduction of matrices \a m and \a n.
+ *
+ */
+static inline
+int MMG3D_simred(MMG5_pMesh mesh,double *m,double *n,double dm[3],
+                 double dn[3],double vp[3][3] ) {
+
+  double       lambda[3],im[6],imn[9];
+  int          order,ier;
+  static char  mmgWarn0=0;
+
+  /* Compute imn = M^{-1}N */
+  if ( !MMG5_invmat ( m,im ) ) {
+    if ( !mmgWarn0 ) {
+      mmgWarn0 = 1;
+      fprintf(stderr,"\n  ## Warning: %s: unable to invert the matrix.\n",__func__);
+    }
+    return 0;
+  }
+
+  MMG5_mn(im,n,imn);
+
+  /* Find eigenvalues of imn */
+  order = MMG5_eigenv(0,imn,lambda,vp);
+
+  if ( !order ) {
+    if ( !mmgWarn0 ) {
+      mmgWarn0 = 1;
+      fprintf(stderr,"\n  ## Warning: %s: at least 1 failing"
+              " simultaneous reduction.\n",__func__);
+    }
+    return 0;
+  }
+
+  if ( order == 3 ) {
+    /* First case : matrices m and n are homothetic: n = lambda0*m */
+    if ( (fabs(m[1]) < MMG5_EPS && fabs(m[2]) < MMG5_EPS
+          && fabs(m[4]) < MMG5_EPS) ) {
+      /* Subcase where m is diaonal */
+        dm[0]   = m[0];
+        dm[1]   = m[3];
+        dm[2]   = m[5];
+        vp[0][0] = 1;
+        vp[0][1] = 0;
+        vp[0][2] = 0;
+        vp[1][0] = 0;
+        vp[1][1] = 1;
+        vp[1][2] = 0;
+        vp[2][0] = 0;
+        vp[2][1] = 0;
+        vp[2][2] = 1;
+    }
+    else {
+      /* Subcase where m is not diagonal; dd,trimn,... are reused */
+      ier = MMG5_eigenv(1,m,dm,vp);
+    }
+    /* Eigenvalues of metric n */
+    dn[0] = lambda[0]*dm[0];
+    dn[1] = lambda[0]*dm[1];
+    dn[2] = lambda[0]*dm[2];
+  }
+  else {
+    /* Second case: eigenvalues of imn are distinct ; theory says qf associated
+       to m and n are diagonalizable in basis (vp[0], vp[1], vp[2]) - the
+       coreduction basis */
+    /* Compute diagonal values in simultaneous reduction basis */
+    dm[0] = m[0]*vp[0][0]*vp[0][0] + 2.0*m[1]*vp[0][0]*vp[0][1] + 2.0*m[2]*vp[0][0]*vp[0][2]
+      + m[3]*vp[0][1]*vp[0][1] + 2.0*m[4]*vp[0][1]*vp[0][2] + m[5]*vp[0][2]*vp[0][2];
+    dm[1] = m[0]*vp[1][0]*vp[1][0] + 2.0*m[1]*vp[1][0]*vp[1][1] + 2.0*m[2]*vp[1][0]*vp[1][2]
+      + m[3]*vp[1][1]*vp[1][1] + 2.0*m[4]*vp[1][1]*vp[1][2] + m[5]*vp[1][2]*vp[1][2];
+    dm[2] = m[0]*vp[2][0]*vp[2][0] + 2.0*m[1]*vp[2][0]*vp[2][1] + 2.0*m[2]*vp[2][0]*vp[2][2]
+      + m[3]*vp[2][1]*vp[2][1] + 2.0*m[4]*vp[2][1]*vp[2][2] + m[5]*vp[2][2]*vp[2][2];
+
+    dn[0] = n[0]*vp[0][0]*vp[0][0] + 2.0*n[1]*vp[0][0]*vp[0][1] + 2.0*n[2]*vp[0][0]*vp[0][2]
+      + n[3]*vp[0][1]*vp[0][1] + 2.0*n[4]*vp[0][1]*vp[0][2] + n[5]*vp[0][2]*vp[0][2];
+    dn[1] = n[0]*vp[1][0]*vp[1][0] + 2.0*n[1]*vp[1][0]*vp[1][1] + 2.0*n[2]*vp[1][0]*vp[1][2]
+      + n[3]*vp[1][1]*vp[1][1] + 2.0*n[4]*vp[1][1]*vp[1][2] + n[5]*vp[1][2]*vp[1][2];
+    dn[2] = n[0]*vp[2][0]*vp[2][0] + 2.0*n[1]*vp[2][0]*vp[2][1] + 2.0*n[2]*vp[2][0]*vp[2][2]
+      + n[3]*vp[2][1]*vp[2][1] + 2.0*n[4]*vp[2][1]*vp[2][2] + n[5]*vp[2][2]*vp[2][2];
+  }
+
+  assert ( dm[0] >= MMG5_EPSD2 && dm[1] >= MMG5_EPSD2 && dm[2] >= MMG5_EPSD2 && "positive eigenvalue" );
+  assert ( dn[0] >= MMG5_EPSD2 && dn[1] >= MMG5_EPSD2 && dn[2] >= MMG5_EPSD2 && "positive eigenvalue" );
+
+  if ( dm[0] < MMG5_EPSOK || dn[0] < MMG5_EPSOK ) { return 0; }
+  if ( dm[1] < MMG5_EPSOK || dn[1] < MMG5_EPSOK ) { return 0; }
+  if ( dm[2] < MMG5_EPSOK || dn[2] < MMG5_EPSOK ) { return 0; }
+
+  return 1;
+}
+
+/**
+ * \param n  matrix to update
+ * \param dn eigenvalues of n in the coreduction basis
+ * \param vp coreduction basis
+ *
+ * \return 0 if fail, 1 otherwise
+ *
+ * Update of the metric n = tP^-1 diag(dn0,dn1,dn2)P^-1, P = (vp[0],vp[1],vp[2])
+ * stored in columns
+ *
+ */
+int MMG3D_updatemetreq_ani(double *n,double dn[3],double vp[3][3]) {
+  double ip[3][3];
+
+  /* P^-1 */
+  if ( !MMG5_invmat33(vp,ip) ) {
+    return 0;
+  }
+
+  /* tp^-1 * dn * P^-1 */
+  n[0] = dn[0]*ip[0][0]*ip[0][0] + dn[1]*ip[1][0]*ip[1][0] + dn[2]*ip[2][0]*ip[2][0];
+  n[1] = dn[0]*ip[0][0]*ip[0][1] + dn[1]*ip[1][0]*ip[1][1] + dn[2]*ip[2][0]*ip[2][1];
+  n[2] = dn[0]*ip[0][0]*ip[0][2] + dn[1]*ip[1][0]*ip[1][2] + dn[2]*ip[2][0]*ip[2][2];
+
+  n[3] = dn[0]*ip[0][1]*ip[0][1] + dn[1]*ip[1][1]*ip[1][1] + dn[2]*ip[2][1]*ip[2][1];
+  n[4] = dn[0]*ip[0][1]*ip[0][2] + dn[1]*ip[1][1]*ip[1][2] + dn[2]*ip[2][1]*ip[2][2];
+
+  n[5] = dn[0]*ip[0][2]*ip[0][2] + dn[1]*ip[1][2]*ip[1][2] + dn[2]*ip[2][2]*ip[2][2];
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh.
+ * \param met pointer toward the metric structure.
+ * \param pt pointer toward a tetra.
+ * \param npmaster edge extremity that cannot be modified
+ * \param npslave edge extremity to modify to respect the gradation.
+ *
+ * \return 1 if the graddation succeed, 0 otherwise
+ *
+ * Enforces gradation of metric from required entity toward other using the
+ * simultaneous reduction technique (note that as the gradation is propagated,
+ * we can be on an edge without a required extremity).
+ *
+ */
+static inline
+int MMG5_grad2metVolreq(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int npmaster,
+                        int npslave) {
+  MMG5_pPoint    p1,p2;
+  double         *mm1,*mm2,m1[6],m2[6],ux,uy,uz;
+  double         l,difsiz,rbasis1[3][3],rbasis2[3][3];
+  double         lambda[3],vp[3][3],beta,mu[3];
+  int            cfg_m2;
+  int8_t         ier;
+
+  p1  = &mesh->point[npmaster];
+  p2  = &mesh->point[npslave];
+
+  ux = p2->c[0] - p1->c[0];
+  uy = p2->c[1] - p1->c[1];
+  uz = p2->c[2] - p1->c[2];
+
+  mm1  = &met->m[6*npmaster];
+  mm2  = &met->m[6*npslave];
+
+  cfg_m2 = 0;
+  ier = 0;
+
+  if ( (!( MG_SIN(p1->tag) || (p1->tag & MG_NOM) )) &&  p1->tag & MG_GEO ) {
+    /* Recover normal and metric associated to p1 */
+    if( !MMG5_buildridmet(mesh,met,npmaster,ux,uy,uz,m1,rbasis1) ) { return 0; }
+  }
+  else
+    memcpy(m1,mm1,6*sizeof(double));
+
+  if ( (!( MG_SIN(p2->tag) || (p2->tag & MG_NOM) )) && p2->tag & MG_GEO ) {
+    /* Recover normal and metric associated to p2 */
+    cfg_m2 = MMG5_buildridmet(mesh,met,npslave,ux,uy,uz,m2,rbasis2);
+    if( !cfg_m2 ) { return 0; }
+  }
+  else
+    memcpy(m2,mm2,6*sizeof(double));
+
+  l = sqrt(ux*ux+uy*uy+uz*uz);
+
+  difsiz = mesh->info.hgradreq*l;
+
+  /* Simultaneous reduction of mtan1 and mtan2 */
+  if ( !MMG3D_simred(mesh,m1,m2,lambda,mu,vp) ) {
+    return 0;
+  }
+
+  /* Gradation of sizes = 1/sqrt(eigenv of the tensors) in the first direction */
+  MMG5_gradEigenvreq(lambda,mu,difsiz,0,&ier);
+
+  /* Gradation of sizes = 1/sqrt(eigenv of the tensors) in the second direction */
+  MMG5_gradEigenvreq(lambda,mu,difsiz,1,&ier);
+
+  /* Gradation of sizes = 1/sqrt(eigenv of the tensors) in the third direction */
+  MMG5_gradEigenvreq(lambda,mu,difsiz,2,&ier);
+
+  if ( !ier ) {
+    return 0;
+  }
+
+  /* Metric update using the simultaneous reduction technique */
+  if( MG_SIN(p2->tag) || (p2->tag & MG_NOM) ){
+    /* We choose to not respect the gradation in order to restrict the influence
+     * of the singular points. Thus:
+     * lambda_new = = 0.5 lambda_1 + 0.5 lambda_new = lambda_1 + 0.5 beta.
+     * with beta the smallest variation of the eigenvalues (lambda_new-lambda_1). */
+    assert ( fabs(mm2[0]-mm2[3]) < MMG5_EPSOK && fabs(mm2[3]-mm2[5]) < MMG5_EPSOK
+             && "iso metric?" );
+
+    beta = mu[0] - mm2[0];
+
+    if ( fabs(beta) < fabs(mm2[0]-mu[1]) ) {
+      beta = mu[1] - mm2[0];
+    }
+    if ( fabs(beta) < fabs(mm2[0]-mu[2]) ) {
+      beta = mu[2] - mm2[0];
+    }
+
+    mm2[0] += 0.5*beta;
+    mm2[3] += 0.5*beta;
+    mm2[5] += 0.5*beta;
+  }
+  else if( p2->tag & MG_GEO ){
+
+    if ( !MMG3D_updatemetreq_ani(m2,mu,vp) ) { return 0; }
+
+    /* Here mtan2 contains the gradated metric in the coreduction basis: compute
+     * the sizes in the directions (t,u=t^n,n) */
+    mu[0] = m2[0]*rbasis2[0][0]*rbasis2[0][0] + 2. * m2[1]*rbasis2[1][0]*rbasis2[0][0]
+      + 2. * m2[2]*rbasis2[2][0]*rbasis2[0][0]
+      + m2[3]*rbasis2[1][0]*rbasis2[1][0] + 2. * m2[4]*rbasis2[2][0]*rbasis2[1][0]
+      + m2[5]*rbasis2[2][0]*rbasis2[2][0];
+
+    /* h = 1/sqrt(t_e M e) */
+    assert ( mu[0] > MMG5_EPSD2 );
+
+    mu[1] = m2[0]*rbasis2[0][1]*rbasis2[0][1] + 2. * m2[1]*rbasis2[1][1]*rbasis2[0][1]
+      + 2. * m2[2]*rbasis2[2][1]*rbasis2[0][1]
+      + m2[3]*rbasis2[1][1]*rbasis2[1][1] + 2. * m2[4]*rbasis2[2][1]*rbasis2[1][1]
+      + m2[5]*rbasis2[2][1]*rbasis2[2][1];
+
+    /* h = 1/sqrt(t_e M e) */
+    assert ( mu[1] > MMG5_EPSD2 );
+
+    mu[2] = m2[0]*rbasis2[0][2]*rbasis2[0][2] + 2. * m2[1]*rbasis2[1][2]*rbasis2[0][2]
+      + 2. * m2[2]*rbasis2[2][2]*rbasis2[0][2]
+      + m2[3]*rbasis2[1][2]*rbasis2[1][2] + 2. * m2[4]*rbasis2[2][2]*rbasis2[1][2]
+      + m2[5]*rbasis2[2][2]*rbasis2[2][2];
+
+    /* h = 1/sqrt(t_e M e) */
+    assert ( mu[2] > MMG5_EPSD2 );
+
+    /* Update the ridge metric */
+    mm2[0] =  mu[0];
+
+    assert ( cfg_m2 );
+  }
+  else{
+
+    if ( !MMG3D_updatemetreq_ani(m2,mu,vp) ) { return 0; }
+    memcpy(mm2,m2,6*sizeof(double));
+  }
+
+  return 1;
+}
+
+
+/**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
  * \return 1
@@ -1833,7 +2107,7 @@ int MMG3D_gradsizreq_ani(MMG5_pMesh mesh,MMG5_pSol met) {
         }
 
         /* Impose the gradation to npslave from npmaster */
-        ier = 0;// MMG5_grad2metVol(mesh,met,pt,np0,np1);
+        ier =  MMG5_grad2metVolreq(mesh,met,pt,npmaster,npslave);
         if ( ier ) {
           mesh->point[npslave].s = mesh->point[npmaster].s - 1;
 
