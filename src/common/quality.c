@@ -114,7 +114,7 @@ double MMG5_caltri33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt) {
  */
 double MMG5_caltri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
   MMG5_pPoint   p[3];
-  double        rap,anisurf,l0,l1,l2,m[6],mm[6];
+  double        rap,anisurf,l0,l1,l2,m[6],mm[6],rbasis[3][3];
   double        abx,aby,abz,acx,acy,acz,bcy,bcx,bcz;
   int           np[3],i,j;
   char          i1,i2;
@@ -140,7 +140,10 @@ double MMG5_caltri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
       abx = 0.5*(p[i1]->c[0]+p[i2]->c[0]) - p[i]->c[0];
       aby = 0.5*(p[i1]->c[1]+p[i2]->c[1]) - p[i]->c[1];
       abz = 0.5*(p[i1]->c[2]+p[i2]->c[2]) - p[i]->c[2];
-      if ( !MMG5_buildridmet(mesh,met,np[i],abx,aby,abz,&m[0]) )  return 0.0;
+      /* Note that rbasis is unused here */
+      if ( !MMG5_buildridmet(mesh,met,np[i],abx,aby,abz,&m[0],rbasis) ) {
+        return 0.0;
+      }
     }
     else {
       memcpy(&m[0],&met->m[6*np[i]],6*sizeof(double));

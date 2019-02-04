@@ -197,7 +197,7 @@ double MMG5_lenEdg(MMG5_pMesh mesh,int np0,int np1,
 static inline
 double MMG5_lenSurfEdg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,char isedg) {
   MMG5_pPoint   p0,p1;
-  double        *m0,*m1,met0[6],met1[6],ux,uy,uz;
+  double        *m0,*m1,met0[6],met1[6],ux,uy,uz,rbasis[3][3];
   static char   mmgWarn = 0;
 
   p0 = &mesh->point[np0];
@@ -212,7 +212,8 @@ double MMG5_lenSurfEdg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,char is
     m0 = &met->m[6*np0];
   }
   else if ( MG_GEO & p0->tag ) {
-    if ( !MMG5_buildridmet(mesh,met,np0,ux,uy,uz,met0) )  {
+    /* Note that rbasis isn't used here */
+    if ( !MMG5_buildridmet(mesh,met,np0,ux,uy,uz,met0,rbasis) )  {
       if ( !mmgWarn ) {
         fprintf(stderr,"  ## Warning: %s: a- unable to compute at least 1 ridge"
                 " metric.\n",__func__);
@@ -230,7 +231,8 @@ double MMG5_lenSurfEdg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,char is
     m1 = &met->m[6*np1];
   }
   else if ( MG_GEO & p1->tag ) {
-    if ( !MMG5_buildridmet(mesh,met,np1,ux,uy,uz,met1) )  {
+    /* Note that rbasis isn't used here */
+    if ( !MMG5_buildridmet(mesh,met,np1,ux,uy,uz,met1,rbasis) )  {
       if ( !mmgWarn ) {
         fprintf(stderr,"  ## Warning: %s: b- unable to compute at least 1 ridge"
                 " metric.\n",__func__);

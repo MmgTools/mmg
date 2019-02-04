@@ -111,23 +111,25 @@ int MMG5_intmetsavedir(MMG5_pMesh mesh, double *m,double *n,double *mr) {
  * \param uy distance \f$[p0;p1]\f$ along y axis.
  * \param uz distance \f$[p0;p1]\f$ along z axis.
  * \param mr computed metric tensor.
+ * \param r basis in which the metric is diagona
  *
  * \return 1 if success
  *
  * Build metric tensor at ridge point p0, when computations with respect to p1
- * are to be held.
+ * are to be held. Store the basis vectors in \a r.
  *
  * \remark ALGIANE: a mettre à plat : si p0-p1 est une ridge, on peut
  * reconstruire la mauvaise métrique non? Est-ce qu'il ne vaut mieux pas passer
  * la normale au triangle d'où l'on vient en argument pour le choix de la
- * métrique à reconstruire?
+ * métrique à reconstruire si c'est possible(quand on vient de grad2metSurfreq)?
  *
  */
 int MMG5_buildridmet(MMG5_pMesh mesh,MMG5_pSol met,int np0,
-                      double ux,double uy,double uz,double mr[6]) {
+                     double ux,double uy,double uz,double mr[6],
+                     double r[3][3] ) {
   MMG5_pPoint  p0;
   MMG5_pxPoint go;
-  double       ps1,ps2,*n1,*n2,*t,*m,dv,dn,u[3],r[3][3];
+  double       ps1,ps2,*n1,*n2,*t,*m,dv,dn,u[3];
 
   p0 = &mesh->point[np0];
   if ( !(MG_GEO & p0->tag) )  return 0;

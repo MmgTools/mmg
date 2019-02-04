@@ -1370,7 +1370,7 @@ static inline
 int MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int np1,int np2) {
   MMG5_pPoint    p1,p2;
   double         *mm1,*mm2,m1[6],m2[6],ps1,ps2,ux,uy,uz;
-  double         c[5],l,val,t[3];
+  double         c[5],l,val,t[3],rbasis1[3][3],rbasis2[3][3];
   double         lambda[3],vp[3][3],alpha,beta,mu[3];
   int            kmin,i;
   char           ichg;
@@ -1388,7 +1388,8 @@ int MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int np1,int np
 
   if ( (!( MG_SIN(p1->tag) || (p1->tag & MG_NOM) )) &&  p1->tag & MG_GEO ) {
     /* Recover normal and metric associated to p1 */
-    if( !MMG5_buildridmet(mesh,met,np1,ux,uy,uz,m1) )
+    /* Note that rbasis1/2 are not used in this function */
+    if( !MMG5_buildridmet(mesh,met,np1,ux,uy,uz,m1,rbasis1) )
       return -1;
   }
   else
@@ -1396,7 +1397,7 @@ int MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int np1,int np
 
   if ( (!( MG_SIN(p2->tag) || (p2->tag & MG_NOM) )) && p2->tag & MG_GEO ) {
     /* Recover normal and metric associated to p2 */
-    if( !MMG5_buildridmet(mesh,met,np2,ux,uy,uz,m2) )
+    if( !MMG5_buildridmet(mesh,met,np2,ux,uy,uz,m2,rbasis2) )
       return -1;
   }
   else

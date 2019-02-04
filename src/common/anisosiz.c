@@ -122,7 +122,7 @@ double MMG5_surf(MMG5_pMesh mesh,double m[3][6],MMG5_pTria ptt) {
 double MMG5_surftri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
   MMG5_pPoint    p[3];
   int            np[3];
-  double         ux,uy,uz,m[3][6];
+  double         ux,uy,uz,m[3][6],rbasis[3][3];
   char           i1,i2;
   int            i;
 
@@ -143,7 +143,8 @@ double MMG5_surftri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
       ux = 0.5*(p[i1]->c[0]+p[i2]->c[0]) - p[i]->c[0];
       uy = 0.5*(p[i1]->c[1]+p[i2]->c[1]) - p[i]->c[1];
       uz = 0.5*(p[i1]->c[2]+p[i2]->c[2]) - p[i]->c[2];
-      if ( !MMG5_buildridmet(mesh,met,np[i],ux,uy,uz,&m[i][0]) )  return 0.0;
+      /* Note that rbasis is unused in this function */
+      if ( !MMG5_buildridmet(mesh,met,np[i],ux,uy,uz,&m[i][0],rbasis) )  return 0.0;
     }
     else {
       memcpy(&m[i][0],&met->m[6*np[i]],6*sizeof(double));
@@ -914,7 +915,7 @@ int MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int np1,
   MMG5_pPoint  p1,p2;
   double      *mm1,*mm2,*nn1,*nn2,ps1,ps2,ux,uy,uz,m1[6],m2[6],n1[3],n2[3],nt[3];
   double       r1[3][3],r2[3][3],t1[2],t2[2],c[3],mtan1[3],mtan2[3],mr1[6],mr2[6];
-  double       mtmp[3][3],val;
+  double       mtmp[3][3],val,rbasis[3][3];
   double       /*,l1,l2*/l,dd;
   double       lambda[2],vp[2][2],alpha,beta,mu[3];
   int          kmin,idx;
@@ -949,7 +950,8 @@ int MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int np1,
     else
       memcpy(n1,nn1,3*sizeof(double));
 
-    if( !MMG5_buildridmet(mesh,met,np1,ux,uy,uz,m1) )
+    /* Note that rbasis is unused in this function */
+    if( !MMG5_buildridmet(mesh,met,np1,ux,uy,uz,m1,rbasis) )
       return -1;
   }
   else if( ( MG_REF & p1->tag ) ){
@@ -977,7 +979,8 @@ int MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int np1,
     else
       memcpy(n2,nn1,3*sizeof(double));
 
-    if( !MMG5_buildridmet(mesh,met,np2,ux,uy,uz,m2) )
+    /* Note that rbasis is unused in this function */
+    if( !MMG5_buildridmet(mesh,met,np2,ux,uy,uz,m2,rbasis) )
       return -1;
   }
   else if( (MG_REF & p2->tag) ){

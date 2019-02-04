@@ -512,7 +512,7 @@ typedef struct MMG5_dNode_s {
  int           MMG5_Add_inode( MMG5_pMesh mesh, MMG5_iNode **liLi, int val );
  int           MMG5_Add_dnode( MMG5_pMesh mesh, MMG5_dNode **liLi, int, double);
  extern void   MMG5_bezierEdge(MMG5_pMesh, int, int, double*, double*, char,double*);
- int           MMG5_buildridmet(MMG5_pMesh,MMG5_pSol,int,double,double,double,double*);
+ int           MMG5_buildridmet(MMG5_pMesh,MMG5_pSol,int,double,double,double,double*,double[3][3]);
  extern int    MMG5_buildridmetfic(MMG5_pMesh,double*,double*,double,double,double,double*);
  int           MMG5_buildridmetnor(MMG5_pMesh, MMG5_pSol, int,double*, double*,double[3][3]);
  int           MMG5_paratmet(double c0[3],double n0[3],double m[6],double c1[3],double n1[3],double mt[6]);
