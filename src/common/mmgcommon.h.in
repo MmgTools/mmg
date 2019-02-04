@@ -562,6 +562,7 @@ typedef struct MMG5_dNode_s {
  extern int    MMG5_rotmatrix(double n[3],double r[3][3]);
  int           MMG5_invmat(double *m,double *mi);
  int           MMG5_invmatg(double m[9],double mi[9]);
+ int           MMG5_invmat33(double m[3][3],double mi[3][3]);
  double        MMG5_ridSizeInNormalDir(MMG5_pMesh,int,double*,MMG5_pBezier,double,double);
  double        MMG5_ridSizeInTangentDir(MMG5_pMesh, MMG5_pPoint,int,int*,double,double);
  int           MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met);
