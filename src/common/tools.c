@@ -158,7 +158,43 @@ inline int MMG5_nortri(MMG5_pMesh mesh,MMG5_pTria pt,double *n) {
 
 }
 
-/* Compute product R*M*tR when M is symmetric */
+
+/**
+ * \param m symetric matrix
+ * \param n symetric matrix
+ * \param mn result
+ *
+ * Compute product m*n (mn stored in columns: mn[1] = mn[1][0]).
+ *
+ */
+void MMG5_mn(double m[6], double n[6], double mn[9] ){
+
+  mn[0] = m[0]*n[0] + m[1]*n[1] + m[2]*n[2];
+  mn[1] = m[1]*n[0] + m[3]*n[1] + m[4]*n[2];
+  mn[2] = m[2]*n[0] + m[4]*n[1] + m[5]*n[2];
+
+  mn[3] = m[0]*n[1] + m[1]*n[3] + m[2]*n[4];
+  mn[4] = m[1]*n[1] + m[3]*n[3] + m[4]*n[4];
+  mn[5] = m[2]*n[1] + m[4]*n[3] + m[5]*n[4];
+
+  mn[6] = m[0]*n[2] + m[1]*n[4] + m[2]*n[5];
+  mn[7] = m[1]*n[2] + m[3]*n[4] + m[4]*n[5];
+  mn[8] = m[2]*n[2] + m[4]*n[4] + m[5]*n[5];
+
+  return;
+}
+
+
+/**
+ * \param r 3x3 matrix
+ * \param m symetric matrix
+ * \param mr result
+ *
+ * \return 1
+ *
+ * Compute product R*M*tR when M is symmetric
+ *
+ */
 inline int MMG5_rmtr(double r[3][3],double m[6], double mr[6]){
   double n[3][3];
 
