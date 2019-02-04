@@ -512,38 +512,6 @@ void MMG2D_gradEigenv(double dm[2],double dn[2],double difsiz,int8_t dir,int8_t 
 }
 
 /**
- * \param dm eigenvalues of the first matrix (not modified)
- * \param dn eigenvalues of the second matrix (modified)
- * \param difsiz maximal size gap authorized by the gradation.
- * \param dir direction in which the sizes are graded.
- * \param ier 2 if dn has been updated, 0 otherwise.
- *
- *  Gradation of size dn = 1/sqrt(eigenv of the tensor) for required points in
- *  the \a idir direction.
- *
- */
-static inline
-void MMG2D_gradEigenvreq(double dm[2],double dn[2],double difsiz,int8_t dir,int8_t *ier) {
-  double hm,hn;
-
-  hm = 1.0 / sqrt(dm[dir]);
-  hn = 1.0 / sqrt(dn[dir]);
-
-  if ( hn > hm + difsiz + MMG5_EPSOK ) {
-    /* Decrease the size in \a ipslave */
-    hn = hm+difsiz;
-    dn[dir] = 1.0 / (hn*hn);
-    (*ier) = 2;
-  }
-  else if ( hn + MMG5_EPSOK < hm - difsiz ) {
-    /* Increase the size in \a ipslave */
-    hn = hm-difsiz;
-    dn[dir] = 1.0 / (hn*hn);
-    (*ier) = 2;
-  }
-}
-
-/**
  * \param m first matrix
  * \param n second matrix
  * \param dm eigenvalues of m in the coreduction basis

@@ -1375,7 +1375,7 @@ int MMG5_simred(MMG5_pMesh mesh,double *m,double *n,double dm[2],
  *  the \a idir direction.
  *
  */
-void MMG5_gradEigenvreq(double dm[2],double dn[2],double difsiz,int8_t dir,int8_t *ier) {
+void MMG5_gradEigenvreq(double *dm,double *dn,double difsiz,int8_t dir,int8_t *ier) {
   double hm,hn;
 
   hm = 1.0 / sqrt(dm[dir]);
@@ -1645,7 +1645,7 @@ int MMG5_grad2metSurfreq(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int npma
   else if ( p2->tag & MG_GEO ){
     if ( !MMG5_updatemetreq_ani(mtan2,mu,vp) ) { return 0; }
 
-    /* Here mtan2 contains the gradated metric it the coreduction basis: compute
+    /* Here mtan2 contains the gradated metric in the coreduction basis: compute
      * the sizes in the directions (t,u=t^n,n): Computation in 3D but it is
      * maybe more efficient to work in the tangent plane (but we need to compute
      * the basis of the ridge metric in the tangent plane) */
