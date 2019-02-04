@@ -1656,19 +1656,17 @@ int MMG5_grad2metSurfreq(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int npma
     rmet3D[4] = 0;
     rmet3D[5] = mr2[5];
 
-    mu[0] = rmet3D[0]*rbasis2[0][0]*rbasis2[0][0] + rmet3D[1]*rbasis2[1][0]*rbasis2[0][0]
-      + rmet3D[2]*rbasis2[2][0]*rbasis2[0][0] + rmet3D[1]*rbasis2[0][0]*rbasis2[1][0]
-      + rmet3D[3]*rbasis2[1][0]*rbasis2[1][0] + rmet3D[4]*rbasis2[2][0]*rbasis2[1][0]
-      + rmet3D[2]*rbasis2[0][0]*rbasis2[2][0] + rmet3D[4]*rbasis2[1][0]*rbasis2[2][0]
+    mu[0] = rmet3D[0]*rbasis2[0][0]*rbasis2[0][0] + 2. * rmet3D[1]*rbasis2[1][0]*rbasis2[0][0]
+      + 2. * rmet3D[2]*rbasis2[2][0]*rbasis2[0][0]
+      + rmet3D[3]*rbasis2[1][0]*rbasis2[1][0] + 2. * rmet3D[4]*rbasis2[2][0]*rbasis2[1][0]
       + rmet3D[5]*rbasis2[2][0]*rbasis2[2][0];
 
     /* h = 1/sqrt(t_e M e) */
     assert ( mu[0] > MMG5_EPSD2 );
 
-    mu[1] = rmet3D[0]*rbasis2[0][1]*rbasis2[0][1] + rmet3D[1]*rbasis2[1][1]*rbasis2[0][1]
-      + rmet3D[2]*rbasis2[2][1]*rbasis2[0][1] + rmet3D[1]*rbasis2[0][1]*rbasis2[1][1]
-      + rmet3D[3]*rbasis2[1][1]*rbasis2[1][1] + rmet3D[4]*rbasis2[2][1]*rbasis2[1][1]
-      + rmet3D[2]*rbasis2[0][1]*rbasis2[2][1] + rmet3D[4]*rbasis2[1][1]*rbasis2[2][1]
+    mu[1] = rmet3D[0]*rbasis2[0][1]*rbasis2[0][1] + 2. * rmet3D[1]*rbasis2[1][1]*rbasis2[0][1]
+      + 2. * rmet3D[2]*rbasis2[2][1]*rbasis2[0][1]
+      + rmet3D[3]*rbasis2[1][1]*rbasis2[1][1] + 2. * rmet3D[4]*rbasis2[2][1]*rbasis2[1][1]
       + rmet3D[5]*rbasis2[2][1]*rbasis2[2][1];
 
     /* h = 1/sqrt(t_e M e) */
