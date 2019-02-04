@@ -1020,7 +1020,7 @@ void MMG3D_mark_pointsOnReqEdge_fromTetra (  MMG5_pMesh mesh ) {
   MMG5_pxTetra pxt;
   MMG5_pPoint  ppt;
   int          k;
-  int8_t       i,j;
+  int8_t       i;
 
   for ( k=1; k<=mesh->np; k++ ) {
     ppt = &mesh->point[k];

@@ -702,9 +702,8 @@ void MMG3D_computeOutqua(MMG5_pMesh mesh,MMG5_pSol met,int *ne,double *max,doubl
  *
  */
 int MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
-  MMG5_pTetra pt;
   double      rapmin,rapmax,rapavg;
-  int         med,good,iel,ne,his[5],nrid,k;
+  int         med,good,iel,ne,his[5],nrid;
 
   nrid = 0;
   if( mesh->info.optimLES ) {

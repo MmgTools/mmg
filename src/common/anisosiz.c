@@ -1450,12 +1450,11 @@ int MMG5_grad2metSurfreq(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int npma
   MMG5_pPoint  p1,p2;
   double      *mm1,*mm2,*nn1,*nn2,ps1,ps2,ux,uy,uz,m1[6],m2[6],n1[3],n2[3],nt[3];
   double       r1[3][3],r2[3][3],t1[2],t2[2],c[3],mtan1[3],mtan2[3],mr1[6],mr2[6];
-  double       mtmp[3][3],val,rbasis1[3][3],rbasis2[3][3];
+  double       mtmp[3][3],rbasis1[3][3],rbasis2[3][3];
   double       l,dd,difsiz,rmet3D[6];
   double       lambda[2],vp[2][2],alpha,beta,mu[3];
-  int          kmin,idx,cfg_m2;
+  int          cfg_m2;
   int8_t       ier;
-  char         ichg;
 
   p1 = &mesh->point[npmaster];
   p2 = &mesh->point[npslave];

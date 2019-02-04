@@ -1737,7 +1737,6 @@ int MMG3D_gradsizreq_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pxTetra  pxt;
   MMG5_Tria     ptt;
   MMG5_pPoint   p0,p1;
-  double        *m,mv;
   int           k,it,itv,nup,nu,nupv,maxit;
   int           i,j,np0,np1,npmaster,npslave,ier;
 

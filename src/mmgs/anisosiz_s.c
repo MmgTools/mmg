@@ -767,7 +767,7 @@ int MMGS_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
 int MMGS_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pPoint  p1;
   double       *m,mv;
-  int          k,it,nup;
+  int          k,it;
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
     fprintf(stdout,"  ** Anisotropic mesh gradation\n");
