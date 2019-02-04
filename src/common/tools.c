@@ -440,13 +440,13 @@ int MMG5_invmat33(double m[3][3],double mi[3][3]) {
   res[2][2] = m[2][0] * mi[0][2] + m[2][1] * mi[1][2] + m[2][2] * mi[2][2];
 
 
-  assert ( ( fabs(res[0][0]-1.) < MMG5_EPSOK ) &&
-           ( fabs(res[1][1]-1.) < MMG5_EPSOK ) &&
-           ( fabs(res[2][2]-1.) < MMG5_EPSOK ) &&
-           ( fabs(res[0][1]) < MMG5_EPSOK ) && ( fabs(res[0][2]) < MMG5_EPSOK ) &&
-           ( fabs(res[1][2]) < MMG5_EPSOK ) &&
-           ( fabs(res[1][0]) < MMG5_EPSOK ) && ( fabs(res[2][0]) < MMG5_EPSOK ) &&
-           ( fabs(res[2][1]) < MMG5_EPSOK ) && "Matrix inversion" );
+  assert ( ( fabs(res[0][0]-1.) < MMG5_EPS ) &&
+           ( fabs(res[1][1]-1.) < MMG5_EPS ) &&
+           ( fabs(res[2][2]-1.) < MMG5_EPS ) &&
+           ( fabs(res[0][1]) < MMG5_EPS ) && ( fabs(res[0][2]) < MMG5_EPS ) &&
+           ( fabs(res[1][2]) < MMG5_EPS ) &&
+           ( fabs(res[1][0]) < MMG5_EPS ) && ( fabs(res[2][0]) < MMG5_EPS ) &&
+           ( fabs(res[2][1]) < MMG5_EPS ) && "Matrix inversion" );
 
 #endif
 
