@@ -703,7 +703,7 @@ void MMG3D_computeOutqua(MMG5_pMesh mesh,MMG5_pSol met,int *ne,double *max,doubl
  */
 int MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
   double      rapmin,rapmax,rapavg;
-  int         med,good,iel,ne,his[5],nrid;
+  int         k,med,good,iel,ne,his[5],nrid;
 
   nrid = ne = iel = good = med = 0;
   for ( k=0; k<5; ++k ) {
