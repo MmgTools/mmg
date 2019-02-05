@@ -184,12 +184,12 @@ SET(passRegex "Mismatched options")
 SET_PROPERTY(TEST mmg_hsizHmax_${SHRT_EXEC}
   PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}")
 
-#ADD_TEST(NAME mmg_hsizHmin_${SHRT_EXEC}
-#  COMMAND ${EXEC} -v 5 -hsiz 0.1 -hmin 0.2
-#  ${MMG_CI_TESTS}/Cube/cube
-#  -out ${CTEST_OUTPUT_DIR}/mmg_hsizHmin_${SHRT_EXEC}.o.meshb)
-#SET_PROPERTY(TEST mmg_hsizHmin_${SHRT_EXEC}
-#  PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}")
+ADD_TEST(NAME mmg_hsizHmin_${SHRT_EXEC}
+  COMMAND ${EXEC} -v 5 -hsiz 0.1 -hmin 0.2
+  ${MMG_CI_TESTS}/Cube/cube
+  -out ${CTEST_OUTPUT_DIR}/mmg_hsizHmin_${SHRT_EXEC}.o.meshb)
+SET_PROPERTY(TEST mmg_hsizHmin_${SHRT_EXEC}
+  PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}")
 
 # Required entities
 ADD_TEST(NAME mmg_MultiDom_Ellipse_ReqEntities_${SHRT_EXEC}
