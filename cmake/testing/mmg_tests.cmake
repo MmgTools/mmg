@@ -180,7 +180,7 @@ ADD_TEST(NAME mmg_hsizHmax_${SHRT_EXEC}
   COMMAND ${EXEC} -v 5 -hsiz 0.1 -hmax 0.05
   ${MMG_CI_TESTS}/Cube/cube
   -out ${CTEST_OUTPUT_DIR}/mmg_hsizHmax_${SHRT_EXEC}.o.meshb)
-SET(passRegex "MISMATCH OPTIONS")
+SET(passRegex "Mismatched options")
 SET_PROPERTY(TEST mmg_hsizHmax_${SHRT_EXEC}
   PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}")
 
