@@ -431,7 +431,7 @@ int MMG5_Set_defaultTruncatureSizes(MMG5_pMesh mesh,char sethmin,char sethmax) {
 
   if ( mesh->info.hmax < mesh->info.hmin ) {
     assert ( sethmin && sethmax );
-    fprintf(stderr,"\n  ## Error: %s: mismatch parameters:"
+    fprintf(stderr,"\n  ## Error: %s: Mismatched options:"
             " minimal mesh size larger than maximal one.\n",__func__);
     return 0;
   }
