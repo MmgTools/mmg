@@ -586,7 +586,15 @@ void MMG3D_computeInqua(MMG5_pMesh mesh,MMG5_pSol met,int *ne,double *max,double
  */
 int MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
   double      rapmin,rapmax,rapavg;
-  int         med,good,iel,ne,his[5];
+  int         k,med,good,iel,ne,his[5];
+
+  ne = iel = good = med = 0;
+  for ( k=0; k<5; ++k ) {
+    his[k] = 0;
+  }
+  rapmax = 0.;
+  rapmin = 2.;
+  rapavg = 2.;
 
   if( mesh->info.optimLES ) {
     MMG3D_computeLESqua(mesh,met,&ne,&rapmax,&rapavg,&rapmin,&iel,&good,&med,
@@ -702,7 +710,6 @@ void MMG3D_computeOutqua(MMG5_pMesh mesh,MMG5_pSol met,int *ne,double *max,doubl
  *
  */
 int MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
-  MMG5_pTetra pt;
   double      rapmin,rapmax,rapavg;
   int         med,good,iel,ne,his[5],nrid,k;
 
