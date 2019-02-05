@@ -434,6 +434,8 @@ static int MMG5_singul(MMG5_pMesh mesh) {
       if ( !MG_VOK(ppt) || ( ppt->tag & MG_CRN ) || ( ppt->tag & MG_NOM ) )
         continue;
       else if ( MG_EDG(ppt->tag) ) {
+        /* Store the number of ridges passing through the point (xp) and the
+         * number of ref edges (nr) */
         ns = MMG5_bouler(mesh,mesh->adjt,k,i,list,listref,&xp,&nr,MMG3D_LMAX);
 
         if ( !ns )  continue;

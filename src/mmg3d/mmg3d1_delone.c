@@ -859,7 +859,7 @@ MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree PROctree, int* warn
   /* Iterative mesh modifications */
   it = nnc = nns = nnf = nnm = nfilt = 0;
   noptim = 0;
-  maxit = 50;
+  maxit = 10;
   mesh->gap = maxgap = 0.5;
   declic = 0.5/MMG3D_ALPHAD;
   declicsurf = 1./3.46;

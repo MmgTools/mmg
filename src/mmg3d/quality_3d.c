@@ -705,7 +705,14 @@ int MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
   double      rapmin,rapmax,rapavg;
   int         med,good,iel,ne,his[5],nrid;
 
-  nrid = 0;
+  nrid = ne = iel = good = med = 0;
+  for ( k=0; k<5; ++k ) {
+    his[k] = 0;
+  }
+  rapmax = 0.;
+  rapmin = 2.;
+  rapavg = 2.;
+
   if( mesh->info.optimLES ) {
     MMG3D_computeLESqua(mesh,met,&ne,&rapmax,&rapavg,&rapmin,&iel,&good,&med,
                         his,mesh->info.imprim);
