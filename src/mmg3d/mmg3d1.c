@@ -1529,7 +1529,7 @@ int MMG5_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,int k,
  *
  * \return 1 if success, 0 if fail.
  *
- * Mark edges to split on geometric criterion (mark stored in \a ptt->flag)
+ * Mark edges to split on geometric criterion (mark stored in \a pt->flag)
  *
  */
 static
@@ -1635,17 +1635,15 @@ int MMG3D_chkbdyface(MMG5_pMesh mesh,MMG5_pSol met,int k,MMG5_pTetra pt,
  * Split surface edges on geometric criterion.
  *
  */
-static int MMG5_anatets_ani(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
+static int MMG3D_anatets_ani(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   MMG5_pTetra  pt;
   MMG5_pxTetra pxt;
   MMG5_Tria    ptt;
-  MMG5_pPar    par;
   double       len,lmax;
-  double       ux,uy,uz,hmax,hausd;
-  int          k,l,ip1,ip2;
+  double       ux,uy,uz;
+  int          k,ip1,ip2;
   int          ns,ier,warn;
-  int8_t       isloc;
-  char         imax,j,i,i1,i2,ia;
+  char         imax,j,i,i1,i2;
 
   assert ( met->m && met->size==6 );
 
@@ -1673,85 +1671,7 @@ static int MMG5_anatets_ani(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
       MMG5_tet2tri(mesh,k,i,&ptt);
       if ( !MG_GET(pxt->ori,i) ) continue;
 
-      if ( typchk == 1 ) {
-
-        /* Local parameters for ptt and k */
-        hmax  = mesh->info.hmax;
-        hausd = mesh->info.hausd;
-        isloc = 0;
-
-        if ( mesh->info.parTyp & MG_Tetra ) {
-          for ( l=0; l<mesh->info.npar; ++l ) {
-            par = &mesh->info.par[l];
-
-            if ( par->elt != MMG5_Tetrahedron )  continue;
-            if ( par->ref != pt->ref ) continue;
-
-            hmax = par->hmax;
-            hausd = par->hausd;
-            isloc = 1;
-            break;
-          }
-        }
-        if ( mesh->info.parTyp & MG_Tria ) {
-          if ( isloc ) {
-            for ( l=0; l<mesh->info.npar; ++l ) {
-              par = &mesh->info.par[l];
-
-              if ( par->elt != MMG5_Triangle )  continue;
-              if ( par->ref != ptt.ref ) continue;
-
-              hmax = MG_MIN(hmax,par->hmax);
-              hausd = MG_MIN(hausd,par->hausd);
-              break;
-            }
-          }
-          else {
-            for ( l=0; l<mesh->info.npar; ++l ) {
-              par = &mesh->info.par[l];
-
-              if ( par->elt != MMG5_Triangle )  continue;
-              if ( par->ref != ptt.ref ) continue;
-
-              hmax  = par->hmax;
-              hausd = par->hausd;
-              isloc = 1;
-              break;
-            }
-          }
-        }
-
-        if ( !MMG5_chkedg(mesh,&ptt,MG_GET(pxt->ori,i),hmax,hausd,isloc) )
-          continue;
-
-        /* put back flag on tetra */
-        for (j=0; j<3; j++){
-          if ( pxt->tag[MMG5_iarf[i][j]] & MG_REQ )  continue;
-          if ( MG_GET(ptt.flag,j) )  MG_SET(pt->flag,MMG5_iarf[i][j]);
-        }
-      }
-      else if ( typchk == 2 ) {
-        for (j=0; j<3; j++) {
-          ia = MMG5_iarf[i][j];
-          if ( pxt->tag[ia] & MG_REQ )  continue;
-          i1  = MMG5_iare[ia][0];
-          i2  = MMG5_iare[ia][1];
-          ip1 = pt->v[i1];
-          ip2 = pt->v[i2];
-          len = MMG5_lenedg(mesh,met,ia,pt);
-
-          assert( isfinite(len) && (len!=-len) );
-
-          // Case of an internal tetra with 4 ridges vertices.
-          if ( len == 0 ) continue;
-          if ( len > MMG3D_LLONG )  MG_SET(pt->flag,ia);
-          /* Treat here the ridges coming from a corner (we can not do that after
-           * because the corner don't have xpoints) */
-          if ( (mesh->point[ip1].tag & MG_CRN) ||  (mesh->point[ip2].tag & MG_CRN) ) {
-            if ( len > MMG3D_LOPTL )  MG_SET(pt->flag,ia);
-          }
-        }
-      }
+      if ( !MMG3D_chkbdyface(mesh,met,k,pt,pxt,i,&ptt,typchk) ) { continue; }
     }
 
     /** Split only the longest edge */
@@ -1803,17 +1723,16 @@ static int MMG5_anatets_ani(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
  *
  */
 static int
-MMG5_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
+MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   MMG5_pTetra   pt;
   MMG5_pPoint   ppt,p1,p2;
   MMG5_Tria     ptt,ptt2;
-  MMG5_xTetra  *pxt;
-  MMG5_xPoint  *pxp;
-  MMG5_Bezier  pb,pb2;
-  MMG5_Hash    hash;
-  MMG5_pPar     par;
-  double        o[3],no[3],to[3],dd,len,hmax,hausd;
-  int           vx[6],k,l,ip,ic,it,nap,nc,ni,ne,ns,ip1,ip2,ier,isloc;
+  MMG5_xTetra   *pxt;
+  MMG5_xPoint   *pxp;
+  MMG5_Bezier   pb,pb2;
+  MMG5_Hash     hash;
+  double        o[3],no[3],to[3],dd;
+  int           vx[6],k,ip,ic,it,nap,nc,ni,ne,ns,ip1,ip2,ier;
   char          i,j,j2,ia,i1,i2,ifac;
   static double uv[3][2] = { {0.5,0.5}, {0.,0.5}, {0.5,0.} };
   static char   mmgWarn = 0, mmgWarn2 = 0;
@@ -1836,86 +1755,12 @@ MMG5_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
 
       /* virtual triangle */
       MMG5_tet2tri(mesh,k,i,&ptt);
+
       if ( typchk == 1 ) {
-        if ( !MG_GET(pxt->ori,i) ) continue;
-
-        /* Local parameters for ptt and k */
-        hmax  = mesh->info.hmax;
-        hausd = mesh->info.hausd;
-        isloc = 0;
-
-        if ( mesh->info.parTyp & MG_Tetra ) {
-          for ( l=0; l<mesh->info.npar; ++l ) {
-            par = &mesh->info.par[l];
-
-            if ( par->elt != MMG5_Tetrahedron )  continue;
-            if ( par->ref != pt->ref ) continue;
-
-            hmax = par->hmax;
-            hausd = par->hausd;
-            isloc = 1;
-            break;
-          }
-        }
-        if ( mesh->info.parTyp & MG_Tria ) {
-          if ( isloc ) {
-            for ( l=0; l<mesh->info.npar; ++l ) {
-              par = &mesh->info.par[l];
-
-              if ( par->elt != MMG5_Triangle )  continue;
-              if ( par->ref != ptt.ref ) continue;
-
-              hmax = MG_MIN(hmax,par->hmax);
-              hausd = MG_MIN(hausd,par->hausd);
-              break;
-            }
-          }
-          else {
-            for ( l=0; l<mesh->info.npar; ++l ) {
-              par = &mesh->info.par[l];
-
-              if ( par->elt != MMG5_Triangle )  continue;
-              if ( par->ref != ptt.ref ) continue;
-
-              hmax  = par->hmax;
-              hausd = par->hausd;
-              isloc = 1;
-              break;
-            }
-          }
-        }
-
-        if ( !MMG5_chkedg(mesh,&ptt,MG_GET(pxt->ori,i),hmax,hausd,isloc) )
-          continue;
-
-        /* put back flag on tetra */
-        for (j=0; j<3; j++){
-          if ( pxt->tag[MMG5_iarf[i][j]] & MG_REQ )  continue;
-          if ( MG_GET(ptt.flag,j) )  MG_SET(pt->flag,MMG5_iarf[i][j]);
-        }
+        if ( !MG_GET(pxt->ori,i) ) { continue; }
       }
-      else if ( typchk == 2 ) {
-        for (j=0; j<3; j++) {
-          ia = MMG5_iarf[i][j];
-          if ( pxt->tag[ia] & MG_REQ )  continue;
-          i1  = MMG5_iare[ia][0];
-          i2  = MMG5_iare[ia][1];
-          ip1 = pt->v[i1];
-          ip2 = pt->v[i2];
-          len = MMG5_lenedg(mesh,met,ia,pt);
 
-          assert( isfinite(len) && (len!=-len) );
-
-          // Case of an internal tetra with 4 ridges vertices.
-          if ( len == 0 ) continue;
-          if ( len > MMG3D_LLONG )  MG_SET(pt->flag,ia);
-          /* Treat here the ridges coming from a corner (we can not do that after
-           * because the corner don't have xpoints) */
-          if ( (mesh->point[ip1].tag & MG_CRN) ||  (mesh->point[ip2].tag & MG_CRN) ) {
-            if ( len > MMG3D_LOPTL )  MG_SET(pt->flag,ia);
-          }
-        }
-      }
+      if ( !MMG3D_chkbdyface(mesh,met,k,pt,pxt,i,&ptt,typchk) ) { continue; }
 
       if ( !pt->flag )  continue;
       ns++;
@@ -2278,7 +2123,7 @@ MMG5_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   return nap;
 }
 
-static int (*MMG5_anatets)(MMG5_pMesh mesh,MMG5_pSol met,char typchk);
+static int (*MMG3D_anatets)(MMG5_pMesh mesh,MMG5_pSol met,char typchk);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -2704,10 +2549,10 @@ int MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,char typchk, int patternMode) {
   if ( met->m && met->size==6 ) {
     /* if the aniso metric is not compatible with the geometry, the non
      * conformal surface operators may create spurious ridges */
-    MMG5_anatets = MMG5_anatets_ani;
+    MMG3D_anatets = MMG3D_anatets_ani;
   }
   else {
-    MMG5_anatets = MMG5_anatets_iso;
+    MMG3D_anatets = MMG3D_anatets_iso;
   }
 
   /* analyze tetras : initial splitting */
@@ -2739,7 +2584,7 @@ int MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,char typchk, int patternMode) {
 
     if ( !mesh->info.noinsert ) {
       /* analyze surface tetras */
-      ier = MMG5_anatets(mesh,met,typchk);
+      ier = MMG3D_anatets(mesh,met,typchk);
 
       if ( ier < 0 ) {
         fprintf(stderr,"\n  ## Unable to complete surface mesh. Exit program.\n");
