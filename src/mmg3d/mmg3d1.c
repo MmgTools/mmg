@@ -1613,6 +1613,9 @@ static int MMG5_anatets_ani(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           }
         }
 
+        if ( !MMG5_chkedg(mesh,&ptt,MG_GET(pxt->ori,i),hmax,hausd,isloc) )
+          continue;
+
         /* put back flag on tetra */
         for (j=0; j<3; j++){
           if ( pxt->tag[MMG5_iarf[i][j]] & MG_REQ )  continue;
