@@ -1520,6 +1520,114 @@ int MMG5_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,int k,
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
+ * \param k index of tetra thath we check
+ * \param pt pointer toward the tetra that we check
+ * \param pxt pointer toward the xtetra that we check
+ * \param i index of the face in \a k that we check
+ * \param ptt pointer toward the virtual triangle build from the face \i of \a k.
+ * \param typchk type of checking permformed for edge length (hmax or MMG3D_LLONG criterion).
+ *
+ * \return 1 if success, 0 if fail.
+ *
+ * Mark edges to split on geometric criterion (mark stored in \a ptt->flag)
+ *
+ */
+static
+int MMG3D_chkbdyface(MMG5_pMesh mesh,MMG5_pSol met,int k,MMG5_pTetra pt,
+                     MMG5_pxTetra pxt,char i,MMG5_pTria ptt,char typchk ) {
+
+  MMG5_pPar    par;
+  double       len,hmax,hausd;
+  int          l,ip1,ip2;
+  int8_t       isloc;
+  char         j,i1,i2,ia;
+
+  if ( typchk == 1 ) {
+
+    /* Local parameters for ptt and k */
+    hmax  = mesh->info.hmax;
+    hausd = mesh->info.hausd;
+    isloc = 0;
+
+    if ( mesh->info.parTyp & MG_Tetra ) {
+      for ( l=0; l<mesh->info.npar; ++l ) {
+        par = &mesh->info.par[l];
+
+        if ( par->elt != MMG5_Tetrahedron )  continue;
+        if ( par->ref != pt->ref ) continue;
+
+        hmax = par->hmax;
+        hausd = par->hausd;
+        isloc = 1;
+        break;
+      }
+    }
+    if ( mesh->info.parTyp & MG_Tria ) {
+      if ( isloc ) {
+        for ( l=0; l<mesh->info.npar; ++l ) {
+          par = &mesh->info.par[l];
+
+          if ( par->elt != MMG5_Triangle )  continue;
+          if ( par->ref != ptt->ref ) continue;
+
+          hmax = MG_MIN(hmax,par->hmax);
+          hausd = MG_MIN(hausd,par->hausd);
+          break;
+        }
+      }
+      else {
+        for ( l=0; l<mesh->info.npar; ++l ) {
+          par = &mesh->info.par[l];
+
+          if ( par->elt != MMG5_Triangle )  continue;
+          if ( par->ref != ptt->ref ) continue;
+
+          hmax  = par->hmax;
+          hausd = par->hausd;
+          isloc = 1;
+          break;
+        }
+      }
+    }
+
+    if ( !MMG5_chkedg(mesh,ptt,MG_GET(pxt->ori,i),hmax,hausd,isloc) ) {
+      return 0;
+    }
+
+    /* put back flag on tetra */
+    for (j=0; j<3; j++){
+      if ( pxt->tag[MMG5_iarf[i][j]] & MG_REQ )  continue;
+      if ( MG_GET(ptt->flag,j) )  MG_SET(pt->flag,MMG5_iarf[i][j]);
+    }
+  }
+  else if ( typchk == 2 ) {
+    for (j=0; j<3; j++) {
+      ia = MMG5_iarf[i][j];
+      if ( pxt->tag[ia] & MG_REQ )  continue;
+      i1  = MMG5_iare[ia][0];
+      i2  = MMG5_iare[ia][1];
+      ip1 = pt->v[i1];
+      ip2 = pt->v[i2];
+      len = MMG5_lenedg(mesh,met,ia,pt);
+
+      assert( isfinite(len) && (len!=-len) );
+
+      // Case of an internal tetra with 4 ridges vertices.
+      if ( len == 0 )  continue;
+      if ( len > MMG3D_LLONG )  MG_SET(pt->flag,ia);
+      /* Treat here the ridges coming from a corner (we can not do that after
+       * because the corner don't have xpoints) */
+      if ( (mesh->point[ip1].tag & MG_CRN) ||  (mesh->point[ip2].tag & MG_CRN) ) {
+        if ( len > MMG3D_LOPTL )  MG_SET(pt->flag,ia);
+      }
+    }
+  }
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
  * \param typchk type of checking permformed for edge length (hmax or MMG3D_LLONG criterion).
  * \return -1 if failed.
  * \return number of new points.
@@ -1536,7 +1644,7 @@ static int MMG5_anatets_ani(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   double       ux,uy,uz,hmax,hausd;
   int          k,l,ip1,ip2;
   int          ns,ier,warn;
-  int16_t      isloc;
+  int8_t       isloc;
   char         imax,j,i,i1,i2,ia;
 
   assert ( met->m && met->size==6 );
