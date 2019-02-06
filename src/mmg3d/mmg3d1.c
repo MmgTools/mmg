@@ -2275,7 +2275,7 @@ int MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,char typchk, int patternMode) {
 
 
     /* split or swap tetra with more than 2 bdry faces */
-    nf = 0;
+    nf = ier = 0;
     if ( mesh->info.fem == typchk ) {
       ier = MMG5_anatet4(mesh,met,&nf,typchk);
       if ( ier < 0 )  return 0;
@@ -2314,7 +2314,6 @@ int MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,char typchk, int patternMode) {
         }
         ns += ier;
       }
-      else  ns = 0;
     }
 
     if ( !MMG3D_hashTetra(mesh,1) ) {
