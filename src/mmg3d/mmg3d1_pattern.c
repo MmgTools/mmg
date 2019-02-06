@@ -108,7 +108,7 @@ static int MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
     if ( pt->xt && (pxt->ftag[i] & MG_BDY) ) {
       if ( !(MG_GET(pxt->ori,i)) ) continue;
 
-      ier = MMG5_splsurfedge( mesh,met,k,pt,pxt,imax,1,warn );
+      ier = MMG5_splsurfedge( mesh,met,k,pt,pxt,imax,chkRidTet,warn );
 
       if ( ier==-1 ) { return -1; }
       else if ( !ier ) { continue; }
