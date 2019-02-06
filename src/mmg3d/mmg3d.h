@@ -450,8 +450,8 @@ void MMG5_tet2tri(MMG5_pMesh mesh,int k,char ie,MMG5_Tria *ptt);
 int  MMG3D_dichoto(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx);
 int  MMG3D_dichoto1b(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int);
 char MMG5_chkedg(MMG5_pMesh mesh,MMG5_Tria *pt,char ori,double,double,int);
-int  MMG5_splsurfedge( MMG5_pMesh,MMG5_pSol,int,MMG5_pTetra,MMG5_pxTetra,char,
-                       int8_t,int* );
+int  MMG3D_splsurfedge( MMG5_pMesh,MMG5_pSol,int,MMG5_pTetra,MMG5_pxTetra,char,
+                        int,int8_t,int* );
 int  MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met, char typchk, int patternMode) ;
 int  MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree PROctree,
                   double clickSurf,double clickVol,int moveVol,int improveSurf,int improveVolSurf,

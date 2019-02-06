@@ -1366,6 +1366,7 @@ MMG3D_storeGeom(MMG5_pPoint ppt, MMG5_pxPoint pxp, double no[3]) {
  * \param pt tetra to split
  * \param pxt associated xtetra
  * \param imax index of the edge to split to split
+ * \param typchk type of check
  * \param chkRidTet check for ridge metric
  * \param *warn \a warn is set to 1 if we don't have enough memory to complete mesh.
  *
@@ -1375,8 +1376,8 @@ MMG3D_storeGeom(MMG5_pPoint ppt, MMG5_pxPoint pxp, double no[3]) {
  * Split a surface edge using split1b
  *
  */
-int MMG5_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,int k,
-                      MMG5_pTetra pt,MMG5_pxTetra pxt,char imax,
+int MMG3D_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,int k,
+                      MMG5_pTetra pt,MMG5_pxTetra pxt,char imax,int typchk,
                       int8_t chkRidTet,int *warn ) {
   MMG5_Tria    ptt;
   MMG5_pPoint  p0,p1,ppt;
@@ -1461,7 +1462,12 @@ int MMG5_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,int k,
   }
 
   if ( met->m ) {
-    ier = MMG5_intmet(mesh,met,k,imax,ip,0.5);
+    if ( typchk == 1 && (met->size>1) ) {
+      ier = MMG3D_intmet33_ani(mesh,met,k,imax,ip,0.5);
+    }
+    else {
+      ier = MMG5_intmet(mesh,met,k,imax,ip,0.5);
+    }
     if ( !ier ) {
       MMG3D_delPt(mesh,ip);
       return -1;
@@ -1700,7 +1706,7 @@ static int MMG3D_anatets_ani(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
 
     if ( !pt->flag )  continue;
 
-    ier = MMG5_splsurfedge( mesh,met,k,pt,pxt,imax,1,&warn );
+    ier = MMG3D_splsurfedge( mesh,met,k,pt,pxt,imax,typchk,1,&warn );
 
     if ( ier==-1 ) { return -1; }
     else if ( !ier ) { continue; }
