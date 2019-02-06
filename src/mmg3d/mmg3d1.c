@@ -2291,11 +2291,10 @@ int MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,char typchk, int patternMode) {
     if ( mesh->adja )
       MMG5_DEL_MEM(mesh,mesh->adja);
 
-    if ( met->size==1 ) {
-      /* only in isotropic case : because if the aniso metric is not compatible
-       * with the geometry, the surface operators may create spurious ridges */
-
-      if ( !mesh->info.noinsert ) {
+    if ( !mesh->info.noinsert ) {
+      if ( met->size==1 ) {
+        /* only in isotropic case : because if the aniso metric is not compatible
+         * with the geometry, the surface operators may create spurious ridges */
         /* analyze surface tetras */
         ier = MMG5_anatets(mesh,met,typchk);
 
@@ -2304,15 +2303,16 @@ int MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,char typchk, int patternMode) {
           return 0;
         }
         ns += ier;
-        if ( patternMode ) {
-          /* analyze internal tetras */
-          ier = MMG5_anatetv(mesh,met,typchk);
-          if ( ier < 0 ) {
-            fprintf(stderr,"\n  ## Unable to complete volume mesh. Exit program.\n");
-            return 0;
-          }
-          ns += ier;
+      }
+
+      if ( patternMode ) {
+        /* analyze internal tetras */
+        ier = MMG5_anatetv(mesh,met,typchk);
+        if ( ier < 0 ) {
+          fprintf(stderr,"\n  ## Unable to complete volume mesh. Exit program.\n");
+          return 0;
         }
+        ns += ier;
       }
       else  ns = 0;
     }
