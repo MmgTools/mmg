@@ -1366,6 +1366,282 @@ MMG3D_storeGeom(MMG5_pPoint ppt, MMG5_pxPoint pxp, double no[3]) {
  * \return -1 if failed.
  * \return number of new points.
  *
+ * Split surface edges on geometric criterion.
+ *
+ */
+static int MMG5_anatets_ani(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
+  MMG5_pTetra  pt;
+  MMG5_pxTetra pxt;
+  MMG5_Tria    ptt;
+  MMG5_pPoint  p0,p1,ppt;
+  MMG5_pxPoint pxp;
+  MMG5_pPar    par;
+  double       dd,len,lmax,o[3],to[3],no1[3],no2[3],v[3];
+  double       ux,uy,uz,hmax,hausd;
+  int          k,l,ip,ip1,ip2,list[MMG3D_LMAX+2],ilist;
+  int          ns,ref,ier;
+  int16_t      tag,isloc;
+  char         imax,j,i,i1,i2,ifa0,ifa1,ia;
+
+  assert ( met->m && met->size==6 );
+
+  if ( !MMG3D_hashTetra(mesh,1) ) {
+    fprintf(stderr,"\n  ## Hashing problem. Exit program.\n");
+    return -1;
+  }
+
+  ns = 0;
+
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+    if ( !MG_EOK(pt) || (pt->tag & MG_REQ) || !pt->xt )  continue;
+
+    /* check boundary face cut w/r Hausdorff or hmax */
+    pt->flag = 0;
+    pxt = &mesh->xtetra[pt->xt];
+
+    for (i=0; i<4; i++){
+      if ( pxt->ftag[i] & MG_REQ )     continue;
+      if ( !(pxt->ftag[i] & MG_BDY) )  continue;
+
+      /* virtual triangle */
+      MMG5_tet2tri(mesh,k,i,&ptt);
+      if ( !MG_GET(pxt->ori,i) ) continue;
+
+      if ( typchk == 1 ) {
+
+        /* Local parameters for ptt and k */
+        hmax  = mesh->info.hmax;
+        hausd = mesh->info.hausd;
+        isloc = 0;
+
+        if ( mesh->info.parTyp & MG_Tetra ) {
+          for ( l=0; l<mesh->info.npar; ++l ) {
+            par = &mesh->info.par[l];
+
+            if ( par->elt != MMG5_Tetrahedron )  continue;
+            if ( par->ref != pt->ref ) continue;
+
+            hmax = par->hmax;
+            hausd = par->hausd;
+            isloc = 1;
+            break;
+          }
+        }
+        if ( mesh->info.parTyp & MG_Tria ) {
+          if ( isloc ) {
+            for ( l=0; l<mesh->info.npar; ++l ) {
+              par = &mesh->info.par[l];
+
+              if ( par->elt != MMG5_Triangle )  continue;
+              if ( par->ref != ptt.ref ) continue;
+
+              hmax = MG_MIN(hmax,par->hmax);
+              hausd = MG_MIN(hausd,par->hausd);
+              break;
+            }
+          }
+          else {
+            for ( l=0; l<mesh->info.npar; ++l ) {
+              par = &mesh->info.par[l];
+
+              if ( par->elt != MMG5_Triangle )  continue;
+              if ( par->ref != ptt.ref ) continue;
+
+              hmax  = par->hmax;
+              hausd = par->hausd;
+              isloc = 1;
+              break;
+            }
+          }
+        }
+
+        /* put back flag on tetra */
+        for (j=0; j<3; j++){
+          if ( pxt->tag[MMG5_iarf[i][j]] & MG_REQ )  continue;
+          if ( MG_GET(ptt.flag,j) )  MG_SET(pt->flag,MMG5_iarf[i][j]);
+        }
+      }
+      else if ( typchk == 2 ) {
+        for (j=0; j<3; j++) {
+          ia = MMG5_iarf[i][j];
+          if ( pxt->tag[ia] & MG_REQ )  continue;
+          i1  = MMG5_iare[ia][0];
+          i2  = MMG5_iare[ia][1];
+          ip1 = pt->v[i1];
+          ip2 = pt->v[i2];
+          len = MMG5_lenedg(mesh,met,ia,pt);
+
+          assert( isfinite(len) && (len!=-len) );
+
+          // Case of an internal tetra with 4 ridges vertices.
+          if ( len == 0 ) continue;
+          if ( len > MMG3D_LLONG )  MG_SET(pt->flag,ia);
+          /* Treat here the ridges coming from a corner (we can not do that after
+           * because the corner don't have xpoints) */
+          if ( (mesh->point[ip1].tag & MG_CRN) ||  (mesh->point[ip2].tag & MG_CRN) ) {
+            if ( len > MMG3D_LOPTL )  MG_SET(pt->flag,ia);
+          }
+        }
+      }
+    }
+
+    /** Split only the longest edge */
+    imax = 6;
+    lmax = 0.;
+    for ( j=0; j<6; ++j ) {
+      if ( !MG_GET(pt->flag,j) ) { continue; }
+
+      i1  = MMG5_iare[j][0];
+      i2  = MMG5_iare[j][1];
+      ip1 = pt->v[i1];
+      ip2 = pt->v[i2];
+
+      ux = mesh->point[ip1].c[0] - mesh->point[ip2].c[0];
+      uy = mesh->point[ip1].c[1] - mesh->point[ip2].c[1];
+      uz = mesh->point[ip1].c[2] - mesh->point[ip2].c[2];
+
+      len = ux*ux + uy*uy + uz*uz;
+      if ( len <= lmax) { continue; }
+      lmax = len;
+      imax = j;
+    }
+
+    pt->flag = 0;
+    if ( imax < 6 ) { MG_SET(pt->flag,imax); }
+
+    if ( !pt->flag )  continue;
+
+    ifa0 = MMG5_ifar[imax][0];
+    ifa1 = MMG5_ifar[imax][1];
+    i  = (pt->xt && (pxt->ftag[ifa1] & MG_BDY)) ? ifa1 : ifa0;
+    j  = MMG5_iarfinv[i][imax];
+    i1 = MMG5_idir[i][MMG5_inxt2[j]];
+    i2 = MMG5_idir[i][MMG5_iprv2[j]];
+    ip1 = pt->v[i1];
+    ip2 = pt->v[i2];
+    p0  = &mesh->point[ip1];
+    p1  = &mesh->point[ip2];
+
+    ref = pxt->edg[imax];
+    tag = pxt->tag[imax];
+    if ( tag & MG_REQ )  continue;
+    tag |= MG_BDY;
+    ilist = MMG5_coquil(mesh,k,imax,list);
+    if ( !ilist )  continue;
+    else if ( ilist < 0 )
+      return -1;
+    if ( tag & MG_NOM ){
+      if( !MMG5_BezierNom(mesh,ip1,ip2,0.5,o,no1,to) )
+        continue;
+      else if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
+        MMG5_tet2tri(mesh,k,i,&ptt);
+        MMG5_nortri(mesh,&ptt,no1);
+        if ( !MG_GET(pxt->ori,i) ) {
+          no1[0] *= -1.0;
+          no1[1] *= -1.0;
+          no1[2] *= -1.0;
+        }
+      }
+    }
+    else if ( tag & MG_GEO ) {
+      if ( !MMG5_BezierRidge(mesh,ip1,ip2,0.5,o,no1,no2,to) )
+        continue;
+      if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
+        MMG5_tet2tri(mesh,k,i,&ptt);
+        MMG5_nortri(mesh,&ptt,no1);
+        no2[0] = to[1]*no1[2] - to[2]*no1[1];
+        no2[1] = to[2]*no1[0] - to[0]*no1[2];
+        no2[2] = to[0]*no1[1] - to[1]*no1[0];
+        dd = no2[0]*no2[0] + no2[1]*no2[1] + no2[2]*no2[2];
+        if ( dd > MMG5_EPSD2 ) {
+          dd = 1.0 / sqrt(dd);
+          no2[0] *= dd;
+          no2[1] *= dd;
+          no2[2] *= dd;
+        }
+      }
+    }
+    else if ( tag & MG_REF ) {
+      if ( !MMG5_BezierRef(mesh,ip1,ip2,0.5,o,no1,to) )
+        continue;
+    }
+    else {
+      if ( !MMG5_norface(mesh,k,i,v) )  continue;
+      if ( !MMG5_BezierReg(mesh,ip1,ip2,0.5,v,o,no1) )
+        continue;
+    }
+    ip = MMG3D_newPt(mesh,o,tag);
+    if ( !ip ) {
+      /* reallocation of point table */
+      MMG3D_POINT_REALLOC(mesh,met,ip,mesh->gap,
+                          break
+                          ,o,tag);
+    }
+    if ( met->m ) {
+      ier = MMG5_intmet(mesh,met,k,imax,ip,0.5);
+      if ( !ier ) {
+        MMG3D_delPt(mesh,ip);
+        return -1;
+      }
+      else if (ier < 0) {
+        MMG3D_delPt(mesh,ip);
+        continue;
+      }
+    }
+    ier = MMG3D_simbulgept(mesh,met,list,ilist,ip);
+    if ( !ier ) {
+      ier = MMG3D_dichoto1b(mesh,met,list,ilist,ip);
+    }
+    if ( ier ) ier = MMG5_split1b(mesh,met,list,ilist,ip,1,1,1);
+
+    /* if we realloc memory in MMG5_split1b pt and pxt pointers are not valid */
+    pt = &mesh->tetra[k];
+    pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
+
+    if ( ier < 0 ) {
+      fprintf(stderr,"\n  ## Error: %s: unable to split.\n",__func__);
+      return -1;
+    }
+    else if ( !ier ) {
+      MMG3D_delPt(mesh,ip);
+      continue;
+    }
+    ns++;
+    ppt = &mesh->point[ip];
+    if ( MG_EDG(tag) || (tag & MG_NOM) )
+      ppt->ref = ref;
+    else
+      ppt->ref = pxt->ref[i];
+
+    pxp = &mesh->xpoint[ppt->xp];
+    if ( tag & MG_NOM ){
+      memcpy(pxp->n1,no1,3*sizeof(double));
+      memcpy(ppt->n,to,3*sizeof(double));
+    }
+    else if ( tag & MG_GEO ) {
+      memcpy(pxp->n1,no1,3*sizeof(double));
+      memcpy(pxp->n2,no2,3*sizeof(double));
+      memcpy(ppt->n,to,3*sizeof(double));
+    }
+    else if ( tag & MG_REF ) {
+      memcpy(pxp->n1,no1,3*sizeof(double));
+      memcpy(ppt->n,to,3*sizeof(double));
+    }
+    else
+      memcpy(pxp->n1,no1,3*sizeof(double));
+  }
+
+  return ns;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param typchk type of checking permformed for edge length (hmax or MMG3D_LLONG criterion).
+ * \return -1 if failed.
+ * \return number of new points.
+ *
  * Analyze tetra and split on geometric criterion.
  *
  */
