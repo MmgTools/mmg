@@ -147,7 +147,8 @@ static int MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
         }
       }
       ier = MMG3D_simbulgept(mesh,met,list,ilist,ip);
-      if ( ier )
+      assert ( ier != -1 );
+      if ( ier > 0 )
         ier = MMG5_split1b(mesh,met,list,ilist,ip,1,1,0);
 
       if ( ier < 0 ) {

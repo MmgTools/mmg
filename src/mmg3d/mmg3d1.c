@@ -272,7 +272,8 @@ int MMG3D_dichoto1b(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int ip) {
     ppt->c[2] = m[2] + t*(o[2]-m[2]);
 
     ier = MMG3D_simbulgept(mesh,met,list,ret,ip);
-    if ( ier )
+    assert ( ier != -1 );
+    if ( ier > 0 )
       to = t;
     else
       tp = t;
@@ -1478,10 +1479,12 @@ int MMG3D_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,int k,
     }
   }
   ier = MMG3D_simbulgept(mesh,met,list,ilist,ip);
-  if ( !ier ) {
-    ier = MMG3D_dichoto1b(mesh,met,list,ilist,ip);
+  assert ( ier !=- 1 );
+  if ( ier <= 0 ) {
+    return 0;
   }
-  if ( ier ) ier = MMG5_split1b(mesh,met,list,ilist,ip,1,1,chkRidTet);
+
+  ier = MMG5_split1b(mesh,met,list,ilist,ip,1,1,chkRidTet);
 
   /* if we realloc memory in MMG5_split1b pt and pxt pointers are not valid */
   pt = &mesh->tetra[k];

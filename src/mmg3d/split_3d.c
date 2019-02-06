@@ -309,7 +309,7 @@ int MMG3D_normalDeviation(MMG5_pMesh mesh , int  start, char   iface, char ia,
  * \param list pointer toward the edge shell.
  * \param ret size of the edge shell.
  * \param ip new point index.
- * \return 0 if final position is invalid, 1 if all checks are ok.
+ * \return 0 if final position is invalid, 1 if all checks are ok, 0 if fail.
  *
  * Simulate at the same time creation and bulging of one point, with new
  * position o and tag \a tag, to be inserted at an edge, whose shell is passed.
@@ -5320,7 +5320,9 @@ int MMG5_splitedg(MMG5_pMesh mesh, MMG5_pSol met,int iel, int iar, double crit){
   }
 
   ier = MMG3D_simbulgept(mesh,met,list,lon,ip);
-  if (!ier) return 0;
+  assert ( ier != -1 );
+  if ( ier<=0 ) return 0;
+
   ier = MMG3D_chksplit(mesh,met,ip,&list[0],lon,crit);
   if(!ier) return 0;
   ier = MMG5_split1b(mesh,met,list,lon,ip,0,1,0);
