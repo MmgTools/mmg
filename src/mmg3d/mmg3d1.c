@@ -1387,10 +1387,12 @@ int MMG5_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,int k,
   int16_t      tag;
   char         j,i,i1,i2,ifa0,ifa1;
 
+  assert ( pxt = &mesh->xtetra[pt->xt] );
+
   /* proceed edges according to lengths */
   ifa0 = MMG5_ifar[imax][0];
   ifa1 = MMG5_ifar[imax][1];
-  i  = (pt->xt && (pxt->ftag[ifa1] & MG_BDY)) ? ifa1 : ifa0;
+  i  = (pxt->ftag[ifa1] & MG_BDY) ? ifa1 : ifa0;
   j  = MMG5_iarfinv[i][imax];
   i1 = MMG5_idir[i][MMG5_inxt2[j]];
   i2 = MMG5_idir[i][MMG5_iprv2[j]];
@@ -1529,15 +1531,13 @@ static int MMG5_anatets_ani(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   MMG5_pTetra  pt;
   MMG5_pxTetra pxt;
   MMG5_Tria    ptt;
-  MMG5_pPoint  p0,p1,ppt;
-  MMG5_pxPoint pxp;
   MMG5_pPar    par;
-  double       dd,len,lmax,o[3],to[3],no1[3],no2[3],v[3];
+  double       len,lmax;
   double       ux,uy,uz,hmax,hausd;
-  int          k,l,ip,ip1,ip2,list[MMG3D_LMAX+2],ilist;
-  int          ns,ref,ier;
-  int16_t      tag,isloc;
-  char         imax,j,i,i1,i2,ifa0,ifa1,ia;
+  int          k,l,ip1,ip2;
+  int          ns,ier,warn;
+  int16_t      isloc;
+  char         imax,j,i,i1,i2,ia;
 
   assert ( met->m && met->size==6 );
 
@@ -1547,6 +1547,7 @@ static int MMG5_anatets_ani(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   }
 
   ns = 0;
+  warn = 0;
 
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
@@ -1668,124 +1669,13 @@ static int MMG5_anatets_ani(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
 
     if ( !pt->flag )  continue;
 
-    ifa0 = MMG5_ifar[imax][0];
-    ifa1 = MMG5_ifar[imax][1];
-    i  = (pt->xt && (pxt->ftag[ifa1] & MG_BDY)) ? ifa1 : ifa0;
-    j  = MMG5_iarfinv[i][imax];
-    i1 = MMG5_idir[i][MMG5_inxt2[j]];
-    i2 = MMG5_idir[i][MMG5_iprv2[j]];
-    ip1 = pt->v[i1];
-    ip2 = pt->v[i2];
-    p0  = &mesh->point[ip1];
-    p1  = &mesh->point[ip2];
+    ier = MMG5_splsurfedge( mesh,met,k,pt,pxt,imax,1,&warn );
 
-    ref = pxt->edg[imax];
-    tag = pxt->tag[imax];
-    if ( tag & MG_REQ )  continue;
-    tag |= MG_BDY;
-    ilist = MMG5_coquil(mesh,k,imax,list);
-    if ( !ilist )  continue;
-    else if ( ilist < 0 )
-      return -1;
-    if ( tag & MG_NOM ){
-      if( !MMG5_BezierNom(mesh,ip1,ip2,0.5,o,no1,to) )
-        continue;
-      else if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
-        MMG5_tet2tri(mesh,k,i,&ptt);
-        MMG5_nortri(mesh,&ptt,no1);
-        if ( !MG_GET(pxt->ori,i) ) {
-          no1[0] *= -1.0;
-          no1[1] *= -1.0;
-          no1[2] *= -1.0;
-        }
-      }
-    }
-    else if ( tag & MG_GEO ) {
-      if ( !MMG5_BezierRidge(mesh,ip1,ip2,0.5,o,no1,no2,to) )
-        continue;
-      if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
-        MMG5_tet2tri(mesh,k,i,&ptt);
-        MMG5_nortri(mesh,&ptt,no1);
-        no2[0] = to[1]*no1[2] - to[2]*no1[1];
-        no2[1] = to[2]*no1[0] - to[0]*no1[2];
-        no2[2] = to[0]*no1[1] - to[1]*no1[0];
-        dd = no2[0]*no2[0] + no2[1]*no2[1] + no2[2]*no2[2];
-        if ( dd > MMG5_EPSD2 ) {
-          dd = 1.0 / sqrt(dd);
-          no2[0] *= dd;
-          no2[1] *= dd;
-          no2[2] *= dd;
-        }
-      }
-    }
-    else if ( tag & MG_REF ) {
-      if ( !MMG5_BezierRef(mesh,ip1,ip2,0.5,o,no1,to) )
-        continue;
-    }
-    else {
-      if ( !MMG5_norface(mesh,k,i,v) )  continue;
-      if ( !MMG5_BezierReg(mesh,ip1,ip2,0.5,v,o,no1) )
-        continue;
-    }
-    ip = MMG3D_newPt(mesh,o,tag);
-    if ( !ip ) {
-      /* reallocation of point table */
-      MMG3D_POINT_REALLOC(mesh,met,ip,mesh->gap,
-                          break
-                          ,o,tag);
-    }
-    if ( met->m ) {
-      ier = MMG5_intmet(mesh,met,k,imax,ip,0.5);
-      if ( !ier ) {
-        MMG3D_delPt(mesh,ip);
-        return -1;
-      }
-      else if (ier < 0) {
-        MMG3D_delPt(mesh,ip);
-        continue;
-      }
-    }
-    ier = MMG3D_simbulgept(mesh,met,list,ilist,ip);
-    if ( !ier ) {
-      ier = MMG3D_dichoto1b(mesh,met,list,ilist,ip);
-    }
-    if ( ier ) ier = MMG5_split1b(mesh,met,list,ilist,ip,1,1,1);
+    if ( ier==-1 ) { return -1; }
+    else if ( !ier ) { continue; }
+    else if ( ier==2 ) { break; }
 
-    /* if we realloc memory in MMG5_split1b pt and pxt pointers are not valid */
-    pt = &mesh->tetra[k];
-    pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
-
-    if ( ier < 0 ) {
-      fprintf(stderr,"\n  ## Error: %s: unable to split.\n",__func__);
-      return -1;
-    }
-    else if ( !ier ) {
-      MMG3D_delPt(mesh,ip);
-      continue;
-    }
-    ns++;
-    ppt = &mesh->point[ip];
-    if ( MG_EDG(tag) || (tag & MG_NOM) )
-      ppt->ref = ref;
-    else
-      ppt->ref = pxt->ref[i];
-
-    pxp = &mesh->xpoint[ppt->xp];
-    if ( tag & MG_NOM ){
-      memcpy(pxp->n1,no1,3*sizeof(double));
-      memcpy(ppt->n,to,3*sizeof(double));
-    }
-    else if ( tag & MG_GEO ) {
-      memcpy(pxp->n1,no1,3*sizeof(double));
-      memcpy(pxp->n2,no2,3*sizeof(double));
-      memcpy(ppt->n,to,3*sizeof(double));
-    }
-    else if ( tag & MG_REF ) {
-      memcpy(pxp->n1,no1,3*sizeof(double));
-      memcpy(ppt->n,to,3*sizeof(double));
-    }
-    else
-      memcpy(pxp->n1,no1,3*sizeof(double));
+    ++ns;
   }
 
   return ns;
