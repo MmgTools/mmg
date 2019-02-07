@@ -1484,6 +1484,7 @@ int MMG3D_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,int k,
   ier = MMG3D_simbulgept(mesh,met,list,ilist,ip);
   assert ( (!mesh->info.ddebug) || (mesh->info.ddebug && ier != -1) );
   if ( ier < 0 || ier == 2 ) {
+    MMG3D_delPt(mesh,ip);
     return 0;
   }
   else if ( ier == 0 ) {
@@ -1499,7 +1500,7 @@ int MMG3D_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,int k,
     fprintf(stderr,"\n  ## Error: %s: unable to split.\n",__func__);
     return -1;
   }
-  else if ( !ier ) {
+  else if ( ier == 0 || ier == 2 ) {
     MMG3D_delPt(mesh,ip);
     return 0;
   }
