@@ -147,15 +147,14 @@ static int MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
         }
       }
       ier = MMG3D_simbulgept(mesh,met,list,ilist,ip);
-      assert ( ier != -1 );
-      if ( ier > 0 )
+      if ( ier == 1 )
         ier = MMG5_split1b(mesh,met,list,ilist,ip,1,1,0);
 
       if ( ier < 0 ) {
         fprintf(stderr,"\n  ## Error: %s: unable to split.\n",__func__);
         return -1;
       }
-      else if ( !ier ) {
+      else if ( ier == 0 || ier == 2 ) {
         MMG3D_delPt(mesh,ip);
       }
       else {

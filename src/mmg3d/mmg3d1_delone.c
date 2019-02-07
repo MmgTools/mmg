@@ -217,12 +217,19 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree,int ne,
           }
         }
         ier = MMG3D_simbulgept(mesh,met,list,ilist,ip);
-        assert ( ier !=-1 );
-        if ( ier > 0 ) {
+        assert ( (!mesh->info.ddebug) || (mesh->info.ddebug && ier != -1) );
+         if ( ier == 2 || ier < 0 ) {
+          /* sharp angle failure */
           MMG3D_delPt(mesh,ip);
           goto collapse;
         }
-        ier = MMG5_split1b(mesh,met,list,ilist,ip,1,1,chkRidTet);
+        else if ( ier == 0 ) {
+          /* very bad quality failure */
+          ier = MMG3D_dichoto1b(mesh,met,list,ilist,ip);
+        }
+        if ( ier == 1 ) {
+          ier = MMG5_split1b(mesh,met,list,ilist,ip,1,1,chkRidTet);
+        }
 
         /* if we realloc memory in MMG5_split1b pt and pxt pointers are not valid */
         pt = &mesh->tetra[k];
@@ -233,7 +240,7 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree,int ne,
           MMG3D_delPt(mesh,ip);
           return -1;
         }
-        else if ( !ier ) {
+        else if ( ier == 0 || ier == 2 ) {
           MMG3D_delPt(mesh,ip);
           goto collapse;
         } else {
@@ -294,15 +301,14 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree,int ne,
           }
         }
         ier = MMG3D_simbulgept(mesh,met,list,ilist,ip);
-        assert ( ier != -1 );
-        if ( ier > 0 )
+        if ( ier == 1 )
           ier = MMG5_split1b(mesh,met,list,ilist,ip,1,1,0);
         if ( ier < 0 ) {
           fprintf(stderr,"\n  ## Error: %s: unable to split.\n",__func__);
           MMG3D_delPt(mesh,ip);
           return -1;
         }
-        else if ( !ier ) {
+        else if ( ier == 0 || ier == 2 ) {
           MMG3D_delPt(mesh,ip);
           goto collapse;
         }
@@ -540,12 +546,19 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree,int ne,
             }
           }
           ier = MMG3D_simbulgept(mesh,met,list,ilist,ip);
-          assert ( ier != -1 );
-          if ( ier > 0 ) {
+          assert ( (!mesh->info.ddebug) || (mesh->info.ddebug && ier != -1) );
+          if ( ier == 2 || ier < 0 ) {
+            /* sharp angle failure */
             MMG3D_delPt(mesh,ip);
             goto collapse2;
           }
-          ier = MMG5_split1b(mesh,met,list,ilist,ip,1,1,chkRidTet);
+          else if ( ier == 0 ) {
+            /* very bad quality failure */
+            ier = MMG3D_dichoto1b(mesh,met,list,ilist,ip);
+          }
+          if ( ier == 1 ) {
+            ier = MMG5_split1b(mesh,met,list,ilist,ip,1,1,chkRidTet);
+          }
 
           /* if we realloc memory in MMG5_split1b pt and pxt pointers are not valid */
           pt = &mesh->tetra[k];
@@ -619,15 +632,15 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree,int ne,
             }
           }
           ier = MMG3D_simbulgept(mesh,met,list,ilist,ip);
-          assert ( ier != -1 );
-          if ( ier > 0 )
+          if ( ier == 1 ) {
             ier = MMG5_split1b(mesh,met,list,ilist,ip,1,1,0);
+          }
           if ( ier < 0 ) {
             fprintf(stderr,"\n  ## Error: %s: unable to split.\n",__func__);
             MMG3D_delPt(mesh,ip);
             return -1;
           }
-          else if ( !ier ) {
+          else if ( ier == 0 || ier == 2 ) {
             MMG3D_delPt(mesh,ip);
             goto collapse2;
           }

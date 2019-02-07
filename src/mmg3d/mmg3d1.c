@@ -228,7 +228,10 @@ int MMG3D_dichoto(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
  * \param list pointer toward the shell of edge.
  * \param ret double of the number of tetrahedra in the shell.
  * \param ip new point index.
- * \return 1 if success, 0 if fail
+ *
+ * \return 1 if success
+ * \return 0 if fail due to a very bad quality
+ * \return 2 if fail due to a sharp angle creation
  *
  * Find acceptable position for MMG5_split1b, passing the shell of
  * considered edge, starting from o point.
@@ -272,8 +275,8 @@ int MMG3D_dichoto1b(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int ip) {
     ppt->c[2] = m[2] + t*(o[2]-m[2]);
 
     ier = MMG3D_simbulgept(mesh,met,list,ret,ip);
-    assert ( ier != -1 );
-    if ( ier > 0 )
+    assert ( (!mesh->info.ddebug) || (mesh->info.ddebug && ier != -1) );
+    if ( ier == 1 )
       to = t;
     else
       tp = t;
@@ -1479,12 +1482,14 @@ int MMG3D_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,int k,
     }
   }
   ier = MMG3D_simbulgept(mesh,met,list,ilist,ip);
-  assert ( ier !=- 1 );
-  if ( ier <= 0 ) {
+  assert ( (!mesh->info.ddebug) || (mesh->info.ddebug && ier != -1) );
+  if ( ier < 0 || ier == 2 ) {
     return 0;
   }
-
-  ier = MMG5_split1b(mesh,met,list,ilist,ip,1,1,chkRidTet);
+  else if ( ier == 0 ) {
+    ier = MMG3D_dichoto1b(mesh,met,list,ilist,ip);
+  }
+  if ( ier == 1 ) { ier = MMG5_split1b(mesh,met,list,ilist,ip,1,1,chkRidTet); }
 
   /* if we realloc memory in MMG5_split1b pt and pxt pointers are not valid */
   pt = &mesh->tetra[k];

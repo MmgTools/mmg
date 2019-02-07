@@ -309,7 +309,10 @@ int MMG3D_normalDeviation(MMG5_pMesh mesh , int  start, char   iface, char ia,
  * \param list pointer toward the edge shell.
  * \param ret size of the edge shell.
  * \param ip new point index.
- * \return 0 if final position is invalid, 1 if all checks are ok, 0 if fail.
+ *
+ * \return 1 if all checks are ok
+ * \return 0 if fail due to a very bad quality elt
+ * \return 2 if fail due to a ridge angle creation
  *
  * Simulate at the same time creation and bulging of one point, with new
  * position o and tag \a tag, to be inserted at an edge, whose shell is passed.
@@ -384,15 +387,15 @@ int MMG3D_simbulgept(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int ip) {
       /* Normal deviation between the two new triangles and their neighbors */
       ier = MMG3D_normalDeviation(mesh,iel,iface,ie,0,ip,&n0[idx]);
       if ( ier < 0 ) return -1;
-      else if ( ier==0 ) return 0;
+      else if ( ier == 0 ) return 2;
 
       ier = MMG3D_normalDeviation(mesh,iel,iface,ie,1,ip,&n1[idx]);
       if ( ier < 0 ) return -1;
-      else if ( ier==0 ) return 0;
+      else if ( ier == 0 ) return 2;
 
       /* Test sharp angle creation along the new edge */
       if ( !MMG5_devangle(&n0[idx],&n1[idx],mesh->info.dhd) ) {
-        return 0;
+        return 2;
       }
 
       if ( !idx ) {
@@ -430,10 +433,10 @@ int MMG3D_simbulgept(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int ip) {
 
         /* Test sharp angle creation along the splitted edge */
         if ( !MMG5_devangle(&n0[0],&n1[idx],mesh->info.dhd) ) {
-          return 0;
+          return 2;
         }
         if ( !MMG5_devangle(&n1[0],&n0[idx],mesh->info.dhd) ) {
-          return 0;
+          return 2;
         }
       }
     }
@@ -5320,8 +5323,8 @@ int MMG5_splitedg(MMG5_pMesh mesh, MMG5_pSol met,int iel, int iar, double crit){
   }
 
   ier = MMG3D_simbulgept(mesh,met,list,lon,ip);
-  assert ( ier != -1 );
-  if ( ier<=0 ) return 0;
+  assert ( (!mesh->info.ddebug) || (mesh->info.ddebug && ier != -1) );
+  if ( ier <= 0 || ier == 2 ) return 0;
 
   ier = MMG3D_chksplit(mesh,met,ip,&list[0],lon,crit);
   if(!ier) return 0;
