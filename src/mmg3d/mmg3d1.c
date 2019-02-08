@@ -1490,7 +1490,7 @@ int MMG3D_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,int k,
   else if ( ier == 0 ) {
     ier = MMG3D_dichoto1b(mesh,met,list,ilist,ip);
   }
-  if ( ier == 1 ) { ier = MMG5_split1b(mesh,met,list,ilist,ip,1,1,chkRidTet); }
+  if ( ier == 1 ) { ier = MMG5_split1b(mesh,met,list,ilist,ip,1,typchk-1,chkRidTet); }
 
   /* if we realloc memory in MMG5_split1b pt and pxt pointers are not valid */
   pt = &mesh->tetra[k];

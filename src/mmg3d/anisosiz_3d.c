@@ -1603,7 +1603,7 @@ int MMG3D_simred(MMG5_pMesh mesh,double *m,double *n,double dm[3],
                  double dn[3],double vp[3][3] ) {
 
   double       lambda[3],im[6],imn[9];
-  int          order,ier;
+  int          order;
   static char  mmgWarn0=0;
 
   /* Compute imn = M^{-1}N */
@@ -1649,7 +1649,7 @@ int MMG3D_simred(MMG5_pMesh mesh,double *m,double *n,double dm[3],
     }
     else {
       /* Subcase where m is not diagonal; dd,trimn,... are reused */
-      ier = MMG5_eigenv(1,m,dm,vp);
+      MMG5_eigenv(1,m,dm,vp);
     }
     /* Eigenvalues of metric n */
     dn[0] = lambda[0]*dm[0];
