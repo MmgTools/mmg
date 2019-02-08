@@ -1847,6 +1847,9 @@ int MMG5_grad2metVolreq(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int npmaste
     mm2[0] =  mu[0];
 
     assert ( cfg_m2 );
+
+    mm2[cfg_m2] = mu[1];
+    mm2[cfg_m2+2] = mu[2];
   }
   else{
 
