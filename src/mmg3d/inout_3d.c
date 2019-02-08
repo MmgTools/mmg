@@ -535,6 +535,12 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
           pt1->ref = ref;
           ina[k]=mesh->nt;
         }
+        else {
+          /* Mark the MG_ISO point to be able to delete the normal at points */
+          mesh->point[v[0]].xp = -1;
+          mesh->point[v[1]].xp = -1;
+          mesh->point[v[2]].xp = -1;
+        }
       }
       if( !mesh->nt )
         MMG5_DEL_MEM(mesh,mesh->tria);
@@ -853,71 +859,84 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
     }
   }
 
-  /* read geometric entities */
-  if ( mesh->nc1 && !ng ) {
-    fprintf(stderr,"\n  ## Warning: %s: your mesh don't contains Normals but contains"
-           " NormalAtVertices. The NormalAtVertices are deleted. \n",__func__);
-    mesh->nc1 = 0;
-  }
+  if ( !mesh->info.iso ) {
+    /* read geometric entities */
+    if ( mesh->nc1 && !ng ) {
+      fprintf(stderr,"\n  ## Warning: %s: your mesh don't contains Normals but contains"
+              " NormalAtVertices. The NormalAtVertices are deleted. \n",__func__);
+      mesh->nc1 = 0;
+    }
 
-  if ( ng > 0 ) {
-    MMG5_SAFE_CALLOC(norm,3*ng+1,double,return -1);
+    if ( ng > 0 ) {
+      MMG5_SAFE_CALLOC(norm,3*ng+1,double,return -1);
 
-    rewind(inm);
-    fseek(inm,posnormal,SEEK_SET);
-    for (k=1; k<=ng; k++) {
-      n = &norm[3*(k-1)+1];
-      if ( mesh->ver == 1 ) {
-        if (!bin) {
-          for (i=0 ; i<3 ; i++) {
-            fscanf(inm,"%f",&fc);
-            n[i] = (double) fc;
-          }
-        } else {
-          for (i=0 ; i<3 ; i++) {
-            fread(&fc,sw,1,inm);
-            if(iswp) fc=MMG5_swapf(fc);
-            n[i] = (double) fc;
+      rewind(inm);
+      fseek(inm,posnormal,SEEK_SET);
+      for (k=1; k<=ng; k++) {
+        n = &norm[3*(k-1)+1];
+        if ( mesh->ver == 1 ) {
+          if (!bin) {
+            for (i=0 ; i<3 ; i++) {
+              fscanf(inm,"%f",&fc);
+              n[i] = (double) fc;
+            }
+          } else {
+            for (i=0 ; i<3 ; i++) {
+              fread(&fc,sw,1,inm);
+              if(iswp) fc=MMG5_swapf(fc);
+              n[i] = (double) fc;
+            }
           }
         }
-      }
-      else {
-        if (!bin)
-          fscanf(inm,"%lf %lf %lf",&n[0],&n[1],&n[2]);
         else {
-          for (i=0 ; i<3 ; i++) {
-            fread(&n[i],sd,1,inm);
-            if(iswp) n[i]=MMG5_swapd(n[i]);
+          if (!bin)
+            fscanf(inm,"%lf %lf %lf",&n[0],&n[1],&n[2]);
+          else {
+            for (i=0 ; i<3 ; i++) {
+              fread(&n[i],sd,1,inm);
+              if(iswp) n[i]=MMG5_swapd(n[i]);
+            }
           }
         }
+        dd = n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
+        if ( dd > MMG5_EPSD2 ) {
+          dd = 1.0 / sqrt(dd);
+          n[0] *= dd;
+          n[1] *= dd;
+          n[2] *= dd;
+        }
       }
-      dd = n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
-      if ( dd > MMG5_EPSD2 ) {
-        dd = 1.0 / sqrt(dd);
-        n[0] *= dd;
-        n[1] *= dd;
-        n[2] *= dd;
+
+      rewind(inm);
+      fseek(inm,posnc1,SEEK_SET);
+
+      for (k=1; k<=mesh->nc1; k++) {
+        if (!bin)
+          fscanf(inm,"%d %d",&ip,&idn);
+        else {
+          fread(&ip,sw,1,inm);
+          if(iswp) ip=MMG5_swapbin(ip);
+          fread(&idn,sw,1,inm);
+          if(iswp) idn=MMG5_swapbin(idn);
+        }
+        if ( idn > 0 && ip < mesh->np+1 ) {
+          if ( (mesh->info.iso ) &&  mesh->point[ip].xp == -1 ) {
+            /* Do not store the normals at MG_ISO points (ls mode) */
+            continue;
+          }
+          memcpy(&mesh->point[ip].n,&norm[3*(idn-1)+1],3*sizeof(double));
+        }
       }
+      MMG5_SAFE_FREE(norm);
     }
 
-    rewind(inm);
-    fseek(inm,posnc1,SEEK_SET);
-
-    for (k=1; k<=mesh->nc1; k++) {
-      if (!bin)
-        fscanf(inm,"%d %d",&ip,&idn);
-      else {
-        fread(&ip,sw,1,inm);
-        if(iswp) ip=MMG5_swapbin(ip);
-        fread(&idn,sw,1,inm);
-        if(iswp) idn=MMG5_swapbin(idn);
+    /* Delete the mark added iso mode */
+    if ( (mesh->info.iso ) && mesh->nc1 ) {
+      for (k=1; k<=mesh->np; k++) {
+        mesh->point[k].xp = 0;
       }
-      if ( idn > 0 && ip < mesh->np+1 )
-        memcpy(&mesh->point[ip].n,&norm[3*(idn-1)+1],3*sizeof(double));
     }
-    MMG5_SAFE_FREE(norm);
   }
-
 
   /* stats */
   if ( abs(mesh->info.imprim) > 3 ) {

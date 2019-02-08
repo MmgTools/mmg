@@ -67,11 +67,12 @@ int MMG3D_chk4ridVertices(MMG5_pMesh mesh, MMG5_pTetra pt) {
  *
  */
 inline int MMG5_moymet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,double *m1) {
-  MMG5_pPoint  ppt;
-  double       mm[6],*mp;
-  double       dd;
-  int          i,k,n;
-  static char  mmgWarn=0;
+  MMG5_pPoint   ppt;
+  double        mm[6],*mp;
+  double        dd;
+  int           i,k,n;
+  int8_t        ddebug = 0;
+  static int8_t mmgWarn=0;
 
   n = 0;
   for (k=0; k<6; ++k) mm[k] = 0.;
@@ -86,7 +87,7 @@ inline int MMG5_moymet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,double *m1) 
   }
 
   if(!n) {
-    if ( !mmgWarn ) {
+    if ( ddebug && !mmgWarn ) {
       mmgWarn=1;
       fprintf(stderr,"\n  ## Warning: %s: at least 1 tetra with 4 ridges vertices"
               "... Unable to compute metric.\n",__func__);
