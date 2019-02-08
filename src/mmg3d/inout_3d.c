@@ -535,6 +535,12 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
           pt1->ref = ref;
           ina[k]=mesh->nt;
         }
+        else {
+          /* Mark the MG_ISO point to be able to delete the normal at points */
+          mesh->point[v[0]].xp = -1;
+          mesh->point[v[1]].xp = -1;
+          mesh->point[v[2]].xp = -1;
+        }
       }
       if( !mesh->nt )
         MMG5_DEL_MEM(mesh,mesh->tria);
@@ -912,12 +918,23 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         fread(&idn,sw,1,inm);
         if(iswp) idn=MMG5_swapbin(idn);
       }
-      if ( idn > 0 && ip < mesh->np+1 )
+      if ( idn > 0 && ip < mesh->np+1 ) {
+        if ( (mesh->info.iso ) &&  mesh->point[ip].xp == -1 ) {
+          /* Do not store the normals at MG_ISO points (ls mode) */
+          continue;
+        }
         memcpy(&mesh->point[ip].n,&norm[3*(idn-1)+1],3*sizeof(double));
+      }
     }
     MMG5_SAFE_FREE(norm);
   }
 
+  /* Delete the mark added iso mode */
+  if ( (mesh->info.iso ) && mesh->nc1 ) {
+    for (k=1; k<=mesh->np; k++) {
+      mesh->point[k].xp = 0;
+    }
+  }
 
   /* stats */
   if ( abs(mesh->info.imprim) > 3 ) {
