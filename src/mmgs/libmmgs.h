@@ -1473,7 +1473,8 @@ void  MMGS_setfunc(MMG5_pMesh mesh,MMG5_pSol met);
  * \param met pointer toward the sol structure
  * \return 1 if success
  *
- * Compute constant size map according to mesh->info.hsiz
+ * Compute constant size map according to mesh->info.hsiz, mesh->info.hmin and
+ * mesh->info.hmax. Update this 3 value if not compatible.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_CONSTANTSIZE(mesh,met,retval)\n
