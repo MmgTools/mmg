@@ -278,12 +278,10 @@ static int MMG5_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
 static int MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met) {
   int      it1,it,nnc,nns,nnf,nnm,maxit,nc,ns,nf,nm;
   int      warn;//,nw;
-  double   maxgap;
 
   /* Iterative mesh modifications */
   it = nnc = nns = nnf = nnm = warn = 0;
   maxit = 10;
-  mesh->gap = maxgap = 0.5;
   do {
     if ( !mesh->info.noinsert ) {
       ns = MMG5_adpspl(mesh,met,&warn);
@@ -341,11 +339,6 @@ static int MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met) {
     nns += ns;
     nnf += nf;
     nnm += nm;
-    /* decrease size of gap for reallocation */
-    if ( mesh->gap > maxgap/(double)maxit )
-      mesh->gap -= maxgap/(double)maxit;
-    else
-      mesh->gap -= mesh->gap/(double)maxit;
 
     if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && ns+nc > 0 )
       fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %8d moved\n",ns,nc,nf,nm);
