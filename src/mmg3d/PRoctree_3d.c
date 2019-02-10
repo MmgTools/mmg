@@ -1166,8 +1166,8 @@ int MMG3D_PROctreein_iso(MMG5_pMesh mesh,MMG5_pSol sol,MMG3D_pPROctree PROctree,
   ncells = MMG3D_getListSquare(mesh, ani, PROctree, methalo, &lococ);
   if (ncells < 0)
   {
-
-    MMG5_DEL_MEM(mesh,lococ);
+    if ( lococ )
+      MMG5_DEL_MEM(mesh,lococ);
     return 0;
   }
   /* Check the PROctree cells */
