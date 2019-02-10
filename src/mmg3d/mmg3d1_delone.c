@@ -352,7 +352,7 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree,int ne,
         }
         else lfilt = 0.2;
 
-        if ( PROctree && !MMG3D_PROctreein(mesh,met,PROctree,ip,lfilt) ) {
+        if ( PROctree && MMG3D_PROctreein(mesh,met,PROctree,ip,lfilt) <= 0 ) {
           MMG3D_delPt(mesh,ip);
           (*ifilt)++;
           goto collapse;
@@ -681,7 +681,7 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree,int ne,
           }
           else lfilt = 0.2;
 
-          if (  /*it &&*/  PROctree && !MMG3D_PROctreein(mesh,met,PROctree,ip,lfilt) ) {
+          if (  /*it &&*/  PROctree && MMG3D_PROctreein(mesh,met,PROctree,ip,lfilt) <=0 ) {
             MMG3D_delPt(mesh,ip);
             (*ifilt)++;
             goto collapse2;
