@@ -45,32 +45,45 @@ extern "C" {
 
 /** Reallocation of point table and sol table and creation
     of point ip with coordinates o and tag tag*/
-#define MMG3D_POINT_REALLOC(mesh,sol,ip,wantedGap,law,o,tag ) do       \
+#define MMG3D_POINT_REALLOC(mesh,sol,ip,wantedGap,law,o,tag ) do        \
   {                                                                     \
-    int klink;                                                          \
+  int klink;                                                            \
+  int oldnpmax = mesh->npmax;                                           \
                                                                         \
-    MMG5_TAB_RECALLOC(mesh,mesh->point,mesh->npmax,wantedGap,MMG5_Point, \
-                       "larger point table",law);                       \
+  MMG5_TAB_RECALLOC(mesh,mesh->point,mesh->npmax,wantedGap,MMG5_Point,  \
+                    "larger point table",law);                          \
                                                                         \
-    mesh->npnil = mesh->np+1;                                           \
-    for (klink=mesh->npnil; klink<mesh->npmax-1; klink++)               \
-      mesh->point[klink].tmp  = klink+1;                                \
+  mesh->npnil = mesh->np+1;                                             \
+  for (klink=mesh->npnil; klink<mesh->npmax-1; klink++)                 \
+    mesh->point[klink].tmp  = klink+1;                                  \
                                                                         \
-    /* solution */                                                      \
-    if ( sol ) {                                                        \
-      if ( sol->m ) {                                                   \
-        MMG5_ADD_MEM(mesh,(sol->size*(mesh->npmax-sol->npmax))*sizeof(double), \
-                      "larger solution",law);                           \
-        MMG5_SAFE_REALLOC(sol->m,sol->size*(sol->npmax+1),             \
-                           sol->size*(mesh->npmax+1),                   \
-                           double,"larger solution",law);               \
-      }                                                                 \
-      sol->npmax = mesh->npmax;                                         \
+  /* solution */                                                        \
+  if ( sol ) {                                                          \
+    if ( sol->m ) {                                                     \
+      MMG5_ADD_MEM(mesh,(sol->size*(mesh->npmax-sol->npmax))*sizeof(double), \
+                   "larger solution",                                   \
+                   MMG5_SAFE_RECALLOC(mesh->point,mesh->npmax+1,oldnpmax+1,MMG5_Point,,); \
+                   mesh->memCur -= (mesh->npmax - oldnpmax)*sizeof(MMG5_Point); \
+                   mesh->npmax = oldnpmax;                              \
+                   mesh->np = mesh->npmax-1;                            \
+                   mesh->npnil = 0;                                     \
+                   law);                                                \
+      MMG5_SAFE_REALLOC(sol->m,sol->size*(sol->npmax+1),                \
+                        sol->size*(mesh->npmax+1),                      \
+                        double,"larger solution",                       \
+                        MMG5_SAFE_RECALLOC(mesh->point,mesh->npmax+1,oldnpmax+1,MMG5_Point,,); \
+                        mesh->memCur -= (mesh->npmax - oldnpmax)*sizeof(MMG5_Point); \
+                        mesh->npmax = oldnpmax;                         \
+                        mesh->np = mesh->npmax-1;                       \
+                        mesh->npnil = 0;                                \
+                        law);                                           \
     }                                                                   \
+    sol->npmax = mesh->npmax;                                           \
+  }                                                                     \
                                                                         \
-    /* We try again to add the point */                                 \
-    ip = MMG3D_newPt(mesh,o,tag);                                      \
-    if ( !ip ) {law;}                                                   \
+  /* We try again to add the point */                                   \
+  ip = MMG3D_newPt(mesh,o,tag);                                         \
+  if ( !ip ) { law; }                                                   \
   }while(0)
 
 
