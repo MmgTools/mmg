@@ -1261,9 +1261,6 @@ int MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
 
   if ( !MMG5_anatet(mesh,met,1,0) ) {
     fprintf(stderr,"\n  ## Unable to split mesh. Exiting.\n");
-    if ( PROctree )
-      /*free PROctree*/
-      MMG3D_freePROctree(mesh,&PROctree);
     return 0;
   }
 
@@ -1274,9 +1271,6 @@ int MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
   /* define metric map */
   if ( !MMG3D_defsiz(mesh,met) ) {
     fprintf(stderr,"\n  ## Metric undefined. Exit program.\n");
-    if ( PROctree )
-      /*free PROctree*/
-      MMG3D_freePROctree(mesh,&PROctree);
     return 0;
   }
 
@@ -1285,10 +1279,6 @@ int MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( mesh->info.hgrad > 0. ) {
     if ( !MMG3D_gradsiz(mesh,met) ) {
       fprintf(stderr,"\n  ## Gradation problem. Exit program.\n");
-      if ( PROctree ) {
-        /*free PROctree*/
-        MMG3D_freePROctree(mesh,&PROctree);
-      }
       return 0;
     }
   }
@@ -1301,58 +1291,55 @@ int MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
 
   if ( !MMG5_anatet(mesh,met,2,0) ) {
     fprintf(stderr,"\n  ## Unable to split mesh. Exiting.\n");
-    if ( PROctree )
-      /*free PROctree*/
-      MMG3D_freePROctree(mesh,&PROctree);
     return 0;
   }
 
   /* renumerotation if available */
   if ( !MMG5_scotchCall(mesh,met) ) {
-    if ( PROctree )
-      /*free PROctree*/
-      MMG3D_freePROctree(mesh,&PROctree);
     return 0;
   }
 
   if ( mesh->info.PROctree > 0 ) {
     if ( !MMG3D_initPROctree(mesh,&PROctree,mesh->info.PROctree) ) {
-      if ( PROctree )
+      if ( PROctree ) {
         /*free PROctree*/
         MMG3D_freePROctree(mesh,&PROctree);
+      }
     }
   }
 
   if ( !MMG5_adptet_delone(mesh,met,PROctree) ) {
     fprintf(stderr,"\n  ## Unable to adapt. Exit program.\n");
-    if ( PROctree )
+    if ( PROctree ) {
       /*free PROctree*/
       MMG3D_freePROctree(mesh,&PROctree);
+    }
     return 0;
   }
 
   /* in test phase: check if no element with 2 bdry faces */
   if ( !MMG5_chkfemtopo(mesh) ) {
     fprintf(stderr,"\n  ## Topology of mesh unsuited for fem computations. Exit program.\n");
-    if ( PROctree )
+    if ( PROctree ) {
       /*free PROctree*/
       MMG3D_freePROctree(mesh,&PROctree);
+    }
     return 0;
   }
+
+  int ier = 1;
 
   if ( mesh->info.iso && !MMG5_chkmani(mesh) ) {
     fprintf(stderr,"\n  ## Non orientable implicit surface. Exit program.\n");
-    if ( PROctree )
-      /*free PROctree*/
-      MMG3D_freePROctree(mesh,&PROctree);
-    return 0;
+    ier = 0;
   }
 
-  if ( PROctree )
+  if ( PROctree ) {
     /*free PROctree*/
     MMG3D_freePROctree(mesh,&PROctree);
+  }
 
-  return 1;
+  return ier;
 }
 
 #endif
