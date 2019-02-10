@@ -1381,8 +1381,8 @@ MMG3D_storeGeom(MMG5_pPoint ppt, MMG5_pxPoint pxp, double no[3]) {
  *
  */
 int MMG3D_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,int k,
-                      MMG5_pTetra pt,MMG5_pxTetra pxt,char imax,int typchk,
-                      int8_t chkRidTet,int *warn ) {
+                      MMG5_pTetra pt,MMG5_pxTetra pxt,char imax,char typchk,
+                      char chkRidTet,int *warn ) {
   MMG5_Tria    ptt;
   MMG5_pPoint  p0,p1,ppt;
   MMG5_pxPoint pxp;
