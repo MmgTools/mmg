@@ -66,7 +66,7 @@ char  ddb;
  *
  */
 static inline int
-MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree,int ne,
+MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
                  int* ifilt,int* ns,int* nc,int* warn,int it) {
   MMG5_pTetra  pt;
   MMG5_pxTetra pxt;
@@ -313,8 +313,8 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree,int ne,
           goto collapse;
         }
         else {
-          if ( PROctree ) {
-            MMG3D_addPROctree(mesh,PROctree,ip);
+          if ( *PROctree ) {
+            MMG3D_addPROctree(mesh,*PROctree,ip);
           }
 
           (*ns)++;
@@ -352,10 +352,24 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree,int ne,
         }
         else lfilt = 0.2;
 
-        if ( PROctree && MMG3D_PROctreein(mesh,met,PROctree,ip,lfilt) <= 0 ) {
+        ier = 1;
+        if ( *PROctree ) {
+          ier = MMG3D_PROctreein(mesh,met,*PROctree,ip,lfilt);
+        }
+
+        if ( ier == 0 ) {
+          /* PROctree allocated and PROctreein refuse the insertion */
           MMG3D_delPt(mesh,ip);
           (*ifilt)++;
           goto collapse;
+        }
+        else if ( ier < 0 ) {
+          /* PROctree allocated but PROctreein fail due to lack of memory */
+          MMG3D_freePROctree ( mesh,PROctree );
+          MMG3D_delPt(mesh,ip);
+          (*ifilt)++;
+          goto collapse;
+
         } else {
           lon = MMG5_cavity(mesh,met,k,ip,list,ilist/2,volmin);
           if ( lon < 1 ) {
@@ -365,8 +379,8 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree,int ne,
           } else {
             ret = MMG5_delone(mesh,met,ip,list,lon);
             if ( ret > 0 ) {
-              if ( PROctree ) {
-                MMG3D_addPROctree(mesh,PROctree,ip);
+              if ( *PROctree ) {
+                MMG3D_addPROctree(mesh,*PROctree,ip);
               }
               (*ns)++;
               continue;
@@ -439,8 +453,8 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree,int ne,
           if ( ilist < 0 ) continue;
           if ( ier < 0 ) return -1;
           else if(ier) {
-            if ( PROctree )
-              MMG3D_delPROctree(mesh, PROctree, ier);
+            if ( *PROctree )
+              MMG3D_delPROctree(mesh, *PROctree, ier);
             MMG3D_delPt(mesh,ier);
             (*nc)++;
             continue;
@@ -573,8 +587,8 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree,int ne,
             goto collapse2;//continue;
           } else {
             (*ns)++;
-            //~ if ( PROctree )
-              //~ MMG3D_addPROctree(mesh,PROctree,ip);
+            //~ if ( *PROctree )
+              //~ MMG3D_addPROctree(mesh,*PROctree,ip);
 
             ppt = &mesh->point[ip];
 
@@ -645,8 +659,8 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree,int ne,
             goto collapse2;
           }
           else {
-            if ( PROctree )
-              MMG3D_addPROctree(mesh,PROctree,ip);
+            if ( *PROctree )
+              MMG3D_addPROctree(mesh,*PROctree,ip);
             (*ns)++;
             break;//imax continue;
           }
@@ -681,7 +695,7 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree,int ne,
           }
           else lfilt = 0.2;
 
-          if (  /*it &&*/  PROctree && MMG3D_PROctreein(mesh,met,PROctree,ip,lfilt) <=0 ) {
+          if (  /*it &&*/  *PROctree && MMG3D_PROctreein(mesh,met,*PROctree,ip,lfilt) <=0 ) {
             MMG3D_delPt(mesh,ip);
             (*ifilt)++;
             goto collapse2;
@@ -694,8 +708,8 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree,int ne,
             } else {
               ret = MMG5_delone(mesh,met,ip,list,lon);
               if ( ret > 0 ) {
-                if ( PROctree )
-                  MMG3D_addPROctree(mesh,PROctree,ip);
+                if ( *PROctree )
+                  MMG3D_addPROctree(mesh,*PROctree,ip);
                 (*ns)++;
                 break;//imax continue;
               }
@@ -765,8 +779,8 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree,int ne,
           if ( ilist < 0 ) continue;
           if ( ier < 0 ) return -1;
           else if(ier) {
-            if ( PROctree )
-              MMG3D_delPROctree(mesh,PROctree,ier);
+            if ( *PROctree )
+              MMG3D_delPROctree(mesh,*PROctree,ier);
             MMG3D_delPt(mesh,ier);
             (*nc)++;
             break;
@@ -865,7 +879,7 @@ MMG5_optbad(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree) {
  *
  */
 static int
-MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree PROctree, int* warn) {
+MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree *PROctree, int* warn) {
   int        nfilt,ifilt,ne,ier;
   int        ns,nc,it,nnc,nns,nnf,nnm,maxit,nf,nm,noptim;
   double     maxgap,dd,declic,declicsurf;
@@ -890,14 +904,14 @@ MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree PROctree, int* warn
     else  ns = nc = ifilt = 0;
 
     if ( !mesh->info.noswap ) {
-      nf = MMG5_swpmsh(mesh,met,PROctree,2);
+      nf = MMG5_swpmsh(mesh,met,*PROctree,2);
       if ( nf < 0 ) {
         fprintf(stderr,"\n  ## Error: %s: unable to improve mesh. Exiting.\n",
           __func__);
         return 0;
       }
       nnf += nf;
-      nf += MMG5_swptet(mesh,met,MMG3D_SSWAPIMPROVE,declic,PROctree,2,mesh->mark-2);
+      nf += MMG5_swptet(mesh,met,MMG3D_SSWAPIMPROVE,declic,*PROctree,2,mesh->mark-2);
 
       if ( nf < 0 ) {
         fprintf(stderr,"\n  ## Error: %s: unable to improve mesh. Exiting.\n",
@@ -914,7 +928,7 @@ MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree PROctree, int* warn
        * move allowed, surface degradation forbidden, volume degradation during
        * the surface move authorized and volume degradation during volumic move
        * forbidden. Perform 2 iter max (1). */
-      nm = MMG5_movtet(mesh,met,PROctree,declicsurf,declic,1,1,0,1,1,mesh->mark-2);
+      nm = MMG5_movtet(mesh,met,*PROctree,declicsurf,declic,1,1,0,1,1,mesh->mark-2);
 
       if ( nm < 0 ) {
         fprintf(stderr,"\n  ## Error: %s: Unable to improve mesh.\n",__func__);
@@ -944,7 +958,7 @@ MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree PROctree, int* warn
     /*optimization*/
     dd = abs(nc-ns);
     if ( !noptim && (it==5 || ((dd < 5) || (dd < 0.05*MG_MAX(nc,ns)) || !(ns+nc))) ) {
-      MMG5_optbad(mesh,met,PROctree);
+      MMG5_optbad(mesh,met,*PROctree);
       noptim = 1;
     }
 
@@ -1176,20 +1190,20 @@ MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree) {
  *
  */
 static int
-MMG5_adptet_delone(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree PROctree) {
+MMG5_adptet_delone(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree *PROctree) {
   int      nnf,ns,nf;
   int      warn;
 
   /*initial swap*/
   if ( !mesh->info.noswap ) {
-    nf = MMG5_swpmsh(mesh,met,PROctree,2);
+    nf = MMG5_swpmsh(mesh,met,*PROctree,2);
     if ( nf < 0 ) {
       fprintf(stderr,"\n  ## Error: %s: unable to improve mesh. Exiting.\n",
               __func__);
       return 0;
     }
     nnf = nf;
-    nf = MMG5_swptet(mesh,met,MMG3D_SSWAPIMPROVE,MMG3D_SWAP06,PROctree,2,mesh->mark-2);
+    nf = MMG5_swptet(mesh,met,MMG3D_SSWAPIMPROVE,MMG3D_SWAP06,*PROctree,2,mesh->mark-2);
     if ( nf < 0 ) {
       fprintf(stderr,"\n  ## Error: %s: Unable to improve mesh. Exiting.\n",
               __func__);
@@ -1228,10 +1242,10 @@ MMG5_adptet_delone(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree PROctree) {
     return 0;
 
   if(mesh->info.optimLES) {
-    if(!MMG5_optetLES(mesh,met,PROctree)) return 0;
+    if(!MMG5_optetLES(mesh,met,*PROctree)) return 0;
   }
   else {
-    if(!MMG5_optet(mesh,met,PROctree)) return 0;
+    if(!MMG5_optet(mesh,met,*PROctree)) return 0;
   }
   return 1;
 }
@@ -1308,7 +1322,7 @@ int MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
     }
   }
 
-  if ( !MMG5_adptet_delone(mesh,met,PROctree) ) {
+  if ( !MMG5_adptet_delone(mesh,met,&PROctree) ) {
     fprintf(stderr,"\n  ## Unable to adapt. Exit program.\n");
     if ( PROctree ) {
       /*free PROctree*/
