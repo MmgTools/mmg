@@ -128,22 +128,44 @@ int MMG5_startedgsurfball(MMG5_pMesh mesh,int nump,int numq,int *list,int ilist)
     return 2;
 }
 
-/** Compute point located at parameter value step from point ip0, as well as interpolate
-    of normals, tangent for a RIDGE edge */
-inline int MMG5_BezierRidge(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,double *no1,double *no2,double *to){
+/**
+ * \param mesh mesh
+ * \param ip0 first edge extremity
+ * \param ip1 second edge extremity
+ * \param s parameter value
+ * \param o point coordinates
+ * \param no1 normal at point \a o (to fill)
+ * \param no2 normal at point \a o (to fill)
+ * \param to tangent at point \a o (to fill)
+ *
+ * \return 0 if fail,  1 otherwise
+ *
+ * \warning return 1 without filling \a no1 and \a no2 if the edge has 2
+ * singular extremities.
+ *
+ * Compute point located at parameter value step from point ip0, as
+ * well as interpolate of normals, tangent for a RIDGE edge
+ *
+ */
+inline int MMG5_BezierRidge ( MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,
+                              double *no1,double *no2,double *to ) {
     MMG5_pPoint    p0,p1;
     double    ux,uy,uz,n01[3],n02[3],n11[3],n12[3],t0[3],t1[3];
     double    ps,ps2,b0[3],b1[3],bn[3],ll,il,ntemp[3],dd,alpha;
 
     p0 = &mesh->point[ip0];  /* Ref point, from which step is counted */
     p1 = &mesh->point[ip1];
-    if ( !(MG_GEO & p0->tag) || !(MG_GEO & p1->tag) )  return 0;
+    if ( !(MG_GEO & p0->tag) || !(MG_GEO & p1->tag) ) {
+      return 0;
+    }
 
     ux = p1->c[0] - p0->c[0];
     uy = p1->c[1] - p0->c[1];
     uz = p1->c[2] - p0->c[2];
     ll = ux*ux + uy*uy + uz*uz;
-    if ( ll < MMG5_EPSD2 )  return 0;
+    if ( ll < MMG5_EPSD2 )  {
+      return 0;
+    }
     il = 1.0 / sqrt(ll);
 
     if ( MG_SIN(p0->tag) ) {
@@ -310,9 +332,25 @@ inline int MMG5_BezierRidge(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,d
     return 1;
 }
 
-/** Compute point located at parameter value step from point ip0, as well as interpolate
-    of normals, tangent for a REF edge */
-inline int MMG5_BezierRef(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,double *no,double *to) {
+/**
+ * \param mesh mesh
+ * \param ip0 first edge extremity
+ * \param ip1 second edge extremity
+ * \param s parameter value
+ * \param o point coordinates
+ * \param no normal at point \a o (to fill)
+ * \param to tangent at point \a o (to fill)
+ *
+ * \return 0 if fail,  1 otherwise
+ *
+ * \warning return 1 without filling \a no if the edge has 2 singular extremities.
+ *
+ * Compute point located at parameter value step from point ip0, as
+ * well as interpolate of normals, tangent for a REF edge.
+ *
+ */
+inline int MMG5_BezierRef ( MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,
+                            double *no,double *to) {
     MMG5_pPoint          p0,p1;
     double          ux,uy,uz,n01[3],n02[3],n11[3],n12[3],ntemp[3],t0[3],t1[3];
     double          ps,b0[3],b1[3],bn[3],ll,il,dd,alpha,ps2;
@@ -324,7 +362,9 @@ inline int MMG5_BezierRef(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,dou
     uy = p1->c[1] - p0->c[1];
     uz = p1->c[2] - p0->c[2];
     ll = ux*ux + uy*uy + uz*uz;
-    if ( ll < MMG5_EPSD2 )  return 0;
+    if ( ll < MMG5_EPSD2 ) {
+      return 0;
+    }
     il = 1.0 / sqrt(ll);
     assert( (MG_REF & p0->tag) && (MG_REF & p1->tag) );
 
@@ -465,8 +505,23 @@ inline int MMG5_BezierRef(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,dou
     return 1;
 }
 
-/** Compute point located at parameter value step from point ip0, as well as interpolate
-    of normals, tangent for a NOM edge */
+/**
+ * \param mesh mesh
+ * \param ip0 first edge extremity
+ * \param ip1 second edge extremity
+ * \param s parameter value
+ * \param o point coordinates
+ * \param no normal at point \a o (to fill)
+ * \param to tangent at point \a o along edge ip0 ip1 (to fill)
+ *
+ * \return 0 if fail,  1 otherwise
+ *
+ * \warning return 1 without filling \a no if the edge has 2 singular extremities.
+ *
+ * Compute point located at parameter value \a s from point ip0, as
+ * well as interpolate of normals, tangent for a NOM edge
+ *
+ */
 inline int MMG5_BezierNom(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,double *no,double *to) {
     MMG5_pPoint      p0,p1;
     double      ux,uy,uz,il,ll,ps,alpha,dd;
@@ -607,11 +662,29 @@ inline int MMG5_BezierNom(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,dou
     return 1;
 }
 
-/** Compute point located at parameter value step from point ip0, as well as interpolate
-    of normals, tangent for a regular edge ; v = ref vector (normal) for choice of normals if need be */
+
+/**
+ * \param mesh mesh
+ * \param ip0 first edge extremity
+ * \param ip1 second edge extremity
+ * \param s parameter value
+ * \param v reference normal
+ * \param o point coordinates
+ * \param no normal at point \a o (to fill)
+ *
+ * \return 0 if fail,  1 otherwise
+ *
+ * \warning return 1 without filling \a no if the edge has 2 singular extremities.
+ *
+ * Compute point located at parameter value step from point ip0, as
+ * well as interpolate of normals, tangent for a regular edge ; v =
+ * ref vector (normal) for choice of normals if need be
+ *
+ */
 inline int MMG5_BezierReg(MMG5_pMesh mesh,int ip0, int ip1, double s, double v[3], double *o, double *no){
     MMG5_pPoint p0,p1;
-    double b0[3],b1[3],bn[3],t0[3],t1[3],np0[3],np1[3],alpha,ux,uy,uz,ps1,ps2,ll,il,dd,*n1,*n2;
+    double b0[3],b1[3],bn[3],t0[3],t1[3],np0[3],np1[3],alpha,ux,uy,uz,ps1,ps2,ll;
+    double il,dd,*n1,*n2;
 
     p0 = &mesh->point[ip0];
     p1 = &mesh->point[ip1];
