@@ -378,7 +378,7 @@ int MMG3D_pack_tetraAndAdja(MMG5_pMesh mesh) {
   mesh->ne = ne;
 
   /* Recreate nil chain */
-  if ( mesh->ne == mesh->nemax )
+  if ( mesh->ne >= mesh->nemax-1 )
     mesh->nenil = 0;
   else
     mesh->nenil = mesh->ne + 1;
@@ -418,7 +418,7 @@ int MMG3D_pack_tetra(MMG5_pMesh mesh) {
   mesh->ne = ne;
 
   /* Recreate nil chain */
-  if ( mesh->ne == mesh->nemax )
+  if ( mesh->ne >= mesh->nemax-1 )
     mesh->nenil = 0;
   else
     mesh->nenil = mesh->ne + 1;
@@ -600,7 +600,7 @@ int MMG3D_pack_pointArray(MMG5_pMesh mesh) {
   for(k=1 ; k<=mesh->np ; k++)
     mesh->point[k].tmp = 0;
 
-  if ( mesh->np == mesh->npmax )
+  if ( mesh->np >= mesh->npmax-1 )
     mesh->npnil = 0;
   else
     mesh->npnil = mesh->np + 1;

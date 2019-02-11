@@ -82,9 +82,11 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
   int          imin,iq;
   int          ii;
   double       lmaxtet,lmintet,volmin;
-  int          imaxtet,imintet,base;
+  int          imaxtet,imintet,base,countMemFailure;
   char         chkRidTet;
   static char  mmgWarn0 = 0;
+
+  countMemFailure = 0;
 
   /*first try to adapt the bdry so very strict criterion on the volume for Delaunay insertion*/
   volmin=1e-15;
@@ -206,7 +208,7 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
         if ( !ip ) {
           /* reallocation of point table */
           MMG3D_POINT_REALLOC(mesh,met,ip,mesh->gap,
-                               *warn=1;
+                               *warn=1;++countMemFailure;
                                goto collapse,
                                o,tag);
         }
@@ -290,7 +292,7 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
         if ( !ip )  {
           /* reallocation of point table */
           MMG3D_POINT_REALLOC(mesh,met,ip,mesh->gap,
-                               *warn=1;
+                               *warn=1;++countMemFailure;
                                goto collapse,
                                o,MG_NOTAG);
         }
@@ -335,7 +337,7 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
         if ( !ip )  {
           /* reallocation of point table */
           MMG3D_POINT_REALLOC(mesh,met,ip,mesh->gap,
-                               *warn=1;
+                               *warn=1;++countMemFailure;
                                goto collapse,
                                o,MG_NOTAG);
         }
@@ -399,6 +401,11 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
       }
     }
   collapse:
+    if ( countMemFailure > 10 ) {
+      printf("  ## Error:%s: too much reallocation errors. Exit program.\n",__func__);
+      return -1;
+    }
+
     if(lmin <= MMG3D_LOPTSMMG5_DEL) {
       // Case of an internal tetra with 4 ridges vertices.
       if ( lmin == 0 ) continue;
@@ -549,7 +556,7 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
           if ( !ip ){
             /* reallocation of point table */
             MMG3D_POINT_REALLOC(mesh,met,ip,mesh->gap,
-                                 *warn=1;
+                                 *warn=1;++countMemFailure;
                                  goto collapse2//break
                                  ,o,tag);
           }
@@ -635,7 +642,7 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
           if ( !ip )  {
             /* reallocation of point table */
             MMG3D_POINT_REALLOC(mesh,met,ip,mesh->gap,
-                                 *warn=1;
+                                 *warn=1;++countMemFailure;
                                  goto collapse2
                                  ,o,MG_NOTAG);
           }
@@ -679,7 +686,7 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
           if ( !ip )  {
             /* reallocation of point table */
             MMG3D_POINT_REALLOC(mesh,met,ip,mesh->gap,
-                                 *warn=1;
+                                 *warn=1;++countMemFailure;
                                  goto collapse2,
                                  o,MG_NOTAG);
           }
@@ -727,6 +734,11 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
         }
       }
     collapse2:
+      if ( countMemFailure > 10 ) {
+        printf("  ## Error:%s: too much reallocation errors. Exit program.\n",__func__);
+        return -1;
+      }
+
       if(lmin > MMG3D_LOPTSMMG5_DEL) continue;
       // Case of an internal tetra with 4 ridges vertices.
       if ( lmin == 0 ) continue;
