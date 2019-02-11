@@ -204,7 +204,9 @@ int MMGS_dichoto1b(MMG5_pMesh mesh, MMG5_pSol met, int iel, int ia, int ip) {
   return  MMGS_simbulgept(mesh,met,iel,ia,ip) ;
 }
 
-/* check if edge need to be split and return a binary coding the numbers of the edges of tria iel that should be split according to a hausdorff distance criterion */
+/* check if edge need to be split and return a binary coding the numbers of the
+ * edges of tria iel that should be split according to a hausdorff distance
+ * criterion */
 int chkedg(MMG5_pMesh mesh,int iel) {
   MMG5_pTria    pt;
   MMG5_pPoint   p[3];
@@ -538,10 +540,11 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   ns = 0;
   s  = 0.5;
   for (k=1; k<=mesh->nt; k++) {
-
     pt = &mesh->tria[k];
+
     if ( !MG_EOK(pt) || pt->ref < 0 )  continue;
-    if ( MS_SIN(pt->tag[0]) || MS_SIN(pt->tag[1]) || MS_SIN(pt->tag[2]) )  continue;
+    /* Required triangle */
+    if ( MS_SIN(pt->tag[0]) && MS_SIN(pt->tag[1]) && MS_SIN(pt->tag[2]) )  continue;
 
     /* check element cut */
     pt->flag = 0;
@@ -1369,16 +1372,21 @@ int MMG5_mmgs1(MMG5_pMesh mesh,MMG5_pSol met) {
     fprintf(stdout,"  ** COMPUTATIONAL MESH\n");
 
   /* define metric map */
-  if ( !MMG5_defsiz(mesh,met) ) {
+  if ( !MMGS_defsiz(mesh,met) ) {
     fprintf(stderr,"\n  ## Metric undefined. Exit program.\n");
     return 0;
   }
+
+  MMG5_gradation_info(mesh);
   if ( mesh->info.hgrad > 0. ) {
-    if ( mesh->info.imprim > 0 )   fprintf(stdout,"\n  -- GRADATION : %8f\n",exp(mesh->info.hgrad));
-    if (!gradsiz(mesh,met) ) {
+     if (!MMGS_gradsiz(mesh,met) ) {
       fprintf(stderr,"\n  ## Gradation problem. Exit program.\n");
       return 0;
     }
+  }
+
+  if ( mesh->info.hgradreq > 0. ) {
+    MMGS_gradsizreq(mesh,met);
   }
 
   if ( !anatri(mesh,met,2) ) {

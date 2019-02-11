@@ -111,18 +111,25 @@ int MMG5_intmetsavedir(MMG5_pMesh mesh, double *m,double *n,double *mr) {
  * \param uy distance \f$[p0;p1]\f$ along y axis.
  * \param uz distance \f$[p0;p1]\f$ along z axis.
  * \param mr computed metric tensor.
+ * \param r basis in which the metric is diagona
  *
  * \return 1 if success
  *
  * Build metric tensor at ridge point p0, when computations with respect to p1
- * are to be held.
+ * are to be held. Store the basis vectors in \a r.
+ *
+ * \remark ALGIANE: a mettre à plat : si p0-p1 est une ridge, on peut
+ * reconstruire la mauvaise métrique non? Est-ce qu'il ne vaut mieux pas passer
+ * la normale au triangle d'où l'on vient en argument pour le choix de la
+ * métrique à reconstruire si c'est possible(quand on vient de grad2metSurfreq)?
  *
  */
 int MMG5_buildridmet(MMG5_pMesh mesh,MMG5_pSol met,int np0,
-                      double ux,double uy,double uz,double mr[6]) {
+                     double ux,double uy,double uz,double mr[6],
+                     double r[3][3] ) {
   MMG5_pPoint  p0;
   MMG5_pxPoint go;
-  double       ps1,ps2,*n1,*n2,*t,*m,dv,dn,u[3],r[3][3];
+  double       ps1,ps2,*n1,*n2,*t,*m,dv,dn,u[3];
 
   p0 = &mesh->point[np0];
   if ( !(MG_GEO & p0->tag) )  return 0;
@@ -151,7 +158,8 @@ int MMG5_buildridmet(MMG5_pMesh mesh,MMG5_pSol met,int np0,
   u[1] = n1[2]*t[0] - n1[0]*t[2];
   u[2] = n1[0]*t[1] - n1[1]*t[0];
 
-  /* If u = n1 ^ t, matrix of the desired metric in (t,u,n1) = diag(m[0],dv,dn)*/
+  /* If u = n1 ^ t, matrix of the desired metric in (t,u,n1) =
+   * diag(m[0],dv,dn). Now, compute the metric in the canonical basis. */
   r[0][0] = t[0];  r[0][1] = u[0];  r[0][2] = n1[0];
   r[1][0] = t[1];  r[1][1] = u[1];  r[1][2] = n1[1];
   r[2][0] = t[2];  r[2][1] = u[2];  r[2][2] = n1[2];
@@ -171,15 +179,21 @@ int MMG5_buildridmet(MMG5_pMesh mesh,MMG5_pSol met,int np0,
  * \param np0 index of edge's extremity.
  * \param nt normal direction at the ridge point.
  * \param mr computed metric tensor.
+ * \param r basis in which the metric is diagonal
+ *
+ * \return 0 if fail, 1 if the metric is build with respect to n1, 2 if it is
+ * build with respect to n2.
  *
  * Build metric tensor at ridge point \a p0, when the 'good' normal direction is
- * given by \a nt.
+ * given by \a nt and store the basis vectors in \a r.
  *
  */
-int MMG5_buildridmetnor(MMG5_pMesh mesh,MMG5_pSol met,int np0,double nt[3],double mr[6]) {
+int MMG5_buildridmetnor(MMG5_pMesh mesh,MMG5_pSol met,int np0,double nt[3],
+                        double mr[6],double r[3][3] ) {
   MMG5_pPoint  p0;
   MMG5_pxPoint go;
-  double       ps1,ps2,*n1,*n2,*t,*m,dv,dn,u[3],r[3][3];
+  double       ps1,ps2,*n1,*n2,*t,*m,dv,dn,u[3];
+  int          ier = 0;
 
   p0 = &mesh->point[np0];
   if ( !(MG_GEO & p0->tag) )  return 0;
@@ -198,17 +212,20 @@ int MMG5_buildridmetnor(MMG5_pMesh mesh,MMG5_pSol met,int np0,double nt[3],doubl
     n1 = &go->n2[0];
     dv = m[2];
     dn = m[4];
+    ier = 2;
   }
   else{
     dv = m[1];
     dn = m[3];
+    ier = 1;
   }
 
   u[0] = n1[1]*t[2] - n1[2]*t[1];
   u[1] = n1[2]*t[0] - n1[0]*t[2];
   u[2] = n1[0]*t[1] - n1[1]*t[0];
 
-  /* If u = n1 ^ t, matrix of the desired metric in (t,u,n1) = diag(m[0],dv,0)*/
+  /* If u = n1 ^ t, matrix of the desired metric in (t,u,n1) = diag(m[0],dv,0).
+     Now, compute the metric in the canonical basis.*/
   r[0][0] = t[0];  r[0][1] = u[0];  r[0][2] = n1[0];
   r[1][0] = t[1];  r[1][1] = u[1];  r[1][2] = n1[1];
   r[2][0] = t[2];  r[2][1] = u[2];  r[2][2] = n1[2];
@@ -220,7 +237,7 @@ int MMG5_buildridmetnor(MMG5_pMesh mesh,MMG5_pSol met,int np0,double nt[3],doubl
   mr[4] = m[0]*r[1][0]*r[2][0] + dv*r[1][1]*r[2][1] + dn*r[1][2]*r[2][2];
   mr[5] = m[0]*r[2][0]*r[2][0] + dv*r[2][1]*r[2][1] + dn*r[2][2]*r[2][2];
 
-  return 1;
+  return ier;
 }
 
 /**

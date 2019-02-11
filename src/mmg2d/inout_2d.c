@@ -845,6 +845,8 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
     }
   }
 
+  mesh->info.inputMet = 1;
+
   fclose(inm);
 
   /* stats */
@@ -1066,7 +1068,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
       ref = ppt->ref;
       if ( mesh->info.nreg ) {
         if ( !bin )
-          fprintf(inm,"%.15lg %.15lg 0. %d\n",ppt->c[0],ppt->c[1],ref);
+          fprintf(inm,"%.15lg %.15lg 0 %d\n",ppt->c[0],ppt->c[1],ref);
         else {
           dblb = 0.;
           fwrite((unsigned char*)&ppt->c[0],sd,1,inm);
@@ -1206,7 +1208,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
         ne++;
         if (  mesh->edge[k].tag & MG_REQ ) {
           if(!bin) {
-            fprintf(inm,"%d \n",ne);
+            fprintf(inm,"%d\n",ne);
           } else {
             fwrite(&ne,sw,1,inm);
           }
@@ -1260,7 +1262,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
       if(!bin) {
         strcpy(&chaine[0],"\n\nRequiredTriangles\n");
         fprintf(inm,"%s",chaine);
-        fprintf(inm,"%d \n",nereq);
+        fprintf(inm,"%d\n",nereq);
       } else {
         binch = 17; //ReqTriangles
         fwrite(&binch,sw,1,inm);
@@ -1276,7 +1278,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
         if ( (pt->tag[0] & MG_REQ) && (pt->tag[1] & MG_REQ)
              && pt->tag[2] & MG_REQ ) {
           if(!bin) {
-            fprintf(inm,"%d \n",ne);
+            fprintf(inm,"%d\n",ne);
           } else {
             fwrite(&ne,sw,1,inm);
           }
@@ -1367,7 +1369,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
   /*     if(ppt->tag & MG_CRN) continue; */
 
   /*     if(!bin) { */
-  /*       fprintf(inm,"%d %d \n",ppt->tmp,nn++); */
+  /*       fprintf(inm,"%d %d\n",ppt->tmp,nn++); */
   /*     } */
   /*     else { */
   /*       fwrite(&ppt->tmp,sw,1,inm); */
@@ -1446,13 +1448,20 @@ int MMG2D_saveSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   FILE*        inm;
   MMG5_pPoint  ppt;
   int          k,ier;
-  int          binch,bin;
+  int          binch,bin,dim;
 
   if ( !sol->np )  return 1;
 
   sol->ver = 2;
 
-  ier = MMG5_saveSolHeader( mesh,filename,&inm,sol->ver,&bin,mesh->np,sol->dim,
+  if ( sol->dim==2 && mesh->info.nreg ) {
+    dim = 3;
+  }
+  else {
+    dim = 2;
+  }
+
+  ier = MMG5_saveSolHeader( mesh,filename,&inm,sol->ver,&bin,mesh->np,dim,
                             1,&sol->type,&sol->size);
 
   if ( ier < 1 ) return ier;

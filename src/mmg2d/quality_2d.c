@@ -234,5 +234,5 @@ int MMG2D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
     }
   }
 
-  return  MMG5_minQualCheck(iel,rapmin,MMG2D_ALPHAD);
+  return  MMG5_minQualCheck(iel,rapmin,1.);
 }

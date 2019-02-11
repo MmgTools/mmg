@@ -114,7 +114,10 @@ int MMGS_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int 
   }
 
   sol->dim = 3;
+
   if ( np ) {
+    mesh->info.inputMet = 1;
+
     sol->np  = np;
     sol->npi = np;
     if ( sol->m )
@@ -1372,6 +1375,13 @@ int MMGS_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val){
       mesh->info.hgrad = -1.0;
     else
       mesh->info.hgrad = log(mesh->info.hgrad);
+    break;
+  case MMGS_DPARAM_hgradreq :
+    mesh->info.hgradreq    = val;
+    if ( mesh->info.hgradreq < 0.0 )
+      mesh->info.hgradreq = -1.0;
+    else
+      mesh->info.hgradreq = log(mesh->info.hgradreq);
     break;
   case MMGS_DPARAM_hausd :
     if ( val <=0 ) {

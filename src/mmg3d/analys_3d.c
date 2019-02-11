@@ -42,7 +42,7 @@
  * not realy required.
  *
  */
-static inline void MMG3D_set_reqBoundaries(MMG5_pMesh mesh) {
+void MMG3D_set_reqBoundaries(MMG5_pMesh mesh) {
   MMG5_pTria     ptt;
   int            k;
 
@@ -93,7 +93,7 @@ static inline void MMG3D_set_reqBoundaries(MMG5_pMesh mesh) {
  * topology: set adjacent, detect Moebius, flip faces, count connected comp.
  *
  */
-static int MMG5_setadj(MMG5_pMesh mesh){
+int MMG5_setadj(MMG5_pMesh mesh){
   MMG5_pTria   pt,pt1;
   int          *adja,*adjb,adji1,adji2,*pile,iad,ipil,ip1,ip2,gen;
   int          k,kk,iel,jel,nvf,nf,nr,nt,nre,nreq,ncc,ned,ref;
@@ -280,7 +280,7 @@ static int MMG5_setadj(MMG5_pMesh mesh){
 }
 
 /** check for ridges: dihedral angle */
-static int MMG5_setdhd(MMG5_pMesh mesh) {
+int MMG5_setdhd(MMG5_pMesh mesh) {
   MMG5_pTria    pt,pt1;
   double        n1[3],n2[3],dhd;
   int          *adja,k,kk,ne,nr;
@@ -347,7 +347,7 @@ static int MMG5_setdhd(MMG5_pMesh mesh) {
  * check subdomains connected by a vertex and mark these vertex as CRN and REQ.
  *
  */
-static int MMG5_chkVertexConnectedDomains(MMG5_pMesh mesh){
+int MMG5_chkVertexConnectedDomains(MMG5_pMesh mesh){
   MMG5_pTetra  pt;
   MMG5_pxTetra pxt;
   MMG5_pPoint  ppt;
@@ -417,7 +417,7 @@ static int MMG5_chkVertexConnectedDomains(MMG5_pMesh mesh){
 }
 
 /** check for singularities */
-static int MMG5_singul(MMG5_pMesh mesh) {
+int MMG5_singul(MMG5_pMesh mesh) {
   MMG5_pTria     pt;
   MMG5_pPoint    ppt,p1,p2;
   double         ux,uy,uz,vx,vy,vz,dd;
@@ -434,6 +434,8 @@ static int MMG5_singul(MMG5_pMesh mesh) {
       if ( !MG_VOK(ppt) || ( ppt->tag & MG_CRN ) || ( ppt->tag & MG_NOM ) )
         continue;
       else if ( MG_EDG(ppt->tag) ) {
+        /* Store the number of ridges passing through the point (xp) and the
+         * number of ref edges (nr) */
         ns = MMG5_bouler(mesh,mesh->adjt,k,i,list,listref,&xp,&nr,MMG3D_LMAX);
 
         if ( !ns )  continue;
@@ -489,7 +491,7 @@ static int MMG5_singul(MMG5_pMesh mesh) {
 }
 
 /** compute normals at C1 vertices, for C0: tangents */
-static int MMG5_norver(MMG5_pMesh mesh) {
+int MMG5_norver(MMG5_pMesh mesh) {
   MMG5_pTria     pt;
   MMG5_pPoint    ppt;
   MMG5_xPoint    *pxp;
@@ -661,7 +663,7 @@ static int MMG5_norver(MMG5_pMesh mesh) {
  * information.
  *
  */
-static int MMG3D_nmgeom(MMG5_pMesh mesh){
+int MMG3D_nmgeom(MMG5_pMesh mesh){
   MMG5_pTetra     pt;
   MMG5_pPoint     p0;
   MMG5_pxPoint    pxp;

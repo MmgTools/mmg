@@ -85,6 +85,8 @@ void MMG5_Init_parameters(MMG5_pMesh mesh) {
   mesh->info.hausd    = MMG5_HAUSD;
   /* control gradation */
   mesh->info.hgrad    = MMG5_HGRAD;
+  /* control gradation on required entities */
+  mesh->info.hgradreq = MMG5_HGRADREQ;
 
   /* default values for pointers */
   /* list of user-defined references */
@@ -344,6 +346,51 @@ int MMG5_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solout) {
   return 1;
 }
 
+void MMG5_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met,double hsiz) {
+  MMG5_pPoint ppt;
+  int         k,iadr;
+
+  if ( met->size == 1 ) {
+    for (k=1; k<=mesh->np; k++) {
+      ppt = &mesh->point[k];
+      if ( !MG_VOK(ppt) ) continue;
+      met->m[k] = hsiz;
+    }
+  }
+  else {
+    hsiz    = 1./(hsiz*hsiz);
+
+    if ( mesh->dim==2 ) {
+      for (k=1; k<=mesh->np; k++) {
+        ppt = &mesh->point[k];
+        if ( !MG_VOK(ppt) ) continue;
+
+        iadr           = 3*k;
+        met->m[iadr]   = hsiz;
+        met->m[iadr+1] = 0.;
+        met->m[iadr+2] = hsiz;
+      }
+    }
+    else {
+      assert ( mesh->dim==3 );
+      for (k=1; k<=mesh->np; k++) {
+        ppt = &mesh->point[k];
+        if ( !MG_VOK(ppt) ) continue;
+
+        iadr           = 6*k;
+        met->m[iadr]   = hsiz;
+        met->m[iadr+1] = 0.;
+        met->m[iadr+2] = 0.;
+        met->m[iadr+3] = hsiz;
+        met->m[iadr+4] = 0.;
+        met->m[iadr+5] = hsiz;
+      }
+    }
+  }
+
+  return;
+}
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the sol structure.
@@ -412,24 +459,24 @@ int MMG5_Set_defaultTruncatureSizes(MMG5_pMesh mesh,char sethmin,char sethmax) {
 
   if ( !sethmin ) {
     if ( sethmax ) {
-      mesh->info.hmin  = MG_MIN(0.001,0.001 * mesh->info.hmax);
+      mesh->info.hmin  = MG_MIN ( MMG5_HMINCOE, MMG5_HMINCOE * mesh->info.hmax);
     } else {
-      mesh->info.hmin  = 0.001;
+      mesh->info.hmin  = MMG5_HMINCOE;
     }
   }
 
   if ( !sethmax ) {
     if ( sethmin ) {
-      mesh->info.hmax = MG_MAX(2.,100. * mesh->info.hmin);
+      mesh->info.hmax = MG_MAX ( MMG5_HMAXCOE, 1./MMG5_HMINCOE * mesh->info.hmin);
     }
     else {
-      mesh->info.hmax  = 2.;
+      mesh->info.hmax  = MMG5_HMAXCOE;
     }
   }
 
   if ( mesh->info.hmax < mesh->info.hmin ) {
     assert ( sethmin && sethmax );
-    fprintf(stderr,"\n  ## Error: %s: mismatch parameters:"
+    fprintf(stderr,"\n  ## Error: %s: Mismatched options:"
             " minimal mesh size larger than maximal one.\n",__func__);
     return 0;
   }

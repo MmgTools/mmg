@@ -442,7 +442,8 @@ typedef MMG5_Mat * MMG5_pMat;
  */
 typedef struct {
   MMG5_pPar     par;
-  double        dhd,hmin,hmax,hsiz,hgrad,hausd,min[3],max[3],delta,ls,*vpar;
+  double        dhd,hmin,hmax,hsiz,hgrad,hgradreq,hausd;
+  double        min[3],max[3],delta,ls;
   int           mem,npar,npari;
   int           opnbdy;
   int           renum;
@@ -455,6 +456,7 @@ typedef struct {
                           param are setted: if \f$tag = 1+2+4\f$ then the point
                           is \a MG_Vert, MG_Tria and MG_Tetra */
   unsigned char optim, optimLES, noinsert, noswap, nomove, nosurf;
+  unsigned char inputMet; /*!< 1 if we don't have a metric when we enter in mmg3d1, 0 otherwise */
   MMG5_pMat     mat;
 } MMG5_Info;
 

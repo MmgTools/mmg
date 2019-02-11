@@ -74,14 +74,8 @@ static int MMG2D_usage(char *name) {
  *
  */
 static inline int MMG5_defaultValues(MMG5_pMesh mesh) {
-  double hgradexp;
-
-  hgradexp = mesh->info.hgrad;
-  mesh->info.hgrad = log(hgradexp);
 
   MMG5_mmgDefaultValues(mesh);
-
-  mesh->info.hgrad = hgradexp;
 
   fprintf(stdout,"\n\n");
 
@@ -374,6 +368,11 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
         }
         else if ( !strcmp(argv[i],"-hausd") && ++i <= argc ) {
           if ( !MMG2D_Set_dparameter(mesh,met,MMG2D_DPARAM_hausd,
+                                     atof(argv[i])) )
+            return 0;
+        }
+        else if ( !strcmp(argv[i],"-hgradreq") && ++i <= argc ) {
+          if ( !MMG2D_Set_dparameter(mesh,met,MMG2D_DPARAM_hgradreq,
                                      atof(argv[i])) )
             return 0;
         }

@@ -366,12 +366,12 @@ int MMG5_mmg3dRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
   mesh->ne = nereal;
   mesh->np = npreal;
 
-  if ( mesh->np == mesh->npmax )
+  if ( mesh->np >= mesh->npmax-1 )
     mesh->npnil = 0;
   else
     mesh->npnil = mesh->np + 1;
 
-  if ( mesh->ne == mesh->nemax )
+  if ( mesh->ne >= mesh->nemax-1 )
     mesh->nenil = 0;
   else
     mesh->nenil = mesh->ne + 1;

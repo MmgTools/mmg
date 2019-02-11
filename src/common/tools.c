@@ -158,7 +158,43 @@ inline int MMG5_nortri(MMG5_pMesh mesh,MMG5_pTria pt,double *n) {
 
 }
 
-/* Compute product R*M*tR when M is symmetric */
+
+/**
+ * \param m symetric matrix
+ * \param n symetric matrix
+ * \param mn result
+ *
+ * Compute product m*n (mn stored in columns: mn[1] = mn[1][0]).
+ *
+ */
+void MMG5_mn(double m[6], double n[6], double mn[9] ){
+
+  mn[0] = m[0]*n[0] + m[1]*n[1] + m[2]*n[2];
+  mn[1] = m[1]*n[0] + m[3]*n[1] + m[4]*n[2];
+  mn[2] = m[2]*n[0] + m[4]*n[1] + m[5]*n[2];
+
+  mn[3] = m[0]*n[1] + m[1]*n[3] + m[2]*n[4];
+  mn[4] = m[1]*n[1] + m[3]*n[3] + m[4]*n[4];
+  mn[5] = m[2]*n[1] + m[4]*n[3] + m[5]*n[4];
+
+  mn[6] = m[0]*n[2] + m[1]*n[4] + m[2]*n[5];
+  mn[7] = m[1]*n[2] + m[3]*n[4] + m[4]*n[5];
+  mn[8] = m[2]*n[2] + m[4]*n[4] + m[5]*n[5];
+
+  return;
+}
+
+
+/**
+ * \param r 3x3 matrix
+ * \param m symetric matrix
+ * \param mr result
+ *
+ * \return 1
+ *
+ * Compute product R*M*tR when M is symmetric
+ *
+ */
 inline int MMG5_rmtr(double r[3][3],double m[6], double mr[6]){
   double n[3][3];
 
@@ -325,6 +361,99 @@ int MMG5_invmatg(double m[9],double mi[9]) {
 }
 
 /**
+ * \param m initial matrix.
+ * \param mi inverted matrix.
+ *
+ * Invert 3x3 non-symmetric matrix stored in 2 dimensions
+ *
+ */
+int MMG5_invmat33(double m[3][3],double mi[3][3]) {
+  double  aa,bb,cc,det,vmin,vmax,maxx;
+  int     k,l;
+
+  /* check ill-conditionned matrix */
+  vmin = vmax = fabs(m[0][0]);
+  for (k=0; k<3; k++) {
+    for (l=0; l<3; l++) {
+      maxx = fabs(m[k][l]);
+      if ( maxx < vmin )  vmin = maxx;
+      else if ( maxx > vmax )  vmax = maxx;
+    }
+  }
+  if ( vmax == 0.0 )  return 0;
+
+  /* check diagonal matrices */
+  /* lower */
+  vmax = fabs(m[1][0]);
+  maxx = fabs(m[2][0]);
+  if( maxx > vmax ) vmax = maxx;
+  maxx = fabs(m[2][1]);
+  if( maxx > vmax ) vmax = maxx;
+  /* upper */
+  maxx = fabs(m[0][1]);
+  if( maxx > vmax ) vmax = maxx;
+  maxx = fabs(m[0][2]);
+  if( maxx > vmax ) vmax = maxx;
+  maxx = fabs(m[1][2]);
+  if( maxx > vmax ) vmax = maxx;
+
+  if ( vmax < MMG5_EPS ) {
+    mi[0][0]  = 1./m[0][0];
+    mi[1][1]  = 1./m[1][1];
+    mi[2][2]  = 1./m[2][2];
+    mi[1][0] = mi[0][1] = mi[2][0] = mi[0][2] = mi[1][2] = mi[2][1] = 0.0;
+    return 1;
+  }
+
+  /* compute sub-dets */
+  aa = m[1][1]*m[2][2] - m[2][1]*m[1][2];
+  bb = m[2][1]*m[0][2] - m[0][1]*m[2][2];
+  cc = m[0][1]*m[1][2] - m[1][1]*m[0][2];
+  det = m[0][0]*aa + m[1][0]*bb + m[2][0]*cc;
+  if ( fabs(det) < MMG5_EPSD )  return 0;
+  det = 1.0 / det;
+
+  mi[0][0] = aa*det;
+  mi[0][1] = bb*det;
+  mi[0][2] = cc*det;
+  mi[1][0] = (m[2][0]*m[1][2] - m[1][0]*m[2][2])*det;
+  mi[1][1] = (m[0][0]*m[2][2] - m[2][0]*m[0][2])*det;
+  mi[1][2] = (m[1][0]*m[0][2] - m[0][0]*m[1][2])*det;
+  mi[2][0] = (m[1][0]*m[2][1] - m[2][0]*m[1][1])*det;
+  mi[2][1] = (m[2][0]*m[0][1] - m[0][0]*m[2][1])*det;
+  mi[2][2] = (m[0][0]*m[1][1] - m[1][0]*m[0][1])*det;
+
+  /* Check results */
+#ifndef NDEBUG
+  double res[3][3];
+
+  res[0][0] = m[0][0] * mi[0][0] + m[0][1] * mi[1][0] + m[0][2] * mi[2][0];
+  res[0][1] = m[0][0] * mi[0][1] + m[0][1] * mi[1][1] + m[0][2] * mi[2][1];
+  res[0][2] = m[0][0] * mi[0][2] + m[0][1] * mi[1][2] + m[0][2] * mi[2][2];
+
+  res[1][0] = m[1][0] * mi[0][0] + m[1][1] * mi[1][0] + m[1][2] * mi[2][0];
+  res[1][1] = m[1][0] * mi[0][1] + m[1][1] * mi[1][1] + m[1][2] * mi[2][1];
+  res[1][2] = m[1][0] * mi[0][2] + m[1][1] * mi[1][2] + m[1][2] * mi[2][2];
+
+  res[2][0] = m[2][0] * mi[0][0] + m[2][1] * mi[1][0] + m[2][2] * mi[2][0];
+  res[2][1] = m[2][0] * mi[0][1] + m[2][1] * mi[1][1] + m[2][2] * mi[2][1];
+  res[2][2] = m[2][0] * mi[0][2] + m[2][1] * mi[1][2] + m[2][2] * mi[2][2];
+
+
+  assert ( ( fabs(res[0][0]-1.) < MMG5_EPS ) &&
+           ( fabs(res[1][1]-1.) < MMG5_EPS ) &&
+           ( fabs(res[2][2]-1.) < MMG5_EPS ) &&
+           ( fabs(res[0][1]) < MMG5_EPS ) && ( fabs(res[0][2]) < MMG5_EPS ) &&
+           ( fabs(res[1][2]) < MMG5_EPS ) &&
+           ( fabs(res[1][0]) < MMG5_EPS ) && ( fabs(res[2][0]) < MMG5_EPS ) &&
+           ( fabs(res[2][1]) < MMG5_EPS ) && "Matrix inversion" );
+
+#endif
+
+  return 1;
+}
+
+/**
  * \param a matrix to invert.
  * \param b last member.
  * \param r vector of unknowns.
@@ -455,8 +584,6 @@ size_t MMG5_memSize (void) {
  *
  */
 void MMG5_memOption_memSet(MMG5_pMesh mesh) {
-  size_t   usedMem,avMem,reservedMem;
-  int      ctri,npadd,bytes;
 
   if ( mesh->info.mem <= 0 ) {
     if ( mesh->memMax )

@@ -90,6 +90,7 @@ enum MMG3D_Param {
   MMG3D_DPARAM_hsiz,              /*!< [val], Constant mesh size */
   MMG3D_DPARAM_hausd,             /*!< [val], Control global Hausdorff distance (on all the boundary surfaces of the mesh) */
   MMG3D_DPARAM_hgrad,             /*!< [val], Control gradation */
+  MMG3D_DPARAM_hgradreq,          /*!< [val], Control gradation on required entites (advanced usage) */
   MMG3D_DPARAM_ls,                /*!< [val], Value of level-set */
   MMG3D_PARAM_size,               /*!< [n], Number of parameters */
 };
@@ -2236,7 +2237,8 @@ enum MMG3D_Param {
  * \param met pointer toward the sol structure
  * \return 1 if success
  *
- * Compute constant size map according to mesh->info.hsiz
+ * Compute constant size map according to mesh->info.hsiz, mesh->info.hmin and
+ * mesh->info.hmax. Update this 3 value if not compatible.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_CONSTANTSIZE(mesh,met,retval)\n
@@ -2284,27 +2286,52 @@ int MMG3D_switch_metricStorage(MMG5_pMesh mesh, MMG5_pSol met);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param ktri index of the boundary triangle.
- * \param ktet pointer toward an array of size 2 or an integer that will
- * contain the indices of the tetra (filled by the function)
- * \param iface pointer toward an array of size 2that will contains the indices
- * of the faces of the tetras \a ktet[i] that correspond to the boundary tria
- * \a ktri.
+ * \param ktet pointer toward an integer that will contains the tetra index.
+ * \param iface pointer toward the triangle in \a ktet.
+ *
  * \return 0 if fail, 1 otherwise
  *
- * Fill \a ktet by the indices of the tetra to which belong a boundary triangle
- * and \a iface by the indices of the faces of the tetras that correspond to the
- * triangle.
+ * Fill \a ktet by the indice of a tetra to which belong a boundary triangle
+ * and \a iface by the indice of the triangle in the tetra.
+ *
+ * \warning will be deprecated in release 5.5
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_GET_TETFROMTRIA(mesh,ktri,ktet,iface,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(IN)              :: mesh\n
  * >     INTEGER, INTENT(IN)                      :: ktri\n
- * >     INTEGER, DIMENSION(*), INTENT(OUT)       :: ktet,iface\n
+ * >     INTEGER, INTENT(OUT)                     :: ktet,iface\n
  * >     INTEGER, INTENT(OUT)                     :: retval\n
  * >   END SUBROUTINE\n
  *
  */
   int MMG3D_Get_tetFromTria(MMG5_pMesh mesh, int ktri, int *ktet, int *iface);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param ktri index of the boundary triangle.
+ * \param ktet array of size 2 that will contain the indices of the tetra
+ * (filled by the function).
+ * \param iface pointer toward an array of size 2 that will contains the indices
+ * of the faces of the tetras \a ktet[i] that corresponds to the boundary tria
+ * \a ktri.
+ *
+ * \return 0 if fail, 1 otherwise
+ *
+ * Fill \a ktet by the indices of the tetra to which belong a boundary triangle
+ * and \a iface by the indices of the faces of the tetras that correspond to the
+ * triangle. Fill ktet[1] and iface[1] by 0 if the triangle belongs to 1 tetra only.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_GET_TETSFROMTRIA(mesh,ktri,ktet,iface,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(IN)              :: mesh\n
+ * >     INTEGER, INTENT(IN)                      :: ktri\n
+ * >     INTEGER, DIMENSION(2), INTENT(OUT)       :: ktet,iface\n
+ * >     INTEGER, INTENT(OUT)                     :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int MMG3D_Get_tetsFromTria(MMG5_pMesh mesh, int ktri, int ktet[2], int iface[2]);
 #ifdef __cplusplus
 }
 #endif

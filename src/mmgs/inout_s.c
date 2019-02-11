@@ -107,7 +107,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
   long         posnp,posnt,posne,posncor,posnq,posned,posnr;
   long         posnpreq,posnormal,posnc1;
   int         i,k,ia,nq,nri,ip,idn,ng,npreq;
-  int         ncor,bin,iswp,nedreq,posnedreq,bdim,binch,bpos;
+  int         ncor,bin,iswp,nedreq,ntreq,posnedreq,bdim,binch,bpos;
   int         na,*ina,a,b,ref;
   char        *ptr,*data,chaine[128];
 
@@ -115,7 +115,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
   posnp = posnt = posne = posncor = posnq = 0;
   posned = posnr = posnpreq = posnc1 = npreq = 0;
   posnedreq = posnormal = 0;
-  ncor = nri = ng = nedreq = nq = 0;
+  ncor = nri = ng = nedreq = nq = ntreq = 0;
   bin = 0;
   iswp = 0;
   mesh->np = mesh->nt = mesh->nti = mesh->npi = 0;
@@ -178,6 +178,12 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
       } else if(!strncmp(chaine,"Triangles",strlen("Triangles"))) {
         fscanf(inm,"%d",&mesh->nti);
         posnt = ftell(inm);
+        continue;
+      }
+      else if(!strncmp(chaine,"RequiredTriangles",strlen("RequiredTriangles"))) {
+        fscanf(inm,"%d",&ntreq);
+        fprintf(stderr,"\n  ## Warning: %s: required triangles not yet implementd in mmgs.\n"
+                " %d required triangle(s) ignored.\n",__func__,ntreq);
         continue;
       } else if(!strncmp(chaine,"Quadrilaterals",strlen("Quadrilaterals"))) {
         fscanf(inm,"%d",&nq);
@@ -508,6 +514,13 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
           ped->b   = b;
           ped->ref = ref;
           ina[k]   = mesh->na;
+        }
+        else {
+          /* Remove MG_REQ and MG_CRN tags on ISO edges */
+          if ( MG_REQ & mesh->point[a].tag ) { mesh->point[a].tag &= ~MG_REQ; }
+          if ( MG_REQ & mesh->point[b].tag ) { mesh->point[b].tag &= ~MG_REQ; }
+          if ( MG_CRN & mesh->point[a].tag ) { mesh->point[a].tag &= ~MG_CRN; }
+          if ( MG_CRN & mesh->point[b].tag ) { mesh->point[b].tag &= ~MG_CRN; }
         }
       }
       if( !mesh->na )
@@ -912,35 +925,6 @@ int MMGS_saveMesh(MMG5_pMesh mesh, const char* filename) {
     nt++;
   }
 
-  /* write triangles */
-  if(!bin) {
-    strcpy(&chaine[0],"\n\nTriangles\n");
-    fprintf(inm,"%s",chaine);
-    fprintf(inm,"%d \n",nt);
-  } else {
-    binch = 6; //Triangles
-    fwrite(&binch,sw,1,inm);
-    bpos += 12+16*nt; //Pos
-    fwrite(&bpos,sw,1,inm);
-    fwrite(&nt,sw,1,inm);
-  }
-
-  for (k=1; k<=mesh->nt; k++) {
-    pt = &mesh->tria[k];
-    if ( MG_EOK(pt) ) {
-      if(!bin) {
-        fprintf(inm,"%d %d %d %d\n",mesh->point[pt->v[0]].tmp,mesh->point[pt->v[1]].tmp
-                ,mesh->point[pt->v[2]].tmp,abs(pt->ref));
-      } else {
-        fwrite(&mesh->point[pt->v[0]].tmp,sw,1,inm);
-        fwrite(&mesh->point[pt->v[1]].tmp,sw,1,inm);
-        fwrite(&mesh->point[pt->v[2]].tmp,sw,1,inm);
-        pt->ref = abs(pt->ref);
-        fwrite(&pt->ref,sw,1,inm);
-      }
-    }
-  }
-
   /* write corners */
   if ( nc ) {
     if(!bin) {
@@ -958,7 +942,7 @@ int MMGS_saveMesh(MMG5_pMesh mesh, const char* filename) {
       ppt = &mesh->point[k];
       if ( MG_VOK(ppt) && ppt->tag & MG_CRN ) {
         if(!bin) {
-          fprintf(inm,"%d \n",ppt->tmp);
+          fprintf(inm,"%d\n",ppt->tmp);
         } else {
           fwrite(&ppt->tmp,sw,1,inm);
         }
@@ -981,7 +965,7 @@ int MMGS_saveMesh(MMG5_pMesh mesh, const char* filename) {
       ppt = &mesh->point[k];
       if ( MG_VOK(ppt) && ppt->tag & MG_REQ ) {
         if(!bin) {
-          fprintf(inm,"%d \n",ppt->tmp);
+          fprintf(inm,"%d\n",ppt->tmp);
         } else {
           fwrite(&ppt->tmp,sw,1,inm);
         }
@@ -1005,7 +989,7 @@ int MMGS_saveMesh(MMG5_pMesh mesh, const char* filename) {
     nre = nr = 0;
     for (k=1; k<=mesh->na; k++) {
       if(!bin) {
-        fprintf(inm,"%d %d %d \n",
+        fprintf(inm,"%d %d %d\n",
                 mesh->edge[k].a,mesh->edge[k].b,mesh->edge[k].ref);
       } else {
         fwrite(&mesh->edge[k].a,sw,1,inm);
@@ -1031,7 +1015,7 @@ int MMGS_saveMesh(MMG5_pMesh mesh, const char* filename) {
       for (k=1; k<=mesh->na; k++) {
         if ( mesh->edge[k].tag & MG_GEO ) {
           if(!bin) {
-            fprintf(inm,"%d \n",k);
+            fprintf(inm,"%d\n",k);
           } else {
             fwrite(&k,sw,1,inm);
           }
@@ -1053,7 +1037,7 @@ int MMGS_saveMesh(MMG5_pMesh mesh, const char* filename) {
       for (k=1; k<=mesh->na; k++)
         if ( mesh->edge[k].tag & MG_REQ )  {
           if(!bin) {
-            fprintf(inm,"%d \n",k);
+            fprintf(inm,"%d\n",k);
           } else {
             fwrite(&k,sw,1,inm);
           }
@@ -1061,8 +1045,37 @@ int MMGS_saveMesh(MMG5_pMesh mesh, const char* filename) {
     }
   }
 
-  if ( (!mesh->xp) || (!mesh->xpoint) ) nn = ng = 0;
+  /* write triangles */
+  if(!bin) {
+    strcpy(&chaine[0],"\n\nTriangles\n");
+    fprintf(inm,"%s",chaine);
+    fprintf(inm,"%d\n",nt);
+  } else {
+    binch = 6; //Triangles
+    fwrite(&binch,sw,1,inm);
+    bpos += 12+16*nt; //Pos
+    fwrite(&bpos,sw,1,inm);
+    fwrite(&nt,sw,1,inm);
+  }
 
+  for (k=1; k<=mesh->nt; k++) {
+    pt = &mesh->tria[k];
+    if ( MG_EOK(pt) ) {
+      if(!bin) {
+        fprintf(inm,"%d %d %d %d\n",mesh->point[pt->v[0]].tmp,mesh->point[pt->v[1]].tmp
+                ,mesh->point[pt->v[2]].tmp,abs(pt->ref));
+      } else {
+        fwrite(&mesh->point[pt->v[0]].tmp,sw,1,inm);
+        fwrite(&mesh->point[pt->v[1]].tmp,sw,1,inm);
+        fwrite(&mesh->point[pt->v[2]].tmp,sw,1,inm);
+        pt->ref = abs(pt->ref);
+        fwrite(&pt->ref,sw,1,inm);
+      }
+    }
+  }
+
+
+  if ( (!mesh->xp) || (!mesh->xpoint) ) nn = ng = 0;
 
   /* write normals */
   if ( nn ) {
@@ -1298,6 +1311,8 @@ int MMGS_loadSol(MMG5_pMesh mesh,MMG5_pSol met,const char* filename) {
       MMG5_readDoubleSol3D(met,inm,bin,iswp,k);
     }
   }
+
+  mesh->info.inputMet = 1;
 
   fclose(inm);
 

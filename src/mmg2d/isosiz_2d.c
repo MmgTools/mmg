@@ -34,6 +34,89 @@
 #include "mmg2d.h"
 
 /**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param pt tetra to process.
+ * \param i index of the edge of the tetra \a pt that we process.
+ *
+ * \return 1 if success, 0 if fail.
+ *
+ * Compute the euclidean length of the edge \a i of the tria \a pt, add this
+ * length to the metric of the edge extremities and increment the count of times
+ * we have processed this extremities.
+ *
+ */
+int MMG2D_sum_reqEdgeLengthsAtPoint(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,char i) {
+  int         ip0,ip1;
+
+  ip0 = pt->v[MMG5_iprv2[i]];
+  ip1 = pt->v[MMG5_inxt2[i]];
+
+  if ( !MMG5_sum_reqEdgeLengthsAtPoint(mesh,met,ip0,ip1) )
+    return 0;
+
+  return 1;
+}
+
+
+/**
+ * \param mesh pointer toward the mesh
+ * \param met pointer toward the metric
+ *
+ * \return 0 if fail, 1 otherwise
+ *
+ * Compute the metric at points on trequired adges as the mean of the lengths of
+ * the required eges to which belongs the point. The processeed points are
+ * marked with flag 3.
+ *
+ */
+int MMG2D_set_metricAtPointsOnReqEdges ( MMG5_pMesh mesh,MMG5_pSol met ) {
+  MMG5_pTria pt;
+  int        k,i,iadj;
+
+  /* Reset the tria flag */
+  for ( k=1; k<=mesh->nt; k++ ) {
+    mesh->tria[k].flag = 0;
+  }
+
+  /* Reset the input metric at required edges extremities */
+  if ( !MMG5_reset_metricAtReqEdges_surf (mesh, met ) ) {
+    return 0;
+  }
+
+  /* Process the required edges and add the edge length to the metric of the
+   * edge extremities */
+  for ( k=1; k<=mesh->nt; k++ ) {
+    pt = &mesh->tria[k];
+    if ( !MG_EOK(pt) )  continue;
+
+    /* Mark the tria as proceeded */
+    pt->flag = 1;
+    for ( i=0; i<3; i++ ) {
+      if ( (pt->tag[i] & MG_REQ) || (pt->tag[i] & MG_NOSURF) ||
+           (pt->tag[i] & MG_PARBDY) ) {
+
+        /* Check if the edge has been proceeded by the neighbour triangle */
+        iadj = mesh->adja[3*(k-1)+i+1];
+        if ( iadj && mesh->tria[iadj/3].flag ) continue;
+
+        if ( !MMG2D_sum_reqEdgeLengthsAtPoint(mesh,met,pt,i) ) {
+          return 0;
+        }
+      }
+    }
+  }
+
+  /* Travel the points and compute the metric of the points belonging to
+   * required edges as the mean of the required edges length */
+  if ( !MMG5_compute_meanMetricAtMarkedPoints ( mesh,met ) ) {
+    return 0;
+  }
+
+return 1;
+}
+
+/**
  * \param mesh pointer toward the mesh
  * \param met pointer toward the metric
  *
@@ -52,12 +135,20 @@ int MMG2D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   int              k,l,ip,ip1,ip2;
   unsigned char    i,i1,i2;
 
+  if ( !MMG5_defsiz_startingMessage (mesh,met,__func__) ) {
+    return 0;
+  }
 
-  if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
-    fprintf(stdout,"  ** Defining isotropic map\n");
+  /* Reset the s and flag field : s is used to count the number of req edges to
+   * which a req point belongs and flag is used to differenciate the point not
+   * yet treated, the points with a required metric and the classical points */
+  for (k=1; k<=mesh->np; k++) {
+    p0 = &mesh->point[k];
+    p0->flag = 0;
+    p0->s    = 0;
+  }
 
-  if ( mesh->info.hmax < 0.0 )  mesh->info.hmax = 0.5 * mesh->info.delta;
-
+  /** 1) Size at internal points */
   hmax = mesh->info.hmax;
   hausd = mesh->info.hausd;
   hmin = mesh->info.hmin;
@@ -69,19 +160,50 @@ int MMG2D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
     if ( !MMG2D_Set_solSize(mesh,met,MMG5_Vertex,mesh->np,1) ) {
       return 0;
     }
-
-    /* Initialize metric with a constant size in the case met->np = 0 (meaning that no metric was supplied) */
-    for (k=1; k<=mesh->np; k++)
-      met->m[k] = hmax;
+    /* Set_solSize modify the value of the inputMet field => we need to reset it */
+    mesh->info.inputMet = 0;
+  }
+  else {
+    assert ( mesh->info.inputMet );
   }
 
-  /* Minimum size feature imposed by the boundary edges */
-  for (k=1; k<=mesh->nt; k++) {
+  /** Step 1: Set metric at points belonging to a required edge: compute the
+   * metric as the mean of the length of the required eges passing through the
+   * point */
+  if ( !MMG2D_set_metricAtPointsOnReqEdges ( mesh,met ) ) {
+    return 0;
+  }
+
+  /** Step 2: size at non required internal points */
+  if ( !mesh->info.inputMet ) {
+    /* Initialize metric with a constant size */
+    for ( k=1; k<=mesh->np; k++ ) {
+      if ( mesh->point[k].flag ) {
+        continue;
+      }
+      met->m[k] = hmax;
+      mesh->point[k].flag = 1;
+    }
+  }
+
+  /** Step 3: Minimum size feature imposed by the boundary edges */
+  for ( k=1; k<=mesh->nt; k++ ) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) ) continue;
 
-    for (i=0; i<3; i++) {
+    for ( i=0; i<3; i++ ) {
+
       if ( !MG_EDG(pt->tag[i]) ) continue;
+
+      i1 = MMG5_inxt2[i];
+      i2 = MMG5_iprv2[i];
+      ip1 = pt->v[i1];
+      ip2 = pt->v[i2];
+
+      p1 = &mesh->point[ip1];
+      p2 = &mesh->point[ip2];
+
+      if ( p1->flag>1 && p2->flag>1 ) continue;
 
       lhmax = hmax;
       lhausd = hausd;
@@ -98,13 +220,6 @@ int MMG2D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
         }
       }
 
-      i1 = MMG5_inxt2[i];
-      i2 = MMG5_iprv2[i];
-      ip1 = pt->v[i1];
-      ip2 = pt->v[i2];
-
-      p1 = &mesh->point[ip1];
-      p2 = &mesh->point[ip2];
 
       ux = p2->c[0] - p1->c[0];
       uy = p2->c[1] - p1->c[1];
@@ -112,7 +227,8 @@ int MMG2D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
       if ( ll < MMG5_EPSD ) continue;
       li = 1.0 / sqrt(ll);
 
-      /* Recovery of the two tangent vectors associated to points p1,p2; they need not be oriented in the same fashion */
+      /* Recovery of the two tangent vectors associated to points p1,p2; they
+       * need not be oriented in the same fashion */
       if ( MG_SIN(p1->tag) || (p1->tag & MG_NOM) ) {
         t1[0] = li*ux;
         t1[1] = li*uy;
@@ -169,12 +285,19 @@ int MMG2D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
         lm = 8.0*lhausd / M1;
         lm = MG_MIN(lhmax,sqrt(lm));
       }
-      met->m[ip1] = MG_MAX(hmin,MG_MIN(met->m[ip1],lm));
-      met->m[ip2] = MG_MAX(hmin,MG_MIN(met->m[ip2],lm));
+
+      if ( p1->flag < 3 ) {
+        met->m[ip1] = MG_MAX(hmin,MG_MIN(met->m[ip1],lm));
+      }
+      if ( p2->flag < 3 ) {
+        met->m[ip2] = MG_MAX(hmin,MG_MIN(met->m[ip2],lm));
+      }
     }
   }
 
-  /* Without local parameters information, only the boundary edges impose a minimum size feature */
+  /** If local parameters are provided: size truncation on the entire mesh */
+  /* Without local parameters information, only the boundary edges impose a
+   * minimum size feature */
   if ( mesh->info.npar ) {
     /* Minimum size feature imposed by triangles */
     for (k=1; k<=mesh->nt; k++) {
@@ -187,7 +310,9 @@ int MMG2D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
         if ( ppa->elt == MMG5_Triangle && ppa->ref == pt->ref ) {
           for (i=0; i<3; i++) {
             ip = pt->v[i];
-            met->m[ip] = MG_MAX(hmin,MG_MIN(met->m[ip],ppa->hmax));
+            if ( mesh->point[ip].flag < 3 ) {
+              met->m[ip] = MG_MAX(hmin,MG_MIN(met->m[ip],ppa->hmax));
+            }
           }
           break;
         }
@@ -196,7 +321,7 @@ int MMG2D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
     /* Minimum size feature imposed by vertices */
     for (k=1; k<=mesh->np; k++) {
       p0 = &mesh->point[k];
-      if ( !MG_VOK(p0) ) continue;
+      if ( (!MG_VOK(p0)) || p0->flag == 3 ) continue;
 
       /* Retrieve local parameters associated to vertex k */
       for (l=0; l<mesh->info.npar; l++) {
@@ -208,84 +333,6 @@ int MMG2D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
       }
     }
   }
-
-  return 1;
-}
-
-/**
- * \param mesh pointer toward the mesh
- * \param met pointer toward the metric
- *
- * \return 0 if fail, 1 otherwise
- *
- * Isotropic mesh gradation routine
- *
- */
-int MMG2D_gradsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
-  MMG5_pTria        pt;
-  MMG5_pPoint       p1,p2;
-  double            hgrad,ll,h1,h2,hn;
-  int               k,it,ip1,ip2,maxit,nup,nu;
-  unsigned char     i,i1,i2;
-
-
-  if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
-    fprintf(stdout,"  ** Grading mesh\n");
-
-  for (k=1; k<=mesh->np; k++)
-    mesh->point[k].flag = mesh->base;
-
-  hgrad = log(mesh->info.hgrad);
-  it = nup = 0;
-  maxit = 100;
-
-  do {
-    mesh->base++;
-    nu = 0;
-    for (k=1; k<=mesh->nt; k++) {
-      pt = &mesh->tria[k];
-      if ( !MG_EOK(pt) )  continue;
-
-      for (i=0; i<3; i++) {
-        i1  = MMG5_inxt2[i];
-        i2  = MMG5_iprv2[i];
-        ip1 = pt->v[i1];
-        ip2 = pt->v[i2];
-        p1 = &mesh->point[ip1];
-        p2 = &mesh->point[ip2];
-        if ( p1->flag < mesh->base-1 && p2->flag < mesh->base-1 )  continue;
-
-        ll = (p2->c[0]-p1->c[0])*(p2->c[0]-p1->c[0]) + (p2->c[1]-p1->c[1])*(p2->c[1]-p1->c[1]);
-        ll = sqrt(ll);
-
-        h1 = met->m[ip1];
-        h2 = met->m[ip2];
-        if ( h1 < h2 ) {
-          if ( h1 < MMG5_EPSD )  continue;
-          hn  = h1 + hgrad*ll;
-          if ( h2 > hn ) {
-            met->m[ip2] = hn;
-            p2->flag    = mesh->base;
-            nu++;
-          }
-        }
-        else {
-          if ( h2 < MMG5_EPSD )  continue;
-          hn = h2 + hgrad*ll;
-          if ( h1 > hn ) {
-            met->m[ip1] = hn;
-            p1->flag    = mesh->base;
-            nu++;
-          }
-        }
-      }
-    }
-    nup += nu;
-  }
-  while ( ++it < maxit && nu > 0 );
-
-  if ( abs(mesh->info.imprim) > 4 )
-    fprintf(stdout,"     gradation: %7d updated, %d iter.\n",nup,it);
 
   return 1;
 }

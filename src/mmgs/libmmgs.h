@@ -76,6 +76,7 @@ enum MMGS_Param {
   MMGS_DPARAM_hsiz,              /*!< [val], Constant mesh size */
   MMGS_DPARAM_hausd,             /*!< [val], Control global Hausdorff distance (on all the boundary surfaces of the mesh) */
   MMGS_DPARAM_hgrad,             /*!< [val], Control gradation */
+  MMGS_DPARAM_hgradreq,          /*!< [val], Control gradation on required entites (advanced usage) */
   MMGS_DPARAM_ls,                /*!< [val], Value of level-set */
   MMGS_PARAM_size,               /*!< [n], Number of parameters */
 };
@@ -1472,7 +1473,8 @@ void  MMGS_setfunc(MMG5_pMesh mesh,MMG5_pSol met);
  * \param met pointer toward the sol structure
  * \return 1 if success
  *
- * Compute constant size map according to mesh->info.hsiz
+ * Compute constant size map according to mesh->info.hsiz, mesh->info.hmin and
+ * mesh->info.hmax. Update this 3 value if not compatible.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_CONSTANTSIZE(mesh,met,retval)\n

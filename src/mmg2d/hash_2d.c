@@ -406,11 +406,12 @@ int MMG2D_pack(MMG5_pMesh mesh,MMG5_pSol sol) {
         pt->tag[i] &= ~MG_NOSURF;
       }
 
-      if ( !iel ) ++mesh->na;
-      else if ( iel < k ) {
-        pt1 = &mesh->tria[iel];
-        if ( pt->ref != pt1->ref ) ++mesh->na;
-        else if ( MG_SIN(pt->tag[i]) )  ++mesh->na;
+      pt1 = &mesh->tria[iel];
+      if ( (!iel) || (pt->ref > pt1->ref) ) {
+        ++mesh->na;
+      }
+      else if ( (pt->ref==pt1->ref) && MG_SIN(pt->tag[i]) ) {
+        ++mesh->na;
       }
     }
   }
@@ -450,8 +451,8 @@ int MMG2D_pack(MMG5_pMesh mesh,MMG5_pSol sol) {
           i2 = MMG5_iprv2[i];
           iel = adja[i] / 3;
           pt1 = &mesh->tria[iel];
-          if ( !iel ||
-               ( iel < k && ((pt->ref != pt1->ref) || MG_SIN(pt->tag[i])) ) ) {
+          if ( !iel || (pt->ref > pt1->ref) ||
+               ((pt->ref==pt1->ref) && MG_SIN(pt->tag[i])) ) {
             ++ned;
             ped = &mesh->edge[ned];
             ped->a = pt->v[i1];
@@ -585,16 +586,3 @@ int MMG2D_pack(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   return 1;
 }
-
-/*
- opt[0] = option
- opt[1] = ddebug
- opt[2] = noswap
- opt[3] = noinsert
- opt[4] = nomove
- opt[5] = imprim
- opt[6] = nr
-
- optdbl[0] = hgrad
- optdbl[1] =ar
- */

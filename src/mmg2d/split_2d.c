@@ -122,7 +122,7 @@ int MMG2D_chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
     /* Delete point and abort splitting if one of the created triangles
        has very bad quality.
        MMG5_EPSOK is not sufficient :
-       we created very bad element and was not able to delete them */
+       we were created very bad element and were not able to delete them */
     if ( (calnew < calseuil)  ) {
       MMG2D_delPt(mesh,ip);
       return 0;

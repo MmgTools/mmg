@@ -70,6 +70,8 @@ int MMG3D_tetraQual(MMG5_pMesh mesh, MMG5_pSol met,char metRidTyp) {
     }
   }
 
+  /* Here the quality is not normalized by alpha, thus we need to
+   * normalized it */
   return  MMG5_minQualCheck(iel,minqual,MMG3D_ALPHAD);
 }
 
@@ -343,13 +345,14 @@ int MMG3D_prilen(MMG5_pMesh mesh, MMG5_pSol met, char metRidTyp) {
  * \param good number of good elements (to fill).
  * \param med number of elements with a quality greather than 0.5 (to fill).
  * \param his pointer toward the mesh histogram (to fill).
+ * \param imprim verbosity level
  *
  * Compute the needed quality information in order to print the quality histogram
  * in optimLES mode.
  *
  */
 void MMG3D_computeLESqua(MMG5_pMesh mesh,MMG5_pSol met,int *ne,double *max,double *avg,
-                         double *min,int *iel,int *good,int *med,int his[5]) {
+                         double *min,int *iel,int *good,int *med,int his[5],int imprim) {
   MMG5_pTetra    pt;
   double         rap;
   int            k,ok,nex;
@@ -363,7 +366,7 @@ void MMG3D_computeLESqua(MMG5_pMesh mesh,MMG5_pSol met,int *ne,double *max,doubl
     pt->qual = MMG5_orcal(mesh,met,k);
   }
 
-  if ( mesh->info.imprim <= 0 )
+  if ( imprim <= 0 )
     return;
 
   (*min)  = (*avg) = 0.0;
@@ -411,27 +414,6 @@ void MMG3D_computeLESqua(MMG5_pMesh mesh,MMG5_pSol met,int *ne,double *max,doubl
   (*ne) = mesh->ne-nex;
 
   return;
-}
-
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \return 0 if the worst element has a nul quality, 1 otherwise.
- *
- * Print histogram of LES mesh qualities for classic storage of metric at ridges.
- *
- */
-static int MMG3D_printquaLES(MMG5_pMesh mesh,MMG5_pSol met) {
-  double         rapmin,rapmax,rapavg;
-  int            med,good,iel,ne,his[5];
-
-  MMG3D_computeLESqua(mesh,met,&ne,&rapmax,&rapavg,&rapmin,&iel,&good,&med,his);
-
-  if ( mesh->info.imprim <= 0 ) return 1;
-
-  return MMG3D_displayQualHisto(ne,rapmax,rapavg,rapmin,
-                                iel,good,med,his,0,mesh->info.optimLES,
-                                mesh->info.imprim);
 }
 
 /**
@@ -511,7 +493,7 @@ int MMG3D_displayQualHisto_internal(int ne,double max,double avg,double min,int 
     }
   }
 
-  return MMG5_minQualCheck(iel,min,MMG3D_ALPHAD);
+  return MMG5_minQualCheck(iel,min,1.);
 }
 
 /**
@@ -525,13 +507,14 @@ int MMG3D_displayQualHisto_internal(int ne,double max,double avg,double min,int 
  * \param good number of good elements (to fill).
  * \param med number of elements with a quality greather than 0.5 (to fill).
  * \param his pointer toward the mesh histogram (to fill).
+ * \param imprim verbosity level
  *
  * Compute the needed quality information in order to print the quality histogram
  * (for a classic storage of the metric at ridges).
  *
  */
 void MMG3D_computeInqua(MMG5_pMesh mesh,MMG5_pSol met,int *ne,double *max,double *avg,
-                        double *min,int *iel,int *good,int *med,int his[5]) {
+                        double *min,int *iel,int *good,int *med,int his[5],int imprim) {
   MMG5_pTetra pt;
   double      rap;
   int         k,ok,ir,nex;
@@ -552,7 +535,7 @@ void MMG3D_computeInqua(MMG5_pMesh mesh,MMG5_pSol met,int *ne,double *max,double
     else // -A option
       pt->qual = MMG5_caltet_iso(mesh,met,pt);
   }
-  if ( mesh->info.imprim <= 0 ) return;
+  if ( imprim <= 0 ) return;
 
   (*min)  = 2.0;
   (*max)  = (*avg) = 0.0;
@@ -603,13 +586,24 @@ void MMG3D_computeInqua(MMG5_pMesh mesh,MMG5_pSol met,int *ne,double *max,double
  */
 int MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
   double      rapmin,rapmax,rapavg;
-  int         med,good,iel,ne,his[5];
+  int         k,med,good,iel,ne,his[5];
 
-  if( mesh->info.optimLES )
-    return MMG3D_printquaLES(mesh,met);
+  ne = iel = good = med = 0;
+  for ( k=0; k<5; ++k ) {
+    his[k] = 0;
+  }
+  rapmax = 0.;
+  rapmin = 2.;
+  rapavg = 2.;
 
-  MMG3D_computeInqua(mesh,met,&ne,&rapmax,&rapavg,&rapmin,&iel,&good,&med,
-                     his);
+  if( mesh->info.optimLES ) {
+    MMG3D_computeLESqua(mesh,met,&ne,&rapmax,&rapavg,&rapmin,&iel,&good,&med,
+                        his,mesh->info.imprim);
+  }
+  else {
+    MMG3D_computeInqua(mesh,met,&ne,&rapmax,&rapavg,&rapmin,&iel,&good,&med,
+                       his,mesh->info.imprim);
+  }
 
   if ( mesh->info.imprim <= 0 )
     return 1;
@@ -632,18 +626,30 @@ int MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
  * \param his pointer toward the mesh histogram (to fill).
  * \param nrid number of tetra with 4 ridge points if we want to warn the user
  *             to fill.
+ * \param imprim verbosity level
  *
  * Compute the needed quality information in order to print the quality histogram
  * (for special storage of the metric at ridges).
  *
  */
 void MMG3D_computeOutqua(MMG5_pMesh mesh,MMG5_pSol met,int *ne,double *max,double *avg,
-                         double *min,int *iel,int *good,int *med,int his[5],int *nrid) {
+                         double *min,int *iel,int *good,int *med,int his[5],
+                         int *nrid,int imprim) {
   MMG5_pTetra pt;
   MMG5_pPoint ppt;
   double      rap;
   int         i,k,ok,ir,nex,n;
   static char mmgWarn0 = 0;
+
+  /*compute tet quality*/
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+    if( !MG_EOK(pt) )   continue;
+    pt->qual = MMG5_orcal(mesh,met,k);
+  }
+
+  if ( imprim <= 0 )
+    return;
 
   (*min)  = 2.0;
   (*max)  = (*avg) = 0.0;
@@ -704,25 +710,28 @@ void MMG3D_computeOutqua(MMG5_pMesh mesh,MMG5_pSol met,int *ne,double *max,doubl
  *
  */
 int MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
-  MMG5_pTetra pt;
   double      rapmin,rapmax,rapavg;
-  int         med,good,iel,ne,his[5],nrid,k;
+  int         k,med,good,iel,ne,his[5],nrid;
 
-  if( mesh->info.optimLES )
-    return MMG3D_printquaLES(mesh,met);
+  nrid = ne = iel = good = med = 0;
+  for ( k=0; k<5; ++k ) {
+    his[k] = 0;
+  }
+  rapmax = 0.;
+  rapmin = 2.;
+  rapavg = 2.;
 
-  /*compute tet quality*/
-  for (k=1; k<=mesh->ne; k++) {
-    pt = &mesh->tetra[k];
-    if( !MG_EOK(pt) )   continue;
-    pt->qual = MMG5_orcal(mesh,met,k);
+  if( mesh->info.optimLES ) {
+    MMG3D_computeLESqua(mesh,met,&ne,&rapmax,&rapavg,&rapmin,&iel,&good,&med,
+                        his,mesh->info.imprim);
+  }
+  else {
+    MMG3D_computeOutqua(mesh,met,&ne,&rapmax,&rapavg,&rapmin,&iel,&good,&med,
+                        his,&nrid,mesh->info.imprim);
   }
 
   if ( mesh->info.imprim <= 0 )
     return 1;
-
-  MMG3D_computeOutqua(mesh,met,&ne,&rapmax,&rapavg,&rapmin,&iel,&good,&med,
-                      his,&nrid);
 
   return MMG3D_displayQualHisto(ne,rapmax,rapavg,rapmin,
                                 iel,good,med,his,nrid,mesh->info.optimLES,

@@ -40,11 +40,13 @@ void MMGS_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( met->size < 6 ) {
     MMG5_calelt      = MMG5_caltri_iso;
     MMG5_lenSurfEdg  = MMG5_lenSurfEdg_iso;
-    MMG5_defsiz      = MMGS_defsiz_iso;
-    gradsiz           = gradsiz_iso;
-    intmet            = intmet_iso;
-    movintpt          = movintpt_iso;
-    movridpt          = movridpt_iso;
+    MMG5_compute_meanMetricAtMarkedPoints = MMG5_compute_meanMetricAtMarkedPoints_iso;
+    MMGS_defsiz      = MMGS_defsiz_iso;
+    MMGS_gradsiz     = MMG5_gradsiz_iso;
+    MMGS_gradsizreq  = MMG5_gradsizreq_iso;
+    intmet           = intmet_iso;
+    movintpt         = movintpt_iso;
+    movridpt         = movridpt_iso;
   }
   else {
     if ( !met->m ) {
@@ -55,8 +57,10 @@ void MMGS_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
       MMG5_calelt     = MMG5_caltri_ani;
       MMG5_lenSurfEdg = MMG5_lenSurfEdg_ani;
     }
-    MMG5_defsiz  = MMGS_defsiz_ani;
-    gradsiz       = gradsiz_ani;
+    MMG5_compute_meanMetricAtMarkedPoints = MMG5_compute_meanMetricAtMarkedPoints_ani;
+    MMGS_defsiz      = MMGS_defsiz_ani;
+    MMGS_gradsiz     = MMGS_gradsiz_ani;
+    MMGS_gradsizreq  = MMG5_gradsizreq_ani;
     intmet        = intmet_ani;
     movintpt      = movintpt_ani;
     movridpt      = movridpt_ani;
@@ -141,6 +145,11 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
         }
         else if ( !strcmp(argv[i],"-hausd") && ++i <= argc ) {
           if ( !MMGS_Set_dparameter(mesh,met,MMGS_DPARAM_hausd,
+                                    atof(argv[i])) )
+            return 0;
+        }
+        else if ( !strcmp(argv[i],"-hgradreq") && ++i <= argc ) {
+          if ( !MMGS_Set_dparameter(mesh,met,MMGS_DPARAM_hgradreq,
                                     atof(argv[i])) )
             return 0;
         }
@@ -466,9 +475,8 @@ int MMGS_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMGS
 }
 
 int MMGS_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met) {
-  MMG5_pPoint ppt;
   double      hsiz;
-  int         k,iadr,type;
+  int         type;
 
   /* Memory alloc */
   if ( met->size==1 ) type=1;
@@ -484,25 +492,9 @@ int MMGS_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( !MMG5_Compute_constantSize(mesh,met,&hsiz) )
     return 0;
 
-  if ( met->size == 1 ) {
-    for (k=1; k<=mesh->np; k++) {
-      ppt = &mesh->point[k];
-      if ( !MG_VOK(ppt) ) continue;
-      met->m[k] = hsiz;
-    }
-  }
-  else {
-    hsiz    = 1./(hsiz*hsiz);
+  mesh->info.hsiz = hsiz;
 
-    for (k=1; k<=mesh->np; k++) {
-      ppt = &mesh->point[k];
-      if ( !MG_VOK(ppt) ) continue;
+  MMG5_Set_constantSize(mesh,met,hsiz);
 
-      iadr           = met->size*k;
-      met->m[iadr]   = hsiz;
-      met->m[iadr+3] = hsiz;
-      met->m[iadr+5] = hsiz;
-    }
-  }
   return 1;
 }

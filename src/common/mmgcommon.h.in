@@ -82,7 +82,7 @@ extern "C" {
 #define MMG5_UNSET -1
 
 /* reference of the boundary that moves in lagrangian mode */
-#define MMG5_DISPREF 0
+#define MMG5_DISPREF 10
 
 /* million */
 #define MMG5_MILLION 1048576
@@ -117,9 +117,20 @@ extern "C" {
 #define MMG5_NONSET_HMAX -1 /**< hmax value for unspecified hmax size */
 #define MMG5_NONSET_HSIZ -1 /**< hsiz value for unspecified hsiz map */
 #define MMG5_HAUSD     0.01 /**< default value for hausdorff param */
-#define MMG5_HGRAD     0.26236426446 /**< default value for gradation */
+#define MMG5_HGRAD     0.26236426446 /**< default value for gradation (1.3) */
+#define MMG5_HGRADREQ  0.83290912294 /**< default value for required gradation (2.3) */
+#define MMG5_NOHGRAD     -1 /**< disable gradation */
 #define MMG5_LAG         -1 /**< default value for lagrangian option */
+#define MMG5_NR          -1 /**< no ridge detection */
+#define MMG5_LS         0.0 /**< default level-set to discretize */
+#define MMG5_PROCTREE    32 /**< default size of the PROctree */
+#define MMG5_OFF          0 /**< 0 */
+#define MMG5_ON           1 /**< 1 */
 #define MMG5_GAP        0.2 /**< gap value for reallocation */
+#define MMG5_HMINCOE  0.001 /**< coefficient to compute the default hmin value */
+#define MMG5_HMAXCOE      2 /**< coefficient to compute the default hmax value */
+#define MMG5_HMINMAXGAP   5 /**< imposed gap between hmin and hmax if hmax<hmin */
+#define MMG5_FEM          1 /**< defaut value for FEM mode */
 
 /* Macros */
 #define MG_MAX(a,b) (((a) > (b)) ? (a) : (b))
@@ -135,6 +146,8 @@ extern "C" {
 #define  MG_CRN       (1 << 5)        /**< 32  corner         */
 #define  MG_NOSURF    (1 << 6)        /**< 64  freezed boundary */
 #define  MG_OPNBDY    (1 << 7)        /**< 128 open boundary */
+#define  MG_OLDPARBDY (1 << 11)       /**< 2048 old parallel boundary */
+#define  MG_PARBDYBDY (1 << 12)       /**< 4096 parallel boundary over a boundary */
 #define  MG_PARBDY    (1 << 13)       /**< 8192 parallel boundary */
 #define  MG_NUL       (1 << 14)       /**< 16384 vertex removed */
 
@@ -148,6 +161,8 @@ extern "C" {
 
 #define MG_EDG(tag) ((tag & MG_GEO) || (tag & MG_REF)) /**< Edge or Ridge */
 #define MG_SIN(tag) ((tag & MG_CRN) || (tag & MG_REQ)) /**< Corner or Required */
+#define MG_RID(tag) ((!( MG_SIN(tag)||(tag & MG_NOM))) &&  tag & MG_GEO ) /**< Non-singular ridge point (so ridge metric in aniso mode) */
+
 
 #define MG_SET(flag,bit) ((flag) |= (1 << (bit)))  /**< bit number bit is set to 1 */
 #define MG_CLR(flag,bit) ((flag) &= ~(1 << (bit))) /**< bit number bit is set to 0 */
@@ -498,10 +513,11 @@ typedef struct MMG5_dNode_s {
  int           MMG5_Add_inode( MMG5_pMesh mesh, MMG5_iNode **liLi, int val );
  int           MMG5_Add_dnode( MMG5_pMesh mesh, MMG5_dNode **liLi, int, double);
  extern void   MMG5_bezierEdge(MMG5_pMesh, int, int, double*, double*, char,double*);
- int           MMG5_buildridmet(MMG5_pMesh,MMG5_pSol,int,double,double,double,double*);
+ int           MMG5_buildridmet(MMG5_pMesh,MMG5_pSol,int,double,double,double,double*,double[3][3]);
  extern int    MMG5_buildridmetfic(MMG5_pMesh,double*,double*,double,double,double,double*);
- int           MMG5_buildridmetnor(MMG5_pMesh, MMG5_pSol, int,double*, double*);
+ int           MMG5_buildridmetnor(MMG5_pMesh, MMG5_pSol, int,double*, double*,double[3][3]);
  int           MMG5_paratmet(double c0[3],double n0[3],double m[6],double c1[3],double n1[3],double mt[6]);
+ void          MMG5_mn(double m[6], double n[6], double mn[9] );
  extern int    MMG5_rmtr(double r[3][3],double m[6], double mr[6]);
  int           MMG5_boundingBox(MMG5_pMesh mesh);
  int           MMG5_boulec(MMG5_pMesh, int*, int, int i,double *tt);
@@ -510,7 +526,7 @@ typedef struct MMG5_dNode_s {
  double        MMG5_caltri33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt);
  extern double MMG5_caltri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
  extern double MMG5_caltri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
- void          MMG5_defUninitSize(MMG5_pMesh mesh,MMG5_pSol met, char ismet);
+ void          MMG5_defUninitSize(MMG5_pMesh mesh,MMG5_pSol met);
  void          MMG5_displayLengthHisto(MMG5_pMesh,int,double*,int,int,double,
                                         int,int,double,int,double*,int*,char);
  void          MMG5_displayLengthHisto_internal(MMG5_pMesh,int,int,int,double,
@@ -523,7 +539,8 @@ typedef struct MMG5_dNode_s {
                                        double *, double *, double *, double *);
  void          MMG5_Free_ilinkedList( MMG5_pMesh mesh, MMG5_iNode *liLi );
  void          MMG5_Free_dlinkedList( MMG5_pMesh mesh, MMG5_dNode *liLi );
- int           MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int i);
+ int           MMG5_grad2metSurf(MMG5_pMesh,MMG5_pSol,MMG5_pTria,int,int);
+ int           MMG5_grad2metSurfreq(MMG5_pMesh,MMG5_pSol,MMG5_pTria,int,int);
  int           MMG5_hashEdge(MMG5_pMesh mesh,MMG5_Hash *hash,int a,int b,int k);
  int           MMG5_hashUpdate(MMG5_Hash *hash,int a,int b,int k);
  int           MMG5_hashGet(MMG5_Hash *hash,int a,int b);
@@ -546,6 +563,7 @@ typedef struct MMG5_dNode_s {
  extern int    MMG5_rotmatrix(double n[3],double r[3][3]);
  int           MMG5_invmat(double *m,double *mi);
  int           MMG5_invmatg(double m[9],double mi[9]);
+ int           MMG5_invmat33(double m[3][3],double mi[3][3]);
  double        MMG5_ridSizeInNormalDir(MMG5_pMesh,int,double*,MMG5_pBezier,double,double);
  double        MMG5_ridSizeInTangentDir(MMG5_pMesh, MMG5_pPoint,int,int*,double,double);
  int           MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met);
@@ -590,10 +608,30 @@ void            MMG5_printMetStats(MMG5_pMesh mesh,MMG5_pSol met);
 void            MMG5_printSolStats(MMG5_pMesh mesh,MMG5_pSol *sol);
 void            MMG5_chooseOutputFormat(MMG5_pMesh mesh, int *msh);
 
+int MMG5_defsiz_startingMessage (MMG5_pMesh,MMG5_pSol,const char * funcname );
+void MMG5_gradation_info ( MMG5_pMesh );
+int MMG5_sum_reqEdgeLengthsAtPoint ( MMG5_pMesh,MMG5_pSol,int ip0,int ip1 );
+int MMG5_compute_meanMetricAtMarkedPoints_iso ( MMG5_pMesh mesh,MMG5_pSol met);
+int MMG5_compute_meanMetricAtMarkedPoints_ani ( MMG5_pMesh mesh,MMG5_pSol met);
+
+int  MMG5_reset_metricAtReqEdges_surf ( MMG5_pMesh,MMG5_pSol );
+void MMG5_mark_pointsOnReqEdge_fromTria ( MMG5_pMesh mesh );
+int  MMG5_gradsiz_iso ( MMG5_pMesh mesh,MMG5_pSol met );
+int  MMG5_gradsizreq_iso(MMG5_pMesh ,MMG5_pSol );
+int  MMG5_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met,int *it);
+int  MMG5_gradsizreq_ani(MMG5_pMesh mesh,MMG5_pSol met);
+int  MMG5_simred(MMG5_pMesh,double*,double*,double dm[2],double dn[2],double vp[2][2]);
+void MMG5_gradEigenvreq(double *dm,double *dn,double,int8_t,int8_t *);
+int  MMG5_updatemetreq_ani(double *n,double dn[2],double vp[2][2]);
+
 /* function pointers */
 int    (*MMG5_chkmsh)(MMG5_pMesh,int,int);
 int    (*MMG5_bezierCP)(MMG5_pMesh ,MMG5_Tria *,MMG5_pBezier ,char );
 double (*MMG5_lenSurfEdg)(MMG5_pMesh mesh,MMG5_pSol sol ,int ,int, char );
+int    (*MMG5_grad2met_ani)(MMG5_pMesh,MMG5_pSol,MMG5_pTria,int,int);
+int    (*MMG5_grad2metreq_ani)(MMG5_pMesh,MMG5_pSol,MMG5_pTria,int,int);
+int    (*MMG5_compute_meanMetricAtMarkedPoints)( MMG5_pMesh,MMG5_pSol);
+
 
 /* useful functions to debug */
 int  (*MMG5_indElt)(MMG5_pMesh mesh,int kel);

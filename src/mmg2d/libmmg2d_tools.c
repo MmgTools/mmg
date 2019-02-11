@@ -35,18 +35,22 @@
 void MMG2D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( met->size == 3 ) {
     MMG2D_lencurv  = MMG2D_lencurv_ani;
-    MMG2D_defsiz   = MMG2D_defsiz_ani;
-    MMG2D_gradsiz  = lissmet_ani;
-    MMG2D_caltri   = MMG2D_caltri_ani;
-    MMG2D_intmet   = MMG2D_intmet_ani;
+    MMG5_compute_meanMetricAtMarkedPoints = MMG5_compute_meanMetricAtMarkedPoints_ani;
+    MMG2D_defsiz     = MMG2D_defsiz_ani;
+    MMG2D_gradsiz    = lissmet_ani;
+    MMG2D_gradsizreq = MMG5_gradsizreq_ani;
+    MMG2D_caltri     = MMG2D_caltri_ani;
+    MMG2D_intmet     = MMG2D_intmet_ani;
     //    MMG2D_optlen    = optlen_ani;
   }
   else {
     MMG2D_lencurv   = MMG2D_lencurv_iso;
-    MMG2D_defsiz    = MMG2D_defsiz_iso;
-    MMG2D_gradsiz   = MMG2D_gradsiz_iso;
-    MMG2D_caltri    = MMG2D_caltri_iso;
-    MMG2D_intmet    = MMG2D_intmet_iso;
+    MMG5_compute_meanMetricAtMarkedPoints = MMG5_compute_meanMetricAtMarkedPoints_iso;
+    MMG2D_defsiz     = MMG2D_defsiz_iso;
+    MMG2D_gradsiz    = MMG5_gradsiz_iso;
+    MMG2D_gradsizreq = MMG5_gradsizreq_iso;
+    MMG2D_caltri     = MMG2D_caltri_iso;
+    MMG2D_intmet     = MMG2D_intmet_iso;
   }
   return;
 }
@@ -297,21 +301,61 @@ int MMG2D_Get_triFromEdge(MMG5_pMesh mesh, int ked, int *ktri, int *ied)
 
   val = mesh->edge[ked].base;
 
-  if ( !val ) return 0;
+  if ( !val ) {
+    fprintf(stderr,"  ## Error: %s: the main fonction of the Mmg library must be"
+            " called before this function.\n",__func__);
+    return 0;
+  }
 
   *ktri = val/3;
 
   *ied = val%3;
 
   return 1;
+}
 
+int MMG2D_Get_trisFromEdge(MMG5_pMesh mesh, int ked, int ktri[2], int ied[2])
+{
+  int ier,itri;
+#ifndef NDEBUG
+  int ia0,ib0,ia1,ib1;
+#endif
 
+  ktri[0]  =  ktri[1] = 0;
+  ied[0]   =  ied[1]  = 0;
+
+  ier = MMG2D_Get_triFromEdge(mesh, ked, ktri, ied);
+
+  if ( !ier ) return 0;
+
+  if ( !mesh->adja ) {
+    if (!MMG2D_hashTria(mesh) )
+      return 0;
+  }
+
+  itri = mesh->adja[3*(*ktri-1) + *ied + 1 ];
+
+  if ( itri ) {
+    ktri[1]  = itri/3;
+    ied[1]   = itri%3;
+
+#ifndef NDEBUG
+    ia0 = mesh->tria[ktri[0]].v[MMG5_inxt2[ied[0]]];
+    ib0 = mesh->tria[ktri[0]].v[MMG5_iprv2[ied[0]]];
+
+    ia1 = mesh->tria[ktri[1]].v[MMG5_inxt2[ied[1]]];
+    ib1 = mesh->tria[ktri[1]].v[MMG5_iprv2[ied[1]]];
+
+    assert ( ( (ia0 == ia1) && (ib0 == ib1) ) ||
+             ( (ia0 == ib1) && (ib0 == ia1) ) );
+#endif
+  }
+
+  return 1;
 }
 
 int MMG2D_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met) {
-  MMG5_pPoint ppt;
   double      hsiz;
-  int         k,iadr;
 
   /* Memory alloc */
   if ( met->size!=1 && met->size!=3 ) {
@@ -326,25 +370,10 @@ int MMG2D_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( !MMG5_Compute_constantSize(mesh,met,&hsiz) )
     return 0;
 
-  if ( met->size == 1 ) {
-    for (k=1; k<=mesh->np; k++) {
-      ppt = &mesh->point[k];
-      if ( !MG_VOK(ppt) ) continue;
-      met->m[k] = hsiz;
-    }
-  }
-  else {
-    hsiz    = 1./(hsiz*hsiz);
+  mesh->info.hsiz = hsiz;
 
-    for (k=1; k<=mesh->np; k++) {
-      ppt = &mesh->point[k];
-      if ( !MG_VOK(ppt) ) continue;
+  MMG5_Set_constantSize(mesh,met,hsiz);
 
-      iadr           = met->size*k;
-      met->m[iadr]   = hsiz;
-      met->m[iadr+2] = hsiz;
-    }
-  }
   return 1;
 }
 
