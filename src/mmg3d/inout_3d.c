@@ -536,10 +536,11 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
           ina[k]=mesh->nt;
         }
         else {
+          /* To uncomment when the normals reading will be enabled in iso mode */
           /* Mark the MG_ISO point to be able to delete the normal at points */
-          mesh->point[v[0]].xp = -1;
-          mesh->point[v[1]].xp = -1;
-          mesh->point[v[2]].xp = -1;
+          /* mesh->point[v[0]].xp = -1; */
+          /* mesh->point[v[1]].xp = -1; */
+          /* mesh->point[v[2]].xp = -1; */
         }
       }
       if( !mesh->nt )
