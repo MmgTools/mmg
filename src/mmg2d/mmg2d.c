@@ -39,6 +39,7 @@ static void MMG5_endcod() {
 static int MMG2D_usage(char *name) {
   MMG5_mmgUsage(name);
 
+  fprintf(stdout,"-rmc         Enable the removal of small componants in ls mode\n");
 #ifdef USE_ELAS
   fprintf(stdout,"-lag [n] Lagrangian mesh displacement according to mode [0/1/2]\n");
   fprintf(stdout,"             0: displacement\n");
