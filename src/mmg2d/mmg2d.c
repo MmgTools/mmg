@@ -508,8 +508,11 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
         }
         break;
       case 'r':
-          if ( !strcmp(argv[i],"-rmc") )
-            mesh->info.rmc = 1;
+          if ( !strcmp(argv[i],"-rmc") ) {
+            if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_rmc,1) ) {
+              return 0;
+            }
+          }
       case 's':
         if ( !strcmp(argv[i],"-sol") ) {
           if ( ++i < argc && isascii(argv[i][0]) && argv[i][0]!='-' ) {

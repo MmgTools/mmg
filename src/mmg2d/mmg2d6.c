@@ -49,10 +49,10 @@ inline double MMG2D_voltri(MMG5_pMesh mesh,int ip0,int ip1,int ip2) {
   p0 = &mesh->point[ip0];
   p1 = &mesh->point[ip1];
   p2 = &mesh->point[ip2];
-  
+
   vol = (p1->c[0]-p0->c[0])*(p2->c[1]-p0->c[1]) - (p1->c[1]-p0->c[1])*(p2->c[0]-p0->c[0]);
   vol = 0.5*fabs(vol);
-  
+
   return vol;
 }
 
@@ -62,7 +62,7 @@ inline double MMG2D_voltri(MMG5_pMesh mesh,int ip0,int ip1,int ip2) {
  * \param k index of the triangle
  * \return volfrac
  *
- * Calculate the area of the positive (if pm == 1) or negative (if pm == -1) subdomain 
+ * Calculate the area of the positive (if pm == 1) or negative (if pm == -1) subdomain
  * inside triangle k defined by the ls function in sol
  *
  **/
@@ -72,26 +72,26 @@ double MMG2D_vfrac(MMG5_pMesh mesh,MMG5_pSol sol,int k,int pm) {
   double        v[3],vfp,vfm,lam,area,eps,o1[2],o2[2];
   int           ip[3],nplus,nminus,nzero;
   char          i,i0,i1,i2,imin1,imin2,iplus1,iplus2,iz;
-  
+
   eps = MMG5_EPS*MMG5_EPS;
   pt = &mesh->tria[k];
-  
+
   ip[0] = pt->v[0];
   ip[1] = pt->v[1];
   ip[2] = pt->v[2];
-  
+
   ppt[0] = &mesh->point[ip[0]];
   ppt[1] = &mesh->point[ip[1]];
   ppt[2] = &mesh->point[ip[2]];
-  
+
   v[0] = sol->m[ip[0]];
   v[1] = sol->m[ip[1]];
   v[2] = sol->m[ip[2]];
-  
+
   /* Identify number of zero, positive and negative vertices, and corresponding indices */
   nplus = nminus = nzero = 0;
   imin1 = imin2 = iplus1 = iplus2 = iz = -1;
-  
+
   for (i=0; i<3; i++) {
     if ( fabs(v[i]) < eps ) {
       nzero++;
@@ -108,10 +108,10 @@ double MMG2D_vfrac(MMG5_pMesh mesh,MMG5_pSol sol,int k,int pm) {
       else imin2 = i;
     }
   }
-  
+
   /* Degenerate case */
   if ( nzero == 3 ) return 0.0;
-  
+
   /* Whole triangle is positive */
   if ( nminus == 0 ) {
     vfp = (ppt[1]->c[0]-ppt[0]->c[0])*(ppt[2]->c[1]-ppt[0]->c[1]) - (ppt[1]->c[1]-ppt[0]->c[1])*(ppt[2]->c[0]-ppt[0]->c[0]);
@@ -119,7 +119,7 @@ double MMG2D_vfrac(MMG5_pMesh mesh,MMG5_pSol sol,int k,int pm) {
     if ( pm == 1 ) return vfp;
     else           return 0.0;
   }
-  
+
   /* Whole triangle is negative */
   if ( nplus == 0 ) {
     vfm = (ppt[1]->c[0]-ppt[0]->c[0])*(ppt[2]->c[1]-ppt[0]->c[1]) - (ppt[1]->c[1]-ppt[0]->c[1])*(ppt[2]->c[0]-ppt[0]->c[0]);
@@ -127,24 +127,24 @@ double MMG2D_vfrac(MMG5_pMesh mesh,MMG5_pSol sol,int k,int pm) {
     if ( pm == -1 ) return vfm;
     else            return 0.0;
   }
-  
+
   /* Exactly one vertex is negative */
   if ( nminus == 1 ) {
     i0 = imin1;
     i1 = MMG5_inxt2[i0];
     i2 = MMG5_iprv2[i0];
-    
+
     lam = v[i0] / (v[i0]-v[i1]);
     o1[0] = ppt[i0]->c[0] + lam*(ppt[i1]->c[0]-ppt[i0]->c[0]);
     o1[1] = ppt[i0]->c[1] + lam*(ppt[i1]->c[1]-ppt[i0]->c[1]);
-    
+
     lam = v[i0] / (v[i0]-v[i2]);
     o2[0] = ppt[i0]->c[0] + lam*(ppt[i2]->c[0]-ppt[i0]->c[0]);
     o2[1] = ppt[i0]->c[1] + lam*(ppt[i2]->c[1]-ppt[i0]->c[1]);
-    
+
     vfm = (o1[0]-ppt[i0]->c[0])*(o2[1]-ppt[i0]->c[1]) - (o1[1]-ppt[i0]->c[1])*(o2[0]-ppt[i0]->c[0]);
     vfm = 0.5*fabs(vfm);
-    
+
     if ( pm == -1 ) return vfm;
     else {
       area = (ppt[1]->c[0]-ppt[0]->c[0])*(ppt[2]->c[1]-ppt[0]->c[1]) - (ppt[1]->c[1]-ppt[0]->c[1])*(ppt[2]->c[0]-ppt[0]->c[0]);
@@ -153,24 +153,24 @@ double MMG2D_vfrac(MMG5_pMesh mesh,MMG5_pSol sol,int k,int pm) {
       return vfp;
     }
   }
-  
+
   /* Exactly one vertex is positive */
   if ( nplus == 1 ) {
     i0 = iplus1;
     i1 = MMG5_inxt2[i0];
     i2 = MMG5_iprv2[i0];
-    
+
     lam = v[i0] / (v[i0]-v[i1]);
     o1[0] = ppt[i0]->c[0] + lam*(ppt[i1]->c[0]-ppt[i0]->c[0]);
     o1[1] = ppt[i0]->c[1] + lam*(ppt[i1]->c[1]-ppt[i0]->c[1]);
-    
+
     lam = v[i0] / (v[i0]-v[i2]);
     o2[0] = ppt[i0]->c[0] + lam*(ppt[i2]->c[0]-ppt[i0]->c[0]);
     o2[1] = ppt[i0]->c[1] + lam*(ppt[i2]->c[1]-ppt[i0]->c[1]);
-    
+
     vfp = (o1[0]-ppt[i0]->c[0])*(o2[1]-ppt[i0]->c[1]) - (o1[1]-ppt[i0]->c[1])*(o2[0]-ppt[i0]->c[0]);
     vfp = 0.5*fabs(vfp);
-    
+
     if ( pm == 1 ) return vfp;
     else {
       area = (ppt[1]->c[0]-ppt[0]->c[0])*(ppt[2]->c[1]-ppt[0]->c[1]) - (ppt[1]->c[1]-ppt[0]->c[1])*(ppt[2]->c[0]-ppt[0]->c[0]);
@@ -179,7 +179,7 @@ double MMG2D_vfrac(MMG5_pMesh mesh,MMG5_pSol sol,int k,int pm) {
       return vfm;
     }
   }
-  
+
   /* Should not pass here */
   return(0.0);
 }
@@ -556,7 +556,7 @@ int MMG2D_chkmanimesh(MMG5_pMesh mesh) {
  *
  * \return 1 if success, 0 otherwise
  *
- * Removal of small parasitic components (bubbles of material, etc) with volume less than 
+ * Removal of small parasitic components (bubbles of material, etc) with volume less than
  * VOLFRAC * volume of the mesh.
  *
  */
@@ -565,13 +565,13 @@ int MMG2D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
   double         volc,voltot,v0,v1,v2;
   int            k,kk,l,ll,ncp,ncm,ip0,ip1,ip2,base,cur,ipile,*pile,*adja;
   char           i,i1,i2;
-  
+
   ncp = 0;
   ncm = 0;
-  
+
   /* Erase triangle flags */
   for (k=1; k<=mesh->nt; k++) mesh->tria[k].flag = 0;
-  
+
   /* Calculate volume of the total mesh */
   voltot = 0.0;
   for (k=1; k<=mesh->nt; k++) {
@@ -582,34 +582,34 @@ int MMG2D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
     ip2 = pt->v[2];
     voltot += MMG2D_voltri(mesh,ip0,ip1,ip2);
   }
-  
+
   /* Memory allocation for pile */
   MMG5_ADD_MEM(mesh,(mesh->nt+1)*sizeof(int),"temporary table",
                printf("  Exit program.\n");
                return 0);
   MMG5_SAFE_CALLOC(pile,mesh->nt+1,int,return 0);
-  
+
   /* Investigate only positive connected components */
   base = ++mesh->base;
-  
+
   for (k=1; k<=mesh->nt; k++) {
     ipile = 0;
     volc = 0.0;
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) ) continue;
     if ( pt->flag == base ) continue;
-    
+
     /* Checks signs of the LS function at the 3 vertices of pt */
     ip0 = pt->v[0];
     ip1 = pt->v[1];
     ip2 = pt->v[2];
-    
+
     v0 = sol->m[ip0];
     v1 = sol->m[ip1];
     v2 = sol->m[ip2];
-    
+
     if ( v0 <= 0.0 && v1 <= 0.0 && v2 <= 0.0 ) continue;
-    
+
     /* Add triangle to pile if one vertex is > 0 */
     pt->flag = base;
     pile[ipile] = k;
@@ -618,18 +618,18 @@ int MMG2D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
       fprintf(stderr,"\n  ## Problem in length of pile; function rmc. Exit program.\n");
       return 0;
     }
-    
+
     /* Pile up all the positive connected component attached to the first triangle */
     cur = 0;
     do {
       kk = pile[cur];
       pt1 = &mesh->tria[kk];
-      
+
       /* Add local volume fraction of the positive subdomain to volc */
       ip0 = pt1->v[0];
       ip1 = pt1->v[1];
       ip2 = pt1->v[2];
-      
+
       volc += MMG2D_vfrac(mesh,sol,kk,1);
 
       /* Add adjacent triangles to kk via positive vertices to the pile, if need be */
@@ -637,10 +637,10 @@ int MMG2D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
       for (i=0; i<3; i++) {
         ip0 = pt1->v[i];
         if ( sol->m[ip0] <= 0.0 ) continue;
-        
+
         i1 = MMG5_inxt2[i];
         i2 = MMG5_inxt2[i1];
-        
+
         /* First neighbor of positive vertex i */
         ll = adja[i1] / 3;
         if ( ll ) {
@@ -655,7 +655,7 @@ int MMG2D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
             }
           }
         }
-        
+
         /* Second neighbor of positive vertex i */
         ll = adja[i2] / 3;
         if ( ll ) {
@@ -673,7 +673,7 @@ int MMG2D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
       }
     }
     while ( ++cur < ipile );
-    
+
     /* Remove connected component if its volume is too small */
     if ( volc < MMG2D_VOLFRAC*voltot ) {
       for (l=0; l<ipile; l++) {
@@ -685,9 +685,9 @@ int MMG2D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
       }
       ncp++;
     }
-    
+
   }
-  
+
   /* Investigate only negative connected components */
   base = ++mesh->base;
 
@@ -697,18 +697,18 @@ int MMG2D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) ) continue;
     if ( pt->flag == base ) continue;
-    
+
     /* Checks signs of the LS function at the 3 vertices of pt */
     ip0 = pt->v[0];
     ip1 = pt->v[1];
     ip2 = pt->v[2];
-    
+
     v0 = sol->m[ip0];
     v1 = sol->m[ip1];
     v2 = sol->m[ip2];
-    
+
     if ( v0 >= 0.0 && v1 >= 0.0 && v2 >= 0.0 ) continue;
-    
+
     /* Pile up all the negative connected component attached to the first triangle */
     pt->flag = base;
     pile[ipile] = k;
@@ -717,28 +717,28 @@ int MMG2D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
       fprintf(stderr,"\n  ## Problem in length of pile; function rmc. Exit program.\n");
       return 0;
     }
-    
+
     cur = 0;
     do {
       kk = pile[cur];
       pt1 = &mesh->tria[kk];
-      
+
       /* Add local volume fraction of the negative subdomain to volc */
       ip0 = pt1->v[0];
       ip1 = pt1->v[1];
       ip2 = pt1->v[2];
-        
+
       volc += MMG2D_vfrac(mesh,sol,kk,-1);
-        
+
       /* Add adjacent triangles to kk via negative vertices to the pile, if need be */
       adja = &mesh->adja[3*(kk-1)+1];
       for (i=0; i<3; i++) {
         ip0 = pt1->v[i];
         if ( sol->m[ip0] >= 0.0 ) continue;
-          
+
         i1= MMG5_inxt2[i];
         i2 = MMG5_inxt2[i1];
-          
+
         /* First neighbor of negative vertex i */
         ll = adja[i1] / 3;
         if ( ll ) {
@@ -753,7 +753,7 @@ int MMG2D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
             }
           }
         }
-          
+
         /* Second neighbor of negative vertex i */
         ll = adja[i2] / 3;
         if ( ll ) {
@@ -768,11 +768,11 @@ int MMG2D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
             }
           }
         }
-      
+
       }
     }
     while ( ++cur < ipile );
-      
+
     /* Remove connected component if its volume is too small */
     if ( volc < MMG2D_VOLFRAC*voltot ) {
       for (l=0; l<ipile; l++) {
@@ -785,15 +785,17 @@ int MMG2D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
       ncm++;
     }
   }
-  
+
   /* Erase triangle flags */
   for (k=1; k<=mesh->nt; k++) mesh->tria[k].flag = 0;
-  
+
   /* Release memory */
   MMG5_DEL_MEM(mesh,pile);
-  
-  printf("Removed %d positive parasitic bubbles and %d negative parasitic bubbles\n",ncp,ncm);
-  
+
+  if ( mesh->info.imprim > 0 || mesh->info.ddebug ) {
+    printf("\n  *** Removed %d positive parasitic bubbles and %d negative parasitic bubbles\n",ncp,ncm);
+  }
+
   return(1);
 }
 
@@ -1032,7 +1034,7 @@ int MMG2D_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol) {
     fprintf(stderr,"\n  ## Wrong input implicit function. Exit program.\n");
     return 0;
   }
-  
+
   /* Removal of small parasitic components */
   if ( mesh->info.rmc && !MMG2D_rmc(mesh,sol) ) {
     fprintf(stderr,"\n  ## Error in removing small parasitic components. Exit program.\n");
