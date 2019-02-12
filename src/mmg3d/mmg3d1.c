@@ -1450,10 +1450,28 @@ int MMG3D_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,int k,
   }
   else if ( tag & MG_REF ) {
     if ( !MMG5_BezierRef(mesh,ip1,ip2,0.5,o,no1,to) ) { return 0; }
+    else if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
+      MMG5_tet2tri(mesh,k,i,&ptt);
+      MMG5_nortri(mesh,&ptt,no1);
+      if ( !MG_GET(pxt->ori,i) ) {
+        no1[0] *= -1.0;
+        no1[1] *= -1.0;
+        no1[2] *= -1.0;
+      }
+    }
   }
   else {
     if ( !MMG5_norface(mesh,k,i,v) ) { return 0; }
     if ( !MMG5_BezierReg(mesh,ip1,ip2,0.5,v,o,no1) ) { return 0; }
+    else if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
+      MMG5_tet2tri(mesh,k,i,&ptt);
+      MMG5_nortri(mesh,&ptt,no1);
+      if ( !MG_GET(pxt->ori,i) ) {
+        no1[0] *= -1.0;
+        no1[1] *= -1.0;
+        no1[2] *= -1.0;
+      }
+    }
   }
 
   ip = MMG3D_newPt(mesh,o,tag);
