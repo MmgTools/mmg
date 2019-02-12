@@ -529,7 +529,7 @@ typedef struct MMG5_dNode_s {
  void          MMG5_defUninitSize(MMG5_pMesh mesh,MMG5_pSol met);
  void          MMG5_displayLengthHisto(MMG5_pMesh,int,double*,int,int,double,
                                         int,int,double,int,double*,int*,char);
- void          MMG5_displayLengthHisto_internal(MMG5_pMesh,int,int,int,double,
+ void          MMG5_displayLengthHisto_internal( int,int,int,double,
                                                  int,int,double, int,double*,
                                                  int*,char,int);
  int           MMG5_minQualCheck ( int iel, double minqual, double alpha );
