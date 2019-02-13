@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
+**  Copyright (c) Bx INP/CNRS/Inria/UBordeaux/UPMC, 2004-
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -64,7 +64,7 @@ FORTRAN_NAME(MMG5_SET_INPUTMESHNAME, mmg5_set_inputmeshname,
   strncpy(tmp,meshin,*strlen);
   tmp[*strlen] = '\0';
   *retval = MMG5_Set_inputMeshName(*mesh,tmp);
-  _MMG5_SAFE_FREE(tmp);
+  MMG5_SAFE_FREE(tmp);
 
   return;
 }
@@ -82,7 +82,7 @@ FORTRAN_NAME(MMG5_SET_INPUTSOLNAME, mmg5_set_inputsolname,
   strncpy(tmp,solin,*strlen);
   tmp[*strlen] = '\0';
   *retval = MMG5_Set_inputSolName(*mesh,*sol,tmp);
-  _MMG5_SAFE_FREE(tmp);
+  MMG5_SAFE_FREE(tmp);
 
   return;
 }
@@ -100,7 +100,7 @@ FORTRAN_NAME(MMG5_SET_OUTPUTMESHNAME,mmg5_set_outputmeshname,
   strncpy(tmp,meshout,*strlen);
   tmp[*strlen] = '\0';
   *retval = MMG5_Set_outputMeshName(*mesh, tmp);
-  _MMG5_SAFE_FREE(tmp);
+  MMG5_SAFE_FREE(tmp);
 
   return;
 }
@@ -117,7 +117,7 @@ FORTRAN_NAME(MMG5_SET_OUTPUTSOLNAME,mmg5_set_outputsolname,
   strncpy(tmp,solout,*strlen);
   tmp[*strlen] = '\0';
   *retval = MMG5_Set_outputSolName(*mesh,*sol,tmp);
-  _MMG5_SAFE_FREE(tmp);
+  MMG5_SAFE_FREE(tmp);
 
   return;
 }

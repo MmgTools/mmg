@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
+**  Copyright (c) Bx INP/CNRS/Inria/UBordeaux/UPMC, 2004-
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -94,6 +94,18 @@ FORTRAN_NAME(MMG2D_GET_TRIFROMEDGE,mmg2d_get_trifromedge,
   *retval = MMG2D_Get_triFromEdge(*mesh,*ked,ktri,ied);
   return;
 }
+
+/**
+ * See \ref MMG2D_Get_trisFromEdge function in \ref mmg2d/libmmg2d.h file.
+ */
+FORTRAN_NAME(MMG2D_GET_TRISFROMEDGE,mmg2d_get_trisfromedge,
+             (MMG5_pMesh *mesh,int *ked, int ktri[2], int ied[2],int *retval),
+             (mesh,ked,ktri,ied,retval)) {
+
+  *retval = MMG2D_Get_trisFromEdge(*mesh,*ked,ktri,ied);
+  return;
+}
+
 /**
  * See \ref MMG2D_Reset_verticestags function in \ref mmg2d/libmmg2d.h file.
  */

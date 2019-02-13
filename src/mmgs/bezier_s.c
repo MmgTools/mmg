@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
+**  Copyright (c) Bx INP/CNRS/Inria/UBordeaux/UPMC, 2004-
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -42,16 +42,16 @@ extern char ddb;
  * \param pt pointer toward the triangle structure.
  * \param pb pointer toward the computed Bezier structure.
  * \param ori triangle orientation (unused but here for compatibility
- * with the _MMG5_bezierCP interface).
+ * with the MMG5_bezierCP interface).
  * \return 1.
  *
  * Compute Bezier control points on triangle \a pt (cf. Vlachos)
  *
- * \todo merge with the _MMG5_mmg3dBeizerCP function and remove the pointer
+ * \todo merge with the MMG5_mmg3dBeizerCP function and remove the pointer
  * toward this functions.
  *
  */
-int _MMG5_mmgsBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,_MMG5_pBezier pb,
+int MMG5_mmgsBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,MMG5_pBezier pb,
                        char ori) {
   MMG5_pPoint    p[3];
   double         *n1,*n2,nt[3],ps,ps2,dd,ux,uy,uz,ll;
@@ -65,7 +65,7 @@ int _MMG5_mmgsBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,_MMG5_pBezier pb,
   p[1] = &mesh->point[ib];
   p[2] = &mesh->point[ic];
 
-  memset(pb,0,sizeof(_MMG5_Bezier));
+  memset(pb,0,sizeof(MMG5_Bezier));
 
   /* first 3 CP = vertices, normals */
   for (i=0; i<3; i++) {
@@ -73,10 +73,10 @@ int _MMG5_mmgsBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,_MMG5_pBezier pb,
     pb->p[i] = p[i];
 
     if ( MS_SIN(p[i]->tag) ) {
-      _MMG5_nortri(mesh,pt,pb->n[i]);
+      MMG5_nortri(mesh,pt,pb->n[i]);
     }
     else if ( MG_EDG(p[i]->tag) ) {
-      _MMG5_nortri(mesh,pt,nt);
+      MMG5_nortri(mesh,pt,nt);
 
       n1 = &mesh->xpoint[p[i]->xp].n1[0];
       n2 = &mesh->xpoint[p[i]->xp].n2[0];
@@ -95,8 +95,8 @@ int _MMG5_mmgsBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,_MMG5_pBezier pb,
 
   /* compute control points along edges */
   for (i=0; i<3; i++) {
-    i1 = _MMG5_inxt2[i];
-    i2 = _MMG5_iprv2[i];
+    i1 = MMG5_inxt2[i];
+    i2 = MMG5_iprv2[i];
 
     ux = p[i2]->c[0] - p[i1]->c[0];
     uy = p[i2]->c[1] - p[i1]->c[1];
@@ -142,7 +142,7 @@ int _MMG5_mmgsBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,_MMG5_pBezier pb,
       pb->t[i+3][1] = pb->t[i1][1] + pb->t[i2][1] - ps*uy;
       pb->t[i+3][2] = pb->t[i1][2] + pb->t[i2][2] - ps*uz;
       dd = pb->t[i+3][0]*pb->t[i+3][0] + pb->t[i+3][1]*pb->t[i+3][1] + pb->t[i+3][2]*pb->t[i+3][2];
-      if ( dd > _MMG5_EPSD2 ) {
+      if ( dd > MMG5_EPSD2 ) {
         dd = 1.0 / sqrt(dd);
         pb->t[i+3][0] *= dd;
         pb->t[i+3][1] *= dd;
@@ -169,7 +169,7 @@ int _MMG5_mmgsBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,_MMG5_pBezier pb,
     pb->n[i+3][1] = n1[1] + n2[1] - ps*uy;
     pb->n[i+3][2] = n1[2] + n2[2] - ps*uz;
     dd = pb->n[i+3][0]*pb->n[i+3][0] + pb->n[i+3][1]*pb->n[i+3][1] + pb->n[i+3][2]*pb->n[i+3][2];
-    if ( dd > _MMG5_EPSD2 ) {
+    if ( dd > MMG5_EPSD2 ) {
       dd = 1.0 / sqrt(dd);
       pb->n[i+3][0] *= dd;
       pb->n[i+3][1] *= dd;
@@ -190,7 +190,7 @@ int _MMG5_mmgsBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,_MMG5_pBezier pb,
     pb->b[9][2] += 0.25 * (pb->b[2*i+3][2] + pb->b[2*i+4][2]);
   }
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -204,7 +204,7 @@ int _MMG5_mmgsBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,_MMG5_pBezier pb,
  * Compute \a o, \a no and \a to at \f$(u,v)\f$ in Bezier patch.
  *
  */
-int _MMGS_bezierInt(_MMG5_pBezier pb,double uv[2],double o[3],double no[3],double to[3]) {
+int MMGS_bezierInt(MMG5_pBezier pb,double uv[2],double o[3],double no[3],double to[3]) {
   double    dd,u,v,w,ps,ux,uy,uz;
   char      i;
 
@@ -229,12 +229,12 @@ int _MMGS_bezierInt(_MMG5_pBezier pb,double uv[2],double o[3],double no[3],doubl
   }
 
   /* tangent */
-  if ( w < _MMG5_EPSD2 ) {
+  if ( w < MMG5_EPSD2 ) {
     ux = pb->b[2][0] - pb->b[1][0];
     uy = pb->b[2][1] - pb->b[1][1];
     uz = pb->b[2][2] - pb->b[1][2];
     dd = ux*ux + uy*uy + uz*uz;
-    if ( dd > _MMG5_EPSD2 ) {
+    if ( dd > MMG5_EPSD2 ) {
       dd = 1.0 / sqrt(dd);
       ux *= dd;
       uy *= dd;
@@ -266,12 +266,12 @@ int _MMGS_bezierInt(_MMG5_pBezier pb,double uv[2],double o[3],double no[3],doubl
     }
   }
 
-  if ( u < _MMG5_EPSD2 ) {
+  if ( u < MMG5_EPSD2 ) {
     ux = pb->b[2][0] - pb->b[0][0];
     uy = pb->b[2][1] - pb->b[0][1];
     uz = pb->b[2][2] - pb->b[0][2];
     dd = ux*ux + uy*uy + uz*uz;
-    if ( dd > _MMG5_EPSD2 ) {
+    if ( dd > MMG5_EPSD2 ) {
       dd = 1.0 / sqrt(dd);
       ux *= dd;
       uy *= dd;
@@ -303,12 +303,12 @@ int _MMGS_bezierInt(_MMG5_pBezier pb,double uv[2],double o[3],double no[3],doubl
     }
   }
 
-  if ( v < _MMG5_EPSD2 ) {
+  if ( v < MMG5_EPSD2 ) {
     ux = pb->b[1][0] - pb->b[0][0];
     uy = pb->b[1][1] - pb->b[0][1];
     uz = pb->b[1][2] - pb->b[0][2];
     dd = ux*ux + uy*uy + uz*uz;
-    if ( dd > _MMG5_EPSD2 ) {
+    if ( dd > MMG5_EPSD2 ) {
       dd = 1.0 / sqrt(dd);
       ux *= dd;
       uy *= dd;
@@ -341,7 +341,7 @@ int _MMGS_bezierInt(_MMG5_pBezier pb,double uv[2],double o[3],double no[3],doubl
   }
 
   dd = no[0]*no[0] + no[1]*no[1] + no[2]*no[2];
-  if ( dd > _MMG5_EPSD2 ) {
+  if ( dd > MMG5_EPSD2 ) {
     dd = 1.0 / sqrt(dd);
     no[0] *= dd;
     no[1] *= dd;
@@ -349,12 +349,12 @@ int _MMGS_bezierInt(_MMG5_pBezier pb,double uv[2],double o[3],double no[3],doubl
   }
 
   dd = to[0]*to[0] + to[1]*to[1] + to[2]*to[2];
-  if ( dd > _MMG5_EPSD2 ) {
+  if ( dd > MMG5_EPSD2 ) {
     dd = 1.0 / sqrt(dd);
     to[0] *= dd;
     to[1] *= dd;
     to[2] *= dd;
   }
 
-  return(1);
+  return 1;
 }

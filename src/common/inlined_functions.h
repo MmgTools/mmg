@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
+**  Copyright (c) Bx INP/CNRS/Inria/UBordeaux/UPMC, 2004-
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -51,7 +51,7 @@
  *
  */
 static inline
-double _MMG5_lenEdg(MMG5_pMesh mesh,int np0,int np1,
+double MMG5_lenEdg(MMG5_pMesh mesh,int np0,int np1,
                     double *m0,double *m1,char isedg) {
   MMG5_pPoint   p0,p1;
   double        gammaprim0[3],gammaprim1[3],t[3],*n1,*n2,ux,uy,uz,ps1,ps2,l0,l1;
@@ -166,7 +166,7 @@ double _MMG5_lenEdg(MMG5_pMesh mesh,int np0,int np1,
               "(%e)\n",__func__,l0);
       mmgWarn = 1;
     }
-    return(0.);
+    return 0.;
   }
   if(l1 < 0.) {
     if ( !mmgWarn ) {
@@ -174,11 +174,11 @@ double _MMG5_lenEdg(MMG5_pMesh mesh,int np0,int np1,
               "(%e)\n",__func__,l1);
       mmgWarn = 1;
     }
-    return(0.);
+    return 0.;
   }
   l0 = 0.5*(sqrt(l0) + sqrt(l1));
 
-  return(l0);
+  return l0;
 }
 
 /**
@@ -195,9 +195,9 @@ double _MMG5_lenEdg(MMG5_pMesh mesh,int np0,int np1,
  *
  */
 static inline
-double _MMG5_lenSurfEdg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,char isedg) {
+double MMG5_lenSurfEdg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,char isedg) {
   MMG5_pPoint   p0,p1;
-  double        *m0,*m1,met0[6],met1[6],ux,uy,uz;
+  double        *m0,*m1,met0[6],met1[6],ux,uy,uz,rbasis[3][3];
   static char   mmgWarn = 0;
 
   p0 = &mesh->point[np0];
@@ -212,7 +212,8 @@ double _MMG5_lenSurfEdg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,char i
     m0 = &met->m[6*np0];
   }
   else if ( MG_GEO & p0->tag ) {
-    if ( !_MMG5_buildridmet(mesh,met,np0,ux,uy,uz,met0) )  {
+    /* Note that rbasis isn't used here */
+    if ( !MMG5_buildridmet(mesh,met,np0,ux,uy,uz,met0,rbasis) )  {
       if ( !mmgWarn ) {
         fprintf(stderr,"  ## Warning: %s: a- unable to compute at least 1 ridge"
                 " metric.\n",__func__);
@@ -230,7 +231,8 @@ double _MMG5_lenSurfEdg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,char i
     m1 = &met->m[6*np1];
   }
   else if ( MG_GEO & p1->tag ) {
-    if ( !_MMG5_buildridmet(mesh,met,np1,ux,uy,uz,met1) )  {
+    /* Note that rbasis isn't used here */
+    if ( !MMG5_buildridmet(mesh,met,np1,ux,uy,uz,met1,rbasis) )  {
       if ( !mmgWarn ) {
         fprintf(stderr,"  ## Warning: %s: b- unable to compute at least 1 ridge"
                 " metric.\n",__func__);
@@ -244,7 +246,7 @@ double _MMG5_lenSurfEdg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,char i
     m1 = &met->m[6*np1];
   }
 
-  return(_MMG5_lenEdg(mesh,np0,np1,m0,m1,isedg));
+  return MMG5_lenEdg(mesh,np0,np1,m0,m1,isedg);
 }
 
 
@@ -261,7 +263,7 @@ double _MMG5_lenSurfEdg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,char i
  *
  */
 static inline
-double _MMG5_lenSurfEdg33_ani(MMG5_pMesh mesh,MMG5_pSol met,
+double MMG5_lenSurfEdg33_ani(MMG5_pMesh mesh,MMG5_pSol met,
                               int np0,int np1,char isedg) {
   double        *m0,*m1;
 
@@ -269,7 +271,7 @@ double _MMG5_lenSurfEdg33_ani(MMG5_pMesh mesh,MMG5_pSol met,
   m0 = &met->m[6*np0];
   m1 = &met->m[6*np1];
 
-  return(_MMG5_lenEdg(mesh,np0,np1,m0,m1,isedg));
+  return MMG5_lenEdg(mesh,np0,np1,m0,m1,isedg);
 }
 
 /**
@@ -286,7 +288,7 @@ double _MMG5_lenSurfEdg33_ani(MMG5_pMesh mesh,MMG5_pSol met,
  *
  */
 static
-inline double _MMG5_lenSurfEdg_iso(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2, char isedg) {
+inline double MMG5_lenSurfEdg_iso(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2, char isedg) {
   MMG5_pPoint   p1,p2;
   double   h1,h2,l,r,len;
 
@@ -298,9 +300,9 @@ inline double _MMG5_lenSurfEdg_iso(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2
     + (p2->c[2]-p1->c[2])*(p2->c[2]-p1->c[2]);
   l = sqrt(l);
   r = h2 / h1 - 1.0;
-  len = fabs(r) < _MMG5_EPS ? l / h1 : l / (h2-h1) * log(r+1.0);
+  len = fabs(r) < MMG5_EPS ? l / h1 : l / (h2-h1) * log(r+1.0);
 
-  return(len);
+  return len;
 }
 
 #endif

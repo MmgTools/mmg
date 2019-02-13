@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the triangular
 **  mesh modification.
-**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
+**  Copyright (c) Bx INP/CNRS/Inria/UBordeaux/UPMC, 2004-
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -45,7 +45,7 @@ int MMGS_Init_mesh(const int starter,...) {
 
   va_start(argptr, starter);
 
-  ier = _MMGS_Init_mesh_var(argptr);
+  ier = MMGS_Init_mesh_var(argptr);
 
   va_end(argptr);
 
@@ -61,27 +61,27 @@ void MMGS_Init_fileNames(MMG5_pMesh mesh,MMG5_pSol sol
 
 int MMGS_Set_inputMeshName(MMG5_pMesh mesh, const char* meshin) {
 
-  return(MMG5_Set_inputMeshName(mesh,meshin));
+  return MMG5_Set_inputMeshName(mesh,meshin);
 }
 
 int MMGS_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solin) {
-  return(MMG5_Set_inputSolName(mesh,sol,solin));
+  return MMG5_Set_inputSolName(mesh,sol,solin);
 }
 
 int MMGS_Set_outputMeshName(MMG5_pMesh mesh, const char* meshout) {
 
-  return(MMG5_Set_outputMeshName(mesh,meshout));
+  return MMG5_Set_outputMeshName(mesh,meshout);
 }
 
 int MMGS_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solout) {
-  return(MMG5_Set_outputSolName(mesh,sol,solout));
+  return MMG5_Set_outputSolName(mesh,sol,solout);
 }
 void MMGS_Init_parameters(MMG5_pMesh mesh) {
 
   /* Init common parameters for mmgs and mmgs. */
-  _MMG5_Init_parameters(mesh);
-
-  mesh->info.renum    = 0;   /* [0/1], Turn off/on the renumbering using SCOTCH; */
+  MMG5_Init_parameters(mesh);
+  /* [0/1], Turn off/on the renumbering using SCOTCH; */
+  mesh->info.renum    = 0;
 
 }
 
@@ -93,7 +93,7 @@ int MMGS_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int 
   if ( typEntity != MMG5_Vertex ) {
     fprintf(stderr,"\n  ## Error: %s: mmgs need a solution imposed on vertices.\n",
             __func__);
-    return(0);
+    return 0;
   }
 
   sol->type = typSol;
@@ -110,27 +110,62 @@ int MMGS_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int 
   else {
     fprintf(stderr,"\n  ## Error: %s: type of solution not yet implemented.\n",
       __func__);
-    return(0);
+    return 0;
   }
 
   sol->dim = 3;
+
   if ( np ) {
+    mesh->info.inputMet = 1;
+
     sol->np  = np;
     sol->npi = np;
     if ( sol->m )
-      _MMG5_DEL_MEM(mesh,sol->m,(sol->size*(sol->npmax+1))*sizeof(double));
+      MMG5_DEL_MEM(mesh,sol->m);
 
     sol->npmax = mesh->npmax;
-    _MMG5_ADD_MEM(mesh,(sol->size*(sol->npmax+1))*sizeof(double),"initial solution",
+    MMG5_ADD_MEM(mesh,(sol->size*(sol->npmax+1))*sizeof(double),"initial solution",
                   fprintf(stderr,"  Exit program.\n");
                   return 0);
-    _MMG5_SAFE_CALLOC(sol->m,(sol->size*(sol->npmax+1)),double,0);
+    MMG5_SAFE_CALLOC(sol->m,(sol->size*(sol->npmax+1)),double,return 0);
   }
-  return(1);
+  return 1;
+}
+
+int MMGS_Set_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol *sol,int nsols,
+                                 int nentities, int *typSol) {
+  MMG5_pSol psl;
+  int       j;
+
+  if ( ( (mesh->info.imprim > 5) || mesh->info.ddebug ) && mesh->nsols ) {
+    if ( *sol ) {
+      fprintf(stderr,"\n  ## Warning: %s: old solutions array deletion.\n",
+              __func__);
+      MMG5_DEL_MEM(mesh,*sol);
+    }
+  }
+
+  /** Sol tab allocation */
+  mesh->nsols = nsols;
+
+  MMG5_ADD_MEM(mesh,nsols*sizeof(MMG5_Sol),"solutions array",
+                return 0);
+  MMG5_SAFE_CALLOC(*sol,nsols,MMG5_Sol,return 0);
+
+  for ( j=0; j<nsols; ++j ) {
+    psl = *sol + j;
+    psl->ver = 2;
+
+    if ( !MMGS_Set_solSize(mesh,psl,MMG5_Vertex,mesh->np,typSol[j]) ) {
+      fprintf(stderr,"\n  ## Error: %s: unable to set the size of the"
+              " solution num %d.\n",__func__,j);
+      return 0;
+    }
+  }
+  return 1;
 }
 
 int MMGS_Set_meshSize(MMG5_pMesh mesh, int np, int nt, int na) {
-  int k;
 
   if ( ( (mesh->info.imprim > 5) || mesh->info.ddebug ) &&
        ( mesh->point || mesh->tria || mesh->edge) )
@@ -146,65 +181,33 @@ int MMGS_Set_meshSize(MMG5_pMesh mesh, int np, int nt, int na) {
   if ( !np || !nt ) {
     fprintf(stderr,"  ** MISSING DATA:\n");
     fprintf(stderr,"     Your mesh must contains at least points and triangles.\n");
-    return(0);
+    return 0;
   }
 
   if ( mesh->point )
-    _MMG5_DEL_MEM(mesh,mesh->point,(mesh->npmax+1)*sizeof(MMG5_Point));
+    MMG5_DEL_MEM(mesh,mesh->point);
   if ( mesh->tria )
-    _MMG5_DEL_MEM(mesh,mesh->tria,(mesh->nt+1)*sizeof(MMG5_Tria));
+    MMG5_DEL_MEM(mesh,mesh->tria);
   if ( mesh->edge )
-    _MMG5_DEL_MEM(mesh,mesh->edge,(mesh->na+1)*sizeof(MMG5_Edge));
+    MMG5_DEL_MEM(mesh,mesh->edge);
 
   /*tester si -m defini : renvoie 0 si pas ok et met la taille min dans info.mem */
   if( mesh->info.mem > 0) {
     if ( mesh->npmax < mesh->np || mesh->ntmax < mesh->nt) {
-      if ( !_MMGS_memOption(mesh) )  return 0;
+      if ( !MMGS_memOption(mesh) )  return 0;
     } else if(mesh->info.mem < 39) {
       fprintf(stderr,"\n  ## Error: %s: not enough memory  %d\n",
               __func__,mesh->info.mem);
-      return(0);
+      return 0;
     }
   } else {
-    mesh->memMax = _MMG5_memSize();
-    mesh->npmax  = MG_MAX(1.5*mesh->np,_MMGS_NPMAX);
-    mesh->ntmax  = MG_MAX(1.5*mesh->nt,_MMGS_NTMAX);
-
-  }
-  _MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(MMG5_Point),"initial vertices",
-                fprintf(stderr,"  Exit program.\n");
-                return 0);
-  _MMG5_SAFE_CALLOC(mesh->point,mesh->npmax+1,MMG5_Point,0);
-
-  _MMG5_ADD_MEM(mesh,(mesh->ntmax+1)*sizeof(MMG5_Tria),"initial triangles",return(0));
-  _MMG5_SAFE_CALLOC(mesh->tria,mesh->ntmax+1,MMG5_Tria,0);
-
-
-  mesh->namax = mesh->na;
-  if ( mesh->na ) {
-    _MMG5_ADD_MEM(mesh,(mesh->na+1)*sizeof(MMG5_Edge),"initial edges",return(0));
-    _MMG5_SAFE_CALLOC(mesh->edge,(mesh->na+1),MMG5_Edge,0);
+    if ( !MMGS_memOption(mesh) )  return 0;
   }
 
-  /* keep track of empty links */
-  mesh->npnil = mesh->np + 1;
-  mesh->nenil = mesh->nt + 1;
-  for (k=mesh->npnil; k<mesh->npmax-1; k++) {
-    mesh->point[k].tmp  = k+1;
-  }
-  for (k=mesh->nenil; k<mesh->ntmax-1; k++) {
-    mesh->tria[k].v[2] = k+1;
-  }
+  /* Mesh allocation and linkage */
+  if ( !MMGS_setMeshSize_alloc( mesh ) ) return 0;
 
-  /* stats */
-  if ( abs(mesh->info.imprim) > 6 ) {
-    fprintf(stdout,"     NUMBER OF VERTICES     %8d\n",mesh->np);
-    if ( mesh->na ) {
-      fprintf(stdout,"     NUMBER OF EDGES        %8d\n",mesh->na);
-    }
-    fprintf(stdout,"     NUMBER OF TRIANGLES    %8d\n",mesh->nt);
-  }
-  return(1);
+  return 1;
 }
 
 int MMGS_Get_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int* typEntity, int* np, int* typSol) {
@@ -230,7 +233,36 @@ int MMGS_Get_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int* typEntity, int* np, in
 
   sol->npi = 0;
 
-  return(1);
+  return 1;
+}
+
+int MMGS_Get_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol *sol, int *nsols,
+                                 int* np, int* typSol) {
+  MMG5_pSol psl;
+  int       j;
+
+  if ( !mesh ) {
+    fprintf(stderr,"\n  ## Error: %s: your mesh structure must be allocated"
+            " and filled\n",__func__);
+    return 0;
+  }
+
+  if ( nsols != NULL )
+    *nsols = mesh->nsols;
+
+  for ( j=0; j<mesh->nsols; ++j ) {
+    psl = *sol + j;
+
+    if ( typSol != NULL ) {
+      typSol[j]    = psl->type;
+    }
+
+    assert( (!psl->np) || (psl->np == mesh->np));
+  }
+  if ( np != NULL )
+    *np = mesh->np;
+
+  return 1;
 }
 
 int MMGS_Get_meshSize(MMG5_pMesh mesh, int* np, int* nt, int* na) {
@@ -242,7 +274,7 @@ int MMGS_Get_meshSize(MMG5_pMesh mesh, int* np, int* nt, int* na) {
   if ( na != NULL )
     *na = mesh->na;
 
-  return(1);
+  return 1;
 }
 
 int MMGS_Set_vertex(MMG5_pMesh mesh, double c0, double c1, double c2, int ref, int pos) {
@@ -251,14 +283,14 @@ int MMGS_Set_vertex(MMG5_pMesh mesh, double c0, double c1, double c2, int ref, i
     fprintf(stderr,"\n  ## Error: %s: you must set the number of points with the",
             __func__);
     fprintf(stderr," MMGS_Set_meshSize function before setting vertices in mesh.\n");
-    return(0);
+    return 0;
   }
 
   if ( pos > mesh->npmax ) {
     fprintf(stderr,"\n  ## Error: %s: unable to allocate a new point.\n",__func__);
     fprintf(stderr,"    max number of points: %d\n",mesh->npmax);
-    _MMG5_INCREASE_MEM_MESSAGE();
-    return(0);
+    MMG5_INCREASE_MEM_MESSAGE();
+    return 0;
   }
 
   if ( pos > mesh->np ) {
@@ -267,7 +299,7 @@ int MMGS_Set_vertex(MMG5_pMesh mesh, double c0, double c1, double c2, int ref, i
     fprintf(stderr," Overflow of the given number of vertices: %d\n",mesh->np);
     fprintf(stderr,"\n  ## Check the mesh size, its compactness or the position");
     fprintf(stderr," of the vertex.\n");
-    return(0);
+    return 0;
   }
 
   mesh->point[pos].c[0] = c0;
@@ -278,7 +310,7 @@ int MMGS_Set_vertex(MMG5_pMesh mesh, double c0, double c1, double c2, int ref, i
   mesh->point[pos].flag = 0;
   mesh->point[pos].tmp = 0;
 
-  return(1);
+  return 1;
 }
 
 int  MMGS_Set_vertices(MMG5_pMesh mesh, double *vertices,int *refs) {
@@ -329,7 +361,7 @@ int MMGS_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2, int* re
     fprintf(stderr,"\n  ## Error: %s: unable to get point.\n",__func__);
     fprintf(stderr,"     The number of call of MMGS_Get_vertex function");
     fprintf(stderr," can not exceed the number of points: %d\n ",mesh->np);
-    return(0);
+    return 0;
   }
 
   *c0  = mesh->point[mesh->npi].c[0];
@@ -352,7 +384,7 @@ int MMGS_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2, int* re
       *isRequired = 0;
   }
 
-  return(1);
+  return 1;
 }
 
 int  MMGS_Get_vertices(MMG5_pMesh mesh, double* vertices, int* refs,
@@ -397,15 +429,15 @@ int MMGS_Set_triangle(MMG5_pMesh mesh, int v0, int v1, int v2, int ref,int pos) 
     fprintf(stderr,"\n  ## Error: %s: You must set the number of triangles"
             " with the",__func__);
     fprintf(stderr," MMGS_Set_meshSize function before setting triangles in mesh\n");
-    return(0);
+    return 0;
   }
 
   if ( pos > mesh->ntmax ) {
     fprintf(stderr,"\n  ## Error: %s: unable to allocate a new triangle.\n",
             __func__);
     fprintf(stderr,"    max number of triangle: %d\n",mesh->ntmax);
-    _MMG5_INCREASE_MEM_MESSAGE();
-    return(0);
+    MMG5_INCREASE_MEM_MESSAGE();
+    return 0;
   }
 
   if ( pos > mesh->nt ) {
@@ -414,7 +446,7 @@ int MMGS_Set_triangle(MMG5_pMesh mesh, int v0, int v1, int v2, int ref,int pos) 
     fprintf(stderr," Overflow of the given number of triangles: %d\n",mesh->nt);
     fprintf(stderr,"\n  ## Check the mesh size, its compactness or the position");
     fprintf(stderr," of the triangle.\n");
-    return(0);
+    return 0;
   }
 
   mesh->tria[pos].v[0] = v0;
@@ -426,7 +458,7 @@ int MMGS_Set_triangle(MMG5_pMesh mesh, int v0, int v1, int v2, int ref,int pos) 
   mesh->point[v1].tag &= ~MG_NUL;
   mesh->point[v2].tag &= ~MG_NUL;
 
-  return(1);
+  return 1;
 }
 
 int MMGS_Get_triangle(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* ref
@@ -451,7 +483,7 @@ int MMGS_Get_triangle(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* ref
     fprintf(stderr,"\n  ## Error: %s: unable to get triangle.\n",__func__);
     fprintf(stderr,"    The number of call of MMGS_Get_triangle function");
     fprintf(stderr," can not exceed the number of triangles: %d\n ",mesh->nt);
-    return(0);
+    return 0;
   }
 
   ptt = &mesh->tria[mesh->nti];
@@ -469,7 +501,7 @@ int MMGS_Get_triangle(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* ref
       *isRequired = 0;
   }
 
-  return(1);
+  return 1;
 }
 
 int  MMGS_Set_triangles(MMG5_pMesh mesh, int *tria, int *refs) {
@@ -503,8 +535,8 @@ int  MMGS_Get_triangles(MMG5_pMesh mesh, int *tria, int *refs, int *areRequired)
       j = (i-1)*3;
       ptt = &mesh->tria[i];
       tria[j]   = ptt->v[0];
-      tria[j+2] = ptt->v[1];
-      tria[j+1] = ptt->v[2];
+      tria[j+1] = ptt->v[1];
+      tria[j+2] = ptt->v[2];
 
       if ( refs!=NULL )
         refs[i-1]  = ptt->ref ;
@@ -526,14 +558,14 @@ int MMGS_Set_edge(MMG5_pMesh mesh, int v0, int v1, int ref, int pos) {
     fprintf(stderr,"\n  ## Error: %s: You must set the number of edges with the",
             __func__);
     fprintf(stderr," MMGS_Set_meshSize function before setting edges in mesh\n");
-    return(0);
+    return 0;
   }
   if ( pos > mesh->namax ) {
     fprintf(stderr,"\n  ## Error: %s: unable to allocate a new edge.\n",
             __func__);
     fprintf(stderr,"    max number of edge: %d\n",mesh->namax);
-    _MMG5_INCREASE_MEM_MESSAGE();
-    return(0);
+    MMG5_INCREASE_MEM_MESSAGE();
+    return 0;
   }
   if ( pos > mesh->na ) {
     fprintf(stderr,"\n  ## Error: %s: attempt to set new edge at position %d.",
@@ -541,7 +573,7 @@ int MMGS_Set_edge(MMG5_pMesh mesh, int v0, int v1, int ref, int pos) {
     fprintf(stderr," Overflow of the given number of edges: %d\n",mesh->na);
     fprintf(stderr,"\n  ## Check the mesh size, its compactness or the position");
     fprintf(stderr," of the edge.\n");
-    return(0);
+    return 0;
   }
 
   mesh->edge[pos].a = v0;
@@ -549,7 +581,7 @@ int MMGS_Set_edge(MMG5_pMesh mesh, int v0, int v1, int ref, int pos) {
   mesh->edge[pos].ref  = ref;
   mesh->edge[pos].tag |= MG_REF;
 
-  return(1);
+  return 1;
 }
 
 int MMGS_Get_edge(MMG5_pMesh mesh, int* e0, int* e1, int* ref
@@ -573,7 +605,7 @@ int MMGS_Get_edge(MMG5_pMesh mesh, int* e0, int* e1, int* ref
     fprintf(stderr,"\n  ## Error: %s: unable to get edge.\n",__func__);
     fprintf(stderr,"    The number of call of MMGS_Get_edge function");
     fprintf(stderr," can not exceed the number of edges: %d\n ",mesh->na);
-    return(0);
+    return 0;
   }
 
   *e0  = mesh->edge[mesh->nai].a;
@@ -595,19 +627,66 @@ int MMGS_Get_edge(MMG5_pMesh mesh, int* e0, int* e1, int* ref
       *isRequired = 0;
   }
 
-  return(1);
+  return 1;
+}
+
+int MMGS_Set_edges(MMG5_pMesh mesh, int *edges, int *refs) {
+  int i,j;
+
+  for (i=1;i<=mesh->na;i++)
+  {
+    j = (i-1)*2;
+
+    mesh->edge[i].a    = edges[j];
+    mesh->edge[i].b    = edges[j+1];
+    if ( refs != NULL )
+      mesh->edge[i].ref  = refs[i];
+    mesh->edge[i].tag |= MG_REF;
+  }
+
+  return 1;
+}
+
+int MMGS_Get_edges(MMG5_pMesh mesh, int* edges,int *refs,int* areRidges,int* areRequired) {
+  int i,j;
+
+  for (i=1;i<=mesh->na;i++)
+  {
+    j = (i-1)*2;
+    edges[j]   = mesh->edge[i].a;
+    edges[j+1] = mesh->edge[i].b;
+
+    if ( refs!=NULL )
+      refs[i-1] = mesh->edge[i].ref;
+
+    if ( areRidges != NULL ) {
+      if ( mesh->edge[i].tag & MG_GEO )
+        areRidges[i-1] = 1;
+      else
+        areRidges[i-1] = 0;
+    }
+
+    if ( areRequired != NULL ) {
+      if ( mesh->edge[i].tag & MG_REQ )
+        areRequired[i-1] = 1;
+      else
+        areRequired[i-1] = 0;
+    }
+  }
+
+  return 1;
 }
 
 int MMGS_Set_corner(MMG5_pMesh mesh, int k) {
   assert ( k <= mesh->np );
   mesh->point[k].tag |= MG_CRN;
-  return(1);
+  return 1;
 }
 
 int MMGS_Set_requiredVertex(MMG5_pMesh mesh, int k) {
   assert ( k <= mesh->np );
   mesh->point[k].tag |= MG_REQ;
-  return(1);
+  return 1;
 }
 
 int MMGS_Set_requiredTriangle(MMG5_pMesh mesh, int k) {
@@ -615,19 +694,19 @@ int MMGS_Set_requiredTriangle(MMG5_pMesh mesh, int k) {
   mesh->tria[k].tag[0] |= MG_REQ;
   mesh->tria[k].tag[1] |= MG_REQ;
   mesh->tria[k].tag[2] |= MG_REQ;
-  return(1);
+  return 1;
 }
 
 int MMGS_Set_ridge(MMG5_pMesh mesh, int k) {
   assert ( k <= mesh->na );
   mesh->edge[k].tag |= MG_GEO;
-  return(1);
+  return 1;
 }
 
 int MMGS_Set_requiredEdge(MMG5_pMesh mesh, int k) {
   assert ( k <= mesh->na );
   mesh->edge[k].tag |= MG_REQ;
-  return(1);
+  return 1;
 }
 
 int MMGS_Set_normalAtVertex(MMG5_pMesh mesh, int k, double n0, double n1, double n2) {
@@ -639,7 +718,7 @@ int MMGS_Set_normalAtVertex(MMG5_pMesh mesh, int k, double n0, double n1, double
 
   ++mesh->nc1;
 
-  return(1);
+  return 1;
 }
 
 int MMGS_Get_normalAtVertex(MMG5_pMesh mesh, int k, double *n0, double *n1, double *n2) {
@@ -649,7 +728,7 @@ int MMGS_Get_normalAtVertex(MMG5_pMesh mesh, int k, double *n0, double *n1, doub
   (*n1) = mesh->point[k].n[1];
   (*n2) = mesh->point[k].n[2];
 
-  return(1);
+  return 1;
 }
 
 int MMGS_Set_scalarSol(MMG5_pSol met, double s, int pos) {
@@ -659,19 +738,19 @@ int MMGS_Set_scalarSol(MMG5_pSol met, double s, int pos) {
             " with the",__func__);
     fprintf(stderr," MMGS_Set_solSize function before setting values");
     fprintf(stderr," in solution structure \n");
-    return(0);
+    return 0;
   }
   if ( pos < 1 ) {
     fprintf(stderr,"\n  ## Error: %s: unable to set a new solution.\n",
             __func__);
     fprintf(stderr,"    Minimal index of the solution position must be 1.\n");
-    return(0);
+    return 0;
   }
   if ( pos >= met->npmax ) {
     fprintf(stderr,"\n  ## Error: %s: unable to set a new solution.\n",
             __func__);
     fprintf(stderr,"    max number of solutions: %d\n",met->npmax);
-    return(0);
+    return 0;
   }
 
   if ( pos > met->np ) {
@@ -680,11 +759,11 @@ int MMGS_Set_scalarSol(MMG5_pSol met, double s, int pos) {
     fprintf(stderr," Overflow of the given number of solutions: %d\n",met->np);
     fprintf(stderr,"\n  ## Check the solution size, its compactness or the position");
     fprintf(stderr," of the solution.\n");
-    return(0);
+    return 0;
   }
 
   met->m[pos] = s;
-  return(1);
+  return 1;
 }
 
 int MMGS_Get_scalarSol(MMG5_pSol met, double* s) {
@@ -708,12 +787,12 @@ int MMGS_Get_scalarSol(MMG5_pSol met, double* s) {
     fprintf(stderr,"\n  ## Error: %s: unable to get solution.\n",__func__);
     fprintf(stderr,"     The number of call of MMGS_Get_scalarSol function");
     fprintf(stderr," can not exceed the number of points: %d\n ",met->np);
-    return(0);
+    return 0;
   }
 
   *s  = met->m[met->npi];
 
-  return(1);
+  return 1;
 }
 
 int MMGS_Set_scalarSols(MMG5_pSol met, double *s ) {
@@ -724,13 +803,13 @@ int MMGS_Set_scalarSols(MMG5_pSol met, double *s ) {
             " with the",__func__);
     fprintf(stderr," MMGS_Set_solSize function before setting values");
     fprintf(stderr," in solution structure \n");
-    return(0);
+    return 0;
   }
 
   for ( k=0; k<met->np; ++k )
     met->m[k+1] = s[k];
 
-  return(1);
+  return 1;
 }
 
 int MMGS_Get_scalarSols(MMG5_pSol met, double* s) {
@@ -739,7 +818,7 @@ int MMGS_Get_scalarSols(MMG5_pSol met, double* s) {
   for ( k=0; k<met->np; ++k )
     s[k]  = met->m[k+1];
 
-  return(1);
+  return 1;
 }
 
 
@@ -750,19 +829,19 @@ int MMGS_Set_vectorSol(MMG5_pSol met, double vx,double vy, double vz, int pos) {
             " solution with the",__func__);
     fprintf(stderr," MMGS_Set_solSize function before setting values");
     fprintf(stderr," in solution structure \n");
-    return(0);
+    return 0;
   }
   if ( pos < 1 ) {
     fprintf(stderr,"\n  ## Error: %s: unable to set a new solution.\n",
             __func__);
     fprintf(stderr,"    Minimal index of the solution position must be 1.\n");
-    return(0);
+    return 0;
   }
   if ( pos >= met->npmax ) {
     fprintf(stderr,"\n  ## Error: %s: unable to set a new solution.\n",
             __func__);
     fprintf(stderr,"    max number of solutions: %d\n",met->npmax);
-    return(0);
+    return 0;
   }
 
   if ( pos > met->np ) {
@@ -771,14 +850,14 @@ int MMGS_Set_vectorSol(MMG5_pSol met, double vx,double vy, double vz, int pos) {
     fprintf(stderr," Overflow of the given number of solutions: %d\n",met->np);
     fprintf(stderr,"\n  ## Check the solution size, its compactness or the position");
     fprintf(stderr," of the solution.\n");
-    return(0);
+    return 0;
   }
 
   met->m[3*pos]   = vx;
   met->m[3*pos+1] = vy;
   met->m[3*pos+2] = vz;
 
-  return(1);
+  return 1;
 }
 
 int MMGS_Get_vectorSol(MMG5_pSol met, double* vx, double* vy, double* vz) {
@@ -802,14 +881,14 @@ int MMGS_Get_vectorSol(MMG5_pSol met, double* vx, double* vy, double* vz) {
     fprintf(stderr,"\n  ## Error: %s: unable to get solution.\n",__func__);
     fprintf(stderr,"     The number of call of MMGS_Get_vectorSol function");
     fprintf(stderr," can not exceed the number of points: %d\n ",met->np);
-    return(0);
+    return 0;
   }
 
   *vx  = met->m[3*met->npi];
   *vy  = met->m[3*met->npi+1];
   *vz  = met->m[3*met->npi+2];
 
-  return(1);
+  return 1;
 }
 
 
@@ -822,7 +901,7 @@ int MMGS_Set_vectorSols(MMG5_pSol met, double *sols) {
             " solution with the",__func__);
     fprintf(stderr," MMGS_Set_solSize function before setting values");
     fprintf(stderr," in solution structure \n");
-    return(0);
+    return 0;
   }
 
   for ( k=0; k<met->np; ++k ) {
@@ -833,7 +912,7 @@ int MMGS_Set_vectorSols(MMG5_pSol met, double *sols) {
     m[2] = sols[j+2];
   }
 
-  return(1);
+  return 1;
 }
 
 int MMGS_Get_vectorSols(MMG5_pSol met, double* sols) {
@@ -848,7 +927,7 @@ int MMGS_Get_vectorSols(MMG5_pSol met, double* sols) {
     sols[j+2] = m[2];
   }
 
-  return(1);
+  return 1;
 }
 
 int MMGS_Set_tensorSol(MMG5_pSol met, double m11,double m12, double m13,
@@ -859,19 +938,19 @@ int MMGS_Set_tensorSol(MMG5_pSol met, double m11,double m12, double m13,
             " solution with the",__func__);
     fprintf(stderr," MMGS_Set_solSize function before setting values");
     fprintf(stderr," in solution structure \n");
-    return(0);
+    return 0;
   }
   if ( pos < 1 ) {
     fprintf(stderr,"\n  ## Error: %s: unable to set a new solution.\n",
             __func__);
     fprintf(stderr,"    Minimal index of the solution position must be 1.\n");
-    return(0);
+    return 0;
   }
   if ( pos >= met->npmax ) {
     fprintf(stderr,"\n  ## Error: %s: unable to set a new solution.\n",
             __func__);
     fprintf(stderr,"    max number of solutions: %d\n",met->npmax);
-    return(0);
+    return 0;
   }
 
   if ( pos > met->np ) {
@@ -880,7 +959,7 @@ int MMGS_Set_tensorSol(MMG5_pSol met, double m11,double m12, double m13,
     fprintf(stderr," Overflow of the given number of solutions: %d\n",met->np);
     fprintf(stderr,"\n  ## Check the solution size, its compactness or the position");
     fprintf(stderr," of the solution.\n");
-    return(0);
+    return 0;
   }
 
   met->m[6*pos]   = m11;
@@ -890,7 +969,7 @@ int MMGS_Set_tensorSol(MMG5_pSol met, double m11,double m12, double m13,
   met->m[6*pos+4] = m23;
   met->m[6*pos+5] = m33;
 
-  return(1);
+  return 1;
 }
 
 int MMGS_Get_tensorSol(MMG5_pSol met, double *m11,double *m12, double *m13,
@@ -916,7 +995,7 @@ int MMGS_Get_tensorSol(MMG5_pSol met, double *m11,double *m12, double *m13,
     fprintf(stderr,"\n  ## Error: %s: unable to get solution.\n",__func__);
     fprintf(stderr,"     The number of call of MMGS_Get_tensorSol function");
     fprintf(stderr," can not exceed the number of points: %d\n ",met->np);
-    return(0);
+    return 0;
   }
 
   *m11 = met->m[6*met->npi];
@@ -926,7 +1005,7 @@ int MMGS_Get_tensorSol(MMG5_pSol met, double *m11,double *m12, double *m13,
   *m23 = met->m[6*met->npi+4];
   *m33 = met->m[6*met->npi+5];
 
-  return(1);
+  return 1;
 }
 
 
@@ -939,7 +1018,7 @@ int MMGS_Set_tensorSols(MMG5_pSol met, double *sols) {
             " of solution with the",__func__);
     fprintf(stderr," MMGS_Set_solSize function before setting values");
     fprintf(stderr," in solution structure \n");
-    return(0);
+    return 0;
   }
 
   for ( k=0; k<met->np; ++k ) {
@@ -953,7 +1032,7 @@ int MMGS_Set_tensorSols(MMG5_pSol met, double *sols) {
     m[4] = sols[j+4];
     m[5] = sols[j+5];
   }
-  return(1);
+  return 1;
 }
 
 int MMGS_Get_tensorSols(MMG5_pSol met, double *sols) {
@@ -972,7 +1051,120 @@ int MMGS_Get_tensorSols(MMG5_pSol met, double *sols) {
     sols[j+5] = m[5];
   }
 
-  return(1);
+  return 1;
+}
+
+int  MMGS_Set_ithSol_inSolsAtVertices(MMG5_pSol sol,int i, double* s,int pos) {
+  MMG5_pSol psl;
+
+  /* Warning: users give indices from 1 to nsols */
+  psl = sol + (i-1);
+
+  switch ( psl->type ) {
+  case MMG5_Scalar:
+    return MMGS_Set_scalarSol(psl,s[0],pos);
+    break;
+
+  case MMG5_Vector:
+    MMGS_Set_vectorSol(psl,s[0],s[1],s[2],pos);
+    break;
+
+  case MMG5_Tensor:
+    MMGS_Set_tensorSol(psl,s[0],s[1],s[2],s[3],s[4],s[5],pos);
+    break;
+
+  default:
+    fprintf(stderr,"\n  ## Error: %s: unexpected type of solution: %s.\n",
+            __func__,MMG5_Get_typeName(psl->type));
+    return 0;
+  }
+  return 1;
+}
+
+int  MMGS_Get_ithSol_inSolsAtVertices(MMG5_pSol sol,int i, double *s,int pos) {
+  MMG5_pSol psl;
+
+  /* Warning: users give indices from 1 to nsols */
+  psl = sol + (i-1);
+
+  psl->npi = pos-1;
+
+  switch ( psl->type ) {
+  case MMG5_Scalar:
+    return MMGS_Get_scalarSol(psl,&s[0]);
+    break;
+
+  case MMG5_Vector:
+    MMGS_Get_vectorSol(psl,&s[0],&s[1],&s[2]);
+    break;
+
+  case MMG5_Tensor:
+    MMGS_Get_tensorSol(psl,&s[0],&s[1],&s[2],&s[3],&s[4],&s[5]);
+    break;
+
+  default:
+    fprintf(stderr,"\n  ## Error: %s: unexpected type of solution: %s\n",
+            __func__,MMG5_Get_typeName(psl->type));
+    return 0;
+  }
+
+  return 1;
+}
+
+int  MMGS_Set_ithSols_inSolsAtVertices(MMG5_pSol sol,int i, double *s) {
+  MMG5_pSol psl;
+
+  /* Warning: users give indices from 1 to nsols */
+  psl = sol + (i-1);
+
+  switch ( psl->type ) {
+  case MMG5_Scalar:
+    return MMGS_Set_scalarSols(psl,s);
+    break;
+
+  case MMG5_Vector:
+    MMGS_Set_vectorSols(psl,s);
+    break;
+
+  case MMG5_Tensor:
+    MMGS_Set_tensorSols(psl,s);
+    break;
+
+  default:
+    fprintf(stderr,"\n  ## Error: %s: unexpected type of solution: %s.\n",
+            __func__,MMG5_Get_typeName(psl->type));
+    return 0;
+  }
+
+  return 1;
+}
+
+int  MMGS_Get_ithSols_inSolsAtVertices(MMG5_pSol sol,int i, double *s) {
+  MMG5_pSol psl;
+
+  /* Warning: users give indices from 1 to nsols */
+  psl = sol + (i-1);
+
+  switch ( psl->type ) {
+  case MMG5_Scalar:
+    return MMGS_Get_scalarSols(psl,s);
+    break;
+
+  case MMG5_Vector:
+    MMGS_Get_vectorSols(psl,s);
+    break;
+
+  case MMG5_Tensor:
+    MMGS_Get_tensorSols(psl,s);
+    break;
+
+  default:
+    fprintf(stderr,"\n  ## Error: %s: unexpected type of solution: %s\n",
+            __func__,MMG5_Get_typeName(psl->type));
+    return 0;
+  }
+
+  return 1;
 }
 
 
@@ -984,7 +1176,7 @@ int MMGS_Chk_meshData(MMG5_pMesh mesh,MMG5_pSol met) {
     fprintf(stderr," you must call the MMGS_Set_meshSize function to have a");
     fprintf(stderr," valid mesh.\n");
     fprintf(stderr," Missing datas.\n");
-    return(0);
+    return 0;
   }
 
   if ( met->npi != met->np ) {
@@ -993,7 +1185,7 @@ int MMGS_Chk_meshData(MMG5_pMesh mesh,MMG5_pSol met) {
     fprintf(stderr," you must call the MMGS_Set_solSize function to have a");
     fprintf(stderr," valid solution.\n");
     fprintf(stderr," Missing datas.\n");
-    return(0);
+    return 0;
   }
 
   /*  Check mesh data */
@@ -1003,22 +1195,22 @@ int MMGS_Chk_meshData(MMG5_pMesh mesh,MMG5_pSol met) {
       fprintf(stderr,"  ** MISSING DATA.\n");
       fprintf(stderr," Check that your mesh contains points and triangles.\n");
       fprintf(stderr," Exit program.\n");
-      return(0);
+      return 0;
     }
   }
 
   if ( mesh->dim != 3 ) {
     fprintf(stderr,"  ** 3 DIMENSIONAL MESH NEEDED. Exit program.\n");
-    return(0);
+    return 0;
   }
   if ( met->dim != 3 ) {
     fprintf(stderr,"  ** WRONG DIMENSION FOR METRIC. Exit program.\n");
-    return(0);
+    return 0;
   }
   if ( !mesh->ver )  mesh->ver = 2;
   if ( !met ->ver )  met ->ver = 2;
 
-  return(1);
+  return 1;
 }
 
 int MMGS_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
@@ -1037,21 +1229,21 @@ int MMGS_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
     }
     else
       mesh->info.mem      = val;
-    if ( !_MMGS_memOption(mesh) ) return 0;
+    if ( !MMGS_memOption(mesh) ) return 0;
     break;
   case MMGS_IPARAM_debug :
     mesh->info.ddebug   = val;
     break;
   case MMGS_IPARAM_angle :
     if ( mesh->xpoint )
-      _MMG5_DEL_MEM(mesh,mesh->xpoint,(mesh->xpmax+1)*sizeof(MMG5_xPoint));
+      MMG5_DEL_MEM(mesh,mesh->xpoint);
     if ( !val )
       mesh->info.dhd    = -1.;
     else {
       if ( (mesh->info.imprim > 5) || mesh->info.ddebug )
         fprintf(stderr,"\n  ## Warning: %s: angle detection parameter set"
                 " to default value\n",__func__);
-      mesh->info.dhd    = _MMG5_ANGEDG;
+      mesh->info.dhd    = MMG5_ANGEDG;
     }
     break;
   case MMGS_IPARAM_iso :
@@ -1076,7 +1268,7 @@ int MMGS_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
     break;
   case MMGS_IPARAM_numberOfLocalParam :
     if ( mesh->info.par ) {
-      _MMG5_DEL_MEM(mesh,mesh->info.par,mesh->info.npar*sizeof(MMG5_Par));
+      MMG5_DEL_MEM(mesh,mesh->info.par);
       if ( (mesh->info.imprim > 5) || mesh->info.ddebug )
         fprintf(stderr,"\n  ## Warning: %s: new local parameter values\n",__func__);
     }
@@ -1084,10 +1276,10 @@ int MMGS_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
     mesh->info.npari  = 0;
     mesh->info.parTyp = 0;
 
-    _MMG5_ADD_MEM(mesh,mesh->info.npar*sizeof(MMG5_Par),"parameters",
+    MMG5_ADD_MEM(mesh,mesh->info.npar*sizeof(MMG5_Par),"parameters",
                   fprintf(stderr,"  Exit program.\n");
                   return 0);
-    _MMG5_SAFE_CALLOC(mesh->info.par,mesh->info.npar,MMG5_Par,0);
+    MMG5_SAFE_CALLOC(mesh->info.par,mesh->info.npar,MMG5_Par,return 0);
 
     for (k=0; k<mesh->info.npar; k++) {
       mesh->info.par[k].elt   = MMG5_Noentity;
@@ -1105,11 +1297,11 @@ int MMGS_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
 #endif
   default :
     fprintf(stderr,"\n  ## Error: %s: unknown type of parameter\n",__func__);
-    return(0);
+    return 0;
   }
   /* other options */
   mesh->info.fem      = 0;
-  return(1);
+  return 1;
 }
 
 int MMGS_Get_iparameter(MMG5_pMesh mesh, int iparam) {
@@ -1117,40 +1309,40 @@ int MMGS_Get_iparameter(MMG5_pMesh mesh, int iparam) {
   switch ( iparam ) {
     /* Integer parameters */
   case MMGS_IPARAM_verbose :
-    return ( mesh->info.imprim );
+    return  mesh->info.imprim;
     break;
   case MMGS_IPARAM_mem :
-    return ( mesh->info.mem );
+    return  mesh->info.mem;
     break;
   case MMGS_IPARAM_debug :
-    return ( mesh->info.ddebug );
+    return  mesh->info.ddebug;
     break;
   case MMGS_IPARAM_angle :
     if ( mesh->info.dhd <= 0. ) {
-      return ( 0 );
+      return  0;
     }
     else {
-      return ( 1 );
+      return  1;
     }
     break;
   case MMGS_IPARAM_noinsert :
-    return ( mesh->info.noinsert );
+    return  mesh->info.noinsert;
     break;
   case MMGS_IPARAM_noswap :
-    return ( mesh->info.noswap );
+    return  mesh->info.noswap;
     break;
   case MMGS_IPARAM_nomove :
-    return ( mesh->info.nomove );
+    return  mesh->info.nomove;
     break;
   case MMGS_IPARAM_nreg :
-    return ( mesh->info.nreg );
+    return  mesh->info.nreg;
     break;
   case MMGS_IPARAM_numberOfLocalParam :
-    return ( mesh->info.npar );
+    return  mesh->info.npar;
     break;
 #ifdef USE_SCOTCH
   case MMGS_IPARAM_renum :
-    return ( mesh->info.renum );
+    return  mesh->info.renum;
     break;
 #endif
   default :
@@ -1184,11 +1376,18 @@ int MMGS_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val){
     else
       mesh->info.hgrad = log(mesh->info.hgrad);
     break;
+  case MMGS_DPARAM_hgradreq :
+    mesh->info.hgradreq    = val;
+    if ( mesh->info.hgradreq < 0.0 )
+      mesh->info.hgradreq = -1.0;
+    else
+      mesh->info.hgradreq = log(mesh->info.hgradreq);
+    break;
   case MMGS_DPARAM_hausd :
     if ( val <=0 ) {
       fprintf(stderr,"\n  ## Error: %s: hausdorff number must be strictly"
               " positive.\n",__func__);
-      return(0);
+      return 0;
     }
     else
       mesh->info.hausd    = val;
@@ -1198,9 +1397,9 @@ int MMGS_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val){
     break;
   default :
     fprintf(stderr,"\n  ## Error: %s: unknown type of parameter\n",__func__);
-    return(0);
+    return 0;
   }
-  return(1);
+  return 1;
 }
 
 int MMGS_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref,
@@ -1213,25 +1412,25 @@ int MMGS_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref,
             " parameters",__func__);
     fprintf(stderr," with the MMGS_Set_iparameters function before setting");
     fprintf(stderr," values in local parameters structure. \n");
-    return(0);
+    return 0;
   }
   if ( mesh->info.npari > mesh->info.npar ) {
     fprintf(stderr,"\n  ## Error: %s: unable to set a new local parameter.\n",
             __func__);
     fprintf(stderr,"    max number of local parameters: %d\n",mesh->info.npar);
-    return(0);
+    return 0;
   }
   if ( typ != MMG5_Triangle ) {
     fprintf(stderr,"\n  ## Warning: %s: you must apply your local parameters",
             __func__);
     fprintf(stderr," on triangles (MMG5_Triangle or %d).\n",MMG5_Triangle);
     fprintf(stderr,"  ## Unknown type of entity: ignored.\n");
-    return(0);
+    return 0;
   }
   if ( ref < 0 ) {
     fprintf(stderr,"\n  ## Error: %s: negative references are not allowed.\n",
             __func__);
-    return(0);
+    return 0;
   }
 
   for (k=0; k<mesh->info.npari; k++) {
@@ -1268,7 +1467,7 @@ int MMGS_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref,
 
   mesh->info.npari++;
 
-  return(1);
+  return 1;
 }
 
 int MMGS_Free_all(const int starter,...)
@@ -1278,7 +1477,7 @@ int MMGS_Free_all(const int starter,...)
 
   va_start(argptr, starter);
 
-  ier = _MMGS_Free_all_var(argptr);
+  ier = MMGS_Free_all_var(argptr);
 
   va_end(argptr);
 
@@ -1292,7 +1491,7 @@ int MMGS_Free_structures(const int starter,...)
 
   va_start(argptr, starter);
 
-  ier = _MMGS_Free_structures_var(argptr);
+  ier = MMGS_Free_structures_var(argptr);
 
   va_end(argptr);
 
@@ -1306,7 +1505,7 @@ int MMGS_Free_names(const int starter,...)
 
   va_start(argptr, starter);
 
-  ier = _MMGS_Free_names_var(argptr);
+  ier = MMGS_Free_names_var(argptr);
 
   va_end(argptr);
 

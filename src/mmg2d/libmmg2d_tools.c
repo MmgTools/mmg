@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Inria - IMB (Université de Bordeaux) - LJLL (UPMC), 2004- .
+**  Copyright (c) Bx INP/CNRS/Inria/UBordeaux/UPMC, 2004-
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -34,19 +34,23 @@
 
 void MMG2D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( met->size == 3 ) {
-    MMG2D_lencurv  = _MMG2_lencurv_ani;
-    MMG2D_defsiz   = _MMG2_defsiz_ani;
-    MMG2D_gradsiz  = lissmet_ani;
-    MMG2D_caltri   = _MMG2_caltri_ani;
-    MMG2D_intmet   = _MMG2_intmet_ani;
-    //    MMG2_optlen    = optlen_ani;
+    MMG2D_lencurv  = MMG2D_lencurv_ani;
+    MMG5_compute_meanMetricAtMarkedPoints = MMG5_compute_meanMetricAtMarkedPoints_ani;
+    MMG2D_defsiz     = MMG2D_defsiz_ani;
+    MMG2D_gradsiz    = lissmet_ani;
+    MMG2D_gradsizreq = MMG5_gradsizreq_ani;
+    MMG2D_caltri     = MMG2D_caltri_ani;
+    MMG2D_intmet     = MMG2D_intmet_ani;
+    //    MMG2D_optlen    = optlen_ani;
   }
   else {
-    MMG2D_lencurv   = _MMG2_lencurv_iso;
-    MMG2D_defsiz    = _MMG2_defsiz_iso;
-    MMG2D_gradsiz   = _MMG2_gradsiz_iso;
-    MMG2D_caltri    = _MMG2_caltri_iso;
-    MMG2D_intmet    = _MMG2_intmet_iso;
+    MMG2D_lencurv   = MMG2D_lencurv_iso;
+    MMG5_compute_meanMetricAtMarkedPoints = MMG5_compute_meanMetricAtMarkedPoints_iso;
+    MMG2D_defsiz     = MMG2D_defsiz_iso;
+    MMG2D_gradsiz    = MMG5_gradsiz_iso;
+    MMG2D_gradsizreq = MMG5_gradsizreq_iso;
+    MMG2D_caltri     = MMG2D_caltri_iso;
+    MMG2D_intmet     = MMG2D_intmet_iso;
   }
   return;
 }
@@ -60,51 +64,53 @@ void MMG2D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
  * Read parameter file DEFAULT.mmg2d
  *
  */
-int MMG2_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
-  int       ret,i;
-  char     *ptr,data[256];
-  FILE     *in;
-  MMG5_pMat pm;
-  fpos_t    position;
-  
+int MMG2D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
+  int        ret,i,j;
+  float      fp1,fp2,fp3;
+  char       *ptr,data[256];
+  FILE       *in;
+  MMG5_pMat  pm;
+  MMG5_pPar  ppar;
+  fpos_t     position;
+
   /* Check for parameter file */
   strcpy(data,mesh->namein);
   ptr = strstr(data,".mesh");
   if ( ptr ) *ptr = '\0';
   strcat(data,".mmg2d");
   in = fopen(data,"rb");
-  
+
   if ( !in ) {
     sprintf(data,"%s","DEFAULT.mmg2d");
     in = fopen(data,"rb");
     if ( !in )
-      return(1);
+      return 1;
   }
   if ( mesh->info.imprim >= 0 )
     fprintf(stdout,"\n  %%%% %s OPENED\n",data);
   
   /* Read parameters */
   while ( !feof(in) ) {
-    ret = fscanf(in,"%s",data);
+    ret = fscanf(in,"%255s",data);
     if ( !ret || feof(in) ) break;
     for (i=0; i<strlen(data); i++) data[i] = tolower(data[i]);
-    
-    /* Read user defined references for the LS mode */
+
+    /* Read user-defined references for the LS mode */
     if ( !strcmp(data,"lsreferences") ) {
       ret = fscanf(in,"%d",&mesh->info.nmat);
-      
+
       if ( !ret ) {
         fprintf(stderr,"  %%%% Wrong format: %d\n",mesh->info.nmat);
-        return 0;
+        return (0);
       }
 
       if ( mesh->info.nmat ) {
-        _MMG5_SAFE_CALLOC(mesh->info.mat,mesh->info.nmat,MMG5_Mat,0);
+        MMG5_SAFE_CALLOC(mesh->info.mat,mesh->info.nmat,MMG5_Mat,return 0);
         for (i=0; i<mesh->info.nmat; i++) {
           pm = &mesh->info.mat[i];
           fscanf(in,"%d",&pm->ref);
           fgetpos(in,&position);
-          fscanf(in,"%s",data);
+          fscanf(in,"%255s",data);
           if ( !strcmp(data,"nosplit") ) {
             pm->dospl = 0;
             pm->rin = pm->ref;
@@ -119,44 +125,102 @@ int MMG2_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
         }
       }
     }
+    /* Read user-defined local parameters and store them in the structure info->par */
+    else if ( !strcmp(data,"parameters") ) {
+      ret = fscanf(in,"%d",&mesh->info.npar);
+
+      if ( !ret ) {
+        fprintf(stderr,"  %%%% Wrong format: %d\n",mesh->info.npar);
+        return (0);
+      }
+      else if ( mesh->info.npar > MMG2D_LPARMAX ) {
+        fprintf(stderr,"  %%%% Too many local parameters %d. Abort\n",mesh->info.npar);
+        return (0);
+      }
+
+      /* Allocate memory and fill the info->par table (adding one, corresponding to the command line data) */
+      if ( mesh->info.npar ) {
+        MMG5_SAFE_CALLOC(mesh->info.par,mesh->info.npar,MMG5_Par,return 0);
+
+        for (i=0; i<mesh->info.npar; i++) {
+          ppar = &mesh->info.par[i];
+          ret = fscanf(in,"%d %255s",&ppar->ref,data);
+          if ( ret ) ret = fscanf(in,"%f %f %f",&fp1,&fp2,&fp3);
+
+          if ( !ret ) {
+            fprintf(stderr,"  %%%% Wrong format: %s\n",data);
+            return (0);
+          }
+
+          for (j=0; j<strlen(data); j++) data[j] = tolower(data[j]);
+          if ( !strcmp(data,"triangles") || !strcmp(data,"triangle") ) {
+            ppar->hmin  = fp1;
+            ppar->hmax  = fp2;
+            ppar->hausd = fp3;
+            ppar->elt   = MMG5_Triangle;
+
+          }
+          else if ( !strcmp(data,"edges") || !strcmp(data,"edge") ) {
+            ppar->hmin  = fp1;
+            ppar->hmax  = fp2;
+            ppar->hausd = fp3;
+            ppar->elt   = MMG5_Edg;
+
+          }
+          else if ( !strcmp(data,"vertices") || !strcmp(data,"vertex") ) {
+            ppar->hmin  = fp1;
+            ppar->hmax  = fp2;
+            ppar->hausd = fp3;
+            ppar->elt   = MMG5_Vertex;
+          }
+        }
+      }
+    }
     else {
       fprintf(stderr,"  %%%% Wrong format: %s\n",data);
       return 0;
     }
   }
-  
+
   fclose(in);
-  return(1);
+  return 1;
+}
+
+/* Free the structure dedicated to the management of multiple local parameters */
+int MMG2D_freeLocalPar(MMG5_pMesh mesh) {
+
+  free(mesh->info.par);
+  mesh->info.npar = 0;
+
+  return 1;
 }
 
 int MMG2D_Get_adjaTri(MMG5_pMesh mesh, int kel, int listri[3]) {
 
   if ( ! mesh->adja ) {
-    if (! MMG2_hashTria(mesh))
-      return(0);
+    if (! MMG2D_hashTria(mesh))
+      return 0;
   }
 
   listri[0] = mesh->adja[3*(kel-1)+1]/3;
   listri[1] = mesh->adja[3*(kel-1)+2]/3;
   listri[2] = mesh->adja[3*(kel-1)+3]/3;
 
-  return(1);
+  return 1;
 }
 
-inline
 int MMG2D_Get_adjaVertices(MMG5_pMesh mesh, int ip, int lispoi[MMG2D_LMAX])
 {
   int start;
 
   if ( !mesh->tria ) return 0;
 
-  start=MMG2_findTria(mesh,ip);
+  start=MMG2D_findTria(mesh,ip);
   if ( !start ) return 0;
 
   return MMG2D_Get_adjaVerticesFast(mesh,ip,start,lispoi);
 }
 
-inline
 int MMG2D_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMG2D_LMAX])
 {
   MMG5_pTria pt;
@@ -178,9 +242,9 @@ int MMG2D_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMG
       fprintf(stderr,"\n  ## Warning: %s: unable to compute adjacent"
               " vertices of the vertex %d:\nthe ball of point contain too many"
               " elements.\n",__func__,ip);
-      return(0);
+      return 0;
     }
-    i1 = _MMG5_inxt2[i];
+    i1 = MMG5_inxt2[i];
     lispoi[nbpoi] = mesh->tria[k].v[i1];
     ++nbpoi;
 
@@ -188,20 +252,20 @@ int MMG2D_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMG
     prevk = k;
     k  = adja[i1] / 3;
     i  = adja[i1] % 3;
-    i  = _MMG5_inxt2[i];
+    i  = MMG5_inxt2[i];
   }
   while ( k && k != start );
 
-  if ( k > 0 ) return(nbpoi);
+  if ( k > 0 ) return nbpoi;
 
   /* store the last point of the boundary triangle */
   if ( nbpoi == MMG2D_LMAX ) {
     fprintf(stderr,"\n  ## Warning: %s: unable to compute adjacent vertices of the"
             " vertex %d:\nthe ball of point contain too many elements.\n",
             __func__,ip);
-    return(0);
+    return 0;
   }
-  i1 = _MMG5_inxt2[i1];
+  i1 = MMG5_inxt2[i1];
   lispoi[nbpoi] = mesh->tria[prevk].v[i1];
   ++nbpoi;
 
@@ -210,7 +274,7 @@ int MMG2D_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMG
   i = iploc;
   do {
     adja = &mesh->adja[3*(k-1)+1];
-    i2 = _MMG5_iprv2[i];
+    i2 = MMG5_iprv2[i];
     k  = adja[i2] / 3;
     if ( k == 0 )  break;
 
@@ -218,13 +282,13 @@ int MMG2D_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMG
       fprintf(stderr,"\n  ## Warning: %s: unable to compute adjacent vertices of the"
               " vertex %d:\nthe ball of point contain too many elements.\n",
               __func__,ip);
-      return(0);
+      return 0;
     }
     i  = adja[i2] % 3;
     lispoi[nbpoi] = mesh->tria[k].v[i];
     ++nbpoi;
 
-    i  = _MMG5_iprv2[i];
+    i  = MMG5_iprv2[i];
   }
   while ( k );
 
@@ -237,21 +301,61 @@ int MMG2D_Get_triFromEdge(MMG5_pMesh mesh, int ked, int *ktri, int *ied)
 
   val = mesh->edge[ked].base;
 
-  if ( !val ) return(0);
+  if ( !val ) {
+    fprintf(stderr,"  ## Error: %s: the main fonction of the Mmg library must be"
+            " called before this function.\n",__func__);
+    return 0;
+  }
 
   *ktri = val/3;
 
   *ied = val%3;
 
   return 1;
+}
 
+int MMG2D_Get_trisFromEdge(MMG5_pMesh mesh, int ked, int ktri[2], int ied[2])
+{
+  int ier,itri;
+#ifndef NDEBUG
+  int ia0,ib0,ia1,ib1;
+#endif
 
+  ktri[0]  =  ktri[1] = 0;
+  ied[0]   =  ied[1]  = 0;
+
+  ier = MMG2D_Get_triFromEdge(mesh, ked, ktri, ied);
+
+  if ( !ier ) return 0;
+
+  if ( !mesh->adja ) {
+    if (!MMG2D_hashTria(mesh) )
+      return 0;
+  }
+
+  itri = mesh->adja[3*(*ktri-1) + *ied + 1 ];
+
+  if ( itri ) {
+    ktri[1]  = itri/3;
+    ied[1]   = itri%3;
+
+#ifndef NDEBUG
+    ia0 = mesh->tria[ktri[0]].v[MMG5_inxt2[ied[0]]];
+    ib0 = mesh->tria[ktri[0]].v[MMG5_iprv2[ied[0]]];
+
+    ia1 = mesh->tria[ktri[1]].v[MMG5_inxt2[ied[1]]];
+    ib1 = mesh->tria[ktri[1]].v[MMG5_iprv2[ied[1]]];
+
+    assert ( ( (ia0 == ia1) && (ib0 == ib1) ) ||
+             ( (ia0 == ib1) && (ib0 == ia1) ) );
+#endif
+  }
+
+  return 1;
 }
 
 int MMG2D_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met) {
-  MMG5_pPoint ppt;
   double      hsiz;
-  int         k,iadr;
 
   /* Memory alloc */
   if ( met->size!=1 && met->size!=3 ) {
@@ -266,25 +370,10 @@ int MMG2D_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( !MMG5_Compute_constantSize(mesh,met,&hsiz) )
     return 0;
 
-  if ( met->size == 1 ) {
-    for (k=1; k<=mesh->np; k++) {
-      ppt = &mesh->point[k];
-      if ( !MG_VOK(ppt) ) continue;
-      met->m[k] = hsiz;
-    }
-  }
-  else {
-    hsiz    = 1./(hsiz*hsiz);
+  mesh->info.hsiz = hsiz;
 
-    for (k=1; k<=mesh->np; k++) {
-      ppt = &mesh->point[k];
-      if ( !MG_VOK(ppt) ) continue;
+  MMG5_Set_constantSize(mesh,met,hsiz);
 
-      iadr           = met->size*k;
-      met->m[iadr]   = hsiz;
-      met->m[iadr+2] = hsiz;
-    }
-  }
   return 1;
 }
 
@@ -302,10 +391,10 @@ void MMG2D_Reset_verticestags(MMG5_pMesh mesh) {
 void MMG2D_Free_triangles(MMG5_pMesh mesh) {
 
   if ( mesh->adja )
-    _MMG5_DEL_MEM(mesh,mesh->adja,(3*mesh->ntmax+5)*sizeof(int));
+    MMG5_DEL_MEM(mesh,mesh->adja);
 
   if ( mesh->tria )
-    _MMG5_DEL_MEM(mesh,mesh->tria,(mesh->ntmax+1)*sizeof(MMG5_Tria));
+    MMG5_DEL_MEM(mesh,mesh->tria);
 
   mesh->nt = 0;
   mesh->nti = 0;
@@ -317,10 +406,10 @@ void MMG2D_Free_triangles(MMG5_pMesh mesh) {
 void MMG2D_Free_edges(MMG5_pMesh mesh) {
 
   if ( mesh->edge )
-    _MMG5_DEL_MEM(mesh,mesh->edge,(mesh->namax+1)*sizeof(MMG5_Edge));
+    MMG5_DEL_MEM(mesh,mesh->edge);
 
   if ( mesh->xpoint )
-    _MMG5_DEL_MEM(mesh,mesh->xpoint,(mesh->xpmax+1)*sizeof(MMG5_xPoint));
+    MMG5_DEL_MEM(mesh,mesh->xpoint);
 
   mesh->na = 0;
   mesh->nai = 0;
@@ -335,7 +424,7 @@ void MMG2D_Free_solutions(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   /* sol */
   if ( sol && sol->m )
-    _MMG5_DEL_MEM(mesh,sol->m,(sol->size*(sol->npmax+1))*sizeof(double));
+    MMG5_DEL_MEM(mesh,sol->m);
 
   return;
 }

@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
+**  Copyright (c) Bx INP/CNRS/Inria/UBordeaux/UPMC, 2004-
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -38,25 +38,29 @@
 
 void MMGS_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( met->size < 6 ) {
-    _MMG5_calelt      = _MMG5_caltri_iso;
-    _MMG5_lenSurfEdg  = _MMG5_lenSurfEdg_iso;
-    _MMG5_defsiz      = _MMGS_defsiz_iso;
-    gradsiz           = gradsiz_iso;
-    intmet            = intmet_iso;
-    movintpt          = movintpt_iso;
-    movridpt          = movridpt_iso;
+    MMG5_calelt      = MMG5_caltri_iso;
+    MMG5_lenSurfEdg  = MMG5_lenSurfEdg_iso;
+    MMG5_compute_meanMetricAtMarkedPoints = MMG5_compute_meanMetricAtMarkedPoints_iso;
+    MMGS_defsiz      = MMGS_defsiz_iso;
+    MMGS_gradsiz     = MMG5_gradsiz_iso;
+    MMGS_gradsizreq  = MMG5_gradsizreq_iso;
+    intmet           = intmet_iso;
+    movintpt         = movintpt_iso;
+    movridpt         = movridpt_iso;
   }
   else {
     if ( !met->m ) {
-      _MMG5_calelt     = _MMG5_caltri_iso;
-      _MMG5_lenSurfEdg = _MMG5_lenSurfEdg_iso;
+      MMG5_calelt     = MMG5_caltri_iso;
+      MMG5_lenSurfEdg = MMG5_lenSurfEdg_iso;
     }
     else {
-      _MMG5_calelt     = _MMG5_caltri_ani;
-      _MMG5_lenSurfEdg = _MMG5_lenSurfEdg_ani;
+      MMG5_calelt     = MMG5_caltri_ani;
+      MMG5_lenSurfEdg = MMG5_lenSurfEdg_ani;
     }
-    _MMG5_defsiz  = _MMGS_defsiz_ani;
-    gradsiz       = gradsiz_ani;
+    MMG5_compute_meanMetricAtMarkedPoints = MMG5_compute_meanMetricAtMarkedPoints_ani;
+    MMGS_defsiz      = MMGS_defsiz_ani;
+    MMGS_gradsiz     = MMGS_gradsiz_ani;
+    MMGS_gradsizreq  = MMG5_gradsizreq_ani;
     intmet        = intmet_ani;
     movintpt      = movintpt_ani;
     movridpt      = movridpt_ani;
@@ -64,7 +68,7 @@ void MMGS_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
 }
 
 int MMGS_usage(char *prog) {
-  _MMG5_mmgUsage(prog);
+  MMG5_mmgUsage(prog);
 
   fprintf(stdout,"-A           enable anisotropy (without metric file).\n");
   fprintf(stdout,"-keep-ref    preserve initial domain references in level-set mode.\n");
@@ -79,7 +83,7 @@ int MMGS_usage(char *prog) {
 
 int MMGS_defaultValues(MMG5_pMesh mesh) {
 
-  _MMG5_mmgDefaultValues(mesh);
+  MMG5_mmgDefaultValues(mesh);
 #ifdef USE_SCOTCH
   fprintf(stdout,"SCOTCH renumbering                  : enabled\n");
 #else
@@ -141,6 +145,11 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
         }
         else if ( !strcmp(argv[i],"-hausd") && ++i <= argc ) {
           if ( !MMGS_Set_dparameter(mesh,met,MMGS_DPARAM_hausd,
+                                    atof(argv[i])) )
+            return 0;
+        }
+        else if ( !strcmp(argv[i],"-hgradreq") && ++i <= argc ) {
+          if ( !MMGS_Set_dparameter(mesh,met,MMGS_DPARAM_hgradreq,
                                     atof(argv[i])) )
             return 0;
         }
@@ -337,7 +346,7 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
   if ( mesh->namein == NULL ) {
     fprintf(stdout,"  -- INPUT MESH NAME ?\n");
     fflush(stdin);
-    fscanf(stdin,"%s",namein);
+    fscanf(stdin,"%127s",namein);
     if ( !MMGS_Set_inputMeshName(mesh,namein) )
       return 0;
   }
@@ -355,20 +364,20 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
     if ( !MMGS_Set_outputSolName(mesh,met,"") )
       return 0;
   }
-  return(1);
+  return 1;
 }
 
 int MMGS_stockOptions(MMG5_pMesh mesh, MMG5_Info *info) {
 
   memcpy(&mesh->info,info,sizeof(MMG5_Info));
-  _MMGS_memOption(mesh);
+  MMGS_memOption(mesh);
   if( mesh->info.mem > 0) {
     if ( mesh->npmax < mesh->np || mesh->ntmax < mesh->nt ) {
-      return(0);
+      return 0;
     } else if(mesh->info.mem < 39)
-      return(0);
+      return 0;
   }
-  return(1);
+  return 1;
 }
 
 void MMGS_destockOptions(MMG5_pMesh mesh, MMG5_Info *info) {
@@ -380,18 +389,17 @@ void MMGS_destockOptions(MMG5_pMesh mesh, MMG5_Info *info) {
 int MMGS_Get_adjaTri(MMG5_pMesh mesh, int kel, int listri[3]) {
 
   if ( ! mesh->adja ) {
-    if (! _MMGS_hashTria(mesh))
-      return(0);
+    if (! MMGS_hashTria(mesh))
+      return 0;
   }
 
   listri[0] = mesh->adja[3*(kel-1)+1]/3;
   listri[1] = mesh->adja[3*(kel-1)+2]/3;
   listri[2] = mesh->adja[3*(kel-1)+3]/3;
 
-  return(1);
+  return 1;
 }
 
-inline
 int MMGS_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMGS_LMAX])
 {
   MMG5_pTria pt;
@@ -413,9 +421,9 @@ int MMGS_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMGS
       fprintf(stderr,"\n  ## Warning: %s: unable to compute adjacent"
               " vertices of the vertex %d:\nthe ball of point contain too many"
               " elements.\n",__func__,ip);
-      return(0);
+      return 0;
     }
-    i1 = _MMG5_inxt2[i];
+    i1 = MMG5_inxt2[i];
     lispoi[nbpoi] = mesh->tria[k].v[i1];
     ++nbpoi;
 
@@ -423,20 +431,20 @@ int MMGS_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMGS
     prevk = k;
     k  = adja[i1] / 3;
     i  = adja[i1] % 3;
-    i  = _MMG5_inxt2[i];
+    i  = MMG5_inxt2[i];
   }
   while ( k && k != start );
 
-  if ( k > 0 ) return(nbpoi);
+  if ( k > 0 ) return nbpoi;
 
   /* store the last point of the boundary triangle */
   if ( nbpoi == MMGS_LMAX ) {
     fprintf(stderr,"\n  ## Warning: %s: unable to compute adjacent vertices of the"
             " vertex %d:\nthe ball of point contain too many elements.\n",
             __func__,ip);
-    return(0);
+    return 0;
   }
-  i1 = _MMG5_inxt2[i1];
+  i1 = MMG5_inxt2[i1];
   lispoi[nbpoi] = mesh->tria[prevk].v[i1];
   ++nbpoi;
 
@@ -445,7 +453,7 @@ int MMGS_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMGS
   i = iploc;
   do {
     adja = &mesh->adja[3*(k-1)+1];
-    i2 = _MMG5_iprv2[i];
+    i2 = MMG5_iprv2[i];
     k  = adja[i2] / 3;
     if ( k == 0 )  break;
 
@@ -453,13 +461,13 @@ int MMGS_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMGS
       fprintf(stderr,"\n  ## Warning: %s: unable to compute adjacent vertices of the"
               " vertex %d:\nthe ball of point contain too many elements.\n",
               __func__,ip);
-      return(0);
+      return 0;
     }
     i  = adja[i2] % 3;
     lispoi[nbpoi] = mesh->tria[k].v[i];
     ++nbpoi;
 
-    i  = _MMG5_iprv2[i];
+    i  = MMG5_iprv2[i];
   }
   while ( k );
 
@@ -467,9 +475,8 @@ int MMGS_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMGS
 }
 
 int MMGS_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met) {
-  MMG5_pPoint ppt;
   double      hsiz;
-  int         k,iadr,type;
+  int         type;
 
   /* Memory alloc */
   if ( met->size==1 ) type=1;
@@ -485,25 +492,9 @@ int MMGS_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( !MMG5_Compute_constantSize(mesh,met,&hsiz) )
     return 0;
 
-  if ( met->size == 1 ) {
-    for (k=1; k<=mesh->np; k++) {
-      ppt = &mesh->point[k];
-      if ( !MG_VOK(ppt) ) continue;
-      met->m[k] = hsiz;
-    }
-  }
-  else {
-    hsiz    = 1./(hsiz*hsiz);
+  mesh->info.hsiz = hsiz;
 
-    for (k=1; k<=mesh->np; k++) {
-      ppt = &mesh->point[k];
-      if ( !MG_VOK(ppt) ) continue;
+  MMG5_Set_constantSize(mesh,met,hsiz);
 
-      iadr           = met->size*k;
-      met->m[iadr]   = hsiz;
-      met->m[iadr+3] = hsiz;
-      met->m[iadr+5] = hsiz;
-    }
-  }
   return 1;
 }

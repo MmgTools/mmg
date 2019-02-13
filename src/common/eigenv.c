@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
+**  Copyright (c) Bx INP/CNRS/Inria/UBordeaux/UPMC, 2004-
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -37,15 +37,16 @@
 #include <string.h>
 #include <math.h>
 #include <assert.h>
+#include <stdlib.h>
 
 #include "eigenv.h"
 
 /* seeking 1.e-05 accuracy */
-#define  _MG_EPSD           1.e-13
-#define  _MG_EPSD2          1.e-10
-#define  _MG_EPS6           5.e-06
-#define  _MG_EPS            1.e-06
-#define  _MG_EPSX2          2.e-06
+#define  MG_EIGENV_EPSD           1.e-13
+#define  MG_EIGENV_EPSD2          1.e-10
+#define  MG_EIGENV_EPS6           5.e-06
+#define  MG_EIGENV_EPS            1.e-06
+#define  MG_EIGENV_EPSX2          2.e-06
 #define  MAXTOU         50
 
 /**
@@ -53,9 +54,9 @@
  * Check if numbers \a x and \a y are equal.
  */
 #define egal(x,y)   (                                             \
-    (  ((x) == 0.0f) ? (fabs(y) < _MG_EPS) :                      \
-       ( ((y) == 0.0f) ? (fabs(x) < _MG_EPS) :                    \
-         (fabs((x)-(y)) / (fabs(x) + fabs(y)) < _MG_EPSX2) )  ) )
+    (  ((x) == 0.0f) ? (fabs(y) < MG_EIGENV_EPS) :                      \
+       ( ((y) == 0.0f) ? (fabs(x) < MG_EIGENV_EPS) :                    \
+         (fabs((x)-(y)) / (fabs(x) + fabs(y)) < MG_EIGENV_EPSX2) )  ) )
 
 /**
  * \brief Identity matrix.
@@ -94,7 +95,7 @@ static int newton3(double p[4],double x[3]) {
               __func__);
       mmgWarn = 1;
     }
-    return(0);
+    return 0;
   }
 
   b = p[2];
@@ -107,7 +108,7 @@ static int newton3(double p[4],double x[3]) {
 
   /* solve 2nd order eqn */
   delta = db*db - 4.0*da*c;
-  epsd  = db*db*_MG_EPSD2;
+  epsd  = db*db*MG_EIGENV_EPSD2;
 
   /* inflexion (f'(x)=0, x=-b/2a) */
   x1 = -db / 6.0f;
@@ -121,7 +122,7 @@ static int newton3(double p[4],double x[3]) {
     fdx0 = d + dx0*(c+dx0*(b+dx0));
     fdx1 = d + dx1*(c+dx1*(b+dx1));
 
-    if ( fabs(fdx0) < _MG_EPSD ) {
+    if ( fabs(fdx0) < MG_EIGENV_EPSD ) {
       /* dx0: double root, compute single root */
       n = 2;
       x[0] = dx0;
@@ -129,16 +130,16 @@ static int newton3(double p[4],double x[3]) {
       x[2] = -b - 2.0*dx0;
       /* check if P(x) = 0 */
       fx = d + x[2]*(c+x[2]*(b+x[2]));
-      if ( fabs(fx) > _MG_EPSD2 ) {
+      if ( fabs(fx) > MG_EIGENV_EPSD2 ) {
 #ifdef DEBUG
          fprintf(stderr,"\n  ## Error: %s: ERR 9100, newton3: fx= %E.\n",
                  __func__,fx);
 #endif
-        return(0);
+        return 0;
       }
-      return(n);
+      return n;
     }
-    else if ( fabs(fdx1) < _MG_EPSD ) {
+    else if ( fabs(fdx1) < MG_EIGENV_EPSD ) {
       /* dx1: double root, compute single root */
       n = 2;
       x[0] = dx1;
@@ -146,14 +147,14 @@ static int newton3(double p[4],double x[3]) {
       x[2] = -b - 2.0*dx1;
       /* check if P(x) = 0 */
       fx = d + x[2]*(c+x[2]*(b+x[2]));
-      if ( fabs(fx) > _MG_EPSD2 ) {
+      if ( fabs(fx) > MG_EIGENV_EPSD2 ) {
 #ifdef DEBUG
         fprintf(stderr,"\n  ## Error: %s: ERR 9100, newton3: fx= %E.\n",
                 __func__,fx);
 #endif
-        return(0);
+        return 0;
       }
-      return(n);
+      return n;
     }
   }
 
@@ -165,14 +166,14 @@ static int newton3(double p[4],double x[3]) {
     x[2] = x1;
     /* check if P(x) = 0 */
     fx = d + x[0]*(c+x[0]*(b+x[0]));
-    if ( fabs(fx) > _MG_EPSD2 ) {
+    if ( fabs(fx) > MG_EIGENV_EPSD2 ) {
 #ifdef DEBUG
       fprintf(stderr,"\n  ## Error: %s: ERR 9100, newton3: fx= %E.\n",
               __func__,fx);
 #endif
-      return(0);
+      return 0;
     }
-    return(n);
+    return n;
   }
 
   else {
@@ -180,7 +181,7 @@ static int newton3(double p[4],double x[3]) {
     fprintf(stderr,"\n  ## Error: %s: ERR 9101, newton3: no real roots.\n",
             __func__);
 #endif
-    return(0);
+    return 0;
   }
 
   /* Newton method: find one root (middle)
@@ -192,7 +193,7 @@ static int newton3(double p[4],double x[3]) {
   do {
     x2 = x1 - fx / dfx;
     fx = d + x2*(c+x2*(b+x2));
-    if ( fabs(fx) < _MG_EPSD ) {
+    if ( fabs(fx) < MG_EIGENV_EPSD ) {
       x[0] = x2;
       break;
     }
@@ -202,11 +203,11 @@ static int newton3(double p[4],double x[3]) {
     dxx = fabs((x2-x1) / x2);
     if ( dxx < 1.0e-10 ) {
       x[0] = x2;
-      if ( fabs(fx) > _MG_EPSD2 ) {
+      if ( fabs(fx) > MG_EIGENV_EPSD2 ) {
         fprintf(stderr,"\n  ## Error: %s: ERR 9102, newton3, no root found"
                 " (fx %E).\n",
                 __func__,fx);
-        return(0);
+        return 0;
       }
       break;
     }
@@ -218,11 +219,11 @@ static int newton3(double p[4],double x[3]) {
   if ( it == MAXTOU ) {
     x[0] = x1;
     fx   = d + x1*(c+(x1*(b+x1)));
-    if ( fabs(fx) > _MG_EPSD2 ) {
+    if ( fabs(fx) > MG_EIGENV_EPSD2 ) {
       fprintf(stderr,"\n  ## Error: %s: ERR 9102, newton3, no root found"
               " (fx %E).\n",
               __func__,fx);
-      return(0);
+      return 0;
     }
   }
 
@@ -234,7 +235,7 @@ static int newton3(double p[4],double x[3]) {
 
   if ( delta <= 0.0 ) {
     fprintf(stderr,"\n  ## Error: %s: ERR 9103, newton3, det = 0.\n",__func__);
-    return(0);
+    return 0;
   }
 
   delta = sqrt(delta);
@@ -244,20 +245,100 @@ static int newton3(double p[4],double x[3]) {
 #ifdef DEBUG
   /* check for root accuracy */
   fx = d + x[1]*(c+x[1]*(b+x[1]));
-  if ( fabs(fx) > _MG_EPSD2 ) {
+  if ( fabs(fx) > MG_EIGENV_EPSD2 ) {
     fprintf(stderr,"\n  ## Error: %s: ERR 9104, newton3: fx= %E  x= %E.\n",
             __func__,fx,x[1]);
-    return(0);
+    return 0;
   }
   fx = d + x[2]*(c+x[2]*(b+x[2]));
-  if ( fabs(fx) > _MG_EPSD2 ) {
+  if ( fabs(fx) > MG_EIGENV_EPSD2 ) {
     fprintf(stderr,"\n  ## Error: %s: ERR 9104, newton3: fx= %E  x= %E.\n",
             __func__,fx,x[2]);
-    return(0);
+    return 0;
   }
 #endif
 
-  return(n);
+  return n;
+}
+
+/**
+ * \param mat pointer toward a 3x3 matrix.
+ * \param lambda eigenvalues.
+ * \param v eigenvectors.
+ * \param w1 temporary array to perform the matrix cross product.
+ * \param w2 temporary array to perform the matrix cross product.
+ * \param w3 temporary array to perform the matrix cross product.
+ * \param maxm maximal value of the matrix used for normalization.
+ * \param order order of eigenvalues (1,2,3) or 0 if failed.
+ * \param symmat 0 if matrix is not symetric, 1 otherwise.
+ *
+ * \return 1 if success, 0 if fail.
+ *
+ * Check the accuracy of the eigenvalues and vectors computation of a 3x3 matrix
+ * (symetric).
+ *
+ */
+static
+int MMG5_check_accuracy(double mat[6],double lambda[3], double v[3][3],
+                        double w1[3], double w2[3], double w3[3],
+                        double maxm, int order, int symmat) {
+  double  err,tmpx,tmpy,tmpz;
+  float   m[6];
+  int     i,j,k;
+
+  if ( !symmat ) return 1;
+
+  k = 0;
+  for (i=0; i<3; i++) {
+    for (j=i; j<3; j++) {
+      m[k++] = lambda[0]*v[i][0]*v[j][0]
+        + lambda[1]*v[i][1]*v[j][1]
+        + lambda[2]*v[i][2]*v[j][2];
+    }
+  }
+  err = fabs(mat[0]-m[0]);
+  for (i=1; i<6; i++)
+    if ( fabs(m[i]-mat[i]) > err )  err = fabs(m[i]-mat[i]);
+
+  if ( err > 1.e03*maxm ) {
+    fprintf(stderr,"\n  ## Error: %s:\nProbleme eigenv3: err= %f\n",__func__,err*maxm);
+    fprintf(stderr,"\n  ## Error: %s:mat depart :\n",__func__);
+    fprintf(stderr,"\n  ## Error: %s:%13.6f  %13.6f  %13.6f\n",__func__,mat[0],mat[1],mat[2]);
+    fprintf(stderr,"\n  ## Error: %s:%13.6f  %13.6f  %13.6f\n",__func__,mat[1],mat[3],mat[4]);
+    fprintf(stderr,"\n  ## Error: %s:%13.6f  %13.6f  %13.6f\n",__func__,mat[2],mat[4],mat[5]);
+    fprintf(stderr,"\n  ## Error: %s:mat finale :\n",__func__);
+    fprintf(stderr,"\n  ## Error: %s:%13.6f  %13.6f  %13.6f\n",__func__,m[0],m[1],m[2]);
+    fprintf(stderr,"\n  ## Error: %s:%13.6f  %13.6f  %13.6f\n",__func__,m[1],m[3],m[4]);
+    fprintf(stderr,"\n  ## Error: %s:%13.6f  %13.6f  %13.6f\n",__func__,m[2],m[4],m[5]);
+    fprintf(stderr,"\n  ## Error: %s:lambda : %f %f %f\n",__func__,lambda[0],lambda[1],lambda[2]);
+    fprintf(stderr,"\n  ## Error: %s: ordre %d\n",__func__,order);
+    fprintf(stderr,"\n  ## Error: %s:\nOrtho:\n",__func__);
+    fprintf(stderr,"\n  ## Error: %s:v1.v2 = %.14f\n",__func__,
+            v[0][0]*v[1][0]+v[0][1]*v[1][1]+ v[0][2]*v[1][2]);
+    fprintf(stderr,"\n  ## Error: %s:v1.v3 = %.14f\n",__func__,
+            v[0][0]*v[2][0]+v[0][1]*v[2][1]+ v[0][2]*v[2][2]);
+    fprintf(stderr,"\n  ## Error: %s:v2.v3 = %.14f\n",__func__,
+            v[1][0]*v[2][0]+v[1][1]*v[2][1]+ v[1][2]*v[2][2]);
+
+    fprintf(stderr,"\n  ## Error: %s:Consistency\n",__func__);
+    for (i=0; i<3; i++) {
+      tmpx = v[0][i]*m[0] + v[1][i]*m[1]
+        + v[2][i]*m[2] - lambda[i]*v[0][i];
+      tmpy = v[0][i]*m[1] + v[1][i]*m[3]
+        + v[2][i]*m[4] - lambda[i]*v[1][i];
+      tmpz = v[0][i]*m[2] + v[1][i]*m[4]
+        + v[2][i]*m[5] - lambda[i]*v[2][i];
+      fprintf(stderr,"\n  ## Error: %s: Av %d - lambda %d *v %d = %f %f %f\n",
+              __func__,i,i,i,tmpx,tmpy,tmpz);
+
+      fprintf(stderr,"\n  ## Error: %s:w1 %f %f %f\n",__func__,w1[0],w1[1],w1[2]);
+      fprintf(stderr,"\n  ## Error: %s:w2 %f %f %f\n",__func__,w2[0],w2[1],w2[2]);
+      fprintf(stderr,"\n  ## Error: %s:w3 %f %f %f\n",__func__,w3[0],w3[1],w3[2]);
+    }
+    return 0;
+  }
+
+  return 1;
 }
 
 /**
@@ -272,7 +353,7 @@ static int newton3(double p[4],double x[3]) {
  * \remark the i^{th} eigenvector is stored in v[i][.].
  *
  */
-int _MMG5_eigenv(int symmat,double *mat,double lambda[3],double v[3][3]) {
+int MMG5_eigenv(int symmat,double *mat,double lambda[3],double v[3][3]) {
   double    a11,a12,a13,a21,a22,a23,a31,a32,a33;
   double    aa,bb,cc,dd,ee,ii,vx1[3],vx2[3],vx3[3],dd1,dd2,dd3;
   double    maxd,maxm,valm,p[4],w1[3],w2[3],w3[3];
@@ -291,7 +372,7 @@ int _MMG5_eigenv(int symmat,double *mat,double lambda[3],double v[3][3]) {
       if ( valm > maxm )  maxm = valm;
     }
     /* single float accuracy */
-    if ( maxm < _MG_EPS6 )  return(1);
+    if ( maxm < MG_EIGENV_EPS6 )  return 1;
 
     /* normalize matrix */
     dd  = 1.0 / maxm;
@@ -308,7 +389,7 @@ int _MMG5_eigenv(int symmat,double *mat,double lambda[3],double v[3][3]) {
     if ( valm > maxd )  maxd = valm;
     valm = fabs(a23);
     if ( valm > maxd )  maxd = valm;
-    if ( maxd < _MG_EPSD )  return(1);
+    if ( maxd < MG_EIGENV_EPSD )  return 1;
 
     a21  = a12;
     a31  = a13;
@@ -335,7 +416,7 @@ int _MMG5_eigenv(int symmat,double *mat,double lambda[3],double v[3][3]) {
       valm = fabs(mat[k]);
       if ( valm > maxm )  maxm = valm;
     }
-    if ( maxm < _MG_EPS6 )  return(1);
+    if ( maxm < MG_EIGENV_EPS6 )  return 1;
 
     /* normalize matrix */
     dd  = 1.0 / maxm;
@@ -361,7 +442,7 @@ int _MMG5_eigenv(int symmat,double *mat,double lambda[3],double v[3][3]) {
     if ( valm > maxd )  maxd = valm;
     valm = fabs(a32);
     if ( valm > maxd )  maxd = valm;
-    if ( maxd < _MG_EPSD )  return(1);
+    if ( maxd < MG_EIGENV_EPSD )  return 1;
 
     /* build characteristic polynomial
        P(X) = X^3 - trace X^2 + (somme des mineurs)X - det = 0 */
@@ -379,7 +460,7 @@ int _MMG5_eigenv(int symmat,double *mat,double lambda[3],double v[3][3]) {
 
   /* solve polynomial (find roots using newton) */
   n = newton3(p,lambda);
-  if ( n <= 0 )  return(0);
+  if ( n <= 0 )  return 0;
 
   /* compute eigenvectors:
      an eigenvalue belong to orthogonal of Im(A-lambda*Id) */
@@ -530,63 +611,12 @@ int _MMG5_eigenv(int symmat,double *mat,double lambda[3],double v[3][3]) {
   lambda[2] *= maxm;
 
   /* check accuracy */
-  /*-------------------------------------------------------------------
-    if ( ddebug && symmat ) {
-    double  err,tmpx,tmpy,tmpz;
-    float   m[6];
-    int     i,j;
+  if ( getenv("MMG_EIGENV_DDEBUG") && symmat ) {
+    if ( !MMG5_check_accuracy ( mat, lambda, v, w1, w2, w3, maxm, n, symmat ) )
+      return 0;
+  }
 
-    k = 0;
-    for (i=0; i<3; i++)
-    for (j=i; j<3; j++)
-    m[k++] = lambda[0]*v[i][0]*v[j][0]
-    + lambda[1]*v[i][1]*v[j][1]
-    + lambda[2]*v[i][2]*v[j][2];
-    err = fabs(mat[0]-m[0]);
-    for (i=1; i<6; i++)
-    if ( fabs(m[i]-mat[i]) > err )  err = fabs(m[i]-mat[i]);
-
-    if ( err > 1.e03*maxm ) {
-    fprintf(stderr,"\n  ## Error: %s:\nProbleme eigenv3: err= %f\n",__func__,err*maxm);
-    fprintf(stderr,"\n  ## Error: %s:mat depart :\n",__func__);
-    fprintf(stderr,"\n  ## Error: %s:%13.6f  %13.6f  %13.6f\n",__func__,mat[0],mat[1],mat[2]);
-    fprintf(stderr,"\n  ## Error: %s:%13.6f  %13.6f  %13.6f\n",__func__,mat[1],mat[3],mat[4]);
-    fprintf(stderr,"\n  ## Error: %s:%13.6f  %13.6f  %13.6f\n",__func__,mat[2],mat[4],mat[5]);
-    fprintf(stderr,"\n  ## Error: %s:mat finale :\n",__func__);
-    fprintf(stderr,"\n  ## Error: %s:%13.6f  %13.6f  %13.6f\n",__func__,m[0],m[1],m[2]);
-    fprintf(stderr,"\n  ## Error: %s:%13.6f  %13.6f  %13.6f\n",__func__,m[1],m[3],m[4]);
-    fprintf(stderr,"\n  ## Error: %s:%13.6f  %13.6f  %13.6f\n",__func__,m[2],m[4],m[5]);
-    fprintf(stderr,"\n  ## Error: %s:lambda : %f %f %f\n",__func__,lambda[0],lambda[1],lambda[2]);
-    fprintf(stderr,"\n  ## Error: %s: ordre %d\n",__func__,n);
-    fprintf(stderr,"\n  ## Error: %s:\nOrtho:\n",__func__);
-    fprintf(stderr,"\n  ## Error: %s:v1.v2 = %.14f\n",__func__,
-    v[0][0]*v[1][0]+v[0][1]*v[1][1]+ v[0][2]*v[1][2]);
-    fprintf(stderr,"\n  ## Error: %s:v1.v3 = %.14f\n",__func__,
-    v[0][0]*v[2][0]+v[0][1]*v[2][1]+ v[0][2]*v[2][2]);
-    fprintf(stderr,"\n  ## Error: %s:v2.v3 = %.14f\n",__func__,
-    v[1][0]*v[2][0]+v[1][1]*v[2][1]+ v[1][2]*v[2][2]);
-
-    fprintf(stderr,"\n  ## Error: %s:Consistency\n",__func__);
-    for (i=0; i<3; i++) {
-    tmpx = v[0][i]*m[0] + v[1][i]*m[1]
-    + v[2][i]*m[2] - lambda[i]*v[0][i];
-    tmpy = v[0][i]*m[1] + v[1][i]*m[3]
-    + v[2][i]*m[4] - lambda[i]*v[1][i];
-    tmpz = v[0][i]*m[2] + v[1][i]*m[4]
-    + v[2][i]*m[5] - lambda[i]*v[2][i];
-    fprintf(stderr,"\n  ## Error: %s: Av %d - lambda %d *v %d = %f %f %f\n",
-    __func__,i,i,i,tmpx,tmpy,tmpz);
-
-    fprintf(stderr,"\n  ## Error: %s:w1 %f %f %f\n",__func__,w1[0],w1[1],w1[2]);
-    fprintf(stderr,"\n  ## Error: %s:w2 %f %f %f\n",__func__,w2[0],w2[1],w2[2]);
-    fprintf(stderr,"\n  ## Error: %s:w3 %f %f %f\n",__func__,w3[0],w3[1],w3[2]);
-    }
-    return(1);
-    }
-    }
-    -------------------------------------------------------------------*/
-
-  return(n);
+  return n;
 }
 
 /**
@@ -598,7 +628,7 @@ int _MMG5_eigenv(int symmat,double *mat,double lambda[3],double v[3][3]) {
  *
  * \warning not used for now
  */
-int _MMG5_eigen2(double *mm,double *lambda,double vp[2][2]) {
+int MMG5_eigen2(double *mm,double *lambda,double vp[2][2]) {
   double   m[3],dd,a1,xn,ddeltb,rr1,rr2,ux,uy;
 
   /* normalize */
@@ -606,13 +636,13 @@ int _MMG5_eigen2(double *mm,double *lambda,double vp[2][2]) {
   xn = fabs(m[0]);
   if ( fabs(m[1]) > xn )  xn = fabs(m[1]);
   if ( fabs(m[2]) > xn )  xn = fabs(m[2]);
-  if ( xn < _MG_EPSD2 ) {
+  if ( xn < MG_EIGENV_EPSD2 ) {
     lambda[0] = lambda[1] = 0.0;
     vp[0][0] = 1.0;
     vp[0][1] = 0.0;
     vp[1][0] = 0.0;
     vp[1][1] = 1.0;
-    return(1);
+    return 1;
   }
   xn = 1.0 / xn;
   m[0] *= xn;
@@ -635,7 +665,7 @@ int _MMG5_eigen2(double *mm,double *lambda,double vp[2][2]) {
   }
   ddeltb = sqrt(ddeltb);
 
-  if ( fabs(a1) < _MG_EPS ) {
+  if ( fabs(a1) < MG_EIGENV_EPS ) {
     rr1 = 0.5 * sqrt(ddeltb);
     rr2 = -rr1;
   }
@@ -659,7 +689,7 @@ vect:
 
   /* eigenvectors */
   a1 = m[0] - rr1;
-  if ( fabs(a1)+fabs(m[1]) < _MG_EPS ) {
+  if ( fabs(a1)+fabs(m[1]) < MG_EIGENV_EPS ) {
     if (fabs(lambda[1]) < fabs(lambda[0]) ) {
       ux = 1.0;
       uy = 0.0;
@@ -701,7 +731,7 @@ vect:
   vp[1][0] = -vp[0][1];
   vp[1][1] =  vp[0][0];
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -713,7 +743,7 @@ vect:
  * Compute eigenelements of a symetric matrix m. Eigenvectors are orthogonal.
  *
  */
-inline int _MMG5_eigensym(double m[3],double lambda[2],double vp[2][2]) {
+inline int MMG5_eigensym(double m[3],double lambda[2],double vp[2][2]) {
   double   sqDelta,dd,trm,vnorm;
 
   dd  = m[0]-m[2];
@@ -722,25 +752,25 @@ inline int _MMG5_eigensym(double m[3],double lambda[2],double vp[2][2]) {
   lambda[0] = 0.5*(trm - sqDelta);
 
   /* Case when m = lambda[0]*I */
-  if ( sqDelta < _MMG5_EPS ) {
+  if ( sqDelta < MMG5_EPS ) {
     lambda[1] = lambda[0];
     vp[0][0] = 1.0;
     vp[0][1] = 0.0;
 
     vp[1][0] = 0.0;
     vp[1][1] = 1.0;
-    return(2);
+    return 2;
   }
   vp[0][0] = m[1];
   vp[0][1] = (lambda[0] - m[0]);
   vnorm = sqrt(vp[0][0]*vp[0][0] + vp[0][1]*vp[0][1]);
 
-  if ( vnorm < _MMG5_EPS ) {
+  if ( vnorm < MMG5_EPS ) {
     vp[0][0] = (lambda[0] - m[2]);
     vp[0][1] = m[1];
     vnorm = sqrt(vp[0][0]*vp[0][0] + vp[0][1]*vp[0][1]);
   }
-  assert(vnorm > _MMG5_EPSD);
+  assert(vnorm > MMG5_EPSD);
 
   vnorm = 1.0/vnorm;
   vp[0][0] *= vnorm;
@@ -752,5 +782,5 @@ inline int _MMG5_eigensym(double m[3],double lambda[2],double vp[2][2]) {
   lambda[1] = m[0]*vp[1][0]*vp[1][0] + 2.0*m[1]*vp[1][0]*vp[1][1]
     + m[2]*vp[1][1]*vp[1][1];
 
-  return(1);
+  return 1;
 }

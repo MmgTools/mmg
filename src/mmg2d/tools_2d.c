@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
+**  Copyright (c) Bx INP/CNRS/Inria/UBordeaux/UPMC, 2004-
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -42,7 +42,7 @@
  * find the element index in packed numerotation
  *
  */
-int _MMG2D_indElt(MMG5_pMesh mesh, int kel) {
+int MMG2D_indElt(MMG5_pMesh mesh, int kel) {
     MMG5_pTria pt;
     int        ne, k;
 
@@ -51,10 +51,10 @@ int _MMG2D_indElt(MMG5_pMesh mesh, int kel) {
         pt = &mesh->tria[k];
         if ( MG_EOK(pt) ) {
             ne++;
-            if ( k == kel )  return(ne);
+            if ( k == kel )  return ne;
         }
     }
-    return(0);
+    return 0;
 }
 
 /**
@@ -66,7 +66,7 @@ int _MMG2D_indElt(MMG5_pMesh mesh, int kel) {
  * find the point index in packed numerotation
  *
  */
-int _MMG2D_indPt(MMG5_pMesh mesh, int kp) {
+int MMG2D_indPt(MMG5_pMesh mesh, int kp) {
     MMG5_pPoint ppt;
     int         np, k;
 
@@ -75,8 +75,8 @@ int _MMG2D_indPt(MMG5_pMesh mesh, int kp) {
         ppt = &mesh->point[k];
         if ( MG_VOK(ppt) ) {
             np++;
-            if ( k == kp )  return(np);
+            if ( k == kp )  return np;
         }
     }
-    return(0);
+    return 0;
 }

@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
+**  Copyright (c) Bx INP/CNRS/Inria/UBordeaux/UPMC, 2004-
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -31,11 +31,11 @@
  * Check if all edges exist in the mesh and if not force them.
  *
  */
-int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
+int MMG2D_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTria      pt,pt1;
   MMG5_pEdge      ped;
   MMG5_pPoint     ppt;
-  int             k,l,kk,nex,list[MMG2_LONMAX],kdep,lon,iel,iare,ied;
+  int             k,l,kk,nex,list[MMG2D_LONMAX],kdep,lon,iel,iare,ied;
   int             ia,ib,ilon,rnd,idep,*adja,ir,adj,list2[3];
   char            i,i1,i2,j;
 //  int       iadr2,*adja2,ndel,iadr,ped0,ped1;
@@ -44,20 +44,20 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
   static char     mmgWarn8=0;
 
   nex = 0;
-  
+
   /* Associate seed to each point in the mesh */
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
     if ( MG_VOK(ppt) ) ppt->s = 0;
   }
-  
+
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) ) continue;
     for (i=0; i<3; i++)
       mesh->point[pt->v[i]].s = k;
   }
-  
+
   /* Check for the existing edges in the mesh */
   /* No command for identifying whether an edge is valid or not? */
   for(k=1; k<=mesh->na; k++) {
@@ -67,37 +67,37 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
       nex++;
       continue;
     }
-    
+
     ppt = &mesh->point[ped->a];
     kdep = ppt->s;
     pt = &mesh->tria[kdep];
-    
+
     if ( pt->v[0] == ped->a )
       j=0;
     else if ( pt->v[1] == ped->a )
       j=1;
     else
       j=2;
-    
-    lon = _MMG2_boulet(mesh,kdep,j,list);
-    
+
+    lon = MMG2D_boulet(mesh,kdep,j,list);
+
     if ( lon <= 0 ) {
       if ( !mmgWarn0 ) {
         mmgWarn0=1;
         fprintf(stderr,"\n  ## Error: %s: at least 1 wrong ball "
                 "(point %d of triangle %d).\n",__func__,
-                _MMG2D_indPt(mesh, mesh->tria[kdep].v[j]),_MMG2D_indElt(mesh,kdep));
+                MMG2D_indPt(mesh, mesh->tria[kdep].v[j]),MMG2D_indElt(mesh,kdep));
       }
-      return(0);
+      return 0;
     }
-    
+
     for (l=0; l<lon; l++) {
       iel = list[l] / 3;
       pt  = &mesh->tria[iel];
       i = list[l] % 3;
-      i1 = _MMG5_inxt2[i];
-      i2 = _MMG5_iprv2[i];
-      
+      i1 = MMG5_inxt2[i];
+      i2 = MMG5_iprv2[i];
+
       if ( pt->v[i1] == ped->b ) {
         ped->base = -1;
         nex++;
@@ -109,51 +109,56 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
         break;
       }
     }
-    
+
     if ( l >= lon ) {
       if ( (mesh->info.imprim > 5) && (!mmgWarn1) ) {
         mmgWarn1 = 1;
-        fprintf(stderr,"\n  ## Error: %s: at least 1 missing edge (%d %d).\n",
-                __func__,_MMG2D_indPt(mesh,ped->a),_MMG2D_indPt(mesh,ped->b));
+        fprintf(stderr,"\n  ## Warning: %s: at least 1 missing edge (%d %d).\n",
+                __func__,MMG2D_indPt(mesh,ped->a),MMG2D_indPt(mesh,ped->b));
       }
       ped->base = kdep;
     }
   }
-    
-  /* Now treat the missing edges */
+
+  /** Now treat the missing edges */
   if ( nex != mesh->na ) {
     if(mesh->info.imprim > 5)
       printf(" ** number of missing edges : %d\n",mesh->na-nex);
-    
+
     for (kk=1; kk<=mesh->na; kk++) {
       ped = &mesh->edge[kk];
       if ( !ped->a || ped->base < 0 ) continue;
       ia = ped->a;
       ib = ped->b;
       kdep = ped->base;
-      
+
       if(mesh->info.ddebug)
         printf("\n  -- edge enforcement %d %d\n",ia,ib);
 
-      if ( !(lon=MMG2_locateEdge(mesh,ia,ib,&kdep,list)) ) {
+      /* List of the triangles intersected by the edge */
+      if ( !(lon=MMG2D_locateEdge(mesh,ia,ib,&kdep,list)) ) {
         if ( mesh->info.ddebug && (!mmgWarn2) ) {
           fprintf(stderr,"\n  ## Error: %s: at least 1 edge not found.\n",
                   __func__);
           mmgWarn2=1;
         }
-        return(0);
+        return 0;
       }
-      
+
+      /* Failure */
       if ( !( lon < 0 || lon == 4 ) ) {
         if ( mesh->info.ddebug && (!mmgWarn3) ) {
           mmgWarn3=1;
           fprintf(stderr,"\n ## Error: %s: Unable to force at least"
-                  " 1 edge (%d %d -- %d).\n",__func__,_MMG2D_indPt(mesh,ia),
-                  _MMG2D_indPt(mesh,ib),lon);
+                  " 1 edge (%d %d -- %d).\n",__func__,MMG2D_indPt(mesh,ia),
+                  MMG2D_indPt(mesh,ib),lon);
         }
         return 0;
       }
-      
+
+      /* Insertion of the edge */
+      lon = -lon;
+
       /* Considered edge actually exists */
       if ( lon == 4 ) {
         if ( mesh->info.ddebug && (!mmgWarn4) ) {
@@ -161,7 +166,7 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
           fprintf(stderr,"\n  ## Warning: %s: existing edge.\n",__func__);
         }
       }
-      if( (!mmgWarn5) && (lon>MMG2_LONMAX) ) {
+      if( (!mmgWarn5) && (lon>MMG2D_LONMAX) ) {
         mmgWarn5 = 1;
         fprintf(stderr,"\n  ## Error: %s: at least 1 edge intersecting too many"
                " triangles (%d)\n",__func__,lon);
@@ -172,17 +177,16 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
           fprintf(stderr,"\n  ## Warning: %s: few edges... %d\n",__func__,lon);
         }
       }
-      lon = -lon;
-      ilon = lon;
 
       /* Randomly swap edges in the list, while... */
+      ilon = lon;
       srand(time(NULL));
-      
+
       while ( ilon > 0 ) {
         rnd = ( rand() % lon );
         k   = list[rnd] / 3;
 
-        /* Check for triangle k in the pipe until one triangle with base+1 is met (indicating that it is 
+        /* Check for triangle k in the pipe until one triangle with base+1 is met (indicating that it is
            crossed by the considered edge) */
         l = 0;
         while ( l++ < lon ) {
@@ -190,22 +194,22 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
           if ( pt->base == mesh->base+1 ) break;
           k = list[(++rnd)%lon] / 3;
         }
-        
+
         assert ( l <= lon );
         idep = list[rnd] % 3;
         // if(mesh->info.ddebug) printf("i= %d < %d ? on demarre avec %d\n",i,lon+1,k);
         adja = &mesh->adja[3*(k-1)+1];
-        
+
         for (i=0; i<3; i++) {
           ir = (idep+i) % 3;
-          
+
           /* Check the adjacent triangle in the pipe */
           adj = adja[ir] / 3;
           pt1 = &mesh->tria[adj];
           if ( pt1->base != (mesh->base+1) ) continue;
-          
+
           /* Swap edge ir in triangle k, corresponding to a situation where both triangles are to base+1 */
-          if ( !_MMG2_swapdelone(mesh,sol,k,ir,1e+4,list2) ) {
+          if ( !MMG2D_swapdelone(mesh,sol,k,ir,1e+4,list2) ) {
             if ( mesh->info.ddebug && (!mmgWarn7) ) {
               mmgWarn7 = 1;
               fprintf(stderr,"\n  ## Warning: %s: unable to swap at least 1"
@@ -213,21 +217,23 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
             }
             continue;
           }
-          
+
           /* Is new triangle intersected by ia-ib ?? */
           for (ied=1; ied<3; ied++) {
-            iare = MMG2_cutEdgeTriangle(mesh,list2[ied],ia,ib);
-            if ( !iare ) { /*tr not in pipe*/
+            iare = MMG2D_cutEdgeTriangle(mesh,list2[ied],ia,ib);
+            if ( !iare ) {
+              /* tr not in pipe */
               ilon--;
               if ( mesh->info.ddebug && (!mmgWarn8) ) {
                 mmgWarn8 = 1;
                 fprintf(stderr,"\n  ## Warning: %s: at least 1 triangle (%d)"
                         " not intersected ==> %d\n",__func__,
-                        _MMG2D_indElt(mesh,list2[ied]),ilon);
+                        MMG2D_indElt(mesh,list2[ied]),ilon);
               }
               mesh->tria[list2[ied]].base = mesh->base;
             }
             else if ( iare < 0 ) {
+              /* ia-ib is one edge of k */
               mesh->tria[list2[ied]].base = mesh->base;
               ilon -= 2;
             }
@@ -242,7 +248,7 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
      }
     }
   }
-  
+
   /* Reset ->s field of vertices */
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
@@ -262,8 +268,8 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
 
 /*       for(i=0 ; i<3 ; i++)  { */
 /*  if(adja[i]) continue; */
-/*         ped0 = pt->v[MMG2_iare[i][0]]; */
-/*         ped1 = pt->v[MMG2_iare[i][1]]; */
+/*         ped0 = pt->v[MMG2D_iare[i][0]]; */
+/*         ped1 = pt->v[MMG2D_iare[i][1]]; */
 /*         for(j=1 ; j<=mesh->na ; j++) { */
 /*           ped = &mesh->edge[j]; */
 /*           if((ped->a == ped0 && ped->b==ped1) || (ped->b == ped0 && ped->a==ped1)) break;   */
@@ -282,11 +288,11 @@ int MMG2_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
 /*  adja2 = &mesh->adja[iadr2]; */
 /*  adja2[adja[i]%3] = 0; */
 /*       } */
-/*       MMG2_delElt(mesh,k);  */
+/*       MMG2D_delElt(mesh,k);  */
 /*       ndel++; */
 
 /*     }           */
 /*   } while(ndel); */
 
-  return(1);
+  return 1;
 }

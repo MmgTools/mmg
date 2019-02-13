@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
+**  Copyright (c) Bx INP/CNRS/Inria/UBordeaux/UPMC, 2004-
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -39,7 +39,7 @@
  * Compute radius and center of circumscribing circle to the element.
  *
  */
-int _MMG2_cenrad_iso(MMG5_pMesh mesh,double *ct,double *c,double *rad) {
+int MMG2D_cenrad_iso(MMG5_pMesh mesh,double *ct,double *c,double *rad) {
   double      dd,ux,uy,n1[2],n2[2],*c1,*c2,*c3,pl1,pl2;
   double      cc1,cc2;
 
@@ -67,7 +67,7 @@ int _MMG2_cenrad_iso(MMG5_pMesh mesh,double *ct,double *c,double *rad) {
 
   /* center = intersection of 3 mediatrice */
   dd = n1[0]*n2[1] - n2[0]*n1[1] ;
-  if(fabs((dd))<1e-12)  return(0);
+  if(fabs((dd))<1e-12)  return 0;
   dd = 1./dd;
 
   cc1 = n2[1]*pl1 - n1[1]*pl2;
@@ -84,5 +84,5 @@ int _MMG2_cenrad_iso(MMG5_pMesh mesh,double *ct,double *c,double *rad) {
   /*     + (c[1] - c2[1]) * (c[1] - c2[1]), (c[0] - c3[0]) * (c[0] - c3[0]) \ */
   /*     + (c[1] - c3[1]) * (c[1] - c3[1])); */
 
-  return(1);
+  return 1;
 }

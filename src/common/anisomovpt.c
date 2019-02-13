@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
+**  Copyright (c) Bx INP/CNRS/Inria/UBordeaux/UPMC, 2004-
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -50,8 +50,8 @@
  * Compute integral of sqrt(T^J(xi)  M(P(xi)) J(xi)) * P(xi) over the triangle.
  *
  */
-int _MMG5_elementWeight(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pTria pt,
-                        MMG5_pPoint p0, _MMG5_Bezier *pb,double r[3][3],
+int MMG5_elementWeight(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pTria pt,
+                        MMG5_pPoint p0, MMG5_Bezier *pb,double r[3][3],
                         double gv[2])
 {
   MMG5_pPoint    p1,p2;
@@ -97,11 +97,11 @@ int _MMG5_elementWeight(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pTria pt,
 
     /* Take metric at control point */
     if ( !(MG_GEO & pt->tag[i2]) ) {
-      if ( !_MMG5_interpreg_ani(mesh,met,pt,i2,0.5,m) )  return(0);
+      if ( !MMG5_interpreg_ani(mesh,met,pt,i2,0.5,m) )  return 0;
     }
     else {
-      if ( !_MMG5_nortri(mesh,pt,no) )  return(0);
-      if ( !_MMG5_intridmet(mesh,met,pt->v[i0],pt->v[i1],0.5,no,mo) )  return(0);
+      if ( !MMG5_nortri(mesh,pt,no) )  return 0;
+      if ( !MMG5_intridmet(mesh,met,pt->v[i0],pt->v[i1],0.5,no,mo) )  return 0;
 
       p1 = &mesh->point[pt->v[i0]];
       p2 = &mesh->point[pt->v[i1]];
@@ -111,7 +111,7 @@ int _MMG5_elementWeight(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pTria pt,
       to[2] = p2->c[2] - p1->c[2];
 
       ll = to[0]*to[0] + to[1]*to[1] + to[2]*to[2];
-      if ( ll < _MMG5_EPSD )  return(0);
+      if ( ll < MMG5_EPSD )  return 0;
       ll = 1.0 / sqrt(ll);
       to[0] *= ll;
       to[1] *= ll;
@@ -119,8 +119,8 @@ int _MMG5_elementWeight(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pTria pt,
 
       if ( ( MG_SIN(p1->tag) || (p1->tag & MG_NOM) )
            && ( MG_SIN(p2->tag) || (p2->tag & MG_NOM) ) ) {
-             if ( !_MMG5_buildridmetfic(mesh,to,no,mo[0],mo[0],mo[0],m) )
-               return(0);
+             if ( !MMG5_buildridmetfic(mesh,to,no,mo[0],mo[0],mo[0],m) )
+               return 0;
       }
       else if ( !(MG_SIN(p1->tag) || (p1->tag & MG_NOM)) ) {
         n1 = &mesh->xpoint[p1->xp].n1[0];
@@ -128,10 +128,10 @@ int _MMG5_elementWeight(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pTria pt,
         ps1 = n1[0]*no[0] + n1[1]*no[1] + n1[2]*no[2];
         ps2 = n2[0]*no[0] + n2[1]*no[1] + n2[2]*no[2];
         if ( fabs(ps1) > fabs(ps2) ) {
-          if ( !_MMG5_buildridmetfic(mesh,to,no,mo[0],mo[1],mo[3],m) )  return(0);
+          if ( !MMG5_buildridmetfic(mesh,to,no,mo[0],mo[1],mo[3],m) )  return 0;
         }
         else {
-          if ( !_MMG5_buildridmetfic(mesh,to,no,mo[0],mo[2],mo[4],m) )  return(0);
+          if ( !MMG5_buildridmetfic(mesh,to,no,mo[0],mo[2],mo[4],m) )  return 0;
         }
       }
       else {
@@ -141,10 +141,10 @@ int _MMG5_elementWeight(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pTria pt,
         ps1 = n1[0]*no[0] + n1[1]*no[1] + n1[2]*no[2];
         ps2 = n2[0]*no[0] + n2[1]*no[1] + n2[2]*no[2];
         if ( fabs(ps1) > fabs(ps2) ) {
-          if ( !_MMG5_buildridmetfic(mesh,to,no,mo[0],mo[1],mo[3],m) )  return(0);
+          if ( !MMG5_buildridmetfic(mesh,to,no,mo[0],mo[1],mo[3],m) )  return 0;
         }
         else {
-          if ( !_MMG5_buildridmetfic(mesh,to,no,mo[0],mo[2],mo[4],m) )  return(0);
+          if ( !MMG5_buildridmetfic(mesh,to,no,mo[0],mo[2],mo[4],m) )  return 0;
         }
       }
     }
@@ -163,7 +163,7 @@ int _MMG5_elementWeight(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pTria pt,
     dens[2] = Jacsigma[0][1]*Jactmp[0][1] + Jacsigma[1][1]*Jactmp[1][1] + Jacsigma[2][1]*Jactmp[2][1];
 
     density = dens[0]*dens[2] - dens[1]*dens[1];
-    if ( density <= _MMG5_EPSD2 ) {
+    if ( density <= MMG5_EPSD2 ) {
 #ifndef DNDEBUG
       if ( !mmgErr ) {
         fprintf(stderr,"\n  ## Warning: %s: at least 1 negative or null density.\n",
@@ -187,15 +187,15 @@ int _MMG5_elementWeight(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pTria pt,
     intpt[0] =  r[0][0]*ux + r[0][1]*uy + r[0][2]*uz;
     intpt[1] =  r[1][0]*ux + r[1][1]*uy + r[1][2]*uz;
 
-    gv[0] += density*_MMG5_ATHIRD*intpt[0];
-    gv[1] += density*_MMG5_ATHIRD*intpt[1];
+    gv[0] += density*MMG5_ATHIRD*intpt[0];
+    gv[1] += density*MMG5_ATHIRD*intpt[1];
 
-    i0 = _MMG5_inxt2[i0];
-    i1 = _MMG5_inxt2[i1];
-    i2 = _MMG5_inxt2[i2];
+    i0 = MMG5_inxt2[i0];
+    i1 = MMG5_inxt2[i1];
+    i2 = MMG5_inxt2[i2];
   }
 
   if ( nullDens==3 ) return 0;
 
-  return(1);
+  return 1;
 }

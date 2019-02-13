@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
+**  Copyright (c) Bx INP/CNRS/Inria/UBordeaux/UPMC, 2004-
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -47,7 +47,7 @@ extern char ddb;
  * \param i local index of edge in \a k.
  * \param s interpolation parameter.
  * \param mr computed metric.
- * \return call to _MMG5_interpreg_ani (thus, 0 if fail, 1 otherwise).
+ * \return call to MMG5_interpreg_ani (thus, 0 if fail, 1 otherwise).
  *
  * Metric interpolation on edge \a i in elt \a it at
  * parameter \f$ 0 <= s0 <= 1 \f$ from \a p1 result is stored in \a mr. edge
@@ -59,7 +59,7 @@ int intregmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,double mr[6]) 
 
   pt  = &mesh->tria[k];
 
-  return(_MMG5_interpreg_ani(mesh,met,pt,i,s,mr));
+  return MMG5_interpreg_ani(mesh,met,pt,i,s,mr);
 }
 
 /**
@@ -80,12 +80,12 @@ int intmet_iso(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s) {
   char   i1,i2;
 
   pt  = &mesh->tria[k];
-  i1  = _MMG5_inxt2[i];
-  i2  = _MMG5_iprv2[i];
+  i1  = MMG5_inxt2[i];
+  i2  = MMG5_iprv2[i];
   ip1 = pt->v[i1];
   ip2 = pt->v[i2];
   met->m[ip] = s * (met->m[ip1] + met->m[ip2]);
-  return(1);
+  return 1;
 }
 
 /**
@@ -109,8 +109,8 @@ int intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s) {
   int           ip1, ip2, i1, i2;
 
   pt  = &mesh->tria[k];
-  i1  = _MMG5_inxt2[i];
-  i2  = _MMG5_iprv2[i];
+  i1  = MMG5_inxt2[i];
+  i2  = MMG5_iprv2[i];
   ip1 = pt->v[i1];
   ip2 = pt->v[i2];
 
@@ -119,12 +119,12 @@ int intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s) {
     ppt = &mesh->point[ip];
     assert(ppt->xp);
     go = &mesh->xpoint[ppt->xp];
-    return(_MMG5_intridmet(mesh,met,ip1,ip2,s,go->n1,m));
+    return MMG5_intridmet(mesh,met,ip1,ip2,s,go->n1,m);
   }
   else {
-    return(intregmet(mesh,met,k,i,s,m));
+    return intregmet(mesh,met,k,i,s,m);
   }
-  return(1);
+  return 1;
 }
 
 /**
@@ -140,14 +140,14 @@ int intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s) {
  * \a k for classic storage of ridges metrics (before defsiz call).
  *
  */
-int _MMGS_intmet33_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s) {
+int MMGS_intmet33_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s) {
   MMG5_pTria    pt;
   double        *mr,*m,*n;
   int           ip1, ip2, i1, i2;
 
   pt  = &mesh->tria[k];
-  i1  = _MMG5_inxt2[i];
-  i2  = _MMG5_iprv2[i];
+  i1  = MMG5_inxt2[i];
+  i2  = MMG5_iprv2[i];
   ip1 = pt->v[i1];
   ip2 = pt->v[i2];
 
@@ -155,5 +155,5 @@ int _MMGS_intmet33_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double 
   n   = &met->m[6*ip2];
   mr  = &met->m[6*ip];
 
-  return(_MMG5_mmgIntmet33_ani(m,n,mr,s));
+  return MMG5_mmgIntmet33_ani(m,n,mr,s);
 }

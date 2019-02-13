@@ -152,6 +152,8 @@ IF ( BUILD_TESTING )
       SET(LIBMMGS_EXEC0_b ${EXECUTABLE_OUTPUT_PATH}/libmmgs_example0_b)
       SET(LIBMMGS_EXEC1   ${EXECUTABLE_OUTPUT_PATH}/libmmgs_example1)
       SET(LIBMMGS_EXEC2   ${EXECUTABLE_OUTPUT_PATH}/libmmgs_example2)
+      SET(LIBMMGS_EXEC3   ${EXECUTABLE_OUTPUT_PATH}/libmmgs_example3)
+
 
       ADD_TEST(NAME libmmgs_example0_a   COMMAND ${LIBMMGS_EXEC0_a}
         "${PROJECT_SOURCE_DIR}/libexamples/mmgs/adaptation_example0/example0_a/cube.mesh"
@@ -169,10 +171,21 @@ IF ( BUILD_TESTING )
         "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_example0/teapot"
         "${CTEST_OUTPUT_DIR}/libmmgs-IsosurfDiscretization_0-teapot.o"
         )
+      ADD_TEST(NAME libmmgs_example3_io_0   COMMAND ${LIBMMGS_EXEC3}
+        "${PROJECT_SOURCE_DIR}/libexamples/mmgs/io_multisols_example3/torus.mesh"
+        "${CTEST_OUTPUT_DIR}/libmmgs_io_3-naca.o" "0"
+       )
+      ADD_TEST(NAME libmmgs_example3_io_1   COMMAND ${LIBMMGS_EXEC3}
+        "${PROJECT_SOURCE_DIR}/libexamples/mmgs/io_multisols_example3/torus.mesh"
+        "${CTEST_OUTPUT_DIR}/libmmgs_io_3-naca.o" "1"
+       )
+
 
       IF ( CMAKE_Fortran_COMPILER)
         SET(LIBMMGS_EXECFORTRAN_a ${EXECUTABLE_OUTPUT_PATH}/libmmgs_fortran_a)
         SET(LIBMMGS_EXECFORTRAN_b ${EXECUTABLE_OUTPUT_PATH}/libmmgs_fortran_b)
+        SET(LIBMMGS_EXECFORTRAN_IO ${EXECUTABLE_OUTPUT_PATH}/libmmgs_fortran_io)
+
         ADD_TEST(NAME libmmgs_fortran_a   COMMAND ${LIBMMGS_EXECFORTRAN_a}
           "${PROJECT_SOURCE_DIR}/libexamples/mmgs/adaptation_example0_fortran/example0_a/cube.mesh"
           "${CTEST_OUTPUT_DIR}/libmmgs-Adaptation_Fortran_0_a-cube.o"
@@ -180,6 +193,15 @@ IF ( BUILD_TESTING )
         ADD_TEST(NAME libmmgs_fortran_b   COMMAND ${LIBMMGS_EXECFORTRAN_b}
           "${CTEST_OUTPUT_DIR}/libmmgs_Adaptation_Fortran_0_b.o"
           )
+        ADD_TEST(NAME libmmgs_fortran_io_0   COMMAND ${LIBMMGS_EXECFORTRAN_IO}
+          "${PROJECT_SOURCE_DIR}/libexamples/mmgs/io_multisols_example3/torus.mesh"
+          "${CTEST_OUTPUT_DIR}/libmmgs_Fortran_io-torus.o" "0"
+         )
+        ADD_TEST(NAME libmmgs_fortran_io_1   COMMAND ${LIBMMGS_EXECFORTRAN_IO}
+          "${PROJECT_SOURCE_DIR}/libexamples/mmgs/io_multisols_example3/torus.mesh"
+          "${CTEST_OUTPUT_DIR}/libmmgs_Fortran_io-torus.o" "1"
+         )
+
       ENDIF()
 
     ENDIF()

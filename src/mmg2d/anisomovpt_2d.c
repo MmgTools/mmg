@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
+**  Copyright (c) Bx INP/CNRS/Inria/UBordeaux/UPMC, 2004-
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -34,10 +34,11 @@
 #include "mmg2d.h"
 
 /* Relocate internal vertex whose ball is passed */
-int _MMG2_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list,char improve) {
+int MMG2D_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list,char improve) {
   MMG5_pTria         pt,pt0;
   MMG5_pPoint        ppt0,p0,p1,p2;
-  double             calold,calnew,area,det,alpha,ps,ps1,ps2,step,sqdetm1,sqdetm2,gr[2],grp[2],*m0,*m1,*m2;
+  double             calold,calnew,area,det,alpha,ps,ps1,ps2,step,sqdetm1,sqdetm2;
+  double             gr[2],grp[2],*m0,*m1,*m2;
   int                k,iel,ip0,ip1,ip2;
   char               i,i1,i2;
   static char        mmgWarn0=0;
@@ -50,6 +51,9 @@ int _MMG2_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list,char im
   
   /* Step 1: Calculation of the gradient of the variance function; store the quality of the previous
      configuration */
+  p0 = p1 = p2 = NULL;
+  m0 = NULL;
+  assert ( ilist );
   for (k=0; k<ilist; k++) {
     iel = list[k] / 3;
     pt = &mesh->tria[iel];
@@ -58,8 +62,8 @@ int _MMG2_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list,char im
     calold = MG_MIN(MMG2D_caltri(mesh,met,pt),calold);
     
     i = list[k] % 3;
-    i1 = _MMG5_inxt2[i];
-    i2 = _MMG5_iprv2[i];
+    i1 = MMG5_inxt2[i];
+    i2 = MMG5_iprv2[i];
     
     ip0 = pt->v[i];
     ip1 = pt->v[i1];
@@ -79,26 +83,27 @@ int _MMG2_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list,char im
     sqdetm1 = sqrt(m1[0]*m1[2]-m1[1]*m1[1]);
     sqdetm2 = sqrt(m2[0]*m2[2]-m2[1]*m2[1]);
     
-    gr[0] += _MMG5_ATHIRD*area*((p1->c[0]-p0->c[0])*sqdetm1 + (p2->c[0]-p0->c[0])*sqdetm2);
-    gr[1] += _MMG5_ATHIRD*area*((p1->c[1]-p0->c[1])*sqdetm1 + (p2->c[1]-p0->c[1])*sqdetm2);
+    gr[0] += MMG5_ATHIRD*area*((p1->c[0]-p0->c[0])*sqdetm1 + (p2->c[0]-p0->c[0])*sqdetm2);
+    gr[1] += MMG5_ATHIRD*area*((p1->c[1]-p0->c[1])*sqdetm1 + (p2->c[1]-p0->c[1])*sqdetm2);
   }
   
   /* Preconditionning of the gradient gr = M^{-1}gr */
   det = m0[0]*m0[2]-m0[1]*m0[1];
-  if ( det < _MMG5_EPSD ) return(0);
+  if ( det < MMG5_EPSD ) return 0;
   det = 1.0 / det;
   
   grp[0] = det*(m0[2]*gr[0]-m0[1]*gr[1]);
   grp[1] = det*(-m0[1]*gr[0]+m0[0]*gr[1]);
   
   /* Step 2: Identification of the triangle such that gr is comprised in the associated angular sector */
+  ps1 = ps2 = 0.;
   for (k=0; k<ilist; k++) {
     iel = list[k] / 3;
     pt = &mesh->tria[iel];
     
     i = list[k] % 3;
-    i1 = _MMG5_inxt2[i];
-    i2 = _MMG5_iprv2[i];
+    i1 = MMG5_inxt2[i];
+    i2 = MMG5_iprv2[i];
     
     ip0 = pt->v[i];
     ip1 = pt->v[i1];
@@ -127,13 +132,15 @@ int _MMG2_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list,char im
      the new point is inside the triangle */
   det = (p1->c[0]-p0->c[0])*(p2->c[1]-p0->c[1]) - (p1->c[1]-p0->c[1])*(p2->c[0]-p0->c[0]);
   ps = ps1+ps2;
-  if ( ps < _MMG5_EPSD ) return(0);
+  if ( ps < MMG5_EPSD ) return 0;
   alpha = det / ps;
   
   ppt0->c[0] = p0->c[0] + alpha*step*grp[0];
   ppt0->c[1] = p0->c[1] + alpha*step*grp[1];
   
   /* Step 3: Vertex relocation and checks */
+  i  = 0;
+  pt = NULL;
   for (k=0; k<ilist; k++) {
     iel = list[k] / 3;
     i   = list[k] % 3;
@@ -144,15 +151,15 @@ int _MMG2_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list,char im
     calnew = MG_MIN(MMG2D_caltri(mesh,met,pt0),calnew);
   }
   
-  if (calold < _MMG2_NULKAL && calnew <= calold) return(0);
-  else if (calnew < _MMG2_NULKAL) return(0);
-  else if ( improve && calnew < 1.02 * calold ) return(0);
-  else if ( calnew < 0.3 * calold ) return(0);
+  if (calold < MMG2D_NULKAL && calnew <= calold) return 0;
+  else if (calnew < MMG2D_NULKAL) return 0;
+  else if ( improve && calnew < 1.02 * calold ) return 0;
+  else if ( calnew < 0.3 * calold ) return 0;
   
   /* Update of the coordinates of the point */
   p0 = &mesh->point[pt->v[i]];
   p0->c[0] = ppt0->c[0];
   p0->c[1] = ppt0->c[1];
   
-  return(1);
+  return 1;
 }

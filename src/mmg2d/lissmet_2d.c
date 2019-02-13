@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
+**  Copyright (c) Bx INP/CNRS/Inria/UBordeaux/UPMC, 2004-
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -40,7 +40,8 @@
  * \return 0 if fail, 1 if success
  *
  * Anisotropic gradation (h-gradation procedure). See:
- * http://www.ann.jussieu.fr/frey/publications/ijnme4398.pdf
+ * http://www.ljll.math.upmc.fr/frey/publications/ijnme4398.pdf
+ * Skip edges with a required extremity (treated in lissmetreq_ani).
  *
  */
 int lissmet_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
@@ -48,35 +49,47 @@ int lissmet_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
   Hedge         *pht;
   MMG5_pTria     pt;
   MMG5_pPoint    p1,p2;
-  double         hsiz,logh,logs,*ma,*mb,ux,uy,d1,d2,dd,rap,dh;
+  double         logh,logs,*ma,*mb,ux,uy,d1,d2,dd,rap,dh;
   double         tail,coef,ma1[3],mb1[3],m[3],dd1,dd2;
   int            i,nc,k,itour,maxtou,ncor,a,b,iadr;
   double         SQRT3DIV2=0.8660254037844386;
 
-  hsiz   = mesh->info.hgrad;
-  logh   = log(hsiz);
+  if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {
+    fprintf(stdout,"  ** Grading mesh\n");
+  }
+
+  MMG5_mark_pointsOnReqEdge_fromTria ( mesh );
+
+  logh   = mesh->info.hgrad;
   logs   = 0.001 + logh;
   maxtou = 100;
   ncor   = 0;
   itour  = 0;
 
-  /*alloc hashtable*/
-  //#warning revoir le dimensionnement!!!!
+  /* alloc hashtable */
   edgeTable.size  = mesh->ntmax;
   edgeTable.nxtmax = 3*mesh->ntmax+1;
   edgeTable.hnxt  = mesh->ntmax;
-  _MMG5_SAFE_CALLOC(edgeTable.item,edgeTable.nxtmax,Hedge,0);
+  MMG5_SAFE_CALLOC(edgeTable.item,edgeTable.nxtmax,Hedge,return 0);
 
   memset(edgeTable.item,0,edgeTable.nxtmax*sizeof(Hedge));
+
   for (k=edgeTable.size; k<edgeTable.nxtmax; k++)
     edgeTable.item[k].nxt = k+1;
 
-  /*build edge table*/
-  //#warning optimiser!
+  /* build edge table */
   for(k=1 ; k<=mesh->nt ; k++) {
     pt = &mesh->tria[k];
-    for(i=0 ; i<3 ; i++)
-      MMG2_hashEdge(&edgeTable,k,pt->v[MMG2_iare[i][0]],pt->v[MMG2_iare[i][1]]);
+    for(i=0 ; i<3 ; i++) {
+      a = pt->v[MMG2D_iare[i][0]];
+      b = pt->v[MMG2D_iare[i][1]];
+
+      /* Skip edges with a required vertex */
+      if ( mesh->point[a].s || mesh->point[b].s ) {
+        continue;
+      }
+      MMG2D_hashEdge(&edgeTable,k,pt->v[MMG2D_iare[i][0]],pt->v[MMG2D_iare[i][1]]);
+    }
   }
 
   /* reset color */
@@ -113,12 +126,12 @@ int lissmet_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
         d1 = ma[0]*ux*ux + ma[2]*uy*uy + 2.0*ma[1]*ux*uy;
         assert(d1 >=0);
         if ( d1 < 0.0 )  d1 = 0.0;
-        dd1 = M_MAX(_MMG2_EPSD,sqrt(d1));
+        dd1 = M_MAX(MMG2D_EPSD,sqrt(d1));
 
         d2 = mb[0]*ux*ux + mb[2]*uy*uy+ 2.0*mb[1]*ux*uy;
         assert(d2 >=0);
         if ( d2 < 0.0 )  d2 = 0.0;
-        dd2 = M_MAX(_MMG2_EPSD,sqrt(d2));
+        dd2 = M_MAX(MMG2D_EPSD,sqrt(d2));
 
         /* swap vertices */
         if ( dd1 > dd2 ) {
@@ -133,7 +146,7 @@ int lissmet_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
         }
         rap = dd2 / dd1;
         dh = rap - 1.0;
-        if ( fabs(dh) > _MMG2_EPSD ) {
+        if ( fabs(dh) > MMG2D_EPSD ) {
           // Edge length in the metric
           tail = (dd1+dd2+4*sqrt(0.5*(d1+d2))) / 6.0;
           coef = log(rap) / tail;
@@ -153,13 +166,13 @@ int lissmet_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
               mb1[i] = coef * mb[i];
             }
 
-            if ( _MMG5_intersecmet22(mesh,ma,mb1,m) ) {
+            if ( MMG5_intersecmet22(mesh,ma,mb1,m) ) {
               for (i=0; i<3; i++)  ma[i] = m[i];
             }
             else {
               for (i=0; i<3; i++)  ma[i]  = SQRT3DIV2 * (ma[i]+mb1[i]);
             }
-            if ( _MMG5_intersecmet22(mesh,ma1,mb,m) ) {
+            if ( MMG5_intersecmet22(mesh,ma1,mb,m) ) {
               for (i=0; i<3; i++)  mb[i] = m[i];
             }
             else {
@@ -174,11 +187,11 @@ int lissmet_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
     }
     ncor += nc;
   } while ( nc && ++itour < maxtou );
-  _MMG5_SAFE_FREE(edgeTable.item);
+  MMG5_SAFE_FREE(edgeTable.item);
 
-  if ( abs(mesh->info.imprim) > 3 ) {
-    fprintf(stdout,"    gradation: %7d updated, %d iter\n",ncor,itour);
+  if ( abs(mesh->info.imprim) > 3 && ncor ) {
+    fprintf(stdout,"     gradation: %7d updated, %d iter.\n",ncor,itour);
   }
 
-  return(1);
+  return 1;
 }

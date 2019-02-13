@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
+**  Copyright (c) Bx INP/CNRS/Inria/UBordeaux/UPMC, 2004-
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -21,8 +21,8 @@
 ** =============================================================================
 */
 
-#ifndef _CHRONO_H
-#define _CHRONO_H
+#ifndef CHRONO_H
+#define CHRONO_H
 
 #include <time.h>
 #include "mmgcommon.h"

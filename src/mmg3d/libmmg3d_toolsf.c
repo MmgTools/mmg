@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
+**  Copyright (c) Bx INP/CNRS/Inria/UBordeaux/UPMC, 2004-
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -65,7 +65,7 @@ FORTRAN_NAME(MMG3D_USAGE,mmg3d_usage,
   strncpy(tmp,prog,*strlen);
   tmp[*strlen] = '\0';
   MMG3D_usage(tmp);
-  _MMG5_SAFE_FREE(tmp);
+  MMG5_SAFE_FREE(tmp);
 
   return;
 }
@@ -157,6 +157,17 @@ FORTRAN_NAME(MMG3D_GET_TETFROMTRIA,mmg3d_get_tetfromtria,
              (mesh,ktri,ktet,iface,retval)) {
 
   *retval = MMG3D_Get_tetFromTria(*mesh,*ktri,ktet,iface);
+  return;
+}
+
+/**
+ * See \ref MMG3D_Get_tetsFromTria function in \ref mmg3d/libmmg3d.h file.
+ */
+FORTRAN_NAME(MMG3D_GET_TETSFROMTRIA,mmg3d_get_tetsfromtria,
+             (MMG5_pMesh *mesh,int *ktri, int ktet[2], int iface[2],int *retval),
+             (mesh,ktri,ktet,iface,retval)) {
+
+  *retval = MMG3D_Get_tetsFromTria(*mesh,*ktri,ktet,iface);
   return;
 }
 

@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
+**  Copyright (c) Bx INP/CNRS/Inria/UBordeaux/UPMC, 2004-
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -34,97 +34,118 @@
 #include "mmg2d.h"
 
 /**
-   Inversion of a symetric matrix m/.
-*/
-static inline
-int _MMG2_invmat(double *m,double *minv) {
-  double        det;
+ * \param mesh pointer toward the mesh
+ * \param m first matrix
+ * \param n second matrix
+ * \param dm eigenvalues of m in the coreduction basis (to fill)
+ * \param dn eigenvalues of n in the coreduction basis (to fill)
+ * \param vp coreduction basis (to fill)
+ *
+ * \return 0 if fail 1 otherwise.
+ *
+ * Perform simultaneous reduction of matrices \a m and \a n.
+ *
+ */
+int MMG2D_simred(MMG5_pMesh mesh,double *m,double *n,double dm[2],
+                 double dn[2],double vp[2][2] ) {
 
-  if(fabs(m[1]) < _MMG2_EPSD) { /*mat diago*/
-    minv[0] = 1./m[0];
-    minv[1] = 0;
-    minv[2] = 1./m[2];
-  } else {
-    det = m[0]*m[2] - m[1]*m[1];
-    det = 1. / det;
-    minv[0] = det * m[2];
-    minv[1] = - det * m[1];
-    minv[2] = det * m[0];
+  double       det,dd,sqDelta,trimn,vnorm,lambda[2],imn[4];
+  static char  mmgWarn0=0;
+
+  /* Compute imn = M^{-1}N */
+  det = m[0]*m[2] - m[1]*m[1];
+  if ( fabs(det) < MMG5_EPS*MMG5_EPS ) {
+    if ( !mmgWarn0 ) {
+      mmgWarn0 = 1;
+      fprintf(stderr,"\n  ## Warning: %s: at least 1 null metric det : %E \n",
+              __func__,det);
+    }
+    return 0;
   }
-  return(1);
-}
+  det = 1.0 / det;
 
-/* Simultaneous reduction of matrices m1, m2; result is stored in m */
-int simred(double *m1,double *m2,double *m) {
-  double  lambda[2],hh[2],det,pp[2][2];
-  double  maxd1,maxd2,ex,ey,m1i[3],n[4],pi[4];
+  imn[0] = det * ( m[2]*n[0] - m[1]*n[1]);
+  imn[1] = det * ( m[2]*n[1] - m[1]*n[2]);
+  imn[2] = det * (-m[1]*n[0] + m[0]*n[1]);
+  imn[3] = det * (-m[1]*n[1] + m[0]*n[2]);
+  dd = imn[0] - imn[3];
+  sqDelta = sqrt(fabs(dd*dd + 4.0*imn[1]*imn[2]));
+  trimn = imn[0] + imn[3];
 
-  /* check diag matrices */
-  if ( fabs(m1[1]) < _MMG2_EPSD && fabs(m2[1]) < _MMG2_EPSD ) {
-    m[0] = M_MAX(m1[0],m2[0]);
-    m[2] = M_MAX(m1[2],m2[2]);
-    m[1] = 0.0;
-    return(1);
+  lambda[0] = 0.5 * (trimn - sqDelta);
+  if ( lambda[0] < 0.0 ) {
+    if ( !mmgWarn0 ) {
+      mmgWarn0 = 1;
+      fprintf(stderr,"\n  ## Warning: %s: at least 1 metric with a "
+              "negative eigenvalue: %f \n",__func__,lambda[0]);
+    }
+    return 0;
   }
-  if ( !_MMG2_invmat(m1,m1i) )  return(0);
 
-  /* n = (m1)^-1*m2 : stocke en ligne*/
-  n[0] = m1i[0]*m2[0] + m1i[1]*m2[1];
-  n[1] = m1i[0]*m2[1] + m1i[1]*m2[2];
-  n[2] = m1i[1]*m2[0] + m1i[2]*m2[1];
-  n[3] = m1i[1]*m2[1] + m1i[2]*m2[2];
+  /* First case : matrices m and n are homothetic: n = lambda0*m */
+  if ( sqDelta < MMG5_EPS ) {
 
-  _MMG5_eigensym(n,lambda,pp);
+    /* Subcase where m is diaonal */
+    if ( fabs(m[1]) < MMG5_EPS ) {
+      dm[0]   = m[0];
+      dm[1]   = m[2];
+      vp[0][0] = 1;
+      vp[0][1] = 0;
+      vp[1][0] = 0;
+      vp[1][1] = 1;
+    }
+    /* Subcase where m is not diagonal; dd,trimn,... are reused */
+    else
+      MMG5_eigensym(m,dm,vp);
 
-  if ( fabs(lambda[0]-lambda[1]) < _MMG2_EPSD ) {
-    m[0] = m[2] = lambda[0];
-    m[1] = 0.0;
-    return(1);
+    /* Eigenvalues of metric n */
+    dn[0] = lambda[0]*dm[0];
+    dn[1] = lambda[0]*dm[1];
+
   }
+  /* Second case: both eigenvalues of imn are distinct ; theory says qf associated to m and n
+   are diagonalizable in basis (vp[0], vp[1]) - the coreduction basis */
   else {
-    /* matrix of passage */
-    det = pp[0][0]*pp[1][1]-pp[1][0]*pp[0][1];
-    if(fabs(det) < _MMG2_EPSD) return(0);
+    lambda[1] = 0.5 * (trimn + sqDelta);
+    assert(lambda[1] >= 0.0);
 
-    det = 1./det;
-    pi[0] = det*pp[1][1];
-    pi[1] = -det*pp[0][1];
-    pi[2] = -det*pp[1][0];
-    pi[3] = det*pp[0][0];
+    vp[0][0] = imn[1];
+    vp[0][1] = (lambda[0] - imn[0]);
+    vnorm  = sqrt(vp[0][0]*vp[0][0] + vp[0][1]*vp[0][1]);
 
-    /*eigenvalues*/
-    ex = pp[0][0];
-    ey = pp[0][1];
-    maxd1 = ex*(m1[0]*ex+m1[1]*ey)
-      + ey*(m1[1]*ex+m1[2]*ey);
-    maxd2 = ex*(m2[0]*ex+m2[1]*ey)
-      + ey*(m2[1]*ex+m2[2]*ey);
-    hh[0] = M_MAX(maxd1,maxd2);
-    ex = pp[1][0];
-    ey = pp[1][1];
-    maxd1 = ex*(m1[0]*ex+m1[1]*ey)
-      + ey*(m1[1]*ex+m1[2]*ey);
-    maxd2 = ex*(m2[0]*ex+m2[1]*ey)
-      + ey*(m2[1]*ex+m2[2]*ey);
-    hh[1] = M_MAX(maxd1,maxd2);
+    if ( vnorm < MMG5_EPS ) {
+      vp[0][0] = (lambda[0] - imn[3]);
+      vp[0][1] = imn[2];
+      vnorm  = sqrt(vp[0][0]*vp[0][0] + vp[0][1]*vp[0][1]);
+    }
 
-    /* compose matrix tP^-1*lambda*P^-1 */
-    m[0] = pi[0]*hh[0]*pi[0] + pi[2]*hh[1]*pi[2];
-    m[1] = pi[0]*hh[0]*pi[1] + pi[2]*hh[1]*pi[3];
-    m[2] = pi[1]*hh[0]*pi[1] + pi[3]*hh[1]*pi[3];
+    vnorm   = 1.0 / vnorm;
+    vp[0][0] *= vnorm;
+    vp[0][1] *= vnorm;
 
-    /*decomment this part to debug*/
-    /* if ( ddebug ) { */
-    /*   _MMG5_eigensym(m,lambda,pp); */
-    /*   if ( lambda[0] < -EPSD || lambda[1] < -EPSD ) { */
-    /*     fprintf(stderr,"\n  ## simred, not a metric !\n"); */
-    /*     fprintf(stderr,"  %.6f %.6f %.6f\n", */
-    /*             m[0],m[1],m[2]); */
-    /*     fprintf(stderr,"  Lambda %f %f \n",lambda[0],lambda[1]); */
-    /*     return(0); */
-    /*   } */
-    /* } */
+    vp[1][0] = imn[1];
+    vp[1][1] = (lambda[1] - imn[0]);
+    vnorm  = sqrt(vp[1][0]*vp[1][0] + vp[1][1]*vp[1][1]);
 
-    return(1);
+    if ( vnorm < MMG5_EPS ) {
+      vp[1][0] = (lambda[1] - imn[3]);
+      vp[1][1] = imn[2];
+      vnorm  = sqrt(vp[1][0]*vp[1][0] + vp[1][1]*vp[1][1]);
+    }
+
+    vnorm   = 1.0 / vnorm;
+    vp[1][0] *= vnorm;
+    vp[1][1] *= vnorm;
+
+    /* Compute diagonal values in simultaneous reduction basis */
+    dm[0] = m[0]*vp[0][0]*vp[0][0] + 2.0*m[1]*vp[0][0]*vp[0][1] + m[2]*vp[0][1]*vp[0][1];
+    dm[1] = m[0]*vp[1][0]*vp[1][0] + 2.0*m[1]*vp[1][0]*vp[1][1] + m[2]*vp[1][1]*vp[1][1];
+    dn[0] = n[0]*vp[0][0]*vp[0][0] + 2.0*n[1]*vp[0][0]*vp[0][1] + n[2]*vp[0][1]*vp[0][1];
+    dn[1] = n[0]*vp[1][0]*vp[1][0] + 2.0*n[1]*vp[1][0]*vp[1][1] + n[2]*vp[1][1]*vp[1][1];
   }
+
+  assert ( dm[0] > MMG5_EPS && dn[0] > MMG5_EPS );
+  assert ( dm[1] > MMG5_EPS && dn[1] > MMG5_EPS );
+
+  return 1;
 }

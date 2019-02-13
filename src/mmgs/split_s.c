@@ -1,7 +1,7 @@
 /* ============================================================================
 **  This file is part of the mmg software package for the tetrahedra
 **  mesh modification.
-**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
+**  Copyright (c) Bx INP/CNRS/Inria/UBordeaux/UPMC, 2004-
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -47,50 +47,50 @@
  * triangles are not empty (otherwise we can create a 0 surface triangle).
  *
  */
-int _MMGS_split1_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,int *vx) {
+int MMGS_split1_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,int *vx) {
   MMG5_pTria      pt,pt0;
   double          n[3],nref[3],vnew,vold;
   int             is;
 
   pt  = &mesh->tria[k];
-  _MMG5_nonUnitNorPts(mesh, pt->v[0], pt->v[1],pt->v[2],nref);
+  MMG5_nonUnitNorPts(mesh, pt->v[0], pt->v[1],pt->v[2],nref);
 
   vold = nref[0]*nref[0] + nref[1]*nref[1] + nref[2]*nref[2];
-  if ( vold < _MMG5_EPSOK ) return 0;
+  if ( vold < MMG5_EPSOK ) return 0;
 
   pt0 = &mesh->tria[0];
 
   /* Test volume of the two created triangles */
   memcpy(pt0,pt,sizeof(MMG5_Tria));
 
-  is         = _MMG5_iprv2[i];
+  is         = MMG5_iprv2[i];
   pt0->v[is] = vx[i];
 
-  _MMG5_nonUnitNorPts(mesh, pt0->v[0], pt0->v[1],pt0->v[2],n);
+  MMG5_nonUnitNorPts(mesh, pt0->v[0], pt0->v[1],pt0->v[2],n);
 
   vnew = n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
-  if ( vnew < _MMG5_EPSOK )  return(0);
+  if ( vnew < MMG5_EPSOK )  return 0;
 
   /* Check if we create a tri with wrong orientation */
   if ( nref[0]*n[0]+nref[1]*n[1]+nref[2]*n[2] < 0 ) {
-    return(0);
+    return 0;
   }
 
   pt0->v[is] = pt->v[is];
-  is         = _MMG5_inxt2[i];
+  is         = MMG5_inxt2[i];
   pt0->v[is] = vx[i];
 
-  _MMG5_nonUnitNorPts(mesh, pt0->v[0], pt0->v[1],pt0->v[2],n);
+  MMG5_nonUnitNorPts(mesh, pt0->v[0], pt0->v[1],pt0->v[2],n);
 
   vnew = n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
-  if ( vnew < _MMG5_EPSOK )  return(0);
+  if ( vnew < MMG5_EPSOK )  return 0;
 
   /* Check if we create a tri with wrong orientation */
   if ( nref[0]*n[0]+nref[1]*n[1]+nref[2]*n[2] < 0 ) {
-    return(0);
+    return 0;
   }
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -104,20 +104,20 @@ int _MMGS_split1_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,int *vx) {
  * Split element \a k along edge \a i.
  *
  */
-int _MMGS_split1(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,int *vx) {
+int MMGS_split1(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,int *vx) {
   MMG5_pTria      pt,pt1;
   MMG5_pPoint     ppt;
   int             iel;
   char            i1,i2;
 
-  iel = _MMGS_newElt(mesh);
+  iel = MMGS_newElt(mesh);
   if ( !iel ) {
-    _MMGS_TRIA_REALLOC(mesh,iel,mesh->gap,
+    MMGS_TRIA_REALLOC(mesh,iel,mesh->gap,
                        fprintf(stderr,"\n  ## Error: %s: unable to allocate"
                                " a new element.\n",__func__);
-                       _MMG5_INCREASE_MEM_MESSAGE();
+                       MMG5_INCREASE_MEM_MESSAGE();
                        fprintf(stderr,"  Exit program.\n");
-                       return 0,0 );
+                       return 0);
   }
 
   pt  = &mesh->tria[k];
@@ -125,8 +125,8 @@ int _MMGS_split1(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,int *vx) {
   pt1 = &mesh->tria[iel];
   pt1 = memcpy(pt1,pt,sizeof(MMG5_Tria));
 
-  i1 = _MMG5_inxt2[i];
-  i2 = _MMG5_inxt2[i1];
+  i1 = MMG5_inxt2[i];
+  i2 = MMG5_inxt2[i1];
 
 
   if ( pt->edg[i] > 0 ) {
@@ -138,7 +138,7 @@ int _MMGS_split1(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,int *vx) {
   pt->tag[i1] = pt1->tag[i2] = MG_NOTAG;
   pt->edg[i1] = pt1->edg[i2] = 0;
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -155,7 +155,7 @@ int _MMGS_split1(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,int *vx) {
  *
  * \remark Don't work for non-manifold edge.
  */
-int _MMGS_simbulgept(MMG5_pMesh mesh,MMG5_pSol met, int k,int i,int ip) {
+int MMGS_simbulgept(MMG5_pMesh mesh,MMG5_pSol met, int k,int i,int ip) {
   MMG5_pTria     pt,pt0;
   MMG5_pPoint    ppt0;
   double         cal;
@@ -171,16 +171,16 @@ int _MMGS_simbulgept(MMG5_pMesh mesh,MMG5_pSol met, int k,int i,int ip) {
   // Check the validity of the two triangles created from k.
   pt = &mesh->tria[k];
   memcpy(pt0,pt,sizeof(MMG5_Tria));
-  is         = _MMG5_iprv2[i];
+  is         = MMG5_iprv2[i];
   pt0->v[is] = 0;
-  cal        = _MMG5_calelt(mesh,met,pt0);
-  if ( cal < _MMG5_EPSOK )  return(0);
+  cal        = MMG5_calelt(mesh,met,pt0);
+  if ( cal < MMG5_EPSOK )  return 0;
 
   pt0->v[is] = pt->v[is];
-  is         = _MMG5_inxt2[i];
+  is         = MMG5_inxt2[i];
   pt0->v[is] = 0;
-  cal        = _MMG5_calelt(mesh,met,pt0);
-  if ( cal < _MMG5_EPSOK )  return(0);
+  cal        = MMG5_calelt(mesh,met,pt0);
+  if ( cal < MMG5_EPSOK )  return 0;
 
   // Check the validity of the two triangles created from the triangle adjacent
   // to k by edge i.
@@ -191,18 +191,18 @@ int _MMGS_simbulgept(MMG5_pMesh mesh,MMG5_pSol met, int k,int i,int ip) {
 
   pt = &mesh->tria[kadja];
   memcpy(pt0,pt,sizeof(MMG5_Tria));
-  is         = _MMG5_iprv2[iadja];
+  is         = MMG5_iprv2[iadja];
   pt0->v[is] = 0;
-  cal        = _MMG5_calelt(mesh,met,pt0);
-  if ( cal < _MMG5_EPSOK )  return(0);
+  cal        = MMG5_calelt(mesh,met,pt0);
+  if ( cal < MMG5_EPSOK )  return 0;
 
   pt0->v[is] = pt->v[is];
-  is         = _MMG5_inxt2[iadja];
+  is         = MMG5_inxt2[iadja];
   pt0->v[is] = 0;
-  cal        = _MMG5_calelt(mesh,met,pt0);
-  if ( cal < _MMG5_EPSOK )  return(0);
+  cal        = MMG5_calelt(mesh,met,pt0);
+  if ( cal < MMG5_EPSOK )  return 0;
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -220,17 +220,17 @@ int _MMGS_simbulgept(MMG5_pMesh mesh,MMG5_pSol met, int k,int i,int ip) {
 int split1b(MMG5_pMesh mesh,int k,char i,int ip) {
   MMG5_pTria     pt,pt1;
   MMG5_pPoint    ppt;
-  _MMG5_Bezier   b;
+  MMG5_Bezier   b;
   MMG5_pxPoint   go;
   double         uv[2],o[3],no[3],to[3];
   int            *adja,iel,jel,kel,mel,ier;
   char           i1,i2,j,j1,j2,m;
 
-  iel = _MMGS_newElt(mesh);
+  iel = MMGS_newElt(mesh);
   if ( !iel )  {
-    _MMGS_TRIA_REALLOC(mesh,iel,mesh->gap,
-                       _MMG5_INCREASE_MEM_MESSAGE();
-                       return(0),0);
+    MMGS_TRIA_REALLOC(mesh,iel,mesh->gap,
+                       MMG5_INCREASE_MEM_MESSAGE();
+                       return 0);
   }
   pt = &mesh->tria[k];
   pt->flag = 0;
@@ -250,22 +250,22 @@ int split1b(MMG5_pMesh mesh,int k,char i,int ip) {
 
   /* update normal n2 if need be */
   if ( jel && pt->tag[i] & MG_GEO ) {
-    ier = _MMG5_bezierCP(mesh,&mesh->tria[jel],&b,1);
+    ier = MMG5_bezierCP(mesh,&mesh->tria[jel],&b,1);
     assert(ier);
     uv[0] = 0.5;
     uv[1] = 0.5;
     if ( j == 1 )       uv[0] = 0.0;
     else if ( j == 2 )  uv[1] = 0.0;
 
-    ier = _MMGS_bezierInt(&b,uv,o,no,to);
+    ier = MMGS_bezierInt(&b,uv,o,no,to);
     assert(ier);
     go = &mesh->xpoint[ppt->xp];
     memcpy(go->n2,no,3*sizeof(double));
   }
 
   /* update two triangles */
-  i1  = _MMG5_inxt2[i];
-  i2  = _MMG5_iprv2[i];
+  i1  = MMG5_inxt2[i];
+  i2  = MMG5_iprv2[i];
   pt->v[i2]   = ip;
   pt->tag[i1] = MG_NOTAG;
   pt->edg[i1] = 0;
@@ -283,12 +283,12 @@ int split1b(MMG5_pMesh mesh,int k,char i,int ip) {
     mesh->adja[3*(mel-1)+1+m]  = 3*iel+i1;
 
   if ( jel ) {
-    kel = _MMGS_newElt(mesh);
+    kel = MMGS_newElt(mesh);
     if ( !kel )  {
-      _MMGS_TRIA_REALLOC(mesh,kel,mesh->gap,
-                         _MMG5_INCREASE_MEM_MESSAGE();
-                         if ( !_MMGS_delElt(mesh,iel) )  return 0;
-                         return(0),0);
+      MMGS_TRIA_REALLOC(mesh,kel,mesh->gap,
+                         MMG5_INCREASE_MEM_MESSAGE();
+                         if ( !MMGS_delElt(mesh,iel) )  return 0;
+                         return 0);
     }
     pt  = &mesh->tria[jel];
     pt1 = &mesh->tria[kel];
@@ -297,8 +297,8 @@ int split1b(MMG5_pMesh mesh,int k,char i,int ip) {
     memcpy(pt1,pt,sizeof(MMG5_Tria));
     memcpy(&mesh->adja[3*(kel-1)+1],&mesh->adja[3*(jel-1)+1],3*sizeof(int));
 
-    j1 = _MMG5_inxt2[j];
-    j2 = _MMG5_iprv2[j];
+    j1 = MMG5_inxt2[j];
+    j2 = MMG5_iprv2[j];
     pt->v[j1]    = ip;
     pt->tag[j2]  = MG_NOTAG;
     pt->edg[j2]  = 0;
@@ -320,7 +320,7 @@ int split1b(MMG5_pMesh mesh,int k,char i,int ip) {
     mesh->adja[3*(kel-1)+1+j]  = 3*iel+i;
   }
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -335,16 +335,16 @@ int split1b(MMG5_pMesh mesh,int k,char i,int ip) {
  * surface triangle).
  *
  */
-int _MMG5_split2_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
+int MMG5_split2_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
   MMG5_pTria    pt,pt0;
   double        n[3],nref[3],vold,vnew;
   int           i1,i2,i;
 
   pt  = &mesh->tria[k];
-  _MMG5_nonUnitNorPts(mesh, pt->v[0], pt->v[1],pt->v[2],nref);
+  MMG5_nonUnitNorPts(mesh, pt->v[0], pt->v[1],pt->v[2],nref);
 
   vold = nref[0]*nref[0] + nref[1]*nref[1] + nref[2]*nref[2];
-  if ( vold < _MMG5_EPSOK ) return 0;
+  if ( vold < MMG5_EPSOK ) return 0;
 
   pt0 = &mesh->tria[0];
 
@@ -353,34 +353,34 @@ int _MMG5_split2_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
   i = 0;
   if ( !vx[0] )  i = 1;
   else if ( !vx[1] )  i = 2;
-  i1 = _MMG5_inxt2[i];
-  i2 = _MMG5_inxt2[i1];
+  i1 = MMG5_inxt2[i];
+  i2 = MMG5_inxt2[i1];
 
   /* Check the quality of the 3 new triangles */
   /* Tri 1 */
   pt0->v[i2] = vx[i];
-  _MMG5_nonUnitNorPts(mesh, pt0->v[0], pt0->v[1],pt0->v[2],n);
+  MMG5_nonUnitNorPts(mesh, pt0->v[0], pt0->v[1],pt0->v[2],n);
 
   vnew = n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
-  if ( vnew < _MMG5_EPSOK )  return(0);
+  if ( vnew < MMG5_EPSOK )  return 0;
 
   /* Check if we create a tri with wrong orientation */
   if ( nref[0]*n[0]+nref[1]*n[1]+nref[2]*n[2] < 0 ) {
-    return(0);
+    return 0;
   }
 
   /* Tri 2 */
   pt0->v[i1] = vx[i];
   pt0->v[i2] = vx[i1];
 
-  _MMG5_nonUnitNorPts(mesh, pt0->v[0], pt0->v[1],pt0->v[2],n);
+  MMG5_nonUnitNorPts(mesh, pt0->v[0], pt0->v[1],pt0->v[2],n);
 
   vnew = n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
-  if ( vnew < _MMG5_EPSOK )  return(0);
+  if ( vnew < MMG5_EPSOK )  return 0;
 
   /* Check if we create a tri with wrong orientation */
   if ( nref[0]*n[0]+nref[1]*n[1]+nref[2]*n[2] < 0 ) {
-    return(0);
+    return 0;
   }
 
   /* Tri 3 */
@@ -388,17 +388,17 @@ int _MMG5_split2_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
   pt0->v[i1] = vx[i];
   pt0->v[i]  = vx[i1];
 
-  _MMG5_nonUnitNorPts(mesh, pt0->v[0], pt0->v[1],pt0->v[2],n);
+  MMG5_nonUnitNorPts(mesh, pt0->v[0], pt0->v[1],pt0->v[2],n);
 
   vnew = n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
-  if ( vnew < _MMG5_EPSOK )  return(0);
+  if ( vnew < MMG5_EPSOK )  return 0;
 
   /* Check if we create a tri with wrong orientation */
   if ( nref[0]*n[0]+nref[1]*n[1]+nref[2]*n[2] < 0 ) {
-    return(0);
+    return 0;
   }
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -411,30 +411,30 @@ int _MMG5_split2_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
  * Split element \a k along the 2 edges \a i1 and \a i2.
  *
  */
-int _MMGS_split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
+int MMGS_split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
   MMG5_pTria    pt,pt1,pt2;
   MMG5_pPoint   p3,p4;
   int           iel,jel;
   char          i,i1,i2;
 
   /* create 2 elements */
-  iel = _MMGS_newElt(mesh);
+  iel = MMGS_newElt(mesh);
   if ( !iel ) {
-    _MMGS_TRIA_REALLOC(mesh,iel,mesh->gap,
+    MMGS_TRIA_REALLOC(mesh,iel,mesh->gap,
                        fprintf(stderr,"\n  ## Error: %s: unable to allocate"
                                " a new element.\n",__func__);
-                       _MMG5_INCREASE_MEM_MESSAGE();
+                       MMG5_INCREASE_MEM_MESSAGE();
                        fprintf(stderr,"  Exit program.\n");
-                       return 0,0);
+                       return 0);
   }
-  jel = _MMGS_newElt(mesh);
+  jel = MMGS_newElt(mesh);
   if ( !jel ) {
-    _MMGS_TRIA_REALLOC(mesh,jel,mesh->gap,
+    MMGS_TRIA_REALLOC(mesh,jel,mesh->gap,
                        fprintf(stderr,"\n  ## Error: %s: unable to allocate"
                                " a new element.\n",__func__);
-                       _MMG5_INCREASE_MEM_MESSAGE();
+                       MMG5_INCREASE_MEM_MESSAGE();
                        fprintf(stderr,"  Exit program.\n");
-                       return 0,0);
+                       return 0);
   }
 
   pt  = &mesh->tria[k];
@@ -447,8 +447,8 @@ int _MMGS_split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
   i = 0;
   if ( !vx[0] )  i = 1;
   else if ( !vx[1] )  i = 2;
-  i1 = _MMG5_inxt2[i];
-  i2 = _MMG5_inxt2[i1];
+  i1 = MMG5_inxt2[i];
+  i2 = MMG5_inxt2[i1];
 
   p3 = &mesh->point[vx[i]];
   p4 = &mesh->point[vx[i1]];
@@ -470,7 +470,7 @@ int _MMGS_split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
   /* pt->tag[i] = pt1->tag[i1] = pt1->tag[i2] = pt2->tag[i2] = MG_NOTAG; */
   /* pt->edg[i] = pt1->edg[i1] = pt1->edg[i2] = pt2->edg[i2] = 0; */
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -484,15 +484,15 @@ int _MMGS_split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
  * triangles are not empty (otherwise we can create a 0 surface triangle).
  *
  */
-int _MMGS_split3_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
+int MMGS_split3_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
   MMG5_pTria    pt,pt0;
   double        n[3],nref[3],vnew,vold;
 
   pt   = &mesh->tria[k];
-  _MMG5_nonUnitNorPts(mesh, pt->v[0], pt->v[1],pt->v[2],nref);
+  MMG5_nonUnitNorPts(mesh, pt->v[0], pt->v[1],pt->v[2],nref);
 
   vold = nref[0]*nref[0] + nref[1]*nref[1] + nref[2]*nref[2];
-  if ( vold < _MMG5_EPSOK ) return 0;
+  if ( vold < MMG5_EPSOK ) return 0;
 
   pt0  = &mesh->tria[0];
 
@@ -503,14 +503,14 @@ int _MMGS_split3_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
   pt0->v[1]  = vx[2];
   pt0->v[2]  = vx[1];
 
-  _MMG5_nonUnitNorPts(mesh, pt0->v[0], pt0->v[1],pt0->v[2],n);
+  MMG5_nonUnitNorPts(mesh, pt0->v[0], pt0->v[1],pt0->v[2],n);
 
   vnew = n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
-  if ( vnew < _MMG5_EPSOK )  return(0);
+  if ( vnew < MMG5_EPSOK )  return 0;
 
   /* Check if we create a tri with wrong orientation */
   if ( nref[0]*n[0]+nref[1]*n[1]+nref[2]*n[2] < 0 ) {
-    return(0);
+    return 0;
   }
 
   /* Tri 2 */
@@ -518,14 +518,14 @@ int _MMGS_split3_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
   pt0->v[0]  = vx[2];
   pt0->v[2]  = vx[0];
 
-  _MMG5_nonUnitNorPts(mesh, pt0->v[0], pt0->v[1],pt0->v[2],n);
+  MMG5_nonUnitNorPts(mesh, pt0->v[0], pt0->v[1],pt0->v[2],n);
 
   vnew = n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
-  if ( vnew < _MMG5_EPSOK )  return(0);
+  if ( vnew < MMG5_EPSOK )  return 0;
 
   /* Check if we create a tri with wrong orientation */
   if ( nref[0]*n[0]+nref[1]*n[1]+nref[2]*n[2] < 0 ) {
-    return(0);
+    return 0;
   }
 
   /* Tri 3 */
@@ -533,14 +533,14 @@ int _MMGS_split3_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
   pt0->v[0]  = vx[1];
   pt0->v[1]  = vx[0];
 
-  _MMG5_nonUnitNorPts(mesh, pt0->v[0], pt0->v[1],pt0->v[2],n);
+  MMG5_nonUnitNorPts(mesh, pt0->v[0], pt0->v[1],pt0->v[2],n);
 
   vnew = n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
-  if ( vnew < _MMG5_EPSOK )  return(0);
+  if ( vnew < MMG5_EPSOK )  return 0;
 
   /* Check if we create a tri with wrong orientation */
   if ( nref[0]*n[0]+nref[1]*n[1]+nref[2]*n[2] < 0 ) {
-    return(0);
+    return 0;
   }
 
 
@@ -549,17 +549,17 @@ int _MMGS_split3_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
   pt0->v[1]  = vx[0];
   pt0->v[2]  = vx[1];
 
-  _MMG5_nonUnitNorPts(mesh, pt0->v[0], pt0->v[1],pt0->v[2],n);
+  MMG5_nonUnitNorPts(mesh, pt0->v[0], pt0->v[1],pt0->v[2],n);
 
   vnew = n[0]*n[0] + n[1]*n[1] + n[2]*n[2];
-  if ( vnew < _MMG5_EPSOK )  return(0);
+  if ( vnew < MMG5_EPSOK )  return 0;
 
   /* Check if we create a tri with wrong orientation */
   if ( nref[0]*n[0]+nref[1]*n[1]+nref[2]*n[2] < 0 ) {
-    return(0);
+    return 0;
   }
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -572,38 +572,38 @@ int _MMGS_split3_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
  * Split element \a k along the 3 edges
  *
  */
-int _MMGS_split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
+int MMGS_split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
   MMG5_pTria    pt,pt1,pt2,pt3;
   MMG5_pPoint   p3,p4,p5;
   int           iel,jel,kel;
 
   /* create 3 elements */
-  iel = _MMGS_newElt(mesh);
+  iel = MMGS_newElt(mesh);
   if ( !iel ) {
-    _MMGS_TRIA_REALLOC(mesh,iel,mesh->gap,
+    MMGS_TRIA_REALLOC(mesh,iel,mesh->gap,
                        fprintf(stderr,"\n  ## Error: %s: unable to allocate"
                                " a new element.\n",__func__);
-                       _MMG5_INCREASE_MEM_MESSAGE();
+                       MMG5_INCREASE_MEM_MESSAGE();
                        fprintf(stderr,"  Exit program.\n");
-                       return 0;, 0);
+                       return 0);
   }
-  jel = _MMGS_newElt(mesh);
+  jel = MMGS_newElt(mesh);
   if ( !jel ) {
-    _MMGS_TRIA_REALLOC(mesh,jel,mesh->gap,
+    MMGS_TRIA_REALLOC(mesh,jel,mesh->gap,
                        fprintf(stderr,"\n  ## Error: %s: unable to allocate"
                                " a new element.\n",__func__);
-                       _MMG5_INCREASE_MEM_MESSAGE();
+                       MMG5_INCREASE_MEM_MESSAGE();
                        fprintf(stderr,"  Exit program.\n");
-                       return 0;, 0);
+                       return 0);
   }
-  kel = _MMGS_newElt(mesh);
+  kel = MMGS_newElt(mesh);
   if ( !kel ) {
-    _MMGS_TRIA_REALLOC(mesh,kel,mesh->gap,
+    MMGS_TRIA_REALLOC(mesh,kel,mesh->gap,
                        fprintf(stderr,"\n  ## Error: %s: unable to allocate"
                                " a new element.\n",__func__);
-                       _MMG5_INCREASE_MEM_MESSAGE();
+                       MMG5_INCREASE_MEM_MESSAGE();
                        fprintf(stderr,"  Exit program.\n");
-                       return 0;, 0);
+                       return 0);
   }
 
   pt  = &mesh->tria[k];
@@ -635,5 +635,5 @@ int _MMGS_split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
   pt3->tag[0] = pt3->tag[1] = pt3->tag[2] = MG_NOTAG;
   pt3->edg[0] = pt3->edg[1] = pt3->edg[2] = 0;
 
-  return(1);
+  return 1;
 }

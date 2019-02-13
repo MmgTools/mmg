@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
+**  Copyright (c) Bx INP/CNRS/Inria/UBordeaux/UPMC, 2004-
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -48,7 +48,7 @@
  * \f$[p0;p1]\f$.
  *
  */
-inline void _MMG5_bezierEdge(MMG5_pMesh mesh,int i0,int i1,
+inline void MMG5_bezierEdge(MMG5_pMesh mesh,int i0,int i1,
                              double b0[3],double b1[3], char isrid,double v[3])
 {
   MMG5_pPoint    p0,p1;
@@ -63,38 +63,38 @@ inline void _MMG5_bezierEdge(MMG5_pMesh mesh,int i0,int i1,
 
   if ( isrid ) {
     if ( MG_SIN(p0->tag) || (p0->tag & MG_NOM) ) {
-      b0[0] = p0->c[0] + _MMG5_ATHIRD*ux;
-      b0[1] = p0->c[1] + _MMG5_ATHIRD*uy;
-      b0[2] = p0->c[2] + _MMG5_ATHIRD*uz;
+      b0[0] = p0->c[0] + MMG5_ATHIRD*ux;
+      b0[1] = p0->c[1] + MMG5_ATHIRD*uy;
+      b0[2] = p0->c[2] + MMG5_ATHIRD*uz;
     }
     else {
       t = &p0->n[0];
       ps1 = t[0]*ux + t[1]*uy + t[2]*uz;
-      b0[0] = p0->c[0] + _MMG5_ATHIRD*ps1*t[0];
-      b0[1] = p0->c[1] + _MMG5_ATHIRD*ps1*t[1];
-      b0[2] = p0->c[2] + _MMG5_ATHIRD*ps1*t[2];
+      b0[0] = p0->c[0] + MMG5_ATHIRD*ps1*t[0];
+      b0[1] = p0->c[1] + MMG5_ATHIRD*ps1*t[1];
+      b0[2] = p0->c[2] + MMG5_ATHIRD*ps1*t[2];
     }
 
     if (MG_SIN(p1->tag) || (p1->tag & MG_NOM) ) {
-      b1[0] = p1->c[0] - _MMG5_ATHIRD*ux;
-      b1[1] = p1->c[1] - _MMG5_ATHIRD*uy;
-      b1[2] = p1->c[2] - _MMG5_ATHIRD*uz;
+      b1[0] = p1->c[0] - MMG5_ATHIRD*ux;
+      b1[1] = p1->c[1] - MMG5_ATHIRD*uy;
+      b1[2] = p1->c[2] - MMG5_ATHIRD*uz;
     }
     else {
       t = &p1->n[0];
       ps1 = -(t[0]*ux + t[1]*uy + t[2]*uz);
-      b1[0] = p1->c[0] + _MMG5_ATHIRD*ps1*t[0];
-      b1[1] = p1->c[1] + _MMG5_ATHIRD*ps1*t[1];
-      b1[2] = p1->c[2] + _MMG5_ATHIRD*ps1*t[2];
+      b1[0] = p1->c[0] + MMG5_ATHIRD*ps1*t[0];
+      b1[1] = p1->c[1] + MMG5_ATHIRD*ps1*t[1];
+      b1[2] = p1->c[2] + MMG5_ATHIRD*ps1*t[2];
     }
   }
 
   /* regular edge */
   else {
     if ( MG_SIN(p0->tag) || (p0->tag & MG_NOM) ) {
-      b0[0] = p0->c[0] + _MMG5_ATHIRD*ux;
-      b0[1] = p0->c[1] + _MMG5_ATHIRD*uy;
-      b0[2] = p0->c[2] + _MMG5_ATHIRD*uz;
+      b0[0] = p0->c[0] + MMG5_ATHIRD*ux;
+      b0[1] = p0->c[1] + MMG5_ATHIRD*uy;
+      b0[2] = p0->c[2] + MMG5_ATHIRD*uz;
     }
     else {
       if ( MG_GEO & p0->tag ) {
@@ -116,15 +116,15 @@ inline void _MMG5_bezierEdge(MMG5_pMesh mesh,int i0,int i1,
         n1 = &p0->n[0];
         ps1 = ux*n1[0] + uy*n1[1] + uz*n1[2];
       }
-      b0[0] = _MMG5_ATHIRD*(2.0*p0->c[0] + p1->c[0] - ps1*n1[0]);
-      b0[1] = _MMG5_ATHIRD*(2.0*p0->c[1] + p1->c[1] - ps1*n1[1]);
-      b0[2] = _MMG5_ATHIRD*(2.0*p0->c[2] + p1->c[2] - ps1*n1[2]);
+      b0[0] = MMG5_ATHIRD*(2.0*p0->c[0] + p1->c[0] - ps1*n1[0]);
+      b0[1] = MMG5_ATHIRD*(2.0*p0->c[1] + p1->c[1] - ps1*n1[1]);
+      b0[2] = MMG5_ATHIRD*(2.0*p0->c[2] + p1->c[2] - ps1*n1[2]);
     }
 
     if ( MG_SIN(p1->tag) || (p1->tag & MG_NOM) ) {
-      b1[0] = p1->c[0] - _MMG5_ATHIRD*ux;
-      b1[1] = p1->c[1] - _MMG5_ATHIRD*uy;
-      b1[2] = p1->c[2] - _MMG5_ATHIRD*uz;
+      b1[0] = p1->c[0] - MMG5_ATHIRD*ux;
+      b1[1] = p1->c[1] - MMG5_ATHIRD*uy;
+      b1[2] = p1->c[2] - MMG5_ATHIRD*uz;
     }
     else {
       if ( MG_GEO & p1->tag ) {
@@ -146,9 +146,9 @@ inline void _MMG5_bezierEdge(MMG5_pMesh mesh,int i0,int i1,
         n1 = &p1->n[0];
         ps1 = -(ux*n1[0] + uy*n1[1] + uz*n1[2]);
       }
-      b1[0] = _MMG5_ATHIRD*(2.0*p1->c[0] + p0->c[0] - ps1*n1[0]);
-      b1[1] = _MMG5_ATHIRD*(2.0*p1->c[1] + p0->c[1] - ps1*n1[1]);
-      b1[2] = _MMG5_ATHIRD*(2.0*p1->c[2] + p0->c[2] - ps1*n1[2]);
+      b1[0] = MMG5_ATHIRD*(2.0*p1->c[0] + p0->c[0] - ps1*n1[0]);
+      b1[1] = MMG5_ATHIRD*(2.0*p1->c[1] + p0->c[1] - ps1*n1[1]);
+      b1[2] = MMG5_ATHIRD*(2.0*p1->c[2] + p0->c[2] - ps1*n1[2]);
     }
   }
 }

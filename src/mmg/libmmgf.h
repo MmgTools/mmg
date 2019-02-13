@@ -1,7 +1,7 @@
 !/* =============================================================================
 !**  This file is part of the mmg software package for the tetrahedral
 !**  mesh modification.
-!**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
+!**  Copyright (c) Bx INP/CNRS/Inria/UBordeaux/UPMC, 2004-
 !**
 !**  mmg is free software: you can redistribute it and/or modify it
 !**  under the terms of the GNU Lesser General Public License as published
@@ -32,8 +32,8 @@
 ! * name and the opening brace (it creates errors under windows)
 ! */
 
-#ifndef _MMGFLIB_H
-#define _MMGFLIB_H
+#ifndef MMGFLIB_H
+#define MMGFLIB_H
 
 #include "mmg/mmg2d/libmmg2df.h"
 #include "mmg/mmgs/libmmgsf.h"

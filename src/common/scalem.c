@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
+**  Copyright (c) Bx INP/CNRS/Inria/UBordeaux/UPMC, 2004-
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -39,10 +39,10 @@
  * \return 1 if success, 0 if fail (computed bounding box too small).
  *
  * Compute the mesh bounding box and fill the \a min, \a max and \a delta fields
- * of the \a _MMG5_info structure.
+ * of the \a MMG5_info structure.
  *
  */
-int _MMG5_boundingBox(MMG5_pMesh mesh) {
+int MMG5_boundingBox(MMG5_pMesh mesh) {
   MMG5_pPoint    ppt;
   int            k,i;
   double         dd;
@@ -66,14 +66,14 @@ int _MMG5_boundingBox(MMG5_pMesh mesh) {
     dd = mesh->info.max[i] - mesh->info.min[i];
     if ( dd > mesh->info.delta )  mesh->info.delta = dd;
   }
-  if ( mesh->info.delta < _MMG5_EPSD ) {
+  if ( mesh->info.delta < MMG5_EPSD ) {
     fprintf(stderr,"\n  ## Error: %s: unable to scale mesh:"
             " Check that your mesh contains non-zero points and "
             "valid elements.\n",__func__);
-    return(0);
+    return 0;
   }
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -86,7 +86,7 @@ int _MMG5_boundingBox(MMG5_pMesh mesh) {
  * Compute a default value for the hmin/hmax parameters if needed.
  *
  */
-int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
+int MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pPoint    ppt;
   double         dd,d1;
   int            k,i,sethmin,sethmax;
@@ -96,7 +96,7 @@ int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
 
 
   /* compute bounding box */
-  if ( ! _MMG5_boundingBox(mesh) ) return(0);
+  if ( ! MMG5_boundingBox(mesh) ) return 0;
 
   /* normalize coordinates */
   dd = 1.0 / mesh->info.delta;
@@ -109,7 +109,7 @@ int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
 
   mesh->info.hausd *= dd;
   mesh->info.ls    *= dd;
-  mesh->info.hsiz  *=dd;
+  mesh->info.hsiz  *= dd;
 
   /* normalize local parameters */
   for (k=0; k<mesh->info.npar; k++) {
@@ -140,7 +140,7 @@ int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
 
   /* Warning: we don't want to compute hmin/hmax from the level-set or the
    * displacement! */
-  if ( mesh->info.iso || (mesh->info.lag>-1) || (!met->m && !mesh->info.optim) ) {
+  if ( mesh->info.iso || (mesh->info.lag>-1) || (!met->m && ((!mesh->info.optim) && (mesh->info.hsiz<=0)) ) ) {
     /* Set default values to hmin/hmax from the bounding box if not provided by
      * the user */
     if ( !MMG5_Set_defaultTruncatureSizes(mesh,sethmin,sethmax) ) {
@@ -151,9 +151,8 @@ int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
     sethmax = 1;
   }
 
-
-  /* normalize sizes and if not provided by user, compute hmin/hmax */
   if ( met->m ) {
+    /* normalize sizes and if not provided by user, compute hmin/hmax */
     if ( met->size == 1 ) {
       for (k=1; k<=mesh->np; k++) {
         met->m[k] *= dd;
@@ -161,7 +160,7 @@ int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
         if ( (!mesh->info.iso) && met->m[k] <= 0) {
           fprintf(stderr,"\n  ## Error: %s: at least 1 wrong metric"
                   " (point %d).\n",__func__,k);
-          return(0);
+          return 0;
         }
       }
 
@@ -208,10 +207,10 @@ int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
         m    = &met->m[6*k];
 
         /* Check the input metric */
-        if ( !_MMG5_eigenv(1,m,lambda,v) ) {
+        if ( !MMG5_eigenv(1,m,lambda,v) ) {
           fprintf(stderr,"\n  ## Error: %s: unable to diagonalize at least"
                   " 1 metric (point %d).\n",__func__,k);
-          return(0);
+          return 0;
         }
         for (i=0; i<3; i++) {
           if(lambda[i]<=0) {
@@ -220,7 +219,7 @@ int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
                     "            metric tensor: %e %e %e %e %e %e.\n",
                     __func__,k,lambda[0],lambda[1],lambda[2],
                               m[0],m[1],m[2],m[3],m[4],m[5]);
-            return(0);
+            return 0;
           }
           if ( !sethmin )
             mesh->info.hmin = MG_MIN(mesh->info.hmin,1./sqrt(lambda[i]));
@@ -247,7 +246,7 @@ int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
     }
   }
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -258,7 +257,7 @@ int _MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
  * Unscale the mesh and the size informations to their initial sizes.
  *
  */
-int _MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
+int MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pPoint     ppt;
   double          dd;
   int             k,i;
@@ -309,5 +308,12 @@ int _MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
     }
   }
 
-  return(1);
+  /* reset the scaling data to ensure that if we try to unscale again, we will
+   * do nothing */
+  mesh->info.delta = 1.;
+  mesh->info.min[0]= 0.;
+  mesh->info.min[1]= 0.;
+  mesh->info.min[2]= 0.;
+
+  return 1;
 }

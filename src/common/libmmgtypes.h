@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
+**  Copyright (c) Bx INP/CNRS/Inria/UBordeaux/UPMC, 2004-
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -26,7 +26,7 @@
  */
 #include <stdint.h>
 #include <stdarg.h>
-
+#include <stddef.h>
 
 #ifndef _LIBMMGTYPES_H
 #define _LIBMMGTYPES_H
@@ -159,6 +159,14 @@
 #define MMG5_ARG_end    10
 
 /**
+ * \def MMG5_NSOLS_MAX
+ *
+ * Maximal number of solutions per entity
+ *
+ */
+#define MMG5_NSOLS_MAX   100
+
+/**
  * \enum MMG5_type
  * \brief Type of solutions.
  */
@@ -176,6 +184,7 @@ enum MMG5_type {
 enum MMG5_entities {
   MMG5_Noentity, /*!< Undefined type (unusable) */
   MMG5_Vertex, /*!< Vertex entity */
+  MMG5_Edg,  /*!< Edge entity */
   MMG5_Triangle, /*!< Triangle entity */
   MMG5_Tetrahedron, /*!< Tetra entity */
 };
@@ -433,11 +442,12 @@ typedef MMG5_Mat * MMG5_pMat;
  */
 typedef struct {
   MMG5_pPar     par;
-  double        dhd,hmin,hmax,hsiz,hgrad,hausd,min[3],max[3],delta,ls;
+  double        dhd,hmin,hmax,hsiz,hgrad,hgradreq,hausd;
+  double        min[3],max[3],delta,ls;
   int           mem,npar,npari;
   int           opnbdy;
   int           renum;
-  int           octree;
+  int           PROctree;
   int           nmat;
   char          nreg;
   char          imprim,ddebug,badkal,iso,fem,lag;
@@ -445,12 +455,13 @@ typedef struct {
                           param are setted: if \f$tag = 1+2+4\f$ then the point
                           is \a MG_Vert, MG_Tria and MG_Tetra */
   unsigned char optim, optimLES, noinsert, noswap, nomove, nosurf;
+  unsigned char inputMet; /*!< 1 if we don't have a metric when we enter in mmg3d1, 0 otherwise */
   MMG5_pMat     mat;
 } MMG5_Info;
 
 /**
  * \struct MMG5_hgeom
- * \brief To store geometric edges.
+ * \brief Cell of the hash table of geom edges.
  */
 typedef struct {
   int     a; /*!< First extremity of edge */
@@ -460,10 +471,35 @@ typedef struct {
   int16_t tag; /*!< tag of edge */
 } MMG5_hgeom;
 
+/**
+ * \struct MMG5_HGeom
+ * \brief Hash table to store geometric edges.
+ */
 typedef struct {
   MMG5_hgeom  *geom;
   int         siz,max,nxt;
 } MMG5_HGeom;
+
+
+/**
+ * \struct MMG5_hedge
+ * \brief Used to hash edges (memory economy compared to \ref MMG5_hgeom).
+ */
+typedef struct {
+  int   a,b,nxt;
+  int   k; /*!< k = point along edge a b or triangle index */
+  int   s;
+} MMG5_hedge;
+
+/**
+ * \struct MMG5_Hash
+ * \brief Identic as \ref MMG5_HGeom but use \ref MMG5_hedge to store edges
+ * instead of \ref MMG5_hgeom (memory economy).
+ */
+typedef struct {
+  int     siz,max,nxt;
+  MMG5_hedge  *item;
+} MMG5_Hash;
 
 /**
  * \struct MMG5_Mesh
@@ -471,15 +507,15 @@ typedef struct {
  * \todo try to remove nc1;
  */
 typedef struct {
-  long long memMax; /*!< Maximum memory available */
-  long long memCur; /*!< Current memory used */
+  size_t    memMax; /*!< Maximum memory available */
+  size_t    memCur; /*!< Current memory used */
   double    gap; /*!< Gap for table reallocation */
   int       ver; /*!< Version of the mesh file */
   int       dim; /*!< Dimension of the mesh */
   int       type; /*!< Type of the mesh */
   int       npi,nti,nai,nei,np,na,nt,ne,npmax,namax,ntmax,nemax,xpmax,xtmax;
   int       nquad,nprism; /* number of quadrangles and prisms */
-  int       nsols; /* number of solutions in the solution file (mshmet/int) */
+  int       nsols; /* number of solutions (metric excluded) in the solution file */
   int       nc1;
 
   int       base; /*!< Used with \a flag to know if an entity has been
@@ -502,6 +538,7 @@ typedef struct {
                     \f$adjapr[5*(i-1)+1+j]=5*k+l\f$ then the \f$i^{th}\f$ and
                     \f$k^th\f$ prism are adjacent and share their
                     faces \a j and \a l (resp.) */
+  int      *ipar;   /*!< Store indices of the local parameters */
   MMG5_pPoint    point; /*!< Pointer toward the \ref MMG5_Point structure */
   MMG5_pxPoint   xpoint; /*!< Pointer toward the \ref MMG5_xPoint structure */
   MMG5_pTetra    tetra; /*!< Pointer toward the \ref MMG5_Tetra structure */

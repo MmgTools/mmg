@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
+**  Copyright (c) Bx INP/CNRS/Inria/UBordeaux/UPMC, 2004-
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -39,6 +39,92 @@
 #define MAXLEN   1.0e+3
 
 /**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param hash edge hashtable.
+ * \param pt tria to process.
+ * \param i index of the edge of the tria \a pt that we process.
+ *
+ * \return 1 if success, 0 if fail.
+ *
+ * If the edge \a i of the tria \a pt is seen for the first time, compute its
+ * euclidean length, add this length to the metric of the edge extremities and
+ * increment the count of times we have processed this extremities.
+ *
+ */
+static inline
+int MMGS_sum_reqEdgeLengthsAtPoint(MMG5_pMesh mesh,MMG5_pSol met,MMG5_Hash *hash,
+                                  MMG5_pTria pt,char i) {
+  int         ip0,ip1;
+
+  ip0 = pt->v[MMG5_inxt2[i]];
+  ip1 = pt->v[MMG5_iprv2[i]];
+
+  /* Check if the edge is already treated */
+  if ( MMG5_hashGet(hash,ip0,ip1) ) return 1;
+
+  /* Mark the edge as treated */
+  if ( !MMG5_hashEdge(mesh,hash,ip0,ip1,1) ) return 0;
+
+  if ( !MMG5_sum_reqEdgeLengthsAtPoint(mesh,met,ip0,ip1) )
+    return 0;
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh
+ * \param met pointer toward the metric
+ *
+ * \return 0 if fail, 1 otherwise
+ *
+ * Compute the metric at points on trequired adges as the mean of the lengths of
+ * the required eges to which belongs the point. The processeed points are
+ * marked with flag 3.
+ *
+ */
+int MMGS_set_metricAtPointsOnReqEdges ( MMG5_pMesh mesh,MMG5_pSol met ) {
+  MMG5_pTria pt;
+  MMG5_Hash  hash;
+  int        k,i;
+
+  /* Reset the input metric at required edges extremities */
+  if ( !MMG5_reset_metricAtReqEdges_surf (mesh, met ) ) {
+    return 0;
+  }
+
+  /* Process the required edges and add the edge length to the metric of the
+   * edge extremities */
+  if ( !MMG5_hashNew(mesh,&hash,mesh->np,7*mesh->np) )  return 0;
+
+  for ( k=1; k<=mesh->nt; k++ ) {
+    pt = &mesh->tria[k];
+    if ( !MG_EOK(pt) )  continue;
+
+    for ( i=0; i<3; i++ ) {
+      if ( (pt->tag[i] & MG_REQ) || (pt->tag[i] & MG_NOSURF) ||
+           (pt->tag[i] & MG_PARBDY) ) {
+
+        /* Check if the edge has been proceeded by the neighbour triangle */
+        if ( !MMGS_sum_reqEdgeLengthsAtPoint(mesh,met,&hash,pt,i) ) {
+          MMG5_DEL_MEM(mesh,hash.item);
+          return 0;
+        }
+      }
+    }
+  }
+  MMG5_DEL_MEM(mesh,hash.item);
+
+  /* Travel the points and compute the metric of the points belonging to
+   * required edges as the mean of the required edges length */
+  if ( !MMG5_compute_meanMetricAtMarkedPoints ( mesh,met ) ) {
+    return 0;
+  }
+
+  return 1;
+}
+
+/**
  * \param mesh pointer toward the mesh
  * \param met pointer toward the metric
  *
@@ -48,19 +134,24 @@
  * geometric approx ; by convention, p0->h stores desired length at point p0
  *
  */
-int _MMGS_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
-  MMG5_pTria    pt;
-  MMG5_pPoint   p[3];
-  MMG5_pPar     par;
-  double   n[3][3],t[3][3],nt[3],c1[3],c2[3],*n1,*n2,*t1,*t2;
-  double   ps,ps2,ux,uy,uz,ll,l,lm,dd,M1,M2,hausd,hmin,hmax;
-  int      k,j,ip1,ip2,isloc;
-  char     i,i1,i2;
+int MMGS_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
+  MMG5_pTria  pt;
+  MMG5_pPoint p[3],p0;
+  MMG5_pPar   par;
+  double      n[3][3],t[3][3],nt[3],c1[3],c2[3],*n1,*n2,*t1,*t2;
+  double      ps,ps2,ux,uy,uz,ll,l,lm,dd,M1,M2,hausd,hmin,hmax;
+  int         k,j,ip1,ip2,isloc;
+  char        i,i1,i2;
 
-  if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
-    fprintf(stdout,"  ** Defining isotropic map\n");
+  if ( !MMG5_defsiz_startingMessage (mesh,met,__func__) ) {
+    return 0;
+  }
 
-  if ( mesh->info.hmax < 0.0 )  mesh->info.hmax = 0.5 * mesh->info.delta;
+  for (k=1; k<=mesh->np; k++) {
+    p0 = &mesh->point[k];
+    p0->flag = 0;
+    p0->s    = 0;
+  }
 
   /* alloc structure */
   if ( !met->m ) {
@@ -68,12 +159,34 @@ int _MMGS_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
     if ( !MMGS_Set_solSize(mesh,met,MMG5_Vertex,mesh->np,1) ) {
       return 0;
     }
-
-    /* init constant size */
-    for (k=1; k<=mesh->np; k++)
-      met->m[k] = mesh->info.hmax;
+    /* Set_solSize modify the value of the inputMet field => we need to reset it */
+    mesh->info.inputMet = 0;
+  }
+  else {
+    assert ( mesh->info.inputMet );
   }
 
+  /** Step 1: Set metric at points belonging to a required edge: compute the
+   * metric as the mean of the length of the required eges passing through the
+   * point */
+  if ( !MMGS_set_metricAtPointsOnReqEdges ( mesh,met ) ) {
+    return 0;
+  }
+
+  /** Step 2: size at non required internal points */
+  if ( !mesh->info.inputMet ) {
+
+    /* init constant size */
+    for (k=1; k<=mesh->np; k++) {
+      if ( mesh->point[k].flag ) {
+        continue;
+      }
+      met->m[k] = mesh->info.hmax;
+      mesh->point[k].flag = 1;
+    }
+  }
+
+  /** Step 3: Minimum size feature imposed by the hausdorff distance */
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) )  continue;
@@ -85,10 +198,10 @@ int _MMGS_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
     /* normal recovery */
     for (i=0; i<3; i++) {
       if ( MS_SIN(p[i]->tag) ) {
-        _MMG5_nortri(mesh,pt,n[i]);
+        MMG5_nortri(mesh,pt,n[i]);
       }
       else if ( MG_EDG(p[i]->tag) ) {
-        _MMG5_nortri(mesh,pt,nt);
+        MMG5_nortri(mesh,pt,nt);
         n1  = &mesh->xpoint[p[i]->xp].n1[0];
         n2  = &mesh->xpoint[p[i]->xp].n2[0];
         ps  = n1[0]*nt[0] + n1[1]*nt[1] + n1[2]*nt[2];
@@ -104,8 +217,8 @@ int _MMGS_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
     }
 
     for (i=0; i<3; i++) {
-      i1  = _MMG5_inxt2[i];
-      i2  = _MMG5_iprv2[i];
+      i1  = MMG5_inxt2[i];
+      i2  = MMG5_iprv2[i];
       ip1 = pt->v[i1];
       ip2 = pt->v[i2];
 
@@ -116,9 +229,7 @@ int _MMGS_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
       isloc = 0;
       for (j=0; j<mesh->info.npar; j++) {
         par = &mesh->info.par[j];
-        if ( /*( (par->elt == MMG5_Vertex) &&
-               ( (p[i1]->ref == par->ref ) || (p[i2]->ref == par->ref) ))
-               ||*/ ( (par->elt == MMG5_Triangle) && (pt->ref == par->ref ) ) ) {
+        if ( (par->elt == MMG5_Triangle) && (pt->ref == par->ref ) ) {
           if ( !isloc ) {
             hausd = par->hausd;
             hmin  = par->hmin;
@@ -138,7 +249,7 @@ int _MMGS_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
       uz = p[i2]->c[2] - p[i1]->c[2];
       ll = ux*ux + uy*uy + uz*uz;
 
-      if ( ll < _MMG5_EPSD )  continue;
+      if ( ll < MMG5_EPSD )  continue;
 
       if ( MG_EDG(pt->tag[i]) ) {
         if ( MS_SIN(p[i1]->tag) ) {
@@ -185,14 +296,18 @@ int _MMGS_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
         M2 = 6.0 * sqrt(M2);
         M1 = MG_MAX(M1,M2);
 
-        if ( M1 < _MMG5_EPSD )
+        if ( M1 < MMG5_EPSD )
           lm = MAXLEN;
         else {
           lm = (16.0*ll*hausd) / (3.0*M1);
           lm = sqrt(lm);
         }
-        met->m[ip1] = MG_MAX(hmin,MG_MIN(met->m[ip1],lm));
-        met->m[ip2] = MG_MAX(hmin,MG_MIN(met->m[ip2],lm));
+        if ( mesh->point[ip1].flag < 3 ) {
+          met->m[ip1] = MG_MAX(hmin,MG_MIN(met->m[ip1],lm));
+        }
+        if ( mesh->point[ip2].flag < 3 ) {
+          met->m[ip2] = MG_MAX(hmin,MG_MIN(met->m[ip2],lm));
+        }
       }
       else {
         n1 = n[i1];
@@ -220,14 +335,18 @@ int _MMGS_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
         M2 = 6.0 * sqrt(M2);
         M1 = MG_MAX(M1,M2);
 
-        if ( M1 < _MMG5_EPSD )
+        if ( M1 < MMG5_EPSD )
           lm = MAXLEN;
         else {
           lm = (16.0*ll*hausd) / (3.0*M1);
           lm = sqrt(lm);
         }
-        met->m[ip1] = MG_MAX(hmin,MG_MIN(met->m[ip1],lm));
-        met->m[ip2] = MG_MAX(hmin,MG_MIN(met->m[ip2],lm));
+        if ( mesh->point[ip1].flag < 3 ) {
+          met->m[ip1] = MG_MAX(hmin,MG_MIN(met->m[ip1],lm));
+        }
+        if ( mesh->point[ip2].flag < 3 ) {
+          met->m[ip2] = MG_MAX(hmin,MG_MIN(met->m[ip2],lm));
+        }
       }
     }
   }
@@ -235,90 +354,21 @@ int _MMGS_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   /* take local parameters */
   for (j=0; j<mesh->info.npar; j++) {
     par = &mesh->info.par[j];
-    /* if ( par->elt == MMG5_Vertex ) { */
-    /*   for (k=1; k<=mesh->np; k++) { */
-    /*     ppt = &mesh->point[k]; */
-    /*     if ( !MG_VOK(ppt) || ppt->ref != par->ref )  continue; */
-    /*     met->m[k] = MG_MAX(par->hmin,MG_MIN(met->m[k],par->hmax)); */
-    /*   } */
-    /* } */
-    /* else */ if ( par->elt == MMG5_Triangle ) {
+    if ( par->elt == MMG5_Triangle ) {
       for (k=1; k<=mesh->nt; k++) {
         pt = &mesh->tria[k];
         if ( !MG_EOK(pt) || pt->ref != par->ref )  continue;
-        met->m[pt->v[0]] = MG_MAX(par->hmin,MG_MIN(met->m[pt->v[0]],par->hmax));
-        met->m[pt->v[1]] = MG_MAX(par->hmin,MG_MIN(met->m[pt->v[1]],par->hmax));
-        met->m[pt->v[2]] = MG_MAX(par->hmin,MG_MIN(met->m[pt->v[2]],par->hmax));
-      }
-    }
-  }
-  return(1);
-}
-
-
-/** Enforces mesh gradations by truncating size map */
-int gradsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
-  MMG5_pTria    pt;
-  MMG5_pPoint   p1,p2;
-  double   ll,hn,h1,h2;
-  int      k,nu,nup,it,maxit,ip1,ip2;
-  char     i,i1,i2;
-
-  if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
-    fprintf(stdout,"  ** Grading mesh\n");
-
-  for (k=1; k<=mesh->np; k++)
-    mesh->point[k].flag = mesh->base;
-
-  it = nup = 0;
-  maxit = 100;
-  do {
-    mesh->base++;
-    nu = 0;
-    for (k=1; k<=mesh->nt; k++) {
-      pt = &mesh->tria[k];
-      if ( !MG_EOK(pt) )  continue;
-
-      for (i=0; i<3; i++) {
-        i1  = _MMG5_inxt2[i];
-        i2  = _MMG5_iprv2[i];
-        ip1 = pt->v[i1];
-        ip2 = pt->v[i2];
-        p1 = &mesh->point[ip1];
-        p2 = &mesh->point[ip2];
-        if ( p1->flag < mesh->base-1 && p2->flag < mesh->base-1 )  continue;
-
-        ll = (p2->c[0]-p1->c[0])*(p2->c[0]-p1->c[0]) + (p2->c[1]-p1->c[1])*(p2->c[1]-p1->c[1]) \
-          + (p2->c[2]-p1->c[2])*(p2->c[2]-p1->c[2]);
-        ll = sqrt(ll);
-
-        h1 = met->m[ip1];
-        h2 = met->m[ip2];
-        if ( h1 < h2 ) {
-          if ( h1 < _MMG5_EPSD )  continue;
-          hn  = h1 + mesh->info.hgrad*ll;
-          if ( h2 > hn ) {
-            met->m[ip2] = hn;
-            p2->flag    = mesh->base;
-            nu++;
-          }
+        if ( mesh->point[pt->v[0]].flag < 3 ) {
+          met->m[pt->v[0]] = MG_MAX(par->hmin,MG_MIN(met->m[pt->v[0]],par->hmax));
         }
-        else {
-          if ( h2 < _MMG5_EPSD )  continue;
-          hn = h2 + mesh->info.hgrad*ll;
-          if ( h1 > hn ) {
-            met->m[ip1] = hn;
-            p1->flag    = mesh->base;
-            nu++;
-          }
+        if ( mesh->point[pt->v[1]].flag < 3 ) {
+          met->m[pt->v[1]] = MG_MAX(par->hmin,MG_MIN(met->m[pt->v[1]],par->hmax));
+        }
+        if ( mesh->point[pt->v[2]].flag < 3 ) {
+          met->m[pt->v[2]] = MG_MAX(par->hmin,MG_MIN(met->m[pt->v[2]],par->hmax));
         }
       }
     }
-    nup += nu;
   }
-  while ( ++it < maxit && nu > 0 );
-
-  if ( abs(mesh->info.imprim) > 4 )  fprintf(stdout,"     gradation: %7d updated, %d iter.\n",nup,it);
-  return(1);
+  return 1;
 }
-

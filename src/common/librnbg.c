@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
+**  Copyright (c) Bx INP/CNRS/Inria/UBordeaux/UPMC, 2004-
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -49,7 +49,7 @@
  * k-partitioning and assuming that baseval of the graph is 1.
  *
  **/
-int _MMG5_kPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr,
+int MMG5_kPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr,
                           SCOTCH_Num *permVrtTab,MMG5_pMesh mesh) {
   int boxNbr, vertIdx;
   SCOTCH_Num logMaxVal, SupMaxVal, InfMaxVal, maxVal;
@@ -76,13 +76,13 @@ int _MMG5_kPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr,
   sprintf(s, "m{vert=%d,low=r{job=t,map=t,poli=S,sep=m{vert=80,low=h{pass=10}f{bal=0.0005,move=80},asc=f{bal=0.005,move=80}}}}", vertNbr / boxVertNbr);
   CHECK_SCOTCH(SCOTCH_stratGraphMap(&strat, s), "scotch_stratGraphMap", 0) ;
 
-  _MMG5_ADD_MEM(mesh,2*vertNbr*sizeof(SCOTCH_Num),"sortPartTb",return(1));
-  _MMG5_SAFE_CALLOC(sortPartTb,2*vertNbr,SCOTCH_Num,0);
+  MMG5_ADD_MEM(mesh,2*vertNbr*sizeof(SCOTCH_Num),"sortPartTb",return 1);
+  MMG5_SAFE_CALLOC(sortPartTb,2*vertNbr,SCOTCH_Num,return 0);
 
   /* Partionning the graph */
   if ( 0!=SCOTCH_graphMap(&graf, &arch, &strat, sortPartTb) ) {
     perror("scotch_graphMap");
-    _MMG5_DEL_MEM(mesh,sortPartTb,2*vertNbr*sizeof(SCOTCH_Num));
+    MMG5_DEL_MEM(mesh,sortPartTb);
     return 0;
   }
 
@@ -135,7 +135,7 @@ int _MMG5_kPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr,
   SCOTCH_stratExit(&strat) ;
   SCOTCH_archExit(&arch) ;
 
-  _MMG5_DEL_MEM(mesh,sortPartTb,2*vertNbr*sizeof(SCOTCH_Num));
+  MMG5_DEL_MEM(mesh,sortPartTb);
 
   return 0;
 }
@@ -152,7 +152,7 @@ int _MMG5_kPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr,
  * Swap two nodes in the table of vertices.
  *
  */
-void _MMG5_swapNod(MMG5_pPoint points, double* sols, int* perm,
+void MMG5_swapNod(MMG5_pPoint points, double* sols, int* perm,
                    int ind1, int ind2, int solsiz) {
   MMG5_Point ptttmp;
   MMG5_Sol   soltmp;
@@ -182,14 +182,14 @@ void _MMG5_swapNod(MMG5_pPoint points, double* sols, int* perm,
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the solution structure.
- * \return 0 if \a _MMG5_renumbering fail (non conformal mesh), 1 otherwise
+ * \return 0 if \a MMG5_renumbering fail (non conformal mesh), 1 otherwise
  * (renumerotation success of renumerotation fail but the mesh is still
  *  conformal).
  *
  * Call scotch renumbering.
  *
  **/
-int _MMG5_scotchCall(MMG5_pMesh mesh, MMG5_pSol met)
+int MMG5_scotchCall(MMG5_pMesh mesh, MMG5_pSol met)
 {
 
 #ifdef USE_SCOTCH
@@ -197,7 +197,7 @@ int _MMG5_scotchCall(MMG5_pMesh mesh, MMG5_pSol met)
   static char mmgError = 0;
 
   /*check enough vertex to renum*/
-  if ( mesh->info.renum && (mesh->np/2. > _MMG5_BOXSIZE) && mesh->np>100000 ) {
+  if ( mesh->info.renum && (mesh->np/2. > MMG5_BOXSIZE) && mesh->np>100000 ) {
 
     if ( (SCOTCH_5 && SCOTCH_6 ) || ( (!SCOTCH_5) && (!SCOTCH_6) ) ) {
       if ( !mmgWarn ) {
@@ -212,14 +212,14 @@ int _MMG5_scotchCall(MMG5_pMesh mesh, MMG5_pSol met)
     if ( mesh->info.imprim > 5 )
       fprintf(stdout,"  -- RENUMBERING. \n");
 
-    if ( !_MMG5_renumbering(_MMG5_BOXSIZE,mesh, met) ) {
+    if ( !MMG5_renumbering(MMG5_BOXSIZE,mesh, met) ) {
       if ( !mmgError ) {
         fprintf(stderr,"\n  ## Error: %s: Unable to renumbering mesh. "
                 "Try to run without renumbering option (-rn 0).\n",
                 __func__);
         mmgError = 1;
       }
-      return(0);
+      return 0;
     }
 
     if ( mesh->info.imprim > 5) {
@@ -227,13 +227,13 @@ int _MMG5_scotchCall(MMG5_pMesh mesh, MMG5_pSol met)
     }
 
     if ( mesh->info.ddebug ) {
-      if ( !_MMG5_chkmsh(mesh,1,0) )
+      if ( !MMG5_chkmsh(mesh,1,0) )
         return 0;
     }
     /* renumbering end */
   }
-  return(1);
+  return 1;
 #else
-  return(1);
+  return 1;
 #endif
 }

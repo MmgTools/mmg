@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
+**  Copyright (c) Bx INP/CNRS/Inria/UBordeaux/UPMC, 2004-
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -35,36 +35,36 @@
 
 /* Interpolation of isotropic metric met along edge i of triangle k, according to parameter s;
    ip = index of the new point */
-int _MMG2_intmet_iso(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s) {
+int MMG2D_intmet_iso(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s) {
   MMG5_pTria  pt;
-  int    ip1,ip2;
-  char   i1,i2;
+  int         ip1,ip2;
+  char        i1,i2;
   
   pt  = &mesh->tria[k];
-  i1  = _MMG5_inxt2[i];
-  i2  = _MMG5_iprv2[i];
+  i1  = MMG5_inxt2[i];
+  i2  = MMG5_iprv2[i];
   ip1 = pt->v[i1];
   ip2 = pt->v[i2];
   met->m[ip] = (1.0-s)*met->m[ip1] + s*met->m[ip2];
   
-  return(1);
+  return 1;
 }
 
 /* Interpolation of metrics m and n according to parameter s; result is stored in mr. A simultaneous reduction of both matrices is performed and the sizes are interpolated. */
-int _MMG5_interpmet22(MMG5_pMesh mesh,double *m,double *n,double s,double *mr) {
+int MMG5_interpmet22(MMG5_pMesh mesh,double *m,double *n,double s,double *mr) {
   double      det,imn[4],dd,den,sqDelta,trimn,lambda[2],vp0[2],vp1[2],dm[2];
   double      dn[2],vnorm,d0,d1,ip[4];
   static char mmgWarn0=0,mmgWarn1=0;
 
   /* Compute imn = M^{-1}N */
   det = m[0]*m[2] - m[1]*m[1];
-  if ( fabs(det) < _MMG5_EPS*_MMG5_EPS ) {
+  if ( fabs(det) < MMG5_EPS*MMG5_EPS ) {
     if ( !mmgWarn0 ) {
       mmgWarn0 = 1;
       fprintf(stderr,"\n  ## Error: %s: null metric det : %E \n",
               __func__,det);
     }
-    return(0);
+    return 0;
   }
   det = 1.0 / det;
   
@@ -83,13 +83,13 @@ int _MMG5_interpmet22(MMG5_pMesh mesh,double *m,double *n,double s,double *mr) {
       fprintf(stderr,"\n  ## Error: %s: at least 1 negative eigenvalue: %f \n",
               __func__,lambda[0]);
     }
-    return(0);
+    return 0;
   }
   
   /* First case : matrices m and n are homothetic: n = lambda0*m */
-  if ( sqDelta < _MMG5_EPS ) {
+  if ( sqDelta < MMG5_EPS ) {
     /* Diagonalize m and truncate eigenvalues : trimn, det, etc... are reused */
-    if ( fabs(m[1]) <= _MMG5_EPS || fabs(n[1]) <= _MMG5_EPS ) {
+    if ( fabs(m[1]) <= MMG5_EPS || fabs(n[1]) <= MMG5_EPS ) {
       dm[0]   = m[0];
       dm[1]   = m[2];
       vp0[0] = 1;
@@ -100,6 +100,7 @@ int _MMG5_interpmet22(MMG5_pMesh mesh,double *m,double *n,double s,double *mr) {
     else {
       dd    = m[0] - m[2];
       trimn = m[0] + m[2];
+
       sqDelta = sqrt(fabs(dd*dd +4.0*m[1]*m[1]));
       dm[0]   = 0.5 * (trimn + sqDelta);
       dm[1]   = 0.5 * (trimn - sqDelta);
@@ -107,11 +108,11 @@ int _MMG5_interpmet22(MMG5_pMesh mesh,double *m,double *n,double s,double *mr) {
       vp0[0] = m[1];
       vp0[1] = (dm[0]-m[0]);
       vnorm  = sqrt(vp0[0]*vp0[0] + vp0[1]*vp0[1]);
-      if ( vnorm < _MMG5_EPS ) {
+      if ( vnorm < MMG5_EPS ) {
         vp0[0] = (dm[0] - m[2]);
         vp0[1] = m[1];
         vnorm  = sqrt(vp0[0]*vp0[0] + vp0[1]*vp0[1]);
-        if ( vnorm < _MMG5_EPS ) return(0);
+        if ( vnorm < MMG5_EPS ) return 0;
       }
       
       vnorm   = 1.0 / vnorm;
@@ -122,11 +123,11 @@ int _MMG5_interpmet22(MMG5_pMesh mesh,double *m,double *n,double s,double *mr) {
       vp1[1] = (dm[1]-m[0]);
       vnorm  = sqrt(vp1[0]*vp1[0] + vp1[1]*vp1[1]);
       
-      if ( vnorm < _MMG5_EPS ) {
+      if ( vnorm < MMG5_EPS ) {
         vp1[0] = (dm[1] - m[2]);
         vp1[1] = m[1];
         vnorm  = sqrt(vp1[0]*vp1[0] + vp1[1]*vp1[1]);
-        if ( vnorm < _MMG5_EPS ) return(0);
+        if ( vnorm < MMG5_EPS ) return 0;
       }
       
       vnorm   = 1.0 / vnorm;
@@ -143,13 +144,13 @@ int _MMG5_interpmet22(MMG5_pMesh mesh,double *m,double *n,double s,double *mr) {
     den = (1.0-s)*(1.0-s)*dn[0] + s*s*dm[0] + 2.0*s*(1.0-s)*sqrt(dd);
     
     /* If den is too small (should not happen) simply interpolate diagonal values; else interpolate sizes */
-    if ( den < _MMG5_EPS ) d0 = (1.0-s)*dm[0] + s*dn[0];
+    if ( den < MMG5_EPS ) d0 = (1.0-s)*dm[0] + s*dn[0];
     else d0 = dd / den;
     
     dd = dn[1]*dm[1];
     den = (1.0-s)*(1.0-s)*dn[1] + s*s*dm[1] + 2.0*s*(1.0-s)*sqrt(dd);
 
-    if ( den < _MMG5_EPS ) d1 = (1.0-s)*dm[1] + s*dn[1];
+    if ( den < MMG5_EPS ) d1 = (1.0-s)*dm[1] + s*dn[1];
     else d1 = dd / den;
 
     /* Intersected metric = P diag(d0,d1){^t}P, P = (vp0, vp1) stored in columns */
@@ -157,7 +158,7 @@ int _MMG5_interpmet22(MMG5_pMesh mesh,double *m,double *n,double s,double *mr) {
     mr[1] = d0*vp0[0]*vp0[1] + d1*vp1[0]*vp1[1];
     mr[2] = d0*vp0[1]*vp0[1] + d1*vp1[1]*vp1[1];
     
-    return(1);
+    return 1;
   }
   
   /* Second case: both eigenvalues of imn are distinct ; theory says qf associated to m and n
@@ -170,7 +171,7 @@ int _MMG5_interpmet22(MMG5_pMesh mesh,double *m,double *n,double s,double *mr) {
     vp0[1] = (lambda[0] - imn[0]);
     vnorm  = sqrt(vp0[0]*vp0[0] + vp0[1]*vp0[1]);
     
-    if ( vnorm < _MMG5_EPS ) {
+    if ( vnorm < MMG5_EPS ) {
       vp0[0] = (lambda[0] - imn[3]);
       vp0[1] = imn[2];
       vnorm  = sqrt(vp0[0]*vp0[0] + vp0[1]*vp0[1]);
@@ -184,7 +185,7 @@ int _MMG5_interpmet22(MMG5_pMesh mesh,double *m,double *n,double s,double *mr) {
     vp1[1] = (lambda[1] - imn[0]);
     vnorm  = sqrt(vp1[0]*vp1[0] + vp1[1]*vp1[1]);
     
-    if ( vnorm < _MMG5_EPS ) {
+    if ( vnorm < MMG5_EPS ) {
       vp1[0] = (lambda[1] - imn[3]);
       vp1[1] = imn[2];
       vnorm  = sqrt(vp1[0]*vp1[0] + vp1[1]*vp1[1]);
@@ -204,18 +205,18 @@ int _MMG5_interpmet22(MMG5_pMesh mesh,double *m,double *n,double s,double *mr) {
     dd = dn[0]*dm[0];
     den = (1.0-s)*(1.0-s)*dn[0] + s*s*dm[0] + 2.0*s*(1.0-s)*sqrt(dd);
     
-    if ( den < _MMG5_EPS ) d0 = (1.0-s)*dm[0] + s*dn[0];
+    if ( den < MMG5_EPS ) d0 = (1.0-s)*dm[0] + s*dn[0];
     else d0 = dd / den;
     
     dd = dn[1]*dm[1];
     den = (1.0-s)*(1.0-s)*dn[1] + s*s*dm[1] + 2.0*s*(1.0-s)*sqrt(dd);
     
-    if ( den < _MMG5_EPS ) d1 = (1.0-s)*dm[1] + s*dn[1];
+    if ( den < MMG5_EPS ) d1 = (1.0-s)*dm[1] + s*dn[1];
     else d1 = dd / den;
     
     /* Intersected metric = tP^-1 diag(d0,d1)P^-1, P = (vp0, vp1) stored in columns */
     det = vp0[0]*vp1[1] - vp0[1]*vp1[0];
-    if ( fabs(det) < _MMG5_EPS )  return(0);
+    if ( fabs(det) < MMG5_EPS )  return 0;
     det = 1.0 / det;
     
     ip[0] =  vp1[1]*det;
@@ -228,12 +229,12 @@ int _MMG5_interpmet22(MMG5_pMesh mesh,double *m,double *n,double s,double *mr) {
     mr[2] = d0*ip[1]*ip[1] + d1*ip[3]*ip[3];
   }
   
-  return(1);
+  return 1;
 }
 
 /* Interpolation of anisotropic metric met along edge i of triangle k, according to parameter s;
  ip = index of the new point */
-int _MMG2_intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s) {
+int MMG2D_intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s) {
   MMG5_pTria     pt;
   double         *m1,*m2,*mr;
   int            ip1,ip2;
@@ -241,15 +242,15 @@ int _MMG2_intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s)
   static char    mmgWarn=0;
   
   pt = &mesh->tria[k];
-  i1 = _MMG5_inxt2[i];
-  i2 = _MMG5_iprv2[i];
+  i1 = MMG5_inxt2[i];
+  i2 = MMG5_iprv2[i];
   ip1 = pt->v[i1];
   ip2 = pt->v[i2];
   m1 = &met->m[3*ip1];
   m2 = &met->m[3*ip2];
   mr = &met->m[3*ip];
   
-  if ( !_MMG5_interpmet22(mesh,m1,m2,s,mr) ) {
+  if ( !MMG5_interpmet22(mesh,m1,m2,s,mr) ) {
     if ( !mmgWarn ) {
       mmgWarn=1;
       fprintf(stderr,"  ## Error: %s: at least 1 naive interpolation.\n",
@@ -259,5 +260,5 @@ int _MMG2_intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s)
     mr[1] = (1.0-s)*m1[1] + s*m2[1];
     mr[2] = (1.0-s)*m1[2] + s*m2[2];
   }
-  return(1);
+  return 1;
 }

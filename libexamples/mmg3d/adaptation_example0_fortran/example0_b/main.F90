@@ -26,6 +26,7 @@ PROGRAM main
   DOUBLE PRECISION :: Point(3),Sol
   INTEGER, DIMENSION(:), ALLOCATABLE :: corner, required, ridge
   CHARACTER(LEN=31) :: FMT="(E14.8,1X,E14.8,1X,E14.8,1X,I3)"
+  INTEGER,DIMENSION(2) :: ktet,iface
 
   PRINT*,"  -- TEST MMG3DLIB"
 

@@ -61,6 +61,7 @@ int main(int argc,char *argv[]) {
   int             ref, Tetra[4], Tria[3], Edge[2], *corner, *required, *ridge;
   double          Point[3],Sol;
   char            *fileout, *solout;
+  int             ktet[2],iface[2];
 
   fprintf(stdout,"  -- TEST MMG3DLIB \n");
 
@@ -224,7 +225,7 @@ int main(int argc,char *argv[]) {
     perror("  ## Memory problem: calloc");
     exit(EXIT_FAILURE);
   }
-  /* Table to know if a coponant is corner and/or required */
+  /* Table to know if an edge delimits a sharp angle */
   ridge = (int*)calloc(na+1 ,sizeof(int));
   if ( !ridge ) {
     perror("  ## Memory problem: calloc");
@@ -266,6 +267,20 @@ int main(int argc,char *argv[]) {
   fprintf(inm,"\nRequiredTriangles\n%d\n",nreq);
   for(k=1; k<=nt; k++) {
     if ( required[k] )  fprintf(inm,"%d \n",k);
+  }
+
+  /* Facultative step : if you want to know with which tetrahedra a triangle is
+   * connected */
+  for(k=1; k<=nt; k++) {
+    ktet[0]  = ktet[1]  = 0;
+    iface[0] = iface[1] = 0;
+
+    if (! MMG3D_Get_tetFromTria(mmgMesh,k,ktet,iface) ) {
+      printf("Get tet from tria fail.\n");
+      return 0;
+    }
+    printf("Tria %d is connected with tet %d (face %d) and %d (face %d) \n",
+           k,ktet[0],iface[0],ktet[1],iface[1]);
   }
 
   nreq = 0;nr = 0;

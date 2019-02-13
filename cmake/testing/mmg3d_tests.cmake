@@ -33,7 +33,6 @@ SET ( test_names
   mmg3d_SimpleCube
   # MultiDomain
   mmg3d_MultiDom_Ellipse_fast
-  mmg3d_MultiDom_Ellipse_ReqEntities_fast
   # Non-manifold test case
   mmg3d_NM_Cube_fast
   mmg3d_NM_Complex_fast
@@ -43,8 +42,7 @@ SET ( input_files
   ${MMG3D_CI_TESTS}/Cube/cube
   ### Multidom
   ${MMG3D_CI_TESTS}/MultiDom_Ellipse/c.d
-  ${MMG3D_CI_TESTS}/MultiDom_Ellipse_ReqEntities/c.d
-  ### non-manifold
+   ### non-manifold
   ${MMG3D_CI_TESTS}/NM_Cube/nm
   ${MMG3D_CI_TESTS}/NM_Complex/nm4
   )
@@ -52,7 +50,6 @@ SET ( input_files
 SET ( args
   "-v 5"
   ### MultiDomain
-  "-v 5 -hausd 0.002"
   "-v 5 -hausd 0.002"
   ### non-manifold
   "-v 5 -hmax 0.1"
@@ -109,9 +106,7 @@ IF ( LONG_TESTS )
     mmg3d_Various_refunref_Santa_met0.05_hausd0.0001_ar90
     # 5: MultiDomain
     mmg3d_MultiDom_Cube
-    mmg3d_MultiDom_Cube_ReqEntities
     mmg3d_MultiDom_Ellipse
-    mmg3d_MultiDom_Ellipse_ReqEntities
     # Non-manifold test case
     mmg3d_NM_Cube
     mmg3d_NM_Complex
@@ -161,9 +156,7 @@ IF ( LONG_TESTS )
     ${MMG3D_CI_TESTS}/Various_refunref_Santa_met0.05_hausd0.0001_ar90/santa
     ### MultiDomain
     ${MMG3D_CI_TESTS}/MultiDom_Cube/c
-    ${MMG3D_CI_TESTS}/MultiDom_Cube_ReqEntities/c
     ${MMG3D_CI_TESTS}/MultiDom_Ellipse/c.d
-    ${MMG3D_CI_TESTS}/MultiDom_Ellipse_ReqEntities/c.d
     ${MMG3D_CI_TESTS}/NM_Cube/nm
     ${MMG3D_CI_TESTS}/NM_Complex/nm4
     )
@@ -212,8 +205,6 @@ IF ( LONG_TESTS )
     "-v 5 -hausd 0.0001 -ar 90"
     ### MultiDomain
     "-v 5 -hmax 0.02"
-    "-v 5 -hmax 0.02"
-    "-v 5 -hausd 0.0003"
     "-v 5 -hausd 0.0003"
     "-v 5 -hmax 0.05"
     "-v 5"
@@ -331,6 +322,27 @@ ADD_TEST(NAME mmg3d_LeakCheck_optLevelSet
   ${MMG3D_CI_TESTS}/LeakCheck_optLevelSet/rect03d
   -out ${CTEST_OUTPUT_DIR}/mmg3d_LeakCheck_optLevelSet-rect03d.o.meshb)
 
+##############################################################################
+#####
+#####         Check Options
+#####
+##############################################################################
+#####
+ADD_TEST(NAME mmg3d_memOption
+  COMMAND ${EXECUT_MMG3D} -v 5 -m 100
+  ${MMG3D_CI_TESTS}/Cube/cube
+  -out ${CTEST_OUTPUT_DIR}/mmg3d_memOption.o.meshb)
+
+ADD_TEST(NAME mmg3d_hsizAndNosurfOption
+  COMMAND ${EXECUT_MMG3D} -v 5 -hsiz 0.1 -nosurf
+  ${MMG3D_CI_TESTS}/Cube/cube
+  -out ${CTEST_OUTPUT_DIR}/mmg3d_hsizNosurf.o.meshb)
+
+ADD_TEST(NAME mmg3d_hsizAndNosurfAni
+  COMMAND ${EXECUT_MMG3D} -v 5 -hsiz 0.1 -nosurf -A
+  ${MMG3D_CI_TESTS}/Cube/cube
+  -out ${CTEST_OUTPUT_DIR}/mmg3d_hsizNosurfAni.o.meshb)
+
 
 ###############################################################################
 #####
@@ -408,12 +420,24 @@ ADD_TEST(NAME mmg3d_OpnBdy_ref_island
 #####
 ###############################################################################
 #####
-IF ( USE_SUSCELAS )
+IF ( USE_ELAS )
+  ADD_TEST(NAME mmg3d_LagMotion0_tinyBoxt
+    COMMAND ${EXECUT_MMG3D} -v 5  -lag 0
+    -in ${MMG3D_CI_TESTS}/LagMotion1_tinyBoxt/tinyBoxt
+    -sol ${MMG3D_CI_TESTS}/LagMotion1_tinyBoxt/tinyBoxt.sol
+    -out ${CTEST_OUTPUT_DIR}/mmg3d_LagMotion0_tinyBoxt-tinyBoxt.o.meshb
+    )
   ADD_TEST(NAME mmg3d_LagMotion1_tinyBoxt
     COMMAND ${EXECUT_MMG3D} -v 5  -lag 1
     -in ${MMG3D_CI_TESTS}/LagMotion1_tinyBoxt/tinyBoxt
     -sol ${MMG3D_CI_TESTS}/LagMotion1_tinyBoxt/tinyBoxt.sol
     -out ${CTEST_OUTPUT_DIR}/mmg3d_LagMotion1_tinyBoxt-tinyBoxt.o.meshb
+    )
+  ADD_TEST(NAME mmg3d_LagMotion2_tinyBoxt
+    COMMAND ${EXECUT_MMG3D} -v 5  -lag 2
+    -in ${MMG3D_CI_TESTS}/LagMotion1_tinyBoxt/tinyBoxt
+    -sol ${MMG3D_CI_TESTS}/LagMotion1_tinyBoxt/tinyBoxt.sol
+    -out ${CTEST_OUTPUT_DIR}/mmg3d_LagMotion2_tinyBoxt-tinyBoxt.o.meshb
     )
 ENDIF()
 
@@ -450,6 +474,18 @@ ADD_TEST(NAME mmg3d_OptimAni_Sphere
 ###############################################################################
 #####
 
+ADD_TEST(NAME mmg3d_OptLs_plane_p
+  COMMAND ${EXECUT_MMG3D} -v 5 -ls
+  ${MMG3D_CI_TESTS}/OptLs_plane/plane
+  -sol ${MMG3D_CI_TESTS}/OptLs_plane/p.sol
+  mmg3d_OptLs_plane-p.o.meshb)
+
+ADD_TEST(NAME mmg3d_OptLs_plane_m
+  COMMAND ${EXECUT_MMG3D} -v 5 -ls
+  ${MMG3D_CI_TESTS}/OptLs_plane/plane
+  -sol ${MMG3D_CI_TESTS}/OptLs_plane/m.sol
+  mmg3d_OptLs_plane-m.o.meshb)
+
 IF ( LONG_TESTS )
   # Test the Ls option
   ADD_TEST(NAME mmg3d_OptLs_cube303d_hminMax_hgrad1.2_hausd0.005
@@ -471,12 +507,24 @@ IF ( LONG_TESTS )
   #####
   ###############################################################################
   #####
-  IF ( USE_SUSCELAS )
+  IF ( USE_ELAS )
+    ADD_TEST(NAME mmg3d_LagMotion0_boxt
+      COMMAND ${EXECUT_MMG3D} -v 5  -lag 0
+      -in ${MMG3D_CI_TESTS}/LagMotion1_boxt/boxt
+      -sol ${MMG3D_CI_TESTS}/LagMotion1_boxt/boxt.sol
+      -out ${CTEST_OUTPUT_DIR}/mmg3d_LagMotion0_boxt-boxt.o.meshb
+      )
     ADD_TEST(NAME mmg3d_LagMotion1_boxt
       COMMAND ${EXECUT_MMG3D} -v 5  -lag 1
       -in ${MMG3D_CI_TESTS}/LagMotion1_boxt/boxt
       -sol ${MMG3D_CI_TESTS}/LagMotion1_boxt/boxt.sol
       -out ${CTEST_OUTPUT_DIR}/mmg3d_LagMotion1_boxt-boxt.o.meshb
+      )
+    ADD_TEST(NAME mmg3d_LagMotion2_boxt
+      COMMAND ${EXECUT_MMG3D} -v 5  -lag 2
+      -in ${MMG3D_CI_TESTS}/LagMotion1_boxt/boxt
+      -sol ${MMG3D_CI_TESTS}/LagMotion1_boxt/boxt.sol
+      -out ${CTEST_OUTPUT_DIR}/mmg3d_LagMotion2_boxt-boxt.o.meshb
       )
   ENDIF()
 

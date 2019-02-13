@@ -28,7 +28,7 @@ int main(int argc,char *argv[]) {
   fprintf(stdout,"  -- TEST MMG2DMESH \n");
 
 
-  if ( argc != 2 ) {
+  if ( argc != 3 ) {
     printf(" Usage: %s filein fileout \n",argv[0]);
     return(1);
   }

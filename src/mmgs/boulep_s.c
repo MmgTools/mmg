@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
+**  Copyright (c) Bx INP/CNRS/Inria/UBordeaux/UPMC, 2004-
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -61,18 +61,18 @@ int boulet(MMG5_pMesh mesh,int start,int ip,int *list) {
   k = start;
   i = ip;
   do {
-    if ( ilist > _MMGS_LMAX-2 )  return(0);
+    if ( ilist > MMGS_LMAX-2 )  return 0;
     list[ilist] = 3*k + i;
     ++ilist;
 
     adja = &mesh->adja[3*(k-1)+1];
-    i1 = _MMG5_inxt2[i];
+    i1 = MMG5_inxt2[i];
     k  = adja[i1] / 3;
     i  = adja[i1] % 3;
-    i  = _MMG5_inxt2[i];
+    i  = MMG5_inxt2[i];
   }
   while ( k && k != start );
-  if ( k > 0 )  return(ilist);
+  if ( k > 0 )  return ilist;
 
   if ( ppt->tag & MG_NOM )
     return 0;
@@ -82,19 +82,19 @@ int boulet(MMG5_pMesh mesh,int start,int ip,int *list) {
   i = ip;
   do {
     adja = &mesh->adja[3*(k-1)+1];
-    i2 = _MMG5_iprv2[i];
+    i2 = MMG5_iprv2[i];
     k  = adja[i2] / 3;
     if ( k == 0 )  break;
     i  = adja[i2] % 3;
-    i  = _MMG5_iprv2[i];
+    i  = MMG5_iprv2[i];
 
-    if ( ilist > _MMGS_LMAX-2 )  return(0);
+    if ( ilist > MMGS_LMAX-2 )  return 0;
     list[ilist] = 3*k + i;
     ilist++;
   }
   while ( k );
 
-  return(ilist);
+  return ilist;
 }
 
 /**
@@ -117,25 +117,25 @@ int boulechknm(MMG5_pMesh mesh,int start,int ip,int *list) {
   base = ++mesh->base;
 
   pt = &mesh->tria[start];
-  ia = _MMG5_iprv2[ip];
-  iq = _MMG5_inxt2[ip];
-  if ( !MG_EOK(pt) )  return(0);
+  ia = MMG5_iprv2[ip];
+  iq = MMG5_inxt2[ip];
+  if ( !MG_EOK(pt) )  return 0;
   ppt = &mesh->point[pt->v[ip]];
-  if ( ppt->tag & MG_NOM )  return(0);
+  if ( ppt->tag & MG_NOM )  return 0;
   ilist = 0;
 
   /* store neighbors */
   k = start;
   i = ip;
   do {
-    if ( ilist > _MMGS_LMAX-2 )  return(-ilist);
+    if ( ilist > MMGS_LMAX-2 )  return -ilist;
     list[ilist] = 3*k + i;
     ++ilist;
 
     pt = &mesh->tria[k];
 
-    i1 = _MMG5_inxt2[i];
-    i2 = _MMG5_iprv2[i];
+    i1 = MMG5_inxt2[i];
+    i2 = MMG5_iprv2[i];
     ppt = &mesh->point[pt->v[i1]];
     ppt->s = base;
     ppt = &mesh->point[pt->v[i2]];
@@ -144,7 +144,7 @@ int boulechknm(MMG5_pMesh mesh,int start,int ip,int *list) {
     adja = &mesh->adja[3*(k-1)+1];
     k  = adja[i1] / 3;
     i  = adja[i1] % 3;
-    i  = _MMG5_inxt2[i];
+    i  = MMG5_inxt2[i];
   }
   while ( k && k != start );
 
@@ -154,8 +154,8 @@ int boulechknm(MMG5_pMesh mesh,int start,int ip,int *list) {
     i = ip;
     do {
       adja = &mesh->adja[3*(k-1)+1];
-      i1 = _MMG5_inxt2[i];
-      i2 = _MMG5_iprv2[i];
+      i1 = MMG5_inxt2[i];
+      i2 = MMG5_iprv2[i];
 
       pt = &mesh->tria[k];
       ppt = &mesh->point[pt->v[i1]];
@@ -166,9 +166,9 @@ int boulechknm(MMG5_pMesh mesh,int start,int ip,int *list) {
       k  = adja[i2] / 3;
       if ( k == 0 )  break;
       i  = adja[i2] % 3;
-      i  = _MMG5_iprv2[i];
+      i  = MMG5_iprv2[i];
 
-      if ( ilist > _MMGS_LMAX-2 )  return(-ilist);
+      if ( ilist > MMGS_LMAX-2 )  return -ilist;
       list[ilist] = 3*k + i;
       ilist++;
     }
@@ -176,8 +176,8 @@ int boulechknm(MMG5_pMesh mesh,int start,int ip,int *list) {
   }
 
   pt = &mesh->tria[start];
-  i1 = _MMG5_inxt2[ip];
-  i2 = _MMG5_iprv2[ip];
+  i1 = MMG5_inxt2[ip];
+  i2 = MMG5_iprv2[ip];
   ppt = &mesh->point[pt->v[i1]];
   ppt->s = 0;
   ppt = &mesh->point[pt->v[i2]];
@@ -199,43 +199,43 @@ int boulechknm(MMG5_pMesh mesh,int start,int ip,int *list) {
   do {
     pt = &mesh->tria[k];
 
-    i1 = _MMG5_inxt2[i];
-    i2 = _MMG5_iprv2[i];
+    i1 = MMG5_inxt2[i];
+    i2 = MMG5_iprv2[i];
     ppt = &mesh->point[pt->v[i1]];
-    if ( ppt->s == base ) return(0);
+    if ( ppt->s == base ) return 0;
     ppt = &mesh->point[pt->v[i2]];
-    if ( ppt->s == base ) return(0);
+    if ( ppt->s == base ) return 0;
 
     adja = &mesh->adja[3*(k-1)+1];
     k  = adja[i1] / 3;
     i  = adja[i1] % 3;
-    i  = _MMG5_inxt2[i];
+    i  = MMG5_inxt2[i];
   }
   while ( k && k != start );
-  if( k > 0 ) return(ilist);
+  if( k > 0 ) return ilist;
 
   /* check if boundary hit */
   k = start;
   i = iq;
   do {
     adja = &mesh->adja[3*(k-1)+1];
-    i1 = _MMG5_inxt2[i];
-    i2 = _MMG5_iprv2[i];
+    i1 = MMG5_inxt2[i];
+    i2 = MMG5_iprv2[i];
 
     pt = &mesh->tria[k];
     ppt = &mesh->point[pt->v[i1]];
-    if ( ppt->s == base ) return(0);
+    if ( ppt->s == base ) return 0;
     ppt = &mesh->point[pt->v[i2]];
-    if ( ppt->s == base ) return(0);
+    if ( ppt->s == base ) return 0;
 
     k  = adja[i2] / 3;
     if ( k == 0 )  break;
     i  = adja[i2] % 3;
-    i  = _MMG5_iprv2[i];
+    i  = MMG5_iprv2[i];
   }
   while ( k );
 
-  return(ilist);
+  return ilist;
 }
 
 /* return all vertices connected to ip, list[0] = ip */
@@ -245,49 +245,49 @@ int boulep(MMG5_pMesh mesh,int start,int ip,int *list) {
   char     i,i1,i2;
 
   pt = &mesh->tria[start];
-  if ( !MG_EOK(pt) )  return(0);
+  if ( !MG_EOK(pt) )  return 0;
   list[0] = pt->v[ip];
   ilist   = 0;
 
   /* store neighbors */
   k  = start;
   i  = ip;
-  i1 = _MMG5_inxt2[i];
-  i2 = _MMG5_iprv2[i];
+  i1 = MMG5_inxt2[i];
+  i2 = MMG5_iprv2[i];
   do {
-    if ( ilist > _MMGS_LMAX-2 )  return(-ilist);
+    if ( ilist > MMGS_LMAX-2 )  return -ilist;
     ilist++;
     list[ilist] = pt->v[i2];
 
     adja = &mesh->adja[3*(k-1)+1];
     k  = adja[i1] / 3;
     i2 = adja[i1] % 3;
-    i1 = _MMG5_iprv2[i2];
+    i1 = MMG5_iprv2[i2];
     pt = &mesh->tria[k];
   }
   while ( k && k != start );
-  if ( k > 0 )  return(ilist);
+  if ( k > 0 )  return ilist;
 
   /* reverse loop */
   k  = start;
   i  = ip;
   pt = &mesh->tria[k];
-  i1 = _MMG5_inxt2[i];
-  i2 = _MMG5_inxt2[i1];
+  i1 = MMG5_inxt2[i];
+  i2 = MMG5_inxt2[i1];
   do {
-    if ( ilist > _MMGS_LMAX-2 )  return(-ilist);
+    if ( ilist > MMGS_LMAX-2 )  return -ilist;
     ilist++;
     list[ilist] = pt->v[i1];
 
     adja = &mesh->adja[3*(k-1)+1];
     k  = adja[i2] / 3;
     i1 = adja[i2] % 3;
-    i2 = _MMG5_iprv2[i1];
+    i2 = MMG5_iprv2[i1];
     pt = &mesh->tria[k];
   }
   while ( k > 0 );
 
-  return(ilist);
+  return ilist;
 }
 
 /**
@@ -317,14 +317,14 @@ int bouletrid(MMG5_pMesh mesh,int start,int ip,int *il1,int *l1,int *il2,int *l2
   double               *n1,*n2,nt[3],ps1,ps2;
 
   pt = &mesh->tria[start];
-  if ( !MG_EOK(pt) )  return(0);
+  if ( !MG_EOK(pt) )  return 0;
 
   idp = pt->v[ip];
   ppt = &mesh->point[idp];
   assert( ppt->tag & MG_GEO );
 
   /* set pointers: first manifold is on side of triangle */
-  if ( !_MMG5_nortri(mesh,pt,nt) )  return(0);
+  if ( !MMG5_nortri(mesh,pt,nt) )  return 0;
 
   n1 = &(mesh->xpoint[ppt->xp].n1[0]);
   n2 = &(mesh->xpoint[ppt->xp].n2[0]);
@@ -351,13 +351,13 @@ int bouletrid(MMG5_pMesh mesh,int start,int ip,int *il1,int *l1,int *il2,int *l2
   do {
     pt   = &mesh->tria[k];
     adja = &mesh->adja[3*(k-1)+1];
-    i1 = _MMG5_inxt2[i];
-    i2 = _MMG5_iprv2[i];
+    i1 = MMG5_inxt2[i];
+    i2 = MMG5_iprv2[i];
     kold = k;
     iold = i;
     k = adja[i1] / 3;
     i = adja[i1] % 3;
-    i = _MMG5_inxt2[i];
+    i = MMG5_inxt2[i];
   }
   // Remark: here the test k!=start is a security bound: theorically it is
   // useless but in case of bad edge tag, it ensure that the loop is not
@@ -374,14 +374,14 @@ int bouletrid(MMG5_pMesh mesh,int start,int ip,int *il1,int *l1,int *il2,int *l2
   do {
     pt   = &mesh->tria[k];
     adja = &mesh->adja[3*(k-1)+1];
-    if ( (*ilist1) > _MMGS_LMAX-2 )  return(0);
+    if ( (*ilist1) > MMGS_LMAX-2 )  return 0;
     list1[(*ilist1)] = 3*k+i;
     (*ilist1)++;
-    i1 = _MMG5_inxt2[i];
-    i2 = _MMG5_iprv2[i];
+    i1 = MMG5_inxt2[i];
+    i2 = MMG5_iprv2[i];
     k = adja[i2] / 3;
     i = adja[i2] % 3;
-    i = _MMG5_iprv2[i];
+    i = MMG5_iprv2[i];
   }
   while ( k && !(MG_GEO & pt->tag[i2]) );
   *ip1 = pt->v[i1];
@@ -394,7 +394,7 @@ int bouletrid(MMG5_pMesh mesh,int start,int ip,int *il1,int *l1,int *il2,int *l2
   }
   /* At this point, either something has been stored in iel or an open boundary has been hit */
   *ilist2 = 0;
-  if ( !iel )  return(1);
+  if ( !iel )  return 1;
 
   /* Else, start back from the hit boundary, until another boundary is hit */
   k  = iel;
@@ -402,18 +402,18 @@ int bouletrid(MMG5_pMesh mesh,int start,int ip,int *il1,int *l1,int *il2,int *l2
   do {
     pt   = &mesh->tria[k];
     adja = &mesh->adja[3*(k-1)+1];
-    if ( *ilist2 > _MMGS_LMAX-2 )  return(0);
+    if ( *ilist2 > MMGS_LMAX-2 )  return 0;
     list2[*ilist2] = 3*k+i;
     (*ilist2)++;
-    i1 = _MMG5_inxt2[i];
+    i1 = MMG5_inxt2[i];
     k = adja[i1] / 3;
     i = adja[i1] % 3;
-    i = _MMG5_inxt2[i];
+    i = MMG5_inxt2[i];
   }
   while ( k && !(MG_GEO & pt->tag[i1]) );
 
   if ( !(MG_GEO & pt->tag[i1]) )
-    return(0);
+    return 0;
   else
-    return(1);
+    return 1;
 }

@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
+**  Copyright (c) Bx INP/CNRS/Inria/UBordeaux/UPMC, 2004-
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -42,7 +42,7 @@
  * Compute radius (squared) and center of circumscribing circle to the element.
  *
  */
-int _MMG5_cenrad_iso(MMG5_pMesh mesh,double *ct,double *c,double *rad) {
+int MMG5_cenrad_iso(MMG5_pMesh mesh,double *ct,double *c,double *rad) {
   double      dd,ux,uy,uz,n1[3],n2[3],n3[3],*c1,*c2,*c3,*c4,pl1,pl2,pl3;
   double      cc1,cc2,cc3;
 
@@ -92,7 +92,7 @@ int _MMG5_cenrad_iso(MMG5_pMesh mesh,double *ct,double *c,double *rad) {
   uz = n1[1]*n2[2] - n1[2]*n2[1];
 
   dd = n1[0]*ux + n2[0]*uy + n3[0]*uz;
-  if(fabs((dd))<1e-12)  return(0);
+  if(fabs((dd))<1e-12)  return 0;
   dd = 0.5 / dd;
 
   cc1 = ux*pl1 + uy*pl2 + uz*pl3;
@@ -112,7 +112,7 @@ int _MMG5_cenrad_iso(MMG5_pMesh mesh,double *ct,double *c,double *rad) {
     + (c[1] - c4[1]) * (c[1] - c4[1]) \
     + (c[2] - c4[2]) * (c[2] - c4[2]);
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -127,7 +127,7 @@ int _MMG5_cenrad_iso(MMG5_pMesh mesh,double *ct,double *c,double *rad) {
  * for an anisotropic metric \a m.
  *
  */
-int _MMG5_cenrad_ani(MMG5_pMesh mesh,double *ct,double *m,double *c,double *rad) {
+int MMG5_cenrad_ani(MMG5_pMesh mesh,double *ct,double *m,double *c,double *rad) {
   double      d1,d2,d3,det,dd,ux,uy,uz,vx,vy,vz,wx,wy,wz;
   double      ax,ay,az,bx,by,bz,cx,cy,cz;
 
@@ -189,5 +189,5 @@ int _MMG5_cenrad_ani(MMG5_pMesh mesh,double *ct,double *m,double *c,double *rad)
   *rad =      m[0]*ux*ux + m[3]*uy*uy + m[5]*uz*uz \
     + 2.0*(m[1]*ux*uy + m[2]*ux*uz + m[4]*uy*uz);
 
-  return(1);
+  return 1;
 }

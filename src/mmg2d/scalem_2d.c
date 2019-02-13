@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
+**  Copyright (c) Bx INP/CNRS/Inria/UBordeaux/UPMC, 2004-
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -44,10 +44,11 @@
  * Truncate the metric sizes between hmin/hmax
  *
  */
-int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
+int MMG2D_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   //Displ     pd;
   MMG5_pPoint    ppt;
   MMG5_Info     *info;
+  MMG5_pPar      ppar;
   double         dd,isqhmin,isqhmax;
   double         *m;
   double         lambda[2],v[2][2];
@@ -57,17 +58,26 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   // pd  = mesh->disp;
   /* compute bounding box */
-  if ( ! _MMG5_boundingBox(mesh) ) return(0);
+  if ( ! MMG5_boundingBox(mesh) ) return 0;
 
   info = &mesh->info;
- 
 
-  /* normalize coordinates */
-  dd = _MMG2D_PRECI / info->delta;
+
+  /* normalize coordinates and local parameters */
+  dd = MMG2D_PRECI / info->delta;
 
   mesh->info.hausd *= dd;
   mesh->info.hsiz  *= dd;
   mesh->info.ls    *= dd;
+
+  if ( mesh->info.npar ) {
+    for (i=0; i<mesh->info.npar; i++) {
+      ppar = &mesh->info.par[i];
+      ppar->hmin   *= dd;
+      ppar->hmax   *= dd;
+      ppar->hausd  *= dd;
+    }
+  }
 
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
@@ -109,7 +119,7 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
     sethmax = 1;
   }
 
-  if ( !sol->np )  return(1);
+  if ( !sol->np )  return 1;
 
   /* metric truncature and normalization and default values for hmin/hmax if not
    * provided by the user ( 0.1 \times the minimum of the metric sizes for hmin
@@ -126,7 +136,7 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
           fprintf(stderr,"\n  ## Error: %s: at least 1 wrong metric.\n",
                   __func__);
         }
-        return(0);
+        return 0;
       }
     }
 
@@ -190,13 +200,13 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
         m    = &sol->m[iadr];
 
         /* Check the input metric */
-        if ( !_MMG5_eigensym(m,lambda,v) ) {
+        if ( !MMG5_eigensym(m,lambda,v) ) {
           if ( !mmgWarn0 ) {
             mmgWarn0 = 1;
             fprintf(stderr,"\n  ## Error: %s: at least 1 wrong metric.\n",
                     __func__);
           }
-          return(0);
+          return 0;
         }
         for (i=0; i<2; i++) {
           if(lambda[i]<=0) {
@@ -206,7 +216,7 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
                       " (eigenvalue : %e %e -- det %e\n",__func__,lambda[0],
                       lambda[1],m[0]*m[2]-m[1]*m[1]);
             }
-            return(0);
+            return 0;
           }
           mesh->info.hmin = MG_MIN(mesh->info.hmin,1./sqrt(lambda[i]));
         }
@@ -219,13 +229,13 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
         m    = &sol->m[iadr];
 
         /* Check the input metric */
-        if ( !_MMG5_eigensym(m,lambda,v) ) {
+        if ( !MMG5_eigensym(m,lambda,v) ) {
           if ( !mmgWarn0 ) {
             mmgWarn0 = 1;
             fprintf(stderr,"\n  ## Error: %s: at least 1 wrong metric.\n",
                     __func__);
           }
-          return(0);
+          return 0;
         }
         for (i=0; i<2; i++) {
           if(lambda[i]<=0) {
@@ -235,7 +245,7 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
                       " (eigenvalue : %e %e -- det %e\n",__func__,lambda[0],
                       lambda[1],m[0]*m[2]-m[1]*m[1]);
             }
-            return(0);
+            return 0;
           }
           mesh->info.hmax = MG_MAX(mesh->info.hmax,1./sqrt(lambda[i]));
         }
@@ -267,13 +277,13 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
 
       m    = &sol->m[iadr];
       /* Check the input metric */
-      if ( !_MMG5_eigensym(m,lambda,v) ) {
+      if ( !MMG5_eigensym(m,lambda,v) ) {
         if ( !mmgWarn0 ) {
           mmgWarn0 = 1;
           fprintf(stderr,"\n  ## Error: %s: at least 1 wrong metric.\n",
                   __func__);
         }
-        return(0);
+        return 0;
       }
       for (i=0; i<2; i++) {
         if(lambda[i]<=0) {
@@ -283,7 +293,7 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
                     " (eigenvalue : %e %e -- det %e\n",__func__,lambda[0],
                     lambda[1],m[0]*m[2]-m[1]*m[1]);
           }
-          return(0);
+          return 0;
         }
         lambda[i]=MG_MIN(isqhmin,lambda[i]);
         lambda[i]=MG_MAX(isqhmax,lambda[i]);
@@ -294,20 +304,21 @@ int MMG2_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
     }
     break;
   }
-  return(1);
+  return 1;
 }
 
 /* Unscale mesh coordinates */
-int MMG2_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
+int MMG2D_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pPoint     ppt;
   MMG5_Info      *info;
+  MMG5_pPar      ppar;
   double          dd;
   int             i,k,iadr;
 
   info = &mesh->info;
 
   /* de-normalize coordinates */
-  dd = info->delta / (double)_MMG2D_PRECI;
+  dd = info->delta / (double)MMG2D_PRECI;
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
     if ( !MG_VOK(ppt) )  continue;
@@ -323,8 +334,17 @@ int MMG2_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   mesh->info.hsiz  *= dd;
   mesh->info.ls    *= dd;
 
+  if ( mesh->info.npar ) {
+    for (i=0; i<mesh->info.npar; i++) {
+      ppar = &mesh->info.par[i];
+      ppar->hmin   *= dd;
+      ppar->hmax   *= dd;
+      ppar->hausd  *= dd;
+    }
+  }
+
   /* de-normalize metric */
-  if ( !sol->np )  return(1);
+  if ( (!sol->np) || (!sol->m) )  return 1;
 
   switch (sol->size) {
   case 1:
@@ -353,5 +373,5 @@ int MMG2_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
     break;
   }
 
-  return(1);
+  return 1;
 }

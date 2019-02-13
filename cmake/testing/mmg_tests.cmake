@@ -125,6 +125,21 @@ FOREACH(EXEC ${LISTEXEC_MMG})
    )
 
 
+ ADD_TEST(NAME mmg_HausdLoc_2SpheresAni${SHRT_EXEC}
+   COMMAND ${EXEC} -v 5 -hgrad 2 -A
+   ${MMG_CI_TESTS}/HausdLoc_2Spheres/2spheres
+   ${CTEST_OUTPUT_DIR}/mmg_HausdLoc_2SpheresAni${SHRT_EXEC}-2spheres.o.meshb
+   -hgrad 2
+   )
+ #####
+ ADD_TEST(NAME mmg_hminmaxLoc_2SpheresAni${SHRT_EXEC}
+   COMMAND ${EXEC} -v 5 -hgrad 2 -A
+   ${MMG_CI_TESTS}/HausdLoc_2Spheres/2spheres
+   ${CTEST_OUTPUT_DIR}/mmg_HausdLoc_2SpheresAni${SHRT_EXEC}-2spheres.o.meshb
+   -hgrad 2
+   )
+
+
  ##############################################################################
  #####
  #####         Check Precision
@@ -144,5 +159,78 @@ FOREACH(EXEC ${LISTEXEC_MMG})
    -sol ${MMG_CI_TESTS}/MeshVersionFormatted2/dsol.sol
    ${CTEST_OUTPUT_DIR}/mmg_MeshVersionFormatted2_${SHRT_EXEC}-d.o
    )
+
+###############################################################################
+#####
+#####         Options
+#####
+###############################################################################
+ADD_TEST(NAME mmg_hsizOption_${SHRT_EXEC}
+  COMMAND ${EXEC} -v 5 -hsiz 0.1
+  ${MMG_CI_TESTS}/Cube/cube
+  -out ${CTEST_OUTPUT_DIR}/mmg_hsiz_${SHRT_EXEC}.o.meshb)
+
+# hsiz Aniso
+ADD_TEST(NAME mmg_hsizAni_${SHRT_EXEC}
+  COMMAND ${EXEC} -v 5 -hsiz 0.1 -sol 2 -A
+  ${MMG_CI_TESTS}/TorusholesAni_chocCyl/torusholesTiny
+  -out ${CTEST_OUTPUT_DIR}/mmg_hsizAni_${SHRT_EXEC}.o.meshb)
+
+ADD_TEST(NAME mmg_hsizHmax_${SHRT_EXEC}
+  COMMAND ${EXEC} -v 5 -hsiz 0.1 -hmax 0.05
+  ${MMG_CI_TESTS}/Cube/cube
+  -out ${CTEST_OUTPUT_DIR}/mmg_hsizHmax_${SHRT_EXEC}.o.meshb)
+SET(passRegex "Mismatched options")
+SET_PROPERTY(TEST mmg_hsizHmax_${SHRT_EXEC}
+  PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}")
+
+ADD_TEST(NAME mmg_hsizHmin_${SHRT_EXEC}
+  COMMAND ${EXEC} -v 5 -hsiz 0.1 -hmin 0.2
+  ${MMG_CI_TESTS}/Cube/cube
+  -out ${CTEST_OUTPUT_DIR}/mmg_hsizHmin_${SHRT_EXEC}.o.meshb)
+SET_PROPERTY(TEST mmg_hsizHmin_${SHRT_EXEC}
+  PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}")
+
+# Required entities
+ADD_TEST(NAME mmg_MultiDom_Ellipse_ReqEntities_${SHRT_EXEC}
+  COMMAND ${EXEC} -v 5 -hausd 0.002
+  ${MMG_CI_TESTS}/MultiDom_Ellipse_ReqEntities/c.d
+  -out ${CTEST_OUTPUT_DIR}/mmg_MultiDom_Ellipse_ReqEntities_${SHRT_EXEC}.o.meshb)
+
+ADD_TEST(NAME mmg_MultiDom_Cube_ReqEntities_${SHRT_EXEC}
+  COMMAND ${EXEC} -v 5 -hsiz 0.02
+  ${MMG_CI_TESTS}/MultiDom_Cube_ReqEntities/c
+  -out ${CTEST_OUTPUT_DIR}/mmg_MultiDom_Cube_ReqEntities_${SHRT_EXEC}.o.meshb)
+
+ADD_TEST(NAME mmg_MultiDom_Ellipse_ReqEntitiesAni_${SHRT_EXEC}
+  COMMAND ${EXEC} -v 5 -hausd 0.002 -A
+  ${MMG_CI_TESTS}/MultiDom_Ellipse_ReqEntities/c.d
+  -out ${CTEST_OUTPUT_DIR}/mmg_MultiDom_Ellipse_ReqEntitiesAni_${SHRT_EXEC}.o.meshb)
+
+
+# -A
+ADD_TEST(NAME mmg_CommandLineAni_${SHRT_EXEC}
+  COMMAND ${EXEC} -v 5 -hausd 0.005 -sol 2 -A
+  ${MMG_CI_TESTS}/TorusholesAni_chocCyl/torusholesTiny
+  -out ${CTEST_OUTPUT_DIR}/mmg_CommandLineAni_${SHRT_EXEC}.o.meshb)
+
+  ##############################################################################
+  #####
+  #####         Various test cases
+  #####
+  ##############################################################################
+  #####
+
+  # Lot of reference edges, ridges, corners and singularities
+  ADD_TEST(NAME mmg_SurfEdges_${SHRT_EXEC}
+    COMMAND ${EXEC} -v 5 -hausd 0.1 -A
+    ${MMG_CI_TESTS}/SurfEdges_house/housebad.meshb
+    -out ${CTEST_OUTPUT_DIR}/mmg_SurfEdgesAni_${SHRT_EXEC}.o.meshb)
+
+  ADD_TEST(NAME mmg_SurfEdgesAni_${SHRT_EXEC}
+    COMMAND ${EXEC} -v 5 -hausd 0.1
+    ${MMG_CI_TESTS}/SurfEdges_house/housebad.meshb
+    -out ${CTEST_OUTPUT_DIR}/mmg_SurfEdges_${SHRT_EXEC}.o.meshb)
+
 
 ENDFOREACH(EXEC)

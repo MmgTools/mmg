@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
+**  Copyright (c) Bx INP/CNRS/Inria/UBordeaux/UPMC, 2004-
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -49,11 +49,11 @@
  *
  */
 static inline
-int _MMGS_Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol) {
+int MMGS_Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol) {
 
   /* mesh allocation */
-  if ( *mesh )  _MMG5_SAFE_FREE(*mesh);
-  _MMG5_SAFE_CALLOC(*mesh,1,MMG5_Mesh,0);
+  if ( *mesh )  MMG5_SAFE_FREE(*mesh);
+  MMG5_SAFE_CALLOC(*mesh,1,MMG5_Mesh,return 0);
 
   /* sol allocation */
   if ( !sol ) {
@@ -63,8 +63,8 @@ int _MMGS_Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol) {
     return 0;
   }
 
-  if ( *sol )  _MMG5_DEL_MEM(*mesh,*sol,sizeof(MMG5_Sol));
-  _MMG5_SAFE_CALLOC(*sol,1,MMG5_Sol,0);
+  if ( *sol )  MMG5_DEL_MEM(*mesh,*sol);
+  MMG5_SAFE_CALLOC(*sol,1,MMG5_Sol,return 0);
 
   return 1;
 }
@@ -77,13 +77,13 @@ int _MMGS_Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol) {
  *
  */
 static inline
-void _MMGS_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol ) {
+void MMGS_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol ) {
 
-  _MMGS_Set_commonFunc();
+  MMGS_Set_commonFunc();
 
   (mesh)->dim   = 3;
   (mesh)->ver   = 2;
-  (mesh)->nsols = 1;
+  (mesh)->nsols = 0;
 
   (sol)->dim   = 3;
   (sol)->ver   = 2;
@@ -120,7 +120,7 @@ void _MMGS_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol ) {
  * Internal function for structure allocations (taking a va_list argument).
  *
  */
-int _MMGS_Init_mesh_var( va_list argptr ) {
+int MMGS_Init_mesh_var( va_list argptr ) {
   MMG5_pMesh     *mesh;
   MMG5_pSol      *sol;
   int            typArg;
@@ -169,10 +169,10 @@ int _MMGS_Init_mesh_var( va_list argptr ) {
   }
 
   /* allocations */
-  if ( !_MMGS_Alloc_mesh(mesh,sol) )  return 0;
+  if ( !MMGS_Alloc_mesh(mesh,sol) )  return 0;
 
   /* initialisations */
-  _MMGS_Init_woalloc_mesh(*mesh,*sol);
+  MMGS_Init_woalloc_mesh(*mesh,*sol);
 
   return 1;
 }
@@ -202,7 +202,7 @@ int _MMGS_Init_mesh_var( va_list argptr ) {
  * \remark we pass the structures by reference in order to have argument
  * compatibility between the library call from a Fortran code and a C code.
  */
-int _MMGS_Free_all_var(va_list argptr)
+int MMGS_Free_all_var(va_list argptr)
 {
 
   MMG5_pMesh     *mesh;
@@ -244,35 +244,25 @@ int _MMGS_Free_all_var(va_list argptr)
     return 0;
   }
 
-  if ( !sol ) {
-    fprintf(stderr,"\n  ## Error: %s: MMGS_Free_all:\n"
-            " you need to provide your metric structure"
-            " (of type MMG5_pSol and indentified by the MMG5_ARG_ppMet or"
-            " the MMG5_ARG_ppLs preprocessor variable)"
-            " to allow to free the associated memory.\n",__func__);
-    return 0;
-  }
-
-
   if ( !MMGS_Free_structures(MMG5_ARG_start,
                              MMG5_ARG_ppMesh, mesh, MMG5_ARG_ppMet, sol,
                              MMG5_ARG_end) )
     return 0;
 
   if ( sol )
-    _MMG5_SAFE_FREE(*sol);
+    MMG5_SAFE_FREE(*sol);
 
   if ( sols ) {
     for ( i=0; i<(*mesh)->nsols; ++i ) {
       psl = (*sols) + i;
       if ( psl->m ) {
-        _MMG5_DEL_MEM(*mesh,psl->m,(psl->size*(psl->npmax+1))*sizeof(double));
+        MMG5_DEL_MEM(*mesh,psl->m);
       }
     }
-    _MMG5_DEL_MEM(*mesh,*sols,((*mesh)->nsols)*sizeof(MMG5_Sol));
+    MMG5_DEL_MEM(*mesh,*sols);
   }
 
-  _MMG5_SAFE_FREE(*mesh);
+  MMG5_SAFE_FREE(*mesh);
 
   return 1;
 }
@@ -303,7 +293,7 @@ int _MMGS_Free_all_var(va_list argptr)
  * compatibility between the library call from a Fortran code and a C code.
  *
  */
-int _MMGS_Free_structures_var(va_list argptr)
+int MMGS_Free_structures_var(va_list argptr)
 {
 
   MMG5_pMesh     *mesh;
@@ -348,18 +338,22 @@ int _MMGS_Free_structures_var(va_list argptr)
 
  /* mesh */
   assert(mesh && *mesh);
-  assert(sol  && *sol);
 
   if ( (*mesh)->edge )
-    _MMG5_DEL_MEM((*mesh),(*mesh)->edge,((*mesh)->na+1)*sizeof(MMG5_Edge));
+    MMG5_DEL_MEM((*mesh),(*mesh)->edge);
 
   if ( (*mesh)->adja )
-    _MMG5_DEL_MEM((*mesh),(*mesh)->adja,(3*(*mesh)->ntmax+5)*sizeof(int));
+    MMG5_DEL_MEM((*mesh),(*mesh)->adja);
 
   if ( (*mesh)->tria )
-    _MMG5_DEL_MEM((*mesh),(*mesh)->tria,((*mesh)->ntmax+1)*sizeof(MMG5_Tria));
+    MMG5_DEL_MEM((*mesh),(*mesh)->tria);
 
-  MMG5_Free_structures(*mesh,*sol);
+  if ( sol ) {
+    MMG5_Free_structures(*mesh,*sol);
+  }
+  else {
+    MMG5_Free_structures(*mesh,NULL);
+  }
 
   return 1;
 }
@@ -391,7 +385,7 @@ int _MMGS_Free_structures_var(va_list argptr)
  * compatibility between the library call from a Fortran code and a C code.
  *
  */
-int _MMGS_Free_names_var(va_list argptr)
+int MMGS_Free_names_var(va_list argptr)
 {
 
   MMG5_pMesh     *mesh;
@@ -429,17 +423,16 @@ int _MMGS_Free_names_var(va_list argptr)
             " to allow to free the associated memory.\n",__func__);
     return 0;
   }
-  if ( !sol ) {
-    fprintf(stderr,"\n  ## Error: %s: MMGS_Free_names:\n"
-            " you need to provide your metric structure"
-            " (of type MMG5_pSol and indentified by the MMG5_ARG_ppMet or the "
-            " MMG5_ARG_ppLs preprocessor variable)"
-            " to allow to free the associated memory.\n",__func__);
-  }
 
   /* mesh & met */
-  assert(mesh && *mesh && sol && *sol );
-  MMG5_mmgFree_names(*mesh,*sol);
+  assert(mesh && *mesh );
+
+  if ( sol ) {
+    MMG5_mmgFree_names(*mesh,*sol);
+  }
+  else {
+    MMG5_mmgFree_names(*mesh,NULL);
+  }
 
   return 1;
 }

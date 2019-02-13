@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
+**  Copyright (c) Bx INP/CNRS/Inria/UBordeaux/UPMC, 2004-
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -48,7 +48,7 @@
  *
  */
 static inline
-void _MMG5_swapTet(MMG5_pTetra tetras/*, int* adja*/, int* perm, int ind1, int ind2) {
+void MMG5_swapTet(MMG5_pTetra tetras/*, int* adja*/, int* perm, int ind1, int ind2) {
   MMG5_Tetra pttmp;
   int        tmp;
 
@@ -107,7 +107,7 @@ void _MMG5_swapTet(MMG5_pTetra tetras/*, int* adja*/, int* perm, int ind1, int i
  * Modifies the node indicies to prevent from cache missing.
  *
  */
-int _MMG5_mmg3dRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
+int MMG5_mmg3dRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
   MMG5_pPoint ppt;
   MMG5_pTetra ptet;
   MMG5_pPrism pp;
@@ -124,8 +124,8 @@ int _MMG5_mmg3dRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
   /* Computing the number of vertices and a contiguous tabular of vertices */
   vertNbr = 0;
 
-  _MMG5_ADD_MEM(mesh,(mesh->ne+1)*sizeof(int),"vertOldTab",return(1));
-  _MMG5_SAFE_CALLOC(vertOldTab,mesh->ne+1,int,1);
+  MMG5_ADD_MEM(mesh,(mesh->ne+1)*sizeof(int),"vertOldTab",return 1);
+  MMG5_SAFE_CALLOC(vertOldTab,mesh->ne+1,int,return 1);
 
   for(tetraIdx = 1 ; tetraIdx < mesh->ne + 1 ; tetraIdx++) {
 
@@ -134,21 +134,21 @@ int _MMG5_mmg3dRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
     vertOldTab[tetraIdx] = ++vertNbr;
   }
 
-  if ( vertNbr/2 < _MMG5_BOXSIZE ) {
+  if ( vertNbr/2 < MMG5_BOXSIZE ) {
     /* not enough tetra to renum */
-    _MMG5_DEL_MEM(mesh,vertOldTab,(mesh->ne+1)*sizeof(int));
-    return(1);
+    MMG5_DEL_MEM(mesh,vertOldTab);
+    return 1;
   }
   /* Allocating memory to compute adjacency lists */
-  _MMG5_ADD_MEM(mesh,(vertNbr+2)*sizeof(SCOTCH_Num),"vertTab",
-                _MMG5_DEL_MEM(mesh,vertOldTab,(mesh->ne+1)*sizeof(int));
-                return(1));
-  _MMG5_SAFE_CALLOC(vertTab,vertNbr+2,SCOTCH_Num,1);
+  MMG5_ADD_MEM(mesh,(vertNbr+2)*sizeof(SCOTCH_Num),"vertTab",
+                MMG5_DEL_MEM(mesh,vertOldTab);
+                return 1);
+  MMG5_SAFE_CALLOC(vertTab,vertNbr+2,SCOTCH_Num,return 1);
 
   if (!memset(vertTab, ~0, sizeof(SCOTCH_Num)*(vertNbr + 2))) {
     perror("  ## Memory problem: memset");
-    _MMG5_DEL_MEM(mesh,vertOldTab,(mesh->ne+1)*sizeof(int));
-    _MMG5_DEL_MEM(mesh,vertTab,(vertNbr+2)*sizeof(SCOTCH_Num));
+    MMG5_DEL_MEM(mesh,vertOldTab);
+    MMG5_DEL_MEM(mesh,vertTab);
     return 1;
   }
 
@@ -157,11 +157,11 @@ int _MMG5_mmg3dRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
      (2*(12*mesh->np (triangles)-2*mesh->np (boundary triangles))) */
   edgeSiz = vertNbr*4;
 
-  _MMG5_ADD_MEM(mesh,edgeSiz*sizeof(SCOTCH_Num),"edgeTab",
-                _MMG5_DEL_MEM(mesh,vertOldTab,(mesh->ne+1)*sizeof(int));
-                _MMG5_DEL_MEM(mesh,vertTab,(vertNbr+2)*sizeof(SCOTCH_Num));
-                return(1));
-  _MMG5_SAFE_CALLOC(edgeTab,edgeSiz,SCOTCH_Num,1);
+  MMG5_ADD_MEM(mesh,edgeSiz*sizeof(SCOTCH_Num),"edgeTab",
+                MMG5_DEL_MEM(mesh,vertOldTab);
+                MMG5_DEL_MEM(mesh,vertTab);
+                return 1);
+  MMG5_SAFE_CALLOC(edgeTab,edgeSiz,SCOTCH_Num,return 1);
 
 
   /* Computing the adjacency list for each vertex */
@@ -185,12 +185,13 @@ int _MMG5_mmg3dRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
 
       /* Testing if edgeTab memory is enough */
       if (edgeNbr >= edgeSiz) {
-        _MMG5_ADD_MEM(mesh,0.2*sizeof(SCOTCH_Num),"edgeTab",
-                      _MMG5_DEL_MEM(mesh,vertOldTab,(mesh->ne+1)*sizeof(int));
-                      _MMG5_DEL_MEM(mesh,vertTab,(vertNbr+2)*sizeof(SCOTCH_Num));
-                      return(1));
+        int oldsize = edgeSiz;
+        MMG5_ADD_MEM(mesh,0.2*sizeof(SCOTCH_Num),"edgeTab",
+                      MMG5_DEL_MEM(mesh,vertOldTab);
+                      MMG5_DEL_MEM(mesh,vertTab);
+                      return 1);
         edgeSiz *= 1.2;
-        _MMG5_SAFE_REALLOC(edgeTab,edgeSiz,SCOTCH_Num,"scotch table",1);
+        MMG5_SAFE_REALLOC(edgeTab,oldsize,edgeSiz,SCOTCH_Num,"scotch table",return 1);
       }
 
       edgeTab[edgeNbr++] = vertOldTab[ballTetIdx];
@@ -207,9 +208,9 @@ int _MMG5_mmg3dRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
       if(vertOldTab[tetraIdx] == vertNbr) {
         fprintf(stderr,"  ## Warning: %s: graph error, no renumbering.\n",
                 __func__);
-        _MMG5_DEL_MEM(mesh,edgeTab,edgeSiz*sizeof(SCOTCH_Num));
-        _MMG5_DEL_MEM(mesh,vertTab,(vertNbr+2)*sizeof(SCOTCH_Num));
-        return(1);
+        MMG5_DEL_MEM(mesh,edgeTab);
+        MMG5_DEL_MEM(mesh,vertTab);
+        return 1;
       }
       if(vertTab[vertOldTab[tetraIdx] + 1] > 0)
         vertTab[vertOldTab[tetraIdx]] = vertTab[vertOldTab[tetraIdx] + 1];
@@ -217,9 +218,9 @@ int _MMG5_mmg3dRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
         if(vertOldTab[tetraIdx]+1 == vertNbr) {
           fprintf(stderr,"  ## Warning: %s: graph error, no renumbering.\n",
                   __func__);
-          _MMG5_DEL_MEM(mesh,edgeTab,edgeSiz*sizeof(SCOTCH_Num));
-          _MMG5_DEL_MEM(mesh,vertTab,(vertNbr+2)*sizeof(SCOTCH_Num));
-          return(1);
+          MMG5_DEL_MEM(mesh,edgeTab);
+          MMG5_DEL_MEM(mesh,vertTab);
+          return 1;
         }
         i = 1;
         do  {
@@ -228,9 +229,9 @@ int _MMG5_mmg3dRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
         if(vertOldTab[tetraIdx] + i == vertNbr) {
           fprintf(stderr,"  ## Warning: %s: graph error, no renumbering.\n",
                   __func__);
-          _MMG5_DEL_MEM(mesh,edgeTab,edgeSiz*sizeof(SCOTCH_Num));
-          _MMG5_DEL_MEM(mesh,vertTab,(vertNbr+2)*sizeof(SCOTCH_Num));
-          return(1);
+          MMG5_DEL_MEM(mesh,edgeTab);
+          MMG5_DEL_MEM(mesh,vertTab);
+          return 1;
         }
         vertTab[vertOldTab[tetraIdx]] = vertTab[vertOldTab[tetraIdx] + i];
       }
@@ -238,7 +239,7 @@ int _MMG5_mmg3dRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
   }
 
   /* free adjacents to gain memory space */
-  _MMG5_DEL_MEM(mesh,mesh->adja,(4*mesh->nemax+5)*sizeof(int));
+  MMG5_DEL_MEM(mesh,mesh->adja);
 
   /* Building the graph by calling Scotch functions */
   SCOTCH_graphInit(&graf) ;
@@ -252,31 +253,31 @@ int _MMG5_mmg3dRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
   CHECK_SCOTCH(SCOTCH_graphCheck(&graf), "scotch_graphcheck", 0);
 #endif
 
-  _MMG5_ADD_MEM(mesh,(vertNbr+1)*sizeof(SCOTCH_Num),"permVrtTab",
-                _MMG5_DEL_MEM(mesh,vertOldTab,(mesh->ne+1)*sizeof(int));
-                _MMG5_DEL_MEM(mesh,vertTab,(vertNbr+2)*sizeof(SCOTCH_Num));
-                _MMG5_DEL_MEM(mesh,edgeTab,edgeSiz*sizeof(SCOTCH_Num));
-                if( !MMG3D_hashTetra(mesh,1) ) return(0);
-                return(1));
-  _MMG5_SAFE_CALLOC(permVrtTab,vertNbr+1,SCOTCH_Num,1);
+  MMG5_ADD_MEM(mesh,(vertNbr+1)*sizeof(SCOTCH_Num),"permVrtTab",
+                MMG5_DEL_MEM(mesh,vertOldTab);
+                MMG5_DEL_MEM(mesh,vertTab);
+                MMG5_DEL_MEM(mesh,edgeTab);
+                if( !MMG3D_hashTetra(mesh,1) ) return 0;
+                return 1);
+  MMG5_SAFE_CALLOC(permVrtTab,vertNbr+1,SCOTCH_Num,return 1);
 
-  CHECK_SCOTCH(_MMG5_kPartBoxCompute(graf, vertNbr, boxVertNbr, permVrtTab, mesh),
+  CHECK_SCOTCH(MMG5_kPartBoxCompute(graf, vertNbr, boxVertNbr, permVrtTab, mesh),
                "boxCompute", 0);
 
   SCOTCH_graphExit(&graf) ;
 
-  _MMG5_DEL_MEM(mesh,edgeTab,edgeSiz*sizeof(SCOTCH_Num));
-  _MMG5_DEL_MEM(mesh,vertTab,(vertNbr+2)*sizeof(SCOTCH_Num));
+  MMG5_DEL_MEM(mesh,edgeTab);
+  MMG5_DEL_MEM(mesh,vertTab);
 
   /* Computing the new point list and modifying the adja strcuture */
-  _MMG5_ADD_MEM(mesh,(mesh->np+1)*sizeof(int),"permNodTab",
-                _MMG5_DEL_MEM(mesh,vertOldTab,(mesh->ne+1)*sizeof(int));
-                _MMG5_DEL_MEM(mesh,vertTab,(vertNbr+2)*sizeof(SCOTCH_Num));
-                _MMG5_DEL_MEM(mesh,permVrtTab,(vertNbr+1)*sizeof(SCOTCH_Num));
-                _MMG5_DEL_MEM(mesh,edgeTab,edgeSiz*sizeof(SCOTCH_Num));
-                if( !MMG3D_hashTetra(mesh,1) ) return(0);
-                return(1));
-  _MMG5_SAFE_CALLOC(permNodTab,mesh->np+1,int,1);
+  MMG5_ADD_MEM(mesh,(mesh->np+1)*sizeof(int),"permNodTab",
+                MMG5_DEL_MEM(mesh,vertOldTab);
+                MMG5_DEL_MEM(mesh,vertTab);
+                MMG5_DEL_MEM(mesh,permVrtTab);
+                MMG5_DEL_MEM(mesh,edgeTab);
+                if( !MMG3D_hashTetra(mesh,1) ) return 0;
+                return 1);
+  MMG5_SAFE_CALLOC(permNodTab,mesh->np+1,int,return 1);
 
   nereal = 0;
   npreal = 0;
@@ -285,11 +286,11 @@ int _MMG5_mmg3dRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
     if ( !mesh->tetra[tetraIdx].v[0] )  continue;
     vertOldTab[tetraIdx] = permVrtTab[vertOldTab[tetraIdx]];
   }
-  _MMG5_DEL_MEM(mesh,permVrtTab,(vertNbr+1)*sizeof(SCOTCH_Num));
+  MMG5_DEL_MEM(mesh,permVrtTab);
 
   for(tetraIdx = 1 ; tetraIdx < mesh->ne + 1 ; tetraIdx++) {
     while ( vertOldTab[tetraIdx] != tetraIdx && vertOldTab[tetraIdx] )
-      _MMG5_swapTet(mesh->tetra/*,mesh->adja*/,vertOldTab,tetraIdx,vertOldTab[tetraIdx]);
+      MMG5_swapTet(mesh->tetra/*,mesh->adja*/,vertOldTab,tetraIdx,vertOldTab[tetraIdx]);
   }
 
   for(tetraIdx = 1 ; tetraIdx < mesh->ne + 1 ; tetraIdx++) {
@@ -331,7 +332,7 @@ int _MMG5_mmg3dRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
     }
   }
 
-  _MMG5_DEL_MEM(mesh,vertOldTab,(mesh->ne+1)*sizeof(int));
+  MMG5_DEL_MEM(mesh,vertOldTab);
 
   /* Modify the numbering of the nodes of each tetra */
   for( tetraIdx = 1; tetraIdx < nereal + 1; tetraIdx++) {
@@ -357,20 +358,20 @@ int _MMG5_mmg3dRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
   /* Permute nodes and sol */
   for (j=1; j<= mesh->np; j++) {
     while ( permNodTab[j] != j && permNodTab[j] )
-      _MMG5_swapNod(mesh->point,sol->m,permNodTab,j,permNodTab[j],sol->size);
+      MMG5_swapNod(mesh->point,sol->m,permNodTab,j,permNodTab[j],sol->size);
   }
-  _MMG5_DEL_MEM(mesh,permNodTab,(mesh->np+1)*sizeof(int));
+  MMG5_DEL_MEM(mesh,permNodTab);
 
 
   mesh->ne = nereal;
   mesh->np = npreal;
 
-  if ( mesh->np == mesh->npmax )
+  if ( mesh->np >= mesh->npmax-1 )
     mesh->npnil = 0;
   else
     mesh->npnil = mesh->np + 1;
 
-  if ( mesh->ne == mesh->nemax )
+  if ( mesh->ne >= mesh->nemax-1 )
     mesh->nenil = 0;
   else
     mesh->nenil = mesh->ne + 1;
@@ -383,7 +384,7 @@ int _MMG5_mmg3dRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
     for (k=mesh->nenil; k<mesh->nemax-1; k++)
       mesh->tetra[k].v[3] = k+1;
 
-  if( !MMG3D_hashTetra(mesh,0) ) return(0);
+  if( !MMG3D_hashTetra(mesh,0) ) return 0;
 
   return 1;
 }

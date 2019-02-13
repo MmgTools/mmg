@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
+**  Copyright (c) Bx INP/CNRS/Inria/UBordeaux/UPMC, 2004-
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -42,21 +42,21 @@
  * Compute oriented area of tria pt
  *
  */
-double _MMG2_quickcal(MMG5_pMesh mesh, MMG5_pTria pt) {
+double MMG2D_quickcal(MMG5_pMesh mesh, MMG5_pTria pt) {
   MMG5_pPoint        p0,p1,p2;
   double             cal;
-  
+
   p0 = &mesh->point[pt->v[0]];
   p1 = &mesh->point[pt->v[1]];
   p2 = &mesh->point[pt->v[2]];
-  
-  cal = MMG2_quickarea(p0->c,p1->c,p2->c);
-  return(cal);
+
+  cal = MMG2D_quickarea(p0->c,p1->c,p2->c);
+  return cal;
 }
 
-/* Compute quality of the triangle pt when the supplied metric is isotropic; 
+/* Compute quality of the triangle pt when the supplied metric is isotropic;
    return 0 in the case that the triangle has inverted orientation */
-double _MMG2_caltri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt) {
+double MMG2D_caltri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt) {
   double    abx,aby,acx,acy,bcx,bcy;
   double    *a,*b,*c,h1,h2,h3,area,hm;
 
@@ -73,7 +73,7 @@ double _MMG2_caltri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt) {
 
   /* orientation */
   area = abx*acy - aby*acx;
-  if ( area <= 0.0 ) return(0.0);
+  if ( area <= 0.0 ) return 0.0;
 
   /* edge lengths */
   h1 = abx*abx + aby*aby;
@@ -82,17 +82,17 @@ double _MMG2_caltri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt) {
 
   hm = h1 + h2 + h3;
 
-  if ( hm > _MMG2_EPSD ) {
-    return ( area / hm );
+  if ( hm > MMG2D_EPSD ) {
+    return  area / hm;
   }
   else {
-    return(0.0);
+    return 0.0;
   }
 }
 
 /* Compute quality of the triangle pt when the supplied metric is anisotropic;
  return 0 in the case that the triangle has inverted orientation */
-double _MMG2_caltri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt) {
+double MMG2D_caltri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt) {
   double     abx,aby,acx,acy,bcx,bcy;
   double     *a,*b,*c,*ma,*mb,*mc;
   double     area,aream,hm,m[6],h1,h2,h3;
@@ -101,11 +101,11 @@ double _MMG2_caltri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt) {
   ipa = pt->v[0];
   ipb = pt->v[1];
   ipc = pt->v[2];
-  
+
   a  = mesh->point[ipa].c;
   b  = mesh->point[ipb].c;
   c  = mesh->point[ipc].c;
-  
+
   ma = &met->m[3*ipa];
   mb = &met->m[3*ipb];
   mc = &met->m[3*ipc];
@@ -118,7 +118,7 @@ double _MMG2_caltri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt) {
   bcx = c[0] - b[0];
   bcy = c[1] - b[1];
   area = abx*acy - aby*acx;
-  if ( area <= 0.0 ) return(0.0);
+  if ( area <= 0.0 ) return 0.0;
 
   for (i=0; i<3; i++)  m[i] = (ma[i]+mb[i]+mc[i]) / 3.0;
 
@@ -136,8 +136,8 @@ double _MMG2_caltri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt) {
   aream = sqrt(m[0]*m[2]-m[1]*m[1])*area;
 
   /* Quality measure = (Vol_M(T) / (l(ab)^2+l(ac)^2+l(bc)^2)) */
-  if ( hm > _MMG2_EPSD ) {
-    return ( aream/hm );
+  if ( hm > MMG2D_EPSD ) {
+    return  aream/hm;
   }
   else {
     return (0.0);
@@ -153,7 +153,7 @@ double _MMG2_caltri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt) {
  * Print histogram of mesh qualities.
  *
  */
-int MMG2_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
+int MMG2D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria    pt;
   double        rap,rapmin,rapmax,rapavg,med,good;
   int           i,k,iel,ok,ir,imax,nex,his[5];
@@ -165,7 +165,7 @@ int MMG2_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
     if( !MG_EOK(pt) )   continue;
 
     if ( !met->m ) {
-      pt->qual = _MMG2_caltri_iso(mesh,met,pt);
+      pt->qual = MMG2D_caltri_iso(mesh,met,pt);
     }
     else
       pt->qual = MMG2D_caltri(mesh,met,pt);
@@ -187,16 +187,16 @@ int MMG2_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
       continue;
     }
     ok++;
-    if ( (!mmgWarn0) && (_MMG2_quickcal(mesh,pt) < 0.0) ) {
+    if ( (!mmgWarn0) && (MMG2D_quickcal(mesh,pt) < 0.0) ) {
       mmgWarn0 = 1;
       fprintf(stderr,"  ## Warning: %s: at least 1 negative area\n",__func__);
     }
 
     if ( !met->m ) {
-      rap = _MMG2D_ALPHAD * _MMG2_caltri_iso(mesh,met,pt);
+      rap = MMG2D_ALPHAD * MMG2D_caltri_iso(mesh,met,pt);
     }
     else
-      rap = _MMG2D_ALPHAD * MMG2D_caltri(mesh,met,pt);
+      rap = MMG2D_ALPHAD * MMG2D_caltri(mesh,met,pt);
 
     if ( rap < rapmin ) {
       rapmin = rap;
@@ -204,7 +204,7 @@ int MMG2_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
     }
     if ( rap > 0.5 )  med++;
     if ( rap > 0.12 ) good++;
-    if ( rap < _MMG2D_BADKAL )  mesh->info.badkal = 1;
+    if ( rap < MMG2D_BADKAL )  mesh->info.badkal = 1;
     rapavg += rap;
     rapmax  = MG_MAX(rapmax,rap);
     ir = MG_MIN(4,(int)(5.0*rap));
@@ -218,8 +218,8 @@ int MMG2_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
 #else
   fprintf(stdout,"     BEST   %e  AVRG.   %e  WRST.   %e (%d)\n => %d %d %d\n",
           rapmax,rapavg / (mesh->nt-nex),rapmin,iel,
-          _MMG5_indPt(mesh,mesh->tria[iel].v[0]),_MMG5_indPt(mesh,mesh->tria[iel].v[1]),
-          _MMG5_indPt(mesh,mesh->tria[iel].v[2]));
+          MMG5_indPt(mesh,mesh->tria[iel].v[0]),MMG5_indPt(mesh,mesh->tria[iel].v[1]),
+          MMG5_indPt(mesh,mesh->tria[iel].v[2]));
 #endif
 
   /* print histo */
@@ -234,5 +234,5 @@ int MMG2_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
     }
   }
 
-  return ( _MMG5_minQualCheck(iel,rapmin,_MMG2D_ALPHAD) );
+  return  MMG5_minQualCheck(iel,rapmin,1.);
 }

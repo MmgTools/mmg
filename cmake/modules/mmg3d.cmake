@@ -151,6 +151,8 @@ FILE(INSTALL  ${mmg3d_headers} DESTINATION ${MMG3D_INCLUDE}
 #####         Compile program to test library
 #####
 ############################################################################
+SET(MMG3D_CI_TESTS ${CI_DIR}/mmg3d )
+SET(MMG_CI_TESTS ${CI_DIR}/mmg )
 
 IF ( TEST_LIBMMG3D )
   INCLUDE(cmake/testing/libmmg3d_tests.cmake)
@@ -174,8 +176,6 @@ IF ( BUILD_TESTING )
   ##-------------------------------------------------------------------##
   ##------- Set the continuous integration options --------------------##
   ##-------------------------------------------------------------------##
-  SET(MMG3D_CI_TESTS ${CI_DIR}/mmg3d )
-  SET(MMG_CI_TESTS ${CI_DIR}/mmg )
 
   ##-------------------------------------------------------------------##
   ##--------------------------- Add tests and configure it ------------##
@@ -204,6 +204,8 @@ IF ( BUILD_TESTING )
       SET(LIBMMG3D_EXEC2   ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_example2)
       SET(LIBMMG3D_EXEC4   ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_example4)
       SET(LIBMMG3D_EXEC5   ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_example5)
+      SET(LIBMMG3D_EXEC6   ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_example6_io)
+      SET(TEST_API3D_EXEC0 ${EXECUTABLE_OUTPUT_PATH}/test_api3d_0)
 
       ADD_TEST(NAME libmmg3d_example0_a COMMAND ${LIBMMG3D_EXEC0_a}
         "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/adaptation_example0/example0_a/cube.mesh"
@@ -230,11 +232,26 @@ IF ( BUILD_TESTING )
         "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_example0/test"
         "${CTEST_OUTPUT_DIR}/libmmg3d-IsosurfDiscretization_0-test.o"
         )
+      ADD_TEST(NAME libmmg3d_example6_io_0   COMMAND ${LIBMMG3D_EXEC6}
+        "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/io_multisols_example6/torus.mesh"
+        "${CTEST_OUTPUT_DIR}/libmmg3d_io_6-naca.o" "0"
+       )
+      ADD_TEST(NAME libmmg3d_example6_io_1   COMMAND ${LIBMMG3D_EXEC6}
+        "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/io_multisols_example6/torus.mesh"
+        "${CTEST_OUTPUT_DIR}/libmmg3d_io_6-naca.o" "1"
+       )
+      ADD_TEST(NAME test_api3d_0   COMMAND ${TEST_API3D_EXEC0}
+        "${MMG3D_CI_TESTS}/API_tests/2dom.mesh"
+        "${CTEST_OUTPUT_DIR}/test_API3d.o"
+       )
 
       IF ( CMAKE_Fortran_COMPILER)
-        SET(LIBMMG3D_EXECFORTRAN_a ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_fortran_a )
+        SET(LIBMMG3D_EXECFORTRAN_a  ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_fortran_a)
+        SET(LIBMMG3D_EXECFORTRAN_b  ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_fortran_b)
+        SET(LIBMMG3D_EXECFORTRAN_IO ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_fortran_io)
+        SET(TEST_API3D_FORTRAN_EXEC0 ${EXECUTABLE_OUTPUT_PATH}/test_api3d_fortran_0)
 
-        SET(LIBMMG3D_EXECFORTRAN_b ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_fortran_b)
+
         ADD_TEST(NAME libmmg3d_fortran_a  COMMAND ${LIBMMG3D_EXECFORTRAN_a}
           "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/adaptation_example0_fortran/example0_a/cube.mesh"
           "${CTEST_OUTPUT_DIR}/libmmg3d-Adaptation_Fortran_0_a-cube.o"
@@ -242,6 +259,19 @@ IF ( BUILD_TESTING )
         ADD_TEST(NAME libmmg3d_fortran_b  COMMAND ${LIBMMG3D_EXECFORTRAN_b}
           "${CTEST_OUTPUT_DIR}/libmmg3d-Adaptation_Fortran_0_b-cube.o"
           )
+        ADD_TEST(NAME libmmg3d_fortran_io_0   COMMAND ${LIBMMG3D_EXECFORTRAN_IO}
+          "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/io_multisols_example6/torus.mesh"
+          "${CTEST_OUTPUT_DIR}/libmmg3d_Fortran_io-torus.o" "0"
+          )
+        ADD_TEST(NAME libmmg3d_fortran_io_1   COMMAND ${LIBMMG3D_EXECFORTRAN_IO}
+          "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/io_multisols_example6/torus.mesh"
+          "${CTEST_OUTPUT_DIR}/libmmg3d_Fortran_io-torus.o" "1"
+         )
+       ADD_TEST(NAME test_api3d_fortran_0   COMMAND ${TEST_API3D_FORTRAN_EXEC0}
+         "${MMG3D_CI_TESTS}/API_tests/2dom.mesh"
+         "${CTEST_OUTPUT_DIR}/test_API3d.o"
+         )
+
       ENDIF()
 
     ENDIF ( TEST_LIBMMG3D )

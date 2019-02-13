@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
+**  Copyright (c) Bx INP/CNRS/Inria/UBordeaux/UPMC, 2004-
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -35,11 +35,11 @@
 
 
 /* Create a new vertex in the mesh, and return its number */
-int _MMG2D_newPt(MMG5_pMesh mesh,double c[2],int16_t tag) {
+int MMG2D_newPt(MMG5_pMesh mesh,double c[2],int16_t tag) {
   MMG5_pPoint  ppt;
   int     curpt;
 
-  if ( !mesh->npnil )  return(0);
+  if ( !mesh->npnil )  return 0;
 
   curpt = mesh->npnil;
   if ( mesh->npnil > mesh->np )  mesh->np = mesh->npnil;
@@ -48,22 +48,16 @@ int _MMG2D_newPt(MMG5_pMesh mesh,double c[2],int16_t tag) {
   ppt->tag   &= ~MG_NUL;
   mesh->npnil = ppt->tmp;
   ppt->tmp    = 0;
-  ppt->xp     = 0;
   ppt->tag = tag;
 
-  return(curpt);
+  return curpt;
 }
 
 /* Delete a point in the mesh and update the garbage collector accordingly */
-void _MMG2D_delPt(MMG5_pMesh mesh,int ip) {
+void MMG2D_delPt(MMG5_pMesh mesh,int ip) {
   MMG5_pPoint   ppt;
-  MMG5_pxPoint  pxp;
 
   ppt = &mesh->point[ip];
-  if ( ppt->xp ) {
-    pxp = &mesh->xpoint[ppt->xp];
-    memset(pxp,0,sizeof(MMG5_xPoint));
-  }
 
   memset(ppt,0,sizeof(MMG5_Point));
   ppt->tag    = MG_NUL;
@@ -73,23 +67,7 @@ void _MMG2D_delPt(MMG5_pMesh mesh,int ip) {
   if ( ip == mesh->np )  mesh->np--;
 }
 
-/* Create a new edge in the mesh and return its address */
-int _MMG5_newEdge(MMG5_pMesh mesh) {
-  int     curiel;
-
-  if ( !mesh->nanil ) {
-    return(0);
-  }
-  curiel = mesh->nanil;
-  if ( mesh->nanil > mesh->na )  mesh->na = mesh->nanil;
-  mesh->nanil = mesh->edge[curiel].b;
-  mesh->edge[curiel].b = 0;
-
-  return(curiel);
-}
-
-
-void _MMG5_delEdge(MMG5_pMesh mesh,int iel) {
+void MMG5_delEdge(MMG5_pMesh mesh,int iel) {
   MMG5_pEdge    pt;
 
   pt = &mesh->edge[iel];
@@ -104,11 +82,11 @@ void _MMG5_delEdge(MMG5_pMesh mesh,int iel) {
 }
 
 /* Create a new triangle in the mesh and return its address */
-int _MMG2D_newElt(MMG5_pMesh mesh) {
+int MMG2D_newElt(MMG5_pMesh mesh) {
   int     curiel;
 
   if ( !mesh->nenil ) {
-    return(0);
+    return 0;
   }
   curiel = mesh->nenil;
   if ( mesh->nenil > mesh->nt )  mesh->nt = mesh->nenil;
@@ -120,11 +98,11 @@ int _MMG2D_newElt(MMG5_pMesh mesh) {
   mesh->tria[curiel].edg[1] = 0;
   mesh->tria[curiel].edg[2] = 0;
 
-  return(curiel);
+  return curiel;
 }
 
 /* Delete a triangle in the mesh and update the garbage collector accordingly */
-int _MMG2D_delElt(MMG5_pMesh mesh,int iel) {
+int MMG2D_delElt(MMG5_pMesh mesh,int iel) {
   MMG5_pTria    pt;
   int      iadr;
 
@@ -147,136 +125,137 @@ int _MMG2D_delElt(MMG5_pMesh mesh,int iel) {
 
 
 /* check if n elets available */
-int _MMG5_getnElt(MMG5_pMesh mesh,int n) {
+int MMG5_getnElt(MMG5_pMesh mesh,int n) {
   int     curiel;
 
-  if ( !mesh->nenil )  return(0);
+  if ( !mesh->nenil )  return 0;
   curiel = mesh->nenil;
   do {
     curiel = mesh->tria[curiel].v[2];
   }
   while (--n);
 
-  return(n == 0);
+  return n == 0;
 }
 
-/** memory repartition for the -m option */
-int _MMG2D_memOption(MMG5_pMesh mesh) {
-  long long  million = 1048576L,memtmp;
-  int        ctri,npask,bytes;
+/**
+ * \param mesh pointer toward the mesh structure
+ *
+ * \return 0 if fail, 1 otherwise
+ *
+ * Set the memMax value to its "true" value (50% of the RAM or memory asked by
+ * user) and perform memory repartition for the -m option.  If -m is not given,
+ * memMax is the detected RAM. If -m is provided, check the user option and set
+ * memMax to the available RAM if the user ask for too much memory. Last,
+ * perform the memory repartition between the mmg arrays with respect to the
+ * memMax value.
+ *
+ * \remark Here, mesh->npmax/ntmax must be setted.
+ *
+ */
+static inline
+int MMG2D_memOption_memSet(MMG5_pMesh mesh) {
+  size_t   usedMem,avMem,reservedMem;
+  int      ctri,npadd,bytes;
 
-  mesh->memMax = _MMG5_memSize();
+  MMG5_memOption_memSet(mesh);
 
-  mesh->npmax = MG_MAX(1.5*mesh->np,_MMG2D_NPMAX);
-  mesh->ntmax = MG_MAX(1.5*mesh->nt,_MMG2D_NEMAX);
-  mesh->namax = mesh->na;
-  mesh->xpmax  = M_MAX(0.1*mesh->xp,0.1*_MMG2D_NPMAX);
+  /* init allocation need MMG5_MEMMIN B */
+  reservedMem = MMG5_MEMMIN;
 
-  if ( mesh->info.mem <= 0 ) {
-    if ( mesh->memMax && (mesh->memMax >2000*million))
-      /* maximal memory = 2Go */
-      mesh->memMax = 2000*million;
-    else {
-      /* default value = 800 MB */
-      printf(" ## Maximum memory set to default value: %d MB.\n",_MMG5_MEMMAX);
-      mesh->memMax = _MMG5_MEMMAX*million;
-    }
+  /* Compute the needed initial memory */
+  usedMem = reservedMem + (mesh->np+1)*sizeof(MMG5_Point)
+    + (mesh->nt+1)*sizeof(MMG5_Tria) + (3*mesh->nt+1)*sizeof(int)
+    + (mesh->na+1)*sizeof(MMG5_Edge) + (mesh->np+1)*sizeof(double);
+
+  if ( usedMem > mesh->memMax  ) {
+    fprintf(stderr,"\n  ## Error: %s: %zu MB of memory ",__func__,
+            mesh->memMax/MMG5_MILLION);
+    fprintf(stderr,"is not enough to load mesh. You need to ask %zu MB minimum\n",
+            usedMem/MMG5_MILLION+1);
+    return 0;
   }
-  else {
-    /* memory asked by user if possible, otherwise total physical memory */
-    if ( (long long)(mesh->info.mem)*million > mesh->memMax && mesh->memMax ) {
-      fprintf(stderr,"\n  ## Warning: %s: asking for %d MB of memory ",
-              __func__,mesh->info.mem);
-      fprintf(stderr,"when only %lld available.\n",mesh->memMax/million);
-    }
-    else {
-      mesh->memMax= (long long)(mesh->info.mem)*million;
-    }
 
-    /* if asked memory is lower than default _MMG2D_NPMAX/_MMG2D_NTMAX we take lower values */
-    ctri = 2;
+  ctri = 2;
 
-    /* Euler-poincare: ne = 6*np; nt = 2*np; na = np/5 *
-     * point+tria+edges+adjt+sol */
-    bytes = sizeof(MMG5_Point) +  0.1*sizeof(MMG5_xPoint) +
-      2*sizeof(MMG5_Tria) + 3*2*sizeof(int)
-      + sizeof(MMG5_Sol) /*+ sizeof(Displ)*/
-      + 0.2*sizeof(MMG5_Edge);
+  /* Euler-poincare: ne = 6*np; nt = 2*np; na = np/5 *
+   * point+tria+edges+adjt+ aniso sol */
+  bytes = sizeof(MMG5_Point) +
+    2*sizeof(MMG5_Tria) + 3*2*sizeof(int)
+    + 0.2*sizeof(MMG5_Edge) + 3*sizeof(double);
 
-    /* init allocation need _MMG5_MEMMIN B (for mesh->namein/out and
-     * sol->namein/out */
-    npask = (int)((double)(mesh->info.mem*million-_MMG5_MEMMIN)/(double)bytes);
+  avMem = mesh->memMax-usedMem;
 
-    mesh->npmax = MG_MIN(npask,mesh->npmax);
-    mesh->ntmax = MG_MIN(ctri*npask,mesh->ntmax);
-    mesh->namax = MG_MIN(ctri*npask,mesh->namax);
-    mesh->xpmax = MG_MIN(0.1*npask,0.1*mesh->xp);
-
-    /*check if the memory asked is enough to load the mesh*/
-    if(mesh->np &&
-       (mesh->npmax < mesh->np || mesh->ntmax < mesh->nt || mesh->namax < mesh->na) ){
-      memtmp = (long long)mesh->np * bytes + _MMG5_MEMMIN;
-      memtmp = MG_MAX(memtmp, ((long long)mesh->nt * bytes /ctri)+_MMG5_MEMMIN);
-      memtmp = MG_MAX(memtmp, ((long long)mesh->na * bytes /ctri)+_MMG5_MEMMIN);
-      mesh->memMax = memtmp+1;
-      fprintf(stderr,"  ## Error: %s: asking for %d MB of memory ",
-              __func__,mesh->info.mem);
-      fprintf(stderr,"is not enough to load mesh. You need to ask %lld MB minimum\n",
-              memtmp/million+1);
-      return 0;
-    }
-    if(mesh->info.mem < _MMG5_MEMMIN + 1) {
-      mesh->memMax =  _MMG5_MEMMIN + 1;
-      fprintf(stderr,"\n  ## Error: %s: asking for %d MB of memory ",
-              __func__,mesh->info.mem);
-      fprintf(stderr,"is not enough to load mesh. You need to ask %d B minimum\n",
-              _MMG5_MEMMIN + 1);
-      return 0;
-    }
-  }
+  /* If npadd is exactly the maximum memory available, we will use all the
+   * memory and the analysis step will fail. As arrays may be reallocated, we
+   * can have smaller values for npmax and ntmax (npadd/2). */
+  npadd = avMem/(double)(2*bytes);
+  mesh->npmax = MG_MIN(mesh->npmax,mesh->np+npadd);
+  mesh->ntmax = MG_MIN(mesh->ntmax,ctri*npadd+mesh->nt);
+  mesh->namax = MG_MIN(mesh->namax,ctri*npadd+mesh->na);
 
   if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug ) {
-    fprintf(stdout,"  MAXIMUM MEMORY AUTHORIZED (MB)    %lld\n",
-            mesh->memMax/million);
+    fprintf(stdout,"  MAXIMUM MEMORY AUTHORIZED (MB)    %zu\n",
+            mesh->memMax/MMG5_MILLION);
   }
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {
-    fprintf(stdout,"  _MMG2D_NPMAX    %d\n",mesh->npmax);
-    fprintf(stdout,"  _MMG2D_NTMAX    %d\n",mesh->ntmax);
+    fprintf(stdout,"  MMG2D_NPMAX    %d\n",mesh->npmax);
+    fprintf(stdout,"  MMG2D_NTMAX    %d\n",mesh->ntmax);
   }
 
   return 1;
 }
 
-/* allocate main structure */
-int MMG2D_zaldy(MMG5_pMesh mesh) {
-  int     k;
+/**
+ * \param mesh pointer toward the mesh structure
+ *
+ * \return 0 if fail, 1 otherwise
+ *
+ * memory repartition for the -m option
+ *
+ */
+int MMG2D_memOption(MMG5_pMesh mesh) {
 
-  if ( !_MMG2D_memOption(mesh) )  return 0;
+  mesh->memMax = MMG5_memSize();
 
-  _MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(MMG5_Point),"initial vertices",
+  mesh->npmax = MG_MAX(1.5*mesh->np,MMG2D_NPMAX);
+  mesh->ntmax = MG_MAX(1.5*mesh->nt,MMG2D_NEMAX);
+  mesh->namax = mesh->na;
+
+  return  MMG2D_memOption_memSet(mesh);
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ *
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Allocation of the array fields of the mesh.
+ *
+ */
+int MMG2D_setMeshSize_alloc( MMG5_pMesh mesh ) {
+  int k;
+
+  MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(MMG5_Point),"initial vertices",
                 printf("  Exit program.\n");
                 return 0);
-  _MMG5_SAFE_CALLOC(mesh->point,mesh->npmax+1,MMG5_Point,0);
+  MMG5_SAFE_CALLOC(mesh->point,mesh->npmax+1,MMG5_Point,return 0);
 
-  if ( mesh->xp ) {
-    _MMG5_ADD_MEM(mesh,(mesh->xpmax+1)*sizeof(MMG5_xPoint),"initial xpoint",return(0));
-    _MMG5_SAFE_CALLOC(mesh->xpoint,mesh->xpmax+1,MMG5_xPoint,0);
-    memset(&mesh->xpoint[0],0,sizeof(MMG5_xPoint));
-  }
-  _MMG5_ADD_MEM(mesh,(mesh->ntmax+1)*sizeof(MMG5_Tria),"initial triangles",return(0));
-  _MMG5_SAFE_CALLOC(mesh->tria,mesh->ntmax+1,MMG5_Tria,0);
+  MMG5_ADD_MEM(mesh,(mesh->ntmax+1)*sizeof(MMG5_Tria),"initial triangles",return 0);
+  MMG5_SAFE_CALLOC(mesh->tria,mesh->ntmax+1,MMG5_Tria,return 0);
   memset(&mesh->tria[0],0,sizeof(MMG5_Tria));
 
+  mesh->namax = mesh->na;
   if ( mesh->na ) {
-    _MMG5_ADD_MEM(mesh,(mesh->namax+1)*sizeof(MMG5_Edge),"initial edges",return(0));
-    _MMG5_SAFE_CALLOC(mesh->edge,(mesh->namax+1),MMG5_Edge,0);
+    MMG5_ADD_MEM(mesh,(mesh->namax+1)*sizeof(MMG5_Edge),"initial edges",return 0);
+    MMG5_SAFE_CALLOC(mesh->edge,(mesh->namax+1),MMG5_Edge,return 0);
   }
 
   /* keep track of empty links */
   mesh->npnil = mesh->np + 1;
   mesh->nenil = mesh->nt + 1;
-
+  mesh->nanil = 0;
 
   for (k=mesh->npnil; k<mesh->npmax-1; k++) {
     /* Set tangent field of point to 0 */
@@ -290,5 +269,20 @@ int MMG2D_zaldy(MMG5_pMesh mesh) {
   for (k=mesh->nenil; k<mesh->ntmax-1; k++)
     mesh->tria[k].v[2] = k+1;
 
-  return(1);
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure
+ *
+ * \return 0 if fail, 1 otherwise
+ *
+ * allocate main structure
+ *
+ */
+int MMG2D_zaldy(MMG5_pMesh mesh) {
+
+  if ( !MMG2D_memOption(mesh) )  return 0;
+
+  return  MMG2D_setMeshSize_alloc(mesh);
 }

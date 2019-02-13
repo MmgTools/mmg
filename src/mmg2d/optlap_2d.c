@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
+**  Copyright (c) Bx INP/CNRS/Inria/UBordeaux/UPMC, 2004-
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -37,7 +37,7 @@
  * \warning UNUSED FUNCTION : change memory allocation to use it
  */
 
-int MMG2_optlap(MMG5_pMesh mesh,MMG5_pSol sol) {
+int MMG2D_optlap(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTria   pt;
   MMG5_pPoint  ppt,ppta,pptb;
   int     k,it,maxtou,i,ipa,ipb,iadr;
@@ -192,5 +192,5 @@ int MMG2_optlap(MMG5_pMesh mesh,MMG5_pSol sol) {
   free(cnew);
   free(cini);
   free(ncount);
-  return(1);
+  return 1;
 }

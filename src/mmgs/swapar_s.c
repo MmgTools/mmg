@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
+**  Copyright (c) Bx INP/CNRS/Inria/UBordeaux/UPMC, 2004-
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -47,10 +47,10 @@ int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,char typchk) {
 
   pt0 = &mesh->tria[0];
   pt  = &mesh->tria[k];
-  i1 = _MMG5_inxt2[i];
-  i2 = _MMG5_iprv2[i];
-  if ( MG_EDG(pt->tag[i]) || MS_SIN(pt->tag[i]) )  return(0);
-  else if ( MS_SIN(pt->tag[i1]) )  return(0);
+  i1 = MMG5_inxt2[i];
+  i2 = MMG5_iprv2[i];
+  if ( MG_EDG(pt->tag[i]) || MS_SIN(pt->tag[i]) )  return 0;
+  else if ( MS_SIN(pt->tag[i1]) )  return 0;
 
   ip0  = pt->v[i];
   ip1  = pt->v[i1];
@@ -60,13 +60,13 @@ int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,char typchk) {
   p[2] = &mesh->point[ip2];
 
   adja = &mesh->adja[3*(k-1)+1];
-  if ( !adja[i] )  return(0);
+  if ( !adja[i] )  return 0;
 
   kk = adja[i] / 3;
   ii = adja[i] % 3;
-  jj = _MMG5_inxt2[ii];
+  jj = MMG5_inxt2[ii];
   pt1 = &mesh->tria[kk];
-  if ( MS_SIN(pt1->tag[jj]) )  return(0);
+  if ( MS_SIN(pt1->tag[jj]) )  return 0;
 
   iq = pt1->v[ii];
   q  = &mesh->point[iq];
@@ -94,26 +94,26 @@ int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,char typchk) {
 
   /* check length */
   if ( typchk == 2 && met->m ) {
-    loni = _MMG5_lenSurfEdg(mesh,met,ip1,ip2,0);
-    lona = _MMG5_lenSurfEdg(mesh,met,ip0,iq,0);
-    if ( loni > 1.0 )  loni = MG_MIN(1.0 / loni,_MMGS_LSHRT);
+    loni = MMG5_lenSurfEdg(mesh,met,ip1,ip2,0);
+    lona = MMG5_lenSurfEdg(mesh,met,ip0,iq,0);
+    if ( loni > 1.0 )  loni = MG_MIN(1.0 / loni,MMGS_LSHRT);
     if ( lona > 1.0 )  lona = 1.0 / lona;
-    if ( lona < loni || !loni )  return(0);
+    if ( lona < loni || !loni )  return 0;
   }
 
   /* check non convexity */
-  _MMG5_norpts(mesh,ip0,ip1,iq,c1);
-  _MMG5_norpts(mesh,ip0,iq,ip2,c2);
+  MMG5_norpts(mesh,ip0,ip1,iq,c1);
+  MMG5_norpts(mesh,ip0,iq,ip2,c2);
   ps = c1[0]*c2[0] + c1[1]*c2[1] + c1[2]*c2[2];
-  if ( ps < _MMG5_ANGEDG )   return(0);
+  if ( ps < MMG5_ANGEDG )   return 0;
 
   /* normal recovery at points p[0],p[1],p[2],q */
   for (j=0; j<3; j++) {
     if ( MS_SIN(p[j]->tag) ) {
-      _MMG5_nortri(mesh,pt,np[j]);
+      MMG5_nortri(mesh,pt,np[j]);
     }
     else if ( MG_EDG(p[j]->tag) ) {
-      _MMG5_nortri(mesh,pt,nt);
+      MMG5_nortri(mesh,pt,nt);
       nr1  = &mesh->xpoint[p[j]->xp].n1[0];
       nr2  = &mesh->xpoint[p[j]->xp].n2[0];
       ps  = nr1[0]*nt[0] + nr1[1]*nt[1] + nr1[2]*nt[2];
@@ -128,10 +128,10 @@ int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,char typchk) {
   }
 
   if ( MS_SIN(q->tag) ) {
-    _MMG5_nortri(mesh,pt,nq);
+    MMG5_nortri(mesh,pt,nq);
   }
   else if ( MG_EDG(q->tag) ) {
-    _MMG5_nortri(mesh,pt,nt);
+    MMG5_nortri(mesh,pt,nt);
     nr1  = &mesh->xpoint[q->xp].n1[0];
     nr2  = &mesh->xpoint[q->xp].n2[0];
     ps  = nr1[0]*nt[0] + nr1[1]*nt[1] + nr1[2]*nt[2];
@@ -151,7 +151,7 @@ int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,char typchk) {
   uz = p[2]->c[2] - p[1]->c[2];
 
   ll = ux*ux + uy*uy + uz*uz;
-  if ( ll < _MMG5_EPS )  return(0); /* no change for short edge */
+  if ( ll < MMG5_EPS )  return 0; /* no change for short edge */
 
   n1 = np[1];
   n2 = np[2];
@@ -182,7 +182,7 @@ int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,char typchk) {
   cosn2 *= (0.25*ll);
 
   cosnat = MG_MAX(fabs(cosn1),fabs(cosn2));
-  cosnat = cosnat < _MMG5_EPS ? 0.0 : cosnat;
+  cosnat = cosnat < MMG5_EPS ? 0.0 : cosnat;
 
   /* Estimate of the Hausdorff distance between approximation and underlying surface
      when using the 'swapped' edge [i0,q] */
@@ -191,7 +191,7 @@ int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,char typchk) {
   uz = q->c[2] - p[0]->c[2];
 
   ll = ux*ux + uy*uy + uz*uz;
-  if ( ll < _MMG5_EPS )  return(0);
+  if ( ll < MMG5_EPS )  return 0;
 
   n1 = np[0];
   n2 = nq;
@@ -222,10 +222,10 @@ int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,char typchk) {
   cosn2 *= (0.25*ll);
 
   coschg = MG_MAX(fabs(cosn1),fabs(cosn2));
-  coschg = coschg < _MMG5_EPS ? 0.0 : coschg;
+  coschg = coschg < MMG5_EPS ? 0.0 : coschg;
 
   /* swap if Hausdorff contribution of the swapped edge is less than existing one */
-  if ( coschg > hausd*hausd )  return(0);
+  if ( coschg > hausd*hausd )  return 0;
 
   if ( typchk == 2 && met->m ) {
     /* initial quality */
@@ -233,14 +233,14 @@ int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,char typchk) {
     pt0->tag[0] = pt->tag[i];
     pt0->tag[1] = pt->tag[i1];
     pt0->tag[2] = pt->tag[i2];
-    cal1 = _MMG5_calelt(mesh,met,pt0);
+    cal1 = MMG5_calelt(mesh,met,pt0);
 
     /* BUG ??? pt1 should be here !*/
     pt0->v[0]= ip1;  pt0->v[1]= iq;   pt0->v[2]= ip2;
     pt0->tag[0] = pt->tag[i1];
     pt0->tag[1] = pt->tag[ii];
     pt0->tag[2] = pt->tag[i2];
-    cal2 = _MMG5_calelt(mesh,met,pt0);
+    cal2 = MMG5_calelt(mesh,met,pt0);
 
     calnat = MG_MIN(cal1,cal2);
     assert(calnat > 0.);
@@ -250,37 +250,37 @@ int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,char typchk) {
     pt0->tag[0] = pt->tag[i];
     pt0->tag[1] = pt->tag[i1];
     pt0->tag[2] = pt->tag[ii];
-    cal1 = _MMG5_calelt(mesh,met,pt0);
+    cal1 = MMG5_calelt(mesh,met,pt0);
 
     pt0->v[0]= ip0;  pt0->v[1]= iq;   pt0->v[2]= ip2;
     pt0->tag[0] = pt->tag[i];
     pt0->tag[1] = pt->tag[ii];
     pt0->tag[2] = pt->tag[i2];
-    cal2 = _MMG5_calelt(mesh,met,pt0);
+    cal2 = MMG5_calelt(mesh,met,pt0);
 
     calchg = MG_MIN(cal1,cal2);
   }
   else {
     pt0->v[0]= ip0;  pt0->v[1]= ip1;  pt0->v[2]= ip2;
-    cal1 = _MMG5_caltri_iso(mesh,NULL,pt0);
+    cal1 = MMG5_caltri_iso(mesh,NULL,pt0);
     pt0->v[0]= ip1;  pt0->v[1]= iq;   pt0->v[2]= ip2;
-    cal2 = _MMG5_caltri_iso(mesh,NULL,pt0);
+    cal2 = MMG5_caltri_iso(mesh,NULL,pt0);
     calnat = MG_MIN(cal1,cal2);
     pt0->v[0]= ip0;  pt0->v[1]= ip1;  pt0->v[2]= iq;
-    cal1 = _MMG5_caltri_iso(mesh,NULL,pt0);
+    cal1 = MMG5_caltri_iso(mesh,NULL,pt0);
     pt0->v[0]= ip0;  pt0->v[1]= iq;   pt0->v[2]= ip2;
-    cal2 = _MMG5_caltri_iso(mesh,NULL,pt0);
+    cal2 = MMG5_caltri_iso(mesh,NULL,pt0);
     calchg = MG_MIN(cal1,cal2);
   }
 
   /* if the quality is very bad, don't degrade it, even to improve the surface
    * approx. */
-  if ( calchg < _MMG5_EPS && calnat >= calchg ) return(0);
+  if ( calchg < MMG5_EPS && calnat >= calchg ) return 0;
 
   /* else we can degrade the quality to improve the surface approx. */
-  if ( coschg < hausd*hausd && cosnat > hausd*hausd )  return(1);
+  if ( coschg < hausd*hausd && cosnat > hausd*hausd )  return 1;
 
-  return(calchg > 1.01 * calnat);
+  return calchg > 1.01 * calnat;
 }
 
 /**
@@ -295,11 +295,11 @@ int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,char typchk) {
  */
 int swapar(MMG5_pMesh mesh,int k,int i) {
   MMG5_pTria    pt,pt1;
-  int     *adja,adj,k11,k21;
+  int     *adja,adj,k11,k21,ip1,ip2,i2save,j2save;
   char     i1,i2,j,jj,j2,v11,v21;
 
   pt   = &mesh->tria[k];
-  if ( MG_EDG(pt->tag[i]) || MS_SIN(pt->tag[i]) )  return(0);
+  if ( MG_EDG(pt->tag[i]) || MS_SIN(pt->tag[i]) )  return 0;
 
   adja = &mesh->adja[3*(k-1)+1];
   assert(adja[i]);
@@ -309,22 +309,42 @@ int swapar(MMG5_pMesh mesh,int k,int i) {
   pt1 = &mesh->tria[adj];
 
   /* simulation */
-  i1 = _MMG5_inxt2[i];
-  i2 = _MMG5_iprv2[i];
+  i1 = MMG5_inxt2[i];
+  i2 = MMG5_iprv2[i];
 
   /* update structure */
   k11 = adja[i1] / 3;
   v11 = adja[i1] % 3;
-  if ( k11 < 1 )  return(0);
+  if ( k11 < 1 )  return 0;
+  ip1 = mesh->tria[k11].v[v11];
+
   adja = &mesh->adja[3*(adj-1)+1];
-  jj  = _MMG5_inxt2[j];
-  j2  = _MMG5_iprv2[j];
+  jj  = MMG5_inxt2[j];
+  j2  = MMG5_iprv2[j];
   k21 = adja[jj] / 3;
   v21 = adja[jj] % 3;
-  if ( k21 < 1 )  return(0);
+  if ( k21 < 1 )  return 0;
+  ip2 = mesh->tria[k21].v[v21];
 
+  i2save = pt->v[i2];
   pt->v[i2]  = pt1->v[j];
+  j2save = pt1->v[j2];
   pt1->v[j2] = pt->v[i];
+
+  /* Check that the edge swap doesn't create a lost face. Revert the swap in
+   * this case */
+  if ( pt->v[i] == ip2 ) {
+    pt->v[i2]  = i2save;
+    pt1->v[j2] = j2save;
+    return 0;
+  }
+
+  if ( pt1->v[j] == ip1 ) {
+    pt->v[i2]  = i2save;
+    pt1->v[j2] = j2save;
+    return 0;
+  }
+
 
   /* update info */
   pt->tag[i] = pt1->tag[jj];
@@ -346,7 +366,7 @@ int swapar(MMG5_pMesh mesh,int k,int i) {
   mesh->adja[3*(k11-1)+1+v11] = 3*adj+j;
   mesh->adja[3*(adj-1)+1+j]   = 3*k11+v11;
 
-  return(1);
+  return 1;
 }
 
 
@@ -359,10 +379,10 @@ int litswp(MMG5_pMesh mesh,int k,char i,double kali) {
 
   pt0 = &mesh->tria[0];
   pt  = &mesh->tria[k];
-  if ( !MG_EOK(pt) || MG_EDG(pt->tag[i]) )  return(0);
+  if ( !MG_EOK(pt) || MG_EDG(pt->tag[i]) )  return 0;
 
-  i1 = _MMG5_inxt2[i];
-  i2 = _MMG5_iprv2[i];
+  i1 = MMG5_inxt2[i];
+  i2 = MMG5_iprv2[i];
   ia = pt->v[i];
   ib = pt->v[i1];
   ic = pt->v[i2];
@@ -371,29 +391,29 @@ int litswp(MMG5_pMesh mesh,int k,char i,double kali) {
   kk  = adja[i] / 3;
   ii  = adja[i] % 3;
   pt1 = &mesh->tria[kk];
-  if ( MS_SIN(pt1->tag[ii]) )  return(0);
+  if ( MS_SIN(pt1->tag[ii]) )  return 0;
   id = pt1->v[ii];
 
   /* check non convexity */
-  _MMG5_norpts(mesh,ia,ib,id,n1);
-  _MMG5_norpts(mesh,ia,id,ic,n2);
+  MMG5_norpts(mesh,ia,ib,id,n1);
+  MMG5_norpts(mesh,ia,id,ic,n2);
   ps = n1[0]*n2[0] + n1[1]*n2[1] + n1[2]*n2[2];
-  if ( ps < _MMG5_ANGEDG )  return(0);
+  if ( ps < MMG5_ANGEDG )  return 0;
 
   /* check quality */
   pt0->v[0] = id;  pt0->v[1] = ic;  pt0->v[2] = ib;
-  kalt = _MMG5_calelt(mesh,NULL,pt0);
+  kalt = MMG5_calelt(mesh,NULL,pt0);
   kali = MG_MIN(kali,kalt);
   pt0->v[0] = ia;  pt0->v[1] = id;  pt0->v[2] = ic;
-  kalt = _MMG5_calelt(mesh,NULL,pt0);
+  kalt = MMG5_calelt(mesh,NULL,pt0);
   pt0->v[0] = ia;  pt0->v[1] = ib;  pt0->v[2] = id;
-  kalf = _MMG5_calelt(mesh,NULL,pt0);
+  kalf = MMG5_calelt(mesh,NULL,pt0);
   kalf = MG_MIN(kalf,kalt);
   if ( kalf > 1.02 * kali ) {
     swapar(mesh,k,i);
-    return(1);
+    return 1;
   }
-  return(0);
+  return 0;
 }
 
 
@@ -413,7 +433,7 @@ int swpedg(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char typchk) {
   do {
     iel = list[k] / 3;
     i   = list[k] % 3;
-    i1  = _MMG5_inxt2[i];
+    i1  = MMG5_inxt2[i];
     if ( chkswp(mesh,met,iel,i1,typchk) ) {
       ns += swapar(mesh,iel,i1);
       k++;
@@ -422,5 +442,5 @@ int swpedg(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char typchk) {
   }
   while ( k < ilist );
 
-  return(ns);
+  return ns;
 }

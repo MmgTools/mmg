@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
+**  Copyright (c) Bx INP/CNRS/Inria/UBordeaux/UPMC, 2004-
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -55,7 +55,7 @@ static int setadj(MMG5_pMesh mesh){
 
   nvf = nf = ncc = ned = 0;
 
-  _MMG5_SAFE_MALLOC(pile,mesh->nt+1,int,0);
+  MMG5_SAFE_MALLOC(pile,mesh->nt+1,int,return 0);
 
   pile[1] = 1;
   ipil    = 1;
@@ -72,8 +72,8 @@ static int setadj(MMG5_pMesh mesh){
       pt->cc = ncc;
       adja = &mesh->adja[3*(k-1)+1];
       for (i=0; i<3; i++) {
-        i1  = _MMG5_inxt2[i];
-        i2  = _MMG5_iprv2[i];
+        i1  = MMG5_inxt2[i];
+        i2  = MMG5_iprv2[i];
         ip1 = pt->v[i1];
         ip2 = pt->v[i2];
 
@@ -133,8 +133,8 @@ static int setadj(MMG5_pMesh mesh){
         }
 
         /* check orientation */
-        ii1 = _MMG5_inxt2[ii];
-        ii2 = _MMG5_iprv2[ii];
+        ii1 = MMG5_inxt2[ii];
+        ii2 = MMG5_iprv2[ii];
         if ( pt1->v[ii1] == ip1 ) {
           /* Moebius strip */
           if ( pt1->base < 0 ) {
@@ -227,8 +227,8 @@ static int setadj(MMG5_pMesh mesh){
             ned,nr+nre+nreq,nr,nreq,nre);
   }
 
-  _MMG5_SAFE_FREE(pile);
-  return(1);
+  MMG5_SAFE_FREE(pile);
+  return 1;
 }
 
 /* Detect non manifold points */
@@ -270,11 +270,11 @@ static void nmpoints(MMG5_pMesh mesh) {
       do {
         iel = jel;
         i0  =  jp;
-        i1  = _MMG5_inxt2[i0];
+        i1  = MMG5_inxt2[i0];
         adja = &mesh->adja[3*(iel-1)+1];
         jel = adja[i1] / 3;
         jp  = adja[i1] % 3;
-        jp  = _MMG5_inxt2[jp];
+        jp  = MMG5_inxt2[jp];
       }
       while ( jel && (jel != numt) && (jel !=k) );
 
@@ -296,11 +296,11 @@ static void nmpoints(MMG5_pMesh mesh) {
       do {
         iel = jel;
         i0  =  jp;
-        i1  = _MMG5_iprv2[i0];
+        i1  = MMG5_iprv2[i0];
         adja = &mesh->adja[3*(iel-1)+1];
         jel = adja[i1] / 3;
         jp  = adja[i1] % 3;
-        jp  = _MMG5_iprv2[jp];
+        jp  = MMG5_iprv2[jp];
       }
       while ( jel && (jel != numt));  
           
@@ -330,7 +330,7 @@ static void nmpoints(MMG5_pMesh mesh) {
 /*   char     i,ia,i1,i2,j,typ; */
 
 /*   it = ndd = 0; */
-/*   declic = _MMGS_BADKAL / _MMGS_ALPHAD; */
+/*   declic = MMGS_BADKAL / MMGS_ALPHAD; */
 
 /*   do { */
 /*     nd = 0; */
@@ -338,7 +338,7 @@ static void nmpoints(MMG5_pMesh mesh) {
 /*       pt = &mesh->tria[k]; */
 /*       if ( !MG_EOK(pt) )  continue; */
 
-/*       kal = _MMG5_calelt(mesh,NULL,pt); */
+/*       kal = MMG5_calelt(mesh,NULL,pt); */
 /*       if ( kal > declic )  continue; */
 
 /*       p[0] = &mesh->point[pt->v[0]]; */
@@ -359,8 +359,8 @@ static void nmpoints(MMG5_pMesh mesh) {
 /*         /\* delete boundary elt *\/ */
 /*         if ( !adja[ia] ) { */
 /*           /\* update point coordinates on ridge *\/ */
-/*           i1 = _MMG5_inxt2[ia]; */
-/*           i2 = _MMG5_iprv2[ia]; */
+/*           i1 = MMG5_inxt2[ia]; */
+/*           i2 = MMG5_iprv2[ia]; */
 /*           p[0] = &mesh->point[pt->v[ia]]; */
 /*           p[1] = &mesh->point[pt->v[i1]]; */
 /*           p[2] = &mesh->point[pt->v[i2]]; */
@@ -409,7 +409,7 @@ static void nmpoints(MMG5_pMesh mesh) {
 /*   if ( abs(mesh->info.imprim) > 4 ) */
 /*     fprintf(stdout,"     %d bad elements improved\n",ndd); */
 
-/*   return(1); */
+/*   return 1; */
 /* } */
 
 
@@ -426,7 +426,7 @@ static int setdhd(MMG5_pMesh mesh) {
     if ( !MG_EOK(pt) )  continue;
 
     /* triangle normal */
-    _MMG5_nortri(mesh,pt,n1);
+    MMG5_nortri(mesh,pt,n1);
     adja = &mesh->adja[3*(k-1)+1];
     for (i=0; i<3; i++) {
       if ( pt->tag[i] & MG_GEO )  continue;
@@ -436,13 +436,13 @@ static int setdhd(MMG5_pMesh mesh) {
       /* check angle w. neighbor */
       if ( k < kk ) {
         pt1 = &mesh->tria[kk];
-        _MMG5_nortri(mesh,pt1,n2);
+        MMG5_nortri(mesh,pt1,n2);
         dhd = n1[0]*n2[0] + n1[1]*n2[1] + n1[2]*n2[2];
         if ( dhd <= mesh->info.dhd ) {
           pt->tag[i]   |= MG_GEO;
           pt1->tag[ii] |= MG_GEO;
-          i1 = _MMG5_inxt2[i];
-          i2 = _MMG5_inxt2[i1];
+          i1 = MMG5_inxt2[i];
+          i2 = MMG5_inxt2[i1];
           mesh->point[pt->v[i1]].tag |= MG_GEO;
           mesh->point[pt->v[i2]].tag |= MG_GEO;
           nr++;
@@ -454,15 +454,15 @@ static int setdhd(MMG5_pMesh mesh) {
   if ( abs(mesh->info.imprim) > 4 && nr > 0 )
     fprintf(stdout,"     %d ridges updated\n",nr);
 
-  return(1);
+  return 1;
 }
 
 /** check for singularities */
-static int _MMG5_singul(MMG5_pMesh mesh) {
+static int MMG5_singul(MMG5_pMesh mesh) {
   MMG5_pTria     pt;
   MMG5_pPoint    ppt,p1,p2;
   double         ux,uy,uz,vx,vy,vz,dd;
-  int            list[_MMGS_LMAX+2],listref[_MMGS_LMAX+2],k,nc,xp,nr,ns,nre;
+  int            list[MMGS_LMAX+2],listref[MMGS_LMAX+2],k,nc,xp,nr,ns,nre;
   char           i;
 
   nre = nc = 0;
@@ -475,7 +475,7 @@ static int _MMG5_singul(MMG5_pMesh mesh) {
       ppt->s++;
       if ( !MG_VOK(ppt) || ( ppt->tag & MG_CRN ) || ( ppt->tag & MG_NOM ) )  continue;
       else if ( MG_EDG(ppt->tag) ) {
-        ns = _MMG5_bouler(mesh,mesh->adja,k,i,list,listref,&xp,&nr, _MMGS_LMAX);
+        ns = MMG5_bouler(mesh,mesh->adja,k,i,list,listref,&xp,&nr, MMGS_LMAX);
 
         if ( !ns )  continue;
         if ( (xp+nr) > 2 ) {
@@ -508,7 +508,7 @@ static int _MMG5_singul(MMG5_pMesh mesh) {
           vy = p2->c[1] - ppt->c[1];
           vz = p2->c[2] - ppt->c[2];
           dd = (ux*ux + uy*uy + uz*uz) * (vx*vx + vy*vy + vz*vz);
-          if ( fabs(dd) > _MMG5_EPSD ) {
+          if ( fabs(dd) > MMG5_EPSD ) {
             dd = (ux*vx + uy*vy + uz*vz) / sqrt(dd);
             if ( dd > -mesh->info.dhd ) {
               ppt->tag |= MG_CRN;
@@ -543,7 +543,7 @@ static int _MMG5_singul(MMG5_pMesh mesh) {
 
   if ( abs(mesh->info.imprim) > 3 && nre > 0 )
     fprintf(stdout,"     %d corners, %d singular points detected\n",nc,nre);
-  return(1);
+  return 1;
 }
 
 
@@ -584,7 +584,7 @@ static int norver(MMG5_pMesh mesh) {
         continue;
       }
 
-      ier = _MMG5_boulen(mesh,mesh->adja,k,i,ppt->n);
+      ier = MMG5_boulen(mesh,mesh->adja,k,i,ppt->n);
       if ( ier ) {
         ppt->flag = mesh->base;
         nn++;
@@ -595,9 +595,11 @@ static int norver(MMG5_pMesh mesh) {
   }
 
   /* memory to store normals on both sides of ridges */
-  mesh->xpmax = MG_MAX(1.5*xp,_MMGS_XPMAX);
-  _MMG5_ADD_MEM(mesh,(mesh->xpmax+1)*sizeof(MMG5_xPoint),"boundary points",return(0));
-  _MMG5_SAFE_CALLOC(mesh->xpoint,mesh->xpmax+1,MMG5_xPoint,0);
+  mesh->xpmax = MG_MAX(1.5*xp,MMGS_XPMAX);
+  /* no need to have more xpoint than point */
+  mesh->xpmax = MG_MIN(mesh->npmax,mesh->xpmax);
+  MMG5_ADD_MEM(mesh,(mesh->xpmax+1)*sizeof(MMG5_xPoint),"boundary points",return 0);
+  MMG5_SAFE_CALLOC(mesh->xpoint,mesh->xpmax+1,MMG5_xPoint,return 0);
 
   if ( xp ) {
     /* 2. process C0 vertices on curves, tangents */
@@ -607,21 +609,21 @@ static int norver(MMG5_pMesh mesh) {
 
       adja = &mesh->adja[3*(k-1)+1];
       for (i=0; i<3; i++) {
-        i1  = _MMG5_inxt2[i];
+        i1  = MMG5_inxt2[i];
         ppt = &mesh->point[pt->v[i]];
 
         if ( ppt->tag & MG_CRN || ppt->flag == mesh->base )  continue;
         else if ( !MG_EDG(pt->tag[i1]) )  continue;
 
-        ier = _MMG5_boulen(mesh,mesh->adja,k,i,n);
+        ier = MMG5_boulen(mesh,mesh->adja,k,i,n);
         if ( !ier )  continue;
 
         ++mesh->xp;
         if(mesh->xp > mesh->xpmax){
-          _MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,MMG5_xPoint,
+          MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,MMG5_xPoint,
                              "larger xpoint table",
                              mesh->xp--;
-                             return(0),0);
+                             return 0);
         }
         ppt->xp = mesh->xp;
         go = &mesh->xpoint[mesh->xp];
@@ -632,9 +634,9 @@ static int norver(MMG5_pMesh mesh) {
           if ( adja[i1] ) {
             kk  = adja[i1] / 3;
             ii  = adja[i1] % 3;
-            ii  = _MMG5_inxt2[ii];
+            ii  = MMG5_inxt2[ii];
 
-            ier = _MMG5_boulen(mesh,mesh->adja,kk,ii,n);
+            ier = MMG5_boulen(mesh,mesh->adja,kk,ii,n);
             if ( !ier )  continue;
             memcpy(go->n2,n,3*sizeof(double));
 
@@ -644,7 +646,7 @@ static int norver(MMG5_pMesh mesh) {
             ppt->n[2] = go->n1[0]*go->n2[1] - go->n1[1]*go->n2[0];
             ppt->flag = mesh->base;
             dd = ppt->n[0]*ppt->n[0] + ppt->n[1]*ppt->n[1] + ppt->n[2]*ppt->n[2];
-            if ( dd > _MMG5_EPSD2 ) {
+            if ( dd > MMG5_EPSD2 ) {
               dd = 1.0 / sqrt(dd);
               ppt->n[0] *= dd;
               ppt->n[1] *= dd;
@@ -656,14 +658,14 @@ static int norver(MMG5_pMesh mesh) {
         }
 
         /* compute tgte */
-        ier = _MMG5_boulec(mesh,mesh->adja,k,i,ppt->n);
+        ier = MMG5_boulec(mesh,mesh->adja,k,i,ppt->n);
         if ( !ier )  continue;
         dd = go->n1[0]*ppt->n[0] + go->n1[1]*ppt->n[1] + go->n1[2]*ppt->n[2];
         ppt->n[0] -= dd*go->n1[0];
         ppt->n[1] -= dd*go->n1[1];
         ppt->n[2] -= dd*go->n1[2];
         dd = ppt->n[0]*ppt->n[0] + ppt->n[1]*ppt->n[1] + ppt->n[2]*ppt->n[2];
-        if ( dd > _MMG5_EPSD2 ) {
+        if ( dd > MMG5_EPSD2 ) {
           dd = 1.0 / sqrt(dd);
           ppt->n[0] *= dd;
           ppt->n[1] *= dd;
@@ -681,7 +683,7 @@ static int norver(MMG5_pMesh mesh) {
     fprintf(stdout,"     %d normals,  %d tangents updated  (%d failed)\n",nn,nt,nf);
   }
 
-  return(1);
+  return 1;
 }
 
 /* regularization procedure for derivatives, dual Laplacian */
@@ -689,7 +691,7 @@ static int regnor(MMG5_pMesh mesh) {
   MMG5_pTria    pt;
   MMG5_pPoint   ppt,p0;
   double  *tabl,n[3],lm1,lm2,dd,nx,ny,nz,res0,res;
-  int      i,k,iad,it,nn,nit,iel,ilist,list[_MMGS_LMAX];
+  int      i,k,iad,it,nn,nit,iel,ilist,list[MMGS_LMAX];
 
   /* assign seed to vertex */
   for (k=1; k<=mesh->nt; k++) {
@@ -702,7 +704,7 @@ static int regnor(MMG5_pMesh mesh) {
   }
 
   /* allocate memory for normals */
-  _MMG5_SAFE_CALLOC(tabl,3*mesh->np+1,double,0);
+  MMG5_SAFE_CALLOC(tabl,3*mesh->np+1,double,return 0);
 
   it   = 0;
   nit  = 2;
@@ -734,7 +736,7 @@ static int regnor(MMG5_pMesh mesh) {
         nz += p0->n[2];
       }
       dd  = nx*nx + ny*ny + nz*nz;
-      if ( dd > _MMG5_EPSD2 ) {
+      if ( dd > MMG5_EPSD2 ) {
         dd = 1.0 / sqrt(dd);
         nx *= dd;
         ny *= dd;
@@ -773,7 +775,7 @@ static int regnor(MMG5_pMesh mesh) {
         nz += tabl[iad+2];
       }
       dd  = nx*nx + ny*ny + nz*nz;
-      if ( dd > _MMG5_EPSD2 ) {
+      if ( dd > MMG5_EPSD2 ) {
         dd = 1.0 / sqrt(dd);
         nx *= dd;
         ny *= dd;
@@ -790,12 +792,12 @@ static int regnor(MMG5_pMesh mesh) {
     }
 
     if ( it == 1 )  res0 = res;
-    if ( res0 > _MMG5_EPSD )  res  = res / res0;
+    if ( res0 > MMG5_EPSD )  res  = res / res0;
     if ( mesh->info.imprim < -1 || mesh->info.ddebug ) {
       fprintf(stdout,"     iter %5d  res %.3E\r",it,res); 
       fflush(stdout);
     }
-    if ( it > 1 && res < _MMG5_EPS )  break;
+    if ( it > 1 && res < MMG5_EPS )  break;
   }
 
   /* reset the ppt->s tag */
@@ -808,66 +810,66 @@ static int regnor(MMG5_pMesh mesh) {
   if ( abs(mesh->info.imprim) > 4 )
     fprintf(stdout,"     %d normals regularized: %.3e\n",nn,res);
 
-  _MMG5_SAFE_FREE(tabl);
-  return(1);
+  MMG5_SAFE_FREE(tabl);
+  return 1;
 }
 
 
 /* preprocessing stage: mesh analysis */
-int _MMGS_analys(MMG5_pMesh mesh) {
+int MMGS_analys(MMG5_pMesh mesh) {
 
   /* set tria edges tags */
   if ( !assignEdge(mesh) ) {
     fprintf(stderr,"\n  ## Analysis problem. Exit program.\n");
-    return(0);
+    return 0;
   }
 
   /* create adjacency */
-  if ( !_MMGS_hashTria(mesh) ) {
+  if ( !MMGS_hashTria(mesh) ) {
     fprintf(stderr,"\n  ## Hashing problem. Exit program.\n");
-    return(0);
+    return 0;
   }
 
   /* delete badly shaped elts */
   /*if ( mesh->info.badkal && !delbad(mesh) ) {
     fprintf(stderr,"\n  ## Geometry trouble. Exit program.\n");
-    return(0);
+    return 0;
     }*/
 
   /* identify connexity */
   if ( !setadj(mesh) ) {
     fprintf(stderr,"\n  ## Topology problem. Exit program.\n");
-    return(0);
+    return 0;
   }
 
   /* check for nomanifold point */
   nmpoints(mesh);
 
   /* check for ridges */
-  if ( mesh->info.dhd > _MMG5_ANGLIM && !setdhd(mesh) ) {
+  if ( mesh->info.dhd > MMG5_ANGLIM && !setdhd(mesh) ) {
     fprintf(stderr,"\n  ## Geometry problem. Exit program.\n");
-    return(0);
+    return 0;
   }
 
   /* identify singularities */
-  if ( !_MMG5_singul(mesh) ) {
+  if ( !MMG5_singul(mesh) ) {
     fprintf(stderr,"\n  ## Singularity problem. Exit program.\n");
-    return(0);
+    return 0;
   }
 
   /* define normals */
   if ( !mesh->xp ) {
     if ( !norver(mesh) ) {
       fprintf(stderr,"\n  ## Normal problem. Exit program.\n");
-      return(0);
+      return 0;
     }
     /* regularize normals */
     if ( mesh->info.nreg && !regnor(mesh) ) {
       fprintf(stderr,"\n  ## Normal regularization problem. Exit program.\n");
-      return(0);
+      return 0;
     }
   }
 
-  return(1);
+  return 1;
 }
 

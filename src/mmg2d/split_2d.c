@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
+**  Copyright (c) Bx INP/CNRS/Inria/UBordeaux/UPMC, 2004-
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -47,29 +47,30 @@ extern unsigned char ddb;
  * possibly perform a dichotomy to find the latest valid position for the point.
  *
  */
-int _MMG2_chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
+int MMG2D_chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
   MMG5_pTria           pt,pt1,pt0;
   MMG5_pPoint          p1,p2,ppt;
-  double               mid[2],o[2],no[2],calnew,caltmp,tp,to,t;
+  double               mid[2],o[2],no[2],calnew,caltmp,tp,to,t,calseuil;
   int                  ip,jel,*adja,it,maxit,npinit;
   char                 i1,i2,j,j1,j2,ier,isv;
 
+  calseuil = 1e-4 / MMG2D_ALPHAD;
   npinit = mesh->np;
 
   pt  = &mesh->tria[k];
   pt0 = &mesh->tria[0];
-  i1  = _MMG5_inxt2[i];
-  i2  = _MMG5_iprv2[i];
+  i1  = MMG5_inxt2[i];
+  i2  = MMG5_iprv2[i];
 
   p1 = &mesh->point[pt->v[i1]];
   p2 = &mesh->point[pt->v[i2]];
 
   adja = &mesh->adja[3*(k-1)+1];
-  
+
   jel  = adja[i] / 3;
   j    = adja[i] % 3;
-  j1   = _MMG5_inxt2[j];
-  j2   = _MMG5_iprv2[j];
+  j1   = MMG5_inxt2[j];
+  j2   = MMG5_iprv2[j];
 
   /* Midpoint of edge i */
   mid[0] = 0.5*(p1->c[0]+p2->c[0]);
@@ -77,69 +78,72 @@ int _MMG2_chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
 
   /* If the splitted edge is not geometric, the new point is simply its midpoint */
   if ( !MG_EDG(pt->tag[i]) ) {
-    ip = _MMG2D_newPt(mesh,mid,0);
+    ip = MMG2D_newPt(mesh,mid,0);
     if ( !ip ) {
       /* reallocation of point table */
-      _MMG2D_POINT_REALLOC(mesh,met,ip,mesh->gap,
+      MMG2D_POINT_REALLOC(mesh,met,ip,mesh->gap,
                            printf("  ## Error: unable to allocate a new point.\n");
-                           _MMG5_INCREASE_MEM_MESSAGE();
+                           MMG5_INCREASE_MEM_MESSAGE();
                            do {
-                             _MMG2D_delPt(mesh,mesh->np);
+                             MMG2D_delPt(mesh,mesh->np);
                            } while ( mesh->np>npinit );return -1;,
-                           mid,pt->tag[i],-1);
+                           mid,pt->tag[i]);
 
     }
 
     ppt = &mesh->point[ip];
     if ( pt->tag[i] ) ppt->tag = pt->tag[i];
     if ( pt->edg[i] ) ppt->ref = pt->edg[i];
-    
+
     /* Check quality of the four new elements */
     calnew = DBL_MAX;
     memcpy(pt0,pt,sizeof(MMG5_Tria));
     pt0->v[i2] = ip;
-    
-    caltmp = _MMG2D_ALPHAD*MMG2D_caltri(mesh,met,pt0);
+
+    caltmp = MMG2D_ALPHAD*MMG2D_caltri(mesh,met,pt0);
     calnew = MG_MIN(calnew,caltmp);
 
     pt0->v[i1] = ip; pt0->v[i2] = pt->v[i2];
-    caltmp = _MMG2D_ALPHAD*MMG2D_caltri(mesh,met,pt0);
+    caltmp = MMG2D_ALPHAD*MMG2D_caltri(mesh,met,pt0);
     calnew = MG_MIN(calnew,caltmp);
 
     if ( jel ) {
       pt1 = &mesh->tria[jel];
       memcpy(pt0,pt1,sizeof(MMG5_Tria));
       pt0->v[j1] = ip;
-      caltmp = _MMG2D_ALPHAD*MMG2D_caltri(mesh,met,pt0);
+      caltmp = MMG2D_ALPHAD*MMG2D_caltri(mesh,met,pt0);
       calnew = MG_MIN(calnew,caltmp);
 
       pt0->v[j1] = pt1->v[j1] ; pt0->v[j2] = ip;
-      caltmp = _MMG2D_ALPHAD*MMG2D_caltri(mesh,met,pt0);
+      caltmp = MMG2D_ALPHAD*MMG2D_caltri(mesh,met,pt0);
       calnew = MG_MIN(calnew,caltmp);
     }
 
-    /* Delete point and abort splitting if one of the created triangles is nearly degenerate */
-    if ( calnew < _MMG5_EPSOK ) {
-      _MMG2D_delPt(mesh,ip);
-      return(0);
+    /* Delete point and abort splitting if one of the created triangles
+       has very bad quality.
+       MMG5_EPSOK is not sufficient :
+       we were created very bad element and were not able to delete them */
+    if ( (calnew < calseuil)  ) {
+      MMG2D_delPt(mesh,ip);
+      return 0;
     }
   }
   /* Otherwise, the new point is inserted on the underlying curve to the edge;
      a dichotomy is applied to find the largest distance to the edge that yields an admissible configuration */
   else {
-    ier = _MMG2_bezierCurv(mesh,k,i,0.5,o,no);
+    ier = MMG2D_bezierCurv(mesh,k,i,0.5,o,no);
     if ( !ier ) return 0;
 
-    ip  = _MMG2D_newPt(mesh,o,pt->tag[i]);
+    ip  = MMG2D_newPt(mesh,o,pt->tag[i]);
     if ( !ip ) {
       /* reallocation of point table */
-      _MMG2D_POINT_REALLOC(mesh,met,ip,mesh->gap,
+      MMG2D_POINT_REALLOC(mesh,met,ip,mesh->gap,
                            printf("  ## Error: unable to allocate a new point.\n");
-                           _MMG5_INCREASE_MEM_MESSAGE();
+                           MMG5_INCREASE_MEM_MESSAGE();
                            do {
-                             _MMG2D_delPt(mesh,mesh->np);
+                             MMG2D_delPt(mesh,mesh->np);
                            } while ( mesh->np>npinit ); return -1;,
-                           o,pt->tag[i],-1);
+                           o,pt->tag[i]);
     }
 
     ppt = &mesh->point[ip];
@@ -164,26 +168,26 @@ int _MMG2_chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
       calnew = DBL_MAX;
       memcpy(pt0,pt,sizeof(MMG5_Tria));
       pt0->v[i2] = ip;
-      caltmp = _MMG2D_ALPHAD*MMG2D_caltri(mesh,met,pt0);
+      caltmp = MMG2D_ALPHAD*MMG2D_caltri(mesh,met,pt0);
       calnew = MG_MIN(calnew,caltmp);
 
       pt0->v[i1] = ip; pt0->v[i2] = pt->v[i2];
-      caltmp = _MMG2D_ALPHAD*MMG2D_caltri(mesh,met,pt0);
+      caltmp = MMG2D_ALPHAD*MMG2D_caltri(mesh,met,pt0);
       calnew = MG_MIN(calnew,caltmp);
 
       if ( jel ) {
         pt1 = &mesh->tria[jel];
         memcpy(pt0,pt1,sizeof(MMG5_Tria));
         pt0->v[j1] = ip;
-        caltmp = _MMG2D_ALPHAD*MMG2D_caltri(mesh,met,pt0);
+        caltmp = MMG2D_ALPHAD*MMG2D_caltri(mesh,met,pt0);
         calnew = MG_MIN(calnew,caltmp);
 
         pt0->v[j1] = pt1->v[j1] ; pt0->v[j2] = ip;
-        caltmp = _MMG2D_ALPHAD*MMG2D_caltri(mesh,met,pt0);
+        caltmp = MMG2D_ALPHAD*MMG2D_caltri(mesh,met,pt0);
         calnew = MG_MIN(calnew,caltmp);
       }
-      
-      ier = ( calnew > _MMG5_EPSOK );
+
+      ier = ( calnew > MMG5_EPSOK );
       if ( ier ) {
         isv = 1;
         to = t;
@@ -199,7 +203,7 @@ int _MMG2_chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
         t = 0.5*(to+tp);
     }
     while ( ++it < maxit );
-    
+
     /* One satisfying position has been found: to */
     if ( isv ) {
       ppt->c[0] = mid[0] + to*(o[0] - mid[0]);
@@ -207,15 +211,16 @@ int _MMG2_chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
     }
     /* No satisfying position has been found */
     else {
-      _MMG2D_delPt(mesh,ip);
-      return(0);
+      MMG2D_delPt(mesh,ip);
+      return 0;
     }
   }
 
-  /* Interpolate metric at ip, if any */
-  MMG2D_intmet(mesh,met,k,i,ip,0.5);
+  if ( met->m )
+    /* Interpolate metric at ip, if any */
+    MMG2D_intmet(mesh,met,k,i,ip,0.5);
 
-  return(ip);
+  return ip;
 }
 
 /**
@@ -230,25 +235,25 @@ int _MMG2_chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
  * adjacency structure in the mesh is preserved
  *
  */
-int _MMG2_split1b(MMG5_pMesh mesh,int k,char i,int ip) {
+int MMG2D_split1b(MMG5_pMesh mesh,int k,char i,int ip) {
   MMG5_pTria         pt,pt1;
   int                *adja,iel,jel,kel,mel;
   char               i1,i2,m,j,j1,j2;
 
-  iel = _MMG2D_newElt(mesh);
+  iel = MMG2D_newElt(mesh);
   if ( !iel ) {
-    _MMG2D_TRIA_REALLOC(mesh,iel,mesh->gap,
+    MMG2D_TRIA_REALLOC(mesh,iel,mesh->gap,
                         printf("  ## Error: unable to allocate a new element.\n");
-                        _MMG5_INCREASE_MEM_MESSAGE();
-                        printf("  Exit program.\n");return 0;,0);
+                        MMG5_INCREASE_MEM_MESSAGE();
+                        printf("  Exit program.\n");return 0);
   }
 
   pt = &mesh->tria[k];
   pt->flag = 0;
   pt->base = mesh->base;
 
-  i1 = _MMG5_inxt2[i];
-  i2 = _MMG5_iprv2[i];
+  i1 = MMG5_inxt2[i];
+  i2 = MMG5_iprv2[i];
 
   adja = &mesh->adja[3*(k-1)+1];
   jel  = adja[i] / 3;
@@ -277,18 +282,18 @@ int _MMG2_split1b(MMG5_pMesh mesh,int k,char i,int ip) {
     mesh->adja[3*(mel-1)+1+m] = 3*iel+i1;
 
   if ( jel ) {
-    kel = _MMG2D_newElt(mesh);
+    kel = MMG2D_newElt(mesh);
     if ( !kel ) {
-      _MMG2D_TRIA_REALLOC(mesh,kel,mesh->gap,
+      MMG2D_TRIA_REALLOC(mesh,kel,mesh->gap,
                           printf("  ## Error: unable to allocate a new element.\n");
-                          _MMG5_INCREASE_MEM_MESSAGE();
-                          printf("  Exit program.\n");return 0;,0);
+                          MMG5_INCREASE_MEM_MESSAGE();
+                          printf("  Exit program.\n");return 0);
     }
 
     pt  = &mesh->tria[jel];
     pt1 = &mesh->tria[kel];
-    j1 = _MMG5_inxt2[j];
-    j2 = _MMG5_iprv2[j];
+    j1 = MMG5_inxt2[j];
+    j2 = MMG5_iprv2[j];
 
     pt->flag = 0;
     pt->base = mesh->base;
@@ -317,7 +322,7 @@ int _MMG2_split1b(MMG5_pMesh mesh,int k,char i,int ip) {
     mesh->adja[3*(kel-1)+1+j] = 3*iel+i;
   }
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -331,7 +336,7 @@ int _MMG2_split1b(MMG5_pMesh mesh,int k,char i,int ip) {
  * Simulate the split of one edge in triangle k
  *
  */
-int _MMG2_split1_sim(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
+int MMG2D_split1_sim(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
   MMG5_pTria         pt,pt0;
   double             cal;
   unsigned char      tau[3];
@@ -354,15 +359,15 @@ int _MMG2_split1_sim(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
   }
 
   pt0->v[tau[2]] = vx[tau[0]];
-  cal = _MMG2_quickcal(mesh,pt0);
-  if ( cal < _MMG5_EPSD )  return(0);
+  cal = MMG2D_quickcal(mesh,pt0);
+  if ( cal < MMG5_EPSD )  return 0;
 
   pt0->v[tau[2]] = pt->v[tau[2]];
   pt0->v[tau[1]] = vx[tau[0]];
-  cal = _MMG2_quickcal(mesh,pt0);
-  if ( cal < _MMG5_EPSD )  return(0);
+  cal = MMG2D_quickcal(mesh,pt0);
+  if ( cal < MMG5_EPSD )  return 0;
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -376,7 +381,7 @@ int _MMG2_split1_sim(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
  * Split 1 edge of triangle k
  *
  */
-int _MMG2_split1(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
+int MMG2D_split1(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
   MMG5_pTria       pt,pt1;
   MMG5_pPoint      p0;
   int              iel;
@@ -405,12 +410,12 @@ int _MMG2_split1(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
   if ( pt->edg[tau[0]] > 0 )
     p0->ref = pt->edg[tau[0]];
 
-  iel = _MMG2D_newElt(mesh);
+  iel = MMG2D_newElt(mesh);
   if ( !iel ) {
-    _MMG2D_TRIA_REALLOC(mesh,iel,mesh->gap,
+    MMG2D_TRIA_REALLOC(mesh,iel,mesh->gap,
                         printf("  ## Error: unable to allocate a new element.\n");
-                        _MMG5_INCREASE_MEM_MESSAGE();
-                        printf("  Exit program.\n");return 0;,0);
+                        MMG5_INCREASE_MEM_MESSAGE();
+                        printf("  Exit program.\n");return 0);
     pt = &mesh->tria[k];
   }
   pt1 = &mesh->tria[iel];
@@ -428,7 +433,7 @@ int _MMG2_split1(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
   pt1->tag[tau[2]] = MG_NOTAG;
   pt1->edg[tau[2]] = 0;
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -442,7 +447,7 @@ int _MMG2_split1(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
  * Simulate the split of two edges in triangle k
  *
  */
-int _MMG2_split2_sim(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
+int MMG2D_split2_sim(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
   MMG5_pTria        pt,pt0;
   double            cal;
   unsigned char     tau[3];
@@ -465,19 +470,19 @@ int _MMG2_split2_sim(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
   }
 
   pt0->v[tau[1]] = vx[tau[2]] ; pt0->v[tau[2]] = vx[tau[1]];
-  cal = _MMG2_quickcal(mesh,pt0);
-  if ( cal < _MMG5_EPSD )  return(0);
+  cal = MMG2D_quickcal(mesh,pt0);
+  if ( cal < MMG5_EPSD )  return 0;
 
   pt0->v[tau[1]] = pt->v[tau[1]] ; pt0->v[tau[2]] = pt->v[tau[2]];
   pt0->v[tau[0]] = vx[tau[2]];
-  cal = _MMG2_quickcal(mesh,pt0);
-  if ( cal < _MMG5_EPSD )  return(0);
+  cal = MMG2D_quickcal(mesh,pt0);
+  if ( cal < MMG5_EPSD )  return 0;
 
   pt0->v[tau[0]] = vx[tau[1]] ; pt0->v[tau[1]] = vx[tau[2]];
-  cal = _MMG2_quickcal(mesh,pt0);
-  if ( cal < _MMG5_EPSD )  return(0);
+  cal = MMG2D_quickcal(mesh,pt0);
+  if ( cal < MMG5_EPSD )  return 0;
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -491,7 +496,7 @@ int _MMG2_split2_sim(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
  * Split 2 edges of triangle k
  *
  */
-int _MMG2_split2(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
+int MMG2D_split2(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
   MMG5_pTria       pt,pt1,pt2;
   MMG5_pPoint      p1,p2;
   int              iel,jel;
@@ -524,21 +529,21 @@ int _MMG2_split2(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
   if ( pt->edg[tau[2]] > 0 )
     p2->ref = pt->edg[tau[2]];
 
-  iel = _MMG2D_newElt(mesh);
+  iel = MMG2D_newElt(mesh);
   if ( !iel ) {
-    _MMG2D_TRIA_REALLOC(mesh,iel,mesh->gap,
+    MMG2D_TRIA_REALLOC(mesh,iel,mesh->gap,
                         printf("  ## Error: unable to allocate a new element.\n");
-                        _MMG5_INCREASE_MEM_MESSAGE();
-                        printf("  Exit program.\n");return 0;,0);
+                        MMG5_INCREASE_MEM_MESSAGE();
+                        printf("  Exit program.\n");return 0);
     pt = &mesh->tria[k];
   }
 
-  jel = _MMG2D_newElt(mesh);
+  jel = MMG2D_newElt(mesh);
   if ( !jel ) {
-    _MMG2D_TRIA_REALLOC(mesh,jel,mesh->gap,
+    MMG2D_TRIA_REALLOC(mesh,jel,mesh->gap,
                         printf("  ## Error: unable to allocate a new element.\n");
-                        _MMG5_INCREASE_MEM_MESSAGE();
-                        printf("  Exit program.\n");return 0;,0);
+                        MMG5_INCREASE_MEM_MESSAGE();
+                        printf("  Exit program.\n");return 0);
     pt = &mesh->tria[k];
   }
 
@@ -564,7 +569,7 @@ int _MMG2_split2(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
   pt2->tag[tau[0]] = MG_NOTAG;   pt2->tag[tau[2]] = MG_NOTAG;
   pt2->edg[tau[0]] = MG_NOTAG;   pt2->edg[tau[2]] = MG_NOTAG;
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -578,7 +583,7 @@ int _MMG2_split2(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
  * Simulate the split of three edges in triangle k
  *
  */
-int _MMG2_split3_sim(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
+int MMG2D_split3_sim(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
   MMG5_pTria         pt,pt0;
   double             cal;
 
@@ -587,22 +592,22 @@ int _MMG2_split3_sim(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
   memcpy(pt0,pt,sizeof(MMG5_Tria));
 
   pt0->v[1] = vx[2] ; pt0->v[2] = vx[1];
-  cal = _MMG2_quickcal(mesh,pt0);
-  if ( cal < _MMG5_EPSD )  return(0);
+  cal = MMG2D_quickcal(mesh,pt0);
+  if ( cal < MMG5_EPSD )  return 0;
 
   pt0->v[0] = vx[2] ; pt0->v[1] = pt->v[1]; pt0->v[2] = vx[0];
-  cal = _MMG2_quickcal(mesh,pt0);
-  if ( cal < _MMG5_EPSD )  return(0);
+  cal = MMG2D_quickcal(mesh,pt0);
+  if ( cal < MMG5_EPSD )  return 0;
 
   pt0->v[0] = vx[1] ; pt0->v[1] = vx[0]; pt0->v[2] = pt->v[2];
-  cal = _MMG2_quickcal(mesh,pt0);
-  if ( cal < _MMG5_EPSD )  return(0);
+  cal = MMG2D_quickcal(mesh,pt0);
+  if ( cal < MMG5_EPSD )  return 0;
 
   pt0->v[1] = vx[2]; pt0->v[2] = vx[0];
-  cal = _MMG2_quickcal(mesh,pt0);
-  if ( cal < _MMG5_EPSD )  return(0);
+  cal = MMG2D_quickcal(mesh,pt0);
+  if ( cal < MMG5_EPSD )  return 0;
 
-  return(1);
+  return 1;
 }
 
 /**
@@ -616,7 +621,7 @@ int _MMG2_split3_sim(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
  * Split the three edges of triangle k
  *
  */
-int _MMG2_split3(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
+int MMG2D_split3(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
   MMG5_pTria          pt,pt1,pt2,pt3;
   MMG5_pPoint         p0,p1,p2;
   int                 iel,jel,kel;
@@ -638,33 +643,33 @@ int _MMG2_split3(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
   if ( pt->edg[2] > 0 )
     p2->ref = pt->edg[2];
 
-  iel = _MMG2D_newElt(mesh);
+  iel = MMG2D_newElt(mesh);
   if ( !iel ) {
-    _MMG2D_TRIA_REALLOC(mesh,iel,mesh->gap,
+    MMG2D_TRIA_REALLOC(mesh,iel,mesh->gap,
                         printf("  ## Error: unable to allocate a new element.\n");
-                        _MMG5_INCREASE_MEM_MESSAGE();
-                        printf("  Exit program.\n");return 0;,0);
+                        MMG5_INCREASE_MEM_MESSAGE();
+                        printf("  Exit program.\n");return 0);
 
     pt = &mesh->tria[k];
   }
 
-  jel = _MMG2D_newElt(mesh);
+  jel = MMG2D_newElt(mesh);
 
   if ( !jel ) {
-    _MMG2D_TRIA_REALLOC(mesh,jel,mesh->gap,
+    MMG2D_TRIA_REALLOC(mesh,jel,mesh->gap,
                         printf("  ## Error: unable to allocate a new element.\n");
-                        _MMG5_INCREASE_MEM_MESSAGE();
-                        printf("  Exit program.\n");return 0;,0);
+                        MMG5_INCREASE_MEM_MESSAGE();
+                        printf("  Exit program.\n");return 0);
     pt = &mesh->tria[k];
   }
 
-  kel = _MMG2D_newElt(mesh);
+  kel = MMG2D_newElt(mesh);
 
   if ( !kel ) {
-    _MMG2D_TRIA_REALLOC(mesh,kel,mesh->gap,
+    MMG2D_TRIA_REALLOC(mesh,kel,mesh->gap,
                         printf("  ## Error: unable to allocate a new element.\n");
-                        _MMG5_INCREASE_MEM_MESSAGE();
-                        printf("  Exit program.\n");return 0;,0);
+                        MMG5_INCREASE_MEM_MESSAGE();
+                        printf("  Exit program.\n");return 0);
     pt = &mesh->tria[k];
   }
 
@@ -707,12 +712,12 @@ int _MMG2_split3(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
  * Insert the point ip inside the tria k
  *
  */
-int _MMG2_splitbar(MMG5_pMesh mesh,int k,int ip) {
+int MMG2D_splitbar(MMG5_pMesh mesh,int k,int ip) {
   MMG5_pTria         pt,pt0,pt1,pt2;
   MMG5_pPoint        p0,p1,p2,ppt;
-  int                *adja,iel1,iel2,jel0,jel1,jel2;
+  int                *adja,iel1,iel2,jel0,jel2;
   int                ip0,ip1,ip2;
-  char               i1,i2,m,j,j1,j2,j0;
+  char               j2,j0;
   double             cal,calseuil;
 
   pt  = &mesh->tria[k];
@@ -725,37 +730,37 @@ int _MMG2_splitbar(MMG5_pMesh mesh,int k,int ip) {
   ip2 = pt->v[2];
   p2 = &mesh->point[ip2];
 
-  calseuil = _MMG2_EPSD ;
+  calseuil = MMG5_EPSOK ;
 
   /* Check quality of the three new elements */
-  cal = MMG2_quickarea(ppt->c,p1->c,p2->c);
+  cal = MMG2D_quickarea(ppt->c,p1->c,p2->c);
   if ( (cal < calseuil)  ) {
-     return(0);
+     return 0;
   }
 
-  cal = MMG2_quickarea(p0->c,ppt->c,p2->c);
+  cal = MMG2D_quickarea(p0->c,ppt->c,p2->c);
   if ( (cal < calseuil)  ) {
-      return(0);
+      return 0;
   }
   pt0->v[0] = ip0;
-  cal = MMG2_quickarea(p0->c,p1->c,ppt->c);
+  cal = MMG2D_quickarea(p0->c,p1->c,ppt->c);
   if ( (cal < calseuil)  ) {
-      return(0);
+      return 0;
   }
 
-  iel1 = _MMG2D_newElt(mesh);
+  iel1 = MMG2D_newElt(mesh);
   if ( !iel1 ) {
-    _MMG2D_TRIA_REALLOC(mesh,iel1,mesh->gap,
+    MMG2D_TRIA_REALLOC(mesh,iel1,mesh->gap,
                         printf("  ## Error: unable to allocate a new element.\n");
-                        _MMG5_INCREASE_MEM_MESSAGE();
-                        printf("  Exit program.\n");return 0;,0);
+                        MMG5_INCREASE_MEM_MESSAGE();
+                        printf("  Exit program.\n");return 0);
   }
-  iel2 = _MMG2D_newElt(mesh);
+  iel2 = MMG2D_newElt(mesh);
   if ( !iel2 ) {
-    _MMG2D_TRIA_REALLOC(mesh,iel2,mesh->gap,
+    MMG2D_TRIA_REALLOC(mesh,iel2,mesh->gap,
                         printf("  ## Error: unable to allocate a new element.\n");
-                        _MMG5_INCREASE_MEM_MESSAGE();
-                        printf("  Exit program.\n");return 0;,0);
+                        MMG5_INCREASE_MEM_MESSAGE();
+                        printf("  Exit program.\n");return 0);
   }
 
   pt->flag = 0;
@@ -764,8 +769,10 @@ int _MMG2_splitbar(MMG5_pMesh mesh,int k,int ip) {
   adja = &mesh->adja[3*(k-1)+1];
   jel0  = adja[0] / 3;
   j0    = adja[0] % 3;
-  jel1  = adja[1] / 3;
-  j1    = adja[1] % 3;
+ #ifndef NDEBUG
+  char jel1 = adja[1] / 3;
+  char j1   = adja[1] % 3;
+#endif
   jel2  = adja[2] / 3;
   j2    = adja[2] % 3;
 
@@ -791,10 +798,13 @@ int _MMG2_splitbar(MMG5_pMesh mesh,int k,int ip) {
   pt2->edg[0] = 0;
 
   /* Update external adjacencies */
+#ifndef NDEBUG
   assert(mesh->adja[3*(k-1)+1+1] == 3*jel1+j1);
   if ( jel1 ) {
     assert(mesh->adja[3*(jel1-1)+1+j1] == 3*k+1);
   }
+#endif
+
   mesh->adja[3*(iel1-1)+1+2] = 3*jel2+j2;
   if ( jel2 )
     mesh->adja[3*(jel2-1)+1+j2] = 3*iel1+2;

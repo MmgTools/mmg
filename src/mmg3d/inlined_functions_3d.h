@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
+**  Copyright (c) Bx INP/CNRS/Inria/UBordeaux/UPMC, 2004-
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -53,7 +53,7 @@
  *
  */
 static
-inline double _MMG5_lenedgCoor_ani(double *ca,double *cb,double *sa,double *sb) {
+inline double MMG5_lenedgCoor_ani(double *ca,double *cb,double *sa,double *sb) {
   double   ux,uy,uz,dd1,dd2,len;
 
   ux = cb[0] - ca[0];
@@ -72,11 +72,11 @@ inline double _MMG5_lenedgCoor_ani(double *ca,double *cb,double *sa,double *sb) 
   /*precision a 3.5 10e-3 pres*/
   if(fabs(dd1-dd2) < 0.05 ) {
     len = sqrt(0.5*(dd1+dd2));
-    return(len);
+    return len;
   }
   len = (sqrt(dd1)+sqrt(dd2)+4.0*sqrt(0.5*(dd1+dd2))) / 6.0;
 
-  return(len);
+  return len;
 }
 
 /**
@@ -91,21 +91,21 @@ inline double _MMG5_lenedgCoor_ani(double *ca,double *cb,double *sa,double *sb) 
  *
  */
 static
-inline double _MMG5_lenedg33_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
+inline double MMG5_lenedg33_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
                                  MMG5_pTetra pt)
 {
   int ip1,ip2;
   char isedg;
 
-  ip1 = pt->v[_MMG5_iare[ia][0]];
-  ip2 = pt->v[_MMG5_iare[ia][1]];
+  ip1 = pt->v[MMG5_iare[ia][0]];
+  ip2 = pt->v[MMG5_iare[ia][1]];
 
   if ( pt->xt && (mesh->xtetra[pt->xt].tag[ia] & MG_BDY)) {
     isedg = ( mesh->xtetra[pt->xt].tag[ia] & MG_GEO);
-    return(_MMG5_lenSurfEdg33_ani(mesh, met, ip1, ip2, isedg));
+    return MMG5_lenSurfEdg33_ani(mesh, met, ip1, ip2, isedg);
   } else {
-    return( _MMG5_lenedgCoor_ani(mesh->point[ip1].c,mesh->point[ip2].c,
-                                 &met->m[6*ip1],&met->m[6*ip2]) );
+    return MMG5_lenedgCoor_ani(mesh->point[ip1].c,mesh->point[ip2].c,
+                                &met->m[6*ip1],&met->m[6*ip2]);
   }
   return 0.0;
 }
@@ -122,15 +122,15 @@ inline double _MMG5_lenedg33_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
  *
  */
 static
-inline double _MMG5_lenedgspl33_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
+inline double MMG5_lenedgspl33_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
                                     MMG5_pTetra pt)
 {
   MMG5_pPoint pp1,pp2;
   double      *m1,*m2;
   int         ip1,ip2;
 
-  ip1 = pt->v[_MMG5_iare[ia][0]];
-  ip2 = pt->v[_MMG5_iare[ia][1]];
+  ip1 = pt->v[MMG5_iare[ia][0]];
+  ip2 = pt->v[MMG5_iare[ia][1]];
 
   pp1 = &mesh->point[ip1];
   pp2 = &mesh->point[ip2];
@@ -138,7 +138,7 @@ inline double _MMG5_lenedgspl33_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
   m1 = &met->m[6*ip1];
   m2 = &met->m[6*ip2];
 
-  return(_MMG5_lenedgCoor_ani(pp1->c,pp2->c,m1,m2));
+  return MMG5_lenedgCoor_ani(pp1->c,pp2->c,m1,m2);
 }
 
 
@@ -155,34 +155,34 @@ inline double _MMG5_lenedgspl33_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
  *
  */
 static
-inline double _MMG5_lenedgspl_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
+inline double MMG5_lenedgspl_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
                                   MMG5_pTetra pt)
 {
   MMG5_pPoint pp1,pp2;
   double      m1[6],m2[6];
   int         ip1,ip2,i;
 
-  ip1 = pt->v[_MMG5_iare[ia][0]];
-  ip2 = pt->v[_MMG5_iare[ia][1]];
+  ip1 = pt->v[MMG5_iare[ia][0]];
+  ip2 = pt->v[MMG5_iare[ia][1]];
 
   pp1 = &mesh->point[ip1];
   pp2 = &mesh->point[ip2];
 
   if ( !(MG_SIN(pp1->tag) || (MG_NOM & pp1->tag)) && (pp1->tag & MG_GEO) ) {
-    if ( !_MMG5_moymet(mesh,met,pt,m1) ) return(0);
+    if ( !MMG5_moymet(mesh,met,pt,m1) ) return 0;
   } else {
     for ( i=0; i<6; ++i )
       m1[i] = met->m[6*ip1+i];
   }
 
   if ( !(MG_SIN(pp2->tag)|| (MG_NOM & pp2->tag)) && (pp2->tag & MG_GEO) ) {
-    if ( !_MMG5_moymet(mesh,met,pt,m2) ) return(0);
+    if ( !MMG5_moymet(mesh,met,pt,m2) ) return 0;
   } else {
     for ( i=0; i<6; ++i )
       m2[i] = met->m[6*ip2+i];
   }
 
-  return(_MMG5_lenedgCoor_ani(pp1->c,pp2->c,m1,m2));
+  return MMG5_lenedgCoor_ani(pp1->c,pp2->c,m1,m2);
 }
 
 /**
@@ -197,20 +197,20 @@ inline double _MMG5_lenedgspl_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
  *
  */
 static
-inline double _MMG5_lenedg_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
+inline double MMG5_lenedg_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
                                MMG5_pTetra pt)
 {
   int ip1,ip2;
   char isedg;
 
-  ip1 = pt->v[_MMG5_iare[ia][0]];
-  ip2 = pt->v[_MMG5_iare[ia][1]];
+  ip1 = pt->v[MMG5_iare[ia][0]];
+  ip2 = pt->v[MMG5_iare[ia][1]];
 
   if ( pt->xt && (mesh->xtetra[pt->xt].tag[ia] & MG_BDY)) {
     isedg = ( mesh->xtetra[pt->xt].tag[ia] & MG_GEO);
-    return(_MMG5_lenSurfEdg_ani(mesh, met, ip1, ip2, isedg));
+    return MMG5_lenSurfEdg_ani(mesh, met, ip1, ip2, isedg);
   } else {
-    return(_MMG5_lenedgspl_ani(mesh ,met, ia, pt));
+    return MMG5_lenedgspl_ani(mesh ,met, ia, pt);
   }
   return 0.0;
 }
@@ -227,24 +227,24 @@ inline double _MMG5_lenedg_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
  *
  */
 static
-inline double _MMG5_lenedg_iso(MMG5_pMesh mesh,MMG5_pSol met,int ia,
+inline double MMG5_lenedg_iso(MMG5_pMesh mesh,MMG5_pSol met,int ia,
                                MMG5_pTetra pt) {
   int ip1,ip2;
 
-  ip1 = pt->v[_MMG5_iare[ia][0]];
-  ip2 = pt->v[_MMG5_iare[ia][1]];
-  return(_MMG5_lenSurfEdg_iso(mesh,met,ip1,ip2,0));
+  ip1 = pt->v[MMG5_iare[ia][0]];
+  ip2 = pt->v[MMG5_iare[ia][1]];
+  return MMG5_lenSurfEdg_iso(mesh,met,ip1,ip2,0);
 }
 
 static
-inline double _MMG5_lenedgspl_iso(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
+inline double MMG5_lenedgspl_iso(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
                                   MMG5_pTetra pt) {
   int ip1,ip2;
 
-  ip1 = pt->v[_MMG5_iare[ia][0]];
-  ip2 = pt->v[_MMG5_iare[ia][1]];
+  ip1 = pt->v[MMG5_iare[ia][0]];
+  ip2 = pt->v[MMG5_iare[ia][1]];
 
-  return(_MMG5_lenSurfEdg_iso(mesh,met,ip1,ip2,0));
+  return MMG5_lenSurfEdg_iso(mesh,met,ip1,ip2,0);
 
 }
 
@@ -259,12 +259,12 @@ inline double _MMG5_lenedgspl_iso(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
  *
  */
 static
-inline double _MMG5_orcal(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
+inline double MMG5_orcal(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
   MMG5_pTetra     pt;
 
   pt = &mesh->tetra[iel];
 
-  return(_MMG5_caltet(mesh,met,pt));
+  return MMG5_caltet(mesh,met,pt);
 }
 
 
@@ -280,7 +280,7 @@ inline double _MMG5_orcal(MMG5_pMesh mesh,MMG5_pSol met,int iel) {
  *
  */
 static
-inline double _MMG3D_caltetLES_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
+inline double MMG3D_caltetLES_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
   double    ct[12],cs[3],rad,Vref,V,cal;
   int j,l;
 
@@ -288,8 +288,8 @@ inline double _MMG3D_caltetLES_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt)
     memcpy(&ct[l],mesh->point[pt->v[j]].c,3*sizeof(double));
   }
 
-  if(!_MMG5_cenrad_iso(mesh,ct,cs,&rad)) {
-    return(0.0);
+  if(!MMG5_cenrad_iso(mesh,ct,cs,&rad)) {
+    return 0.0;
   }
 
   assert(rad>0.);
@@ -297,10 +297,10 @@ inline double _MMG3D_caltetLES_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt)
   /* Vref volume */
   Vref = 8.*sqrt(3)/27.*rad*sqrt(rad);
 
-  V = _MMG5_orvol(mesh->point,pt->v)/6.;
+  V = MMG5_orvol(mesh->point,pt->v)/6.;
 
   if ( V<0. ) {
-    return(0.0);
+    return 0.0;
   }
 
   cal =  V/Vref; //1-Qles in order to have the best quality equal to 1
@@ -310,7 +310,7 @@ inline double _MMG3D_caltetLES_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt)
 
   // the normalization by ALPHAD
   //in order to be coherent with the other quality measure
-  return(cal/_MMG3D_ALPHAD);
+  return cal/MMG3D_ALPHAD;
 }
 
 /**
@@ -325,12 +325,12 @@ inline double _MMG3D_caltetLES_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt)
  *
  */
 static
-inline double _MMG5_caltet_iso_4pt(double *a, double *b, double *c, double *d) {
+inline double MMG5_caltet_iso_4pt(double *a, double *b, double *c, double *d) {
   double       abx,aby,abz,acx,acy,acz,adx,ady,adz,bcx,bcy,bcz,bdx,bdy,bdz;
   double       cdx,cdy,cdz;
   double       vol,v1,v2,v3,rap;
 
-  /* volume */
+  /* volume: (ac^ad).ab/6. Note that here we compute 6*vol. */
   abx = b[0] - a[0];
   aby = b[1] - a[1];
   abz = b[2] - a[2];
@@ -350,7 +350,7 @@ inline double _MMG5_caltet_iso_4pt(double *a, double *b, double *c, double *d) {
   v2  = acz*adx - acx*adz;
   v3  = acx*ady - acy*adx;
   vol = abx * v1 + aby * v2 + abz * v3;
-  if ( vol < _MMG5_EPSD2 )  return(0.0);
+  if ( vol < MMG5_EPSD2 )  return 0.0;
 
   bcx = c[0] - b[0];
   bcy = c[1] - b[1];
@@ -366,11 +366,11 @@ inline double _MMG5_caltet_iso_4pt(double *a, double *b, double *c, double *d) {
   cdy = d[1] - c[1];
   cdz = d[2] - c[2];
   rap += cdx*cdx + cdy*cdy + cdz*cdz;
-  if ( rap < _MMG5_EPSD2 )  return(0.0);
+  if ( rap < MMG5_EPSD2 )  return 0.0;
 
-  /* quality = vol / len^3/2 */
+  /* quality = 6*vol / len^3/2. Q = 1/(12 sqrt(3)) for the regular tetra of length 1. */
   rap = rap * sqrt(rap);
-  return(vol / rap);
+  return vol / rap;
 }
 
 /**
@@ -384,7 +384,7 @@ inline double _MMG5_caltet_iso_4pt(double *a, double *b, double *c, double *d) {
  *
  */
 static
-inline double _MMG5_caltet_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra  pt) {
+inline double MMG5_caltet_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra  pt) {
   double       *a,*b,*c,*d;
   int          ia, ib, ic, id;
 
@@ -398,7 +398,7 @@ inline double _MMG5_caltet_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra  pt) {
   c = mesh->point[ic].c;
   d = mesh->point[id].c;
 
-  return(_MMG5_caltet_iso_4pt(a,b,c,d));
+  return MMG5_caltet_iso_4pt(a,b,c,d);
 
 }
 
@@ -414,7 +414,7 @@ inline double _MMG5_caltet_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra  pt) {
  * \todo test with the square of this measure
  */
 static
-inline double _MMG5_caltet_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
+inline double MMG5_caltet_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
   double       cal,abx,aby,abz,acx,acy,acz,adx,ady,adz;
   double       h1,h2,h3,h4,h5,h6,det,vol,rap,v1,v2,v3,num;
   double       bcx,bcy,bcz,bdx,bdy,bdz,cdx,cdy,cdz;
@@ -428,7 +428,7 @@ inline double _MMG5_caltet_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
   ip[3] = pt->v[3];
 
   /* average metric */
-  if ( !_MMG5_moymet(mesh,met,pt,&mm[0]) )
+  if ( !MMG5_moymet(mesh,met,pt,&mm[0]) )
     return (0.0);
 
   a = mesh->point[ip[0]].c;
@@ -465,13 +465,13 @@ inline double _MMG5_caltet_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
   v2  = acz*adx - acx*adz;
   v3  = acx*ady - acy*adx;
   vol = abx * v1 + aby * v2 + abz * v3;
-  if ( vol <= 0. )  return(0.0);
+  if ( vol <= 0. )  return 0.0;
 
   det = mm[0] * ( mm[3]*mm[5] - mm[4]*mm[4]) \
       - mm[1] * ( mm[1]*mm[5] - mm[2]*mm[4]) \
       + mm[2] * ( mm[1]*mm[4] - mm[2]*mm[3]);
-  if ( det < _MMG5_EPSD2 )   {
-    return(0.0);
+  if ( det < MMG5_EPSD2 )   {
+    return 0.0;
   }
   det = sqrt(det) * vol;
 
@@ -496,7 +496,7 @@ inline double _MMG5_caltet_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
 
   cal = det / num;
 
-  return(cal);
+  return cal;
 }
 
 #endif
