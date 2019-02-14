@@ -449,6 +449,7 @@ typedef struct {
   int           renum;
   int           PROctree;
   int           nmat;
+  int           rmc;
   char          nreg;
   char          imprim,ddebug,badkal,iso,fem,lag;
   char          parTyp; /*!< Contains binary flags to say which kind of local

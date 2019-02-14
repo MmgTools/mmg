@@ -71,6 +71,8 @@ void MMG5_Init_parameters(MMG5_pMesh mesh) {
   mesh->info.nomove   =  0;
   /* [n]    ,number of user-defined references */
   mesh->info.nmat = 0;
+  /* [0/1]    ,Turn on/off the removal of small bubles in levelset meshing */
+  mesh->info.rmc      =  0;
 
   /* default values for doubles */
   /* angle detection */
