@@ -235,6 +235,12 @@ static inline
 void * myrealloc(void * ptr_in, size_t s, size_t oldsize) {
   char *ptr;
   char *ptr_in_c = (char*)ptr_in;
+
+  if ( !ptr_in ) {
+    assert ( !oldsize );
+    return mymalloc( s );
+  }
+
   ptr_in_c -= sizeof(size_t);
   if (oldsize != *((size_t*)ptr_in_c)) {
     fprintf(stderr, "myrealloc: Error: freed memory mismatch\n");
@@ -254,6 +260,8 @@ static inline
 size_t myfree(void *ptr) {
   size_t s;
   char * ptr_c = (char*)ptr;
+
+  if ( !ptr ) return 0;
 
   ptr_c = ptr_c-sizeof(size_t);
   s = *((size_t*)ptr_c);
