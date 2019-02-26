@@ -384,8 +384,10 @@ int MMG5_check_accuracy(double mat[6],double lambda[3], double v[3][3],
 int MMG5_eigenv(int symmat,double *mat,double lambda[3],double v[3][3]) {
   double    a11,a12,a13,a21,a22,a23,a31,a32,a33;
   double    aa,bb,cc,dd,ee,ii,vx1[3],vx2[3],vx3[3],dd1,dd2,dd3;
-  double    maxd,maxm,valm,p[4],w1[3],w2[3],w3[3];
+  double    maxd,maxm,valm,p[4],w1[3],w2[3],w3[3],epsd;
   int       k,n;
+
+  epsd = MG_EIGENV_EPS13;
 
   /* default */
   memcpy(v,Id,9*sizeof(double));
@@ -399,8 +401,16 @@ int MMG5_eigenv(int symmat,double *mat,double lambda[3],double v[3][3]) {
       valm = fabs(mat[k]);
       if ( valm > maxm )  maxm = valm;
     }
-    /* single float accuracy */
-    if ( maxm < MG_EIGENV_EPS5e6 ) return 1;
+    /* single float accuracy if sufficient, else double float accuracy */
+    if ( maxm < MG_EIGENV_EPS5e6 ) {
+      if ( lambda[0]>0. && lambda[1] > 0. & lambda[2] > 0. ) {
+        return 1;
+      }
+      else if ( maxm < MG_EIGENV_EPS13 ) {
+        return 0;
+      }
+      epsd = MG_EIGENV_EPS27;
+    }
 
     /* normalize matrix */
     dd  = 1.0 / maxm;
@@ -417,7 +427,7 @@ int MMG5_eigenv(int symmat,double *mat,double lambda[3],double v[3][3]) {
     if ( valm > maxd )  maxd = valm;
     valm = fabs(a23);
     if ( valm > maxd )  maxd = valm;
-    if ( maxd < MG_EIGENV_EPS13 )  return 1;
+    if ( maxd < epsd )  return 1;
 
     a21  = a12;
     a31  = a13;
@@ -444,7 +454,17 @@ int MMG5_eigenv(int symmat,double *mat,double lambda[3],double v[3][3]) {
       valm = fabs(mat[k]);
       if ( valm > maxm )  maxm = valm;
     }
-    if ( maxm < MG_EIGENV_EPS5e6 )  return 1;
+
+    /* single float accuracy if sufficient, else double float accuracy */
+    if ( maxm < MG_EIGENV_EPS5e6 ) {
+      if ( lambda[0]>0. && lambda[1] > 0. & lambda[2] > 0. ) {
+        return 1;
+      }
+      else if ( maxm < MG_EIGENV_EPS13 ) {
+        return 0;
+      }
+      epsd = MG_EIGENV_EPS27;
+    }
 
     /* normalize matrix */
     dd  = 1.0 / maxm;
@@ -470,7 +490,7 @@ int MMG5_eigenv(int symmat,double *mat,double lambda[3],double v[3][3]) {
     if ( valm > maxd )  maxd = valm;
     valm = fabs(a32);
     if ( valm > maxd )  maxd = valm;
-    if ( maxd < MG_EIGENV_EPS13 )  return 1;
+    if ( maxd < epsd )  return 1;
 
     /* build characteristic polynomial
        P(X) = X^3 - trace X^2 + (somme des mineurs)X - det = 0 */
