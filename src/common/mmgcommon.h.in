@@ -371,7 +371,7 @@ size_t myfree(void *ptr) {
   }while(0);
 
 /** Error message when lack of memory */
-#define MMG5_INCREASE_MEM_MESSAGE() do                     \
+#define MMG5_INCREASE_MEM_MESSAGE() do                      \
   {                                                         \
     printf("  ## Check the mesh size or increase maximal"); \
     printf(" authorized memory with the -m option.\n");     \
@@ -380,6 +380,34 @@ size_t myfree(void *ptr) {
 #define MMG5_SAFELL2LCAST(longlongval) (((longlongval) > (LONG_MAX)) ? 0 : ((long)(longlongval)))
 #define MMG5_SAFELL2ICAST(longlongval) (((longlongval) > (INT_MAX)) ? 0 : ((int)(longlongval)))
 
+/** check the return value of fread */
+#define MMG_FREAD(ptr,size,count,stream) do             \
+  {                                                     \
+                                                        \
+    if ( count != fread(ptr,size,count,stream) ) {      \
+      fputs ( "Reading error", stderr );                \
+      return 0;                                         \
+    }                                                   \
+  } while(0);
+
+/** macro to help to count the number of variadic arguments */
+#define CV_VA_NUM_ARGS_HELPER(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10, N, ...)    N
+
+/** count the number of variadic arguments provided to the macro */
+#define CV_VA_NUM_ARGS(...)      CV_VA_NUM_ARGS_HELPER(__VA_ARGS__, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0)
+
+/**
+ * check the return value of fscanf
+ *
+ * \remark don't work without any variadic arg
+ */
+#define MMG_FSCANF(stream,format,...) do                                \
+  {                                                                     \
+    if ( CV_VA_NUM_ARGS(__VA_ARGS__) != fscanf(stream,format,__VA_ARGS__) ) { \
+      fputs ( "Reading error", stderr );                                \
+      return 0;                                                         \
+    }                                                                   \
+  } while(0);
 
 /** Inlined functions for libraries and executables */
 #ifdef USE_SCOTCH
@@ -599,8 +627,8 @@ int             MMG5_saveMshMesh(MMG5_pMesh,MMG5_pSol*,const char*,const int);
 int             MMG5_loadSolHeader(const char*,int,FILE**,int*,int*,int*,int*,
                                    int*,int*,int**,long*,int);
 int             MMG5_chkMetricType(MMG5_pMesh mesh,int *type, FILE *inm);
-void            MMG5_readFloatSol3D(MMG5_pSol,FILE*,int,int,int);
-void            MMG5_readDoubleSol3D(MMG5_pSol,FILE*,int,int,int);
+int             MMG5_readFloatSol3D(MMG5_pSol,FILE*,int,int,int);
+int             MMG5_readDoubleSol3D(MMG5_pSol,FILE*,int,int,int);
 int             MMG5_saveSolHeader( MMG5_pMesh,const char*,FILE**,int,int*,int,
                                     int,int,int*,int*);
 void            MMG5_writeDoubleSol3D(MMG5_pMesh,MMG5_pSol,FILE*,int,int,int);
