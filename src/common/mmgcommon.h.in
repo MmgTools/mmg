@@ -386,7 +386,7 @@ size_t myfree(void *ptr) {
                                                         \
     if ( count != fread(ptr,size,count,stream) ) {      \
       fputs ( "Reading error", stderr );                \
-      return 0;                                         \
+      return -1;                                        \
     }                                                   \
   } while(0);
 
@@ -405,7 +405,7 @@ size_t myfree(void *ptr) {
   {                                                                     \
     if ( CV_VA_NUM_ARGS(__VA_ARGS__) != fscanf(stream,format,__VA_ARGS__) ) { \
       fputs ( "Reading error", stderr );                                \
-      return 0;                                                         \
+      return -1;                                                        \
     }                                                                   \
   } while(0);
 

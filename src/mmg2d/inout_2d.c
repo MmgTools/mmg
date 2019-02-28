@@ -735,7 +735,7 @@ int MMG2D_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * \param iswp Endianess
  * \param index of the readed solution
  *
- * \return 1 if success, 0 if fail
+ * \return 1 if success, -1 if fail
  *
  * Read the solution value for vertex of index pos in floating precision.
  *
@@ -766,7 +766,7 @@ int MMG2D_readFloatSol(MMG5_pSol sol,FILE *inm,int bin,int iswp,int pos) {
  * \param iswp Endianess
  * \param index of the readed solution
  *
- * \return 1 if success, 0 if fail
+ * \return 1 if success, -1 if fail
  *
  * Read the solution value for vertex of index pos in double precision.
  *
@@ -848,13 +848,13 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   if ( sol->ver == 1 ) {
     /* Simple precision */
     for (k=1; k<=sol->np; k++) {
-      if ( !MMG2D_readFloatSol(sol,inm,bin,iswp,k) ) return -1;
+      if ( MMG2D_readFloatSol(sol,inm,bin,iswp,k) < 0 ) return -1;
     }
   }
   else {
     for (k=1; k<=sol->np; k++) {
       /* Double precision */
-      if ( !MMG2D_readDoubleSol(sol,inm,bin,iswp,k) ) return -1;
+      if ( MMG2D_readDoubleSol(sol,inm,bin,iswp,k) < 0 ) return -1;
     }
   }
 
@@ -953,7 +953,7 @@ int MMG2D_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
     for (k=1; k<=mesh->np; k++) {
       for ( j=0; j<nsols; ++j ) {
         psl = *sol+j;
-        if ( !MMG2D_readFloatSol(psl,inm,bin,iswp,k) ) return -1;
+        if ( MMG2D_readFloatSol(psl,inm,bin,iswp,k) < 0 ) return -1;
       }
     }
   }
@@ -962,7 +962,7 @@ int MMG2D_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
     for (k=1; k<=mesh->np; k++) {
       for ( j=0; j<nsols; ++j ) {
         psl = *sol+j;
-        if ( !MMG2D_readDoubleSol(psl,inm,bin,iswp,k) ) return -1;
+        if ( MMG2D_readDoubleSol(psl,inm,bin,iswp,k) < 0 ) return -1;
       }
     }
   }

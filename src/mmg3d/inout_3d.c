@@ -1836,13 +1836,13 @@ int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
   if ( met->ver == 1 ) {
     /* Simple precision */
     for (k=1; k<=mesh->np; k++) {
-      if ( !MMG5_readFloatSol3D(met,inm,bin,iswp,k) ) return -1;
+      if ( MMG5_readFloatSol3D(met,inm,bin,iswp,k) < 0 ) return -1;
     }
   }
   else {
     /* Double precision */
     for (k=1; k<=mesh->np; k++) {
-      if ( !MMG5_readDoubleSol3D(met,inm,bin,iswp,k) ) return -1;
+      if ( MMG5_readDoubleSol3D(met,inm,bin,iswp,k) < 0 ) return -1;
     }
   }
 
@@ -1941,7 +1941,7 @@ int MMG3D_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
     for (k=1; k<=mesh->np; k++) {
       for ( j=0; j<nsols; ++j ) {
         psl = *sol + j;
-        if ( !MMG5_readFloatSol3D(psl,inm,bin,iswp,k) ) return -1;
+        if ( MMG5_readFloatSol3D(psl,inm,bin,iswp,k) < 0 ) return -1;
       }
     }
   }
@@ -1950,7 +1950,7 @@ int MMG3D_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
     for (k=1; k<=mesh->np; k++) {
       for ( j=0; j<nsols; ++j ) {
         psl = *sol + j;
-        if ( !MMG5_readDoubleSol3D(psl,inm,bin,iswp,k) ) return -1;
+        if ( MMG5_readDoubleSol3D(psl,inm,bin,iswp,k) < 0 ) return -1;
       }
     }
   }

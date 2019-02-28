@@ -2079,7 +2079,7 @@ int MMG5_loadSolHeader( const char *filename,int meshDim,FILE **inm,int *ver,
  * \param iswp Endianess
  * \param index of the readed solution
  *
- * \return 1 if success, 0 if fail
+ * \return 1 if success, -1 if fail
  *
  * Read the solution value for vertex of index pos in floating precision.
  *
@@ -2128,7 +2128,7 @@ int MMG5_readFloatSol3D(MMG5_pSol sol,FILE *inm,int bin,int iswp,int pos) {
  * \param iswp Endianess
  * \param index of the readed solution
  *
- * \return 1 if success, 0 if fail
+ * \return 1 if success, -1 if fail
  *
  * Read the solution value for vertex of index pos in double precision.
  *
