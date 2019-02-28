@@ -403,7 +403,7 @@ int MMG5_eigenv(int symmat,double *mat,double lambda[3],double v[3][3]) {
     }
     /* single float accuracy if sufficient, else double float accuracy */
     if ( maxm < MG_EIGENV_EPS5e6 ) {
-      if ( lambda[0]>0. && lambda[1] > 0. & lambda[2] > 0. ) {
+      if ( lambda[0]>0. && lambda[1] > 0. && lambda[2] > 0. ) {
         return 1;
       }
       else if ( maxm < MG_EIGENV_EPS13 ) {
@@ -457,7 +457,7 @@ int MMG5_eigenv(int symmat,double *mat,double lambda[3],double v[3][3]) {
 
     /* single float accuracy if sufficient, else double float accuracy */
     if ( maxm < MG_EIGENV_EPS5e6 ) {
-      if ( lambda[0]>0. && lambda[1] > 0. & lambda[2] > 0. ) {
+      if ( lambda[0]>0. && lambda[1] > 0. && lambda[2] > 0. ) {
         return 1;
       }
       else if ( maxm < MG_EIGENV_EPS13 ) {
