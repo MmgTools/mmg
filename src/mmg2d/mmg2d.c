@@ -39,6 +39,7 @@ static void MMG5_endcod() {
 static int MMG2D_usage(char *name) {
   MMG5_mmgUsage(name);
 
+  fprintf(stdout,"-rmc         Enable the removal of small componants in ls mode\n");
 #ifdef USE_ELAS
   fprintf(stdout,"-lag [n] Lagrangian mesh displacement according to mode [0/1/2]\n");
   fprintf(stdout,"             0: displacement\n");
@@ -507,6 +508,12 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
           mesh->info.renum = -10;
         }
         break;
+      case 'r':
+          if ( !strcmp(argv[i],"-rmc") ) {
+            if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_rmc,1) ) {
+              return 0;
+            }
+          }
       case 's':
         if ( !strcmp(argv[i],"-sol") ) {
           if ( ++i < argc && isascii(argv[i][0]) && argv[i][0]!='-' ) {
