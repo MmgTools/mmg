@@ -276,7 +276,7 @@ inline int MMG5_rotmatrix(double n[3],double r[3][3]) {
  *
  */
 int MMG5_invmat(double *m,double *mi) {
-  double  aa,bb,cc,det,vmin,vmax,maxx;
+  double  aa,bb,cc,det,vmax,maxx;
   int     k;
 
   /* check diagonal matrices */
@@ -294,13 +294,13 @@ int MMG5_invmat(double *m,double *mi) {
   }
 
   /* check ill-conditionned matrix */
-  vmin = vmax = fabs(m[0]);
+  vmax = fabs(m[0]);
   for (k=1; k<6; k++) {
     maxx = fabs(m[k]);
-    if ( maxx < vmin )  vmin = maxx;
-    else if ( maxx > vmax )  vmax = maxx;
+    if ( maxx > vmax )  vmax = maxx;
   }
   if ( vmax == 0.0 )  return 0;
+
   /* compute sub-dets */
   aa  = m[3]*m[5] - m[4]*m[4];
   bb  = m[4]*m[2] - m[1]*m[5];
