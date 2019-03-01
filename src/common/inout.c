@@ -92,7 +92,7 @@ static
 int MMG5_countBinaryElts(FILE **inm, const int nelts,const int iswp,
                           int *np, int *na, int* nt,int *nq, int *ne, int *npr)
 {
-  int    typ,num,tagNum,i,k,l,idx,nb;
+  int    typ,num,tagNum,i,k,l,idx;
   static char mmgWarn = 0;
 
   k = 0;
@@ -356,13 +356,19 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,const char *filename,
         /* String tags */
         MMG_FSCANF((*inm),"%d ",&tagNum);
         for ( k=0; k<tagNum; ++k ) {
-          if ( 0 != fscanf((*inm),"%*[^\n]%*c") );
+          if ( 0 != fscanf((*inm),"%*[^\n]%*c") ) {
+            fputs ( "Reading error", stderr );
+            return -1;
+          }
         }
 
         /* Real tags */
         MMG_FSCANF((*inm),"%d ",&tagNum);
         for ( k=0; k<tagNum; ++k ) {
-          if ( 0 != fscanf((*inm),"%*[^\n]%*c") );
+          if ( 0 != fscanf((*inm),"%*[^\n]%*c") ) {
+            fputs ( "Reading error", stderr );
+            return -1;
+          }
         }
 
         /* Integer tags */
@@ -423,7 +429,10 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,const char *filename,
             ++np;
             break;
           }
-          if ( 0 != fscanf((*inm),"%*[^\n]%*c") );
+          if ( 0 != fscanf((*inm),"%*[^\n]%*c") ) {
+            fputs ( "Reading error", stderr );
+            return -1;
+          }
         }
       }
       else {
