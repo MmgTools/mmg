@@ -108,9 +108,9 @@ int MMG2D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
         MMG5_SAFE_CALLOC(mesh->info.mat,mesh->info.nmat,MMG5_Mat,return 0);
         for (i=0; i<mesh->info.nmat; i++) {
           pm = &mesh->info.mat[i];
-          fscanf(in,"%d",&pm->ref);
+          MMG_FSCANF(in,"%d",&pm->ref);
           fgetpos(in,&position);
-          fscanf(in,"%255s",data);
+          MMG_FSCANF(in,"%255s",data);
           if ( !strcmp(data,"nosplit") ) {
             pm->dospl = 0;
             pm->rin = pm->ref;
@@ -118,8 +118,8 @@ int MMG2D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
           }
           else {
             fsetpos(in,&position);
-            fscanf(in,"%d",&pm->rin);
-            fscanf(in,"%d",&pm->rex);
+            MMG_FSCANF(in,"%d",&pm->rin);
+            MMG_FSCANF(in,"%d",&pm->rex);
             pm->dospl = 1;
           }
         }

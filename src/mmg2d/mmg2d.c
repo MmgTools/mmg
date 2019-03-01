@@ -576,7 +576,7 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
   if ( mesh->info.imprim == -99 ) {
     fprintf(stdout,"\n  -- PRINT (0 10(advised) -10) ?\n");
     fflush(stdin);
-    fscanf(stdin,"%d",&i);
+    MMG_FSCANF(stdin,"%d",&i);
     if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_verbose,i) )
       return 0;
   }
@@ -584,7 +584,7 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
   if ( mesh->namein == NULL ) {
     fprintf(stdout,"  -- INPUT MESH NAME ?\n");
     fflush(stdin);
-    fscanf(stdin,"%127s",namein);
+    MMG_FSCANF(stdin,"%127s",namein);
     if ( !MMG2D_Set_inputMeshName(mesh,namein) )
       return 0;
   }
