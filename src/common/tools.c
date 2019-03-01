@@ -327,15 +327,14 @@ int MMG5_invmat(double *m,double *mi) {
  *
  */
 int MMG5_invmatg(double m[9],double mi[9]) {
-  double  aa,bb,cc,det,vmin,vmax,maxx;
+  double  aa,bb,cc,det,vmax,maxx;
   int     k;
 
   /* check ill-conditionned matrix */
-  vmin = vmax = fabs(m[0]);
+  vmax = fabs(m[0]);
   for (k=1; k<9; k++) {
     maxx = fabs(m[k]);
-    if ( maxx < vmin )  vmin = maxx;
-    else if ( maxx > vmax )  vmax = maxx;
+    if ( maxx > vmax )  vmax = maxx;
   }
   if ( vmax == 0.0 )  return 0;
 
