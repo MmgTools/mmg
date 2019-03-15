@@ -1584,7 +1584,6 @@ int MMG2D_savemesh_db(MMG5_pMesh mesh,char *filename,char pack) {
     }
     else if ( !pack ) {
       np++;
-      ppt->tmp = np;
     }
   }
 
@@ -1608,7 +1607,12 @@ int MMG2D_savemesh_db(MMG5_pMesh mesh,char *filename,char pack) {
       p0 = &mesh->point[pt->v[0]];
       p1 = &mesh->point[pt->v[1]];
       p2 = &mesh->point[pt->v[2]];
-      fprintf(out,"%d %d %d %d\n",p0->tmp,p1->tmp,p2->tmp,pt->ref);
+      if ( pack ) {
+        fprintf(out,"%d %d %d %d\n",p0->tmp,p1->tmp,p2->tmp,pt->ref);
+      }
+      else {
+        fprintf(out,"%d %d %d %d\n",pt->v[0],pt->v[1],pt->v[2],pt->ref);
+      }
     }
   }
 
