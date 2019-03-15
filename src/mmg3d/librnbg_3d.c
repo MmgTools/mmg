@@ -134,7 +134,7 @@ int MMG5_mmg3dRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
     vertOldTab[tetraIdx] = ++vertNbr;
   }
 
-  if ( vertNbr/2 < MMG5_BOXSIZE ) {
+  if ( vertNbr/2 < 0 /*MMG5_BOXSIZE*/ ) {
     /* not enough tetra to renum */
     MMG5_DEL_MEM(mesh,vertOldTab);
     return 1;
@@ -362,6 +362,7 @@ int MMG5_mmg3dRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
   }
   MMG5_DEL_MEM(mesh,permNodTab);
 
+puts("RENUMBERING OK");
 
   mesh->ne = nereal;
   mesh->np = npreal;

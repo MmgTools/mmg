@@ -197,7 +197,7 @@ int MMG5_scotchCall(MMG5_pMesh mesh, MMG5_pSol met)
   static char mmgError = 0;
 
   /*check enough vertex to renum*/
-  if ( mesh->info.renum && (mesh->np/2. > MMG5_BOXSIZE) && mesh->np>100000 ) {
+/*  if ( mesh->info.renum && (mesh->np/2. > MMG5_BOXSIZE) && mesh->np>100000 ) { */
 
     if ( (SCOTCH_5 && SCOTCH_6 ) || ( (!SCOTCH_5) && (!SCOTCH_6) ) ) {
       if ( !mmgWarn ) {
@@ -231,7 +231,7 @@ int MMG5_scotchCall(MMG5_pMesh mesh, MMG5_pSol met)
         return 0;
     }
     /* renumbering end */
-  }
+/*  } */
   return 1;
 #else
   return 1;
