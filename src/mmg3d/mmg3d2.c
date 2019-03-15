@@ -1357,11 +1357,14 @@ int MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int nd
         }
         assert( indp >= 0 && indp < 4 );
 
-        /* Only tets of the shell of (np,nq) can be added, unless future ball is non manifold */
+        /* Only tets of the shell of (np,nq) can be added, unless future ball is
+         * non manifold */
         if ( indq == -1 ) {
-          fprintf(stderr,"\n  ## Warning: %s: we should rarely passed here. "
-                  "tetra %d =  %d %d %d %d, ref = %d.",__func__,
-                  jel,pt1->v[0],pt1->v[1],pt1->v[2],pt1->v[3],pt1->ref);
+          if ( mesh->info.ddebug ) {
+            fprintf(stderr,"\n  ## Warning: %s: we should rarely passed here. "
+                    "tetra %d =  %d %d %d %d, ref = %d.",__func__,
+                    jel,pt1->v[0],pt1->v[1],pt1->v[2],pt1->v[3],pt1->ref);
+          }
           return 0;
         }
 
@@ -1400,9 +1403,11 @@ int MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int nd
 
         /* Only tets of the shell of (np,nq) can be added, unless future ball is non manifold */
         if ( indp == -1 ) {
-          fprintf(stderr,"\n  ## Warning: %s: we should rarely passed here. "
-                  "tetra %d =  %d %d %d %d, ref = %d\n",__func__,
-                  jel,pt1->v[0],pt1->v[1],pt1->v[2],pt1->v[3],pt1->ref);
+          if ( mesh->info.ddebug ) {
+            fprintf(stderr,"\n  ## Warning: %s: we should rarely passed here. "
+                    "tetra %d =  %d %d %d %d, ref = %d\n",__func__,
+                    jel,pt1->v[0],pt1->v[1],pt1->v[2],pt1->v[3],pt1->ref);
+          }
           return 0;
         }
 
