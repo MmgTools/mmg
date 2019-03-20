@@ -96,11 +96,13 @@ MACRO ( ADD_AND_INSTALL_LIBRARY
   ADD_LIBRARY ( ${target_name} ${target_type} ${sources} )
 
   IF ( CMAKE_VERSION VERSION_LESS 2.8.12 )
-    INCLUDE_DIRECTORIES ( ${target_name} PUBLIC
-      ${COMMON_BINARY_DIR} ${COMMON_SOURCE_DIR} ${PROJECT_BINARY_DIR}/include )
+    INCLUDE_DIRECTORIES ( ${target_name}
+      PRIVATE ${COMMON_BINARY_DIR} ${COMMON_SOURCE_DIR}
+      PRIVATE ${PROJECT_BINARY_DIR}/include )
   ELSE ( )
-    TARGET_INCLUDE_DIRECTORIES ( ${target_name} PUBLIC
-      ${COMMON_BINARY_DIR} ${COMMON_SOURCE_DIR} ${PROJECT_BINARY_DIR}/include )
+    TARGET_INCLUDE_DIRECTORIES ( ${target_name}
+      PRIVATE ${COMMON_BINARY_DIR} ${COMMON_SOURCE_DIR}
+      PRIVATE ${PROJECT_BINARY_DIR}/include )
   ENDIF ( )
 
   SET_TARGET_PROPERTIES ( ${target_name}
@@ -110,10 +112,21 @@ MACRO ( ADD_AND_INSTALL_LIBRARY
 
   TARGET_LINK_LIBRARIES ( ${target_name} ${LIBRARIES} )
 
-  INSTALL ( TARGETS ${target_name}
+  INSTALL ( TARGETS ${target_name} EXPORT ${output_name}Targets
     ARCHIVE DESTINATION lib
     LIBRARY DESTINATION lib
-    COMPONENT lib)
+    COMPONENT lib
+    PUBLIC_HEADER DESTINATION include
+    )
+
+  INSTALL(EXPORT ${output_name}Targets
+    FILE ${output_name}Targets.cmake
+    NAMESPACE ${output_name}::
+    DESTINATION lib/cmake/${output_name})
+
+  # zinstall the config file containing all information (targets + some variables like the version)
+  INSTALL(FILES "${PROJECT_SOURCE_DIR}/cmake/modules/${output_name}Config.cmake"
+    DESTINATION lib/cmake/${output_name})
 
 ENDMACRO ( )
 
@@ -147,11 +160,13 @@ MACRO ( ADD_AND_INSTALL_EXECUTABLE
   ENDIF ( )
 
  IF ( CMAKE_VERSION VERSION_LESS 2.8.12 )
-   INCLUDE_DIRECTORIES ( ${exec_name} PUBLIC
-     ${COMMON_BINARY_DIR} ${COMMON_SOURCE_DIR} ${PROJECT_BINARY_DIR}/include )
+   INCLUDE_DIRECTORIES ( ${exec_name}
+     PRIVATE ${COMMON_BINARY_DIR} ${COMMON_SOURCE_DIR}
+     PUBLIC ${PROJECT_BINARY_DIR}/include )
  ELSE ( )
-   TARGET_INCLUDE_DIRECTORIES ( ${exec_name} PUBLIC
-     ${COMMON_BINARY_DIR} ${COMMON_SOURCE_DIR} ${PROJECT_BINARY_DIR}/include )
+   TARGET_INCLUDE_DIRECTORIES ( ${exec_name}
+     PRIVATE ${COMMON_BINARY_DIR} ${COMMON_SOURCE_DIR}
+     PUBLIC ${PROJECT_BINARY_DIR}/include )
  ENDIF ( )
 
   TARGET_LINK_LIBRARIES ( ${exec_name} ${LIBRARIES}  )
@@ -226,9 +241,9 @@ MACRO ( ADD_LIBRARY_TEST target_name main_path target_dependency lib_name )
   ADD_DEPENDENCIES( ${target_name} ${target_dependency} )
 
   IF ( CMAKE_VERSION VERSION_LESS 2.8.12 )
-    INCLUDE_DIRECTORIES ( ${target_name} PUBLIC ${PROJECT_BINARY_DIR}/include )
+    INCLUDE_DIRECTORIES ( ${target_name} PRIVATE ${PROJECT_BINARY_DIR}/include )
   ELSE ( )
-    TARGET_INCLUDE_DIRECTORIES ( ${target_name} PUBLIC ${PROJECT_BINARY_DIR}/include )
+    TARGET_INCLUDE_DIRECTORIES ( ${target_name} PRIVATE ${PROJECT_BINARY_DIR}/include )
   ENDIF ( )
 
   IF ( WIN32 AND ((NOT MINGW) AND USE_SCOTCH) )
