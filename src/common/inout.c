@@ -512,7 +512,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
   int         *ina_t,*ina_a,nt,na,nq,ne,npr;
   int         nbl_t,nbl_a,typ,tagNum,ref,idx,num;
   int         v[4],isol;
-  char        chaine[128];
+  char        chaine[128],*ptr;
   static char mmgWarn=0, mmgWarn1=0;
 
   ina_t = ina_a = NULL;
@@ -1200,6 +1200,15 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
     MMG_FSCANF((*inm),"%d ",&tagNum);
     MMG_FSCANF(*inm,"%127s\n",&chaine[0]);
 
+    ptr = NULL;
+    ptr = strstr(chaine,":metric");
+
+    if ( ptr ) {
+      *ptr = '\0';
+      mesh->info.inputMet = 1;
+    }
+
+
     if ( !MMG5_Set_inputSolName(mesh,psl,chaine) ) {
       if ( !mmgWarn1 ) {
         mmgWarn1 = 1;
@@ -1826,7 +1835,8 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename,
 
     fprintf(inm,"$NodeData\n");
 
-    /* One string tag saying the type of solution saved */
+    /* One string tag saying the type of solution saved.
+       Add the "metric" keyword if we save a metric */
     fprintf(inm,"1\n");
 
     if ( psl->size == 1 ) {
@@ -1838,7 +1848,12 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename,
     else {
       typ = 9;
     }
-    fprintf(inm,"\"%s\"\n",psl->namein);
+    if ( metricData ) {
+      fprintf(inm,"\"%s:metric\"\n",psl->namein);
+    }
+    else {
+      fprintf(inm,"\"%s\"\n",psl->namein);
+    }
 
     /* One real tag unused */
     fprintf(inm,"1\n");
