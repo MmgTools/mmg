@@ -1453,7 +1453,7 @@ int MMG5_grad2metSurfreq(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int npma
 
   MMG5_pPoint  p1,p2;
   double      *mm1,*mm2,*nn1,*nn2,ps1,ps2,ux,uy,uz,m1[6],m2[6],n1[3],n2[3],nt[3];
-  double       r1[3][3],r2[3][3],c[3],mtan1[3],mtan2[3],mr1[6],mr2[6];
+  double       r1[3][3],r2[3][3],mtan1[3],mtan2[3],mr1[6],mr2[6];
   double       mtmp[3][3],rbasis1[3][3],rbasis2[3][3];
   double       l,difsiz,rmet3D[6];
   double       lambda[2],vp[2][2],beta,mu[3];
@@ -1548,9 +1548,6 @@ int MMG5_grad2metSurfreq(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int npma
   mtan1[0] = mr1[0];
   mtan1[1] = mr1[1];
   mtan1[2] = mr1[3];
-
-  c[0] = r1[0][0]*ux + r1[0][1]*uy + r1[0][2]*uz;
-  c[1] = r1[1][0]*ux + r1[1][1]*uy + r1[1][2]*uz;
 
   MMG5_rmtr(r2,m2,mr2);
 

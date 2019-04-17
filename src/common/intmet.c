@@ -179,7 +179,7 @@ int MMG5_mmgIntmet33_ani(double *m,double *n,double *mr,double s) {
   int     order;
   double  lambda[3],vp[3][3],mu[3],is[6],isnis[6],mt[9],P[9],dd;
   char    i;
-  static char mmgWarn;
+  static char mmgWarn=0;
 
   /* Compute inverse of square root of matrix M : is =
    * P*diag(1/sqrt(lambda))*{^t}P */

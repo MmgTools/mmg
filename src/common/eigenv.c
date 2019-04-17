@@ -41,22 +41,24 @@
 
 #include "eigenv.h"
 
-/* seeking 1.e-05 accuracy */
-#define  MG_EIGENV_EPSD           1.e-13
-#define  MG_EIGENV_EPSD2          1.e-10
-#define  MG_EIGENV_EPS6           5.e-06
-#define  MG_EIGENV_EPS            1.e-06
-#define  MG_EIGENV_EPSX2          2.e-06
-#define  MAXTOU         50
+/* seeking at least 1.e-05 accuracy, more if not sufficient */
+#define  MG_EIGENV_EPS27          1.e-27
+#define  MG_EIGENV_EPS13          1.e-13
+#define  MG_EIGENV_EPS10          1.e-10
+#define  MG_EIGENV_EPS5e6         5.e-06
+#define  MG_EIGENV_EPS6           1.e-06
+#define  MG_EIGENV_EPS2e6         2.e-06
+#define  MG_EIGENV_EPS5           1.e-05
+#define  MAXTOU                   50
 
 /**
  * \def egal(x,y)
  * Check if numbers \a x and \a y are equal.
  */
 #define egal(x,y)   (                                             \
-    (  ((x) == 0.0f) ? (fabs(y) < MG_EIGENV_EPS) :                      \
-       ( ((y) == 0.0f) ? (fabs(x) < MG_EIGENV_EPS) :                    \
-         (fabs((x)-(y)) / (fabs(x) + fabs(y)) < MG_EIGENV_EPSX2) )  ) )
+    (  ((x) == 0.0f) ? (fabs(y) < MG_EIGENV_EPS6) :                      \
+       ( ((y) == 0.0f) ? (fabs(x) < MG_EIGENV_EPS6) :                    \
+         (fabs((x)-(y)) / (fabs(x) + fabs(y)) < MG_EIGENV_EPS2e6) )  ) )
 
 /**
  * \brief Identity matrix.
@@ -83,8 +85,8 @@ static double Id[3][3] = {
 static int newton3(double p[4],double x[3]) {
   double      b,c,d,da,db,dc,epsd;
   double      delta,fx,dfx,dxx;
-  double      fdx0,fdx1,dx0,dx1,x1,x2;
-  int         it,n;
+  double      fdx0,fdx1,dx0,dx1,x1,x2,tmp,epsA,epsB;
+  int         it,it2,n;
   static char mmgWarn=0;
 
   /* coeffs polynomial, a=1 */
@@ -108,7 +110,7 @@ static int newton3(double p[4],double x[3]) {
 
   /* solve 2nd order eqn */
   delta = db*db - 4.0*da*c;
-  epsd  = db*db*MG_EIGENV_EPSD2;
+  epsd  = db*db*MG_EIGENV_EPS10;
 
   /* inflexion (f'(x)=0, x=-b/2a) */
   x1 = -db / 6.0f;
@@ -122,32 +124,36 @@ static int newton3(double p[4],double x[3]) {
     fdx0 = d + dx0*(c+dx0*(b+dx0));
     fdx1 = d + dx1*(c+dx1*(b+dx1));
 
-    if ( fabs(fdx0) < MG_EIGENV_EPSD ) {
+
+    x[2] = -b - 2.0*dx0;
+    tmp =  -b - 2.0*dx1;
+    if ( fabs(fdx0) < MG_EIGENV_EPS27 ||
+         ( fabs(fdx0) < MG_EIGENV_EPS13 && (dx0 > 0. && x[2] > 0.) ) ) {
       /* dx0: double root, compute single root */
       n = 2;
       x[0] = dx0;
       x[1] = dx0;
-      x[2] = -b - 2.0*dx0;
       /* check if P(x) = 0 */
       fx = d + x[2]*(c+x[2]*(b+x[2]));
-      if ( fabs(fx) > MG_EIGENV_EPSD2 ) {
+      if ( fabs(fx) > MG_EIGENV_EPS10 ) {
 #ifdef DEBUG
-         fprintf(stderr,"\n  ## Error: %s: ERR 9100, newton3: fx= %E.\n",
-                 __func__,fx);
+        fprintf(stderr,"\n  ## Error: %s: ERR 9100, newton3: fx= %E.\n",
+                __func__,fx);
 #endif
         return 0;
       }
       return n;
     }
-    else if ( fabs(fdx1) < MG_EIGENV_EPSD ) {
+    else if ( fabs(fdx1) < MG_EIGENV_EPS27 ||
+              ( fabs(fdx1) < MG_EIGENV_EPS13 && (dx1 > 0. && tmp > 0.) ) ) {
       /* dx1: double root, compute single root */
       n = 2;
       x[0] = dx1;
       x[1] = dx1;
-      x[2] = -b - 2.0*dx1;
+      x[2] = tmp;
       /* check if P(x) = 0 */
       fx = d + x[2]*(c+x[2]*(b+x[2]));
-      if ( fabs(fx) > MG_EIGENV_EPSD2 ) {
+      if ( fabs(fx) > MG_EIGENV_EPS10 ) {
 #ifdef DEBUG
         fprintf(stderr,"\n  ## Error: %s: ERR 9100, newton3: fx= %E.\n",
                 __func__,fx);
@@ -158,7 +164,8 @@ static int newton3(double p[4],double x[3]) {
     }
   }
 
-  else if ( fabs(delta) < epsd ) {
+  else if (  fabs(delta) < db*db * 1.e-20 ||
+             ( fabs(delta) < epsd && x1 > 0. ) ) {
     /* triple root */
     n = 3;
     x[0] = x1;
@@ -166,7 +173,7 @@ static int newton3(double p[4],double x[3]) {
     x[2] = x1;
     /* check if P(x) = 0 */
     fx = d + x[0]*(c+x[0]*(b+x[0]));
-    if ( fabs(fx) > MG_EIGENV_EPSD2 ) {
+    if ( fabs(fx) > MG_EIGENV_EPS10 ) {
 #ifdef DEBUG
       fprintf(stderr,"\n  ## Error: %s: ERR 9100, newton3: fx= %E.\n",
               __func__,fx);
@@ -189,11 +196,18 @@ static int newton3(double p[4],double x[3]) {
   x1  = -b / 3.0;
   dfx =  c + b*x1;
   fx  = d + x1*(c -2.0*x1*x1);
+
+  epsA = MG_EIGENV_EPS13;
+  epsB = MG_EIGENV_EPS10;
+
+  it2 = 0;
+newton :
+
   it  = 0;
   do {
     x2 = x1 - fx / dfx;
     fx = d + x2*(c+x2*(b+x2));
-    if ( fabs(fx) < MG_EIGENV_EPSD ) {
+    if ( fabs(fx) < epsA  && x2 > 0. ) {
       x[0] = x2;
       break;
     }
@@ -201,9 +215,12 @@ static int newton3(double p[4],double x[3]) {
 
     /* check for break-off condition */
     dxx = fabs((x2-x1) / x2);
-    if ( dxx < 1.0e-10 ) {
+    if ( dxx < epsB && x2 > 0. ) {
       x[0] = x2;
-      if ( fabs(fx) > MG_EIGENV_EPSD2 ) {
+
+      /* Check accuracy for 1e-5 precision only (we don't want to fail for smaller
+       * precision) */
+      if ( fabs(fx) >  MG_EIGENV_EPS10 ) {
         fprintf(stderr,"\n  ## Error: %s: ERR 9102, newton3, no root found"
                 " (fx %E).\n",
                 __func__,fx);
@@ -219,7 +236,9 @@ static int newton3(double p[4],double x[3]) {
   if ( it == MAXTOU ) {
     x[0] = x1;
     fx   = d + x1*(c+(x1*(b+x1)));
-    if ( fabs(fx) > MG_EIGENV_EPSD2 ) {
+    /* Check accuracy for 1e-5 precision only (we don't want to fail for smaller
+     * precision) */
+    if ( fabs(fx) > MG_EIGENV_EPS10 ) {
       fprintf(stderr,"\n  ## Error: %s: ERR 9102, newton3, no root found"
               " (fx %E).\n",
               __func__,fx);
@@ -242,16 +261,25 @@ static int newton3(double p[4],double x[3]) {
   x[1] = 0.5 * (-db+delta);
   x[2] = 0.5 * (-db-delta);
 
+  while ( ++it2 < 5 && ( ( x[0] <= 0 && fabs(x[0]) <= MG_EIGENV_EPS5 ) ||
+                         ( x[1] <= 0 && fabs(x[1]) <= MG_EIGENV_EPS5 ) ||
+                         ( x[2] <= 0 && fabs(x[2]) <= MG_EIGENV_EPS5 ) ) ) {
+    /* Get back to the newton method with increased accuracy */
+    epsA  /= 10;
+    epsB  /= 10;
+    goto newton;
+  }
+
 #ifdef DEBUG
   /* check for root accuracy */
   fx = d + x[1]*(c+x[1]*(b+x[1]));
-  if ( fabs(fx) > MG_EIGENV_EPSD2 ) {
+  if ( fabs(fx) > MG_EIGENV_EPS10 ) {
     fprintf(stderr,"\n  ## Error: %s: ERR 9104, newton3: fx= %E  x= %E.\n",
             __func__,fx,x[1]);
     return 0;
   }
   fx = d + x[2]*(c+x[2]*(b+x[2]));
-  if ( fabs(fx) > MG_EIGENV_EPSD2 ) {
+  if ( fabs(fx) > MG_EIGENV_EPS10 ) {
     fprintf(stderr,"\n  ## Error: %s: ERR 9104, newton3: fx= %E  x= %E.\n",
             __func__,fx,x[2]);
     return 0;
@@ -356,8 +384,10 @@ int MMG5_check_accuracy(double mat[6],double lambda[3], double v[3][3],
 int MMG5_eigenv(int symmat,double *mat,double lambda[3],double v[3][3]) {
   double    a11,a12,a13,a21,a22,a23,a31,a32,a33;
   double    aa,bb,cc,dd,ee,ii,vx1[3],vx2[3],vx3[3],dd1,dd2,dd3;
-  double    maxd,maxm,valm,p[4],w1[3],w2[3],w3[3];
+  double    maxd,maxm,valm,p[4],w1[3],w2[3],w3[3],epsd;
   int       k,n;
+
+  epsd = MG_EIGENV_EPS13;
 
   /* default */
   memcpy(v,Id,9*sizeof(double));
@@ -371,8 +401,16 @@ int MMG5_eigenv(int symmat,double *mat,double lambda[3],double v[3][3]) {
       valm = fabs(mat[k]);
       if ( valm > maxm )  maxm = valm;
     }
-    /* single float accuracy */
-    if ( maxm < MG_EIGENV_EPS6 )  return 1;
+    /* single float accuracy if sufficient, else double float accuracy */
+    if ( maxm < MG_EIGENV_EPS5e6 ) {
+      if ( lambda[0]>0. && lambda[1] > 0. && lambda[2] > 0. ) {
+        return 1;
+      }
+      else if ( maxm < MG_EIGENV_EPS13 ) {
+        return 0;
+      }
+      epsd = MG_EIGENV_EPS27;
+    }
 
     /* normalize matrix */
     dd  = 1.0 / maxm;
@@ -389,7 +427,7 @@ int MMG5_eigenv(int symmat,double *mat,double lambda[3],double v[3][3]) {
     if ( valm > maxd )  maxd = valm;
     valm = fabs(a23);
     if ( valm > maxd )  maxd = valm;
-    if ( maxd < MG_EIGENV_EPSD )  return 1;
+    if ( maxd < epsd )  return 1;
 
     a21  = a12;
     a31  = a13;
@@ -416,7 +454,17 @@ int MMG5_eigenv(int symmat,double *mat,double lambda[3],double v[3][3]) {
       valm = fabs(mat[k]);
       if ( valm > maxm )  maxm = valm;
     }
-    if ( maxm < MG_EIGENV_EPS6 )  return 1;
+
+    /* single float accuracy if sufficient, else double float accuracy */
+    if ( maxm < MG_EIGENV_EPS5e6 ) {
+      if ( lambda[0]>0. && lambda[1] > 0. && lambda[2] > 0. ) {
+        return 1;
+      }
+      else if ( maxm < MG_EIGENV_EPS13 ) {
+        return 0;
+      }
+      epsd = MG_EIGENV_EPS27;
+    }
 
     /* normalize matrix */
     dd  = 1.0 / maxm;
@@ -442,7 +490,7 @@ int MMG5_eigenv(int symmat,double *mat,double lambda[3],double v[3][3]) {
     if ( valm > maxd )  maxd = valm;
     valm = fabs(a32);
     if ( valm > maxd )  maxd = valm;
-    if ( maxd < MG_EIGENV_EPSD )  return 1;
+    if ( maxd < epsd )  return 1;
 
     /* build characteristic polynomial
        P(X) = X^3 - trace X^2 + (somme des mineurs)X - det = 0 */
@@ -636,7 +684,7 @@ int MMG5_eigen2(double *mm,double *lambda,double vp[2][2]) {
   xn = fabs(m[0]);
   if ( fabs(m[1]) > xn )  xn = fabs(m[1]);
   if ( fabs(m[2]) > xn )  xn = fabs(m[2]);
-  if ( xn < MG_EIGENV_EPSD2 ) {
+  if ( xn < MG_EIGENV_EPS10 ) {
     lambda[0] = lambda[1] = 0.0;
     vp[0][0] = 1.0;
     vp[0][1] = 0.0;
@@ -665,7 +713,7 @@ int MMG5_eigen2(double *mm,double *lambda,double vp[2][2]) {
   }
   ddeltb = sqrt(ddeltb);
 
-  if ( fabs(a1) < MG_EIGENV_EPS ) {
+  if ( fabs(a1) < MG_EIGENV_EPS6 ) {
     rr1 = 0.5 * sqrt(ddeltb);
     rr2 = -rr1;
   }
@@ -689,7 +737,7 @@ vect:
 
   /* eigenvectors */
   a1 = m[0] - rr1;
-  if ( fabs(a1)+fabs(m[1]) < MG_EIGENV_EPS ) {
+  if ( fabs(a1)+fabs(m[1]) < MG_EIGENV_EPS6 ) {
     if (fabs(lambda[1]) < fabs(lambda[0]) ) {
       ux = 1.0;
       uy = 0.0;
