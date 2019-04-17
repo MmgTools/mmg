@@ -604,6 +604,7 @@ typedef struct MMG5_dNode_s {
  double        MMG5_ridSizeInTangentDir(MMG5_pMesh, MMG5_pPoint,int,int*,double,double);
  int           MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met);
  int           MMG5_scotchCall(MMG5_pMesh mesh, MMG5_pSol sol);
+ void          MMG5_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met);
  int           MMG5_solveDefmetregSys( MMG5_pMesh, double r[3][3], double *, double *,
                                         double *, double *, double, double, double);
  int           MMG5_solveDefmetrefSys( MMG5_pMesh,MMG5_pPoint,int*, double r[3][3],
