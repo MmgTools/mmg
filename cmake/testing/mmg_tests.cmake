@@ -214,6 +214,17 @@ ADD_TEST(NAME mmg_CommandLineAni_${SHRT_EXEC}
   ${MMG_CI_TESTS}/TorusholesAni_chocCyl/torusholesTiny
   -out ${CTEST_OUTPUT_DIR}/mmg_CommandLineAni_${SHRT_EXEC}.o.meshb)
 
+# -Optim
+ADD_TEST(NAME mmg_optimOption_${SHRT_EXEC}
+  COMMAND ${EXEC} -v 5 -hausd 1 -optim
+  ${MMG_CI_TESTS}/MecaPart/geom_1_before.mesh
+  -out ${CTEST_OUTPUT_DIR}/mmg_optimOption_${SHRT_EXEC}.o.meshb)
+
+ADD_TEST(NAME mmg_optimHmax_${SHRT_EXEC}
+  COMMAND ${EXEC} -v 5 -hausd 1 -optim -hmax 1
+  ${MMG_CI_TESTS}/MecaPart/geom_1_before.mesh
+  -out ${CTEST_OUTPUT_DIR}/mmg_optimHmax_${SHRT_EXEC}.o.meshb)
+
   ##############################################################################
   #####
   #####         Various test cases

@@ -48,7 +48,7 @@ ELSE ( )
     SET ( OLD_MMG_MD5 "0" )
   ENDIF ( )
 
-  FILE(DOWNLOAD https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmRktsVkFDTGlfdzQ
+  FILE(DOWNLOAD https://drive.google.com/uc?export=download&id=1tSey9RCMDWbjovX9CCHPZUZsiNHD5se_
     ${CI_DIR}/mmg.version
     STATUS MMG_VERSION_STATUS
     INACTIVITY_TIMEOUT 5)
