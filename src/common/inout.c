@@ -1209,6 +1209,15 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
     }
 
 
+    ptr = NULL;
+    ptr = strstr(chaine,":metric");
+
+    if ( ptr ) {
+      *ptr = '\0';
+      mesh->info.inputMet = 1;
+    }
+
+
     if ( !MMG5_Set_inputSolName(mesh,psl,chaine) ) {
       if ( !mmgWarn1 ) {
         mmgWarn1 = 1;
