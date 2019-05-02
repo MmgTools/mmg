@@ -916,7 +916,6 @@ int MMG2D_Get_edge(MMG5_pMesh mesh, int* e0, int* e1, int* ref
     ped = &mesh->edge[mesh->nai];
   }
 
-
   *e0  = ped->a;
   *e1  = ped->b;
 

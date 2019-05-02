@@ -195,6 +195,104 @@ int MMG2D_freeLocalPar(MMG5_pMesh mesh) {
   return 1;
 }
 
+int MMG2D_Get_numberOfNonBdyEdges(MMG5_pMesh mesh, int* nb_edges) {
+  MMG5_pTria pt,pt1;
+  MMG5_pEdge ped;
+  int        *adja,k,i,j,i1,i2,iel;
+
+  *nb_edges = 0;
+  if ( mesh->tria ) {
+    /* Create the triangle adjacency if needed */
+    if ( !mesh->adja ) {
+      if ( !MMG2D_hashTria( mesh ) ) {
+        fprintf(stderr,"\n  ## Error: %s: unable to create "
+                "adjacency table.\n",__func__);
+        return 0;
+      }
+    }
+
+    /* Count the number of non boundary edges */
+    for ( k=1; k<=mesh->nt; k++ ) {
+      pt = &mesh->tria[k];
+      if ( !MG_EOK(pt) ) continue;
+
+      adja = &mesh->adja[3*(k-1)+1];
+
+      for ( i=0; i<3; i++ ) {
+        i1 = MMG5_inxt2[i];
+        i2 = MMG5_iprv2[i];
+        iel = adja[i] / 3;
+        assert ( iel != k );
+
+        pt1 = &mesh->tria[iel];
+
+        if ( (!iel) || (pt->ref > pt1->ref) ||
+             ((pt->ref==pt1->ref) && MG_SIN(pt->tag[i])) ) {
+          /* Do not treat boundary edges */
+          continue;
+        }
+        if ( k < iel ) {
+          /* Treat edge from the triangle with lowest index */
+          ++(*nb_edges);
+        }
+      }
+    }
+
+    /* Append the non boundary edges to the boundary edges array */
+    MMG5_ADD_MEM(mesh,(*nb_edges)*sizeof(MMG5_Edge),"non boundary edges",
+                  printf("  Exit program.\n");
+                  return 0);
+    MMG5_SAFE_RECALLOC(mesh->edge,(mesh->na+1),(mesh->na+(*nb_edges)+1),
+                       MMG5_Edge,"non bdy edges arrray",return 0);
+
+    j = mesh->na+1;
+    for ( k=1; k<=mesh->nt; k++ ) {
+      pt = &mesh->tria[k];
+      if ( !MG_EOK(pt) ) continue;
+
+      adja = &mesh->adja[3*(k-1)+1];
+
+      for ( i=0; i<3; i++ ) {
+        i1 = MMG5_inxt2[i];
+        i2 = MMG5_iprv2[i];
+        iel = adja[i] / 3;
+        assert ( iel != k );
+
+        pt1 = &mesh->tria[iel];
+
+        if ( (!iel) || (pt->ref > pt1->ref) ||
+             ((pt->ref==pt1->ref) && MG_SIN(pt->tag[i])) ) {
+          /* Do not treat boundary edges */
+          continue;
+        }
+        if ( k < iel ) {
+          /* Treat edge from the triangle with lowest index */
+          ped = &mesh->edge[j++];
+          ped->a   = pt->v[i1];
+          ped->b   = pt->v[i2];
+          ped->ref = pt->edg[i];
+        }
+      }
+    }
+  }
+  return 1;
+}
+
+int MMG2D_Get_nonBdyEdge(MMG5_pMesh mesh, int* e0, int* e1, int* ref, int idx) {
+  MMG5_pEdge        ped;
+
+  ped = &mesh->edge[mesh->na+idx];
+
+  *e0  = ped->a;
+  *e1  = ped->b;
+
+  if ( ref != NULL ) {
+    *ref = mesh->edge[mesh->na+idx].ref;
+  }
+
+  return 1;
+}
+
 int MMG2D_Get_adjaTri(MMG5_pMesh mesh, int kel, int listri[3]) {
 
   if ( ! mesh->adja ) {
