@@ -851,14 +851,18 @@ int MMG5_hTag(MMG5_HGeom *hash,int a,int b,int ref,int16_t tag) {
     return 0;
   else if ( ph->a == ia && ph->b == ib ) {
     ph->tag |= tag;
-    ph->ref  = ref;
+    if ( ref ) {
+      ph->ref  = ref;
+    }
     return 1;
   }
   while ( ph->nxt ) {
     ph = &hash->geom[ph->nxt];
     if ( ph->a == ia && ph->b == ib ) {
       ph->tag |= tag;
-      ph->ref  = ref;
+      if ( ref ) {
+        ph->ref  = ref;
+      }
       return 1;
     }
   }

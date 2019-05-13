@@ -253,7 +253,7 @@ int MMG3D_defaultOption(MMG5_pMesh mesh,MMG5_pSol met) {
       if ( !MMG5_unscaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
       _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
     }
-    MMG3D_solTruncatureForOptim(mesh,met);
+    MMG5_solTruncatureForOptim(mesh,met);
   }
 
   if ( mesh->info.hsiz > 0. ) {

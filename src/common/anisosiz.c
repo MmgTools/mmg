@@ -1453,10 +1453,10 @@ int MMG5_grad2metSurfreq(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int npma
 
   MMG5_pPoint  p1,p2;
   double      *mm1,*mm2,*nn1,*nn2,ps1,ps2,ux,uy,uz,m1[6],m2[6],n1[3],n2[3],nt[3];
-  double       r1[3][3],r2[3][3],t1[2],t2[2],c[3],mtan1[3],mtan2[3],mr1[6],mr2[6];
+  double       r1[3][3],r2[3][3],mtan1[3],mtan2[3],mr1[6],mr2[6];
   double       mtmp[3][3],rbasis1[3][3],rbasis2[3][3];
-  double       l,dd,difsiz,rmet3D[6];
-  double       lambda[2],vp[2][2],alpha,beta,mu[3];
+  double       l,difsiz,rmet3D[6];
+  double       lambda[2],vp[2][2],beta,mu[3];
   int          cfg_m2;
   int8_t       ier;
 
@@ -1549,9 +1549,6 @@ int MMG5_grad2metSurfreq(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int npma
   mtan1[1] = mr1[1];
   mtan1[2] = mr1[3];
 
-  c[0] = r1[0][0]*ux + r1[0][1]*uy + r1[0][2]*uz;
-  c[1] = r1[1][0]*ux + r1[1][1]*uy + r1[1][2]*uz;
-
   MMG5_rmtr(r2,m2,mr2);
 
   mtan2[0] = mr2[0];
@@ -1559,57 +1556,6 @@ int MMG5_grad2metSurfreq(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int npma
   mtan2[2] = mr2[3];
 
   difsiz = mesh->info.hgradreq*l;
-
-#ifndef NDEBUG
-  /* Verification */
-  memcpy(t1,c,2*sizeof(double));
-  /* Here we work in the tangent plane (thus in 2d) */
-  dd = t1[0]*t1[0] + t1[1]*t1[1];
-  if(dd < MMG5_EPSD2)
-    return 0;
-
-  dd = 1.0/sqrt(dd);
-  t1[0] *= dd;
-  t1[1] *= dd;
-
-  /* edge length in metric mtan1: sqrt(t^(t1) * mtan1 * t1). */
-  ps1 =  mtan1[0]*t1[0]*t1[0] + 2.0*mtan1[1]*t1[0]*t1[1] + mtan1[2]*t1[1]*t1[1];
-  assert ( ps1  > 0. );
-  ps1 = sqrt(ps1);
-
-  memcpy(t2,c,2*sizeof(double));
-
-  dd = t2[0]*t2[0] + t2[1]*t2[1];
-  if(dd < MMG5_EPSD2)
-    return 0;
-
-  dd = 1.0/sqrt(dd);
-  t2[0] *= dd;
-  t2[1] *= dd;
-
-  /* edge length: sqrt(t^(t2) * mtan2 * t2) */
-  ps2 = mtan2[0]*t2[0]*t2[0] + 2.0*mtan2[1]*t2[0]*t2[1] + mtan2[2]*t2[1]*t2[1];
-  assert ( ps2  > 0. );
-  ps2 = sqrt(ps2);
-  int cfg = 0;
-  if( ps2 < ps1 ){
-    /* Impose a smaller metric in p2 */
-    alpha = ps1 /(1.0+difsiz*ps1);
-    if( ps2 < alpha - MMG5_EPS ) {
-      /* Need to graduate */
-      cfg = 1;
-    }
-  }
-  else {
-    /* Impose a larger metric in p2 ( M1 > M2 ) */
-    /* compute alpha = h1 - hgrad*l */
-    alpha = ps1 /(1.0-difsiz*ps1);
-    if( ps2 > alpha + MMG5_EPS ) {
-      /* Need to graduate: l_{M1-hgrad*l} < l_{M2} => M1-hgrad*l > M2 */
-      cfg = 2;
-    }
-  }
-#endif
 
   /* Simultaneous reduction of mtan1 and mtan2 */
   if ( !MMG5_simred(mesh,mtan1,mtan2,lambda,mu,vp) ) {

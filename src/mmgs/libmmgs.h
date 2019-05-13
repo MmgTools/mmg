@@ -64,6 +64,7 @@ enum MMGS_Param {
   MMGS_IPARAM_angle,             /*!< [1/0], Turn on/off angle detection */
   MMGS_IPARAM_iso,               /*!< [1/0], Level-set meshing */
   MMGS_IPARAM_keepRef,           /*!< [1/0], Preserve the initial domain references in level-set mode */
+  MMGS_IPARAM_optim,             /*!< [1/0], Optimize mesh keeping its initial edge sizes */
   MMGS_IPARAM_noinsert,          /*!< [1/0], Avoid/allow point insertion */
   MMGS_IPARAM_noswap,            /*!< [1/0], Avoid/allow edge or face flipping */
   MMGS_IPARAM_nomove,            /*!< [1/0], Avoid/allow point relocation */
@@ -1473,7 +1474,25 @@ void  MMGS_setfunc(MMG5_pMesh mesh,MMG5_pSol met);
  * \param met pointer toward the sol structure
  * \return 1 if success
  *
- * Compute constant size map according to mesh->info.hsiz
+ * Compute isotropic size map according to the mean of the length of the
+ * edges passing through a point.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMGS_DOSOL(mesh,met,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT)     :: mesh,met\n
+ * >     INTEGER, INTENT(OUT)               :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+int MMGS_doSol(MMG5_pMesh mesh,MMG5_pSol met);
+
+/**
+ * \param mesh pointer toward the mesh structure
+ * \param met pointer toward the sol structure
+ * \return 1 if success
+ *
+ * Compute constant size map according to mesh->info.hsiz, mesh->info.hmin and
+ * mesh->info.hmax. Update this 3 value if not compatible.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_CONSTANTSIZE(mesh,met,retval)\n

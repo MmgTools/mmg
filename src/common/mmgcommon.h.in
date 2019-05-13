@@ -235,6 +235,12 @@ static inline
 void * myrealloc(void * ptr_in, size_t s, size_t oldsize) {
   char *ptr;
   char *ptr_in_c = (char*)ptr_in;
+
+  if ( !ptr_in ) {
+    assert ( !oldsize );
+    return mymalloc( s );
+  }
+
   ptr_in_c -= sizeof(size_t);
   if (oldsize != *((size_t*)ptr_in_c)) {
     fprintf(stderr, "myrealloc: Error: freed memory mismatch\n");
@@ -254,6 +260,8 @@ static inline
 size_t myfree(void *ptr) {
   size_t s;
   char * ptr_c = (char*)ptr;
+
+  if ( !ptr ) return 0;
 
   ptr_c = ptr_c-sizeof(size_t);
   s = *((size_t*)ptr_c);
@@ -371,7 +379,7 @@ size_t myfree(void *ptr) {
   }while(0);
 
 /** Error message when lack of memory */
-#define MMG5_INCREASE_MEM_MESSAGE() do                     \
+#define MMG5_INCREASE_MEM_MESSAGE() do                      \
   {                                                         \
     printf("  ## Check the mesh size or increase maximal"); \
     printf(" authorized memory with the -m option.\n");     \
@@ -380,6 +388,34 @@ size_t myfree(void *ptr) {
 #define MMG5_SAFELL2LCAST(longlongval) (((longlongval) > (LONG_MAX)) ? 0 : ((long)(longlongval)))
 #define MMG5_SAFELL2ICAST(longlongval) (((longlongval) > (INT_MAX)) ? 0 : ((int)(longlongval)))
 
+/** check the return value of fread */
+#define MMG_FREAD(ptr,size,count,stream) do             \
+  {                                                     \
+                                                        \
+    if ( count != fread(ptr,size,count,stream) ) {      \
+      fputs ( "Reading error", stderr );                \
+      return -1;                                        \
+    }                                                   \
+  } while(0);
+
+/** macro to help to count the number of variadic arguments */
+#define CV_VA_NUM_ARGS_HELPER(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10, N, ...)    N
+
+/** count the number of variadic arguments provided to the macro */
+#define CV_VA_NUM_ARGS(...)      CV_VA_NUM_ARGS_HELPER(__VA_ARGS__, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0)
+
+/**
+ * check the return value of fscanf
+ *
+ * \remark don't work without any variadic arg
+ */
+#define MMG_FSCANF(stream,format,...) do                                \
+  {                                                                     \
+    if ( CV_VA_NUM_ARGS(__VA_ARGS__) != fscanf(stream,format,__VA_ARGS__) ) { \
+      fputs ( "Reading error", stderr );                                \
+      return -1;                                                        \
+    }                                                                   \
+  } while(0);
 
 /** Inlined functions for libraries and executables */
 #ifdef USE_SCOTCH
@@ -529,7 +565,7 @@ typedef struct MMG5_dNode_s {
  void          MMG5_defUninitSize(MMG5_pMesh mesh,MMG5_pSol met);
  void          MMG5_displayLengthHisto(MMG5_pMesh,int,double*,int,int,double,
                                         int,int,double,int,double*,int*,char);
- void          MMG5_displayLengthHisto_internal(MMG5_pMesh,int,int,int,double,
+ void          MMG5_displayLengthHisto_internal( int,int,int,double,
                                                  int,int,double, int,double*,
                                                  int*,char,int);
  int           MMG5_minQualCheck ( int iel, double minqual, double alpha );
@@ -568,6 +604,7 @@ typedef struct MMG5_dNode_s {
  double        MMG5_ridSizeInTangentDir(MMG5_pMesh, MMG5_pPoint,int,int*,double,double);
  int           MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met);
  int           MMG5_scotchCall(MMG5_pMesh mesh, MMG5_pSol sol);
+ void          MMG5_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met);
  int           MMG5_solveDefmetregSys( MMG5_pMesh, double r[3][3], double *, double *,
                                         double *, double *, double, double, double);
  int           MMG5_solveDefmetrefSys( MMG5_pMesh,MMG5_pPoint,int*, double r[3][3],
@@ -599,8 +636,8 @@ int             MMG5_saveMshMesh(MMG5_pMesh,MMG5_pSol*,const char*,const int);
 int             MMG5_loadSolHeader(const char*,int,FILE**,int*,int*,int*,int*,
                                    int*,int*,int**,long*,int);
 int             MMG5_chkMetricType(MMG5_pMesh mesh,int *type, FILE *inm);
-void            MMG5_readFloatSol3D(MMG5_pSol,FILE*,int,int,int);
-void            MMG5_readDoubleSol3D(MMG5_pSol,FILE*,int,int,int);
+int             MMG5_readFloatSol3D(MMG5_pSol,FILE*,int,int,int);
+int             MMG5_readDoubleSol3D(MMG5_pSol,FILE*,int,int,int);
 int             MMG5_saveSolHeader( MMG5_pMesh,const char*,FILE**,int,int*,int,
                                     int,int,int*,int*);
 void            MMG5_writeDoubleSol3D(MMG5_pMesh,MMG5_pSol,FILE*,int,int,int);

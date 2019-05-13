@@ -90,12 +90,12 @@ static int MMG5_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
 
     /* check for condition type */
     if ( !strcmp(data,"parameters") ) {
-      fscanf(in,"%d",&npar);
+      MMG_FSCANF(in,"%d",&npar);
       if ( !MMGS_Set_iparameter(mesh,met,MMGS_IPARAM_numberOfLocalParam,npar) )
         return 0;
 
       for (i=0; i<mesh->info.npar; i++) {
-        fscanf(in,"%d %255s ",&ref,buf);
+        MMG_FSCANF(in,"%d %255s ",&ref,buf);
         ret = fscanf(in,"%f %f %f",&fp1,&fp2,&hausd);
 
         if ( !ret ) {
@@ -242,6 +242,14 @@ int MMGS_defaultOption(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( !MMG5_scaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
 
   /* Specific meshing + hmin/hmax update */
+  if ( mesh->info.optim ) {
+    if ( !MMGS_doSol(mesh,met) ) {
+      if ( !MMG5_unscaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+      _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
+    }
+    MMG5_solTruncatureForOptim(mesh,met);
+  }
+
   if ( mesh->info.hsiz > 0. ) {
     if ( !MMG5_Compute_constantSize(mesh,met,&hsiz) ) {
      if ( !MMG5_unscaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);

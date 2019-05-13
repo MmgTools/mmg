@@ -177,6 +177,9 @@ int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
   case MMG2D_IPARAM_nosurf :
     mesh->info.nosurf   = val;
     break;
+  case MMG2D_IPARAM_rmc :
+    mesh->info.rmc      = val;
+    break;
   default :
     fprintf(stderr,"\n  ## Error: %s: unknown type of parameter\n",__func__);
     return 0;
@@ -912,7 +915,6 @@ int MMG2D_Get_edge(MMG5_pMesh mesh, int* e0, int* e1, int* ref
   while ( !ped->a && ++mesh->nai <= mesh->na ) {
     ped = &mesh->edge[mesh->nai];
   }
-
 
   *e0  = ped->a;
   *e1  = ped->b;

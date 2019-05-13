@@ -39,6 +39,7 @@ static void MMG5_endcod() {
 static int MMG2D_usage(char *name) {
   MMG5_mmgUsage(name);
 
+  fprintf(stdout,"-rmc         Enable the removal of small componants in ls mode\n");
 #ifdef USE_ELAS
   fprintf(stdout,"-lag [n] Lagrangian mesh displacement according to mode [0/1/2]\n");
   fprintf(stdout,"             0: displacement\n");
@@ -507,6 +508,12 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
           mesh->info.renum = -10;
         }
         break;
+      case 'r':
+          if ( !strcmp(argv[i],"-rmc") ) {
+            if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_rmc,1) ) {
+              return 0;
+            }
+          }
       case 's':
         if ( !strcmp(argv[i],"-sol") ) {
           if ( ++i < argc && isascii(argv[i][0]) && argv[i][0]!='-' ) {
@@ -569,7 +576,7 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
   if ( mesh->info.imprim == -99 ) {
     fprintf(stdout,"\n  -- PRINT (0 10(advised) -10) ?\n");
     fflush(stdin);
-    fscanf(stdin,"%d",&i);
+    MMG_FSCANF(stdin,"%d",&i);
     if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_verbose,i) )
       return 0;
   }
@@ -577,7 +584,7 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
   if ( mesh->namein == NULL ) {
     fprintf(stdout,"  -- INPUT MESH NAME ?\n");
     fflush(stdin);
-    fscanf(stdin,"%127s",namein);
+    MMG_FSCANF(stdin,"%127s",namein);
     if ( !MMG2D_Set_inputMeshName(mesh,namein) )
       return 0;
   }

@@ -108,9 +108,9 @@ int MMG2D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
         MMG5_SAFE_CALLOC(mesh->info.mat,mesh->info.nmat,MMG5_Mat,return 0);
         for (i=0; i<mesh->info.nmat; i++) {
           pm = &mesh->info.mat[i];
-          fscanf(in,"%d",&pm->ref);
+          MMG_FSCANF(in,"%d",&pm->ref);
           fgetpos(in,&position);
-          fscanf(in,"%255s",data);
+          MMG_FSCANF(in,"%255s",data);
           if ( !strcmp(data,"nosplit") ) {
             pm->dospl = 0;
             pm->rin = pm->ref;
@@ -118,8 +118,8 @@ int MMG2D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
           }
           else {
             fsetpos(in,&position);
-            fscanf(in,"%d",&pm->rin);
-            fscanf(in,"%d",&pm->rex);
+            MMG_FSCANF(in,"%d",&pm->rin);
+            MMG_FSCANF(in,"%d",&pm->rex);
             pm->dospl = 1;
           }
         }
@@ -191,6 +191,104 @@ int MMG2D_freeLocalPar(MMG5_pMesh mesh) {
 
   free(mesh->info.par);
   mesh->info.npar = 0;
+
+  return 1;
+}
+
+int MMG2D_Get_numberOfNonBdyEdges(MMG5_pMesh mesh, int* nb_edges) {
+  MMG5_pTria pt,pt1;
+  MMG5_pEdge ped;
+  int        *adja,k,i,j,i1,i2,iel;
+
+  *nb_edges = 0;
+  if ( mesh->tria ) {
+    /* Create the triangle adjacency if needed */
+    if ( !mesh->adja ) {
+      if ( !MMG2D_hashTria( mesh ) ) {
+        fprintf(stderr,"\n  ## Error: %s: unable to create "
+                "adjacency table.\n",__func__);
+        return 0;
+      }
+    }
+
+    /* Count the number of non boundary edges */
+    for ( k=1; k<=mesh->nt; k++ ) {
+      pt = &mesh->tria[k];
+      if ( !MG_EOK(pt) ) continue;
+
+      adja = &mesh->adja[3*(k-1)+1];
+
+      for ( i=0; i<3; i++ ) {
+        i1 = MMG5_inxt2[i];
+        i2 = MMG5_iprv2[i];
+        iel = adja[i] / 3;
+        assert ( iel != k );
+
+        pt1 = &mesh->tria[iel];
+
+        if ( (!iel) || (pt->ref > pt1->ref) ||
+             ((pt->ref==pt1->ref) && MG_SIN(pt->tag[i])) ) {
+          /* Do not treat boundary edges */
+          continue;
+        }
+        if ( k < iel ) {
+          /* Treat edge from the triangle with lowest index */
+          ++(*nb_edges);
+        }
+      }
+    }
+
+    /* Append the non boundary edges to the boundary edges array */
+    MMG5_ADD_MEM(mesh,(*nb_edges)*sizeof(MMG5_Edge),"non boundary edges",
+                  printf("  Exit program.\n");
+                  return 0);
+    MMG5_SAFE_RECALLOC(mesh->edge,(mesh->namax+1),(mesh->namax+(*nb_edges)+1),
+                       MMG5_Edge,"non bdy edges arrray",return 0);
+
+    j = mesh->namax+1;
+    for ( k=1; k<=mesh->nt; k++ ) {
+      pt = &mesh->tria[k];
+      if ( !MG_EOK(pt) ) continue;
+
+      adja = &mesh->adja[3*(k-1)+1];
+
+      for ( i=0; i<3; i++ ) {
+        i1 = MMG5_inxt2[i];
+        i2 = MMG5_iprv2[i];
+        iel = adja[i] / 3;
+        assert ( iel != k );
+
+        pt1 = &mesh->tria[iel];
+
+        if ( (!iel) || (pt->ref > pt1->ref) ||
+             ((pt->ref==pt1->ref) && MG_SIN(pt->tag[i])) ) {
+          /* Do not treat boundary edges */
+          continue;
+        }
+        if ( k < iel ) {
+          /* Treat edge from the triangle with lowest index */
+          ped = &mesh->edge[j++];
+          ped->a   = pt->v[i1];
+          ped->b   = pt->v[i2];
+          ped->ref = pt->edg[i];
+        }
+      }
+    }
+  }
+  return 1;
+}
+
+int MMG2D_Get_nonBdyEdge(MMG5_pMesh mesh, int* e0, int* e1, int* ref, int idx) {
+  MMG5_pEdge        ped;
+
+  ped = &mesh->edge[mesh->namax+idx];
+
+  *e0  = ped->a;
+  *e1  = ped->b;
+
+  if ( ref != NULL ) {
+    *ref = mesh->edge[mesh->namax+idx].ref;
+  }
 
   return 1;
 }
@@ -355,9 +453,7 @@ int MMG2D_Get_trisFromEdge(MMG5_pMesh mesh, int ked, int ktri[2], int ied[2])
 }
 
 int MMG2D_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met) {
-  MMG5_pPoint ppt;
   double      hsiz;
-  int         k,iadr;
 
   /* Memory alloc */
   if ( met->size!=1 && met->size!=3 ) {
@@ -372,25 +468,10 @@ int MMG2D_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( !MMG5_Compute_constantSize(mesh,met,&hsiz) )
     return 0;
 
-  if ( met->size == 1 ) {
-    for (k=1; k<=mesh->np; k++) {
-      ppt = &mesh->point[k];
-      if ( !MG_VOK(ppt) ) continue;
-      met->m[k] = hsiz;
-    }
-  }
-  else {
-    hsiz    = 1./(hsiz*hsiz);
+  mesh->info.hsiz = hsiz;
 
-    for (k=1; k<=mesh->np; k++) {
-      ppt = &mesh->point[k];
-      if ( !MG_VOK(ppt) ) continue;
+  MMG5_Set_constantSize(mesh,met,hsiz);
 
-      iadr           = met->size*k;
-      met->m[iadr]   = hsiz;
-      met->m[iadr+2] = hsiz;
-    }
-  }
   return 1;
 }
 

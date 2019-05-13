@@ -265,7 +265,7 @@ void MMG5_displayLengthHisto(MMG5_pMesh mesh, int ned, double *avlen,
   fprintf(stdout,"     LARGEST  EDGE LENGTH   %12.4f   %6d %6d \n",
           lmax,amax,bmax);
 
-  MMG5_displayLengthHisto_internal(mesh,ned,amin,bmin,lmin,amax,bmax,
+  MMG5_displayLengthHisto_internal( ned,amin,bmin,lmin,amax,bmax,
                                     lmax,nullEdge,bd,hl,shift,
                                     mesh->info.imprim);
 
@@ -291,23 +291,23 @@ void MMG5_displayLengthHisto(MMG5_pMesh mesh, int ned, double *avlen,
  * Display histogram of edge length without the histo header
  *
  */
-void MMG5_displayLengthHisto_internal(MMG5_pMesh mesh, int ned,int amin,
+void MMG5_displayLengthHisto_internal( int ned,int amin,
                                        int bmin, double lmin,int amax, int bmax,
                                        double lmax,int nullEdge,double *bd,
                                        int *hl,char shift,int imprim)
 {
   int    k;
 
-  if ( abs(mesh->info.imprim) < 3 ) return;
+  if ( abs(imprim) < 3 ) return;
 
   if ( hl[2+shift]+hl[3+shift]+hl[4+shift] )
     fprintf(stdout,"   %6.2f < L <%5.2f  %8d   %5.2f %%  \n",
             bd[2+shift],bd[5+shift],hl[2+shift]+hl[3+shift]+hl[4+shift],
             100.*(hl[2+shift]+hl[3+shift]+hl[4+shift])/(double)ned);
 
-  if ( abs(mesh->info.imprim) < 4 ) return;
+  if ( abs(imprim) < 4 ) return;
 
-  if ( abs(mesh->info.imprim) > 3 ) {
+  if ( abs(imprim) > 3 ) {
     fprintf(stdout,"\n     HISTOGRAMM:\n");
     if ( hl[0] )
       fprintf(stdout,"     0.00 < L < 0.30  %8d   %5.2f %%  \n",

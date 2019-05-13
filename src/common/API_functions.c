@@ -71,6 +71,8 @@ void MMG5_Init_parameters(MMG5_pMesh mesh) {
   mesh->info.nomove   =  0;
   /* [n]    ,number of user-defined references */
   mesh->info.nmat = 0;
+  /* [0/1]    ,Turn on/off the removal of small bubles in levelset meshing */
+  mesh->info.rmc      =  0;
 
   /* default values for doubles */
   /* angle detection */
@@ -344,6 +346,51 @@ int MMG5_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solout) {
     }
   }
   return 1;
+}
+
+void MMG5_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met,double hsiz) {
+  MMG5_pPoint ppt;
+  int         k,iadr;
+
+  if ( met->size == 1 ) {
+    for (k=1; k<=mesh->np; k++) {
+      ppt = &mesh->point[k];
+      if ( !MG_VOK(ppt) ) continue;
+      met->m[k] = hsiz;
+    }
+  }
+  else {
+    hsiz    = 1./(hsiz*hsiz);
+
+    if ( mesh->dim==2 ) {
+      for (k=1; k<=mesh->np; k++) {
+        ppt = &mesh->point[k];
+        if ( !MG_VOK(ppt) ) continue;
+
+        iadr           = 3*k;
+        met->m[iadr]   = hsiz;
+        met->m[iadr+1] = 0.;
+        met->m[iadr+2] = hsiz;
+      }
+    }
+    else {
+      assert ( mesh->dim==3 );
+      for (k=1; k<=mesh->np; k++) {
+        ppt = &mesh->point[k];
+        if ( !MG_VOK(ppt) ) continue;
+
+        iadr           = 6*k;
+        met->m[iadr]   = hsiz;
+        met->m[iadr+1] = 0.;
+        met->m[iadr+2] = 0.;
+        met->m[iadr+3] = hsiz;
+        met->m[iadr+4] = 0.;
+        met->m[iadr+5] = hsiz;
+      }
+    }
+  }
+
+  return;
 }
 
 /**

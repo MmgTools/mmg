@@ -561,7 +561,8 @@ int MMG3D_getListSquareRec(MMG3D_PROctree_s* q, double* center, double* rect,
  * \param qlist pointer toward the list of pointer over the sub PROctrees that
  *  intersect \a rect.
  *
- * \return index, the number of subtrees in the list, -1 if fail.
+ * \return index, the number of subtrees in the list
+ * \return  -1 if fail due to lack of memory.
  *
  * List the number of PROctree cells that intersect the rectangle \a rect.
  *
@@ -613,14 +614,14 @@ int MMG3D_getListSquare(MMG5_pMesh mesh, double* ani, MMG3D_pPROctree q, double*
   if ( !MMG3D_getListSquareRec(q->q0, center, rect2, qlist, dist, ani, l0,
                                 q->nc, dim, &index) ) {
     MMG5_DEL_MEM(mesh,dist);
-    return -1;
+    return 0;
   }
 
 
   if (index>q->nc-4)
   {
     MMG5_DEL_MEM(mesh,dist);
-    return -1;
+    return 0;
   }
 
   MMG5_DEL_MEM(mesh,dist);
@@ -1126,7 +1127,8 @@ int* MMG3D_sizeArbre(MMG3D_pPROctree q,int dim)
  * \param PROctree pointer toward the PROctree structure.
  * \param ip index of point to check.
  *
- * \return 1 if we can insert \a ip, 0 otherwise
+ * \return 1 if we can insert \a ip, 0 if we cannot insert the point
+ * \return -1 if fail because of memory.
  *
  * Check if the vertex \a ip is not too close from another one (for an isotropic
  * metric).
@@ -1166,9 +1168,9 @@ int MMG3D_PROctreein_iso(MMG5_pMesh mesh,MMG5_pSol sol,MMG3D_pPROctree PROctree,
   ncells = MMG3D_getListSquare(mesh, ani, PROctree, methalo, &lococ);
   if (ncells < 0)
   {
-
-    MMG5_DEL_MEM(mesh,lococ);
-    return 0;
+    if ( lococ )
+      MMG5_DEL_MEM(mesh,lococ);
+    return -1;
   }
   /* Check the PROctree cells */
   for ( i=0; i<ncells; ++i )
@@ -1206,6 +1208,7 @@ int MMG3D_PROctreein_iso(MMG5_pMesh mesh,MMG5_pSol sol,MMG3D_pPROctree PROctree,
  * \param ip index of point to check.
  *
  * \return 1 if we can insert \a ip, 0 otherwise
+ * \return -1 if fail due to lack of memory.
  *
  * Check if the vertex \a ip is not too close from another one (for an
  * anisotropic metric).
@@ -1266,7 +1269,7 @@ int MMG3D_PROctreein_ani(MMG5_pMesh mesh,MMG5_pSol sol,MMG3D_pPROctree PROctree,
   if (ncells < 0)
   {
     MMG5_DEL_MEM(mesh,lococ);
-    return 0;
+    return -1;
   }
   /* Check the PROctree cells */
   for ( i=0; i<ncells; ++i )
