@@ -1340,7 +1340,7 @@ split:
  */
 static inline int
 MMG3D_storeGeom(MMG5_pPoint ppt, MMG5_pxPoint pxp, double no[3]) {
-  double dd;
+  double dd,to[3];
 
   dd = no[0]*pxp->n1[0]+no[1]*pxp->n1[1]+no[2]*pxp->n1[2];
   if ( dd > 1.0-MMG5_EPS ) return 0;
@@ -1348,17 +1348,29 @@ MMG3D_storeGeom(MMG5_pPoint ppt, MMG5_pxPoint pxp, double no[3]) {
   memcpy(pxp->n2,no,3*sizeof(double));
 
   /* a computation of the tangent with respect to these two normals is possible */
-  ppt->n[0] = pxp->n1[1]*pxp->n2[2] - pxp->n1[2]*pxp->n2[1];
-  ppt->n[1] = pxp->n1[2]*pxp->n2[0] - pxp->n1[0]*pxp->n2[2];
-  ppt->n[2] = pxp->n1[0]*pxp->n2[1] - pxp->n1[1]*pxp->n2[0];
-  dd = ppt->n[0]*ppt->n[0] + ppt->n[1]*ppt->n[1] + ppt->n[2]*ppt->n[2];
+  to[0] = pxp->n1[1]*pxp->n2[2] - pxp->n1[2]*pxp->n2[1];
+  to[1] = pxp->n1[2]*pxp->n2[0] - pxp->n1[0]*pxp->n2[2];
+  to[2] = pxp->n1[0]*pxp->n2[1] - pxp->n1[1]*pxp->n2[0];
+  dd = to[0]*to[0] + to[1]*to[1] + to[2]*to[2];
   if ( dd > MMG5_EPSD2 ) {
     dd = 1.0 / sqrt(dd);
-    ppt->n[0] *= dd;
-    ppt->n[1] *= dd;
-    ppt->n[2] *= dd;
+    to[0] *= dd;
+    to[1] *= dd;
+    to[2] *= dd;
+    memcpy(ppt->n,to,3*sizeof(double));
   }
-  assert ( dd>MMG5_EPSD2 );
+  else {
+    /* Detect opposite normals... */
+    if ( to[0]*to[0]+to[1]*to[1]+to[2]*to[2] > MMG5_EPSD2 ) {
+      /* Non opposite normals: fail in debug mode */
+      assert ( dd > MMG5_EPSD2 );
+    }
+    else {
+      /* Opposite normals: unable to compute the tangent, check if we have
+       * already stored a tangent, fail otherwise */
+      assert ( ppt->n[0]*ppt->n[0]+ppt->n[1]*ppt->n[1]+ppt->n[2]*ppt->n[2] > MMG5_EPSD2 );
+    }
+  }
 
   return 1;
 }
