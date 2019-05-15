@@ -692,11 +692,19 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
           ina[k] = mesh->na;
         }
         else {
-          /* Remove MG_REQ and MG_CRN tags on ISO edges */
-          if ( MG_REQ & pa->a ) { pa->a &= ~MG_REQ; }
-          if ( MG_REQ & pa->b ) { pa->b &= ~MG_REQ; }
-          if ( MG_CRN & pa->a ) { pa->a &= ~MG_CRN; }
-          if ( MG_CRN & pa->b ) { pa->b &= ~MG_CRN; }
+          /* Remove MG_REQ and MG_CRN tags on ISO edges extremities */
+          if ( MG_REQ & mesh->point[pa->a].tag ) {
+            mesh->point[pa->a].tag &= ~MG_REQ;
+          }
+          if ( MG_REQ & mesh->point[pa->b].tag ) {
+            mesh->point[pa->b].tag &= ~MG_REQ;
+          }
+          if ( MG_CRN & mesh->point[pa->a].tag ) {
+            mesh->point[pa->a].tag &= ~MG_CRN;
+          }
+          if ( MG_CRN & mesh->point[pa->b].tag ) {
+            mesh->point[pa->b].tag &= ~MG_CRN;
+          }
         }
       }
     }
