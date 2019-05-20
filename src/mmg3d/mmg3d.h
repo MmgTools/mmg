@@ -148,7 +148,7 @@ static const          char MMG5_idirinv[4][4] = {{-1,0,1,2},{0,-1,2,1},{0,1,-1,2
 /** \brief iarf[i]: edges of face opposite to vertex i */
 static const unsigned char MMG5_iarf[4][3] = { {5,4,3}, {5,1,2}, {4,2,0}, {3,0,1} };
 /** \brief num of the j^th edge in the i^th face */
-static const unsigned char MMG5_iarfinv[4][6] = { {-1,-1,-1,2,1,0}, {-1,1,2,-1,-1,0},{2,-1,1,-1,0,-1},{1,2,-1,0,-1,-1}};
+static const          char MMG5_iarfinv[4][6] = { {-1,-1,-1,2,1,0}, {-1,1,2,-1,-1,0},{2,-1,1,-1,0,-1},{1,2,-1,0,-1,-1}};
 /** \brief vertices of extremities of the edges of the tetra */
 static const unsigned char MMG5_iare[6][2] = { {0,1}, {0,2}, {0,3}, {1,2}, {1,3}, {2,3} };
 /** \brief ifar[i][]: faces sharing the ith edge of the tetra */
