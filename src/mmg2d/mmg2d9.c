@@ -589,7 +589,7 @@ int MMG2D_mmg2d9(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met) {
       }
 
       tau = tau + ((double)t /MMG2D_SHORTMAX)*(1.0-tau);
-      //if ( (abs(mesh->info.imprim) > 3 ) || mesh->info.ddebug )
+      if ( (abs(mesh->info.imprim) > 3 ) || mesh->info.ddebug )
         printf("   ---> Realized displacement: %f\n",tau);
 
       /* Local remeshing depending on the option */
@@ -656,10 +656,12 @@ int MMG2D_mmg2d9(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met) {
 
       if ( t == MMG2D_SHORTMAX ) break;
     }
-
-    if ( abs(mesh->info.imprim) > 2 )
-      printf(" %d edges splitted, %d vertices collapsed, %d elements"
+    if ( mesh->info.imprim > 0 && abs(mesh->info.imprim) < 4 ) {
+      printf("   ---> Realized displacement: %f\n",tau);
+      if ( abs(mesh->info.imprim) > 2 )
+        printf(" %d edges splitted, %d vertices collapsed, %d elements"
                " swapped, %d vertices moved.\n",nnnspl,nnnc,nnns,nnnm);
+    }
 
     if ( t == MMG2D_SHORTMAX ) break;
   }
