@@ -261,7 +261,7 @@ int MMG5_mmg3dRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
                 return 1);
   MMG5_SAFE_CALLOC(permVrtTab,vertNbr+1,SCOTCH_Num,return 1);
 
-  CHECK_SCOTCH(MMG5_kPartBoxCompute(graf, vertNbr, boxVertNbr, permVrtTab, mesh),
+  CHECK_SCOTCH(MMG5_kPartBoxCompute(&graf, vertNbr, boxVertNbr, permVrtTab, mesh),
                "boxCompute", 0);
 
   SCOTCH_graphExit(&graf) ;
