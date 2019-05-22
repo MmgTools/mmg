@@ -1115,8 +1115,8 @@ int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,char
                 }
               }
               assert(i!=3);
-              pxt1->tag[iav] = pxt->tag[ia];
-              pxt1->edg[iav] = pxt->edg[ia];
+              pxt1->tag[iav] |= pxt->tag[ia];
+              pxt1->edg[iav] = MG_MAX ( pxt1->edg[iav], pxt->edg[ia]);
             }
           }
         }
@@ -1152,8 +1152,8 @@ int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,char
                 }
               }
               assert(i!=3);
-              pxt1->tag[iav] = pxt->tag[ia];
-              pxt1->edg[iav] = pxt->edg[ia];
+              pxt1->tag[iav] |= pxt->tag[ia];
+              pxt1->edg[iav] =  MG_MAX ( pxt1->edg[iav],pxt->edg[ia]);
             }
           }
           /* Recover the already used place by pxt */
