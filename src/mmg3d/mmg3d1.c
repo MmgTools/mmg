@@ -1770,7 +1770,7 @@ static int MMG3D_anatets_ani(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
 static int
 MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   MMG5_pTetra   pt;
-  MMG5_pPoint   ppt,p1,p2;
+  MMG5_pPoint   ppt;
   MMG5_Tria     ptt,ptt2;
   MMG5_xTetra   *pxt;
   MMG5_xPoint   *pxp;
@@ -2040,16 +2040,9 @@ MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
       }
       else {
         if ( it < 20 ) {
-          for (ia=0,i=0; i<3; i++) {
-            for (j=i+1; j<4; j++,ia++) {
-              if ( vx[ia] > 0 ) {
-                p1 = &mesh->point[pt->v[MMG5_iare[ia][0]]];
-                p2 = &mesh->point[pt->v[MMG5_iare[ia][1]]];
-                ppt = &mesh->point[vx[ia]];
-                ppt->c[0] = 0.5 * (p1->c[0] + p2->c[0]);
-                ppt->c[1] = 0.5 * (p1->c[1] + p2->c[1]);
-                ppt->c[2] = 0.5 * (p1->c[2] + p2->c[2]);
-              }
+          for (ia=0; ia<6; ++ia ) {
+            if ( vx[ia] > 0 ) {
+              MMG5_hashPop(&hash,pt->v[MMG5_iare[ia][0]],pt->v[MMG5_iare[ia][1]]);
             }
           }
         }
