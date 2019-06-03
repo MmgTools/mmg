@@ -270,15 +270,6 @@ int MMG5_mmg3dRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
   MMG5_DEL_MEM(mesh,vertTab);
 
   /* Computing the new point list and modifying the adja strcuture */
-  MMG5_ADD_MEM(mesh,(mesh->np+1)*sizeof(int),"permNodTab",
-                MMG5_DEL_MEM(mesh,vertOldTab);
-                MMG5_DEL_MEM(mesh,vertTab);
-                MMG5_DEL_MEM(mesh,permVrtTab);
-                MMG5_DEL_MEM(mesh,edgeTab);
-                if( !MMG3D_hashTetra(mesh,1) ) return 0;
-                return 1);
-  MMG5_SAFE_CALLOC(permNodTab,mesh->np+1,int,return 1);
-
   nereal = 0;
   npreal = 0;
   /* Create the final permutation table for tetras (stored in vertOldTab) */
@@ -292,6 +283,12 @@ int MMG5_mmg3dRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
     while ( vertOldTab[tetraIdx] != tetraIdx && vertOldTab[tetraIdx] )
       MMG5_swapTet(mesh->tetra/*,mesh->adja*/,vertOldTab,tetraIdx,vertOldTab[tetraIdx]);
   }
+  MMG5_DEL_MEM(mesh,vertOldTab);
+
+  MMG5_ADD_MEM(mesh,(mesh->np+1)*sizeof(int),"permNodTab",
+                if( !MMG3D_hashTetra(mesh,1) ) return 0;
+                return 1);
+  MMG5_SAFE_CALLOC(permNodTab,mesh->np+1,int,return 1);
 
   for(tetraIdx = 1 ; tetraIdx < mesh->ne + 1 ; tetraIdx++) {
     ptet = &mesh->tetra[tetraIdx];
@@ -331,8 +328,6 @@ int MMG5_mmg3dRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
         permNodTab[nodeGlbIdx] = ++npreal;
     }
   }
-
-  MMG5_DEL_MEM(mesh,vertOldTab);
 
   /* Modify the numbering of the nodes of each tetra */
   for( tetraIdx = 1; tetraIdx < nereal + 1; tetraIdx++) {
