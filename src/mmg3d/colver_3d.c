@@ -716,8 +716,8 @@ int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,char
   MMG5_xTetra          xt,xts;
   int             i,iel,jel,pel,qel,k,np,nq,*adja,p0,p1;
   unsigned char   ip,iq,j,voy,voyp,voyq,ia,iav;
-  unsigned char   (*ind)[2];
-  int             *p0_c,*p1_c;
+  unsigned char   (ind)[MMG3D_LMAX][2];
+  int             p0_c[MMG3D_LMAX],p1_c[MMG3D_LMAX];
   char            indar[4][4][2] = {
     /* indar[ip][iq][0/1]: indices of edges which have iq for extremity but not ip*/
     { {-1,-1}, { 3, 4}, { 3, 5}, { 4, 5} },
@@ -725,15 +725,8 @@ int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,char
     { { 0, 2}, { 0, 4}, {-1,-1}, { 2, 4} },
     { { 0, 1}, { 0, 3}, { 1, 3}, {-1,-1} } };
 
-  // Dynamic allocations for windows compatibility
-  if (!(ind = malloc(ilist * sizeof(unsigned char[2])))) {
-    perror("  ## Memory problem: malloc");
-    return 0;
-  }
-
-  MMG5_SAFE_CALLOC(p0_c, ilist, int,free(ind);ind=NULL;return -1);
-  MMG5_SAFE_CALLOC(p1_c, ilist, int,
-                    free(ind);ind=NULL;MMG5_SAFE_FREE(p1_c);return -1);
+  memset( p0_c,0x00,ilist*sizeof(int) );
+  memset( p1_c,0x00,ilist*sizeof(int) );
 
   iel = list[0] / 4;
   ip  = list[0] % 4;
@@ -821,8 +814,6 @@ int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,char
     voy  = adja[ip] % 4;
     pt = &mesh->tetra[jel];
     if (pt->v[voy] == nq) {
-      free(ind);ind=NULL;
-      MMG5_SAFE_FREE(p0_c); MMG5_SAFE_FREE(p1_c);
       return 0;
     }
   }
@@ -1058,9 +1049,7 @@ int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,char
             if ( mesh->xt > mesh->xtmax ) {
               MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
                                  "larger xtetra table",
-                                 mesh->xt--;
-                                 free(ind);ind=0;MMG5_SAFE_FREE(p0_c);
-                                 MMG5_SAFE_FREE(p1_c);return -1;);
+                                 mesh->xt--;return -1;);
             }
             pt1->xt = mesh->xt;
             pxt = &mesh->xtetra[pt1->xt];
@@ -1163,7 +1152,6 @@ int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,char
       }
     }
     if ( !MMG3D_delElt(mesh,iel) ) {
-      free(ind);ind=0; MMG5_SAFE_FREE(p0_c); MMG5_SAFE_FREE(p1_c);
       return -1;
     }
   }
@@ -1182,6 +1170,5 @@ int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,char
     pt->mark=mesh->mark;
   }
 
-  free(ind);ind=0; MMG5_SAFE_FREE(p0_c); MMG5_SAFE_FREE(p1_c);
   return np;
 }
