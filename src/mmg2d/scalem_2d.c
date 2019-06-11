@@ -62,7 +62,6 @@ int MMG2D_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   info = &mesh->info;
 
-
   /* normalize coordinates and local parameters */
   dd = MMG2D_PRECI / info->delta;
 
@@ -91,19 +90,13 @@ int MMG2D_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   sethmin = 0;
   sethmax = 0;
 
-  if ( mesh->info.hsiz > 0. || mesh->info.optim ) {
-    // We don't want to set hmin/hmax, it will be done later
-    sethmin = sethmax = 1;
+  if ( mesh->info.hmin > 0. ) {
+    mesh->info.hmin  *= dd;
+    sethmin = 1;
   }
-  else {
-    if ( mesh->info.hmin > 0. ) {
-      mesh->info.hmin  *= dd;
-      sethmin = 1;
-    }
-    if ( mesh->info.hmax > 0. ) {
-      mesh->info.hmax  *= dd;
-      sethmax = 1;
-    }
+  if ( mesh->info.hmax > 0. ) {
+    mesh->info.hmax  *= dd;
+    sethmax = 1;
   }
 
   /* Warning: we don't want to compute hmin/hmax from the level-set! */

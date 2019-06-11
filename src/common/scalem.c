@@ -93,6 +93,7 @@ int MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pPar      par;
   double         *m;
   double         lambda[3],v[3][3];
+  int8_t         hsizOrOptim;
 
 
   /* compute bounding box */
@@ -123,7 +124,8 @@ int MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
   sethmin = 0;
   sethmax = 0;
 
-  if ( mesh->info.hsiz > 0. || mesh->info.optim ) {
+  hsizOrOptim = ( mesh->info.hsiz > 0. || mesh->info.optim )? 1 : 0;
+  if ( hsizOrOptim ) {
     // We don't want to set hmin/hmax here, it will be done in solTruncature
     sethmin = sethmax = 1;
   }
@@ -137,9 +139,9 @@ int MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
     sethmax = 1;
   }
 
-  /* Warning: we don't want to compute hmin/hmax from the level-set or the
-   * displacement! */
-  if ( mesh->info.iso || (mesh->info.lag>-1) || (!met->m && ((!mesh->info.optim) && (mesh->info.hsiz<=0)) ) ) {
+  /* Warning: we don't want to compute hmin/hmax from the level-set, the
+   * displacement or from a solution not yet computed (hsiz and optim mode) */
+  if ( mesh->info.iso || (mesh->info.lag>-1) || !(met->m || hsizOrOptim) ) {
     /* Set default values to hmin/hmax from the bounding box if not provided by
      * the user */
     if ( !MMG5_Set_defaultTruncatureSizes(mesh,sethmin,sethmax) ) {
@@ -277,7 +279,7 @@ int MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met) {
   mesh->info.hmax  *= dd;
   mesh->info.hausd *= dd;
   mesh->info.ls    *= dd;
-  mesh->info.hsiz  *=dd;
+  mesh->info.hsiz  *= dd;
 
   /* normalize local parameters */
   for (k=0; k<mesh->info.npar; k++) {

@@ -574,7 +574,6 @@ int MMGS_doSol(MMG5_pMesh mesh,MMG5_pSol met) {
       mesh->info.hmax = 10.*dd;
     }
 
-
     /* vertex size */
     if ( met->size == 1 ) {
       for (k=1; k<=mesh->np; k++) {
