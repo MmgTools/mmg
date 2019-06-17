@@ -229,12 +229,27 @@ int MMG3D_memOption_memRepartition(MMG5_pMesh mesh) {
  *
  * \return 0 if fail, 1 otherwise
  *
- * memory repartition for the -m option
+ * memory repartition for the -m option with computation of the
+ * available memory.
  *
  */
 int MMG3D_memOption(MMG5_pMesh mesh) {
 
   mesh->memMax = MMG5_memSize();
+
+  return  MMG3D_memOption_keepMaxMem(mesh);
+}
+
+/**
+ * \param mesh pointer toward the mesh structure
+ *
+ * \return 0 if fail, 1 otherwise
+ *
+ * memory repartition for the -m option using the stored available
+ * memory.
+ *
+ */
+int MMG3D_memOption_keepMaxMem(MMG5_pMesh mesh) {
 
   mesh->npmax = MG_MAX(1.5*mesh->np,MMG3D_NPMAX);
   mesh->nemax = MG_MAX(1.5*mesh->ne,MMG3D_NEMAX);
