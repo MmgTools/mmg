@@ -1046,7 +1046,10 @@ int MMG3D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
                                  posNodes,posElts,posNodeData,
                                  bin,iswp,nelts,nsols);
   MMG5_SAFE_FREE(posNodeData);
-  if ( ier < 1 ) return  ier;
+  if ( ier < 1 ) {
+    fprintf(stderr,"  ** ERROR WHEN PARSING THE INPUT FILE\n");
+    return  ier;
+  }
 
   /* Check the metric type */
   ier = MMG5_chkMetricType(mesh,&sol->type,inm);
@@ -1101,8 +1104,12 @@ int MMG3D_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
   ier =  MMG5_loadMshMesh_part2( mesh, sol,&inm,
                                  posNodes,posElts,posNodeData,
                                  bin,iswp,nelts,nsols);
+
+  if ( ier < 1 ) {
+    fprintf(stderr,"  ** ERROR WHEN PARSING THE INPUT FILE\n");
+  }
+
   MMG5_SAFE_FREE(posNodeData);
-  if ( ier < 1 ) return  ier;
 
   return ier;
 }
