@@ -1198,7 +1198,9 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
 
     /* String tags: The first one stores the solution name */
     MMG_FSCANF((*inm),"%d ",&tagNum);
-    MMG_FSCANF(*inm,"%127s\n",&chaine[0]);
+    if ( 1 != fscanf(*inm,"\"%127s\"\n",&chaine[0]) ) {
+      MMG_FSCANF(*inm,"%127s\n",&chaine[0]);
+    }
 
     ptr = NULL;
     ptr = strstr(chaine,":metric");
@@ -1231,9 +1233,10 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
     }
 
     /* Real tags ignored */
-    MMG_FSCANF((*inm),"%d ",&tagNum);
-    for ( k=0; k<tagNum; ++k ) {
-      if ( 0 != fscanf((*inm),"%*[^\n]%*c") ) return -1;
+    if ( fscanf((*inm),"%d",&tagNum) ) {
+      for ( k=0; k<tagNum; ++k ) {
+        MMG_FSCANF((*inm),"%f",&fc);
+      }
     }
 
     /* Integer tags : allow to recover the number of sols and their types */
