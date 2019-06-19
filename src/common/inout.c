@@ -1216,7 +1216,11 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
     /* Real tags ignored */
     if ( fscanf((*inm),"%d",&tagNum) ) {
       for ( k=0; k<tagNum; ++k ) {
-        if ( 1 != fscanf((*inm),"%f",&fc) ) { return -1; }
+        if ( 1 != fscanf((*inm),"%f",&fc) ) {
+          fprintf(stderr,"\n  ## Error: unable to skip real tags\n");
+          fclose(*inm);
+          return -1;
+        }
       }
     }
 

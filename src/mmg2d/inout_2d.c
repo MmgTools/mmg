@@ -654,7 +654,10 @@ int MMG2D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 
   /* Check the metric type */
   ier = MMG5_chkMetricType(mesh,&sol->type,inm);
-  if ( ier <1 ) return ier;
+  if ( ier <1 ) {
+    fprintf(stderr,"  ** ERROR WHEN PARSING THE INPUT FILE\n");
+    return ier;
+  }
 
   /* Mark all points as used in case of mesh generation and check the
    * z-componant */
@@ -712,7 +715,10 @@ int MMG2D_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
                                 bin,iswp,nelts,nsols);
 
   MMG5_SAFE_FREE(posNodeData);
-  if ( ier < 1 ) return  ier;
+  if ( ier < 1 ) {
+    fprintf(stderr,"  ** ERROR WHEN PARSING THE INPUT FILE\n");
+    return  ier;
+  }
 
   /* Mark all points as used in case of mesh generation and check the
    * z-componant */
