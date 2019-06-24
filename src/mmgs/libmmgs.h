@@ -1437,7 +1437,8 @@ int  MMGS_mmgslib(MMG5_pMesh mesh, MMG5_pSol met);
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol (metric) structure.
+ * \param met pointer toward the sol (level-set) structure.
+ * \param met pointer toward the sol (metric) structure (optionnal).
  * \return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if fail but a
  * conform mesh is saved or \ref MMG5_STRONGFAILURE if fail and we can't save
  * the mesh.
@@ -1445,13 +1446,13 @@ int  MMGS_mmgslib(MMG5_pMesh mesh, MMG5_pSol met);
  * Main program for level set discretization library.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMGS_MMGSLS(mesh,met,retval)\n
- * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,met\n
+ * >   SUBROUTINE MMGS_MMGSLS(mesh,sol,met,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol,met\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
  */
-int  MMGS_mmgsls(MMG5_pMesh mesh, MMG5_pSol met);
+int  MMGS_mmgsls(MMG5_pMesh mesh,  MMG5_pSol sol,MMG5_pSol met);
 
 /** To associate function pointers without calling MMGS_mmgslib */
 /**

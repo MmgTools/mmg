@@ -174,7 +174,7 @@ extern "C" {
 /** Reset the customized signals and set the internal counters of points, edges,
  * tria and tetra to the suitable value (needed by users to recover their mesh
  * using the API) */
-#define _LIBMMG5_RETURN(mesh,met,val)do          \
+#define _LIBMMG5_RETURN(mesh,sol,met,val)do      \
   {                                              \
     signal(SIGABRT,SIG_DFL);                     \
     signal(SIGFPE,SIG_DFL);                      \
@@ -186,14 +186,15 @@ extern "C" {
     mesh->nti = mesh->nt;                        \
     mesh->nai = mesh->na;                        \
     mesh->nei = mesh->ne;                        \
-    met->npi  = met->np;                         \
+    if ( sol ) { sol->npi  = sol->np; }          \
+    if ( met ) { met->npi  = met->np; }          \
     return val;                                  \
   }while(0)
 
 /* Macros for memory management */
 /** Check if used memory overflow maximal authorized memory.
     Execute the command law if lack of memory. */
-#define MMG5_CHK_MEM(mesh,size,string,law) do                          \
+#define MMG5_CHK_MEM(mesh,size,string,law) do                           \
   {                                                                     \
     if ( (mesh)->memCur > (mesh)->memMax ) {                            \
       fprintf(stderr,"  ## Error:");                                    \
@@ -379,7 +380,7 @@ size_t myfree(void *ptr) {
   }while(0);
 
 /** Error message when lack of memory */
-#define MMG5_INCREASE_MEM_MESSAGE() do                      \
+#define MMG5_INCREASE_MEM_MESSAGE() do                     \
   {                                                         \
     printf("  ## Check the mesh size or increase maximal"); \
     printf(" authorized memory with the -m option.\n");     \

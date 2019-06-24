@@ -52,14 +52,15 @@ extern "C" {
 
 
 /** Free allocated pointers of mesh and sol structure and return value val */
-#define MMGS_RETURN_AND_FREE(mesh,met,val)do                       \
+#define MMGS_RETURN_AND_FREE(mesh,met,ls,val)do                     \
   {                                                                 \
     if ( !MMGS_Free_all(MMG5_ARG_start,                             \
                         MMG5_ARG_ppMesh,&mesh,MMG5_ARG_ppMet,&met,  \
+                        MMG5_ARG_ppLs,&ls,                          \
                         MMG5_ARG_end) ) {                           \
       return MMG5_LOWFAILURE;                                       \
     }                                                               \
-    return val;                                                    \
+    return val;                                                     \
   }while(0)
 
 /** Reallocation of point table and sol table and creation
@@ -131,7 +132,7 @@ int  MMGS_outqua(MMG5_pMesh,MMG5_pSol);
 int  MMGS_hashTria(MMG5_pMesh );
 int  curvpo(MMG5_pMesh ,MMG5_pSol );
 int  MMG5_mmgs1(MMG5_pMesh ,MMG5_pSol );
-int  MMGS_mmgs2(MMG5_pMesh ,MMG5_pSol );
+int  MMGS_mmgs2(MMG5_pMesh ,MMG5_pSol, MMG5_pSol);
 int  boulet(MMG5_pMesh mesh,int start,int ip,int *list);
 int  boulechknm(MMG5_pMesh mesh,int start,int ip,int *list);
 int  boulep(MMG5_pMesh mesh,int start,int ip,int *list);

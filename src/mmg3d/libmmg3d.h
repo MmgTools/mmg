@@ -1948,21 +1948,23 @@ enum MMG3D_Param {
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol (level-set) structure.
+ * \param sol pointer toward the sol (level-set) structure.
+ * \param met pointer toward a sol structure (metric), optionnal.
  * \return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if fail but a
  * conform mesh is saved or \ref MMG5_STRONGFAILURE if fail and we can't save
  * the mesh.
  *
- * Main program for the level-set discretization library.
+ * Main program for the level-set discretization library. If a metric \a met is
+ * provided, use it to adapt the mesh.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG3D_MMG3DLS(mesh,met,retval)\n
- * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,met\n
+ * >   SUBROUTINE MMG3D_MMG3DLS(mesh,sol,met,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol,met\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_mmg3dls(MMG5_pMesh mesh, MMG5_pSol met );
+  int  MMG3D_mmg3dls(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol met );
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -2078,7 +2080,8 @@ enum MMG3D_Param {
 /** Checks */
 /**
  * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
+ * \param met pointer toward the sol structure (metric).
+ * \param sol pointer toward the sol structure (ls or displacement).
  * \param critmin minimum quality for elements.
  * \param lmin minimum edge length.
  * \param lmax maximum ede length.
@@ -2089,9 +2092,9 @@ enum MMG3D_Param {
  * Search invalid elements (in term of quality or edge length).
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG3D_MMG3DCHECK(mesh,met,critmin,lmin,lmax,eltab,&\n
+ * >   SUBROUTINE MMG3D_MMG3DCHECK(mesh,met,sol,critmin,lmin,lmax,eltab,&\n
  * >                               metridtyp,retval)\n
- * >     MMG5_DATA_PTR_T, INTENT(INOUT)      :: mesh,met\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT)      :: mesh,met,sol\n
  * >     REAL(KIND=8), INTENT(IN)            :: critmin,lmin,lmax\n
  * >     INTEGER,DIMENSION(*), INTENT(OUT)   :: eltab\n
  * >     INTEGER, INTENT(IN)                 :: metridtyp\n
@@ -2099,7 +2102,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int MMG3D_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,double critmin,
+  int MMG3D_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol,double critmin,
                        double lmin, double lmax, int *eltab,char metRidTyp);
 /**
  * \param mesh pointer toward the mesh structure.

@@ -1366,21 +1366,23 @@ extern "C" {
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward a sol structure (metric).
+ * \param sol pointer toward a sol structure (level-set).
+ * \param met pointer toward a sol structure (metric).
  * \return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if failed
  * but a conform mesh is saved and \ref MMG5_STRONGFAILURE if failed and we
  * can't save the mesh.
  *
- * Main program for the level-set discretization library .
+ * Main program for the level-set discretization library. If a metric \a met is
+ * provided, use it to adapt the mesh.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG2D_MMG2DLS(mesh,sol,retval)\n
- * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
+ * >   SUBROUTINE MMG2D_MMG2DLS(mesh,sol,met,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol,met\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol) ;
+  int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) ;
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward a sol structure (displacement).

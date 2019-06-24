@@ -574,13 +574,15 @@ static int MMGS_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol) {
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the solution structure
+ * \param sol pointer toward the level-set
+ * \param sol pointer toward a metric (optionnal)
+ *
  * \return 0 if fail, 1 otherwise.
  *
  * Create implicit surface in mesh.
  *
  */
-int MMGS_mmgs2(MMG5_pMesh mesh,MMG5_pSol sol) {
+int MMGS_mmgs2(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
 
   if ( abs(mesh->info.imprim) > 3 )
     fprintf(stdout,"  ** ISOSURFACE EXTRACTION\n");

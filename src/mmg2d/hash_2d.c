@@ -344,14 +344,16 @@ int MMG2D_bdryEdge(MMG5_pMesh mesh) {
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the solution structure.
+ * \param sol pointer toward a solution structure.
+ * \param met pointer toward a solution structure.
+ *
  * \return 0 if memory problem (uncomplete mesh), 1 otherwise.
  *
  * Pack the mesh and metric and create explicitly all the mesh structures
  * (edges).
  *
  */
-int MMG2D_pack(MMG5_pMesh mesh,MMG5_pSol sol) {
+int MMG2D_pack(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
   MMG5_pTria         pt,ptnew,pt1;
   MMG5_pEdge         ped;
   MMG5_pPoint        ppt,pptnew;
@@ -512,7 +514,7 @@ int MMG2D_pack(MMG5_pMesh mesh,MMG5_pSol sol) {
   }
   mesh->nt = nt;
 
-  /* Pack metric map */
+  /* Pack solutions (metric map, displacement, ...) */
   if ( sol && sol->m ) {
     nbl = 1;
     for (k=1; k<=mesh->np; k++) {
@@ -523,6 +525,20 @@ int MMG2D_pack(MMG5_pMesh mesh,MMG5_pSol sol) {
 
       for (i=0; i<sol->size; i++)
         sol->m[isolnew + i] = sol->m[isol + i];
+      ++nbl;
+    }
+  }
+
+  if ( met && met->m ) {
+    nbl = 1;
+    for (k=1; k<=mesh->np; k++) {
+      ppt = &mesh->point[k];
+      if ( !MG_VOK(ppt) )  continue;
+      isol    = k * met->size;
+      isolnew = nbl * met->size;
+
+      for (i=0; i<met->size; i++)
+        met->m[isolnew + i] = met->m[isol + i];
       ++nbl;
     }
   }

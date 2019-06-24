@@ -41,7 +41,8 @@
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure.
+ * \param met pointer toward the sol structure.
+ * \param ls pointer toward the sol structure.
  *
  * \return 0 if fail, 1 if success
  *
@@ -49,35 +50,38 @@
  *
  */
 static inline
-int MMGS_Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *sol) {
+int MMGS_Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *met, MMG5_pSol *ls) {
 
   /* mesh allocation */
   if ( *mesh )  MMG5_SAFE_FREE(*mesh);
   MMG5_SAFE_CALLOC(*mesh,1,MMG5_Mesh,return 0);
 
-  /* sol allocation */
-  if ( !sol ) {
-    fprintf(stderr,"\n  ## Error: %s: an allocatable solution structure"
-            " of type \"MMG5_pSol\" is needed.\n",__func__);
-    fprintf(stderr,"            Exit program.\n");
-    return 0;
+ /* metric allocation */
+  if ( met ) {
+    if ( *met )  MMG5_DEL_MEM(*mesh,*met);
+    MMG5_SAFE_CALLOC(*met,1,MMG5_Sol,return 0);
   }
 
-  if ( *sol )  MMG5_DEL_MEM(*mesh,*sol);
-  MMG5_SAFE_CALLOC(*sol,1,MMG5_Sol,return 0);
+  /* level-set allocation in ls mode */
+  if ( ls ) {
+    if ( *ls )
+      MMG5_DEL_MEM(*mesh,*ls);
+    MMG5_SAFE_CALLOC(*ls,1,MMG5_Sol,return 0);
+  }
 
   return 1;
 }
 /**
  * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure.
+ * \param met pointer toward a sol structure (metric).
+ * \param ls pointer toward the level-set (in ls-mode).
  *
  * Initialization of mesh and solution structures to their default
  * values (default names, versions, dimensions...).
  *
  */
 static inline
-void MMGS_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol ) {
+void MMGS_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol *met,MMG5_pSol *ls ) {
 
   MMGS_Set_commonFunc();
 
@@ -85,15 +89,28 @@ void MMGS_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol ) {
   (mesh)->ver   = 2;
   (mesh)->nsols = 0;
 
-  (sol)->dim   = 3;
-  (sol)->ver   = 2;
-  (sol)->size  = 1;
+  if ( met && *met ) {
+    (*met)->dim  = 2;
+    (*met)->ver  = 2;
+    (*met)->size = 1;
+  }
+
+  if ( ls && *ls ) {
+    (*ls)->dim  = 2;
+    (*ls)->ver  = 2;
+    (*ls)->size = 1;
+  }
 
   /* Default parameters values */
   MMGS_Init_parameters(mesh);
 
   /* Default vaules for file names */
-  MMGS_Init_fileNames(mesh,sol);
+  MMGS_Init_fileNames(mesh,*met);
+
+  if ( ls && *ls ) {
+    MMGS_Set_inputSolName(mesh,*ls,"");
+    MMGS_Set_outputSolName(mesh,*ls,"");
+  }
 
   return;
 }
@@ -122,12 +139,12 @@ void MMGS_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol sol ) {
  */
 int MMGS_Init_mesh_var( va_list argptr ) {
   MMG5_pMesh     *mesh;
-  MMG5_pSol      *sol;
+  MMG5_pSol      *sol,*ls;
   int            typArg;
   int            meshCount;
 
   meshCount = 0;
-  sol = NULL;
+  sol = ls = NULL;
 
 
   while ( (typArg = va_arg(argptr,int)) != MMG5_ARG_end )
@@ -138,8 +155,11 @@ int MMGS_Init_mesh_var( va_list argptr ) {
       mesh = va_arg(argptr,MMG5_pMesh*);
       ++meshCount;
       break;
-    case MMG5_ARG_ppMet: case MMG5_ARG_ppLs:
+    case MMG5_ARG_ppMet:
       sol = va_arg(argptr,MMG5_pSol*);
+      break;
+    case(MMG5_ARG_ppLs):
+      ls = va_arg(argptr,MMG5_pSol*);
       break;
     default:
       fprintf(stderr,"\n  ## Error: %s: MMGS_Init_mesh:\n"
@@ -169,10 +189,10 @@ int MMGS_Init_mesh_var( va_list argptr ) {
   }
 
   /* allocations */
-  if ( !MMGS_Alloc_mesh(mesh,sol) )  return 0;
+  if ( !MMGS_Alloc_mesh(mesh,sol,ls) )  return 0;
 
   /* initialisations */
-  MMGS_Init_woalloc_mesh(*mesh,*sol);
+  MMGS_Init_woalloc_mesh(*mesh,sol,ls);
 
   return 1;
 }

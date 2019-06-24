@@ -125,7 +125,7 @@ int main(int argc,char *argv[]) {
     exit(EXIT_FAILURE);
 
   /** isovalue discretization */
-  ier = MMG3D_mmg3dls(mmgMesh,mmgSol);
+  ier = MMG3D_mmg3dls(mmgMesh,mmgSol,NULL);
 
   if ( ier == MMG5_STRONGFAILURE ) {
     fprintf(stdout,"BAD ENDING OF MMG3DLS: UNABLE TO SAVE MESH\n");

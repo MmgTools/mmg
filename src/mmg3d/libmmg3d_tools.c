@@ -573,7 +573,7 @@ void MMG3D_destockOptions(MMG5_pMesh mesh, MMG5_Info *info) {
   return;
 }
 
-int MMG3D_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,double critmin, double lmin,
+int MMG3D_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol,double critmin, double lmin,
                     double lmax, int *eltab,char metRidTyp) {
 
   mytime    ctim[TIMEMAX];
@@ -600,13 +600,13 @@ int MMG3D_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,double critmin, double lmin,
   if ( mesh->info.lag > -1 ) {
     fprintf(stderr,"\n  ## Error: lagrangian mode unavailable (MMG3D_IPARAM_lag):\n"
             "            You must call the MMG3D_mmg3dmov function to move a rigidbody.\n");
-    _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+    _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
   }
   else if ( mesh->info.iso ) {
     fprintf(stderr,"\n  ## Error: level-set discretisation unavailable"
             " (MMG3D_IPARAM_iso):\n"
             "          You must call the MMG3D_mmg3dmov function to use this option.\n");
-    _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+    _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
   }
 
 #ifdef USE_SCOTCH
@@ -618,16 +618,27 @@ int MMG3D_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,double critmin, double lmin,
   chrono(ON,&(ctim[1]));
   MMG5_warnOrientation(mesh);
 
-
-
-  if ( met->np && (met->np != mesh->np) ) {
-    fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
-    MMG5_DEL_MEM(mesh,met->m);
-    met->np = 0;
+  if ( met ) {
+    if ( met->np && (met->np != mesh->np) ) {
+      fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
+      MMG5_DEL_MEM(mesh,met->m);
+      met->np = 0;
+    }
+    else if ( met->size!=1 && met->size!=6 ) {
+      fprintf(stderr,"\n  ## ERROR: WRONG DATA TYPE.\n");
+      _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+    }
   }
-  else if ( met->size!=1 && met->size!=6 ) {
-    fprintf(stderr,"\n  ## ERROR: WRONG DATA TYPE.\n");
-    _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+  if ( sol ) {
+    if ( sol->np && (sol->np != mesh->np) ) {
+      fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
+      MMG5_DEL_MEM(mesh,sol->m);
+      sol->np = 0;
+    }
+    else if ( sol->size!=1 && sol->size!=6 ) {
+      fprintf(stderr,"\n  ## ERROR: WRONG DATA TYPE.\n");
+      _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+    }
   }
 
   chrono(OFF,&(ctim[1]));
@@ -645,15 +656,15 @@ int MMG3D_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,double critmin, double lmin,
   }
 
   /* scaling mesh */
-  if ( !MMG5_scaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+  if ( !MMG5_scaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
 
 
   MMG3D_searchqua(mesh,met,critmin,eltab,metRidTyp);
   ier = MMG3D_searchlen(mesh,met,lmin,lmax,eltab,metRidTyp);
   if ( !ier )
-    _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
+    _LIBMMG5_RETURN(mesh,met,sol,MMG5_LOWFAILURE);
 
-  _LIBMMG5_RETURN(mesh,met,MMG5_SUCCESS);
+  _LIBMMG5_RETURN(mesh,met,sol,MMG5_SUCCESS);
 }
 
 void MMG3D_searchqua(MMG5_pMesh mesh,MMG5_pSol met,double critmin, int *eltab,

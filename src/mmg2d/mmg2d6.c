@@ -1012,7 +1012,7 @@ int MMG2D_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol){
 }
 
 /* Main function of the -ls mode */
-int MMG2D_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol) {
+int MMG2D_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met) {
   double *tmp;
   int k;
 

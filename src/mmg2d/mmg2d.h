@@ -73,10 +73,11 @@ extern "C" {
 #define MMG2D_NEMAX   100000
 
 /** Free allocated pointers of mesh and sol structure and return value val */
-#define MMG2D_RETURN_AND_FREE(mesh,met,disp,val)do                 \
+#define MMG2D_RETURN_AND_FREE(mesh,met,ls,disp,val)do               \
   {                                                                 \
     if ( !MMG2D_Free_all(MMG5_ARG_start,                            \
                          MMG5_ARG_ppMesh,&mesh,MMG5_ARG_ppMet,&met, \
+                         MMG5_ARG_ppLs,&ls,MMG5_ARG_ppDisp,&disp,   \
                          MMG5_ARG_end) ) {                          \
       return MMG5_LOWFAILURE;                                       \
     }                                                               \
@@ -206,7 +207,7 @@ int  MMG2D_setMeshSize_alloc(MMG5_pMesh);
 
 int MMG2D_scaleMesh(MMG5_pMesh ,MMG5_pSol );
 int MMG2D_unscaleMesh(MMG5_pMesh ,MMG5_pSol );
-int MMG2D_pack(MMG5_pMesh ,MMG5_pSol );
+int MMG2D_pack(MMG5_pMesh ,MMG5_pSol, MMG5_pSol );
 int MMG2D_outqua(MMG5_pMesh ,MMG5_pSol );
 //int MMG2D_mmg2d0(MMG5_pMesh ,MMG5_pSol );
 int MMG2D_mmg2d1(MMG5_pMesh ,MMG5_pSol );
@@ -223,7 +224,7 @@ int  MMG2D_Free_names_var( va_list argptr );
 void MMG2D_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met);
 
 int MMG2D_mmg2d2(MMG5_pMesh , MMG5_pSol);
-int MMG2D_mmg2d6(MMG5_pMesh ,MMG5_pSol );
+int MMG2D_mmg2d6(MMG5_pMesh ,MMG5_pSol,MMG5_pSol );
 int MMG2D_mmg2d9(MMG5_pMesh ,MMG5_pSol ,MMG5_pSol );
 //int MMG2D_cendel(MMG5_pMesh ,MMG5_pSol ,double ,int );
 int MMG2D_swapdelone(MMG5_pMesh ,MMG5_pSol ,int ,char ,double ,int *);

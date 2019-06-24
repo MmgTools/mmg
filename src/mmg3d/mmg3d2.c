@@ -1424,13 +1424,14 @@ int MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int nd
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the solution structure
+ * \param sol pointer toward the level-set.
+ * \param met pointer toward  a metric (optionnal).
  * \return 0 if fail, 1 otherwise.
  *
  * Create implicit surface in mesh.
  *
  */
-int MMG3D_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol) {
+int MMG3D_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
   double   *tmp;
 
   if ( abs(mesh->info.imprim) > 3 )

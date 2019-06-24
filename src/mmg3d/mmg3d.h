@@ -32,15 +32,15 @@ extern "C" {
 #endif
 
 /** Free allocated pointers of mesh and sol structure and return value val */
-#define MMG5_RETURN_AND_FREE(mesh,met,disp,val)do                  \
+#define MMG5_RETURN_AND_FREE(mesh,met,ls,disp,val)do                \
   {                                                                 \
     if ( !MMG3D_Free_all(MMG5_ARG_start,                            \
                          MMG5_ARG_ppMesh,&mesh,MMG5_ARG_ppMet,&met, \
-                         MMG5_ARG_ppDisp,&disp,                     \
+                         MMG5_ARG_ppLs,&ls,MMG5_ARG_ppDisp,&disp,   \
                          MMG5_ARG_end) ) {                          \
-      return MMG5_LOWFAILURE;                                      \
+      return MMG5_LOWFAILURE;                                       \
     }                                                               \
-    return val;                                                    \
+    return val;                                                     \
   }while(0)
 
 /** Reallocation of point table and sol table and creation
@@ -326,7 +326,7 @@ int  MMG3D_memOption_memSet(MMG5_pMesh mesh);
 int  MMG3D_memOption_memRepartition(MMG5_pMesh mesh);
 int  MMG5_mmg3d1_pattern(MMG5_pMesh ,MMG5_pSol );
 int  MMG5_mmg3d1_delone(MMG5_pMesh ,MMG5_pSol );
-int  MMG3D_mmg3d2(MMG5_pMesh ,MMG5_pSol );
+int  MMG3D_mmg3d2(MMG5_pMesh ,MMG5_pSol,MMG5_pSol );
 int  MMG5_mmg3dChkmsh(MMG5_pMesh,int,int);
 int   MMG3D_setMeshSize_initData(MMG5_pMesh,int,int,int,int,int,int);
 int   MMG3D_setMeshSize_alloc(MMG5_pMesh);
