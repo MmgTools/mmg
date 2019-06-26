@@ -195,6 +195,7 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
             return 0;
         }
         else {
+          fprintf(stderr,"Unrecognized option %s\n",argv[i]);
           MMG3D_usage(argv[0]);
           return 0;
         }
@@ -203,6 +204,7 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
         if ( !MMG3D_Set_solSize(mesh,met,MMG5_Vertex,0,MMG5_Tensor) )
           return 0;
         else {
+          fprintf(stderr,"Unrecognized option %s\n",argv[i]);
           MMG3D_usage(argv[0]);
           return 0;
         }
@@ -218,6 +220,7 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
           }
         }
         else {
+          fprintf(stderr,"Unrecognized option %s\n",argv[i]);
           MMG3D_usage(argv[0]);
           return 0;
         }
@@ -254,7 +257,12 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
                                      atof(argv[i+1])) )
             return 0;
         }
+        else if ( !strcmp(argv[i],"-h") ) {
+          MMG3D_usage(argv[0]);
+          return 0;
+        }
         else {
+          fprintf(stderr,"Unrecognized option %s\n",argv[i]);
           MMG3D_usage(argv[0]);
           return 0;
         }
@@ -302,6 +310,7 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
           else i--;
         }
         else {
+          fprintf(stderr,"Unrecognized option %s\n",argv[i]);
           MMG3D_usage(argv[0]);
           return 0;
         }
@@ -344,6 +353,7 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
             return 0;
         }
         else {
+          fprintf(stderr,"Unrecognized option %s\n",argv[i]);
           MMG3D_usage(argv[0]);
           return 0;
         }
@@ -477,7 +487,7 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
           return 0;
       }
       else {
-        fprintf(stdout,"Argument %s ignored\n",argv[i]);
+        fprintf(stderr,"Unrecognized option %s\n",argv[i]);
         MMG3D_usage(argv[0]);
         return 0;
       }

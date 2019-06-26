@@ -123,6 +123,7 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
             return 0;
         }
         else {
+          fprintf(stderr,"Unrecognized option %s\n",argv[i]);
           MMGS_usage(argv[0]);
           return 0;
         }
@@ -133,6 +134,7 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
             return 0;
         }
         else {
+          fprintf(stderr,"Unrecognized option %s\n",argv[i]);
           MMGS_usage(argv[0]);
           return 0;
         }
@@ -146,6 +148,7 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
             return 0;
         }
         else {
+          fprintf(stderr,"Unrecognized option %s\n",argv[i]);
           MMGS_usage(argv[0]);
           return 0;
         }
@@ -183,7 +186,12 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
                                     atof(argv[i+1])) )
             return 0;
         }
+        else if ( !strcmp(argv[i],"-h") ) {
+          MMGS_usage(argv[0]);
+          return 0;
+        }
         else {
+          fprintf(stderr,"Unrecognized option %s\n",argv[i]);
           MMGS_usage(argv[0]);
           return 0;
         }
@@ -207,6 +215,7 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
             return 0;
         }
         else {
+          fprintf(stderr,"Unrecognized option %s\n",argv[i]);
           MMGS_usage(argv[0]);
           return 0;
         }
@@ -223,6 +232,7 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
           else i--;
         }
         else {
+          fprintf(stderr,"Unrecognized option %s\n",argv[i]);
           MMGS_usage(argv[0]);
           return 0;
         }
@@ -261,6 +271,7 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
             return 0;
         }
         else {
+          fprintf(stderr,"Unrecognized option %s\n",argv[i]);
           MMGS_usage(argv[0]);
           return 0;
         }
@@ -373,7 +384,7 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
           return 0;
       }
       else {
-        fprintf(stdout,"Argument %s ignored\n",argv[i]);
+        fprintf(stderr,"Unrecognized option %s\n",argv[i]);
         MMGS_usage(argv[0]);
         return 0;
       }
