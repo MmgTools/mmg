@@ -278,7 +278,6 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,const char *filename,
       *ptr = '\0';
       strcat(data,".msh");
       if( !((*inm) = fopen(data,"rb")) ) {
-        fprintf(stderr,"  ** %s  NOT FOUND.\n",data);
         MMG5_SAFE_FREE(data);
         MMG5_SAFE_FREE(*posNodeData);
         return 0;
@@ -287,7 +286,6 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,const char *filename,
   }
   else {
     if( !((*inm) = fopen(data,"rb")) ) {
-      fprintf(stderr,"  ** %s  NOT FOUND.\n",data);
       MMG5_SAFE_FREE(data);
       MMG5_SAFE_FREE(*posNodeData);
       return 0;
