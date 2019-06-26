@@ -137,6 +137,20 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
           return 0;
         }
         break;
+      case 'd':
+        if ( !strcmp(argv[i],"-default") ) {
+          mesh->mark=1;
+        }
+        else if ( !strcmp(argv[i],"-d") ) {
+          if ( !MMGS_Set_iparameter(mesh,met,MMGS_IPARAM_debug,1) )
+            return 0;
+        }
+        else {
+          MMGS_usage(argv[0]);
+          return 0;
+        }
+        break;
+
       case 'h':
         if ( (!strcmp(argv[i],"-hmin")) && i+1 < argc ) {
           if ( !MMGS_Set_dparameter(mesh,met,MMGS_DPARAM_hmin,
@@ -175,26 +189,10 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
         }
         ++i;
         break;
-      case 'd':
-        if ( !strcmp(argv[i],"-default") ) {
-          mesh->mark=1;
-        }
-        else if ( !strcmp(argv[i],"-d") ) {
-          if ( !MMGS_Set_iparameter(mesh,met,MMGS_IPARAM_debug,1) )
-            return 0;
-        }
-        else {
-          MMGS_usage(argv[0]);
-          return 0;
-        }
-        break;
       case 'i':
         if ( !strcmp(argv[i],"-in") ) {
           if ( ++i < argc && isascii(argv[i][0]) && argv[i][0]!='-') {
             if ( !MMGS_Set_inputMeshName(mesh, argv[i]) )
-              return 0;
-
-            if ( !MMGS_Set_iparameter(mesh,met,MMGS_IPARAM_verbose,5) )
               return 0;
           }else{
             fprintf(stderr,"Missing filname for %c%c\n",argv[i-1][1],argv[i-1][2]);
@@ -337,8 +335,9 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
         break;
       case 'v':
         if ( !strcmp(argv[i],"-v") ) {
-          if ( ++i < argc &&  ((argv[i][0] == '-') || isdigit(argv[i][0])) ) {
-            if ( !MMGS_Set_iparameter(mesh,met,MMGS_IPARAM_verbose,atoi(argv[i])) )
+           if ( ++i < argc && ( isdigit(argv[i][0]) ||
+               (argv[i][0]=='-' && isdigit(argv[i][1])) ) ) {
+             if ( !MMGS_Set_iparameter(mesh,met,MMGS_IPARAM_verbose,atoi(argv[i])) )
               return 0;
           }
           else {
