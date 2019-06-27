@@ -201,8 +201,10 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
         }
          break;
       case 'A': /* anisotropy */
-        if ( !MMG3D_Set_solSize(mesh,met,MMG5_Vertex,0,MMG5_Tensor) )
-          return 0;
+        if ( !strcmp(argv[i],"-A") ) {
+          if ( !MMG3D_Set_solSize(mesh,met,MMG5_Vertex,0,MMG5_Tensor) )
+            return 0;
+        }
         else {
           fprintf(stderr,"Unrecognized option %s\n",argv[i]);
           MMG3D_usage(argv[0]);
