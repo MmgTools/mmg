@@ -247,7 +247,7 @@ int main(int argc,char *argv[]) {
     exit(EXIT_FAILURE);
   }
   fprintf(inm,"MeshVersionFormatted 2\n");
-  fprintf(inm,"\nDimension 3\n");
+  fprintf(inm,"\nDimension 2\n");
 
   /** a) get the size of the sol: type of entity (SolAtVertices,...),
       number of sol, type of solution (scalar, tensor...) */

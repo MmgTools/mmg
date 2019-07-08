@@ -1611,6 +1611,30 @@ extern "C" {
  *
  */
   int MMG2D_Get_trisFromEdge(MMG5_pMesh mesh, int ked, int ktri[2], int ied[2]);
+
+/**
+ * \param m upper part of a symetric matric diagonalizable in |R
+ * \param lambda array of the metric eigenvalues
+ * \param vp array of the metric eigenvectors
+ *
+ * \return the order of the eigenvalues
+ *
+ * Compute the real eigenvalues and eigenvectors of a symetric matrice m whose
+ * upper part is provided (m11, m12, m22, in this order).
+ * lambda[0] is the eigenvalue associated to the eigenvector ( v[0][0], v[0,1] )
+ * lambda[1] is the eigenvalue associated to the eigenvector ( v[1][0], v[1,1] )
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG2D_COMPUTE_EIGENV(m,lambda,vp,retval)\n
+ * >     REAL(KIND=8), INTENT(IN)         :: m(*)\n
+ * >     REAL(KIND=8), INTENT(OUT)        :: lambda(*),vp(*)\n
+ * >     INTEGER, INTENT(OUT)             :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int MMG2D_Compute_eigenv(double m[3],double lambda[2],double vp[2][2]);
+
+
 /**
  * \param mesh pointer toward the mesh structure
  *

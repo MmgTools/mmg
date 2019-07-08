@@ -140,7 +140,7 @@ PROGRAM main
   !> 1) Manually get the mesh
   OPEN(unit=inm,file=TRIM(ADJUSTL(fileout))//".mesh",form="formatted",status="replace")
   WRITE(inm,*) "MeshVersionFormatted 2"
-  WRITE(inm,*) "Dimension 3"
+  WRITE(inm,*) "Dimension 2"
 
   !> a) get the size of the mesh: vertices, tetra, triangles, edges
   CALL MMG2D_Get_meshSize(mmgMesh,np,nt,na,ier)

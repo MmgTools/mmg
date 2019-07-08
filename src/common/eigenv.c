@@ -792,15 +792,34 @@ vect:
  *
  */
 inline int MMG5_eigensym(double m[3],double lambda[2],double vp[2][2]) {
-  double   sqDelta,dd,trm,vnorm;
+  double   sqDelta,dd,trm,vnorm,maxm,a11,a12,a22;
 
-  dd  = m[0]-m[2];
-  trm = m[0]+m[2];
-  sqDelta = sqrt(dd*dd + 4.0*m[1]*m[1]);
+  lambda[0] = lambda[1] = 0.;
+  vp[0][0]  = vp[0][1] = vp[1][0] = vp[1][1] = 0.;
+
+  maxm = fabs(m[0]);
+  maxm = fabs( m[1] ) > maxm ? m[1] : maxm;
+  maxm = fabs( m[2] ) > maxm ? m[2] : maxm;
+
+  if ( maxm < MG_EIGENV_EPS13 ) {
+    return 0;
+  }
+
+  /* normalize matrix */
+  maxm = 1.;
+  dd  = 1.0 / maxm;
+  a11 = m[0] * dd;
+  a12 = m[1] * dd;
+  a22 = m[2] * dd;
+
+  dd  = a11 - a22;
+  trm = a11 + a22;
+  sqDelta = sqrt(dd*dd + 4.0*a12*a12);
   lambda[0] = 0.5*(trm - sqDelta);
 
   /* Case when m = lambda[0]*I */
   if ( sqDelta < MMG5_EPS ) {
+    lambda[0] *= maxm;
     lambda[1] = lambda[0];
     vp[0][0] = 1.0;
     vp[0][1] = 0.0;
@@ -809,13 +828,13 @@ inline int MMG5_eigensym(double m[3],double lambda[2],double vp[2][2]) {
     vp[1][1] = 1.0;
     return 2;
   }
-  vp[0][0] = m[1];
-  vp[0][1] = (lambda[0] - m[0]);
+  vp[0][0] = a12;
+  vp[0][1] = (lambda[0] - a11);
   vnorm = sqrt(vp[0][0]*vp[0][0] + vp[0][1]*vp[0][1]);
 
   if ( vnorm < MMG5_EPS ) {
-    vp[0][0] = (lambda[0] - m[2]);
-    vp[0][1] = m[1];
+    vp[0][0] = (lambda[0] - a22);
+    vp[0][1] = a12;
     vnorm = sqrt(vp[0][0]*vp[0][0] + vp[0][1]*vp[0][1]);
   }
   assert(vnorm > MMG5_EPSD);
@@ -827,8 +846,11 @@ inline int MMG5_eigensym(double m[3],double lambda[2],double vp[2][2]) {
   vp[1][0] = -vp[0][1];
   vp[1][1] = vp[0][0];
 
-  lambda[1] = m[0]*vp[1][0]*vp[1][0] + 2.0*m[1]*vp[1][0]*vp[1][1]
-    + m[2]*vp[1][1]*vp[1][1];
+  lambda[1] = a11*vp[1][0]*vp[1][0] + 2.0*a12*vp[1][0]*vp[1][1]
+    + a22*vp[1][1]*vp[1][1];
+
+  lambda[0] *= maxm;
+  lambda[1] *= maxm;
 
   return 1;
 }

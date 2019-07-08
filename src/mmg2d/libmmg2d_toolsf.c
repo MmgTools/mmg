@@ -126,6 +126,18 @@ FORTRAN_NAME(MMG2D_GET_TRISFROMEDGE,mmg2d_get_trisfromedge,
 }
 
 /**
+ * See \ref MMG2D_Compute_eigenv function in \ref mmg2d/libmmg2d.h file.
+ */
+FORTRAN_NAME(MMG2D_COMPUTE_EIGENV,mmg2d_compute_eigenv,
+             (double m[3],double lambda[2],double vp[2][2],int *retval),
+             (m,lambda,vp,retval)) {
+
+  *retval = MMG2D_Compute_eigenv(m,lambda,vp);
+  return;
+}
+
+
+/**
  * See \ref MMG2D_Reset_verticestags function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_RESET_VERTICESTAGS,mmg2d_reset_verticestags,
