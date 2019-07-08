@@ -222,12 +222,6 @@ int chkedg(MMG5_pMesh mesh,int iel) {
   p[1] = &mesh->point[pt->v[1]];
   p[2] = &mesh->point[pt->v[2]];
 
-  for(i=0 ; i<3 ;i++) {
-    t1[i]=400;
-    t2[i]=300;
-    for(i1=0 ; i1<3 ; i1++)
-      t[i][i1] = 1000000;
-  }
   /* normal recovery */
   for (i=0; i<3; i++) {
     if ( MS_SIN(p[i]->tag) ) {
@@ -617,6 +611,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
             ppt->ref = pt->edg[i];
           ppt->xp  = mesh->xp;
           go = &mesh->xpoint[mesh->xp];
+          memset(go->n2,0x00,3*sizeof(double));
           memcpy(go->n1,no,3*sizeof(double));
 
           dd = go->n1[0]*ppt->n[0] + go->n1[1]*ppt->n[1] + go->n1[2]*ppt->n[2];
@@ -647,7 +642,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           return -1;
         }
       }
-      else if ( pt->tag[i] & MG_GEO ) {
+      else if ( pt->tag[i] & MG_GEO && !(pt->tag[i] & MG_NOM) ) {
         ppt = &mesh->point[ip];
         go  = &mesh->xpoint[ppt->xp];
         memcpy(go->n2,no,3*sizeof(double));
@@ -669,7 +664,9 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
             fprintf(stderr,"\n  ## Warning: %s: flattened angle around ridge."
                     " Unable to split it.\n",__func__);
           }
-          if ( !MMGS_delPatternPts( mesh, hash) ) return -1;
+          /* Remove the point */
+          MMGS_delPt(mesh,ip);
+          MMG5_hashUpdate(&hash,ip1,ip2,0);
         }
       }
     }
@@ -1095,7 +1092,7 @@ static int adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
         MMGS_delPt(mesh,ip);
         return ns;
       }
-      /* if we realloc memory in split1b pt pointer is not valid aymore. */
+      /* if we realloc memory in split1b pt pointer is not valid anymore. */
       ns += ier;
     }
   }

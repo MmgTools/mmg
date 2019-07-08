@@ -347,8 +347,13 @@ int main(int argc,char *argv[]) {
       ier = MMG3D_loadMshMesh(mesh,met,mesh->namein);
     msh = 1;
   }
-  if ( ier<1 )
+  if ( ier<1 ) {
+    if ( ier==0 ) {
+      fprintf(stderr,"  ** %s  NOT FOUND.\n",mesh->namein);
+      fprintf(stderr,"  ** UNABLE TO OPEN INPUT FILE.\n");
+    }
     MMG5_RETURN_AND_FREE(mesh,met,disp,MMG5_STRONGFAILURE);
+  }
 
   /* read displacement if any */
   if ( mesh->info.lag > -1 ) {

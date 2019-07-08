@@ -318,8 +318,13 @@ int main(int argc,char *argv[]) {
     ier = MMGS_loadMshMesh(mesh,met,mesh->namein);
     msh = 1;
   }
-  if ( ier<1 )
+  if ( ier<1 ) {
+    if ( ier==0 ) {
+      fprintf(stderr,"  ** %s  NOT FOUND.\n",mesh->namein);
+      fprintf(stderr,"  ** UNABLE TO OPEN INPUT FILE.\n");
+    }
     MMGS_RETURN_AND_FREE(mesh,met,MMG5_STRONGFAILURE);
+  }
 
   if ( !msh ) {
     ier = MMGS_loadSol(mesh,met,met->namein);

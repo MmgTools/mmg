@@ -122,44 +122,19 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
                                     atof(argv[i])) )
             return 0;
         }
+        else {
+          fprintf(stderr,"Unrecognized option %s\n",argv[i]);
+          MMGS_usage(argv[0]);
+          return 0;
+        }
         break;
       case 'A': /* anisotropy */
-        if ( !MMGS_Set_solSize(mesh,met,MMG5_Vertex,0,MMG5_Tensor) )
-          return 0;
-        break;
-      case 'h':
-        if ( !strcmp(argv[i],"-hmin") && ++i < argc ) {
-          if ( !MMGS_Set_dparameter(mesh,met,MMGS_DPARAM_hmin,
-                                    atof(argv[i])) )
-            return 0;
-        }
-        else if ( !strcmp(argv[i],"-hmax") && ++i < argc ) {
-          if ( !MMGS_Set_dparameter(mesh,met,MMGS_DPARAM_hmax,
-                                    atof(argv[i])) )
-            return 0;
-        }
-        else if ( !strcmp(argv[i],"-hsiz") && ++i < argc ) {
-          if ( !MMGS_Set_dparameter(mesh,met,MMGS_DPARAM_hsiz,
-                                    atof(argv[i])) )
-            return 0;
-
-        }
-        else if ( !strcmp(argv[i],"-hausd") && ++i <= argc ) {
-          if ( !MMGS_Set_dparameter(mesh,met,MMGS_DPARAM_hausd,
-                                    atof(argv[i])) )
-            return 0;
-        }
-        else if ( !strcmp(argv[i],"-hgradreq") && ++i <= argc ) {
-          if ( !MMGS_Set_dparameter(mesh,met,MMGS_DPARAM_hgradreq,
-                                    atof(argv[i])) )
-            return 0;
-        }
-        else if ( !strcmp(argv[i],"-hgrad") && ++i <= argc ) {
-          if ( !MMGS_Set_dparameter(mesh,met,MMGS_DPARAM_hgrad,
-                                    atof(argv[i])) )
+        if ( !strcmp(argv[i],"-A") ) {
+          if ( !MMGS_Set_solSize(mesh,met,MMG5_Vertex,0,MMG5_Tensor) )
             return 0;
         }
         else {
+          fprintf(stderr,"Unrecognized option %s\n",argv[i]);
           MMGS_usage(argv[0]);
           return 0;
         }
@@ -168,18 +143,64 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
         if ( !strcmp(argv[i],"-default") ) {
           mesh->mark=1;
         }
-        else {
+        else if ( !strcmp(argv[i],"-d") ) {
           if ( !MMGS_Set_iparameter(mesh,met,MMGS_IPARAM_debug,1) )
             return 0;
         }
+        else {
+          fprintf(stderr,"Unrecognized option %s\n",argv[i]);
+          MMGS_usage(argv[0]);
+          return 0;
+        }
+        break;
+
+      case 'h':
+        if ( (!strcmp(argv[i],"-hmin")) && i+1 < argc ) {
+          if ( !MMGS_Set_dparameter(mesh,met,MMGS_DPARAM_hmin,
+                                    atof(argv[i+1])) )
+            return 0;
+        }
+        else if ( (!strcmp(argv[i],"-hmax")) && i+1 < argc ) {
+          if ( !MMGS_Set_dparameter(mesh,met,MMGS_DPARAM_hmax,
+                                    atof(argv[i+1])) )
+            return 0;
+        }
+        else if ( (!strcmp(argv[i],"-hsiz")) && i+1 < argc ) {
+          if ( !MMGS_Set_dparameter(mesh,met,MMGS_DPARAM_hsiz,
+                                    atof(argv[i+1])) )
+            return 0;
+
+        }
+        else if ( (!strcmp(argv[i],"-hausd")) && i+1 < argc ) {
+          if ( !MMGS_Set_dparameter(mesh,met,MMGS_DPARAM_hausd,
+                                    atof(argv[i+1])) )
+            return 0;
+        }
+        else if ( (!strcmp(argv[i],"-hgradreq")) && i+1 < argc ) {
+          if ( !MMGS_Set_dparameter(mesh,met,MMGS_DPARAM_hgradreq,
+                                    atof(argv[i+1])) )
+            return 0;
+        }
+        else if ( (!strcmp(argv[i],"-hgrad")) && i+1 < argc ) {
+          if ( !MMGS_Set_dparameter(mesh,met,MMGS_DPARAM_hgrad,
+                                    atof(argv[i+1])) )
+            return 0;
+        }
+        else if ( !strcmp(argv[i],"-h") ) {
+          MMGS_usage(argv[0]);
+          return 0;
+        }
+        else {
+          fprintf(stderr,"Unrecognized option %s\n",argv[i]);
+          MMGS_usage(argv[0]);
+          return 0;
+        }
+        ++i;
         break;
       case 'i':
         if ( !strcmp(argv[i],"-in") ) {
           if ( ++i < argc && isascii(argv[i][0]) && argv[i][0]!='-') {
             if ( !MMGS_Set_inputMeshName(mesh, argv[i]) )
-              return 0;
-
-            if ( !MMGS_Set_iparameter(mesh,met,MMGS_IPARAM_verbose,5) )
               return 0;
           }else{
             fprintf(stderr,"Missing filname for %c%c\n",argv[i-1][1],argv[i-1][2]);
@@ -193,6 +214,11 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
           if ( !MMGS_Set_iparameter(mesh,met,MMGS_IPARAM_keepRef,1) )
             return 0;
         }
+        else {
+          fprintf(stderr,"Unrecognized option %s\n",argv[i]);
+          MMGS_usage(argv[0]);
+          return 0;
+        }
         break;
       case 'l':
         if ( !strcmp(argv[i],"-ls") ) {
@@ -205,14 +231,20 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
           }
           else i--;
         }
+        else {
+          fprintf(stderr,"Unrecognized option %s\n",argv[i]);
+          MMGS_usage(argv[0]);
+          return 0;
+        }
         break;
       case 'm':
-        if ( ++i < argc && isdigit(argv[i][0]) ) {
+        if ( (!strcmp(argv[i],"-m")) &&  ++i < argc && isdigit(argv[i][0]) ) {
           if ( !MMGS_Set_iparameter(mesh,met,MMGS_IPARAM_mem,atoi(argv[i])) )
             return 0;
         }
         else {
-          fprintf(stderr,"Missing argument option %c\n",argv[i-1][1]);
+          --i;
+          fprintf(stderr,"Unrecognize option or missing argument option %s \n",argv[i]);
           MMGS_usage(argv[0]);
           return 0;
         }
@@ -238,9 +270,14 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
           if ( !MMGS_Set_iparameter(mesh,met,MMGS_IPARAM_nreg,1) )
             return 0;
         }
+        else {
+          fprintf(stderr,"Unrecognized option %s\n",argv[i]);
+          MMGS_usage(argv[0]);
+          return 0;
+        }
         break;
       case 'o':
-        if ( !strcmp(argv[i],"-out") ) {
+        if ( (!strcmp(argv[i],"-out")) || !strcmp(argv[i],"-o") ) {
           if ( ++i < argc && isascii(argv[i][0])  && argv[i][0]!='-') {
             if ( !MMGS_Set_outputMeshName(mesh,argv[i]) )
               return 0;
@@ -281,6 +318,11 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
             return 0;
           }
         }
+        else {
+          fprintf(stderr,"Unrecognized option %s\n",argv[i]);
+          MMGS_usage(argv[0]);
+          return 0;
+        }
         break;
 #endif
       case 's':
@@ -295,21 +337,32 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
             return 0;
           }
         }
-        break;
-      case 'v':
-        if ( ++i < argc ) {
-          if ( argv[i][0] == '-' || isdigit(argv[i][0]) ) {
-            if ( !MMGS_Set_iparameter(mesh,met,MMGS_IPARAM_verbose,atoi(argv[i])) )
-              return 0;
-          }
-          else
-            i--;
-        }
         else {
-          fprintf(stderr,"Missing argument option %c\n",argv[i-1][1]);
+          fprintf(stderr,"Unrecognized option %s\n",argv[i]);
           MMGS_usage(argv[0]);
           return 0;
         }
+
+        break;
+      case 'v':
+        if ( !strcmp(argv[i],"-v") ) {
+           if ( ++i < argc && ( isdigit(argv[i][0]) ||
+               (argv[i][0]=='-' && isdigit(argv[i][1])) ) ) {
+             if ( !MMGS_Set_iparameter(mesh,met,MMGS_IPARAM_verbose,atoi(argv[i])) )
+              return 0;
+          }
+          else {
+            fprintf(stderr,"Missing argument option %s\n",argv[i-1]);
+            MMGS_usage(argv[0]);
+            return 0;
+          }
+        }
+        else {
+          fprintf(stderr,"Unrecognized option %s\n",argv[i]);
+          MMGS_usage(argv[0]);
+          return 0;
+        }
+
         break;
       default:
         fprintf(stderr,"Unrecognized option %s\n",argv[i]);
@@ -331,7 +384,7 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
           return 0;
       }
       else {
-        fprintf(stdout,"Argument %s ignored\n",argv[i]);
+        fprintf(stderr,"Unrecognized option %s\n",argv[i]);
         MMGS_usage(argv[0]);
         return 0;
       }

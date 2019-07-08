@@ -189,69 +189,92 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
         return 0;
 
       case 'a':
-        if ( !strcmp(argv[i],"-ar") && ++i < argc )
+        if ( !strcmp(argv[i],"-ar") && ++i < argc ) {
           if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_angleDetection,
-                                    atof(argv[i])) )
+                                     atof(argv[i])) )
             return 0;
-        break;
-      case 'A': /* anisotropy */
-        if ( !MMG3D_Set_solSize(mesh,met,MMG5_Vertex,0,MMG5_Tensor) )
+        }
+        else {
+          fprintf(stderr,"Unrecognized option %s\n",argv[i]);
+          MMG3D_usage(argv[0]);
           return 0;
+        }
+         break;
+      case 'A': /* anisotropy */
+        if ( !strcmp(argv[i],"-A") ) {
+          if ( !MMG3D_Set_solSize(mesh,met,MMG5_Vertex,0,MMG5_Tensor) )
+            return 0;
+        }
+        else {
+          fprintf(stderr,"Unrecognized option %s\n",argv[i]);
+          MMG3D_usage(argv[0]);
+          return 0;
+        }
         break;
       case 'd':
         if ( !strcmp(argv[i],"-default") ) {
           mesh->mark=1;
         }
-        else {
+        else if ( !strcmp(argv[i],"-d") ) {
           /* debug */
           if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_debug,1) ) {
             return 0;
           }
         }
-        break;
-      case 'h':
-        if ( !strcmp(argv[i],"-hmin") && ++i < argc ) {
-          if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_hmin,
-                                    atof(argv[i])) )
-            return 0;
-        }
-        else if ( !strcmp(argv[i],"-hmax") && ++i < argc ) {
-          if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_hmax,
-                                    atof(argv[i])) )
-            return 0;
-        }
-        else if ( !strcmp(argv[i],"-hsiz") && ++i < argc ) {
-          if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_hsiz,
-                                     atof(argv[i])) )
-            return 0;
-
-        }
-        else if ( !strcmp(argv[i],"-hausd") && ++i <= argc ) {
-          if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_hausd,
-                                    atof(argv[i])) )
-            return 0;
-        }
-        else if ( !strcmp(argv[i],"-hgradreq") && ++i <= argc ) {
-          if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_hgradreq,
-                                    atof(argv[i])) )
-            return 0;
-        }
-        else if ( !strcmp(argv[i],"-hgrad") && ++i <= argc ) {
-          if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_hgrad,
-                                    atof(argv[i])) )
-            return 0;
-        }
         else {
+          fprintf(stderr,"Unrecognized option %s\n",argv[i]);
           MMG3D_usage(argv[0]);
           return 0;
         }
+        break;
+      case 'h':
+        if ( (!strcmp(argv[i],"-hmin")) && i+1 < argc ) {
+          if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_hmin,
+                                     atof(argv[i+1])) )
+            return 0;
+        }
+        else if ( (!strcmp(argv[i],"-hmax")) && i+1 < argc ) {
+          if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_hmax,
+                                     atof(argv[i+1])) )
+            return 0;
+        }
+        else if ( (!strcmp(argv[i],"-hsiz")) && i+1 < argc ) {
+          if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_hsiz,
+                                     atof(argv[i+1])) )
+            return 0;
+
+        }
+        else if ( (!strcmp(argv[i],"-hausd")) && i+1 < argc ) {
+          if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_hausd,
+                                     atof(argv[i+1])) )
+            return 0;
+        }
+        else if ( (!strcmp(argv[i],"-hgradreq")) && i+1 < argc ) {
+          if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_hgradreq,
+                                     atof(argv[i+1])) )
+            return 0;
+        }
+        else if ( (!strcmp(argv[i],"-hgrad")) && i+1 < argc ) {
+          if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_hgrad,
+                                     atof(argv[i+1])) )
+            return 0;
+        }
+        else if ( !strcmp(argv[i],"-h") ) {
+          MMG3D_usage(argv[0]);
+          return 0;
+        }
+        else {
+          fprintf(stderr,"Unrecognized option %s\n",argv[i]);
+          MMG3D_usage(argv[0]);
+          return 0;
+        }
+        ++i;
         break;
       case 'i':
         if ( !strcmp(argv[i],"-in") ) {
           if ( ++i < argc && isascii(argv[i][0]) && argv[i][0]!='-') {
             if ( !MMG3D_Set_inputMeshName(mesh, argv[i]) )
               return 0;
-
           }else{
             fprintf(stderr,"Missing filname for %c%c\n",argv[i-1][1],argv[i-1][2]);
             MMG3D_usage(argv[0]);
@@ -288,14 +311,20 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
           }
           else i--;
         }
+        else {
+          fprintf(stderr,"Unrecognized option %s\n",argv[i]);
+          MMG3D_usage(argv[0]);
+          return 0;
+        }
         break;
       case 'm':  /* memory */
-        if ( ++i < argc && isdigit(argv[i][0]) ) {
+        if ( (!strcmp(argv[i],"-m")) &&  ++i < argc && isdigit(argv[i][0]) ) {
           if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_mem,atoi(argv[i])) )
             return 0;
         }
         else {
-          fprintf(stderr,"Missing argument option %c\n",argv[i-1][1]);
+          --i;
+          fprintf(stderr,"Missing argument option %s\n",argv[i]);
           MMG3D_usage(argv[0]);
           return 0;
         }
@@ -325,9 +354,14 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
           if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_nosurf,1) )
             return 0;
         }
+        else {
+          fprintf(stderr,"Unrecognized option %s\n",argv[i]);
+          MMG3D_usage(argv[0]);
+          return 0;
+        }
         break;
       case 'o':
-        if ( !strcmp(argv[i],"-out") ) {
+        if ( (!strcmp(argv[i],"-out")) || !strcmp(argv[i],"-o") ) {
           if ( ++i < argc && isascii(argv[i][0])  && argv[i][0]!='-') {
             if ( !MMG3D_Set_outputMeshName(mesh,argv[i]) )
               return 0;
@@ -343,10 +377,18 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
             return 0;
         }
 #ifndef PATTERN
-        else if ( !strcmp(argv[i],"-octree") && ++i < argc ) {
-          if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_octree,
-                                     atoi(argv[i])) )
+        else if ( !strcmp(argv[i],"-octree") ) {
+          if ( ++i < argc  && (isdigit(argv[i][0]) ||
+                               (argv[i][0]=='-' && isdigit(argv[i][1])) )) {
+            if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_octree,
+                                       atoi(argv[i])) )
+              return 0;
+          }
+          else {
+            fprintf(stderr,"Missing argument option %s\n",argv[i-1]);
+            MMG3D_usage(argv[0]);
             return 0;
+          }
         }
 #endif
         else if( !strcmp(argv[i],"-optimLES") ) {
@@ -356,6 +398,11 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
         else if( !strcmp(argv[i],"-optim") ) {
           if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_optim,1) )
             return 0;
+        }
+        else {
+          fprintf(stderr,"Unrecognized option %s\n",argv[i]);
+          MMG3D_usage(argv[0]);
+          return 0;
         }
         break;
 #ifdef USE_SCOTCH
@@ -378,6 +425,11 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
             return 0;
           }
         }
+        else {
+          fprintf(stderr,"Unrecognized option %s\n",argv[i]);
+          MMG3D_usage(argv[0]);
+          return 0;
+        }
         break;
 #endif
       case 's':
@@ -392,21 +444,27 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
             return 0;
           }
         }
+        else {
+          fprintf(stderr,"Unrecognized option %s\n",argv[i]);
+          MMG3D_usage(argv[0]);
+          return 0;
+        }
         break;
       case 'v':
-        if ( ++i < argc ) {
-          if ( isdigit(argv[i][0]) ||
-               (argv[i][0]=='-' && isdigit(argv[i][1])) ) {
+        if ( !strcmp(argv[i],"-v") ) {
+          if ( ++i < argc && ( isdigit(argv[i][0]) ||
+               (argv[i][0]=='-' && isdigit(argv[i][1])) ) ) {
             if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_verbose,atoi(argv[i])) )
               return 0;
           }
           else {
-            i--;
-            fprintf(stderr,"Missing argument option %s\n",argv[i]);
+            fprintf(stderr,"Missing argument option %s\n",argv[i-1]);
+            MMG3D_usage(argv[0]);
+            return 0;
           }
         }
-        else {
-          fprintf(stderr,"Missing argument option %s\n",argv[i-1]);
+       else {
+          fprintf(stderr,"Unrecognized option %s\n",argv[i]);
           MMG3D_usage(argv[0]);
           return 0;
         }
@@ -431,7 +489,7 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
           return 0;
       }
       else {
-        fprintf(stdout,"Argument %s ignored\n",argv[i]);
+        fprintf(stderr,"Unrecognized option %s\n",argv[i]);
         MMG3D_usage(argv[0]);
         return 0;
       }
