@@ -1622,7 +1622,9 @@ extern "C" {
  * Compute the real eigenvalues and eigenvectors of a symetric matrice m whose
  * upper part is provided (m11, m12, m22, in this order).
  * lambda[0] is the eigenvalue associated to the eigenvector ( v[0][0], v[0,1] )
+ * in C and to the eigenvector v(1,:) in fortran
  * lambda[1] is the eigenvalue associated to the eigenvector ( v[1][0], v[1,1] )
+ * in C and to the eigenvector v(2,:) in fortran
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_COMPUTE_EIGENV(m,lambda,vp,retval)\n
