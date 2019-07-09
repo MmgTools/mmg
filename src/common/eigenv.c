@@ -798,8 +798,8 @@ inline int MMG5_eigensym(double m[3],double lambda[2],double vp[2][2]) {
   vp[0][0]  = vp[0][1] = vp[1][0] = vp[1][1] = 0.;
 
   maxm = fabs(m[0]);
-  maxm = fabs( m[1] ) > maxm ? m[1] : maxm;
-  maxm = fabs( m[2] ) > maxm ? m[2] : maxm;
+  maxm = fabs( m[1] ) > maxm ? fabs ( m[1] ) : maxm;
+  maxm = fabs( m[2] ) > maxm ? fabs ( m[2] ) : maxm;
 
   if ( maxm < MG_EIGENV_EPS13 ) {
     return 0;
