@@ -35,7 +35,8 @@
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the metric or solution structure.
+ * \param met pointer toward a solution structure.
+ * \param sol pointer toward a solution structure (level-set or displacement).
  * \return 1 if success, 0 if fail (computed bounding box too small
  * or one af the anisotropic input metric is not valid).
  *
@@ -44,7 +45,7 @@
  * Truncate the metric sizes between hmin/hmax
  *
  */
-int MMG2D_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
+int MMG2D_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
   //Displ     pd;
   MMG5_pPoint    ppt;
   MMG5_Info     *info;
@@ -56,7 +57,17 @@ int MMG2D_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   char           sethmin,sethmax;
   static char    mmgWarn0=0, mmgWarn1=0;
 
-  // pd  = mesh->disp;
+  /* sol is a level-set or a displacement so it cannot be an aniso metric */
+  if ( sol ) { assert ( sol->size == MMG5_Scalar || sol->size == MMG5_Vector ); }
+
+  /* met is a metric so it cannot be a vector */
+  if ( met ) { assert ( met->size != MMG5_Vector ); }
+
+  /* if we are not in iso or lagrangian mode, check that sol isn't allocated */
+  if ( (!mesh->info.iso) && mesh->info.lag < 0 ) {
+    assert ( !sol );
+  }
+
   /* compute bounding box */
   if ( ! MMG5_boundingBox(mesh) ) return 0;
 
@@ -99,9 +110,9 @@ int MMG2D_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
     sethmax = 1;
   }
 
-  /* Warning: we don't want to compute hmin/hmax from the level-set! */
-  if ( mesh->info.iso || mesh->info.lag>=0 ||
-       ((!sol->np) && ((!mesh->info.optim) && (mesh->info.hsiz <= 0.)) ) ) {
+  /* if we are not in optim or hsiz mode and if we don't have a metric, compute
+   * default hmin/hmax */
+  if ( (!(mesh->info.optim || mesh->info.hsiz > 0.)) && (!(met && met->np)) ) {
     /* Set default values to hmin/hmax from the bounding box if not provided by
      * the user */
     if ( !MMG5_Set_defaultTruncatureSizes(mesh,sethmin,sethmax) ) {
@@ -112,18 +123,24 @@ int MMG2D_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
     sethmax = 1;
   }
 
-  if ( !sol->np )  return 1;
+  if ( sol && sol->np ) {
+    for (k=sol->size; k<sol->size*(mesh->np+1); k++) {
+      sol->m[k]   *= dd;
+    }
+  }
+
+  if ( (!met) || (met && !met->np) )  return 1;
 
   /* metric truncature and normalization and default values for hmin/hmax if not
    * provided by the user ( 0.1 \times the minimum of the metric sizes for hmin
    * and 10 \times the max of the metric sizes for hmax ). */
-  switch (sol->size) {
+  switch (met->size) {
   case 1:
     /* normalization */
     for (k=1; k<=mesh->np; k++)  {
-      sol->m[k] *= dd;
+      met->m[k] *= dd;
       /* Check the metric */
-      if (  (!mesh->info.iso) && sol->m[k] <= 0) {
+      if (  (!mesh->info.iso) && met->m[k] <= 0) {
         if ( !mmgWarn0 ) {
           mmgWarn0 = 1;
           fprintf(stderr,"\n  ## Error: %s: at least 1 wrong metric.\n",
@@ -137,13 +154,13 @@ int MMG2D_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
     if ( !sethmin ) {
       mesh->info.hmin = FLT_MAX;
       for (k=1; k<=mesh->np; k++)  {
-        mesh->info.hmin = MG_MIN(mesh->info.hmin,sol->m[k]);
+        mesh->info.hmin = MG_MIN(mesh->info.hmin,met->m[k]);
       }
     }
     if ( !sethmax ) {
       mesh->info.hmax = 0.;
       for (k=1; k<=mesh->np; k++)  {
-        mesh->info.hmax = MG_MAX(mesh->info.hmax,sol->m[k]);
+        mesh->info.hmax = MG_MAX(mesh->info.hmax,met->m[k]);
       }
     }
     if ( !sethmin ) {
@@ -163,34 +180,26 @@ int MMG2D_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
       }
     }
 
-    /* Truncature... if we have a metric (not a level-set) */
-    if ( !mesh->info.iso ) {
-      for (k=1; k<=mesh->np; k++)  {
-        sol->m[k]=MG_MAX(mesh->info.hmin,sol->m[k]);
-        sol->m[k]=MG_MIN(mesh->info.hmax,sol->m[k]);
-      }
-    }
-    break;
-  case 2:
-    for (k=1; k<=mesh->np; k++) {
-      sol->m[2*k]   *= dd;
-      sol->m[2*k+1] *= dd;
+    /* Truncature */
+    for (k=1; k<=mesh->np; k++)  {
+      met->m[k]=MG_MAX(mesh->info.hmin,met->m[k]);
+      met->m[k]=MG_MIN(mesh->info.hmax,met->m[k]);
     }
     break;
   case 3:
     dd = 1.0 / (dd*dd);
     /* Normalization */
     for (k=1; k<=mesh->np; k++) {
-      iadr = k*sol->size;
-      for (i=0; i<sol->size; i++)  sol->m[iadr+i] *= dd;
+      iadr = k*met->size;
+      for (i=0; i<met->size; i++)  met->m[iadr+i] *= dd;
     }
 
     /* compute hmin and hmax parameters if not provided by the user */
     if ( !sethmin ) {
       mesh->info.hmin = FLT_MAX;
       for (k=1; k<=mesh->np; k++)  {
-        iadr = k*sol->size;
-        m    = &sol->m[iadr];
+        iadr = k*met->size;
+        m    = &met->m[iadr];
 
         /* Check the input metric */
         if ( !MMG5_eigensym(m,lambda,v) ) {
@@ -218,8 +227,8 @@ int MMG2D_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
     if ( !sethmax ) {
       mesh->info.hmax = 0.;
       for (k=1; k<=mesh->np; k++)  {
-        iadr = k*sol->size;
-        m    = &sol->m[iadr];
+        iadr = k*met->size;
+        m    = &met->m[iadr];
 
         /* Check the input metric */
         if ( !MMG5_eigensym(m,lambda,v) ) {
@@ -261,14 +270,13 @@ int MMG2D_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
       }
     }
 
-    /* Truncature... if we have a metric, not a level-set */
-    assert( !mesh->info.iso );
+    /* Truncature */
     isqhmin  = 1.0 / (mesh->info.hmin*mesh->info.hmin);
     isqhmax  = 1.0 / (mesh->info.hmax*mesh->info.hmax);
     for (k=1; k<=mesh->np; k++) {
-      iadr = k*sol->size;
+      iadr = k*met->size;
 
-      m    = &sol->m[iadr];
+      m    = &met->m[iadr];
       /* Check the input metric */
       if ( !MMG5_eigensym(m,lambda,v) ) {
         if ( !mmgWarn0 ) {
@@ -300,11 +308,19 @@ int MMG2D_scaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   return 1;
 }
 
-/* Unscale mesh coordinates */
-int MMG2D_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward a solution structure.
+ * \param sol pointer toward a solution structure (level-set or displacement).
+ * \return 1 if success, 0 if fail.
+ *
+ * Unscale mesh coordinates and data.
+ *
+ */
+int MMG2D_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
   MMG5_pPoint     ppt;
   MMG5_Info      *info;
-  MMG5_pPar      ppar;
+  MMG5_pPar       ppar;
   double          dd;
   int             i,k,iadr;
 
@@ -336,23 +352,34 @@ int MMG2D_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
     }
   }
 
-  /* de-normalize metric */
-  if ( (!sol->np) || (!sol->m) )  return 1;
+  /* de-normalize level-set or displacement */
+  if ( sol && sol->np && sol->m ) {
+    assert ( sol->size != MMG5_Tensor );
+    for (k=1; k<=mesh->np; k++) {
+      ppt = &mesh->point[k];
+      if ( !MG_VOK(ppt) )  continue;
+      iadr = k*sol->size;
+      for (i=0; i<sol->size; i++)  sol->m[iadr+i] *= dd;
+    }
+  }
 
-  switch (sol->size) {
+  /* de-normalize metric */
+  if ( !(met && met->np && met->m) )  return 1;
+
+  switch (met->size) {
   case 1:
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
       if ( !MG_VOK(ppt) )  continue;
-      sol->m[k] *= dd;
+      met->m[k] *= dd;
     }
     break;
   case 2:
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
       if ( !MG_VOK(ppt) )  continue;
-      sol->m[2*k]   *= dd;
-      sol->m[2*k+1] *= dd;
+      met->m[2*k]   *= dd;
+      met->m[2*k+1] *= dd;
     }
     break;
   case 3:
@@ -360,8 +387,8 @@ int MMG2D_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol sol) {
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
       if ( !MG_VOK(ppt) )  continue;
-      iadr = k*sol->size;
-      for (i=0; i<sol->size; i++)  sol->m[iadr+i] *= dd;
+      iadr = k*met->size;
+      for (i=0; i<met->size; i++)  met->m[iadr+i] *= dd;
     }
     break;
   }

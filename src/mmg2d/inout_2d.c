@@ -808,12 +808,20 @@ int MMG2D_readDoubleSol(MMG5_pSol sol,FILE *inm,int bin,int iswp,int pos) {
 int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   FILE       *inm;
   long        posnp;
-  int         iswp,ier,dim;
+  int         iswp,ier,dim,meshDim;
   int         k,ver,bin,np,nsols,*type;
 
   /** Read the file header */
-  ier =  MMG5_loadSolHeader(filename,2,&inm,&ver,&bin,&iswp,&np,&dim,&nsols,
+  meshDim = 2;
+  if ( mesh->info.nreg == 2 ) {
+    /* -msh mode */
+    meshDim = 3;
+  }
+  ier =  MMG5_loadSolHeader(filename,meshDim,&inm,&ver,&bin,&iswp,&np,&dim,&nsols,
                              &type,&posnp,mesh->info.imprim);
+
+  /* correction for the -msh mode */
+  sol->dim = 2;
 
   if ( ier < 1 ) return ier;
 
@@ -887,13 +895,19 @@ int MMG2D_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
   MMG5_pSol   psl;
   FILE       *inm;
   long        posnp;
-  int         iswp,ier,dim;
+  int         iswp,ier,dim,meshDim;
   int         j,k,ver,bin,np,nsols,*type;
   char        data[16];
   static char mmgWarn = 0;
 
   /** Read the file header */
-  ier =  MMG5_loadSolHeader(filename,2,&inm,&ver,&bin,&iswp,&np,&dim,&nsols,
+  meshDim = 2;
+  if ( mesh->info.nreg == 2 ) {
+    /* -msh mode */
+    meshDim = 3;
+  }
+
+  ier =  MMG5_loadSolHeader(filename,meshDim,&inm,&ver,&bin,&iswp,&np,&dim,&nsols,
                             &type,&posnp,mesh->info.imprim);
   if ( ier < 1 ) return ier;
 
@@ -945,6 +959,7 @@ int MMG2D_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
       fclose(inm);
       return -1;
     }
+    psl->dim = 2;
     /* For binary file, we read the verson inside the file */
     if ( ver ) psl->ver = ver;
   }

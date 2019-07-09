@@ -158,7 +158,19 @@ ADD_TEST(NAME mmg2d_SquareIso_nonConstant2
 ADD_TEST(NAME mmg2d_2squares
   COMMAND ${EXECUT_MMG2D} -msh 2 -hmax 1 -nosurf -v 5
   ${MMG2D_CI_TESTS}/2squares/2squares
-  -out ${CTEST_OUTPUT_DIR}/mmg2d_2squares-2squares.o.meshb)
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_2squares.o.meshb)
+
+####### -met option
+ADD_TEST(NAME mmg2d_2squares-withMet
+  COMMAND ${EXECUT_MMG2D} -msh 2  -v 5
+  ${MMG2D_CI_TESTS}/2squares/2squares -met ${MMG2D_CI_TESTS}/2squares/2s.sol
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_2squares-met.o.meshb)
+
+####### -sol option
+ADD_TEST(NAME mmg2d_2squares-withSol
+  COMMAND ${EXECUT_MMG2D} -msh 2  -v 5
+  ${MMG2D_CI_TESTS}/2squares/2squares -sol ${MMG2D_CI_TESTS}/2squares/2s.sol
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_2squares-sol.o.meshb)
 
 
 ###############################################################################
@@ -171,10 +183,15 @@ ADD_TEST(NAME mmg2d_SquareAniso
   ${MMG2D_CI_TESTS}/SquareAniso/adap1
   ${CTEST_OUTPUT_DIR}/mmg2d_SquareAniso-mmg2d_SquareAniso-adap1.o.meshb)
 
-ADD_TEST(NAME mmg2d_CircleOptimAni
+ADD_TEST(NAME mmg2d_Circle-optimAni
   COMMAND ${EXECUT_MMG2D} -v 5 -optim -A -sol 2
   ${MMG2D_CI_TESTS}/Circle/cercle
-  -out ${CTEST_OUTPUT_DIR}/mmg2d_CircleOptimAni-cercle.o.mesh)
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_Circle-optimAni.o.mesh)
+
+ADD_TEST(NAME mmg2d_Circle-hsizAni
+  COMMAND ${EXECUT_MMG2D} -v 5 -hsiz 0.01 -A -sol 2
+  ${MMG2D_CI_TESTS}/Circle/cercle
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_Circle-hsizAni.o.mesh)
 
 ###############################################################################
 #####
@@ -195,6 +212,24 @@ ADD_TEST(NAME mmg2d_NacaGenerationAni
   COMMAND ${EXECUT_MMG2D} -v 5 -hausd 0.001 -A
   ${MMG2D_CI_TESTS}/NacaGeneration/naca
   -out ${CTEST_OUTPUT_DIR}/mmg2d_NacaGeneration-naca.o.meshb)
+
+# optim
+ADD_TEST(NAME mmg2d_NacaGeneration-optim
+  COMMAND ${EXECUT_MMG2D} -v 5 -hausd 0.001 -optim
+  ${MMG2D_CI_TESTS}/NacaGeneration/naca
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_NacaGeneration-optim.o.meshb)
+
+# hsiz
+ADD_TEST(NAME mmg2d_NacaGeneration-hsiz
+  COMMAND ${EXECUT_MMG2D} -v 5 -hausd 0.001 -hsiz 0.01
+  ${MMG2D_CI_TESTS}/NacaGeneration/naca
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_NacaGeneration-hsiz.o.meshb)
+
+# hsiz + ani
+ADD_TEST(NAME mmg2d_NacaGeneration-hsizAni
+  COMMAND ${EXECUT_MMG2D} -v 5 -hausd 0.001 -hsiz 0.01 -A
+  ${MMG2D_CI_TESTS}/NacaGeneration/naca
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_NacaGeneration-hsizAni.o.meshb)
 
 # non convex test cases
 ADD_TEST(NAME mmg2d_ACDCGeneration
@@ -226,6 +261,53 @@ ADD_TEST(NAME mmg2d_LSMultiMat
   COMMAND ${EXECUT_MMG2D} -v 5 -ls -hmin 0.005 -hmax 0.1 -hausd 0.001 -hgrad 1.3
   ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat
   ${CTEST_OUTPUT_DIR}/mmg2d_LSMultiMat.o.meshb)
+
+# non 0 ls
+ADD_TEST(NAME mmg2d_LSMultiMat_nonzero
+  COMMAND ${EXECUT_MMG2D} -v 5 -ls 0.01 -hausd 0.001
+  ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat
+  ${CTEST_OUTPUT_DIR}/mmg2d_LSMultiMat-nonzero.o.meshb)
+
+
+# ls discretisation + optim option
+ADD_TEST(NAME mmg2d_LSMultiMat_optim
+  COMMAND ${EXECUT_MMG2D} -v 5 -ls -optim -hausd 0.001
+  ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat
+  ${CTEST_OUTPUT_DIR}/mmg2d_LSMultiMat-optim.o.meshb)
+
+# ls discretisation + optim + aniso option
+ADD_TEST(NAME mmg2d_LSMultiMat_optimAni
+  COMMAND ${EXECUT_MMG2D} -v 5 -ls -optim -A -hausd 0.001
+  ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat
+  ${CTEST_OUTPUT_DIR}/mmg2d_LSMultiMat-optimAni.o.meshb)
+
+# ls discretisation + hsiz option
+ADD_TEST(NAME mmg2d_LSMultiMat_hsiz
+  COMMAND ${EXECUT_MMG2D} -v 5 -ls -hsiz 0.05 -hausd 0.001
+  ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat
+  ${CTEST_OUTPUT_DIR}/mmg2d_LSMultiMat-hsiz.o.meshb)
+
+# ls discretisation + hsiz Ani option
+ADD_TEST(NAME mmg2d_LSMultiMat_hsizAni
+  COMMAND ${EXECUT_MMG2D} -v 5 -ls -hsiz 0.05 -A -hausd 0.001
+  ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat
+  ${CTEST_OUTPUT_DIR}/mmg2d_LSMultiMat-hsizAni.o.meshb)
+
+# ls discretisation + metric
+ADD_TEST(NAME mmg2d_LSMultiMat_withMet
+  COMMAND ${EXECUT_MMG2D} -v 5 -ls -hausd 0.001
+  -met ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat-met.sol
+  ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat
+  ${CTEST_OUTPUT_DIR}/mmg2d_LSMultiMat-withMet.o.meshb)
+
+# ls discretisation + metric + ls
+ADD_TEST(NAME mmg2d_LSMultiMat_withMetAndLs
+  COMMAND ${EXECUT_MMG2D} -v 5 -ls -hausd 0.001
+  -met ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat-met.sol
+  -sol ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat-sol.sol
+  ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat
+  ${CTEST_OUTPUT_DIR}/mmg2d_LSMultiMat-withMetAndLs.o.meshb)
+
 
 ###############################################################################
 #####

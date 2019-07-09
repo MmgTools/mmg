@@ -125,8 +125,10 @@ void MMG5_Init_fileNames(MMG5_pMesh mesh,MMG5_pSol sol
   MMG5_Set_inputMeshName(mesh,"");
   MMG5_Set_outputMeshName(mesh,"");
 
-  MMG5_Set_inputSolName(mesh,sol,"");
-  MMG5_Set_outputSolName(mesh,sol,"");
+  if ( sol ) {
+    MMG5_Set_inputSolName(mesh,sol,"");
+    MMG5_Set_outputSolName(mesh,sol,"");
+  }
 
   return;
 }

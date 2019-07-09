@@ -285,12 +285,12 @@ int MMG2D_defaultOption(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
   }
 
   /* scaling mesh and hmin/hmax computation*/
-  if ( !MMG2D_scaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+  if ( !MMG2D_scaleMesh(mesh,met,sol) ) _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
 
   /* specific meshing + update hmin/hmax */
   if ( mesh->info.optim ) {
     if ( !MMG2D_doSol(mesh,met) ) {
-      if ( !MMG2D_unscaleMesh(mesh,met) )
+      if ( !MMG2D_unscaleMesh(mesh,met,sol) )
         _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
       _LIBMMG5_RETURN(mesh,met,sol,MMG5_LOWFAILURE);
     }
@@ -298,13 +298,13 @@ int MMG2D_defaultOption(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
   }
   if ( mesh->info.hsiz > 0. ) {
     if ( !MMG5_Compute_constantSize(mesh,met,&hsiz) ) {
-     if ( !MMG2D_unscaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+     if ( !MMG2D_unscaleMesh(mesh,met,sol) ) _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
      _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
     }
   }
 
   /* unscaling mesh */
-  if ( !MMG2D_unscaleMesh(mesh,met) ) _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+  if ( !MMG2D_unscaleMesh(mesh,met,sol) ) _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
 
   /* Save the local parameters file */
   mesh->mark = 0;
@@ -317,10 +317,12 @@ int MMG2D_defaultOption(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
   _LIBMMG5_RETURN(mesh,met,sol,MMG5_SUCCESS);
 }
 
-
-int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
-  int     i;
-  char    namein[128];
+// In ls mode : metric must be provided using -met option (-sol or default is the ls).
+// In adp mode : -sol or -met or default allow to store the metric.
+int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
+  MMG5_pSol tmp = NULL;
+  int       i;
+  char      namein[128];
 
   /* First step: search if user want to see the default parameters values. */
   for ( i=1; i< argc; ++i ) {
@@ -438,9 +440,25 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
         }
         break;
       case 'm':  /* memory */
-        if (!strcmp(argv[i],"-m") ) {
+        if ( !strcmp(argv[i],"-met") ) {
+          if ( !met ) {
+            fprintf(stderr,"No metric structure allocated for %c%c%c option\n",
+                    argv[i-1][1],argv[i-1][2],argv[i-1][3]);
+            return 0;
+          }
+          if ( ++i < argc && isascii(argv[i][0]) && argv[i][0]!='-' ) {
+            if ( !MMG2D_Set_inputSolName(mesh,met,argv[i]) )
+              return 0;
+          }
+          else {
+            fprintf(stderr,"Missing filname for %c%c%c\n",argv[i-1][1],argv[i-1][2],argv[i-1][3]);
+            MMG2D_usage(argv[0]);
+            return 0;
+          }
+        }
+        else if(!strcmp(argv[i],"-msh") ) {
           if ( ++i < argc && isdigit(argv[i][0]) ) {
-            if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_mem,atoi(argv[i])) )
+            if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_msh,atoi(argv[i])) )
               return 0;
           }
           else {
@@ -448,9 +466,10 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
             MMG2D_usage(argv[0]);
             return 0;
           }
-        } else if(!strcmp(argv[i],"-msh") ) {
+        }
+        else if (!strcmp(argv[i],"-m") ) {
           if ( ++i < argc && isdigit(argv[i][0]) ) {
-            if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_msh,atoi(argv[i])) )
+            if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_mem,atoi(argv[i])) )
               return 0;
           }
           else {
@@ -523,8 +542,12 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
           }
       case 's':
         if ( !strcmp(argv[i],"-sol") ) {
+          /* For retrocompatibility, store the metric if no sol structure available */
+          tmp = sol ? sol : met;
+
+          assert(tmp);
           if ( ++i < argc && isascii(argv[i][0]) && argv[i][0]!='-' ) {
-            if ( !MMG2D_Set_inputSolName(mesh,met,argv[i]) )
+            if ( !MMG2D_Set_inputSolName(mesh,tmp,argv[i]) )
               return 0;
           }
           else {
@@ -579,7 +602,7 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
     i++;
   }
 
-  /* check file names */
+  /** check file names */
   if ( mesh->info.imprim == -99 ) {
     fprintf(stdout,"\n  -- PRINT (0 10(advised) -10) ?\n");
     fflush(stdin);
@@ -599,8 +622,19 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
     if ( !MMG2D_Set_outputMeshName(mesh,"") )
       return 0;
   }
-  if ( met->namein == NULL ) {
-    if ( !MMG2D_Set_inputSolName(mesh,met,"") )
+
+  /* adp mode: if the metric name has been stored in sol, move it in met */
+  if ( met->namein==NULL && sol->namein && !(mesh->info.iso || mesh->info.lag>=0) ) {
+    if ( !MMG2D_Set_inputSolName(mesh,met,sol->namein) )
+      return 0;
+    MMG5_DEL_MEM(mesh,sol->namein);
+  }
+
+  /* default : store solution (resp. displacement) name in iso
+   * (resp. lagrangian) mode, metric name otherwise */
+  tmp = ( mesh->info.iso || mesh->info.lag >=0 ) ? sol : met;
+  if ( tmp->namein == NULL ) {
+    if ( !MMG2D_Set_inputSolName(mesh,tmp,"") )
       return 0;
   }
   if ( met->nameout == NULL ) {
@@ -656,7 +690,7 @@ int main(int argc,char *argv[]) {
     MMG2D_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
 
   /* Read command line */
-  if ( !parsar(argc,argv,mesh,met) )  return MMG5_STRONGFAILURE;
+  if ( !parsar(argc,argv,mesh,met,ls) )  return MMG5_STRONGFAILURE;
 
   /* load data */
   if ( mesh->info.imprim >= 0 )
@@ -687,14 +721,21 @@ int main(int argc,char *argv[]) {
   /* Read displacement if any */
   if ( mesh->info.lag >= 0 ) {
 
-    /* In Lagrangian mode, the name of the displacement file has been parsed in met */
-    if ( !MMG2D_Set_inputSolName(mesh,disp,met->namein) )
+    /* In Lagrangian mode, the name of the displacement file has been parsed in ls */
+    if ( !MMG2D_Set_inputSolName(mesh,disp,ls->namein) ) {
       MMG2D_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
+    }
+    MMG5_DEL_MEM(mesh,ls->namein);
 
     if ( !msh ) {
       ier = MMG2D_loadSol(mesh,disp,disp->namein);
       if ( ier < 1 ) {
         fprintf(stdout,"  ## ERROR: UNABLE TO LOAD DISPLACEMENT.\n");
+        MMG2D_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
+      }
+      if ( met->namein ) {
+        fprintf(stdout,"  ## WARNING: MESH ADAPTATION UNAVAILABLE IN"
+                " LAGRANGIAN MODE. METRIC IGNORED.\n");
         MMG2D_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
       }
     }
@@ -705,15 +746,18 @@ int main(int argc,char *argv[]) {
   }
   /* Read levelset if any */
   else if ( mesh->info.iso ) {
-    /* The name of the level-set file has been parsed in met */
-    if ( !MMG2D_Set_inputSolName(mesh,ls,met->namein) )
-      MMG2D_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
-
     if ( !msh ) {
       ier = MMG2D_loadSol(mesh,ls,ls->namein);
       if ( ier < 1 ) {
         fprintf(stdout,"  ## ERROR: UNABLE TO LOAD LEVEL-SET.\n");
         MMG2D_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
+      }
+      if ( met->namein ) {
+        ier = MMG2D_loadSol(mesh,met,met->namein);
+        if ( ier < 1 ) {
+          fprintf(stdout,"  ## ERROR: UNABLE TO LOAD METRIC.\n");
+          MMG2D_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
+        }
       }
     }
     if ( ls->m==NULL ) {
@@ -755,6 +799,12 @@ int main(int argc,char *argv[]) {
   }
   /* Remeshing mode */
   else {
+    if ( met && ls && met->namein && ls->namein ) {
+      fprintf(stdout,"\n  ## ERROR: IMPOSSIBLE TO PROVIDE BOTH A METRIC"
+              " AND A SOLUTION IN ADAPTATION MODE.\n");
+      MMG2D_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
+    }
+
     ier = MMG2D_mmg2dlib(mesh,met);
   }
 

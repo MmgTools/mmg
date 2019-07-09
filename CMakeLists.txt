@@ -313,7 +313,7 @@ SET(ELAS_DIR "" CACHE PATH "Installation directory for Elas")
 INCLUDE(cmake/modules/FindElas.cmake)
 CMAKE_DEPENDENT_OPTION (
   USE_ELAS "Use the Elas library for lagrangian motion option" ON
-  "BUILD_MMG3D;ELAS_FOUND" OFF)
+  "ELAS_FOUND" OFF)
 
 # add Scotch library?
 CMAKE_DEPENDENT_OPTION ( USE_SCOTCH "Use SCOTCH TOOL for renumbering" ON

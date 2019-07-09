@@ -32,6 +32,7 @@
 
 #include "mmg2d.h"
 
+
 void MMG2D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( met->size == 3 ) {
     MMG2D_lencurv  = MMG2D_lencurv_ani;
@@ -88,7 +89,7 @@ int MMG2D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
   }
   if ( mesh->info.imprim >= 0 )
     fprintf(stdout,"\n  %%%% %s OPENED\n",data);
-  
+
   /* Read parameters */
   while ( !feof(in) ) {
     ret = fscanf(in,"%255s",data);

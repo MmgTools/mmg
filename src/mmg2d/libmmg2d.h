@@ -1377,7 +1377,8 @@ extern "C" {
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_MMG2DLS(mesh,sol,met,retval)\n
- * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol,met\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
+ * >     MMG5_DATA_PTR_T                :: met\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *

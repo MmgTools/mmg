@@ -73,7 +73,12 @@ FORTRAN_NAME(MMG2D_MMG2DLS,mmg2d_mmg2dls,(MMG5_pMesh *mesh,MMG5_pSol *sol,
                                           MMG5_pSol *met,int* retval),
              (mesh,sol,met,retval)){
 
-  *retval = MMG2D_mmg2dls(*mesh,*sol,*met);
+  if ( met ) {
+    *retval = MMG2D_mmg2dls(*mesh,*sol,*met);
+  }
+  else {
+    *retval = MMG2D_mmg2dls(*mesh,*sol,NULL);
+  }
 
   return;
 }
