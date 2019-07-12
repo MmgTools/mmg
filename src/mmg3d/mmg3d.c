@@ -253,12 +253,12 @@ int MMG3D_defaultOption(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
   }
 
   /* scaling mesh + hmin/hmax computation*/
-  if ( !MMG5_scaleMesh(mesh,met) )   _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+  if ( !MMG5_scaleMesh(mesh,met,sol) )   _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
 
   /* specific meshing + hmin/hmax update */
   if ( mesh->info.optim ) {
     if ( !MMG3D_doSol(mesh,met) ) {
-      if ( !MMG5_unscaleMesh(mesh,met) )   _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+      if ( !MMG5_unscaleMesh(mesh,met,sol) )   _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
         _LIBMMG5_RETURN(mesh,met,sol,MMG5_LOWFAILURE);
     }
     MMG5_solTruncatureForOptim(mesh,met);
@@ -266,13 +266,13 @@ int MMG3D_defaultOption(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
 
   if ( mesh->info.hsiz > 0. ) {
     if ( !MMG5_Compute_constantSize(mesh,met,&hsiz) ) {
-     if ( !MMG5_unscaleMesh(mesh,met) )   _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+     if ( !MMG5_unscaleMesh(mesh,met,sol) )   _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
        _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
     }
   }
 
   /* unscaling mesh */
-  if ( !MMG5_unscaleMesh(mesh,met) )   _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+  if ( !MMG5_unscaleMesh(mesh,met,sol) )   _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
 
   /* Save the local parameters file */
   mesh->mark = 0;
@@ -327,6 +327,7 @@ int main(int argc,char *argv[]) {
                   MMG5_ARG_ppDisp,&disp,
                   MMG5_ARG_ppLs,&ls,
                   MMG5_ARG_end);
+
   /* reset default values for file names */
   if ( !MMG3D_Free_names(MMG5_ARG_start,
                          MMG5_ARG_ppMesh,&mesh,MMG5_ARG_ppMet,&met,
@@ -341,7 +342,7 @@ int main(int argc,char *argv[]) {
     MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
 
   /* command line */
-  if ( !MMG3D_parsar(argc,argv,mesh,met) )  return MMG5_STRONGFAILURE;
+  if ( !MMG3D_parsar(argc,argv,mesh,met,ls) )  return MMG5_STRONGFAILURE;
 
   /* load data */
   if ( mesh->info.imprim >= 0 )
@@ -370,8 +371,10 @@ int main(int argc,char *argv[]) {
     if ( !msh && !MMG3D_Set_solSize(mesh,disp,MMG5_Vertex,0,MMG5_Vector) )
       MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
 
-    if ( !MMG3D_Set_inputSolName(mesh,disp,met->namein) )
+    /* In Lagrangian mode, the name of the displacement file has been parsed in ls */
+    if ( !MMG3D_Set_inputSolName(mesh,disp,ls->namein) )
       MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
+    MMG5_DEL_MEM(mesh,ls->namein);
 
     if ( !msh ) {
       ier = MMG3D_loadSol(mesh,disp,disp->namein);
@@ -383,19 +386,27 @@ int main(int argc,char *argv[]) {
         fprintf(stderr,"\n  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
         MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
       }
+      if ( met->namein ) {
+        fprintf(stdout,"  ## WARNING: MESH ADAPTATION UNAVAILABLE IN"
+                " LAGRANGIAN MODE. METRIC IGNORED.\n");
+        MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
+      }
     }
   }
   /* Read levelset if any */
   else if ( mesh->info.iso ) {
-    /* The name of the level-set file has been parsed in met */
-    if ( !MMG3D_Set_inputSolName(mesh,ls,met->namein) )
-      MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
-
     if ( !msh ) {
       ier = MMG3D_loadSol(mesh,ls,ls->namein);
       if ( ier < 1 ) {
         fprintf(stdout,"  ## ERROR: UNABLE TO LOAD LEVEL-SET.\n");
         MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
+      }
+      if ( met->namein ) {
+        ier = MMG3D_loadSol(mesh,met,met->namein);
+        if ( ier < 1 ) {
+          fprintf(stdout,"  ## ERROR: UNABLE TO LOAD METRIC.\n");
+          MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
+        }
       }
     }
     if ( ls->m==0 ) {
@@ -434,6 +445,11 @@ int main(int argc,char *argv[]) {
     ier = MMG3D_mmg3dls(mesh,ls,met);
   }
   else {
+    if ( met && ls && met->namein && ls->namein ) {
+      fprintf(stdout,"\n  ## ERROR: IMPOSSIBLE TO PROVIDE BOTH A METRIC"
+              " AND A SOLUTION IN ADAPTATION MODE.\n");
+      MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
+    }
     ier = MMG3D_mmg3dlib(mesh,met);
   }
 

@@ -205,6 +205,8 @@ IF ( BUILD_TESTING )
       SET(LIBMMG3D_EXEC4   ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_example4)
       SET(LIBMMG3D_EXEC5   ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_example5)
       SET(LIBMMG3D_EXEC6   ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_example6_io)
+      SET(LIBMMG3D_LSONLY ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_lsOnly )
+      SET(LIBMMG3D_LSANDMETRIC ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_lsAndMetric )
       SET(TEST_API3D_EXEC0 ${EXECUTABLE_OUTPUT_PATH}/test_api3d_0)
 
       ADD_TEST(NAME libmmg3d_example0_a COMMAND ${LIBMMG3D_EXEC0_a}
@@ -228,10 +230,6 @@ IF ( BUILD_TESTING )
           "${CTEST_OUTPUT_DIR}/libmmg3d_LagrangianMotion_0-tinyBoxt.o"
           )
       ENDIF ()
-      ADD_TEST(NAME libmmg3d_example5   COMMAND ${LIBMMG3D_EXEC5}
-        "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_example0/test"
-        "${CTEST_OUTPUT_DIR}/libmmg3d-IsosurfDiscretization_0-test.o"
-        )
       ADD_TEST(NAME libmmg3d_example6_io_0   COMMAND ${LIBMMG3D_EXEC6}
         "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/io_multisols_example6/torus.mesh"
         "${CTEST_OUTPUT_DIR}/libmmg3d_io_6-naca.o" "0"
@@ -240,6 +238,16 @@ IF ( BUILD_TESTING )
         "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/io_multisols_example6/torus.mesh"
         "${CTEST_OUTPUT_DIR}/libmmg3d_io_6-naca.o" "1"
        )
+      ADD_TEST(NAME libmmg3d_lsOnly   COMMAND ${LIBMMG3D_LSONLY}
+        "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsOnly/plane.mesh"
+        "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsOnly/m.sol"
+        "${CTEST_OUTPUT_DIR}/libmmg3d_lsOnly_multimat.o"
+        )
+      ADD_TEST(NAME libmmg3d_lsAndMetric   COMMAND ${LIBMMG3D_LSANDMETRIC}
+        "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsOnly/plane.mesh"
+        "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsOnly/m.sol"
+        "${CTEST_OUTPUT_DIR}/libmmg3d_lsAndMetric_multimat.o"
+        )
       ADD_TEST(NAME test_api3d_0   COMMAND ${TEST_API3D_EXEC0}
         "${MMG3D_CI_TESTS}/API_tests/2dom.mesh"
         "${CTEST_OUTPUT_DIR}/test_API3d.o"
@@ -249,6 +257,8 @@ IF ( BUILD_TESTING )
         SET(LIBMMG3D_EXECFORTRAN_a  ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_fortran_a)
         SET(LIBMMG3D_EXECFORTRAN_b  ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_fortran_b)
         SET(LIBMMG3D_EXECFORTRAN_IO ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_fortran_io)
+        SET(LIBMMG3D_EXECFORTRAN_LSONLY ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_fortran_lsOnly )
+        SET(LIBMMG3D_EXECFORTRAN_LSANDMETRIC ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_fortran_lsAndMetric )
         SET(TEST_API3D_FORTRAN_EXEC0 ${EXECUTABLE_OUTPUT_PATH}/test_api3d_fortran_0)
 
 
@@ -266,7 +276,16 @@ IF ( BUILD_TESTING )
         ADD_TEST(NAME libmmg3d_fortran_io_1   COMMAND ${LIBMMG3D_EXECFORTRAN_IO}
           "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/io_multisols_example6/torus.mesh"
           "${CTEST_OUTPUT_DIR}/libmmg3d_Fortran_io-torus.o" "1"
-         )
+          )
+       ADD_TEST(NAME libmmg3d_fortran_lsOnly3d   COMMAND ${LIBMMG3D_EXECFORTRAN_LSONLY}
+         "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsOnly/plane.mesh"
+         "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsOnly/m.sol"
+         "${CTEST_OUTPUT_DIR}/libmmg3d_lsOnly_multimat.o" )
+
+       ADD_TEST(NAME libmmg3d_fortran_lsAndMetric3d   COMMAND ${LIBMMG3D_EXECFORTRAN_LSANDMETRIC}
+          "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsOnly/plane.mesh"
+          "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsOnly/m.sol"
+          "${CTEST_OUTPUT_DIR}/libmmg3d_lsAndMetric_multimat.o" )
        ADD_TEST(NAME test_api3d_fortran_0   COMMAND ${TEST_API3D_FORTRAN_EXEC0}
          "${MMG3D_CI_TESTS}/API_tests/2dom.mesh"
          "${CTEST_OUTPUT_DIR}/test_API3d.o"

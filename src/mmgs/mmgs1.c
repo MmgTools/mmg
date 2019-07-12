@@ -557,7 +557,9 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         i2 = MMG5_iprv2[i];
         len = MMG5_lenSurfEdg(mesh,met,pt->v[i1],pt->v[i2],0);
         if ( !len ) return -1;
-        else if ( len > MMGS_LLONG )  MG_SET(pt->flag,i);
+        else if ( len > MMGS_LLONG )  {
+          MG_SET(pt->flag,i);
+        }
       }
       if ( !pt->flag )  continue;
     }
@@ -576,6 +578,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
       ip2 = pt->v[i2];
       ip = MMG5_hashGet(&hash,ip1,ip2);
 
+      /* do not compute the point twice except along special edges */
       if ( !MG_EDG(pt->tag[i]) && ip > 0 )  continue;
 
       /* new point along edge */

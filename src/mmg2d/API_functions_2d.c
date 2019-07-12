@@ -99,6 +99,7 @@ void MMG2D_Init_parameters(MMG5_pMesh mesh) {
 }
 
 int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
+  int k;
 
   switch ( iparam ) {
     /* Integer parameters */
@@ -177,6 +178,29 @@ int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
   case MMG2D_IPARAM_nosurf :
     mesh->info.nosurf   = val;
     break;
+  case MMG2D_IPARAM_numberOfLocalParam :
+    if ( mesh->info.par ) {
+      MMG5_DEL_MEM(mesh,mesh->info.par);
+      if ( (mesh->info.imprim > 5) || mesh->info.ddebug )
+        fprintf(stderr,"\n  ## Warning: %s: new local parameter values\n",__func__);
+    }
+    mesh->info.npar   = val;
+    mesh->info.npari  = 0;
+    mesh->info.parTyp = 0;
+
+    MMG5_ADD_MEM(mesh,mesh->info.npar*sizeof(MMG5_Par),"parameters",
+                  printf("  Exit program.\n");
+                  return 0);
+    MMG5_SAFE_CALLOC(mesh->info.par,mesh->info.npar,MMG5_Par,return 0);
+
+    for (k=0; k<mesh->info.npar; k++) {
+      mesh->info.par[k].elt   = MMG5_Noentity;
+      mesh->info.par[k].ref   = INT_MAX;
+      mesh->info.par[k].hausd = mesh->info.hausd;
+      mesh->info.par[k].hmin  = mesh->info.hmin;
+      mesh->info.par[k].hmax  = mesh->info.hmax;
+    }
+    break;
   case MMG2D_IPARAM_rmc :
     mesh->info.rmc      = val;
     break;
@@ -244,6 +268,80 @@ int MMG2D_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val)
   }
   return 1;
 }
+
+int MMG2D_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref,
+                             double hmin,double hmax,double hausd){
+  MMG5_pPar par;
+  int k;
+
+  if ( !mesh->info.npar ) {
+    fprintf(stderr,"\n  ## Error: %s: You must set the number of local"
+            " parameters",__func__);
+    fprintf(stderr," with the MMG2D_Set_iparameters function before setting");
+    fprintf(stderr," values in local parameters structure. \n");
+    return 0;
+  }
+  if ( mesh->info.npari >= mesh->info.npar ) {
+    fprintf(stderr,"\n  ## Error: %s: unable to set a new local parameter.\n",
+            __func__);
+    fprintf(stderr,"    max number of local parameters: %d\n",mesh->info.npar);
+    return 0;
+  }
+  if ( typ != MMG5_Triangle && typ != MMG5_Edg ) {
+    fprintf(stderr,"\n  ## Warning: %s: you must apply your local parameters",
+            __func__);
+    fprintf(stderr," on triangles (MMG5_Triangle or %d) or edges"
+            " (MMG5_Edg or %d).\n",MMG5_Triangle,MMG5_Edg);
+    fprintf(stderr,"\n  ## Unknown type of entity: ignored.\n");
+    return 0;
+  }
+  if ( ref < 0 ) {
+    fprintf(stderr,"\n  ## Error: %s: negative references are not allowed.\n",
+            __func__);
+    return 0;
+  }
+
+  for (k=0; k<mesh->info.npari; k++) {
+    par = &mesh->info.par[k];
+
+    if ( par->elt == typ && par->ref == ref ) {
+      par->hausd = hausd;
+      par->hmin  = hmin;
+      par->hmax  = hmax;
+      if ( (mesh->info.imprim > 5) || mesh->info.ddebug ) {
+        fprintf(stderr,"\n  ## Warning: %s: new parameters (hausd, hmin and hmax)",
+                __func__);
+        fprintf(stderr," for entities of type %d and of ref %d\n",typ,ref);
+      }
+      return 1;
+    }
+  }
+
+  mesh->info.par[mesh->info.npari].elt   = typ;
+  mesh->info.par[mesh->info.npari].ref   = ref;
+  mesh->info.par[mesh->info.npari].hmin  = hmin;
+  mesh->info.par[mesh->info.npari].hmax  = hmax;
+  mesh->info.par[mesh->info.npari].hausd = hausd;
+
+  switch ( typ )
+  {
+  case ( MMG5_Triangle ):
+    mesh->info.parTyp |= MG_Tria;
+    break;
+  case ( MMG5_Edg ):
+    mesh->info.parTyp |= MG_Edge;
+    break;
+  default:
+    fprintf(stderr,"\n  ## Error: %s: unexpected entity type: %s.\n",
+            __func__,MMG5_Get_entitiesName(typ));
+    return 0;
+  }
+
+  mesh->info.npari++;
+
+  return 1;
+}
+
 
 int MMG2D_Set_meshSize(MMG5_pMesh mesh, int np, int nt, int na) {
 

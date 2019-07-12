@@ -199,6 +199,7 @@ int MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, MMG5_Hash *hash, int chkISO) {
     fprintf(stdout,"\n");
   }
   if ( mesh->info.ddebug )  fprintf(stdout,"  h- completed.\n");
+
   return 1;
 }
 

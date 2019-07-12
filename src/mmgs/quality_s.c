@@ -407,8 +407,9 @@ int MMGS_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
     if ( met->m && (met->size == 6) ) {
       rap = MMGS_ALPHAD * MMG5_caltri33_ani(mesh,met,pt);
     }
-    else
-      rap = MMGS_ALPHAD * MMG5_calelt(mesh,NULL,pt);
+    else {
+      rap = MMGS_ALPHAD * MMG5_caltri_iso (mesh,NULL,pt);
+    }
 
     if ( rap < rapmin ) {
       rapmin = rap;

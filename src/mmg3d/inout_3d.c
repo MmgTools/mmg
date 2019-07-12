@@ -1991,7 +1991,10 @@ int MMG3D_saveSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
   MMG5_pPoint  ppt;
   int          binch,bin,ier,k;
 
-  if ( !met->m )  return -1;
+  if ( !met->m ) {
+    fprintf(stderr,"\n  ## Warning: %s: no metric data to save.\n",__func__);
+    return 1;
+  }
 
   met->ver = 2;
 

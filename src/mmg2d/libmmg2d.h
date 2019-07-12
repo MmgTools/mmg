@@ -68,6 +68,7 @@ extern "C" {
     MMG2D_IPARAM_noswap,            /*!< [1/0], Avoid/allow edge or face flipping */
     MMG2D_IPARAM_nomove,            /*!< [1/0], Avoid/allow point relocation */
     MMG2D_IPARAM_nosurf,            /*!< [1/0], Avoid/allow surface modifications */
+    MMG2D_IPARAM_numberOfLocalParam,/*!< [n], Number of local parameters */
     MMG2D_IPARAM_rmc,               /*!< [0/1], Remove small connex componants in level-set mode */
     MMG2D_DPARAM_angleDetection,    /*!< [val], Value for angle detection */
     MMG2D_DPARAM_hmin,              /*!< [val], Minimal mesh size */
@@ -244,6 +245,32 @@ extern "C" {
  *
  */
   int MMG2D_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the sol structure.
+ * \param typ type of entity (triangle, edge,...).
+ * \param ref reference of the entity.
+ * \param hmin minimal edge size.
+ * \param hmax maximal edge size.
+ * \param hausd value of the Hausdorff number.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Set local parameters: set the hausdorff value at \a val for all
+ * elements of type \a typ and reference \a ref.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG2D_SET_LOCALPARAMETER(mesh,sol,typ,ref,& \n
+ * >                                       hmin,hmax,hausd,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol\n
+ * >     INTEGER, INTENT(IN)           :: typ,ref\n
+ * >     REAL(KIND=8), INTENT(IN)      :: hmin,hmax,hausd\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int  MMG2D_Set_localParameter(MMG5_pMesh mesh, MMG5_pSol sol, int typ,
+                                int ref,double hmin,double hmax,double hausd);
 
 /* init structure datas */
 /**

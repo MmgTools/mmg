@@ -49,7 +49,7 @@ void MMGS_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
     movridpt         = movridpt_iso;
   }
   else {
-    if ( !met->m ) {
+    if ( (!met->m) && (!mesh->info.optim) && mesh->info.hsiz<=0. ) {
       MMG5_calelt     = MMG5_caltri_iso;
       MMG5_lenSurfEdg = MMG5_lenSurfEdg_iso;
     }
@@ -95,9 +95,12 @@ int MMGS_defaultValues(MMG5_pMesh mesh) {
   return 1;
 }
 
-int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
-  int    i;
-  char   namein[128];
+// In ls mode : metric must be provided using -met option (-sol or default is the ls).
+// In adp mode : -sol or -met or default allow to store the metric.
+int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
+  MMG5_pSol tmp = NULL;
+  int       i;
+  char      namein[128];
 
   /* First step: search if user want to see the default parameters values. */
   for ( i=1; i< argc; ++i ) {
@@ -207,14 +210,32 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
         }
         break;
       case 'm':
-        if ( ++i < argc && isdigit(argv[i][0]) ) {
-          if ( !MMGS_Set_iparameter(mesh,met,MMGS_IPARAM_mem,atoi(argv[i])) )
+        if ( !strcmp(argv[i],"-met") ) {
+          if ( !met ) {
+            fprintf(stderr,"No metric structure allocated for %c%c%c option\n",
+                    argv[i-1][1],argv[i-1][2],argv[i-1][3]);
             return 0;
+          }
+          if ( ++i < argc && isascii(argv[i][0]) && argv[i][0]!='-' ) {
+            if ( !MMGS_Set_inputSolName(mesh,met,argv[i]) )
+              return 0;
+          }
+          else {
+            fprintf(stderr,"Missing filname for %c%c%c\n",argv[i-1][1],argv[i-1][2],argv[i-1][3]);
+            MMGS_usage(argv[0]);
+            return 0;
+          }
         }
-        else {
-          fprintf(stderr,"Missing argument option %c\n",argv[i-1][1]);
-          MMGS_usage(argv[0]);
-          return 0;
+        else if  (!strcmp(argv[i],"-m") ) {
+          if ( ++i < argc && isdigit(argv[i][0]) ) {
+            if ( !MMGS_Set_iparameter(mesh,met,MMGS_IPARAM_mem,atoi(argv[i])) )
+              return 0;
+          }
+          else {
+            fprintf(stderr,"Missing argument option %c\n",argv[i-1][1]);
+            MMGS_usage(argv[0]);
+            return 0;
+          }
         }
         break;
       case 'n':
@@ -285,8 +306,11 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
 #endif
       case 's':
         if ( !strcmp(argv[i],"-sol") ) {
+          /* For retrocompatibility, store the metric if no sol structure available */
+          tmp = sol ? sol : met;
+          assert(tmp);
           if ( ++i < argc && isascii(argv[i][0]) && argv[i][0]!='-' ) {
-            if ( !MMGS_Set_inputSolName(mesh,met,argv[i]) )
+            if ( !MMGS_Set_inputSolName(mesh,tmp,argv[i]) )
               return 0;
           }
           else {
@@ -361,9 +385,17 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
       return 0;
   }
 
-  if ( met->namein == NULL ) {
-    if ( !MMGS_Set_inputSolName(mesh,met,"") )
+  /* adp mode: if the metric name has been stored in sol, move it in met */
+  if ( met->namein==NULL && sol->namein && !(mesh->info.iso || mesh->info.lag>=0) ) {
+    if ( !MMGS_Set_inputSolName(mesh,met,sol->namein) )
       return 0;
+    MMG5_DEL_MEM(mesh,sol->namein);
+  }
+
+  /* default : store solution name in iso mode, metric name otherwise */
+  tmp = ( mesh->info.iso || mesh->info.lag >=0 ) ? sol : met;
+  if ( tmp->namein == NULL ) {
+    if ( !MMGS_Set_inputSolName(mesh,tmp,"") ) { return 0; }
   }
   if ( met->nameout == NULL ) {
     if ( !MMGS_Set_outputSolName(mesh,met,"") )

@@ -2262,15 +2262,16 @@ int MMG3D_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref,
 
   switch ( typ )
   {
-  case ( MMG5_Vertex ):
-    mesh->info.parTyp |= MG_Vert;
-    break;
   case ( MMG5_Triangle ):
     mesh->info.parTyp |= MG_Tria;
     break;
   case ( MMG5_Tetrahedron ):
     mesh->info.parTyp |= MG_Tetra;
     break;
+  default:
+    fprintf(stderr,"\n  ## Error: %s: unexpected entity type: %s.\n",
+            __func__,MMG5_Get_entitiesName(typ));
+    return 0;
   }
 
   mesh->info.npari++;

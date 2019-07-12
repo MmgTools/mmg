@@ -43,6 +43,19 @@ ADD_TEST(NAME mmg2d_memOption
   ${MMG2D_CI_TESTS}/Circle/cercle
   -out ${CTEST_OUTPUT_DIR}/mmg2d_memOption.o.meshb)
 
+ADD_TEST(NAME mmg2d_val
+  COMMAND ${EXECUT_MMG2D} -v val
+  ${MMG2D_CI_TESTS}/Circle/cercle
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_val.o.meshb)
+
+#ADD_TEST(NAME mmg2d_default
+#  COMMAND ${EXECUT_MMG2D} -default
+#  ${MMG2D_CI_TESTS}/Circle/cercle
+#  -out ${CTEST_OUTPUT_DIR}/mmg2d_default.o.meshb)
+
+SET_PROPERTY(TEST mmg2d_val #mmg2d_default
+  PROPERTY WILL_FAIL TRUE)
+
 ADD_TEST(NAME mmg2d_hsizOption
   COMMAND ${EXECUT_MMG2D} -v 5 -hsiz 0.1 -sol 2
   ${MMG2D_CI_TESTS}/Circle/cercle
@@ -247,6 +260,24 @@ ADD_TEST(NAME mmg2d_GaronneGeneration
 #####         Implicit domain discretization
 #####
 ###############################################################################
+ADD_TEST(NAME mmg2d_LSMultiMat_val
+  COMMAND ${EXECUT_MMG2D} -val -v 5 -ls -hausd 0.001
+  -met ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat-met.sol
+  -sol ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat-sol.sol
+  ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat
+  ${CTEST_OUTPUT_DIR}/mmg2d_multi-mat-val.o.meshb
+  )
+
+#ADD_TEST(NAME mmg2d_LSMultiMat_default
+#  COMMAND ${EXECUT_MMG2D} -val -v 5 -ls -hausd 0.001
+#  -met ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat-met.sol
+#  -sol ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat-sol.sol
+#  ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat
+#  ${CTEST_OUTPUT_DIR}/mmg2d_multi-mat-default.o.meshb
+#  )
+SET_PROPERTY(TEST mmg2d_LSMultiMat_val #mmg2d_LSMultiMat_default
+  PROPERTY WILL_FAIL TRUE)
+
 ADD_TEST(NAME mmg2d_LSDiscretization
   COMMAND ${EXECUT_MMG2D} -v 5 -ls
   ${MMG2D_CI_TESTS}/LSDiscretization/dom

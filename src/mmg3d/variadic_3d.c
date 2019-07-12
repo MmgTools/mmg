@@ -102,28 +102,36 @@ void MMG3D_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol *met,MMG5_pSol *ls, MMG5
   (mesh)->nsols = 0;
 
   if ( met && *met ) {
-    (*met)->dim  = 2;
+    (*met)->dim  = 3;
     (*met)->ver  = 2;
     (*met)->size = 1;
+    (*met)->type = 1;
   }
 
   if ( ls && *ls ) {
-    (*ls)->dim  = 2;
+    (*ls)->dim  = 3;
     (*ls)->ver  = 2;
     (*ls)->size = 1;
+    (*ls)->type = 1;
   }
 
   if ( disp && *disp ) {
-    (*disp)->dim  = 2;
+    (*disp)->dim  = 3;
     (*disp)->ver  = 2;
     (*disp)->size = 2;
+    (*disp)->type = 2;
   }
 
   /* Default parameters values */
   MMG3D_Init_parameters(mesh);
 
   /* Default vaules for file names */
-  MMG3D_Init_fileNames(mesh,*met);
+  if ( met ) {
+    MMG3D_Init_fileNames(mesh,*met);
+  }
+  else {
+    MMG3D_Init_fileNames(mesh,NULL);
+  }
 
   if ( ls && *ls ) {
     MMG3D_Set_inputSolName(mesh,*ls,"");
@@ -210,13 +218,13 @@ int MMG3D_Init_mesh_var( va_list argptr ) {
     return 0;
   }
 
-  if ( !sol ) {
+  if ( !(sol || ls || disp) ) {
     fprintf(stderr,"\n  ## Error: %s: MMG3D_Init_mesh:\n"
             " you need to initialize a solution structure"
-            " (of type MMG5_pSol and indentified by the MMG5_ARG_ppMet or"
-            " MMG5_ARG_ppLs preprocessor variable) that will contain the output"
-            " mesh metric"
-            " informations, and the input one, if provided.\n.",__func__);
+            " (of type MMG5_pSol and indentified by the MMG5_ARG_ppMet, "
+            " MMG5_ARG_ppLs or MMG5_ARG_ppDisp preprocessor variable)"
+            " that will contain the output mesh metric, level-set or"
+            " displacement.\n",__func__);
     return 0;
   }
 
@@ -268,7 +276,7 @@ int MMG3D_Free_all_var(va_list argptr)
 
   meshCount = 0;
   mesh = NULL;
-  disp = sol = sols = NULL;
+  disp = sol = sols = ls = NULL;
 
   while ( (typArg = va_arg(argptr,int)) != MMG5_ARG_end )
   {
@@ -310,7 +318,7 @@ int MMG3D_Free_all_var(va_list argptr)
 
   if ( !MMG3D_Free_structures(MMG5_ARG_start,
                               MMG5_ARG_ppMesh, mesh, MMG5_ARG_ppMet, sol,
-                              MMG5_ARG_ppMet, ls,MMG5_ARG_ppDisp, disp,
+                              MMG5_ARG_ppLs, ls,MMG5_ARG_ppDisp, disp,
                               MMG5_ARG_end) ) {
     return 0;
   }
@@ -379,7 +387,7 @@ int MMG3D_Free_structures_var(va_list argptr)
 
   meshCount = 0;
   mesh = NULL;
-  disp = sol = NULL;
+  disp = sol = ls = NULL;
 
   while ( (typArg = va_arg(argptr,int)) != MMG5_ARG_end )
   {
@@ -461,19 +469,21 @@ int MMG3D_Free_structures_var(va_list argptr)
     MMG5_DEL_MEM((*mesh),(*mesh)->xprism);
 
   /* disp */
-  if ( disp && (*disp) && (*disp)->m )
+  if ( disp && (*disp) && (*disp)->m ) {
     MMG5_DEL_MEM((*mesh),(*disp)->m);
+  }
 
   /* ls */
-  if ( ls && (*ls) && (*ls)->m )
+  if ( ls && (*ls) && (*ls)->m ) {
     MMG5_DEL_MEM((*mesh),(*ls)->m);
+  }
 
-  if ( sol ) {
-    MMG5_Free_structures(*mesh,*sol);
+  /* met */
+  if ( sol && (*sol) && (*sol)->m ) {
+    MMG5_DEL_MEM((*mesh),(*sol)->m);
   }
-  else {
-    MMG5_Free_structures(*mesh,NULL);
-  }
+
+  MMG5_Free_structures(*mesh,NULL);
 
   return 1;
 }

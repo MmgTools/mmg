@@ -90,22 +90,29 @@ void MMGS_Init_woalloc_mesh(MMG5_pMesh mesh, MMG5_pSol *met,MMG5_pSol *ls ) {
   (mesh)->nsols = 0;
 
   if ( met && *met ) {
-    (*met)->dim  = 2;
+    (*met)->dim  = 3;
     (*met)->ver  = 2;
     (*met)->size = 1;
+    (*met)->type = 1;
   }
 
   if ( ls && *ls ) {
-    (*ls)->dim  = 2;
+    (*ls)->dim  = 3;
     (*ls)->ver  = 2;
     (*ls)->size = 1;
+    (*ls)->type = 1;
   }
 
   /* Default parameters values */
   MMGS_Init_parameters(mesh);
 
   /* Default vaules for file names */
-  MMGS_Init_fileNames(mesh,*met);
+  if ( met ) {
+    MMGS_Init_fileNames(mesh,*met);
+  }
+  else {
+    MMGS_Init_fileNames(mesh,NULL);
+  }
 
   if ( ls && *ls ) {
     MMGS_Set_inputSolName(mesh,*ls,"");
@@ -178,15 +185,16 @@ int MMGS_Init_mesh_var( va_list argptr ) {
     return 0;
   }
 
-  if ( !sol ) {
+  if ( !(sol || ls) ) {
     fprintf(stderr,"\n  ## Error: %s: MMGS_Init_mesh:\n"
             " you need to initialize a solution structure"
-            " (of type MMG5_pSol and indentified by the MMG5_ARG_ppMet or the"
-            " MMG5_ARG_ppLs preprocessor variable) that will contain the output"
-            " mesh metric informations, and the input one, if provided.\n.",
+            " (of type MMG5_pSol and indentified by the MMG5_ARG_ppMet or "
+            " MMG5_ARG_ppLs preprocessor variable)"
+            " that will contain the output mesh metric or the level-set.\n",
             __func__);
     return 0;
   }
+
 
   /* allocations */
   if ( !MMGS_Alloc_mesh(mesh,sol,ls) )  return 0;
@@ -226,12 +234,12 @@ int MMGS_Free_all_var(va_list argptr)
 {
 
   MMG5_pMesh     *mesh;
-  MMG5_pSol      psl,*sol,*sols;
+  MMG5_pSol      psl,*sol,*sols,*ls;
   int            typArg;
   int            meshCount,i;
 
   meshCount = 0;
-  sol = sols = NULL;
+  sol = sols = ls = NULL;
 
   while ( (typArg = va_arg(argptr,int)) != MMG5_ARG_end )
   {
@@ -241,8 +249,11 @@ int MMGS_Free_all_var(va_list argptr)
       mesh = va_arg(argptr,MMG5_pMesh*);
       ++meshCount;
       break;
-    case(MMG5_ARG_ppMet): case(MMG5_ARG_ppLs):
+    case(MMG5_ARG_ppMet):
       sol = va_arg(argptr,MMG5_pSol*);
+      break;
+    case(MMG5_ARG_ppLs):
+      ls = va_arg(argptr,MMG5_pSol*);
       break;
     case(MMG5_ARG_ppSols):
       sols = va_arg(argptr,MMG5_pSol*);
@@ -266,6 +277,7 @@ int MMGS_Free_all_var(va_list argptr)
 
   if ( !MMGS_Free_structures(MMG5_ARG_start,
                              MMG5_ARG_ppMesh, mesh, MMG5_ARG_ppMet, sol,
+                             MMG5_ARG_ppLs, ls,
                              MMG5_ARG_end) )
     return 0;
 
@@ -317,12 +329,12 @@ int MMGS_Free_structures_var(va_list argptr)
 {
 
   MMG5_pMesh     *mesh;
-  MMG5_pSol      *sol;
+  MMG5_pSol      *sol,*ls;
   int            typArg;
   int            meshCount;
 
   meshCount = 0;
-  sol = NULL;
+  sol = ls = NULL;
 
   while ( (typArg = va_arg(argptr,int)) != MMG5_ARG_end )
   {
@@ -332,8 +344,11 @@ int MMGS_Free_structures_var(va_list argptr)
       mesh = va_arg(argptr,MMG5_pMesh*);
       ++meshCount;
       break;
-    case(MMG5_ARG_ppMet): case(MMG5_ARG_ppLs):
+    case(MMG5_ARG_ppMet):
       sol = va_arg(argptr,MMG5_pSol*);
+      break;
+    case(MMG5_ARG_ppLs):
+      ls = va_arg(argptr,MMG5_pSol*);
       break;
     default:
       fprintf(stderr,"\n  ## Error: %s: MMGS_Free_structures:\n"
@@ -353,27 +368,24 @@ int MMGS_Free_structures_var(va_list argptr)
   }
 
   MMGS_Free_names(MMG5_ARG_start,
-                   MMG5_ARG_ppMesh, mesh, MMG5_ARG_ppMet, sol,
-                   MMG5_ARG_end);
+                  MMG5_ARG_ppMesh, mesh, MMG5_ARG_ppMet, sol,
+                  MMG5_ARG_ppLs, ls,
+                  MMG5_ARG_end);
 
- /* mesh */
+  /* mesh */
   assert(mesh && *mesh);
 
-  if ( (*mesh)->edge )
-    MMG5_DEL_MEM((*mesh),(*mesh)->edge);
-
-  if ( (*mesh)->adja )
-    MMG5_DEL_MEM((*mesh),(*mesh)->adja);
-
-  if ( (*mesh)->tria )
-    MMG5_DEL_MEM((*mesh),(*mesh)->tria);
-
-  if ( sol ) {
-    MMG5_Free_structures(*mesh,*sol);
+  /* ls */
+  if ( ls && (*ls) && (*ls)->m ) {
+    MMG5_DEL_MEM((*mesh),(*ls)->m);
   }
-  else {
-    MMG5_Free_structures(*mesh,NULL);
+
+  /* met */
+  if ( sol && (*sol) && (*sol)->m ) {
+    MMG5_DEL_MEM((*mesh),(*sol)->m);
   }
+
+  MMG5_Free_structures(*mesh,NULL);
 
   return 1;
 }
@@ -409,12 +421,12 @@ int MMGS_Free_names_var(va_list argptr)
 {
 
   MMG5_pMesh     *mesh;
-  MMG5_pSol      *sol;
+  MMG5_pSol      *sol,*ls;
   int            typArg;
   int            meshCount;
 
   meshCount = 0;
-  sol = NULL;
+  sol = ls = NULL;
 
   while ( (typArg = va_arg(argptr,int)) != MMG5_ARG_end )
   {
@@ -424,8 +436,11 @@ int MMGS_Free_names_var(va_list argptr)
       mesh = va_arg(argptr,MMG5_pMesh*);
       ++meshCount;
       break;
-    case(MMG5_ARG_ppMet): case(MMG5_ARG_ppLs):
+    case(MMG5_ARG_ppMet):
       sol = va_arg(argptr,MMG5_pSol*);
+      break;
+    case(MMG5_ARG_ppLs):
+      ls = va_arg(argptr,MMG5_pSol*);
       break;
     default:
       fprintf(stderr,"\n  ## Error: %s: MMGS_Free_names:\n"
@@ -452,6 +467,16 @@ int MMGS_Free_names_var(va_list argptr)
   }
   else {
     MMG5_mmgFree_names(*mesh,NULL);
+  }
+  /* ls */
+  if ( ls && *ls ) {
+    if ( (*ls)->namein ) {
+      MMG5_DEL_MEM(*mesh,(*ls)->namein);
+    }
+
+    if ( (*ls)->nameout ) {
+      MMG5_DEL_MEM(*mesh,(*ls)->nameout);
+    }
   }
 
   return 1;

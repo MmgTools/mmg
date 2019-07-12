@@ -110,11 +110,6 @@ static int MMG5_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
             return 0;
           }
         }
-        /* else if ( !strcmp(buf,"vertices") || !strcmp(buf,"vertex") ) { */
-        /*   if ( !MMGS_Set_localParameter(mesh,met,MMG5_Vertex,ref,fp1,fp2,hausd) ) { */
-        /*     return 0; */
-        /*   } */
-        /* } */
         else {
           fprintf(stdout,"  %%%% Wrong format: %s\n",buf);
           return 0;
@@ -247,12 +242,12 @@ int MMGS_defaultOption(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
   }
 
   /* scaling mesh and hmin/hmax computation*/
-  if ( !MMG5_scaleMesh(mesh,met) )   _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+  if ( !MMG5_scaleMesh(mesh,met,sol) )   _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
 
   /* Specific meshing + hmin/hmax update */
   if ( mesh->info.optim ) {
     if ( !MMGS_doSol(mesh,met) ) {
-      if ( !MMG5_unscaleMesh(mesh,met) )   _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+      if ( !MMG5_unscaleMesh(mesh,met,sol) )   _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
         _LIBMMG5_RETURN(mesh,met,sol,MMG5_LOWFAILURE);
     }
     MMG5_solTruncatureForOptim(mesh,met);
@@ -260,13 +255,13 @@ int MMGS_defaultOption(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
 
   if ( mesh->info.hsiz > 0. ) {
     if ( !MMG5_Compute_constantSize(mesh,met,&hsiz) ) {
-     if ( !MMG5_unscaleMesh(mesh,met) )   _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+     if ( !MMG5_unscaleMesh(mesh,met,sol) )   _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
        _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
     }
   }
 
   /* unscaling mesh */
-  if ( !MMG5_unscaleMesh(mesh,met) )   _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+  if ( !MMG5_unscaleMesh(mesh,met,sol) )   _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
 
   /* Save the local parameters file */
   mesh->mark = 0;
@@ -315,7 +310,7 @@ int main(int argc,char *argv[]) {
                   MMG5_ARG_end);
 
   /* command line */
-  if ( !MMGS_parsar(argc,argv,mesh,met) )  return MMG5_STRONGFAILURE;
+  if ( !MMGS_parsar(argc,argv,mesh,met,ls) )  return MMG5_STRONGFAILURE;
 
   /* load data */
   if ( mesh->info.imprim >= 0 )
@@ -334,20 +329,24 @@ int main(int argc,char *argv[]) {
     }
     msh = 1;
   }
+
   if ( ier<1 )
     MMGS_RETURN_AND_FREE(mesh,met,ls,MMG5_STRONGFAILURE);
 
   /* read level-set if any */
   if ( mesh->info.iso ) {
-    /* The name of the level-set file has been parsed in met */
-    if ( !MMGS_Set_inputSolName(mesh,ls,met->namein) )
-      MMGS_RETURN_AND_FREE(mesh,met,ls,MMG5_STRONGFAILURE);
-
     if ( !msh ) {
       ier = MMGS_loadSol(mesh,ls,ls->namein);
       if ( ier < 1 ) {
         fprintf(stdout,"  ## ERROR: UNABLE TO LOAD LEVEL-SET.\n");
         MMGS_RETURN_AND_FREE(mesh,met,ls,MMG5_STRONGFAILURE);
+      }
+      if ( met->namein ) {
+        ier = MMGS_loadSol(mesh,met,met->namein);
+        if ( ier < 1 ) {
+          fprintf(stdout,"  ## ERROR: UNABLE TO LOAD METRIC.\n");
+          MMGS_RETURN_AND_FREE(mesh,met,ls,MMG5_STRONGFAILURE);
+        }
       }
     }
     if ( ls->m==NULL ) {
@@ -385,6 +384,12 @@ int main(int argc,char *argv[]) {
     ier = MMGS_mmgsls(mesh,ls,met);
   }
   else {
+    if ( met && ls && met->namein && ls->namein ) {
+      fprintf(stdout,"\n  ## ERROR: IMPOSSIBLE TO PROVIDE BOTH A METRIC"
+              " AND A SOLUTION IN ADAPTATION MODE.\n");
+      MMGS_RETURN_AND_FREE(mesh,met,ls,MMG5_STRONGFAILURE);
+    }
+
     ier = MMGS_mmgslib(mesh,met);
   }
 

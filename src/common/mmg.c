@@ -206,6 +206,9 @@ void MMG5_chooseOutputFormat(MMG5_pMesh mesh, int *msh) {
  * Truncate the metric computed by the DoSol function by hmax and hmin values
  * (if setted by the user). Set hmin and hmax if they are not setted.
  *
+ * \warning works only for a metric computed by the DoSol function because we
+ * suppose that we have a diagonal tensor in aniso.
+ *
  */
 void MMG5_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
   MMG5_pTetra pt;
@@ -213,7 +216,7 @@ void MMG5_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
   double      isqhmin, isqhmax;
   int         i,k,iadr,sethmin,sethmax;
 
-  assert ( mesh->info.optim || mesh->info.hsiz > 0. );
+  assert ( mesh->info.optim );
 
   /* Detect the point used only by prisms */
   if ( mesh->nprism ) {
@@ -281,23 +284,9 @@ void MMG5_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
     }
   }
 
-
-  if ( !sethmin ) {
-    mesh->info.hmin *=.1;
-    /* Check that user has not given a hmax value lower that the founded
-     * hmin. */
-    if ( mesh->info.hmin > mesh->info.hmax ) {
-      mesh->info.hmin = 0.1*mesh->info.hmax;
-    }
-  }
-  if ( !sethmax ) {
-    mesh->info.hmax *=10.;
-    /* Check that user has not given a hmin value bigger that the founded
-     * hmax. */
-    if ( mesh->info.hmax < mesh->info.hmin ) {
-      mesh->info.hmax = 10.*mesh->info.hmin;
-    }
-  }
+  /* Check the compatibility between the user settings and the automatically
+   * computed values */
+  MMG5_check_hminhmax(mesh,sethmin,sethmax);
 
   /* vertex size */
   if ( met->size == 1 ) {

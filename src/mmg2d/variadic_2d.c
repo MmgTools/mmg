@@ -104,18 +104,21 @@ void MMG2D_Init_woalloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *met,MMG5_pSol *ls,MMG5
     (*met)->dim  = 2;
     (*met)->ver  = 2;
     (*met)->size = 1;
+    (*met)->type = 1;
   }
 
   if ( ls && *ls ) {
     (*ls)->dim  = 2;
     (*ls)->ver  = 2;
     (*ls)->size = 1;
+    (*ls)->type = 1;
   }
 
   if ( disp && *disp ) {
     (*disp)->dim  = 2;
     (*disp)->ver  = 2;
     (*disp)->size = 2;
+    (*disp)->type = 2;
   }
 
   /* Default parameters values */
@@ -216,10 +219,10 @@ int MMG2D_Init_mesh_var( va_list argptr ) {
   if ( !(sol || ls || disp) ) {
     fprintf(stderr,"\n  ## Error: %s: MMG2D_Init_mesh:\n"
             " you need to initialize a solution structure"
-            " (of type MMG5_pSol and indentified by the MMG5_ARG_ppMet or"
-            " MMG5_ARG_ppLs preprocessor variable)"
-            " that will contain the output mesh metric"
-            " informations, and the input one, if provided.\n.",__func__);
+            " (of type MMG5_pSol and indentified by the MMG5_ARG_ppMet, "
+            " MMG5_ARG_ppLs or MMG5_ARG_ppDisp preprocessor variable)"
+            " that will contain the output mesh metric, level-set or"
+            " displacement.\n",__func__);
     return 0;
   }
 

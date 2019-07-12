@@ -494,9 +494,6 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
     rewind(inm);
     fseek(inm,posned,SEEK_SET);
 
-    MMG5_ADD_MEM(mesh,(mesh->na+1)*sizeof(MMG5_Edge),"initial edges",return 0);
-    MMG5_SAFE_CALLOC(mesh->edge,mesh->na+1,MMG5_Edge,return 0);
-
     /* Skip edges with MG_ISO refs */
     if( mesh->info.iso ) {
       mesh->na = 0;
@@ -529,8 +526,9 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
           if ( MG_CRN & mesh->point[b].tag ) { mesh->point[b].tag &= ~MG_CRN; }
         }
       }
-      if( !mesh->na )
+      if( !mesh->na ){
         MMG5_DEL_MEM(mesh,mesh->edge);
+      }
 
       else if ( mesh->na < na ) {
         MMG5_ADD_MEM(mesh,(mesh->na-na)*sizeof(MMG5_Edge),"edges",
@@ -1460,7 +1458,10 @@ int MMGS_saveSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
   MMG5_pPoint  ppt;
   int          binch,bin,ier,k;
 
-  if ( !met->m )  return -1;
+  if ( !met->m ) {
+    fprintf(stderr,"\n  ## Warning: %s: no metric data to save.\n",__func__);
+    return 1;
+  }
 
   met->ver = 2;
 

@@ -413,6 +413,15 @@ void MMG5_Free_structures(MMG5_pMesh mesh,MMG5_pSol sol){
   if ( mesh->edge )
     MMG5_DEL_MEM(mesh,mesh->edge);
 
+  if ( mesh->adja )
+    MMG5_DEL_MEM(mesh,mesh->adja);
+
+  if ( mesh->tria )
+    MMG5_DEL_MEM(mesh,mesh->tria);
+
+  if ( mesh->adjt )
+    MMG5_DEL_MEM(mesh,mesh->adjt);
+
   /* sol */
   if ( sol && sol->m )
     MMG5_DEL_MEM(mesh,sol->m);

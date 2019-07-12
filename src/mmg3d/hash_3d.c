@@ -767,6 +767,8 @@ int MMG5_setNmTag(MMG5_pMesh mesh, MMG5_Hash *hash) {
  */
 int MMG3D_hashTria(MMG5_pMesh mesh, MMG5_Hash *hash) {
 
+  MMG5_DEL_MEM(mesh,mesh->adjt);
+
   MMG5_ADD_MEM(mesh,(3*mesh->nt+4)*sizeof(int),"surfacic adjacency table",return 0);
   MMG5_SAFE_CALLOC(mesh->adjt,3*mesh->nt+4,int,return 0);
 
@@ -1034,7 +1036,7 @@ int MMG5_hNew(MMG5_pMesh mesh,MMG5_HGeom *hash,int hsiz,int hmax) {
 int MMG5_hGeom(MMG5_pMesh mesh) {
   MMG5_pTria   pt;
   MMG5_pEdge   pa;
-  MMG5_Hash   hash;
+  MMG5_Hash    hash;
   int         *adja,k,kk,edg,ier;
   int16_t      tag;
   char         i,i1,i2;
@@ -1099,9 +1101,10 @@ int MMG5_hGeom(MMG5_pMesh mesh) {
   /* else, infer special edges from information carried by triangles */
   else {
     if ( !mesh->adjt ) {
+      memset(&hash,0x0,sizeof(MMG5_Hash));
       ier = MMG3D_hashTria(mesh,&hash);
-      if ( !ier ) return 0;
       MMG5_DEL_MEM(mesh,hash.item);
+      if ( !ier ) return 0;
     }
 
     for (k=1; k<=mesh->nt; k++) {

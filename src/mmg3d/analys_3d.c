@@ -763,8 +763,8 @@ int MMG3D_analys(MMG5_pMesh mesh) {
   /* Set surface triangles to required in nosurf mode or for parallel boundaries */
   MMG3D_set_reqBoundaries(mesh);
 
-
   /* create surface adjacency */
+  memset ( &hash, 0x0, sizeof(MMG5_Hash));
   if ( !MMG3D_hashTria(mesh,&hash) ) {
     MMG5_DEL_MEM(mesh,hash.item);
     fprintf(stderr,"\n  ## Hashing problem (2). Exit program.\n");

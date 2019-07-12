@@ -1486,6 +1486,13 @@ int MMG2D_saveSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 
   if ( !sol->np )  return 1;
 
+
+  if ( !(sol->np || sol->m) ) {
+    fprintf(stderr,"\n  ## Warning: %s: no metric data to save.\n",__func__);
+    return 1;
+  }
+
+
   sol->ver = 2;
 
   if ( sol->dim==2 && mesh->info.nreg ) {

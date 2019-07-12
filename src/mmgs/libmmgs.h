@@ -1437,17 +1437,19 @@ int  MMGS_mmgslib(MMG5_pMesh mesh, MMG5_pSol met);
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol (level-set) structure.
+ * \param sol pointer toward the sol (level-set) structure.
  * \param met pointer toward the sol (metric) structure (optionnal).
  * \return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if fail but a
  * conform mesh is saved or \ref MMG5_STRONGFAILURE if fail and we can't save
  * the mesh.
  *
- * Main program for level set discretization library.
+ * Main program for level set discretization library. If a metric \a met is
+ * provided, use it to adapt the mesh.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_MMGSLS(mesh,sol,met,retval)\n
- * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol,met\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
+ * >     MMG5_DATA_PTR_T                :: met\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -1523,6 +1525,8 @@ int MMGS_usage(char *prog);
  * \param argv command line arguments.
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.
+ * \param sol pointer toward a level-set or displacement
+ *
  * \return 1.
  *
  * Store command line arguments.
@@ -1530,7 +1534,7 @@ int MMGS_usage(char *prog);
  * \remark no matching fortran function.
  *
  */
-int  MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met);
+int  MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol);
 /**
  * \param mesh pointer toward the mesh structure.
  * \return 0 if fail, 1 if success.

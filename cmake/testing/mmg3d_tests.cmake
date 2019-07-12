@@ -313,7 +313,7 @@ ADD_TEST(NAME mmg3d_LeakCheck_AbnormalEnd3
   ${MMG3D_CI_TESTS}/LeakCheck_AbnormalEnd3/d -sol
   ${MMG3D_CI_TESTS}/LeakCheck_AbnormalEnd3/dsol.sol -ls
   -out ${CTEST_OUTPUT_DIR}/mmg3d_LeakCheck_AbnormalEnd3-d.o.meshb)
-SET(passRegex "## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER")
+SET(passRegex "## ERROR: UNABLE TO LOAD LEVEL-SET.")
 SET_PROPERTY(TEST mmg3d_LeakCheck_AbnormalEnd3
   PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}")
 #####
@@ -343,6 +343,19 @@ ADD_TEST(NAME mmg3d_hsizAndNosurfAni
   ${MMG3D_CI_TESTS}/Cube/cube
   -out ${CTEST_OUTPUT_DIR}/mmg3d_hsizNosurfAni.o.meshb)
 
+ADD_TEST(NAME mmg3d_val
+  COMMAND ${EXECUT_MMG3D} -v 5 -val
+  ${MMG3D_CI_TESTS}/Cube/cube
+  ${CTEST_OUTPUT_DIR}/mmg3d_cube-val.o.meshb
+  )
+
+#ADD_TEST(NAME mmg3d_default
+#  COMMAND ${EXECUT_MMG3D} -v 5 -default
+#  ${MMG3D_CI_TESTS}/Cube/cube
+#  -out ${CTEST_OUTPUT_DIR}/mmg3d_default.o.meshb)
+
+SET_PROPERTY(TEST mmg3d_val #mmg3d_default
+  PROPERTY WILL_FAIL TRUE)
 
 ###############################################################################
 #####
@@ -466,7 +479,6 @@ ADD_TEST(NAME mmg3d_OptimAni_Sphere
   ${CTEST_OUTPUT_DIR}/mmg3d_OptimAni_Sphere.o.mesh
   )
 
-
 ###############################################################################
 #####
 #####         Check Results
@@ -474,17 +486,79 @@ ADD_TEST(NAME mmg3d_OptimAni_Sphere
 ###############################################################################
 #####
 
+ADD_TEST(NAME mmg3d_OptLs_plane_val
+  COMMAND ${EXECUT_MMG3D} -v 5 -ls -val
+  ${MMG3D_CI_TESTS}/OptLs_plane/plane
+  -sol ${MMG3D_CI_TESTS}/OptLs_plane/m.sol
+  -met ${MMG3D_CI_TESTS}/OptLs_plane/met.sol
+  ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_plane-nonzero.o.meshb)
+
+#ADD_TEST(NAME mmg3d_OptLs_plane_default
+#  COMMAND ${EXECUT_MMG3D} -v 5 -ls -default
+#  ${MMG3D_CI_TESTS}/OptLs_plane/plane
+#  -sol ${MMG3D_CI_TESTS}/OptLs_plane/m.sol
+#  -met ${MMG3D_CI_TESTS}/OptLs_plane/met.sol
+#  ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_plane-nonzero.o.meshb)
+
+SET_PROPERTY(TEST  mmg3d_OptLs_plane_val #mmg3d_OptLs_plane_default
+  PROPERTY WILL_FAIL TRUE)
+
+# ls oritentation
 ADD_TEST(NAME mmg3d_OptLs_plane_p
   COMMAND ${EXECUT_MMG3D} -v 5 -ls
   ${MMG3D_CI_TESTS}/OptLs_plane/plane
   -sol ${MMG3D_CI_TESTS}/OptLs_plane/p.sol
-  mmg3d_OptLs_plane-p.o.meshb)
+  ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_plane-p.o.meshb)
 
 ADD_TEST(NAME mmg3d_OptLs_plane_m
   COMMAND ${EXECUT_MMG3D} -v 5 -ls
   ${MMG3D_CI_TESTS}/OptLs_plane/plane
   -sol ${MMG3D_CI_TESTS}/OptLs_plane/m.sol
-  mmg3d_OptLs_plane-m.o.meshb)
+  ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_plane-m.o.meshb)
+
+# non-zero ls
+ADD_TEST(NAME mmg3d_OptLs_plane_nonzero
+  COMMAND ${EXECUT_MMG3D} -v 5 -ls 0.1
+  ${MMG3D_CI_TESTS}/OptLs_plane/plane
+  -sol ${MMG3D_CI_TESTS}/OptLs_plane/m.sol
+  ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_plane-nonzero.o.meshb)
+
+# ls discretization + optim
+ADD_TEST(NAME mmg3d_OptLs_plane_optim
+  COMMAND ${EXECUT_MMG3D} -v 5 -ls -optim
+  ${MMG3D_CI_TESTS}/OptLs_plane/plane
+  -sol ${MMG3D_CI_TESTS}/OptLs_plane/m.sol
+  ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_plane-nonzero.o.meshb)
+
+# ls discretization + optim + aniso
+ADD_TEST(NAME mmg3d_OptLs_plane_optimAni
+  COMMAND ${EXECUT_MMG3D} -v 5 -ls -optim -A
+  ${MMG3D_CI_TESTS}/OptLs_plane/plane
+  -sol ${MMG3D_CI_TESTS}/OptLs_plane/m.sol
+  ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_plane-nonzero.o.meshb)
+
+# ls discretization + hsiz
+ADD_TEST(NAME mmg3d_OptLs_plane_hsiz
+  COMMAND ${EXECUT_MMG3D} -v 5 -ls -hsiz 0.2
+  ${MMG3D_CI_TESTS}/OptLs_plane/plane
+  -sol ${MMG3D_CI_TESTS}/OptLs_plane/m.sol
+  ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_plane-nonzero.o.meshb)
+
+# ls discretization + hsiz
+ADD_TEST(NAME mmg3d_OptLs_plane_hsizAni
+  COMMAND ${EXECUT_MMG3D} -v 5 -ls -hsiz 0.2 -A
+  ${MMG3D_CI_TESTS}/OptLs_plane/plane
+  -sol ${MMG3D_CI_TESTS}/OptLs_plane/m.sol
+  ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_plane-nonzero.o.meshb)
+
+# ls discretization + metric
+ADD_TEST(NAME mmg3d_OptLs_plane_withMetAndLs
+  COMMAND ${EXECUT_MMG3D} -v 5 -ls
+  ${MMG3D_CI_TESTS}/OptLs_plane/plane
+  -sol ${MMG3D_CI_TESTS}/OptLs_plane/m.sol
+  -met ${MMG3D_CI_TESTS}/OptLs_plane/met.sol
+  ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_plane-nonzero.o.meshb)
+
 
 IF ( LONG_TESTS )
   # Test the Ls option
@@ -493,7 +567,7 @@ IF ( LONG_TESTS )
     ${MMG3D_CI_TESTS}/OptLs_cube303d_hminMax_hgrad1.2_hausd0.005/cube303d
     -sol ${MMG3D_CI_TESTS}/OptLs_cube303d_hminMax_hgrad1.2_hausd0.005/cube303d.sol
     -hausd 0.005 -nr -hgrad 1.2 -hmin 0.001 -hmax 0.1
-    mmg3d_OptLs_cube303d_hminMax_hgrad1.2_hausd0.005-cube303d.o.meshb)
+    ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_cube303d_hminMax_hgrad1.2_hausd0.005-cube303d.o.meshb)
   ADD_TEST(NAME mmg3d_OptLs_temp_hminMax_hgrad1.2_hausd0.1
     COMMAND ${EXECUT_MMG3D} -v 5 -ls
     ${MMG3D_CI_TESTS}/OptLs_temp_hminMax_hgrad1.2_hausd0.1/temp

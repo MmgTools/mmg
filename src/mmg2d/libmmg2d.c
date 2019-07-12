@@ -47,6 +47,9 @@
  * Truncate the metric computed by the DoSol function by hmax and hmin values
  * (if setted by the user). Set hmin and hmax if they are not setted.
  *
+ * \warning works only for a metric computed by the DoSol function because we
+ * suppose that we have a diagonal tensor in aniso.
+ *
  */
 void MMG2D_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
   MMG5_pPoint ppt;
@@ -667,8 +670,8 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
     _LIBMMG5_RETURN(mesh,sol,met,MMG5_STRONGFAILURE);
   } else if ( sol->np && (sol->np != mesh->np) ) {
     fprintf(stdout,"\n  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
-    MMG5_DEL_MEM(mesh,sol->m);
-    sol->np = 0;
+    if ( mettofree ) { MMG5_SAFE_FREE (met); }
+    _LIBMMG5_RETURN(mesh,sol,met,MMG5_STRONGFAILURE);
   }
 
   /* specific meshing */
@@ -685,6 +688,11 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
              " WITH AN INPUT METRIC.\n");
       if ( mettofree ) { MMG5_SAFE_FREE (met); }
       _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+    }
+    if ( met->np != mesh->np ) {
+      fprintf(stdout,"\n  ## WARNING: WRONG METRIC NUMBER. IGNORED\n");
+      if ( mettofree ) { MMG5_SAFE_FREE (met); }
+      _LIBMMG5_RETURN(mesh,sol,met,MMG5_STRONGFAILURE);
     }
   }
 

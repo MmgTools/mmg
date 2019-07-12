@@ -66,7 +66,7 @@ void MMG2D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
  *
  */
 int MMG2D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
-  int        ret,i,j;
+  int        ret,ref,i,j,npar;
   float      fp1,fp2,fp3;
   char       *ptr,data[256];
   FILE       *in;
@@ -106,6 +106,7 @@ int MMG2D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
       }
 
       if ( mesh->info.nmat ) {
+        MMG5_ADD_MEM(mesh,(mesh->info.nmat)*sizeof(MMG5_Mat),"multi material params",return 0);
         MMG5_SAFE_CALLOC(mesh->info.mat,mesh->info.nmat,MMG5_Mat,return 0);
         for (i=0; i<mesh->info.nmat; i++) {
           pm = &mesh->info.mat[i];
@@ -128,24 +129,25 @@ int MMG2D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
     }
     /* Read user-defined local parameters and store them in the structure info->par */
     else if ( !strcmp(data,"parameters") ) {
-      ret = fscanf(in,"%d",&mesh->info.npar);
+      ret = fscanf(in,"%d",&npar);
 
       if ( !ret ) {
-        fprintf(stderr,"  %%%% Wrong format: %d\n",mesh->info.npar);
-        return (0);
+        fprintf(stderr,"  %%%% Wrong format: %d\n",npar);
+        return 0;
       }
-      else if ( mesh->info.npar > MMG2D_LPARMAX ) {
-        fprintf(stderr,"  %%%% Too many local parameters %d. Abort\n",mesh->info.npar);
-        return (0);
+      else if ( npar > MMG2D_LPARMAX ) {
+        fprintf(stderr,"  %%%% Too many local parameters %d. Abort\n",npar);
+        return 0;
       }
 
       /* Allocate memory and fill the info->par table (adding one, corresponding to the command line data) */
-      if ( mesh->info.npar ) {
-        MMG5_SAFE_CALLOC(mesh->info.par,mesh->info.npar,MMG5_Par,return 0);
+      if ( npar ) {
+        if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_numberOfLocalParam,npar) )
+          return 0;
 
         for (i=0; i<mesh->info.npar; i++) {
           ppar = &mesh->info.par[i];
-          ret = fscanf(in,"%d %255s",&ppar->ref,data);
+          ret = fscanf(in,"%d %255s",&ref,data);
           if ( ret ) ret = fscanf(in,"%f %f %f",&fp1,&fp2,&fp3);
 
           if ( !ret ) {
@@ -155,24 +157,18 @@ int MMG2D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
 
           for (j=0; j<strlen(data); j++) data[j] = tolower(data[j]);
           if ( !strcmp(data,"triangles") || !strcmp(data,"triangle") ) {
-            ppar->hmin  = fp1;
-            ppar->hmax  = fp2;
-            ppar->hausd = fp3;
-            ppar->elt   = MMG5_Triangle;
-
+            if ( !MMG2D_Set_localParameter(mesh,met,MMG5_Triangle,ref,fp1,fp2,fp3) ) {
+              return 0;
+            }
           }
           else if ( !strcmp(data,"edges") || !strcmp(data,"edge") ) {
-            ppar->hmin  = fp1;
-            ppar->hmax  = fp2;
-            ppar->hausd = fp3;
-            ppar->elt   = MMG5_Edg;
-
+            if ( !MMG2D_Set_localParameter(mesh,met,MMG5_Edg,ref,fp1,fp2,fp3) ) {
+              return 0;
+            }
           }
-          else if ( !strcmp(data,"vertices") || !strcmp(data,"vertex") ) {
-            ppar->hmin  = fp1;
-            ppar->hmax  = fp2;
-            ppar->hausd = fp3;
-            ppar->elt   = MMG5_Vertex;
+          else {
+            fprintf(stderr,"  %%%% Wrong format: %s\n",data);
+            return 0;
           }
         }
       }

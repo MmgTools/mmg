@@ -1959,7 +1959,8 @@ enum MMG3D_Param {
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_MMG3DLS(mesh,sol,met,retval)\n
- * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol,met\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
+ * >     MMG5_DATA_PTR_T                :: met\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -2006,7 +2007,8 @@ enum MMG3D_Param {
  * \param argc number of command line arguments.
  * \param argv command line arguments.
  * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
+ * \param met pointer toward a metric
+ * \param sol pointer toward a level-set or displacement
  * \return 1 if we want to run Mmg after, 0 if not or if fail.
  *
  * Store command line arguments.
@@ -2014,7 +2016,7 @@ enum MMG3D_Param {
  * \remark no matching fortran function.
  *
  */
-  int  MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met);
+  int  MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol);
 
 /**
  * \param mesh pointer toward the mesh structure.

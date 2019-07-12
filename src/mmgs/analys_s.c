@@ -568,6 +568,7 @@ static int norver(MMG5_pMesh mesh) {
 
     for (i=0; i<3; i++) {
       ppt = &mesh->point[pt->v[i]];
+
       if ( MS_SIN(ppt->tag) || MG_EDG(ppt->tag) ) {
         if ( mesh->nc1 ) {
           if ( ppt->n[0]*ppt->n[0]+ppt->n[1]*ppt->n[1]+ppt->n[2]*ppt->n[2] > 0 )
