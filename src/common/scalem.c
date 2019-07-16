@@ -389,7 +389,6 @@ int MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
  * Unscale the mesh and the size informations to their initial sizes.
  *
  */
-#warning to factorize
 int MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
   MMG5_pPoint     ppt;
   double          dd;

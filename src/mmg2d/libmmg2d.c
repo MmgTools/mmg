@@ -256,7 +256,7 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol met)
   /* Specific meshing */
   if ( mesh->info.optim ) {
     if ( !MMG2D_doSol(mesh,met) ) {
-     if ( !MMG2D_unscaleMesh(mesh,met,NULL) ) _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+     if ( !MMG5_unscaleMesh(mesh,met,NULL) ) _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
      _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
     }
     MMG2D_solTruncatureForOptim(mesh,met);
@@ -264,7 +264,7 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol met)
 
   if ( mesh->info.hsiz > 0. ) {
     if ( !MMG2D_Set_constantSize(mesh,met) ) {
-     if ( !MMG2D_unscaleMesh(mesh,met,NULL) ) _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+     if ( !MMG5_unscaleMesh(mesh,met,NULL) ) _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
      _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
     }
   }
@@ -278,14 +278,14 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol met)
   /* Print initial quality history */
   if ( mesh->info.imprim > 0  ||  mesh->info.imprim < -1 ) {
     if ( !MMG2D_outqua(mesh,met) ) {
-      if ( !MMG2D_unscaleMesh(mesh,met,NULL) ) _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+      if ( !MMG5_unscaleMesh(mesh,met,NULL) ) _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
       _LIBMMG5_RETURN(mesh,met,sol,MMG5_LOWFAILURE);
     }
   }
 
   /* Mesh analysis */
   if (! MMG2D_analys(mesh) ) {
-    if ( !MMG2D_unscaleMesh(mesh,met,NULL) ) _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+    if ( !MMG5_unscaleMesh(mesh,met,NULL) ) _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
     _LIBMMG5_RETURN(mesh,met,sol,MMG5_LOWFAILURE);
   }
 
@@ -304,7 +304,7 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol met)
 
   /* Mesh improvement */
   if ( !MMG2D_mmg2d1n(mesh,met) ) {
-    if ( !MMG2D_unscaleMesh(mesh,met,NULL) )  _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+    if ( !MMG5_unscaleMesh(mesh,met,NULL) )  _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
     MMG2D_RETURN_AND_PACK(mesh,met,sol,MMG5_LOWFAILURE);
   }
 
@@ -316,7 +316,7 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol met)
 
   /* Print output quality history */
   if ( !MMG2D_outqua(mesh,met) ) {
-     if ( !MMG2D_unscaleMesh(mesh,met,NULL) )  _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+     if ( !MMG5_unscaleMesh(mesh,met,NULL) )  _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
      MMG2D_RETURN_AND_PACK(mesh,met,sol,MMG5_LOWFAILURE);
    }
 
@@ -329,7 +329,7 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol met)
   if ( mesh->info.imprim > 0 )  fprintf(stdout,"\n  -- MESH PACKED UP\n");
 
   /* Unscale mesh */
-  if ( !MMG2D_unscaleMesh(mesh,met,NULL) )  _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+  if ( !MMG5_unscaleMesh(mesh,met,NULL) )  _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
   if (!MMG2D_pack(mesh,met,sol) ) _LIBMMG5_RETURN(mesh,met,sol,MMG5_LOWFAILURE);
 
   chrono(OFF,&(ctim[1]));
@@ -504,7 +504,7 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol met) {
   /* Delaunay triangulation of the set of points contained in the mesh,
    * enforcing the edges of the mesh */
   if ( !MMG2D_mmg2d2(mesh,met) )  {
-    if ( !MMG2D_unscaleMesh(mesh,met,NULL) )  _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+    if ( !MMG5_unscaleMesh(mesh,met,NULL) )  _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
     MMG2D_RETURN_AND_PACK(mesh,met,sol,MMG5_LOWFAILURE);
   }
 
@@ -522,20 +522,20 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol met) {
   /* specific meshing */
   if ( mesh->info.optim ) {
     if ( !MMG2D_doSol(mesh,met) ) {
-      if ( !MMG2D_unscaleMesh(mesh,met,NULL) )
+      if ( !MMG5_unscaleMesh(mesh,met,NULL) )
         _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
       MMG2D_RETURN_AND_PACK(mesh,met,sol,MMG5_LOWFAILURE);
     }
     MMG2D_solTruncatureForOptim(mesh,met);
   } else if (mesh->info.hsiz > 0.) {
     if ( !MMG2D_Set_constantSize(mesh,met) ) {
-     if ( !MMG2D_unscaleMesh(mesh,met,NULL) ) _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+     if ( !MMG5_unscaleMesh(mesh,met,NULL) ) _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
      _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
     }
   } else {
     /* Set default hmin and hmax values */
     if ( !MMG5_Set_defaultTruncatureSizes(mesh,mesh->info.hmin>0.,mesh->info.hmax>0.) ) {
-      if ( !MMG2D_unscaleMesh(mesh,met,NULL) )
+      if ( !MMG5_unscaleMesh(mesh,met,NULL) )
         _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
       MMG2D_RETURN_AND_PACK(mesh,met,sol,MMG5_LOWFAILURE);
     }
@@ -543,7 +543,7 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol met) {
 
   /* Mesh analysis */
   if (! MMG2D_analys(mesh) ) {
-    if ( !MMG2D_unscaleMesh(mesh,met,NULL) )
+    if ( !MMG5_unscaleMesh(mesh,met,NULL) )
       _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
     MMG2D_RETURN_AND_PACK(mesh,met,sol,MMG5_LOWFAILURE);
   }
@@ -560,7 +560,7 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol met) {
             met->size < 3 ? "ISOTROPIC" : "ANISOTROPIC");
 
   if ( !MMG2D_mmg2d1n(mesh,met) ) {
-    if ( !MMG2D_unscaleMesh(mesh,met,NULL) )  _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+    if ( !MMG5_unscaleMesh(mesh,met,NULL) )  _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
     MMG2D_RETURN_AND_PACK(mesh,met,sol,MMG5_LOWFAILURE);
   }
 
@@ -571,7 +571,7 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
   /* Unscale mesh */
-  if ( !MMG2D_unscaleMesh(mesh,met,NULL) )  _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+  if ( !MMG5_unscaleMesh(mesh,met,NULL) )  _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
 
   /* Print quality histories */
   if ( !MMG2D_outqua(mesh,met) ) {
@@ -745,7 +745,7 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
       MMG5_DEL_MEM(mesh,met->m);
       MMG5_SAFE_FREE (met);
     }
-      if ( !MMG2D_unscaleMesh(mesh,met,sol) ) {
+      if ( !MMG5_unscaleMesh(mesh,met,sol) ) {
         _LIBMMG5_RETURN(mesh,sol,met,MMG5_STRONGFAILURE);
       }
       MMG2D_RETURN_AND_PACK(mesh,sol,met,MMG5_LOWFAILURE);
@@ -776,7 +776,7 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
         MMG5_SAFE_FREE (met);
       }
 
-      if ( !MMG2D_unscaleMesh(mesh,met,NULL) ) {
+      if ( !MMG5_unscaleMesh(mesh,met,NULL) ) {
         _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE); }
       MMG2D_RETURN_AND_PACK(mesh,met,sol,MMG5_LOWFAILURE);
     }
@@ -788,7 +788,7 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
         MMG5_DEL_MEM(mesh,met->m);
         MMG5_SAFE_FREE (met);
       }
-      if ( !MMG2D_unscaleMesh(mesh,met,sol) ) {
+      if ( !MMG5_unscaleMesh(mesh,met,sol) ) {
         _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
       }
      _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
@@ -801,7 +801,7 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
       MMG5_DEL_MEM(mesh,met->m);
       MMG5_SAFE_FREE (met);
     }
-    if ( !MMG2D_unscaleMesh(mesh,met,NULL) ) {
+    if ( !MMG5_unscaleMesh(mesh,met,NULL) ) {
       _LIBMMG5_RETURN(mesh,sol,met,MMG5_STRONGFAILURE);
     }
     MMG2D_RETURN_AND_PACK(mesh,sol,met,MMG5_LOWFAILURE);
@@ -823,7 +823,7 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
       MMG5_DEL_MEM(mesh,met->m);
       MMG5_SAFE_FREE (met);
     }
-    if ( !MMG2D_unscaleMesh(mesh,met,NULL) ) _LIBMMG5_RETURN(mesh,sol,met,MMG5_STRONGFAILURE);
+    if ( !MMG5_unscaleMesh(mesh,met,NULL) ) _LIBMMG5_RETURN(mesh,sol,met,MMG5_STRONGFAILURE);
     MMG2D_RETURN_AND_PACK(mesh,sol,met,MMG5_LOWFAILURE);
   }
 
@@ -835,7 +835,7 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
   }
 
   /* Unscale mesh */
-  if ( !MMG2D_unscaleMesh(mesh,met,NULL) ) {
+  if ( !MMG5_unscaleMesh(mesh,met,NULL) ) {
     if ( mettofree ) {
       MMG5_DEL_MEM(mesh,met->m);
       MMG5_SAFE_FREE (met);
@@ -970,7 +970,7 @@ int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   /* Print initial quality */
   if ( mesh->info.imprim > 0  ||  mesh->info.imprim < -1 ) {
     if ( !MMG2D_outqua(mesh,met) ) {
-      if ( !MMG2D_unscaleMesh(mesh,NULL,disp) )  _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
+      if ( !MMG5_unscaleMesh(mesh,NULL,disp) )  _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
       MMG2D_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE);
     }
   }
@@ -1001,7 +1001,7 @@ int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
 
   /* End with a classical remeshing stage, provided mesh->info.lag > 1 */
   if ( (mesh->info.lag >= 1) && !MMG2D_mmg2d1n(mesh,met) ) {
-    if ( !MMG2D_unscaleMesh(mesh,met,NULL) )  _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
+    if ( !MMG5_unscaleMesh(mesh,met,NULL) )  _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
     MMG2D_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE);
   }
 
@@ -1012,7 +1012,7 @@ int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   }
 
   /* Unscale mesh */
-  if ( !MMG2D_unscaleMesh(mesh,met,NULL) )  _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
+  if ( !MMG5_unscaleMesh(mesh,met,NULL) )  _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
 
   /* Print quality histories */
   if ( !MMG2D_outqua(mesh,met) ) {
