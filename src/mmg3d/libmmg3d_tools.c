@@ -1021,3 +1021,9 @@ int MMG3D_switch_metricStorage(MMG5_pMesh mesh, MMG5_pSol met) {
   }
   return 1;
 }
+
+int MMG3D_Compute_eigenv(double m[6],double lambda[3],double vp[3][3]) {
+
+  return  MMG5_eigenv(1,m,lambda,vp);
+
+}
