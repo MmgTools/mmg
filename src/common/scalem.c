@@ -400,7 +400,7 @@ int MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
     if ( !MG_VOK(ppt) )  continue;
-    for ( i=0; i<=mesh->dim; ++i ) {
+    for ( i=0; i<mesh->dim; ++i ) {
       ppt->c[i] = ppt->c[i] * dd + mesh->info.min[i];
     }
   }
@@ -448,7 +448,7 @@ int MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
       if ( !MG_VOK(ppt) )  continue;
-      for (i=0; i<met->size; i++)  met->m[6*k+i] *= dd;
+      for (i=0; i<met->size; i++)  met->m[met->size*k+i] *= dd;
     }
     break;
   default:
