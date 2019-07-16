@@ -472,6 +472,11 @@ int MMG2D_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met) {
   return 1;
 }
 
+int MMG2D_Compute_eigenv(double m[3],double lambda[2],double vp[2][2]) {
+
+  return  MMG5_eigensym(m,lambda,vp);
+
+}
 
 
 void MMG2D_Reset_verticestags(MMG5_pMesh mesh) {

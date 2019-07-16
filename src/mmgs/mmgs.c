@@ -325,7 +325,7 @@ int main(int argc,char *argv[]) {
       ier = MMGS_loadMshMesh(mesh,ls,mesh->namein);
     }
     else {
-      ier = MMGS_loadMshMesh(mesh,met,mesh->namein);
+    ier = MMGS_loadMshMesh(mesh,met,mesh->namein);
     }
     msh = 1;
   }
@@ -356,10 +356,10 @@ int main(int argc,char *argv[]) {
   }
   /* read metric if any */
   else {
-    if ( !msh ) {
-      ier = MMGS_loadSol(mesh,met,met->namein);
-      if ( ier==-1 ) {
-        fprintf(stderr,"\n  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
+  if ( !msh ) {
+    ier = MMGS_loadSol(mesh,met,met->namein);
+    if ( ier==-1 ) {
+      fprintf(stderr,"\n  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
         MMGS_RETURN_AND_FREE(mesh,met,ls,MMG5_STRONGFAILURE);
       }
     }
@@ -420,4 +420,4 @@ int main(int argc,char *argv[]) {
   MMGS_RETURN_AND_FREE(mesh,met,ls,ier);
 
   return 0;
-  }
+}

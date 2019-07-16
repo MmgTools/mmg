@@ -1624,6 +1624,34 @@ int MMGS_Get_adjaTri(MMG5_pMesh mesh, int kel, int listri[3]);
  */
 int MMGS_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMGS_LMAX]);
 
+/**
+ * \param m upper part of a symetric matric diagonalizable in |R
+ * \param lambda array of the metric eigenvalues
+ * \param vp array of the metric eigenvectors
+ *
+ * \return the order of the eigenvalues
+ *
+ * Compute the real eigenvalues and eigenvectors of a symetric matrice m whose
+ * upper part is provided (m11, m12, m13, m22, m23, m33 in this order).
+ * lambda[0] is the eigenvalue associated to the eigenvector ( v[0][0], v[0,1], v[0,2] )
+ * in C and to the eigenvector v(1,:) in fortran
+ * lambda[1] is the eigenvalue associated to the eigenvector ( v[1][0], v[1,1], v[1,2] )
+ * in C and to the eigenvector v(2,:) in fortran
+ * lambda[2] is the eigenvalue associated to the eigenvector ( v[2][0], v[2,1], v[2,2] )
+ * in C and to the eigenvector v(3,:) in fortran
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMGS_COMPUTE_EIGENV(m,lambda,vp,retval)\n
+ * >     REAL(KIND=8), INTENT(IN)         :: m(*)\n
+ * >     REAL(KIND=8), INTENT(OUT)        :: lambda(*),vp(*)\n
+ * >     INTEGER, INTENT(OUT)             :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+int MMGS_Compute_eigenv(double m[6],double lambda[3],double vp[3][3]);
+
+
+
 #ifdef __cplusplus
 }
 #endif

@@ -200,3 +200,14 @@ FORTRAN_NAME(MMG3D_SET_CONSTANTSIZE,mmg3d_set_constantsize,
   *retval =  MMG3D_Set_constantSize(*mesh,*met);
   return;
 }
+
+/**
+ * See \ref MMG3D_Compute_eigenv function in \ref mmg3d/libmmg3d.h file.
+ */
+FORTRAN_NAME(MMG3D_COMPUTE_EIGENV,mmg3d_compute_eigenv,
+             (double m[6],double lambda[3],double vp[3][3],int *retval),
+             (m,lambda,vp,retval)) {
+
+  *retval = MMG3D_Compute_eigenv(m,lambda,vp);
+  return;
+}

@@ -321,8 +321,8 @@ int MMG2D_defaultOption(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
 // In adp mode : -sol or -met or default allow to store the metric.
 int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
   MMG5_pSol tmp = NULL;
-  int       i;
-  char      namein[128];
+  int     i;
+  char    namein[128];
 
   /* First step: search if user want to see the default parameters values. */
   for ( i=1; i< argc; ++i ) {
@@ -711,6 +711,10 @@ int main(int argc,char *argv[]) {
     msh = 1;
   }
   if ( ier < 1) {
+    if ( ier==0 ) {
+      fprintf(stderr,"  ** %s  NOT FOUND.\n",mesh->namein);
+      fprintf(stderr,"  ** UNABLE TO OPEN INPUT FILE.\n");
+    }
     MMG2D_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
   }
 

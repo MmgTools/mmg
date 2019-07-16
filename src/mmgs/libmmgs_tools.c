@@ -99,8 +99,8 @@ int MMGS_defaultValues(MMG5_pMesh mesh) {
 // In adp mode : -sol or -met or default allow to store the metric.
 int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
   MMG5_pSol tmp = NULL;
-  int       i;
-  char      namein[128];
+  int    i;
+  char   namein[128];
 
   /* First step: search if user want to see the default parameters values. */
   for ( i=1; i< argc; ++i ) {
@@ -227,15 +227,15 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol so
           }
         }
         else if  (!strcmp(argv[i],"-m") ) {
-          if ( ++i < argc && isdigit(argv[i][0]) ) {
-            if ( !MMGS_Set_iparameter(mesh,met,MMGS_IPARAM_mem,atoi(argv[i])) )
-              return 0;
-          }
-          else {
-            fprintf(stderr,"Missing argument option %c\n",argv[i-1][1]);
-            MMGS_usage(argv[0]);
+        if ( ++i < argc && isdigit(argv[i][0]) ) {
+          if ( !MMGS_Set_iparameter(mesh,met,MMGS_IPARAM_mem,atoi(argv[i])) )
             return 0;
-          }
+        }
+        else {
+          fprintf(stderr,"Missing argument option %c\n",argv[i-1][1]);
+          MMGS_usage(argv[0]);
+          return 0;
+        }
         }
         break;
       case 'n':

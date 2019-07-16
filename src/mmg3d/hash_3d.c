@@ -678,11 +678,17 @@ static inline
 int MMG5_setVertexNmTag(MMG5_pMesh mesh) {
   MMG5_pTetra         ptet;
   MMG5_pPoint         ppt;
+  MMG5_Hash           hash;
   int                 k,i;
   int                 nc, nre, ng, nrp,ier;
 
   /* Second: seek the non-required non-manifold points and try to analyse
    * whether they are corner or required. */
+
+  /* Hash table used by boulernm to store the special edges passing through
+   * a given point */
+  if ( ! MMG5_hashNew(mesh,&hash,mesh->np,3.71*mesh->np) ) return 0;
+
   nc = nre = 0;
   ++mesh->base;
   for (k=1; k<=mesh->ne; ++k) {
@@ -696,7 +702,7 @@ int MMG5_setVertexNmTag(MMG5_pMesh mesh) {
 
       if ( (!(ppt->tag & MG_NOM)) || (ppt->tag & MG_REQ) ) continue;
 
-      ier = MMG5_boulernm(mesh, k, i, &ng, &nrp);
+      ier = MMG5_boulernm(mesh,&hash, k, i, &ng, &nrp);
       if ( ier < 0 ) return 0;
       else if ( !ier ) continue;
 
@@ -725,6 +731,9 @@ int MMG5_setVertexNmTag(MMG5_pMesh mesh) {
       }
     }
   }
+
+  /* Free the edge hash table */
+  MMG5_DEL_MEM(mesh,hash.item);
 
   if ( mesh->info.ddebug || abs(mesh->info.imprim) > 3 )
     fprintf(stdout,"     %d corner and %d required vertices added\n",nc,nre);
@@ -1074,14 +1083,14 @@ int MMG5_hGeom(MMG5_pMesh mesh) {
         i2 = MMG5_iprv2[i];
         /* transfer non manifold tag to edges */
         if ( pt->tag[i] & MG_NOM ) {
-	  ier = MMG5_hTag(&mesh->htab,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]);
+          ier = MMG5_hTag(&mesh->htab,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]);
           if ( !ier ) {
-	    /* The edge is marked as non manifold but doesn't exist in the mesh */
-	    ier = MMG5_hEdge(mesh,&mesh->htab,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]);
-	    if ( !ier )
-	      return 0;
-	  }
-	}
+            /* The edge is marked as non manifold but doesn't exist in the mesh */
+            ier = MMG5_hEdge(mesh,&mesh->htab,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]);
+            if ( !ier )
+              return 0;
+          }
+        }
         MMG5_hGet(&mesh->htab,pt->v[i1],pt->v[i2],&edg,&tag);
         pt->edg[i]  = edg;
 

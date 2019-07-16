@@ -394,14 +394,14 @@ int MMG5_chkVertexConnectedDomains(MMG5_pMesh mesh){
         if( ppt->tag & MG_NOM ){
           if ( mesh->adja[4*(k-1)+1+i] ) continue;
           ier=MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,1);
-	} else {
+        } else {
           ier=MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,0);
         }
-	if ( ier != 1 && !mmgWarn ) {
-	  mmgWarn = 1;
-	  printf("  ## Warning: %s: unable to check that we don't have"
-		 " non-connected domains.\n",__func__);
-	}
+        if ( ier != 1 && !mmgWarn ) {
+          mmgWarn = 1;
+          printf("  ## Warning: %s: unable to check that we don't have"
+                 " non-connected domains.\n",__func__);
+        }
 
         if(ilistv != ppt->s) {
           if(!(ppt->tag & MG_REQ) ) {

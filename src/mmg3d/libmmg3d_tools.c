@@ -172,8 +172,8 @@ int MMG3D_defaultValues(MMG5_pMesh mesh) {
 // In adp mode : -sol or -met or default allow to store the metric.
 int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
   MMG5_pSol tmp = NULL;
-  int       i;
-  char      namein[128];
+  int     i;
+  char    namein[128];
 
   /* First step: search if user want to see the default parameters values. */
   for ( i=1; i< argc; ++i ) {
@@ -312,15 +312,15 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
         }
         else if ( !strcmp(argv[i],"-m") ) {
           /* memory */
-          if ( ++i < argc && isdigit(argv[i][0]) ) {
-            if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_mem,atoi(argv[i])) )
-              return 0;
-          }
-          else {
-            fprintf(stderr,"Missing argument option %c\n",argv[i-1][1]);
-            MMG3D_usage(argv[0]);
+        if ( ++i < argc && isdigit(argv[i][0]) ) {
+          if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_mem,atoi(argv[i])) )
             return 0;
-          }
+        }
+        else {
+          fprintf(stderr,"Missing argument option %c\n",argv[i-1][1]);
+          MMG3D_usage(argv[0]);
+          return 0;
+        }
         }
         break;
       case 'n':
@@ -649,13 +649,13 @@ int MMG3D_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol,double critmin,
   MMG5_warnOrientation(mesh);
 
   if ( met ) {
-    if ( met->np && (met->np != mesh->np) ) {
-      fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
-      MMG5_DEL_MEM(mesh,met->m);
-      met->np = 0;
-    }
-    else if ( met->size!=1 && met->size!=6 ) {
-      fprintf(stderr,"\n  ## ERROR: WRONG DATA TYPE.\n");
+  if ( met->np && (met->np != mesh->np) ) {
+    fprintf(stdout,"  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
+    MMG5_DEL_MEM(mesh,met->m);
+    met->np = 0;
+  }
+  else if ( met->size!=1 && met->size!=6 ) {
+    fprintf(stderr,"\n  ## ERROR: WRONG DATA TYPE.\n");
       _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
     }
   }

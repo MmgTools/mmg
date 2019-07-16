@@ -422,9 +422,9 @@ int main(int argc,char *argv[]) {
         fprintf(stderr,"\n  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
         MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
       }
+      }
     }
-  }
-  if ( !MMG3D_parsop(mesh,met) )
+    if ( !MMG3D_parsop(mesh,met) )
     MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_LOWFAILURE);
 
   chrono(OFF,&MMG5_ctim[1]);

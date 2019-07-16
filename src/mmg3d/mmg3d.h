@@ -267,7 +267,7 @@ extern int  MMG5_BezierRidge(MMG5_pMesh mesh,int ip0, int ip1, double s, double 
 extern int  MMG5_BezierNom(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,double *no,double *to);
 int  MMG5_norface(MMG5_pMesh mesh ,int k, int iface, double v[3]);
 int  MMG3D_findEdge(MMG5_pMesh,MMG5_pTetra,int,int,int,int,char*,char* );
-int  MMG5_boulernm (MMG5_pMesh mesh, int start, int ip, int *ng, int *nr);
+int  MMG5_boulernm (MMG5_pMesh mesh,MMG5_Hash *hash, int start, int ip, int *ng, int *nr);
 int  MMG5_boulenm(MMG5_pMesh mesh, int start, int ip, int iface, double n[3],double t[3]);
 int  MMG5_boulevolp(MMG5_pMesh mesh, int start, int ip, int * list);
 int  MMG5_boulesurfvolp(MMG5_pMesh mesh,int start,int ip,int iface,int *listv,

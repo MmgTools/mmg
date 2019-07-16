@@ -180,7 +180,7 @@ void MMG3D_freePROctree(MMG5_pMesh mesh,MMG3D_pPROctree *q)
  */
 int64_t MMG3D_getPROctreeCoordinate(MMG3D_pPROctree q, double* ver, int dim)
 {
-  int64_t s    = 1<<10;
+  int64_t s    = 1<<20;
   double  prec = 1./(1<<30);
   int place = 0;
   int ix = floor((ver[0]-prec)*s);

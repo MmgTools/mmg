@@ -106,7 +106,6 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
       *ptr = '\0';
       strcat(data,".mesh");
       if (!(inm = fopen(data,"rb")) ) {
-        fprintf(stderr,"  ** %s  NOT FOUND.\n",data);
         MMG5_SAFE_FREE(data);
         return 0;
       }
@@ -119,7 +118,6 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
     if ( ptr )  bin = 1;
 
     if( !(inm = fopen(data,"rb")) ) {
-      fprintf(stderr,"  ** %s  NOT FOUND.\n",data);
       MMG5_SAFE_FREE(data);
       return 0;
     }
@@ -1019,7 +1017,6 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
       *ptr = '\0';
       strcat(data,".mesh");
       if( !(inm = fopen(data,"wb")) ) {
-        fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",data);
         MMG5_SAFE_FREE(data);
         return 0;
       }

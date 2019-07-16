@@ -105,7 +105,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
   double      *norm,*n,dd;
   float       fc;
   long         posnp,posnt,posne,posncor,posnq,posned,posnr;
-  long         posnpreq,posnormal,posnc1;
+  long        posntreq,posnpreq,posnormal,posnc1;
   int         i,k,ia,nq,nri,ip,idn,ng,npreq;
   int         ncor,bin,iswp,nedreq,ntreq,posnedreq,bdim,binch,bpos;
   int         na,*ina,a,b,ref;
@@ -133,7 +133,6 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
       *ptr = '\0';
       strcat(data,".mesh");
       if( !(inm = fopen(data,"rb")) ) {
-        fprintf(stderr,"  ** %s  NOT FOUND.\n",data);
         MMG5_SAFE_FREE(data);
         return 0;
       }
@@ -144,7 +143,6 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
     ptr = strstr(data,".meshb");
     if ( ptr )  bin = 1;
       if( !(inm = fopen(data,"rb")) ) {
-        fprintf(stderr,"  ** %s  NOT FOUND.\n",data);
         MMG5_SAFE_FREE(data);
         return 0;
       }
@@ -182,8 +180,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
       }
       else if(!strncmp(chaine,"RequiredTriangles",strlen("RequiredTriangles"))) {
         MMG_FSCANF(inm,"%d",&ntreq);
-        fprintf(stderr,"\n  ## Warning: %s: required triangles not yet implementd in mmgs.\n"
-                " %d required triangle(s) ignored.\n",__func__,ntreq);
+        posntreq = ftell(inm);
         continue;
       } else if(!strncmp(chaine,"Quadrilaterals",strlen("Quadrilaterals"))) {
         MMG_FSCANF(inm,"%d",&nq);
@@ -264,6 +261,15 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
         MMG_FREAD(&mesh->nti,sw,1,inm);
         if(iswp) mesh->nti=swapbin(mesh->nti);
         posnt = ftell(inm);
+        rewind(inm);
+        fseek(inm,bpos,SEEK_SET);
+        continue;
+      } else if(binch==17) {  //RequiredTriangles
+        MMG_FREAD(&bpos,sw,1,inm); //NulPos
+        if(iswp) bpos=swapbin(bpos);
+        MMG_FREAD(&ntreq,sw,1,inm);
+        if(iswp) ntreq=swapbin(ntreq);
+        posntreq = ftell(inm);
         rewind(inm);
         fseek(inm,bpos,SEEK_SET);
         continue;
@@ -388,6 +394,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
   }
 
   /* read triangles and set seed */
+  if ( mesh->nt ) {
   rewind(inm);
   fseek(inm,posnt,SEEK_SET);
   for (k=1; k<=mesh->nt; k++) {
@@ -408,6 +415,31 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
       ppt->tag &= ~MG_NUL;
     }
   }
+    /* get required triangles */
+    if(ntreq) {
+      rewind(inm);
+      fseek(inm,posntreq,SEEK_SET);
+      for (k=1; k<=ntreq; k++) {
+        if(!bin) {
+          MMG_FSCANF(inm,"%d",&i);
+        }
+        else {
+          MMG_FREAD(&i,sw,1,inm);
+          if(iswp) i=swapbin(i);
+        }
+        if ( i>mesh->nt ) {
+          fprintf(stderr,"\n  ## Warning: %s: required triangle number %8d"
+                  " ignored.\n",__func__,i);
+        } else {
+          pt1 = &mesh->tria[i];
+          pt1->tag[0] |= MG_REQ;
+          pt1->tag[1] |= MG_REQ;
+          pt1->tag[2] |= MG_REQ;
+        }
+      }
+    }
+  }
+
   /* read quads */
   if ( nq > 0 ) {
     rewind(inm);
@@ -826,7 +858,7 @@ int MMGS_saveMesh(MMG5_pMesh mesh, const char* filename) {
   MMG5_pPoint  ppt;
   MMG5_pTria   pt;
   MMG5_pxPoint go;
-  int          k,np,nt,nc,ng,nn,nr,nre;
+  int          k,np,nt,nc,ng,nn,nr,nre,ntreq;
   int          bin,binch,bpos;
   // int          outm;
   char         *data,*ptr,chaine[128];
@@ -846,7 +878,6 @@ int MMGS_saveMesh(MMG5_pMesh mesh, const char* filename) {
       *ptr = '\0';
       strcat(data,".mesh");
       if( !(inm = fopen(data,"w")) ) {
-        fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",data);
         MMG5_SAFE_FREE(data);
         return 0;
       }
@@ -1063,6 +1094,7 @@ int MMGS_saveMesh(MMG5_pMesh mesh, const char* filename) {
   }
 
   /* write triangles */
+  if ( mesh->nt ) {
   if(!bin) {
     strcpy(&chaine[0],"\n\nTriangles\n");
     fprintf(inm,"%s",chaine);
@@ -1075,6 +1107,7 @@ int MMGS_saveMesh(MMG5_pMesh mesh, const char* filename) {
     fwrite(&nt,sw,1,inm);
   }
 
+    ntreq = 0;
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( MG_EOK(pt) ) {
@@ -1088,9 +1121,36 @@ int MMGS_saveMesh(MMG5_pMesh mesh, const char* filename) {
         pt->ref = abs(pt->ref);
         fwrite(&pt->ref,sw,1,inm);
       }
+
+        if ( (pt->tag[0] & MG_REQ) && (pt->tag[1] & MG_REQ) && (pt->tag[2] & MG_REQ) ) {
+          ntreq++;
     }
   }
-
+    }
+    if ( ntreq ) {
+      if(!bin) {
+        strcpy(&chaine[0],"\n\nRequiredTriangles\n");
+        fprintf(inm,"%s",chaine);
+        fprintf(inm,"%d\n",ntreq);
+      } else {
+        binch = 17; //ReqTriangles
+        fwrite(&binch,sw,1,inm);
+        bpos += 12+4*ntreq; //Pos
+        fwrite(&bpos,sw,1,inm);
+        fwrite(&ntreq,sw,1,inm);
+      }
+      for (k=0; k<=mesh->nt; k++) {
+        pt = &mesh->tria[k];
+        if ( (pt->tag[0] & MG_REQ) && (pt->tag[1] & MG_REQ) && pt->tag[2] & MG_REQ ) {
+          if(!bin) {
+            fprintf(inm,"%d\n",k);
+          } else {
+            fwrite(&k,sw,1,inm);
+          }
+        }
+      }
+    }
+  }
 
   if ( (!mesh->xp) || (!mesh->xpoint) ) nn = ng = 0;
 
