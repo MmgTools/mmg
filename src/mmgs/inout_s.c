@@ -104,7 +104,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
   MMG5_pPoint ppt;
   double      *norm,*n,dd;
   float       fc;
-  long        posnp,posnt,posne,posncor,posnq,posned,posnr;
+  long         posnp,posnt,posne,posncor,posnq,posned,posnr;
   long        posntreq,posnpreq,posnormal,posnc1;
   int         i,k,ia,nq,nri,ip,idn,ng,npreq;
   int         ncor,bin,iswp,nedreq,ntreq,posnedreq,bdim,binch,bpos;
@@ -395,26 +395,26 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
 
   /* read triangles and set seed */
   if ( mesh->nt ) {
-    rewind(inm);
-    fseek(inm,posnt,SEEK_SET);
-    for (k=1; k<=mesh->nt; k++) {
-      pt1 = &mesh->tria[k];
-      if (!bin) {
-        MMG_FSCANF(inm,"%d %d %d %d",&pt1->v[0],&pt1->v[1],&pt1->v[2],&pt1->ref);
-      }
-      else {
-        for (i=0 ; i<3 ; i++) {
-          MMG_FREAD(&pt1->v[i],sw,1,inm);
-          if(iswp) pt1->v[i]=swapbin(pt1->v[i]);
-        }
-        MMG_FREAD(&pt1->ref,sw,1,inm);
-        if(iswp) pt1->ref=swapbin(pt1->ref);
-      }
-      for (i=0; i<3; i++) {
-        ppt = &mesh->point[pt1->v[i]];
-        ppt->tag &= ~MG_NUL;
-      }
+  rewind(inm);
+  fseek(inm,posnt,SEEK_SET);
+  for (k=1; k<=mesh->nt; k++) {
+    pt1 = &mesh->tria[k];
+    if (!bin) {
+      MMG_FSCANF(inm,"%d %d %d %d",&pt1->v[0],&pt1->v[1],&pt1->v[2],&pt1->ref);
     }
+    else {
+      for (i=0 ; i<3 ; i++) {
+        MMG_FREAD(&pt1->v[i],sw,1,inm);
+        if(iswp) pt1->v[i]=swapbin(pt1->v[i]);
+      }
+      MMG_FREAD(&pt1->ref,sw,1,inm);
+      if(iswp) pt1->ref=swapbin(pt1->ref);
+    }
+    for (i=0; i<3; i++) {
+      ppt = &mesh->point[pt1->v[i]];
+      ppt->tag &= ~MG_NUL;
+    }
+  }
     /* get required triangles */
     if(ntreq) {
       rewind(inm);
@@ -1097,37 +1097,37 @@ int MMGS_saveMesh(MMG5_pMesh mesh, const char* filename) {
 
   /* write triangles */
   if ( mesh->nt ) {
-    if(!bin) {
-      strcpy(&chaine[0],"\n\nTriangles\n");
-      fprintf(inm,"%s",chaine);
-      fprintf(inm,"%d\n",nt);
-    } else {
-      binch = 6; //Triangles
-      fwrite(&binch,sw,1,inm);
-      bpos += 12+16*nt; //Pos
-      fwrite(&bpos,sw,1,inm);
-      fwrite(&nt,sw,1,inm);
-    }
+  if(!bin) {
+    strcpy(&chaine[0],"\n\nTriangles\n");
+    fprintf(inm,"%s",chaine);
+    fprintf(inm,"%d\n",nt);
+  } else {
+    binch = 6; //Triangles
+    fwrite(&binch,sw,1,inm);
+    bpos += 12+16*nt; //Pos
+    fwrite(&bpos,sw,1,inm);
+    fwrite(&nt,sw,1,inm);
+  }
 
     ntreq = 0;
-    for (k=1; k<=mesh->nt; k++) {
-      pt = &mesh->tria[k];
-      if ( MG_EOK(pt) ) {
-        if(!bin) {
-          fprintf(inm,"%d %d %d %d\n",mesh->point[pt->v[0]].tmp,mesh->point[pt->v[1]].tmp
-                  ,mesh->point[pt->v[2]].tmp,abs(pt->ref));
-        } else {
-          fwrite(&mesh->point[pt->v[0]].tmp,sw,1,inm);
-          fwrite(&mesh->point[pt->v[1]].tmp,sw,1,inm);
-          fwrite(&mesh->point[pt->v[2]].tmp,sw,1,inm);
-          pt->ref = abs(pt->ref);
-          fwrite(&pt->ref,sw,1,inm);
-        }
+  for (k=1; k<=mesh->nt; k++) {
+    pt = &mesh->tria[k];
+    if ( MG_EOK(pt) ) {
+      if(!bin) {
+        fprintf(inm,"%d %d %d %d\n",mesh->point[pt->v[0]].tmp,mesh->point[pt->v[1]].tmp
+                ,mesh->point[pt->v[2]].tmp,abs(pt->ref));
+      } else {
+        fwrite(&mesh->point[pt->v[0]].tmp,sw,1,inm);
+        fwrite(&mesh->point[pt->v[1]].tmp,sw,1,inm);
+        fwrite(&mesh->point[pt->v[2]].tmp,sw,1,inm);
+        pt->ref = abs(pt->ref);
+        fwrite(&pt->ref,sw,1,inm);
+      }
 
         if ( (pt->tag[0] & MG_REQ) && (pt->tag[1] & MG_REQ) && (pt->tag[2] & MG_REQ) ) {
           ntreq++;
-        }
-      }
+    }
+  }
     }
     if ( ntreq ) {
       if(!bin) {
