@@ -1038,7 +1038,6 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet) {
     MMG5_RETURN_AND_PACK(mesh,sol,met,MMG5_LOWFAILURE);
   }
 #else
-#warning test failure (for sol passed to unscalem)
   if ( !MMG5_mmg3d1_pattern(mesh,met) ) {
     if ( mettofree ) { MMG5_DEL_MEM(mesh,met->m);MMG5_SAFE_FREE (met); }
     if ( !(mesh->adja) && !MMG3D_hashTetra(mesh,1) ) {
