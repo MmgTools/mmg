@@ -125,7 +125,7 @@ int  MMGS_Free_structures_var( va_list argptr );
 int  MMGS_Free_names_var( va_list argptr );
 
 int  MMGS_zaldy(MMG5_pMesh mesh);
-int  assignEdge(MMG5_pMesh mesh);
+int  MMGS_assignEdge(MMG5_pMesh mesh);
 int  MMGS_analys(MMG5_pMesh mesh);
 int  MMGS_inqua(MMG5_pMesh,MMG5_pSol);
 int  MMGS_outqua(MMG5_pMesh,MMG5_pSol);
@@ -133,6 +133,7 @@ int  MMGS_hashTria(MMG5_pMesh );
 int  curvpo(MMG5_pMesh ,MMG5_pSol );
 int  MMG5_mmgs1(MMG5_pMesh ,MMG5_pSol );
 int  MMGS_mmgs2(MMG5_pMesh ,MMG5_pSol, MMG5_pSol);
+int  MMGS_bdryUpdate(MMG5_pMesh mesh);
 int  boulet(MMG5_pMesh mesh,int start,int ip,int *list);
 int  boulechknm(MMG5_pMesh mesh,int start,int ip,int *list);
 int  boulep(MMG5_pMesh mesh,int start,int ip,int *list);
