@@ -818,8 +818,14 @@ static int regnor(MMG5_pMesh mesh) {
 /* preprocessing stage: mesh analysis */
 int MMGS_analys(MMG5_pMesh mesh) {
 
-  /* set tria edges tags */
-  if ( !assignEdge(mesh) ) {
+  /* Update tags stored into tria */
+  if ( !MMGS_bdryUpdate(mesh) ) {
+    fprintf(stderr,"\n  ## Analysis problem. Exit program.\n");
+    return 0;
+  }
+
+  /* set edges tags and refs to tria */
+  if ( !MMGS_assignEdge(mesh) ) {
     fprintf(stderr,"\n  ## Analysis problem. Exit program.\n");
     return 0;
   }
