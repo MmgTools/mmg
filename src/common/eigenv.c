@@ -793,6 +793,7 @@ vect:
  */
 inline int MMG5_eigensym(double m[3],double lambda[2],double vp[2][2]) {
   double   sqDelta,dd,trm,vnorm,maxm,a11,a12,a22;
+  static   int ddebug = 0;
 
   lambda[0] = lambda[1] = 0.;
   vp[0][0]  = vp[0][1] = vp[1][0] = vp[1][1] = 0.;
@@ -802,11 +803,11 @@ inline int MMG5_eigensym(double m[3],double lambda[2],double vp[2][2]) {
   maxm = fabs( m[2] ) > maxm ? fabs ( m[2] ) : maxm;
 
   if ( maxm < MG_EIGENV_EPS13 ) {
-    return 0;
+    if ( ddebug ) printf("  ## Warning:%s: Quasi-null matrix.",__func__);
+    maxm = 1.;
   }
 
   /* normalize matrix */
-  maxm = 1.;
   dd  = 1.0 / maxm;
   a11 = m[0] * dd;
   a12 = m[1] * dd;
