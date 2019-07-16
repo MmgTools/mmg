@@ -104,8 +104,8 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
   MMG5_pPoint ppt;
   double      *norm,*n,dd;
   float       fc;
-  long         posnp,posnt,posne,posncor,posnq,posned,posnr;
-  long         posnpreq,posnormal,posnc1;
+  long        posnp,posnt,posne,posncor,posnq,posned,posnr;
+  long        posntreq,posnpreq,posnormal,posnc1;
   int         i,k,ia,nq,nri,ip,idn,ng,npreq;
   int         ncor,bin,iswp,nedreq,ntreq,posnedreq,bdim,binch,bpos;
   int         na,*ina,a,b,ref;
@@ -180,8 +180,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
       }
       else if(!strncmp(chaine,"RequiredTriangles",strlen("RequiredTriangles"))) {
         MMG_FSCANF(inm,"%d",&ntreq);
-        fprintf(stderr,"\n  ## Warning: %s: required triangles not yet implementd in mmgs.\n"
-                " %d required triangle(s) ignored.\n",__func__,ntreq);
+        posntreq = ftell(inm);
         continue;
       } else if(!strncmp(chaine,"Quadrilaterals",strlen("Quadrilaterals"))) {
         MMG_FSCANF(inm,"%d",&nq);
@@ -262,6 +261,15 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
         MMG_FREAD(&mesh->nti,sw,1,inm);
         if(iswp) mesh->nti=swapbin(mesh->nti);
         posnt = ftell(inm);
+        rewind(inm);
+        fseek(inm,bpos,SEEK_SET);
+        continue;
+      } else if(binch==17) {  //RequiredTriangles
+        MMG_FREAD(&bpos,sw,1,inm); //NulPos
+        if(iswp) bpos=swapbin(bpos);
+        MMG_FREAD(&ntreq,sw,1,inm);
+        if(iswp) ntreq=swapbin(ntreq);
+        posntreq = ftell(inm);
         rewind(inm);
         fseek(inm,bpos,SEEK_SET);
         continue;
@@ -386,26 +394,53 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
   }
 
   /* read triangles and set seed */
-  rewind(inm);
-  fseek(inm,posnt,SEEK_SET);
-  for (k=1; k<=mesh->nt; k++) {
-    pt1 = &mesh->tria[k];
-    if (!bin) {
-      MMG_FSCANF(inm,"%d %d %d %d",&pt1->v[0],&pt1->v[1],&pt1->v[2],&pt1->ref);
-    }
-    else {
-      for (i=0 ; i<3 ; i++) {
-        MMG_FREAD(&pt1->v[i],sw,1,inm);
-        if(iswp) pt1->v[i]=swapbin(pt1->v[i]);
+  if ( mesh->nt ) {
+    rewind(inm);
+    fseek(inm,posnt,SEEK_SET);
+    for (k=1; k<=mesh->nt; k++) {
+      pt1 = &mesh->tria[k];
+      if (!bin) {
+        MMG_FSCANF(inm,"%d %d %d %d",&pt1->v[0],&pt1->v[1],&pt1->v[2],&pt1->ref);
       }
-      MMG_FREAD(&pt1->ref,sw,1,inm);
-      if(iswp) pt1->ref=swapbin(pt1->ref);
+      else {
+        for (i=0 ; i<3 ; i++) {
+          MMG_FREAD(&pt1->v[i],sw,1,inm);
+          if(iswp) pt1->v[i]=swapbin(pt1->v[i]);
+        }
+        MMG_FREAD(&pt1->ref,sw,1,inm);
+        if(iswp) pt1->ref=swapbin(pt1->ref);
+      }
+      for (i=0; i<3; i++) {
+        ppt = &mesh->point[pt1->v[i]];
+        ppt->tag &= ~MG_NUL;
+      }
     }
-    for (i=0; i<3; i++) {
-      ppt = &mesh->point[pt1->v[i]];
-      ppt->tag &= ~MG_NUL;
+    /* get required triangles */
+    if(ntreq) {
+      rewind(inm);
+      fseek(inm,posntreq,SEEK_SET);
+      for (k=1; k<=ntreq; k++) {
+        if(!bin) {
+          MMG_FSCANF(inm,"%d",&i);
+        }
+        else {
+          MMG_FREAD(&i,sw,1,inm);
+          if(iswp) i=swapbin(i);
+        }
+        if ( i>mesh->nt ) {
+          fprintf(stderr,"\n  ## Warning: %s: required triangle number %8d"
+                  " ignored.\n",__func__,i);
+        } else {
+          printf("%d is req \n",i);
+          pt1 = &mesh->tria[i];
+          pt1->tag[0] |= MG_REQ;
+          pt1->tag[1] |= MG_REQ;
+          pt1->tag[2] |= MG_REQ;
+        }
+      }
     }
   }
+
   /* read quads */
   if ( nq > 0 ) {
     rewind(inm);

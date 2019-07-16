@@ -1081,14 +1081,14 @@ int MMG5_hGeom(MMG5_pMesh mesh) {
         i2 = MMG5_iprv2[i];
         /* transfer non manifold tag to edges */
         if ( pt->tag[i] & MG_NOM ) {
-	  ier = MMG5_hTag(&mesh->htab,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]);
+          ier = MMG5_hTag(&mesh->htab,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]);
           if ( !ier ) {
-	    /* The edge is marked as non manifold but doesn't exist in the mesh */
-	    ier = MMG5_hEdge(mesh,&mesh->htab,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]);
-	    if ( !ier )
-	      return 0;
-	  }
-	}
+            /* The edge is marked as non manifold but doesn't exist in the mesh */
+            ier = MMG5_hEdge(mesh,&mesh->htab,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]);
+            if ( !ier )
+              return 0;
+          }
+        }
         MMG5_hGet(&mesh->htab,pt->v[i1],pt->v[i2],&edg,&tag);
         pt->edg[i]  = edg;
 

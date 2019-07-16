@@ -245,6 +245,8 @@ int chkedg(MMG5_pMesh mesh,int iel) {
 
   /* analyze edges */
   for (i=0; i<3; i++) {
+    if ( pt->tag[i] & MG_REQ) continue;
+
     i1 = MMG5_inxt2[i];
     i2 = MMG5_iprv2[i];
 
@@ -536,17 +538,27 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
 
-    if ( !MG_EOK(pt) || pt->ref < 0 )  continue;
+    if ( !MG_EOK(pt) ) {
+      continue;
+    }
+
+    pt->flag = 0;
+
+    if ( pt->ref < 0 ) {
+      continue;
+    }
+
     /* Required triangle */
     if ( MS_SIN(pt->tag[0]) && MS_SIN(pt->tag[1]) && MS_SIN(pt->tag[2]) )  continue;
 
     /* check element cut */
-    pt->flag = 0;
     if ( typchk == 1 ) {
       if ( !chkedg(mesh,k) )  continue;
     }
     else if ( typchk == 2 ) {
       for (i=0; i<3; i++) {
+        if ( pt->tag[i] & MG_REQ) continue;
+
         i1 = MMG5_inxt2[i];
         i2 = MMG5_iprv2[i];
         len = MMG5_lenSurfEdg(mesh,met,pt->v[i1],pt->v[i2],0);
@@ -690,7 +702,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
     for (i=0; i<3; i++) {
       i1 = MMG5_inxt2[i];
       i2 = MMG5_inxt2[i1];
-      if ( !MG_GET(pt->flag,i) && !MS_SIN(pt->tag[i]) ) {
+      if ( !MG_GET(pt->flag,i) ) {
         ip = MMG5_hashGet(&hash,pt->v[i1],pt->v[i2]);
         if ( ip > 0 ) {
           MG_SET(pt->flag,i);
