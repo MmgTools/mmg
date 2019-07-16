@@ -207,12 +207,14 @@ SET_PROPERTY(TEST mmgs_LSMultiMat_val #mmgs_LSMultiMat_default
 ADD_TEST(NAME mmgs_LSMultiMat
   COMMAND ${EXECUT_MMGS} -v 5 -ls -hmin 0.005 -hmax 0.1 -hausd 0.001 -hgrad 1.3
   ${MMGS_CI_TESTS}/LSMultiMat/multi-mat
+  -sol ${MMGS_CI_TESTS}/LSMultiMat/multi-mat-sol.sol
   ${CTEST_OUTPUT_DIR}/mmgs_LSMultiMat.o.meshb)
 
 # non 0 ls
 ADD_TEST(NAME mmgs_LSMultiMat_nonzero
   COMMAND ${EXECUT_MMGS} -v 5 -ls 0.01 -hausd 0.001
   ${MMGS_CI_TESTS}/LSMultiMat/multi-mat
+  -sol ${MMGS_CI_TESTS}/LSMultiMat/multi-mat-sol.sol
   ${CTEST_OUTPUT_DIR}/mmgs_LSMultiMat-nonzero.o.meshb)
 
 
@@ -220,30 +222,35 @@ ADD_TEST(NAME mmgs_LSMultiMat_nonzero
 ADD_TEST(NAME mmgs_LSMultiMat_optim
   COMMAND ${EXECUT_MMGS} -v 5 -ls -optim -hausd 0.001
   ${MMGS_CI_TESTS}/LSMultiMat/multi-mat
+  -sol ${MMGS_CI_TESTS}/LSMultiMat/multi-mat-sol.sol
   ${CTEST_OUTPUT_DIR}/mmgs_LSMultiMat-optim.o.meshb)
 
 # ls discretisation + optim + aniso option
 ADD_TEST(NAME mmgs_LSMultiMat_optimAni
   COMMAND ${EXECUT_MMGS} -v 5 -ls -optim -A -hausd 0.001
   ${MMGS_CI_TESTS}/LSMultiMat/multi-mat
+  -sol ${MMGS_CI_TESTS}/LSMultiMat/multi-mat-sol.sol
   ${CTEST_OUTPUT_DIR}/mmgs_LSMultiMat-optimAni.o.meshb)
 
 # ls discretisation + hsiz option
 ADD_TEST(NAME mmgs_LSMultiMat_hsiz
   COMMAND ${EXECUT_MMGS} -v 5 -ls -hsiz 0.05 -hausd 0.001
   ${MMGS_CI_TESTS}/LSMultiMat/multi-mat
+  -sol ${MMGS_CI_TESTS}/LSMultiMat/multi-mat-sol.sol
   ${CTEST_OUTPUT_DIR}/mmgs_LSMultiMat-hsiz.o.meshb)
 
 # ls discretisation + hsiz Ani option
 ADD_TEST(NAME mmgs_LSMultiMat_hsizAni
   COMMAND ${EXECUT_MMGS} -v 5 -ls -hsiz 0.05 -A -hausd 0.001
   ${MMGS_CI_TESTS}/LSMultiMat/multi-mat
+  -sol ${MMGS_CI_TESTS}/LSMultiMat/multi-mat-sol.sol
   ${CTEST_OUTPUT_DIR}/mmgs_LSMultiMat-hsizAni.o.meshb)
 
 # ls discretisation + metric
 ADD_TEST(NAME mmgs_LSMultiMat_withMet
   COMMAND ${EXECUT_MMGS} -v 5 -ls -hausd 0.001
   -met ${MMGS_CI_TESTS}/LSMultiMat/multi-mat-met.sol
+  -sol ${MMGS_CI_TESTS}/LSMultiMat/multi-mat-sol.sol
   ${MMGS_CI_TESTS}/LSMultiMat/multi-mat
   ${CTEST_OUTPUT_DIR}/mmgs_LSMultiMat-withMet.o.meshb)
 
