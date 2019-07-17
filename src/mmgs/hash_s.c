@@ -169,7 +169,7 @@ int MMGS_assignEdge(MMG5_pMesh mesh) {
 int MMGS_bdryUpdate(MMG5_pMesh mesh) {
   MMG5_Hash   hash;
   MMG5_pTria  pt;
-  int         k,tag;
+  int         k,tag,nad;
   int8_t      i,i1,i2;
 
   /* adjust hash table params */
@@ -184,6 +184,7 @@ int MMGS_bdryUpdate(MMG5_pMesh mesh) {
     hash.item[k].nxt = k+1;
 
   /* hash tagged edges */
+  nad = 0;
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) )  continue;
@@ -196,30 +197,31 @@ int MMGS_bdryUpdate(MMG5_pMesh mesh) {
           printf("  # Error: %s: Lack of memory.",__func__);
           return 0;
         }
+        ++nad;
       }
     }
   }
 
   /* update tags */
-  for (k=1; k<=mesh->nt; k++) {
-    pt = &mesh->tria[k];
-    if ( !MG_EOK(pt) )  continue;
+  if ( nad ) {
+    for (k=1; k<=mesh->nt; k++) {
+      pt = &mesh->tria[k];
+      if ( !MG_EOK(pt) )  continue;
 
-    for (i=0; i<3; i++) {
-      i1 = MMG5_inxt2[i];
-      i2 = MMG5_iprv2[i];
+      for (i=0; i<3; i++) {
+        i1 = MMG5_inxt2[i];
+        i2 = MMG5_iprv2[i];
 
-      tag = MMG5_hashGet(&hash,pt->v[i1],pt->v[i2]);
-      if ( tag ) {
-        pt->tag[i] |= tag;
+        tag = MMG5_hashGet(&hash,pt->v[i1],pt->v[i2]);
+        if ( tag ) {
+          pt->tag[i] |= tag;
+        }
       }
     }
   }
 
-  /* reset edge structure */
+  /* free hash structure */
   MMG5_DEL_MEM(mesh,hash.item);
-  MMG5_DEL_MEM(mesh,mesh->edge);
-  mesh->na = 0;
 
   return 1;
 }
