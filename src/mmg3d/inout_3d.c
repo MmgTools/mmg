@@ -114,7 +114,8 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
   int         npreq,ntreq,nereq,nedreq,nqreq,ncor,ned,ng,bin,iswp;
   int         binch,bdim,bpos,i,k,ip,idn;
   int         *ina,v[3],ref,nt,na,nr,ia,aux,nref;
-  char        *ptr,*data,chaine[128];
+  char        *ptr,*data;
+  char        chaine[MMG5_FILESTR_LGTH],strskip[MMG5_FILESTR_LGTH];
 
   posnp = posnt = posne = posncor = 0;
   posnpreq = posntreq = posnereq = posnqreq = posned = posnedreq = posnr = 0;
@@ -162,6 +163,11 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
   if (!bin) {
     strcpy(chaine,"D");
     while(fscanf(inm,"%127s",&chaine[0])!=EOF && strncmp(chaine,"End",strlen("End")) ) {
+      if ( chaine[0] == '#' ) {
+        fgets(strskip,MMG5_FILESTR_LGTH,inm);
+        continue;
+      }
+
       if(!strncmp(chaine,"MeshVersionFormatted",strlen("MeshVersionFormatted"))) {
         MMG_FSCANF(inm,"%d",&mesh->ver);
         continue;
@@ -1134,7 +1140,8 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
   int          k,na,nc,np,ne,nn,nr,nre,nedreq,ntreq,nt,nereq;
   int          npr,nprreq,nq,nqreq;
   int          bin,binch,bpos;
-  char         *data,chaine[128],*ptr;
+  char         *data,*ptr;
+  char         chaine[MMG5_FILESTR_LGTH];
 
   mesh->ver = 2;
   bin = 0;

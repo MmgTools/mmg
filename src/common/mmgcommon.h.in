@@ -131,6 +131,7 @@ extern "C" {
 #define MMG5_HMAXCOE      2 /**< coefficient to compute the default hmax value */
 #define MMG5_HMINMAXGAP   5 /**< imposed gap between hmin and hmax if hmax<hmin */
 #define MMG5_FEM          1 /**< defaut value for FEM mode */
+#define MMG5_FILESTR_LGTH 128 /** Maximal length of a line in input file */
 
 /* Macros */
 #define MG_MAX(a,b) (((a) > (b)) ? (a) : (b))

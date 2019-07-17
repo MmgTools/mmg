@@ -248,7 +248,7 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,const char *filename,
   int         ver,oneBin,k,i;
   int         nt,na,nq,ne,npr,np;
   int         typ,tagNum,posNodeDataSize,initPosNodeDataSize;
-  char        *ptr,*data,chaine[128],verNum[5];
+  char        *ptr,*data,chaine[MMG5_FILESTR_LGTH],verNum[5];
 
   ver = oneBin = 0;
   *posNodes = 0;
@@ -510,7 +510,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
   int         *ina_t,*ina_a,nt,na,nq,ne,npr;
   int         nbl_t,nbl_a,typ,tagNum,ref,idx,num;
   int         v[4],isol;
-  char        chaine[128],*ptr;
+  char        chaine[MMG5_FILESTR_LGTH],*ptr;
   static char mmgWarn=0, mmgWarn1=0;
 
   ina_t = ina_a = NULL;
@@ -1974,7 +1974,7 @@ int MMG5_loadSolHeader( const char *filename,int meshDim,FILE **inm,int *ver,
                         long *posnp, int imprim) {
   int         binch,bdim;
   int         bpos,i;
-  char        *ptr,*data,chaine[128];
+  char        *ptr,*data,chaine[MMG5_FILESTR_LGTH];
 
   *posnp = 0;
   *bin   = 0;
@@ -2279,7 +2279,7 @@ int MMG5_saveSolHeader( MMG5_pMesh mesh,const char *filename,
   MMG5_pPoint ppt;
   int         binch,bpos;
   int         k;
-  char        *ptr,*data,chaine[128];
+  char        *ptr,*data,chaine[MMG5_FILESTR_LGTH];
 
   *bin = 0;
 

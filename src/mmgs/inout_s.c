@@ -109,8 +109,8 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
   int         i,k,ia,nq,nri,ip,idn,ng,npreq;
   int         ncor,bin,iswp,nedreq,ntreq,posnedreq,bdim,binch,bpos;
   int         na,*ina,a,b,ref;
-  char        *ptr,*data,chaine[128];
-
+  char        *ptr,*data;
+  char        chaine[MMG5_FILESTR_LGTH],strskip[MMG5_FILESTR_LGTH];
 
   posnp = posnt = posne = posncor = posnq = 0;
   posned = posnr = posnpreq = posnc1 = npreq = 0;
@@ -155,6 +155,10 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
   if (!bin) {
     strcpy(chaine,"D");
     while(fscanf(inm,"%127s",&chaine[0])!=EOF && strncmp(chaine,"End",strlen("End")) ) {
+      if ( chaine[0] == '#' ) {
+        fgets(strskip,MMG5_FILESTR_LGTH,inm);
+        continue;
+      }
       if(!strncmp(chaine,"MeshVersionFormatted",strlen("MeshVersionFormatted"))) {
         MMG_FSCANF(inm,"%d",&mesh->ver);
         continue;
@@ -861,7 +865,7 @@ int MMGS_saveMesh(MMG5_pMesh mesh, const char* filename) {
   int          k,np,nt,nc,ng,nn,nr,nre,ntreq;
   int          bin,binch,bpos;
   // int          outm;
-  char         *data,*ptr,chaine[128];
+  char         *data,*ptr,chaine[MMG5_FILESTR_LGTH];
 
   mesh->ver = 2;
 
