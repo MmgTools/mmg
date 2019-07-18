@@ -443,7 +443,7 @@ int MMG5_chkmovmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t) {
 }
 
 /** Return the largest fraction t that makes the motion along disp valid */
-short MMG5_dikomv(MMG5_pMesh mesh,MMG5_pSol disp) {
+short MMG5_dikmov(MMG5_pMesh mesh,MMG5_pSol disp) {
   int     it,maxit;
   short   t,tmin,tmax;
   char    ier;
@@ -622,7 +622,7 @@ int MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met) {
     for (itdc=0; itdc<maxitdc; itdc++) {
       nnspl = nnc = nns = nnm = 0;
 
-      t = MMG5_dikomv(mesh,disp);
+      t = MMG5_dikmov(mesh,disp);
       if ( t == 0 ) {
         if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
           fprintf(stderr,"\n   *** Stop: impossible to proceed further\n");
