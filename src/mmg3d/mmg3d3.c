@@ -698,15 +698,16 @@ int MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met) {
 
       if ( t == MMG3D_SHORTMAX ) break;
     }
-    if ( mesh->info.imprim > 0 && abs(mesh->info.imprim) < 4 ) {
+    if ( mesh->info.imprim > 0 ) {
       printf("   ---> Realized displacement: %f\n",tau);
       if ( abs(mesh->info.imprim) > 2 )
         printf(" %d edges splitted, %d vertices collapsed, %d elements"
                " swapped, %d vertices moved.\n",nnnspl,nnnc,nnns,nnnm);
-    }
 
-    if ( t == MMG3D_SHORTMAX ) break;
+    }
+    if ( t == MMG3D_SHORTMAX || (t==0 && itdc==0) ) break;
   }
+
   /* Clean memory */
   /* Doing this, memcur of mesh is decreased by size of displacement */
   MMG5_DEL_MEM(mesh,disp->m);
