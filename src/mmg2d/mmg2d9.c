@@ -614,7 +614,7 @@ int MMG2D_mmg2d9(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int **invalidTrias
 #endif
     //MMG2D_saveDisp(mesh,disp);
     /* Sequence of dichotomy loops to find the largest admissible displacements */
-    for (itdc=1; itdc<=maxitdc; itdc++) {
+    for (itdc=0; itdc<maxitdc; itdc++) {
       nnspl = nnc = nns = nnm = 0;
 
       t = MMG2D_dikomv(mesh,disp,&lastt);
