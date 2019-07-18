@@ -225,7 +225,7 @@ void MMG2D_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met);
 
 int MMG2D_mmg2d2(MMG5_pMesh , MMG5_pSol);
 int MMG2D_mmg2d6(MMG5_pMesh ,MMG5_pSol,MMG5_pSol );
-int MMG2D_mmg2d9(MMG5_pMesh ,MMG5_pSol ,MMG5_pSol );
+int MMG2D_mmg2d9(MMG5_pMesh ,MMG5_pSol ,MMG5_pSol,int** );
 //int MMG2D_cendel(MMG5_pMesh ,MMG5_pSol ,double ,int );
 int MMG2D_swapdelone(MMG5_pMesh ,MMG5_pSol ,int ,char ,double ,int *);
 int MMG5_mmg2dChkmsh(MMG5_pMesh , int, int );

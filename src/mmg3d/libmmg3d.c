@@ -1228,6 +1228,7 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
 
 #ifdef USE_ELAS
   /* Lagrangian mode */
+  invalidTets = NULL;
   ier = MMG5_mmg3d3(mesh,disp,met,&invalidTets);
   if ( !ier ) {
     disp->npi = disp->np;

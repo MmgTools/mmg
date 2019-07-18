@@ -880,6 +880,8 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
 int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   mytime    ctim[TIMEMAX];
   char      stim[32];
+  int       *invalidTris;
+  int       k,ier;
 
   if ( mesh->info.imprim >= 0 ) {
     fprintf(stdout,"\n  %s\n   MODULE MMG2D : %s (%s)\n  %s\n",
@@ -993,14 +995,28 @@ int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
 #ifdef USE_ELAS
 
   /* Lagrangian mode */
-  if ( !MMG2D_mmg2d9(mesh,disp,met) ) {
+  invalidTris = NULL;
+  ier = MMG2D_mmg2d9(mesh,disp,met,&invalidTris);
+  if ( !ier ) {
     disp->npi = disp->np;
     _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
+  }
+  else if ( ier < 0 ) {
+    printf("\n  ## Warning: Unable to perform any movement "
+           "(%d intersecting triangles).\n",-ier);
+    if ( mesh->info.imprim > 1 ) {
+      printf("     List of invalid trias: ");
+      for ( k=0; k<-ier; ++k ) {
+        printf("%d ",MMG2D_indElt(mesh,invalidTris[k]));
+      }
+      printf("\n\n");
+    }
+    MMG5_SAFE_FREE(invalidTris);
   }
 #endif
 
   /* End with a classical remeshing stage, provided mesh->info.lag > 1 */
-  if ( (mesh->info.lag >= 1) && !MMG2D_mmg2d1n(mesh,met) ) {
+  if ( (ier > 0) && (mesh->info.lag >= 1) && !MMG2D_mmg2d1n(mesh,met) ) {
     if ( !MMG5_unscaleMesh(mesh,met,NULL) )  _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
     MMG2D_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE);
   }

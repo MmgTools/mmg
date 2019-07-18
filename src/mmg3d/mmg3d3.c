@@ -614,7 +614,7 @@ int MMG5_saveDisp(MMG5_pMesh mesh,MMG5_pSol disp) {
  * to move.
  *
  * \return 0 if fail, 1 if success to move, the opposite of the number of non
- * valid tets if we can't move (- ninvalidRets).
+ * valid tets if we can't move (- ninvalidTets).
  *
  * Lagrangian node displacement and meshing.
  * Code for options: info.lag >= 0 -> displacement,
