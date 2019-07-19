@@ -174,14 +174,9 @@ int MMGS_bdryUpdate(MMG5_pMesh mesh) {
 
   /* adjust hash table params */
   /* Euler formula : na ~ 3np */
-  hash.siz  = 3*mesh->np;
-  hash.max  = 9*mesh->np+1;
-  MMG5_ADD_MEM(mesh,(hash.max+1)*sizeof(MMG5_Hash),"hash table",return 0);
-  MMG5_SAFE_CALLOC(hash.item,hash.max+1,MMG5_hedge,return 0);
-
-  hash.nxt  = mesh->na;
-  for (k=hash.siz; k<hash.max; k++)
-    hash.item[k].nxt = k+1;
+  if ( !MMG5_hashNew(mesh,&hash,3*mesh->np,9*mesh->np) ) {
+    printf("  # Error: %s: Not enough memory to allocate edge hash table",__func__);
+  }
 
   /* hash tagged edges */
   nad = 0;
