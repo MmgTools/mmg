@@ -69,9 +69,12 @@ static int MMG5_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
 
   /* check for parameter file */
   strcpy(data,mesh->namein);
-  ptr = strstr(data,".mesh");
+
+  ptr = MMG5_Get_filenameExt(data);
+
   if ( ptr )  *ptr = '\0';
   strcat(data,".mmgs");
+
   in = fopen(data,"rb");
   if ( !in ) {
     sprintf(data,"%s","DEFAULT.mmgs");
@@ -137,8 +140,11 @@ int MMGS_writeLocalParam( MMG5_pMesh mesh ) {
   FILE         *out;
 
   strcpy(data,mesh->namein);
-  ptr = strstr(data,".mesh");
+
+  ptr = MMG5_Get_filenameExt(data);
+
   if ( ptr ) *ptr = '\0';
+
   strcat(data,".mmgs");
 
   /** Save the local parameters file */
@@ -278,8 +284,8 @@ int MMGS_defaultOption(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
 int main(int argc,char *argv[]) {
   MMG5_pMesh mesh;
   MMG5_pSol  met,ls;
-  int        ier,ierSave,msh;
-  char       stim[32];
+  int        ier,ierSave,fmtin,fmtout;
+  char       stim[32],*ptr;
 
   fprintf(stdout,"  -- MMGS, Release %s (%s) \n",MG_VER,MG_REL);
   fprintf(stdout,"     %s\n",MG_CPY);
@@ -318,24 +324,43 @@ int main(int argc,char *argv[]) {
   chrono(ON,&MMG5_ctim[1]);
 
   /* read mesh file */
-  msh = 0;
-  ier = MMGS_loadMesh(mesh,mesh->namein);
-  if ( !ier ) {
+  ptr   = MMG5_Get_filenameExt(mesh->namein);
+  fmtin = MMG5_Get_format(ptr,NULL);
+
+  switch ( fmtin ) {
+  case ( MMG5_FMT_GmshASCII ): case ( MMG5_FMT_GmshBinary ):
     if ( mesh->info.iso ) {
       ier = MMGS_loadMshMesh(mesh,ls,mesh->namein);
     }
     else {
-    ier = MMGS_loadMshMesh(mesh,met,mesh->namein);
+      ier = MMGS_loadMshMesh(mesh,met,mesh->namein);
     }
-    msh = 1;
+    break;
+  /* case ( MMG5_FMT_VtkVtu ): case ( MMG5_FMT_VtkPvtu ): */
+  /* case ( MMG5_FMT_VtkVtp ): case ( MMG5_FMT_VtkPvtp ): */
+  /*   if ( mesh->info.iso ) { */
+  /*     ier = 0; // To code //MMGS_loadMshMesh(mesh,ls,mesh->namein); */
+  /*   } */
+  /*   else { */
+  /*     ier = 0; // To code //MMGS_loadMshMesh(mesh,met,mesh->namein); */
+  /*   } */
+  /*   break; */
+  default:
+    ier = MMGS_loadMesh(mesh,mesh->namein);
+    break;
   }
 
-  if ( ier<1 )
+  if ( ier<1 ) {
+    if ( ier==0 ) {
+      fprintf(stderr,"  ** %s  NOT FOUND.\n",mesh->namein);
+      fprintf(stderr,"  ** UNABLE TO OPEN INPUT FILE.\n");
+    }
     MMGS_RETURN_AND_FREE(mesh,met,ls,MMG5_STRONGFAILURE);
+  }
 
   /* read level-set if any */
   if ( mesh->info.iso ) {
-    if ( !msh ) {
+    if ( !fmtin ) {
       ier = MMGS_loadSol(mesh,ls,ls->namein);
       if ( ier < 1 ) {
         fprintf(stdout,"  ## ERROR: UNABLE TO LOAD LEVEL-SET.\n");
@@ -356,10 +381,10 @@ int main(int argc,char *argv[]) {
   }
   /* read metric if any */
   else {
-  if ( !msh ) {
-    ier = MMGS_loadSol(mesh,met,met->namein);
-    if ( ier==-1 ) {
-      fprintf(stderr,"\n  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
+    if ( !fmtin ) {
+      ier = MMGS_loadSol(mesh,met,met->namein);
+      if ( ier==-1 ) {
+        fprintf(stderr,"\n  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
         MMGS_RETURN_AND_FREE(mesh,met,ls,MMG5_STRONGFAILURE);
       }
     }
@@ -398,17 +423,29 @@ int main(int argc,char *argv[]) {
     if ( mesh->info.imprim > 0 )
       fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh->nameout);
 
-    MMG5_chooseOutputFormat(mesh,&msh);
+    ptr    = MMG5_Get_filenameExt(mesh->nameout);
+    fmtout = MMG5_Get_format(ptr,&fmtin);
 
-    if ( !msh )
-      ierSave = MMGS_saveMesh(mesh,mesh->nameout);
-    else
+    switch ( fmtout ) {
+    case ( MMG5_FMT_GmshASCII ): case ( MMG5_FMT_GmshBinary ):
       ierSave = MMGS_saveMshMesh(mesh,met,mesh->nameout);
+      break;
+    case ( MMG5_FMT_VtkVtu ): case ( MMG5_FMT_VtkPvtu ):
+    case ( MMG5_FMT_VtkVtp ): case ( MMG5_FMT_VtkPvtp ):
+      ierSave = 0; // To code
+      break;
+    default:
+      ierSave = MMGS_saveMesh(mesh,mesh->nameout);
+      if ( !ierSave ) {
+        MMGS_RETURN_AND_FREE(mesh,met,ls,MMG5_STRONGFAILURE);
+      }
+      if ( met && met->np ) {
+        ierSave = MMGS_saveSol(mesh,met,met->nameout);
+      }
+      break;
+    }
 
     if ( !ierSave )
-      MMGS_RETURN_AND_FREE(mesh,met,ls,MMG5_STRONGFAILURE);
-
-    if ( !msh && !MMGS_saveSol(mesh,met,met->nameout) )
       MMGS_RETURN_AND_FREE(mesh,met,ls,MMG5_STRONGFAILURE);
 
     chrono(OFF,&MMG5_ctim[1]);

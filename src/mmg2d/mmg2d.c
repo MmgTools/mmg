@@ -171,7 +171,9 @@ int MMG2D_writeLocalParam( MMG5_pMesh mesh ) {
 
   /** Save the local parameters file */
   strcpy(data,mesh->namein);
-  ptr = strstr(data,".mesh");
+
+  ptr = MMG5_Get_filenameExt(data);
+
   if ( ptr ) *ptr = '\0';
   strcat(data,".mmg2d");
 
@@ -648,8 +650,8 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
 int main(int argc,char *argv[]) {
   MMG5_pMesh    mesh;
   MMG5_pSol     met,disp,ls;
-  int           ier,ierSave,msh;
-  char          stim[32];
+  int           ier,ierSave,fmtin,fmtout;
+  char          stim[32],*ptr;
 
   fprintf(stdout,"  -- MMG2D, Release %s (%s) \n",MG_VER,MG_REL);
   fprintf(stdout,"     %s\n",MG_CPY);
@@ -657,8 +659,6 @@ int main(int argc,char *argv[]) {
 
   /* Print timer at exit */
   atexit(MMG5_endcod);
-
-  msh = 0;
 
   MMG2D_Set_commonFunc();
   tminit(MMG5_ctim,TIMEMAX);
@@ -698,8 +698,11 @@ int main(int argc,char *argv[]) {
   chrono(ON,&MMG5_ctim[1]);
 
   /* read mesh file */
-  ier = MMG2D_loadMesh(mesh,mesh->namein);
-  if ( !ier ) {
+  ptr   = MMG5_Get_filenameExt(mesh->namein);
+  fmtin = MMG5_Get_format(ptr,NULL);
+
+  switch ( fmtin ) {
+  case ( MMG5_FMT_GmshASCII ): case ( MMG5_FMT_GmshBinary ):
     if ( mesh->info.lag >= 0 )
       ier = MMG2D_loadMshMesh(mesh,disp,mesh->namein);
     else if ( mesh->info.iso ) {
@@ -708,8 +711,23 @@ int main(int argc,char *argv[]) {
     else {
       ier = MMG2D_loadMshMesh(mesh,met,mesh->namein);
     }
-    msh = 1;
+    break;
+    /* case ( MMG5_FMT_VtkVtu ): case ( MMG5_FMT_VtkPvtu ): */
+    /* case ( MMG5_FMT_VtkVtp ): case ( MMG5_FMT_VtkPvtp ): */
+    /*   if ( mesh->info.lag >= 0 ) */
+    /*     ier = 0;// To code //MMG2D_loadMshMesh(mesh,disp,mesh->namein); */
+    /*   else if ( mesh->info.iso ) { */
+    /*     ier = 0; // To code //MMG2D_loadMshMesh(mesh,ls,mesh->namein); */
+    /*   } */
+    /*   else { */
+    /*     ier = 0; // To code //MMG2D_loadMshMesh(mesh,met,mesh->namein); */
+    /*   } */
+    /*   break; */
+  default:
+    ier = MMG2D_loadMesh(mesh,mesh->namein);
+    break;
   }
+
   if ( ier < 1) {
     if ( ier==0 ) {
       fprintf(stderr,"  ** %s  NOT FOUND.\n",mesh->namein);
@@ -731,7 +749,7 @@ int main(int argc,char *argv[]) {
     }
     MMG5_DEL_MEM(mesh,ls->namein);
 
-    if ( !msh ) {
+    if ( !fmtin ) {
       ier = MMG2D_loadSol(mesh,disp,disp->namein);
       if ( ier < 1 ) {
         fprintf(stdout,"  ## ERROR: UNABLE TO LOAD DISPLACEMENT.\n");
@@ -750,7 +768,7 @@ int main(int argc,char *argv[]) {
   }
   /* Read levelset if any */
   else if ( mesh->info.iso ) {
-    if ( !msh ) {
+    if ( !fmtin ) {
       ier = MMG2D_loadSol(mesh,ls,ls->namein);
       if ( ier < 1 ) {
         fprintf(stdout,"  ## ERROR: UNABLE TO LOAD LEVEL-SET.\n");
@@ -770,7 +788,7 @@ int main(int argc,char *argv[]) {
     }
   }
   /* Read metric if any */
-  else if ( !msh ) {
+  else if ( !fmtin ) {
     ier = MMG2D_loadSol(mesh,met,met->namein);
     if ( ier == -1 ) {
         fprintf(stdout,"\n  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
@@ -817,18 +835,29 @@ int main(int argc,char *argv[]) {
     if ( mesh->info.imprim > 0 )
       fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh->nameout);
 
-    MMG5_chooseOutputFormat(mesh,&msh);
+    ptr    = MMG5_Get_filenameExt(mesh->nameout);
+    fmtout = MMG5_Get_format(ptr,&fmtin);
 
-    if ( !msh )
-      ierSave = MMG2D_saveMesh(mesh,mesh->nameout);
-    else
+    switch ( fmtout ) {
+    case ( MMG5_FMT_GmshASCII ): case ( MMG5_FMT_GmshBinary ):
       ierSave = MMG2D_saveMshMesh(mesh,met,mesh->nameout);
+      break;
+    case ( MMG5_FMT_VtkVtp ): case ( MMG5_FMT_VtkPvtp ):
+      ierSave = 0; // To code
+      break;
+    default:
+      ierSave = MMG2D_saveMesh(mesh,mesh->nameout);
+      if ( !ierSave ) {
+        MMG2D_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
+      }
+      if ( met && met->np ) {
+        ierSave = MMG2D_saveSol(mesh,met,mesh->nameout);
+      }
+      break;
+    }
 
     if ( !ierSave )
       MMG2D_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
-
-    if( !msh && met->np )
-      MMG2D_saveSol(mesh,met,mesh->nameout);
 
     chrono(OFF,&MMG5_ctim[1]);
     if ( mesh->info.imprim > 0 ) fprintf(stdout,"  -- WRITING COMPLETED\n");

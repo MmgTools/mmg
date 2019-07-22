@@ -177,30 +177,6 @@ int MMG5_writeLocalParamAtTri( MMG5_pMesh mesh, MMG5_iNode *bdryRefs,
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param mesh pointer toward the msh value.
- *
- * Update the msh value if we detect that the user want to force output at Gmsh
- * or Medit format.
- *
- */
-void MMG5_chooseOutputFormat(MMG5_pMesh mesh, int *msh) {
-  int len;
-
-  len = strlen(mesh->nameout);
-
-  if ( ( len>4 && !strcmp(&mesh->nameout[len-5],".mesh") ) ||
-       ( len>5 && !strcmp(&mesh->nameout[len-6],".meshb") ) )
-    *msh = 0;
-  else if ( ( len>3 && !strcmp(&mesh->nameout[len-4],".msh") ) ||
-            ( len>4 && !strcmp(&mesh->nameout[len-5],".mshb") ))
-    *msh = 1;
-  else
-    *msh = 0;
-
-}
-
-/**
- * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the solution structure.
  *
  * Truncate the metric computed by the DoSol function by hmax and hmin values
@@ -311,4 +287,64 @@ void MMG5_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
   }
 
   return;
+}
+
+/**
+ * \param filename string containing a filename
+ *
+ * \return NULL if fail, pointer toward the filename extension otherwise.
+ *
+ * Get the extension of the filename string.
+ *
+ */
+char *MMG5_Get_filenameExt( char *filename ) {
+  char *dot;
+
+  dot = strrchr(filename, '.');
+
+  if ( !dot || dot == filename ) return NULL;
+
+  return dot;
+}
+
+/**
+ * \param ptr pointer toward the file extension (dot included)
+ * \param fmt default file format if provided.
+ *
+ * \return and index associated to the file format detected from the extension.
+ *
+ * Get the wanted file format from the mesh extension. If \a fmt is provided, it
+ * is used as default file format (\a ptr==NULL), otherwise, the default file
+ * format is the medit one.
+ *
+ */
+int MMG5_Get_format( char *ptr, int *fmt ) {
+  /* Default is the Medit file format or a format given as input */
+  int defFmt = MMG5_FMT_Medit;
+  if ( fmt ) {
+    defFmt = *fmt;
+  }
+
+  if ( !ptr ) return defFmt;
+
+  if ( !strncmp( ptr,".mshb",strlen(ptr) ) ) {
+    return MMG5_FMT_GmshBinary;
+  }
+  else if ( !strncmp( ptr,".msh",strlen(ptr) ) ) {
+    return MMG5_FMT_GmshASCII;
+  }
+  else if ( !strncmp ( ptr,".pvtu",strlen(ptr) ) ) {
+    return MMG5_FMT_VtkPvtu;
+  }
+  else if ( !strncmp ( ptr,".vtu",strlen(ptr) ) ) {
+    return MMG5_FMT_VtkVtu;
+  }
+  else if ( !strncmp ( ptr,".pvtp",strlen(ptr) ) ) {
+    return MMG5_FMT_VtkPvtp;
+  }
+  else if ( !strncmp ( ptr,".vtp",strlen(ptr) ) ) {
+    return MMG5_FMT_VtkVtp;
+  }
+
+  return defFmt;
 }
