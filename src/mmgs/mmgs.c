@@ -347,6 +347,28 @@ int main(int argc,char *argv[]) {
   /*   break; */
   default:
     ier = MMGS_loadMesh(mesh,mesh->namein);
+    if ( ier <  1 ) { break; }
+
+    /* read level-set in iso mode any */
+    if ( mesh->info.iso ) {
+      if ( MMGS_loadSol(mesh,ls,ls->namein) < 1 ) {
+        fprintf(stdout,"  ## ERROR: UNABLE TO LOAD LEVEL-SET.\n");
+        MMGS_RETURN_AND_FREE(mesh,met,ls,MMG5_STRONGFAILURE);
+      }
+      if ( met->namein ) {
+        if ( MMGS_loadSol(mesh,met,met->namein) < 1 ) {
+          fprintf(stdout,"  ## ERROR: UNABLE TO LOAD METRIC.\n");
+          MMGS_RETURN_AND_FREE(mesh,met,ls,MMG5_STRONGFAILURE);
+        }
+      }
+    }
+    /* read metric if any */
+    else {
+      if ( MMGS_loadSol(mesh,met,met->namein) == -1 ) {
+        fprintf(stderr,"\n  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
+        MMGS_RETURN_AND_FREE(mesh,met,ls,MMG5_STRONGFAILURE);
+      }
+    }
     break;
   }
 
@@ -358,38 +380,15 @@ int main(int argc,char *argv[]) {
     MMGS_RETURN_AND_FREE(mesh,met,ls,MMG5_STRONGFAILURE);
   }
 
-  /* read level-set if any */
+  /* Check input data */
   if ( mesh->info.iso ) {
-    if ( !fmtin ) {
-      ier = MMGS_loadSol(mesh,ls,ls->namein);
-      if ( ier < 1 ) {
-        fprintf(stdout,"  ## ERROR: UNABLE TO LOAD LEVEL-SET.\n");
-        MMGS_RETURN_AND_FREE(mesh,met,ls,MMG5_STRONGFAILURE);
-      }
-      if ( met->namein ) {
-        ier = MMGS_loadSol(mesh,met,met->namein);
-        if ( ier < 1 ) {
-          fprintf(stdout,"  ## ERROR: UNABLE TO LOAD METRIC.\n");
-          MMGS_RETURN_AND_FREE(mesh,met,ls,MMG5_STRONGFAILURE);
-        }
-      }
-    }
     if ( ls->m==NULL ) {
       fprintf(stderr,"\n  ## ERROR: NO ISOVALUE DATA.\n");
       MMGS_RETURN_AND_FREE(mesh,met,ls,MMG5_STRONGFAILURE);
     }
   }
-  /* read metric if any */
-  else {
-    if ( !fmtin ) {
-      ier = MMGS_loadSol(mesh,met,met->namein);
-      if ( ier==-1 ) {
-        fprintf(stderr,"\n  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
-        MMGS_RETURN_AND_FREE(mesh,met,ls,MMG5_STRONGFAILURE);
-      }
-    }
-  }
 
+  /* Read parameter file */
   if ( !MMG5_parsop(mesh,met) )
     MMGS_RETURN_AND_FREE(mesh,met,ls,MMG5_LOWFAILURE);
 

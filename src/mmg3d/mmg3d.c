@@ -351,7 +351,7 @@ int main(int argc,char *argv[]) {
     fprintf(stdout,"\n  -- INPUT DATA\n");
   chrono(ON,&MMG5_ctim[1]);
 
-  /* read mesh file */
+  /* read mesh/sol files */
   ptr   = MMG5_Get_filenameExt(mesh->namein);
 
   fmtin = MMG5_Get_format(ptr,NULL);
@@ -379,6 +379,48 @@ int main(int argc,char *argv[]) {
   /*   break; */
   default:
     ier = MMG3D_loadMesh(mesh,mesh->namein);
+    if ( ier <  1 ) { break; }
+
+    /* Read displacement in lag mode */
+    if ( mesh->info.lag >= 0 ) {
+      /* In Lagrangian mode, the name of the displacement file has been parsed in ls */
+      if ( !MMG3D_Set_inputSolName(mesh,disp,ls->namein) ) {
+        MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
+      }
+      MMG5_DEL_MEM(mesh,ls->namein);
+
+      /* Load displacement */
+      ier = MMG3D_loadSol(mesh,disp,disp->namein);
+      if ( ier == 0 ) {
+        fprintf(stderr,"\n  ## ERROR: NO DISPLACEMENT FOUND.\n");
+        MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
+      }
+      else if ( ier == -1 ) {
+        fprintf(stderr,"\n  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
+        MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
+      }
+    }
+    /* Read levelset in iso mode */
+    else if ( mesh->info.iso ) {
+      if ( MMG3D_loadSol(mesh,ls,ls->namein) < 1 ) {
+        fprintf(stdout,"  ## ERROR: UNABLE TO LOAD LEVEL-SET.\n");
+        MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
+      }
+      /* Read metric if any */
+      if ( met->namein ) {
+        if ( MMG3D_loadSol(mesh,met,met->namein) < 1 ) {
+          fprintf(stdout,"  ## ERROR: UNABLE TO LOAD METRIC.\n");
+          MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
+        }
+      }
+    }
+    /* Read metric if any */
+    else {
+      if ( MMG3D_loadSol(mesh,met,met->namein) == -1 ) {
+        fprintf(stderr,"\n  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
+        MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
+      }
+    }
     break;
   }
 
@@ -390,65 +432,23 @@ int main(int argc,char *argv[]) {
     MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
   }
 
-  /* read displacement if any */
+  /* Check input data */
   if ( mesh->info.lag > -1 ) {
-    if ( (!fmtin) && !MMG3D_Set_solSize(mesh,disp,MMG5_Vertex,0,MMG5_Vector) )
+    if ( met->namein ) {
+      fprintf(stdout,"  ## WARNING: MESH ADAPTATION UNAVAILABLE IN"
+              " LAGRANGIAN MODE. METRIC IGNORED.\n");
       MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
-
-    /* In Lagrangian mode, the name of the displacement file has been parsed in ls */
-    if ( !MMG3D_Set_inputSolName(mesh,disp,ls->namein) )
-      MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
-    MMG5_DEL_MEM(mesh,ls->namein);
-
-    if ( !fmtin ) {
-      ier = MMG3D_loadSol(mesh,disp,disp->namein);
-      if ( ier == 0 ) {
-        fprintf(stderr,"\n  ## ERROR: NO DISPLACEMENT FOUND.\n");
-        MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
-      }
-      else if ( ier == -1 ) {
-        fprintf(stderr,"\n  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
-        MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
-      }
-      if ( met->namein ) {
-        fprintf(stdout,"  ## WARNING: MESH ADAPTATION UNAVAILABLE IN"
-                " LAGRANGIAN MODE. METRIC IGNORED.\n");
-        MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
-      }
     }
   }
-  /* Read levelset if any */
   else if ( mesh->info.iso ) {
-    if ( !fmtin ) {
-      ier = MMG3D_loadSol(mesh,ls,ls->namein);
-      if ( ier < 1 ) {
-        fprintf(stdout,"  ## ERROR: UNABLE TO LOAD LEVEL-SET.\n");
-        MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
-      }
-      if ( met->namein ) {
-        ier = MMG3D_loadSol(mesh,met,met->namein);
-        if ( ier < 1 ) {
-          fprintf(stdout,"  ## ERROR: UNABLE TO LOAD METRIC.\n");
-          MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
-        }
-      }
-    }
-    if ( ls->m==0 ) {
+     if ( ls->m == NULL ) {
       fprintf(stderr,"\n  ## ERROR: NO ISOVALUE DATA.\n");
       MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
     }
   }
-  /* read metric if any */
-  else {
-    if ( !fmtin ) {
-      ier = MMG3D_loadSol(mesh,met,met->namein);
-      if ( ier == -1 ) {
-        fprintf(stderr,"\n  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
-        MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
-      }
-      }
-    }
-    if ( !MMG3D_parsop(mesh,met) )
+
+  /* Read parameter file */
+  if ( !MMG3D_parsop(mesh,met) )
     MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_LOWFAILURE);
 
   chrono(OFF,&MMG5_ctim[1]);
