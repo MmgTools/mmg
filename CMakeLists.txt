@@ -215,6 +215,13 @@ ENDIF ( )
 
 ############################################################################
 #####
+#####         VTK (to parse (p)vtp/(p)vtu files )
+#####
+############################################################################
+FIND_PACKAGE(VTK)
+
+############################################################################
+#####
 ##### RPATH for MacOSX
 #####
 ############################################################################
@@ -327,6 +334,15 @@ IF( USE_SCOTCH )
   SET( LIBRARIES ${SCOTCH_LIBRARIES} ${LIBRARIES})
 ENDIF()
 
+# add the VTK library ?
+CMAKE_DEPENDENT_OPTION ( USE_VTK "Use VTK I/O" ON
+  "VTK_FOUND" OFF)
+
+IF ( USE_VTK )
+  MESSAGE ( STATUS "Compilation with VTK: add vtp and vtu I/O." )
+  INCLUDE ( ${VTK_USE_FILE} )
+  SET( LIBRARIES ${VTK_LIBRARIES} ${LIBRARIES} )
+ENDIF ( )
 
 #---------------------------- mmg library gathering mmg2d, mmgs and mmg3d libs
 CMAKE_DEPENDENT_OPTION ( LIBMMG_STATIC

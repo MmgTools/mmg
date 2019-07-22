@@ -506,7 +506,7 @@ void MMG5_excfun(int sigid) {
   { body }                                        \
 
 /**
- * \enum MMG5_fmt
+ * \enum MMG5_Format
  * \brief Type of supported file format
  */
 enum MMG5_Format {
@@ -597,6 +597,7 @@ void           MMG5_check_hminhmax(MMG5_pMesh mesh, int8_t sethmin, int8_t sethm
  int           MMG5_grad2metSurf(MMG5_pMesh,MMG5_pSol,MMG5_pTria,int,int);
  int           MMG5_grad2metSurfreq(MMG5_pMesh,MMG5_pSol,MMG5_pTria,int,int);
  char         *MMG5_Get_filenameExt( char *filename );
+const char    *MMG5_Get_formatName(enum MMG5_Format fmt);
  int           MMG5_Get_format( char *ptr, int* );
  int           MMG5_hashEdge(MMG5_pMesh mesh,MMG5_Hash *hash,int a,int b,int k);
  int           MMG5_hashUpdate(MMG5_Hash *hash,int a,int b,int k);

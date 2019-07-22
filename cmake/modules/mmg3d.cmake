@@ -75,6 +75,10 @@ FILE(
 LIST(REMOVE_ITEM mmg3d_library_files
   ${MMG3D_SOURCE_DIR}/${PROJECT_NAME}3d.c
 )
+IF ( USE_VTK )
+  LIST(APPEND  ${COMMON_SOURCE_DIR}/iovtk.cpp)
+ENDIF ( )
+
 FILE(
   GLOB
   mmg3d_main_file

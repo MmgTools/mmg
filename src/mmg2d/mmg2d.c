@@ -649,7 +649,7 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
 
 int main(int argc,char *argv[]) {
   MMG5_pMesh    mesh;
-  MMG5_pSol     met,disp,ls;
+  MMG5_pSol     sol,met,disp,ls;
   int           ier,ierSave,fmtin,fmtout;
   char          stim[32],*ptr;
 
@@ -697,20 +697,25 @@ int main(int argc,char *argv[]) {
     fprintf(stdout,"\n  -- INPUT DATA\n");
   chrono(ON,&MMG5_ctim[1]);
 
+  /* For each mode: pointer over the solution structure to load */
+  if ( mesh->info.lag >= 0 ) {
+    sol = disp;
+  }
+  else if ( mesh->info.iso ) {
+    sol = ls;
+  }
+  else {
+    sol = met;
+  }
+
   /* read mesh/sol files */
   ptr   = MMG5_Get_filenameExt(mesh->namein);
   fmtin = MMG5_Get_format(ptr,NULL);
 
+  ier = 0;
   switch ( fmtin ) {
   case ( MMG5_FMT_GmshASCII ): case ( MMG5_FMT_GmshBinary ):
-    if ( mesh->info.lag >= 0 )
-      ier = MMG2D_loadMshMesh(mesh,disp,mesh->namein);
-    else if ( mesh->info.iso ) {
-      ier = MMG2D_loadMshMesh(mesh,ls,mesh->namein);
-    }
-    else {
-      ier = MMG2D_loadMshMesh(mesh,met,mesh->namein);
-    }
+    ier = MMG2D_loadMshMesh(mesh,sol,mesh->namein);
     break;
     /* case ( MMG5_FMT_VtkVtu ): case ( MMG5_FMT_VtkPvtu ): */
     /* case ( MMG5_FMT_VtkVtp ): case ( MMG5_FMT_VtkPvtp ): */
@@ -723,7 +728,7 @@ int main(int argc,char *argv[]) {
     /*     ier = 0; // To code //MMG2D_loadMshMesh(mesh,met,mesh->namein); */
     /*   } */
     /*   break; */
-  default:
+  case ( MMG5_FMT_Medit ):
     ier = MMG2D_loadMesh(mesh,mesh->namein);
     if ( ier <  1 ) { break; }
 
@@ -734,35 +739,31 @@ int main(int argc,char *argv[]) {
         MMG2D_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
       }
       MMG5_DEL_MEM(mesh,ls->namein);
+    }
 
-      /* Load displacement */
-      if (  MMG2D_loadSol(mesh,disp,disp->namein) < 1 ) {
-        fprintf(stdout,"  ## ERROR: UNABLE TO LOAD DISPLACEMENT.\n");
-        MMG2D_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
-      }
+    if (  MMG2D_loadSol(mesh,sol,sol->namein) < 1 ) {
+      /* displacement or isovalue are mandatory */
+      fprintf(stdout,"  ## ERROR: UNABLE TO LOAD SOLUTION.\n");
+      MMG2D_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
     }
-    /* Read levelset in iso mode */
-    else if ( mesh->info.iso ) {
-      if ( MMG2D_loadSol(mesh,ls,ls->namein) < 1 ) {
-        fprintf(stdout,"  ## ERROR: UNABLE TO LOAD LEVEL-SET.\n");
-        MMG2D_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
-      }
-      /* Read metric if any */
-      if ( met->namein ) {
-        if (  MMG2D_loadSol(mesh,met,met->namein) < 1 ) {
-          fprintf(stdout,"  ## ERROR: UNABLE TO LOAD METRIC.\n");
-          MMG2D_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
-        }
-      }
-    }
-    /* Read metric if any */
     else {
+      /* Facultative metric */
       if ( MMG2D_loadSol(mesh,met,met->namein) == -1 ) {
         fprintf(stdout,"\n  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
         MMG2D_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
       }
     }
+    /* In iso mode: read metric if any */
+    if ( mesh->info.iso && met->namein ) {
+      if (  MMG2D_loadSol(mesh,met,met->namein) < 1 ) {
+        fprintf(stdout,"  ## ERROR: UNABLE TO LOAD METRIC.\n");
+        MMG2D_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
+      }
+    }
     break;
+  default:
+    fprintf(stderr,"  ** I/O AT FORMAT %s NOT IMPLEMENTED.\n",MMG5_Get_formatName(fmtin) );
+    MMG2D_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
   }
 
   if ( ier < 1) {

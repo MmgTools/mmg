@@ -301,7 +301,7 @@ int MMG3D_defaultOption(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
 int main(int argc,char *argv[]) {
 
   MMG5_pMesh      mesh;
-  MMG5_pSol       met,disp,ls;
+  MMG5_pSol       sol,met,disp,ls;
   int             ier,ierSave,fmtin,fmtout;
   char            stim[32],*ptr;
 
@@ -351,23 +351,28 @@ int main(int argc,char *argv[]) {
     fprintf(stdout,"\n  -- INPUT DATA\n");
   chrono(ON,&MMG5_ctim[1]);
 
+  /* For each mode: pointer over the solution structure to load */
+  if ( mesh->info.lag >= 0 ) {
+    sol = disp;
+  }
+  else if ( mesh->info.iso ) {
+    sol = ls;
+  }
+  else {
+    sol = met;
+  }
+
   /* read mesh/sol files */
   ptr   = MMG5_Get_filenameExt(mesh->namein);
-
   fmtin = MMG5_Get_format(ptr,NULL);
+
   switch ( fmtin ) {
+
   case ( MMG5_FMT_GmshASCII ): case ( MMG5_FMT_GmshBinary ):
-    if ( mesh->info.lag >= 0 )
-      ier = MMG3D_loadMshMesh(mesh,disp,mesh->namein);
-    else if ( mesh->info.iso ) {
-      ier = MMG3D_loadMshMesh(mesh,ls,mesh->namein);
-    }
-    else {
-      ier = MMG3D_loadMshMesh(mesh,met,mesh->namein);
-    }
+    ier = MMG3D_loadMshMesh(mesh,sol,mesh->namein);
     break;
+
   /* case ( MMG5_FMT_VtkVtu ): case ( MMG5_FMT_VtkPvtu ): */
-  /* case ( MMG5_FMT_VtkVtp ): case ( MMG5_FMT_VtkPvtp ): */
   /*   if ( mesh->info.lag >= 0 ) */
   /*     ier = 0;// To code //MMG3D_loadMshMesh(mesh,disp,mesh->namein); */
   /*   else if ( mesh->info.iso ) { */
@@ -377,51 +382,45 @@ int main(int argc,char *argv[]) {
   /*     ier = 0; // To code //MMG3D_loadMshMesh(mesh,met,mesh->namein); */
   /*   } */
   /*   break; */
-  default:
+
+  case ( MMG5_FMT_Medit ):
     ier = MMG3D_loadMesh(mesh,mesh->namein);
     if ( ier <  1 ) { break; }
 
-    /* Read displacement in lag mode */
+    /* In Lagrangian mode, the name of the displacement file has been parsed in ls */
     if ( mesh->info.lag >= 0 ) {
-      /* In Lagrangian mode, the name of the displacement file has been parsed in ls */
       if ( !MMG3D_Set_inputSolName(mesh,disp,ls->namein) ) {
         MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
       }
       MMG5_DEL_MEM(mesh,ls->namein);
+    }
 
-      /* Load displacement */
-      ier = MMG3D_loadSol(mesh,disp,disp->namein);
-      if ( ier == 0 ) {
-        fprintf(stderr,"\n  ## ERROR: NO DISPLACEMENT FOUND.\n");
-        MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
-      }
-      else if ( ier == -1 ) {
-        fprintf(stderr,"\n  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
+    if ( mesh->info.lag >= 0 || mesh->info.iso ) {
+      /* displacement or isovalue are mandatory */
+      if ( MMG3D_loadSol(mesh,sol,sol->namein) < 1 ) {
+        fprintf(stdout,"  ## ERROR: UNABLE TO LOAD SOLUTION FILE.\n");
         MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
       }
     }
-    /* Read levelset in iso mode */
-    else if ( mesh->info.iso ) {
-      if ( MMG3D_loadSol(mesh,ls,ls->namein) < 1 ) {
-        fprintf(stdout,"  ## ERROR: UNABLE TO LOAD LEVEL-SET.\n");
-        MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
-      }
-      /* Read metric if any */
-      if ( met->namein ) {
-        if ( MMG3D_loadSol(mesh,met,met->namein) < 1 ) {
-          fprintf(stdout,"  ## ERROR: UNABLE TO LOAD METRIC.\n");
-          MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
-        }
-      }
-    }
-    /* Read metric if any */
     else {
+      /* Facultative metric */
       if ( MMG3D_loadSol(mesh,met,met->namein) == -1 ) {
         fprintf(stderr,"\n  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
         MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
       }
     }
+    /* In iso mode: read metric if any */
+    if ( mesh->info.iso && met->namein ) {
+      if ( MMG3D_loadSol(mesh,met,met->namein) < 1 ) {
+        fprintf(stdout,"  ## ERROR: UNABLE TO LOAD METRIC.\n");
+        MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
+      }
+    }
     break;
+
+  default:
+    fprintf(stderr,"  ** I/O AT FORMAT %s NOT IMPLEMENTED.\n",MMG5_Get_formatName(fmtin) );
+    MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
   }
 
   if ( ier<1 ) {
@@ -441,7 +440,7 @@ int main(int argc,char *argv[]) {
     }
   }
   else if ( mesh->info.iso ) {
-     if ( ls->m == NULL ) {
+     if ( ls == NULL || ls->m == NULL ) {
       fprintf(stderr,"\n  ## ERROR: NO ISOVALUE DATA.\n");
       MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
     }
@@ -490,7 +489,6 @@ int main(int argc,char *argv[]) {
       ierSave = MMG3D_saveMshMesh(mesh,met,mesh->nameout);
       break;
     case ( MMG5_FMT_VtkVtu ): case ( MMG5_FMT_VtkPvtu ):
-    case ( MMG5_FMT_VtkVtp ): case ( MMG5_FMT_VtkPvtp ):
       ierSave = 0; // To code
       break;
     default:

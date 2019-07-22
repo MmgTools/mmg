@@ -348,3 +348,41 @@ int MMG5_Get_format( char *ptr, int *fmt ) {
 
   return defFmt;
 }
+
+/**
+ * \param fmt file format.
+ *
+ * \return The name of the file format in a string.
+ *
+ * Print the name of the file format associated to \a fmt.
+ *
+ */
+const char* MMG5_Get_formatName(enum MMG5_Format fmt)
+{
+  switch (fmt)
+  {
+  case MMG5_FMT_Medit:
+    return "MMG5_FMT_Medit";
+    break;
+  case MMG5_FMT_VtkVtu:
+    return "MMG5_FMT_VtkVtu";
+    break;
+  case MMG5_FMT_VtkVtp:
+    return "MMG5_FMT_VtkVtp";
+    break;
+  case MMG5_FMT_VtkPvtu:
+    return "MMG5_FMT_VtkPvtu";
+    break;
+  case MMG5_FMT_VtkPvtp:
+    return "MMG5_FMT_VtkPvtp";
+    break;
+  case MMG5_FMT_GmshASCII:
+    return "MMG5_FMT_GmshASCII";
+    break;
+  case MMG5_FMT_GmshBinary:
+    return "MMG5_FMT_GmshBinary";
+    break;
+  default:
+    return "MMG5_Unknown";
+  }
+}

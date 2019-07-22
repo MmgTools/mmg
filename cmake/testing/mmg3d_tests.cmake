@@ -313,7 +313,7 @@ ADD_TEST(NAME mmg3d_LeakCheck_AbnormalEnd3
   ${MMG3D_CI_TESTS}/LeakCheck_AbnormalEnd3/d -sol
   ${MMG3D_CI_TESTS}/LeakCheck_AbnormalEnd3/dsol.sol -ls
   -out ${CTEST_OUTPUT_DIR}/mmg3d_LeakCheck_AbnormalEnd3-d.o.meshb)
-SET(passRegex "## ERROR: UNABLE TO LOAD LEVEL-SET.")
+SET(passRegex "## ERROR: UNABLE TO LOAD SOLUTION")
 SET_PROPERTY(TEST mmg3d_LeakCheck_AbnormalEnd3
   PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}")
 #####

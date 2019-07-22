@@ -61,6 +61,11 @@ FILE(
 LIST(REMOVE_ITEM mmgs_library_files
   ${MMGS_SOURCE_DIR}/mmgs.c
   ${REMOVE_FILE} )
+
+IF ( USE_VTK )
+  LIST(APPEND  ${COMMON_SOURCE_DIR}/iovtk.cpp)
+ENDIF ( )
+
 FILE(
   GLOB
   mmgs_main_file

@@ -283,7 +283,7 @@ int MMGS_defaultOption(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
 
 int main(int argc,char *argv[]) {
   MMG5_pMesh mesh;
-  MMG5_pSol  met,ls;
+  MMG5_pSol  sol,met,ls;
   int        ier,ierSave,fmtin,fmtout;
   char       stim[32],*ptr;
 
@@ -323,19 +323,24 @@ int main(int argc,char *argv[]) {
     fprintf(stdout,"\n  -- INPUT DATA\n");
   chrono(ON,&MMG5_ctim[1]);
 
+  /* For each mode: pointer over the solution structure to load */
+  if ( mesh->info.iso ) {
+    sol = ls;
+  }
+  else {
+    sol = met;
+  }
+
   /* read mesh file */
   ptr   = MMG5_Get_filenameExt(mesh->namein);
   fmtin = MMG5_Get_format(ptr,NULL);
 
   switch ( fmtin ) {
+
   case ( MMG5_FMT_GmshASCII ): case ( MMG5_FMT_GmshBinary ):
-    if ( mesh->info.iso ) {
-      ier = MMGS_loadMshMesh(mesh,ls,mesh->namein);
-    }
-    else {
-      ier = MMGS_loadMshMesh(mesh,met,mesh->namein);
-    }
+    ier = MMGS_loadMshMesh(mesh,sol,mesh->namein);
     break;
+
   /* case ( MMG5_FMT_VtkVtu ): case ( MMG5_FMT_VtkPvtu ): */
   /* case ( MMG5_FMT_VtkVtp ): case ( MMG5_FMT_VtkPvtp ): */
   /*   if ( mesh->info.iso ) { */
@@ -345,14 +350,15 @@ int main(int argc,char *argv[]) {
   /*     ier = 0; // To code //MMGS_loadMshMesh(mesh,met,mesh->namein); */
   /*   } */
   /*   break; */
-  default:
+
+  case ( MMG5_FMT_Medit ):
     ier = MMGS_loadMesh(mesh,mesh->namein);
     if ( ier <  1 ) { break; }
 
-    /* read level-set in iso mode any */
+    /* read level-set in iso mode */
     if ( mesh->info.iso ) {
       if ( MMGS_loadSol(mesh,ls,ls->namein) < 1 ) {
-        fprintf(stdout,"  ## ERROR: UNABLE TO LOAD LEVEL-SET.\n");
+        fprintf(stderr,"\n  ## ERROR: UNABLE TO LOAD LEVEL-SET.\n");
         MMGS_RETURN_AND_FREE(mesh,met,ls,MMG5_STRONGFAILURE);
       }
       if ( met->namein ) {
@@ -362,14 +368,18 @@ int main(int argc,char *argv[]) {
         }
       }
     }
-    /* read metric if any */
     else {
+      /* read metric if any */
       if ( MMGS_loadSol(mesh,met,met->namein) == -1 ) {
         fprintf(stderr,"\n  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
         MMGS_RETURN_AND_FREE(mesh,met,ls,MMG5_STRONGFAILURE);
       }
     }
     break;
+
+  default:
+    fprintf(stderr,"  ** I/O AT FORMAT %s NOT IMPLEMENTD.\n",MMG5_Get_formatName(fmtin) );
+    MMGS_RETURN_AND_FREE(mesh,met,ls,MMG5_STRONGFAILURE);
   }
 
   if ( ier<1 ) {

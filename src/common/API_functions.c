@@ -593,4 +593,3 @@ const char* MMG5_Get_typeName(enum MMG5_type typ)
     return "MMG5_Unknown";
   }
 }
-

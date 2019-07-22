@@ -61,6 +61,11 @@ FILE(
 LIST(REMOVE_ITEM mmg2d_library_files
   ${MMG2D_SOURCE_DIR}/mmg2d.c
   ${REMOVE_FILE} )
+
+IF ( USE_VTK )
+  LIST(APPEND  ${COMMON_SOURCE_DIR}/iovtk.cpp)
+ENDIF ( )
+
 FILE(
   GLOB
   mmg2d_main_file
