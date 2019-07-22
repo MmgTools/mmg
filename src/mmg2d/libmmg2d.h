@@ -715,7 +715,7 @@ extern "C" {
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_GET_SOLSATVERTICESSIZE(mesh,sol,nsols,nentities,typSol,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol\n
- * >     INTEGER                       :: nsol,nentities\n
+ * >     INTEGER                       :: nsols,nentities\n
  * >     INTEGER                       :: typSol(*)\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
