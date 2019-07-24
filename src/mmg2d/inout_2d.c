@@ -83,7 +83,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
   MMG5_pQuad        pq1;
   float             fc;
   long         posnp,posnt,posncor,posned,posnq,posreq,posreqed,posntreq;
-  int          k,ref,tmp,ncor,norient,nreq,ntreq,nreqed,bin,iswp,nq;
+  int          k,ref,tmp,ncor,norient,nreq,ntreq,nreqed,bin,iswp,nq,nref;
   double       air,dtmp;
   int          i,bdim,binch,bpos;
   char         *ptr,*data;
@@ -95,6 +95,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
   iswp = 0;
   mesh->np = mesh->nt = mesh->na = mesh->xp = 0;
   nq = 0;
+  nref = 0;
 
   MMG5_SAFE_CALLOC(data,strlen(filename)+7,char,return 0);
   strcpy(data,filename);
@@ -375,6 +376,10 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         if(iswp) ppt->ref=MMG_swapbin(ppt->ref);
       }
     }
+    if ( ppt->ref < 0 ) {
+      ppt->ref = -ppt->ref;
+      ++nref;
+    }
     ppt->tag = MG_NUL;
   }
 
@@ -393,6 +398,10 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
       if(iswp) ped->b=MMG_swapbin(ped->b);
       MMG_FREAD(&ped->ref,sw,1,inm);
       if(iswp) ped->ref=MMG_swapbin(ped->ref);
+    }
+    if ( ped->ref < 0 ) {
+      ped->ref = -ped->ref;
+      ++nref;
     }
   }
 
@@ -420,9 +429,16 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
       }
       for(i=0 ; i<3 ; i++)
         pt->edg[i] = 0;
+
+      /* Get positive ref */
+      if ( pt->ref < 0 ) {
+        pt->ref = -pt->ref;
+        ++nref;
+      }
+
+      /* Check orientation */
       air = MMG2D_quickarea(mesh->point[pt->v[0]].c,mesh->point[pt->v[1]].c,
                            mesh->point[pt->v[2]].c);
-
       if(air < 0) {
         norient++;
         tmp = pt->v[2];
@@ -484,6 +500,11 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         }
         MMG_FREAD(&pq1->ref,sw,1,inm);
         if(iswp) pq1->ref=MMG_swapbin(pq1->ref);
+      }
+
+      if ( pq1->ref < 0 ) {
+        pq1->ref = -pq1->ref;
+        ++nref;
       }
     }
   }
@@ -564,6 +585,13 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         ppt->c[1] += 1;
       }
     }
+  }
+
+  if ( nref ) {
+    fprintf(stdout,"\n     $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ \n");
+    fprintf(stdout,"         WARNING : %d entities with unexpected refs (ref< 0).",nref);
+    fprintf(stdout," We take their absolute values.\n");
+    fprintf(stdout,"     $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ \n\n");
   }
 
   if ( abs(mesh->info.imprim) > 4 ) {

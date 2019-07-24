@@ -125,6 +125,7 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
   iswp = 0;
   ina = NULL;
   mesh->np = mesh->nt = mesh->ne = 0;
+  nref = 0;
 
   MMG5_SAFE_CALLOC(data,strlen(filename)+7,char,return -1);
 
@@ -466,6 +467,12 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         if(iswp) ppt->ref=MMG5_swapbin(ppt->ref);
       }
     }
+
+    if ( ppt->ref < 0 ) {
+      ppt->ref = -ppt->ref;
+      ++nref;
+    }
+
     ppt->tag  = MG_NUL;
     ppt->tmp  = 0;
   }
@@ -542,6 +549,10 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
           pt1->v[2] = v[2];
           pt1->ref = ref;
           ina[k]=mesh->nt;
+          if ( pt1->ref < 0 ) {
+            pt1->ref = -pt1->ref;
+            ++nref;
+          }
         }
         else {
           /* To uncomment when the normals reading will be enabled in iso mode */
@@ -575,6 +586,10 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
           }
           MMG_FREAD(&pt1->ref,sw,1,inm);
           if(iswp) pt1->ref=MMG5_swapbin(pt1->ref);
+        }
+        if ( pt1->ref < 0 ) {
+          pt1->ref = -pt1->ref;
+          ++nref;
         }
       }
     }
@@ -635,6 +650,10 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         MMG_FREAD(&pq1->ref,sw,1,inm);
         if(iswp) pq1->ref=MMG5_swapbin(pq1->ref);
       }
+      if ( pq1->ref < 0 ) {
+        pq1->ref = -pq1->ref;
+        ++nref;
+      }
     }
 
     /* get required quadrilaterals */
@@ -688,10 +707,14 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         if(iswp) pa->ref=MMG5_swapbin(pa->ref);
       }
       pa->tag |= MG_REF;
+      if ( pa->ref < 0 ) {
+        pa->ref = -pa->ref;
+        ++nref;
+      }
+
       if ( mesh->info.iso ) {
-        if( abs(pa->ref) != MG_ISO ) {
+        if( pa->ref != MG_ISO ) {
           ++mesh->na;
-          pa->ref = abs(pa->ref);
           memmove(&mesh->edge[mesh->na],&mesh->edge[k],sizeof(MMG5_Edge));
           ina[k] = mesh->na;
         }
@@ -796,7 +819,6 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
   rewind(inm);
   fseek(inm,posne,SEEK_SET);
   mesh->xt = 0;
-  nref = 0;
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
     if (!bin) {
@@ -829,11 +851,6 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
       pt->v[2] = pt->v[3];
       pt->v[3] = aux;
     }
-  }
-  if(nref) {
-    fprintf(stdout,"\n     $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ \n");
-    fprintf(stdout,"         WARNING : %d tet with ref < 0 \n",nref);
-    fprintf(stdout,"     $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ \n\n");
   }
   if(mesh->xt) {
     fprintf(stderr,"\n     $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ \n");
@@ -880,10 +897,21 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
       if(iswp) ref=MMG5_swapbin(ref);
     }
     pp->ref  = ref;
+    if ( pp-> ref < 0 ) {
+      pp->ref = -pp->ref;
+      ++nref;
+    }
     for (i=0; i<6; i++) {
       ppt = &mesh->point[pp->v[i]];
       ppt->tag &= ~MG_NUL;
     }
+  }
+
+  if ( nref ) {
+    fprintf(stdout,"\n     $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ \n");
+    fprintf(stdout,"         WARNING : %d entities with unexpected refs (ref< 0).",nref);
+    fprintf(stdout," We take their absolute values.\n");
+    fprintf(stdout,"     $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ \n\n");
   }
 
   if ( !mesh->info.iso ) {
@@ -1004,7 +1032,6 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
   return 1;
 }
 
-
 int MMG3D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   FILE*       inm;
   int         ier;
@@ -1060,7 +1087,6 @@ int MMG3D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 
   return ier;
 }
-
 
 int MMG3D_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename) {
   FILE*       inm;
@@ -1798,15 +1824,6 @@ int MMG3D_saveMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
   return MMG5_saveMshMesh(mesh,sol,filename,0);
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
- * \param filename name of file.
- * \return -1 data invalid or we fail, 0 no file, 1 ok.
- *
- * Load metric field.
- *
- */
 int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
   FILE       *inm;
   long        posnp;
@@ -1875,15 +1892,6 @@ int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
   return 1;
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward an allocatable sol structure.
- * \param filename name of file.
- * \return -1 data invalid or we fail, 0 no file, 1 ok.
- *
- * Load a medit solution file containing 1 or more solutions.
- *
- */
 int MMG3D_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
   MMG5_pSol   psl;
   FILE       *inm;
@@ -1981,15 +1989,6 @@ int MMG3D_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
   return 1;
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
- * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
- *
- * Write isotropic or anisotropic metric.
- *
- */
 int MMG3D_saveSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
   FILE*        inm;
   MMG5_pPoint  ppt;
@@ -2026,15 +2025,6 @@ int MMG3D_saveSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
   return 1;
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the solutions array
- * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
- *
- * Write solutions array
- *
- */
 int MMG3D_saveAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
   MMG5_pSol    psl;
   FILE*        inm;
