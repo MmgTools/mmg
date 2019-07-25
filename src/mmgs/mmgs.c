@@ -333,7 +333,7 @@ int main(int argc,char *argv[]) {
 
   /* read mesh file */
   ptr   = MMG5_Get_filenameExt(mesh->namein);
-  fmtin = MMG5_Get_format(ptr,NULL);
+  fmtin = MMG5_Get_format(ptr,MMG5_FMT_MeditASCII);
 
   switch ( fmtin ) {
 
@@ -341,17 +341,19 @@ int main(int argc,char *argv[]) {
     ier = MMGS_loadMshMesh(mesh,sol,mesh->namein);
     break;
 
-  /* case ( MMG5_FMT_VtkVtu ): case ( MMG5_FMT_VtkPvtu ): */
-  /* case ( MMG5_FMT_VtkVtp ): case ( MMG5_FMT_VtkPvtp ): */
-  /*   if ( mesh->info.iso ) { */
-  /*     ier = 0; // To code //MMGS_loadMshMesh(mesh,ls,mesh->namein); */
-  /*   } */
-  /*   else { */
-  /*     ier = 0; // To code //MMGS_loadMshMesh(mesh,met,mesh->namein); */
-  /*   } */
-  /*   break; */
+  case ( MMG5_FMT_VtkVtp ):
+    ier = MMGS_loadVtpMesh(mesh,sol,mesh->namein);
+    break;
 
-  case ( MMG5_FMT_Medit ):
+  case ( MMG5_FMT_VtkVtu ):
+    ier = MMGS_loadVtuMesh(mesh,sol,mesh->namein);
+    break;
+
+  case ( MMG5_FMT_VtkVtk ):
+    ier = MMGS_loadVtkMesh(mesh,sol,mesh->namein);
+    break;
+
+  case ( MMG5_FMT_MeditASCII ): case ( MMG5_FMT_MeditBinary ):
     ier = MMGS_loadMesh(mesh,mesh->namein);
     if ( ier <  1 ) { break; }
 
@@ -433,15 +435,20 @@ int main(int argc,char *argv[]) {
       fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh->nameout);
 
     ptr    = MMG5_Get_filenameExt(mesh->nameout);
-    fmtout = MMG5_Get_format(ptr,&fmtin);
+    fmtout = MMG5_Get_format(ptr,fmtin);
 
     switch ( fmtout ) {
     case ( MMG5_FMT_GmshASCII ): case ( MMG5_FMT_GmshBinary ):
       ierSave = MMGS_saveMshMesh(mesh,met,mesh->nameout);
       break;
-    case ( MMG5_FMT_VtkVtu ): case ( MMG5_FMT_VtkPvtu ):
-    case ( MMG5_FMT_VtkVtp ): case ( MMG5_FMT_VtkPvtp ):
-      ierSave = 0; // To code
+    case ( MMG5_FMT_VtkVtp ):
+      ierSave = MMGS_saveVtpMesh(mesh,met,mesh->nameout);
+      break;
+    case ( MMG5_FMT_VtkVtu ):
+      ierSave = MMGS_saveVtuMesh(mesh,met,mesh->nameout);
+      break;
+    case ( MMG5_FMT_VtkVtk ):
+      ierSave = MMGS_saveVtkMesh(mesh,met,mesh->nameout);
       break;
     default:
       ierSave = MMGS_saveMesh(mesh,mesh->nameout);

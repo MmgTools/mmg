@@ -710,25 +710,27 @@ int main(int argc,char *argv[]) {
 
   /* read mesh/sol files */
   ptr   = MMG5_Get_filenameExt(mesh->namein);
-  fmtin = MMG5_Get_format(ptr,NULL);
+  fmtin = MMG5_Get_format(ptr,MMG5_FMT_MeditASCII);
 
   ier = 0;
   switch ( fmtin ) {
   case ( MMG5_FMT_GmshASCII ): case ( MMG5_FMT_GmshBinary ):
     ier = MMG2D_loadMshMesh(mesh,sol,mesh->namein);
     break;
-    /* case ( MMG5_FMT_VtkVtu ): case ( MMG5_FMT_VtkPvtu ): */
-    /* case ( MMG5_FMT_VtkVtp ): case ( MMG5_FMT_VtkPvtp ): */
-    /*   if ( mesh->info.lag >= 0 ) */
-    /*     ier = 0;// To code //MMG2D_loadMshMesh(mesh,disp,mesh->namein); */
-    /*   else if ( mesh->info.iso ) { */
-    /*     ier = 0; // To code //MMG2D_loadMshMesh(mesh,ls,mesh->namein); */
-    /*   } */
-    /*   else { */
-    /*     ier = 0; // To code //MMG2D_loadMshMesh(mesh,met,mesh->namein); */
-    /*   } */
-    /*   break; */
-  case ( MMG5_FMT_Medit ):
+
+  case ( MMG5_FMT_VtkVtp ):
+    ier = MMG2D_loadVtpMesh(mesh,sol,mesh->namein);
+    break;
+
+  case ( MMG5_FMT_VtkVtu ):
+    ier = MMG2D_loadVtuMesh(mesh,sol,mesh->namein);
+    break;
+
+  case ( MMG5_FMT_VtkVtk ):
+    ier = MMG2D_loadVtkMesh(mesh,sol,mesh->namein);
+    break;
+
+  case ( MMG5_FMT_MeditASCII ): case ( MMG5_FMT_MeditBinary ):
     ier = MMG2D_loadMesh(mesh,mesh->namein);
     if ( ier <  1 ) { break; }
 
@@ -741,10 +743,13 @@ int main(int argc,char *argv[]) {
       MMG5_DEL_MEM(mesh,ls->namein);
     }
 
-    if (  MMG2D_loadSol(mesh,sol,sol->namein) < 1 ) {
+    if ( mesh->info.lag >= 0 || mesh->info.iso ) {
       /* displacement or isovalue are mandatory */
-      fprintf(stdout,"  ## ERROR: UNABLE TO LOAD SOLUTION.\n");
-      MMG2D_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
+      if (  MMG2D_loadSol(mesh,sol,sol->namein) < 1 ) {
+        /* displacement or isovalue are mandatory */
+        fprintf(stdout,"  ## ERROR: UNABLE TO LOAD SOLUTION.\n");
+        MMG2D_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
+      }
     }
     else {
       /* Facultative metric */
@@ -833,14 +838,20 @@ int main(int argc,char *argv[]) {
       fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh->nameout);
 
     ptr    = MMG5_Get_filenameExt(mesh->nameout);
-    fmtout = MMG5_Get_format(ptr,&fmtin);
+    fmtout = MMG5_Get_format(ptr,fmtin);
 
     switch ( fmtout ) {
     case ( MMG5_FMT_GmshASCII ): case ( MMG5_FMT_GmshBinary ):
       ierSave = MMG2D_saveMshMesh(mesh,met,mesh->nameout);
       break;
-    case ( MMG5_FMT_VtkVtp ): case ( MMG5_FMT_VtkPvtp ):
-      ierSave = 0; // To code
+    case ( MMG5_FMT_VtkVtp ):
+      ierSave = MMG2D_saveVtpMesh(mesh,met,mesh->nameout);
+      break;
+    case ( MMG5_FMT_VtkVtu ):
+      ierSave = MMG2D_saveVtuMesh(mesh,met,mesh->nameout);
+      break;
+    case ( MMG5_FMT_VtkVtk ):
+      ierSave = MMG2D_saveVtkMesh(mesh,met,mesh->nameout);
       break;
     default:
       ierSave = MMG2D_saveMesh(mesh,mesh->nameout);

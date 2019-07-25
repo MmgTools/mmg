@@ -819,7 +819,6 @@ int MMGS_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   return ier;
 }
 
-
 int MMGS_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename) {
   FILE*       inm;
   long        posNodes,posElts,*posNodeData;

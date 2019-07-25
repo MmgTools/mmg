@@ -364,7 +364,7 @@ int main(int argc,char *argv[]) {
 
   /* read mesh/sol files */
   ptr   = MMG5_Get_filenameExt(mesh->namein);
-  fmtin = MMG5_Get_format(ptr,NULL);
+  fmtin = MMG5_Get_format(ptr,MMG5_FMT_MeditASCII);
 
   switch ( fmtin ) {
 
@@ -372,18 +372,15 @@ int main(int argc,char *argv[]) {
     ier = MMG3D_loadMshMesh(mesh,sol,mesh->namein);
     break;
 
-  /* case ( MMG5_FMT_VtkVtu ): case ( MMG5_FMT_VtkPvtu ): */
-  /*   if ( mesh->info.lag >= 0 ) */
-  /*     ier = 0;// To code //MMG3D_loadMshMesh(mesh,disp,mesh->namein); */
-  /*   else if ( mesh->info.iso ) { */
-  /*     ier = 0; // To code //MMG3D_loadMshMesh(mesh,ls,mesh->namein); */
-  /*   } */
-  /*   else { */
-  /*     ier = 0; // To code //MMG3D_loadMshMesh(mesh,met,mesh->namein); */
-  /*   } */
-  /*   break; */
+  case ( MMG5_FMT_VtkVtu ):
+    ier = MMG3D_loadVtuMesh(mesh,sol,mesh->namein);
+    break;
 
-  case ( MMG5_FMT_Medit ):
+  case ( MMG5_FMT_VtkVtk ):
+    ier = MMG3D_loadVtkMesh(mesh,sol,mesh->namein);
+    break;
+
+  case ( MMG5_FMT_MeditASCII ): case ( MMG5_FMT_MeditBinary ):
     ier = MMG3D_loadMesh(mesh,mesh->namein);
     if ( ier <  1 ) { break; }
 
@@ -483,13 +480,16 @@ int main(int argc,char *argv[]) {
       fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh->nameout);
 
     ptr    = MMG5_Get_filenameExt(mesh->nameout);
-    fmtout = MMG5_Get_format(ptr,&fmtin);
+    fmtout = MMG5_Get_format(ptr,fmtin);
     switch ( fmtout ) {
     case ( MMG5_FMT_GmshASCII ): case ( MMG5_FMT_GmshBinary ):
       ierSave = MMG3D_saveMshMesh(mesh,met,mesh->nameout);
       break;
-    case ( MMG5_FMT_VtkVtu ): case ( MMG5_FMT_VtkPvtu ):
-      ierSave = 0; // To code
+    case ( MMG5_FMT_VtkVtu ):
+      ierSave = MMG3D_saveVtuMesh(mesh,met,mesh->nameout);
+      break;
+    case ( MMG5_FMT_VtkVtk ):
+      ierSave = MMG3D_saveVtkMesh(mesh,met,mesh->nameout);
       break;
     default:
       ierSave = MMG3D_saveMesh(mesh,mesh->nameout);

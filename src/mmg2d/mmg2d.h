@@ -229,6 +229,7 @@ int MMG2D_mmg2d9(MMG5_pMesh ,MMG5_pSol ,MMG5_pSol,int** );
 //int MMG2D_cendel(MMG5_pMesh ,MMG5_pSol ,double ,int );
 int MMG2D_swapdelone(MMG5_pMesh ,MMG5_pSol ,int ,char ,double ,int *);
 int MMG5_mmg2dChkmsh(MMG5_pMesh , int, int );
+int MMG2D_2dMeshCheck(MMG5_pMesh mesh);
 int MMG2D_boulep(MMG5_pMesh , int , int , int * );
 //int MMG2D_markBdry(MMG5_pMesh );
 int MMG2D_prilen(MMG5_pMesh ,MMG5_pSol );

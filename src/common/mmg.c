@@ -35,6 +35,20 @@
 
 #include "mmgcommon.h"
 
+/* Declared in the header, but need to define in at most one compilation unit */
+int    (*MMG5_chkmsh)(MMG5_pMesh,int,int);
+int    (*MMG5_bezierCP)(MMG5_pMesh ,MMG5_Tria *,MMG5_pBezier ,char );
+double (*MMG5_lenSurfEdg)(MMG5_pMesh mesh,MMG5_pSol sol ,int ,int, char );
+int    (*MMG5_grad2met_ani)(MMG5_pMesh,MMG5_pSol,MMG5_pTria,int,int);
+int    (*MMG5_grad2metreq_ani)(MMG5_pMesh,MMG5_pSol,MMG5_pTria,int,int);
+int    (*MMG5_compute_meanMetricAtMarkedPoints)( MMG5_pMesh,MMG5_pSol);
+int    (*MMG5_indElt)(MMG5_pMesh mesh,int kel);
+int    (*MMG5_indPt)(MMG5_pMesh mesh,int kp);
+
+#ifdef USE_SCOTCH
+int    (*MMG5_renumbering)(int vertBoxNbr, MMG5_pMesh mesh, MMG5_pSol sol);
+#endif
+
 /**
  * \param *prog pointer toward the program name.
  *
@@ -292,7 +306,8 @@ void MMG5_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
 /**
  * \param filename string containing a filename
  *
- * \return NULL if fail, pointer toward the filename extension otherwise.
+ * \return pointer toward the filename extension or toward the end of the string
+ * if no extension have been founded
  *
  * Get the extension of the filename string.
  *
@@ -302,14 +317,31 @@ char *MMG5_Get_filenameExt( char *filename ) {
 
   dot = strrchr(filename, '.');
 
-  if ( !dot || dot == filename ) return NULL;
+  if ( (!dot) || dot == filename ) return filename + 1;
 
   return dot;
 }
 
 /**
+ * \param filename string containing a filename and its path
+ *
+ * \return a pointer toward the file basename.
+ *
+ * Extract basename from a path.
+ *
+ */
+char *MMG5_Get_basename(char *path) {
+  char *s = strrchr(path, '/');
+
+  if (!s)
+    return strdup(path);
+  else
+    return strdup(s + 1);
+}
+
+/**
  * \param ptr pointer toward the file extension (dot included)
- * \param fmt default file format if provided.
+ * \param fmt default file format.
  *
  * \return and index associated to the file format detected from the extension.
  *
@@ -318,32 +350,38 @@ char *MMG5_Get_filenameExt( char *filename ) {
  * format is the medit one.
  *
  */
-int MMG5_Get_format( char *ptr, int *fmt ) {
+int MMG5_Get_format( char *ptr, int fmt ) {
   /* Default is the Medit file format or a format given as input */
-  int defFmt = MMG5_FMT_Medit;
-  if ( fmt ) {
-    defFmt = *fmt;
-  }
+  int defFmt = fmt;
 
   if ( !ptr ) return defFmt;
 
-  if ( !strncmp( ptr,".mshb",strlen(ptr) ) ) {
+  if ( !strncmp ( ptr,".meshb",strlen(".meshb") ) ) {
+    return MMG5_FMT_MeditBinary;
+  }
+  else if ( !strncmp( ptr,".mesh",strlen(".mesh") ) ) {
+    return MMG5_FMT_MeditASCII;
+  }
+  else if ( !strncmp( ptr,".mshb",strlen(".mshb") ) ) {
     return MMG5_FMT_GmshBinary;
   }
-  else if ( !strncmp( ptr,".msh",strlen(ptr) ) ) {
+  else if ( !strncmp( ptr,".msh",strlen(".msh") ) ) {
     return MMG5_FMT_GmshASCII;
   }
-  else if ( !strncmp ( ptr,".pvtu",strlen(ptr) ) ) {
+  else if ( !strncmp ( ptr,".pvtu",strlen(".pvtu") ) ) {
     return MMG5_FMT_VtkPvtu;
   }
-  else if ( !strncmp ( ptr,".vtu",strlen(ptr) ) ) {
+  else if ( !strncmp ( ptr,".vtu",strlen(".vtu") ) ) {
     return MMG5_FMT_VtkVtu;
   }
-  else if ( !strncmp ( ptr,".pvtp",strlen(ptr) ) ) {
+  else if ( !strncmp ( ptr,".pvtp",strlen(".pvtu") ) ) {
     return MMG5_FMT_VtkPvtp;
   }
-  else if ( !strncmp ( ptr,".vtp",strlen(ptr) ) ) {
+  else if ( !strncmp ( ptr,".vtp",strlen(".vtp") ) ) {
     return MMG5_FMT_VtkVtp;
+  }
+  else if ( !strncmp ( ptr,".vtk",strlen(".vtk") ) ) {
+    return MMG5_FMT_VtkVtk;
   }
 
   return defFmt;
@@ -361,8 +399,11 @@ const char* MMG5_Get_formatName(enum MMG5_Format fmt)
 {
   switch (fmt)
   {
-  case MMG5_FMT_Medit:
-    return "MMG5_FMT_Medit";
+  case MMG5_FMT_MeditASCII:
+    return "MMG5_FMT_MeditASCII";
+    break;
+  case MMG5_FMT_MeditBinary:
+    return "MMG5_FMT_MeditBinary";
     break;
   case MMG5_FMT_VtkVtu:
     return "MMG5_FMT_VtkVtu";
@@ -375,6 +416,9 @@ const char* MMG5_Get_formatName(enum MMG5_Format fmt)
     break;
   case MMG5_FMT_VtkPvtp:
     return "MMG5_FMT_VtkPvtp";
+    break;
+  case MMG5_FMT_VtkVtk:
+    return "MMG5_FMT_VtkVtk";
     break;
   case MMG5_FMT_GmshASCII:
     return "MMG5_FMT_GmshASCII";

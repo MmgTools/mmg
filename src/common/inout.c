@@ -635,8 +635,9 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
   int         nt,na,nq,ne,npr;
   int         nbl_t,nbl_a,typ,tagNum,ref,idx,num;
   int         v[4],isol;
+  int8_t      metricData;
   char        chaine[MMG5_FILESTR_LGTH],*ptr;
-  static char mmgWarn=0, mmgWarn1=0;
+  static int8_t mmgWarn=0, mmgWarn1=0;
 
   /** Second step: read the nodes and elements */
   rewind((*inm));
@@ -1182,9 +1183,11 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
     ptr = NULL;
     ptr = strstr(chaine,"metric");
 
+    metricData = 0;
     if ( ptr ) {
       *ptr = '\0';
       mesh->info.inputMet = 1;
+      metricData = 1;
     }
 
 
@@ -1241,8 +1244,14 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
       psl->type = 2;
     }
     else if ( typ == 9 ) {
-      psl->size = (psl->dim*(psl->dim+1))/2;
-      psl->type = 3;
+      if ( metricData ) {
+        psl->size = (psl->dim*(psl->dim+1))/2;
+        psl->type = 3;
+      }
+      else {
+        psl->size = psl->dim*psl->dim;
+        psl->type = 4;
+      }
     }
     else {
       fprintf(stderr,"  ** DATA TYPE IGNORED %d \n",typ);
@@ -1339,7 +1348,9 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
     /* anisotropic sol */
     else {
       if ( psl->ver == 1 ) {
+        /* Solution at simple precision */
         for (k=1; k<=psl->np; k++) {
+
           if(!bin){
             MMG_FSCANF((*inm),"%d ",&idx);
             for(i=0 ; i<9 ; i++)
@@ -1353,27 +1364,45 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
             }
           }
 
-          assert(fbuf[1]==fbuf[3] && fbuf[2]==fbuf[6] && fbuf[5]==fbuf[7]);
+          iadr = psl->size*idx;
 
-          if ( psl->dim ==2 ) {
-            iadr = 3*idx;
-            psl->m[iadr] = fbuf[0];
-            psl->m[iadr+1] = fbuf[1];
-            psl->m[iadr+2] = fbuf[4];
+          if ( !metricData ) {
+            if ( psl->dim ==2 ) {
+              psl->m[iadr] = fbuf[0];
+              psl->m[iadr+1] = fbuf[1];
+              psl->m[iadr+2] = fbuf[3];
+              psl->m[iadr+3] = fbuf[4];
+            }
+            else {
+              for(i=0 ; i<9 ; i++) {
+                psl->m[iadr+i] = fbuf[i];
+              }
+            }
           }
           else {
-            iadr = 6*idx;
-            psl->m[iadr+0] = fbuf[0];
-            psl->m[iadr+1] = fbuf[1];
-            psl->m[iadr+2] = fbuf[2];
-            psl->m[iadr+3] = fbuf[4];
-            psl->m[iadr+4] = fbuf[5];
-            psl->m[iadr+5] = fbuf[8];
+            if ( psl->dim ==2 ) {
+              assert ( fbuf[1] == fbuf[2] );
+
+              psl->m[iadr] = fbuf[0];
+              psl->m[iadr+1] = fbuf[1];
+              psl->m[iadr+2] = fbuf[4];
+            }
+            else {
+              assert ( fbuf[1]==fbuf[3] && fbuf[2]==fbuf[6] && fbuf[5]==fbuf[7] );
+
+              psl->m[iadr+0] = fbuf[0];
+              psl->m[iadr+1] = fbuf[1];
+              psl->m[iadr+2] = fbuf[2];
+              psl->m[iadr+3] = fbuf[4];
+              psl->m[iadr+4] = fbuf[5];
+              psl->m[iadr+5] = fbuf[8];
+            }
           }
         }
       }
       else {
         for (k=1; k<=psl->np; k++) {
+          /* Solution at double precision */
           if(!bin){
             MMG_FSCANF((*inm),"%d ",&idx);
             for(i=0 ; i<9 ; i++)
@@ -1387,22 +1416,39 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
             }
           }
 
-          assert(dbuf[1]==dbuf[3] && dbuf[2]==dbuf[6] && dbuf[5]==dbuf[7]);
+          iadr = psl->size*idx;
 
-          if ( psl->dim ==2 ) {
-            iadr = 3*idx;
-            psl->m[iadr  ] = dbuf[0];
-            psl->m[iadr+1] = dbuf[1];
-            psl->m[iadr+2] = dbuf[4];
+          if ( !metricData ) {
+            if ( psl->dim ==2 ) {
+              psl->m[iadr] = dbuf[0];
+              psl->m[iadr+1] = dbuf[1];
+              psl->m[iadr+2] = dbuf[3];
+              psl->m[iadr+3] = dbuf[4];
+            }
+            else {
+              for(i=0 ; i<9 ; i++) {
+                psl->m[iadr+i] = dbuf[i];
+              }
+            }
           }
           else {
-            iadr = 6*idx;
-            psl->m[iadr  ] = dbuf[0];
-            psl->m[iadr+1] = dbuf[1];
-            psl->m[iadr+2] = dbuf[2];
-            psl->m[iadr+3] = dbuf[4];
-            psl->m[iadr+4] = dbuf[5];
-            psl->m[iadr+5] = dbuf[8];
+            if ( psl->dim ==2 ) {
+              assert ( dbuf[1] == dbuf[2] );
+
+              psl->m[iadr] = dbuf[0];
+              psl->m[iadr+1] = dbuf[1];
+              psl->m[iadr+2] = dbuf[4];
+            }
+            else {
+              assert ( dbuf[1]==dbuf[3] || dbuf[2]==dbuf[6] || dbuf[5]==dbuf[7] );
+
+              psl->m[iadr+0] = dbuf[0];
+              psl->m[iadr+1] = dbuf[1];
+              psl->m[iadr+2] = dbuf[2];
+              psl->m[iadr+3] = dbuf[4];
+              psl->m[iadr+4] = dbuf[5];
+              psl->m[iadr+5] = dbuf[8];
+            }
           }
         }
       }
@@ -1426,7 +1472,6 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
  * Build the metric at point \a ip depending with its type (ridge/not ridge).
  *
  */
-static inline
 void  MMG5_build3DMetric(MMG5_pMesh mesh,MMG5_pSol sol,int ip,
                          double dbuf[6]) {
   MMG5_pPoint ppt;
@@ -1828,12 +1873,16 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename,
     else {
       typ = 9;
     }
+
+    char *tmp = MMG5_Get_basename(psl->namein);
+
     if ( metricData ) {
-      fprintf(inm,"\"%s metric\"\n",psl->namein);
+      fprintf(inm,"\"%s:metric\"\n",tmp);
     }
     else {
-      fprintf(inm,"\"%s\"\n",psl->namein);
+      fprintf(inm,"\"%s\"\n",tmp);
     }
+    free(tmp); tmp = 0;
 
     /* One real tag unused */
     fprintf(inm,"1\n");
@@ -2373,7 +2422,7 @@ int MMG5_chkMetricType(MMG5_pMesh mesh,int *type, FILE *inm) {
     if ( type[0]!=1 && type[0]!=3) {
       fprintf(stderr,"  ** DATA TYPE IGNORED %d \n",type[0]);
       MMG5_SAFE_FREE(type);
-      fclose(inm);
+      if ( inm ) fclose(inm);
       return -1;
     }
   }
@@ -2382,7 +2431,7 @@ int MMG5_chkMetricType(MMG5_pMesh mesh,int *type, FILE *inm) {
       fprintf(stderr,"  ** MISMATCH DATA TYPE FOR LAGRANGIAN MODE %d \n",
               type[0]);
       MMG5_SAFE_FREE(type);
-      fclose(inm);
+      if ( inm ) fclose(inm);
       return -1;
     }
   }

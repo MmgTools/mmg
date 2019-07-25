@@ -76,7 +76,8 @@ LIST(REMOVE_ITEM mmg3d_library_files
   ${MMG3D_SOURCE_DIR}/${PROJECT_NAME}3d.c
 )
 IF ( USE_VTK )
-  LIST(APPEND  ${COMMON_SOURCE_DIR}/iovtk.cpp)
+  LIST(APPEND  mmg3d_library_files
+    ${COMMON_SOURCE_DIR}/vtkparser.cpp ${MMG3D_SOURCE_DIR}/inoutcpp_3d.cpp)
 ENDIF ( )
 
 FILE(

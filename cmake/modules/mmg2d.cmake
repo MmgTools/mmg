@@ -63,7 +63,8 @@ LIST(REMOVE_ITEM mmg2d_library_files
   ${REMOVE_FILE} )
 
 IF ( USE_VTK )
-  LIST(APPEND  ${COMMON_SOURCE_DIR}/iovtk.cpp)
+  LIST(APPEND  mmg2d_library_files
+    ${COMMON_SOURCE_DIR}/vtkparser.cpp ${MMG2D_SOURCE_DIR}/inoutcpp_2d.cpp)
 ENDIF ( )
 
 FILE(

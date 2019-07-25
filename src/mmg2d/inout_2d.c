@@ -613,8 +613,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
  * the mesh (mesh generation) and check that all z-componants are 0.
  *
  */
-static inline
-int MMG2D_2dMshCheck(MMG5_pMesh mesh) {
+int MMG2D_2dMeshCheck(MMG5_pMesh mesh) {
   MMG5_pPoint ppt;
   double      z;
   int         k;
@@ -699,7 +698,7 @@ int MMG2D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 
   /* Mark all points as used in case of mesh generation and check the
    * z-componant */
-  if ( !MMG2D_2dMshCheck(mesh) ) return -1;
+  if ( !MMG2D_2dMeshCheck(mesh) ) return -1;
 
   return 1;
 }
@@ -760,7 +759,7 @@ int MMG2D_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
 
   /* Mark all points as used in case of mesh generation and check the
    * z-componant */
-  if ( !MMG2D_2dMshCheck(mesh) ) return -1;
+  if ( !MMG2D_2dMeshCheck(mesh) ) return -1;
 
   return 1;
 }

@@ -469,6 +469,7 @@ int MMG3D_pack_pointArray(MMG5_pMesh mesh) {
       memset(ppt,0,sizeof(MMG5_Point));
       ppt->tag    = MG_NUL;
     }
+
     nbl++;
   }
   mesh->np = np;
