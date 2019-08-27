@@ -1181,7 +1181,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
     }
 
     ptr = NULL;
-    ptr = strstr(chaine,"metric");
+    ptr = strstr(chaine,":metric");
 
     metricData = 0;
     if ( ptr ) {

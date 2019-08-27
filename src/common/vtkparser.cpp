@@ -156,7 +156,7 @@ int MMG5_count_vtkEntities ( vtkDataSet *dataset, MMG5_pMesh mesh,
   if ( pd ) {
     npointData = pd->GetNumberOfArrays();
     for (int k = 0; k < npointData; k++) {
-      if  ( strstr(pd->GetArrayName(k),"metric" ) ) {
+      if  ( strstr(pd->GetArrayName(k),":metric" ) ) {
         ++nmetricField;
       }
       else if ( strstr(pd->GetArrayName(k),"medit:ref" ) ) {
@@ -600,14 +600,13 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
       if  ( strstr(chaine,"medit:ref" ) ) {
         continue;
       }
-      else if ( (ptr = strstr(chaine,"metric")) ) {
-        // Warning: the array name of pd is modified here
+      else if ( (ptr = strstr(chaine,":metric")) ) {
         *ptr = '\0';
         mesh->info.inputMet = 1;
         metricData = 1;
       }
 
-      if ( !MMG5_Set_inputSolName(mesh,psl,pd->GetArrayName(k)) ) {
+      if ( !MMG5_Set_inputSolName(mesh,psl,chaine) ) {
         if ( !mmgWarn1 ) {
           mmgWarn1 = 1;
           fprintf(stderr,"\n  ## Warning: %s: unable to set solution name for"
