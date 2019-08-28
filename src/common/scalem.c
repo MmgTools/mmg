@@ -124,18 +124,20 @@ int MMG5_scale_scalarMetric(MMG5_pMesh mesh, MMG5_pSol met, double dd,
   int    k;
   static int8_t mmgWarn0 = 0;
 
-  for (k=1; k<=mesh->np; k++)  {
-    /* Check the metric */
-    if ( met->m[k] <= 0 ) {
-      if ( !mmgWarn0 ) {
-        mmgWarn0 = 1;
-        fprintf(stderr,"\n  ## Error: %s: at least 1 wrong metric.\n",
-                __func__);
-        return 0;
+  if ( met ) {
+    for (k=1; k<=mesh->np; k++)  {
+      /* Check the metric */
+      if ( met->m[k] <= 0 ) {
+        if ( !mmgWarn0 ) {
+          mmgWarn0 = 1;
+          fprintf(stderr,"\n  ## Error: %s: at least 1 wrong metric.\n",
+                  __func__);
+          return 0;
+        }
       }
+      /* normalization */
+      met->m[k] *= dd;
     }
-    /* normalization */
-    met->m[k] *= dd;
   }
 
   /* compute hmin and hmax parameters if not provided by the user */
@@ -431,6 +433,13 @@ int MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
     }
   }
 
+  /* reset the scaling data to ensure that if we try to unscale again, we will
+   * do nothing */
+  mesh->info.delta = 1.;
+  mesh->info.min[0]= 0.;
+  mesh->info.min[1]= 0.;
+  mesh->info.min[2]= 0.;
+
   /* de-normalize metric */
   if ( !(met && met->np && met->m) )  return 1;
 
@@ -455,13 +464,6 @@ int MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
     fprintf(stderr,"\n  ## Error: %s: unexpected metric size (%d)\n",__func__,met->size);
     break;
   }
-
-  /* reset the scaling data to ensure that if we try to unscale again, we will
-   * do nothing */
-  mesh->info.delta = 1.;
-  mesh->info.min[0]= 0.;
-  mesh->info.min[1]= 0.;
-  mesh->info.min[2]= 0.;
 
   return 1;
 }
