@@ -124,20 +124,18 @@ int MMG5_scale_scalarMetric(MMG5_pMesh mesh, MMG5_pSol met, double dd,
   int    k;
   static int8_t mmgWarn0 = 0;
 
-  if ( met->m ) {
-    for (k=1; k<=mesh->np; k++)  {
-      /* Check the metric */
-      if ( met->m[k] <= 0 ) {
-        if ( !mmgWarn0 ) {
-          mmgWarn0 = 1;
-          fprintf(stderr,"\n  ## Error: %s: at least 1 wrong metric.\n",
-                  __func__);
-          return 0;
-        }
+  for (k=1; k<=mesh->np; k++)  {
+    /* Check the metric */
+    if ( met->m[k] <= 0 ) {
+      if ( !mmgWarn0 ) {
+        mmgWarn0 = 1;
+        fprintf(stderr,"\n  ## Error: %s: at least 1 wrong metric.\n",
+                __func__);
+        return 0;
       }
-      /* normalization */
-      met->m[k] *= dd;
     }
+    /* normalization */
+    met->m[k] *= dd;
   }
 
   /* compute hmin and hmax parameters if not provided by the user */
@@ -159,11 +157,10 @@ int MMG5_scale_scalarMetric(MMG5_pMesh mesh, MMG5_pSol met, double dd,
   MMG5_check_hminhmax(mesh,sethmin,sethmax);
 
   /* Truncature */
-  if( met->m )
-    for (k=1; k<=mesh->np; k++)  {
-      met->m[k]=MG_MAX(mesh->info.hmin,met->m[k]);
-      met->m[k]=MG_MIN(mesh->info.hmax,met->m[k]);
-    }
+  for (k=1; k<=mesh->np; k++)  {
+    met->m[k]=MG_MAX(mesh->info.hmin,met->m[k]);
+    met->m[k]=MG_MIN(mesh->info.hmax,met->m[k]);
+  }
   return 1;
 }
 
@@ -283,7 +280,7 @@ int MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
     return 0;
   }
 
-  if ( (!met) || (met && !met->np) ) {
+  if ( (!met) || (met && !met->np) || (!met->m) ) {
     return 1;
   }
 
