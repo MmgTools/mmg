@@ -294,7 +294,7 @@ int MMG5_saveVtkMesh(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename,
 
   // Transfer point solutions into data set
   MMG5_pSol   psl   = NULL;
-  int         nsols = (metricData==1)? 1 : mesh->nsols;
+  int         nsols = (metricData==1 && sol && *sol)? 1 : mesh->nsols;
 
   static int mmgWarn = 0;
   for ( int isol=0; isol<nsols; ++isol) {
@@ -363,13 +363,8 @@ int MMG5_saveVtkMesh(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename,
         if ( psl->dim==2 ) {
           dfmt[0] = d[0];
           dfmt[1] = d[1];
-          dfmt[2] = 0.;
-          dfmt[3] = d[1];
-          dfmt[4] = d[2];
-          dfmt[5] = 0.;
-          dfmt[6] = 0.;
-          dfmt[7] = 0.;
-          dfmt[8] = 1.;
+          dfmt[2] = d[1];
+          dfmt[3] = d[2];
         }
         else {
           double dbuf[6] = {0,0,0,0,0,0};
