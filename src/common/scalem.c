@@ -124,20 +124,18 @@ int MMG5_scale_scalarMetric(MMG5_pMesh mesh, MMG5_pSol met, double dd,
   int    k;
   static int8_t mmgWarn0 = 0;
 
-  if ( met ) {
-    for (k=1; k<=mesh->np; k++)  {
-      /* Check the metric */
-      if ( met->m[k] <= 0 ) {
-        if ( !mmgWarn0 ) {
-          mmgWarn0 = 1;
-          fprintf(stderr,"\n  ## Error: %s: at least 1 wrong metric.\n",
-                  __func__);
-          return 0;
-        }
+  for (k=1; k<=mesh->np; k++)  {
+    /* Check the metric */
+    if ( met->m[k] <= 0 ) {
+      if ( !mmgWarn0 ) {
+        mmgWarn0 = 1;
+        fprintf(stderr,"\n  ## Error: %s: at least 1 wrong metric.\n",
+                __func__);
+        return 0;
       }
-      /* normalization */
-      met->m[k] *= dd;
     }
+    /* normalization */
+    met->m[k] *= dd;
   }
 
   /* compute hmin and hmax parameters if not provided by the user */
@@ -282,7 +280,7 @@ int MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
     return 0;
   }
 
-  if ( (!met) || (met && !met->np) ) {
+  if ( (!met) || (met && !met->np) || (!met->m) ) {
     return 1;
   }
 
