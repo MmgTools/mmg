@@ -124,7 +124,7 @@ int MMG5_scale_scalarMetric(MMG5_pMesh mesh, MMG5_pSol met, double dd,
   int    k;
   static int8_t mmgWarn0 = 0;
 
-  if ( met ) {
+  if ( met->m ) {
     for (k=1; k<=mesh->np; k++)  {
       /* Check the metric */
       if ( met->m[k] <= 0 ) {
@@ -159,10 +159,11 @@ int MMG5_scale_scalarMetric(MMG5_pMesh mesh, MMG5_pSol met, double dd,
   MMG5_check_hminhmax(mesh,sethmin,sethmax);
 
   /* Truncature */
-  for (k=1; k<=mesh->np; k++)  {
-    met->m[k]=MG_MAX(mesh->info.hmin,met->m[k]);
-    met->m[k]=MG_MIN(mesh->info.hmax,met->m[k]);
-  }
+  if( met->m )
+    for (k=1; k<=mesh->np; k++)  {
+      met->m[k]=MG_MAX(mesh->info.hmin,met->m[k]);
+      met->m[k]=MG_MIN(mesh->info.hmax,met->m[k]);
+    }
   return 1;
 }
 
