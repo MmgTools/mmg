@@ -125,6 +125,7 @@ int MMG5_scale_scalarMetric(MMG5_pMesh mesh, MMG5_pSol met, double dd,
   static int8_t mmgWarn0 = 0;
 
   for (k=1; k<=mesh->np; k++)  {
+    if( !MG_VOK( &mesh->point[k] ) ) continue;
     /* Check the metric */
     if ( met->m[k] <= 0 ) {
       if ( !mmgWarn0 ) {
