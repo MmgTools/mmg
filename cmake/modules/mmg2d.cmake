@@ -57,6 +57,7 @@ FILE(
   mmg2d_library_files
   ${MMG2D_SOURCE_DIR}/*.c
   ${COMMON_SOURCE_DIR}/*.c
+  ${MMG2D_SOURCE_DIR}/inoutcpp_2d.cpp
   )
 LIST(REMOVE_ITEM mmg2d_library_files
   ${MMG2D_SOURCE_DIR}/mmg2d.c
@@ -64,7 +65,7 @@ LIST(REMOVE_ITEM mmg2d_library_files
 
 IF ( USE_VTK )
   LIST(APPEND  mmg2d_library_files
-    ${COMMON_SOURCE_DIR}/vtkparser.cpp ${MMG2D_SOURCE_DIR}/inoutcpp_2d.cpp)
+    ${COMMON_SOURCE_DIR}/vtkparser.cpp )
 ENDIF ( )
 
 FILE(

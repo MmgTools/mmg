@@ -70,7 +70,6 @@ static int MMG3D_loadVtkMesh_part2 ( MMG5_pMesh mesh,MMG5_pSol *sol,
 
 
 int MMG3D_loadVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
-  vtkDataSet  *dataset;
   int         ier,nsols;
   int8_t      ptMeditRef,eltMeditRef;
 
@@ -80,6 +79,8 @@ int MMG3D_loadVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   return -1;
 
 #else
+  vtkDataSet  *dataset;
+
   mesh->dim = 3;
 
   ier = MMG5_loadVtuMesh_part1(mesh,filename,&dataset,&ptMeditRef,&eltMeditRef,&nsols);
@@ -102,7 +103,6 @@ int MMG3D_loadVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 }
 
 int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename) {
-  vtkDataSet  *dataset;
   int         ier,nsols;
   int8_t      ptMeditRef,eltMeditRef;
 
@@ -112,6 +112,8 @@ int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
   return -1;
 
 #else
+  vtkDataSet  *dataset;
+
   mesh->dim = 3;
 
   ier = MMG5_loadVtuMesh_part1(mesh,filename,&dataset,&ptMeditRef,&eltMeditRef,&nsols);
@@ -133,7 +135,6 @@ int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
 }
 
 int MMG3D_loadVtkMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
-  vtkDataSet  *dataset;
   int         ier,nsols;
   int8_t      ptMeditRef,eltMeditRef;
 
@@ -143,6 +144,8 @@ int MMG3D_loadVtkMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   return -1;
 
 #else
+  vtkDataSet  *dataset;
+
   mesh->dim = 3;
 
   ier = MMG5_loadVtkMesh_part1(mesh,filename,&dataset,&ptMeditRef,&eltMeditRef,&nsols);
@@ -165,7 +168,6 @@ int MMG3D_loadVtkMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 }
 
 int MMG3D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename) {
-  vtkDataSet  *dataset;
   int         ier,nsols;
   int8_t      ptMeditRef,eltMeditRef;
 
@@ -175,6 +177,8 @@ int MMG3D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
   return -1;
 
 #else
+  vtkDataSet  *dataset;
+
   mesh->dim = 3;
 
   ier = MMG5_loadVtkMesh_part1(mesh,filename,&dataset,&ptMeditRef,&eltMeditRef,&nsols);
