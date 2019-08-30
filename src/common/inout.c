@@ -1381,7 +1381,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
           }
           else {
             if ( psl->dim ==2 ) {
-              assert ( fbuf[1] == fbuf[2] );
+              assert ( fbuf[1] == fbuf[3] );
 
               psl->m[iadr] = fbuf[0];
               psl->m[iadr+1] = fbuf[1];
@@ -1433,7 +1433,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
           }
           else {
             if ( psl->dim ==2 ) {
-              assert ( dbuf[1] == dbuf[2] );
+              assert ( dbuf[1] == dbuf[3] );
 
               psl->m[iadr] = dbuf[0];
               psl->m[iadr+1] = dbuf[1];

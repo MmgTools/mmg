@@ -1047,9 +1047,7 @@ int MMG3D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 
   if ( nsols>1 ) {
     fprintf(stderr,"SEVERAL SOLUTION => IGNORED: %d\n",nsols);
-    fclose(inm);
-    MMG5_SAFE_FREE(posNodeData);
-    return -1;
+    nsols = 0;
   }
 
   if ( !MMG3D_zaldy(mesh) ) {

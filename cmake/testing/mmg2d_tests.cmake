@@ -133,19 +133,95 @@ ADD_TEST(NAME mmg2d_locParam_ani
 #####
 ###############################################################################
 
-# Binary gmsh
+# Binary gmsh no metric
 ADD_TEST(NAME mmg2d_binary_gmsh_2d
   COMMAND ${EXECUT_MMG2D} -v 5
   ${MMG2D_CI_TESTS}/GmshInout/cercle1.mshb
-  ${CTEST_OUTPUT_DIR}/mmg2d_binary_gmsh_2d-cercle)
+  ${CTEST_OUTPUT_DIR}/mmg2d_binary_gmsh_2d-cercle.mshb)
 
-# Ascii gmsh
+# Ascii gmsh no metric
 ADD_TEST(NAME mmg2d_ascii_gmsh_2d
   COMMAND ${EXECUT_MMG2D} -v 5
   ${MMG2D_CI_TESTS}/GmshInout/cercle1.msh
   ${CTEST_OUTPUT_DIR}/mmg2d_ascii_gmsh_2d-cercle)
 
+# Binary gmsh iso metric
+ADD_TEST(NAME mmg2d_binary_gmsh_iso
+  COMMAND ${EXECUT_MMG2D} -v 5
+  ${MMG2D_CI_TESTS}/GmshInout/iso.mshb
+  ${CTEST_OUTPUT_DIR}/mmg2d_binary_gmsh_iso.mshb)
 
+# Ascii gmsh iso metric
+ADD_TEST(NAME mmg2d_ascii_gmsh_iso
+  COMMAND ${EXECUT_MMG2D} -v 5
+  ${MMG2D_CI_TESTS}/GmshInout/iso.msh
+  ${CTEST_OUTPUT_DIR}/mmg2d_ascii_gmsh_iso)
+
+# Binary gmsh iso metric
+ADD_TEST(NAME mmg2d_binary_gmsh_ani
+  COMMAND ${EXECUT_MMG2D} -v 5
+  ${MMG2D_CI_TESTS}/GmshInout/ani.mshb
+  ${CTEST_OUTPUT_DIR}/mmg2d_binary_gmsh_ani.mshb)
+
+# Ascii gmsh iso metric
+ADD_TEST(NAME mmg2d_ascii_gmsh_ani
+  COMMAND ${EXECUT_MMG2D} -v 5
+  ${MMG2D_CI_TESTS}/GmshInout/ani.msh
+  ${CTEST_OUTPUT_DIR}/mmg2d_ascii_gmsh_ani)
+
+# VTK .vtk no metric
+ADD_TEST(NAME mmg2d_vtkvtk
+  COMMAND ${EXECUT_MMG2D} -v 5
+  ${MMG2D_CI_TESTS}/VtkInout/cercle.vtk
+  ${CTEST_OUTPUT_DIR}/mmg2d_vtkvtk)
+
+# VTK .vtp no metric
+ADD_TEST(NAME mmg2d_vtkvtp
+  COMMAND ${EXECUT_MMG2D} -v 5
+  ${MMG2D_CI_TESTS}/VtkInout/cercle.vtp
+  ${CTEST_OUTPUT_DIR}/mmg2d_vtkvtp)
+
+# VTK .vtu no metric
+ADD_TEST(NAME mmg2d_vtkvtu
+  COMMAND ${EXECUT_MMG2D} -v 5
+  ${MMG2D_CI_TESTS}/VtkInout/cercle.vtu
+  ${CTEST_OUTPUT_DIR}/mmg2d_vtkvtu)
+
+# VTK .vtk with iso metric
+ADD_TEST(NAME mmg2d_vtkvtk_iso
+  COMMAND ${EXECUT_MMG2D} -v 5
+  ${MMG2D_CI_TESTS}/VtkInout/iso.vtk
+  ${CTEST_OUTPUT_DIR}/mmg2d_vtkvtk_iso)
+
+# VTK .vtp with iso metric
+ADD_TEST(NAME mmg2d_vtkvtp_iso
+  COMMAND ${EXECUT_MMG2D} -v 5
+  ${MMG2D_CI_TESTS}/VtkInout/iso.vtp
+  ${CTEST_OUTPUT_DIR}/mmg2d_vtkvtp_iso)
+
+# VTK .vtu with iso metric
+ADD_TEST(NAME mmg2d_vtkvtu_iso
+  COMMAND ${EXECUT_MMG2D} -v 5
+  ${MMG2D_CI_TESTS}/VtkInout/iso.vtu
+  ${CTEST_OUTPUT_DIR}/mmg2d_vtkvtu_iso)
+
+# VTK .vtk with aniso metric
+ADD_TEST(NAME mmg2d_vtkvtk_ani
+  COMMAND ${EXECUT_MMG2D} -v 5
+  ${MMG2D_CI_TESTS}/VtkInout/ani.vtk
+  ${CTEST_OUTPUT_DIR}/mmg2d_vtkvtk_ani)
+
+# VTK .vtp with aniso metric
+ADD_TEST(NAME mmg2d_vtkvtp_ani
+  COMMAND ${EXECUT_MMG2D} -v 5
+  ${MMG2D_CI_TESTS}/VtkInout/ani.vtp
+  ${CTEST_OUTPUT_DIR}/mmg2d_vtkvtp_ani)
+
+# VTK .vtu with aniso metric
+ADD_TEST(NAME mmg2d_vtkvtu_ani
+  COMMAND ${EXECUT_MMG2D} -v 5
+  ${MMG2D_CI_TESTS}/VtkInout/ani.vtu
+  ${CTEST_OUTPUT_DIR}/mmg2d_vtkvtu_ani)
 
 ###############################################################################
 #####

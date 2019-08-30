@@ -63,6 +63,32 @@ int MMG5_loadVtkMesh_part1(MMG5_pMesh,const char*,vtkDataSet**,int8_t*,int8_t*,i
 
 int MMG5_loadVtkMesh_part2(MMG5_pMesh,MMG5_pSol*,vtkDataSet**,int8_t,int8_t,int);
 
+/// @param d vtk data type in which we want to store the array \a ca
+/// @param ca vtk cell array containing the lines connectivity
+///
+/// Store a list of vtk cells containing only lines into a vtkPolyData and reset
+/// the list of cells. Otherwise, lines are casted into polygons by the SetPoly
+/// method.
+///
+static void MMG5_internal_VTKSetLine(vtkSmartPointer<vtkPolyData> d,vtkSmartPointer<vtkCellArray> *ca) {
+
+  d->SetLines(*ca);
+
+  *ca = NULL;
+  *ca = vtkSmartPointer< vtkCellArray >::New();
+
+}
+
+/// @param d vtk data type in which we want to store the array \a ca
+/// @param ca vtk cell array containing the lines connectivity
+///
+/// Nothing to do here, the SetCell method allow to handle both lines and elements.
+///
+static void MMG5_internal_VTKSetLine(vtkSmartPointer<vtkUnstructuredGrid> d,vtkSmartPointer<vtkCellArray> *ca) {
+
+}
+
+
 /// @param t array of integer storing the cell types
 /// @param d vtk data type in which we want to store the array \a ca
 /// @param ca vtk cell array containing the cells connectivity
@@ -153,6 +179,11 @@ int MMG5_saveVtkMesh(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename,
     points->InsertNextPoint(ppt->c[0], ppt->c[1], ppt->c[2]);
   }
 
+
+  auto dataset = vtkSmartPointer<T> :: New();
+  dataset->SetPoints(points);
+
+
   // VTK types
   vtkSmartPointer<vtkCellArray>  cellArray  = vtkSmartPointer<vtkCellArray>  ::New();
   vtkSmartPointer<vtkWedge>      wedge      = vtkSmartPointer<vtkWedge>      ::New();
@@ -167,17 +198,19 @@ int MMG5_saveVtkMesh(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename,
 
   // transfer edges from Mmg to VTK
   for ( int k=1; k<=mesh->na; ++k ) {
-   MMG5_pEdge pa = &mesh->edge[k];
-   if ( !pa || !pa->a ) continue;
+    MMG5_pEdge pa = &mesh->edge[k];
+    if ( !pa || !pa->a ) continue;
 
-   if ( pa->ref ) hasCellRef = 1;
+    if ( pa->ref ) hasCellRef = 1;
 
-   edge->GetPointIds()->SetId(0, mesh->point[pa->a].tmp);
-   edge->GetPointIds()->SetId(1, mesh->point[pa->b].tmp);
+    edge->GetPointIds()->SetId(0, mesh->point[pa->a].tmp);
+    edge->GetPointIds()->SetId(1, mesh->point[pa->b].tmp);
 
-   cellArray->InsertNextCell(edge);
-   types[ic++] = VTK_LINE;
- }
+    cellArray->InsertNextCell(edge);
+    types[ic++] = VTK_LINE;
+  }
+
+  MMG5_internal_VTKSetLine(dataset, &cellArray);
 
  // Transfer trias from Mmg to VTK
  for ( int k=1; k<=mesh->nt; ++k ) {
@@ -238,9 +271,6 @@ int MMG5_saveVtkMesh(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename,
   assert ( ic == nc );
 
   // Transfer cell array into data set
-  auto dataset = vtkSmartPointer<T> :: New();
-
-  dataset->SetPoints(points);
   MMG5_internal_VTKSetCells(types,dataset,cellArray);
 
   // Transfer references if needed (i.e. the mesh contains non 0 refs)

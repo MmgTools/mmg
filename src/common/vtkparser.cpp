@@ -120,6 +120,13 @@ int MMG5_count_vtkEntities ( vtkDataSet *dataset, MMG5_pMesh mesh,
     case ( VTK_VERTEX ):
       ++mesh->npi;
       break;
+    case ( VTK_POLY_LINE ):
+      cout << "polylin " <<  dataset->GetCell(i)->GetNumberOfPoints() - 1 << endl;
+
+      cout << dataset->GetCell(i)->GetPointId(0)  +1 << " " << dataset->GetCell(i)->GetPointId(1)  +1 << " " 
+        <<  dataset->GetCell(i)->GetPointId(2)  +1 << endl;
+      mesh->na += dataset->GetCell(i)->GetNumberOfPoints() - 1;
+      break;
     case ( VTK_LINE ):
       ++mesh->na;
       break;
@@ -439,7 +446,36 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
         ++nref;
       }
       break;
+    case ( VTK_POLY_LINE ):
+      int n;
+      n = (*dataset)->GetCell(k)->GetNumberOfPoints() - 1;
+
+      for ( int i=0; i<n; ++i ) {
+        ++mesh->nai;
+        ref = car ? car->GetTuple1(k) : 0;
+      }
+      /* Skip edges with iso ref */
+      if ( mesh->info.iso &&  abs(ref) == MG_ISO ) {
+        /* Skip this edge */
+        ++nbl_a;
+      }
+      else {
+        for ( int i=0; i < n; ++i ) {
+          pa = &mesh->edge[++na];
+          pa->a = (*dataset)->GetCell(k)->GetPointId(i)  +1;
+          pa->b = (*dataset)->GetCell(k)->GetPointId(i+1)+1;
+        }
+        pa->ref = ref;
+        pa->tag |= MG_REF;
+        if ( pa->ref < 0 ) {
+          pa->ref = -pa->ref;
+          ++nref;
+        }
+      }
+
+      break;
     case ( VTK_LINE ):
+
       ++mesh->nai;
       ref = car ? car->GetTuple1(k) : 0;
 
@@ -696,7 +732,7 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
 
               psl->m[iadr] = dbuf[0];
               psl->m[iadr+1] = dbuf[1];
-              psl->m[iadr+2] = dbuf[4];
+              psl->m[iadr+2] = dbuf[3];
             }
             else {
               assert ( dbuf[1]==dbuf[3] || dbuf[2]==dbuf[6] || dbuf[5]==dbuf[7] );

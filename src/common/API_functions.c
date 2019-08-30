@@ -244,7 +244,7 @@ int MMG5_Set_outputMeshName(MMG5_pMesh mesh, const char* meshout) {
     MMG5_SAFE_CALLOC(mesh->nameout,strlen(meshout)+7,char,return 0);
     strcpy(mesh->nameout,meshout);
 
-    if ( ( ptr && !MMG5_Get_format(ptr,0) ) || (!ptr) || ptr == meshout ) {
+    if ( ( ptr && MMG5_Get_format(ptr,0)==MMG5_FMT_Unknown ) || (!ptr) || ptr == meshout ) {
       /* No extension */
       ptrin   = MMG5_Get_filenameExt(mesh->namein);
       fmtin   = MMG5_Get_format(ptrin,MMG5_FMT_MeditASCII);
