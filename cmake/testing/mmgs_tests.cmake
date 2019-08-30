@@ -105,6 +105,16 @@ ADD_TEST(NAME mmgs_vtkvtp_ani
   ${MMGS_CI_TESTS}/VtkInout/ani.vtp
   ${CTEST_OUTPUT_DIR}/mmgs_vtkvtp_ani)
 
+IF ( NOT USE_VTK )
+  SET(expr "VTK library not founded")
+  SET_PROPERTY(TEST mmgs_vtkvtp
+    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
+  SET_PROPERTY(TEST mmgs_vtkvtp_iso
+    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
+  SET_PROPERTY(TEST mmgs_vtkvtp_ani
+    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
+ENDIF ( )
+
 ###############################################################################
 #####
 #####         Check Memory Leaks

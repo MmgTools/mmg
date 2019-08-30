@@ -223,6 +223,28 @@ ADD_TEST(NAME mmg2d_vtkvtu_ani
   ${MMG2D_CI_TESTS}/VtkInout/ani.vtu
   ${CTEST_OUTPUT_DIR}/mmg2d_vtkvtu_ani)
 
+IF ( NOT USE_VTK )
+  SET(expr "VTK library not founded")
+  SET_PROPERTY(TEST mmg2d_vtkvtk
+    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
+  SET_PROPERTY(TEST mmg2d_vtkvtp
+    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
+  SET_PROPERTY(TEST mmg2d_vtkvtu
+    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
+  SET_PROPERTY(TEST mmg2d_vtkvtk_iso
+    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
+  SET_PROPERTY(TEST mmg2d_vtkvtp_iso
+    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
+  SET_PROPERTY(TEST mmg2d_vtkvtu_iso
+    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
+  SET_PROPERTY(TEST mmg2d_vtkvtk_ani
+    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
+  SET_PROPERTY(TEST mmg2d_vtkvtp_ani
+    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
+  SET_PROPERTY(TEST mmg2d_vtkvtu_ani
+    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
+ENDIF ( )
+
 ###############################################################################
 #####
 #####         Isotropic cases

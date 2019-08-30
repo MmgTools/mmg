@@ -75,7 +75,7 @@ int MMG3D_loadVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 
 #ifndef USE_VTK
 
-  fprintf(stderr,"  ** VTK library not found. Unavailable file format.\n");
+  fprintf(stderr,"  ** VTK library not founded. Unavailable file format.\n");
   return -1;
 
 #else
@@ -108,7 +108,7 @@ int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
 
 #ifndef USE_VTK
 
-  fprintf(stderr,"  ** VTK library not found. Unavailable file format.\n");
+  fprintf(stderr,"  ** VTK library not founded. Unavailable file format.\n");
   return -1;
 
 #else
@@ -140,7 +140,7 @@ int MMG3D_loadVtkMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 
 #ifndef USE_VTK
 
-  fprintf(stderr,"  ** VTK library not found. Unavailable file format.\n");
+  fprintf(stderr,"  ** VTK library not founded. Unavailable file format.\n");
   return -1;
 
 #else
@@ -173,7 +173,7 @@ int MMG3D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
 
 #ifndef USE_VTK
 
-  fprintf(stderr,"  ** VTK library not found. Unavailable file format.\n");
+  fprintf(stderr,"  ** VTK library not founded. Unavailable file format.\n");
   return -1;
 
 #else
@@ -203,7 +203,7 @@ int MMG3D_saveVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 
 #ifndef USE_VTK
 
-  fprintf(stderr,"  ** VTK library not found. Unavailable file format.\n");
+  fprintf(stderr,"  ** VTK library not founded. Unavailable file format.\n");
   return -1;
 
 #else
@@ -216,7 +216,7 @@ int MMG3D_saveVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
 
 #ifndef USE_VTK
 
-  fprintf(stderr,"  ** VTK library not found. Unavailable file format.\n");
+  fprintf(stderr,"  ** VTK library not founded. Unavailable file format.\n");
   return -1;
 
 #else
@@ -231,7 +231,7 @@ int MMG3D_saveVtkMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 
 #ifndef USE_VTK
 
-  fprintf(stderr,"  ** VTK library not found. Unavailable file format.\n");
+  fprintf(stderr,"  ** VTK library not founded. Unavailable file format.\n");
   return -1;
 
 #else
@@ -245,7 +245,7 @@ int MMG3D_saveVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
 
 #ifndef USE_VTK
 
-  fprintf(stderr,"  ** VTK library not found. Unavailable file format.\n");
+  fprintf(stderr,"  ** VTK library not founded. Unavailable file format.\n");
   return -1;
 
 #else
