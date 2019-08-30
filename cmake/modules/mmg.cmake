@@ -39,6 +39,9 @@
 FILE(
   GLOB
   mmg_library_files
+  ${MMG2D_SOURCE_DIR}/inoutcpp_2d.cpp
+  ${MMG3D_SOURCE_DIR}/inoutcpp_3d.cpp
+  ${MMGS_SOURCE_DIR}/inoutcpp_s.cpp
   ${MMG2D_SOURCE_DIR}/*.c
   ${MMG3D_SOURCE_DIR}/*.c
   ${MMGS_SOURCE_DIR}/*.c
@@ -50,6 +53,10 @@ LIST(REMOVE_ITEM mmg_library_files
   ${MMG3D_SOURCE_DIR}/mmg3d.c
   ${REMOVE_FILE} )
 
+IF ( USE_VTK )
+  LIST(APPEND  mmg_library_files
+    ${COMMON_SOURCE_DIR}/vtkparser.cpp )
+ENDIF ( )
 
 IF ( LIBMMG_STATIC )
   ADD_AND_INSTALL_LIBRARY ( lib${PROJECT_NAME}_a  STATIC
