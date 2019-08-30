@@ -534,6 +534,9 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
       break;
 
     case ( VTK_TETRA ):
+      // Skip volume elts if called from mmgs
+      if ( !mesh->tetra ) continue;
+
       pt = &mesh->tetra[++mesh->nei];
       pt->ref = car ? car->GetTuple1(k) : 0;
       for ( int i=0; i<4; ++i ) {
@@ -546,6 +549,9 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
       break;
 
     case ( VTK_WEDGE ):
+      // Skip volume elts if called from mmgs
+      if ( !mesh->prism ) continue;
+
       ppr = &mesh->prism[++npri];
       ppr->ref = car ? car->GetTuple1(k) : 0;
       for ( int i=0; i<6; ++i ) {

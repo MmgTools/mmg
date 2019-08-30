@@ -87,6 +87,23 @@ ADD_TEST(NAME mmgs_ascii_gmsh_s
   ${MMGS_CI_TESTS}/GmshInout/cube.msh
   ${CTEST_OUTPUT_DIR}/mmgs-cube-gmsh.o.msh)
 
+# VTK .vtp no metric
+ADD_TEST(NAME mmgs_vtkvtp
+  COMMAND ${EXECUT_MMGS} -v 5
+  ${MMGS_CI_TESTS}/VtkInout/c1.vtp
+  ${CTEST_OUTPUT_DIR}/mmgs_vtkvtp)
+
+# VTK .vtp with iso metric
+ADD_TEST(NAME mmgs_vtkvtp_iso
+  COMMAND ${EXECUT_MMGS} -v 5
+  ${MMGS_CI_TESTS}/VtkInout/iso.vtp
+  ${CTEST_OUTPUT_DIR}/mmgs_vtkvtp_iso)
+
+# VTK .vtp with aniso metric
+ADD_TEST(NAME mmgs_vtkvtp_ani
+  COMMAND ${EXECUT_MMGS} -v 5
+  ${MMGS_CI_TESTS}/VtkInout/ani.vtp
+  ${CTEST_OUTPUT_DIR}/mmgs_vtkvtp_ani)
 
 ###############################################################################
 #####
