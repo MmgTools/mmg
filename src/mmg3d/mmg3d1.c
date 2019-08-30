@@ -2039,37 +2039,18 @@ MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           if ( vx[ia] > 0 )  mesh->point[vx[ia]].flag++;
       }
       else {
-        if ( it < 20 ) {
-          for (ia=0; ia<6; ++ia ) {
-            if ( vx[ia] > 0 ) {
-              MMG5_hashPop(&hash,pt->v[MMG5_iare[ia][0]],pt->v[MMG5_iare[ia][1]]);
-            }
-          }
-        }
-        else {
-          if ( it==20 && (mesh->info.ddebug || mesh->info.imprim > 5) ) {
-            if ( !mmgWarn2 ) {
+        for (ia=0; ia<6; ++ia ) {
+          if ( vx[ia] > 0 ) {
+            MMG5_hashPop(&hash,pt->v[MMG5_iare[ia][0]],pt->v[MMG5_iare[ia][1]]);
+            MMG3D_delPt(mesh,vx[ia]);
+
+            if ( (mesh->info.ddebug || mesh->info.imprim > 5) && !mmgWarn2 ) {
               fprintf(stderr,"\n  ## Warning: %s: surfacic pattern: unable to find"
-                      " a valid split for at least 1 point. Point(s) deletion.",
+                      " a valid split for at least 1 point. Point(s) deletion.\n",
                       __func__ );
               mmgWarn2 = 1;
             }
-          }
-          for (ia=0,i=0; i<3; i++) {
-            for (j=i+1; j<4; j++,ia++) {
-              if ( vx[ia] > 0 ) {
-                if ( !MMG5_hashUpdate(&hash,pt->v[MMG5_iare[ia][0]],
-                                       pt->v[MMG5_iare[ia][1]],-1) ) {
-                  fprintf(stderr,"\n  ## Error: %s: unable to delete point"
-                          " idx along edge %d %d.\n",
-                          __func__,MMG3D_indPt(mesh,pt->v[MMG5_iare[ia][0]]),
-                          MMG3D_indPt(mesh,pt->v[MMG5_iare[ia][1]]));
-                  MMG5_DEL_MEM(mesh,hash.item);
-                  return -1;
-                }
-                MMG3D_delPt(mesh,vx[ia]);
-              }
-            }
+
           }
         }
       }

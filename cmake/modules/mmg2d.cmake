@@ -95,7 +95,8 @@ ENDIF()
 
 IF (ELAS_NOTFOUND)
 MESSAGE ( WARNING "Elas is a library to solve the linear elasticity "
-    "problem (see https://github.com/SUscTools/Elas to download it). "
+    "problem (see https://github.com/ISCDtoolbox/LinearElasticity to"
+    " download it). "
 "This library is needed to use the lagrangian motion option. "
     "If you have already installed Elas and want to use it, "
 "please set the CMake variable or environment variable ELAS_DIR "

@@ -125,6 +125,7 @@ int MMG5_scale_scalarMetric(MMG5_pMesh mesh, MMG5_pSol met, double dd,
   static int8_t mmgWarn0 = 0;
 
   for (k=1; k<=mesh->np; k++)  {
+    if( !MG_VOK( &mesh->point[k] ) ) continue;
     /* Check the metric */
     if ( met->m[k] <= 0 ) {
       if ( !mmgWarn0 ) {
@@ -280,7 +281,7 @@ int MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
     return 0;
   }
 
-  if ( (!met) || (met && !met->np) ) {
+  if ( (!met) || (met && !met->np) || (!met->m) ) {
     return 1;
   }
 
@@ -431,6 +432,13 @@ int MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
     }
   }
 
+  /* reset the scaling data to ensure that if we try to unscale again, we will
+   * do nothing */
+  mesh->info.delta = 1.;
+  mesh->info.min[0]= 0.;
+  mesh->info.min[1]= 0.;
+  mesh->info.min[2]= 0.;
+
   /* de-normalize metric */
   if ( !(met && met->np && met->m) )  return 1;
 
@@ -455,13 +463,6 @@ int MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
     fprintf(stderr,"\n  ## Error: %s: unexpected metric size (%d)\n",__func__,met->size);
     break;
   }
-
-  /* reset the scaling data to ensure that if we try to unscale again, we will
-   * do nothing */
-  mesh->info.delta = 1.;
-  mesh->info.min[0]= 0.;
-  mesh->info.min[1]= 0.;
-  mesh->info.min[2]= 0.;
 
   return 1;
 }
