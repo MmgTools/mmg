@@ -2360,7 +2360,7 @@ int MMG3D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * >   END SUBROUTINE\n
  *
  */
-  double (*MMG3D_lenedgCoor)(double *ca,double *cb,double *sa,double *sb);
+extern  double (*MMG3D_lenedgCoor)(double *ca,double *cb,double *sa,double *sb);
 
 /**
  * \param mesh pointer toward the mesh structure.
