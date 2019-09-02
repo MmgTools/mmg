@@ -35,18 +35,48 @@
 
 #include "mmg3d.h"
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param filename name of file.
- *
- * \return 0 if the file is not found, -1 if we detect mismatch parameters or we
- * fail, 1 otherwise.
- *
- * Read mesh data.
- *
- */
-int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
-  FILE*       inm;
+int MMG3D_openMesh(MMG5_pMesh mesh,const char *filename,FILE **inm,int *bin) {
+  char        *ptr,*data;
+
+  *bin = 0;
+  MMG5_SAFE_CALLOC(data,strlen(filename)+7,char,return -1);
+
+  strcpy(data,filename);
+  ptr = strstr(data,".mesh");
+
+  if ( !ptr ) {
+    /* data contains the filename without extension */
+    strcat(data,".meshb");
+    if( !(*inm = fopen(data,"rb")) ) {
+      /* our file is not a .meshb file, try with .mesh ext */
+      ptr = strstr(data,".mesh");
+      *ptr = '\0';
+      strcat(data,".mesh");
+      if( !(*inm = fopen(data,"rb")) ) {
+        MMG5_SAFE_FREE(data);
+        return 0;
+      }
+    }
+    else  *bin = 1;
+  }
+  else {
+    ptr = strstr(data,".meshb");
+    if ( ptr )  *bin = 1;
+    if( !(*inm = fopen(data,"rb")) ) {
+      MMG5_SAFE_FREE(data);
+      return 0;
+    }
+  }
+
+  if ( mesh->info.imprim >= 0 ) {
+    fprintf(stdout,"  %%%% %s OPENED\n",data);
+  }
+  MMG5_SAFE_FREE(data);
+
+ return 1;
+}
+
+int MMG3D_loadMesh_opened(MMG5_pMesh mesh,FILE *inm,int bin) {
   MMG5_pTetra pt;
   MMG5_pPrism pp;
   MMG5_pTria  pt1;
@@ -57,54 +87,20 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
   float       fc;
   long        posnp,posnt,posne,posned,posncor,posnpreq,posntreq,posnereq,posnedreq;
   long        posnr,posnprism,posnormal,posnc1,posnq,posnqreq;
-  int         npreq,ntreq,nereq,nedreq,nqreq,ncor,ned,ng,bin,iswp;
+  int         npreq,ntreq,nereq,nedreq,nqreq,ncor,ned,ng,iswp;
   int         binch,bdim,bpos,i,k,ip,idn;
   int         *ina,v[3],ref,nt,na,nr,ia,aux,nref;
-  char        *ptr,*data;
+  char        *ptr;
   char        chaine[MMG5_FILESTR_LGTH],strskip[MMG5_FILESTR_LGTH];
 
   posnp = posnt = posne = posncor = 0;
   posnpreq = posntreq = posnereq = posnqreq = posned = posnedreq = posnr = 0;
   posnprism = posnormal= posnc1 = posnq = 0;
   ncor = ned = npreq = ntreq = nqreq = nereq = nedreq = nr = ng = 0;
-  bin = 0;
   iswp = 0;
   ina = NULL;
   mesh->np = mesh->nt = mesh->ne = 0;
 
-  MMG5_SAFE_CALLOC(data,strlen(filename)+7,char,return -1);
-
-  strcpy(data,filename);
-  ptr = strstr(data,".mesh");
-
-  if ( !ptr ) {
-    /* data contains the filename without extension */
-    strcat(data,".meshb");
-    if( !(inm = fopen(data,"rb")) ) {
-      /* our file is not a .meshb file, try with .mesh ext */
-      ptr = strstr(data,".mesh");
-      *ptr = '\0';
-      strcat(data,".mesh");
-      if( !(inm = fopen(data,"rb")) ) {
-        MMG5_SAFE_FREE(data);
-        return 0;
-      }
-    }
-    else  bin = 1;
-  }
-  else {
-    ptr = strstr(data,".meshb");
-    if ( ptr )  bin = 1;
-    if( !(inm = fopen(data,"rb")) ) {
-      MMG5_SAFE_FREE(data);
-      return 0;
-    }
-  }
-
-  if ( mesh->info.imprim >= 0 ) {
-    fprintf(stdout,"  %%%% %s OPENED\n",data);
-  }
-  MMG5_SAFE_FREE(data);
 
   if (!bin) {
     strcpy(chaine,"D");
@@ -946,6 +942,30 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
     }
     if(ncor) fprintf(stdout,"     NUMBER OF CORNERS        %8d \n",ncor);
   }
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param filename name of file.
+ *
+ * \return 0 if the file is not found, -1 if we detect mismatch parameters or we
+ * fail, 1 otherwise.
+ *
+ * Read mesh data.
+ *
+ */
+int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
+  FILE*       inm;
+  int         bin,ier;
+  char        *data;
+
+  ier = MMG3D_openMesh(mesh,filename,&inm,&bin);
+  if( ier < 1 ) return ier;
+  ier = MMG3D_loadMesh_opened(mesh,inm,bin;
+  if( ier < 1 ) return ier;
+
   fclose(inm);
   return 1;
 }
