@@ -963,7 +963,7 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
 
   ier = MMG3D_openMesh(mesh,filename,&inm,&bin);
   if( ier < 1 ) return ier;
-  ier = MMG3D_loadMesh_opened(mesh,inm,bin;
+  ier = MMG3D_loadMesh_opened(mesh,inm,bin);
   if( ier < 1 ) return ier;
 
   fclose(inm);
