@@ -709,10 +709,10 @@ int MMG2D_analys(MMG5_pMesh mesh) {
   }
 
   /* Regularize normal vector field with a Laplacian / anti-laplacian smoothing */
-  /*if ( !MMG2D_regnor(mesh) ) {
+  if ( mesh->info.nreg && !MMG2D_regnor(mesh) ) {
       fprintf(stderr,"\n  ## Problem in regularizing normal vectors. Exit program.\n");
       return 0;
-  }*/
+  }
 
   return 1;
 }

@@ -68,6 +68,7 @@ extern "C" {
     MMG2D_IPARAM_noswap,            /*!< [1/0], Avoid/allow edge or face flipping */
     MMG2D_IPARAM_nomove,            /*!< [1/0], Avoid/allow point relocation */
     MMG2D_IPARAM_nosurf,            /*!< [1/0], Avoid/allow surface modifications */
+    MMG2D_IPARAM_nreg,              /*!< [0/1], Enable normal regularization */
     MMG2D_IPARAM_numberOfLocalParam,/*!< [n], Number of local parameters */
     MMG2D_IPARAM_rmc,               /*!< [0/1], Remove small connex componants in level-set mode */
     MMG2D_DPARAM_angleDetection,    /*!< [val], Value for angle detection */
