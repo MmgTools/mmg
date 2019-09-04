@@ -708,7 +708,7 @@ static int regnor(MMG5_pMesh mesh) {
   MMG5_SAFE_CALLOC(tabl,3*mesh->np+1,double,return 0);
 
   it   = 0;
-  nit  = 2;
+  nit  = 10;
   res0 = 0.0;
   lm1  = 0.4;
   lm2  = 0.399;
@@ -790,6 +790,10 @@ static int regnor(MMG5_pMesh mesh) {
       n[2] = tabl[iad+2] - lm2 * (nz - tabl[iad+2]);
       nn++;
       res += (ppt->n[0]-n[0])*(ppt->n[0]*n[0]) + (ppt->n[1]-n[1])*(ppt->n[1]*n[1]) + (ppt->n[2]-n[2])*(ppt->n[2]*n[2]); 
+
+      ppt->n[0] = n[0];
+      ppt->n[1] = n[1];
+      ppt->n[2] = n[2];
     }
 
     if ( it == 1 )  res0 = res;
