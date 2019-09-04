@@ -311,7 +311,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
 
   if ( !mesh->np  ) {
     fprintf(stdout,"  ** MISSING DATA : no point\n");
-    return 0;
+    return -1;
   }
 
   mesh->npi  = mesh->np;
@@ -319,7 +319,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
   mesh->nti  = mesh->nt;
   if ( !mesh->np ) {
     fprintf(stdout,"  ** MISSING DATA\n");
-    return 0;
+    return -1;
   }
 
   /* Memory allocation */

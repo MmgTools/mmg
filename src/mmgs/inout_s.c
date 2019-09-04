@@ -353,7 +353,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
 
   if ( !mesh->npi || !mesh->nti ) {
     fprintf(stdout,"  ** MISSING DATA\n");
-    return 0;
+    return -1;
   }
   mesh->np = mesh->npi;
   mesh->nt = mesh->nti + 2*nq;
