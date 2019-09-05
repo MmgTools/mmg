@@ -317,7 +317,7 @@ char *MMG5_Get_filenameExt( char *filename ) {
 
   dot = strrchr(filename, '.');
 
-  if ( (!dot) || dot == filename ) return filename + 1;
+  if ( (!dot) || dot == filename ) return filename + strlen(filename);
 
   return dot;
 }
