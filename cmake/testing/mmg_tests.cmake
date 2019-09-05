@@ -309,6 +309,12 @@ FOREACH(EXEC ${LISTEXEC_MMG})
     ${MMG_CI_TESTS}/MecaPart/geom_1_before.mesh
     -out ${CTEST_OUTPUT_DIR}/mmg_optimHmax_${SHRT_EXEC}.o.meshb)
 
+  # -nreg
+  ADD_TEST(NAME mmg_nreg_${SHRT_EXEC}
+    COMMAND ${EXEC} -v 5 -nreg
+    ${MMG_CI_TESTS}/c1/c1.meshb
+    -out ${CTEST_OUTPUT_DIR}/mmg_nreg_${SHRT_EXEC}.o.meshb)
+
   ##############################################################################
   #####
   #####         Various test cases

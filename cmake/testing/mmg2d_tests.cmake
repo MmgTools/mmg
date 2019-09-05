@@ -283,6 +283,11 @@ ADD_TEST(NAME mmg2d_2squares-withSol
   ${MMG2D_CI_TESTS}/2squares/2squares -sol ${MMG2D_CI_TESTS}/2squares/2s.sol
   -out ${CTEST_OUTPUT_DIR}/mmg2d_2squares-sol.o.meshb)
 
+# -nreg
+ADD_TEST(NAME mmg2d_nreg
+  COMMAND ${EXECUT_MMG2D} -v 5 -nreg
+  ${MMG2D_CI_TESTS}/SquareIso/carretest
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_nreg.o.meshb)
 
 ###############################################################################
 #####
