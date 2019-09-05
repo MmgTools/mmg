@@ -111,6 +111,8 @@ extern "C" {
 
 #define MMG5_MEMMIN 38 /**< minimal memory needed to store the mesh/sol names */
 
+#define MMG5_LMAX      10240
+
 /* Variables for option initialization */
 #define MMG5_NONSET_MEM  -1 /**< mem value for unspecified max memory */
 #define MMG5_NONSET_HMIN -1 /**< hmin value for unspecified hmin size */
@@ -578,6 +580,7 @@ void           MMG5_check_hminhmax(MMG5_pMesh mesh, int8_t sethmin, int8_t sethm
  void          MMG5_mn(double m[6], double n[6], double mn[9] );
  extern int    MMG5_rmtr(double r[3][3],double m[6], double mr[6]);
  int           MMG5_boundingBox(MMG5_pMesh mesh);
+ int           MMG5_boulep(MMG5_pMesh mesh,int start,int ip,int*,int *list);
  int           MMG5_boulec(MMG5_pMesh, int*, int, int i,double *tt);
  int           MMG5_boulen(MMG5_pMesh, int*, int, int i,double *nn);
  int           MMG5_bouler(MMG5_pMesh, int*, int, int i,int *,int *,int *, int*, int);
@@ -627,6 +630,7 @@ const char    *MMG5_Get_formatName(enum MMG5_Format fmt);
  int           MMG5_invmat(double *m,double *mi);
  int           MMG5_invmatg(double m[9],double mi[9]);
  int           MMG5_invmat33(double m[3][3],double mi[3][3]);
+ int           MMG5_regnor(MMG5_pMesh mesh);
  double        MMG5_ridSizeInNormalDir(MMG5_pMesh,int,double*,MMG5_pBezier,double,double);
  double        MMG5_ridSizeInTangentDir(MMG5_pMesh, MMG5_pPoint,int,int*,double,double);
  int           MMG5_scale_meshAndSol(MMG5_pMesh,MMG5_pSol,MMG5_pSol,double*,int8_t*,int8_t*);

@@ -813,6 +813,10 @@ int MMG3D_analys(MMG5_pMesh mesh) {
     MMG5_DEL_MEM(mesh,hash.item);
     return 0;
   }
+  if ( mesh->info.nreg && !MMG5_regnor(mesh) ) {
+    fprintf(stderr,"\n  ## Normal regularization problem. Exit program.\n");
+    return 0;
+  }
 
   /* set bdry entities to tetra */
   if ( !MMG5_bdrySet(mesh) ) {

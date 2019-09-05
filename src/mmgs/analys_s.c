@@ -687,139 +687,6 @@ static int norver(MMG5_pMesh mesh) {
   return 1;
 }
 
-/* regularization procedure for derivatives, dual Laplacian */
-static int regnor(MMG5_pMesh mesh) {
-  MMG5_pTria    pt;
-  MMG5_pPoint   ppt,p0;
-  double  *tabl,n[3],lm1,lm2,dd,nx,ny,nz,res0,res;
-  int      i,k,iad,it,nn,nit,iel,ilist,list[MMGS_LMAX];
-
-  /* assign seed to vertex */
-  for (k=1; k<=mesh->nt; k++) {
-    pt = &mesh->tria[k];
-    if ( !MG_EOK(pt) )  continue;
-    for (i=0; i<3; i++) {
-      ppt = &mesh->point[pt->v[i]];
-      if ( !ppt->s )  ppt->s = k;
-    }
-  }
-
-  /* allocate memory for normals */
-  MMG5_SAFE_CALLOC(tabl,3*mesh->np+1,double,return 0);
-
-  it   = 0;
-  nit  = 10;
-  res0 = 0.0;
-  lm1  = 0.4;
-  lm2  = 0.399;
-  while ( it++ < nit ) {
-    /* step 1: laplacian */
-    for (k=1; k<=mesh->np; k++) {
-      ppt = &mesh->point[k];
-      if ( !MG_VOK(ppt) || ppt->tag > MG_REF )  continue;
-
-      iel = ppt->s;
-      assert(iel);
-      pt = &mesh->tria[iel];
-      i  = 0;
-      if ( pt->v[1] == k )  i = 1;
-      else if ( pt->v[2] == k ) i = 2;
-
-      ilist = boulep(mesh,iel,i,list);  
-
-      /* average normal */
-      nx = ny = nz = 0.0;
-      for (i=1; i<=ilist; i++) {
-        p0  = &mesh->point[list[i]];
-        if ( p0->tag > MG_REF )  continue;
-        nx += p0->n[0];
-        ny += p0->n[1];
-        nz += p0->n[2];
-      }
-      dd  = nx*nx + ny*ny + nz*nz;
-      if ( dd > MMG5_EPSD2 ) {
-        dd = 1.0 / sqrt(dd);
-        nx *= dd;
-        ny *= dd;
-        nz *= dd;
-      }
-
-      /* Laplacian */
-      iad = 3*(k-1)+1;
-      tabl[iad+0] = ppt->n[0] + lm1 * (nx - ppt->n[0]);
-      tabl[iad+1] = ppt->n[1] + lm1 * (ny - ppt->n[1]);
-      tabl[iad+2] = ppt->n[2] + lm1 * (nz - ppt->n[2]);
-    }
-
-    /* step 2: anti-laplacian */
-    res = 0;
-    nn  = 0;
-    for (k=1; k<=mesh->np; k++) {
-      ppt = &mesh->point[k];
-      if ( !MG_VOK(ppt) || ppt->tag > MG_REF )  continue;
-
-      iel = ppt->s;
-      assert(iel);
-      pt = &mesh->tria[iel];
-      i = 0;
-      if ( pt->v[1] == k )  i = 1;
-      else if ( pt->v[2] == k ) i = 2;
-
-      ilist = boulep(mesh,iel,i,list);  
-
-      /* average normal */
-      nx = ny = nz = 0.0;
-      for (i=1; i<=ilist; i++) {
-        iad = 3*(list[i]-1) + 1;
-        nx += tabl[iad+0];
-        ny += tabl[iad+1];
-        nz += tabl[iad+2];
-      }
-      dd  = nx*nx + ny*ny + nz*nz;
-      if ( dd > MMG5_EPSD2 ) {
-        dd = 1.0 / sqrt(dd);
-        nx *= dd;
-        ny *= dd;
-        nz *= dd;
-      }
-
-      /* antiLaplacian */
-      iad = 3*(k-1)+1;
-      n[0] = tabl[iad+0] - lm2 * (nx - tabl[iad+0]);
-      n[1] = tabl[iad+1] - lm2 * (ny - tabl[iad+1]);
-      n[2] = tabl[iad+2] - lm2 * (nz - tabl[iad+2]);
-      nn++;
-      res += (ppt->n[0]-n[0])*(ppt->n[0]*n[0]) + (ppt->n[1]-n[1])*(ppt->n[1]*n[1]) + (ppt->n[2]-n[2])*(ppt->n[2]*n[2]); 
-
-      ppt->n[0] = n[0];
-      ppt->n[1] = n[1];
-      ppt->n[2] = n[2];
-    }
-
-    if ( it == 1 )  res0 = res;
-    if ( res0 > MMG5_EPSD )  res  = res / res0;
-    if ( mesh->info.imprim < -1 || mesh->info.ddebug ) {
-      fprintf(stdout,"     iter %5d  res %.3E\r",it,res); 
-      fflush(stdout);
-    }
-    if ( it > 1 && res < MMG5_EPS )  break;
-  }
-
-  /* reset the ppt->s tag */
-  for (k=1; k<=mesh->np; ++k) {
-    mesh->point[k].s = 0;
-  }
-
-  if ( mesh->info.imprim < -1 || mesh->info.ddebug )  fprintf(stdout,"\n");
-
-  if ( abs(mesh->info.imprim) > 4 )
-    fprintf(stdout,"     %d normals regularized: %.3e\n",nn,res);
-
-  MMG5_SAFE_FREE(tabl);
-  return 1;
-}
-
-
 /* preprocessing stage: mesh analysis */
 int MMGS_analys(MMG5_pMesh mesh) {
 
@@ -875,7 +742,7 @@ int MMGS_analys(MMG5_pMesh mesh) {
       return 0;
     }
     /* regularize normals */
-    if ( mesh->info.nreg && !regnor(mesh) ) {
+    if ( mesh->info.nreg && !MMG5_regnor(mesh) ) {
       fprintf(stderr,"\n  ## Normal regularization problem. Exit program.\n");
       return 0;
     }
