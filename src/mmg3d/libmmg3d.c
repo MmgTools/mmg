@@ -222,37 +222,36 @@ int MMG3D_mark_packedPoints(MMG5_pMesh mesh,int *np,int *nc) {
  *
  */
 int MMG3D_pack_tetraAndAdja(MMG5_pMesh mesh) {
-  MMG5_pTetra   pt,ptnew;
-  int           iadr,iadrnew,iadrv,*adjav,*adja,*adjanew,voy;
-  int           ne,nbl,k,i;
+  MMG5_pTetra   pt,pt1;
+  int           iadr,iadr1,iadrv,*adjav,*adja,*adja1,voy;
+  int           k,i;
 
-  ne  = 0;
-  nbl = 1;
-  for (k=1; k<=mesh->ne; k++) {
+  k = 1;
+  do {
     pt = &mesh->tetra[k];
-    if ( !MG_EOK(pt) )  continue;
+    if ( !MG_EOK(pt) ) {
+      pt1 = &mesh->tetra[mesh->ne];
+      assert( pt && pt1 && MG_EOK(pt1) );
+      memcpy(pt,pt1,sizeof(MMG5_Tetra));
 
-    ne++;
-    if ( k!=nbl ) {
-      ptnew = &mesh->tetra[nbl];
-      memcpy(ptnew,pt,sizeof(MMG5_Tetra));
-
+      /* treat adja array */
       iadr = 4*(k-1) + 1;
       adja = &mesh->adja[iadr];
-      iadrnew = 4*(nbl-1) + 1;
-      adjanew = &mesh->adja[iadrnew];
+      iadr1 = 4*(mesh->ne-1) + 1;
+      adja1 = &mesh->adja[iadr1];
       for(i=0 ; i<4 ; i++) {
-        adjanew[i] = adja[i];
-        if(!adja[i]) continue;
-        iadrv = 4*(adja[i]/4-1) +1;
+        adja[i] = adja1[i];
+        if(!adja1[i]) continue;
+        iadrv = 4*(adja1[i]/4-1) + 1;
         adjav = &mesh->adja[iadrv];
         voy = i;
-        adjav[adja[i]%4] = 4*nbl + voy;
+        adjav[adja1[i]%4] = 4*k + voy;
       }
+
+      if ( !MMG3D_delElt(mesh,mesh->ne) )  return 0;
     }
-    nbl++;
   }
-  mesh->ne = ne;
+  while ( ++k < mesh->ne );
 
   /* Recreate nil chain */
   if ( mesh->ne >= mesh->nemax-1 )
@@ -276,33 +275,32 @@ int MMG3D_pack_tetraAndAdja(MMG5_pMesh mesh) {
  *
  */
 int MMG3D_pack_tetra(MMG5_pMesh mesh) {
-  MMG5_pTetra   pt,ptnew;
-  int           ne,nbl,k;
+  MMG5_pTetra   pt,pt1;
+  int           k;
 
-  ne  = 0;
-  nbl = 1;
-  for (k=1; k<=mesh->ne; k++) {
-    pt = &mesh->tetra[k];
-    if ( !MG_EOK(pt) )  continue;
-
-    ne++;
-    if ( k!=nbl ) {
-      ptnew = &mesh->tetra[nbl];
-      memcpy(ptnew,pt,sizeof(MMG5_Tetra));
+  if ( mesh->tetra ) {
+    k = 1;
+    do {
+      pt = &mesh->tetra[k];
+      if ( !MG_EOK(pt) ) {
+        pt1 = &mesh->tetra[mesh->ne];
+        assert( pt && pt1 && MG_EOK(pt1) );
+        memcpy(pt,pt1,sizeof(MMG5_Tetra));
+        if ( !MMG3D_delElt(mesh,mesh->ne) )  return 0;
+      }
     }
-    nbl++;
+    while ( ++k < mesh->ne );
+
+    /* Recreate nil chain */
+    if ( mesh->ne >= mesh->nemax-1 )
+      mesh->nenil = 0;
+    else
+      mesh->nenil = mesh->ne + 1;
+
+    if ( mesh->nenil )
+      for(k=mesh->nenil; k<mesh->nemax-1; k++)
+        mesh->tetra[k].v[0] = 0;
   }
-  mesh->ne = ne;
-
-  /* Recreate nil chain */
-  if ( mesh->ne >= mesh->nemax-1 )
-    mesh->nenil = 0;
-  else
-    mesh->nenil = mesh->ne + 1;
-
-  if ( mesh->nenil )
-    for(k=mesh->nenil; k<mesh->nemax-1; k++)
-      mesh->tetra[k].v[0] = 0;
 
   return 1;
 }
@@ -316,39 +314,37 @@ int MMG3D_pack_tetra(MMG5_pMesh mesh) {
  *
  */
 int MMG3D_pack_prismsAndQuads(MMG5_pMesh mesh) {
-  MMG5_pPrism   pp,ppnew;
-  MMG5_pQuad    pq,pqnew;
-  int           k,ne,nbl;
+  MMG5_pPrism   pp,pp1;
+  MMG5_pQuad    pq,pq1;
+  int           k;
 
-  ne  = 0;
-  nbl = 1;
-  for (k=1; k<=mesh->nprism; k++) {
-    pp = &mesh->prism[k];
-    if ( !MG_EOK(pp) )  continue;
-
-    ++ne;
-    if ( k!=nbl ) {
-      ppnew = &mesh->prism[nbl];
-      memcpy(ppnew,pp,sizeof(MMG5_Prism));
+  if ( mesh->prism ) {
+    k = 1;
+    do {
+      pp = &mesh->prism[k];
+      if ( !MG_EOK(pp) ) {
+        pp1 = &mesh->prism[mesh->nprism];
+        assert( pp && pp1 && MG_EOK(pp1) );
+        memcpy(pp,pp1,sizeof(MMG5_Prism));
+        --mesh->nprism;
+      }
     }
-    ++nbl;
+    while ( ++k < mesh->nprism );
   }
-  mesh->nprism = ne;
 
-  ne  = 0;
-  nbl = 1;
-  for (k=1; k<=mesh->nquad; k++) {
-    pq = &mesh->quadra[k];
-    if ( !MG_EOK(pq) )  continue;
-
-    ++ne;
-    if ( k!=nbl ) {
-      pqnew = &mesh->quadra[nbl];
-      memcpy(pqnew,pq,sizeof(MMG5_Quad));
+  if ( mesh->quadra ) {
+    k = 1;
+    do {
+      pq = &mesh->quadra[k];
+      if ( !MG_EOK(pq) ) {
+        pq1 = &mesh->quadra[mesh->nquad];
+        assert( pq && pq1 && MG_EOK(pq1) );
+        memcpy(pq,pq1,sizeof(MMG5_Quad));
+        --mesh->nquad;
+      }
     }
-    ++nbl;
+    while ( ++k < mesh->nquad );
   }
-  mesh->nquad = ne;
 
   return 1;
 }
@@ -362,29 +358,36 @@ int MMG3D_pack_prismsAndQuads(MMG5_pMesh mesh) {
  *
  */
 int MMG3D_pack_sol(MMG5_pMesh mesh,MMG5_pSol sol) {
-  MMG5_pPoint   ppt;
-  int           k,isol,isolnew,i;
-  int           np,nbl;
+  MMG5_pPoint   ppt,ppt1;
+  int           np,k,isol,isol1,i;
 
-  np  = 0;
-  nbl = 1;
   if ( sol && sol->m ) {
-    for (k=1; k<=mesh->np; k++) {
+    k  = 1;
+    np = mesh->np;
+    do {
       ppt = &mesh->point[k];
-      if ( !MG_VOK(ppt) )  continue;
+      if ( !MG_VOK(ppt) ) {
+        /* Copy last used point into first used one */
+        isol    = k  * sol->size;
+        isol1   = np * sol->size;
 
-      ++np;
+        assert( sol->m+isol && sol->m+isol1 && MG_VOK(&mesh->point[np]) );
 
-      if ( k!= nbl ) {
-        isol    = k   * sol->size;
-        isolnew = nbl * sol->size;
+        for (i=0; i<sol->size; i++) {
+          sol->m[isol + i] = sol->m[isol1 + i];
+        }
 
-        for (i=0; i<sol->size; i++)
-          sol->m[isolnew + i] = sol->m[isol + i];
+        /* Search the last used point */
+        do {
+          --np;
+          ppt1 = &mesh->point[np];
+        }
+        while ( !MG_VOK(ppt1) );
       }
-      ++nbl;
     }
-    sol->np = np;
+    while ( ++k < np );
+
+    sol->np = MG_MAX(k-1,np);
   }
 
   return 1;
@@ -444,16 +447,21 @@ int MMG3D_update_eltsVertices(MMG5_pMesh mesh) {
  *
  */
 int MMG3D_pack_pointArray(MMG5_pMesh mesh) {
-  MMG5_pPoint   ppt,pptnew;
-  int           k,np,nbl;
+  MMG5_pPoint   ppt,ppt1;
+  int           k;
 
-  nbl       = 1;
-  mesh->nc1 = 0;
-  np        = 0;
-  for (k=1; k<=mesh->np; k++) {
+  k = 1;
+  do {
     ppt = &mesh->point[k];
-    if ( !MG_VOK(ppt) )  continue;
+    if ( !MG_VOK(ppt) ) {
+      ppt1 = &mesh->point[mesh->np];
+      assert( ppt && ppt1 && MG_VOK(ppt1) );
+      memcpy(ppt,ppt1,sizeof(MMG5_Point));
 
+      MMG3D_delPt(mesh,mesh->np);
+    }
+
+    /* Copy the normal stored in ppt->n into an xpoint. */
     if ( ppt->tag & MG_BDY &&
          !(ppt->tag & MG_CRN || ppt->tag & MG_NOM || MG_EDG(ppt->tag)) ) {
 
@@ -462,19 +470,10 @@ int MMG3D_pack_pointArray(MMG5_pMesh mesh) {
         ++mesh->nc1;
       }
     }
-
-    np++;
-    if ( k!=nbl ) {
-      pptnew = &mesh->point[nbl];
-      memmove(pptnew,ppt,sizeof(MMG5_Point));
-      memset(ppt,0,sizeof(MMG5_Point));
-      ppt->tag    = MG_NUL;
-    }
-
-    nbl++;
   }
-  mesh->np = np;
+  while ( ++k < mesh->np );
 
+  /* Recreate nil chain */
   for(k=1 ; k<=mesh->np ; k++)
     mesh->point[k].tmp = 0;
 

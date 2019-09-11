@@ -289,10 +289,6 @@ int MMG3D_setMeshSize_alloc( MMG5_pMesh mesh ) {
   mesh->nenil = mesh->ne + 1;
 
   for (k=mesh->npnil; k<mesh->npmax-1; k++) {
-    /* Set tangent field of point to 0 */
-    mesh->point[k].n[0] = 0;
-    mesh->point[k].n[1] = 0;
-    mesh->point[k].n[2] = 0;
     /* link */
     mesh->point[k].tmp  = k+1;
   }
