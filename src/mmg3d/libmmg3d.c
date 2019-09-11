@@ -192,14 +192,28 @@ int MMG3D_bdryBuild(MMG5_pMesh mesh) {
  */
 
 int MMG3D_mark_packedPoints(MMG5_pMesh mesh,int *np,int *nc) {
-  MMG5_pPoint   ppt;
-  int           k;
+  MMG5_pPoint   ppt,ppt1;
+  int           k,idx;
 
   (*np) = (*nc) = 0;
-  for (k=1; k<=mesh->np; k++) {
+  k   = 1;
+  idx = mesh->np;
+  do {
     ppt = &mesh->point[k];
-    if ( !MG_VOK(ppt) )  continue;
-    ppt->tmp = ++(*np);
+    if ( !MG_VOK(ppt) ) {
+      ppt1 = &mesh->point[idx];
+      ppt1->tmp = k;
+
+      /* Search the last used point */
+      do {
+        --idx;
+        ppt1 = &mesh->point[idx];
+      }
+      while ( !MG_VOK(ppt1) );
+    }
+    else {
+      ppt->tmp = k;
+    }
 
     if ( ppt->tag & MG_NOSURF ) {
       ppt->tag &= ~MG_NOSURF;
@@ -210,6 +224,8 @@ int MMG3D_mark_packedPoints(MMG5_pMesh mesh,int *np,int *nc) {
 
     ppt->ref = abs(ppt->ref);
   }
+  while ( ++k < idx );
+
   return 1;
 }
 
