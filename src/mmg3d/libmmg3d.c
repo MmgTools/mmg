@@ -193,23 +193,29 @@ int MMG3D_bdryBuild(MMG5_pMesh mesh) {
 
 int MMG3D_mark_packedPoints(MMG5_pMesh mesh,int *np,int *nc) {
   MMG5_pPoint   ppt,ppt1;
-  int           k,idx;
+  int           k;
 
-  (*np) = (*nc) = 0;
-  k   = 1;
-  idx = mesh->np;
+  for ( k=1; k<=mesh->np; ++k ) {
+    mesh->point[k].tmp = 0;
+  }
+
+  (*nc) = 0;
+  k     = 1;
+  (*np) = mesh->np;
+
   do {
     ppt = &mesh->point[k];
     if ( !MG_VOK(ppt) ) {
-      ppt1 = &mesh->point[idx];
+
+      ppt1 = &mesh->point[*np];
       ppt1->tmp = k;
 
       /* Search the last used point */
       do {
-        --idx;
-        ppt1 = &mesh->point[idx];
+        --(*np);
+        ppt1 = &mesh->point[*np];
       }
-      while ( !MG_VOK(ppt1) );
+      while ( !MG_VOK(ppt1) && k < *np );
     }
     else {
       ppt->tmp = k;
@@ -224,7 +230,32 @@ int MMG3D_mark_packedPoints(MMG5_pMesh mesh,int *np,int *nc) {
 
     ppt->ref = abs(ppt->ref);
   }
-  while ( ++k < idx );
+  while ( ++k < (*np) );
+
+
+  // if k==*np mesh->point[k] may not be treated
+  if ( k==*np && MG_VOK(&mesh->point[*np]) ) {
+    if ( !mesh->point[k].tmp ) {
+      mesh->point[k].tmp = *np;
+
+      if ( ppt->tag & MG_NOSURF ) {
+        ppt->tag &= ~MG_NOSURF;
+        ppt->tag &= ~MG_REQ;
+      }
+
+      if ( ppt->tag & MG_CRN )  (*nc)++;
+
+      ppt->ref = abs(ppt->ref);
+    }
+  }
+
+#ifndef NDEBUG
+  for ( k=1; k<=(*np); ++k  ) {
+    if ( MG_VOK(&mesh->point[k]) ) {
+      assert(mesh->point[k].tmp);
+    }
+  }
+#endif
 
   return 1;
 }
@@ -398,12 +429,12 @@ int MMG3D_pack_sol(MMG5_pMesh mesh,MMG5_pSol sol) {
           --np;
           ppt1 = &mesh->point[np];
         }
-        while ( !MG_VOK(ppt1) );
+        while ( !MG_VOK(ppt1) && k < np );
       }
     }
     while ( ++k < np );
 
-    sol->np = MG_MAX(k-1,np);
+    sol->np = np;
   }
 
   return 1;
@@ -474,10 +505,15 @@ int MMG3D_pack_pointArray(MMG5_pMesh mesh) {
       assert( ppt && ppt1 && MG_VOK(ppt1) );
       memcpy(ppt,ppt1,sizeof(MMG5_Point));
 
-      MMG3D_delPt(mesh,mesh->np);
+      /* delete point without deleting xpoint */
+      memset(ppt1,0,sizeof(MMG5_Point));
+      ppt1->tag    = MG_NUL;
+
+      while ( !MG_VOK((&mesh->point[mesh->np])) )  mesh->np--;
+
     }
 
-    /* Copy the normal stored in ppt->n into an xpoint. */
+    /* Copy the normal stored in the xpoint into ppt->n. */
     if ( ppt->tag & MG_BDY &&
          !(ppt->tag & MG_CRN || ppt->tag & MG_NOM || MG_EDG(ppt->tag)) ) {
 
