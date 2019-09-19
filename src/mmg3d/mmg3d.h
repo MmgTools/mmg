@@ -246,6 +246,7 @@ int  MMG3D_Init_mesh_var( va_list argptr );
 int  MMG3D_Free_all_var( va_list argptr );
 int  MMG3D_Free_structures_var( va_list argptr );
 int  MMG3D_Free_names_var( va_list argptr );
+void MMG3D_Free_arrays(MMG5_pMesh *mesh,MMG5_pSol *sol,MMG5_pSol *disp);
 int  MMG3D_newPt(MMG5_pMesh mesh,double c[3],int16_t tag);
 int  MMG3D_newElt(MMG5_pMesh mesh);
 int  MMG3D_delElt(MMG5_pMesh mesh,int iel);
