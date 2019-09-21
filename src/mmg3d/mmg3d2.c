@@ -342,18 +342,18 @@ MMG5_ismaniball(MMG5_pMesh mesh,MMG5_pSol sol,int k,int indp) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the level-set function.
- * \param tmp saving of the level-set values before the snap.
  * \return 1 if success, 0 if fail.
  *
  * Snap values of the level set function very close to 0 to exactly 0,
  * and prevent nonmanifold patterns from being generated.
  *
  */
-static int MMG3D_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol,double *tmp) {
+static int MMG3D_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTetra   pt;
   MMG5_pPoint   p0;
-  int      k,nc,ns,ip;
-  char     i;
+  double        *tmp;
+  int           k,nc,ns,ip;
+  char          i;
 
   /* create tetra adjacency */
   if ( !MMG3D_hashTetra(mesh,1) ) {
@@ -365,6 +365,11 @@ static int MMG3D_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol,double *tmp) {
   /* Reset point flags */
   for (k=1; k<=mesh->np; k++)
     mesh->point[k].flag = 0;
+
+  MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(double),"temporary table",
+                fprintf(stderr,"  Exit program.\n");
+                return 0);
+  MMG5_SAFE_CALLOC(tmp,mesh->npmax+1,double,return 0);
 
   /* Snap values of sol that are close to 0 to 0 exactly */
   ns = nc = 0;
@@ -407,6 +412,7 @@ static int MMG3D_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol,double *tmp) {
 
   /* memory free */
   MMG5_DEL_MEM(mesh,mesh->adja);
+  MMG5_DEL_MEM(mesh,tmp);
 
   return 1;
 }
@@ -414,13 +420,14 @@ static int MMG3D_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol,double *tmp) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the level-set values.
+ * \param met pointer toward a metric (non-mandatory).
  * \return 1 if success, 0 otherwise.
  *
  * Proceed to discretization of the implicit function carried by sol into mesh,
  * once values of sol have been snapped/checked
  *
  */
-static int MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol){
+static int MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
   MMG5_pPoint   p0,p1;
@@ -534,6 +541,22 @@ static int MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol){
                              ,c,0);
       }
       sol->m[np] = mesh->info.ls;
+      /* If user provide a metric, interpolate it at the new point */
+      if ( met && met->m ) {
+        if ( met->size > 1 ) {
+          ier = MMG3D_intmet33_ani(mesh,met,k,ia,np,s);
+        }
+        else {
+          ier = MMG5_intmet_iso(mesh,met,k,ia,np,s);
+        }
+        if ( ier <= 0 ) {
+          // Unable to compute the metric
+          fprintf(stderr,"\n  ## Error: %s: unable to"
+                  " interpolate the metric during the level-set"
+                  " discretization\n",__func__);
+          return 0;
+        }
+      }
 
       if ( npneg ) {
         /* We split a required edge */
@@ -1357,11 +1380,14 @@ int MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int nd
         }
         assert( indp >= 0 && indp < 4 );
 
-        /* Only tets of the shell of (np,nq) can be added, unless future ball is non manifold */
+        /* Only tets of the shell of (np,nq) can be added, unless future ball is
+         * non manifold */
         if ( indq == -1 ) {
-          fprintf(stderr,"\n  ## Warning: %s: we should rarely passed here. "
-                  "tetra %d =  %d %d %d %d, ref = %d.",__func__,
-                  jel,pt1->v[0],pt1->v[1],pt1->v[2],pt1->v[3],pt1->ref);
+          if ( mesh->info.ddebug ) {
+            fprintf(stderr,"\n  ## Warning: %s: we should rarely passed here. "
+                    "tetra %d =  %d %d %d %d, ref = %d.",__func__,
+                    jel,pt1->v[0],pt1->v[1],pt1->v[2],pt1->v[3],pt1->ref);
+          }
           return 0;
         }
 
@@ -1400,9 +1426,11 @@ int MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int nd
 
         /* Only tets of the shell of (np,nq) can be added, unless future ball is non manifold */
         if ( indp == -1 ) {
-          fprintf(stderr,"\n  ## Warning: %s: we should rarely passed here. "
-                  "tetra %d =  %d %d %d %d, ref = %d\n",__func__,
-                  jel,pt1->v[0],pt1->v[1],pt1->v[2],pt1->v[3],pt1->ref);
+          if ( mesh->info.ddebug ) {
+            fprintf(stderr,"\n  ## Warning: %s: we should rarely passed here. "
+                    "tetra %d =  %d %d %d %d, ref = %d\n",__func__,
+                    jel,pt1->v[0],pt1->v[1],pt1->v[2],pt1->v[3],pt1->ref);
+          }
           return 0;
         }
 
@@ -1419,14 +1447,14 @@ int MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int nd
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the solution structure
+ * \param sol pointer toward the level-set.
+ * \param met pointer toward  a metric (optionnal).
  * \return 0 if fail, 1 otherwise.
  *
  * Create implicit surface in mesh.
  *
  */
-int MMG3D_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol) {
-  double   *tmp;
+int MMG3D_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
 
   if ( abs(mesh->info.imprim) > 3 )
     fprintf(stdout,"  ** ISOSURFACE EXTRACTION\n");
@@ -1437,17 +1465,11 @@ int MMG3D_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol) {
     return 0;
   }
 
-  MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(double),"temporary table",
-                fprintf(stderr,"  Exit program.\n");
-                return 0);
-  MMG5_SAFE_CALLOC(tmp,mesh->npmax+1,double,return 0);
-
   /* Snap values of level set function if need be, then discretize it */
-  if ( !MMG3D_snpval_ls(mesh,sol,tmp) ) {
+  if ( !MMG3D_snpval_ls(mesh,sol) ) {
     fprintf(stderr,"\n  ## Problem with implicit function. Exit program.\n");
     return 0;
   }
-  MMG5_DEL_MEM(mesh,tmp);
 
   if ( !MMG3D_hashTetra(mesh,1) ) {
     fprintf(stderr,"\n  ## Hashing problem. Exit program.\n");
@@ -1476,12 +1498,13 @@ int MMG3D_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol) {
     return 0;
   }
 
-  if ( !MMG3D_cuttet_ls(mesh,sol) ) {
+  if ( !MMG3D_cuttet_ls(mesh,sol,met) ) {
     fprintf(stderr,"\n  ## Problem in discretizing implicit function. Exit program.\n");
     return 0;
   }
 
   MMG5_DEL_MEM(mesh,mesh->adja);
+  MMG5_DEL_MEM(mesh,mesh->adjt);
   MMG5_DEL_MEM(mesh,mesh->tria);
 
   mesh->nt = 0;

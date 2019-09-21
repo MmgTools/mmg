@@ -80,6 +80,7 @@ enum MMG3D_Param {
   MMG3D_IPARAM_noswap,            /*!< [1/0], Avoid/allow edge or face flipping */
   MMG3D_IPARAM_nomove,            /*!< [1/0], Avoid/allow point relocation */
   MMG3D_IPARAM_nosurf,            /*!< [1/0], Avoid/allow surface modifications */
+  MMG3D_IPARAM_nreg,              /*!< [0/1], Enable normal regularization */
   MMG3D_IPARAM_numberOfLocalParam,/*!< [n], Number of local parameters */
   MMG3D_IPARAM_renum,             /*!< [1/0], Turn on/off point relocation with Scotch */
   MMG3D_IPARAM_anisosize,         /*!< [1/0], Turn on/off anisotropic metric creation when no metric is provided */
@@ -1671,6 +1672,93 @@ enum MMG3D_Param {
  *
  */
   int MMG3D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the solution structure.
+ * \param filename name of file.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Read mesh and 0 or 1 data at VTU (VTK) file format (.vtu extension). We read
+ * only low-order points, edges, tria, quadra, tetra and prisms. Point and cell
+ * references must be stored in PointData or CellData whose names contains the
+ * "medit:ref" keyword.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_LOADVTUMESH(mesh,sol,filename,strlen0,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
+ * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+int MMG3D_loadVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the solution structure.
+ * \param filename name of file.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Read mesh a list of data in VTU file format (.vtu extension). We read
+ * only low-order points, edges, tria, quadra, tetra and prisms. Point and cell
+ * references must be stored in PointData or CellData whose names contains the
+ * "medit:ref" keyword.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_LOADVTUMESH_AND_ALLDATA(mesh,sol,filename,strlen0,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
+ * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the solution structure.
+ * \param filename name of file.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Read mesh and 0 or 1 data at VTK file format (.vtu extension). We read
+ * only low-order points, edges, tria, quadra, tetra and prisms. Point and cell
+ * references must be stored in PointData or CellData whose names contains the
+ * "medit:ref" keyword.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_LOADVTKMESH(mesh,sol,filename,strlen0,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
+ * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+int MMG3D_loadVtkMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the solution structure.
+ * \param filename name of file.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Read mesh and a list of data in VTK file format (.vtu extension). We read
+ * only low-order points, edges, tria, quadra, tetra and prisms. Point and cell
+ * references must be stored in PointData or CellData whose names contains the
+ * "medit:ref" keyword.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_LOADVTKMESH_AND_ALLDATA(mesh,sol,filename,strlen0,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
+ * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+int MMG3D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward a list of solution structures.
@@ -1727,6 +1815,7 @@ enum MMG3D_Param {
  *
  */
   int MMG3D_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the solution structure.
@@ -1748,6 +1837,78 @@ enum MMG3D_Param {
  *
  */
   int MMG3D_saveMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the solution structure.
+ * \param filename name of file.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Write mesh and 0 or 1 data at Vtk file format (.vtk extension).
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_SAVEVTKMESH(mesh,sol,filename,strlen0,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
+ * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int MMG3D_saveVtkMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the solution structure.
+ * \param filename name of file.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Write mesh and a list of data fields at Vtk file format (.vtk extension).
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_SAVEVTKMESH_AND_ALLDATA(mesh,sol,filename,strlen0,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
+ * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int MMG3D_saveVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the solution structure.
+ * \param filename name of file.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Write mesh and 0 or 1 data at vtu Vtk file format (.vtu extension).
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_SAVEVTUMESH(mesh,sol,filename,strlen0,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
+ * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int MMG3D_saveVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the solution structure.
+ * \param filename name of file.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Write mesh and a list of data fields at vtu Vtk file format (.vtu extension).
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_SAVEVTUMESH_AND_ALLDATA(mesh,sol,filename,strlen0,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
+ * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int MMG3D_saveVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.
@@ -1948,21 +2109,24 @@ enum MMG3D_Param {
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol (level-set) structure.
+ * \param sol pointer toward the sol (level-set) structure.
+ * \param met pointer toward a sol structure (metric), optionnal.
  * \return \ref MMG5_SUCCESS if success, \ref MMG5_LOWFAILURE if fail but a
  * conform mesh is saved or \ref MMG5_STRONGFAILURE if fail and we can't save
  * the mesh.
  *
- * Main program for the level-set discretization library.
+ * Main program for the level-set discretization library. If a metric \a met is
+ * provided, use it to adapt the mesh.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG3D_MMG3DLS(mesh,met,retval)\n
- * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,met\n
+ * >   SUBROUTINE MMG3D_MMG3DLS(mesh,sol,met,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
+ * >     MMG5_DATA_PTR_T                :: met\n
  * >     INTEGER, INTENT(OUT)           :: retval\n
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_mmg3dls(MMG5_pMesh mesh, MMG5_pSol met );
+  int  MMG3D_mmg3dls(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol met );
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -2004,7 +2168,8 @@ enum MMG3D_Param {
  * \param argc number of command line arguments.
  * \param argv command line arguments.
  * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
+ * \param met pointer toward a metric
+ * \param sol pointer toward a level-set or displacement
  * \return 1 if we want to run Mmg after, 0 if not or if fail.
  *
  * Store command line arguments.
@@ -2012,7 +2177,7 @@ enum MMG3D_Param {
  * \remark no matching fortran function.
  *
  */
-  int  MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met);
+  int  MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -2078,7 +2243,8 @@ enum MMG3D_Param {
 /** Checks */
 /**
  * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
+ * \param met pointer toward the sol structure (metric).
+ * \param sol pointer toward the sol structure (ls or displacement).
  * \param critmin minimum quality for elements.
  * \param lmin minimum edge length.
  * \param lmax maximum ede length.
@@ -2089,9 +2255,9 @@ enum MMG3D_Param {
  * Search invalid elements (in term of quality or edge length).
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG3D_MMG3DCHECK(mesh,met,critmin,lmin,lmax,eltab,&\n
+ * >   SUBROUTINE MMG3D_MMG3DCHECK(mesh,met,sol,critmin,lmin,lmax,eltab,&\n
  * >                               metridtyp,retval)\n
- * >     MMG5_DATA_PTR_T, INTENT(INOUT)      :: mesh,met\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT)      :: mesh,met,sol\n
  * >     REAL(KIND=8), INTENT(IN)            :: critmin,lmin,lmax\n
  * >     INTEGER,DIMENSION(*), INTENT(OUT)   :: eltab\n
  * >     INTEGER, INTENT(IN)                 :: metridtyp\n
@@ -2099,7 +2265,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int MMG3D_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,double critmin,
+  int MMG3D_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol,double critmin,
                        double lmin, double lmax, int *eltab,char metRidTyp);
 /**
  * \param mesh pointer toward the mesh structure.
@@ -2195,7 +2361,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  double (*MMG3D_lenedgCoor)(double *ca,double *cb,double *sa,double *sb);
+extern  double (*MMG3D_lenedgCoor)(double *ca,double *cb,double *sa,double *sb);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -2332,6 +2498,35 @@ int MMG3D_switch_metricStorage(MMG5_pMesh mesh, MMG5_pSol met);
  *
  */
   int MMG3D_Get_tetsFromTria(MMG5_pMesh mesh, int ktri, int ktet[2], int iface[2]);
+
+/**
+ * \param m upper part of a symetric matric diagonalizable in |R
+ * \param lambda array of the metric eigenvalues
+ * \param vp array of the metric eigenvectors
+ *
+ * \return the order of the eigenvalues
+ *
+ * Compute the real eigenvalues and eigenvectors of a symetric matrice m whose
+ * upper part is provided (m11, m12, m13, m22, m23, m33 in this order).
+ * lambda[0] is the eigenvalue associated to the eigenvector ( v[0][0], v[0,1], v[0,2] )
+ * in C and to the eigenvector v(1,:) in fortran
+ * lambda[1] is the eigenvalue associated to the eigenvector ( v[1][0], v[1,1], v[1,2] )
+ * in C and to the eigenvector v(2,:) in fortran
+ * lambda[2] is the eigenvalue associated to the eigenvector ( v[2][0], v[2,1], v[2,2] )
+ * in C and to the eigenvector v(3,:) in fortran
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_COMPUTE_EIGENV(m,lambda,vp,retval)\n
+ * >     REAL(KIND=8), INTENT(IN)         :: m(*)\n
+ * >     REAL(KIND=8), INTENT(OUT)        :: lambda(*),vp(*)\n
+ * >     INTEGER, INTENT(OUT)             :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int MMG3D_Compute_eigenv(double m[6],double lambda[3],double vp[3][3]);
+
+
+
 #ifdef __cplusplus
 }
 #endif

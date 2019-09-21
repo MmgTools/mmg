@@ -394,14 +394,14 @@ int MMG5_chkVertexConnectedDomains(MMG5_pMesh mesh){
         if( ppt->tag & MG_NOM ){
           if ( mesh->adja[4*(k-1)+1+i] ) continue;
           ier=MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,1);
-	} else {
+        } else {
           ier=MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,0);
         }
-	if ( ier != 1 && !mmgWarn ) {
-	  mmgWarn = 1;
-	  printf("  ## Warning: %s: unable to check that we don't have"
-		 " non-connected domains.\n",__func__);
-	}
+        if ( ier != 1 && !mmgWarn ) {
+          mmgWarn = 1;
+          printf("  ## Warning: %s: unable to check that we don't have"
+                 " non-connected domains.\n",__func__);
+        }
 
         if(ilistv != ppt->s) {
           if(!(ppt->tag & MG_REQ) ) {
@@ -763,8 +763,8 @@ int MMG3D_analys(MMG5_pMesh mesh) {
   /* Set surface triangles to required in nosurf mode or for parallel boundaries */
   MMG3D_set_reqBoundaries(mesh);
 
-
   /* create surface adjacency */
+  memset ( &hash, 0x0, sizeof(MMG5_Hash));
   if ( !MMG3D_hashTria(mesh,&hash) ) {
     MMG5_DEL_MEM(mesh,hash.item);
     fprintf(stderr,"\n  ## Hashing problem (2). Exit program.\n");
@@ -811,6 +811,10 @@ int MMG3D_analys(MMG5_pMesh mesh) {
   if ( !MMG5_norver(mesh) ) {
     fprintf(stderr,"\n  ## Normal problem. Exit program.\n");
     MMG5_DEL_MEM(mesh,hash.item);
+    return 0;
+  }
+  if ( mesh->info.nreg && !MMG5_regnor(mesh) ) {
+    fprintf(stderr,"\n  ## Normal regularization problem. Exit program.\n");
     return 0;
   }
 

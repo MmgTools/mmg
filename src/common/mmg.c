@@ -35,6 +35,20 @@
 
 #include "mmgcommon.h"
 
+/* Declared in the header, but need to define in at most one compilation unit */
+int    (*MMG5_chkmsh)(MMG5_pMesh,int,int);
+int    (*MMG5_bezierCP)(MMG5_pMesh ,MMG5_Tria *,MMG5_pBezier ,char );
+double (*MMG5_lenSurfEdg)(MMG5_pMesh mesh,MMG5_pSol sol ,int ,int, char );
+int    (*MMG5_grad2met_ani)(MMG5_pMesh,MMG5_pSol,MMG5_pTria,int,int);
+int    (*MMG5_grad2metreq_ani)(MMG5_pMesh,MMG5_pSol,MMG5_pTria,int,int);
+int    (*MMG5_compute_meanMetricAtMarkedPoints)( MMG5_pMesh,MMG5_pSol);
+int    (*MMG5_indElt)(MMG5_pMesh mesh,int kel);
+int    (*MMG5_indPt)(MMG5_pMesh mesh,int kp);
+
+#ifdef USE_SCOTCH
+int    (*MMG5_renumbering)(int vertBoxNbr, MMG5_pMesh mesh, MMG5_pSol sol);
+#endif
+
 /**
  * \param *prog pointer toward the program name.
  *
@@ -177,24 +191,242 @@ int MMG5_writeLocalParamAtTri( MMG5_pMesh mesh, MMG5_iNode *bdryRefs,
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param mesh pointer toward the msh value.
+ * \param met pointer toward the solution structure.
  *
- * Update the msh value if we detect that the user want to force output at Gmsh
- * or Medit format.
+ * Truncate the metric computed by the DoSol function by hmax and hmin values
+ * (if setted by the user). Set hmin and hmax if they are not setted.
+ *
+ * \warning works only for a metric computed by the DoSol function because we
+ * suppose that we have a diagonal tensor in aniso.
  *
  */
-void MMG5_chooseOutputFormat(MMG5_pMesh mesh, int *msh) {
-  int len;
+void MMG5_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
+  MMG5_pTetra pt;
+  MMG5_pPoint ppt;
+  double      isqhmin, isqhmax;
+  int         i,k,iadr,sethmin,sethmax;
 
-  len = strlen(mesh->nameout);
+  assert ( mesh->info.optim );
 
-  if ( ( len>4 && !strcmp(&mesh->nameout[len-5],".mesh") ) ||
-       ( len>5 && !strcmp(&mesh->nameout[len-6],".meshb") ) )
-    *msh = 0;
-  else if ( ( len>3 && !strcmp(&mesh->nameout[len-4],".msh") ) ||
-            ( len>4 && !strcmp(&mesh->nameout[len-5],".mshb") ))
-    *msh = 1;
+  /* Detect the point used only by prisms */
+  if ( mesh->nprism ) {
+    for (k=1; k<=mesh->np; k++) {
+      mesh->point[k].flag = 1;
+    }
+    for (k=1; k<=mesh->ne; k++) {
+      pt = &mesh->tetra[k];
+      if ( !MG_EOK(pt) ) continue;
+
+      for (i=0; i<4; i++) {
+        mesh->point[pt->v[i]].flag = 0;
+      }
+    }
+  }
+
+  /* If not provided by the user, compute hmin/hmax from the metric computed by
+   * the DoSol function. */
+  sethmin = sethmax = 1;
+  if ( mesh->info.hmin < 0 ) {
+    sethmin = 0;
+    if ( met->size == 1 ) {
+      mesh->info.hmin = FLT_MAX;
+      for (k=1; k<=mesh->np; k++)  {
+        ppt = &mesh->point[k];
+        if ( !MG_VOK(ppt) || ppt->flag ) continue;
+        mesh->info.hmin = MG_MIN(mesh->info.hmin,met->m[k]);
+      }
+    }
+    else if ( met->size == 6 ){
+      mesh->info.hmin = 0.;
+      for (k=1; k<=mesh->np; k++)  {
+        ppt = &mesh->point[k];
+        if ( !MG_VOK(ppt) || ppt->flag ) continue;
+        iadr = met->size*k;
+        mesh->info.hmin = MG_MAX(mesh->info.hmin,met->m[iadr]);
+        mesh->info.hmin = MG_MAX(mesh->info.hmin,met->m[iadr+3]);
+        mesh->info.hmin = MG_MAX(mesh->info.hmin,met->m[iadr+5]);
+      }
+      mesh->info.hmin = 1./sqrt(mesh->info.hmin);
+    }
+  }
+
+  if ( mesh->info.hmax < 0 ) {
+    sethmax = 0;
+    if ( met->size == 1 ) {
+      mesh->info.hmax = 0.;
+      for (k=1; k<=mesh->np; k++)  {
+        ppt = &mesh->point[k];
+        if ( !MG_VOK(ppt) || ppt->flag ) continue;
+        mesh->info.hmax = MG_MAX(mesh->info.hmax,met->m[k]);
+      }
+    }
+    else if ( met->size == 6 ){
+      mesh->info.hmax = FLT_MAX;
+      for (k=1; k<=mesh->np; k++)  {
+        ppt = &mesh->point[k];
+        if ( !MG_VOK(ppt) || ppt->flag ) continue;
+        iadr = met->size*k;
+        mesh->info.hmax = MG_MIN(mesh->info.hmax,met->m[iadr]);
+        mesh->info.hmax = MG_MIN(mesh->info.hmax,met->m[iadr+3]);
+        mesh->info.hmax = MG_MIN(mesh->info.hmax,met->m[iadr+5]);
+      }
+      mesh->info.hmax = 1./sqrt(mesh->info.hmax);
+    }
+  }
+
+  /* Check the compatibility between the user settings and the automatically
+   * computed values */
+  MMG5_check_hminhmax(mesh,sethmin,sethmax);
+
+  /* vertex size */
+  if ( met->size == 1 ) {
+    for (k=1; k<=mesh->np; k++) {
+      ppt = &mesh->point[k];
+      if ( !MG_VOK(ppt) ) continue;
+      met->m[k] = MG_MIN(mesh->info.hmax,MG_MAX(mesh->info.hmin,met->m[k]));
+    }
+  }
+  else if ( met->size == 6 ) {
+    isqhmin = 1./(mesh->info.hmin*mesh->info.hmin);
+    isqhmax = 1./(mesh->info.hmax*mesh->info.hmax);
+
+    for (k=1; k<=mesh->np; k++) {
+      ppt = &mesh->point[k];
+      if ( !MG_VOK(ppt) ) continue;
+      iadr = 6*k;
+      met->m[iadr]   = MG_MAX(isqhmax,MG_MIN(isqhmin,met->m[iadr]));
+      met->m[iadr+3] = met->m[iadr];
+      met->m[iadr+5] = met->m[iadr];
+    }
+  }
+
+  return;
+}
+
+/**
+ * \param filename string containing a filename
+ *
+ * \return pointer toward the filename extension or toward the end of the string
+ * if no extension have been founded
+ *
+ * Get the extension of the filename string.
+ *
+ */
+char *MMG5_Get_filenameExt( char *filename ) {
+  char *dot;
+
+  dot = strrchr(filename, '.');
+
+  if ( (!dot) || dot == filename ) return filename + strlen(filename);
+
+  return dot;
+}
+
+/**
+ * \param filename string containing a filename and its path
+ *
+ * \return a pointer toward the file basename.
+ *
+ * Extract basename from a path.
+ *
+ */
+char *MMG5_Get_basename(char *path) {
+  char *s = strrchr(path, '/');
+
+  if (!s)
+    return strdup(path);
   else
-    *msh = 0;
+    return strdup(s + 1);
+}
 
+/**
+ * \param ptr pointer toward the file extension (dot included)
+ * \param fmt default file format.
+ *
+ * \return and index associated to the file format detected from the extension.
+ *
+ * Get the wanted file format from the mesh extension. If \a fmt is provided, it
+ * is used as default file format (\a ptr==NULL), otherwise, the default file
+ * format is the medit one.
+ *
+ */
+int MMG5_Get_format( char *ptr, int fmt ) {
+  /* Default is the Medit file format or a format given as input */
+  int defFmt = fmt;
+
+  if ( !ptr ) return defFmt;
+
+  if ( !strncmp ( ptr,".meshb",strlen(".meshb") ) ) {
+    return MMG5_FMT_MeditBinary;
+  }
+  else if ( !strncmp( ptr,".mesh",strlen(".mesh") ) ) {
+    return MMG5_FMT_MeditASCII;
+  }
+  else if ( !strncmp( ptr,".mshb",strlen(".mshb") ) ) {
+    return MMG5_FMT_GmshBinary;
+  }
+  else if ( !strncmp( ptr,".msh",strlen(".msh") ) ) {
+    return MMG5_FMT_GmshASCII;
+  }
+  else if ( !strncmp ( ptr,".pvtu",strlen(".pvtu") ) ) {
+    return MMG5_FMT_VtkPvtu;
+  }
+  else if ( !strncmp ( ptr,".vtu",strlen(".vtu") ) ) {
+    return MMG5_FMT_VtkVtu;
+  }
+  else if ( !strncmp ( ptr,".pvtp",strlen(".pvtu") ) ) {
+    return MMG5_FMT_VtkPvtp;
+  }
+  else if ( !strncmp ( ptr,".vtp",strlen(".vtp") ) ) {
+    return MMG5_FMT_VtkVtp;
+  }
+  else if ( !strncmp ( ptr,".vtk",strlen(".vtk") ) ) {
+    return MMG5_FMT_VtkVtk;
+  }
+
+  return defFmt;
+}
+
+/**
+ * \param fmt file format.
+ *
+ * \return The name of the file format in a string.
+ *
+ * Print the name of the file format associated to \a fmt.
+ *
+ */
+const char* MMG5_Get_formatName(enum MMG5_Format fmt)
+{
+  switch (fmt)
+  {
+  case MMG5_FMT_MeditASCII:
+    return "MMG5_FMT_MeditASCII";
+    break;
+  case MMG5_FMT_MeditBinary:
+    return "MMG5_FMT_MeditBinary";
+    break;
+  case MMG5_FMT_VtkVtu:
+    return "MMG5_FMT_VtkVtu";
+    break;
+  case MMG5_FMT_VtkVtp:
+    return "MMG5_FMT_VtkVtp";
+    break;
+  case MMG5_FMT_VtkPvtu:
+    return "MMG5_FMT_VtkPvtu";
+    break;
+  case MMG5_FMT_VtkPvtp:
+    return "MMG5_FMT_VtkPvtp";
+    break;
+  case MMG5_FMT_VtkVtk:
+    return "MMG5_FMT_VtkVtk";
+    break;
+  case MMG5_FMT_GmshASCII:
+    return "MMG5_FMT_GmshASCII";
+    break;
+  case MMG5_FMT_GmshBinary:
+    return "MMG5_FMT_GmshBinary";
+    break;
+  default:
+    return "MMG5_Unknown";
+  }
 }

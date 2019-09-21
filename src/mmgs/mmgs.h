@@ -52,10 +52,11 @@ extern "C" {
 
 
 /** Free allocated pointers of mesh and sol structure and return value val */
-#define MMGS_RETURN_AND_FREE(mesh,met,val)do                       \
+#define MMGS_RETURN_AND_FREE(mesh,met,ls,val)do                     \
   {                                                                 \
     if ( !MMGS_Free_all(MMG5_ARG_start,                             \
                         MMG5_ARG_ppMesh,&mesh,MMG5_ARG_ppMet,&met,  \
+                        MMG5_ARG_ppLs,&ls,                          \
                         MMG5_ARG_end) ) {                           \
       return MMG5_LOWFAILURE;                                       \
     }                                                               \
@@ -124,17 +125,17 @@ int  MMGS_Free_structures_var( va_list argptr );
 int  MMGS_Free_names_var( va_list argptr );
 
 int  MMGS_zaldy(MMG5_pMesh mesh);
-int  assignEdge(MMG5_pMesh mesh);
+int  MMGS_assignEdge(MMG5_pMesh mesh);
 int  MMGS_analys(MMG5_pMesh mesh);
 int  MMGS_inqua(MMG5_pMesh,MMG5_pSol);
 int  MMGS_outqua(MMG5_pMesh,MMG5_pSol);
 int  MMGS_hashTria(MMG5_pMesh );
 int  curvpo(MMG5_pMesh ,MMG5_pSol );
 int  MMG5_mmgs1(MMG5_pMesh ,MMG5_pSol );
-int  MMGS_mmgs2(MMG5_pMesh ,MMG5_pSol );
+int  MMGS_mmgs2(MMG5_pMesh ,MMG5_pSol, MMG5_pSol);
+int  MMGS_bdryUpdate(MMG5_pMesh mesh);
 int  boulet(MMG5_pMesh mesh,int start,int ip,int *list);
 int  boulechknm(MMG5_pMesh mesh,int start,int ip,int *list);
-int  boulep(MMG5_pMesh mesh,int start,int ip,int *list);
 int  bouletrid(MMG5_pMesh mesh,int start,int ip,int *il1,int *l1,int *il2,int *l2,int *ip0,int *ip1);
 int  MMGS_newPt(MMG5_pMesh mesh,double c[3],double n[3]);
 void MMGS_delPt(MMG5_pMesh mesh,int ip);

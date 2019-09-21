@@ -331,13 +331,27 @@ int MMG2D_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, int start, char istart) {
   return 1;
 }
 
-/* Snap values of sol very close to 0 to 0 exactly (to avoid very small triangles in cutting) */
-int MMG2D_snapval(MMG5_pMesh mesh, MMG5_pSol sol, double *tmp) {
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the level-set
+ *
+ * \return 1 if success, 0 if fail
+ *
+ * Snap values of sol very close to 0 to 0 exactly (to avoid very small
+ * triangles in cutting)
+ */
+int MMG2D_snapval(MMG5_pMesh mesh, MMG5_pSol sol) {
   MMG5_pTria       pt,pt1;
   MMG5_pPoint      p0;
-  double           v1,v2;
+  double           v1,v2,*tmp;
   int              k,kk,iel,ns,nc,ip,ip1,ip2,npl,nmn,ilist,list[MMG2D_LONMAX+2];
   char             i,j,j1,j2;
+
+  /* Allocate memory for tmp */
+  MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(double),"temporary table",
+                printf("  Exit program.\n");
+                return 0);
+  MMG5_SAFE_CALLOC(tmp,mesh->npmax+1,double,return 0);
 
   /* Reset point flags */
   for (k=1; k<=mesh->np; k++)
@@ -410,6 +424,8 @@ int MMG2D_snapval(MMG5_pMesh mesh, MMG5_pSol sol, double *tmp) {
         sol->m[ip] = -100.0*MMG5_EPS;
     }
   }
+
+  MMG5_DEL_MEM ( mesh, tmp );
 
   if ( (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) && ns+nc > 0 )
     fprintf(stdout,"     %8d points snapped, %d corrected\n",ns,nc);
@@ -802,16 +818,17 @@ int MMG2D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
 /**
  * \param mesh pointer toward the mesh
  * \param sol pointer toward the level-set
+ * \param met pointer toward a metric (non-mandatory)
  *
  * \return 1 if success, 0 otherwise
  *
  * Effective discretization of the 0 level set encoded in sol in the mesh
  *
  */
-int MMG2D_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol){
+int MMG2D_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol met){
   MMG5_pTria   pt;
   MMG5_pPoint  p0,p1;
-  MMG5_Hash   hash;
+  MMG5_Hash    hash;
   double       v0,v1,s,c[2];
   int          k,ip0,ip1,nb,np,nt,ns,refint,refext,vx[3];
   char         i,i0,i1,ier;
@@ -888,11 +905,19 @@ int MMG2D_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol){
 
       np = MMG2D_newPt(mesh,c,0);
       if ( !np ) {
-        fprintf(stderr,"\n  ## Error: %s: Insufficient memory; abort\n",
-          __func__);
-        return 0;
+       /* reallocation of point table */
+        MMG2D_POINT_REALLOC(mesh,met,np,mesh->gap,
+                            fprintf(stderr,"\n  ## Error: %s: unable to"
+                                    " allocate a new point.\n",__func__);
+                            MMG5_INCREASE_MEM_MESSAGE();
+                            return 0;,
+                            c,0);
       }
       sol->m[np] = 0.0;
+      /* If there is a metric in the mesh, interpolate it at the new point */
+      if ( met && met->m )
+        MMG2D_intmet(mesh,met,k,i,np,s);
+
       MMG5_hashEdge(mesh,&hash,ip0,ip1,np);
     }
   }
@@ -1012,8 +1037,7 @@ int MMG2D_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol){
 }
 
 /* Main function of the -ls mode */
-int MMG2D_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol) {
-  double *tmp;
+int MMG2D_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met) {
   int k;
 
   if ( abs(mesh->info.imprim) > 3 )
@@ -1023,14 +1047,8 @@ int MMG2D_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol) {
   for (k=1; k<= sol->np; k++)
     sol->m[k] -= mesh->info.ls;
 
-  /* Allocate memory for tmp */
-  MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(double),"temporary table",
-                printf("  Exit program.\n");
-                return 0);
-  MMG5_SAFE_CALLOC(tmp,mesh->npmax+1,double,return 0);
-
   /* Snap values of the level set function which are very close to 0 to 0 exactly */
-  if ( !MMG2D_snapval(mesh,sol,tmp) ) {
+  if ( !MMG2D_snapval(mesh,sol) ) {
     fprintf(stderr,"\n  ## Wrong input implicit function. Exit program.\n");
     return 0;
   }
@@ -1040,8 +1058,6 @@ int MMG2D_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol) {
     fprintf(stderr,"\n  ## Error in removing small parasitic components. Exit program.\n");
     return 0;
   }
-
-  MMG5_DEL_MEM(mesh,tmp);
 
   /* Creation of adjacency relations in the mesh */
   if ( !MMG2D_hashTria(mesh) ) {
@@ -1065,7 +1081,7 @@ int MMG2D_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol) {
   }
 
   /* Effective splitting of the crossed triangles */
-  if ( !MMG2D_cuttri_ls(mesh,sol) ) {
+  if ( !MMG2D_cuttri_ls(mesh,sol,met) ) {
     fprintf(stderr,"\n  ## Problem in cutting triangles. Exit program.\n");
     return 0;
   }
@@ -1092,8 +1108,7 @@ int MMG2D_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol) {
   MMG5_DEL_MEM(mesh,sol->m);
   sol->np = 0;
 
-  if ( mesh->info.mat )
-    MMG5_SAFE_FREE( mesh->info.mat );
+  MMG5_DEL_MEM( mesh,mesh->info.mat );
 
   return 1;
 }

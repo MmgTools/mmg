@@ -116,12 +116,12 @@ FORTRAN_NAME(MMG3D_DESTOCKOPTIONS,mmg3d_destockoptions,
  * See \ref MMG3D_mmg3dcheck function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_MMG3DCHECK,mmg3d_mmg3dcheck,
-             (MMG5_pMesh *mesh,MMG5_pSol *met,double *critmin, double *lmin,
+             (MMG5_pMesh *mesh,MMG5_pSol *met,MMG5_pSol *sol,double *critmin, double *lmin,
               double *lmax, int *eltab,int *metRidTyp,int *retval),
-             (mesh,met,critmin,lmin,lmax,eltab,metRidTyp,retval)) {
+             (mesh,met,sol,critmin,lmin,lmax,eltab,metRidTyp,retval)) {
   char tmp = (char)(*metRidTyp);
 
-  *retval = MMG3D_mmg3dcheck(*mesh,*met,*critmin,*lmin,*lmax,eltab,tmp);
+  *retval = MMG3D_mmg3dcheck(*mesh,*met,*sol,*critmin,*lmin,*lmax,eltab,tmp);
 
   return;
 }
@@ -198,5 +198,16 @@ FORTRAN_NAME(MMG3D_SET_CONSTANTSIZE,mmg3d_set_constantsize,
              (MMG5_pMesh *mesh,MMG5_pSol *met,int *retval),
              (mesh,met,retval)) {
   *retval =  MMG3D_Set_constantSize(*mesh,*met);
+  return;
+}
+
+/**
+ * See \ref MMG3D_Compute_eigenv function in \ref mmg3d/libmmg3d.h file.
+ */
+FORTRAN_NAME(MMG3D_COMPUTE_EIGENV,mmg3d_compute_eigenv,
+             (double m[6],double lambda[3],double vp[3][3],int *retval),
+             (m,lambda,vp,retval)) {
+
+  *retval = MMG3D_Compute_eigenv(m,lambda,vp);
   return;
 }

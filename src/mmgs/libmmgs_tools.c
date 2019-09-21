@@ -49,7 +49,7 @@ void MMGS_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
     movridpt         = movridpt_iso;
   }
   else {
-    if ( !met->m ) {
+    if ( (!met->m) && (!mesh->info.optim) && mesh->info.hsiz<=0. ) {
       MMG5_calelt     = MMG5_caltri_iso;
       MMG5_lenSurfEdg = MMG5_lenSurfEdg_iso;
     }
@@ -73,6 +73,7 @@ int MMGS_usage(char *prog) {
   fprintf(stdout,"-A           enable anisotropy (without metric file).\n");
   fprintf(stdout,"-keep-ref    preserve initial domain references in level-set mode.\n");
   fprintf(stdout,"-nreg        normal regul.\n");
+  fprintf(stdout,"-optim       mesh optimization\n");
 #ifdef USE_SCOTCH
   fprintf(stdout,"-rn [n]      Turn on or off the renumbering using SCOTCH [0/1] \n");
 #endif
@@ -94,7 +95,10 @@ int MMGS_defaultValues(MMG5_pMesh mesh) {
   return 1;
 }
 
-int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
+// In ls mode : metric must be provided using -met option (-sol or default is the ls).
+// In adp mode : -sol or -met or default allow to store the metric.
+int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
+  MMG5_pSol tmp = NULL;
   int    i;
   char   namein[128];
 
@@ -206,6 +210,23 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
         }
         break;
       case 'm':
+        if ( !strcmp(argv[i],"-met") ) {
+          if ( !met ) {
+            fprintf(stderr,"No metric structure allocated for %c%c%c option\n",
+                    argv[i-1][1],argv[i-1][2],argv[i-1][3]);
+            return 0;
+          }
+          if ( ++i < argc && isascii(argv[i][0]) && argv[i][0]!='-' ) {
+            if ( !MMGS_Set_inputSolName(mesh,met,argv[i]) )
+              return 0;
+          }
+          else {
+            fprintf(stderr,"Missing filname for %c%c%c\n",argv[i-1][1],argv[i-1][2],argv[i-1][3]);
+            MMGS_usage(argv[0]);
+            return 0;
+          }
+        }
+        else if  (!strcmp(argv[i],"-m") ) {
         if ( ++i < argc && isdigit(argv[i][0]) ) {
           if ( !MMGS_Set_iparameter(mesh,met,MMGS_IPARAM_mem,atoi(argv[i])) )
             return 0;
@@ -214,6 +235,7 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
           fprintf(stderr,"Missing argument option %c\n",argv[i-1][1]);
           MMGS_usage(argv[0]);
           return 0;
+        }
         }
         break;
       case 'n':
@@ -250,6 +272,10 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
             return 0;
           }
         }
+        else if( !strcmp(argv[i],"-optim") ) {
+          if ( !MMGS_Set_iparameter(mesh,met,MMGS_IPARAM_optim,1) )
+            return 0;
+        }
         else {
           fprintf(stderr,"Unrecognized option %s\n",argv[i]);
           MMGS_usage(argv[0]);
@@ -280,8 +306,11 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
 #endif
       case 's':
         if ( !strcmp(argv[i],"-sol") ) {
+          /* For retrocompatibility, store the metric if no sol structure available */
+          tmp = sol ? sol : met;
+          assert(tmp);
           if ( ++i < argc && isascii(argv[i][0]) && argv[i][0]!='-' ) {
-            if ( !MMGS_Set_inputSolName(mesh,met,argv[i]) )
+            if ( !MMGS_Set_inputSolName(mesh,tmp,argv[i]) )
               return 0;
           }
           else {
@@ -356,9 +385,17 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met) {
       return 0;
   }
 
-  if ( met->namein == NULL ) {
-    if ( !MMGS_Set_inputSolName(mesh,met,"") )
+  /* adp mode: if the metric name has been stored in sol, move it in met */
+  if ( met->namein==NULL && sol && sol->namein && !(mesh->info.iso || mesh->info.lag>=0) ) {
+    if ( !MMGS_Set_inputSolName(mesh,met,sol->namein) )
       return 0;
+    MMG5_DEL_MEM(mesh,sol->namein);
+  }
+
+  /* default : store solution name in iso mode, metric name otherwise */
+  tmp = ( mesh->info.iso || mesh->info.lag >=0 ) ? sol : met;
+  if ( tmp->namein == NULL ) {
+    if ( !MMGS_Set_inputSolName(mesh,tmp,"") ) { return 0; }
   }
   if ( met->nameout == NULL ) {
     if ( !MMGS_Set_outputSolName(mesh,met,"") )
@@ -474,6 +511,133 @@ int MMGS_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMGS
   return nbpoi;
 }
 
+int MMGS_doSol(MMG5_pMesh mesh,MMG5_pSol met) {
+    MMG5_pTria   ptt;
+    MMG5_pPoint  p1,p2;
+    double       ux,uy,uz,dd;
+    int          i,k,iadr,ipa,ipb,type;
+    int          *mark;
+
+    MMG5_SAFE_CALLOC(mark,mesh->np+1,int,return 0);
+
+    /* Memory alloc */
+    if ( met->size==1 ) type=1;
+    else if ( met->size==6 ) type = 3;
+    else {
+      fprintf(stderr,"\n  ## Error: %s: unexpected size of metric: %d.\n",
+              __func__,met->size);
+      return 0;
+    }
+
+    if ( !MMGS_Set_solSize(mesh,met,MMG5_Vertex,mesh->np,type) )
+      return 0;
+
+    /* edges */
+    dd = 0.;
+    for (k=1; k<=mesh->nt; k++) {
+        ptt = &mesh->tria[k];
+        if ( !MG_EOK(ptt) )  continue;
+
+        if ( met->size == 1 ) {
+          for (i=0; i<3; i++) {
+            ipa = ptt->v[i];
+            ipb = ptt->v[MMG5_inxt2[i]];
+            p1  = &mesh->point[ipa];
+            p2  = &mesh->point[ipb];
+
+            ux  = p1->c[0] - p2->c[0];
+            uy  = p1->c[1] - p2->c[1];
+            uz  = p1->c[2] - p2->c[2];
+            dd  = sqrt(ux*ux + uy*uy + uz*uz);
+
+            met->m[ipa] += dd;
+            mark[ipa]++;
+            met->m[ipb] += dd;
+            mark[ipb]++;
+          }
+        }
+        else if ( met->size == 6 ) {
+          for (i=0; i<3; i++) {
+            ipa = ptt->v[i];
+            ipb = ptt->v[MMG5_inxt2[i]];
+            p1  = &mesh->point[ipa];
+            p2  = &mesh->point[ipb];
+
+            ux  = p1->c[0] - p2->c[0];
+            uy  = p1->c[1] - p2->c[1];
+            uz  = p1->c[2] - p2->c[2];
+            dd  = sqrt(ux*ux + uy*uy + uz*uz);
+
+            iadr = 6*ipa;
+            met->m[iadr]   += dd;
+            mark[ipa]++;
+
+            iadr = 6*ipb;
+            met->m[iadr] += dd;
+            mark[ipb]++;
+          }
+        }
+        else {
+          MMG5_SAFE_FREE(mark);
+          return 0;
+        }
+    }
+
+    /* if hmax is not specified, compute it from the metric */
+    if ( mesh->info.hmax < 0. ) {
+      if ( met->size == 1 ) {
+        dd = 0.;
+        for (k=1; k<=mesh->np; k++) {
+          if ( !mark[k] ) continue;
+          dd = MG_MAX(dd,met->m[k]);
+        }
+        assert ( dd );
+      }
+      else if ( met->size == 6 ) {
+        dd = FLT_MAX;
+        for (k=1; k<=mesh->np; k++) {
+          if ( !mark[k] ) continue;
+          iadr = 6*k;
+          dd = MG_MIN(dd,met->m[iadr]);
+        }
+        assert ( dd < FLT_MAX );
+        dd = 1./sqrt(dd);
+      }
+      mesh->info.hmax = 10.*dd;
+    }
+
+    /* vertex size */
+    if ( met->size == 1 ) {
+      for (k=1; k<=mesh->np; k++) {
+        if ( !mark[k] ) {
+          met->m[k] = mesh->info.hmax;
+          continue;
+        }
+        else
+          met->m[k] = met->m[k] / (double)mark[k];
+      }
+    }
+    else if ( met->size == 6 ) {
+      for (k=1; k<=mesh->np; k++) {
+        iadr = 6*k;
+        if ( !mark[k] ) {
+          met->m[iadr]   = 1./(mesh->info.hmax*mesh->info.hmax);
+          met->m[iadr+3] = met->m[iadr];
+          met->m[iadr+5] = met->m[iadr];
+          continue;
+        }
+        else {
+          met->m[iadr]   = (double)mark[k]*(double)mark[k]/(met->m[iadr]*met->m[iadr]);
+          met->m[iadr+3] = met->m[iadr];
+          met->m[iadr+5] = met->m[iadr];
+        }
+      }
+    }
+
+    MMG5_SAFE_FREE(mark);
+    return 1;
+}
+
 int MMGS_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met) {
   double      hsiz;
   int         type;
@@ -497,4 +661,10 @@ int MMGS_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_Set_constantSize(mesh,met,hsiz);
 
   return 1;
+}
+
+int MMGS_Compute_eigenv(double m[6],double lambda[3],double vp[3][3]) {
+
+  return  MMG5_eigenv(1,m,lambda,vp);
+
 }

@@ -73,10 +73,11 @@ extern "C" {
 #define MMG2D_NEMAX   100000
 
 /** Free allocated pointers of mesh and sol structure and return value val */
-#define MMG2D_RETURN_AND_FREE(mesh,met,disp,val)do                 \
+#define MMG2D_RETURN_AND_FREE(mesh,met,ls,disp,val)do               \
   {                                                                 \
     if ( !MMG2D_Free_all(MMG5_ARG_start,                            \
                          MMG5_ARG_ppMesh,&mesh,MMG5_ARG_ppMet,&met, \
+                         MMG5_ARG_ppLs,&ls,MMG5_ARG_ppDisp,&disp,   \
                          MMG5_ARG_end) ) {                          \
       return MMG5_LOWFAILURE;                                       \
     }                                                               \
@@ -204,9 +205,9 @@ size_t MMG5_memSize(void);
 int MMG2D_memOption(MMG5_pMesh mesh);
 int  MMG2D_setMeshSize_alloc(MMG5_pMesh);
 
-int MMG2D_scaleMesh(MMG5_pMesh ,MMG5_pSol );
-int MMG2D_unscaleMesh(MMG5_pMesh ,MMG5_pSol );
-int MMG2D_pack(MMG5_pMesh ,MMG5_pSol );
+int MMG2D_scaleMesh(MMG5_pMesh ,MMG5_pSol, MMG5_pSol );
+int MMG2D_unscaleMesh(MMG5_pMesh ,MMG5_pSol, MMG5_pSol );
+int MMG2D_pack(MMG5_pMesh ,MMG5_pSol, MMG5_pSol );
 int MMG2D_outqua(MMG5_pMesh ,MMG5_pSol );
 //int MMG2D_mmg2d0(MMG5_pMesh ,MMG5_pSol );
 int MMG2D_mmg2d1(MMG5_pMesh ,MMG5_pSol );
@@ -223,11 +224,12 @@ int  MMG2D_Free_names_var( va_list argptr );
 void MMG2D_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met);
 
 int MMG2D_mmg2d2(MMG5_pMesh , MMG5_pSol);
-int MMG2D_mmg2d6(MMG5_pMesh ,MMG5_pSol );
-int MMG2D_mmg2d9(MMG5_pMesh ,MMG5_pSol ,MMG5_pSol );
+int MMG2D_mmg2d6(MMG5_pMesh ,MMG5_pSol,MMG5_pSol );
+int MMG2D_mmg2d9(MMG5_pMesh ,MMG5_pSol ,MMG5_pSol,int** );
 //int MMG2D_cendel(MMG5_pMesh ,MMG5_pSol ,double ,int );
 int MMG2D_swapdelone(MMG5_pMesh ,MMG5_pSol ,int ,char ,double ,int *);
 int MMG5_mmg2dChkmsh(MMG5_pMesh , int, int );
+int MMG2D_2dMeshCheck(MMG5_pMesh mesh);
 int MMG2D_boulep(MMG5_pMesh , int , int , int * );
 //int MMG2D_markBdry(MMG5_pMesh );
 int MMG2D_prilen(MMG5_pMesh ,MMG5_pSol );
@@ -269,11 +271,11 @@ int MMG2D_getIniRef(MMG5_pMesh ,int );
 int MMG2D_isSplit(MMG5_pMesh ,int ,int *,int *);
 int MMG2D_parsop(MMG5_pMesh ,MMG5_pSol );
 int MMG2D_ismaniball(MMG5_pMesh , MMG5_pSol , int , char );
-int MMG2D_snapval(MMG5_pMesh ,MMG5_pSol ,double *);
+int MMG2D_snapval(MMG5_pMesh ,MMG5_pSol);
 int MMG2D_chkmanimesh(MMG5_pMesh );
 int MMG2D_hashTria(MMG5_pMesh );
 int MMG2D_resetRef(MMG5_pMesh );
-int MMG2D_cuttri_ls(MMG5_pMesh ,MMG5_pSol );
+int MMG2D_cuttri_ls(MMG5_pMesh ,MMG5_pSol,MMG5_pSol );
 int MMG2D_rmc(MMG5_pMesh ,MMG5_pSol );
 int MMG2D_setref_ls(MMG5_pMesh ,MMG5_pSol );
 int MMG2D_split1_sim(MMG5_pMesh ,MMG5_pSol ,int ,int vx[3]);

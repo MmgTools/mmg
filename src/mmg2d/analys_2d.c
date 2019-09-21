@@ -551,6 +551,14 @@ int MMG2D_regnor(MMG5_pMesh mesh) {
         ny += p2->n[1];
       }
 
+      /* Average normal normalization */
+      dd  = nx*nx + ny*ny;
+      if ( dd > MMG5_EPSD2 ) {
+        dd = 1.0 / sqrt(dd);
+        nx *= dd;
+        ny *= dd;
+      }
+
       /* Laplacian operation */
       tmp[2*(k-1)+1] = ppt->n[0] + lm1 * (nx - ppt->n[0]);
       tmp[2*(k-1)+2] = ppt->n[1] + lm1 * (ny - ppt->n[1]);
@@ -638,6 +646,14 @@ int MMG2D_regnor(MMG5_pMesh mesh) {
         ny += tmp[2*(ip2-1)+2];
       }
 
+      /* Average normal normalization */
+      dd  = nx*nx + ny*ny;
+      if ( dd > MMG5_EPSD2 ) {
+        dd = 1.0 / sqrt(dd);
+        nx *= dd;
+        ny *= dd;
+      }
+
       /* Anti Laplacian operation */
       n[0] = tmp[2*(k-1)+1] - lm2 * (nx - tmp[2*(k-1)+1]);
       n[1] = tmp[2*(k-1)+2] - lm2 * (ny - tmp[2*(k-1)+2]);
@@ -664,10 +680,14 @@ int MMG2D_regnor(MMG5_pMesh mesh) {
 
     if ( it == 0 ) res0 = res;
     if ( res0 > MMG5_EPSD ) res = res / res0;
+
+    if ( mesh->info.imprim < -1 || mesh->info.ddebug ) {
+      fprintf(stdout,"     iter %5d  res %.3E",it,res);
+      fflush(stdout);
+    }
   }
   while ( ++it < maxit && res > MMG5_EPS );
 
-  if ( mesh->info.imprim < -1 || mesh->info.ddebug )  fprintf(stdout,"\n");
 
   if ( abs(mesh->info.imprim) > 4 )
     fprintf(stdout,"     %d normals regularized: %.3e\n",nn,res);
@@ -709,10 +729,10 @@ int MMG2D_analys(MMG5_pMesh mesh) {
   }
 
   /* Regularize normal vector field with a Laplacian / anti-laplacian smoothing */
-  /*if ( !MMG2D_regnor(mesh) ) {
+  if ( mesh->info.nreg && !MMG2D_regnor(mesh) ) {
       fprintf(stderr,"\n  ## Problem in regularizing normal vectors. Exit program.\n");
       return 0;
-  }*/
+  }
 
   return 1;
 }

@@ -276,7 +276,7 @@ inline int MMG5_rotmatrix(double n[3],double r[3][3]) {
  *
  */
 int MMG5_invmat(double *m,double *mi) {
-  double  aa,bb,cc,det,vmin,vmax,maxx;
+  double  aa,bb,cc,det,vmax,maxx;
   int     k;
 
   /* check diagonal matrices */
@@ -294,13 +294,13 @@ int MMG5_invmat(double *m,double *mi) {
   }
 
   /* check ill-conditionned matrix */
-  vmin = vmax = fabs(m[0]);
+  vmax = fabs(m[0]);
   for (k=1; k<6; k++) {
     maxx = fabs(m[k]);
-    if ( maxx < vmin )  vmin = maxx;
-    else if ( maxx > vmax )  vmax = maxx;
+    if ( maxx > vmax )  vmax = maxx;
   }
   if ( vmax == 0.0 )  return 0;
+
   /* compute sub-dets */
   aa  = m[3]*m[5] - m[4]*m[4];
   bb  = m[4]*m[2] - m[1]*m[5];
@@ -327,15 +327,14 @@ int MMG5_invmat(double *m,double *mi) {
  *
  */
 int MMG5_invmatg(double m[9],double mi[9]) {
-  double  aa,bb,cc,det,vmin,vmax,maxx;
+  double  aa,bb,cc,det,vmax,maxx;
   int     k;
 
   /* check ill-conditionned matrix */
-  vmin = vmax = fabs(m[0]);
+  vmax = fabs(m[0]);
   for (k=1; k<9; k++) {
     maxx = fabs(m[k]);
-    if ( maxx < vmin )  vmin = maxx;
-    else if ( maxx > vmax )  vmax = maxx;
+    if ( maxx > vmax )  vmax = maxx;
   }
   if ( vmax == 0.0 )  return 0;
 
@@ -368,16 +367,15 @@ int MMG5_invmatg(double m[9],double mi[9]) {
  *
  */
 int MMG5_invmat33(double m[3][3],double mi[3][3]) {
-  double  aa,bb,cc,det,vmin,vmax,maxx;
+  double  aa,bb,cc,det,vmax,maxx;
   int     k,l;
 
   /* check ill-conditionned matrix */
-  vmin = vmax = fabs(m[0][0]);
+  vmax = fabs(m[0][0]);
   for (k=0; k<3; k++) {
     for (l=0; l<3; l++) {
       maxx = fabs(m[k][l]);
-      if ( maxx < vmin )  vmin = maxx;
-      else if ( maxx > vmax )  vmax = maxx;
+      if ( maxx > vmax )  vmax = maxx;
     }
   }
   if ( vmax == 0.0 )  return 0;
@@ -466,19 +464,20 @@ inline int MMG5_sys33sym(double a[6], double b[3], double r[3]){
   double ia[6],as[6],det,m;
   int    i;
 
-  /* Multiply matrix by a constant coefficient for stability purpose (because of the scaling) */
+  /* If possible : multiply matrix by a constant coefficient for stability
+     purpose */
   m = fabs(a[0]);
-  for(i=1;i<6;i++){
-    if(fabs(a[i])<m && fabs(a[i]) > 0.){
-      m = fabs(a[i]);
-    }
-  }
+  m = MG_MIN ( fabs(a[3]), m );
+  m = MG_MIN ( fabs(a[5]), m );
 
-  if(m < MMG5_EPSD) {
-    return 0;
+  if ( m >= MMG5_EPSD ) {
+    /* Normalization */
+    m = 1.0/m;
   }
-
-  m = 1.0/m;
+  else {
+    /* Unable to normalized */
+    m = 1.;
+  }
 
   for(i=0;i<6;i++){
     as[i] = a[i]*m;
@@ -503,9 +502,9 @@ inline int MMG5_sys33sym(double a[6], double b[3], double r[3]){
   r[1] = ia[1]*b[0] + ia[3]*b[1] + ia[4]*b[2];
   r[2] = ia[2]*b[0] + ia[4]*b[1] + ia[5]*b[2];
 
-  r[0]*=(det*m);
-  r[1]*=(det*m);
-  r[2]*=(det*m);
+  r[0] *= (det*m);
+  r[1] *= (det*m);
+  r[2] *= (det*m);
 
   return 1;
 }

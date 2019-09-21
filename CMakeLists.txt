@@ -46,8 +46,8 @@ MARK_AS_ADVANCED ( CI_DIR )
 ###############################################################################
 SET (CMAKE_RELEASE_VERSION_MAJOR "5" )
 SET (CMAKE_RELEASE_VERSION_MINOR "4" )
-SET (CMAKE_RELEASE_VERSION_PATCH "0" )
-SET (CMAKE_RELEASE_DATE "Feb. 13, 2019" )
+SET (CMAKE_RELEASE_VERSION_PATCH "2" )
+SET (CMAKE_RELEASE_DATE "Mar. 20, 2019" )
 
 SET (CMAKE_RELEASE_VERSION
   "${CMAKE_RELEASE_VERSION_MAJOR}.${CMAKE_RELEASE_VERSION_MINOR}.${CMAKE_RELEASE_VERSION_PATCH}")
@@ -215,6 +215,13 @@ ENDIF ( )
 
 ############################################################################
 #####
+#####         VTK (to parse (p)vtp/(p)vtu files )
+#####
+############################################################################
+FIND_PACKAGE(VTK)
+
+############################################################################
+#####
 ##### RPATH for MacOSX
 #####
 ############################################################################
@@ -313,11 +320,11 @@ SET(ELAS_DIR "" CACHE PATH "Installation directory for Elas")
 INCLUDE(cmake/modules/FindElas.cmake)
 CMAKE_DEPENDENT_OPTION (
   USE_ELAS "Use the Elas library for lagrangian motion option" ON
-  "BUILD_MMG3D;ELAS_FOUND" OFF)
+  "ELAS_FOUND" OFF)
 
 # add Scotch library?
 CMAKE_DEPENDENT_OPTION ( USE_SCOTCH "Use SCOTCH TOOL for renumbering" ON
-  "SCOTCH_FOUND;BUILD_MMGS3D" OFF)
+  "SCOTCH_FOUND;BUILD_MMG3D" OFF)
 
 IF( USE_SCOTCH )
   SET(CMAKE_C_FLAGS "-DUSE_SCOTCH ${CMAKE_C_FLAGS}")
@@ -327,6 +334,17 @@ IF( USE_SCOTCH )
   SET( LIBRARIES ${SCOTCH_LIBRARIES} ${LIBRARIES})
 ENDIF()
 
+# add the VTK library ?
+CMAKE_DEPENDENT_OPTION ( USE_VTK "Use VTK I/O" ON
+  "VTK_FOUND" OFF)
+
+IF ( USE_VTK )
+  ADD_DEFINITIONS(-DUSE_VTK)
+
+  MESSAGE ( STATUS "Compilation with VTK: add vtp and vtu I/O." )
+  INCLUDE ( ${VTK_USE_FILE} )
+  SET( LIBRARIES ${VTK_LIBRARIES} ${LIBRARIES} )
+ENDIF ( )
 
 #---------------------------- mmg library gathering mmg2d, mmgs and mmg3d libs
 CMAKE_DEPENDENT_OPTION ( LIBMMG_STATIC

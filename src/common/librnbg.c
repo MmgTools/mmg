@@ -38,7 +38,7 @@
 #include "librnbg.h"
 
 /**
- * \param graf the input graph structure.
+ * \param graf pointer toward the input graph structure.
  * \param vertNbr the number of vertices.
  * \param boxVertNbr the number of vertices of each box.
  * \param permVrtTab the new numbering.
@@ -49,7 +49,7 @@
  * k-partitioning and assuming that baseval of the graph is 1.
  *
  **/
-int MMG5_kPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr,
+int MMG5_kPartBoxCompute(SCOTCH_Graph *graf, int vertNbr, int boxVertNbr,
                           SCOTCH_Num *permVrtTab,MMG5_pMesh mesh) {
   int boxNbr, vertIdx;
   SCOTCH_Num logMaxVal, SupMaxVal, InfMaxVal, maxVal;
@@ -80,7 +80,7 @@ int MMG5_kPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr,
   MMG5_SAFE_CALLOC(sortPartTb,2*vertNbr,SCOTCH_Num,return 0);
 
   /* Partionning the graph */
-  if ( 0!=SCOTCH_graphMap(&graf, &arch, &strat, sortPartTb) ) {
+  if ( 0!=SCOTCH_graphMap(graf, &arch, &strat, sortPartTb) ) {
     perror("scotch_graphMap");
     MMG5_DEL_MEM(mesh,sortPartTb);
     return 0;

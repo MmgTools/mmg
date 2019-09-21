@@ -373,6 +373,7 @@ int MMG5_mmg3dBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,MMG5_pBezier pb,char ori) {
           nt[1] *= -1.0;
           nt[2] *= -1.0;
         }
+        /* Choose the closest normal to our surface to ensure smoothness */
         ps  = pxp->n1[0]*nt[0] + pxp->n1[1]*nt[1] + pxp->n1[2]*nt[2];
         ps2 = pxp->n2[0]*nt[0] + pxp->n2[1]*nt[1] + pxp->n2[2]*nt[2];
         if ( fabs(ps) > fabs(ps2) )
@@ -380,6 +381,14 @@ int MMG5_mmg3dBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,MMG5_pBezier pb,char ori) {
         else
           memcpy(&pb->n[i],pxp->n2,3*sizeof(double));
         memcpy(&pb->t[i],p[i]->n,3*sizeof(double));
+
+        /* Normal reorientation if needed */
+        ps  = pb->n[i][0]*nt[0] + pb->n[i][1]*nt[1] + pb->n[i][2]*nt[2];
+        if ( ps < 0.0 ) {
+          pb->n[i][0] *= -1.0;
+          pb->n[i][1] *= -1.0;
+          pb->n[i][2] *= -1.0;
+        }
       }
       else
         memcpy(&pb->n[i],pxp->n1,3*sizeof(double));
@@ -570,6 +579,7 @@ int MMG3D_bezierInt(MMG5_pBezier pb,double uv[2],double o[3],double no[3],double
     /* linear interpolation, not used here
        no[i] = pb->n[0][i]*w + pb->n[1][i]*u + pb->n[2][i]*v; */
   }
+  assert ( no[0]*no[0] + no[1]*no[1] + no[2]*no[2] >0 );
 
   /* tangent */
   if ( w < MMG5_EPSD2 ) {

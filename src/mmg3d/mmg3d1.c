@@ -1340,7 +1340,7 @@ split:
  */
 static inline int
 MMG3D_storeGeom(MMG5_pPoint ppt, MMG5_pxPoint pxp, double no[3]) {
-  double dd;
+  double dd,to[3];
 
   dd = no[0]*pxp->n1[0]+no[1]*pxp->n1[1]+no[2]*pxp->n1[2];
   if ( dd > 1.0-MMG5_EPS ) return 0;
@@ -1348,17 +1348,29 @@ MMG3D_storeGeom(MMG5_pPoint ppt, MMG5_pxPoint pxp, double no[3]) {
   memcpy(pxp->n2,no,3*sizeof(double));
 
   /* a computation of the tangent with respect to these two normals is possible */
-  ppt->n[0] = pxp->n1[1]*pxp->n2[2] - pxp->n1[2]*pxp->n2[1];
-  ppt->n[1] = pxp->n1[2]*pxp->n2[0] - pxp->n1[0]*pxp->n2[2];
-  ppt->n[2] = pxp->n1[0]*pxp->n2[1] - pxp->n1[1]*pxp->n2[0];
-  dd = ppt->n[0]*ppt->n[0] + ppt->n[1]*ppt->n[1] + ppt->n[2]*ppt->n[2];
+  to[0] = pxp->n1[1]*pxp->n2[2] - pxp->n1[2]*pxp->n2[1];
+  to[1] = pxp->n1[2]*pxp->n2[0] - pxp->n1[0]*pxp->n2[2];
+  to[2] = pxp->n1[0]*pxp->n2[1] - pxp->n1[1]*pxp->n2[0];
+  dd = to[0]*to[0] + to[1]*to[1] + to[2]*to[2];
   if ( dd > MMG5_EPSD2 ) {
     dd = 1.0 / sqrt(dd);
-    ppt->n[0] *= dd;
-    ppt->n[1] *= dd;
-    ppt->n[2] *= dd;
+    to[0] *= dd;
+    to[1] *= dd;
+    to[2] *= dd;
+    memcpy(ppt->n,to,3*sizeof(double));
   }
-  assert ( dd>MMG5_EPSD2 );
+  else {
+    /* Detect opposite normals... */
+    if ( to[0]*to[0]+to[1]*to[1]+to[2]*to[2] > MMG5_EPSD2 ) {
+      /* Non opposite normals: fail in debug mode */
+      assert ( dd > MMG5_EPSD2 );
+    }
+    else {
+      /* Opposite normals: unable to compute the tangent, check if we have
+       * already stored a tangent, fail otherwise */
+      assert ( ppt->n[0]*ppt->n[0]+ppt->n[1]*ppt->n[1]+ppt->n[2]*ppt->n[2] > MMG5_EPSD2 );
+    }
+  }
 
   return 1;
 }
@@ -1758,7 +1770,7 @@ static int MMG3D_anatets_ani(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
 static int
 MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   MMG5_pTetra   pt;
-  MMG5_pPoint   ppt,p1,p2;
+  MMG5_pPoint   ppt;
   MMG5_Tria     ptt,ptt2;
   MMG5_xTetra   *pxt;
   MMG5_xPoint   *pxp;
@@ -2027,44 +2039,18 @@ MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           if ( vx[ia] > 0 )  mesh->point[vx[ia]].flag++;
       }
       else {
-        if ( it < 20 ) {
-          for (ia=0,i=0; i<3; i++) {
-            for (j=i+1; j<4; j++,ia++) {
-              if ( vx[ia] > 0 ) {
-                p1 = &mesh->point[pt->v[MMG5_iare[ia][0]]];
-                p2 = &mesh->point[pt->v[MMG5_iare[ia][1]]];
-                ppt = &mesh->point[vx[ia]];
-                ppt->c[0] = 0.5 * (p1->c[0] + p2->c[0]);
-                ppt->c[1] = 0.5 * (p1->c[1] + p2->c[1]);
-                ppt->c[2] = 0.5 * (p1->c[2] + p2->c[2]);
-              }
-            }
-          }
-        }
-        else {
-          if ( it==20 && (mesh->info.ddebug || mesh->info.imprim > 5) ) {
-            if ( !mmgWarn2 ) {
+        for (ia=0; ia<6; ++ia ) {
+          if ( vx[ia] > 0 ) {
+            MMG5_hashPop(&hash,pt->v[MMG5_iare[ia][0]],pt->v[MMG5_iare[ia][1]]);
+            MMG3D_delPt(mesh,vx[ia]);
+
+            if ( (mesh->info.ddebug || mesh->info.imprim > 5) && !mmgWarn2 ) {
               fprintf(stderr,"\n  ## Warning: %s: surfacic pattern: unable to find"
-                      " a valid split for at least 1 point. Point(s) deletion.",
+                      " a valid split for at least 1 point. Point(s) deletion.\n",
                       __func__ );
               mmgWarn2 = 1;
             }
-          }
-          for (ia=0,i=0; i<3; i++) {
-            for (j=i+1; j<4; j++,ia++) {
-              if ( vx[ia] > 0 ) {
-                if ( !MMG5_hashUpdate(&hash,pt->v[MMG5_iare[ia][0]],
-                                       pt->v[MMG5_iare[ia][1]],-1) ) {
-                  fprintf(stderr,"\n  ## Error: %s: unable to delete point"
-                          " idx along edge %d %d.\n",
-                          __func__,MMG3D_indPt(mesh,pt->v[MMG5_iare[ia][0]]),
-                          MMG3D_indPt(mesh,pt->v[MMG5_iare[ia][1]]));
-                  MMG5_DEL_MEM(mesh,hash.item);
-                  return -1;
-                }
-                MMG3D_delPt(mesh,vx[ia]);
-              }
-            }
+
           }
         }
       }
