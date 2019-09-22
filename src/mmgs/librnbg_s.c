@@ -66,6 +66,8 @@ void MMG5_swapTri(MMG5_pTria trias, int* perm, int ind1, int ind2) {
  * \param boxVertNbr number of vertices by box.
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward he solution structure
+ * \param permNodGlob array to store the global permutation of nodes (if provided)
+ *
  * \return 0 if the renumbering fail and we can't rebuild tetrahedra hashtable,
  * 1 if the renumbering fail but we can rebuild tetrahedra hashtable or
  * if the renumbering success.
@@ -73,7 +75,8 @@ void MMG5_swapTri(MMG5_pTria trias, int* perm, int ind1, int ind2) {
  * Modifies the node indicies to prevent from cache missing.
  *
  */
-int MMG5_mmgsRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
+int MMG5_mmgsRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol,
+                         int* permNodGlob) {
   MMG5_pPoint ppt;
   MMG5_pTria ptri;
   SCOTCH_Num edgeNbr;
@@ -285,6 +288,13 @@ int MMG5_mmgsRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol) {
   for( triaIdx = 1; triaIdx < ntreal + 1; triaIdx++) {
     for(j = 0 ; j < 3 ; j++) {
       mesh->tria[triaIdx].v[j] = permNodTab[mesh->tria[triaIdx].v[j]];
+    }
+  }
+
+  /* If needed, store update the global permutation for point array */
+  if ( permNodGlob ) {
+    for ( k=1; k<=mesh->np; ++k ) {
+      permNodGlob[k] = permNodTab[permNodGlob[k]];
     }
   }
 

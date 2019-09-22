@@ -466,7 +466,7 @@ int MMGS_mmgsls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
     fprintf(stdout,"\n  -- PHASE 3 : MESH IMPROVEMENT\n");
   }
 
-  if ( !MMG5_mmgs1(mesh,met) ) {
+  if ( !MMG5_mmgs1(mesh,met,NULL) ) {
     if ( mettofree ) { MMG5_DEL_MEM(mesh,met->m);MMG5_SAFE_FREE (met); }
     if ( (!mesh->adja) && !MMGS_hashTria(mesh) ) {
       fprintf(stderr,"\n  ## Hashing problem. Invalid mesh.\n");
@@ -655,7 +655,7 @@ int MMGS_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
       fprintf(stdout,"\n  -- PHASE 2 : %s MESHING\n",met->size < 6 ? "ISOTROPIC" : "ANISOTROPIC");
   }
 
-  if ( !MMG5_mmgs1(mesh,met) ) {
+  if ( !MMG5_mmgs1(mesh,met,NULL) ) {
     if ( (!mesh->adja) && !MMGS_hashTria(mesh) ) {
       fprintf(stderr,"\n  ## Hashing problem. Invalid mesh.\n");
         _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);

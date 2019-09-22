@@ -46,7 +46,7 @@ int    (*MMG5_indElt)(MMG5_pMesh mesh,int kel);
 int    (*MMG5_indPt)(MMG5_pMesh mesh,int kp);
 
 #ifdef USE_SCOTCH
-int    (*MMG5_renumbering)(int vertBoxNbr, MMG5_pMesh mesh, MMG5_pSol sol);
+int    (*MMG5_renumbering)(int vertBoxNbr, MMG5_pMesh mesh, MMG5_pSol sol,int*);
 #endif
 
 /**

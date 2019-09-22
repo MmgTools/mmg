@@ -325,8 +325,8 @@ size_t MMG5_memSize(void);
 int  MMG3D_memOption(MMG5_pMesh mesh);
 int  MMG3D_memOption_memSet(MMG5_pMesh mesh);
 int  MMG3D_memOption_memRepartition(MMG5_pMesh mesh);
-int  MMG5_mmg3d1_pattern(MMG5_pMesh ,MMG5_pSol );
-int  MMG5_mmg3d1_delone(MMG5_pMesh ,MMG5_pSol );
+int  MMG5_mmg3d1_pattern(MMG5_pMesh ,MMG5_pSol,int* );
+int  MMG5_mmg3d1_delone(MMG5_pMesh ,MMG5_pSol,int* );
 int  MMG3D_mmg3d2(MMG5_pMesh ,MMG5_pSol,MMG5_pSol );
 int  MMG5_mmg3dChkmsh(MMG5_pMesh,int,int);
 int   MMG3D_setMeshSize_initData(MMG5_pMesh,int,int,int,int,int,int);
@@ -441,7 +441,7 @@ void MMG5_printTetra(MMG5_pMesh mesh,char* fileName);
 
 
 #ifdef USE_SCOTCH
-int MMG5_mmg3dRenumbering(int vertBoxNbr, MMG5_pMesh mesh, MMG5_pSol sol);
+int MMG5_mmg3dRenumbering(int vertBoxNbr,MMG5_pMesh, MMG5_pSol,int*);
 #endif
 
 int    MMG5_meancur(MMG5_pMesh mesh,int np,double c[3],int ilist,int *list,double h[3]);

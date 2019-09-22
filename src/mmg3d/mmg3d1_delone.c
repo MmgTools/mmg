@@ -1195,6 +1195,7 @@ MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree) {
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
  * \param PROctree pointer toward the PROctree structure.
+ * \param permNodGlob if provided, strore the global permutation of nodes
  * \return 0 if failed, 1 otherwise.
  *
  * Analyze tetrahedra and split long / collapse short, according to
@@ -1202,7 +1203,8 @@ MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree) {
  *
  */
 static int
-MMG5_adptet_delone(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree *PROctree) {
+MMG5_adptet_delone(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree *PROctree,
+                   int * permNodGlob) {
   int      nnf,ns,nf;
   int      warn;
 
@@ -1250,7 +1252,7 @@ MMG5_adptet_delone(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree *PROctree) {
   }
 
   /* renumerotation if available */
-  if ( !MMG5_scotchCall(mesh,met) )
+  if ( !MMG5_scotchCall(mesh,met,permNodGlob) )
     return 0;
 
   if(mesh->info.optimLES) {
@@ -1265,12 +1267,13 @@ MMG5_adptet_delone(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree *PROctree) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
+ * \param permNodGlob if provided, strore the global permutation of nodes
  * \return 0 if failed, 1 if success.
  *
  * Main adaptation routine.
  *
  */
-int MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
+int MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met,int *permNodGlob) {
   MMG3D_pPROctree PROctree = NULL;
 
   if ( abs(mesh->info.imprim) > 4 )
@@ -1321,7 +1324,7 @@ int MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
   /* renumerotation if available */
-  if ( !MMG5_scotchCall(mesh,met) ) {
+  if ( !MMG5_scotchCall(mesh,met,permNodGlob) ) {
     return 0;
   }
 
@@ -1334,7 +1337,7 @@ int MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met) {
     }
   }
 
-  if ( !MMG5_adptet_delone(mesh,met,&PROctree) ) {
+  if ( !MMG5_adptet_delone(mesh,met,&PROctree,permNodGlob) ) {
     fprintf(stderr,"\n  ## Unable to adapt. Exit program.\n");
     if ( PROctree ) {
       /*free PROctree*/
