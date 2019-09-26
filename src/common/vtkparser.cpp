@@ -47,7 +47,6 @@
 
 #include "vtkparser.hpp"
 
-
 /// @tparam TReader one of the VTK reader class.
 /// @param filename name of the input file.
 ///
@@ -121,10 +120,10 @@ int MMG5_count_vtkEntities ( vtkDataSet *dataset, MMG5_pMesh mesh,
       ++mesh->npi;
       break;
     case ( VTK_POLY_LINE ):
-      cout << "polylin " <<  dataset->GetCell(i)->GetNumberOfPoints() - 1 << endl;
+      printf( "polylin %lld \n", dataset->GetCell(i)->GetNumberOfPoints() - 1 );
 
-      cout << dataset->GetCell(i)->GetPointId(0)  +1 << " " << dataset->GetCell(i)->GetPointId(1)  +1 << " " 
-        <<  dataset->GetCell(i)->GetPointId(2)  +1 << endl;
+      printf( "%lld %lld %lld\n", dataset->GetCell(i)->GetPointId(0)+1,
+              dataset->GetCell(i)->GetPointId(1)+1,dataset->GetCell(i)->GetPointId(2)+1);
       mesh->na += dataset->GetCell(i)->GetNumberOfPoints() - 1;
       break;
     case ( VTK_LINE ):
@@ -144,8 +143,7 @@ int MMG5_count_vtkEntities ( vtkDataSet *dataset, MMG5_pMesh mesh,
       break;
     default:
       if ( !mmgWarn1 ) {
-        cout << "  ## Warning: "<< __func__ << ": unexpected element type ("
-             << typ <<")." << endl;
+        printf( "  ## Warning:%s: unexpected element type (%d).",__func__,typ);
         mmgWarn1 = 1;
       }
     }
@@ -173,15 +171,13 @@ int MMG5_count_vtkEntities ( vtkDataSet *dataset, MMG5_pMesh mesh,
     }
 
     if ( npointRef > 1 ) {
-      cout << "  ## Warning: " << __func__ << ": "<< npointRef <<
-        " reference fields detected (labelled 'medit:ref')."
-        " Only the last is used, others are ignored." << endl;
+      printf( "  ## Warning:%s: %d reference fields detected (labelled 'medit:ref')."
+              " Only the last is used, others are ignored.", __func__, npointRef);
     }
     if ( nmetricField > 1 ) {
-      cerr << "  ## Error: " << __func__ << ": "<< nmetricField <<
-        " metric fields detected (labelled with a string containing the"
-        " 'metric' keyword).\n"
-        " Exit Program." << endl;
+      printf("  ## Error:%s: %d metric fields detected (labelled with a string"
+             " containing the 'metric' keyword).\n"
+             " Exit Program.\n",__func__,nmetricField);
       return -1;
     }
   }
@@ -200,23 +196,22 @@ int MMG5_count_vtkEntities ( vtkDataSet *dataset, MMG5_pMesh mesh,
         ++ncellRef;
       }
       else {
-        cout << "  ## Warning: " << __func__ << ": VTK cell data used"
-          " only to assign reference to cells (cell data labelled 'medit:ref')."
-          " Cell data " << cd->GetArrayName(k) << " ignored." << endl;
+        printf( "  ## Warning:%s: %s VTK cell data used"
+                " only to assign reference to cells (cell data labelled 'medit:ref')."
+                " Cell data ignored.\n",__func__,cd->GetArrayName(k));
       }
     }
     if ( ncellRef > 1 ) {
-      cout << "  ## Warning: " << __func__ << ": "<< ncellRef <<
-        " reference fields detected (labelled 'medit:ref')."
-        " Only the first is used, others are ignored." << endl;
+      printf( "  ## Warning:%s: %d reference fields detected (labelled 'medit:ref')."
+              " Only the first is used, others are ignored.\n",__func__,ncellRef);
     }
   }
 
   // Count the number of field data
   auto *fd = dataset->GetFieldData();
   if ( fd->GetNumberOfArrays() ) {
-    cout << "  ## Warning: " << __func__ << ": VTK field data not used in Mmg."
-      " Ignored." << endl;
+    printf( "  ## Warning:%s: VTK field data not used in Mmg."
+            " Ignored.\n",__func__ );
   }
 
   *nsols = npointData - npointRef;
@@ -363,8 +358,8 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
 
     int np = ptar->GetNumberOfTuples();
     if ( np != mesh->np ) {
-      cout << "  ## Error: Point data size ("<< np <<") differs from the number of"
-        " vertices (" << mesh->np << ")" << endl;
+      printf( "  ## Error: Point data size (%d) differs from the number of"
+              " vertices (%d)\n",np,mesh->np);
       return 0;
     }
     // read vertices and vertices refs
@@ -419,8 +414,8 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
 
     int ne = car->GetNumberOfTuples();
     if ( ne != numCells ) {
-      cout << "  ## Error: Cell data size ("<< ne <<") differs from the number of"
-        " cells (" << numCells << ")" << endl;
+      printf( "  ## Error: Cell data size (%d) differs from the number of"
+              " cells (%lld)\n",ne,numCells);
       return 0;
     }
   }
@@ -565,8 +560,8 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
 
     default:
       if ( !mmgWarn1 ) {
-        cout << "  ## Warning: "<< __func__ << ": unexpected element type ("
-             << typ <<")." << endl;
+        printf("  ## Warning:%s: unexpected element type (%d).\n",
+               __func__,typ);
         mmgWarn1 = 1;
       }
     }

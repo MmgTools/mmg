@@ -356,13 +356,19 @@ int MMG5_saveVtkMesh(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename,
     ar->SetNumberOfTuples(mesh->np);
 
     char *tmp = MMG5_Get_basename(psl->namein);
-    std::string data = tmp;
+    char *data;
+
+    MMG5_SAFE_CALLOC(data,strlen(tmp)+8,char,return 0);
+
+    strcpy(data,tmp);
     free(tmp); tmp = 0;
 
     if ( metricData ) {
-      data += ":metric";
+      strcat ( data , ":metric");
     }
-    ar->SetName(data.c_str());
+    ar->SetName(data);
+
+    MMG5_DEL_MEM(mesh,data);
 
     double dfmt[ncp];
     if ( psl->size!= (psl->dim*(psl->dim+1))/2 ) {
@@ -435,7 +441,7 @@ int MMG5_saveVtkMesh(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename,
 
   MMG5_internal_VTKbinary(writer,binary);
 
-  writer->Write();
+  //writer->Write();
 
   return 1;
 }
