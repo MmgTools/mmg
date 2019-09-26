@@ -533,7 +533,7 @@ static int MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
 
       np = MMG3D_newPt(mesh,c,0);
       if ( !np ) {
-        MMG3D_POINT_REALLOC(mesh,sol,np,0.2,
+        MMG3D_POINT_REALLOC(mesh,sol,np,MMG5_GAP,
                              fprintf(stderr,"\n  ## Error: %s: unable to"
                                      " allocate a new point\n",__func__);
                              MMG5_INCREASE_MEM_MESSAGE();

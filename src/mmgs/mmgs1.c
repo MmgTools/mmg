@@ -616,7 +616,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           ++mesh->xp;
           if(mesh->xp > mesh->xpmax){
             /* reallocation of xpoint table */
-            MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,MMG5_xPoint,
+            MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,MMG5_GAP,MMG5_xPoint,
                                "larger xpoint table",
                                return -1);
           }

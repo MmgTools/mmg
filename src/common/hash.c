@@ -152,7 +152,7 @@ int MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, MMG5_Hash *hash, int chkISO) {
               fprintf(stderr,"\n  ## Warning: %s: memory alloc problem (edge):"
                       " %d\n",__func__,hash->max);
             }
-            MMG5_TAB_RECALLOC(mesh,hash->item,hash->max,0.2,MMG5_hedge,
+            MMG5_TAB_RECALLOC(mesh,hash->item,hash->max,MMG5_GAP,MMG5_hedge,
                                "MMG5_edge",
                                MMG5_DEL_MEM(mesh,hash->item);
                                return 0);
@@ -238,7 +238,7 @@ int MMG5_hashEdge(MMG5_pMesh mesh,MMG5_Hash *hash, int a,int b,int k) {
         fprintf(stderr,"\n  ## Warning: %s: memory alloc problem (edge):"
                 " %d\n",__func__,hash->max);
 
-      MMG5_TAB_RECALLOC(mesh,hash->item,hash->max,0.2,MMG5_hedge,
+      MMG5_TAB_RECALLOC(mesh,hash->item,hash->max,MMG5_GAP,MMG5_hedge,
                          "MMG5_edge",return 0);
       /* ph pointer may be false after realloc */
       ph        = &hash->item[hash->nxt];

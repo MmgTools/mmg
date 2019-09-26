@@ -188,7 +188,7 @@ int MMG5_mmg3dRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol,int* pe
       /* Testing if edgeTab memory is enough */
       if (edgeNbr >= edgeSiz) {
         int oldsize = edgeSiz;
-        MMG5_ADD_MEM(mesh,0.2*sizeof(SCOTCH_Num),"edgeTab",
+        MMG5_ADD_MEM(mesh,MMG5_GAP*sizeof(SCOTCH_Num),"edgeTab",
                       MMG5_DEL_MEM(mesh,vertOldTab);
                       MMG5_DEL_MEM(mesh,vertTab);
                       return 1);
