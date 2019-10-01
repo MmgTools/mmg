@@ -20,7 +20,6 @@
 **  use this copy of the mmg distribution only if you accept them.
 ** =============================================================================
 */
-double (*MMG3D_lenedgCoor)(double *ca,double *cb,double *sa,double *sb);
 
 /**
  * \file mmg3d/libmmg3d.c
@@ -44,6 +43,23 @@ double (*MMG3D_lenedgCoor)(double *ca,double *cb,double *sa,double *sb);
 
 /* Declared in the header, but need to define in at most one compilation unit */
 double (*MMG3D_lenedgCoor)(double *ca,double *cb,double *sa,double *sb);
+
+double (*MMG5_lenedg)(MMG5_pMesh mesh ,MMG5_pSol sol ,int n, MMG5_pTetra );
+double (*MMG5_lenedgspl)(MMG5_pMesh mesh ,MMG5_pSol sol ,int n, MMG5_pTetra );
+double (*MMG5_caltet)(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt);
+double (*MMG5_caltri)(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
+int    (*MMG3D_defsiz)(MMG5_pMesh mesh ,MMG5_pSol sol);
+int    (*MMG3D_gradsiz)(MMG5_pMesh mesh,MMG5_pSol sol );
+int    (*MMG3D_gradsizreq)(MMG5_pMesh mesh,MMG5_pSol sol);
+int    (*MMG5_intmet)(MMG5_pMesh mesh,MMG5_pSol sol,int n1,char c,int n2, double r);
+int    (*MMG5_interp4bar)(MMG5_pMesh mesh,MMG5_pSol sol,int n1,int n2,double *r);
+int    (*MMG5_movintpt)(MMG5_pMesh mesh,MMG5_pSol sol, MMG3D_pPROctree o,int *n1, int n2, int n3);
+int    (*MMG5_movbdyregpt)(MMG5_pMesh mesh, MMG5_pSol sol, MMG3D_pPROctree o,int*n1, int n2, int*n3, int n4, int n5 ,int n6);
+int    (*MMG5_movbdyrefpt)(MMG5_pMesh mesh, MMG5_pSol sol, MMG3D_pPROctree o,int*n1, int n2, int* n3, int n4,int n5);
+int    (*MMG5_movbdynompt)(MMG5_pMesh mesh, MMG5_pSol sol, MMG3D_pPROctree o,int*n1, int n2, int* n3, int n4,int n5);
+int    (*MMG5_movbdyridpt)(MMG5_pMesh mesh, MMG5_pSol sol, MMG3D_pPROctree o,int*n1, int n2, int* n3, int n4,int n5);
+int    (*MMG5_cavity)(MMG5_pMesh mesh,MMG5_pSol sol ,int n1,int n2,int *n3,int n4,double r);
+int    (*MMG3D_PROctreein)(MMG5_pMesh mesh,MMG5_pSol sol ,MMG3D_pPROctree o ,int n,double r);
 
 /**
  * Pack the mesh \a mesh and its associated metric \a met and/or solution \a sol
