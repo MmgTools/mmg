@@ -441,7 +441,7 @@ int MMG5_saveVtkMesh(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename,
 
   MMG5_internal_VTKbinary(writer,binary);
 
-  //writer->Write();
+  writer->Write();
 
   return 1;
 }

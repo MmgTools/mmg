@@ -207,7 +207,6 @@ int MMG3D_saveVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   return -1;
 
 #else
-
   return MMG5_saveVtkMesh<vtkUnstructuredGrid,vtkXMLUnstructuredGridWriter>(mesh,&sol,filename,1,1);
 
 #endif
