@@ -300,7 +300,8 @@ int MMG2D_saveVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 
 #else
 
-  return MMG5_saveVtkMesh<vtkUnstructuredGrid,vtkXMLUnstructuredGridWriter>(mesh,&sol,filename,1,1);
+  return MMG5_saveVtkMesh<vtkUnstructuredGrid,vtkXMLUnstructuredGridWriter,
+                          vtkXMLPUnstructuredGridWriter>(mesh,&sol,filename,1,1);
 
 #endif
 }
@@ -314,7 +315,8 @@ int MMG2D_saveVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
 
 #else
 
-  return MMG5_saveVtkMesh<vtkUnstructuredGrid,vtkXMLUnstructuredGridWriter>(mesh,sol,filename,0,1);
+  return MMG5_saveVtkMesh<vtkUnstructuredGrid,vtkXMLUnstructuredGridWriter,
+                          vtkXMLPUnstructuredGridWriter>(mesh,sol,filename,0,1);
 
 #endif
 }
@@ -328,7 +330,8 @@ int MMG2D_saveVtkMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 
 #else
 
-  return MMG5_saveVtkMesh<vtkUnstructuredGrid,vtkDataSetWriter>(mesh,&sol,filename,1,0);
+  return MMG5_saveVtkMesh<vtkUnstructuredGrid,vtkDataSetWriter,
+                          vtkPDataSetWriter>(mesh,&sol,filename,1,0);
 
 #endif
 }
@@ -342,7 +345,8 @@ int MMG2D_saveVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
 
 #else
 
-  return MMG5_saveVtkMesh<vtkUnstructuredGrid,vtkDataSetWriter>(mesh,sol,filename,0,0);
+  return MMG5_saveVtkMesh<vtkUnstructuredGrid,vtkDataSetWriter,
+                          vtkPDataSetWriter>(mesh,sol,filename,0,0);
 
 #endif
 }
@@ -356,7 +360,8 @@ int MMG2D_saveVtpMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 
 #else
 
-  return MMG5_saveVtkMesh<vtkPolyData,vtkXMLPolyDataWriter>(mesh,&sol,filename,1,1);
+  return MMG5_saveVtkMesh<vtkPolyData,vtkXMLPolyDataWriter,
+                          vtkXMLPPolyDataWriter>(mesh,&sol,filename,1,1);
 
 #endif
 
@@ -371,7 +376,8 @@ int MMG2D_saveVtpMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
 
 #else
 
-  return MMG5_saveVtkMesh<vtkPolyData,vtkXMLPolyDataWriter>(mesh,sol,filename,0,1);
+  return MMG5_saveVtkMesh<vtkPolyData,vtkXMLPolyDataWriter,
+                          vtkXMLPPolyDataWriter>(mesh,sol,filename,0,1);
 
 #endif
 

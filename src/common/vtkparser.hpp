@@ -33,10 +33,13 @@
 #include <vtkXMLWriter.h>
 #include <vtkXMLUnstructuredGridReader.h>
 #include <vtkXMLUnstructuredGridWriter.h>
+#include <vtkXMLPUnstructuredGridWriter.h>
 #include <vtkXMLPolyDataReader.h>
 #include <vtkXMLPolyDataWriter.h>
+#include <vtkXMLPPolyDataWriter.h>
 #include <vtkDataSetReader.h>
 #include <vtkDataSetWriter.h>
+#include <vtkPDataSetWriter.h>
 #include <vtkDataSet.h>
 #include <vtkUnstructuredGrid.h>
 #include <vtkPolyData.h>
@@ -148,19 +151,26 @@ static void MMG5_internal_VTKbinary(vtkDataSetWriter *w, int binary) {
 
 /// @tparam T one of the VTK data class.
 /// @tparam TWriter one of the VTK writer class.
+/// @tparam PWriter one of the parallel VTK writer class.
+///
 /// @param mesh pointer toward a MMG5 mesh
 /// @param sol pointer toward a MMG5 solution array
-/// @param filename name of the input file.
+/// @param mfilename name of the master file to save (if call by master).
 /// @param metricData 1 if sol contains a metric array
 /// @param binary 1 to save file at binary format (if available in TWriter class)
+/// @param npart number of parts of the saving
+/// @param myid id of the process (save the file part number myid)
+/// @param master id of the master process (save its part file + the master file)
 ///
 /// @return 1 if success, 0 if fail.
 ///
-/// Save a vtk file at .vtp, .vtu or .vtk format.
+/// Save a vtk file at .(p)vtp, .(p)vtu or .(p)vtk format.
 ///
-template <class T, class TWriter>
-int MMG5_saveVtkMesh(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename,
-                     int metricData,int binary) {
+template <class T, class TWriter, class PWriter>
+int MMG5_saveVtkMesh_i(MMG5_pMesh mesh,MMG5_pSol *sol,
+                       const char *mfilename,
+                       int metricData,int binary,
+                       int npart, int myid,int master) {
   int hasPointRef = 0, hasCellRef = 0;
 
   // Transfer points from Mmg to VTK
@@ -427,23 +437,47 @@ int MMG5_saveVtkMesh(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename,
     dataset->GetPointData()->AddArray(ar);
   }
 
-  // Write output mesh file
-  vtkSmartPointer<TWriter> writer =
-    vtkSmartPointer<TWriter>::New();
-
-  writer->SetFileName(filename);
+  // parallel IO
+  if ( npart ) {
+    vtkSmartPointer<PWriter> pwriter = vtkSmartPointer<PWriter>::New();
 
 #if VTK_MAJOR_VERSION <= 5
-  writer->SetInput(dataset);
+    pwriter->SetInput(dataset);
 #else
-  writer->SetInputData(dataset);
+    pwriter->SetInputData(dataset);
 #endif
 
-  MMG5_internal_VTKbinary(writer,binary);
+    pwriter->SetFileName(mfilename);
 
-  writer->Write();
+    pwriter->SetNumberOfPieces(npart);
+    pwriter->SetStartPiece(myid);
+    pwriter->SetEndPiece(myid);
+
+    pwriter->Write();
+  }
 
   return 1;
+}
+
+/// @tparam T one of the VTK data class.
+/// @tparam TWriter one of the VTK writer class.
+/// @param mesh pointer toward a MMG5 mesh
+/// @param sol pointer toward a MMG5 solution array
+/// @param filename name of the input file.
+/// @param metricData 1 if sol contains a metric array
+/// @param binary 1 to save file at binary format (if available in TWriter class)
+///
+/// @return 1 if success, 0 if fail.
+///
+/// Save a vtk file at .vtp, .vtu or .vtk format.
+///
+template <class T, class TWriter,class PWriter>
+int MMG5_saveVtkMesh(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename,
+                     int metricData,int binary) {
+
+  return MMG5_saveVtkMesh_i<T,TWriter,PWriter>( mesh,sol,filename,
+                                                metricData,binary,0,0,0);
+
 }
 
 #endif
