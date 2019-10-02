@@ -265,13 +265,15 @@ int MMG2D_resetRef(MMG5_pMesh mesh) {
 int MMG2D_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, int start, char istart) {
   MMG5_pTria       pt;
   double           v1, v2;
-  int              *adja,k,ip1,ip2,end1;
+  int              *adja,k,ip1,ip2,end1,refstart;
   char             i,i1,smsgn;
   static char      mmgWarn=0;
-
+char ddb;
+  
   k = start;
+  refstart = mesh->tria[k].ref;
   i = MMG5_inxt2[istart];
-
+  
   /* First loop: stop if an external boundary, or a change in signs (or a 0) is met
      recall that MG_SMGSGN(a,b) = 1 provided a*b >0 */
   do{
@@ -283,13 +285,19 @@ int MMG2D_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, int start, char istart) {
     if ( k==0 ) break;
 
     pt = &mesh->tria[k];
+    
     ip1 = pt->v[i1];
     ip2 = pt->v[i];
 
     v1 = sol->m[ip1];
     v2 = sol->m[ip2];
-
-    smsgn = MG_SMSGN(v1,v2) ? 1 : 0;
+    
+    /* Authorize change of references only provided the boundary reference is MG_ISO */
+    if ( pt->ref != refstart && pt->edg[i1] != MG_ISO )
+      smsgn = 0;
+    else
+      smsgn = (fabs(v1) < MMG5_EPS) || ( (fabs(v2) > MMG5_EPS) && MG_SMSGN(v1,v2) ) ? 1 : 0;
+    // smsgn =  MG_SMSGN(v1,v2) ? 1 : 0;
   }
   while ( smsgn );
 
@@ -309,14 +317,18 @@ int MMG2D_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, int start, char istart) {
     pt = &mesh->tria[k];
     ip1 = pt->v[i1];
     ip2 = pt->v[i];
-
+    
     v1 = sol->m[ip1];
     v2 = sol->m[ip2];
-
-    smsgn = MG_SMSGN(v1,v2) ? 1 : 0;
+    
+    if ( pt->ref != refstart && pt->edg[i1] != MG_ISO )
+      smsgn = 0;
+    else
+      smsgn = (fabs(v2) < MMG5_EPS) || ( (fabs(v1) > MMG5_EPS) && MG_SMSGN(v1,v2) ) ? 1 : 0;
+    // smsgn = MG_SMSGN(v1,v2) ? 1 : 0;
   }
   while ( smsgn );
-
+  
   /* If first stop was due to an external boundary, the second one must too;
      else, the final triangle for the first travel must be that of the second one */
   if ( k != end1 ) {
@@ -468,8 +480,8 @@ int MMG2D_chkmaniball(MMG5_pMesh mesh, int start, char istart) {
     i = adja[i1] % 3;
     i = MMG5_iprv2[i];
 
-    /* Check of the way the point is caught (the left-hand edge is not an external edge) */
-    assert ( k );
+    /* Tested point is connected to two external edges */
+    if ( k == 0 ) return 1;
 
     do {
       adja = &mesh->adja[3*(k-1)+1];
@@ -556,8 +568,7 @@ int MMG2D_chkmanimesh(MMG5_pMesh mesh) {
       if ( pt->ref == pt1->ref ) continue;
 
       i1 = MMG5_inxt2[i];
-      if ( !MMG2D_chkmaniball(mesh,k,i1) )
-        return 0;
+      if ( !MMG2D_chkmaniball(mesh,k,i1) ) return 0;
     }
   }
 
@@ -1047,39 +1058,33 @@ int MMG2D_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met) {
   for (k=1; k<= sol->np; k++)
     sol->m[k] -= mesh->info.ls;
 
-  /* Snap values of the level set function which are very close to 0 to 0 exactly */
-  if ( !MMG2D_snapval(mesh,sol) ) {
-    fprintf(stderr,"\n  ## Wrong input implicit function. Exit program.\n");
-    return 0;
-  }
-
-  /* Removal of small parasitic components */
-  if ( mesh->info.rmc && !MMG2D_rmc(mesh,sol) ) {
-    fprintf(stderr,"\n  ## Error in removing small parasitic components. Exit program.\n");
-    return 0;
-  }
-
-  /* Creation of adjacency relations in the mesh */
-  if ( !MMG2D_hashTria(mesh) ) {
-    fprintf(stderr,"\n  ## Hashing problem. Exit program.\n");
-    return 0;
-  }
-
-  /* No need to keep adjacencies from now on */
-  MMG5_DEL_MEM(mesh,mesh->adja);
-
   /* Transfer the boundary edge references to the triangles */
   if ( !MMG2D_assignEdge(mesh) ) {
     fprintf(stderr,"\n  ## Problem in setting boundary. Exit program.\n");
     return 0;
   }
+  
+  /* Snap values of the level set function which are very close to 0 to 0 exactly */
+  if ( !MMG2D_snapval(mesh,sol) ) {
+    fprintf(stderr,"\n  ## Wrong input implicit function. Exit program.\n");
+    return 0;
+  }
+  
+  /* Removal of small parasitic components */
+  if ( mesh->info.rmc && !MMG2D_rmc(mesh,sol) ) {
+    fprintf(stderr,"\n  ## Error in removing small parasitic components. Exit program.\n");
+    return 0;
+  }
+  
+  /* No need to keep adjacencies from now on */
+  MMG5_DEL_MEM(mesh,mesh->adja);
 
   /* Reset the MG_ISO field everywhere it appears */
   if ( !MMG2D_resetRef(mesh) ) {
     fprintf(stderr,"\n  ## Problem in resetting references. Exit program.\n");
     return 0;
   }
-
+  
   /* Effective splitting of the crossed triangles */
   if ( !MMG2D_cuttri_ls(mesh,sol,met) ) {
     fprintf(stderr,"\n  ## Problem in cutting triangles. Exit program.\n");
@@ -1091,19 +1096,19 @@ int MMG2D_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met) {
     fprintf(stderr,"\n  ## Problem in setting references. Exit program.\n");
     return 0;
   }
-
+  
   /* Creation of adjacency relations in the mesh */
   if ( !MMG2D_hashTria(mesh) ) {
     fprintf(stderr,"\n  ## Hashing problem. Exit program.\n");
     return 0;
   }
-
+  
   /* Check that the resulting mesh is manifold */
   if ( !MMG2D_chkmanimesh(mesh) ) {
     fprintf(stderr,"\n  ## No manifold resulting situation. Exit program.\n");
     return 0;
   }
-
+    
   /* Clean memory */
   MMG5_DEL_MEM(mesh,sol->m);
   sol->np = 0;
