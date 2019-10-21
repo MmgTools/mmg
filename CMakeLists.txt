@@ -189,10 +189,12 @@ GENERATE_FORTRAN_HEADER ( mmg
 
 # Libraries
 IF ( NOT WIN32 OR MINGW )
-  if(NOT DEFINED M_LIB)
-	message("M_LIB not defined. Searching it")
-	FIND_LIBRARY(M_LIB m)
-  endif(NOT DEFINED M_LIB)
+
+  IF(NOT DEFINED M_LIB)
+    MESSAGE(STATUS "M_LIB not defined. Searching it")
+    FIND_LIBRARY(M_LIB m)
+  ENDIF(NOT DEFINED M_LIB)
+
   MARK_AS_ADVANCED(FORCE M_LIB)
   SET( LIBRARIES ${M_LIB} ${LIBRARIES})
 ENDIF()
