@@ -136,6 +136,9 @@ int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
       mesh->info.dhd    = MMG5_ANGEDG;
     }
     break;
+  case MMG2D_IPARAM_opnbdy :
+    mesh->info.opnbdy = val;
+    break;
   case MMG2D_IPARAM_iso :
     mesh->info.iso      = val;
     break;

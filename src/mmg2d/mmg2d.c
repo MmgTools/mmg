@@ -39,6 +39,9 @@ static void MMG5_endcod() {
 static int MMG2D_usage(char *name) {
   MMG5_mmgUsage(name);
 
+  fprintf(stdout,"-opnbdy      preserve input edges at the interface of"
+          " two domains of the same reference.\n");
+
   fprintf(stdout,"-rmc         Enable the removal of small componants in ls mode\n");
 #ifdef USE_ELAS
   fprintf(stdout,"-lag [n] Lagrangian mesh displacement according to mode [0/1/2]\n");
@@ -528,6 +531,10 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
             MMG2D_usage(argv[0]);
             return 0;
           }
+        }
+        else if ( !strcmp(argv[i],"-opnbdy") ) {
+          if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_opnbdy,1) )
+            return 0;
         }
         else if( !strcmp(argv[i],"-optim") ) {
           if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_optim,1) )
