@@ -38,6 +38,24 @@
 extern char  ddb;
 
 /**
+ * \param mesh pointer toward the mesh structure
+ * \param sol pointer toward the ls function
+ * \param k index of the triangle
+ * \return volfrac
+ *
+ * Calculate the area of the positive (if pm == 1) or negative (if pm == -1)
+ * subdomain inside tetra k defined by the ls function in sol
+ *
+ **/
+double MMG3D_vfrac(MMG5_pMesh mesh,MMG5_pSol sol,int k,int pm) {
+
+#warning to implement MMG3D_vfrac
+
+  return 1;
+
+}
+
+/**
  * \remark Not used.
  *
  * solve 3*3 non symmetric system Ar = b
@@ -413,6 +431,23 @@ static int MMG3D_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
   /* memory free */
   MMG5_DEL_MEM(mesh,mesh->adja);
   MMG5_DEL_MEM(mesh,tmp);
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh
+ * \param sol pointer toward the level-set
+ *
+ * \return 1 if success, 0 otherwise
+ *
+ * Removal of small parasitic components (bubbles of material, etc) with volume
+ * less than VOLFRAC * volume of the mesh.
+ *
+ */
+int MMG3D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
+
+#warning to implement MMG3D_rmc
 
   return 1;
 }
@@ -1468,6 +1503,13 @@ int MMG3D_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
   /* Snap values of level set function if need be, then discretize it */
   if ( !MMG3D_snpval_ls(mesh,sol) ) {
     fprintf(stderr,"\n  ## Problem with implicit function. Exit program.\n");
+    return 0;
+  }
+
+  /* Removal of small parasitic components */
+  if ( mesh->info.rmc && !MMG3D_rmc(mesh,sol) ) {
+    fprintf(stderr,"\n  ## Error in removing small parasitic components."
+            " Exit program.\n");
     return 0;
   }
 

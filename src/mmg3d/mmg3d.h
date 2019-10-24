@@ -136,6 +136,7 @@ extern "C" {
 
 #define MMG3D_SHORTMAX     0x7fff
 
+#define MMG3D_VOLFRAC      1.e-5
 
 /** \brief next vertex of tetra: {1,2,3,0,1,2,3} */
 static const unsigned char MMG5_inxt3[7] = { 1,2,3,0,1,2,3 };
@@ -433,6 +434,11 @@ int  MMG3D_pack_points(MMG5_pMesh mesh);
 void MMG3D_unset_reqBoundaries(MMG5_pMesh mesh);
 int  MMG3D_packMesh(MMG5_pMesh,MMG5_pSol,MMG5_pSol);
 int  MMG3D_bdryBuild(MMG5_pMesh);
+
+/* rmc option */
+double MMG3D_vfrac(MMG5_pMesh ,MMG5_pSol ,int ,int );
+int    MMG3D_rmc(MMG5_pMesh ,MMG5_pSol );
+
 
 /* useful functions to debug */
 int  MMG3D_indElt(MMG5_pMesh mesh,int kel);

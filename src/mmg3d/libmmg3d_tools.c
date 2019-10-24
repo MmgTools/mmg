@@ -385,9 +385,14 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
             return 0;
         }
         break;
-#ifdef USE_SCOTCH
       case 'r':
-        if ( !strcmp(argv[i],"-rn") ) {
+        if ( !strcmp(argv[i],"-rmc") ) {
+          if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_rmc,1) ) {
+            return 0;
+          }
+        }
+#ifdef USE_SCOTCH
+        else if ( !strcmp(argv[i],"-rn") ) {
           if ( ++i < argc ) {
             if ( isdigit(argv[i][0]) ) {
               if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_renum,atoi(argv[i])) )
@@ -405,8 +410,13 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
             return 0;
           }
         }
-        break;
 #endif
+        else {
+          fprintf(stderr,"Unrecognized option %s\n",argv[i]);
+          MMG3D_usage(argv[0]);
+          return 0;
+        }
+        break;
       case 's':
         if ( !strcmp(argv[i],"-sol") ) {
           /* For retrocompatibility, store the metric if no sol structure available */
