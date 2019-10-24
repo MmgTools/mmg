@@ -127,6 +127,21 @@ ADD_TEST(NAME mmg2d_locParam_ani
   ${MMG2D_CI_TESTS}/LocParams/circle2refs.mesh
   -out ${CTEST_OUTPUT_DIR}/locParams-ani.o.meshb)
 
+ADD_TEST(NAME mmg2d_opnbdy_yes
+  COMMAND ${EXECUT_MMG2D} -v 5 -opnbdy -hausd 0.001
+  ${MMG2D_CI_TESTS}/Opnbdy/opnbdy-mesh.msh
+  -out ${CTEST_OUTPUT_DIR}/mmg2d-opnbdy-mesh-yes.o.meshb)
+
+ADD_TEST(NAME mmg2d_opnbdy_no
+  COMMAND ${EXECUT_MMG2D} -v 5 -hausd 0.001
+  ${MMG2D_CI_TESTS}/Opnbdy/opnbdy-mesh.msh
+  -out ${CTEST_OUTPUT_DIR}/mmg2d-opnbdy-mesh-no.o.meshb)
+
+ADD_TEST(NAME mmg2d_opnbdy_yes_ani
+  COMMAND ${EXECUT_MMG2D} -v 5 -hausd 0.001 -A -opnbdy
+  ${MMG2D_CI_TESTS}/Opnbdy/opnbdy-mesh.msh
+  -out ${CTEST_OUTPUT_DIR}/mmg2d-opnbdy-mesh-yes-ani.o.meshb)
+
 ###############################################################################
 #####
 #####         Input/Output
