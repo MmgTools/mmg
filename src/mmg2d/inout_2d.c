@@ -403,6 +403,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
       ped->ref = -ped->ref;
       ++nref;
     }
+    ped->tag |= MG_REF+MG_BDY;
   }
 
   /* Read triangles */

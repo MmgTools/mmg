@@ -41,7 +41,7 @@ extern char ddb;
  *
  * \return 1 if success, 0 if fail
  *
- * Set tags GEO and REF to triangles and points by traveling the mesh;
+ * Set tags GEO, BDY and REF to triangles and points by traveling the mesh;
  * count number of subdomains or connected components
  *
  */
@@ -80,13 +80,19 @@ int MMG2D_setadj(MMG5_pMesh mesh) {
         ip2 = pt->v[i2];
 
         if ( adja[i] ) {
-          /* Transfert edge tag to adjacent */
           kk = adja[i] / 3;
           ii = adja[i] % 3;
           pt1 = &mesh->tria[kk];
 
-          pt1->tag[ii] |= pt->tag[i];
-          pt->tag[i] |= pt1->tag[ii];
+          if ( (!mesh->info.opnbdy) && (pt->ref==pt1->ref) ) {
+            /* Remove edge tag */
+            pt1->tag[ii] = pt->tag[i] = 0;
+          }
+          else {
+            /* Transfert edge tag to adjacent */
+            pt1->tag[ii] |= pt->tag[i];
+            pt->tag[i] |= pt1->tag[ii];
+          }
         }
 
         /* Transfer tags if i is already an edge (e.g. supplied by the user) */
@@ -128,8 +134,10 @@ int MMG2D_setadj(MMG5_pMesh mesh) {
         ii = adja[i] % 3;
         pt1 = &mesh->tria[kk];
 
-        /* Case of a boundary between two subdomains */
-        if ( abs(pt1->ref) != abs(pt->ref) ) {
+        /* Case of a boundary (except if opnbdy is enabled, the boundary must be
+         * between 2 different subdomains) */
+        if ( (mesh->info.opnbdy && ( pt->tag[i] || pt1->tag[ii] ) )
+             || abs(pt1->ref) != abs(pt->ref) ) {
           tag = ( MG_REF+MG_BDY );
 
           if ( !mesh->info.nosurf ) {
@@ -356,7 +364,7 @@ int MMG2D_norver(MMG5_pMesh mesh, int ref) {
     for ( k=1; k<=mesh->np; ++k ) {
       mesh->point[k].s = 1;
     }
-    /* Second: if the point belongs to a boundary edge of reference ref, remove
+    /* Second: if the point belongs to a boundary edge or reference ref, remove
      * the mark */
     for ( k=1; k<=mesh->nt; ++k ) {
       pt = &mesh->tria[k];
