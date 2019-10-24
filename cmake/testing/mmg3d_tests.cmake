@@ -559,6 +559,18 @@ ADD_TEST(NAME mmg3d_OptLs_plane_withMetAndLs
   -met ${MMG3D_CI_TESTS}/OptLs_plane/met.sol
   ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_plane-nonzero.o.meshb)
 
+# ls + rmc
+ADD_TEST(NAME mmg3d_OptLs_plane_withbub
+  COMMAND ${EXECUT_MMG3D} -v 5 -ls
+  ${MMG3D_CI_TESTS}/OptLs_plane/plane
+  -sol ${MMG3D_CI_TESTS}/OptLs_plane/bub.sol
+  ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_plane-withbub.o.meshb)
+
+ADD_TEST(NAME mmg3d_OptLs_plane_rembub
+  COMMAND ${EXECUT_MMG3D} -v 5 -ls -rmc
+  ${MMG3D_CI_TESTS}/OptLs_plane/plane
+  -sol ${MMG3D_CI_TESTS}/OptLs_plane/bub.sol
+  ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_plane-rembub.o.meshb)
 
 IF ( LONG_TESTS )
   # Test the Ls option
