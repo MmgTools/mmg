@@ -224,7 +224,8 @@ int MMG2D_Get_numberOfNonBdyEdges(MMG5_pMesh mesh, int* nb_edges) {
         pt1 = &mesh->tria[iel];
 
         if ( (!iel) || (pt->ref != pt1->ref) ||
-             ((pt->ref==pt1->ref) && MG_SIN(pt->tag[i])) ) {
+             ((pt->ref==pt1->ref) && MG_SIN(pt->tag[i])) ||
+             (mesh->info.opnbdy && pt->tag[i]) ) {
           /* Do not treat boundary edges */
           continue;
         }
@@ -258,7 +259,8 @@ int MMG2D_Get_numberOfNonBdyEdges(MMG5_pMesh mesh, int* nb_edges) {
         pt1 = &mesh->tria[iel];
 
         if ( (!iel) || (pt->ref != pt1->ref) ||
-             ((pt->ref==pt1->ref) && MG_SIN(pt->tag[i])) ) {
+             ((pt->ref==pt1->ref) && MG_SIN(pt->tag[i])) ||
+             (mesh->info.opnbdy && pt->tag[i]) ) {
           /* Do not treat boundary edges */
           continue;
         }

@@ -65,7 +65,7 @@ int MMG2D_sum_reqEdgeLengthsAtPoint(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,
  *
  * \return 0 if fail, 1 otherwise
  *
- * Compute the metric at points on trequired adges as the mean of the lengths of
+ * Compute the metric at points on required edges as the mean of the lengths of
  * the required eges to which belongs the point. The processeed points are
  * marked with flag 3.
  *
@@ -229,7 +229,7 @@ int MMG2D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
 
       /* Recovery of the two tangent vectors associated to points p1,p2; they
        * need not be oriented in the same fashion */
-      if ( MG_SIN(p1->tag) || (p1->tag & MG_NOM) ) {
+      if ( MG_CRN & p1->tag || (p1->tag & MG_NOM) ) {
         t1[0] = li*ux;
         t1[1] = li*uy;
       }
@@ -238,7 +238,7 @@ int MMG2D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
         t1[1] = p1->n[0];
       }
 
-      if ( MG_SIN(p2->tag) || (p2->tag & MG_NOM) ) {
+      if ( MG_CRN & p2->tag || (p2->tag & MG_NOM) ) {
         li = 1.0 / sqrt(ll);
         t2[0] = li*ux;
         t2[1] = li*uy;

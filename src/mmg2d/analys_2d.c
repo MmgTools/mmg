@@ -258,7 +258,7 @@ int MMG2D_singul(MMG5_pMesh mesh, int ref ) {
       if ( ppt->s ) continue;
       ppt->s = 1;
 
-      if ( !MG_VOK(ppt) || MG_SIN(ppt->tag) )  continue;
+      if ( !MG_VOK(ppt) || MG_CRN & ppt->tag )  continue;
 
       if ( !MG_EDG(ppt->tag) ) continue;
 
@@ -312,7 +312,7 @@ int MMG2D_singul(MMG5_pMesh mesh, int ref ) {
 
         /* If both edges carry different refs, tag vertex as singular */
         if ( listref[1] != listref[2] ) {
-          ppt->tag |= MG_CRN;
+          ppt->tag |= MG_REQ;
           nc++;
         }
 
@@ -387,7 +387,7 @@ int MMG2D_norver(MMG5_pMesh mesh, int ref) {
     for (i=0; i<3; i++) {
       ppt = &mesh->point[pt->v[i]];
       if ( !MG_EDG(ppt->tag) ) continue;
-      if ( ppt->s || MG_SIN(ppt->tag) || (ppt->tag & MG_NOM) ) continue;
+      if ( ppt->s || (MG_CRN & ppt->tag) || (ppt->tag & MG_NOM) ) continue;
 
       /* Travel the curve ppt belongs to from left to right until a singularity is met */
       kk = k;
@@ -408,7 +408,7 @@ int MMG2D_norver(MMG5_pMesh mesh, int ref) {
         pt1 = &mesh->tria[kk];
         ppt = &mesh->point[pt1->v[ii]];
       }
-      while ( !ppt->s && !MG_SIN(ppt->tag) && !(ppt->tag & MG_NOM) );
+      while ( !ppt->s && !(MG_CRN  & ppt->tag) && !(ppt->tag & MG_NOM) );
 
       /* Now travel the curve ppt belongs to from right to left until a singularity is met */
       ppt = &mesh->point[pt->v[i]];
@@ -430,7 +430,7 @@ int MMG2D_norver(MMG5_pMesh mesh, int ref) {
         pt1 = &mesh->tria[kk];
         ppt = &mesh->point[pt1->v[ii]];
       }
-      while ( !ppt->s && !MG_SIN(ppt->tag) && !(ppt->tag & MG_NOM) );
+      while ( !ppt->s && !(MG_CRN & ppt->tag) && !(ppt->tag & MG_NOM) );
     }
   }
 

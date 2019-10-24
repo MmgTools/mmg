@@ -92,8 +92,10 @@ int MMG2D_boulep(MMG5_pMesh mesh, int ifirst, int iploc, int * list) {
  * \param mesh pointer toward the mesh
  * \param start index of the first tria
  * \param ip local index of the point on which we work in tria \a start
- * \param pleft index of the left point to ip along the geom edge
- * \param pright index of the right point to ip along the geom edge
+ * \param pleft index of the left point of ip along the geom edge
+ * (local index of the point inside a triangle)
+ * \param pright index of the right point of ip along the geom edge
+ * (local index of the point inside a triangle)
  * \param nn computed normal at ip
  *
  * \return 0 if fail, 1 if success
@@ -119,10 +121,6 @@ int MMG2D_boulen(MMG5_pMesh mesh, int start,char ip, int *pleft, int *pright, do
   kk = start;
   ii = MMG5_iprv2[ip];
   refs = mesh->tria[start].ref;
-
-  if ( mesh->tria[start].v[ip] == 169 ) {
-    assert ( "coucou" );
-  }
 
   do {
     k = kk;
