@@ -297,7 +297,7 @@ inline double MMG3D_caltetLES_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) 
   /* Vref volume */
   Vref = 8.*sqrt(3)/27.*rad*sqrt(rad);
 
-  V = MMG5_orvol(mesh->point,pt->v)/6.;
+  V = MMG5_orvol(mesh->point,pt->v) * MMG3D_DET2VOL;
 
   if ( V<0. ) {
     return 0.0;
