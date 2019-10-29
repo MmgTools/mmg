@@ -690,7 +690,7 @@ static int MMG3D_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
  * \return 1 if success, 0 otherwise
  *
  * Removal of small parasitic components (bubbles of material, etc) with volume
- * less than VOLFRAC * volume of the mesh.
+ * less than mesh->info.rmc (default VOLFRAC) * volume of the mesh.
  *
  */
 int MMG3D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
@@ -786,7 +786,7 @@ int MMG3D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
     while ( ++cur < ipile );
 
     /* Remove connected component if its volume is too small */
-    if ( volc < MMG3D_VOLFRAC*voltot ) {
+    if ( volc < mesh->info.rmc * voltot ) {
       for (l=0; l<ipile; l++) {
         pt1 = &mesh->tetra[pile[l]];
         for (i=0; i<4; i++) {
@@ -867,7 +867,7 @@ int MMG3D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
     while ( ++cur < ipile );
 
     /* Remove connected component if its volume is too small */
-    if ( volc < MMG3D_VOLFRAC*voltot ) {
+    if ( volc < mesh->info.rmc * voltot ) {
       for (l=0; l<ipile; l++) {
         pt1 = &mesh->tetra[pile[l]];
         for (i=0; i<4; i++) {
@@ -1951,7 +1951,7 @@ int MMG3D_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
     return 0;
   }
   /* Removal of small parasitic components */
-  if ( mesh->info.rmc && !MMG3D_rmc(mesh,sol) ) {
+  if ( mesh->info.rmc > 0. && !MMG3D_rmc(mesh,sol) ) {
     fprintf(stderr,"\n  ## Error in removing small parasitic components."
             " Exit program.\n");
     return 0;

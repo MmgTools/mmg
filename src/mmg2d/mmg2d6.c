@@ -584,7 +584,7 @@ int MMG2D_chkmanimesh(MMG5_pMesh mesh) {
  * \return 1 if success, 0 otherwise
  *
  * Removal of small parasitic components (bubbles of material, etc) with volume less than
- * VOLFRAC * volume of the mesh.
+ * mesh->info.rmc * volume of the mesh.
  *
  */
 int MMG2D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
@@ -702,7 +702,7 @@ int MMG2D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
     while ( ++cur < ipile );
 
     /* Remove connected component if its volume is too small */
-    if ( volc < MMG2D_VOLFRAC*voltot ) {
+    if ( volc < mesh->info.rmc*voltot ) {
       for (l=0; l<ipile; l++) {
         pt1 = &mesh->tria[pile[l]];
         for (i=0; i<3; i++) {
@@ -801,7 +801,7 @@ int MMG2D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
     while ( ++cur < ipile );
 
     /* Remove connected component if its volume is too small */
-    if ( volc < MMG2D_VOLFRAC*voltot ) {
+    if ( volc < mesh->info.rmc*voltot ) {
       for (l=0; l<ipile; l++) {
         pt1 = &mesh->tria[pile[l]];
         for (i=0; i<3; i++) {
@@ -1071,7 +1071,7 @@ int MMG2D_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met) {
   }
   
   /* Removal of small parasitic components */
-  if ( mesh->info.rmc && !MMG2D_rmc(mesh,sol) ) {
+  if ( mesh->info.rmc > 0. && !MMG2D_rmc(mesh,sol) ) {
     fprintf(stderr,"\n  ## Error in removing small parasitic components. Exit program.\n");
     return 0;
   }

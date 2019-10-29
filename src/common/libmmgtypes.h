@@ -443,13 +443,12 @@ typedef MMG5_Mat * MMG5_pMat;
 typedef struct {
   MMG5_pPar     par;
   double        dhd,hmin,hmax,hsiz,hgrad,hgradreq,hausd;
-  double        min[3],max[3],delta,ls;
+  double        min[3],max[3],delta,ls,rmc;
   int           mem,npar,npari;
   int           opnbdy;
   int           renum;
   int           PROctree;
   int           nmat;
-  int           rmc;
   char          nreg;
   char          imprim,ddebug,badkal,iso,fem,lag;
   char          parTyp; /*!< Contains binary flags to say which kind of local

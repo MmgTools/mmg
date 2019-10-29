@@ -71,7 +71,6 @@ extern "C" {
     MMG2D_IPARAM_nosurf,            /*!< [1/0], Avoid/allow surface modifications */
     MMG2D_IPARAM_nreg,              /*!< [0/1], Enable normal regularization */
     MMG2D_IPARAM_numberOfLocalParam,/*!< [n], Number of local parameters */
-    MMG2D_IPARAM_rmc,               /*!< [0/1], Remove small connex componants in level-set mode */
     MMG2D_DPARAM_angleDetection,    /*!< [val], Value for angle detection */
     MMG2D_DPARAM_hmin,              /*!< [val], Minimal mesh size */
     MMG2D_DPARAM_hmax,              /*!< [val], Maximal mesh size */
@@ -79,7 +78,8 @@ extern "C" {
     MMG2D_DPARAM_hausd,             /*!< [val], Control global Hausdorff distance (on all the boundary surfaces of the mesh) */
     MMG2D_DPARAM_hgrad,             /*!< [val], Control gradation */
     MMG2D_DPARAM_hgradreq,          /*!< [val], Control gradation on required entites (advanced usage) */
-    MMG2D_DPARAM_ls,                /*!< [val], Value of level-set (not use for now) */
+    MMG2D_DPARAM_ls,                /*!< [val], Value of level-set */
+    MMG2D_DPARAM_rmc,               /*!< [-1/val], Remove small connex componants in level-set mode */
   };
 
 /*----------------------------- functions header -----------------------------*/

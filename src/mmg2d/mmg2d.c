@@ -42,7 +42,8 @@ static int MMG2D_usage(char *name) {
   fprintf(stdout,"-opnbdy      preserve input edges at the interface of"
           " two domains of the same reference.\n");
 
-  fprintf(stdout,"-rmc         Enable the removal of small componants in ls mode\n");
+  fprintf(stdout,"-rmc [val]   Enable the removal of componants whose volume fraction is less than\n"
+          "             val (1e-5 if not given) of the mesh volume (ls mode).\n");
 #ifdef USE_ELAS
   fprintf(stdout,"-lag [n] Lagrangian mesh displacement according to mode [0/1/2]\n");
   fprintf(stdout,"             0: displacement\n");
@@ -548,11 +549,16 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
         }
         break;
       case 'r':
-          if ( !strcmp(argv[i],"-rmc") ) {
-            if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_rmc,1) ) {
+        if ( !strcmp(argv[i],"-rmc") ) {
+          if ( !MMG2D_Set_dparameter(mesh,met,MMG2D_DPARAM_rmc,0) )
+            return 0;
+          if ( ++i < argc && (isdigit(argv[i][0]) ) ) {
+            if ( !MMG2D_Set_dparameter(mesh,met,MMG2D_DPARAM_rmc,atof(argv[i])) )
               return 0;
-            }
           }
+          else i--;
+        }
+        break;
       case 's':
         if ( !strcmp(argv[i],"-sol") ) {
           /* For retrocompatibility, store the metric if no sol structure available */

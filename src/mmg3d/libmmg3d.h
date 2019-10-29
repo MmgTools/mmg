@@ -83,7 +83,6 @@ enum MMG3D_Param {
   MMG3D_IPARAM_nreg,              /*!< [0/1], Enable normal regularization */
   MMG3D_IPARAM_numberOfLocalParam,/*!< [n], Number of local parameters */
   MMG3D_IPARAM_renum,             /*!< [1/0], Turn on/off point relocation with Scotch */
-  MMG3D_IPARAM_rmc,               /*!< [0/1], Remove small connex componants in level-set mode */
   MMG3D_IPARAM_anisosize,         /*!< [1/0], Turn on/off anisotropic metric creation when no metric is provided */
   MMG3D_IPARAM_octree,            /*!< [n], Specify the max number of points per PROctree cell (DELAUNAY) */
   MMG3D_DPARAM_angleDetection,    /*!< [val], Value for angle detection */
@@ -94,6 +93,7 @@ enum MMG3D_Param {
   MMG3D_DPARAM_hgrad,             /*!< [val], Control gradation */
   MMG3D_DPARAM_hgradreq,          /*!< [val], Control gradation on required entites (advanced usage) */
   MMG3D_DPARAM_ls,                /*!< [val], Value of level-set */
+  MMG3D_DPARAM_rmc,               /*!< [-1/val], Remove small connex componants in level-set mode */
   MMG3D_PARAM_size,               /*!< [n], Number of parameters */
 };
 

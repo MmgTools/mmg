@@ -118,6 +118,7 @@ extern "C" {
 #define MMG5_NONSET_HMIN -1 /**< hmin value for unspecified hmin size */
 #define MMG5_NONSET_HMAX -1 /**< hmax value for unspecified hmax size */
 #define MMG5_NONSET_HSIZ -1 /**< hsiz value for unspecified hsiz map */
+#define MMG5_NONSET      -1
 #define MMG5_HAUSD     0.01 /**< default value for hausdorff param */
 #define MMG5_HGRAD     0.26236426446 /**< default value for gradation (1.3) */
 #define MMG5_HGRADREQ  0.83290912294 /**< default value for required gradation (2.3) */

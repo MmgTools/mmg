@@ -137,7 +137,7 @@ extern "C" {
 
 #define MMG3D_SHORTMAX     0x7fff
 
-#define MMG3D_VOLFRAC      6.e-5 // 1e.-5 * 6 because we compute the tetra area*6
+#define MMG3D_VOLFRAC      1.e-5
 
 /** \brief next vertex of tetra: {1,2,3,0,1,2,3} */
 static const unsigned char MMG5_inxt3[7] = { 1,2,3,0,1,2,3 };

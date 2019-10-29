@@ -417,6 +417,25 @@ ADD_TEST(NAME mmg2d_LSMultiMat_nonzero
   ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat
   ${CTEST_OUTPUT_DIR}/mmg2d_LSMultiMat-nonzero.o.meshb)
 
+# ls + rmc
+ADD_TEST(NAME mmg2d_OptLs_dom_withbub
+  COMMAND ${EXECUT_MMG2D} -v 5 -ls
+  ${MMG2D_CI_TESTS}/LSDiscretization/dom
+  -sol ${MMG2D_CI_TESTS}/LSDiscretization/bub.sol
+  ${CTEST_OUTPUT_DIR}/mmg2d_OptLs_dom-withbub.o.meshb)
+
+ADD_TEST(NAME mmg2d_OptLs_dom_rembub
+  COMMAND ${EXECUT_MMG2D} -v 5 -ls
+  ${MMG2D_CI_TESTS}/LSDiscretization/dom
+  -sol ${MMG2D_CI_TESTS}/LSDiscretization/bub.sol
+  ${CTEST_OUTPUT_DIR}/mmg2d_OptLs_dom-rembub.o.meshb -rmc)
+
+ADD_TEST(NAME mmg2d_OptLs_dom_rembub2
+  COMMAND ${EXECUT_MMG2D} -v 5 -ls -rmc 0.1
+  ${MMG2D_CI_TESTS}/LSDiscretization/dom
+  -sol ${MMG2D_CI_TESTS}/LSDiscretization/bub.sol
+  ${CTEST_OUTPUT_DIR}/mmg2d_OptLs_dom-rembub2.o.meshb)
+
 
 # ls discretisation + optim option
 ADD_TEST(NAME mmg2d_LSMultiMat_optim
