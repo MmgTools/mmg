@@ -66,7 +66,7 @@ int MMG2D_chkedg(MMG5_pMesh mesh, int k) {
     if ( !MG_EDG(pt->tag[i]) ) continue;
 
     /* Collect tangent vectors at both endpoints; remark t1 and t2 need not be oriented in the same fashion */
-    if ( MG_SIN(p1->tag) || (p1->tag & MG_NOM) ) {
+    if ( (MG_CRN & p1->tag) || (p1->tag & MG_NOM) ) {
       li = 1.0 / sqrt(ll);
       t1[0] = li*ux;
       t1[1] = li*uy;
@@ -76,7 +76,7 @@ int MMG2D_chkedg(MMG5_pMesh mesh, int k) {
       t1[1] = p1->n[0];
     }
 
-    if ( MG_SIN(p2->tag) || (p2->tag & MG_NOM) ) {
+    if ( (MG_CRN & p2->tag) || (p2->tag & MG_NOM) ) {
       li = 1.0 / sqrt(ll);
       t2[0] = li*ux;
       t2[1] = li*uy;
@@ -143,7 +143,7 @@ int MMG2D_bezierCurv(MMG5_pMesh mesh,int k,char i,double s,double *o,double *no)
   if ( ll < MMG5_EPSD ) return 0;
 
   /* Recover normal and tangent vectors */
-  if ( MG_SIN(p1->tag) || (p1->tag & MG_NOM) ) {
+  if ( (MG_CRN & p1->tag) || (p1->tag & MG_NOM) ) {
     li = 1.0 / sqrt(ll);
     t1[0] = li*ux;
     t1[1] = li*uy;
@@ -159,7 +159,7 @@ int MMG2D_bezierCurv(MMG5_pMesh mesh,int k,char i,double s,double *o,double *no)
     t1[1] = p1->n[0];
   }
 
-  if ( MG_SIN(p2->tag) || (p2->tag & MG_NOM) ) {
+  if ( (MG_CRN & p2->tag) || (p2->tag & MG_NOM) ) {
     li = 1.0 / sqrt(ll);
     t2[0] = li*ux;
     t2[1] = li*uy;
@@ -177,14 +177,14 @@ int MMG2D_bezierCurv(MMG5_pMesh mesh,int k,char i,double s,double *o,double *no)
 
   /* When either p1 or p2 is singular, make orientation of both normal vectors consistent
    (otherwise, it is already the case) */
-  if ( MG_SIN(p1->tag) || (p1->tag & MG_NOM) ){
+  if ( (MG_CRN & p1->tag) || (p1->tag & MG_NOM) ){
     ps = n1[0]*n2[0] + n1[1]*n2[1];
     if ( ps < 0.0 ) {
       n1[0] *= -1.0;
       n1[1] *= -1.0;
     }
   }
-  else if ( MG_SIN(p2->tag) || (p2->tag & MG_NOM) ) {
+  else if ( (MG_CRN & p2->tag) || (p2->tag & MG_NOM) ) {
     ps = n1[0]*n2[0] + n1[1]*n2[1];
     if ( ps < 0.0 ) {
       n2[0] *= -1.0;

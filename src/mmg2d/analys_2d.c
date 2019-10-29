@@ -41,7 +41,7 @@ extern char ddb;
  *
  * \return 1 if success, 0 if fail
  *
- * Set tags GEO and REF to triangles and points by traveling the mesh;
+ * Set tags GEO, BDY and REF to triangles and points by traveling the mesh;
  * count number of subdomains or connected components
  *
  */
@@ -80,13 +80,19 @@ int MMG2D_setadj(MMG5_pMesh mesh) {
         ip2 = pt->v[i2];
 
         if ( adja[i] ) {
-          /* Transfert edge tag to adjacent */
           kk = adja[i] / 3;
           ii = adja[i] % 3;
           pt1 = &mesh->tria[kk];
 
-          pt1->tag[ii] |= pt->tag[i];
-          pt->tag[i] |= pt1->tag[ii];
+          if ( (!mesh->info.opnbdy) && (pt->ref==pt1->ref) ) {
+            /* Remove edge tag */
+            pt1->tag[ii] = pt->tag[i] = 0;
+          }
+          else {
+            /* Transfert edge tag to adjacent */
+            pt1->tag[ii] |= pt->tag[i];
+            pt->tag[i] |= pt1->tag[ii];
+          }
         }
 
         /* Transfer tags if i is already an edge (e.g. supplied by the user) */
@@ -128,8 +134,10 @@ int MMG2D_setadj(MMG5_pMesh mesh) {
         ii = adja[i] % 3;
         pt1 = &mesh->tria[kk];
 
-        /* Case of a boundary between two subdomains */
-        if ( abs(pt1->ref) != abs(pt->ref) ) {
+        /* Case of a boundary (except if opnbdy is enabled, the boundary must be
+         * between 2 different subdomains) */
+        if ( (mesh->info.opnbdy && ( pt->tag[i] || pt1->tag[ii] ) )
+             || abs(pt1->ref) != abs(pt->ref) ) {
           tag = ( MG_REF+MG_BDY );
 
           if ( !mesh->info.nosurf ) {
@@ -250,7 +258,7 @@ int MMG2D_singul(MMG5_pMesh mesh, int ref ) {
       if ( ppt->s ) continue;
       ppt->s = 1;
 
-      if ( !MG_VOK(ppt) || MG_SIN(ppt->tag) )  continue;
+      if ( !MG_VOK(ppt) || MG_CRN & ppt->tag )  continue;
 
       if ( !MG_EDG(ppt->tag) ) continue;
 
@@ -304,7 +312,7 @@ int MMG2D_singul(MMG5_pMesh mesh, int ref ) {
 
         /* If both edges carry different refs, tag vertex as singular */
         if ( listref[1] != listref[2] ) {
-          ppt->tag |= MG_CRN;
+          ppt->tag |= MG_REQ;
           nc++;
         }
 
@@ -356,7 +364,7 @@ int MMG2D_norver(MMG5_pMesh mesh, int ref) {
     for ( k=1; k<=mesh->np; ++k ) {
       mesh->point[k].s = 1;
     }
-    /* Second: if the point belongs to a boundary edge of reference ref, remove
+    /* Second: if the point belongs to a boundary edge or reference ref, remove
      * the mark */
     for ( k=1; k<=mesh->nt; ++k ) {
       pt = &mesh->tria[k];
@@ -379,7 +387,7 @@ int MMG2D_norver(MMG5_pMesh mesh, int ref) {
     for (i=0; i<3; i++) {
       ppt = &mesh->point[pt->v[i]];
       if ( !MG_EDG(ppt->tag) ) continue;
-      if ( ppt->s || MG_SIN(ppt->tag) || (ppt->tag & MG_NOM) ) continue;
+      if ( ppt->s || (MG_CRN & ppt->tag) || (ppt->tag & MG_NOM) ) continue;
 
       /* Travel the curve ppt belongs to from left to right until a singularity is met */
       kk = k;
@@ -400,7 +408,7 @@ int MMG2D_norver(MMG5_pMesh mesh, int ref) {
         pt1 = &mesh->tria[kk];
         ppt = &mesh->point[pt1->v[ii]];
       }
-      while ( !ppt->s && !MG_SIN(ppt->tag) && !(ppt->tag & MG_NOM) );
+      while ( !ppt->s && !(MG_CRN  & ppt->tag) && !(ppt->tag & MG_NOM) );
 
       /* Now travel the curve ppt belongs to from right to left until a singularity is met */
       ppt = &mesh->point[pt->v[i]];
@@ -422,7 +430,7 @@ int MMG2D_norver(MMG5_pMesh mesh, int ref) {
         pt1 = &mesh->tria[kk];
         ppt = &mesh->point[pt1->v[ii]];
       }
-      while ( !ppt->s && !MG_SIN(ppt->tag) && !(ppt->tag & MG_NOM) );
+      while ( !ppt->s && !(MG_CRN & ppt->tag) && !(ppt->tag & MG_NOM) );
     }
   }
 
