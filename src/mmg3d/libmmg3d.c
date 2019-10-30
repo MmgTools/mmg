@@ -20,6 +20,7 @@
 **  use this copy of the mmg distribution only if you accept them.
 ** =============================================================================
 */
+double (*MMG3D_lenedgCoor)(double *ca,double *cb,double *sa,double *sb);
 
 /**
  * \file mmg3d/libmmg3d.c
