@@ -49,7 +49,7 @@ extern "C" {
   {                                                                     \
   int klink;                                                            \
   int oldnpmax = mesh->npmax;                                           \
-                                                                        \
+  assert ( mesh && mesh->point );                                       \
   MMG5_TAB_RECALLOC(mesh,mesh->point,mesh->npmax,wantedGap,MMG5_Point,  \
                     "larger point table",law);                          \
                                                                         \

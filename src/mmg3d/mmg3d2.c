@@ -108,7 +108,7 @@ double MMG3D_vfrac(MMG5_pMesh mesh,MMG5_pSol sol,int k,int pm) {
   double        v[4],vfm,vfp,lam,area,eps,o[18];
   int           ip[4],nplus,nminus,nzero;
   int8_t        flag,cfg,ia;
-  char          i,i0,i1,i2,imin1,imin2,imin3,iplus1,iplus2,iplus3,iz;
+  char          i,i0,i1,i2,imin1,imin2,iplus1,iplus2,iz;
   unsigned char tau[4];
   const unsigned char *taued;
 
@@ -133,7 +133,7 @@ double MMG3D_vfrac(MMG5_pMesh mesh,MMG5_pSol sol,int k,int pm) {
   /* Identify number of zero, positive and negative vertices, and corresponding
    * indices */
   nplus = nminus = nzero = 0;
-  imin1 = imin2 = imin3 = iplus1 = iplus2 = iplus3 = iz = -1;
+  imin1 = imin2 = iplus1 = iplus2 = iz = -1;
 
   for (i=0; i<4; i++) {
     if ( fabs(v[i]) < eps ) {
@@ -144,13 +144,11 @@ double MMG3D_vfrac(MMG5_pMesh mesh,MMG5_pSol sol,int k,int pm) {
       nplus++;
       if ( iplus1 < 0 ) iplus1 = i;
       else if ( iplus2 < 0 ) iplus2 = i;
-      else iplus3 = i;
     }
     else {
       nminus++;
       if ( imin1 < 0 ) imin1 = i;
       else if ( imin2 < 0 ) imin2 = i;
-      else imin3 = i;
     }
   }
 
@@ -187,8 +185,6 @@ double MMG3D_vfrac(MMG5_pMesh mesh,MMG5_pSol sol,int k,int pm) {
   for ( ia=0; ia<18; ++ia ) {
     o[ia] = 0.0;
   }
-
-return 0.;
 
   /* We have exactly 2 negative vertices and 2 positive ones */
   assert ( nplus==2 && nminus==2 );

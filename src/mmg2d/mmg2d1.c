@@ -193,6 +193,7 @@ int MMG2D_anaelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
       }
 
       /* If there is a metric in the mesh, interpolate it at the new point */
+      assert ( met );
       if ( met->m )
         MMG2D_intmet(mesh,met,k,i,ip,s);
 
