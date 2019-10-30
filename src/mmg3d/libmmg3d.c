@@ -224,6 +224,7 @@ int MMG3D_mark_packedPoints(MMG5_pMesh mesh,int *np,int *nc) {
     if ( !MG_VOK(ppt) ) {
 
       ppt1 = &mesh->point[*np];
+      assert ( ppt1 );
       ppt1->tmp = k;
 
       /* Search the last used point */

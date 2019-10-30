@@ -652,6 +652,7 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
   /* default : store solution (resp. displacement) name in iso
    * (resp. lagrangian) mode, metric name otherwise */
   tmp = ( mesh->info.iso || mesh->info.lag >=0 ) ? sol : met;
+  assert ( tmp );
   if ( tmp->namein == NULL ) {
     if ( !MMG2D_Set_inputSolName(mesh,tmp,"") )
       return 0;
@@ -729,7 +730,6 @@ int main(int argc,char *argv[]) {
   ptr   = MMG5_Get_filenameExt(mesh->namein);
   fmtin = MMG5_Get_format(ptr,MMG5_FMT_MeditASCII);
 
-  ier = 0;
   switch ( fmtin ) {
   case ( MMG5_FMT_GmshASCII ): case ( MMG5_FMT_GmshBinary ):
     ier = MMG2D_loadMshMesh(mesh,sol,mesh->namein);

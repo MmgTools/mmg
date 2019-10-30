@@ -151,14 +151,16 @@ static const unsigned int MMG2D_inxt[5] = {1,2,0,1,2};
       mesh->point[klink].tmp  = klink+1;                                \
                                                                         \
     /* solution */                                                      \
-    if ( sol->m ) {                                                     \
-      MMG5_ADD_MEM(mesh,(sol->size*(mesh->npmax-sol->npmax))*sizeof(double), \
-                    "larger solution",law);                             \
-      MMG5_SAFE_REALLOC(sol->m,sol->size*(sol->npmax+1),               \
-                         sol->size*(mesh->npmax+1),                     \
-                         double,"larger solution",law);                 \
+    if ( sol ) {                                                        \
+      if ( sol->m ) {                                                   \
+        MMG5_ADD_MEM(mesh,(sol->size*(mesh->npmax-sol->npmax))*sizeof(double), \
+                     "larger solution",law);                            \
+        MMG5_SAFE_REALLOC(sol->m,sol->size*(sol->npmax+1),              \
+                          sol->size*(mesh->npmax+1),                    \
+                          double,"larger solution",law);                \
+      }                                                                 \
+      sol->npmax = mesh->npmax;                                         \
     }                                                                   \
-    sol->npmax = mesh->npmax;                                           \
                                                                         \
     /* We try again to add the point */                                 \
     ip = MMG2D_newPt(mesh,o,tag);                                      \

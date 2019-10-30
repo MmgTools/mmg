@@ -518,6 +518,7 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
   /* default : store solution (resp. displacement) name in iso
    * (resp. lagrangian) mode, metric name otherwise */
   tmp = ( mesh->info.iso || mesh->info.lag >=0 ) ? sol : met;
+  assert ( tmp );
   if ( tmp->namein == NULL ) {
     if ( !MMG3D_Set_inputSolName(mesh,tmp,"") ) { return 0; }
   }

@@ -71,7 +71,7 @@ double MMG2D_vfrac(MMG5_pMesh mesh,MMG5_pSol sol,int k,int pm) {
   MMG5_pPoint   ppt[3];
   double        v[3],vfp,vfm,lam,area,eps,o1[2],o2[2];
   int           ip[3],nplus,nminus,nzero;
-  char          i,i0,i1,i2,imin1,imin2,iplus1,iplus2,iz;
+  char          i,i0,i1,i2,imin1,iplus1,iz;
 
   eps = MMG5_EPS*MMG5_EPS;
   pt = &mesh->tria[k];
@@ -90,7 +90,7 @@ double MMG2D_vfrac(MMG5_pMesh mesh,MMG5_pSol sol,int k,int pm) {
 
   /* Identify number of zero, positive and negative vertices, and corresponding indices */
   nplus = nminus = nzero = 0;
-  imin1 = imin2 = iplus1 = iplus2 = iz = -1;
+  imin1 = iplus1 = iz = -1;
 
   for (i=0; i<3; i++) {
     if ( fabs(v[i]) < eps ) {
@@ -100,12 +100,10 @@ double MMG2D_vfrac(MMG5_pMesh mesh,MMG5_pSol sol,int k,int pm) {
     else if ( v[i] >= eps ) {
       nplus++;
       if ( iplus1 < 0 ) iplus1 = i;
-      else iplus2 = i;
     }
     else {
       nminus++;
       if ( imin1 < 0 ) imin1 = i;
-      else imin2 = i;
     }
   }
 
@@ -653,10 +651,6 @@ int MMG2D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
       pt1 = &mesh->tria[kk];
 
       /* Add local volume fraction of the positive subdomain to volc */
-      ip0 = pt1->v[0];
-      ip1 = pt1->v[1];
-      ip2 = pt1->v[2];
-
       volc += MMG2D_vfrac(mesh,sol,kk,1);
 
       /* Add adjacent triangles to kk via positive vertices to the pile, if need be */
@@ -751,10 +745,6 @@ int MMG2D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
       pt1 = &mesh->tria[kk];
 
       /* Add local volume fraction of the negative subdomain to volc */
-      ip0 = pt1->v[0];
-      ip1 = pt1->v[1];
-      ip2 = pt1->v[2];
-
       volc += MMG2D_vfrac(mesh,sol,kk,-1);
 
       /* Add adjacent triangles to kk via negative vertices to the pile, if need be */

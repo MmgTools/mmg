@@ -71,7 +71,6 @@ int MMG2D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
   char       *ptr,data[256];
   FILE       *in;
   MMG5_pMat  pm;
-  MMG5_pPar  ppar;
   fpos_t     position;
 
   /* Check for parameter file */
@@ -146,7 +145,6 @@ int MMG2D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
           return 0;
 
         for (i=0; i<mesh->info.npar; i++) {
-          ppar = &mesh->info.par[i];
           ret = fscanf(in,"%d %255s",&ref,data);
           if ( ret ) ret = fscanf(in,"%f %f %f",&fp1,&fp2,&fp3);
 
@@ -216,8 +214,6 @@ int MMG2D_Get_numberOfNonBdyEdges(MMG5_pMesh mesh, int* nb_edges) {
       adja = &mesh->adja[3*(k-1)+1];
 
       for ( i=0; i<3; i++ ) {
-        i1 = MMG5_inxt2[i];
-        i2 = MMG5_iprv2[i];
         iel = adja[i] / 3;
         assert ( iel != k );
 

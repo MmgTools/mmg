@@ -394,6 +394,7 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol so
 
   /* default : store solution name in iso mode, metric name otherwise */
   tmp = ( mesh->info.iso || mesh->info.lag >=0 ) ? sol : met;
+  assert ( tmp );
   if ( tmp->namein == NULL ) {
     if ( !MMGS_Set_inputSolName(mesh,tmp,"") ) { return 0; }
   }
