@@ -1031,8 +1031,8 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet) {
     }
   }
 
-  if ( !sol->np ) {
-    fprintf(stderr,"\n  ## ERROR: A VALID SOLUTION FILE IS NEEDED \n");
+  if ( (!sol->np) || (!sol->m) ) {
+    fprintf(stderr,"\n  ## ERROR: A VALID SOLUTION FIELD IS NEEDED \n");
     if ( mettofree ) { MMG5_DEL_MEM(mesh,met->m);MMG5_SAFE_FREE (met); }
     _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
   }

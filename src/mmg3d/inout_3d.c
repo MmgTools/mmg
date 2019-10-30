@@ -1577,14 +1577,16 @@ int MMG3D_saveVTKOctree(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   }
 
   /** Step 4: save the levelset values at points */
-  fprintf(inm,"\n%s %d\n","POINT_DATA",np);
-  fprintf(inm,"\n%s\n","SCALARS distance double 1");
-  fprintf(inm,"\n%s\n","LOOKUP_TABLE default");
+  if ( sol && sol->m ) {
+    fprintf(inm,"\n%s %d\n","POINT_DATA",np);
+    fprintf(inm,"\n%s\n","SCALARS distance double 1");
+    fprintf(inm,"\n%s\n","LOOKUP_TABLE default");
 
-  for ( k=1; k<=mesh->np; ++k ) {
-    ppt = &mesh->point[k];
-    if ( MG_VOK(ppt) ) {
-      fprintf(inm,"%.15lg\n",sol->m[k]);
+    for ( k=1; k<=mesh->np; ++k ) {
+      ppt = &mesh->point[k];
+      if ( MG_VOK(ppt) ) {
+        fprintf(inm,"%.15lg\n",sol->m[k]);
+      }
     }
   }
 

@@ -440,7 +440,7 @@ int main(int argc,char *argv[]) {
   }
 
   /* Conversion of grid into tetra mesh if needed */
-  if ( mesh->info.grid && !MMG3D_convert_grid2tetmesh(mesh,met) ) {
+  if ( mesh->info.grid && !MMG3D_convert_grid2tetmesh(mesh,sol) ) {
     MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
   }
 

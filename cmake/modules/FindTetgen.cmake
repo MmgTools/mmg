@@ -21,23 +21,13 @@
 ## =============================================================================
 
 IF ((NOT WIN32) AND (NOT WIN64))
-  SET ( TETGEN_DIR TETGEN_DIR-NOTFOUND )
   SET ( TETGEN_EXEC TETGEN_EXEC-NOTFOUND )
 ENDIF()
 
-FIND_PATH(TETGEN_DIR
-  NAMES tetgen.h
-  HINTS ${TETGEN_DIR}
-  $ENV{TETGEN_DIR}
-  $ENV{HOME}/tetgen
-  DOC "Directory of TETGEN Header")
-
-# Check for elas library (search in common locations in order to prevent
-# modifications in ELAS installation)
 FIND_PROGRAM(TETGEN_EXEC
   NAMES tetgen
-  HINTS ${TETGEN_DIR} ${TETGEN_DIR}/build
-  $ENV{TETGEN_DIR}  $ENV{TETGEN_DIR}/build
+  HINTS ${TETGEN_EXEC} ${TETGEN} ${TETGEN}/build
+  $ENV{TETGEN}  $ENV{TETGEN}/build
   $ENV{HOME}/bin
   DOC "The tetgen executable"
   )

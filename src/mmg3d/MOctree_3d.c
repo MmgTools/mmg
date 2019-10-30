@@ -128,6 +128,12 @@ int MMG3D_init_MOctree_s( MMG5_pMesh mesh, MMG5_MOctree_s* q,int ip, int depth,i
 int  MMG3D_set_splitls_MOctree ( MMG5_pMesh mesh, MMG5_MOctree_s* q, MMG5_pSol sol) {
   int ip;
   int FDL,FDR,BDL,BDR,FUL,FUR,BUL,BUR;// ip of the 8 vertices of an octree cell
+
+  if ( (!sol) || (!sol->m) ) {
+    q->split_ls = 0;
+    return 1;
+  }
+
   ip=q->blf_ip;
 
   FDL=ip; // Front Down Left corner

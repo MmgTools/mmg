@@ -531,6 +531,7 @@ int MMG3D_convert_octree2tetmesh_with_tetgen(MMG5_pMesh mesh, MMG5_pSol sol) {
   fclose(inm);
 
   /* run tetgen on the .node file */
+  printf("  --> Tetgen executable: %s\n",TETGEN);
   sprintf(command, "%s -BANEF -Q -g %s", TETGEN, tetgenfile);
   ier = system(command);
   if ( ier != 0 ) {
@@ -622,19 +623,18 @@ int MMG3D_convert_grid2tetmesh(MMG5_pMesh mesh, MMG5_pSol sol) {
   MMG3D_check_octreeSons ( mesh->octree->root );
 #endif
 
-  /* Creation of the coarse octree */
-  if ( !MMG3D_coarsen_octree(mesh,sol) ) {
+  /* Creation of the coarse octree if an isovalue is provided */
+  if ( sol && sol->m && !MMG3D_coarsen_octree(mesh,sol) ) {
     fprintf(stderr,"\n  ## Octree coarsening problem. Exit program.\n");
     return 0;
   }
 
 #ifndef NDEBUG
   MMG3D_check_octreeSons ( mesh->octree->root );
-#endif
-
   if ( !MMG3D_saveVTKOctree(mesh,sol,mesh->nameout) ) {
     fprintf(stderr,"\n  ## Warning: unable to save the coarsen octree\n");
   }
+#endif
 
   /**--- stage 2: Tetrahedralization */
   if ( abs(mesh->info.imprim) > 3 )
