@@ -224,7 +224,6 @@ double MMG3D_vfrac(MMG5_pMesh mesh,MMG5_pSol sol,int k,int pm) {
     break;
   }
 
-  cfg = -1;
   if ( pm < 0 ) {
     if ( v[tau[0]] < 0.0 ) {
       /* compute the area that contains tau[0] and tau[1] */

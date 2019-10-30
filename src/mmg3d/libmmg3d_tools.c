@@ -725,6 +725,8 @@ void MMG3D_searchqua(MMG5_pMesh mesh,MMG5_pSol met,double critmin, int *eltab,
   double   rap;
   int      k;
 
+  assert ( met );
+
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
 
