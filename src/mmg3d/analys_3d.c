@@ -42,7 +42,7 @@
  * not realy required.
  *
  */
-static inline void MMG3D_set_reqBoundaries(MMG5_pMesh mesh) {
+void MMG3D_set_reqBoundaries(MMG5_pMesh mesh) {
   MMG5_pTria     ptt;
   int            k;
 
@@ -93,7 +93,7 @@ static inline void MMG3D_set_reqBoundaries(MMG5_pMesh mesh) {
  * topology: set adjacent, detect Moebius, flip faces, count connected comp.
  *
  */
-static int MMG5_setadj(MMG5_pMesh mesh){
+int MMG5_setadj(MMG5_pMesh mesh){
   MMG5_pTria   pt,pt1;
   int          *adja,*adjb,adji1,adji2,*pile,iad,ipil,ip1,ip2,gen;
   int          k,kk,iel,jel,nvf,nf,nr,nt,nre,nreq,ncc,ned,ref;
@@ -280,7 +280,7 @@ static int MMG5_setadj(MMG5_pMesh mesh){
 }
 
 /** check for ridges: dihedral angle */
-static int MMG5_setdhd(MMG5_pMesh mesh) {
+int MMG5_setdhd(MMG5_pMesh mesh) {
   MMG5_pTria    pt,pt1;
   double        n1[3],n2[3],dhd;
   int          *adja,k,kk,ne,nr;
@@ -347,7 +347,7 @@ static int MMG5_setdhd(MMG5_pMesh mesh) {
  * check subdomains connected by a vertex and mark these vertex as CRN and REQ.
  *
  */
-static int MMG5_chkVertexConnectedDomains(MMG5_pMesh mesh){
+int MMG5_chkVertexConnectedDomains(MMG5_pMesh mesh){
   MMG5_pTetra  pt;
   MMG5_pxTetra pxt;
   MMG5_pPoint  ppt;
@@ -394,14 +394,14 @@ static int MMG5_chkVertexConnectedDomains(MMG5_pMesh mesh){
         if( ppt->tag & MG_NOM ){
           if ( mesh->adja[4*(k-1)+1+i] ) continue;
           ier=MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,1);
-	} else {
+        } else {
           ier=MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,0);
         }
-	if ( ier != 1 && !mmgWarn ) {
-	  mmgWarn = 1;
-	  printf("  ## Warning: %s: unable to check that we don't have"
-		 " non-connected domains.\n",__func__);
-	}
+        if ( ier != 1 && !mmgWarn ) {
+          mmgWarn = 1;
+          printf("  ## Warning: %s: unable to check that we don't have"
+                 " non-connected domains.\n",__func__);
+        }
 
         if(ilistv != ppt->s) {
           if(!(ppt->tag & MG_REQ) ) {
@@ -417,7 +417,7 @@ static int MMG5_chkVertexConnectedDomains(MMG5_pMesh mesh){
 }
 
 /** check for singularities */
-static int MMG5_singul(MMG5_pMesh mesh) {
+int MMG5_singul(MMG5_pMesh mesh) {
   MMG5_pTria     pt;
   MMG5_pPoint    ppt,p1,p2;
   double         ux,uy,uz,vx,vy,vz,dd;
@@ -434,6 +434,8 @@ static int MMG5_singul(MMG5_pMesh mesh) {
       if ( !MG_VOK(ppt) || ( ppt->tag & MG_CRN ) || ( ppt->tag & MG_NOM ) )
         continue;
       else if ( MG_EDG(ppt->tag) ) {
+        /* Store the number of ridges passing through the point (xp) and the
+         * number of ref edges (nr) */
         ns = MMG5_bouler(mesh,mesh->adjt,k,i,list,listref,&xp,&nr,MMG3D_LMAX);
 
         if ( !ns )  continue;
@@ -489,7 +491,7 @@ static int MMG5_singul(MMG5_pMesh mesh) {
 }
 
 /** compute normals at C1 vertices, for C0: tangents */
-static int MMG5_norver(MMG5_pMesh mesh) {
+int MMG5_norver(MMG5_pMesh mesh) {
   MMG5_pTria     pt;
   MMG5_pPoint    ppt;
   MMG5_xPoint    *pxp;
@@ -567,7 +569,7 @@ static int MMG5_norver(MMG5_pMesh mesh) {
 
         ++mesh->xp;
         if(mesh->xp > mesh->xpmax){
-          MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,MMG5_xPoint,
+          MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,MMG5_GAP,MMG5_xPoint,
                              "larger xpoint table",
                              mesh->xp--;return 0;);
         }
@@ -588,7 +590,7 @@ static int MMG5_norver(MMG5_pMesh mesh) {
       }
       ++mesh->xp;
       if(mesh->xp > mesh->xpmax){
-        MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,MMG5_xPoint,
+        MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,MMG5_GAP,MMG5_xPoint,
                            "larger xpoint table",
                            mesh->xp--;return 0;);
       }
@@ -661,7 +663,7 @@ static int MMG5_norver(MMG5_pMesh mesh) {
  * information.
  *
  */
-static int MMG3D_nmgeom(MMG5_pMesh mesh){
+int MMG3D_nmgeom(MMG5_pMesh mesh){
   MMG5_pTetra     pt;
   MMG5_pPoint     p0;
   MMG5_pxPoint    pxp;
@@ -700,7 +702,7 @@ static int MMG3D_nmgeom(MMG5_pMesh mesh){
           if ( !p0->xp ) {
             ++mesh->xp;
             if(mesh->xp > mesh->xpmax){
-              MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,MMG5_xPoint,
+              MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,MMG5_GAP,MMG5_xPoint,
                                  "larger xpoint table",
                                  mesh->xp--;
                                  fprintf(stderr,"  Exit program.\n");return 0;);
@@ -761,8 +763,8 @@ int MMG3D_analys(MMG5_pMesh mesh) {
   /* Set surface triangles to required in nosurf mode or for parallel boundaries */
   MMG3D_set_reqBoundaries(mesh);
 
-
   /* create surface adjacency */
+  memset ( &hash, 0x0, sizeof(MMG5_Hash));
   if ( !MMG3D_hashTria(mesh,&hash) ) {
     MMG5_DEL_MEM(mesh,hash.item);
     fprintf(stderr,"\n  ## Hashing problem (2). Exit program.\n");
@@ -809,6 +811,10 @@ int MMG3D_analys(MMG5_pMesh mesh) {
   if ( !MMG5_norver(mesh) ) {
     fprintf(stderr,"\n  ## Normal problem. Exit program.\n");
     MMG5_DEL_MEM(mesh,hash.item);
+    return 0;
+  }
+  if ( mesh->info.nreg && !MMG5_regnor(mesh) ) {
+    fprintf(stderr,"\n  ## Normal regularization problem. Exit program.\n");
     return 0;
   }
 

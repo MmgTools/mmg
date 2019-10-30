@@ -678,38 +678,40 @@ int MMGS_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pPoint   ppt;
   double        mm[6];
   int           k;
-  char          i,ismet;
+  char          i;
   static char   mmgErr=0;
 
-  if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
-    fprintf(stdout,"  ** Defining anisotropic map\n");
-
-  if ( mesh->info.hmax < 0.0 ) {
-    //  mesh->info.hmax = 0.5 * mesh->info.delta;
-    if ( !mmgErr ) {
-      fprintf(stderr,"\n  ## Error: %s: negative hmax value.\n",__func__);
-      mmgErr = 1;
-    }
+  if ( !MMG5_defsiz_startingMessage (mesh,met,__func__) ) {
     return 0;
-  }
-
-  if ( met->m )
-    ismet = 1;
-  else {
-    ismet = 0;
-
-     MMG5_calelt     = MMG5_caltri_ani;
-     MMG5_lenSurfEdg = MMG5_lenSurfEdg_ani;
-
-     if ( !MMGS_Set_solSize(mesh,met,MMG5_Vertex,mesh->np,3) )
-       return 0;
   }
 
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
     ppt->flag = 0;
+    ppt->s    = 0;
   }
 
+  if ( met->m ) {
+    assert ( mesh->info.inputMet );
+  }
+  else {
+    MMG5_calelt     = MMG5_caltri_ani;
+    MMG5_lenSurfEdg = MMG5_lenSurfEdg_ani;
+
+    if ( !MMGS_Set_solSize(mesh,met,MMG5_Vertex,mesh->np,3) )
+      return 0;
+    /* Set_solSize modify the value of the inputMet field => we need to reset it */
+    mesh->info.inputMet = 0;
+  }
+
+  /** Step 1: Set metric at points belonging to a required edge: compute the
+   * metric as the mean of the length of the required eges passing through the
+   * point */
+  if ( !MMGS_set_metricAtPointsOnReqEdges ( mesh,met ) ) {
+    return 0;
+  }
+
+  /* Step 2: Travel all the points (via triangles) in the mesh and set metric tensor */
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) || pt->ref < 0 )  continue;
@@ -717,7 +719,7 @@ int MMGS_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
     for (i=0; i<3; i++) {
       ppt = &mesh->point[pt->v[i]];
       if ( ppt->flag || !MG_VOK(ppt) )  continue;
-      if ( ismet )  memcpy(mm,&met->m[6*(pt->v[i])],6*sizeof(double));
+      if ( mesh->info.inputMet )  memcpy(mm,&met->m[6*(pt->v[i])],6*sizeof(double));
 
       if ( MS_SIN(ppt->tag) ) {
         if ( !MMG5_defmetsin(mesh,met,k,i) )  continue;
@@ -732,7 +734,7 @@ int MMGS_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
       else {
         if ( !MMG5_defmetreg(mesh,met,k,i) )  continue;
       }
-      if ( ismet ) {
+      if ( mesh->info.inputMet ) {
         if ( !MMGS_intextmet(mesh,met,pt->v[i],mm) ) {
           if ( !mmgErr ) {
             fprintf(stderr,"\n  ## Error: %s: unable to intersect metrics"
@@ -748,11 +750,10 @@ int MMGS_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
   /* search for unintialized metric */
-  MMG5_defUninitSize(mesh,met,ismet);
+  MMG5_defUninitSize ( mesh,met );
 
   return 1;
 }
-
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -763,20 +764,18 @@ int MMGS_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
  * Enforces mesh gradation by truncating metric field.
  *
  */
-int gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
-  MMG5_pTria   pt;
-  MMG5_pPoint  p1,p2;
-  double  *m,mv;
-  int     k,it,nup,nu,maxit;
-  char    i,ier,i1,i2;
+int MMGS_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
+  MMG5_pPoint  p1;
+  double       *m,mv;
+  int          k,it;
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
     fprintf(stdout,"  ** Anisotropic mesh gradation\n");
 
-  for (k=1; k<=mesh->np; k++)
-    mesh->point[k].flag = mesh->base;
-
   /* First step : make ridges iso in each apairing direction */
+  // remark ALGIANE: a mettre à plat : on veut vraiment faire ça ? Pour une demi
+  // sphère, on n'a pas envie de garder une métrique "infinie du coté du plan et
+  // petite dans la direction de la sphère?? "
   for (k=1; k<= mesh->np; k++) {
     p1 = &mesh->point[k];
     if ( !MG_VOK(p1) ) continue;
@@ -793,39 +792,7 @@ int gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
   /* Second step : standard gradation procedure */
-  it = nup = 0;
-  maxit = 100;
-  do {
-    mesh->base++;
-    nu = 0;
-    for (k=1; k<=mesh->nt; k++) {
-      pt = &mesh->tria[k];
-      if ( !MG_EOK(pt) )  continue;
-
-      for (i=0; i<3; i++) {
-        i1 = MMG5_inxt2[i];
-        i2 = MMG5_iprv2[i];
-        p1 = &mesh->point[pt->v[i1]];
-        p2 = &mesh->point[pt->v[i2]];
-
-        if ( p1->flag < mesh->base-1 && p2->flag < mesh->base-1 )  continue;
-        ier = MMG5_grad2metSurf(mesh,met,pt,i);
-        if ( ier == i1 ) {
-          p1->flag = mesh->base;
-          nu++;
-        }
-        else if ( ier == i2 ) {
-          p2->flag = mesh->base;
-          nu++;
-        }
-      }
-    }
-    nup += nu;
-  }
-  while( ++it < maxit && nu > 0 );
-
-  if ( abs(mesh->info.imprim) > 4 )
-    fprintf(stdout,"     gradation: %7d updated, %d iter.\n",nup,it);
+  MMG5_gradsiz_ani(mesh,met,&it);
 
   return 1;
 }

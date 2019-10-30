@@ -38,7 +38,7 @@
 #include "librnbg.h"
 
 /**
- * \param graf the input graph structure.
+ * \param graf pointer toward the input graph structure.
  * \param vertNbr the number of vertices.
  * \param boxVertNbr the number of vertices of each box.
  * \param permVrtTab the new numbering.
@@ -49,7 +49,7 @@
  * k-partitioning and assuming that baseval of the graph is 1.
  *
  **/
-int MMG5_kPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr,
+int MMG5_kPartBoxCompute(SCOTCH_Graph *graf, int vertNbr, int boxVertNbr,
                           SCOTCH_Num *permVrtTab,MMG5_pMesh mesh) {
   int boxNbr, vertIdx;
   SCOTCH_Num logMaxVal, SupMaxVal, InfMaxVal, maxVal;
@@ -80,7 +80,7 @@ int MMG5_kPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr,
   MMG5_SAFE_CALLOC(sortPartTb,2*vertNbr,SCOTCH_Num,return 0);
 
   /* Partionning the graph */
-  if ( 0!=SCOTCH_graphMap(&graf, &arch, &strat, sortPartTb) ) {
+  if ( 0!=SCOTCH_graphMap(graf, &arch, &strat, sortPartTb) ) {
     perror("scotch_graphMap");
     MMG5_DEL_MEM(mesh,sortPartTb);
     return 0;
@@ -182,6 +182,8 @@ void MMG5_swapNod(MMG5_pPoint points, double* sols, int* perm,
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the solution structure.
+ * \param permNodGlob store the global permutation of nodes (if provided).
+ *
  * \return 0 if \a MMG5_renumbering fail (non conformal mesh), 1 otherwise
  * (renumerotation success of renumerotation fail but the mesh is still
  *  conformal).
@@ -189,7 +191,7 @@ void MMG5_swapNod(MMG5_pPoint points, double* sols, int* perm,
  * Call scotch renumbering.
  *
  **/
-int MMG5_scotchCall(MMG5_pMesh mesh, MMG5_pSol met)
+int MMG5_scotchCall(MMG5_pMesh mesh, MMG5_pSol met, int *permNodGlob)
 {
 
 #ifdef USE_SCOTCH
@@ -212,9 +214,9 @@ int MMG5_scotchCall(MMG5_pMesh mesh, MMG5_pSol met)
     if ( mesh->info.imprim > 5 )
       fprintf(stdout,"  -- RENUMBERING. \n");
 
-    if ( !MMG5_renumbering(MMG5_BOXSIZE,mesh, met) ) {
+    if ( !MMG5_renumbering(MMG5_BOXSIZE,mesh, met,permNodGlob) ) {
       if ( !mmgError ) {
-        fprintf(stderr,"\n  ## Error: %s: Unable to renumbering mesh. "
+        fprintf(stderr,"\n  ## Error: %s: Unable to renumber mesh. "
                 "Try to run without renumbering option (-rn 0).\n",
                 __func__);
         mmgError = 1;

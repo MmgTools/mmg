@@ -123,7 +123,7 @@ int MMG5_hashFace(MMG5_pMesh mesh,MMG5_Hash *hash,int ia,int ib,int ic,int k) {
     ph->nxt = 0;
 
     if ( hash->nxt >= hash->max ) {
-      MMG5_TAB_RECALLOC(mesh,hash->item,hash->max,0.2,MMG5_hedge,"face",return 0;);
+      MMG5_TAB_RECALLOC(mesh,hash->item,hash->max,MMG5_GAP,MMG5_hedge,"face",return 0;);
       for (j=hash->nxt; j<hash->max; j++)  hash->item[j].nxt = j+1;
     }
     return -1;
@@ -678,11 +678,17 @@ static inline
 int MMG5_setVertexNmTag(MMG5_pMesh mesh) {
   MMG5_pTetra         ptet;
   MMG5_pPoint         ppt;
+  MMG5_Hash           hash;
   int                 k,i;
   int                 nc, nre, ng, nrp,ier;
 
   /* Second: seek the non-required non-manifold points and try to analyse
    * whether they are corner or required. */
+
+  /* Hash table used by boulernm to store the special edges passing through
+   * a given point */
+  if ( ! MMG5_hashNew(mesh,&hash,mesh->np,3.71*mesh->np) ) return 0;
+
   nc = nre = 0;
   ++mesh->base;
   for (k=1; k<=mesh->ne; ++k) {
@@ -696,7 +702,7 @@ int MMG5_setVertexNmTag(MMG5_pMesh mesh) {
 
       if ( (!(ppt->tag & MG_NOM)) || (ppt->tag & MG_REQ) ) continue;
 
-      ier = MMG5_boulernm(mesh, k, i, &ng, &nrp);
+      ier = MMG5_boulernm(mesh,&hash, k, i, &ng, &nrp);
       if ( ier < 0 ) return 0;
       else if ( !ier ) continue;
 
@@ -725,6 +731,9 @@ int MMG5_setVertexNmTag(MMG5_pMesh mesh) {
       }
     }
   }
+
+  /* Free the edge hash table */
+  MMG5_DEL_MEM(mesh,hash.item);
 
   if ( mesh->info.ddebug || abs(mesh->info.imprim) > 3 )
     fprintf(stdout,"     %d corner and %d required vertices added\n",nc,nre);
@@ -766,6 +775,8 @@ int MMG5_setNmTag(MMG5_pMesh mesh, MMG5_Hash *hash) {
  *
  */
 int MMG3D_hashTria(MMG5_pMesh mesh, MMG5_Hash *hash) {
+
+  MMG5_DEL_MEM(mesh,mesh->adjt);
 
   MMG5_ADD_MEM(mesh,(3*mesh->nt+4)*sizeof(int),"surfacic adjacency table",return 0);
   MMG5_SAFE_CALLOC(mesh->adjt,3*mesh->nt+4,int,return 0);
@@ -851,14 +862,18 @@ int MMG5_hTag(MMG5_HGeom *hash,int a,int b,int ref,int16_t tag) {
     return 0;
   else if ( ph->a == ia && ph->b == ib ) {
     ph->tag |= tag;
-    ph->ref  = ref;
+    if ( ref ) {
+      ph->ref  = ref;
+    }
     return 1;
   }
   while ( ph->nxt ) {
     ph = &hash->geom[ph->nxt];
     if ( ph->a == ia && ph->b == ib ) {
       ph->tag |= tag;
-      ph->ref  = ref;
+      if ( ref ) {
+        ph->ref  = ref;
+      }
       return 1;
     }
   }
@@ -984,7 +999,7 @@ int MMG5_hEdge(MMG5_pMesh mesh,MMG5_HGeom *hash,int a,int b,int ref,int16_t tag)
     if ( hash->nxt >= hash->max ) {
       if ( mesh->info.ddebug )
         fprintf(stderr,"\n  ## Memory alloc problem (edge): %d\n",hash->max);
-      MMG5_TAB_RECALLOC(mesh,hash->geom,hash->max,0.2,MMG5_hgeom,
+      MMG5_TAB_RECALLOC(mesh,hash->geom,hash->max,MMG5_GAP,MMG5_hgeom,
                          "larger htab table",
                          fprintf(stderr,"  Exit program.\n");return 0;);
       for (j=hash->nxt; j<hash->max; j++)  hash->geom[j].nxt = j+1;
@@ -1030,7 +1045,7 @@ int MMG5_hNew(MMG5_pMesh mesh,MMG5_HGeom *hash,int hsiz,int hmax) {
 int MMG5_hGeom(MMG5_pMesh mesh) {
   MMG5_pTria   pt;
   MMG5_pEdge   pa;
-  MMG5_Hash   hash;
+  MMG5_Hash    hash;
   int         *adja,k,kk,edg,ier;
   int16_t      tag;
   char         i,i1,i2;
@@ -1068,14 +1083,14 @@ int MMG5_hGeom(MMG5_pMesh mesh) {
         i2 = MMG5_iprv2[i];
         /* transfer non manifold tag to edges */
         if ( pt->tag[i] & MG_NOM ) {
-	  ier = MMG5_hTag(&mesh->htab,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]);
+          ier = MMG5_hTag(&mesh->htab,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]);
           if ( !ier ) {
-	    /* The edge is marked as non manifold but doesn't exist in the mesh */
-	    ier = MMG5_hEdge(mesh,&mesh->htab,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]);
-	    if ( !ier )
-	      return 0;
-	  }
-	}
+            /* The edge is marked as non manifold but doesn't exist in the mesh */
+            ier = MMG5_hEdge(mesh,&mesh->htab,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]);
+            if ( !ier )
+              return 0;
+          }
+        }
         MMG5_hGet(&mesh->htab,pt->v[i1],pt->v[i2],&edg,&tag);
         pt->edg[i]  = edg;
 
@@ -1095,9 +1110,10 @@ int MMG5_hGeom(MMG5_pMesh mesh) {
   /* else, infer special edges from information carried by triangles */
   else {
     if ( !mesh->adjt ) {
+      memset(&hash,0x0,sizeof(MMG5_Hash));
       ier = MMG3D_hashTria(mesh,&hash);
-      if ( !ier ) return 0;
       MMG5_DEL_MEM(mesh,hash.item);
+      if ( !ier ) return 0;
     }
 
     for (k=1; k<=mesh->nt; k++) {
@@ -1754,7 +1770,7 @@ int MMG5_bdrySet(MMG5_pMesh mesh) {
           if ( !pt->xt ) {
             mesh->xt++;
             if ( mesh->xt > mesh->xtmax ) {
-              MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
+              MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
                                  "larger xtetra table",
                                  mesh->xt--;
                                  fprintf(stderr,"  Exit program.\n");return 0;);
@@ -1787,7 +1803,7 @@ int MMG5_bdrySet(MMG5_pMesh mesh) {
         if ( !pt->xt ) {
           mesh->xt++;
           if ( mesh->xt > mesh->xtmax ) {
-            MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
+            MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
                                "larger xtetra table",
                                mesh->xt--;
                                fprintf(stderr,"  Exit program.\n");return 0;);

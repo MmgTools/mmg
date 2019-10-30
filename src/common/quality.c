@@ -114,7 +114,7 @@ double MMG5_caltri33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt) {
  */
 double MMG5_caltri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
   MMG5_pPoint   p[3];
-  double        rap,anisurf,l0,l1,l2,m[6],mm[6];
+  double        rap,anisurf,l0,l1,l2,m[6],mm[6],rbasis[3][3];
   double        abx,aby,abz,acx,acy,acz,bcy,bcx,bcz;
   int           np[3],i,j;
   char          i1,i2;
@@ -140,7 +140,10 @@ double MMG5_caltri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
       abx = 0.5*(p[i1]->c[0]+p[i2]->c[0]) - p[i]->c[0];
       aby = 0.5*(p[i1]->c[1]+p[i2]->c[1]) - p[i]->c[1];
       abz = 0.5*(p[i1]->c[2]+p[i2]->c[2]) - p[i]->c[2];
-      if ( !MMG5_buildridmet(mesh,met,np[i],abx,aby,abz,&m[0]) )  return 0.0;
+      /* Note that rbasis is unused here */
+      if ( !MMG5_buildridmet(mesh,met,np[i],abx,aby,abz,&m[0],rbasis) ) {
+        return 0.0;
+      }
     }
     else {
       memcpy(&m[0],&met->m[6*np[i]],6*sizeof(double));
@@ -262,7 +265,7 @@ void MMG5_displayLengthHisto(MMG5_pMesh mesh, int ned, double *avlen,
   fprintf(stdout,"     LARGEST  EDGE LENGTH   %12.4f   %6d %6d \n",
           lmax,amax,bmax);
 
-  MMG5_displayLengthHisto_internal(mesh,ned,amin,bmin,lmin,amax,bmax,
+  MMG5_displayLengthHisto_internal( ned,amin,bmin,lmin,amax,bmax,
                                     lmax,nullEdge,bd,hl,shift,
                                     mesh->info.imprim);
 
@@ -288,23 +291,23 @@ void MMG5_displayLengthHisto(MMG5_pMesh mesh, int ned, double *avlen,
  * Display histogram of edge length without the histo header
  *
  */
-void MMG5_displayLengthHisto_internal(MMG5_pMesh mesh, int ned,int amin,
+void MMG5_displayLengthHisto_internal( int ned,int amin,
                                        int bmin, double lmin,int amax, int bmax,
                                        double lmax,int nullEdge,double *bd,
                                        int *hl,char shift,int imprim)
 {
   int    k;
 
-  if ( abs(mesh->info.imprim) < 3 ) return;
+  if ( abs(imprim) < 3 ) return;
 
   if ( hl[2+shift]+hl[3+shift]+hl[4+shift] )
     fprintf(stdout,"   %6.2f < L <%5.2f  %8d   %5.2f %%  \n",
             bd[2+shift],bd[5+shift],hl[2+shift]+hl[3+shift]+hl[4+shift],
             100.*(hl[2+shift]+hl[3+shift]+hl[4+shift])/(double)ned);
 
-  if ( abs(mesh->info.imprim) < 4 ) return;
+  if ( abs(imprim) < 4 ) return;
 
-  if ( abs(mesh->info.imprim) > 3 ) {
+  if ( abs(imprim) > 3 ) {
     fprintf(stdout,"\n     HISTOGRAMM:\n");
     if ( hl[0] )
       fprintf(stdout,"     0.00 < L < 0.30  %8d   %5.2f %%  \n",

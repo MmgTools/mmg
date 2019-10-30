@@ -375,13 +375,14 @@ int MMGS_chkmanimesh(MMG5_pMesh mesh) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the level-set values.
+ * \param met pointer toward a metric (non-mandatory).
  * \return 1 if success, 0 otherwise.
  *
  * Proceed to discretization of the implicit function carried by sol into mesh,
  * once values of sol have been snapped/checked
  *
  */
-static int MMGS_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol){
+static int MMGS_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
   MMG5_pTria   pt;
   MMG5_pPoint  p0,p1;
   MMG5_Hash   hash;
@@ -455,6 +456,24 @@ static int MMGS_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol){
                             ,c,NULL);
       }
       sol->m[np] = mesh->info.ls;
+
+      /* If user provide a metric, interpolate it at the new point */
+      if ( met && met->m ) {
+        if ( met->size > 1 ) {
+          ier = MMGS_intmet33_ani(mesh,met,k,ia,np,s);
+        }
+        else {
+          ier = intmet_iso(mesh,met,k,ia,np,s);
+        }
+        if ( ier <= 0 ) {
+          // Unable to compute the metric
+          fprintf(stderr,"\n  ## Error: %s: unable to"
+                  " interpolate the metric during the level-set"
+                  " discretization\n",__func__);
+          return 0;
+        }
+      }
+
       MMG5_hashEdge(mesh,&hash,ip0,ip1,np);
     }
   }
@@ -508,6 +527,10 @@ static int MMGS_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol){
   }
   if ( (mesh->info.ddebug || abs(mesh->info.imprim) > 5) && ns > 0 )
     fprintf(stdout,"     %7d splitted\n",ns);
+
+  /* reset point flags */
+  for (k=1; k<=mesh->np; k++)
+    mesh->point[k].flag = 0;
 
   MMG5_DEL_MEM(mesh,hash.item);
   return ns;
@@ -574,13 +597,15 @@ static int MMGS_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol) {
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the solution structure
+ * \param sol pointer toward the level-set
+ * \param sol pointer toward a metric (optionnal)
+ *
  * \return 0 if fail, 1 otherwise.
  *
  * Create implicit surface in mesh.
  *
  */
-int MMGS_mmgs2(MMG5_pMesh mesh,MMG5_pSol sol) {
+int MMGS_mmgs2(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
 
   if ( abs(mesh->info.imprim) > 3 )
     fprintf(stdout,"  ** ISOSURFACE EXTRACTION\n");
@@ -599,7 +624,7 @@ int MMGS_mmgs2(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   MMG5_DEL_MEM(mesh,mesh->adja);
 
-  if ( !MMGS_cuttri_ls(mesh,sol) ) {
+  if ( !MMGS_cuttri_ls(mesh,sol,met) ) {
     fprintf(stderr,"\n  ## Problem in discretizing implicit function. Exit program.\n");
     return 0;
   }

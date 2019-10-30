@@ -83,26 +83,26 @@ void MMG3D_Init_parameters(MMG5_pMesh mesh) {
   MMG5_Init_parameters(mesh);
 
   /* default values for integers */
-  mesh->info.lag      = -1;
+  mesh->info.lag      = MMG5_LAG;
   mesh->info.fem      = MMG5_FEM;
-  mesh->info.optim    =  0;
-  mesh->info.optimLES  =  0;
+  mesh->info.optim    = MMG5_OFF;
+  mesh->info.optimLES = MMG5_OFF;
   /* [0/1]    ,avoid/allow surface modifications */
-  mesh->info.nosurf   =  0;
+  mesh->info.nosurf   =  MMG5_OFF;
 #ifdef USE_SCOTCH
-   /* [1/0]    , Turn on/off the renumbering using SCOTCH; */
-  mesh->info.renum    = 1;
+   /* [1/0]    , Turn on/off the renumbering using SCOTCH */
+  mesh->info.renum    = MMG5_ON;
 #else
-   /* [0]    , Turn on/off the renumbering using SCOTCH; */
-  mesh->info.renum    = 0;
+   /* [0]    , Turn on/off the renumbering using SCOTCH */
+  mesh->info.renum    = MMG5_OFF;
 #endif
 
   /* default values for doubles */
   /* level set value */
-  mesh->info.ls       = 0.0;
+  mesh->info.ls       = MMG5_LS;
 
 #ifndef PATTERN
-  mesh->info.PROctree = 32;
+  mesh->info.PROctree = MMG5_PROCTREE;
 #endif
 }
 
@@ -2055,6 +2055,9 @@ int MMG3D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam,int val){
   case MMG3D_IPARAM_nosurf :
     mesh->info.nosurf   = val;
     break;
+  case MMG3D_IPARAM_nreg :
+    mesh->info.nreg     = val;
+    break;
   case MMG3D_IPARAM_numberOfLocalParam :
     if ( mesh->info.par ) {
       MMG5_DEL_MEM(mesh,mesh->info.par);
@@ -2145,6 +2148,9 @@ int MMG3D_Get_iparameter(MMG5_pMesh mesh, int iparam) {
   case MMG3D_IPARAM_nosurf :
     return  mesh->info.nosurf;
     break;
+  case MMG3D_IPARAM_nreg :
+    return mesh->info.nreg;
+    break;
   case MMG3D_IPARAM_numberOfLocalParam :
     return  mesh->info.npar;
     break;
@@ -2184,6 +2190,13 @@ int MMG3D_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val)
     else
       mesh->info.hgrad = log(mesh->info.hgrad);
     break;
+  case MMG3D_DPARAM_hgradreq :
+    mesh->info.hgradreq    = val;
+    if ( mesh->info.hgradreq < 0.0 )
+      mesh->info.hgradreq = -1.0;
+    else
+      mesh->info.hgradreq = log(mesh->info.hgradreq);
+    break;
   case MMG3D_DPARAM_hausd :
     if ( val <=0 ) {
       fprintf(stderr,"\n  ## Error: %s: hausdorff number must be strictly"
@@ -2195,6 +2208,16 @@ int MMG3D_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val)
     break;
   case MMG3D_DPARAM_ls :
     mesh->info.ls       = val;
+    break;
+  case MMG3D_DPARAM_rmc :
+    if ( !val ) {
+      /* Default value */
+      mesh->info.rmc      = MMG3D_VOLFRAC;
+    }
+    else {
+      /* User customized value */
+      mesh->info.rmc      = val;
+    }
     break;
   default :
     fprintf(stderr,"\n  ## Error: %s: unknown type of parameter\n", __func__);
@@ -2259,15 +2282,16 @@ int MMG3D_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref,
 
   switch ( typ )
   {
-  case ( MMG5_Vertex ):
-    mesh->info.parTyp |= MG_Vert;
-    break;
   case ( MMG5_Triangle ):
     mesh->info.parTyp |= MG_Tria;
     break;
   case ( MMG5_Tetrahedron ):
     mesh->info.parTyp |= MG_Tetra;
     break;
+  default:
+    fprintf(stderr,"\n  ## Error: %s: unexpected entity type: %s.\n",
+            __func__,MMG5_Get_entitiesName(typ));
+    return 0;
   }
 
   mesh->info.npari++;

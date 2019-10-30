@@ -45,7 +45,7 @@ node('mmg-sonnar-new') {
         export SONAR_SCANNER_OPTS="-Xms512m -Xmx1024m"
         export version_mmg=develop
         cat > sonar-project.properties << EOF
-sonar.host.url=https://sonarqube.bordeaux.inria.fr/sonarqube
+sonar.host.url=https://sonarqube.inria.fr/sonarqube
 sonar.links.homepage=http://www.mmgtools.org/
 #sonar.links.ci=
 sonar.links.scm=https://github.com/MmgTools/mmg.git

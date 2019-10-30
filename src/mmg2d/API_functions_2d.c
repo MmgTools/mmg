@@ -83,25 +83,23 @@ void MMG2D_Init_parameters(MMG5_pMesh mesh) {
   MMG5_Init_parameters(mesh);
 
   /* default values for integers */
-  mesh->info.lag      = -1;
-  mesh->info.optim    =  0;
+  mesh->info.lag      = MMG5_LAG;
+  mesh->info.optim    = MMG5_OFF;
   /* [0/1]    ,avoid/allow surface modifications */
-  mesh->info.nosurf   =  0;
-  /* [0]    , Turn on/off the renumbering using SCOTCH; */
-  mesh->info.renum    = 0;
-  mesh->info.nreg     = 0;
+  mesh->info.nosurf   =  MMG5_OFF;
+  /* [0]    , Turn on/off the renumbering using SCOTCH */
+  mesh->info.renum    = MMG5_OFF;
+  mesh->info.nreg     = MMG5_OFF;
   /* default values for doubles */
   /* level set value */
-  mesh->info.ls       = 0.0;
-  /* control gradation; */
-  mesh->info.hgrad    = 1.3;
+  mesh->info.ls       = MMG5_LS;
 
-  mesh->info.dhd  = MMG5_ANGEDG;
-
-  mesh->info.PROctree = 64;
+  /* Ridge detection */
+  mesh->info.dhd      = MMG5_ANGEDG;
 }
 
 int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
+  int k;
 
   switch ( iparam ) {
     /* Integer parameters */
@@ -130,13 +128,16 @@ int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
     if ( mesh->xtetra )
       MMG5_DEL_MEM(mesh,mesh->xtetra);
     if ( !val )
-      mesh->info.dhd    = -1.;
+      mesh->info.dhd    = MMG5_NR;
     else {
       if ( (mesh->info.imprim > 5) || mesh->info.ddebug )
         fprintf(stderr,"\n  ## Warning: %s: angle detection parameter"
                 " set to default value\n",__func__);
       mesh->info.dhd    = MMG5_ANGEDG;
     }
+    break;
+  case MMG2D_IPARAM_opnbdy :
+    mesh->info.opnbdy = val;
     break;
   case MMG2D_IPARAM_iso :
     mesh->info.iso      = val;
@@ -180,12 +181,38 @@ int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
   case MMG2D_IPARAM_nosurf :
     mesh->info.nosurf   = val;
     break;
+  case MMG2D_IPARAM_nreg :
+    mesh->info.nreg     = val;
+    break;
+  case MMG2D_IPARAM_numberOfLocalParam :
+    if ( mesh->info.par ) {
+      MMG5_DEL_MEM(mesh,mesh->info.par);
+      if ( (mesh->info.imprim > 5) || mesh->info.ddebug )
+        fprintf(stderr,"\n  ## Warning: %s: new local parameter values\n",__func__);
+    }
+    mesh->info.npar   = val;
+    mesh->info.npari  = 0;
+    mesh->info.parTyp = 0;
+
+    MMG5_ADD_MEM(mesh,mesh->info.npar*sizeof(MMG5_Par),"parameters",
+                  printf("  Exit program.\n");
+                  return 0);
+    MMG5_SAFE_CALLOC(mesh->info.par,mesh->info.npar,MMG5_Par,return 0);
+
+    for (k=0; k<mesh->info.npar; k++) {
+      mesh->info.par[k].elt   = MMG5_Noentity;
+      mesh->info.par[k].ref   = INT_MAX;
+      mesh->info.par[k].hausd = mesh->info.hausd;
+      mesh->info.par[k].hmin  = mesh->info.hmin;
+      mesh->info.par[k].hmax  = mesh->info.hmax;
+    }
+    break;
   default :
     fprintf(stderr,"\n  ## Error: %s: unknown type of parameter\n",__func__);
     return 0;
   }
   /* other options */
-  mesh->info.fem      = 0;
+  mesh->info.fem      = MMG5_OFF;
   return 1;
 }
 
@@ -209,8 +236,21 @@ int MMG2D_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val)
     break;
   case MMG2D_DPARAM_hgrad :
     mesh->info.hgrad    = val;
-    if ( mesh->info.hgrad < 0.0 )
-      mesh->info.hgrad = -1.0;
+    if ( mesh->info.hgrad < 0.0 ) {
+      mesh->info.hgrad = MMG5_NOHGRAD;
+    }
+    else {
+      mesh->info.hgrad = log(mesh->info.hgrad);
+    }
+    break;
+  case MMG2D_DPARAM_hgradreq :
+    mesh->info.hgradreq    = val;
+    if ( mesh->info.hgradreq < 0.0 ) {
+      mesh->info.hgradreq = MMG5_NOHGRAD;
+    }
+    else {
+      mesh->info.hgradreq = log(mesh->info.hgradreq);
+    }
     break;
   case MMG2D_DPARAM_hausd :
     if ( val <=0 ) {
@@ -224,6 +264,16 @@ int MMG2D_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val)
   case MMG2D_DPARAM_ls :
     mesh->info.ls       = val;
     break;
+  case MMG2D_DPARAM_rmc :
+    if ( !val ) {
+      /* Default value */
+      mesh->info.rmc      = MMG2D_VOLFRAC;
+    }
+    else {
+      /* User customized value */
+      mesh->info.rmc      = val;
+    }
+    break;
   default :
     fprintf(stderr,"\n  ## Error: %s: unknown type of parameter\n",
             __func__);
@@ -231,6 +281,80 @@ int MMG2D_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val)
   }
   return 1;
 }
+
+int MMG2D_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref,
+                             double hmin,double hmax,double hausd){
+  MMG5_pPar par;
+  int k;
+
+  if ( !mesh->info.npar ) {
+    fprintf(stderr,"\n  ## Error: %s: You must set the number of local"
+            " parameters",__func__);
+    fprintf(stderr," with the MMG2D_Set_iparameters function before setting");
+    fprintf(stderr," values in local parameters structure. \n");
+    return 0;
+  }
+  if ( mesh->info.npari >= mesh->info.npar ) {
+    fprintf(stderr,"\n  ## Error: %s: unable to set a new local parameter.\n",
+            __func__);
+    fprintf(stderr,"    max number of local parameters: %d\n",mesh->info.npar);
+    return 0;
+  }
+  if ( typ != MMG5_Triangle && typ != MMG5_Edg ) {
+    fprintf(stderr,"\n  ## Warning: %s: you must apply your local parameters",
+            __func__);
+    fprintf(stderr," on triangles (MMG5_Triangle or %d) or edges"
+            " (MMG5_Edg or %d).\n",MMG5_Triangle,MMG5_Edg);
+    fprintf(stderr,"\n  ## Unknown type of entity: ignored.\n");
+    return 0;
+  }
+  if ( ref < 0 ) {
+    fprintf(stderr,"\n  ## Error: %s: negative references are not allowed.\n",
+            __func__);
+    return 0;
+  }
+
+  for (k=0; k<mesh->info.npari; k++) {
+    par = &mesh->info.par[k];
+
+    if ( par->elt == typ && par->ref == ref ) {
+      par->hausd = hausd;
+      par->hmin  = hmin;
+      par->hmax  = hmax;
+      if ( (mesh->info.imprim > 5) || mesh->info.ddebug ) {
+        fprintf(stderr,"\n  ## Warning: %s: new parameters (hausd, hmin and hmax)",
+                __func__);
+        fprintf(stderr," for entities of type %d and of ref %d\n",typ,ref);
+      }
+      return 1;
+    }
+  }
+
+  mesh->info.par[mesh->info.npari].elt   = typ;
+  mesh->info.par[mesh->info.npari].ref   = ref;
+  mesh->info.par[mesh->info.npari].hmin  = hmin;
+  mesh->info.par[mesh->info.npari].hmax  = hmax;
+  mesh->info.par[mesh->info.npari].hausd = hausd;
+
+  switch ( typ )
+  {
+  case ( MMG5_Triangle ):
+    mesh->info.parTyp |= MG_Tria;
+    break;
+  case ( MMG5_Edg ):
+    mesh->info.parTyp |= MG_Edge;
+    break;
+  default:
+    fprintf(stderr,"\n  ## Error: %s: unexpected entity type: %s.\n",
+            __func__,MMG5_Get_entitiesName(typ));
+    return 0;
+  }
+
+  mesh->info.npari++;
+
+  return 1;
+}
+
 
 int MMG2D_Set_meshSize(MMG5_pMesh mesh, int np, int nt, int na) {
 
@@ -827,6 +951,7 @@ int MMG2D_Set_edge(MMG5_pMesh mesh, int v0, int v1, int ref, int pos) {
   pt->a = v0;
   pt->b = v1;
   pt->ref  = ref;
+  pt->tag &= MG_REF + MG_BDY;
 
   mesh->point[pt->a].tag &= ~MG_NUL;
   mesh->point[pt->b].tag &= ~MG_NUL;
@@ -903,7 +1028,6 @@ int MMG2D_Get_edge(MMG5_pMesh mesh, int* e0, int* e1, int* ref
     ped = &mesh->edge[mesh->nai];
   }
 
-
   *e0  = ped->a;
   *e1  = ped->b;
 
@@ -938,6 +1062,7 @@ int MMG2D_Set_edges(MMG5_pMesh mesh, int *edges, int *refs) {
     mesh->edge[i].b    = edges[j+1];
     if ( refs != NULL )
       mesh->edge[i].ref  = refs[i];
+    mesh->edge[i].tag &= MG_REF+MG_BDY;
 
     mesh->point[mesh->edge[i].a].tag &= ~MG_NUL;
     mesh->point[mesh->edge[i].b].tag &= ~MG_NUL;

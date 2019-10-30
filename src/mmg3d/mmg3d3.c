@@ -413,16 +413,29 @@ static int MMG5_coltetlag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
   return nc;
 }
 
-/** Check if moving mesh with disp for a fraction t yields a valid mesh */
-int MMG5_chkmovmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t) {
+/**
+ * \param mesh pointer toward the mesh structure
+ * \param disp pointer toward the displacement structure.
+ * \param t fraction of displacement to test
+ * \param tetIdx to fill with the list of non valid tetra if provided.
+ *
+ * \return 0 if success (movement can be achieved), 1 or the number of invalid
+ * tetra otherwise.
+ *
+ * Check if moving mesh with disp for a fraction t yields a
+ * valid mesh.
+ *
+ */
+int MMG5_chkmovmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t,int *tetIdx) {
   MMG5_pTetra  pt;
   MMG5_pPoint  ppt;
   double       *v,c[4][3],tau;
-  int          k,np;
+  int          k,np,idx;
   char         i,j;
 
   /* Pseudo time-step = fraction of disp to perform */
   tau = (double)t / MMG3D_SHORTMAX;
+  idx = 0;
 
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
@@ -436,14 +449,29 @@ int MMG5_chkmovmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t) {
         c[i][j] = ppt->c[j]+tau*v[j];
     }
 
-    if( MMG5_caltet_iso_4pt(c[0],c[1],c[2],c[3]) < MMG5_EPSOK) return 0;  //     Other criteria : eg. a rate of degradation, etc... ?
-  }
+    //     Other criteria : eg. a rate of degradation, etc... ?
+    if( MMG5_caltet_iso_4pt(c[0],c[1],c[2],c[3]) < MMG5_EPSOK) {
 
-  return 1;
+      if ( tetIdx ) {
+        tetIdx[idx++] = k;
+      }
+      else {
+        return 1;
+      }
+    }
+  }
+  return idx;
 }
 
-/** Return the largest fraction t that makes the motion along disp valid */
-short MMG5_dikomv(MMG5_pMesh mesh,MMG5_pSol disp) {
+/**
+ * \param mesh pointer toward the mesh structure
+ * \param disp pointer toward the displacement field
+ * \param lastt 0 if a movement is possible, pointer toward the last tested fraction otherwise
+ *
+ * Return the largest fraction t that makes the motion along disp valid.
+ *
+ */
+short MMG5_dikmov(MMG5_pMesh mesh,MMG5_pSol disp,short *lastt) {
   int     it,maxit;
   short   t,tmin,tmax;
   char    ier;
@@ -454,8 +482,10 @@ short MMG5_dikomv(MMG5_pMesh mesh,MMG5_pSol disp) {
   tmin = 0;
   tmax = MMG3D_SHORTMAX;
 
+  *lastt = 0;
+
   /* If full displacement can be achieved */
-  if ( MMG5_chkmovmesh(mesh,disp,tmax) )
+  if ( !MMG5_chkmovmesh(mesh,disp,tmax,NULL) )
     return tmax;
 
   /* Else, find the largest displacement by dichotomy */
@@ -464,21 +494,31 @@ short MMG5_dikomv(MMG5_pMesh mesh,MMG5_pSol disp) {
 
     /* Case that tmax = tmin +1 : check move with tmax */
     if ( t == tmin ) {
-      ier = MMG5_chkmovmesh(mesh,disp,tmax);
-      if ( ier )
+      ier = MMG5_chkmovmesh(mesh,disp,tmax,NULL);
+      if ( !ier ) {
         return tmax;
-      else
+      }
+      else {
+        if ( tmin==0 ) {
+          *lastt = tmax;
+        }
         return tmin;
+      }
     }
 
     /* General case: check move with t */
-    ier = MMG5_chkmovmesh(mesh,disp,t);
-    if ( ier )
+    ier = MMG5_chkmovmesh(mesh,disp,t,NULL);
+    if ( !ier ) {
       tmin = t;
+    }
     else
       tmax = t;
 
     it++;
+  }
+
+  if ( tmin==0 ) {
+    *lastt=t;
   }
 
   return tmin;
@@ -570,8 +610,11 @@ int MMG5_saveDisp(MMG5_pMesh mesh,MMG5_pSol disp) {
  * \param mesh mesh structure
  * \param disp displacement structure
  * \param met metric structure
+ * \param invalidTets array to store the list of invalid tetra if we are unable
+ * to move.
  *
- * \return 0 if fail, 1 if success
+ * \return 0 if fail, 1 if success to move, the opposite of the number of non
+ * valid tets if we can't move (- ninvalidTets).
  *
  * Lagrangian node displacement and meshing.
  * Code for options: info.lag >= 0 -> displacement,
@@ -579,17 +622,18 @@ int MMG5_saveDisp(MMG5_pMesh mesh,MMG5_pSol disp) {
  *                   info.lag > 1  -> displacement+remeshing with split+collapse+swap+move
  *
  */
-int MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met) {
+int MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int **invalidTets) {
   double  avlen,tau;
   int     itdc,itmn,maxitmn,maxitdc,nspl,ns,nm,nc,iit,k,warn;
-  int     nns,nnm,nnc,nnspl,nnns,nnnm,nnnc,nnnspl;
-  short   t;
+  int     nns,nnm,nnc,nnspl,nnns,nnnm,nnnc,nnnspl,ninvalidTets;
+  short   t,lastt;
   char    ier;
 
   tau = 0.0;
   maxitmn = 10;
   maxitdc = 100;
   t  = 0;
+  ninvalidTets = 0;
 
   //++mesh->info.fem;
 
@@ -622,7 +666,7 @@ int MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met) {
     for (itdc=0; itdc<maxitdc; itdc++) {
       nnspl = nnc = nns = nnm = 0;
 
-      t = MMG5_dikomv(mesh,disp);
+      t = MMG5_dikmov(mesh,disp,&lastt);
       if ( t == 0 ) {
         if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
           fprintf(stderr,"\n   *** Stop: impossible to proceed further\n");
@@ -696,22 +740,36 @@ int MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met) {
       nnnc   += nnc;
       nnns   += nns;
 
-      if ( t == MMG3D_SHORTMAX ) break;
-    }
-    if ( mesh->info.imprim > 0 && abs(mesh->info.imprim) < 4 ) {
-      printf("   ---> Realized displacement: %f\n",tau);
-      if ( abs(mesh->info.imprim) > 2 )
+      if ( (mesh->info.imprim > 0) && (mesh->info.imprim < 4) ) {
+        printf("   ---> Realized displacement: %f\n",tau);
+      }
+
+      if ( abs(mesh->info.imprim) > 2 && mesh->info.lag )
         printf(" %d edges splitted, %d vertices collapsed, %d elements"
                " swapped, %d vertices moved.\n",nnnspl,nnnc,nnns,nnnm);
     }
-
-    if ( t == MMG3D_SHORTMAX ) break;
+    if ( t == MMG3D_SHORTMAX || (t==0 && itdc==0) ) break;
   }
+  if ( tau < MMG5_EPSD2 ) {
+    MMG5_SAFE_CALLOC(*invalidTets,mesh->np,int,
+                     printf("## Warning: Not enough memory to keep track of"
+                            " the invalid tetrahedron.\n");
+                     MMG5_DEL_MEM(mesh,disp->m);
+                     return 1);
+    ninvalidTets = MMG5_chkmovmesh(mesh,disp,lastt,*invalidTets);
+    assert ( ninvalidTets );
+  }
+
   /* Clean memory */
   /* Doing this, memcur of mesh is decreased by size of displacement */
   MMG5_DEL_MEM(mesh,disp->m);
 
-  return 1;
+  if ( ninvalidTets ) {
+    return -ninvalidTets;
+  }
+  else {
+    return 1;
+  }
 }
 #else
 /**

@@ -67,11 +67,12 @@ int MMG3D_chk4ridVertices(MMG5_pMesh mesh, MMG5_pTetra pt) {
  *
  */
 inline int MMG5_moymet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,double *m1) {
-  MMG5_pPoint  ppt;
-  double       mm[6],*mp;
-  double       dd;
-  int          i,k,n;
-  static char  mmgWarn=0;
+  MMG5_pPoint   ppt;
+  double        mm[6],*mp;
+  double        dd;
+  int           i,k,n;
+  int8_t        ddebug = 0;
+  static int8_t mmgWarn=0;
 
   n = 0;
   for (k=0; k<6; ++k) mm[k] = 0.;
@@ -86,7 +87,7 @@ inline int MMG5_moymet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,double *m1) 
   }
 
   if(!n) {
-    if ( !mmgWarn ) {
+    if ( ddebug && !mmgWarn ) {
       mmgWarn=1;
       fprintf(stderr,"\n  ## Warning: %s: at least 1 tetra with 4 ridges vertices"
               "... Unable to compute metric.\n",__func__);
@@ -346,9 +347,8 @@ static int MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int kel,
       if ( isloc )  break;
 
       par = &mesh->info.par[i];
-      if ( /*( (par->elt != MMG5_Vertex) || (p0->ref != par->ref ) ) && */
-        ( (par->elt != MMG5_Triangle)    || (pxt->ref[iface] != par->ref ) ) &&
-        ( (par->elt != MMG5_Tetrahedron) || (pt->ref != par->ref )         ) )
+      if ( ( (par->elt != MMG5_Triangle)    || (pxt->ref[iface] != par->ref ) ) &&
+           ( (par->elt != MMG5_Tetrahedron) || (pt->ref != par->ref )         ) )
         continue;
 
       isqhmin = par->hmin;
@@ -359,9 +359,8 @@ static int MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int kel,
     for ( ; i<mesh->info.npar; ++i) {
       par = &mesh->info.par[i];
 
-      if ( /*( (par->elt != MMG5_Vertex) || (p0->ref != par->ref ) ) && */
-        ( (par->elt != MMG5_Triangle)    || (pxt->ref[iface] != par->ref ) ) &&
-        ( (par->elt != MMG5_Tetrahedron) || (pt->ref != par->ref )         ) )
+      if ( ( (par->elt != MMG5_Triangle)    || (pxt->ref[iface] != par->ref ) ) &&
+           ( (par->elt != MMG5_Tetrahedron) || (pt->ref != par->ref )         ) )
         continue;
 
       isqhmin = MG_MAX(isqhmin,par->hmin);
@@ -532,7 +531,7 @@ static int MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int 
   MMG5_Tria     ptt;
   MMG5_pPoint   p0,p1;
   MMG5_pxPoint  px0;
-  MMG5_Bezier  b;
+  MMG5_Bezier   b;
   MMG5_pPar     par;
   int           lists[MMG3D_LMAX+2],listv[MMG3D_LMAX+2],ilists,ilistv,ilist;
   int           k,iel,ipref[2],idp,ifac,isloc;
@@ -1021,19 +1020,15 @@ int MMG5_defmetvol(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pPar     par;
   double        v[3][3],lambda[3],isqhmax,isqhmin,*m;
   int           list[MMG3D_LMAX+2],ilist,k,l,i,j,isloc,ip;
+  int8_t        ismet;
   static char   mmgWarn = 0;
 
   isqhmin = 1./(mesh->info.hmin*mesh->info.hmin);
   isqhmax = 1./(mesh->info.hmax*mesh->info.hmax);
 
-  for (k=1; k<=mesh->np; k++) {
-    ppt = &mesh->point[k];
-    ppt->flag = 0;
-  }
+  ismet = mesh->info.inputMet;
 
-  if ( !met->m ) {
-    if ( !MMG3D_Set_solSize(mesh,met,MMG5_Vertex,mesh->np,3) )
-      return 0;
+  if ( !ismet ) {
 
     for (k=1; k<=mesh->ne; k++) {
       pt = &mesh->tetra[k];
@@ -1248,173 +1243,6 @@ int MMG3D_intextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6]) {
 
 }
 
-
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \param iel tetra in which we work
- * \param iploc local index of point where metric must be defined
- * \param iface face to which belong \a iploc
- * \return 0 if fail, 1 otherwise.
- *
- * Define metric at point \a iploc of tetra \a iel for \a iploc a surface point
- * marked by option nosurf.
- *
- * If a metric is provided, preserve it except on
- * ridges points where a metric with hmax size and directions normal to the
- * ridges is intersected with the user metric.
- *
- * Without initial metric, an isotropic metric is computed from the mean of the
- * lengths of the edges passing through the point (except on ridges points).
- *
- */
-static inline
-int MMG3D_nosurfsiz_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel, int iploc,
-                         int iface,int ismet) {
-
-  MMG5_pTetra   pt;
-  MMG5_pPoint   ppt,p0,p1;
-  double        *m,isqhmin,isqhmax,ux,uy,uz,lm,lambda[3],v[3][3];
-  int           lists[MMG3D_LMAX+2],listv[MMG3D_LMAX+2],ilists,ilistv;
-  int           i,iadr,i0,ip0,ip1,i1,ia,j;
-  static char   mmgWarn=0;
-
-  pt    = &mesh->tetra[iel];
-  ip0   = pt->v[iploc];
-  iadr  = ip0*6;
-  ppt   = &mesh->point[ip0];
-
-  if ( ismet ) {
-
-    if ( ppt->flag ) return 1;
-
-    /** A metric is provided: metric truncature */
-    /* Step 1: recover the local hmin and hmax values */
-    if ( !(ppt->tag & MG_NOM) ) {
-      if ( MMG5_boulesurfvolp(mesh,iel,iploc,iface,listv,&ilistv,lists,&ilists,0)!=1 ||
-           !MMG3D_localParamReg(mesh,ip0,listv,ilistv,lists,ilists,NULL,&isqhmin,&isqhmax) )
-      {
-        isqhmin = mesh->info.hmin;
-        isqhmax = mesh->info.hmax;
-      }
-    }
-    else {
-      i0 = MMG5_idirinv[iface][iploc];
-      j = MMG5_inxt2[i0];
-      ia = MMG5_iarf[iface][j];
-
-      if ( !MMG3D_localParamNm(mesh,iel,iface,ia,NULL,&isqhmin,&isqhmax) ) {
-        isqhmin  = mesh->info.hmin;
-        isqhmax  = mesh->info.hmax;
-      }
-    }
-    isqhmin = 1./(isqhmin*isqhmin);
-    isqhmax = 1./(isqhmax*isqhmax);
-
-    /* Step 2: size truncature */
-    m = &met->m[iadr];
-    if ( !MMG5_eigenv(1,m,lambda,v) ) {
-      if ( !mmgWarn ) {
-        fprintf(stderr,"\n  ## Warning: %s: Unable to diagonalize at least"
-                " 1 metric.\n",__func__);
-        mmgWarn = 1;
-      }
-      return 0;
-    }
-
-    for (i=0; i<3; i++) {
-      if( lambda[i]<=0) {
-        if ( !mmgWarn ) {
-          fprintf(stderr,"\n  ## Warning: %s: at least 1 wrong metric "
-                  "(eigenvalues : %e %e %e).\n",__func__,lambda[0],
-                  lambda[1],lambda[2]);
-          mmgWarn = 1;
-        }
-        return 0;
-      }
-      lambda[i]=MG_MIN(isqhmin,lambda[i]);
-      lambda[i]=MG_MAX(isqhmax,lambda[i]);
-    }
-
-    m[0] = v[0][0]*v[0][0]*lambda[0] + v[1][0]*v[1][0]*lambda[1]
-      + v[2][0]*v[2][0]*lambda[2];
-    m[1] = v[0][0]*v[0][1]*lambda[0] + v[1][0]*v[1][1]*lambda[1]
-      + v[2][0]*v[2][1]*lambda[2];
-    m[2] = v[0][0]*v[0][2]*lambda[0] + v[1][0]*v[1][2]*lambda[1]
-      + v[2][0]*v[2][2]*lambda[2];
-    m[3] = v[0][1]*v[0][1]*lambda[0] + v[1][1]*v[1][1]*lambda[1]
-      + v[2][1]*v[2][1]*lambda[2];
-    m[4] = v[0][1]*v[0][2]*lambda[0] + v[1][1]*v[1][2]*lambda[1]
-      + v[2][1]*v[2][2]*lambda[2];
-    m[5] = v[0][2]*v[0][2]*lambda[0] + v[1][2]*v[1][2]*lambda[1]
-      + v[2][2]*v[2][2]*lambda[2];
-  }
-  else {
-    /** No metric is provided: Define size at regular surface point for the
-     * -nosurf option (ie a manifold point): the size is computed as the mean of
-     * the length of edges passing through the point */
-    if ( !(ppt->tag & MG_NOM) ) {
-
-      if ( ppt->flag ) return 1;
-
-      /* First step: search for local parameters */
-      // To improve: compute the volume and surface ball af the non-manifold
-      // point to apply local parameters
-      if ( MMG5_boulesurfvolp(mesh,iel,iploc,iface,listv,&ilistv,lists,&ilists,0) !=1 )
-        return 0;
-
-      if ( !MMG3D_localParamReg(mesh,ip0,listv,ilistv,lists,ilists,
-                                 NULL,&isqhmin,&isqhmax) ) {
-        isqhmin = mesh->info.hmin;
-        isqhmax = mesh->info.hmax;
-      }
-
-      /* Step 2: edge length computation */
-      lm = MMG5_meansizreg_iso(mesh,met,ip0,lists,ilists,isqhmin,isqhmax);
-      met->m[iadr] = 1./(lm*lm);
-      met->m[iadr+3] = met->m[iadr+5] = met->m[iadr];
-      met->m[iadr+1] = met->m[iadr+2] = met->m[iadr+4] = 0;
-    }
-    else {
-      i0 = MMG5_idirinv[iface][iploc];
-      j = MMG5_inxt2[i0];
-      ia = MMG5_iarf[iface][j];
-      i0 = MMG5_iare[ia][0];
-      i1 = MMG5_iare[ia][1];
-      ip0 = pt->v[i0];
-      ip1 = pt->v[i1];
-      p0  = &mesh->point[ip0];
-      p1  = &mesh->point[ip1];
-      if ( !MG_EDG(mesh->xtetra[pt->xt].tag[ia]) ) return 0;
-
-      /** First step: search for local parameters */
-      if ( !MMG3D_localParamNm(mesh,iel,iface,ia,NULL,&isqhmin,&isqhmax) ) {
-        isqhmin  = mesh->info.hmin;
-        isqhmax  = mesh->info.hmax;
-      }
-      isqhmin =  1.0 / (isqhmin*isqhmin);
-      isqhmax =  1.0 / (isqhmax*isqhmax);
-
-      /** Second step: Very rough eval of the metric at non-manifold point: take
-       * the non-manifold edge length */
-      ux = (p0->c[0]-p1->c[0]);
-      uy = (p0->c[1]-p1->c[1]);
-      uz = (p0->c[2]-p1->c[2]);
-      lm = ux*ux + uy*uy + uz*uz;
-
-      lm = MG_MAX(isqhmax,MG_MIN(isqhmin,1./lm));
-      met->m[iadr] = MG_MAX(met->m[iadr],lm);
-
-      met->m[iadr+3] = met->m[iadr+5] = met->m[iadr];
-      met->m[iadr+1] = met->m[iadr+2] = met->m[iadr+4] = 0;
-    }
-  }
-
-  return 1;
-
-}
-
-
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric stucture.
@@ -1430,25 +1258,27 @@ int MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pPoint   ppt;
   double        mm[6];
   int           k,l,iploc;
-  char          i,ismet;
+  char          i;
   static char   mmgErr = 0;
 
-  if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
-    fprintf(stdout,"  ** Defining anisotropic map\n");
-
-  if ( mesh->info.hmax < 0.0 ) {
-    //  mesh->info.hmax = 0.5 * mesh->info.delta;
-    if ( !mmgErr ) {
-      fprintf(stderr,"\n  ## Error: %s: negative hmax value.\n",__func__);
-      mmgErr = 1;
-    }
+  if ( !MMG5_defsiz_startingMessage (mesh,met,__func__) ) {
     return 0;
   }
 
-  if ( met->m )
-    ismet = 1;
-  else {
-    ismet = 0;
+  for (k=1; k<=mesh->np; k++) {
+    ppt = &mesh->point[k];
+    ppt->flag = 0;
+    ppt->s    = 0;
+  }
+
+  if ( !met->m ) {
+    /* Allocate and store the header informations for each solution */
+    if ( !MMG3D_Set_solSize(mesh,met,MMG5_Vertex,mesh->np,3) ) {
+      return 0;
+    }
+
+    /* Set_solSize modify the value of the inputMet field => we need to reset it */
+    mesh->info.inputMet = 0;
 
     MMG5_caltet         = MMG5_caltet_ani;
     MMG5_caltri         = MMG5_caltri_ani;
@@ -1457,13 +1287,17 @@ int MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
     MMG5_lenSurfEdg     = MMG5_lenSurfEdg_ani;
   }
 
-  if ( !MMG5_defmetvol(mesh,met) )  return 0;
-
-  for (k=1; k<=mesh->np; k++) {
-    ppt = &mesh->point[k];
-    ppt->flag = 0;
+  /** Step 1: Set metric at points belonging to a required edge: compute the
+   * metric as the mean of the length of the required eges passing through the
+   * point */
+  if ( !MMG3D_set_metricAtPointsOnReqEdges ( mesh,met ) ) {
+    return 0;
   }
 
+  /* Step 2: metric definition at internal points */
+  if ( !MMG5_defmetvol(mesh,met) )  return 0;
+
+  /* Step 3: metric definition at boundary points */
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
     // Warning: why are we skipped the tetra with negative refs ?
@@ -1483,44 +1317,39 @@ int MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
 
         if ( !MG_VOK(ppt) )  continue;
 
-        if ( mesh->info.nosurf ) {
-          if ( !MMG3D_nosurfsiz_ani(mesh,met,k,iploc,l,ismet) ) continue;
+        if ( ppt->flag > 1 ) continue;
+
+        if ( mesh->info.inputMet )  memcpy(mm,&met->m[6*(pt->v[iploc])],6*sizeof(double));
+
+        if ( (MG_SIN(ppt->tag) || (ppt->tag & MG_NOM) ) ) {
+          if ( !MMG5_defmetsin(mesh,met,k,l,iploc) )  continue;
         }
-        else {
-          if ( ppt->flag ) continue;
-
-          if ( ismet )  memcpy(mm,&met->m[6*(pt->v[iploc])],6*sizeof(double));
-
-          if ( (MG_SIN(ppt->tag) || (ppt->tag & MG_NOM) ) ) {
-            if ( !MMG5_defmetsin(mesh,met,k,l,iploc) )  continue;
-          }
-          else if ( ppt->tag & MG_GEO ) {
-            if ( !MMG5_defmetrid(mesh,met,k,l,iploc))  continue;
-          }
-          else if ( ppt->tag & MG_REF ) {
-            if ( !MMG5_defmetref(mesh,met,k,l,iploc) )  continue;
-          } else {
-            if ( !MMG5_defmetreg(mesh,met,k,l,iploc) )  continue;
-          }
-          if ( ismet ) {
-            if ( !MMG3D_intextmet(mesh,met,pt->v[iploc],mm) ) {
-              if ( !mmgErr ) {
-                 fprintf(stderr,"\n  ## Error: %s: unable to intersect metrics"
-                         " at point %d.\n",__func__,
-                         MMG3D_indPt(mesh,pt->v[iploc]));
-                 mmgErr = 1;
-              }
-              return 0;
+        else if ( ppt->tag & MG_GEO ) {
+          if ( !MMG5_defmetrid(mesh,met,k,l,iploc))  continue;
+        }
+        else if ( ppt->tag & MG_REF ) {
+          if ( !MMG5_defmetref(mesh,met,k,l,iploc) )  continue;
+        } else {
+          if ( !MMG5_defmetreg(mesh,met,k,l,iploc) )  continue;
+        }
+        if ( mesh->info.inputMet ) {
+          if ( !MMG3D_intextmet(mesh,met,pt->v[iploc],mm) ) {
+            if ( !mmgErr ) {
+              fprintf(stderr,"\n  ## Error: %s: unable to intersect metrics"
+                      " at point %d.\n",__func__,
+                      MMG3D_indPt(mesh,pt->v[iploc]));
+              mmgErr = 1;
             }
+            return 0;
           }
         }
-        ppt->flag = 1;
+        ppt->flag = 2;
       }
     }
   }
 
   /* search for unintialized metric */
-  MMG5_defUninitSize(mesh,met,ismet);
+  MMG5_defUninitSize(mesh,met);
 
   return 1;
 }
@@ -1529,7 +1358,9 @@ int MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
  * \param mesh pointer toward the mesh.
  * \param met pointer toward the metric structure.
  * \param pt pointer toward a tetra.
- * \param ia edge index in tetra \a pt.
+ * \param np1 global index of the first edge extremity.
+ * \param np2 global index of the second edge extremity.
+ *
  * \return -1 if no gradation is needed, else index of graded point.
  *
  * Enforces gradation of metric in one extremity of edge \a ia in tetra \a pt
@@ -1537,25 +1368,20 @@ int MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
  *
  */
 static inline
-int MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int ia) {
+int MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int np1,int np2) {
   MMG5_pPoint    p1,p2;
   double         *mm1,*mm2,m1[6],m2[6],ps1,ps2,ux,uy,uz;
-  double         c[5],l,val,t[3];
+  double         c[5],l,val,t[3],rbasis1[3][3],rbasis2[3][3];
   double         lambda[3],vp[3][3],alpha,beta,mu[3];
-  int            ip1,ip2,kmin,i;
-  char           i1,i2,ichg;
+  int            kmin,i;
+  char           ichg;
   static char    mmgWarn = 0;
 
-  i1  = MMG5_iare[ia][0];
-  i2  = MMG5_iare[ia][1];
-  ip1 = pt->v[i1];
-  ip2 = pt->v[i2];
+  p1  = &mesh->point[np1];
+  p2  = &mesh->point[np2];
 
-  p1  = &mesh->point[ip1];
-  p2  = &mesh->point[ip2];
-
-  mm1  = &met->m[6*ip1];
-  mm2  = &met->m[6*ip2];
+  mm1  = &met->m[6*np1];
+  mm2  = &met->m[6*np2];
 
   ux = p2->c[0] - p1->c[0];
   uy = p2->c[1] - p1->c[1];
@@ -1563,7 +1389,8 @@ int MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int ia) {
 
   if ( (!( MG_SIN(p1->tag) || (p1->tag & MG_NOM) )) &&  p1->tag & MG_GEO ) {
     /* Recover normal and metric associated to p1 */
-    if( !MMG5_buildridmet(mesh,met,ip1,ux,uy,uz,m1) )
+    /* Note that rbasis1/2 are not used in this function */
+    if( !MMG5_buildridmet(mesh,met,np1,ux,uy,uz,m1,rbasis1) )
       return -1;
   }
   else
@@ -1571,7 +1398,7 @@ int MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int ia) {
 
   if ( (!( MG_SIN(p2->tag) || (p2->tag & MG_NOM) )) && p2->tag & MG_GEO ) {
     /* Recover normal and metric associated to p2 */
-    if( !MMG5_buildridmet(mesh,met,ip2,ux,uy,uz,m2) )
+    if( !MMG5_buildridmet(mesh,met,np2,ux,uy,uz,m2,rbasis2) )
       return -1;
   }
   else
@@ -1681,7 +1508,7 @@ int MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int ia) {
 
       memcpy(mm1,m1,6*sizeof(double));
     }
-    return i1;
+    return np1;
   }
   /* Metric in p2 has to be changed */
   else{
@@ -1753,8 +1580,291 @@ int MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int ia) {
       m2[5] = mu[0]*vp[0][2]*vp[0][2] + mu[1]*vp[1][2]*vp[1][2] + vp[2][2]*vp[2][2]*mu[2];
       memcpy(mm2,m2,6*sizeof(double));
     }
-    return i2;
+    return np2;
   }
+}
+
+
+/**
+ * \param mesh pointer toward the mesh
+ * \param m first matrix
+ * \param n second matrix
+ * \param dm eigenvalues of m in the coreduction basis (to fill)
+ * \param dn eigenvalues of n in the coreduction basis (to fill)
+ * \param vp coreduction basis (to fill)
+ *
+ * \return 0 if fail 1 otherwise.
+ *
+ * Perform simultaneous reduction of matrices \a m and \a n.
+ *
+ */
+static inline
+int MMG3D_simred(MMG5_pMesh mesh,double *m,double *n,double dm[3],
+                 double dn[3],double vp[3][3] ) {
+
+  double       lambda[3],im[6],imn[9];
+  int          order;
+  static char  mmgWarn0=0;
+
+  /* Compute imn = M^{-1}N */
+  if ( !MMG5_invmat ( m,im ) ) {
+    if ( !mmgWarn0 ) {
+      mmgWarn0 = 1;
+      fprintf(stderr,"\n  ## Warning: %s: unable to invert the matrix.\n",__func__);
+    }
+    return 0;
+  }
+
+  MMG5_mn(im,n,imn);
+
+  /* Find eigenvalues of imn */
+  order = MMG5_eigenv(0,imn,lambda,vp);
+
+  if ( !order ) {
+    if ( !mmgWarn0 ) {
+      mmgWarn0 = 1;
+      fprintf(stderr,"\n  ## Warning: %s: at least 1 failing"
+              " simultaneous reduction.\n",__func__);
+    }
+    return 0;
+  }
+
+  if ( order == 3 ) {
+    /* First case : matrices m and n are homothetic: n = lambda0*m */
+    if ( (fabs(m[1]) < MMG5_EPS && fabs(m[2]) < MMG5_EPS
+          && fabs(m[4]) < MMG5_EPS) ) {
+      /* Subcase where m is diaonal */
+        dm[0]   = m[0];
+        dm[1]   = m[3];
+        dm[2]   = m[5];
+        vp[0][0] = 1;
+        vp[0][1] = 0;
+        vp[0][2] = 0;
+        vp[1][0] = 0;
+        vp[1][1] = 1;
+        vp[1][2] = 0;
+        vp[2][0] = 0;
+        vp[2][1] = 0;
+        vp[2][2] = 1;
+    }
+    else {
+      /* Subcase where m is not diagonal; dd,trimn,... are reused */
+      MMG5_eigenv(1,m,dm,vp);
+    }
+    /* Eigenvalues of metric n */
+    dn[0] = lambda[0]*dm[0];
+    dn[1] = lambda[0]*dm[1];
+    dn[2] = lambda[0]*dm[2];
+  }
+  else {
+    /* Second case: eigenvalues of imn are distinct ; theory says qf associated
+       to m and n are diagonalizable in basis (vp[0], vp[1], vp[2]) - the
+       coreduction basis */
+    /* Compute diagonal values in simultaneous reduction basis */
+    dm[0] = m[0]*vp[0][0]*vp[0][0] + 2.0*m[1]*vp[0][0]*vp[0][1] + 2.0*m[2]*vp[0][0]*vp[0][2]
+      + m[3]*vp[0][1]*vp[0][1] + 2.0*m[4]*vp[0][1]*vp[0][2] + m[5]*vp[0][2]*vp[0][2];
+    dm[1] = m[0]*vp[1][0]*vp[1][0] + 2.0*m[1]*vp[1][0]*vp[1][1] + 2.0*m[2]*vp[1][0]*vp[1][2]
+      + m[3]*vp[1][1]*vp[1][1] + 2.0*m[4]*vp[1][1]*vp[1][2] + m[5]*vp[1][2]*vp[1][2];
+    dm[2] = m[0]*vp[2][0]*vp[2][0] + 2.0*m[1]*vp[2][0]*vp[2][1] + 2.0*m[2]*vp[2][0]*vp[2][2]
+      + m[3]*vp[2][1]*vp[2][1] + 2.0*m[4]*vp[2][1]*vp[2][2] + m[5]*vp[2][2]*vp[2][2];
+
+    dn[0] = n[0]*vp[0][0]*vp[0][0] + 2.0*n[1]*vp[0][0]*vp[0][1] + 2.0*n[2]*vp[0][0]*vp[0][2]
+      + n[3]*vp[0][1]*vp[0][1] + 2.0*n[4]*vp[0][1]*vp[0][2] + n[5]*vp[0][2]*vp[0][2];
+    dn[1] = n[0]*vp[1][0]*vp[1][0] + 2.0*n[1]*vp[1][0]*vp[1][1] + 2.0*n[2]*vp[1][0]*vp[1][2]
+      + n[3]*vp[1][1]*vp[1][1] + 2.0*n[4]*vp[1][1]*vp[1][2] + n[5]*vp[1][2]*vp[1][2];
+    dn[2] = n[0]*vp[2][0]*vp[2][0] + 2.0*n[1]*vp[2][0]*vp[2][1] + 2.0*n[2]*vp[2][0]*vp[2][2]
+      + n[3]*vp[2][1]*vp[2][1] + 2.0*n[4]*vp[2][1]*vp[2][2] + n[5]*vp[2][2]*vp[2][2];
+  }
+
+  assert ( dm[0] >= MMG5_EPSD2 && dm[1] >= MMG5_EPSD2 && dm[2] >= MMG5_EPSD2 && "positive eigenvalue" );
+  assert ( dn[0] >= MMG5_EPSD2 && dn[1] >= MMG5_EPSD2 && dn[2] >= MMG5_EPSD2 && "positive eigenvalue" );
+
+  if ( dm[0] < MMG5_EPSOK || dn[0] < MMG5_EPSOK ) { return 0; }
+  if ( dm[1] < MMG5_EPSOK || dn[1] < MMG5_EPSOK ) { return 0; }
+  if ( dm[2] < MMG5_EPSOK || dn[2] < MMG5_EPSOK ) { return 0; }
+
+  return 1;
+}
+
+/**
+ * \param n  matrix to update
+ * \param dn eigenvalues of n in the coreduction basis
+ * \param vp coreduction basis
+ *
+ * \return 0 if fail, 1 otherwise
+ *
+ * Update of the metric n = tP^-1 diag(dn0,dn1,dn2)P^-1, P = (vp[0],vp[1],vp[2])
+ * stored in columns
+ *
+ */
+int MMG3D_updatemetreq_ani(double *n,double dn[3],double vp[3][3]) {
+  double ip[3][3];
+
+  /* P^-1 */
+  if ( !MMG5_invmat33(vp,ip) ) {
+    return 0;
+  }
+
+  /* tp^-1 * dn * P^-1 */
+  n[0] = dn[0]*ip[0][0]*ip[0][0] + dn[1]*ip[1][0]*ip[1][0] + dn[2]*ip[2][0]*ip[2][0];
+  n[1] = dn[0]*ip[0][0]*ip[0][1] + dn[1]*ip[1][0]*ip[1][1] + dn[2]*ip[2][0]*ip[2][1];
+  n[2] = dn[0]*ip[0][0]*ip[0][2] + dn[1]*ip[1][0]*ip[1][2] + dn[2]*ip[2][0]*ip[2][2];
+
+  n[3] = dn[0]*ip[0][1]*ip[0][1] + dn[1]*ip[1][1]*ip[1][1] + dn[2]*ip[2][1]*ip[2][1];
+  n[4] = dn[0]*ip[0][1]*ip[0][2] + dn[1]*ip[1][1]*ip[1][2] + dn[2]*ip[2][1]*ip[2][2];
+
+  n[5] = dn[0]*ip[0][2]*ip[0][2] + dn[1]*ip[1][2]*ip[1][2] + dn[2]*ip[2][2]*ip[2][2];
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh.
+ * \param met pointer toward the metric structure.
+ * \param pt pointer toward a tetra.
+ * \param npmaster edge extremity that cannot be modified
+ * \param npslave edge extremity to modify to respect the gradation.
+ *
+ * \return 1 if the graddation succeed, 0 otherwise
+ *
+ * Enforces gradation of metric from required entity toward other using the
+ * simultaneous reduction technique (note that as the gradation is propagated,
+ * we can be on an edge without a required extremity).
+ *
+ */
+static inline
+int MMG5_grad2metVolreq(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int npmaster,
+                        int npslave) {
+  MMG5_pPoint    p1,p2;
+  double         *mm1,*mm2,m1[6],m2[6],ux,uy,uz;
+  double         l,difsiz,rbasis1[3][3],rbasis2[3][3];
+  double         lambda[3],vp[3][3],beta,mu[3];
+  int            cfg_m2;
+  int8_t         ier;
+
+  p1  = &mesh->point[npmaster];
+  p2  = &mesh->point[npslave];
+
+  ux = p2->c[0] - p1->c[0];
+  uy = p2->c[1] - p1->c[1];
+  uz = p2->c[2] - p1->c[2];
+
+  mm1  = &met->m[6*npmaster];
+  mm2  = &met->m[6*npslave];
+
+  cfg_m2 = 0;
+  ier = 0;
+
+  if ( (!( MG_SIN(p1->tag) || (p1->tag & MG_NOM) )) &&  p1->tag & MG_GEO ) {
+    if ( (!( MG_SIN(p2->tag) || (p2->tag & MG_NOM) )) && p2->tag & MG_GEO ) {
+      // The volume gradation from ridge point toward another ridge point is
+      // bugged...
+      return 0;
+    }
+
+    /* Recover normal and metric associated to p1 */
+    if( !MMG5_buildridmet(mesh,met,npmaster,ux,uy,uz,m1,rbasis1) ) { return 0; }
+  }
+  else
+    memcpy(m1,mm1,6*sizeof(double));
+
+  if ( (!( MG_SIN(p2->tag) || (p2->tag & MG_NOM) )) && p2->tag & MG_GEO ) {
+    /* Recover normal and metric associated to p2 */
+    cfg_m2 = MMG5_buildridmet(mesh,met,npslave,ux,uy,uz,m2,rbasis2);
+    if( !cfg_m2 ) { return 0; }
+  }
+  else
+    memcpy(m2,mm2,6*sizeof(double));
+
+  l = sqrt(ux*ux+uy*uy+uz*uz);
+
+  difsiz = mesh->info.hgradreq*l;
+
+  /* Simultaneous reduction of mtan1 and mtan2 */
+  if ( !MMG3D_simred(mesh,m1,m2,lambda,mu,vp) ) {
+    return 0;
+  }
+
+  /* Gradation of sizes = 1/sqrt(eigenv of the tensors) in the first direction */
+  MMG5_gradEigenvreq(lambda,mu,difsiz,0,&ier);
+
+  /* Gradation of sizes = 1/sqrt(eigenv of the tensors) in the second direction */
+  MMG5_gradEigenvreq(lambda,mu,difsiz,1,&ier);
+
+  /* Gradation of sizes = 1/sqrt(eigenv of the tensors) in the third direction */
+  MMG5_gradEigenvreq(lambda,mu,difsiz,2,&ier);
+
+  if ( !ier ) {
+    return 0;
+  }
+
+  /* Metric update using the simultaneous reduction technique */
+  if( MG_SIN(p2->tag) || (p2->tag & MG_NOM) ){
+    /* We choose to not respect the gradation in order to restrict the influence
+     * of the singular points. Thus:
+     * lambda_new = = 0.5 lambda_1 + 0.5 lambda_new = lambda_1 + 0.5 beta.
+     * with beta the smallest variation of the eigenvalues (lambda_new-lambda_1). */
+    assert ( fabs(mm2[0]-mm2[3]) < MMG5_EPSOK && fabs(mm2[3]-mm2[5]) < MMG5_EPSOK
+             && "iso metric?" );
+
+    beta = mu[0] - mm2[0];
+
+    if ( fabs(beta) < fabs(mm2[0]-mu[1]) ) {
+      beta = mu[1] - mm2[0];
+    }
+    if ( fabs(beta) < fabs(mm2[0]-mu[2]) ) {
+      beta = mu[2] - mm2[0];
+    }
+
+    mm2[0] += 0.5*beta;
+    mm2[3] += 0.5*beta;
+    mm2[5] += 0.5*beta;
+  }
+  else if( p2->tag & MG_GEO ){
+
+    if ( !MMG3D_updatemetreq_ani(m2,mu,vp) ) { return 0; }
+
+    /* Here mtan2 contains the gradated metric in the coreduction basis: compute
+     * the sizes in the directions (t,u=t^n,n) */
+    mu[0] = m2[0]*rbasis2[0][0]*rbasis2[0][0] + 2. * m2[1]*rbasis2[1][0]*rbasis2[0][0]
+      + 2. * m2[2]*rbasis2[2][0]*rbasis2[0][0]
+      + m2[3]*rbasis2[1][0]*rbasis2[1][0] + 2. * m2[4]*rbasis2[2][0]*rbasis2[1][0]
+      + m2[5]*rbasis2[2][0]*rbasis2[2][0];
+
+    /* h = 1/sqrt(t_e M e) */
+    assert ( mu[0] > MMG5_EPSD2 );
+
+    mu[1] = m2[0]*rbasis2[0][1]*rbasis2[0][1] + 2. * m2[1]*rbasis2[1][1]*rbasis2[0][1]
+      + 2. * m2[2]*rbasis2[2][1]*rbasis2[0][1]
+      + m2[3]*rbasis2[1][1]*rbasis2[1][1] + 2. * m2[4]*rbasis2[2][1]*rbasis2[1][1]
+      + m2[5]*rbasis2[2][1]*rbasis2[2][1];
+
+    /* h = 1/sqrt(t_e M e) */
+    assert ( mu[1] > MMG5_EPSD2 );
+
+    mu[2] = m2[0]*rbasis2[0][2]*rbasis2[0][2] + 2. * m2[1]*rbasis2[1][2]*rbasis2[0][2]
+      + 2. * m2[2]*rbasis2[2][2]*rbasis2[0][2]
+      + m2[3]*rbasis2[1][2]*rbasis2[1][2] + 2. * m2[4]*rbasis2[2][2]*rbasis2[1][2]
+      + m2[5]*rbasis2[2][2]*rbasis2[2][2];
+
+    /* h = 1/sqrt(t_e M e) */
+    assert ( mu[2] > MMG5_EPSD2 );
+
+    /* Update the ridge metric */
+    mm2[0] =  mu[0];
+
+    assert ( cfg_m2 );
+
+    mm2[cfg_m2] = mu[1];
+    mm2[cfg_m2+2] = mu[2];
+  }
+  else{
+
+    if ( !MMG3D_updatemetreq_ani(m2,mu,vp) ) { return 0; }
+    memcpy(mm2,m2,6*sizeof(double));
+  }
+
+  return 1;
 }
 
 
@@ -1767,21 +1877,17 @@ int MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int ia) {
  * Enforces mesh gradation by truncating metric field.
  *
  */
-int MMG5_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
+int MMG3D_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
   MMG5_Tria     ptt;
   MMG5_pPoint   p0,p1;
   double        *m,mv;
   int           k,it,itv,nup,nu,nupv,maxit;
-  int           i,j,ip0,ip1;
-  char          ier,i0,i1;
+  int           i,j,np0,np1,ier;
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
     fprintf(stdout,"  ** Anisotropic mesh gradation\n");
-
-  for (k=1; k<=mesh->np; k++)
-    mesh->point[k].flag = mesh->base;
 
   /* First step : make ridges iso in each apairing direction */
   for (k=1; k<= mesh->np; k++) {
@@ -1798,6 +1904,12 @@ int MMG5_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
     m[3] = mv;
     m[4] = mv;
   }
+
+  /** Mark the edges belonging to a required entity */
+  MMG3D_mark_pointsOnReqEdge_fromTetra ( mesh );
+
+  for (k=1; k<=mesh->np; k++)
+    mesh->point[k].flag = mesh->base;
 
   it = nup = 0;
   maxit = 100;
@@ -1816,27 +1928,28 @@ int MMG5_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
             /* virtual triangle */
             MMG5_tet2tri(mesh,k,i,&ptt);
             for (j=0; j<3; j++) {
-              i0  = MMG5_inxt2[j];
-              i1  = MMG5_iprv2[j];
-              ip0 = ptt.v[i0];
-              ip1 = ptt.v[i1];
-              p0  = &mesh->point[ip0];
-              p1  = &mesh->point[ip1];
+              np0 = ptt.v[MMG5_inxt2[j]];
+              np1 = ptt.v[MMG5_iprv2[j]];
+              p0  = &mesh->point[np0];
+              p1  = &mesh->point[np1];
               if ( (p0->flag < mesh->base-1) && (p1->flag < mesh->base-1) )
                 continue;
+
+              /* Skip points belonging to a required edge */
+              if ( p0->s || p1->s ) continue;
+
               /* gradation along the tangent plane */
-              ier = MMG5_grad2metSurf(mesh,met,&ptt,j);
-              if ( ier == i0 ) {
+              ier = MMG5_grad2metSurf(mesh,met,&ptt,np0,np1);
+              if ( ier == np0 ) {
                 p0->flag = mesh->base;
                 nu++;
               }
-              else if ( ier == i1 ) {
+              else if ( ier == np1 ) {
                 p1->flag = mesh->base;
                 nu++;
               }
             }
           }
-
           else continue;
         }
       }
@@ -1859,20 +1972,21 @@ int MMG5_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
       if ( !MG_EOK(pt) )  continue;
       for (i=0; i<4; i++) {
         /* Gradation along a volume edge */
-        i0  = MMG5_iare[i][0];
-        i1  = MMG5_iare[i][1];
-        ip0 = pt->v[i0];
-        ip1 = pt->v[i1];
-        p0  = &mesh->point[ip0];
-        p1  = &mesh->point[ip1];
+        np0  = pt->v[MMG5_iare[i][0]];
+        np1  = pt->v[MMG5_iare[i][1]];
+        p0  = &mesh->point[np0];
+        p1  = &mesh->point[np1];
         if ( p0->flag < mesh->base-1 && p1->flag < mesh->base-1 )  continue;
 
-        ier = MMG5_grad2metVol(mesh,met,pt,i);
-        if ( ier == i0 ) {
+        /* Skip points belonging to a required edge */
+        if ( p0->s || p1->s ) continue;
+
+        ier = MMG5_grad2metVol(mesh,met,pt,np0,np1);
+        if ( ier == np0 ) {
           p0->flag = mesh->base;
           nu++;
         }
-        else if ( ier == i1 ) {
+        else if ( ier == np1 ) {
           p1->flag = mesh->base;
           nu++;
         }
@@ -1891,5 +2005,139 @@ int MMG5_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
               "    volume gradation:  %7d updated, %d iter\n",nup,it,nupv,itv);
     }
   }
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \return 0 if fail, 1 otherwise.
+ *
+ * Enforce mesh gradation by truncating size map.
+ *
+ */
+int MMG3D_gradsizreq_ani(MMG5_pMesh mesh,MMG5_pSol met) {
+  MMG5_pTetra   pt;
+  MMG5_pxTetra  pxt;
+  MMG5_Tria     ptt;
+  MMG5_pPoint   p0,p1;
+  int           k,it,itv,nup,nu,nupv,maxit;
+  int           i,j,np0,np1,npmaster,npslave,ier;
+
+  if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {
+    fprintf(stdout,"  ** Grading required points.\n");
+  }
+
+  if ( mesh->info.hgrad < 0. ) {
+    /** Mark the edges belonging to a required entity (already done if the
+     * classic gradation is enabled) */
+    MMG3D_mark_pointsOnReqEdge_fromTetra ( mesh );
+  }
+
+  it = nup = 0;
+  maxit = 100;
+  do {
+    nu = 0;
+    for (k=1; k<=mesh->ne; k++) {
+      pt = &mesh->tetra[k];
+      if ( !MG_EOK(pt) )  continue;
+      pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
+
+      if ( pxt ) {
+        for (i=0; i<4; i++) {
+          if ( pxt->ftag[i] & MG_BDY) {
+            /* Gradation along a surface edge */
+            /* virtual triangle */
+            MMG5_tet2tri(mesh,k,i,&ptt);
+            for (j=0; j<3; j++) {
+              np0 = ptt.v[MMG5_inxt2[j]];
+              np1 = ptt.v[MMG5_iprv2[j]];
+              p0  = &mesh->point[np0];
+              p1  = &mesh->point[np1];
+
+              if ( abs ( p0->s - p1->s ) < 2 ) {
+                /* No size to propagate */
+                continue;
+              }
+              else if ( p0->s > p1->s ) {
+                npmaster = np0;
+                npslave  = np1;
+              }
+              else {
+                assert ( p1->s > p0->s );
+                npmaster = np1;
+                npslave  = np0;
+              }
+
+              /* Impose the gradation to npslave from npmaster */
+              /* gradation along the tangent plane */
+              ier = MMG5_grad2metSurfreq(mesh,met,&ptt,npmaster,npslave);
+              if ( ier ) {
+                mesh->point[npslave].s = mesh->point[npmaster].s - 1;
+                nu++;
+              }
+            }
+          }
+
+          else continue;
+        }
+      }
+    }
+    nup += nu;
+  }
+  while( ++it < maxit && nu > 0 );
+
+  nupv = itv = 0;
+  maxit = 500;
+
+  do {
+    nu = 0;
+    for (k=1; k<=mesh->ne; k++) {
+      pt = &mesh->tetra[k];
+      if ( !MG_EOK(pt) )  continue;
+      for (i=0; i<4; i++) {
+        /* Gradation along a volume edge */
+        np0  = pt->v[MMG5_iare[i][0]];
+        np1  = pt->v[MMG5_iare[i][1]];
+        p0  = &mesh->point[np0];
+        p1  = &mesh->point[np1];
+
+        if ( abs ( p0->s - p1->s ) < 2 ) {
+          /* No size to propagate */
+          continue;
+        }
+        else if ( p0->s > p1->s ) {
+          npmaster = np0;
+          npslave  = np1;
+        }
+        else {
+          assert ( p1->s > p0->s );
+          npmaster = np1;
+          npslave  = np0;
+        }
+
+        /* Impose the gradation to npslave from npmaster */
+        ier =  MMG5_grad2metVolreq(mesh,met,pt,npmaster,npslave);
+        if ( ier ) {
+          mesh->point[npslave].s = mesh->point[npmaster].s - 1;
+
+          nu++;
+        }
+      }
+    }
+    nupv += nu;
+  }
+  while( ++itv < maxit && nu > 0 );
+
+  if ( abs(mesh->info.imprim) > 3 ) {
+    if ( abs(mesh->info.imprim) < 5 && !mesh->info.ddebug ) {
+      fprintf(stdout,"    gradation: %7d updated, %d iter\n",nup+nupv,it+itv);
+    }
+    else {
+      fprintf(stdout,"    surface gradation: %7d updated, %d iter\n"
+              "    volume gradation:  %7d updated, %d iter\n",nup,it,nupv,itv);
+    }
+  }
+
   return 1;
 }

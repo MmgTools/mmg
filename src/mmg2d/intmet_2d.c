@@ -39,14 +39,14 @@ int MMG2D_intmet_iso(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s)
   MMG5_pTria  pt;
   int         ip1,ip2;
   char        i1,i2;
-
+  
   pt  = &mesh->tria[k];
   i1  = MMG5_inxt2[i];
   i2  = MMG5_iprv2[i];
   ip1 = pt->v[i1];
   ip2 = pt->v[i2];
   met->m[ip] = (1.0-s)*met->m[ip1] + s*met->m[ip2];
-
+  
   return 1;
 }
 
@@ -67,7 +67,7 @@ int MMG5_interpmet22(MMG5_pMesh mesh,double *m,double *n,double s,double *mr) {
     return 0;
   }
   det = 1.0 / det;
-
+  
   imn[0] = det * ( m[2]*n[0] - m[1]*n[1]);
   imn[1] = det * ( m[2]*n[1] - m[1]*n[2]);
   imn[2] = det * (-m[1]*n[0] + m[0]*n[1]);
@@ -75,7 +75,7 @@ int MMG5_interpmet22(MMG5_pMesh mesh,double *m,double *n,double s,double *mr) {
   dd = imn[0] - imn[3];
   sqDelta = sqrt(fabs(dd*dd + 4.0*imn[1]*imn[2]));
   trimn = imn[0] + imn[3];
-
+  
   lambda[0] = 0.5 * (trimn - sqDelta);
   if ( lambda[0] < 0.0 ) {
     if ( !mmgWarn1 ) {
@@ -85,11 +85,11 @@ int MMG5_interpmet22(MMG5_pMesh mesh,double *m,double *n,double s,double *mr) {
     }
     return 0;
   }
-
+  
   /* First case : matrices m and n are homothetic: n = lambda0*m */
   if ( sqDelta < MMG5_EPS ) {
     /* Diagonalize m and truncate eigenvalues : trimn, det, etc... are reused */
-    if ( fabs(m[1]) < MMG5_EPS ) {
+    if ( fabs(m[1]) <= MMG5_EPS || fabs(n[1]) <= MMG5_EPS ) {
       dm[0]   = m[0];
       dm[1]   = m[2];
       vp0[0] = 1;
@@ -101,10 +101,10 @@ int MMG5_interpmet22(MMG5_pMesh mesh,double *m,double *n,double s,double *mr) {
       dd    = m[0] - m[2];
       trimn = m[0] + m[2];
 
-      sqDelta = sqrt(fabs(dd*dd +4*0*m[1]*m[1]));
+      sqDelta = sqrt(fabs(dd*dd +4.0*m[1]*m[1]));
       dm[0]   = 0.5 * (trimn + sqDelta);
       dm[1]   = 0.5 * (trimn - sqDelta);
-
+      
       vp0[0] = m[1];
       vp0[1] = (dm[0]-m[0]);
       vnorm  = sqrt(vp0[0]*vp0[0] + vp0[1]*vp0[1]);
@@ -114,39 +114,39 @@ int MMG5_interpmet22(MMG5_pMesh mesh,double *m,double *n,double s,double *mr) {
         vnorm  = sqrt(vp0[0]*vp0[0] + vp0[1]*vp0[1]);
         if ( vnorm < MMG5_EPS ) return 0;
       }
-
+      
       vnorm   = 1.0 / vnorm;
       vp0[0] *= vnorm;
       vp0[1] *= vnorm;
-
+      
       vp1[0] = m[1];
       vp1[1] = (dm[1]-m[0]);
       vnorm  = sqrt(vp1[0]*vp1[0] + vp1[1]*vp1[1]);
-
+      
       if ( vnorm < MMG5_EPS ) {
         vp1[0] = (dm[1] - m[2]);
         vp1[1] = m[1];
         vnorm  = sqrt(vp1[0]*vp1[0] + vp1[1]*vp1[1]);
         if ( vnorm < MMG5_EPS ) return 0;
       }
-
+      
       vnorm   = 1.0 / vnorm;
       vp1[0] *= vnorm;
       vp1[1] *= vnorm;
     }
-
+    
     /* Eigenvalues of metric n */
     dn[0] = lambda[0]*dm[0];
     dn[1] = lambda[0]*dm[1];
-
+    
     /* Diagonal values of the intersected metric */
     dd = dn[0]*dm[0];
     den = (1.0-s)*(1.0-s)*dn[0] + s*s*dm[0] + 2.0*s*(1.0-s)*sqrt(dd);
-
+    
     /* If den is too small (should not happen) simply interpolate diagonal values; else interpolate sizes */
     if ( den < MMG5_EPS ) d0 = (1.0-s)*dm[0] + s*dn[0];
     else d0 = dd / den;
-
+    
     dd = dn[1]*dm[1];
     den = (1.0-s)*(1.0-s)*dn[1] + s*s*dm[1] + 2.0*s*(1.0-s)*sqrt(dd);
 
@@ -157,78 +157,78 @@ int MMG5_interpmet22(MMG5_pMesh mesh,double *m,double *n,double s,double *mr) {
     mr[0] = d0*vp0[0]*vp0[0] + d1*vp1[0]*vp1[0];
     mr[1] = d0*vp0[0]*vp0[1] + d1*vp1[0]*vp1[1];
     mr[2] = d0*vp0[1]*vp0[1] + d1*vp1[1]*vp1[1];
-
+    
     return 1;
   }
-
+  
   /* Second case: both eigenvalues of imn are distinct ; theory says qf associated to m and n
    are diagonalizable in basis (vp0, vp1) - the coreduction basis */
   else {
     lambda[1] = 0.5 * (trimn + sqDelta);
     assert(lambda[1] >= 0.0);
-
+    
     vp0[0] = imn[1];
     vp0[1] = (lambda[0] - imn[0]);
     vnorm  = sqrt(vp0[0]*vp0[0] + vp0[1]*vp0[1]);
-
+    
     if ( vnorm < MMG5_EPS ) {
       vp0[0] = (lambda[0] - imn[3]);
       vp0[1] = imn[2];
       vnorm  = sqrt(vp0[0]*vp0[0] + vp0[1]*vp0[1]);
     }
-
+    
     vnorm   = 1.0 / vnorm;
     vp0[0] *= vnorm;
     vp0[1] *= vnorm;
-
+    
     vp1[0] = imn[1];
     vp1[1] = (lambda[1] - imn[0]);
     vnorm  = sqrt(vp1[0]*vp1[0] + vp1[1]*vp1[1]);
-
+    
     if ( vnorm < MMG5_EPS ) {
       vp1[0] = (lambda[1] - imn[3]);
       vp1[1] = imn[2];
       vnorm  = sqrt(vp1[0]*vp1[0] + vp1[1]*vp1[1]);
     }
-
+    
     vnorm   = 1.0 / vnorm;
     vp1[0] *= vnorm;
     vp1[1] *= vnorm;
-
+    
     /* Compute diagonal values in simultaneous reduction basis */
     dm[0] = m[0]*vp0[0]*vp0[0] + 2.0*m[1]*vp0[0]*vp0[1] + m[2]*vp0[1]*vp0[1];
     dm[1] = m[0]*vp1[0]*vp1[0] + 2.0*m[1]*vp1[0]*vp1[1] + m[2]*vp1[1]*vp1[1];
     dn[0] = n[0]*vp0[0]*vp0[0] + 2.0*n[1]*vp0[0]*vp0[1] + n[2]*vp0[1]*vp0[1];
     dn[1] = n[0]*vp1[0]*vp1[0] + 2.0*n[1]*vp1[0]*vp1[1] + n[2]*vp1[1]*vp1[1];
-
+    
     /* Diagonal values of the intersected metric */
     dd = dn[0]*dm[0];
     den = (1.0-s)*(1.0-s)*dn[0] + s*s*dm[0] + 2.0*s*(1.0-s)*sqrt(dd);
-
+    
     if ( den < MMG5_EPS ) d0 = (1.0-s)*dm[0] + s*dn[0];
     else d0 = dd / den;
-
+    
     dd = dn[1]*dm[1];
     den = (1.0-s)*(1.0-s)*dn[1] + s*s*dm[1] + 2.0*s*(1.0-s)*sqrt(dd);
-
+    
     if ( den < MMG5_EPS ) d1 = (1.0-s)*dm[1] + s*dn[1];
     else d1 = dd / den;
-
+    
     /* Intersected metric = tP^-1 diag(d0,d1)P^-1, P = (vp0, vp1) stored in columns */
     det = vp0[0]*vp1[1] - vp0[1]*vp1[0];
     if ( fabs(det) < MMG5_EPS )  return 0;
     det = 1.0 / det;
-
+    
     ip[0] =  vp1[1]*det;
     ip[1] = -vp1[0]*det;
     ip[2] = -vp0[1]*det;
     ip[3] =  vp0[0]*det;
-
+    
     mr[0] = d0*ip[0]*ip[0] + d1*ip[2]*ip[2];
     mr[1] = d0*ip[0]*ip[1] + d1*ip[2]*ip[3];
     mr[2] = d0*ip[1]*ip[1] + d1*ip[3]*ip[3];
   }
-
+  
   return 1;
 }
 
@@ -240,7 +240,7 @@ int MMG2D_intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s)
   int            ip1,ip2;
   char           i1,i2;
   static char    mmgWarn=0;
-
+  
   pt = &mesh->tria[k];
   i1 = MMG5_inxt2[i];
   i2 = MMG5_iprv2[i];
@@ -249,7 +249,7 @@ int MMG2D_intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s)
   m1 = &met->m[3*ip1];
   m2 = &met->m[3*ip2];
   mr = &met->m[3*ip];
-
+  
   if ( !MMG5_interpmet22(mesh,m1,m2,s,mr) ) {
     if ( !mmgWarn ) {
       mmgWarn=1;

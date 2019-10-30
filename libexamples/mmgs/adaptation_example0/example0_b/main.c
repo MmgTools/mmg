@@ -106,7 +106,7 @@ int main(int argc,char *argv[]) {
       file formatted or manually set your mesh using the MMGS_Set* functions */
 
   /** Manually set of the mesh */
-  /** a) give the size of the mesh: 12 vertices, 12 tetra, 20 triangles, 0 edges */
+  /** a) give the size of the mesh: 12 vertices, 20 triangles, 0 edges */
   if ( MMGS_Set_meshSize(mmgMesh,12,20,0) != 1 )  exit(EXIT_FAILURE);
 
   /** b) give the vertices: for each vertex, give the coordinates, the reference

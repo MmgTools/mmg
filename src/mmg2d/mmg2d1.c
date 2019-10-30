@@ -808,7 +808,7 @@ int MMG2D_mmg2d1n(MMG5_pMesh mesh,MMG5_pSol met) {
   /* Stage 1: creation of a geometric mesh */
   if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
     fprintf(stdout,"  ** GEOMETRIC MESH\n");
-
+  
   if ( !MMG2D_anatri(mesh,met,1) ) {
     fprintf(stderr,"  ## Unable to split mesh-> Exiting.\n");
     return 0;
@@ -823,12 +823,16 @@ int MMG2D_mmg2d1n(MMG5_pMesh mesh,MMG5_pSol met) {
     return 0;
   }
 
+  MMG5_gradation_info(mesh);
   if ( mesh->info.hgrad > 0. ) {
-    if ( mesh->info.imprim > 0 )   fprintf(stdout,"\n  -- GRADATION : %8f\n",mesh->info.hgrad);
     if (!MMG2D_gradsiz(mesh,met) ) {
       fprintf(stderr,"  ## Gradation problem. Exit program.\n");
       return 0;
     }
+  }
+
+  if ( mesh->info.hgradreq > 0. ) {
+    MMG2D_gradsizreq(mesh,met);
   }
 
   if ( !MMG2D_anatri(mesh,met,2) ) {

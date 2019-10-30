@@ -152,7 +152,7 @@ int MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, MMG5_Hash *hash, int chkISO) {
               fprintf(stderr,"\n  ## Warning: %s: memory alloc problem (edge):"
                       " %d\n",__func__,hash->max);
             }
-            MMG5_TAB_RECALLOC(mesh,hash->item,hash->max,0.2,MMG5_hedge,
+            MMG5_TAB_RECALLOC(mesh,hash->item,hash->max,MMG5_GAP,MMG5_hedge,
                                "MMG5_edge",
                                MMG5_DEL_MEM(mesh,hash->item);
                                return 0);
@@ -199,6 +199,7 @@ int MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, MMG5_Hash *hash, int chkISO) {
     fprintf(stdout,"\n");
   }
   if ( mesh->info.ddebug )  fprintf(stdout,"  h- completed.\n");
+
   return 1;
 }
 
@@ -237,7 +238,7 @@ int MMG5_hashEdge(MMG5_pMesh mesh,MMG5_Hash *hash, int a,int b,int k) {
         fprintf(stderr,"\n  ## Warning: %s: memory alloc problem (edge):"
                 " %d\n",__func__,hash->max);
 
-      MMG5_TAB_RECALLOC(mesh,hash->item,hash->max,0.2,MMG5_hedge,
+      MMG5_TAB_RECALLOC(mesh,hash->item,hash->max,MMG5_GAP,MMG5_hedge,
                          "MMG5_edge",return 0);
       /* ph pointer may be false after realloc */
       ph        = &hash->item[hash->nxt];
@@ -289,6 +290,66 @@ int MMG5_hashUpdate(MMG5_Hash *hash, int a,int b,int k) {
   }
 
   return 0;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param hash pointer toward the hash table of edges.
+ * \param a index of the first extremity of the edge.
+ * \param b index of the second extremity of the edge.
+ * \param tag edge tag
+ * \return the edge tag if success, 0 if fail.
+ *
+ * Add edge \f$[a;b]\f$ to the hash table if it doesn't exist and store the edge
+ * tag. If the edge exist, add the new tag to the already stored tags.
+ *
+ */
+int MMG5_hashEdgeTag(MMG5_pMesh mesh,MMG5_Hash *hash, int a,int b,int16_t tag) {
+  MMG5_hedge  *ph;
+  int          key,ia,ib,j;
+
+  ia  = MG_MIN(a,b);
+  ib  = MG_MAX(a,b);
+  key = (MMG5_KA*ia + MMG5_KB*ib) % hash->siz;
+  ph  = &hash->item[key];
+
+  if ( ph->a ) {
+    if ( ph->a == ia && ph->b == ib ) {
+      ph->k |= tag;
+      return ph->k;
+    }
+    else {
+      while ( ph->nxt && ph->nxt < hash->max ) {
+        ph = &hash->item[ph->nxt];
+        if ( ph->a == ia && ph->b == ib )  {
+          ph->k |= tag;
+          return ph->k;
+        }
+      }
+    }
+    ph->nxt   = hash->nxt;
+    ph        = &hash->item[hash->nxt];
+    ph->a     = ia;
+    ph->b     = ib;
+    ph->k     = tag;
+    hash->nxt = ph->nxt;
+    ph->nxt   = 0;
+
+    if ( hash->nxt >= hash->max ) {
+      MMG5_TAB_RECALLOC(mesh,hash->item,hash->max,mesh->gap,MMG5_hedge,
+                        "edge hash table",return 0);
+      for (j=hash->nxt; j<hash->max; j++)  hash->item[j].nxt = j+1;
+    }
+    return tag;
+  }
+
+  /* insert new edge */
+  ph->a     = ia;
+  ph->b     = ib;
+  ph->k     = tag;
+  ph->nxt   = 0;
+
+  return tag;
 }
 
 /**

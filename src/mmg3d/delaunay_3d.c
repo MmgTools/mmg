@@ -109,7 +109,7 @@ int MMG5_hashEdgeDelone(MMG5_pMesh mesh,MMG5_Hash *hash,int iel,int i,int *v) {
     ha->nxt   = 0;
 
     if ( hash->nxt >= hash->max ) {
-      MMG5_TAB_RECALLOC(mesh,hash->item,hash->max,0.2,MMG5_hedge,"face",
+      MMG5_TAB_RECALLOC(mesh,hash->item,hash->max,MMG5_GAP,MMG5_hedge,"face",
                          return 0;);
       for (j=hash->nxt; j<hash->max; j++)  hash->item[j].nxt = j+1;
     }
@@ -279,7 +279,7 @@ int MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
             } else {
               mesh->xt++;
               if ( mesh->xt > mesh->xtmax ) {
-                MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
+                MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
                                    "larger xtetra table",
                                    mesh->xt--;
                                    fprintf(stderr,"  Exit program.\n"); return -1;);

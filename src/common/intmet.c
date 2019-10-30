@@ -179,7 +179,7 @@ int MMG5_mmgIntmet33_ani(double *m,double *n,double *mr,double s) {
   int     order;
   double  lambda[3],vp[3][3],mu[3],is[6],isnis[6],mt[9],P[9],dd;
   char    i;
-  static char mmgWarn;
+  static char mmgWarn=0;
 
   /* Compute inverse of square root of matrix M : is =
    * P*diag(1/sqrt(lambda))*{^t}P */
@@ -627,9 +627,9 @@ int MMG5_interp_iso(double *ma,double *mb,double *mp,double t) {
 int MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,char i,
                         double s,double mr[6]) {
   MMG5_pPoint    p1,p2;
-  MMG5_Bezier   b;
+  MMG5_Bezier    b;
   double         b1[3],b2[3],bn[3],c[3],nt[3],cold[3],nold[3],n[3];
-  double         m1old[6],m2old[6],m1[6],m2[6];
+  double         m1old[6],m2old[6],m1[6],m2[6],rbasis[3][3];
   double         *n1,*n2,step,u,r[3][3],dd,ddbn;
   int            ip1,ip2,nstep,l;
   char           i1,i2;
@@ -653,7 +653,7 @@ int MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,char i,
   memcpy(b2,&b.b[2*i+4][0],3*sizeof(double));
 
   ddbn = bn[0]*bn[0] + bn[1]*bn[1] + bn[2]*bn[2];
-  
+
   /* Parallel transport of metric at p1 to point p(s) */
   step = s / nstep;
   cold[0] = p1->c[0];
@@ -670,7 +670,7 @@ int MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,char i,
   else {
     if ( MG_GEO & p1->tag ) {
       MMG5_nortri(mesh,pt,nt);
-      if ( !MMG5_buildridmetnor(mesh,met,pt->v[i1],nt,m1) )  return 0;
+      if ( !MMG5_buildridmetnor(mesh,met,pt->v[i1],nt,m1,rbasis) )  return 0;
     }
     else {
       memcpy(m1,&met->m[6*ip1],6*sizeof(double));
@@ -725,7 +725,7 @@ int MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,char i,
   else {
     if ( p2->tag & MG_GEO ) {
       MMG5_nortri(mesh,pt,nt);
-      if ( !MMG5_buildridmetnor(mesh,met,pt->v[i2],nt,m2))  return 0;
+      if ( !MMG5_buildridmetnor(mesh,met,pt->v[i2],nt,m2,rbasis))  return 0;
     }
     else {
       memcpy(m2,&met->m[6*ip2],6*sizeof(double));

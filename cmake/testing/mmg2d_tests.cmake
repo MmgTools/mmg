@@ -43,6 +43,19 @@ ADD_TEST(NAME mmg2d_memOption
   ${MMG2D_CI_TESTS}/Circle/cercle
   -out ${CTEST_OUTPUT_DIR}/mmg2d_memOption.o.meshb)
 
+ADD_TEST(NAME mmg2d_val
+  COMMAND ${EXECUT_MMG2D} -v val
+  ${MMG2D_CI_TESTS}/Circle/cercle
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_val.o.meshb)
+
+#ADD_TEST(NAME mmg2d_default
+#  COMMAND ${EXECUT_MMG2D} -default
+#  ${MMG2D_CI_TESTS}/Circle/cercle
+#  -out ${CTEST_OUTPUT_DIR}/mmg2d_default.o.meshb)
+
+SET_PROPERTY(TEST mmg2d_val #mmg2d_default
+  PROPERTY WILL_FAIL TRUE)
+
 ADD_TEST(NAME mmg2d_hsizOption
   COMMAND ${EXECUT_MMG2D} -v 5 -hsiz 0.1 -sol 2
   ${MMG2D_CI_TESTS}/Circle/cercle
@@ -114,25 +127,138 @@ ADD_TEST(NAME mmg2d_locParam_ani
   ${MMG2D_CI_TESTS}/LocParams/circle2refs.mesh
   -out ${CTEST_OUTPUT_DIR}/locParams-ani.o.meshb)
 
+ADD_TEST(NAME mmg2d_opnbdy_yes
+  COMMAND ${EXECUT_MMG2D} -v 5 -opnbdy -hausd 0.001
+  ${MMG2D_CI_TESTS}/Opnbdy/opnbdy-mesh.msh
+  -out ${CTEST_OUTPUT_DIR}/mmg2d-opnbdy-mesh-yes.o.meshb)
+
+ADD_TEST(NAME mmg2d_opnbdy_no
+  COMMAND ${EXECUT_MMG2D} -v 5 -hausd 0.001
+  ${MMG2D_CI_TESTS}/Opnbdy/opnbdy-mesh.msh
+  -out ${CTEST_OUTPUT_DIR}/mmg2d-opnbdy-mesh-no.o.meshb)
+
+ADD_TEST(NAME mmg2d_opnbdy_yes_ani
+  COMMAND ${EXECUT_MMG2D} -v 5 -hausd 0.001 -A -opnbdy
+  ${MMG2D_CI_TESTS}/Opnbdy/opnbdy-mesh.msh
+  -out ${CTEST_OUTPUT_DIR}/mmg2d-opnbdy-mesh-yes-ani.o.meshb)
+
 ###############################################################################
 #####
 #####         Input/Output
 #####
 ###############################################################################
 
-# Binary gmsh
+# Binary gmsh no metric
 ADD_TEST(NAME mmg2d_binary_gmsh_2d
   COMMAND ${EXECUT_MMG2D} -v 5
   ${MMG2D_CI_TESTS}/GmshInout/cercle1.mshb
-  ${CTEST_OUTPUT_DIR}/mmg2d_binary_gmsh_2d-cercle)
+  ${CTEST_OUTPUT_DIR}/mmg2d_binary_gmsh_2d-cercle.mshb)
 
-# Ascii gmsh
+# Ascii gmsh no metric
 ADD_TEST(NAME mmg2d_ascii_gmsh_2d
   COMMAND ${EXECUT_MMG2D} -v 5
   ${MMG2D_CI_TESTS}/GmshInout/cercle1.msh
   ${CTEST_OUTPUT_DIR}/mmg2d_ascii_gmsh_2d-cercle)
 
+# Binary gmsh iso metric
+ADD_TEST(NAME mmg2d_binary_gmsh_iso
+  COMMAND ${EXECUT_MMG2D} -v 5
+  ${MMG2D_CI_TESTS}/GmshInout/iso.mshb
+  ${CTEST_OUTPUT_DIR}/mmg2d_binary_gmsh_iso.mshb)
 
+# Ascii gmsh iso metric
+ADD_TEST(NAME mmg2d_ascii_gmsh_iso
+  COMMAND ${EXECUT_MMG2D} -v 5
+  ${MMG2D_CI_TESTS}/GmshInout/iso.msh
+  ${CTEST_OUTPUT_DIR}/mmg2d_ascii_gmsh_iso)
+
+# Binary gmsh iso metric
+ADD_TEST(NAME mmg2d_binary_gmsh_ani
+  COMMAND ${EXECUT_MMG2D} -v 5
+  ${MMG2D_CI_TESTS}/GmshInout/ani.mshb
+  ${CTEST_OUTPUT_DIR}/mmg2d_binary_gmsh_ani.mshb)
+
+# Ascii gmsh iso metric
+ADD_TEST(NAME mmg2d_ascii_gmsh_ani
+  COMMAND ${EXECUT_MMG2D} -v 5
+  ${MMG2D_CI_TESTS}/GmshInout/ani.msh
+  ${CTEST_OUTPUT_DIR}/mmg2d_ascii_gmsh_ani)
+
+# VTK .vtk no metric
+ADD_TEST(NAME mmg2d_vtkvtk
+  COMMAND ${EXECUT_MMG2D} -v 5
+  ${MMG2D_CI_TESTS}/VtkInout/cercle.vtk
+  ${CTEST_OUTPUT_DIR}/mmg2d_vtkvtk)
+
+# VTK .vtp no metric
+ADD_TEST(NAME mmg2d_vtkvtp
+  COMMAND ${EXECUT_MMG2D} -v 5
+  ${MMG2D_CI_TESTS}/VtkInout/cercle.vtp
+  ${CTEST_OUTPUT_DIR}/mmg2d_vtkvtp)
+
+# VTK .vtu no metric
+ADD_TEST(NAME mmg2d_vtkvtu
+  COMMAND ${EXECUT_MMG2D} -v 5
+  ${MMG2D_CI_TESTS}/VtkInout/cercle.vtu
+  ${CTEST_OUTPUT_DIR}/mmg2d_vtkvtu)
+
+# VTK .vtk with iso metric
+ADD_TEST(NAME mmg2d_vtkvtk_iso
+  COMMAND ${EXECUT_MMG2D} -v 5
+  ${MMG2D_CI_TESTS}/VtkInout/iso.vtk
+  ${CTEST_OUTPUT_DIR}/mmg2d_vtkvtk_iso)
+
+# VTK .vtp with iso metric
+ADD_TEST(NAME mmg2d_vtkvtp_iso
+  COMMAND ${EXECUT_MMG2D} -v 5
+  ${MMG2D_CI_TESTS}/VtkInout/iso.vtp
+  ${CTEST_OUTPUT_DIR}/mmg2d_vtkvtp_iso)
+
+# VTK .vtu with iso metric
+ADD_TEST(NAME mmg2d_vtkvtu_iso
+  COMMAND ${EXECUT_MMG2D} -v 5
+  ${MMG2D_CI_TESTS}/VtkInout/iso.vtu
+  ${CTEST_OUTPUT_DIR}/mmg2d_vtkvtu_iso)
+
+# VTK .vtk with aniso metric
+ADD_TEST(NAME mmg2d_vtkvtk_ani
+  COMMAND ${EXECUT_MMG2D} -v 5
+  ${MMG2D_CI_TESTS}/VtkInout/ani.vtk
+  ${CTEST_OUTPUT_DIR}/mmg2d_vtkvtk_ani)
+
+# VTK .vtp with aniso metric
+ADD_TEST(NAME mmg2d_vtkvtp_ani
+  COMMAND ${EXECUT_MMG2D} -v 5
+  ${MMG2D_CI_TESTS}/VtkInout/ani.vtp
+  ${CTEST_OUTPUT_DIR}/mmg2d_vtkvtp_ani)
+
+# VTK .vtu with aniso metric
+ADD_TEST(NAME mmg2d_vtkvtu_ani
+  COMMAND ${EXECUT_MMG2D} -v 5
+  ${MMG2D_CI_TESTS}/VtkInout/ani.vtu
+  ${CTEST_OUTPUT_DIR}/mmg2d_vtkvtu_ani)
+
+IF ( NOT USE_VTK )
+  SET(expr "VTK library not founded")
+  SET_PROPERTY(TEST mmg2d_vtkvtk
+    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
+  SET_PROPERTY(TEST mmg2d_vtkvtp
+    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
+  SET_PROPERTY(TEST mmg2d_vtkvtu
+    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
+  SET_PROPERTY(TEST mmg2d_vtkvtk_iso
+    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
+  SET_PROPERTY(TEST mmg2d_vtkvtp_iso
+    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
+  SET_PROPERTY(TEST mmg2d_vtkvtu_iso
+    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
+  SET_PROPERTY(TEST mmg2d_vtkvtk_ani
+    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
+  SET_PROPERTY(TEST mmg2d_vtkvtp_ani
+    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
+  SET_PROPERTY(TEST mmg2d_vtkvtu_ani
+    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
+ENDIF ( )
 
 ###############################################################################
 #####
@@ -158,8 +284,25 @@ ADD_TEST(NAME mmg2d_SquareIso_nonConstant2
 ADD_TEST(NAME mmg2d_2squares
   COMMAND ${EXECUT_MMG2D} -msh 2 -hmax 1 -nosurf -v 5
   ${MMG2D_CI_TESTS}/2squares/2squares
-  -out ${CTEST_OUTPUT_DIR}/mmg2d_2squares-2squares.o.meshb)
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_2squares.o.meshb)
 
+####### -met option
+ADD_TEST(NAME mmg2d_2squares-withMet
+  COMMAND ${EXECUT_MMG2D} -msh 2  -v 5
+  ${MMG2D_CI_TESTS}/2squares/2squares -met ${MMG2D_CI_TESTS}/2squares/2s.sol
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_2squares-met.o.meshb)
+
+####### -sol option
+ADD_TEST(NAME mmg2d_2squares-withSol
+  COMMAND ${EXECUT_MMG2D} -msh 2  -v 5
+  ${MMG2D_CI_TESTS}/2squares/2squares -sol ${MMG2D_CI_TESTS}/2squares/2s.sol
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_2squares-sol.o.meshb)
+
+# -nreg
+ADD_TEST(NAME mmg2d_nreg
+  COMMAND ${EXECUT_MMG2D} -v 5 -nreg
+  ${MMG2D_CI_TESTS}/SquareIso/carretest
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_nreg.o.meshb)
 
 ###############################################################################
 #####
@@ -171,10 +314,15 @@ ADD_TEST(NAME mmg2d_SquareAniso
   ${MMG2D_CI_TESTS}/SquareAniso/adap1
   ${CTEST_OUTPUT_DIR}/mmg2d_SquareAniso-mmg2d_SquareAniso-adap1.o.meshb)
 
-ADD_TEST(NAME mmg2d_CircleOptimAni
+ADD_TEST(NAME mmg2d_Circle-optimAni
   COMMAND ${EXECUT_MMG2D} -v 5 -optim -A -sol 2
   ${MMG2D_CI_TESTS}/Circle/cercle
-  -out ${CTEST_OUTPUT_DIR}/mmg2d_CircleOptimAni-cercle.o.mesh)
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_Circle-optimAni.o.mesh)
+
+ADD_TEST(NAME mmg2d_Circle-hsizAni
+  COMMAND ${EXECUT_MMG2D} -v 5 -hsiz 0.01 -A -sol 2
+  ${MMG2D_CI_TESTS}/Circle/cercle
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_Circle-hsizAni.o.mesh)
 
 ###############################################################################
 #####
@@ -196,6 +344,24 @@ ADD_TEST(NAME mmg2d_NacaGenerationAni
   ${MMG2D_CI_TESTS}/NacaGeneration/naca
   -out ${CTEST_OUTPUT_DIR}/mmg2d_NacaGeneration-naca.o.meshb)
 
+# optim
+ADD_TEST(NAME mmg2d_NacaGeneration-optim
+  COMMAND ${EXECUT_MMG2D} -v 5 -hausd 0.001 -optim
+  ${MMG2D_CI_TESTS}/NacaGeneration/naca
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_NacaGeneration-optim.o.meshb)
+
+# hsiz
+ADD_TEST(NAME mmg2d_NacaGeneration-hsiz
+  COMMAND ${EXECUT_MMG2D} -v 5 -hausd 0.001 -hsiz 0.01
+  ${MMG2D_CI_TESTS}/NacaGeneration/naca
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_NacaGeneration-hsiz.o.meshb)
+
+# hsiz + ani
+ADD_TEST(NAME mmg2d_NacaGeneration-hsizAni
+  COMMAND ${EXECUT_MMG2D} -v 5 -hausd 0.001 -hsiz 0.01 -A
+  ${MMG2D_CI_TESTS}/NacaGeneration/naca
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_NacaGeneration-hsizAni.o.meshb)
+
 # non convex test cases
 ADD_TEST(NAME mmg2d_ACDCGeneration
   COMMAND ${EXECUT_MMG2D} -v 5
@@ -212,20 +378,104 @@ ADD_TEST(NAME mmg2d_GaronneGeneration
 #####         Implicit domain discretization
 #####
 ###############################################################################
-#ADD_TEST(NAME mmg2d_LSDiscretization
-#  COMMAND ${EXECUT_MMG2D} -v 5 -ls
-#  ${MMG2D_CI_TESTS}/LSDiscretization/dom
-#  -out ${CTEST_OUTPUT_DIR}/mmg2d_LSDiscretization-dom.o.meshb)
-#
-#ADD_TEST(NAME mmg2d_LSDiscretization2
-#  COMMAND ${EXECUT_MMG2D} -v 5 -ls
-#  ${MMG2D_CI_TESTS}/LSDiscretization/nacai
-#  -out ${CTEST_OUTPUT_DIR}/mmg2d_LSDiscretization2-nacai.o.meshb)
+ADD_TEST(NAME mmg2d_LSMultiMat_val
+  COMMAND ${EXECUT_MMG2D} -val -v 5 -ls -hausd 0.001
+  -met ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat-met.sol
+  -sol ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat-sol.sol
+  ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat
+  ${CTEST_OUTPUT_DIR}/mmg2d_multi-mat-val.o.meshb
+  )
+
+#ADD_TEST(NAME mmg2d_LSMultiMat_default
+#  COMMAND ${EXECUT_MMG2D} -val -v 5 -ls -hausd 0.001
+#  -met ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat-met.sol
+#  -sol ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat-sol.sol
+#  ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat
+#  ${CTEST_OUTPUT_DIR}/mmg2d_multi-mat-default.o.meshb
+#  )
+SET_PROPERTY(TEST mmg2d_LSMultiMat_val #mmg2d_LSMultiMat_default
+  PROPERTY WILL_FAIL TRUE)
+
+ADD_TEST(NAME mmg2d_LSDiscretization
+  COMMAND ${EXECUT_MMG2D} -v 5 -ls
+  ${MMG2D_CI_TESTS}/LSDiscretization/dom
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_LSDiscretization-dom.o.meshb)
+
+ADD_TEST(NAME mmg2d_LSDiscretization2
+  COMMAND ${EXECUT_MMG2D} -v 5 -ls
+  ${MMG2D_CI_TESTS}/LSDiscretization/nacai
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_LSDiscretization2-nacai.o.meshb)
 
 ADD_TEST(NAME mmg2d_LSMultiMat
   COMMAND ${EXECUT_MMG2D} -v 5 -ls -hmin 0.005 -hmax 0.1 -hausd 0.001 -hgrad 1.3
   ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat
   ${CTEST_OUTPUT_DIR}/mmg2d_LSMultiMat.o.meshb)
+
+# non 0 ls
+ADD_TEST(NAME mmg2d_LSMultiMat_nonzero
+  COMMAND ${EXECUT_MMG2D} -v 5 -ls 0.01 -hausd 0.001
+  ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat
+  ${CTEST_OUTPUT_DIR}/mmg2d_LSMultiMat-nonzero.o.meshb)
+
+# ls + rmc
+ADD_TEST(NAME mmg2d_OptLs_dom_withbub
+  COMMAND ${EXECUT_MMG2D} -v 5 -ls
+  ${MMG2D_CI_TESTS}/LSDiscretization/dom
+  -sol ${MMG2D_CI_TESTS}/LSDiscretization/bub.sol
+  ${CTEST_OUTPUT_DIR}/mmg2d_OptLs_dom-withbub.o.meshb)
+
+ADD_TEST(NAME mmg2d_OptLs_dom_rembub
+  COMMAND ${EXECUT_MMG2D} -v 5 -ls
+  ${MMG2D_CI_TESTS}/LSDiscretization/dom
+  -sol ${MMG2D_CI_TESTS}/LSDiscretization/bub.sol
+  ${CTEST_OUTPUT_DIR}/mmg2d_OptLs_dom-rembub.o.meshb -rmc)
+
+ADD_TEST(NAME mmg2d_OptLs_dom_rembub2
+  COMMAND ${EXECUT_MMG2D} -v 5 -ls -rmc 0.1
+  ${MMG2D_CI_TESTS}/LSDiscretization/dom
+  -sol ${MMG2D_CI_TESTS}/LSDiscretization/bub.sol
+  ${CTEST_OUTPUT_DIR}/mmg2d_OptLs_dom-rembub2.o.meshb)
+
+
+# ls discretisation + optim option
+ADD_TEST(NAME mmg2d_LSMultiMat_optim
+  COMMAND ${EXECUT_MMG2D} -v 5 -ls -optim -hausd 0.001
+  ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat
+  ${CTEST_OUTPUT_DIR}/mmg2d_LSMultiMat-optim.o.meshb)
+
+# ls discretisation + optim + aniso option
+ADD_TEST(NAME mmg2d_LSMultiMat_optimAni
+  COMMAND ${EXECUT_MMG2D} -v 5 -ls -optim -A -hausd 0.001
+  ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat
+  ${CTEST_OUTPUT_DIR}/mmg2d_LSMultiMat-optimAni.o.meshb)
+
+# ls discretisation + hsiz option
+ADD_TEST(NAME mmg2d_LSMultiMat_hsiz
+  COMMAND ${EXECUT_MMG2D} -v 5 -ls -hsiz 0.05 -hausd 0.001
+  ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat
+  ${CTEST_OUTPUT_DIR}/mmg2d_LSMultiMat-hsiz.o.meshb)
+
+# ls discretisation + hsiz Ani option
+ADD_TEST(NAME mmg2d_LSMultiMat_hsizAni
+  COMMAND ${EXECUT_MMG2D} -v 5 -ls -hsiz 0.05 -A -hausd 0.001
+  ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat
+  ${CTEST_OUTPUT_DIR}/mmg2d_LSMultiMat-hsizAni.o.meshb)
+
+# ls discretisation + metric
+ADD_TEST(NAME mmg2d_LSMultiMat_withMet
+  COMMAND ${EXECUT_MMG2D} -v 5 -ls -hausd 0.001
+  -met ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat-met.sol
+  ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat
+  ${CTEST_OUTPUT_DIR}/mmg2d_LSMultiMat-withMet.o.meshb)
+
+# ls discretisation + metric + ls
+ADD_TEST(NAME mmg2d_LSMultiMat_withMetAndLs
+  COMMAND ${EXECUT_MMG2D} -v 5 -ls -hausd 0.001
+  -met ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat-met.sol
+  -sol ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat-sol.sol
+  ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat
+  ${CTEST_OUTPUT_DIR}/mmg2d_LSMultiMat-withMetAndLs.o.meshb)
+
 
 ###############################################################################
 #####

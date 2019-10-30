@@ -229,12 +229,21 @@ int MMG2D_assignEdge(MMG5_pMesh mesh) {
 
   hash.nxt = mesh->na;
 
+  for ( k=1; k <= mesh->nt; ++k ) {
+    for ( i=0; i<3; ++i ) {
+      if ( mesh->tria[k].tag[i] & MG_REF || mesh->tria[k].tag[i] & MG_BDY) {
+        assert ( 0 );
+      }
+    }
+  }
+
   for (k=mesh->na; k<hash.max; k++)
     hash.item[k].nxt = k+1;
 
   /* hash mesh edges */
-  for (k=1; k<=mesh->na; k++)
+  for (k=1; k<=mesh->na; k++) {
     MMG5_hashEdge(mesh,&hash,mesh->edge[k].a,mesh->edge[k].b,k);
+  }
 
   /* set references to triangles */
   for (k=1; k<=mesh->nt; k++) {
@@ -249,6 +258,7 @@ int MMG2D_assignEdge(MMG5_pMesh mesh) {
         pa = &mesh->edge[ia];
         pt->edg[i2] = pa->ref;
         pt->tag[i2] |= pa->tag;
+
       }
     }
   }
@@ -270,6 +280,7 @@ int MMG2D_assignEdge(MMG5_pMesh mesh) {
  * by identifying the different components of the mesh.
  *
  * \remark Possible extension needed to take into account constrained edges
+ * \remark Call in debug mode only
  *
  */
 int MMG2D_bdryEdge(MMG5_pMesh mesh) {
@@ -344,14 +355,16 @@ int MMG2D_bdryEdge(MMG5_pMesh mesh) {
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the solution structure.
+ * \param sol pointer toward a solution structure.
+ * \param met pointer toward a solution structure.
+ *
  * \return 0 if memory problem (uncomplete mesh), 1 otherwise.
  *
  * Pack the mesh and metric and create explicitly all the mesh structures
  * (edges).
  *
  */
-int MMG2D_pack(MMG5_pMesh mesh,MMG5_pSol sol) {
+int MMG2D_pack(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
   MMG5_pTria         pt,ptnew,pt1;
   MMG5_pEdge         ped;
   MMG5_pPoint        ppt,pptnew;
@@ -413,6 +426,12 @@ int MMG2D_pack(MMG5_pMesh mesh,MMG5_pSol sol) {
       else if ( (pt->ref==pt1->ref) && MG_SIN(pt->tag[i]) ) {
         ++mesh->na;
       }
+      else if ( mesh->info.opnbdy ) {
+        if ( (pt->tag[i] & MG_REF) || pt->tag[i] & MG_BDY ) {
+          assert ( pt->tag[i] & (MG_REF+MG_BDY) );
+          ++mesh->na;
+        }
+      }
     }
   }
 
@@ -452,7 +471,8 @@ int MMG2D_pack(MMG5_pMesh mesh,MMG5_pSol sol) {
           iel = adja[i] / 3;
           pt1 = &mesh->tria[iel];
           if ( !iel || (pt->ref > pt1->ref) ||
-               ((pt->ref==pt1->ref) && MG_SIN(pt->tag[i])) ) {
+               ((pt->ref==pt1->ref) && MG_SIN(pt->tag[i])) ||
+               (mesh->info.opnbdy && ((pt->tag[i] & MG_REF) || (pt->tag[i] & MG_BDY)))) {
             ++ned;
             ped = &mesh->edge[ned];
             ped->a = pt->v[i1];
@@ -512,7 +532,7 @@ int MMG2D_pack(MMG5_pMesh mesh,MMG5_pSol sol) {
   }
   mesh->nt = nt;
 
-  /* Pack metric map */
+  /* Pack solutions (metric map, displacement, ...) */
   if ( sol && sol->m ) {
     nbl = 1;
     for (k=1; k<=mesh->np; k++) {
@@ -523,6 +543,20 @@ int MMG2D_pack(MMG5_pMesh mesh,MMG5_pSol sol) {
 
       for (i=0; i<sol->size; i++)
         sol->m[isolnew + i] = sol->m[isol + i];
+      ++nbl;
+    }
+  }
+
+  if ( met && met->m ) {
+    nbl = 1;
+    for (k=1; k<=mesh->np; k++) {
+      ppt = &mesh->point[k];
+      if ( !MG_VOK(ppt) )  continue;
+      isol    = k * met->size;
+      isolnew = nbl * met->size;
+
+      for (i=0; i<met->size; i++)
+        met->m[isolnew + i] = met->m[isol + i];
       ++nbl;
     }
   }
@@ -586,16 +620,3 @@ int MMG2D_pack(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   return 1;
 }
-
-/*
- opt[0] = option
- opt[1] = ddebug
- opt[2] = noswap
- opt[3] = noinsert
- opt[4] = nomove
- opt[5] = imprim
- opt[6] = nr
-
- optdbl[0] = hgrad
- optdbl[1] =ar
- */

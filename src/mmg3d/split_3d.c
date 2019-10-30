@@ -212,7 +212,7 @@ nextstep1:
       mesh->xt++;
       if ( mesh->xt > mesh->xtmax ) {
         /* realloc of xtetras table */
-        MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
+        MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
                            "larger xtetra table",
                            mesh->xt--;
                            fprintf(stderr,"  Exit program.\n");
@@ -309,7 +309,10 @@ int MMG3D_normalDeviation(MMG5_pMesh mesh , int  start, char   iface, char ia,
  * \param list pointer toward the edge shell.
  * \param ret size of the edge shell.
  * \param ip new point index.
- * \return 0 if final position is invalid, 1 if all checks are ok.
+ *
+ * \return 1 if all checks are ok
+ * \return 0 if fail due to a very bad quality elt
+ * \return 2 if fail due to a ridge angle creation
  *
  * Simulate at the same time creation and bulging of one point, with new
  * position o and tag \a tag, to be inserted at an edge, whose shell is passed.
@@ -384,15 +387,15 @@ int MMG3D_simbulgept(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int ip) {
       /* Normal deviation between the two new triangles and their neighbors */
       ier = MMG3D_normalDeviation(mesh,iel,iface,ie,0,ip,&n0[idx]);
       if ( ier < 0 ) return -1;
-      else if ( ier==0 ) return 0;
+      else if ( ier == 0 ) return 2;
 
       ier = MMG3D_normalDeviation(mesh,iel,iface,ie,1,ip,&n1[idx]);
       if ( ier < 0 ) return -1;
-      else if ( ier==0 ) return 0;
+      else if ( ier == 0 ) return 2;
 
       /* Test sharp angle creation along the new edge */
       if ( !MMG5_devangle(&n0[idx],&n1[idx],mesh->info.dhd) ) {
-        return 0;
+        return 2;
       }
 
       if ( !idx ) {
@@ -430,10 +433,10 @@ int MMG3D_simbulgept(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int ip) {
 
         /* Test sharp angle creation along the splitted edge */
         if ( !MMG5_devangle(&n0[0],&n1[idx],mesh->info.dhd) ) {
-          return 0;
+          return 2;
         }
         if ( !MMG5_devangle(&n1[0],&n0[idx],mesh->info.dhd) ) {
-          return 0;
+          return 2;
         }
       }
     }
@@ -745,7 +748,7 @@ int MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
         mesh->xt++;
         if ( mesh->xt > mesh->xtmax ) {
           /* realloc of xtetras table */
-          MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
+          MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
                              "larger xtetra table",
                              mesh->xt--;
                              return -1);
@@ -881,7 +884,7 @@ int MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
         mesh->xt++;
         if ( mesh->xt > mesh->xtmax ) {
           /* realloc of xtetras table */
-          MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
+          MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
                              "larger xtetra table",
                              mesh->xt--;
                              return -1);
@@ -1382,7 +1385,7 @@ int MMG5_split2sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp){
           mesh->xt++;
           if ( mesh->xt > mesh->xtmax ) {
             /* realloc of xtetras table */
-            MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
+            MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
                                "larger xtetra table",
                                mesh->xt--;
                                fprintf(stderr,"  Exit program.\n");
@@ -1409,7 +1412,7 @@ int MMG5_split2sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp){
             mesh->xt++;
             if ( mesh->xt > mesh->xtmax ) {
               /* realloc of xtetras table */
-              MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
+              MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
                                  "larger xtetra table",
                                  mesh->xt--;
                                  fprintf(stderr,"  Exit program.\n");
@@ -1651,7 +1654,7 @@ int MMG5_split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
           mesh->xt++;
           if ( mesh->xt > mesh->xtmax ) {
             /* realloc of xtetras table */
-            MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
+            MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
                                "larger xtetra table",
                                mesh->xt--;
                                fprintf(stderr,"  Exit program.\n");
@@ -1680,7 +1683,7 @@ int MMG5_split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
             mesh->xt++;
             if ( mesh->xt > mesh->xtmax ) {
               /* realloc of xtetras table */
-              MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
+              MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
                                  "larger xtetra table",
                                  mesh->xt--;
                                  fprintf(stderr,"  Exit program.\n");
@@ -1929,7 +1932,7 @@ int MMG5_split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
           mesh->xt++;
           if ( mesh->xt > mesh->xtmax ) {
             /* realloc of xtetras table */
-            MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
+            MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
                                "larger xtetra table",
                                mesh->xt--;
                                fprintf(stderr,"  Exit program.\n");
@@ -1956,7 +1959,7 @@ int MMG5_split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
             mesh->xt++;
             if ( mesh->xt > mesh->xtmax ) {
               /* realloc of xtetras table */
-              MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
+              MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
                                  "larger xtetra table",
                                  mesh->xt--;
                                  fprintf(stderr,"  Exit program.\n");
@@ -2474,7 +2477,7 @@ int MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp
           mesh->xt++;
           if ( mesh->xt > mesh->xtmax ) {
             /* realloc of xtetras table */
-            MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
+            MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
                                "larger xtetra table",
                                mesh->xt--;
                                fprintf(stderr,"  Exit program.\n");
@@ -2501,7 +2504,7 @@ int MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp
             mesh->xt++;
             if ( mesh->xt > mesh->xtmax ) {
               /* realloc of xtetras table */
-              MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
+              MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
                                  "larger xtetra table",
                                  mesh->xt--;
                                  fprintf(stderr,"  Exit program.\n");
@@ -3150,7 +3153,7 @@ int MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],char metRidTy
             mesh->xt++;
             if ( mesh->xt >= mesh->xtmax ) {
               /* realloc of xtetras table */
-              MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
+              MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
                                  "larger xtetra table",
                                  mesh->xt--;
                                  fprintf(stderr,"  Exit program.\n");
@@ -3178,7 +3181,7 @@ int MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],char metRidTy
               mesh->xt++;
               if ( mesh->xt > mesh->xtmax ) {
                 /* realloc of xtetras table */
-                MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
+                MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
                                    "larger xtetra table",
                                    mesh->xt--;
                                    fprintf(stderr,"  Exit program.\n");
@@ -3216,7 +3219,7 @@ int MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],char metRidTy
             mesh->xt++;
             if ( mesh->xt > mesh->xtmax ) {
               /* realloc of xtetras table */
-              MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
+              MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
                                  "larger xtetra table",
                                  mesh->xt--;
                                  fprintf(stderr,"  Exit program.\n");
@@ -3244,7 +3247,7 @@ int MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],char metRidTy
               mesh->xt++;
               if ( mesh->xt > mesh->xtmax ) {
                 /* realloc of xtetras table */
-                MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
+                MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
                                    "larger xtetra table",
                                    mesh->xt--;
                                    fprintf(stderr,"  Exit program.\n");
@@ -3491,7 +3494,7 @@ int MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k,char metRidTyp) {
           mesh->xt++;
           if ( mesh->xt > mesh->xtmax ) {
             /* realloc of xtetras table */
-            MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
+            MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
                                "larger xtetra table",
                                mesh->xt--;
                                return 0);
@@ -3519,7 +3522,7 @@ int MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k,char metRidTyp) {
             mesh->xt++;
             if ( mesh->xt > mesh->xtmax ) {
               /* realloc of xtetras table */
-              MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
+              MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
                                  "larger xtetra table",
                                  mesh->xt--;
                                  return 0);
@@ -3916,7 +3919,7 @@ int MMG5_split4sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) 
           mesh->xt++;
           if ( mesh->xt > mesh->xtmax ) {
             /* realloc of xtetras table */
-            MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
+            MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
                                "larger xtetra table",
                                mesh->xt--;
                                fprintf(stderr,"  Exit program.\n");
@@ -3944,7 +3947,7 @@ int MMG5_split4sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) 
             mesh->xt++;
             if ( mesh->xt > mesh->xtmax ) {
               /* realloc of xtetras table */
-              MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
+              MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
                                  "larger xtetra table",
                                  mesh->xt--;
                                  fprintf(stderr,"  Exit program.\n");
@@ -4307,7 +4310,7 @@ int MMG5_split4op(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) 
           mesh->xt++;
           if ( mesh->xt > mesh->xtmax ) {
             /* realloc of xtetras table */
-            MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
+            MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
                                "larger xtetra table",
                                mesh->xt--;
                                fprintf(stderr,"  Exit program.\n");
@@ -4335,7 +4338,7 @@ int MMG5_split4op(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) 
             mesh->xt++;
             if ( mesh->xt > mesh->xtmax ) {
               /* realloc of xtetras table */
-              MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
+              MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
                                  "larger xtetra table",
                                  mesh->xt--;
                                  fprintf(stderr,"  Exit program.\n");
@@ -4686,7 +4689,7 @@ int MMG5_split5(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
           mesh->xt++;
           if ( mesh->xt > mesh->xtmax ) {
             /* realloc of xtetras table */
-            MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
+            MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
                                "larger xtetra table",
                                mesh->xt--;
                                fprintf(stderr,"  Exit program.\n");
@@ -4714,7 +4717,7 @@ int MMG5_split5(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
             mesh->xt++;
             if ( mesh->xt > mesh->xtmax ) {
               /* realloc of xtetras table */
-              MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
+              MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
                                  "larger xtetra table",
                                  mesh->xt--;
                                  fprintf(stderr,"  Exit program.\n");
@@ -4906,7 +4909,7 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
         mesh->xt++;
         if ( mesh->xt > mesh->xtmax ) {
           /* realloc of xtetras table */
-          MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
+          MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
                              "larger xtetra table",
                              mesh->xt--;
                              fprintf(stderr,"  Exit program.\n");
@@ -4946,7 +4949,7 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
         mesh->xt++;
         if ( mesh->xt > mesh->xtmax ) {
           /* realloc of xtetras table */
-          MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
+          MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
                              "larger xtetra table",
                              mesh->xt--;
                              fprintf(stderr,"  Exit program.\n");
@@ -4987,7 +4990,7 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
         mesh->xt++;
         if ( mesh->xt > mesh->xtmax ) {
           /* realloc of xtetras table */
-          MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
+          MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
                              "larger xtetra table",
                              mesh->xt--;
                              fprintf(stderr,"  Exit program.\n");
@@ -5031,7 +5034,7 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
         mesh->xt++;
         if ( mesh->xt > mesh->xtmax ) {
           /* realloc of xtetras table */
-          MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
+          MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
                              "larger xtetra table",
                              mesh->xt--;
                              fprintf(stderr,"  Exit program.\n");
@@ -5075,7 +5078,7 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
         mesh->xt++;
         if ( mesh->xt > mesh->xtmax ) {
           /* realloc of xtetras table */
-          MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
+          MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
                              "larger xtetra table",
                              mesh->xt--;
                              fprintf(stderr,"  Exit program.\n");
@@ -5119,7 +5122,7 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
         mesh->xt++;
         if ( mesh->xt > mesh->xtmax ) {
           /* realloc of xtetras table */
-          MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
+          MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
                              "larger xtetra table",
                              mesh->xt--;
                              fprintf(stderr,"  Exit program.\n");
@@ -5162,7 +5165,7 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp) {
         mesh->xt++;
         if ( mesh->xt > mesh->xtmax ) {
           /* realloc of xtetras table */
-          MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
+          MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
                              "larger xtetra table",
                              mesh->xt--;
                              fprintf(stderr,"  Exit program.\n");
@@ -5320,7 +5323,9 @@ int MMG5_splitedg(MMG5_pMesh mesh, MMG5_pSol met,int iel, int iar, double crit){
   }
 
   ier = MMG3D_simbulgept(mesh,met,list,lon,ip);
-  if (!ier) return 0;
+  assert ( (!mesh->info.ddebug) || (mesh->info.ddebug && ier != -1) );
+  if ( ier <= 0 || ier == 2 ) return 0;
+
   ier = MMG3D_chksplit(mesh,met,ip,&list[0],lon,crit);
   if(!ier) return 0;
   ier = MMG5_split1b(mesh,met,list,lon,ip,0,1,0);

@@ -1254,6 +1254,9 @@ int MMGS_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
     if ( val )
       mesh->info.iso      = 2;
     break;
+  case MMGS_IPARAM_optim :
+    mesh->info.optim = val;
+    break;
   case MMGS_IPARAM_noinsert :
     mesh->info.noinsert = val;
     break;
@@ -1376,6 +1379,13 @@ int MMGS_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val){
     else
       mesh->info.hgrad = log(mesh->info.hgrad);
     break;
+  case MMGS_DPARAM_hgradreq :
+    mesh->info.hgradreq    = val;
+    if ( mesh->info.hgradreq < 0.0 )
+      mesh->info.hgradreq = -1.0;
+    else
+      mesh->info.hgradreq = log(mesh->info.hgradreq);
+    break;
   case MMGS_DPARAM_hausd :
     if ( val <=0 ) {
       fprintf(stderr,"\n  ## Error: %s: hausdorff number must be strictly"
@@ -1450,12 +1460,13 @@ int MMGS_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref,
 
   switch ( typ )
   {
-  case ( MMG5_Vertex ):
-    mesh->info.parTyp |= MG_Vert;
-    break;
   case ( MMG5_Triangle ):
     mesh->info.parTyp |= MG_Tria;
     break;
+  default:
+    fprintf(stderr,"\n  ## Error: %s: unexpected entity type: %s.\n",
+            __func__,MMG5_Get_entitiesName(typ));
+    return 0;
   }
 
   mesh->info.npari++;

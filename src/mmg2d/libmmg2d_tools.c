@@ -32,21 +32,26 @@
 
 #include "mmg2d.h"
 
+
 void MMG2D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( met->size == 3 ) {
     MMG2D_lencurv  = MMG2D_lencurv_ani;
-    MMG2D_defsiz   = MMG2D_defsiz_ani;
-    MMG2D_gradsiz  = lissmet_ani;
-    MMG2D_caltri   = MMG2D_caltri_ani;
-    MMG2D_intmet   = MMG2D_intmet_ani;
+    MMG5_compute_meanMetricAtMarkedPoints = MMG5_compute_meanMetricAtMarkedPoints_ani;
+    MMG2D_defsiz     = MMG2D_defsiz_ani;
+    MMG2D_gradsiz    = lissmet_ani;
+    MMG2D_gradsizreq = MMG5_gradsizreq_ani;
+    MMG2D_caltri     = MMG2D_caltri_ani;
+    MMG2D_intmet     = MMG2D_intmet_ani;
     //    MMG2D_optlen    = optlen_ani;
   }
   else {
     MMG2D_lencurv   = MMG2D_lencurv_iso;
-    MMG2D_defsiz    = MMG2D_defsiz_iso;
-    MMG2D_gradsiz   = MMG2D_gradsiz_iso;
-    MMG2D_caltri    = MMG2D_caltri_iso;
-    MMG2D_intmet    = MMG2D_intmet_iso;
+    MMG5_compute_meanMetricAtMarkedPoints = MMG5_compute_meanMetricAtMarkedPoints_iso;
+    MMG2D_defsiz     = MMG2D_defsiz_iso;
+    MMG2D_gradsiz    = MMG5_gradsiz_iso;
+    MMG2D_gradsizreq = MMG5_gradsizreq_iso;
+    MMG2D_caltri     = MMG2D_caltri_iso;
+    MMG2D_intmet     = MMG2D_intmet_iso;
   }
   return;
 }
@@ -61,12 +66,11 @@ void MMG2D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
  *
  */
 int MMG2D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
-  int        ret,i,j;
+  int        ret,ref,i,j,npar;
   float      fp1,fp2,fp3;
   char       *ptr,data[256];
   FILE       *in;
   MMG5_pMat  pm;
-  MMG5_pPar  ppar;
   fpos_t     position;
 
   /* Check for parameter file */
@@ -84,7 +88,7 @@ int MMG2D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
   }
   if ( mesh->info.imprim >= 0 )
     fprintf(stdout,"\n  %%%% %s OPENED\n",data);
-  
+
   /* Read parameters */
   while ( !feof(in) ) {
     ret = fscanf(in,"%255s",data);
@@ -101,12 +105,13 @@ int MMG2D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
       }
 
       if ( mesh->info.nmat ) {
+        MMG5_ADD_MEM(mesh,(mesh->info.nmat)*sizeof(MMG5_Mat),"multi material params",return 0);
         MMG5_SAFE_CALLOC(mesh->info.mat,mesh->info.nmat,MMG5_Mat,return 0);
         for (i=0; i<mesh->info.nmat; i++) {
           pm = &mesh->info.mat[i];
-          fscanf(in,"%d",&pm->ref);
+          MMG_FSCANF(in,"%d",&pm->ref);
           fgetpos(in,&position);
-          fscanf(in,"%255s",data);
+          MMG_FSCANF(in,"%255s",data);
           if ( !strcmp(data,"nosplit") ) {
             pm->dospl = 0;
             pm->rin = pm->ref;
@@ -114,8 +119,8 @@ int MMG2D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
           }
           else {
             fsetpos(in,&position);
-            fscanf(in,"%d",&pm->rin);
-            fscanf(in,"%d",&pm->rex);
+            MMG_FSCANF(in,"%d",&pm->rin);
+            MMG_FSCANF(in,"%d",&pm->rex);
             pm->dospl = 1;
           }
         }
@@ -123,24 +128,24 @@ int MMG2D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
     }
     /* Read user-defined local parameters and store them in the structure info->par */
     else if ( !strcmp(data,"parameters") ) {
-      ret = fscanf(in,"%d",&mesh->info.npar);
+      ret = fscanf(in,"%d",&npar);
 
       if ( !ret ) {
-        fprintf(stderr,"  %%%% Wrong format: %d\n",mesh->info.npar);
-        return (0);
+        fprintf(stderr,"  %%%% Wrong format: %d\n",npar);
+        return 0;
       }
-      else if ( mesh->info.npar > MMG2D_LPARMAX ) {
-        fprintf(stderr,"  %%%% Too many local parameters %d. Abort\n",mesh->info.npar);
-        return (0);
+      else if ( npar > MMG2D_LPARMAX ) {
+        fprintf(stderr,"  %%%% Too many local parameters %d. Abort\n",npar);
+        return 0;
       }
 
       /* Allocate memory and fill the info->par table (adding one, corresponding to the command line data) */
-      if ( mesh->info.npar ) {
-        MMG5_SAFE_CALLOC(mesh->info.par,mesh->info.npar,MMG5_Par,return 0);
+      if ( npar ) {
+        if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_numberOfLocalParam,npar) )
+          return 0;
 
         for (i=0; i<mesh->info.npar; i++) {
-          ppar = &mesh->info.par[i];
-          ret = fscanf(in,"%d %255s",&ppar->ref,data);
+          ret = fscanf(in,"%d %255s",&ref,data);
           if ( ret ) ret = fscanf(in,"%f %f %f",&fp1,&fp2,&fp3);
 
           if ( !ret ) {
@@ -150,24 +155,18 @@ int MMG2D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
 
           for (j=0; j<strlen(data); j++) data[j] = tolower(data[j]);
           if ( !strcmp(data,"triangles") || !strcmp(data,"triangle") ) {
-            ppar->hmin  = fp1;
-            ppar->hmax  = fp2;
-            ppar->hausd = fp3;
-            ppar->elt   = MMG5_Triangle;
-
+            if ( !MMG2D_Set_localParameter(mesh,met,MMG5_Triangle,ref,fp1,fp2,fp3) ) {
+              return 0;
+            }
           }
           else if ( !strcmp(data,"edges") || !strcmp(data,"edge") ) {
-            ppar->hmin  = fp1;
-            ppar->hmax  = fp2;
-            ppar->hausd = fp3;
-            ppar->elt   = MMG5_Edg;
-
+            if ( !MMG2D_Set_localParameter(mesh,met,MMG5_Edg,ref,fp1,fp2,fp3) ) {
+              return 0;
+            }
           }
-          else if ( !strcmp(data,"vertices") || !strcmp(data,"vertex") ) {
-            ppar->hmin  = fp1;
-            ppar->hmax  = fp2;
-            ppar->hausd = fp3;
-            ppar->elt   = MMG5_Vertex;
+          else {
+            fprintf(stderr,"  %%%% Wrong format: %s\n",data);
+            return 0;
           }
         }
       }
@@ -187,6 +186,104 @@ int MMG2D_freeLocalPar(MMG5_pMesh mesh) {
 
   free(mesh->info.par);
   mesh->info.npar = 0;
+
+  return 1;
+}
+
+int MMG2D_Get_numberOfNonBdyEdges(MMG5_pMesh mesh, int* nb_edges) {
+  MMG5_pTria pt,pt1;
+  MMG5_pEdge ped;
+  int        *adja,k,i,j,i1,i2,iel;
+
+  *nb_edges = 0;
+  if ( mesh->tria ) {
+    /* Create the triangle adjacency if needed */
+    if ( !mesh->adja ) {
+      if ( !MMG2D_hashTria( mesh ) ) {
+        fprintf(stderr,"\n  ## Error: %s: unable to create "
+                "adjacency table.\n",__func__);
+        return 0;
+      }
+    }
+
+    /* Count the number of non boundary edges */
+    for ( k=1; k<=mesh->nt; k++ ) {
+      pt = &mesh->tria[k];
+      if ( !MG_EOK(pt) ) continue;
+
+      adja = &mesh->adja[3*(k-1)+1];
+
+      for ( i=0; i<3; i++ ) {
+        iel = adja[i] / 3;
+        assert ( iel != k );
+
+        pt1 = &mesh->tria[iel];
+
+        if ( (!iel) || (pt->ref != pt1->ref) ||
+             ((pt->ref==pt1->ref) && MG_SIN(pt->tag[i])) ||
+             (mesh->info.opnbdy && pt->tag[i]) ) {
+          /* Do not treat boundary edges */
+          continue;
+        }
+        if ( k < iel ) {
+          /* Treat edge from the triangle with lowest index */
+          ++(*nb_edges);
+        }
+      }
+    }
+
+    /* Append the non boundary edges to the boundary edges array */
+    MMG5_ADD_MEM(mesh,(*nb_edges)*sizeof(MMG5_Edge),"non boundary edges",
+                  printf("  Exit program.\n");
+                  return 0);
+    MMG5_SAFE_RECALLOC(mesh->edge,(mesh->namax+1),(mesh->namax+(*nb_edges)+1),
+                       MMG5_Edge,"non bdy edges arrray",return 0);
+
+    j = mesh->namax+1;
+    for ( k=1; k<=mesh->nt; k++ ) {
+      pt = &mesh->tria[k];
+      if ( !MG_EOK(pt) ) continue;
+
+      adja = &mesh->adja[3*(k-1)+1];
+
+      for ( i=0; i<3; i++ ) {
+        i1 = MMG5_inxt2[i];
+        i2 = MMG5_iprv2[i];
+        iel = adja[i] / 3;
+        assert ( iel != k );
+
+        pt1 = &mesh->tria[iel];
+
+        if ( (!iel) || (pt->ref != pt1->ref) ||
+             ((pt->ref==pt1->ref) && MG_SIN(pt->tag[i])) ||
+             (mesh->info.opnbdy && pt->tag[i]) ) {
+          /* Do not treat boundary edges */
+          continue;
+        }
+        if ( k < iel ) {
+          /* Treat edge from the triangle with lowest index */
+          ped = &mesh->edge[j++];
+          ped->a   = pt->v[i1];
+          ped->b   = pt->v[i2];
+          ped->ref = pt->edg[i];
+        }
+      }
+    }
+  }
+  return 1;
+}
+
+int MMG2D_Get_nonBdyEdge(MMG5_pMesh mesh, int* e0, int* e1, int* ref, int idx) {
+  MMG5_pEdge        ped;
+
+  ped = &mesh->edge[mesh->namax+idx];
+
+  *e0  = ped->a;
+  *e1  = ped->b;
+
+  if ( ref != NULL ) {
+    *ref = mesh->edge[mesh->namax+idx].ref;
+  }
 
   return 1;
 }
@@ -351,9 +448,7 @@ int MMG2D_Get_trisFromEdge(MMG5_pMesh mesh, int ked, int ktri[2], int ied[2])
 }
 
 int MMG2D_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met) {
-  MMG5_pPoint ppt;
   double      hsiz;
-  int         k,iadr;
 
   /* Memory alloc */
   if ( met->size!=1 && met->size!=3 ) {
@@ -368,28 +463,18 @@ int MMG2D_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( !MMG5_Compute_constantSize(mesh,met,&hsiz) )
     return 0;
 
-  if ( met->size == 1 ) {
-    for (k=1; k<=mesh->np; k++) {
-      ppt = &mesh->point[k];
-      if ( !MG_VOK(ppt) ) continue;
-      met->m[k] = hsiz;
-    }
-  }
-  else {
-    hsiz    = 1./(hsiz*hsiz);
+  mesh->info.hsiz = hsiz;
 
-    for (k=1; k<=mesh->np; k++) {
-      ppt = &mesh->point[k];
-      if ( !MG_VOK(ppt) ) continue;
+  MMG5_Set_constantSize(mesh,met,hsiz);
 
-      iadr           = met->size*k;
-      met->m[iadr]   = hsiz;
-      met->m[iadr+2] = hsiz;
-    }
-  }
   return 1;
 }
 
+int MMG2D_Compute_eigenv(double m[3],double lambda[2],double vp[2][2]) {
+
+  return  MMG5_eigensym(m,lambda,vp);
+
+}
 
 
 void MMG2D_Reset_verticestags(MMG5_pMesh mesh) {

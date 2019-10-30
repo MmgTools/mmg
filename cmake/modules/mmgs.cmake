@@ -57,10 +57,17 @@ FILE(
   mmgs_library_files
   ${MMGS_SOURCE_DIR}/*.c
   ${COMMON_SOURCE_DIR}/*.c
+  ${MMGS_SOURCE_DIR}/inoutcpp_s.cpp
   )
 LIST(REMOVE_ITEM mmgs_library_files
   ${MMGS_SOURCE_DIR}/mmgs.c
   ${REMOVE_FILE} )
+
+IF ( USE_VTK )
+  LIST(APPEND  mmgs_library_files
+   ${COMMON_SOURCE_DIR}/vtkparser.cpp )
+ENDIF ( )
+
 FILE(
   GLOB
   mmgs_main_file
@@ -131,8 +138,9 @@ IF ( BUILD_TESTING )
   ##-------------------------------------------------------------------##
   ##------- Set the continuous integration options --------------------##
   ##-------------------------------------------------------------------##
-  SET(MMGS_CI_TESTS ${CI_DIR}/mmgs )
-  SET(MMG_CI_TESTS ${CI_DIR}/mmg )
+  SET(MMG2D_CI_TESTS ${CI_DIR}/mmg2d )
+  SET(MMGS_CI_TESTS  ${CI_DIR}/mmgs )
+  SET(MMG_CI_TESTS   ${CI_DIR}/mmg )
 
   ##-------------------------------------------------------------------##
   ##--------------------------- Add tests and configure it ------------##
@@ -153,6 +161,8 @@ IF ( BUILD_TESTING )
       SET(LIBMMGS_EXEC1   ${EXECUTABLE_OUTPUT_PATH}/libmmgs_example1)
       SET(LIBMMGS_EXEC2   ${EXECUTABLE_OUTPUT_PATH}/libmmgs_example2)
       SET(LIBMMGS_EXEC3   ${EXECUTABLE_OUTPUT_PATH}/libmmgs_example3)
+      SET(LIBMMGS_LSONLY  ${EXECUTABLE_OUTPUT_PATH}/libmmgs_lsOnly )
+      SET(LIBMMGS_LSANDMETRIC ${EXECUTABLE_OUTPUT_PATH}/libmmgs_lsAndMetric )
 
 
       ADD_TEST(NAME libmmgs_example0_a   COMMAND ${LIBMMGS_EXEC0_a}
@@ -178,13 +188,24 @@ IF ( BUILD_TESTING )
       ADD_TEST(NAME libmmgs_example3_io_1   COMMAND ${LIBMMGS_EXEC3}
         "${PROJECT_SOURCE_DIR}/libexamples/mmgs/io_multisols_example3/torus.mesh"
         "${CTEST_OUTPUT_DIR}/libmmgs_io_3-naca.o" "1"
-       )
-
+        )
+      ADD_TEST(NAME libmmgs_lsOnly   COMMAND ${LIBMMGS_LSONLY}
+        "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/multi-mat.mesh"
+        "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/multi-mat-sol.sol"
+        "${CTEST_OUTPUT_DIR}/libmmgs_lsOnly_multimat.o"
+        )
+      ADD_TEST(NAME libmmgs_lsAndMetric   COMMAND ${LIBMMGS_LSANDMETRIC}
+        "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/multi-mat.mesh"
+        "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/multi-mat-sol.sol"
+        "${CTEST_OUTPUT_DIR}/libmmgs_lsAndMetric_multimat.o"
+        )
 
       IF ( CMAKE_Fortran_COMPILER)
         SET(LIBMMGS_EXECFORTRAN_a ${EXECUTABLE_OUTPUT_PATH}/libmmgs_fortran_a)
         SET(LIBMMGS_EXECFORTRAN_b ${EXECUTABLE_OUTPUT_PATH}/libmmgs_fortran_b)
         SET(LIBMMGS_EXECFORTRAN_IO ${EXECUTABLE_OUTPUT_PATH}/libmmgs_fortran_io)
+        SET(LIBMMGS_EXECFORTRAN_LSONLY ${EXECUTABLE_OUTPUT_PATH}/libmmgs_fortran_lsOnly )
+        SET(LIBMMGS_EXECFORTRAN_LSANDMETRIC ${EXECUTABLE_OUTPUT_PATH}/libmmgs_fortran_lsAndMetric )
 
         ADD_TEST(NAME libmmgs_fortran_a   COMMAND ${LIBMMGS_EXECFORTRAN_a}
           "${PROJECT_SOURCE_DIR}/libexamples/mmgs/adaptation_example0_fortran/example0_a/cube.mesh"
@@ -200,9 +221,18 @@ IF ( BUILD_TESTING )
         ADD_TEST(NAME libmmgs_fortran_io_1   COMMAND ${LIBMMGS_EXECFORTRAN_IO}
           "${PROJECT_SOURCE_DIR}/libexamples/mmgs/io_multisols_example3/torus.mesh"
           "${CTEST_OUTPUT_DIR}/libmmgs_Fortran_io-torus.o" "1"
-         )
-
-      ENDIF()
+          )
+        ADD_TEST(NAME libmmgs_fortran_lsOnly   COMMAND ${LIBMMGS_EXECFORTRAN_LSONLY}
+          "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/multi-mat.mesh"
+          "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/multi-mat-sol.sol"
+          "${CTEST_OUTPUT_DIR}/libmmgs_lsOnly_multimat.o"
+          )
+        ADD_TEST(NAME libmmgs_fortran_lsAndMetric   COMMAND ${LIBMMGS_EXECFORTRAN_LSANDMETRIC}
+          "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/multi-mat.mesh"
+          "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/multi-mat-sol.sol"
+          "${CTEST_OUTPUT_DIR}/libmmgs_lsAndMetric_multimat.o"
+          )
+     ENDIF()
 
     ENDIF()
 

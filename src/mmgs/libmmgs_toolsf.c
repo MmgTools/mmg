@@ -121,11 +121,32 @@ FORTRAN_NAME(MMGS_GET_ADJAVERTICESFAST,mmgs_get_adjaverticesfast,
 }
 
 /**
+ * See \ref MMGS_doSol function in \ref mmgs/libmmgs.h file.
+ */
+FORTRAN_NAME(MMGS_DOSOL,mmgs_dosol,
+             (MMG5_pMesh *mesh,MMG5_pSol *met,int *retval),
+             (mesh,met,retval)) {
+  *retval = MMGS_doSol(*mesh,*met);
+  return;
+}
+
+/**
  * See \ref MMGS_Set_constantSize function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_NAME(MMGS_SET_CONSTANTSIZE,mmgs_set_constantsize,
              (MMG5_pMesh *mesh,MMG5_pSol *met,int *retval),
              (mesh,met,retval)) {
   *retval =  MMGS_Set_constantSize(*mesh,*met);
+  return;
+}
+
+/**
+ * See \ref MMGS_Compute_eigenv function in \ref mmgs/libmmgs.h file.
+ */
+FORTRAN_NAME(MMGS_COMPUTE_EIGENV,mmgs_compute_eigenv,
+             (double m[6],double lambda[3],double vp[3][3],int *retval),
+             (m,lambda,vp,retval)) {
+
+  *retval = MMGS_Compute_eigenv(m,lambda,vp);
   return;
 }
