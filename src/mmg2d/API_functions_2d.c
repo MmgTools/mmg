@@ -136,6 +136,9 @@ int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
       mesh->info.dhd    = MMG5_ANGEDG;
     }
     break;
+  case MMG2D_IPARAM_opnbdy :
+    mesh->info.opnbdy = val;
+    break;
   case MMG2D_IPARAM_iso :
     mesh->info.iso      = val;
     break;
@@ -178,6 +181,9 @@ int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
   case MMG2D_IPARAM_nosurf :
     mesh->info.nosurf   = val;
     break;
+  case MMG2D_IPARAM_nreg :
+    mesh->info.nreg     = val;
+    break;
   case MMG2D_IPARAM_numberOfLocalParam :
     if ( mesh->info.par ) {
       MMG5_DEL_MEM(mesh,mesh->info.par);
@@ -200,9 +206,6 @@ int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
       mesh->info.par[k].hmin  = mesh->info.hmin;
       mesh->info.par[k].hmax  = mesh->info.hmax;
     }
-    break;
-  case MMG2D_IPARAM_rmc :
-    mesh->info.rmc      = val;
     break;
   default :
     fprintf(stderr,"\n  ## Error: %s: unknown type of parameter\n",__func__);
@@ -260,6 +263,16 @@ int MMG2D_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val)
     break;
   case MMG2D_DPARAM_ls :
     mesh->info.ls       = val;
+    break;
+  case MMG2D_DPARAM_rmc :
+    if ( !val ) {
+      /* Default value */
+      mesh->info.rmc      = MMG2D_VOLFRAC;
+    }
+    else {
+      /* User customized value */
+      mesh->info.rmc      = val;
+    }
     break;
   default :
     fprintf(stderr,"\n  ## Error: %s: unknown type of parameter\n",
@@ -938,6 +951,7 @@ int MMG2D_Set_edge(MMG5_pMesh mesh, int v0, int v1, int ref, int pos) {
   pt->a = v0;
   pt->b = v1;
   pt->ref  = ref;
+  pt->tag &= MG_REF + MG_BDY;
 
   mesh->point[pt->a].tag &= ~MG_NUL;
   mesh->point[pt->b].tag &= ~MG_NUL;
@@ -1048,6 +1062,7 @@ int MMG2D_Set_edges(MMG5_pMesh mesh, int *edges, int *refs) {
     mesh->edge[i].b    = edges[j+1];
     if ( refs != NULL )
       mesh->edge[i].ref  = refs[i];
+    mesh->edge[i].tag &= MG_REF+MG_BDY;
 
     mesh->point[mesh->edge[i].a].tag &= ~MG_NUL;
     mesh->point[mesh->edge[i].b].tag &= ~MG_NUL;

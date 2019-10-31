@@ -229,12 +229,21 @@ int MMG2D_assignEdge(MMG5_pMesh mesh) {
 
   hash.nxt = mesh->na;
 
+  for ( k=1; k <= mesh->nt; ++k ) {
+    for ( i=0; i<3; ++i ) {
+      if ( mesh->tria[k].tag[i] & MG_REF || mesh->tria[k].tag[i] & MG_BDY) {
+        assert ( 0 );
+      }
+    }
+  }
+
   for (k=mesh->na; k<hash.max; k++)
     hash.item[k].nxt = k+1;
 
   /* hash mesh edges */
-  for (k=1; k<=mesh->na; k++)
+  for (k=1; k<=mesh->na; k++) {
     MMG5_hashEdge(mesh,&hash,mesh->edge[k].a,mesh->edge[k].b,k);
+  }
 
   /* set references to triangles */
   for (k=1; k<=mesh->nt; k++) {
@@ -249,6 +258,7 @@ int MMG2D_assignEdge(MMG5_pMesh mesh) {
         pa = &mesh->edge[ia];
         pt->edg[i2] = pa->ref;
         pt->tag[i2] |= pa->tag;
+
       }
     }
   }
@@ -270,6 +280,7 @@ int MMG2D_assignEdge(MMG5_pMesh mesh) {
  * by identifying the different components of the mesh.
  *
  * \remark Possible extension needed to take into account constrained edges
+ * \remark Call in debug mode only
  *
  */
 int MMG2D_bdryEdge(MMG5_pMesh mesh) {
@@ -415,6 +426,12 @@ int MMG2D_pack(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
       else if ( (pt->ref==pt1->ref) && MG_SIN(pt->tag[i]) ) {
         ++mesh->na;
       }
+      else if ( mesh->info.opnbdy ) {
+        if ( (pt->tag[i] & MG_REF) || pt->tag[i] & MG_BDY ) {
+          assert ( pt->tag[i] & (MG_REF+MG_BDY) );
+          ++mesh->na;
+        }
+      }
     }
   }
 
@@ -454,7 +471,8 @@ int MMG2D_pack(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
           iel = adja[i] / 3;
           pt1 = &mesh->tria[iel];
           if ( !iel || (pt->ref > pt1->ref) ||
-               ((pt->ref==pt1->ref) && MG_SIN(pt->tag[i])) ) {
+               ((pt->ref==pt1->ref) && MG_SIN(pt->tag[i])) ||
+               (mesh->info.opnbdy && ((pt->tag[i] & MG_REF) || (pt->tag[i] & MG_BDY)))) {
             ++ned;
             ped = &mesh->edge[ned];
             ped->a = pt->v[i1];

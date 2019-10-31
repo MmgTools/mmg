@@ -348,6 +348,61 @@ int MMG3D_Free_all_var(va_list argptr)
 }
 
 /**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward a solution / level-set.
+ * \param sol pointer toward a displacement.
+ *
+ * Free mesh arrays.
+ *
+ */
+void MMG3D_Free_arrays(MMG5_pMesh *mesh,MMG5_pSol *sol,MMG5_pSol *disp){
+  if ( (*mesh)->tetra )
+    MMG5_DEL_MEM((*mesh),(*mesh)->tetra);
+
+  if ( (*mesh)->prism )
+    MMG5_DEL_MEM((*mesh),(*mesh)->prism);
+
+  if ( (*mesh)->edge )
+    MMG5_DEL_MEM((*mesh),(*mesh)->edge);
+
+  if ( (*mesh)->adjt )
+    MMG5_DEL_MEM(*mesh,(*mesh)->adjt);
+
+  if ( (*mesh)->adja )
+    MMG5_DEL_MEM((*mesh),(*mesh)->adja);
+
+  if ( (*mesh)->adjapr )
+    MMG5_DEL_MEM((*mesh),(*mesh)->adjapr);
+
+  if ( (*mesh)->htab.geom )
+    MMG5_DEL_MEM((*mesh),(*mesh)->htab.geom);
+
+  if ( (*mesh)->tria )
+    MMG5_DEL_MEM((*mesh),(*mesh)->tria);
+
+  if ( (*mesh)->quadra )
+    MMG5_DEL_MEM((*mesh),(*mesh)->quadra);
+
+  if ( (*mesh)->xtetra )
+    MMG5_DEL_MEM((*mesh),(*mesh)->xtetra);
+
+  if ( (*mesh)->xprism )
+    MMG5_DEL_MEM((*mesh),(*mesh)->xprism);
+
+  /* disp */
+  if ( disp && (*disp) && (*disp)->m )
+    MMG5_DEL_MEM((*mesh),(*disp)->m);
+
+  if ( sol ) {
+    MMG5_Free_structures(*mesh,*sol);
+  }
+  else {
+    MMG5_Free_structures(*mesh,NULL);
+  }
+  return;
+}
+
+/**
  * \param argptr list of the mmg structures that must be deallocated. Each
  * structure must follow one of the MMG5_ARG* preprocessor variable that allow
  * to identify it.
@@ -435,55 +490,8 @@ int MMG3D_Free_structures_var(va_list argptr)
   /* mesh */
   assert(mesh && *mesh);
 
-  if ( (*mesh)->tetra )
-    MMG5_DEL_MEM((*mesh),(*mesh)->tetra);
 
-  if ( (*mesh)->prism )
-    MMG5_DEL_MEM((*mesh),(*mesh)->prism);
-
-  if ( (*mesh)->edge )
-    MMG5_DEL_MEM((*mesh),(*mesh)->edge);
-
-  if ( (*mesh)->adjt )
-    MMG5_DEL_MEM(*mesh,(*mesh)->adjt);
-
-  if ( (*mesh)->adja )
-    MMG5_DEL_MEM((*mesh),(*mesh)->adja);
-
-  if ( (*mesh)->adjapr )
-    MMG5_DEL_MEM((*mesh),(*mesh)->adjapr);
-
-  if ( (*mesh)->htab.geom )
-    MMG5_DEL_MEM((*mesh),(*mesh)->htab.geom);
-
-  if ( (*mesh)->tria )
-    MMG5_DEL_MEM((*mesh),(*mesh)->tria);
-
-  if ( (*mesh)->quadra )
-    MMG5_DEL_MEM((*mesh),(*mesh)->quadra);
-
-  if ( (*mesh)->xtetra )
-    MMG5_DEL_MEM((*mesh),(*mesh)->xtetra);
-
-  if ( (*mesh)->xprism )
-    MMG5_DEL_MEM((*mesh),(*mesh)->xprism);
-
-  /* disp */
-  if ( disp && (*disp) && (*disp)->m ) {
-    MMG5_DEL_MEM((*mesh),(*disp)->m);
-  }
-
-  /* ls */
-  if ( ls && (*ls) && (*ls)->m ) {
-    MMG5_DEL_MEM((*mesh),(*ls)->m);
-  }
-
-  /* met */
-  if ( sol && (*sol) && (*sol)->m ) {
-    MMG5_DEL_MEM((*mesh),(*sol)->m);
-  }
-
-  MMG5_Free_structures(*mesh,NULL);
+  MMG3D_Free_arrays(mesh,sol,disp);
 
   return 1;
 }

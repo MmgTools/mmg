@@ -151,14 +151,16 @@ static const unsigned int MMG2D_inxt[5] = {1,2,0,1,2};
       mesh->point[klink].tmp  = klink+1;                                \
                                                                         \
     /* solution */                                                      \
-    if ( sol->m ) {                                                     \
-      MMG5_ADD_MEM(mesh,(sol->size*(mesh->npmax-sol->npmax))*sizeof(double), \
-                    "larger solution",law);                             \
-      MMG5_SAFE_REALLOC(sol->m,sol->size*(sol->npmax+1),               \
-                         sol->size*(mesh->npmax+1),                     \
-                         double,"larger solution",law);                 \
+    if ( sol ) {                                                        \
+      if ( sol->m ) {                                                   \
+        MMG5_ADD_MEM(mesh,(sol->size*(mesh->npmax-sol->npmax))*sizeof(double), \
+                     "larger solution",law);                            \
+        MMG5_SAFE_REALLOC(sol->m,sol->size*(sol->npmax+1),              \
+                          sol->size*(mesh->npmax+1),                    \
+                          double,"larger solution",law);                \
+      }                                                                 \
+      sol->npmax = mesh->npmax;                                         \
     }                                                                   \
-    sol->npmax = mesh->npmax;                                           \
                                                                         \
     /* We try again to add the point */                                 \
     ip = MMG2D_newPt(mesh,o,tag);                                      \
@@ -229,6 +231,7 @@ int MMG2D_mmg2d9(MMG5_pMesh ,MMG5_pSol ,MMG5_pSol,int** );
 //int MMG2D_cendel(MMG5_pMesh ,MMG5_pSol ,double ,int );
 int MMG2D_swapdelone(MMG5_pMesh ,MMG5_pSol ,int ,char ,double ,int *);
 int MMG5_mmg2dChkmsh(MMG5_pMesh , int, int );
+int MMG2D_2dMeshCheck(MMG5_pMesh mesh);
 int MMG2D_boulep(MMG5_pMesh , int , int , int * );
 //int MMG2D_markBdry(MMG5_pMesh );
 int MMG2D_prilen(MMG5_pMesh ,MMG5_pSol );

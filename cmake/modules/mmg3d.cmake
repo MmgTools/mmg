@@ -71,10 +71,17 @@ FILE(
   mmg3d_library_files
   ${MMG3D_SOURCE_DIR}/*.c
   ${COMMON_SOURCE_DIR}/*.c
+  ${MMG3D_SOURCE_DIR}/inoutcpp_3d.cpp
   )
 LIST(REMOVE_ITEM mmg3d_library_files
   ${MMG3D_SOURCE_DIR}/${PROJECT_NAME}3d.c
-)
+  )
+
+IF ( USE_VTK )
+  LIST(APPEND  mmg3d_library_files
+    ${COMMON_SOURCE_DIR}/vtkparser.cpp)
+ENDIF ( )
+
 FILE(
   GLOB
   mmg3d_main_file

@@ -131,12 +131,11 @@ int  MMGS_inqua(MMG5_pMesh,MMG5_pSol);
 int  MMGS_outqua(MMG5_pMesh,MMG5_pSol);
 int  MMGS_hashTria(MMG5_pMesh );
 int  curvpo(MMG5_pMesh ,MMG5_pSol );
-int  MMG5_mmgs1(MMG5_pMesh ,MMG5_pSol );
+int  MMG5_mmgs1(MMG5_pMesh ,MMG5_pSol,int* );
 int  MMGS_mmgs2(MMG5_pMesh ,MMG5_pSol, MMG5_pSol);
 int  MMGS_bdryUpdate(MMG5_pMesh mesh);
 int  boulet(MMG5_pMesh mesh,int start,int ip,int *list);
 int  boulechknm(MMG5_pMesh mesh,int start,int ip,int *list);
-int  boulep(MMG5_pMesh mesh,int start,int ip,int *list);
 int  bouletrid(MMG5_pMesh mesh,int start,int ip,int *il1,int *l1,int *il2,int *l2,int *ip0,int *ip1);
 int  MMGS_newPt(MMG5_pMesh mesh,double c[3],double n[3]);
 void MMGS_delPt(MMG5_pMesh mesh,int ip);
@@ -176,7 +175,7 @@ int MMGS_memOption(MMG5_pMesh mesh);
 int MMGS_setMeshSize_alloc( MMG5_pMesh mesh );
 
 #ifdef USE_SCOTCH
-int MMG5_mmgsRenumbering(int vertBoxNbr, MMG5_pMesh mesh, MMG5_pSol sol);
+int MMG5_mmgsRenumbering(int vertBoxNbr, MMG5_pMesh mesh, MMG5_pSol sol,int*);
 #endif
 
 /* useful functions to debug */

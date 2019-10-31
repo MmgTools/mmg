@@ -616,7 +616,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           ++mesh->xp;
           if(mesh->xp > mesh->xpmax){
             /* reallocation of xpoint table */
-            MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,MMG5_xPoint,
+            MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,MMG5_GAP,MMG5_xPoint,
                                "larger xpoint table",
                                return -1);
           }
@@ -1183,7 +1183,7 @@ static int adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
 
 
 /* analyze triangles and split or collapse to match gradation */
-static int adptri(MMG5_pMesh mesh,MMG5_pSol met) {
+static int adptri(MMG5_pMesh mesh,MMG5_pSol met,int* permNodGlob) {
   int        it,nnc,nns,nnf,nnm,maxit,nc,ns,nf,nm;
 
   /* iterative mesh modifications */
@@ -1198,7 +1198,7 @@ static int adptri(MMG5_pMesh mesh,MMG5_pSol met) {
       }
 
       /* renumbering if available and needed */
-      if ( it==1 && !MMG5_scotchCall(mesh,met) )
+      if ( it==1 && !MMG5_scotchCall(mesh,met,permNodGlob) )
         return 0;
 
       nc = adpcol(mesh,met);
@@ -1242,7 +1242,7 @@ static int adptri(MMG5_pMesh mesh,MMG5_pSol met) {
   while( ++it < maxit && nc+ns > 0 );
 
   /* renumbering if available */
-  if ( !MMG5_scotchCall(mesh,met) )
+  if ( !MMG5_scotchCall(mesh,met,permNodGlob) )
     return 0;
 
   /*shape optim*/
@@ -1361,7 +1361,16 @@ static int anatri(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   return 1;
 }
 
-int MMG5_mmgs1(MMG5_pMesh mesh,MMG5_pSol met) {
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param permNodGlob if provided, strore the global permutation of nodes.
+ * \return 0 if failed, 1 if success.
+ *
+ * Main adaptation routine.
+ *
+ */
+int MMG5_mmgs1(MMG5_pMesh mesh,MMG5_pSol met,int *permNodGlob) {
 
   /* renumbering if available */
   if ( abs(mesh->info.imprim) > 4 )
@@ -1376,7 +1385,7 @@ int MMG5_mmgs1(MMG5_pMesh mesh,MMG5_pSol met) {
     return 0;
   }
   /* renumbering if available */
-  if ( !MMG5_scotchCall(mesh,met) )
+  if ( !MMG5_scotchCall(mesh,met,permNodGlob) )
     return 0;
 
   /*--- stage 2: computational mesh */
@@ -1407,10 +1416,10 @@ int MMG5_mmgs1(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
   /* renumbering if available */
-  if ( !MMG5_scotchCall(mesh,met) )
+  if ( !MMG5_scotchCall(mesh,met,permNodGlob) )
     return 0;
 
-  if ( !adptri(mesh,met) ) {
+  if ( !adptri(mesh,met,permNodGlob) ) {
     fprintf(stderr,"\n  ## Unable to adapt. Exit program.\n");
     return 0;
   }

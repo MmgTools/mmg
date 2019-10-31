@@ -757,7 +757,7 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
     if ( mettofree ) { MMG5_SAFE_FREE (met); }
     _LIBMMG5_RETURN(mesh,sol,met,MMG5_STRONGFAILURE);
   }
-
+  
   chrono(OFF,&(ctim[2]));
   printim(ctim[2].gdif,stim);
   if ( mesh->info.imprim > 0 )

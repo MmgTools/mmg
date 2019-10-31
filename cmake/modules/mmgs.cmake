@@ -57,10 +57,17 @@ FILE(
   mmgs_library_files
   ${MMGS_SOURCE_DIR}/*.c
   ${COMMON_SOURCE_DIR}/*.c
+  ${MMGS_SOURCE_DIR}/inoutcpp_s.cpp
   )
 LIST(REMOVE_ITEM mmgs_library_files
   ${MMGS_SOURCE_DIR}/mmgs.c
   ${REMOVE_FILE} )
+
+IF ( USE_VTK )
+  LIST(APPEND  mmgs_library_files
+   ${COMMON_SOURCE_DIR}/vtkparser.cpp )
+ENDIF ( )
+
 FILE(
   GLOB
   mmgs_main_file

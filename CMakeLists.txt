@@ -189,7 +189,12 @@ GENERATE_FORTRAN_HEADER ( mmg
 
 # Libraries
 IF ( NOT WIN32 OR MINGW )
-  FIND_LIBRARY(M_LIB m)
+
+  IF(NOT DEFINED M_LIB)
+    MESSAGE(STATUS "M_LIB not defined. Searching it")
+    FIND_LIBRARY(M_LIB m)
+  ENDIF(NOT DEFINED M_LIB)
+
   MARK_AS_ADVANCED(FORCE M_LIB)
   SET( LIBRARIES ${M_LIB} ${LIBRARIES})
 ENDIF()
@@ -212,6 +217,13 @@ IF ( NOT SCOTCH_FOUND )
     "please set the CMake variable or environment variable SCOTCH_DIR "
     "to your scotch directory.")
 ENDIF ( )
+
+############################################################################
+#####
+#####         VTK (to parse (p)vtp/(p)vtu files )
+#####
+############################################################################
+FIND_PACKAGE(VTK)
 
 ############################################################################
 #####
@@ -327,6 +339,17 @@ IF( USE_SCOTCH )
   SET( LIBRARIES ${SCOTCH_LIBRARIES} ${LIBRARIES})
 ENDIF()
 
+# add the VTK library ?
+CMAKE_DEPENDENT_OPTION ( USE_VTK "Use VTK I/O" ON
+  "VTK_FOUND" OFF)
+
+IF ( USE_VTK )
+  ADD_DEFINITIONS(-DUSE_VTK)
+
+  MESSAGE ( STATUS "Compilation with VTK: add vtp and vtu I/O." )
+  INCLUDE ( ${VTK_USE_FILE} )
+  SET( LIBRARIES ${VTK_LIBRARIES} ${LIBRARIES} )
+ENDIF ( )
 
 #---------------------------- mmg library gathering mmg2d, mmgs and mmg3d libs
 CMAKE_DEPENDENT_OPTION ( LIBMMG_STATIC

@@ -392,7 +392,7 @@ int MMG5_boulernm(MMG5_pMesh mesh,MMG5_Hash *hash,int start,int ip,int *ng,int *
               if ( mesh->info.ddebug )
                 fprintf(stderr,"\n  ## Warning: %s: memory alloc problem (edge):"
                         " %d\n",__func__,hash->max);
-              MMG5_TAB_RECALLOC(mesh,hash->item,hash->max,0.2,MMG5_hedge,
+              MMG5_TAB_RECALLOC(mesh,hash->item,hash->max,MMG5_GAP,MMG5_hedge,
                                  "MMG5_edge",return -1);
               /* ph pointer may be false after realloc */
               ph        = &hash->item[hash->nxt];

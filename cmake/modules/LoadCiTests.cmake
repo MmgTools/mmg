@@ -76,7 +76,7 @@ ELSE ( )
     SET ( OLD_MMG2D_MD5 "0" )
   ENDIF ( )
 
-  FILE(DOWNLOAD https://drive.google.com/uc?export=download&id=1Lnvh7AldwEXS7WRa1VxsRqI7Xu7CgJNj
+  FILE(DOWNLOAD https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmV3BlUER4M0Z4MGs
     ${CI_DIR}/mmg2d.version
     STATUS MMG2D_VERSION_STATUS
     INACTIVITY_TIMEOUT 5)
@@ -159,30 +159,59 @@ ENDIF()
 #--------------> mmg
 IF ( GET_MMG_TESTS MATCHES "TRUE" )
   MESSAGE("-- Download the mmg test cases. May be very long...")
-  FILE(DOWNLOAD https://drive.google.com/uc?export=download&id=1Kd2aow6nfBI1i5dSN6lXMxaDKLrtpd6r
-    ${CI_DIR}/mmg.tgz
-    SHOW_PROGRESS)
-  IF ( NOT EXISTS ${CI_DIR}/mmg.tgz )
-    MESSAGE("\n")
-    MESSAGE(WARNING "Fail to automatically download the mmg test cases.
-Try to get it at the following link:
-       https://drive.google.com/uc?export=download&id=1Kd2aow6nfBI1i5dSN6lXMxaDKLrtpd6r then untar it in the ${CI_DIR} directory.")
-  ELSE()
-    EXECUTE_PROCESS(
-      COMMAND ${CMAKE_COMMAND} -E tar xzf
-      ${CI_DIR}/mmg.tgz
-      WORKING_DIRECTORY ${CI_DIR}/
-      )
-    IF ( NOT EXISTS ${CI_DIR}/mmg.tgz )
-      MESSAGE("\n")
-      MESSAGE(WARNING "Fail to automatically untar the mmg "
-        "test cases directory (mmg.tgz).
-Try to untar it by hand in the ${CI_DIR} directory.")
-    ENDIF()
-    FILE(REMOVE ${CI_DIR}/mmg.tgz)
-  ENDIF ()
-ENDIF ()
 
+  SET(ADDRESS
+    https://drive.google.com/uc?export=download&id=1Pren7-lwnkG7UTaUimspE-16hlIDLoCc
+    https://drive.google.com/uc?export=download&id=1CZJM__QvYq_88BcMb3dBtaY2nDRYrcLz
+    https://drive.google.com/uc?export=download&id=1NZHHeSmMzpiADGfLbTatbVn2bjv0bbVp
+    )
+
+  SET(FILENAME
+    ${CI_DIR}/mmg.tgz.aa
+    ${CI_DIR}/mmg.tgz.ab
+    ${CI_DIR}/mmg.tgz.ac
+    )
+
+  SET(LOAD_OK 1)
+
+  FOREACH( i RANGE 0 2)
+    LIST(GET ADDRESS  ${i} ADDRESS_i)
+    LIST(GET FILENAME ${i} FILENAME_i)
+
+    FILE(DOWNLOAD ${ADDRESS_i}
+      ${FILENAME_i}
+      SHOW_PROGRESS)
+    IF ( NOT EXISTS ${FILENAME_i} )
+      MESSAGE("\n")
+      MESSAGE(WARNING "Fail to automatically download the mmg3d test cases
+Try to get it at the following link:
+       ${ADDRESS_i}
+then untar it in the ${CI_DIR} directory.")
+      SET ( LOAD_OK 0 )
+      BREAK()
+    ENDIF()
+
+  ENDFOREACH()
+
+  IF ( ${LOAD_OK} )
+    EXECUTE_PROCESS(
+      COMMAND cat ${FILENAME}
+      COMMAND tar -xzf -
+      WORKING_DIRECTORY ${CI_DIR}/
+      TIMEOUT 10000
+      )
+    IF ( NOT EXISTS ${CI_DIR}/mmg )
+      MESSAGE("\n")
+      MESSAGE(WARNING "Fail to automatically untar the mmg3d"
+        "test cases directory (mmg.tgz.*).
+Try to untar it by hand in the ${CI_DIR} directory: "
+        "cat mmg.tgz.* | tar xzvf - ")
+    ENDIF()
+
+    FILE(REMOVE ${FILENAME})
+  ENDIF()
+
+ENDIF()
 
 #--------------> mmg2d
 IF ( GET_MMG2D_TESTS MATCHES "TRUE" )

@@ -123,7 +123,7 @@ int MMG5_hashFace(MMG5_pMesh mesh,MMG5_Hash *hash,int ia,int ib,int ic,int k) {
     ph->nxt = 0;
 
     if ( hash->nxt >= hash->max ) {
-      MMG5_TAB_RECALLOC(mesh,hash->item,hash->max,0.2,MMG5_hedge,"face",return 0;);
+      MMG5_TAB_RECALLOC(mesh,hash->item,hash->max,MMG5_GAP,MMG5_hedge,"face",return 0;);
       for (j=hash->nxt; j<hash->max; j++)  hash->item[j].nxt = j+1;
     }
     return -1;
@@ -999,7 +999,7 @@ int MMG5_hEdge(MMG5_pMesh mesh,MMG5_HGeom *hash,int a,int b,int ref,int16_t tag)
     if ( hash->nxt >= hash->max ) {
       if ( mesh->info.ddebug )
         fprintf(stderr,"\n  ## Memory alloc problem (edge): %d\n",hash->max);
-      MMG5_TAB_RECALLOC(mesh,hash->geom,hash->max,0.2,MMG5_hgeom,
+      MMG5_TAB_RECALLOC(mesh,hash->geom,hash->max,MMG5_GAP,MMG5_hgeom,
                          "larger htab table",
                          fprintf(stderr,"  Exit program.\n");return 0;);
       for (j=hash->nxt; j<hash->max; j++)  hash->geom[j].nxt = j+1;
@@ -1770,7 +1770,7 @@ int MMG5_bdrySet(MMG5_pMesh mesh) {
           if ( !pt->xt ) {
             mesh->xt++;
             if ( mesh->xt > mesh->xtmax ) {
-              MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
+              MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
                                  "larger xtetra table",
                                  mesh->xt--;
                                  fprintf(stderr,"  Exit program.\n");return 0;);
@@ -1803,7 +1803,7 @@ int MMG5_bdrySet(MMG5_pMesh mesh) {
         if ( !pt->xt ) {
           mesh->xt++;
           if ( mesh->xt > mesh->xtmax ) {
-            MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
+            MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
                                "larger xtetra table",
                                mesh->xt--;
                                fprintf(stderr,"  Exit program.\n");return 0;);

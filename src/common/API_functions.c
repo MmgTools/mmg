@@ -71,8 +71,8 @@ void MMG5_Init_parameters(MMG5_pMesh mesh) {
   mesh->info.nomove   =  0;
   /* [n]    ,number of user-defined references */
   mesh->info.nmat = 0;
-  /* [0/1]    ,Turn on/off the removal of small bubles in levelset meshing */
-  mesh->info.rmc      =  0;
+  /* [-1/val]    ,Turn off/on the removal of small bubles in levelset meshing */
+  mesh->info.rmc      =  MMG5_NONSET;
 
   /* default values for doubles */
   /* angle detection */
@@ -227,7 +227,8 @@ int MMG5_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solin) {
  *
  */
 int MMG5_Set_outputMeshName(MMG5_pMesh mesh, const char* meshout) {
-  char *ptrMed,*ptrGmsh;
+  int  fmt = MMG5_FMT_MeditASCII,fmtin,trailing_len;
+  char *ptrMed,*ptrGmsh,*ptr,*ptrin;
 
   ptrMed = ptrGmsh = NULL;
 
@@ -235,47 +236,86 @@ int MMG5_Set_outputMeshName(MMG5_pMesh mesh, const char* meshout) {
     MMG5_DEL_MEM(mesh,mesh->nameout);
 
   if ( strlen(meshout) ) {
-    MMG5_ADD_MEM(mesh,(strlen(meshout)+1)*sizeof(char),"output mesh name",
-                  fprintf(stderr,"  Exit program.\n");
-                  return 0);
-    MMG5_SAFE_CALLOC(mesh->nameout,strlen(meshout)+1,char,return 0);
+    ptr   = strrchr(meshout, '.');
+
+    MMG5_ADD_MEM(mesh,(strlen(meshout)+7)*sizeof(char),"output mesh name",
+                 fprintf(stderr,"  Exit program.\n");
+                 return 0);
+    MMG5_SAFE_CALLOC(mesh->nameout,strlen(meshout)+7,char,return 0);
     strcpy(mesh->nameout,meshout);
+
+    if ( ( ptr && MMG5_Get_format(ptr,0)==MMG5_FMT_Unknown ) || (!ptr) || ptr == meshout ) {
+      /* No extension */
+      ptrin   = MMG5_Get_filenameExt(mesh->namein);
+      fmtin   = MMG5_Get_format(ptrin,MMG5_FMT_MeditASCII);
+      fmt     = MMG5_FMT_Unknown;
+    }
+    strcpy(mesh->nameout,meshout);
+
+    if ( fmt == MMG5_FMT_Unknown ) {
+      /* No extension */
+      switch ( fmtin ) {
+      case ( MMG5_FMT_GmshASCII ):
+        strcat(mesh->nameout,".msh");
+        break;
+      case ( MMG5_FMT_GmshBinary ):
+        strcat(mesh->nameout,".mshb");
+        break;
+      case ( MMG5_FMT_VtkVtu ):
+        strcat(mesh->nameout,".vtu");
+        break;
+      case ( MMG5_FMT_VtkVtp ):
+        strcat(mesh->nameout,".vtp");
+        break;
+      case ( MMG5_FMT_VtkVtk ):
+        strcat(mesh->nameout,".vtk");
+        break;
+      case ( MMG5_FMT_MeditBinary ):
+        strcat(mesh->nameout,".meshb");
+        break;
+      case ( MMG5_FMT_MeditASCII ): default:
+        strcat(mesh->nameout,".mesh");
+        break;
+      }
+    }
   }
   else {
     if ( mesh->namein && strlen(mesh->namein) ) {
-      MMG5_ADD_MEM(mesh,(strlen(mesh->namein)+3)*sizeof(char),"output mesh name",
+      MMG5_ADD_MEM(mesh,(strlen(mesh->namein)+9)*sizeof(char),"output mesh name",
                     fprintf(stderr,"  Exit program.\n");
                     return 0);
-      MMG5_SAFE_CALLOC(mesh->nameout,strlen(mesh->namein)+3,char,return 0);
+      MMG5_SAFE_CALLOC(mesh->nameout,strlen(mesh->namein)+9,char,return 0);
       strcpy(mesh->nameout,mesh->namein);
 
-      /* medit format? */
-      ptrMed = strstr(mesh->nameout,".mesh");
-      if ( !ptrMed )
-        /* Gmsh format? */
-        ptrGmsh = strstr(mesh->nameout,".msh");
+      ptr   = MMG5_Get_filenameExt(mesh->nameout);
+      fmt   = MMG5_Get_format(ptr,MMG5_FMT_MeditASCII);
 
-      if ( !ptrMed && !ptrGmsh ) {
-        /* filename without extension */
-        strcat(mesh->nameout,".o");
-      }
-      else if ( ptrMed ) {
-        *ptrMed = '\0';
-        strcat(mesh->nameout,".o.mesh");
-      }
-      else if ( ptrGmsh ) {
-        *ptrGmsh = '\0';
+      if ( ptr ) *ptr = '\0';
+
+      switch ( fmt ) {
+
+      case ( MMG5_FMT_GmshASCII ):
         strcat(mesh->nameout,".o.msh");
+        break;
+      case ( MMG5_FMT_GmshBinary ):
+        strcat(mesh->nameout,".o.mshb");
+        break;
+      case ( MMG5_FMT_VtkVtu ):
+        strcat(mesh->nameout,".o.vtu");
+        break;
+      case ( MMG5_FMT_VtkVtp ):
+        strcat(mesh->nameout,".o.vtp");
+        break;
+      case ( MMG5_FMT_VtkVtk ):
+        strcat(mesh->nameout,".o.vtk");
+        break;
+      case ( MMG5_FMT_MeditBinary ):
+        strcat(mesh->nameout,".o.meshb");
+        break;
+      case ( MMG5_FMT_MeditASCII ): default:
+        strcat(mesh->nameout,".o.mesh");
+        break;
       }
-
-      ptrMed = strstr(mesh->namein,".meshb");
-      ptrGmsh = strstr(mesh->namein,".mshb");
-      if ( ptrMed || ptrGmsh ) {
-        /* binary file */
-        strcat(mesh->nameout,"b");
-      }
-
-
     }
     else {
       MMG5_ADD_MEM(mesh,12*sizeof(char),"output mesh name",
@@ -593,4 +633,3 @@ const char* MMG5_Get_typeName(enum MMG5_type typ)
     return "MMG5_Unknown";
   }
 }
-

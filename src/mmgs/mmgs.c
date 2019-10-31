@@ -69,9 +69,12 @@ static int MMG5_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
 
   /* check for parameter file */
   strcpy(data,mesh->namein);
-  ptr = strstr(data,".mesh");
+
+  ptr = MMG5_Get_filenameExt(data);
+
   if ( ptr )  *ptr = '\0';
   strcat(data,".mmgs");
+
   in = fopen(data,"rb");
   if ( !in ) {
     sprintf(data,"%s","DEFAULT.mmgs");
@@ -137,8 +140,11 @@ int MMGS_writeLocalParam( MMG5_pMesh mesh ) {
   FILE         *out;
 
   strcpy(data,mesh->namein);
-  ptr = strstr(data,".mesh");
+
+  ptr = MMG5_Get_filenameExt(data);
+
   if ( ptr ) *ptr = '\0';
+
   strcat(data,".mmgs");
 
   /** Save the local parameters file */
@@ -277,9 +283,9 @@ int MMGS_defaultOption(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
 
 int main(int argc,char *argv[]) {
   MMG5_pMesh mesh;
-  MMG5_pSol  met,ls;
-  int        ier,ierSave,msh;
-  char       stim[32];
+  MMG5_pSol  sol,met,ls;
+  int        ier,ierSave,fmtin,fmtout;
+  char       stim[32],*ptr;
 
   fprintf(stdout,"  -- MMGS, Release %s (%s) \n",MG_VER,MG_REL);
   fprintf(stdout,"     %s\n",MG_CPY);
@@ -317,54 +323,84 @@ int main(int argc,char *argv[]) {
     fprintf(stdout,"\n  -- INPUT DATA\n");
   chrono(ON,&MMG5_ctim[1]);
 
-  /* read mesh file */
-  msh = 0;
-  ier = MMGS_loadMesh(mesh,mesh->namein);
-  if ( !ier ) {
-    if ( mesh->info.iso ) {
-      ier = MMGS_loadMshMesh(mesh,ls,mesh->namein);
-    }
-    else {
-    ier = MMGS_loadMshMesh(mesh,met,mesh->namein);
-    }
-    msh = 1;
+  /* For each mode: pointer over the solution structure to load */
+  if ( mesh->info.iso ) {
+    sol = ls;
+  }
+  else {
+    sol = met;
   }
 
-  if ( ier<1 )
-    MMGS_RETURN_AND_FREE(mesh,met,ls,MMG5_STRONGFAILURE);
+  /* read mesh file */
+  ptr   = MMG5_Get_filenameExt(mesh->namein);
+  fmtin = MMG5_Get_format(ptr,MMG5_FMT_MeditASCII);
 
-  /* read level-set if any */
-  if ( mesh->info.iso ) {
-    if ( !msh ) {
-      ier = MMGS_loadSol(mesh,ls,ls->namein);
-      if ( ier < 1 ) {
-        fprintf(stdout,"  ## ERROR: UNABLE TO LOAD LEVEL-SET.\n");
+  switch ( fmtin ) {
+
+  case ( MMG5_FMT_GmshASCII ): case ( MMG5_FMT_GmshBinary ):
+    ier = MMGS_loadMshMesh(mesh,sol,mesh->namein);
+    break;
+
+  case ( MMG5_FMT_VtkVtp ):
+    ier = MMGS_loadVtpMesh(mesh,sol,mesh->namein);
+    break;
+
+  case ( MMG5_FMT_VtkVtu ):
+    ier = MMGS_loadVtuMesh(mesh,sol,mesh->namein);
+    break;
+
+  case ( MMG5_FMT_VtkVtk ):
+    ier = MMGS_loadVtkMesh(mesh,sol,mesh->namein);
+    break;
+
+  case ( MMG5_FMT_MeditASCII ): case ( MMG5_FMT_MeditBinary ):
+    ier = MMGS_loadMesh(mesh,mesh->namein);
+    if ( ier <  1 ) { break; }
+
+    /* read level-set in iso mode */
+    if ( mesh->info.iso ) {
+      if ( MMGS_loadSol(mesh,ls,ls->namein) < 1 ) {
+        fprintf(stderr,"\n  ## ERROR: UNABLE TO LOAD LEVEL-SET.\n");
         MMGS_RETURN_AND_FREE(mesh,met,ls,MMG5_STRONGFAILURE);
       }
       if ( met->namein ) {
-        ier = MMGS_loadSol(mesh,met,met->namein);
-        if ( ier < 1 ) {
+        if ( MMGS_loadSol(mesh,met,met->namein) < 1 ) {
           fprintf(stdout,"  ## ERROR: UNABLE TO LOAD METRIC.\n");
           MMGS_RETURN_AND_FREE(mesh,met,ls,MMG5_STRONGFAILURE);
         }
       }
     }
+    else {
+      /* read metric if any */
+      if ( MMGS_loadSol(mesh,met,met->namein) == -1 ) {
+        fprintf(stderr,"\n  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
+        MMGS_RETURN_AND_FREE(mesh,met,ls,MMG5_STRONGFAILURE);
+      }
+    }
+    break;
+
+  default:
+    fprintf(stderr,"  ** I/O AT FORMAT %s NOT IMPLEMENTD.\n",MMG5_Get_formatName(fmtin) );
+    MMGS_RETURN_AND_FREE(mesh,met,ls,MMG5_STRONGFAILURE);
+  }
+
+  if ( ier<1 ) {
+    if ( ier==0 ) {
+      fprintf(stderr,"  ** %s  NOT FOUND.\n",mesh->namein);
+      fprintf(stderr,"  ** UNABLE TO OPEN INPUT FILE.\n");
+    }
+    MMGS_RETURN_AND_FREE(mesh,met,ls,MMG5_STRONGFAILURE);
+  }
+
+  /* Check input data */
+  if ( mesh->info.iso ) {
     if ( ls->m==NULL ) {
       fprintf(stderr,"\n  ## ERROR: NO ISOVALUE DATA.\n");
       MMGS_RETURN_AND_FREE(mesh,met,ls,MMG5_STRONGFAILURE);
     }
   }
-  /* read metric if any */
-  else {
-  if ( !msh ) {
-    ier = MMGS_loadSol(mesh,met,met->namein);
-    if ( ier==-1 ) {
-      fprintf(stderr,"\n  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
-        MMGS_RETURN_AND_FREE(mesh,met,ls,MMG5_STRONGFAILURE);
-      }
-    }
-  }
 
+  /* Read parameter file */
   if ( !MMG5_parsop(mesh,met) )
     MMGS_RETURN_AND_FREE(mesh,met,ls,MMG5_LOWFAILURE);
 
@@ -398,17 +434,34 @@ int main(int argc,char *argv[]) {
     if ( mesh->info.imprim > 0 )
       fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh->nameout);
 
-    MMG5_chooseOutputFormat(mesh,&msh);
+    ptr    = MMG5_Get_filenameExt(mesh->nameout);
+    fmtout = MMG5_Get_format(ptr,fmtin);
 
-    if ( !msh )
-      ierSave = MMGS_saveMesh(mesh,mesh->nameout);
-    else
+    switch ( fmtout ) {
+    case ( MMG5_FMT_GmshASCII ): case ( MMG5_FMT_GmshBinary ):
       ierSave = MMGS_saveMshMesh(mesh,met,mesh->nameout);
+      break;
+    case ( MMG5_FMT_VtkVtp ):
+      ierSave = MMGS_saveVtpMesh(mesh,met,mesh->nameout);
+      break;
+    case ( MMG5_FMT_VtkVtu ):
+      ierSave = MMGS_saveVtuMesh(mesh,met,mesh->nameout);
+      break;
+    case ( MMG5_FMT_VtkVtk ):
+      ierSave = MMGS_saveVtkMesh(mesh,met,mesh->nameout);
+      break;
+    default:
+      ierSave = MMGS_saveMesh(mesh,mesh->nameout);
+      if ( !ierSave ) {
+        MMGS_RETURN_AND_FREE(mesh,met,ls,MMG5_STRONGFAILURE);
+      }
+      if ( met && met->np ) {
+        ierSave = MMGS_saveSol(mesh,met,met->nameout);
+      }
+      break;
+    }
 
     if ( !ierSave )
-      MMGS_RETURN_AND_FREE(mesh,met,ls,MMG5_STRONGFAILURE);
-
-    if ( !msh && !MMGS_saveSol(mesh,met,met->nameout) )
       MMGS_RETURN_AND_FREE(mesh,met,ls,MMG5_STRONGFAILURE);
 
     chrono(OFF,&MMG5_ctim[1]);

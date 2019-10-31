@@ -31,7 +31,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
   MMG5_pQuad        pq1;
   float             fc;
   long         posnp,posnt,posncor,posned,posnq,posreq,posreqed,posntreq;
-  int          k,ref,tmp,ncor,norient,nreq,ntreq,nreqed,bin,iswp,nq;
+  int          k,ref,tmp,ncor,norient,nreq,ntreq,nreqed,bin,iswp,nq,nref;
   double       air,dtmp;
   int          i,bdim,binch,bpos;
   char         *ptr,*data;
@@ -43,6 +43,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
   iswp = 0;
   mesh->np = mesh->nt = mesh->na = mesh->xp = 0;
   nq = 0;
+  nref = 0;
 
   MMG5_SAFE_CALLOC(data,strlen(filename)+7,char,return 0);
   strcpy(data,filename);
@@ -258,7 +259,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
 
   if ( !mesh->np  ) {
     fprintf(stdout,"  ** MISSING DATA : no point\n");
-    return 0;
+    return -1;
   }
 
   mesh->npi  = mesh->np;
@@ -266,7 +267,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
   mesh->nti  = mesh->nt;
   if ( !mesh->np ) {
     fprintf(stdout,"  ** MISSING DATA\n");
-    return 0;
+    return -1;
   }
 
   /* Memory allocation */
@@ -323,6 +324,10 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         if(iswp) ppt->ref=MMG5_swapbin(ppt->ref);
       }
     }
+    if ( ppt->ref < 0 ) {
+      ppt->ref = -ppt->ref;
+      ++nref;
+    }
     ppt->tag = MG_NUL;
   }
 
@@ -342,6 +347,11 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
       MMG_FREAD(&ped->ref,MMG5_SW,1,inm);
       if(iswp) ped->ref=MMG5_swapbin(ped->ref);
     }
+    if ( ped->ref < 0 ) {
+      ped->ref = -ped->ref;
+      ++nref;
+    }
+    ped->tag |= MG_REF+MG_BDY;
   }
 
   /* Read triangles */
@@ -368,9 +378,16 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
       }
       for(i=0 ; i<3 ; i++)
         pt->edg[i] = 0;
+
+      /* Get positive ref */
+      if ( pt->ref < 0 ) {
+        pt->ref = -pt->ref;
+        ++nref;
+      }
+
+      /* Check orientation */
       air = MMG2D_quickarea(mesh->point[pt->v[0]].c,mesh->point[pt->v[1]].c,
                            mesh->point[pt->v[2]].c);
-
       if(air < 0) {
         norient++;
         tmp = pt->v[2];
@@ -432,6 +449,11 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         }
         MMG_FREAD(&pq1->ref,MMG5_SW,1,inm);
         if(iswp) pq1->ref=MMG5_swapbin(pq1->ref);
+      }
+
+      if ( pq1->ref < 0 ) {
+        pq1->ref = -pq1->ref;
+        ++nref;
       }
     }
   }
@@ -514,6 +536,13 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
     }
   }
 
+  if ( nref ) {
+    fprintf(stdout,"\n     $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ \n");
+    fprintf(stdout,"         WARNING : %d entities with unexpected refs (ref< 0).\n",nref);
+    fprintf(stdout,"                   We take their absolute values.\n");
+    fprintf(stdout,"     $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ \n\n");
+  }
+
   if ( abs(mesh->info.imprim) > 4 ) {
     fprintf(stdout,"     NUMBER OF VERTICES   %8d  CORNERS    %6d\n",mesh->np,ncor);
     fprintf(stdout,"     NUMBER OF TRIANGLES  %8d\n",mesh->nt);
@@ -533,8 +562,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
  * the mesh (mesh generation) and check that all z-componants are 0.
  *
  */
-static inline
-int MMG2D_2dMshCheck(MMG5_pMesh mesh) {
+int MMG2D_2dMeshCheck(MMG5_pMesh mesh) {
   MMG5_pPoint ppt;
   double      z;
   int         k;
@@ -576,9 +604,7 @@ int MMG2D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 
   if ( nsols>1 ) {
     fprintf(stderr,"SEVERAL SOLUTION => IGNORED: %d\n",nsols);
-    fclose(inm);
-    MMG5_SAFE_FREE(posNodeData);
-    return -1;
+    nsols = 0;
   }
 
   if ( !MMG2D_zaldy(mesh) ) {
@@ -619,7 +645,7 @@ int MMG2D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 
   /* Mark all points as used in case of mesh generation and check the
    * z-componant */
-  if ( !MMG2D_2dMshCheck(mesh) ) return -1;
+  if ( !MMG2D_2dMeshCheck(mesh) ) return -1;
 
   return 1;
 }
@@ -680,7 +706,7 @@ int MMG2D_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
 
   /* Mark all points as used in case of mesh generation and check the
    * z-componant */
-  if ( !MMG2D_2dMshCheck(mesh) ) return -1;
+  if ( !MMG2D_2dMeshCheck(mesh) ) return -1;
 
   return 1;
 }

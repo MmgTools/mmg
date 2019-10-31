@@ -60,6 +60,7 @@ extern "C" {
     MMG2D_IPARAM_debug,             /*!< [1/0], Turn on/off debug mode */
     MMG2D_IPARAM_angle,             /*!< [1/0], Turn on/off angle detection */
     MMG2D_IPARAM_iso,               /*!< [1/0], Level-set meshing */
+    MMG2D_IPARAM_opnbdy,            /*!< [1/0], Preserve edges at interface of 2 domains with same reference */
     MMG2D_IPARAM_lag,               /*!< [-1/0/1/2], Lagrangian option */
     MMG2D_IPARAM_msh,               /*!< [0/1/2], Read/write to gmsh visu if val=1 (out) if val=2 (in/out) */
     MMG2D_IPARAM_numsubdomain,       /*!<only if no given triangle, save the subdomain nb (0==all subdomain) */
@@ -68,8 +69,8 @@ extern "C" {
     MMG2D_IPARAM_noswap,            /*!< [1/0], Avoid/allow edge or face flipping */
     MMG2D_IPARAM_nomove,            /*!< [1/0], Avoid/allow point relocation */
     MMG2D_IPARAM_nosurf,            /*!< [1/0], Avoid/allow surface modifications */
+    MMG2D_IPARAM_nreg,              /*!< [0/1], Enable normal regularization */
     MMG2D_IPARAM_numberOfLocalParam,/*!< [n], Number of local parameters */
-    MMG2D_IPARAM_rmc,               /*!< [0/1], Remove small connex componants in level-set mode */
     MMG2D_DPARAM_angleDetection,    /*!< [val], Value for angle detection */
     MMG2D_DPARAM_hmin,              /*!< [val], Minimal mesh size */
     MMG2D_DPARAM_hmax,              /*!< [val], Maximal mesh size */
@@ -77,7 +78,8 @@ extern "C" {
     MMG2D_DPARAM_hausd,             /*!< [val], Control global Hausdorff distance (on all the boundary surfaces of the mesh) */
     MMG2D_DPARAM_hgrad,             /*!< [val], Control gradation */
     MMG2D_DPARAM_hgradreq,          /*!< [val], Control gradation on required entites (advanced usage) */
-    MMG2D_DPARAM_ls,                /*!< [val], Value of level-set (not use for now) */
+    MMG2D_DPARAM_ls,                /*!< [val], Value of level-set */
+    MMG2D_DPARAM_rmc,               /*!< [-1/val], Remove small connex componants in level-set mode */
   };
 
 /*----------------------------- functions header -----------------------------*/
@@ -1181,6 +1183,126 @@ extern "C" {
  *
  */
   int MMG2D_loadMesh(MMG5_pMesh mesh,const char * filename);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the solution structure.
+ * \param filename name of file.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Read mesh and 0 or 1 data field at VTK vtp file format (.vtp extension). We
+ * read only low-order points, edges, tria and quad.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG2D_LOADVTPMESH(mesh,sol,filename,strlen0,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
+ * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+int MMG2D_loadVtpMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the solution structure.
+ * \param filename name of file.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Read mesh and a list of data fields at VTK vtp file format (.vtp extension). We
+ * read only low-order points, edges, tria and quad.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG2D_LOADVTPMESH_AND_ALLDATA(mesh,sol,filename,strlen0,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
+ * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+int MMG2D_loadVtpMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the solution structure.
+ * \param filename name of file.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Read mesh and 0 or 1 data field at VTK vtu file format (.vtu extension). We
+ * read only low-order points, edges, tria and quad.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG2D_LOADVTUMESH(mesh,sol,filename,strlen0,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
+ * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+int MMG2D_loadVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the solution structure.
+ * \param filename name of file.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Read mesh and a list of data field at VTK vtu file format (.vtu extension). We
+ * read only low-order points, edges, tria and quad.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG2D_LOADVTUMESH_AND_ALLDATA(mesh,sol,filename,strlen0,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
+ * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+int MMG2D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the solution structure.
+ * \param filename name of file.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Read mesh and 0 or 1 data field at VTK vtk file format (.vtk extension). We
+ * read only low-order points, edges, tria and quad.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG2D_LOADVTKMESH(mesh,sol,filename,strlen0,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
+ * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+int MMG2D_loadVtkMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the solution structure.
+ * \param filename name of file.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Read mesh and a list of data field at VTK vtk file format (.vtk extension). We
+ * read only low-order points, edges, tria and quad.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG2D_LOADVTKMESH_AND_ALLDATA(mesh,sol,filename,strlen0,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
+ * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the solution structure.
@@ -1315,6 +1437,114 @@ extern "C" {
  *
  */
   int MMG2D_saveMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the solution structure.
+ * \param filename name of file.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Write mesh and 0 or 1 data at Vtk file format (.vtk extension).
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG2D_SAVEVTKMESH(mesh,sol,filename,strlen0,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
+ * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int MMG2D_saveVtkMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the solution structure.
+ * \param filename name of file.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Write mesh and a list of data fields at Vtk file format (.vtk extension).
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG2D_SAVEVTKMESH_AND_ALLDATA(mesh,sol,filename,strlen0,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
+ * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int MMG2D_saveVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the solution structure.
+ * \param filename name of file.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Write mesh and 0 or 1 data at vtu Vtk file format (.vtu extension).
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG2D_SAVEVTUMESH(mesh,sol,filename,strlen0,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
+ * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int MMG2D_saveVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the solution structure.
+ * \param filename name of file.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Write mesh and a list of data fields at vtu Vtk file format (.vtu extension).
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG2D_SAVEVTUMESH_AND_ALLDATA(mesh,sol,filename,strlen0,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
+ * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int MMG2D_saveVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the solution structure.
+ * \param filename name of file.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Write mesh and 0 or 1 data at polydata Vtk file format (.vtp extension).
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG2D_SAVEVTPMESH(mesh,sol,filename,strlen0,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
+ * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int MMG2D_saveVtpMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the solution structure.
+ * \param filename name of file.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Write mesh and a list of data fields at polydata Vtk file format (.vtp extension).
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG2D_SAVEVTPMESH_AND_ALLDATA(mesh,sol,filename,strlen0,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
+ * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int MMG2D_saveVtpMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the solution structure..

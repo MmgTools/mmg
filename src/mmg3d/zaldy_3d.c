@@ -56,7 +56,7 @@ int MMG3D_newPt(MMG5_pMesh mesh,double c[3],int16_t tag) {
     mesh->xp++;
     if(mesh->xp > mesh->xpmax){
       /* reallocation of xpoint table */
-      MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,MMG5_xPoint,
+      MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,MMG5_GAP,MMG5_xPoint,
                          "larger xpoint table",
                          return 0);
     }
@@ -289,10 +289,6 @@ int MMG3D_setMeshSize_alloc( MMG5_pMesh mesh ) {
   mesh->nenil = mesh->ne + 1;
 
   for (k=mesh->npnil; k<mesh->npmax-1; k++) {
-    /* Set tangent field of point to 0 */
-    mesh->point[k].n[0] = 0;
-    mesh->point[k].n[1] = 0;
-    mesh->point[k].n[2] = 0;
     /* link */
     mesh->point[k].tmp  = k+1;
   }

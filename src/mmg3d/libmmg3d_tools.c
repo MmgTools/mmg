@@ -34,7 +34,7 @@
 
 void MMG3D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
 
-  if ( met->size == 6 ) {
+  if ( met && met->size == 6 ) {
     if ( (!met->m) && (!mesh->info.optim) && mesh->info.hsiz<=0. ) {
       MMG5_caltet          = MMG5_caltet_iso;
       MMG5_caltri          = MMG5_caltri_iso;
@@ -122,6 +122,9 @@ int MMG3D_usage(char *prog) {
   fprintf(stdout,"-A           enable anisotropy (without metric file).\n");
   fprintf(stdout,"-opnbdy      preserve input triangles at the interface of"
           " two domains of the same reference.\n");
+
+  fprintf(stdout,"-rmc [val]   Enable the removal of componants whose volume fraction is less than\n"
+          "             val (1e-5 if not given) of the mesh volume (ls mode).\n");
 
 #ifdef USE_ELAS
   fprintf(stdout,"-lag [n] Lagrangian mesh displacement according to mode [0/1/2]\n");
@@ -328,6 +331,10 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
           if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_nofem,1) )
             return 0;
         }
+        else if ( !strcmp(argv[i],"-nreg") ) {
+          if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_nreg,1) )
+            return 0;
+        }
         else if ( !strcmp(argv[i],"-nr") ) {
           if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_angle,0) )
             return 0;
@@ -381,9 +388,18 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
             return 0;
         }
         break;
-#ifdef USE_SCOTCH
       case 'r':
-        if ( !strcmp(argv[i],"-rn") ) {
+        if ( !strcmp(argv[i],"-rmc") ) {
+          if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_rmc,0) )
+            return 0;
+          if ( ++i < argc && (isdigit(argv[i][0]) ) ) {
+            if ( !MMG3D_Set_dparameter(mesh,met,MMG3D_DPARAM_rmc,atof(argv[i])) )
+              return 0;
+          }
+          else i--;
+        }
+#ifdef USE_SCOTCH
+        else if ( !strcmp(argv[i],"-rn") ) {
           if ( ++i < argc ) {
             if ( isdigit(argv[i][0]) ) {
               if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_renum,atoi(argv[i])) )
@@ -401,8 +417,13 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
             return 0;
           }
         }
-        break;
 #endif
+        else {
+          fprintf(stderr,"Unrecognized option %s\n",argv[i]);
+          MMG3D_usage(argv[0]);
+          return 0;
+        }
+        break;
       case 's':
         if ( !strcmp(argv[i],"-sol") ) {
           /* For retrocompatibility, store the metric if no sol structure available */
@@ -497,6 +518,7 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
   /* default : store solution (resp. displacement) name in iso
    * (resp. lagrangian) mode, metric name otherwise */
   tmp = ( mesh->info.iso || mesh->info.lag >=0 ) ? sol : met;
+  assert ( tmp );
   if ( tmp->namein == NULL ) {
     if ( !MMG3D_Set_inputSolName(mesh,tmp,"") ) { return 0; }
   }
@@ -702,6 +724,8 @@ void MMG3D_searchqua(MMG5_pMesh mesh,MMG5_pSol met,double critmin, int *eltab,
   MMG5_pTetra   pt;
   double   rap;
   int      k;
+
+  assert ( met );
 
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];

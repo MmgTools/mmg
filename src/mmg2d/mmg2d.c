@@ -39,7 +39,11 @@ static void MMG5_endcod() {
 static int MMG2D_usage(char *name) {
   MMG5_mmgUsage(name);
 
-  fprintf(stdout,"-rmc         Enable the removal of small componants in ls mode\n");
+  fprintf(stdout,"-opnbdy      preserve input edges at the interface of"
+          " two domains of the same reference.\n");
+
+  fprintf(stdout,"-rmc [val]   Enable the removal of componants whose volume fraction is less than\n"
+          "             val (1e-5 if not given) of the mesh volume (ls mode).\n");
 #ifdef USE_ELAS
   fprintf(stdout,"-lag [n] Lagrangian mesh displacement according to mode [0/1/2]\n");
   fprintf(stdout,"             0: displacement\n");
@@ -171,7 +175,9 @@ int MMG2D_writeLocalParam( MMG5_pMesh mesh ) {
 
   /** Save the local parameters file */
   strcpy(data,mesh->namein);
-  ptr = strstr(data,".mesh");
+
+  ptr = MMG5_Get_filenameExt(data);
+
   if ( ptr ) *ptr = '\0';
   strcat(data,".mmg2d");
 
@@ -480,7 +486,11 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
         }
         break;
       case 'n':
-        if ( !strcmp(argv[i],"-nr") ) {
+        if ( !strcmp(argv[i],"-nreg") ) {
+          if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_nreg,1) )
+            return 0;
+        }
+        else if ( !strcmp(argv[i],"-nr") ) {
           if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_angle,0) )
             return 0;
         }
@@ -523,6 +533,10 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
             return 0;
           }
         }
+        else if ( !strcmp(argv[i],"-opnbdy") ) {
+          if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_opnbdy,1) )
+            return 0;
+        }
         else if( !strcmp(argv[i],"-optim") ) {
           if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_optim,1) )
             return 0;
@@ -535,11 +549,16 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
         }
         break;
       case 'r':
-          if ( !strcmp(argv[i],"-rmc") ) {
-            if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_rmc,1) ) {
+        if ( !strcmp(argv[i],"-rmc") ) {
+          if ( !MMG2D_Set_dparameter(mesh,met,MMG2D_DPARAM_rmc,0) )
+            return 0;
+          if ( ++i < argc && (isdigit(argv[i][0]) ) ) {
+            if ( !MMG2D_Set_dparameter(mesh,met,MMG2D_DPARAM_rmc,atof(argv[i])) )
               return 0;
-            }
           }
+          else i--;
+        }
+        break;
       case 's':
         if ( !strcmp(argv[i],"-sol") ) {
           /* For retrocompatibility, store the metric if no sol structure available */
@@ -633,6 +652,7 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
   /* default : store solution (resp. displacement) name in iso
    * (resp. lagrangian) mode, metric name otherwise */
   tmp = ( mesh->info.iso || mesh->info.lag >=0 ) ? sol : met;
+  assert ( tmp );
   if ( tmp->namein == NULL ) {
     if ( !MMG2D_Set_inputSolName(mesh,tmp,"") )
       return 0;
@@ -647,9 +667,9 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
 
 int main(int argc,char *argv[]) {
   MMG5_pMesh    mesh;
-  MMG5_pSol     met,disp,ls;
-  int           ier,ierSave,msh;
-  char          stim[32];
+  MMG5_pSol     sol,met,disp,ls;
+  int           ier,ierSave,fmtin,fmtout;
+  char          stim[32],*ptr;
 
   fprintf(stdout,"  -- MMG2D, Release %s (%s) \n",MG_VER,MG_REL);
   fprintf(stdout,"     %s\n",MG_CPY);
@@ -657,8 +677,6 @@ int main(int argc,char *argv[]) {
 
   /* Print timer at exit */
   atexit(MMG5_endcod);
-
-  msh = 0;
 
   MMG2D_Set_commonFunc();
   tminit(MMG5_ctim,TIMEMAX);
@@ -697,19 +715,79 @@ int main(int argc,char *argv[]) {
     fprintf(stdout,"\n  -- INPUT DATA\n");
   chrono(ON,&MMG5_ctim[1]);
 
-  /* read mesh file */
-  ier = MMG2D_loadMesh(mesh,mesh->namein);
-  if ( !ier ) {
-    if ( mesh->info.lag >= 0 )
-      ier = MMG2D_loadMshMesh(mesh,disp,mesh->namein);
-    else if ( mesh->info.iso ) {
-      ier = MMG2D_loadMshMesh(mesh,ls,mesh->namein);
+  /* For each mode: pointer over the solution structure to load */
+  if ( mesh->info.lag >= 0 ) {
+    sol = disp;
+  }
+  else if ( mesh->info.iso ) {
+    sol = ls;
+  }
+  else {
+    sol = met;
+  }
+
+  /* read mesh/sol files */
+  ptr   = MMG5_Get_filenameExt(mesh->namein);
+  fmtin = MMG5_Get_format(ptr,MMG5_FMT_MeditASCII);
+
+  switch ( fmtin ) {
+  case ( MMG5_FMT_GmshASCII ): case ( MMG5_FMT_GmshBinary ):
+    ier = MMG2D_loadMshMesh(mesh,sol,mesh->namein);
+    break;
+
+  case ( MMG5_FMT_VtkVtp ):
+    ier = MMG2D_loadVtpMesh(mesh,sol,mesh->namein);
+    break;
+
+  case ( MMG5_FMT_VtkVtu ):
+    ier = MMG2D_loadVtuMesh(mesh,sol,mesh->namein);
+    break;
+
+  case ( MMG5_FMT_VtkVtk ):
+    ier = MMG2D_loadVtkMesh(mesh,sol,mesh->namein);
+    break;
+
+  case ( MMG5_FMT_MeditASCII ): case ( MMG5_FMT_MeditBinary ):
+    ier = MMG2D_loadMesh(mesh,mesh->namein);
+    if ( ier <  1 ) { break; }
+
+    /* Read displacement in lag mode */
+    if ( mesh->info.lag >= 0 ) {
+      /* In Lagrangian mode, the name of the displacement file has been parsed in ls */
+      if ( !MMG2D_Set_inputSolName(mesh,disp,ls->namein) ) {
+        MMG2D_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
+      }
+      MMG5_DEL_MEM(mesh,ls->namein);
+    }
+
+    if ( mesh->info.lag >= 0 || mesh->info.iso ) {
+      /* displacement or isovalue are mandatory */
+      if (  MMG2D_loadSol(mesh,sol,sol->namein) < 1 ) {
+        /* displacement or isovalue are mandatory */
+        fprintf(stdout,"  ## ERROR: UNABLE TO LOAD SOLUTION.\n");
+        MMG2D_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
+      }
     }
     else {
-      ier = MMG2D_loadMshMesh(mesh,met,mesh->namein);
+      /* Facultative metric */
+      if ( MMG2D_loadSol(mesh,met,met->namein) == -1 ) {
+        fprintf(stdout,"\n  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
+        MMG2D_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
+      }
     }
-    msh = 1;
+    /* In iso mode: read metric if any */
+    if ( mesh->info.iso && met->namein ) {
+      if (  MMG2D_loadSol(mesh,met,met->namein) < 1 ) {
+        fprintf(stdout,"  ## ERROR: UNABLE TO LOAD METRIC.\n");
+        MMG2D_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
+      }
+    }
+    break;
+  default:
+    fprintf(stderr,"  ** I/O AT FORMAT %s NOT IMPLEMENTED.\n",MMG5_Get_formatName(fmtin) );
+    MMG2D_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
   }
+
   if ( ier < 1) {
     if ( ier==0 ) {
       fprintf(stderr,"  ** %s  NOT FOUND.\n",mesh->namein);
@@ -718,65 +796,24 @@ int main(int argc,char *argv[]) {
     MMG2D_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
   }
 
-  /* Read parameter file */
-  if ( !MMG2D_parsop(mesh,met) )
-    MMG2D_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
-
-  /* Read displacement if any */
+  /* Check input data */
   if ( mesh->info.lag >= 0 ) {
-
-    /* In Lagrangian mode, the name of the displacement file has been parsed in ls */
-    if ( !MMG2D_Set_inputSolName(mesh,disp,ls->namein) ) {
-      MMG2D_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
-    }
-    MMG5_DEL_MEM(mesh,ls->namein);
-
-    if ( !msh ) {
-      ier = MMG2D_loadSol(mesh,disp,disp->namein);
-      if ( ier < 1 ) {
-        fprintf(stdout,"  ## ERROR: UNABLE TO LOAD DISPLACEMENT.\n");
-        MMG2D_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
-      }
-      if ( met->namein ) {
-        fprintf(stdout,"  ## WARNING: MESH ADAPTATION UNAVAILABLE IN"
-                " LAGRANGIAN MODE. METRIC IGNORED.\n");
-        MMG2D_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
-      }
-    }
-    if ( disp->size != 2 ) {
-      fprintf(stdout,"  ## ERROR: WRONG DATA TYPE.\n");
+    if ( met->namein ) {
+      fprintf(stdout,"  ## WARNING: MESH ADAPTATION UNAVAILABLE IN"
+              " LAGRANGIAN MODE. METRIC IGNORED.\n");
       MMG2D_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
     }
   }
-  /* Read levelset if any */
   else if ( mesh->info.iso ) {
-    if ( !msh ) {
-      ier = MMG2D_loadSol(mesh,ls,ls->namein);
-      if ( ier < 1 ) {
-        fprintf(stdout,"  ## ERROR: UNABLE TO LOAD LEVEL-SET.\n");
-        MMG2D_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
-      }
-      if ( met->namein ) {
-        ier = MMG2D_loadSol(mesh,met,met->namein);
-        if ( ier < 1 ) {
-          fprintf(stdout,"  ## ERROR: UNABLE TO LOAD METRIC.\n");
-          MMG2D_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
-        }
-      }
-    }
-    if ( ls->m==NULL ) {
+    if ( ls->m == NULL ) {
       fprintf(stderr,"\n  ## ERROR: NO ISOVALUE DATA.\n");
       MMG2D_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
     }
   }
-  /* Read metric if any */
-  else if ( !msh ) {
-    ier = MMG2D_loadSol(mesh,met,met->namein);
-    if ( ier == -1 ) {
-        fprintf(stdout,"\n  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
-        MMG2D_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
-    }
-  }
+
+  /* Read parameter file */
+  if ( !MMG2D_parsop(mesh,met) )
+    MMG2D_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
 
   chrono(OFF,&MMG5_ctim[1]);
   if ( mesh->info.imprim >= 0 ) {
@@ -817,18 +854,35 @@ int main(int argc,char *argv[]) {
     if ( mesh->info.imprim > 0 )
       fprintf(stdout,"\n  -- WRITING DATA FILE %s\n",mesh->nameout);
 
-    MMG5_chooseOutputFormat(mesh,&msh);
+    ptr    = MMG5_Get_filenameExt(mesh->nameout);
+    fmtout = MMG5_Get_format(ptr,fmtin);
 
-    if ( !msh )
-      ierSave = MMG2D_saveMesh(mesh,mesh->nameout);
-    else
+    switch ( fmtout ) {
+    case ( MMG5_FMT_GmshASCII ): case ( MMG5_FMT_GmshBinary ):
       ierSave = MMG2D_saveMshMesh(mesh,met,mesh->nameout);
+      break;
+    case ( MMG5_FMT_VtkVtp ):
+      ierSave = MMG2D_saveVtpMesh(mesh,met,mesh->nameout);
+      break;
+    case ( MMG5_FMT_VtkVtu ):
+      ierSave = MMG2D_saveVtuMesh(mesh,met,mesh->nameout);
+      break;
+    case ( MMG5_FMT_VtkVtk ):
+      ierSave = MMG2D_saveVtkMesh(mesh,met,mesh->nameout);
+      break;
+    default:
+      ierSave = MMG2D_saveMesh(mesh,mesh->nameout);
+      if ( !ierSave ) {
+        MMG2D_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
+      }
+      if ( met && met->np ) {
+        ierSave = MMG2D_saveSol(mesh,met,mesh->nameout);
+      }
+      break;
+    }
 
     if ( !ierSave )
       MMG2D_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
-
-    if( !msh && met->np )
-      MMG2D_saveSol(mesh,met,mesh->nameout);
 
     chrono(OFF,&MMG5_ctim[1]);
     if ( mesh->info.imprim > 0 ) fprintf(stdout,"  -- WRITING COMPLETED\n");

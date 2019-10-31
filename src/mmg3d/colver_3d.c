@@ -1047,7 +1047,7 @@ int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,char
             /* Create new field xt */
             mesh->xt++;
             if ( mesh->xt > mesh->xtmax ) {
-              MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
+              MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
                                  "larger xtetra table",
                                  mesh->xt--;return -1;);
             }

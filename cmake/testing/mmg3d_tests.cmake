@@ -313,7 +313,7 @@ ADD_TEST(NAME mmg3d_LeakCheck_AbnormalEnd3
   ${MMG3D_CI_TESTS}/LeakCheck_AbnormalEnd3/d -sol
   ${MMG3D_CI_TESTS}/LeakCheck_AbnormalEnd3/dsol.sol -ls
   -out ${CTEST_OUTPUT_DIR}/mmg3d_LeakCheck_AbnormalEnd3-d.o.meshb)
-SET(passRegex "## ERROR: UNABLE TO LOAD LEVEL-SET.")
+SET(passRegex "## ERROR: UNABLE TO LOAD SOLUTION")
 SET_PROPERTY(TEST mmg3d_LeakCheck_AbnormalEnd3
   PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}")
 #####
@@ -559,6 +559,24 @@ ADD_TEST(NAME mmg3d_OptLs_plane_withMetAndLs
   -met ${MMG3D_CI_TESTS}/OptLs_plane/met.sol
   ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_plane-nonzero.o.meshb)
 
+# ls + rmc
+ADD_TEST(NAME mmg3d_OptLs_plane_withbub
+  COMMAND ${EXECUT_MMG3D} -v 5 -ls
+  ${MMG3D_CI_TESTS}/OptLs_plane/plane
+  -sol ${MMG3D_CI_TESTS}/OptLs_plane/bub.sol
+  ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_plane-withbub.o.meshb)
+
+ADD_TEST(NAME mmg3d_OptLs_plane_rembub
+  COMMAND ${EXECUT_MMG3D} -v 5 -ls
+  ${MMG3D_CI_TESTS}/OptLs_plane/plane
+  -sol ${MMG3D_CI_TESTS}/OptLs_plane/bub.sol
+  ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_plane-rembub.o.meshb -rmc)
+
+ADD_TEST(NAME mmg3d_OptLs_plane_rembub2
+  COMMAND ${EXECUT_MMG3D} -v 5 -ls -rmc 0.1
+  ${MMG3D_CI_TESTS}/OptLs_plane/plane
+  -sol ${MMG3D_CI_TESTS}/OptLs_plane/bub.sol
+  ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_plane-rembub2.o.meshb)
 
 IF ( LONG_TESTS )
   # Test the Ls option

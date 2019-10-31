@@ -2055,6 +2055,9 @@ int MMG3D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam,int val){
   case MMG3D_IPARAM_nosurf :
     mesh->info.nosurf   = val;
     break;
+  case MMG3D_IPARAM_nreg :
+    mesh->info.nreg     = val;
+    break;
   case MMG3D_IPARAM_numberOfLocalParam :
     if ( mesh->info.par ) {
       MMG5_DEL_MEM(mesh,mesh->info.par);
@@ -2141,6 +2144,9 @@ int MMG3D_Get_iparameter(MMG5_pMesh mesh, int iparam) {
   case MMG3D_IPARAM_nosurf :
     return  mesh->info.nosurf;
     break;
+  case MMG3D_IPARAM_nreg :
+    return mesh->info.nreg;
+    break;
   case MMG3D_IPARAM_numberOfLocalParam :
     return  mesh->info.npar;
     break;
@@ -2198,6 +2204,16 @@ int MMG3D_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val)
     break;
   case MMG3D_DPARAM_ls :
     mesh->info.ls       = val;
+    break;
+  case MMG3D_DPARAM_rmc :
+    if ( !val ) {
+      /* Default value */
+      mesh->info.rmc      = MMG3D_VOLFRAC;
+    }
+    else {
+      /* User customized value */
+      mesh->info.rmc      = val;
+    }
     break;
   default :
     fprintf(stderr,"\n  ## Error: %s: unknown type of parameter\n", __func__);
