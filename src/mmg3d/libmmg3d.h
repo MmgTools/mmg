@@ -49,7 +49,6 @@
 extern "C" {
 #endif
 
-#include <stdio.h>
 #include "mmg/mmg3d/libmmgtypes.h"
 
 /**
@@ -1638,29 +1637,6 @@ enum MMG3D_Param {
                         double c2, int ref);
 
 /* input/output functions */
-/**
- * \param mesh pointer toward the mesh structure.
- * \param filename name of file.
- * \param inm file pointer.
- * \param bin flag for binary or ascii file.
- * \return 0 if failed, 1 otherwise.
- *
- * Open a mesh file.
- *
- */
-  int MMG3D_openMesh(MMG5_pMesh mesh,const char *filename,FILE **inm,int *bin);
-
-/**
- * \param mesh pointer toward the mesh structure.
- * \param inm file pointer.
- * \param bin flag for binary or ascii file.
- * \return 0 if failed, 1 otherwise.
- *
- * Read mesh data from an already open file.
- *
- */
-  int MMG3D_loadMesh_opened(MMG5_pMesh mesh,FILE *inm,int bin);
-
 /**
  * \param mesh pointer toward the mesh structure.
  * \param filename name of file.

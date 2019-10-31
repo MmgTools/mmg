@@ -526,6 +526,10 @@ extern int    (*MMG5_movbdyridpt)(MMG5_pMesh, MMG5_pSol, MMG3D_pPROctree ,int*, 
 extern int    (*MMG5_cavity)(MMG5_pMesh ,MMG5_pSol ,int ,int ,int *,int ,double);
 extern int    (*MMG3D_PROctreein)(MMG5_pMesh ,MMG5_pSol ,MMG3D_pPROctree ,int,double );
 
+/* input */
+int MMG3D_openMesh(MMG5_pMesh mesh,const char *filename,FILE **inm,int *bin);
+int MMG3D_loadMesh_opened(MMG5_pMesh mesh,FILE *inm,int bin);
+
 /**
  * \param mesh pointer toward the mesh structure.
  *
