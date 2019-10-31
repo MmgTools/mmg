@@ -100,6 +100,7 @@ int MMG3D_loadMesh_opened(MMG5_pMesh mesh,FILE *inm,int bin) {
   iswp = 0;
   ina = NULL;
   mesh->np = mesh->nt = mesh->ne = 0;
+  nref = 0;
 
 
   if (!bin) {
