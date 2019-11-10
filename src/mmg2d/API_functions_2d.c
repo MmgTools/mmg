@@ -868,8 +868,8 @@ int  MMG2D_Set_triangles(MMG5_pMesh mesh, int *tria, int *refs) {
     mesh->point[ptt->v[1]].tag &= ~MG_NUL;
     mesh->point[ptt->v[2]].tag &= ~MG_NUL;
 
-    for(i=0 ; i<3 ; i++)
-      ptt->edg[i] = 0;
+    for(int ii=0 ; ii<3 ; ii++)
+      ptt->edg[ii] = 0;
 
     vol = MMG2D_quickarea(mesh->point[ptt->v[0]].c,mesh->point[ptt->v[1]].c,
                          mesh->point[ptt->v[2]].c);
@@ -879,8 +879,8 @@ int  MMG2D_Set_triangles(MMG5_pMesh mesh, int *tria, int *refs) {
               __func__,i);
       for ( ip=0; ip<3; ip++ ) {
         ppt = &mesh->point[ptt->v[ip]];
-        for ( j=0; j<3; j++ ) {
-          if ( fabs(ppt->c[j])>0. ) {
+        for (int jj=0; jj<3; jj++ ) {
+          if ( fabs(ppt->c[jj])>0. ) {
             fprintf(stderr," Check that you don't have a sliver triangle.\n");
             return 0;
           }
