@@ -30,3 +30,4 @@ ci_tests
 src/common/mmg.h
 
 include/*
+*.o
