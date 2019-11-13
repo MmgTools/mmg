@@ -75,7 +75,12 @@ static int paktri(MMG5_pMesh mesh) {
  *
  */
 int MMGS_hashTria(MMG5_pMesh mesh) {
-  MMG5_Hash          hash;
+  MMG5_Hash      hash;
+  MMG5_pTria     pt,pt1;
+  MMG5_hedge     *ph;
+  int            *adja,*adjt,k,kk,jel,lel,hmax,dup,nmf,ia,ib;
+  char           i,i1,i2,j,l;
+  unsigned int   key;
 
   if ( mesh->adja )  return 1;
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
@@ -90,6 +95,143 @@ int MMGS_hashTria(MMG5_pMesh mesh) {
   MMG5_SAFE_CALLOC(mesh->adja,3*mesh->ntmax+5,int,return 0);
 
   if ( !MMG5_mmgHashTria(mesh, mesh->adja, &hash, 0) ) return 0;
+
+  adjt = mesh->adja;
+
+  /* adjust hash table params */
+  hmax = 3.71*mesh->np;
+  hash.siz  = mesh->np;
+  hash.max  = hmax + 1;
+  hash.nxt  = hash.siz;
+  MMG5_ADD_MEM(mesh,(hash.max+1)*sizeof(MMG5_hedge),"hash table",return 0);
+  MMG5_SAFE_CALLOC(hash.item,hash.max+1,MMG5_hedge,return 0);
+
+  for (k=hash.siz; k<hash.max; k++)
+    hash.item[k].nxt = k+1;
+
+  if ( mesh->info.ddebug )  fprintf(stdout,"  h- stage 1: init\n");
+
+  /* hash triangles */
+  mesh->base = 1;
+  dup = nmf = 0;
+  for (k=1; k<=mesh->nt; k++) {
+    pt = &mesh->tria[k];
+    if ( !MG_EOK(pt) )  continue;
+
+    pt->flag = 0;
+    pt->base = mesh->base;
+    adja = &adjt[3*(k-1)+1];
+    for (i=0; i<3; i++) {
+      i1 = MMG5_inxt2[i];
+      i2 = MMG5_iprv2[i];
+
+      /* compute key */
+      ia  = MG_MIN(pt->v[i1],pt->v[i2]);
+      ib  = MG_MAX(pt->v[i1],pt->v[i2]);
+      key = (MMG5_KA*ia + MMG5_KB*ib) % hash.siz;
+      ph  = &hash.item[key];
+
+      /* store edge */
+      if ( ph->a == 0 ) {
+        ph->a = ia;
+        ph->b = ib;
+        ph->k = 3*k + i;
+        ph->nxt = 0;
+        ++ph->s;
+        continue;
+      }
+      /* update info about adjacent */
+#ifndef NDEBUG
+      char ok = 0;
+#endif
+      while ( ph->a ) {
+        if ( ph->a == ia && ph->b == ib ) {
+          jel = ph->k / 3;
+          j   = ph->k % 3;
+          pt1 = &mesh->tria[jel];
+          /* discard duplicate face */
+          if ( pt1->v[j] == pt->v[i] ) {
+            pt1->v[0] = 0;
+            dup++;
+          }
+          /* update adjacent */
+          else if ( !adjt[3*(jel-1)+1+j] ) {
+            adja[i] = 3*jel + j;
+            adjt[3*(jel-1)+1+j] = 3*k + i;
+            ++ph->s;
+          }
+          /* non-manifold case */
+          else if ( adja[i] != 3*jel+j ) {
+            lel = adjt[3*(jel-1)+1+j]/3;
+            l   = adjt[3*(jel-1)+1+j]%3;
+            (mesh->tria[lel]).tag[l] |= MG_GEO + MG_NOM;
+            pt1->tag[j] |= MG_GEO + MG_NOM;
+            pt->tag[i] |= MG_GEO + MG_NOM;
+            nmf++;
+            ++ph->s;
+          }
+#ifndef NDEBUG
+          ok = 1;
+#endif
+          break;
+        }
+        else if ( !ph->nxt ) {
+          ph->nxt = hash.nxt;
+          ph = &hash.item[ph->nxt];
+          assert(ph);
+
+          if ( hash.nxt >= hash.max-1 ) {
+            if ( mesh->info.ddebug ) {
+              fprintf(stderr,"\n  ## Warning: %s: memory alloc problem (edge):"
+                      " %d\n",__func__,hash.max);
+            }
+            MMG5_TAB_RECALLOC(mesh,hash.item,hash.max,MMG5_GAP,MMG5_hedge,
+                               "MMG5_edge",
+                               MMG5_DEL_MEM(mesh,hash.item);
+                               return 0);
+
+            ph = &hash.item[hash.nxt];
+
+            for (kk=ph->nxt; kk<hash.max; kk++)
+              hash.item[kk].nxt = kk+1;
+          }
+
+          hash.nxt = ph->nxt;
+          ph->a = ia;
+          ph->b = ib;
+          ph->k = 3*k + i;
+          ph->nxt = 0;
+          ++ph->s;
+#ifndef NDEBUG
+          ok = 1;
+#endif
+          break;
+        }
+        else
+          ph = &hash.item[ph->nxt];
+      }
+      assert(ok);
+    }
+  }
+
+  /* set tag */
+  for (k=1; k<=mesh->nt; k++) {
+    pt  = &mesh->tria[k];
+    for (i=0; i<3; i++) {
+      if ( pt->tag[i] & MG_NOM ) {
+        mesh->point[pt->v[MMG5_inxt2[i]]].tag |= MG_NOM;
+        mesh->point[pt->v[MMG5_iprv2[i]]].tag |= MG_NOM;
+      }
+    }
+  }
+
+  if ( abs(mesh->info.imprim) > 5 && dup+nmf > 0 ) {
+    fprintf(stdout,"  ## ");  fflush(stdout);
+    if ( nmf > 0 )  fprintf(stdout,"[non-manifold model]  ");
+    if ( dup > 0 )  fprintf(stdout," %d duplicate removed",dup);
+    fprintf(stdout,"\n");
+  }
+  if ( mesh->info.ddebug )  fprintf(stdout,"  h- completed.\n");
 
   MMG5_DEL_MEM(mesh,hash.item);
 
