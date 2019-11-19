@@ -520,7 +520,7 @@ static int MMG5_singul(MMG5_pMesh mesh) {
     }
   }
 
-  /* check for handle */
+  /* check for handle (point connecting two surfaces non connected by edges) */
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) )  continue;
