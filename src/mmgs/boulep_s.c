@@ -256,6 +256,7 @@ int boulechknm(MMG5_pMesh mesh,int start,int ip,int *list) {
  * to normal \a n1's side. \a ip0 and \a ip1 are the indices of the 2 ending
  * point of the ridge. Both lists are returned enumerated in direct order.
  *
+ * \warning can't be called from a non-manifold point
  */
 int bouletrid(MMG5_pMesh mesh,int start,int ip,int *il1,int *l1,int *il2,int *l2,int *ip0,int *ip1) {
   MMG5_pTria           pt;
@@ -269,7 +270,9 @@ int bouletrid(MMG5_pMesh mesh,int start,int ip,int *il1,int *l1,int *il2,int *l2
 
   idp = pt->v[ip];
   ppt = &mesh->point[idp];
+
   assert( ppt->tag & MG_GEO );
+  assert( !(ppt->tag & MG_NOM) );
 
   /* set pointers: first manifold is on side of triangle */
   if ( !MMG5_nortri(mesh,pt,nt) )  return 0;
