@@ -971,6 +971,11 @@ static int colelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
     for (i=0; i<3; i++) {
       if ( MS_SIN(pt->tag[i]) )  continue;
 
+#ifndef NDEBUG
+      if ( mesh->adja[3*(k-1)+1+i] )
+        assert ( 3*k+i == mesh->adja[ 3* (mesh->adja[3*(k-1)+1+i]/3-1) + 1 +mesh->adja[3*(k-1)+1+i]%3 ] );
+#endif
+
       i1 = MMG5_inxt2[i];
       i2 = MMG5_iprv2[i];
       p1 = &mesh->point[pt->v[i1]];
@@ -1154,12 +1159,19 @@ static int adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
       p1 = &mesh->point[pt->v[i1]];
       p2 = &mesh->point[pt->v[i2]];
       if ( MS_SIN(p1->tag) )  continue;
-      else if ( p1->tag > p2->tag || p1->tag > pt->tag[i] )  continue;
+
+#ifndef NDEBUG
+      if ( mesh->adja[3*(k-1)+1+i] ) {
+        assert ( 3*k+i == mesh->adja[ 3* (mesh->adja[3*(k-1)+1+i]/3-1) + 1 +mesh->adja[3*(k-1)+1+i]%3 ] );
+      }
+#endif
+
+      if ( p1->tag > p2->tag || p1->tag > pt->tag[i] )  continue;
 
       /* check if geometry preserved */
       ilist = chkcol(mesh,met,k,i,list,2);
       if ( ilist > 3 ) {
-        ier =  colver(mesh,list,ilist);;
+        ier =  colver(mesh,list,ilist);
         nc +=  ier;
         if ( !ier ) return -1;
         break;

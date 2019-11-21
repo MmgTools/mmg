@@ -126,6 +126,7 @@ int  MMGS_Free_names_var( va_list argptr );
 
 int  MMGS_zaldy(MMG5_pMesh mesh);
 int  MMGS_assignEdge(MMG5_pMesh mesh);
+int  MMGS_is_smallestAdja(MMG5_pMesh mesh, int k, int i);
 int  MMGS_analys(MMG5_pMesh mesh);
 int  MMGS_inqua(MMG5_pMesh,MMG5_pSol);
 int  MMGS_outqua(MMG5_pMesh,MMG5_pSol);
@@ -163,6 +164,7 @@ char typelt(MMG5_pPoint p[3],char *ia);
 int  litswp(MMG5_pMesh mesh,int k,char i,double kal);
 int  litcol(MMG5_pMesh mesh,int k,char i,double kal);
 int  MMG5_mmgsChkmsh(MMG5_pMesh,int,int);
+int  MMGS_chkadja(MMG5_pMesh mesh);
 int  paratmet(double c0[3],double n0[3],double m[6],double c1[3],double n1[3],double mt[6]);
 int  intregmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,double mr[6]);
 int  MMG5_intridmet(MMG5_pMesh,MMG5_pSol,int,int,double,double*,double*);

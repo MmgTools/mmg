@@ -164,6 +164,10 @@ int MMGS_hashTria(MMG5_pMesh mesh) {
           else if ( adja[i] != 3*jel+j ) {
             lel = adjt[3*(jel-1)+1+j]/3;
             l   = adjt[3*(jel-1)+1+j]%3;
+
+            /* Circle adjacency relation jel -> k -> lel -> ... -> jel */
+            adjt[3*(jel-1)+1+j] = 3*k   + i;
+            adjt[3*(k  -1)+1+i] = 3*lel + l;
             (mesh->tria[lel]).tag[l] |= MG_GEO + MG_NOM;
             pt1->tag[j] |= MG_GEO + MG_NOM;
             pt->tag[i] |= MG_GEO + MG_NOM;

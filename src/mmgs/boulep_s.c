@@ -40,59 +40,66 @@
  * \param start index of triangle to start.
  * \param ip index of point for wich we compute the ball.
  * \param list pointer toward the computed ball of \a ip.
- * \return the size of the computed ball or 0 if fail.
+ * \return the size of the computed ball (ilist) or -ilist if fail.
  *
  * Find all triangles sharing \a ip, \f$list[0] =\f$ \a start do not stop when
  * crossing ridge.
  *
  */
 int boulet(MMG5_pMesh mesh,int start,int ip,int *list) {
-  MMG5_pTria    pt;
+  MMG5_pTria    pt,pt1;
   MMG5_pPoint   ppt;
-  int           *adja,k,ilist;
-  char          i,i1,i2;
+  int           *adja,cur,k,ilist,nump,k1,j,base;
+  char          i,l;
 
-  pt = &mesh->tria[start];
+  base = ++mesh->base;
+  pt   = &mesh->tria[start];
 
-  ppt = &mesh->point[pt->v[ip]];
-  ilist = 0;
+  nump = pt->v[ip];
+  ppt  = &mesh->point[nump];
 
-  /* store neighbors */
-  k = start;
-  i = ip;
-  do {
-    if ( ilist > MMGS_LMAX-2 )  return 0;
-    list[ilist] = 3*k + i;
-    ++ilist;
+  /* store initial tria */
+  pt->flag = base;
+  list[0]  = 3*start + ip;
+  ilist    = 1;
 
-    adja = &mesh->adja[3*(k-1)+1];
-    i1 = MMG5_inxt2[i];
-    k  = adja[i1] / 3;
-    i  = adja[i1] % 3;
-    i  = MMG5_inxt2[i];
+  /* Explore list and travel by adjacency through elements sharing nump */
+  cur = 0;
+
+  while ( cur < ilist ) {
+    k = list[cur] / 3;
+    i = list[cur] % 3; // index of point nump in tria k
+
+    adja = &mesh->adja[ 3*(k-1)+ 1 ];
+
+    for (l=0; l<2; l++) {
+      i  = MMG5_inxt2[i];
+      k1 = adja[i];
+      if ( !k1 ) continue;
+
+      j   = k1%3;
+      k1 /= 3;
+
+      pt1 = &mesh->tria[k1];
+      if ( pt1->flag == base )  continue;
+      pt1->flag = base;
+
+      /* Find the local index of nump */
+      j = MMG5_inxt2[j];
+      if ( pt1->v[MMG5_inxt2[j]] == nump ) {
+        j = MMG5_inxt2[j];
+      }
+      assert ( pt1->v[j] == nump );
+
+      /* Check for overflow */
+      if ( ilist > MMGS_LMAX-2 )  return 0;
+
+      /* Store adjacent */
+      list[ilist] = 3*k1 + j;
+      ++ilist;
+    }
+    ++cur;
   }
-  while ( k && k != start );
-  if ( k > 0 )  return ilist;
-
-  if ( ppt->tag & MG_NOM )
-    return 0;
-
-  /* check if boundary hit */
-  k = start;
-  i = ip;
-  do {
-    adja = &mesh->adja[3*(k-1)+1];
-    i2 = MMG5_iprv2[i];
-    k  = adja[i2] / 3;
-    if ( k == 0 )  break;
-    i  = adja[i2] % 3;
-    i  = MMG5_iprv2[i];
-
-    if ( ilist > MMGS_LMAX-2 )  return 0;
-    list[ilist] = 3*k + i;
-    ilist++;
-  }
-  while ( k );
 
   return ilist;
 }
@@ -104,6 +111,9 @@ int boulet(MMG5_pMesh mesh,int start,int ip,int *list) {
  * the ball.
  * \param list pointer toward the computed ball of point.
  *
+ * \return -ilist (number of tria in ball) if buffer overflow, ilist if the
+ * collapse is ok, 0 if the collapse lead to a non manifold situation.
+ *
  * Find all triangles sharing \a ip, \f$list[0] = start\f$. Do not stop when
  * crossing ridge. Check whether resulting configuration is manifold.
  *
@@ -114,70 +124,26 @@ int boulechknm(MMG5_pMesh mesh,int start,int ip,int *list) {
   int           *adja,k,ilist,base,iel;
   char          i,i1,i2,ia,iq,voy;
 
-  base = ++mesh->base;
+  pt = &mesh->tria[start];
+  if ( !MG_EOK(pt) )  return 0;
 
+
+#warning ajeter : on, fait quoi dans ce cas?
+  if ( mesh->point[pt->v[ip]].tag & MG_NOM ) return 0;
+
+  /** Stage 1: fill the ball of point */
+  ilist = boulet(mesh,start,ip,list);
+
+  if ( ilist < 1 ) return ilist;
+
+  /** Stage 2: check if a collapse may lead to a non-convex situation */
+  /* Flags initialization */
   pt = &mesh->tria[start];
   ia = MMG5_iprv2[ip];
   iq = MMG5_inxt2[ip];
-  if ( !MG_EOK(pt) )  return 0;
-  ppt = &mesh->point[pt->v[ip]];
-  if ( ppt->tag & MG_NOM )  return 0;
-  ilist = 0;
 
-  /* store neighbors */
-  k = start;
-  i = ip;
-  do {
-    if ( ilist > MMGS_LMAX-2 )  return -ilist;
-    list[ilist] = 3*k + i;
-    ++ilist;
-
-    pt = &mesh->tria[k];
-
-    i1 = MMG5_inxt2[i];
-    i2 = MMG5_iprv2[i];
-    ppt = &mesh->point[pt->v[i1]];
-    ppt->s = base;
-    ppt = &mesh->point[pt->v[i2]];
-    ppt->s = base;
-
-    adja = &mesh->adja[3*(k-1)+1];
-    k  = adja[i1] / 3;
-    i  = adja[i1] % 3;
-    i  = MMG5_inxt2[i];
-  }
-  while ( k && k != start );
-
-  /* check if boundary hit */
-  if ( k <= 0 ) {
-    k = start;
-    i = ip;
-    do {
-      adja = &mesh->adja[3*(k-1)+1];
-      i1 = MMG5_inxt2[i];
-      i2 = MMG5_iprv2[i];
-
-      pt = &mesh->tria[k];
-      ppt = &mesh->point[pt->v[i1]];
-      ppt->s = base;
-      ppt = &mesh->point[pt->v[i2]];
-      ppt->s = base;
-
-      k  = adja[i2] / 3;
-      if ( k == 0 )  break;
-      i  = adja[i2] % 3;
-      i  = MMG5_iprv2[i];
-
-      if ( ilist > MMGS_LMAX-2 )  return -ilist;
-      list[ilist] = 3*k + i;
-      ilist++;
-    }
-    while ( k );
-  }
-
-  pt = &mesh->tria[start];
-  i1 = MMG5_inxt2[ip];
-  i2 = MMG5_iprv2[ip];
+  i1 = ia;
+  i2 = iq;
   ppt = &mesh->point[pt->v[i1]];
   ppt->s = 0;
   ppt = &mesh->point[pt->v[i2]];
@@ -193,7 +159,8 @@ int boulechknm(MMG5_pMesh mesh,int start,int ip,int *list) {
     ppt->s = 0;
   }
 
-  /* check if a collapse may lead to a non-convex situation */
+  /* Unfold the ball af iq and check that it doesn't contains common tria with
+   * the ball of ip (except for the ip-iq shell) */
   k = start;
   i = iq;
   do {
@@ -214,7 +181,7 @@ int boulechknm(MMG5_pMesh mesh,int start,int ip,int *list) {
   while ( k && k != start );
   if( k > 0 ) return ilist;
 
-  /* check if boundary hit */
+  /* Unfold the ball in opposite direction if boundary hit */
   k = start;
   i = iq;
   do {

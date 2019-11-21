@@ -35,6 +35,99 @@
 
 #include "mmgs.h"
 
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \return 0 if fail, 1 if success.
+ *
+ * Check the adjacency relationship validity
+ *
+ */
+int MMGS_chkadja(MMG5_pMesh mesh) {
+  MMG5_pTria  pt,pt1,pt2;
+  int         k,i,key,jel,j,jkey,lel,l,kcur,icur,next,count;
+
+#define MMGS_MAXNM 20
+
+  if ( !mesh->adja ) return 1;
+
+  for ( k=1; k<=mesh->nt; ++k ) {
+    pt = &mesh->tria[k];
+
+    for ( i=0; i<3; ++i) {
+      if ( pt->tag[i] & MG_NOM ) {
+        /* Check point tag */
+        if ( ! (mesh->point[pt->v[MMG5_inxt2[i]]].tag & MG_NOM) ) {
+          fprintf(stderr,"  ## Error: %s: nm edge: wrong tag at point %d\n",
+                  __func__,pt->v[MMG5_inxt2[i]]);
+        }
+        /* Check point tag */
+        if ( ! (mesh->point[pt->v[MMG5_iprv2[i]]].tag & MG_NOM) ) {
+          fprintf(stderr,"  ## Error: %s: nm edge: wrong tag at point %d\n",
+                  __func__,pt->v[MMG5_iprv2[i]]);
+        }
+
+        /* Check circulary adjacency relation along nm edge */
+        kcur  = k;
+        icur  = i;
+        next  = mesh->adja[ 3*(kcur-1) + icur+1];
+
+        count = 0;
+        assert ( next );
+        while ( next != 3*k + i && ++count < MMGS_MAXNM ) {
+          kcur = next/3;
+          icur = next%3;
+          next = mesh->adja[ 3*(kcur-1) + icur+1 ];
+
+          pt1 = &mesh->tria[kcur];
+          if ( (pt->v[MMG5_inxt2[i]] != pt1->v[MMG5_iprv2[icur]] ||
+                pt->v[MMG5_iprv2[i]] != pt1->v[MMG5_inxt2[icur]]) &&
+               (pt->v[MMG5_iprv2[i]] != pt1->v[MMG5_iprv2[icur]] ||
+                pt->v[MMG5_inxt2[i]] != pt1->v[MMG5_inxt2[icur]]) ) {
+            fprintf(stderr,"  ## Error: %s: nm edge: wrong adjacency relationship:\n"
+                    "          elt %d: %d %d %d (edg %d, tag %d) adjacent to elt %d: %d %d %d (edg %d, tag %d)\n",
+                    __func__,k,pt->v[0],pt->v[1],pt->v[2],i,pt->tag[i],kcur,pt1->v[0],pt1->v[1],pt1->v[2],icur,pt1->tag[icur]);
+            return 0;
+          }
+          if ( !(pt1->tag[icur] & MG_NOM) ) {
+            fprintf(stderr,"  ## Error: %s: non symmetric tag on nm edge:\n"
+                    "          elt %d: %d %d %d (edg %d, tag %d) adjacent to elt %d: %d %d %d (edg %d, tag %d)\n",
+                      __func__,k,pt->v[0],pt->v[1],pt->v[2],i,pt->tag[i],kcur,pt1->v[0],pt1->v[1],pt1->v[2],icur,pt1->tag[icur]);
+          }
+        }
+      }
+      else {
+        /* Classic edge */
+        key = mesh->adja[3*(k-1)+i+1];
+
+        if ( !key ) continue;
+
+        jel = key/3;
+        j   = key%3;
+
+        jkey = mesh->adja[3*(jel-1) + j+1];
+        lel  = jkey/3;
+        l    = jkey%3;
+
+        pt1 = &mesh->tria[jel];
+        if ( (3*k+i != jkey) ||
+             ( pt->v[MMG5_inxt2[i]] != pt1->v[MMG5_iprv2[j]] ||
+               pt->v[MMG5_iprv2[i]] != pt1->v[MMG5_inxt2[j]] ) ) {
+
+          pt2 = &mesh->tria[lel];
+          fprintf(stderr,"  ## Error: %s: wrong adjacency relationship:\n"
+                  "          elt %d: %d %d %d (edg %d, tag %d) adjacent to elt %d: %d %d %d (edg %d, tag %d)\n"
+                  "          elt %d: %d %d %d (edg %d, tag %d) adjacent to elt %d: %d %d %d (edg %d, tag %d)\n",
+                  __func__,k,pt->v[0],pt->v[1],pt->v[2],i,pt->tag[i],jel,pt1->v[0],pt1->v[1],pt1->v[2],j,pt1->tag[j],
+                  jel,pt1->v[0],pt1->v[1],pt1->v[2],j,pt1->tag[j],lel,pt2->v[0],pt2->v[1],pt2->v[2],l,pt2->tag[l]);
+          return 0;
+        }
+      }
+
+    }
+  }
+
+  return 1;
+}
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -53,6 +146,9 @@ int MMG5_mmgsChkmsh(MMG5_pMesh mesh,int severe,int base) {
     char                voy,voy1,i1,i2,j1,j2;
     static char         mmgErr0=0,mmgErr1=0,mmgErr2=0,mmgErr3=0,mmgErr4=0;
     static char         mmgErr5=0,mmgErr6=0,mmgErr7=0;
+
+    if ( !mesh->adja ) return 1;
+    MMGS_chkadja(mesh);
 
     for (k=1; k<=mesh->nt; k++) {
         pt1 = &mesh->tria[k];
@@ -117,32 +213,34 @@ int MMG5_mmgsChkmsh(MMG5_pMesh mesh,int severe,int base) {
                         MMGS_indElt(mesh,adj),pt1->tag[i],pt2->tag[voy]);
                 return 0;
             }
-            adjb = &mesh->adja[3*(adj-1)+1];
-            adj1 = adjb[voy] / 3;
-            voy1 = adjb[voy] % 3;
-            if ( adj1 != k || voy1 != i ) {
-              if ( !mmgErr3 ) {
-                mmgErr3 = 1;
-                fprintf(stderr,"\n  ## Error: %s: 2. at least 1 wrong"
-                        " adjacency (%d %d)\n",__func__, MMGS_indElt(mesh,k),
-                         MMGS_indElt(mesh,adj1));
-                fprintf(stderr,"vertices of %d: %d %d %d \n",MMGS_indElt(mesh,k),
-                        MMGS_indPt(mesh,pt1->v[0]),MMGS_indPt(mesh,pt1->v[1]),
-                        MMGS_indPt(mesh,pt1->v[2]));
-                fprintf(stderr,"vertices of adj %d: %d %d %d \n",
-                        MMGS_indElt(mesh,adj),
-                        MMGS_indPt(mesh,pt2->v[0]),MMGS_indPt(mesh,pt2->v[1]),
-                        MMGS_indPt(mesh,pt2->v[2]));
-                fprintf(stderr,"adj(%d): %d %d %d\n",MMGS_indElt(mesh,k),
-                        MMGS_indElt(mesh,adja[0]/3),MMGS_indElt(mesh,adja[1]/3),
-                        MMGS_indElt(mesh,adja[2]/3));
-                fprintf(stderr,"adj(%d): %d %d %d\n",MMGS_indElt(mesh,adj),
-                        MMGS_indElt(mesh,adjb[0]/3),MMGS_indElt(mesh,adjb[1]/3),
-                        MMGS_indElt(mesh,adjb[2]/3));
+
+            if ( !(pt1->tag[i] & MG_NOM) ) {
+              adjb = &mesh->adja[3*(adj-1)+1];
+              adj1 = adjb[voy] / 3;
+              voy1 = adjb[voy] % 3;
+              if ( adj1 != k || voy1 != i ) {
+                if ( !mmgErr3 ) {
+                  mmgErr3 = 1;
+                  fprintf(stderr,"\n  ## Error: %s: 2. at least 1 wrong"
+                          " adjacency (%d %d)\n",__func__, MMGS_indElt(mesh,k),
+                          MMGS_indElt(mesh,adj1));
+                  fprintf(stderr,"vertices of %d: %d %d %d \n",MMGS_indElt(mesh,k),
+                          MMGS_indPt(mesh,pt1->v[0]),MMGS_indPt(mesh,pt1->v[1]),
+                          MMGS_indPt(mesh,pt1->v[2]));
+                  fprintf(stderr,"vertices of adj %d: %d %d %d \n",
+                          MMGS_indElt(mesh,adj),
+                          MMGS_indPt(mesh,pt2->v[0]),MMGS_indPt(mesh,pt2->v[1]),
+                          MMGS_indPt(mesh,pt2->v[2]));
+                  fprintf(stderr,"adj(%d): %d %d %d\n",MMGS_indElt(mesh,k),
+                          MMGS_indElt(mesh,adja[0]/3),MMGS_indElt(mesh,adja[1]/3),
+                          MMGS_indElt(mesh,adja[2]/3));
+                  fprintf(stderr,"adj(%d): %d %d %d\n",MMGS_indElt(mesh,adj),
+                          MMGS_indElt(mesh,adjb[0]/3),MMGS_indElt(mesh,adjb[1]/3),
+                          MMGS_indElt(mesh,adjb[2]/3));
+                }
+                return 0;
               }
-              return 0;
-            }
-            if ( !MS_SIN(pt1->tag[i]) ) {
+              if ( !MS_SIN(pt1->tag[i]) ) {
                 j1 = MMG5_inxt2[voy];
                 j2 = MMG5_iprv2[voy];
                 if ( pt2->v[j2] != pt1->v[i1] || pt2->v[j1] != pt1->v[i2] ) {
@@ -154,6 +252,7 @@ int MMG5_mmgsChkmsh(MMG5_pMesh mesh,int severe,int base) {
                   }
                   return 0;
                 }
+              }
             }
         }
     }

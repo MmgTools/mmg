@@ -90,7 +90,7 @@ static inline
 int MMGS_packMesh(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
   MMG5_pTria    pt,ptnew;
   MMG5_pPoint   ppt,pptnew;
-  int           np,nc,nr, k,nt,nbl,imet,imetnew,i,na,jel;
+  int           np,nc,nr, k,nt,nbl,imet,imetnew,i,na,jel,kcur,icur,next;
   int           iadr,iadrnew,iadrv,*adjav,*adja,*adjanew,voy;
   char          i1,i2;
 
@@ -127,36 +127,33 @@ int MMGS_packMesh(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
       for(i=0 ; i<3 ; i++) {
         adjanew[i] = adja[i];
         if(!adja[i]) continue;
-        iadrv = 3*(adja[i]/3-1) +1;
+
+        next = adja[i];
+        while ( next != 3*k + i ) {
+          kcur = next/3;
+          icur = next%3;
+          next = mesh->adja[ 3*(kcur-1) + icur+1 ];
+        }
+
+        iadrv = 3*(kcur-1) +1;
         adjav = &mesh->adja[iadrv];
         voy = i;
-        adjav[adja[i]%3] = 3*nbl + voy;
+        adjav[icur] = 3*nbl + voy;
       }
     }
-    nbl++;
 
     /* Count the edges */
     for(i=0 ; i<3 ; i++) {
       if ( !MG_EDG(pt->tag[i]) ) continue;
 
-      adja = &mesh->adja[3*(k-1)+1];
-      jel  = adja[i] / 3;
-
-      assert ( jel != k );
-      if ( jel ) {
-        /* If we have an adjacent, treat the edge either from the tria with
-         * higher ref or, if both tria have the same references, from the tria
-         * with higher index */
-        if ( mesh->tria[jel].ref < mesh->tria[k].ref ) {
-          continue;
-        }
-        else if ( (mesh->tria[jel].ref == mesh->tria[k].ref) && (k < jel)  ) {
-          continue;
-        }
+      /* Count the edge only if we come from the lowest tria of the list of tria
+       * that contains this edge */
+      if ( MMGS_is_smallestAdja(mesh, nbl,i) ) {
+        ++na;
       }
-      ++na;
     }
 
+    nbl++;
   }
   mesh->nt = nt;
 
@@ -234,18 +231,10 @@ int MMGS_packMesh(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
         for (i=0; i<3; i++) {
           if ( !MG_EDG(pt->tag[i]) )  continue;
 
-          adja = &mesh->adja[3*(k-1)+1];
-          jel  = adja[i] / 3;
-          if ( jel ) {
-            /* If we have an adjacent, treat the edge either from the tria with
-             * higher ref or, if both tria have the same references, from the tria
-             * with higher index */
-            if ( mesh->tria[jel].ref < mesh->tria[k].ref ) {
-              continue;
-            }
-            else if ( (mesh->tria[jel].ref == mesh->tria[k].ref) && (k < jel)  ) {
-              continue;
-            }
+          /* Treat the edge only if we come from the lowest tria of the list of
+           * tria that contains this edge */
+          if ( !MMGS_is_smallestAdja(mesh, k,i) ) {
+            continue;
           }
 
           i1 = MMG5_inxt2[i];

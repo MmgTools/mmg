@@ -36,6 +36,42 @@
 #include "mmgs.h"
 
 /**
+ * \param mesh pointer toward the mesh structure
+ * \param k starting tria
+ * \param edge in the tria
+ * \return 1 if k is the lowest tria that contains the edge i, 0 otherwise
+ *
+ * Travel by adjacency through the list of trias that contains the edge \a i of
+ * \a k and return 1 if k is the tria of lowest index.
+ *
+ */
+int MMGS_is_smallestAdja(MMG5_pMesh mesh, int k, int i) {
+  int kmin  = k;
+  int imin  = i;
+  int kcur  = k;
+  int icur  = i;
+  int next  = mesh->adja[ 3*(kcur-1) + icur+1];
+
+  if ( next ) {
+    while ( next != 3*k + i ) {
+      kcur = next/3;
+      icur = next%3;
+      next = mesh->adja[ 3*(kcur-1) + icur+1 ];
+
+      if ( kcur < kmin ) {
+        kmin = kcur;
+        imin = icur;
+      }
+    }
+  }
+  if ( kmin != k ) {
+    return 0;
+  }
+
+  return 1;
+}
+
+/**
  * \param mesh pointer toward the mesh
  *
  * \return 1 if success, 0 if fail
@@ -96,6 +132,9 @@ static int setadj(MMG5_pMesh mesh){
 
         kk = adja[i] / 3;
         ii = adja[i] % 3;
+
+        /* Due to the order in which adjacency relationships are created
+         * (1->4->3->2->1), nm edges are counted only once */
         if ( kk > k )  ned++;
 
         /* store adjacent */
@@ -205,8 +244,7 @@ static int setadj(MMG5_pMesh mesh){
     for (i=0; i<3; i++) {
       if ( ( !MG_EDG(pt->tag[i]) ) && ( !(pt->tag[i] & MG_REQ) ) )  continue;
 
-      jel  = adja[i] / 3;
-      if ( !jel || jel > k ) {
+      if ( MMGS_is_smallestAdja(mesh, k,i) ) {
         if ( pt->tag[i] & MG_GEO )  nr++;
         if ( pt->tag[i] & MG_REF )  nre++;
         if ( pt->tag[i] & MG_REQ )  nreq++;
@@ -239,7 +277,7 @@ static void nmpoints(MMG5_pMesh mesh) {
   char       i0,i1,i,jp;
   
   nmp = 0;
-  /* Initialize point flags */
+  /* Initialize point flags with the index of a tria that contains the point */
   for (k=1; k<=mesh->np; k++)
     mesh->point[k].s = 0;
   
@@ -392,6 +430,7 @@ static void nmpoints(MMG5_pMesh mesh) {
 /*           break; */
 /*         } */
 /*         else if ( adja[i] ) { */
+/* #warning does it work on nm points? */
 /*           iel = adja[i] / 3; */
 /*           j   = adja[i] % 3; */
 /*           if ( litcol(mesh,iel,j,kal) ) { */
