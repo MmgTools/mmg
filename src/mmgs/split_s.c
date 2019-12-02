@@ -113,11 +113,11 @@ int MMGS_split1(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,int *vx) {
   iel = MMGS_newElt(mesh);
   if ( !iel ) {
     MMGS_TRIA_REALLOC(mesh,iel,mesh->gap,
-                       fprintf(stderr,"\n  ## Error: %s: unable to allocate"
-                               " a new element.\n",__func__);
-                       MMG5_INCREASE_MEM_MESSAGE();
-                       fprintf(stderr,"  Exit program.\n");
-                       return 0);
+                      fprintf(stderr,"\n  ## Error: %s: unable to allocate"
+                              " a new element.\n",__func__);
+                      MMG5_INCREASE_MEM_MESSAGE();
+                      fprintf(stderr,"  Exit program.\n");
+                      return 0);
   }
 
   pt  = &mesh->tria[k];
@@ -379,10 +379,6 @@ int split1b(MMG5_pMesh mesh,int start,char istart,int ip) {
     mesh->adja[3*(iel-1)+1+i]  = 3*start    +istart;
   }
 
-    mesh->adja[3*(iel-1)+1+i]  = 3*kel+j;
-    mesh->adja[3*(kel-1)+1+j]  = 3*iel+i;
-  }
-
   return 1;
 }
 
@@ -484,20 +480,20 @@ int MMGS_split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
   iel = MMGS_newElt(mesh);
   if ( !iel ) {
     MMGS_TRIA_REALLOC(mesh,iel,mesh->gap,
-                       fprintf(stderr,"\n  ## Error: %s: unable to allocate"
-                               " a new element.\n",__func__);
-                       MMG5_INCREASE_MEM_MESSAGE();
-                       fprintf(stderr,"  Exit program.\n");
-                       return 0);
+                      fprintf(stderr,"\n  ## Error: %s: unable to allocate"
+                              " a new element.\n",__func__);
+                      MMG5_INCREASE_MEM_MESSAGE();
+                      fprintf(stderr,"  Exit program.\n");
+                      return 0);
   }
   jel = MMGS_newElt(mesh);
   if ( !jel ) {
     MMGS_TRIA_REALLOC(mesh,jel,mesh->gap,
-                       fprintf(stderr,"\n  ## Error: %s: unable to allocate"
-                               " a new element.\n",__func__);
-                       MMG5_INCREASE_MEM_MESSAGE();
-                       fprintf(stderr,"  Exit program.\n");
-                       return 0);
+                      fprintf(stderr,"\n  ## Error: %s: unable to allocate"
+                              " a new element.\n",__func__);
+                      MMG5_INCREASE_MEM_MESSAGE();
+                      fprintf(stderr,"  Exit program.\n");
+                      return 0);
   }
 
   pt  = &mesh->tria[k];
@@ -644,29 +640,29 @@ int MMGS_split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
   iel = MMGS_newElt(mesh);
   if ( !iel ) {
     MMGS_TRIA_REALLOC(mesh,iel,mesh->gap,
-                       fprintf(stderr,"\n  ## Error: %s: unable to allocate"
-                               " a new element.\n",__func__);
-                       MMG5_INCREASE_MEM_MESSAGE();
-                       fprintf(stderr,"  Exit program.\n");
-                       return 0);
+                      fprintf(stderr,"\n  ## Error: %s: unable to allocate"
+                              " a new element.\n",__func__);
+                      MMG5_INCREASE_MEM_MESSAGE();
+                      fprintf(stderr,"  Exit program.\n");
+                      return 0);
   }
   jel = MMGS_newElt(mesh);
   if ( !jel ) {
     MMGS_TRIA_REALLOC(mesh,jel,mesh->gap,
-                       fprintf(stderr,"\n  ## Error: %s: unable to allocate"
-                               " a new element.\n",__func__);
-                       MMG5_INCREASE_MEM_MESSAGE();
-                       fprintf(stderr,"  Exit program.\n");
-                       return 0);
+                      fprintf(stderr,"\n  ## Error: %s: unable to allocate"
+                              " a new element.\n",__func__);
+                      MMG5_INCREASE_MEM_MESSAGE();
+                      fprintf(stderr,"  Exit program.\n");
+                      return 0);
   }
   kel = MMGS_newElt(mesh);
   if ( !kel ) {
     MMGS_TRIA_REALLOC(mesh,kel,mesh->gap,
-                       fprintf(stderr,"\n  ## Error: %s: unable to allocate"
-                               " a new element.\n",__func__);
-                       MMG5_INCREASE_MEM_MESSAGE();
-                       fprintf(stderr,"  Exit program.\n");
-                       return 0);
+                      fprintf(stderr,"\n  ## Error: %s: unable to allocate"
+                              " a new element.\n",__func__);
+                      MMG5_INCREASE_MEM_MESSAGE();
+                      fprintf(stderr,"  Exit program.\n");
+                      return 0);
   }
 
   pt  = &mesh->tria[k];
