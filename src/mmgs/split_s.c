@@ -182,74 +182,122 @@ int MMGS_simbulgept(MMG5_pMesh mesh,MMG5_pSol met, int k,int i,int ip) {
   cal        = MMG5_calelt(mesh,met,pt0);
   if ( cal < MMG5_EPSOK )  return 0;
 
-  // Check the validity of the two triangles created from the triangle adjacent
-  // to k by edge i.
-  kadja = mesh->adja[3*(k-1)+i+1]/3;
-  iadja = mesh->adja[3*(k-1)+i+1]%3;
+  // Check the validity of the triangles (2 for manifold test cases, more for
+  // non manifold ones) created from the triangle adjacent to k by edge i.
+  kadja = mesh->adja[3*(k-1)+i+1];
 
   if ( !kadja ) return 1;
 
-  pt = &mesh->tria[kadja];
-  memcpy(pt0,pt,sizeof(MMG5_Tria));
-  is         = MMG5_iprv2[iadja];
-  pt0->v[is] = 0;
-  cal        = MMG5_calelt(mesh,met,pt0);
-  if ( cal < MMG5_EPSOK )  return 0;
+  while (  kadja != 3*k + i ) {
+    iadja = kadja%3;
+    kadja /= 3;
 
-  pt0->v[is] = pt->v[is];
-  is         = MMG5_inxt2[iadja];
-  pt0->v[is] = 0;
-  cal        = MMG5_calelt(mesh,met,pt0);
-  if ( cal < MMG5_EPSOK )  return 0;
+    pt = &mesh->tria[kadja];
+    memcpy(pt0,pt,sizeof(MMG5_Tria));
+    is         = MMG5_iprv2[iadja];
+    pt0->v[is] = 0;
+    cal        = MMG5_calelt(mesh,met,pt0);
+    if ( cal < MMG5_EPSOK )  return 0;
+
+    pt0->v[is] = pt->v[is];
+    is         = MMG5_inxt2[iadja];
+    pt0->v[is] = 0;
+    cal        = MMG5_calelt(mesh,met,pt0);
+    if ( cal < MMG5_EPSOK )  return 0;
+
+    kadja = mesh->adja[ 3*(kadja-1) + iadja+1 ];
+  }
 
   return 1;
 }
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param k index of element to split.
- * \param i index of edge to split.
+ * \param kstart index of element to split.
+ * \param istart index of edge to split.
  * \param ip index of the new point.
  * \return 0 if lack of memory, 1 otherwise.
  *
- * Split element \a k along edge \a i, inserting point \a ip and updating
- * the adjacency relations.
+ * Split element \a kstart along edge \a istart, inserting point \a ip and
+ * updating the adjacency relations.
  *
  * \remark do not call this function in non-manifold case
  */
-int split1b(MMG5_pMesh mesh,int k,char i,int ip) {
+int split1b(MMG5_pMesh mesh,int start,char istart,int ip) {
   MMG5_pTria     pt,pt1;
   MMG5_pPoint    ppt;
-  MMG5_Bezier   b;
+  MMG5_Bezier    b;
   MMG5_pxPoint   go;
   double         uv[2],o[3],no[3],to[3];
-  int            *adja,iel,jel,kel,mel,ier;
-  char           i1,i2,j,j1,j2,m;
+  int            k,adj,*adja,l,iel,jel,kel,mel,ier,next,*newelt,ilist;
+  char           i,i1,i2,j,m;
 
-  iel = MMGS_newElt(mesh);
-  if ( !iel )  {
-    MMGS_TRIA_REALLOC(mesh,iel,mesh->gap,
-                       MMG5_INCREASE_MEM_MESSAGE();
-                       return 0);
+  /** Count the number of elements in the shell of i */
+  ilist = 1;
+
+  adja = &mesh->adja[3*(start-1)+1];
+  next = adja[istart] ;
+
+  if ( next ) {
+    while ( next != 3*start + istart ) {
+      jel = next / 3;
+      j   = next % 3;
+
+      ++ilist;
+      next = mesh->adja[3*(jel-1)+1+j];
+    }
   }
-  pt = &mesh->tria[k];
-  pt->flag = 0;
-  pt->base = mesh->base;
-
-  pt1 = &mesh->tria[iel];
-  memcpy(pt1,pt,sizeof(MMG5_Tria));
-  memcpy(&mesh->adja[3*(iel-1)+1],&mesh->adja[3*(k-1)+1],3*sizeof(int));
 
   ppt = &mesh->point[ip];
-  if ( pt->edg[i] )  ppt->ref = pt->edg[i];
-  if ( pt->tag[i] )  ppt->tag = pt->tag[i];
 
-  adja = &mesh->adja[3*(k-1)+1];
-  jel = adja[i] / 3;
-  j   = adja[i] % 3;
+  MMG5_SAFE_CALLOC(newelt,ilist,int,return 0);
+
+  k = start;
+  i = istart;
+  for ( l=0; l<ilist; ++l ) {
+    assert ( k );
+
+    pt = &mesh->tria[k];
+    pt->flag = 0;
+    pt->base = mesh->base;
+
+    iel = MMGS_newElt(mesh);
+    if ( !iel )  {
+      MMGS_TRIA_REALLOC(mesh,iel,mesh->gap,
+                        fprintf(stderr,"\n  ## Error: %s: unable to allocate"
+                                " a new element.\n",__func__);
+                        MMG5_INCREASE_MEM_MESSAGE();
+                        l--;
+                        for ( ; l>=0 ; --l ) {
+                          if ( !MMGS_delElt(mesh,newelt[l]) ) return -0;
+                        }
+                        return 0);
+    }
+    newelt[l] = iel;
+
+    pt1 = &mesh->tria[iel];
+
+    memcpy(pt1,pt,sizeof(MMG5_Tria));
+    memcpy(&mesh->adja[3*(iel-1)+1],&mesh->adja[3*(k-1)+1],3*sizeof(int));
+
+    if ( pt->edg[i] )  ppt->ref = pt->edg[i];
+    if ( pt->tag[i] )  ppt->tag = pt->tag[i];
+
+    next = mesh->adja[3*(k-1)+1+i];
+    k    = next / 3;
+    i    = next % 3;
+  }
+
+
+  /** Update normal n2 if need to be (from the first tria of shell) */
+  pt  = &mesh->tria[start];
+
+  adja = &mesh->adja[3*(start-1)+1];
+  jel  = adja[istart] / 3;
+  j    = adja[istart] % 3;
 
   /* update normal n2 if need be */
-  if ( jel && pt->tag[i] & MG_GEO ) {
+  if ( pt->tag[i] & MG_GEO ) {
     ier = MMG5_bezierCP(mesh,&mesh->tria[jel],&b,1);
     assert(ier);
     uv[0] = 0.5;
@@ -263,58 +311,73 @@ int split1b(MMG5_pMesh mesh,int k,char i,int ip) {
     memcpy(go->n2,no,3*sizeof(double));
   }
 
-  /* update two triangles */
-  i1  = MMG5_inxt2[i];
-  i2  = MMG5_iprv2[i];
-  pt->v[i2]   = ip;
-  pt->tag[i1] = MG_NOTAG;
-  pt->edg[i1] = 0;
-  pt1->v[i1]   = ip;
-  pt1->tag[i2] = MG_NOTAG;
-  pt1->edg[i2] = 0;
+  k = start;
+  i = istart;
+  for ( l=0; l<ilist; ++l ) {
+    assert ( k );
 
-  /* update adjacency relations */
-  mel = adja[i1] / 3;
-  m   = adja[i1] % 3;
-  mesh->adja[3*(k-1)+1+i1]   = 3*iel+i2;
-  mesh->adja[3*(iel-1)+1+i2] = 3*k+i1;
-  mesh->adja[3*(iel-1)+1+i1] = 3*mel+m;
-  if(mel)
-    mesh->adja[3*(mel-1)+1+m]  = 3*iel+i1;
+    pt  = &mesh->tria[k];
 
-  if ( jel ) {
-    kel = MMGS_newElt(mesh);
-    if ( !kel )  {
-      MMGS_TRIA_REALLOC(mesh,kel,mesh->gap,
-                         MMG5_INCREASE_MEM_MESSAGE();
-                         if ( !MMGS_delElt(mesh,iel) )  return 0;
-                         return 0);
-    }
-    pt  = &mesh->tria[jel];
-    pt1 = &mesh->tria[kel];
-    pt->flag = 0;
-    pt->base = mesh->base;
-    memcpy(pt1,pt,sizeof(MMG5_Tria));
-    memcpy(&mesh->adja[3*(kel-1)+1],&mesh->adja[3*(jel-1)+1],3*sizeof(int));
+    adja = &mesh->adja[3*(k-1)+1];
 
-    j1 = MMG5_inxt2[j];
-    j2 = MMG5_iprv2[j];
-    pt->v[j1]    = ip;
-    pt->tag[j2]  = MG_NOTAG;
-    pt->edg[j2]  = 0;
-    pt1->v[j2]   = ip;
-    pt1->tag[j1] = MG_NOTAG;
-    pt1->edg[j1] = 0;
+    iel = newelt[l];
+    pt1 = &mesh->tria[iel];
 
-    /* update adjacency */
-    adja = &mesh->adja[3*(jel-1)+1];
-    mel  = adja[j2] / 3;
-    m    = adja[j2] % 3;
-    mesh->adja[3*(jel-1)+1+j2] = 3*kel+j1;
-    mesh->adja[3*(kel-1)+1+j1] = 3*jel+j2;
-    mesh->adja[3*(kel-1)+1+j2] = 3*mel+m;
+    /** update two triangles created by the splitting of k */
+    i1  = MMG5_inxt2[i];
+    i2  = MMG5_iprv2[i];
+    pt->v[i2]    = ip;
+    pt->tag[i1]  = MG_NOTAG;
+    pt->edg[i1]  = 0;
+    pt1->v[i1]   = ip;
+    pt1->tag[i2] = MG_NOTAG;
+    pt1->edg[i2] = 0;
+
+    /** update adjacency relations */
+    mel = adja[i1] / 3;
+    m   = adja[i1] % 3;
+    /* Through i1, pt is adja to pt1,i2 */
+    mesh->adja[3*(k-1)+1+i1]   = 3*iel+i2;
+    /* Through i2, pt1 is adja to pt,i1 */
+    mesh->adja[3*(iel-1)+1+i2] = 3*k+i1;
+    /* Through i1, pt1 is adja to mel,m */
+    mesh->adja[3*(iel-1)+1+i1] = 3*mel+m;
+    /* Through m, mel is adja to pt1,i1 */
     if(mel)
-      mesh->adja[3*(mel-1)+1+m]  = 3*kel+j2;
+      mesh->adja[3*(mel-1)+1+m]  = 3*iel+i1;
+
+    k = adja[i] / 3;
+    i = adja[i] % 3;
+  }
+
+  /** Update the adjacents through edge i */
+  if ( mesh->adja[3*(start-1)+1+istart] ) {
+    k = start;
+    i = istart;
+
+    iel = newelt[0];
+
+    for ( l=1; l<ilist; ++l ) {
+      assert ( k );
+      adj  = mesh->adja[3*(k-1)+1+i];
+      j    = adj%3;
+
+      kel = newelt[l];
+
+      assert ( kel );
+
+      mesh->adja[3*(k-1)+1+i]    = 3*kel+j;
+      k   = adj / 3;
+
+      mesh->adja[3*(iel-1)+1+i]  = 3*k  +j;
+
+      i   = j;
+      iel = kel;
+    }
+
+    mesh->adja[3*(  k-1)+1+i]  = 3*newelt[0]+istart;
+    mesh->adja[3*(iel-1)+1+i]  = 3*start    +istart;
+  }
 
     mesh->adja[3*(iel-1)+1+i]  = 3*kel+j;
     mesh->adja[3*(kel-1)+1+j]  = 3*iel+i;
