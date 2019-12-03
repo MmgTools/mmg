@@ -460,26 +460,28 @@ int MMGS_mmgsls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
   if ( mesh->info.imprim > 0 )
     fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
 
-  /* mesh adaptation */
-  chrono(ON,&(ctim[4]));
-  if ( mesh->info.imprim > 0 ) {
-    fprintf(stdout,"\n  -- PHASE 3 : MESH IMPROVEMENT\n");
-  }
-
-  if ( !MMG5_mmgs1(mesh,met,NULL) ) {
-    if ( mettofree ) { MMG5_DEL_MEM(mesh,met->m);MMG5_SAFE_FREE (met); }
-    if ( (!mesh->adja) && !MMGS_hashTria(mesh) ) {
-      fprintf(stderr,"\n  ## Hashing problem. Invalid mesh.\n");
-        _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+  if ( (!mesh->info.nomove) || (!mesh->info.noswap) || (!mesh->info.noinsert) ) {
+    /* mesh adaptation */
+    chrono(ON,&(ctim[4]));
+    if ( mesh->info.imprim > 0 ) {
+      fprintf(stdout,"\n  -- PHASE 3 : MESH IMPROVEMENT\n");
     }
-    if ( !MMG5_unscaleMesh(mesh,met,sol) ) _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
-    MMGS_RETURN_AND_PACK(mesh,met,sol,MMG5_LOWFAILURE);
-  }
 
-  chrono(OFF,&(ctim[4]));
-  printim(ctim[4].gdif,stim);
-  if ( mesh->info.imprim > 0 ) {
-    fprintf(stdout,"  -- PHASE 3 COMPLETED.     %s\n",stim);
+    if ( !MMG5_mmgs1(mesh,met,NULL) ) {
+      if ( mettofree ) { MMG5_DEL_MEM(mesh,met->m);MMG5_SAFE_FREE (met); }
+      if ( (!mesh->adja) && !MMGS_hashTria(mesh) ) {
+        fprintf(stderr,"\n  ## Hashing problem. Invalid mesh.\n");
+        _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+      }
+      if ( !MMG5_unscaleMesh(mesh,met,sol) ) _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+      MMGS_RETURN_AND_PACK(mesh,met,sol,MMG5_LOWFAILURE);
+    }
+
+    chrono(OFF,&(ctim[4]));
+    printim(ctim[4].gdif,stim);
+    if ( mesh->info.imprim > 0 ) {
+      fprintf(stdout,"  -- PHASE 3 COMPLETED.     %s\n",stim);
+    }
   }
 
   /* save file */

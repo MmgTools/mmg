@@ -69,7 +69,7 @@ static int MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   isqhmax = mesh->info.hmax;
 
   ilist = boulet(mesh,it,ip,list);
-  if ( !ilist )
+  if ( ilist < 1 )
     return 0;
 
   maxkappa = 0.0;
@@ -358,7 +358,7 @@ static int MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   p0  = &mesh->point[idp];
 
   ilist = boulet(mesh,it,ip,list);
-  if ( !ilist )
+  if ( ilist < 1 )
     return 0;
 
   /* Computation of the rotation matrix T_p0 S -> [z = 0] */
@@ -527,7 +527,7 @@ static int MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   p0  = &mesh->point[idp];
 
   ilist = boulet(mesh,it,ip,list);
-  if ( !ilist )
+  if ( ilist < 1 )
     return 0;
 
   /* Computation of the rotation matrix T_p0 S -> [z = 0] */
