@@ -222,6 +222,8 @@ int chkedg(MMG5_pMesh mesh,int iel) {
   p[1] = &mesh->point[pt->v[1]];
   p[2] = &mesh->point[pt->v[2]];
 
+  pt->flag = 0;
+
   /* normal recovery */
   for (i=0; i<3; i++) {
     if ( MS_SIN(p[i]->tag) ) {

@@ -138,6 +138,8 @@ int boulechknm(MMG5_pMesh mesh,int start,int ip,int *list) {
 
   /** Stage 2: check if a collapse may lead to a non-convex situation */
   /* Flags initialization */
+  base = ++mesh->base;
+
   pt = &mesh->tria[start];
   ia = MMG5_iprv2[ip];
   iq = MMG5_inxt2[ip];
