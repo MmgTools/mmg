@@ -79,7 +79,7 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
   adja = &mesh->adja[3*(k-1)+1];
   open = adja[i] == 0;
 
-  if ( ilist > 3 ) {
+  if ( ilist+open > 3 ) {
     /* check references */
     if ( MG_EDG(pt->tag[i2]) ) {
       jel = list[1] / 3;
@@ -182,6 +182,9 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
 
   /* specific test: no collapse if any interior edge is EDG */
   else if ( ilist == 3 ) {
+    /* Remark: if ilist==3 and i is an open ridge, we pass in the previous
+     * test (open+ilist > 3) so here, ip1 is in the middle of the 3
+     * triangles */
 
     p1 = &mesh->point[pt->v[i1]];
     if ( MS_SIN(p1->tag) )  return 0;

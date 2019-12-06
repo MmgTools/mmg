@@ -1013,7 +1013,10 @@ static int colelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
 
       /* check if geometry preserved */
       ilist = chkcol(mesh,met,k,i,list,typchk);
-      if ( ilist > 3 ) {
+
+      int8_t open = (mesh->adja[3*(k-1)+1+i] == 0);
+
+      if ( ilist+open > 3 ) {
         ier = colver(mesh,list,ilist);
         if ( !ier ) return -1;
         nc += ier;
@@ -1158,7 +1161,10 @@ static int adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
 
       /* check if geometry preserved */
       ilist = chkcol(mesh,met,k,i,list,2);
-      if ( ilist > 3 ) {
+
+      int8_t open = (mesh->adja[3*(k-1)+1+i] == 0);
+
+      if ( ilist+open > 3 ) {
         ier =  colver(mesh,list,ilist);;
         nc +=  ier;
         if ( !ier ) return -1;
