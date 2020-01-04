@@ -315,9 +315,12 @@ void MMG3D_placeInListPROctree(MMG3D_PROctree_s** qlist, MMG3D_PROctree_s* q, in
 {
   memmove(&(qlist[index+2]),&(qlist[index+1]),(size-(index+1))*sizeof(MMG3D_PROctree_s*));
   #ifdef DEBUG
-  if (index+2+(size-(index+1)>61 || index+1<0)
-    fprintf(stderr, "\n  ## Error: %s: index"
-            " too large %i > 61\n",__func__, index+2+(size-(index+1));
+  if (index+2+(size-(index+1)>61 || index+1<0))
+    fprintf(
+        stderr, "\n  ## Error: %s: index"
+            " too large %i > 61\n",
+        __func__, index+2+(size-(index+1))
+    );
   #endif
   qlist[index+1] = q;
 }
