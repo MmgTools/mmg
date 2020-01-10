@@ -690,9 +690,10 @@ static int MMG3D_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
  */
 int MMG3D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
   MMG5_pTetra    pt,pt1,pt2;
+  MMG5_pxTetra   pxt;
   double         volc,voltot,v0,v1,v2,v3;
   int            k,kk,l,ll,ncp,ncm,ip0,ip1,ip2,ip3,base,cur,ipile,*pile,*adja;
-  char           i,i1,i2,i3;
+  char           i,j,i1,i2,i3,onbr;
 
   ncp = 0;
   ncm = 0;
@@ -871,6 +872,40 @@ int MMG3D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
         }
       }
       ncm++;
+    }
+    
+    /* Remove connected component if it is not attached to one base reference */
+    if ( mesh->info.nbr ) {
+      onbr = 0;
+      for (l=0; l<ipile; l++) {
+        pt1 = &mesh->tetra[pile[l]];
+        if ( pt1->xt ) {
+          pxt = &mesh->xtetra[pt1->xt];
+          for (i=0; i<4; i++) {
+            if ( MMG5_isbr(mesh,pxt->ref[i]) ) {
+              for (j=0; j<3; j++) {
+                ip0 = pt1->v[MMG5_idir[i][j]];
+                if ( sol->m[ip0]-mesh->info.ls < 0.0 )  {
+                  onbr = 1;
+                  break;
+                }
+              }
+            }
+          }
+        }
+        if ( onbr ) break;
+      }
+      
+      if ( !onbr ) {
+        for (l=0; l<ipile; l++) {
+          pt1 = &mesh->tetra[pile[l]];
+          for (i=0; i<4; i++) {
+            ip0 = pt1->v[i];
+            if ( sol->m[ip0]-mesh->info.ls < 0.0 ) sol->m[ip0] = mesh->info.ls + 100*MMG5_EPS;
+          }
+        }
+        ncm++;
+      }
     }
   }
 
@@ -1945,12 +1980,6 @@ int MMG3D_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
     fprintf(stderr,"\n  ## Hashing problem. Exit program.\n");
     return 0;
   }
-  /* Removal of small parasitic components */
-  if ( mesh->info.rmc > 0. && !MMG3D_rmc(mesh,sol) ) {
-    fprintf(stderr,"\n  ## Error in removing small parasitic components."
-            " Exit program.\n");
-    return 0;
-  }
 
   /* compatibility triangle orientation w/r tetras */
   if ( !MMG5_bdryPerm(mesh) ) {
@@ -1971,6 +2000,13 @@ int MMG3D_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
 
   if ( !MMG5_bdrySet(mesh) ) {
     fprintf(stderr,"\n  ## Problem in setting boundary. Exit program.\n");
+    return 0;
+  }
+  
+  /* Removal of small parasitic components */
+  if ( mesh->info.rmc > 0. && !MMG3D_rmc(mesh,sol) ) {
+    fprintf(stderr,"\n  ## Error in removing small parasitic components."
+            " Exit program.\n");
     return 0;
   }
 

@@ -532,7 +532,7 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
 
 int MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
   float       fp1,fp2,hausd;
-  int         ref,i,j,ret,npar;
+  int         ref,i,j,ret,npar,nbr,br;
   char       *ptr,buf[256],data[256];
   FILE       *in;
 
@@ -559,7 +559,7 @@ int MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
   }
   if ( mesh->info.imprim >= 0 )
     fprintf(stdout,"\n  %%%% %s OPENED\n",data);
-
+  
   /* read parameters */
   while ( !feof(in) ) {
     /* scan line */
@@ -599,6 +599,16 @@ int MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
           fprintf(stderr,"  %%%% Wrong format: %s\n",buf);
           return 0;
         }
+      }
+    }
+    else if ( !strcmp(data,"lsbasereferences") ) {
+      MMG_FSCANF(in,"%d",&nbr);
+      if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_numberOfLSBaseReferences,nbr) )
+        return 0;
+      
+      for (i=0; i<mesh->info.nbr; i++) {
+        MMG_FSCANF(in,"%d",&br);
+        mesh->info.br[i] = br;
       }
     }
   }

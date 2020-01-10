@@ -37,6 +37,16 @@
 
 extern char ddb;
 
+/** Return 1 if reference ref is in the br table, 0 otherwise */
+int MMG5_isbr(MMG5_pMesh mesh,int ref) {
+  int k;
+  
+  for(k=0; k<mesh->info.nbr; k++)
+    if ( ref == mesh->info.br[k] ) return(1);
+  
+  return(0);
+}
+
 /** naive (increasing) sorting algorithm, for very small tabs ; permutation is stored in perm */
 inline void MMG5_nsort(int n,double *val,char *perm){
     int   i,j,aux;

@@ -445,6 +445,7 @@ typedef struct {
   double        dhd,hmin,hmax,hsiz,hgrad,hgradreq,hausd;
   double        min[3],max[3],delta,ls,rmc;
   int           mem,npar,npari;
+  int           nbr,*br;
   int           opnbdy;
   int           renum;
   int           PROctree;

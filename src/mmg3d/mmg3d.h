@@ -439,6 +439,7 @@ int  MMG3D_bdryBuild(MMG5_pMesh);
 /* rmc option */
 double MMG3D_vfrac(MMG5_pMesh ,MMG5_pSol ,int ,int );
 int    MMG3D_rmc(MMG5_pMesh ,MMG5_pSol );
+int    MMG5_isbr(MMG5_pMesh ,int );
 
 
 /* useful functions to debug */

@@ -830,7 +830,7 @@ inline double MMG5_det4pt(double c0[3],double c1[3],double c2[3],double c3[3]) {
  *
  * \return the oriented volume of tetra
  *
- * Compute oriented volume of a tetrahedron
+ * Compute oriented volume of a tetrahedron (x6)
  *
  */
 inline double MMG5_orvol(MMG5_pPoint point,int *v) {

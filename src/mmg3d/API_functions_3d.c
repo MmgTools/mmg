@@ -2082,6 +2082,18 @@ int MMG3D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam,int val){
     }
 
     break;
+  case MMG3D_IPARAM_numberOfLSBaseReferences :
+    mesh->info.nbr = val;
+    MMG5_ADD_MEM(mesh,mesh->info.nbr*sizeof(int),"References",
+                 printf("  Exit program.\n");
+                 return 0);
+    MMG5_SAFE_CALLOC(mesh->info.br,mesh->info.nbr,int,return 0);
+    
+    for (k=0; k<mesh->info.nbr; k++)
+      mesh->info.br[k] = 0;
+    
+    break;
+
 #ifdef USE_SCOTCH
   case MMG3D_IPARAM_renum :
     mesh->info.renum    = val;
