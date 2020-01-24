@@ -239,6 +239,7 @@ void  MMG3D_sizeArbreRec(MMG3D_PROctree_s* q, int nv, int dim, int*,int*);
 int*  MMG3D_sizeArbre(MMG3D_PROctree* q, int dim);
 int  MMG3D_PROctreein_iso(MMG5_pMesh,MMG5_pSol,MMG3D_pPROctree,int,double);
 int  MMG3D_PROctreein_ani(MMG5_pMesh,MMG5_pSol,MMG3D_pPROctree,int,double);
+int64_t MMG3D_getPROctreeCoordinate(MMG3D_pPROctree q, double* ver, int dim);
 
 /* prototypes */
 int  MMG3D_tetraQual(MMG5_pMesh mesh, MMG5_pSol met,char metRidTyp);
