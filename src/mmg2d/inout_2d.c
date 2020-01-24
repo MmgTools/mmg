@@ -30,15 +30,15 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
   MMG5_pTria        pt;
   MMG5_pQuad        pq1;
   float             fc;
-  long         posnp,posnt,posncor,posned,posnq,posreq,posreqed,posntreq;
-  int          k,ref,tmp,ncor,norient,nreq,ntreq,nreqed,bin,iswp,nq,nref;
+  long         posnp,posnt,posncor,posned,posnq,posreq,posreqed,posntreq,posnqreq;
+  int          k,ref,tmp,ncor,norient,nreq,ntreq,nreqed,bin,iswp,nq,nqreq,nref;
   double       air,dtmp;
   int          i,bdim,binch,bpos;
   char         *ptr,*data;
   char         chaine[MMG5_FILESTR_LGTH],strskip[MMG5_FILESTR_LGTH];
 
-  posnp = posnt = posncor = posned = posnq = posreq = posreqed = posntreq = 0;
-  ncor = nreq = nreqed = ntreq = 0;
+  posnp = posnt = posncor = posned = posnq = posreq = posreqed = posntreq = posnqreq = 0;
+  ncor = nreq = nreqed = ntreq = nqreq = 0;
   bin = 0;
   iswp = 0;
   mesh->np = mesh->nt = mesh->na = mesh->xp = 0;
@@ -112,6 +112,16 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         posnt = ftell(inm);
         continue;
       }
+      else if(!strncmp(chaine,"Quadrilaterals",strlen("Quadrilaterals"))) {
+        fscanf(inm,"%d",&mesh->nquad);
+        posnq = ftell(inm);
+        continue;
+      }
+      else if(!strncmp(chaine,"RequiredQuadrilaterals",strlen("RequiredQuadrilaterals"))) {
+        MMG_FSCANF(inm,"%d",&nqreq);
+        posnqreq = ftell(inm);
+        continue;
+      }
       else if(!strncmp(chaine,"Corners",strlen("Corners"))) {
         MMG_FSCANF(inm,"%d",&ncor);
         posncor = ftell(inm);
@@ -135,11 +145,6 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
       else if(!strncmp(chaine,"RequiredTriangles",strlen("RequiredTriangles"))) {
         MMG_FSCANF(inm,"%d",&ntreq);
         posntreq = ftell(inm);
-        continue;
-      }
-      else if(!strncmp(chaine,"Quadrilaterals",strlen("Quadrilaterals"))) {
-        MMG_FSCANF(inm,"%d",&nq);
-        posnq = ftell(inm);
         continue;
       }
     }
@@ -188,7 +193,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         fseek(inm,bpos,SEEK_SET);
         continue;
       }
-        else if(binch==17) {  //RequiredTriangles
+      else if(binch==17) {  //RequiredTriangles
         MMG_FREAD(&bpos,MMG5_SW,1,inm); //NulPos
         if(iswp) bpos=MMG5_swapbin(bpos);
         MMG_FREAD(&ntreq,MMG5_SW,1,inm);
@@ -203,6 +208,15 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         MMG_FREAD(&mesh->nquad,MMG5_SW,1,inm);
         if(iswp) mesh->nquad=MMG5_swapbin(mesh->nquad);
         posnq = ftell(inm);
+        rewind(inm);
+        fseek(inm,bpos,SEEK_SET);
+        continue;
+      } else if(binch==18) {  //RequiredQuadrilaterals
+        MMG_FREAD(&bpos,MMG5_SW,1,inm); //NulPos
+        if(iswp) bpos=MMG5_swapbin(bpos);
+        MMG_FREAD(&nqreq,MMG5_SW,1,inm);
+        if(iswp) nqreq=MMG5_swapbin(nqreq);
+        posnqreq = ftell(inm);
         rewind(inm);
         fseek(inm,bpos,SEEK_SET);
         continue;
@@ -456,6 +470,30 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         ++nref;
       }
     }
+    /* get required quadrilaterals */
+    if(nqreq) {
+      rewind(inm);
+      fseek(inm,posnqreq,SEEK_SET);
+      for (k=1; k<=nqreq; k++) {
+        if(!bin) {
+          MMG_FSCANF(inm,"%d",&i);
+        }
+        else {
+          MMG_FREAD(&i,MMG5_SW,1,inm);
+          if(iswp) i=MMG5_swapbin(i);
+        }
+        if ( i>mesh->nquad ) {
+          fprintf(stderr,"\n  ## Warning: %s: required quadrilaterals number"
+                  " %8d ignored.\n",__func__,i);
+        } else {
+          pq1 = &mesh->quadra[i];
+          pq1->tag[0] |= MG_REQ;
+          pq1->tag[1] |= MG_REQ;
+          pq1->tag[2] |= MG_REQ;
+          pq1->tag[3] |= MG_REQ;
+        }
+      }
+    }
   }
 
   /* Read corners */
@@ -543,12 +581,27 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
     fprintf(stdout,"     $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ \n\n");
   }
 
-  if ( abs(mesh->info.imprim) > 4 ) {
+  if ( abs(mesh->info.imprim) > 3 ) {
     fprintf(stdout,"     NUMBER OF VERTICES   %8d  CORNERS    %6d\n",mesh->np,ncor);
     fprintf(stdout,"     NUMBER OF TRIANGLES  %8d\n",mesh->nt);
+    if ( mesh->nquad )
+      fprintf(stdout,"     NUMBER OF QUADRILATERALS %8d\n",mesh->nquad);
 
     if ( mesh->na )
       fprintf(stdout,"     NUMBER OF EDGES      %8d\n",mesh->na);
+
+    if ( nreq || nreqed || ntreq || nqreq ) {
+      fprintf(stdout,"     NUMBER OF REQUIRED ENTITIES: \n");
+      if ( nreq )
+        fprintf(stdout,"                  VERTICES       %8d \n",nreq);
+      if ( nreqed )
+        fprintf(stdout,"                  EDGES          %8d \n",nreqed);
+      if ( ntreq )
+        fprintf(stdout,"                  TRIANGLES      %8d \n",ntreq);
+      if ( nqreq )
+        fprintf(stdout,"                  QUADRILATERALS %8d \n",nqreq);
+    }
+    if(ncor) fprintf(stdout,"     NUMBER OF CORNERS        %8d \n",ncor);
   }
 
   return 1;
@@ -977,8 +1030,9 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
   MMG5_pPoint       ppt;
   MMG5_pEdge        ped;
   MMG5_pTria        pt;
+  MMG5_pQuad        pq;
   double            dblb;
-  int               k,ne,np,nc,nreq,nereq,nedreq,ref,ntang;
+  int               k,ne,np,nc,nreq,nereq,nedreq,nq,nqreq,ref,ntang;
   int               bin, binch, bpos;
   char              *ptr,*data,chaine[MMG5_FILESTR_LGTH];
 
@@ -1297,6 +1351,82 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
     }
   }
 
+  /* quad + required quad */
+  nq = nqreq = 0;
+
+  if ( mesh->nquad ) {
+
+    for (k=1; k<=mesh->nquad; k++) {
+      pq = &mesh->quadra[k];
+      if ( !MG_EOK(pq) ) {
+        continue;
+      }
+      nq++;
+      if ( pq->tag[0] & MG_REQ && pq->tag[1] & MG_REQ &&
+           pq->tag[2] & MG_REQ && pq->tag[3] & MG_REQ ) {
+        nqreq++;
+      }
+    }
+  }
+
+  if ( nq ) {
+    if(!bin) {
+      strcpy(&chaine[0],"\n\nQuadrilaterals\n");
+      fprintf(inm,"%s",chaine);
+      fprintf(inm,"%d\n",nq);
+    } else {
+      binch = 7; //Quadrilaterals
+      fwrite(&binch,MMG5_SW,1,inm);
+      bpos += 12+20*nq; //Pos
+      fwrite(&bpos,MMG5_SW,1,inm);
+      fwrite(&nq,MMG5_SW,1,inm);
+    }
+    for (k=1; k<=mesh->nquad; k++) {
+      pq = &mesh->quadra[k];
+      if ( !MG_EOK(pq) ) continue;
+
+      if(!bin) {
+        fprintf(inm,"%d %d %d %d %d\n",mesh->point[pq->v[0]].tmp,
+                mesh->point[pq->v[1]].tmp,mesh->point[pq->v[2]].tmp,
+                mesh->point[pq->v[3]].tmp, pq->ref);
+      } else {
+        fwrite(&mesh->point[pq->v[0]].tmp,MMG5_SW,1,inm);
+        fwrite(&mesh->point[pq->v[1]].tmp,MMG5_SW,1,inm);
+        fwrite(&mesh->point[pq->v[2]].tmp,MMG5_SW,1,inm);
+        fwrite(&mesh->point[pq->v[3]].tmp,MMG5_SW,1,inm);
+        fwrite(&pq->ref,MMG5_SW,1,inm);
+      }
+      if ( pq->tag[0] & MG_REQ && pq->tag[1] & MG_REQ &&
+           pq->tag[2] & MG_REQ && pq->tag[3] & MG_REQ ) {
+        nqreq++;
+      }
+    }
+    if ( nqreq ) {
+      if(!bin) {
+        strcpy(&chaine[0],"\n\nRequiredQuadrilaterals\n");
+        fprintf(inm,"%s",chaine);
+        fprintf(inm,"%d\n",nqreq);
+      } else {
+        binch = 18; //ReqQuad
+        fwrite(&binch,MMG5_SW,1,inm);
+        bpos += 12+4*nqreq; //Pos
+        fwrite(&bpos,MMG5_SW,1,inm);
+        fwrite(&nqreq,MMG5_SW,1,inm);
+      }
+      for (k=0; k<=mesh->nquad; k++) {
+        pq = &mesh->quadra[k];
+        if ( (pq->tag[0] & MG_REQ) && (pq->tag[1] & MG_REQ)
+             && pq->tag[2] & MG_REQ && pq->tag[3] & MG_REQ ) {
+          if(!bin) {
+            fprintf(inm,"%d\n",k);
+          } else {
+            fwrite(&k,MMG5_SW,1,inm);
+          }
+        }
+      }
+    }
+  }
+
   /*savetangent*/
   ntang=0;
   for(k=1 ; k<=mesh->np ; k++) {
@@ -1399,11 +1529,16 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
   }
 
   if ( abs(mesh->info.imprim) > 4 ) {
-    fprintf(stdout,"     NUMBER OF VERTICES   %8d  CORNERS    %6d\n",np,nc);
-    fprintf(stdout,"     NUMBER OF TRIANGLES  %8d\n",ne);
+    fprintf(stdout,"     NUMBER OF VERTICES       %8d   CORNERS   %8d"
+            "   REQUIRED %8d\n",np,nc,nreq);
 
     if ( mesh->na )
-      fprintf(stdout,"     NUMBER OF EDGES      %8d\n",mesh->na);
+      fprintf(stdout,"     NUMBER OF EDGES          %8d   REQUIRED  %8d\n",mesh->na,nreq);
+    if ( mesh->nt )
+      fprintf(stdout,"     NUMBER OF TRIANGLES      %8d   REQUIRED  %8d\n",
+              mesh->nt, nereq);
+    if ( nq )
+      fprintf(stdout,"     NUMBER OF QUADRILATERALS %8d\n",nq);
   }
 
   fclose(inm);
