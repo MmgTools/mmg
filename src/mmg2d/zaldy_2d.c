@@ -161,7 +161,7 @@ int MMG2D_memOption_memSet(MMG5_pMesh mesh) {
   MMG5_memOption_memSet(mesh);
 
   /* init allocation need MMG5_MEMMIN B */
-  reservedMem = MMG5_MEMMIN;
+  reservedMem = MMG5_MEMMIN + mesh->nquad*sizeof(MMG5_Quad);
 
   /* Compute the needed initial memory */
   usedMem = reservedMem + (mesh->np+1)*sizeof(MMG5_Point)
@@ -245,6 +245,11 @@ int MMG2D_setMeshSize_alloc( MMG5_pMesh mesh ) {
   MMG5_ADD_MEM(mesh,(mesh->ntmax+1)*sizeof(MMG5_Tria),"initial triangles",return 0);
   MMG5_SAFE_CALLOC(mesh->tria,mesh->ntmax+1,MMG5_Tria,return 0);
   memset(&mesh->tria[0],0,sizeof(MMG5_Tria));
+
+  if ( mesh->nquad ) {
+    MMG5_ADD_MEM(mesh,(mesh->nquad+1)*sizeof(MMG5_Quad),"initial quadrilaterals",return 0);
+    MMG5_SAFE_CALLOC(mesh->quadra,(mesh->nquad+1),MMG5_Quad,return 0);
+  }
 
   mesh->namax = mesh->na;
   if ( mesh->na ) {
