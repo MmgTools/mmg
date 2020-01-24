@@ -717,7 +717,7 @@ int MMG3D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
 
   /* Investigate only positive connected components */
   base = ++mesh->base;
-
+  
   for (k=1; k<=mesh->ne; k++) {
     ipile = 0;
     volc  = 0.0;
@@ -742,7 +742,7 @@ int MMG3D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
     pt->flag = base;
     pile[ipile] = k;
     ipile++;
-    if ( ipile >= mesh->ne -1 ) {
+    if ( ipile >= mesh->ne ) {
       fprintf(stderr,"\n  ## Problem in length of pile; function rmc. Exit program.\n");
       return 0;
     }
@@ -771,7 +771,7 @@ int MMG3D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
             pt2->flag   = base;
             pile[ipile] = ll;
             ipile++;
-            if ( ipile >= mesh->ne-1 ) {
+            if ( ipile >= mesh->ne ) {
               fprintf(stderr,"\n  ## Problem in length of pile; function rmc. Exit program.\n");
               return 0;
             }
@@ -795,7 +795,7 @@ int MMG3D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
       ncp++;
     }
   }
-
+  
   /* Investigate only negative connected components */
   base = ++mesh->base;
 
@@ -823,7 +823,7 @@ int MMG3D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
     pt->flag = base;
     pile[ipile] = k;
     ipile++;
-    if ( ipile >= mesh->ne -1 ) {
+    if ( ipile >= mesh->ne ) {
       fprintf(stderr,"\n  ## Problem in length of pile; function rmc. Exit program.\n");
       return 0;
     }
@@ -852,7 +852,7 @@ int MMG3D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
             pt2->flag   = base;
             pile[ipile] = ll;
             ipile++;
-            if ( ipile >= mesh->ne-1 ) {
+            if ( ipile >= mesh->ne ) {
               fprintf(stderr,"\n  ## Problem in length of pile; function rmc. Exit program.\n");
               return 0;
             }
@@ -909,7 +909,7 @@ int MMG3D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
     }
   }
 
-  /* Erase tretra flags */
+  /* Erase tetra flags */
   for (k=1; k<=mesh->ne; k++) mesh->tetra[k].flag = 0;
 
   /* Release memory */
