@@ -279,22 +279,23 @@ extern "C" {
  * \param mesh pointer toward the mesh structure.
  * \param np number of vertices.
  * \param nt number of triangles.
+ * \param nquad number of quads.
  * \param na number of edges.
  * \return 0 if failed, 1 otherwise.
  *
- * Set the number of vertices, tetrahedra, triangles and edges of the
+ * Set the number of vertices, triangles, quadrilaterals and edges of the
  * mesh and allocate the associated tables. If call twice, reset the
  * whole mesh to realloc it at the new size
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG2D_SET_MESHSIZE(mesh,np,nt,na,retval)\n
+ * >   SUBROUTINE MMG2D_SET_MESHSIZE(mesh,np,nt,nquad,na,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     INTEGER                       :: np,nt,na\n
+ * >     INTEGER                       :: np,nt,nquad,na\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG2D_Set_meshSize(MMG5_pMesh mesh, int np, int nt, int na);
+  int  MMG2D_Set_meshSize(MMG5_pMesh mesh, int np, int nt, int nquad, int na);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the sol structure.
@@ -467,6 +468,53 @@ extern "C" {
  *
  */
   int  MMG2D_Set_requiredTriangle(MMG5_pMesh mesh, int k);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param v0 first vertex of quadrilateral.
+ * \param v1 second vertex of quadrilateral.
+ * \param v2 third vertex of quadrilateral.
+ * \param v3 fourth vertex of quadrilateral.
+ * \param ref quadrilateral reference.
+ * \param pos quadrilateral position in the mesh.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Set quadrangle of vertices \a v0, \a v1,\a v2,\a v3 and reference
+ * \a ref at position \a pos in mesh structure.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG2D_SET_QUADRILATERAL(mesh,v0,v1,v2,v3,ref,pos,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * >     INTEGER, INTENT(IN)           :: v0,v1,v2,v3,ref,pos\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int  MMG2D_Set_quadrilateral(MMG5_pMesh mesh, int v0, int v1,
+                               int v2, int v3, int ref, int pos);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param quadra vertices of the quadrilaterals of the mesh
+ * Vertices of the \f$i^{th}\f$ quadrilateral are stored in quadra[(i-1)*4]\@4.
+ * \param refs table of the quadrangles references.
+ * References of the \f$i^{th}\f$ quad is stored in refs[i-1].
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Set vertices and references of the mesh quadrilaterals.
+ *
+ * \remark Fortran interface: (commentated in
+ * order to allow to pass \%val(0) instead of the refs array)
+ *
+ * > !  SUBROUTINE MMG2D_SET_QUADRILATERALS(mesh,quadra,refs,retval)\n
+ * > !    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * > !    INTEGER, DIMENSION(*), INTENT(IN) :: quadra,refs\n
+ * > !    INTEGER, INTENT(OUT)          :: retval\n
+ * > !  END SUBROUTINE\n
+ *
+ */
+  int  MMG2D_Set_quadrilaterals(MMG5_pMesh mesh, int *quadra,
+                                int *refs);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -697,20 +745,21 @@ extern "C" {
  * \param mesh pointer toward the mesh structure.
  * \param np pointer toward the number of vertices.
  * \param nt pointer toward the number of triangles.
+ * \param nquad pointer toward the number of quads.
  * \param na pointer toward the number of edges.
  * \return 1.
  *
  * Get the number of vertices, triangles and edges of the mesh.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG2D_GET_MESHSIZE(mesh,np,nt,na,retval)\n
+ * >   SUBROUTINE MMG2D_GET_MESHSIZE(mesh,np,nt,nquad,na,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     INTEGER                       :: np,nt,na\n
+ * >     INTEGER                       :: np,nt,nquad,na\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG2D_Get_meshSize(MMG5_pMesh mesh, int* np, int* nt, int* na);
+  int  MMG2D_Get_meshSize(MMG5_pMesh mesh, int* np, int* nt, int* nquad, int* na);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the sol structure.
@@ -853,6 +902,60 @@ extern "C" {
  */
   int  MMG2D_Get_triangles(MMG5_pMesh mesh, int* tria, int* refs,
                            int* areRequired);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param v0 pointer toward the first vertex of quadrangle.
+ * \param v1 pointer toward the second vertex of quadrangle.
+ * \param v2 pointer toward the third vertex of quadrangle.
+ * \param v3 pointer toward the fourth vertex of quadrangle.
+ * \param ref pointer toward the quadrangle reference.
+ * \param isRequired pointer toward the flag saying if quadrangle is
+ *  required.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Get vertices \a v0, \a v1, \a v2, \a v3 and reference \a ref of
+ * next quad of mesh.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG2D_GET_QUADRILATERAL(mesh,v0,v1,v2,v3,ref,isRequired,&\n
+ * >                                      retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * >     INTEGER, INTENT(OUT)          :: v0,v1,v2,v3\n
+ * >     INTEGER                       :: ref,isRequired\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int  MMG2D_Get_quadrilateral(MMG5_pMesh mesh, int* v0, int* v1, int* v2,
+                               int* v3,int* ref, int* isRequired);
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param quadra pointer toward the table of the quadrilaterals vertices.
+ * Vertices of the \f$i^{th}\f$ quadrangle are stored in quadra[(i-1)*4]\@4.
+ * \param refs pointer toward the table of the quadrlaterals references.
+ * References of the \f$i^{th}\f$ quad is stored in refs[i-1].
+ * \param areRequired pointer toward the table of the flags saying if the
+ *  quadrilaterals are required. areRequired[i-1]=1 if the \f$i^{th}\f$ quad
+ * is required.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Get vertices and references of the mesh quadrilaterals.
+ *
+ * \remark Fortran interface: (commentated in order to allow to pass \%val(0)
+ * instead of the refs, areCorners or areRequired arrays)
+ *
+ * > !  SUBROUTINE MMG2D_GET_QUADRILATERALS(mesh,quadra,refs,areRequired,&\n
+ * > !                                      retval)\n
+ * > !    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * > !    INTEGER, DIMENSION(*),INTENT(OUT) :: quadra\n
+ * > !    INTEGER, DIMENSION(*)         :: refs,areRequired\n
+ * > !    INTEGER, INTENT(OUT)          :: retval\n
+ * > !  END SUBROUTINE\n
+ *
+ */
+  int  MMG2D_Get_quadrilaterals(MMG5_pMesh mesh, int* quadra,int* refs,
+                                int* areRequired);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param e0 pointer toward the first extremity of the edge.
@@ -1310,7 +1413,7 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * \return 0 if failed, 1 otherwise.
  *
  * Read mesh and 0 or 1 data at MSH file format (.msh extension). We read only
- * low-order points, edges, tria, quadra, tetra and prisms.
+ * low-order points, edges, tria, quadra.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_LOADMSHMESH(mesh,sol,filename,strlen0,retval)\n

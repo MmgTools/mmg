@@ -1044,6 +1044,12 @@ int MMG2D_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met) {
   if ( abs(mesh->info.imprim) > 3 )
     fprintf(stdout,"  ** ISOSURFACE EXTRACTION\n");
 
+  if ( mesh->nquad ) {
+    fprintf(stderr,"\n  ## Error: Isosurface extraction not available with"
+            " hybrid meshes. Exit program.\n");
+    return 0;
+  }
+
   /* Work only with the 0 level set */
   for (k=1; k<= sol->np; k++)
     sol->m[k] -= mesh->info.ls;
