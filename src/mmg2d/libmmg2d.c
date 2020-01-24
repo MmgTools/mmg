@@ -52,12 +52,28 @@
  *
  */
 void MMG2D_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
+  MMG5_pTria  ptt;
   MMG5_pPoint ppt;
-  int         k,iadr;
+  int         k,i,iadr;
   double      isqhmin, isqhmax;
   char        sethmin, sethmax;
 
   assert ( mesh->info.optim || mesh->info.hsiz > 0. );
+
+  /* Detect the point used only by quads */
+  if ( mesh->nquad ) {
+    for (k=1; k<=mesh->np; k++) {
+      mesh->point[k].flag = 1;
+    }
+    for (k=1; k<=mesh->nt; k++) {
+      ptt = &mesh->tria[k];
+      if ( !MG_EOK(ptt) ) continue;
+
+      for (i=0; i<3; i++) {
+        mesh->point[ptt->v[i]].flag = 0;
+      }
+    }
+  }
 
   /* If not provided by the user, compute hmin/hmax from the metric computed by
    * the DoSol function. */
@@ -68,7 +84,7 @@ void MMG2D_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
       mesh->info.hmin = FLT_MAX;
       for (k=1; k<=mesh->np; k++)  {
         ppt = &mesh->point[k];
-        if ( !MG_VOK(ppt) ) continue;
+        if ( (!MG_VOK(ppt)) || ppt->flag ) continue;
         mesh->info.hmin = MG_MIN(mesh->info.hmin,met->m[k]);
       }
     }
@@ -76,7 +92,7 @@ void MMG2D_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
       mesh->info.hmin = 0.;
       for (k=1; k<=mesh->np; k++)  {
         ppt = &mesh->point[k];
-        if ( !MG_VOK(ppt) ) continue;
+        if ( (!MG_VOK(ppt)) || ppt->flag ) continue;
         iadr = met->size*k;
         mesh->info.hmin = MG_MAX(mesh->info.hmin,met->m[iadr]);
         mesh->info.hmin = MG_MAX(mesh->info.hmin,met->m[iadr+2]);
@@ -98,7 +114,7 @@ void MMG2D_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
       mesh->info.hmax = FLT_MAX;
       for (k=1; k<=mesh->np; k++)  {
         ppt = &mesh->point[k];
-        if ( !MG_VOK(ppt) ) continue;
+        if ( (!MG_VOK(ppt)) || ppt->flag ) continue;
         iadr = met->size*k;
         mesh->info.hmax = MG_MIN(mesh->info.hmax,met->m[iadr]);
         mesh->info.hmax = MG_MIN(mesh->info.hmax,met->m[iadr+2]);

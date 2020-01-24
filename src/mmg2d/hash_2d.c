@@ -366,6 +366,7 @@ int MMG2D_bdryEdge(MMG5_pMesh mesh) {
  */
 int MMG2D_pack(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
   MMG5_pTria         pt,ptnew,pt1;
+  MMG5_pQuad         pq,pq1;
   MMG5_pEdge         ped;
   MMG5_pPoint        ppt,pptnew;
   int                np,ned,nt,k,iel,nbl,isol,isolnew,memWarn,nc;
@@ -531,6 +532,32 @@ int MMG2D_pack(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
     nbl++;
   }
   mesh->nt = nt;
+
+  /* Pack quadrangles */
+  if ( mesh->quadra ) {
+    k = 1;
+    do {
+      pq = &mesh->quadra[k];
+      if ( !MG_EOK(pq) ) {
+        pq1 = &mesh->quadra[mesh->nquad];
+        assert( pq && pq1 && MG_EOK(pq1) );
+        memcpy(pq,pq1,sizeof(MMG5_Quad));
+        --mesh->nquad;
+      }
+    }
+    while ( ++k < mesh->nquad );
+  }
+
+  if ( mesh->quadra ) {
+    for (k=1; k<=mesh->nquad; k++) {
+      pq = &mesh->quadra[k];
+      if ( !MG_EOK(pq) )  continue;
+      pq->v[0] = mesh->point[pq->v[0]].tmp;
+      pq->v[1] = mesh->point[pq->v[1]].tmp;
+      pq->v[2] = mesh->point[pq->v[2]].tmp;
+      pq->v[3] = mesh->point[pq->v[3]].tmp;
+    }
+  }
 
   /* Pack solutions (metric map, displacement, ...) */
   if ( sol && sol->m ) {
