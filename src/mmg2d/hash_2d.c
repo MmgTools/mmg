@@ -149,6 +149,140 @@ int MMG2D_hashTria(MMG5_pMesh mesh) {
   return 1;
 }
 
+/**
+ * \param mesh pointer toward the mesh structure.
+ *
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Create table of adjacency for quadrangles.
+ *
+ */
+int MMG2D_hashQuad(MMG5_pMesh mesh) {
+  MMG5_pQuad     pq,pq1;
+  int            k,kk,pp,l,ll,mins,mins1,maxs,maxs1,sum,sum1,iadr;
+  int           *hcode,*link,hsize,inival;
+  unsigned char  i,ii,i1,i2,i3;
+  unsigned int   key;
+
+  /* default */
+  if ( mesh->adjq ) {
+    return 1;
+  }
+
+  /* default */
+  if ( mesh->adjq ) {
+    if ( abs(mesh->info.imprim) > 3 || mesh->info.ddebug ) {
+      fprintf(stderr,"\n  ## Warning: %s: no re-build of adjacencies of quadrangles. "
+              "mesh->adjq must be freed to enforce analysis.\n",__func__);
+    }
+    return 1;
+  }
+
+  if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
+    fprintf(stdout,"  ** SETTING QUAD ADJACENCY\n");
+
+  /* memory alloc */
+  MMG5_ADD_MEM(mesh,(4*mesh->nquad+5)*sizeof(int),"quad adjacency table",
+               fprintf(stderr,"  Exit program.\n");
+               return 0);
+  MMG5_SAFE_CALLOC(mesh->adjq,4*mesh->nquad+5,int,return 0);
+  MMG5_SAFE_CALLOC(hcode,mesh->nquad+5,int,return 0);
+
+  link  = mesh->adjq;
+  hsize = mesh->nquad;
+
+  /* init */
+  if ( mesh->info.ddebug )  fprintf(stdout,"  h- stage 1: init\n");
+  inival = INT_MAX;
+  iadr   = 0;
+  for (k=0; k<=mesh->nquad; k++)
+    hcode[k] = -inival;
+
+  /* hash quads */
+  for (k=1; k<=mesh->nquad; k++) {
+    pq = &mesh->quadra[k];
+    if ( !MG_EOK(pq) )  continue;
+    for (i=0; i<4; i++) {
+      i1 = MMG2D_idir_q[i][0];
+      i2 = MMG2D_idir_q[i][1];
+      if ( pq->v[i1] < pq->v[i2] ) {
+        mins = pq->v[i1];
+        maxs = pq->v[i2];
+      }
+      else {
+        mins = pq->v[i2];
+        maxs = pq->v[i1];
+      }
+
+      /* compute key */
+      key = KTA*mins + KTB*maxs;
+      key = key % hsize + 1;
+
+      /* insert */
+      iadr++;
+      link[iadr] = hcode[key];
+      hcode[key] = -iadr;
+    }
+  }
+
+  /* set adjacency */
+  if ( mesh->info.ddebug )  fprintf(stdout,"  h- stage 2: adjacencies\n");
+
+  for (l=iadr; l>0; l--) {
+    if ( link[l] >= 0 )  continue;
+
+    /* current element */
+    k = (l-1) / 4 + 1;
+    i = (l-1) % 4;
+    i1 = MMG2D_idir_q[i][0];
+    i2 = MMG2D_idir_q[i][1];
+
+    pq = &mesh->quadra[k];
+    if ( pq->v[i1] < pq->v[i2] ) {
+      mins = pq->v[i1];
+      maxs = pq->v[i2];
+    }
+    else {
+      mins = pq->v[i2];
+      maxs = pq->v[i1];
+    }
+
+    /* accross link */
+    ll      = -link[l];
+    pp      = 0;
+    link[l] = 0;
+    while ( ll != inival ) {
+      kk = (ll-1) / 4 + 1;
+      ii = (ll-1) % 4;
+      i1 = MMG2D_idir_q[ii][0];
+      i2 = MMG2D_idir_q[ii][1];
+      pq1  = &mesh->quadra[kk];
+
+      if ( pq1->v[i1] < pq1->v[i2] ) {
+        mins1 = pq1->v[i1];
+        maxs1 = pq1->v[i2];
+      }
+      else {
+        mins1 = pq1->v[i2];
+        maxs1 = pq1->v[i1];
+      }
+
+      if ( mins1 == mins  && maxs1 == maxs ) {
+        /* adjacent found */
+        if ( pp != 0 )  link[pp] = link[ll];
+        link[l]  = 4*kk + ii;
+        link[ll] = 4*k + i;
+        break;
+      }
+      pp = ll;
+      ll = -link[ll];
+    }
+  }
+  MMG5_SAFE_FREE(hcode);
+  return 1;
+}
+
+
 /*hash edge :
   return 1 if edge exist in the table*/
 int MMG2D_hashEdge(pHashTable edgeTable,int iel,int ia, int ib) {
@@ -636,11 +770,13 @@ int MMG2D_pack(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
   }
 
   if ( mesh->info.imprim > 0 ) {
-    fprintf(stdout,"     NUMBER OF VERTICES   %8d   CORNERS %8d\n",mesh->np,nc);
-    fprintf(stdout,"     NUMBER OF TRIANGLES  %8d\n",mesh->nt);
-
+    fprintf(stdout,"     NUMBER OF VERTICES       %8d   CORNERS %8d\n",mesh->np,nc);
+    fprintf(stdout,"     NUMBER OF TRIANGLES      %8d\n",mesh->nt);
+    if ( mesh->nquad ) {
+      fprintf(stdout,"     NUMBER OF QUADRILATERALS %8d\n",mesh->nquad);
+    }
     if ( mesh->na )
-      fprintf(stdout,"     NUMBER OF EDGES      %8d\n",mesh->na);
+      fprintf(stdout,"     NUMBER OF EDGES          %8d\n",mesh->na);
   }
 
   if ( memWarn ) return 0;

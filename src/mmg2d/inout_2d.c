@@ -463,6 +463,10 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         MMG_FREAD(&pq1->ref,MMG5_SW,1,inm);
         if(iswp) pq1->ref=MMG5_swapbin(pq1->ref);
       }
+      for (i=0; i<4; i++) {
+        ppt = &mesh->point[ pq1->v[i] ];
+        ppt->tag &= ~MG_NUL;
+      }
 
       if ( pq1->ref < 0 ) {
         pq1->ref = -pq1->ref;

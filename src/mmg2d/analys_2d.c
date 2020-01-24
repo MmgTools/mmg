@@ -706,15 +706,21 @@ int MMG2D_regnor(MMG5_pMesh mesh) {
 
 /** preprocessing stage: mesh analysis */
 int MMG2D_analys(MMG5_pMesh mesh) {
-  /* Transfer the boundary edge references to the triangles, if it has not been already done (option 1) */
+  /* Transfer the boundary edge references to the triangles, if it has not been
+   * already done (option 1) */
   if ( !MMG2D_assignEdge(mesh) ) {
      fprintf(stderr,"\n  ## Problem in setting boundary. Exit program.\n");
     return 0;
   }
 
-  /* Creation of adjacency relations in the mesh */
+  /* Creation of tria adjacency relations in the mesh */
   if ( !MMG2D_hashTria(mesh) ) {
      fprintf(stderr,"\n  ## Hashing problem. Exit program.\n");
+    return 0;
+  }
+  /* Creation quadrilaterals adjacency relations in the mesh */
+  if ( !MMG2D_hashQuad(mesh) ) {
+     fprintf(stderr,"\n  ## Quadrilaterals hashing problem. Exit program.\n");
     return 0;
   }
 
@@ -741,6 +747,7 @@ int MMG2D_analys(MMG5_pMesh mesh) {
       fprintf(stderr,"\n  ## Problem in regularizing normal vectors. Exit program.\n");
       return 0;
   }
+  if ( mesh->nquad ) MMG5_DEL_MEM(mesh,mesh->adjq);
 
   return 1;
 }
