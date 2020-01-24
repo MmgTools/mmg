@@ -1766,7 +1766,7 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
       fprintf(stdout,"     NUMBER OF TRIANGLES      %8d   REQUIRED  %8d\n",
               mesh->nt, ntreq);
     if ( nq )
-      fprintf(stdout,"     NUMBER OF QUADRILATERALS %8d\n",nq);
+      fprintf(stdout,"     NUMBER OF QUADRILATERALS %8d   REQUIRED  %8d\n",nq,nqreq);
   }
 
   /*fin fichier*/
