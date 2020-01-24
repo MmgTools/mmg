@@ -1846,7 +1846,11 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename,
   for ( isol=0; isol<nsols; ++isol) {
     psl = *sol + isol;
 
-    if ( (!psl || !psl->m) ) {
+    if ( !psl ) {
+      continue;
+    }
+
+    if ( !psl->m ) {
       if ( !mmgWarn ) {
         mmgWarn = 1;
         fprintf(stderr, "  ## Warning: %s: missing data for at least 1 solution."
