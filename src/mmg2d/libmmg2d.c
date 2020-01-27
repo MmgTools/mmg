@@ -719,6 +719,12 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
     _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
   }
 
+  if ( mesh->nquad && mesh->quadra ) {
+    printf("\n  ## ERROR: UNABLE TO HANDLE HYBRID MESHES IN ISOVALUE DISCRETIZATION MODE.\n");
+    if ( mettofree ) { MMG5_SAFE_FREE (met); }
+    _LIBMMG5_RETURN(mesh,sol,met,MMG5_STRONGFAILURE);
+  }
+
   chrono(OFF,&(ctim[1]));
   printim(ctim[1].gdif,stim);
   if ( mesh->info.imprim > 0 )
@@ -949,15 +955,21 @@ int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   }
 
   if ( mesh->info.optim ) {
-    printf("\n  ## ERROR: OPTIM OPTION UNAVAILABLE IN ISOSURFACE"
-           " DISCRETIZATION MODE.\n");
+    printf("\n  ## ERROR: OPTIM OPTION UNAVAILABLE IN LAGRANGIAN"
+           " MOVEMENT MODE.\n");
     _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
   }
   if ( mesh->info.hsiz>0. ) {
-    printf("\n  ## ERROR: HSIZ OPTION UNAVAILABLE IN ISOSURFACE"
-           " DISCRETIZATION MODE.\n");
+    printf("\n  ## ERROR: HSIZ OPTION UNAVAILABLE IN LAGRANGIAN"
+           " MOVEMENT MODE.\n");
     _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
   }
+
+  if ( mesh->nquad && mesh->quadra ) {
+    printf("\n  ## ERROR: UNABLE TO HANDLE HYBRID MESHES IN LAGRANGIAN MOVEMENT MODE.\n");
+    _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
+  }
+
 
   chrono(OFF,&(ctim[1]));
   printim(ctim[1].gdif,stim);
