@@ -1476,10 +1476,12 @@ int MMG5_chkBdryTria(MMG5_pMesh mesh) {
           ++ntmesh;
           continue;
         }
-        else if ( adj<0 ) continue;
+        else if ( adj<0 ) {
+          continue;
+        }
 
         adj /= 5;
-        pp1 = &mesh->prism[abs(adj)];
+        pp1 = &mesh->prism[adj];
         if ( pp->ref > pp1->ref) {
           ++ntmesh;
         }
@@ -1508,6 +1510,9 @@ int MMG5_chkBdryTria(MMG5_pMesh mesh) {
       }
     }
   }
+
+  /* Fill the adjacency relationship between prisms and tetra (fill adjapr with
+   * a negative value to mark this special faces) */
   for (k=1; k<=mesh->nprism; k++) {
     pp = &mesh->prism[k];
     if ( !MG_EOK(pp) )  continue;
