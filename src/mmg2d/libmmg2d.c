@@ -285,12 +285,6 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol met)
     }
   }
 
-  /* Create adjacency relations in the mesh */
-  if ( !MMG2D_hashTria(mesh) )
-    _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
-
-  if ( mesh->info.ddebug && !MMG5_chkmsh(mesh,1,0) )  _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
-
   /* Print initial quality history */
   if ( mesh->info.imprim > 0  ||  mesh->info.imprim < -1 ) {
     if ( !MMG2D_outqua(mesh,met) ) {
@@ -304,6 +298,8 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol met)
     if ( !MMG5_unscaleMesh(mesh,met,NULL) ) _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
     _LIBMMG5_RETURN(mesh,met,sol,MMG5_LOWFAILURE);
   }
+
+  if ( mesh->info.ddebug && !MMG5_chkmsh(mesh,1,0) )  _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
 
   if ( mesh->info.imprim > 1 && met->m && met->np ) MMG2D_prilen(mesh,met);
 
@@ -738,7 +734,6 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
 
   if ( mesh->info.imprim > 0 )
     fprintf(stdout,"\n  -- PHASE 1 : ISOSURFACE DISCRETIZATION\n");
-
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {
     fprintf(stdout,"  MAXIMUM NUMBER OF POINTS    (NPMAX) : %8d\n",mesh->npmax);
