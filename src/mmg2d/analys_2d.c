@@ -47,6 +47,7 @@ extern char ddb;
  */
 int MMG2D_setadj(MMG5_pMesh mesh) {
   MMG5_pTria       pt,pt1;
+  MMG5_pQuad       pq;
   int              *pile,*adja,ipil,k,kk,ncc,ip1,ip2,nr,nref;
   int16_t          tag;
   char             i,ii,i1,i2;
@@ -54,6 +55,7 @@ int MMG2D_setadj(MMG5_pMesh mesh) {
   if ( abs(mesh->info.imprim) > 5  || mesh->info.ddebug )
     fprintf(stdout,"  ** SETTING TOPOLOGY\n");
 
+  /** Step 1: Tags setting from triangles analysis */
   MMG5_SAFE_MALLOC(pile,mesh->nt+1,int,return 0);
 
   /* Initialization of the pile */
@@ -191,13 +193,54 @@ int MMG2D_setadj(MMG5_pMesh mesh) {
       }
     }
   }
+  MMG5_SAFE_FREE(pile);
+
+  /** Step 2: Mark the edges at interface between tria and quads as nosurf and
+   * required */
+  for ( k=1; k<=mesh->nquad; k++ ) {
+    pq = &mesh->quadra[k];
+    if ( !MG_EOK(pq) )  continue;
+
+    adja = &mesh->adjq[4*(k-1)+1];
+    for (i=0; i<4; i++) {
+
+      kk = adja[i];
+      if ( kk >= 0 ) {
+        continue;
+      }
+
+      /* The edge is at the interface between a quad and a triangle */
+      kk = abs(kk);
+      ii = kk%3;
+      pt = &mesh->tria[kk/3];
+
+      if ( !(pt->tag[ii] & MG_REQ) ) {
+        pt->tag[ii] |= (MG_REQ + MG_NOSURF + MG_BDY);
+      }
+      if ( !(pq->tag[i] & MG_REQ) ) {
+        pq->tag[i] |= (MG_REQ + MG_NOSURF + MG_BDY);
+      }
+      assert ( pt->edg[ii] == pq->edg[i] );
+
+      /* Transfer edge tag toward edge vertices */
+      i1 = MMG2D_idir_q[i][0];
+      i2 = MMG2D_idir_q[i][1];
+
+      if ( !(mesh->point[pq->v[i1]].tag & MG_REQ) ) {
+        mesh->point[pq->v[i1]].tag |= (MG_REQ + MG_NOSURF + MG_BDY);
+      }
+      if ( !(mesh->point[pq->v[i2]].tag & MG_REQ) ) {
+        mesh->point[pq->v[i2]].tag |= (MG_REQ + MG_NOSURF + MG_BDY);
+      }
+    }
+  }
+
 
   if ( abs(mesh->info.imprim) > 4 ) {
     fprintf(stdout,"     Connected component or subdomains: %d \n",ncc);
     fprintf(stdout,"     Tagged edges: %d,  ridges: %d,  refs: %d\n",nr+nref,nr,nref);
   }
 
-  MMG5_SAFE_FREE(pile);
   return 1;
 }
 

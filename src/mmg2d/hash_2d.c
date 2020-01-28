@@ -154,18 +154,25 @@ int MMG2D_hashTria(MMG5_pMesh mesh) {
  *
  * \return 0 if failed, 1 otherwise.
  *
- * Create table of adjacency for quadrangles.
+ * Create full table of adjacency for quadrangles (quad \f$ <-> \f$ quad
+ * adjacencies and quad \f$ -> \f$ tri adjacencies): 1) if the edge \f$ i1 \f$
+ * of quad \f$ k1 \f$ is adja to quad \f$ k2 \f$ through edge \f$ i2 \f$, \f$
+ * adja[4*(k1-1)+1+i1] = 4*k2+i2 \f$.  2) if the edge \f$ i1 \f$ of quad \f$ k1
+ * \f$ is adja to tria \f$ k2 \f$ through edge \f$ i2 \f$, \f$
+ * adja[4*(k1-1)+1+i1] = -(3*k2+i2) \f$.
  *
  */
 int MMG2D_hashQuad(MMG5_pMesh mesh) {
   MMG5_pQuad     pq,pq1;
+  MMG5_pTria     pt;
+  MMG5_Hash      hash;
   int            k,kk,pp,l,ll,mins,mins1,maxs,maxs1,sum,sum1,iadr;
   int           *hcode,*link,hsize,inival;
   unsigned char  i,ii,i1,i2,i3;
   unsigned int   key;
 
-  /* default */
-  if ( mesh->adjq ) {
+  /** Step 1: Fill adjacendies between quadrangles */
+  if ( !mesh->nquad ) {
     return 1;
   }
 
@@ -279,6 +286,53 @@ int MMG2D_hashQuad(MMG5_pMesh mesh) {
     }
   }
   MMG5_SAFE_FREE(hcode);
+
+  /** Step 2: Fill adjacencies between quadrangles and triangles */
+  /* Temporarily allocate a hash structure for storing edges */
+  if ( !MMG5_hashNew( mesh,&hash,0.51*mesh->nt, 1.51*mesh->nt) ) return 0;
+
+  /* Hash edge belonging to only one triangle (hcode==0) */
+  for (k=1; k<=mesh->nt; k++) {
+    pt = &mesh->tria[k];
+    if ( !MG_EOK(pt) )  continue;
+
+    hcode = &mesh->adja[3*(k-1)+1];
+    for (i=0; i<3; i++) {
+      if ( hcode[i] ) {
+        continue;
+      }
+      /* The edge belongs to one tria only */
+      MMG5_hashEdge(mesh,&hash,pt->v[MMG5_iprv2[i]],pt->v[MMG5_inxt2[i]],3*k+i);
+    }
+  }
+
+  /* Search edges that belong to one quad only and update adjacency array if the
+   * edge is founded in the hash table */
+  for (k=1; k<=mesh->nquad; k++) {
+    pq = &mesh->quadra[k];
+    if ( !MG_EOK(pq) )  continue;
+
+    hcode = &mesh->adjq[4*(k-1)+1];
+    for (i=0; i<4; i++) {
+      assert ( hcode[i] >= 0 );
+
+      if ( hcode[i] ) {
+        continue;
+      }
+
+      /* The edge belongs to one quad only */
+      i1 = MMG2D_idir_q[i][0];
+      i2 = MMG2D_idir_q[i][1];
+
+      kk = MMG5_hashGet(&hash,pq->v[i1],pq->v[i2]);
+      if ( kk ) {
+        /* The edge is at the interface between a quad and a triangle */
+        hcode[i] = -kk;
+      }
+    }
+  }
+  MMG5_DEL_MEM(mesh,hash.item);
+
   return 1;
 }
 
@@ -346,8 +400,9 @@ int MMG2D_hashEdge(pHashTable edgeTable,int iel,int ia, int ib) {
  *
  */
 int MMG2D_assignEdge(MMG5_pMesh mesh) {
-  MMG5_Hash      hash;
+  MMG5_Hash       hash;
   MMG5_pTria      pt;
+  MMG5_pQuad      pq;
   MMG5_pEdge      pa;
   int             k,ia;
   char            i,i1,i2;
@@ -393,6 +448,23 @@ int MMG2D_assignEdge(MMG5_pMesh mesh) {
         pt->edg[i2] = pa->ref;
         pt->tag[i2] |= pa->tag;
 
+      }
+    }
+  }
+
+  /* set references to quadrangles */
+  for (k=1; k<=mesh->nquad; k++) {
+    pq = &mesh->quadra[k];
+    if ( !MG_EOK(pq) )  continue;
+
+    for (i=0; i<4; i++) {
+      i1 = MMG2D_idir_q[i][0];
+      i2 = MMG2D_idir_q[i][1];
+      ia = MMG5_hashGet(&hash,pq->v[i1],pq->v[i2]);
+      if ( ia ) {
+        pa = &mesh->edge[ia];
+        pq->edg[i]  = pa->ref;
+        pq->tag[i] |= pa->tag;
       }
     }
   }
@@ -540,7 +612,15 @@ int MMG2D_pack(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
     mesh->na = 0;
   }
 
+  if ( mesh->nquad && mesh->quadra ) {
+    if ( !MMG2D_hashQuad(mesh) ) {
+      fprintf(stderr,"\n  ## Warning: %s: unable to build quad adjacencies."
+              " Quad edges will be ignored.\n",__func__);
+    }
+  }
+
   mesh->na = 0;
+  /* Count edges stored in triangles */
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) ) continue;
@@ -564,6 +644,35 @@ int MMG2D_pack(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
       else if ( mesh->info.opnbdy ) {
         if ( (pt->tag[i] & MG_REF) || pt->tag[i] & MG_BDY ) {
           assert ( pt->tag[i] & (MG_REF+MG_BDY) );
+          ++mesh->na;
+        }
+      }
+    }
+  }
+  /* Count edges stored in quadrangles */
+  for (k=1; k<=mesh->nquad; k++) {
+    pq = &mesh->quadra[k];
+    if ( !MG_EOK(pq) ) continue;
+    adja = &mesh->adjq[4*(k-1)+1];
+
+    for (i=0; i<4; i++) {
+      iel = adja[i] / 4;
+
+      if ( iel < 0) {
+        /* Edge at the in erface between a quad and a tria: treated from the tria */
+        continue;
+      }
+
+      pq1 = &mesh->quadra[iel];
+      if ( (!iel) || (pq->ref > pq1->ref) ) {
+        ++mesh->na;
+      }
+      else if ( (pq->ref==pq1->ref) && MG_SIN(pq->tag[i]) ) {
+        ++mesh->na;
+      }
+      else if ( mesh->info.opnbdy ) {
+        if ( (pq->tag[i] & MG_REF) || pq->tag[i] & MG_BDY ) {
+          assert ( pq->tag[i] & (MG_REF+MG_BDY) );
           ++mesh->na;
         }
       }
@@ -594,6 +703,7 @@ int MMG2D_pack(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
       MMG5_SAFE_CALLOC(mesh->edge,(mesh->namax+1),MMG5_Edge, return 0);
 
       nt = 0;
+      /* Edges stored in triangles */
       for (k=1; k<=mesh->nt; k++) {
         pt = &mesh->tria[k];
         if ( !MG_EOK(pt) ) continue;
@@ -617,6 +727,42 @@ int MMG2D_pack(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
             ped->base = 3*nt+i;
             ped->ref = pt->edg[i];
             ped->tag = pt->tag[i];
+          }
+        }
+      }
+
+      /* Edges stored in quadrangles */
+      nt = 0;
+      for (k=1; k<=mesh->nquad; k++) {
+        pq = &mesh->quadra[k];
+        if ( !MG_EOK(pq) ) continue;
+        ++nt;
+        adja = &mesh->adjq[4*(k-1)+1];
+
+        for (i=0; i<4; i++) {
+          i1 = MMG2D_idir_q[i][0];
+          i2 = MMG2D_idir_q[i][1];
+
+          iel = adja[i] / 4;
+
+          if ( iel < 0) {
+            /* Edge at the in erface between a quad and a tria: treated from the tria */
+            continue;
+          }
+
+          pq1 = &mesh->quadra[iel];
+          if ( !iel || (pq->ref > pq1->ref) ||
+               ((pq->ref==pq1->ref) && MG_SIN(pq->tag[i])) ||
+               (mesh->info.opnbdy && ((pq->tag[i] & MG_REF) || (pq->tag[i] & MG_BDY)))) {
+            ++ned;
+            ped = &mesh->edge[ned];
+            ped->a = pq->v[i1];
+            ped->b = pq->v[i2];
+            /* the base field is used to be able to recover the quad (and its face)
+             * from which comes a boundary edge */
+            ped->base = 4*nt+i;
+            ped->ref = pq->edg[i];
+            ped->tag = pq->tag[i];
           }
         }
       }

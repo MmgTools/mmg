@@ -288,7 +288,9 @@ int MMG3D_hashTetra(MMG5_pMesh mesh, int pack) {
  *
  * \return 0 if failed, 1 otherwise.
  *
- * Create table of adjacency for prisms.
+ * Create partial table of adjacency for prisms (prism \f$ <-> \f$ prism).
+ *
+ * \remark Adjacencies between prisms and tetra are not filled here.
  *
  * \warning check the hashtable efficiency
  */
