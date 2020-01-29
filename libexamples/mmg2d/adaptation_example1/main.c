@@ -74,7 +74,7 @@ int main(int argc,char *argv[]) {
 
   /** Manually set of the sol */
   /** a) Get np the number of vertex */
-  if ( MMG2D_Get_meshSize(mmgMesh,&np,&nt,&na) != 1 )
+  if ( MMG2D_Get_meshSize(mmgMesh,&np,NULL,NULL,NULL) != 1 )
     exit(EXIT_FAILURE);
 
   /** b) give info for the sol structure: sol applied on vertex entities,

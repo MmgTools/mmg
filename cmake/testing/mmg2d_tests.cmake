@@ -142,6 +142,24 @@ ADD_TEST(NAME mmg2d_opnbdy_yes_ani
   ${MMG2D_CI_TESTS}/Opnbdy/opnbdy-mesh.msh
   -out ${CTEST_OUTPUT_DIR}/mmg2d-opnbdy-mesh-yes-ani.o.meshb)
 
+# default hybrid
+ADD_TEST(NAME mmg2d_hybrid_2d
+  COMMAND ${EXECUT_MMG2D} -v 5
+  ${MMG2D_CI_TESTS}/Hybrid/hybrid.mesh
+  ${CTEST_OUTPUT_DIR}/mmg2d_hybrid_2d-default)
+
+# hybrid opnbdy
+ADD_TEST(NAME mmg2d_hybrid_opnbdy_2d
+  COMMAND ${EXECUT_MMG2D} -v 5 -opnbdy
+  ${MMG2D_CI_TESTS}/Hybrid/hybrid.mesh
+  ${CTEST_OUTPUT_DIR}/mmg2d_hybrid_2d-opnbdy)
+
+# hybrid hsiz
+ADD_TEST(NAME mmg2d_hybrid_hsiz_2d
+  COMMAND ${EXECUT_MMG2D} -v 5 -hsiz 0.05 -hgradreq -1
+  ${MMG2D_CI_TESTS}/Hybrid/hybrid.mesh
+  ${CTEST_OUTPUT_DIR}/mmg2d_hybrid_2d-opnbdy)
+
 ###############################################################################
 #####
 #####         Input/Output
@@ -159,6 +177,12 @@ ADD_TEST(NAME mmg2d_ascii_gmsh_2d
   COMMAND ${EXECUT_MMG2D} -v 5
   ${MMG2D_CI_TESTS}/GmshInout/cercle1.msh
   ${CTEST_OUTPUT_DIR}/mmg2d_ascii_gmsh_2d-cercle)
+
+# Ascii gmsh no metric hybrid
+ADD_TEST(NAME mmg2d_gmsh_hybrid_2d
+  COMMAND ${EXECUT_MMG2D} -v 5
+  ${MMG2D_CI_TESTS}/Hybrid/hybrid.msh
+  ${CTEST_OUTPUT_DIR}/mmg2d_hybrid_gmsh_2d-hybrid)
 
 # Binary gmsh iso metric
 ADD_TEST(NAME mmg2d_binary_gmsh_iso
