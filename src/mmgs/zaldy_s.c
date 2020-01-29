@@ -126,8 +126,8 @@ int MMGS_delElt(MMG5_pMesh mesh,int iel) {
  */
 static inline
 int MMGS_memOption_memSet(MMG5_pMesh mesh) {
-  size_t     usedMem,avMem,reservedMem;
-  int        npadd,bytes;
+  size_t     usedMem,avMem,reservedMem,npadd;
+  int        bytes;
 
   MMG5_memOption_memSet(mesh);
 
