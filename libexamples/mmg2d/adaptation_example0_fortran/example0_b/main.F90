@@ -143,7 +143,7 @@ PROGRAM main
   WRITE(inm,*) "Dimension 2"
 
   !> a) get the size of the mesh: vertices, tetra, triangles,quads, edges
-  CALL MMG2D_Get_meshSize(mmgMesh,np,nt,nq,na,ier)
+  CALL MMG2D_Get_meshSize(mmgMesh,np,nt,%val(0),na,ier)
   IF ( ier /= 1 ) CALL EXIT(108)
 
   ! Table to know if a vertex is corner
