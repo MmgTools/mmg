@@ -155,8 +155,8 @@ int MMG5_getnElt(MMG5_pMesh mesh,int n) {
  */
 static inline
 int MMG2D_memOption_memSet(MMG5_pMesh mesh) {
-  size_t   usedMem,avMem,reservedMem;
-  int      ctri,npadd,bytes;
+  size_t   usedMem,avMem,reservedMem,npadd;
+  int      ctri,bytes;
 
   MMG5_memOption_memSet(mesh);
 
