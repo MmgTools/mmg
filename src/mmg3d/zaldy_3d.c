@@ -166,8 +166,8 @@ int MMG3D_memOption_memSet(MMG5_pMesh mesh) {
  *
  */
 int MMG3D_memOption_memRepartition(MMG5_pMesh mesh) {
-  size_t     usedMem,avMem,reservedMem;
-  int        ctri,npadd,bytes;
+  size_t     usedMem,avMem,reservedMem,npadd;
+  int        ctri,bytes;
 
   /* init allocation need MMG5_MEMMIN B */
   reservedMem = MMG5_MEMMIN +
