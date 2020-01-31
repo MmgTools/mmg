@@ -1048,7 +1048,7 @@ int  MMG2D_Get_quadrilaterals(MMG5_pMesh mesh, int *quadra, int *refs, int * are
   MMG5_pQuad pq;
   int        i, j;
 
-  for (i=1;i<=mesh->ne;i++)
+  for (i=1;i<=mesh->nquad;i++)
   {
     j = (i-1)*4;
     pq = &mesh->quadra[i];
@@ -1207,7 +1207,7 @@ int MMG2D_Set_edges(MMG5_pMesh mesh, int *edges, int *refs) {
     mesh->edge[i].a    = edges[j];
     mesh->edge[i].b    = edges[j+1];
     if ( refs != NULL )
-      mesh->edge[i].ref  = refs[i];
+      mesh->edge[i].ref  = refs[i-1];
     mesh->edge[i].tag &= MG_REF+MG_BDY;
 
     mesh->point[mesh->edge[i].a].tag &= ~MG_NUL;
