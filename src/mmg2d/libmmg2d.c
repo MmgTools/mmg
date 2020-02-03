@@ -897,8 +897,9 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
 int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   mytime    ctim[TIMEMAX];
   char      stim[32];
-  int       *invalidTris;
-  int       k,ier;
+  int       ier;
+  int       k,*invalidTris;
+
 
   if ( mesh->info.imprim >= 0 ) {
     fprintf(stdout,"\n  %s\n   MODULE MMG2D : %s (%s)\n  %s\n",
@@ -930,6 +931,12 @@ int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   chrono(ON,&(ctim[1]));
 
   disp->ver  = mesh->ver;
+
+#ifndef USE_ELAS
+  fprintf(stderr,"\n  ## ERROR: YOU NEED TO COMPILE WITH THE USE_ELAS"
+    " CMake's FLAG SET TO ON TO USE THE RIGIDBODY MOVEMENT LIBRARY.\n");
+    _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
+#endif
 
   if ( !mesh->nt ) {
     fprintf(stdout,"\n  ## ERROR: NO TRIANGLES IN THE MESH \n");
@@ -1015,8 +1022,6 @@ int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
     fprintf(stdout,"\n  -- PHASE 2 : LAGRANGIAN MOTION\n");
   }
 
-#ifdef USE_ELAS
-
   /* Lagrangian mode */
   invalidTris = NULL;
   ier = MMG2D_mmg2d9(mesh,disp,met,&invalidTris);
@@ -1036,7 +1041,6 @@ int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
     }
     MMG5_SAFE_FREE(invalidTris);
   }
-#endif
 
   /* End with a classical remeshing stage, provided mesh->info.lag > 1 */
   if ( (ier > 0) && (mesh->info.lag >= 1) && !MMG2D_mmg2d1n(mesh,met) ) {

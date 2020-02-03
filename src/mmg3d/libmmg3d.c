@@ -1299,7 +1299,6 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
     MMG5_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE);
   }
 
-#ifdef USE_ELAS
   /* Lagrangian mode */
   invalidTets = NULL;
   ier = MMG5_mmg3d3(mesh,disp,met,&invalidTets);
@@ -1319,7 +1318,6 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
     }
     MMG5_SAFE_FREE(invalidTets);
   }
-#endif
   disp->npi = disp->np;
 
   if ( (ier > 0) && mesh->info.optim ) {
