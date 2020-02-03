@@ -45,14 +45,16 @@
  *
  */
 int lissmet_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
-  HashTable      edgeTable;
-  Hedge         *pht;
+  MMG5_Hash      edgeTable;
+  MMG5_hedge     *pht;
   MMG5_pTria     pt;
   MMG5_pPoint    p1,p2;
   double         logh,logs,*ma,*mb,ux,uy,d1,d2,dd,rap,dh;
   double         tail,coef,ma1[3],mb1[3],m[3],dd1,dd2;
-  int            i,nc,k,itour,maxtou,ncor,a,b,iadr;
   double         SQRT3DIV2=0.8660254037844386;
+  int            i,nc,k,itour,maxtou,ncor,a,b,iadr;
+  int8_t         ier;
+  static int8_t  mmgWarn = 0;
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {
     fprintf(stdout,"  ** Grading mesh\n");
@@ -67,15 +69,10 @@ int lissmet_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
   itour  = 0;
 
   /* alloc hashtable */
-  edgeTable.size  = mesh->ntmax;
-  edgeTable.nxtmax = 3*mesh->ntmax+1;
-  edgeTable.hnxt  = mesh->ntmax;
-  MMG5_SAFE_CALLOC(edgeTable.item,edgeTable.nxtmax,Hedge,return 0);
-
-  memset(edgeTable.item,0,edgeTable.nxtmax*sizeof(Hedge));
-
-  for (k=edgeTable.size; k<edgeTable.nxtmax; k++)
-    edgeTable.item[k].nxt = k+1;
+  if ( !MMG5_hashNew(mesh,&edgeTable,mesh->ntmax,3*mesh->ntmax) ) {
+    fprintf(stderr,"\n  ## Error: %s: unable to allocate hash table.\n",__func__);
+    return 0;
+  }
 
   /* build edge table */
   for(k=1 ; k<=mesh->nt ; k++) {
@@ -88,7 +85,14 @@ int lissmet_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
       if ( mesh->point[a].s || mesh->point[b].s ) {
         continue;
       }
-      MMG2D_hashEdge(&edgeTable,k,pt->v[MMG2D_iare[i][0]],pt->v[MMG2D_iare[i][1]]);
+      ier = MMG5_hashEdge(mesh,&edgeTable,a,b,k);
+      if ( !ier ) {
+        if ( !mmgWarn ) {
+          mmgWarn = 1;
+          fprintf(stderr,"\n  ## Warning: %s: unable to hash at least one edge"
+                  " (tria %d, edge %d).\n",__func__,MMG2D_indElt(mesh,k),i);
+        }
+      }
     }
   }
 
@@ -100,13 +104,13 @@ int lissmet_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
   do {
     ++mesh->base;
     nc = 0;
-    for (k=0; k<edgeTable.size; k++) {
+    for (k=0; k<edgeTable.siz; k++) {
       pht = &edgeTable.item[k];
       /* analyze linked list */
       while ( pht ) {
-        if ( !pht->min )  break;
-        a  = pht->min;
-        b  = pht->max;
+        if ( !pht->a )  break;
+        a  = pht->a;
+        b  = pht->b;
         p1 = &mesh->point[a];
         p2 = &mesh->point[b];
         iadr = a*sol->size;

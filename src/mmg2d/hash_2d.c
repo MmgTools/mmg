@@ -43,7 +43,7 @@ int MMG2D_hashNew(HashTable *hash,int hsize,int hmax) {
  * \param mesh pointer toward the mesh
  * \return 1 if success, 0 if fail
  *
- * Create adjacency relations between the triangles in the mesh
+ * Create adjacency relations between the triangles dein the mesh
  *
  */
 int MMG2D_hashTria(MMG5_pMesh mesh) {
@@ -419,7 +419,12 @@ int MMG2D_assignEdge(MMG5_pMesh mesh) {
 
   /* hash mesh edges */
   for (k=1; k<=mesh->na; k++) {
-    MMG5_hashEdge(mesh,&hash,mesh->edge[k].a,mesh->edge[k].b,k);
+    ier = MMG5_hashEdge(mesh,&hash,mesh->edge[k].a,mesh->edge[k].b,k);
+    if ( !ier ) {
+      fprintf(stderr,"\n  ## Error: %s: unable to hash edge %d %d.\n",__func__,
+              MMG2D_indPt(mesh,mesh->edge[k].a),MMG2D_indPt(mesh,mesh->edge[k].b));
+      return 0;
+    }
   }
 
   /* set references to triangles */
