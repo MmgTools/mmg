@@ -266,7 +266,6 @@ int MMG2D_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, int start, char istart) {
   int              *adja,k,ip1,ip2,end1,refstart;
   char             i,i1,smsgn;
   static char      mmgWarn=0;
-char ddb;
   
   k = start;
   refstart = mesh->tria[k].ref;
@@ -1043,6 +1042,12 @@ int MMG2D_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met) {
 
   if ( abs(mesh->info.imprim) > 3 )
     fprintf(stdout,"  ** ISOSURFACE EXTRACTION\n");
+
+  if ( mesh->nquad ) {
+    fprintf(stderr,"\n  ## Error: Isosurface extraction not available with"
+            " hybrid meshes. Exit program.\n");
+    return 0;
+  }
 
   /* Work only with the 0 level set */
   for (k=1; k<= sol->np; k++)

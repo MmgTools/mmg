@@ -127,7 +127,7 @@ int main(int argc,char *argv[]) {
   /** a) give info for the metric: the metric is applied on vertex
       entities, number of vertices np is recoverd using get_meshSize and the sol
       is tensorial */
-  if ( MMG2D_Get_meshSize(mmgMesh,&np,NULL,NULL) !=1 )  exit(EXIT_FAILURE);
+  if ( MMG2D_Get_meshSize(mmgMesh,&np,NULL,NULL,NULL) !=1 )  exit(EXIT_FAILURE);
 
   if ( MMG2D_Set_solSize(mmgMesh,mmgMet,MMG5_Vertex,np,MMG5_Tensor) != 1 )
     exit(EXIT_FAILURE);

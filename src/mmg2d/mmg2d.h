@@ -72,6 +72,9 @@ extern "C" {
 #define MMG2D_NEDMAX  100000
 #define MMG2D_NEMAX   100000
 
+/** \brief idir[i]: vertices of edge i for a quad */
+static const unsigned char MMG2D_idir_q[4][2] = { {0,1},{0,3},{1,2},{2,3} };
+
 /** Free allocated pointers of mesh and sol structure and return value val */
 #define MMG2D_RETURN_AND_FREE(mesh,met,ls,disp,val)do               \
   {                                                                 \
@@ -276,6 +279,7 @@ int MMG2D_ismaniball(MMG5_pMesh , MMG5_pSol , int , char );
 int MMG2D_snapval(MMG5_pMesh ,MMG5_pSol);
 int MMG2D_chkmanimesh(MMG5_pMesh );
 int MMG2D_hashTria(MMG5_pMesh );
+int MMG2D_hashQuad(MMG5_pMesh mesh);
 int MMG2D_resetRef(MMG5_pMesh );
 int MMG2D_cuttri_ls(MMG5_pMesh ,MMG5_pSol,MMG5_pSol );
 int MMG2D_rmc(MMG5_pMesh ,MMG5_pSol );

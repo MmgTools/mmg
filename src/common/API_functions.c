@@ -227,10 +227,8 @@ int MMG5_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solin) {
  *
  */
 int MMG5_Set_outputMeshName(MMG5_pMesh mesh, const char* meshout) {
-  int  fmt = MMG5_FMT_MeditASCII,fmtin,trailing_len;
-  char *ptrMed,*ptrGmsh,*ptr,*ptrin;
-
-  ptrMed = ptrGmsh = NULL;
+  int  fmt = MMG5_FMT_MeditASCII,fmtin;
+  char *ptr,*ptrin;
 
   if ( mesh->nameout )
     MMG5_DEL_MEM(mesh,mesh->nameout);

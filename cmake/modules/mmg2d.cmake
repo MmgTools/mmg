@@ -239,6 +239,7 @@ IF ( BUILD_TESTING )
         SET(LIBMMG2D_EXECFORTRAN_LSONLY ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_fortran_lsOnly )
         SET(LIBMMG2D_EXECFORTRAN_LSANDMETRIC ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_fortran_lsAndMetric )
         SET(TEST_API2D_FORTRAN_EXEC0 ${EXECUTABLE_OUTPUT_PATH}/test_api2d_fortran_0)
+        SET(TEST_IO2D_FORTRAN_EXEC ${EXECUTABLE_OUTPUT_PATH}/test_io2d_fortran)
 
 
         ADD_TEST(NAME libmmg2d_fortran_a   COMMAND ${LIBMMG2D_EXECFORTRAN_a}
@@ -269,6 +270,14 @@ IF ( BUILD_TESTING )
         ADD_TEST(NAME test_api2d_fortran_0   COMMAND ${TEST_API2D_FORTRAN_EXEC0}
           "${MMG2D_CI_TESTS}/API_tests/2dom.mesh"
           "${CTEST_OUTPUT_DIR}/test_API2d.o"
+          )
+        ADD_TEST(NAME test_io2d_fortran_scalar   COMMAND ${TEST_IO2D_FORTRAN_EXEC}
+          "${MMG2D_CI_TESTS}/Hybrid/hybrid.mesh"
+          "${CTEST_OUTPUT_DIR}/hybrid-2d-scal.o" 0
+          )
+        ADD_TEST(NAME test_io2d_fortran_array   COMMAND ${TEST_IO2D_FORTRAN_EXEC}
+          "${MMG2D_CI_TESTS}/Hybrid/hybrid.mesh"
+          "${CTEST_OUTPUT_DIR}/hybrid-2d-array.o" 1
           )
 
       ENDIF()

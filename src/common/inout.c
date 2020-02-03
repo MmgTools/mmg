@@ -486,6 +486,7 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,const char *filename,
 int  MMG5_check_readedMesh ( MMG5_pMesh mesh, int nref ) {
   MMG5_pPoint ppt;
   MMG5_pTria  ptt;
+  MMG5_pQuad  pq;
   MMG5_pPrism pp;
   MMG5_pTetra pt;
   int         i,k,aux;
@@ -523,6 +524,13 @@ int  MMG5_check_readedMesh ( MMG5_pMesh mesh, int nref ) {
         aux = ptt->v[2];
         ptt->v[2] = ptt->v[1];
         ptt->v[1] = aux;
+      }
+    }
+    for (k=1; k<=mesh->nquad; k++) {
+      pq = &mesh->quadra[k];
+      for (i=0; i<4; i++) {
+        ppt = &mesh->point[ pq->v[i] ];
+        ppt->tag &= ~MG_NUL;
       }
     }
   }
@@ -626,7 +634,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
   MMG5_pEdge  pa;
   MMG5_pPoint ppt;
   MMG5_pSol   psl;
-  double      aux, dbuf[9];
+  double      dbuf[9];
   float       fbuf[9],fc;
   int         k,i,l,nref,iadr,ier;
   int         nt,na,nq,ne,npr;

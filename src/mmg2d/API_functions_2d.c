@@ -356,7 +356,7 @@ int MMG2D_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref,
 }
 
 
-int MMG2D_Set_meshSize(MMG5_pMesh mesh, int np, int nt, int na) {
+int MMG2D_Set_meshSize(MMG5_pMesh mesh, int np, int nt, int nquad, int na) {
 
   if ( ( (mesh->info.imprim > 5) || mesh->info.ddebug ) &&
        ( mesh->point || mesh->tria || mesh->edge) )
@@ -366,11 +366,14 @@ int MMG2D_Set_meshSize(MMG5_pMesh mesh, int np, int nt, int na) {
     MMG5_DEL_MEM(mesh,mesh->point);
   if ( mesh->tria )
     MMG5_DEL_MEM(mesh,mesh->tria);
+  if ( mesh->quadra )
+    MMG5_DEL_MEM(mesh,mesh->quadra);
   if ( mesh->edge )
     MMG5_DEL_MEM(mesh,mesh->edge);
 
   mesh->np  = np;
   mesh->nt  = nt;
+  mesh->nquad  = nquad;
   mesh->na  = na;
   mesh->npi = mesh->np;
   mesh->nti = mesh->nt;
@@ -528,13 +531,16 @@ int MMG2D_Get_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol *sol, int *nsols,
   return 1;
 }
 
-int MMG2D_Get_meshSize(MMG5_pMesh mesh, int* np, int* nt, int* na) {
+int MMG2D_Get_meshSize(MMG5_pMesh mesh, int* np, int* nt, int* nquad, int* na) {
   int k;
 
   if ( np != NULL )
     *np = mesh->np;
   if ( nt != NULL )
     *nt = mesh->nt;
+
+  if ( nquad != NULL )
+    *nquad = mesh->nquad;
 
   if ( na != NULL ) {
     // Edges are not packed, thus we must count it.
@@ -893,7 +899,7 @@ int  MMG2D_Set_triangles(MMG5_pMesh mesh, int *tria, int *refs) {
       tmp = ptt->v[2];
       ptt->v[2] = ptt->v[1];
       ptt->v[1] = tmp;
-      /* mesh->xt temporary used to count reoriented tetra */
+      /* mesh->xt temporary used to count reoriented quadra */
       mesh->xt++;
     }
     if ( mesh->info.ddebug && mesh->xt > 0 ) {
@@ -929,6 +935,141 @@ int  MMG2D_Get_triangles(MMG5_pMesh mesh, int* tria, int* refs,
   }
   return 1;
 }
+
+int MMG2D_Set_quadrilateral(MMG5_pMesh mesh, int v0, int v1, int v2, int v3, int ref, int pos) {
+  MMG5_pQuad  pq;
+
+  if ( !mesh->nquad ) {
+    fprintf(stderr,"\n  ## Error: %s: You must set the number of quadrilaterals with the",
+            __func__);
+    fprintf(stderr," MMG2D_Set_meshSize function before setting elements in mesh\n");
+    return 0;
+  }
+
+  if ( pos > mesh->nquad ) {
+    fprintf(stderr,"\n  ## Error: %s: attempt to set new quad at position %d.",
+            __func__,pos);
+    fprintf(stderr," Overflow of the given number of quads: %d\n",mesh->nquad);
+    fprintf(stderr,"\n  ## Check the mesh size, its compactness or the position");
+    fprintf(stderr," of the quad.\n");
+    return 0;
+  }
+
+  pq = &mesh->quadra[pos];
+  pq->v[0] = v0;
+  pq->v[1] = v1;
+  pq->v[2] = v2;
+  pq->v[3] = v3;
+  pq->ref  = ref;
+
+  mesh->point[pq->v[0]].tag &= ~MG_NUL;
+  mesh->point[pq->v[1]].tag &= ~MG_NUL;
+  mesh->point[pq->v[2]].tag &= ~MG_NUL;
+  mesh->point[pq->v[3]].tag &= ~MG_NUL;
+
+  return 1;
+}
+
+int MMG2D_Get_quadrilateral(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* v3,
+                            int* ref, int* isRequired) {
+  static int nqi = 0;
+
+  if ( nqi == mesh->nquad ) {
+    nqi = 0;
+    if ( mesh->info.ddebug ) {
+      fprintf(stderr,"\n  ## Warning: %s: reset the internal counter of"
+              " quadrilaterals.\n",__func__);
+      fprintf(stderr,"     You must pass here exactly one time (the first time ");
+      fprintf(stderr,"you call the MMG2D_Get_quadrilateral function).\n");
+      fprintf(stderr,"     If not, the number of call of this function");
+      fprintf(stderr," exceed the number of quadrilaterals: %d\n ",mesh->nquad);
+    }
+  }
+
+  ++nqi;
+
+  if ( nqi > mesh->nquad ) {
+    fprintf(stderr,"\n  ## Error: %s: unable to get quadra.\n",__func__);
+    fprintf(stderr,"    The number of call of MMG2D_Get_quadrilateral function");
+    fprintf(stderr," can not exceed the number of quadra: %d\n ",mesh->nquad);
+    return 0;
+  }
+
+  *v0  = mesh->quadra[nqi].v[0];
+  *v1  = mesh->quadra[nqi].v[1];
+  *v2  = mesh->quadra[nqi].v[2];
+  *v3  = mesh->quadra[nqi].v[3];
+
+  if ( ref != NULL ) {
+    *ref = mesh->quadra[nqi].ref;
+  }
+
+  if ( isRequired != NULL ) {
+    if ( ( mesh->quadra[nqi].tag[0] & MG_REQ) && ( mesh->quadra[nqi].tag[1] & MG_REQ) &&
+         ( mesh->quadra[nqi].tag[2] & MG_REQ) && ( mesh->quadra[nqi].tag[3] & MG_REQ) ) {
+      *isRequired = 1;
+    }
+    else
+      *isRequired = 0;
+  }
+
+  return 1;
+}
+
+int  MMG2D_Set_quadrilaterals(MMG5_pMesh mesh, int *quadra, int *refs) {
+  MMG5_pQuad pq;
+  int        i,j;
+
+  for (i=1;i<=mesh->nquad;i++)
+  {
+    j = (i-1)*4;
+    pq = &mesh->quadra[i];
+    pq->v[0]  = quadra[j];
+    pq->v[1]  = quadra[j+1];
+    pq->v[2]  = quadra[j+2];
+    pq->v[3]  = quadra[j+3];
+
+    if ( refs != NULL )
+      pq->ref   = refs[i-1];
+
+    mesh->point[pq->v[0]].tag &= ~MG_NUL;
+    mesh->point[pq->v[1]].tag &= ~MG_NUL;
+    mesh->point[pq->v[2]].tag &= ~MG_NUL;
+    mesh->point[pq->v[3]].tag &= ~MG_NUL;
+  }
+
+  return 1;
+}
+
+int  MMG2D_Get_quadrilaterals(MMG5_pMesh mesh, int *quadra, int *refs, int * areRequired) {
+  MMG5_pQuad pq;
+  int        i, j;
+
+  for (i=1;i<=mesh->nquad;i++)
+  {
+    j = (i-1)*4;
+    pq = &mesh->quadra[i];
+    quadra[j]   = pq->v[0];
+    quadra[j+1] = pq->v[1];
+    quadra[j+2] = pq->v[2];
+    quadra[j+3] = pq->v[3];
+
+    if ( refs!=NULL )
+      refs[i-1]  = pq->ref ;
+
+    if ( areRequired != NULL ) {
+     if ( (pq->tag[0] & MG_REQ) && (pq->tag[1] & MG_REQ) &&
+          (pq->tag[2] & MG_REQ) && (pq->tag[3] & MG_REQ) ) {
+       areRequired[i-1] = 1;
+     }
+      else
+        areRequired[i-1] = 0;
+    }
+
+  }
+  return 1;
+}
+
 
 int MMG2D_Set_edge(MMG5_pMesh mesh, int v0, int v1, int ref, int pos) {
   MMG5_pEdge pt;
@@ -1063,7 +1204,7 @@ int MMG2D_Set_edges(MMG5_pMesh mesh, int *edges, int *refs) {
     mesh->edge[i].a    = edges[j];
     mesh->edge[i].b    = edges[j+1];
     if ( refs != NULL )
-      mesh->edge[i].ref  = refs[i];
+      mesh->edge[i].ref  = refs[i-1];
     mesh->edge[i].tag &= MG_REF+MG_BDY;
 
     mesh->point[mesh->edge[i].a].tag &= ~MG_NUL;
