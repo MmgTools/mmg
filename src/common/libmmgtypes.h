@@ -467,7 +467,7 @@ typedef struct {
 typedef struct {
   int     a; /*!< First extremity of edge */
   int     b;  /*!< Second extremity of edge */
-  int     ref; /*!< Reference of edge */
+  int     ref; /*!< Reference or idx (2D) of edge */
   int     nxt; /*!< Next element of hash table */
   int16_t tag; /*!< tag of edge */
 } MMG5_hgeom;
