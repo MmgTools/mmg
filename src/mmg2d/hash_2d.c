@@ -405,29 +405,17 @@ int MMG2D_assignEdge(MMG5_pMesh mesh) {
   MMG5_pQuad      pq;
   MMG5_pEdge      pa;
   int             k,ia;
+  int8_t          ier;
   char            i,i1,i2;
 
   if ( !mesh->na ) return 1;
 
   /* Temporarily allocate a hash structure for storing edges */
-  hash.siz = mesh->na;
-  hash.max = 3*mesh->na+1;
-
-  MMG5_ADD_MEM(mesh,(hash.max+1)*sizeof(MMG5_hedge),"hash table",return 0);
-  MMG5_SAFE_CALLOC(hash.item,hash.max+1,MMG5_hedge,return 0);
-
-  hash.nxt = mesh->na;
-
-  for ( k=1; k <= mesh->nt; ++k ) {
-    for ( i=0; i<3; ++i ) {
-      if ( mesh->tria[k].tag[i] & MG_REF || mesh->tria[k].tag[i] & MG_BDY) {
-        assert ( 0 );
-      }
-    }
+  ier = MMG5_hashNew ( mesh,&hash, mesh->na,3*mesh->na );
+  if ( !ier ) {
+    printf("  ## Error: %s: Unable to allocate edge hash table\n.",__func__);
+    return 0;
   }
-
-  for (k=mesh->na; k<hash.max; k++)
-    hash.item[k].nxt = k+1;
 
   /* hash mesh edges */
   for (k=1; k<=mesh->na; k++) {
