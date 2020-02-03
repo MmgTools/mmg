@@ -1821,7 +1821,11 @@ int MMG3D_movv_ani(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
   assert(ib<4);
   pt = &mesh->tetra[k];
   ppa  = &mesh->point[pt->v[ib]];
-  if(ppa->tag & MG_BDY) return 0;
+
+  if ( (ppa->tag & MG_BDY) || (ppa->tag & MG_REQ) ) {
+    return 0;
+  }
+
   iadr = pt->v[ib]*sol->size + 0;
   mp   = &sol->m[iadr];
 
@@ -1933,7 +1937,10 @@ int MMG3D_movnormal_iso(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
   pt = &mesh->tetra[k];
 
   ppa  = &mesh->point[pt->v[ib]];
-  if(ppa->tag & MG_BDY) return 0;
+
+  if ( ppa->tag & MG_BDY || (ppa->tag & MG_REQ) ) {
+    return 0;
+  }
 
   /*compute normal*/
   i1 = pt->v[MMG5_idir[ib][0]];
@@ -2040,7 +2047,9 @@ int MMG3D_movv_iso(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
   pt = &mesh->tetra[k];
 
   ppa  = &mesh->point[pt->v[ib]];
-  if(ppa->tag & MG_BDY) return 0;
+  if ( (ppa->tag & MG_BDY) || (ppa->tag & MG_REQ) ) {
+    return 0;
+  }
 
   iadr = (pt->v[ib])*sol->size;
   hp   = sol->m[iadr];
