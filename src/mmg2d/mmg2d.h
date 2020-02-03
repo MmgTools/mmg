@@ -124,15 +124,6 @@ typedef struct {
 } Bucket;
 typedef Bucket * pBucket;
 
-typedef struct {
-  int      min,max,iel,nxt;
-} Hedge;
-
-typedef struct {
-  int      size,nxtmax,hnxt;
-  Hedge    *item;
-} HashTable;
-typedef HashTable * pHashTable;
 
 static const int MMG2D_iare[3][2] = {{1,2},{2,0},{0,1}};
 static const int MMG2D_iopp[3][2] = {{1,2},{0,2},{0,1}};
@@ -256,9 +247,6 @@ int MMG2D_kiudel(pQueue q,int iel);
 int MMG2D_kiuput(pQueue q,int iel);
 int MMG2D_kiupop(pQueue q);
 
-int MMG2D_hashEdge(pHashTable edgeTable,int iel,int ia, int ib);
-//int MMG2D_hashel(MMG5_pMesh mesh);
-int MMG2D_hashNew(HashTable *hash,int hsize,int hmax);
 int MMG2D_baseBdry(MMG5_pMesh mesh);
 
 int simred(double *m1,double *m2,double *m);

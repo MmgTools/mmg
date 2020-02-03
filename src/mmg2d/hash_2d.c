@@ -25,20 +25,6 @@
 #define KTA     7
 #define KTB    11
 
-int MMG2D_hashNew(HashTable *hash,int hsize,int hmax) {
-  int   k;
-
-  hash->size  = hsize;
-  hash->nxtmax =hmax+1;
-  hash->hnxt  = hsize;
-  MMG5_SAFE_CALLOC(hash->item,hash->nxtmax,Hedge,return 0);
-
-  for (k=hash->size; k<hash->nxtmax; k++)
-    hash->item[k].nxt = k+1;
-
-  return 1;
-}
-
 /**
  * \param mesh pointer toward the mesh
  * \return 1 if success, 0 if fail
@@ -334,61 +320,6 @@ int MMG2D_hashQuad(MMG5_pMesh mesh) {
   MMG5_DEL_MEM(mesh,hash.item);
 
   return 1;
-}
-
-
-/*hash edge :
-  return 1 if edge exist in the table*/
-int MMG2D_hashEdge(pHashTable edgeTable,int iel,int ia, int ib) {
-  int         key,mins,maxs;
-  Hedge      *ha;
-  static char mmgErr = 0;
-
-  /* compute key */
-  if ( ia < ib ) {
-    mins = ia;
-    maxs = ib;
-  }
-  else {
-    mins = ib;
-    maxs = ia;
-  }
-
-  key = KTA*mins + KTB*maxs;
-  key = key % edgeTable->size;
-  ha  = &edgeTable->item[key];
-  if ( ha->min ) {
-    /* edge exist*/
-    if ( ha->min == mins && ha->max == maxs ) {
-      return ha->iel;
-    }
-    else {
-      while ( ha->nxt && ha->nxt < edgeTable->nxtmax ) {
-        ha = &edgeTable->item[ha->nxt];
-        if ( ha->min == mins && ha->max == maxs )
-          return ha->iel;
-      }
-      ha->nxt = edgeTable->hnxt;
-      ha      = &edgeTable->item[edgeTable->hnxt];
-      ++edgeTable->hnxt;
-      if ( edgeTable->hnxt == edgeTable->nxtmax ) {
-        if ( !mmgErr ) {
-          mmgErr = 1;
-          fprintf(stderr,"\n  ## Error: %s: memory alloc problem (edge): %d.\n",
-                  __func__,edgeTable->nxtmax);
-        }
-        return 0;
-      }
-    }
-  }
-  /* insert */
-  ha->min = mins;
-  ha->max = maxs;
-  ha->iel = iel;
-  ha->nxt = 0;
-
-  return 0;
-
 }
 
 /**
