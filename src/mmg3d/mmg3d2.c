@@ -54,7 +54,7 @@ extern char  ddb;
  */
 static inline
 double MMG3D_vfrac_1vertex(MMG5_pPoint ppt[4],char i0,double v[4],int8_t part_opp) {
-  double      vfrac,lam,area,eps,o1[3],o2[3],o3[3];
+  double      vfrac,lam,area,o1[3],o2[3],o3[3];
   char        i1,i2,i3;
 
   i1 = MMG5_idir[i0][0];
@@ -105,10 +105,10 @@ double MMG3D_vfrac_1vertex(MMG5_pPoint ppt[4],char i0,double v[4],int8_t part_op
 double MMG3D_vfrac(MMG5_pMesh mesh,MMG5_pSol sol,int k,int pm) {
   MMG5_pTetra   pt;
   MMG5_pPoint   ppt[4];
-  double        v[4],vfm,vfp,lam,area,eps,o[18];
+  double        v[4],vfm,vfp,lam,eps,o[18];
   int           ip[4],nplus,nminus,nzero;
   int8_t        flag,cfg,ia;
-  char          i,i0,i1,i2,imin1,imin2,iplus1,iplus2,iz;
+  char          i,i0,i1,imin1,imin2,iplus1,iplus2,iz;
   unsigned char tau[4];
   const unsigned char *taued;
 
@@ -693,7 +693,7 @@ int MMG3D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
   MMG5_pxTetra   pxt;
   double         volc,voltot,v0,v1,v2,v3;
   int            k,kk,l,ll,ncp,ncm,ip0,ip1,ip2,ip3,base,cur,ipile,*pile,*adja;
-  char           i,j,i1,i2,i3,onbr;
+  char           i,j,i1,onbr;
 
   ncp = 0;
   ncm = 0;

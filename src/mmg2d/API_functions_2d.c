@@ -938,9 +938,6 @@ int  MMG2D_Get_triangles(MMG5_pMesh mesh, int* tria, int* refs,
 
 int MMG2D_Set_quadrilateral(MMG5_pMesh mesh, int v0, int v1, int v2, int v3, int ref, int pos) {
   MMG5_pQuad  pq;
-  MMG5_pPoint ppt;
-  double vol;
-  int    aux,j, ip;
 
   if ( !mesh->nquad ) {
     fprintf(stderr,"\n  ## Error: %s: You must set the number of quadrilaterals with the",

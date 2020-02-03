@@ -266,7 +266,6 @@ int MMG2D_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, int start, char istart) {
   int              *adja,k,ip1,ip2,end1,refstart;
   char             i,i1,smsgn;
   static char      mmgWarn=0;
-char ddb;
   
   k = start;
   refstart = mesh->tria[k].ref;

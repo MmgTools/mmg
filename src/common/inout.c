@@ -634,7 +634,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
   MMG5_pEdge  pa;
   MMG5_pPoint ppt;
   MMG5_pSol   psl;
-  double      aux, dbuf[9];
+  double      dbuf[9];
   float       fbuf[9],fc;
   int         k,i,l,nref,iadr,ier;
   int         nt,na,nq,ne,npr;

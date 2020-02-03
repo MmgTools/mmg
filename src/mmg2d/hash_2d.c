@@ -166,9 +166,9 @@ int MMG2D_hashQuad(MMG5_pMesh mesh) {
   MMG5_pQuad     pq,pq1;
   MMG5_pTria     pt;
   MMG5_Hash      hash;
-  int            k,kk,pp,l,ll,mins,mins1,maxs,maxs1,sum,sum1,iadr;
+  int            k,kk,pp,l,ll,mins,mins1,maxs,maxs1,iadr;
   int           *hcode,*link,hsize,inival;
-  unsigned char  i,ii,i1,i2,i3;
+  unsigned char  i,ii,i1,i2;
   unsigned int   key;
 
   /** Step 1: Fill adjacendies between quadrangles */

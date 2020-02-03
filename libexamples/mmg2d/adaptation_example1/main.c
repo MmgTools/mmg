@@ -22,7 +22,7 @@ int main(int argc,char *argv[]) {
   MMG5_pMesh      mmgMesh;
   MMG5_pSol       mmgSol;
   char            *filename, *outname;
-  int             k,np,nt,na,ier;
+  int             k,np,ier;
 
   fprintf(stdout,"  -- TEST MMG2DLIB \n");
 
