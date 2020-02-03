@@ -169,7 +169,7 @@ subroutine loadmesh(mesh,filename,by_array)
      ENDDO
 
      do i= 1,nc
-        CALL MMG2D_Set_corner(mesh, corner(i))
+        CALL MMG2D_Set_corner(mesh, corner(i),ier)
         IF ( ier /= 1 ) THEN
            print*, "Fail to set corner"
            CALL EXIT(103)
@@ -207,7 +207,7 @@ subroutine loadmesh(mesh,filename,by_array)
      ENDIF
 
      do i= 1,nc
-        CALL MMG2D_Set_corner(mesh, corner(i))
+        CALL MMG2D_Set_corner(mesh, corner(i),ier)
         IF ( ier /= 1 ) THEN
            print*, "Fail to set corner"
            CALL EXIT(103)
