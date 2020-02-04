@@ -407,22 +407,22 @@ ADD_TEST(NAME mmg3d_ChkBdry_multidomCube3
   ${CTEST_OUTPUT_DIR}/mmg3d_ChkBdry_multidomCube2-cube.o
   )
 
-ADD_TEST(NAME mmg3d_OpnBdy_unref_peninsula
+ADD_TEST(NAME mmg3d_opnbdy_unref_peninsula
   COMMAND ${EXECUT_MMG3D} -v 5 -opnbdy
   -in ${MMG3D_CI_TESTS}/OpnBdy_peninsula/peninsula
   -out ${CTEST_OUTPUT_DIR}/mmg3d_OpnBdy_peninsula.o.meshb)
 
-ADD_TEST(NAME mmg3d_OpnBdy_ref_peninsula
+ADD_TEST(NAME mmg3d_opnbdy_ref_peninsula
   COMMAND ${EXECUT_MMG3D} -v 5 -hmax 0.06 -opnbdy
   -in ${MMG3D_CI_TESTS}/OpnBdy_peninsula/peninsula
   -out ${CTEST_OUTPUT_DIR}/mmg3d_OpnBdy_peninsula.o.meshb)
 
-ADD_TEST(NAME mmg3d_OpnBdy_unref_island
+ADD_TEST(NAME mmg3d_opnbdy_unref_island
   COMMAND ${EXECUT_MMG3D} -v 5 -opnbdy
   -in ${MMG3D_CI_TESTS}/OpnBdy_island/island
   -out ${CTEST_OUTPUT_DIR}/mmg3d_OpnBdy_island.o.meshb)
 
-ADD_TEST(NAME mmg3d_OpnBdy_ref_island
+ADD_TEST(NAME mmg3d_opnbdy_ref_island
   COMMAND ${EXECUT_MMG3D} -v 5 -hmax 0.06 -opnbdy
   -in ${MMG3D_CI_TESTS}/OpnBdy_island/island
   -out ${CTEST_OUTPUT_DIR}/mmg3d_OpnBdy_island.o.meshb)
