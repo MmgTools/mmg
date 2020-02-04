@@ -743,7 +743,10 @@ int MMG3D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
     pile[ipile] = k;
     ipile++;
     if ( ipile >= mesh->ne ) {
-      fprintf(stderr,"\n  ## Problem in length of pile; function rmc. Exit program.\n");
+      fprintf(stderr,"\n  ## Problem in length of pile; function rmc.\n"
+              " Check that the level-set intersect the mesh.\n"
+              " Exit program.\n");
+
       return 0;
     }
 
