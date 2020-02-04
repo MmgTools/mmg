@@ -204,7 +204,7 @@ extern "C" {
 /* Macros for memory management */
 /** Check if used memory overflow maximal authorized memory.
     Execute the command law if lack of memory. */
-#define MMG5_CHK_MEM(mesh,size,string,law) do                           \
+#define MMG5_CHK_MEM(mesh,size,string,law) do                          \
   {                                                                     \
     if ( (mesh)->memCur > (mesh)->memMax ) {                            \
       fprintf(stderr,"  ## Error:");                                    \
@@ -531,8 +531,8 @@ enum MMG5_Format {
 
 
 /* Global variables */
-static const unsigned char MMG5_inxt2[6] = {1,2,0,1,2}; /*!< next vertex of triangle: {1,2,0} */
-  static const unsigned char MMG5_iprv2[3] = {2,0,1}; /*!< previous vertex of triangle: {2,0,1} */
+  static const unsigned char MMG5_inxt2[6] = {1,2,0,1,2}; /*!< next vertex of triangle: {1,2,0} */
+static const unsigned char MMG5_iprv2[3] = {2,0,1}; /*!< previous vertex of triangle: {2,0,1} */
 
 /* Private structures */
 /**
@@ -658,7 +658,7 @@ const char    *MMG5_Get_formatName(enum MMG5_Format fmt);
  int           MMG5_intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr);
  extern int    MMG5_countLocalParamAtTri( MMG5_pMesh,MMG5_iNode **);
  extern int    MMG5_writeLocalParamAtTri( MMG5_pMesh,MMG5_iNode *,FILE*);
- double        MMG2D_quickarea(double a[2],double b[2],double c[2]);
+ double         MMG2D_quickarea(double a[2],double b[2],double c[2]);
  void          MMG5_build3DMetric(MMG5_pMesh mesh,MMG5_pSol sol,int ip,double dbuf[6]);
  int           MMG5_loadVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
  int            MMG5_loadMshMesh_part1(MMG5_pMesh mesh,const char *filename,

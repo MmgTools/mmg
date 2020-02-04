@@ -203,13 +203,13 @@ int    movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist);
 int    MMGS_prilen(MMG5_pMesh mesh,MMG5_pSol met,int);
 int    MMGS_set_metricAtPointsOnReqEdges ( MMG5_pMesh,MMG5_pSol );
 
-double (*MMG5_calelt)(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
-int    (*MMGS_defsiz)(MMG5_pMesh mesh,MMG5_pSol met);
-int    (*MMGS_gradsiz)(MMG5_pMesh mesh,MMG5_pSol met);
-int    (*MMGS_gradsizreq)(MMG5_pMesh mesh,MMG5_pSol met);
-int    (*intmet)(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s);
-int    (*movridpt)(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist);
-int    (*movintpt)(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist);
+extern double (*MMG5_calelt)(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
+extern int    (*MMGS_defsiz)(MMG5_pMesh mesh,MMG5_pSol met);
+extern int    (*MMGS_gradsiz)(MMG5_pMesh mesh,MMG5_pSol met);
+extern int    (*MMGS_gradsizreq)(MMG5_pMesh mesh,MMG5_pSol met);
+extern int    (*intmet)(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s);
+extern int    (*movridpt)(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist);
+extern int    (*movintpt)(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist);
 
 /**
  * Set common pointer functions between mmgs and mmg3d to the matching mmgs

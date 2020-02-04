@@ -38,7 +38,7 @@
 
 #include "inlined_functions_3d.h"
 
-char  ddb;
+extern char  ddb;
 
 /**
  * \param mesh pointer toward the mesh structure.

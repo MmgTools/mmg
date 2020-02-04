@@ -36,6 +36,23 @@
 
 mytime         MMG5_ctim[TIMEMAX];
 
+double (*MMG5_lenedg)(MMG5_pMesh ,MMG5_pSol ,int, MMG5_pTetra );
+double (*MMG5_lenedgspl)(MMG5_pMesh ,MMG5_pSol ,int, MMG5_pTetra );
+double (*MMG5_caltet)(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt);
+double (*MMG5_caltri)(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
+int    (*MMG3D_defsiz)(MMG5_pMesh ,MMG5_pSol );
+int    (*MMG3D_gradsiz)(MMG5_pMesh ,MMG5_pSol );
+int    (*MMG3D_gradsizreq)(MMG5_pMesh ,MMG5_pSol );
+int    (*MMG5_intmet)(MMG5_pMesh,MMG5_pSol,int,char,int, double);
+int    (*MMG5_interp4bar)(MMG5_pMesh,MMG5_pSol,int,int,double *);
+int    (*MMG5_movintpt)(MMG5_pMesh ,MMG5_pSol, MMG3D_pPROctree ,int *, int , int );
+int    (*MMG5_movbdyregpt)(MMG5_pMesh, MMG5_pSol, MMG3D_pPROctree ,int*, int, int*, int, int ,int);
+int    (*MMG5_movbdyrefpt)(MMG5_pMesh, MMG5_pSol, MMG3D_pPROctree ,int*, int, int*, int ,int);
+int    (*MMG5_movbdynompt)(MMG5_pMesh, MMG5_pSol, MMG3D_pPROctree ,int*, int, int*, int ,int);
+int    (*MMG5_movbdyridpt)(MMG5_pMesh, MMG5_pSol, MMG3D_pPROctree ,int*, int, int*, int ,int);
+int    (*MMG5_cavity)(MMG5_pMesh ,MMG5_pSol ,int ,int ,int *,int ,double);
+int    (*MMG3D_PROctreein)(MMG5_pMesh ,MMG5_pSol ,MMG3D_pPROctree ,int,double );
+
 /**
  * Print elapsed time at end of process.
  */
@@ -389,28 +406,28 @@ int main(int argc,char *argv[]) {
         MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
       }
       MMG5_DEL_MEM(mesh,ls->namein);
-    }
+      }
 
     if ( mesh->info.lag >= 0 || mesh->info.iso ) {
       /* displacement or isovalue are mandatory */
       if ( MMG3D_loadSol(mesh,sol,sol->namein) < 1 ) {
         fprintf(stdout,"  ## ERROR: UNABLE TO LOAD SOLUTION FILE.\n");
         MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
-      }
     }
-    else {
+  }
+  else {
       /* Facultative metric */
       if ( MMG3D_loadSol(mesh,met,met->namein) == -1 ) {
         fprintf(stderr,"\n  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
         MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
       }
-    }
+      }
     /* In iso mode: read metric if any */
     if ( mesh->info.iso && met->namein ) {
       if ( MMG3D_loadSol(mesh,met,met->namein) < 1 ) {
         fprintf(stdout,"  ## ERROR: UNABLE TO LOAD METRIC.\n");
         MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
-      }
+    }
     }
     break;
 
@@ -437,13 +454,13 @@ int main(int argc,char *argv[]) {
   }
   else if ( mesh->info.iso ) {
      if ( ls == NULL || ls->m == NULL ) {
-      fprintf(stderr,"\n  ## ERROR: NO ISOVALUE DATA.\n");
+        fprintf(stderr,"\n  ## ERROR: NO ISOVALUE DATA.\n");
       MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
+      }
     }
-  }
 
   /* Read parameter file */
-  if ( !MMG3D_parsop(mesh,met) )
+    if ( !MMG3D_parsop(mesh,met) )
     MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_LOWFAILURE);
 
   chrono(OFF,&MMG5_ctim[1]);

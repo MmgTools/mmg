@@ -38,9 +38,9 @@ extern "C" {
                          MMG5_ARG_ppMesh,&mesh,MMG5_ARG_ppMet,&met, \
                          MMG5_ARG_ppLs,&ls,MMG5_ARG_ppDisp,&disp,   \
                          MMG5_ARG_end) ) {                          \
-      return MMG5_LOWFAILURE;                                       \
+      return MMG5_LOWFAILURE;                                      \
     }                                                               \
-    return val;                                                     \
+    return val;                                                    \
   }while(0)
 
 /** Reallocation of point table and sol table and creation
