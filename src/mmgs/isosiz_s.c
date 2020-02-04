@@ -35,6 +35,7 @@
 
 #include "mmgs.h"
 #include <math.h>
+#include "mmgsexterns.c"
 
 #define MAXLEN   1.0e+3
 

@@ -40,6 +40,8 @@
 
 #include "mmg3d.h"
 
+#include "mmg3dexterns.c"
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward a sol structure (metric).

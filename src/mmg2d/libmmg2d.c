@@ -21,6 +21,7 @@
 ** =============================================================================
 */
 #include "mmg2d.h"
+#include "mmg2dexterns.c"
 
 /**
  * Pack the mesh \a mesh and its associated metric \a met and/or solution \a sol
