@@ -1168,6 +1168,116 @@ static int MMG3D_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol) {
 }
 
 /**
+ * \param mesh pointer toward the mesh structure.
+ * \return 1 if success, 0 if the xtetra array can't be reallocated.
+ *
+ * Update the xtetra array to store the new bdy faces created by the isosurface
+ * discretization.
+ *
+ */
+int MMG3D_update_xtetra ( MMG5_pMesh mesh ) {
+  MMG5_pTetra   pt,pt1,ptmax,ptmin;
+  MMG5_pxTetra  pxt;
+  int           *adja,k,i,jel,j,kmax,imax,kmin,imin;
+
+  if ( (!mesh->info.iso) || (!mesh->info.opnbdy) ) {
+    /* In non opnbdy mode, info stored in xtetra is not used */
+    /* In non ls mode, xtetra are alread updated */
+    return 1;
+  }
+
+  /* Opnbdy mode uses data stored in xtetra but in iso mode, the new triangles
+   * created by the ls discretization haven't been stored inside the xtetra */
+  if ( !mesh->xtetra ) {
+    fprintf(stderr,"\n  ## Error: %s: the xtetra array must be allocated.\n",
+      __func__);
+    return 0;
+  }
+  if ( !mesh->adja ) {
+    fprintf(stderr,"\n  ## Error: %s: the ajda array must be allocated.\n",
+      __func__);
+    return 0;
+  }
+
+
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+
+    adja = &mesh->adja[4*(k-1)+1];
+
+    for (i=0; i<4; i++) {
+      if ( !adja[i] ) {
+        /* Face is already stored */
+        continue;
+      }
+
+      jel = adja[i]/4;
+      pt1 = &mesh->tetra[jel];
+
+      if ( pt->ref == pt1->ref ) {
+        /* Potential opnbdy face is already stored */
+        continue;
+      }
+
+      j = adja[i]%4;
+      /* Detection of the tetra of higher ref */
+      if ( pt->ref > pt1->ref ) {
+        ptmax = pt;
+        kmax  = k;
+        imax  = i;
+        ptmin = pt1;
+        kmin  = jel;
+        imin  = j;
+      }
+      else {
+        ptmax = pt1;
+        kmax  = jel;
+        imax  = j;
+        ptmin = pt;
+        kmin  = k;
+        imin  = i;
+      }
+
+      /* Update the xtetra array for both tetra */
+      /* Tetra ptmax */
+      if ( !ptmax->xt ) {
+        mesh->xt++;
+        if ( mesh->xt > mesh->xtmax ) {
+          MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
+                            "larger xtetra table",
+                            mesh->xt--;
+                            fprintf(stderr,"  Exit program.\n");return 0;);
+        }
+        ptmax->xt = mesh->xt;
+      }
+
+      pxt = &mesh->xtetra[ptmax->xt];
+      pxt->ref[imax]   = MG_ISO;
+      pxt->ftag[imax] |= MG_BDY;
+      MG_SET(pxt->ori,imax);
+
+      /* Tetra ptmin */
+      if ( !ptmin->xt ) {
+        mesh->xt++;
+        if ( mesh->xt > mesh->xtmax ) {
+          MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
+                            "larger xtetra table",
+                            mesh->xt--;
+                            fprintf(stderr,"  Exit program.\n");return 0;);
+        }
+        ptmin->xt = mesh->xt;
+      }
+
+      pxt = &mesh->xtetra[ptmin->xt];
+      pxt->ref[imin]   = MG_ISO;
+      pxt->ftag[imin] |= MG_BDY;
+      MG_CLR(pxt->ori,imin);
+    }
+  }
+  return 1;
+}
+
+/**
  * \param mesh pointer toward the mesh
  * \param start index of the starting tetra
  * \param ip point index
@@ -2025,6 +2135,7 @@ int MMG3D_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
     fprintf(stderr,"\n  ## Problem in setting references. Exit program.\n");
     return 0;
   }
+
 
   /* Clean memory */
   MMG5_DEL_MEM(mesh,sol->m);

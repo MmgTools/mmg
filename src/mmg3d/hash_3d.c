@@ -1785,7 +1785,7 @@ int MMG5_bdrySet(MMG5_pMesh mesh) {
             pt->xt = mesh->xt;
           }
           ptt = &mesh->tria[kt];
-          pxt = &mesh->xtetra[mesh->xt];
+          pxt = &mesh->xtetra[pt->xt];
           pxt->ref[i]   = ptt->ref;
           pxt->ftag[i] |= MG_BDY;
           pxt->ftag[i] |= (ptt->tag[0] & ptt->tag[1] & ptt->tag[2]);
