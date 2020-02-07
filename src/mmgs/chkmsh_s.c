@@ -142,7 +142,7 @@ int MMG5_mmgsChkmsh(MMG5_pMesh mesh,int severe,int base) {
     MMG5_pPoint         ppt;
     MMG5_pTria          pt1,pt2;
     int                 adj,adj1,k,kk,l,nk,i,j,ip,lon,len;
-    int                 *adja,*adjb,list[MMGS_LMAX+2];
+    int                 *adja,*adjb,list[MMGS_LMAX+2],ishell;
     char                voy,voy1,i1,i2,j1,j2;
     static char         mmgErr0=0,mmgErr1=0,mmgErr2=0,mmgErr3=0,mmgErr4=0;
     static char         mmgErr5=0,mmgErr6=0,mmgErr7=0;
@@ -282,8 +282,12 @@ int MMG5_mmgsChkmsh(MMG5_pMesh mesh,int severe,int base) {
             }
             else if ( MS_SIN(ppt->tag) )  continue;
 
-            lon = boulet(mesh,k,i,list);
-            if ( lon < 1 )  continue;
+            lon = MMGS_boulet(mesh,k,i,MMG5_inxt2[i],list,&ishell);
+            if ( lon < 1 ) {
+              fprintf(stderr,"\n  ## Warning: %s: 6. overflow in the ball of %d (from %d)\n",
+                      __func__,MMGS_indPt(mesh,ip),MMGS_indElt(mesh,k));
+              continue;
+            }
             for (l=0; l<lon; l++) {
                 kk  = list[l] / 3;
                 nk  = list[l] % 3;

@@ -501,7 +501,7 @@ static int MMG5_singul(MMG5_pMesh mesh) {
   MMG5_pTria     pt;
   MMG5_pPoint    ppt,p1,p2;
   double         ux,uy,uz,vx,vy,vz,dd;
-  int            list[MMGS_LMAX+2],listref[MMGS_LMAX+2],k,nc,xp,nr,ns,nre;
+  int            list[MMGS_LMAX+2],listref[MMGS_LMAX+2],k,nc,xp,nr,ns,nre,ishell;
   char           i;
 
   nre = nc = 0;
@@ -566,7 +566,7 @@ static int MMG5_singul(MMG5_pMesh mesh) {
     for (i=0; i<3; i++) {
       ppt = &mesh->point[pt->v[i]];
       if ( !ppt->s )  continue;
-      nr = boulet(mesh,k,i,list);
+      nr = MMGS_boulet(mesh,k,i,MMG5_iprv2[i],list,&ishell);
       if ( nr != ppt->s ) {
         ppt->tag |= MG_CRN + MG_REQ;
         ppt->s = 0;

@@ -35,35 +35,106 @@
 
 #include "mmgs.h"
 
+/**
+ * \param mesh pointer toward the mesh
+ * \param k index of the element in wich we collapse
+ * \param i index of the edge from which we start
+ * \param ip1 global index of point for which we want to compute the ball
+ * \param fwd sense of travel (to fill) to not cross the edge \a i
+ *
+ * \return ilist, the number of item in the local ball
+ *
+ * cout the number of triangles of the ball of ip1 that we can reach from tria
+ * \a k without crossing a non manifold edge.
+ *
+ */
+static
+int MMGS_count_bouleploc(MMG5_pMesh mesh,int k,int i, int ip1,int*fwd) {
+  MMG5_pTria pt,pt1;
+  int        *adja,ilist,jel,j,j1,j2;
 
+  ilist = 0;
+  jel   = k;
+  j     = i;
+
+  /* Detect the sense of travel */
+  pt   = &mesh->tria[k];
+  *fwd = 1;
+  if ( pt->v[MMG5_inxt2[i]] != ip1 ) {
+    *fwd = 0;
+    assert(pt->v[MMG5_iprv2[i]] == ip1);
+  }
+
+  do {
+    ++ilist;
+    pt1 = &mesh->tria[jel];
+    adja = &mesh->adja[3*(jel-1)+1];
+    if ( *fwd ) {
+      j1  = MMG5_inxt2[j];
+      j2  = MMG5_iprv2[j];
+    }
+    else {
+      j1  = MMG5_iprv2[j];
+      j2  = MMG5_inxt2[j];
+    }
+    assert ( pt1->v[j1] == ip1 );
+
+    if ( pt1->tag[j2] & MG_NOM ) break;
+
+    jel = adja[j2]/3;
+    j   = adja[j2]%3;
+  } while ( jel && (jel != k) );
+
+  return ilist;
+}
+
+#define MMGS_UPDATE_PIV(ia,ia1,ia2,fwd) do      \
+  {                                             \
+    if ( fwd==1 ) {                             \
+      ia1  = MMG5_inxt2[ia];                    \
+      ia2  = MMG5_iprv2[ia];                    \
+    }                                           \
+    else {                                      \
+      ia1  = MMG5_iprv2[ia];                    \
+      ia2  = MMG5_inxt2[ia];                    \
+    }                                           \
+  } while(0)
 
 /**
  * \param mesh pointer toward the mesh
  * \param met pointer toward the metric
- * \param k index of the element in wich we collapse
- * \param i index of the edge to collapse
- * \param list pointer toward the ball of point
+ * \param start index of the element in wich we collapse
+ * \param istart index of the edge to collapse
+ * \param list pointer toward the ball of point \a ip1
+ * \param ishell number of tria in the shell of \a istart
  * \param typchk type of check to perform
  *
  * \return 0 if we can't move of if we fail, 1 if success
  *
- * check if geometry preserved by collapsing edge i
+ * check if geometry preserved by collapsing non-manifold edge \a istart
+ * (collapse \a ip1 over \a ip2).
  *
  */
-int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
+int MMGS_chkcol(MMG5_pMesh mesh,MMG5_pSol met,int start,char istart,int *list,
+                int *ishell,char typchk) {
   MMG5_pTria     pt,pt0,pt1,pt2;
   MMG5_pPoint    p1,p2;
   double         len,lon,ps,cosnold,cosnnew,kal,n0old[3],n1old[3],n00old[3];
   double         n0new[3],n1new[3],n00new[3];
-  int            *adja,jel,kel,ip1,ip2,l,ll,ilist;
-  char           i1,i2,j,jj,j2,lj,open,voy;
+  int            *adja,jel,kel,ip1,ip2,nump,l,ll,base,kk,k,i;
+  int            ilistfull,ilist,sumilist,fwd;
+  char           i1,i2,j,jj,j1,j2,lj,lj1,lj2,open,voy;
 
   pt0 = &mesh->tria[0];
-  pt  = &mesh->tria[k];
-  i1  = MMG5_inxt2[i];
-  i2  = MMG5_iprv2[i];
+  pt  = &mesh->tria[start];
+  i1  = MMG5_inxt2[istart];
+  i2  = MMG5_iprv2[istart];
   ip1 = pt->v[i1];
   ip2 = pt->v[i2];
+  nump = ip1;
+
+  assert ( !MG_SIN(mesh->point[ip1].tag) );
+
   if ( typchk == 2 && met->m ) {
     lon = MMG5_lenSurfEdg(mesh,met,ip1,ip2,0);
     if ( !lon ) return 0;
@@ -72,79 +143,223 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
   }
 
   /* collect all triangles around vertex i1 */
-  ilist = boulechknm(mesh,k,i1,list);
-  if ( ilist <= 0 )  return 0;
+  ilistfull = MMGS_boulechknm(mesh,start,i1,istart,list,ishell);
+  if ( ilistfull <= 0 )  return 0;
 
   /* check for open ball */
-  adja = &mesh->adja[3*(k-1)+1];
-  open = adja[i] == 0;
+  adja = &mesh->adja[3*(start-1)+1];
+ // open = adja[istart] == 0;
 
-  if ( ilist > 3 ) {
-    /* check references */
+  /** Starting from each tria of the shell of i, travel by adjacency around \a
+   * ip1 and process the portion of surface until meeting a non-manifold edge */
+  base = ++mesh->base;
+  sumilist = 0;
+  for ( kk = 0; kk<*ishell; ++ kk ) {
+    k = list[kk]/3;
+    i = list[kk]%3;
+
+    adja = &mesh->adja[3*(k-1)+1];
+
+    pt  = &mesh->tria[k];
+    if ( pt->base == base ) continue;
+    pt->base = base;
+
+    /* First tria of the portion of surface */
+    jel   = k;
+    j     = i;
+    i1    = i;
+    i2    = MMG5_inxt2[i1];
+    i     = MMG5_iprv2[i1];
+    if ( pt->v[i2]!= ip2 ) {
+      i  = i2;
+      i2 = MMG5_inxt2[i2];
+    }
+    assert ( (pt->v[i1] == nump) && (pt->v[i2] == ip2) );
+
+    fwd = 1;
+    if ( pt->tag[i] & MG_NOM ) {
+      //assert ( !open );
+      assert ( *ishell > 2 );
+      /** Count the number of tria that we can reach without crossing a nm edge */
+      ilist = MMGS_count_bouleploc( mesh, k, i, ip1,&fwd);
+      open = 1;
+    }
+    else {
+      assert ( *ishell < 3 );
+      ilist = ilistfull;
+      open  = ( adja[i]==0 );
+      if ( !open ) {
+        /* Closed manifold case: mark the last tria of the ball as treated to
+         * not unfold the ball a second time */
+        mesh->tria[adja[i]/3].base = base;
+      }
+    }
+    sumilist += ilist;
+
+    /* check references:  */
     if ( MG_EDG(pt->tag[i2]) ) {
       jel = list[1] / 3;
       pt1 = &mesh->tria[jel];
       if ( abs(pt->ref) != abs(pt1->ref) )  return 0;
     }
 
-    /* analyze ball */
-    assert ( ilist-1+open > 1 );
-    for (l=1; l<ilist-1+open; l++) {
-      jel = list[l] / 3;
-      j   = list[l] % 3;
-      jj  = MMG5_inxt2[j];
-      j2  = MMG5_iprv2[j];
+    if ( ilist+open > 3 ) {
+      /* If only one pt is the only elt of a given ref, refuse the collapse */
+      jel = adja[i2] / 3;
+      assert ( jel );
       pt1 = &mesh->tria[jel];
 
-      /* check length */
-      if ( typchk == 2 && met->m && !MG_EDG(mesh->point[ip2].tag) ) {
-        ip1 = pt1->v[j2];
-        len = MMG5_lenSurfEdg(mesh,met,ip1,ip2,0);
-        if ( len > lon || !len )  return 0;
+      j   = adja[i2] % 3;
+      MMGS_UPDATE_PIV(j,j1,j2,fwd);
+      assert ( pt1->v[j1] == nump );
+
+      if ( MG_EDG(pt->tag[i2]) ) {
+        if ( abs(pt->ref) != abs(pt1->ref) )  return 0;
       }
 
-      /* check normal flipping */
-      if ( !MMG5_nortri(mesh,pt1,n1old) )  return 0;
-      memcpy(pt0,pt1,sizeof(MMG5_Tria));
-      pt0->v[j] = ip2;
-      if ( !MMG5_nortri(mesh,pt0,n1new) )  return 0;
+      /* analyze ball */
+      assert ( ilist-1+open > 1 );
 
-      ps = n1new[0]*n1old[0] + n1new[1]*n1old[1]  + n1new[2]*n1old[2];
-      if ( ps < 0.0 )  return 0;
+      for ( l=1; l<ilist-1+open; l++) {
+        assert ( jel != k );
+        pt1 = &mesh->tria[jel];
+        MMGS_UPDATE_PIV(j,j1,j2,fwd);
+        assert ( pt1->v[j1] == nump );
 
-      /* keep normals at 1st triangles */
-      if ( l == 1 && !open ) {
-        memcpy(n00old,n1old,3*sizeof(double));
-        memcpy(n00new,n1new,3*sizeof(double));
-      }
+        pt1->flag = base;
 
-      /* check normals deviation */
-      if ( !(pt1->tag[j2] & MG_GEO) ) {
-        if ( l > 1 ) {
-          cosnold = n0old[0]*n1old[0] + n0old[1]*n1old[1] + n0old[2]*n1old[2];
-          cosnnew = n0new[0]*n1new[0] + n0new[1]*n1new[1] + n0new[2]*n1new[2];
-          if ( cosnold < MMG5_ANGEDG ) {
-            if ( cosnnew < cosnold )  return 0;
+        /* check length */
+        if ( typchk == 2 && met->m && !MG_EDG(mesh->point[ip2].tag) ) {
+          ip1 = pt1->v[j2];
+          len = MMG5_lenSurfEdg(mesh,met,ip1,ip2,0);
+          if ( len > lon || !len )  return 0;
+        }
+
+        /* check normal flipping */
+        if ( !MMG5_nortri(mesh,pt1,n1old) )  return 0;
+        memcpy(pt0,pt1,sizeof(MMG5_Tria));
+        pt0->v[j1] = ip2;
+        if ( !MMG5_nortri(mesh,pt0,n1new) )  return 0;
+
+        ps = n1new[0]*n1old[0] + n1new[1]*n1old[1]  + n1new[2]*n1old[2];
+        if ( ps < 0.0 )  return 0;
+
+        /* keep normals at 1st triangles */
+        if ( l == 1 && !open ) {
+          memcpy(n00old,n1old,3*sizeof(double));
+          memcpy(n00new,n1new,3*sizeof(double));
+        }
+
+        /* check normals deviation */
+        if ( !(pt1->tag[j] & MG_GEO) ) {
+          if ( l > 1 ) {
+            cosnold = n0old[0]*n1old[0] + n0old[1]*n1old[1] + n0old[2]*n1old[2];
+            cosnnew = n0new[0]*n1new[0] + n0new[1]*n1new[1] + n0new[2]*n1new[2];
+            if ( cosnold < MMG5_ANGEDG ) {
+              if ( cosnnew < cosnold )  return 0;
+            }
+            else if ( cosnnew < MMG5_ANGEDG )  return 0;
           }
-          else if ( cosnnew < MMG5_ANGEDG )  return 0;
         }
+
+        /* check geometric support */
+        if ( l == 1 ) {
+          pt0->tag[j] |= pt->tag[i1];
+        }
+        else if ( l == ilist-2+open ) {
+          if ( !open ) {
+            ll = mesh->adja[3*(jel-1)+1+j2] / 3;
+            lj = mesh->adja[3*(jel-1)+1+j2] % 3;
+            MMGS_UPDATE_PIV(lj,lj1,lj2,fwd);
+            assert ( mesh->tria[ll].v[lj1]==nump );
+            pt0->tag[j2] |= mesh->tria[ll].tag[lj1];
+          }
+          else {
+            pt0->tag[j2] |= pt->tag[i];
+          }
+        }
+        if ( chkedg(mesh,0) )  return 0;
+
+        /* check quality */
+        if ( typchk == 2 && met->m )
+          kal = MMGS_ALPHAD*MMG5_calelt(mesh,met,pt0);
+        else
+          kal = MMGS_ALPHAD*MMG5_caltri_iso(mesh,NULL,pt0);
+        if ( kal < MMGS_NULKAL )  return 0;
+
+        memcpy(n0old,n1old,3*sizeof(double));
+        memcpy(n0new,n1new,3*sizeof(double));
+
+        if ( pt1->tag[j2] & MG_NOM ) break;
+
+        adja = &mesh->adja[3*(jel-1)+1];
+
+        jel = adja[j2]/3;
+        j   = adja[j2]%3;
       }
 
-      /* check geometric support */
-      if ( l == 1 ) {
-        pt0->tag[j2] |= pt->tag[i1];
-      }
-      else if ( l == ilist-2+open ) {
-        if ( !open ) {
-          ll = list[ilist-1] / 3;
-          lj = list[ilist-1] % 3;
-          pt0->tag[jj] |= mesh->tria[ll].tag[lj];
+      /* check angle between 1st and last triangles */
+      if ( (!open) && !(pt->tag[i] & MG_GEO) ) {
+        cosnold = n00old[0]*n1old[0] + n00old[1]*n1old[1] + n00old[2]*n1old[2];
+        cosnnew = n00new[0]*n1new[0] + n00new[1]*n1new[1] + n00new[2]*n1new[2];
+        if ( cosnold < MMG5_ANGEDG ) {
+          if ( cosnnew < cosnold )  return 0;
         }
-        else {
-          assert ( list[0]/3 == k );
-          pt0->tag[jj] |= pt->tag[i];
+        else if ( cosnnew < MMG5_ANGEDG )  return 0;
+
+        /* other checks for reference collapse */
+        adja = &mesh->adja[3*(jel-1)+1];
+        jel = adja[j]/3;
+        j   = adja[j]%3;
+        MMGS_UPDATE_PIV(j,j1,j2,-fwd);
+
+        pt  = &mesh->tria[jel];
+        if ( MG_EDG(pt->tag[j2]) ) {
+          adja = &mesh->adja[3*(jel-1)+1];
+          jel = adja[j2] / 3;
+          pt1 = &mesh->tria[jel];
+          if ( abs(pt->ref) != abs(pt1->ref) )  return 0;
         }
       }
+    }
+
+    /* specific test: no collapse if any interior edge is EDG */
+    else if ( ilist == 3 ) {
+      /* Remark: if ilist==3 and i is an open ridge, we pass in the previous
+       * test (open+ilist > 3) so here, ip1 is in the middle of the 3
+       * triangles */
+      p1 = &mesh->point[pt->v[i1]];
+      if ( MS_SIN(p1->tag) )  return 0;
+      else if ( MG_EDG(pt->tag[i2]) && !MG_EDG(pt->tag[i]) )  return 0;
+      else if ( !MG_EDG(pt->tag[i2]) && MG_EDG(pt->tag[i]) )  return 0;
+      else if ( MG_EDG(pt->tag[i2]) && MG_EDG(pt->tag[i]) && MG_EDG(pt->tag[i1]) )  return 0;
+
+      /* Check geometric approximation */
+      jel = adja[i2] / 3;
+      assert ( jel );
+      pt1 = &mesh->tria[jel];
+      pt1->base = base;
+
+      j   = adja[i2] % 3;
+      MMGS_UPDATE_PIV(j,j1,j2,fwd);
+      assert ( pt1->v[j1] == nump );
+
+      pt0 = &mesh->tria[0];
+      memcpy(pt0,pt1,sizeof(MMG5_Tria));
+      pt0->v[j1] = ip2;
+
+      adja = &mesh->adja[3*(jel-1)+1];
+
+      jel = adja[j2] / 3;
+      assert ( jel );
+      pt1 = &mesh->tria[jel];
+      pt1->base = base;
+
+      lj  = adja[j2] % 3;
+      MMGS_UPDATE_PIV(lj,lj1,lj2,fwd);
+
+      pt0->tag[j2] |= pt1->tag[lj1];
+      pt0->tag[j ] |= pt1->tag[lj2];
       if ( chkedg(mesh,0) )  return 0;
 
       /* check quality */
@@ -153,131 +368,169 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
       else
         kal = MMGS_ALPHAD*MMG5_caltri_iso(mesh,NULL,pt0);
       if ( kal < MMGS_NULKAL )  return 0;
-
-      memcpy(n0old,n1old,3*sizeof(double));
-      memcpy(n0new,n1new,3*sizeof(double));
     }
 
-    /* check angle between 1st and last triangles */
-    if ( !open && !(pt->tag[i] & MG_GEO) ) {
-      cosnold = n00old[0]*n1old[0] + n00old[1]*n1old[1] + n00old[2]*n1old[2];
-      cosnnew = n00new[0]*n1new[0] + n00new[1]*n1new[1] + n00new[2]*n1new[2];
-      if ( cosnold < MMG5_ANGEDG ) {
-        if ( cosnnew < cosnold )  return 0;
-      }
-      else if ( cosnnew < MMG5_ANGEDG )  return 0;
+    /* for specific configurations along open ridge */
+    else if ( ilist == 2 ) {
+      if ( !open )  return 0;
 
-      /* other checks for reference collapse */
-      jel = list[ilist-1] / 3;
-      j   = list[ilist-1] % 3;
-      j   = MMG5_iprv2[j];
-      pt  = &mesh->tria[jel];
-      if ( MG_EDG(pt->tag[j]) ) {
-        jel = list[ilist-2] / 3;
-        pt1 = &mesh->tria[jel];
-        if ( abs(pt->ref) != abs(pt1->ref) )  return 0;
+      jel = adja[i2] / 3;
+      assert ( jel );
+      pt1 = &mesh->tria[jel];
+      pt1->base = base;
+
+      j   = adja[i2] % 3;
+      MMGS_UPDATE_PIV(j,j1,j2,fwd);
+      assert ( pt1->v[j1] == nump );
+
+      /* Topological test */
+      adja = &mesh->adja[3*(jel-1)+1];
+      kel = adja[j1] / 3;
+      voy = adja[j1] % 3;
+      pt2 = &mesh->tria[kel];
+
+      if ( pt2->v[voy] == ip2) return 0;
+
+      if ( fwd ) {
+        jj  = MMG5_inxt2[j1];
+        j2  = MMG5_iprv2[j1];
       }
+      else {
+        jj = MMG5_iprv2[j1];
+        j2 = MMG5_inxt2[j1];
+      }
+      if ( abs(pt->ref) != abs(pt1->ref) )  return 0;
+      else if ( !(pt1->tag[jj] & MG_GEO) )  return 0;
+
+      p1 = &mesh->point[pt->v[i1]];
+      p2 = &mesh->point[pt1->v[j]];
+      if ( p2->tag > p1->tag || p2->ref != p1->ref )  return 0;
+
+      /* Check geometric approximation */
+      pt0 = &mesh->tria[0];
+      memcpy(pt0,pt,sizeof(MMG5_Tria));
+      pt0->v[i1] = pt1->v[j2];
+
+      if ( chkedg(mesh,0) )  return 0;
+
+      /* check quality */
+      if ( typchk == 2 && met->m )
+        kal = MMGS_ALPHAD*MMG5_calelt(mesh,met,pt0);
+      else
+        kal = MMGS_ALPHAD*MMG5_caltri_iso(mesh,NULL,pt0);
+      if ( kal < MMGS_NULKAL )  return 0;
     }
   }
 
-  /* specific test: no collapse if any interior edge is EDG */
-  else if ( ilist == 3 ) {
+  assert ( sumilist == ilistfull &&
+           "ip1 is at intersection of multiple nm edges but non singular... " );
 
-    p1 = &mesh->point[pt->v[i1]];
-    if ( MS_SIN(p1->tag) )  return 0;
-    else if ( MG_EDG(pt->tag[i2]) && !MG_EDG(pt->tag[i]) )  return 0;
-    else if ( !MG_EDG(pt->tag[i2]) && MG_EDG(pt->tag[i]) )  return 0;
-    else if ( MG_EDG(pt->tag[i2]) && MG_EDG(pt->tag[i]) && MG_EDG(pt->tag[i1]) )  return 0;
-
-    /* Check geometric approximation */
-    jel = list[1] / 3;
-    j   = list[1] % 3;
-    jj  = MMG5_inxt2[j];
-    j2  = MMG5_iprv2[j];
-    pt0 = &mesh->tria[0];
-    pt1 = &mesh->tria[jel];
-    memcpy(pt0,pt1,sizeof(MMG5_Tria));
-    pt0->v[j] = ip2;
-
-    jel = list[2] / 3;
-    j   = list[2] % 3;
-    pt1 = &mesh->tria[jel];
-    pt0->tag[jj] |= pt1->tag[j];
-    pt0->tag[j2] |= pt1->tag[MMG5_inxt2[j]];
-    if ( chkedg(mesh,0) )  return 0;
-
-    /* check quality */
-    if ( typchk == 2 && met->m )
-      kal = MMGS_ALPHAD*MMG5_calelt(mesh,met,pt0);
-    else
-      kal = MMGS_ALPHAD*MMG5_caltri_iso(mesh,NULL,pt0);
-    if ( kal < MMGS_NULKAL )  return 0;
-  }
-
-  /* for specific configurations along open ridge */
-  else if ( ilist == 2 ) {
-    if ( !open )  return 0;
-
-    jel = list[1] / 3;
-    j   = list[1] % 3;
-
-    /* Topological test */
-    adja = &mesh->adja[3*(jel-1)+1];
-    kel = adja[j] / 3;
-    voy = adja[j] % 3;
-    pt2 = &mesh->tria[kel];
-
-    if ( pt2->v[voy] == ip2) return 0;
-
-    jj  = MMG5_inxt2[j];
-    pt1 = &mesh->tria[jel];
-    if ( abs(pt->ref) != abs(pt1->ref) )  return 0;
-    else if ( !(pt1->tag[jj] & MG_GEO) )  return 0;
-
-    p1 = &mesh->point[pt->v[i1]];
-    p2 = &mesh->point[pt1->v[jj]];
-    if ( p2->tag > p1->tag || p2->ref != p1->ref )  return 0;
-
-    /* Check geometric approximation */
-    j2  = MMG5_iprv2[j];
-    pt0 = &mesh->tria[0];
-    memcpy(pt0,pt,sizeof(MMG5_Tria));
-    pt0->v[i1] = pt1->v[j2];
-
-    if ( chkedg(mesh,0) )  return 0;
-
-    /* check quality */
-    if ( typchk == 2 && met->m )
-      kal = MMGS_ALPHAD*MMG5_calelt(mesh,met,pt0);
-    else
-      kal = MMGS_ALPHAD*MMG5_caltri_iso(mesh,NULL,pt0);
-    if ( kal < MMGS_NULKAL )  return 0;
-
-  }
-
-  return ilist;
+  return ilistfull;
 }
 
-/* collapse edge i of k, i1->i2 */
-int colver(MMG5_pMesh mesh,int *list,int ilist) {
-  MMG5_pTria    pt,pt1,pt2;
-  int     *adja,k,iel,jel,kel,ip1,ip2;
-  char     i,i1,i2,j,jj,open;
+/**
+ * \param mesh pointer toward the mesh structure
+ * \param list ball of the point to collapse, \f$list[k]\%3\f$ being the local
+ *             index of the point in tetra \f$list[k]/3\f$.
+ * \param ishell number of triangles in the shell of the collapsed edge.
+ * \param ilist number of triangles in the ball of the point to collapse.
+ *
+ * \return 0 if fail, 1 if success.
+ *
+ * Collapse point \f$list[k]\%3\f$ (i1) over point \f$ MMG5_inxt2[list[k]\%3]\f$
+ * (i2) in tria \f$list[k]/3\f$ (iel).
+ *
+ */
+int colver(MMG5_pMesh mesh,int *list,int ishell,int ilist) {
+  MMG5_pTria    ptstart,pt,pt1;
+  int           *adja,start,k,iel,jel,kel,ip1,ip2,iadr,fwd;
+  char          istart,istart1,istart2,i,i1,i2,j,jj,j1,j2,kk;
 
-  iel = list[0] / 3;
-  i1  = list[0] % 3;
-  i   = MMG5_iprv2[i1];
-  i2  = MMG5_inxt2[i1];
-  pt  = &mesh->tria[iel];
-  ip1 = pt->v[i1];
-  ip2 = pt->v[i2];
+  /** Keep the index in the starting tetra in memory */
+  start    = list[0] / 3;
+  istart1  = list[0] % 3;
 
-  /* check for open ball */
-  adja = &mesh->adja[3*(iel-1)+1];
-  open = adja[i] == 0;
+  /* Index of the edge along which we collapse */
+  istart   = MMG5_iprv2[istart1];
+  istart2  = MMG5_inxt2[istart1];
+  ptstart  = &mesh->tria[start];
+  ip1 = ptstart->v[istart1];
+  ip2 = ptstart->v[istart2];
 
-  /* update vertex ip1 -> ip2 */
-  for (k=1; k<ilist-1+open; k++) {
+  /* We are not able to collapse a singular point (which implies that ip1 is not
+   * a non manifold point or is at the extremity of exactly 2 non-manifold
+   * edges) */
+  assert ( !MG_SIN(mesh->point[ip1].tag) );
+
+  /* update adjacents */
+  for (k=0; k<ishell; k++) {
+    /* Elt to delete */
+    iel = list[k] / 3;
+    i1  = list[k] % 3;
+
+    pt  = &mesh->tria[iel];
+    assert ( ip1 == pt->v[i1]);
+
+    /* Look for ip2 to reach the adjacent that need to be updated */
+    i2    = MMG5_inxt2[i1];
+    i     = MMG5_iprv2[i1];
+    fwd   = 1;
+    if ( ip2 != pt->v[i2] ) {
+      i   = i2;
+      i2  = MMG5_inxt2[i2];
+      fwd = 0;
+    }
+    assert ( ip2 == pt->v[i2] );
+
+    /* Check that we dont collapse a domain with only one element (must be
+     * refused by chkcol) */
+ #warning To remove: is it possible that the edge i2 is nm (collapse of a point over a nm point along a non nm edge)
+    assert ( !(pt->tag[i2] & MG_NOM) );
+
+    adja = &mesh->adja[3*(iel-1)+1];
+
+    if ( !adja[i2] ) {
+      continue;
+    }
+
+    jel  = adja[i2]/3;
+    j    = adja[i2]%3;
+
+    pt1 = &mesh->tria[jel];
+    if ( ishell!=2 || ilist!=3 || k!=1 ) {
+      /* If ishell == 2 && ilist == 3 && k==1 pt1->v[j1] has been updated at
+       * previous iteration */
+      if ( fwd ) {
+        j1 = MMG5_inxt2[j];
+        j2 = MMG5_iprv2[j];
+        assert ( ip1 == pt1->v[j1] );
+        assert ( pt1->v[j2] == pt->v[i] );
+      }
+      else {
+        j2 = MMG5_inxt2[j];
+        j1 = MMG5_iprv2[j];
+        assert ( ip1 == pt1->v[j1] );
+        assert ( pt1->v[j2] == pt->v[i] );
+      }
+      /* Update pt1 vertex (ip1 becomes ip2) */
+      pt1->v[j1] = ip2;
+    }
+
+    /* Update tag and ref of edge j of pt1 (merged with edge i1 of pt) */
+    pt1->tag[j] |= pt->tag[i1];
+    pt1->edg[j] = MG_MAX( pt1->edg[j], pt->edg[i1] );
+
+    /* Update adjacency relationships */
+    iadr = adja[i1];
+    kel  = iadr/3;
+    kk   = iadr%3;
+
+    mesh->adja[3*(kel-1)+kk+1] = 3*jel + j;
+    mesh->adja[3*(jel-1)+j +1] = iadr;
+  }
+
+  /* update vertex ip1 -> ip2 in the ball of \a ip1 */
+  for ( k=ishell; k<ilist; k++ ) {
     jel = list[k] / 3;
     jj  = list[k] % 3;
     pt1 = &mesh->tria[jel];
@@ -285,55 +538,12 @@ int colver(MMG5_pMesh mesh,int *list,int ilist) {
     pt1->base  = mesh->base;
   }
 
-  /* update adjacent with 1st elt */
-  jel = list[1] / 3;
-  jj  = list[1] % 3;
-  j   = MMG5_iprv2[jj];
-  pt1 = &mesh->tria[jel];
-  pt1->tag[j] |= pt->tag[i1];
-  pt1->edg[j] = MG_MAX(pt->edg[i1],pt1->edg[j]);
-  if ( adja[i1] ) {
-    kel = adja[i1] / 3;
-    k   = adja[i1] % 3;
-    mesh->adja[3*(kel-1)+1+k] = 3*jel + j;
-    mesh->adja[3*(jel-1)+1+j] = 3*kel + k;
-    pt2 = &mesh->tria[kel];
-    pt2->tag[k] |= pt1->tag[j];
-    pt2->edg[k] = MG_MAX(pt1->edg[j],pt2->edg[k]);
-  }
-  else
-    mesh->adja[3*(jel-1)+1+j] = 0;
-
-  /* adjacent with last elt */
-  if ( !open ) {
-    iel = list[ilist-1] / 3;
-    i1  = list[ilist-1] % 3;
-    pt  = &mesh->tria[iel];
-
-    jel = list[ilist-2] / 3;
-    jj  = list[ilist-2] % 3;
-    j   = MMG5_inxt2[jj];
-    pt1 = &mesh->tria[jel];
-    pt1->tag[j] |= pt->tag[i1];
-    pt1->edg[j] = MG_MAX(pt->edg[i1],pt1->edg[j]);
-    adja = &mesh->adja[3*(iel-1)+1];
-    if ( adja[i1] ) {
-      kel = adja[i1] / 3;
-      k   = adja[i1] % 3;
-      mesh->adja[3*(kel-1)+1+k] = 3*jel + j;
-      mesh->adja[3*(jel-1)+1+j] = 3*kel + k;
-      pt2 = &mesh->tria[kel];
-      pt2->tag[k] |= pt1->tag[j];
-      pt2->edg[k] = MG_MAX(pt1->edg[j],pt2->edg[k]);
-    }
-    else
-      mesh->adja[3*(jel-1)+1+j] = 0;
-  }
 
   MMGS_delPt(mesh,ip1);
-  if ( !MMGS_delElt(mesh,list[0] / 3) ) return 0;
-  if ( !open ) {
-    if ( !MMGS_delElt(mesh,list[ilist-1] / 3) )  return 0;
+
+  for ( k=0; k<ishell; k++) {
+    jel = list[k] / 3;
+    if ( !MMGS_delElt(mesh,jel) ) return 0;
   }
 
   return 1;
@@ -452,11 +662,12 @@ int colver2(MMG5_pMesh mesh,int* list) {
 }
 
 /* collapse edge i of k, i1->i2 */
+#warning does it still work???
 int litcol(MMG5_pMesh mesh,int k,char i,double kali) {
   MMG5_pTria     pt,pt0,pt1;
   MMG5_pPoint    p1,p2;
   double         kal,ps,cosnold,cosnnew,n0old[3],n0new[3],n1old[3],n1new[3],n00old[3],n00new[3];
-  int            *adja,list[MMGS_LMAX+2],jel,ip2,l,ilist;
+  int            *adja,list[MMGS_LMAX+2],jel,ip2,l,ilist,ishell;
   char           i1,i2,j,jj,j2,open;
 
   pt0 = &mesh->tria[0];
@@ -477,7 +688,10 @@ int litcol(MMG5_pMesh mesh,int k,char i,double kali) {
   /* collect all triangles around vertex i1 */
   if ( pt->v[i1] & MG_NOM )  return 0;
 
-  ilist = boulet(mesh,k,i1,list);
+  ilist = MMGS_boulet(mesh,k,i1,MMG5_inxt2[i1],list,&ishell);
+  if ( ilist <= 1 ) {
+    return 0;
+  }
 
   /* check for open ball */
   adja = &mesh->adja[3*(k-1)+1];
@@ -547,7 +761,7 @@ int litcol(MMG5_pMesh mesh,int k,char i,double kali) {
       if ( abs(pt->ref) != abs(pt1->ref) )  return 0;
     }
 
-    return colver(mesh,list,ilist);
+    return colver(mesh,list,ishell,ilist);
   }
 
   /* specific test: no collapse if any interior edge is EDG */
@@ -580,6 +794,3 @@ int litcol(MMG5_pMesh mesh,int k,char i,double kali) {
 
   return 0;
 }
-
-
-

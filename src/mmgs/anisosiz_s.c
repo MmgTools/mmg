@@ -55,7 +55,7 @@ static int MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   double             *m,n[3],isqhmin,isqhmax,b0[3],b1[3],ps1,tau[3];
   double             ntau2,gammasec[3];
   double             c[3],kappa,maxkappa,alpha,hausd,hausd_v;
-  int                ilist,list[MMGS_LMAX+2],k,i,iel,idp,init_s;
+  int                ilist,list[MMGS_LMAX+2],k,i,iel,idp,init_s,ishell;
   unsigned char      i0,i1,i2;
 
   pt  = &mesh->tria[it];
@@ -68,8 +68,8 @@ static int MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   isqhmin = mesh->info.hmin;
   isqhmax = mesh->info.hmax;
 
-  ilist = boulet(mesh,it,ip,list);
-  if ( !ilist )
+  ilist = MMGS_boulet(mesh,it,ip,MMG5_iprv2[ip],list,&ishell);
+  if ( ilist < 1 )
     return 0;
 
   maxkappa = 0.0;
@@ -345,7 +345,7 @@ static int MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   MMG5_pPoint        p0,p1;
   MMG5_Bezier       b;
   MMG5_pPar          par;
-  int                i,ilist,list[MMGS_LMAX+2],k,iel,ipref[2],idp,isloc;
+  int                i,ilist,list[MMGS_LMAX+2],k,iel,ipref[2],idp,isloc,ishell;
   double             *m,isqhmin,isqhmax,*n,r[3][3],lispoi[3*MMGS_LMAX+1];
   double             ux,uy,uz,det2d,intm[3],c[3];
   double             tAA[6],tAb[3],hausd;
@@ -357,8 +357,8 @@ static int MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   idp = pt->v[ip];
   p0  = &mesh->point[idp];
 
-  ilist = boulet(mesh,it,ip,list);
-  if ( !ilist )
+  ilist = MMGS_boulet(mesh,it,ip,MMG5_iprv2[ip],list,&ishell);
+  if ( ilist < 1 )
     return 0;
 
   /* Computation of the rotation matrix T_p0 S -> [z = 0] */
@@ -516,7 +516,7 @@ static int MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   MMG5_pPoint         p0,p1;
   MMG5_Bezier        b;
   MMG5_pPar           par;
-  int                 ilist,list[MMGS_LMAX+2],k,iel,idp,isloc,i;
+  int                 ilist,list[MMGS_LMAX+2],k,iel,idp,isloc,i,ishell;
   double              *n,*m,r[3][3],ux,uy,uz,lispoi[3*MMGS_LMAX+1];
   double              det2d,c[3],isqhmin,isqhmax;
   double              tAA[6],tAb[3],hausd;
@@ -526,8 +526,8 @@ static int MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   idp = pt->v[ip];
   p0  = &mesh->point[idp];
 
-  ilist = boulet(mesh,it,ip,list);
-  if ( !ilist )
+  ilist = MMGS_boulet(mesh,it,ip,MMG5_iprv2[ip],list,&ishell);
+  if ( ilist < 1 )
     return 0;
 
   /* Computation of the rotation matrix T_p0 S -> [z = 0] */
