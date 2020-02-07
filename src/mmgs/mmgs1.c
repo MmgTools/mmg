@@ -1022,13 +1022,14 @@ static int colelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
       ilist = MMGS_chkcol(mesh,met,k,i,list,&ishell,typchk);
 
       if ( ilist > 1 ) {
-        ier =  colver(mesh,list,ishell,ilist);
+        ier = colver(mesh,list,ishell,ilist);
         nc +=  ier;
         if ( !ier ) return -1;
         break;
       }
     }
   }
+
   if ( nc > 0 && (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) )
     fprintf(stdout,"     %8d vertices removed\n",nc);
 

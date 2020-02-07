@@ -148,12 +148,14 @@ int MMGS_chkcol(MMG5_pMesh mesh,MMG5_pSol met,int start,char istart,int *list,
 
   /* check for open ball */
   adja = &mesh->adja[3*(start-1)+1];
- // open = adja[istart] == 0;
 
   /** Starting from each tria of the shell of i, travel by adjacency around \a
    * ip1 and process the portion of surface until meeting a non-manifold edge */
   base = ++mesh->base;
+
+
   sumilist = 0;
+
   for ( kk = 0; kk<*ishell; ++ kk ) {
     k = list[kk]/3;
     i = list[kk]%3;
@@ -178,7 +180,6 @@ int MMGS_chkcol(MMG5_pMesh mesh,MMG5_pSol met,int start,char istart,int *list,
 
     fwd = 1;
     if ( pt->tag[i] & MG_NOM ) {
-      //assert ( !open );
       assert ( *ishell > 2 );
       /** Count the number of tria that we can reach without crossing a nm edge */
       ilist = MMGS_count_bouleploc( mesh, k, i, ip1,&fwd);
@@ -198,7 +199,7 @@ int MMGS_chkcol(MMG5_pMesh mesh,MMG5_pSol met,int start,char istart,int *list,
 
     /* check references:  */
     if ( MG_EDG(pt->tag[i2]) ) {
-      jel = list[1] / 3;
+      jel = adja[i2] / 3;
       pt1 = &mesh->tria[jel];
       if ( abs(pt->ref) != abs(pt1->ref) )  return 0;
     }
@@ -230,7 +231,7 @@ int MMGS_chkcol(MMG5_pMesh mesh,MMG5_pSol met,int start,char istart,int *list,
 
         /* check length */
         if ( typchk == 2 && met->m && !MG_EDG(mesh->point[ip2].tag) ) {
-          ip1 = pt1->v[j2];
+          ip1 = pt1->v[j];
           len = MMG5_lenSurfEdg(mesh,met,ip1,ip2,0);
           if ( len > lon || !len )  return 0;
         }
@@ -299,24 +300,29 @@ int MMGS_chkcol(MMG5_pMesh mesh,MMG5_pSol met,int start,char istart,int *list,
       }
 
       /* check angle between 1st and last triangles */
-      if ( (!open) && !(pt->tag[i] & MG_GEO) ) {
-        cosnold = n00old[0]*n1old[0] + n00old[1]*n1old[1] + n00old[2]*n1old[2];
-        cosnnew = n00new[0]*n1new[0] + n00new[1]*n1new[1] + n00new[2]*n1new[2];
-        if ( cosnold < MMG5_ANGEDG ) {
-          if ( cosnnew < cosnold )  return 0;
+      if ( !open ) {
+
+        if ( !(pt->tag[i] & MG_GEO) ) {
+          cosnold = n00old[0]*n1old[0] + n00old[1]*n1old[1] + n00old[2]*n1old[2];
+          cosnnew = n00new[0]*n1new[0] + n00new[1]*n1new[1] + n00new[2]*n1new[2];
+          if ( cosnold < MMG5_ANGEDG ) {
+            if ( cosnnew < cosnold )  return 0;
+          }
+          else if ( cosnnew < MMG5_ANGEDG )  return 0;
         }
-        else if ( cosnnew < MMG5_ANGEDG )  return 0;
 
         /* other checks for reference collapse */
+        MMGS_UPDATE_PIV(j,j1,j2,fwd);
+
         adja = &mesh->adja[3*(jel-1)+1];
         jel = adja[j]/3;
         j   = adja[j]%3;
-        MMGS_UPDATE_PIV(j,j1,j2,-fwd);
+        MMGS_UPDATE_PIV(j,j1,j2,fwd);
 
         pt  = &mesh->tria[jel];
-        if ( MG_EDG(pt->tag[j2]) ) {
+        if ( MG_EDG(pt->tag[j]) ) {
           adja = &mesh->adja[3*(jel-1)+1];
-          jel = adja[j2] / 3;
+          jel = adja[j] / 3;
           pt1 = &mesh->tria[jel];
           if ( abs(pt->ref) != abs(pt1->ref) )  return 0;
         }
