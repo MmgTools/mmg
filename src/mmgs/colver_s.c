@@ -238,7 +238,7 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
     else if ( !(pt1->tag[jj] & MG_GEO) )  return 0;
 
     p1 = &mesh->point[pt->v[i1]];
-    p2 = &mesh->point[pt1->v[jj]];
+    p2 = &mesh->point[pt1->v[j]];
     if ( p2->tag > p1->tag || p2->ref != p1->ref )  return 0;
 
     /* Check geometric approximation */
