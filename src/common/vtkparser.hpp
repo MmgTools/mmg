@@ -442,23 +442,37 @@ int MMG5_saveVtkMesh_i(MMG5_pMesh mesh,MMG5_pSol *sol,
     dataset->GetPointData()->AddArray(ar);
   }
 
-  // parallel IO
   if ( npart ) {
-    vtkSmartPointer<PWriter> pwriter = vtkSmartPointer<PWriter>::New();
+    // distributed IO
+    vtkSmartPointer<PWriter> writer = vtkSmartPointer<PWriter>::New();
 
 #if VTK_MAJOR_VERSION <= 5
-    pwriter->SetInput(dataset);
+    writer->SetInput(dataset);
 #else
-    pwriter->SetInputData(dataset);
+    writer->SetInputData(dataset);
 #endif
 
-    pwriter->SetFileName(mfilename);
+    writer->SetFileName(mfilename);
 
-    pwriter->SetNumberOfPieces(npart);
-    pwriter->SetStartPiece(myid);
-    pwriter->SetEndPiece(myid);
+    writer->SetNumberOfPieces(npart);
+    writer->SetStartPiece(myid);
+    writer->SetEndPiece(myid);
+    writer->Write();
+  }
+  else {
+    // centralized IO
+    vtkSmartPointer<TWriter> writer = vtkSmartPointer<TWriter>::New();
 
-    pwriter->Write();
+    writer->SetFileName(mfilename);
+
+#if VTK_MAJOR_VERSION <= 5
+    writer->SetInput(dataset);
+#else
+    writer->SetInputData(dataset);
+#endif
+
+    //MMG5_internal_VTKbinary(writer,binary);
+    writer->Write();
   }
 
   return 1;
