@@ -82,7 +82,7 @@ double MMG2D_caltri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt) {
 
   hm = h1 + h2 + h3;
 
-  if ( hm > MMG2D_EPSD ) {
+  if ( hm > 0. ) {
     return  area / hm;
   }
   else {
@@ -136,7 +136,7 @@ double MMG2D_caltri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt) {
   aream = sqrt(m[0]*m[2]-m[1]*m[1])*area;
 
   /* Quality measure = (Vol_M(T) / (l(ab)^2+l(ac)^2+l(bc)^2)) */
-  if ( hm > MMG2D_EPSD ) {
+  if ( hm > 0. ) {
     return  aream/hm;
   }
   else {
