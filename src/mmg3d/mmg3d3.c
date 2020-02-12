@@ -33,10 +33,7 @@
  * \todo Doxygen documentation
  */
 
-#ifdef USE_ELAS
-
 #include "mmg3d.h"
-#include "ls_calls.h"
 #include "inlined_functions_3d.h"
 
 #define MMG5_DEGTOL  1.e-1
@@ -654,11 +651,17 @@ int MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int **invalidTets) 
   for (itmn=0; itmn<maxitmn; itmn++) {
     nnnspl = nnnc = nnns = nnnm = 0;
 
+#ifdef USE_ELAS
     /* Extension of the velocity field */
     if ( !MMG5_velextLS(mesh,disp) ) {
       fprintf(stderr,"\n  ## Problem in func. MMG5_packLS. Exit program.\n");
       return 0;
     }
+#else
+    fprintf(stderr,"\n  ## Error: %s: you need to compile with the USE_ELAS"
+            " CMake's flag set to ON to use the rigidbody movement.\n",__func__);
+    return 0;
+#endif
 
     //MMG5_saveDisp(mesh,disp);
 
@@ -771,14 +774,3 @@ int MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int **invalidTets) 
     return 1;
   }
 }
-#else
-/**
- *
- * Hack to avoid to have an empty translation unit (forbidden by ISO C)
- *
- */
-static void MMG3D_unused_function(void) {
-  return;
-}
-
-#endif
