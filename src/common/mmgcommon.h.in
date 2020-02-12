@@ -419,14 +419,29 @@ size_t myfree(void *ptr) {
  * check the return value of fscanf
  *
  * \remark don't work without any variadic arg
+ * \remark don't work on MSVC because variadic args are not expanded
  */
+#ifdef POSIX
 #define MMG_FSCANF(stream,format,...) do                                \
   {                                                                     \
-    if ( CV_VA_NUM_ARGS(__VA_ARGS__) != fscanf(stream,format,__VA_ARGS__) ) { \
-      fputs ( "Reading error", stderr );                                \
+    int io_count   = fscanf(stream,format,__VA_ARGS__);                 \
+    int args_count = CV_VA_NUM_ARGS(__VA_ARGS__);                       \
+    if ( args_count != io_count ) {                                     \
+      fprintf (stderr, "Reading error: fscanf counts %d args while %d provided\n",io_count,args_count ); \
       return -1;                                                        \
     }                                                                   \
   } while(0);
+#else
+#define MMG_FSCANF(stream,format,...) do                                \
+  {                                                                     \
+    int io_count   = fscanf(stream,format,__VA_ARGS__);                 \
+    int args_count = CV_VA_NUM_ARGS(__VA_ARGS__);                       \
+    if ( 0 > io_count ) {                                               \
+      fprintf (stderr, "Reading error: fscanf counts %d args\n",io_count); \
+      return -1;                                                        \
+    }                                                                   \
+  } while(0);
+#endif
 
 /** Inlined functions for libraries and executables */
 #ifdef USE_SCOTCH
