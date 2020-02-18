@@ -401,6 +401,23 @@ int  MMGS_Set_corner(MMG5_pMesh mesh, int k);
  * \param k vertex index.
  * \return 1.
  *
+ * Remove corner attribute at point \a pos (from 1 to nb_vertices included).
+ *
+ * \remark Fortran interface
+ *
+ * >   SUBROUTINE MMGS_UNSET_CORNER(mesh,k,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * >     INTEGER, INTENT(IN)           :: k\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+int  MMGS_Unset_corner(MMG5_pMesh mesh, int k);
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param k vertex index.
+ * \return 1.
+ *
  * Set point \a k as required.
  *
  * \remark Fortran interface:
@@ -412,6 +429,23 @@ int  MMGS_Set_corner(MMG5_pMesh mesh, int k);
  *
  */
 int  MMGS_Set_requiredVertex(MMG5_pMesh mesh, int k);
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param k vertex index.
+ * \return 1.
+ *
+ * Remove required attribute from point \a k.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMGS_UNSET_REQUIREDVERTEX(mesh,k,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * >     INTEGER, INTENT(IN)           :: k\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int  MMGS_Unset_requiredVertex(MMG5_pMesh mesh, int k);
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \param k triangle index.
@@ -428,6 +462,24 @@ int  MMGS_Set_requiredVertex(MMG5_pMesh mesh, int k);
  *
  */
 int  MMGS_Set_requiredTriangle(MMG5_pMesh mesh, int k);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param k triangle index.
+ * \return 1.
+ *
+ * Remove required attribute from triangle \a k.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMGS_UNSET_REQUIREDTRIANGLE(mesh,k,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * >     INTEGER, INTENT(IN)           :: k\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int  MMGS_Unset_requiredTriangle(MMG5_pMesh mesh, int k);
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \param k edge index.
@@ -444,6 +496,24 @@ int  MMGS_Set_requiredTriangle(MMG5_pMesh mesh, int k);
  *
  */
 int  MMGS_Set_ridge(MMG5_pMesh mesh, int k);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param k edge index.
+ * \return 1.
+ *
+ * Remove ridge attribute at edge \a k.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMGS_UNSET_RIDGE(mesh,k,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * >     INTEGER, INTENT(IN)           :: k\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+int  MMGS_Unset_ridge(MMG5_pMesh mesh, int k);
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \param k edge index.
@@ -460,6 +530,23 @@ int  MMGS_Set_ridge(MMG5_pMesh mesh, int k);
  *
  */
 int  MMGS_Set_requiredEdge(MMG5_pMesh mesh, int k);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param k edge index.
+ * \return 1.
+ *
+ * Remove required attribute from edge \a k.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMGS_UNSET_REQUIREDEDGE(mesh,k,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * >     INTEGER, INTENT(IN)           :: k\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int  MMGS_Unset_requiredEdge(MMG5_pMesh mesh, int k);
 
 /**
  * \param mesh pointer toward the mesh structure.

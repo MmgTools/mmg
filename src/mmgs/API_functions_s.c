@@ -683,9 +683,21 @@ int MMGS_Set_corner(MMG5_pMesh mesh, int k) {
   return 1;
 }
 
+int MMGS_Unset_corner(MMG5_pMesh mesh, int k) {
+  assert ( k <= mesh->np );
+  mesh->point[k].tag &= ~MG_CRN;
+  return 1;
+}
+
 int MMGS_Set_requiredVertex(MMG5_pMesh mesh, int k) {
   assert ( k <= mesh->np );
   mesh->point[k].tag |= MG_REQ;
+  return 1;
+}
+
+int MMGS_Unset_requiredVertex(MMG5_pMesh mesh, int k) {
+  assert ( k <= mesh->np );
+  mesh->point[k].tag &= ~MG_REQ;
   return 1;
 }
 
@@ -697,15 +709,34 @@ int MMGS_Set_requiredTriangle(MMG5_pMesh mesh, int k) {
   return 1;
 }
 
+int MMGS_Unset_requiredTriangle(MMG5_pMesh mesh, int k) {
+  assert ( k <= mesh->nt );
+  mesh->tria[k].tag[0] &= ~MG_REQ;
+  mesh->tria[k].tag[1] &= ~MG_REQ;
+  mesh->tria[k].tag[2] &= ~MG_REQ;
+  return 1;
+}
+
 int MMGS_Set_ridge(MMG5_pMesh mesh, int k) {
   assert ( k <= mesh->na );
   mesh->edge[k].tag |= MG_GEO;
+  return 1;
+}
+int MMGS_Unset_ridge(MMG5_pMesh mesh, int k) {
+  assert ( k <= mesh->na );
+  mesh->edge[k].tag &= ~MG_GEO;
   return 1;
 }
 
 int MMGS_Set_requiredEdge(MMG5_pMesh mesh, int k) {
   assert ( k <= mesh->na );
   mesh->edge[k].tag |= MG_REQ;
+  return 1;
+}
+
+int MMGS_Unset_requiredEdge(MMG5_pMesh mesh, int k) {
+  assert ( k <= mesh->na );
+  mesh->edge[k].tag &= ~MG_REQ;
   return 1;
 }
 

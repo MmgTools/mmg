@@ -405,6 +405,24 @@ extern "C" {
  * \param k vertex index.
  * \return 1.
  *
+ * Remove corner attribute at point \a pos (from 1 to nb_vertices included).
+ *
+ * \remark Fortran interface
+ *
+ * >   SUBROUTINE MMG2D_UNSET_CORNER(mesh,k,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * >     INTEGER, INTENT(IN)           :: k\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int  MMG2D_Unset_corner(MMG5_pMesh mesh, int k);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param k vertex index.
+ * \return 1.
+ *
  * Set point \a k as required.
  *
  * \remark Fortran interface:
@@ -416,6 +434,23 @@ extern "C" {
  *
  */
   int  MMG2D_Set_requiredVertex(MMG5_pMesh mesh, int k);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param k vertex index.
+ * \return 1.
+ *
+ * Remove required attribute from point \a k.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG2D_UNSET_REQUIREDVERTEX(mesh,k,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * >     INTEGER, INTENT(IN)           :: k\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int  MMG2D_Unset_requiredVertex(MMG5_pMesh mesh, int k);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -459,15 +494,42 @@ extern "C" {
  *
  */
   int  MMG2D_Set_triangles(MMG5_pMesh mesh, int *tria, int *refs);
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \param k triangle index.
  * \return 1.
  *
- * Set triangle \a k as required.
+ * Set triangle \a k as required. Tria vertices are also set as required
+ * vertices.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG2D_SET_REQUIREDTRIANGLE(mesh,k,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * >     INTEGER, INTENT(IN)           :: k\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
  *
  */
   int  MMG2D_Set_requiredTriangle(MMG5_pMesh mesh, int k);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param k triangle index.
+ * \return 1.
+ *
+ * Remove required attribute from triangle \a k. Required attribute is also
+ * removed from tria vertices.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG2D_UNSET_REQUIREDTRIANGLE(mesh,k,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * >     INTEGER, INTENT(IN)           :: k\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int  MMG2D_Unset_requiredTriangle(MMG5_pMesh mesh, int k);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -570,6 +632,23 @@ extern "C" {
  *
  */
   int  MMG2D_Set_requiredEdge(MMG5_pMesh mesh, int k);
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param k edge index.
+ * \return 1.
+ *
+ * Remove required attribute from edge \a k. Required attribute are also removed
+ * from edge extremities.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG2D_UNSET_REQUIREDEDGE(mesh,k,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * >     INTEGER, INTENT(IN)           :: k\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int  MMG2D_Unset_requiredEdge(MMG5_pMesh mesh, int k);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param k edge index.

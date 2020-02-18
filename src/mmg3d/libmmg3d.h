@@ -566,6 +566,25 @@ enum MMG3D_Param {
  *
  */
   int  MMG3D_Set_corner(MMG5_pMesh mesh, int k);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param k vertex index.
+ * \return 1.
+ *
+ * Remove corner attribute at point \a pos (from 1 to nb_vertices included).
+ *
+ * \remark Fortran interface
+ *
+ * >   SUBROUTINE MMG3D_UNSET_CORNER(mesh,k,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * >     INTEGER, INTENT(IN)           :: k\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int  MMG3D_Unset_corner(MMG5_pMesh mesh, int k);
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \param k vertex index.
@@ -582,6 +601,24 @@ enum MMG3D_Param {
  *
  */
   int  MMG3D_Set_requiredVertex(MMG5_pMesh mesh, int k);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param k vertex index.
+ * \return 1.
+ *
+ * Remove required attribute from point \a k.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_UNSET_REQUIREDVERTEX(mesh,k,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * >     INTEGER, INTENT(IN)           :: k\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int  MMG3D_Unset_requiredVertex(MMG5_pMesh mesh, int k);
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \param k element index.
@@ -598,6 +635,25 @@ enum MMG3D_Param {
  *
  */
   int  MMG3D_Set_requiredTetrahedron(MMG5_pMesh mesh, int k);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param k element index.
+ * \return 1.
+ *
+ * Remove required attribute from element \a k (\a k from 1 to
+ * nb_tetra included).
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_UNSET_REQUIREDTETRAHEDRON(mesh,k,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * >     INTEGER, INTENT(IN)           :: k\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int  MMG3D_Unset_requiredTetrahedron(MMG5_pMesh mesh, int k);
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \param reqIdx table of the indices of the required elements.
@@ -616,6 +672,27 @@ enum MMG3D_Param {
  *
  */
   int  MMG3D_Set_requiredTetrahedra(MMG5_pMesh mesh, int *reqIdx, int nreq);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param reqIdx table of the indices of the required elements.
+ * \param nreq number of required elements
+ * \return 1.
+ *
+ * Remove required attribute from a list of Tetra whose indices are contained in
+ * array \a reqIdx.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_UNSET_REQUIREDTETRAHEDRA(mesh,reqIdx,nreq,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * >     INTEGER, DIMENSION(*),INTENT(IN) :: reqIdx\n
+ * >     INTEGER, INTENT(IN)           :: nreq\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int  MMG3D_Unset_requiredTetrahedra(MMG5_pMesh mesh, int *reqIdx, int nreq);
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \param k triangle index.
@@ -632,6 +709,24 @@ enum MMG3D_Param {
  *
  */
   int  MMG3D_Set_requiredTriangle(MMG5_pMesh mesh, int k);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param k triangle index.
+ * \return 1.
+ *
+ * Remove required attribute from triangle \a k.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_UNSET_REQUIREDTRIANGLE(mesh,k,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * >     INTEGER, INTENT(IN)           :: k\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int  MMG3D_Unset_requiredTriangle(MMG5_pMesh mesh, int k);
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \param reqIdx table of the indices of the required trias.
@@ -653,6 +748,25 @@ enum MMG3D_Param {
 
 /**
  * \param mesh pointer toward the mesh structure.
+ * \param reqIdx table of the indices of the required trias.
+ * \param nreq number of required trias
+ * \return 1.
+ *
+ * Remove required attribute from triangles
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_UNSET_REQUIREDTRIANGLES(mesh,reqIdx,nreq,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * >     INTEGER, DIMENSION(*),INTENT(IN) :: reqIdx\n
+ * >     INTEGER, INTENT(IN)           :: nreq\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int  MMG3D_Unset_requiredTriangles(MMG5_pMesh mesh, int *reqIdx, int nreq);
+
+/**
+ * \param mesh pointer toward the mesh structure.
  * \param k triangle index.
  * \return 1.
  *
@@ -668,6 +782,25 @@ enum MMG3D_Param {
  *
  */
   int  MMG3D_Set_parallelTriangle(MMG5_pMesh mesh, int k);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param k triangle index.
+ * \return 1.
+ *
+ * Remove parallel attribute from triangle \a k (ie tria aren't preserved
+ * anymore). (\a k from 1 to nb_tria included).
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_UNSET_PARALLELTRIANGLE(mesh,k,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * >     INTEGER, INTENT(IN)           :: k\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int  MMG3D_Unset_parallelTriangle(MMG5_pMesh mesh, int k);
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \param parIdx table of the indices of the parallel trias.
@@ -690,6 +823,26 @@ enum MMG3D_Param {
 
 /**
  * \param mesh pointer toward the mesh structure.
+ * \param parIdx table of the indices of the parallel trias.
+ * \param npar number of triangles between processors.
+ * \return 1.
+ *
+ * Remove parallel attributes from triangles (ie
+ * tria aren't preserved anymore).
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_UNSET_PARALLELTRIANGLES(mesh,parIdx,npar,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * >     INTEGER, DIMENSION(*),INTENT(IN) :: parIdx\n
+ * >     INTEGER, INTENT(IN)           :: npar\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int  MMG3D_Unset_parallelTriangles(MMG5_pMesh mesh, int *parIdx, int npar);
+
+/**
+ * \param mesh pointer toward the mesh structure.
  * \param k edge index.
  * \return 1.
  *
@@ -704,6 +857,24 @@ enum MMG3D_Param {
  *
  */
   int  MMG3D_Set_ridge(MMG5_pMesh mesh, int k);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param k edge index.
+ * \return 1.
+ *
+ * Remove ridge attribute at edge \a k.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_UNSET_RIDGE(mesh,k,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * >     INTEGER, INTENT(IN)           :: k\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int  MMG3D_Unset_ridge(MMG5_pMesh mesh, int k);
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \param k edge index.
@@ -720,6 +891,24 @@ enum MMG3D_Param {
  *
  */
   int  MMG3D_Set_requiredEdge(MMG5_pMesh mesh, int k);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param k edge index.
+ * \return 1.
+ *
+ * Remove required attribute from edge \a k.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_UNSET_REQUIREDEDGE(mesh,k,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * >     INTEGER, INTENT(IN)           :: k\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int  MMG3D_Unset_requiredEdge(MMG5_pMesh mesh, int k);
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \param k point index

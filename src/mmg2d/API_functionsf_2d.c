@@ -233,6 +233,14 @@ FORTRAN_NAME(MMG2D_SET_CORNER,mmg2d_set_corner,(MMG5_pMesh *mesh, int *k, int* r
   *retval =  MMG2D_Set_corner(*mesh,*k);
   return;
 }
+/**
+ * See \ref MMG2D_Unset_corner function in \ref mmg2d/libmmg2d.h file.
+ */
+FORTRAN_NAME(MMG2D_UNSET_CORNER,mmg2d_unset_corner,(MMG5_pMesh *mesh, int *k, int* retval),
+             (mesh,k,retval)) {
+  *retval =  MMG2D_Unset_corner(*mesh,*k);
+  return;
+}
 
 /**
  * See \ref MMG2D_Set_requiredVertex function in \ref mmg2d/libmmg2d.h file.
@@ -241,6 +249,16 @@ FORTRAN_NAME(MMG2D_SET_REQUIREDVERTEX,mmg2d_set_requiredvertex,
              (MMG5_pMesh *mesh, int *k, int* retval),
              (mesh,k,retval)) {
   *retval =  MMG2D_Set_requiredVertex(*mesh,*k);
+  return;
+}
+
+/**
+ * See \ref MMG2D_Unset_requiredVertex function in \ref mmg2d/libmmg2d.h file.
+ */
+FORTRAN_NAME(MMG2D_UNSET_REQUIREDVERTEX,mmg2d_unset_requiredvertex,
+             (MMG5_pMesh *mesh, int *k, int* retval),
+             (mesh,k,retval)) {
+  *retval =  MMG2D_Unset_requiredVertex(*mesh,*k);
   return;
 }
 
@@ -295,6 +313,15 @@ FORTRAN_NAME(MMG2D_SET_REQUIREDTRIANGLE,mmg2d_set_requiredtriangle,
              (MMG5_pMesh *mesh, int *k, int* retval),
              (mesh,k,retval)) {
   *retval = MMG2D_Set_requiredTriangle(*mesh, *k);
+  return;
+}
+/**
+ * See \ref MMG2D_Unset_requiredTriangle function in \ref mmg2d/libmmg2d.h file.
+ */
+FORTRAN_NAME(MMG2D_UNSET_REQUIREDTRIANGLE,mmg2d_unset_requiredtriangle,
+             (MMG5_pMesh *mesh, int *k, int* retval),
+             (mesh,k,retval)) {
+  *retval = MMG2D_Unset_requiredTriangle(*mesh, *k);
   return;
 }
 
@@ -388,6 +415,15 @@ FORTRAN_NAME(MMG2D_SET_REQUIREDEDGE,mmg2d_set_requirededge,
              (MMG5_pMesh *mesh, int *k, int* retval),
              (mesh,k,retval)) {
   *retval = MMG2D_Set_requiredEdge(*mesh,*k);
+  return;
+}
+/**
+ * See \ref MMG2D_Unset_requiredEdge function in \ref mmg2d/libmmg2d.h file.
+ */
+FORTRAN_NAME(MMG2D_UNSET_REQUIREDEDGE,mmg2d_unset_requirededge,
+             (MMG5_pMesh *mesh, int *k, int* retval),
+             (mesh,k,retval)) {
+  *retval = MMG2D_Unset_requiredEdge(*mesh,*k);
   return;
 }
 /**
