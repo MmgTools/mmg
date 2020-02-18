@@ -79,7 +79,7 @@ int MMG5_boundingBox(MMG5_pMesh mesh) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sethmin 1 if hmin is setted by the user.
- * \param sethamx 1 if hmax is setted by the user.
+ * \param sethmax 1 if hmax is setted by the user.
  *
  * Check the compatibility between the automatically computed hmin/hmax values
  * and the user settings.

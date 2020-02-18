@@ -39,6 +39,7 @@
 /**
  * \param n1 first normal
  * \param n2 second normal
+ * \param crit ridge threshold
  *
  * \return 1 if success, 0 if fail
  *

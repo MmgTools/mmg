@@ -165,7 +165,6 @@ int MMG5_countLocalParamAtTri( MMG5_pMesh mesh,MMG5_iNode **bdryRefs) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param bdryRefs pointer toward the list of the boundary references.
- * \param npar number of local param at triangles.
  * \param out pointer toward the file in which to write.
  * \return 1 if success, 0 otherwise.
  *
@@ -323,7 +322,7 @@ char *MMG5_Get_filenameExt( char *filename ) {
 }
 
 /**
- * \param filename string containing a filename and its path
+ * \param path string containing a filename and its path
  *
  * \return a pointer toward the file basename.
  *

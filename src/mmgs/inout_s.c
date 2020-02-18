@@ -36,14 +36,6 @@
 #include "mmgs.h"
 #include <math.h>
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
- *
- * Read mesh data.
- *
- */
 int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
   FILE        *inm;
   MMG5_pTria  pt1,pt2;
@@ -821,17 +813,6 @@ int MMGS_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *file
   return ier;
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
- *
- * Save mesh data.
- *
- * \warning you must call the \a MMGS_packMesh function before saving your
- * mesh.
- */
-
 int MMGS_saveMesh(MMG5_pMesh mesh, const char* filename) {
   FILE         *inm;
   MMG5_pPoint  ppt;
@@ -1300,15 +1281,6 @@ int MMGS_saveMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *file
   return MMG5_saveMshMesh(mesh,sol,filename,0);
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
- * \param filename name of file.
- * \return -1 data invalid, 0 no file, 1 ok.
- *
- * Load metric field.
- *
- */
 int MMGS_loadSol(MMG5_pMesh mesh,MMG5_pSol met,const char* filename) {
 
   FILE       *inm;
@@ -1378,15 +1350,6 @@ int MMGS_loadSol(MMG5_pMesh mesh,MMG5_pSol met,const char* filename) {
   return 1;
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward an allocatable sol structure.
- * \param filename name of file.
- * \return -1 data invalid or we fail, 0 no file, 1 ok.
- *
- * Load a medit solution file containing 1 or more solutions.
- *
- */
 int MMGS_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
   MMG5_pSol   psl;
   FILE       *inm;
@@ -1483,15 +1446,6 @@ int MMGS_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
   return 1;
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the sol structure.
- * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
- *
- * Write isotropic or anisotropic metric.
- *
- */
 int MMGS_saveSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
   FILE*        inm;
   MMG5_pPoint  ppt;
@@ -1528,15 +1482,6 @@ int MMGS_saveSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
   return 1;
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the solutions array
- * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
- *
- * Write solutions array
- *
- */
 int MMGS_saveAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
   MMG5_pSol    psl;
   FILE*        inm;

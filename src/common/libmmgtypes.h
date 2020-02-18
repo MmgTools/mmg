@@ -427,7 +427,7 @@ typedef struct {
 typedef MMG5_xPrism * MMG5_pxPrism;
 
 /**
- * \struc MMG5_Mat
+ * \struct MMG5_Mat
  * \brief To store user-defined references in the mesh (useful in LS mode)
  */
 typedef struct {
