@@ -1536,7 +1536,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
             "   REQUIRED %8d\n",np,nc,nreq);
 
     if ( mesh->na )
-      fprintf(stdout,"     NUMBER OF EDGES          %8d   REQUIRED  %8d\n",mesh->na,nreq);
+      fprintf(stdout,"     NUMBER OF EDGES          %8d   REQUIRED  %8d\n",mesh->na,nedreq);
     if ( mesh->nt )
       fprintf(stdout,"     NUMBER OF TRIANGLES      %8d   REQUIRED  %8d\n",
               mesh->nt, nereq);

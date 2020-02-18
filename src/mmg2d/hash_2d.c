@@ -339,6 +339,23 @@ int MMG2D_assignEdge(MMG5_pMesh mesh) {
   int8_t          ier;
   char            i,i1,i2;
 
+  /* Try to clean triangle structure (in case where mmg2dlib is called after
+   * mmg2dmesh) */
+  for (k=1; k<=mesh->nt; k++) {
+    pt = &mesh->tria[k];
+    if ( !MG_EOK(pt) )  continue;
+
+    /* If all edges are required, the triangle is maybe required by the user */
+    if ( (pt->tag[0] & MG_REQ) && (pt->tag[1] & MG_REQ) && (pt->tag[2] & MG_REQ) ) {
+      continue;
+    }
+
+    /* Otherwise there is no reason to have required tags on edges */
+    for ( ia = 0; ia < 3; ++ia ) {
+      pt->tag[ia] &= ~MG_REQ;
+    }
+  }
+
   if ( !mesh->na ) return 1;
 
   /* Temporarily allocate a hash structure for storing edges */
