@@ -631,6 +631,7 @@ int MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int **invalidTets) 
   maxitdc = 100;
   t  = 0;
   ninvalidTets = 0;
+  lastt = 0;
 
   //++mesh->info.fem;
 
