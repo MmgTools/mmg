@@ -675,6 +675,10 @@ int MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
     /* Set_solSize modify the value of the inputMet field => we need to reset it */
     mesh->info.inputMet = 0;
   }
+  else {
+    assert ( met->np );
+    mesh->info.inputMet = 1;
+  }
 
   /** Step 1: Set metric at points belonging to a required edge: compute the
    * metric as the mean of the length of the required eges passing through the

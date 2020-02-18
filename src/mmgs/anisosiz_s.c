@@ -693,7 +693,8 @@ int MMGS_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
   if ( met->m ) {
-    assert ( mesh->info.inputMet );
+    assert ( met->np );
+    mesh->info.inputMet = 1;
   }
   else {
     MMG5_calelt     = MMG5_caltri_ani;

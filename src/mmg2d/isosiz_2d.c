@@ -165,7 +165,8 @@ int MMG2D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
     mesh->info.inputMet = 0;
   }
   else {
-    assert ( mesh->info.inputMet );
+    assert ( met->m );
+    mesh->info.inputMet = 1;
   }
 
   /** Step 1: Set metric at points belonging to a required edge: compute the

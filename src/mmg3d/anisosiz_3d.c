@@ -1287,7 +1287,9 @@ int MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
     MMG3D_lenedgCoor     = MMG5_lenedgCoor_ani;
     MMG5_lenSurfEdg     = MMG5_lenSurfEdg_ani;
   }
-
+  else {
+    mesh->info.inputMet = 1;
+  }
   /** Step 1: Set metric at points belonging to a required edge: compute the
    * metric as the mean of the length of the required eges passing through the
    * point */
