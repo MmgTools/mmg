@@ -347,7 +347,7 @@ extern "C" {
  * \return 1 if success, 0 if fail.
  *
  * Set vertex of coordinates \a c0, \a c1 and reference \a ref
- * at position \a pos in mesh structure
+ * at position \a pos in mesh structure (from 1 to nb_vertices included)..
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_SET_VERTEX(mesh,c0,c1,ref,pos,retval)\n
@@ -388,7 +388,7 @@ extern "C" {
  * \param k vertex index.
  * \return 1.
  *
- * Set corner at point \a pos.
+ * Set corner at point \a pos (from 1 to nb_vertices included).
  *
  * \remark Fortran interface
  *
@@ -427,7 +427,7 @@ extern "C" {
  * \return 0 if failed, 1 otherwise.
  *
  * Set triangle of vertices \a v0, \a v1, \a v2 and reference \a ref
- * at position \a pos in mesh structure.
+ * at position \a pos in mesh structure (from 1 to nb_tria included).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_SET_TRIANGLE(mesh,v0,v1,v2,ref,pos,retval)\n
@@ -480,7 +480,7 @@ extern "C" {
  * \return 0 if failed, 1 otherwise.
  *
  * Set quadrangle of vertices \a v0, \a v1,\a v2,\a v3 and reference
- * \a ref at position \a pos in mesh structure.
+ * \a ref at position \a pos in mesh structure (from 1 to nb_quad included).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_SET_QUADRILATERAL(mesh,v0,v1,v2,v3,ref,pos,retval)\n
@@ -525,7 +525,7 @@ extern "C" {
  * \return 0 if failed, 1 otherwise.
  *
  * Set edge of vertices \a v0, \a v1 and reference \a ref
- * at position \a pos in mesh structure.
+ * at position \a pos in mesh structure (pos from 1 to nb_edges included).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_SET_EDGE(mesh,v0,v1,ref,pos,retval)\n
@@ -592,7 +592,8 @@ extern "C" {
  * \param pos position of the solution in the mesh.
  * \return 0 if failed, 1 otherwise.
  *
- * Set scalar value \a s at position \a pos in solution structure
+ * Set scalar value \a s at position \a pos in solution structure.
+ * (pos from 1 to nb_vertices included).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_SET_SCALARSOL(met,s,pos,retval)\n
@@ -629,7 +630,7 @@ extern "C" {
  * \return 0 if failed, 1 otherwise.
  *
  * Set vectorial value \f$(v_x,v_y)\f$ at position \a pos in solution
- * structure.
+ * structure. ( pos from 1 to nb_vertices included).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_SET_VECTORSOL(met,vx,vy,pos,retval)\n
@@ -668,6 +669,7 @@ extern "C" {
  * \return 0 if failed, 1 otherwise.
  *
  * Set tensor value \a s at position \a pos in solution structure
+ * (\a pos from 1 to nb_vertices included).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_SET_TENSORSOL(met,m11,m12,m22,pos,retval)\n
@@ -707,6 +709,7 @@ extern "C" {
  * \return 0 if failed, 1 otherwise.
  *
  * Set values of the solution at the ith field of the solution array.
+ * (\a pos from 1 to \a nb_vertices included and \a i from 1 to \a nb_sols).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_SET_ITHSOL_INSOLSATVERTICES(sol,i,s,pos,retval)\n
@@ -728,6 +731,7 @@ extern "C" {
  * \return 0 if failed, 1 otherwise.
  *
  * Set values of the solution at the ith field of the solution array.
+ * (\a i from 1 to \a nb_sols)
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_SET_ITHSOLS_INSOLSATVERTICES(sol,i,s,retval)\n
@@ -1114,6 +1118,7 @@ extern "C" {
  * \return 0 if failed, 1 otherwise.
  *
  * Get values of the ith field of the solution array at vertex \a pos.
+ * (pos from 1 to nb_vertices included and  \a i from 1 to \a nb_sols).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_GET_ITHSOL_INSOLSATVERTICES(sol,i,s,pos,retval)\n
@@ -1135,6 +1140,7 @@ extern "C" {
  * \return 0 if failed, 1 otherwise.
  *
  * Get values of the solution at the ith field of the solution array.
+ * (\a i from 1 to \a nb_sols)
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_GET_ITHSOLS_INSOLSATVERTICES(sol,i,s,retval)\n

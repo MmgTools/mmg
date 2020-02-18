@@ -314,7 +314,7 @@ enum MMG3D_Param {
  * \return 1.
  *
  * Set vertex of coordinates \a c0, \a c1,\a c2 and reference \a ref
- * at position \a pos in mesh structure
+ * at position \a pos in mesh structure (from 1 to nb_vertices included).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_VERTEX(mesh,c0,c1,c2,ref,pos,retval)\n
@@ -361,7 +361,7 @@ enum MMG3D_Param {
  * \return 0 if failed, 1 otherwise.
  *
  * Set tetrahedra of vertices \a v0, \a v1,\a v2,\a v3 and reference
- * \a ref at position \a pos in mesh structure.
+ * \a ref at position \a pos in mesh structure  (from 1 to nb_tetra included).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_TETRAHEDRON(mesh,v0,v1,v2,v3,ref,pos,retval)\n
@@ -408,7 +408,7 @@ enum MMG3D_Param {
  * \return 0 if failed, 1 otherwise.
  *
  * Set prisms of vertices \a v0, \a v1,\a v2,\a v3,\a v4,\a v5 and reference
- * \a ref at position \a pos in mesh structure.
+ * \a ref at position \a pos in mesh structure (from 1 to nb_prisms included).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_PRISM(mesh,v0,v1,v2,v3,v4,v5,ref,pos,retval)\n
@@ -453,7 +453,7 @@ enum MMG3D_Param {
  * \return 0 if failed, 1 otherwise.
  *
  * Set triangle of vertices \a v0, \a v1, \a v2 and reference \a ref
- * at position \a pos in mesh structure.
+ * at position \a pos in mesh structure (from 1 to nb_triangle included).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_TRIANGLE(mesh,v0,v1,v2,ref,pos,retval)\n
@@ -497,7 +497,7 @@ enum MMG3D_Param {
  * \return 0 if failed, 1 otherwise.
  *
  * Set quadrilateral of vertices \a v0, \a v1, \a v2, \a v3 and reference \a ref
- * at position \a pos in mesh structure.
+ * at position \a pos in mesh structure (from 1 to nb_quadrangles included).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_QUADRILATERAL(mesh,v0,v1,v2,v3,ref,pos,retval)\n
@@ -539,7 +539,7 @@ enum MMG3D_Param {
  * \return 0 if failed, 1 otherwise.
  *
  * Set edges of extremities \a v0, \a v1 and reference \a ref at
- * position \a pos in mesh structure
+ * position \a pos in mesh structure  (from 1 to nb_edges included)
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_EDGE(mesh,v0,v1,ref,pos,retval)\n
@@ -571,7 +571,7 @@ enum MMG3D_Param {
  * \param k vertex index.
  * \return 1.
  *
- * Set point \a k as required.
+ * Set point \a k as required (\a k from 1 to nb_vertices included).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_REQUIREDVERTEX(mesh,k,retval)\n
@@ -587,7 +587,7 @@ enum MMG3D_Param {
  * \param k element index.
  * \return 1.
  *
- * Set element \a k as required.
+ * Set element \a k as required (\a k from 1 to nb_tetra included).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_REQUIREDTETRAHEDRON(mesh,k,retval)\n
@@ -621,7 +621,7 @@ enum MMG3D_Param {
  * \param k triangle index.
  * \return 1.
  *
- * Set triangle \a k as required.
+ * Set triangle \a k as required (\a k from 1 to nb_tria included).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_REQUIREDTRIANGLE(mesh,k,retval)\n
@@ -657,7 +657,7 @@ enum MMG3D_Param {
  * \return 1.
  *
  * Set triangle \a k as parallel (triangle at the interface between two
- * processors, ie, this triangle is required).
+ * processors, ie, this triangle is required). (\a k from 1 to nb_tria included).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_PARALLELTRIANGLE(mesh,k,retval)\n
@@ -750,6 +750,7 @@ enum MMG3D_Param {
  * \return 0 if failed, 1 otherwise.
  *
  * Set scalar value \a s at position \a pos in solution structure
+ * (pos from 1 to nb_vertices included).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_SCALARSOL(met,s,pos,retval)\n
@@ -787,7 +788,7 @@ enum MMG3D_Param {
  * \return 0 if failed, 1 otherwise.
  *
  * Set vectorial value \f$(v_x,v_y,v_z)\f$ at position \a pos in solution
- * structure.
+ * structure. (pos from 1 to nb_vertices included).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_VECTORSOL(met,vx,vy,vz,pos,retval)\n
@@ -829,7 +830,7 @@ enum MMG3D_Param {
  * \return 0 if failed, 1 otherwise.
  *
  * Set tensorial values at position \a pos in solution
- * structure.
+ * structure. (pos from 1 to nb_vertices included).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_TENSORSOL(met,m11,m12,m13,m22,m23,m33,pos,retval)\n
@@ -848,8 +849,7 @@ enum MMG3D_Param {
  * sols[6*(i-1)]\@6 is the solution at vertex i
  * \return 0 if failed, 1 otherwise.
  *
- * Set tensorial values at position \a pos in solution
- * structure.
+ * Set tensorial values by array.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_TENSORSOLS(met,sols,retval)\n
@@ -868,7 +868,9 @@ enum MMG3D_Param {
  *
  * \return 0 if failed, 1 otherwise.
  *
- * Set values of the solution at the ith field of the solution array.
+ * Set values of the solution at the ith field of the solution array and at
+ * position \a pos (\a pos from 1 to \a nb_vertices included and \a i from 1 to \a
+ * nb_sols).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_ITHSOL_INSOLSATVERTICES(sol,i,s,pos,retval)\n
@@ -889,7 +891,8 @@ enum MMG3D_Param {
  *
  * \return 0 if failed, 1 otherwise.
  *
- * Get values of the ith field of the solution array at vertex \a pos.
+ * Get values of the ith field of the solution array by array (\a i from 1 to \a
+ * nb_sols).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_ITHSOLS_INSOLSATVERTICES(sol,i,s,retval)\n
@@ -1529,13 +1532,14 @@ enum MMG3D_Param {
   int MMG3D_Get_tensorSols(MMG5_pSol met, double *sols);
 /**
  * \param sol pointer toward the array of solutions
- * \param i position of the solution field that we want to set.
+ * \param i position of the solution field that we want to get.
  * \param s solution(s) at mesh vertex \a pos.
  * \param pos index of the vertex on which we get the solution.
  *
  * \return 0 if failed, 1 otherwise.
  *
  * Get values of the ith field of the solution array at vertex \a pos.
+ * (pos from 1 to nb_vertices included and \a i from 1 to \a nb_sols).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_GET_ITHSOL_INSOLSATVERTICES(sol,i,s,pos,retval)\n
@@ -1556,7 +1560,8 @@ enum MMG3D_Param {
  *
  * \return 0 if failed, 1 otherwise.
  *
- * Get values of the solution at the ith field of the solution array.
+ * Get values of the solution at the ith field of the solution array (\a i from
+ * 1 to \a nb_sols).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_GET_ITHSOLS_INSOLSATVERTICES(sol,i,s,retval)\n

@@ -283,7 +283,7 @@ int  MMGS_Set_meshSize(MMG5_pMesh mesh, int np, int nt, int na);
  * \return 1.
  *
  * Set vertex of coordinates \a c0, \a c1,\a c2 and reference \a ref
- * at position \a pos in mesh structure
+ * at position \a pos in mesh structure (\a pos from 1 to nb_vertices included).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_VERTEX(mesh,c0,c1,c2,ref,pos,retval)\n
@@ -328,7 +328,7 @@ int  MMGS_Set_vertex(MMG5_pMesh mesh, double c0, double c1,
  * \return 0 if failed, 1 otherwise.
  *
  * Set triangle of vertices \a v0, \a v1, \a v2 and reference \a ref
- * at position \a pos in mesh structure.
+ * at position \a pos in mesh structure.(\a pos from 1 to nb_tria included).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_TRIANGLE(mesh,v0,v1,v2,ref,pos,retval)\n
@@ -369,7 +369,7 @@ int  MMGS_Set_triangle(MMG5_pMesh mesh, int v0, int v1,
  * \return 0 if failed, 1 otherwise.
  *
  * Set edges of extremities \a v0, \a v1 and reference \a ref at
- * position \a pos in mesh structure
+ * position \a pos in mesh structure (\a pos from 1 to nb_edges included).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_EDGE(mesh,v0,v1,ref,pos,retval)\n
@@ -385,7 +385,7 @@ int  MMGS_Set_edge(MMG5_pMesh mesh, int v0, int v1, int ref,int pos);
  * \param k vertex index.
  * \return 1.
  *
- * Set corner at point \a pos.
+ * Set corner at point \a pos (\a pos from 1 to nb_vertices included).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_CORNER(mesh,k,retval)\n
@@ -531,6 +531,7 @@ int  MMGS_Set_normalAtVertex(MMG5_pMesh mesh, int k, double n0, double n1, doubl
  * \return 0 if failed, 1 otherwise.
  *
  * Set scalar value \a s at position \a pos in solution structure
+ * (\a pos from 1 to nb_vertices included).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_SCALARSOL(met,s,pos,retval)\n
@@ -569,6 +570,7 @@ int  MMGS_Set_scalarSols(MMG5_pSol met, double *s);
  *
  * Set vectorial value \f$(v_x,v_y,v_z)\f$ at position \a pos in solution
  * structure.
+ * (\a pos from 1 to nb_vertices included).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_VECTORSOL(met,vx,vy,vz,pos,retval)\n
@@ -610,6 +612,7 @@ int MMGS_Set_vectorSols(MMG5_pSol met, double *sols);
  *
  * Set tensorial values at position \a pos in solution
  * structure.
+ * (\a pos from 1 to nb_vertices included).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_TENSORSOL(met,m11,m12,m13,m22,m23,m33,pos,retval)\n
@@ -628,8 +631,7 @@ int MMGS_Set_tensorSol(MMG5_pSol met, double m11,double m12, double m13,
  * sols[6*(i-1)]\@6 is the solution at vertex i
  * \return 0 if failed, 1 otherwise.
  *
- * Set tensorial values at position \a pos in solution
- * structure.
+ * Set tensorial values by array.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_TENSORSOLS(met,sols,retval)\n
@@ -648,7 +650,8 @@ int MMGS_Set_tensorSols(MMG5_pSol met, double *sols);
  *
  * \return 0 if failed, 1 otherwise.
  *
- * Set values of the solution at the ith field of the solution array.
+ * Set values of the solution at the ith field of the solution array and at
+ * position \pos (\a pos from 1 to nb_vertices included and i from 1 to nb_sols).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_ITHSOL_INSOLSATVERTICES(sol,i,s,pos,retval)\n
@@ -669,7 +672,8 @@ int MMGS_Set_tensorSols(MMG5_pSol met, double *sols);
  *
  * \return 0 if failed, 1 otherwise.
  *
- * Set values of the solution at the ith field of the solution array.
+ * Set values of the solution at the ith field of the solution array (\a i from
+ * 1 to nb_sols).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_ITHSOLS_INSOLSATVERTICES(sol,i,s,retval)\n
@@ -1089,6 +1093,7 @@ int MMGS_Get_tensorSols(MMG5_pSol met, double *sols);
  * \return 0 if failed, 1 otherwise.
  *
  * Get values of the ith field of the solution array at vertex \a pos.
+ * (\a pos from 1 to nb_vertices included and \a i from 1 to nb_sols).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_GET_ITHSOL_INSOLSATVERTICES(sol,i,s,pos,retval)\n
@@ -1110,6 +1115,7 @@ int MMGS_Get_tensorSols(MMG5_pSol met, double *sols);
  * \return 0 if failed, 1 otherwise.
  *
  * Get values of the solution at the ith field of the solution array.
+ * (\a i from 1 to \a nb_sols).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_GET_ITHSOLS_INSOLSATVERTICES(sol,i,s,retval)\n
