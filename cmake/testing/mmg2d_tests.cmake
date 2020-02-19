@@ -166,6 +166,11 @@ ADD_TEST(NAME mmg2d_hybrid_hsiz_2d
   ${MMG2D_CI_TESTS}/Hybrid/hybrid.mesh
   ${CTEST_OUTPUT_DIR}/mmg2d_hybrid_2d-opnbdy)
 
+ADD_TEST(NAME mmg2d_hybrid_nosizreq_nohgradreq_2d
+  COMMAND ${EXECUT_MMG2D} -v 5
+  ${MMG2D_CI_TESTS}/Hybrid/hybrid.mesh -nosizreq -hgradreq -1
+  ${CTEST_OUTPUT_DIR}/mmg2d_hybrid_2d-nosizreq)
+
 ###############################################################################
 #####
 #####         Input/Output

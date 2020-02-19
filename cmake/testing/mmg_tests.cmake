@@ -286,6 +286,11 @@ FOREACH(EXEC ${LISTEXEC_MMG})
     ${MMG_CI_TESTS}/MultiDom_Cube_ReqEntities/c
     -out ${CTEST_OUTPUT_DIR}/mmg_MultiDom_Cube_ReqEntities_${SHRT_EXEC}.o.meshb)
 
+  ADD_TEST(NAME mmg_MultiDom_Cube_ReqEntities_nosizreq_${SHRT_EXEC}
+    COMMAND ${EXEC} -v 5 -nosizreq -hgradreq -1
+    ${MMG_CI_TESTS}/MultiDom_Cube_ReqEntities/c
+    -out ${CTEST_OUTPUT_DIR}/mmg_MultiDom_Cube_ReqEntities_nosizreq_${SHRT_EXEC}.o.meshb)
+
   ADD_TEST(NAME mmg_MultiDom_Ellipse_ReqEntitiesAni_${SHRT_EXEC}
     COMMAND ${EXEC} -v 5 -hausd 0.002 -A
     ${MMG_CI_TESTS}/MultiDom_Ellipse_ReqEntities/c.d
