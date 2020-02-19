@@ -87,8 +87,18 @@ int MMG2D_setadj(MMG5_pMesh mesh) {
           pt1 = &mesh->tria[kk];
 
           if ( (!mesh->info.opnbdy) && (pt->ref==pt1->ref) ) {
-            /* Remove edge tag */
-            pt1->tag[ii] = pt->tag[i] = 0;
+            /* Remove BDY/REF and GEO edge tags but required tag must be keeped
+             * (to preserve required tria info) */
+            pt->tag[i] &= ~MG_REF;
+            pt->tag[i] &= ~MG_BDY;
+            pt->tag[i] &= ~MG_GEO;
+
+            pt1->tag[ii] &= ~MG_REF;
+            pt1->tag[ii] &= ~MG_BDY;
+            pt1->tag[ii] &= ~MG_GEO;
+
+            pt1->tag[ii] |= pt->tag[i];
+            pt->tag[i]   |= pt1->tag[ii];
           }
           else {
             /* Transfert edge tag to adjacent */

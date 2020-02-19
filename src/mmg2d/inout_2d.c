@@ -547,10 +547,6 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
       }
       ped = &mesh->edge[ref];
       ped->tag |= MG_REQ;
-      ppt = &mesh->point[ped->a];
-      ppt->tag |= MG_REQ;
-      ppt = &mesh->point[ped->b];
-      ppt->tag |= MG_REQ;
     }
   }
 

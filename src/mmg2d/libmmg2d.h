@@ -500,8 +500,7 @@ extern "C" {
  * \param k triangle index.
  * \return 1.
  *
- * Set triangle \a k as required. Tria vertices are also set as required
- * vertices.
+ * Set triangle \a k as required.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_SET_REQUIREDTRIANGLE(mesh,k,retval)\n
@@ -518,8 +517,7 @@ extern "C" {
  * \param k triangle index.
  * \return 1.
  *
- * Remove required attribute from triangle \a k. Required attribute is also
- * removed from tria vertices.
+ * Remove required attribute from triangle \a k.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_UNSET_REQUIREDTRIANGLE(mesh,k,retval)\n
@@ -637,8 +635,7 @@ extern "C" {
  * \param k edge index.
  * \return 1.
  *
- * Remove required attribute from edge \a k. Required attribute are also removed
- * from edge extremities.
+ * Remove required attribute from edge \a k.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_UNSET_REQUIREDEDGE(mesh,k,retval)\n

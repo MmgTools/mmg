@@ -814,9 +814,6 @@ int MMG2D_Set_requiredTriangle(MMG5_pMesh mesh, int k) {
   pt->tag[1] |= MG_REQ;
   pt->tag[2] |= MG_REQ;
 
-  for(i=0 ; i<3 ;i++)
-    mesh->point[pt->v[i]].tag |= MG_REQ;
-
   return 1;
 }
 
@@ -830,9 +827,6 @@ int MMG2D_Unset_requiredTriangle(MMG5_pMesh mesh, int k) {
   pt->tag[0] &= ~MG_REQ;
   pt->tag[1] &= ~MG_REQ;
   pt->tag[2] &= ~MG_REQ;
-
-  for(i=0 ; i<3 ;i++)
-    mesh->point[pt->v[i]].tag &= ~MG_REQ;
 
   return 1;
 }
@@ -1132,7 +1126,6 @@ int MMG2D_Set_edge(MMG5_pMesh mesh, int v0, int v1, int ref, int pos) {
 }
 
 int MMG2D_Set_requiredEdge(MMG5_pMesh mesh, int k) {
-  MMG5_pPoint ppt;
   MMG5_pEdge  ped;
 
   assert ( k <= mesh->na );
@@ -1141,16 +1134,10 @@ int MMG2D_Set_requiredEdge(MMG5_pMesh mesh, int k) {
 
   ped->tag |= MG_REQ;
 
-  ppt = &mesh->point[ped->a];
-  ppt->tag |= MG_REQ;
-  ppt = &mesh->point[ped->b];
-  ppt->tag |= MG_REQ;
-
   return 1;
 }
 
 int MMG2D_Unset_requiredEdge(MMG5_pMesh mesh, int k) {
-  MMG5_pPoint ppt;
   MMG5_pEdge  ped;
 
   assert ( k <= mesh->na );
@@ -1158,11 +1145,6 @@ int MMG2D_Unset_requiredEdge(MMG5_pMesh mesh, int k) {
   ped = &mesh->edge[k];
 
   ped->tag &= ~MG_REQ;
-
-  ppt = &mesh->point[ped->a];
-  ppt->tag &= ~MG_REQ;
-  ppt = &mesh->point[ped->b];
-  ppt->tag &= ~MG_REQ;
 
   return 1;
 }
