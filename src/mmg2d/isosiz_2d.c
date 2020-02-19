@@ -96,7 +96,6 @@ int MMG2D_set_metricAtPointsOnReqEdges ( MMG5_pMesh mesh,MMG5_pSol met ) {
     for ( i=0; i<3; i++ ) {
       if ( (pt->tag[i] & MG_REQ) || (pt->tag[i] & MG_NOSURF) ||
            (pt->tag[i] & MG_PARBDY) ) {
-
         /* Check if the edge has been proceeded by the neighbour triangle */
         iadj = mesh->adja[3*(k-1)+i+1];
         if ( iadj && mesh->tria[iadj/3].flag ) continue;
@@ -172,8 +171,10 @@ int MMG2D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   /** Step 1: Set metric at points belonging to a required edge: compute the
    * metric as the mean of the length of the required eges passing through the
    * point */
-  if ( !MMG2D_set_metricAtPointsOnReqEdges ( mesh,met ) ) {
-    return 0;
+  if ( !mesh->info.nosizreq ) {
+    if ( !MMG2D_set_metricAtPointsOnReqEdges ( mesh,met ) ) {
+      return 0;
+    }
   }
 
   /** Step 2: size at non required internal points */

@@ -71,6 +71,7 @@ enum MMGS_Param {
   MMGS_IPARAM_nreg,              /*!< [0/1], Disabled/enabled normal regularization */
   MMGS_IPARAM_numberOfLocalParam,/*!< [n], Number of local parameters */
   MMGS_IPARAM_renum,             /*!< [1/0], Turn on/off point relocation with Scotch */
+  MMGS_IPARAM_nosizreq,          /*!< [0/1], Allow/avoid overwritten of sizes at required points (advanced usage) */
   MMGS_DPARAM_angleDetection,    /*!< [val], Value for angle detection */
   MMGS_DPARAM_hmin,              /*!< [val], Minimal mesh size */
   MMGS_DPARAM_hmax,              /*!< [val], Maximal mesh size */

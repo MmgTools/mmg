@@ -641,6 +641,7 @@ const char    *MMG5_Get_formatName(enum MMG5_Format fmt);
  int           MMG5_mmgHashTria(MMG5_pMesh mesh, int *adja, MMG5_Hash*, int chkISO);
  void          MMG5_mmgInit_parameters(MMG5_pMesh mesh);
  void          MMG5_mmgUsage(char *prog);
+ void          MMG5_advancedUsage();
  extern int    MMG5_nonUnitNorPts(MMG5_pMesh,int,int,int,double*);
  extern double MMG5_nonorsurf(MMG5_pMesh mesh,MMG5_pTria pt);
  extern int    MMG5_norpts(MMG5_pMesh,int,int,int,double *);

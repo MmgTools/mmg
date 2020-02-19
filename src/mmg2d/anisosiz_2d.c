@@ -392,8 +392,10 @@ int MMG2D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   /** Step 1: Set metric at points belonging to a required edge: compute the
    * metric as the mean of the length of the required eges passing through the
    * point */
-  if ( !MMG2D_set_metricAtPointsOnReqEdges ( mesh,met ) ) {
-    return 0;
+  if ( !mesh->info.nosizreq ) {
+    if ( !MMG2D_set_metricAtPointsOnReqEdges ( mesh,met ) ) {
+      return 0;
+    }
   }
 
   /* Step 2: Travel all the points (via triangles) in the mesh and set metric tensor */

@@ -77,6 +77,9 @@ int MMGS_usage(char *prog) {
 #ifdef USE_SCOTCH
   fprintf(stdout,"-rn [n]      Turn on or off the renumbering using SCOTCH [0/1] \n");
 #endif
+
+  MMG5_advancedUsage();
+
   fprintf(stdout,"\n\n");
 
   return 1;
@@ -258,6 +261,11 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol so
         else if ( !strcmp(argv[i],"-nreg") ) {
           if ( !MMGS_Set_iparameter(mesh,met,MMGS_IPARAM_nreg,1) )
             return 0;
+        }
+        else if( !strcmp(argv[i],"-nosizreq") ) {
+          if ( !MMGS_Set_iparameter(mesh,met,MMGS_IPARAM_nosizreq,1) ) {
+            return 0;
+          }
         }
         break;
       case 'o':

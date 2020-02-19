@@ -184,6 +184,9 @@ int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
   case MMG2D_IPARAM_nreg :
     mesh->info.nreg     = val;
     break;
+  case MMG2D_IPARAM_nosizreq :
+    mesh->info.nosizreq = val;
+    break;
   case MMG2D_IPARAM_numberOfLocalParam :
     if ( mesh->info.par ) {
       MMG5_DEL_MEM(mesh,mesh->info.par);

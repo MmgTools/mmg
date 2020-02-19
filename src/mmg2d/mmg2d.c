@@ -65,6 +65,9 @@ static int MMG2D_usage(char *name) {
   fprintf(stdout,"-noinsert     no insertion/suppression point\n");
   fprintf(stdout,"-noswap       no edge flipping\n");
   fprintf(stdout,"-nomove       no point relocation\n");
+
+  MMG5_advancedUsage();
+
   fprintf(stdout,"\n\n");
 
   return 1;
@@ -518,6 +521,11 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
         else if( !strcmp(argv[i],"-nosurf") ) {
           if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_nosurf,1) )
             return 0;
+        }
+        else if( !strcmp(argv[i],"-nosizreq") ) {
+          if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_nosizreq,1) ) {
+            return 0;
+          }
         }
         break;
       case 'o':

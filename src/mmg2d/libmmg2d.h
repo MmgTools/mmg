@@ -71,6 +71,7 @@ extern "C" {
     MMG2D_IPARAM_nosurf,            /*!< [1/0], Avoid/allow surface modifications */
     MMG2D_IPARAM_nreg,              /*!< [0/1], Enable normal regularization */
     MMG2D_IPARAM_numberOfLocalParam,/*!< [n], Number of local parameters */
+    MMG2D_IPARAM_nosizreq,          /*!< [0/1], Allow/avoid overwritten of sizes at required points (advanced usage) */
     MMG2D_DPARAM_angleDetection,    /*!< [val], Value for angle detection */
     MMG2D_DPARAM_hmin,              /*!< [val], Minimal mesh size */
     MMG2D_DPARAM_hmax,              /*!< [val], Maximal mesh size */
