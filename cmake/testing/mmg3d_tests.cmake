@@ -357,6 +357,12 @@ ADD_TEST(NAME mmg3d_val
 SET_PROPERTY(TEST mmg3d_val #mmg3d_default
   PROPERTY WILL_FAIL TRUE)
 
+# default hybrid
+ADD_TEST(NAME mmg3d_hybrid_3d
+  COMMAND ${EXECUT_MMG3D} -v 5
+  ${MMG3D_CI_TESTS}/Hybrid/prism.mesh
+  ${CTEST_OUTPUT_DIR}/mmg3d_hybrid_3d-default.msh)
+
 ###############################################################################
 #####
 #####         Check Boundaries
