@@ -77,6 +77,9 @@ int lissmet_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
   /* build edge table */
   for(k=1 ; k<=mesh->nt ; k++) {
     pt = &mesh->tria[k];
+    if ( !MG_EOK(pt) ) {
+      continue;
+    }
     for(i=0 ; i<3 ; i++) {
       a = pt->v[MMG2D_iare[i][0]];
       b = pt->v[MMG2D_iare[i][1]];
