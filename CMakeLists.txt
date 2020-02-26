@@ -392,11 +392,13 @@ IF( USE_SCOTCH )
   INCLUDE_DIRECTORIES(${SCOTCH_INCLUDE_DIRS})
 ENDIF()
 
-install(EXPORT MmgTargets
-  FILE MmgTargets.cmake
-  NAMESPACE Mmg::
-  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/mmg
-  )
+IF ( MmgTargetsExported )
+  install(EXPORT MmgTargets
+    FILE MmgTargets.cmake
+    NAMESPACE Mmg::
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/mmg
+    )
+ENDIF()
 
 ###############################################################################
 #####
