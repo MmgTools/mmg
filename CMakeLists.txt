@@ -22,6 +22,11 @@
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0)
 
+# if PROJECT_NAME is defined, mmg is a subproject
+if(DEFINED PROJECT_NAME)
+  set(MMG_SUBPROJECT ON)
+endif()
+
 INCLUDE(CMakeDependentOption)
 INCLUDE(cmake/modules/macros.cmake)
 
@@ -38,6 +43,11 @@ FILE(MAKE_DIRECTORY ${COMMON_BINARY_DIR})
 SET ( CI_DIR ${PROJECT_SOURCE_DIR}/ci_tests
   CACHE PATH "Path toward the continuous integration directory" )
 MARK_AS_ADVANCED ( CI_DIR )
+
+
+# various variables to help standard install directories
+include(GNUInstallDirs)
+
 
 ###############################################################################
 #####
@@ -382,6 +392,12 @@ IF( USE_SCOTCH )
   INCLUDE_DIRECTORIES(${SCOTCH_INCLUDE_DIRS})
 ENDIF()
 
+install(EXPORT MmgTargets
+  FILE MmgTargets.cmake
+  NAMESPACE Mmg::
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/mmg
+  )
+
 ###############################################################################
 #####
 #####         Continuous integration
@@ -541,10 +557,14 @@ IF(DOXYGEN_FOUND)
     ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg3d/html/index.html file to see
     it" VERBATIM )
 
-  ADD_CUSTOM_TARGET(doc DEPENDS mmgs_doc mmg3d_doc mmg2d_doc COMMENT "Generating
+  if ( NOT TARGET doc )
+    ADD_CUSTOM_TARGET(doc DEPENDS mmgs_doc mmg3d_doc mmg2d_doc COMMENT "Generating
     MMG API documentation with Doxygen.  Open up the
     ${PROJECT_BINARY_DIR}/doc/mmg*/html/index.html file to see it"
-    VERBATIM )
+      VERBATIM )
+  else()
+    add_dependencies( doc mmgs_doc mmg3d_doc mmg2d_doc )
+  endif() 
 ENDIF ( DOXYGEN_FOUND )
 
 ###############################################################################

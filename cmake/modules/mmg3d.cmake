@@ -138,7 +138,7 @@ SET( mmg3d_headers
   )
 
 # Install header files in /usr/local or equivalent
-INSTALL(FILES ${mmg3d_headers} DESTINATION include/mmg/mmg3d COMPONENT headers)
+INSTALL(FILES ${mmg3d_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/mmg/mmg3d COMPONENT headers)
 
 COPY_FORTRAN_HEADER_AND_CREATE_TARGET ( ${MMG3D_BINARY_DIR} ${MMG3D_INCLUDE} 3d )
 
