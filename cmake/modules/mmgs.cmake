@@ -101,7 +101,7 @@ SET( mmgs_headers
   )
 
 # Install header files in /usr/local or equivalent
-INSTALL(FILES ${mmgs_headers} DESTINATION include/mmg/mmgs COMPONENT headers)
+INSTALL(FILES ${mmgs_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/mmg/mmgs COMPONENT headers)
 
 COPY_FORTRAN_HEADER_AND_CREATE_TARGET ( ${MMGS_BINARY_DIR} ${MMGS_INCLUDE} s )
 
