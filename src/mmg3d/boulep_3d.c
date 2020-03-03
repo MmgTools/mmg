@@ -1608,7 +1608,7 @@ int16_t MMG5_coquilTravel(MMG5_pMesh mesh, int na, int nb, int* adj, int *piv,
     *adj = adja[ MMG5_ifar[*i][1] ] /4;
     *piv = pt->v[ MMG5_ifar[*i][0] ];
   }
-  isbdy = pt->xt ? pxt->ftag[*iface] : 0;
+  isbdy = pt->xt ? (pxt->ftag[*iface] & MG_BDY) : 0;
 
   /* identification of edge number in tetra *adj */
   if ( *adj ) {
