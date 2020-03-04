@@ -644,7 +644,8 @@ int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
       }
     }
 
-    if ( MMG5_chkedg(mesh,&tt,MG_GET(pxt->ori,iopp),hmax,hausd,isloc) )  return 0;
+    /* If some edges must be splitted, refuse the collapse */
+    if ( MMG5_chkedg(mesh,&tt,MG_GET(pxt->ori,iopp),hmax,hausd,isloc) > 0 )  return 0;
 
     memcpy(nprvold,ncurold,3*sizeof(double));
     memcpy(nprvnew,ncurnew,3*sizeof(double));

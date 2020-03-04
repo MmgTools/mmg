@@ -299,7 +299,7 @@ int MMG3D_dichoto1b(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int ip) {
  * \param hmax maximal edge length.
  * \param hausd maximal hausdorff distance.
  * \param locPar 1 if hmax and hausd are locals parameters.
- * \return 0 if error.
+ * \return -1 if error
  * \return edges of the triangle pt that need to be split.
  *
  * Find edges of (virtual) triangle pt that need to be split with
@@ -461,7 +461,7 @@ char MMG5_chkedg(MMG5_pMesh mesh,MMG5_Tria *pt,char ori, double hmax,
                     " problem\n",__func__);
             mmgWarn0 = 1;
           }
-          return 0;
+          return -1;
         }
         memcpy(t1,t[i1],3*sizeof(double));
         ps = t1[0]*ux + t1[1]*uy + t1[2]*uz;
@@ -483,7 +483,7 @@ char MMG5_chkedg(MMG5_pMesh mesh,MMG5_Tria *pt,char ori, double hmax,
                     " problem\n",__func__);
             mmgWarn1 = 1;
           }
-          return 0;
+          return -1;
         }
         memcpy(t2,t[i2],3*sizeof(double));
         ps = - ( t2[0]*ux + t2[1]*uy + t2[2]*uz );
@@ -1584,7 +1584,7 @@ int MMG3D_chkbdyface(MMG5_pMesh mesh,MMG5_pSol met,int k,MMG5_pTetra pt,
   MMG5_pPar    par;
   double       len,hmax,hausd;
   int          l,ip1,ip2;
-  int8_t       isloc;
+  int8_t       isloc,ier;
   char         j,i1,i2,ia;
 
   if ( typchk == 1 ) {
@@ -1635,8 +1635,13 @@ int MMG3D_chkbdyface(MMG5_pMesh mesh,MMG5_pSol met,int k,MMG5_pTetra pt,
       }
     }
 
-    if ( !MMG5_chkedg(mesh,ptt,MG_GET(pxt->ori,i),hmax,hausd,isloc) ) {
+    ier = MMG5_chkedg(mesh,ptt,MG_GET(pxt->ori,i),hmax,hausd,isloc);
+    if ( ier < 0 ) {
+      /* Error */
       return 0;
+    } else if ( ier == 0 ) {
+      /* Nothing to split */
+      return 1;
     }
 
     /* put back flag on tetra */
