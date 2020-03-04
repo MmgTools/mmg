@@ -1830,7 +1830,6 @@ MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         ip1 = pt->v[i1];
         ip2 = pt->v[i2];
         ip  = MMG5_hashGet(&hash,ip1,ip2);
-        if ( ip > 0 && !(ptt.tag[j] & MG_GEO) )  continue;
 
         ier = MMG3D_bezierInt(&pb,&uv[j][0],o,no,to);
         assert(ier);
