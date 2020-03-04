@@ -1717,9 +1717,10 @@ static int MMG3D_anatets_ani(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
       if ( pxt->ftag[i] & MG_REQ )     continue;
       if ( !(pxt->ftag[i] & MG_BDY) )  continue;
 
+      if ( !MG_GET(pxt->ori,i) ) continue;
+
       /* virtual triangle */
       MMG5_tet2tri(mesh,k,i,&ptt);
-      if ( !MG_GET(pxt->ori,i) ) continue;
 
       if ( !MMG3D_chkbdyface(mesh,met,k,pt,pxt,i,&ptt,typchk) ) { continue; }
     }
