@@ -1803,12 +1803,12 @@ MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
       if ( pxt->ftag[i] & MG_REQ )     continue;
       if ( !(pxt->ftag[i] & MG_BDY) )  continue;
 
-      /* virtual triangle */
-      MMG5_tet2tri(mesh,k,i,&ptt);
-
       if ( typchk == 1 ) {
         if ( !MG_GET(pxt->ori,i) ) { continue; }
       }
+
+      /* virtual triangle */
+      MMG5_tet2tri(mesh,k,i,&ptt);
 
       if ( !MMG3D_chkbdyface(mesh,met,k,pt,pxt,i,&ptt,typchk) ) { continue; }
 
