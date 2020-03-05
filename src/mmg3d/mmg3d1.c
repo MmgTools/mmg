@@ -1831,10 +1831,22 @@ MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         ip2 = pt->v[i2];
         ip  = MMG5_hashGet(&hash,ip1,ip2);
 
-        ier = MMG3D_bezierInt(&pb,&uv[j][0],o,no,to);
-        assert(ier);
         /* new point along edge */
         if ( !ip ) {
+
+          if ( ptt.tag[j] & MG_NOM ) {
+            /* Use BezierNom to ensure that the new nm point has a normal that
+             * is consistent with the normals at point ip1 and ip2 */
+            if ( !MMG5_BezierNom(mesh,ip1,ip2,0.5,o,no,to) ) {
+              continue;
+            }
+          }
+          else {
+            /* Otherwise we can build the bezier patch */
+            ier = MMG3D_bezierInt(&pb,&uv[j][0],o,no,to);
+            assert(ier);
+          }
+
           ip = MMG3D_newPt(mesh,o,MG_BDY);
           if ( !ip ) {
             /* reallocation of point table */
@@ -1909,6 +1921,10 @@ MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           nap++;
         }
         else if ( MG_EDG(ptt.tag[j]) && !(ptt.tag[j] & MG_NOM) ) {
+          /* Store the tangent and the second normal at edge */
+          ier = MMG3D_bezierInt(&pb,&uv[j][0],o,no,to);
+          assert(ier);
+
           ppt = &mesh->point[ip];
           assert(ppt->xp);
           pxp = &mesh->xpoint[ppt->xp];
