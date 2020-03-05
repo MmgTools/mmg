@@ -1967,8 +1967,9 @@ MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
 
           MG_SET(pt->flag,ia);
           nc++;
-          /* ridge on a boundary face */
-          if ( !(ptt.tag[j] & MG_GEO) && !(ptt.tag[j] & MG_NOM) )  continue;
+
+          if ( (!(ptt.tag[j] & MG_GEO)) || (ptt.tag[j] & MG_NOM) )  continue;
+
           ppt = &mesh->point[ip];
           assert(ppt->xp);
           pxp = &mesh->xpoint[ppt->xp];
