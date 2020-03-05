@@ -345,7 +345,7 @@ int colver(MMG5_pMesh mesh,int *list,int ilist) {
  * \param list pointer toward the ball of the point to collapse.
  * \return 1 if success, 0 if fail.
  *
- * Collapse edge \f$list[0]%3\f$ in tet \f$list[0]/3\f$ (\f$ ip->i1\f$ ) for a
+ * Collapse edge \f$list[0]\%3\f$ in tet \f$list[0]/3\f$ (\f$ ip->i1\f$ ) for a
  * ball of the collapsed point of size 3: the collapsed point is removed.
  *
  */
