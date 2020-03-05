@@ -39,7 +39,6 @@
  */
 
 #include "mmgs.h"
-#include "mmgsexterns.c"
 
 /**
  * Pack the mesh \a mesh and its associated metric \a met and return \a val.

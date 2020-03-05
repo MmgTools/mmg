@@ -1,4 +1,3 @@
-#include "mmgexterns.c"
 #include "mmg3d.h"
 
 double (*MMG3D_lenedgCoor)(double *ca,double *cb,double *sa,double *sb);

@@ -1,4 +1,3 @@
-#include "mmgexterns.c"
 #include "mmg2d.h"
 
 int    (*MMG2D_defsiz)(MMG5_pMesh ,MMG5_pSol );

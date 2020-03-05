@@ -38,7 +38,6 @@
  */
 
 #include "mmg2d.h"
-#include "mmg2dexterns.c"
 
 /**
  * \param mesh pointer toward the mesh structure.
