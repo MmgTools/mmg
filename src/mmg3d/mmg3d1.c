@@ -1952,14 +1952,39 @@ MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
     for (i=0; i<4; i++) {
       /* virtual triangle */
       memset(&ptt,0,sizeof(MMG5_Tria));
-      if ( pt->xt && pxt->ftag[i] )
+      if ( pt->xt && pxt->ftag[i] ) {
         MMG5_tet2tri(mesh,k,i,&ptt);
+      }
 
       for (j=0; j<3; j++) {
         ia  = MMG5_iarf[i][j];
-        if ( MG_GET(pt->flag,ia) )                continue;
+
+        /* If edge is already marked, nothing to do */
+        if ( MG_GET(pt->flag,ia) ) {
+          continue;
+        }
+
+        /** Edge analysis */
+        /* First: skip edge if required */
         if ( pt->xt && (pxt->tag[ia] & MG_REQ) )  continue;
-        else if ( ptt.tag[j] & MG_REQ )           continue;
+        else if ( ptt.tag[j] & MG_REQ ) {
+          // Dead code: to remove (Algiane 05/03/20)?
+          assert ( pt->xt && (pxt->tag[ia] & MG_REQ) );
+          continue;
+        }
+
+        /* Second: if possible treat manifold ridges from a boundary face (to
+         * ensure the computation of n2) */
+        if ( pt->xt ) {
+          if ( pxt->tag[ia] & MG_GEO && (!(pxt->tag[ia] & MG_NOM) ) ) {
+            int ifac2 = (MMG5_ifar[ia][0]!=i)? MMG5_ifar[ia][1] : MMG5_ifar[ia][0];
+            if ( (!(pxt->ftag[i] & MG_BDY) ) && (pxt->ftag[ifac2] & MG_BDY) ) {
+              assert ( ifac2 > i && "lower face is already processed" );
+              continue;
+            }
+          }
+        }
+
         ip1 = pt->v[MMG5_iare[ia][0]];
         ip2 = pt->v[MMG5_iare[ia][1]];
         ip  = MMG5_hashGet(&hash,ip1,ip2);
@@ -1970,6 +1995,8 @@ MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
 
           if ( (!(ptt.tag[j] & MG_GEO)) || (ptt.tag[j] & MG_NOM) )  continue;
 
+          /* From a boundary face of a boundary tetra we can update normal/tangent
+           at ridges; */
           ppt = &mesh->point[ip];
           assert(ppt->xp);
           pxp = &mesh->xpoint[ppt->xp];
