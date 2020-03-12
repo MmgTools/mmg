@@ -136,7 +136,7 @@ int MMG2D_boulen(MMG5_pMesh mesh, int start,char ip, int *pleft, int *pright, do
 
   if ( kk == start ) {
     fprintf(stderr,"  ## Error: %s: Unable to find a boundary edge in"
-            " the ball of point %d.\n",__func__,MMG2D_indPt(mesh,ip));
+            " the ball of point %d.\n",__func__,MMG2D_indPt(mesh,mesh->tria[start].v[ip]));
     return 0;
   }
 
