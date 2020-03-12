@@ -130,11 +130,15 @@ int MMG2D_boulen(MMG5_pMesh mesh, int start,char ip, int *pleft, int *pright, do
     ii = adja[i] % 3;
 
     notedg = mesh->info.opnbdy ?
-      !mesh->tria[k].tag[i] : mesh->tria[kk].ref == refs;
+      (!mesh->tria[k].tag[i]) : (mesh->tria[kk].ref == refs);
   }
   while ( kk && (kk != start) && notedg );
 
-  if ( kk == start ) return 0;
+  if ( kk == start ) {
+    fprintf(stderr,"  ## Error: %s: Unable to find a boundary edge in"
+            " the ball of point %d.\n",__func__,MMG2D_indPt(mesh,ip));
+    return 0;
+  }
 
   /* Calculation of the first normal vector */
   pt = &mesh->tria[k];
