@@ -1042,7 +1042,7 @@ int MMG5_movbdyrefpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
       }
     }
 
-    if ( MMG5_chkedg(mesh,&tt,MG_GET(pxt->ori,iface),hmax,hausd,isloc) ) {
+    if ( MMG5_chkedg(mesh,&tt,MG_GET(pxt->ori,iface),hmax,hausd,isloc) > 0 ) {
       memset(pxp,0,sizeof(MMG5_xPoint));
       return 0;
     }
@@ -1394,7 +1394,7 @@ int MMG5_movbdynompt_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree
       }
     }
 
-    if ( MMG5_chkedg(mesh,&tt,MG_GET(pxt->ori,iface),hmax,hausd,isloc) ) {
+    if ( MMG5_chkedg(mesh,&tt,MG_GET(pxt->ori,iface),hmax,hausd,isloc) > 0 ) {
       memset(pxp,0,sizeof(MMG5_xPoint));
       return 0;
     }
@@ -1742,7 +1742,7 @@ int MMG5_movbdyridpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
       }
     }
 
-    if ( MMG5_chkedg(mesh,&tt,MG_GET(pxt->ori,iface),hmax,hausd,isloc) ) {
+    if ( MMG5_chkedg(mesh,&tt,MG_GET(pxt->ori,iface),hmax,hausd,isloc) > 0 ) {
       memset(pxp,0,sizeof(MMG5_xPoint));
       return 0;
     }

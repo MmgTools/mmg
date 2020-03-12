@@ -258,7 +258,6 @@ int  MMG3D_zaldy(MMG5_pMesh mesh);
 void MMG5_freeXTets(MMG5_pMesh mesh);
 void MMG5_freeXPrisms(MMG5_pMesh mesh);
 void MMG3D_Free_topoTables(MMG5_pMesh mesh);
-char MMG5_chkedg(MMG5_pMesh mesh,MMG5_pTria pt,char ori,double,double,int);
 int  MMG5_chkBdryTria(MMG5_pMesh mesh);
 int  MMG5_mmg3dBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,MMG5_pBezier pb,char ori);
 extern int    MMG5_BezierTgt(double c1[3],double c2[3],double n1[3],double n2[3],double t1[3],double t2[3]);

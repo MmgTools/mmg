@@ -299,7 +299,7 @@ int MMG3D_dichoto1b(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int ip) {
  * \param hmax maximal edge length.
  * \param hausd maximal hausdorff distance.
  * \param locPar 1 if hmax and hausd are locals parameters.
- * \return 0 if error.
+ * \return -1 if error
  * \return edges of the triangle pt that need to be split.
  *
  * Find edges of (virtual) triangle pt that need to be split with
@@ -461,7 +461,7 @@ char MMG5_chkedg(MMG5_pMesh mesh,MMG5_Tria *pt,char ori, double hmax,
                     " problem\n",__func__);
             mmgWarn0 = 1;
           }
-          return 0;
+          return -1;
         }
         memcpy(t1,t[i1],3*sizeof(double));
         ps = t1[0]*ux + t1[1]*uy + t1[2]*uz;
@@ -483,7 +483,7 @@ char MMG5_chkedg(MMG5_pMesh mesh,MMG5_Tria *pt,char ori, double hmax,
                     " problem\n",__func__);
             mmgWarn1 = 1;
           }
-          return 0;
+          return -1;
         }
         memcpy(t2,t[i2],3*sizeof(double));
         ps = - ( t2[0]*ux + t2[1]*uy + t2[2]*uz );
@@ -1584,7 +1584,7 @@ int MMG3D_chkbdyface(MMG5_pMesh mesh,MMG5_pSol met,int k,MMG5_pTetra pt,
   MMG5_pPar    par;
   double       len,hmax,hausd;
   int          l,ip1,ip2;
-  int8_t       isloc;
+  int8_t       isloc,ier;
   char         j,i1,i2,ia;
 
   if ( typchk == 1 ) {
@@ -1635,8 +1635,13 @@ int MMG3D_chkbdyface(MMG5_pMesh mesh,MMG5_pSol met,int k,MMG5_pTetra pt,
       }
     }
 
-    if ( !MMG5_chkedg(mesh,ptt,MG_GET(pxt->ori,i),hmax,hausd,isloc) ) {
+    ier = MMG5_chkedg(mesh,ptt,MG_GET(pxt->ori,i),hmax,hausd,isloc);
+    if ( ier < 0 ) {
+      /* Error */
       return 0;
+    } else if ( ier == 0 ) {
+      /* Nothing to split */
+      return 1;
     }
 
     /* put back flag on tetra */
@@ -1712,9 +1717,10 @@ static int MMG3D_anatets_ani(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
       if ( pxt->ftag[i] & MG_REQ )     continue;
       if ( !(pxt->ftag[i] & MG_BDY) )  continue;
 
+      if ( !MG_GET(pxt->ori,i) ) continue;
+
       /* virtual triangle */
       MMG5_tet2tri(mesh,k,i,&ptt);
-      if ( !MG_GET(pxt->ori,i) ) continue;
 
       if ( !MMG3D_chkbdyface(mesh,met,k,pt,pxt,i,&ptt,typchk) ) { continue; }
     }
@@ -1798,12 +1804,12 @@ MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
       if ( pxt->ftag[i] & MG_REQ )     continue;
       if ( !(pxt->ftag[i] & MG_BDY) )  continue;
 
-      /* virtual triangle */
-      MMG5_tet2tri(mesh,k,i,&ptt);
-
       if ( typchk == 1 ) {
         if ( !MG_GET(pxt->ori,i) ) { continue; }
       }
+
+      /* virtual triangle */
+      MMG5_tet2tri(mesh,k,i,&ptt);
 
       if ( !MMG3D_chkbdyface(mesh,met,k,pt,pxt,i,&ptt,typchk) ) { continue; }
 
@@ -1824,12 +1830,23 @@ MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         ip1 = pt->v[i1];
         ip2 = pt->v[i2];
         ip  = MMG5_hashGet(&hash,ip1,ip2);
-        if ( ip > 0 && !(ptt.tag[j] & MG_GEO) )  continue;
 
-        ier = MMG3D_bezierInt(&pb,&uv[j][0],o,no,to);
-        assert(ier);
         /* new point along edge */
         if ( !ip ) {
+
+          if ( ptt.tag[j] & MG_NOM ) {
+            /* Use BezierNom to ensure that the new nm point has a normal that
+             * is consistent with the normals at point ip1 and ip2 */
+            if ( !MMG5_BezierNom(mesh,ip1,ip2,0.5,o,no,to) ) {
+              continue;
+            }
+          }
+          else {
+            /* Otherwise we can build the bezier patch */
+            ier = MMG3D_bezierInt(&pb,&uv[j][0],o,no,to);
+            assert(ier);
+          }
+
           ip = MMG3D_newPt(mesh,o,MG_BDY);
           if ( !ip ) {
             /* reallocation of point table */
@@ -1904,6 +1921,10 @@ MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           nap++;
         }
         else if ( MG_EDG(ptt.tag[j]) && !(ptt.tag[j] & MG_NOM) ) {
+          /* Store the tangent and the second normal at edge */
+          ier = MMG3D_bezierInt(&pb,&uv[j][0],o,no,to);
+          assert(ier);
+
           ppt = &mesh->point[ip];
           assert(ppt->xp);
           pxp = &mesh->xpoint[ppt->xp];
@@ -1931,14 +1952,39 @@ MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
     for (i=0; i<4; i++) {
       /* virtual triangle */
       memset(&ptt,0,sizeof(MMG5_Tria));
-      if ( pt->xt && pxt->ftag[i] )
+      if ( pt->xt && pxt->ftag[i] ) {
         MMG5_tet2tri(mesh,k,i,&ptt);
+      }
 
       for (j=0; j<3; j++) {
         ia  = MMG5_iarf[i][j];
-        if ( MG_GET(pt->flag,ia) )                continue;
+
+        /* If edge is already marked, nothing to do */
+        if ( MG_GET(pt->flag,ia) ) {
+          continue;
+        }
+
+        /** Edge analysis */
+        /* First: skip edge if required */
         if ( pt->xt && (pxt->tag[ia] & MG_REQ) )  continue;
-        else if ( ptt.tag[j] & MG_REQ )           continue;
+        else if ( ptt.tag[j] & MG_REQ ) {
+          // Dead code: to remove (Algiane 05/03/20)?
+          assert ( pt->xt && (pxt->tag[ia] & MG_REQ) );
+          continue;
+        }
+
+        /* Second: if possible treat manifold ridges from a boundary face (to
+         * ensure the computation of n2) */
+        if ( pt->xt ) {
+          if ( pxt->tag[ia] & MG_GEO && (!(pxt->tag[ia] & MG_NOM) ) ) {
+            int ifac2 = (MMG5_ifar[ia][0]!=i)? MMG5_ifar[ia][1] : MMG5_ifar[ia][0];
+            if ( (!(pxt->ftag[i] & MG_BDY) ) && (pxt->ftag[ifac2] & MG_BDY) ) {
+              assert ( ifac2 > i && "lower face is already processed" );
+              continue;
+            }
+          }
+        }
+
         ip1 = pt->v[MMG5_iare[ia][0]];
         ip2 = pt->v[MMG5_iare[ia][1]];
         ip  = MMG5_hashGet(&hash,ip1,ip2);
@@ -1946,8 +1992,11 @@ MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
 
           MG_SET(pt->flag,ia);
           nc++;
-          /* ridge on a boundary face */
-          if ( !(ptt.tag[j] & MG_GEO) && !(ptt.tag[j] & MG_NOM) )  continue;
+
+          if ( (!(ptt.tag[j] & MG_GEO)) || (ptt.tag[j] & MG_NOM) )  continue;
+
+          /* From a boundary face of a boundary tetra we can update normal/tangent
+           at ridges; */
           ppt = &mesh->point[ip];
           assert(ppt->xp);
           pxp = &mesh->xpoint[ppt->xp];
