@@ -20,7 +20,6 @@
 **  use this copy of the mmg distribution only if you accept them.
 ** =============================================================================
 */
-double (*MMG3D_lenedgCoor)(double *ca,double *cb,double *sa,double *sb);
 
 /**
  * \file mmg3d/libmmg3d.c
@@ -41,9 +40,7 @@ double (*MMG3D_lenedgCoor)(double *ca,double *cb,double *sa,double *sb);
  */
 
 #include "inlined_functions_3d.h"
-
-/* Declared in the header, but need to define in at most one compilation unit */
-double (*MMG3D_lenedgCoor)(double *ca,double *cb,double *sa,double *sb);
+#include "mmg3dexterns.c"
 
 /**
  * Pack the mesh \a mesh and its associated metric \a met and return \a val.

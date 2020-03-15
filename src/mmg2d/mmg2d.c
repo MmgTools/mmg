@@ -24,7 +24,6 @@
 
 mytime   MMG5_ctim[TIMEMAX];
 
-
 /**
  * Print elapsed time at end of process.
  */

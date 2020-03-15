@@ -166,5 +166,5 @@ int main(int argc,char *argv[]) {
   free(fileout);
   fileout = NULL;
 
-  return(0);
+  return 0;
 }

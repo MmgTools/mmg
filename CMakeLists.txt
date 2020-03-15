@@ -57,8 +57,8 @@ include(GNUInstallDirs)
 ###############################################################################
 SET (CMAKE_RELEASE_VERSION_MAJOR "5" )
 SET (CMAKE_RELEASE_VERSION_MINOR "4" )
-SET (CMAKE_RELEASE_VERSION_PATCH "2" )
-SET (CMAKE_RELEASE_DATE "Mar. 20, 2019" )
+SET (CMAKE_RELEASE_VERSION_PATCH "3" )
+SET (CMAKE_RELEASE_DATE "Feb. 26, 2020" )
 
 SET (CMAKE_RELEASE_VERSION
   "${CMAKE_RELEASE_VERSION_MAJOR}.${CMAKE_RELEASE_VERSION_MINOR}.${CMAKE_RELEASE_VERSION_PATCH}")
@@ -393,25 +393,26 @@ IF( USE_SCOTCH )
   INCLUDE_DIRECTORIES(${SCOTCH_INCLUDE_DIRS})
 ENDIF()
 
-set( MMG_CMAKE_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/mmg )
+IF ( MmgTargetsExported )
+  set( MMG_CMAKE_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/mmg )
 
-configure_package_config_file(mmgConfig.cmake.in
-  ${PROJECT_BINARY_DIR}/mmgConfig.cmake
-  INSTALL_DESTINATION ${MMG_CMAKE_INSTALL_DIR} )
+  configure_package_config_file(mmgConfig.cmake.in
+    ${PROJECT_BINARY_DIR}/mmgConfig.cmake
+    INSTALL_DESTINATION ${MMG_CMAKE_INSTALL_DIR} )
   
-install(EXPORT MmgTargets
-  FILE MmgTargets.cmake
-  NAMESPACE Mmg::
-  DESTINATION ${MMG_CMAKE_INSTALL_DIR}
-  )
-install(FILES ${PROJECT_BINARY_DIR}/mmgConfig.cmake
-  DESTINATION ${MMG_CMAKE_INSTALL_DIR} )
+  install(EXPORT MmgTargets
+    FILE MmgTargets.cmake
+    NAMESPACE Mmg::
+    DESTINATION ${MMG_CMAKE_INSTALL_DIR}
+    )
+  install(FILES ${PROJECT_BINARY_DIR}/mmgConfig.cmake
+    DESTINATION ${MMG_CMAKE_INSTALL_DIR} )
 
-install(FILES
-  ${PROJECT_SOURCE_DIR}/cmake/modules/FindScotch.cmake
-  ${PROJECT_SOURCE_DIR}/cmake/modules/FindElas.cmake
-  DESTINATION ${MMG_CMAKE_INSTALL_DIR} )
-
+  install(FILES
+    ${PROJECT_SOURCE_DIR}/cmake/modules/FindScotch.cmake
+    ${PROJECT_SOURCE_DIR}/cmake/modules/FindElas.cmake
+    DESTINATION ${MMG_CMAKE_INSTALL_DIR} )
+ENDIF()
 
 ###############################################################################
 #####
