@@ -362,6 +362,7 @@ set(CMAKE_REQUIRED_INCLUDES "")
 # ---------------------------------
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(SCOTCH DEFAULT_MSG
+  SCOTCH_INCLUDE_DIRS
   SCOTCH_LIBRARIES
   SCOTCH_WORKS)
 #
