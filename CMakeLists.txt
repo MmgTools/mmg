@@ -45,6 +45,7 @@ SET ( CI_DIR ${PROJECT_SOURCE_DIR}/ci_tests
 MARK_AS_ADVANCED ( CI_DIR )
 
 
+include(CMakePackageConfigHelpers)
 # various variables to help standard install directories
 include(GNUInstallDirs)
 
@@ -393,11 +394,24 @@ IF( USE_SCOTCH )
 ENDIF()
 
 IF ( MmgTargetsExported )
+  set( MMG_CMAKE_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/mmg )
+
+  configure_package_config_file(mmgConfig.cmake.in
+    ${PROJECT_BINARY_DIR}/mmgConfig.cmake
+    INSTALL_DESTINATION ${MMG_CMAKE_INSTALL_DIR} )
+  
   install(EXPORT MmgTargets
     FILE MmgTargets.cmake
     NAMESPACE Mmg::
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/mmg
+    DESTINATION ${MMG_CMAKE_INSTALL_DIR}
     )
+  install(FILES ${PROJECT_BINARY_DIR}/mmgConfig.cmake
+    DESTINATION ${MMG_CMAKE_INSTALL_DIR} )
+
+  install(FILES
+    ${PROJECT_SOURCE_DIR}/cmake/modules/FindScotch.cmake
+    ${PROJECT_SOURCE_DIR}/cmake/modules/FindElas.cmake
+    DESTINATION ${MMG_CMAKE_INSTALL_DIR} )
 ENDIF()
 
 ###############################################################################
