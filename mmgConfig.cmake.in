@@ -4,6 +4,6 @@ include(CMakeFindDependencyMacro)
 
 find_package(Scotch)
 
-if (NOT TARGET Mmg::feelpp_mmg )
+if (NOT TARGET Mmg::mmg )
   include(${CMAKE_CURRENT_LIST_DIR}/MmgTargets.cmake)
 endif ()
