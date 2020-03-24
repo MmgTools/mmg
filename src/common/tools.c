@@ -579,16 +579,17 @@ size_t MMG5_memSize (void) {
 /**
  * \param mesh pointer toward the mesh structure
  *
- * Set the memMax value to its "true" value (50% of the RAM or memory asked by
- * user).
+ * Set the memMax value to its "true" value if memory asked by
+ * user. Here the MMG5_MEMPERCENT coef is already applied on memMax.
  *
  */
 void MMG5_memOption_memSet(MMG5_pMesh mesh) {
 
+  assert ( mesh->memMax );
   if ( mesh->info.mem <= 0 ) {
     if ( mesh->memMax )
       /* maximal memory = 50% of total physical memory */
-      mesh->memMax = mesh->memMax*MMG5_MEMPERCENT;
+      mesh->memMax = MMG5_memSize()*MMG5_MEMPERCENT;
     else {
       /* default value = 800 MB */
       printf("  Maximum memory set to default value: %d MB.\n",MMG5_MEMMAX);
@@ -597,7 +598,7 @@ void MMG5_memOption_memSet(MMG5_pMesh mesh) {
   }
   else {
     /* memory asked by user if possible, otherwise total physical memory */
-    if ( (size_t)mesh->info.mem*MMG5_MILLION > mesh->memMax && mesh->memMax ) {
+    if ( (size_t)mesh->info.mem*MMG5_MILLION > (mesh->memMax/MMG5_MEMPERCENT) && mesh->memMax ) {
       fprintf(stderr,"\n  ## Warning: %s: asking for %d MB of memory ",
               __func__,mesh->info.mem);
       fprintf(stderr,"when only %zu available.\n",mesh->memMax/MMG5_MILLION);
