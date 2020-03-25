@@ -508,7 +508,7 @@ int    MMG3D_gradsizreq_ani(MMG5_pMesh ,MMG5_pSol );
 double     MMG5_meansizreg_iso(MMG5_pMesh,MMG5_pSol,int,int*,int,double,double);
 int        MMG3D_chk4ridVertices(MMG5_pMesh mesh,MMG5_pTetra pt);
 extern int MMG5_moymet(MMG5_pMesh ,MMG5_pSol ,MMG5_pTetra ,double *);
-int    MMG3D_set_metricAtPointsOnReqEdges (MMG5_pMesh,MMG5_pSol);
+int    MMG3D_set_metricAtPointsOnReqEdges (MMG5_pMesh,MMG5_pSol,int8_t);
 void MMG3D_mark_pointsOnReqEdge_fromTetra (  MMG5_pMesh mesh );
 
 extern double (*MMG5_lenedg)(MMG5_pMesh ,MMG5_pSol ,int, MMG5_pTetra );

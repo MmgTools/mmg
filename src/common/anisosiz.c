@@ -216,19 +216,17 @@ double MMG5_surftri33_ani(MMG5_pMesh mesh,MMG5_pTria ptt,
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
+ * \param ismet 1 if user provided metric.
  *
  * Search for points with unintialized metric and define anisotropic size at
  * this points.
  *
  */
-void MMG5_defUninitSize(MMG5_pMesh mesh,MMG5_pSol met)
+void MMG5_defUninitSize(MMG5_pMesh mesh,MMG5_pSol met,int8_t ismet )
 {
   MMG5_pPoint   ppt;
   double        *m,*n,r[3][3],isqhmax;
   int           k;
-  int8_t        ismet;
-
-  ismet = mesh->info.inputMet;
 
   isqhmax = 1.0 / (mesh->info.hmax*mesh->info.hmax);
   for (k=1; k<=mesh->np; k++) {

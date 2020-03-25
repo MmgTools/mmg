@@ -456,7 +456,9 @@ typedef struct {
                           param are setted: if \f$tag = 1+2+4\f$ then the point
                           is \a MG_Vert, MG_Tria and MG_Tetra */
   unsigned char optim, optimLES, noinsert, noswap, nomove, nosurf, nosizreq;
-  unsigned char inputMet; /*!< 1 if we don't have a metric when we enter in mmg3d1, 0 otherwise */
+  /*!< inputMet used only by ParMmg: 1 if Metric setted by proper input
+   * (set_solsize) or by option (hsiz / dosol) */
+  unsigned char inputMet;
   MMG5_pMat     mat;
 } MMG5_Info;
 

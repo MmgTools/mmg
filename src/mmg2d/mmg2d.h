@@ -354,7 +354,7 @@ int    interp_iso(double *,double *,double * ,double );
 int    lissmet_iso(MMG5_pMesh mesh,MMG5_pSol sol);
 int    lissmet_ani(MMG5_pMesh mesh,MMG5_pSol sol);
 int    MMG2D_sum_reqEdgeLengthsAtPoint(MMG5_pMesh,MMG5_pSol,MMG5_pTria,char);
-int    MMG2D_set_metricAtPointsOnReqEdges(MMG5_pMesh,MMG5_pSol);
+int    MMG2D_set_metricAtPointsOnReqEdges(MMG5_pMesh,MMG5_pSol,int8_t);
 
 extern double (*MMG2D_lencurv)(MMG5_pMesh ,MMG5_pSol ,int ,int );
 extern double (*MMG2D_caltri)(MMG5_pMesh ,MMG5_pSol ,MMG5_pTria );
