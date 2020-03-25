@@ -607,7 +607,7 @@ void           MMG5_check_hminhmax(MMG5_pMesh mesh, int8_t sethmin, int8_t sethm
  double        MMG5_caltri33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt);
  extern double MMG5_caltri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
  extern double MMG5_caltri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
- void          MMG5_defUninitSize(MMG5_pMesh mesh,MMG5_pSol met);
+ void          MMG5_defUninitSize(MMG5_pMesh mesh,MMG5_pSol met,int8_t ismet);
  void          MMG5_displayLengthHisto(MMG5_pMesh,int,double*,int,int,double,
                                         int,int,double,int,double*,int*,char);
  void          MMG5_displayLengthHisto_internal( int,int,int,double,
@@ -705,7 +705,7 @@ int MMG5_sum_reqEdgeLengthsAtPoint ( MMG5_pMesh,MMG5_pSol,int ip0,int ip1 );
 int MMG5_compute_meanMetricAtMarkedPoints_iso ( MMG5_pMesh mesh,MMG5_pSol met);
 int MMG5_compute_meanMetricAtMarkedPoints_ani ( MMG5_pMesh mesh,MMG5_pSol met);
 
-int  MMG5_reset_metricAtReqEdges_surf ( MMG5_pMesh,MMG5_pSol );
+int  MMG5_reset_metricAtReqEdges_surf ( MMG5_pMesh,MMG5_pSol,int8_t );
 void MMG5_mark_pointsOnReqEdge_fromTria ( MMG5_pMesh mesh );
 int  MMG5_gradsiz_iso ( MMG5_pMesh mesh,MMG5_pSol met );
 int  MMG5_gradsizreq_iso(MMG5_pMesh ,MMG5_pSol );
