@@ -103,9 +103,14 @@ int MMG3D_optlap(MMG5_pMesh mesh,MMG5_pSol sol) {
     }
 
     for ( i=1 ; i<=mesh->np ; i++) {
-      if ( compt[i]) {
-        ppt           = &mesh->point[i];
 
+      ppt           = &mesh->point[i];
+      if ( !MG_VOK(ppt) ) {
+        assert ( !compt[i] );
+        continue;
+      }
+
+      if ( compt[i]) {
         dd            = 1./(double) compt[i];
         pos[3*(i-1) + 1 + 0] *= dd;
         pos[3*(i-1) + 1 + 1] *= dd;
