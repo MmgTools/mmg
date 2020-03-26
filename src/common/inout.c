@@ -1191,7 +1191,6 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
     metricData = 0;
     if ( ptr ) {
       *ptr = '\0';
-      mesh->info.inputMet = 1;
       metricData = 1;
     }
 

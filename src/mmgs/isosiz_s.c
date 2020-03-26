@@ -159,14 +159,11 @@ int MMGS_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   /* alloc structure */
   if ( !met->m ) {
     ismet = 0;
-    assert ( !mesh->info.inputMet );
 
     /* Allocate and store the header informations for each solution */
     if ( !MMGS_Set_solSize(mesh,met,MMG5_Vertex,mesh->np,MMG5_Scalar) ) {
       return 0;
     }
-    /* Set_solSize modify the value of the inputMet field => we need to reset it */
-    mesh->info.inputMet = 0;
   }
   else {
     ismet = 1;

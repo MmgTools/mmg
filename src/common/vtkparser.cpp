@@ -639,7 +639,6 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
       }
       else if ( (ptr = strstr(chaine,":metric")) ) {
         *ptr = '\0';
-        mesh->info.inputMet = 1;
         metricData = 1;
       }
 

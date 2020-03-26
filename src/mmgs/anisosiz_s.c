@@ -699,15 +699,12 @@ int MMGS_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   }
   else {
     ismet = 0;
-    assert ( !mesh->info.inputMet );
 
     MMG5_calelt     = MMG5_caltri_ani;
     MMG5_lenSurfEdg = MMG5_lenSurfEdg_ani;
 
     if ( !MMGS_Set_solSize(mesh,met,MMG5_Vertex,mesh->np,3) )
       return 0;
-    /* Set_solSize modify the value of the inputMet field => we need to reset it */
-    mesh->info.inputMet = 0;
   }
 
   /** Step 1: Set metric at points belonging to a required edge: compute the

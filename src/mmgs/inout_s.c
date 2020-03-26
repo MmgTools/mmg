@@ -1340,8 +1340,6 @@ int MMGS_loadSol(MMG5_pMesh mesh,MMG5_pSol met,const char* filename) {
     }
   }
 
-  mesh->info.inputMet = 1;
-
   fclose(inm);
 
   /* stats */
