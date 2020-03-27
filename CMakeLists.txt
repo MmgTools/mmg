@@ -414,7 +414,7 @@ ENDIF()
 IF ( MmgTargetsExported )
   set( MMG_CMAKE_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/mmg )
 
-  configure_package_config_file(mmgConfig.cmake.in
+  configure_package_config_file(cmake/config/mmgConfig.cmake.in
     ${PROJECT_BINARY_DIR}/mmgConfig.cmake
     INSTALL_DESTINATION ${MMG_CMAKE_INSTALL_DIR} )
   
