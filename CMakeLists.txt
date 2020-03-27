@@ -212,21 +212,21 @@ ENDIF()
 
 ############################################################################
 #####
-#####         SCOTCH
+#####         Scotch
 #####
 ############################################################################
 # Find SCOTCH library?
-SET(SCOTCH_DIR "" CACHE PATH "Installation directory for SCOTCH")
+SET(SCOTCH_DIR "" CACHE PATH "Installation directory for scotch")
 LIST(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules)
-FIND_PACKAGE(SCOTCH)
+FIND_PACKAGE(Scotch)
 
 IF ( NOT SCOTCH_FOUND )
-  MESSAGE ( WARNING "SCOTCH library not found:"
-    "Using SCOTCH reduce the execution time of mmg3d "
+  MESSAGE ( WARNING "Scotch library not found:"
+    "Using scotch reduce the execution time of mmg3d "
     "(see https://gforge.inria.fr/frs/?group_id=248 to download it)."
-    "If you have already installed SCOTCH and want to use it, "
+    "If you have already installed Scotch and want to use it, "
     "please set the CMake variable or environment variable SCOTCH_DIR "
-    "to your SCOTCH directory.")
+    "to your scotch directory.")
 ENDIF ( )
 
 ############################################################################
@@ -338,7 +338,7 @@ CMAKE_DEPENDENT_OPTION (
   USE_ELAS "Use the Elas library for lagrangian motion option" ON
   "ELAS_FOUND" OFF)
 
-# add SCOTCH library?
+# add Scotch library?
 CMAKE_DEPENDENT_OPTION ( USE_SCOTCH "Use SCOTCH TOOL for renumbering" ON
   "SCOTCH_FOUND;BUILD_MMG3D" OFF)
 
@@ -346,7 +346,7 @@ IF( USE_SCOTCH )
   SET(CMAKE_C_FLAGS "-DUSE_SCOTCH ${CMAKE_C_FLAGS}")
 
   MESSAGE(STATUS
-    "Compilation with SCOTCH: ${SCOTCH_LIBRARIES}")
+    "Compilation with scotch: ${SCOTCH_LIBRARIES}")
   SET( LIBRARIES ${SCOTCH_LIBRARIES} ${LIBRARIES})
 ENDIF()
 
@@ -407,7 +407,7 @@ IF ( BUILD_MMG )
 ENDIF ( )
 
 IF( USE_SCOTCH )
-  # Include SCOTCH Dir here to ensure that Mmg doesn't search it's own headers in /usr/local
+  # Include Scotch Dir here to ensure that Mmg doesn't search it's own headers in /usr/local
   INCLUDE_DIRECTORIES(${SCOTCH_INCLUDE_DIRS})
 ENDIF()
 
