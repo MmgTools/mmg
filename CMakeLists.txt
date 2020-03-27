@@ -218,7 +218,7 @@ ENDIF()
 # Find SCOTCH library?
 SET(SCOTCH_DIR "" CACHE PATH "Installation directory for scotch")
 LIST(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules)
-FIND_PACKAGE(Scotch)
+FIND_PACKAGE(SCOTCH)
 
 IF ( NOT SCOTCH_FOUND )
   MESSAGE ( WARNING "Scotch library not found:"
