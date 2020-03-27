@@ -417,7 +417,7 @@ IF ( MmgTargetsExported )
   configure_package_config_file(cmake/config/mmgConfig.cmake.in
     ${PROJECT_BINARY_DIR}/mmgConfig.cmake
     INSTALL_DESTINATION ${MMG_CMAKE_INSTALL_DIR} )
-  
+
   install(EXPORT MmgTargets
     FILE MmgTargets.cmake
     NAMESPACE Mmg::
@@ -598,7 +598,7 @@ IF(DOXYGEN_FOUND)
       VERBATIM )
   else()
     add_dependencies( doc mmgs_doc mmg3d_doc mmg2d_doc )
-  endif() 
+  endif()
 ENDIF ( DOXYGEN_FOUND )
 
 ###############################################################################
