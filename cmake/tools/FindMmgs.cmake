@@ -148,7 +148,8 @@ else()
     set(MMGS_libmmgtypes.h_DIRS "MMGS_libmmgtypes.h_DIRS-NOTFOUND")
     find_path(MMGS_libmmgtypes.h_DIRS
       NAMES libmmgtypes.h
-      HINTS ${_inc_env})
+      HINTS ${_inc_env}
+      PATH_SUFFIXES "include/mmg" "include/mmg/mmgs")
   endif()
 endif()
 STRING(REGEX REPLACE "(mmg/mmgs)" ""

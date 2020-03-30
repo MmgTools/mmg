@@ -136,12 +136,6 @@ MACRO ( ADD_AND_INSTALL_LIBRARY
     SET(CMAKE_INSTALL_LIBDIR lib)
   ENDIF()
 
-#  INSTALL ( TARGETS ${target_name}
-#    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-#    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-#    COMPONENT lib
-#    )
-
 
   SET ( MmgTargetsExported 1 )
   install(TARGETS ${target_name} EXPORT MmgTargets
