@@ -33,6 +33,7 @@
  */
 
 #include "mmg3d.h"
+#include "git_log_mmg.h"
 
 mytime         MMG5_ctim[TIMEMAX];
 
@@ -307,6 +308,9 @@ int main(int argc,char *argv[]) {
   fprintf(stdout,"  -- MMG3D, Release %s (%s) \n",MG_VER,MG_REL);
   fprintf(stdout,"     %s\n",MG_CPY);
   fprintf(stdout,"     %s %s\n",__DATE__,__TIME__);
+  fprintf(stdout,"     git branch: %s\n",MMG_GIT_BRANCH);
+  fprintf(stdout,"     git commit: %s\n",MMG_GIT_COMMIT);
+  fprintf(stdout,"     git date:   %s\n\n",MMG_GIT_DATE);
 
   MMG3D_Set_commonFunc();
 

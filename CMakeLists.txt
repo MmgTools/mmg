@@ -537,6 +537,21 @@ ENDIF ( )
 
 ENDIF ( BUILD_TESTING )
 
+############################################################################
+#####
+#####         Print git hash to source file
+#####
+############################################################################
+
+IF (NOT WIN32 OR MINGW)
+
+  ADD_CUSTOM_TARGET(GenerateGitHash
+    COMMAND ./git_log_mmg.sh ${PROJECT_SOURCE_DIR} ${PROJECT_BINARY_DIR}
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/scripts/
+    COMMENT "Getting git commit hash"
+  )
+ENDIF ()
+
 ###############################################################################
 #####
 #####         Create API Documentation
