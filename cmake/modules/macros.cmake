@@ -95,7 +95,7 @@ MACRO ( ADD_AND_INSTALL_LIBRARY
 
   ADD_LIBRARY ( ${target_name} ${target_type} ${sources} )
   ADD_LIBRARY ( Mmg::${target_name} ALIAS ${target_name} )
-  
+
   IF ( CMAKE_VERSION VERSION_LESS 2.8.12 )
     INCLUDE_DIRECTORIES ( ${target_name} PUBLIC
       ${COMMON_BINARY_DIR} ${COMMON_SOURCE_DIR} ${PROJECT_BINARY_DIR}/include )
@@ -111,7 +111,7 @@ MACRO ( ADD_AND_INSTALL_LIBRARY
       $<BUILD_INTERFACE:${MMG3D_BINARY_DIR}>
       $<BUILD_INTERFACE:${MMGS_BINARY_DIR}>
       $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}> )
-    
+
   ENDIF ( )
   if ( USE_SCOTCH )
     message(STATUS "[mmg] add include scotch directories ${SCOTCH_INCLUDE_DIRS}")
@@ -121,13 +121,13 @@ MACRO ( ADD_AND_INSTALL_LIBRARY
       target_include_directories( ${target_name} PUBLIC ${SCOTCH_INCLUDE_DIRS} )
     endif()
   endif( USE_SCOTCH )
-  
+
   SET_TARGET_PROPERTIES ( ${target_name} PROPERTIES
     OUTPUT_NAME ${output_name}
     VERSION ${CMAKE_RELEASE_VERSION_MAJOR}.${CMAKE_RELEASE_VERSION_MINOR}.${CMAKE_RELEASE_VERSION_PATCH}
     SOVERSION ${CMAKE_RELEASE_VERSION_MAJOR} )
 
-  
+
   SET_PROPERTY(TARGET ${target_name} PROPERTY C_STANDARD 99)
 
   TARGET_LINK_LIBRARIES ( ${target_name} ${LIBRARIES} )
