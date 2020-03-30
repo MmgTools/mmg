@@ -484,8 +484,6 @@ ENDIF ( )
       "${PROJECT_SOURCE_DIR}/cmake/Supp/libSystem.supp")
   ENDIF(APPLE)
   # Copy config file and custom file in the good directories
-  CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/cmake/config/CTestConfig.cmake
-    ${PROJECT_SOURCE_DIR}/CTestConfig.cmake)
   CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/cmake/config/CTestCustom.cmake
     ./CTestCustom.cmake)
 
