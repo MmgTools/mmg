@@ -280,13 +280,6 @@ CMAKE_DEPENDENT_OPTION(
   MMG2D_CI "Enable/Disable continuous integration for mmg2d" ON
   "BUILD_TESTING;BUILD_MMG2D" OFF)
 
-# add LinearElasticity library?
-SET(ELAS_DIR "" CACHE PATH "Installation directory for Elas")
-INCLUDE(cmake/modules/FindElas.cmake)
-CMAKE_DEPENDENT_OPTION (
-  USE_ELAS "Use the Elas library for lagrangian motion option" ON
-  "BUILD_MMG2D;ELAS_FOUND" OFF)
-
 #------------------------------- mmgs
 CMAKE_DEPENDENT_OPTION ( LIBMMGS_STATIC "Compile the mmgs static library" ${BUILD_STATIC_LIBS}
   "BUILD_MMGS" OFF)
@@ -331,13 +324,6 @@ CMAKE_DEPENDENT_OPTION ( PATTERN
 #-- Remove the next line to have this option visible in basic cmake mode
 MARK_AS_ADVANCED(PATTERN)
 
-# add Elastic library?
-SET(ELAS_DIR "" CACHE PATH "Installation directory for Elas")
-INCLUDE(cmake/modules/FindElas.cmake)
-CMAKE_DEPENDENT_OPTION (
-  USE_ELAS "Use the Elas library for lagrangian motion option" ON
-  "ELAS_FOUND" OFF)
-
 # add Scotch library?
 CMAKE_DEPENDENT_OPTION ( USE_SCOTCH "Use SCOTCH TOOL for renumbering" ON
   "SCOTCH_FOUND;BUILD_MMG3D" OFF)
@@ -349,6 +335,13 @@ IF( USE_SCOTCH )
     "Compilation with scotch: ${SCOTCH_LIBRARIES}")
   SET( LIBRARIES ${SCOTCH_LIBRARIES} ${LIBRARIES})
 ENDIF()
+
+# add LinearElasticity library?
+SET(ELAS_DIR "" CACHE PATH "Installation directory for Elas")
+INCLUDE(cmake/modules/FindElas.cmake)
+CMAKE_DEPENDENT_OPTION (
+  USE_ELAS "Use the Elas library for lagrangian motion option" ON
+  "ELAS_FOUND" OFF)
 
 # add the VTK library ?
 CMAKE_DEPENDENT_OPTION ( USE_VTK "Use VTK I/O" ON
