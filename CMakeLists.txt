@@ -420,7 +420,7 @@ IF ( MmgTargetsExported )
     DESTINATION ${MMG_CMAKE_INSTALL_DIR} )
 
   install(FILES
-    ${PROJECT_SOURCE_DIR}/cmake/modules/FindScotch.cmake
+    ${PROJECT_SOURCE_DIR}/cmake/modules/FindSCOTCH.cmake
     ${PROJECT_SOURCE_DIR}/cmake/modules/FindElas.cmake
     DESTINATION ${MMG_CMAKE_INSTALL_DIR} )
 ENDIF()
