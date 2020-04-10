@@ -297,6 +297,45 @@ double MMG3D_vfrac(MMG5_pMesh mesh,MMG5_pSol sol,int k,int pm) {
   return 0.0;
 }
 
+/**
+ * \param mesh pointer toward the mesh.
+ *
+ * Reset MG_ISO vertex and tetra references to 0.
+ *
+ * \warning to improve: for now, entities linked to the old ls (corners,required
+ * points, normals/tangents, triangles and edges) are deleted in loadMesh. It
+ * would be better to analyze wich entities must be keeped and which one must be
+ * deleted depending on the split/nosplit infos.
+ */
+int MMG3D_resetRef(MMG5_pMesh mesh) {
+  MMG5_pTetra     pt;
+  MMG5_pPoint     p0;
+  int             k,ref;
+  char            i;
+
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+    if ( !MG_EOK(pt) ) continue;
+
+    for (i=0; i<4; i++) {
+      p0 = &mesh->point[pt->v[i]];
+      if ( p0->ref == MG_ISO ) p0->ref = 0;
+    }
+  }
+
+  /* Reset the tetra references to their initial distribution */
+  for ( k=1; k<=mesh->ne; k++ ) {
+    pt = &mesh->tetra[k];
+
+    if ( !MG_EOK(pt) ) continue;
+
+    ref = MMG5_getIniRef(mesh,pt->ref);
+    pt->ref = ref;
+  }
+
+  return 1;
+}
+
 
 /**
  * \remark Not used.
@@ -941,7 +980,7 @@ static int MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
   MMG5_pPoint   p0,p1;
   MMG5_Hash     hash;
   double        c[3],v0,v1,s;
-  int           vx[6],nb,k,ip0,ip1,np,ns,ne,ier;
+  int           vx[6],nb,k,ip0,ip1,np,ns,ne,ier,refext,refint;
   char          ia,j,npneg;
   static char   mmgWarn = 0;
 
@@ -1021,6 +1060,8 @@ static int MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
       np  = MMG5_hashGet(&hash,ip0,ip1);
 
       if ( np>0 )  continue;
+
+      if ( !MMG5_isSplit(mesh,pt->ref,&refint,&refext) ) continue;
 
       p0 = &mesh->point[ip0];
       p1 = &mesh->point[ip1];
@@ -1140,11 +1181,14 @@ static int MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
 static int MMG3D_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol) {
   MMG5_pTetra   pt;
   double        v;
-  int      k,ip;
-  char     nmns,npls,nz,i;
+  int           k,ip,ref,refint,refext,ier;
+  char          nmns,npls,nz,i;
 
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
+    if ( !MG_EOK(pt) ) continue;
+
+    ref = pt->ref;
     nmns = npls = nz = 0;
     for (i=0; i<4; i++) {
       ip = pt->v[i];
@@ -1157,14 +1201,19 @@ static int MMG3D_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol) {
         nz ++;
     }
     assert(nz < 4);
+    ier = MMG5_isSplit(mesh,ref,&refint,&refext);
 
     if ( npls ) {
       assert(!nmns);
-      pt->ref = MG_PLUS;
+      if ( ier ) {
+        pt->ref = refext;
+      }
     }
     else {
       assert(nmns);
-      pt->ref = MG_MINUS;
+      if ( ier ) {
+        pt->ref = refint;
+      }
     }
   }
   return 1;
@@ -2091,6 +2140,12 @@ int MMG3D_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
 
   if ( !MMG3D_hashTetra(mesh,1) ) {
     fprintf(stderr,"\n  ## Hashing problem. Exit program.\n");
+    return 0;
+  }
+
+  /* Reset the MG_ISO field everywhere it appears */
+  if ( !MMG3D_resetRef(mesh) ) {
+    fprintf(stderr,"\n  ## Problem in resetting references. Exit program.\n");
     return 0;
   }
 

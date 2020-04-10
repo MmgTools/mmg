@@ -782,8 +782,6 @@ int MMG3D_loadMesh_opened(MMG5_pMesh mesh,FILE *inm,int bin) {
       ppt->tag &= ~MG_NUL;
     }
 
-    if ( mesh->info.iso )  pt->ref = 0;
-
     /* Possibly switch 2 vertices number so that each tet is positively oriented */
     if ( MMG5_orvol(mesh->point,pt->v) < 0.0 ) {
       /* mesh->xt temporary used to count reoriented tetra */

@@ -2174,10 +2174,29 @@ int MMG3D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam,int val){
                  printf("  Exit program.\n");
                  return 0);
     MMG5_SAFE_CALLOC(mesh->info.br,mesh->info.nbr,int,return 0);
-    
+
     for (k=0; k<mesh->info.nbr; k++)
       mesh->info.br[k] = 0;
-    
+
+    break;
+
+  case MMG3D_IPARAM_numberOfMat :
+    if ( mesh->info.mat ) {
+      MMG5_DEL_MEM(mesh,mesh->info.mat);
+      if ( (mesh->info.imprim > 5) || mesh->info.ddebug )
+        fprintf(stderr,"\n  ## Warning: %s: new multi materials values\n",__func__);
+    }
+    mesh->info.nmat   = val;
+    mesh->info.nmati  = 0;
+
+    MMG5_ADD_MEM(mesh,(mesh->info.nmat)*sizeof(MMG5_Mat),"multi material",
+                 printf("  Exit program.\n");
+                 return 0);
+    MMG5_SAFE_CALLOC(mesh->info.mat,mesh->info.nmat,MMG5_Mat,return 0);
+    for (k=0; k<mesh->info.nmat; k++) {
+      mesh->info.mat[k].ref   = INFINITY;
+    }
+
     break;
 
 #ifdef USE_SCOTCH
@@ -2247,6 +2266,9 @@ int MMG3D_Get_iparameter(MMG5_pMesh mesh, int iparam) {
     break;
   case MMG3D_IPARAM_numberOfLocalParam :
     return  mesh->info.npar;
+    break;
+  case MMG3D_IPARAM_numberOfMat :
+    return  mesh->info.nmat;
     break;
 #ifdef USE_SCOTCH
   case MMG3D_IPARAM_renum :
@@ -2392,6 +2414,11 @@ int MMG3D_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref,
 
   return 1;
 }
+
+int MMG3D_Set_multiMat(MMG5_pMesh mesh,MMG5_pSol sol,int ref,int split,int rin,int rout) {
+  return MMG5_Set_multiMat(mesh,sol,ref,split,rin,rout);
+}
+
 
 int MMG3D_Free_all(const int starter,...)
 {

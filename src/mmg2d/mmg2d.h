@@ -260,8 +260,6 @@ int MMG2D_cenrad_iso(MMG5_pMesh ,double *,double *,double *);
 /* Adds Charles */
 double MMG2D_voltri(MMG5_pMesh ,int ,int ,int );
 double MMG2D_vfrac(MMG5_pMesh ,MMG5_pSol ,int ,int );
-int MMG2D_getIniRef(MMG5_pMesh ,int );
-int MMG2D_isSplit(MMG5_pMesh ,int ,int *,int *);
 int MMG2D_parsop(MMG5_pMesh ,MMG5_pSol );
 int MMG2D_ismaniball(MMG5_pMesh , MMG5_pSol , int , char );
 int MMG2D_snapval(MMG5_pMesh ,MMG5_pSol);

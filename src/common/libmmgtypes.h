@@ -167,6 +167,23 @@
 #define MMG5_NSOLS_MAX   100
 
 /**
+ * \def MMG5_MMAT_NOSPLIT
+ *
+ * Entity that must not be splitted in multimat mode
+ *
+ */
+#define MMG5_MMAT_NoSplit  0
+
+/**
+ * \def MMG5_MMAT_Split
+ *
+ * Entity that must be splitted in multimat mode
+ *
+ */
+#define MMG5_MMAT_Split  1
+
+
+/**
  * \enum MMG5_type
  * \brief Type of solutions.
  */
@@ -449,7 +466,7 @@ typedef struct {
   int           opnbdy;
   int           renum;
   int           PROctree;
-  int           nmat;
+  int           nmat,nmati;
   char          nreg;
   char          imprim,ddebug,badkal,iso,fem,lag;
   char          parTyp; /*!< Contains binary flags to say which kind of local

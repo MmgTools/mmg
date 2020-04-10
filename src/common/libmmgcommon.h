@@ -157,6 +157,22 @@ int  MMG5_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solout);
  */
 void MMG5_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met,double hsiz);
 
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the sol structure.
+ * \param ref input tetra reference.
+ * \param split MMG5_MMAT_NoSplit if the entity must not be splitted, MMG5_MMAT_Split otherwise
+ * \param rin internal reference after ls discretization
+ * \param rex external reference after ls discretization
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Set the reference mapping for the elements of ref \a ref in ls discretization mode.
+ *
+ */
+  int  MMG5_Set_multiMat(MMG5_pMesh mesh, MMG5_pSol sol,int ref,int split,
+                         int rin, int rex);
+
+
 /* deallocations */
 void MMG5_Free_structures(MMG5_pMesh mesh,MMG5_pSol sol);
 
