@@ -273,7 +273,7 @@ ADD_TEST(NAME mmg2d_vtkvtu_ani
   ${MMG2D_CI_TESTS}/VtkInout/ani.vtu
   ${CTEST_OUTPUT_DIR}/mmg2d_vtkvtu_ani)
 
-IF ( NOT USE_VTK )
+IF ( NOT VTK_FOUND )
   SET(expr "VTK library not founded")
   SET_PROPERTY(TEST mmg2d_vtkvtk
     PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
