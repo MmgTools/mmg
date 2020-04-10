@@ -118,14 +118,14 @@ MACRO ( ADD_AND_INSTALL_LIBRARY
       $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}> )
 
   ENDIF ( )
-  if ( USE_SCOTCH )
+  if ( SCOTCH_FOUND )
     message(STATUS "[mmg] add include scotch directories ${SCOTCH_INCLUDE_DIRS}")
     IF ( CMAKE_VERSION VERSION_LESS 2.8.12 )
       INCLUDE_DIRECTORIES ( ${target_name} PUBLIC ${SCOTCH_INCLUDE_DIRS} )
     ELSE ( )
       target_include_directories( ${target_name} PUBLIC ${SCOTCH_INCLUDE_DIRS} )
     endif()
-  endif( USE_SCOTCH )
+  endif( )
 
   SET_TARGET_PROPERTIES ( ${target_name} PROPERTIES
     OUTPUT_NAME ${output_name}
@@ -180,7 +180,7 @@ MACRO ( ADD_AND_INSTALL_EXECUTABLE
     ADD_DEPENDENCIES(${exec_name} GenerateGitHash)
   endif()
 
-  IF ( WIN32 AND NOT MINGW AND USE_SCOTCH )
+  IF ( WIN32 AND NOT MINGW AND SCOTCH_FOUND )
     my_add_link_flags ( ${exec_name} "/SAFESEH:NO")
   ENDIF ( )
 
@@ -269,7 +269,7 @@ MACRO ( ADD_LIBRARY_TEST target_name main_path target_dependency lib_name )
     TARGET_INCLUDE_DIRECTORIES ( ${target_name} PUBLIC ${PROJECT_BINARY_DIR}/include )
   ENDIF ( )
 
-  IF ( WIN32 AND ((NOT MINGW) AND USE_SCOTCH) )
+  IF ( WIN32 AND ((NOT MINGW) AND SCOTCH_FOUND) )
     MY_ADD_LINK_FLAGS ( ${target_name} "/SAFESEH:NO" )
   ENDIF ( )
 
