@@ -218,15 +218,39 @@ ENDIF()
 # Find SCOTCH library?
 SET(SCOTCH_DIR "" CACHE PATH "Installation directory for scotch")
 LIST(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules)
-FIND_PACKAGE(SCOTCH)
 
-IF ( NOT SCOTCH_FOUND )
-  MESSAGE ( WARNING "Scotch library not found:"
-    "Using scotch reduce the execution time of mmg3d "
-    "(see https://gforge.inria.fr/frs/?group_id=248 to download it)."
-    "If you have already installed Scotch and want to use it, "
-    "please set the CMake variable or environment variable SCOTCH_DIR "
-    "to your scotch directory.")
+# add Scotch library?
+OPTION ( USE_SCOTCH "Use SCOTCH TOOL for renumbering" ON )
+
+IF ( USE_SCOTCH )
+  FIND_PACKAGE(SCOTCH)
+
+  IF ( NOT SCOTCH_FOUND )
+    MESSAGE ( WARNING "Scotch library not found:"
+      "Using scotch reduce the execution time of mmg3d "
+      "(see https://gforge.inria.fr/frs/?group_id=248 to download it)."
+      "If you have already installed Scotch and want to use it, "
+      "please set the CMake variable or environment variable SCOTCH_DIR "
+      "to your scotch directory.")
+  ENDIF ( )
+ENDIF ( )
+
+# add LinearElasticity library?
+SET(ELAS_DIR "" CACHE PATH "Installation directory for Elas")
+OPTION (
+  USE_ELAS "Use the Elas library for lagrangian motion option" ON )
+
+IF ( USE_ELAS )
+  INCLUDE(cmake/modules/FindElas.cmake)
+  IF ( NOT ELAS_FOUND )
+    MESSAGE ( WARNING "Elas is a library to solve the linear elasticity "
+      "problem (see https://github.com/ISCDtoolbox/LinearElasticity to"
+      " download it). "
+      "This library is needed to use the lagrangian motion option. "
+      "If you have already installed Elas and want to use it, "
+      "please set the CMake variable or environment variable ELAS_DIR "
+      "to your Elas directory.")
+  ENDIF ( )
 ENDIF ( )
 
 ############################################################################
@@ -234,7 +258,14 @@ ENDIF ( )
 #####         VTK (to parse (p)vtp/(p)vtu files )
 #####
 ############################################################################
-FIND_PACKAGE(VTK)
+# add the VTK library ?
+OPTION ( USE_VTK "Use VTK I/O" ON )
+IF ( USE_VTK )
+  FIND_PACKAGE(VTK QUIET)
+  IF ( NOT VTK_FOUND )
+    MESSAGE ( WARNING "VTK library not found: vtk I/O will not be available.")
+  ENDIF ( )
+ENDIF ( )
 
 ############################################################################
 #####
@@ -324,11 +355,8 @@ CMAKE_DEPENDENT_OPTION ( PATTERN
 #-- Remove the next line to have this option visible in basic cmake mode
 MARK_AS_ADVANCED(PATTERN)
 
-# add Scotch library?
-CMAKE_DEPENDENT_OPTION ( USE_SCOTCH "Use SCOTCH TOOL for renumbering" ON
-  "SCOTCH_FOUND;BUILD_MMG3D" OFF)
 
-IF( USE_SCOTCH )
+IF( SCOTCH_FOUND )
   SET(CMAKE_C_FLAGS "-DUSE_SCOTCH ${CMAKE_C_FLAGS}")
 
   MESSAGE(STATUS
@@ -336,18 +364,8 @@ IF( USE_SCOTCH )
   SET( LIBRARIES ${SCOTCH_LIBRARIES} ${LIBRARIES})
 ENDIF()
 
-# add LinearElasticity library?
-SET(ELAS_DIR "" CACHE PATH "Installation directory for Elas")
-INCLUDE(cmake/modules/FindElas.cmake)
-CMAKE_DEPENDENT_OPTION (
-  USE_ELAS "Use the Elas library for lagrangian motion option" ON
-  "ELAS_FOUND" OFF)
 
-# add the VTK library ?
-CMAKE_DEPENDENT_OPTION ( USE_VTK "Use VTK I/O" ON
-  "VTK_FOUND" OFF)
-
-IF ( USE_VTK )
+IF ( VTK_FOUND )
   ADD_DEFINITIONS(-DUSE_VTK)
 
   MESSAGE ( STATUS "Compilation with VTK: add vtp and vtu I/O." )
@@ -399,9 +417,9 @@ IF ( BUILD_MMG )
   INCLUDE(cmake/modules/mmg.cmake)
 ENDIF ( )
 
-IF( USE_SCOTCH )
+IF( SCOTCH_FOUND )
   # Include Scotch Dir here to ensure that Mmg doesn't search it's own headers in /usr/local
-  INCLUDE_DIRECTORIES(${SCOTCH_INCLUDE_DIRS})
+  INCLUDE_DIRECTORIES(PUBLIC ${SCOTCH_INCLUDE_DIRS})
 ENDIF()
 
 IF ( MmgTargetsExported )

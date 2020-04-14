@@ -63,7 +63,7 @@ LIST(REMOVE_ITEM mmgs_library_files
   ${MMGS_SOURCE_DIR}/mmgs.c
   ${REMOVE_FILE} )
 
-IF ( USE_VTK )
+IF ( VTK_FOUND )
   LIST(APPEND  mmgs_library_files
    ${COMMON_SOURCE_DIR}/vtkparser.cpp )
 ENDIF ( )

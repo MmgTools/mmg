@@ -77,7 +77,7 @@ LIST(REMOVE_ITEM mmg3d_library_files
   ${MMG3D_SOURCE_DIR}/${PROJECT_NAME}3d.c
   )
 
-IF ( USE_VTK )
+IF ( VTK_FOUND )
   LIST(APPEND  mmg3d_library_files
     ${COMMON_SOURCE_DIR}/vtkparser.cpp)
 ENDIF ( )
@@ -94,9 +94,9 @@ FILE(
 #####
 ############################################################################
 
-IF( USE_ELAS )
+IF( ELAS_FOUND )
   # Set flags for building test program
-  INCLUDE_DIRECTORIES(${ELAS_INCLUDE_DIR})
+  INCLUDE_DIRECTORIES(PUBLIC ${ELAS_INCLUDE_DIR})
 
   SET(CMAKE_REQUIRED_INCLUDES ${ELAS_INCLUDE_DIR})
   SET(CMAKE_REQUIRED_LIBRARIES ${ELAS_LIBRARY})
@@ -108,15 +108,6 @@ IF( USE_ELAS )
   SET( LIBRARIES ${ELAS_LIBRARY} ${LIBRARIES})
 ENDIF()
 
-IF (ELAS_NOTFOUND)
-  MESSAGE ( WARNING "Elas is a library to solve the linear elasticity "
-    "problem (see https://github.com/ISCDtoolbox/LinearElasticity to"
-    " download it). "
-    "This library is needed to use the lagrangian motion option. "
-    "If you have already installed Elas and want to use it, "
-    "please set the CMake variable or environment variable ELAS_DIR "
-    "to your Elas directory.")
-ENDIF ( )
 
 ############################################################################
 #####
@@ -232,7 +223,7 @@ IF ( BUILD_TESTING )
         "${CTEST_OUTPUT_DIR}/libmmg3d_Adaptation_1-2spheres_1.o"
         "${CTEST_OUTPUT_DIR}/libmmg3d_Adaptation_1-2spheres_2.o"
         )
-      IF ( USE_ELAS )
+      IF ( ELAS_FOUND )
         ADD_TEST(NAME libmmg3d_example4   COMMAND ${LIBMMG3D_EXEC4}
           "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/LagrangianMotion_example0/tinyBoxt"
           "${CTEST_OUTPUT_DIR}/libmmg3d_LagrangianMotion_0-tinyBoxt.o"

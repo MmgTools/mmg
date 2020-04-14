@@ -63,7 +63,7 @@ LIST(REMOVE_ITEM mmg2d_library_files
   ${MMG2D_SOURCE_DIR}/mmg2d.c
   ${REMOVE_FILE} )
 
-IF ( USE_VTK )
+IF ( VTK_FOUND )
   LIST(APPEND  mmg2d_library_files
     ${COMMON_SOURCE_DIR}/vtkparser.cpp )
 ENDIF ( )
@@ -80,7 +80,7 @@ FILE(
 #####
 ############################################################################
 
-IF( USE_ELAS )
+IF( ELAS_FOUND )
 # Set flags for building test program
 INCLUDE_DIRECTORIES(${ELAS_INCLUDE_DIR})
 
@@ -92,16 +92,7 @@ MESSAGE(STATUS
 "Compilation with the Elas library: ${ELAS_LIBRARY} ")
 SET( LIBRARIES ${ELAS_LINK_FLAGS} ${LIBRARIES})
 SET( LIBRARIES ${ELAS_LIBRARY} ${LIBRARIES})
-ENDIF()
 
-IF (ELAS_NOTFOUND)
-MESSAGE ( WARNING "Elas is a library to solve the linear elasticity "
-    "problem (see https://github.com/ISCDtoolbox/LinearElasticity to"
-    " download it). "
-"This library is needed to use the lagrangian motion option. "
-    "If you have already installed Elas and want to use it, "
-"please set the CMake variable or environment variable ELAS_DIR "
-"to your Elas directory.")
 ENDIF ( )
 
 ############################################################################
