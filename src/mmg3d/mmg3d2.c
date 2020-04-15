@@ -313,13 +313,25 @@ int MMG3D_resetRef(MMG5_pMesh mesh) {
   int             k,ref;
   char            i;
 
+  /* Travel edges and reset tags at edges extremities */
+
+
+  /* Reset ref and tags at ISO points */
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
     if ( !MG_EOK(pt) ) continue;
 
     for (i=0; i<4; i++) {
       p0 = &mesh->point[pt->v[i]];
-      if ( p0->ref == MG_ISO ) p0->ref = 0;
+      /* Reset triangles */
+
+      /* Reset vertices */
+      if ( p0->ref == MG_ISO ) {
+        p0->ref = 0;
+        /* Reset tags */
+        p0->tag &= ~MG_CRN;
+        p0->tag &= ~MG_REQ;
+      }
     }
   }
 
@@ -1189,6 +1201,7 @@ static int MMG3D_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol) {
     if ( !MG_EOK(pt) ) continue;
 
     ref = pt->ref;
+
     nmns = npls = nz = 0;
     for (i=0; i<4; i++) {
       ip = pt->v[i];

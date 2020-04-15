@@ -540,7 +540,7 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
 
 int MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
   float       fp1,fp2,hausd;
-  int         ref,i,j,ret,npar,nbr,br,rin,rex;
+  int         ref,i,j,ret,npar,nbr,br,rin,rex,split;
   char       *ptr,buf[256],data[256];
   FILE       *in;
   fpos_t     position;
@@ -591,12 +591,14 @@ int MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
         MMG_FSCANF(in,"%d",&ref);
         fgetpos(in,&position);
         MMG_FSCANF(in,"%255s",data);
+        split = MMG5_MMAT_NoSplit;
         if ( strcmp(data,"nosplit") ) {
           fsetpos(in,&position);
+          split = MMG5_MMAT_Split;
           MMG_FSCANF(in,"%d",&rin);
           MMG_FSCANF(in,"%d",&rex);
         }
-        if ( !MMG3D_Set_multiMat(mesh,met,ref,MMG5_MMAT_Split,rin,rex) ) {
+        if ( !MMG3D_Set_multiMat(mesh,met,ref,split,rin,rex) ) {
           return 0;
         }
       }

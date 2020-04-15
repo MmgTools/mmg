@@ -53,7 +53,9 @@ int MMG5_isSplit(MMG5_pMesh mesh,int ref,int *refint,int *refext) {
   for (k=0; k<mesh->info.nmat; k++) {
     pm = &mesh->info.mat[k];
     if ( pm->ref == ref ) {
-      if ( !pm->dospl ) return 0;
+      if ( !pm->dospl ) {
+        return 0;
+      }
       else {
         *refint = pm->rin;
         *refext = pm->rex;
