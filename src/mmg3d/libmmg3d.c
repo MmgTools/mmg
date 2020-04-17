@@ -40,7 +40,9 @@
  */
 
 #include "inlined_functions_3d.h"
+#ifndef _WIN32
 #include "git_log_mmg.h"
+#endif
 #include "mmg3dexterns.c"
 
 double (*MMG5_lenedg)(MMG5_pMesh mesh ,MMG5_pSol sol ,int n, MMG5_pTetra );
@@ -696,9 +698,11 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
 
   if ( mesh->info.imprim >= 0 ) {
     fprintf(stdout,"\n  %s\n   MODULE MMG3D: %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
+#ifndef _WIN32
     fprintf(stdout,"     git branch: %s\n",MMG_GIT_BRANCH);
     fprintf(stdout,"     git commit: %s\n",MMG_GIT_COMMIT);
     fprintf(stdout,"     git date:   %s\n\n",MMG_GIT_DATE);
+#endif
   }
 
   MMG3D_Set_commonFunc();
@@ -906,9 +910,11 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet) {
 
   if ( mesh->info.imprim >= 0 ) {
     fprintf(stdout,"\n  %s\n   MODULE MMG3D: %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
+#ifndef _WIN32
     fprintf(stdout,"     git branch: %s\n",MMG_GIT_BRANCH);
     fprintf(stdout,"     git commit: %s\n",MMG_GIT_COMMIT);
     fprintf(stdout,"     git date:   %s\n\n",MMG_GIT_DATE);
+#endif
   }
 
   /** In debug mode, check that all structures are allocated */
@@ -1170,9 +1176,11 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
 
   if ( mesh->info.imprim >= 0 ) {
     fprintf(stdout,"\n  %s\n   MODULE MMG3D: %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
+#ifndef _WIN32
     fprintf(stdout,"     git branch: %s\n",MMG_GIT_BRANCH);
     fprintf(stdout,"     git commit: %s\n",MMG_GIT_COMMIT);
     fprintf(stdout,"     git date:   %s\n\n",MMG_GIT_DATE);
+#endif
   }
 
   /** In debug mode, check that all structures are allocated */
