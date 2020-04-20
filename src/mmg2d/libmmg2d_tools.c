@@ -523,7 +523,16 @@ void MMG2D_Free_solutions(MMG5_pMesh mesh,MMG5_pSol sol) {
   /* sol */
   if ( sol && sol->m )
     MMG5_DEL_MEM(mesh,sol->m);
-  
-  sol->np = 0;
+
+  if ( sol->namein ) {
+    MMG5_DEL_MEM(mesh,sol->namein);
+  }
+
+  if ( sol->nameout ) {
+    MMG5_DEL_MEM(mesh,sol->nameout);
+  }
+
+  memset ( sol, 0x0, sizeof(MMG5_Sol) );
+
   return;
 }
