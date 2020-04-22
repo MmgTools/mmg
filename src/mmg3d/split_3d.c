@@ -3335,7 +3335,7 @@ int MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k,char metRidTyp) {
                          ,o,0);
   }
 #ifdef POINTMAP
-  mesh->point[ip].src = mesh->point[pt[0]->v[0]].src;
+  mesh->point[ib].src = mesh->point[pt[0]->v[0]].src;
 #endif
   if ( met->m ) {
     if ( !metRidTyp && met->size > 1 )
