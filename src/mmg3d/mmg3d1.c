@@ -1497,7 +1497,6 @@ int MMG3D_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,int k,
 #ifdef POINTMAP
   mesh->point[ip].src = mesh->point[mesh->tetra[k]->v[0]].src;
 #endif
-
   if ( met->m ) {
     if ( typchk == 1 && (met->size>1) ) {
       ier = MMG3D_intmet33_ani(mesh,met,k,imax,ip,0.5);
@@ -1864,6 +1863,9 @@ MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
             pb.p[1] = &mesh->point[ptt.v[1]];
             pb.p[2] = &mesh->point[ptt.v[2]];
           }
+#ifdef POINTMAP
+          mesh->point[ip].src = mesh->point[pt->v[0]].src;
+#endif
           if ( !MMG5_hashEdge(mesh,&hash,ip1,ip2,ip) )  return -1;
           ppt = &mesh->point[ip];
 
