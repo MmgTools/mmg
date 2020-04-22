@@ -1203,7 +1203,9 @@ MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
                                goto split
                                ,o,0);
         }
-
+#ifdef POINTMAP
+        mesh->point[ip].src = mesh->point[pt->v[0]].src;
+#endif
         assert ( met );
         if ( met->m ) {
           if ( typchk == 1 && (met->size>1) )
