@@ -212,6 +212,9 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
                                goto collapse,
                                o,tag);
         }
+#ifdef POINTMAP
+        mesh->point[ip].src = mesh->point[pt->v[0]].src;
+#endif
         if ( met->m ) {
           if ( MMG5_intmet(mesh,met,k,imax,ip,0.5) <=0 ) {
             MMG3D_delPt(mesh,ip);
@@ -296,6 +299,9 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
                                goto collapse,
                                o,MG_NOTAG);
         }
+#ifdef POINTMAP
+        mesh->point[ip].src = mesh->point[pt->v[0]].src;
+#endif
         if ( met->m ) {
           if ( MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
             MMG3D_delPt(mesh,ip);
@@ -341,6 +347,9 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
                                goto collapse,
                                o,MG_NOTAG);
         }
+#ifdef POINTMAP
+        mesh->point[ip].src = mesh->point[pt->v[0]].src;
+#endif
         if ( met->m ) {
           if ( MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
             MMG3D_delPt(mesh,ip);
@@ -560,6 +569,9 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
                                  goto collapse2//break
                                  ,o,tag);
           }
+#ifdef POINTMAP
+          mesh->point[ip].src = mesh->point[pt->v[0]].src;
+#endif
           if ( met->m ) {
             if ( MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
               MMG3D_delPt(mesh,ip);
@@ -646,6 +658,9 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
                                  goto collapse2
                                  ,o,MG_NOTAG);
           }
+#ifdef POINTMAP
+          mesh->point[ip].src = mesh->point[pt[0]->v[0]].src;
+#endif
           if ( met->m ) {
             if ( MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
               MMG3D_delPt(mesh,ip);
@@ -690,6 +705,9 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
                                  goto collapse2,
                                  o,MG_NOTAG);
           }
+#ifdef POINTMAP
+          mesh->point[ip].src = mesh->point[pt[0]->v[0]].src;
+#endif
           if ( met->m ) {
             if ( MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
               MMG3D_delPt(mesh,ip);
