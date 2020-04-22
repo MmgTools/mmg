@@ -3326,9 +3326,6 @@ int MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k,char metRidTyp) {
 
   cb[0] = 0.25; cb[1] = 0.25;  cb[2] = 0.25;  cb[3] = 0.25;
   ib = MMG3D_newPt(mesh,o,0);
-#ifdef POINTMAP
-  mesh->point[ip].src = mesh->point[pt[0]->v[0]].src;
-#endif
   if ( !ib ) {
     MMG3D_POINT_REALLOC(mesh,met,ib,mesh->gap,
                          fprintf(stderr,"\n  ## Error: %s: unable to allocate"
@@ -3337,6 +3334,9 @@ int MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k,char metRidTyp) {
                          return 0
                          ,o,0);
   }
+#ifdef POINTMAP
+  mesh->point[ip].src = mesh->point[pt[0]->v[0]].src;
+#endif
   if ( met->m ) {
     if ( !metRidTyp && met->size > 1 )
       MMG5_interp4bar33_ani(mesh,met,k,ib,cb);
