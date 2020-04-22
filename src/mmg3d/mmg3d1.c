@@ -1494,6 +1494,9 @@ int MMG3D_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,int k,
                         return 2;
                         ,o,tag);
   }
+#ifdef POINTMAP
+  mesh->point[ip].src = mesh->point[pt[0]->v[0]].src;
+#endif
 
   if ( met->m ) {
     if ( typchk == 1 && (met->size>1) ) {
