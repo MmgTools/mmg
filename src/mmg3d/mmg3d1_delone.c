@@ -213,7 +213,7 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
                                o,tag);
         }
 #ifdef POINTMAP
-        mesh->point[ip].src = mesh->point[pt->v[0]].src;
+        mesh->point[ip].src = p0->src;
 #endif
         if ( met->m ) {
           if ( MMG5_intmet(mesh,met,k,imax,ip,0.5) <=0 ) {
@@ -300,7 +300,7 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
                                o,MG_NOTAG);
         }
 #ifdef POINTMAP
-        mesh->point[ip].src = mesh->point[pt->v[0]].src;
+        mesh->point[ip].src = p0->src;
 #endif
         if ( met->m ) {
           if ( MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
@@ -348,7 +348,7 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
                                o,MG_NOTAG);
         }
 #ifdef POINTMAP
-        mesh->point[ip].src = mesh->point[pt->v[0]].src;
+        mesh->point[ip].src = p0->src;
 #endif
         if ( met->m ) {
           if ( MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
@@ -570,7 +570,7 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
                                  ,o,tag);
           }
 #ifdef POINTMAP
-          mesh->point[ip].src = mesh->point[pt->v[0]].src;
+          mesh->point[ip].src = p0->src;
 #endif
           if ( met->m ) {
             if ( MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
@@ -659,7 +659,7 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
                                  ,o,MG_NOTAG);
           }
 #ifdef POINTMAP
-          mesh->point[ip].src = mesh->point[pt[0]->v[0]].src;
+          mesh->point[ip].src = p0->src;
 #endif
           if ( met->m ) {
             if ( MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
@@ -706,7 +706,7 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
                                  o,MG_NOTAG);
           }
 #ifdef POINTMAP
-          mesh->point[ip].src = mesh->point[pt[0]->v[0]].src;
+          mesh->point[ip].src = p0->src;
 #endif
           if ( met->m ) {
             if ( MMG5_intmet(mesh,met,k,imax,ip,0.5)<=0 ) {
