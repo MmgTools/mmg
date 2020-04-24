@@ -275,6 +275,9 @@ int MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,int *list,
                          return -1
                          ,m,0);
   }
+#ifdef USE_POINTMAP
+  mesh->point[np].src = p0->src;
+#endif
   assert ( met );
   if ( met->m ) {
     if ( typchk == 1 && (met->size>1) ) {
