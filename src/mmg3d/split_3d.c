@@ -5312,6 +5312,9 @@ int MMG5_splitedg(MMG5_pMesh mesh, MMG5_pSol met,int iel, int iar, double crit){
                          break
                          ,o,tag);
   }
+#ifdef USE_POINTMAP
+  mesh->point[ip].src = p0->src;
+#endif
 
   if ( warn ) {
     fprintf(stderr,"\n  ## Warning: %s:",__func__);
