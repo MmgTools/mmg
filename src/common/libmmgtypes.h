@@ -167,6 +167,14 @@
 #define MMG5_NSOLS_MAX   100
 
 /**
+ * \def MMG5_FILENAME_LEN_MAX
+ *
+ * Maximal length of filenames
+ *
+ */
+#define  MMG5_FILENAME_LEN_MAX 255
+
+/**
  * \enum MMG5_type
  * \brief Type of solutions.
  */
