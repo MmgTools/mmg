@@ -838,7 +838,7 @@ int MMG3D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
       pt1 = &mesh->tetra[kk];
 
       /* Add local volume fraction of the negative subdomain to volc */
-      volc += MMG3D_vfrac(mesh,sol,kk,1);
+      volc += MMG3D_vfrac(mesh,sol,kk,-1);
 
       /* Add adjacent tetra to kk via negative vertices to the pile, if need be */
       adja = &mesh->adja[4*(kk-1)+1];
