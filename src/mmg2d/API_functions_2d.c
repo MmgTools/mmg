@@ -468,7 +468,7 @@ int MMG2D_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int
 int MMG2D_Set_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol *sol,int nsols,
                                  int np, int *typSol) {
   MMG5_pSol psl;
-  char      data[16];
+  char      data[18];
   int       j;
 
   if ( ( (mesh->info.imprim > 5) || mesh->info.ddebug ) && mesh->nsols ) {
@@ -493,6 +493,11 @@ int MMG2D_Set_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol *sol,int nsols,
     /* Give an arbitrary name to the solution */
     sprintf(data,"sol_%d",j);
     if ( !MMG2D_Set_inputSolName(mesh,psl,data) ) {
+      return 0;
+    }
+    /* Give an arbitrary name to the solution */
+    sprintf(data,"sol_%d.o",j);
+    if ( !MMG2D_Set_outputSolName(mesh,psl,data) ) {
       return 0;
     }
 

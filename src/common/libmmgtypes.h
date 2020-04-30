@@ -167,6 +167,14 @@
 #define MMG5_NSOLS_MAX   100
 
 /**
+ * \def MMG5_FILENAME_LEN_MAX
+ *
+ * Maximal length of filenames
+ *
+ */
+#define  MMG5_FILENAME_LEN_MAX 255
+
+/**
  * \def MMG5_MMAT_NOSPLIT
  *
  * Entity that must not be splitted in multimat mode
@@ -181,7 +189,6 @@
  *
  */
 #define MMG5_MMAT_Split  1
-
 
 /**
  * \enum MMG5_type
