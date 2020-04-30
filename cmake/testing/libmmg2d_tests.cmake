@@ -68,6 +68,7 @@ IF ( CMAKE_Fortran_COMPILER )
     libmmg2d_fortran_lsOnly
     libmmg2d_fortran_lsAndMetric
     test_api2d_fortran_0
+    test_io2d_fortran
     )
 
   SET ( MMG2D_LIB_TESTS_MAIN_PATH ${MMG2D_LIB_TESTS_MAIN_PATH}
@@ -77,6 +78,7 @@ IF ( CMAKE_Fortran_COMPILER )
     ${PROJECT_SOURCE_DIR}/libexamples/mmg2d/IsosurfDiscretization_lsOnly/main.F90
     ${PROJECT_SOURCE_DIR}/libexamples/mmg2d/IsosurfDiscretization_lsAndMetric/main.F90
     ${MMG2D_CI_TESTS}/API_tests/2d.F90
+    ${PROJECT_SOURCE_DIR}/cmake/testing/code/mmg2d_io.F90
     )
 
 ENDIF ( CMAKE_Fortran_COMPILER )

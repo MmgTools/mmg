@@ -22,6 +22,11 @@
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0)
 
+# if PROJECT_NAME is defined, mmg is a subproject
+if(DEFINED PROJECT_NAME)
+  set(MMG_SUBPROJECT ON)
+endif()
+
 INCLUDE(CMakeDependentOption)
 INCLUDE(cmake/modules/macros.cmake)
 
@@ -39,6 +44,12 @@ SET ( CI_DIR ${PROJECT_SOURCE_DIR}/ci_tests
   CACHE PATH "Path toward the continuous integration directory" )
 MARK_AS_ADVANCED ( CI_DIR )
 
+
+include(CMakePackageConfigHelpers)
+# various variables to help standard install directories
+include(GNUInstallDirs)
+
+
 ###############################################################################
 #####
 #####         Release version and date
@@ -46,8 +57,8 @@ MARK_AS_ADVANCED ( CI_DIR )
 ###############################################################################
 SET (CMAKE_RELEASE_VERSION_MAJOR "5" )
 SET (CMAKE_RELEASE_VERSION_MINOR "4" )
-SET (CMAKE_RELEASE_VERSION_PATCH "2" )
-SET (CMAKE_RELEASE_DATE "Mar. 20, 2019" )
+SET (CMAKE_RELEASE_VERSION_PATCH "3" )
+SET (CMAKE_RELEASE_DATE "Feb. 26, 2020" )
 
 SET (CMAKE_RELEASE_VERSION
   "${CMAKE_RELEASE_VERSION_MAJOR}.${CMAKE_RELEASE_VERSION_MINOR}.${CMAKE_RELEASE_VERSION_PATCH}")
@@ -207,15 +218,39 @@ ENDIF()
 # Find SCOTCH library?
 SET(SCOTCH_DIR "" CACHE PATH "Installation directory for scotch")
 LIST(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules)
-FIND_PACKAGE(Scotch)
 
-IF ( NOT SCOTCH_FOUND )
-  MESSAGE ( WARNING "Scotch library not found:"
-    "Using scotch reduce the execution time of mmg3d "
-    "(see https://gforge.inria.fr/frs/?group_id=248 to download it)."
-    "If you have already installed Scotch and want to use it, "
-    "please set the CMake variable or environment variable SCOTCH_DIR "
-    "to your scotch directory.")
+# add Scotch library?
+OPTION ( USE_SCOTCH "Use SCOTCH TOOL for renumbering" ON )
+
+IF ( USE_SCOTCH )
+  FIND_PACKAGE(SCOTCH)
+
+  IF ( NOT SCOTCH_FOUND )
+    MESSAGE ( WARNING "Scotch library not found:"
+      "Using scotch reduce the execution time of mmg3d "
+      "(see https://gforge.inria.fr/frs/?group_id=248 to download it)."
+      "If you have already installed Scotch and want to use it, "
+      "please set the CMake variable or environment variable SCOTCH_DIR "
+      "to your scotch directory.")
+  ENDIF ( )
+ENDIF ( )
+
+# add LinearElasticity library?
+SET(ELAS_DIR "" CACHE PATH "Installation directory for Elas")
+OPTION (
+  USE_ELAS "Use the Elas library for lagrangian motion option" ON )
+
+IF ( USE_ELAS )
+  INCLUDE(cmake/modules/FindElas.cmake)
+  IF ( NOT ELAS_FOUND )
+    MESSAGE ( WARNING "Elas is a library to solve the linear elasticity "
+      "problem (see https://github.com/ISCDtoolbox/LinearElasticity to"
+      " download it). "
+      "This library is needed to use the lagrangian motion option. "
+      "If you have already installed Elas and want to use it, "
+      "please set the CMake variable or environment variable ELAS_DIR "
+      "to your Elas directory.")
+  ENDIF ( )
 ENDIF ( )
 
 ############################################################################
@@ -223,7 +258,14 @@ ENDIF ( )
 #####         VTK (to parse (p)vtp/(p)vtu files )
 #####
 ############################################################################
-FIND_PACKAGE(VTK)
+# add the VTK library ?
+OPTION ( USE_VTK "Use VTK I/O" ON )
+IF ( USE_VTK )
+  FIND_PACKAGE(VTK QUIET)
+  IF ( NOT VTK_FOUND )
+    MESSAGE ( WARNING "VTK library not found: vtk I/O will not be available.")
+  ENDIF ( )
+ENDIF ( )
 
 ############################################################################
 #####
@@ -269,13 +311,6 @@ CMAKE_DEPENDENT_OPTION(
   MMG2D_CI "Enable/Disable continuous integration for mmg2d" ON
   "BUILD_TESTING;BUILD_MMG2D" OFF)
 
-# add LinearElasticity library?
-SET(ELAS_DIR "" CACHE PATH "Installation directory for Elas")
-INCLUDE(cmake/modules/FindElas.cmake)
-CMAKE_DEPENDENT_OPTION (
-  USE_ELAS "Use the Elas library for lagrangian motion option" ON
-  "BUILD_MMG2D;ELAS_FOUND" OFF)
-
 #------------------------------- mmgs
 CMAKE_DEPENDENT_OPTION ( LIBMMGS_STATIC "Compile the mmgs static library" ${BUILD_STATIC_LIBS}
   "BUILD_MMGS" OFF)
@@ -320,18 +355,8 @@ CMAKE_DEPENDENT_OPTION ( PATTERN
 #-- Remove the next line to have this option visible in basic cmake mode
 MARK_AS_ADVANCED(PATTERN)
 
-# add Elastic library?
-SET(ELAS_DIR "" CACHE PATH "Installation directory for Elas")
-INCLUDE(cmake/modules/FindElas.cmake)
-CMAKE_DEPENDENT_OPTION (
-  USE_ELAS "Use the Elas library for lagrangian motion option" ON
-  "ELAS_FOUND" OFF)
 
-# add Scotch library?
-CMAKE_DEPENDENT_OPTION ( USE_SCOTCH "Use SCOTCH TOOL for renumbering" ON
-  "SCOTCH_FOUND;BUILD_MMG3D" OFF)
-
-IF( USE_SCOTCH )
+IF( SCOTCH_FOUND )
   SET(CMAKE_C_FLAGS "-DUSE_SCOTCH ${CMAKE_C_FLAGS}")
 
   MESSAGE(STATUS
@@ -339,11 +364,8 @@ IF( USE_SCOTCH )
   SET( LIBRARIES ${SCOTCH_LIBRARIES} ${LIBRARIES})
 ENDIF()
 
-# add the VTK library ?
-CMAKE_DEPENDENT_OPTION ( USE_VTK "Use VTK I/O" ON
-  "VTK_FOUND" OFF)
 
-IF ( USE_VTK )
+IF ( VTK_FOUND )
   ADD_DEFINITIONS(-DUSE_VTK)
 
   MESSAGE ( STATUS "Compilation with VTK: add vtp and vtu I/O." )
@@ -395,9 +417,30 @@ IF ( BUILD_MMG )
   INCLUDE(cmake/modules/mmg.cmake)
 ENDIF ( )
 
-IF( USE_SCOTCH )
+IF( SCOTCH_FOUND )
   # Include Scotch Dir here to ensure that Mmg doesn't search it's own headers in /usr/local
-  INCLUDE_DIRECTORIES(${SCOTCH_INCLUDE_DIRS})
+  INCLUDE_DIRECTORIES(PUBLIC ${SCOTCH_INCLUDE_DIRS})
+ENDIF()
+
+IF ( MmgTargetsExported )
+  set( MMG_CMAKE_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/mmg )
+
+  configure_package_config_file(cmake/config/mmgConfig.cmake.in
+    ${PROJECT_BINARY_DIR}/mmgConfig.cmake
+    INSTALL_DESTINATION ${MMG_CMAKE_INSTALL_DIR} )
+
+  install(EXPORT MmgTargets
+    FILE MmgTargets.cmake
+    NAMESPACE Mmg::
+    DESTINATION ${MMG_CMAKE_INSTALL_DIR}
+    )
+  install(FILES ${PROJECT_BINARY_DIR}/mmgConfig.cmake
+    DESTINATION ${MMG_CMAKE_INSTALL_DIR} )
+
+  install(FILES
+    ${PROJECT_SOURCE_DIR}/cmake/modules/FindSCOTCH.cmake
+    ${PROJECT_SOURCE_DIR}/cmake/modules/FindElas.cmake
+    DESTINATION ${MMG_CMAKE_INSTALL_DIR} )
 ENDIF()
 
 ###############################################################################
@@ -452,8 +495,6 @@ ENDIF ( )
       "${PROJECT_SOURCE_DIR}/cmake/Supp/libSystem.supp")
   ENDIF(APPLE)
   # Copy config file and custom file in the good directories
-  CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/cmake/config/CTestConfig.cmake
-    ${PROJECT_SOURCE_DIR}/CTestConfig.cmake)
   CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/cmake/config/CTestCustom.cmake
     ./CTestCustom.cmake)
 
@@ -507,6 +548,21 @@ ENDIF ( )
 
 ENDIF ( BUILD_TESTING )
 
+############################################################################
+#####
+#####         Print git hash to source file
+#####
+############################################################################
+
+IF (NOT WIN32 OR MINGW)
+
+  ADD_CUSTOM_TARGET(GenerateGitHash
+    COMMAND ./git_log_mmg.sh ${PROJECT_SOURCE_DIR} ${PROJECT_BINARY_DIR}
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/scripts/
+    COMMENT "Getting git commit hash"
+  )
+ENDIF ()
+
 ###############################################################################
 #####
 #####         Create API Documentation
@@ -559,10 +615,14 @@ IF(DOXYGEN_FOUND)
     ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg3d/html/index.html file to see
     it" VERBATIM )
 
-  ADD_CUSTOM_TARGET(doc DEPENDS mmgs_doc mmg3d_doc mmg2d_doc COMMENT "Generating
+  if ( NOT TARGET doc )
+    ADD_CUSTOM_TARGET(doc DEPENDS mmgs_doc mmg3d_doc mmg2d_doc COMMENT "Generating
     MMG API documentation with Doxygen.  Open up the
     ${PROJECT_BINARY_DIR}/doc/mmg*/html/index.html file to see it"
-    VERBATIM )
+      VERBATIM )
+  else()
+    add_dependencies( doc mmgs_doc mmg3d_doc mmg2d_doc )
+  endif()
 ENDIF ( DOXYGEN_FOUND )
 
 ###############################################################################

@@ -38,9 +38,9 @@ extern "C" {
                          MMG5_ARG_ppMesh,&mesh,MMG5_ARG_ppMet,&met, \
                          MMG5_ARG_ppLs,&ls,MMG5_ARG_ppDisp,&disp,   \
                          MMG5_ARG_end) ) {                          \
-      return MMG5_LOWFAILURE;                                       \
+      return MMG5_LOWFAILURE;                                      \
     }                                                               \
-    return val;                                                     \
+    return val;                                                    \
   }while(0)
 
 /** Reallocation of point table and sol table and creation
@@ -239,6 +239,7 @@ void  MMG3D_sizeArbreRec(MMG3D_PROctree_s* q, int nv, int dim, int*,int*);
 int*  MMG3D_sizeArbre(MMG3D_PROctree* q, int dim);
 int  MMG3D_PROctreein_iso(MMG5_pMesh,MMG5_pSol,MMG3D_pPROctree,int,double);
 int  MMG3D_PROctreein_ani(MMG5_pMesh,MMG5_pSol,MMG3D_pPROctree,int,double);
+int64_t MMG3D_getPROctreeCoordinate(MMG3D_pPROctree q, double* ver, int dim);
 
 /* prototypes */
 int  MMG3D_tetraQual(MMG5_pMesh mesh, MMG5_pSol met,char metRidTyp);
@@ -257,7 +258,6 @@ int  MMG3D_zaldy(MMG5_pMesh mesh);
 void MMG5_freeXTets(MMG5_pMesh mesh);
 void MMG5_freeXPrisms(MMG5_pMesh mesh);
 void MMG3D_Free_topoTables(MMG5_pMesh mesh);
-char MMG5_chkedg(MMG5_pMesh mesh,MMG5_pTria pt,char ori,double,double,int);
 int  MMG5_chkBdryTria(MMG5_pMesh mesh);
 int  MMG5_mmg3dBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,MMG5_pBezier pb,char ori);
 extern int    MMG5_BezierTgt(double c1[3],double c2[3],double n1[3],double n2[3],double t1[3],double t2[3]);
@@ -330,9 +330,10 @@ int  MMG3D_memOption_memRepartition(MMG5_pMesh mesh);
 int  MMG5_mmg3d1_pattern(MMG5_pMesh ,MMG5_pSol,int* );
 int  MMG5_mmg3d1_delone(MMG5_pMesh ,MMG5_pSol,int* );
 int  MMG3D_mmg3d2(MMG5_pMesh ,MMG5_pSol,MMG5_pSol );
+int  MMG3D_update_xtetra ( MMG5_pMesh mesh );
 int  MMG5_mmg3dChkmsh(MMG5_pMesh,int,int);
-int   MMG3D_setMeshSize_initData(MMG5_pMesh,int,int,int,int,int,int);
-int   MMG3D_setMeshSize_alloc(MMG5_pMesh);
+int  MMG3D_setMeshSize_initData(MMG5_pMesh,int,int,int,int,int,int);
+int  MMG3D_setMeshSize_alloc(MMG5_pMesh);
 int  MMG3D_split1_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]);
 int  MMG5_split1(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],char metRidTyp);
 int  MMG5_split1b(MMG5_pMesh,MMG5_pSol,int*,int,int,int,char,char);
@@ -507,7 +508,7 @@ int    MMG3D_gradsizreq_ani(MMG5_pMesh ,MMG5_pSol );
 double     MMG5_meansizreg_iso(MMG5_pMesh,MMG5_pSol,int,int*,int,double,double);
 int        MMG3D_chk4ridVertices(MMG5_pMesh mesh,MMG5_pTetra pt);
 extern int MMG5_moymet(MMG5_pMesh ,MMG5_pSol ,MMG5_pTetra ,double *);
-int    MMG3D_set_metricAtPointsOnReqEdges (MMG5_pMesh,MMG5_pSol);
+int    MMG3D_set_metricAtPointsOnReqEdges (MMG5_pMesh,MMG5_pSol,int8_t);
 void MMG3D_mark_pointsOnReqEdge_fromTetra (  MMG5_pMesh mesh );
 
 extern double (*MMG5_lenedg)(MMG5_pMesh ,MMG5_pSol ,int, MMG5_pTetra );

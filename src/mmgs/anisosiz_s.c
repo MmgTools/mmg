@@ -35,6 +35,7 @@
 
 #include "mmgs.h"
 #include "inlined_functions.h"
+#include "mmgsexterns.c"
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -678,6 +679,7 @@ int MMGS_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pPoint   ppt;
   double        mm[6];
   int           k;
+  int8_t        ismet;
   char          i;
   static char   mmgErr=0;
 
@@ -692,23 +694,26 @@ int MMGS_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
   if ( met->m ) {
-    assert ( mesh->info.inputMet );
+    assert ( met->np );
+    ismet = 1;
   }
   else {
+    ismet = 0;
+
     MMG5_calelt     = MMG5_caltri_ani;
     MMG5_lenSurfEdg = MMG5_lenSurfEdg_ani;
 
     if ( !MMGS_Set_solSize(mesh,met,MMG5_Vertex,mesh->np,3) )
       return 0;
-    /* Set_solSize modify the value of the inputMet field => we need to reset it */
-    mesh->info.inputMet = 0;
   }
 
   /** Step 1: Set metric at points belonging to a required edge: compute the
    * metric as the mean of the length of the required eges passing through the
    * point */
-  if ( !MMGS_set_metricAtPointsOnReqEdges ( mesh,met ) ) {
-    return 0;
+  if ( !mesh->info.nosizreq ) {
+    if ( !MMGS_set_metricAtPointsOnReqEdges ( mesh,met,ismet ) ) {
+      return 0;
+    }
   }
 
   /* Step 2: Travel all the points (via triangles) in the mesh and set metric tensor */
@@ -719,7 +724,7 @@ int MMGS_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
     for (i=0; i<3; i++) {
       ppt = &mesh->point[pt->v[i]];
       if ( ppt->flag || !MG_VOK(ppt) )  continue;
-      if ( mesh->info.inputMet )  memcpy(mm,&met->m[6*(pt->v[i])],6*sizeof(double));
+      if ( ismet )  memcpy(mm,&met->m[6*(pt->v[i])],6*sizeof(double));
 
       if ( MS_SIN(ppt->tag) ) {
         if ( !MMG5_defmetsin(mesh,met,k,i) )  continue;
@@ -734,7 +739,7 @@ int MMGS_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
       else {
         if ( !MMG5_defmetreg(mesh,met,k,i) )  continue;
       }
-      if ( mesh->info.inputMet ) {
+      if ( ismet ) {
         if ( !MMGS_intextmet(mesh,met,pt->v[i],mm) ) {
           if ( !mmgErr ) {
             fprintf(stderr,"\n  ## Error: %s: unable to intersect metrics"
@@ -750,7 +755,7 @@ int MMGS_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
   /* search for unintialized metric */
-  MMG5_defUninitSize ( mesh,met );
+  MMG5_defUninitSize ( mesh,met,ismet );
 
   return 1;
 }

@@ -730,6 +730,7 @@ int MMG3D_nmgeom(MMG5_pMesh mesh){
 /** preprocessing stage: mesh analysis */
 int MMG3D_analys(MMG5_pMesh mesh) {
   MMG5_Hash hash;
+  int       ier;
 
   /**--- stage 1: data structures for surface */
   if ( abs(mesh->info.imprim) > 3 )
@@ -739,6 +740,15 @@ int MMG3D_analys(MMG5_pMesh mesh) {
   if ( !MMG3D_hashTetra(mesh,1) ) {
     fprintf(stderr,"\n  ## Hashing problem (1). Exit program.\n");
     return 0;
+  }
+
+  if ( mesh->info.iso && mesh->info.opnbdy ) {
+    ier = MMG3D_update_xtetra ( mesh );
+    if ( !ier ) {
+      fprintf(stderr,"\n  ## Problem when updating the xtetra data after ls discretization."
+              " Exit program.\n");
+      return 0;
+    }
   }
 
   /* create prism adjacency */

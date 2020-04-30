@@ -87,7 +87,7 @@ double MMG5_swapd(double sbin)
 
 static
 int MMG5_countBinaryElts(FILE **inm, const int nelts,const int iswp,
-                          int *np, int *na, int* nt,int *nq, int *ne, int *npr)
+                         int *np, int *na, int* nt,int *nq, int *ne, int *npr)
 {
   int    typ,num,tagNum,i,k,l,idx;
   static char mmgWarn = 0;
@@ -341,8 +341,8 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,const char *filename,
       (*posNodeData)[*nsols] = ftell((*inm));
       if ( ++(*nsols) == posNodeDataSize ) {
         MMG5_SAFE_RECALLOC(*posNodeData,*nsols,
-                            posNodeDataSize+initPosNodeDataSize,
-                            long,"posNodeData",return 0);
+                           posNodeDataSize+initPosNodeDataSize,
+                           long,"posNodeData",return 0);
         posNodeDataSize += initPosNodeDataSize;
       }
 
@@ -486,6 +486,7 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,const char *filename,
 int  MMG5_check_readedMesh ( MMG5_pMesh mesh, int nref ) {
   MMG5_pPoint ppt;
   MMG5_pTria  ptt;
+  MMG5_pQuad  pq;
   MMG5_pPrism pp;
   MMG5_pTetra pt;
   int         i,k,aux;
@@ -517,12 +518,19 @@ int  MMG5_check_readedMesh ( MMG5_pMesh mesh, int nref ) {
         ptt->edg[i] = 0;
 
       if ( MMG2D_quickarea(mesh->point[ptt->v[0]].c,mesh->point[ptt->v[1]].c,
-                          mesh->point[ptt->v[2]].c) < 0.0 ) {
+                           mesh->point[ptt->v[2]].c) < 0.0 ) {
         /* mesh->xt temporary used to count reoriented tetra*/
         mesh->xt++;
         aux = ptt->v[2];
         ptt->v[2] = ptt->v[1];
         ptt->v[1] = aux;
+      }
+    }
+    for (k=1; k<=mesh->nquad; k++) {
+      pq = &mesh->quadra[k];
+      for (i=0; i<4; i++) {
+        ppt = &mesh->point[ pq->v[i] ];
+        ppt->tag &= ~MG_NUL;
       }
     }
   }
@@ -626,7 +634,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
   MMG5_pEdge  pa;
   MMG5_pPoint ppt;
   MMG5_pSol   psl;
-  double      aux, dbuf[9];
+  double      dbuf[9];
   float       fbuf[9],fc;
   int         k,i,l,nref,iadr,ier;
   int         nt,na,nq,ne,npr;
@@ -785,7 +793,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
         {
           pp = &mesh->prism[++npr];
           MMG_FSCANF((*inm),"%d %d %d %d %d %d ",&pp->v[0],&pp->v[1],&pp->v[2],
-                 &pp->v[3],&pp->v[4],&pp->v[5]);
+                     &pp->v[3],&pp->v[4],&pp->v[5]);
           pp->ref = abs(ref);
         }
         if(ref < 0) {
@@ -936,7 +944,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
           num = MMG5_swapbin(num);
           tagNum = MMG5_swapbin(tagNum);
         }
-       if ( tagNum < 2 ) {
+        if ( tagNum < 2 ) {
           fprintf(stderr,"\n  ## Error: %s: Expected at least 2 tags per element (%d given).\n",
                   __func__,tagNum);
           fclose(*inm);
@@ -1126,11 +1134,11 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
 
       else if ( nt < mesh->nt ) {
         MMG5_ADD_MEM(mesh,(nt-mesh->nt)*sizeof(MMG5_Tria),"triangles",
-                      fprintf(stderr,"  Exit program.\n");
-                      fclose(*inm);
-                      return 0);
+                     fprintf(stderr,"  Exit program.\n");
+                     fclose(*inm);
+                     return 0);
         MMG5_SAFE_RECALLOC(mesh->tria,mesh->nt+1,(nt+1),MMG5_Tria,"triangles",
-                            return 0);
+                           return 0);
       }
       mesh->nt = nt;
     }
@@ -1139,11 +1147,11 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
         MMG5_DEL_MEM(mesh,mesh->edge);
       else if ( na < mesh->na ) {
         MMG5_ADD_MEM(mesh,(na-mesh->na)*sizeof(MMG5_Edge),"edges",
-                      fprintf(stderr,"  Exit program.\n");
-                      fclose(*inm);
-                      return 0);
+                     fprintf(stderr,"  Exit program.\n");
+                     fclose(*inm);
+                     return 0);
         MMG5_SAFE_RECALLOC(mesh->edge,mesh->na+1,(na+1),MMG5_Edge,"edges",
-                            return 0);
+                           return 0);
       }
       mesh->na = na;
     }
@@ -1183,7 +1191,6 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
     metricData = 0;
     if ( ptr ) {
       *ptr = '\0';
-      mesh->info.inputMet = 1;
       metricData = 1;
     }
 
@@ -1202,7 +1209,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
 
     /* Real tags ignored */
     if ( fscanf((*inm),"%d",&tagNum) ) {
-    for ( k=0; k<tagNum; ++k ) {
+      for ( k=0; k<tagNum; ++k ) {
         MMG_FSCANF((*inm),"%f",&fc);
       }
     }
@@ -1233,8 +1240,8 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
     }
 
     if ( typ == 1 ) {
-        psl->size = 1;
-        psl->type = 1;
+      psl->size = 1;
+      psl->type = 1;
     }
     else if ( typ == 3 ) {
       psl->size = psl->dim;
@@ -1261,9 +1268,9 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
     psl->npmax = mesh->npmax;
 
     MMG5_ADD_MEM(mesh,(psl->size*(psl->npmax+1))*sizeof(double),"initial solution",
-                  fprintf(stderr,"  Exit program.\n");
-                  fclose(*inm);
-                  return 0);
+                 fprintf(stderr,"  Exit program.\n");
+                 fclose(*inm);
+                 return 0);
     MMG5_SAFE_CALLOC(psl->m,psl->size*(psl->npmax+1),double,return 0);
 
     /* isotropic solution */
@@ -1417,7 +1424,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
 
           if ( !metricData ) {
             if ( psl->dim ==2 ) {
-              psl->m[iadr] = dbuf[0];
+              psl->m[iadr  ] = dbuf[0];
               psl->m[iadr+1] = dbuf[1];
               psl->m[iadr+2] = dbuf[3];
               psl->m[iadr+3] = dbuf[4];
@@ -1432,7 +1439,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
             if ( psl->dim ==2 ) {
               assert ( dbuf[1] == dbuf[3] );
 
-              psl->m[iadr] = dbuf[0];
+              psl->m[iadr  ] = dbuf[0];
               psl->m[iadr+1] = dbuf[1];
               psl->m[iadr+2] = dbuf[4];
             }
@@ -1846,7 +1853,11 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename,
   for ( isol=0; isol<nsols; ++isol) {
     psl = *sol + isol;
 
-    if ( (!psl || !psl->m) ) {
+    if ( !psl ) {
+      continue;
+    }
+
+    if ( !psl->m ) {
       if ( !mmgWarn ) {
         mmgWarn = 1;
         fprintf(stderr, "  ## Warning: %s: missing data for at least 1 solution."

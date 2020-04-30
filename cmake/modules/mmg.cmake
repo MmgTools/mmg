@@ -53,7 +53,7 @@ LIST(REMOVE_ITEM mmg_library_files
   ${MMG3D_SOURCE_DIR}/mmg3d.c
   ${REMOVE_FILE} )
 
-IF ( USE_VTK )
+IF ( VTK_FOUND )
   LIST(APPEND  mmg_library_files
     ${COMMON_SOURCE_DIR}/vtkparser.cpp )
 ENDIF ( )
@@ -101,10 +101,10 @@ IF ( LIBMMG_STATIC OR LIBMMG_SHARED )
   SET(MMG_INCLUDE ${PROJECT_BINARY_DIR}/include/mmg )
 
   # Install header files in /usr/local or equivalent
-  INSTALL(FILES ${mmg2d_headers} DESTINATION include/mmg/mmg2d)
-  INSTALL(FILES ${mmgs_headers} DESTINATION include/mmg/mmgs)
-  INSTALL(FILES ${mmg3d_headers} DESTINATION include/mmg/mmg3d)
-  INSTALL(FILES ${mmg_headers} DESTINATION include/mmg)
+  INSTALL(FILES ${mmg2d_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/mmg/mmg2d)
+  INSTALL(FILES ${mmgs_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/mmg/mmgs)
+  INSTALL(FILES ${mmg3d_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/mmg/mmg3d)
+  INSTALL(FILES ${mmg_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/mmg)
 
   FILE(INSTALL ${PROJECT_SOURCE_DIR}/src/mmg/libmmgf.h DESTINATION  ${PROJECT_BINARY_DIR}/include/mmg/)
 

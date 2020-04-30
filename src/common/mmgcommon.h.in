@@ -72,7 +72,7 @@ extern "C" {
 /** Maximal memory used if available memory compitation fail. */
 #define MMG5_MEMMAX  800        /**< Default mem if unable to compute memMax */
 #define MMG5_BITWIZE_MB_TO_B 20 /**< Bitwise convertion from Mo to O */
-#define MMG5_MEMPERCENT 50/100  /**< Percent of RAM used by default */
+#define MMG5_MEMPERCENT 0.5     /**< Percent of RAM used by default */
 
 /* Domain refs in iso mode */
 #define MG_PLUS    2
@@ -204,7 +204,7 @@ extern "C" {
 /* Macros for memory management */
 /** Check if used memory overflow maximal authorized memory.
     Execute the command law if lack of memory. */
-#define MMG5_CHK_MEM(mesh,size,string,law) do                           \
+#define MMG5_CHK_MEM(mesh,size,string,law) do                          \
   {                                                                     \
     if ( (mesh)->memCur > (mesh)->memMax ) {                            \
       fprintf(stderr,"  ## Error:");                                    \
@@ -419,14 +419,29 @@ size_t myfree(void *ptr) {
  * check the return value of fscanf
  *
  * \remark don't work without any variadic arg
+ * \remark don't work on MSVC because variadic args are not expanded
  */
+#ifdef POSIX
 #define MMG_FSCANF(stream,format,...) do                                \
   {                                                                     \
-    if ( CV_VA_NUM_ARGS(__VA_ARGS__) != fscanf(stream,format,__VA_ARGS__) ) { \
-      fputs ( "Reading error", stderr );                                \
+    int io_count   = fscanf(stream,format,__VA_ARGS__);                 \
+    int args_count = CV_VA_NUM_ARGS(__VA_ARGS__);                       \
+    if ( args_count != io_count ) {                                     \
+      fprintf (stderr, "Reading error: fscanf counts %d args while %d provided\n",io_count,args_count ); \
       return -1;                                                        \
     }                                                                   \
   } while(0);
+#else
+#define MMG_FSCANF(stream,format,...) do                                \
+  {                                                                     \
+    int io_count   = fscanf(stream,format,__VA_ARGS__);                 \
+    int args_count = CV_VA_NUM_ARGS(__VA_ARGS__);                       \
+    if ( 0 > io_count ) {                                               \
+      fprintf (stderr, "Reading error: fscanf counts %d args\n",io_count); \
+      return -1;                                                        \
+    }                                                                   \
+  } while(0);
+#endif
 
 /** Inlined functions for libraries and executables */
 #ifdef USE_SCOTCH
@@ -531,8 +546,8 @@ enum MMG5_Format {
 
 
 /* Global variables */
-static const unsigned char MMG5_inxt2[6] = {1,2,0,1,2}; /*!< next vertex of triangle: {1,2,0} */
-  static const unsigned char MMG5_iprv2[3] = {2,0,1}; /*!< previous vertex of triangle: {2,0,1} */
+  static const unsigned char MMG5_inxt2[6] = {1,2,0,1,2}; /*!< next vertex of triangle: {1,2,0} */
+static const unsigned char MMG5_iprv2[3] = {2,0,1}; /*!< previous vertex of triangle: {2,0,1} */
 
 /* Private structures */
 /**
@@ -592,7 +607,7 @@ void           MMG5_check_hminhmax(MMG5_pMesh mesh, int8_t sethmin, int8_t sethm
  double        MMG5_caltri33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt);
  extern double MMG5_caltri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
  extern double MMG5_caltri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
- void          MMG5_defUninitSize(MMG5_pMesh mesh,MMG5_pSol met);
+ void          MMG5_defUninitSize(MMG5_pMesh mesh,MMG5_pSol met,int8_t ismet);
  void          MMG5_displayLengthHisto(MMG5_pMesh,int,double*,int,int,double,
                                         int,int,double,int,double*,int*,char);
  void          MMG5_displayLengthHisto_internal( int,int,int,double,
@@ -626,6 +641,7 @@ const char    *MMG5_Get_formatName(enum MMG5_Format fmt);
  int           MMG5_mmgHashTria(MMG5_pMesh mesh, int *adja, MMG5_Hash*, int chkISO);
  void          MMG5_mmgInit_parameters(MMG5_pMesh mesh);
  void          MMG5_mmgUsage(char *prog);
+ void          MMG5_advancedUsage();
  extern int    MMG5_nonUnitNorPts(MMG5_pMesh,int,int,int,double*);
  extern double MMG5_nonorsurf(MMG5_pMesh mesh,MMG5_pTria pt);
  extern int    MMG5_norpts(MMG5_pMesh,int,int,int,double *);
@@ -658,7 +674,7 @@ const char    *MMG5_Get_formatName(enum MMG5_Format fmt);
  int           MMG5_intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr);
  extern int    MMG5_countLocalParamAtTri( MMG5_pMesh,MMG5_iNode **);
  extern int    MMG5_writeLocalParamAtTri( MMG5_pMesh,MMG5_iNode *,FILE*);
- double        MMG2D_quickarea(double a[2],double b[2],double c[2]);
+ double         MMG2D_quickarea(double a[2],double b[2],double c[2]);
  void          MMG5_build3DMetric(MMG5_pMesh mesh,MMG5_pSol sol,int ip,double dbuf[6]);
  int           MMG5_loadVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
  int            MMG5_loadMshMesh_part1(MMG5_pMesh mesh,const char *filename,
@@ -689,7 +705,7 @@ int MMG5_sum_reqEdgeLengthsAtPoint ( MMG5_pMesh,MMG5_pSol,int ip0,int ip1 );
 int MMG5_compute_meanMetricAtMarkedPoints_iso ( MMG5_pMesh mesh,MMG5_pSol met);
 int MMG5_compute_meanMetricAtMarkedPoints_ani ( MMG5_pMesh mesh,MMG5_pSol met);
 
-int  MMG5_reset_metricAtReqEdges_surf ( MMG5_pMesh,MMG5_pSol );
+int  MMG5_reset_metricAtReqEdges_surf ( MMG5_pMesh,MMG5_pSol,int8_t );
 void MMG5_mark_pointsOnReqEdge_fromTria ( MMG5_pMesh mesh );
 int  MMG5_gradsiz_iso ( MMG5_pMesh mesh,MMG5_pSol met );
 int  MMG5_gradsizreq_iso(MMG5_pMesh ,MMG5_pSol );

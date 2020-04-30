@@ -5286,6 +5286,11 @@ int MMG5_splitedg(MMG5_pMesh mesh, MMG5_pSol met,int iel, int iar, double crit){
     }
   }
 
+  /* Do not split a required edge */
+  if ( pt->tag & MG_REQ || tag & MG_REQ ) {
+    return 0;
+  }
+
   if ( (p0->tag & MG_BDY) && (p1->tag & MG_BDY) ) {
     return 0;
   }

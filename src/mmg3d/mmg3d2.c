@@ -54,7 +54,7 @@ extern char  ddb;
  */
 static inline
 double MMG3D_vfrac_1vertex(MMG5_pPoint ppt[4],char i0,double v[4],int8_t part_opp) {
-  double      vfrac,lam,area,eps,o1[3],o2[3],o3[3];
+  double      vfrac,lam,area,o1[3],o2[3],o3[3];
   char        i1,i2,i3;
 
   i1 = MMG5_idir[i0][0];
@@ -105,10 +105,10 @@ double MMG3D_vfrac_1vertex(MMG5_pPoint ppt[4],char i0,double v[4],int8_t part_op
 double MMG3D_vfrac(MMG5_pMesh mesh,MMG5_pSol sol,int k,int pm) {
   MMG5_pTetra   pt;
   MMG5_pPoint   ppt[4];
-  double        v[4],vfm,vfp,lam,area,eps,o[18];
+  double        v[4],vfm,vfp,lam,eps,o[18];
   int           ip[4],nplus,nminus,nzero;
   int8_t        flag,cfg,ia;
-  char          i,i0,i1,i2,imin1,imin2,iplus1,iplus2,iz;
+  char          i,i0,i1,imin1,imin2,iplus1,iplus2,iz;
   unsigned char tau[4];
   const unsigned char *taued;
 
@@ -693,7 +693,7 @@ int MMG3D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
   MMG5_pxTetra   pxt;
   double         volc,voltot,v0,v1,v2,v3;
   int            k,kk,l,ll,ncp,ncm,ip0,ip1,ip2,ip3,base,cur,ipile,*pile,*adja;
-  char           i,j,i1,i2,i3,onbr;
+  char           i,j,i1,onbr;
 
   ncp = 0;
   ncm = 0;
@@ -743,7 +743,10 @@ int MMG3D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
     pile[ipile] = k;
     ipile++;
     if ( ipile >= mesh->ne ) {
-      fprintf(stderr,"\n  ## Problem in length of pile; function rmc. Exit program.\n");
+      fprintf(stderr,"\n  ## Problem in length of pile; function rmc.\n"
+              " Check that the level-set intersect the mesh.\n"
+              " Exit program.\n");
+
       return 0;
     }
 
@@ -835,7 +838,7 @@ int MMG3D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
       pt1 = &mesh->tetra[kk];
 
       /* Add local volume fraction of the negative subdomain to volc */
-      volc += MMG3D_vfrac(mesh,sol,kk,1);
+      volc += MMG3D_vfrac(mesh,sol,kk,-1);
 
       /* Add adjacent tetra to kk via negative vertices to the pile, if need be */
       adja = &mesh->adja[4*(kk-1)+1];
@@ -1162,6 +1165,116 @@ static int MMG3D_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol) {
     else {
       assert(nmns);
       pt->ref = MG_MINUS;
+    }
+  }
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \return 1 if success, 0 if the xtetra array can't be reallocated.
+ *
+ * Update the xtetra array to store the new bdy faces created by the isosurface
+ * discretization.
+ *
+ */
+int MMG3D_update_xtetra ( MMG5_pMesh mesh ) {
+  MMG5_pTetra   pt,pt1,ptmax,ptmin;
+  MMG5_pxTetra  pxt;
+  int           *adja,k,i,jel,j,kmax,imax,kmin,imin;
+
+  if ( (!mesh->info.iso) || (!mesh->info.opnbdy) ) {
+    /* In non opnbdy mode, info stored in xtetra is not used */
+    /* In non ls mode, xtetra are alread updated */
+    return 1;
+  }
+
+  /* Opnbdy mode uses data stored in xtetra but in iso mode, the new triangles
+   * created by the ls discretization haven't been stored inside the xtetra */
+  if ( !mesh->xtetra ) {
+    fprintf(stderr,"\n  ## Error: %s: the xtetra array must be allocated.\n",
+      __func__);
+    return 0;
+  }
+  if ( !mesh->adja ) {
+    fprintf(stderr,"\n  ## Error: %s: the ajda array must be allocated.\n",
+      __func__);
+    return 0;
+  }
+
+
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+
+    adja = &mesh->adja[4*(k-1)+1];
+
+    for (i=0; i<4; i++) {
+      if ( !adja[i] ) {
+        /* Face is already stored */
+        continue;
+      }
+
+      jel = adja[i]/4;
+      pt1 = &mesh->tetra[jel];
+
+      if ( pt->ref == pt1->ref ) {
+        /* Potential opnbdy face is already stored */
+        continue;
+      }
+
+      j = adja[i]%4;
+      /* Detection of the tetra of higher ref */
+      if ( pt->ref > pt1->ref ) {
+        ptmax = pt;
+        kmax  = k;
+        imax  = i;
+        ptmin = pt1;
+        kmin  = jel;
+        imin  = j;
+      }
+      else {
+        ptmax = pt1;
+        kmax  = jel;
+        imax  = j;
+        ptmin = pt;
+        kmin  = k;
+        imin  = i;
+      }
+
+      /* Update the xtetra array for both tetra */
+      /* Tetra ptmax */
+      if ( !ptmax->xt ) {
+        mesh->xt++;
+        if ( mesh->xt > mesh->xtmax ) {
+          MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
+                            "larger xtetra table",
+                            mesh->xt--;
+                            fprintf(stderr,"  Exit program.\n");return 0;);
+        }
+        ptmax->xt = mesh->xt;
+      }
+
+      pxt = &mesh->xtetra[ptmax->xt];
+      pxt->ref[imax]   = MG_ISO;
+      pxt->ftag[imax] |= MG_BDY;
+      MG_SET(pxt->ori,imax);
+
+      /* Tetra ptmin */
+      if ( !ptmin->xt ) {
+        mesh->xt++;
+        if ( mesh->xt > mesh->xtmax ) {
+          MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
+                            "larger xtetra table",
+                            mesh->xt--;
+                            fprintf(stderr,"  Exit program.\n");return 0;);
+        }
+        ptmin->xt = mesh->xt;
+      }
+
+      pxt = &mesh->xtetra[ptmin->xt];
+      pxt->ref[imin]   = MG_ISO;
+      pxt->ftag[imin] |= MG_BDY;
+      MG_CLR(pxt->ori,imin);
     }
   }
   return 1;
@@ -2025,6 +2138,7 @@ int MMG3D_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
     fprintf(stderr,"\n  ## Problem in setting references. Exit program.\n");
     return 0;
   }
+
 
   /* Clean memory */
   MMG5_DEL_MEM(mesh,sol->m);

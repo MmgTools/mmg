@@ -389,28 +389,28 @@ int main(int argc,char *argv[]) {
         MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
       }
       MMG5_DEL_MEM(mesh,ls->namein);
-    }
+      }
 
     if ( mesh->info.lag >= 0 || mesh->info.iso ) {
       /* displacement or isovalue are mandatory */
       if ( MMG3D_loadSol(mesh,sol,sol->namein) < 1 ) {
         fprintf(stdout,"  ## ERROR: UNABLE TO LOAD SOLUTION FILE.\n");
         MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
-      }
     }
-    else {
+  }
+  else {
       /* Facultative metric */
       if ( MMG3D_loadSol(mesh,met,met->namein) == -1 ) {
         fprintf(stderr,"\n  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
         MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
       }
-    }
+      }
     /* In iso mode: read metric if any */
     if ( mesh->info.iso && met->namein ) {
       if ( MMG3D_loadSol(mesh,met,met->namein) < 1 ) {
         fprintf(stdout,"  ## ERROR: UNABLE TO LOAD METRIC.\n");
         MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
-      }
+    }
     }
     break;
 
@@ -437,13 +437,13 @@ int main(int argc,char *argv[]) {
   }
   else if ( mesh->info.iso ) {
      if ( ls == NULL || ls->m == NULL ) {
-      fprintf(stderr,"\n  ## ERROR: NO ISOVALUE DATA.\n");
+        fprintf(stderr,"\n  ## ERROR: NO ISOVALUE DATA.\n");
       MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
+      }
     }
-  }
 
   /* Read parameter file */
-  if ( !MMG3D_parsop(mesh,met) )
+    if ( !MMG3D_parsop(mesh,met) )
     MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_LOWFAILURE);
 
   chrono(OFF,&MMG5_ctim[1]);

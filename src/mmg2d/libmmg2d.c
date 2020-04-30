@@ -21,6 +21,10 @@
 ** =============================================================================
 */
 #include "mmg2d.h"
+#ifndef _WIN32
+#include "git_log_mmg.h"
+#endif
+#include "mmg2dexterns.c"
 
 /**
  * Pack the mesh \a mesh and its associated metric \a met and/or solution \a sol
@@ -52,12 +56,28 @@
  *
  */
 void MMG2D_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
+  MMG5_pTria  ptt;
   MMG5_pPoint ppt;
-  int         k,iadr;
+  int         k,i,iadr;
   double      isqhmin, isqhmax;
   char        sethmin, sethmax;
 
   assert ( mesh->info.optim || mesh->info.hsiz > 0. );
+
+  /* Detect the point used only by quads */
+  if ( mesh->nquad ) {
+    for (k=1; k<=mesh->np; k++) {
+      mesh->point[k].flag = 1;
+    }
+    for (k=1; k<=mesh->nt; k++) {
+      ptt = &mesh->tria[k];
+      if ( !MG_EOK(ptt) ) continue;
+
+      for (i=0; i<3; i++) {
+        mesh->point[ptt->v[i]].flag = 0;
+      }
+    }
+  }
 
   /* If not provided by the user, compute hmin/hmax from the metric computed by
    * the DoSol function. */
@@ -68,7 +88,7 @@ void MMG2D_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
       mesh->info.hmin = FLT_MAX;
       for (k=1; k<=mesh->np; k++)  {
         ppt = &mesh->point[k];
-        if ( !MG_VOK(ppt) ) continue;
+        if ( (!MG_VOK(ppt)) || ppt->flag ) continue;
         mesh->info.hmin = MG_MIN(mesh->info.hmin,met->m[k]);
       }
     }
@@ -76,7 +96,7 @@ void MMG2D_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
       mesh->info.hmin = 0.;
       for (k=1; k<=mesh->np; k++)  {
         ppt = &mesh->point[k];
-        if ( !MG_VOK(ppt) ) continue;
+        if ( (!MG_VOK(ppt)) || ppt->flag ) continue;
         iadr = met->size*k;
         mesh->info.hmin = MG_MAX(mesh->info.hmin,met->m[iadr]);
         mesh->info.hmin = MG_MAX(mesh->info.hmin,met->m[iadr+2]);
@@ -98,7 +118,7 @@ void MMG2D_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
       mesh->info.hmax = FLT_MAX;
       for (k=1; k<=mesh->np; k++)  {
         ppt = &mesh->point[k];
-        if ( !MG_VOK(ppt) ) continue;
+        if ( (!MG_VOK(ppt)) || ppt->flag ) continue;
         iadr = met->size*k;
         mesh->info.hmax = MG_MIN(mesh->info.hmax,met->m[iadr]);
         mesh->info.hmax = MG_MIN(mesh->info.hmax,met->m[iadr+2]);
@@ -152,6 +172,11 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol met)
   if ( mesh->info.imprim >= 0 ) {
     fprintf(stdout,"\n  %s\n   MODULE MMG2D: %s (%s)\n  %s\n",
             MG_STR,MG_VER,MG_REL,MG_STR);
+#ifndef _WIN32
+    fprintf(stdout,"     git branch: %s\n",MMG_GIT_BRANCH);
+    fprintf(stdout,"     git commit: %s\n",MMG_GIT_COMMIT);
+    fprintf(stdout,"     git date:   %s\n\n",MMG_GIT_DATE);
+#endif
   }
 
   assert ( mesh );
@@ -269,12 +294,6 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol met)
     }
   }
 
-  /* Create adjacency relations in the mesh */
-  if ( !MMG2D_hashTria(mesh) )
-    _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
-
-  if ( mesh->info.ddebug && !MMG5_chkmsh(mesh,1,0) )  _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
-
   /* Print initial quality history */
   if ( mesh->info.imprim > 0  ||  mesh->info.imprim < -1 ) {
     if ( !MMG2D_outqua(mesh,met) ) {
@@ -288,6 +307,8 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol met)
     if ( !MMG5_unscaleMesh(mesh,met,NULL) ) _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
     _LIBMMG5_RETURN(mesh,met,sol,MMG5_LOWFAILURE);
   }
+
+  if ( mesh->info.ddebug && !MMG5_chkmsh(mesh,1,0) )  _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
 
   if ( mesh->info.imprim > 1 && met->m && met->np ) MMG2D_prilen(mesh,met);
 
@@ -395,6 +416,11 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( mesh->info.imprim >= 0 ) {
     fprintf(stdout,"\n  %s\n   MODULE MMG2D: %s (%s)\n  %s\n",
             MG_STR,MG_VER,MG_REL,MG_STR);
+#ifndef _WIN32
+    fprintf(stdout,"     git branch: %s\n",MMG_GIT_BRANCH);
+    fprintf(stdout,"     git commit: %s\n",MMG_GIT_COMMIT);
+    fprintf(stdout,"     git date:   %s\n\n",MMG_GIT_DATE);
+#endif
   }
 
   assert ( mesh );
@@ -610,6 +636,11 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
 
   if ( mesh->info.imprim >= 0 ) {
     fprintf(stdout,"\n  %s\n   MODULE MMG2D: %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
+#ifndef _WIN32
+    fprintf(stdout,"     git branch: %s\n",MMG_GIT_BRANCH);
+    fprintf(stdout,"     git commit: %s\n",MMG_GIT_COMMIT);
+    fprintf(stdout,"     git date:   %s\n\n",MMG_GIT_DATE);
+#endif
   }
 
   assert ( mesh );
@@ -703,6 +734,12 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
     _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
   }
 
+  if ( mesh->nquad && mesh->quadra ) {
+    printf("\n  ## ERROR: UNABLE TO HANDLE HYBRID MESHES IN ISOVALUE DISCRETIZATION MODE.\n");
+    if ( mettofree ) { MMG5_SAFE_FREE (met); }
+    _LIBMMG5_RETURN(mesh,sol,met,MMG5_STRONGFAILURE);
+  }
+
   chrono(OFF,&(ctim[1]));
   printim(ctim[1].gdif,stim);
   if ( mesh->info.imprim > 0 )
@@ -716,7 +753,6 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
 
   if ( mesh->info.imprim > 0 )
     fprintf(stdout,"\n  -- PHASE 1 : ISOSURFACE DISCRETIZATION\n");
-
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {
     fprintf(stdout,"  MAXIMUM NUMBER OF POINTS    (NPMAX) : %8d\n",mesh->npmax);
@@ -880,12 +916,18 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
 int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   mytime    ctim[TIMEMAX];
   char      stim[32];
-  int       *invalidTris;
-  int       k,ier;
+  int       ier;
+  int       k,*invalidTris;
+
 
   if ( mesh->info.imprim >= 0 ) {
     fprintf(stdout,"\n  %s\n   MODULE MMG2D : %s (%s)\n  %s\n",
             MG_STR,MG_VER,MG_REL,MG_STR);
+#ifndef _WIN32
+    fprintf(stdout,"     git branch: %s\n",MMG_GIT_BRANCH);
+    fprintf(stdout,"     git commit: %s\n",MMG_GIT_COMMIT);
+    fprintf(stdout,"     git date:   %s\n\n",MMG_GIT_DATE);
+#endif
   }
 
   assert ( mesh );
@@ -914,6 +956,12 @@ int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
 
   disp->ver  = mesh->ver;
 
+#ifndef USE_ELAS
+  fprintf(stderr,"\n  ## ERROR: YOU NEED TO COMPILE WITH THE USE_ELAS"
+    " CMake's FLAG SET TO ON TO USE THE RIGIDBODY MOVEMENT LIBRARY.\n");
+    _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
+#endif
+
   if ( !mesh->nt ) {
     fprintf(stdout,"\n  ## ERROR: NO TRIANGLES IN THE MESH \n");
     _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
@@ -933,15 +981,21 @@ int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   }
 
   if ( mesh->info.optim ) {
-    printf("\n  ## ERROR: OPTIM OPTION UNAVAILABLE IN ISOSURFACE"
-           " DISCRETIZATION MODE.\n");
+    printf("\n  ## ERROR: OPTIM OPTION UNAVAILABLE IN LAGRANGIAN"
+           " MOVEMENT MODE.\n");
     _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
   }
   if ( mesh->info.hsiz>0. ) {
-    printf("\n  ## ERROR: HSIZ OPTION UNAVAILABLE IN ISOSURFACE"
-           " DISCRETIZATION MODE.\n");
+    printf("\n  ## ERROR: HSIZ OPTION UNAVAILABLE IN LAGRANGIAN"
+           " MOVEMENT MODE.\n");
     _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
   }
+
+  if ( mesh->nquad && mesh->quadra ) {
+    printf("\n  ## ERROR: UNABLE TO HANDLE HYBRID MESHES IN LAGRANGIAN MOVEMENT MODE.\n");
+    _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
+  }
+
 
   chrono(OFF,&(ctim[1]));
   printim(ctim[1].gdif,stim);
@@ -992,8 +1046,6 @@ int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
     fprintf(stdout,"\n  -- PHASE 2 : LAGRANGIAN MOTION\n");
   }
 
-#ifdef USE_ELAS
-
   /* Lagrangian mode */
   invalidTris = NULL;
   ier = MMG2D_mmg2d9(mesh,disp,met,&invalidTris);
@@ -1013,7 +1065,6 @@ int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
     }
     MMG5_SAFE_FREE(invalidTris);
   }
-#endif
 
   /* End with a classical remeshing stage, provided mesh->info.lag > 1 */
   if ( (ier > 0) && (mesh->info.lag >= 1) && !MMG2D_mmg2d1n(mesh,met) ) {

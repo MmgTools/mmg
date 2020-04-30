@@ -71,6 +71,7 @@ enum MMGS_Param {
   MMGS_IPARAM_nreg,              /*!< [0/1], Disabled/enabled normal regularization */
   MMGS_IPARAM_numberOfLocalParam,/*!< [n], Number of local parameters */
   MMGS_IPARAM_renum,             /*!< [1/0], Turn on/off point relocation with Scotch */
+  MMGS_IPARAM_nosizreq,          /*!< [0/1], Allow/avoid overwritten of sizes at required points (advanced usage) */
   MMGS_DPARAM_angleDetection,    /*!< [val], Value for angle detection */
   MMGS_DPARAM_hmin,              /*!< [val], Minimal mesh size */
   MMGS_DPARAM_hmax,              /*!< [val], Maximal mesh size */
@@ -218,7 +219,9 @@ int  MMGS_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solout);
  * \param typSol type of solution (scalar, vectorial...).
  * \return 0 if failed, 1 otherwise.
  *
- * Set the solution number, dimension and type.
+ * Initialize an array of solutions field: set dimension, types and number of
+ * data.
+ * To use to initialize an array of solution fields (not used by Mmg itself).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_SOLSIZE(mesh,sol,typEntity,np,typSol,retval)\n
@@ -238,7 +241,9 @@ int  MMGS_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int
  *                  (scalar, vectorial...).
  * \return 0 if failed, 1 otherwise.
  *
- * Set the solution number, dimension and type.
+ * Initialize an array of solutions field defined at vertices: set dimension,
+ * types and number of data.
+ * To use to initialize an array of solution fields (not used by Mmg itself).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_SOLSATVERTICESSIZE(mesh,sol,nsols,nentities,typSol,retval)\n
@@ -283,7 +288,7 @@ int  MMGS_Set_meshSize(MMG5_pMesh mesh, int np, int nt, int na);
  * \return 1.
  *
  * Set vertex of coordinates \a c0, \a c1,\a c2 and reference \a ref
- * at position \a pos in mesh structure
+ * at position \a pos in mesh structure (\a pos from 1 to nb_vertices included).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_VERTEX(mesh,c0,c1,c2,ref,pos,retval)\n
@@ -328,7 +333,7 @@ int  MMGS_Set_vertex(MMG5_pMesh mesh, double c0, double c1,
  * \return 0 if failed, 1 otherwise.
  *
  * Set triangle of vertices \a v0, \a v1, \a v2 and reference \a ref
- * at position \a pos in mesh structure.
+ * at position \a pos in mesh structure.(\a pos from 1 to nb_tria included).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_TRIANGLE(mesh,v0,v1,v2,ref,pos,retval)\n
@@ -369,7 +374,7 @@ int  MMGS_Set_triangle(MMG5_pMesh mesh, int v0, int v1,
  * \return 0 if failed, 1 otherwise.
  *
  * Set edges of extremities \a v0, \a v1 and reference \a ref at
- * position \a pos in mesh structure
+ * position \a pos in mesh structure (\a pos from 1 to nb_edges included).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_EDGE(mesh,v0,v1,ref,pos,retval)\n
@@ -385,7 +390,7 @@ int  MMGS_Set_edge(MMG5_pMesh mesh, int v0, int v1, int ref,int pos);
  * \param k vertex index.
  * \return 1.
  *
- * Set corner at point \a pos.
+ * Set corner at point \a pos (\a pos from 1 to nb_vertices included).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_CORNER(mesh,k,retval)\n
@@ -396,6 +401,23 @@ int  MMGS_Set_edge(MMG5_pMesh mesh, int v0, int v1, int ref,int pos);
  *
  */
 int  MMGS_Set_corner(MMG5_pMesh mesh, int k);
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param k vertex index.
+ * \return 1.
+ *
+ * Remove corner attribute at point \a pos (from 1 to nb_vertices included).
+ *
+ * \remark Fortran interface
+ *
+ * >   SUBROUTINE MMGS_UNSET_CORNER(mesh,k,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * >     INTEGER, INTENT(IN)           :: k\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+int  MMGS_Unset_corner(MMG5_pMesh mesh, int k);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param k vertex index.
@@ -414,6 +436,23 @@ int  MMGS_Set_corner(MMG5_pMesh mesh, int k);
 int  MMGS_Set_requiredVertex(MMG5_pMesh mesh, int k);
 /**
  * \param mesh pointer toward the mesh structure.
+ * \param k vertex index.
+ * \return 1.
+ *
+ * Remove required attribute from point \a k.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMGS_UNSET_REQUIREDVERTEX(mesh,k,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * >     INTEGER, INTENT(IN)           :: k\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int  MMGS_Unset_requiredVertex(MMG5_pMesh mesh, int k);
+
+/**
+ * \param mesh pointer toward the mesh structure.
  * \param k triangle index.
  * \return 1.
  *
@@ -428,6 +467,24 @@ int  MMGS_Set_requiredVertex(MMG5_pMesh mesh, int k);
  *
  */
 int  MMGS_Set_requiredTriangle(MMG5_pMesh mesh, int k);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param k triangle index.
+ * \return 1.
+ *
+ * Remove required attribute from triangle \a k.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMGS_UNSET_REQUIREDTRIANGLE(mesh,k,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * >     INTEGER, INTENT(IN)           :: k\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int  MMGS_Unset_requiredTriangle(MMG5_pMesh mesh, int k);
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \param k edge index.
@@ -444,6 +501,24 @@ int  MMGS_Set_requiredTriangle(MMG5_pMesh mesh, int k);
  *
  */
 int  MMGS_Set_ridge(MMG5_pMesh mesh, int k);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param k edge index.
+ * \return 1.
+ *
+ * Remove ridge attribute at edge \a k.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMGS_UNSET_RIDGE(mesh,k,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * >     INTEGER, INTENT(IN)           :: k\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+int  MMGS_Unset_ridge(MMG5_pMesh mesh, int k);
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \param k edge index.
@@ -460,6 +535,23 @@ int  MMGS_Set_ridge(MMG5_pMesh mesh, int k);
  *
  */
 int  MMGS_Set_requiredEdge(MMG5_pMesh mesh, int k);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param k edge index.
+ * \return 1.
+ *
+ * Remove required attribute from edge \a k.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMGS_UNSET_REQUIREDEDGE(mesh,k,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * >     INTEGER, INTENT(IN)           :: k\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int  MMGS_Unset_requiredEdge(MMG5_pMesh mesh, int k);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -531,6 +623,7 @@ int  MMGS_Set_normalAtVertex(MMG5_pMesh mesh, int k, double n0, double n1, doubl
  * \return 0 if failed, 1 otherwise.
  *
  * Set scalar value \a s at position \a pos in solution structure
+ * (\a pos from 1 to nb_vertices included).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_SCALARSOL(met,s,pos,retval)\n
@@ -569,6 +662,7 @@ int  MMGS_Set_scalarSols(MMG5_pSol met, double *s);
  *
  * Set vectorial value \f$(v_x,v_y,v_z)\f$ at position \a pos in solution
  * structure.
+ * (\a pos from 1 to nb_vertices included).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_VECTORSOL(met,vx,vy,vz,pos,retval)\n
@@ -610,6 +704,7 @@ int MMGS_Set_vectorSols(MMG5_pSol met, double *sols);
  *
  * Set tensorial values at position \a pos in solution
  * structure.
+ * (\a pos from 1 to nb_vertices included).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_TENSORSOL(met,m11,m12,m13,m22,m23,m33,pos,retval)\n
@@ -628,8 +723,7 @@ int MMGS_Set_tensorSol(MMG5_pSol met, double m11,double m12, double m13,
  * sols[6*(i-1)]\@6 is the solution at vertex i
  * \return 0 if failed, 1 otherwise.
  *
- * Set tensorial values at position \a pos in solution
- * structure.
+ * Set tensorial values by array.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_TENSORSOLS(met,sols,retval)\n
@@ -648,7 +742,8 @@ int MMGS_Set_tensorSols(MMG5_pSol met, double *sols);
  *
  * \return 0 if failed, 1 otherwise.
  *
- * Set values of the solution at the ith field of the solution array.
+ * Set values of the solution at the ith field of the solution array and at
+ * position \pos (\a pos from 1 to nb_vertices included and i from 1 to nb_sols).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_ITHSOL_INSOLSATVERTICES(sol,i,s,pos,retval)\n
@@ -669,7 +764,8 @@ int MMGS_Set_tensorSols(MMG5_pSol met, double *sols);
  *
  * \return 0 if failed, 1 otherwise.
  *
- * Set values of the solution at the ith field of the solution array.
+ * Set values of the solution at the ith field of the solution array (\a i from
+ * 1 to nb_sols).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_ITHSOLS_INSOLSATVERTICES(sol,i,s,retval)\n
@@ -1089,6 +1185,7 @@ int MMGS_Get_tensorSols(MMG5_pSol met, double *sols);
  * \return 0 if failed, 1 otherwise.
  *
  * Get values of the ith field of the solution array at vertex \a pos.
+ * (\a pos from 1 to nb_vertices included and \a i from 1 to nb_sols).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_GET_ITHSOL_INSOLSATVERTICES(sol,i,s,pos,retval)\n
@@ -1110,6 +1207,7 @@ int MMGS_Get_tensorSols(MMG5_pSol met, double *sols);
  * \return 0 if failed, 1 otherwise.
  *
  * Get values of the solution at the ith field of the solution array.
+ * (\a i from 1 to \a nb_sols).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_GET_ITHSOLS_INSOLSATVERTICES(sol,i,s,retval)\n

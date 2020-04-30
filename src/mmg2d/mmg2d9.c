@@ -581,7 +581,7 @@ int MMG2D_mmg2d9(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int **invalidTrias
   tau = 0.0;
   ninvalidTrias = 0;
 
-  nnnspl = nnnc = nnns = nnnm = 0;
+  nnnspl = nnnc = nnns = nnnm = lastt = 0;
 
   if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
     fprintf(stdout,"  ** LAGRANGIAN MOTION\n");

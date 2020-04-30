@@ -92,7 +92,7 @@ FOREACH(EXEC ${LISTEXEC_MMG})
     ${MMG_CI_TESTS}/VtkInout/ani.vtu
     ${CTEST_OUTPUT_DIR}/mmg_vtkvtu_ani_${SHRT_EXEC})
 
-  IF ( NOT USE_VTK )
+  IF ( NOT VTK_FOUND )
     SET(expr "VTK library not founded")
     SET_PROPERTY(TEST mmg_vtkvtk_${SHRT_EXEC}
       PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
@@ -285,6 +285,11 @@ FOREACH(EXEC ${LISTEXEC_MMG})
     COMMAND ${EXEC} -v 5 -hsiz 0.02
     ${MMG_CI_TESTS}/MultiDom_Cube_ReqEntities/c
     -out ${CTEST_OUTPUT_DIR}/mmg_MultiDom_Cube_ReqEntities_${SHRT_EXEC}.o.meshb)
+
+  ADD_TEST(NAME mmg_MultiDom_Cube_ReqEntities_nosizreq_${SHRT_EXEC}
+    COMMAND ${EXEC} -v 5 -nosizreq -hgradreq -1
+    ${MMG_CI_TESTS}/MultiDom_Cube_ReqEntities/c
+    -out ${CTEST_OUTPUT_DIR}/mmg_MultiDom_Cube_ReqEntities_nosizreq_${SHRT_EXEC}.o.meshb)
 
   ADD_TEST(NAME mmg_MultiDom_Ellipse_ReqEntitiesAni_${SHRT_EXEC}
     COMMAND ${EXEC} -v 5 -hausd 0.002 -A

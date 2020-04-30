@@ -90,7 +90,6 @@ int MMG3D_loadMesh_opened(MMG5_pMesh mesh,FILE *inm,int bin) {
   int         npreq,ntreq,nereq,nedreq,nqreq,ncor,ned,ng,iswp;
   int         binch,bdim,bpos,i,k,ip,idn;
   int         *ina,v[3],ref,nt,na,nr,ia,aux,nref;
-  char        *ptr;
   char        chaine[MMG5_FILESTR_LGTH],strskip[MMG5_FILESTR_LGTH];
 
   posnp = posnt = posne = posncor = 0;
@@ -987,7 +986,6 @@ int MMG3D_loadMesh_opened(MMG5_pMesh mesh,FILE *inm,int bin) {
 int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
   FILE*       inm;
   int         bin,ier;
-  char        *data;
 
   ier = MMG3D_openMesh(mesh,filename,&inm,&bin);
   if( ier < 1 ) return ier;
@@ -1766,7 +1764,7 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
       fprintf(stdout,"     NUMBER OF TRIANGLES      %8d   REQUIRED  %8d\n",
               mesh->nt, ntreq);
     if ( nq )
-      fprintf(stdout,"     NUMBER OF QUADRILATERALS %8d\n",nq);
+      fprintf(stdout,"     NUMBER OF QUADRILATERALS %8d   REQUIRED  %8d\n",nq,nqreq);
   }
 
   /*fin fichier*/
@@ -1848,8 +1846,6 @@ int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
       if ( MMG5_readDoubleSol3D(met,inm,bin,iswp,k) < 0 ) return -1;
     }
   }
-
-  mesh->info.inputMet = 1;
 
   fclose(inm);
 

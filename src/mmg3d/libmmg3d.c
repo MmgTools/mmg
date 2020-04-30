@@ -20,7 +20,6 @@
 **  use this copy of the mmg distribution only if you accept them.
 ** =============================================================================
 */
-double (*MMG3D_lenedgCoor)(double *ca,double *cb,double *sa,double *sb);
 
 /**
  * \file mmg3d/libmmg3d.c
@@ -41,9 +40,10 @@ double (*MMG3D_lenedgCoor)(double *ca,double *cb,double *sa,double *sb);
  */
 
 #include "inlined_functions_3d.h"
-
-/* Declared in the header, but need to define in at most one compilation unit */
-double (*MMG3D_lenedgCoor)(double *ca,double *cb,double *sa,double *sb);
+#ifndef _WIN32
+#include "git_log_mmg.h"
+#endif
+#include "mmg3dexterns.c"
 
 double (*MMG5_lenedg)(MMG5_pMesh mesh ,MMG5_pSol sol ,int n, MMG5_pTetra );
 double (*MMG5_lenedgspl)(MMG5_pMesh mesh ,MMG5_pSol sol ,int n, MMG5_pTetra );
@@ -698,6 +698,11 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
 
   if ( mesh->info.imprim >= 0 ) {
     fprintf(stdout,"\n  %s\n   MODULE MMG3D: %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
+#ifndef _WIN32
+    fprintf(stdout,"     git branch: %s\n",MMG_GIT_BRANCH);
+    fprintf(stdout,"     git commit: %s\n",MMG_GIT_COMMIT);
+    fprintf(stdout,"     git date:   %s\n\n",MMG_GIT_DATE);
+#endif
   }
 
   MMG3D_Set_commonFunc();
@@ -905,6 +910,11 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet) {
 
   if ( mesh->info.imprim >= 0 ) {
     fprintf(stdout,"\n  %s\n   MODULE MMG3D: %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
+#ifndef _WIN32
+    fprintf(stdout,"     git branch: %s\n",MMG_GIT_BRANCH);
+    fprintf(stdout,"     git commit: %s\n",MMG_GIT_COMMIT);
+    fprintf(stdout,"     git date:   %s\n\n",MMG_GIT_DATE);
+#endif
   }
 
   /** In debug mode, check that all structures are allocated */
@@ -1166,6 +1176,11 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
 
   if ( mesh->info.imprim >= 0 ) {
     fprintf(stdout,"\n  %s\n   MODULE MMG3D: %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
+#ifndef _WIN32
+    fprintf(stdout,"     git branch: %s\n",MMG_GIT_BRANCH);
+    fprintf(stdout,"     git commit: %s\n",MMG_GIT_COMMIT);
+    fprintf(stdout,"     git date:   %s\n\n",MMG_GIT_DATE);
+#endif
   }
 
   /** In debug mode, check that all structures are allocated */
@@ -1299,7 +1314,6 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
     MMG5_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE);
   }
 
-#ifdef USE_ELAS
   /* Lagrangian mode */
   invalidTets = NULL;
   ier = MMG5_mmg3d3(mesh,disp,met,&invalidTets);
@@ -1319,7 +1333,6 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
     }
     MMG5_SAFE_FREE(invalidTets);
   }
-#endif
   disp->npi = disp->np;
 
   if ( (ier > 0) && mesh->info.optim ) {

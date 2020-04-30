@@ -85,6 +85,19 @@ void MMG5_mmgUsage(char *prog) {
 }
 
 /**
+ *
+ * Print help for advanced users of mmg.
+ *
+ */
+void MMG5_advancedUsage() {
+
+  fprintf(stdout,"\n**  Parameters for advanced users\n");
+  fprintf(stdout,"-nosizreq       disable setting of required edge sizes over required vertices.\n");
+  fprintf(stdout,"-hgradreq  val  control gradation from required entities toward others\n");
+
+}
+
+/**
  * \param mesh pointer toward the mesh structure.
  * \return 0 if fail, 1 if success.
  *
@@ -115,6 +128,9 @@ void MMG5_mmgDefaultValues(MMG5_pMesh mesh) {
           mesh->info.hausd);
   fprintf(stdout,"gradation control         (-hgrad)  : %lf\n",
           exp(mesh->info.hgrad));
+
+  fprintf(stdout,"gradation control for required entities (-hgradreq)  : %lf\n",
+          exp(mesh->info.hgradreq));
 }
 
 /**
@@ -165,7 +181,6 @@ int MMG5_countLocalParamAtTri( MMG5_pMesh mesh,MMG5_iNode **bdryRefs) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param bdryRefs pointer toward the list of the boundary references.
- * \param npar number of local param at triangles.
  * \param out pointer toward the file in which to write.
  * \return 1 if success, 0 otherwise.
  *
@@ -323,7 +338,7 @@ char *MMG5_Get_filenameExt( char *filename ) {
 }
 
 /**
- * \param filename string containing a filename and its path
+ * \param path string containing a filename and its path
  *
  * \return a pointer toward the file basename.
  *

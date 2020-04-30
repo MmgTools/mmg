@@ -137,10 +137,39 @@ ADD_TEST(NAME mmg2d_opnbdy_no
   ${MMG2D_CI_TESTS}/Opnbdy/opnbdy-mesh.msh
   -out ${CTEST_OUTPUT_DIR}/mmg2d-opnbdy-mesh-no.o.meshb)
 
+ADD_TEST(NAME mmg2d_opnbdy_ls
+  COMMAND ${EXECUT_MMG2D} -v 5 -opnbdy -ls 3.4 -hausd 0.001
+  ${MMG2D_CI_TESTS}/Opnbdy/opnbdy.mesh
+  -sol  ${MMG2D_CI_TESTS}/Opnbdy/ls.sol
+  -out ${CTEST_OUTPUT_DIR}/mmg2d-opnbdy-ls.o.meshb)
+
 ADD_TEST(NAME mmg2d_opnbdy_yes_ani
   COMMAND ${EXECUT_MMG2D} -v 5 -hausd 0.001 -A -opnbdy
   ${MMG2D_CI_TESTS}/Opnbdy/opnbdy-mesh.msh
   -out ${CTEST_OUTPUT_DIR}/mmg2d-opnbdy-mesh-yes-ani.o.meshb)
+
+# default hybrid
+ADD_TEST(NAME mmg2d_hybrid_2d
+  COMMAND ${EXECUT_MMG2D} -v 5
+  ${MMG2D_CI_TESTS}/Hybrid/hybrid.mesh
+  ${CTEST_OUTPUT_DIR}/mmg2d_hybrid_2d-default)
+
+# hybrid opnbdy
+ADD_TEST(NAME mmg2d_hybrid_opnbdy_2d
+  COMMAND ${EXECUT_MMG2D} -v 5 -opnbdy
+  ${MMG2D_CI_TESTS}/Hybrid/hybrid.mesh
+  ${CTEST_OUTPUT_DIR}/mmg2d_hybrid_2d-opnbdy)
+
+# hybrid hsiz
+ADD_TEST(NAME mmg2d_hybrid_hsiz_2d
+  COMMAND ${EXECUT_MMG2D} -v 5 -hsiz 0.05 -hgradreq -1
+  ${MMG2D_CI_TESTS}/Hybrid/hybrid.mesh
+  ${CTEST_OUTPUT_DIR}/mmg2d_hybrid_2d-opnbdy)
+
+ADD_TEST(NAME mmg2d_hybrid_nosizreq_nohgradreq_2d
+  COMMAND ${EXECUT_MMG2D} -v 5
+  ${MMG2D_CI_TESTS}/Hybrid/hybrid.mesh -nosizreq -hgradreq -1
+  ${CTEST_OUTPUT_DIR}/mmg2d_hybrid_2d-nosizreq)
 
 ###############################################################################
 #####
@@ -159,6 +188,12 @@ ADD_TEST(NAME mmg2d_ascii_gmsh_2d
   COMMAND ${EXECUT_MMG2D} -v 5
   ${MMG2D_CI_TESTS}/GmshInout/cercle1.msh
   ${CTEST_OUTPUT_DIR}/mmg2d_ascii_gmsh_2d-cercle)
+
+# Ascii gmsh no metric hybrid
+ADD_TEST(NAME mmg2d_gmsh_hybrid_2d
+  COMMAND ${EXECUT_MMG2D} -v 5
+  ${MMG2D_CI_TESTS}/Hybrid/hybrid.msh
+  ${CTEST_OUTPUT_DIR}/mmg2d_hybrid_gmsh_2d-hybrid)
 
 # Binary gmsh iso metric
 ADD_TEST(NAME mmg2d_binary_gmsh_iso
@@ -238,7 +273,7 @@ ADD_TEST(NAME mmg2d_vtkvtu_ani
   ${MMG2D_CI_TESTS}/VtkInout/ani.vtu
   ${CTEST_OUTPUT_DIR}/mmg2d_vtkvtu_ani)
 
-IF ( NOT USE_VTK )
+IF ( NOT VTK_FOUND )
   SET(expr "VTK library not founded")
   SET_PROPERTY(TEST mmg2d_vtkvtk
     PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
@@ -483,7 +518,7 @@ ADD_TEST(NAME mmg2d_LSMultiMat_withMetAndLs
 #####
 ###############################################################################
 #####
-IF ( USE_ELAS )
+IF ( ELAS_FOUND )
   ADD_TEST(NAME mmg2d_LagMotion0_circle
     COMMAND ${EXECUT_MMG2D} -v 5  -lag 0
     -in ${MMG2D_CI_TESTS}/LagMotion_circle/circle

@@ -33,7 +33,6 @@
  */
 
 #include "mmgs.h"
-
 #include <math.h>
 
 mytime         MMG5_ctim[TIMEMAX];

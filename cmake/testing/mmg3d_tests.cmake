@@ -357,6 +357,12 @@ ADD_TEST(NAME mmg3d_val
 SET_PROPERTY(TEST mmg3d_val #mmg3d_default
   PROPERTY WILL_FAIL TRUE)
 
+# default hybrid
+ADD_TEST(NAME mmg3d_hybrid_3d
+  COMMAND ${EXECUT_MMG3D} -v 5
+  ${MMG3D_CI_TESTS}/Hybrid/prism.mesh
+  ${CTEST_OUTPUT_DIR}/mmg3d_hybrid_3d-default.msh)
+
 ###############################################################################
 #####
 #####         Check Boundaries
@@ -407,22 +413,29 @@ ADD_TEST(NAME mmg3d_ChkBdry_multidomCube3
   ${CTEST_OUTPUT_DIR}/mmg3d_ChkBdry_multidomCube2-cube.o
   )
 
-ADD_TEST(NAME mmg3d_OpnBdy_unref_peninsula
+ADD_TEST(NAME mmg3d_opnbdy_unref_peninsula
   COMMAND ${EXECUT_MMG3D} -v 5 -opnbdy
   -in ${MMG3D_CI_TESTS}/OpnBdy_peninsula/peninsula
   -out ${CTEST_OUTPUT_DIR}/mmg3d_OpnBdy_peninsula.o.meshb)
 
-ADD_TEST(NAME mmg3d_OpnBdy_ref_peninsula
+ADD_TEST(NAME mmg3d_opnbdy_ls_peninsula
+  COMMAND ${EXECUT_MMG3D} -v 5 -opnbdy -ls
+  -in ${MMG3D_CI_TESTS}/OpnBdy_peninsula/peninsula
+  -sol  ${MMG3D_CI_TESTS}/OpnBdy_peninsula/ls.sol
+  -out ${CTEST_OUTPUT_DIR}/mmg3d_OpnBdy_ls_peninsula.o.meshb)
+
+
+ADD_TEST(NAME mmg3d_opnbdy_ref_peninsula
   COMMAND ${EXECUT_MMG3D} -v 5 -hmax 0.06 -opnbdy
   -in ${MMG3D_CI_TESTS}/OpnBdy_peninsula/peninsula
   -out ${CTEST_OUTPUT_DIR}/mmg3d_OpnBdy_peninsula.o.meshb)
 
-ADD_TEST(NAME mmg3d_OpnBdy_unref_island
+ADD_TEST(NAME mmg3d_opnbdy_unref_island
   COMMAND ${EXECUT_MMG3D} -v 5 -opnbdy
   -in ${MMG3D_CI_TESTS}/OpnBdy_island/island
   -out ${CTEST_OUTPUT_DIR}/mmg3d_OpnBdy_island.o.meshb)
 
-ADD_TEST(NAME mmg3d_OpnBdy_ref_island
+ADD_TEST(NAME mmg3d_opnbdy_ref_island
   COMMAND ${EXECUT_MMG3D} -v 5 -hmax 0.06 -opnbdy
   -in ${MMG3D_CI_TESTS}/OpnBdy_island/island
   -out ${CTEST_OUTPUT_DIR}/mmg3d_OpnBdy_island.o.meshb)
@@ -433,7 +446,7 @@ ADD_TEST(NAME mmg3d_OpnBdy_ref_island
 #####
 ###############################################################################
 #####
-IF ( USE_ELAS )
+IF ( ELAS_FOUND )
   ADD_TEST(NAME mmg3d_LagMotion0_tinyBoxt
     COMMAND ${EXECUT_MMG3D} -v 5  -lag 0
     -in ${MMG3D_CI_TESTS}/LagMotion1_tinyBoxt/tinyBoxt
@@ -599,7 +612,7 @@ IF ( LONG_TESTS )
   #####
   ###############################################################################
   #####
-  IF ( USE_ELAS )
+  IF ( ELAS_FOUND )
     ADD_TEST(NAME mmg3d_LagMotion0_boxt
       COMMAND ${EXECUT_MMG3D} -v 5  -lag 0
       -in ${MMG3D_CI_TESTS}/LagMotion1_boxt/boxt

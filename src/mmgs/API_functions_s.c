@@ -116,8 +116,6 @@ int MMGS_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int 
   sol->dim = 3;
 
   if ( np ) {
-    mesh->info.inputMet = 1;
-
     sol->np  = np;
     sol->npi = np;
     if ( sol->m )
@@ -135,6 +133,7 @@ int MMGS_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int 
 int MMGS_Set_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol *sol,int nsols,
                                  int nentities, int *typSol) {
   MMG5_pSol psl;
+  char      data[18];
   int       j;
 
   if ( ( (mesh->info.imprim > 5) || mesh->info.ddebug ) && mesh->nsols ) {
@@ -155,6 +154,17 @@ int MMGS_Set_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol *sol,int nsols,
   for ( j=0; j<nsols; ++j ) {
     psl = *sol + j;
     psl->ver = 2;
+
+    /* Give an arbitrary name to the solution */
+    sprintf(data,"sol_%d",j);
+    if ( !MMGS_Set_inputSolName(mesh,psl,data) ) {
+      return 0;
+    }
+    /* Give an arbitrary name to the solution */
+    sprintf(data,"sol_%d.o",j);
+    if ( !MMGS_Set_outputSolName(mesh,psl,data) ) {
+      return 0;
+    }
 
     if ( !MMGS_Set_solSize(mesh,psl,MMG5_Vertex,mesh->np,typSol[j]) ) {
       fprintf(stderr,"\n  ## Error: %s: unable to set the size of the"
@@ -683,9 +693,21 @@ int MMGS_Set_corner(MMG5_pMesh mesh, int k) {
   return 1;
 }
 
+int MMGS_Unset_corner(MMG5_pMesh mesh, int k) {
+  assert ( k <= mesh->np );
+  mesh->point[k].tag &= ~MG_CRN;
+  return 1;
+}
+
 int MMGS_Set_requiredVertex(MMG5_pMesh mesh, int k) {
   assert ( k <= mesh->np );
   mesh->point[k].tag |= MG_REQ;
+  return 1;
+}
+
+int MMGS_Unset_requiredVertex(MMG5_pMesh mesh, int k) {
+  assert ( k <= mesh->np );
+  mesh->point[k].tag &= ~MG_REQ;
   return 1;
 }
 
@@ -697,15 +719,34 @@ int MMGS_Set_requiredTriangle(MMG5_pMesh mesh, int k) {
   return 1;
 }
 
+int MMGS_Unset_requiredTriangle(MMG5_pMesh mesh, int k) {
+  assert ( k <= mesh->nt );
+  mesh->tria[k].tag[0] &= ~MG_REQ;
+  mesh->tria[k].tag[1] &= ~MG_REQ;
+  mesh->tria[k].tag[2] &= ~MG_REQ;
+  return 1;
+}
+
 int MMGS_Set_ridge(MMG5_pMesh mesh, int k) {
   assert ( k <= mesh->na );
   mesh->edge[k].tag |= MG_GEO;
+  return 1;
+}
+int MMGS_Unset_ridge(MMG5_pMesh mesh, int k) {
+  assert ( k <= mesh->na );
+  mesh->edge[k].tag &= ~MG_GEO;
   return 1;
 }
 
 int MMGS_Set_requiredEdge(MMG5_pMesh mesh, int k) {
   assert ( k <= mesh->na );
   mesh->edge[k].tag |= MG_REQ;
+  return 1;
+}
+
+int MMGS_Unset_requiredEdge(MMG5_pMesh mesh, int k) {
+  assert ( k <= mesh->na );
+  mesh->edge[k].tag &= ~MG_REQ;
   return 1;
 }
 
@@ -1268,6 +1309,9 @@ int MMGS_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
     break;
   case MMGS_IPARAM_nreg :
     mesh->info.nreg     = val;
+    break;
+  case MMGS_IPARAM_nosizreq :
+    mesh->info.nosizreq = val;
     break;
   case MMGS_IPARAM_numberOfLocalParam :
     if ( mesh->info.par ) {

@@ -38,6 +38,7 @@
  */
 
 #include "mmg2d.h"
+#include "mmg2dexterns.c"
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -426,8 +427,14 @@ int MMG2D_Free_structures_var(va_list argptr)
   if ( (*mesh)->adja )
     MMG5_DEL_MEM((*mesh),(*mesh)->adja);
 
+  if ( (*mesh)->adjq )
+    MMG5_DEL_MEM((*mesh),(*mesh)->adjq);
+
   if ( (*mesh)->tria )
     MMG5_DEL_MEM((*mesh),(*mesh)->tria);
+
+  if ( (*mesh)->quadra )
+    MMG5_DEL_MEM((*mesh),(*mesh)->quadra);
 
   /* disp */
   if ( disp && (*disp) && (*disp)->m )

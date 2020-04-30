@@ -336,6 +336,15 @@ FORTRAN_NAME(MMGS_SET_CORNER,mmgs_set_corner,(MMG5_pMesh *mesh, int *k, int* ret
 }
 
 /**
+ * See \ref MMGS_Unset_corner function in \ref mmgs/libmmgs.h file.
+ */
+FORTRAN_NAME(MMGS_UNSET_CORNER,mmgs_unset_corner,(MMG5_pMesh *mesh, int *k, int* retval),
+             (mesh,k,retval)) {
+  *retval =  MMGS_Unset_corner(*mesh,*k);
+  return;
+}
+
+/**
  * See \ref MMGS_Set_requiredVertex function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_NAME(MMGS_SET_REQUIREDVERTEX,mmgs_set_requiredvertex,
@@ -344,6 +353,17 @@ FORTRAN_NAME(MMGS_SET_REQUIREDVERTEX,mmgs_set_requiredvertex,
   *retval =  MMGS_Set_requiredVertex(*mesh,*k);
   return;
 }
+
+/**
+ * See \ref MMGS_Unset_requiredVertex function in \ref mmgs/libmmgs.h file.
+ */
+FORTRAN_NAME(MMGS_UNSET_REQUIREDVERTEX,mmgs_unset_requiredvertex,
+             (MMG5_pMesh *mesh, int *k, int* retval),
+             (mesh,k,retval)) {
+  *retval =  MMGS_Unset_requiredVertex(*mesh,*k);
+  return;
+}
+
 /**
  * See \ref MMGS_Set_requiredTriangle function in \ref mmgs/libmmgs.h file.
  */
@@ -351,6 +371,16 @@ FORTRAN_NAME(MMGS_SET_REQUIREDTRIANGLE,mmgs_set_requiredtriangle,
              (MMG5_pMesh *mesh, int *k, int* retval),
              (mesh,k,retval)) {
   *retval = MMGS_Set_requiredTriangle(*mesh, *k);
+  return;
+}
+
+/**
+ * See \ref MMGS_Unset_requiredTriangle function in \ref mmgs/libmmgs.h file.
+ */
+FORTRAN_NAME(MMGS_UNSET_REQUIREDTRIANGLE,mmgs_unset_requiredtriangle,
+             (MMG5_pMesh *mesh, int *k, int* retval),
+             (mesh,k,retval)) {
+  *retval = MMGS_Unset_requiredTriangle(*mesh, *k);
   return;
 }
 
@@ -365,6 +395,16 @@ FORTRAN_NAME(MMGS_SET_RIDGE,mmgs_set_ridge,
 }
 
 /**
+ * See \ref MMGS_Unset_ridge function in \ref mmgs/libmmgs.h file.
+ */
+FORTRAN_NAME(MMGS_UNSET_RIDGE,mmgs_unset_ridge,
+             (MMG5_pMesh *mesh, int *k, int* retval),
+             (mesh,k,retval)) {
+  *retval = MMGS_Unset_ridge(*mesh,*k);
+  return;
+}
+
+/**
  * See \ref MMGS_Set_requiredEdge function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_NAME(MMGS_SET_REQUIREDEDGE,mmgs_set_requirededge,
@@ -374,6 +414,15 @@ FORTRAN_NAME(MMGS_SET_REQUIREDEDGE,mmgs_set_requirededge,
   return;
 }
 
+/**
+ * See \ref MMGS_Unset_requiredEdge function in \ref mmgs/libmmgs.h file.
+ */
+FORTRAN_NAME(MMGS_UNSET_REQUIREDEDGE,mmgs_unset_requirededge,
+             (MMG5_pMesh *mesh, int *k, int* retval),
+             (mesh,k,retval)) {
+  *retval = MMGS_Unset_requiredEdge(*mesh,*k);
+  return;
+}
 /**
  * See \ref MMGS_Set_normalAtVertex function in \ref mmgs/libmmgs.h file.
  */

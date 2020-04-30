@@ -167,6 +167,14 @@
 #define MMG5_NSOLS_MAX   100
 
 /**
+ * \def MMG5_FILENAME_LEN_MAX
+ *
+ * Maximal length of filenames
+ *
+ */
+#define  MMG5_FILENAME_LEN_MAX 255
+
+/**
  * \enum MMG5_type
  * \brief Type of solutions.
  */
@@ -427,7 +435,7 @@ typedef struct {
 typedef MMG5_xPrism * MMG5_pxPrism;
 
 /**
- * \struc MMG5_Mat
+ * \struct MMG5_Mat
  * \brief To store user-defined references in the mesh (useful in LS mode)
  */
 typedef struct {
@@ -455,8 +463,7 @@ typedef struct {
   char          parTyp; /*!< Contains binary flags to say which kind of local
                           param are setted: if \f$tag = 1+2+4\f$ then the point
                           is \a MG_Vert, MG_Tria and MG_Tetra */
-  unsigned char optim, optimLES, noinsert, noswap, nomove, nosurf;
-  unsigned char inputMet; /*!< 1 if we don't have a metric when we enter in mmg3d1, 0 otherwise */
+  unsigned char optim, optimLES, noinsert, noswap, nomove, nosurf, nosizreq;
   MMG5_pMat     mat;
 } MMG5_Info;
 
@@ -467,7 +474,7 @@ typedef struct {
 typedef struct {
   int     a; /*!< First extremity of edge */
   int     b;  /*!< Second extremity of edge */
-  int     ref; /*!< Reference of edge */
+  int     ref; /*!< Reference or idx (2D) of edge */
   int     nxt; /*!< Next element of hash table */
   int16_t tag; /*!< tag of edge */
 } MMG5_hgeom;
@@ -539,6 +546,10 @@ typedef struct {
                     \f$adjapr[5*(i-1)+1+j]=5*k+l\f$ then the \f$i^{th}\f$ and
                     \f$k^th\f$ prism are adjacent and share their
                     faces \a j and \a l (resp.) */
+  int      *adjq; /*!< Table of quadrangles adjacency: if
+                    \f$adjq[4*(i-1)+1+j]=4*k+l\f$ then the \f$i^{th}\f$ and
+                    \f$k^th\f$ quadrilaterals are adjacent and share their
+                    edges \a j and \a l (resp.) */
   int      *ipar;   /*!< Store indices of the local parameters */
   MMG5_pPoint    point; /*!< Pointer toward the \ref MMG5_Point structure */
   MMG5_pxPoint   xpoint; /*!< Pointer toward the \ref MMG5_xPoint structure */

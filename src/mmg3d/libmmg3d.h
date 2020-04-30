@@ -86,6 +86,7 @@ enum MMG3D_Param {
   MMG3D_IPARAM_renum,                     /*!< [1/0], Turn on/off point relocation with Scotch */
   MMG3D_IPARAM_anisosize,                 /*!< [1/0], Turn on/off anisotropic metric creation when no metric is provided */
   MMG3D_IPARAM_octree,                    /*!< [n], Specify the max number of points per PROctree cell (DELAUNAY) */
+  MMG3D_IPARAM_nosizreq,                  /*!< [0/1], Allow/avoid overwritten of sizes at required points (advanced usage) */
   MMG3D_DPARAM_angleDetection,            /*!< [val], Value for angle detection */
   MMG3D_DPARAM_hmin,                      /*!< [val], Minimal mesh size */
   MMG3D_DPARAM_hmax,                      /*!< [val], Maximal mesh size */
@@ -242,7 +243,8 @@ enum MMG3D_Param {
  * \param typSol type of solution (scalar, vectorial...).
  * \return 0 if failed, 1 otherwise.
  *
- * Set the solution number, dimension and type.
+ * Initialize a solution field: set dimension, types and number of data.
+ * To use to initialize a metric, a level-set or a displacement field.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_SOLSIZE(mesh,sol,typEntity,np,typSol,retval)\n
@@ -264,7 +266,9 @@ enum MMG3D_Param {
  *                  (scalar, vectorial...).
  * \return 0 if failed, 1 otherwise.
  *
- * Set the solution number, dimension and type.
+ * Initialize an array of solutions field defined at vertices: set dimension,
+ * types and number of data.
+ * To use to initialize an array of solution fields (not used by Mmg itself).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_SOLSATVERTICESSIZE(mesh,sol,nsols,nentities,typSol,retval)\n
@@ -314,7 +318,7 @@ enum MMG3D_Param {
  * \return 1.
  *
  * Set vertex of coordinates \a c0, \a c1,\a c2 and reference \a ref
- * at position \a pos in mesh structure
+ * at position \a pos in mesh structure (from 1 to nb_vertices included).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_VERTEX(mesh,c0,c1,c2,ref,pos,retval)\n
@@ -361,7 +365,7 @@ enum MMG3D_Param {
  * \return 0 if failed, 1 otherwise.
  *
  * Set tetrahedra of vertices \a v0, \a v1,\a v2,\a v3 and reference
- * \a ref at position \a pos in mesh structure.
+ * \a ref at position \a pos in mesh structure  (from 1 to nb_tetra included).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_TETRAHEDRON(mesh,v0,v1,v2,v3,ref,pos,retval)\n
@@ -408,7 +412,7 @@ enum MMG3D_Param {
  * \return 0 if failed, 1 otherwise.
  *
  * Set prisms of vertices \a v0, \a v1,\a v2,\a v3,\a v4,\a v5 and reference
- * \a ref at position \a pos in mesh structure.
+ * \a ref at position \a pos in mesh structure (from 1 to nb_prisms included).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_PRISM(mesh,v0,v1,v2,v3,v4,v5,ref,pos,retval)\n
@@ -453,7 +457,7 @@ enum MMG3D_Param {
  * \return 0 if failed, 1 otherwise.
  *
  * Set triangle of vertices \a v0, \a v1, \a v2 and reference \a ref
- * at position \a pos in mesh structure.
+ * at position \a pos in mesh structure (from 1 to nb_triangle included).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_TRIANGLE(mesh,v0,v1,v2,ref,pos,retval)\n
@@ -497,7 +501,7 @@ enum MMG3D_Param {
  * \return 0 if failed, 1 otherwise.
  *
  * Set quadrilateral of vertices \a v0, \a v1, \a v2, \a v3 and reference \a ref
- * at position \a pos in mesh structure.
+ * at position \a pos in mesh structure (from 1 to nb_quadrangles included).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_QUADRILATERAL(mesh,v0,v1,v2,v3,ref,pos,retval)\n
@@ -539,7 +543,7 @@ enum MMG3D_Param {
  * \return 0 if failed, 1 otherwise.
  *
  * Set edges of extremities \a v0, \a v1 and reference \a ref at
- * position \a pos in mesh structure
+ * position \a pos in mesh structure  (from 1 to nb_edges included)
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_EDGE(mesh,v0,v1,ref,pos,retval)\n
@@ -566,12 +570,31 @@ enum MMG3D_Param {
  *
  */
   int  MMG3D_Set_corner(MMG5_pMesh mesh, int k);
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \param k vertex index.
  * \return 1.
  *
- * Set point \a k as required.
+ * Remove corner attribute at point \a pos (from 1 to nb_vertices included).
+ *
+ * \remark Fortran interface
+ *
+ * >   SUBROUTINE MMG3D_UNSET_CORNER(mesh,k,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * >     INTEGER, INTENT(IN)           :: k\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int  MMG3D_Unset_corner(MMG5_pMesh mesh, int k);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param k vertex index.
+ * \return 1.
+ *
+ * Set point \a k as required (\a k from 1 to nb_vertices included).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_REQUIREDVERTEX(mesh,k,retval)\n
@@ -582,12 +605,30 @@ enum MMG3D_Param {
  *
  */
   int  MMG3D_Set_requiredVertex(MMG5_pMesh mesh, int k);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param k vertex index.
+ * \return 1.
+ *
+ * Remove required attribute from point \a k.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_UNSET_REQUIREDVERTEX(mesh,k,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * >     INTEGER, INTENT(IN)           :: k\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int  MMG3D_Unset_requiredVertex(MMG5_pMesh mesh, int k);
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \param k element index.
  * \return 1.
  *
- * Set element \a k as required.
+ * Set element \a k as required (\a k from 1 to nb_tetra included).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_REQUIREDTETRAHEDRON(mesh,k,retval)\n
@@ -598,6 +639,25 @@ enum MMG3D_Param {
  *
  */
   int  MMG3D_Set_requiredTetrahedron(MMG5_pMesh mesh, int k);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param k element index.
+ * \return 1.
+ *
+ * Remove required attribute from element \a k (\a k from 1 to
+ * nb_tetra included).
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_UNSET_REQUIREDTETRAHEDRON(mesh,k,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * >     INTEGER, INTENT(IN)           :: k\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int  MMG3D_Unset_requiredTetrahedron(MMG5_pMesh mesh, int k);
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \param reqIdx table of the indices of the required elements.
@@ -616,12 +676,33 @@ enum MMG3D_Param {
  *
  */
   int  MMG3D_Set_requiredTetrahedra(MMG5_pMesh mesh, int *reqIdx, int nreq);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param reqIdx table of the indices of the required elements.
+ * \param nreq number of required elements
+ * \return 1.
+ *
+ * Remove required attribute from a list of Tetra whose indices are contained in
+ * array \a reqIdx.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_UNSET_REQUIREDTETRAHEDRA(mesh,reqIdx,nreq,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * >     INTEGER, DIMENSION(*),INTENT(IN) :: reqIdx\n
+ * >     INTEGER, INTENT(IN)           :: nreq\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int  MMG3D_Unset_requiredTetrahedra(MMG5_pMesh mesh, int *reqIdx, int nreq);
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \param k triangle index.
  * \return 1.
  *
- * Set triangle \a k as required.
+ * Set triangle \a k as required (\a k from 1 to nb_tria included).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_REQUIREDTRIANGLE(mesh,k,retval)\n
@@ -632,6 +713,24 @@ enum MMG3D_Param {
  *
  */
   int  MMG3D_Set_requiredTriangle(MMG5_pMesh mesh, int k);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param k triangle index.
+ * \return 1.
+ *
+ * Remove required attribute from triangle \a k.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_UNSET_REQUIREDTRIANGLE(mesh,k,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * >     INTEGER, INTENT(IN)           :: k\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int  MMG3D_Unset_requiredTriangle(MMG5_pMesh mesh, int k);
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \param reqIdx table of the indices of the required trias.
@@ -653,11 +752,30 @@ enum MMG3D_Param {
 
 /**
  * \param mesh pointer toward the mesh structure.
+ * \param reqIdx table of the indices of the required trias.
+ * \param nreq number of required trias
+ * \return 1.
+ *
+ * Remove required attribute from triangles
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_UNSET_REQUIREDTRIANGLES(mesh,reqIdx,nreq,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * >     INTEGER, DIMENSION(*),INTENT(IN) :: reqIdx\n
+ * >     INTEGER, INTENT(IN)           :: nreq\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int  MMG3D_Unset_requiredTriangles(MMG5_pMesh mesh, int *reqIdx, int nreq);
+
+/**
+ * \param mesh pointer toward the mesh structure.
  * \param k triangle index.
  * \return 1.
  *
  * Set triangle \a k as parallel (triangle at the interface between two
- * processors, ie, this triangle is required).
+ * processors, ie, this triangle is required). (\a k from 1 to nb_tria included).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_PARALLELTRIANGLE(mesh,k,retval)\n
@@ -668,6 +786,25 @@ enum MMG3D_Param {
  *
  */
   int  MMG3D_Set_parallelTriangle(MMG5_pMesh mesh, int k);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param k triangle index.
+ * \return 1.
+ *
+ * Remove parallel attribute from triangle \a k (ie tria aren't preserved
+ * anymore). (\a k from 1 to nb_tria included).
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_UNSET_PARALLELTRIANGLE(mesh,k,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * >     INTEGER, INTENT(IN)           :: k\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int  MMG3D_Unset_parallelTriangle(MMG5_pMesh mesh, int k);
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \param parIdx table of the indices of the parallel trias.
@@ -690,6 +827,26 @@ enum MMG3D_Param {
 
 /**
  * \param mesh pointer toward the mesh structure.
+ * \param parIdx table of the indices of the parallel trias.
+ * \param npar number of triangles between processors.
+ * \return 1.
+ *
+ * Remove parallel attributes from triangles (ie
+ * tria aren't preserved anymore).
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_UNSET_PARALLELTRIANGLES(mesh,parIdx,npar,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * >     INTEGER, DIMENSION(*),INTENT(IN) :: parIdx\n
+ * >     INTEGER, INTENT(IN)           :: npar\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int  MMG3D_Unset_parallelTriangles(MMG5_pMesh mesh, int *parIdx, int npar);
+
+/**
+ * \param mesh pointer toward the mesh structure.
  * \param k edge index.
  * \return 1.
  *
@@ -704,6 +861,24 @@ enum MMG3D_Param {
  *
  */
   int  MMG3D_Set_ridge(MMG5_pMesh mesh, int k);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param k edge index.
+ * \return 1.
+ *
+ * Remove ridge attribute at edge \a k.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_UNSET_RIDGE(mesh,k,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * >     INTEGER, INTENT(IN)           :: k\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int  MMG3D_Unset_ridge(MMG5_pMesh mesh, int k);
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \param k edge index.
@@ -720,6 +895,24 @@ enum MMG3D_Param {
  *
  */
   int  MMG3D_Set_requiredEdge(MMG5_pMesh mesh, int k);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param k edge index.
+ * \return 1.
+ *
+ * Remove required attribute from edge \a k.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_UNSET_REQUIREDEDGE(mesh,k,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * >     INTEGER, INTENT(IN)           :: k\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int  MMG3D_Unset_requiredEdge(MMG5_pMesh mesh, int k);
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \param k point index
@@ -750,6 +943,7 @@ enum MMG3D_Param {
  * \return 0 if failed, 1 otherwise.
  *
  * Set scalar value \a s at position \a pos in solution structure
+ * (pos from 1 to nb_vertices included).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_SCALARSOL(met,s,pos,retval)\n
@@ -787,7 +981,7 @@ enum MMG3D_Param {
  * \return 0 if failed, 1 otherwise.
  *
  * Set vectorial value \f$(v_x,v_y,v_z)\f$ at position \a pos in solution
- * structure.
+ * structure. (pos from 1 to nb_vertices included).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_VECTORSOL(met,vx,vy,vz,pos,retval)\n
@@ -829,7 +1023,7 @@ enum MMG3D_Param {
  * \return 0 if failed, 1 otherwise.
  *
  * Set tensorial values at position \a pos in solution
- * structure.
+ * structure. (pos from 1 to nb_vertices included).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_TENSORSOL(met,m11,m12,m13,m22,m23,m33,pos,retval)\n
@@ -848,8 +1042,7 @@ enum MMG3D_Param {
  * sols[6*(i-1)]\@6 is the solution at vertex i
  * \return 0 if failed, 1 otherwise.
  *
- * Set tensorial values at position \a pos in solution
- * structure.
+ * Set tensorial values by array.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_TENSORSOLS(met,sols,retval)\n
@@ -868,7 +1061,9 @@ enum MMG3D_Param {
  *
  * \return 0 if failed, 1 otherwise.
  *
- * Set values of the solution at the ith field of the solution array.
+ * Set values of the solution at the ith field of the solution array and at
+ * position \a pos (\a pos from 1 to \a nb_vertices included and \a i from 1 to \a
+ * nb_sols).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_ITHSOL_INSOLSATVERTICES(sol,i,s,pos,retval)\n
@@ -889,7 +1084,8 @@ enum MMG3D_Param {
  *
  * \return 0 if failed, 1 otherwise.
  *
- * Get values of the ith field of the solution array at vertex \a pos.
+ * Get values of the ith field of the solution array by array (\a i from 1 to \a
+ * nb_sols).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_ITHSOLS_INSOLSATVERTICES(sol,i,s,retval)\n
@@ -1529,13 +1725,14 @@ enum MMG3D_Param {
   int MMG3D_Get_tensorSols(MMG5_pSol met, double *sols);
 /**
  * \param sol pointer toward the array of solutions
- * \param i position of the solution field that we want to set.
+ * \param i position of the solution field that we want to get.
  * \param s solution(s) at mesh vertex \a pos.
  * \param pos index of the vertex on which we get the solution.
  *
  * \return 0 if failed, 1 otherwise.
  *
  * Get values of the ith field of the solution array at vertex \a pos.
+ * (pos from 1 to nb_vertices included and \a i from 1 to \a nb_sols).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_GET_ITHSOL_INSOLSATVERTICES(sol,i,s,pos,retval)\n
@@ -1556,7 +1753,8 @@ enum MMG3D_Param {
  *
  * \return 0 if failed, 1 otherwise.
  *
- * Get values of the solution at the ith field of the solution array.
+ * Get values of the solution at the ith field of the solution array (\a i from
+ * 1 to \a nb_sols).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_GET_ITHSOLS_INSOLSATVERTICES(sol,i,s,retval)\n

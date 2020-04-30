@@ -47,6 +47,7 @@ extern char ddb;
  */
 int MMG2D_setadj(MMG5_pMesh mesh) {
   MMG5_pTria       pt,pt1;
+  MMG5_pQuad       pq;
   int              *pile,*adja,ipil,k,kk,ncc,ip1,ip2,nr,nref;
   int16_t          tag;
   char             i,ii,i1,i2;
@@ -54,6 +55,7 @@ int MMG2D_setadj(MMG5_pMesh mesh) {
   if ( abs(mesh->info.imprim) > 5  || mesh->info.ddebug )
     fprintf(stdout,"  ** SETTING TOPOLOGY\n");
 
+  /** Step 1: Tags setting from triangles analysis */
   MMG5_SAFE_MALLOC(pile,mesh->nt+1,int,return 0);
 
   /* Initialization of the pile */
@@ -85,8 +87,18 @@ int MMG2D_setadj(MMG5_pMesh mesh) {
           pt1 = &mesh->tria[kk];
 
           if ( (!mesh->info.opnbdy) && (pt->ref==pt1->ref) ) {
-            /* Remove edge tag */
-            pt1->tag[ii] = pt->tag[i] = 0;
+            /* Remove BDY/REF and GEO edge tags but required tag must be keeped
+             * (to preserve required tria info) */
+            pt->tag[i] &= ~MG_REF;
+            pt->tag[i] &= ~MG_BDY;
+            pt->tag[i] &= ~MG_GEO;
+
+            pt1->tag[ii] &= ~MG_REF;
+            pt1->tag[ii] &= ~MG_BDY;
+            pt1->tag[ii] &= ~MG_GEO;
+
+            pt1->tag[ii] |= pt->tag[i];
+            pt->tag[i]   |= pt1->tag[ii];
           }
           else {
             /* Transfert edge tag to adjacent */
@@ -191,13 +203,54 @@ int MMG2D_setadj(MMG5_pMesh mesh) {
       }
     }
   }
+  MMG5_SAFE_FREE(pile);
+
+  /** Step 2: Mark the edges at interface between tria and quads as nosurf and
+   * required */
+  for ( k=1; k<=mesh->nquad; k++ ) {
+    pq = &mesh->quadra[k];
+    if ( !MG_EOK(pq) )  continue;
+
+    adja = &mesh->adjq[4*(k-1)+1];
+    for (i=0; i<4; i++) {
+
+      kk = adja[i];
+      if ( kk >= 0 ) {
+        continue;
+      }
+
+      /* The edge is at the interface between a quad and a triangle */
+      kk = abs(kk);
+      ii = kk%3;
+      pt = &mesh->tria[kk/3];
+
+      if ( !(pt->tag[ii] & MG_REQ) ) {
+        pt->tag[ii] |= (MG_REQ + MG_NOSURF + MG_BDY);
+      }
+      if ( !(pq->tag[i] & MG_REQ) ) {
+        pq->tag[i] |= (MG_REQ + MG_NOSURF + MG_BDY);
+      }
+      assert ( pt->edg[ii] == pq->edg[i] );
+
+      /* Transfer edge tag toward edge vertices */
+      i1 = MMG2D_idir_q[i][0];
+      i2 = MMG2D_idir_q[i][1];
+
+      if ( !(mesh->point[pq->v[i1]].tag & MG_REQ) ) {
+        mesh->point[pq->v[i1]].tag |= (MG_REQ + MG_NOSURF + MG_BDY);
+      }
+      if ( !(mesh->point[pq->v[i2]].tag & MG_REQ) ) {
+        mesh->point[pq->v[i2]].tag |= (MG_REQ + MG_NOSURF + MG_BDY);
+      }
+    }
+  }
+
 
   if ( abs(mesh->info.imprim) > 4 ) {
     fprintf(stdout,"     Connected component or subdomains: %d \n",ncc);
     fprintf(stdout,"     Tagged edges: %d,  ridges: %d,  refs: %d\n",nr+nref,nr,nref);
   }
 
-  MMG5_SAFE_FREE(pile);
   return 1;
 }
 
@@ -706,15 +759,21 @@ int MMG2D_regnor(MMG5_pMesh mesh) {
 
 /** preprocessing stage: mesh analysis */
 int MMG2D_analys(MMG5_pMesh mesh) {
-  /* Transfer the boundary edge references to the triangles, if it has not been already done (option 1) */
+  /* Transfer the boundary edge references to the triangles, if it has not been
+   * already done (option 1) */
   if ( !MMG2D_assignEdge(mesh) ) {
      fprintf(stderr,"\n  ## Problem in setting boundary. Exit program.\n");
     return 0;
   }
 
-  /* Creation of adjacency relations in the mesh */
+  /* Creation of tria adjacency relations in the mesh */
   if ( !MMG2D_hashTria(mesh) ) {
      fprintf(stderr,"\n  ## Hashing problem. Exit program.\n");
+    return 0;
+  }
+  /* Creation quadrilaterals adjacency relations in the mesh */
+  if ( !MMG2D_hashQuad(mesh) ) {
+     fprintf(stderr,"\n  ## Quadrilaterals hashing problem. Exit program.\n");
     return 0;
   }
 
@@ -741,6 +800,7 @@ int MMG2D_analys(MMG5_pMesh mesh) {
       fprintf(stderr,"\n  ## Problem in regularizing normal vectors. Exit program.\n");
       return 0;
   }
+  if ( mesh->nquad ) MMG5_DEL_MEM(mesh,mesh->adjq);
 
   return 1;
 }

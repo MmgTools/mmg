@@ -105,7 +105,7 @@ ADD_TEST(NAME mmgs_vtkvtp_ani
   ${MMGS_CI_TESTS}/VtkInout/ani.vtp
   ${CTEST_OUTPUT_DIR}/mmgs_vtkvtp_ani)
 
-IF ( NOT USE_VTK )
+IF ( NOT VTK_FOUND )
   SET(expr "VTK library not founded")
   SET_PROPERTY(TEST mmgs_vtkvtp
     PROPERTY PASS_REGULAR_EXPRESSION "${expr}")

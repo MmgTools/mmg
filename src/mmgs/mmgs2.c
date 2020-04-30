@@ -598,7 +598,7 @@ static int MMGS_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the level-set
- * \param sol pointer toward a metric (optionnal)
+ * \param met pointer toward a metric (optionnal)
  *
  * \return 0 if fail, 1 otherwise.
  *

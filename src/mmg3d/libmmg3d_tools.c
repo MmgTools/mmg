@@ -148,6 +148,9 @@ int MMG3D_usage(char *prog) {
   fprintf(stdout,"-noswap      no edge or face flipping\n");
   fprintf(stdout,"-nomove      no point relocation\n");
   fprintf(stdout,"-nosurf      no surface modifications\n");
+
+  MMG5_advancedUsage();
+
   fprintf(stdout,"\n\n");
 
   return 1;
@@ -354,6 +357,11 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
         else if( !strcmp(argv[i],"-nosurf") ) {
           if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_nosurf,1) )
             return 0;
+        }
+        else if( !strcmp(argv[i],"-nosizreq") ) {
+          if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_nosizreq,1) ) {
+            return 0;
+          }
         }
         break;
       case 'o':

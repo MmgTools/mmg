@@ -288,7 +288,9 @@ int MMG3D_hashTetra(MMG5_pMesh mesh, int pack) {
  *
  * \return 0 if failed, 1 otherwise.
  *
- * Create table of adjacency for prisms.
+ * Create partial table of adjacency for prisms (prism \f$ <-> \f$ prism).
+ *
+ * \remark Adjacencies between prisms and tetra are not filled here.
  *
  * \warning check the hashtable efficiency
  */
@@ -1476,10 +1478,12 @@ int MMG5_chkBdryTria(MMG5_pMesh mesh) {
           ++ntmesh;
           continue;
         }
-        else if ( adj<0 ) continue;
+        else if ( adj<0 ) {
+          continue;
+        }
 
         adj /= 5;
-        pp1 = &mesh->prism[abs(adj)];
+        pp1 = &mesh->prism[adj];
         if ( pp->ref > pp1->ref) {
           ++ntmesh;
         }
@@ -1508,6 +1512,9 @@ int MMG5_chkBdryTria(MMG5_pMesh mesh) {
       }
     }
   }
+
+  /* Fill the adjacency relationship between prisms and tetra (fill adjapr with
+   * a negative value to mark this special faces) */
   for (k=1; k<=mesh->nprism; k++) {
     pp = &mesh->prism[k];
     if ( !MG_EOK(pp) )  continue;
@@ -1778,7 +1785,7 @@ int MMG5_bdrySet(MMG5_pMesh mesh) {
             pt->xt = mesh->xt;
           }
           ptt = &mesh->tria[kt];
-          pxt = &mesh->xtetra[mesh->xt];
+          pxt = &mesh->xtetra[pt->xt];
           pxt->ref[i]   = ptt->ref;
           pxt->ftag[i] |= MG_BDY;
           pxt->ftag[i] |= (ptt->tag[0] & ptt->tag[1] & ptt->tag[2]);

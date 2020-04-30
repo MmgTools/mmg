@@ -216,19 +216,17 @@ double MMG5_surftri33_ani(MMG5_pMesh mesh,MMG5_pTria ptt,
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
+ * \param ismet 1 if user provided metric.
  *
  * Search for points with unintialized metric and define anisotropic size at
  * this points.
  *
  */
-void MMG5_defUninitSize(MMG5_pMesh mesh,MMG5_pSol met)
+void MMG5_defUninitSize(MMG5_pMesh mesh,MMG5_pSol met,int8_t ismet )
 {
   MMG5_pPoint   ppt;
   double        *m,*n,r[3][3],isqhmax;
   int           k;
-  int8_t        ismet;
-
-  ismet = mesh->info.inputMet;
 
   isqhmax = 1.0 / (mesh->info.hmax*mesh->info.hmax);
   for (k=1; k<=mesh->np; k++) {
@@ -1688,6 +1686,7 @@ int MMG5_compute_meanMetricAtMarkedPoints_ani ( MMG5_pMesh mesh,MMG5_pSol met ) 
   MMG5_pPoint p0;
   double      lm;
   int         k,iadr;
+  int         mmgWarn = 0;
 
   for ( k=1; k<=mesh->np; k++ ) {
     p0 = &mesh->point[k];
@@ -1713,6 +1712,14 @@ int MMG5_compute_meanMetricAtMarkedPoints_ani ( MMG5_pMesh mesh,MMG5_pSol met ) 
     }
 
     p0->flag = 3;
+
+    /* Warn the user that edge size is erased */
+    if ( !mmgWarn ) {
+      mmgWarn = 1;
+      if ( mesh->info.ddebug || (mesh->info.imprim > 4) ) {
+        printf("\n  -- SIZEMAP CORRECTION : overwritten of sizes at required vertices\n");
+      }
+    }
   }
 
   return 1;

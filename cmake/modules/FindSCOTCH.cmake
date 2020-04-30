@@ -111,7 +111,6 @@ list(APPEND _inc_env "${CMAKE_PLATFORM_IMPLICIT_INCLUDE_DIRECTORIES}")
 list(APPEND _inc_env "${CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES}")
 list(REMOVE_DUPLICATES _inc_env)
 
-
 # Try to find the scotch header in the given paths
 # -------------------------------------------------
 # call cmake macro to find the header path
@@ -362,6 +361,7 @@ set(CMAKE_REQUIRED_INCLUDES "")
 # ---------------------------------
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(SCOTCH DEFAULT_MSG
+  SCOTCH_INCLUDE_DIRS
   SCOTCH_LIBRARIES
   SCOTCH_WORKS)
 #

@@ -72,6 +72,9 @@ extern "C" {
 #define MMG2D_NEDMAX  100000
 #define MMG2D_NEMAX   100000
 
+/** \brief idir[i]: vertices of edge i for a quad */
+static const unsigned char MMG2D_idir_q[4][2] = { {0,1},{0,3},{1,2},{2,3} };
+
 /** Free allocated pointers of mesh and sol structure and return value val */
 #define MMG2D_RETURN_AND_FREE(mesh,met,ls,disp,val)do               \
   {                                                                 \
@@ -121,15 +124,6 @@ typedef struct {
 } Bucket;
 typedef Bucket * pBucket;
 
-typedef struct {
-  int      min,max,iel,nxt;
-} Hedge;
-
-typedef struct {
-  int      size,nxtmax,hnxt;
-  Hedge    *item;
-} HashTable;
-typedef HashTable * pHashTable;
 
 static const int MMG2D_iare[3][2] = {{1,2},{2,0},{0,1}};
 static const int MMG2D_iopp[3][2] = {{1,2},{0,2},{0,1}};
@@ -253,9 +247,6 @@ int MMG2D_kiudel(pQueue q,int iel);
 int MMG2D_kiuput(pQueue q,int iel);
 int MMG2D_kiupop(pQueue q);
 
-int MMG2D_hashEdge(pHashTable edgeTable,int iel,int ia, int ib);
-//int MMG2D_hashel(MMG5_pMesh mesh);
-int MMG2D_hashNew(HashTable *hash,int hsize,int hmax);
 int MMG2D_baseBdry(MMG5_pMesh mesh);
 
 int simred(double *m1,double *m2,double *m);
@@ -276,6 +267,7 @@ int MMG2D_ismaniball(MMG5_pMesh , MMG5_pSol , int , char );
 int MMG2D_snapval(MMG5_pMesh ,MMG5_pSol);
 int MMG2D_chkmanimesh(MMG5_pMesh );
 int MMG2D_hashTria(MMG5_pMesh );
+int MMG2D_hashQuad(MMG5_pMesh mesh);
 int MMG2D_resetRef(MMG5_pMesh );
 int MMG2D_cuttri_ls(MMG5_pMesh ,MMG5_pSol,MMG5_pSol );
 int MMG2D_rmc(MMG5_pMesh ,MMG5_pSol );
@@ -362,15 +354,15 @@ int    interp_iso(double *,double *,double * ,double );
 int    lissmet_iso(MMG5_pMesh mesh,MMG5_pSol sol);
 int    lissmet_ani(MMG5_pMesh mesh,MMG5_pSol sol);
 int    MMG2D_sum_reqEdgeLengthsAtPoint(MMG5_pMesh,MMG5_pSol,MMG5_pTria,char);
-int    MMG2D_set_metricAtPointsOnReqEdges(MMG5_pMesh,MMG5_pSol);
+int    MMG2D_set_metricAtPointsOnReqEdges(MMG5_pMesh,MMG5_pSol,int8_t);
 
-double (*MMG2D_lencurv)(MMG5_pMesh ,MMG5_pSol ,int ,int );
-double (*MMG2D_caltri)(MMG5_pMesh ,MMG5_pSol ,MMG5_pTria );
-int    (*MMG2D_optlen)(MMG5_pMesh ,MMG5_pSol ,double ,int );
-int    (*MMG2D_intmet)(MMG5_pMesh ,MMG5_pSol ,int ,char ,int ,double );
-int    (*MMG2D_gradsiz)(MMG5_pMesh ,MMG5_pSol );
-int    (*MMG2D_gradsizreq)(MMG5_pMesh ,MMG5_pSol );
-int    (*MMG2D_defsiz)(MMG5_pMesh ,MMG5_pSol );
+extern double (*MMG2D_lencurv)(MMG5_pMesh ,MMG5_pSol ,int ,int );
+extern double (*MMG2D_caltri)(MMG5_pMesh ,MMG5_pSol ,MMG5_pTria );
+extern int    (*MMG2D_optlen)(MMG5_pMesh ,MMG5_pSol ,double ,int );
+extern int    (*MMG2D_intmet)(MMG5_pMesh ,MMG5_pSol ,int ,char ,int ,double );
+extern int    (*MMG2D_gradsiz)(MMG5_pMesh ,MMG5_pSol );
+extern int    (*MMG2D_gradsizreq)(MMG5_pMesh ,MMG5_pSol );
+extern int    (*MMG2D_defsiz)(MMG5_pMesh ,MMG5_pSol );
 
 /* init structures */
 void  MMG2D_Init_parameters(MMG5_pMesh mesh);

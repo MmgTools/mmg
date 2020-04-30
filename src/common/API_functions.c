@@ -56,23 +56,26 @@ void MMG5_Init_parameters(MMG5_pMesh mesh) {
   /* [-1..10], Tune level of imprim */
   mesh->info.imprim   =  1;
   /* [0/1]    ,Turn on/off levelset meshing */
-  mesh->info.iso      =  0;
+  mesh->info.iso      =  MMG5_OFF;
   /* [n/-1]   ,Set memory size to n Mbytes/keep the default value */
   mesh->info.mem      = MMG5_NONSET_MEM;
   /* [0/1]    ,Turn on/off debug mode */
-  mesh->info.ddebug   =  0;
+  mesh->info.ddebug   =  MMG5_OFF;
   /* [n]      ,number of local parameters */
-  mesh->info.npar     =  0;
+  mesh->info.npar     =  MMG5_OFF;
   /* [0/1]    ,avoid/allow point insertion/deletion */
-  mesh->info.noinsert =  0;
+  mesh->info.noinsert =  MMG5_OFF;
   /* [0/1]    ,avoid/allow edge or face flipping */
-  mesh->info.noswap   =  0;
+  mesh->info.noswap   =  MMG5_OFF;
   /* [0/1]    ,avoid/allow point relocation */
-  mesh->info.nomove   =  0;
+  mesh->info.nomove   =  MMG5_OFF;
   /* [n]    ,number of user-defined references */
-  mesh->info.nmat = 0;
+  mesh->info.nmat = MMG5_OFF;
   /* [-1/val]    ,Turn off/on the removal of small bubles in levelset meshing */
   mesh->info.rmc      =  MMG5_NONSET;
+  /* [0/1]    ,avoid/allow  */
+  mesh->info.nosizreq =  MMG5_OFF;
+
 
   /* default values for doubles */
   /* angle detection */
@@ -227,10 +230,8 @@ int MMG5_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solin) {
  *
  */
 int MMG5_Set_outputMeshName(MMG5_pMesh mesh, const char* meshout) {
-  int  fmt = MMG5_FMT_MeditASCII,fmtin,trailing_len;
-  char *ptrMed,*ptrGmsh,*ptr,*ptrin;
-
-  ptrMed = ptrGmsh = NULL;
+  int  fmt = MMG5_FMT_MeditASCII,fmtin;
+  char *ptr,*ptrin;
 
   if ( mesh->nameout )
     MMG5_DEL_MEM(mesh,mesh->nameout);
