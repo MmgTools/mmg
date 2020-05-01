@@ -218,7 +218,10 @@ ENDIF()
 
 # add point map?
 OPTION ( USE_POINTMAP "Use map for point tracking" OFF )
-SET(CMAKE_C_FLAGS "-DUSE_POINTMAP ${CMAKE_C_FLAGS}")
+
+IF ( USE_POINTMAP )
+  SET(CMAKE_C_FLAGS "-DUSE_POINTMAP ${CMAKE_C_FLAGS}")
+ENDIF ( )
 
 ############################################################################
 #####
