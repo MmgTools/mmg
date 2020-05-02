@@ -1191,7 +1191,7 @@ MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         o[1] = 0.5 * (p1->c[1]+p2->c[1]);
         o[2] = 0.5 * (p1->c[2]+p2->c[2]);
 
-#ifdef POINTMAP
+#ifdef USE_POINTMAP
         src = mesh->point[ip1].src;
 #endif
         ip  = MMG3D_newPt(mesh,o,0,src);
@@ -1488,7 +1488,7 @@ int MMG3D_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,int k,
     }
   }
 
-#ifdef POINTMAP
+#ifdef USE_POINTMAP
   mesh->point[ip].src = mesh->point[ip1].src;
 #endif
   ip = MMG3D_newPt(mesh,o,tag,src);
@@ -1851,7 +1851,7 @@ MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
             assert(ier);
           }
 
-#ifdef POINTMAP
+#ifdef USE_POINTMAP
           mesh->point[ip].src = mesh->point[ip1].src;
 #endif
           ip = MMG3D_newPt(mesh,o,MG_BDY,src);

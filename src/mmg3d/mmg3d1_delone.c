@@ -204,7 +204,7 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
           if ( !MMG5_BezierReg(mesh,ip1,ip2,0.5,v,o,no1) ) goto collapse;
 
         }
-#ifdef POINTMAP
+#ifdef USE_POINTMAP
         src = mesh->point[ip1].src;
 #endif
         ip = MMG3D_newPt(mesh,o,tag,src);
@@ -290,8 +290,8 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
         o[0] = 0.5*(p0->c[0] + p1->c[0]);
         o[1] = 0.5*(p0->c[1] + p1->c[1]);
         o[2] = 0.5*(p0->c[2] + p1->c[2]);
-#ifdef POINTMAP
-        src =mesh->point[ip1].src;
+#ifdef USE_POINTMAP
+        src = mesh->point[ip1].src;
 #endif
         ip = MMG3D_newPt(mesh,o,MG_NOTAG,src);
 
@@ -338,7 +338,7 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
         o[0] = 0.5*(p0->c[0] + p1->c[0]);
         o[1] = 0.5*(p0->c[1] + p1->c[1]);
         o[2] = 0.5*(p0->c[2] + p1->c[2]);
-#ifdef POINTMAP
+#ifdef USE_POINTMAP
         src = mesh->point[ip1].src;
 #endif
         ip = MMG3D_newPt(mesh,o,MG_NOTAG,src);
@@ -561,7 +561,7 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
             if ( !MMG5_BezierReg(mesh,ip1,ip2,0.5,v,o,no1) ) goto collapse2;
 
           }
-#ifdef POINTMAP
+#ifdef USE_POINTMAP
           src = mesh->point[ip1].src;
 #endif
           ip = MMG3D_newPt(mesh,o,tag,src);
@@ -649,7 +649,7 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
           o[0] = 0.5*(p0->c[0] + p1->c[0]);
           o[1] = 0.5*(p0->c[1] + p1->c[1]);
           o[2] = 0.5*(p0->c[2] + p1->c[2]);
-#ifdef POINTMAP
+#ifdef USE_POINTMAP
           src = mesh->point[ip1].src;
 #endif
           ip = MMG3D_newPt(mesh,o,MG_NOTAG,src);
@@ -696,7 +696,7 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
           o[0] = 0.5*(p0->c[0] + p1->c[0]);
           o[1] = 0.5*(p0->c[1] + p1->c[1]);
           o[2] = 0.5*(p0->c[2] + p1->c[2]);
-#ifdef POINTMAP
+#ifdef USE_POINTMAP
           src = mesh->point[ip1].src;
 #endif
           ip = MMG3D_newPt(mesh,o,MG_NOTAG,src);
