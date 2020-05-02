@@ -1852,7 +1852,7 @@ MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           }
 
 #ifdef USE_POINTMAP
-          mesh->point[ip].src = mesh->point[ip1].src;
+          src = mesh->point[ip1].src;
 #endif
           ip = MMG3D_newPt(mesh,o,MG_BDY,src);
           if ( !ip ) {
