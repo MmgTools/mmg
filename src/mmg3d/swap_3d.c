@@ -487,7 +487,7 @@ int MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,
                          ,c,MG_BDY);
   }
 #ifdef USE_POINTMAP
-  mesh->point[nm].src = p0->src;
+  mesh->point[nm].src = mesh->point[np].src;
 #endif
   assert ( met );
   if ( met->m ) {

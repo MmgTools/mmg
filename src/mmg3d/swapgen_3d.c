@@ -276,7 +276,7 @@ int MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,int *list,
                          ,m,0);
   }
 #ifdef USE_POINTMAP
-  mesh->point[np].src = p0->src;
+  mesh->point[np].src = mesh->point[na].src;
 #endif
   assert ( met );
   if ( met->m ) {

@@ -1204,7 +1204,7 @@ MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
                                ,o,0);
         }
 #ifdef POINTMAP
-        mesh->point[ip].src = p1->src;
+        mesh->point[ip].src = mesh->point[ip1].src;
 #endif
         assert ( met );
         if ( met->m ) {
@@ -1497,7 +1497,7 @@ int MMG3D_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,int k,
                         ,o,tag);
   }
 #ifdef POINTMAP
-  mesh->point[ip].src = p0->src;
+  mesh->point[ip].src = mesh->point[ip1].src;
 #endif
   if ( met->m ) {
     if ( typchk == 1 && (met->size>1) ) {
