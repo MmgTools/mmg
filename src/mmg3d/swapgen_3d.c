@@ -247,7 +247,7 @@ int MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,int *list,
                  MMG3D_pPROctree PROctree, char typchk) {
   MMG5_pTetra    pt;
   MMG5_pPoint    p0,p1;
-  int       iel,na,nb,np,nball,ret,start;
+  int       iel,na,nb,np,nball,src,ret,start;
   double    m[3];
   char      ia,ip,iq;
   int       ier;
@@ -266,18 +266,18 @@ int MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,int *list,
   m[1] = 0.5*(p0->c[1] + p1->c[1]);
   m[2] = 0.5*(p0->c[2] + p1->c[2]);
 
-  np  = MMG3D_newPt(mesh,m,0);
+#ifdef USE_POINTMAP
+  src = mesh->point[na].src;
+#endif
+  np  = MMG3D_newPt(mesh,m,0,src);
   if(!np){
     MMG3D_POINT_REALLOC(mesh,met,np,mesh->gap,
                          fprintf(stderr,"\n  ## Error: %s: unable to allocate"
                                  " a new point\n",__func__);
                          MMG5_INCREASE_MEM_MESSAGE();
                          return -1
-                         ,m,0);
+                         ,m,0,src);
   }
-#ifdef USE_POINTMAP
-  mesh->point[np].src = mesh->point[na].src;
-#endif
   assert ( met );
   if ( met->m ) {
     if ( typchk == 1 && (met->size>1) ) {

@@ -435,7 +435,7 @@ int MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,
                  MMG3D_pPROctree PROctree, char typchk) {
   MMG5_pTetra   pt,pt1;
   MMG5_pPoint   p0,p1;
-  int           iel,iel1,ilist,np,nq,nm;
+  int           iel,iel1,ilist,np,nq,nm,src;
   double        c[3];
   char          ia,iface1,j,ipa,im;
   int           ier;
@@ -477,18 +477,18 @@ int MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,
   c[0] = 0.5*( p0->c[0] + p1->c[0]);
   c[1] = 0.5*( p0->c[1] + p1->c[1]);
   c[2] = 0.5*( p0->c[2] + p1->c[2]);
-  nm = MMG3D_newPt(mesh,c,MG_BDY);
+#ifdef USE_POINTMAP
+  src = mesh->point[np].src;
+#endif
+  nm = MMG3D_newPt(mesh,c,MG_BDY,src);
   if ( !nm ) {
     MMG3D_POINT_REALLOC(mesh,met,nm,mesh->gap,
                          fprintf(stderr,"\n  ## Error: %s: unable to allocate a"
                                  " new point\n",__func__);
                          MMG5_INCREASE_MEM_MESSAGE();
                          return -1
-                         ,c,MG_BDY);
+                         ,c,MG_BDY,src);
   }
-#ifdef USE_POINTMAP
-  mesh->point[nm].src = mesh->point[np].src;
-#endif
   assert ( met );
   if ( met->m ) {
     if ( typchk == 1 && (met->size>1) ) {

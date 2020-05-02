@@ -1086,7 +1086,7 @@ MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   MMG5_Hash    hash;
   MMG5_pPar     par;
   double   ll,o[3],ux,uy,uz,hma2,mincal;
-  int      l,vx[6],k,ip,ip1,ip2,nap,ns,ne,memlack,ier;
+  int      l,vx[6],k,ip,ip1,ip2,src,nap,ns,ne,memlack,ier;
   char     i,j,ia;
 
   /** 1. analysis */
@@ -1191,7 +1191,10 @@ MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         o[1] = 0.5 * (p1->c[1]+p2->c[1]);
         o[2] = 0.5 * (p1->c[2]+p2->c[2]);
 
-        ip  = MMG3D_newPt(mesh,o,0);
+#ifdef POINTMAP
+        src = mesh->point[ip1].src;
+#endif
+        ip  = MMG3D_newPt(mesh,o,0,src);
         if ( !ip ) {
           /* reallocation of point table */
 
@@ -1201,11 +1204,8 @@ MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
                                MMG5_INCREASE_MEM_MESSAGE();
                                memlack=1;
                                goto split
-                               ,o,0);
+                               ,o,0,src);
         }
-#ifdef POINTMAP
-        mesh->point[ip].src = mesh->point[ip1].src;
-#endif
         assert ( met );
         if ( met->m ) {
           if ( typchk == 1 && (met->size>1) )
@@ -1402,7 +1402,7 @@ int MMG3D_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,int k,
   MMG5_pxPoint pxp;
   double       dd,o[3],to[3],no1[3],no2[3],v[3];
   int          ip,ip1,ip2,list[MMG3D_LMAX+2],ilist;
-  int          ref,ier;
+  int          src,ref,ier;
   int16_t      tag;
   char         j,i,i1,i2,ifa0,ifa1;
 
@@ -1488,17 +1488,17 @@ int MMG3D_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,int k,
     }
   }
 
-  ip = MMG3D_newPt(mesh,o,tag);
+#ifdef POINTMAP
+  mesh->point[ip].src = mesh->point[ip1].src;
+#endif
+  ip = MMG3D_newPt(mesh,o,tag,src);
   if ( !ip ) {
     /* reallocation of point table */
     MMG3D_POINT_REALLOC(mesh,met,ip,mesh->gap,
                         *warn=1;
                         return 2;
-                        ,o,tag);
+                        ,o,tag,src);
   }
-#ifdef POINTMAP
-  mesh->point[ip].src = mesh->point[ip1].src;
-#endif
   if ( met->m ) {
     if ( typchk == 1 && (met->size>1) ) {
       ier = MMG3D_intmet33_ani(mesh,met,k,imax,ip,0.5);
@@ -1787,7 +1787,7 @@ MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   MMG5_Bezier   pb,pb2;
   MMG5_Hash     hash;
   double        o[3],no[3],to[3],dd;
-  int           vx[6],k,ip,ic,it,nap,nc,ni,ne,ns,ip1,ip2,ier;
+  int           vx[6],k,ip,ic,it,src,nap,nc,ni,ne,ns,ip1,ip2,ier;
   char          i,j,j2,ia,i1,i2,ifac;
   static double uv[3][2] = { {0.5,0.5}, {0.,0.5}, {0.5,0.} };
   static char   mmgWarn = 0, mmgWarn2 = 0;
@@ -1851,7 +1851,10 @@ MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
             assert(ier);
           }
 
-          ip = MMG3D_newPt(mesh,o,MG_BDY);
+#ifdef POINTMAP
+          mesh->point[ip].src = mesh->point[ip1].src;
+#endif
+          ip = MMG3D_newPt(mesh,o,MG_BDY,src);
           if ( !ip ) {
             /* reallocation of point table */
             MMG3D_POINT_REALLOC(mesh,met,ip,mesh->gap,
@@ -1859,15 +1862,12 @@ MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
                                          " allocate a new point.\n",__func__);
                                  MMG5_INCREASE_MEM_MESSAGE();
                                  MMG3D_delPatternPts(mesh,hash);return -1;
-                                 ,o,MG_BDY);
+                                 ,o,MG_BDY,src);
             // Now pb->p contain a wrong memory address.
             pb.p[0] = &mesh->point[ptt.v[0]];
             pb.p[1] = &mesh->point[ptt.v[1]];
             pb.p[2] = &mesh->point[ptt.v[2]];
           }
-#ifdef POINTMAP
-          mesh->point[ip].src = mesh->point[ip1].src;
-#endif
           if ( !MMG5_hashEdge(mesh,&hash,ip1,ip2,ip) )  return -1;
           ppt = &mesh->point[ip];
 
