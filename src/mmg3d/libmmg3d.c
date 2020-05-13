@@ -1067,7 +1067,7 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol met) {
   printim(ctim[3].gdif,stim);
   if ( mesh->info.imprim > 0 )
     fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
-
+  
   /* mesh adaptation */
   chrono(ON,&(ctim[4]));
   if ( mesh->info.imprim > 0 ) {
