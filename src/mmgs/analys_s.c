@@ -124,12 +124,15 @@ static int setadj(MMG5_pMesh mesh){
           mesh->point[ip2].tag |= MG_REF;
         }
 
+        /* Do not treat adjacent through a non-manifold edge */
+        if ( pt1->tag[ii] & MG_NOM ) {
+          continue;
+        }
+
         /* store adjacent */
         if ( !pt1->flag ) {
           pt1->flag    = 1;
-          if ( !(pt1->tag[ii] & MG_NOM) ) {
-            pile[++ipil] = kk;
-          }
+          pile[++ipil] = kk;
         }
 
         /* check orientation */
@@ -143,7 +146,7 @@ static int setadj(MMG5_pMesh mesh){
             pt1->tag[ii] |= MG_REF;
           }
           /* flip orientation */
-          else if ( !(pt->tag[i] & MG_NOM) ) {
+          else {
             pt1->base   = -pt1->base;
             pt1->v[ii1] = ip2;
             pt1->v[ii2] = ip1;
