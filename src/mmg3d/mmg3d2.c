@@ -1316,8 +1316,6 @@ int MMG5_chkmaniball(MMG5_pMesh mesh, int start, char ip){
   list[ilist] = 4*start+ip;
   ilist++;
   
-  if ( nump == 3862 ) printf("Tetra initial: %d  %d %d %d %d et ref %d\n",start,pt->v[0],pt->v[1],pt->v[2],pt->v[3],pt->ref);
-
   /* explore list, and find all tets in ball of p belonging to the component ref */
   cur = 0;
   while( cur < ilist ) {
