@@ -32,6 +32,7 @@ GET_FILENAME_COMPONENT ( SHRT_EXECUT_MMGS ${EXECUT_MMGS} NAME )
 SET ( test_names mmgs_SimpleTeapot )
 SET ( input_files ${MMGS_CI_TESTS}/Teapot/teapot )
 SET ( args  "-v 5" )
+SET ( common_args "" )
 
 ADD_RUN_AGAIN_TESTS ( ${EXECUT_MMGS} "${test_names}" "${args}" "${input_files}" )
 

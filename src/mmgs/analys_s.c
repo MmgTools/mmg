@@ -142,11 +142,14 @@ static int setadj(MMG5_pMesh mesh){
           /* Moebius strip */
           if ( pt1->base < 0 ) {
             pt1->ref      = -abs(pt1->ref);
-            pt->tag[i]   |= MG_REF;
-            pt1->tag[ii] |= MG_REF;
+            /* Add MG_NOM flag because it allows neighbours to have non
+             * consistent orientations */
+            pt->tag[i]   |= MG_REF + MG_NOM;
+            pt1->tag[ii] |= MG_REF + MG_NOM;
           }
           /* flip orientation */
           else {
+            pt1->ref = pt->ref;
             pt1->base   = -pt1->base;
             pt1->v[ii1] = ip2;
             pt1->v[ii2] = ip1;
@@ -180,6 +183,11 @@ static int setadj(MMG5_pMesh mesh){
             }
             nf++;
           }
+        }
+        else {
+          /* Mark triangles that have a consistent orientation with their
+           * neighbours */
+          pt1->base =  -pt1->base;
         }
       }
     }
