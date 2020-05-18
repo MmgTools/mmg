@@ -133,6 +133,11 @@ ADD_TEST(NAME mmgs_Rhino_M
   ${MMGS_CI_TESTS}/Rhino_M/rhino -hausd 1
   -out ${CTEST_OUTPUT_DIR}/mmgs_Rhino_M-rhino.d.meshb)
 
+ADD_TEST(NAME mmgs_moebius
+  COMMAND ${EXECUT_MMGS} -v 5 ${common_args} -d
+  ${MMGS_CI_TESTS}/moebius-strip/moebius-strip.mesh -nr
+  -out ${CTEST_OUTPUT_DIR}/mmgs_moebius-strip.d.mesh)
+
 ###############################################################################
 #####
 #####         Non manifold cases
