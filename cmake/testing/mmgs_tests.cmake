@@ -135,7 +135,7 @@ ADD_TEST(NAME mmgs_Rhino_M
 
 ADD_TEST(NAME mmgs_moebius
   COMMAND ${EXECUT_MMGS} -v 5 ${common_args} -d
-  ${MMGS_CI_TESTS}/moebius-strip/moebius-strip.mesh -nr
+  ${MMGS_CI_TESTS}/Moebius-strip/moebius-strip.mesh -nr
   -out ${CTEST_OUTPUT_DIR}/mmgs_moebius-strip.d.mesh)
 
 ###############################################################################
