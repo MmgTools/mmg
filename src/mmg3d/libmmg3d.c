@@ -40,7 +40,7 @@
  */
 
 #include "inlined_functions_3d.h"
-#include "mmg3dexterns.c"
+#include "mmg3dexterns.h"
 
 /**
  * Pack the mesh \a mesh and its associated metric \a met and return \a val.

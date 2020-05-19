@@ -1,4 +1,4 @@
-#include "mmgexterns.c"
+#include "mmgexterns.h"
 #include "mmgs.h"
 
 int    (*movintpt)(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist);
