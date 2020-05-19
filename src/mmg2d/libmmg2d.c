@@ -24,7 +24,7 @@
 #ifndef _WIN32
 #include "git_log_mmg.h"
 #endif
-#include "mmg2dexterns.c"
+#include "mmg2dexterns.h"
 
 /**
  * Pack the mesh \a mesh and its associated metric \a met and/or solution \a sol
@@ -33,16 +33,16 @@
 #define MMG2D_RETURN_AND_PACK(mesh,met,sol,val)do                       \
   {                                                                     \
     if ( !MMG2D_pack(mesh,met,sol) ) {                                  \
-      mesh->npi = mesh->np;                                             \
-      mesh->nti = mesh->nt;                                             \
-      mesh->nai = mesh->na;                                             \
-      mesh->nei = mesh->ne;                                             \
+    mesh->npi = mesh->np;                                               \
+    mesh->nti = mesh->nt;                                               \
+    mesh->nai = mesh->na;                                               \
+    mesh->nei = mesh->ne;                                               \
       if ( met ) { met->npi  = met->np; }                               \
       if ( sol ) { sol->npi  = sol->np; }                               \
-      return MMG5_LOWFAILURE;                                           \
-    }                                                                   \
+    return MMG5_LOWFAILURE;                                            \
+  }                                                                     \
     _LIBMMG5_RETURN(mesh,met,sol,val);                                  \
-  }while(0)
+    }while(0)
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -707,14 +707,14 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
 
   /* specific meshing */
   if ( met && met->np ) {
-    if ( mesh->info.optim ) {
+  if ( mesh->info.optim ) {
       printf("\n  ## ERROR: MISMATCH OPTIONS: OPTIM OPTION CAN NOT BE USED"
              " WITH AN INPUT METRIC.\n");
       if ( mettofree ) { MMG5_SAFE_FREE (met); }
       _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
-    }
+  }
 
-    if ( mesh->info.hsiz>0. ) {
+  if ( mesh->info.hsiz>0. ) {
       printf("\n  ## ERROR: MISMATCH OPTIONS: HSIZ OPTION CAN NOT BE USED"
              " WITH AN INPUT METRIC.\n");
       if ( mettofree ) { MMG5_SAFE_FREE (met); }
@@ -793,7 +793,7 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
     if ( mettofree ) { MMG5_SAFE_FREE (met); }
     _LIBMMG5_RETURN(mesh,sol,met,MMG5_STRONGFAILURE);
   }
-  
+
   chrono(OFF,&(ctim[2]));
   printim(ctim[2].gdif,stim);
   if ( mesh->info.imprim > 0 )
@@ -832,7 +832,7 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
   }
 
   /* Mesh analysis */
-  if ( !MMG2D_analys(mesh) ) {
+  if (! MMG2D_analys(mesh) ) {
     if ( mettofree ) {
       MMG5_DEL_MEM(mesh,met->m);
       MMG5_SAFE_FREE (met);
