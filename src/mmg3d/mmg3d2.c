@@ -1217,14 +1217,14 @@ static int MMG3D_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol) {
     ier = MMG5_isSplit(mesh,ref,&refint,&refext);
 
     if ( npls ) {
-      assert(!nmns);
       if ( ier ) {
+        assert(!nmns);
         pt->ref = refext;
       }
     }
     else {
-      assert(nmns);
       if ( ier ) {
+        assert(nmns);
         pt->ref = refint;
       }
     }

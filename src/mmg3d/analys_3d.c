@@ -226,6 +226,11 @@ int MMG5_setadj(MMG5_pMesh mesh){
             nf++;
           }
         }
+        else {
+          /* Mark triangles that have a consistent orientation with their
+           * neighbours */
+          pt1->base =  -pt1->base;
+        }
       }
     }
     while ( ipil > 0 );
