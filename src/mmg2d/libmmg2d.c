@@ -21,7 +21,7 @@
 ** =============================================================================
 */
 #include "mmg2d.h"
-#include "mmg2dexterns.c"
+#include "mmg2dexterns.h"
 
 /**
  * Pack the mesh \a mesh and its associated metric \a met and return \a val.
