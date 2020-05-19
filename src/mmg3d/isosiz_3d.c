@@ -34,7 +34,7 @@
 
 #include "mmg3d.h"
 #include "inlined_functions.h"
-#include "mmg3dexterns.c"
+#include "mmg3dexterns.h"
 
 extern char   ddb;
 
