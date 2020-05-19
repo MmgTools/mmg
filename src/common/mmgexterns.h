@@ -24,14 +24,14 @@
 #include "mmgcommon.h"
 
 
-int  (*MMG5_chkmsh)(MMG5_pMesh,int,int)=NULL;
-int  (*MMG5_bezierCP)(MMG5_pMesh ,MMG5_Tria *,MMG5_pBezier ,char )=NULL;
-double (*MMG5_lenSurfEdg)(MMG5_pMesh mesh,MMG5_pSol sol ,int ,int, char )=NULL;
-int  (*MMG5_indElt)(MMG5_pMesh mesh,int kel)=NULL;
-int  (*MMG5_indPt)(MMG5_pMesh mesh,int kp)=NULL;
-int  (*MMG5_grad2met_ani)(MMG5_pMesh,MMG5_pSol,MMG5_pTria,int,int)=NULL;
-int  (*MMG5_grad2metreq_ani)(MMG5_pMesh,MMG5_pSol,MMG5_pTria,int,int)=NULL;
-int    (*MMG5_compute_meanMetricAtMarkedPoints)( MMG5_pMesh,MMG5_pSol)=NULL;
+extern int  (*MMG5_chkmsh)(MMG5_pMesh,int,int);
+extern int  (*MMG5_bezierCP)(MMG5_pMesh ,MMG5_Tria *,MMG5_pBezier ,char );
+extern double (*MMG5_lenSurfEdg)(MMG5_pMesh mesh,MMG5_pSol sol ,int ,int, char );
+extern int  (*MMG5_indElt)(MMG5_pMesh mesh,int kel);
+extern int  (*MMG5_indPt)(MMG5_pMesh mesh,int kp);
+extern int  (*MMG5_grad2met_ani)(MMG5_pMesh,MMG5_pSol,MMG5_pTria,int,int);
+extern int  (*MMG5_grad2metreq_ani)(MMG5_pMesh,MMG5_pSol,MMG5_pTria,int,int);
+extern int    (*MMG5_compute_meanMetricAtMarkedPoints)( MMG5_pMesh,MMG5_pSol);
 #ifdef USE_SCOTCH
-int  (*MMG5_renumbering)(int vertBoxNbr, MMG5_pMesh mesh, MMG5_pSol sol,int*)=NULL;
+extern int  (*MMG5_renumbering)(int vertBoxNbr, MMG5_pMesh mesh, MMG5_pSol sol);
 #endif

@@ -40,7 +40,7 @@
 
 #include "mmg3d.h"
 
-#include "mmg3dexterns.c"
+#include "mmg3dexterns.h"
 
 /**
  * \param mesh pointer toward the mesh structure.

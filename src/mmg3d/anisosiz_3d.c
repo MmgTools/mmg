@@ -34,7 +34,7 @@
  */
 
 #include "inlined_functions_3d.h"
-#include "mmg3dexterns.c"
+#include "mmg3dexterns.h"
 
 int MMG3D_chk4ridVertices(MMG5_pMesh mesh, MMG5_pTetra pt) {
   MMG5_pPoint  ppt;

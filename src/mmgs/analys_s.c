@@ -132,8 +132,8 @@ static int setadj(MMG5_pMesh mesh){
         /* store adjacent */
         if ( !pt1->flag ) {
           pt1->flag    = 1;
-          pile[++ipil] = kk;
-        }
+            pile[++ipil] = kk;
+          }
 
         /* check orientation */
         ii1 = MMG5_inxt2[ii];
@@ -149,7 +149,6 @@ static int setadj(MMG5_pMesh mesh){
           }
           /* flip orientation */
           else {
-            pt1->ref = pt->ref;
             pt1->base   = -pt1->base;
             pt1->v[ii1] = ip2;
             pt1->v[ii2] = ip1;
