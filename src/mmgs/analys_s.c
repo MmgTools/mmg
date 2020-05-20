@@ -124,13 +124,16 @@ static int setadj(MMG5_pMesh mesh){
           mesh->point[ip2].tag |= MG_REF;
         }
 
+        /* Do not treat adjacent through a non-manifold edge */
+        if ( pt1->tag[ii] & MG_NOM ) {
+          continue;
+        }
+
         /* store adjacent */
         if ( !pt1->flag ) {
           pt1->flag    = 1;
-          if ( !(pt1->tag[ii] & MG_NOM) ) {
             pile[++ipil] = kk;
           }
-        }
 
         /* check orientation */
         ii1 = MMG5_inxt2[ii];
@@ -139,11 +142,13 @@ static int setadj(MMG5_pMesh mesh){
           /* Moebius strip */
           if ( pt1->base < 0 ) {
             pt1->ref      = -abs(pt1->ref);
-            pt->tag[i]   |= MG_REF;
-            pt1->tag[ii] |= MG_REF;
+            /* Add MG_NOM flag because it allows neighbours to have non
+             * consistent orientations */
+            pt->tag[i]   |= MG_REF + MG_NOM;
+            pt1->tag[ii] |= MG_REF + MG_NOM;
           }
           /* flip orientation */
-          else if ( !(pt->tag[i] & MG_NOM) ) {
+          else {
             pt1->base   = -pt1->base;
             pt1->v[ii1] = ip2;
             pt1->v[ii2] = ip1;
@@ -177,6 +182,11 @@ static int setadj(MMG5_pMesh mesh){
             }
             nf++;
           }
+        }
+        else {
+          /* Mark triangles that have a consistent orientation with their
+           * neighbours */
+          pt1->base =  -pt1->base;
         }
       }
     }

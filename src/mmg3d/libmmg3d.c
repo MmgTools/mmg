@@ -43,24 +43,7 @@
 #ifndef _WIN32
 #include "git_log_mmg.h"
 #endif
-#include "mmg3dexterns.c"
-
-double (*MMG5_lenedg)(MMG5_pMesh mesh ,MMG5_pSol sol ,int n, MMG5_pTetra );
-double (*MMG5_lenedgspl)(MMG5_pMesh mesh ,MMG5_pSol sol ,int n, MMG5_pTetra );
-double (*MMG5_caltet)(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt);
-double (*MMG5_caltri)(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
-int    (*MMG3D_defsiz)(MMG5_pMesh mesh ,MMG5_pSol sol);
-int    (*MMG3D_gradsiz)(MMG5_pMesh mesh,MMG5_pSol sol );
-int    (*MMG3D_gradsizreq)(MMG5_pMesh mesh,MMG5_pSol sol);
-int    (*MMG5_intmet)(MMG5_pMesh mesh,MMG5_pSol sol,int n1,char c,int n2, double r);
-int    (*MMG5_interp4bar)(MMG5_pMesh mesh,MMG5_pSol sol,int n1,int n2,double *r);
-int    (*MMG5_movintpt)(MMG5_pMesh mesh,MMG5_pSol sol, MMG3D_pPROctree o,int *n1, int n2, int n3);
-int    (*MMG5_movbdyregpt)(MMG5_pMesh mesh, MMG5_pSol sol, MMG3D_pPROctree o,int*n1, int n2, int*n3, int n4, int n5 ,int n6);
-int    (*MMG5_movbdyrefpt)(MMG5_pMesh mesh, MMG5_pSol sol, MMG3D_pPROctree o,int*n1, int n2, int* n3, int n4,int n5);
-int    (*MMG5_movbdynompt)(MMG5_pMesh mesh, MMG5_pSol sol, MMG3D_pPROctree o,int*n1, int n2, int* n3, int n4,int n5);
-int    (*MMG5_movbdyridpt)(MMG5_pMesh mesh, MMG5_pSol sol, MMG3D_pPROctree o,int*n1, int n2, int* n3, int n4,int n5);
-int    (*MMG5_cavity)(MMG5_pMesh mesh,MMG5_pSol sol ,int n1,int n2,int *n3,int n4,double r);
-int    (*MMG3D_PROctreein)(MMG5_pMesh mesh,MMG5_pSol sol ,MMG3D_pPROctree o ,int n,double r);
+#include "mmg3dexterns.h"
 
 /**
  * Pack the mesh \a mesh and its associated metric \a met and/or solution \a sol
@@ -346,25 +329,25 @@ int MMG3D_pack_tetra(MMG5_pMesh mesh) {
   if ( mesh->tetra ) {
     k = 1;
     do {
-      pt = &mesh->tetra[k];
+    pt = &mesh->tetra[k];
       if ( !MG_EOK(pt) ) {
         pt1 = &mesh->tetra[mesh->ne];
         assert( pt && pt1 && MG_EOK(pt1) );
         memcpy(pt,pt1,sizeof(MMG5_Tetra));
         if ( !MMG3D_delElt(mesh,mesh->ne) )  return 0;
-      }
     }
+  }
     while ( ++k < mesh->ne );
 
-    /* Recreate nil chain */
-    if ( mesh->ne >= mesh->nemax-1 )
-      mesh->nenil = 0;
-    else
-      mesh->nenil = mesh->ne + 1;
+  /* Recreate nil chain */
+  if ( mesh->ne >= mesh->nemax-1 )
+    mesh->nenil = 0;
+  else
+    mesh->nenil = mesh->ne + 1;
 
-    if ( mesh->nenil )
-      for(k=mesh->nenil; k<mesh->nemax-1; k++)
-        mesh->tetra[k].v[0] = 0;
+  if ( mesh->nenil )
+    for(k=mesh->nenil; k<mesh->nemax-1; k++)
+      mesh->tetra[k].v[0] = 0;
   }
 
   return 1;
@@ -386,28 +369,28 @@ int MMG3D_pack_prismsAndQuads(MMG5_pMesh mesh) {
   if ( mesh->prism ) {
     k = 1;
     do {
-      pp = &mesh->prism[k];
+    pp = &mesh->prism[k];
       if ( !MG_EOK(pp) ) {
         pp1 = &mesh->prism[mesh->nprism];
         assert( pp && pp1 && MG_EOK(pp1) );
         memcpy(pp,pp1,sizeof(MMG5_Prism));
         --mesh->nprism;
-      }
     }
+  }
     while ( ++k < mesh->nprism );
   }
 
   if ( mesh->quadra ) {
     k = 1;
     do {
-      pq = &mesh->quadra[k];
+    pq = &mesh->quadra[k];
       if ( !MG_EOK(pq) ) {
         pq1 = &mesh->quadra[mesh->nquad];
         assert( pq && pq1 && MG_EOK(pq1) );
         memcpy(pq,pq1,sizeof(MMG5_Quad));
         --mesh->nquad;
-      }
     }
+  }
     while ( ++k < mesh->nquad );
   }
 
@@ -446,9 +429,9 @@ int MMG3D_pack_sol(MMG5_pMesh mesh,MMG5_pSol sol) {
         do {
           --np;
           ppt1 = &mesh->point[np];
-        }
-        while ( !MG_VOK(ppt1) && k < np );
       }
+        while ( !MG_VOK(ppt1) && k < np );
+    }
     }
     while ( ++k < np );
 
@@ -540,7 +523,7 @@ int MMG3D_pack_pointArray(MMG5_pMesh mesh) {
         ++mesh->nc1;
       }
     }
-  }
+    }
   while ( ++k < mesh->np );
 
   /* Recreate nil chain */
@@ -655,7 +638,7 @@ int MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
   nc = MMG3D_pack_points(mesh);
   if ( nc<0 ) return 0;
 
-  if ( met && met->m ) assert(met->np == mesh->np);
+  if ( met  && met->m  ) assert(met->np ==mesh->np);
   if ( sol && sol->m ) assert(sol->np == mesh->np);
 
   /* create prism adjacency */
@@ -837,45 +820,45 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
     fprintf(stdout,"  -- PHASE 1 COMPLETED.     %s\n",stim);
 
   if ( (!mesh->info.nomove) || (!mesh->info.noswap) || (!mesh->info.noinsert) ) {
-    /* mesh adaptation */
-    chrono(ON,&(ctim[3]));
-    if ( mesh->info.imprim > 0 ) {
-      fprintf(stdout,"\n  -- PHASE 2 : %s MESHING\n",met->size < 6 ? "ISOTROPIC" : "ANISOTROPIC");
-    }
+  /* mesh adaptation */
+  chrono(ON,&(ctim[3]));
+  if ( mesh->info.imprim > 0 ) {
+    fprintf(stdout,"\n  -- PHASE 2 : %s MESHING\n",met->size < 6 ? "ISOTROPIC" : "ANISOTROPIC");
+  }
 
 
-    /* renumerotation if available */
+  /* renumerotation if available */
     if ( !MMG5_scotchCall(mesh,met,NULL) )
-    {
+  {
       if ( !MMG5_unscaleMesh(mesh,met,NULL) ) _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
       MMG5_RETURN_AND_PACK(mesh,met,sol,MMG5_LOWFAILURE);
-    }
+  }
 
 #ifdef PATTERN
     if ( !MMG5_mmg3d1_pattern(mesh,met,NULL) ) {
-      if ( !(mesh->adja) && !MMG3D_hashTetra(mesh,1) ) {
-        fprintf(stderr,"\n  ## Hashing problem. Invalid mesh.\n");
+    if ( !(mesh->adja) && !MMG3D_hashTetra(mesh,1) ) {
+      fprintf(stderr,"\n  ## Hashing problem. Invalid mesh.\n");
         _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
-      }
+    }
       if ( !MMG5_unscaleMesh(mesh,met,NULL) )    _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
       MMG5_RETURN_AND_PACK(mesh,met,sol,MMG5_LOWFAILURE);
-    }
+  }
 #else
     if ( !MMG5_mmg3d1_delone(mesh,met,NULL) ) {
-      if ( (!mesh->adja) && !MMG3D_hashTetra(mesh,1) ) {
-        fprintf(stderr,"\n  ## Hashing problem. Invalid mesh.\n");
+    if ( (!mesh->adja) && !MMG3D_hashTetra(mesh,1) ) {
+      fprintf(stderr,"\n  ## Hashing problem. Invalid mesh.\n");
         _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
-      }
+    }
       if ( !MMG5_unscaleMesh(mesh,met,NULL) )    _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
       MMG5_RETURN_AND_PACK(mesh,met,sol,MMG5_LOWFAILURE);
-    }
+  }
 #endif
 
-    chrono(OFF,&(ctim[3]));
-    printim(ctim[3].gdif,stim);
-    if ( mesh->info.imprim > 0 ) {
-      fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
-    }
+  chrono(OFF,&(ctim[3]));
+  printim(ctim[3].gdif,stim);
+  if ( mesh->info.imprim > 0 ) {
+    fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
+  }
   }
 
   /* save file */
@@ -963,14 +946,14 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet) {
 
   /* specific meshing */
   if ( met && met->np ) {
-    if ( mesh->info.optim ) {
+  if ( mesh->info.optim ) {
       printf("\n  ## ERROR: MISMATCH OPTIONS: OPTIM OPTION CAN NOT BE USED"
              " WITH AN INPUT METRIC.\n");
       if ( mettofree ) { MMG5_DEL_MEM(mesh,met->m);MMG5_SAFE_FREE (met); }
       _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
-    }
+  }
 
-    if ( mesh->info.hsiz>0. ) {
+  if ( mesh->info.hsiz>0. ) {
       printf("\n  ## ERROR: MISMATCH OPTIONS: HSIZ OPTION CAN NOT BE USED"
              " WITH AN INPUT METRIC.\n");
       if ( mettofree ) { MMG5_DEL_MEM(mesh,met->m);MMG5_SAFE_FREE (met); }
