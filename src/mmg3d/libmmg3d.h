@@ -2725,7 +2725,19 @@ int MMG3D_switch_metricStorage(MMG5_pMesh mesh, MMG5_pSol met);
  */
   int MMG3D_Compute_eigenv(double m[6],double lambda[3],double vp[3][3]);
 
-
+/**
+ * \param mesh pointer toward the mesh structure
+ * \param sol pointer toward the solution structure
+ *
+ * Free the solution.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_FREE_SOLUTIONS(mesh,sol)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  void MMG3D_Free_solutions(MMG5_pMesh mesh,MMG5_pSol sol);
 
 #ifdef __cplusplus
 }

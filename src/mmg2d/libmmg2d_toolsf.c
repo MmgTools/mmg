@@ -171,7 +171,7 @@ FORTRAN_NAME(MMG2D_FREE_EDGES,mmg2d_free_edges,
 }
 
 /**
- * See \ref MMG2D_Free_Edges function in \ref mmg2d/libmmg2d.h file.
+ * See \ref MMG2D_Free_solutions function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_FREE_SOLUTIONS,mmg2d_free_solutions,
              (MMG5_pMesh *mesh,MMG5_pSol *sol),(mesh,sol)) {

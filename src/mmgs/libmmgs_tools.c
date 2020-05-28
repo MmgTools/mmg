@@ -677,3 +677,30 @@ int MMGS_Compute_eigenv(double m[6],double lambda[3],double vp[3][3]) {
   return  MMG5_eigenv(1,m,lambda,vp);
 
 }
+
+void MMGS_Free_solutions(MMG5_pMesh mesh,MMG5_pSol sol) {
+
+  /* sol */
+  if ( !sol ) return;
+
+  if ( sol->m )
+    MMG5_DEL_MEM(mesh,sol->m);
+
+  if ( sol->namein ) {
+    MMG5_DEL_MEM(mesh,sol->namein);
+  }
+
+  if ( sol->nameout ) {
+    MMG5_DEL_MEM(mesh,sol->nameout);
+  }
+
+  memset ( sol, 0x0, sizeof(MMG5_Sol) );
+
+  /* Reset state to a scalar status */
+  sol->dim  = 3;
+  sol->ver  = 2;
+  sol->size = 1;
+  sol->type = 1;
+
+  return;
+}

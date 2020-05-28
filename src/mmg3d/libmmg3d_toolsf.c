@@ -182,6 +182,17 @@ FORTRAN_NAME(MMG3D_GET_ADJATET,mmg3d_get_adjatet,
 }
 
 /**
+ * See \ref MMG3D_Free_solutions function in \ref mmg3d/libmmg3d.h file.
+ */
+FORTRAN_NAME(MMG3D_FREE_SOLUTIONS,mmg3d_free_solutions,
+             (MMG5_pMesh *mesh,MMG5_pSol *sol),(mesh,sol)) {
+
+  MMG3D_Free_solutions(*mesh,*sol);
+
+  return;
+}
+
+/**
  * See \ref MMG3D_doSol function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_DOSOL,mmg3d_dosol,
