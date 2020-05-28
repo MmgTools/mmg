@@ -229,9 +229,11 @@ int MMG2D_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val)
     mesh->info.dhd = cos(mesh->info.dhd*M_PI/180.0);
     break;
   case MMG2D_DPARAM_hmin :
+    mesh->info.sethmin  = 1;
     mesh->info.hmin     = val;
     break;
   case MMG2D_DPARAM_hmax :
+    mesh->info.sethmax  = 1;
     mesh->info.hmax     = val;
     break;
   case MMG2D_DPARAM_hsiz :

@@ -415,8 +415,19 @@ int MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
   }
 
   /* unscale paramter values */
-  mesh->info.hmin  *= dd;
-  mesh->info.hmax  *= dd;
+  if ( !mesh->info.sethmin ) {
+    mesh->info.hmin = MMG5_NONSET_HMIN;
+  }
+  else {
+    mesh->info.hmin  *= MMG5_NONSET_HMAX;
+  }
+
+  if ( !mesh->info.sethmax ) {
+    mesh->info.hmax = 0.;
+  }
+  else {
+    mesh->info.hmax  *= dd;
+  }
   mesh->info.hausd *= dd;
   mesh->info.ls    *= dd;
   mesh->info.hsiz  *= dd;

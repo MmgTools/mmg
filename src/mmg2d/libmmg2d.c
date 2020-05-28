@@ -39,10 +39,10 @@
     mesh->nei = mesh->ne;                                               \
       if ( met ) { met->npi  = met->np; }                               \
       if ( sol ) { sol->npi  = sol->np; }                               \
-    return MMG5_LOWFAILURE;                                            \
-  }                                                                     \
+      return MMG5_LOWFAILURE;                                           \
+    }                                                                   \
     _LIBMMG5_RETURN(mesh,met,sol,val);                                  \
-    }while(0)
+  }while(0)
 
 /**
  * \param mesh pointer toward the mesh structure.
