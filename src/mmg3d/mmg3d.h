@@ -272,6 +272,7 @@ int  MMG5_norface(MMG5_pMesh mesh ,int k, int iface, double v[3]);
 int  MMG3D_findEdge(MMG5_pMesh,MMG5_pTetra,int,int,int,int,char*,char* );
 int  MMG5_boulernm (MMG5_pMesh mesh,MMG5_Hash *hash, int start, int ip, int *ng, int *nr);
 int  MMG5_boulenm(MMG5_pMesh mesh, int start, int ip, int iface, double n[3],double t[3]);
+int  MMG5_boulenmInt(MMG5_pMesh mesh, int start, int ip, double t[3]);
 int  MMG5_boulevolp(MMG5_pMesh mesh, int start, int ip, int * list);
 int  MMG5_boulesurfvolp(MMG5_pMesh mesh,int start,int ip,int iface,int *listv,
                          int *ilistv,int *lists,int*ilists, int isnm);

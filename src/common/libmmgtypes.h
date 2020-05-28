@@ -257,6 +257,7 @@ typedef MMG5_Point * MMG5_pPoint;
 typedef struct {
   double   n1[3],n2[3]; /*!< Normals at boundary vertex;
                           n1!=n2 if the vertex belong to a ridge */
+  char     nnor; /* By default 0; 1 if no normal available (internal NOM point) */
 } MMG5_xPoint;
 typedef MMG5_xPoint * MMG5_pxPoint;
 

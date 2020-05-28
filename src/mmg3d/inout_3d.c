@@ -689,7 +689,6 @@ int MMG3D_loadMesh_opened(MMG5_pMesh mesh,FILE *inm,int bin) {
       }
     }
 
-
     /* get ridges */
     if ( nr ) {
       rewind(inm);

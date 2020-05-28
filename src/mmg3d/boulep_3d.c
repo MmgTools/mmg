@@ -308,6 +308,133 @@ int MMG5_boulenm(MMG5_pMesh mesh,int start,int ip,int iface,
   return 1;
 }
 
+/** 
+Travel the ball of the internal non manifold point ip in tetra start
+ and calculate the tangent vector to the underlying curve.
+ Return 1 when the procedure has completed successfully, 0 when more than two NOM points are attached to ip.
+*/
+int MMG5_boulenmInt(MMG5_pMesh mesh,int start,int ip,double t[3]) {
+  MMG5_pTetra    pt,pt1;
+  MMG5_pxTetra   pxt;
+  MMG5_pPoint    p0,p1,ppt;
+  double         l0,l1,dd;
+  int            k,kk,ip0,ip1,nump,na,nb,base,cur,ilist,*adja;
+  int            list[MMG3D_LMAX+2];
+  char           i,j,ii,ie;
+  
+  base = ++mesh->base;
+  ip0 = ip1 = 0;
+  cur = ilist = 0;
+  
+  /* Store initial tetrahedron */
+  pt = &mesh->tetra[start];
+  nump = pt->v[ip];
+  list[0] = 4*start+ip;
+  pt->flag = base;
+  ilist++;
+  
+  while ( cur < ilist ) {
+    k = list[cur] / 4;
+    i = list[cur] % 4;
+    pt = &mesh->tetra[k];
+    
+    /* If pt bears geometric information, search for endpoints of the NOM curve of ppt */
+    if ( pt->xt ) {
+      pxt = &mesh->xtetra[pt->xt];
+      for (j=0; j<3; j++) {
+        ie = MMG5_arpt[i][j];
+        if ( pxt->tag[ie] & MG_NOM ) {
+          na = pt->v[MMG5_iare[ie][0]];
+          nb = pt->v[MMG5_iare[ie][1]];
+          /* Store nb, if need be */
+          if ( na == nump ) {
+            if ( ip0 == 0 ) ip0 = nb;
+            else if ( ip1 == 0 ) {
+              if ( ip0 != nb ) ip1 = nb;
+            }
+            else {
+              if ( ip0 != nb && ip1 != nb ) return 0;
+            }
+          }
+          /* Store na, if need be */
+          else {
+            if ( ip0 == 0 ) ip0 = na;
+            else if ( ip1 == 0 ) {
+              if ( ip0 != na ) ip1 = na;
+            }
+            else {
+              if ( ip0 != na && ip1 != na ) return 0;
+            }
+          }
+        }
+      }
+    }
+    
+    /* Pile up tetrahedra in the ball of nump */
+    adja = &mesh->adja[4*(k-1)+1];
+    
+    for (j=0; j<3; j++) {
+      i = MMG5_inxt3[i];
+      kk = adja[i] / 4;
+      assert ( kk );
+      
+      pt1 = &mesh->tetra[kk];
+      if ( pt1->flag == base ) continue;
+      
+      for (ii=0; ii<4; ii++)
+        if ( pt1->v[ii] == nump ) break;
+      assert ( ii < 4 );
+      
+      list[ilist] = 4*kk+ii;
+      pt1->flag = base;
+      if ( ilist > MMG3D_LMAX-3 )  return 0;
+      ilist++;
+    }
+    
+    cur++;
+  }
+  
+  /* At this point, the two points connected to ppt via the NOM curve are ip0 and ip1 */
+  ppt = &mesh->point[nump];
+  p0  = &mesh->point[ip0];
+  p1  = &mesh->point[ip1];
+  
+  l0 = (ppt->c[0] - p0->c[0])*(ppt->c[0] - p0->c[0]) \
+  + (ppt->c[1] - p0->c[1])*(ppt->c[1] - p0->c[1]) + (ppt->c[2] - p0->c[2])*(ppt->c[2] - p0->c[2]);
+  l1 = (ppt->c[0] - p1->c[0])*(ppt->c[0] - p1->c[0]) \
+  + (ppt->c[1] - p1->c[1])*(ppt->c[1] - p1->c[1]) + (ppt->c[2] - p1->c[2])*(ppt->c[2] - p1->c[2]);
+  l0 = sqrt(l0);
+  l1 = sqrt(l1);
+  
+  if ( (l0 < MMG5_EPSD2) || (l1 < MMG5_EPSD2) ) {
+    t[0] = p1->c[0] - p0->c[0];
+    t[1] = p1->c[1] - p0->c[1];
+    t[2] = p1->c[2] - p0->c[2];
+  }
+  else if ( l0 < l1 ) {
+    dd = l0 / l1;
+    t[0] = dd*(p1->c[0] - ppt->c[0]) + ppt->c[0] - p0->c[0];
+    t[1] = dd*(p1->c[1] - ppt->c[1]) + ppt->c[1] - p0->c[1];
+    t[2] = dd*(p1->c[2] - ppt->c[2]) + ppt->c[2] - p0->c[2];
+  }
+  else {
+    dd = l1 / l0;
+    t[0] = dd*(p0->c[0] - ppt->c[0]) + ppt->c[0] - p1->c[0];
+    t[1] = dd*(p0->c[1] - ppt->c[1]) + ppt->c[1] - p1->c[1];
+    t[2] = dd*(p0->c[2] - ppt->c[2]) + ppt->c[2] - p1->c[2];
+  }
+  
+  dd = t[0]*t[0] + t[1]*t[1] + t[2]*t[2];
+  if ( dd > MMG5_EPSD2 ) {
+    dd = 1.0 / sqrt(dd);
+    t[0] *= dd;
+    t[1] *= dd;
+    t[2] *= dd;
+  }
+  
+  return 1;
+}
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \param hash pointer toward an allocated hash table.

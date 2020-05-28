@@ -2152,7 +2152,7 @@ int MMG3D_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
     return 0;
   }
 
-  /* Snap values of level set function if need be, then discretize it */
+  /* Snap values of level set function if need be */
   if ( !MMG3D_snpval_ls(mesh,sol) ) {
     fprintf(stderr,"\n  ## Problem with implicit function. Exit program.\n");
     return 0;
@@ -2169,7 +2169,7 @@ int MMG3D_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
     return 0;
   }
 
-  /* compatibility triangle orientation w/r tetras */
+  /* Compatibility triangle orientation w/r tetras */
   if ( !MMG5_bdryPerm(mesh) ) {
     fprintf(stderr,"\n  ## Boundary orientation problem. Exit program.\n");
     return 0;
@@ -2180,7 +2180,7 @@ int MMG3D_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
     return 0;
   }
 
-  /* build hash table for initial edges */
+  /* Build hash table for initial edges */
   if ( !MMG5_hGeom(mesh) ) {
     fprintf(stderr,"\n  ## Hashing problem (0). Exit program.\n");
     return 0;

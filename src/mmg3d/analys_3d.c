@@ -721,14 +721,43 @@ int MMG3D_nmgeom(MMG5_pMesh mesh){
       }
     }
   }
-  /* Mark as required the non-manifold points that do not belong to a surface
+  /* Deal with the non-manifold points that do not belong to a surface
    * tetra (a tetra that have a face without adjacent)*/
-  for (k=1; k<=mesh->np; k++) {
+  for (k=1; k<=mesh->ne; k++) {
+    pt   = &mesh->tetra[k];
+    if( !MG_EOK(pt) ) continue;
+    
+    for (i=0; i<4; i++) {
+      p0 = &mesh->point[pt->v[i]];
+      if ( p0->tag & MG_REQ || !(p0->tag & MG_NOM) || p0->xp ) continue;
+      ier = MMG5_boulenmInt(mesh,k,i,t);
+      if ( ier ) {
+        ++mesh->xp;
+        if(mesh->xp > mesh->xpmax){
+          MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,MMG5_GAP,MMG5_xPoint,
+                            "larger xpoint table",
+                            mesh->xp--;
+                            fprintf(stderr,"  Exit program.\n");return 0;);
+        }
+        p0->xp = mesh->xp;
+        pxp = &mesh->xpoint[p0->xp];
+        memcpy(p0->n,t,3*sizeof(double));
+        pxp->nnor = 1;
+      }
+      else {
+        p0->tag |= MG_REQ;
+        p0->tag &= ~MG_NOSURF;
+      }
+    }
+  }
+
+  /*for (k=1; k<=mesh->np; k++) {
     p0 = &mesh->point[k];
     if ( !(p0->tag & MG_NOM) || p0->xp ) continue;
     p0->tag |= MG_REQ;
     p0->tag &= ~MG_NOSURF;
-  }
+  }*/
+  
   return 1;
 }
 
