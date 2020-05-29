@@ -754,8 +754,8 @@ int  MMG2D_Set_triangles(MMG5_pMesh mesh, int *tria, int *refs) {
     mesh->point[ptt->v[1]].tag &= ~MG_NUL;
     mesh->point[ptt->v[2]].tag &= ~MG_NUL;
 
-    for(i=0 ; i<3 ; i++)
-      ptt->edg[i] = 0;
+    for(j=0 ; j<3 ; j++)
+      ptt->edg[j] = 0;
 
     vol = MMG2D_quickarea(mesh->point[ptt->v[0]].c,mesh->point[ptt->v[1]].c,
                          mesh->point[ptt->v[2]].c);
