@@ -181,6 +181,7 @@ int MMG3D_bdryBuild(MMG5_pMesh mesh) {
   return nr;
 }
 
+#ifndef SCOTCH
 /**
  * \param mesh pointer toward the mesh structure (unused).
  * \param np pointer toward the number of packed points
@@ -188,6 +189,7 @@ int MMG3D_bdryBuild(MMG5_pMesh mesh) {
  * \return 1 if success, 0 if fail.
  *
  * Count the number of packed points and store the packed point index in tmp.
+ * Don't preserve numbering order.
  *
  */
 
@@ -266,7 +268,8 @@ int MMG3D_mark_packedPoints(MMG5_pMesh mesh,int *np,int *nc) {
  *
  * \return 1 if success, 0 if fail.
  *
- * Pack the sparse tetra and the associated adja array
+ * Pack the sparse tetra and the associated adja array.
+ * Don't preserve numbering order.
  *
  */
 int MMG3D_pack_tetraAndAdja(MMG5_pMesh mesh) {
@@ -320,6 +323,7 @@ int MMG3D_pack_tetraAndAdja(MMG5_pMesh mesh) {
  * \return 1 if success, 0 if fail.
  *
  * Pack the sparse tetra. Doesn't pack the adjacency array.
+ * Don't preserve numbering order.
  *
  */
 int MMG3D_pack_tetra(MMG5_pMesh mesh) {
@@ -358,7 +362,7 @@ int MMG3D_pack_tetra(MMG5_pMesh mesh) {
  *
  * \return 1 if success, 0 if fail.
  *
- * Pack prisms and quads
+ * Pack prisms and quads. Don't preserve numbering order.
  *
  */
 int MMG3D_pack_prismsAndQuads(MMG5_pMesh mesh) {
@@ -402,7 +406,7 @@ int MMG3D_pack_prismsAndQuads(MMG5_pMesh mesh) {
  * \param met pointer toward the solution (metric or level-set) structure.
  * \return 1 if success, 0 if fail.
  *
- * Pack a sparse solution structure.
+ * Pack a sparse solution structure. Don't preserve numbering order.
  *
  */
 int MMG3D_pack_sol(MMG5_pMesh mesh,MMG5_pSol sol) {
@@ -440,6 +444,332 @@ int MMG3D_pack_sol(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   return 1;
 }
+
+/**
+ * \param mesh pointer toward the mesh structure (unused).
+ * \return the number of corners if success, -1 otherwise
+ *
+ * Pack a sparse point array. Don't preserve numbering order.
+ *
+ */
+int MMG3D_pack_pointArray(MMG5_pMesh mesh) {
+  MMG5_pPoint   ppt,ppt1;
+  int           k;
+
+  k = 1;
+  do {
+    ppt = &mesh->point[k];
+    if ( !MG_VOK(ppt) ) {
+      ppt1 = &mesh->point[mesh->np];
+      assert( ppt && ppt1 && MG_VOK(ppt1) );
+      memcpy(ppt,ppt1,sizeof(MMG5_Point));
+
+      /* delete point without deleting xpoint */
+      memset(ppt1,0,sizeof(MMG5_Point));
+      ppt1->tag    = MG_NUL;
+
+      while ( !MG_VOK((&mesh->point[mesh->np])) )  mesh->np--;
+
+    }
+
+    /* Copy the normal stored in the xpoint into ppt->n. */
+    if ( ppt->tag & MG_BDY &&
+         !(ppt->tag & MG_CRN || ppt->tag & MG_NOM || MG_EDG(ppt->tag)) ) {
+
+      if ( ppt->xp && mesh->xpoint ) {
+        memcpy(ppt->n,mesh->xpoint[ppt->xp].n1,3*sizeof(double));
+        ++mesh->nc1;
+      }
+    }
+  }
+  while ( ++k < mesh->np );
+
+  /* Recreate nil chain */
+  for(k=1 ; k<=mesh->np ; k++)
+    mesh->point[k].tmp = 0;
+
+  if ( mesh->np >= mesh->npmax-1 )
+    mesh->npnil = 0;
+  else
+    mesh->npnil = mesh->np + 1;
+
+  if ( mesh->npnil )
+    for(k=mesh->npnil; k<mesh->npmax-1; k++)
+      mesh->point[k].tmp  = k+1;
+
+  return 1;
+}
+
+#else
+
+/**
+ * \param mesh pointer toward the mesh structure (unused).
+ * \param np pointer toward the number of packed points
+ * \param nc pointer toward the number of packed corners
+ * \return 1 if success, 0 if fail.
+ *
+ * Count the number of packed points and store the packed point index in tmp.
+ * Preserve numbering order.
+ *
+ */
+
+int MMG3D_mark_packedPoints(MMG5_pMesh mesh,int *np,int *nc) {
+  MMG5_pPoint   ppt;
+  int           k;
+
+  (*np) = (*nc) = 0;
+  for (k=1; k<=mesh->np; k++) {
+    ppt = &mesh->point[k];
+    if ( !MG_VOK(ppt) )  continue;
+    ppt->tmp = ++(*np);
+
+    if ( ppt->tag & MG_NOSURF ) {
+      ppt->tag &= ~MG_NOSURF;
+      ppt->tag &= ~MG_REQ;
+    }
+
+    if ( ppt->tag & MG_CRN )  (*nc)++;
+
+    ppt->ref = abs(ppt->ref);
+  }
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure
+ *
+ * \return 1 if success, 0 if fail.
+ *
+ * Pack the sparse tetra and the associated adja array.
+ * Preserve numbering order.
+ *
+ */
+int MMG3D_pack_tetraAndAdja(MMG5_pMesh mesh) {
+  MMG5_pTetra   pt,ptnew;
+  int           iadr,iadrnew,iadrv,*adjav,*adja,*adjanew,voy;
+  int           ne,nbl,k,i;
+
+  ne  = 0;
+  nbl = 1;
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+    if ( !MG_EOK(pt) )  continue;
+
+    ne++;
+    if ( k!=nbl ) {
+      ptnew = &mesh->tetra[nbl];
+      memcpy(ptnew,pt,sizeof(MMG5_Tetra));
+
+      iadr = 4*(k-1) + 1;
+      adja = &mesh->adja[iadr];
+      iadrnew = 4*(nbl-1) + 1;
+      adjanew = &mesh->adja[iadrnew];
+      for(i=0 ; i<4 ; i++) {
+        adjanew[i] = adja[i];
+        if(!adja[i]) continue;
+        iadrv = 4*(adja[i]/4-1) +1;
+        adjav = &mesh->adja[iadrv];
+        voy = i;
+        adjav[adja[i]%4] = 4*nbl + voy;
+      }
+    }
+    nbl++;
+  }
+  mesh->ne = ne;
+
+  /* Recreate nil chain */
+  if ( mesh->ne >= mesh->nemax-1 )
+    mesh->nenil = 0;
+  else
+    mesh->nenil = mesh->ne + 1;
+
+  if ( mesh->nenil )
+    for(k=mesh->nenil; k<mesh->nemax-1; k++)
+      mesh->tetra[k].v[3] = k+1;
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure
+ *
+ * \return 1 if success, 0 if fail.
+ *
+ * Pack the sparse tetra. Doesn't pack the adjacency array.
+ * Preserve numbering order.
+ *
+ */
+int MMG3D_pack_tetra(MMG5_pMesh mesh) {
+  MMG5_pTetra   pt,ptnew;
+  int           ne,nbl,k;
+
+  ne  = 0;
+  nbl = 1;
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+    if ( !MG_EOK(pt) )  continue;
+
+    ne++;
+    if ( k!=nbl ) {
+      ptnew = &mesh->tetra[nbl];
+      memcpy(ptnew,pt,sizeof(MMG5_Tetra));
+    }
+    nbl++;
+  }
+  mesh->ne = ne;
+
+  /* Recreate nil chain */
+  if ( mesh->ne >= mesh->nemax-1 )
+    mesh->nenil = 0;
+  else
+    mesh->nenil = mesh->ne + 1;
+
+  if ( mesh->nenil )
+    for(k=mesh->nenil; k<mesh->nemax-1; k++)
+      mesh->tetra[k].v[0] = 0;
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure
+ *
+ * \return 1 if success, 0 if fail.
+ *
+ * Pack prisms and quads. Preserve numbering order.
+ *
+ */
+int MMG3D_pack_prismsAndQuads(MMG5_pMesh mesh) {
+  MMG5_pPrism   pp,ppnew;
+  MMG5_pQuad    pq,pqnew;
+  int           k,ne,nbl;
+
+  ne  = 0;
+  nbl = 1;
+  for (k=1; k<=mesh->nprism; k++) {
+    pp = &mesh->prism[k];
+    if ( !MG_EOK(pp) )  continue;
+
+    ++ne;
+    if ( k!=nbl ) {
+      ppnew = &mesh->prism[nbl];
+      memcpy(ppnew,pp,sizeof(MMG5_Prism));
+    }
+    ++nbl;
+  }
+  mesh->nprism = ne;
+
+  ne  = 0;
+  nbl = 1;
+  for (k=1; k<=mesh->nquad; k++) {
+    pq = &mesh->quadra[k];
+    if ( !MG_EOK(pq) )  continue;
+
+    ++ne;
+    if ( k!=nbl ) {
+      pqnew = &mesh->quadra[nbl];
+      memcpy(pqnew,pq,sizeof(MMG5_Quad));
+    }
+    ++nbl;
+  }
+  mesh->nquad = ne;
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure (unused).
+ * \param met pointer toward the solution (metric or level-set) structure.
+ * \return 1 if success, 0 if fail.
+ *
+ * Pack a sparse solution structure. Preserve numbering order.
+ *
+ */
+int MMG3D_pack_sol(MMG5_pMesh mesh,MMG5_pSol sol) {
+  MMG5_pPoint   ppt;
+  int           k,isol,isolnew,i;
+  int           np,nbl;
+
+  np  = 0;
+  nbl = 1;
+  if ( sol && sol->m ) {
+    for (k=1; k<=mesh->np; k++) {
+      ppt = &mesh->point[k];
+      if ( !MG_VOK(ppt) )  continue;
+
+      ++np;
+
+      if ( k!= nbl ) {
+        isol    = k   * sol->size;
+        isolnew = nbl * sol->size;
+
+        for (i=0; i<sol->size; i++)
+          sol->m[isolnew + i] = sol->m[isol + i];
+      }
+      ++nbl;
+    }
+    sol->np = np;
+  }
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure (unused).
+ * \return the number of corners if success, -1 otherwise
+ *
+ * Pack a sparse point array. Preserve numbering order.
+ *
+ */
+int MMG3D_pack_pointArray(MMG5_pMesh mesh) {
+  MMG5_pPoint   ppt,pptnew;
+  int           k,np,nbl;
+
+  nbl       = 1;
+  mesh->nc1 = 0;
+  np        = 0;
+  for (k=1; k<=mesh->np; k++) {
+    ppt = &mesh->point[k];
+    if ( !MG_VOK(ppt) )  continue;
+
+    if ( ppt->tag & MG_BDY &&
+         !(ppt->tag & MG_CRN || ppt->tag & MG_NOM || MG_EDG(ppt->tag)) ) {
+
+      if ( ppt->xp && mesh->xpoint ) {
+        memcpy(ppt->n,mesh->xpoint[ppt->xp].n1,3*sizeof(double));
+        ++mesh->nc1;
+      }
+    }
+
+    np++;
+    if ( k!=nbl ) {
+      pptnew = &mesh->point[nbl];
+      memmove(pptnew,ppt,sizeof(MMG5_Point));
+      memset(ppt,0,sizeof(MMG5_Point));
+      ppt->tag    = MG_NUL;
+    }
+
+    nbl++;
+  }
+  mesh->np = np;
+
+  for(k=1 ; k<=mesh->np ; k++)
+    mesh->point[k].tmp = 0;
+
+  if ( mesh->np >= mesh->npmax-1 )
+    mesh->npnil = 0;
+  else
+    mesh->npnil = mesh->np + 1;
+
+  if ( mesh->npnil )
+    for(k=mesh->npnil; k<mesh->npmax-1; k++)
+      mesh->point[k].tmp  = k+1;
+
+  return 1;
+}
+
+#endif
+
 
 /**
  * \param mesh pointer toward the mesh structure (unused).
@@ -484,61 +814,6 @@ int MMG3D_update_eltsVertices(MMG5_pMesh mesh) {
     pq->v[2] = mesh->point[pq->v[2]].tmp;
     pq->v[3] = mesh->point[pq->v[3]].tmp;
   }
-  return 1;
-}
-
-/**
- * \param mesh pointer toward the mesh structure (unused).
- * \return the number of corners if success, -1 otherwise
- *
- * Pack a sparse point array.
- *
- */
-int MMG3D_pack_pointArray(MMG5_pMesh mesh) {
-  MMG5_pPoint   ppt,ppt1;
-  int           k;
-
-  k = 1;
-  do {
-    ppt = &mesh->point[k];
-    if ( !MG_VOK(ppt) ) {
-      ppt1 = &mesh->point[mesh->np];
-      assert( ppt && ppt1 && MG_VOK(ppt1) );
-      memcpy(ppt,ppt1,sizeof(MMG5_Point));
-
-      /* delete point without deleting xpoint */
-      memset(ppt1,0,sizeof(MMG5_Point));
-      ppt1->tag    = MG_NUL;
-
-      while ( !MG_VOK((&mesh->point[mesh->np])) )  mesh->np--;
-
-    }
-
-    /* Copy the normal stored in the xpoint into ppt->n. */
-    if ( ppt->tag & MG_BDY &&
-         !(ppt->tag & MG_CRN || ppt->tag & MG_NOM || MG_EDG(ppt->tag)) ) {
-
-      if ( ppt->xp && mesh->xpoint ) {
-        memcpy(ppt->n,mesh->xpoint[ppt->xp].n1,3*sizeof(double));
-        ++mesh->nc1;
-      }
-    }
-    }
-  while ( ++k < mesh->np );
-
-  /* Recreate nil chain */
-  for(k=1 ; k<=mesh->np ; k++)
-    mesh->point[k].tmp = 0;
-
-  if ( mesh->np >= mesh->npmax-1 )
-    mesh->npnil = 0;
-  else
-    mesh->npnil = mesh->np + 1;
-
-  if ( mesh->npnil )
-    for(k=mesh->npnil; k<mesh->npmax-1; k++)
-      mesh->point[k].tmp  = k+1;
-
   return 1;
 }
 
