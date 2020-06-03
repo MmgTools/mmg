@@ -812,6 +812,7 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   MMG5_pTetra     pt,ptloc;
   MMG5_pxTetra    pxt;
   MMG5_pPoint     p0,p1;
+  MMG5_pxPoint    px0,px1;
   MMG5_pPar       par;
   double     ll,ux,uy,uz,hmi2;
   int        k,nc,list[MMG3D_LMAX+2],ilist,ilists,lists[MMG3D_LMAX+2];
@@ -845,6 +846,7 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
 
         p0 = &mesh->point[pt->v[ip]];
         p1 = &mesh->point[pt->v[iq]];
+        
         if ( p0->flag == base )  continue;
         else if ( (p0->tag & MG_REQ) || (p0->tag > p1->tag) )  continue;
 
@@ -859,6 +861,7 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
 
             if ( p0->tag > tag ) continue;
             if ( isnm && mesh->adja[4*(k-1)+1+i] )  continue;
+            /* TO do: do same thing as below */
             if (MMG5_boulesurfvolp(mesh,k,ip,i,
                                     list,&ilist,lists,&ilists,p0->tag & MG_NOM) < 0 )
               return -1;
@@ -875,7 +878,7 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           uz = p1->c[2] - p0->c[2];
           ll = ux*ux + uy*uy + uz*uz;
 
-          /* local parameters*/
+          /* local parameters */
           hmi2  = mesh->info.hmin;
           isloc = 0;
 
@@ -974,7 +977,12 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
             isnm = (tag & MG_NOM);
 
             if ( p0->tag > tag ) continue;
-            if ( isnm && mesh->adja[4*(k-1)+1+i] )  continue;
+            if ( isnm && mesh->adja[4*(k-1)+1+i] ) {
+              /* Deal with internal NOM points */
+              if ( !p0->xp || !mesh->xpoint[p0->xp].nnor ) continue;
+              /* TO DO: take ball */
+              continue; // for now
+            }
             if (MMG5_boulesurfvolp(mesh,k,ip,i,
                                     list,&ilist,lists,&ilists,p0->tag & MG_NOM) < 0 )
               return -1;
@@ -990,6 +998,7 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           tag |= MG_BDY;
 
           isnm = ( tag & MG_NOM );
+          /* To do: deal here with internal NOM points */
           if ( isnm ) {
             if ( mesh->adja[4*(k-1)+1+i] )  continue;
           }
@@ -1783,8 +1792,8 @@ MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   MMG5_Bezier   pb,pb2;
   MMG5_Hash     hash;
   double        o[3],no[3],to[3],dd;
-  int           vx[6],k,ip,ic,it,nap,nc,ni,ne,ns,ip1,ip2,ier;
-  char          i,j,j2,ia,i1,i2,ifac;
+  int           vx[6],k,ip,ic,it,nap,nc,ni,ne,ns,ip1,ip2,ixp1,ixp2,ier;
+  char          i,j,j2,ia,i1,i2,ifac,intnom;
   static double uv[3][2] = { {0.5,0.5}, {0.,0.5}, {0.5,0.} };
   static char   mmgWarn = 0, mmgWarn2 = 0;
 
@@ -1891,7 +1900,17 @@ MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
             ppt->ref = ptt.ref;
           ppt->tag |= ptt.tag[j];
           pxp = &mesh->xpoint[ppt->xp];
-          memcpy(pxp->n1,no,3*sizeof(double));
+          
+          /* Update normal and tangent vectors */
+          intnom = 0;
+          if ( ptt.tag[j] & MG_NOM ) {
+            ixp1 = mesh->point[ip1].xp;
+            ixp2 = mesh->point[ip2].xp;
+            intnom = ( mesh->xpoint[ixp1].nnor ) || ( mesh->xpoint[ixp2].nnor );
+          }
+          if ( intnom ) pxp->nnor = 1;
+          else memcpy(pxp->n1,no,3*sizeof(double));
+          
           memcpy(ppt->n,to,3*sizeof(double));
 
           if ( mesh->info.fem<typchk ) {
