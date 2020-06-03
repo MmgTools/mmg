@@ -1489,7 +1489,7 @@ int MMG3D_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,int k,
   }
 
 #ifdef USE_POINTMAP
-  mesh->point[ip].src = mesh->point[ip1].src;
+  src = mesh->point[ip1].src;
 #endif
   ip = MMG3D_newPt(mesh,o,tag,src);
   if ( !ip ) {
