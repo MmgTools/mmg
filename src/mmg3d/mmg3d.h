@@ -375,6 +375,7 @@ int    MMG5_movbdyrefpt_ani(MMG5_pMesh, MMG5_pSol,MMG3D_pPROctree, int*, int,
                              int*, int ,int);
 int    MMG5_movbdynompt_iso(MMG5_pMesh, MMG5_pSol,MMG3D_pPROctree, int*, int,
                              int*, int ,int);
+int    MMG5_movbdynomintpt_iso(MMG5_pMesh, MMG5_pSol,MMG3D_pPROctree, int*, int, int);
 int    MMG5_movbdynompt_ani(MMG5_pMesh, MMG5_pSol,MMG3D_pPROctree, int*, int,
                              int*, int ,int);
 int    MMG5_movbdyridpt_iso(MMG5_pMesh, MMG5_pSol,MMG3D_pPROctree, int*, int,

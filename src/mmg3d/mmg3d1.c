@@ -724,16 +724,25 @@ int MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree,
           }
           ier = 0;
           if ( ppt->tag & MG_BDY ) {
-            /* Catch a boundary point by a boundary face */
+            /* Catch a boundary point by an external  face, unless point is internal non manifold */
             if ( (!pt->xt) || !(MG_BDY & pxt->ftag[i]) )  continue;
             else if( ppt->tag & MG_NOM ){
-              if ( mesh->adja[4*(k-1)+1+i] ) continue;
-              ier=MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,1);
-              if( !ier )  continue;
-              else if ( ier>0 )
-                ier = MMG5_movbdynompt(mesh,met,PROctree,listv,ilistv,lists,ilists,improveVolSurf);
-              else
-                return -1;
+              if ( ppt->xp && mesh->xpoint[ppt->xp].nnor ) {
+                ilistv = MMG5_boulevolp(mesh,k,i0,listv);
+                if ( !ilistv )  continue;
+                /* Iso for now */
+                ier = MMG5_movbdynomintpt_iso(mesh,met,PROctree,listv,ilistv,improveVolSurf);
+              }
+              else {
+                if ( mesh->adja[4*(k-1)+1+i] ) continue;
+              
+                ier=MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,1);
+                if( !ier )  continue;
+                else if ( ier>0 )
+                  ier = MMG5_movbdynompt(mesh,met,PROctree,listv,ilistv,lists,ilists,improveVolSurf);
+                else
+                  return -1;
+              }
             }
             else if ( ppt->tag & MG_GEO ) {
               ier=MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,0);
@@ -817,7 +826,7 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   double     ll,ux,uy,uz,hmi2;
   int        k,nc,list[MMG3D_LMAX+2],ilist,ilists,lists[MMG3D_LMAX+2];
   int        base,nnm,l,kk,isloc,ifac1;
-  int16_t    tag,isnm;
+  int16_t    tag,isnm,isnmint;
   char       i,j,ip,iq;
   int        ier;
 
@@ -858,9 +867,18 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           if ( pt->xt && (pxt->ftag[i] & MG_BDY) ) {
             tag = pxt->tag[MMG5_iarf[i][j]];
             isnm = (tag & MG_NOM);
+            isnmint = ( p0->xp && mesh->xpoint[p0->xp].nnor );
 
             if ( p0->tag > tag ) continue;
-            if ( isnm && mesh->adja[4*(k-1)+1+i] )  continue;
+            
+            /* Catch an exterior non manifold point by an external face */
+            if ( isnm ) {
+              if ( isnmint ) {
+                /* TOFILL */
+                continue;
+              }
+              else if ( mesh->adja[4*(k-1)+1+i] )  continue;
+            }
             /* TO do: do same thing as below */
             if (MMG5_boulesurfvolp(mesh,k,ip,i,
                                     list,&ilist,lists,&ilists,p0->tag & MG_NOM) < 0 )
@@ -969,19 +987,21 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           if ( ll > MMG3D_LSHRT )  continue;
         }
 
-
         /* Ball computation if not computed before */
         if ( !mesh->info.npar ) {
           if ( pt->xt && (pxt->ftag[i] & MG_BDY) ) {
             tag = pxt->tag[MMG5_iarf[i][j]];
             isnm = (tag & MG_NOM);
+            isnmint = ( p0->xp && mesh->xpoint[p0->xp].nnor );
 
             if ( p0->tag > tag ) continue;
             if ( isnm && mesh->adja[4*(k-1)+1+i] ) {
               /* Deal with internal NOM points */
-              if ( !p0->xp || !mesh->xpoint[p0->xp].nnor ) continue;
-              /* TO DO: take ball */
-              continue; // for now
+              if ( isnmint ) {
+                /* TO FILL */
+                continue;
+              }
+              else continue;
             }
             if (MMG5_boulesurfvolp(mesh,k,ip,i,
                                     list,&ilist,lists,&ilists,p0->tag & MG_NOM) < 0 )
@@ -998,9 +1018,13 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           tag |= MG_BDY;
 
           isnm = ( tag & MG_NOM );
-          /* To do: deal here with internal NOM points */
           if ( isnm ) {
-            if ( mesh->adja[4*(k-1)+1+i] )  continue;
+            isnmint = ( p0->xp && mesh->xpoint[p0->xp].nnor );
+            if ( isnmint ) {
+              /* TO FILL */
+              continue;
+            }
+            else if ( mesh->adja[4*(k-1)+1+i] )  continue;
           }
           if ( p0->tag > tag )  continue;
           ilist = MMG5_chkcol_bdy(mesh,met,k,i,j,list,ilist,lists,ilists,typchk);

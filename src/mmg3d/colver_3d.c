@@ -680,7 +680,7 @@ int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
     }
   }
 
-  /* Ensure collapse does not lead to a non manifold configuration (case of implicit surface)*/
+  /* Ensure collapse does not lead to a non manifold configuration (case of implicit surface) */
   if ( mesh->info.iso ) {
     ier = MMG5_chkmanicoll(mesh,k,iface,iedg,ndepmin,ndepplus,isminp,isplp);
     if ( !ier )  return 0;
