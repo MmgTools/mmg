@@ -679,7 +679,7 @@ int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
       return 0;
     }
   }
-
+  
   /* Ensure collapse does not lead to a non manifold configuration (case of implicit surface) */
   if ( mesh->info.iso ) {
     ier = MMG5_chkmanicoll(mesh,k,iface,iedg,ndepmin,ndepplus,isminp,isplp);
@@ -692,6 +692,122 @@ int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
     else if ( !ier )  return 0;
   }
 
+  return ilistv;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param k index of element in which we collapse.
+ * \param iface face through wich we perform the collapse
+ * \param iedg edge to collapse (in local face num)
+ * \param listv pointer toward the list of the tetra in the ball of \a p0.
+ * \param ilistv number of tetra in the ball of \a p0.
+ * \param typchk  typchk type of checking permformed for edge length
+ * (hmax or MMG3D_LLONG criterion).
+ *
+ * \return 1 if success, 0 if the point cannot be collapsed, -1 if fail.
+ *
+ * Check whether collapse ip -> iq could be performed, ip internal non manifold point;
+ *  'mechanical' tests (positive jacobian) are not performed here ;
+ *  iface = boundary face on which lie edge iedg - in local face num.
+ *  (pq, or ia in local tet notation).
+ *
+ */
+int MMG5_chkcol_nomint(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
+                    char iedg,int *listv,int ilistv,char typchk) {
+  MMG5_pTetra  pt,pt0,pt1;
+  MMG5_pxTetra pxt;
+  MMG5_pPar    par;
+  double       calold,calnew,caltmp;
+  double       hmax,hausd;
+  int          ipp,nump,numq,l,iel,kk;
+  int          nr,nbbdy;
+  char         ia,ip,i,iq,i0,i1,ier;
+#ifndef NDEBUG
+  MMG5_pPoint  p0;
+#endif
+  
+  pt   = &mesh->tetra[k];
+  pxt  = 0;
+  pt0  = &mesh->tetra[0];
+  ip   = MMG5_idir[iface][MMG5_inxt2[iedg]];
+  nump = pt->v[ip];
+  numq = pt->v[MMG5_idir[iface][MMG5_iprv2[iedg]]];
+  
+#ifndef NDEBUG
+  p0   = &mesh->point[nump];
+  assert(p0->tag & MG_BDY);
+  assert(p0->xp);
+#endif
+  
+  /* check tetra quality */
+  calold = calnew = DBL_MAX;
+  for (l=0; l<ilistv; l++) {
+    iel = listv[l] / 4;
+    ipp = listv[l] % 4;
+    pt  = &mesh->tetra[iel];
+
+    /* Topological test for tetras of the shell */
+    for (iq=0; iq<4; iq++)
+      if ( pt->v[iq] == numq )  break;
+    
+    if ( iq < 4 ) {
+      nbbdy = 0;
+      if ( pt->xt )  pxt = &mesh->xtetra[pt->xt];
+      for (i=0; i<4; i++) {
+        if ( pt->xt && (pxt->ftag[i] & MG_BDY) )  nbbdy++;
+      }
+      
+      /* Topological problem triggered when one of the two faces of collapsed edge is the only
+      internal one : closing a part of the domain */
+      if ( nbbdy == 4 )
+        return 0;
+      else if ( nbbdy == 3 ) {
+       
+        /* Identification of edge number in tetra iel */
+        if ( !MMG3D_findEdge(mesh,pt,iel,numq,nump,1,NULL,&ia) ) return -1;
+        
+        i0 = MMG5_ifar[ia][0];
+        i1 = MMG5_ifar[ia][1];
+        if ( pt->xt && (!(pxt->ftag[i0] & MG_BDY) || !(pxt->ftag[i1] & MG_BDY)) )
+          return 0;
+      }
+      
+      /* Now check that the 2 faces identified by collapse are not boundary */
+      if ( pt->xt && (pxt->ftag[ipp] & MG_BDY) && (pxt->ftag[iq] & MG_BDY) )
+        return 0;
+      
+      continue;
+    }
+   
+   /* Prevent from creating a tetra with 4 ridges vertices */
+   if ( mesh->point[numq].tag & MG_GEO ) {
+      i  = ipp;
+      nr = 0;
+      for (iq=0; iq<3; iq++) {
+        i = MMG5_inxt3[i];
+        if ( mesh->point[pt->v[i]].tag & MG_GEO ) ++nr;
+      }
+      if ( nr==3 ) return 0;
+    }
+    
+    /* Quality checks for tetrahedra outside the shell */
+    memcpy(pt0,pt,sizeof(MMG5_Tetra));
+    pt0->v[ipp] = numq;
+    
+    calold = MG_MIN(calold, pt->qual);
+    if ( typchk==1 && met->m && met->size > 1 )
+      caltmp = MMG5_caltet33_ani(mesh,met,pt0);
+    else
+      caltmp = MMG5_orcal(mesh,met,0);
+   
+    if ( caltmp < MMG5_NULKAL )  return 0;
+    calnew = MG_MIN(calnew,caltmp);
+  }
+  if ( calold < MMG5_EPSOK && calnew <= calold )  return 0;
+  else if ( calnew < MMG5_EPSOK || calnew < 0.3*calold )  return 0;
+  
   return ilistv;
 }
 

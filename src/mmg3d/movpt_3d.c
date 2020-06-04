@@ -1581,11 +1581,10 @@ int MMG5_movbdynomintpt_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROct
     (&mesh->tetra[listv[l]/4])->qual = callist[l];
     (&mesh->tetra[listv[l]/4])->mark = mesh->mark;
   }
-    
+  
   MMG5_SAFE_FREE(callist);
   return 1;
 }
-
 
 /**
  * \param mesh pointer toward the mesh structure.

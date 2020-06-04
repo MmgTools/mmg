@@ -874,22 +874,27 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
             /* Catch an exterior non manifold point by an external face */
             if ( isnm ) {
               if ( isnmint ) {
-                /* TOFILL */
-                continue;
+                ilist = MMG5_boulevolp(mesh,k,ip,list);
               }
-              else if ( mesh->adja[4*(k-1)+1+i] )  continue;
+              else {
+                if ( mesh->adja[4*(k-1)+1+i] )  continue;
+                if (MMG5_boulesurfvolp(mesh,k,ip,i,
+                                       list,&ilist,lists,&ilists,p0->tag & MG_NOM) < 0 )
+                  return -1;
+              }
             }
-            /* TO do: do same thing as below */
-            if (MMG5_boulesurfvolp(mesh,k,ip,i,
+            else {
+              if (MMG5_boulesurfvolp(mesh,k,ip,i,
                                     list,&ilist,lists,&ilists,p0->tag & MG_NOM) < 0 )
               return -1;
+            }
           }
           else {
             ilist = MMG5_boulevolp(mesh,k,ip,list);
           }
         }
 
-        /* check length */
+        /* Check length */
         if ( typchk == 1 ) {
           ux = p1->c[0] - p0->c[0];
           uy = p1->c[1] - p0->c[1];
@@ -995,17 +1000,23 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
             isnmint = ( p0->xp && mesh->xpoint[p0->xp].nnor );
 
             if ( p0->tag > tag ) continue;
-            if ( isnm && mesh->adja[4*(k-1)+1+i] ) {
-              /* Deal with internal NOM points */
+            if ( isnm ) {
               if ( isnmint ) {
-                /* TO FILL */
-                continue;
+                ilist = MMG5_boulevolp(mesh,k,ip,list);
               }
-              else continue;
+              else {
+                if ( mesh->adja[4*(k-1)+1+i] )  continue;
+                if (MMG5_boulesurfvolp(mesh,k,ip,i,
+                                       list,&ilist,lists,&ilists,p0->tag & MG_NOM) < 0 )
+                  return -1;
+                
+              }
             }
-            if (MMG5_boulesurfvolp(mesh,k,ip,i,
+            else {
+                if (MMG5_boulesurfvolp(mesh,k,ip,i,
                                     list,&ilist,lists,&ilists,p0->tag & MG_NOM) < 0 )
               return -1;
+            }
           }
           else {
             ilist = MMG5_boulevolp(mesh,k,ip,list);
@@ -1016,18 +1027,22 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         if ( pt->xt && (pxt->ftag[i] & MG_BDY) ) {
           tag = pxt->tag[MMG5_iarf[i][j]];
           tag |= MG_BDY;
+          if ( p0->tag > tag )  continue;
 
           isnm = ( tag & MG_NOM );
           if ( isnm ) {
             isnmint = ( p0->xp && mesh->xpoint[p0->xp].nnor );
             if ( isnmint ) {
-              /* TO FILL */
-              continue;
+              ilist = MMG5_chkcol_nomint(mesh,met,k,i,j,list,ilist,typchk);
             }
-            else if ( mesh->adja[4*(k-1)+1+i] )  continue;
+            else {
+              if ( mesh->adja[4*(k-1)+1+i] )  continue;
+              ilist = MMG5_chkcol_bdy(mesh,met,k,i,j,list,ilist,lists,ilists,typchk);
+            }
           }
-          if ( p0->tag > tag )  continue;
-          ilist = MMG5_chkcol_bdy(mesh,met,k,i,j,list,ilist,lists,ilists,typchk);
+          else {
+            ilist = MMG5_chkcol_bdy(mesh,met,k,i,j,list,ilist,lists,ilists,typchk);
+          }
         }
         /* internal face */
         else {

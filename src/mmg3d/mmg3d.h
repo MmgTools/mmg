@@ -295,6 +295,7 @@ int  MMG5_deltag(MMG5_pMesh,int,int,int16_t);
 int  MMG5_setNmTag(MMG5_pMesh mesh, MMG5_Hash *hash);
 int  MMG5_chkcol_int(MMG5_pMesh,MMG5_pSol,int,char,char,int*,int,char);
 int  MMG5_chkcol_bdy(MMG5_pMesh,MMG5_pSol,int,char,char,int*,int,int*,int,char);
+int  MMG5_chkcol_nomint(MMG5_pMesh,MMG5_pSol,int,char,char,int*,int,char);
 int  MMG5_chkmanicoll(MMG5_pMesh,int,int,int,int,int,char,char);
 int  MMG5_chkmani(MMG5_pMesh mesh);
 int  MMG5_colver(MMG5_pMesh,MMG5_pSol,int *,int,char,char);
