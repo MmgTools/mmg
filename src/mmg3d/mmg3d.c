@@ -131,7 +131,7 @@ static inline
 int MMG3D_writeLocalParam( MMG5_pMesh mesh ) {
   MMG5_iNode  *triRefs,*tetRefs;
   int          nparTri,nparTet;
-  char         *ptr,data[128];
+  char         *ptr,data[MMG5_FILESTR_LGTH];
   FILE         *out;
 
   /** Save the local parameters file */

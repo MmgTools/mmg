@@ -179,7 +179,7 @@ int MMG3D_defaultValues(MMG5_pMesh mesh) {
 int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
   MMG5_pSol tmp = NULL;
   int     i;
-  char    namein[128];
+  char    namein[MMG5_FILESTR_LGTH];
 
   /* First step: search if user want to see the default parameters values. */
   for ( i=1; i< argc; ++i ) {

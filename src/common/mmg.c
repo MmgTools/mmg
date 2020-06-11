@@ -328,11 +328,20 @@ void MMG5_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
  *
  */
 char *MMG5_Get_filenameExt( char *filename ) {
-  char *dot;
+  const char pathsep='/';
+  char       *dot,*lastpath;
+
+  if ( !filename ) {
+    return NULL;
+  }
 
   dot = strrchr(filename, '.');
+  lastpath = (pathsep == 0) ? NULL : strrchr (filename, pathsep);
 
-  if ( (!dot) || dot == filename ) return filename + strlen(filename);
+  if ( (!dot) || dot == filename || (lastpath>dot) ) {
+    /* No extension */
+    return filename + strlen(filename);
+  }
 
   return dot;
 }
@@ -352,6 +361,58 @@ char *MMG5_Get_basename(char *path) {
     return strdup(path);
   else
     return strdup(s + 1);
+}
+
+/**
+ * \param path path from which we want to remove the extension.
+ *
+ * \return allocated string or NULL if the allocation fail.
+ *
+ * Allocate a new string and copy \a path without extension in it.
+ *
+ */
+char *MMG5_Remove_ext (char* path,char *ext) {
+  int        len;
+  char       *retpath, *lastext, *lastpath;
+  char       *extloc;
+  const char pathsep='/';
+
+  /* Default extension if not provided */
+  if ( (!ext) || !*ext ) {
+    extloc = ".";
+  }
+  else {
+    extloc = ext;
+  }
+
+  /* Error checks and string allocation. */
+  if ( path == NULL) return NULL;
+
+  /* Find the relevant characters and the length of the string without
+   * extension */
+  lastext = strstr (path, extloc);
+  lastpath = (pathsep == 0) ? NULL : strrchr (path, pathsep);
+
+  if ( lastext == NULL || (lastpath != NULL && lastpath > lastext) ) {
+    /* No extension or the extension is left from a separator (i.e. it is not an
+     * extension) */
+    len = strlen(path);
+  }
+  else {
+    /* An extension is found */
+    len = 0;
+    while ( path+len != lastext ) {
+      ++len;
+    }
+  }
+
+  MMG5_SAFE_MALLOC(retpath,len+1,char,return NULL);
+
+  /* Copy the string without the extension and add \0 */
+  strncpy ( retpath, path, len );
+  retpath[len] = '\0';
+
+  return retpath;
 }
 
 /**

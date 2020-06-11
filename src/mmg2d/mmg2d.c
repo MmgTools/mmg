@@ -172,7 +172,7 @@ static inline
 int MMG2D_writeLocalParam( MMG5_pMesh mesh ) {
   MMG5_iNode  *edgRefs,*triRefs;
   int          nparEdg,nparTri;
-  char         *ptr,data[128];
+  char         *ptr,data[MMG5_FILESTR_LGTH];
   FILE         *out;
 
   /** Save the local parameters file */
@@ -330,7 +330,7 @@ int MMG2D_defaultOption(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
 int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
   MMG5_pSol tmp = NULL;
   int     i;
-  char    namein[128];
+  char    namein[MMG5_FILESTR_LGTH];
 
   /* First step: search if user want to see the default parameters values. */
   for ( i=1; i< argc; ++i ) {

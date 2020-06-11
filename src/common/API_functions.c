@@ -136,7 +136,6 @@ void MMG5_Init_fileNames(MMG5_pMesh mesh,MMG5_pSol sol
   return;
 }
 
-
 /**
  * \param mesh pointer toward the mesh structure.
  * \param meshin input mesh name.
