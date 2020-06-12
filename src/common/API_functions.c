@@ -186,7 +186,7 @@ int MMG5_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solin) {
   if ( sol->namein )
     MMG5_DEL_MEM(mesh,sol->namein);
 
-  if ( strlen(solin) ) {
+  if ( solin && strlen(solin) ) {
     MMG5_ADD_MEM(mesh,(strlen(solin)+1)*sizeof(char),"input sol name",
                   fprintf(stderr,"  Exit program.\n");
                   return 0);
@@ -235,7 +235,7 @@ int MMG5_Set_outputMeshName(MMG5_pMesh mesh, const char* meshout) {
   if ( mesh->nameout )
     MMG5_DEL_MEM(mesh,mesh->nameout);
 
-  if ( strlen(meshout) ) {
+  if ( meshout && strlen(meshout) ) {
     ptr   = strrchr(meshout, '.');
 
     MMG5_ADD_MEM(mesh,(strlen(meshout)+7)*sizeof(char),"output mesh name",
@@ -350,7 +350,7 @@ int MMG5_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solout) {
   if ( sol->nameout )
     MMG5_DEL_MEM(mesh,sol->nameout);
 
-  if ( strlen(solout) ) {
+  if ( solout && strlen(solout) ) {
     MMG5_ADD_MEM(mesh,(strlen(solout)+1)*sizeof(char),"output sol name",
                   fprintf(stderr,"  Exit program.\n");
                   return 0);
@@ -358,7 +358,7 @@ int MMG5_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solout) {
     strcpy(sol->nameout,solout);
   }
   else {
-    if ( strlen(mesh->nameout) ) {
+    if ( mesh->nameout && strlen(mesh->nameout) ) {
       ptr = strstr(mesh->nameout,".mesh");
       if ( ptr ) {
         MMG5_SAFE_CALLOC(sol->nameout,strlen(mesh->nameout)+1,char,return 0);
