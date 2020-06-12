@@ -364,6 +364,41 @@ char *MMG5_Get_basename(char *path) {
 }
 
 /**
+ * \param path string containing a filename and its path
+ *
+ * \return a pointer toward the file path.
+ *
+ * Remove filename from a path
+ *
+ */
+char *MMG5_Get_path(char *path) {
+  char *lastpath,*retpath;
+  int len;
+
+  if ( path == NULL) return NULL;
+
+  lastpath = (MMG5_PATHSEP == 0) ? NULL : strrchr (path, MMG5_PATHSEP);
+
+  if ( !lastpath ) {
+    return NULL;
+  }
+
+
+  len = 0;
+  while ( path+len != lastpath ) {
+    ++len;
+  }
+
+  MMG5_SAFE_MALLOC(retpath,len+1,char,return NULL);
+
+  /* Copy the string without the extension and add \0 */
+  strncpy ( retpath, path, len );
+  retpath[len] = '\0';
+
+  return retpath;
+}
+
+/**
  * \param path path from which we want to remove the extension.
  *
  * \return allocated string or NULL if the allocation fail.
@@ -375,7 +410,6 @@ char *MMG5_Remove_ext (char* path,char *ext) {
   int        len;
   char       *retpath, *lastext, *lastpath;
   char       *extloc;
-  const char pathsep='/';
 
   /* Default extension if not provided */
   if ( (!ext) || !*ext ) {
@@ -391,7 +425,7 @@ char *MMG5_Remove_ext (char* path,char *ext) {
   /* Find the relevant characters and the length of the string without
    * extension */
   lastext = strstr (path, extloc);
-  lastpath = (pathsep == 0) ? NULL : strrchr (path, pathsep);
+  lastpath = (MMG5_PATHSEP == 0) ? NULL : strrchr (path, MMG5_PATHSEP);
 
   if ( lastext == NULL || (lastpath != NULL && lastpath > lastext) ) {
     /* No extension or the extension is left from a separator (i.e. it is not an
