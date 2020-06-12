@@ -88,5 +88,11 @@ int MMG5_getIniRef(MMG5_pMesh mesh,int ref) {
     if ( pm->ref == ref && !pm->dospl ) return pm->ref;
     if ( ref == pm->rin || ref == pm->rex ) return pm->ref;
   }
+
+  if ( k==0 ) {
+    /* No materials */
+    return 0;
+  }
+
   return ref;
 }
