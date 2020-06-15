@@ -684,6 +684,8 @@ int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
  * \param ilistv number of tetra in the ball of \a p0.
  * \param lists pointer toward the surfacic ball of \a p0.
  * \param ilists number of tetra in the surfacic ball of \a p0.
+ * \param refmin reference of one of the two subdomains in presence
+ * \param refplus reference of the other subdomain in presence
  * \param typchk  typchk type of checking permformed for edge length
  * (hmax or MMG3D_LLONG criterion).
  *
@@ -696,7 +698,7 @@ int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
  *
  */
 int MMG5_chkcol_nom(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
-                    char iedg,int *listv,int ilistv,int *lists,int ilists,
+                    char iedg,int *listv,int ilistv,int *lists,int ilists,int refmin,int refplus,
                     char typchk) {
   MMG5_pTetra  pt,pt0,pt1;
   MMG5_pxTetra pxt;
@@ -741,8 +743,8 @@ int MMG5_chkcol_nom(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
     ipp = listv[l] % 4;
     pt  = &mesh->tetra[iel];
     
-    if ( pt->ref == MG_MINUS ) isminp = 1;
-    else if ( pt->ref == MG_PLUS ) isplp = 1;
+    if ( pt->ref == refmin ) isminp = 1;
+    else if ( pt->ref == refplus ) isplp = 1;
     
     /* Topological test for tetras of the shell */
     for (iq=0; iq<4; iq++)
@@ -778,9 +780,9 @@ int MMG5_chkcol_nom(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
     }
     
     /* Volume test for tetras outside the shell */
-    if ( !ndepmin && pt->ref == MG_MINUS )
+    if ( !ndepmin && pt->ref == refmin )
       ndepmin = iel;
-    else if ( !ndepplus && pt->ref == MG_PLUS )
+    else if ( !ndepplus && pt->ref == refplus )
       ndepplus = iel;
     
     /* Prevent from creating a tetra with 4 ridges vertices */
@@ -1019,7 +1021,7 @@ int MMG5_chkcol_nom(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
   }
   
   /* Ensure collapse does not lead to a non manifold configuration (case of implicit surface) */
-  ier = MMG5_chkmanicoll(mesh,k,iface,iedg,ndepmin,ndepplus,isminp,isplp);
+  ier = MMG5_chkmanicoll(mesh,k,iface,iedg,ndepmin,ndepplus,refmin,refplus,isminp,isplp);
   if ( !ier )  return 0;
   
   return ilistv;

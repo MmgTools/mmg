@@ -1595,10 +1595,12 @@ int MMG5_chkmani2(MMG5_pMesh mesh,MMG5_pSol sol) {
  * \param k index of element in which we collapse.
  * \param iface face through wich we perform the collapse
  * \param iedg edge to collapse
- * \param ndepmin index of an elt with ref MG_MINUS and outside the shell of edge.
- * \param ndepplus ndex of an elt with ref MG_PLUS and outside the shell of edge.
- * \param isminp 1 if we have found a tetra with ref MG_MINUS
- * \param isplp 1 if we have found a tetra with ref MG_PLUS
+ * \param ndepmin index of an elt with ref refmin and outside the shell of edge.
+ * \param ndepplus ndex of an elt with ref refplus and outside the shell of edge.
+ * \param refmin reference of one of the two subdomains in presence
+ * \param refplus reference of the other subdomain in presence
+ * \param isminp 1 if we have found a tetra with ref refmin
+ * \param isplp 1 if we have found a tetra with ref refplus
  * \return 0 if we create a non manifold situation, 1 otherwise
  *
  * Check whether collapse of point np to nq does not create a non manifold
@@ -1606,7 +1608,7 @@ int MMG5_chkmani2(MMG5_pMesh mesh,MMG5_pSol sol) {
  * not in shell of (np,nq).
  *
  */
-int MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int ndepplus,char isminp,char isplp) {
+int MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int ndepplus,int refmin,int refplus,char isminp,char isplp) {
   MMG5_pTetra    pt,pt1;
   int       nump,numq,ilist,ref,cur,stor,iel,jel,base,ndepmq,ndeppq;
   int       list[MMG3D_LMAX+2],*adja,*adja1;
@@ -1637,8 +1639,8 @@ int MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int nd
     assert( ilist < MMG3D_LMAX+2 );
     pt->flag = base;
 
-    if ( pt->ref == MG_MINUS ) isminq = 1;
-    else if ( pt->ref == MG_PLUS ) isplq = 1;
+    if ( pt->ref == refmin ) isminq = 1;
+    else if ( pt->ref == refplus ) isplq = 1;
 
     cur = 0;
     while( cur < ilist ) {
@@ -1654,8 +1656,8 @@ int MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int nd
         jel /= 4;
         pt1 = &mesh->tetra[jel];
 
-        if ( pt1->ref == MG_MINUS ) isminq = 1;
-        else if ( pt1->ref == MG_PLUS ) isplq = 1;
+        if ( pt1->ref == refmin ) isminq = 1;
+        else if ( pt1->ref == refplus ) isplq = 1;
 
         if ( pt1->flag == base ) continue;
         pt1->flag = base;
@@ -1669,12 +1671,12 @@ int MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int nd
         ilist++;
 
         /* check if jel is an available starting tetra for further enumeration */
-        if ( !ndeppq && pt1->ref == MG_PLUS ) {
+        if ( !ndeppq && pt1->ref == refplus ) {
           for(ip=0; ip<4; ip++)
             if ( pt1->v[ip] == nump ) break;
           if( ip == 4 ) ndeppq = jel;
         }
-        if( !ndepmq && pt1->ref == MG_MINUS ) {
+        if( !ndepmq && pt1->ref == refmin ) {
           for(ip=0; ip<4; ip++)
             if ( pt1->v[ip] == nump ) break;
           if( ip == 4 ) ndepmq = jel;

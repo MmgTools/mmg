@@ -825,7 +825,7 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   MMG5_pPar       par;
   double     ll,ux,uy,uz,hmi2;
   int        k,nc,list[MMG3D_LMAX+2],ilist,ilists,lists[MMG3D_LMAX+2];
-  int        base,nnm,l,kk,isloc,ifac1;
+  int        base,nnm,l,kk,isloc,ifac1,refmin,refplus;
   int16_t    tag,isnm,isnmint;
   char       i,j,ip,iq;
   int        ier;
@@ -878,8 +878,8 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
               }
               else {
                 if ( mesh->adja[4*(k-1)+1+i] )  continue;
-                if (MMG5_boulesurfvolp(mesh,k,ip,i,
-                                       list,&ilist,lists,&ilists,p0->tag & MG_NOM) < 0 )
+                if (MMG5_boulesurfvolpNom(mesh,k,ip,i,
+                                       list,&ilist,lists,&ilists,&refmin,&refplus,p0->tag & MG_NOM) < 0 )
                   return -1;
               }
             }
@@ -1006,10 +1006,9 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
               }
               else {
                 if ( mesh->adja[4*(k-1)+1+i] )  continue;
-                if (MMG5_boulesurfvolp(mesh,k,ip,i,
-                                       list,&ilist,lists,&ilists,p0->tag & MG_NOM) < 0 )
+                if (MMG5_boulesurfvolpNom(mesh,k,ip,i,
+                                       list,&ilist,lists,&ilists,&refmin,&refplus,p0->tag & MG_NOM) < 0 )
                   return -1;
-                
               }
             }
             else {
@@ -1037,7 +1036,7 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
             }
             else {
               if ( mesh->adja[4*(k-1)+1+i] )  continue;
-              ilist = MMG5_chkcol_nom(mesh,met,k,i,j,list,ilist,lists,ilists,typchk);
+              ilist = MMG5_chkcol_nom(mesh,met,k,i,j,list,ilist,lists,ilists,refmin,refplus,typchk);
             }
           }
           else {
