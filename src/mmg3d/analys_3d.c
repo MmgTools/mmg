@@ -722,7 +722,7 @@ int MMG3D_nmgeom(MMG5_pMesh mesh){
     }
   }
   /* Deal with the non-manifold points that do not belong to a surface
-   * tetra (a tetra that have a face without adjacent)*/
+   * tetra (a tetra that has a face without adjacent)*/
   for (k=1; k<=mesh->ne; k++) {
     pt   = &mesh->tetra[k];
     if( !MG_EOK(pt) ) continue;

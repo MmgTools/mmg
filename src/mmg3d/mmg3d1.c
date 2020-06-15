@@ -1037,7 +1037,7 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
             }
             else {
               if ( mesh->adja[4*(k-1)+1+i] )  continue;
-              ilist = MMG5_chkcol_bdy(mesh,met,k,i,j,list,ilist,lists,ilists,typchk);
+              ilist = MMG5_chkcol_nom(mesh,met,k,i,j,list,ilist,lists,ilists,typchk);
             }
           }
           else {
