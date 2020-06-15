@@ -829,6 +829,8 @@ inline int MMG5_eigensym(double m[3],double lambda[2],double vp[2][2]) {
     vp[1][1] = 1.0;
     return 2;
   }
+  /* Remark: the computation of an independent basis of eigenvectors fail if the
+   * matrix is diagonal (we find twice the same eigenvector) */
   vp[0][0] = a12;
   vp[0][1] = (lambda[0] - a11);
   vnorm = sqrt(vp[0][0]*vp[0][0] + vp[0][1]*vp[0][1]);
@@ -852,6 +854,10 @@ inline int MMG5_eigensym(double m[3],double lambda[2],double vp[2][2]) {
 
   lambda[0] *= maxm;
   lambda[1] *= maxm;
+
+  /* Check orthogonality of eigenvectors. If they are not, we probably miss the
+   * dectection of a diagonal matrix. */
+  assert ( fabs(vp[0][0]*vp[1][0] + vp[0][1]*vp[1][1]) <= MG_EIGENV_EPS6 );
 
   return 1;
 }
