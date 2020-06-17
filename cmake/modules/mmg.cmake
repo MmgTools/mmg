@@ -53,7 +53,7 @@ LIST(REMOVE_ITEM mmg_library_files
   ${MMG3D_SOURCE_DIR}/mmg3d.c
   ${REMOVE_FILE} )
 
-IF ( USE_VTK )
+IF ( VTK_FOUND )
   LIST(APPEND  mmg_library_files
     ${COMMON_SOURCE_DIR}/vtkparser.cpp )
 ENDIF ( )

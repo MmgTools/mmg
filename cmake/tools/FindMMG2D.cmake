@@ -20,29 +20,29 @@
 ##  use this copy of the mmg distribution only if you accept them.
 ## =============================================================================
 #
-# - Find mmg include dirs and libraries
+# - Find mmg2d include dirs and libraries
 # Use this module by invoking find_package with the form:
-#  find_package(MMG
-#              [REQUIRED]             # Fail with error if mmg is not found
+#  find_package(MMG2D
+#              [REQUIRED]             # Fail with error if mmg2d not found
 #              )
 #
 # This module finds headers and mmg libraries.
 # Results are reported in variables:
-#  MMG_FOUND           - True if headers and requested libraries were found
-#  MMG_INCLUDE_DIRS    - mmg include directories
-#  MMG_LIBRARY_DIRS    - Link directories for mmg libraries
-#  MMG_LIBRARIES       - mmg component libraries to be linked
+#  MMG2D_FOUND           - True if headers and requested libraries were found
+#  MMG2D_INCLUDE_DIRS    - mmg2d include directories
+#  MMG2D_LIBRARY_DIRS    - Link directories for mmg libraries
+#  MMG2D_LIBRARIES       - mmg component libraries to be linked
 #
 # The user can give specific paths where to find the libraries adding cmake
 # options at configure (ex: cmake path/to/project -DMMG_DIR=path/to/mmg):
-#  MMG_DIR                  - Where to find the base directory of mmg
-#  MMG_INCDIR               - Where to find the header files
-#  MMG_LIBDIR               - Where to find the library files
-#  MMG_BUILDDIR             - Where to find the build directory of Mmg
+#  MMG_DIR                   - Where to find the base directory of mmg
+#  MMG_INCDIR                - Where to find the header files
+#  MMG_LIBDIR                - Where to find the library files
+#  MMG_BUILDDIR              - Where to find the build directory of Mmg
 # The module can also look for the following environment variables if paths
 # are not given as cmake variable: MMG_DIR, MMG_INCDIR, MMG_LIBDIR, MMG_BUILDDIR
 
-if (NOT MMG_FOUND)
+if (NOT MMG2D_FOUND)
   set(MMG_DIR "" CACHE PATH "Installation directory of MMG library")
   if (NOT MMG_FIND_QUIETLY)
     message(STATUS "A cache variable, namely MMG_DIR, has been set to specify the install directory of MMG")
@@ -118,56 +118,54 @@ list(REMOVE_DUPLICATES _inc_env)
 # -------------------------------------------------
 # call cmake macro to find the header path
 if(MMG_INCDIR)
-  set(MMG_libmmgtypes.h_DIRS "MMG_libmmgtypes.h_DIRS-NOTFOUND")
-  find_path(MMG_libmmgtypes.h_DIRS
+  set(MMG2D_libmmgtypes.h_DIRS "MMG2D_libmmgtypes.h_DIRS-NOTFOUND")
+  find_path(MMG2D_libmmgtypes.h_DIRS
     NAMES libmmgtypes.h
     HINTS ${MMG_INCDIR}
-    PATH_SUFFIXES "mmg2d" "mmgs" "mmg3d")
+    PATH_SUFFIXES "mmg2d")
 elseif(MMG_BUILDDIR)
-  set(MMG_libmmgtypes.h_DIRS "MMG_libmmgtypes.h_DIRS-NOTFOUND")
-  find_path(MMG_libmmgtypes.h_DIRS
+  set(MMG2D_libmmgtypes.h_DIRS "MMG2D_libmmgtypes.h_DIRS-NOTFOUND")
+  find_path(MMG2D_libmmgtypes.h_DIRS
     NAMES libmmgtypes.h
     HINTS ${MMG_BUILDDIR}
-    PATH_SUFFIXES "include" "include/mmg" "include/mmg/mmg2d"
-        "include/mmg/mmgs" "include/mmg/mmg3d")
+    PATH_SUFFIXES "include" "include/mmg" "include/mmg/mmg2d")
 else()
   if(MMG_DIR)
-    set(MMG_libmmgtypes.h_DIRS "MMG_libmmgtypes.h_DIRS-NOTFOUND")
+    set(MMG2D_libmmgtypes.h_DIRS "MMG2D_libmmgtypes.h_DIRS-NOTFOUND")
     if ( MMG_BUILDDIR )
-      find_path(MMG_libmmgtypes.h_DIRS
+      find_path(MMG2D_libmmgtypes.h_DIRS
         NAMES */libmmgtypes.h
         HINTS ${MMG_BUILDDIR}
-        PATH_SUFFIXES "include" "include/mmg" "include/mmg/mmg2d"
-        "include/mmg/mmgs" "include/mmg/mmg3d")
+        PATH_SUFFIXES "include" "include/mmg" "include/mmg/mmg2d")
     else()
-      find_path(MMG_libmmgtypes.h_DIRS
+      find_path(MMG2D_libmmgtypes.h_DIRS
         NAMES libmmgtypes.h
         HINTS ${MMG_DIR} ${MMG_BUILDDIR_INTERNAL}
-        PATH_SUFFIXES "include" "include/mmg" "include/mmg/mmg2d"
-        "include/mmg/mmgs" "include/mmg/mmg3d")
+        PATH_SUFFIXES "include" "include/mmg" "include/mmg/mmg2d")
     endif()
 
   else()
-    set(MMG_libmmgtypes.h_DIRS "MMG_libmmgtypes.h_DIRS-NOTFOUND")
-    find_path(MMG_libmmgtypes.h_DIRS
+    set(MMG2D_libmmgtypes.h_DIRS "MMG2D_libmmgtypes.h_DIRS-NOTFOUND")
+    find_path(MMG2D_libmmgtypes.h_DIRS
       NAMES libmmgtypes.h
-      HINTS ${_inc_env})
+      HINTS ${_inc_env}
+      PATH_SUFFIXES "include/mmg" "include/mmg/mmg2d")
   endif()
 endif()
-STRING(REGEX REPLACE "(mmg/mmg2d)|(mmg/mmgs)|(mmg/mmg3d)" ""
-  MMG_libmmgtypes.h_DIRS ${MMG_libmmgtypes.h_DIRS})
+STRING(REGEX REPLACE "(mmg/mmg2d)" ""
+  MMG2D_libmmgtypes.h_DIRS ${MMG2D_libmmgtypes.h_DIRS} )
 
-mark_as_advanced(MMG_libmmgtypes.h_DIRS)
+mark_as_advanced(MMG2D_libmmgtypes.h_DIRS)
 
 
 # If found, add path to cmake variable
 # ------------------------------------
-if (MMG_libmmgtypes.h_DIRS AND NOT MMG_FIND_QUIETLY)
-  set(MMG_INCLUDE_DIRS "${MMG_libmmgtypes.h_DIRS}")
+if (MMG2D_libmmgtypes.h_DIRS AND NOT MMG_FIND_QUIETLY)
+  set(MMG2D_INCLUDE_DIRS "${MMG2D_libmmgtypes.h_DIRS}")
 else ()
-  set(MMG_INCLUDE_DIRS "MMG_INCLUDE_DIRS-NOTFOUND")
+  set(MMG2D_INCLUDE_DIRS "MMG2D_INCLUDE_DIRS-NOTFOUND")
   if(NOT MMG_FIND_QUIETLY)
-    message(STATUS "Looking for mmg -- libmmgtypes.h not found")
+    message(STATUS "Looking for mmg2d -- libmmgtypes.h not found")
   endif()
 endif()
 
@@ -209,68 +207,68 @@ else()
 endif()
 list(REMOVE_DUPLICATES _lib_env)
 
-# Try to find the mmg lib in the given paths
+# Try to find the mmg2d lib in the given paths
 # ----------------------------------------------
 # call cmake macro to find the lib path
 if(MMG_LIBDIR)
-  set(MMG_mmg_LIBRARY "MMG_mmg_LIBRARY-NOTFOUND")
-  find_library(MMG_mmg_LIBRARY
-    NAMES mmg
+  set(MMG2D_mmg2d_LIBRARY "MMG2D_mmg2d_LIBRARY-NOTFOUND")
+  find_library(MMG2D_mmg2d_LIBRARY
+    NAMES mmg2d
     HINTS ${MMG_LIBDIR})
 else()
   if(MMG_DIR)
-    set(MMG_mmg_LIBRARY "MMG_mmg_LIBRARY-NOTFOUND")
+    set(MMG2D_mmg2d_LIBRARY "MMG2D_mmg2d_LIBRARY-NOTFOUND")
 
     if ( MMG_BUILDDIR )
-      find_library(MMG_mmg_LIBRARY
-        NAMES mmg
+      find_library(MMG2D_mmg2d_LIBRARY
+        NAMES mmg2d
         HINTS ${MMG_BUILDDIR}
         PATH_SUFFIXES lib lib32 lib64)
     else ()
-      find_library(MMG_mmg_LIBRARY
-        NAMES mmg
+      find_library(MMG2D_mmg2d_LIBRARY
+        NAMES mmg2d
         HINTS ${MMG_DIR} ${MMG_BUILDDIR_INTERNAL}
         PATH_SUFFIXES lib lib32 lib64)
     endif()
   else()
-    set(MMG_mmg_LIBRARY "MMG_mmg_LIBRARY-NOTFOUND")
-    find_library(MMG_mmg_LIBRARY
-      NAMES mmg
+    set(MMG2D_mmg2d_LIBRARY "MMG2D_mmg2d_LIBRARY-NOTFOUND")
+    find_library(MMG2D_mmg2d_LIBRARY
+      NAMES mmg2d
       HINTS ${_lib_env})
   endif()
 endif()
-mark_as_advanced(MMG_mmg_LIBRARY)
+mark_as_advanced(MMG2D_mmg2d_LIBRARY)
 
 # If found, add path to cmake variable
 # ------------------------------------
-if (MMG_mmg_LIBRARY)
-  get_filename_component(mmg_lib_path "${MMG_mmg_LIBRARY}" PATH)
+if (MMG2D_mmg2d_LIBRARY)
+  get_filename_component(mmg_lib_path "${MMG2D_mmg2d_LIBRARY}" PATH)
   # set cmake variables
-  set(MMG_LIBRARIES    "${MMG_mmg_LIBRARY}")
-  set(MMG_LIBRARY_DIRS "${mmg_lib_path}")
+  set(MMG2D_LIBRARIES    "${MMG2D_mmg2d_LIBRARY}")
+  set(MMG2D_LIBRARY_DIRS "${mmg_lib_path}")
 else ()
-  set(MMG_LIBRARIES    "MMG_LIBRARIES-NOTFOUND")
-  set(MMG_LIBRARY_DIRS "MMG_LIBRARY_DIRS-NOTFOUND")
+  set(MMG2D_LIBRARIES    "MMG2D_LIBRARIES-NOTFOUND")
+  set(MMG2D_LIBRARY_DIRS "MMG2D_LIBRARY_DIRS-NOTFOUND")
   if (NOT MMG_FIND_QUIETLY)
-    message(STATUS "Looking for mmg -- lib mmg not found")
+    message(STATUS "Looking for mmg2d -- lib mmg2d not found")
   endif()
 endif ()
 
 # check a function to validate the find
-if(MMG_LIBRARIES)
+if(MMG2D_LIBRARIES)
 
   set(REQUIRED_INCDIRS)
   set(REQUIRED_LIBDIRS)
   set(REQUIRED_LIBS)
 
-  # MMG
-  if (MMG_INCLUDE_DIRS)
-    set(REQUIRED_INCDIRS "${MMG_INCLUDE_DIRS}")
+  # MMG2D
+  if (MMG2D_INCLUDE_DIRS)
+    set(REQUIRED_INCDIRS "${MMG2D_INCLUDE_DIRS}")
   endif()
-  if (MMG_LIBRARY_DIRS)
-    set(REQUIRED_LIBDIRS "${MMG_LIBRARY_DIRS}")
+  if (MMG2D_LIBRARY_DIRS)
+    set(REQUIRED_LIBDIRS "${MMG2D_LIBRARY_DIRS}")
   endif()
-  set(REQUIRED_LIBS "${MMG_LIBRARIES}")
+  set(REQUIRED_LIBS "${MMG2D_LIBRARIES}")
   # m
   find_library(M_LIBRARY NAMES m)
   mark_as_advanced(M_LIBRARY)
@@ -288,14 +286,14 @@ if(MMG_LIBRARIES)
   string(REGEX REPLACE "^ -" "-" CMAKE_REQUIRED_LIBRARIES "${CMAKE_REQUIRED_LIBRARIES}")
 
   # test link
-  unset(MMG_WORKS CACHE)
+  unset(MMG2D_WORKS CACHE)
   include(CheckFunctionExists)
-  check_function_exists(MMG5_loadMshMesh_part1 MMG_WORKS)
-  mark_as_advanced(MMG_WORKS)
+  check_function_exists(MMG5_loadMshMesh_part1 MMG2D_WORKS)
+  mark_as_advanced(MMG2D_WORKS)
 
-  if(NOT MMG_WORKS)
+  if(NOT MMG2D_WORKS)
     if(NOT MMG_FIND_QUIETLY)
-      message(STATUS "Looking for MMG : test of MMG5_loadMshMesh_part1 with MMG library fails")
+      message(STATUS "Looking for MMG2D : test of MMG5_loadMshMesh_part1 with MMG2D library fails")
       message(STATUS "CMAKE_REQUIRED_LIBRARIES: ${CMAKE_REQUIRED_LIBRARIES}")
       message(STATUS "CMAKE_REQUIRED_INCLUDES: ${CMAKE_REQUIRED_INCLUDES}")
       message(STATUS "Check in CMakeFiles/CMakeError.log to figure out why it fails")
@@ -304,10 +302,10 @@ if(MMG_LIBRARIES)
   set(CMAKE_REQUIRED_INCLUDES)
   set(CMAKE_REQUIRED_FLAGS)
   set(CMAKE_REQUIRED_LIBRARIES)
-endif(MMG_LIBRARIES)
+endif(MMG2D_LIBRARIES)
 
-if (MMG_LIBRARIES)
-  list(GET MMG_LIBRARIES 0 first_lib)
+if (MMG2D_LIBRARIES)
+  list(GET MMG2D_LIBRARIES 0 first_lib)
   get_filename_component(first_lib_path "${first_lib}" PATH)
   if (${first_lib_path} MATCHES "/lib(32|64)?$")
     string(REGEX REPLACE "/lib(32|64)?$" "" not_cached_dir "${first_lib_path}")
@@ -316,12 +314,11 @@ if (MMG_LIBRARIES)
     set(MMG_DIR_FOUND "${first_lib_path}" CACHE PATH "Installation directory of MMG library" FORCE)
   endif()
 endif()
-mark_as_advanced(MMG_DIR)
 mark_as_advanced(MMG_DIR_FOUND)
 
 # check that MMG has been found
 # ----------------------------------
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(MMG DEFAULT_MSG
-  MMG_LIBRARIES
-  MMG_WORKS)
+find_package_handle_standard_args(MMG2D DEFAULT_MSG
+  MMG2D_LIBRARIES
+  MMG2D_WORKS)

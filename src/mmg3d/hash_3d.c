@@ -1183,7 +1183,8 @@ int MMG5_hGeom(MMG5_pMesh mesh) {
  * Identify boundary triangles.
  *
  * \remark mesh->xtetra is not allocated when \ref MMG5_bdryTria is called by
- * \ref MMG3D_analys but it is allocated when called by packMesh.
+ * \ref MMG3D_analys in mesh adp mode but it is allocated when called by
+ * packMesh or by analys in ls discretization mode.
  *
  */
 static inline
@@ -1279,15 +1280,26 @@ int MMG5_bdryTria(MMG5_pMesh mesh, int ntmesh) {
         ptt->cc = 4*k + i;
 
         if ( pxt ) {
-          /* useful only when saving mesh */
+          /* useful only when saving mesh or in ls mode */
           if ( pxt->tag[MMG5_iarf[i][0]] )  ptt->tag[0] = pxt->tag[MMG5_iarf[i][0]];
           if ( pxt->tag[MMG5_iarf[i][1]] )  ptt->tag[1] = pxt->tag[MMG5_iarf[i][1]];
           if ( pxt->tag[MMG5_iarf[i][2]] )  ptt->tag[2] = pxt->tag[MMG5_iarf[i][2]];
+
+          if ( pxt->edg[MMG5_iarf[i][0]] )  ptt->edg[0] = pxt->edg[MMG5_iarf[i][0]];
+          if ( pxt->edg[MMG5_iarf[i][1]] )  ptt->edg[1] = pxt->edg[MMG5_iarf[i][1]];
+          if ( pxt->edg[MMG5_iarf[i][2]] )  ptt->edg[2] = pxt->edg[MMG5_iarf[i][2]];
         }
         if ( adj ) {
-          if ( mesh->info.iso ) ptt->ref = MG_ISO;
-          /* useful only when saving mesh */
-          else ptt->ref  = pxt ? pxt->ref[i] : MG_MIN(pt->ref,pt1->ref);
+          if ( mesh->info.iso ) {
+            /* Triangle at the interface between two tets is set to MG_ISO ref */
+            ptt->ref = MG_ISO;
+          }
+          /* useful only when saving mesh or in ls mode */
+          else {
+            /* Triangle at the interface between two tet is set its init ref or
+             * to the min ref of the adja tetra */
+            ptt->ref  = pxt ? pxt->ref[i] : MG_MIN(pt->ref,pt1->ref);
+          }
         }
         else {
           /* useful only when saving mesh */

@@ -35,7 +35,7 @@
 
 #include "mmgs.h"
 #include <math.h>
-#include "mmgsexterns.c"
+#include "mmgsexterns.h"
 
 #define MAXLEN   1.0e+3
 
@@ -76,6 +76,7 @@ int MMGS_sum_reqEdgeLengthsAtPoint(MMG5_pMesh mesh,MMG5_pSol met,MMG5_Hash *hash
 /**
  * \param mesh pointer toward the mesh
  * \param met pointer toward the metric
+ * \param ismet 1 if user provided metric
  *
  * \return 0 if fail, 1 otherwise
  *
@@ -84,13 +85,13 @@ int MMGS_sum_reqEdgeLengthsAtPoint(MMG5_pMesh mesh,MMG5_pSol met,MMG5_Hash *hash
  * marked with flag 3.
  *
  */
-int MMGS_set_metricAtPointsOnReqEdges ( MMG5_pMesh mesh,MMG5_pSol met ) {
+int MMGS_set_metricAtPointsOnReqEdges ( MMG5_pMesh mesh,MMG5_pSol met,int8_t ismet ) {
   MMG5_pTria pt;
   MMG5_Hash  hash;
   int        k,i;
 
   /* Reset the input metric at required edges extremities */
-  if ( !MMG5_reset_metricAtReqEdges_surf (mesh, met ) ) {
+  if ( !MMG5_reset_metricAtReqEdges_surf (mesh, met,ismet ) ) {
     return 0;
   }
 
@@ -142,6 +143,7 @@ int MMGS_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   double      n[3][3],t[3][3],nt[3],c1[3],c2[3],*n1,*n2,*t1,*t2;
   double      ps,ps2,ux,uy,uz,ll,l,lm,dd,M1,M2,hausd,hmin,hmax;
   int         k,j,ip1,ip2,isloc;
+  int8_t      ismet;
   char        i,i1,i2;
 
   if ( !MMG5_defsiz_startingMessage (mesh,met,__func__) ) {
@@ -156,29 +158,29 @@ int MMGS_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
 
   /* alloc structure */
   if ( !met->m ) {
+    ismet = 0;
+
     /* Allocate and store the header informations for each solution */
     if ( !MMGS_Set_solSize(mesh,met,MMG5_Vertex,mesh->np,MMG5_Scalar) ) {
       return 0;
     }
-    /* Set_solSize modify the value of the inputMet field => we need to reset it */
-    mesh->info.inputMet = 0;
   }
   else {
+    ismet = 1;
     assert ( met->m );
-    mesh->info.inputMet = 1;
   }
 
   /** Step 1: Set metric at points belonging to a required edge: compute the
    * metric as the mean of the length of the required eges passing through the
    * point */
   if ( !mesh->info.nosizreq ) {
-    if ( !MMGS_set_metricAtPointsOnReqEdges ( mesh,met ) ) {
+    if ( !MMGS_set_metricAtPointsOnReqEdges ( mesh,met,ismet ) ) {
       return 0;
     }
   }
 
   /** Step 2: size at non required internal points */
-  if ( !mesh->info.inputMet ) {
+  if ( !ismet ) {
 
     /* init constant size */
     for (k=1; k<=mesh->np; k++) {

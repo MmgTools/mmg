@@ -167,6 +167,14 @@
 #define MMG5_NSOLS_MAX   100
 
 /**
+ * \def MMG5_FILENAME_LEN_MAX
+ *
+ * Maximal length of filenames
+ *
+ */
+#define  MMG5_FILENAME_LEN_MAX 255
+
+/**
  * \enum MMG5_type
  * \brief Type of solutions.
  */
@@ -446,17 +454,19 @@ typedef struct {
   double        min[3],max[3],delta,ls,rmc;
   int           mem,npar,npari;
   int           nbr,*br;
-  int           opnbdy;
-  int           renum;
-  int           PROctree;
-  int           nmat;
-  char          nreg;
-  char          imprim,ddebug,badkal,iso,fem,lag;
+  int           opnbdy; /*!< floating surfaces */
+  int           renum; /*!< scotch renumbering */
+  int           PROctree; /*!< octree to speedup delaunay insertion */
+  int           nmat; /*!< number of materials in ls multimat mode */
+  int           imprim; /*!< verbosity level */
+  char          nreg; /*!< normal regularization */
+  char          ddebug,badkal,iso,fem,lag;
   char          parTyp; /*!< Contains binary flags to say which kind of local
                           param are setted: if \f$tag = 1+2+4\f$ then the point
                           is \a MG_Vert, MG_Tria and MG_Tetra */
+  char          sethmin; /*!< 1 if user set hmin, 0 otherwise (needed for multiple library calls) */
+  char          sethmax; /*!< 1 if user set hmin, 0 otherwise (needed for multiple library calls) */
   unsigned char optim, optimLES, noinsert, noswap, nomove, nosurf, nosizreq;
-  unsigned char inputMet; /*!< 1 if we don't have a metric when we enter in mmg3d1, 0 otherwise */
   MMG5_pMat     mat;
 } MMG5_Info;
 

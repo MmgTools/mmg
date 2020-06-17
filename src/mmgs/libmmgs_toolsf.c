@@ -121,6 +121,17 @@ FORTRAN_NAME(MMGS_GET_ADJAVERTICESFAST,mmgs_get_adjaverticesfast,
 }
 
 /**
+ * See \ref MMGS_Free_solutions function in \ref mmgs/libmmgs.h file.
+ */
+FORTRAN_NAME(MMGS_FREE_SOLUTIONS,mmgs_free_solutions,
+             (MMG5_pMesh *mesh,MMG5_pSol *sol),(mesh,sol)) {
+
+  MMGS_Free_solutions(*mesh,*sol);
+
+  return;
+}
+
+/**
  * See \ref MMGS_doSol function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_NAME(MMGS_DOSOL,mmgs_dosol,

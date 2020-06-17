@@ -32,7 +32,7 @@
  * \copyright GNU Lesser General Public License.
  **/
 #include "mmg2d.h"
-#include "mmg2dexterns.c"
+#include "mmg2dexterns.h"
 
 /**
  * \param mesh pointer toward the mesh
@@ -386,14 +386,12 @@ int MMG2D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
       return 0;
     }
   }
-  /* Set_solSize modify the value of the inputMet field => we need to reset it */
-  mesh->info.inputMet = ismet;
 
   /** Step 1: Set metric at points belonging to a required edge: compute the
    * metric as the mean of the length of the required eges passing through the
    * point */
   if ( !mesh->info.nosizreq ) {
-    if ( !MMG2D_set_metricAtPointsOnReqEdges ( mesh,met ) ) {
+    if ( !MMG2D_set_metricAtPointsOnReqEdges ( mesh,met,ismet ) ) {
       return 0;
     }
   }

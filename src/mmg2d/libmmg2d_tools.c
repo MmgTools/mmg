@@ -521,8 +521,26 @@ void MMG2D_Free_edges(MMG5_pMesh mesh) {
 void MMG2D_Free_solutions(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   /* sol */
-  if ( sol && sol->m )
+  if ( !sol ) return;
+
+  if ( sol->m )
     MMG5_DEL_MEM(mesh,sol->m);
+
+  if ( sol->namein ) {
+    MMG5_DEL_MEM(mesh,sol->namein);
+  }
+
+  if ( sol->nameout ) {
+    MMG5_DEL_MEM(mesh,sol->nameout);
+  }
+
+  memset ( sol, 0x0, sizeof(MMG5_Sol) );
+
+  /* Reset state to a scalar status */
+  sol->dim  = 2;
+  sol->ver  = 2;
+  sol->size = 1;
+  sol->type = 1;
 
   return;
 }

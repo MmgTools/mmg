@@ -40,24 +40,10 @@
  */
 
 #include "inlined_functions_3d.h"
-#include "mmg3dexterns.c"
-
-double (*MMG5_lenedg)(MMG5_pMesh mesh ,MMG5_pSol sol ,int n, MMG5_pTetra );
-double (*MMG5_lenedgspl)(MMG5_pMesh mesh ,MMG5_pSol sol ,int n, MMG5_pTetra );
-double (*MMG5_caltet)(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt);
-double (*MMG5_caltri)(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
-int    (*MMG3D_defsiz)(MMG5_pMesh mesh ,MMG5_pSol sol);
-int    (*MMG3D_gradsiz)(MMG5_pMesh mesh,MMG5_pSol sol );
-int    (*MMG3D_gradsizreq)(MMG5_pMesh mesh,MMG5_pSol sol);
-int    (*MMG5_intmet)(MMG5_pMesh mesh,MMG5_pSol sol,int n1,char c,int n2, double r);
-int    (*MMG5_interp4bar)(MMG5_pMesh mesh,MMG5_pSol sol,int n1,int n2,double *r);
-int    (*MMG5_movintpt)(MMG5_pMesh mesh,MMG5_pSol sol, MMG3D_pPROctree o,int *n1, int n2, int n3);
-int    (*MMG5_movbdyregpt)(MMG5_pMesh mesh, MMG5_pSol sol, MMG3D_pPROctree o,int*n1, int n2, int*n3, int n4, int n5 ,int n6);
-int    (*MMG5_movbdyrefpt)(MMG5_pMesh mesh, MMG5_pSol sol, MMG3D_pPROctree o,int*n1, int n2, int* n3, int n4,int n5);
-int    (*MMG5_movbdynompt)(MMG5_pMesh mesh, MMG5_pSol sol, MMG3D_pPROctree o,int*n1, int n2, int* n3, int n4,int n5);
-int    (*MMG5_movbdyridpt)(MMG5_pMesh mesh, MMG5_pSol sol, MMG3D_pPROctree o,int*n1, int n2, int* n3, int n4,int n5);
-int    (*MMG5_cavity)(MMG5_pMesh mesh,MMG5_pSol sol ,int n1,int n2,int *n3,int n4,double r);
-int    (*MMG3D_PROctreein)(MMG5_pMesh mesh,MMG5_pSol sol ,MMG3D_pPROctree o ,int n,double r);
+#ifndef _WIN32
+#include "git_log_mmg.h"
+#endif
+#include "mmg3dexterns.h"
 
 /**
  * Pack the mesh \a mesh and its associated metric \a met and/or solution \a sol
@@ -195,6 +181,7 @@ int MMG3D_bdryBuild(MMG5_pMesh mesh) {
   return nr;
 }
 
+#ifndef SCOTCH
 /**
  * \param mesh pointer toward the mesh structure (unused).
  * \param np pointer toward the number of packed points
@@ -202,6 +189,7 @@ int MMG3D_bdryBuild(MMG5_pMesh mesh) {
  * \return 1 if success, 0 if fail.
  *
  * Count the number of packed points and store the packed point index in tmp.
+ * Don't preserve numbering order.
  *
  */
 
@@ -280,7 +268,8 @@ int MMG3D_mark_packedPoints(MMG5_pMesh mesh,int *np,int *nc) {
  *
  * \return 1 if success, 0 if fail.
  *
- * Pack the sparse tetra and the associated adja array
+ * Pack the sparse tetra and the associated adja array.
+ * Don't preserve numbering order.
  *
  */
 int MMG3D_pack_tetraAndAdja(MMG5_pMesh mesh) {
@@ -334,6 +323,7 @@ int MMG3D_pack_tetraAndAdja(MMG5_pMesh mesh) {
  * \return 1 if success, 0 if fail.
  *
  * Pack the sparse tetra. Doesn't pack the adjacency array.
+ * Don't preserve numbering order.
  *
  */
 int MMG3D_pack_tetra(MMG5_pMesh mesh) {
@@ -343,25 +333,25 @@ int MMG3D_pack_tetra(MMG5_pMesh mesh) {
   if ( mesh->tetra ) {
     k = 1;
     do {
-      pt = &mesh->tetra[k];
+    pt = &mesh->tetra[k];
       if ( !MG_EOK(pt) ) {
         pt1 = &mesh->tetra[mesh->ne];
         assert( pt && pt1 && MG_EOK(pt1) );
         memcpy(pt,pt1,sizeof(MMG5_Tetra));
         if ( !MMG3D_delElt(mesh,mesh->ne) )  return 0;
-      }
     }
+  }
     while ( ++k < mesh->ne );
 
-    /* Recreate nil chain */
-    if ( mesh->ne >= mesh->nemax-1 )
-      mesh->nenil = 0;
-    else
-      mesh->nenil = mesh->ne + 1;
+  /* Recreate nil chain */
+  if ( mesh->ne >= mesh->nemax-1 )
+    mesh->nenil = 0;
+  else
+    mesh->nenil = mesh->ne + 1;
 
-    if ( mesh->nenil )
-      for(k=mesh->nenil; k<mesh->nemax-1; k++)
-        mesh->tetra[k].v[0] = 0;
+  if ( mesh->nenil )
+    for(k=mesh->nenil; k<mesh->nemax-1; k++)
+      mesh->tetra[k].v[0] = 0;
   }
 
   return 1;
@@ -372,7 +362,7 @@ int MMG3D_pack_tetra(MMG5_pMesh mesh) {
  *
  * \return 1 if success, 0 if fail.
  *
- * Pack prisms and quads
+ * Pack prisms and quads. Don't preserve numbering order.
  *
  */
 int MMG3D_pack_prismsAndQuads(MMG5_pMesh mesh) {
@@ -383,28 +373,28 @@ int MMG3D_pack_prismsAndQuads(MMG5_pMesh mesh) {
   if ( mesh->prism ) {
     k = 1;
     do {
-      pp = &mesh->prism[k];
+    pp = &mesh->prism[k];
       if ( !MG_EOK(pp) ) {
         pp1 = &mesh->prism[mesh->nprism];
         assert( pp && pp1 && MG_EOK(pp1) );
         memcpy(pp,pp1,sizeof(MMG5_Prism));
         --mesh->nprism;
-      }
     }
+  }
     while ( ++k < mesh->nprism );
   }
 
   if ( mesh->quadra ) {
     k = 1;
     do {
-      pq = &mesh->quadra[k];
+    pq = &mesh->quadra[k];
       if ( !MG_EOK(pq) ) {
         pq1 = &mesh->quadra[mesh->nquad];
         assert( pq && pq1 && MG_EOK(pq1) );
         memcpy(pq,pq1,sizeof(MMG5_Quad));
         --mesh->nquad;
-      }
     }
+  }
     while ( ++k < mesh->nquad );
   }
 
@@ -416,7 +406,7 @@ int MMG3D_pack_prismsAndQuads(MMG5_pMesh mesh) {
  * \param met pointer toward the solution (metric or level-set) structure.
  * \return 1 if success, 0 if fail.
  *
- * Pack a sparse solution structure.
+ * Pack a sparse solution structure. Don't preserve numbering order.
  *
  */
 int MMG3D_pack_sol(MMG5_pMesh mesh,MMG5_pSol sol) {
@@ -443,9 +433,9 @@ int MMG3D_pack_sol(MMG5_pMesh mesh,MMG5_pSol sol) {
         do {
           --np;
           ppt1 = &mesh->point[np];
-        }
-        while ( !MG_VOK(ppt1) && k < np );
       }
+        while ( !MG_VOK(ppt1) && k < np );
+    }
     }
     while ( ++k < np );
 
@@ -457,55 +447,9 @@ int MMG3D_pack_sol(MMG5_pMesh mesh,MMG5_pSol sol) {
 
 /**
  * \param mesh pointer toward the mesh structure (unused).
- * \return 1 if success, 0 otherwise
- *
- * Update the element vertices indices with the pack point index stored in the
- * tmp field of the points.
- *
- */
-int MMG3D_update_eltsVertices(MMG5_pMesh mesh) {
-  MMG5_pTetra   pt;
-  MMG5_pPrism   pp;
-  MMG5_pQuad    pq;
-  int           k;
-
-  for (k=1; k<=mesh->ne; k++) {
-    pt = &mesh->tetra[k];
-    if ( !MG_EOK(pt) )  continue;
-
-    pt->v[0] = mesh->point[pt->v[0]].tmp;
-    pt->v[1] = mesh->point[pt->v[1]].tmp;
-    pt->v[2] = mesh->point[pt->v[2]].tmp;
-    pt->v[3] = mesh->point[pt->v[3]].tmp;
-  }
-  for (k=1; k<=mesh->nprism; k++) {
-    pp = &mesh->prism[k];
-    if ( !MG_EOK(pp) )  continue;
-
-    pp->v[0] = mesh->point[pp->v[0]].tmp;
-    pp->v[1] = mesh->point[pp->v[1]].tmp;
-    pp->v[2] = mesh->point[pp->v[2]].tmp;
-    pp->v[3] = mesh->point[pp->v[3]].tmp;
-    pp->v[4] = mesh->point[pp->v[4]].tmp;
-    pp->v[5] = mesh->point[pp->v[5]].tmp;
-  }
-  for (k=1; k<=mesh->nquad; k++) {
-    pq = &mesh->quadra[k];
-    if ( !MG_EOK(pq) )  continue;
-
-    pq->v[0] = mesh->point[pq->v[0]].tmp;
-    pq->v[1] = mesh->point[pq->v[1]].tmp;
-    pq->v[2] = mesh->point[pq->v[2]].tmp;
-    pq->v[3] = mesh->point[pq->v[3]].tmp;
-  }
-  return 1;
-}
-
-/**
- * \param mesh pointer toward the mesh structure (unused).
  * \return the number of corners if success, -1 otherwise
  *
- * Pack a sparse point array.
+ * Pack a sparse point array. Don't preserve numbering order.
  *
  */
 int MMG3D_pack_pointArray(MMG5_pMesh mesh) {
@@ -553,6 +497,323 @@ int MMG3D_pack_pointArray(MMG5_pMesh mesh) {
     for(k=mesh->npnil; k<mesh->npmax-1; k++)
       mesh->point[k].tmp  = k+1;
 
+  return 1;
+}
+
+#else
+
+/**
+ * \param mesh pointer toward the mesh structure (unused).
+ * \param np pointer toward the number of packed points
+ * \param nc pointer toward the number of packed corners
+ * \return 1 if success, 0 if fail.
+ *
+ * Count the number of packed points and store the packed point index in tmp.
+ * Preserve numbering order.
+ *
+ */
+
+int MMG3D_mark_packedPoints(MMG5_pMesh mesh,int *np,int *nc) {
+  MMG5_pPoint   ppt;
+  int           k;
+
+  (*np) = (*nc) = 0;
+  for (k=1; k<=mesh->np; k++) {
+    ppt = &mesh->point[k];
+    if ( !MG_VOK(ppt) )  continue;
+    ppt->tmp = ++(*np);
+
+    if ( ppt->tag & MG_NOSURF ) {
+      ppt->tag &= ~MG_NOSURF;
+      ppt->tag &= ~MG_REQ;
+    }
+
+    if ( ppt->tag & MG_CRN )  (*nc)++;
+
+    ppt->ref = abs(ppt->ref);
+  }
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure
+ *
+ * \return 1 if success, 0 if fail.
+ *
+ * Pack the sparse tetra and the associated adja array.
+ * Preserve numbering order.
+ *
+ */
+int MMG3D_pack_tetraAndAdja(MMG5_pMesh mesh) {
+  MMG5_pTetra   pt,ptnew;
+  int           iadr,iadrnew,iadrv,*adjav,*adja,*adjanew,voy;
+  int           ne,nbl,k,i;
+
+  ne  = 0;
+  nbl = 1;
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+    if ( !MG_EOK(pt) )  continue;
+
+    ne++;
+    if ( k!=nbl ) {
+      ptnew = &mesh->tetra[nbl];
+      memcpy(ptnew,pt,sizeof(MMG5_Tetra));
+
+      iadr = 4*(k-1) + 1;
+      adja = &mesh->adja[iadr];
+      iadrnew = 4*(nbl-1) + 1;
+      adjanew = &mesh->adja[iadrnew];
+      for(i=0 ; i<4 ; i++) {
+        adjanew[i] = adja[i];
+        if(!adja[i]) continue;
+        iadrv = 4*(adja[i]/4-1) +1;
+        adjav = &mesh->adja[iadrv];
+        voy = i;
+        adjav[adja[i]%4] = 4*nbl + voy;
+      }
+    }
+    nbl++;
+  }
+  mesh->ne = ne;
+
+  /* Recreate nil chain */
+  if ( mesh->ne >= mesh->nemax-1 )
+    mesh->nenil = 0;
+  else
+    mesh->nenil = mesh->ne + 1;
+
+  if ( mesh->nenil )
+    for(k=mesh->nenil; k<mesh->nemax-1; k++)
+      mesh->tetra[k].v[3] = k+1;
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure
+ *
+ * \return 1 if success, 0 if fail.
+ *
+ * Pack the sparse tetra. Doesn't pack the adjacency array.
+ * Preserve numbering order.
+ *
+ */
+int MMG3D_pack_tetra(MMG5_pMesh mesh) {
+  MMG5_pTetra   pt,ptnew;
+  int           ne,nbl,k;
+
+  ne  = 0;
+  nbl = 1;
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+    if ( !MG_EOK(pt) )  continue;
+
+    ne++;
+    if ( k!=nbl ) {
+      ptnew = &mesh->tetra[nbl];
+      memcpy(ptnew,pt,sizeof(MMG5_Tetra));
+    }
+    nbl++;
+  }
+  mesh->ne = ne;
+
+  /* Recreate nil chain */
+  if ( mesh->ne >= mesh->nemax-1 )
+    mesh->nenil = 0;
+  else
+    mesh->nenil = mesh->ne + 1;
+
+  if ( mesh->nenil )
+    for(k=mesh->nenil; k<mesh->nemax-1; k++)
+      mesh->tetra[k].v[0] = 0;
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure
+ *
+ * \return 1 if success, 0 if fail.
+ *
+ * Pack prisms and quads. Preserve numbering order.
+ *
+ */
+int MMG3D_pack_prismsAndQuads(MMG5_pMesh mesh) {
+  MMG5_pPrism   pp,ppnew;
+  MMG5_pQuad    pq,pqnew;
+  int           k,ne,nbl;
+
+  ne  = 0;
+  nbl = 1;
+  for (k=1; k<=mesh->nprism; k++) {
+    pp = &mesh->prism[k];
+    if ( !MG_EOK(pp) )  continue;
+
+    ++ne;
+    if ( k!=nbl ) {
+      ppnew = &mesh->prism[nbl];
+      memcpy(ppnew,pp,sizeof(MMG5_Prism));
+    }
+    ++nbl;
+  }
+  mesh->nprism = ne;
+
+  ne  = 0;
+  nbl = 1;
+  for (k=1; k<=mesh->nquad; k++) {
+    pq = &mesh->quadra[k];
+    if ( !MG_EOK(pq) )  continue;
+
+    ++ne;
+    if ( k!=nbl ) {
+      pqnew = &mesh->quadra[nbl];
+      memcpy(pqnew,pq,sizeof(MMG5_Quad));
+    }
+    ++nbl;
+  }
+  mesh->nquad = ne;
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure (unused).
+ * \param met pointer toward the solution (metric or level-set) structure.
+ * \return 1 if success, 0 if fail.
+ *
+ * Pack a sparse solution structure. Preserve numbering order.
+ *
+ */
+int MMG3D_pack_sol(MMG5_pMesh mesh,MMG5_pSol sol) {
+  MMG5_pPoint   ppt;
+  int           k,isol,isolnew,i;
+  int           np,nbl;
+
+  np  = 0;
+  nbl = 1;
+  if ( sol && sol->m ) {
+    for (k=1; k<=mesh->np; k++) {
+      ppt = &mesh->point[k];
+      if ( !MG_VOK(ppt) )  continue;
+
+      ++np;
+
+      if ( k!= nbl ) {
+        isol    = k   * sol->size;
+        isolnew = nbl * sol->size;
+
+        for (i=0; i<sol->size; i++)
+          sol->m[isolnew + i] = sol->m[isol + i];
+      }
+      ++nbl;
+    }
+    sol->np = np;
+  }
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure (unused).
+ * \return the number of corners if success, -1 otherwise
+ *
+ * Pack a sparse point array. Preserve numbering order.
+ *
+ */
+int MMG3D_pack_pointArray(MMG5_pMesh mesh) {
+  MMG5_pPoint   ppt,pptnew;
+  int           k,np,nbl;
+
+  nbl       = 1;
+  mesh->nc1 = 0;
+  np        = 0;
+  for (k=1; k<=mesh->np; k++) {
+    ppt = &mesh->point[k];
+    if ( !MG_VOK(ppt) )  continue;
+
+    if ( ppt->tag & MG_BDY &&
+         !(ppt->tag & MG_CRN || ppt->tag & MG_NOM || MG_EDG(ppt->tag)) ) {
+
+      if ( ppt->xp && mesh->xpoint ) {
+        memcpy(ppt->n,mesh->xpoint[ppt->xp].n1,3*sizeof(double));
+        ++mesh->nc1;
+      }
+    }
+
+    np++;
+    if ( k!=nbl ) {
+      pptnew = &mesh->point[nbl];
+      memmove(pptnew,ppt,sizeof(MMG5_Point));
+      memset(ppt,0,sizeof(MMG5_Point));
+      ppt->tag    = MG_NUL;
+    }
+
+    nbl++;
+  }
+  mesh->np = np;
+
+  for(k=1 ; k<=mesh->np ; k++)
+    mesh->point[k].tmp = 0;
+
+  if ( mesh->np >= mesh->npmax-1 )
+    mesh->npnil = 0;
+  else
+    mesh->npnil = mesh->np + 1;
+
+  if ( mesh->npnil )
+    for(k=mesh->npnil; k<mesh->npmax-1; k++)
+      mesh->point[k].tmp  = k+1;
+
+  return 1;
+}
+
+#endif
+
+
+/**
+ * \param mesh pointer toward the mesh structure (unused).
+ * \return 1 if success, 0 otherwise
+ *
+ * Update the element vertices indices with the pack point index stored in the
+ * tmp field of the points.
+ *
+ */
+int MMG3D_update_eltsVertices(MMG5_pMesh mesh) {
+  MMG5_pTetra   pt;
+  MMG5_pPrism   pp;
+  MMG5_pQuad    pq;
+  int           k;
+
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+    if ( !MG_EOK(pt) )  continue;
+
+    pt->v[0] = mesh->point[pt->v[0]].tmp;
+    pt->v[1] = mesh->point[pt->v[1]].tmp;
+    pt->v[2] = mesh->point[pt->v[2]].tmp;
+    pt->v[3] = mesh->point[pt->v[3]].tmp;
+  }
+  for (k=1; k<=mesh->nprism; k++) {
+    pp = &mesh->prism[k];
+    if ( !MG_EOK(pp) )  continue;
+
+    pp->v[0] = mesh->point[pp->v[0]].tmp;
+    pp->v[1] = mesh->point[pp->v[1]].tmp;
+    pp->v[2] = mesh->point[pp->v[2]].tmp;
+    pp->v[3] = mesh->point[pp->v[3]].tmp;
+    pp->v[4] = mesh->point[pp->v[4]].tmp;
+    pp->v[5] = mesh->point[pp->v[5]].tmp;
+  }
+  for (k=1; k<=mesh->nquad; k++) {
+    pq = &mesh->quadra[k];
+    if ( !MG_EOK(pq) )  continue;
+
+    pq->v[0] = mesh->point[pq->v[0]].tmp;
+    pq->v[1] = mesh->point[pq->v[1]].tmp;
+    pq->v[2] = mesh->point[pq->v[2]].tmp;
+    pq->v[3] = mesh->point[pq->v[3]].tmp;
+  }
   return 1;
 }
 
@@ -652,7 +913,7 @@ int MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
   nc = MMG3D_pack_points(mesh);
   if ( nc<0 ) return 0;
 
-  if ( met && met->m ) assert(met->np == mesh->np);
+  if ( met  && met->m  ) assert(met->np ==mesh->np);
   if ( sol && sol->m ) assert(sol->np == mesh->np);
 
   /* create prism adjacency */
@@ -695,6 +956,11 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
 
   if ( mesh->info.imprim >= 0 ) {
     fprintf(stdout,"\n  %s\n   MODULE MMG3D: %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
+#ifndef _WIN32
+    fprintf(stdout,"     git branch: %s\n",MMG_GIT_BRANCH);
+    fprintf(stdout,"     git commit: %s\n",MMG_GIT_COMMIT);
+    fprintf(stdout,"     git date:   %s\n\n",MMG_GIT_DATE);
+#endif
   }
 
   MMG3D_Set_commonFunc();
@@ -829,45 +1095,45 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
     fprintf(stdout,"  -- PHASE 1 COMPLETED.     %s\n",stim);
 
   if ( (!mesh->info.nomove) || (!mesh->info.noswap) || (!mesh->info.noinsert) ) {
-    /* mesh adaptation */
-    chrono(ON,&(ctim[3]));
-    if ( mesh->info.imprim > 0 ) {
-      fprintf(stdout,"\n  -- PHASE 2 : %s MESHING\n",met->size < 6 ? "ISOTROPIC" : "ANISOTROPIC");
-    }
+  /* mesh adaptation */
+  chrono(ON,&(ctim[3]));
+  if ( mesh->info.imprim > 0 ) {
+    fprintf(stdout,"\n  -- PHASE 2 : %s MESHING\n",met->size < 6 ? "ISOTROPIC" : "ANISOTROPIC");
+  }
 
 
-    /* renumerotation if available */
+  /* renumerotation if available */
     if ( !MMG5_scotchCall(mesh,met,NULL) )
-    {
+  {
       if ( !MMG5_unscaleMesh(mesh,met,NULL) ) _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
       MMG5_RETURN_AND_PACK(mesh,met,sol,MMG5_LOWFAILURE);
-    }
+  }
 
 #ifdef PATTERN
     if ( !MMG5_mmg3d1_pattern(mesh,met,NULL) ) {
-      if ( !(mesh->adja) && !MMG3D_hashTetra(mesh,1) ) {
-        fprintf(stderr,"\n  ## Hashing problem. Invalid mesh.\n");
+    if ( !(mesh->adja) && !MMG3D_hashTetra(mesh,1) ) {
+      fprintf(stderr,"\n  ## Hashing problem. Invalid mesh.\n");
         _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
-      }
+    }
       if ( !MMG5_unscaleMesh(mesh,met,NULL) )    _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
       MMG5_RETURN_AND_PACK(mesh,met,sol,MMG5_LOWFAILURE);
-    }
+  }
 #else
     if ( !MMG5_mmg3d1_delone(mesh,met,NULL) ) {
-      if ( (!mesh->adja) && !MMG3D_hashTetra(mesh,1) ) {
-        fprintf(stderr,"\n  ## Hashing problem. Invalid mesh.\n");
+    if ( (!mesh->adja) && !MMG3D_hashTetra(mesh,1) ) {
+      fprintf(stderr,"\n  ## Hashing problem. Invalid mesh.\n");
         _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
-      }
+    }
       if ( !MMG5_unscaleMesh(mesh,met,NULL) )    _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
       MMG5_RETURN_AND_PACK(mesh,met,sol,MMG5_LOWFAILURE);
-    }
+  }
 #endif
 
-    chrono(OFF,&(ctim[3]));
-    printim(ctim[3].gdif,stim);
-    if ( mesh->info.imprim > 0 ) {
-      fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
-    }
+  chrono(OFF,&(ctim[3]));
+  printim(ctim[3].gdif,stim);
+  if ( mesh->info.imprim > 0 ) {
+    fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
+  }
   }
 
   /* save file */
@@ -902,6 +1168,11 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet) {
 
   if ( mesh->info.imprim >= 0 ) {
     fprintf(stdout,"\n  %s\n   MODULE MMG3D: %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
+#ifndef _WIN32
+    fprintf(stdout,"     git branch: %s\n",MMG_GIT_BRANCH);
+    fprintf(stdout,"     git commit: %s\n",MMG_GIT_COMMIT);
+    fprintf(stdout,"     git date:   %s\n\n",MMG_GIT_DATE);
+#endif
   }
 
   /** In debug mode, check that all structures are allocated */
@@ -950,14 +1221,14 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet) {
 
   /* specific meshing */
   if ( met && met->np ) {
-    if ( mesh->info.optim ) {
+  if ( mesh->info.optim ) {
       printf("\n  ## ERROR: MISMATCH OPTIONS: OPTIM OPTION CAN NOT BE USED"
              " WITH AN INPUT METRIC.\n");
       if ( mettofree ) { MMG5_DEL_MEM(mesh,met->m);MMG5_SAFE_FREE (met); }
       _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
-    }
+  }
 
-    if ( mesh->info.hsiz>0. ) {
+  if ( mesh->info.hsiz>0. ) {
       printf("\n  ## ERROR: MISMATCH OPTIONS: HSIZ OPTION CAN NOT BE USED"
              " WITH AN INPUT METRIC.\n");
       if ( mettofree ) { MMG5_DEL_MEM(mesh,met->m);MMG5_SAFE_FREE (met); }
@@ -1163,6 +1434,11 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
 
   if ( mesh->info.imprim >= 0 ) {
     fprintf(stdout,"\n  %s\n   MODULE MMG3D: %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
+#ifndef _WIN32
+    fprintf(stdout,"     git branch: %s\n",MMG_GIT_BRANCH);
+    fprintf(stdout,"     git commit: %s\n",MMG_GIT_COMMIT);
+    fprintf(stdout,"     git date:   %s\n\n",MMG_GIT_DATE);
+#endif
   }
 
   /** In debug mode, check that all structures are allocated */

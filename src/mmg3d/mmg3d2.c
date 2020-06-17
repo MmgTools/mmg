@@ -359,10 +359,10 @@ MMG5_ismaniball(MMG5_pMesh mesh,MMG5_pSol sol,int k,int indp) {
   pt = &mesh->tetra[k];
   np = pt->v[indp];
   if ( fabs(sol->m[np]-mesh->info.ls) > MMG5_EPSD2 )  return 1;
-
+  
   memset(bdy,0,(MMG3D_LMAX+1)*sizeof(int));
   memset(list,0,(MMG3D_LMAX+1)*sizeof(int));
-
+  
   /* Sign of a starting point in ball of np */
   for (j=0; j<3; j++) {
     ip = MMG5_idir[indp][j];
@@ -633,7 +633,7 @@ static int MMG3D_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_SAFE_CALLOC(tmp,mesh->npmax+1,double,return 0);
 
   /* Snap values of sol that are close to 0 to 0 exactly */
-  ns = nc = 0;
+  ns = 0;
   for (k=1; k<=mesh->np; k++) {
     p0 = &mesh->point[k];
     if ( !MG_VOK(p0) ) continue;
@@ -641,36 +641,43 @@ static int MMG3D_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
       if ( mesh->info.ddebug )
         fprintf(stderr,"  ## Warning: %s: snapping value %d; "
                 "previous value: %E.\n",__func__,k,fabs(sol->m[k]));
-
+      
       tmp[k] = ( fabs(sol->m[k]-mesh->info.ls) < MMG5_EPSD ) ?
-        (mesh->info.ls-100.0*MMG5_EPS) : sol->m[k];
+      (mesh->info.ls-100.0*MMG5_EPS) : sol->m[k];
       p0->flag = 1;
       sol->m[k] = mesh->info.ls;
       ns++;
     }
   }
-
-  /* Check snapping did not lead to a nonmanifold situation */
-  for (k=1; k<=mesh->ne; k++) {
-    pt = &mesh->tetra[k];
-    if ( !MG_EOK(pt) ) continue;
-    for (i=0; i<4; i++) {
-      ip = pt->v[i];
-      p0 = &mesh->point[ip];
-      if ( p0->flag ) {
-        if ( !MMG5_ismaniball(mesh,sol,k,i) ) {
-          sol->m[ip] = tmp[ip];
-          nc++;
+  
+  do {
+    nc = 0;
+    /* Check snapping did not lead to a nonmanifold situation */
+    for (k=1; k<=mesh->ne; k++) {
+      pt = &mesh->tetra[k];
+      if ( !MG_EOK(pt) ) continue;
+      for (i=0; i<4; i++) {
+        ip = pt->v[i];
+        p0 = &mesh->point[ip];
+        if ( p0->flag == 1 ) {
+          if ( !MMG5_ismaniball(mesh,sol,k,i) ) {
+            sol->m[ip] = tmp[ip];
+            p0->flag = 0;
+            nc++;
+          }
         }
-        p0->flag = 0;
-        tmp[ip]  = mesh->info.ls;
       }
     }
   }
+  while ( nc );
 
   if ( (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) && ns+nc > 0 )
     fprintf(stdout,"     %8d points snapped, %d corrected\n",ns,nc);
-
+  
+  /* Reset point flags */
+  for (k=1; k<=mesh->np; k++)
+    mesh->point[k].flag = 0;
+  
   /* memory free */
   MMG5_DEL_MEM(mesh,mesh->adja);
   MMG5_DEL_MEM(mesh,tmp);
@@ -838,7 +845,7 @@ int MMG3D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
       pt1 = &mesh->tetra[kk];
 
       /* Add local volume fraction of the negative subdomain to volc */
-      volc += MMG3D_vfrac(mesh,sol,kk,1);
+      volc += MMG3D_vfrac(mesh,sol,kk,-1);
 
       /* Add adjacent tetra to kk via negative vertices to the pile, if need be */
       adja = &mesh->adja[4*(kk-1)+1];
@@ -1308,7 +1315,7 @@ int MMG5_chkmaniball(MMG5_pMesh mesh, int start, char ip){
   pt->flag = base;
   list[ilist] = 4*start+ip;
   ilist++;
-
+  
   /* explore list, and find all tets in ball of p belonging to the component ref */
   cur = 0;
   while( cur < ilist ) {
@@ -1362,7 +1369,7 @@ int MMG5_chkmaniball(MMG5_pMesh mesh, int start, char ip){
       k1/=4;
 
       pt1 = &mesh->tetra[k1];
-      if(pt1->flag == base) continue;
+      if ( pt1->flag == base ) continue;
       pt1->flag = base;
 
       for(j=0; j<4 ; j++){

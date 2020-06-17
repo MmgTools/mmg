@@ -72,7 +72,7 @@ extern "C" {
 /** Maximal memory used if available memory compitation fail. */
 #define MMG5_MEMMAX  800        /**< Default mem if unable to compute memMax */
 #define MMG5_BITWIZE_MB_TO_B 20 /**< Bitwise convertion from Mo to O */
-#define MMG5_MEMPERCENT 50/100  /**< Percent of RAM used by default */
+#define MMG5_MEMPERCENT 0.5     /**< Percent of RAM used by default */
 
 /* Domain refs in iso mode */
 #define MG_PLUS    2
@@ -112,6 +112,8 @@ extern "C" {
 #define MMG5_MEMMIN 38 /**< minimal memory needed to store the mesh/sol names */
 
 #define MMG5_LMAX      10240
+
+#define MMG5_PATHSEP  '/'
 
 /* Variables for option initialization */
 #define MMG5_NONSET_MEM  -1 /**< mem value for unspecified max memory */
@@ -349,7 +351,7 @@ size_t myfree(void *ptr) {
                                                                         \
     tmp = (type *)myrealloc((ptr),size_to_allocate,(prevSize)*sizeof(type)); \
     if ( !tmp ) {                                                       \
-      MMG5_SAFE_FREE(ptr);                                             \
+      MMG5_SAFE_FREE(ptr);                                              \
       perror(" ## Memory problem: realloc");                            \
       law;                                                              \
     }                                                                   \
@@ -607,7 +609,7 @@ void           MMG5_check_hminhmax(MMG5_pMesh mesh, int8_t sethmin, int8_t sethm
  double        MMG5_caltri33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt);
  extern double MMG5_caltri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
  extern double MMG5_caltri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
- void          MMG5_defUninitSize(MMG5_pMesh mesh,MMG5_pSol met);
+ void          MMG5_defUninitSize(MMG5_pMesh mesh,MMG5_pSol met,int8_t ismet);
  void          MMG5_displayLengthHisto(MMG5_pMesh,int,double*,int,int,double,
                                         int,int,double,int,double*,int*,char);
  void          MMG5_displayLengthHisto_internal( int,int,int,double,
@@ -624,6 +626,8 @@ void           MMG5_check_hminhmax(MMG5_pMesh mesh, int8_t sethmin, int8_t sethm
  int           MMG5_grad2metSurfreq(MMG5_pMesh,MMG5_pSol,MMG5_pTria,int,int);
  char         *MMG5_Get_filenameExt( char *filename );
  char         *MMG5_Get_basename(char *path);
+ char         *MMG5_Get_path(char *path);
+ char         *MMG5_Remove_ext( char *path, char* );
 const char    *MMG5_Get_formatName(enum MMG5_Format fmt);
  int           MMG5_Get_format( char *ptr, int );
  int           MMG5_hashEdge(MMG5_pMesh mesh,MMG5_Hash *hash,int a,int b,int k);
@@ -705,7 +709,7 @@ int MMG5_sum_reqEdgeLengthsAtPoint ( MMG5_pMesh,MMG5_pSol,int ip0,int ip1 );
 int MMG5_compute_meanMetricAtMarkedPoints_iso ( MMG5_pMesh mesh,MMG5_pSol met);
 int MMG5_compute_meanMetricAtMarkedPoints_ani ( MMG5_pMesh mesh,MMG5_pSol met);
 
-int  MMG5_reset_metricAtReqEdges_surf ( MMG5_pMesh,MMG5_pSol );
+int  MMG5_reset_metricAtReqEdges_surf ( MMG5_pMesh,MMG5_pSol,int8_t );
 void MMG5_mark_pointsOnReqEdge_fromTria ( MMG5_pMesh mesh );
 int  MMG5_gradsiz_iso ( MMG5_pMesh mesh,MMG5_pSol met );
 int  MMG5_gradsizreq_iso(MMG5_pMesh ,MMG5_pSol );

@@ -2508,6 +2508,8 @@ static int MMG5_anatet4(MMG5_pMesh mesh, MMG5_pSol met,int *nf, char typchk) {
       for (j=0; j<4; j++)
         if ( ( pxt->ftag[j] & MG_BDY ) && (!(pxt->ftag[j] & MG_PARBDY)) )  nbdy++;
     }
+    
+    /* Check for the number of boundary faces */
     if ( nbdy > 1 ) {
       id_op = MMG3D_anatet4_sim(mesh,met,k,typchk-1,&ifac,&conf0,&adj,&conf1);
       if ( !id_op ) {
@@ -2538,6 +2540,7 @@ static int MMG5_anatet4(MMG5_pMesh mesh, MMG5_pSol met,int *nf, char typchk) {
         else if ( ier ) ++(*nf);
       }
     }
+    /* Check for the number of boundary vertices */
     else {
       nbdy = 0;
       for (j=0; j<4; j++) {
@@ -2566,7 +2569,7 @@ static int MMG5_anatet4(MMG5_pMesh mesh, MMG5_pSol met,int *nf, char typchk) {
  * \param typchk type of checking permformed.
  * \return -1 if failed, number of new points otherwise.
  *
- * Split tetra into 4 when more than 1 boundary face or if 4 boundary vertices.
+ * Split tetra into 4 when its 4 points are ridge points.
  *
  */
 static int MMG5_anatet4rid(MMG5_pMesh mesh, MMG5_pSol met,int *nf, char typchk) {

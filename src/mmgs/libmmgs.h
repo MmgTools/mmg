@@ -219,7 +219,9 @@ int  MMGS_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solout);
  * \param typSol type of solution (scalar, vectorial...).
  * \return 0 if failed, 1 otherwise.
  *
- * Set the solution number, dimension and type.
+ * Initialize an array of solutions field: set dimension, types and number of
+ * data.
+ * To use to initialize an array of solution fields (not used by Mmg itself).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_SOLSIZE(mesh,sol,typEntity,np,typSol,retval)\n
@@ -239,7 +241,9 @@ int  MMGS_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int
  *                  (scalar, vectorial...).
  * \return 0 if failed, 1 otherwise.
  *
- * Set the solution number, dimension and type.
+ * Initialize an array of solutions field defined at vertices: set dimension,
+ * types and number of data.
+ * To use to initialize an array of solution fields (not used by Mmg itself).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_SOLSATVERTICESSIZE(mesh,sol,nsols,nentities,typSol,retval)\n
@@ -1967,7 +1971,19 @@ int MMGS_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMGS
  */
 int MMGS_Compute_eigenv(double m[6],double lambda[3],double vp[3][3]);
 
-
+/**
+ * \param mesh pointer toward the mesh structure
+ * \param sol pointer toward the solution structure
+ *
+ * Free the solution.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMGS_FREE_SOLUTIONS(mesh,sol)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  void MMGS_Free_solutions(MMG5_pMesh mesh,MMG5_pSol sol);
 
 #ifdef __cplusplus
 }

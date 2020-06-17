@@ -63,7 +63,7 @@ LIST(REMOVE_ITEM mmg2d_library_files
   ${MMG2D_SOURCE_DIR}/mmg2d.c
   ${REMOVE_FILE} )
 
-IF ( USE_VTK )
+IF ( VTK_FOUND )
   LIST(APPEND  mmg2d_library_files
     ${COMMON_SOURCE_DIR}/vtkparser.cpp )
 ENDIF ( )
@@ -80,7 +80,7 @@ FILE(
 #####
 ############################################################################
 
-IF( USE_ELAS )
+IF( ELAS_FOUND )
 # Set flags for building test program
 INCLUDE_DIRECTORIES(${ELAS_INCLUDE_DIR})
 
@@ -92,16 +92,7 @@ MESSAGE(STATUS
 "Compilation with the Elas library: ${ELAS_LIBRARY} ")
 SET( LIBRARIES ${ELAS_LINK_FLAGS} ${LIBRARIES})
 SET( LIBRARIES ${ELAS_LIBRARY} ${LIBRARIES})
-ENDIF()
 
-IF (ELAS_NOTFOUND)
-MESSAGE ( WARNING "Elas is a library to solve the linear elasticity "
-    "problem (see https://github.com/ISCDtoolbox/LinearElasticity to"
-    " download it). "
-"This library is needed to use the lagrangian motion option. "
-    "If you have already installed Elas and want to use it, "
-"please set the CMake variable or environment variable ELAS_DIR "
-"to your Elas directory.")
 ENDIF ( )
 
 ############################################################################
@@ -182,39 +173,44 @@ IF ( BUILD_TESTING )
     ADD_EXEC_TO_CI_TESTS ( ${PROJECT_NAME}2d EXECUT_MMG2D )
 
     IF ( TEST_LIBMMG2D )
-      SET(LIBMMG2D_EXEC0_a ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_example0_a )
-
-      SET(LIBMMG2D_EXEC0_b ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_example0_b )
-      SET(LIBMMG2D_EXEC1 ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_example1 )
-      SET(LIBMMG2D_EXEC2 ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_example2 )
-      SET(LIBMMG2D_EXEC3 ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_example3 )
+      SET(LIBMMG2D_ADP0_a ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_adp_example0_a )
+      SET(LIBMMG2D_ADP0_b ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_adp_example0_b )
+      SET(LIBMMG2D_ADP1 ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_adp_example1 )
+      SET(LIBMMG2D_ADP2 ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_adp_example2 )
+      SET(LIBMMG2D_GENE0 ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_gene_example0 )
+      SET(LIBMMG2D_LS0 ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_ls_example0 )
       SET(LIBMMG2D_LSONLY ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_lsOnly )
       SET(LIBMMG2D_LSANDMETRIC ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_lsAndMetric )
       SET(TEST_API2D_EXEC0 ${EXECUTABLE_OUTPUT_PATH}/test_api2d_0)
 
 
-      ADD_TEST(NAME libmmg2d_example0_a   COMMAND ${LIBMMG2D_EXEC0_a}
+      ADD_TEST(NAME libmmg2d_adp_example0_a   COMMAND ${LIBMMG2D_ADP0_a}
         "${PROJECT_SOURCE_DIR}/libexamples/mmg2d/adaptation_example0/example0_a/init.mesh"
         "${CTEST_OUTPUT_DIR}/libmmg2d_Adaptation_0_a-init.o"
         )
-      ADD_TEST(NAME libmmg2d_example0_b   COMMAND ${LIBMMG2D_EXEC0_b}
+      ADD_TEST(NAME libmmg2d_adp_example0_b   COMMAND ${LIBMMG2D_ADP0_b}
         "${CTEST_OUTPUT_DIR}/libmmg2d_Adaptation_0_b.o.mesh"
         )
-      ADD_TEST(NAME libmmg2d_example1   COMMAND ${LIBMMG2D_EXEC1}
+      ADD_TEST(NAME libmmg2d_adp_example1   COMMAND ${LIBMMG2D_ADP1}
         "${PROJECT_SOURCE_DIR}/libexamples/mmg2d/adaptation_example1/dom.mesh"
         "${CTEST_OUTPUT_DIR}/libmmg2d_Adaptation_1-dom.o"
         )
-      ADD_TEST(NAME libmmg2d_example2   COMMAND ${LIBMMG2D_EXEC2}
-        "${PROJECT_SOURCE_DIR}/libexamples/mmg2d/squareGeneration_example2/carretest.mesh"
-        "${CTEST_OUTPUT_DIR}/libmmg2d_Generation_2-carre.o"
+      ADD_TEST(NAME libmmg2d_adp_example2   COMMAND ${LIBMMG2D_ADP2}
+        "${PROJECT_SOURCE_DIR}/libexamples/mmg2d/adaptation_example1/dom.mesh"
+        "${CTEST_OUTPUT_DIR}/libmmg2d_Adaptation_2-dom.o"
+        "${CTEST_OUTPUT_DIR}/libmmg2d_Adaptation_2-dom-end.o"
         )
-      ADD_TEST(NAME libmmg2d_example3_io_0   COMMAND ${LIBMMG2D_EXEC3}
-        "${PROJECT_SOURCE_DIR}/libexamples/mmg2d/io_multisols_example3/naca-multiSols.mesh"
-        "${CTEST_OUTPUT_DIR}/libmmg2d_io_3-naca.o" "0"
+      ADD_TEST(NAME libmmg2d_gene_example0   COMMAND ${LIBMMG2D_GENE0}
+        "${PROJECT_SOURCE_DIR}/libexamples/mmg2d/squareGeneration_example0/carretest.mesh"
+        "${CTEST_OUTPUT_DIR}/libmmg2d_Generation_0-carre.o"
         )
-      ADD_TEST(NAME libmmg2d_example3_io_1   COMMAND ${LIBMMG2D_EXEC3}
-        "${PROJECT_SOURCE_DIR}/libexamples/mmg2d/io_multisols_example3/naca-multiSols.mesh"
-        "${CTEST_OUTPUT_DIR}/libmmg2d_io_3-naca.o" "1"
+      ADD_TEST(NAME libmmg2d_ls0_io_0   COMMAND ${LIBMMG2D_LS0}
+        "${PROJECT_SOURCE_DIR}/libexamples/mmg2d/io_multisols_example0/naca-multiSols.mesh"
+        "${CTEST_OUTPUT_DIR}/libmmg2d_io_0-naca.o" "0"
+        )
+      ADD_TEST(NAME libmmg2d_ls0_io_1   COMMAND ${LIBMMG2D_LS0}
+        "${PROJECT_SOURCE_DIR}/libexamples/mmg2d/io_multisols_example0/naca-multiSols.mesh"
+        "${CTEST_OUTPUT_DIR}/libmmg2d_io_0-naca.o" "1"
         )
       ADD_TEST(NAME libmmg2d_lsOnly   COMMAND ${LIBMMG2D_LSONLY}
         "${PROJECT_SOURCE_DIR}/libexamples/mmg2d/IsosurfDiscretization_lsOnly/multi-mat.mesh"
@@ -250,11 +246,11 @@ IF ( BUILD_TESTING )
           "${CTEST_OUTPUT_DIR}/libmmg2d_Adaptation_Fortran_0_b.o"
          )
         ADD_TEST(NAME libmmg2d_fortran_io_0   COMMAND ${LIBMMG2D_EXECFORTRAN_IO}
-          "${PROJECT_SOURCE_DIR}/libexamples/mmg2d/io_multisols_example3/naca-multiSols.mesh"
+          "${PROJECT_SOURCE_DIR}/libexamples/mmg2d/io_multisols_example0/naca-multiSols.mesh"
           "${CTEST_OUTPUT_DIR}/libmmg2d_Fortran_io-naca.o" "0"
          )
         ADD_TEST(NAME libmmg2d_fortran_io_1   COMMAND ${LIBMMG2D_EXECFORTRAN_IO}
-          "${PROJECT_SOURCE_DIR}/libexamples/mmg2d/io_multisols_example3/naca-multiSols.mesh"
+          "${PROJECT_SOURCE_DIR}/libexamples/mmg2d/io_multisols_example0/naca-multiSols.mesh"
           "${CTEST_OUTPUT_DIR}/libmmg2d_Fortran_io-naca.o" "1"
           )
         ADD_TEST(NAME libmmg2d_fortran_lsOnly   COMMAND ${LIBMMG2D_EXECFORTRAN_LSONLY}

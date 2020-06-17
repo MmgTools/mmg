@@ -1191,7 +1191,6 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
     metricData = 0;
     if ( ptr ) {
       *ptr = '\0';
-      mesh->info.inputMet = 1;
       metricData = 1;
     }
 
@@ -1883,15 +1882,24 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename,
       typ = 9;
     }
 
-    char *tmp = MMG5_Get_basename(psl->namein);
-
-    if ( metricData ) {
-      fprintf(inm,"\"%s:metric\"\n",tmp);
+    if ( psl->namein ) {
+      char *tmp = MMG5_Get_basename(psl->namein);
+      if ( metricData ) {
+        fprintf(inm,"\"%s:metric\"\n",tmp);
+      }
+      else {
+        fprintf(inm,"\"%s\"\n",tmp);
+      }
+      free(tmp); tmp = 0;
     }
     else {
-      fprintf(inm,"\"%s\"\n",tmp);
+      if ( metricData ) {
+        fprintf(inm,"\"solution:metric\"\n");
+      }
+      else {
+        fprintf(inm,"\"solution\"\n");
+      }
     }
-    free(tmp); tmp = 0;
 
     /* One real tag unused */
     fprintf(inm,"1\n");

@@ -296,6 +296,9 @@ int MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
       d1 = 1.0 / (dd*dd);
       /* Normalization */
       for (k=1; k<=mesh->np; k++) {
+
+        if( !MG_VOK( &mesh->point[k] ) ) continue;
+
         for ( i=0; i<met->size; ++i ) {
           met->m[6*k+i] *= d1;
         }
@@ -312,6 +315,8 @@ int MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
       }
 
       for (k=1; k<=mesh->np; k++) {
+        if( !MG_VOK( &mesh->point[k] ) ) continue;
+
         m    = &met->m[6*k];
 
         /* Check the input metric */
@@ -344,6 +349,9 @@ int MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
       isqhmin  = 1.0 / (mesh->info.hmin*mesh->info.hmin);
       isqhmax  = 1.0 / (mesh->info.hmax*mesh->info.hmax);
       for (k=1; k<=mesh->np; k++) {
+
+        if( !MG_VOK( &mesh->point[k] ) ) continue;
+
         m    = &met->m[6*k];
 
         if ( !MMG5_eigenv(1,m,lambda,v) ) {
@@ -407,8 +415,19 @@ int MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
   }
 
   /* unscale paramter values */
-  mesh->info.hmin  *= dd;
-  mesh->info.hmax  *= dd;
+  if ( !mesh->info.sethmin ) {
+    mesh->info.hmin = MMG5_NONSET_HMIN;
+  }
+  else {
+    mesh->info.hmin  *= dd;
+  }
+
+  if ( !mesh->info.sethmax ) {
+    mesh->info.hmax = MMG5_NONSET_HMAX;
+  }
+  else {
+    mesh->info.hmax  *= dd;
+  }
   mesh->info.hausd *= dd;
   mesh->info.ls    *= dd;
   mesh->info.hsiz  *= dd;

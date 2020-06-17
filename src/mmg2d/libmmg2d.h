@@ -305,7 +305,9 @@ extern "C" {
  * \param typSol type of solution (scalar, vectorial...).
  * \return 0 if failed, 1 otherwise.
  *
- * Set the solution number, dimension and type.
+ * Initialize an array of solutions field: set dimension, types and number of
+ * data.
+ * To use to initialize an array of solution fields (not used by Mmg itself).
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_SET_SOLSIZE(mesh,sol,typEntity,np,typSol,retval)\n
@@ -326,8 +328,11 @@ extern "C" {
  *                  (scalar, vectorial...).
  * \return 0 if failed, 1 otherwise.
  *
- * Set the solution number, dimension and type.
+ * Initialize an array of solutions field defined at vertices: set dimension,
+ * types and number of data.
+ * To use to initialize an array of solution fields (not used by Mmg itself).
  *
+*
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_SET_SOLSATVERTICESSIZE(mesh,sol,nsols,nentities,typSol,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol\n

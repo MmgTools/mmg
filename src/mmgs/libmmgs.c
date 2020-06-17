@@ -39,7 +39,10 @@
  */
 
 #include "mmgs.h"
-#include "mmgsexterns.c"
+#ifndef _WIN32
+#include "git_log_mmg.h"
+#endif
+#include "mmgsexterns.h"
 
 /**
  * Pack the mesh \a mesh and its associated metric \a met and return \a val.
@@ -298,6 +301,11 @@ int MMGS_mmgsls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
 
   if ( mesh->info.imprim >= 0 ) {
     fprintf(stdout,"\n  %s\n   MODULE MMGS: %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
+#ifndef _WIN32
+    fprintf(stdout,"     git branch: %s\n",MMG_GIT_BRANCH);
+    fprintf(stdout,"     git commit: %s\n",MMG_GIT_COMMIT);
+    fprintf(stdout,"     git date:   %s\n\n",MMG_GIT_DATE);
+#endif
   }
 
   /** In debug mode, check that all structures are allocated */
@@ -462,27 +470,27 @@ int MMGS_mmgsls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
     fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
 
   if ( (!mesh->info.nomove) || (!mesh->info.noswap) || (!mesh->info.noinsert) ) {
-    /* mesh adaptation */
-    chrono(ON,&(ctim[4]));
-    if ( mesh->info.imprim > 0 ) {
-      fprintf(stdout,"\n  -- PHASE 3 : MESH IMPROVEMENT\n");
-    }
+  /* mesh adaptation */
+  chrono(ON,&(ctim[4]));
+  if ( mesh->info.imprim > 0 ) {
+    fprintf(stdout,"\n  -- PHASE 3 : MESH IMPROVEMENT\n");
+  }
 
     if ( !MMG5_mmgs1(mesh,met,NULL) ) {
       if ( mettofree ) { MMG5_DEL_MEM(mesh,met->m);MMG5_SAFE_FREE (met); }
-      if ( (!mesh->adja) && !MMGS_hashTria(mesh) ) {
-        fprintf(stderr,"\n  ## Hashing problem. Invalid mesh.\n");
+    if ( (!mesh->adja) && !MMGS_hashTria(mesh) ) {
+      fprintf(stderr,"\n  ## Hashing problem. Invalid mesh.\n");
         _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
-      }
+    }
       if ( !MMG5_unscaleMesh(mesh,met,sol) ) _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
       MMGS_RETURN_AND_PACK(mesh,met,sol,MMG5_LOWFAILURE);
-    }
+  }
 
-    chrono(OFF,&(ctim[4]));
-    printim(ctim[4].gdif,stim);
-    if ( mesh->info.imprim > 0 ) {
-      fprintf(stdout,"  -- PHASE 3 COMPLETED.     %s\n",stim);
-    }
+  chrono(OFF,&(ctim[4]));
+  printim(ctim[4].gdif,stim);
+  if ( mesh->info.imprim > 0 ) {
+    fprintf(stdout,"  -- PHASE 3 COMPLETED.     %s\n",stim);
+  }
   }
 
   /* save file */
@@ -531,6 +539,11 @@ int MMGS_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
 
   if ( mesh->info.imprim >= 0 ) {
     fprintf(stdout,"\n  %s\n   MODULE MMGS: %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
+#ifndef _WIN32
+    fprintf(stdout,"     git branch: %s\n",MMG_GIT_BRANCH);
+    fprintf(stdout,"     git commit: %s\n",MMG_GIT_COMMIT);
+    fprintf(stdout,"     git date:   %s\n\n",MMG_GIT_DATE);
+#endif
   }
 
   MMGS_Set_commonFunc();
@@ -578,11 +591,11 @@ int MMGS_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
   /* specific meshing */
 
   if ( met->np ) {
-    if ( mesh->info.optim ) {
+  if ( mesh->info.optim ) {
       printf("\n  ## ERROR: MISMATCH OPTIONS: OPTIM OPTION CAN NOT BE USED"
              " WITH AN INPUT METRIC.\n");
         _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
-    }
+  }
 
     if ( mesh->info.hsiz>0. ) {
       printf("\n  ## ERROR: MISMATCH OPTIONS: HSIZ OPTION CAN NOT BE USED"
