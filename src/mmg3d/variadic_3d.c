@@ -617,6 +617,7 @@ int MMG3D_Free_names_var(va_list argptr)
     }
   }
 
+  /* Fields */
   for ( i=0; i<(*mesh)->nsols; ++i ) {
     psl = (*sols) + i;
     if ( psl->namein ) {
