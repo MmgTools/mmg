@@ -768,7 +768,7 @@ int MMG3D_analys(MMG5_pMesh mesh) {
 
   /**--- stage 1: data structures for surface */
   if ( abs(mesh->info.imprim) > 3 )
-    fprintf(stdout,"\n  ** SURFACE ANALYSIS\n");
+    fprintf(stdout,"\n  ** SURFACE ANALYSISMG_\n");
 
   /* create tetra adjacency */
   if ( !MMG3D_hashTetra(mesh,1) ) {
@@ -790,17 +790,19 @@ int MMG3D_analys(MMG5_pMesh mesh) {
     fprintf(stderr,"\n  ## Prism hashing problem. Exit program.\n");
     return 0;
   }
+  
   /* compatibility triangle orientation w/r tetras */
   if ( !MMG5_bdryPerm(mesh) ) {
     fprintf(stderr,"\n  ## Boundary orientation problem. Exit program.\n");
     return 0;
   }
-
+  
   /* identify surface mesh */
   if ( !MMG5_chkBdryTria(mesh) ) {
     fprintf(stderr,"\n  ## Boundary problem. Exit program.\n");
     return 0;
   }
+  
   MMG5_freeXTets(mesh);
   MMG5_freeXPrisms(mesh);
 
