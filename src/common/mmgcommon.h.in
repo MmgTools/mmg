@@ -113,6 +113,8 @@ extern "C" {
 
 #define MMG5_LMAX      10240
 
+#define MMG5_PATHSEP  '/'
+
 /* Variables for option initialization */
 #define MMG5_NONSET_MEM  -1 /**< mem value for unspecified max memory */
 #define MMG5_NONSET_HMIN -1 /**< hmin value for unspecified hmin size */
@@ -349,7 +351,7 @@ size_t myfree(void *ptr) {
                                                                         \
     tmp = (type *)myrealloc((ptr),size_to_allocate,(prevSize)*sizeof(type)); \
     if ( !tmp ) {                                                       \
-      MMG5_SAFE_FREE(ptr);                                             \
+      MMG5_SAFE_FREE(ptr);                                              \
       perror(" ## Memory problem: realloc");                            \
       law;                                                              \
     }                                                                   \
@@ -624,6 +626,8 @@ void           MMG5_check_hminhmax(MMG5_pMesh mesh, int8_t sethmin, int8_t sethm
  int           MMG5_grad2metSurfreq(MMG5_pMesh,MMG5_pSol,MMG5_pTria,int,int);
  char         *MMG5_Get_filenameExt( char *filename );
  char         *MMG5_Get_basename(char *path);
+ char         *MMG5_Get_path(char *path);
+ char         *MMG5_Remove_ext( char *path, char* );
 const char    *MMG5_Get_formatName(enum MMG5_Format fmt);
  int           MMG5_Get_format( char *ptr, int );
  int           MMG5_hashEdge(MMG5_pMesh mesh,MMG5_Hash *hash,int a,int b,int k);

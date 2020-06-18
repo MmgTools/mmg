@@ -457,15 +457,18 @@ typedef struct {
   double        min[3],max[3],delta,ls,rmc;
   int           mem,npar,npari;
   int           nbr,*br;
-  int           opnbdy;
-  int           renum;
-  int           PROctree;
-  int           nmat;
-  char          nreg;
-  char          imprim,ddebug,badkal,iso,fem,lag;
+  int           opnbdy; /*!< floating surfaces */
+  int           renum; /*!< scotch renumbering */
+  int           PROctree; /*!< octree to speedup delaunay insertion */
+  int           nmat; /*!< number of materials in ls multimat mode */
+  int           imprim; /*!< verbosity level */
+  char          nreg; /*!< normal regularization */
+  char          ddebug,badkal,iso,fem,lag;
   char          parTyp; /*!< Contains binary flags to say which kind of local
                           param are setted: if \f$tag = 1+2+4\f$ then the point
                           is \a MG_Vert, MG_Tria and MG_Tetra */
+  char          sethmin; /*!< 1 if user set hmin, 0 otherwise (needed for multiple library calls) */
+  char          sethmax; /*!< 1 if user set hmin, 0 otherwise (needed for multiple library calls) */
   unsigned char optim, optimLES, noinsert, noswap, nomove, nosurf, nosizreq;
   MMG5_pMat     mat;
 } MMG5_Info;

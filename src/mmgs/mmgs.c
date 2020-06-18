@@ -135,7 +135,7 @@ static inline
 int MMGS_writeLocalParam( MMG5_pMesh mesh ) {
   MMG5_iNode  *triRefs;
   int          npar;
-  char         *ptr,data[128];
+  char         *ptr,data[MMG5_FILESTR_LGTH];
   FILE         *out;
 
   strcpy(data,mesh->namein);
