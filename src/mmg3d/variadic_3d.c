@@ -274,9 +274,9 @@ int MMG3D_Free_all_var(va_list argptr)
   MMG5_pMesh     *mesh;
   MMG5_pSol      *sol,*disp,*sols,*ls;
   int            typArg;
-  int            meshCount;
+  int            meshCount,metCount,lsCount,dispCount,fieldsCount;
 
-  meshCount = 0;
+  meshCount = metCount = lsCount = dispCount = fieldsCount = 0;
   mesh = NULL;
   disp = sol = sols = ls = NULL;
 
@@ -289,15 +289,19 @@ int MMG3D_Free_all_var(va_list argptr)
       ++meshCount;
       break;
     case(MMG5_ARG_ppMet):
+      ++metCount;
       sol = va_arg(argptr,MMG5_pSol*);
       break;
    case(MMG5_ARG_ppLs):
+     ++lsCount;
       ls = va_arg(argptr,MMG5_pSol*);
       break;
     case(MMG5_ARG_ppDisp):
+      ++dispCount;
       disp = va_arg(argptr,MMG5_pSol*);
       break;
     case(MMG5_ARG_ppSols):
+      ++fieldsCount;
       sols = va_arg(argptr,MMG5_pSol*);
       break;
     default:
@@ -318,6 +322,13 @@ int MMG3D_Free_all_var(va_list argptr)
     return 0;
   }
 
+  if ( metCount > 1 || lsCount > 1 || dispCount > 1 || fieldsCount > 1 ) {
+    fprintf(stdout,"\n  ## Warning: %s: MMG3D_Free_all:\n"
+            " This function can free only one structure of each type.\n"
+            " Probable memory leak.\n",
+            __func__);
+  }
+
   if ( !MMG3D_Free_structures(MMG5_ARG_start,
                               MMG5_ARG_ppMesh, mesh, MMG5_ARG_ppMet, sol,
                               MMG5_ARG_ppLs, ls,MMG5_ARG_ppDisp, disp,
@@ -326,14 +337,17 @@ int MMG3D_Free_all_var(va_list argptr)
     return 0;
   }
 
-  if ( sol )
+  if ( sol ) {
     MMG5_SAFE_FREE(*sol);
+  }
 
-  if ( disp )
+  if ( disp ) {
     MMG5_SAFE_FREE(*disp);
+  }
 
-  if ( ls )
+  if ( ls ) {
     MMG5_SAFE_FREE(*ls);
+  }
 
   if ( sols ) {
     MMG5_DEL_MEM(*mesh,*sols);
@@ -399,7 +413,7 @@ void MMG3D_Free_arrays(MMG5_pMesh *mesh,MMG5_pSol *sol,MMG5_pSol *ls,
   /* field */
   if ( field && (*mesh)->nsols ) {
     for ( i=0; i<(*mesh)->nsols; ++i ) {
-      MMG5_DEL_MEM((*mesh),field[i]->m);
+      MMG5_DEL_MEM((*mesh),(*field)[i].m);
     }
   }
 
