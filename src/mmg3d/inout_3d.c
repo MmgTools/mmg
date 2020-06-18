@@ -1917,6 +1917,7 @@ int MMG3D_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
       fclose(inm);
       return -1;
     }
+
     /* For binary file, we read the verson inside the file */
     if ( ver ) psl->ver = ver;
   }

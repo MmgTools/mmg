@@ -237,9 +237,9 @@ int MMGS_Free_all_var(va_list argptr)
   MMG5_pMesh     *mesh;
   MMG5_pSol      psl,*sol,*sols,*ls;
   int            typArg;
-  int            meshCount,i;
+  int            meshCount,metCount,lsCount,fieldsCount,i;
 
-  meshCount = 0;
+  meshCount = metCount = lsCount = fieldsCount = 0;
   sol = sols = ls = NULL;
 
   while ( (typArg = va_arg(argptr,int)) != MMG5_ARG_end )
@@ -251,12 +251,15 @@ int MMGS_Free_all_var(va_list argptr)
       ++meshCount;
       break;
     case(MMG5_ARG_ppMet):
+      ++metCount;
       sol = va_arg(argptr,MMG5_pSol*);
       break;
     case(MMG5_ARG_ppLs):
+      ++lsCount;
       ls = va_arg(argptr,MMG5_pSol*);
       break;
     case(MMG5_ARG_ppSols):
+      ++fieldsCount;
       sols = va_arg(argptr,MMG5_pSol*);
       break;
     default:
@@ -274,6 +277,13 @@ int MMGS_Free_all_var(va_list argptr)
             " you need to provide your mesh structure"
             " to allow to free the associated memory.\n",__func__);
     return 0;
+  }
+
+  if ( metCount > 1 || lsCount > 1 || fieldsCount > 1 ) {
+    fprintf(stdout,"\n  ## Warning: %s: MMGS_Free_all:\n"
+            " This function can free only one structure of each type.\n"
+            " Probable memory leak.\n",
+            __func__);
   }
 
   if ( !MMGS_Free_structures(MMG5_ARG_start,
