@@ -150,7 +150,7 @@ int MMG5_Set_inputMeshName(MMG5_pMesh mesh, const char* meshin) {
     MMG5_DEL_MEM(mesh,mesh->namein);
   }
 
-  if ( strlen(meshin) ) {
+  if ( meshin && strlen(meshin) ) {
     MMG5_ADD_MEM(mesh,(strlen(meshin)+1)*sizeof(char),"input mesh name",
                   fprintf(stderr,"  Exit program.\n");
                   return 0);
