@@ -913,6 +913,19 @@ FORTRAN_NAME(MMG3D_SET_LOCALPARAMETER,mmg3d_set_localparameter,
 }
 
 /**
+ * See \ref MMG3D_Free_allSols function in \ref mmg3d/libmmg3d.h file.
+ */
+FORTRAN_NAME(MMG3D_FREE_ALLSOLS,mmg3d_free_allsols,
+             (MMG5_pMesh *mesh,MMG5_pSol *sol,int* retval),
+             (mesh,sol,retval)){
+
+  *retval = MMG3D_Free_allSols(*mesh,sol);
+
+  return;
+}
+
+
+/**
  * See \ref MMG3D_Free_all function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_VARIADIC(MMG3D_FREE_ALL,mmg3d_free_all,

@@ -2184,6 +2184,22 @@ int MMG3D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  */
   int MMG3D_saveAllSols(MMG5_pMesh  mesh,MMG5_pSol *sol ,const char *filename);
 
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward an array of solution structure (that stores solution fields).
+ * \return 1
+ *
+ * Deallocation of an array of solution fields
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_Free_allSols(mesh,sol,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+int MMG3D_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol);
+
 /* deallocations */
 /**
  * \param starter dummy argument used to initialize the variadic argument

@@ -645,6 +645,19 @@ FORTRAN_NAME(MMG2D_CHK_MESHDATA,mmg2d_chk_meshdata,
 }
 
 /**
+ * See \ref MMG2D_Free_allSols function in \ref mmg2d/libmmg2d.h file.
+ */
+FORTRAN_NAME(MMG2D_FREE_ALLSOLS,mmg2d_free_allsols,
+             (MMG5_pMesh *mesh,MMG5_pSol *sol,int* retval),
+             (mesh,sol,retval)){
+
+  *retval = MMG2D_Free_allSols(*mesh,sol);
+
+  return;
+}
+
+
+/**
  * See \ref MMG2D_Free_all function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_VARIADIC(MMG2D_FREE_ALL,mmg2d_free_all,

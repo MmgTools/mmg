@@ -650,6 +650,19 @@ FORTRAN_NAME(MMGS_SET_LOCALPARAMETER,mmgs_set_localparameter,
 }
 
 /**
+ * See \ref MMGS_Free_allSols function in \ref mmgs/libmmgs.h file.
+ */
+FORTRAN_NAME(MMGS_FREE_ALLSOLS,mmgs_free_allsols,
+             (MMG5_pMesh *mesh,MMG5_pSol *sol,int* retval),
+             (mesh,sol,retval)){
+
+  *retval = MMGS_Free_allSols(*mesh,sol);
+
+  return;
+}
+
+
+/**
  * See \ref MMGS_Free_all function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_VARIADIC(MMGS_FREE_ALL,mmgs_free_all,

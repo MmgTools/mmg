@@ -435,6 +435,19 @@ void MMG5_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met,double hsiz) {
   return;
 }
 
+int MMG5_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol) {
+  int i;
+
+  if ( sol && mesh->nsols ) {
+    for ( i=0; i<mesh->nsols; ++i ) {
+      MMG5_DEL_MEM(mesh,(*sol)[i].m);
+    }
+  }
+  MMG5_DEL_MEM(mesh,(*sol));
+
+  return 1;
+}
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the sol structure.
