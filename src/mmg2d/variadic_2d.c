@@ -462,7 +462,7 @@ int MMG2D_Free_structures_var(va_list argptr)
   /* field */
   if ( sols && (*mesh)->nsols ) {
     for ( i=0; i<(*mesh)->nsols; ++i ) {
-      MMG5_DEL_MEM((*mesh),sols[i]->m);
+      MMG5_DEL_MEM((*mesh),(*sols)[i].m);
     }
   }
 
