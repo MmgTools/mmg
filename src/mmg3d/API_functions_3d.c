@@ -2179,10 +2179,10 @@ int MMG3D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam,int val){
                  printf("  Exit program.\n");
                  return 0);
     MMG5_SAFE_CALLOC(mesh->info.br,mesh->info.nbr,int,return 0);
-    
+
     for (k=0; k<mesh->info.nbr; k++)
       mesh->info.br[k] = 0;
-    
+
     break;
 
 #ifdef USE_SCOTCH
@@ -2398,6 +2398,11 @@ int MMG3D_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref,
   mesh->info.npari++;
 
   return 1;
+}
+
+int MMG3D_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol) {
+
+  return MMG5_Free_allSols(mesh,sol);
 }
 
 int MMG3D_Free_all(const int starter,...)

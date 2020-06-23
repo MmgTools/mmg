@@ -155,9 +155,10 @@ int main(int argc,char *argv[]) {
     exit(EXIT_FAILURE);
 
   /** 3) Free the MMG2D structures */
+  MMG2D_Free_allSols(mmgMesh,&mmgSol);
+
   MMG2D_Free_all(MMG5_ARG_start,
                  MMG5_ARG_ppMesh,&mmgMesh,MMG5_ARG_ppSols,&tmpSol,
-                 MMG5_ARG_ppSols,&mmgSol,
                  MMG5_ARG_end);
 
   free(filename);

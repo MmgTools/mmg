@@ -1748,6 +1748,12 @@ int MMG2D_Chk_meshData(MMG5_pMesh mesh,MMG5_pSol met) {
   return 1;
 }
 
+int MMG2D_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol) {
+
+  return MMG5_Free_allSols(mesh,sol);
+}
+
+
 int MMG2D_Free_all(const int starter,...)
 {
   va_list argptr;

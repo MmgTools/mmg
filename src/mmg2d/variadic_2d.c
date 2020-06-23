@@ -269,11 +269,12 @@ int MMG2D_Free_all_var(va_list argptr)
 {
 
   MMG5_pMesh     *mesh;
-  MMG5_pSol      psl,*sol,*disp,*ls,*sols;
+  MMG5_pSol      *sol,*disp,*ls,*sols;
   int            typArg;
-  int            meshCount,ier,i;
+  int            meshCount,metCount,lsCount,dispCount,fieldsCount;
+  int            ier;
 
-  meshCount = 0;
+  meshCount = metCount = lsCount = dispCount = fieldsCount = 0;
   disp = sol = sols = ls = NULL;
 
   while ( (typArg = va_arg(argptr,int          )) != MMG5_ARG_end )
@@ -285,15 +286,19 @@ int MMG2D_Free_all_var(va_list argptr)
       ++meshCount;
       break;
     case(MMG5_ARG_ppMet):
+      ++metCount;
       sol = va_arg(argptr,MMG5_pSol*);
       break;
     case(MMG5_ARG_ppLs):
+      ++lsCount;
       ls = va_arg(argptr,MMG5_pSol*);
       break;
     case(MMG5_ARG_ppDisp):
+      ++dispCount;
       disp = va_arg(argptr,MMG5_pSol*);
       break;
     case(MMG5_ARG_ppSols):
+      ++fieldsCount;
       sols = va_arg(argptr,MMG5_pSol*);
       break;
     default:
@@ -312,9 +317,17 @@ int MMG2D_Free_all_var(va_list argptr)
     return 0;
   }
 
+  if ( metCount > 1 || lsCount > 1 || dispCount > 1 || fieldsCount > 1 ) {
+    fprintf(stdout,"\n  ## Warning: %s: MMG2D_Free_all:\n"
+            " This function can free only one structure of each type.\n"
+            " Probable memory leak.\n",
+            __func__);
+  }
+
   ier = MMG2D_Free_structures(MMG5_ARG_start,
                               MMG5_ARG_ppMesh, mesh, MMG5_ARG_ppMet, sol,
                               MMG5_ARG_ppLs,ls ,MMG5_ARG_ppDisp, disp,
+                              MMG5_ARG_ppSols, sols,
                               MMG5_ARG_end);
 
   if ( sol )
@@ -327,12 +340,6 @@ int MMG2D_Free_all_var(va_list argptr)
     MMG5_SAFE_FREE(*ls);
 
   if ( sols ) {
-    for ( i=0; i<(*mesh)->nsols; ++i ) {
-      psl = (*sols) + i;
-      if ( psl->m ) {
-        MMG5_DEL_MEM(*mesh,psl->m);
-      }
-    }
     MMG5_DEL_MEM(*mesh,*sols);
   }
 
@@ -371,13 +378,13 @@ int MMG2D_Free_structures_var(va_list argptr)
 {
 
   MMG5_pMesh     *mesh;
-  MMG5_pSol      *sol,*disp,*ls;
-  int            typArg;
+  MMG5_pSol      *sol,*disp,*ls,*sols;
+  int            typArg,i;
   int            meshCount;
 
   meshCount = 0;
   mesh = NULL;
-  disp = sol = ls = NULL;
+  disp = sol = ls = sols = NULL;
 
   while ( (typArg = va_arg(argptr,int          )) != MMG5_ARG_end )
   {
@@ -395,6 +402,9 @@ int MMG2D_Free_structures_var(va_list argptr)
       break;
     case(MMG5_ARG_ppDisp):
       disp = va_arg(argptr,MMG5_pSol*);
+      break;
+    case(MMG5_ARG_ppSols):
+      sols = va_arg(argptr,MMG5_pSol*);
       break;
     default:
       fprintf(stderr,"\n  ## Error: %s: MMG2D_Free_structures:\n"
@@ -415,6 +425,7 @@ int MMG2D_Free_structures_var(va_list argptr)
   if ( !MMG2D_Free_names(MMG5_ARG_start,
                          MMG5_ARG_ppMesh, mesh, MMG5_ARG_ppMet, sol,
                          MMG5_ARG_ppLs, ls ,MMG5_ARG_ppDisp, disp,
+                         MMG5_ARG_ppSols, sols,
                          MMG5_ARG_end) )
     return 0;
 
@@ -448,6 +459,13 @@ int MMG2D_Free_structures_var(va_list argptr)
   if ( sol && (*sol) && (*sol)->m )
     MMG5_DEL_MEM((*mesh),(*sol)->m);
 
+  /* field */
+  if ( sols && (*mesh)->nsols ) {
+    for ( i=0; i<(*mesh)->nsols; ++i ) {
+      MMG5_DEL_MEM((*mesh),(*sols)[i].m);
+    }
+  }
+
   MMG5_Free_structures(*mesh,NULL);
 
   return 1;
@@ -475,12 +493,12 @@ int MMG2D_Free_names_var(va_list argptr)
 {
 
   MMG5_pMesh     *mesh;
-  MMG5_pSol      *sol,*disp,*ls;
-  int            typArg;
+  MMG5_pSol      psl,*sol,*disp,*ls,*sols;
+  int            typArg,i;
   int            meshCount;
 
   meshCount = 0;
-  disp = sol = ls = NULL;
+  disp = sol = ls = sols = NULL;
 
   while ( (typArg = va_arg(argptr,int          )) != MMG5_ARG_end )
   {
@@ -498,6 +516,9 @@ int MMG2D_Free_names_var(va_list argptr)
       break;
     case(MMG5_ARG_ppDisp):
       disp = va_arg(argptr,MMG5_pSol*);
+      break;
+    case(MMG5_ARG_ppSols):
+      sols = va_arg(argptr,MMG5_pSol*);
       break;
     default:
       fprintf(stderr,"\n  ## Error: %s: MMG2D_Free_names:\n"
@@ -542,6 +563,17 @@ int MMG2D_Free_names_var(va_list argptr)
 
     if ( (*ls)->nameout ) {
       MMG5_DEL_MEM(*mesh,(*ls)->nameout);
+    }
+  }
+
+  /* Fields */
+  for ( i=0; i<(*mesh)->nsols; ++i ) {
+    psl = (*sols) + i;
+    if ( psl->namein ) {
+      MMG5_DEL_MEM(*mesh,psl->namein);
+    }
+    if ( psl->nameout ) {
+      MMG5_DEL_MEM(*mesh,psl->nameout);
     }
   }
 

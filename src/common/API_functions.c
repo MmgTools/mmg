@@ -150,7 +150,7 @@ int MMG5_Set_inputMeshName(MMG5_pMesh mesh, const char* meshin) {
     MMG5_DEL_MEM(mesh,mesh->namein);
   }
 
-  if ( strlen(meshin) ) {
+  if ( meshin && strlen(meshin) ) {
     MMG5_ADD_MEM(mesh,(strlen(meshin)+1)*sizeof(char),"input mesh name",
                   fprintf(stderr,"  Exit program.\n");
                   return 0);
@@ -433,6 +433,19 @@ void MMG5_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met,double hsiz) {
   }
 
   return;
+}
+
+int MMG5_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol) {
+  int i;
+
+  if ( sol && mesh->nsols ) {
+    for ( i=0; i<mesh->nsols; ++i ) {
+      MMG5_DEL_MEM(mesh,(*sol)[i].m);
+    }
+  }
+  MMG5_DEL_MEM(mesh,(*sol));
+
+  return 1;
 }
 
 /**

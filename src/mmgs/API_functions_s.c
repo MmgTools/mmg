@@ -1520,6 +1520,11 @@ int MMGS_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref,
   return 1;
 }
 
+int MMGS_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol) {
+
+  return MMG5_Free_allSols(mesh,sol);
+}
+
 int MMGS_Free_all(const int starter,...)
 {
   va_list argptr;
