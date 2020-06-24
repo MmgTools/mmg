@@ -199,47 +199,37 @@ int MMG3D_mark_packedPoints(MMG5_pMesh mesh,int *np,int *nc) {
 
   for ( k=1; k<=mesh->np; ++k ) {
     mesh->point[k].tmp = 0;
+    mesh->point[k].ref = -1;
   }
 
   (*nc) = 0;
   k     = 1;
-  (*np) = mesh->np;
+  (*np) = mesh->np+1;
 
   do {
     ppt = &mesh->point[k];
     if ( !MG_VOK(ppt) ) {
-
-      ppt1 = &mesh->point[*np];
-      assert ( ppt1 );
-      ppt1->tmp = k;
+      --(*np);
+      ppt = &mesh->point[*np];
+      assert ( ppt );
 
       /* Search the last used point */
-      do {
+      while ( !MG_VOK(ppt) && k < *np ) {
         --(*np);
-        ppt1 = &mesh->point[*np];
+        ppt = &mesh->point[*np];
       }
-      while ( !MG_VOK(ppt1) && k < *np );
     }
-    else {
+
+#ifndef NDEBUG
+    if ( !MG_VOK(ppt) ) {
+      assert ( k==*np );
+    }
+    if ( k==*np ) {
+      assert ( !MG_VOK(ppt) );
+    }
+#endif
+    if ( MG_VOK (ppt) ) {
       ppt->tmp = k;
-    }
-
-    if ( ppt->tag & MG_NOSURF ) {
-      ppt->tag &= ~MG_NOSURF;
-      ppt->tag &= ~MG_REQ;
-    }
-
-    if ( ppt->tag & MG_CRN )  (*nc)++;
-
-    ppt->ref = abs(ppt->ref);
-  }
-  while ( ++k < (*np) );
-
-
-  // if k==*np mesh->point[k] may not be treated
-  if ( k==*np && MG_VOK(&mesh->point[*np]) ) {
-    if ( !mesh->point[k].tmp ) {
-      mesh->point[k].tmp = *np;
 
       if ( ppt->tag & MG_NOSURF ) {
         ppt->tag &= ~MG_NOSURF;
@@ -250,7 +240,11 @@ int MMG3D_mark_packedPoints(MMG5_pMesh mesh,int *np,int *nc) {
 
       ppt->ref = abs(ppt->ref);
     }
+    else {
+      assert ( k==(*np) );
+    }
   }
+  while ( ++k < (*np) );
 
 #ifndef NDEBUG
   for ( k=1; k<=(*np); ++k  ) {
@@ -259,6 +253,11 @@ int MMG3D_mark_packedPoints(MMG5_pMesh mesh,int *np,int *nc) {
     }
   }
 #endif
+
+  for ( k=1; k<=mesh->np; ++k ) {
+    if ( mesh->point[k].tmp ) assert( mesh->point[k].ref >0);
+  }
+
 
   return 1;
 }
