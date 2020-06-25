@@ -171,6 +171,9 @@ int MMG3D_bdryBuild(MMG5_pMesh mesh) {
   else
     mesh->memCur -= (long long)((3*mesh->nt+2)*sizeof(MMG5_hgeom));
 
+  mesh->nti = mesh->nt;
+  mesh->nai = mesh->na;
+
   if ( mesh->info.imprim > 0 ) {
     if ( mesh->na )
       fprintf(stdout,"     NUMBER OF EDGES      %8d   RIDGES  %8d\n",mesh->na,nr);
@@ -184,11 +187,11 @@ int MMG3D_bdryBuild(MMG5_pMesh mesh) {
 #ifndef SCOTCH
 /**
  * \param mesh pointer toward the mesh structure (unused).
- * \param np pointer toward the number of packed points
+ * \param np pointer toward the number of used points
  * \param nc pointer toward the number of packed corners
  * \return 1 if success, 0 if fail.
  *
- * Count the number of packed points and store the packed point index in tmp.
+ * Pack the mesh points and store the packed point index in tmp.
  * Don't preserve numbering order.
  *
  */
@@ -248,8 +251,9 @@ int MMG3D_mark_packedPoints(MMG5_pMesh mesh,int *np,int *nc) {
   --(*np);
 
 #ifndef NDEBUG
-  for ( k=1; k<=(*np); ++k  ) {
+  for ( k=1; k<=mesh->np; ++k  ) {
     if ( MG_VOK(&mesh->point[k]) ) {
+      /* Check that all the used points have a tmp field  */
       assert(mesh->point[k].tmp);
     }
   }
@@ -305,6 +309,8 @@ int MMG3D_pack_tetraAndAdja(MMG5_pMesh mesh) {
   else
     mesh->nenil = mesh->ne + 1;
 
+  mesh->nei = mesh->ne;
+
   if ( mesh->nenil )
     for(k=mesh->nenil; k<mesh->nemax-1; k++)
       mesh->tetra[k].v[3] = k+1;
@@ -348,6 +354,7 @@ int MMG3D_pack_tetra(MMG5_pMesh mesh) {
     for(k=mesh->nenil; k<mesh->nemax-1; k++)
       mesh->tetra[k].v[0] = 0;
   }
+  mesh->nei = mesh->ne;
 
   return 1;
 }
@@ -434,7 +441,7 @@ int MMG3D_pack_sol(MMG5_pMesh mesh,MMG5_pSol sol) {
     }
     while ( ++k < np );
 
-    sol->np = np;
+    sol->npi = sol->np = np;
   }
 
   return 1;
@@ -491,6 +498,9 @@ int MMG3D_pack_pointArray(MMG5_pMesh mesh) {
   if ( mesh->npnil )
     for(k=mesh->npnil; k<mesh->npmax-1; k++)
       mesh->point[k].tmp  = k+1;
+
+  /* Set mesh->npi to suitable value */
+  mesh->npi = mesh->np;
 
   return 1;
 }
@@ -570,7 +580,7 @@ int MMG3D_pack_tetraAndAdja(MMG5_pMesh mesh) {
     }
     nbl++;
   }
-  mesh->ne = ne;
+  mesh->nei = mesh->ne = ne;
 
   /* Recreate nil chain */
   if ( mesh->ne >= mesh->nemax-1 )
@@ -611,7 +621,7 @@ int MMG3D_pack_tetra(MMG5_pMesh mesh) {
     }
     nbl++;
   }
-  mesh->ne = ne;
+  mesh->nei = mesh->ne = ne;
 
   /* Recreate nil chain */
   if ( mesh->ne >= mesh->nemax-1 )
@@ -703,7 +713,7 @@ int MMG3D_pack_sol(MMG5_pMesh mesh,MMG5_pSol sol) {
       }
       ++nbl;
     }
-    sol->np = np;
+    sol->npi = sol->np = np;
   }
 
   return 1;
@@ -746,7 +756,7 @@ int MMG3D_pack_pointArray(MMG5_pMesh mesh) {
 
     nbl++;
   }
-  mesh->np = np;
+  mesh->npi = mesh->np = np;
 
   for(k=1 ; k<=mesh->np ; k++)
     mesh->point[k].tmp = 0;
