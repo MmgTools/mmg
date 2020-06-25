@@ -227,21 +227,25 @@ int MMG3D_mark_packedPoints(MMG5_pMesh mesh,int *np,int *nc) {
       assert ( !MG_VOK(ppt) );
     }
 #endif
-
-    if ( MG_VOK (ppt) ) {
-      ppt->tmp = k;
-
-      if ( ppt->tag & MG_NOSURF ) {
-        ppt->tag &= ~MG_NOSURF;
-        ppt->tag &= ~MG_REQ;
-      }
-
-      if ( ppt->tag & MG_CRN )  (*nc)++;
-
-      ppt->ref = abs(ppt->ref);
+    if ( k==*np ) {
+      break;
     }
+
+    ppt->tmp = k;
+
+    if ( ppt->tag & MG_NOSURF ) {
+      ppt->tag &= ~MG_NOSURF;
+      ppt->tag &= ~MG_REQ;
+    }
+
+    if ( ppt->tag & MG_CRN )  (*nc)++;
+
+    ppt->ref = abs(ppt->ref);
   }
   while ( ++k < (*np) );
+
+  assert ( k==*np );
+  --(*np);
 
 #ifndef NDEBUG
   for ( k=1; k<=(*np); ++k  ) {
