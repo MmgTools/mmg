@@ -194,12 +194,11 @@ int MMG3D_bdryBuild(MMG5_pMesh mesh) {
  */
 
 int MMG3D_mark_packedPoints(MMG5_pMesh mesh,int *np,int *nc) {
-  MMG5_pPoint   ppt,ppt1;
+  MMG5_pPoint   ppt;
   int           k;
 
   for ( k=1; k<=mesh->np; ++k ) {
     mesh->point[k].tmp = 0;
-    mesh->point[k].ref = -1;
   }
 
   (*nc) = 0;
@@ -228,6 +227,7 @@ int MMG3D_mark_packedPoints(MMG5_pMesh mesh,int *np,int *nc) {
       assert ( !MG_VOK(ppt) );
     }
 #endif
+
     if ( MG_VOK (ppt) ) {
       ppt->tmp = k;
 
@@ -240,9 +240,6 @@ int MMG3D_mark_packedPoints(MMG5_pMesh mesh,int *np,int *nc) {
 
       ppt->ref = abs(ppt->ref);
     }
-    else {
-      assert ( k==(*np) );
-    }
   }
   while ( ++k < (*np) );
 
@@ -253,11 +250,6 @@ int MMG3D_mark_packedPoints(MMG5_pMesh mesh,int *np,int *nc) {
     }
   }
 #endif
-
-  for ( k=1; k<=mesh->np; ++k ) {
-    if ( mesh->point[k].tmp ) assert( mesh->point[k].ref >0);
-  }
-
 
   return 1;
 }
