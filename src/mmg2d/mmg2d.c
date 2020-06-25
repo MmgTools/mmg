@@ -878,7 +878,7 @@ int main(int argc,char *argv[]) {
       ierSave = MMG2D_saveVtkMesh(mesh,met,mesh->nameout);
       break;
     case ( MMG5_FMT_Tetgen ):
-      ierSave = MMG2D_saveTriangleMesh(mesh,mesh->nameout);
+      ierSave = MMG2D_saveTetgenMesh(mesh,mesh->nameout);
       /* This format dont allow to save a solution: use a .sol file */
       if ( !ierSave ) {
         MMG2D_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);

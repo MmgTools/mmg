@@ -1761,7 +1761,7 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * Save mesh data at Triangle (or equivalent to Tetgen in 2D) file format.
  *
  * \remark Fortran interface:
- * >   SUBROUTINE MMG2D_SAVETRIAGNLEMESH(mesh,filename,strlen0,retval)\n
+ * >   SUBROUTINE MMG2D_SAVETETGENMESH(mesh,filename,strlen0,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh\n
  * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
  * >     INTEGER, INTENT(IN)            :: strlen0\n
@@ -1769,7 +1769,7 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_saveTriangleMesh(MMG5_pMesh ,const char *);
+  int MMG2D_saveTetgenMesh(MMG5_pMesh ,const char *);
 
 
 /**

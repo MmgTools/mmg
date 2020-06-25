@@ -2352,3 +2352,244 @@ int MMG3D_saveAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
   fclose(inm);
   return 1;
 }
+
+static inline
+int MMG3D_saveEle(MMG5_pMesh mesh,const char *filename) {
+  FILE*             inm;
+  MMG5_pTetra       pt;
+  int               k,i,ne;
+  char              *ptr,*data;
+
+  if ( !mesh->ne ) {
+    return 1;
+  }
+
+  if ( (!filename) || !(*filename) ) {
+    filename = mesh->nameout;
+  }
+  if ( (!filename) || !(*filename) ) {
+    printf("\n  ## Error: %s: unable to save a file without a valid filename\n.",
+           __func__);
+    return 0;
+  }
+
+  /* Name of file */
+  MMG5_SAFE_CALLOC(data,strlen(filename)+5,char,return 0);
+  strcpy(data,filename);
+  ptr = strstr(data,".node");
+  if ( ptr ) {
+    *ptr = '\0';
+  }
+
+  /* Add .node ext  */
+  strcat(data,".ele");
+  if( !(inm = fopen(data,"wb")) ) {
+    fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",data);
+    MMG5_SAFE_FREE(data);
+    return 0;
+  }
+
+  fprintf(stdout,"  %%%% %s OPENED\n",data);
+  MMG5_SAFE_FREE(data);
+
+  ne    = 0;
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+    if ( !MG_EOK(pt) ) continue;
+    ne++;
+  }
+
+  /* Save elt number, node number per elt, 1 bdy marker */
+  fprintf(inm, "%d %d %d\n\n",ne,mesh->dim+1,1);
+
+  ne = 0;
+  for ( k=1; k<=mesh->ne; ++k ) {
+    pt = &mesh->tetra[k];
+    if ( MG_EOK(pt) ) {
+      /* Save elt idx */
+      fprintf(inm, "%d ",++ne);
+
+      /* Save connectivity */
+      for ( i=0; i<=mesh->dim; ++i ) {
+        fprintf(inm, "%d ",mesh->point[pt->v[i]].tmp);
+      }
+
+      /* Save bdy marker */
+      fprintf(inm, "%d\n",pt->ref);
+    }
+  }
+  fprintf(stdout,"     NUMBER OF ELEMENT       %8d\n",ne);
+
+  fclose(inm);
+
+  return 1;
+}
+
+static inline
+int MMG3D_saveNeigh(MMG5_pMesh mesh,const char *filename) {
+  FILE*             inm;
+  MMG5_pTetra       pt;
+  int               k,i,ne,idx;
+  char              *ptr,*data;
+
+  if ( !mesh->na ) {
+    return 1;
+  }
+
+  if ( (!filename) || !(*filename) ) {
+    filename = mesh->nameout;
+  }
+  if ( (!filename) || !(*filename) ) {
+    printf("\n  ## Error: %s: unable to save a file without a valid filename\n.",
+           __func__);
+    return 0;
+  }
+
+  /* Name of file */
+  MMG5_SAFE_CALLOC(data,strlen(filename)+7,char,return 0);
+  strcpy(data,filename);
+  ptr = strstr(data,".node");
+  if ( ptr ) {
+    *ptr = '\0';
+  }
+
+  /* Add .node ext  */
+  strcat(data,".neigh");
+  if( !(inm = fopen(data,"wb")) ) {
+    fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",data);
+    MMG5_SAFE_FREE(data);
+    return 0;
+  }
+
+  fprintf(stdout,"  %%%% %s OPENED\n",data);
+  MMG5_SAFE_FREE(data);
+
+  if ( ! mesh->adja ) {
+    if ( !MMG3D_hashTetra(mesh,1) ) {
+      printf("\n  ## Error: %s: unable to compute triangle adjacencies\n.",__func__);
+      return 0;
+    }
+  }
+
+  ne    = 0;
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+    if ( !MG_EOK(pt) ) continue;
+    ne++;
+  }
+
+  /* Save elt number, number of neighbors per elt */
+  fprintf(inm, "%d %d\n\n",ne,mesh->dim+1);
+
+  ne = 0;
+  for ( k=1; k<=mesh->ne; ++k ) {
+    pt = &mesh->tetra[k];
+    if ( MG_EOK(pt) ) {
+      /* Save elt idx */
+      fprintf(inm, "%d ",++ne);
+
+      /* Save neighbors */
+      for ( i=1; i<=mesh->dim+1; ++i ) {
+        /* The triangle conventions is that no neighbors <=> -1 */
+        idx = ( mesh->adja[4*(k-1)+i] > 0 ) ? mesh->adja[4*(k-1)+i]/4 : -1;
+        fprintf(inm, "%d ",idx);
+      }
+      /* Save bdy marker */
+      fprintf(inm, "\n");
+    }
+  }
+
+  fclose(inm);
+
+  return 1;
+}
+
+static inline
+int MMG3D_saveFace(MMG5_pMesh mesh,const char *filename) {
+  FILE*             inm;
+  MMG5_pTria        pt;
+  int               k,i;
+  char              *ptr,*data;
+
+  if ( !mesh->nt ) {
+    return 1;
+  }
+
+  if ( (!filename) || !(*filename) ) {
+    filename = mesh->nameout;
+  }
+  if ( (!filename) || !(*filename) ) {
+    printf("\n  ## Error: %s: unable to save a file without a valid filename\n.",
+           __func__);
+    return 0;
+  }
+
+  /* Name of file */
+  MMG5_SAFE_CALLOC(data,strlen(filename)+6,char,return 0);
+  strcpy(data,filename);
+  ptr = strstr(data,".node");
+  if ( ptr ) {
+    *ptr = '\0';
+  }
+
+  /* Add .node ext  */
+  strcat(data,".face");
+  if( !(inm = fopen(data,"wb")) ) {
+    fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",data);
+    MMG5_SAFE_FREE(data);
+    return 0;
+  }
+
+  fprintf(stdout,"  %%%% %s OPENED\n",data);
+  MMG5_SAFE_FREE(data);
+
+  /* Save tria number, 1 bdy marker */
+  fprintf(inm, "%d %d\n\n",mesh->nt,1);
+
+  for ( k=1; k<=mesh->nt; ++k ) {
+    pt = &mesh->tria[k];
+    if ( MG_EOK(pt) ) {
+      /* Save elt idx */
+      fprintf(inm, "%d ",k);
+
+      /* Save connectivity */
+      for ( i=0; i<mesh->dim; ++i ) {
+        fprintf(inm, "%d ",mesh->point[pt->v[i]].tmp);
+      }
+
+      /* Save bdy marker */
+      fprintf(inm, "%d\n",pt->ref);
+    }
+  }
+  fprintf(stdout,"     NUMBER OF TRIANGLES       %8d\n",mesh->nt);
+
+  fclose(inm);
+
+  return 1;
+}
+
+
+int MMG3D_saveTetgenMesh(MMG5_pMesh mesh,const char *filename) {
+
+  if ( !MMG5_saveNode(mesh,filename) ) {
+    return 0;
+  }
+
+  if ( !MMG3D_saveEle(mesh,filename) ) {
+    return 0;
+  }
+
+  if ( !MMG3D_saveFace(mesh,filename) ) {
+    return 0;
+  }
+
+  if ( !MMG5_saveEdge(mesh,filename) ) {
+    return 0;
+  }
+
+  if ( !MMG3D_saveNeigh(mesh,filename) ) {
+    return 0;
+  }
+
+  return 1;
+}

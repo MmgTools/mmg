@@ -2504,6 +2504,10 @@ int MMG5_saveNode(MMG5_pMesh mesh,const char *filename) {
   int               k,np,i;
   char              *ptr,*data;
 
+  if ( !mesh->np ) {
+    return 1;
+  }
+
   if ( (!filename) || !(*filename) ) {
     filename = mesh->nameout;
   }

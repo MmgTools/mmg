@@ -1957,11 +1957,16 @@ int MMG2D_savedisp_db(MMG5_pMesh mesh,MMG5_pSol disp,char *filename,char pack) {
   return 1;
 }
 
+static inline
 int MMG2D_saveEle(MMG5_pMesh mesh,const char *filename) {
   FILE*             inm;
   MMG5_pTria        pt;
   int               k,i,ne;
   char              *ptr,*data;
+
+  if ( !mesh->nt ) {
+    return 1;
+  }
 
   if ( (!filename) || !(*filename) ) {
     filename = mesh->nameout;
@@ -2031,7 +2036,7 @@ int MMG2D_saveNeigh(MMG5_pMesh mesh,const char *filename) {
   int               k,i,ne,idx;
   char              *ptr,*data;
 
-  if ( !mesh->na ) {
+  if ( !mesh->nt ) {
     return 1;
   }
 
@@ -2103,7 +2108,7 @@ int MMG2D_saveNeigh(MMG5_pMesh mesh,const char *filename) {
   return 1;
 }
 
-int MMG2D_saveTriangleMesh(MMG5_pMesh mesh,const char *filename) {
+int MMG2D_saveTetgenMesh(MMG5_pMesh mesh,const char *filename) {
 
   if ( !MMG5_saveNode(mesh,filename) ) {
     return 0;
