@@ -543,6 +543,7 @@ enum MMG5_Format {
   MMG5_FMT_VtkVtu, /*!< VTK vtu */
   MMG5_FMT_VtkVtp, /*!< VTK vtp */
   MMG5_FMT_VtkVtk, /*!< VTK vtk */
+  MMG5_FMT_Tetgen, /*!< Tetgen or Triangle */
   MMG5_FMT_Unknown /*!< Unrecognized */
 };
 
