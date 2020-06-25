@@ -184,7 +184,7 @@ int MMG3D_bdryBuild(MMG5_pMesh mesh) {
   return nr;
 }
 
-#ifndef SCOTCH
+#ifndef USE_SCOTCH
 /**
  * \param mesh pointer toward the mesh structure (unused).
  * \param np pointer toward the number of used points
