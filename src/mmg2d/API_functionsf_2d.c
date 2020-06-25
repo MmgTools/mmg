@@ -1050,6 +1050,21 @@ FORTRAN_NAME(MMG2D_SAVEMSHMESH_AND_ALLDATA,mmg2d_savemshmesh_and_alldata,
   return;
 }
 
+/**
+ * See \ref MMG2D_saveTriangleMesh function in \ref mmg2d/libmmg2d.h file.
+ */
+FORTRAN_NAME(MMG2D_SAVETRIANGLEMESH,mmg2d_savetrianglemesh,(MMG5_pMesh *mesh,char *meshin,int *strlen0, int* retval),
+             (mesh,meshin,strlen0,retval)){
+  char *tmp = NULL;
+
+  MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
+  strncpy(tmp,meshin,*strlen0);
+  tmp[*strlen0] = '\0';
+  *retval = MMG2D_saveTriangleMesh(*mesh,tmp);
+  MMG5_SAFE_FREE(tmp);
+
+  return;
+}
 
 /**
  * See \ref MMG2D_loadSol function in \ref mmg2d/libmmg2d.h file.

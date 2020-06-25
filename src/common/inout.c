@@ -2497,3 +2497,129 @@ void MMG5_printSolStats(MMG5_pMesh mesh,MMG5_pSol *sol) {
     fprintf(stdout,"\n");
   }
 }
+
+int MMG5_saveNode(MMG5_pMesh mesh,const char *filename) {
+  FILE*             inm;
+  MMG5_pPoint       ppt;
+  int               k,np,i;
+  char              *ptr,*data;
+
+  if ( (!filename) || !(*filename) ) {
+    filename = mesh->nameout;
+  }
+  if ( (!filename) || !(*filename) ) {
+    printf("\n  ## Error: %s: unable to save a file without a valid filename\n.",
+           __func__);
+    return 0;
+  }
+
+  /* Name of file */
+  MMG5_SAFE_CALLOC(data,strlen(filename)+7,char,return 0);
+  strcpy(data,filename);
+  ptr = strstr(data,".node");
+  if ( ptr ) {
+    *ptr = '\0';
+  }
+
+  /* Add .node ext  */
+  strcat(data,".node");
+  if( !(inm = fopen(data,"wb")) ) {
+    fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",data);
+    MMG5_SAFE_FREE(data);
+    return 0;
+  }
+
+  fprintf(stdout,"  %%%% %s OPENED\n",data);
+  MMG5_SAFE_FREE(data);
+
+  /* Write vertices */
+  np = 0;
+  for (k=1; k<=mesh->np; k++) {
+    ppt = &mesh->point[k];
+    if ( MG_VOK(ppt) )  np++;
+    ppt->tmp = np;
+  }
+
+  /* Save node number, dim, no attributes, 1 bdy marker */
+  fprintf(inm, "%d %d %d %d\n\n",np,mesh->dim,0,1);
+
+  for ( k=1; k<=mesh->np; ++k ) {
+    /* Save node idx */
+    ppt = &mesh->point[k];
+    if ( MG_VOK(ppt) ) {
+      fprintf(inm, "%d ",ppt->tmp);
+
+      /* Save coordinates */
+      for ( i=0; i<mesh->dim; ++i ) {
+        fprintf(inm, " %.15lf",ppt->c[i]);
+      }
+
+      /* Save bdy marker */
+      fprintf(inm, "%d\n",ppt->ref);
+    }
+  }
+
+  fprintf(stdout,"     NUMBER OF VERTICES       %8d\n",np);
+
+  fclose(inm);
+
+  return 1;
+}
+
+int MMG5_saveEdge(MMG5_pMesh mesh,const char *filename) {
+  FILE*             inm;
+  MMG5_pEdge        pt;
+  int               k;
+  char              *ptr,*data;
+
+  if ( !mesh->na ) {
+    return 1;
+  }
+
+  if ( (!filename) || !(*filename) ) {
+    filename = mesh->nameout;
+  }
+  if ( (!filename) || !(*filename) ) {
+    printf("\n  ## Error: %s: unable to save a file without a valid filename\n.",
+           __func__);
+    return 0;
+  }
+
+  /* Name of file */
+  MMG5_SAFE_CALLOC(data,strlen(filename)+6,char,return 0);
+  strcpy(data,filename);
+  ptr = strstr(data,".node");
+  if ( ptr ) {
+    *ptr = '\0';
+  }
+
+  /* Add .node ext  */
+  strcat(data,".edge");
+  if( !(inm = fopen(data,"wb")) ) {
+    fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",data);
+    MMG5_SAFE_FREE(data);
+    return 0;
+  }
+
+  fprintf(stdout,"  %%%% %s OPENED\n",data);
+  MMG5_SAFE_FREE(data);
+
+  /* Save node number, dim, no attributes, 1 bdy marker */
+  fprintf(inm, "%d %d\n\n",mesh->na,1);
+
+  for ( k=1; k<=mesh->na; ++k ) {
+    /* Save edge idx */
+    fprintf(inm, "%d ",k);
+
+    pt = &mesh->edge[k];
+
+    /* Save connectivity */
+    fprintf(inm,"%d %d %d\n",mesh->point[pt->a].tmp,mesh->point[pt->b].tmp,pt->ref);
+
+  }
+  fprintf(stdout,"     NUMBER OF EDGES       %8d\n",mesh->na);
+
+  fclose(inm);
+
+  return 1;
+}

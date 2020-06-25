@@ -877,6 +877,16 @@ int main(int argc,char *argv[]) {
     case ( MMG5_FMT_VtkVtk ):
       ierSave = MMG2D_saveVtkMesh(mesh,met,mesh->nameout);
       break;
+    case ( MMG5_FMT_Tetgen ):
+      ierSave = MMG2D_saveTriangleMesh(mesh,mesh->nameout);
+      /* This format dont allow to save a solution: use a .sol file */
+      if ( !ierSave ) {
+        MMG2D_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
+      }
+      if ( met && met->np ) {
+        ierSave = MMG2D_saveSol(mesh,met,mesh->nameout);
+      }
+      break;
     default:
       ierSave = MMG2D_saveMesh(mesh,mesh->nameout);
       if ( !ierSave ) {

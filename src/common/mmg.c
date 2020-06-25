@@ -493,6 +493,9 @@ int MMG5_Get_format( char *ptr, int fmt ) {
   else if ( !strncmp ( ptr,".vtk",strlen(".vtk") ) ) {
     return MMG5_FMT_VtkVtk;
   }
+  else if ( !strncmp ( ptr,".node",strlen(".node") ) ) {
+    return MMG5_FMT_Tetgen;
+  }
 
   return defFmt;
 }
@@ -535,6 +538,9 @@ const char* MMG5_Get_formatName(enum MMG5_Format fmt)
     break;
   case MMG5_FMT_GmshBinary:
     return "MMG5_FMT_GmshBinary";
+    break;
+  case MMG5_FMT_Tetgen:
+    return "MMG5_FMT_Tetgen";
     break;
   default:
     return "MMG5_Unknown";
