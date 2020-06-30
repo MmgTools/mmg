@@ -379,13 +379,21 @@ int MMG5_mmg3dRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol,int* pe
   else
     mesh->nenil = mesh->ne + 1;
 
-  if ( mesh->npnil )
-    for (k=mesh->npnil; k<mesh->npmax-1; k++)
+  if ( mesh->npnil ) {
+    for (k=mesh->npnil; k<mesh->npmax-1; k++) {
       mesh->point[k].tmp  = k+1;
+    }
+    mesh->point[mesh->npmax-1].tmp = 0;
+    mesh->point[mesh->npmax  ].tmp = 0;
+  }
 
-  if ( mesh->nenil )
-    for (k=mesh->nenil; k<mesh->nemax-1; k++)
+  if ( mesh->nenil ) {
+    for (k=mesh->nenil; k<mesh->nemax-1; k++) {
       mesh->tetra[k].v[3] = k+1;
+    }
+    mesh->tetra[mesh->nemax-1].v[3] = 0;
+    mesh->tetra[mesh->nemax  ].v[3] = 0;
+  }
 
   if( !MMG3D_hashTetra(mesh,0) ) return 0;
 
