@@ -355,7 +355,10 @@ int MMG5_mmg3dRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol,int* pe
   /* If needed, store update the global permutation for point array */
   if ( permNodGlob ) {
     for ( k=1; k<=mesh->npi; ++k ) {
-      permNodGlob[k] = permNodTab[permNodGlob[k]];
+      if ( MG_VOK( &mesh->point[permNodGlob[k]] ) ) {
+        permNodGlob[k] = permNodTab[permNodGlob[k]];
+        assert ( permNodGlob[k] > 0 );
+      }
     }
   }
 
