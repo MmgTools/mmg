@@ -1108,7 +1108,7 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
 
 
     /* renumerotation if available */
-    if ( !MMG5_scotchCall(mesh,met,NULL) )
+    if ( !MMG5_scotchCall(mesh,met,NULL,NULL) )
     {
       if ( !MMG5_unscaleMesh(mesh,met,NULL) ) _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
       MMG5_RETURN_AND_PACK(mesh,met,sol,MMG5_LOWFAILURE);
@@ -1142,7 +1142,7 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
   /* last renum to give back a good numbering to the user */
-  if ( !MMG5_scotchCall(mesh,met,NULL) )
+  if ( !MMG5_scotchCall(mesh,met,NULL,NULL) )
   {
     if ( !MMG5_unscaleMesh(mesh,met,NULL) ) _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
     MMG5_RETURN_AND_PACK(mesh,met,sol,MMG5_LOWFAILURE);
@@ -1373,7 +1373,7 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet) {
   }
 
   /* renumerotation if available */
-  if ( !MMG5_scotchCall(mesh,met,NULL) )
+  if ( !MMG5_scotchCall(mesh,met,NULL,NULL) )
   {
     if ( mettofree ) { MMG5_DEL_MEM(mesh,met->m);MMG5_SAFE_FREE (met); }
     if ( !MMG5_unscaleMesh(mesh,met,sol) )    _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
@@ -1409,7 +1409,7 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet) {
   }
 
   /* last renum to give back a good numbering to the user */
-  if ( !MMG5_scotchCall(mesh,met,NULL) )
+  if ( !MMG5_scotchCall(mesh,met,NULL,NULL) )
   {
     if ( !MMG5_unscaleMesh(mesh,met,NULL) ) _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
     MMG5_RETURN_AND_PACK(mesh,met,sol,MMG5_LOWFAILURE);
@@ -1585,7 +1585,7 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
   }
 
   /* renumerotation if available */
-  if ( !MMG5_scotchCall(mesh,met,NULL) )
+  if ( !MMG5_scotchCall(mesh,met,NULL,NULL) )
   {
     if ( !MMG5_unscaleMesh(mesh,met,disp) )    _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
     MMG5_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE);
@@ -1634,7 +1634,7 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
     }
 
     /* renumerotation if available */
-    if ( !MMG5_scotchCall(mesh,met,NULL) )
+    if ( !MMG5_scotchCall(mesh,met,NULL,NULL) )
     {
       if ( !MMG5_unscaleMesh(mesh,met,disp) )    _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
       MMG5_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE);
@@ -1668,7 +1668,7 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
   }
 
   /* last renum to give back a good numbering to the user */
-  if ( !MMG5_scotchCall(mesh,met,NULL) )
+  if ( !MMG5_scotchCall(mesh,met,NULL,NULL) )
   {
     if ( !MMG5_unscaleMesh(mesh,met,NULL) ) _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
     MMG5_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE);

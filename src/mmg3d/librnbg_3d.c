@@ -99,7 +99,8 @@ void MMG5_swapTet(MMG5_pTetra tetras/*, int* adja*/, int* perm, int ind1, int in
 /**
  * \param boxVertNbr number of vertices by box.
  * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward he solution structure
+ * \param sol pointer toward the solution structure
+ * \param fields pointer toward an array of solution fields
  * \param permNodGlob array to store the global permutation of nodes (non mandatory)
  *
  * \return 0 if the renumbering fail and we can't rebuild tetrahedra hashtable,
@@ -109,7 +110,8 @@ void MMG5_swapTet(MMG5_pTetra tetras/*, int* adja*/, int* perm, int ind1, int in
  * Modifies the node indicies to prevent from cache missing.
  *
  */
-int MMG5_mmg3dRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol,int* permNodGlob) {
+int MMG5_mmg3dRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol,
+                          MMG5_pSol fields,int* permNodGlob) {
   MMG5_pPoint ppt;
   MMG5_pTetra ptet;
   MMG5_pPrism pp;
@@ -365,7 +367,7 @@ int MMG5_mmg3dRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol,int* pe
   /* Permute nodes and sol */
   for (j=1; j<= mesh->np; j++) {
     while ( permNodTab[j] != j && permNodTab[j] )
-      MMG5_swapNod(mesh->point,sol->m,permNodTab,j,permNodTab[j],sol->size);
+      MMG5_swapNod(mesh,mesh->point,sol->m,fields,permNodTab,j,permNodTab[j],sol->size);
   }
   MMG5_DEL_MEM(mesh,permNodTab);
 

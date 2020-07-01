@@ -296,7 +296,7 @@ static int MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met,int *permNodGlob) {
     else  ns = 0;
 
     /* renumbering if available and needed */
-    if ( it==1 && !MMG5_scotchCall(mesh,met,permNodGlob) )
+    if ( it==1 && !MMG5_scotchCall(mesh,met,NULL,permNodGlob) )
       return 0;
 
     if ( !mesh->info.noinsert ) {
@@ -360,7 +360,7 @@ static int MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met,int *permNodGlob) {
   }
 
   /* renumbering if available */
-  if ( !MMG5_scotchCall(mesh,met,permNodGlob) )
+  if ( !MMG5_scotchCall(mesh,met,NULL,permNodGlob) )
     return 0;
 
   /*shape optim*/
@@ -466,7 +466,7 @@ int MMG5_mmg3d1_pattern(MMG5_pMesh mesh,MMG5_pSol met,int *permNodGlob) {
   }
 
   /* renumbering if available */
-  if ( !MMG5_scotchCall(mesh,met,permNodGlob) )
+  if ( !MMG5_scotchCall(mesh,met,NULL,permNodGlob) )
     return 0;
 
   /**--- Stage 2: computational mesh */
@@ -500,7 +500,7 @@ int MMG5_mmg3d1_pattern(MMG5_pMesh mesh,MMG5_pSol met,int *permNodGlob) {
   }
 
   /* renumbering if available */
-  if ( !MMG5_scotchCall(mesh,met,permNodGlob) )
+  if ( !MMG5_scotchCall(mesh,met,NULL,permNodGlob) )
     return 0;
 
 #ifdef DEBUG

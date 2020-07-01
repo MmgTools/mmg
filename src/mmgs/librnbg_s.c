@@ -65,7 +65,8 @@ void MMG5_swapTri(MMG5_pTria trias, int* perm, int ind1, int ind2) {
 /**
  * \param boxVertNbr number of vertices by box.
  * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward he solution structure
+ * \param sol pointer toward the solution structure
+ * \param fields pointer toward an array of solution fields
  * \param permNodGlob array to store the global permutation of nodes (if provided)
  *
  * \return 0 if the renumbering fail and we can't rebuild tetrahedra hashtable,
@@ -76,7 +77,7 @@ void MMG5_swapTri(MMG5_pTria trias, int* perm, int ind1, int ind2) {
  *
  */
 int MMG5_mmgsRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol,
-                         int* permNodGlob) {
+                         MMG5_pSol fields,int* permNodGlob) {
   MMG5_pPoint ppt;
   MMG5_pTria ptri;
   SCOTCH_Num edgeNbr;
@@ -301,7 +302,7 @@ int MMG5_mmgsRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol,
   /* Permute nodes and sol */
   for (j=1; j<= mesh->np; j++) {
     while ( permNodTab[j] != j && permNodTab[j] )
-      MMG5_swapNod(mesh->point,sol->m,permNodTab,j,permNodTab[j],sol->size);
+      MMG5_swapNod(mesh,mesh->point,sol->m,fields,permNodTab,j,permNodTab[j],sol->size);
   }
   MMG5_DEL_MEM(mesh,permNodTab);
 
@@ -318,13 +319,21 @@ int MMG5_mmgsRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol,
   else
     mesh->nenil = mesh->nt + 1;
 
-  if ( mesh->npnil )
-    for (k=mesh->npnil; k<mesh->npmax-1; k++)
+  if ( mesh->npnil ) {
+    for (k=mesh->npnil; k<mesh->npmax-1; k++) {
       mesh->point[k].tmp  = k+1;
+    }
+    mesh->point[mesh->npmax-1].tmp = 0;
+    mesh->point[mesh->npmax  ].tmp = 0;
+  }
 
-  if ( mesh->nenil )
-    for (k=mesh->nenil; k<mesh->ntmax-1; k++)
+  if ( mesh->nenil ) {
+    for (k=mesh->nenil; k<mesh->ntmax-1; k++) {
       mesh->tria[k].v[2] = k+1;
+    }
+    mesh->tria[mesh->ntmax-1].v[2] = 0;
+    mesh->tria[mesh->ntmax  ].v[2] = 0;
+  }
 
   if( !MMGS_hashTria(mesh) ) return 0;
 

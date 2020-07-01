@@ -450,7 +450,7 @@ void MMG5_printTetra(MMG5_pMesh mesh,char* fileName);
 
 
 #ifdef USE_SCOTCH
-int MMG5_mmg3dRenumbering(int vertBoxNbr,MMG5_pMesh, MMG5_pSol,int*);
+int MMG5_mmg3dRenumbering(int,MMG5_pMesh,MMG5_pSol,MMG5_pSol,int*);
 #endif
 
 int    MMG5_meancur(MMG5_pMesh mesh,int np,double c[3],int ilist,int *list,double h[3]);
