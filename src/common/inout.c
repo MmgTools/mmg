@@ -2540,8 +2540,10 @@ int MMG5_saveNode(MMG5_pMesh mesh,const char *filename) {
   np = 0;
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
-    if ( MG_VOK(ppt) )  np++;
-    ppt->tmp = np;
+    if ( MG_VOK(ppt) ) {
+      ++np;
+      ppt->tmp = np;
+    }
   }
 
   /* Save node number, dim, no attributes, 1 bdy marker */

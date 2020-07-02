@@ -356,10 +356,12 @@ size_t myfree(void *ptr) {
       law;                                                              \
     }                                                                   \
                                                                         \
-    (ptr) = tmp;                                                        \
+    if ( ptr ) {                                                        \
+      (ptr) = tmp;                                                      \
                                                                         \
-    if ( newSize > prevSize ) {                                         \
-      memset(&((ptr)[prevSize]),0,((newSize)-(prevSize))*sizeof(type));   \
+      if ( newSize > prevSize ) {                                       \
+        memset(&((ptr)[prevSize]),0,((newSize)-(prevSize))*sizeof(type)); \
+      }                                                                 \
     }                                                                   \
   }while(0)
 

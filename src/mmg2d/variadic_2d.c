@@ -567,13 +567,15 @@ int MMG2D_Free_names_var(va_list argptr)
   }
 
   /* Fields */
-  for ( i=0; i<(*mesh)->nsols; ++i ) {
-    psl = (*sols) + i;
-    if ( psl->namein ) {
-      MMG5_DEL_MEM(*mesh,psl->namein);
-    }
-    if ( psl->nameout ) {
-      MMG5_DEL_MEM(*mesh,psl->nameout);
+  if ( sol ) {
+    for ( i=0; i<(*mesh)->nsols; ++i ) {
+      psl = (*sols) + i;
+      if ( psl->namein ) {
+        MMG5_DEL_MEM(*mesh,psl->namein);
+      }
+      if ( psl->nameout ) {
+        MMG5_DEL_MEM(*mesh,psl->nameout);
+      }
     }
   }
 

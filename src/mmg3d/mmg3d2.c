@@ -1188,7 +1188,7 @@ static int MMG3D_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol) {
 int MMG3D_update_xtetra ( MMG5_pMesh mesh ) {
   MMG5_pTetra   pt,pt1,ptmax,ptmin;
   MMG5_pxTetra  pxt;
-  int           *adja,k,i,jel,j,kmax,imax,kmin,imin;
+  int           *adja,k,i,jel,j,imax,imin;
 
   if ( (!mesh->info.iso) || (!mesh->info.opnbdy) ) {
     /* In non opnbdy mode, info stored in xtetra is not used */
@@ -1233,18 +1233,14 @@ int MMG3D_update_xtetra ( MMG5_pMesh mesh ) {
       /* Detection of the tetra of higher ref */
       if ( pt->ref > pt1->ref ) {
         ptmax = pt;
-        kmax  = k;
         imax  = i;
         ptmin = pt1;
-        kmin  = jel;
         imin  = j;
       }
       else {
         ptmax = pt1;
-        kmax  = jel;
         imax  = j;
         ptmin = pt;
-        kmin  = k;
         imin  = i;
       }
 
