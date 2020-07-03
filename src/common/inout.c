@@ -2561,7 +2561,7 @@ int MMG5_saveNode(MMG5_pMesh mesh,const char *filename) {
       }
 
       /* Save bdy marker */
-      fprintf(inm, "%d\n",ppt->ref);
+      fprintf(inm, " %d\n",ppt->ref);
     }
   }
 
