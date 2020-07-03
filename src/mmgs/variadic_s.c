@@ -441,7 +441,7 @@ int MMGS_Free_names_var(va_list argptr)
   int            meshCount;
 
   meshCount = 0;
-  sol = ls = NULL;
+  sol = ls = sols = NULL;
 
   while ( (typArg = va_arg(argptr,int)) != MMG5_ARG_end )
   {

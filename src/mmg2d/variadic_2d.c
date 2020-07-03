@@ -567,7 +567,7 @@ int MMG2D_Free_names_var(va_list argptr)
   }
 
   /* Fields */
-  if ( sol ) {
+  if ( sols ) {
     for ( i=0; i<(*mesh)->nsols; ++i ) {
       psl = (*sols) + i;
       if ( psl->namein ) {

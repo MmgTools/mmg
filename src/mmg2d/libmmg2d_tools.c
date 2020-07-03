@@ -263,6 +263,7 @@ int MMG2D_Get_numberOfNonBdyEdges(MMG5_pMesh mesh, int* nb_edges) {
         if ( k < iel ) {
           /* Treat edge from the triangle with lowest index */
           ped = &mesh->edge[j++];
+          assert ( ped );
           ped->a   = pt->v[i1];
           ped->b   = pt->v[i2];
           ped->ref = pt->edg[i];

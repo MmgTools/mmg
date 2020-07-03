@@ -224,6 +224,7 @@ nextstep1:
       assert ( pxt0 );
       memcpy(pxt0,&xt,sizeof(MMG5_xTetra));
       pxt0 = &mesh->xtetra[mesh->xt];
+      assert ( pxt0 );
       memcpy(pxt0,&xt1,sizeof(MMG5_xTetra));
     }
     else {

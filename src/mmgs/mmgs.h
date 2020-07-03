@@ -68,7 +68,7 @@ extern "C" {
 #define MMGS_POINT_REALLOC(mesh,sol,ip,wantedGap,law,o,tag ) do        \
   {                                                                     \
     int klink;                                                          \
-                                                                        \
+    assert ( mesh && mesh->point );                                     \
     MMG5_TAB_RECALLOC(mesh,mesh->point,mesh->npmax,wantedGap,MMG5_Point, \
                        "larger point table",law);                       \
                                                                         \
