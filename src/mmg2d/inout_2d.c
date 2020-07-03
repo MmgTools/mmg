@@ -2109,6 +2109,37 @@ int MMG2D_saveNeigh(MMG5_pMesh mesh,const char *filename) {
 }
 
 int MMG2D_saveTetgenMesh(MMG5_pMesh mesh,const char *filename) {
+  MMG5_pPoint ppt;
+  MMG5_pEdge  ped;
+  int k;
+
+  /** Hack to impose edge reference over its nodes extremities */
+  /* Reset reference */
+  for ( k=1; k<=mesh->np; ++k ) {
+    ppt = &mesh->point[k];
+    if ( MG_VOK(ppt) ) {
+      ppt->ref  = 0;
+      ppt->flag = 0;
+    }
+  }
+
+  for ( k=1; k<=mesh->na; ++k ) {
+    ped = &mesh->edge[k];
+
+    ppt = &mesh->point[ped->a];
+    assert ( MG_VOK(ppt) );
+    if ( !ppt->flag ) {
+      /* Point is seen for the first time */
+      ppt->ref  = ped->ref;
+      ppt->flag = 1;
+    }
+    else {
+      if ( ped->ref != ppt->ref ) {
+        /* Point belongs to two edges with different references */
+        ppt->ref = 0;
+      }
+    }
+  }
 
   if ( !MMG5_saveNode(mesh,filename) ) {
     return 0;
