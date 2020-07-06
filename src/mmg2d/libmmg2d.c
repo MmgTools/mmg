@@ -33,16 +33,17 @@
 #define MMG2D_RETURN_AND_PACK(mesh,met,sol,val)do                       \
   {                                                                     \
     if ( !MMG2D_pack(mesh,met,sol) ) {                                  \
-    mesh->npi = mesh->np;                                               \
-    mesh->nti = mesh->nt;                                               \
-    mesh->nai = mesh->na;                                               \
-    mesh->nei = mesh->ne;                                               \
+      mesh->npi = mesh->np;                                             \
+      mesh->nti = mesh->nt;                                             \
+      mesh->nai = mesh->na;                                             \
+      mesh->nei = mesh->ne;                                             \
+      mesh->xt  = 0;                                                    \
       if ( met ) { met->npi  = met->np; }                               \
       if ( sol ) { sol->npi  = sol->np; }                               \
       return MMG5_LOWFAILURE;                                           \
-    }                                                                   \
+  }                                                                     \
     _LIBMMG5_RETURN(mesh,met,sol,val);                                  \
-  }while(0)
+    }while(0)
 
 /**
  * \param mesh pointer toward the mesh structure.

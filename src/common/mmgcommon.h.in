@@ -198,6 +198,7 @@ extern "C" {
     mesh->nti = mesh->nt;                        \
     mesh->nai = mesh->na;                        \
     mesh->nei = mesh->ne;                        \
+    mesh->xt  = 0;                               \
     if ( sol ) { sol->npi  = sol->np; }          \
     if ( met ) { met->npi  = met->np; }          \
     return val;                                  \
@@ -351,17 +352,17 @@ size_t myfree(void *ptr) {
                                                                         \
     tmp = (type *)myrealloc((ptr),size_to_allocate,(prevSize)*sizeof(type)); \
     if ( !tmp ) {                                                       \
-      MMG5_SAFE_FREE(ptr);                                              \
+      MMG5_SAFE_FREE(ptr);                                             \
       perror(" ## Memory problem: realloc");                            \
       law;                                                              \
     }                                                                   \
                                                                         \
     if ( ptr ) {                                                        \
-      (ptr) = tmp;                                                      \
+    (ptr) = tmp;                                                        \
                                                                         \
-      if ( newSize > prevSize ) {                                       \
-        memset(&((ptr)[prevSize]),0,((newSize)-(prevSize))*sizeof(type)); \
-      }                                                                 \
+    if ( newSize > prevSize ) {                                         \
+      memset(&((ptr)[prevSize]),0,((newSize)-(prevSize))*sizeof(type));   \
+    }                                                                   \
     }                                                                   \
   }while(0)
 
