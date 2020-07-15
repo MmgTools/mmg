@@ -89,6 +89,7 @@ void MMG2D_Init_parameters(MMG5_pMesh mesh) {
   mesh->info.nosurf   =  MMG5_OFF;
   /* [0]    , Turn on/off the renumbering using SCOTCH */
   mesh->info.renum    = MMG5_OFF;
+
   mesh->info.nreg     = MMG5_OFF;
   /* default values for doubles */
   /* level set value */
@@ -164,7 +165,7 @@ int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
     mesh->info.nreg = val;
     break;
   case MMG2D_IPARAM_numsubdomain :
-    mesh->info.renum = val;
+    mesh->info.nsd = val;
     break;
   case MMG2D_IPARAM_optim :
     mesh->info.optim = val;

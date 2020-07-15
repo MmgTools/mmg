@@ -2318,8 +2318,6 @@ int MMG3D_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol);
  *
  * \remark No fortran interface to allow variadic arguments.
  *
- * \remark no Fortran interface to allow variadic args.
- *
  */
   int MMG3D_Free_names(const int starter,...);
 

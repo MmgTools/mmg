@@ -553,7 +553,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
   fclose(inm);
 
   /*maill periodique : remettre toutes les coord entre 0 et 1*/
-  if(mesh->info.renum==-10) {
+  if(mesh->info.nsd == -10) {
     if ( mesh->info.imprim > 4 || mesh->info.ddebug )
       printf("  ## Periodic mesh: %d points %d triangles\n",mesh->np,mesh->nt);
     for (k=1; k<=mesh->np; k++) {

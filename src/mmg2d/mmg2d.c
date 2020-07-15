@@ -552,7 +552,7 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
       case 'p':
         if ( !strcmp(argv[i],"-per") ) {
           fprintf(stdout,"WARNING OBSOLETE OPTION\n");
-          mesh->info.renum = -10;
+          mesh->info.nsd = -10;
         }
         break;
       case 'r':

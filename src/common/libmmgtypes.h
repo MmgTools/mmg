@@ -459,6 +459,7 @@ typedef struct {
   int           PROctree; /*!< octree to speedup delaunay insertion */
   int           nmat; /*!< number of materials in ls multimat mode */
   int           imprim; /*!< verbosity level */
+  int           nsd; /*!< index of subdomain to save (0 by default == all subdomains are saved) */
   char          nreg; /*!< normal regularization */
   char          ddebug,badkal,iso,fem,lag;
   char          parTyp; /*!< Contains binary flags to say which kind of local
