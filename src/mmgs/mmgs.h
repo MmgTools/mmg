@@ -178,6 +178,9 @@ int MMGS_setMeshSize_alloc( MMG5_pMesh mesh );
 int MMG5_mmgsRenumbering(int,MMG5_pMesh,MMG5_pSol,MMG5_pSol,int*);
 #endif
 
+/* tools */
+void MMGS_keep_only1Subdomain ( MMG5_pMesh mesh,int nsd );
+
 /* useful functions to debug */
 int  MMGS_indElt(MMG5_pMesh mesh,int kel);
 int  MMGS_indPt(MMG5_pMesh mesh,int kp);

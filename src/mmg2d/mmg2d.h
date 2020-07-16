@@ -335,6 +335,9 @@ int MMG2D_savenor_db(MMG5_pMesh ,char *,char );
 int MMG2D_savedisp_db(MMG5_pMesh mesh,MMG5_pSol ,char *,char );
 int MMG2D_velextLS(MMG5_pMesh ,MMG5_pSol );
 
+/* tools */
+void MMG2D_keep_only1Subdomain ( MMG5_pMesh mesh,int nsd );
+
 /* useful functions to debug */
 int  MMG2D_indElt(MMG5_pMesh mesh,int kel);
 int  MMG2D_indPt(MMG5_pMesh mesh,int kp);

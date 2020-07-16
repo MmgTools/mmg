@@ -1194,3 +1194,64 @@ int MMG3D_localParamNm(MMG5_pMesh mesh,int iel,int iface,int ia,
 
   return 1;
 }
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ *
+ * Mark the mesh vertices that belong to triangles or quadrangles as used (for
+ * Mmgs or Mmg2d).
+ *
+ */
+static inline
+void MMG3D_mark_usedVertices ( MMG5_pMesh mesh ) {
+  MMG5_pTetra pt;
+  MMG5_pPrism pq;
+  MMG5_pPoint ppt;
+  int         k,i;
+
+  for ( k=1; k<=mesh->ne; k++ ) {
+    pt = &mesh->tetra[k];
+    if ( !MG_EOK(pt) )  continue;
+
+    for (i=0; i<4; i++) {
+      ppt = &mesh->point[ pt->v[i] ];
+      ppt->tag &= ~MG_NUL;
+    }
+  }
+
+  for ( k=1; k<=mesh->nprism; k++ ) {
+    pq = &mesh->prism[k];
+    if ( !MG_EOK(pq) )  continue;
+
+    for (i=0; i<6; i++) {
+      ppt = &mesh->point[ pq->v[i] ];
+      ppt->tag &= ~MG_NUL;
+    }
+  }
+
+  return;
+}
+
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param nsd index of subdomain to keep.
+ *
+ * Keep only subdomain of index \a nsd and remove other subdomains.
+ *
+ */
+void MMG3D_keep_only1Subdomain ( MMG5_pMesh mesh,int nsd ) {
+  int nfac = 4; // number of faces per element
+
+  if ( !nsd ) {
+    return;
+  }
+
+  MMG5_mark_verticesAsUnused ( mesh );
+
+  MMG5_keep_subdomainElts ( mesh, nsd, nfac, MMG3D_delElt );
+
+  MMG3D_mark_usedVertices ( mesh );
+
+  return;
+}

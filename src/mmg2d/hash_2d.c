@@ -517,66 +517,11 @@ int MMG2D_pack(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
   MMG5_pEdge         ped;
   MMG5_pPoint        ppt,pptnew;
   int                np,ned,nt,k,iel,nbl,isol,isolnew,memWarn,nc;
-  int                iadr,iadrnew,iadrv,*adjav,*adja,*adjanew,voy,nsd;
+  int                iadr,iadrnew,iadrv,*adjav,*adja,*adjanew,voy;
   char               i,i1,i2;
 
   /** Delete useless subdomains if needed */
-  if ( mesh->info.nsd ) {
-    /* Mark all vertices as unused */
-    for ( k=1; k<=mesh->np; k++ ) {
-      ppt = &mesh->point[k];
-      if ( !MG_VOK(ppt) )  continue;
-
-      ppt->tag &= MG_NUL;
-    }
-
-    /* Delete triangles that are not of reference nsd */
-    nsd = mesh->info.nsd;
-    for ( k=1 ; k <= mesh->nt ; k++) {
-      pt = &mesh->tria[k];
-
-      if ( !MG_EOK(pt) ) continue;
-      if ( pt->ref == nsd ) continue;
-
-      /* Update adjacency relationship: we will delete elt k so k adjacent will
-       * not be adjacent to k anymore */
-      if ( mesh->adja ) {
-        iadr = 3*(k-1) + 1;
-        adja = &mesh->adja[iadr];
-        for ( i=0; i<3; ++i ) {
-          iadrv = adja[i];
-          if ( !iadrv ) {
-            continue;
-          }
-          i1 = iadrv%3;
-          iadrv /= 3;
-          mesh->adja[3*(iadrv-1)+1+i1] = 0;
-        }
-      }
-
-      /* Delete triangles */
-      MMG2D_delElt(mesh,k);
-    }
-
-    /* Mark vertices that are used by the remaining subdomain (or by quads) as
-     * used */
-    for ( k=1; k<=mesh->nt; k++ ) {
-      pt = &mesh->tria[k];
-      if ( !MG_EOK(pt) )  continue;
-      for (i=0; i<3; i++) {
-        ppt = &mesh->point[ pt->v[i] ];
-        ppt->tag &= ~MG_NUL;
-      }
-    }
-    for ( k=1; k<=mesh->nquad; k++ ) {
-      pq = &mesh->quadra[k];
-      if ( !MG_EOK(pq) )  continue;
-      for (i=0; i<4; i++) {
-        ppt = &mesh->point[ pq->v[i] ];
-        ppt->tag &= ~MG_NUL;
-      }
-    }
-  }
+  MMG2D_keep_only1Subdomain ( mesh, mesh->info.nsd );
 
   /** Recreate adjacencies if need be */
   if ( !MMG2D_hashTria(mesh) ) {

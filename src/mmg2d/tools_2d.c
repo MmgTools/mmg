@@ -80,3 +80,26 @@ int MMG2D_indPt(MMG5_pMesh mesh, int kp) {
     }
     return 0;
 }
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param nsd index of subdomain to keep.
+ *
+ * Keep only subdomain of index \a nsd and remove other subdomains.
+ *
+ */
+void MMG2D_keep_only1Subdomain ( MMG5_pMesh mesh,int nsd ) {
+  int nfac = 3; // number of faces per elements
+
+  if ( !nsd ) {
+    return;
+  }
+
+  MMG5_mark_verticesAsUnused ( mesh );
+
+  MMG5_keep_subdomainElts ( mesh, nsd, nfac, MMG2D_delElt );
+
+  MMG5_mark_usedVertices ( mesh );
+
+  return;
+}

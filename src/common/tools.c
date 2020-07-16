@@ -872,3 +872,103 @@ double MMG2D_quickarea(double a[2],double b[2],double c[2]) {
   return aire;
 }
 
+/**
+ * \param mesh pointer toward the mesh structure.
+ *
+ * Mark all mesh vertices as unused.
+ *
+ */
+void MMG5_mark_verticesAsUnused ( MMG5_pMesh mesh ) {
+  MMG5_pPoint ppt;
+  int         k;
+
+  for ( k=1; k<=mesh->np; k++ ) {
+    ppt = &mesh->point[k];
+    if ( !MG_VOK(ppt) )  continue;
+
+    ppt->tag &= MG_NUL;
+  }
+
+  return;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ *
+ * Mark the mesh vertices that belong to triangles or quadrangles as used (for
+ * Mmgs or Mmg2d).
+ *
+ */
+void MMG5_mark_usedVertices ( MMG5_pMesh mesh ) {
+  MMG5_pTria  pt;
+  MMG5_pQuad  pq;
+  MMG5_pPoint ppt;
+  int         k,i;
+
+  for ( k=1; k<=mesh->nt; k++ ) {
+    pt = &mesh->tria[k];
+    if ( !MG_EOK(pt) )  continue;
+
+    for (i=0; i<3; i++) {
+      ppt = &mesh->point[ pt->v[i] ];
+      ppt->tag &= ~MG_NUL;
+    }
+  }
+
+  for ( k=1; k<=mesh->nquad; k++ ) {
+    pq = &mesh->quadra[k];
+    if ( !MG_EOK(pq) )  continue;
+
+    for (i=0; i<4; i++) {
+      ppt = &mesh->point[ pq->v[i] ];
+      ppt->tag &= ~MG_NUL;
+    }
+  }
+
+  return;
+}
+
+
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param nsd subdomain index.
+ * \param nfac number of faces in elt.
+ * \param delElt function to call to delete elt.
+ *
+ * Remove triangles that do not belong to subdomain of index \a nsd
+ *
+ */
+void MMG5_keep_subdomainElts ( MMG5_pMesh mesh, int nsd, int nfac,
+                               int (*delElt)(MMG5_pMesh,int) ) {
+  MMG5_pTria  pt;
+  int         k,i,*adja,iadr,iadrv,iv;
+
+  for ( k=1 ; k <= mesh->nt ; k++) {
+    pt = &mesh->tria[k];
+
+    if ( !MG_EOK(pt) ) continue;
+    if ( pt->ref == nsd ) continue;
+
+    /* Update adjacency relationship: we will delete elt k so k adjacent will
+     * not be adjacent to k anymore */
+    if ( mesh->adja ) {
+      iadr = nfac*(k-1) + 1;
+      adja = &mesh->adja[iadr];
+      for ( i=0; i<nfac; ++i ) {
+        iadrv = adja[i];
+        if ( !iadrv ) {
+          continue;
+        }
+        iv = iadrv%nfac;
+        iadrv /= nfac;
+        mesh->adja[nfac*(iadrv-1)+1+iv] = 0;
+      }
+    }
+
+    /* Delete element (triangle in 2D and surface, tetra in 3D) */
+    delElt(mesh,k);
+  }
+
+  return;
+}

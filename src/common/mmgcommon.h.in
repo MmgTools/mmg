@@ -726,6 +726,11 @@ int    MMG5_swapbin(int sbin);
 float  MMG5_swapf(float sbin);
 double MMG5_swapd(double sbin);
 
+/* tools */
+void MMG5_mark_verticesAsUnused ( MMG5_pMesh mesh );
+void MMG5_mark_usedVertices ( MMG5_pMesh mesh );
+void MMG5_keep_subdomainElts ( MMG5_pMesh,int,int,int (*delElt)(MMG5_pMesh,int) );
+
 /* function pointers */
 extern int    (*MMG5_chkmsh)(MMG5_pMesh,int,int);
 extern int    (*MMG5_bezierCP)(MMG5_pMesh ,MMG5_Tria *,MMG5_pBezier ,char );
