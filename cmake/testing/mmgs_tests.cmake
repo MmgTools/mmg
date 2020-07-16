@@ -62,6 +62,12 @@ ADD_TEST(NAME mmgs_val
   ${MMGS_CI_TESTS}/Teapot/teapot
   )
 
+# nsd
+ADD_TEST(NAME mmgs_nsd24
+  COMMAND ${EXECUT_MMGS} -v 5 -nsd 24 ${common_args}
+  ${MMGS_CI_TESTS}/Teapot/teapot
+  -out ${CTEST_OUTPUT_DIR}/mmgs_nsd24.o.meshb)
+
 #ADD_TEST(NAME mmgs_default
 #  COMMAND ${EXECUT_MMGS} -default
 #  ${MMGS_CI_TESTS}/Teapot/teapot
@@ -198,6 +204,12 @@ ADD_TEST(NAME mmgs_2squares-withSol
   COMMAND ${EXECUT_MMGS} -v 5
   ${MMG2D_CI_TESTS}/2squares/2squares -sol ${MMG2D_CI_TESTS}/2squares/2s.sol
   -out ${CTEST_OUTPUT_DIR}/mmgs_2squares-sol.o.meshb)
+
+# nsd + ls
+ADD_TEST(NAME mmgs_OptLs_teapot-nsd3
+  COMMAND ${EXECUT_MMGS} -v 5 -ls -nsd 3 ${common_args}
+  ${MMGS_CI_TESTS}/OptLs_teapot/teapot
+  ${CTEST_OUTPUT_DIR}/mmgs_OptLs_teapot-ls-nsd3.o.meshb)
 
 
 ###############################################################################

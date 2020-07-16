@@ -171,6 +171,12 @@ ADD_TEST(NAME mmg2d_hybrid_nosizreq_nohgradreq_2d
   ${MMG2D_CI_TESTS}/Hybrid/hybrid.mesh -nosizreq -hgradreq -1
   ${CTEST_OUTPUT_DIR}/mmg2d_hybrid_2d-nosizreq)
 
+# hybrid nsd: remove the triangular domain as it is of ref 1001
+ADD_TEST(NAME mmg2d_hybrid-nsd1
+  COMMAND ${EXECUT_MMG2D} -v 5 -nsd 1
+  ${MMG2D_CI_TESTS}/Hybrid/hybrid.mesh
+  ${CTEST_OUTPUT_DIR}/mmg2d_hybrid_2d-nsd1)
+
 ###############################################################################
 #####
 #####         Input/Output
@@ -321,6 +327,12 @@ ADD_TEST(NAME mmg2d_2squares
   ${MMG2D_CI_TESTS}/2squares/2squares
   -out ${CTEST_OUTPUT_DIR}/mmg2d_2squares.o.meshb)
 
+####### -nsd
+ADD_TEST(NAME mmg2d_2squares-nsd16
+  COMMAND ${EXECUT_MMG2D} -msh 2 -v 5 -nsd 16
+  ${MMG2D_CI_TESTS}/2squares/2squares
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_2squares-nsd16.o.mesh)
+
 ####### -met option
 ADD_TEST(NAME mmg2d_2squares-withMet
   COMMAND ${EXECUT_MMG2D} -msh 2  -v 5
@@ -403,6 +415,12 @@ ADD_TEST(NAME mmg2d_ACDCGeneration
   ${MMG2D_CI_TESTS}/ACDCGeneration/acdcBdy.mesh
   -out ${CTEST_OUTPUT_DIR}/mmg2d_ACDCGeneration.o.meshb)
 
+# nsd option: keep only domain of ref 2
+ADD_TEST(NAME mmg2d_ACDCGeneration-nsd2
+  COMMAND ${EXECUT_MMG2D} -v 5 -nsd 2
+  ${MMG2D_CI_TESTS}/ACDCGeneration/acdcBdy.mesh
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_ACDCGeneration-nds2.o.mesh)
+
 ADD_TEST(NAME mmg2d_GaronneGeneration
   COMMAND ${EXECUT_MMG2D} -v 5
   ${MMG2D_CI_TESTS}/GaronneGeneration/garonneEdges.mesh
@@ -419,6 +437,13 @@ ADD_TEST(NAME mmg2d_LSMultiMat_val
   -sol ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat-sol.sol
   ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat
   ${CTEST_OUTPUT_DIR}/mmg2d_multi-mat-val.o.meshb
+  )
+
+####### -nsd
+ADD_TEST(NAME mmg2d_LSMultiMat-nsd22
+  COMMAND ${EXECUT_MMG2D} -nsd 22 -v 5 -ls
+  ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat
+  ${CTEST_OUTPUT_DIR}/mmg2d_multi-mat-nsd22.o.mesh
   )
 
 #ADD_TEST(NAME mmg2d_LSMultiMat_default
@@ -534,4 +559,12 @@ IF ( ELAS_FOUND )
     -in ${MMG2D_CI_TESTS}/LagMotion_circle/circle
     -out ${CTEST_OUTPUT_DIR}/mmg2d_LagMotion2_circle-circle.o.meshb
     )
+
+  # nsd
+  ADD_TEST(NAME mmg2d_LagMotion2_circle-nsd3
+    COMMAND ${EXECUT_MMG2D} -v 5  -lag 2 -nsd 3
+    -in ${MMG2D_CI_TESTS}/LagMotion_circle/circle
+    -out ${CTEST_OUTPUT_DIR}/mmg2d_LagMotion2_circle-nsd3.o.mesh
+    )
+
 ENDIF()

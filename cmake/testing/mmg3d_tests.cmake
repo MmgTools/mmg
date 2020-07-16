@@ -363,6 +363,12 @@ ADD_TEST(NAME mmg3d_hybrid_3d
   ${MMG3D_CI_TESTS}/Hybrid/prism.mesh
   ${CTEST_OUTPUT_DIR}/mmg3d_hybrid_3d-default.msh)
 
+# nsd + hybrid
+ADD_TEST(NAME mmg3d_hybrid-nsd78
+  COMMAND ${EXECUT_MMG3D} -v 5 -nsd 78
+  ${MMG3D_CI_TESTS}/Hybrid/prism.mesh
+  ${CTEST_OUTPUT_DIR}/mmg3d_hybrid-nsd.mesh)
+
 ###############################################################################
 #####
 #####         Check Boundaries
@@ -424,6 +430,12 @@ ADD_TEST(NAME mmg3d_opnbdy_ls_peninsula
   -sol  ${MMG3D_CI_TESTS}/OpnBdy_peninsula/ls.sol
   -out ${CTEST_OUTPUT_DIR}/mmg3d_OpnBdy_ls_peninsula.o.meshb)
 
+# ls + nsd
+ADD_TEST(NAME mmg3d_opnbdy_ls_peninsula-nsd3
+  COMMAND ${EXECUT_MMG3D} -v 5 -opnbdy -ls -nsd 3
+  -in ${MMG3D_CI_TESTS}/OpnBdy_peninsula/peninsula
+  -sol  ${MMG3D_CI_TESTS}/OpnBdy_peninsula/ls.sol
+  -out ${CTEST_OUTPUT_DIR}/mmg3d_OpnBdy_ls_peninsula-nsd3.o.meshb)
 
 ADD_TEST(NAME mmg3d_opnbdy_ref_peninsula
   COMMAND ${EXECUT_MMG3D} -v 5 -hmax 0.06 -opnbdy
@@ -465,6 +477,14 @@ IF ( ELAS_FOUND )
     -sol ${MMG3D_CI_TESTS}/LagMotion1_tinyBoxt/tinyBoxt.sol
     -out ${CTEST_OUTPUT_DIR}/mmg3d_LagMotion2_tinyBoxt-tinyBoxt.o.meshb
     )
+  # nsd
+  ADD_TEST(NAME mmg3d_LagMotion2_tinyBoxt-nsd3
+    COMMAND ${EXECUT_MMG3D} -v 5  -lag 2 -nsd 3
+    -in ${MMG3D_CI_TESTS}/LagMotion1_tinyBoxt/tinyBoxt
+    -sol ${MMG3D_CI_TESTS}/LagMotion1_tinyBoxt/tinyBoxt.sol
+    -out ${CTEST_OUTPUT_DIR}/mmg3d_LagMotion2_tinyBoxt-nsd3.o.meshb
+    )
+
 ENDIF()
 
 ##############################################################################
