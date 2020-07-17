@@ -98,6 +98,9 @@ int MMGS_packMesh(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
   int           iadr,iadrnew,iadrv,*adjav,*adja,*adjanew,voy;
   char          i1,i2;
 
+  /* Remove non wanted subdomains if needed */
+  MMGS_keep_only1Subdomain ( mesh, mesh->info.nsd );
+
   /* compact vertices */
   np = nc = nr = 0;
   for (k=1; k<=mesh->np; k++) {

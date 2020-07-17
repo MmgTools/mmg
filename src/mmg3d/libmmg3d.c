@@ -277,6 +277,10 @@ int MMG3D_pack_tetraAndAdja(MMG5_pMesh mesh) {
   int           iadr,iadr1,iadrv,*adjav,*adja,*adja1,voy;
   int           k,i;
 
+  if ( !mesh->ne ) {
+    return 1;
+  }
+
   k = 1;
   do {
     pt = &mesh->tetra[k];
@@ -331,6 +335,10 @@ int MMG3D_pack_tetraAndAdja(MMG5_pMesh mesh) {
 int MMG3D_pack_tetra(MMG5_pMesh mesh) {
   MMG5_pTetra   pt,pt1;
   int           k;
+
+  if ( !mesh->ne ) {
+    return 1;
+  }
 
   if ( mesh->tetra ) {
     k = 1;
@@ -884,6 +892,9 @@ void MMG3D_unset_reqBoundaries(MMG5_pMesh mesh) {
  */
 int MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
   int           nc,nr;
+
+  /* Remove non wanted subdomains if needed */
+  MMG3D_keep_only1Subdomain ( mesh, mesh->info.nsd );
 
   /* compact vertices */
   if ( !mesh->point ) {

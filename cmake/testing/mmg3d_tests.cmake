@@ -364,8 +364,8 @@ ADD_TEST(NAME mmg3d_hybrid_3d
   ${CTEST_OUTPUT_DIR}/mmg3d_hybrid_3d-default.msh)
 
 # nsd + hybrid
-ADD_TEST(NAME mmg3d_hybrid-nsd78
-  COMMAND ${EXECUT_MMG3D} -v 5 -nsd 78
+ADD_TEST(NAME mmg3d_hybrid-nsd1
+  COMMAND ${EXECUT_MMG3D} -v 5 -nsd 1
   ${MMG3D_CI_TESTS}/Hybrid/prism.mesh
   ${CTEST_OUTPUT_DIR}/mmg3d_hybrid-nsd.mesh)
 

@@ -928,21 +928,19 @@ void MMG5_mark_usedVertices ( MMG5_pMesh mesh ) {
   return;
 }
 
-
-
 /**
  * \param mesh pointer toward the mesh structure.
  * \param nsd subdomain index.
- * \param nfac number of faces in elt.
  * \param delElt function to call to delete elt.
  *
  * Remove triangles that do not belong to subdomain of index \a nsd
  *
  */
-void MMG5_keep_subdomainElts ( MMG5_pMesh mesh, int nsd, int nfac,
+void MMG5_keep_subdomainElts ( MMG5_pMesh mesh, int nsd,
                                int (*delElt)(MMG5_pMesh,int) ) {
   MMG5_pTria  pt;
   int         k,i,*adja,iadr,iadrv,iv;
+  int         nfac = 3; // number of faces per elt
 
   for ( k=1 ; k <= mesh->nt ; k++) {
     pt = &mesh->tria[k];

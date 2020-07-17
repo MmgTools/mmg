@@ -1232,6 +1232,47 @@ void MMG3D_mark_usedVertices ( MMG5_pMesh mesh ) {
   return;
 }
 
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param nsd subdomain index.
+ *
+ * Remove tetra that do not belong to subdomain of index \a nsd
+ *
+ */
+static
+void MMG3D_keep_subdomainElts ( MMG5_pMesh mesh, int nsd ) {
+  MMG5_pTetra pt;
+  int         k,i,*adja,iadr,iadrv,iv;
+  int         nfac = 4; // number of faces per elt
+
+  for ( k=1 ; k <= mesh->ne ; k++) {
+    pt = &mesh->tetra[k];
+
+    if ( !MG_EOK(pt) ) continue;
+    if ( pt->ref == nsd ) continue;
+
+    /* Update adjacency relationship: we will delete elt k so k adjacent will
+     * not be adjacent to k anymore */
+    if ( mesh->adja ) {
+      iadr = nfac*(k-1) + 1;
+      adja = &mesh->adja[iadr];
+      for ( i=0; i<nfac; ++i ) {
+        iadrv = adja[i];
+        if ( !iadrv ) {
+          continue;
+        }
+        iv = iadrv%nfac;
+        iadrv /= nfac;
+        mesh->adja[nfac*(iadrv-1)+1+iv] = 0;
+      }
+    }
+
+    /* Delete element (triangle in 2D and surface, tetra in 3D) */
+    MMG3D_delElt(mesh,k);
+  }
+
+  return;
+}
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1241,7 +1282,6 @@ void MMG3D_mark_usedVertices ( MMG5_pMesh mesh ) {
  *
  */
 void MMG3D_keep_only1Subdomain ( MMG5_pMesh mesh,int nsd ) {
-  int nfac = 4; // number of faces per element
 
   if ( !nsd ) {
     return;
@@ -1253,7 +1293,7 @@ void MMG3D_keep_only1Subdomain ( MMG5_pMesh mesh,int nsd ) {
 
   MMG5_mark_verticesAsUnused ( mesh );
 
-  MMG5_keep_subdomainElts ( mesh, nsd, nfac, MMG3D_delElt );
+  MMG3D_keep_subdomainElts ( mesh, nsd );
 
   MMG3D_mark_usedVertices ( mesh );
 

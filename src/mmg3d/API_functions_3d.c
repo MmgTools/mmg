@@ -2125,6 +2125,9 @@ int MMG3D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam,int val){
     return 0;
 #endif
     break;
+  case MMG3D_IPARAM_numsubdomain :
+    mesh->info.nsd = val;
+    break;
   case MMG3D_IPARAM_optim :
     mesh->info.optim = val;
     break;
