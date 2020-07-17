@@ -693,10 +693,6 @@ int MMG3D_nmgeom(MMG5_pMesh mesh){
         else if ( !ier ) {
           p0->tag |= MG_REQ;
           p0->tag &= ~MG_NOSURF;
-          if ( p0->ref != 0 )
-            p0->ref = -abs(p0->ref);
-          else
-            p0->ref = MG_ISO;
         }
         else {
           if ( !p0->xp ) {

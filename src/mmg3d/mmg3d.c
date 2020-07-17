@@ -490,6 +490,17 @@ int main(int argc,char *argv[]) {
     case ( MMG5_FMT_VtkVtk ):
       ierSave = MMG3D_saveVtkMesh(mesh,met,mesh->nameout);
       break;
+    case ( MMG5_FMT_Tetgen ):
+      ierSave = MMG3D_saveTetgenMesh(mesh,mesh->nameout);
+      /* This format dont allow to save a solution: use a .sol file */
+      if ( !ierSave ) {
+        MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
+      }
+      if ( met && met->np ) {
+        ierSave = MMG3D_saveSol(mesh,met,met->nameout);
+      }
+      break;
+
     default:
       ierSave = MMG3D_saveMesh(mesh,mesh->nameout);
       if ( !ierSave ) {

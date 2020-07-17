@@ -46,7 +46,7 @@ int    (*MMG5_indElt)(MMG5_pMesh mesh,int kel);
 int    (*MMG5_indPt)(MMG5_pMesh mesh,int kp);
 
 #ifdef USE_SCOTCH
-int    (*MMG5_renumbering)(int vertBoxNbr, MMG5_pMesh mesh, MMG5_pSol sol,int*);
+int    (*MMG5_renumbering)(int vertBoxNbr, MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol,int*);
 #endif
 
 /**
@@ -118,12 +118,14 @@ void MMG5_mmgDefaultValues(MMG5_pMesh mesh) {
   fprintf(stdout,"\n**  Parameters\n");
   fprintf(stdout,"angle detection           (-ar)     : %lf\n",
           180/M_PI*acos(mesh->info.dhd) );
-  fprintf(stdout,"minimal mesh size         (-hmin)   : 0.001 of "
+  fprintf(stdout,"minimal mesh size         (-hmin)   : %lf\n"
+          "If not yet computed: 0.001 of "
           "the mesh bounding box if no metric is provided, 0.1 times the "
-          "minimum of the metric sizes otherwise.\n");
-  fprintf(stdout,"maximal mesh size         (-hmax)   : size of "
+          "minimum of the metric sizes otherwise.\n",mesh->info.hmin);
+  fprintf(stdout,"maximal mesh size         (-hmax)   : %lf\n"
+          " If not yet computed: size of "
           "the mesh bounding box without metric, 10 times the maximum of the "
-          "metric sizes otherwise.\n");
+          "metric sizes otherwise.\n",mesh->info.hmax);
   fprintf(stdout,"Hausdorff distance        (-hausd)  : %lf\n",
           mesh->info.hausd);
   fprintf(stdout,"gradation control         (-hgrad)  : %lf\n",
@@ -493,6 +495,9 @@ int MMG5_Get_format( char *ptr, int fmt ) {
   else if ( !strncmp ( ptr,".vtk",strlen(".vtk") ) ) {
     return MMG5_FMT_VtkVtk;
   }
+  else if ( !strncmp ( ptr,".node",strlen(".node") ) ) {
+    return MMG5_FMT_Tetgen;
+  }
 
   return defFmt;
 }
@@ -535,6 +540,9 @@ const char* MMG5_Get_formatName(enum MMG5_Format fmt)
     break;
   case MMG5_FMT_GmshBinary:
     return "MMG5_FMT_GmshBinary";
+    break;
+  case MMG5_FMT_Tetgen:
+    return "MMG5_FMT_Tetgen";
     break;
   default:
     return "MMG5_Unknown";

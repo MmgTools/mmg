@@ -441,7 +441,7 @@ int MMGS_Free_names_var(va_list argptr)
   int            meshCount;
 
   meshCount = 0;
-  sol = ls = NULL;
+  sol = ls = sols = NULL;
 
   while ( (typArg = va_arg(argptr,int)) != MMG5_ARG_end )
   {
@@ -497,13 +497,15 @@ int MMGS_Free_names_var(va_list argptr)
     }
   }
   /* Fields */
-  for ( i=0; i<(*mesh)->nsols; ++i ) {
-    psl = (*sols) + i;
-    if ( psl->namein ) {
-      MMG5_DEL_MEM(*mesh,psl->namein);
-    }
-    if ( psl->nameout ) {
-      MMG5_DEL_MEM(*mesh,psl->nameout);
+  if ( sols ) {
+    for ( i=0; i<(*mesh)->nsols; ++i ) {
+      psl = (*sols) + i;
+      if ( psl->namein ) {
+        MMG5_DEL_MEM(*mesh,psl->namein);
+      }
+      if ( psl->nameout ) {
+        MMG5_DEL_MEM(*mesh,psl->nameout);
+      }
     }
   }
 

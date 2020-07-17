@@ -806,7 +806,7 @@ int MMG2D_Set_triangle(MMG5_pMesh mesh, int v0, int v1, int v2, int ref, int pos
     tmp = pt->v[2];
     pt->v[2] = pt->v[1];
     pt->v[1] = tmp;
-    /* mesh->xt temporary used to count reoriented tetra */
+    /* mesh->xt temporary used to count reoriented tria */
     mesh->xt++;
   }
   if ( mesh->info.ddebug && (mesh->nt == pos) && mesh->xt > 0 ) {

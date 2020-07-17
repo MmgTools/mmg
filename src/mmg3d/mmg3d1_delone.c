@@ -1270,7 +1270,7 @@ MMG5_adptet_delone(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree *PROctree,
   }
 
   /* renumerotation if available */
-  if ( !MMG5_scotchCall(mesh,met,permNodGlob) )
+  if ( !MMG5_scotchCall(mesh,met,NULL,permNodGlob) )
     return 0;
 
   if(mesh->info.optimLES) {
@@ -1342,7 +1342,7 @@ int MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met,int *permNodGlob) {
   }
 
   /* renumerotation if available */
-  if ( !MMG5_scotchCall(mesh,met,permNodGlob) ) {
+  if ( !MMG5_scotchCall(mesh,met,NULL,permNodGlob) ) {
     return 0;
   }
 

@@ -198,6 +198,7 @@ extern "C" {
     mesh->nti = mesh->nt;                        \
     mesh->nai = mesh->na;                        \
     mesh->nei = mesh->ne;                        \
+    mesh->xt  = 0;                               \
     if ( sol ) { sol->npi  = sol->np; }          \
     if ( met ) { met->npi  = met->np; }          \
     return val;                                  \
@@ -351,15 +352,17 @@ size_t myfree(void *ptr) {
                                                                         \
     tmp = (type *)myrealloc((ptr),size_to_allocate,(prevSize)*sizeof(type)); \
     if ( !tmp ) {                                                       \
-      MMG5_SAFE_FREE(ptr);                                              \
+      MMG5_SAFE_FREE(ptr);                                             \
       perror(" ## Memory problem: realloc");                            \
       law;                                                              \
     }                                                                   \
                                                                         \
+    if ( ptr ) {                                                        \
     (ptr) = tmp;                                                        \
                                                                         \
     if ( newSize > prevSize ) {                                         \
       memset(&((ptr)[prevSize]),0,((newSize)-(prevSize))*sizeof(type));   \
+    }                                                                   \
     }                                                                   \
   }while(0)
 
@@ -543,6 +546,7 @@ enum MMG5_Format {
   MMG5_FMT_VtkVtu, /*!< VTK vtu */
   MMG5_FMT_VtkVtp, /*!< VTK vtp */
   MMG5_FMT_VtkVtk, /*!< VTK vtk */
+  MMG5_FMT_Tetgen, /*!< Tetgen or Triangle */
   MMG5_FMT_Unknown /*!< Unrecognized */
 };
 
@@ -661,7 +665,7 @@ const char    *MMG5_Get_formatName(enum MMG5_Format fmt);
  int           MMG5_scale_meshAndSol(MMG5_pMesh,MMG5_pSol,MMG5_pSol,double*,int8_t*,int8_t*);
  int           MMG5_scale_scalarMetric(MMG5_pMesh, MMG5_pSol,double, int8_t, int8_t);
  int           MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol ls);
- int           MMG5_scotchCall(MMG5_pMesh mesh, MMG5_pSol sol,int*);
+ int           MMG5_scotchCall(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol fields,int*);
  void          MMG5_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met);
  int           MMG5_solveDefmetregSys( MMG5_pMesh, double r[3][3], double *, double *,
                                         double *, double *, double, double, double);
@@ -736,7 +740,7 @@ extern int  (*MMG5_indElt)(MMG5_pMesh mesh,int kel);
 extern int  (*MMG5_indPt)(MMG5_pMesh mesh,int kp);
 
 #ifdef USE_SCOTCH
-extern int    (*MMG5_renumbering)(int vertBoxNbr, MMG5_pMesh mesh, MMG5_pSol sol,int*);
+extern int    (*MMG5_renumbering)(int,MMG5_pMesh,MMG5_pSol sol,MMG5_pSol fields,int*);
 #endif
 
 void   MMG5_Set_commonFunc();

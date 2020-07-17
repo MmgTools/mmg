@@ -438,12 +438,14 @@ void MMG5_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met,double hsiz) {
 int MMG5_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol) {
   int i;
 
-  if ( sol && mesh->nsols ) {
-    for ( i=0; i<mesh->nsols; ++i ) {
-      MMG5_DEL_MEM(mesh,(*sol)[i].m);
+  if ( sol ) {
+    if ( mesh->nsols ) {
+      for ( i=0; i<mesh->nsols; ++i ) {
+        MMG5_DEL_MEM(mesh,(*sol)[i].m);
+      }
     }
+    MMG5_DEL_MEM(mesh,(*sol));
   }
-  MMG5_DEL_MEM(mesh,(*sol));
 
   return 1;
 }

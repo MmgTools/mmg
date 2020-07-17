@@ -137,6 +137,7 @@ static const unsigned int MMG2D_inxt[5] = {1,2,0,1,2};
   {                                                                     \
     int klink;                                                          \
                                                                         \
+    assert ( mesh && mesh->point );                                     \
     MMG5_TAB_RECALLOC(mesh,mesh->point,mesh->npmax,wantedGap,MMG5_Point, \
                        "larger point table",law);                       \
                                                                         \
