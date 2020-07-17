@@ -52,7 +52,7 @@ int    (*MMG5_renumbering)(int vertBoxNbr, MMG5_pMesh mesh, MMG5_pSol sol,MMG5_p
 /**
  * \param *prog pointer toward the program name.
  *
- * Print help for common options of mmg3d and mmgs.
+ * Print help for common options of the 3 codes (first section).
  *
  */
 void MMG5_mmgUsage(char *prog) {
@@ -73,6 +73,7 @@ void MMG5_mmgUsage(char *prog) {
   fprintf(stdout,"-sol file  load solution or metric file\n");
 
   fprintf(stdout,"\n**  Parameters\n");
+  fprintf(stdout,"-A           enable anisotropy (without metric file).\n");
   fprintf(stdout,"-ar     val  angle detection\n");
   fprintf(stdout,"-nr          no angle detection\n");
   fprintf(stdout,"-hmin   val  minimal mesh size\n");
@@ -81,6 +82,54 @@ void MMG5_mmgUsage(char *prog) {
   fprintf(stdout,"-hausd  val  control Hausdorff distance\n");
   fprintf(stdout,"-hgrad  val  control gradation\n");
   fprintf(stdout,"-ls     val  create mesh of isovalue val (0 if no argument provided)\n");
+
+}
+
+/**
+ *
+ * Print help for common options of the 3 codes (second section).
+ *
+ */
+void MMG5_mmgUsage2( ) {
+
+  fprintf(stdout,"-noinsert    no point insertion/deletion \n");
+  fprintf(stdout,"-nomove      no point relocation\n");
+  fprintf(stdout,"-noswap      no edge or face flipping\n");
+  fprintf(stdout,"-optim       mesh optimization\n");
+
+}
+
+/**
+ *
+ * Print help for lagrangian motion option.
+ *
+ */
+void MMG5_lagUsage( ) {
+
+#ifdef USE_ELAS
+  fprintf(stdout,"-lag [n]     Lagrangian mesh displacement according to mode [0/1/2]\n");
+  fprintf(stdout,"               0: displacement\n");
+  fprintf(stdout,"               1: displacement + remeshing (swap and move)\n");
+  fprintf(stdout,"               2: displacement + remeshing (split, collapse,"
+          " swap and move)\n");
+#endif
+}
+
+/**
+ *
+ * Print help for common options between 2D and 3D.
+ *
+ */
+void MMG5_2d3dUsage( ) {
+
+  fprintf(stdout,"-nsd val     save the subdomain number val (0==all subdomain)\n");
+  fprintf(stdout,"-opnbdy      preserve input triangles at the interface of"
+          " two domains of the same reference.\n");
+
+  fprintf(stdout,"-rmc [val]   Enable the removal of componants whose volume fraction is less than\n"
+          "             val (1e-5 if not given) of the mesh volume (ls mode).\n");
+
+  MMG5_lagUsage();
 
 }
 

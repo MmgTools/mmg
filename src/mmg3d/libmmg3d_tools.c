@@ -119,20 +119,8 @@ int MMG3D_usage(char *prog) {
 
   MMG5_mmgUsage(prog);
 
-  fprintf(stdout,"-A           enable anisotropy (without metric file).\n");
-  fprintf(stdout,"-opnbdy      preserve input triangles at the interface of"
-          " two domains of the same reference.\n");
+  MMG5_2d3dUsage();
 
-  fprintf(stdout,"-rmc [val]   Enable the removal of componants whose volume fraction is less than\n"
-          "             val (1e-5 if not given) of the mesh volume (ls mode).\n");
-
-#ifdef USE_ELAS
-  fprintf(stdout,"-lag [n] Lagrangian mesh displacement according to mode [0/1/2]\n");
-  fprintf(stdout,"             0: displacement\n");
-  fprintf(stdout,"             1: displacement + remeshing (swap and move)\n");
-  fprintf(stdout,"             2: displacement + remeshing (split, collapse,"
-          " swap and move)\n");
-#endif
 #ifndef PATTERN
   fprintf(stdout,"-octree val  Specify the max number of points per octree cell \n");
 #endif
@@ -142,12 +130,11 @@ int MMG3D_usage(char *prog) {
   fprintf(stdout,"\n");
 
   fprintf(stdout,"-nofem       do not force Mmg to create a finite element mesh \n");
-  fprintf(stdout,"-optim       mesh optimization\n");
-  fprintf(stdout,"-optimLES    strong mesh optimization for LES computations\n");
-  fprintf(stdout,"-noinsert    no point insertion/deletion \n");
-  fprintf(stdout,"-noswap      no edge or face flipping\n");
-  fprintf(stdout,"-nomove      no point relocation\n");
   fprintf(stdout,"-nosurf      no surface modifications\n");
+
+  MMG5_mmgUsage2();
+
+  fprintf(stdout,"-optimLES    strong mesh optimization for LES computations\n");
 
   MMG5_advancedUsage();
 

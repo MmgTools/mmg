@@ -38,33 +38,15 @@ static void MMG5_endcod() {
 static int MMG2D_usage(char *name) {
   MMG5_mmgUsage(name);
 
-  fprintf(stdout,"-opnbdy      preserve input edges at the interface of"
-          " two domains of the same reference.\n");
+  MMG5_2d3dUsage();
 
-  fprintf(stdout,"-rmc [val]   Enable the removal of componants whose volume fraction is less than\n"
-          "             val (1e-5 if not given) of the mesh volume (ls mode).\n");
-#ifdef USE_ELAS
-  fprintf(stdout,"-lag [n] Lagrangian mesh displacement according to mode [0/1/2]\n");
-  fprintf(stdout,"             0: displacement\n");
-  fprintf(stdout,"             1: displacement + remeshing (swap and move)\n");
-  fprintf(stdout,"             2: displacement + remeshing (split, collapse,"
-          " swap and move)\n");
-#endif
-  fprintf(stdout,"-nsd val     only if no given triangle, save the subdomain number val (0==all subdomain)\n");
   fprintf(stdout,"-msh val     read and write to gmsh visu if val = 1 (out) if val=2 (in and out)\n");
-  fprintf(stdout,"-degrad Qw Qdeg (with -lag option) : threshold for optimization\n");
-
-  /* fprintf(stdout,"-per          obsolete : to deal with periodic mesh on a square\n");*/
 
   fprintf(stdout,"\n");
 
-  fprintf(stdout,"-optim        mesh optimization\n");
+  fprintf(stdout,"-nosurf      no surface modifications\n");
 
-  fprintf(stdout,"-nosurf       no surfacic modifications\n");
-
-  fprintf(stdout,"-noinsert     no insertion/suppression point\n");
-  fprintf(stdout,"-noswap       no edge flipping\n");
-  fprintf(stdout,"-nomove       no point relocation\n");
+  MMG5_mmgUsage2();
 
   MMG5_advancedUsage();
 
@@ -547,12 +529,6 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
         else if( !strcmp(argv[i],"-optim") ) {
           if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_optim,1) )
             return 0;
-        }
-        break;
-      case 'p':
-        if ( !strcmp(argv[i],"-per") ) {
-          fprintf(stdout,"WARNING OBSOLETE OPTION\n");
-          mesh->info.nsd = -10;
         }
         break;
       case 'r':

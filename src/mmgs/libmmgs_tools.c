@@ -70,13 +70,15 @@ void MMGS_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
 int MMGS_usage(char *prog) {
   MMG5_mmgUsage(prog);
 
-  fprintf(stdout,"-A           enable anisotropy (without metric file).\n");
   fprintf(stdout,"-keep-ref    preserve initial domain references in level-set mode.\n");
   fprintf(stdout,"-nreg        normal regul.\n");
-  fprintf(stdout,"-optim       mesh optimization\n");
+  fprintf(stdout,"-nsd val     save the subdomain number val (0==all subdomain)\n");
+
 #ifdef USE_SCOTCH
   fprintf(stdout,"-rn [n]      Turn on or off the renumbering using SCOTCH [0/1] \n");
 #endif
+
+  MMG5_mmgUsage2();
 
   MMG5_advancedUsage();
 
