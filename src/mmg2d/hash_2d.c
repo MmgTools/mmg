@@ -520,9 +520,6 @@ int MMG2D_pack(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
   int                iadr,iadrnew,iadrv,*adjav,*adja,*adjanew,voy;
   char               i,i1,i2;
 
-  /** Delete useless subdomains if needed */
-  MMG2D_keep_only1Subdomain ( mesh, mesh->info.nsd );
-
   /** Recreate adjacencies if need be */
   if ( !MMG2D_hashTria(mesh) ) {
     fprintf(stderr,"\n  ## Warning: %s: hashing problem. Exit program.\n",
