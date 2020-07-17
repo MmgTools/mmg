@@ -36,18 +36,30 @@ static void MMG5_endcod() {
 }
 
 static int MMG2D_usage(char *name) {
+
+  /* Common generic options, file options and mode options */
   MMG5_mmgUsage(name);
 
+  /* Lagrangian option (only for mmg2d/3d) */
+  MMG5_lagUsage();
+
+  /* Common parameters (first section) */
+  MMG5_paramUsage1( );
+
+  /* Parameters shared by mmg2d and 3d only*/
   MMG5_2d3dUsage();
 
-  fprintf(stdout,"-msh val     read and write to gmsh visu if val = 1 (out) if val=2 (in and out)\n");
+  /* Specific parameters */
+  fprintf(stdout,"-3dMedit val read and write to gmsh visu if val = 1 (out) if val=2 (in and out)\n");
 
   fprintf(stdout,"\n");
 
   fprintf(stdout,"-nosurf      no surface modifications\n");
 
-  MMG5_mmgUsage2();
+  /* Common parameters (second section) */
+  MMG5_paramUsage2();
 
+  /* Common options for advanced users */
   MMG5_advancedUsage();
 
   fprintf(stdout,"\n\n");
@@ -446,17 +458,6 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
             return 0;
           }
         }
-        else if(!strcmp(argv[i],"-msh") ) {
-          if ( ++i < argc && isdigit(argv[i][0]) ) {
-            if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_msh,atoi(argv[i])) )
-              return 0;
-          }
-          else {
-            fprintf(stderr,"Missing argument option %c\n",argv[i-1][1]);
-            MMG2D_usage(argv[0]);
-            return 0;
-          }
-        }
         else if (!strcmp(argv[i],"-m") ) {
           if ( ++i < argc && isdigit(argv[i][0]) ) {
             if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_mem,atoi(argv[i])) )
@@ -572,6 +573,19 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
           fprintf(stderr,"Missing argument option %c\n",argv[i-1][1]);
           MMG2D_usage(argv[0]);
           return 0;
+        }
+        break;
+      case '3':
+        if(!strcmp(argv[i],"-3dMedit") ) {
+          if ( ++i < argc && isdigit(argv[i][0]) ) {
+            if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_3dMedit,atoi(argv[i])) )
+              return 0;
+          }
+          else {
+            fprintf(stderr,"Missing argument option %c\n",argv[i-1][1]);
+            MMG2D_usage(argv[0]);
+            return 0;
+          }
         }
         break;
       default:

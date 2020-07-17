@@ -117,25 +117,37 @@ int MMG3D_Get_adjaTet(MMG5_pMesh mesh, int kel, int listet[4]) {
 
 int MMG3D_usage(char *prog) {
 
+  /* Common generic options, file options and mode options */
   MMG5_mmgUsage(prog);
 
+  /* Lagrangian option (only for mmg2d/3d) */
+  MMG5_lagUsage();
+
+  /* Common parameters (first section) */
+  MMG5_paramUsage1( );
+
+  /* Parameters shared by mmg2d and 3d only*/
   MMG5_2d3dUsage();
 
 #ifndef PATTERN
-  fprintf(stdout,"-octree val  Specify the max number of points per octree cell \n");
+  fprintf(stdout,"-octree val  specify the max number of points per octree cell \n");
 #endif
 #ifdef USE_SCOTCH
-  fprintf(stdout,"-rn [n]      Turn on or off the renumbering using SCOTCH [1/0] \n");
+  fprintf(stdout,"-rn [n]      turn on or off the renumbering using SCOTCH [1/0] \n");
 #endif
   fprintf(stdout,"\n");
 
   fprintf(stdout,"-nofem       do not force Mmg to create a finite element mesh \n");
   fprintf(stdout,"-nosurf      no surface modifications\n");
 
-  MMG5_mmgUsage2();
+  fprintf(stdout,"\n");
 
-  fprintf(stdout,"-optimLES    strong mesh optimization for LES computations\n");
+  /* Common parameters (second section) */
+  MMG5_paramUsage2();
 
+  fprintf(stdout,"-optimLES    enable skewness improvement (for LES computations)\n");
+
+  /* Common options for advanced users */
   MMG5_advancedUsage();
 
   fprintf(stdout,"\n\n");
@@ -328,6 +340,17 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
         else if ( !strcmp(argv[i],"-nr") ) {
           if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_angle,0) )
             return 0;
+        }
+        else if ( !strcmp(argv[i],"-nsd") ) {
+          if ( ++i < argc && isdigit(argv[i][0]) ) {
+            if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_numsubdomain,atoi(argv[i])) )
+              return 0;
+          }
+          else {
+            fprintf(stderr,"Missing argument option %c\n",argv[i-1][1]);
+            MMG3D_usage(argv[0]);
+            return 0;
+          }
         }
         else if ( !strcmp(argv[i],"-noswap") ) {
           if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_noswap,1) )

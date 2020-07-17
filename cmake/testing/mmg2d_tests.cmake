@@ -77,7 +77,7 @@ ADD_TEST(NAME mmg2d_hsizAndNosurfAni
   -out ${CTEST_OUTPUT_DIR}/mmg2d_hsizNosurfAni-circle.o.meshb)
 
 ADD_TEST(NAME mmg2d_hsizAndNosurfOption2
-  COMMAND ${EXECUT_MMG2D} -v 5 -hsiz 0.1 -sol 2 -nosurf -msh 2
+  COMMAND ${EXECUT_MMG2D} -v 5 -hsiz 0.1 -sol 2 -nosurf -3dMedit 2
   ${MMG2D_CI_TESTS}/2squares/2squares
   -out ${CTEST_OUTPUT_DIR}/mmg2d_hsizNosurf-2squares.o.meshb)
 
@@ -323,25 +323,25 @@ ADD_TEST(NAME mmg2d_SquareIso_nonConstant2
 
 ####### -nosurf option
 ADD_TEST(NAME mmg2d_2squares
-  COMMAND ${EXECUT_MMG2D} -msh 2 -hmax 1 -nosurf -v 5
+  COMMAND ${EXECUT_MMG2D} -3dMedit 2 -hmax 1 -nosurf -v 5
   ${MMG2D_CI_TESTS}/2squares/2squares
   -out ${CTEST_OUTPUT_DIR}/mmg2d_2squares.o.meshb)
 
 ####### -nsd
 ADD_TEST(NAME mmg2d_2squares-nsd16
-  COMMAND ${EXECUT_MMG2D} -msh 2 -v 5 -nsd 16
+  COMMAND ${EXECUT_MMG2D} -3dMedit 2 -v 5 -nsd 16
   ${MMG2D_CI_TESTS}/2squares/2squares
   -out ${CTEST_OUTPUT_DIR}/mmg2d_2squares-nsd16.o.mesh)
 
 ####### -met option
 ADD_TEST(NAME mmg2d_2squares-withMet
-  COMMAND ${EXECUT_MMG2D} -msh 2  -v 5
+  COMMAND ${EXECUT_MMG2D} -3dMedit 2  -v 5
   ${MMG2D_CI_TESTS}/2squares/2squares -met ${MMG2D_CI_TESTS}/2squares/2s.sol
   -out ${CTEST_OUTPUT_DIR}/mmg2d_2squares-met.o.meshb)
 
 ####### -sol option
 ADD_TEST(NAME mmg2d_2squares-withSol
-  COMMAND ${EXECUT_MMG2D} -msh 2  -v 5
+  COMMAND ${EXECUT_MMG2D} -3dMedit 2  -v 5
   ${MMG2D_CI_TESTS}/2squares/2squares -sol ${MMG2D_CI_TESTS}/2squares/2s.sol
   -out ${CTEST_OUTPUT_DIR}/mmg2d_2squares-sol.o.meshb)
 

@@ -62,14 +62,14 @@ extern "C" {
     MMG2D_IPARAM_iso,               /*!< [1/0], Level-set meshing */
     MMG2D_IPARAM_opnbdy,            /*!< [1/0], Preserve edges at interface of 2 domains with same reference */
     MMG2D_IPARAM_lag,               /*!< [-1/0/1/2], Lagrangian option */
-    MMG2D_IPARAM_msh,               /*!< [0/1/2], Read/write to gmsh visu if val=1 (out) if val=2 (in/out) */
-    MMG2D_IPARAM_numsubdomain,       /*!<only if no given triangle, save the subdomain nb (0==all subdomain) */
+    MMG2D_IPARAM_3dMedit,           /*!< [0/1/2], Read/write 2D mesh in 3D (Medit only). out if val=1 in/out if val=2 */
     MMG2D_IPARAM_optim,             /*!< [1/0], Optimize mesh keeping its initial edge sizes */
     MMG2D_IPARAM_noinsert,          /*!< [1/0], Avoid/allow point insertion */
     MMG2D_IPARAM_noswap,            /*!< [1/0], Avoid/allow edge or face flipping */
     MMG2D_IPARAM_nomove,            /*!< [1/0], Avoid/allow point relocation */
     MMG2D_IPARAM_nosurf,            /*!< [1/0], Avoid/allow surface modifications */
     MMG2D_IPARAM_nreg,              /*!< [0/1], Enable normal regularization */
+    MMG2D_IPARAM_numsubdomain,      /*!< [0/n], Save the subdomain nb (0==all subdomain) */
     MMG2D_IPARAM_numberOfLocalParam,/*!< [n], Number of local parameters */
     MMG2D_IPARAM_nosizreq,          /*!< [0/1], Allow/avoid overwritten of sizes at required points (advanced usage) */
     MMG2D_DPARAM_angleDetection,    /*!< [val], Value for angle detection */

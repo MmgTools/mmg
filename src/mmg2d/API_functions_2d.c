@@ -161,7 +161,7 @@ int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
     return 0;
 #endif
     break;
-  case MMG2D_IPARAM_msh :
+  case MMG2D_IPARAM_3dMedit :
     mesh->info.nreg = val;
     break;
   case MMG2D_IPARAM_numsubdomain :

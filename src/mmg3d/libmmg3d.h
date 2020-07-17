@@ -82,7 +82,8 @@ enum MMG3D_Param {
   MMG3D_IPARAM_nosurf,                    /*!< [1/0], Avoid/allow surface modifications */
   MMG3D_IPARAM_nreg,                      /*!< [0/1], Enable normal regularization */
   MMG3D_IPARAM_numberOfLocalParam,        /*!< [n], Number of local parameters */
-  MMG3D_IPARAM_numberOfLSBaseReferences,   /*!< [n], Number of base references for bubble removal */
+  MMG3D_IPARAM_numberOfLSBaseReferences,  /*!< [n], Number of base references for bubble removal */
+  MMG3D_IPARAM_numsubdomain,              /*!< [0/n], Save the subdomain nb (0==all subdomain) */
   MMG3D_IPARAM_renum,                     /*!< [1/0], Turn on/off point relocation with Scotch */
   MMG3D_IPARAM_anisosize,                 /*!< [1/0], Turn on/off anisotropic metric creation when no metric is provided */
   MMG3D_IPARAM_octree,                    /*!< [n], Specify the max number of points per PROctree cell (DELAUNAY) */
