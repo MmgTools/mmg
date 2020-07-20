@@ -37,6 +37,11 @@ ADD_TEST(NAME mmg2d_SimpleCircle
 #####         Options
 #####
 ###############################################################################
+ADD_TEST(NAME mmg2d_help
+  COMMAND ${EXECUT_MMG2D} -h
+  )
+SET_PROPERTY(TEST mmg2d_help
+  PROPERTY PASS_REGULAR_EXPRESSION "File specifications")
 
 ADD_TEST(NAME mmg2d_memOption
   COMMAND ${EXECUT_MMG2D} -v 5 -m 100
