@@ -936,7 +936,7 @@ int  MMG2D_Set_triangles(MMG5_pMesh mesh, int *tria, int *refs) {
       tmp = ptt->v[2];
       ptt->v[2] = ptt->v[1];
       ptt->v[1] = tmp;
-      /* mesh->xt temporary used to count reoriented quadra */
+      /* mesh->xt temporary used to count reoriented triangles */
       mesh->xt++;
     }
     if ( mesh->info.ddebug && mesh->xt > 0 ) {
