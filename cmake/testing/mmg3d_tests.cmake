@@ -301,6 +301,12 @@ ADD_TEST(NAME mmg3d_ascii_gmsh_3d
   ${CTEST_OUTPUT_DIR}/mmg3d_ascii_gmsh_3d-cube.o
 )
 
+# Tetgen
+ADD_TEST ( NAME mmg3d_cube-tetgen
+  COMMAND ${EXECUT_MMG3D} -v 5
+  ${MMG3D_CI_TESTS}/Cube/cube
+  ${CTEST_OUTPUT_DIR}/mmg3d_cube-tetgen.o.node
+ )
 
 ##############################################################################
 #####

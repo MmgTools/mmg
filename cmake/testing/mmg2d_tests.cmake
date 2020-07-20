@@ -299,7 +299,13 @@ IF ( NOT VTK_FOUND )
     PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
   SET_PROPERTY(TEST mmg2d_vtkvtu_ani
     PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
-ENDIF ( )
+ENDIF()
+
+# Triangle output
+ADD_TEST(NAME mmg2d_Circle-triangle
+  COMMAND ${EXECUT_MMG2D} -v 5
+  ${MMG2D_CI_TESTS}/Circle/cercle
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_Circle.o.node)
 
 ###############################################################################
 #####
