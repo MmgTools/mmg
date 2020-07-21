@@ -447,6 +447,117 @@ int MMGS_paramDisp(MMG5_pMesh mesh,int it1,int it2,
   return ier;
 }
 
+/**
+ * \param mesh pointer toward the mesh
+ * \param p0 point to move.
+ * \param p neighbouring point toward which we try to move.
+ * \param llold init length of edge p0-p
+ * \param lam0 first bezier basis function (order 2)
+ * \param lam1 second bezier basis function (order 2)
+ * \param lam2 third bezier basis function (order 2)
+ * \param no1 init normal at point \a p0
+ * \param no2 init normal at point \a p0
+ * \param np1 normal at point \a p associated to \a no1
+ * \param np2 normal at point \a p associated to \a no2
+ * \param nn1 normal at point \a p0 after relocation
+ * \param nn2 normal at point \a p0 after relocation
+ * \param to tangent along edge at point \a p0 after relocation
+ *
+ * \return 1 if success, 0 if fail
+ *
+ * Update normals and tangent at ref or ridge point \a p0 after relocation
+ * at coordinates \a o with the normal \a np1 associated to the normal \a no1
+ * and the normal \a np2 associated to the normal \a no2.
+ *
+ */
+static
+int MMGS_update_normalAndTangent(MMG5_pMesh mesh,MMG5_pPoint p0,MMG5_pPoint p,
+                                 double llold,double lam0,double lam1,double lam2,
+                                 double no1[3],double no2[3],
+                                 double np1[3],double np2[3],
+                                 double nn1[3],double nn2[3],double to[3] ) {
+
+  double dd1,dd2,ddt,ps2;
+
+  nn1[0] = no1[0]+np1[0];
+  nn1[1] = no1[1]+np1[1];
+  nn1[2] = no1[2]+np1[2];
+
+  nn2[0] = no2[0]+np2[0];
+  nn2[1] = no2[1]+np2[1];
+  nn2[2] = no2[2]+np2[2];
+
+  ps2 = (p->c[0]-p0->c[0])*nn1[0]+(p->c[1]-p0->c[1])*nn1[1]+(p->c[2]-p0->c[2])*nn1[2];
+  if ( llold < MMG5_EPSD2 ) {
+    return 0;
+  }
+
+  ps2 *= (2.0 / llold);
+  nn1[0] -= ps2*(p->c[0]-p0->c[0]);
+  nn1[1] -= ps2*(p->c[1]-p0->c[1]);
+  nn1[2] -= ps2*(p->c[2]-p0->c[2]);
+
+  ps2 = (p->c[0]-p0->c[0])*nn2[0]+(p->c[1]-p0->c[1])*nn2[1]+(p->c[2]-p0->c[2])*nn2[2];
+  ps2 *= (2.0/llold);
+  nn2[0] -=  ps2*(p->c[0]-p0->c[0]);
+  nn2[1] -=  ps2*(p->c[1]-p0->c[1]);
+  nn2[2] -=  ps2*(p->c[2]-p0->c[2]);
+
+  dd1 = nn1[0]*nn1[0] + nn1[1]*nn1[1] + nn1[2]*nn1[2];
+  dd2 = nn2[0]*nn2[0] + nn2[1]*nn2[1] + nn2[2]*nn2[2];
+  if ( (dd1 < MMG5_EPSD2) || (dd2<MMG5_EPSD2) ) {
+    return 0;
+  }
+
+  dd1 = 1.0 / sqrt(dd1);
+  nn1[0] = dd1*nn1[0];
+  nn1[1] = dd1*nn1[1];
+  nn1[2] = dd1*nn1[2];
+
+  dd2 = 1.0 / sqrt(dd2);
+  nn2[0] = dd2*nn2[0];
+  nn2[1] = dd2*nn2[1];
+  nn2[2] = dd2*nn2[2];
+
+  /* At this point, the control points associated to the interpolation formula for normals
+     have been computed .*/
+  nn1[0] = lam0*no1[0] + lam1*nn1[0] + lam2*np1[0];
+  nn1[1] = lam0*no1[1] + lam1*nn1[1] + lam2*np1[1];
+  nn1[2] = lam0*no1[2] + lam1*nn1[2] + lam2*np1[2];
+
+  nn2[0] = lam0*no2[0] + lam1*nn2[0] + lam2*np2[0];
+  nn2[1] = lam0*no2[1] + lam1*nn2[1] + lam2*np2[1];
+  nn2[2] = lam0*no2[2] + lam1*nn2[2] + lam2*np2[2];
+
+  to[0] = nn1[1]*nn2[2]-nn1[2]*nn2[1];
+  to[1] = nn1[2]*nn2[0]-nn1[0]*nn2[2];
+  to[2] = nn1[0]*nn2[1]-nn1[1]*nn2[0];
+
+  ddt = to[0]*to[0] + to[1]*to[1] + to[2]*to[2];
+  dd1 = nn1[0]*nn1[0] + nn1[1]*nn1[1] + nn1[2]*nn1[2];
+  dd2 = nn2[0]*nn2[0] + nn2[1]*nn2[1] + nn2[2]*nn2[2];
+
+  if ( (dd1 < MMG5_EPSD2) || (dd2<MMG5_EPSD2) || (ddt < MMG5_EPSD2) ) {
+    return 0;
+  }
+
+  dd1 = 1.0 / sqrt(dd1);
+  nn1[0] = dd1*nn1[0];
+  nn1[1] = dd1*nn1[1];
+  nn1[2] = dd1*nn1[2];
+
+  dd2 = 1.0 / sqrt(dd2);
+  nn2[0] = dd2*nn2[0];
+  nn2[1] = dd2*nn2[1];
+  nn2[2] = dd2*nn2[2];
+
+  ddt = 1.0 / sqrt(ddt);
+  to[0] = ddt*to[0];
+  to[1] = ddt*to[1];
+  to[2] = ddt*to[2];
+
+  return 1;
+}
 
 /**
  * \param mesh pointer toward the mesh
@@ -470,7 +581,7 @@ int MMGS_moveTowardPoint(MMG5_pMesh mesh,MMG5_pPoint p0,MMG5_pPoint p,
                          double llold,double lam0,double lam1,double lam2,
                          double nn1[3],double nn2[3],double to[3]) {
 
-  double *no1,*no2,dd1,dd2,ddt,*np1,*np2,psn11,psn12,ps2;
+  double *no1,*no2,*np1,*np2,psn11,psn12;
 
   no1 = &mesh->xpoint[p0->xp].n1[0];
   no2 = &mesh->xpoint[p0->xp].n2[0];
@@ -488,161 +599,18 @@ int MMGS_moveTowardPoint(MMG5_pMesh mesh,MMG5_pPoint p0,MMG5_pPoint p,
 
   /* no1 goes with np1, no2 with np2 */
   if ( fabs(1.0-fabs(psn11)) < fabs(1.0-fabs(psn12)) ){
-    nn1[0] = no1[0]+np1[0];
-    nn1[1] = no1[1]+np1[1];
-    nn1[2] = no1[2]+np1[2];
-
-    nn2[0] = no2[0]+np2[0];
-    nn2[1] = no2[1]+np2[1];
-    nn2[2] = no2[2]+np2[2];
-
-    ps2 = (p->c[0]-p0->c[0])*nn1[0]+(p->c[1]-p0->c[1])*nn1[1]+(p->c[2]-p0->c[2])*nn1[2];
-    if ( llold < MMG5_EPSD2 ) {
+    if ( !MMGS_update_normalAndTangent( mesh,p0,p,llold,lam0,lam1,lam2,
+                                        no1,no2,np1,np2,nn1,nn2,to ) ) {
       return 0;
     }
-
-    ps2 *= (2.0 / llold);
-    nn1[0] -= ps2*(p->c[0]-p0->c[0]);
-    nn1[1] -= ps2*(p->c[1]-p0->c[1]);
-    nn1[2] -= ps2*(p->c[2]-p0->c[2]);
-
-    ps2 = (p->c[0]-p0->c[0])*nn2[0]+(p->c[1]-p0->c[1])*nn2[1]+(p->c[2]-p0->c[2])*nn2[2];
-    ps2 *= (2.0/llold);
-    nn2[0] -=  ps2*(p->c[0]-p0->c[0]);
-    nn2[1] -=  ps2*(p->c[1]-p0->c[1]);
-    nn2[2] -=  ps2*(p->c[2]-p0->c[2]);
-
-    dd1 = nn1[0]*nn1[0] + nn1[1]*nn1[1] + nn1[2]*nn1[2];
-    dd2 = nn2[0]*nn2[0] + nn2[1]*nn2[1] + nn2[2]*nn2[2];
-    if ( (dd1 < MMG5_EPSD2) || (dd2<MMG5_EPSD2) ) {
-      return 0;
-    }
-
-    dd1 = 1.0 / sqrt(dd1);
-    nn1[0] = dd1*nn1[0];
-    nn1[1] = dd1*nn1[1];
-    nn1[2] = dd1*nn1[2];
-
-    dd2 = 1.0 / sqrt(dd2);
-    nn2[0] = dd2*nn2[0];
-    nn2[1] = dd2*nn2[1];
-    nn2[2] = dd2*nn2[2];
-
-    /* At this point, the control points associated to the interpolation formula for normals
-       have been computed .*/
-    nn1[0] = lam0*no1[0] + lam1*nn1[0] + lam2*np1[0];
-    nn1[1] = lam0*no1[1] + lam1*nn1[1] + lam2*np1[1];
-    nn1[2] = lam0*no1[2] + lam1*nn1[2] + lam2*np1[2];
-
-    nn2[0] = lam0*no2[0] + lam1*nn2[0] + lam2*np2[0];
-    nn2[1] = lam0*no2[1] + lam1*nn2[1] + lam2*np2[1];
-    nn2[2] = lam0*no2[2] + lam1*nn2[2] + lam2*np2[2];
-
-    to[0] = nn1[1]*nn2[2]-nn1[2]*nn2[1];
-    to[1] = nn1[2]*nn2[0]-nn1[0]*nn2[2];
-    to[2] = nn1[0]*nn2[1]-nn1[1]*nn2[0];
-
-    ddt = to[0]*to[0] + to[1]*to[1] + to[2]*to[2];
-    dd1 = nn1[0]*nn1[0] + nn1[1]*nn1[1] + nn1[2]*nn1[2];
-    dd2 = nn2[0]*nn2[0] + nn2[1]*nn2[1] + nn2[2]*nn2[2];
-
-    if ( (dd1 < MMG5_EPSD2) || (dd2<MMG5_EPSD2) || (ddt < MMG5_EPSD2) ) {
-      return 0;
-    }
-
-    dd1 = 1.0 / sqrt(dd1);
-    nn1[0] = dd1*nn1[0];
-    nn1[1] = dd1*nn1[1];
-    nn1[2] = dd1*nn1[2];
-
-    dd2 = 1.0 / sqrt(dd2);
-    nn2[0] = dd2*nn2[0];
-    nn2[1] = dd2*nn2[1];
-    nn2[2] = dd2*nn2[2];
-
-    ddt = 1.0 / sqrt(ddt);
-    to[0] = ddt*to[0];
-    to[1] = ddt*to[1];
-    to[2] = ddt*to[2];
   }
 
   /* no1 goes with np2 and no2 with np1 */
   else {
-    nn1[0] = no1[0]+np2[0];
-    nn1[1] = no1[1]+np2[1];
-    nn1[2] = no1[2]+np2[2];
-
-    nn2[0] = no2[0]+np1[0];
-    nn2[1] = no2[1]+np1[1];
-    nn2[2] = no2[2]+np1[2];
-
-    ps2 = (p->c[0]-p0->c[0])*nn1[0]+(p->c[1]-p0->c[1])*nn1[1]+(p->c[2]-p0->c[2])*nn1[2];
-    if ( llold < MMG5_EPSD2 ) {
+    if ( !MMGS_update_normalAndTangent( mesh,p0,p,llold,lam0,lam1,lam2,
+                                        no1,no2,np2,np1,nn1,nn2,to ) ) {
       return 0;
     }
-    ps2 *= (2.0 / llold);
-    nn1[0] -= ps2*(p->c[0]-p0->c[0]);
-    nn1[1] -= ps2*(p->c[1]-p0->c[1]);
-    nn1[2] -= ps2*(p->c[2]-p0->c[2]);
-
-    ps2 = (p->c[0]-p0->c[0])*nn2[0]+(p->c[1]-p0->c[1])*nn2[1]+(p->c[2]-p0->c[2])*nn2[2];
-    ps2 *= (2.0 / llold);
-    nn2[0] -=  ps2*(p->c[0]-p0->c[0]);
-    nn2[1] -=  ps2*(p->c[1]-p0->c[1]);
-    nn2[2] -=  ps2*(p->c[2]-p0->c[2]);
-
-    dd1 = nn1[0]*nn1[0] + nn1[1]*nn1[1] + nn1[2]*nn1[2];
-    dd2 = nn2[0]*nn2[0] + nn2[1]*nn2[1] + nn2[2]*nn2[2];
-
-    if (( dd1 < MMG5_EPSD2 ) || (dd2<MMG5_EPSD2) ) {
-      return 0;
-    }
-    dd1 = 1.0 / sqrt(dd1);
-    nn1[0] = dd1*nn1[0];
-    nn1[1] = dd1*nn1[1];
-    nn1[2] = dd1*nn1[2];
-
-    dd2 = 1.0 / sqrt(dd2);
-    nn2[0] = dd2*nn2[0];
-    nn2[1] = dd2*nn2[1];
-    nn2[2] = dd2*nn2[2];
-
-    /* At this point, the control points associated to the interpolation formula for normals
-       have been computed .*/
-    nn1[0] = lam0*no1[0] + lam1*nn1[0] + lam2*np2[0];
-    nn1[1] = lam0*no1[1] + lam1*nn1[1] + lam2*np2[1];
-    nn1[2] = lam0*no1[2] + lam1*nn1[2] + lam2*np2[2];
-
-    nn2[0] = lam0*no2[0] + lam1*nn2[0] + lam2*np1[0];
-    nn2[1] = lam0*no2[1] + lam1*nn2[1] + lam2*np1[1];
-    nn2[2] = lam0*no2[2] + lam1*nn2[2] + lam2*np1[2];
-
-    to[0] = nn1[1]*nn2[2]-nn1[2]*nn2[1];
-    to[1] = nn1[2]*nn2[0]-nn1[0]*nn2[2];
-    to[2] = nn1[0]*nn2[1]-nn1[1]*nn2[0];
-
-    dd1 = nn1[0]*nn1[0] + nn1[1]*nn1[1] + nn1[2]*nn1[2];
-    dd2 = nn2[0]*nn2[0] + nn2[1]*nn2[1] + nn2[2]*nn2[2];
-    ddt = to[0]*to[0] + to[1]*to[1] + to[2]*to[2];
-
-    if ( (dd1 < MMG5_EPSD2) || (dd2<MMG5_EPSD2) || (ddt < MMG5_EPSD2) ) {
-      return 0;
-    }
-
-    dd1 = 1.0 / sqrt(dd1);
-    nn1[0] = dd1*nn1[0];
-    nn1[1] = dd1*nn1[1];
-    nn1[2] = dd1*nn1[2];
-
-    dd2 = 1.0 / sqrt(dd2);
-    nn2[0] = dd2*nn2[0];
-    nn2[1] = dd2*nn2[1];
-    nn2[2] = dd2*nn2[2];
-
-    ddt = 1.0 / sqrt(ddt);
-    to[0] = ddt*to[0];
-    to[1] = ddt*to[1];
-    to[2] = ddt*to[2];
   }
 
   return 1;

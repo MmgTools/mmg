@@ -341,7 +341,9 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
 
   /* Move is made towards p2 */
   if ( l2old > l1old ) {
-    MMGS_moveTowardPoint(mesh,p0,p2,ll2old,lam0,lam1,lam2,nn1,nn2,to);
+    if ( !MMGS_moveTowardPoint(mesh,p0,p2,ll2old,lam0,lam1,lam2,nn1,nn2,to) ) {
+      return 0;
+    }
 
     /* Interpolation of metric between ip0 and ip2 */
     if ( isrid ) {
@@ -356,7 +358,9 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
 
   /* Move along p1 */
   else {
-    MMGS_moveTowardPoint( mesh,p0,p1,ll1old,lam0,lam1,lam2,nn1,nn2,to);
+    if ( !MMGS_moveTowardPoint(mesh,p0,p1,ll1old,lam0,lam1,lam2,nn1,nn2,to) ) {
+      return 0;
+    }
 
     /* Interpolation of metric between ip0 and ip1 */
     if ( isrid ) {
