@@ -90,7 +90,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         MMG_FSCANF(inm,"%d",&mesh->dim);
         if(mesh->info.nreg==2) {
           if(mesh->dim!=3) {
-            fprintf(stdout,"WRONG USE OF -msh \n");
+            fprintf(stdout,"WRONG USE OF 3dMedit option \n");
             return 0;
           }
           mesh->dim = 2;
@@ -1008,7 +1008,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
   MMG5_pTria        pt;
   MMG5_pQuad        pq;
   double            dblb;
-  int               k,ne,np,nc,nreq,nereq,nedreq,nq,nqreq,ref,ntang;
+  int               k,ne,np,nc,nreq,nereq,nedreq,nq,nqreq,ref;
   int               bin, binch, bpos;
   char              *ptr,*data,chaine[MMG5_FILESTR_LGTH];
 
@@ -1093,9 +1093,9 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
     binch = 4; //Vertices
     fwrite(&binch,MMG5_SW,1,inm);
     if ( mesh->info.nreg )
-      bpos += 12+(1+3*mesh->ver)*4*np; //NullPos
+      bpos += (3+(1+3*mesh->ver)*np)*MMG5_SW; //NullPos
     else
-      bpos += 12+(1+2*mesh->ver)*4*np; //NullPos
+      bpos += (3+(1+2*mesh->ver)*np)*MMG5_SW; //NullPos
 
     fwrite(&bpos,MMG5_SW,1,inm);
     fwrite(&np,MMG5_SW,1,inm);
@@ -1148,7 +1148,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
     {
       binch = 13; //
       fwrite(&binch,MMG5_SW,1,inm);
-      bpos += 12+4*nc; //NullPos
+      bpos += (3+nc)*MMG5_SW; //NullPos
       fwrite(&bpos,MMG5_SW,1,inm);
       fwrite(&nc,MMG5_SW,1,inm);
     }
@@ -1184,7 +1184,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
     else {
       binch = 15; //
       fwrite(&binch,MMG5_SW,1,inm);
-      bpos += 12+4*nreq; //NullPos
+      bpos += (3+nreq)*MMG5_SW; //NullPos
       fwrite(&bpos,MMG5_SW,1,inm);
       fwrite(&nreq,MMG5_SW,1,inm);
     }
@@ -1214,7 +1214,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
     else {
       binch = 5; //Edges
       fwrite(&binch,MMG5_SW,1,inm);
-      bpos += 12 + 3*4*mesh->na;//Pos
+      bpos += (3+3*mesh->na)*MMG5_SW;//Pos
       fwrite(&bpos,MMG5_SW,1,inm);
       fwrite(&mesh->na,MMG5_SW,1,inm);
     }
@@ -1239,7 +1239,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
       } else {
         binch = 16; //RequiredEdges
         fwrite(&binch,MMG5_SW,1,inm);
-        bpos += 12 + 4*nedreq;//Pos
+        bpos += (3 + nedreq)*MMG5_SW;//Pos
         fwrite(&bpos,MMG5_SW,1,inm);
         fwrite(&nedreq,MMG5_SW,1,inm);
       }
@@ -1277,7 +1277,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
     else {
       binch = 6; //Triangles
       fwrite(&binch,MMG5_SW,1,inm);
-      bpos += 12+16*ne; //Pos
+      bpos += (3+4*ne)*MMG5_SW; //Pos
       fwrite(&bpos,MMG5_SW,1,inm);
       fwrite(&ne,MMG5_SW,1,inm);
     }
@@ -1306,7 +1306,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
       } else {
         binch = 17; //ReqTriangles
         fwrite(&binch,MMG5_SW,1,inm);
-        bpos += 12+4*nereq; //Pos
+        bpos += (3+nereq)*MMG5_SW; //Pos
         fwrite(&bpos,MMG5_SW,1,inm);
         fwrite(&nereq,MMG5_SW,1,inm);
       }
@@ -1353,7 +1353,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
     } else {
       binch = 7; //Quadrilaterals
       fwrite(&binch,MMG5_SW,1,inm);
-      bpos += 12+20*nq; //Pos
+      bpos += (3+5*nq)*MMG5_SW; //Pos
       fwrite(&bpos,MMG5_SW,1,inm);
       fwrite(&nq,MMG5_SW,1,inm);
     }
@@ -1385,7 +1385,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
       } else {
         binch = 18; //ReqQuad
         fwrite(&binch,MMG5_SW,1,inm);
-        bpos += 12+4*nqreq; //Pos
+        bpos += (3+nqreq)*MMG5_SW; //Pos
         fwrite(&bpos,MMG5_SW,1,inm);
         fwrite(&nqreq,MMG5_SW,1,inm);
       }
@@ -1403,98 +1403,6 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
     }
   }
 
-  /*savetangent*/
-  ntang=0;
-  for(k=1 ; k<=mesh->np ; k++) {
-    ppt = &mesh->point[k];
-    if ( MG_VOK(ppt) ) {
-      if(!(ppt->tag & MG_BDY)) continue;
-      if(ppt->tag & MG_CRN) continue;
-      ntang++;
-    }
-  }
-
-
-  /* Remark: here we save the tangents but there is a bug in medit (it crashes
-   * if it try to read tangents without normals. It is easy to patch, in
-   * zaldy1.c, seek the " if ( mesh->ntg )" field and replace
-   * "assert(mesh->extra->n);" by "assert(mesh->extra->t);").
-   * To not have to modify medit, here we save the tangents as if it were normals. */
-  /* if ( ntang ) { */
-  /*   if ( !bin ) { */
-  /*     strcpy(&chaine[0],"\n\nNormals\n"); //be careful it is tangent!! */
-  /*     fprintf(inm,"%s",chaine); */
-  /*     fprintf(inm,"%d\n",ntang); */
-  /*   } */
-  /*   else */
-  /*   { */
-  /*     binch = 60; //normals */
-  /*     fwrite(&binch,MMG5_SW,1,inm); */
-  /*     if ( mesh->info.nreg ) */
-  /*       bpos += 12+(3*mesh->ver)*4*ntang; //Pos */
-  /*     else */
-  /*       bpos += 12+(2*mesh->ver)*4*ntang; //Pos */
-  /*     fwrite(&bpos,MMG5_SW,1,inm); */
-  /*     fwrite(&ntang,MMG5_SW,1,inm); */
-  /*   } */
-
-  /*   for(k=1 ; k<=mesh->np ; k++) { */
-  /*     ppt = &mesh->point[k]; */
-  /*     if(!MG_VOK(ppt)) continue; */
-  /*     if(!(ppt->tag & MG_BDY)) continue; */
-  /*     if(ppt->tag & MG_CRN) continue; */
-  /*     if(mesh->info.nreg) { */
-  /*       if ( !bin ) */
-  /*         fprintf(inm,"%lf %lf %lf\n",ppt->n[0],ppt->n[1],0.e0); */
-  /*       else { */
-  /*         dblb = 0; */
-  /*         fwrite((unsigned char*)&ppt->n[0],MMG5_SD,1,inm); */
-  /*         fwrite((unsigned char*)&ppt->n[1],MMG5_SD,1,inm); */
-  /*         fwrite(&dblb,MMG5_SD,1,inm); */
-  /*       } */
-  /*     } */
-  /*     else */
-  /*     { */
-  /*       if ( !bin ) */
-  /*         fprintf(inm,"%lf %lf \n",ppt->n[0],ppt->n[1]); */
-  /*       else { */
-  /*         fwrite((unsigned char*)&ppt->n[0],MMG5_SD,1,inm); */
-  /*         fwrite((unsigned char*)&ppt->n[1],MMG5_SD,1,inm); */
-  /*       } */
-  /*     } */
-  /*   } */
-
-  /*   if ( !bin ) { */
-  /*     strcpy(&chaine[0],"\n\nNormalAtVertices\n"); */
-  /*     fprintf(inm,"%s",chaine); */
-  /*     fprintf(inm,"%d\n",ntang); */
-  /*   } */
-
-  /*   else { */
-  /*     binch = 20; //normalatvertices */
-  /*     fwrite(&binch,MMG5_SW,1,inm); */
-  /*     bpos += 12 + 2*4*ntang;//Pos */
-  /*     fwrite(&bpos,MMG5_SW,1,inm); */
-  /*     fwrite(&ntang,MMG5_SW,1,inm); */
-  /*   } */
-  /*   nn=1; */
-  /*   for(k=1 ; k<=mesh->np ; k++) { */
-  /*     ppt = &mesh->point[k]; */
-  /*     if ( !MG_VOK(ppt) ) continue; */
-  /*     if(!(ppt->tag & MG_BDY)) continue; */
-  /*     if(ppt->tag & MG_CRN) continue; */
-
-  /*     if(!bin) { */
-  /*       fprintf(inm,"%d %d\n",ppt->tmp,nn++); */
-  /*     } */
-  /*     else { */
-  /*       fwrite(&ppt->tmp,MMG5_SW,1,inm); */
-  /*       ++nn; */
-  /*       fwrite(&nn,MMG5_SW,1,inm); */
-  /*     } */
-  /*   } */
-  /* } */
-
   if(!bin) {
     strcpy(&chaine[0],"\n\nEnd\n");
     fprintf(inm,"%s",chaine);
@@ -1502,6 +1410,8 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
   else {
     binch = 54; //End
     fwrite(&binch,MMG5_SW,1,inm);
+    bpos += 2*MMG5_SW; //bpos + End key
+    fwrite(&bpos,MMG5_SW,1,inm);
   }
 
   if ( abs(mesh->info.imprim) > 4 ) {

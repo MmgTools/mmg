@@ -342,7 +342,7 @@ ADD_TEST(NAME mmg2d_2squares
 ADD_TEST(NAME mmg2d_2squares-nsd16
   COMMAND ${EXECUT_MMG2D} -3dMedit 2 -v 5 -nsd 16
   ${MMG2D_CI_TESTS}/2squares/2squares
-  -out ${CTEST_OUTPUT_DIR}/mmg2d_2squares-nsd16.o.mesh)
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_2squares-nsd16.o.meshb)
 
 ####### -met option
 ADD_TEST(NAME mmg2d_2squares-withMet
@@ -430,7 +430,7 @@ ADD_TEST(NAME mmg2d_ACDCGeneration
 ADD_TEST(NAME mmg2d_ACDCGeneration-nsd2
   COMMAND ${EXECUT_MMG2D} -v 5 -nsd 2
   ${MMG2D_CI_TESTS}/ACDCGeneration/acdcBdy.mesh
-  -out ${CTEST_OUTPUT_DIR}/mmg2d_ACDCGeneration-nds2.o.mesh)
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_ACDCGeneration-nds2.o.meshb)
 
 ADD_TEST(NAME mmg2d_GaronneGeneration
   COMMAND ${EXECUT_MMG2D} -v 5
