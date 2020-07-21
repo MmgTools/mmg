@@ -518,6 +518,18 @@ ADD_TEST(NAME mmg3d_OptimAni_Sphere
   ${CTEST_OUTPUT_DIR}/mmg3d_OptimAni_Sphere.o.mesh
   )
 
+##############################################################################
+#####
+#####         Check optimLES
+#####
+##############################################################################
+#####
+ADD_TEST(NAME mmg3d_OptimLES_sphere
+  COMMAND ${EXECUT_MMG3D} -v 5 -optimLES
+  ${MMG3D_CI_TESTS}/SphereIso_0.25h_met/SphereIso0.5
+  ${CTEST_OUTPUT_DIR}/mmg3d_OptimLES_Sphere.o.mesh
+  )
+
 ###############################################################################
 #####
 #####         Check Results
