@@ -203,6 +203,7 @@ int    movridpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist);
 int    movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist);
 int    movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist);
 int    movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist);
+int    MMGS_surfballRotation(MMG5_pMesh,MMG5_pPoint,int*,int,double r[3][3],double*);
 int    MMGS_prilen(MMG5_pMesh mesh,MMG5_pSol met,int);
 int    MMGS_set_metricAtPointsOnReqEdges ( MMG5_pMesh,MMG5_pSol,int8_t );
 

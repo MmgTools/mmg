@@ -47,10 +47,10 @@
  */
 int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   MMG5_pTria     pt,pt0;
-  MMG5_pPoint    p0,p1,ppt0;
-  MMG5_Bezier   pb;
-  double         r[3][3],ux,uy,uz,*n,area,lispoi[3*MMGS_LMAX+1],*m0;//,m[6],mo[6];
-  double         gv[2],detloc,step,lambda[3],o[3],no[3],to[3],uv[2];
+  MMG5_pPoint    p0,ppt0;
+  MMG5_Bezier    pb;
+  double         r[3][3],lispoi[3*MMGS_LMAX+1],*m0;//,m[6],mo[6];
+  double         gv[2],area,detloc,step,lambda[3],o[3],no[3],to[3],uv[2];
   double         calold,calnew,caltmp;
   int            k,iel,kel,nump,nbeg,nend;
   char           i0,i1,i2,ier;
@@ -77,40 +77,10 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   nend = pt->v[i2];
   if ( nbeg != nend )  return 0;
 
-  /** Step 1 : Rotation matrix that sends normal at p0 to e_z */
-  n = &(p0->n[0]);
-  if ( !MMG5_rotmatrix(n,r) )  return 0;
-
-  /* Apply rotation \circ translation to the whole ball */
-  assert ( ilist );
-  for (k=0; k<ilist; k++) {
-    iel = list[k] / 3;
-    i0  = list[k] % 3;
-    i1  = MMG5_inxt2[i0];
-    pt  = &mesh->tria[iel];
-    p1  = &mesh->point[pt->v[i1]];
-
-    ux = p1->c[0] - p0->c[0];
-    uy = p1->c[1] - p0->c[1];
-    uz = p1->c[2] - p0->c[2];
-
-    lispoi[3*k+1] = r[0][0]*ux + r[0][1]*uy + r[0][2]*uz;
-    lispoi[3*k+2] = r[1][0]*ux + r[1][1]*uy + r[1][2]*uz;
-    lispoi[3*k+3] = r[2][0]*ux + r[2][1]*uy + r[2][2]*uz;
+  /* Rotation of the ball of p0 */
+  if ( !MMGS_surfballRotation(mesh,p0,list,ilist,r,lispoi)  ) {
+    return 0;
   }
-
-  /* list goes modulo ilist */
-  lispoi[3*ilist+1] = lispoi[1];
-  lispoi[3*ilist+2] = lispoi[2];
-  lispoi[3*ilist+3] = lispoi[3];
-
-  /* Check all projections over tangent plane. */
-  for (k=0; k<ilist-1; k++) {
-    area = lispoi[3*k+1]*lispoi[3*(k+1)+2] - lispoi[3*k+2]*lispoi[3*(k+1)+1];
-    if ( area < 0.0 )  return 0;
-  }
-  area = lispoi[3*(ilist-1)+1]*lispoi[3*0+2] - lispoi[3*(ilist-1)+2]*lispoi[3*0+1];
-  if ( area < 0.0 )  return 0;
 
   /** Step 2 : Compute gradient towards optimal position = centre of mass of the
      ball, projected to tangent plane */
