@@ -341,7 +341,6 @@ int movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
  * \param ip1 edge point connected by the ref/ridge edge to \a p0
  * \param ip2 edge point connected by the ref/ridge edge to \a p0
  * \param step displacement factor along the ref/ridge edge
- * \param uv parametric displacement to compute
  * \param o coordinates of point after relocation
  * \param nn1 normal at point \a o
  * \param to tangent along ref/ridge edge at point \a o
@@ -356,10 +355,11 @@ int movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
 int MMGS_paramDisp(MMG5_pMesh mesh,int it1,int it2,
                    double l1old,double l2old,
                    char isrid1, char isrid2,int ip0,int ip1,int ip2,
-                   double step,double uv[2],double o[3],double nn1[3],
+                   double step,double o[3],double nn1[3],
                    double to[3],char *isrid) {
   MMG5_pTria  pt;
   MMG5_Bezier b;
+  double      uv[2];
   int         ier;
 
   /* move towards p2 */
@@ -455,7 +455,7 @@ int movridpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   MMG5_pTria   pt,pt0;
   MMG5_pxPoint go;
   MMG5_pPoint  p0,p1,p2,ppt0;
-  double  step,dd1,dd2,ddt,ps2,ll1old,ll1new,ll2old,ll2new,uv[2],o[3],*no1,*no2,*np1,*np2;
+  double  step,dd1,dd2,ddt,ps2,ll1old,ll1new,ll2old,ll2new,o[3],*no1,*no2,*np1,*np2;
   double  nn1[3],nn2[3],psn11,psn12,to[3],calold,calnew,lam0,lam1,lam2;
   int     k,iel,ip0,ip1,ip2,it1,it2;
   char    i0,i1,i2,isrid1,isrid2,isrid;
@@ -529,7 +529,7 @@ int movridpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
 
   /* Third step : infer arc length of displacement, parameterized over edges */
   if ( !MMGS_paramDisp ( mesh,it1,it2,ll1old,ll2old,isrid1,isrid2,
-                         ip0,ip1,ip2,step,uv,o,nn1,to,&isrid ) ) {
+                         ip0,ip1,ip2,step,o,nn1,to,&isrid ) ) {
     return 0;
   }
 

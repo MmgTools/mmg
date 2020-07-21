@@ -202,7 +202,7 @@ int    MMGS_intmet33_ani(MMG5_pMesh,MMG5_pSol,int,char,int,double);
 int    MMGS_paramDisp(MMG5_pMesh mesh,int it1,int it2,
                       double l1old,double l2old,
                       char isrid1, char isrid2,int ip0,int ip1,int ip2,
-                      double step,double uv[2],double o[3],double nn1[3],
+                      double step,double o[3],double nn1[3],
                       double to[3],char *isrid);
 int    movridpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist);
 int    movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist);
