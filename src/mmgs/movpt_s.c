@@ -342,8 +342,6 @@ int movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
  * \param ip2 edge point connected by the ref/ridge edge to \a p0
  * \param step displacement factor along the ref/ridge edge
  * \param o coordinates of point after relocation
- * \param nn1 normal at point \a o
- * \param to tangent along ref/ridge edge at point \a o
  * \param isrid 1 if point is moved toward a ridge.
  *
  * \return 1 if success, 0 otherwise.
@@ -355,11 +353,10 @@ int movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
 int MMGS_paramDisp(MMG5_pMesh mesh,int it1,int it2,
                    double l1old,double l2old,
                    char isrid1, char isrid2,int ip0,int ip1,int ip2,
-                   double step,double o[3],double nn1[3],
-                   double to[3],char *isrid) {
+                   double step,double o[3],char *isrid) {
   MMG5_pTria  pt;
   MMG5_Bezier b;
-  double      uv[2];
+  double      uv[2],nn1[3],to[3];
   int         ier;
 
   /* move towards p2 */
@@ -450,13 +447,214 @@ int MMGS_paramDisp(MMG5_pMesh mesh,int it1,int it2,
   return ier;
 }
 
+
+/**
+ * \param mesh pointer toward the mesh
+ * \param p0 point to move.
+ * \param p neighbouring point toward which we try to move.
+ * \param llold init length of edge p0-p
+ * \param lam0 first bezier basis function (order 2)
+ * \param lam1 second bezier basis function (order 2)
+ * \param lam2 third bezier basis function (order 2)
+ * \param nn1 normal at point \a p0 after relocation
+ * \param nn2 normal at point \a p0 after relocation
+ * \param to tangent along edge at point \a p0 after relocation
+ *
+ * \return 1 if success, 0 if fail
+ *
+ * Update normals and tangent at ref or ridge point \a p0 after relocation
+ * at coordinates \a o.
+ *
+ */
+int MMGS_moveTowardPoint(MMG5_pMesh mesh,MMG5_pPoint p0,MMG5_pPoint p,
+                         double llold,double lam0,double lam1,double lam2,
+                         double nn1[3],double nn2[3],double to[3]) {
+
+  double *no1,*no2,dd1,dd2,ddt,*np1,*np2,psn11,psn12,ps2;
+
+  no1 = &mesh->xpoint[p0->xp].n1[0];
+  no2 = &mesh->xpoint[p0->xp].n2[0];
+
+  if ( MS_SIN(p->tag) ) {
+    np1 = &mesh->xpoint[p0->xp].n1[0];
+    np2 = &mesh->xpoint[p0->xp].n2[0];
+  }
+  else {
+    np1 = &mesh->xpoint[p->xp].n1[0];
+    np2 = &mesh->xpoint[p->xp].n2[0];
+  }
+  psn11 = no1[0]*np1[0] + no1[1]*np1[1] + no1[2]*np1[2];
+  psn12 = no1[0]*np2[0] + no1[1]*np2[1] + no1[2]*np2[2];
+
+  /* no1 goes with np1, no2 with np2 */
+  if ( fabs(1.0-fabs(psn11)) < fabs(1.0-fabs(psn12)) ){
+    nn1[0] = no1[0]+np1[0];
+    nn1[1] = no1[1]+np1[1];
+    nn1[2] = no1[2]+np1[2];
+
+    nn2[0] = no2[0]+np2[0];
+    nn2[1] = no2[1]+np2[1];
+    nn2[2] = no2[2]+np2[2];
+
+    ps2 = (p->c[0]-p0->c[0])*nn1[0]+(p->c[1]-p0->c[1])*nn1[1]+(p->c[2]-p0->c[2])*nn1[2];
+    if ( llold < MMG5_EPSD2 ) {
+      return 0;
+    }
+
+    ps2 *= (2.0 / llold);
+    nn1[0] -= ps2*(p->c[0]-p0->c[0]);
+    nn1[1] -= ps2*(p->c[1]-p0->c[1]);
+    nn1[2] -= ps2*(p->c[2]-p0->c[2]);
+
+    ps2 = (p->c[0]-p0->c[0])*nn2[0]+(p->c[1]-p0->c[1])*nn2[1]+(p->c[2]-p0->c[2])*nn2[2];
+    ps2 *= (2.0/llold);
+    nn2[0] -=  ps2*(p->c[0]-p0->c[0]);
+    nn2[1] -=  ps2*(p->c[1]-p0->c[1]);
+    nn2[2] -=  ps2*(p->c[2]-p0->c[2]);
+
+    dd1 = nn1[0]*nn1[0] + nn1[1]*nn1[1] + nn1[2]*nn1[2];
+    dd2 = nn2[0]*nn2[0] + nn2[1]*nn2[1] + nn2[2]*nn2[2];
+    if ( (dd1 < MMG5_EPSD2) || (dd2<MMG5_EPSD2) ) {
+      return 0;
+    }
+
+    dd1 = 1.0 / sqrt(dd1);
+    nn1[0] = dd1*nn1[0];
+    nn1[1] = dd1*nn1[1];
+    nn1[2] = dd1*nn1[2];
+
+    dd2 = 1.0 / sqrt(dd2);
+    nn2[0] = dd2*nn2[0];
+    nn2[1] = dd2*nn2[1];
+    nn2[2] = dd2*nn2[2];
+
+    /* At this point, the control points associated to the interpolation formula for normals
+       have been computed .*/
+    nn1[0] = lam0*no1[0] + lam1*nn1[0] + lam2*np1[0];
+    nn1[1] = lam0*no1[1] + lam1*nn1[1] + lam2*np1[1];
+    nn1[2] = lam0*no1[2] + lam1*nn1[2] + lam2*np1[2];
+
+    nn2[0] = lam0*no2[0] + lam1*nn2[0] + lam2*np2[0];
+    nn2[1] = lam0*no2[1] + lam1*nn2[1] + lam2*np2[1];
+    nn2[2] = lam0*no2[2] + lam1*nn2[2] + lam2*np2[2];
+
+    to[0] = nn1[1]*nn2[2]-nn1[2]*nn2[1];
+    to[1] = nn1[2]*nn2[0]-nn1[0]*nn2[2];
+    to[2] = nn1[0]*nn2[1]-nn1[1]*nn2[0];
+
+    ddt = to[0]*to[0] + to[1]*to[1] + to[2]*to[2];
+    dd1 = nn1[0]*nn1[0] + nn1[1]*nn1[1] + nn1[2]*nn1[2];
+    dd2 = nn2[0]*nn2[0] + nn2[1]*nn2[1] + nn2[2]*nn2[2];
+
+    if ( (dd1 < MMG5_EPSD2) || (dd2<MMG5_EPSD2) || (ddt < MMG5_EPSD2) ) {
+      return 0;
+    }
+
+    dd1 = 1.0 / sqrt(dd1);
+    nn1[0] = dd1*nn1[0];
+    nn1[1] = dd1*nn1[1];
+    nn1[2] = dd1*nn1[2];
+
+    dd2 = 1.0 / sqrt(dd2);
+    nn2[0] = dd2*nn2[0];
+    nn2[1] = dd2*nn2[1];
+    nn2[2] = dd2*nn2[2];
+
+    ddt = 1.0 / sqrt(ddt);
+    to[0] = ddt*to[0];
+    to[1] = ddt*to[1];
+    to[2] = ddt*to[2];
+  }
+
+  /* no1 goes with np2 and no2 with np1 */
+  else {
+    nn1[0] = no1[0]+np2[0];
+    nn1[1] = no1[1]+np2[1];
+    nn1[2] = no1[2]+np2[2];
+
+    nn2[0] = no2[0]+np1[0];
+    nn2[1] = no2[1]+np1[1];
+    nn2[2] = no2[2]+np1[2];
+
+    ps2 = (p->c[0]-p0->c[0])*nn1[0]+(p->c[1]-p0->c[1])*nn1[1]+(p->c[2]-p0->c[2])*nn1[2];
+    if ( llold < MMG5_EPSD2 ) {
+      return 0;
+    }
+    ps2 *= (2.0 / llold);
+    nn1[0] -= ps2*(p->c[0]-p0->c[0]);
+    nn1[1] -= ps2*(p->c[1]-p0->c[1]);
+    nn1[2] -= ps2*(p->c[2]-p0->c[2]);
+
+    ps2 = (p->c[0]-p0->c[0])*nn2[0]+(p->c[1]-p0->c[1])*nn2[1]+(p->c[2]-p0->c[2])*nn2[2];
+    ps2 *= (2.0 / llold);
+    nn2[0] -=  ps2*(p->c[0]-p0->c[0]);
+    nn2[1] -=  ps2*(p->c[1]-p0->c[1]);
+    nn2[2] -=  ps2*(p->c[2]-p0->c[2]);
+
+    dd1 = nn1[0]*nn1[0] + nn1[1]*nn1[1] + nn1[2]*nn1[2];
+    dd2 = nn2[0]*nn2[0] + nn2[1]*nn2[1] + nn2[2]*nn2[2];
+
+    if (( dd1 < MMG5_EPSD2 ) || (dd2<MMG5_EPSD2) ) {
+      return 0;
+    }
+    dd1 = 1.0 / sqrt(dd1);
+    nn1[0] = dd1*nn1[0];
+    nn1[1] = dd1*nn1[1];
+    nn1[2] = dd1*nn1[2];
+
+    dd2 = 1.0 / sqrt(dd2);
+    nn2[0] = dd2*nn2[0];
+    nn2[1] = dd2*nn2[1];
+    nn2[2] = dd2*nn2[2];
+
+    /* At this point, the control points associated to the interpolation formula for normals
+       have been computed .*/
+    nn1[0] = lam0*no1[0] + lam1*nn1[0] + lam2*np2[0];
+    nn1[1] = lam0*no1[1] + lam1*nn1[1] + lam2*np2[1];
+    nn1[2] = lam0*no1[2] + lam1*nn1[2] + lam2*np2[2];
+
+    nn2[0] = lam0*no2[0] + lam1*nn2[0] + lam2*np1[0];
+    nn2[1] = lam0*no2[1] + lam1*nn2[1] + lam2*np1[1];
+    nn2[2] = lam0*no2[2] + lam1*nn2[2] + lam2*np1[2];
+
+    to[0] = nn1[1]*nn2[2]-nn1[2]*nn2[1];
+    to[1] = nn1[2]*nn2[0]-nn1[0]*nn2[2];
+    to[2] = nn1[0]*nn2[1]-nn1[1]*nn2[0];
+
+    dd1 = nn1[0]*nn1[0] + nn1[1]*nn1[1] + nn1[2]*nn1[2];
+    dd2 = nn2[0]*nn2[0] + nn2[1]*nn2[1] + nn2[2]*nn2[2];
+    ddt = to[0]*to[0] + to[1]*to[1] + to[2]*to[2];
+
+    if ( (dd1 < MMG5_EPSD2) || (dd2<MMG5_EPSD2) || (ddt < MMG5_EPSD2) ) {
+      return 0;
+    }
+
+    dd1 = 1.0 / sqrt(dd1);
+    nn1[0] = dd1*nn1[0];
+    nn1[1] = dd1*nn1[1];
+    nn1[2] = dd1*nn1[2];
+
+    dd2 = 1.0 / sqrt(dd2);
+    nn2[0] = dd2*nn2[0];
+    nn2[1] = dd2*nn2[1];
+    nn2[2] = dd2*nn2[2];
+
+    ddt = 1.0 / sqrt(ddt);
+    to[0] = ddt*to[0];
+    to[1] = ddt*to[1];
+    to[2] = ddt*to[2];
+  }
+
+  return 1;
+}
+
 /* compute movement of a ridge point whose ball (consisting of triangles) is passed */
 int movridpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   MMG5_pTria   pt,pt0;
   MMG5_pxPoint go;
   MMG5_pPoint  p0,p1,p2,ppt0;
-  double  step,dd1,dd2,ddt,ps2,ll1old,ll1new,ll2old,ll2new,o[3],*no1,*no2,*np1,*np2;
-  double  nn1[3],nn2[3],psn11,psn12,to[3],calold,calnew,lam0,lam1,lam2;
+  double  step,ll1old,ll1new,ll2old,ll2new,o[3];
+  double  nn1[3],nn2[3],to[3],calold,calnew,lam0,lam1,lam2;
   int     k,iel,ip0,ip1,ip2,it1,it2;
   char    i0,i1,i2,isrid1,isrid2,isrid;
 
@@ -529,7 +727,7 @@ int movridpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
 
   /* Third step : infer arc length of displacement, parameterized over edges */
   if ( !MMGS_paramDisp ( mesh,it1,it2,ll1old,ll2old,isrid1,isrid2,
-                         ip0,ip1,ip2,step,o,nn1,to,&isrid ) ) {
+                         ip0,ip1,ip2,step,o,&isrid ) ) {
     return 0;
   }
 
@@ -550,311 +748,16 @@ int movridpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   lam1 = 2.0*step*(1.0-step);
   lam2 = step*step;
 
-  if ( ll2old > ll1old ) {  //move is made towards p2
-    no1 = &mesh->xpoint[p0->xp].n1[0];
-    no2 = &mesh->xpoint[p0->xp].n2[0];
-
-    if ( MS_SIN(p2->tag) ) {
-      np1 = &mesh->xpoint[p0->xp].n1[0];
-      np2 = &mesh->xpoint[p0->xp].n2[0];
-    }
-    else {
-      np1 = &mesh->xpoint[p2->xp].n1[0];
-      np2 = &mesh->xpoint[p2->xp].n2[0];
-    }
-    psn11 = no1[0]*np1[0] + no1[1]*np1[1] + no1[2]*np1[2];
-    psn12 = no1[0]*np2[0] + no1[1]*np2[1] + no1[2]*np2[2];
-
-    if ( fabs(1.0-fabs(psn11)) < fabs(1.0-fabs(psn12)) ){    //no1 goes with np1, no2 with np2
-      nn1[0] = no1[0]+np1[0];
-      nn1[1] = no1[1]+np1[1];
-      nn1[2] = no1[2]+np1[2];
-
-      nn2[0] = no2[0]+np2[0];
-      nn2[1] = no2[1]+np2[1];
-      nn2[2] = no2[2]+np2[2];
-
-      // p0p2 . nn1
-      ps2 = (p2->c[0]-p0->c[0])*nn1[0]+(p2->c[1]-p0->c[1])*nn1[1]+(p2->c[2]-p0->c[2])*nn1[2];
-      if ( ll2old < MMG5_EPSD )  return 0;
-      ps2 *= (2.0 / ll2old);
-      nn1[0] -= ps2*(p2->c[0]-p0->c[0]);
-      nn1[1] -= ps2*(p2->c[1]-p0->c[1]);
-      nn1[2] -= ps2*(p2->c[2]-p0->c[2]);
-
-      ps2 = (p2->c[0]-p0->c[0])*nn2[0]+(p2->c[1]-p0->c[1])*nn2[1]+(p2->c[2]-p0->c[2])*nn2[2];
-      ps2 *= (2.0/ll2old);
-      nn2[0] -=  ps2*(p2->c[0]-p0->c[0]);
-      nn2[1] -=  ps2*(p2->c[1]-p0->c[1]);
-      nn2[2] -=  ps2*(p2->c[2]-p0->c[2]);
-
-      dd1 = nn1[0]*nn1[0] + nn1[1]*nn1[1] + nn1[2]*nn1[2];
-      dd2 = nn2[0]*nn2[0] + nn2[1]*nn2[1] + nn2[2]*nn2[2];
-      if ( (dd1 < MMG5_EPSD2) || (dd2<MMG5_EPSD2) )  return 0;
-      dd1 = 1.0 / sqrt(dd1);
-      nn1[0] = dd1*nn1[0];
-      nn1[1] = dd1*nn1[1];
-      nn1[2] = dd1*nn1[2];
-
-      dd2 = 1.0 / sqrt(dd2);
-      nn2[0] = dd2*nn2[0];
-      nn2[1] = dd2*nn2[1];
-      nn2[2] = dd2*nn2[2];
-
-      /* At this point, we got the control points associated to the interpolaton formula for normals.*/
-      nn1[0] = lam0*no1[0] + lam1*nn1[0] + lam2*np1[0];
-      nn1[1] = lam0*no1[1] + lam1*nn1[1] + lam2*np1[1];
-      nn1[2] = lam0*no1[2] + lam1*nn1[2] + lam2*np1[2];
-
-      nn2[0] = lam0*no2[0] + lam1*nn2[0] + lam2*np2[0];
-      nn2[1] = lam0*no2[1] + lam1*nn2[1] + lam2*np2[1];
-      nn2[2] = lam0*no2[2] + lam1*nn2[2] + lam2*np2[2];
-
-      to[0] = nn1[1]*nn2[2]-nn1[2]*nn2[1];
-      to[1] = nn1[2]*nn2[0]-nn1[0]*nn2[2];
-      to[2] = nn1[0]*nn2[1]-nn1[1]*nn2[0];
-
-      ddt = to[0]*to[0] + to[1]*to[1] + to[2]*to[2];
-      dd1 = nn1[0]*nn1[0] + nn1[1]*nn1[1] + nn1[2]*nn1[2];
-      dd2 = nn2[0]*nn2[0] + nn2[1]*nn2[1] + nn2[2]*nn2[2];
-
-      if ( (dd1 < MMG5_EPSD2) || (dd2<MMG5_EPSD2) || (ddt < MMG5_EPSD2) )  return 0;
-      dd1 = 1.0 / sqrt(dd1);
-      nn1[0] = dd1*nn1[0];
-      nn1[1] = dd1*nn1[1];
-      nn1[2] = dd1*nn1[2];
-
-      dd2 = 1.0 / sqrt(dd2);
-      nn2[0] = dd2*nn2[0];
-      nn2[1] = dd2*nn2[1];
-      nn2[2] = dd2*nn2[2];
-
-      ddt = 1.0 / sqrt(ddt);
-      to[0] = ddt*to[0];
-      to[1] = ddt*to[1];
-      to[2] = ddt*to[2];
-    }
-    else {     /* no1 goes with np2 and no2 with np1 */
-      nn1[0] = no1[0]+np2[0];
-      nn1[1] = no1[1]+np2[1];
-      nn1[2] = no1[2]+np2[2];
-
-      nn2[0] = no2[0]+np1[0];
-      nn2[1] = no2[1]+np1[1];
-      nn2[2] = no2[2]+np1[2];
-
-      ps2 = (p2->c[0]-p0->c[0])*nn1[0]+(p2->c[1]-p0->c[1])*nn1[1]+(p2->c[2]-p0->c[2])*nn1[2];
-      if ( ll2old < MMG5_EPSD )  return 0;
-      ps2 *= (2.0 / ll2old);
-      nn1[0] -= ps2*(p2->c[0]-p0->c[0]);
-      nn1[1] -= ps2*(p2->c[1]-p0->c[1]);
-      nn1[2] -= ps2*(p2->c[2]-p0->c[2]);
-
-      ps2 = (p2->c[0]-p0->c[0])*nn2[0]+(p2->c[1]-p0->c[1])*nn2[1]+(p2->c[2]-p0->c[2])*nn2[2];
-      ps2 *= (2.0 / ll2old);
-      nn2[0] -=  ps2*(p2->c[0]-p0->c[0]);
-      nn2[1] -=  ps2*(p2->c[1]-p0->c[1]);
-      nn2[2] -=  ps2*(p2->c[2]-p0->c[2]);
-
-      dd1 = nn1[0]*nn1[0] + nn1[1]*nn1[1] + nn1[2]*nn1[2];
-      dd2 = nn2[0]*nn2[0] + nn2[1]*nn2[1] + nn2[2]*nn2[2];
-
-      if (( dd1 < MMG5_EPSD2 ) || (dd2<MMG5_EPSD2) )  return 0;
-      dd1 = 1.0 / sqrt(dd1);
-      nn1[0] = dd1*nn1[0];
-      nn1[1] = dd1*nn1[1];
-      nn1[2] = dd1*nn1[2];
-
-      dd2 = 1.0 / sqrt(dd2);
-      nn2[0] = dd2*nn2[0];
-      nn2[1] = dd2*nn2[1];
-      nn2[2] = dd2*nn2[2];
-
-      /* At this point, we got the control points associated to the interpolation formula for normals.*/
-      nn1[0] = lam0*no1[0] + lam1*nn1[0] + lam2*np2[0];
-      nn1[1] = lam0*no1[1] + lam1*nn1[1] + lam2*np2[1];
-      nn1[2] = lam0*no1[2] + lam1*nn1[2] + lam2*np2[2];
-
-      nn2[0] = lam0*no2[0] + lam1*nn2[0] + lam2*np1[0];
-      nn2[1] = lam0*no2[1] + lam1*nn2[1] + lam2*np1[1];
-      nn2[2] = lam0*no2[2] + lam1*nn2[2] + lam2*np1[2];
-
-      to[0] = nn1[1]*nn2[2]-nn1[2]*nn2[1];
-      to[1] = nn1[2]*nn2[0]-nn1[0]*nn2[2];
-      to[2] = nn1[0]*nn2[1]-nn1[1]*nn2[0];
-
-      dd1 = nn1[0]*nn1[0] + nn1[1]*nn1[1] + nn1[2]*nn1[2];
-      dd2 = nn2[0]*nn2[0] + nn2[1]*nn2[1] + nn2[2]*nn2[2];
-      ddt = to[0]*to[0] + to[1]*to[1] + to[2]*to[2];
-
-      if ( (dd1 < MMG5_EPSD2) || (dd2<MMG5_EPSD2) || (ddt < MMG5_EPSD2) )  return 0;
-      dd1 = 1.0 / sqrt(dd1);
-      nn1[0] = dd1*nn1[0];
-      nn1[1] = dd1*nn1[1];
-      nn1[2] = dd1*nn1[2];
-
-      dd2 = 1.0 / sqrt(dd2);
-      nn2[0] = dd2*nn2[0];
-      nn2[1] = dd2*nn2[1];
-      nn2[2] = dd2*nn2[2];
-
-      ddt = 1.0 / sqrt(ddt);
-      to[0] = ddt*to[0];
-      to[1] = ddt*to[1];
-      to[2] = ddt*to[2];
+  /* move toward p2 */
+  if ( ll2old > ll1old ) {
+    if ( !MMGS_moveTowardPoint(mesh,p0,p2,ll2old,lam0,lam1,lam2,nn1,nn2,to) ) {
+      return 0;
     }
   }
-  else {   /* move along p1 */
-    no1 = &mesh->xpoint[p0->xp].n1[0];
-    no2 = &mesh->xpoint[p0->xp].n2[0];
-    if ( MS_SIN(p1->tag) ) {
-      np1 = &mesh->xpoint[p0->xp].n1[0];
-      np2 = &mesh->xpoint[p0->xp].n2[0];
-    }
-    else {
-      np1 = &mesh->xpoint[p1->xp].n1[0];
-      np2 = &mesh->xpoint[p1->xp].n2[0];
-    }
-    psn11 = no1[0]*np1[0] + no1[1]*np1[1] + no1[2]*np1[2];
-    psn12 = no1[0]*np2[0] + no1[1]*np2[1] + no1[2]*np2[2];
-
-    if ( fabs(1.0-fabs(psn11)) < fabs(1.0-fabs(psn12)) ) { /* no1 goes with np1, no2 with np2 */
-      nn1[0] = no1[0]+np1[0];
-      nn1[1] = no1[1]+np1[1];
-      nn1[2] = no1[2]+np1[2];
-
-      nn2[0] = no2[0]+np2[0];
-      nn2[1] = no2[1]+np2[1];
-      nn2[2] = no2[2]+np2[2];
-
-      ps2 = (p1->c[0]-p0->c[0])*nn1[0]+(p1->c[1]-p0->c[1])*nn1[1]+(p1->c[2]-p0->c[2])*nn1[2];
-      if ( ll1old < MMG5_EPSD )  return 0;
-      ps2 *= (2.0 / ll1old);
-      nn1[0] -= ps2*(p1->c[0]-p0->c[0]);
-      nn1[1] -= ps2*(p1->c[1]-p0->c[1]);
-      nn1[2] -= ps2*(p1->c[2]-p0->c[2]);
-
-      ps2 = (p1->c[0]-p0->c[0])*nn2[0]+(p1->c[1]-p0->c[1])*nn2[1]+(p1->c[2]-p0->c[2])*nn2[2];
-      ps2 *= (2.0 / ll1old);
-      nn2[0] -=  ps2*(p1->c[0]-p0->c[0]);
-      nn2[1] -=  ps2*(p1->c[1]-p0->c[1]);
-      nn2[2] -=  ps2*(p1->c[2]-p0->c[2]);
-
-      dd1 = nn1[0]*nn1[0] + nn1[1]*nn1[1] + nn1[2]*nn1[2];
-      dd2 = nn2[0]*nn2[0] + nn2[1]*nn2[1] + nn2[2]*nn2[2];
-
-      if ( (dd1 < MMG5_EPSD2 ) || (dd2<MMG5_EPSD2) )  return 0;
-      dd1 = 1.0 / sqrt(dd1);
-      nn1[0] = dd1*nn1[0];
-      nn1[1] = dd1*nn1[1];
-      nn1[2] = dd1*nn1[2];
-
-      dd2 = 1.0 / sqrt(dd2);
-      nn2[0] = dd2*nn2[0];
-      nn2[1] = dd2*nn2[1];
-      nn2[2] = dd2*nn2[2];
-
-      /* Interpolation formula from the control point */
-      nn1[0] = lam0*no1[0] + lam1*nn1[0] + lam2*np1[0];
-      nn1[1] = lam0*no1[1] + lam1*nn1[1] + lam2*np1[1];
-      nn1[2] = lam0*no1[2] + lam1*nn1[2] + lam2*np1[2];
-
-      nn2[0] = lam0*no2[0] + lam1*nn2[0] + lam2*np2[0];
-      nn2[1] = lam0*no2[1] + lam1*nn2[1] + lam2*np2[1];
-      nn2[2] = lam0*no2[2] + lam1*nn2[2] + lam2*np2[2];
-
-      to[0] = nn1[1]*nn2[2]-nn1[2]*nn2[1];
-      to[1] = nn1[2]*nn2[0]-nn1[0]*nn2[2];
-      to[2] = nn1[0]*nn2[1]-nn1[1]*nn2[0];
-
-      dd1 = nn1[0]*nn1[0] + nn1[1]*nn1[1] + nn1[2]*nn1[2];
-      dd2 = nn2[0]*nn2[0] + nn2[1]*nn2[1] + nn2[2]*nn2[2];
-      ddt = to[0]*to[0] + to[1]*to[1] + to[2]*to[2];
-
-      if ( (dd1 < MMG5_EPSD2) || (dd2<MMG5_EPSD2) || (ddt < MMG5_EPSD2) )  return 0;
-      dd1 = 1.0 / sqrt(dd1);
-      nn1[0] = dd1*nn1[0];
-      nn1[1] = dd1*nn1[1];
-      nn1[2] = dd1*nn1[2];
-
-      dd2 = 1.0 / sqrt(dd2);
-      nn2[0] = dd2*nn2[0];
-      nn2[1] = dd2*nn2[1];
-      nn2[2] = dd2*nn2[2];
-
-      ddt = 1.0 / sqrt(ddt);
-      to[0] = ddt*to[0];
-      to[1] = ddt*to[1];
-      to[2] = ddt*to[2];
-    }
-    else {   /* no1 goes with np2 and no2 with np1 */
-      nn1[0] = no1[0]+np2[0];
-      nn1[1] = no1[1]+np2[1];
-      nn1[2] = no1[2]+np2[2];
-
-      nn2[0] = no2[0]+np1[0];
-      nn2[1] = no2[1]+np1[1];
-      nn2[2] = no2[2]+np1[2];
-
-      ps2 = (p1->c[0]-p0->c[0])*nn1[0]+(p1->c[1]-p0->c[1])*nn1[1]+(p1->c[2]-p0->c[2])*nn1[2];
-      if ( ll1old < MMG5_EPSD )  return 0;
-      ps2 *= (2.0 / ll1old);
-      nn1[0] -= ps2*(p1->c[0]-p0->c[0]);
-      nn1[1] -= ps2*(p1->c[1]-p0->c[1]);
-      nn1[2] -= ps2*(p1->c[2]-p0->c[2]);
-
-      ps2 = (p1->c[0]-p0->c[0])*nn2[0]+(p1->c[1]-p0->c[1])*nn2[1]+(p1->c[2]-p0->c[2])*nn2[2];
-      ps2 *= (2.0 / ll1old);
-      nn2[0] -=  ps2*(p1->c[0]-p0->c[0]);
-      nn2[1] -=  ps2*(p1->c[1]-p0->c[1]);
-      nn2[2] -=  ps2*(p1->c[2]-p0->c[2]);
-
-      dd1 = nn1[0]*nn1[0] + nn1[1]*nn1[1] + nn1[2]*nn1[2];
-      dd2 = nn2[0]*nn2[0] + nn2[1]*nn2[1] + nn2[2]*nn2[2];
-
-      if ( (dd1 < MMG5_EPSD2) || (dd2<MMG5_EPSD2) )  return 0;
-      dd1 = 1.0 / sqrt(dd1);
-      nn1[0] = dd1*nn1[0];
-      nn1[1] = dd1*nn1[1];
-      nn1[2] = dd1*nn1[2];
-
-      dd2 = 1.0 / sqrt(dd2);
-      nn2[0] = dd2*nn2[0];
-      nn2[1] = dd2*nn2[1];
-      nn2[2] = dd2*nn2[2];
-
-      /* Interpolation formula from the control point */
-      nn1[0] = lam0*no1[0] + lam1*nn1[0] + lam2*np2[0];
-      nn1[1] = lam0*no1[1] + lam1*nn1[1] + lam2*np2[1];
-      nn1[2] = lam0*no1[2] + lam1*nn1[2] + lam2*np2[2];
-
-      nn2[0] = lam0*no2[0] + lam1*nn2[0] + lam2*np1[0];
-      nn2[1] = lam0*no2[1] + lam1*nn2[1] + lam2*np1[1];
-      nn2[2] = lam0*no2[2] + lam1*nn2[2] + lam2*np1[2];
-
-      to[0] = nn1[1]*nn2[2]-nn1[2]*nn2[1];
-      to[1] = nn1[2]*nn2[0]-nn1[0]*nn2[2];
-      to[2] = nn1[0]*nn2[1]-nn1[1]*nn2[0];
-
-      dd1 = nn1[0]*nn1[0] + nn1[1]*nn1[1] + nn1[2]*nn1[2];
-      dd2 = nn2[0]*nn2[0] + nn2[1]*nn2[1] + nn2[2]*nn2[2];
-      ddt = to[0]*to[0] + to[1]*to[1] + to[2]*to[2];
-
-      if ( (dd1 < MMG5_EPSD2) || (dd2<MMG5_EPSD2) || (ddt < MMG5_EPSD2) )  return 0;
-      dd1 = 1.0 / sqrt(dd1);
-      nn1[0] = dd1*nn1[0];
-      nn1[1] = dd1*nn1[1];
-      nn1[2] = dd1*nn1[2];
-
-      dd2 = 1.0 / sqrt(dd2);
-      nn2[0] = dd2*nn2[0];
-      nn2[1] = dd2*nn2[1];
-      nn2[2] = dd2*nn2[2];
-
-      ddt = 1.0 / sqrt(ddt);
-      to[0] = ddt*to[0];
-      to[1] = ddt*to[1];
-      to[2] = ddt*to[2];
+  else {
+    /* move toward p1 */
+    if ( !MMGS_moveTowardPoint( mesh,p0,p1,ll1old,lam0,lam1,lam2,nn1,nn2,to) ) {
+      return 0;
     }
   }
 
@@ -900,14 +803,14 @@ int movridpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   p0->c[1] = o[1];
   p0->c[2] = o[2];
 
-  no1[0] = nn1[0];
-  no1[1] = nn1[1];
-  no1[2] = nn1[2];
+  mesh->xpoint[p0->xp].n1[0] = nn1[0];
+  mesh->xpoint[p0->xp].n1[1] = nn1[1];
+  mesh->xpoint[p0->xp].n1[2] = nn1[2];
 
   if ( isrid ) {
-    no2[0] = nn2[0];
-    no2[1] = nn2[1];
-    no2[2] = nn2[2];
+    mesh->xpoint[p0->xp].n2[0] = nn2[0];
+    mesh->xpoint[p0->xp].n2[1] = nn2[1];
+    mesh->xpoint[p0->xp].n2[2] = nn2[2];
   }
   p0->n[0] = to[0];
   p0->n[1] = to[1];
