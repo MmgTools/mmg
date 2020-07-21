@@ -26,9 +26,9 @@
 #####
 ###############################################################################
 
-# Simple test: must already pass
+# Simple test: must already pass (-d option allows to cover chkmsh function)
 ADD_TEST(NAME mmg2d_SimpleCircle
-  COMMAND ${EXECUT_MMG2D} -v 5
+  COMMAND ${EXECUT_MMG2D} -v 5 -d
   ${MMG2D_CI_TESTS}/Circle/cercle
   -out ${CTEST_OUTPUT_DIR}/mmg2d_SimpleCircle-cercle.o.meshb)
 

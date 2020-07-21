@@ -250,8 +250,6 @@ int MMG2D_kiupop(pQueue q);
 
 int MMG2D_baseBdry(MMG5_pMesh mesh);
 
-int simred(double *m1,double *m2,double *m);
-
 //int MMG2D_evalgeom(MMG5_pMesh mesh);
 
 int MMG2D_cavity(MMG5_pMesh ,MMG5_pSol ,int ,int *);
