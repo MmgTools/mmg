@@ -236,11 +236,10 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   MMG5_pTria    pt,pt0;
   MMG5_pPoint   p0,p1,p2,ppt0;
   MMG5_pxPoint  go;
-  MMG5_Bezier  b;
   double       *m0,*m00,step,l1old,l2old,ll1old,ll2old,uv[2],o[3],nn1[3],nn2[3],to[3],mo[6];
   double        lam0,lam1,lam2,*no1,*no2,*np1,*np2;
   double        psn11,psn12,ps2,l1new,l2new,dd1,dd2,ddt,calold,calnew;
-  int           it1,it2,ip0,ip1,ip2,k,iel,ier;
+  int           it1,it2,ip0,ip1,ip2,k,iel;
   char          voy1,voy2,isrid,isrid1,isrid2,i0,i1,i2;
   static char   mmgWarn0 = 0;
 
@@ -329,89 +328,9 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   ll2old = l2old*l2old;
 
   /* Third step : infer arc length of displacement, parameterized over edges */
-  /* Move is made towards p2 */
-  if ( l2old > l1old ) {
-    isrid = isrid2;
-    pt = &mesh->tria[it2];
-
-    ier = MMG5_bezierCP(mesh,pt,&b,1);
-    assert(ier);
-
-    /* fill table uv */
-    if ( pt->v[0] == ip0 ) {
-      if ( pt->v[1] == ip2 ) {
-        uv[0] = step;
-        uv[1] = 0.0;
-      }
-      else if ( pt->v[2] == ip2 ) {
-        uv[0] = 0.0;
-        uv[1] = step;
-      }
-    }
-    else if ( pt->v[0] == ip2 ) {
-      if ( pt->v[1] == ip0 ) {
-        uv[0] = 1.0 - step;
-        uv[1] = 0.0;
-      }
-      else if ( pt->v[2] == ip0 ) {
-        uv[0] = 0.0;
-        uv[1] = 1.0-step;
-      }
-    }
-    else {
-      if ( pt->v[1] == ip0 ) {
-        uv[0] = 1.0 - step;
-        uv[1] = step;
-      }
-      else if ( pt->v[2] == ip0 ) {
-        uv[0] = step;
-        uv[1] = 1.0-step;
-      }
-    }
-    ier = MMGS_bezierInt(&b,uv,o,nn1,to);
-    assert(ier);
-  }
-  /* move towards p1 */
-  else {
-    isrid = isrid1;
-    pt = &mesh->tria[it1];
-
-    ier = MMG5_bezierCP(mesh,pt,&b,1);
-    assert(ier);
-
-    /* fill table uv */
-    if ( pt->v[0] == ip0 ) {
-      if ( pt->v[1] == ip1 ) {
-        uv[0] = step;
-        uv[1] = 0.0;
-      }
-      else if ( pt->v[2] == ip1 ) {
-        uv[0] = 0.0;
-        uv[1] = step;
-      }
-    }
-    else if ( pt->v[0] == ip1 ) {
-      if ( pt->v[1] == ip0 ) {
-        uv[0] = 1.0 - step;
-        uv[1] = 0.0;
-      }
-      else if ( pt->v[2] == ip0 ) {
-        uv[0] = 0.0;
-        uv[1] = 1.0-step;
-      }
-    }
-    else {
-      if ( pt->v[1] == ip0 ) {
-        uv[0] = 1.0-step;
-        uv[1] = step;
-      }
-      else if ( pt->v[2] == ip0 ) {
-        uv[0] = step;
-        uv[1] = 1.0-step;
-      }
-    }
-    ier = MMGS_bezierInt(&b,uv,o,nn1,to);
-    assert(ier);
+  if ( !MMGS_paramDisp ( mesh,it1,it2,l1old,l2old,isrid1,isrid2,
+                         ip0,ip1,ip2,step,uv,o,nn1,to,&isrid ) ) {
+    return 0;
   }
 
   /* check whether proposed move is admissible uner consideration of distances */
