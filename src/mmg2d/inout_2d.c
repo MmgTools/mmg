@@ -88,7 +88,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
       }
       else if(!strncmp(chaine,"Dimension",strlen("Dimension"))) {
         MMG_FSCANF(inm,"%d",&mesh->dim);
-        if(mesh->info.nreg==2) {
+        if(mesh->info.renum==2) {
           if(mesh->dim!=3) {
             fprintf(stdout,"WRONG USE OF 3dMedit option \n");
             return 0;
@@ -293,7 +293,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
     ppt = &mesh->point[k];
     if (mesh->ver < 2) { /*float*/
       if (!bin) {
-        if(mesh->info.nreg==2) {
+        if(mesh->info.renum==2) {
           for (i=0 ; i<3 ; i++) {
             MMG_FSCANF(inm,"%f",&fc);
             if(i==2) break;
@@ -307,7 +307,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         }
         MMG_FSCANF(inm,"%d",&ppt->ref);
       } else {
-        if(mesh->info.nreg==2) {
+        if(mesh->info.renum==2) {
           fprintf(stderr,"  ## Warning: %s: binary not available with"
                   " -msh option.\n",__func__);
           return 0;
@@ -322,7 +322,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
       }
     } else {
       if (!bin) {
-        if(mesh->info.nreg==2) {
+        if(mesh->info.renum==2) {
           MMG_FSCANF(inm,"%lf %lf %lf %d",&ppt->c[0],&ppt->c[1],&dtmp,&ppt->ref);
         } else {
           MMG_FSCANF(inm,"%lf %lf %d",&ppt->c[0],&ppt->c[1],&ppt->ref);
@@ -821,7 +821,7 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 
   /** Read the file header */
   meshDim = 2;
-  if ( mesh->info.nreg == 2 ) {
+  if ( mesh->info.renum == 2 ) {
     /* -msh mode */
     meshDim = 3;
   }
@@ -908,7 +908,7 @@ int MMG2D_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
 
   /** Read the file header */
   meshDim = 2;
-  if ( mesh->info.nreg == 2 ) {
+  if ( mesh->info.renum == 2 ) {
     /* -msh mode */
     meshDim = 3;
   }
@@ -1053,7 +1053,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
   if ( !bin ) {
     strcpy(&chaine[0],"MeshVersionFormatted 2\n");
     fprintf(inm,"%s",chaine);
-    if(mesh->info.nreg) {
+    if(mesh->info.renum) {
       strcpy(&chaine[0],"\n\nDimension 3\n");
     }
     else {
@@ -1071,7 +1071,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
     fwrite(&binch,MMG5_SW,1,inm);
     bpos = 20; //Pos
     fwrite(&bpos,MMG5_SW,1,inm);
-    if(mesh->info.nreg) binch = 3; //Dimension
+    if(mesh->info.renum) binch = 3; //Dimension
     else binch = 2;
     fwrite(&binch,MMG5_SW,1,inm);
   }
@@ -1092,7 +1092,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
   else {
     binch = 4; //Vertices
     fwrite(&binch,MMG5_SW,1,inm);
-    if ( mesh->info.nreg )
+    if ( mesh->info.renum )
       bpos += (3+(1+3*mesh->ver)*np)*MMG5_SW; //NullPos
     else
       bpos += (3+(1+2*mesh->ver)*np)*MMG5_SW; //NullPos
@@ -1106,7 +1106,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
     ppt = &mesh->point[k];
     if ( MG_VOK(ppt) ) {
       ref = ppt->ref;
-      if ( mesh->info.nreg ) {
+      if ( mesh->info.renum ) {
         if ( !bin )
           fprintf(inm,"%.15lg %.15lg 0 %d\n",ppt->c[0],ppt->c[1],ref);
         else {
@@ -1492,7 +1492,7 @@ int MMG2D_saveSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 
   sol->ver = 2;
 
-  if ( sol->dim==2 && mesh->info.nreg ) {
+  if ( sol->dim==2 && mesh->info.renum ) {
     dim = 3;
   }
   else {

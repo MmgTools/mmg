@@ -85,11 +85,11 @@ void MMG2D_Init_parameters(MMG5_pMesh mesh) {
   /* default values for integers */
   mesh->info.lag      = MMG5_LAG;
   mesh->info.optim    = MMG5_OFF;
-  /* [0/1]    ,avoid/allow surface modifications */
+  /* [0/1]   ,avoid/allow surface modifications */
   mesh->info.nosurf   =  MMG5_OFF;
-  /* [0]    , Turn on/off the renumbering using SCOTCH */
+  /* [0/1/2] , set 3D mode for 2D mesh  */
   mesh->info.renum    = MMG5_OFF;
-
+  /* [0/1]   , set off/on normal regularization */
   mesh->info.nreg     = MMG5_OFF;
   /* default values for doubles */
   /* level set value */
@@ -162,7 +162,7 @@ int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
 #endif
     break;
   case MMG2D_IPARAM_3dMedit :
-    mesh->info.nreg = val;
+    mesh->info.renum = val;
     break;
   case MMG2D_IPARAM_numsubdomain :
     mesh->info.nsd = val;
