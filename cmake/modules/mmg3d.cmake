@@ -207,6 +207,7 @@ IF ( BUILD_TESTING )
       SET(LIBMMG3D_LSONLY ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_lsOnly )
       SET(LIBMMG3D_LSANDMETRIC ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_lsAndMetric )
       SET(TEST_API3D_EXEC0 ${EXECUTABLE_OUTPUT_PATH}/test_api3d_0)
+      SET(TEST_API3D_DOMSEL ${EXECUTABLE_OUTPUT_PATH}/test_api3d_domain-selection)
 
       ADD_TEST(NAME libmmg3d_example0_a COMMAND ${LIBMMG3D_EXEC0_a}
         "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/adaptation_example0/example0_a/cube.mesh"
@@ -250,6 +251,12 @@ IF ( BUILD_TESTING )
       ADD_TEST(NAME test_api3d_0   COMMAND ${TEST_API3D_EXEC0}
         "${MMG3D_CI_TESTS}/API_tests/2dom.mesh"
         "${CTEST_OUTPUT_DIR}/test_API3d.o"
+       )
+      ADD_TEST(NAME test_api3d_domain-selection   COMMAND ${TEST_API3D_DOMSEL}
+        "${MMG3D_CI_TESTS}/OptLs_plane/plane.mesh"
+        "${MMG3D_CI_TESTS}/OptLs_plane/p.sol"
+        "${CTEST_OUTPUT_DIR}/test_API3d-domsel-whole.o"
+        "${CTEST_OUTPUT_DIR}/test_API3d-domsel-dom2.o"
        )
 
       IF ( CMAKE_Fortran_COMPILER)
