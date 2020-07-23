@@ -396,21 +396,21 @@ int main(int argc,char *argv[]) {
       if ( MMG3D_loadSol(mesh,sol,sol->namein) < 1 ) {
         fprintf(stdout,"  ## ERROR: UNABLE TO LOAD SOLUTION FILE.\n");
         MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
+      }
     }
-  }
-  else {
+    else {
       /* Facultative metric */
       if ( MMG3D_loadSol(mesh,met,met->namein) == -1 ) {
         fprintf(stderr,"\n  ## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER.\n");
         MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
       }
-      }
+    }
     /* In iso mode: read metric if any */
     if ( mesh->info.iso && met->namein ) {
       if ( MMG3D_loadSol(mesh,met,met->namein) < 1 ) {
         fprintf(stdout,"  ## ERROR: UNABLE TO LOAD METRIC.\n");
         MMG5_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
-    }
+      }
     }
     break;
 
