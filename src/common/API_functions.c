@@ -239,8 +239,8 @@ int MMG5_Set_outputMeshName(MMG5_pMesh mesh, const char* meshout) {
     ptr   = strrchr(meshout, '.');
 
     MMG5_ADD_MEM(mesh,(strlen(meshout)+7)*sizeof(char),"output mesh name",
-                 fprintf(stderr,"  Exit program.\n");
-                 return 0);
+                  fprintf(stderr,"  Exit program.\n");
+                  return 0);
     MMG5_SAFE_CALLOC(mesh->nameout,strlen(meshout)+7,char,return 0);
     strcpy(mesh->nameout,meshout);
 

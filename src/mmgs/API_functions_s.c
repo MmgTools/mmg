@@ -1295,6 +1295,9 @@ int MMGS_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
     if ( val )
       mesh->info.iso      = 2;
     break;
+  case MMGS_IPARAM_numsubdomain :
+    mesh->info.nsd = val;
+    break;
   case MMGS_IPARAM_optim :
     mesh->info.optim = val;
     break;

@@ -85,10 +85,11 @@ void MMG2D_Init_parameters(MMG5_pMesh mesh) {
   /* default values for integers */
   mesh->info.lag      = MMG5_LAG;
   mesh->info.optim    = MMG5_OFF;
-  /* [0/1]    ,avoid/allow surface modifications */
+  /* [0/1]   ,avoid/allow surface modifications */
   mesh->info.nosurf   =  MMG5_OFF;
-  /* [0]    , Turn on/off the renumbering using SCOTCH */
+  /* [0/1/2] , set 3D mode for 2D mesh  */
   mesh->info.renum    = MMG5_OFF;
+  /* [0/1]   , set off/on normal regularization */
   mesh->info.nreg     = MMG5_OFF;
   /* default values for doubles */
   /* level set value */
@@ -160,11 +161,11 @@ int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
     return 0;
 #endif
     break;
-  case MMG2D_IPARAM_msh :
-    mesh->info.nreg = val;
+  case MMG2D_IPARAM_3dMedit :
+    mesh->info.renum = val;
     break;
   case MMG2D_IPARAM_numsubdomain :
-    mesh->info.renum = val;
+    mesh->info.nsd = val;
     break;
   case MMG2D_IPARAM_optim :
     mesh->info.optim = val;
@@ -935,7 +936,7 @@ int  MMG2D_Set_triangles(MMG5_pMesh mesh, int *tria, int *refs) {
       tmp = ptt->v[2];
       ptt->v[2] = ptt->v[1];
       ptt->v[1] = tmp;
-      /* mesh->xt temporary used to count reoriented quadra */
+      /* mesh->xt temporary used to count reoriented triangles */
       mesh->xt++;
     }
     if ( mesh->info.ddebug && mesh->xt > 0 ) {

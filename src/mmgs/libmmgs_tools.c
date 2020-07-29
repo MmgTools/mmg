@@ -68,16 +68,26 @@ void MMGS_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
 }
 
 int MMGS_usage(char *prog) {
+
+  /* Common generic options, file options and mode options */
   MMG5_mmgUsage(prog);
 
-  fprintf(stdout,"-A           enable anisotropy (without metric file).\n");
+  /* Common parameters (first section) */
+  MMG5_paramUsage1( );
+
+  /* Specific options */
   fprintf(stdout,"-keep-ref    preserve initial domain references in level-set mode.\n");
-  fprintf(stdout,"-nreg        normal regul.\n");
-  fprintf(stdout,"-optim       mesh optimization\n");
+
 #ifdef USE_SCOTCH
   fprintf(stdout,"-rn [n]      Turn on or off the renumbering using SCOTCH [0/1] \n");
 #endif
 
+  fprintf(stdout,"\n");
+
+  /* Common parameters (second section) */
+  MMG5_paramUsage2();
+
+  /* Common options for advanced users */
   MMG5_advancedUsage();
 
   fprintf(stdout,"\n\n");
@@ -245,6 +255,17 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol so
         if ( !strcmp(argv[i],"-nr") ) {
           if ( !MMGS_Set_iparameter(mesh,met,MMGS_IPARAM_angle,0) )
             return 0;
+        }
+        else if ( !strcmp(argv[i],"-nsd") ) {
+          if ( ++i < argc && isdigit(argv[i][0]) ) {
+            if ( !MMGS_Set_iparameter(mesh,met,MMGS_IPARAM_numsubdomain,atoi(argv[i])) )
+              return 0;
+          }
+          else {
+            fprintf(stderr,"Missing argument option %c\n",argv[i-1][1]);
+            MMGS_usage(argv[0]);
+            return 0;
+          }
         }
         else if ( !strcmp(argv[i],"-noswap") ) {
           if ( !MMGS_Set_iparameter(mesh,met,MMGS_IPARAM_noswap,1) )

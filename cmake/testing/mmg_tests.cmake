@@ -249,6 +249,12 @@ FOREACH(EXEC ${LISTEXEC_MMG})
 #####         Options
 #####
 ###############################################################################
+ADD_TEST(NAME mmg_help_${SHRT_EXEC}
+  COMMAND ${EXEC} -h
+  )
+SET_PROPERTY(TEST mmg_help_${SHRT_EXEC}
+  PROPERTY PASS_REGULAR_EXPRESSION "File specifications")
+
 ADD_TEST(NAME mmg_hsizOption_${SHRT_EXEC}
   COMMAND ${EXEC} -v 5 -hsiz 0.1 ${common_args}
   ${MMG_CI_TESTS}/Cube/cube

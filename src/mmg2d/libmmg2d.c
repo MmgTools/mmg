@@ -220,7 +220,6 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol met)
     _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
   }
 
-
   if ( mesh->info.imprim > 0 ) fprintf(stdout,"\n  -- MMG2DLIB: INPUT DATA\n");
 
   /* Check input */
@@ -275,6 +274,8 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol met)
   chrono(ON,&ctim[2]);
   if ( mesh->info.imprim > 0 )   fprintf(stdout,"\n  -- PHASE 1 : DATA ANALYSIS\n");
 
+  /* Keep only one domain if asked */
+  MMG2D_keep_only1Subdomain ( mesh, mesh->info.nsd );
 
   /* Scale input mesh */
   if ( !MMG2D_scaleMesh(mesh,met,NULL) )  _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
@@ -1067,16 +1068,29 @@ int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
     MMG5_SAFE_FREE(invalidTris);
   }
 
-  /* End with a classical remeshing stage, provided mesh->info.lag > 1 */
-  if ( (ier > 0) && (mesh->info.lag >= 1) && !MMG2D_mmg2d1n(mesh,met) ) {
-    if ( !MMG5_unscaleMesh(mesh,met,NULL) )  _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
-    MMG2D_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE);
-  }
-
   chrono(OFF,&(ctim[3]));
   printim(ctim[3].gdif,stim);
   if ( mesh->info.imprim > 0 ) {
     fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
+  }
+
+  /* End with a classical remeshing stage, provided mesh->info.lag > 1 */
+  if ( (ier > 0) && (mesh->info.lag >= 1) ) {
+    chrono(ON,&(ctim[4]));
+    if ( mesh->info.imprim > 0 ) {
+      fprintf(stdout,"\n  -- PHASE 3 : MESH IMPROVEMENT\n");
+    }
+
+    if ( !MMG2D_mmg2d1n(mesh,met) ) {
+      if ( !MMG5_unscaleMesh(mesh,met,NULL) )  _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
+      MMG2D_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE);
+    }
+
+    chrono(OFF,&(ctim[4]));
+    printim(ctim[4].gdif,stim);
+    if ( mesh->info.imprim > 0 ) {
+      fprintf(stdout,"  -- PHASE 3 COMPLETED.     %s\n",stim);
+    }
   }
 
   /* Unscale mesh */

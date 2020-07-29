@@ -250,8 +250,6 @@ int MMG2D_kiupop(pQueue q);
 
 int MMG2D_baseBdry(MMG5_pMesh mesh);
 
-int simred(double *m1,double *m2,double *m);
-
 //int MMG2D_evalgeom(MMG5_pMesh mesh);
 
 int MMG2D_cavity(MMG5_pMesh ,MMG5_pSol ,int ,int *);
@@ -334,6 +332,9 @@ int MMG2D_chkor(MMG5_pMesh );
 int MMG2D_savenor_db(MMG5_pMesh ,char *,char );
 int MMG2D_savedisp_db(MMG5_pMesh mesh,MMG5_pSol ,char *,char );
 int MMG2D_velextLS(MMG5_pMesh ,MMG5_pSol );
+
+/* tools */
+void MMG2D_keep_only1Subdomain ( MMG5_pMesh mesh,int nsd );
 
 /* useful functions to debug */
 int  MMG2D_indElt(MMG5_pMesh mesh,int kel);

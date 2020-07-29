@@ -1194,3 +1194,108 @@ int MMG3D_localParamNm(MMG5_pMesh mesh,int iel,int iface,int ia,
 
   return 1;
 }
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ *
+ * Mark the mesh vertices that belong to triangles or quadrangles as used (for
+ * Mmgs or Mmg2d).
+ *
+ */
+static inline
+void MMG3D_mark_usedVertices ( MMG5_pMesh mesh ) {
+  MMG5_pTetra pt;
+  MMG5_pPrism pq;
+  MMG5_pPoint ppt;
+  int         k,i;
+
+  for ( k=1; k<=mesh->ne; k++ ) {
+    pt = &mesh->tetra[k];
+    if ( !MG_EOK(pt) )  continue;
+
+    for (i=0; i<4; i++) {
+      ppt = &mesh->point[ pt->v[i] ];
+      ppt->tag &= ~MG_NUL;
+    }
+  }
+
+  for ( k=1; k<=mesh->nprism; k++ ) {
+    pq = &mesh->prism[k];
+    if ( !MG_EOK(pq) )  continue;
+
+    for (i=0; i<6; i++) {
+      ppt = &mesh->point[ pq->v[i] ];
+      ppt->tag &= ~MG_NUL;
+    }
+  }
+
+  return;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param nsd subdomain index.
+ *
+ * Remove tetra that do not belong to subdomain of index \a nsd
+ *
+ */
+static
+void MMG3D_keep_subdomainElts ( MMG5_pMesh mesh, int nsd ) {
+  MMG5_pTetra pt;
+  int         k,i,*adja,iadr,iadrv,iv;
+  int         nfac = 4; // number of faces per elt
+
+  for ( k=1 ; k <= mesh->ne ; k++) {
+    pt = &mesh->tetra[k];
+
+    if ( !MG_EOK(pt) ) continue;
+    if ( pt->ref == nsd ) continue;
+
+    /* Update adjacency relationship: we will delete elt k so k adjacent will
+     * not be adjacent to k anymore */
+    if ( mesh->adja ) {
+      iadr = nfac*(k-1) + 1;
+      adja = &mesh->adja[iadr];
+      for ( i=0; i<nfac; ++i ) {
+        iadrv = adja[i];
+        if ( !iadrv ) {
+          continue;
+        }
+        iv = iadrv%nfac;
+        iadrv /= nfac;
+        mesh->adja[nfac*(iadrv-1)+1+iv] = 0;
+      }
+    }
+
+    /* Delete element (triangle in 2D and surface, tetra in 3D) */
+    MMG3D_delElt(mesh,k);
+  }
+
+  return;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param nsd index of subdomain to keep.
+ *
+ * Keep only subdomain of index \a nsd and remove other subdomains.
+ *
+ */
+void MMG3D_keep_only1Subdomain ( MMG5_pMesh mesh,int nsd ) {
+
+  if ( !nsd ) {
+    return;
+  }
+
+  if ( mesh->info.imprim > 4 || mesh->info.ddebug ) {
+    fprintf(stdout,"\n  -- ONLY KEEP DOMAIN OF REF %d\n",nsd );
+  }
+
+  MMG5_mark_verticesAsUnused ( mesh );
+
+  MMG3D_keep_subdomainElts ( mesh, nsd );
+
+  MMG3D_mark_usedVertices ( mesh );
+
+  return;
+}

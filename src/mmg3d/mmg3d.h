@@ -443,6 +443,9 @@ int    MMG3D_rmc(MMG5_pMesh ,MMG5_pSol );
 int    MMG5_isbr(MMG5_pMesh ,int );
 
 
+/* tools_3d.c */
+void MMG3D_keep_only1Subdomain ( MMG5_pMesh mesh,int nsd );
+
 /* useful functions to debug */
 int  MMG3D_indElt(MMG5_pMesh mesh,int kel);
 int  MMG3D_indPt(MMG5_pMesh mesh,int kp);

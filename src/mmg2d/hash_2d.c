@@ -520,14 +520,17 @@ int MMG2D_pack(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
   int                iadr,iadrnew,iadrv,*adjav,*adja,*adjanew,voy;
   char               i,i1,i2;
 
-  /* Recreate adjacencies if need be */
+  /* Keep only one domain if asked */
+  MMG2D_keep_only1Subdomain ( mesh, mesh->info.nsd );
+
+  /** Recreate adjacencies if need be */
   if ( !MMG2D_hashTria(mesh) ) {
     fprintf(stderr,"\n  ## Warning: %s: hashing problem. Exit program.\n",
             __func__);
     return 0;
   }
 
-  /* Pack vertex indices */
+  /** Pack vertex indices */
   np = nc = 0;
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
@@ -542,7 +545,7 @@ int MMG2D_pack(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
     }
   }
 
-  /* Count the number of edges in the mesh */
+  /** Count the number of edges in the mesh */
   memWarn = 0;
   ned = 0;
 
@@ -561,7 +564,7 @@ int MMG2D_pack(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
   }
 
   mesh->na = 0;
-  /* Count edges stored in triangles */
+  /** Count edges stored in triangles */
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) ) continue;
@@ -590,7 +593,7 @@ int MMG2D_pack(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
       }
     }
   }
-  /* Count edges stored in quadrangles */
+  /** Count edges stored in quadrangles */
   for (k=1; k<=mesh->nquad; k++) {
     pq = &mesh->quadra[k];
     if ( !MG_EOK(pq) ) continue;
@@ -600,7 +603,7 @@ int MMG2D_pack(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
       iel = adja[i] / 4;
 
       if ( iel < 0) {
-        /* Edge at the in erface between a quad and a tria: treated from the tria */
+        /* Edge at the interface between a quad and a tria: treated from the tria */
         continue;
       }
 
@@ -620,7 +623,7 @@ int MMG2D_pack(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
     }
   }
 
-  /* Pack edges */
+  /** Pack edges */
   mesh->namax = mesh->na+1;
   if ( mesh->na ) {
 
@@ -717,7 +720,7 @@ int MMG2D_pack(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
     ped->b = mesh->point[ped->b].tmp;
   }
 
-  /* Pack triangles */
+  /** Pack triangles */
   nt  = 0;
   nbl = 1;
   for (k=1; k<=mesh->nt; k++) {
@@ -754,7 +757,7 @@ int MMG2D_pack(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
   }
   mesh->nt = nt;
 
-  /* Pack quadrangles */
+  /** Pack quadrangles */
   if ( mesh->quadra ) {
     k = 1;
     do {
@@ -780,7 +783,7 @@ int MMG2D_pack(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
     }
   }
 
-  /* Pack solutions (metric map, displacement, ...) */
+  /** Pack solutions (metric map, displacement, ...) */
   if ( sol && sol->m ) {
     nbl = 1;
     for (k=1; k<=mesh->np; k++) {
@@ -809,7 +812,7 @@ int MMG2D_pack(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
     }
   }
 
-  /* Pack vertices*/
+  /** Pack vertices */
   np  = 0;
   nbl = 1;
   for (k=1; k<=mesh->np; k++) {
@@ -833,7 +836,7 @@ int MMG2D_pack(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
   mesh->np = np;
   if ( sol && sol->m ) sol->np  = np;
 
-  /* Reset ppt->tmp field */
+  /** Reset ppt->tmp field */
   for(k=1 ; k<=mesh->np ; k++)
     mesh->point[k].tmp = 0;
 
@@ -846,7 +849,7 @@ int MMG2D_pack(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
     mesh->npnil = 0;
   }
 
-  /* Reset garbage collector */
+  /** Reset garbage collector */
   if ( mesh->nt < mesh->ntmax - 3 ) {
     mesh->nenil = mesh->nt + 1;
     for (k=mesh->nenil; k<mesh->ntmax-1; k++)
