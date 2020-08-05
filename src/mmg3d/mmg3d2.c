@@ -1473,6 +1473,8 @@ int MMG3D_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol) {
     fprintf(stderr,"\n  ## Boundary problem. Exit program.\n");
     return 0;
   }
+  MMG5_freeXTets(mesh);
+  MMG5_freeXPrisms(mesh);
 
   /* build hash table for initial edges */
   if ( !MMG5_hGeom(mesh) ) {
