@@ -273,7 +273,6 @@ void MMG5_displayLengthHisto(MMG5_pMesh mesh, int ned, double *avlen,
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
  * \param ned edges number.
  * \param amin index of first extremity of the smallest edge.
  * \param bmin index of second extremity of the smallest edge.

@@ -269,13 +269,15 @@ static int MMG5_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
+ * \param permNodGlob if provided, strore the global permutation of nodes.
+ *
  * \return 0 if failed, 1 otherwise.
  *
  * Analyze tetrahedra and split long or collapse short edges according to
  * prescribed metric.
  *
  */
-static int MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met) {
+static int MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met,int *permNodGlob) {
   int      it1,it,nnc,nns,nnf,nnm,maxit,nc,ns,nf,nm;
   int      warn;//,nw;
 
@@ -294,7 +296,7 @@ static int MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met) {
     else  ns = 0;
 
     /* renumbering if available and needed */
-    if ( it==1 && !MMG5_scotchCall(mesh,met) )
+    if ( it==1 && !MMG5_scotchCall(mesh,met,NULL,permNodGlob) )
       return 0;
 
     if ( !mesh->info.noinsert ) {
@@ -358,7 +360,7 @@ static int MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
   /* renumbering if available */
-  if ( !MMG5_scotchCall(mesh,met) )
+  if ( !MMG5_scotchCall(mesh,met,NULL,permNodGlob) )
     return 0;
 
   /*shape optim*/
@@ -437,12 +439,14 @@ static int MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
+ * \param permNodGlob if provided, strore the global permutation of nodes.
+ *
  * \return 0 if failed, 1 if success.
  *
  * Main adaptation routine.
  *
  */
-int MMG5_mmg3d1_pattern(MMG5_pMesh mesh,MMG5_pSol met) {
+int MMG5_mmg3d1_pattern(MMG5_pMesh mesh,MMG5_pSol met,int *permNodGlob) {
 
   if ( abs(mesh->info.imprim) > 4 )
     fprintf(stdout,"  ** MESH ANALYSIS\n");
@@ -462,7 +466,7 @@ int MMG5_mmg3d1_pattern(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
   /* renumbering if available */
-  if ( !MMG5_scotchCall(mesh,met) )
+  if ( !MMG5_scotchCall(mesh,met,NULL,permNodGlob) )
     return 0;
 
   /**--- Stage 2: computational mesh */
@@ -496,14 +500,14 @@ int MMG5_mmg3d1_pattern(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
   /* renumbering if available */
-  if ( !MMG5_scotchCall(mesh,met) )
+  if ( !MMG5_scotchCall(mesh,met,NULL,permNodGlob) )
     return 0;
 
 #ifdef DEBUG
   puts("---------------------------Fin anatet---------------------");
   MMG3D_outqua(mesh,met,mesh->info.optimLES);
 #endif
-  if ( !MMG5_adptet(mesh,met) ) {
+  if ( !MMG5_adptet(mesh,met,permNodGlob) ) {
     fprintf(stderr,"\n  ## Unable to adapt. Exit program.\n");
     return 0;
   }

@@ -69,11 +69,16 @@ FORTRAN_NAME(MMG2D_MMG2DMESH,mmg2d_mmg2dmesh,(MMG5_pMesh *mesh,MMG5_pSol *met
 /**
  * See \ref MMG2D_mmg2dls function in \ref mmg2d/libmmg2d.h file.
  */
-FORTRAN_NAME(MMG2D_MMG2DLS,mmg2d_mmg2dls,(MMG5_pMesh *mesh,MMG5_pSol *met
-                                          ,int* retval),(mesh,met
-                                                         ,retval)){
+FORTRAN_NAME(MMG2D_MMG2DLS,mmg2d_mmg2dls,(MMG5_pMesh *mesh,MMG5_pSol *sol,
+                                          MMG5_pSol *met,int* retval),
+             (mesh,sol,met,retval)){
 
-  *retval = MMG2D_mmg2dls(*mesh,*met);
+  if ( met ) {
+    *retval = MMG2D_mmg2dls(*mesh,*sol,*met);
+  }
+  else {
+    *retval = MMG2D_mmg2dls(*mesh,*sol,NULL);
+  }
 
   return;
 }

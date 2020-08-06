@@ -38,6 +38,267 @@
 extern char  ddb;
 
 /**
+ * \param ppt array of points containing the tetra vertices
+ * \param i0 local index of the vertex that has a sign different to the other vertices.
+ * \param part_opp 0 if we want to compute the area containing the vertex \a i0,
+ *   1 if we want the area that do not contains \a i0.
+ *
+ * \return the computed area (multiplied by 6) if sucess or 0.0 if fail.
+ *
+ * Compute the area (x6) defined by the level-set inside the tetra with vertices
+ * \a ppt. This tetra must be splitted by the level-set such has it has exactly
+ * 1 vertex (the vertex \a i0) with sign opposite to the other vertices. If \a
+ * part_opp == 0, we compte the area that contains \a i0, otherwise we compute
+ * the complementary area.
+ *
+ */
+static inline
+double MMG3D_vfrac_1vertex(MMG5_pPoint ppt[4],char i0,double v[4],int8_t part_opp) {
+  double      vfrac,lam,area,o1[3],o2[3],o3[3];
+  char        i1,i2,i3;
+
+  i1 = MMG5_idir[i0][0];
+  i2 = MMG5_idir[i0][1];
+  i3 = MMG5_idir[i0][2];
+
+  lam = v[i0] / (v[i0]-v[i1]);
+  o1[0] = ppt[i0]->c[0] + lam*(ppt[i1]->c[0]-ppt[i0]->c[0]);
+  o1[1] = ppt[i0]->c[1] + lam*(ppt[i1]->c[1]-ppt[i0]->c[1]);
+  o1[2] = ppt[i0]->c[2] + lam*(ppt[i1]->c[2]-ppt[i0]->c[2]);
+
+  lam = v[i0] / (v[i0]-v[i2]);
+  o2[0] = ppt[i0]->c[0] + lam*(ppt[i2]->c[0]-ppt[i0]->c[0]);
+  o2[1] = ppt[i0]->c[1] + lam*(ppt[i2]->c[1]-ppt[i0]->c[1]);
+  o2[2] = ppt[i0]->c[2] + lam*(ppt[i2]->c[2]-ppt[i0]->c[2]);
+
+  lam = v[i0] / (v[i0]-v[i3]);
+  o3[0] = ppt[i0]->c[0] + lam*(ppt[i3]->c[0]-ppt[i0]->c[0]);
+  o3[1] = ppt[i0]->c[1] + lam*(ppt[i3]->c[1]-ppt[i0]->c[1]);
+  o3[2] = ppt[i0]->c[2] + lam*(ppt[i3]->c[2]-ppt[i0]->c[2]);
+
+  vfrac = fabs (MMG5_det4pt(ppt[i0]->c,o1,o2,o3));
+
+  if ( !part_opp ) {
+    return vfrac;
+  }
+  else {
+    area = MMG5_det4pt(ppt[0]->c,ppt[1]->c,ppt[2]->c,ppt[3]->c);
+    vfrac  = fabs(area) - vfrac;
+    return vfrac;
+  }
+
+  /* Should not pass here */
+  return 0.0;
+}
+
+
+/**
+ * \param mesh pointer toward the mesh structure
+ * \param sol pointer toward the ls function
+ * \param k index of the triangle
+ * \return volfrac
+ *
+ * Calculate the area of the positive (if pm == 1) or negative (if pm == -1)
+ * subdomain inside tetra k defined by the ls function in sol
+ *
+ **/
+double MMG3D_vfrac(MMG5_pMesh mesh,MMG5_pSol sol,int k,int pm) {
+  MMG5_pTetra   pt;
+  MMG5_pPoint   ppt[4];
+  double        v[4],vfm,vfp,lam,eps,o[18];
+  int           ip[4],nplus,nminus,nzero;
+  int8_t        flag,cfg,ia;
+  char          i,i0,i1,imin1,imin2,iplus1,iplus2,iz;
+  unsigned char tau[4];
+  const unsigned char *taued;
+
+  eps = MMG5_EPS*MMG5_EPS;
+  pt = &mesh->tetra[k];
+
+  ip[0] = pt->v[0];
+  ip[1] = pt->v[1];
+  ip[2] = pt->v[2];
+  ip[3] = pt->v[3];
+
+  ppt[0] = &mesh->point[ip[0]];
+  ppt[1] = &mesh->point[ip[1]];
+  ppt[2] = &mesh->point[ip[2]];
+  ppt[3] = &mesh->point[ip[3]];
+
+  v[0] = sol->m[ip[0]] - mesh->info.ls;
+  v[1] = sol->m[ip[1]] - mesh->info.ls;
+  v[2] = sol->m[ip[2]] - mesh->info.ls;
+  v[3] = sol->m[ip[3]] - mesh->info.ls;
+
+  /* Identify number of zero, positive and negative vertices, and corresponding
+   * indices */
+  nplus = nminus = nzero = 0;
+  imin1 = imin2 = iplus1 = iplus2 = iz = -1;
+
+  for (i=0; i<4; i++) {
+    if ( fabs(v[i]) < eps ) {
+      nzero++;
+      if ( iz < 0 ) iz = i;
+    }
+    else if ( v[i] >= eps ) {
+      nplus++;
+      if ( iplus1 < 0 ) iplus1 = i;
+      else if ( iplus2 < 0 ) iplus2 = i;
+    }
+    else {
+      nminus++;
+      if ( imin1 < 0 ) imin1 = i;
+      else if ( imin2 < 0 ) imin2 = i;
+    }
+  }
+
+  /* Degenerate case */
+  if ( nzero == 4 ) return 0.0;
+
+  /* Whole tetra is positive */
+  if ( nminus == 0 ) {
+    vfp = MMG5_det4pt(ppt[0]->c,ppt[1]->c,ppt[2]->c,ppt[3]->c);
+    vfp = fabs(vfp);
+    if ( pm == 1 ) return vfp;
+    else           return 0.0;
+  }
+
+  /* Whole tetra is negative */
+  if ( nplus == 0 ) {
+    vfm = MMG5_det4pt(ppt[0]->c,ppt[1]->c,ppt[2]->c,ppt[3]->c);
+    vfm = fabs(vfm);
+    if ( pm == -1 ) return vfm;
+    else            return 0.0;
+  }
+
+  /* Exactly one vertex is negative */
+  if ( nminus == 1 ) {
+    return MMG3D_vfrac_1vertex(ppt,imin1,v,pm!=-1);
+  }
+
+  /* Exactly one vertex is positive */
+  if ( nplus == 1 ) {
+    return MMG3D_vfrac_1vertex(ppt,iplus1,v,pm!=1);
+  }
+
+  flag = 0;
+  for ( ia=0; ia<18; ++ia ) {
+    o[ia] = 0.0;
+  }
+
+  /* We have exactly 2 negative vertices and 2 positive ones */
+  assert ( nplus==2 && nminus==2 );
+
+  /* Config detection */
+  for ( ia=0; ia<6; ++ia ) {
+    i0 = MMG5_iare[ia][0];
+    i1 = MMG5_iare[ia][1];
+
+    if ( fabs(v[i0]) < MMG5_EPSD2 || fabs(v[i1]) < MMG5_EPSD2 )  continue;
+    else if ( MG_SMSGN(v[i0],v[i1]) )  continue;
+
+    MG_SET(flag,ia);
+
+    /* Computation of the intersection between edges and isovalue */
+    lam = v[i0] / (v[i0]-v[i1]);
+    o[3*ia  ] = ppt[i0]->c[0] + lam*(ppt[i1]->c[0]-ppt[i0]->c[0]);
+    o[3*ia+1] = ppt[i0]->c[1] + lam*(ppt[i1]->c[1]-ppt[i0]->c[1]);
+    o[3*ia+2] = ppt[i0]->c[2] + lam*(ppt[i1]->c[2]-ppt[i0]->c[2]);
+  }
+
+  assert ( flag==30 || flag==45 || flag==51 );
+
+  /* Set permutation of vertices : reference configuration 30 */
+  tau[0] = 0 ; tau[1] = 1 ; tau[2] = 2 ; tau[3] = 3;
+  taued = &MMG5_permedge[0][0];
+
+  switch(flag){
+  case 45:
+    tau[0] = 1 ; tau[1] = 3 ; tau[2] = 2 ; tau[3] = 0;
+    taued = &MMG5_permedge[5][0];
+    break;
+
+  case 51:
+    tau[0] = 1 ; tau[1] = 2 ; tau[2] = 0 ; tau[3] = 3;
+    taued = &MMG5_permedge[4][0];
+    break;
+  }
+
+  if ( pm < 0 ) {
+    if ( v[tau[0]] < 0.0 ) {
+      /* compute the area that contains tau[0] and tau[1] */
+      cfg = 0;
+    }
+    else {
+      /* compute the area that contains tau[2] and tau[3] */
+      cfg = 2;
+    }
+  }
+  else {
+    assert ( pm > 0 );
+    if ( v[tau[0]] < 0.0 ) {
+      /* compute the area that contains tau[0] and tau[1] */
+      cfg = 2;
+    }
+    else {
+      cfg = 0;
+    }
+  }
+  assert ( cfg == 0 || cfg == 2 );
+
+  /* Computation of the area depending on the detected config */
+  if ( cfg == 0 ) {
+    vfp  = fabs ( MMG5_det4pt(ppt[tau[0]]->c,ppt[tau[1]]->c,&o[3*taued[3]],&o[3*taued[4]]) );
+    vfp += fabs ( MMG5_det4pt(ppt[tau[0]]->c,&o[3*taued[4]],&o[3*taued[3]],&o[3*taued[2]]) );
+    vfp += fabs ( MMG5_det4pt(ppt[tau[0]]->c,&o[3*taued[3]],&o[3*taued[1]],&o[3*taued[2]]) );
+#ifdef NDEBUG
+    return vfp;
+#endif
+  }
+  else if ( cfg == 2 ) {
+    vfm  = fabs ( MMG5_det4pt(&o[3*taued[2]],&o[3*taued[4]],ppt[tau[2]]->c,ppt[tau[3]]->c) );
+    vfm += fabs ( MMG5_det4pt(&o[3*taued[2]],&o[3*taued[3]],ppt[tau[2]]->c,&o[3*taued[4]]) );
+    vfm += fabs ( MMG5_det4pt(&o[3*taued[1]],&o[3*taued[3]],ppt[tau[2]]->c,&o[3*taued[2]]) );
+#ifdef NDEBUG
+    return vfm;
+#endif
+  }
+
+#ifndef NDEBUG
+  /** Checks for debug mode */
+  /* Compute the complementary area */
+  if ( cfg == 0 ) {
+    vfm  = fabs ( MMG5_det4pt(&o[3*taued[2]],&o[3*taued[4]],ppt[tau[2]]->c,ppt[tau[3]]->c) );
+    vfm += fabs ( MMG5_det4pt(&o[3*taued[2]],&o[3*taued[3]],ppt[tau[2]]->c,&o[3*taued[4]]) );
+    vfm += fabs ( MMG5_det4pt(&o[3*taued[1]],&o[3*taued[3]],ppt[tau[2]]->c,&o[3*taued[2]]) );
+  }
+  else if ( cfg == 2 ) {
+    vfp  = fabs ( MMG5_det4pt(ppt[tau[0]]->c,ppt[tau[1]]->c,&o[3*taued[3]],&o[3*taued[4]]) );
+    vfp += fabs ( MMG5_det4pt(ppt[tau[0]]->c,&o[3*taued[4]],&o[3*taued[3]],&o[3*taued[2]]) );
+    vfp += fabs ( MMG5_det4pt(ppt[tau[0]]->c,&o[3*taued[3]],&o[3*taued[1]],&o[3*taued[2]]) );
+  }
+
+  /* vfp and vfm have been computed: check that the sum of both area is the
+   * area of the whole tetra */
+  double vf;
+  vf = fabs ( MMG5_det4pt(ppt[0]->c,ppt[1]->c,ppt[2]->c,ppt[3]->c) );
+
+  assert ( fabs(vf-(vfp+vfm)) < MMG5_EPSOK );
+
+  if ( cfg==0 ) {
+    return vfp;
+  }
+  else {
+    return vfm;
+  }
+#endif
+
+  /* Should not pass here */
+  return 0.0;
+}
+
+
+/**
  * \remark Not used.
  *
  * solve 3*3 non symmetric system Ar = b
@@ -98,10 +359,10 @@ MMG5_ismaniball(MMG5_pMesh mesh,MMG5_pSol sol,int k,int indp) {
   pt = &mesh->tetra[k];
   np = pt->v[indp];
   if ( fabs(sol->m[np]-mesh->info.ls) > MMG5_EPSD2 )  return 1;
-  
+
   memset(bdy,0,(MMG3D_LMAX+1)*sizeof(int));
   memset(list,0,(MMG3D_LMAX+1)*sizeof(int));
-  
+
   /* Sign of a starting point in ball of np */
   for (j=0; j<3; j++) {
     ip = MMG5_idir[indp][j];
@@ -342,16 +603,16 @@ MMG5_ismaniball(MMG5_pMesh mesh,MMG5_pSol sol,int k,int indp) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the level-set function.
- * \param tmp saving of the level-set values before the snap.
  * \return 1 if success, 0 if fail.
  *
  * Snap values of the level set function very close to 0 to exactly 0,
  * and prevent nonmanifold patterns from being generated.
  *
  */
-static int MMG3D_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol,double *tmp) {
+static int MMG3D_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTetra   pt;
   MMG5_pPoint   p0;
+  double        *tmp;
   int      k,nc,ns,ip;
   char     i;
 
@@ -366,6 +627,11 @@ static int MMG3D_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol,double *tmp) {
   for (k=1; k<=mesh->np; k++)
     mesh->point[k].flag = 0;
 
+  MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(double),"temporary table",
+                fprintf(stderr,"  Exit program.\n");
+                return 0);
+  MMG5_SAFE_CALLOC(tmp,mesh->npmax+1,double,return 0);
+
   /* Snap values of sol that are close to 0 to 0 exactly */
   ns = 0;
   for (k=1; k<=mesh->np; k++) {
@@ -375,45 +641,293 @@ static int MMG3D_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol,double *tmp) {
       if ( mesh->info.ddebug )
         fprintf(stderr,"  ## Warning: %s: snapping value %d; "
                 "previous value: %E.\n",__func__,k,fabs(sol->m[k]));
-      
+
       tmp[k] = ( fabs(sol->m[k]-mesh->info.ls) < MMG5_EPSD ) ?
-      (mesh->info.ls-100.0*MMG5_EPS) : sol->m[k];
+        (mesh->info.ls-100.0*MMG5_EPS) : sol->m[k];
       p0->flag = 1;
       sol->m[k] = mesh->info.ls;
       ns++;
     }
   }
-  
+
   do {
     nc = 0;
-    /* Check snapping did not lead to a nonmanifold situation */
-    for (k=1; k<=mesh->ne; k++) {
-      pt = &mesh->tetra[k];
-      if ( !MG_EOK(pt) ) continue;
-      for (i=0; i<4; i++) {
-        ip = pt->v[i];
-        p0 = &mesh->point[ip];
+  /* Check snapping did not lead to a nonmanifold situation */
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+    if ( !MG_EOK(pt) ) continue;
+    for (i=0; i<4; i++) {
+      ip = pt->v[i];
+      p0 = &mesh->point[ip];
         if ( p0->flag == 1 ) {
-          if ( !MMG5_ismaniball(mesh,sol,k,i) ) {
-            sol->m[ip] = tmp[ip];
+        if ( !MMG5_ismaniball(mesh,sol,k,i) ) {
+          sol->m[ip] = tmp[ip];
             p0->flag = 0;
-            nc++;
-          }
+          nc++;
         }
       }
     }
+  }
   }
   while ( nc );
 
   if ( (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) && ns+nc > 0 )
     fprintf(stdout,"     %8d points snapped, %d corrected\n",ns,nc);
-  
+
   /* Reset point flags */
   for (k=1; k<=mesh->np; k++)
     mesh->point[k].flag = 0;
   
   /* memory free */
   MMG5_DEL_MEM(mesh,mesh->adja);
+  MMG5_DEL_MEM(mesh,tmp);
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh
+ * \param sol pointer toward the level-set
+ *
+ * \return 1 if success, 0 otherwise
+ *
+ * Removal of small parasitic components (bubbles of material, etc) with volume
+ * less than mesh->info.rmc (default VOLFRAC) * volume of the mesh.
+ *
+ */
+int MMG3D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
+  MMG5_pTetra    pt,pt1,pt2;
+  MMG5_pxTetra   pxt;
+  double         volc,voltot,v0,v1,v2,v3;
+  int            k,kk,l,ll,ncp,ncm,ip0,ip1,ip2,ip3,base,cur,ipile,*pile,*adja;
+  char           i,j,i1,onbr;
+
+  ncp = 0;
+  ncm = 0;
+
+  /* Erase tetra flags */
+  for (k=1; k<=mesh->ne; k++) mesh->tetra[k].flag = 0;
+
+  /* Calculate volume of the total mesh (x6 to avoid useless division)*/
+  voltot = 0.0;
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+    if ( !MG_EOK(pt) ) continue;
+    voltot += fabs ( MMG5_orvol(mesh->point,pt->v) );
+  }
+
+  /* Memory allocation for pile */
+  MMG5_ADD_MEM(mesh,(mesh->ne+1)*sizeof(int),"temporary table",
+               printf("  Exit program.\n");
+               return 0);
+  MMG5_SAFE_CALLOC(pile,mesh->ne+1,int,return 0);
+
+  /* Investigate only positive connected components */
+  base = ++mesh->base;
+  
+  for (k=1; k<=mesh->ne; k++) {
+    ipile = 0;
+    volc  = 0.0;
+    pt = &mesh->tetra[k];
+    if ( !MG_EOK(pt) ) continue;
+    if ( pt->flag == base ) continue;
+
+    /* Checks signs of the LS function at the 4 vertices of pt */
+    ip0 = pt->v[0];
+    ip1 = pt->v[1];
+    ip2 = pt->v[2];
+    ip3 = pt->v[3];
+
+    v0 = sol->m[ip0]-mesh->info.ls;
+    v1 = sol->m[ip1]-mesh->info.ls;
+    v2 = sol->m[ip2]-mesh->info.ls;
+    v3 = sol->m[ip3]-mesh->info.ls;
+
+    if ( v0 <= 0.0 && v1 <= 0.0 && v2 <= 0.0 && v3 <= 0.0 ) continue;
+
+    /* Add tetra to pile if one vertex is > 0 */
+    pt->flag = base;
+    pile[ipile] = k;
+    ipile++;
+    if ( ipile >= mesh->ne ) {
+      fprintf(stderr,"\n  ## Problem in length of pile; function rmc.\n"
+              " Check that the level-set intersect the mesh.\n"
+              " Exit program.\n");
+
+      return 0;
+    }
+
+    /* Pile up all the positive connected component attached to the first tetra */
+    cur = 0;
+    do {
+      kk = pile[cur];
+      pt1 = &mesh->tetra[kk];
+
+      /* Add local volume fraction of the positive subdomain to volc */
+      volc += MMG3D_vfrac(mesh,sol,kk,1);
+
+      /* Add adjacent tetra to kk via positive vertices to the pile, if need be */
+      adja = &mesh->adja[4*(kk-1)+1];
+      for (i=0; i<4; i++) {
+        ip0 = pt1->v[i];
+        if ( sol->m[ip0] - mesh->info.ls <= 0.0 ) continue;
+
+        for ( i1=0; i1<3; ++i1 ) {
+          ll = adja[MMG5_idir[i][i1]] / 4;
+          if ( !ll ) continue;
+
+          pt2 = &mesh->tetra[ll];
+          if ( MG_EOK(pt2) && pt2->flag != base ) {
+            pt2->flag   = base;
+            pile[ipile] = ll;
+            ipile++;
+            if ( ipile >= mesh->ne ) {
+              fprintf(stderr,"\n  ## Problem in length of pile; function rmc. Exit program.\n");
+              return 0;
+            }
+          }
+        }
+      }
+    }
+    while ( ++cur < ipile );
+
+    /* Remove connected component if its volume is too small */
+    if ( volc < mesh->info.rmc * voltot ) {
+      for (l=0; l<ipile; l++) {
+        pt1 = &mesh->tetra[pile[l]];
+        for (i=0; i<4; i++) {
+          ip0 = pt1->v[i];
+          if ( sol->m[ip0]-mesh->info.ls > 0.0 ) {
+            sol->m[ip0] = mesh->info.ls - 100*MMG5_EPS;
+          }
+        }
+      }
+      ncp++;
+    }
+  }
+  
+  /* Investigate only negative connected components */
+  base = ++mesh->base;
+
+  for (k=1; k<=mesh->ne; k++) {
+    ipile = 0;
+    volc  = 0.0;
+    pt = &mesh->tetra[k];
+    if ( !MG_EOK(pt) ) continue;
+    if ( pt->flag == base ) continue;
+
+    /* Checks signs of the LS function at the 4 vertices of pt */
+    ip0 = pt->v[0];
+    ip1 = pt->v[1];
+    ip2 = pt->v[2];
+    ip3 = pt->v[3];
+
+    v0 = sol->m[ip0]-mesh->info.ls;
+    v1 = sol->m[ip1]-mesh->info.ls;
+    v2 = sol->m[ip2]-mesh->info.ls;
+    v3 = sol->m[ip3]-mesh->info.ls;
+
+    if ( v0 >= 0.0 && v1 >= 0.0 && v2 >= 0.0 && v3 >= 0.0 ) continue;
+
+    /* Add tetra to pile if one vertex is > 0 */
+    pt->flag = base;
+    pile[ipile] = k;
+    ipile++;
+    if ( ipile >= mesh->ne ) {
+      fprintf(stderr,"\n  ## Problem in length of pile; function rmc. Exit program.\n");
+      return 0;
+    }
+
+    /* Pile up all the negative connected component attached to the first tetra */
+    cur = 0;
+    do {
+      kk = pile[cur];
+      pt1 = &mesh->tetra[kk];
+
+      /* Add local volume fraction of the negative subdomain to volc */
+      volc += MMG3D_vfrac(mesh,sol,kk,-1);
+
+      /* Add adjacent tetra to kk via negative vertices to the pile, if need be */
+      adja = &mesh->adja[4*(kk-1)+1];
+      for (i=0; i<4; i++) {
+        ip0 = pt1->v[i];
+        if ( sol->m[ip0]-mesh->info.ls >= 0.0 ) continue;
+
+        for ( i1=0; i1<3; ++i1 ) {
+          ll = adja[MMG5_idir[i][i1]] / 4;
+          if ( !ll ) continue;
+
+          pt2 = &mesh->tetra[ll];
+          if ( MG_EOK(pt2) && pt2->flag != base ) {
+            pt2->flag   = base;
+            pile[ipile] = ll;
+            ipile++;
+            if ( ipile >= mesh->ne ) {
+              fprintf(stderr,"\n  ## Problem in length of pile; function rmc. Exit program.\n");
+              return 0;
+            }
+          }
+        }
+      }
+    }
+    while ( ++cur < ipile );
+
+    /* Remove connected component if its volume is too small */
+    if ( volc < mesh->info.rmc * voltot ) {
+      for (l=0; l<ipile; l++) {
+        pt1 = &mesh->tetra[pile[l]];
+        for (i=0; i<4; i++) {
+          ip0 = pt1->v[i];
+          if ( sol->m[ip0]-mesh->info.ls < 0.0 ) sol->m[ip0] = mesh->info.ls + 100*MMG5_EPS;
+        }
+      }
+      ncm++;
+    }
+    
+    /* Remove connected component if it is not attached to one base reference */
+    if ( mesh->info.nbr ) {
+      onbr = 0;
+      for (l=0; l<ipile; l++) {
+        pt1 = &mesh->tetra[pile[l]];
+        if ( pt1->xt ) {
+          pxt = &mesh->xtetra[pt1->xt];
+          for (i=0; i<4; i++) {
+            if ( MMG5_isbr(mesh,pxt->ref[i]) ) {
+              for (j=0; j<3; j++) {
+                ip0 = pt1->v[MMG5_idir[i][j]];
+                if ( sol->m[ip0]-mesh->info.ls < 0.0 )  {
+                  onbr = 1;
+                  break;
+                }
+              }
+            }
+          }
+        }
+        if ( onbr ) break;
+      }
+      
+      if ( !onbr ) {
+        for (l=0; l<ipile; l++) {
+          pt1 = &mesh->tetra[pile[l]];
+          for (i=0; i<4; i++) {
+            ip0 = pt1->v[i];
+            if ( sol->m[ip0]-mesh->info.ls < 0.0 ) sol->m[ip0] = mesh->info.ls + 100*MMG5_EPS;
+          }
+        }
+        ncm++;
+      }
+    }
+  }
+
+  /* Erase tetra flags */
+  for (k=1; k<=mesh->ne; k++) mesh->tetra[k].flag = 0;
+
+  /* Release memory */
+  MMG5_DEL_MEM(mesh,pile);
+
+  if ( mesh->info.imprim > 0 || mesh->info.ddebug ) {
+    printf("\n  *** Removed %d positive parasitic bubbles and %d negative parasitic bubbles\n",ncp,ncm);
+  }
 
   return 1;
 }
@@ -421,13 +935,14 @@ static int MMG3D_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol,double *tmp) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the level-set values.
+ * \param met pointer toward a metric (non-mandatory).
  * \return 1 if success, 0 otherwise.
  *
  * Proceed to discretization of the implicit function carried by sol into mesh,
  * once values of sol have been snapped/checked
  *
  */
-static int MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol){
+static int MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
   MMG5_pPoint   p0,p1;
@@ -533,7 +1048,7 @@ static int MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol){
 
       np = MMG3D_newPt(mesh,c,0);
       if ( !np ) {
-        MMG3D_POINT_REALLOC(mesh,sol,np,0.2,
+        MMG3D_POINT_REALLOC(mesh,sol,np,MMG5_GAP,
                              fprintf(stderr,"\n  ## Error: %s: unable to"
                                      " allocate a new point\n",__func__);
                              MMG5_INCREASE_MEM_MESSAGE();
@@ -541,6 +1056,22 @@ static int MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol){
                              ,c,0);
       }
       sol->m[np] = mesh->info.ls;
+      /* If user provide a metric, interpolate it at the new point */
+      if ( met && met->m ) {
+        if ( met->size > 1 ) {
+          ier = MMG3D_intmet33_ani(mesh,met,k,ia,np,s);
+        }
+        else {
+          ier = MMG5_intmet_iso(mesh,met,k,ia,np,s);
+        }
+        if ( ier <= 0 ) {
+          // Unable to compute the metric
+          fprintf(stderr,"\n  ## Error: %s: unable to"
+                  " interpolate the metric during the level-set"
+                  " discretization\n",__func__);
+          return 0;
+        }
+      }
 
       if ( npneg ) {
         /* We split a required edge */
@@ -647,6 +1178,112 @@ static int MMG3D_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol) {
 }
 
 /**
+ * \param mesh pointer toward the mesh structure.
+ * \return 1 if success, 0 if the xtetra array can't be reallocated.
+ *
+ * Update the xtetra array to store the new bdy faces created by the isosurface
+ * discretization.
+ *
+ */
+int MMG3D_update_xtetra ( MMG5_pMesh mesh ) {
+  MMG5_pTetra   pt,pt1,ptmax,ptmin;
+  MMG5_pxTetra  pxt;
+  int           *adja,k,i,jel,j,imax,imin;
+
+  if ( (!mesh->info.iso) || (!mesh->info.opnbdy) ) {
+    /* In non opnbdy mode, info stored in xtetra is not used */
+    /* In non ls mode, xtetra are alread updated */
+    return 1;
+  }
+
+  /* Opnbdy mode uses data stored in xtetra but in iso mode, the new triangles
+   * created by the ls discretization haven't been stored inside the xtetra */
+  if ( !mesh->xtetra ) {
+    fprintf(stderr,"\n  ## Error: %s: the xtetra array must be allocated.\n",
+      __func__);
+    return 0;
+  }
+  if ( !mesh->adja ) {
+    fprintf(stderr,"\n  ## Error: %s: the ajda array must be allocated.\n",
+      __func__);
+    return 0;
+  }
+
+
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+
+    adja = &mesh->adja[4*(k-1)+1];
+
+    for (i=0; i<4; i++) {
+      if ( !adja[i] ) {
+        /* Face is already stored */
+        continue;
+      }
+
+      jel = adja[i]/4;
+      pt1 = &mesh->tetra[jel];
+
+      if ( pt->ref == pt1->ref ) {
+        /* Potential opnbdy face is already stored */
+        continue;
+      }
+
+      j = adja[i]%4;
+      /* Detection of the tetra of higher ref */
+      if ( pt->ref > pt1->ref ) {
+        ptmax = pt;
+        imax  = i;
+        ptmin = pt1;
+        imin  = j;
+      }
+      else {
+        ptmax = pt1;
+        imax  = j;
+        ptmin = pt;
+        imin  = i;
+      }
+
+      /* Update the xtetra array for both tetra */
+      /* Tetra ptmax */
+      if ( !ptmax->xt ) {
+        mesh->xt++;
+        if ( mesh->xt > mesh->xtmax ) {
+          MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
+                            "larger xtetra table",
+                            mesh->xt--;
+                            fprintf(stderr,"  Exit program.\n");return 0;);
+        }
+        ptmax->xt = mesh->xt;
+      }
+
+      pxt = &mesh->xtetra[ptmax->xt];
+      pxt->ref[imax]   = MG_ISO;
+      pxt->ftag[imax] |= MG_BDY;
+      MG_SET(pxt->ori,imax);
+
+      /* Tetra ptmin */
+      if ( !ptmin->xt ) {
+        mesh->xt++;
+        if ( mesh->xt > mesh->xtmax ) {
+          MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
+                            "larger xtetra table",
+                            mesh->xt--;
+                            fprintf(stderr,"  Exit program.\n");return 0;);
+        }
+        ptmin->xt = mesh->xt;
+      }
+
+      pxt = &mesh->xtetra[ptmin->xt];
+      pxt->ref[imin]   = MG_ISO;
+      pxt->ftag[imin] |= MG_BDY;
+      MG_CLR(pxt->ori,imin);
+    }
+  }
+  return 1;
+}
+
+/**
  * \param mesh pointer toward the mesh
  * \param start index of the starting tetra
  * \param ip point index
@@ -674,8 +1311,6 @@ int MMG5_chkmaniball(MMG5_pMesh mesh, int start, char ip){
   pt->flag = base;
   list[ilist] = 4*start+ip;
   ilist++;
-  
-  if ( nump == 3862 ) printf("Tetra initial: %d  %d %d %d %d et ref %d\n",start,pt->v[0],pt->v[1],pt->v[2],pt->v[3],pt->ref);
 
   /* explore list, and find all tets in ball of p belonging to the component ref */
   cur = 0;
@@ -730,7 +1365,7 @@ int MMG5_chkmaniball(MMG5_pMesh mesh, int start, char ip){
       k1/=4;
 
       pt1 = &mesh->tetra[k1];
-      if ( pt1->flag == base ) continue;
+      if(pt1->flag == base) continue;
       pt1->flag = base;
 
       for(j=0; j<4 ; j++){
@@ -1366,11 +2001,14 @@ int MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int nd
         }
         assert( indp >= 0 && indp < 4 );
 
-        /* Only tets of the shell of (np,nq) can be added, unless future ball is non manifold */
+        /* Only tets of the shell of (np,nq) can be added, unless future ball is
+         * non manifold */
         if ( indq == -1 ) {
+          if ( mesh->info.ddebug ) {
           fprintf(stderr,"\n  ## Warning: %s: we should rarely passed here. "
                   "tetra %d =  %d %d %d %d, ref = %d.",__func__,
                   jel,pt1->v[0],pt1->v[1],pt1->v[2],pt1->v[3],pt1->ref);
+          }
           return 0;
         }
 
@@ -1409,9 +2047,11 @@ int MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int nd
 
         /* Only tets of the shell of (np,nq) can be added, unless future ball is non manifold */
         if ( indp == -1 ) {
+          if ( mesh->info.ddebug ) {
           fprintf(stderr,"\n  ## Warning: %s: we should rarely passed here. "
                   "tetra %d =  %d %d %d %d, ref = %d\n",__func__,
                   jel,pt1->v[0],pt1->v[1],pt1->v[2],pt1->v[3],pt1->ref);
+          }
           return 0;
         }
 
@@ -1428,14 +2068,14 @@ int MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int nd
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the solution structure
+ * \param sol pointer toward the level-set.
+ * \param met pointer toward  a metric (optionnal).
  * \return 0 if fail, 1 otherwise.
  *
  * Create implicit surface in mesh.
  *
  */
-int MMG3D_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol) {
-  double   *tmp;
+int MMG3D_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
 
   if ( abs(mesh->info.imprim) > 3 )
     fprintf(stdout,"  ** ISOSURFACE EXTRACTION\n");
@@ -1446,17 +2086,11 @@ int MMG3D_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol) {
     return 0;
   }
 
-  MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(double),"temporary table",
-                fprintf(stderr,"  Exit program.\n");
-                return 0);
-  MMG5_SAFE_CALLOC(tmp,mesh->npmax+1,double,return 0);
-
   /* Snap values of level set function if need be, then discretize it */
-  if ( !MMG3D_snpval_ls(mesh,sol,tmp) ) {
+  if ( !MMG3D_snpval_ls(mesh,sol) ) {
     fprintf(stderr,"\n  ## Problem with implicit function. Exit program.\n");
     return 0;
   }
-  MMG5_DEL_MEM(mesh,tmp);
 
   if ( !MMG3D_hashTetra(mesh,1) ) {
     fprintf(stderr,"\n  ## Hashing problem. Exit program.\n");
@@ -1487,12 +2121,20 @@ int MMG3D_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol) {
     return 0;
   }
 
-  if ( !MMG3D_cuttet_ls(mesh,sol) ) {
+  /* Removal of small parasitic components */
+  if ( mesh->info.rmc > 0. && !MMG3D_rmc(mesh,sol) ) {
+    fprintf(stderr,"\n  ## Error in removing small parasitic components."
+            " Exit program.\n");
+    return 0;
+  }
+
+  if ( !MMG3D_cuttet_ls(mesh,sol,met) ) {
     fprintf(stderr,"\n  ## Problem in discretizing implicit function. Exit program.\n");
     return 0;
   }
 
   MMG5_DEL_MEM(mesh,mesh->adja);
+  MMG5_DEL_MEM(mesh,mesh->adjt);
   MMG5_DEL_MEM(mesh,mesh->tria);
 
   mesh->nt = 0;

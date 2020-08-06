@@ -21,22 +21,28 @@
 ** =============================================================================
 */
 #include "mmg2d.h"
+#ifndef _WIN32
+#include "git_log_mmg.h"
+#endif
 #include "mmg2dexterns.h"
 
 /**
- * Pack the mesh \a mesh and its associated metric \a met and return \a val.
+ * Pack the mesh \a mesh and its associated metric \a met and/or solution \a sol
+ * and return \a val.
  */
-#define MMG2D_RETURN_AND_PACK(mesh,met,val)do                          \
+#define MMG2D_RETURN_AND_PACK(mesh,met,sol,val)do                       \
   {                                                                     \
-  if ( !MMG2D_pack(mesh,met) ) {                                         \
-    mesh->npi = mesh->np;                                               \
-    mesh->nti = mesh->nt;                                               \
-    mesh->nai = mesh->na;                                               \
-    mesh->nei = mesh->ne;                                               \
-    met->npi  = met->np;                                                \
-    return MMG5_LOWFAILURE;                                            \
+    if ( !MMG2D_pack(mesh,met,sol) ) {                                  \
+      mesh->npi = mesh->np;                                             \
+      mesh->nti = mesh->nt;                                             \
+      mesh->nai = mesh->na;                                             \
+      mesh->nei = mesh->ne;                                             \
+      mesh->xt  = 0;                                                    \
+      if ( met ) { met->npi  = met->np; }                               \
+      if ( sol ) { sol->npi  = sol->np; }                               \
+      return MMG5_LOWFAILURE;                                           \
   }                                                                     \
-    _LIBMMG5_RETURN(mesh,met,val);                                      \
+    _LIBMMG5_RETURN(mesh,met,sol,val);                                  \
     }while(0)
 
 /**
@@ -46,14 +52,33 @@
  * Truncate the metric computed by the DoSol function by hmax and hmin values
  * (if setted by the user). Set hmin and hmax if they are not setted.
  *
+ * \warning works only for a metric computed by the DoSol function because we
+ * suppose that we have a diagonal tensor in aniso.
+ *
  */
 void MMG2D_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
+  MMG5_pTria  ptt;
   MMG5_pPoint ppt;
-  int         k,iadr;
+  int         k,i,iadr;
   double      isqhmin, isqhmax;
   char        sethmin, sethmax;
 
   assert ( mesh->info.optim || mesh->info.hsiz > 0. );
+
+  /* Detect the point used only by quads */
+  if ( mesh->nquad ) {
+    for (k=1; k<=mesh->np; k++) {
+      mesh->point[k].flag = 1;
+    }
+    for (k=1; k<=mesh->nt; k++) {
+      ptt = &mesh->tria[k];
+      if ( !MG_EOK(ptt) ) continue;
+
+      for (i=0; i<3; i++) {
+        mesh->point[ptt->v[i]].flag = 0;
+      }
+    }
+  }
 
   /* If not provided by the user, compute hmin/hmax from the metric computed by
    * the DoSol function. */
@@ -64,7 +89,7 @@ void MMG2D_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
       mesh->info.hmin = FLT_MAX;
       for (k=1; k<=mesh->np; k++)  {
         ppt = &mesh->point[k];
-        if ( !MG_VOK(ppt) ) continue;
+        if ( (!MG_VOK(ppt)) || ppt->flag ) continue;
         mesh->info.hmin = MG_MIN(mesh->info.hmin,met->m[k]);
       }
     }
@@ -72,7 +97,7 @@ void MMG2D_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
       mesh->info.hmin = 0.;
       for (k=1; k<=mesh->np; k++)  {
         ppt = &mesh->point[k];
-        if ( !MG_VOK(ppt) ) continue;
+        if ( (!MG_VOK(ppt)) || ppt->flag ) continue;
         iadr = met->size*k;
         mesh->info.hmin = MG_MAX(mesh->info.hmin,met->m[iadr]);
         mesh->info.hmin = MG_MAX(mesh->info.hmin,met->m[iadr+2]);
@@ -94,7 +119,7 @@ void MMG2D_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
       mesh->info.hmax = FLT_MAX;
       for (k=1; k<=mesh->np; k++)  {
         ppt = &mesh->point[k];
-        if ( !MG_VOK(ppt) ) continue;
+        if ( (!MG_VOK(ppt)) || ppt->flag ) continue;
         iadr = met->size*k;
         mesh->info.hmax = MG_MIN(mesh->info.hmax,met->m[iadr]);
         mesh->info.hmax = MG_MIN(mesh->info.hmax,met->m[iadr+2]);
@@ -139,18 +164,24 @@ void MMG2D_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
   return;
 }
 
-int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
+int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol met)
 {
+  MMG5_pSol sol=NULL; // unused
   mytime    ctim[TIMEMAX];
   char      stim[32];
 
   if ( mesh->info.imprim >= 0 ) {
     fprintf(stdout,"\n  %s\n   MODULE MMG2D: %s (%s)\n  %s\n",
             MG_STR,MG_VER,MG_REL,MG_STR);
+#ifndef _WIN32
+    fprintf(stdout,"     git branch: %s\n",MMG_GIT_BRANCH);
+    fprintf(stdout,"     git commit: %s\n",MMG_GIT_COMMIT);
+    fprintf(stdout,"     git date:   %s\n\n",MMG_GIT_DATE);
+#endif
   }
 
   assert ( mesh );
-  assert ( sol );
+  assert ( met );
   assert ( mesh->point );
   assert ( mesh->tria );
 
@@ -173,56 +204,55 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
     fprintf(stdout,"\n  ## ERROR: NO TRIANGLES IN THE MESH. \n");
     fprintf(stdout,"          To generate a mesh from boundaries call the"
             " MMG2D_mmg2dmesh function\n.");
-    _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+    _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
   }
   else if ( mesh->info.iso ) {
     fprintf(stdout,"\n  ## ERROR: LEVEL-SET DISCRETISATION UNAVAILABLE"
             " (MMG2D_IPARAM_iso):\n"
             "          YOU MUST CALL THE MMG2D_mmg2dls FUNCTION TO USE THIS"
             " OPTION.\n");
-    _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+    _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
   }
   else if ( mesh->info.lag >= 0 ) {
     fprintf(stdout,"\n  ## ERROR: LAGRANGIAN MODE UNAVAILABLE (MMG2D_IPARAM_lag):\n"
             "            YOU MUST CALL THE MMG2D_mmg2dmov FUNCTION TO MOVE A"
             " RIGIDBODY.\n");
-    _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+    _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
   }
-
 
   if ( mesh->info.imprim > 0 ) fprintf(stdout,"\n  -- MMG2DLIB: INPUT DATA\n");
 
   /* Check input */
   chrono(ON,&(ctim[1]));
 
-  if ( sol->np && ( sol->np != mesh->np ) ) {
-    fprintf(stdout,"\n  ## WARNING: WRONG SOLUTION NUMBER : %d != %d\n",sol->np,mesh->np);
-    _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+  if ( met->np && ( met->np != mesh->np ) ) {
+    fprintf(stdout,"\n  ## WARNING: WRONG SOLUTION NUMBER : %d != %d\n",met->np,mesh->np);
+    _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
   }
-  else if ( sol->size!=1 && sol->size!=3 ) {
+  else if ( met->size!=1 && met->size!=3 ) {
     fprintf(stderr,"\n  ## ERROR: WRONG DATA TYPE.\n");
-    _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+    _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
   }
 
   /* specific meshing */
-  if ( sol->np ) {
+  if ( met->np ) {
     if ( mesh->info.optim ) {
       printf("\n  ## ERROR: MISMATCH OPTIONS: OPTIM OPTION CAN NOT BE USED"
              " WITH AN INPUT METRIC.\n");
-      _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+      _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
     }
 
     if ( mesh->info.hsiz>0. ) {
       printf("\n  ## ERROR: MISMATCH OPTIONS: HSIZ OPTION CAN NOT BE USED"
              " WITH AN INPUT METRIC.\n");
-      _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+      _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
     }
   }
 
   if ( mesh->info.optim &&  mesh->info.hsiz>0. ) {
     printf("\n  ## ERROR: MISMATCH OPTIONS: HSIZ AND OPTIM OPTIONS CAN NOT BE USED"
            " TOGETHER.\n");
-    _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+    _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
   }
 
   chrono(OFF,&(ctim[1]));
@@ -232,7 +262,7 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
     fprintf(stdout,"  --  INPUT DATA COMPLETED.     %s\n",stim);
 
   /* Set function pointers */
-  MMG2D_setfunc(mesh,sol);
+  MMG2D_setfunc(mesh,met);
   MMG2D_Set_commonFunc();
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {
@@ -244,47 +274,45 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
   chrono(ON,&ctim[2]);
   if ( mesh->info.imprim > 0 )   fprintf(stdout,"\n  -- PHASE 1 : DATA ANALYSIS\n");
 
+  /* Keep only one domain if asked */
+  MMG2D_keep_only1Subdomain ( mesh, mesh->info.nsd );
 
   /* Scale input mesh */
-  if ( !MMG2D_scaleMesh(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+  if ( !MMG2D_scaleMesh(mesh,met,NULL) )  _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
 
   /* Specific meshing */
   if ( mesh->info.optim ) {
-    if ( !MMG2D_doSol(mesh,sol) ) {
-     if ( !MMG2D_unscaleMesh(mesh,sol) ) _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
-     _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+    if ( !MMG2D_doSol(mesh,met) ) {
+     if ( !MMG5_unscaleMesh(mesh,met,NULL) ) _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+     _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
     }
-    MMG2D_solTruncatureForOptim(mesh,sol);
+    MMG2D_solTruncatureForOptim(mesh,met);
   }
 
   if ( mesh->info.hsiz > 0. ) {
-    if ( !MMG2D_Set_constantSize(mesh,sol) ) {
-     if ( !MMG2D_unscaleMesh(mesh,sol) ) _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
-     _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+    if ( !MMG2D_Set_constantSize(mesh,met) ) {
+     if ( !MMG5_unscaleMesh(mesh,met,NULL) ) _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+     _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
     }
   }
 
-  /* Create adjacency relations in the mesh */
-  if ( !MMG2D_hashTria(mesh) )
-    _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
-
-  if ( mesh->info.ddebug && !MMG5_chkmsh(mesh,1,0) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
-
   /* Print initial quality history */
   if ( mesh->info.imprim > 0  ||  mesh->info.imprim < -1 ) {
-    if ( !MMG2D_outqua(mesh,sol) ) {
-      if ( !MMG2D_unscaleMesh(mesh,sol) ) _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
-      _LIBMMG5_RETURN(mesh,sol,MMG5_LOWFAILURE);
+    if ( !MMG2D_outqua(mesh,met) ) {
+      if ( !MMG5_unscaleMesh(mesh,met,NULL) ) _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+      _LIBMMG5_RETURN(mesh,met,sol,MMG5_LOWFAILURE);
     }
   }
 
   /* Mesh analysis */
   if (! MMG2D_analys(mesh) ) {
-    if ( !MMG2D_unscaleMesh(mesh,sol) ) _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
-    _LIBMMG5_RETURN(mesh,sol,MMG5_LOWFAILURE);
+    if ( !MMG5_unscaleMesh(mesh,met,NULL) ) _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+    _LIBMMG5_RETURN(mesh,met,sol,MMG5_LOWFAILURE);
   }
 
-  if ( mesh->info.imprim > 1 && sol->m && sol->np ) MMG2D_prilen(mesh,sol);
+  if ( mesh->info.ddebug && !MMG5_chkmsh(mesh,1,0) )  _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+
+  if ( mesh->info.imprim > 1 && met->m && met->np ) MMG2D_prilen(mesh,met);
 
   chrono(OFF,&(ctim[2]));
   printim(ctim[2].gdif,stim);
@@ -295,12 +323,12 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
   chrono(ON,&ctim[3]);
 
   if ( mesh->info.imprim > 0 )
-    fprintf(stdout,"\n  -- PHASE 2 : %s MESHING\n",sol->size < 3 ? "ISOTROPIC" : "ANISOTROPIC");
+    fprintf(stdout,"\n  -- PHASE 2 : %s MESHING\n",met->size < 3 ? "ISOTROPIC" : "ANISOTROPIC");
 
   /* Mesh improvement */
-  if ( !MMG2D_mmg2d1n(mesh,sol) ) {
-    if ( !MMG2D_unscaleMesh(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
-    MMG2D_RETURN_AND_PACK(mesh,sol,MMG5_LOWFAILURE);
+  if ( !MMG2D_mmg2d1n(mesh,met) ) {
+    if ( !MMG5_unscaleMesh(mesh,met,NULL) )  _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+    MMG2D_RETURN_AND_PACK(mesh,met,sol,MMG5_LOWFAILURE);
   }
 
   chrono(OFF,&(ctim[3]));
@@ -310,22 +338,22 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
   }
 
   /* Print output quality history */
-  if ( !MMG2D_outqua(mesh,sol) ) {
-     if ( !MMG2D_unscaleMesh(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
-     MMG2D_RETURN_AND_PACK(mesh,sol,MMG5_LOWFAILURE);
+  if ( !MMG2D_outqua(mesh,met) ) {
+     if ( !MMG5_unscaleMesh(mesh,met,NULL) )  _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+     MMG2D_RETURN_AND_PACK(mesh,met,sol,MMG5_LOWFAILURE);
    }
 
   /* Print edge length histories */
   if ( abs(mesh->info.imprim) > 4 )  {
-    MMG2D_prilen(mesh,sol);
+    MMG2D_prilen(mesh,met);
   }
 
   chrono(ON,&(ctim[1]));
   if ( mesh->info.imprim > 0 )  fprintf(stdout,"\n  -- MESH PACKED UP\n");
 
   /* Unscale mesh */
-  if ( !MMG2D_unscaleMesh(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
-  if (!MMG2D_pack(mesh,sol) ) _LIBMMG5_RETURN(mesh,sol,MMG5_LOWFAILURE);
+  if ( !MMG5_unscaleMesh(mesh,met,NULL) )  _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+  if (!MMG2D_pack(mesh,met,sol) ) _LIBMMG5_RETURN(mesh,met,sol,MMG5_LOWFAILURE);
 
   chrono(OFF,&(ctim[1]));
 
@@ -335,7 +363,7 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol)
     fprintf(stdout,"\n   MMG2DLIB: ELAPSED TIME  %s\n",stim);
     fprintf(stdout,"\n  %s\n   END OF MODULE MMG2D\n  %s\n\n",MG_STR,MG_STR);
   }
-  _LIBMMG5_RETURN(mesh,sol,MMG5_SUCCESS);
+  _LIBMMG5_RETURN(mesh,met,sol,MMG5_SUCCESS);
 
 }
 
@@ -382,17 +410,23 @@ int MMG2D_restart(MMG5_pMesh mesh){
 }
 
 
-int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol) {
+int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol met) {
+  MMG5_pSol sol=NULL; // unused
   mytime    ctim[TIMEMAX];
   char      stim[32];
 
   if ( mesh->info.imprim >= 0 ) {
     fprintf(stdout,"\n  %s\n   MODULE MMG2D: %s (%s)\n  %s\n",
             MG_STR,MG_VER,MG_REL,MG_STR);
+#ifndef _WIN32
+    fprintf(stdout,"     git branch: %s\n",MMG_GIT_BRANCH);
+    fprintf(stdout,"     git commit: %s\n",MMG_GIT_COMMIT);
+    fprintf(stdout,"     git date:   %s\n\n",MMG_GIT_DATE);
+#endif
   }
 
   assert ( mesh );
-  assert ( sol );
+  assert ( met );
   assert ( mesh->point );
 
   /*uncomment for callback*/
@@ -413,40 +447,40 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   if ( mesh->nt ) {
     fprintf(stdout,"\n  ## ERROR: YOUR MESH CONTAINS ALREADY TRIANGLES.\n"
             " THE MESH GENERATION OPTION IS UNAVAILABLE.\n");
-    _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+    _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
   }
 
   else if ( mesh->info.iso ) {
     fprintf(stdout,"\n  ## ERROR: LEVEL-SET DISCRETISATION UNAVAILABLE"
             " (MMG2D_IPARAM_iso):\n"
             "          YOU MUST CALL THE MMG2D_MMG2DLS FUNCTION TO USE THIS OPTION.\n");
-    _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+    _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
   }
 
   else if ( mesh->info.lag >= 0 ) {
     fprintf(stdout,"\n  ## ERROR: LAGRANGIAN MODE UNAVAILABLE (MMG2D_IPARAM_lag):\n"
             "            YOU MUST CALL THE MMG2D_MMG2DMOV FUNCTION TO MOVE A RIGIDBODY.\n");
-    _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+    _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
   }
   /* specific meshing */
-  if ( sol->np ) {
+  if ( met->np ) {
     if ( mesh->info.optim ) {
       printf("\n  ## ERROR: MISMATCH OPTIONS: OPTIM OPTION CAN NOT BE USED"
              " WITH AN INPUT METRIC.\n");
-      _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+      _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
     }
 
     if ( mesh->info.hsiz>0. ) {
       printf("\n  ## ERROR: MISMATCH OPTIONS: HSIZ OPTION CAN NOT BE USED"
              " WITH AN INPUT METRIC.\n");
-      _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+      _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
     }
   }
 
   if ( mesh->info.optim &&  mesh->info.hsiz>0. ) {
     printf("\n  ## ERROR: MISMATCH OPTIONS: HSIZ AND OPTIM OPTIONS CAN NOT BE USED"
            " TOGETHER.\n");
-    _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+    _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
   }
 
   if ( mesh->info.imprim > 0 ) fprintf(stdout,"\n  -- MMG2DMESH: INPUT DATA\n");
@@ -454,12 +488,12 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   /* Check input */
   chrono(ON,&(ctim[1]));
 
-  if ( sol->np && (sol->np != mesh->np) ) {
-    fprintf(stdout,"\n  ## WARNING: WRONG SOLUTION NUMBER : %d != %d\n",sol->np,mesh->np);
-    _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
-  }  else if ( sol->size!=1 && sol->size!=3 ) {
+  if ( met->np && (met->np != mesh->np) ) {
+    fprintf(stdout,"\n  ## WARNING: WRONG SOLUTION NUMBER : %d != %d\n",met->np,mesh->np);
+    _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+  }  else if ( met->size!=1 && met->size!=3 ) {
     fprintf(stderr,"\n  ## ERROR: WRONG DATA TYPE.\n");
-    _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+    _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
   }
 
   chrono(OFF,&(ctim[1]));
@@ -468,7 +502,7 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol) {
     fprintf(stdout,"  --  INPUT DATA COMPLETED.     %s\n",stim);
 
   /* Create function pointers */
-  MMG2D_setfunc(mesh,sol);
+  MMG2D_setfunc(mesh,met);
   MMG2D_Set_commonFunc();
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {
@@ -480,14 +514,14 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   chrono(ON,&ctim[2]);
 
   if ( !MMG2D_restart(mesh) ) {
-    _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+    _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
   }
 
   if ( mesh->info.imprim > 0 )   fprintf(stdout,"\n  -- PHASE 1 : MESH GENERATION\n");
 
-  if ( !MMG2D_scaleMesh(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+  if ( !MMG2D_scaleMesh(mesh,met,NULL) )  _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
 
-  if ( mesh->info.ddebug && !MMG5_chkmsh(mesh,1,0) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+  if ( mesh->info.ddebug && !MMG5_chkmsh(mesh,1,0) )  _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
 
   /* Memory alloc */
   MMG5_ADD_MEM(mesh,(3*mesh->ntmax+5)*sizeof(int),"adjacency table",
@@ -497,9 +531,9 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   /* Delaunay triangulation of the set of points contained in the mesh,
    * enforcing the edges of the mesh */
-  if ( !MMG2D_mmg2d2(mesh,sol) )  {
-    if ( !MMG2D_unscaleMesh(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
-    MMG2D_RETURN_AND_PACK(mesh,sol,MMG5_LOWFAILURE);
+  if ( !MMG2D_mmg2d2(mesh,met) )  {
+    if ( !MMG5_unscaleMesh(mesh,met,NULL) )  _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+    MMG2D_RETURN_AND_PACK(mesh,met,sol,MMG5_LOWFAILURE);
   }
 
   chrono(OFF,&(ctim[2]));
@@ -515,31 +549,31 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   /* specific meshing */
   if ( mesh->info.optim ) {
-    if ( !MMG2D_doSol(mesh,sol) ) {
-      if ( !MMG2D_unscaleMesh(mesh,sol) )
-        _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
-      MMG2D_RETURN_AND_PACK(mesh,sol,MMG5_LOWFAILURE);
+    if ( !MMG2D_doSol(mesh,met) ) {
+      if ( !MMG5_unscaleMesh(mesh,met,NULL) )
+        _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+      MMG2D_RETURN_AND_PACK(mesh,met,sol,MMG5_LOWFAILURE);
     }
-    MMG2D_solTruncatureForOptim(mesh,sol);
+    MMG2D_solTruncatureForOptim(mesh,met);
   } else if (mesh->info.hsiz > 0.) {
-    if ( !MMG2D_Set_constantSize(mesh,sol) ) {
-     if ( !MMG2D_unscaleMesh(mesh,sol) ) _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
-     _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+    if ( !MMG2D_Set_constantSize(mesh,met) ) {
+     if ( !MMG5_unscaleMesh(mesh,met,NULL) ) _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+     _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
     }
   } else {
     /* Set default hmin and hmax values */
     if ( !MMG5_Set_defaultTruncatureSizes(mesh,mesh->info.hmin>0.,mesh->info.hmax>0.) ) {
-      if ( !MMG2D_unscaleMesh(mesh,sol) )
-        _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
-      MMG2D_RETURN_AND_PACK(mesh,sol,MMG5_LOWFAILURE);
+      if ( !MMG5_unscaleMesh(mesh,met,NULL) )
+        _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+      MMG2D_RETURN_AND_PACK(mesh,met,sol,MMG5_LOWFAILURE);
     }
   }
 
   /* Mesh analysis */
   if (! MMG2D_analys(mesh) ) {
-    if ( !MMG2D_unscaleMesh(mesh,sol) )
-      _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
-    MMG2D_RETURN_AND_PACK(mesh,sol,MMG5_LOWFAILURE);
+    if ( !MMG5_unscaleMesh(mesh,met,NULL) )
+      _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+    MMG2D_RETURN_AND_PACK(mesh,met,sol,MMG5_LOWFAILURE);
   }
 
   chrono(OFF,&(ctim[3]));
@@ -551,11 +585,11 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   chrono(ON,&(ctim[4]));
   if ( mesh->info.imprim > 0 )
     fprintf(stdout,"\n  -- PHASE 3 : MESH IMPROVEMENT (%s)\n",
-            sol->size < 3 ? "ISOTROPIC" : "ANISOTROPIC");
+            met->size < 3 ? "ISOTROPIC" : "ANISOTROPIC");
 
-  if ( !MMG2D_mmg2d1n(mesh,sol) ) {
-    if ( !MMG2D_unscaleMesh(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
-    MMG2D_RETURN_AND_PACK(mesh,sol,MMG5_LOWFAILURE);
+  if ( !MMG2D_mmg2d1n(mesh,met) ) {
+    if ( !MMG5_unscaleMesh(mesh,met,NULL) )  _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+    MMG2D_RETURN_AND_PACK(mesh,met,sol,MMG5_LOWFAILURE);
   }
 
   chrono(OFF,&(ctim[4]));
@@ -565,22 +599,22 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol) {
   }
 
   /* Unscale mesh */
-  if ( !MMG2D_unscaleMesh(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+  if ( !MMG5_unscaleMesh(mesh,met,NULL) )  _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
 
   /* Print quality histories */
-  if ( !MMG2D_outqua(mesh,sol) ) {
-     MMG2D_RETURN_AND_PACK(mesh,sol,MMG5_LOWFAILURE);
+  if ( !MMG2D_outqua(mesh,met) ) {
+     MMG2D_RETURN_AND_PACK(mesh,met,sol,MMG5_LOWFAILURE);
   }
 
   /* Print edge length histories */
   if ( abs(mesh->info.imprim) > 4 )  {
-    MMG2D_prilen(mesh,sol);
+    MMG2D_prilen(mesh,met);
   }
 
   chrono(ON,&(ctim[1]));
   if ( mesh->info.imprim > 0 )  fprintf(stdout,"\n  -- MESH PACKED UP\n");
 
-  if (!MMG2D_pack(mesh,sol) ) _LIBMMG5_RETURN(mesh,sol,MMG5_LOWFAILURE);
+  if (!MMG2D_pack(mesh,met,sol) ) _LIBMMG5_RETURN(mesh,met,sol,MMG5_LOWFAILURE);
 
   chrono(OFF,&(ctim[1]));
 
@@ -591,23 +625,41 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol) {
     fprintf(stdout,"\n  %s\n   END OF MODULE MMG2D\n  %s\n\n",MG_STR,MG_STR);
   }
 
-  _LIBMMG5_RETURN(mesh,sol,MMG5_SUCCESS);
+  _LIBMMG5_RETURN(mesh,met,sol,MMG5_SUCCESS);
 
 }
 
-int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol)
+int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
 {
+  MMG5_pSol met=NULL;
   mytime    ctim[TIMEMAX];
   char      stim[32];
+  int8_t    mettofree = 0;
 
   if ( mesh->info.imprim >= 0 ) {
     fprintf(stdout,"\n  %s\n   MODULE MMG2D: %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
+#ifndef _WIN32
+    fprintf(stdout,"     git branch: %s\n",MMG_GIT_BRANCH);
+    fprintf(stdout,"     git commit: %s\n",MMG_GIT_COMMIT);
+    fprintf(stdout,"     git date:   %s\n\n",MMG_GIT_DATE);
+#endif
   }
 
   assert ( mesh );
   assert ( sol );
   assert ( mesh->point );
   assert ( mesh->tria );
+
+  if ( !mesh->info.iso ) { mesh->info.iso = 1; }
+
+  if ( !umet ) {
+    /* User doesn't provide the metric, allocate our own one */
+    MMG5_SAFE_CALLOC(met,1,MMG5_Sol,_LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE));
+    mettofree = 1;
+  }
+  else {
+    met = umet;
+  }
 
   /*uncomment for callback*/
   //MMG2D_callbackinsert = titi;
@@ -627,7 +679,7 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol)
   if ( mesh->info.lag >= 0 ) {
     fprintf(stdout,"\n  ## ERROR: LAGRANGIAN MODE UNAVAILABLE (MMG2D_IPARAM_lag):\n"
             "            YOU MUST CALL THE MMG2D_mmg2dmov FUNCTION TO MOVE A RIGIDBODY.\n");
-    _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+    _LIBMMG5_RETURN(mesh,sol,met,MMG5_STRONGFAILURE);
   }
 
   /* Check input */
@@ -638,29 +690,56 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol)
 
   if ( !mesh->nt ) {
     fprintf(stdout,"\n  ## ERROR: NO TRIANGLES IN THE MESH \n");
-    _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+    if ( mettofree ) { MMG5_SAFE_FREE (met); }
+    _LIBMMG5_RETURN(mesh,sol,met,MMG5_STRONGFAILURE);
   }
   else if ( !sol->m ) {
     fprintf(stdout,"\n  ## ERROR: A VALID SOLUTION FILE IS NEEDED \n");
-    _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+    if ( mettofree ) { MMG5_SAFE_FREE (met); }
+    _LIBMMG5_RETURN(mesh,sol,met,MMG5_STRONGFAILURE);
   } else   if ( sol->size != 1 ) {
     fprintf(stdout,"\n  ## ERROR: WRONG DATA TYPE.\n");
-    _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+    if ( mettofree ) { MMG5_SAFE_FREE (met); }
+    _LIBMMG5_RETURN(mesh,sol,met,MMG5_STRONGFAILURE);
   } else if ( sol->np && (sol->np != mesh->np) ) {
     fprintf(stdout,"\n  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
-    MMG5_DEL_MEM(mesh,sol->m);
-    sol->np = 0;
+    if ( mettofree ) { MMG5_SAFE_FREE (met); }
+    _LIBMMG5_RETURN(mesh,sol,met,MMG5_STRONGFAILURE);
   }
 
+  /* specific meshing */
+  if ( met && met->np ) {
   if ( mesh->info.optim ) {
-    printf("\n  ## ERROR: OPTIM OPTION UNAVAILABLE IN ISOSURFACE"
-           " DISCRETIZATION MODE.\n");
-    _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+      printf("\n  ## ERROR: MISMATCH OPTIONS: OPTIM OPTION CAN NOT BE USED"
+             " WITH AN INPUT METRIC.\n");
+      if ( mettofree ) { MMG5_SAFE_FREE (met); }
+      _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
   }
+
   if ( mesh->info.hsiz>0. ) {
-    printf("\n  ## ERROR: HSIZ OPTION UNAVAILABLE IN ISOSURFACE"
-           " DISCRETIZATION MODE.\n");
-    _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+      printf("\n  ## ERROR: MISMATCH OPTIONS: HSIZ OPTION CAN NOT BE USED"
+             " WITH AN INPUT METRIC.\n");
+      if ( mettofree ) { MMG5_SAFE_FREE (met); }
+      _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+    }
+    if ( met->np != mesh->np ) {
+      fprintf(stdout,"\n  ## WARNING: WRONG METRIC NUMBER. IGNORED\n");
+      if ( mettofree ) { MMG5_SAFE_FREE (met); }
+      _LIBMMG5_RETURN(mesh,sol,met,MMG5_STRONGFAILURE);
+    }
+  }
+
+  if ( mesh->info.optim &&  mesh->info.hsiz>0. ) {
+    printf("\n  ## ERROR: MISMATCH OPTIONS: HSIZ AND OPTIM OPTIONS CAN NOT BE USED"
+           " TOGETHER.\n");
+    if ( mettofree ) { MMG5_SAFE_FREE (met); }
+    _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+  }
+
+  if ( mesh->nquad && mesh->quadra ) {
+    printf("\n  ## ERROR: UNABLE TO HANDLE HYBRID MESHES IN ISOVALUE DISCRETIZATION MODE.\n");
+    if ( mettofree ) { MMG5_SAFE_FREE (met); }
+    _LIBMMG5_RETURN(mesh,sol,met,MMG5_STRONGFAILURE);
   }
 
   chrono(OFF,&(ctim[1]));
@@ -671,35 +750,51 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol)
   chrono(ON,&ctim[2]);
 
   /* Set pointers */
-  MMG2D_setfunc(mesh,sol);
+  MMG2D_setfunc(mesh,met);
   MMG2D_Set_commonFunc();
 
   if ( mesh->info.imprim > 0 )
     fprintf(stdout,"\n  -- PHASE 1 : ISOSURFACE DISCRETIZATION\n");
-
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {
     fprintf(stdout,"  MAXIMUM NUMBER OF POINTS    (NPMAX) : %8d\n",mesh->npmax);
     fprintf(stdout,"  MAXIMUM NUMBER OF TRIANGLES (NTMAX) : %8d\n",mesh->ntmax);
   }
 
-  if ( !MMG2D_scaleMesh(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+  if ( !MMG2D_scaleMesh(mesh,met,sol) ) {
+    if ( mettofree ) { MMG5_SAFE_FREE (met); }
+    _LIBMMG5_RETURN(mesh,sol,met,MMG5_STRONGFAILURE);
+  }
 
-  if ( mesh->nt && !MMG2D_hashTria(mesh) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+  if ( mesh->nt && !MMG2D_hashTria(mesh) ) {
+    if ( mettofree ) { MMG5_SAFE_FREE (met); }
+    _LIBMMG5_RETURN(mesh,sol,met,MMG5_STRONGFAILURE);
+  }
 
-  if ( mesh->info.ddebug && !MMG5_chkmsh(mesh,1,0) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+  if ( mesh->info.ddebug && !MMG5_chkmsh(mesh,1,0) ) {
+    if ( mettofree ) { MMG5_SAFE_FREE (met); }
+    _LIBMMG5_RETURN(mesh,sol,met,MMG5_STRONGFAILURE);
+  }
 
   /* Print initial quality */
   if ( mesh->info.imprim > 0  ||  mesh->info.imprim < -1 ) {
-    if ( !MMG2D_outqua(mesh,sol) ) {
-      if ( !MMG2D_unscaleMesh(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
-      MMG2D_RETURN_AND_PACK(mesh,sol,MMG5_LOWFAILURE);
+    if ( !MMG2D_outqua(mesh,met) ) {
+    if ( mettofree ) {
+      MMG5_DEL_MEM(mesh,met->m);
+      MMG5_SAFE_FREE (met);
+    }
+      if ( !MMG5_unscaleMesh(mesh,met,sol) ) {
+        _LIBMMG5_RETURN(mesh,sol,met,MMG5_STRONGFAILURE);
+      }
+      MMG2D_RETURN_AND_PACK(mesh,sol,met,MMG5_LOWFAILURE);
     }
   }
 
   /* Discretization of the mesh->info.ls isovalue of sol in the mesh */
-  if (! MMG2D_mmg2d6(mesh,sol) )
-    _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+  if ( !MMG2D_mmg2d6(mesh,sol,umet) ) {
+    if ( mettofree ) { MMG5_SAFE_FREE (met); }
+    _LIBMMG5_RETURN(mesh,sol,met,MMG5_STRONGFAILURE);
+  }
 
   chrono(OFF,&(ctim[2]));
   printim(ctim[2].gdif,stim);
@@ -711,10 +806,43 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol)
     fprintf(stdout,"\n  -- PHASE 2 : ANALYSIS\n");
   }
 
+  /* specific meshing */
+  if ( mesh->info.optim ) {
+    if ( !MMG2D_doSol(mesh,met) ) {
+      if ( mettofree ) {
+        MMG5_DEL_MEM(mesh,met->m);
+        MMG5_SAFE_FREE (met);
+      }
+
+      if ( !MMG5_unscaleMesh(mesh,met,NULL) ) {
+        _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE); }
+      MMG2D_RETURN_AND_PACK(mesh,met,sol,MMG5_LOWFAILURE);
+    }
+    MMG2D_solTruncatureForOptim(mesh,met);
+  }
+  if ( mesh->info.hsiz > 0. ) {
+    if ( !MMG2D_Set_constantSize(mesh,met) ) {
+      if ( mettofree ) {
+        MMG5_DEL_MEM(mesh,met->m);
+        MMG5_SAFE_FREE (met);
+      }
+      if ( !MMG5_unscaleMesh(mesh,met,sol) ) {
+        _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+      }
+     _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+    }
+  }
+
   /* Mesh analysis */
   if (! MMG2D_analys(mesh) ) {
-    if ( !MMG2D_unscaleMesh(mesh,sol) ) _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
-    MMG2D_RETURN_AND_PACK(mesh,sol,MMG5_LOWFAILURE);
+    if ( mettofree ) {
+      MMG5_DEL_MEM(mesh,met->m);
+      MMG5_SAFE_FREE (met);
+    }
+    if ( !MMG5_unscaleMesh(mesh,met,NULL) ) {
+      _LIBMMG5_RETURN(mesh,sol,met,MMG5_STRONGFAILURE);
+    }
+    MMG2D_RETURN_AND_PACK(mesh,sol,met,MMG5_LOWFAILURE);
   }
 
   chrono(OFF,&(ctim[3]));
@@ -728,9 +856,13 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol)
     fprintf(stdout,"\n  -- PHASE 3 : MESH IMPROVEMENT\n");
   }
 
-  if ( (!mesh->info.noinsert) && !MMG2D_mmg2d1n(mesh,sol) ) {
-    if ( !MMG2D_unscaleMesh(mesh,sol) ) _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
-    MMG2D_RETURN_AND_PACK(mesh,sol,MMG5_LOWFAILURE);
+  if ( (!mesh->info.noinsert) && !MMG2D_mmg2d1n(mesh,met) ) {
+    if ( mettofree ) {
+      MMG5_DEL_MEM(mesh,met->m);
+      MMG5_SAFE_FREE (met);
+    }
+    if ( !MMG5_unscaleMesh(mesh,met,NULL) ) _LIBMMG5_RETURN(mesh,sol,met,MMG5_STRONGFAILURE);
+    MMG2D_RETURN_AND_PACK(mesh,sol,met,MMG5_LOWFAILURE);
   }
 
   /* End of mmg2dls */
@@ -741,18 +873,31 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol)
   }
 
   /* Unscale mesh */
-  if ( !MMG2D_unscaleMesh(mesh,sol) )  _LIBMMG5_RETURN(mesh,sol,MMG5_STRONGFAILURE);
+  if ( !MMG5_unscaleMesh(mesh,met,NULL) ) {
+    if ( mettofree ) {
+      MMG5_DEL_MEM(mesh,met->m);
+      MMG5_SAFE_FREE (met);
+    }
+    _LIBMMG5_RETURN(mesh,sol,met,MMG5_STRONGFAILURE);
+  }
 
   /* Print quality histories */
-  if ( !MMG2D_outqua(mesh,sol) ) {
-    MMG2D_RETURN_AND_PACK(mesh,sol,MMG5_LOWFAILURE);
+  if ( !MMG2D_outqua(mesh,met) ) {
+    if ( mettofree ) {
+      MMG5_DEL_MEM(mesh,met->m);
+      MMG5_SAFE_FREE (met);
+    }
+    MMG2D_RETURN_AND_PACK(mesh,sol,met,MMG5_LOWFAILURE);
   }
 
   chrono(ON,&(ctim[1]));
   if ( mesh->info.imprim > 0 )  fprintf(stdout,"\n  -- MESH PACKED UP\n");
 
   /* Pack mesh */
-  if (!MMG2D_pack(mesh,sol) ) _LIBMMG5_RETURN(mesh,sol,MMG5_LOWFAILURE);
+  if (!MMG2D_pack(mesh,sol,met) ) {
+    if ( mettofree ) { MMG5_SAFE_FREE (met); }
+    _LIBMMG5_RETURN(mesh,sol,met,MMG5_LOWFAILURE);
+  }
 
   chrono(OFF,&(ctim[1]));
 
@@ -762,17 +907,29 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol)
     fprintf(stdout,"\n   MMG2DLS: ELAPSED TIME  %s\n",stim);
     fprintf(stdout,"\n  %s\n   END OF MODULE MMG2D\n  %s\n\n",MG_STR,MG_STR);
   }
-  _LIBMMG5_RETURN(mesh,sol,MMG5_SUCCESS);
+  if ( mettofree ) {
+    MMG5_DEL_MEM(mesh,met->m);
+    MMG5_SAFE_FREE (met);
+  }
+  _LIBMMG5_RETURN(mesh,sol,met,MMG5_SUCCESS);
 
 }
 
 int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   mytime    ctim[TIMEMAX];
   char      stim[32];
+  int       ier;
+  int       k,*invalidTris;
+
 
   if ( mesh->info.imprim >= 0 ) {
     fprintf(stdout,"\n  %s\n   MODULE MMG2D : %s (%s)\n  %s\n",
             MG_STR,MG_VER,MG_REL,MG_STR);
+#ifndef _WIN32
+    fprintf(stdout,"     git branch: %s\n",MMG_GIT_BRANCH);
+    fprintf(stdout,"     git commit: %s\n",MMG_GIT_COMMIT);
+    fprintf(stdout,"     git date:   %s\n\n",MMG_GIT_DATE);
+#endif
   }
 
   assert ( mesh );
@@ -801,17 +958,23 @@ int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
 
   disp->ver  = mesh->ver;
 
+#ifndef USE_ELAS
+  fprintf(stderr,"\n  ## ERROR: YOU NEED TO COMPILE WITH THE USE_ELAS"
+    " CMake's FLAG SET TO ON TO USE THE RIGIDBODY MOVEMENT LIBRARY.\n");
+    _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
+#endif
+
   if ( !mesh->nt ) {
     fprintf(stdout,"\n  ## ERROR: NO TRIANGLES IN THE MESH \n");
-    _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+    _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
   }
   else if ( !disp->m ) {
     fprintf(stdout,"\n  ## ERROR: A VALID SOLUTION FILE IS NEEDED \n");
-    _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+    _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
   }
   else if ( disp->size != 2 ) {
     fprintf(stdout,"\n  ## ERROR: LAGRANGIAN MOTION OPTION NEED A VECTOR DISPLACEMENT.\n");
-    _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+    _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
   }
   else if ( disp->np && (disp->np != mesh->np) ) {
     fprintf(stdout,"\n  ## WARNING: WRONG SOLUTION NUMBER. IGNORED\n");
@@ -820,15 +983,21 @@ int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   }
 
   if ( mesh->info.optim ) {
-    printf("\n  ## ERROR: OPTIM OPTION UNAVAILABLE IN ISOSURFACE"
-           " DISCRETIZATION MODE.\n");
-    _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+    printf("\n  ## ERROR: OPTIM OPTION UNAVAILABLE IN LAGRANGIAN"
+           " MOVEMENT MODE.\n");
+    _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
   }
   if ( mesh->info.hsiz>0. ) {
-    printf("\n  ## ERROR: HSIZ OPTION UNAVAILABLE IN ISOSURFACE"
-           " DISCRETIZATION MODE.\n");
-    _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+    printf("\n  ## ERROR: HSIZ OPTION UNAVAILABLE IN LAGRANGIAN"
+           " MOVEMENT MODE.\n");
+    _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
   }
+
+  if ( mesh->nquad && mesh->quadra ) {
+    printf("\n  ## ERROR: UNABLE TO HANDLE HYBRID MESHES IN LAGRANGIAN MOVEMENT MODE.\n");
+    _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
+  }
+
 
   chrono(OFF,&(ctim[1]));
   printim(ctim[1].gdif,stim);
@@ -851,22 +1020,22 @@ int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   }
 
   /* Analysis */
-  if ( !MMG2D_scaleMesh(mesh,disp) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+  if ( !MMG2D_scaleMesh(mesh,NULL,disp) )  _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
 
-  if ( mesh->nt && !MMG2D_hashTria(mesh) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
-  if ( mesh->info.ddebug && !MMG5_chkmsh(mesh,1,0) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+  if ( mesh->nt && !MMG2D_hashTria(mesh) )  _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
+  if ( mesh->info.ddebug && !MMG5_chkmsh(mesh,1,0) )  _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
 
   /* Print initial quality */
   if ( mesh->info.imprim > 0  ||  mesh->info.imprim < -1 ) {
     if ( !MMG2D_outqua(mesh,met) ) {
-      if ( !MMG2D_unscaleMesh(mesh,disp) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
-      MMG2D_RETURN_AND_PACK(mesh,disp,MMG5_LOWFAILURE);
+      if ( !MMG5_unscaleMesh(mesh,NULL,disp) )  _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
+      MMG2D_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE);
     }
   }
 
   /* Mesh analysis */
   if (! MMG2D_analys(mesh) )
-    _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+    _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
 
   chrono(OFF,&(ctim[2]));
   printim(ctim[2].gdif,stim);
@@ -879,19 +1048,24 @@ int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
     fprintf(stdout,"\n  -- PHASE 2 : LAGRANGIAN MOTION\n");
   }
 
-#ifdef USE_ELAS
-
   /* Lagrangian mode */
-  if ( !MMG2D_mmg2d9(mesh,disp,met) ) {
+  invalidTris = NULL;
+  ier = MMG2D_mmg2d9(mesh,disp,met,&invalidTris);
+  if ( !ier ) {
     disp->npi = disp->np;
-    _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+    _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
   }
-#endif
-
-  /* End with a classical remeshing stage, provided mesh->info.lag > 1 */
-  if ( (mesh->info.lag >= 1) && !MMG2D_mmg2d1n(mesh,met) ) {
-    if ( !MMG2D_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
-    MMG2D_RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
+  else if ( ier < 0 ) {
+    printf("\n  ## Warning: Unable to perform any movement "
+           "(%d intersecting triangles).\n",-ier);
+    if ( mesh->info.imprim > 1 ) {
+      printf("     List of invalid trias: ");
+      for ( k=0; k<-ier; ++k ) {
+        printf("%d ",MMG2D_indElt(mesh,invalidTris[k]));
+      }
+      printf("\n\n");
+    }
+    MMG5_SAFE_FREE(invalidTris);
   }
 
   chrono(OFF,&(ctim[3]));
@@ -900,19 +1074,38 @@ int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
     fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
   }
 
+  /* End with a classical remeshing stage, provided mesh->info.lag > 1 */
+  if ( (ier > 0) && (mesh->info.lag >= 1) ) {
+    chrono(ON,&(ctim[4]));
+    if ( mesh->info.imprim > 0 ) {
+      fprintf(stdout,"\n  -- PHASE 3 : MESH IMPROVEMENT\n");
+    }
+
+    if ( !MMG2D_mmg2d1n(mesh,met) ) {
+      if ( !MMG5_unscaleMesh(mesh,met,NULL) )  _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
+      MMG2D_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE);
+    }
+
+    chrono(OFF,&(ctim[4]));
+    printim(ctim[4].gdif,stim);
+    if ( mesh->info.imprim > 0 ) {
+      fprintf(stdout,"  -- PHASE 3 COMPLETED.     %s\n",stim);
+    }
+  }
+
   /* Unscale mesh */
-  if ( !MMG2D_unscaleMesh(mesh,met) )  _LIBMMG5_RETURN(mesh,met,MMG5_STRONGFAILURE);
+  if ( !MMG5_unscaleMesh(mesh,met,NULL) )  _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
 
   /* Print quality histories */
   if ( !MMG2D_outqua(mesh,met) ) {
-    MMG2D_RETURN_AND_PACK(mesh,met,MMG5_LOWFAILURE);
+    MMG2D_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE);
   }
 
   chrono(ON,&(ctim[1]));
   if ( mesh->info.imprim > 0 )  fprintf(stdout,"\n  -- MESH PACKED UP\n");
 
   /* Pack mesh */
-  if (!MMG2D_pack(mesh,met) ) _LIBMMG5_RETURN(mesh,met,MMG5_LOWFAILURE);
+  if (!MMG2D_pack(mesh,met,disp) ) _LIBMMG5_RETURN(mesh,met,disp,MMG5_LOWFAILURE);
 
   chrono(OFF,&(ctim[1]));
 
@@ -923,5 +1116,5 @@ int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
     fprintf(stdout,"\n  %s\n   END OF MODULE MMG2D\n  %s\n\n",MG_STR,MG_STR);
   }
 
-  _LIBMMG5_RETURN(mesh,met,MMG5_SUCCESS);
+  _LIBMMG5_RETURN(mesh,met,disp,MMG5_SUCCESS);
 }

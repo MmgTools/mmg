@@ -33,6 +33,8 @@ SET ( MMGS_LIB_TESTS
   libmmgs_example1
   libmmgs_example2
   libmmgs_example3
+  libmmgs_lsOnly
+  libmmgs_lsAndMetric
   )
 SET ( MMGS_LIB_TESTS_MAIN_PATH
   ${PROJECT_SOURCE_DIR}/libexamples/mmgs/adaptation_example0/example0_a/main.c
@@ -40,6 +42,8 @@ SET ( MMGS_LIB_TESTS_MAIN_PATH
   ${PROJECT_SOURCE_DIR}/libexamples/mmgs/adaptation_example1/main.c
   ${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_example0/main.c
   ${PROJECT_SOURCE_DIR}/libexamples/mmgs/io_multisols_example3/main.c
+  ${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/main.c
+  ${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsAndMetric/main.c
   )
 
 IF ( LIBMMGS_STATIC )
@@ -59,12 +63,16 @@ IF ( CMAKE_Fortran_COMPILER )
     libmmgs_fortran_a
     libmmgs_fortran_b
     libmmgs_fortran_io
+    libmmgs_fortran_lsOnly
+    libmmgs_fortran_lsAndMetric
     )
 
   SET ( MMGS_LIB_TESTS_MAIN_PATH ${MMGS_LIB_TESTS_MAIN_PATH}
     ${PROJECT_SOURCE_DIR}/libexamples/mmgs/adaptation_example0_fortran/example0_a/main.F90
     ${PROJECT_SOURCE_DIR}/libexamples/mmgs/adaptation_example0_fortran/example0_b/main.F90
     ${PROJECT_SOURCE_DIR}/libexamples/mmgs/io_multisols_example3/main.F90
+    ${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/main.F90
+    ${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsAndMetric/main.F90
     )
 
 ENDIF ( CMAKE_Fortran_COMPILER )

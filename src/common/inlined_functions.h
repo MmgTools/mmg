@@ -300,7 +300,7 @@ inline double MMG5_lenSurfEdg_iso(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2,
     + (p2->c[2]-p1->c[2])*(p2->c[2]-p1->c[2]);
   l = sqrt(l);
   r = h2 / h1 - 1.0;
-  len = fabs(r) < MMG5_EPS ? l / h1 : l / (h2-h1) * log(r+1.0);
+  len = fabs(r) < MMG5_EPS ? l / h1 : l / (h2-h1) * log1p(r);
 
   return len;
 }

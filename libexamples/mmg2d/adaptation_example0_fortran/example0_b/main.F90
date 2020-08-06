@@ -60,8 +60,8 @@ PROGRAM main
   !! file formatted or manually set your mesh using the MMG2D_Set* functions
 
   !> Manually set of the mesh
-  !! a) give the size of the mesh: 4 vertices, 2 triangles, 0 edges
-  CALL MMG2D_Set_meshSize(mmgMesh,4,2,4,ier)
+  !! a) give the size of the mesh: 4 vertices, 2 triangles, 0 quads, 4 edges
+  CALL MMG2D_Set_meshSize(mmgMesh,4,2,0,4,ier)
   IF ( ier /= 1 ) CALL EXIT(101)
 
   !> b) give the vertices: for each vertex, give the coordinates, the reference
@@ -140,10 +140,10 @@ PROGRAM main
   !> 1) Manually get the mesh
   OPEN(unit=inm,file=TRIM(ADJUSTL(fileout))//".mesh",form="formatted",status="replace")
   WRITE(inm,*) "MeshVersionFormatted 2"
-  WRITE(inm,*) "Dimension 3"
+  WRITE(inm,*) "Dimension 2"
 
-  !> a) get the size of the mesh: vertices, tetra, triangles, edges
-  CALL MMG2D_Get_meshSize(mmgMesh,np,nt,na,ier)
+  !> a) get the size of the mesh: vertices, tetra, triangles,quads, edges
+  CALL MMG2D_Get_meshSize(mmgMesh,np,nt,%val(0),na,ier)
   IF ( ier /= 1 ) CALL EXIT(108)
 
   ! Table to know if a vertex is corner

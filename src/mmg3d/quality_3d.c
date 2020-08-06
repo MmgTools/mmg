@@ -61,8 +61,13 @@ int MMG3D_tetraQual(MMG5_pMesh mesh, MMG5_pSol met,char metRidTyp) {
     if ( !metRidTyp && met->size == 6 && met->m ) {
       pt->qual = MMG5_caltet33_ani(mesh,met,pt);
     }
-    else
+    else if ( !(met && met->m) ) {
+      pt->qual = MMG5_caltet_iso(mesh,NULL,pt);
+    }
+    else {
       pt->qual = MMG5_orcal(mesh,met,k);
+    }
+
 
     if ( pt->qual < minqual ) {
       minqual = pt->qual;

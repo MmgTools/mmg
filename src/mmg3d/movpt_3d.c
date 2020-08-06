@@ -649,7 +649,7 @@ int MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
 
   nxp = mesh->xp + 1;
   if ( nxp > mesh->xpmax ) {
-    MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,MMG5_xPoint,
+    MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,MMG5_GAP,MMG5_xPoint,
                        "larger xpoint table",
                        return 0);
     n = &(mesh->xpoint[p0->xp].n1[0]);
@@ -954,7 +954,7 @@ int MMG5_movbdyrefpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
 
   nxp = mesh->xp + 1;
   if ( nxp > mesh->xpmax ) {
-    MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,MMG5_xPoint,
+    MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,MMG5_GAP,MMG5_xPoint,
                        "larger xpoint table",
                        return 0);
   }
@@ -1042,7 +1042,7 @@ int MMG5_movbdyrefpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
       }
     }
 
-    if ( MMG5_chkedg(mesh,&tt,MG_GET(pxt->ori,iface),hmax,hausd,isloc) ) {
+    if ( MMG5_chkedg(mesh,&tt,MG_GET(pxt->ori,iface),hmax,hausd,isloc) > 0 ) {
       memset(pxp,0,sizeof(MMG5_xPoint));
       return 0;
     }
@@ -1305,7 +1305,7 @@ int MMG5_movbdynompt_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree
 
   nxp = mesh->xp + 1;
   if ( nxp > mesh->xpmax ) {
-    MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,MMG5_xPoint,
+    MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,MMG5_GAP,MMG5_xPoint,
                        "larger xpoint table",
                        return 0);
   }
@@ -1394,7 +1394,7 @@ int MMG5_movbdynompt_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree
       }
     }
 
-    if ( MMG5_chkedg(mesh,&tt,MG_GET(pxt->ori,iface),hmax,hausd,isloc) ) {
+    if ( MMG5_chkedg(mesh,&tt,MG_GET(pxt->ori,iface),hmax,hausd,isloc) > 0 ) {
       memset(pxp,0,sizeof(MMG5_xPoint));
       return 0;
     }
@@ -1654,7 +1654,7 @@ int MMG5_movbdyridpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
 
   nxp = mesh->xp+1;
   if ( nxp > mesh->xpmax ) {
-    MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,MMG5_xPoint,
+    MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,MMG5_GAP,MMG5_xPoint,
                        "larger xpoint table",
                        return 0);
   }
@@ -1742,7 +1742,7 @@ int MMG5_movbdyridpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
       }
     }
 
-    if ( MMG5_chkedg(mesh,&tt,MG_GET(pxt->ori,iface),hmax,hausd,isloc) ) {
+    if ( MMG5_chkedg(mesh,&tt,MG_GET(pxt->ori,iface),hmax,hausd,isloc) > 0 ) {
       memset(pxp,0,sizeof(MMG5_xPoint));
       return 0;
     }
@@ -1821,7 +1821,11 @@ int MMG3D_movv_ani(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
   assert(ib<4);
   pt = &mesh->tetra[k];
   ppa  = &mesh->point[pt->v[ib]];
-  if(ppa->tag & MG_BDY) return 0;
+
+  if ( (ppa->tag & MG_BDY) || (ppa->tag & MG_REQ) ) {
+    return 0;
+  }
+
   iadr = pt->v[ib]*sol->size + 0;
   mp   = &sol->m[iadr];
 
@@ -1933,7 +1937,10 @@ int MMG3D_movnormal_iso(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
   pt = &mesh->tetra[k];
 
   ppa  = &mesh->point[pt->v[ib]];
-  if(ppa->tag & MG_BDY) return 0;
+
+  if ( ppa->tag & MG_BDY || (ppa->tag & MG_REQ) ) {
+    return 0;
+  }
 
   /*compute normal*/
   i1 = pt->v[MMG5_idir[ib][0]];
@@ -2040,7 +2047,9 @@ int MMG3D_movv_iso(MMG5_pMesh mesh,MMG5_pSol sol,int k,int ib) {
   pt = &mesh->tetra[k];
 
   ppa  = &mesh->point[pt->v[ib]];
-  if(ppa->tag & MG_BDY) return 0;
+  if ( (ppa->tag & MG_BDY) || (ppa->tag & MG_REQ) ) {
+    return 0;
+  }
 
   iadr = (pt->v[ib])*sol->size;
   hp   = sol->m[iadr];

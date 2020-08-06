@@ -63,15 +63,16 @@ int MMG2D_sum_reqEdgeLengthsAtPoint(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,
 /**
  * \param mesh pointer toward the mesh
  * \param met pointer toward the metric
+ * \param ismet 1 if user provided metric
  *
  * \return 0 if fail, 1 otherwise
  *
- * Compute the metric at points on trequired adges as the mean of the lengths of
+ * Compute the metric at points on required edges as the mean of the lengths of
  * the required eges to which belongs the point. The processeed points are
  * marked with flag 3.
  *
  */
-int MMG2D_set_metricAtPointsOnReqEdges ( MMG5_pMesh mesh,MMG5_pSol met ) {
+int MMG2D_set_metricAtPointsOnReqEdges ( MMG5_pMesh mesh,MMG5_pSol met, int8_t ismet ) {
   MMG5_pTria pt;
   int        k,i,iadj;
 
@@ -81,7 +82,7 @@ int MMG2D_set_metricAtPointsOnReqEdges ( MMG5_pMesh mesh,MMG5_pSol met ) {
   }
 
   /* Reset the input metric at required edges extremities */
-  if ( !MMG5_reset_metricAtReqEdges_surf (mesh, met ) ) {
+  if ( !MMG5_reset_metricAtReqEdges_surf (mesh, met, ismet ) ) {
     return 0;
   }
 
@@ -96,7 +97,6 @@ int MMG2D_set_metricAtPointsOnReqEdges ( MMG5_pMesh mesh,MMG5_pSol met ) {
     for ( i=0; i<3; i++ ) {
       if ( (pt->tag[i] & MG_REQ) || (pt->tag[i] & MG_NOSURF) ||
            (pt->tag[i] & MG_PARBDY) ) {
-
         /* Check if the edge has been proceeded by the neighbour triangle */
         iadj = mesh->adja[3*(k-1)+i+1];
         if ( iadj && mesh->tria[iadj/3].flag ) continue;
@@ -134,6 +134,7 @@ int MMG2D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   double           t1[2],t2[2],b1[2],b2[2],gpp1[2],gpp2[2],pv,M1,M2;
   double           ps1,ps2,ux,uy,ll,li,lm,hmax,hausd,hmin,lhmax,lhausd;
   int              k,l,ip,ip1,ip2;
+  int8_t           ismet;
   unsigned char    i,i1,i2;
 
   if ( !MMG5_defsiz_startingMessage (mesh,met,__func__) ) {
@@ -156,27 +157,29 @@ int MMG2D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
 
   /* Allocate the structure */
   if ( !met->np ) {
+    ismet = 0;
 
     /* Allocate and store the header informations for each solution */
-    if ( !MMG2D_Set_solSize(mesh,met,MMG5_Vertex,mesh->np,1) ) {
+    if ( !MMG2D_Set_solSize(mesh,met,MMG5_Vertex,mesh->np,MMG5_Scalar) ) {
       return 0;
     }
-    /* Set_solSize modify the value of the inputMet field => we need to reset it */
-    mesh->info.inputMet = 0;
   }
   else {
-    assert ( mesh->info.inputMet );
+    ismet = 1;
+    assert ( met->m );
   }
 
   /** Step 1: Set metric at points belonging to a required edge: compute the
    * metric as the mean of the length of the required eges passing through the
    * point */
-  if ( !MMG2D_set_metricAtPointsOnReqEdges ( mesh,met ) ) {
-    return 0;
+  if ( !mesh->info.nosizreq ) {
+    if ( !MMG2D_set_metricAtPointsOnReqEdges ( mesh,met,ismet ) ) {
+      return 0;
+    }
   }
 
   /** Step 2: size at non required internal points */
-  if ( !mesh->info.inputMet ) {
+  if ( !ismet ) {
     /* Initialize metric with a constant size */
     for ( k=1; k<=mesh->np; k++ ) {
       if ( mesh->point[k].flag ) {
@@ -230,7 +233,7 @@ int MMG2D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
 
       /* Recovery of the two tangent vectors associated to points p1,p2; they
        * need not be oriented in the same fashion */
-      if ( MG_SIN(p1->tag) || (p1->tag & MG_NOM) ) {
+      if ( MG_CRN & p1->tag || (p1->tag & MG_NOM) ) {
         t1[0] = li*ux;
         t1[1] = li*uy;
       }
@@ -239,7 +242,7 @@ int MMG2D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
         t1[1] = p1->n[0];
       }
 
-      if ( MG_SIN(p2->tag) || (p2->tag & MG_NOM) ) {
+      if ( MG_CRN & p2->tag || (p2->tag & MG_NOM) ) {
         li = 1.0 / sqrt(ll);
         t2[0] = li*ux;
         t2[1] = li*uy;

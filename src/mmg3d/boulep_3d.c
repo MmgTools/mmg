@@ -310,6 +310,7 @@ int MMG5_boulenm(MMG5_pMesh mesh,int start,int ip,int iface,
 
 /**
  * \param mesh pointer toward the mesh structure.
+ * \param hash pointer toward an allocated hash table.
  * \param start index of the starting tetrahedra.
  * \param ip local index of the point in the tetrahedra \a start.
  * \param ng pointer toward the number of ridges.
@@ -320,28 +321,28 @@ int MMG5_boulenm(MMG5_pMesh mesh,int start,int ip,int iface,
  * the vertex \a ip when ip is non-manifold.
  *
  */
-int MMG5_boulernm(MMG5_pMesh mesh, int start, int ip, int *ng, int *nr){
+int MMG5_boulernm(MMG5_pMesh mesh,MMG5_Hash *hash,int start,int ip,int *ng,int *nr){
   MMG5_pTetra    pt,pt1;
   MMG5_pxTetra   pxt;
-  MMG5_Hash     hash;
   MMG5_hedge    *ph;
   int            *adja,nump,ilist,base,cur,k,k1,ns;
-  int            hmax, list[MMG3D_LMAX+2];
+  int            list[MMG3D_LMAX+2];
   int            key,ia,ib,jj,a,b;
   char           j,l,i;
   unsigned char  ie;
 
-  /* allocate hash table to store the special edges passing through ip */
-  hmax = 3.71*mesh->np;
-  hash.siz  = mesh->np;
-  hash.max  = hmax + 1;
-  hash.nxt  = hash.siz;
-  MMG5_ADD_MEM(mesh,(hash.max+1)*sizeof(MMG5_hedge),"hash table",return -1);
-  MMG5_SAFE_CALLOC(hash.item,hash.max+1,MMG5_hedge,return -1);
+  /* reset the hash table */
+  for ( k=0;  k<=hash->max; ++k ) {
+    hash->item[k].a = 0;
+    hash->item[k].b = 0;
+  }
 
-  for (k=hash.siz; k<hash.max; k++)
-    hash.item[k].nxt = k+1;
-
+  for ( k=0;  k<=hash->siz; ++k ) {
+    hash->item[k].nxt = 0;
+  }
+  for (k=hash->siz; k<hash->max; k++) {
+    hash->item[k].nxt = k+1;
+  }
 
   base = ++mesh->base;
   pt   = &mesh->tetra[start];
@@ -374,31 +375,31 @@ int MMG5_boulernm(MMG5_pMesh mesh, int start, int ip, int *ng, int *nr){
           b = pt->v[MMG5_iare[ie][1]];
           ia  = MG_MIN(a,b);
           ib  = MG_MAX(a,b);
-          key = (MMG5_KA*ia + MMG5_KB*ib) % hash.siz;
-          ph  = &hash.item[key];
+          key = (MMG5_KA*ia + MMG5_KB*ib) % hash->siz;
+          ph  = &hash->item[key];
 
           if ( ph->a == ia && ph->b == ib )
             continue;
           else if ( ph->a ) {
-            while ( ph->nxt && ph->nxt < hash.max ) {
-              ph = &hash.item[ph->nxt];
+            while ( ph->nxt && ph->nxt < hash->max ) {
+              ph = &hash->item[ph->nxt];
               if ( ph->a == ia && ph->b == ib )  continue;
             }
-            ph->nxt   = hash.nxt;
-            ph        = &hash.item[hash.nxt];
+            ph->nxt   = hash->nxt;
+            ph        = &hash->item[hash->nxt];
 
-            if ( hash.nxt >= hash.max-1 ) {
+            if ( hash->nxt >= hash->max-1 ) {
               if ( mesh->info.ddebug )
                 fprintf(stderr,"\n  ## Warning: %s: memory alloc problem (edge):"
-                        " %d\n",__func__,hash.max);
-              MMG5_TAB_RECALLOC(mesh,hash.item,hash.max,0.2,MMG5_hedge,
+                        " %d\n",__func__,hash->max);
+              MMG5_TAB_RECALLOC(mesh,hash->item,hash->max,MMG5_GAP,MMG5_hedge,
                                  "MMG5_edge",return -1);
               /* ph pointer may be false after realloc */
-              ph        = &hash.item[hash.nxt];
+              ph        = &hash->item[hash->nxt];
 
-              for (jj=ph->nxt; jj<hash.max; jj++)  hash.item[jj].nxt = jj+1;
+              for (jj=ph->nxt; jj<hash->max; jj++)  hash->item[jj].nxt = jj+1;
             }
-            hash.nxt = ph->nxt;
+            hash->nxt = ph->nxt;
           }
 
           /* insert new edge */
@@ -436,9 +437,6 @@ int MMG5_boulernm(MMG5_pMesh mesh, int start, int ip, int *ng, int *nr){
     }
     cur++;
   }
-
-  /* Free the edge hash table */
-  MMG5_DEL_MEM(mesh,hash.item);
 
   return ns;
 }
@@ -1610,7 +1608,7 @@ int16_t MMG5_coquilTravel(MMG5_pMesh mesh, int na, int nb, int* adj, int *piv,
     *adj = adja[ MMG5_ifar[*i][1] ] /4;
     *piv = pt->v[ MMG5_ifar[*i][0] ];
   }
-  isbdy = pt->xt ? pxt->ftag[*iface] : 0;
+  isbdy = pt->xt ? (pxt->ftag[*iface] & MG_BDY) : 0;
 
   /* identification of edge number in tetra *adj */
   if ( *adj ) {

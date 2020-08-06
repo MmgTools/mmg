@@ -55,3 +55,20 @@ FORTRAN_NAME(MMGS_MMGSLIB,mmgs_mmgslib,(MMG5_pMesh *mesh,MMG5_pSol *met,
 
   return;
 }
+
+/**
+ * See \ref MMGS_mmgsls function in \ref mmgs/libmmgs.h file.
+ */
+FORTRAN_NAME(MMGS_MMGSLS,mmgs_mmgsls,(MMG5_pMesh *mesh,MMG5_pSol *sol,
+                                      MMG5_pSol *met,int* retval),
+             (mesh,sol,met,retval)){
+
+  if ( met ) {
+    *retval = MMGS_mmgsls(*mesh,*sol,*met);
+  }
+  else {
+    *retval = MMGS_mmgsls(*mesh,*sol,NULL);
+  }
+
+  return;
+}

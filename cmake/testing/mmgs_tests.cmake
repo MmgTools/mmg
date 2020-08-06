@@ -32,6 +32,7 @@ GET_FILENAME_COMPONENT ( SHRT_EXECUT_MMGS ${EXECUT_MMGS} NAME )
 SET ( test_names mmgs_SimpleTeapot )
 SET ( input_files ${MMGS_CI_TESTS}/Teapot/teapot )
 SET ( args  "-v 5" )
+SET ( common_args "" )
 
 ADD_RUN_AGAIN_TESTS ( ${EXECUT_MMGS} "${test_names}" "${args}" "${input_files}" )
 
@@ -56,6 +57,25 @@ ADD_TEST(NAME mmgs_memOption
   ${MMGS_CI_TESTS}/Teapot/teapot
   -out ${CTEST_OUTPUT_DIR}/mmgs_memOption.o.meshb)
 
+ADD_TEST(NAME mmgs_val
+  COMMAND ${EXECUT_MMGS} -val
+  ${MMGS_CI_TESTS}/Teapot/teapot
+  )
+
+# nsd
+ADD_TEST(NAME mmgs_nsd24
+  COMMAND ${EXECUT_MMGS} -v 5 -nsd 24 ${common_args}
+  ${MMGS_CI_TESTS}/Teapot/teapot
+  -out ${CTEST_OUTPUT_DIR}/mmgs_nsd24.o.meshb)
+
+#ADD_TEST(NAME mmgs_default
+#  COMMAND ${EXECUT_MMGS} -default
+#  ${MMGS_CI_TESTS}/Teapot/teapot
+#  -out ${CTEST_OUTPUT_DIR}/mmgs_memOption.o.meshb)
+
+SET_PROPERTY(TEST mmgs_val #mmgs_default
+  PROPERTY WILL_FAIL TRUE)
+
 ###############################################################################
 #####
 #####         Input/Output
@@ -72,8 +92,35 @@ ADD_TEST(NAME mmgs_binary_gmsh_s
 ADD_TEST(NAME mmgs_ascii_gmsh_s
   COMMAND ${EXECUT_MMGS} -v 5 ${common_args}
   ${MMGS_CI_TESTS}/GmshInout/cube.msh
-  ${CTEST_OUTPUT_DIR}/)
+  ${CTEST_OUTPUT_DIR}/mmgs-cube-gmsh.o.msh)
 
+# VTK .vtp no metric
+ADD_TEST(NAME mmgs_vtkvtp
+  COMMAND ${EXECUT_MMGS} -v 5
+  ${MMGS_CI_TESTS}/VtkInout/c1.vtp
+  ${CTEST_OUTPUT_DIR}/mmgs_vtkvtp)
+
+# VTK .vtp with iso metric
+ADD_TEST(NAME mmgs_vtkvtp_iso
+  COMMAND ${EXECUT_MMGS} -v 5
+  ${MMGS_CI_TESTS}/VtkInout/iso.vtp
+  ${CTEST_OUTPUT_DIR}/mmgs_vtkvtp_iso)
+
+# VTK .vtp with aniso metric
+ADD_TEST(NAME mmgs_vtkvtp_ani
+  COMMAND ${EXECUT_MMGS} -v 5
+  ${MMGS_CI_TESTS}/VtkInout/ani.vtp
+  ${CTEST_OUTPUT_DIR}/mmgs_vtkvtp_ani)
+
+IF ( NOT VTK_FOUND )
+  SET(expr "VTK library not founded")
+  SET_PROPERTY(TEST mmgs_vtkvtp
+    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
+  SET_PROPERTY(TEST mmgs_vtkvtp_iso
+    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
+  SET_PROPERTY(TEST mmgs_vtkvtp_ani
+    PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
+ENDIF ( )
 
 ###############################################################################
 #####
@@ -92,6 +139,11 @@ ADD_TEST(NAME mmgs_Rhino_M
   ${MMGS_CI_TESTS}/Rhino_M/rhino -hausd 1
   -out ${CTEST_OUTPUT_DIR}/mmgs_Rhino_M-rhino.d.meshb)
 
+ADD_TEST(NAME mmgs_moebius
+  COMMAND ${EXECUT_MMGS} -v 5 ${common_args} -d
+  ${MMGS_CI_TESTS}/Moebius-strip/moebius-strip.mesh -nr
+  -out ${CTEST_OUTPUT_DIR}/mmgs_moebius-strip.d.mesh)
+
 ###############################################################################
 #####
 #####         Non manifold cases
@@ -108,6 +160,19 @@ ADD_TEST(NAME mmgs_Cow_NM_hausd10
 #####
 ###############################################################################
 # Test the Ls option
+ADD_TEST(NAME mmgs_OptLs_val
+  COMMAND ${EXECUT_MMGS} -v 5 -ls -val
+  ${MMGS_CI_TESTS}/OptLs_teapot/teapot
+  ${CTEST_OUTPUT_DIR}/mmgs_teapot-val.o.meshb)
+#ADD_TEST(NAME mmgs_OptLs_default
+#  COMMAND ${EXECUT_MMGS} -v 5 -ls -default
+#  ${MMGS_CI_TESTS}/OptLs_teapot/teapot
+#  ${CTEST_OUTPUT_DIR}/mmgs_teapot-val.o.meshb)
+
+SET_PROPERTY(TEST mmgs_OptLs_val #mmgs_OptLs_default
+  PROPERTY WILL_FAIL TRUE)
+
+
 ADD_TEST(NAME mmgs_OptLs_teapot
   COMMAND ${EXECUT_MMGS} -v 5 -ls ${common_args}
   ${MMGS_CI_TESTS}/OptLs_teapot/teapot
@@ -128,6 +193,24 @@ ADD_TEST(NAME mmgs_OptLs_teapot2
   ${MMGS_CI_TESTS}/OptLs_teapot/teapot
   ${CTEST_OUTPUT_DIR}/mmgs_OptLs_teapot2-teapot.o.meshb)
 
+####### -met option
+ADD_TEST(NAME mmgs_2squares-withMet
+  COMMAND ${EXECUT_MMGS} -v 5
+  ${MMG2D_CI_TESTS}/2squares/2squares -met ${MMG2D_CI_TESTS}/2squares/2s.sol
+  -out ${CTEST_OUTPUT_DIR}/mmgs_2squares-met.o.meshb)
+
+####### -sol option
+ADD_TEST(NAME mmgs_2squares-withSol
+  COMMAND ${EXECUT_MMGS} -v 5
+  ${MMG2D_CI_TESTS}/2squares/2squares -sol ${MMG2D_CI_TESTS}/2squares/2s.sol
+  -out ${CTEST_OUTPUT_DIR}/mmgs_2squares-sol.o.meshb)
+
+# nsd + ls
+ADD_TEST(NAME mmgs_OptLs_teapot-nsd3
+  COMMAND ${EXECUT_MMGS} -v 5 -ls -nsd 3 ${common_args}
+  ${MMGS_CI_TESTS}/OptLs_teapot/teapot
+  ${CTEST_OUTPUT_DIR}/mmgs_OptLs_teapot-ls-nsd3.o.meshb)
+
 
 ###############################################################################
 #####
@@ -143,3 +226,83 @@ ADD_TEST(NAME mmgs_Cow_NM_hausd20
   COMMAND ${EXECUT_MMGS} -v 5 ${common_args}
   ${MMGS_CI_TESTS}/Cow_NM/cow -hausd 20
   -out ${CTEST_OUTPUT_DIR}/mmgs_Cow_NM_hausd20-cow.d.meshb)
+
+###############################################################################
+#####
+#####         Implicit domain discretization
+#####
+###############################################################################
+ADD_TEST(NAME mmgs_LSMultiMat_val
+  COMMAND ${EXECUT_MMGS} -v 5 -ls -hmin 0.005 -hmax 0.1 -hausd 0.001 -hgrad 1.3 -val
+  ${MMGS_CI_TESTS}/LSMultiMat/multi-mat
+  -met ${MMGS_CI_TESTS}/LSMultiMat/multi-mat-met.sol
+  -sol ${MMGS_CI_TESTS}/LSMultiMat/multi-mat-sol.sol
+  ${CTEST_OUTPUT_DIR}/mmgs_LSMultiMat-val.o.meshb
+  )
+#ADD_TEST(NAME mmgs_LSMultiMat_default
+#  COMMAND ${EXECUT_MMGS} -v 5 -ls -hmin 0.005 -hmax 0.1 -hausd 0.001 -hgrad 1.3 -default
+#  ${MMGS_CI_TESTS}/LSMultiMat/multi-mat
+#  -met ${MMGS_CI_TESTS}/LSMultiMat/multi-mat-met.sol
+#  -sol ${MMGS_CI_TESTS}/LSMultiMat/multi-mat-sol.sol
+#  ${CTEST_OUTPUT_DIR}/mmgs_LSMultiMat-default.o.meshb)
+SET_PROPERTY(TEST mmgs_LSMultiMat_val #mmgs_LSMultiMat_default
+  PROPERTY WILL_FAIL TRUE)
+
+
+ADD_TEST(NAME mmgs_LSMultiMat
+  COMMAND ${EXECUT_MMGS} -v 5 -ls -hmin 0.005 -hmax 0.1 -hausd 0.001 -hgrad 1.3
+  ${MMGS_CI_TESTS}/LSMultiMat/multi-mat
+  -sol ${MMGS_CI_TESTS}/LSMultiMat/multi-mat-sol.sol
+  ${CTEST_OUTPUT_DIR}/mmgs_LSMultiMat.o.meshb)
+
+# non 0 ls
+ADD_TEST(NAME mmgs_LSMultiMat_nonzero
+  COMMAND ${EXECUT_MMGS} -v 5 -ls 0.01 -hausd 0.001
+  ${MMGS_CI_TESTS}/LSMultiMat/multi-mat
+  -sol ${MMGS_CI_TESTS}/LSMultiMat/multi-mat-sol.sol
+  ${CTEST_OUTPUT_DIR}/mmgs_LSMultiMat-nonzero.o.meshb)
+
+
+# ls discretisation + optim option
+ADD_TEST(NAME mmgs_LSMultiMat_optim
+  COMMAND ${EXECUT_MMGS} -v 5 -ls -optim -hausd 0.001
+  ${MMGS_CI_TESTS}/LSMultiMat/multi-mat
+  -sol ${MMGS_CI_TESTS}/LSMultiMat/multi-mat-sol.sol
+  ${CTEST_OUTPUT_DIR}/mmgs_LSMultiMat-optim.o.meshb)
+
+# ls discretisation + optim + aniso option
+ADD_TEST(NAME mmgs_LSMultiMat_optimAni
+  COMMAND ${EXECUT_MMGS} -v 5 -ls -optim -A -hausd 0.001
+  ${MMGS_CI_TESTS}/LSMultiMat/multi-mat
+  -sol ${MMGS_CI_TESTS}/LSMultiMat/multi-mat-sol.sol
+  ${CTEST_OUTPUT_DIR}/mmgs_LSMultiMat-optimAni.o.meshb)
+
+# ls discretisation + hsiz option
+ADD_TEST(NAME mmgs_LSMultiMat_hsiz
+  COMMAND ${EXECUT_MMGS} -v 5 -ls -hsiz 0.05 -hausd 0.001
+  ${MMGS_CI_TESTS}/LSMultiMat/multi-mat
+  -sol ${MMGS_CI_TESTS}/LSMultiMat/multi-mat-sol.sol
+  ${CTEST_OUTPUT_DIR}/mmgs_LSMultiMat-hsiz.o.meshb)
+
+# ls discretisation + hsiz Ani option
+ADD_TEST(NAME mmgs_LSMultiMat_hsizAni
+  COMMAND ${EXECUT_MMGS} -v 5 -ls -hsiz 0.05 -A -hausd 0.001
+  ${MMGS_CI_TESTS}/LSMultiMat/multi-mat
+  -sol ${MMGS_CI_TESTS}/LSMultiMat/multi-mat-sol.sol
+  ${CTEST_OUTPUT_DIR}/mmgs_LSMultiMat-hsizAni.o.meshb)
+
+# ls discretisation + metric
+ADD_TEST(NAME mmgs_LSMultiMat_withMet
+  COMMAND ${EXECUT_MMGS} -v 5 -ls -hausd 0.001
+  -met ${MMGS_CI_TESTS}/LSMultiMat/multi-mat-met.sol
+  -sol ${MMGS_CI_TESTS}/LSMultiMat/multi-mat-sol.sol
+  ${MMGS_CI_TESTS}/LSMultiMat/multi-mat
+  ${CTEST_OUTPUT_DIR}/mmgs_LSMultiMat-withMet.o.meshb)
+
+# ls discretisation + metric + ls
+ADD_TEST(NAME mmgs_LSMultiMat_withMetAndLs
+  COMMAND ${EXECUT_MMGS} -v 5 -ls -hausd 0.001
+  -met ${MMGS_CI_TESTS}/LSMultiMat/multi-mat-met.sol
+  -sol ${MMGS_CI_TESTS}/LSMultiMat/multi-mat-sol.sol
+  ${MMGS_CI_TESTS}/LSMultiMat/multi-mat
+  ${CTEST_OUTPUT_DIR}/mmgs_LSMultiMat-withMetAndLs.o.meshb)

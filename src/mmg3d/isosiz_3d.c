@@ -532,6 +532,7 @@ int MMG3D_sum_reqEdgeLengthsAtPoint(MMG5_pMesh mesh,MMG5_pSol met,MMG5_Hash *has
 /**
  * \param mesh pointer toward the mesh
  * \param met pointer toward the metric
+ * \param ismet 1 if user provided metric
  *
  * \return 0 if fail, 1 otherwise
  *
@@ -540,14 +541,11 @@ int MMG3D_sum_reqEdgeLengthsAtPoint(MMG5_pMesh mesh,MMG5_pSol met,MMG5_Hash *has
  * marked with flag 3.
  *
  */
-int MMG3D_set_metricAtPointsOnReqEdges ( MMG5_pMesh mesh,MMG5_pSol met) {
+int MMG3D_set_metricAtPointsOnReqEdges ( MMG5_pMesh mesh,MMG5_pSol met,int8_t ismet) {
   MMG5_pTetra  pt;
   MMG5_pxTetra pxt;
   MMG5_Hash    hash;
   int          k,i,j,ip0,ip1,iad0,iad1;
-  int8_t       ismet;
-
-  ismet = mesh->info.inputMet;
 
   /* Reset the input metric at required edges extremities */
   if ( ismet ) {
@@ -649,6 +647,7 @@ int MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   double         secder0[3],secder1[3],kappa,tau[3],gammasec[3],ntau2,intau,ps,lm;
   int            lists[MMG3D_LMAX+2],listv[MMG3D_LMAX+2],ilists,ilistv,k,ip0,ip1,l;
   int            kk,isloc;
+  int8_t         ismet;
   char           i,j,ia,ised,i0,i1;
   MMG5_pPar      par;
 
@@ -668,23 +667,29 @@ int MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
 
   /* alloc structure */
   if ( !met->m ) {
+    ismet = 0;
+
     /* Allocate and store the header informations for each solution */
-    if ( !MMG3D_Set_solSize(mesh,met,MMG5_Vertex,mesh->np,1) ) {
+    if ( !MMG3D_Set_solSize(mesh,met,MMG5_Vertex,mesh->np,MMG5_Scalar) ) {
       return 0;
     }
-    /* Set_solSize modify the value of the inputMet field => we need to reset it */
-    mesh->info.inputMet = 0;
   }
+  else {
+    ismet = 1;
+    assert ( met->np );
+   }
 
   /** Step 1: Set metric at points belonging to a required edge: compute the
    * metric as the mean of the length of the required eges passing through the
    * point */
-  if ( !MMG3D_set_metricAtPointsOnReqEdges ( mesh,met ) ) {
-    return 0;
+  if ( !mesh->info.nosizreq ) {
+    if ( !MMG3D_set_metricAtPointsOnReqEdges ( mesh,met,ismet ) ) {
+      return 0;
+    }
   }
 
   /** Step 2: size at non required internal points */
-  if ( !mesh->info.inputMet ) {
+  if ( !ismet ) {
     /* init constant size */
     for (k=1; k<=mesh->ne; k++) {
       pt = &mesh->tetra[k];

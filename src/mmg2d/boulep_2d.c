@@ -88,16 +88,33 @@ int MMG2D_boulep(MMG5_pMesh mesh, int ifirst, int iploc, int * list) {
   return ilist;
 }
 
-/* Travel the ball of point ip in triangle start, which is assumed to lie
- either on the external or on an internal boundary of the mesh, and return the normal vector
- convention: the normal vector is oriented from the half ball it starts with towards its exterior
- return pright = 3*kk+ii, where kk = last triangle in the first travel, and ii = local index of ip in kk
-        pleft = 3*kk+ii, where kk = last triangle in the second travel, and ii = local index of ip in kk*/
+/**
+ * \param mesh pointer toward the mesh
+ * \param start index of the first tria
+ * \param ip local index of the point on which we work in tria \a start
+ * \param pleft index of the left point of ip along the geom edge
+ * (local index of the point inside a triangle)
+ * \param pright index of the right point of ip along the geom edge
+ * (local index of the point inside a triangle)
+ * \param nn computed normal at ip
+ *
+ * \return 0 if fail, 1 if success
+ *
+ * Travel the ball of point \a ip in triangle \a start, which is assumed to lie
+ * either on the external or on an internal boundary of the mesh, and return the
+ * normal vector convention: the normal vector is oriented from the half ball it
+ * starts with towards its exterior return pright = 3*kk+ii, where kk = last
+ * triangle in the first travel, and ii = local index of ip in kk pleft =
+ * 3*kk+ii, where kk = last triangle in the second travel, and ii = local index
+ * of ip in kk.
+ *
+ */
 int MMG2D_boulen(MMG5_pMesh mesh, int start,char ip, int *pleft, int *pright, double *nn) {
   MMG5_pTria        pt;
   MMG5_pPoint       p1,p2;
   double            ux,uy,dd,n1[2],n2[2];
   int               *adja,k,kk,refs;
+  int8_t            notedg;
   char              i,ii,i1,i2;
 
   /* First travel of the ball of ip; initialization */
@@ -111,10 +128,17 @@ int MMG2D_boulen(MMG5_pMesh mesh, int start,char ip, int *pleft, int *pright, do
     adja = &mesh->adja[3*(k-1)+1];
     kk = adja[i] / 3;
     ii = adja[i] % 3;
-  }
-  while ( kk && (kk != start) && (mesh->tria[kk].ref == refs) );
 
-  if ( kk == start ) return 0;
+    notedg = mesh->info.opnbdy ?
+      (!mesh->tria[k].tag[i]) : (mesh->tria[kk].ref == refs);
+  }
+  while ( kk && (kk != start) && notedg );
+
+  if ( kk == start ) {
+    fprintf(stderr,"  ## Error: %s: Unable to find a boundary edge in"
+            " the ball of point %d.\n",__func__,MMG2D_indPt(mesh,mesh->tria[start].v[ip]));
+    return 0;
+  }
 
   /* Calculation of the first normal vector */
   pt = &mesh->tria[k];
@@ -149,8 +173,11 @@ int MMG2D_boulen(MMG5_pMesh mesh, int start,char ip, int *pleft, int *pright, do
     adja = &mesh->adja[3*(k-1)+1];
     kk = adja[i] / 3;
     ii = adja[i] % 3;
+
+    notedg = mesh->info.opnbdy ?
+      !mesh->tria[k].tag[i] : mesh->tria[kk].ref == refs;
   }
-  while ( kk && (kk != start) && (mesh->tria[kk].ref == refs) );
+  while ( kk && (kk != start) && notedg );
 
   /* Calculation of the second normal vector */
   pt = &mesh->tria[k];

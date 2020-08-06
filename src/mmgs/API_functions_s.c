@@ -116,8 +116,6 @@ int MMGS_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int 
   sol->dim = 3;
 
   if ( np ) {
-    mesh->info.inputMet = 1;
-
     sol->np  = np;
     sol->npi = np;
     if ( sol->m )
@@ -135,6 +133,7 @@ int MMGS_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int 
 int MMGS_Set_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol *sol,int nsols,
                                  int nentities, int *typSol) {
   MMG5_pSol psl;
+  char      data[18];
   int       j;
 
   if ( ( (mesh->info.imprim > 5) || mesh->info.ddebug ) && mesh->nsols ) {
@@ -155,6 +154,17 @@ int MMGS_Set_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol *sol,int nsols,
   for ( j=0; j<nsols; ++j ) {
     psl = *sol + j;
     psl->ver = 2;
+
+    /* Give an arbitrary name to the solution */
+    sprintf(data,"sol_%d",j);
+    if ( !MMGS_Set_inputSolName(mesh,psl,data) ) {
+      return 0;
+    }
+    /* Give an arbitrary name to the solution */
+    sprintf(data,"sol_%d.o",j);
+    if ( !MMGS_Set_outputSolName(mesh,psl,data) ) {
+      return 0;
+    }
 
     if ( !MMGS_Set_solSize(mesh,psl,MMG5_Vertex,mesh->np,typSol[j]) ) {
       fprintf(stderr,"\n  ## Error: %s: unable to set the size of the"
@@ -683,9 +693,21 @@ int MMGS_Set_corner(MMG5_pMesh mesh, int k) {
   return 1;
 }
 
+int MMGS_Unset_corner(MMG5_pMesh mesh, int k) {
+  assert ( k <= mesh->np );
+  mesh->point[k].tag &= ~MG_CRN;
+  return 1;
+}
+
 int MMGS_Set_requiredVertex(MMG5_pMesh mesh, int k) {
   assert ( k <= mesh->np );
   mesh->point[k].tag |= MG_REQ;
+  return 1;
+}
+
+int MMGS_Unset_requiredVertex(MMG5_pMesh mesh, int k) {
+  assert ( k <= mesh->np );
+  mesh->point[k].tag &= ~MG_REQ;
   return 1;
 }
 
@@ -697,15 +719,34 @@ int MMGS_Set_requiredTriangle(MMG5_pMesh mesh, int k) {
   return 1;
 }
 
+int MMGS_Unset_requiredTriangle(MMG5_pMesh mesh, int k) {
+  assert ( k <= mesh->nt );
+  mesh->tria[k].tag[0] &= ~MG_REQ;
+  mesh->tria[k].tag[1] &= ~MG_REQ;
+  mesh->tria[k].tag[2] &= ~MG_REQ;
+  return 1;
+}
+
 int MMGS_Set_ridge(MMG5_pMesh mesh, int k) {
   assert ( k <= mesh->na );
   mesh->edge[k].tag |= MG_GEO;
+  return 1;
+}
+int MMGS_Unset_ridge(MMG5_pMesh mesh, int k) {
+  assert ( k <= mesh->na );
+  mesh->edge[k].tag &= ~MG_GEO;
   return 1;
 }
 
 int MMGS_Set_requiredEdge(MMG5_pMesh mesh, int k) {
   assert ( k <= mesh->na );
   mesh->edge[k].tag |= MG_REQ;
+  return 1;
+}
+
+int MMGS_Unset_requiredEdge(MMG5_pMesh mesh, int k) {
+  assert ( k <= mesh->na );
+  mesh->edge[k].tag &= ~MG_REQ;
   return 1;
 }
 
@@ -1254,6 +1295,12 @@ int MMGS_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
     if ( val )
       mesh->info.iso      = 2;
     break;
+  case MMGS_IPARAM_numsubdomain :
+    mesh->info.nsd = val;
+    break;
+  case MMGS_IPARAM_optim :
+    mesh->info.optim = val;
+    break;
   case MMGS_IPARAM_noinsert :
     mesh->info.noinsert = val;
     break;
@@ -1265,6 +1312,9 @@ int MMGS_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
     break;
   case MMGS_IPARAM_nreg :
     mesh->info.nreg     = val;
+    break;
+  case MMGS_IPARAM_nosizreq :
+    mesh->info.nosizreq = val;
     break;
   case MMGS_IPARAM_numberOfLocalParam :
     if ( mesh->info.par ) {
@@ -1361,9 +1411,11 @@ int MMGS_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val){
     mesh->info.dhd = cos(mesh->info.dhd*M_PI/180.0);
     break;
   case MMGS_DPARAM_hmin :
+    mesh->info.sethmin  = 1;
     mesh->info.hmin     = val;
     break;
   case MMGS_DPARAM_hmax :
+    mesh->info.sethmax  = 1;
     mesh->info.hmax     = val;
     break;
   case MMGS_DPARAM_hsiz :
@@ -1457,17 +1509,23 @@ int MMGS_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref,
 
   switch ( typ )
   {
-  case ( MMG5_Vertex ):
-    mesh->info.parTyp |= MG_Vert;
-    break;
   case ( MMG5_Triangle ):
     mesh->info.parTyp |= MG_Tria;
     break;
+  default:
+    fprintf(stderr,"\n  ## Error: %s: unexpected entity type: %s.\n",
+            __func__,MMG5_Get_entitiesName(typ));
+    return 0;
   }
 
   mesh->info.npari++;
 
   return 1;
+}
+
+int MMGS_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol) {
+
+  return MMG5_Free_allSols(mesh,sol);
 }
 
 int MMGS_Free_all(const int starter,...)

@@ -222,6 +222,36 @@ const char* MMG5_Get_entitiesName(enum MMG5_entities ent);
  */
 const char* MMG5_Get_typeName(enum MMG5_type typ);
 
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward an array of solution structure (that stores solution fields).
+ * \return 1
+ *
+ * Deallocation of an array of solution fields
+ *
+ */
+int MMG5_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param filename name of file.
+ *
+ * \return 1 if success, 0 if fail.
+ *
+ * Save node list at .node file format (Tetgen/Triangle).
+ */
+int MMG5_saveNode(MMG5_pMesh mesh,const char *filename);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param filename name of file.
+ *
+ * \return 1 if success, 0 if fail.
+ *
+ * Save edge list at .edge file format (Tetgen/Triangle).
+ */
+int MMG5_saveEdge(MMG5_pMesh mesh,const char *filename);
+
 #ifdef __cplusplus
 }
 #endif

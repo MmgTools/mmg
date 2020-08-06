@@ -180,7 +180,7 @@ void MMG3D_freePROctree(MMG5_pMesh mesh,MMG3D_pPROctree *q)
  */
 int64_t MMG3D_getPROctreeCoordinate(MMG3D_pPROctree q, double* ver, int dim)
 {
-  int64_t s    = 1<<10;
+  int64_t s    = 1<<20;
   double  prec = 1./(1<<30);
   int place = 0;
   int ix = floor((ver[0]-prec)*s);
@@ -315,7 +315,7 @@ void MMG3D_placeInListPROctree(MMG3D_PROctree_s** qlist, MMG3D_PROctree_s* q, in
 {
   memmove(&(qlist[index+2]),&(qlist[index+1]),(size-(index+1))*sizeof(MMG3D_PROctree_s*));
   #ifdef DEBUG
-  if (index+2+(size-(index+1)>61 || index+1<0)
+  if (index+2+(size-(index+1))>61 || index+1<0)
     fprintf(stderr, "\n  ## Error: %s: index"
             " too large %i > 61\n",__func__, index+2+(size-(index+1));
   #endif

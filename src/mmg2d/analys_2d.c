@@ -41,12 +41,13 @@ extern char ddb;
  *
  * \return 1 if success, 0 if fail
  *
- * Set tags GEO and REF to triangles and points by traveling the mesh;
+ * Set tags GEO, BDY and REF to triangles and points by traveling the mesh;
  * count number of subdomains or connected components
  *
  */
 int MMG2D_setadj(MMG5_pMesh mesh) {
   MMG5_pTria       pt,pt1;
+  MMG5_pQuad       pq;
   int              *pile,*adja,ipil,k,kk,ncc,ip1,ip2,nr,nref;
   int16_t          tag;
   char             i,ii,i1,i2;
@@ -54,6 +55,7 @@ int MMG2D_setadj(MMG5_pMesh mesh) {
   if ( abs(mesh->info.imprim) > 5  || mesh->info.ddebug )
     fprintf(stdout,"  ** SETTING TOPOLOGY\n");
 
+  /** Step 1: Tags setting from triangles analysis */
   MMG5_SAFE_MALLOC(pile,mesh->nt+1,int,return 0);
 
   /* Initialization of the pile */
@@ -80,13 +82,29 @@ int MMG2D_setadj(MMG5_pMesh mesh) {
         ip2 = pt->v[i2];
 
         if ( adja[i] ) {
-          /* Transfert edge tag to adjacent */
           kk = adja[i] / 3;
           ii = adja[i] % 3;
           pt1 = &mesh->tria[kk];
 
-          pt1->tag[ii] |= pt->tag[i];
-          pt->tag[i] |= pt1->tag[ii];
+          if ( (!mesh->info.opnbdy) && (pt->ref==pt1->ref) ) {
+            /* Remove BDY/REF and GEO edge tags but required tag must be keeped
+             * (to preserve required tria info) */
+            pt->tag[i] &= ~MG_REF;
+            pt->tag[i] &= ~MG_BDY;
+            pt->tag[i] &= ~MG_GEO;
+
+            pt1->tag[ii] &= ~MG_REF;
+            pt1->tag[ii] &= ~MG_BDY;
+            pt1->tag[ii] &= ~MG_GEO;
+
+            pt1->tag[ii] |= pt->tag[i];
+            pt->tag[i]   |= pt1->tag[ii];
+          }
+          else {
+            /* Transfert edge tag to adjacent */
+            pt1->tag[ii] |= pt->tag[i];
+            pt->tag[i] |= pt1->tag[ii];
+          }
         }
 
         /* Transfer tags if i is already an edge (e.g. supplied by the user) */
@@ -128,8 +146,10 @@ int MMG2D_setadj(MMG5_pMesh mesh) {
         ii = adja[i] % 3;
         pt1 = &mesh->tria[kk];
 
-        /* Case of a boundary between two subdomains */
-        if ( abs(pt1->ref) != abs(pt->ref) ) {
+        /* Case of a boundary (except if opnbdy is enabled, the boundary must be
+         * between 2 different subdomains) */
+        if ( (mesh->info.opnbdy && ( pt->tag[i] || pt1->tag[ii] ) )
+             || abs(pt1->ref) != abs(pt->ref) ) {
           tag = ( MG_REF+MG_BDY );
 
           if ( !mesh->info.nosurf ) {
@@ -183,13 +203,54 @@ int MMG2D_setadj(MMG5_pMesh mesh) {
       }
     }
   }
+  MMG5_SAFE_FREE(pile);
+
+  /** Step 2: Mark the edges at interface between tria and quads as nosurf and
+   * required */
+  for ( k=1; k<=mesh->nquad; k++ ) {
+    pq = &mesh->quadra[k];
+    if ( !MG_EOK(pq) )  continue;
+
+    adja = &mesh->adjq[4*(k-1)+1];
+    for (i=0; i<4; i++) {
+
+      kk = adja[i];
+      if ( kk >= 0 ) {
+        continue;
+      }
+
+      /* The edge is at the interface between a quad and a triangle */
+      kk = abs(kk);
+      ii = kk%3;
+      pt = &mesh->tria[kk/3];
+
+      if ( !(pt->tag[ii] & MG_REQ) ) {
+        pt->tag[ii] |= (MG_REQ + MG_NOSURF + MG_BDY);
+      }
+      if ( !(pq->tag[i] & MG_REQ) ) {
+        pq->tag[i] |= (MG_REQ + MG_NOSURF + MG_BDY);
+      }
+      assert ( pt->edg[ii] == pq->edg[i] );
+
+      /* Transfer edge tag toward edge vertices */
+      i1 = MMG2D_idir_q[i][0];
+      i2 = MMG2D_idir_q[i][1];
+
+      if ( !(mesh->point[pq->v[i1]].tag & MG_REQ) ) {
+        mesh->point[pq->v[i1]].tag |= (MG_REQ + MG_NOSURF + MG_BDY);
+      }
+      if ( !(mesh->point[pq->v[i2]].tag & MG_REQ) ) {
+        mesh->point[pq->v[i2]].tag |= (MG_REQ + MG_NOSURF + MG_BDY);
+      }
+    }
+  }
+
 
   if ( abs(mesh->info.imprim) > 4 ) {
     fprintf(stdout,"     Connected component or subdomains: %d \n",ncc);
     fprintf(stdout,"     Tagged edges: %d,  ridges: %d,  refs: %d\n",nr+nref,nr,nref);
   }
 
-  MMG5_SAFE_FREE(pile);
   return 1;
 }
 
@@ -250,7 +311,7 @@ int MMG2D_singul(MMG5_pMesh mesh, int ref ) {
       if ( ppt->s ) continue;
       ppt->s = 1;
 
-      if ( !MG_VOK(ppt) || MG_SIN(ppt->tag) )  continue;
+      if ( !MG_VOK(ppt) || MG_CRN & ppt->tag )  continue;
 
       if ( !MG_EDG(ppt->tag) ) continue;
 
@@ -304,7 +365,7 @@ int MMG2D_singul(MMG5_pMesh mesh, int ref ) {
 
         /* If both edges carry different refs, tag vertex as singular */
         if ( listref[1] != listref[2] ) {
-          ppt->tag |= MG_CRN;
+          ppt->tag |= MG_REQ;
           nc++;
         }
 
@@ -356,7 +417,7 @@ int MMG2D_norver(MMG5_pMesh mesh, int ref) {
     for ( k=1; k<=mesh->np; ++k ) {
       mesh->point[k].s = 1;
     }
-    /* Second: if the point belongs to a boundary edge of reference ref, remove
+    /* Second: if the point belongs to a boundary edge or reference ref, remove
      * the mark */
     for ( k=1; k<=mesh->nt; ++k ) {
       pt = &mesh->tria[k];
@@ -379,7 +440,7 @@ int MMG2D_norver(MMG5_pMesh mesh, int ref) {
     for (i=0; i<3; i++) {
       ppt = &mesh->point[pt->v[i]];
       if ( !MG_EDG(ppt->tag) ) continue;
-      if ( ppt->s || MG_SIN(ppt->tag) || (ppt->tag & MG_NOM) ) continue;
+      if ( ppt->s || (MG_CRN & ppt->tag) || (ppt->tag & MG_NOM) ) continue;
 
       /* Travel the curve ppt belongs to from left to right until a singularity is met */
       kk = k;
@@ -400,7 +461,7 @@ int MMG2D_norver(MMG5_pMesh mesh, int ref) {
         pt1 = &mesh->tria[kk];
         ppt = &mesh->point[pt1->v[ii]];
       }
-      while ( !ppt->s && !MG_SIN(ppt->tag) && !(ppt->tag & MG_NOM) );
+      while ( !ppt->s && !(MG_CRN  & ppt->tag) && !(ppt->tag & MG_NOM) );
 
       /* Now travel the curve ppt belongs to from right to left until a singularity is met */
       ppt = &mesh->point[pt->v[i]];
@@ -422,7 +483,7 @@ int MMG2D_norver(MMG5_pMesh mesh, int ref) {
         pt1 = &mesh->tria[kk];
         ppt = &mesh->point[pt1->v[ii]];
       }
-      while ( !ppt->s && !MG_SIN(ppt->tag) && !(ppt->tag & MG_NOM) );
+      while ( !ppt->s && !(MG_CRN & ppt->tag) && !(ppt->tag & MG_NOM) );
     }
   }
 
@@ -551,6 +612,14 @@ int MMG2D_regnor(MMG5_pMesh mesh) {
         ny += p2->n[1];
       }
 
+      /* Average normal normalization */
+      dd  = nx*nx + ny*ny;
+      if ( dd > MMG5_EPSD2 ) {
+        dd = 1.0 / sqrt(dd);
+        nx *= dd;
+        ny *= dd;
+      }
+
       /* Laplacian operation */
       tmp[2*(k-1)+1] = ppt->n[0] + lm1 * (nx - ppt->n[0]);
       tmp[2*(k-1)+2] = ppt->n[1] + lm1 * (ny - ppt->n[1]);
@@ -638,6 +707,14 @@ int MMG2D_regnor(MMG5_pMesh mesh) {
         ny += tmp[2*(ip2-1)+2];
       }
 
+      /* Average normal normalization */
+      dd  = nx*nx + ny*ny;
+      if ( dd > MMG5_EPSD2 ) {
+        dd = 1.0 / sqrt(dd);
+        nx *= dd;
+        ny *= dd;
+      }
+
       /* Anti Laplacian operation */
       n[0] = tmp[2*(k-1)+1] - lm2 * (nx - tmp[2*(k-1)+1]);
       n[1] = tmp[2*(k-1)+2] - lm2 * (ny - tmp[2*(k-1)+2]);
@@ -664,10 +741,14 @@ int MMG2D_regnor(MMG5_pMesh mesh) {
 
     if ( it == 0 ) res0 = res;
     if ( res0 > MMG5_EPSD ) res = res / res0;
+
+    if ( mesh->info.imprim < -1 || mesh->info.ddebug ) {
+      fprintf(stdout,"     iter %5d  res %.3E",it,res);
+      fflush(stdout);
+    }
   }
   while ( ++it < maxit && res > MMG5_EPS );
 
-  if ( mesh->info.imprim < -1 || mesh->info.ddebug )  fprintf(stdout,"\n");
 
   if ( abs(mesh->info.imprim) > 4 )
     fprintf(stdout,"     %d normals regularized: %.3e\n",nn,res);
@@ -678,15 +759,21 @@ int MMG2D_regnor(MMG5_pMesh mesh) {
 
 /** preprocessing stage: mesh analysis */
 int MMG2D_analys(MMG5_pMesh mesh) {
-  /* Transfer the boundary edge references to the triangles, if it has not been already done (option 1) */
+  /* Transfer the boundary edge references to the triangles, if it has not been
+   * already done (option 1) */
   if ( !MMG2D_assignEdge(mesh) ) {
      fprintf(stderr,"\n  ## Problem in setting boundary. Exit program.\n");
     return 0;
   }
 
-  /* Creation of adjacency relations in the mesh */
+  /* Creation of tria adjacency relations in the mesh */
   if ( !MMG2D_hashTria(mesh) ) {
      fprintf(stderr,"\n  ## Hashing problem. Exit program.\n");
+    return 0;
+  }
+  /* Creation quadrilaterals adjacency relations in the mesh */
+  if ( !MMG2D_hashQuad(mesh) ) {
+     fprintf(stderr,"\n  ## Quadrilaterals hashing problem. Exit program.\n");
     return 0;
   }
 
@@ -709,10 +796,11 @@ int MMG2D_analys(MMG5_pMesh mesh) {
   }
 
   /* Regularize normal vector field with a Laplacian / anti-laplacian smoothing */
-  /*if ( !MMG2D_regnor(mesh) ) {
+  if ( mesh->info.nreg && !MMG2D_regnor(mesh) ) {
       fprintf(stderr,"\n  ## Problem in regularizing normal vectors. Exit program.\n");
       return 0;
-  }*/
+  }
+  if ( mesh->nquad ) MMG5_DEL_MEM(mesh,mesh->adjq);
 
   return 1;
 }

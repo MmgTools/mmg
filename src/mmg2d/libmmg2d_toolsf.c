@@ -53,6 +53,25 @@ FORTRAN_NAME(MMG2D_SETFUNC,mmg2d_setfunc,
   return;
 }
 
+/**
+ * See \ref MMG2D_Get_numberOfNonBdyEdges function in \ref mmg2d/libmmg2d.h file.
+ */
+FORTRAN_NAME(MMG2D_GET_NUMBEROFNONBDYEDGES,mmg2d_get_numberofnonbdyedges,
+             (MMG5_pMesh *mesh,int* nb_edges, int* retval),
+             (mesh,nb_edges,retval)) {
+  *retval =  MMG2D_Get_numberOfNonBdyEdges(*mesh,nb_edges);
+  return;
+}
+
+/**
+ * See \ref MMG2D_Get_nonBdyEdge function in \ref mmg2d/libmmg2d.h file.
+ */
+FORTRAN_NAME(MMG2D_GET_NONBDYEDGE,mmg2d_get_nonbdyedge,
+             (MMG5_pMesh *mesh,int* e0, int* e1,int *ref,int* idx,int* retval),
+             (mesh,e0,e1,ref,idx,retval)) {
+  *retval =  MMG2D_Get_nonBdyEdge(*mesh,e0,e1,ref,*idx);
+  return;
+}
 
 /**
  * See \ref MMG2D_Get_adjaTri function in \ref mmg2d/libmmg2d.h file.
@@ -107,6 +126,18 @@ FORTRAN_NAME(MMG2D_GET_TRISFROMEDGE,mmg2d_get_trisfromedge,
 }
 
 /**
+ * See \ref MMG2D_Compute_eigenv function in \ref mmg2d/libmmg2d.h file.
+ */
+FORTRAN_NAME(MMG2D_COMPUTE_EIGENV,mmg2d_compute_eigenv,
+             (double m[3],double lambda[2],double vp[2][2],int *retval),
+             (m,lambda,vp,retval)) {
+
+  *retval = MMG2D_Compute_eigenv(m,lambda,vp);
+  return;
+}
+
+
+/**
  * See \ref MMG2D_Reset_verticestags function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_RESET_VERTICESTAGS,mmg2d_reset_verticestags,
@@ -140,7 +171,7 @@ FORTRAN_NAME(MMG2D_FREE_EDGES,mmg2d_free_edges,
 }
 
 /**
- * See \ref MMG2D_Free_Edges function in \ref mmg2d/libmmg2d.h file.
+ * See \ref MMG2D_Free_solutions function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_FREE_SOLUTIONS,mmg2d_free_solutions,
              (MMG5_pMesh *mesh,MMG5_pSol *sol),(mesh,sol)) {

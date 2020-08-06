@@ -70,7 +70,7 @@ static int MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   isqhmax = mesh->info.hmax;
 
   ilist = boulet(mesh,it,ip,list);
-  if ( !ilist )
+  if ( ilist < 1 )
     return 0;
 
   maxkappa = 0.0;
@@ -359,7 +359,7 @@ static int MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   p0  = &mesh->point[idp];
 
   ilist = boulet(mesh,it,ip,list);
-  if ( !ilist )
+  if ( ilist < 1 )
     return 0;
 
   /* Computation of the rotation matrix T_p0 S -> [z = 0] */
@@ -503,40 +503,32 @@ static int MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \param it index of the triangle in which we work.
- * \param ip index of the point on which we want to compute the metric in \a it.
+ * \param p0 starting point
+ * \param list ball of \a p0
+ * \param ilist number of tria in the ball of \a p0
+ * \param r rotation that send the normal at p0 onto the z vector
+ * \param lipoint rotated ball of point \a p0
+ *
  * \return 1 if success, 0 otherwise.
  *
- * Define metric map at a REGULAR vertex of the mesh, associated to
- * the geometric approx of the surface.
+ * Compute the rotation matrix that sends the tangent plane at \a p0 onto z=0
+ * and apply this rotation to the ball of \a p0.
  *
  */
-static int MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
-  MMG5_pTria          pt;
-  MMG5_pPoint         p0,p1;
-  MMG5_Bezier        b;
-  MMG5_pPar           par;
-  int                 ilist,list[MMGS_LMAX+2],k,iel,idp,isloc,i;
-  double              *n,*m,r[3][3],ux,uy,uz,lispoi[3*MMGS_LMAX+1];
-  double              det2d,c[3],isqhmin,isqhmax;
-  double              tAA[6],tAb[3],hausd;
-  unsigned char       i0,i1;
-
-  pt  = &mesh->tria[it];
-  idp = pt->v[ip];
-  p0  = &mesh->point[idp];
-
-  ilist = boulet(mesh,it,ip,list);
-  if ( !ilist )
-    return 0;
+int MMGS_surfballRotation(MMG5_pMesh mesh,MMG5_pPoint p0,int *list,int ilist,
+                          double r[3][3],double *lispoi) {
+  MMG5_pTria  pt;
+  MMG5_pPoint p1;
+  double      *n,ux,uy,uz,area;
+  int         iel,i0,i1,k;
 
   /* Computation of the rotation matrix T_p0 S -> [z = 0] */
-  n  = &p0->n[0];
+  n  = p0->n;
   assert ( n[0]*n[0] + n[1]*n[1] + n[2]*n[2] > MMG5_EPSD2 );
 
-  if ( !MMG5_rotmatrix(n,r) ) return 0;
-  m = &met->m[6*idp];
+  if ( !MMG5_rotmatrix(n,r) ) {
+    return 0;
+  }
 
   /* Apply rotation \circ translation to the whole ball */
   assert ( ilist );
@@ -563,13 +555,52 @@ static int MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
 
   /* Check all projections over tangent plane. */
   for (k=0; k<ilist-1; k++) {
-    det2d = lispoi[3*k+1]*lispoi[3*(k+1)+2] - lispoi[3*k+2]*lispoi[3*(k+1)+1];
-    if ( det2d <= 0.0 ) {
+    area = lispoi[3*k+1]*lispoi[3*(k+1)+2] - lispoi[3*k+2]*lispoi[3*(k+1)+1];
+    if ( area <= 0.0 ) {
       return 0;
     }
   }
-  det2d = lispoi[3*(ilist-1)+1]*lispoi[3*0+2] - lispoi[3*(ilist-1)+2]*lispoi[3*0+1];
-  if ( det2d <= 0.0 ) {
+  area = lispoi[3*(ilist-1)+1]*lispoi[3*0+2] - lispoi[3*(ilist-1)+2]*lispoi[3*0+1];
+  if ( area <= 0.0 ) {
+    return 0;
+  }
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param it index of the triangle in which we work.
+ * \param ip index of the point on which we want to compute the metric in \a it.
+ * \return 1 if success, 0 otherwise.
+ *
+ * Define metric map at a REGULAR vertex of the mesh, associated to
+ * the geometric approx of the surface.
+ *
+ */
+static int MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
+  MMG5_pTria          pt;
+  MMG5_pPoint         p0;
+  MMG5_Bezier         b;
+  MMG5_pPar           par;
+  int                 ilist,list[MMGS_LMAX+2],k,iel,idp,isloc,i;
+  double              *m,r[3][3],lispoi[3*MMGS_LMAX+1];
+  double              c[3],isqhmin,isqhmax;
+  double              tAA[6],tAb[3],hausd;
+  unsigned char       i0;
+
+  pt  = &mesh->tria[it];
+  idp = pt->v[ip];
+  p0  = &mesh->point[idp];
+  m   = &met->m[6*idp];
+
+  ilist = boulet(mesh,it,ip,list);
+  if ( ilist < 1 )
+    return 0;
+
+  /* Rotation of the ball of p0 */
+  if ( !MMGS_surfballRotation(mesh,p0,list,ilist,r,lispoi)  ) {
     return 0;
   }
 
@@ -628,7 +659,7 @@ static int MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
 
   /* 2. Solve tAA * tmp_m = tAb and fill m with tmp_m (after rotation) */
   return(MMG5_solveDefmetregSys( mesh,r, c, tAA, tAb, m, isqhmin, isqhmax,
-                                  hausd));
+                                 hausd));
 }
 
 /**
@@ -679,6 +710,7 @@ int MMGS_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pPoint   ppt;
   double        mm[6];
   int           k;
+  int8_t        ismet;
   char          i;
   static char   mmgErr=0;
 
@@ -693,23 +725,26 @@ int MMGS_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
   if ( met->m ) {
-    assert ( mesh->info.inputMet );
+    assert ( met->np );
+    ismet = 1;
   }
   else {
+    ismet = 0;
+
     MMG5_calelt     = MMG5_caltri_ani;
     MMG5_lenSurfEdg = MMG5_lenSurfEdg_ani;
 
     if ( !MMGS_Set_solSize(mesh,met,MMG5_Vertex,mesh->np,3) )
       return 0;
-    /* Set_solSize modify the value of the inputMet field => we need to reset it */
-    mesh->info.inputMet = 0;
   }
 
   /** Step 1: Set metric at points belonging to a required edge: compute the
    * metric as the mean of the length of the required eges passing through the
    * point */
-  if ( !MMGS_set_metricAtPointsOnReqEdges ( mesh,met ) ) {
-    return 0;
+  if ( !mesh->info.nosizreq ) {
+    if ( !MMGS_set_metricAtPointsOnReqEdges ( mesh,met,ismet ) ) {
+      return 0;
+    }
   }
 
   /* Step 2: Travel all the points (via triangles) in the mesh and set metric tensor */
@@ -720,7 +755,7 @@ int MMGS_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
     for (i=0; i<3; i++) {
       ppt = &mesh->point[pt->v[i]];
       if ( ppt->flag || !MG_VOK(ppt) )  continue;
-      if ( mesh->info.inputMet )  memcpy(mm,&met->m[6*(pt->v[i])],6*sizeof(double));
+      if ( ismet )  memcpy(mm,&met->m[6*(pt->v[i])],6*sizeof(double));
 
       if ( MS_SIN(ppt->tag) ) {
         if ( !MMG5_defmetsin(mesh,met,k,i) )  continue;
@@ -735,7 +770,7 @@ int MMGS_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
       else {
         if ( !MMG5_defmetreg(mesh,met,k,i) )  continue;
       }
-      if ( mesh->info.inputMet ) {
+      if ( ismet ) {
         if ( !MMGS_intextmet(mesh,met,pt->v[i],mm) ) {
           if ( !mmgErr ) {
             fprintf(stderr,"\n  ## Error: %s: unable to intersect metrics"
@@ -751,7 +786,7 @@ int MMGS_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
   /* search for unintialized metric */
-  MMG5_defUninitSize ( mesh,met );
+  MMG5_defUninitSize ( mesh,met,ismet );
 
   return 1;
 }

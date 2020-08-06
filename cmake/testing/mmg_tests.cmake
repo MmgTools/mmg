@@ -24,6 +24,90 @@ FOREACH(EXEC ${LISTEXEC_MMG})
 
   GET_FILENAME_COMPONENT ( SHRT_EXEC ${EXEC} NAME )
 
+  ###############################################################################
+  #####
+  #####         Input/Output
+  #####
+  ###############################################################################
+
+  # Gmsh without metric: see mmg3d_tests.cmale and mmgs_tests.cmake
+
+  # Binary gmsh iso metric
+  ADD_TEST(NAME mmg_binary_gmsh_iso_${SHRT_EXEC}
+    COMMAND ${EXEC} -v 5 ${common_args}
+    ${MMG_CI_TESTS}/GmshInout/iso.mshb
+    ${CTEST_OUTPUT_DIR}/mmg_binary_gmsh_iso_${SHRT_EXEC}.mshb)
+
+  # Ascii gmsh iso metric
+  ADD_TEST(NAME mmg_ascii_gmsh_iso_${SHRT_EXEC}
+    COMMAND ${EXEC} -v 5 ${common_args}
+    ${MMG_CI_TESTS}/GmshInout/iso.msh
+    ${CTEST_OUTPUT_DIR}/mmg_ascii_gmsh_iso_${SHRT_EXEC})
+
+  # Binary gmsh iso metric
+  ADD_TEST(NAME mmg_binary_gmsh_ani_${SHRT_EXEC}
+    COMMAND ${EXEC} -v 5 ${common_args}
+    ${MMG_CI_TESTS}/GmshInout/ani.mshb
+    ${CTEST_OUTPUT_DIR}/mmg_binary_gmsh_ani_${SHRT_EXEC}.mshb)
+
+  # Ascii gmsh iso metric
+  ADD_TEST(NAME mmg_ascii_gmsh_ani_${SHRT_EXEC}
+    COMMAND ${EXEC} -v 5 ${common_args}
+    ${MMG_CI_TESTS}/GmshInout/ani.msh
+    ${CTEST_OUTPUT_DIR}/mmg_ascii_gmsh_ani_${SHRT_EXEC})
+
+  # VTK .vtk no metric
+  ADD_TEST(NAME mmg_vtkvtk_${SHRT_EXEC}
+    COMMAND ${EXEC} -v 5 ${common_args}
+    ${MMG_CI_TESTS}/VtkInout/c1.vtk
+    ${CTEST_OUTPUT_DIR}/mmg_vtkvtk_${SHRT_EXEC})
+
+  # VTK .vtu no metric
+  ADD_TEST(NAME mmg_vtkvtu_${SHRT_EXEC}
+    COMMAND ${EXEC} -v 5 ${common_args}
+    ${MMG_CI_TESTS}/VtkInout/c1.vtu
+    ${CTEST_OUTPUT_DIR}/mmg_vtkvtu_${SHRT_EXEC})
+
+  # VTK .vtk with iso metric
+  ADD_TEST(NAME mmg_vtkvtk_iso_${SHRT_EXEC}
+    COMMAND ${EXEC} -v 5 ${common_args}
+    ${MMG_CI_TESTS}/VtkInout/iso.vtk
+    ${CTEST_OUTPUT_DIR}/mmg_vtkvtk_iso_${SHRT_EXEC})
+
+  # VTK .vtu with iso metric
+  ADD_TEST(NAME mmg_vtkvtu_iso_${SHRT_EXEC}
+    COMMAND ${EXEC} -v 5 ${common_args}
+    ${MMG_CI_TESTS}/VtkInout/iso.vtu
+    ${CTEST_OUTPUT_DIR}/mmg_vtkvtu_iso_${SHRT_EXEC})
+
+  # VTK .vtk with aniso metric
+  ADD_TEST(NAME mmg_vtkvtk_ani_${SHRT_EXEC}
+    COMMAND ${EXEC} -v 5 ${common_args}
+    ${MMG_CI_TESTS}/VtkInout/ani.vtk
+    ${CTEST_OUTPUT_DIR}/mmg_vtkvtk_ani_${SHRT_EXEC})
+
+  # VTK .vtu with aniso metric
+  ADD_TEST(NAME mmg_vtkvtu_ani_${SHRT_EXEC}
+    COMMAND ${EXEC} -v 5 ${common_args}
+    ${MMG_CI_TESTS}/VtkInout/ani.vtu
+    ${CTEST_OUTPUT_DIR}/mmg_vtkvtu_ani_${SHRT_EXEC})
+
+  IF ( NOT VTK_FOUND )
+    SET(expr "VTK library not founded")
+    SET_PROPERTY(TEST mmg_vtkvtk_${SHRT_EXEC}
+      PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
+    SET_PROPERTY(TEST mmg_vtkvtu_${SHRT_EXEC}
+      PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
+    SET_PROPERTY(TEST mmg_vtkvtk_iso_${SHRT_EXEC}
+      PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
+    SET_PROPERTY(TEST mmg_vtkvtu_iso_${SHRT_EXEC}
+      PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
+    SET_PROPERTY(TEST mmg_vtkvtk_ani_${SHRT_EXEC}
+      PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
+    SET_PROPERTY(TEST mmg_vtkvtu_ani_${SHRT_EXEC}
+      PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
+  ENDIF ( )
+
   ##############################################################################
   #####
   #####         Aniso test case
@@ -165,6 +249,12 @@ FOREACH(EXEC ${LISTEXEC_MMG})
 #####         Options
 #####
 ###############################################################################
+ADD_TEST(NAME mmg_help_${SHRT_EXEC}
+  COMMAND ${EXEC} -h
+  )
+SET_PROPERTY(TEST mmg_help_${SHRT_EXEC}
+  PROPERTY PASS_REGULAR_EXPRESSION "File specifications")
+
 ADD_TEST(NAME mmg_hsizOption_${SHRT_EXEC}
   COMMAND ${EXEC} -v 5 -hsiz 0.1 ${common_args}
   ${MMG_CI_TESTS}/Cube/cube
@@ -202,6 +292,11 @@ ADD_TEST(NAME mmg_MultiDom_Cube_ReqEntities_${SHRT_EXEC}
   ${MMG_CI_TESTS}/MultiDom_Cube_ReqEntities/c
   -out ${CTEST_OUTPUT_DIR}/mmg_MultiDom_Cube_ReqEntities_${SHRT_EXEC}.o.meshb)
 
+  ADD_TEST(NAME mmg_MultiDom_Cube_ReqEntities_nosizreq_${SHRT_EXEC}
+    COMMAND ${EXEC} -v 5 -nosizreq -hgradreq -1 ${common_args}
+    ${MMG_CI_TESTS}/MultiDom_Cube_ReqEntities/c
+    -out ${CTEST_OUTPUT_DIR}/mmg_MultiDom_Cube_ReqEntities_nosizreq_${SHRT_EXEC}.o.meshb)
+
 ADD_TEST(NAME mmg_MultiDom_Ellipse_ReqEntitiesAni_${SHRT_EXEC}
   COMMAND ${EXEC} -v 5 -hausd 0.002 -A ${common_args}
   ${MMG_CI_TESTS}/MultiDom_Ellipse_ReqEntities/c.d
@@ -213,6 +308,23 @@ ADD_TEST(NAME mmg_CommandLineAni_${SHRT_EXEC}
   COMMAND ${EXEC} -v 5 -hausd 0.005 -sol 2 -A ${common_args}
   ${MMG_CI_TESTS}/TorusholesAni_chocCyl/torusholesTiny
   -out ${CTEST_OUTPUT_DIR}/mmg_CommandLineAni_${SHRT_EXEC}.o.meshb)
+
+  # -Optim
+  ADD_TEST(NAME mmg_optimOption_${SHRT_EXEC}
+    COMMAND ${EXEC} -v 5 -hausd 1 -optim ${common_args}
+    ${MMG_CI_TESTS}/MecaPart/geom_1_before.mesh
+    -out ${CTEST_OUTPUT_DIR}/mmg_optimOption_${SHRT_EXEC}.o.meshb)
+
+  ADD_TEST(NAME mmg_optimHmax_${SHRT_EXEC}
+    COMMAND ${EXEC} -v 5 -hausd 1 -optim -hmax 1 ${common_args}
+    ${MMG_CI_TESTS}/MecaPart/geom_1_before.mesh
+    -out ${CTEST_OUTPUT_DIR}/mmg_optimHmax_${SHRT_EXEC}.o.meshb)
+
+  # -nreg
+  ADD_TEST(NAME mmg_nreg_${SHRT_EXEC}
+    COMMAND ${EXEC} -v 5 -nreg ${common_args}
+    ${MMG_CI_TESTS}/c1/c1.meshb
+    -out ${CTEST_OUTPUT_DIR}/mmg_nreg_${SHRT_EXEC}.o.meshb)
 
   ##############################################################################
   #####

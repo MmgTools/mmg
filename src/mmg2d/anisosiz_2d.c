@@ -277,7 +277,7 @@ int MMG2D_defmetbdy_2d(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
     li = 1.0 / sqrt(ll);
 
     /* Tangent vector at p1 */
-    if ( MG_SIN(p1->tag) || p1->tag & MG_NOM ) {
+    if ( (MG_CRN & p1->tag) || p1->tag & MG_NOM ) {
       t1[0] = li*ux;
       t1[1] = li*uy;
     }
@@ -287,7 +287,7 @@ int MMG2D_defmetbdy_2d(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
     }
 
     /* Tangent vector at p2 */
-    if ( MG_SIN(p2->tag) || p2->tag & MG_NOM ) {
+    if ( (MG_CRN & p2->tag) || p2->tag & MG_NOM ) {
       t2[0] = li*ux;
       t2[1] = li*uy;
     }
@@ -377,22 +377,23 @@ int MMG2D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
   /* Allocate the structure */
-  if ( met->m )
+  if ( met->m ) {
     ismet = 1;
+  }
   else {
     ismet = 0;
     if ( !MMG2D_Set_solSize(mesh,met,MMG5_Vertex,mesh->np,3) ) {
       return 0;
     }
-    /* Set_solSize modify the value of the inputMet field => we need to reset it */
-    mesh->info.inputMet = 0;
   }
 
   /** Step 1: Set metric at points belonging to a required edge: compute the
    * metric as the mean of the length of the required eges passing through the
    * point */
-  if ( !MMG2D_set_metricAtPointsOnReqEdges ( mesh,met ) ) {
-    return 0;
+  if ( !mesh->info.nosizreq ) {
+    if ( !MMG2D_set_metricAtPointsOnReqEdges ( mesh,met,ismet ) ) {
+      return 0;
+    }
   }
 
   /* Step 2: Travel all the points (via triangles) in the mesh and set metric tensor */
@@ -410,7 +411,7 @@ int MMG2D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
       isdef = 0;
       /* Calculation of a metric tensor depending on the anisotropic features of the mesh */
       /* At a singular point, an isotropic metric with size hmax is defined */
-      if ( MG_SIN(ppt->tag) || ppt->tag & MG_NOM ) {
+      if ( (MG_CRN & ppt->tag) || ppt->tag & MG_NOM ) {
         /* Set the point flag to 1 */
         if ( MMG2D_defaultmet_2d(mesh,met,k,i) ) isdef = 1;
       }
