@@ -354,6 +354,7 @@ MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,char iedg,int *lists,
  *  iface = boundary face on which lie edge iedg - in local face num.
  *  (pq, or ia in local tet notation).
  *
+ * \remark we don't check edge lengths.
  */
 int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
                      char iedg,int *listv,int ilistv,int *lists,int ilists,
