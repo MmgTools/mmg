@@ -1349,8 +1349,7 @@ int MMGS_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
     fprintf(stderr,"\n  ## Error: %s: unknown type of parameter\n",__func__);
     return 0;
   }
-  /* other options */
-  mesh->info.fem      = 0;
+
   return 1;
 }
 

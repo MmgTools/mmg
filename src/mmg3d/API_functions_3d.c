@@ -84,7 +84,7 @@ void MMG3D_Init_parameters(MMG5_pMesh mesh) {
 
   /* default values for integers */
   mesh->info.lag      = MMG5_LAG;
-  mesh->info.fem      = MMG5_FEM;
+  mesh->info.setfem   = MMG5_FEM;
   mesh->info.optim    = MMG5_OFF;
   mesh->info.optimLES = MMG5_OFF;
   /* [0/1]    ,avoid/allow surface modifications */
@@ -2096,7 +2096,7 @@ int MMG3D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam,int val){
     }
     break;
   case MMG3D_IPARAM_nofem :
-    mesh->info.fem      = (val==1)? 0 : 1;
+    mesh->info.setfem = (val==1)? 0 : 1;
     break;
   case MMG3D_IPARAM_opnbdy :
     mesh->info.opnbdy = val;

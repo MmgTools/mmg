@@ -461,7 +461,14 @@ typedef struct {
   int           imprim; /*!< verbosity level */
   int           nsd; /*!< index of subdomain to save (0 by default == all subdomains are saved) */
   char          nreg; /*!< normal regularization */
-  char          ddebug,badkal,iso,fem,lag;
+  char          ddebug; /*!< debug mode if 1 */
+  char          badkal; /*!< 1 if the mesh contains a very bad element */
+  char          iso; /*!< level-set discretization mode */
+  char          setfem; /*!< Enforce finite element mesh (try to avoid edges
+                      * connecting 2 bdy points and tet with more than 1 bdy
+                      * face) */
+  char          fem; /*!< internal value for fem / no fem mesh output */
+  char          lag; /*!< lagrangian mode */
   char          parTyp; /*!< Contains binary flags to say which kind of local
                           param are setted: if \f$tag = 1+2+4\f$ then the point
                           is \a MG_Vert, MG_Tria and MG_Tetra */
