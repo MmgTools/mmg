@@ -112,7 +112,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         continue;
       }
       else if(!strncmp(chaine,"Quadrilaterals",strlen("Quadrilaterals"))) {
-        fscanf(inm,"%d",&mesh->nquad);
+        MMG_FSCANF(inm,"%d",&mesh->nquad);
         posnq = ftell(inm);
         continue;
       }
