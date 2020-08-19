@@ -161,6 +161,30 @@ FORTRAN_NAME(MMG2D_SET_DPARAMETER,mmg2d_set_dparameter,
   *retval = MMG2D_Set_dparameter(*mesh,*sol,*dparam,*val);
   return;
 }
+
+/**
+ * See \ref MMG2D_Set_localParameter function in \ref mmg2d/libmmg2d.h file.
+ */
+FORTRAN_NAME(MMG2D_SET_LOCALPARAMETER,mmg2d_set_localparameter,
+             (MMG5_pMesh *mesh,MMG5_pSol *sol, int *typ, int *ref,
+              double *hmin, double *hmax, double *hausd, int* retval),
+             (mesh,sol,typ,ref,hmin, hmax, hausd,retval)){
+  *retval = MMG2D_Set_localParameter(*mesh,*sol,*typ,*ref,*hmin,*hmax,*hausd);
+  return;
+}
+
+
+/**
+ * See \ref MMG2D_Set_multiMat function in \ref mmg2d/libmmg2d.h file.
+ */
+FORTRAN_NAME(MMG2D_SET_MULTIMAT,mmg2d_set_multimat,
+             (MMG5_pMesh *mesh,MMG5_pSol *sol, int *ref,int *split,
+              int* rin,int* rex, int* retval),
+             (mesh,sol,ref,split,rin,rex,retval)){
+  *retval = MMG2D_Set_multiMat(*mesh,*sol,*ref,*split,*rin,*rex);
+  return;
+}
+
 /**
  * See \ref MMG2D_Set_meshSize function in \ref mmg2d/libmmg2d.h file.
  */
