@@ -431,8 +431,8 @@ int MMG5_singul(MMG5_pMesh mesh) {
 
     for (i=0; i<3; i++) {
       ppt = &mesh->point[pt->v[i]];
-      if ( !MG_VOK(ppt) || ( ppt->tag & MG_CRN ) || ( ppt->tag & MG_NOM ) )
-        continue;
+      if ( !MG_VOK(ppt) || ( ppt->tag & MG_CRN ) || ( ppt->tag & MG_NOM ) ||
+          ( ppt->tag & MG_PARBDY ) ) continue;
       else if ( MG_EDG(ppt->tag) ) {
         /* Store the number of ridges passing through the point (xp) and the
          * number of ref edges (nr) */
