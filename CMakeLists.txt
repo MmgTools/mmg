@@ -368,7 +368,7 @@ ENDIF()
 IF ( VTK_FOUND )
   ADD_DEFINITIONS(-DUSE_VTK)
 
-  MESSAGE ( STATUS "Compilation with VTK: add vtp and vtu I/O." )
+  MESSAGE ( STATUS "Compilation with VTK: add vtk, vtp and vtu I/O." )
   INCLUDE ( ${VTK_USE_FILE} )
   SET( LIBRARIES ${VTK_LIBRARIES} ${LIBRARIES} )
 ENDIF ( )
