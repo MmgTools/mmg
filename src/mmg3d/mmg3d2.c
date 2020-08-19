@@ -315,7 +315,7 @@ int MMG3D_resetRef(MMG5_pMesh mesh) {
 
   /* Travel edges and reset tags at edges extremities */
 
-
+#warning if we choose to not delete triangles the loop over the tet is useless
   /* Reset ref and tags at ISO points */
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
