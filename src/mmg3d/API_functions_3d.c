@@ -2195,16 +2195,16 @@ int MMG3D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam,int val){
         fprintf(stderr,"\n  ## Warning: %s: new multi materials values\n",__func__);
     }
     mesh->info.nmat   = val;
-    mesh->info.nmati  = 0;
+    mesh->info.nmati  = MMG5_OFF;
 
     MMG5_ADD_MEM(mesh,(mesh->info.nmat)*sizeof(MMG5_Mat),"multi material",
                  printf("  Exit program.\n");
                  return 0);
     MMG5_SAFE_CALLOC(mesh->info.mat,mesh->info.nmat,MMG5_Mat,return 0);
     for (k=0; k<mesh->info.nmat; k++) {
-      mesh->info.mat[k].ref   = INFINITY;
+      mesh->info.mat[k].ref   = MMG5_NONSET; // -1
     }
-    
+
     break;
 
 #ifdef USE_SCOTCH
