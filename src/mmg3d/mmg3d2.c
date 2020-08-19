@@ -2230,6 +2230,13 @@ int MMG3D_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
     return 0;
   }
 
+  /* Clean old bdy analysis */
+  for ( int k=1; k<=mesh->np; ++k ) {
+    if ( mesh->point[k].tag & MG_BDY ) {
+      mesh->point[k].tag &= ~MG_BDY;
+    }
+  }
+
   /* Clean memory */
   MMG5_DEL_MEM(mesh,sol->m);
 
