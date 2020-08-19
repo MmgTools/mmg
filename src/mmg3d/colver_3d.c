@@ -1051,14 +1051,12 @@ int MMG5_chkcol_nom(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
  */
 int MMG5_chkcol_nomint(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
                     char iedg,int *listv,int ilistv,char typchk) {
-  MMG5_pTetra  pt,pt0,pt1;
+  MMG5_pTetra  pt,pt0;
   MMG5_pxTetra pxt;
-  MMG5_pPar    par;
   double       calold,calnew,caltmp;
-  double       hmax,hausd;
-  int          ipp,nump,numq,l,iel,kk;
+  int          ipp,nump,numq,l,iel;
   int          nr,nbbdy;
-  char         ia,ip,i,iq,i0,i1,ier;
+  char         ia,ip,i,iq,i0,i1;
 #ifndef NDEBUG
   MMG5_pPoint  p0;
 #endif
