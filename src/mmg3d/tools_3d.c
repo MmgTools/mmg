@@ -536,7 +536,6 @@ inline int MMG5_BezierNom(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,dou
     MMG5_pPoint      p0,p1;
     double      ux,uy,uz,il,ll,ps,alpha,dd;
     double      t0[3],t1[3],b0[3],b1[3],n0[3],n1[3],bn[3];
-    char        intnom;
 
     p0 = &mesh->point[ip0];
     p1 = &mesh->point[ip1];
@@ -617,37 +616,32 @@ inline int MMG5_BezierNom(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,dou
         memcpy(n0,&(mesh->xpoint[p0->xp].n1[0]),3*sizeof(double));
         memcpy(n1,&(mesh->xpoint[p1->xp].n1[0]),3*sizeof(double));
     }
-  
-    /* Check for internal non manifold edge */
-    intnom = ( mesh->xpoint[p0->xp].nnor ) || ( mesh->xpoint[p1->xp].nnor );
 
     /* Normal interpolation */
-    if ( !intnom ) {
-      ps = ux*(n0[0] + n1[0]) + uy*(n0[1] + n1[1]) + uz*(n0[2] + n1[2]);
-      ps = 2.0*ps/ll;
+    ps = ux*(n0[0] + n1[0]) + uy*(n0[1] + n1[1]) + uz*(n0[2] + n1[2]);
+    ps = 2.0*ps/ll;
 
-      bn[0] = n0[0] + n1[0] -ps*ux;
-      bn[1] = n0[1] + n1[1] -ps*uy;
-      bn[2] = n0[2] + n1[2] -ps*uz;
+    bn[0] = n0[0] + n1[0] -ps*ux;
+    bn[1] = n0[1] + n1[1] -ps*uy;
+    bn[2] = n0[2] + n1[2] -ps*uz;
 
-      dd = bn[0]*bn[0] + bn[1]*bn[1] + bn[2]*bn[2];
-      if ( dd > MMG5_EPSD ) {
-          dd = 1.0 / sqrt(dd);
-          bn[0] *= dd;
-          bn[1] *= dd;
-          bn[2] *= dd;
-      }
-      no[0] = (1.0-s)*(1.0-s)*n0[0] + 2.0*s*(1.0-s)*bn[0] + s*s*n1[0];
-      no[1] = (1.0-s)*(1.0-s)*n0[1] + 2.0*s*(1.0-s)*bn[1] + s*s*n1[1];
-      no[2] = (1.0-s)*(1.0-s)*n0[2] + 2.0*s*(1.0-s)*bn[2] + s*s*n1[2];
+    dd = bn[0]*bn[0] + bn[1]*bn[1] + bn[2]*bn[2];
+    if ( dd > MMG5_EPSD ) {
+        dd = 1.0 / sqrt(dd);
+        bn[0] *= dd;
+        bn[1] *= dd;
+        bn[2] *= dd;
+    }
+    no[0] = (1.0-s)*(1.0-s)*n0[0] + 2.0*s*(1.0-s)*bn[0] + s*s*n1[0];
+    no[1] = (1.0-s)*(1.0-s)*n0[1] + 2.0*s*(1.0-s)*bn[1] + s*s*n1[1];
+    no[2] = (1.0-s)*(1.0-s)*n0[2] + 2.0*s*(1.0-s)*bn[2] + s*s*n1[2];
 
-      dd = no[0]*no[0] + no[1]*no[1] + no[2]*no[2];
-      if ( dd > MMG5_EPSD2 ) {
-          dd = 1.0/sqrt(dd);
-          no[0] *= dd;
-          no[1] *= dd;
-          no[2] *= dd;
-      }
+    dd = no[0]*no[0] + no[1]*no[1] + no[2]*no[2];
+    if ( dd > MMG5_EPSD2 ) {
+        dd = 1.0/sqrt(dd);
+        no[0] *= dd;
+        no[1] *= dd;
+        no[2] *= dd;
     }
 
     /* Tangent interpolation : possibly flip (back) t1 */
@@ -662,12 +656,10 @@ inline int MMG5_BezierNom(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,dou
     to[2] = (1.0-s)*t0[2] + s*t1[2];
 
     /* Projection of the tangent in the tangent plane defined by no */
-    if ( !intnom ) {
-      ps = to[0]*no[0] + to[1]*no[1] + to[2]*no[2];
-      to[0] = to[0] -ps*no[0];
-      to[1] = to[1] -ps*no[1];
-      to[2] = to[2] -ps*no[2];
-    }
+    ps = to[0]*no[0] + to[1]*no[1] + to[2]*no[2];
+    to[0] = to[0] -ps*no[0];
+    to[1] = to[1] -ps*no[1];
+    to[2] = to[2] -ps*no[2];
 
     dd = to[0]*to[0] + to[1]*to[1] + to[2]*to[2];
     if ( dd > MMG5_EPSD2) {

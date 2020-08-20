@@ -71,7 +71,6 @@ extern "C" {
     MMG2D_IPARAM_nreg,              /*!< [0/1], Enable normal regularization */
     MMG2D_IPARAM_numsubdomain,      /*!< [0/n], Save the subdomain nb (0==all subdomain) */
     MMG2D_IPARAM_numberOfLocalParam,/*!< [n], Number of local parameters */
-    MMG2D_IPARAM_numberOfMat,       /*!< [n], Number of material in ls mode */
     MMG2D_IPARAM_nosizreq,          /*!< [0/1], Allow/avoid overwritten of sizes at required points (advanced usage) */
     MMG2D_DPARAM_angleDetection,    /*!< [val], Value for angle detection */
     MMG2D_DPARAM_hmin,              /*!< [val], Minimal mesh size */
@@ -275,28 +274,6 @@ extern "C" {
  */
   int  MMG2D_Set_localParameter(MMG5_pMesh mesh, MMG5_pSol sol, int typ,
                                 int ref,double hmin,double hmax,double hausd);
-
-/**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure.
- * \param ref input tetra reference.
- * \param split MMG5_MMAT_NoSplit if the entity must not be splitted, MMG5_MMAT_Split otherwise
- * \param rin internal reference after ls discretization
- * \param rex external reference after ls discretization
- * \return 0 if failed, 1 otherwise.
- *
- * Set the reference mapping for the elements of ref \a ref in ls discretization mode.
- *
- * \remark Fortran interface:
- * >   SUBROUTINE MMG2D_SET_MULTIMAT(mesh,sol,ref,split,rin,rex,retval)\n
- * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol\n
- * >     INTEGER, INTENT(IN)           :: ref,split,rin,rex\n
- * >     INTEGER, INTENT(OUT)          :: retval\n
- * >   END SUBROUTINE\n
- *
- */
-  int  MMG2D_Set_multiMat(MMG5_pMesh mesh, MMG5_pSol sol,int ref,int split,
-                          int rin, int rex);
 
 /* init structure datas */
 /**

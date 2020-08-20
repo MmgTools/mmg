@@ -100,7 +100,7 @@ int MMG2D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
       ret = fscanf(in,"%d",&mesh->info.nmat);
 
       if ( !ret ) {
-        fprintf(stderr,"  %%%% Wrong format for lsreferences: %d\n",mesh->info.nmat);
+        fprintf(stderr,"  %%%% Wrong format: %d\n",mesh->info.nmat);
         return (0);
       }
 
@@ -131,7 +131,7 @@ int MMG2D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
       ret = fscanf(in,"%d",&npar);
 
       if ( !ret ) {
-        fprintf(stderr,"  %%%% Wrong format for parameters: %d\n",npar);
+        fprintf(stderr,"  %%%% Wrong format: %d\n",npar);
         return 0;
       }
       else if ( npar > MMG2D_LPARMAX ) {

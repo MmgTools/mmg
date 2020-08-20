@@ -1198,7 +1198,7 @@ int MMG5_bdryTria(MMG5_pMesh mesh, int ntmesh) {
   MMG5_Hash     hash;
   int       ref,*adja,adj,k,ia,ib,ic,kt, tofree=0,ntinit;
   char      i;
-  
+
   hash.item = NULL;
 
   ntinit = mesh->nt;
@@ -1242,8 +1242,7 @@ int MMG5_bdryTria(MMG5_pMesh mesh, int ntmesh) {
 
         if ( (!mesh->info.opnbdy) || (!mesh->xtetra) ) {
           if ( adj && ( pt->ref <= pt1->ref) )  continue;
-        }
-        else {
+        } else {
           if ( adj && ( (pt->ref<pt1->ref) || (!pt->xt) ||
                         (!(pxt->ftag[i] & MG_BDY)) || (!MG_GET(pxt->ori,i) ) ) )
             continue;
@@ -1292,11 +1291,8 @@ int MMG5_bdryTria(MMG5_pMesh mesh, int ntmesh) {
         }
         if ( adj ) {
           if ( mesh->info.iso ) {
-            /* Triangle at the interface between two tets is set to the user-defined ref if any, or else to MG_ISO ref */
-            if ( pxt && pxt->ftag[i] & MG_BDY )
-              ptt->ref = pxt->ref[i];
-            else
-              ptt->ref = MG_ISO;
+            /* Triangle at the interface between two tets is set to MG_ISO ref */
+            ptt->ref = MG_ISO;
           }
           /* useful only when saving mesh or in ls mode */
           else {
@@ -1457,7 +1453,7 @@ int MMG5_chkBdryTria(MMG5_pMesh mesh) {
         ++ntmesh;
     }
   }
-  
+
   if ( mesh->info.opnbdy && mesh->xtetra ) {
     /* We want to preserve internal triangle and we came from bdryBuild: we need
      * to count the preserved boudaries */
@@ -1557,9 +1553,9 @@ int MMG5_chkBdryTria(MMG5_pMesh mesh) {
    * user */
   if ( mesh->nt ) {
     if ( ! MMG5_hashNew(mesh,&hashElt,0.51*ntmesh,1.51*ntmesh) ) return 0;
-    // Hash the boundaries found in the mesh
+    // Hash the boundaries founded in the mesh
     if ( mesh->info.opnbdy) {
-      /* We want to keep the internal triangles: we must hash all the tetra faces */
+      /* We want to keep the internal triangles: we mus hash all the tetra faces */
       for (k=1; k<=mesh->ne; k++) {
         pt = &mesh->tetra[k];
         if ( !MG_EOK(pt) )  continue;
@@ -1571,8 +1567,7 @@ int MMG5_chkBdryTria(MMG5_pMesh mesh) {
           if ( !MMG5_hashFace(mesh,&hashElt,ia,ib,ic,4*k+i) ) return 0;
         }
       }
-    }
-    else {
+    } else {
       for (k=1; k<=mesh->ne; k++) {
         pt = &mesh->tetra[k];
         if ( !MG_EOK(pt) )  continue;
@@ -1622,6 +1617,7 @@ int MMG5_chkBdryTria(MMG5_pMesh mesh) {
         }
       }
     }
+
 
     // Travel through the tria, delete those that are not in the hash tab or
     // that are stored more that once.
@@ -2117,7 +2113,7 @@ int MMG5_bdryPerm(MMG5_pMesh mesh) {
   char     i;
 
   if ( !mesh->nt ) return 1;
-  
+
   /* store triangles temporarily */
   if ( !MMG5_hashNew(mesh,&hash,MG_MAX(0.51*mesh->nt,100),MG_MAX(1.51*mesh->nt,300)) )
     return 0;
