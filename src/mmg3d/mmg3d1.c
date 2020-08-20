@@ -821,6 +821,7 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   MMG5_pTetra     pt,ptloc;
   MMG5_pxTetra    pxt;
   MMG5_pPoint     p0,p1;
+  MMG5_pxPoint    px0,px1;
   MMG5_pPar       par;
   double     ll,ux,uy,uz,hmi2;
   int        k,nc,list[MMG3D_LMAX+2],ilist,ilists,lists[MMG3D_LMAX+2];
