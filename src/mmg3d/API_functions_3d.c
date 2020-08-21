@@ -2028,7 +2028,7 @@ int MMG3D_Add_vertex(MMG5_pMesh mesh,double c0,double c1,double c2,int ref) {
   c[1] = c1;
   c[2] = c2;
 
-  ip = MMG3D_newPt(mesh,c,0,0);
+  ip = MMG3D_newPt(mesh,c,0,1);
   if ( !ip ) {
     MMG5_TAB_RECALLOC(mesh,mesh->point,mesh->npmax,mesh->gap,MMG5_Point,
                        "larger point table",
@@ -2041,7 +2041,7 @@ int MMG3D_Add_vertex(MMG5_pMesh mesh,double c0,double c1,double c2,int ref) {
       mesh->point[klink].tmp  = klink+1;
 
     /* We try again to add the point */
-    ip = MMG3D_newPt(mesh,c,0,0);
+    ip = MMG3D_newPt(mesh,c,0,1);
     if ( !ip ) {
       fprintf(stderr,"\n  ## Error: %s: unable to allocate"
               " a new point\n",__func__);
