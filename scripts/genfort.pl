@@ -123,7 +123,7 @@ sub printTab # ($chaine, $tabcount, $comm)
 sub Convert {
 
     my $startcom  = 0;
-    my $cppdef    = 0;
+    my $opendef   = 0;
     my $startenum = 0;
     my $countenum = 0;
     my $byvalue   = 0;
@@ -181,15 +181,20 @@ sub Convert {
                 {
                     printTab($line,0,0 );
                 }
+                elsif ($line =~ /\#ifdef USE_POINTMAP/ ) {
+                    $opendef++;
+                    $chaine = sprintf("! %s",$line);
+                    printTab($chaine,0,0 );
+                }
                 elsif ($line =~ /\#ifdef __cplusplus/ ) {
-                    $cppdef = 1;
+                    $opendef++;
                     $chaine = sprintf("! %s",$line);
                     printTab($chaine,0,0 );
                 }
                 elsif($line =~ /\#endif/ )
                 {
-                    if ( $cppdef ) {
-                        $cppdef = 0;
+                    if ( $opendef ) {
+                        $opendef--;
                         $chaine = sprintf("! %s",$line);
                         printTab($chaine,0,0 );
                     }

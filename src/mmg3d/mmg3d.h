@@ -45,7 +45,7 @@ extern "C" {
 
 /** Reallocation of point table and sol table and creation
     of point ip with coordinates o and tag tag*/
-#define MMG3D_POINT_REALLOC(mesh,sol,ip,wantedGap,law,o,tag ) do        \
+#define MMG3D_POINT_REALLOC(mesh,sol,ip,wantedGap,law,o,tag,src ) do    \
   {                                                                     \
   int klink;                                                            \
   int oldnpmax = mesh->npmax;                                           \
@@ -82,7 +82,7 @@ extern "C" {
   }                                                                     \
                                                                         \
   /* We try again to add the point */                                   \
-  ip = MMG3D_newPt(mesh,o,tag);                                         \
+  ip = MMG3D_newPt(mesh,o,tag,src);                                     \
   if ( !ip ) { law; }                                                   \
   }while(0)
 
@@ -250,7 +250,7 @@ int  MMG3D_Free_all_var( va_list argptr );
 int  MMG3D_Free_structures_var( va_list argptr );
 int  MMG3D_Free_names_var( va_list argptr );
 void MMG3D_Free_arrays(MMG5_pMesh*,MMG5_pSol*,MMG5_pSol*,MMG5_pSol*,MMG5_pSol*);
-int  MMG3D_newPt(MMG5_pMesh mesh,double c[3],int16_t tag);
+int  MMG3D_newPt(MMG5_pMesh mesh,double c[3],int16_t tag,int src);
 int  MMG3D_newElt(MMG5_pMesh mesh);
 int  MMG3D_delElt(MMG5_pMesh mesh,int iel);
 void MMG3D_delPt(MMG5_pMesh mesh,int ip);

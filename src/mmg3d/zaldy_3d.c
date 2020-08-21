@@ -36,7 +36,7 @@
 #include "mmg3d.h"
 
 /** get new point address */
-int MMG3D_newPt(MMG5_pMesh mesh,double c[3],int16_t tag) {
+int MMG3D_newPt(MMG5_pMesh mesh,double c[3],int16_t tag,int src) {
   MMG5_pPoint  ppt;
   int     curpt;
 
@@ -69,6 +69,10 @@ int MMG3D_newPt(MMG5_pMesh mesh,double c[3],int16_t tag) {
   ppt->n[2]   = 0;
   ppt->tag    = tag;
   ppt->tagdel = 0;
+#ifdef USE_POINTMAP
+  assert( src );
+  ppt->src = src;
+#endif
   return curpt;
 }
 

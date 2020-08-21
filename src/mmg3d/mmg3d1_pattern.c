@@ -126,14 +126,15 @@ static int MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
       o[1] = 0.5*(p0->c[1] + p1->c[1]);
       o[2] = 0.5*(p0->c[2] + p1->c[2]);
 
-      ip = MMG3D_newPt(mesh,o,MG_NOTAG);
+#warning Luca: no pointmap
+      ip = MMG3D_newPt(mesh,o,MG_NOTAG,0);
 
       if ( !ip )  {
         /* reallocation of point table */
         MMG3D_POINT_REALLOC(mesh,met,ip,mesh->gap,
                              *warn=1;
                              break
-                             ,o,MG_NOTAG);
+                             ,o,MG_NOTAG,0);
       }
       if ( met->m ) {
         ier = MMG5_intmet(mesh,met,k,imax,ip,0.5);

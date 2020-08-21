@@ -3306,7 +3306,7 @@ int MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k,char metRidTyp) {
   MMG5_pxTetra  pxt0;
   double        o[3],cb[4];
   int           i,ib,iel,iadr,*adja,adj1,adj2,adj3;
-  int           newtet[4];
+  int           src,newtet[4];
   unsigned char isxt[4],firstxt;
 
   pt[0] = &mesh->tetra[k];
@@ -3326,14 +3326,17 @@ int MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k,char metRidTyp) {
   o[2] *= 0.25;
 
   cb[0] = 0.25; cb[1] = 0.25;  cb[2] = 0.25;  cb[3] = 0.25;
-  ib = MMG3D_newPt(mesh,o,0);
+#ifdef USE_POINTMAP
+  src = mesh->point[pt[0]->v[0]].src;
+#endif
+  ib = MMG3D_newPt(mesh,o,0,src);
   if ( !ib ) {
     MMG3D_POINT_REALLOC(mesh,met,ib,mesh->gap,
                          fprintf(stderr,"\n  ## Error: %s: unable to allocate"
                                  " a new point\n",__func__);
                          MMG5_INCREASE_MEM_MESSAGE();
                          return 0
-                         ,o,0);
+                         ,o,0,src);
   }
   if ( met->m ) {
     if ( !metRidTyp && met->size > 1 )
@@ -5262,7 +5265,7 @@ int MMG5_splitedg(MMG5_pMesh mesh, MMG5_pSol met,int iel, int iar, double crit){
   MMG5_pxTetra pxt;
   MMG5_pPoint  p0,p1;
   double       o[3];
-  int          list[MMG3D_LMAX+2],i0,i1,ip,warn,lon,ier;
+  int          src,list[MMG3D_LMAX+2],i0,i1,ip,warn,lon,ier;
   int16_t      tag;
 
   warn = 0;
@@ -5300,7 +5303,10 @@ int MMG5_splitedg(MMG5_pMesh mesh, MMG5_pSol met,int iel, int iar, double crit){
   o[1] = 0.5*(p0->c[1] + p1->c[1]);
   o[2] = 0.5*(p0->c[2] + p1->c[2]);
 
-  ip = MMG3D_newPt(mesh,o,tag);
+#ifdef USE_POINTMAP
+  src = mesh->point[i0].src;
+#endif
+  ip = MMG3D_newPt(mesh,o,tag,src);
 
   if ( !ip )  {
     assert ( mesh );
@@ -5308,7 +5314,7 @@ int MMG5_splitedg(MMG5_pMesh mesh, MMG5_pSol met,int iel, int iar, double crit){
     MMG3D_POINT_REALLOC(mesh,met,ip,mesh->gap,
                          warn=1;
                          break
-                         ,o,tag);
+                         ,o,tag,src);
   }
 
   if ( warn ) {
