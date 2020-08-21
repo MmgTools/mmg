@@ -864,19 +864,33 @@ int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,char
           pxt1->ref[voyp] = MG_MAX(pxt1->ref[voyp],pxt->ref[ip]);
           pxt1->ftag[voyp] = pxt1->ftag[voyp] | pxt->ftag[ip];
 
-          if ( qel ) {
-            if ( pt1->ref < mesh->tetra[qel].ref )  MG_CLR( pxt1->ori,voyp );
-            else if ( mesh->info.opnbdy && (pt1->ref == mesh->tetra[qel].ref) ) {
-              if ( pxt->ftag[ip] & MG_BDY ) {
-                if ( MG_GET(pxt->ori,ip) )
-                  MG_SET( pxt1->ori,voyp );
-                else
-                  MG_CLR( pxt1->ori,voyp );
-              }
-            }
-            else  MG_SET( pxt1->ori,voyp );
+          /* the face voyp of pxt1 is projected into the face ip of pxt so it
+           * takes its orientation */
+          if ( pxt->ftag[ip] & MG_BDY ) {
+            if ( MG_GET(pxt->ori,ip) )
+              MG_SET( pxt1->ori,voyp );
+            else
+              MG_CLR( pxt1->ori,voyp );
           }
-          else  MG_SET( pxt1->ori,voyp );
+
+#ifndef NDEBUG
+          if ( qel ) {
+            /* Check that the domain of max ref imposes its orientation */
+            if ( pt1->ref < mesh->tetra[qel].ref ) {
+              assert ( !MG_GET(pxt1->ori,voyp) );
+            }
+            else if ( pt1->ref > mesh->tetra[qel].ref ) {
+              assert ( MG_GET(pxt1->ori,voyp ) );
+            }
+          }
+          else {
+            /* Check that a non parallel external boundary face has always a good
+             * orientation */
+            if ( (pxt1->ftag[voyp] & MG_BDY) && !(pxt1->ftag[voyp] & MG_PARBDY) ) {
+              assert ( MG_GET( pxt1->ori,voyp ) );
+            }
+          }
+#endif
 
           /* update tags for edges */
           for ( j=0; j<3; j++ ) {
@@ -968,19 +982,33 @@ int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,char
             pxt1->ref[voyq]  = MG_MAX(pxt1->ref[voyq],pxt->ref[iq]);
             pxt1->ftag[voyq] = (pxt1->ftag[voyq] | pxt->ftag[iq]);
 
-            if ( pel ) {
-              if ( pt1->ref < mesh->tetra[pel].ref )  MG_CLR( pxt1->ori,voyq );
-              else if ( mesh->info.opnbdy && (pt1->ref == mesh->tetra[pel].ref) ) {
-                if ( pxt->ftag[iq] & MG_BDY ) {
-                  if ( MG_GET(pxt->ori,iq) )
-                    MG_SET( pxt1->ori,voyq );
-                  else
-                    MG_CLR( pxt1->ori,voyq );
-                }
-              }
-              else  MG_SET( pxt1->ori,voyq );
+            /* the face voyq of pxt1 is projected into the face iq of pxt so it
+             * takes its orientation */
+            if ( pxt->ftag[iq] & MG_BDY ) {
+              if ( MG_GET(pxt->ori,iq) )
+                MG_SET( pxt1->ori,voyq );
+              else
+                MG_CLR( pxt1->ori,voyq );
             }
-            else  MG_SET( pxt1->ori,voyq );
+
+#ifndef NDEBUG
+            if ( pel ) {
+              /* Check that the domain of max ref imposes its orientation */
+              if ( pt1->ref < mesh->tetra[pel].ref ) {
+                assert ( !MG_GET(pxt1->ori,voyq) );
+              }
+              else if ( pt1->ref > mesh->tetra[pel].ref ) {
+                assert ( MG_GET(pxt1->ori,voyq ) );
+              }
+            }
+            else {
+              /* Check that a non parallel external boundary face has always a good
+               * orientation */
+              if ( (pxt1->ftag[voyq] & MG_BDY) && !(pxt1->ftag[voyq] & MG_PARBDY) ) {
+                assert ( MG_GET( pxt1->ori,voyq ) );
+              }
+            }
+#endif
 
             /* update tags for edges */
             for ( j=0; j<3; j++ ) {
