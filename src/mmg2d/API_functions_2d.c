@@ -216,7 +216,7 @@ int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
     return 0;
   }
   /* other options */
-  mesh->info.fem      = MMG5_OFF;
+  mesh->info.setfem      = MMG5_OFF;
   return 1;
 }
 

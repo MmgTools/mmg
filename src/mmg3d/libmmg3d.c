@@ -1068,6 +1068,9 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
     fprintf(stdout,"\n  -- PHASE 1 : ANALYSIS\n");
   }
 
+  /* reset fem value to user setting (needed for multiple library call) */
+  mesh->info.fem = mesh->info.setfem;
+
   /* scaling mesh */
   if ( !MMG5_scaleMesh(mesh,met,NULL) )   _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
 
@@ -1276,6 +1279,10 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet) {
   chrono(ON,&(ctim[1]));
   MMG5_warnOrientation(mesh);
 
+  /** Free topologic tables (adja, xpoint, xtetra) resulting from a previous
+   * run */
+  MMG3D_Free_topoTables(mesh);
+
   if ( sol->np && (sol->np != mesh->np) ) {
     if ( mettofree ) {  MMG5_DEL_MEM(mesh,met->m);MMG5_SAFE_FREE (met); }
     _LIBMMG5_RETURN(mesh,sol,met,MMG5_STRONGFAILURE);
@@ -1301,6 +1308,9 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet) {
   if ( mesh->info.imprim > 0 ) {
     fprintf(stdout,"\n  -- PHASE 1 : ISOSURFACE DISCRETIZATION\n");
   }
+
+  /* reset fem value to user setting (needed for multiple library call) */
+  mesh->info.fem = mesh->info.setfem;
 
   /* scaling mesh */
   if ( !MMG5_scaleMesh(mesh,met,sol) ) {
@@ -1377,7 +1387,7 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet) {
   printim(ctim[3].gdif,stim);
   if ( mesh->info.imprim > 0 )
     fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
-  
+
   /* mesh adaptation */
   chrono(ON,&(ctim[4]));
   if ( mesh->info.imprim > 0 ) {
@@ -1520,6 +1530,10 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
   chrono(ON,&(ctim[1]));
   MMG5_warnOrientation(mesh);
 
+  /** Free topologic tables (adja, xpoint, xtetra) resulting from a previous
+   * run */
+  MMG3D_Free_topoTables(mesh);
+
   if ( mesh->info.lag == -1 ) {
     if ( mesh->info.imprim > 0 )
       fprintf(stdout,"\n  ## Warning: displacement mode for the rigidbody"
@@ -1563,6 +1577,9 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
   if ( mesh->info.imprim > 0 ) {
     fprintf(stdout,"\n  -- PHASE 1 : ANALYSIS\n");
   }
+
+  /* reset fem value to user setting (needed for multiple library call) */
+  mesh->info.fem = mesh->info.setfem;
 
   /* scaling mesh */
   if ( !MMG5_scaleMesh(mesh,met,disp) )   _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);

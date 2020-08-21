@@ -277,6 +277,9 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol met)
   /* Keep only one domain if asked */
   MMG2D_keep_only1Subdomain ( mesh, mesh->info.nsd );
 
+  /* reset fem value to user setting (needed for multiple library call) */
+  mesh->info.fem = mesh->info.setfem;
+
   /* Scale input mesh */
   if ( !MMG2D_scaleMesh(mesh,met,NULL) )  _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
 
@@ -519,6 +522,10 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol met) {
 
   if ( mesh->info.imprim > 0 )   fprintf(stdout,"\n  -- PHASE 1 : MESH GENERATION\n");
 
+  /* reset fem value to user setting (needed for multiple library call) */
+  mesh->info.fem = mesh->info.setfem;
+
+  /* scaling mesh */
   if ( !MMG2D_scaleMesh(mesh,met,NULL) )  _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
 
   if ( mesh->info.ddebug && !MMG5_chkmsh(mesh,1,0) )  _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
@@ -761,6 +768,10 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
     fprintf(stdout,"  MAXIMUM NUMBER OF TRIANGLES (NTMAX) : %8d\n",mesh->ntmax);
   }
 
+  /* reset fem value to user setting (needed for multiple library call) */
+  mesh->info.fem = mesh->info.setfem;
+
+  /* scaling mesh */
   if ( !MMG2D_scaleMesh(mesh,met,sol) ) {
     if ( mettofree ) { MMG5_SAFE_FREE (met); }
     _LIBMMG5_RETURN(mesh,sol,met,MMG5_STRONGFAILURE);
@@ -1020,6 +1031,11 @@ int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   }
 
   /* Analysis */
+
+  /* reset fem value to user setting (needed for multiple library call) */
+  mesh->info.fem = mesh->info.setfem;
+
+  /* scaling mesh  */
   if ( !MMG2D_scaleMesh(mesh,NULL,disp) )  _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
 
   if ( mesh->nt && !MMG2D_hashTria(mesh) )  _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
