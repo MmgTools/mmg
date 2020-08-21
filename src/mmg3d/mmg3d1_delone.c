@@ -206,6 +206,8 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
         }
 #ifdef USE_POINTMAP
         src = mesh->point[ip1].src;
+#else
+        src = 1;
 #endif
         ip = MMG3D_newPt(mesh,o,tag,src);
         if ( !ip ) {

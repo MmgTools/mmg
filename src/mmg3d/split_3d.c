@@ -3328,6 +3328,8 @@ int MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k,char metRidTyp) {
   cb[0] = 0.25; cb[1] = 0.25;  cb[2] = 0.25;  cb[3] = 0.25;
 #ifdef USE_POINTMAP
   src = mesh->point[pt[0]->v[0]].src;
+#else
+  src = 1;
 #endif
   ib = MMG3D_newPt(mesh,o,0,src);
   if ( !ib ) {
@@ -5305,6 +5307,8 @@ int MMG5_splitedg(MMG5_pMesh mesh, MMG5_pSol met,int iel, int iar, double crit){
 
 #ifdef USE_POINTMAP
   src = mesh->point[i0].src;
+#else
+  src = 1;
 #endif
   ip = MMG3D_newPt(mesh,o,tag,src);
 

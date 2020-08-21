@@ -268,6 +268,8 @@ int MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,int *list,
 
 #ifdef USE_POINTMAP
   src = mesh->point[na].src;
+#else
+  src = 1;
 #endif
   np  = MMG3D_newPt(mesh,m,0,src);
   if(!np){
