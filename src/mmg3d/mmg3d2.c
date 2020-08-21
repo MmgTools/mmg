@@ -1058,7 +1058,7 @@ static int MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
                                      " allocate a new point\n",__func__);
                              MMG5_INCREASE_MEM_MESSAGE();
                              return 0
-                             ,c,0,0);
+                             ,c,0,src);
       }
       sol->m[np] = mesh->info.ls;
       /* If user provide a metric, interpolate it at the new point */

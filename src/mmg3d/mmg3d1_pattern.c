@@ -138,7 +138,7 @@ static int MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
         MMG3D_POINT_REALLOC(mesh,met,ip,mesh->gap,
                              *warn=1;
                              break
-                             ,o,MG_NOTAG,0);
+                             ,o,MG_NOTAG,src);
       }
       if ( met->m ) {
         ier = MMG5_intmet(mesh,met,k,imax,ip,0.5);
