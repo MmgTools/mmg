@@ -105,7 +105,7 @@ static int MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itdeg, i
   MMG5_pPoint  p0,p1;
   double       len,lmax,o[3],hma2;
   double      *m1,*m2,*mp;
-  int          k,ip,ip1,ip2,list[MMG3D_LMAX+2],ilist,ns,ier,iadr;
+  int          k,ip,ip1,ip2,list[MMG3D_LMAX+2],ilist,ns,ier,iadr,src;
   char         imax,i,i1,i2;
   static char  mmgWarn0 = 0;
 
@@ -176,8 +176,12 @@ static int MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itdeg, i
     o[1] = 0.5*(p0->c[1] + p1->c[1]);
     o[2] = 0.5*(p0->c[2] + p1->c[2]);
 
-#warning Luca: no pointmap
-    ip = MMG3D_newPt(mesh,o,MG_NOTAG,0);
+#ifdef USE_POINTMAP
+    src = p0->src;
+#else
+    src = 1;
+#endif
+    ip = MMG3D_newPt(mesh,o,MG_NOTAG,src);
 
     if ( !ip )  {
       /* reallocation of point table */
