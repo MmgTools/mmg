@@ -479,6 +479,8 @@ int MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,
   c[2] = 0.5*( p0->c[2] + p1->c[2]);
 #ifdef USE_POINTMAP
   src = mesh->point[np].src;
+#else
+  src = 1;
 #endif
   nm = MMG3D_newPt(mesh,c,MG_BDY,src);
   if ( !nm ) {
