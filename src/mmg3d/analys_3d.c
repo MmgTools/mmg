@@ -90,7 +90,7 @@ void MMG3D_set_reqBoundaries(MMG5_pMesh mesh) {
  * \param mesh pointer towarad the mesh structure.
  * \return 0 if fail, 1 otherwise.
  *
- * topology: set adjacent, detect Moebius, flip faces, count connected comp.
+ * topology: set tria adjacency, detect Moebius, flip faces, count connected comp.
  *
  */
 int MMG5_setadj(MMG5_pMesh mesh){
@@ -789,7 +789,7 @@ int MMG3D_analys(MMG5_pMesh mesh) {
   if ( abs(mesh->info.imprim) > 5  || mesh->info.ddebug )
     fprintf(stdout,"  ** SETTING TOPOLOGY\n");
 
-  /* identify connexity */
+  /* identify connexity and flip orientation of faces if needed */
   if ( !MMG5_setadj(mesh) ) {
     fprintf(stderr,"\n  ## Topology problem. Exit program.\n");
     MMG5_DEL_MEM(mesh,hash.item);
@@ -824,7 +824,7 @@ int MMG3D_analys(MMG5_pMesh mesh) {
     return 0;
   }
 
-  /* set bdry entities to tetra */
+  /* set bdry entities to tetra and fill the orientation field */
   if ( !MMG5_bdrySet(mesh) ) {
     fprintf(stderr,"\n  ## Boundary problem. Exit program.\n");
     MMG5_DEL_MEM(mesh,hash.item);
@@ -843,7 +843,8 @@ int MMG3D_analys(MMG5_pMesh mesh) {
     return 0;
   }
 
-  /* check subdomains connected by a vertex and mark these vertex as corner and required */
+  /* check subdomains connected by a vertex and mark these vertex as corner and
+     required */
   MMG5_chkVertexConnectedDomains(mesh);
 
   /* build hash table for geometric edges */
