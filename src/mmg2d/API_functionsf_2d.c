@@ -273,6 +273,17 @@ FORTRAN_NAME(MMG2D_GET_VERTEX,mmg2d_get_vertex,
   return;
 }
 /**
+ * See \ref MMG2D_GetByIdx_vertex function in \ref mmg2d/libmmg2d.h file.
+ */
+FORTRAN_NAME(MMG2D_GETBYIDX_VERTEX,mmg2d_getbyidx_vertex,
+             (MMG5_pMesh *mesh, double* c0, double* c1, int* ref,
+              int* isCorner, int* isRequired, int* idx,int* retval),
+             (mesh,c0,c1,ref,isCorner,isRequired,idx, retval)) {
+  *retval = MMG2D_GetByIdx_vertex(*mesh,c0,c1,ref,isCorner,isRequired,*idx);
+  return;
+}
+
+/**
  * See \ref MMG2D_Set_vertices function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_SET_VERTICES,mmg2d_set_vertices,

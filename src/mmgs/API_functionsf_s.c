@@ -222,6 +222,18 @@ FORTRAN_NAME(MMGS_GET_VERTEX,mmgs_get_vertex,
   *retval = MMGS_Get_vertex(*mesh,c0,c1,c2,ref,isCorner,isRequired);
   return;
 }
+
+/**
+ * See \ref MMGS_GetByIdx_vertex function in \ref mmgs/libmmgs.h file.
+ */
+FORTRAN_NAME(MMGS_GETBYIDX_VERTEX,mmgs_getbyidx_vertex,
+             (MMG5_pMesh *mesh, double* c0, double* c1, double* c2, int* ref,
+              int* isCorner, int* isRequired, int* idx,int* retval),
+             (mesh,c0,c1,c2,ref,isCorner,isRequired,idx, retval)) {
+  *retval = MMGS_GetByIdx_vertex(*mesh,c0,c1,c2,ref,isCorner,isRequired,*idx);
+  return;
+}
+
 /**
  * See \ref MMGS_Set_vertices function in \ref mmgs/libmmgs.h file.
  */

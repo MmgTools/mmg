@@ -225,6 +225,16 @@ FORTRAN_NAME(MMG3D_GET_VERTEX,mmg3d_get_vertex,
   *retval = MMG3D_Get_vertex(*mesh,c0,c1,c2,ref,isCorner,isRequired);
   return;
 }
+/**
+ * See \ref MMG3D_GetByIdx_vertex function in \ref mmg3d/libmmg3d.h file.
+ */
+FORTRAN_NAME(MMG3D_GETBYIDX_VERTEX,mmg3d_getbyidx_vertex,
+             (MMG5_pMesh *mesh, double* c0, double* c1, double* c2, int* ref,
+              int* isCorner, int* isRequired, int* idx,int* retval),
+             (mesh,c0,c1,c2,ref,isCorner,isRequired,idx, retval)) {
+  *retval = MMG3D_GetByIdx_vertex(*mesh,c0,c1,c2,ref,isCorner,isRequired,*idx);
+  return;
+}
 
 /**
  * See \ref MMG3D_Set_vertices function in \ref mmg3d/libmmg3d.h file.

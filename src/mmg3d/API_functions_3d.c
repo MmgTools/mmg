@@ -410,21 +410,34 @@ int MMG3D_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2, int* r
     return 0;
   }
 
-  *c0  = mesh->point[mesh->npi].c[0];
-  *c1  = mesh->point[mesh->npi].c[1];
-  *c2  = mesh->point[mesh->npi].c[2];
+  return MMG3D_GetByIdx_vertex( mesh,c0,c1,c2,ref,isCorner,isRequired,mesh->npi);
+}
+
+int MMG3D_GetByIdx_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2, int* ref,
+                          int* isCorner, int* isRequired, int idx) {
+
+  if ( idx < 1 || idx > mesh->np ) {
+    fprintf(stderr,"\n  ## Error: %s: unable to get point at position %d.\n",
+            __func__,idx);
+    fprintf(stderr,"     Your vertices numbering goes from 1 to %d\n",mesh->np);
+    return 0;
+  }
+
+  *c0  = mesh->point[idx].c[0];
+  *c1  = mesh->point[idx].c[1];
+  *c2  = mesh->point[idx].c[2];
   if ( ref != NULL )
-    *ref = mesh->point[mesh->npi].ref;
+    *ref = mesh->point[idx].ref;
 
   if ( isCorner != NULL ) {
-    if ( mesh->point[mesh->npi].tag & MG_CRN )
+    if ( mesh->point[idx].tag & MG_CRN )
       *isCorner = 1;
     else
       *isCorner = 0;
   }
 
   if ( isRequired != NULL ) {
-    if ( mesh->point[mesh->npi].tag & MG_REQ )
+    if ( mesh->point[idx].tag & MG_REQ )
       *isRequired = 1;
     else
       *isRequired = 0;

@@ -950,6 +950,32 @@ int  MMGS_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2, int* r
                      int* isCorner, int* isRequired);
 /**
  * \param mesh pointer toward the mesh structure.
+ * \param c0 pointer toward the coordinate of the point along the first dimension.
+ * \param c1 pointer toward the coordinate of the point along the second dimension.
+ * \param c2 pointer toward the coordinate of the point along the third dimension.
+ * \param ref pointer to the point reference.
+ * \param isCorner pointer toward the flag saying if point is corner.
+ * \param isRequired pointer toward the flag saying if point is required.
+ * \param idx index of point to get.
+ * \return 1.
+ *
+ * Get coordinates \a c0, \a c1, \a c2 and reference \a ref of
+ * vertex \a idx of mesh.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMGS_GETBYIDX_VERTEX(mesh,c0,c1,c2,ref,isCorner,isRequired,idx,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * >     REAL(KIND=8), INTENT(OUT)     :: c0,c1,c2\n
+ * >     INTEGER                       :: ref,isCorner,isRequired,idx\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+ int  MMGS_GetByIdx_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2, int* ref,
+                           int* isCorner, int* isRequired,int idx);
+
+/**
+ * \param mesh pointer toward the mesh structure.
  * \param vertices pointer toward the table of the points coordinates.
  * The coordinates of the \f$i^{th}\f$ point are stored in
  * vertices[(i-1)*3]\@3.
