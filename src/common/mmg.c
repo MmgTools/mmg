@@ -35,20 +35,6 @@
 
 #include "mmgcommon.h"
 
-/* Declared in the header, but need to define in at most one compilation unit */
-int    (*MMG5_chkmsh)(MMG5_pMesh,int,int);
-int    (*MMG5_bezierCP)(MMG5_pMesh ,MMG5_Tria *,MMG5_pBezier ,char );
-double (*MMG5_lenSurfEdg)(MMG5_pMesh mesh,MMG5_pSol sol ,int ,int, char );
-int    (*MMG5_grad2met_ani)(MMG5_pMesh,MMG5_pSol,MMG5_pTria,int,int);
-int    (*MMG5_grad2metreq_ani)(MMG5_pMesh,MMG5_pSol,MMG5_pTria,int,int);
-int    (*MMG5_compute_meanMetricAtMarkedPoints)( MMG5_pMesh,MMG5_pSol);
-int    (*MMG5_indElt)(MMG5_pMesh mesh,int kel);
-int    (*MMG5_indPt)(MMG5_pMesh mesh,int kp);
-
-#ifdef USE_SCOTCH
-int    (*MMG5_renumbering)(int vertBoxNbr, MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol,int*);
-#endif
-
 /**
  * \param *prog pointer toward the program name.
  *
