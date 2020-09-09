@@ -32,7 +32,7 @@ ENDMACRO ( )
 #####         Copy an automatically generated header file to another place
 #####
 ###############################################################################
-MACRO ( COPY_FORTRAN_HEADER
+MACRO ( COPY_HEADER
     in_dir in_file out_dir out_file
     file_dependencies
     target_name
@@ -60,26 +60,41 @@ ENDMACRO ( )
 #####         and create the associated target
 #####
 ###############################################################################
-MACRO ( COPY_FORTRAN_HEADER_AND_CREATE_TARGET
-    binary_dir include_dir target_identifier )
+MACRO ( COPY_HEADERS_AND_CREATE_TARGET
+    source_dir binary_dir include_dir target_identifier )
 
-  COPY_FORTRAN_HEADER (
+  ADD_CUSTOM_TARGET(mmg${target_identifier}types_header ALL
+    DEPENDS
+    ${COMMON_SOURCE_DIR}/libmmgtypes.h )
+
+  ADD_CUSTOM_TARGET(mmg${target_identifier}_header ALL
+    DEPENDS
+    ${source_dir}/libmmg${target_identifier}.h )
+
+  COPY_HEADER (
+    ${COMMON_SOURCE_DIR} libmmgtypes.h
+    ${include_dir} libmmgtypes.h
+    mmg${target_identifier}types_header copy${target_identifier}_libmmgtypes )
+
+  COPY_HEADER (
+    ${source_dir} libmmg${target_identifier}.h
+    ${include_dir} libmmg${target_identifier}.h
+    mmg${target_identifier}_header copy_libmmg${target_identifier} )
+
+  COPY_HEADER (
     ${COMMON_BINARY_DIR} libmmgtypesf.h
     ${include_dir} libmmgtypesf.h
     mmg_fortran_header copy${target_identifier}_libmmgtypesf )
 
-  COPY_FORTRAN_HEADER (
-    ${binary_dir}
-    libmmg${target_identifier}f.h ${include_dir}
-    libmmg${target_identifier}f.h
-    mmg${target_identifier}_fortran_header copy_libmmg${target_identifier}f
-    )
+  COPY_HEADER (
+    ${binary_dir} libmmg${target_identifier}f.h
+    ${include_dir} libmmg${target_identifier}f.h
+    mmg${target_identifier}_fortran_header copy_libmmg${target_identifier}f )
 
   ADD_CUSTOM_TARGET(copy_${target_identifier}_headers ALL
     DEPENDS
     copy_libmmg${target_identifier}f copy${target_identifier}_libmmgtypesf
-    ${include_dir}/libmmg${target_identifier}.h
-    ${include_dir}/libmmgtypes.h )
+    copy_libmmg${target_identifier} copy${target_identifier}_libmmgtypes )
 
 ENDMACRO ( )
 
