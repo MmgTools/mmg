@@ -103,12 +103,8 @@ SET( mmgs_headers
 # Install header files in /usr/local or equivalent
 INSTALL(FILES ${mmgs_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/mmg/mmgs COMPONENT headers)
 
-COPY_FORTRAN_HEADER_AND_CREATE_TARGET ( ${MMGS_BINARY_DIR} ${MMGS_INCLUDE} s )
-
-# Copy header files in project directory at configuration step
-# (generated file don't exists yet or are outdated)
-FILE(INSTALL  ${mmgs_headers} DESTINATION ${MMGS_INCLUDE}
-  PATTERN "libmmg*f.h"  EXCLUDE)
+# Copy header files in project directory at build step
+COPY_HEADERS_AND_CREATE_TARGET ( ${MMGS_SOURCE_DIR} ${MMGS_BINARY_DIR} ${MMGS_INCLUDE} s )
 
 ############################################################################
 #####
