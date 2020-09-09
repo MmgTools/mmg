@@ -183,6 +183,8 @@ extern "C" {
 #define MMG5_SW 4
 #define MMG5_SD 8
 
+#cmakedefine USE_POINTMAP /*!< Flag to enable and export the pointmap used */
+
 /** Reset the customized signals and set the internal counters of points, edges,
  * tria and tetra to the suitable value (needed by users to recover their mesh
  * using the API) */
