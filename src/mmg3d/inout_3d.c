@@ -35,7 +35,21 @@
 
 #include "mmg3d.h"
 
-int MMG3D_openMesh(MMG5_pMesh mesh,const char *filename,FILE **inm,int *bin,
+/**
+ * \param imprim verbosity level (muted for stdout if -1)
+ * \param filename file to open
+ * \param inm pointer toward the file unit
+ * \param bin 1 if file will be at binary format
+ * \param modeASCII mode in which to open an ascii file ("r","r+","w","w+",...)
+ * \param modeASCII mode in which to open an ascii file ("r","r+","w","w+",...)
+ *
+ * \return -1 if lack of memory, 0 if fail to open file, 1 if success.
+ *
+ * Try to open a Medit file at asked mode (read only, write, etc) and store if
+ * file is binary (depending on the extension).
+ *
+ */
+int MMG3D_openMesh(int imprim,const char *filename,FILE **inm,int *bin,
                    char *modeASCII, char* modeBIN) {
   char        *ptr,*data;
   int         out,ier;
@@ -87,7 +101,7 @@ int MMG3D_openMesh(MMG5_pMesh mesh,const char *filename,FILE **inm,int *bin,
     }
   }
 
-  if ( mesh && mesh->info.imprim >= 0 ) {
+  if ( imprim >= 0 ) {
     fprintf(stdout,"  %%%% %s OPENED\n",data);
   }
   MMG5_SAFE_FREE(data);
@@ -1176,7 +1190,7 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
   FILE*       inm;
   int         bin,ier;
 
-  ier = MMG3D_openMesh(mesh,filename,&inm,&bin,"rb","rb");
+  ier = MMG3D_openMesh(mesh->info.imprim,filename,&inm,&bin,"rb","rb");
   if( ier < 1 ) return ier;
   ier = MMG3D_loadMesh_opened(mesh,inm,bin);
   if( ier < 1 ) return ier;
@@ -1325,7 +1339,7 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
 
   mesh->ver = 2;
 
-  if ( !MMG3D_openMesh(mesh,filename,&inm,&bin,"w","wb") ) {
+  if ( !MMG3D_openMesh(mesh->info.imprim,filename,&inm,&bin,"w","wb") ) {
     return 0;
   }
 

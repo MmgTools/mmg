@@ -393,9 +393,9 @@ char *MMG5_Get_filenameExt( char *filename ) {
 /**
  * \param path string containing a filename and its path
  *
- * \return a pointer toward the file basename.
+ * \return a pointer toward the allocated string that contains the file basename.
  *
- * Extract basename from a path.
+ * Extract basename from a path (allocate a string to store it).
  *
  */
 char *MMG5_Get_basename(char *path) {
@@ -410,9 +410,9 @@ char *MMG5_Get_basename(char *path) {
 /**
  * \param path string containing a filename and its path
  *
- * \return a pointer toward the file path.
+ * \return a pointer toward the path allocated here
  *
- * Remove filename from a path
+ * Remove filename from a path and return the path in a newly allocated string.
  *
  */
 char *MMG5_Get_path(char *path) {
