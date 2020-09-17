@@ -37,13 +37,14 @@
 
 #include <stdarg.h>
 
+#include "libmmgtypes.h"
+
 #include "chrono.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include "libmmgtypes.h"
 
 /*----------------------------- functions header -----------------------------*/
 /* Initialization functions */

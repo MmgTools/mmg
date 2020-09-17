@@ -35,9 +35,6 @@
 #include <math.h>
 #include <complex.h>
 
-@DEF_POSIX@
-@DEF_GNU@
-
 #if (defined(__APPLE__) && defined(__MACH__))
 #include <sys/sysctl.h>
 #elif defined(__unix__) || defined(__unix) || defined(unix)
@@ -50,7 +47,6 @@
 #include <windows.h>
 #endif
 
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -58,8 +54,6 @@ extern "C" {
 #include "eigenv.h"
 #include "libmmgcommon.h"
 
-#define MG_VER   "@CMAKE_RELEASE_VERSION@"
-#define MG_REL   "@CMAKE_RELEASE_DATE@"
 #define MG_CPY   "Copyright (c) Bdx INP/CNRS/Inria/UPMC, 2004-"
 #define MG_STR   "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"
 
@@ -182,8 +176,6 @@ extern "C" {
 /* file reading */
 #define MMG5_SW 4
 #define MMG5_SD 8
-
-#cmakedefine USE_POINTMAP /*!< Flag to enable and export the pointmap used */
 
 /** Reset the customized signals and set the internal counters of points, edges,
  * tria and tetra to the suitable value (needed by users to recover their mesh

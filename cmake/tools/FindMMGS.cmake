@@ -55,7 +55,7 @@ set(ENV_MMG_BUILDDIR "$ENV{MMG_BUILDDIR}")
 
 if ( NOT MMG_BUILDDIR )
   FIND_PATH(MMG_BUILDDIR_INTERNAL
-    NAMES src/common/mmgcommon.h
+    NAMES src/common/mmgcmakedefines.h
     HINTS ${ENV_MMG_BUILDDIR} ${MMG_DIR} ${ENV_MMG_DIR}
     PATH_SUFFIXES build Build BUILD builds Builds BUILDS
     DOC "The mmg build directory"

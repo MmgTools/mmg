@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Bx INP/CNRS/Inria/UBordeaux/UPMC, 2004-
+**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -21,63 +21,15 @@
 ** =============================================================================
 */
 
-#ifndef CHRONO_H
-#define CHRONO_H
+#ifndef MMGCMAKEDEFINE_H
+#define MMGCMAKEDEFINE_H
 
-#include <time.h>
-#include "mmgcommon.h"
+@DEF_POSIX@
+@DEF_GNU@
 
-#ifndef MMG_POSIX
-#include <windows.h>
-#else
-#include <sys/time.h>
-#include <sys/resource.h>
-#endif
+#define MG_VER   "@CMAKE_RELEASE_VERSION@"
+#define MG_REL   "@CMAKE_RELEASE_DATE@"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#ifndef  ON
-#define  RESET  0
-#define  ON     1
-#define  OFF    2
-#endif
-
-#define  BIG      1e6
-#define  BIG1     1e-6
-#define  TIMEMAX  12
-
-/**
- * \struct mytime
- * \brief Chrono object.
- *
- * mytime allow storage of chronograph informations.
- *
- */
-typedef struct mytime {
-  double  gini,gend,gdif,uini,uend,udif,sini,send,sdif;
-#ifdef MMG_POSIX
-  struct  timeval rutim;
-  struct  rusage  ru;
-#else
-  HANDLE        thisProcess;
-  FILETIME      ftIni, ftEnd, ftSys, ftUser;
-  SYSTEMTIME    stSys, stUser;
-  LARGE_INTEGER frequency;
-  LARGE_INTEGER rutim;
-#endif
-  int     call;
-} mytime;
-
-
-/* prototypes */
-void   chrono(int cmode,mytime *ptt);
-void   tminit(mytime *t,int maxtim);
-void   printim(double ,char *);
-
-#ifdef __cplusplus
-}
-#endif
+#cmakedefine USE_POINTMAP /*!< Flag to enable and export the pointmap used */
 
 #endif

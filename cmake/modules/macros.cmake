@@ -67,6 +67,10 @@ MACRO ( COPY_HEADERS_AND_CREATE_TARGET
     DEPENDS
     ${COMMON_SOURCE_DIR}/libmmgtypes.h )
 
+  ADD_CUSTOM_TARGET(mmg${target_identifier}cmakedefines_header ALL
+    DEPENDS
+    ${COMMON_BINARY_DIR}/mmgcmakedefines.h )
+
   ADD_CUSTOM_TARGET(mmg${target_identifier}_header ALL
     DEPENDS
     ${source_dir}/libmmg${target_identifier}.h )
@@ -75,6 +79,11 @@ MACRO ( COPY_HEADERS_AND_CREATE_TARGET
     ${COMMON_SOURCE_DIR} libmmgtypes.h
     ${include_dir} libmmgtypes.h
     mmg${target_identifier}types_header copy${target_identifier}_libmmgtypes )
+
+  COPY_HEADER (
+    ${COMMON_BINARY_DIR} mmgcmakedefines.h
+    ${include_dir} mmgcmakedefines.h
+    mmg${target_identifier}cmakedefines_header copy${target_identifier}_mmgcmakedefines )
 
   COPY_HEADER (
     ${source_dir} libmmg${target_identifier}.h
@@ -94,7 +103,8 @@ MACRO ( COPY_HEADERS_AND_CREATE_TARGET
   ADD_CUSTOM_TARGET(copy_${target_identifier}_headers ALL
     DEPENDS
     copy_libmmg${target_identifier}f copy${target_identifier}_libmmgtypesf
-    copy_libmmg${target_identifier} copy${target_identifier}_libmmgtypes )
+    copy_libmmg${target_identifier} copy${target_identifier}_libmmgtypes
+    copy${target_identifier}_mmgcmakedefines)
 
 ENDMACRO ( )
 

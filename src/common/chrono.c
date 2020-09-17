@@ -55,7 +55,7 @@ void  chrono(int cmode,mytime *ptt) {
     ptt->uini = ptt->uend = ptt->udif = 0.0;
   }
   else {
-#ifdef POSIX
+#ifdef MMG_POSIX
     gettimeofday(&(ptt->rutim), NULL);
 #else
 	  QueryPerformanceCounter(&ptt->rutim);
@@ -65,7 +65,7 @@ void  chrono(int cmode,mytime *ptt) {
     FileTimeToSystemTime(&ptt->ftUser, &ptt->stUser);
 #endif
     if ( cmode == ON ) {
-#ifdef POSIX
+#ifdef MMG_POSIX
       ptt->gini  = (double)((ptt->rutim.tv_sec ) + (ptt->rutim.tv_usec) * BIG1);
 
       getrusage(RUSAGE_SELF,&(ptt->ru));
@@ -83,7 +83,7 @@ void  chrono(int cmode,mytime *ptt) {
 #endif
     }
     else if ( cmode == OFF ) {
-#ifdef POSIX
+#ifdef MMG_POSIX
       ptt->gend  = (double)((ptt->rutim.tv_sec ) + (ptt->rutim.tv_usec) * BIG1);
 
       getrusage(RUSAGE_SELF,&(ptt->ru));
@@ -121,7 +121,7 @@ void  tminit(mytime *t,int maxtim) {
   mytime  *ptt;
   int      k;
 
-#ifndef POSIX
+#ifndef MMG_POSIX
   QueryPerformanceFrequency(&t[0].frequency);
 
   t[0].thisProcess = GetCurrentProcess();

@@ -28,6 +28,8 @@
 #include <stdarg.h>
 #include <stddef.h>
 
+#include "mmgcmakedefines.h"
+
 #ifndef _LIBMMGTYPES_H
 #define _LIBMMGTYPES_H
 

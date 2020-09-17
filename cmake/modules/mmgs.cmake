@@ -98,6 +98,7 @@ SET( mmgs_headers
   ${MMGS_BINARY_DIR}/libmmgsf.h
   ${COMMON_SOURCE_DIR}/libmmgtypes.h
   ${COMMON_BINARY_DIR}/libmmgtypesf.h
+  ${COMMON_BINARY_DIR}/mmgcmakedefines.h
   )
 
 # Install header files in /usr/local or equivalent
