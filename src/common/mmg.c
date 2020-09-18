@@ -368,7 +368,7 @@ void MMG5_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
  * \return pointer toward the filename extension or toward the end of the string
  * if no extension have been founded
  *
- * Get the extension of the filename string.
+ * Get the extension of the filename string. Do not consider '.o' as an extension.
  *
  */
 char *MMG5_Get_filenameExt( char *filename ) {
@@ -382,7 +382,7 @@ char *MMG5_Get_filenameExt( char *filename ) {
   dot = strrchr(filename, '.');
   lastpath = (pathsep == 0) ? NULL : strrchr (filename, pathsep);
 
-  if ( (!dot) || dot == filename || (lastpath>dot) ) {
+  if ( (!dot) || dot == filename || (lastpath>dot) || (!strcmp(dot,".o")) ) {
     /* No extension */
     return filename + strlen(filename);
   }
