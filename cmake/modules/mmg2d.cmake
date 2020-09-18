@@ -120,8 +120,10 @@ SET( mmg2d_headers
   ${COMMON_BINARY_DIR}/libmmgtypesf.h
   ${COMMON_BINARY_DIR}/mmgcmakedefines.h
   ${COMMON_BINARY_DIR}/mmgversion.h
-  ${COMMON_BINARY_DIR}/git_log_mmg.h
   )
+IF (NOT WIN32 OR MINGW)
+  LIST(APPEND mmg2d_headers  ${COMMON_BINARY_DIR}/git_log_mmg.h )
+ENDIF()
 
 # Install header files in /usr/local or equivalent
 INSTALL(FILES ${mmg2d_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/mmg/mmg2d COMPONENT headers )
