@@ -55,6 +55,7 @@ include(GNUInstallDirs)
 #####         Release version and date
 #####
 ###############################################################################
+
 SET (CMAKE_RELEASE_VERSION_MAJOR "5" )
 SET (CMAKE_RELEASE_VERSION_MINOR "4" )
 SET (CMAKE_RELEASE_VERSION_PATCH "3" )
@@ -76,10 +77,14 @@ ELSEIF(MINGW)
   SET (DEF_GNU "#define MMG_GNU")
 ENDIF ()
 
-# Create mmgcmakedefines.h file with the good release and architecture infos and
+# Create mmgcmakedefines.h file with the architecture infos and
 # the definition ot the USE_POINTMAP flag.
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/src/common/mmgcmakedefines.h.in
   ${PROJECT_BINARY_DIR}/src/common/mmgcmakedefines.h @ONLY)
+
+# Create mmgversion.h file with the release infos
+CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/src/common/mmgversion.h.in
+  ${PROJECT_BINARY_DIR}/src/common/mmgversion.h @ONLY)
 
 ###############################################################################
 #####
@@ -567,7 +572,7 @@ ENDIF ( BUILD_TESTING )
 IF (NOT WIN32 OR MINGW)
 
   ADD_CUSTOM_TARGET(GenerateGitHash
-    COMMAND ./git_log_mmg.sh ${PROJECT_SOURCE_DIR} ${PROJECT_BINARY_DIR}
+    COMMAND ./git_log_mmg.sh ${PROJECT_SOURCE_DIR} ${COMMON_BINARY_DIR}
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/scripts/
     COMMENT "Getting git commit hash"
   )

@@ -119,6 +119,8 @@ SET( mmg2d_headers
   ${COMMON_SOURCE_DIR}/libmmgtypes.h
   ${COMMON_BINARY_DIR}/libmmgtypesf.h
   ${COMMON_BINARY_DIR}/mmgcmakedefines.h
+  ${COMMON_BINARY_DIR}/mmgversion.h
+  ${COMMON_BINARY_DIR}/git_log_mmg.h
   )
 
 # Install header files in /usr/local or equivalent

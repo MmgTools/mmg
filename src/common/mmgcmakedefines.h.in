@@ -27,9 +27,6 @@
 @DEF_POSIX@
 @DEF_GNU@
 
-#define MG_VER   "@CMAKE_RELEASE_VERSION@"
-#define MG_REL   "@CMAKE_RELEASE_DATE@"
-
 #cmakedefine USE_POINTMAP /*!< Flag to enable and export the pointmap used */
 
 #endif

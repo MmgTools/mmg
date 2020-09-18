@@ -21,9 +21,6 @@
 ** =============================================================================
 */
 #include "mmg2d.h"
-#ifndef _WIN32
-#include "git_log_mmg.h"
-#endif
 #include "mmg2dexterns.h"
 
 /**
@@ -172,7 +169,7 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol met)
 
   if ( mesh->info.imprim >= 0 ) {
     fprintf(stdout,"\n  %s\n   MODULE MMG2D: %s (%s)\n  %s\n",
-            MG_STR,MG_VER,MG_REL,MG_STR);
+            MG_STR,MMG_VERSION_RELEASE,MMG_RELEASE_DATE,MG_STR);
 #ifndef _WIN32
     fprintf(stdout,"     git branch: %s\n",MMG_GIT_BRANCH);
     fprintf(stdout,"     git commit: %s\n",MMG_GIT_COMMIT);
@@ -420,7 +417,7 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol met) {
 
   if ( mesh->info.imprim >= 0 ) {
     fprintf(stdout,"\n  %s\n   MODULE MMG2D: %s (%s)\n  %s\n",
-            MG_STR,MG_VER,MG_REL,MG_STR);
+            MG_STR,MMG_VERSION_RELEASE,MMG_RELEASE_DATE,MG_STR);
 #ifndef _WIN32
     fprintf(stdout,"     git branch: %s\n",MMG_GIT_BRANCH);
     fprintf(stdout,"     git commit: %s\n",MMG_GIT_COMMIT);
@@ -644,7 +641,8 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
   int8_t    mettofree = 0;
 
   if ( mesh->info.imprim >= 0 ) {
-    fprintf(stdout,"\n  %s\n   MODULE MMG2D: %s (%s)\n  %s\n",MG_STR,MG_VER,MG_REL,MG_STR);
+    fprintf(stdout,"\n  %s\n   MODULE MMG2D: %s (%s)\n  %s\n",
+            MG_STR,MMG_VERSION_RELEASE,MMG_RELEASE_DATE,MG_STR);
 #ifndef _WIN32
     fprintf(stdout,"     git branch: %s\n",MMG_GIT_BRANCH);
     fprintf(stdout,"     git commit: %s\n",MMG_GIT_COMMIT);
@@ -935,7 +933,7 @@ int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
 
   if ( mesh->info.imprim >= 0 ) {
     fprintf(stdout,"\n  %s\n   MODULE MMG2D : %s (%s)\n  %s\n",
-            MG_STR,MG_VER,MG_REL,MG_STR);
+            MG_STR,MMG_VERSION_RELEASE,MMG_RELEASE_DATE,MG_STR);
 #ifndef _WIN32
     fprintf(stdout,"     git branch: %s\n",MMG_GIT_BRANCH);
     fprintf(stdout,"     git commit: %s\n",MMG_GIT_COMMIT);

@@ -71,6 +71,10 @@ MACRO ( COPY_HEADERS_AND_CREATE_TARGET
     DEPENDS
     ${COMMON_BINARY_DIR}/mmgcmakedefines.h )
 
+  ADD_CUSTOM_TARGET(mmg${target_identifier}version_header ALL
+    DEPENDS
+    ${COMMON_BINARY_DIR}/mmgversion.h )
+
   ADD_CUSTOM_TARGET(mmg${target_identifier}_header ALL
     DEPENDS
     ${source_dir}/libmmg${target_identifier}.h )
@@ -84,6 +88,11 @@ MACRO ( COPY_HEADERS_AND_CREATE_TARGET
     ${COMMON_BINARY_DIR} mmgcmakedefines.h
     ${include_dir} mmgcmakedefines.h
     mmg${target_identifier}cmakedefines_header copy${target_identifier}_mmgcmakedefines )
+
+  COPY_HEADER (
+    ${COMMON_BINARY_DIR} mmgversion.h
+    ${include_dir} mmgversion.h
+    mmg${target_identifier}version_header copy${target_identifier}_mmgversion )
 
   COPY_HEADER (
     ${source_dir} libmmg${target_identifier}.h
@@ -100,11 +109,21 @@ MACRO ( COPY_HEADERS_AND_CREATE_TARGET
     ${include_dir} libmmg${target_identifier}f.h
     mmg${target_identifier}_fortran_header copy_libmmg${target_identifier}f )
 
-  ADD_CUSTOM_TARGET(copy_${target_identifier}_headers ALL
-    DEPENDS
-    copy_libmmg${target_identifier}f copy${target_identifier}_libmmgtypesf
+  SET ( tgt_list copy_libmmg${target_identifier}f copy${target_identifier}_libmmgtypesf
     copy_libmmg${target_identifier} copy${target_identifier}_libmmgtypes
-    copy${target_identifier}_mmgcmakedefines)
+    copy${target_identifier}_mmgcmakedefines copy${target_identifier}_mmgversion )
+
+  IF (NOT WIN32 OR MINGW)
+    COPY_HEADER (
+      ${COMMON_BINARY_DIR} git_log_mmg.h
+      ${include_dir} git_log_mmg.h
+      GenerateGitHash copy${target_identifier}_mmggithash )
+
+    LIST ( APPEND tgt_list copy${target_identifier}_mmggithash)
+  ENDIF ()
+
+  ADD_CUSTOM_TARGET (copy_${target_identifier}_headers ALL
+    DEPENDS ${tgt_list} )
 
 ENDMACRO ( )
 

@@ -54,7 +54,6 @@ extern "C" {
 #include "eigenv.h"
 #include "libmmgcommon.h"
 
-#define MG_CPY   "Copyright (c) Bdx INP/CNRS/Inria/UPMC, 2004-"
 #define MG_STR   "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"
 
 /** Check if \a a and \a b have the same sign */
