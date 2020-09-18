@@ -8,9 +8,12 @@ HEADER_FILE="git_log_mmg.h"
 # test if $HEADER_FILE is present
 if [ ! -f "$MMG_BINARY_DIR/$HEADER_FILE" ]; then
    \touch $MMG_BINARY_DIR/$HEADER_FILE
+   echo "#ifndef _GIT_LOG_MMG_H" >> "$MMG_BINARY_DIR/$HEADER_FILE"
+   echo "#define _GIT_LOG_MMG_H" >> "$MMG_BINARY_DIR/$HEADER_FILE"
    echo "#define MMG_GIT_BRANCH \"No git branch found\"" >> "$MMG_BINARY_DIR/$HEADER_FILE"
    echo "#define MMG_GIT_COMMIT \"No git commit found\"" >> "$MMG_BINARY_DIR/$HEADER_FILE"
    echo "#define MMG_GIT_DATE   \"No git commit found\"" >> "$MMG_BINARY_DIR/$HEADER_FILE"
+   echo "#endif" >> "$MMG_BINARY_DIR/$HEADER_FILE"
 fi
 
 # parameter
@@ -36,9 +39,12 @@ if [ $git_is_present -eq 1 ]; then
    # erase any previous version file
    \rm -f $MMG_BINARY_DIR/$HEADER_FILE"_tmp"
    \touch $MMG_BINARY_DIR/$HEADER_FILE"_tmp"
+   echo "#ifndef _GIT_LOG_MMG_H" >> $MMG_BINARY_DIR/$HEADER_FILE"_tmp"
+   echo "#define _GIT_LOG_MMG_H" >> $MMG_BINARY_DIR/$HEADER_FILE"_tmp"
    echo "#define MMG_GIT_BRANCH \"$git_branch\"" >> $MMG_BINARY_DIR/$HEADER_FILE"_tmp"
    echo "#define MMG_GIT_COMMIT \"$git_commit\"" >> $MMG_BINARY_DIR/$HEADER_FILE"_tmp"
    echo "#define MMG_GIT_DATE   \"$git_date\""   >> $MMG_BINARY_DIR/$HEADER_FILE"_tmp"
+   echo "#endif" >> $MMG_BINARY_DIR/$HEADER_FILE"_tmp"
 
    # diff
    diff=`diff $MMG_BINARY_DIR/$HEADER_FILE"_tmp" "$MMG_BINARY_DIR/$HEADER_FILE"`
