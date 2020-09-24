@@ -551,9 +551,10 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
 
 int MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
   float       fp1,fp2,hausd;
-  int         ref,i,j,ret,npar,nbr,br;
+  int         ref,i,j,ret,npar,nbr,br,rin,rex,split;
   char       *ptr,buf[256],data[256];
   FILE       *in;
+  fpos_t     position;
 
   /* check for parameter file */
   strcpy(data,mesh->namein);
@@ -578,7 +579,7 @@ int MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
   }
   if ( mesh->info.imprim >= 0 )
     fprintf(stdout,"\n  %%%% %s OPENED\n",data);
-  
+
   /* read parameters */
   while ( !feof(in) ) {
     /* scan line */
@@ -586,11 +587,41 @@ int MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
     if ( !ret || feof(in) )  break;
     for (i=0; i<strlen(data); i++) data[i] = tolower(data[i]);
 
-    /* check for condition type */
-    if ( !strcmp(data,"parameters") ) {
-      MMG_FSCANF(in,"%d",&npar);
-      if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_numberOfLocalParam,npar) )
+    /* Read user-defined references for the LS mode */
+    if ( !strcmp(data,"lsreferences") ) {
+      ret = fscanf(in,"%d",&npar);
+      if ( !ret ) {
+        fprintf(stderr,"  %%%% Wrong format for lsreferences: %d\n",npar);
         return 0;
+      }
+
+      if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_numberOfMat,npar) ) {
+        return 0;
+      }
+      for (i=0; i<mesh->info.nmat; i++) {
+        MMG_FSCANF(in,"%d",&ref);
+        fgetpos(in,&position);
+        MMG_FSCANF(in,"%255s",data);
+        split = MMG5_MMAT_NoSplit;
+        if ( strcmp(data,"nosplit") ) {
+          fsetpos(in,&position);
+          split = MMG5_MMAT_Split;
+          MMG_FSCANF(in,"%d",&rin);
+          MMG_FSCANF(in,"%d",&rex);
+        }
+        if ( !MMG3D_Set_multiMat(mesh,met,ref,split,rin,rex) ) {
+          return 0;
+        }
+      }
+    }
+    /* Read user-defined local parameters and store them in the structure info->par */
+    else if ( !strcmp(data,"parameters") ) {
+      ret = fscanf(in,"%d",&npar);
+
+      if ( !ret ) {
+        fprintf(stderr,"  %%%% Wrong format for parameters: %d\n",npar);
+        return 0;
+      }
 
       for (i=0; i<mesh->info.npar; i++) {
         ret = fscanf(in,"%d %255s ",&ref,buf);

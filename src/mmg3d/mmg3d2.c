@@ -682,7 +682,7 @@ static int MMG3D_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
                 fprintf(stderr,"  Exit program.\n");
                 return 0);
   MMG5_SAFE_CALLOC(tmp,mesh->npmax+1,double,return 0);
-  
+
   /* Include tetras with very poor quality that are connected to the negative part */
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
@@ -1224,7 +1224,7 @@ static int MMG3D_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol) {
   MMG5_pTetra   pt;
   double        v;
   int           k,ip,ref,refint,refext,ier;
-  char          nmns,npls,nz,i;
+  char     nmns,npls,nz,i;
 
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
@@ -1248,13 +1248,13 @@ static int MMG3D_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol) {
 
     if ( npls ) {
       if ( ier ) {
-        assert(!nmns);
+      assert(!nmns);
         pt->ref = refext;
       }
     }
     else {
       if ( ier ) {
-        assert(nmns);
+      assert(nmns);
         pt->ref = refint;
       }
     }
@@ -1280,7 +1280,7 @@ int MMG3D_update_xtetra ( MMG5_pMesh mesh ) {
     /* In non ls mode, xtetra are alread updated */
     return 1;
   }
-  
+
   /* Opnbdy mode uses data stored in xtetra but in iso mode, the new triangles
    * created by the ls discretization haven't been stored inside the xtetra */
   if ( !mesh->xtetra ) {
@@ -1642,7 +1642,7 @@ int MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int nd
   iq    = MMG5_idir[iface][MMG5_iprv2[iedg]];
   nump  = pt->v[ip];
   numq  = pt->v[iq];
-  
+
   /* Case when nump does not have any interior (resp. ext.) tetra which will not
      disappear : search for start in ball of q */
   if ( !ndepmin || !ndepplus ) {

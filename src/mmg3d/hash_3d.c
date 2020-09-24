@@ -1199,9 +1199,9 @@ int MMG5_bdryTria(MMG5_pMesh mesh, int ntmesh) {
   MMG5_pPoint    ppt;
   MMG5_pxTetra   pxt;
   MMG5_pxPrism   pxpr;
-  MMG5_Hash      hash;
-  int            ref,*adja,adj,k,ia,ib,ic,kt, tofree=0,ntinit;
-  char           i;
+  MMG5_Hash     hash;
+  int       ref,*adja,adj,k,ia,ib,ic,kt, tofree=0,ntinit;
+  char      i;
 
   hash.item = NULL;
 
@@ -1300,7 +1300,10 @@ int MMG5_bdryTria(MMG5_pMesh mesh, int ntmesh) {
         }
         if ( adj ) {
           if ( mesh->info.iso ) {
-            /* Triangle at the interface between two tets is set to MG_ISO ref */
+            /* Triangle at the interface between two tets is set to the user-defined ref if any, or else to MG_ISO ref */
+            if ( pxt && pxt->ftag[i] & MG_BDY )
+              ptt->ref = pxt->ref[i];
+            else
             ptt->ref = MG_ISO;
           }
           /* useful only when saving mesh or in ls mode */
@@ -1434,7 +1437,7 @@ int MMG5_bdryTria(MMG5_pMesh mesh, int ntmesh) {
  *   tria array.
  *
  * - Check the matching between actual and given number of faces in the mesh:
- *   Count the number of faces in mesh and compare this number to the number of
+ * Count the number of faces in mesh and compare this number to the number of
  *   given triangles.
  *
  * - If the founded number exceed the given one, add the missing
@@ -1453,7 +1456,7 @@ int MMG5_chkBdryTria(MMG5_pMesh mesh) {
   int            *adja,adj,k,kk,i,j,ntmesh;
   int            ia,ib,ic, nbl,nt,ntpres;
   int            iface;
-  MMG5_Hash      hashElt, hashTri;
+  MMG5_Hash     hashElt, hashTri;
 
   /** Step 1: scan the mesh and count the boundaries */
   ntmesh = ntpres = 0;
@@ -1574,9 +1577,9 @@ int MMG5_chkBdryTria(MMG5_pMesh mesh) {
    * user */
   if ( mesh->nt ) {
     if ( ! MMG5_hashNew(mesh,&hashElt,0.51*ntmesh,1.51*ntmesh) ) return 0;
-    // Hash the boundaries founded in the mesh
+    // Hash the boundaries found in the mesh
     if ( mesh->info.opnbdy) {
-      /* We want to keep the internal triangles: we mus hash all the tetra faces */
+      /* We want to keep the internal triangles: we must hash all the tetra faces */
       for (k=1; k<=mesh->ne; k++) {
         pt = &mesh->tetra[k];
         if ( !MG_EOK(pt) )  continue;

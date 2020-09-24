@@ -648,3 +648,65 @@ const char* MMG5_Get_typeName(enum MMG5_type typ)
     return "MMG5_Unknown";
   }
 }
+
+int MMG5_Set_multiMat(MMG5_pMesh mesh,MMG5_pSol sol,int ref,
+                      int split,int rin,int rex){
+  MMG5_pMat mat;
+  int k;
+
+  if ( !mesh->info.nmat ) {
+    fprintf(stderr,"\n  ## Error: %s: You must set the number of material",__func__);
+    fprintf(stderr," with the MMG2D_Set_iparameters function before setting");
+    fprintf(stderr," values in multi material structure. \n");
+    return 0;
+  }
+  if ( mesh->info.nmati >= mesh->info.nmat ) {
+    fprintf(stderr,"\n  ## Error: %s: unable to set a new material.\n",
+            __func__);
+    fprintf(stderr,"    max number of materials: %d\n",mesh->info.nmat);
+    return 0;
+  }
+  if ( ref < 0 ) {
+    fprintf(stderr,"\n  ## Error: %s: negative references are not allowed.\n",
+            __func__);
+    return 0;
+  }
+
+  for (k=0; k<mesh->info.nmati; k++) {
+    mat = &mesh->info.mat[k];
+
+    if ( mat->ref == ref ) {
+      mat->dospl = split;
+      if ( split ) {
+        mat->rin   = rin;
+        mat->rex   = rex;
+      }
+      else {
+        mat->rin = mat->ref;
+        mat->rex = mat->ref;
+      }
+      if ( (mesh->info.imprim > 5) || mesh->info.ddebug ) {
+        fprintf(stderr,"\n  ## Warning: %s: new materials (interior, exterior)",
+                __func__);
+        fprintf(stderr," for material of ref %d\n",ref);
+      }
+      return 1;
+    }
+  }
+
+  if ( ( split != MMG5_MMAT_Split ) && ( split != MMG5_MMAT_NoSplit ) ) {
+    fprintf(stderr,"\n ## Error: %s: unexpected value for the 'split' argument."
+            " You must use the MMG5_MMAT_Split or MMG5_MMAT_NpSplit keywords \n",
+            __func__);
+    return 0;
+  }
+
+  mesh->info.mat[mesh->info.nmati].ref   = ref;
+  mesh->info.mat[mesh->info.nmati].dospl = split;
+  mesh->info.mat[mesh->info.nmati].rin   = rin;
+  mesh->info.mat[mesh->info.nmati].rex   = rex;
+
+  mesh->info.nmati++;
+
+  return 1;
+}

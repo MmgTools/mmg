@@ -1185,6 +1185,7 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
   _LIBMMG5_RETURN(mesh,met,sol,MMG5_SUCCESS);
 }
 
+/* Level set function discretization and remeshing mode */
 int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet) {
   MMG5_pSol met=NULL;
   mytime    ctim[TIMEMAX];
@@ -1245,7 +1246,7 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet) {
     _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
   }
 
-  /* specific meshing */
+  /* Specific meshing */
   if ( met && met->np ) {
   if ( mesh->info.optim ) {
       printf("\n  ## ERROR: MISMATCH OPTIONS: OPTIM OPTION CAN NOT BE USED"
@@ -1354,8 +1355,8 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet) {
   if ( mesh->info.imprim > 0 ) {
     fprintf(stdout,"\n  -- PHASE 2 : ANALYSIS\n");
   }
-
-  /* specific meshing */
+  
+  /* Specific meshing */
   if ( mesh->info.optim ) {
     if ( !MMG3D_doSol(mesh,met) ) {
       if ( mettofree ) { MMG5_DEL_MEM(mesh,met->m);MMG5_SAFE_FREE (met); }

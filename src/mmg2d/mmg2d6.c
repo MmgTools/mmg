@@ -183,53 +183,11 @@ double MMG2D_vfrac(MMG5_pMesh mesh,MMG5_pSol sol,int k,int pm) {
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the sol structure.
- * \return 1 if success.
+ * \param mesh pointer toward the mesh
  *
- * Isosurface discretization
+ * Reset MG_ISO vertex and edge references to 0.
  *
- **/
-
-/* Identify whether a triangle with reference ref should be split, and the labels of the resulting triangles */
-int MMG2D_isSplit(MMG5_pMesh mesh,int ref,int *refint,int *refext) {
-  MMG5_pMat    pm;
-  int          k;
-
-  /* Check in the info->mat table if reference ref is supplied by the user */
-  for (k=0; k<mesh->info.nmat; k++) {
-    pm = &mesh->info.mat[k];
-    if ( pm->ref == ref ) {
-      if ( !pm->dospl ) return 0;
-      else {
-        *refint = pm->rin;
-        *refext = pm->rex;
-        return 1;
-      }
-    }
-  }
-
-  /* Default case: split with references MG_MINUS, MG_PLUS */
-  *refint = MG_MINUS;
-  *refext = MG_PLUS;
-  return 1;
-
-}
-
-/* Retrieve the initial domain reference associated to the (split) reference ref */
-int MMG2D_getIniRef(MMG5_pMesh mesh,int ref) {
-  MMG5_pMat     pm;
-  int           k;
-
-  for (k=0; k<mesh->info.nmat; k++) {
-    pm = &mesh->info.mat[k];
-    if ( pm->ref == ref && !pm->dospl ) return pm->ref;
-    if ( ref == pm->rin || ref == pm->rex ) return pm->ref;
-  }
-  return ref;
-}
-
-/* Reset MG_ISO vertex and edge references to 0 */
+ */
 int MMG2D_resetRef(MMG5_pMesh mesh) {
   MMG5_pTria      pt;
   MMG5_pPoint     p0;
@@ -251,7 +209,7 @@ int MMG2D_resetRef(MMG5_pMesh mesh) {
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !pt->v[0] ) continue;
-    ref = MMG2D_getIniRef(mesh,pt->ref);
+    ref = MMG5_getIniRef(mesh,pt->ref);
     pt->ref = ref;
   }
 
@@ -890,7 +848,7 @@ int MMG2D_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol met){
       np = MMG5_hashGet(&hash,ip0,ip1);
       if ( np ) continue;
 
-      if ( !MMG2D_isSplit(mesh,pt->ref,&refint,&refext) ) continue;
+      if ( !MMG5_isSplit(mesh,pt->ref,&refint,&refext) ) continue;
 
       v0 = sol->m[ip0];
       v1 = sol->m[ip1];
@@ -1001,7 +959,7 @@ int MMG2D_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol){
     }
 
     assert(nz < 3);
-    ier = MMG2D_isSplit(mesh,ref,&refint,&refext);
+    ier = MMG5_isSplit(mesh,ref,&refint,&refext);
 
     if ( npl ) {
       if ( ier ) {
