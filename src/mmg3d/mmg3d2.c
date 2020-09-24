@@ -315,7 +315,7 @@ int MMG3D_resetRef(MMG5_pMesh mesh) {
 
   /* Travel edges and reset tags at edges extremities */
 
-#warning if we choose to not delete triangles the loop over the tet is useless
+
   /* Reset ref and tags at ISO points */
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
@@ -1017,7 +1017,7 @@ static int MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
   MMG5_pPoint   p0,p1;
   MMG5_Hash     hash;
   double        c[3],v0,v1,s;
-  int           vx[6],nb,k,ip0,ip1,np,ns,ne,ier,refext,refint;
+  int           vx[6],nb,k,ip0,ip1,np,ns,ne,ier,src,refext,refint;
   char          ia,j,npneg;
   static char   mmgWarn = 0;
 
@@ -1117,14 +1117,19 @@ static int MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
       c[1] = p0->c[1] + s*(p1->c[1]-p0->c[1]);
       c[2] = p0->c[2] + s*(p1->c[2]-p0->c[2]);
 
-      np = MMG3D_newPt(mesh,c,0);
+#ifdef USE_POINTMAP
+      src = p0->src;
+#else
+      src = 1;
+#endif
+      np = MMG3D_newPt(mesh,c,0,src);
       if ( !np ) {
         MMG3D_POINT_REALLOC(mesh,sol,np,MMG5_GAP,
                              fprintf(stderr,"\n  ## Error: %s: unable to"
                                      " allocate a new point\n",__func__);
                              MMG5_INCREASE_MEM_MESSAGE();
                              return 0
-                             ,c,0);
+                             ,c,0,src);
       }
       sol->m[np] = mesh->info.ls;
       /* If user provide a metric, interpolate it at the new point */

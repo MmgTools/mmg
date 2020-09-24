@@ -225,6 +225,16 @@ FORTRAN_NAME(MMG3D_GET_VERTEX,mmg3d_get_vertex,
   *retval = MMG3D_Get_vertex(*mesh,c0,c1,c2,ref,isCorner,isRequired);
   return;
 }
+/**
+ * See \ref MMG3D_GetByIdx_vertex function in \ref mmg3d/libmmg3d.h file.
+ */
+FORTRAN_NAME(MMG3D_GETBYIDX_VERTEX,mmg3d_getbyidx_vertex,
+             (MMG5_pMesh *mesh, double* c0, double* c1, double* c2, int* ref,
+              int* isCorner, int* isRequired, int* idx,int* retval),
+             (mesh,c0,c1,c2,ref,isCorner,isRequired,idx, retval)) {
+  *retval = MMG3D_GetByIdx_vertex(*mesh,c0,c1,c2,ref,isCorner,isRequired,*idx);
+  return;
+}
 
 /**
  * See \ref MMG3D_Set_vertices function in \ref mmg3d/libmmg3d.h file.
@@ -913,17 +923,6 @@ FORTRAN_NAME(MMG3D_SET_LOCALPARAMETER,mmg3d_set_localparameter,
 }
 
 /**
- * See \ref MMG3D_Set_multiMat function in \ref mmg3d/libmmg3d.h file.
- */
-FORTRAN_NAME(MMG3D_SET_MULTIMAT,mmg3d_set_multimat,
-             (MMG5_pMesh *mesh,MMG5_pSol *sol, int *ref,int *split,
-              int* rin,int* rex, int* retval),
-             (mesh,sol,ref,split,rin,rex,retval)){
-  *retval = MMG3D_Set_multiMat(*mesh,*sol,*ref,*split,*rin,*rex);
-  return;
-}
-
-/**
  * See \ref MMG3D_Free_allSols function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_FREE_ALLSOLS,mmg3d_free_allsols,
@@ -934,6 +933,8 @@ FORTRAN_NAME(MMG3D_FREE_ALLSOLS,mmg3d_free_allsols,
 
   return;
 }
+
+
 /**
  * See \ref MMG3D_Free_all function in \ref mmg3d/libmmg3d.h file.
  */

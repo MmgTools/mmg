@@ -1180,7 +1180,11 @@ int MMG5_hGeom(MMG5_pMesh mesh) {
  *
  * \return 0 if failed, 1 otherwise.
  *
- * Identify boundary triangles.
+ * Fill tria array with missing triangles:
+ * - if called from the first time, xtetra is not allocated so missing triangles
+ *    may be founded at domains interface or external boundary.
+ * - Otherwise, the tria array is reconstructed from the xtetra
+ *   infos.
  *
  * \remark mesh->xtetra is not allocated when \ref MMG5_bdryTria is called by
  * \ref MMG3D_analys in mesh adp mode but it is allocated when called by
@@ -1195,10 +1199,10 @@ int MMG5_bdryTria(MMG5_pMesh mesh, int ntmesh) {
   MMG5_pPoint    ppt;
   MMG5_pxTetra   pxt;
   MMG5_pxPrism   pxpr;
-  MMG5_Hash     hash;
-  int       ref,*adja,adj,k,ia,ib,ic,kt, tofree=0,ntinit;
-  char      i;
-  
+  MMG5_Hash      hash;
+  int            ref,*adja,adj,k,ia,ib,ic,kt, tofree=0,ntinit;
+  char           i;
+
   hash.item = NULL;
 
   ntinit = mesh->nt;
@@ -1241,9 +1245,11 @@ int MMG5_bdryTria(MMG5_pMesh mesh, int ntmesh) {
         pt1 = &mesh->tetra[adj];
 
         if ( (!mesh->info.opnbdy) || (!mesh->xtetra) ) {
+          /* Classic mode (no open bdy) or no info stored in xtetra (first
+           * call) */
           if ( adj && ( pt->ref <= pt1->ref) )  continue;
-        }
-        else {
+        } else {
+          /* info stored in xtetra and opnbdy mode */
           if ( adj && ( (pt->ref<pt1->ref) || (!pt->xt) ||
                         (!(pxt->ftag[i] & MG_BDY)) || (!MG_GET(pxt->ori,i) ) ) )
             continue;
@@ -1255,6 +1261,7 @@ int MMG5_bdryTria(MMG5_pMesh mesh, int ntmesh) {
 
         kt = MMG5_hashGetFace(&hash,ia,ib,ic);
         if ( kt ) {
+          /* Face is already stored */
           continue;
         }
         else if ( mesh->nprism ) {
@@ -1266,6 +1273,7 @@ int MMG5_bdryTria(MMG5_pMesh mesh, int ntmesh) {
           }
         }
 
+        /* face does not exists: add it in tria array */
         mesh->nt++;
         ptt = &mesh->tria[mesh->nt];
         ptt->v[0] = pt->v[MMG5_idir[i][0]];
@@ -1292,11 +1300,8 @@ int MMG5_bdryTria(MMG5_pMesh mesh, int ntmesh) {
         }
         if ( adj ) {
           if ( mesh->info.iso ) {
-            /* Triangle at the interface between two tets is set to the user-defined ref if any, or else to MG_ISO ref */
-            if ( pxt && pxt->ftag[i] & MG_BDY )
-              ptt->ref = pxt->ref[i];
-            else
-              ptt->ref = MG_ISO;
+            /* Triangle at the interface between two tets is set to MG_ISO ref */
+            ptt->ref = MG_ISO;
           }
           /* useful only when saving mesh or in ls mode */
           else {
@@ -1423,10 +1428,22 @@ int MMG5_bdryTria(MMG5_pMesh mesh, int ntmesh) {
  * \param mesh pointer toward the mesh structure.
  * \return 1 if success, 0 otherwise.
  *
- * Check the matching between actual and given number of faces in the mesh:
- * Count the number of faces in mesh and compare this number to the number of
- * given triangles.  If the founded number exceed the given one, add the missing
- * boundary triangles.  Do nothing otherwise.
+ * - Remove double triangles from tria array.
+ *
+ * - Remove triangles that do not belong to a boundary (non opnbdy mode) from
+ *   tria array.
+ *
+ * - Check the matching between actual and given number of faces in the mesh:
+ *   Count the number of faces in mesh and compare this number to the number of
+ *   given triangles.
+ *
+ * - If the founded number exceed the given one, add the missing
+ *   boundary triangles (call to MMG5_bdryTria). Do nothing otherwise.
+ *
+ * - Fill the adjacency relationship between prisms and tetra (fill adjapr with
+ *   a negative value to mark this special faces).
+ *
+ * - Set to required the triangles at interface betwen prisms and tet.
  *
  */
 int MMG5_chkBdryTria(MMG5_pMesh mesh) {
@@ -1436,7 +1453,7 @@ int MMG5_chkBdryTria(MMG5_pMesh mesh) {
   int            *adja,adj,k,kk,i,j,ntmesh;
   int            ia,ib,ic, nbl,nt,ntpres;
   int            iface;
-  MMG5_Hash     hashElt, hashTri;
+  MMG5_Hash      hashElt, hashTri;
 
   /** Step 1: scan the mesh and count the boundaries */
   ntmesh = ntpres = 0;
@@ -1457,7 +1474,7 @@ int MMG5_chkBdryTria(MMG5_pMesh mesh) {
         ++ntmesh;
     }
   }
-  
+
   if ( mesh->info.opnbdy && mesh->xtetra ) {
     /* We want to preserve internal triangle and we came from bdryBuild: we need
      * to count the preserved boudaries */
@@ -1557,9 +1574,9 @@ int MMG5_chkBdryTria(MMG5_pMesh mesh) {
    * user */
   if ( mesh->nt ) {
     if ( ! MMG5_hashNew(mesh,&hashElt,0.51*ntmesh,1.51*ntmesh) ) return 0;
-    // Hash the boundaries found in the mesh
+    // Hash the boundaries founded in the mesh
     if ( mesh->info.opnbdy) {
-      /* We want to keep the internal triangles: we must hash all the tetra faces */
+      /* We want to keep the internal triangles: we mus hash all the tetra faces */
       for (k=1; k<=mesh->ne; k++) {
         pt = &mesh->tetra[k];
         if ( !MG_EOK(pt) )  continue;
@@ -1571,8 +1588,7 @@ int MMG5_chkBdryTria(MMG5_pMesh mesh) {
           if ( !MMG5_hashFace(mesh,&hashElt,ia,ib,ic,4*k+i) ) return 0;
         }
       }
-    }
-    else {
+    } else {
       for (k=1; k<=mesh->ne; k++) {
         pt = &mesh->tetra[k];
         if ( !MG_EOK(pt) )  continue;
@@ -1622,6 +1638,7 @@ int MMG5_chkBdryTria(MMG5_pMesh mesh) {
         }
       }
     }
+
 
     // Travel through the tria, delete those that are not in the hash tab or
     // that are stored more that once.
@@ -1722,6 +1739,7 @@ int MMG5_chkBdryTria(MMG5_pMesh mesh) {
     fprintf(stderr,"\n  ## Warning: %s: %d extra boundaries founded\n",
             __func__,nbl);
 
+  /* Fill missing bdy triangles */
   return MMG5_bdryTria(mesh,ntmesh);
 }
 
@@ -1865,9 +1883,7 @@ int MMG5_bdrySet(MMG5_pMesh mesh) {
             ptt = &mesh->tria[kt];
 
             /* Set flag to know if tetra has the same orientation than the
-             * triangle: here, we can not suppose that the triangle are oriented
-             * with respect to the face orientation because for non manifold
-             * cases, setadj may have reoriented the triangles */
+             * triangle */
             if ( ptt->v[0] == ia && ptt->v[1] == ib && ptt->v[2] == ic ) {
               MG_SET(pxt->ori,i);
               for (j=0; j<3; j++) {
@@ -1906,7 +1922,7 @@ int MMG5_bdrySet(MMG5_pMesh mesh) {
         ptt = &mesh->tria[kt];
 
         /* Set flag to know if tetra has the same orientation than the triangle
-         * + forcd the triangle numbering to match the tetra face numbering */
+         * + force the triangle numbering to match the tetra face numbering */
         if ( adj ) {
           for ( j=0; j<3; ++j ) {
             i1 = MMG5_inxt2[j];
@@ -2106,18 +2122,19 @@ int MMG5_bdryUpdate(MMG5_pMesh mesh) {
  * \param mesh pointer toward the mesh structure.
  * \return 0 if failed, 1 otherwise.
  *
- * Make orientation of triangles compatible with tetra faces.
+ * Make orientation of triangles compatible with tetra faces for external tria
+ * and with domain of max ref for interface tria.
  *
  */
 int MMG5_bdryPerm(MMG5_pMesh mesh) {
   MMG5_pTetra   pt,pt1;
   MMG5_pTria    ptt;
-  MMG5_Hash    hash;
-  int     *adja,adj,k,kt,ia,ib,ic,nf,npb;
-  char     i;
+  MMG5_Hash     hash;
+  int           *adja,adj,k,kt,ia,ib,ic,nf;
+  char          i;
 
   if ( !mesh->nt ) return 1;
-  
+
   /* store triangles temporarily */
   if ( !MMG5_hashNew(mesh,&hash,MG_MAX(0.51*mesh->nt,100),MG_MAX(1.51*mesh->nt,300)) )
     return 0;
@@ -2131,7 +2148,7 @@ int MMG5_bdryPerm(MMG5_pMesh mesh) {
   }
 
   /* check orientation */
-  nf = npb = 0;
+  nf = 0;
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
     if ( !MG_EOK(pt) )  continue;
@@ -2139,14 +2156,15 @@ int MMG5_bdryPerm(MMG5_pMesh mesh) {
     for (i=0; i<4; i++) {
       adj = adja[i] / 4;
       pt1 = &mesh->tetra[adj];
+
       if ( adj && (pt->ref <= pt1->ref || pt->ref == MG_PLUS) )
         continue;
+
       ia = pt->v[MMG5_idir[i][0]];
       ib = pt->v[MMG5_idir[i][1]];
       ic = pt->v[MMG5_idir[i][2]];
       kt = MMG5_hashGetFace(&hash,ia,ib,ic);
-      if ( !kt ) ++npb;
-      else {
+      if ( kt ) {
         /* check orientation */
         ptt = &mesh->tria[kt];
         if ( ptt->v[0] == ia && ptt->v[1] == ib && ptt->v[2] == ic )

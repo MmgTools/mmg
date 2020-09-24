@@ -35,20 +35,6 @@
 
 #include "mmgcommon.h"
 
-/* Declared in the header, but need to define in at most one compilation unit */
-int    (*MMG5_chkmsh)(MMG5_pMesh,int,int);
-int    (*MMG5_bezierCP)(MMG5_pMesh ,MMG5_Tria *,MMG5_pBezier ,char );
-double (*MMG5_lenSurfEdg)(MMG5_pMesh mesh,MMG5_pSol sol ,int ,int, char );
-int    (*MMG5_grad2met_ani)(MMG5_pMesh,MMG5_pSol,MMG5_pTria,int,int);
-int    (*MMG5_grad2metreq_ani)(MMG5_pMesh,MMG5_pSol,MMG5_pTria,int,int);
-int    (*MMG5_compute_meanMetricAtMarkedPoints)( MMG5_pMesh,MMG5_pSol);
-int    (*MMG5_indElt)(MMG5_pMesh mesh,int kel);
-int    (*MMG5_indPt)(MMG5_pMesh mesh,int kp);
-
-#ifdef USE_SCOTCH
-int    (*MMG5_renumbering)(int vertBoxNbr, MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol,int*);
-#endif
-
 /**
  * \param *prog pointer toward the program name.
  *
@@ -382,7 +368,7 @@ void MMG5_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
  * \return pointer toward the filename extension or toward the end of the string
  * if no extension have been founded
  *
- * Get the extension of the filename string.
+ * Get the extension of the filename string. Do not consider '.o' as an extension.
  *
  */
 char *MMG5_Get_filenameExt( char *filename ) {
@@ -396,7 +382,7 @@ char *MMG5_Get_filenameExt( char *filename ) {
   dot = strrchr(filename, '.');
   lastpath = (pathsep == 0) ? NULL : strrchr (filename, pathsep);
 
-  if ( (!dot) || dot == filename || (lastpath>dot) ) {
+  if ( (!dot) || dot == filename || (lastpath>dot) || (!strcmp(dot,".o")) ) {
     /* No extension */
     return filename + strlen(filename);
   }
@@ -407,9 +393,9 @@ char *MMG5_Get_filenameExt( char *filename ) {
 /**
  * \param path string containing a filename and its path
  *
- * \return a pointer toward the file basename.
+ * \return a pointer toward the allocated string that contains the file basename.
  *
- * Extract basename from a path.
+ * Extract basename from a path (allocate a string to store it).
  *
  */
 char *MMG5_Get_basename(char *path) {
@@ -424,9 +410,9 @@ char *MMG5_Get_basename(char *path) {
 /**
  * \param path string containing a filename and its path
  *
- * \return a pointer toward the file path.
+ * \return a pointer toward the path allocated here
  *
- * Remove filename from a path
+ * Remove filename from a path and return the path in a newly allocated string.
  *
  */
 char *MMG5_Get_path(char *path) {

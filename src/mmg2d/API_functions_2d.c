@@ -211,21 +211,6 @@ int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
       mesh->info.par[k].hmax  = mesh->info.hmax;
     }
     break;
-  case MMG2D_IPARAM_numberOfMat :
-    if ( mesh->info.mat ) {
-      MMG5_DEL_MEM(mesh,mesh->info.mat);
-      if ( (mesh->info.imprim > 5) || mesh->info.ddebug )
-        fprintf(stderr,"\n  ## Warning: %s: new multi materials values\n",__func__);
-    }
-    mesh->info.nmat   = val;
-    mesh->info.nmati  = 0;
-
-    MMG5_ADD_MEM(mesh,(mesh->info.nmat)*sizeof(MMG5_Mat),"multi material",
-                 printf("  Exit program.\n");
-                 return 0);
-    MMG5_SAFE_CALLOC(mesh->info.mat,mesh->info.nmat,MMG5_Mat,return 0);
-    break;
-
   default :
     fprintf(stderr,"\n  ## Error: %s: unknown type of parameter\n",__func__);
     return 0;
@@ -374,11 +359,6 @@ int MMG2D_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref,
   mesh->info.npari++;
 
   return 1;
-}
-
-int MMG2D_Set_multiMat(MMG5_pMesh mesh,MMG5_pSol sol,int ref,
-                       int split,int rin,int rout){
-  return MMG5_Set_multiMat(mesh,sol,ref,split,rin,rout);
 }
 
 
@@ -679,20 +659,33 @@ int MMG2D_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, int* ref,
     return 0;
   }
 
-  *c0  = mesh->point[mesh->npi].c[0];
-  *c1  = mesh->point[mesh->npi].c[1];
+  return MMG2D_GetByIdx_vertex( mesh,c0,c1,ref,isCorner,isRequired,mesh->npi);
+}
+
+int MMG2D_GetByIdx_vertex(MMG5_pMesh mesh, double* c0, double* c1, int* ref,
+                          int* isCorner, int* isRequired, int idx) {
+
+  if ( idx < 1 || idx > mesh->np ) {
+    fprintf(stderr,"\n  ## Error: %s: unable to get point at position %d.\n",
+            __func__,idx);
+    fprintf(stderr,"     Your vertices numbering goes from 1 to %d\n",mesh->np);
+    return 0;
+  }
+
+  *c0  = mesh->point[idx].c[0];
+  *c1  = mesh->point[idx].c[1];
   if ( ref != NULL )
-    *ref = mesh->point[mesh->npi].ref;
+    *ref = mesh->point[idx].ref;
 
   if ( isCorner != NULL ) {
-    if ( mesh->point[mesh->npi].tag & MG_CRN )
+    if ( mesh->point[idx].tag & MG_CRN )
       *isCorner = 1;
     else
       *isCorner = 0;
   }
 
   if ( isRequired != NULL ) {
-    if ( mesh->point[mesh->npi].tag & MG_REQ )
+    if ( mesh->point[idx].tag & MG_REQ )
       *isRequired = 1;
     else
       *isRequired = 0;

@@ -55,6 +55,7 @@ include(GNUInstallDirs)
 #####         Release version and date
 #####
 ###############################################################################
+
 SET (CMAKE_RELEASE_VERSION_MAJOR "5" )
 SET (CMAKE_RELEASE_VERSION_MINOR "4" )
 SET (CMAKE_RELEASE_VERSION_PATCH "3" )
@@ -70,15 +71,20 @@ SET (CMAKE_RELEASE_VERSION
 ###############################################################################
 IF (NOT WIN32)
   # Set preprocessor flags to say that we are posix and gnu compatible
-  SET (DEF_POSIX "#define POSIX")
-  SET (DEF_GNU "#define GNU")
+  SET (DEF_POSIX "#define MMG_POSIX")
+  SET (DEF_GNU "#define MMG_GNU")
 ELSEIF(MINGW)
-  SET (DEF_GNU "#define GNU")
+  SET (DEF_GNU "#define MMG_GNU")
 ENDIF ()
 
-# Create mmgcommon.h file with the good release and architecture infos.
-CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/src/common/mmgcommon.h.in
-  ${PROJECT_BINARY_DIR}/src/common/mmgcommon.h @ONLY)
+# Create mmgcmakedefines.h file with the architecture infos and
+# the definition ot the USE_POINTMAP flag.
+CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/src/common/mmgcmakedefines.h.in
+  ${PROJECT_BINARY_DIR}/src/common/mmgcmakedefines.h @ONLY)
+
+# Create mmgversion.h file with the release infos
+CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/src/common/mmgversion.h.in
+  ${PROJECT_BINARY_DIR}/src/common/mmgversion.h @ONLY)
 
 ###############################################################################
 #####
@@ -209,6 +215,15 @@ IF ( NOT WIN32 OR MINGW )
   MARK_AS_ADVANCED(FORCE M_LIB)
   SET( LIBRARIES ${M_LIB} ${LIBRARIES})
 ENDIF()
+
+############################################################################
+#####
+#####         Point map
+#####
+############################################################################
+
+# add point map?
+OPTION ( USE_POINTMAP "Use map for point tracking" OFF )
 
 ############################################################################
 #####
@@ -557,7 +572,7 @@ ENDIF ( BUILD_TESTING )
 IF (NOT WIN32 OR MINGW)
 
   ADD_CUSTOM_TARGET(GenerateGitHash
-    COMMAND ./git_log_mmg.sh ${PROJECT_SOURCE_DIR} ${PROJECT_BINARY_DIR}
+    COMMAND ./git_log_mmg.sh ${PROJECT_SOURCE_DIR} ${COMMON_BINARY_DIR}
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/scripts/
     COMMENT "Getting git commit hash"
   )
@@ -652,33 +667,5 @@ SET(CPACK_PACKAGE_INSTALL_DIRECTORY "${PROJECT_NAME}-${CPACK_PACKAGE_VERSION}")
 SET(CPACK_PACKAGE_FILE_NAME ${CPACK_PACKAGE_INSTALL_DIRECTORY}-${CMAKE_SYSTEM})
 SET(CPACK_PACKAGE_EXECUTABLES "${PROJECT_NAME}")
 SET(CPACK_OUTPUT_FILE_PREFIX "../archives")
-
-#SET(CPACK_SOURCE_IGNORE_FILES ";src/common/mmgtypes.h$" ${CPACK_SOURCE_IGNORE_FILE})
-#SET(CPACK_SOURCE_IGNORE_FILES ";.\\\\\\\\.#;/\\\\\\\\.git;.~;.#;.-e;.DS_Store"
-#  ${CPACK_SOURCE_IGNORE_FILES})
-#SET(CPACK_IGNORE_FILES ";lib/;bin;archives;def"
-#  ${CPACK_IGNORE_FILES})
-#SET(CPACK_SOURCE_IGNORE_FILES ";.dir-locals.el;.tm_properties"
-#  ${CPACK_SOURCE_IGNORE_FILES})
-#SET(CPACK_SOURCE_IGNORE_FILES ";libexamples/mmg3d/example0/example0_a/mesh.o.*"
-#  ${CPACK_SOURCE_IGNORE_FILES})
-#SET(CPACK_SOURCE_IGNORE_FILES ";libexamples/mmg3d/example0/example0_b/mesh.o.*"
-#  ${CPACK_SOURCE_IGNORE_FILES})
-#SET(CPACK_SOURCE_IGNORE_FILES ";libexamples/mmg3d/example1/result0.*"
-#  ${CPACK_SOURCE_IGNORE_FILES})
-#SET(CPACK_SOURCE_IGNORE_FILES ";libexamples/mmg3d/example2/result1.*"
-#  ${CPACK_SOURCE_IGNORE_FILES})
-#SET(CPACK_SOURCE_IGNORE_FILES ";libexamples/mmg3d/example3/SphereIso.*"
-#  ${CPACK_SOURCE_IGNORE_FILES})
-#SET(CPACK_SOURCE_IGNORE_FILES ";CMakeFiles" ${CPACK_SOURCE_IGNORE_FILES})
-#SET(CPACK_SOURCE_IGNORE_FILES ";cmake/supp/libSystem.supp"
-#  ${CPACK_SOURCE_IGNORE_FILES})
-#SET(CPACK_SOURCE_IGNORE_FILES ";CTestConfig.cmake" ${CPACK_SOURCE_IGNORE_FILES})
-#SET(CPACK_SOURCE_IGNORE_FILES ";cmake/testing/testing.cmake"
-#  ${CPACK_SOURCE_IGNORE_FILES})
-#SET(CPACK_SOURCE_IGNORE_FILES ";.#$"      ${CPACK_SOURCE_IGNORE_FILES})
-#SET(CPACK_SOURCE_IGNORE_FILES ";build*" ${CPACK_SOURCE_IGNORE_FILES}  )
-#SET(CPACK_SOURCE_IGNORE_FILES ";doc/doxygen/.*/html;doc/doxygen/.*/Doxyfile$"
-#  ${CPACK_SOURCE_IGNORE_FILES}  )
 
 INCLUDE(CPack)

@@ -45,7 +45,7 @@ extern "C" {
 
 /** Reallocation of point table and sol table and creation
     of point ip with coordinates o and tag tag*/
-#define MMG3D_POINT_REALLOC(mesh,sol,ip,wantedGap,law,o,tag ) do        \
+#define MMG3D_POINT_REALLOC(mesh,sol,ip,wantedGap,law,o,tag,src ) do    \
   {                                                                     \
   int klink;                                                            \
   int oldnpmax = mesh->npmax;                                           \
@@ -82,7 +82,7 @@ extern "C" {
   }                                                                     \
                                                                         \
   /* We try again to add the point */                                   \
-  ip = MMG3D_newPt(mesh,o,tag);                                         \
+  ip = MMG3D_newPt(mesh,o,tag,src);                                     \
   if ( !ip ) { law; }                                                   \
   }while(0)
 
@@ -250,7 +250,7 @@ int  MMG3D_Free_all_var( va_list argptr );
 int  MMG3D_Free_structures_var( va_list argptr );
 int  MMG3D_Free_names_var( va_list argptr );
 void MMG3D_Free_arrays(MMG5_pMesh*,MMG5_pSol*,MMG5_pSol*,MMG5_pSol*,MMG5_pSol*);
-int  MMG3D_newPt(MMG5_pMesh mesh,double c[3],int16_t tag);
+int  MMG3D_newPt(MMG5_pMesh mesh,double c[3],int16_t tag,int src);
 int  MMG3D_newElt(MMG5_pMesh mesh);
 int  MMG3D_delElt(MMG5_pMesh mesh,int iel);
 void MMG3D_delPt(MMG5_pMesh mesh,int ip);
@@ -272,10 +272,7 @@ int  MMG5_norface(MMG5_pMesh mesh ,int k, int iface, double v[3]);
 int  MMG3D_findEdge(MMG5_pMesh,MMG5_pTetra,int,int,int,int,char*,char* );
 int  MMG5_boulernm (MMG5_pMesh mesh,MMG5_Hash *hash, int start, int ip, int *ng, int *nr);
 int  MMG5_boulenm(MMG5_pMesh mesh, int start, int ip, int iface, double n[3],double t[3]);
-int  MMG5_boulenmInt(MMG5_pMesh mesh, int start, int ip, double t[3]);
 int  MMG5_boulevolp(MMG5_pMesh mesh, int start, int ip, int * list);
-int  MMG5_boulesurfvolpNom(MMG5_pMesh mesh,int start,int ip,int iface,int *listv,
-                          int *ilistv,int *lists,int*ilists,int*refmin,int*refplus,int isnm);
 int  MMG5_boulesurfvolp(MMG5_pMesh mesh,int start,int ip,int iface,int *listv,
                          int *ilistv,int *lists,int*ilists, int isnm);
 int  MMG5_bouletrid(MMG5_pMesh,int,int,int,int *,int *,int *,int *,int *,int *);
@@ -297,9 +294,7 @@ int  MMG5_deltag(MMG5_pMesh,int,int,int16_t);
 int  MMG5_setNmTag(MMG5_pMesh mesh, MMG5_Hash *hash);
 int  MMG5_chkcol_int(MMG5_pMesh,MMG5_pSol,int,char,char,int*,int,char);
 int  MMG5_chkcol_bdy(MMG5_pMesh,MMG5_pSol,int,char,char,int*,int,int*,int,char);
-int  MMG5_chkcol_nom(MMG5_pMesh,MMG5_pSol,int,char,char,int*,int,int*,int,int,int,char);
-int  MMG5_chkcol_nomint(MMG5_pMesh,MMG5_pSol,int,char,char,int*,int,char);
-int  MMG5_chkmanicoll(MMG5_pMesh,int,int,int,int,int,int,int,char,char);
+int  MMG5_chkmanicoll(MMG5_pMesh,int,int,int,int,int,char,char);
 int  MMG5_chkmani(MMG5_pMesh mesh);
 int  MMG5_colver(MMG5_pMesh,MMG5_pSol,int *,int,char,char);
 int  MMG3D_analys(MMG5_pMesh mesh);
@@ -379,7 +374,6 @@ int    MMG5_movbdyrefpt_ani(MMG5_pMesh, MMG5_pSol,MMG3D_pPROctree, int*, int,
                              int*, int ,int);
 int    MMG5_movbdynompt_iso(MMG5_pMesh, MMG5_pSol,MMG3D_pPROctree, int*, int,
                              int*, int ,int);
-int    MMG5_movbdynomintpt_iso(MMG5_pMesh, MMG5_pSol,MMG3D_pPROctree, int*, int, int);
 int    MMG5_movbdynompt_ani(MMG5_pMesh, MMG5_pSol,MMG3D_pPROctree, int*, int,
                              int*, int ,int);
 int    MMG5_movbdyridpt_iso(MMG5_pMesh, MMG5_pSol,MMG3D_pPROctree, int*, int,
@@ -538,7 +532,7 @@ extern int    (*MMG5_cavity)(MMG5_pMesh ,MMG5_pSol ,int ,int ,int *,int ,double)
 extern int    (*MMG3D_PROctreein)(MMG5_pMesh ,MMG5_pSol ,MMG3D_pPROctree ,int,double );
 
 /* input */
-int MMG3D_openMesh(MMG5_pMesh mesh,const char *filename,FILE **inm,int *bin);
+int MMG3D_openMesh(int imprim,const char *filename,FILE **inm,int *bin,char*,char*);
 int MMG3D_loadMesh_opened(MMG5_pMesh mesh,FILE *inm,int bin);
 
 /**

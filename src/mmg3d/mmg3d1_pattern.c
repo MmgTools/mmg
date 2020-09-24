@@ -53,7 +53,7 @@ static int MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
  MMG5_pxTetra pxt;
  MMG5_pPoint  p0,p1;
  double       len,lmax,o[3];
- int          k,ip,ip1,ip2,list[MMG3D_LMAX+2],ilist;
+ int          k,ip,ip1,ip2,list[MMG3D_LMAX+2],ilist,src;
  int          ns,ier;
  char         imax,j,i,i1,i2,ifa0,ifa1;
  char         chkRidTet;
@@ -126,14 +126,19 @@ static int MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
       o[1] = 0.5*(p0->c[1] + p1->c[1]);
       o[2] = 0.5*(p0->c[2] + p1->c[2]);
 
-      ip = MMG3D_newPt(mesh,o,MG_NOTAG);
+#ifdef USE_POINTMAP
+      src = p0->src;
+#else
+      src = 1;
+#endif
+      ip = MMG3D_newPt(mesh,o,MG_NOTAG,src);
 
       if ( !ip )  {
         /* reallocation of point table */
         MMG3D_POINT_REALLOC(mesh,met,ip,mesh->gap,
                              *warn=1;
                              break
-                             ,o,MG_NOTAG);
+                             ,o,MG_NOTAG,src);
       }
       if ( met->m ) {
         ier = MMG5_intmet(mesh,met,k,imax,ip,0.5);

@@ -35,11 +35,30 @@
 
 #include "mmg3d.h"
 
-int MMG3D_openMesh(MMG5_pMesh mesh,const char *filename,FILE **inm,int *bin) {
+/**
+ * \param imprim verbosity level (muted for stdout if -1)
+ * \param filename file to open
+ * \param inm pointer toward the file unit
+ * \param bin 1 if file will be at binary format
+ * \param modeASCII mode in which to open an ascii file ("r","r+","w","w+",...)
+ * \param modeASCII mode in which to open an ascii file ("r","r+","w","w+",...)
+ *
+ * \return -1 if lack of memory, 0 if fail to open file, 1 if success.
+ *
+ * Try to open a Medit file at asked mode (read only, write, etc) and store if
+ * file is binary (depending on the extension).
+ *
+ */
+int MMG3D_openMesh(int imprim,const char *filename,FILE **inm,int *bin,
+                   char *modeASCII, char* modeBIN) {
   char        *ptr,*data;
+  int         out,ier;
+
+  out = (strchr(modeASCII,'w') != NULL) ? 1 : 0;
+  ier = out ? 0 : -1;
 
   *bin = 0;
-  MMG5_SAFE_CALLOC(data,strlen(filename)+7,char,return -1);
+  MMG5_SAFE_CALLOC(data,strlen(filename)+7,char,return ier);
 
   strcpy(data,filename);
   ptr = strstr(data,".mesh");
@@ -47,12 +66,12 @@ int MMG3D_openMesh(MMG5_pMesh mesh,const char *filename,FILE **inm,int *bin) {
   if ( !ptr ) {
     /* data contains the filename without extension */
     strcat(data,".meshb");
-    if( !(*inm = fopen(data,"rb")) ) {
+    if( !(*inm = fopen(data,modeBIN)) ) {
       /* our file is not a .meshb file, try with .mesh ext */
       ptr = strstr(data,".mesh");
       *ptr = '\0';
       strcat(data,".mesh");
-      if( !(*inm = fopen(data,"rb")) ) {
+      if( !(*inm = fopen(data,modeASCII)) ) {
         MMG5_SAFE_FREE(data);
         return 0;
       }
@@ -61,14 +80,28 @@ int MMG3D_openMesh(MMG5_pMesh mesh,const char *filename,FILE **inm,int *bin) {
   }
   else {
     ptr = strstr(data,".meshb");
-    if ( ptr )  *bin = 1;
-    if( !(*inm = fopen(data,"rb")) ) {
-      MMG5_SAFE_FREE(data);
-      return 0;
+    if ( ptr ) {
+      *bin = 1;
+      if( !(*inm = fopen(data,modeBIN)) ) {
+        if ( out ) {
+          fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",data);
+        }
+        MMG5_SAFE_FREE(data);
+        return 0;
+      }
+    }
+    else {
+      if( !(*inm = fopen(data,modeASCII)) ) {
+        if ( out ) {
+          fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",data);
+        }
+        MMG5_SAFE_FREE(data);
+        return 0;
+      }
     }
   }
 
-  if ( mesh->info.imprim >= 0 ) {
+  if ( imprim >= 0 ) {
     fprintf(stdout,"  %%%% %s OPENED\n",data);
   }
   MMG5_SAFE_FREE(data);
@@ -793,6 +826,7 @@ int MMG3D_loadMesh_opened(MMG5_pMesh mesh,FILE *inm,int bin) {
       }
     }
 
+
     /* get ridges */
     if ( nr ) {
       rewind(inm);
@@ -915,6 +949,8 @@ int MMG3D_loadMesh_opened(MMG5_pMesh mesh,FILE *inm,int bin) {
       ppt = &mesh->point[pt->v[i]];
       ppt->tag &= ~MG_NUL;
     }
+
+    if ( mesh->info.iso )  pt->ref = 0;
 
     /* Possibly switch 2 vertices number so that each tet is positively oriented */
     if ( MMG5_orvol(mesh->point,pt->v) < 0.0 ) {
@@ -1154,7 +1190,7 @@ int MMG3D_loadMesh(MMG5_pMesh mesh,const char *filename) {
   FILE*       inm;
   int         bin,ier;
 
-  ier = MMG3D_openMesh(mesh,filename,&inm,&bin);
+  ier = MMG3D_openMesh(mesh->info.imprim,filename,&inm,&bin,"rb","rb");
   if( ier < 1 ) return ier;
   ier = MMG3D_loadMesh_opened(mesh,inm,bin);
   if( ier < 1 ) return ier;
@@ -1298,51 +1334,14 @@ int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
   int          k,na,nc,np,ne,nn,nr,nre,npar,nedreq,nedpar,ntreq,ntpar,nt,nereq,nepar;
   int          npr,nq,nqreq,nqpar;
   int          bin,binch,bpos;
-  char         *data,*ptr;
   char         chaine[MMG5_FILESTR_LGTH];
   static int8_t parWarn = 0;
 
   mesh->ver = 2;
-  bin = 0;
 
-  MMG5_SAFE_CALLOC(data,strlen(filename)+7,char,return 0);
-
-  strcpy(data,filename);
-  ptr = strstr(data,".mesh");
-  if ( !ptr ) {
-    strcat(data,".meshb");
-    if( !(inm = fopen(data,"wb")) ) {
-      ptr  = strstr(data,".mesh");
-      *ptr = '\0';
-      strcat(data,".mesh");
-      if( !(inm = fopen(data,"w")) ) {
-        MMG5_SAFE_FREE(data);
-        return 0;
-      }
-    } else {
-      bin = 1;
-    }
+  if ( !MMG3D_openMesh(mesh->info.imprim,filename,&inm,&bin,"w","wb") ) {
+    return 0;
   }
-  else {
-    ptr = strstr(data,".meshb");
-    if( ptr ) {
-      bin = 1;
-      if( !(inm = fopen(data,"wb")) ) {
-        fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",data);
-        MMG5_SAFE_FREE(data);
-        return 0;
-      }
-    } else {
-      if( !(inm = fopen(data,"w")) ) {
-        fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",data);
-        MMG5_SAFE_FREE(data);
-        return 0;
-      }
-    }
-  }
-  if ( mesh->info.imprim >= 0 )
-    fprintf(stdout,"  %%%% %s OPENED\n",data);
-  MMG5_SAFE_FREE(data);
 
   /*entete fichier*/
   binch=0; bpos=10;

@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Bx INP/CNRS/Inria/UBordeaux/UPMC, 2004-
+**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -20,64 +20,35 @@
 **  use this copy of the mmg distribution only if you accept them.
 ** =============================================================================
 */
-
-#ifndef CHRONO_H
-#define CHRONO_H
-
-#include <time.h>
-#include "mmgcommon.h"
-
-#ifndef MMG_POSIX
-#include <windows.h>
-#else
-#include <sys/time.h>
-#include <sys/resource.h>
+#ifndef _WIN32
+#include "git_log_mmg.h"
 #endif
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#if !defined(MMGVERSION_H)
+#define MMGVERSION_H
 
-#ifndef  ON
-#define  RESET  0
-#define  ON     1
-#define  OFF    2
-#endif
+#define MMG_VERSION_RELEASE "@CMAKE_RELEASE_VERSION@"
+#define MMG_VERSION_MAJOR "@CMAKE_RELEASE_VERSION_MAJOR@"
+#define MMG_VERSION_MINOR "@CMAKE_RELEASE_VERSION_MINOR@"
+#define MMG_VERSION_PATCH "@CMAKE_RELEASE_VERSION_PATCH@"
+#define MMG_RELEASE_DATE "@CMAKE_RELEASE_DATE@"
 
-#define  BIG      1e6
-#define  BIG1     1e-6
-#define  TIMEMAX  12
+#define MMG_COPYRIGHT   "Copyright (c) Bdx INP/CNRS/Inria/UPMC, 2004-"
 
-/**
- * \struct mytime
- * \brief Chrono object.
- *
- * mytime allow storage of chronograph informations.
- *
- */
-typedef struct mytime {
-  double  gini,gend,gdif,uini,uend,udif,sini,send,sdif;
-#ifdef MMG_POSIX
-  struct  timeval rutim;
-  struct  rusage  ru;
-#else
-  HANDLE        thisProcess;
-  FILETIME      ftIni, ftEnd, ftSys, ftUser;
-  SYSTEMTIME    stSys, stUser;
-  LARGE_INTEGER frequency;
-  LARGE_INTEGER rutim;
-#endif
-  int     call;
-} mytime;
+#define MMG_VERSION_EQ(MAJOR,MINOR) \
+((MMG_VERSION_MAJOR == (MAJOR)) && (MMG_VERSION_MINOR == (MINOR))
 
+#define MMG_VERSION_ MMG_VERSION_EQ
 
-/* prototypes */
-void   chrono(int cmode,mytime *ptt);
-void   tminit(mytime *t,int maxtim);
-void   printim(double ,char *);
+#define MMG_VERSION_LT(MAJOR,MINOR)                                  \
+  (MMG_VERSION_MAJOR < (MAJOR) || (MMG_VERSION_MAJOR == (MAJOR) &&   \
+                                   (MMG_VERSION_MINOR < (MINOR) )))
 
-#ifdef __cplusplus
-}
-#endif
+#define MMG_VERSION_LE(MAJOR,MINOR) \
+  (MMG_VERSION_LT(MAJOR,MINOR) || MMG_VERSION_EQ(MAJOR,MINOR))
+
+#define MMG_VERSION_GT(MAJOR,MINOR) (0 == MMG_VERSION_LE(MAJOR,MINOR))
+
+#define MMG_VERSION_GE(MAJOR,MINOR) (0 == MMG_VERSION_LT(MAJOR,MINOR))
 
 #endif

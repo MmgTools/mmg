@@ -35,9 +35,6 @@
 #include <math.h>
 #include <complex.h>
 
-@DEF_POSIX@
-@DEF_GNU@
-
 #if (defined(__APPLE__) && defined(__MACH__))
 #include <sys/sysctl.h>
 #elif defined(__unix__) || defined(__unix) || defined(unix)
@@ -50,7 +47,6 @@
 #include <windows.h>
 #endif
 
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -58,9 +54,6 @@ extern "C" {
 #include "eigenv.h"
 #include "libmmgcommon.h"
 
-#define MG_VER   "@CMAKE_RELEASE_VERSION@"
-#define MG_REL   "@CMAKE_RELEASE_DATE@"
-#define MG_CPY   "Copyright (c) Bdx INP/CNRS/Inria/UPMC, 2004-"
 #define MG_STR   "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"
 
 /** Check if \a a and \a b have the same sign */
@@ -729,9 +722,6 @@ int  MMG5_updatemetreq_ani(double *n,double dn[2],double vp[2][2]);
 int    MMG5_swapbin(int sbin);
 float  MMG5_swapf(float sbin);
 double MMG5_swapd(double sbin);
-int MMG5_isSplit(MMG5_pMesh ,int ,int *,int *);
-int MMG5_getIniRef(MMG5_pMesh ,int );
-
 
 /* tools */
 void MMG5_mark_verticesAsUnused ( MMG5_pMesh mesh );

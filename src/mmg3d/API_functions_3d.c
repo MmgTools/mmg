@@ -410,21 +410,34 @@ int MMG3D_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2, int* r
     return 0;
   }
 
-  *c0  = mesh->point[mesh->npi].c[0];
-  *c1  = mesh->point[mesh->npi].c[1];
-  *c2  = mesh->point[mesh->npi].c[2];
+  return MMG3D_GetByIdx_vertex( mesh,c0,c1,c2,ref,isCorner,isRequired,mesh->npi);
+}
+
+int MMG3D_GetByIdx_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2, int* ref,
+                          int* isCorner, int* isRequired, int idx) {
+
+  if ( idx < 1 || idx > mesh->np ) {
+    fprintf(stderr,"\n  ## Error: %s: unable to get point at position %d.\n",
+            __func__,idx);
+    fprintf(stderr,"     Your vertices numbering goes from 1 to %d\n",mesh->np);
+    return 0;
+  }
+
+  *c0  = mesh->point[idx].c[0];
+  *c1  = mesh->point[idx].c[1];
+  *c2  = mesh->point[idx].c[2];
   if ( ref != NULL )
-    *ref = mesh->point[mesh->npi].ref;
+    *ref = mesh->point[idx].ref;
 
   if ( isCorner != NULL ) {
-    if ( mesh->point[mesh->npi].tag & MG_CRN )
+    if ( mesh->point[idx].tag & MG_CRN )
       *isCorner = 1;
     else
       *isCorner = 0;
   }
 
   if ( isRequired != NULL ) {
-    if ( mesh->point[mesh->npi].tag & MG_REQ )
+    if ( mesh->point[idx].tag & MG_REQ )
       *isRequired = 1;
     else
       *isRequired = 0;
@@ -2028,7 +2041,7 @@ int MMG3D_Add_vertex(MMG5_pMesh mesh,double c0,double c1,double c2,int ref) {
   c[1] = c1;
   c[2] = c2;
 
-  ip = MMG3D_newPt(mesh,c,0);
+  ip = MMG3D_newPt(mesh,c,0,1);
   if ( !ip ) {
     MMG5_TAB_RECALLOC(mesh,mesh->point,mesh->npmax,mesh->gap,MMG5_Point,
                        "larger point table",
@@ -2041,7 +2054,7 @@ int MMG3D_Add_vertex(MMG5_pMesh mesh,double c0,double c1,double c2,int ref) {
       mesh->point[klink].tmp  = klink+1;
 
     /* We try again to add the point */
-    ip = MMG3D_newPt(mesh,c,0);
+    ip = MMG3D_newPt(mesh,c,0,1);
     if ( !ip ) {
       fprintf(stderr,"\n  ## Error: %s: unable to allocate"
               " a new point\n",__func__);
@@ -2182,28 +2195,9 @@ int MMG3D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam,int val){
                  printf("  Exit program.\n");
                  return 0);
     MMG5_SAFE_CALLOC(mesh->info.br,mesh->info.nbr,int,return 0);
-    
+
     for (k=0; k<mesh->info.nbr; k++)
       mesh->info.br[k] = 0;
-
-    break;
-
-  case MMG3D_IPARAM_numberOfMat :
-    if ( mesh->info.mat ) {
-      MMG5_DEL_MEM(mesh,mesh->info.mat);
-      if ( (mesh->info.imprim > 5) || mesh->info.ddebug )
-        fprintf(stderr,"\n  ## Warning: %s: new multi materials values\n",__func__);
-    }
-    mesh->info.nmat   = val;
-    mesh->info.nmati  = MMG5_OFF;
-
-    MMG5_ADD_MEM(mesh,(mesh->info.nmat)*sizeof(MMG5_Mat),"multi material",
-                 printf("  Exit program.\n");
-                 return 0);
-    MMG5_SAFE_CALLOC(mesh->info.mat,mesh->info.nmat,MMG5_Mat,return 0);
-    for (k=0; k<mesh->info.nmat; k++) {
-      mesh->info.mat[k].ref   = MMG5_NONSET; // -1
-    }
 
     break;
 
@@ -2274,9 +2268,6 @@ int MMG3D_Get_iparameter(MMG5_pMesh mesh, int iparam) {
     break;
   case MMG3D_IPARAM_numberOfLocalParam :
     return  mesh->info.npar;
-    break;
-  case MMG3D_IPARAM_numberOfMat :
-    return  mesh->info.nmat;
     break;
 #ifdef USE_SCOTCH
   case MMG3D_IPARAM_renum :
@@ -2423,10 +2414,6 @@ int MMG3D_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref,
   mesh->info.npari++;
 
   return 1;
-}
-
-int MMG3D_Set_multiMat(MMG5_pMesh mesh,MMG5_pSol sol,int ref,int split,int rin,int rout) {
-  return MMG5_Set_multiMat(mesh,sol,ref,split,rin,rout);
 }
 
 int MMG3D_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol) {

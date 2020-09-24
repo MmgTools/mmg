@@ -28,6 +28,9 @@
 #include <stdarg.h>
 #include <stddef.h>
 
+#include "mmgcmakedefines.h"
+#include "mmgversion.h"
+
 #ifndef _LIBMMGTYPES_H
 #define _LIBMMGTYPES_H
 
@@ -175,22 +178,6 @@
 #define  MMG5_FILENAME_LEN_MAX 255
 
 /**
- * \def MMG5_MMAT_NOSPLIT
- *
- * Entity that must not be splitted in multimat mode
- *
- */
-#define MMG5_MMAT_NoSplit  0
-
-/**
- * \def MMG5_MMAT_Split
- *
- * Entity that must be splitted in multimat mode
- *
- */
-#define MMG5_MMAT_Split  1
-
-/**
  * \enum MMG5_type
  * \brief Type of solutions.
  */
@@ -238,6 +225,9 @@ typedef struct {
 typedef struct {
   double   c[3]; /*!< Coordinates of point */
   double   n[3]; /*!< Normal or Tangent for mmgs and Tangent (if needed) for mmg3d */
+#ifdef USE_POINTMAP
+  int      src; /*!< Source point in input mesh */
+#endif
   int      ref; /*!< Reference of point */
   int      xp; /*!< Surface point number */
   int      tmp; /*!< Index of point in the saved mesh (we don't count
@@ -257,7 +247,6 @@ typedef MMG5_Point * MMG5_pPoint;
 typedef struct {
   double   n1[3],n2[3]; /*!< Normals at boundary vertex;
                           n1!=n2 if the vertex belong to a ridge */
-  char     nnor; /* By default 0; 1 if no normal available (internal NOM point) */
 } MMG5_xPoint;
 typedef MMG5_xPoint * MMG5_pxPoint;
 
@@ -474,7 +463,7 @@ typedef struct {
   int           opnbdy; /*!< floating surfaces */
   int           renum; /*!< scotch renumbering */
   int           PROctree; /*!< octree to speedup delaunay insertion */
-  int           nmati,nmat; /*!< number of materials in ls multimat mode */
+  int           nmat; /*!< number of materials in ls multimat mode */
   int           imprim; /*!< verbosity level */
   int           nsd; /*!< index of subdomain to save (0 by default == all subdomains are saved) */
   char          nreg; /*!< normal regularization */
