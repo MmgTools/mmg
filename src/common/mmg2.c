@@ -41,8 +41,8 @@
  * \param refint internal reference after ls discretization.
  * \return 1 if entity can be splitted, 0 if cannot be splitted.
  *
- * Identify whether a triangle with reference ref should be split, and the
- * labels of the resulting triangles.
+ * Identify whether an entity with reference ref should be split, and the
+ * labels of the resulting entities.
  *
  */
 int MMG5_isSplit(MMG5_pMesh mesh,int ref,int *refint,int *refext) {
