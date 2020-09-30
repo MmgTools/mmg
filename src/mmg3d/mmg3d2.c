@@ -1098,7 +1098,7 @@ static int MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
   ier = 1;
   for (k=1; k<=ne; k++) {
     pt = &mesh->tetra[k];
-    if ( !MG_EOK(pt) || (pt->tag & MG_REQ) )  continue;
+    if ( !MG_EOK(pt) )  continue;
     pt->flag = 0;
     memset(vx,0,6*sizeof(int));
     for (ia=0; ia<6; ia++) {
