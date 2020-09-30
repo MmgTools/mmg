@@ -536,6 +536,11 @@ ADD_TEST(NAME mmg3d_OptimLES_sphere
 #####
 ###############################################################################
 #####
+ADD_TEST(NAME mmg3d_LSMultiMat
+  COMMAND ${EXECUT_MMG3D} -v 5 -ls -nr
+  ${MMG3D_CI_TESTS}/LSMultiMat/step.0.mesh
+  -sol ${MMG3D_CI_TESTS}/LSMultiMat/step.0.phi.sol
+  ${CTEST_OUTPUT_DIR}/mmg3d_LSMultiMat.o.meshb)
 
 ADD_TEST(NAME mmg3d_OptLs_plane_val
   COMMAND ${EXECUT_MMG3D} -v 5 -ls -val
