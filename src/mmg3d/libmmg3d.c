@@ -1301,7 +1301,7 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet) {
   chrono(OFF,&(ctim[1]));
   printim(ctim[1].gdif,stim);
   if ( mesh->info.imprim > 0 )
-    fprintf(stdout,"  --  INPUT DATA COMPLETED.     %s\n",stim);
+    fprintf(stdout,"  -- INPUT DATA COMPLETED.     %s\n",stim);
 
   chrono(ON,&(ctim[2]));
 
