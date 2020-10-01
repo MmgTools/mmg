@@ -1483,8 +1483,10 @@ void  MMG5_build3DMetric(MMG5_pMesh mesh,MMG5_pSol sol,int ip,
   int         i;
 
   ppt = &mesh->point[ip];
-  if ( !(MG_SIN(ppt->tag) || (ppt->tag & MG_NOM) || (ppt->tag & MG_NOSURF))
-       && (ppt->tag & MG_GEO) ) {
+  if ( mesh->info.metRidTyp &&
+       ( !(MG_SIN(ppt->tag) || (ppt->tag & MG_NOM) || (ppt->tag & MG_NOSURF))
+         && (ppt->tag & MG_GEO) ) ) {
+    /* Specific storage of the aniso metric at ridge */
     if ( mesh->xp ) {
       // Arbitrary, we take the metric associated to the surface ruled by n_1
       mtmp[0] = sol->m[sol->size*(ip)];

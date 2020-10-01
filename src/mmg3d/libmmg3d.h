@@ -1644,6 +1644,24 @@ enum MMG3D_Param {
                                 double *n2) ;
 
 /**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param k index of the tetra for which we want to get the quality.
+ * \return the computed quality or 0. if fail.
+ *
+ * Get quality of tetra \a k.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_GET_TETRAHEDRONQUALITY(mesh,met,k,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,met\n
+ * >     INTEGER, INTENT(IN)           :: k\n
+ * >     REAL(KIND=8), INTENT(OUT)     :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  double MMG3D_Get_tetrahedronQuality(MMG5_pMesh mesh,MMG5_pSol met, int k);
+
+/**
  * \param met pointer toward the sol structure.
  * \param s pointer toward the scalar solution value.
  * \return 0 if failed, 1 otherwise.
