@@ -394,7 +394,7 @@ void MMG3D_computeLESqua(MMG5_pMesh mesh,MMG5_pSol met,int *ne,double *max,doubl
       fprintf(stderr,"  ## Warning: %s: at least 1 negative volume.\n",
               __func__);
     }
-    rap = MMG3D_ALPHAD * pt->qual;
+    rap = 1. - MMG3D_ALPHAD * pt->qual;
     if ( rap > (*min) ) {
       (*min) = rap;
       (*iel) = ok;
