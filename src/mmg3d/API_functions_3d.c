@@ -128,6 +128,8 @@ int MMG3D_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int
   }
   else if ( typSol == MMG5_Tensor ) {
     sol->size = 6;
+    /* User will provide its own metric: classical storage at ridges */
+    mesh->info.metRidTyp = 0;
   }
   else {
     fprintf(stderr,"\n  ## Error: %s: type of solution not yet implemented.\n",

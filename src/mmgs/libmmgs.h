@@ -618,6 +618,24 @@ int  MMGS_Set_requiredEdge(MMG5_pMesh mesh, int k);
 int  MMGS_Set_normalAtVertex(MMG5_pMesh mesh, int k, double n0, double n1, double n2) ;
 
 /**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param k index of the triangle for which we want to get the quality.
+ * \return the computed quality or 0. if fail.
+ *
+ * Get quality of tria \a k.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMGS_GET_TRIANGLEQUALITY(mesh,met,k,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,met\n
+ * >     INTEGER, INTENT(IN)           :: k\n
+ * >     REAL(KIND=8), INTENT(OUT)     :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  double MMGS_Get_triangleQuality(MMG5_pMesh mesh,MMG5_pSol met, int k);
+
+/**
  * \param met pointer toward the sol structure.
  * \param s solution scalar value.
  * \param pos position of the solution in the mesh.

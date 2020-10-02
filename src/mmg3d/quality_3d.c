@@ -394,7 +394,7 @@ void MMG3D_computeLESqua(MMG5_pMesh mesh,MMG5_pSol met,int *ne,double *max,doubl
       fprintf(stderr,"  ## Warning: %s: at least 1 negative volume.\n",
               __func__);
     }
-    rap = 1 - MMG3D_ALPHAD * pt->qual;
+    rap = MMG3D_ALPHAD * pt->qual;
     if ( rap > (*min) ) {
       (*min) = rap;
       (*iel) = ok;
@@ -478,23 +478,44 @@ int MMG3D_displayQualHisto_internal(int ne,double max,double avg,double min,int 
                                     int good,int med,int his[5],int nrid,int optimLES,
                                     int imprim)
 {
+  const double les_ticks[6] = {0,0.6,0.9,0.93,0.99,1};
   int i,imax;
 
-  if ( optimLES )
-    return 1;
+  if ( abs(imprim) >= 3 ){
+    if ( optimLES ) {
+      /* print histo */
+      fprintf(stdout,"     HISTOGRAMM:");
+      fprintf(stdout,"  %6.2f %% < 0.6\n",100.0*((float)good/(float)ne));
+      if ( abs(imprim) > 3 ) {
+        fprintf(stdout,"                  %6.2f %% < 0.9\n",100.0*( (float)med/(float)ne));
 
-  else if ( abs(imprim) >= 3 ){
-    /* print histo */
-    fprintf(stdout,"     HISTOGRAMM:");
-    fprintf(stdout,"  %6.2f %% > 0.12\n",100.0*((float)good/(float)ne));
-    if ( abs(imprim) > 3 ) {
-      fprintf(stdout,"                  %6.2f %% >  0.5\n",100.0*( (float)med/(float)ne));
-      imax = MG_MIN(4,(int)(5.*max));
-      for (i=imax; i>=(int)(5*min); i--) {
-        fprintf(stdout,"     %5.1f < Q < %5.1f   %7d   %6.2f %%\n",
-                i/5.,i/5.+0.2,his[i],100.*((float)his[i]/(float)ne));
+        assert ( min >= max );
+        for ( i=0; i<5; ++i ) {
+          if ( max < les_ticks[i+1] && min >= les_ticks[i] ) {
+            fprintf(stdout,"     %5.2f < Q < %5.2f   %7d   %6.2f %%\n",
+                    les_ticks[i],les_ticks[i+1],his[i],
+                    100.*((float)his[i]/(float)ne));
+          }
+        }
       }
-      if ( nrid ) fprintf(stdout,"\n  ## WARNING: %d TETRA WITH 4 RIDGES POINTS\n",nrid);
+      return 1;
+    }
+    else {
+      /* print histo */
+      fprintf(stdout,"     HISTOGRAMM:");
+      fprintf(stdout,"  %6.2f %% > 0.12\n",100.0*((float)good/(float)ne));
+      if ( abs(imprim) > 3 ) {
+        fprintf(stdout,"                  %6.2f %% >  0.5\n",100.0*( (float)med/(float)ne));
+        imax = MG_MIN(4,(int)(5.*max));
+        for (i=imax; i>=(int)(5*min); i--) {
+          fprintf(stdout,"     %5.1f < Q < %5.1f   %7d   %6.2f %%\n",
+                  i/5.,i/5.+0.2,his[i],100.*((float)his[i]/(float)ne));
+        }
+        if ( nrid ) {
+          fprintf(stdout,"\n  ## WARNING: %d TETRA WITH 4 RIDGES POINTS:"
+                  " UNABLE TO COMPUTE ANISO QUALITY.\n",nrid);
+        }
+      }
     }
   }
 
@@ -676,16 +697,22 @@ void MMG3D_computeOutqua(MMG5_pMesh mesh,MMG5_pSol met,int *ne,double *max,doubl
       fprintf(stderr,"  ## Warning: %s: at least 1 negative volume\n",
               __func__);
     }
-    n = 0;
-    for(i=0 ; i<4 ; i++) {
-      ppt = &mesh->point[pt->v[i]];
-      if(!(MG_SIN(ppt->tag) || MG_NOM & ppt->tag) && (ppt->tag & MG_GEO)) continue;
-      n++;
+
+    /* Count the number of tets with only ridge metric if special metric storage
+     * at ridge. */
+    if ( mesh->info.metRidTyp==1 ) {
+      n = 0;
+      for(i=0 ; i<4 ; i++) {
+        ppt = &mesh->point[pt->v[i]];
+        if(!(MG_SIN(ppt->tag) || MG_NOM & ppt->tag) && (ppt->tag & MG_GEO)) continue;
+        n++;
+      }
+      if(!n) {
+        (*nrid)++;
+        continue;
+      }
     }
-    if(!n) {
-      (*nrid)++;
-      continue;
-    }
+
     rap = MMG3D_ALPHAD * pt->qual;
     if ( rap < (*min) ) {
       (*min) = rap;

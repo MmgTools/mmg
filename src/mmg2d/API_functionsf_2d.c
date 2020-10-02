@@ -478,6 +478,16 @@ FORTRAN_NAME(MMG2D_GET_EDGES,mmg2d_get_edges,(MMG5_pMesh *mesh, int* edges,
 }
 
 /**
+ * See \ref MMG2D_Get_triangleQuality function in \ref mmg2d/libmmg2d.h file.
+ */
+FORTRAN_NAME(MMG2D_GET_TRIANGLEQUALITY,mmg2d_get_trianglequality,
+             (MMG5_pMesh *mesh, MMG5_pSol *met, int* k, double* retval),
+             (mesh,met,k,retval)) {
+  *retval = MMG2D_Get_triangleQuality(*mesh,*met,*k);
+  return;
+}
+
+/**
  * See \ref MMG2D_Get_meshSize function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_GET_MESHSIZE,mmg2d_get_meshsize,

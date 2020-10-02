@@ -1300,6 +1300,30 @@ int MMG2D_Get_edges(MMG5_pMesh mesh, int* edges,int *refs,int* areRidges,int* ar
   return 1;
 }
 
+double MMG2D_Get_triangleQuality(MMG5_pMesh mesh,MMG5_pSol met, int k) {
+  double qual = 0.;
+  MMG5_pTria pt;
+
+  if ( k < 1 || k > mesh->nt ) {
+    fprintf(stderr,"\n  ## Error: %s: unable to access to triangle %d.\n",
+            __func__,k);
+    fprintf(stderr,"     Tria numbering goes from 1 to %d\n",mesh->nt);
+    return 0.;
+  }
+  pt = &mesh->tria[k];
+  assert ( MG_EOK(pt) );
+
+  if ( (!met) || (!met->m) || met->size==1 ) {
+    /* iso quality */
+    qual =  MMG2D_ALPHAD * MMG2D_caltri_iso(mesh,NULL,pt);
+  }
+  else {
+    qual = MMG2D_ALPHAD * MMG2D_caltri_ani(mesh,met,pt);
+  }
+
+  return qual;
+}
+
 int MMG2D_Set_scalarSol(MMG5_pSol met, double s, int pos) {
 
   if ( !met->np ) {

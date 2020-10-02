@@ -784,6 +784,8 @@ int MMGS_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
       ppt->flag = 1;
     }
   }
+  /* Now the metric storage at ridges is the "mmg" one. */
+  mesh->info.metRidTyp = 1;
 
   /* search for unintialized metric */
   MMG5_defUninitSize ( mesh,met,ismet );
