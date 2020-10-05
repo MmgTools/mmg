@@ -1988,7 +1988,7 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * \return 0 if failed, 1 otherwise.
  *
  * Get the number of non boundary edges (for DG methods for example). An edge is
- * boundary if it is located at the interface of 2 domains witch different
+ * boundary if it is located at the interface of 2 domains with different
  * references, if it belongs to one triangle only or if it is a singular edge
  * (ridge or required).
  *
@@ -2010,7 +2010,7 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * \param idx index of the non boundary edge to get (between 1 and nb_edges)
  * \return 0 if failed, 1 otherwise.
  *
- * Get extremities \a e0, \a e1 and reference \a ref of hte idx^th non boundary
+ * Get extremities \a e0, \a e1 and reference \a ref of the idx^th non boundary
  * edge (for DG methods for example). An edge is boundary if it is located at
  * the interface of 2 domains witch different references, if it belongs to one
  * triangle only or if it is a singular edge (ridge or required).

@@ -206,7 +206,7 @@ PROGRAM main
   !! using the MMG3D_getMesh/MMG3D_getSol functions
 
   !> 1) Manually get the mesh
-  OPEN(unit=inm,file=TRIM(ADJUSTL(fileout)),form="formatted",status="replace")
+  OPEN(unit=inm,file=TRIM(ADJUSTL(fileout))//".mesh",form="formatted",status="replace")
   WRITE(inm,*) "MeshVersionFormatted 2"
   WRITE(inm,*) "Dimension 3"
 
@@ -332,7 +332,7 @@ PROGRAM main
   DEALLOCATE(ridge)
 
   !> 2) Manually get the solution
-  OPEN(unit=inm,file=TRIM(ADJUSTL(fileout)),form="formatted",status="replace")
+  OPEN(unit=inm,file=TRIM(ADJUSTL(fileout))//".sol",form="formatted",status="replace")
   WRITE(inm,*) "MeshVersionFormatted 2"
   WRITE(inm,*) "Dimension 3"
   WRITE(inm,*)

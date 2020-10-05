@@ -434,6 +434,14 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol so
   return 1;
 }
 
+int MMGS_freeLocalPar(MMG5_pMesh mesh) {
+
+  free(mesh->info.par);
+  mesh->info.npar = 0;
+
+  return 1;
+}
+
 int MMGS_stockOptions(MMG5_pMesh mesh, MMG5_Info *info) {
 
   memcpy(&mesh->info,info,sizeof(MMG5_Info));

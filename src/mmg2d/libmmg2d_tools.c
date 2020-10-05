@@ -275,7 +275,34 @@ int MMG2D_Get_numberOfNonBdyEdges(MMG5_pMesh mesh, int* nb_edges) {
 }
 
 int MMG2D_Get_nonBdyEdge(MMG5_pMesh mesh, int* e0, int* e1, int* ref, int idx) {
-  MMG5_pEdge        ped;
+  MMG5_pEdge ped;
+  size_t     na_tot=0;
+  char       *ptr_c = (char*)mesh->edge;
+
+  if ( !mesh->edge ) {
+    fprintf(stderr,"\n  ## Error: %s: edge array is not allocated.\n"
+            " Please, call the MMG2D_Get_numberOfNonBdyEdges function"
+            " before the %s one.\n",
+            __func__,__func__);
+    return 0;
+  }
+
+  ptr_c = ptr_c-sizeof(size_t);
+  na_tot = *((size_t*)ptr_c);
+
+  if ( mesh->namax==na_tot ) {
+    fprintf(stderr,"\n  ## Error: %s: no internal edge.\n"
+            " Please, call the MMG2D_Get_numberOfNonBdyEdges function"
+            " before the %s one and check that the number of internal"
+            " edges is non null.\n",
+            __func__,__func__);
+  }
+
+  if ( mesh->namax+idx > na_tot ) {
+    fprintf(stderr,"\n  ## Error: %s: Can't get the internal edge of index %d."
+            " Index must be between 1 and %zu.\n",
+            __func__,idx,na_tot-mesh->namax);
+  }
 
   ped = &mesh->edge[mesh->namax+idx];
 
