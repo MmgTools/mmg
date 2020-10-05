@@ -624,7 +624,7 @@ int MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
       MMG_FSCANF(in,"%d",&nbr);
       if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_numberOfLSBaseReferences,nbr) )
         return 0;
-      
+
       for (i=0; i<mesh->info.nbr; i++) {
         MMG_FSCANF(in,"%d",&br);
         mesh->info.br[i] = br;
@@ -774,12 +774,22 @@ int MMG3D_Get_numberOfNonBdyTriangles(MMG5_pMesh mesh, int* nb_tria) {
   }
 
   /** Third step: Append the non boundary edges to the boundary edges array */
-  MMG5_ADD_MEM(mesh,(*nb_tria)*sizeof(MMG5_Tria),"non boundary triangles",
-               printf("  Exit program.\n");
-               MMG5_DEL_MEM(mesh,hash.item);
-               return 0);
-  MMG5_SAFE_RECALLOC(mesh->tria,(mesh->nt+1),(mesh->nt+(*nb_tria)+1),
-                     MMG5_Tria,"non bdy tria arrray",return 0);
+  if ( mesh->nt ) {
+    MMG5_ADD_MEM(mesh,(*nb_tria)*sizeof(MMG5_Tria),"non boundary triangles",
+                 printf("  Exit program.\n");
+                 MMG5_DEL_MEM(mesh,hash.item);
+                 return 0);
+    MMG5_SAFE_RECALLOC(mesh->tria,(mesh->nt+1),(mesh->nt+(*nb_tria)+1),
+                       MMG5_Tria,"non bdy tria arrray",return 0);
+  }
+  else {
+    MMG5_ADD_MEM(mesh,((*nb_tria)+1)*sizeof(MMG5_Tria),"non boundary triangles",
+                 printf("  Exit program.\n");
+                 MMG5_DEL_MEM(mesh,hash.item);
+                 return 0);
+    MMG5_SAFE_RECALLOC(mesh->tria,0,((*nb_tria)+1),
+                       MMG5_Tria,"non bdy tria arrray",return 0);
+  }
 
   j = mesh->nt+1;
   for ( k=1; k<=mesh->ne; k++ ) {

@@ -350,13 +350,12 @@ size_t myfree(void *ptr) {
       law;                                                              \
     }                                                                   \
                                                                         \
-    if ( ptr ) {                                                        \
     (ptr) = tmp;                                                        \
                                                                         \
     if ( newSize > prevSize ) {                                         \
-      memset(&((ptr)[prevSize]),0,((newSize)-(prevSize))*sizeof(type));   \
+      memset(&((ptr)[prevSize]),0,((newSize)-(prevSize))*sizeof(type)); \
     }                                                                   \
-    }                                                                   \
+                                                                        \
   }while(0)
 
 /** Reallocation of ptr of type type at size (initSize+wantedGap*initSize)

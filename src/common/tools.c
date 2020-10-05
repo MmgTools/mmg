@@ -886,6 +886,9 @@ void MMG5_mark_verticesAsUnused ( MMG5_pMesh mesh ) {
     ppt = &mesh->point[k];
     if ( !MG_VOK(ppt) )  continue;
 
+    /* Preserve orphan points marked as required */
+    if ( ppt->tag & MG_REQ ) continue;
+
     ppt->tag &= MG_NUL;
   }
 

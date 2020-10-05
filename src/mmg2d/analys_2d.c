@@ -759,6 +759,7 @@ int MMG2D_regnor(MMG5_pMesh mesh) {
 
 /** preprocessing stage: mesh analysis */
 int MMG2D_analys(MMG5_pMesh mesh) {
+
   /* Transfer the boundary edge references to the triangles, if it has not been
    * already done (option 1) */
   if ( !MMG2D_assignEdge(mesh) ) {

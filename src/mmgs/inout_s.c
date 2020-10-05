@@ -473,6 +473,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
       } else {
         ppt = &mesh->point[i];
         ppt->tag |= MG_REQ;
+        ppt->tag &= ~MG_NUL;
       }
     }
   }

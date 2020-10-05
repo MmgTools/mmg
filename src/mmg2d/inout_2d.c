@@ -25,11 +25,11 @@
 /* read mesh data */
 int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
   FILE        *inm;
-  MMG5_pPoint       ppt;
-  MMG5_pEdge        ped;
-  MMG5_pTria        pt;
-  MMG5_pQuad        pq1;
-  float             fc;
+  MMG5_pPoint  ppt;
+  MMG5_pEdge   ped;
+  MMG5_pTria   pt;
+  MMG5_pQuad   pq1;
+  float        fc;
   long         posnp,posnt,posncor,posned,posnq,posreq,posreqed,posntreq,posnqreq;
   int          k,ref,tmp,ncor,norient,nreq,ntreq,nreqed,bin,iswp,nqreq,nref;
   double       air,dtmp;
@@ -530,6 +530,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
       }
       ppt = &mesh->point[ref];
       ppt->tag |= MG_REQ;
+      ppt->tag &= ~MG_NUL;
     }
   }
 

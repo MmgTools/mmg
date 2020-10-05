@@ -1227,6 +1227,7 @@ int MMG3D_Unset_corner(MMG5_pMesh mesh, int k) {
 int MMG3D_Set_requiredVertex(MMG5_pMesh mesh, int k) {
   assert ( k <= mesh->np );
   mesh->point[k].tag |= MG_REQ;
+  mesh->point[k].tag &= ~MG_NUL;
   return 1;
 }
 

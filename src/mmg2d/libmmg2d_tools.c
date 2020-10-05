@@ -233,11 +233,20 @@ int MMG2D_Get_numberOfNonBdyEdges(MMG5_pMesh mesh, int* nb_edges) {
     }
 
     /* Append the non boundary edges to the boundary edges array */
-    MMG5_ADD_MEM(mesh,(*nb_edges)*sizeof(MMG5_Edge),"non boundary edges",
-                  printf("  Exit program.\n");
-                  return 0);
-    MMG5_SAFE_RECALLOC(mesh->edge,(mesh->namax+1),(mesh->namax+(*nb_edges)+1),
-                       MMG5_Edge,"non bdy edges arrray",return 0);
+    if ( mesh->namax ) {
+      MMG5_ADD_MEM(mesh,(*nb_edges)*sizeof(MMG5_Edge),"non boundary edges",
+                   printf("  Exit program.\n");
+                   return 0);
+      MMG5_SAFE_RECALLOC(mesh->edge,(mesh->namax+1),(mesh->namax+(*nb_edges)+1),
+                         MMG5_Edge,"non bdy edges arrray",return 0);
+    }
+    else {
+      MMG5_ADD_MEM(mesh,((*nb_edges)+1)*sizeof(MMG5_Edge),"non boundary edges",
+                   printf("  Exit program.\n");
+                   return 0);
+      MMG5_SAFE_RECALLOC(mesh->edge,0,((*nb_edges)+1),
+                         MMG5_Edge,"non bdy edges arrray",return 0);
+    }
 
     j = mesh->namax+1;
     for ( k=1; k<=mesh->nt; k++ ) {

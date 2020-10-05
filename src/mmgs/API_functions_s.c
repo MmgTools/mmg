@@ -717,6 +717,7 @@ int MMGS_Unset_corner(MMG5_pMesh mesh, int k) {
 int MMGS_Set_requiredVertex(MMG5_pMesh mesh, int k) {
   assert ( k <= mesh->np );
   mesh->point[k].tag |= MG_REQ;
+  mesh->point[k].tag &= ~MG_NUL;
   return 1;
 }
 

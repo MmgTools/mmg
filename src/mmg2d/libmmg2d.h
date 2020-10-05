@@ -2027,7 +2027,6 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  */
   int MMG2D_Get_nonBdyEdge(MMG5_pMesh mesh, int* e0, int* e1, int* ref, int idx);
 
-
 /**
  * \brief Return adjacent elements of a triangle.
  * \param mesh pointer toward the mesh structure.
