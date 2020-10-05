@@ -102,7 +102,7 @@ void MMG2D_keep_only1Subdomain ( MMG5_pMesh mesh,int nsd ) {
 
   MMG5_keep_subdomainElts ( mesh, nsd, MMG2D_delElt );
 
-  MMG5_mark_usedVertices ( mesh );
+  MMG5_mark_usedVertices ( mesh,MMG2D_delPt );
 
   return;
 }

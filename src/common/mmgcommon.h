@@ -724,7 +724,7 @@ double MMG5_swapd(double sbin);
 
 /* tools */
 void MMG5_mark_verticesAsUnused ( MMG5_pMesh mesh );
-void MMG5_mark_usedVertices ( MMG5_pMesh mesh );
+void MMG5_mark_usedVertices ( MMG5_pMesh mesh,void (*delPt)(MMG5_pMesh,int) );
 void MMG5_keep_subdomainElts ( MMG5_pMesh,int,int (*delElt)(MMG5_pMesh,int) );
 
 /* function pointers */

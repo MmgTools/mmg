@@ -349,6 +349,12 @@ ADD_TEST(NAME mmg2d_2squares-nsd16
   ${MMG2D_CI_TESTS}/2squares/2squares
   -out ${CTEST_OUTPUT_DIR}/mmg2d_2squares-nsd16.o.meshb)
 
+####### orphan
+ADD_TEST(NAME mmg2d_2squares-orphan
+  COMMAND ${EXECUT_MMG2D} -3dMedit 2 -v 5 -nsd 10
+  ${MMG2D_CI_TESTS}/2squares/2squares
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_2squares-nsd10.o.meshb)
+
 ####### -met option
 ADD_TEST(NAME mmg2d_2squares-withMet
   COMMAND ${EXECUT_MMG2D} -3dMedit 2  -v 5

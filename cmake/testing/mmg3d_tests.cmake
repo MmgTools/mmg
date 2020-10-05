@@ -629,6 +629,14 @@ ADD_TEST(NAME mmg3d_OptLs_plane_rembub2
   -sol ${MMG3D_CI_TESTS}/OptLs_plane/bub.sol
   ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_plane-rembub2.o.meshb)
 
+# Preservation of orphan points
+ADD_TEST(NAME mmg3d_OptLs_temp_orphan
+  COMMAND ${EXECUT_MMG3D} -v 5 -ls
+  ${MMG3D_CI_TESTS}/OptLs_temp_hminMax_hgrad1.2_hausd0.1/temp
+  -sol ${MMG3D_CI_TESTS}/OptLs_temp_hminMax_hgrad1.2_hausd0.1/temp.sol
+  -hausd 0.5 -nr -hgrad -1 -nsd 3
+  ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_temp_orphan.o.meshb)
+
 IF ( LONG_TESTS )
   # Test the Ls option
   ADD_TEST(NAME mmg3d_OptLs_cube303d_hminMax_hgrad1.2_hausd0.005

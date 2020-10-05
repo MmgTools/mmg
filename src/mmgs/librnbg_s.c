@@ -284,6 +284,21 @@ int MMG5_mmgsRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol,
     }
   }
 
+  /* Append unseen required points for orphan points preservation */
+  for ( k=1; k<=mesh->np; ++k) {
+    ppt = &mesh->point[k];
+    if ( !MG_VOK(ppt) ) {
+      continue;
+    }
+    if ( permNodTab[k] ) continue;
+
+
+    if ( ppt->tag & MG_REQ ) {
+      /* Add orphan required point to permnodtab */
+      permNodTab[k] = ++npreal;
+    }
+  }
+
   /* Create the final permutation table for trias (stored in vertOldTab) and *
      modify the numbering of the nodes of each tria */
   for( triaIdx = 1; triaIdx < ntreal + 1; triaIdx++) {
