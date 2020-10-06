@@ -211,7 +211,6 @@ MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,char iedg,int *lists,
   /* Unfold shell of (nq,nro), starting from (k,iface), with pivot np */
   adj = k;
   piv = nump;
-  pxt = NULL;
   do {
     iel = adj;
     pt = &mesh->tetra[iel];
@@ -236,14 +235,16 @@ MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,char iedg,int *lists,
 
     isface = 0;
     if ( pt->xt ) {
-      pxt = &mesh->xtetra[pt->xt];
-      isface = (MG_BDY & pxt->ftag[iopp]);
+      isface = (MG_BDY & mesh->xtetra[pt->xt].ftag[iopp]);
     }
   }
   while ( adj && ( adj != k ) && !isface );
 
   naq = piv;
   if ( nap == naq ) return 0;
+
+  assert ( mesh->tetra[k].xt && "initial tetra is not boundary");
+  pxt = &mesh->xtetra[mesh->tetra[k].xt];
 
   if ( !( (pxt->tag[MMG5_iarf[iface][MMG5_inxt2[iedg]]] & MG_GEO) ||
           (pxt->tag[MMG5_iarf[iface][MMG5_iprv2[iedg]]] & MG_GEO)   ) ) {
@@ -306,8 +307,7 @@ MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,char iedg,int *lists,
 
     isface = 0;
     if ( pt->xt ) {
-      pxt    = &mesh->xtetra[pt->xt];
-      isface = (MG_BDY & pxt->ftag[iopp]);
+      isface = (MG_BDY & mesh->xtetra[pt->xt].ftag[iopp]);
     }
   }
   while ( adj && ( adj != k ) && !isface );
