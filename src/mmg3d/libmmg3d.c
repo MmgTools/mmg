@@ -424,6 +424,11 @@ int MMG3D_pack_sol(MMG5_pMesh mesh,MMG5_pSol sol) {
   if ( sol && sol->m ) {
     k  = 1;
     np = mesh->np;
+    /* Search the last used point */
+    while ( (!MG_VOK(mesh->point+np)) && np ) {
+      --np;
+    }
+
     do {
       ppt = &mesh->point[k];
       if ( !MG_VOK(ppt) ) {
@@ -465,6 +470,11 @@ int MMG3D_pack_pointArray(MMG5_pMesh mesh) {
   int           k;
 
   k = 1;
+
+  while ( (!MG_VOK(&mesh->point[mesh->np]))  && mesh->np  ) {
+    MMG3D_delPt(mesh,mesh->np);
+  }
+
   do {
     ppt = &mesh->point[k];
     if ( !MG_VOK(ppt) ) {

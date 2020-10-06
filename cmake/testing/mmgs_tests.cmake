@@ -205,6 +205,13 @@ ADD_TEST(NAME mmgs_2squares-withSol
   ${MMG2D_CI_TESTS}/2squares/2squares -sol ${MMG2D_CI_TESTS}/2squares/2s.sol
   -out ${CTEST_OUTPUT_DIR}/mmgs_2squares-sol.o.meshb)
 
+####### orphan points
+ADD_TEST(NAME mmgs_2squares-orphan
+  COMMAND ${EXECUT_MMGS} -v 5 -nsd 10
+  ${MMG2D_CI_TESTS}/2squares/2squares
+  -out ${CTEST_OUTPUT_DIR}/mmgs_2squares-orphan.o.meshb)
+
+
 # nsd + ls
 ADD_TEST(NAME mmgs_OptLs_teapot-nsd3
   COMMAND ${EXECUT_MMGS} -v 5 -ls -nsd 3 ${common_args}

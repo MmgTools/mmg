@@ -655,7 +655,7 @@ int MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
       MMG_FSCANF(in,"%d",&nbr);
       if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_numberOfLSBaseReferences,nbr) )
         return 0;
-      
+
       for (i=0; i<mesh->info.nbr; i++) {
         MMG_FSCANF(in,"%d",&br);
         mesh->info.br[i] = br;
@@ -663,6 +663,272 @@ int MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
     }
   }
   fclose(in);
+  return 1;
+}
+
+int MMG3D_freeLocalPar(MMG5_pMesh mesh) {
+
+  free(mesh->info.par);
+  mesh->info.npar = 0;
+
+  return 1;
+}
+
+int MMG3D_Get_numberOfNonBdyTriangles(MMG5_pMesh mesh, int* nb_tria) {
+  MMG5_pTetra pt,pt1;
+  MMG5_pPrism pp;
+  MMG5_pTria  ptt;
+  MMG5_Hash   hash;
+  int         *adja,ref,k,i,j,iel;
+
+  *nb_tria = 0;
+
+  if ( !mesh->tetra ) {
+    /* No triangle at all */
+    return 1;
+  }
+
+  /** First step: Mesh analysis to detect the tetra/prisms boundary faces and to
+   * store the info in the xtetra/xprisms structures */
+  if ( !mesh->adja ) {
+    /* create tetra adjacency */
+    if ( !MMG3D_hashTetra( mesh,0 ) ) {
+      fprintf(stderr,"\n  ## Error: %s: unable to create "
+              "adjacency table.\n",__func__);
+      return 0;
+    }
+  }
+
+  if ( !mesh->adjapr ) {
+    /* create prism adjacency */
+    if ( !MMG3D_hashPrism(mesh) ) {
+      fprintf(stderr,"\n  ## Error: %s: Prism hashing problem.\n",__func__);
+      return 0;
+    }
+  }
+
+  /* If mesh->xtetra is filled, we assume that the surface analysis is
+   * complete */
+  if ( !mesh->xtetra ) {
+    /* compatibility triangle orientation w/r tetras */
+    if ( !MMG5_bdryPerm(mesh) ) {
+      fprintf(stderr,"\n  ## Error: %s: Boundary orientation problem.\n",__func__);
+      return 0;
+    }
+    /* identify surface mesh */
+    if ( !MMG5_chkBdryTria(mesh) ) {
+      fprintf(stderr,"\n  ## Error: %s: Boundary problem.\n",__func__);
+      return 0;
+    }
+    MMG5_freeXTets(mesh);
+    MMG5_freeXPrisms(mesh);
+
+    /* create surface adjacency */
+    memset ( &hash, 0x0, sizeof(MMG5_Hash));
+    if ( !MMG3D_hashTria(mesh,&hash) ) {
+      MMG5_DEL_MEM(mesh,hash.item);
+      fprintf(stderr,"\n  ## Error: %s: Hashing problem.\n",__func__);
+      return 0;
+    }
+
+    /* identify connexity and flip orientation of faces if needed */
+    if ( !MMG5_setadj(mesh) ) {
+      fprintf(stderr,"\n  ## Error: %s: Topology problem.\n",__func__);
+      MMG5_DEL_MEM(mesh,hash.item);
+      return 0;
+    }
+
+    /* set bdry entities to tetra and fill the orientation field */
+    if ( !MMG5_bdrySet(mesh) ) {
+      MMG5_DEL_MEM(mesh,hash.item);
+      fprintf(stderr,"\n  ## Error: %s: Boundary problem.\n",__func__);
+      return 0;
+    }
+    MMG5_DEL_MEM(mesh,hash.item);
+  }
+
+  /** Second step: Count the number of non boundary faces */
+  for ( k=1; k<=mesh->ne; k++ ) {
+    pt = &mesh->tetra[k];
+    if ( !MG_EOK(pt) ) continue;
+
+    adja = &mesh->adja[4*(k-1)+1];
+
+    for ( i=0; i<4; i++ ) {
+      iel = adja[i] / 4;
+      assert ( iel != k );
+
+      pt1 = &mesh->tetra[iel];
+
+      if ( (!iel) || (pt->ref != pt1->ref) ||
+           (mesh->info.opnbdy && pt->xt &&
+            (mesh->xtetra[pt->xt].ftag[i] & MG_BDY) ) ) {
+        /* Do not treat boundary faces */
+        continue;
+      }
+      if ( k < iel ) {
+        /* Treat face from the tetra with lowest index */
+        ++(*nb_tria);
+      }
+    }
+  }
+  for ( k=1; k<=mesh->nprism; k++ ) {
+    pp = &mesh->prism[k];
+    if ( !MG_EOK(pp) ) continue;
+
+    adja = &mesh->adjapr[5*(k-1)+1];
+
+    for ( i=0; i<2; i++ ) {
+      iel = adja[i] / 5;
+
+      if ( iel<0 ) {
+        ref = mesh->tetra[abs(iel)].ref;
+      } else {
+        ref = mesh->prism[iel].ref;
+      }
+
+      if ( (!iel) || (pp->ref != ref) ||
+           (mesh->info.opnbdy && pp->xpr &&
+            (mesh->xprism[pp->xpr].ftag[i] & MG_BDY) ) ) {
+        /* Do not treat boundary faces */
+        continue;
+      }
+      if ( k < iel ) {
+        /* Treat face from the element with lowest index */
+        ++(*nb_tria);
+      }
+    }
+  }
+
+  if ( !(*nb_tria) ) {
+    return 1;
+  }
+
+  /** Third step: Append the non boundary edges to the boundary edges array */
+  if ( mesh->nt ) {
+    MMG5_ADD_MEM(mesh,(*nb_tria)*sizeof(MMG5_Tria),"non boundary triangles",
+                 printf("  Exit program.\n");
+                 MMG5_DEL_MEM(mesh,hash.item);
+                 return 0);
+    MMG5_SAFE_RECALLOC(mesh->tria,(mesh->nt+1),(mesh->nt+(*nb_tria)+1),
+                       MMG5_Tria,"non bdy tria arrray",return 0);
+  }
+  else {
+    MMG5_ADD_MEM(mesh,((*nb_tria)+1)*sizeof(MMG5_Tria),"non boundary triangles",
+                 printf("  Exit program.\n");
+                 MMG5_DEL_MEM(mesh,hash.item);
+                 return 0);
+    MMG5_SAFE_RECALLOC(mesh->tria,0,((*nb_tria)+1),
+                       MMG5_Tria,"non bdy tria arrray",return 0);
+  }
+
+  j = mesh->nt+1;
+  for ( k=1; k<=mesh->ne; k++ ) {
+    pt = &mesh->tetra[k];
+    if ( !MG_EOK(pt) ) continue;
+
+    adja = &mesh->adja[4*(k-1)+1];
+
+    for ( i=0; i<4; i++ ) {
+      iel = adja[i] / 4;
+      assert ( iel != k );
+
+      pt1 = &mesh->tetra[iel];
+
+      if ( (!iel) || (pt->ref != pt1->ref) ||
+           (mesh->info.opnbdy && pt->xt &&
+            (mesh->xtetra[pt->xt].ftag[i] & MG_BDY)) ) {
+        /* Do not treat boundary faces */
+        continue;
+      }
+      if ( k < iel ) {
+        /* Treat edge from the triangle with lowest index */
+        ptt = &mesh->tria[j++];
+        assert ( ptt );
+        ptt->v[0]   = pt->v[MMG5_idir[i][0]];
+        ptt->v[1]   = pt->v[MMG5_idir[i][1]];
+        ptt->v[2]   = pt->v[MMG5_idir[i][2]];
+        ptt->ref    = mesh->xtetra[pt->xt].ref[i];
+      }
+    }
+  }
+
+  for ( k=1; k<=mesh->nprism; k++ ) {
+    pp = &mesh->prism[k];
+    if ( !MG_EOK(pp) ) continue;
+
+    adja = &mesh->adjapr[5*(k-1)+1];
+
+    for ( i=0; i<2; i++ ) {
+      iel = adja[i] / 5;
+
+      if ( iel<0 ) {
+        ref = mesh->tetra[abs(iel)].ref;
+      } else {
+        ref = mesh->prism[iel].ref;
+      }
+      if ( (!iel) || (pp->ref != ref) ||
+           (mesh->info.opnbdy && pp->xpr &&
+            (mesh->xprism[pp->xpr].ftag[i] & MG_BDY)) ) {
+        /* Do not treat boundary faces */
+        continue;
+      }
+      if ( k < iel ) {
+        /* Treat edge from the triangle with lowest index */
+        ptt = &mesh->tria[j++];
+        assert ( ptt );
+        ptt->v[0]   = pp->v[MMG5_idir_pr[i][0]];
+        ptt->v[1]   = pp->v[MMG5_idir_pr[i][1]];
+        ptt->v[2]   = pp->v[MMG5_idir_pr[i][2]];
+        ptt->ref    = mesh->xprism[pp->xpr].ref[i];
+      }
+    }
+  }
+
+  return 1;
+}
+
+int MMG3D_Get_nonBdyTriangle(MMG5_pMesh mesh,int* v0,int* v1,int* v2,
+                             int* ref,int idx) {
+  MMG5_pTria ptt;
+  size_t     nt_tot=0;
+  char       *ptr_c = (char*)mesh->tria;
+
+  if ( !mesh->tria ) {
+    fprintf(stderr,"\n  ## Error: %s: triangle array is not allocated.\n"
+            " Please, call the MMG3D_Get_numberOfNonBdyTriangles function"
+            " before the %s one.\n",
+            __func__,__func__);
+    return 0;
+  }
+
+  ptr_c = ptr_c-sizeof(size_t);
+  nt_tot = *((size_t*)ptr_c);
+
+  if ( mesh->nt==nt_tot ) {
+    fprintf(stderr,"\n  ## Error: %s: no internal triangle.\n"
+            " Please, call the MMG3D_Get_numberOfNonBdyTriangles function"
+            " before the %s one and check that the number of internal"
+            " triangles is non null.\n",
+            __func__,__func__);
+  }
+
+  if ( mesh->nt+idx > nt_tot ) {
+    fprintf(stderr,"\n  ## Error: %s: Can't get the internal triangle of index %d."
+            " Index must be between 1 and %zu.\n",
+            __func__,idx,nt_tot-mesh->nt);
+  }
+
+  ptt = &mesh->tria[mesh->nt+idx];
+
+  *v0  = ptt->v[0];
+  *v1  = ptt->v[1];
+  *v2  = ptt->v[2];
+
+  if ( ref != NULL ) {
+    *ref = ptt->ref;
+  }
+
   return 1;
 }
 

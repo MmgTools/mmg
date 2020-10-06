@@ -60,6 +60,7 @@ ENDIF ( )
 
 IF ( LIBMMG_STATIC )
   ADD_AND_INSTALL_LIBRARY ( lib${PROJECT_NAME}_a  STATIC
+    copy_mmg_headers
     "${mmg_library_files}"
     ${PROJECT_NAME} )
 ENDIF()
@@ -67,6 +68,7 @@ ENDIF()
 # Compile shared library
 IF ( LIBMMG_SHARED )
   ADD_AND_INSTALL_LIBRARY ( lib${PROJECT_NAME}_so  SHARED
+    copy_mmg_headers
     "${mmg_library_files}"
     ${PROJECT_NAME} )
 ENDIF()

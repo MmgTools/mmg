@@ -491,6 +491,7 @@ int MMG3D_loadMesh_opened(MMG5_pMesh mesh,FILE *inm,int bin) {
       } else {
         ppt = &mesh->point[i];
         ppt->tag |= MG_REQ;
+        ppt->tag &= ~MG_NUL;
       }
     }
   }

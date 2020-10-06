@@ -372,7 +372,7 @@ void  MMG2D_Init_parameters(MMG5_pMesh mesh);
  * functions.
  */
 static inline
-void MMG2D_Set_commonFunc() {
+void MMG2D_Set_commonFunc(void) {
   MMG5_chkmsh            = MMG5_mmg2dChkmsh;
   MMG5_grad2met_ani      = MMG2D_grad2met_ani;
   MMG5_grad2metreq_ani   = MMG2D_grad2metreq_ani;

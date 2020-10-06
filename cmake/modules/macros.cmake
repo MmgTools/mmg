@@ -135,7 +135,7 @@ ENDMACRO ( )
 ###############################################################################
 
 MACRO ( ADD_AND_INSTALL_LIBRARY
-    target_name target_type sources output_name )
+    target_name target_type target_dependencies sources output_name )
 
   ADD_LIBRARY ( ${target_name} ${target_type} ${sources} )
   ADD_LIBRARY ( Mmg::${target_name} ALIAS ${target_name} )
@@ -143,6 +143,7 @@ MACRO ( ADD_AND_INSTALL_LIBRARY
   IF (NOT WIN32 OR MINGW)
     ADD_DEPENDENCIES(${target_name} GenerateGitHash)
   ENDIF()
+  ADD_DEPENDENCIES( ${target_name} ${target_dependencies})
 
   IF ( CMAKE_VERSION VERSION_LESS 2.8.12 )
     INCLUDE_DIRECTORIES ( ${target_name} PUBLIC
@@ -203,7 +204,7 @@ ENDMACRO ( )
 ###############################################################################
 
 MACRO ( ADD_AND_INSTALL_EXECUTABLE
-    exec_name lib_files main_file )
+    exec_name target_dependencies lib_files main_file )
 
   IF ( NOT TARGET lib${exec_name}_a AND NOT TARGET lib${exec_name}_so )
     ADD_EXECUTABLE ( ${exec_name} ${lib_files} ${main_file} )
@@ -223,6 +224,7 @@ MACRO ( ADD_AND_INSTALL_EXECUTABLE
   IF (NOT WIN32 OR MINGW)
     ADD_DEPENDENCIES(${exec_name} GenerateGitHash)
   endif()
+  ADD_DEPENDENCIES(${exec_name} ${target_dependencies})
 
   IF ( WIN32 AND NOT MINGW AND SCOTCH_FOUND )
     my_add_link_flags ( ${exec_name} "/SAFESEH:NO")

@@ -455,6 +455,17 @@ FORTRAN_NAME(MMGS_GET_NORMALATVERTEX,mmgs_get_normalatvertex,
 }
 
 /**
+ * See \ref MMGS_Get_triangleQuality function in \ref mmgs/libmmgs.h file.
+ */
+FORTRAN_NAME(MMGS_GET_TRIANGLEQUALITY,mmgs_get_trianglequality,
+             (MMG5_pMesh *mesh, MMG5_pSol *met, int* k, double* retval),
+             (mesh,met,k,retval)) {
+  *retval = MMGS_Get_triangleQuality(*mesh,*met,*k);
+  return;
+}
+
+
+/**
  * See \ref MMGS_Set_scalarSol function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_NAME(MMGS_SET_SCALARSOL,mmgs_set_scalarsol,

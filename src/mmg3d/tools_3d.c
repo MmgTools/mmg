@@ -1217,6 +1217,16 @@ void MMG3D_mark_usedVertices ( MMG5_pMesh mesh ) {
   MMG5_pPoint ppt;
   int         k,i;
 
+  /* Preserve isolated required points */
+  for ( k=1; k<=mesh->np; k++ ) {
+    ppt = &mesh->point[k];
+    if ( ppt->flag || !(ppt->tag & MG_REQ) ) {
+      continue;
+    }
+    ppt->tag &= ~MG_NUL;
+  }
+
+  /* Mark points used by the connectivity */
   for ( k=1; k<=mesh->ne; k++ ) {
     pt = &mesh->tetra[k];
     if ( !MG_EOK(pt) )  continue;
@@ -1235,6 +1245,11 @@ void MMG3D_mark_usedVertices ( MMG5_pMesh mesh ) {
       ppt = &mesh->point[ pq->v[i] ];
       ppt->tag &= ~MG_NUL;
     }
+  }
+
+  /* Finally, clean point array */
+  while ( (!MG_VOK(&mesh->point[mesh->np])) && mesh->np ) {
+    MMG3D_delPt(mesh,mesh->np);
   }
 
   return;
@@ -1257,6 +1272,13 @@ void MMG3D_keep_subdomainElts ( MMG5_pMesh mesh, int nsd ) {
     pt = &mesh->tetra[k];
 
     if ( !MG_EOK(pt) ) continue;
+
+    /* Mark tetra vertices as seen to be able to detect isolated points */
+    mesh->point[pt->v[0]].flag = 1;
+    mesh->point[pt->v[1]].flag = 1;
+    mesh->point[pt->v[2]].flag = 1;
+    mesh->point[pt->v[3]].flag = 1;
+
     if ( pt->ref == nsd ) continue;
 
     /* Update adjacency relationship: we will delete elt k so k adjacent will
@@ -1275,7 +1297,7 @@ void MMG3D_keep_subdomainElts ( MMG5_pMesh mesh, int nsd ) {
       }
     }
 
-    /* Delete element (triangle in 2D and surface, tetra in 3D) */
+    /* Delete element */
     MMG3D_delElt(mesh,k);
   }
 

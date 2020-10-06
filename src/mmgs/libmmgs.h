@@ -618,6 +618,24 @@ int  MMGS_Set_requiredEdge(MMG5_pMesh mesh, int k);
 int  MMGS_Set_normalAtVertex(MMG5_pMesh mesh, int k, double n0, double n1, double n2) ;
 
 /**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param k index of the triangle for which we want to get the quality.
+ * \return the computed quality or 0. if fail.
+ *
+ * Get quality of tria \a k.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMGS_GET_TRIANGLEQUALITY(mesh,met,k,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,met\n
+ * >     INTEGER, INTENT(IN)           :: k\n
+ * >     REAL(KIND=8), INTENT(OUT)     :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  double MMGS_Get_triangleQuality(MMG5_pMesh mesh,MMG5_pSol met, int k);
+
+/**
  * \param met pointer toward the sol structure.
  * \param s solution scalar value.
  * \param pos position of the solution in the mesh.
@@ -1834,6 +1852,52 @@ int  MMGS_mmgsls(MMG5_pMesh mesh,  MMG5_pSol sol,MMG5_pSol met);
  *
  */
 void  MMGS_setfunc(MMG5_pMesh mesh,MMG5_pSol met);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param nb_edges pointer toward the number of non boundary edges.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Get the number of non boundary edges (for DG methods for example). An edge is
+ * boundary if it is located at the interface of 2 domains with different
+ * references, if it belongs to one triangle only or if it is a singular edge
+ * (ridge or required).
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMGS_GET_NUMBEROFNONBDYEDGES(mesh,nb_edges,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * >     INTEGER, INTENT(OUT)          :: nb_edges\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int MMGS_Get_numberOfNonBdyEdges(MMG5_pMesh mesh, int* nb_edges);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param e0 pointer toward the first extremity of the edge.
+ * \param e1 pointer toward the second  extremity of the edge.
+ * \param ref pointer toward the edge reference.
+ * \param idx index of the non boundary edge to get (between 1 and nb_edges)
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Get extremities \a e0, \a e1 and reference \a ref of the idx^th non boundary
+ * edge (for DG methods for example). An edge is boundary if it is located at
+ * the interface of 2 domains witch different references, if it belongs to one
+ * triangle only or if it is a singular edge (ridge or required).
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMGS_GET_NONBDYEDGE(mesh,e0,e1,ref,idx,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * >     INTEGER, INTENT(OUT)          :: e0,e1\n
+ * >     INTEGER                       :: ref\n
+ * >     INTEGER, INTENT(IN)           :: idx\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int MMGS_Get_nonBdyEdge(MMG5_pMesh mesh, int* e0, int* e1, int* ref, int idx);
+
 
 /* Tools for the library */
 /**

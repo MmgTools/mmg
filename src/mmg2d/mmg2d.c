@@ -44,7 +44,7 @@ static int MMG2D_usage(char *name) {
   MMG5_lagUsage();
 
   /* Common parameters (first section) */
-  MMG5_paramUsage1( );
+  MMG5_paramUsage1();
 
   /* Parameters shared by mmg2d and 3d only*/
   MMG5_2d3dUsage();

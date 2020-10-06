@@ -886,7 +886,9 @@ void MMG5_mark_verticesAsUnused ( MMG5_pMesh mesh ) {
     ppt = &mesh->point[k];
     if ( !MG_VOK(ppt) )  continue;
 
-    ppt->tag &= MG_NUL;
+    /* reset ppt->flag to detect isolated points in keep_subdomainElts */
+    ppt->flag = 0;
+    ppt->tag |= MG_NUL;
   }
 
   return;
@@ -894,17 +896,29 @@ void MMG5_mark_verticesAsUnused ( MMG5_pMesh mesh ) {
 
 /**
  * \param mesh pointer toward the mesh structure.
+ * \param delPt function to call to delete point.
  *
  * Mark the mesh vertices that belong to triangles or quadrangles as used (for
  * Mmgs or Mmg2d).
  *
  */
-void MMG5_mark_usedVertices ( MMG5_pMesh mesh ) {
+void MMG5_mark_usedVertices ( MMG5_pMesh mesh,void (*delPt)(MMG5_pMesh,int)  ) {
   MMG5_pTria  pt;
   MMG5_pQuad  pq;
   MMG5_pPoint ppt;
   int         k,i;
 
+  /* Preserve isolated required points */
+  for ( k=1; k<=mesh->np; k++ ) {
+    ppt = &mesh->point[k];
+
+    if ( ppt->flag || !(ppt->tag & MG_REQ) ) {
+      continue;
+    }
+    ppt->tag &= ~MG_NUL;
+  }
+
+  /* Mark points used by the connectivity */
   for ( k=1; k<=mesh->nt; k++ ) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) )  continue;
@@ -923,6 +937,11 @@ void MMG5_mark_usedVertices ( MMG5_pMesh mesh ) {
       ppt = &mesh->point[ pq->v[i] ];
       ppt->tag &= ~MG_NUL;
     }
+  }
+
+  /* Finally, clean point array */
+  while ( (!MG_VOK(&mesh->point[mesh->np])) && mesh->np ) {
+    delPt(mesh,mesh->np);
   }
 
   return;
@@ -946,6 +965,12 @@ void MMG5_keep_subdomainElts ( MMG5_pMesh mesh, int nsd,
     pt = &mesh->tria[k];
 
     if ( !MG_EOK(pt) ) continue;
+
+    /* Mark triangle vertices as seen to be able to detect isolated points */
+    mesh->point[pt->v[0]].flag = 1;
+    mesh->point[pt->v[1]].flag = 1;
+    mesh->point[pt->v[2]].flag = 1;
+
     if ( pt->ref == nsd ) continue;
 
     /* Update adjacency relationship: we will delete elt k so k adjacent will
