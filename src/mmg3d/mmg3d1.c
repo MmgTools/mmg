@@ -994,12 +994,14 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
             if ( mesh->adja[4*(k-1)+1+i] )  continue;
           }
           if ( p0->tag > tag )  continue;
+          assert ( ilist && ilists );
           ilist = MMG5_chkcol_bdy(mesh,met,k,i,j,list,ilist,lists,ilists,typchk);
         }
         /* internal face */
         else {
           isnm = 0;
           if ( p0->tag & MG_BDY )  continue;
+          assert ( ilist );
           ilist = MMG5_chkcol_int(mesh,met,k,i,j,list,ilist,typchk);
         }
 
@@ -1503,7 +1505,7 @@ int MMG3D_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,int k,
                         return 2;
                         ,o,tag,src);
   }
-  if ( met->m ) {
+  if ( met && met->m ) {
     if ( typchk == 1 && (met->size>1) ) {
       ier = MMG3D_intmet33_ani(mesh,met,k,imax,ip,0.5);
     }

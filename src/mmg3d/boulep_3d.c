@@ -1248,50 +1248,45 @@ int MMG5_srcbdy(MMG5_pMesh mesh,int start,int ia) {
  void MMG5_coquilFaceErrorMessage(MMG5_pMesh mesh, int k1, int k2) {
   MMG5_pPoint ppt;
   MMG5_pTetra pt;
-  int         np, ne, k, kel1, kel2;
+  int         kel1, kel2;
   static char mmgErr0;
 
   if ( mmgErr0 ) return;
 
   mmgErr0 = 1;
 
-  np = ne = kel1 = kel2 = 0;
-  for (k=1; k<=mesh->np; k++) {
-    ppt = &mesh->point[k];
-    if ( MG_VOK(ppt) )  ppt->tmp = ++np;
-  }
-  for (k=1; k<=mesh->ne; k++) {
-    pt = &mesh->tetra[k];
-    if ( MG_EOK(pt) ) {
-      ne++;
-      if ( k == k1 ) kel1 = ne;
-      if ( k == k2 ) kel2 = ne;
-    }
-  }
-
   fprintf(stderr,"\n  ## Error: %s: at least 1 problem in surface"
           " remesh process",__func__);
   fprintf(stderr," (potential creation of a lonely boundary face):\n");
 
+  kel1 = MMG3D_indElt(mesh,k1);
+  kel2 = MMG3D_indElt(mesh,k2);
+
   if ( kel1 != 0 ) {
     pt = &mesh->tetra[k1];
-    assert ( pt );
+    assert ( pt && MG_EOK(pt) );
     fprintf(stderr,"            look at elt %d:",kel1);
-    fprintf(stderr," %d %d %d %d.\n", mesh->point[pt->v[0]].tmp,
-            mesh->point[pt->v[1]].tmp,mesh->point[pt->v[2]].tmp,
-            mesh->point[pt->v[3]].tmp);
-    fprintf(stderr,"            adjacent tetras %d %d %d %d\n",(&mesh->adja[3*(kel1-1)+1])[0],
-            (&mesh->adja[3*(kel1-1)+1])[1],(&mesh->adja[3*(kel1-1)+1])[2],
-            (&mesh->adja[3*(kel1-1)+1])[3]);
-    fprintf(stderr,"            vertex required? %d %d %d %d\n",mesh->point[pt->v[0]].tag & MG_REQ,
+    fprintf(stderr," %d %d %d %d.\n", MMG3D_indPt(mesh,pt->v[0]),
+            MMG3D_indPt(mesh,pt->v[1]),MMG3D_indPt(mesh,pt->v[2]),
+            MMG3D_indPt(mesh,pt->v[3]));
+    fprintf(stderr,"            adjacent tetras %d %d %d %d\n",
+            MMG3D_indElt(mesh,mesh->adja[4*(k1-1)+1]/4),
+            MMG3D_indElt(mesh,mesh->adja[4*(k1-1)+2]/4),
+            MMG3D_indElt(mesh,mesh->adja[4*(k1-1)+3]/4),
+            MMG3D_indElt(mesh,mesh->adja[4*(k1-1)+4]/4));
+    fprintf(stderr,"            vertex required? %d %d %d %d\n",
+            mesh->point[pt->v[0]].tag & MG_REQ,
             mesh->point[pt->v[1]].tag & MG_REQ,
-            mesh->point[pt->v[2]].tag & MG_REQ,mesh->point[pt->v[3]].tag & MG_REQ);
+            mesh->point[pt->v[2]].tag & MG_REQ,
+            mesh->point[pt->v[3]].tag & MG_REQ);
   } else if ( kel2 != 0 ) {
     fprintf(stderr,"            look at elt %d:",kel2);
-    mesh->tetra[kel2].ref=5;
-    fprintf(stderr," %d %d %d %d.\n\n", mesh->point[pt->v[0]].tmp,
-            mesh->point[pt->v[1]].tmp,mesh->point[pt->v[2]].tmp,
-            mesh->point[pt->v[3]].tmp);
+    pt = &mesh->tetra[k2];
+    assert ( pt && MG_EOK(pt) );
+
+    fprintf(stderr," %d %d %d %d.\n\n",MMG3D_indPt(mesh,pt->v[0]),
+            MMG3D_indPt(mesh,pt->v[1]),MMG3D_indPt(mesh,pt->v[2]),
+            MMG3D_indPt(mesh,pt->v[3]));
   }
   fprintf(stderr,"\n  ##        Try to modify the hausdorff number,");
   fprintf(stderr," the maximum mesh size or/and the value of angle detection.\n");
