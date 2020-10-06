@@ -44,12 +44,10 @@
 /**
  * See \ref MMG5_Init_fileNames function in \ref common/libmmgcommon.h file.
  */
-FORTRAN_NAME(INIT_FILENAMES,init_filenames,(MMG5_pMesh *mesh,MMG5_pSol *sol
-               ),(mesh,sol
-                 )) {
+FORTRAN_NAME(MMG5_INIT_FILENAMES,mmg5_init_filenames,(MMG5_pMesh *mesh,MMG5_pSol *sol),(mesh,sol)) {
 
-	MMG5_Init_fileNames(*mesh,*sol);
-    return;
+  MMG5_Init_fileNames(*mesh,*sol);
+  return;
 }
 
 /**
