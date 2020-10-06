@@ -117,13 +117,13 @@ ENDIF()
 
 # Compile static library
 IF ( LIBMMG3D_STATIC )
-  ADD_AND_INSTALL_LIBRARY ( lib${PROJECT_NAME}3d_a STATIC
+  ADD_AND_INSTALL_LIBRARY ( lib${PROJECT_NAME}3d_a STATIC copy_3d_headers
     "${mmg3d_library_files}" ${PROJECT_NAME}3d )
 ENDIF()
 
 # Compile shared library
 IF ( LIBMMG3D_SHARED )
-  ADD_AND_INSTALL_LIBRARY ( lib${PROJECT_NAME}3d_so SHARED
+  ADD_AND_INSTALL_LIBRARY ( lib${PROJECT_NAME}3d_so SHARED copy_3d_headers
     "${mmg3d_library_files}" ${PROJECT_NAME}3d )
 ENDIF()
 
@@ -164,7 +164,7 @@ ENDIF()
 #####         Compile MMG3D executable
 #####
 ###############################################################################
-ADD_AND_INSTALL_EXECUTABLE ( ${PROJECT_NAME}3d
+ADD_AND_INSTALL_EXECUTABLE ( ${PROJECT_NAME}3d copy_3d_headers
   "${mmg3d_library_files}" ${mmg3d_main_file} )
 
 ###############################################################################

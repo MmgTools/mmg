@@ -100,18 +100,6 @@ ENDIF ( )
 #####         Compile mmg2d libraries
 #####
 ############################################################################
-# Compile static library
-IF ( LIBMMG2D_STATIC )
-  ADD_AND_INSTALL_LIBRARY ( lib${PROJECT_NAME}2d_a STATIC
-    "${mmg2d_library_files}" ${PROJECT_NAME}2d )
-ENDIF()
-
-# Compile shared library
-IF ( LIBMMG2D_SHARED )
-  ADD_AND_INSTALL_LIBRARY ( lib${PROJECT_NAME}2d_so SHARED
-    "${mmg2d_library_files}" ${PROJECT_NAME}2d )
-ENDIF()
-
 # mmg2d header files needed for library
 SET( mmg2d_headers
   ${MMG2D_SOURCE_DIR}/libmmg2d.h
@@ -131,6 +119,18 @@ INSTALL(FILES ${mmg2d_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/mmg/mmg2d
 # Copy header files in project directory at build step
 COPY_HEADERS_AND_CREATE_TARGET ( ${MMG2D_SOURCE_DIR} ${MMG2D_BINARY_DIR} ${MMG2D_INCLUDE} 2d )
 
+# Compile static library
+IF ( LIBMMG2D_STATIC )
+  ADD_AND_INSTALL_LIBRARY ( lib${PROJECT_NAME}2d_a STATIC copy_2d_headers
+    "${mmg2d_library_files}" ${PROJECT_NAME}2d )
+ENDIF()
+
+# Compile shared library
+IF ( LIBMMG2D_SHARED )
+  ADD_AND_INSTALL_LIBRARY ( lib${PROJECT_NAME}2d_so SHARED copy_2d_headers
+    "${mmg2d_library_files}" ${PROJECT_NAME}2d )
+ENDIF()
+
 ############################################################################
 #####
 #####         Compile program to test library
@@ -148,7 +148,7 @@ ENDIF ( )
 #####
 ###############################################################################
 
-ADD_AND_INSTALL_EXECUTABLE ( ${PROJECT_NAME}2d
+ADD_AND_INSTALL_EXECUTABLE ( ${PROJECT_NAME}2d copy_2d_headers
   "${mmg2d_library_files}" ${mmg2d_main_file} )
 
 ###############################################################################
