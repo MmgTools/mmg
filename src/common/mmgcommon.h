@@ -641,11 +641,11 @@ const char    *MMG5_Get_formatName(enum MMG5_Format fmt);
  int           MMG5_mmgHashTria(MMG5_pMesh mesh, int *adja, MMG5_Hash*, int chkISO);
  void          MMG5_mmgInit_parameters(MMG5_pMesh mesh);
  void          MMG5_mmgUsage(char *prog);
- void          MMG5_paramUsage1();
- void          MMG5_paramUsage2();
- void          MMG5_2d3dUsage();
- void          MMG5_lagUsage();
- void          MMG5_advancedUsage();
+ void          MMG5_paramUsage1(void);
+ void          MMG5_paramUsage2(void);
+ void          MMG5_2d3dUsage(void);
+ void          MMG5_lagUsage(void);
+ void          MMG5_advancedUsage(void);
  extern int    MMG5_nonUnitNorPts(MMG5_pMesh,int,int,int,double*);
  extern double MMG5_nonorsurf(MMG5_pMesh mesh,MMG5_pTria pt);
  extern int    MMG5_norpts(MMG5_pMesh,int,int,int,double *);
@@ -744,7 +744,7 @@ extern int  (*MMG5_indPt)(MMG5_pMesh mesh,int kp);
 extern int    (*MMG5_renumbering)(int,MMG5_pMesh,MMG5_pSol sol,MMG5_pSol fields,int*);
 #endif
 
-void   MMG5_Set_commonFunc();
+void   MMG5_Set_commonFunc(void);
 
 #ifdef __cplusplus
 }

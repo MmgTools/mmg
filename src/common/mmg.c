@@ -68,7 +68,7 @@ void MMG5_mmgUsage(char *prog) {
  * Print help for common parameters options of the 3 codes (first section).
  *
  */
-void MMG5_paramUsage1( ) {
+void MMG5_paramUsage1(void) {
   fprintf(stdout,"\n**  Parameters\n");
   fprintf(stdout,"-A           enable anisotropy (without metric file).\n");
   fprintf(stdout,"-ar     val  angle detection\n");
@@ -85,7 +85,7 @@ void MMG5_paramUsage1( ) {
  * Print help for common options of the 3 codes (second section).
  *
  */
-void MMG5_paramUsage2( ) {
+void MMG5_paramUsage2(void) {
 
   fprintf(stdout,"-noinsert    no point insertion/deletion \n");
   fprintf(stdout,"-nomove      no point relocation\n");
@@ -101,7 +101,7 @@ void MMG5_paramUsage2( ) {
  * Print help for lagrangian motion option.
  *
  */
-void MMG5_lagUsage( ) {
+void MMG5_lagUsage(void) {
 
 #ifdef USE_ELAS
   fprintf(stdout,"-lag [n]     lagrangian mesh displacement according to mode [0/1/2]\n");
@@ -117,7 +117,7 @@ void MMG5_lagUsage( ) {
  * Print help for common options between 2D and 3D.
  *
  */
-void MMG5_2d3dUsage( ) {
+void MMG5_2d3dUsage(void) {
 
   fprintf(stdout,"-opnbdy      preserve input triangles at the interface of"
           " two domains of the same reference.\n");
@@ -131,7 +131,7 @@ void MMG5_2d3dUsage( ) {
  * Print help for advanced users of mmg.
  *
  */
-void MMG5_advancedUsage() {
+void MMG5_advancedUsage(void) {
 
   fprintf(stdout,"\n**  Parameters for advanced users\n");
   fprintf(stdout,"-nosizreq       disable setting of required edge sizes over required vertices.\n");
