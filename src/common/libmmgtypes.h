@@ -481,6 +481,7 @@ typedef struct {
   char          sethmin; /*!< 1 if user set hmin, 0 otherwise (needed for multiple library calls) */
   char          sethmax; /*!< 1 if user set hmin, 0 otherwise (needed for multiple library calls) */
   unsigned char optim, optimLES, noinsert, noswap, nomove, nosurf, nosizreq;
+  unsigned char metRidTyp; /*!< 0 for a classical storage of the aniso metric at ridge, 1 for the Mmg storage (modified by defsiz) */
   MMG5_pMat     mat;
 } MMG5_Info;
 

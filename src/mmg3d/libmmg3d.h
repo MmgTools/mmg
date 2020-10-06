@@ -1644,6 +1644,24 @@ enum MMG3D_Param {
                                 double *n2) ;
 
 /**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param k index of the tetra for which we want to get the quality.
+ * \return the computed quality or 0. if fail.
+ *
+ * Get quality of tetra \a k.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_GET_TETRAHEDRONQUALITY(mesh,met,k,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,met\n
+ * >     INTEGER, INTENT(IN)           :: k\n
+ * >     REAL(KIND=8), INTENT(OUT)     :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  double MMG3D_Get_tetrahedronQuality(MMG5_pMesh mesh,MMG5_pSol met, int k);
+
+/**
  * \param met pointer toward the sol structure.
  * \param s pointer toward the scalar solution value.
  * \return 0 if failed, 1 otherwise.
@@ -2708,6 +2726,52 @@ int MMG3D_switch_metricStorage(MMG5_pMesh mesh, MMG5_pSol met);
  *
  */
   void  MMG3D_setfunc(MMG5_pMesh mesh,MMG5_pSol met);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param nb_tria pointer toward the number of non boundary triangles.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Get the number of non boundary triangles (for DG methods for example).
+ * A triangle is
+ * boundary if it is located at the interface of 2 domains with different
+ * references or if it belongs to one tetra only.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_GET_NUMBEROFNONBDYTRIANGLESS(mesh,nb_tria,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * >     INTEGER, INTENT(OUT)          :: nb_tria\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int MMG3D_Get_numberOfNonBdyTriangles(MMG5_pMesh mesh, int* nb_tria);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param v0 pointer toward the firts vertex of the triangle
+ * \param v1 pointer toward the second vertex of the triangle.
+ * \param v2 pointer toward the third vertex of the triangle.
+ * \param ref pointer toward the triangle reference.
+ * \param idx index of the non boundary triangle to get (between 1 and nb_tria)
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Get vertices and reference \a ref of the idx^th non boundary
+ * triangle (for DG methods for example). A tria is boundary if it is located at
+ * the interface of 2 domains witch different references or if it belongs to one
+ * tetra only.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_GET_NONBDYTRIANGLE(mesh,v0,v1,v2,ref,idx,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * >     INTEGER, INTENT(OUT)          :: v0,v1,v2\n
+ * >     INTEGER                       :: ref\n
+ * >     INTEGER, INTENT(IN)           :: idx\n
+ * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int MMG3D_Get_nonBdyTriangle(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* ref, int idx);
 
 /**
  * \param mesh pointer toward the mesh structure.

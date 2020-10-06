@@ -227,7 +227,7 @@ extern int    (*movintpt)(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist);
  * functions.
  */
 static inline
-void MMGS_Set_commonFunc() {
+void MMGS_Set_commonFunc(void) {
   MMG5_bezierCP          = MMG5_mmgsBezierCP;
   MMG5_chkmsh            = MMG5_mmgsChkmsh;
   MMG5_indPt             = MMGS_indPt;

@@ -561,7 +561,7 @@ void MMG5_warnOrientation(MMG5_pMesh mesh) {
  * functions.
  */
 static inline
-void MMG3D_Set_commonFunc() {
+void MMG3D_Set_commonFunc(void) {
   MMG5_bezierCP          = MMG5_mmg3dBezierCP;
   MMG5_chkmsh            = MMG5_mmg3dChkmsh;
   MMG5_indPt             = MMG3D_indPt;

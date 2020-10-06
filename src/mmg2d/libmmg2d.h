@@ -1113,6 +1113,25 @@ extern "C" {
  */
   int MMG2D_Get_edges(MMG5_pMesh mesh,int *edges,int* refs,
                       int *areRidges,int *areRequired);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param k index of the triangle for which we want to get the quality.
+ * \return the computed quality or 0. if fail.
+ *
+ * Get quality of tria \a k.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG2D_GET_TRIANGLEQUALITY(mesh,met,k,retval)\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,met\n
+ * >     INTEGER, INTENT(IN)           :: k\n
+ * >     REAL(KIND=8), INTENT(OUT)     :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  double MMG2D_Get_triangleQuality(MMG5_pMesh mesh,MMG5_pSol met, int k);
+
 /**
  * \param met pointer toward the sol structure.
  * \param s pointer toward the scalar solution value.
@@ -1969,7 +1988,7 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * \return 0 if failed, 1 otherwise.
  *
  * Get the number of non boundary edges (for DG methods for example). An edge is
- * boundary if it is located at the interface of 2 domains witch different
+ * boundary if it is located at the interface of 2 domains with different
  * references, if it belongs to one triangle only or if it is a singular edge
  * (ridge or required).
  *
@@ -1991,7 +2010,7 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * \param idx index of the non boundary edge to get (between 1 and nb_edges)
  * \return 0 if failed, 1 otherwise.
  *
- * Get extremities \a e0, \a e1 and reference \a ref of hte idx^th non boundary
+ * Get extremities \a e0, \a e1 and reference \a ref of the idx^th non boundary
  * edge (for DG methods for example). An edge is boundary if it is located at
  * the interface of 2 domains witch different references, if it belongs to one
  * triangle only or if it is a singular edge (ridge or required).
@@ -2007,7 +2026,6 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  *
  */
   int MMG2D_Get_nonBdyEdge(MMG5_pMesh mesh, int* e0, int* e1, int* ref, int idx);
-
 
 /**
  * \brief Return adjacent elements of a triangle.

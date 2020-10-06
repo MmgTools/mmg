@@ -107,6 +107,11 @@ ADD_TEST(NAME mmg2d_reqEntities-ref
   ${MMG2D_CI_TESTS}/Disk_ReqEntities/disk.mesh
   -out ${CTEST_OUTPUT_DIR}/mmg2d_reqEntities-ref.o.meshb)
 
+ADD_TEST(NAME mmg2d_orphanPoint
+  COMMAND ${EXECUT_MMG2D} -v 5 -hausd 10 -hgradreq -1 -nosizreq
+  ${MMG2D_CI_TESTS}/Disk_ReqEntities/disk.mesh
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_orphan.o.meshb)
+
 ADD_TEST(NAME mmg2d_reqEntitiesAni-ref
   COMMAND ${EXECUT_MMG2D} -v 5 -hsiz 0.02 -A
   ${MMG2D_CI_TESTS}/Disk_ReqEntities/disk.mesh
@@ -343,6 +348,12 @@ ADD_TEST(NAME mmg2d_2squares-nsd16
   COMMAND ${EXECUT_MMG2D} -3dMedit 2 -v 5 -nsd 16
   ${MMG2D_CI_TESTS}/2squares/2squares
   -out ${CTEST_OUTPUT_DIR}/mmg2d_2squares-nsd16.o.meshb)
+
+####### orphan
+ADD_TEST(NAME mmg2d_2squares-orphan
+  COMMAND ${EXECUT_MMG2D} -3dMedit 2 -v 5 -nsd 10
+  ${MMG2D_CI_TESTS}/2squares/2squares
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_2squares-nsd10.o.meshb)
 
 ####### -met option
 ADD_TEST(NAME mmg2d_2squares-withMet

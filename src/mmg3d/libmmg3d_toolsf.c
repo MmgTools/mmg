@@ -54,6 +54,28 @@ FORTRAN_NAME(MMG3D_SETFUNC,mmg3d_setfunc,
 }
 
 /**
+ * See \ref MMG3D_Get_numberOfNonBdyTriangles function in \ref mmg3d/libmmg3d.h file.
+ */
+FORTRAN_NAME(MMG3D_GET_NUMBEROFNONBDYTRIANGLES,mmg3d_get_numberofnonbdytriangles,
+             (MMG5_pMesh *mesh,int* nb_tria, int* retval),
+             (mesh,nb_tria,retval)) {
+  *retval =  MMG3D_Get_numberOfNonBdyTriangles(*mesh,nb_tria);
+  return;
+}
+
+/**
+ * See \ref MMG3D_Get_nonBdyTriangle function in \ref mmg3d/libmmg3d.h file.
+ */
+FORTRAN_NAME(MMG3D_GET_NONBDYTRIANGLE,mmg3d_get_nonbdytriangle,
+             (MMG5_pMesh *mesh,int* v0, int* v1,int* v2,int *ref,
+              int* idx,int* retval),
+             (mesh,v0,v1,v2,ref,idx,retval)) {
+  *retval =  MMG3D_Get_nonBdyTriangle(*mesh,v0,v1,v2,ref,*idx);
+  return;
+}
+
+
+/**
  * See \ref MMG3D_usage function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_USAGE,mmg3d_usage,

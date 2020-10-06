@@ -434,6 +434,14 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol so
   return 1;
 }
 
+int MMGS_freeLocalPar(MMG5_pMesh mesh) {
+
+  free(mesh->info.par);
+  mesh->info.npar = 0;
+
+  return 1;
+}
+
 int MMGS_stockOptions(MMG5_pMesh mesh, MMG5_Info *info) {
 
   memcpy(&mesh->info,info,sizeof(MMG5_Info));
@@ -451,6 +459,143 @@ void MMGS_destockOptions(MMG5_pMesh mesh, MMG5_Info *info) {
 
   memcpy(info,&mesh->info,sizeof(MMG5_Info));
   return;
+}
+
+int MMGS_Get_numberOfNonBdyEdges(MMG5_pMesh mesh, int* nb_edges) {
+  MMG5_pTria pt,pt1;
+  MMG5_pEdge ped;
+  int        *adja,k,i,j,i1,i2,iel;
+
+  *nb_edges = 0;
+  if ( mesh->tria ) {
+    /* Create the triangle adjacency if needed */
+    if ( !mesh->adja ) {
+      if ( !MMGS_hashTria(mesh) ) {
+        fprintf(stderr,"\n  ## Error: %s: unable to create "
+                "adjacency table.\n",__func__);
+        return 0;
+      }
+    }
+
+    /* Count the number of non boundary edges */
+    for ( k=1; k<=mesh->nt; k++ ) {
+      pt = &mesh->tria[k];
+      if ( !MG_EOK(pt) ) continue;
+
+      adja = &mesh->adja[3*(k-1)+1];
+
+      for ( i=0; i<3; i++ ) {
+        /* Do not treat boundary edges */
+        if ( MG_EDG(pt->tag[i]) ) continue;
+
+        iel = adja[i] / 3;
+        assert ( iel != k );
+
+        pt1 = &mesh->tria[iel];
+
+        if ( (!iel) || (pt->ref != pt1->ref) ) {
+          /* Do not treat boundary edges */
+          continue;
+        }
+        if ( k < iel ) {
+          /* Treat edge from the triangle with lowest index */
+          ++(*nb_edges);
+        }
+      }
+    }
+
+    /* Append the non boundary edges to the boundary edges array */
+    if ( mesh->na ) {
+      MMG5_ADD_MEM(mesh,(*nb_edges)*sizeof(MMG5_Edge),"non boundary edges",
+                   printf("  Exit program.\n");
+                   return 0);
+      MMG5_SAFE_RECALLOC(mesh->edge,(mesh->na+1),(mesh->na+(*nb_edges)+1),
+                         MMG5_Edge,"non bdy edges arrray",return 0);
+    }
+    else {
+      MMG5_ADD_MEM(mesh,((*nb_edges)+1)*sizeof(MMG5_Edge),"non boundary edges",
+                   printf("  Exit program.\n");
+                   return 0);
+      MMG5_SAFE_RECALLOC(mesh->edge,0,(*nb_edges)+1,
+                         MMG5_Edge,"non bdy edges arrray",return 0);
+    }
+
+    j = mesh->na+1;
+    for ( k=1; k<=mesh->nt; k++ ) {
+      pt = &mesh->tria[k];
+      if ( !MG_EOK(pt) ) continue;
+
+      adja = &mesh->adja[3*(k-1)+1];
+
+      for ( i=0; i<3; i++ ) {
+        /* Do not treat boundary edges */
+        if ( MG_EDG(pt->tag[i]) ) continue;
+
+        i1 = MMG5_inxt2[i];
+        i2 = MMG5_iprv2[i];
+        iel = adja[i] / 3;
+        assert ( iel != k );
+
+        pt1 = &mesh->tria[iel];
+
+        if ( (!iel) || (pt->ref != pt1->ref) ) {
+          /* Do not treat boundary edges */
+          continue;
+        }
+        if ( k < iel ) {
+          /* Treat edge from the triangle with lowest index */
+          ped = &mesh->edge[j++];
+          assert ( ped );
+          ped->a   = pt->v[i1];
+          ped->b   = pt->v[i2];
+          ped->ref = pt->edg[i];
+        }
+      }
+    }
+  }
+  return 1;
+}
+
+int MMGS_Get_nonBdyEdge(MMG5_pMesh mesh, int* e0, int* e1, int* ref, int idx) {
+  MMG5_pEdge ped;
+  size_t     na_tot=0;
+  char       *ptr_c = (char*)mesh->edge;
+
+  if ( !mesh->edge ) {
+    fprintf(stderr,"\n  ## Error: %s: edge array is not allocated.\n"
+            " Please, call the MMGS_Get_numberOfNonBdyEdges function"
+            " before the %s one.\n",
+            __func__,__func__);
+    return 0;
+  }
+
+  ptr_c = ptr_c-sizeof(size_t);
+  na_tot = *((size_t*)ptr_c);
+
+  if ( mesh->namax==na_tot ) {
+    fprintf(stderr,"\n  ## Error: %s: no internal edge.\n"
+            " Please, call the MMGS_Get_numberOfNonBdyEdges function"
+            " before the %s one and check that the number of internal"
+            " edges is non null.\n",
+            __func__,__func__);
+  }
+
+  if ( mesh->namax+idx > na_tot ) {
+    fprintf(stderr,"\n  ## Error: %s: Can't get the internal edge of index %d."
+            " Index must be between 1 and %zu.\n",
+            __func__,idx,na_tot-mesh->namax);
+  }
+
+  ped = &mesh->edge[mesh->na+idx];
+
+  *e0  = ped->a;
+  *e1  = ped->b;
+
+  if ( ref != NULL ) {
+    *ref = mesh->edge[mesh->na+idx].ref;
+  }
+
+  return 1;
 }
 
 int MMGS_Get_adjaTri(MMG5_pMesh mesh, int kel, int listri[3]) {

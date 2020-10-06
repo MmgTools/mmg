@@ -39,6 +39,7 @@
  */
 
 #include "mmg3d.h"
+#include "inlined_functions_3d.h"
 
 int MMG3D_Init_mesh(const int starter,...) {
   va_list argptr;
@@ -127,6 +128,8 @@ int MMG3D_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int
   }
   else if ( typSol == MMG5_Tensor ) {
     sol->size = 6;
+    /* User will provide its own metric: classical storage at ridges */
+    mesh->info.metRidTyp = 0;
   }
   else {
     fprintf(stderr,"\n  ## Error: %s: type of solution not yet implemented.\n",
@@ -1224,6 +1227,7 @@ int MMG3D_Unset_corner(MMG5_pMesh mesh, int k) {
 int MMG3D_Set_requiredVertex(MMG5_pMesh mesh, int k) {
   assert ( k <= mesh->np );
   mesh->point[k].tag |= MG_REQ;
+  mesh->point[k].tag &= ~MG_NUL;
   return 1;
 }
 
@@ -1385,6 +1389,38 @@ int MMG3D_Get_normalAtVertex(MMG5_pMesh mesh, int k, double *n0, double *n1, dou
   (*n2) = mesh->point[k].n[2];
 
   return 1;
+}
+
+double MMG3D_Get_tetrahedronQuality(MMG5_pMesh mesh,MMG5_pSol met, int k) {
+  double qual = 0.;
+  MMG5_pTetra pt;
+
+  if ( k < 1 || k > mesh->ne ) {
+    fprintf(stderr,"\n  ## Error: %s: unable to access to tetra %d.\n",
+            __func__,k);
+    fprintf(stderr,"     Tetra numbering goes from 1 to %d\n",mesh->ne);
+    return 0.;
+  }
+  pt = &mesh->tetra[k];
+  assert ( MG_EOK(pt) );
+
+  if ( (!met) || (!met->m) || met->size==1 ) {
+    if ( mesh->info.optimLES) {
+      /* Skewness */
+      qual =  MMG3D_ALPHAD * MMG3D_caltetLES_iso(mesh,met,pt);
+    } else {
+      /* iso quality */
+      qual =  MMG3D_ALPHAD * MMG5_caltet_iso(mesh,NULL,pt);
+    }
+  }
+  else if ( !mesh->info.metRidTyp ) {
+    qual =  MMG3D_ALPHAD * MMG5_caltet33_ani(mesh,met,pt);
+  }
+  else {
+    qual = MMG3D_ALPHAD * MMG5_caltet_ani(mesh,met,pt);
+  }
+
+  return qual;
 }
 
 int MMG3D_Set_scalarSol(MMG5_pSol met, double s, int pos) {

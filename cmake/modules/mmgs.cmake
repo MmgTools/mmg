@@ -82,13 +82,13 @@ FILE(
 
 # Compile static library
 IF ( LIBMMGS_STATIC )
-  ADD_AND_INSTALL_LIBRARY ( lib${PROJECT_NAME}s_a STATIC
+  ADD_AND_INSTALL_LIBRARY ( lib${PROJECT_NAME}s_a STATIC copy_s_headers
     "${mmgs_library_files}" ${PROJECT_NAME}s )
 ENDIF()
 
 # Compile shared library
 IF ( LIBMMGS_SHARED )
-  ADD_AND_INSTALL_LIBRARY ( lib${PROJECT_NAME}s_so SHARED
+  ADD_AND_INSTALL_LIBRARY ( lib${PROJECT_NAME}s_so SHARED copy_s_headers
     "${mmgs_library_files}" ${PROJECT_NAME}s )
 ENDIF()
 
@@ -126,7 +126,7 @@ ENDIF()
 #####         Compile MMGS executable
 #####
 ###############################################################################
-ADD_AND_INSTALL_EXECUTABLE ( ${PROJECT_NAME}s
+ADD_AND_INSTALL_EXECUTABLE ( ${PROJECT_NAME}s copy_s_headers
   "${mmgs_library_files}" ${mmgs_main_file} )
 
 ###############################################################################

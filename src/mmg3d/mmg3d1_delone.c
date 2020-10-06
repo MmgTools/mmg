@@ -1037,8 +1037,10 @@ MMG5_optetLES(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree) {
     if(it < 5) {
       nw = MMG3D_opttyp(mesh,met,PROctree,mesh->mark-2);
     }
-    else
+    else {
       nw = 0;
+    }
+
     /* badly shaped process */
     if ( !mesh->info.noswap ) {
       nf = MMG5_swptet(mesh,met,declic,MMG3D_SWAP06,PROctree,2,mesh->mark-2);

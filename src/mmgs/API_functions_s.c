@@ -106,6 +106,8 @@ int MMGS_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int 
   }
   else if ( typSol == MMG5_Tensor ) {
     sol->size = 6;
+    /* User will provide its own metric: classical storage at ridges */
+    mesh->info.metRidTyp = 0;
   }
   else {
     fprintf(stderr,"\n  ## Error: %s: type of solution not yet implemented.\n",
@@ -715,6 +717,7 @@ int MMGS_Unset_corner(MMG5_pMesh mesh, int k) {
 int MMGS_Set_requiredVertex(MMG5_pMesh mesh, int k) {
   assert ( k <= mesh->np );
   mesh->point[k].tag |= MG_REQ;
+  mesh->point[k].tag &= ~MG_NUL;
   return 1;
 }
 
@@ -783,6 +786,33 @@ int MMGS_Get_normalAtVertex(MMG5_pMesh mesh, int k, double *n0, double *n1, doub
   (*n2) = mesh->point[k].n[2];
 
   return 1;
+}
+
+double MMGS_Get_triangleQuality(MMG5_pMesh mesh,MMG5_pSol met, int k) {
+  double qual = 0.;
+  MMG5_pTria pt;
+
+  if ( k < 1 || k > mesh->nt ) {
+    fprintf(stderr,"\n  ## Error: %s: unable to access to triangle %d.\n",
+            __func__,k);
+    fprintf(stderr,"     Tria numbering goes from 1 to %d\n",mesh->nt);
+    return 0.;
+  }
+  pt = &mesh->tria[k];
+  assert ( MG_EOK(pt) );
+
+  if ( (!met) || (!met->m) || met->size==1 ) {
+    /* iso quality */
+    qual = MMGS_ALPHAD * MMG5_caltri_iso(mesh,met,pt);
+  }
+  else if ( !mesh->info.metRidTyp ) {
+    qual =  MMGS_ALPHAD * MMG5_caltri33_ani(mesh,met,pt);
+  }
+  else {
+    qual = MMGS_ALPHAD * MMG5_caltri_ani(mesh,met,pt);
+  }
+
+  return qual;
 }
 
 int MMGS_Set_scalarSol(MMG5_pSol met, double s, int pos) {

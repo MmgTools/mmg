@@ -333,6 +333,21 @@ int MMG5_mmg3dRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol,
     }
   }
 
+  /* Append unseen required points for orphan points preservation */
+  for ( k=1; k<=mesh->np; ++k) {
+    ppt = &mesh->point[k];
+    if ( !MG_VOK(ppt) ) {
+      continue;
+    }
+    if ( permNodTab[k] ) continue;
+
+
+    if ( ppt->tag & MG_REQ ) {
+      /* Add orphan required point to permnodtab */
+      permNodTab[k] = ++npreal;
+    }
+  }
+
   /* Modify the numbering of the nodes of each tetra */
   for( tetraIdx = 1; tetraIdx < nereal + 1; tetraIdx++) {
     for(j = 0 ; j <= 3 ; j++) {
