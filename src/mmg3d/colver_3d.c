@@ -714,78 +714,78 @@ int MMG5_chkcol_nom(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
 #ifndef NDEBUG
   MMG5_pPoint  p0;
 #endif
-  
+
   pt   = &mesh->tetra[k];
   pxt  = 0;
   pt0  = &mesh->tetra[0];
   ip   = MMG5_idir[iface][MMG5_inxt2[iedg]];
   nump = pt->v[ip];
   numq = pt->v[MMG5_idir[iface][MMG5_iprv2[iedg]]];
-  
+
 #ifndef NDEBUG
   p0   = &mesh->point[nump];
   assert(p0->tag & MG_BDY);
   assert(p0->xp);
 #endif
-  
+
   ndepmin = ndepplus = 0;
   isminp  = isplp = 0;
-  
+
   /* prevent collapse in case surface ball has 3 triangles */
   if ( ilists <= 2 )  return 0;  // ATTENTION, Normalement, avec 2 c est bon !
-  
+
   /* Surfacic ball is enumerated with first tet having (pq) as edge n° MMG5_iprv2[ip] on face iopp */
   MMG5_startedgsurfball(mesh,nump,numq,lists,ilists);
-  
+
   /* check tetra quality */
   calold = calnew = DBL_MAX;
   for (l=0; l<ilistv; l++) {
     iel = listv[l] / 4;
     ipp = listv[l] % 4;
     pt  = &mesh->tetra[iel];
-    
+
     if ( pt->ref == refmin ) isminp = 1;
     else if ( pt->ref == refplus ) isplp = 1;
-    
+
     /* Topological test for tetras of the shell */
     for (iq=0; iq<4; iq++)
       if ( pt->v[iq] == numq )  break;
-    
+
     if ( iq < 4 ) {
       nbbdy = 0;
       if ( pt->xt )  pxt = &mesh->xtetra[pt->xt];
       for (i=0; i<4; i++) {
         if ( pt->xt && (pxt->ftag[i] & MG_BDY) )  nbbdy++;
       }
-      
+
       /* Topological problem triggered when one of the two faces of collapsed edge is the only
        internal one : closing a part of the domain */
       if ( nbbdy == 4 )
         return 0;
       else if ( nbbdy == 3 ) {
-        
+
         /* Identification of edge number in tetra iel */
         if ( !MMG3D_findEdge(mesh,pt,iel,numq,nump,1,NULL,&ia) ) return -1;
-        
+
         i0 = MMG5_ifar[ia][0];
         i1 = MMG5_ifar[ia][1];
         if ( pt->xt && (!(pxt->ftag[i0] & MG_BDY) || !(pxt->ftag[i1] & MG_BDY)) )
           return 0;
       }
-      
+
       /* Now check that the 2 faces identified by collapse are not boundary */
       if ( pt->xt && (pxt->ftag[ipp] & MG_BDY) && (pxt->ftag[iq] & MG_BDY) )
         return 0;
-      
+
       continue;
     }
-    
+
     /* Volume test for tetras outside the shell */
     if ( !ndepmin && pt->ref == refmin )
       ndepmin = iel;
     else if ( !ndepplus && pt->ref == refplus )
       ndepplus = iel;
-    
+
     /* Prevent from creating a tetra with 4 ridges vertices */
     if ( mesh->point[numq].tag & MG_GEO ) {
       i  = ipp;
@@ -796,22 +796,22 @@ int MMG5_chkcol_nom(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
       }
       if ( nr==3 ) return 0;
     }
-    
+
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     pt0->v[ipp] = numq;
-    
+
     calold = MG_MIN(calold, pt->qual);
     if ( typchk==1 && met->m && met->size > 1 )
       caltmp = MMG5_caltet33_ani(mesh,met,pt0);
     else
       caltmp = MMG5_orcal(mesh,met,0);
-    
+
     if ( caltmp < MMG5_NULKAL )  return 0;
     calnew = MG_MIN(calnew,caltmp);
   }
   if ( calold < MMG5_EPSOK && calnew <= calold )  return 0;
   else if ( calnew < MMG5_EPSOK || calnew < 0.3*calold )  return 0;
-  
+
   /* analyze surfacic ball of p */
   for (l=1; l<ilists-1; l++) {
     iel  = lists[l] / 4;
@@ -819,41 +819,41 @@ int MMG5_chkcol_nom(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
     pt   = &mesh->tetra[iel];
     pxt  = &mesh->xtetra[pt->xt];
     assert(pt->xt);
-    
+
     /* retrieve vertex in tetra */
     for (ip=0; ip<4; ip++)
       if ( pt->v[ip] == nump )  break;
-    
+
     assert(ip<4);
     if ( ip==4 ) return 0;
-    
+
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     pt0->v[ip] = numq;
-    
+
     if ( !MMG5_norface(mesh,iel,iopp,ncurold) )  return 0;
     if ( !MMG5_norface(mesh,0,iopp,ncurnew) )    return 0;
-    
+
     /* check normal flipping */
     ps = ncurold[0]*ncurnew[0] + ncurold[1]*ncurnew[1] + ncurold[2]*ncurnew[2];
     if ( ps < 0.0 )  return 0;
-    
+
     /* check normal deviation between l and its neighbour through the edge ia */
     ia       = MMG5_idirinv[iopp][ip]; /* index of p in tria iopp */
-    
+
     iedgeOpp =  MMG5_iarf[iopp][ia];
-    
+
     if ( ! ( (mesh->xtetra[pt->xt].tag[iedgeOpp] & MG_GEO) ||
             (mesh->xtetra[pt->xt].tag[iedgeOpp] & MG_NOM) ) ) {
-      
+
       ier = MMG3D_normalAdjaTri(mesh,iel,iopp,ia,nadja);
       if ( ier < 0 )  return -1;
       else if (!ier ) return 0;
-      
+
       devnew = nadja[0]*ncurnew[0] + nadja[1]*ncurnew[1] + nadja[2]*ncurnew[2];
-      
+
       if ( devnew < mesh->info.dhd ) return 0;
     }
-    
+
     if ( l == 1 ) {
       /* check normal deviation between the new first tri of the surfacic ball
        * and the surfacic triangle facing ip in the old first tri of the
@@ -863,21 +863,21 @@ int MMG5_chkcol_nom(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
       iopp2 = lists[0] % 4;
       pt1   = &mesh->tetra[kk];
       assert(pt1->xt);
-      
+
       /* retrieve vertex ip in tria iopp2 */
       for (ipp=0; ipp<3; ipp++)
         if ( pt1->v[MMG5_idir[iopp2][ipp]] == nump )  break;
       assert(ipp<3);
-      
+
       iedgeOpp =  MMG5_iarf[iopp2][ipp];
-      
+
       if ( ! ( (mesh->xtetra[pt1->xt].tag[iedgeOpp] & MG_GEO) ||
               (mesh->xtetra[pt1->xt].tag[iedgeOpp] & MG_NOM) ) ) {
         ier = MMG3D_normalAdjaTri(mesh,kk,iopp2,ipp,nadja);
-        
+
         if ( ier < 0 )  return -1;
         else if ( !ier )  return 0;
-        
+
         devnew = nadja[0]*ncurnew[0] + nadja[1]*ncurnew[1] + nadja[2]*ncurnew[2];
         if ( devnew < mesh->info.dhd ) {
           return 0;
@@ -888,11 +888,11 @@ int MMG5_chkcol_nom(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
       /* check normal deviation between l and l-1 */
       ia = MMG5_iprv2[ia];         /* edge between l-1 and l, in local num of tria */
       ia = MMG5_iarf[iopp][ia];    /* edge between l-1 and l in local num of tetra */
-      
+
       if ( !(mesh->xtetra[pt->xt].tag[ia] & MG_GEO) ) {
         devold = nprvold[0]*ncurold[0] + nprvold[1]*ncurold[1] + nprvold[2]*ncurold[2];
         devnew = nprvnew[0]*ncurnew[0] + nprvnew[1]*ncurnew[1] + nprvnew[2]*ncurnew[2];
-        
+
         if ( devold < MMG5_ANGEDG ) {
           if ( devnew < devold )  {
             return 0;
@@ -903,17 +903,17 @@ int MMG5_chkcol_nom(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
         }
       }
     }
-    
+
     /* check Hausdorff distance to geometric support */
     MMG5_tet2tri(mesh,iel,iopp,&tt);
     if ( l == 1 ) {
       for (i=0; i<3; i++) {
         if ( tt.v[i] == nump )  break;
       }
-      
+
       assert(i<3);
       if ( i==3 ) return 0;
-      
+
       /* Index of the third point of the first collapsed triangle */
       i  = MMG5_inxt2[i];
       ia = MMG5_inxt2[i];
@@ -931,15 +931,15 @@ int MMG5_chkcol_nom(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
       tag = pxt->tag[MMG5_iarf[iopp][ia]];
       tt.tag[ia] = MG_MAX(tt.tag[ia],tag);
     }
-    
+
     for (i=0; i<3; i++) {
       if ( tt.v[i] == nump )  break;
     }
     assert(i<3);
     if ( i==3 ) return 0;
-    
+
     tt.v[i] = numq;
-    
+
     /* Local parameters for tt and iel */
     hmax  = mesh->info.hmax;
     hausd = mesh->info.hausd;
@@ -947,10 +947,10 @@ int MMG5_chkcol_nom(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
     if ( mesh->info.parTyp & MG_Tetra ) {
       for ( kk=0; kk<mesh->info.npar; ++kk ) {
         par = &mesh->info.par[kk];
-        
+
         if ( par->elt != MMG5_Tetrahedron )  continue;
         if ( par->ref != pt->ref ) continue;
-        
+
         hmax = par->hmax;
         hausd = par->hausd;
         isloc = 1;
@@ -961,10 +961,10 @@ int MMG5_chkcol_nom(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
       if ( isloc ) {
         for ( kk=0; kk<mesh->info.npar; ++kk ) {
           par = &mesh->info.par[kk];
-          
+
           if ( par->elt != MMG5_Triangle )  continue;
           if ( par->ref != tt.ref ) continue;
-          
+
           hmax = MG_MIN(hmax,par->hmax);
           hausd = MG_MIN(hausd,par->hausd);
           break;
@@ -973,10 +973,10 @@ int MMG5_chkcol_nom(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
       else {
         for ( kk=0; kk<mesh->info.npar; ++kk ) {
           par = &mesh->info.par[kk];
-          
+
           if ( par->elt != MMG5_Triangle )  continue;
           if ( par->ref != tt.ref ) continue;
-          
+
           hmax  = par->hmax;
           hausd = par->hausd;
           isloc = 1;
@@ -984,14 +984,14 @@ int MMG5_chkcol_nom(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
         }
       }
     }
-    
+
     /* If some edges must be splitted, refuse the collapse */
     if ( MMG5_chkedg(mesh,&tt,MG_GET(pxt->ori,iopp),hmax,hausd,isloc) > 0 )  return 0;
-    
+
     memcpy(nprvold,ncurold,3*sizeof(double));
     memcpy(nprvnew,ncurnew,3*sizeof(double));
   }
-  
+
   /* check normal deviation between the new last tri of the surfacic ball
    * and the surfacic triangle facing ip in the old last tri of the
    * surfacic ball (that vanishes due to the collapse)
@@ -1000,31 +1000,31 @@ int MMG5_chkcol_nom(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
   iopp2 = lists[ilists-1] % 4;
   pt1   = &mesh->tetra[kk];
   assert(pt1->xt);
-  
+
   /* retrieve vertex ip in tria iopp2 */
   for (ipp=0; ipp<3; ipp++)
     if ( pt1->v[MMG5_idir[iopp2][ipp]] == nump )  break;
   assert(ipp<3);
-  
+
   iedgeOpp =  MMG5_iarf[iopp2][ipp];
-  
+
   if ( ! ( (mesh->xtetra[pt1->xt].tag[iedgeOpp] & MG_GEO) ||
           (mesh->xtetra[pt1->xt].tag[iedgeOpp] & MG_NOM) ) ) {
     ier = MMG3D_normalAdjaTri(mesh,kk,iopp2,ipp,nadja);
     if ( ier < 0 )  return -1;
     else if ( !ier ) return 0;
-    
+
     devnew = nadja[0]*ncurnew[0] + nadja[1]*ncurnew[1] + nadja[2]*ncurnew[2];
-    
+
     if ( devnew < mesh->info.dhd ) {
       return 0;
     }
   }
-  
+
   /* Ensure collapse does not lead to a non manifold configuration (case of implicit surface) */
   ier = MMG5_chkmanicoll(mesh,k,iface,iedg,ndepmin,ndepplus,refmin,refplus,isminp,isplp);
   if ( !ier )  return 0;
-  
+
   return ilistv;
 }
 
@@ -1060,20 +1060,20 @@ int MMG5_chkcol_nomint(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
 #ifndef NDEBUG
   MMG5_pPoint  p0;
 #endif
-  
+
   pt   = &mesh->tetra[k];
   pxt  = 0;
   pt0  = &mesh->tetra[0];
   ip   = MMG5_idir[iface][MMG5_inxt2[iedg]];
   nump = pt->v[ip];
   numq = pt->v[MMG5_idir[iface][MMG5_iprv2[iedg]]];
-  
+
 #ifndef NDEBUG
   p0   = &mesh->point[nump];
   assert(p0->tag & MG_BDY);
   assert(p0->xp);
 #endif
-  
+
   /* check tetra quality */
   calold = calnew = DBL_MAX;
   for (l=0; l<ilistv; l++) {
@@ -1084,36 +1084,36 @@ int MMG5_chkcol_nomint(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
     /* Topological test for tetras of the shell */
     for (iq=0; iq<4; iq++)
       if ( pt->v[iq] == numq )  break;
-    
+
     if ( iq < 4 ) {
       nbbdy = 0;
       if ( pt->xt )  pxt = &mesh->xtetra[pt->xt];
       for (i=0; i<4; i++) {
         if ( pt->xt && (pxt->ftag[i] & MG_BDY) )  nbbdy++;
       }
-      
+
       /* Topological problem triggered when one of the two faces of collapsed edge is the only
       internal one : closing a part of the domain */
       if ( nbbdy == 4 )
         return 0;
       else if ( nbbdy == 3 ) {
-       
+
         /* Identification of edge number in tetra iel */
         if ( !MMG3D_findEdge(mesh,pt,iel,numq,nump,1,NULL,&ia) ) return -1;
-        
+
         i0 = MMG5_ifar[ia][0];
         i1 = MMG5_ifar[ia][1];
         if ( pt->xt && (!(pxt->ftag[i0] & MG_BDY) || !(pxt->ftag[i1] & MG_BDY)) )
           return 0;
       }
-      
+
       /* Now check that the 2 faces identified by collapse are not boundary */
       if ( pt->xt && (pxt->ftag[ipp] & MG_BDY) && (pxt->ftag[iq] & MG_BDY) )
         return 0;
-      
+
       continue;
     }
-   
+
    /* Prevent from creating a tetra with 4 ridges vertices */
    if ( mesh->point[numq].tag & MG_GEO ) {
       i  = ipp;
@@ -1124,23 +1124,23 @@ int MMG5_chkcol_nomint(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
       }
       if ( nr==3 ) return 0;
     }
-    
+
     /* Quality checks for tetrahedra outside the shell */
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     pt0->v[ipp] = numq;
-    
+
     calold = MG_MIN(calold, pt->qual);
     if ( typchk==1 && met->m && met->size > 1 )
       caltmp = MMG5_caltet33_ani(mesh,met,pt0);
     else
       caltmp = MMG5_orcal(mesh,met,0);
-   
+
     if ( caltmp < MMG5_NULKAL )  return 0;
     calnew = MG_MIN(calnew,caltmp);
   }
   if ( calold < MMG5_EPSOK && calnew <= calold )  return 0;
   else if ( calnew < MMG5_EPSOK || calnew < 0.3*calold )  return 0;
-  
+
   return ilistv;
 }
 
