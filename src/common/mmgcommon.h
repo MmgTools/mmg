@@ -418,7 +418,7 @@ size_t myfree(void *ptr) {
  * \remark don't work without any variadic arg
  * \remark don't work on MSVC because variadic args are not expanded
  */
-#ifdef POSIX
+#ifdef MMG_POSIX
 #define MMG_FSCANF(stream,format,...) do                                \
   {                                                                     \
     int io_count   = fscanf(stream,format,__VA_ARGS__);                 \

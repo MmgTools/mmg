@@ -1557,7 +1557,6 @@ int MMG5_srcbdy(MMG5_pMesh mesh,int start,int ia) {
  *
  */
  void MMG5_coquilFaceErrorMessage(MMG5_pMesh mesh, int k1, int k2) {
-  MMG5_pPoint ppt;
   MMG5_pTetra pt;
   int         kel1, kel2;
   static char mmgErr0;

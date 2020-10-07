@@ -1484,8 +1484,7 @@ int MMG5_movbdynomintpt_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROct
   MMG5_pTetra       pt,pt0;
   MMG5_pxTetra      pxt;
   MMG5_pPoint       p0,p1,p2,ppt0;
-  MMG5_pxPoint      pxp;
-  double            step,ll1old,ll2old,calold,calnew,caltmp,*callist;
+  double            step,ll1old,ll2old,calold,calnew,*callist;
   double            o[3],no[3],to[3];
   int               ip0,ip1,ip2,ip,iel,ipa,l;
   char              i,i0,ie;
