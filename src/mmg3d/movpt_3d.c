@@ -1488,15 +1488,15 @@ int MMG5_movbdynomintpt_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROct
   double            o[3],no[3],to[3];
   int               ip0,ip1,ip2,ip,iel,ipa,l;
   char              i,i0,ie;
-  
+
   step = 0.1;
   ip1 = ip2 = 0;
   pt = &mesh->tetra[listv[0]/4];
   ip0 = pt->v[listv[0]%4];
   p0 = &mesh->point[ip0];
-  
+
   assert ( p0->tag & MG_NOM && p0->xp && mesh->xpoint[p0->xp].nnor );
-  
+
   /* Recover the two ending points of the underlying non manifold curve */
   for (l=0; l<ilistv; l++) {
     iel = listv[l] / 4;
@@ -1504,7 +1504,7 @@ int MMG5_movbdynomintpt_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROct
     pt = &mesh->tetra[iel];
     if ( !pt->xt ) continue;
     pxt = &mesh->xtetra[pt->xt];
-    
+
     for (i=0; i<3; i++) {
       ie = MMG5_arpt[i0][i];
       if ( pxt->tag[ie] & MG_NOM ) {
@@ -1515,39 +1515,39 @@ int MMG5_movbdynomintpt_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROct
     }
   }
   if ( !(ip1 && ip2 && (ip1 != ip2)) )  return 0;
-  
+
   /* At this point, we get the point extremities ip1, ip2 of the non manifold curve passing through ip0 */
   p1 = &mesh->point[ip1];
   p2 = &mesh->point[ip2];
-  
+
   ll1old = (p1->c[0] -p0->c[0])* (p1->c[0] -p0->c[0]) \
   + (p1->c[1] -p0->c[1])* (p1->c[1] -p0->c[1])      \
   + (p1->c[2] -p0->c[2])* (p1->c[2] -p0->c[2]);
   ll2old = (p2->c[0] -p0->c[0])* (p2->c[0] -p0->c[0]) \
   + (p2->c[1] -p0->c[1])* (p2->c[1] -p0->c[1])      \
   + (p2->c[2] -p0->c[2])* (p2->c[2] -p0->c[2]);
-  
+
   if ( ll1old < ll2old ) { //move towards p2
     ip = ip2;
   }
   else {
     ip = ip1;
   }
-  
+
   /* Compute support of the associated edge, and features of the new position */
   if ( !(MMG5_BezierNom(mesh,ip0,ip,step,o,no,to)) )  return 0;
-  
+
   /* Test : check whether all volumes remain positive with new position of the point */
   // Dynamic allocations for windows compatibility
   MMG5_SAFE_MALLOC(callist, ilistv, double,return 0);
-  
+
   ppt0 = &mesh->point[0];
   ppt0->c[0] = o[0];
   ppt0->c[1] = o[1];
   ppt0->c[2] = o[2];
   ppt0->tag  = p0->tag;
   ppt0->ref  = p0->ref;
-  
+
   calold = calnew = DBL_MAX;
   for( l=0 ; l<ilistv ; l++ ){
     iel = listv[l] / 4;
@@ -1572,24 +1572,24 @@ int MMG5_movbdynomintpt_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROct
     MMG5_SAFE_FREE(callist);
     return 0;
   }
-  
+
   /* Update coordinates and tangent for new point */
   if ( PROctree )
     MMG3D_movePROctree(mesh, PROctree, ip0, o, p0->c);
-  
+
   p0->c[0] = o[0];
   p0->c[1] = o[1];
   p0->c[2] = o[2];
-  
+
   p0->n[0] = to[0];
   p0->n[1] = to[1];
   p0->n[2] = to[2];
-  
+
   for(l=0; l<ilistv; l++){
     (&mesh->tetra[listv[l]/4])->qual = callist[l];
     (&mesh->tetra[listv[l]/4])->mark = mesh->mark;
   }
-  
+
   MMG5_SAFE_FREE(callist);
   return 1;
 }
