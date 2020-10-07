@@ -690,7 +690,7 @@ static int MMG3D_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
     if ( pt->qual < MMG5_EPS ) {
       for (i=0; i<4; i++) {
         ip = pt->v[i];
-        if ( sol->m[i] < mesh->info.ls + 1000.0*MMG5_EPS ) break;
+        if ( sol->m[ip] < mesh->info.ls + 1000.0*MMG5_EPS ) break;
       }
       if ( i < 4 ) {
         for (i=0; i<4; i++) {

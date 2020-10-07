@@ -603,6 +603,7 @@ int MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
         fgetpos(in,&position);
         MMG_FSCANF(in,"%255s",data);
         split = MMG5_MMAT_NoSplit;
+        rin = rex = ref;
         if ( strcmp(data,"nosplit") ) {
           fsetpos(in,&position);
           split = MMG5_MMAT_Split;

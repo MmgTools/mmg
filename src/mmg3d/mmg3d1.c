@@ -863,6 +863,7 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
          * evaluation, after length check otherwise (because the ball
          * computation is time consuming) */
         ilist = ilists = 0;
+        refmin = refplus = -1;
         if ( mesh->info.npar ) {
           if ( pt->xt && (pxt->ftag[i] & MG_BDY) ) {
             tag = pxt->tag[MMG5_iarf[i][j]];
@@ -1041,7 +1042,7 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
             }
           }
           else {
-            ilist = MMG5_chkcol_bdy(mesh,met,k,i,j,list,ilist,lists,ilists,0,0,typchk,isnmint);
+            ilist = MMG5_chkcol_bdy(mesh,met,k,i,j,list,ilist,lists,ilists,0,0,typchk,isnm);
           }
         }
         /* internal face */

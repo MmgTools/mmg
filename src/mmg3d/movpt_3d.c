@@ -100,7 +100,7 @@ int MMG5_movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree,
   /* Check new position validity */
   calnew = DBL_MAX;
   i0 = -1;
-  assert ( ilist );
+  assert ( ilist>0 );
   for (k=0; k<ilist; k++) {
     iel = list[k] / 4;
     i0  = list[k] % 4;
