@@ -21,9 +21,9 @@
 
 ---
 
-|:**master branch (release)**:|[![Build Status][master-build]][master-sq-build]|[![Quality Gate][master-qual-gate]][master-sq-qual-gate]|[![Vulnerabilities][master-vulnerabilities]][master-sq-vulnerabilities]|[![Coverage][master-coverage]][master-sq-coverage]|[![Duplication (%)][master-code-dpl]][master-sq-code-dpl]|
-|---|:---:|:---:|:---:|:---:|:---:|
-|:**develop branch**:|[![Build Status][dev-build]][dev-sq-build]|[![Quality Gate][dev-qual-gate]][dev-sq-qual-gate]|[![Vulnerabilities][dev-vulnerabilities]][dev-sq-vulnerabilities]|[![Coverage][dev-coverage]][dev-sq-coverage]|[![Duplication (%)][dev-code-dpl]][dev-sq-code-dpl]|
+|**master branch (release)**|[![Build Status][master-build]][master-sq-build]|[![Quality Gate][master-qual-gate]][master-sq-qual-gate]|[![Vulnerabilities][master-vulnerabilities]][master-sq-vulnerabilities]|[![Coverage][master-coverage]][master-sq-coverage]|[![Duplication (%)][master-code-dpl]][master-sq-code-dpl]|
+|:---:|:---:|:---:|:---:|:---:|:---:|
+|**develop branch**|[![Build Status][dev-build]][dev-sq-build]|[![Quality Gate][dev-qual-gate]][dev-sq-qual-gate]|[![Vulnerabilities][dev-vulnerabilities]][dev-sq-vulnerabilities]|[![Coverage][dev-coverage]][dev-sq-coverage]|[![Duplication (%)][dev-code-dpl]][dev-sq-code-dpl]|
 
 
 [master-build]: https://ci.inria.fr/mmg/buildStatus/icon?job=Mmg-multiConf
