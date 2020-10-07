@@ -47,9 +47,10 @@ extern "C" {
     of point ip with coordinates o and tag tag*/
 #define MMG3D_POINT_REALLOC(mesh,sol,ip,wantedGap,law,o,tag,src ) do    \
   {                                                                     \
-  int klink;                                                            \
-  int oldnpmax = mesh->npmax;                                           \
+  int klink,oldnpmax;                                                   \
   assert ( mesh && mesh->point );                                       \
+                                                                        \
+  oldnpmax = mesh->npmax;                                               \
   MMG5_TAB_RECALLOC(mesh,mesh->point,mesh->npmax,wantedGap,MMG5_Point,  \
                     "larger point table",law);                          \
                                                                         \

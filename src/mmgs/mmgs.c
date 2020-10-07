@@ -94,6 +94,7 @@ static int MMG5_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
     /* check for condition type */
     if ( !strcmp(data,"parameters") ) {
       MMG_FSCANF(in,"%d",&npar);
+
       if ( !MMGS_Set_iparameter(mesh,met,MMGS_IPARAM_numberOfLocalParam,npar) )
         return 0;
 

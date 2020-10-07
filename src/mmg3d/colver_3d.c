@@ -347,7 +347,7 @@ MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,char iedg,int *lists,
  * \param typchk  typchk type of checking permformed for edge length
  * (hmax or MMG3D_LLONG criterion).
  *
- * \return 1 if success, 0 if the point cannot be collapsed, -1 if fail.
+ * \return ilistv if success, 0 if the point cannot be collapsed, -1 if fail.
  *
  * Check whether collapse ip -> iq could be performed, ip boundary point ;
  *  'mechanical' tests (positive jacobian) are not performed here ;
@@ -666,7 +666,7 @@ int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
       return 0;
     }
   }
-  
+
   /* Topological check for surface ball */
   ier = MMG5_topchkcol_bdy(mesh,k,iface,iedg,lists,ilists);
   if ( ier<0 ) return -1;

@@ -623,6 +623,10 @@ int MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
         return 0;
       }
 
+      if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_numberOfLocalParam,npar) ) {
+        return 0;
+      }
+
       for (i=0; i<mesh->info.npar; i++) {
         ret = fscanf(in,"%d %255s ",&ref,buf);
         if ( ret )
