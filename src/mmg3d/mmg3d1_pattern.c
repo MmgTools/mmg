@@ -249,7 +249,7 @@ static int MMG5_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
                               list,&ilist,lists,&ilists,(p0->tag & MG_NOM)) < 0 )
         return -1;
 
-      ilist = MMG5_chkcol_bdy(mesh,met,k,i,j,list,ilist,lists,ilists,2);
+      ilist = MMG5_chkcol_bdy(mesh,met,k,i,j,list,ilist,lists,ilists,0,0,2,0);
     }
     /* Case of an internal face */
     else {
