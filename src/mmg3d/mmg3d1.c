@@ -734,15 +734,15 @@ int MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree,
                 ier = MMG5_movbdynomintpt_iso(mesh,met,PROctree,listv,ilistv,improveVolSurf);
               }
               else {
-                if ( mesh->adja[4*(k-1)+1+i] ) continue;
+              if ( mesh->adja[4*(k-1)+1+i] ) continue;
 
-                ier=MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,1);
-                if( !ier )  continue;
-                else if ( ier>0 )
-                  ier = MMG5_movbdynompt(mesh,met,PROctree,listv,ilistv,lists,ilists,improveVolSurf);
-                else
-                  return -1;
-              }
+              ier=MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,1);
+              if( !ier )  continue;
+              else if ( ier>0 )
+                ier = MMG5_movbdynompt(mesh,met,PROctree,listv,ilistv,lists,ilists,improveVolSurf);
+              else
+                return -1;
+            }
             }
             else if ( ppt->tag & MG_GEO ) {
               ier=MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,0);
@@ -863,6 +863,7 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
         /* Ball of point: computed here if needed for the local parameter
          * evaluation, after length check otherwise (because the ball
          * computation is time consuming) */
+        ilist = ilists = 0;
         if ( mesh->info.npar ) {
           if ( pt->xt && (pxt->ftag[i] & MG_BDY) ) {
             tag = pxt->tag[MMG5_iarf[i][j]];
@@ -884,10 +885,10 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
               }
             }
             else {
-              if (MMG5_boulesurfvolp(mesh,k,ip,i,
-                                     list,&ilist,lists,&ilists,p0->tag & MG_NOM) < 0 )
-                return -1;
-            }
+            if (MMG5_boulesurfvolp(mesh,k,ip,i,
+                                    list,&ilist,lists,&ilists,p0->tag & MG_NOM) < 0 )
+              return -1;
+          }
           }
           else {
             ilist = MMG5_boulevolp(mesh,k,ip,list);
@@ -1016,7 +1017,7 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
             if (MMG5_boulesurfvolp(mesh,k,ip,i,
                                     list,&ilist,lists,&ilists,p0->tag & MG_NOM) < 0 )
               return -1;
-            }
+          }
           }
           else {
             ilist = MMG5_boulevolp(mesh,k,ip,list);
@@ -1038,11 +1039,11 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
             else {
             if ( mesh->adja[4*(k-1)+1+i] )  continue;
               ilist = MMG5_chkcol_nom(mesh,met,k,i,j,list,ilist,lists,ilists,refmin,refplus,typchk);
-            }
+          }
           }
           else {
-            ilist = MMG5_chkcol_bdy(mesh,met,k,i,j,list,ilist,lists,ilists,typchk);
-          }
+          ilist = MMG5_chkcol_bdy(mesh,met,k,i,j,list,ilist,lists,ilists,typchk);
+        }
         }
         /* internal face */
         else {
@@ -1552,8 +1553,7 @@ int MMG3D_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,int k,
                         return 2;
                         ,o,tag,src);
   }
-
-  if ( met->m ) {
+  if ( met && met->m ) {
     if ( typchk == 1 && (met->size>1) ) {
       ier = MMG3D_intmet33_ani(mesh,met,k,imax,ip,0.5);
     }

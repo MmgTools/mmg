@@ -188,6 +188,7 @@ int MMG5_movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree,
  *
  * \remark the metric is not interpolated at the new position.
  * \remark we don't check if we break the hausdorff criterion.
+ * \remark not used.
  *
  */
 int MMG5_movintptLES_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree,
@@ -215,6 +216,7 @@ int MMG5_movintptLES_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree
     iel  = list[k] / 4;
     ifac = list[k] % 4;
     pt = &mesh->tetra[iel];
+    assert ( MG_EOK(pt) );
 
     p0 = &mesh->point[pt->v[ifac]];
     memcpy(oldc,p0->c,3*sizeof(double));
@@ -240,6 +242,7 @@ int MMG5_movintptLES_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree
     nz = (x31*y21 - y31*x21);
 
     dd = sqrt(nx*nx+ny*ny+nz*nz);
+    assert ( dd > 0. && "degenerated element");
     dd = 1./dd;
     nx *= dd;
     ny *= dd;
@@ -257,11 +260,17 @@ int MMG5_movintptLES_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree
     u30[1] = p3->c[1]-p0->c[1];
     u30[2] = p3->c[2]-p0->c[2];
 
+    assert ( met->m[pt->v[MMG5_idir[ifac][0]]] > 0. && "null metric at vertex 0" );
+    assert ( met->m[pt->v[MMG5_idir[ifac][1]]] > 0. && "null metric at vertex 1" );
+    assert ( met->m[pt->v[MMG5_idir[ifac][2]]] > 0. && "null metric at vertex 2" );
+
     len =  sqrt(u10[0]*u10[0]+u10[1]*u10[1]+u10[2]*u10[2])/met->m[pt->v[MMG5_idir[ifac][0]]]
       + sqrt(u20[0]*u20[0]+u20[1]*u20[1]+u20[2]*u20[2])/met->m[pt->v[MMG5_idir[ifac][1]]]
       + sqrt(u30[0]*u30[0]+u30[1]*u30[1]+u30[2]*u30[2])/met->m[pt->v[MMG5_idir[ifac][2]]];
 
     len /= 3.;
+
+    assert ( len>0. && "degenerated element" );
 
     len = 1./len;
 
@@ -286,44 +295,44 @@ int MMG5_movintptLES_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree
   ppt0->c[1] *= 1./(double) ilist;
   ppt0->c[2] *= 1./(double) ilist;
 
-   coe = 0.9;
-   maxtou = 10;
-   iter = 0;
-   do {
-     p0->c[0] = (1. - coe) *oldc[0] + coe * ppt0->c[0] ;
-     p0->c[1] = (1. - coe) *oldc[1] + coe * ppt0->c[1];
-     p0->c[2] = (1. - coe) *oldc[2] + coe * ppt0->c[2];
+  coe = 0.9;
+  maxtou = 10;
+  iter = 0;
+  do {
+    p0->c[0] = (1. - coe) *oldc[0] + coe * ppt0->c[0];
+    p0->c[1] = (1. - coe) *oldc[1] + coe * ppt0->c[1];
+    p0->c[2] = (1. - coe) *oldc[2] + coe * ppt0->c[2];
 
-     /* Check new position validity */
-     calnew = DBL_MAX;
-     for (k=0; k<ilist; k++) {
-       iel = list[k] / 4;
-       pt  = &mesh->tetra[iel];
-       memcpy(pt0,pt,sizeof(MMG5_Tetra));
-       callist[k] = MMG5_caltet(mesh,met,pt0); // MMG5_orcal(mesh,met,0)
-       if (calold < MMG5_EPSOK && callist[k] <= calold) {
-         break;
-       } else if ((callist[k] < MMG5_EPSOK)) {
-         break;
-       } else if( callist[k] < 0.1) {
-         if (callist[k] < 1.01*calold) break;
-       } else {
-         if (callist[k] < 1.02*calold) break;
-       }
-       calnew = MG_MIN(calnew,callist[k]);
-     }
-     if(k<ilist) {
-       coe *= 0.5;
-       continue;
-     }
-     break;
-   } while(++iter <= maxtou );
+    /* Check new position validity */
+    calnew = DBL_MAX;
+    for (k=0; k<ilist; k++) {
+      iel = list[k] / 4;
+      pt  = &mesh->tetra[iel];
+      memcpy(pt0,pt,sizeof(MMG5_Tetra));
+      callist[k] = MMG5_caltet(mesh,met,pt0); // MMG5_orcal(mesh,met,0)
+      if (calold < MMG5_EPSOK && callist[k] <= calold) {
+        break;
+      } else if ((callist[k] < MMG5_EPSOK)) {
+        break;
+      } else if( callist[k] < 0.1) {
+        if (callist[k] < 1.01*calold) break;
+      } else {
+        if (callist[k] < 1.02*calold) break;
+      }
+      calnew = MG_MIN(calnew,callist[k]);
+    }
+    if(k<ilist) {
+      coe *= 0.5;
+      continue;
+    }
+    break;
+  } while(++iter <= maxtou );
 
-   if ( iter > maxtou ) {
-     memcpy(p0->c,oldc,3*sizeof(double));
-     MMG5_SAFE_FREE(callist);
-     return 0;
-   }
+  if ( iter > maxtou ) {
+    memcpy(p0->c,oldc,3*sizeof(double));
+    MMG5_SAFE_FREE(callist);
+    return 0;
+  }
 
    /* update position */
   if ( PROctree )

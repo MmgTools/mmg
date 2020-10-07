@@ -439,7 +439,8 @@ int MMG3D_intersectRect(double *rectin, double *rectinout)
  *
  */
 int MMG3D_getListSquareRec(MMG3D_PROctree_s* q, double* center, double* rect,
-                            MMG3D_PROctree_s*** qlist, double* dist, double* ani, double l0, int nc, int dim, int* index)
+                            MMG3D_PROctree_s*** qlist, double* dist, double* ani,
+                           double l0, int nc, int dim, int* index)
 {
   double recttemp[6];
   double centertemp[3];
@@ -463,6 +464,7 @@ int MMG3D_getListSquareRec(MMG3D_PROctree_s* q, double* center, double* rect,
     //~ return;
   //~ }
 
+  assert ( nc>= 3 );
   if (q->branches==NULL && q->v != NULL)
   {
     // the vector dist is of size nc whereas qlist allows nc-3 inputs
@@ -582,6 +584,7 @@ int MMG3D_getListSquare(MMG5_pMesh mesh, double* ani, MMG3D_pPROctree q, double*
   //instead of counting exactly the number of cells to be listed, the
   //maximum size is set to nc-3 (so the list dist can have nc-3 values + 3 coordinates of
   //the center of the rectangle)
+  assert(q->nc>=3);
   index = q->nc-3;
 
   MMG5_ADD_MEM(mesh,index*sizeof(MMG3D_PROctree_s*),"PROctree cell",return -1);

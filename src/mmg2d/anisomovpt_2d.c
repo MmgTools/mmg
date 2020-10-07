@@ -88,7 +88,9 @@ int MMG2D_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list,char im
   }
   
   /* Preconditionning of the gradient gr = M^{-1}gr */
+  assert(m0 && (m0+1) && (m0+2));
   det = m0[0]*m0[2]-m0[1]*m0[1];
+
   if ( det < MMG5_EPSD ) return 0;
   det = 1.0 / det;
   

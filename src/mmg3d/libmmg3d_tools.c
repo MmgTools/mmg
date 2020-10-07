@@ -686,6 +686,7 @@ int MMG3D_Get_numberOfNonBdyTriangles(MMG5_pMesh mesh, int* nb_tria) {
   int         *adja,ref,k,i,j,iel;
 
   *nb_tria = 0;
+  memset ( &hash, 0x0, sizeof(MMG5_Hash));
 
   if ( !mesh->tetra ) {
     /* No triangle at all */
@@ -728,7 +729,6 @@ int MMG3D_Get_numberOfNonBdyTriangles(MMG5_pMesh mesh, int* nb_tria) {
     MMG5_freeXPrisms(mesh);
 
     /* create surface adjacency */
-    memset ( &hash, 0x0, sizeof(MMG5_Hash));
     if ( !MMG3D_hashTria(mesh,&hash) ) {
       MMG5_DEL_MEM(mesh,hash.item);
       fprintf(stderr,"\n  ## Error: %s: Hashing problem.\n",__func__);

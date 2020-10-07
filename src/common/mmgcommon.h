@@ -345,17 +345,17 @@ size_t myfree(void *ptr) {
                                                                         \
     tmp = (type *)myrealloc((ptr),size_to_allocate,(prevSize)*sizeof(type)); \
     if ( !tmp ) {                                                       \
-      MMG5_SAFE_FREE(ptr);                                             \
+      MMG5_SAFE_FREE(ptr);                                              \
       perror(" ## Memory problem: realloc");                            \
       law;                                                              \
     }                                                                   \
-                                                                        \
-    (ptr) = tmp;                                                        \
-                                                                        \
-    if ( newSize > prevSize ) {                                         \
-      memset(&((ptr)[prevSize]),0,((newSize)-(prevSize))*sizeof(type)); \
+    else {                                                              \
+      (ptr) = tmp;                                                      \
+      assert(ptr);                                                      \
+      if ( newSize > prevSize ) {                                       \
+        memset(&((ptr)[prevSize]),0,((newSize)-(prevSize))*sizeof(type)); \
+      }                                                                 \
     }                                                                   \
-                                                                        \
   }while(0)
 
 /** Reallocation of ptr of type type at size (initSize+wantedGap*initSize)
