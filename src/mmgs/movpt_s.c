@@ -42,7 +42,7 @@ int movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   MMG5_pPoint   p0,p1,ppt0;
   MMG5_pTria    pt,pt0;
   MMG5_Bezier   b;
-  double   aa,bb,ab,ll,l,mlon,devmean,GV[3],gv[2],cosalpha,sinalpha,r[3][3],*n,lispoi[3*MMGS_LMAX+1];
+  double   aa,bb,ab,ll,l,mlon,devmean,GV[3],gv[2],cosalpha,sinalpha,r[3][3],*n,lispoi[3*MMGS_LMAX+3];
   double   ux,uy,uz,det2d,detloc,step,lambda[3],uv[2],o[3],no[3],to[3],Vold,Vnew,calold,calnew,caltmp;
   int      ier,iel,ipp,k,kel,npt,ibeg,iend;
   char     i0,i1,i2;
