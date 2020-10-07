@@ -307,7 +307,7 @@ int MMG3D_dichoto1b(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int ip) {
  *
  */
 char MMG5_chkedg(MMG5_pMesh mesh,MMG5_Tria *pt,char ori, double hmax,
-                  double hausd, int locPar) {
+                 double hausd, int locPar) {
   MMG5_pPoint   p[3];
   MMG5_xPoint  *pxp;
 //  MMG5_pPar     par;
@@ -609,7 +609,7 @@ int MMG5_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree PROctree, int typc
  *
  */
 int MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double crit,double declic,
-                 MMG3D_pPROctree PROctree,int typchk,int testmark) {
+                MMG3D_pPROctree PROctree,int typchk,int testmark) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
   int      list[MMG3D_LMAX+2],ilist,k,it,nconf,maxit,ns,nns,ier;
@@ -671,8 +671,8 @@ int MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double crit,double declic,
  *
  */
 int MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree,
-                 double clickSurf,double clickVol,int moveVol, int improveSurf,
-                 int improveVolSurf, int improveVol, int maxit,int testmark) {
+                double clickSurf,double clickVol,int moveVol, int improveSurf,
+                int improveVolSurf, int improveVol, int maxit,int testmark) {
   MMG5_pTetra        pt;
   MMG5_pPoint        ppt;
   MMG5_pxTetra       pxt;
@@ -734,15 +734,15 @@ int MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree,
                 ier = MMG5_movbdynomintpt_iso(mesh,met,PROctree,listv,ilistv,improveVolSurf);
               }
               else {
-              if ( mesh->adja[4*(k-1)+1+i] ) continue;
+                if ( mesh->adja[4*(k-1)+1+i] ) continue;
 
-              ier=MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,1);
-              if( !ier )  continue;
-              else if ( ier>0 )
-                ier = MMG5_movbdynompt(mesh,met,PROctree,listv,ilistv,lists,ilists,improveVolSurf);
-              else
-                return -1;
-            }
+                ier=MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,1);
+                if( !ier )  continue;
+                else if ( ier>0 )
+                  ier = MMG5_movbdynompt(mesh,met,PROctree,listv,ilistv,lists,ilists,improveVolSurf);
+                else
+                  return -1;
+              }
             }
             else if ( ppt->tag & MG_GEO ) {
               ier=MMG5_boulesurfvolp(mesh,k,i0,i,listv,&ilistv,lists,&ilists,0);
@@ -778,7 +778,7 @@ int MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree,
                   continue;
               }
               ier = MMG5_movbdyregpt(mesh,met,PROctree,listv,ilistv,
-                                      lists,ilists,improveSurf,improveVolSurf);
+                                     lists,ilists,improveSurf,improveVolSurf);
               if (ier < 0 ) return -1;
               else if ( ier )  ns++;
             }
@@ -870,7 +870,7 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
             isnmint = ( p0->xp && mesh->xpoint[p0->xp].nnor );
 
             if ( p0->tag > tag ) continue;
-            
+
             /* Catch an exterior non manifold point by an external face */
             if ( isnm ) {
               if ( isnmint ) {
@@ -879,15 +879,15 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
               else {
                 if ( mesh->adja[4*(k-1)+1+i] )  continue;
                 if (MMG5_boulesurfvolpNom(mesh,k,ip,i,
-                                       list,&ilist,lists,&ilists,&refmin,&refplus,p0->tag & MG_NOM) < 0 )
+                                          list,&ilist,lists,&ilists,&refmin,&refplus,p0->tag & MG_NOM) < 0 )
                   return -1;
               }
             }
             else {
-            if (MMG5_boulesurfvolp(mesh,k,ip,i,
-                                    list,&ilist,lists,&ilists,p0->tag & MG_NOM) < 0 )
-              return -1;
-          }
+              if (MMG5_boulesurfvolp(mesh,k,ip,i,
+                                     list,&ilist,lists,&ilists,p0->tag & MG_NOM) < 0 )
+                return -1;
+            }
           }
           else {
             ilist = MMG5_boulevolp(mesh,k,ip,list);
@@ -1008,15 +1008,15 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
               else {
                 if ( mesh->adja[4*(k-1)+1+i] )  continue;
                 if (MMG5_boulesurfvolpNom(mesh,k,ip,i,
-                                       list,&ilist,lists,&ilists,&refmin,&refplus,p0->tag & MG_NOM) < 0 )
+                                          list,&ilist,lists,&ilists,&refmin,&refplus,p0->tag & MG_NOM) < 0 )
                   return -1;
               }
             }
             else {
-            if (MMG5_boulesurfvolp(mesh,k,ip,i,
-                                    list,&ilist,lists,&ilists,p0->tag & MG_NOM) < 0 )
-              return -1;
-          }
+              if (MMG5_boulesurfvolp(mesh,k,ip,i,
+                                     list,&ilist,lists,&ilists,p0->tag & MG_NOM) < 0 )
+                return -1;
+            }
           }
           else {
             ilist = MMG5_boulevolp(mesh,k,ip,list);
@@ -1036,13 +1036,13 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
               ilist = MMG5_chkcol_nomint(mesh,met,k,i,j,list,ilist,typchk);
             }
             else {
-            if ( mesh->adja[4*(k-1)+1+i] )  continue;
+              if ( mesh->adja[4*(k-1)+1+i] )  continue;
               ilist = MMG5_chkcol_nom(mesh,met,k,i,j,list,ilist,lists,ilists,refmin,refplus,typchk);
-          }
+            }
           }
           else {
-          ilist = MMG5_chkcol_bdy(mesh,met,k,i,j,list,ilist,lists,ilists,typchk);
-        }
+            ilist = MMG5_chkcol_bdy(mesh,met,k,i,j,list,ilist,lists,ilists,typchk);
+          }
         }
         /* internal face */
         else {
@@ -1249,12 +1249,12 @@ MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           /* reallocation of point table */
 
           MMG3D_POINT_REALLOC(mesh,met,ip,mesh->gap,
-                               fprintf(stderr,"\n  ## Warning: %s: unable to"
-                                       " allocate a new point\n",__func__);
-                               MMG5_INCREASE_MEM_MESSAGE();
-                               memlack=1;
-                               goto split
-                               ,o,0,src);
+                              fprintf(stderr,"\n  ## Warning: %s: unable to"
+                                      " allocate a new point\n",__func__);
+                              MMG5_INCREASE_MEM_MESSAGE();
+                              memlack=1;
+                              goto split
+                              ,o,0,src);
         }
 
         assert ( met );
@@ -1446,8 +1446,8 @@ MMG3D_storeGeom(MMG5_pPoint ppt, MMG5_pxPoint pxp, double no[3]) {
  *
  */
 int MMG3D_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,int k,
-                      MMG5_pTetra pt,MMG5_pxTetra pxt,char imax,char typchk,
-                      char chkRidTet,int *warn ) {
+                       MMG5_pTetra pt,MMG5_pxTetra pxt,char imax,char typchk,
+                       char chkRidTet,int *warn ) {
   MMG5_Tria    ptt;
   MMG5_pPoint  p0,p1,ppt;
   MMG5_pxPoint pxp;
@@ -1913,11 +1913,11 @@ MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           if ( !ip ) {
             /* reallocation of point table */
             MMG3D_POINT_REALLOC(mesh,met,ip,mesh->gap,
-                                 fprintf(stderr,"\n  ## Error: %s: unable to"
-                                         " allocate a new point.\n",__func__);
-                                 MMG5_INCREASE_MEM_MESSAGE();
-                                 MMG3D_delPatternPts(mesh,hash);return -1;
-                                 ,o,MG_BDY,src);
+                                fprintf(stderr,"\n  ## Error: %s: unable to"
+                                        " allocate a new point.\n",__func__);
+                                MMG5_INCREASE_MEM_MESSAGE();
+                                MMG3D_delPatternPts(mesh,hash);return -1;
+                                ,o,MG_BDY,src);
             // Now pb->p contain a wrong memory address.
             pb.p[0] = &mesh->point[ptt.v[0]];
             pb.p[1] = &mesh->point[ptt.v[1]];
@@ -1953,7 +1953,7 @@ MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
             ppt->ref = ptt.ref;
           ppt->tag |= ptt.tag[j];
           pxp = &mesh->xpoint[ppt->xp];
-          
+
           /* Update normal and tangent vectors */
           intnom = 0;
           if ( ptt.tag[j] & MG_NOM ) {
@@ -1963,7 +1963,7 @@ MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           }
           if ( intnom ) pxp->nnor = 1;
           else memcpy(pxp->n1,no,3*sizeof(double));
-          
+
           memcpy(ppt->n,to,3*sizeof(double));
 
           if ( mesh->info.fem<typchk ) {
@@ -2068,7 +2068,7 @@ MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
           if ( (!(ptt.tag[j] & MG_GEO)) || (ptt.tag[j] & MG_NOM) )  continue;
 
           /* From a boundary face of a boundary tetra we can update normal/tangent
-           at ridges; */
+             at ridges; */
           ppt = &mesh->point[ip];
           assert(ppt->xp);
           pxp = &mesh->xpoint[ppt->xp];
@@ -2580,7 +2580,7 @@ static int MMG5_anatet4(MMG5_pMesh mesh, MMG5_pSol met,int *nf, char typchk) {
       for (j=0; j<4; j++)
         if ( ( pxt->ftag[j] & MG_BDY ) && (!(pxt->ftag[j] & MG_PARBDY)) )  nbdy++;
     }
-    
+
     /* Check for the number of boundary faces */
     if ( nbdy > 1 ) {
       id_op = MMG3D_anatet4_sim(mesh,met,k,typchk-1,&ifac,&conf0,&adj,&conf1);
