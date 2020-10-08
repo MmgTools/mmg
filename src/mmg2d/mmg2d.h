@@ -34,7 +34,7 @@
 #include <float.h>
 
 #include "libmmg2d.h"
-#include "mmgcommon.h"
+#include "libmmgcommon.h"
 
 #ifdef __cplusplus
 extern "C" {

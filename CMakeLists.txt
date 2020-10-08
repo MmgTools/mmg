@@ -77,6 +77,12 @@ ELSEIF(MINGW)
   SET (DEF_GNU "#define MMG_GNU")
 ENDIF ()
 
+# Do not print warnings about the use of secure function with MSVC
+if ( MSVC )
+  add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+  add_definitions(-Dstrdup=_strdup)
+endif()
+
 # Create mmgcmakedefines.h file with the architecture infos and
 # the definition ot the USE_POINTMAP flag.
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/src/common/mmgcmakedefines.h.in

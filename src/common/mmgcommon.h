@@ -691,7 +691,7 @@ const char    *MMG5_Get_formatName(enum MMG5_Format fmt);
                                        const long *posNodeData,const int bin,
                                        const int iswp,const int nelts,
                                        const int nsols);
-int             MMG5_saveMshMesh(MMG5_pMesh,MMG5_pSol*,const char*,const int);
+int             MMG5_saveMshMesh(MMG5_pMesh,MMG5_pSol*,const char*, int);
 int             MMG5_loadSolHeader(const char*,int,FILE**,int*,int*,int*,int*,
                                    int*,int*,int**,long*,int);
 int             MMG5_chkMetricType(MMG5_pMesh mesh,int *type, FILE *inm);

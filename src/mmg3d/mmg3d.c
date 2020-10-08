@@ -39,7 +39,7 @@ mytime         MMG5_ctim[TIMEMAX];
 /**
  * Print elapsed time at end of process.
  */
-static void MMG5_endcod() {
+static void MMG5_endcod(void) {
   char   stim[32];
 
   chrono(OFF,&MMG5_ctim[0]);

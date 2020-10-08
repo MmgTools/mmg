@@ -24,8 +24,8 @@
 #ifndef MMGS_H
 #define MMGS_H
 
+#include "libmmgcommon.h"
 #include "libmmgs.h"
-#include "mmgcommon.h"
 
 #ifdef __cplusplus
 extern "C" {
