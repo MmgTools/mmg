@@ -2251,9 +2251,9 @@ int MMG3D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam,int val){
                  return 0);
     MMG5_SAFE_CALLOC(mesh->info.mat,mesh->info.nmat,MMG5_Mat,return 0);
     for (k=0; k<mesh->info.nmat; k++) {
-      mesh->info.mat[k].ref   = INFINITY;
+      mesh->info.mat[k].ref   = 0;
     }
-    
+
     break;
 
 #ifdef USE_SCOTCH
