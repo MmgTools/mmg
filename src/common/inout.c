@@ -72,7 +72,7 @@ float MMG5_swapf(float sbin)
 }
 double MMG5_swapd(double sbin)
 {
-  float out;
+  double out;
   char *p_in = (char *) &sbin;
   char *p_out = (char *) &out;
   int i;
@@ -1416,7 +1416,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
             if(iswp) idx = MMG5_swapbin(idx);
             for(i=0 ; i<9 ; i++) {
               MMG_FREAD(&dbuf[i],MMG5_SD,1,(*inm));
-              if(iswp) dbuf[i]=MMG5_swapf(dbuf[i]);
+              if(iswp) dbuf[i]=MMG5_swapd(dbuf[i]);
             }
           }
 
@@ -2231,7 +2231,7 @@ int MMG5_readDoubleSol3D(MMG5_pSol sol,FILE *inm,int bin,int iswp,int pos) {
     } else {
       for(i=0 ; i<sol->size ; i++) {
         MMG_FREAD(&dbuf[i],MMG5_SD,1,inm);
-        if(iswp) dbuf[i]=MMG5_swapf(dbuf[i]);
+        if(iswp) dbuf[i]=MMG5_swapd(dbuf[i]);
       }
     }
     tmpd    = dbuf[2];

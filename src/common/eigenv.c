@@ -311,7 +311,7 @@ int MMG5_check_accuracy(double mat[6],double lambda[3], double v[3][3],
                         double w1[3], double w2[3], double w3[3],
                         double maxm, int order, int symmat) {
   double  err,tmpx,tmpy,tmpz;
-  float   m[6];
+  double  m[6];
   int     i,j,k;
 
   if ( !symmat ) return 1;
