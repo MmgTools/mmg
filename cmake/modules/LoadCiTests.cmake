@@ -97,7 +97,7 @@ ELSE ( )
  then untar it in the ${CI_DIR} directory.")
   ENDIF()
 
-    #--------------> mmgs
+  #--------------> mmgs
   IF ( EXISTS ${CI_DIR}/mmgs.version )
     FILE(MD5 ${CI_DIR}/mmgs.version OLD_MMGS_MD5)
   ELSE ( )
@@ -194,21 +194,45 @@ then untar it in the ${CI_DIR} directory.")
   ENDFOREACH()
 
   IF ( ${LOAD_OK} )
-    EXECUTE_PROCESS(
-      COMMAND cat ${FILENAME}
-      COMMAND tar -xzf -
-      WORKING_DIRECTORY ${CI_DIR}/
-      TIMEOUT 10000
-      )
+    IF ( WIN32 )
+      foreach( file_i IN LISTS FILENAME )
+        file(TO_NATIVE_PATH ${file_i} file_i_n)
+        list(APPEND list_fic_s ${file_i_n})
+      endforeach()
+
+      EXECUTE_PROCESS(
+        COMMAND cmd.exe /c type ${list_fic_s} > ${CI_DIR}/mmg.tgz
+        WORKING_DIRECTORY ${CI_DIR}
+        # COMMAND_ECHO STDOUT
+        # RESULT_VARIABLE cmd_output
+        TIMEOUT 10000
+        )
+
+      EXECUTE_PROCESS(
+        COMMAND ${CMAKE_COMMAND} -E tar xzf mmg.tgz
+        WORKING_DIRECTORY ${CI_DIR}
+        #COMMAND_ECHO STDOUT
+        #RESULT_VARIABLE cmd_output
+        TIMEOUT 10000
+        )
+      #MESSAGE ( "cmd_output ${cmd_output}" )
+    ELSE()
+      EXECUTE_PROCESS(
+        COMMAND cat ${FILENAME}
+        COMMAND tar -xzf -
+        WORKING_DIRECTORY ${CI_DIR}/
+        TIMEOUT 10000 )
+    ENDIF(WIN32)
+
     IF ( NOT EXISTS ${CI_DIR}/mmg )
       MESSAGE("\n")
-      MESSAGE(WARNING "Fail to automatically untar the mmg3d"
+      MESSAGE(WARNING "Fail to automatically untar the mmg "
         "test cases directory (mmg.tgz.*).
 Try to untar it by hand in the ${CI_DIR} directory: "
         "cat mmg.tgz.* | tar xzvf - ")
+    ELSE ()
+      FILE(REMOVE ${FILENAME})
     ENDIF()
-
-    FILE(REMOVE ${FILENAME})
   ENDIF()
 
 ENDIF()
@@ -227,17 +251,21 @@ Try to get it at the following link:
 then untar it in the ${CI_DIR} directory.")
   ELSE()
     EXECUTE_PROCESS(
-      COMMAND ${CMAKE_COMMAND} -E tar xzf
-      ${CI_DIR}/mmg2d.tgz
-      WORKING_DIRECTORY ${CI_DIR}/
+      COMMAND ${CMAKE_COMMAND} -E tar xzf ${CI_DIR}/mmg2d.tgz
+      WORKING_DIRECTORY ${CI_DIR}
+      #RESULT_VARIABLE toto
+      #COMMAND_ECHO STDOUT
       )
-    IF ( NOT EXISTS ${CI_DIR}/mmg2d.tgz )
+    #MESSAGE("${toto}")
+    IF ( NOT EXISTS ${CI_DIR}/mmg2d )
       MESSAGE("\n")
       MESSAGE(WARNING "Fail to automatically untar the mmg2d "
         "test cases directory (mmg2d.tgz).
 Try to untar it by hand in the ${CI_DIR} directory.")
-    ENDIF()
-    FILE(REMOVE ${CI_DIR}/mmg2d.tgz)
+    ELSE()
+      FILE(REMOVE ${CI_DIR}/mmg2d.tgz)
+    ENDIF ()
+
   ENDIF ()
 ENDIF ()
 
@@ -246,7 +274,10 @@ IF ( GET_MMGS_TESTS MATCHES "TRUE" )
   MESSAGE("-- Download the mmgs test cases. May be very long...")
   FILE(DOWNLOAD https://drive.google.com/uc?export=download&id=0B3X6EwOEKqHmcVdZb1EzaTR3ZlU
     ${CI_DIR}/mmgs.tgz
+    #STATUS status
+    #LOG log
     SHOW_PROGRESS)
+  #MESSAGE(${log})
   IF ( NOT EXISTS ${CI_DIR}/mmgs.tgz )
     MESSAGE("\n")
     MESSAGE(WARNING "Fail to automatically download the mmgs test cases.
@@ -259,13 +290,14 @@ then untar it in the ${CI_DIR} directory.")
       ${CI_DIR}/mmgs.tgz
       WORKING_DIRECTORY ${CI_DIR}/
       )
-    IF ( NOT EXISTS ${CI_DIR}/mmgs.tgz )
+    IF ( NOT EXISTS ${CI_DIR}/mmgs )
       MESSAGE("\n")
       MESSAGE(WARNING "Fail to automatically untar the mmgs "
         "test cases directory (mmgs.tgz).
 Try to untar it by hand in the ${CI_DIR} directory.")
-    ENDIF()
-    FILE(REMOVE ${CI_DIR}/mmgs.tgz)
+    ELSE()
+      FILE(REMOVE ${CI_DIR}/mmgs.tgz)
+    ENDIF ()
   ENDIF ()
 ENDIF ()
 
@@ -328,21 +360,47 @@ then untar it in the ${CI_DIR} directory.")
   ENDFOREACH()
 
   IF ( ${LOAD_OK} )
-    EXECUTE_PROCESS(
-      COMMAND cat ${FILENAME}
-      COMMAND tar -xzf -
-      WORKING_DIRECTORY ${CI_DIR}/
-      TIMEOUT 10000
-      )
+    IF ( WIN32 )
+      set(list_fic_s "")
+      foreach( file_i IN LISTS FILENAME )
+        file(TO_NATIVE_PATH ${file_i} file_i_n)
+        list(APPEND list_fic_s ${file_i_n})
+      endforeach()
+
+      EXECUTE_PROCESS(
+        COMMAND cmd.exe /c type ${list_fic_s} > ${CI_DIR}/mmg3d.tgz
+        WORKING_DIRECTORY ${CI_DIR}
+        # COMMAND_ECHO STDOUT
+        # RESULT_VARIABLE cmd_output
+        TIMEOUT 10000
+        )
+
+      EXECUTE_PROCESS(
+        COMMAND cmd.exe /c tar xvzf ${CI_DIR}/mmg3d.tgz
+        WORKING_DIRECTORY ${CI_DIR}
+        # COMMAND_ECHO STDOUT
+        # RESULT_VARIABLE cmd_output
+        TIMEOUT 10000
+        )
+      #MESSAGE ( "cmd_output ${cmd_output}" )
+    ELSE()
+      EXECUTE_PROCESS(
+        COMMAND cat ${FILENAME}
+        COMMAND tar -xzf -
+        WORKING_DIRECTORY ${CI_DIR}/
+        TIMEOUT 10000
+        )
+    ENDIF(WIN32)
+
     IF ( NOT EXISTS ${CI_DIR}/mmg3d )
       MESSAGE("\n")
       MESSAGE(WARNING "Fail to automatically untar the mmg3d"
         "test cases directory (mmg3d.tgz.*).
 Try to untar it by hand in the ${CI_DIR} directory: "
         "cat mmg3d.tgz.* | tar xzvf - ")
+    ELSE()
+      FILE(REMOVE ${FILENAME})
     ENDIF()
-
-    FILE(REMOVE ${FILENAME})
   ENDIF()
 
 ENDIF()
