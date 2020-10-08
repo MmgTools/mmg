@@ -55,7 +55,7 @@ int MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, MMG5_Hash *hash, int chkISO) {
   unsigned int   key;
 
   /* adjust hash table params */
-  hmax = 3.71*mesh->np;
+  hmax =(int)(3.71*mesh->np);
   hash->siz  = mesh->np;
   hash->max  = hmax + 1;
   hash->nxt  = hash->siz;

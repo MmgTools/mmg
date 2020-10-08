@@ -170,8 +170,8 @@ int MMG3D_memOption_memSet(MMG5_pMesh mesh) {
  *
  */
 int MMG3D_memOption_memRepartition(MMG5_pMesh mesh) {
-  size_t     usedMem,avMem,reservedMem,npadd;
-  int        ctri,bytes;
+  size_t     usedMem,avMem,reservedMem;
+  int        ctri,bytes,npadd;
 
   /* init allocation need MMG5_MEMMIN B */
   reservedMem = MMG5_MEMMIN +
@@ -209,7 +209,7 @@ int MMG3D_memOption_memRepartition(MMG5_pMesh mesh) {
   /* If npadd is exactly the maximum memory available, we will use all the
    * memory and the analysis step will fail. As arrays may be reallocated, we
    * can have smaller values for npmax,ntmax and nemax (npadd/2). */
-  npadd = avMem/(double)(2*bytes);
+  npadd = (int)(avMem/(double)(2*bytes));
   mesh->npmax = MG_MIN(mesh->npmax,mesh->np+npadd);
   mesh->ntmax = MG_MIN(mesh->ntmax,ctri*npadd+mesh->nt);
   mesh->nemax = MG_MIN(mesh->nemax,6*npadd+mesh->ne);
@@ -238,9 +238,9 @@ int MMG3D_memOption_memRepartition(MMG5_pMesh mesh) {
  */
 int MMG3D_memOption(MMG5_pMesh mesh) {
 
-  mesh->npmax = MG_MAX(1.5*mesh->np,MMG3D_NPMAX);
-  mesh->nemax = MG_MAX(1.5*mesh->ne,MMG3D_NEMAX);
-  mesh->ntmax = MG_MAX(1.5*mesh->nt,MMG3D_NTMAX);
+  mesh->npmax = MG_MAX((int)(1.5*mesh->np),MMG3D_NPMAX);
+  mesh->nemax = MG_MAX((int)(1.5*mesh->ne),MMG3D_NEMAX);
+  mesh->ntmax = MG_MAX((int)(1.5*mesh->nt),MMG3D_NTMAX);
 
   return  MMG3D_memOption_memSet(mesh);
 }

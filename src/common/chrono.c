@@ -152,14 +152,14 @@ void printim(double elps,char *stim) {
   if ( elps < 60.0 )
     sprintf(stim,"%5.3lfs",elps);
   else if ( elps < 3600.0 ) {
-    mm = elps / 60.0;
+    mm = (int)(elps / 60.0);
     ss = (int)elps - mm * 60;
     sprintf(stim,"%dm%ds (%7.3lfs)",mm,ss,elps);
   }
   else {
-    hh = elps / 3600;
-    mm = (elps - hh*3600) / 60;
-    ss = elps - mm*60 - hh*3600;
+    hh = (int)(elps / 3600);
+    mm = (int)((elps - hh*3600) / 60);
+    ss = (int)(elps - mm*60 - hh*3600);
     sprintf(stim,"%dh%dm%ds",hh,mm,ss);
   }
 }
