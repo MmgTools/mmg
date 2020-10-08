@@ -689,7 +689,7 @@ int MMG5_setVertexNmTag(MMG5_pMesh mesh) {
 
   /* Hash table used by boulernm to store the special edges passing through
    * a given point */
-  if ( ! MMG5_hashNew(mesh,&hash,mesh->np,3.71*mesh->np) ) return 0;
+  if ( ! MMG5_hashNew(mesh,&hash,mesh->np,(int)(3.71*mesh->np)) ) return 0;
 
   nc = nre = 0;
   ++mesh->base;
@@ -1055,7 +1055,7 @@ int MMG5_hGeom(MMG5_pMesh mesh) {
   /* if edges exist in mesh, hash special edges from existing field */
   if ( mesh->na ) {
     if ( !mesh->htab.geom ) {
-      mesh->namax = MG_MAX(1.5*mesh->na,MMG3D_NAMAX);
+      mesh->namax = MG_MAX((int)(1.5*mesh->na),MMG3D_NAMAX);
       if ( !MMG5_hNew(mesh,&mesh->htab,mesh->na,3*mesh->namax) )
         return 0;
     }
@@ -1132,7 +1132,7 @@ int MMG5_hGeom(MMG5_pMesh mesh) {
     if ( mesh->htab.geom )
       MMG5_DEL_MEM(mesh,mesh->htab.geom);
 
-    mesh->namax = MG_MAX(1.5*mesh->na,MMG3D_NAMAX);
+    mesh->namax = MG_MAX((int)(1.5*mesh->na),MMG3D_NAMAX);
     if ( !MMG5_hNew(mesh,&mesh->htab,mesh->na,3*mesh->namax) )
       return 0;
 
@@ -1216,7 +1216,7 @@ int MMG5_bdryTria(MMG5_pMesh mesh, int ntmesh) {
   }
   else if ( mesh->nt ) {
     /* Hash given bdry triangles */
-    if ( ! MMG5_hashNew(mesh,&hash,0.51*mesh->nt,1.51*mesh->nt) ) return 0;
+    if ( ! MMG5_hashNew(mesh,&hash,(int)(0.51*mesh->nt),(int)(1.51*mesh->nt)) ) return 0;
     tofree=1;
   }
 
