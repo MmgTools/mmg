@@ -24,7 +24,7 @@
 #include "git_log_mmg.h"
 #endif
 
-#if !defined(MMGVERSION_H)
+#ifndef MMGVERSION_H
 #define MMGVERSION_H
 
 #define MMG_VERSION_RELEASE "@CMAKE_RELEASE_VERSION@"
