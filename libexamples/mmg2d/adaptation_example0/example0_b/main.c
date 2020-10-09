@@ -82,7 +82,16 @@ int main(int argc,char *argv[]) {
   /** Manually set of the mesh */
   /** a) give the size of the mesh: 4 vertices, 2 triangles, 0 quadrangles, 4 edges */
   /* allocation */
+#ifndef MMG_VERSION_LE
+  /** a) get the size of the mesh: vertices, tetra, triangles, edges */
+  if ( MMG2D_Set_meshSize(mmgMesh,4,2,4) != 1 )  exit(EXIT_FAILURE);
+#elif MMG_VERSION_LE(5,4)
+  /** a) get the size of the mesh: vertices, tetra, triangles, edges */
+  if ( MMG2D_Set_meshSize(mmgMesh,4,2,4) != 1 )  exit(EXIT_FAILURE);
+#else
+  /** a) get the size of the mesh: vertices, tetra, triangles, quadrangles,edges */
   if ( MMG2D_Set_meshSize(mmgMesh,4,2,0,4) != 1 )  exit(EXIT_FAILURE);
+#endif
 
 /** b) give the vertices: for each vertex, give the coordinates, the reference
       and the position in mesh of the vertex */
@@ -154,8 +163,21 @@ int main(int argc,char *argv[]) {
   }
   fprintf(inm,"MeshVersionFormatted 2\n");
   fprintf(inm,"\nDimension 2\n");
+
+  /* Detect API changes: Prior to version 5.5, quadrangles where not supported
+   * by Mmg */
+#ifndef MMG_VERSION_LE
+  /** a) get the size of the mesh: vertices, tetra, triangles, edges */
+  if ( MMG2D_Get_meshSize(mmgMesh,&np,&nt,&na) !=1 )  exit(EXIT_FAILURE);
+
+#elif MMG_VERSION_LE(5,4)
+  /** a) get the size of the mesh: vertices, tetra, triangles, edges */
+  if ( MMG2D_Get_meshSize(mmgMesh,&np,&nt,&na) !=1 )  exit(EXIT_FAILURE);
+
+#else
   /** a) get the size of the mesh: vertices, tetra, triangles, quadrangles,edges */
   if ( MMG2D_Get_meshSize(mmgMesh,&np,&nt,NULL,&na) !=1 )  exit(EXIT_FAILURE);
+#endif
 
   /* Table to know if a vertex is corner */
   corner = (int*)calloc(np+1,sizeof(int));
