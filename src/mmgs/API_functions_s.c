@@ -1388,6 +1388,10 @@ int MMGS_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
     mesh->info.renum    = val;
     break;
 #endif
+  case MMGS_IPARAM_anisosize :
+    if ( !MMGS_Set_solSize(mesh,sol,MMG5_Vertex,0,MMG5_Tensor) )
+      return 0;
+    break;
   default :
     fprintf(stderr,"\n  ## Error: %s: unknown type of parameter\n",__func__);
     return 0;

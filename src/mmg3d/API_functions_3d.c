@@ -2264,7 +2264,7 @@ int MMG3D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam,int val){
   case MMG3D_IPARAM_anisosize :
     if ( !MMG3D_Set_solSize(mesh,sol,MMG5_Vertex,0,MMG5_Tensor) )
       return 0;
-
+    break;
   default :
     fprintf(stderr,"\n  ## Error: %s: unknown type of parameter\n",__func__);
     return 0;
