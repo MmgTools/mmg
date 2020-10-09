@@ -290,7 +290,7 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol so
         }
         break;
       case 'o':
-        if ( !strcmp(argv[i],"-out") ) {
+        if ( (!strcmp(argv[i],"-out")) || (!strcmp(argv[i],"-o")) ) {
           if ( ++i < argc && isascii(argv[i][0])  && argv[i][0]!='-') {
             if ( !MMGS_Set_outputMeshName(mesh,argv[i]) )
               return 0;
