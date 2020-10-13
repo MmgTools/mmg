@@ -38,7 +38,7 @@
 #include <math.h>
 #include <assert.h>
 #include <stdlib.h>
-
+#include <stdint.h>
 #include "eigenv.h"
 
 /* seeking at least 1.e-05 accuracy, more if not sufficient */
