@@ -33,7 +33,7 @@
 
 #include "mmg2d.h"
 
-extern unsigned char ddb;
+extern uint8_t ddb;
 
 /**
  * \param mesh pointer toward the mesh
@@ -47,12 +47,12 @@ extern unsigned char ddb;
  * possibly perform a dichotomy to find the latest valid position for the point.
  *
  */
-int MMG2D_chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
+int MMG2D_chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t i) {
   MMG5_pTria           pt,pt1,pt0;
   MMG5_pPoint          p1,p2,ppt;
   double               mid[2],o[2],no[2],calnew,caltmp,tp,to,t,calseuil;
   int                  ip,jel,*adja,it,maxit,npinit;
-  char                 i1,i2,j,j1,j2,ier,isv;
+  int8_t               i1,i2,j,j1,j2,ier,isv;
 
   calseuil = 1e-4 / MMG2D_ALPHAD;
   npinit = mesh->np;
@@ -236,10 +236,10 @@ int MMG2D_chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
  * adjacency structure in the mesh is preserved
  *
  */
-int MMG2D_split1b(MMG5_pMesh mesh,int k,char i,int ip) {
+int MMG2D_split1b(MMG5_pMesh mesh,int k,int8_t i,int ip) {
   MMG5_pTria         pt,pt1;
   int                *adja,iel,jel,kel,mel;
-  char               i1,i2,m,j,j1,j2;
+  int8_t             i1,i2,m,j,j1,j2;
 
   iel = MMG2D_newElt(mesh);
   if ( !iel ) {
@@ -338,9 +338,9 @@ int MMG2D_split1b(MMG5_pMesh mesh,int k,char i,int ip) {
  *
  */
 int MMG2D_split1_sim(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
-  MMG5_pTria         pt,pt0;
-  double             cal;
-  unsigned char      tau[3];
+  MMG5_pTria  pt,pt0;
+  double      cal;
+  uint8_t     tau[3];
 
   pt = &mesh->tria[k];
   pt0 = &mesh->tria[0];
@@ -383,10 +383,10 @@ int MMG2D_split1_sim(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
  *
  */
 int MMG2D_split1(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
-  MMG5_pTria       pt,pt1;
-  MMG5_pPoint      p0;
-  int              iel;
-  unsigned char    tau[3];
+  MMG5_pTria   pt,pt1;
+  MMG5_pPoint  p0;
+  int          iel;
+  uint8_t      tau[3];
 
   pt = &mesh->tria[k];
 
@@ -449,9 +449,9 @@ int MMG2D_split1(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
  *
  */
 int MMG2D_split2_sim(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
-  MMG5_pTria        pt,pt0;
-  double            cal;
-  unsigned char     tau[3];
+  MMG5_pTria  pt,pt0;
+  double      cal;
+  uint8_t     tau[3];
 
   pt = &mesh->tria[k];
   pt0 = &mesh->tria[0];
@@ -498,10 +498,10 @@ int MMG2D_split2_sim(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
  *
  */
 int MMG2D_split2(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
-  MMG5_pTria       pt,pt1,pt2;
-  MMG5_pPoint      p1,p2;
-  int              iel,jel;
-  unsigned char    tau[3];
+  MMG5_pTria  pt,pt1,pt2;
+  MMG5_pPoint p1,p2;
+  int         iel,jel;
+  uint8_t     tau[3];
 
   pt = &mesh->tria[k];
 
@@ -718,7 +718,7 @@ int MMG2D_splitbar(MMG5_pMesh mesh,int k,int ip) {
   MMG5_pPoint        p0,p1,p2,ppt;
   int                *adja,iel1,iel2,jel0,jel2;
   int                ip0,ip1,ip2;
-  char               j2,j0;
+  int8_t             j2,j0;
   double             cal,calseuil;
 
   pt  = &mesh->tria[k];
@@ -770,9 +770,9 @@ int MMG2D_splitbar(MMG5_pMesh mesh,int k,int ip) {
   adja = &mesh->adja[3*(k-1)+1];
   jel0  = adja[0] / 3;
   j0    = adja[0] % 3;
- #ifndef NDEBUG
-  char jel1 = adja[1] / 3;
-  char j1   = adja[1] % 3;
+#ifndef NDEBUG
+  int8_t jel1 = adja[1] / 3;
+  int8_t j1   = adja[1] % 3;
 #endif
   jel2  = adja[2] / 3;
   j2    = adja[2] % 3;

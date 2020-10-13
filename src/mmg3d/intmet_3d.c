@@ -48,7 +48,7 @@
  * \a k for a special storage of ridges metric (after defsiz call).
  *
  */
-int MMG5_intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,
+int MMG5_intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t i,int ip,
                       double s) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
@@ -98,7 +98,7 @@ int MMG5_intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,
  * \a k for a classic storage of ridges metrics (before defsiz call).
  *
  */
-int MMG3D_intmet33_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,
+int MMG3D_intmet33_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t i,int ip,
                       double s) {
   MMG5_pTetra   pt;
   double        *m,*n,*mr;
@@ -128,7 +128,7 @@ int MMG3D_intmet33_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,
  * \a k.
  *
  */
-int MMG5_intmet_iso(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,
+int MMG5_intmet_iso(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t i,int ip,
                       double s) {
   MMG5_pTetra   pt;
   int           ip1, ip2;
@@ -159,7 +159,7 @@ int MMG5_intmet_iso(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,
  * \f$ p_1-p_2 \f$ must not be a ridge.
  *
  * */
-int MMG5_intregmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,
+int MMG5_intregmet(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t i,double s,
                     double mr[6]) {
   MMG5_pTetra     pt;
   MMG5_pxTetra    pxt;
@@ -204,7 +204,7 @@ static inline int
 MMG5_intregvolmet(double *ma,double *mb,double *mp,double t) {
   double        dma[6],dmb[6],mai[6],mbi[6],mi[6];
   int           i;
-  static char   mmgWarn=0;
+  static int8_t mmgWarn=0;
 
   for (i=0; i<6; i++) {
     dma[i] = ma[i];
@@ -246,7 +246,7 @@ MMG5_intregvolmet(double *ma,double *mb,double *mp,double t) {
  * \f$ p_1-p_2 \f$ is an internal edge.
  *
  */
-int MMG5_intvolmet(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,double s,
+int MMG5_intvolmet(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t i,double s,
                     double mr[6]) {
   MMG5_pTetra     pt;
   MMG5_pPoint     pp1,pp2;
@@ -337,7 +337,7 @@ int MMG5_interp4barintern(MMG5_pSol met,int ip,double cb[4],double dm0[6],
                            double dm1[6],double dm2[6],double dm3[6]) {
   double        m0i[6],m1i[6],m2i[6],m3i[6],mi[6];
   int           i;
-  static char   mmgWarn=0;
+  static int8_t mmgWarn=0;
 
  if ( !MMG5_invmat(dm0,m0i) || !MMG5_invmat(dm1,m1i) ||
        !MMG5_invmat(dm2,m2i) || !MMG5_invmat(dm3,m3i) ) {

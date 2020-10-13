@@ -38,7 +38,7 @@
 #define  MMG5_EPSLOC   1.00005
 #define  IEDG(a,b) (((a) > 0) && ((b) > 0)) ? ((a)+(b)) : (((a)+(b))-(1))
 
-extern char ddb;
+extern int8_t ddb;
 
 /**
  *
@@ -73,10 +73,10 @@ void MMG5_chkvol(MMG5_pMesh mesh) {
  * \warning Not used.
  */
 int MMG5_chkmshsurf(MMG5_pMesh mesh){
-  MMG5_pTria      pt;
+  MMG5_pTria pt;
   int        k,k1;
   int        *adja,*adja1;
-  char       i,voy;
+  int8_t     i,voy;
 
   for (k=1; k<=mesh->nt; k++) {
     pt   = &mesh->tria[k];
@@ -109,12 +109,12 @@ int MMG5_chkmshsurf(MMG5_pMesh mesh){
  *
  */
 int MMG5_mmg3dChkmsh(MMG5_pMesh mesh,int severe,int base) {
-  MMG5_pTetra    pt,pt1,pt2;
-  MMG5_pxTetra   pxt;
-  int            *adja,*adja1,adj,adj1,k,i,iadr;
-  int            iel,a0,a1,a2,b0,b1,b2;
-  unsigned char  voy,voy1;
-  static char    mmgErr0=0,mmgErr1=0,mmgErr2=0,mmgErr3=0,mmgErr4=0,mmgErr5=0;
+  MMG5_pTetra     pt,pt1,pt2;
+  MMG5_pxTetra    pxt;
+  int             *adja,*adja1,adj,adj1,k,i,iadr;
+  int             iel,a0,a1,a2,b0,b1,b2;
+  uint8_t         voy,voy1;
+  static int8_t   mmgErr0=0,mmgErr1=0,mmgErr2=0,mmgErr3=0,mmgErr4=0,mmgErr5=0;
 
   for (k=1; k<=mesh->ne; k++) {
     pt1 = &mesh->tetra[k];
@@ -303,8 +303,8 @@ int MMG5_chkptonbdy(MMG5_pMesh mesh,int np){
   MMG5_pxTetra     pxt;
   MMG5_pPoint      p0;
   int              k;
-  char             i,j,ip;
-  static char      mmgWarn0=0,mmgWarn1=0;
+  int8_t           i,j,ip;
+  static int8_t    mmgWarn0=0,mmgWarn1=0;
 
   for(k=1;k<=mesh->np;k++)
     mesh->point[k].flag = 0;
@@ -361,11 +361,11 @@ int MMG5_chkptonbdy(MMG5_pMesh mesh,int np){
  * \warning Not used.
  */
 int MMG5_cntbdypt(MMG5_pMesh mesh, int nump){
-  MMG5_pTetra  pt;
-  MMG5_pxTetra pxt;
-  int          k,nf,v0,v1,v2;
-  char         i,j,ip;
-  static char  mmgWarn0 = 0;
+  MMG5_pTetra   pt;
+  MMG5_pxTetra  pxt;
+  int           k,nf,v0,v1,v2;
+  int8_t        i,j,ip;
+  static int8_t mmgWarn0 = 0;
 
   nf = 0;
 
@@ -413,7 +413,7 @@ int MMG5_chkfemtopo(MMG5_pMesh mesh) {
   MMG5_pxTetra     pxt;
   MMG5_pPoint      p0,p1;
   int              k,nf,ntet,ned,np,ischk,ilist,list[MMG3D_LMAX+2],l,np1,npchk,iel;
-  char             i0,j,i,i1,ia,ier;
+  int8_t           i0,j,i,i1,ia,ier;
 
   ntet = ned = 0;
   for(k=1; k<=mesh->np; k++)
@@ -490,12 +490,12 @@ int MMG5_chkfemtopo(MMG5_pMesh mesh) {
  * \warning Not used.
  */
 int srcface(MMG5_pMesh mesh,int n0,int n1,int n2) {
-  MMG5_pTetra  pt;
-  MMG5_pxTetra pxt;
-  int          k,ip0,ip1,ip2,minn,maxn,sn,mins,maxs,sum,ref;
-  int16_t      tag;
-  char         i;
-  static char  mmgWarn0 = 0;
+  MMG5_pTetra   pt;
+  MMG5_pxTetra  pxt;
+  int           k,ip0,ip1,ip2,minn,maxn,sn,mins,maxs,sum,ref;
+  int16_t       tag;
+  int8_t        i;
+  static int8_t mmgWarn0 = 0;
 
   minn = MG_MIN(n0,MG_MIN(n1,n2));
   maxn = MG_MAX(n0,MG_MAX(n1,n2));

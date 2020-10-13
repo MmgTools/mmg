@@ -55,9 +55,9 @@ static int MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
  double       len,lmax,o[3];
  int          k,ip,ip1,ip2,list[MMG3D_LMAX+2],ilist,src;
  int          ns,ier;
- char         imax,j,i,i1,i2,ifa0,ifa1;
- char         chkRidTet;
- static char  mmgWarn    = 0;
+ int8_t       imax,j,i,i1,i2,ifa0,ifa1;
+ int8_t       chkRidTet;
+ static int8_t mmgWarn    = 0;
 
   *warn=0;
   ns = 0;
@@ -182,15 +182,15 @@ static int MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
  *
  */
 static int MMG5_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
-  MMG5_pTetra     pt;
-  MMG5_pxTetra    pxt;
-  MMG5_pPoint     p0,p1;
-  double     len,lmin;
-  int        k,ip,iq,list[MMG3D_LMAX+2],ilist,lists[MMG3D_LMAX+2],ilists,nc;
-  int        ier;
-  int16_t    tag;
-  char       imin,j,i,i1,i2,ifa0,ifa1;
-  static char mmgWarn = 0;
+  MMG5_pTetra   pt;
+  MMG5_pxTetra  pxt;
+  MMG5_pPoint   p0,p1;
+  double        len,lmin;
+  int           k,ip,iq,list[MMG3D_LMAX+2],ilist,lists[MMG3D_LMAX+2],ilists,nc;
+  int           ier;
+  int16_t       tag;
+  int8_t        imin,j,i,i1,i2,ifa0,ifa1;
+  static int8_t mmgWarn = 0;
 
   nc = 0;
   for (k=1; k<=mesh->ne; k++) {

@@ -51,8 +51,9 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
   char        *ptr,*data;
   char        chaine[MMG5_FILESTR_LGTH],strskip[MMG5_FILESTR_LGTH];
 
+  ina = NULL;
   posnp = posnt = posne = posncor = posnq = 0;
-  posned = posnr = posnpreq = posnc1 = npreq = 0;
+  posned = posnr = posnpreq = posntreq = posnc1 = npreq = 0;
   posnedreq = posnormal = 0;
   ncor = nri = ng = nedreq = nq = ntreq = 0;
   bin = 0;

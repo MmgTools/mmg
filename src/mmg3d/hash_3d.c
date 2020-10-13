@@ -36,7 +36,7 @@
 
 #define MMG5_KC    13
 
-extern char  ddb;
+extern int8_t  ddb;
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -181,7 +181,7 @@ int MMG3D_hashTetra(MMG5_pMesh mesh, int pack) {
   MMG5_pTetra    pt,pt1;
   int            k,kk,pp,l,ll,mins,mins1,maxs,maxs1,sum,sum1,iadr;
   int           *hcode,*link,hsize,inival;
-  unsigned char  i,ii,i1,i2,i3;
+  uint8_t        i,ii,i1,i2,i3;
   unsigned int   key;
 
   /* default */
@@ -300,7 +300,7 @@ int MMG3D_hashPrism(MMG5_pMesh mesh) {
   int            max12,min12,max34,min34,mins,mins1,mins_b, mins_b1,maxs,maxs1;
   int            iadr;
   int           *hcode,*link,hsize,inival;
-  unsigned char  i,ii,i1,i2,i3,i4;
+  uint8_t        i,ii,i1,i2,i3,i4;
   unsigned int   key;
 
   if ( !mesh->nprism ) return 1;
@@ -523,8 +523,8 @@ int MMG5_setEdgeNmTag(MMG5_pMesh mesh, MMG5_Hash *hash) {
   int                 k,l,i1,i2,na,nb,ia,it1,it2, nr;
   int                 ipa,ipb,nbdy,start;
   unsigned int        key;
-  char                iface,hasadja,i;
-  static char         mmgWarn0=0,mmgWarn1=0;
+  int8_t              iface,hasadja,i;
+  static int8_t       mmgWarn0=0,mmgWarn1=0;
 
   nr = 0;
 
@@ -1050,7 +1050,7 @@ int MMG5_hGeom(MMG5_pMesh mesh) {
   MMG5_Hash    hash;
   int         *adja,k,kk,edg,ier;
   int16_t      tag;
-  char         i,i1,i2;
+  int8_t       i,i1,i2;
 
   /* if edges exist in mesh, hash special edges from existing field */
   if ( mesh->na ) {
@@ -1201,7 +1201,7 @@ int MMG5_bdryTria(MMG5_pMesh mesh, int ntmesh) {
   MMG5_pxPrism   pxpr;
   MMG5_Hash     hash;
   int       ref,*adja,adj,k,ia,ib,ic,kt, tofree=0,ntinit;
-  char      i;
+  int8_t    i;
 
   hash.item = NULL;
 
@@ -1763,7 +1763,7 @@ int MMG5_bdrySet(MMG5_pMesh mesh) {
   MMG5_Hash     hash;
   int      ref,*adja,adj,k,kt,ia,ib,ic,j,na,initedg[3];
   int16_t  tag,inittag[3];
-  char     i,i1,i2;
+  int8_t   i,i1,i2;
 
   if ( !mesh->nt )  return 1;
 
@@ -2046,7 +2046,7 @@ int MMG5_bdryUpdate(MMG5_pMesh mesh) {
   MMG5_Hash     hash;
   int      k,kt,ia,ib,ic,j;
   int16_t  tag;
-  char     i;
+  int8_t   i;
 
   if ( !mesh->nt )  return 1;
   if ( !MMG5_hashNew(mesh,&hash,0.51*mesh->nt,1.51*mesh->nt) )  return 0;
@@ -2134,7 +2134,7 @@ int MMG5_bdryPerm(MMG5_pMesh mesh) {
   MMG5_pTria    ptt;
   MMG5_Hash     hash;
   int           *adja,adj,k,kt,ia,ib,ic,nf;
-  char          i;
+  int8_t        i;
 
   if ( !mesh->nt ) return 1;
 

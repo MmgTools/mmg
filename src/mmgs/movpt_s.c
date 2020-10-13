@@ -45,7 +45,7 @@ int movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   double   aa,bb,ab,ll,l,mlon,devmean,GV[3],gv[2],cosalpha,sinalpha,r[3][3],*n,lispoi[3*MMGS_LMAX+3];
   double   ux,uy,uz,det2d,detloc,step,lambda[3],uv[2],o[3],no[3],to[3],Vold,Vnew,calold,calnew,caltmp;
   int      ier,iel,ipp,k,kel,npt,ibeg,iend;
-  char     i0,i1,i2;
+  int8_t   i0,i1,i2;
 
   step = 0.1;
   Vold = 0.0;
@@ -352,8 +352,8 @@ int movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
  */
 int MMGS_paramDisp(MMG5_pMesh mesh,int it1,int it2,
                    double l1old,double l2old,
-                   char isrid1, char isrid2,int ip0,int ip1,int ip2,
-                   double step,double o[3],char *isrid) {
+                   int8_t isrid1, int8_t isrid2,int ip0,int ip1,int ip2,
+                   double step,double o[3],int8_t *isrid) {
   MMG5_pTria  pt;
   MMG5_Bezier b;
   double      uv[2],nn1[3],to[3];
@@ -621,10 +621,10 @@ int movridpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   MMG5_pTria   pt,pt0;
   MMG5_pxPoint go;
   MMG5_pPoint  p0,p1,p2,ppt0;
-  double  step,ll1old,ll1new,ll2old,ll2new,o[3];
-  double  nn1[3],nn2[3],to[3],calold,calnew,lam0,lam1,lam2;
-  int     k,iel,ip0,ip1,ip2,it1,it2;
-  char    i0,i1,i2,isrid1,isrid2,isrid;
+  double       step,ll1old,ll1new,ll2old,ll2new,o[3];
+  double       nn1[3],nn2[3],to[3],calold,calnew,lam0,lam1,lam2;
+  int          k,iel,ip0,ip1,ip2,it1,it2;
+  int8_t       i0,i1,i2,isrid1,isrid2,isrid;
 
   step   = 0.1;
   isrid1 = 0  ;  isrid2 = 0;

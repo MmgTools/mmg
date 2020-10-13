@@ -51,8 +51,8 @@
  */
 int MMG3D_openMesh(int imprim,const char *filename,FILE **inm,int *bin,
                    char *modeASCII, char* modeBIN) {
-  char        *ptr,*data;
-  int         out,ier;
+  char *ptr,*data;
+  int   out,ier;
 
   out = (strchr(modeASCII,'w') != NULL) ? 1 : 0;
   ier = out ? 0 : -1;

@@ -35,17 +35,17 @@
 
 #include "inlined_functions_3d.h"
 
-extern char  ddb;
+extern int8_t  ddb;
 
 /** Check whether collapse ip -> iq could be performed, ip internal ;
  *  'mechanical' tests (positive jacobian) are not performed here */
-int MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
-                     char iedg,int *list,int ilist,char typchk) {
+int MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t iface,
+                    int8_t iedg,int *list,int ilist,int8_t typchk) {
   MMG5_pTetra   pt,pt0;
   MMG5_pPoint   p0;
-  double   calold,calnew,caltmp,ll,lon;
-  int      j,iel,nq,nr;
-  char     i,jj,ip,iq;
+  double        calold,calnew,caltmp,ll,lon;
+  int           j,iel,nq,nr;
+  int8_t        i,jj,ip,iq;
 
   iq  = MMG5_idir[iface][MMG5_iprv2[iedg]];
   pt  = &mesh->tetra[k];
@@ -177,13 +177,13 @@ int MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
  *
  */
 static int
-MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,char iedg,int *lists,
+MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,int8_t iedg,int *lists,
                     int ilists) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
   double        n0[3],n1[3],devnew;
   int           nump,numq,piv,iel,jel,jel1,nap,nbp,naq,nbq,nro,adj,*adja;
-  char          ip,iq,ipiv,iopp,i,j,j1,jface,jface1,isface;
+  int8_t        ip,iq,ipiv,iopp,i,j,j1,jface,jface1,isface;
 
   pt = &mesh->tetra[k];
   ip = MMG5_idir[iface][MMG5_inxt2[iedg]];
@@ -360,9 +360,9 @@ MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,char iedg,int *lists,
  *
  * \remark we don't check edge lengths.
  */
-int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
-                    char iedg,int *listv,int ilistv,int *lists,int ilists,
-                    int refmin,int refplus, char typchk,int isnm) {
+int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t iface,
+                    int8_t iedg,int *listv,int ilistv,int *lists,int ilists,
+                    int refmin,int refplus, int8_t typchk,int isnm) {
   MMG5_pTetra  pt,pt0,pt1;
   MMG5_pxTetra pxt;
   MMG5_Tria    tt;
@@ -372,7 +372,7 @@ int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
   int          ipp,nump,numq,l,iel,kk;
   int          nr,nbbdy,ndepmin,ndepplus,isloc,iedgeOpp;
   int16_t      tag;
-  char         iopp,iopp2,ia,ip,i,iq,i0,i1,ier,isminp,isplp;
+  int8_t       iopp,iopp2,ia,ip,i,iq,i0,i1,ier,isminp,isplp;
 #ifndef NDEBUG
   MMG5_pPoint  p0;
 #endif
@@ -720,14 +720,14 @@ int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
  *  (pq, or ia in local tet notation).
  *
  */
-int MMG5_chkcol_nomint(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
-                    char iedg,int *listv,int ilistv,char typchk) {
+int MMG5_chkcol_nomint(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t iface,
+                    int8_t iedg,int *listv,int ilistv,int8_t typchk) {
   MMG5_pTetra  pt,pt0;
   MMG5_pxTetra pxt;
   double       calold,calnew,caltmp;
   int          ipp,nump,numq,l,iel;
   int          nr,nbbdy;
-  char         ia,ip,i,iq,i0,i1;
+  int8_t       ia,ip,i,iq,i0,i1;
 #ifndef NDEBUG
   MMG5_pPoint  p0;
 #endif
@@ -831,15 +831,15 @@ int MMG5_chkcol_nomint(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
  * (i.e. approximation of the surface, etc... must be performed outside).
  *
  */
-int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,char typchk) {
+int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int8_t indq,int8_t typchk) {
   MMG5_pTetra          pt,pt1;
   MMG5_pxTetra         pxt,pxt1;
   MMG5_xTetra          xt,xts;
   int             i,iel,jel,pel,qel,k,np,nq,*adja,p0,p1;
-  unsigned char   ip,iq,j,voy,voyp,voyq,ia,iav;
-  unsigned char   (ind)[MMG3D_LMAX][2];
+  uint8_t         ip,iq,j,voy,voyp,voyq,ia,iav;
+  uint8_t         (ind)[MMG3D_LMAX][2];
   int             p0_c[MMG3D_LMAX],p1_c[MMG3D_LMAX];
-  char            indar[4][4][2] = {
+  int8_t          indar[4][4][2] = {
     /* indar[ip][iq][0/1]: indices of edges which have iq for extremity but not ip*/
     { {-1,-1}, { 3, 4}, { 3, 5}, { 4, 5} },
     { { 1, 2}, {-1,-1}, { 1, 5}, { 2, 5} },

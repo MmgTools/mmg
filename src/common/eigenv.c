@@ -87,7 +87,7 @@ static int newton3(double p[4],double x[3]) {
   double      delta,fx,dfx,dxx;
   double      fdx0,fdx1,dx0,dx1,x1,x2,tmp,epsA,epsB;
   int         it,it2,n;
-  static char mmgWarn=0;
+  static int8_t mmgWarn=0;
 
   /* coeffs polynomial, a=1 */
   if ( p[3] != 1. ) {
@@ -389,6 +389,9 @@ int MMG5_eigenv(int symmat,double *mat,double lambda[3],double v[3][3]) {
 
   epsd = MG_EIGENV_EPS13;
 
+  w1[0] = w1[1] = w1[2] = 0;
+  w2[0] = w2[1] = w2[2] = 0;
+  w3[0] = w3[1] = w3[2] = 0;
   /* default */
   memcpy(v,Id,9*sizeof(double));
   if ( symmat ) {

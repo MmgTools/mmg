@@ -377,8 +377,8 @@ int MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
   double            ll,m[2],uv[2],o[3],no[3],to[3];
   double            calold,calnew,caltmp,*callist;
   int               k,kel,iel,l,n0,na,nb,ntempa,ntempb,ntempc,nut,nxp;
-  unsigned char     i0,iface,i;
-  static char       mmgErr0=0,mmgErr1=0;
+  uint8_t           i0,iface,i;
+  static int8_t     mmgErr0=0,mmgErr1=0;
 
   step = 0.1;
   nut    = 0;
@@ -793,7 +793,7 @@ int MMG5_movbdyrefpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
   int                   l,iel,ip0,ipa,ipb,iptmpa,iptmpb,ip1,ip2,ip,nxp;
   int                   isloc,j;
   int16_t               tag;
-  unsigned char         i,i0,ie,iface,iea,ieb;
+  uint8_t       i,i0,ie,iface,iea,ieb;
 
   step = 0.1;
   ip1 = ip2 = 0;
@@ -1146,7 +1146,7 @@ int MMG5_movbdynompt_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree
   int               ip0,ip1,ip2,ip,iel,ipa,ipb,l,iptmpa,iptmpb,nxp;
   int               j,isloc;
   int16_t           tag;
-  char              iface,i,i0,iea,ieb,ie;
+  int8_t            iface,i,i0,iea,ieb,ie;
 
   step = 0.1;
   ip1 = ip2 = 0;
@@ -1487,7 +1487,7 @@ int MMG5_movbdynomintpt_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROct
   double            step,ll1old,ll2old,calold,calnew,*callist;
   double            o[3],no[3],to[3];
   int               ip0,ip1,ip2,ip,iel,ipa,l;
-  char              i,i0,ie;
+  int8_t            i,i0,ie;
 
   step = 0.1;
   ip1 = ip2 = 0;
@@ -1623,7 +1623,7 @@ int MMG5_movbdyridpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
   int                  l,iel,ip0,ipa,ipb,iptmpa,iptmpb,ip1,ip2,ip,nxp;
   int                  j,isloc;
   int16_t              tag;
-  unsigned char        i,i0,ie,iface,iea,ieb;
+  uint8_t              i,i0,ie,iface,iea,ieb;
 
   step = 0.1;
   ip1 = ip2 = 0;

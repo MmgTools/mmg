@@ -157,7 +157,7 @@ int MMG2D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria    pt;
   double        rap,rapmin,rapmax,rapavg,med,good;
   int           i,k,iel,ok,ir,imax,nex,his[5];
-  static char   mmgWarn0;
+  static int8_t mmgWarn0;
 
   /* Compute triangle quality*/
   for (k=1; k<=mesh->nt; k++) {

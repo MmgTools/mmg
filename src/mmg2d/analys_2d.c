@@ -34,7 +34,7 @@
 
 #include "mmg2d.h"
 
-extern char ddb;
+extern int8_t ddb;
 
 /**
  * \param mesh pointer toward the mesh
@@ -50,7 +50,7 @@ int MMG2D_setadj(MMG5_pMesh mesh) {
   MMG5_pQuad       pq;
   int              *pile,*adja,ipil,k,kk,ncc,ip1,ip2,nr,nref;
   int16_t          tag;
-  char             i,ii,i1,i2;
+  int8_t           i,ii,i1,i2;
 
   if ( abs(mesh->info.imprim) > 5  || mesh->info.ddebug )
     fprintf(stdout,"  ** SETTING TOPOLOGY\n");
@@ -269,7 +269,7 @@ int MMG2D_singul(MMG5_pMesh mesh, int ref ) {
   MMG5_pPoint         ppt,p1,p2;
   double              ux,uy,uz,vx,vy,vz,dd;
   int                 list[MMG2D_LONMAX+2],listref[MMG2D_LONMAX+2],k,ns,ng,nr,nm,nre,nc;
-  char                i;
+  int8_t              i;
 
   nre = nc = nm = 0;
 
@@ -401,7 +401,7 @@ int MMG2D_norver(MMG5_pMesh mesh, int ref) {
   MMG5_pTria       pt,pt1;
   MMG5_pPoint      ppt;
   int              k,kk,nn,pleft,pright;
-  char             i,ii;
+  int8_t           i,ii;
 
   nn = 0;
 
@@ -507,7 +507,7 @@ int MMG2D_regnor(MMG5_pMesh mesh) {
   MMG5_pPoint           ppt,p1,p2;
   double                *tmp,dd,ps,lm1,lm2,nx,ny,ux,uy,nxt,nyt,res,res0,n[2];
   int                   k,iel,ip1,ip2,nn,it,maxit;
-  char                  i,ier;
+  int8_t                i,ier;
 
   it = 0;
   maxit = 10;

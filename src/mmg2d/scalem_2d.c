@@ -51,7 +51,7 @@ int MMG2D_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
   double         lambda[2],v[2][2];
   int            i,k,iadr;
   int8_t         sethmin,sethmax;
-  static char    mmgWarn0=0, mmgWarn1=0;
+  static int8_t  mmgWarn0=0, mmgWarn1=0;
 
   if ( !MMG5_scale_meshAndSol(mesh,met,sol,&dd,&sethmin,&sethmax) ) {
     return 0;

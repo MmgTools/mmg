@@ -57,7 +57,7 @@ static int MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   double             ntau2,gammasec[3];
   double             c[3],kappa,maxkappa,alpha,hausd,hausd_v;
   int                ilist,list[MMGS_LMAX+2],k,i,iel,idp,init_s;
-  unsigned char      i0,i1,i2;
+  uint8_t            i0,i1,i2;
 
   pt  = &mesh->tria[it];
   idp = pt->v[ip];
@@ -167,15 +167,15 @@ static int MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
 static int MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   MMG5_pTria     pt;
   MMG5_pPoint    p0,p1,p2;
-  MMG5_Bezier   b;
+  MMG5_Bezier    b;
   MMG5_pPar      par;
   int            k,iel,idp,ilist1,ilist2,ilist,*list,list1[MMGS_LMAX+2];
   int            list2[MMGS_LMAX+2],iprid[2],ier,isloc;
   double         *m,isqhmin,isqhmax,*n1,*n2,*n,*t,trot[2],u[2];
   double         r[3][3],lispoi[3*MMGS_LMAX+1],ux,uy,uz,det,bcu[3];
   double         detg,detd;
-  unsigned char  i,i0,i1,i2;
-  static char    mmgWarn0=0;
+  uint8_t        i,i0,i1,i2;
+  static int8_t  mmgWarn0=0;
 
   pt  = &mesh->tria[it];
   idp = pt->v[ip];
@@ -350,8 +350,8 @@ static int MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   double             *m,isqhmin,isqhmax,*n,r[3][3],lispoi[3*MMGS_LMAX+1];
   double             ux,uy,uz,det2d,intm[3],c[3];
   double             tAA[6],tAb[3],hausd;
-  unsigned char      i0,i1,i2;
-  static char        mmgWarn0=0;
+  uint8_t            i0,i1,i2;
+  static int8_t      mmgWarn0=0;
 
   ipref[0] = ipref[1] = 0;
   pt  = &mesh->tria[it];
@@ -588,7 +588,7 @@ static int MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
   double              *m,r[3][3],lispoi[3*MMGS_LMAX+1];
   double              c[3],isqhmin,isqhmax;
   double              tAA[6],tAb[3],hausd;
-  unsigned char       i0;
+  uint8_t             i0;
 
   pt  = &mesh->tria[it];
   idp = pt->v[ip];
@@ -711,8 +711,8 @@ int MMGS_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   double        mm[6];
   int           k;
   int8_t        ismet;
-  char          i;
-  static char   mmgErr=0;
+  int8_t        i;
+  static int8_t mmgErr=0;
 
   if ( !MMG5_defsiz_startingMessage (mesh,met,__func__) ) {
     return 0;

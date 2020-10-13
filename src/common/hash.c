@@ -51,7 +51,7 @@ int MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, MMG5_Hash *hash, int chkISO) {
   MMG5_pTria     pt,pt1;
   MMG5_hedge    *ph;
   int            *adja,k,kk,jel,lel,hmax,dup,nmf,ia,ib;
-  char           i,i1,i2,j,l;
+  int8_t         i,i1,i2,j,l;
   unsigned int   key;
 
   /* adjust hash table params */
@@ -98,7 +98,7 @@ int MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, MMG5_Hash *hash, int chkISO) {
       }
       /* update info about adjacent */
 #ifndef NDEBUG
-      char ok = 0;
+      int8_t ok = 0;
 #endif
       while ( ph->a ) {
         if ( ph->a == ia && ph->b == ib ) {

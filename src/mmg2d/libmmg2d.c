@@ -58,7 +58,7 @@ void MMG2D_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
   MMG5_pPoint ppt;
   int         k,i,iadr;
   double      isqhmin, isqhmax;
-  char        sethmin, sethmax;
+  int8_t      sethmin, sethmax;
 
   assert ( mesh->info.optim || mesh->info.hsiz > 0. );
 

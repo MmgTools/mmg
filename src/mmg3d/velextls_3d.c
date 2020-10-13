@@ -64,7 +64,7 @@ int* MMG5_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
   int            k,n,ip,iel,jel,nlay,npf,ntf,ilist,ilisto,ilistck,vper[4],*list;
   int            *perm,*invperm,*adja;
   int            refdirh,refdirnh;
-  char           i,j,jface;
+  int8_t         i,j,jface;
 
   nlay = 20;
   refdirh = 0;
@@ -361,7 +361,7 @@ int* MMG5_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
 int MMG5_unpackLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int npf,int *invperm) {
   double     *u;
   int        k,ip;
-  char       i;
+  int8_t     i;
 
   u = LS_getSol(lsst);
 

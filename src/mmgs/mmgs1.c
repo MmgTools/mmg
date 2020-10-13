@@ -35,7 +35,7 @@
 #include "mmgs.h"
 
 
-extern char ddb;
+extern int8_t ddb;
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -53,7 +53,7 @@ int MMGS_dichoto(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
   double       o[3][3],p[3][3];
   float        to,tp,t;
   int          i1,i2,ia,ib,ier,it,maxit;
-  char         i,j;
+  int8_t       i,j;
 
   pt = &mesh->tria[k];
   /* get point on surface and along segment for edge split */
@@ -155,7 +155,7 @@ int MMGS_dichoto1b(MMG5_pMesh mesh, MMG5_pSol met, int iel, int ia, int ip) {
   MMG5_pPoint  p0,p1,ppt;
   int          np,nq,it,maxit,i1,i2;
   double       m[3],o[3],tp,to,t;
-  char         ier;
+  int8_t       ier;
 
   pt  = &mesh->tria[iel];
 
@@ -214,8 +214,8 @@ int chkedg(MMG5_pMesh mesh,int iel) {
   double   n[3][3],t[3][3],nt[3],c1[3],c2[3],*n1,*n2,t1[3],t2[3];
   double   ps,ps2,cosn,ux,uy,uz,ll,li,dd,hausd,hmax;
   int      l,isloc;
-  char     i,i1,i2;
-  static char mmgWarn0 = 0, mmgWarn1 = 0;
+  int8_t   i,i1,i2;
+  static int8_t mmgWarn0 = 0, mmgWarn1 = 0;
 
   pt   = &mesh->tria[iel];
   p[0] = &mesh->point[pt->v[0]];
@@ -386,10 +386,10 @@ int chkedg(MMG5_pMesh mesh,int iel) {
   return pt->flag;
 }
 
-static int swpmsh(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
+static int swpmsh(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
   MMG5_pTria    pt;
   int      k,it,ns,nns,maxit;
-  char     i;
+  int8_t   i;
 
   it = nns = 0;
   maxit = 2;
@@ -422,7 +422,7 @@ static int movtri(MMG5_pMesh mesh,MMG5_pSol met,int maxit) {
   MMG5_pTria    pt;
   MMG5_pPoint   ppt;
   int      it,k,ier,base,nm,ns,nnm,list[MMGS_LMAX+2],ilist;
-  char     i;
+  int8_t   i;
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
     fprintf(stdout,"  ** OPTIMIZING MESH\n");
@@ -520,7 +520,7 @@ int MMGS_delPatternPts(MMG5_pMesh mesh,MMG5_Hash hash)
  * Analyze triangles and split if needed
  *
  */
-static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
+static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
   MMG5_pTria    pt;
   MMG5_pPoint   ppt,p1,p2;
   MMG5_Hash    hash;
@@ -528,9 +528,9 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
   MMG5_pxPoint  go;
   double        s,o[3],no[3],to[3],dd,len;
   int           vx[3],i,j,ip,ip1,ip2,ier,k,ns,nc,ni,ic,nt,it;
-  char          i1,i2;
+  int8_t        i1,i2;
   static double uv[3][2] = { {0.5,0.5}, {0.,0.5}, {0.5,0.} };
-  static char   mmgWarn0=0,mmgWarn1=0,mmgWarn2=0,mmgWarn3=0;
+  static int8_t mmgWarn0=0,mmgWarn1=0,mmgWarn2=0,mmgWarn3=0;
 
   if ( !MMG5_hashNew(mesh,&hash,mesh->np,3*mesh->np) ) return -1;
   ns = 0;
@@ -899,7 +899,7 @@ int chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,int i) {
   MMG5_Bezier   b;
   double   s,uv[2],o[3],no[3],to[3];
   int     *adja,jel,ip,ier;
-  char     i1,i2,j,jj,j2;
+  int8_t   i1,i2,j,jj,j2;
 
   if ( mesh->xp > mesh->xpmax-2 )  return 0;
   pt = &mesh->tria[k];
@@ -952,13 +952,13 @@ int chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,int i) {
 }
 
 /* attempt to collapse small edges */
-static int colelt(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
+static int colelt(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
   MMG5_pTria    pt;
   MMG5_pPoint   p1,p2;
   MMG5_pPar     par;
   double        ll,ux,uy,uz,hmin;
   int           list[MMGS_LMAX+2],ilist,k,nc,l,isloc,ier;
-  char          i,i1,i2;
+  int8_t        i,i1,i2;
 
   nc = 0;
   for (k=1; k<=mesh->nt; k++) {
@@ -1056,7 +1056,7 @@ static int adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pPoint   p1,p2;
   double   len,lmax;
   int      ip,k,ns,ier;
-  char     i,i1,i2,imax;
+  int8_t   i,i1,i2,imax;
 
   ns = 0;
   for (k=1; k<=mesh->nt; k++) {
@@ -1131,7 +1131,7 @@ static int adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pPoint   p1,p2;
   double   len;
   int      k,list[MMGS_LMAX+2],ilist,nc,ier;
-  char     i,i1,i2;
+  int8_t   i,i1,i2;
 
   nc = 0;
   for (k=1; k<=mesh->nt; k++) {
@@ -1304,7 +1304,7 @@ static int adptri(MMG5_pMesh mesh,MMG5_pSol met,int* permNodGlob) {
 }
 
 /* analyze tetrahedra and split if needed */
-static int anatri(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
+static int anatri(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
   int     nc,ns,nf,nnc,nns,nnf,it,maxit;
 
   /* analyze tetras : initial splitting */

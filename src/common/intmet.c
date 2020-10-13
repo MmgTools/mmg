@@ -49,8 +49,8 @@
 int MMG5_mmgIntmet33_ani(double *m,double *n,double *mr,double s) {
   int     order;
   double  lambda[3],vp[3][3],mu[3],is[6],isnis[6],mt[9],P[9],dd;
-  char    i;
-  static char mmgWarn=0;
+  int8_t  i;
+  static int8_t mmgWarn=0;
 
   /* Compute inverse of square root of matrix M : is =
    * P*diag(1/sqrt(lambda))*{^t}P */
@@ -487,7 +487,7 @@ int MMG5_interp_iso(double *ma,double *mb,double *mp,double t) {
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
  * \param pt pointer toward the triangle structure.
- * \param i char : edge of the triangle pt
+ * \param i edge of the triangle pt
  * \param s interpolated parameter (comprise between 0 and 1)
  * \param mr computed interpolated metric
  * \return 0 if fail, 1 otherwise.
@@ -495,7 +495,7 @@ int MMG5_interp_iso(double *ma,double *mb,double *mp,double t) {
  * Metric interpolation between points p1 and p2, in tria \a pt at parameter 0
  * <= \a s <= 1 from p1 result is stored in \a mr. edge p1p2 must not be a ridge
  */
-int MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,char i,
+int MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,int8_t i,
                         double s,double mr[6]) {
   MMG5_pPoint    p1,p2;
   MMG5_Bezier    b;
@@ -503,7 +503,7 @@ int MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,char i,
   double         m1old[6],m2old[6],m1[6],m2[6],rbasis[3][3];
   double         *n1,*n2,step,u,r[3][3],dd,ddbn;
   int            ip1,ip2,nstep,l;
-  char           i1,i2;
+  int8_t         i1,i2;
   static int     warn=0;
 
   /* Number of steps for parallel transport */

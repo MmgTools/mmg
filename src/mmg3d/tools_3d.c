@@ -35,20 +35,20 @@
 
 #include "mmg3d.h"
 
-extern char ddb;
+extern int8_t ddb;
 
 /** Return 1 if reference ref is in the br table, 0 otherwise */
 int MMG5_isbr(MMG5_pMesh mesh,int ref) {
   int k;
-  
+
   for(k=0; k<mesh->info.nbr; k++)
     if ( ref == mesh->info.br[k] ) return(1);
-  
+
   return(0);
 }
 
 /** naive (increasing) sorting algorithm, for very small tabs ; permutation is stored in perm */
-inline void MMG5_nsort(int n,double *val,char *perm){
+inline void MMG5_nsort(int n,double *val,int8_t *perm){
     int   i,j,aux;
 
     for (i=0; i<n; i++)  perm[i] = i;
@@ -81,9 +81,9 @@ int MMG5_norface(MMG5_pMesh mesh,int k,int iface,double n[3]) {
     the direct sense with respect to direction n anchored at point ip (ip = global num.):
     return 2 = orientation reversed, 1 otherwise */
 inline int MMG5_directsurfball(MMG5_pMesh mesh, int ip, int *list, int ilist, double n[3]){
-    int             j,aux,iel;
-    double          nt[3],ps;
-    unsigned char   iface;
+    int     j,aux,iel;
+    double  nt[3],ps;
+    uint8_t iface;
 
     iel   = list[0] / 4;
     iface = list[0] % 4;
@@ -105,9 +105,9 @@ inline int MMG5_directsurfball(MMG5_pMesh mesh, int ip, int *list, int ilist, do
     edge (p,q) (nump,q = global num) as edge MMG5_iprv2[ip] of face iface.
     return 2 = orientation reversed, 1 otherwise */
 int MMG5_startedgsurfball(MMG5_pMesh mesh,int nump,int numq,int *list,int ilist) {
-    MMG5_pTetra          pt;
-    int             iel,tmp,l;
-    unsigned char   iface,ip,ipt;
+    MMG5_pTetra pt;
+    int         iel,tmp,l;
+    uint8_t     iface,ip,ipt;
 
     iel = list[0]/4;
     iface = list[0]%4;
@@ -536,7 +536,7 @@ inline int MMG5_BezierNom(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,dou
     MMG5_pPoint      p0,p1;
     double      ux,uy,uz,il,ll,ps,alpha,dd;
     double      t0[3],t1[3],b0[3],b1[3],n0[3],n1[3],bn[3];
-    char        intnom;
+    int8_t      intnom;
 
     p0 = &mesh->point[ip0];
     p1 = &mesh->point[ip1];
@@ -617,7 +617,7 @@ inline int MMG5_BezierNom(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,dou
         memcpy(n0,&(mesh->xpoint[p0->xp].n1[0]),3*sizeof(double));
         memcpy(n1,&(mesh->xpoint[p1->xp].n1[0]),3*sizeof(double));
     }
-  
+
     /* Check for internal non manifold edge */
     intnom = ( mesh->xpoint[p0->xp].nnor ) || ( mesh->xpoint[p1->xp].nnor );
 
@@ -1070,13 +1070,13 @@ int MMG3D_localParamReg(MMG5_pMesh mesh,int ip,int *listv,int ilistv,
 int MMG3D_localParamNm(MMG5_pMesh mesh,int iel,int iface,int ia,
                          double* hausd_ip,double *hmin_ip,double *hmax_ip) {
 
-  MMG5_pTetra  pt;
-  MMG5_pxTetra pxt;
-  MMG5_pPar    par;
-  double       hausd, hmin, hmax;
-  int          l,k,isloc,ifac1,ifac2;
-  int          listv[MMG3D_LMAX+2],ilistv;
-  static char  mmgWarn0;
+  MMG5_pTetra   pt;
+  MMG5_pxTetra  pxt;
+  MMG5_pPar     par;
+  double        hausd, hmin, hmax;
+  int           l,k,isloc,ifac1,ifac2;
+  int           listv[MMG3D_LMAX+2],ilistv;
+  static int8_t mmgWarn0;
 
 
   hausd = mesh->info.hausd;

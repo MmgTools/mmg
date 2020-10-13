@@ -50,7 +50,7 @@ int boulet(MMG5_pMesh mesh,int start,int ip,int *list) {
   MMG5_pTria    pt;
   MMG5_pPoint   ppt;
   int           *adja,k,ilist;
-  char          i,i1,i2;
+  int8_t        i,i1,i2;
 
   pt = &mesh->tria[start];
 
@@ -112,7 +112,7 @@ int boulechknm(MMG5_pMesh mesh,int start,int ip,int *list) {
   MMG5_pTria    pt;
   MMG5_pPoint   ppt;
   int           *adja,k,ilist,base,iel;
-  char          i,i1,i2,ia,iq,voy;
+  int8_t        i,i1,i2,ia,iq,voy;
 
   base = ++mesh->base;
 
@@ -258,11 +258,11 @@ int boulechknm(MMG5_pMesh mesh,int start,int ip,int *list) {
  *
  */
 int bouletrid(MMG5_pMesh mesh,int start,int ip,int *il1,int *l1,int *il2,int *l2,int *ip0,int *ip1) {
-  MMG5_pTria           pt;
-  MMG5_pPoint          ppt;
-  int                  idp,k,kold,*adja,iel,*ilist1,*ilist2,*list1,*list2,aux;
-  unsigned char        i,iold,i1,i2,ipn;
-  double               *n1,*n2,nt[3],ps1,ps2;
+  MMG5_pTria   pt;
+  MMG5_pPoint  ppt;
+  int          idp,k,kold,*adja,iel,*ilist1,*ilist2,*list1,*list2,aux;
+  uint8_t      i,iold,i1,i2,ipn;
+  double       *n1,*n2,nt[3],ps1,ps2;
 
   pt = &mesh->tria[start];
   if ( !MG_EOK(pt) )  return 0;

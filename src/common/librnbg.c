@@ -216,8 +216,8 @@ int MMG5_scotchCall(MMG5_pMesh mesh, MMG5_pSol met,
 {
 
 #ifdef USE_SCOTCH
-  static char mmgWarn  = 0;
-  static char mmgError = 0;
+  static int8_t mmgWarn  = 0;
+  static int8_t mmgError = 0;
 
   /*check enough vertex to renum*/
   if ( mesh->info.renum && (mesh->np/2. > MMG5_BOXSIZE) ) {

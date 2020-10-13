@@ -98,7 +98,7 @@ int MMG5_setadj(MMG5_pMesh mesh){
   int          *adja,*adjb,adji1,adji2,*pile,iad,ipil,ip1,ip2,gen;
   int          k,kk,iel,jel,nvf,nf,nr,nt,nre,nreq,ncc,ned,ref;
   int16_t      tag;
-  char         i,ii,i1,i2,ii1,ii2,voy;
+  int8_t       i,ii,i1,i2,ii1,ii2,voy;
 
   nvf = nf = ncc = ned = 0;
 
@@ -289,7 +289,7 @@ int MMG5_setdhd(MMG5_pMesh mesh) {
   MMG5_pTria    pt,pt1;
   double        n1[3],n2[3],dhd;
   int          *adja,k,kk,ne,nr;
-  char          i,ii,i1,i2;
+  int8_t        i,ii,i1,i2;
 
   ne = nr = 0;
   for (k=1; k<=mesh->nt; k++) {
@@ -353,12 +353,12 @@ int MMG5_setdhd(MMG5_pMesh mesh) {
  *
  */
 int MMG5_chkVertexConnectedDomains(MMG5_pMesh mesh){
-  MMG5_pTetra  pt;
-  MMG5_pxTetra pxt;
-  MMG5_pPoint  ppt;
-  int          k,lists[MMG3D_LMAX+2],listv[MMG3D_LMAX+2],ilists,ilistv,i0,ier;
-  char         i,j;
-  static char  mmgWarn = 0;
+  MMG5_pTetra   pt;
+  MMG5_pxTetra  pxt;
+  MMG5_pPoint   ppt;
+  int           k,lists[MMG3D_LMAX+2],listv[MMG3D_LMAX+2],ilists,ilistv,i0,ier;
+  int8_t        i,j;
+  static int8_t mmgWarn = 0;
 
   for (k=1; k<=mesh->np; k++) {
     ppt = &mesh->point[k];
@@ -427,7 +427,7 @@ int MMG5_singul(MMG5_pMesh mesh) {
   MMG5_pPoint    ppt,p1,p2;
   double         ux,uy,uz,vx,vy,vz,dd;
   int            list[MMG3D_LMAX+2],listref[MMG3D_LMAX+2],k,nc,xp,nr,ns,nre;
-  char           i;
+  int8_t         i;
 
   nre = nc = 0;
   for (k=1; k<=mesh->nt; k++) {
@@ -502,7 +502,7 @@ int MMG5_norver(MMG5_pMesh mesh) {
   MMG5_xPoint    *pxp;
   double         n[3],dd;
   int            *adja,k,kk,ng,nn,nt,nf,nnr;
-  char           i,ii,i1;
+  int8_t         i,ii,i1;
 
   /* recomputation of normals only if mesh->xpoint has been freed */
   if ( mesh->xpoint ) {
@@ -672,10 +672,10 @@ int MMG3D_nmgeom(MMG5_pMesh mesh){
   MMG5_pTetra     pt;
   MMG5_pPoint     p0;
   MMG5_pxPoint    pxp;
-  int        k,base;
-  int        *adja;
-  double     n[3],t[3];
-  char       i,j,ip,ier;
+  int             k,base;
+  int             *adja;
+  double          n[3],t[3];
+  int8_t          i,j,ip,ier;
 
   base = ++mesh->base;
   for (k=1; k<=mesh->ne; k++) {

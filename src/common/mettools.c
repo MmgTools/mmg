@@ -254,7 +254,7 @@ int MMG5_buildridmetnor(MMG5_pMesh mesh,MMG5_pSol met,int np0,double nt[3],
 int MMG5_intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr) {
   double  det,imn[4],dd,sqDelta,trimn,lambda[2],vp0[2],vp1[2],dm[2],dn[2],vnorm,d0,d1,ip[4];
   double  isqhmin,isqhmax;
-  static char mmgWarn = 0, mmgWarn1 = 0;
+  static int8_t mmgWarn = 0, mmgWarn1 = 0;
 
   isqhmin  = 1.0 / (mesh->info.hmin*mesh->info.hmin);
   isqhmax  = 1.0 / (mesh->info.hmax*mesh->info.hmax);
@@ -448,8 +448,8 @@ int MMG5_mmgIntextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6],
   double              lambda[3],vp[3][3];
   double              *m,*n1,*n2,*t,r[3][3],mrot[6],mr[3],mtan[3],metan[3];
   int                 order;
-  char                i;
-  static char         mmgWarn=0, mmgWarn1=0, mmgWarn2=0;
+  int8_t              i;
+  static int8_t       mmgWarn=0, mmgWarn1=0, mmgWarn2=0;
 
   isqhmin = 1.0 / (mesh->info.hmin*mesh->info.hmin);
   isqhmax = 1.0 / (mesh->info.hmax*mesh->info.hmax);

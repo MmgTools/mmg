@@ -905,7 +905,7 @@ int MMG2D_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
   int         iswp,ier,dim,meshDim;
   int         j,k,ver,bin,np,nsols,*type;
   char        data[16];
-  static char mmgWarn = 0;
+  static int8_t mmgWarn = 0;
 
   /** Read the file header */
   meshDim = 2;
@@ -1588,7 +1588,7 @@ int MMG2D_saveAllSols(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename) {
 }
 
 /* Custom version of Savemesh for debugging purpose */
-int MMG2D_savemesh_db(MMG5_pMesh mesh,char *filename,char pack) {
+int MMG2D_savemesh_db(MMG5_pMesh mesh,char *filename,int8_t pack) {
   MMG5_pTria         pt;
   MMG5_pEdge         pa;
   MMG5_pPoint        ppt,p0,p1,p2;
@@ -1681,7 +1681,7 @@ int MMG2D_savemesh_db(MMG5_pMesh mesh,char *filename,char pack) {
 }
 
 /* Custom version of Savemet for debugging purpose */
-int MMG2D_savemet_db(MMG5_pMesh mesh,MMG5_pSol met,char *filename,char pack) {
+int MMG2D_savemet_db(MMG5_pMesh mesh,MMG5_pSol met,char *filename,int8_t pack) {
   MMG5_pPoint        ppt;
   int                k,np;
   char               *ptr,typ=0,*data;
@@ -1741,7 +1741,7 @@ int MMG2D_savemet_db(MMG5_pMesh mesh,MMG5_pSol met,char *filename,char pack) {
 }
 
 /* Save normal vector field for debugging purpose */
-int MMG2D_savenor_db(MMG5_pMesh mesh,char *filename,char pack) {
+int MMG2D_savenor_db(MMG5_pMesh mesh,char *filename,int8_t pack) {
   MMG5_pPoint        ppt;
   int                k,np;
   char               *ptr,*data;
@@ -1796,7 +1796,7 @@ int MMG2D_savenor_db(MMG5_pMesh mesh,char *filename,char pack) {
 }
 
 /* Save displacement field for debugging purpose */
-int MMG2D_savedisp_db(MMG5_pMesh mesh,MMG5_pSol disp,char *filename,char pack) {
+int MMG2D_savedisp_db(MMG5_pMesh mesh,MMG5_pSol disp,char *filename,int8_t pack) {
   MMG5_pPoint        ppt;
   int                k,np;
   char               *ptr,*data;

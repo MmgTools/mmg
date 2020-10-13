@@ -52,10 +52,10 @@
  */
 static inline
 double MMG5_lenEdg(MMG5_pMesh mesh,int np0,int np1,
-                    double *m0,double *m1,char isedg) {
+                    double *m0,double *m1,int8_t isedg) {
   MMG5_pPoint   p0,p1;
   double        gammaprim0[3],gammaprim1[3],t[3],*n1,*n2,ux,uy,uz,ps1,ps2,l0,l1;
-  static char   mmgWarn=0;
+  static int8_t mmgWarn=0;
 
   p0 = &mesh->point[np0];
   p1 = &mesh->point[np1];
@@ -195,10 +195,10 @@ double MMG5_lenEdg(MMG5_pMesh mesh,int np0,int np1,
  *
  */
 static inline
-double MMG5_lenSurfEdg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,char isedg) {
+double MMG5_lenSurfEdg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,int8_t isedg) {
   MMG5_pPoint   p0,p1;
   double        *m0,*m1,met0[6],met1[6],ux,uy,uz,rbasis[3][3];
-  static char   mmgWarn = 0;
+  static int8_t mmgWarn = 0;
 
   p0 = &mesh->point[np0];
   p1 = &mesh->point[np1];
@@ -264,7 +264,7 @@ double MMG5_lenSurfEdg_ani(MMG5_pMesh mesh,MMG5_pSol met,int np0,int np1,char is
  */
 static inline
 double MMG5_lenSurfEdg33_ani(MMG5_pMesh mesh,MMG5_pSol met,
-                              int np0,int np1,char isedg) {
+                              int np0,int np1,int8_t isedg) {
   double        *m0,*m1;
 
   /* Set metrics */
@@ -288,7 +288,7 @@ double MMG5_lenSurfEdg33_ani(MMG5_pMesh mesh,MMG5_pSol met,
  *
  */
 static
-inline double MMG5_lenSurfEdg_iso(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2, char isedg) {
+inline double MMG5_lenSurfEdg_iso(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2, int8_t isedg) {
   MMG5_pPoint   p1,p2;
   double   h1,h2,l,r,len;
 

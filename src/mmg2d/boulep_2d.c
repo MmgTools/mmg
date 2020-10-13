@@ -23,8 +23,8 @@
 #include "mmg2d.h"
 
 
-static unsigned char inxt[3]  = {1,2,0};
-static unsigned char iprev[3] = {2,0,1};
+static uint8_t inxt[3]  = {1,2,0};
+static uint8_t iprev[3] = {2,0,1};
 
 /* Function boulep should be eventually removed (after all its occurences are removed) */
 /* Find all triangles sharing P
@@ -109,13 +109,13 @@ int MMG2D_boulep(MMG5_pMesh mesh, int ifirst, int iploc, int * list) {
  * of ip in kk.
  *
  */
-int MMG2D_boulen(MMG5_pMesh mesh, int start,char ip, int *pleft, int *pright, double *nn) {
+int MMG2D_boulen(MMG5_pMesh mesh, int start,int8_t ip, int *pleft, int *pright, double *nn) {
   MMG5_pTria        pt;
   MMG5_pPoint       p1,p2;
   double            ux,uy,dd,n1[2],n2[2];
   int               *adja,k,kk,refs;
   int8_t            notedg;
-  char              i,ii,i1,i2;
+  int8_t            i,ii,i1,i2;
 
   /* First travel of the ball of ip; initialization */
   kk = start;
@@ -226,9 +226,9 @@ int MMG2D_boulen(MMG5_pMesh mesh, int start,char ip, int *pleft, int *pright, do
  * crossing ridge.
  *
  */
-int MMG2D_boulet(MMG5_pMesh mesh,int start,char ip,int *list) {
+int MMG2D_boulet(MMG5_pMesh mesh,int start,int8_t ip,int *list) {
   int           *adja,k,ilist;
-  char          i,i1,i2;
+  int8_t        i,i1,i2;
 
   ilist = 0;
 
@@ -279,11 +279,11 @@ int MMG2D_boulet(MMG5_pMesh mesh,int start,char ip,int *list) {
  * \a ip2 with their indices.
  *
  */
-int MMG2D_bouleendp(MMG5_pMesh mesh,int start,char ip,int *ip1,int *ip2) {
+int MMG2D_bouleendp(MMG5_pMesh mesh,int start,int8_t ip,int *ip1,int *ip2) {
   MMG5_pTria    pt;
   int           *adja,k;
-  char          i,i1,i2;
-  static char   mmgWarn0=0;
+  int8_t        i,i1,i2;
+  static int8_t mmgWarn0=0;
 
   *ip1 = 0;
   *ip2 = 0;

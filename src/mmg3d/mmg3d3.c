@@ -38,15 +38,15 @@
 
 #define MMG5_DEGTOL  1.e-1
 
-extern char  ddb;
+extern int8_t  ddb;
 
 /** Calculate an estimate of the average (isotropic) length of edges in the mesh */
 double MMG5_estavglen(MMG5_pMesh mesh) {
-  MMG5_pTetra    pt;
-  MMG5_pPoint    p1,p2;
-  int       k,na;
-  double    len,lent,dna;
-  char      i,i1,i2;
+  MMG5_pTetra pt;
+  MMG5_pPoint p1,p2;
+  int         k,na;
+  double      len,lent,dna;
+  int8_t      i,i1,i2;
 
   na = 0;
   lent = 0.0;
@@ -79,7 +79,7 @@ double MMG5_estavglen(MMG5_pMesh mesh) {
 /** Interpolate displacement between v1 and v2 at intermediate position 0<=t<=1 */
 static
 inline int MMG5_intdispvol(double *v1, double *v2, double *vp, double t) {
-  char i;
+  int8_t i;
 
   for(i=0; i<3; i++)
     vp[i] = (1.0-t)*v1[i] + t*v2[i];
@@ -100,14 +100,14 @@ inline int MMG5_intdispvol(double *v1, double *v2, double *vp, double t) {
  *
  */
 static int MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itdeg, int* warn) {
-  MMG5_pTetra  pt;
-  MMG5_pxTetra pxt;
-  MMG5_pPoint  p0,p1;
-  double       len,lmax,o[3],hma2;
-  double      *m1,*m2,*mp;
-  int          k,ip,ip1,ip2,list[MMG3D_LMAX+2],ilist,ns,ier,iadr,src;
-  char         imax,i,i1,i2;
-  static char  mmgWarn0 = 0;
+  MMG5_pTetra    pt;
+  MMG5_pxTetra   pxt;
+  MMG5_pPoint    p0,p1;
+  double         len,lmax,o[3],hma2;
+  double         *m1,*m2,*mp;
+  int            k,ip,ip1,ip2,list[MMG3D_LMAX+2],ilist,ns,ier,iadr,src;
+  int8_t         imax,i,i1,i2;
+  static int8_t  mmgWarn0 = 0;
 
   *warn=0;
   ns = 0;
@@ -242,10 +242,10 @@ static int MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itdeg, i
  *
  */
 int MMG5_swptetlag(MMG5_pMesh mesh,MMG5_pSol met,double crit,MMG3D_pPROctree PROctree,int itdeg) {
-  MMG5_pTetra   pt;
-  MMG5_pxTetra  pxt;
-  int      list[MMG3D_LMAX+2],ilist,k,it,nconf,maxit,ns,nns,ier;
-  char     i;
+  MMG5_pTetra  pt;
+  MMG5_pxTetra pxt;
+  int          list[MMG3D_LMAX+2],ilist,k,it,nconf,maxit,ns,nns,ier;
+  int8_t       i;
 
   maxit = 2;
   it = nns = 0;
@@ -291,10 +291,10 @@ int MMG5_swptetlag(MMG5_pMesh mesh,MMG5_pSol met,double crit,MMG3D_pPROctree PRO
  *
  */
 int MMG5_movtetlag(MMG5_pMesh mesh,MMG5_pSol met, int itdeg) {
-  MMG5_pTetra        pt;
-  MMG5_pPoint        ppt;
+  MMG5_pTetra   pt;
+  MMG5_pPoint   ppt;
   int           k,ier,nm,nnm,listv[MMG3D_LMAX+2],ilistv,it;
-  unsigned char i,base;
+  uint8_t       i,base;
   int           maxit;
 
   base = 1;
@@ -349,12 +349,12 @@ int MMG5_movtetlag(MMG5_pMesh mesh,MMG5_pSol met, int itdeg) {
  *
  */
 static int MMG5_coltetlag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
-  MMG5_pTetra     pt;
-  MMG5_pPoint     p0,p1;
-  double     ll,ux,uy,uz,hmi2;
-  int        k,nc,list[MMG3D_LMAX+2],ilist,base,nnm;
-  int        ier;
-  char       i,j,ip,iq,isnm;
+  MMG5_pTetra pt;
+  MMG5_pPoint p0,p1;
+  double      ll,ux,uy,uz,hmi2;
+  int         k,nc,list[MMG3D_LMAX+2],ilist,base,nnm;
+  int         ier;
+  int8_t      i,j,ip,iq,isnm;
 
   nc = nnm = 0;
   hmi2 = mesh->info.hmin*mesh->info.hmin;
@@ -433,7 +433,7 @@ int MMG5_chkmovmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t,int *tetIdx) {
   MMG5_pPoint  ppt;
   double       *v,c[4][3],tau;
   int          k,np,idx;
-  char         i,j;
+  int8_t       i,j;
 
   /* Pseudo time-step = fraction of disp to perform */
   tau = (double)t / MMG3D_SHORTMAX;
@@ -476,7 +476,7 @@ int MMG5_chkmovmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t,int *tetIdx) {
 short MMG5_dikmov(MMG5_pMesh mesh,MMG5_pSol disp,short *lastt) {
   int     it,maxit;
   short   t,tmin,tmax;
-  char    ier;
+  int8_t  ier;
 
   maxit = 200;
   it = 0;
@@ -532,7 +532,7 @@ int MMG5_dispmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t,int itdeg) {
   MMG5_pPoint   ppt;
   double        *v,tau,ctau,c[4][3],ocal,ncal;
   int           k,np;
-  char          i,j;
+  int8_t        i,j;
 
   tau = (double)t /MMG3D_SHORTMAX;
   ctau = 1.0 - tau;
@@ -629,7 +629,7 @@ int MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int **invalidTets) 
   int     itdc,itmn,maxitmn,maxitdc,nspl,ns,nm,nc,iit,k,warn;
   int     nns,nnm,nnc,nnspl,nnns,nnnm,nnnc,nnnspl,ninvalidTets;
   short   t,lastt;
-  char    ier;
+  int8_t  ier;
 
   tau = 0.0;
   maxitmn = 10;

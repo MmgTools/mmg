@@ -115,7 +115,7 @@ int MMGS_assignEdge(MMG5_pMesh mesh) {
   MMG5_pTria  pt;
   MMG5_pEdge  pa;
   int         k,ia;
-  char        i,i1,i2;
+  int8_t      i,i1,i2;
 
   if ( !mesh->na ) return 1;
 

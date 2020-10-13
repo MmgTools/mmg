@@ -152,6 +152,7 @@ int MMGS_Init_mesh_var( va_list argptr ) {
   int            meshCount;
 
   meshCount = 0;
+  mesh = NULL;
   sol = ls = NULL;
 
 

@@ -35,10 +35,10 @@
 
 /* Interpolation of isotropic metric met along edge i of triangle k, according to parameter s;
    ip = index of the new point */
-int MMG2D_intmet_iso(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s) {
+int MMG2D_intmet_iso(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t i,int ip,double s) {
   MMG5_pTria  pt;
   int         ip1,ip2;
-  char        i1,i2;
+  int8_t      i1,i2;
   
   pt  = &mesh->tria[k];
   i1  = MMG5_inxt2[i];
@@ -52,9 +52,9 @@ int MMG2D_intmet_iso(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s)
 
 /* Interpolation of metrics m and n according to parameter s; result is stored in mr. A simultaneous reduction of both matrices is performed and the sizes are interpolated. */
 int MMG5_interpmet22(MMG5_pMesh mesh,double *m,double *n,double s,double *mr) {
-  double      det,imn[4],dd,den,sqDelta,trimn,lambda[2],vp[2][2],dm[2];
-  double      dn[2],vnorm,d0,d1,ip[4];
-  static char mmgWarn0=0,mmgWarn1=0;
+  double        det,imn[4],dd,den,sqDelta,trimn,lambda[2],vp[2][2],dm[2];
+  double        dn[2],vnorm,d0,d1,ip[4];
+  static int8_t mmgWarn0=0,mmgWarn1=0;
 
   /* Compute imn = M^{-1}N */
   det = m[0]*m[2] - m[1]*m[1];
@@ -206,12 +206,15 @@ int MMG5_interpmet22(MMG5_pMesh mesh,double *m,double *n,double s,double *mr) {
 
 /* Interpolation of anisotropic metric met along edge i of triangle k, according to parameter s;
  ip = index of the new point */
-int MMG2D_intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int ip,double s) {
+int MMG2D_intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t i,int ip,double s) {
   MMG5_pTria     pt;
-  double         *m1,*m2,*mr,det;
+  double         *m1,*m2,*mr;
+#ifndef NDEBUG
+  double         det;
+#endif
   int            ip1,ip2;
-  char           i1,i2;
-  static char    mmgWarn=0;
+  int8_t         i1,i2;
+  static int8_t  mmgWarn=0;
 
   pt = &mesh->tria[k];
   i1 = MMG5_inxt2[i];

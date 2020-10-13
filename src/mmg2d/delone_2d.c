@@ -149,7 +149,7 @@ int MMG2D_cavity(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list) {
   MMG5_pPoint     ppt;
   double          c[2],crit,dd,eps,rad,ct[6];
   int             *adja,*adjb,adj,adi,voy,i,j,ilist,ipil,jel,iadr,base,nei[3],l,tref; //isreq;
-  static char     mmgWarn0=0;
+  static int8_t   mmgWarn0=0;
 
   ppt = &mesh->point[ip];
   base  = ++mesh->base;
@@ -251,9 +251,9 @@ int MMG2D_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
   int             tref,ielnum[3*MMG2D_LONMAX+1];
   int8_t          ier;
   short           i1;
-  char            alert;
+  int8_t          alert;
   MMG5_Hash       hedg;
-  static char     mmgWarn0=0,mmgWarn1=0;
+  static int8_t   mmgWarn0=0,mmgWarn1=0;
 
   /* Reset tagdel field */
   for (k=1; k<ilist; k++)

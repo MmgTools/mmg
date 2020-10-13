@@ -62,9 +62,9 @@ int delref(MMG5_pMesh mesh) {
  *
  */
 int setref(MMG5_pMesh mesh,int start,int ref,int putreq) {
-  MMG5_pTria      pt,pt1;
+  MMG5_pTria pt,pt1;
   int        *list,*adja,cur,base,k,iel,jel,ilist;
-  char       j,voy;
+  int8_t     j,voy;
 
   ilist = cur = 0;
   MMG5_SAFE_CALLOC(list,mesh->nt+1,int,return 0);

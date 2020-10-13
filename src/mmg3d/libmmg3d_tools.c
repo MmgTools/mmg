@@ -39,20 +39,20 @@ void MMG3D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
     if ( (!met->m) && (!mesh->info.optim) && mesh->info.hsiz<=0. ) {
       MMG5_caltet          = MMG5_caltet_iso;
       MMG5_caltri          = MMG5_caltri_iso;
-      MMG5_lenedg         = MMG5_lenedg_iso;
+      MMG5_lenedg          = MMG5_lenedg_iso;
       MMG3D_lenedgCoor     = MMG5_lenedgCoor_iso;
-      MMG5_lenSurfEdg     = MMG5_lenSurfEdg_iso;
+      MMG5_lenSurfEdg      = MMG5_lenSurfEdg_iso;
     }
     else {
-      MMG5_caltet         = MMG5_caltet_ani;
-      MMG5_caltri         = MMG5_caltri_ani;
-      MMG5_lenedg         = MMG5_lenedg_ani;
+      MMG5_caltet          = MMG5_caltet_ani;
+      MMG5_caltri          = MMG5_caltri_ani;
+      MMG5_lenedg          = MMG5_lenedg_ani;
       MMG3D_lenedgCoor     = MMG5_lenedgCoor_ani;
-      MMG5_lenSurfEdg     = MMG5_lenSurfEdg_ani;
+      MMG5_lenSurfEdg      = MMG5_lenSurfEdg_ani;
     }
-    MMG5_intmet         = MMG5_intmet_ani;
-    MMG5_lenedgspl      = MMG5_lenedg_ani;
-    MMG5_movintpt       = MMG5_movintpt_ani;
+    MMG5_intmet          = MMG5_intmet_ani;
+    MMG5_lenedgspl       = MMG5_lenedg_ani;
+    MMG5_movintpt        = MMG5_movintpt_ani;
     MMG5_movbdyregpt     = MMG5_movbdyregpt_ani;
     MMG5_movbdyrefpt     = MMG5_movbdyrefpt_ani;
     MMG5_movbdynompt     = MMG5_movbdynompt_ani;
@@ -63,8 +63,8 @@ void MMG3D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
     MMG3D_gradsiz        = MMG3D_gradsiz_ani;
     MMG3D_gradsizreq     = MMG3D_gradsizreq_ani;
 #ifndef PATTERN
-    MMG5_cavity         = MMG5_cavity_ani;
-    MMG3D_PROctreein      = MMG3D_PROctreein_ani;
+    MMG5_cavity          = MMG5_cavity_ani;
+    MMG3D_PROctreein     = MMG3D_PROctreein_ani;
 #endif
   }
   else {
@@ -550,8 +550,8 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
 }
 
 int MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
-  float       fp1,fp2,hausd;
-  int         ref,i,j,ret,npar,nbr,br,rin,rex,split;
+  float      fp1,fp2,hausd;
+  int        ref,i,j,ret,npar,nbr,br,rin,rex,split;
   char       *ptr,buf[256],data[256];
   FILE       *in;
   fpos_t     position;
@@ -957,7 +957,7 @@ void MMG3D_destockOptions(MMG5_pMesh mesh, MMG5_Info *info) {
 }
 
 int MMG3D_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol,double critmin, double lmin,
-                    double lmax, int *eltab,char metRidTyp) {
+                    double lmax, int *eltab,int8_t metRidTyp) {
 
   mytime    ctim[TIMEMAX];
   int       ier;
@@ -1052,7 +1052,7 @@ int MMG3D_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol,double critmin,
 }
 
 void MMG3D_searchqua(MMG5_pMesh mesh,MMG5_pSol met,double critmin, int *eltab,
-                    char metRidTyp) {
+                    int8_t metRidTyp) {
   MMG5_pTetra   pt;
   double   rap;
   int      k;
@@ -1144,12 +1144,12 @@ int MMG3D_Get_tetsFromTria(MMG5_pMesh mesh, int ktri, int ktet[2], int iface[2])
 
 
 int MMG3D_searchlen(MMG5_pMesh mesh, MMG5_pSol met, double lmin,
-                   double lmax, int *eltab,char metRidTyp) {
-  MMG5_pTetra          pt;
- MMG5_Hash           hash;
-  double          len;
-  int             k,np,nq;
-  char            ia,i0,i1,ier;
+                    double lmax, int *eltab,int8_t metRidTyp) {
+  MMG5_pTetra pt;
+  MMG5_Hash   hash;
+  double      len;
+  int         k,np,nq;
+  int8_t      ia,i0,i1,ier;
 
   /* Hash all edges in the mesh */
   if ( !MMG5_hashNew(mesh,&hash,mesh->np,7*mesh->np) )  return 0;

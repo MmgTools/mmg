@@ -203,7 +203,7 @@ void MMG5_mmgFree_names(MMG5_pMesh mesh, MMG5_pSol met);
  * \Remark not for extern users.
  *
  */
-extern int MMG5_Set_defaultTruncatureSizes(MMG5_pMesh mesh,char sethmin,char sethmax);
+extern int MMG5_Set_defaultTruncatureSizes(MMG5_pMesh mesh,int8_t sethmin,int8_t sethmax);
 
 /**
  * \param mesh pointer toward the mesh structure.

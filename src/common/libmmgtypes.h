@@ -230,7 +230,7 @@ typedef struct {
   double   hmax; /*!< maximal size for edges */
   double   hausd; /*!< Hausdorff value */
   int      ref; /*!< Reference value */
-  char     elt; /*!< Element type */
+  int8_t   elt; /*!< Element type */
 } MMG5_Par; typedef MMG5_Par * MMG5_pPar;
 
 /**
@@ -252,7 +252,7 @@ typedef struct {
   int      s;
   int16_t  tag; /*!< Contains binary flags : if \f$tag=23=16+4+2+1\f$, then
                   the point is \a MG_REF, \a MG_GEO, \a MG_REQ and \a MG_BDY */
-  char     tagdel; /*!< Tag for delaunay */
+  int8_t   tagdel; /*!< Tag for delaunay */
 } MMG5_Point;
 typedef MMG5_Point * MMG5_pPoint;
 
@@ -263,7 +263,7 @@ typedef MMG5_Point * MMG5_pPoint;
 typedef struct {
   double   n1[3],n2[3]; /*!< Normals at boundary vertex;
                           n1!=n2 if the vertex belong to a ridge */
-  char     nnor; /* By default 0; 1 if no normal available (internal NOM point) */
+  int8_t   nnor; /* By default 0; 1 if no normal available (internal NOM point) */
 } MMG5_xPoint;
 typedef MMG5_xPoint * MMG5_pxPoint;
 
@@ -393,7 +393,7 @@ typedef struct {
                       \f$i^{th}\f$ face of the tetrahedron */
   int16_t  tag[6]; /*!< tag[i] contains the tag associated to the
                      \f$i^{th}\f$ edge of the tetrahedron */
-  char     ori; /*!< Orientation of the triangles of the tetrahedron:
+  int8_t   ori; /*!< Orientation of the triangles of the tetrahedron:
                   the $\f$i^{th}\f$ bit of ori is set to 0 when the
                   \f$i^{th}\f$ face is bad orientated */
 } MMG5_xTetra;
@@ -435,7 +435,7 @@ typedef struct {
   int      flag;
   int      xpr; /*!< Index of the surface \ref MMG5_xPrism associated to
                   the prism*/
-  char     tag;
+  int8_t   tag;
 } MMG5_Prism;
 typedef MMG5_Prism * MMG5_pPrism;
 
@@ -462,8 +462,8 @@ typedef MMG5_xPrism * MMG5_pxPrism;
  * \brief To store user-defined references in the mesh (useful in LS mode)
  */
 typedef struct {
-  char dospl;
-  int  ref,rin,rex;
+  int8_t dospl;
+  int    ref,rin,rex;
 } MMG5_Mat;
 typedef MMG5_Mat * MMG5_pMat;
 
@@ -483,22 +483,22 @@ typedef struct {
   int           nmati,nmat; /*!< number of materials in ls multimat mode */
   int           imprim; /*!< verbosity level */
   int           nsd; /*!< index of subdomain to save (0 by default == all subdomains are saved) */
-  char          nreg; /*!< normal regularization */
-  char          ddebug; /*!< debug mode if 1 */
-  char          badkal; /*!< 1 if the mesh contains a very bad element */
-  char          iso; /*!< level-set discretization mode */
-  char          setfem; /*!< Enforce finite element mesh (try to avoid edges
+  int8_t        nreg; /*!< normal regularization */
+  int8_t        ddebug; /*!< debug mode if 1 */
+  int8_t        badkal; /*!< 1 if the mesh contains a very bad element */
+  int8_t        iso; /*!< level-set discretization mode */
+  int8_t        setfem; /*!< Enforce finite element mesh (try to avoid edges
                       * connecting 2 bdy points and tet with more than 1 bdy
                       * face) */
-  char          fem; /*!< internal value for fem / no fem mesh output */
-  char          lag; /*!< lagrangian mode */
-  char          parTyp; /*!< Contains binary flags to say which kind of local
+  int8_t        fem; /*!< internal value for fem / no fem mesh output */
+  int8_t        lag; /*!< lagrangian mode */
+  int8_t        parTyp; /*!< Contains binary flags to say which kind of local
                           param are setted: if \f$tag = 1+2+4\f$ then the point
                           is \a MG_Vert, MG_Tria and MG_Tetra */
-  char          sethmin; /*!< 1 if user set hmin, 0 otherwise (needed for multiple library calls) */
-  char          sethmax; /*!< 1 if user set hmin, 0 otherwise (needed for multiple library calls) */
-  unsigned char optim, optimLES, noinsert, noswap, nomove, nosurf, nosizreq;
-  unsigned char metRidTyp; /*!< 0 for a classical storage of the aniso metric at ridge, 1 for the Mmg storage (modified by defsiz) */
+  int8_t        sethmin; /*!< 1 if user set hmin, 0 otherwise (needed for multiple library calls) */
+  int8_t        sethmax; /*!< 1 if user set hmin, 0 otherwise (needed for multiple library calls) */
+  uint8_t optim, optimLES, noinsert, noswap, nomove, nosurf, nosizreq;
+  uint8_t metRidTyp; /*!< 0 for a classical storage of the aniso metric at ridge, 1 for the Mmg storage (modified by defsiz) */
   MMG5_pMat     mat;
 } MMG5_Info;
 
@@ -597,8 +597,8 @@ typedef struct {
   MMG5_pEdge     edge; /*!< Pointer toward the \ref MMG5_Edge structure */
   MMG5_HGeom     htab; /*!< \ref MMG5_HGeom structure */
   MMG5_Info      info; /*!< \ref MMG5_Info structure */
-  char     *namein; /*!< Input mesh name */
-  char     *nameout; /*!< Output mesh name */
+  char           *namein; /*!< Input mesh name */
+  char           *nameout; /*!< Output mesh name */
 
 } MMG5_Mesh;
 typedef MMG5_Mesh  * MMG5_pMesh;

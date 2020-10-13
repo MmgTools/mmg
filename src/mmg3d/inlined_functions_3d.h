@@ -94,8 +94,8 @@ static
 inline double MMG5_lenedg33_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
                                  MMG5_pTetra pt)
 {
-  int ip1,ip2;
-  char isedg;
+  int    ip1,ip2;
+  int8_t isedg;
 
   ip1 = pt->v[MMG5_iare[ia][0]];
   ip2 = pt->v[MMG5_iare[ia][1]];
@@ -200,8 +200,8 @@ static
 inline double MMG5_lenedg_ani(MMG5_pMesh mesh ,MMG5_pSol met, int ia,
                                MMG5_pTetra pt)
 {
-  int ip1,ip2;
-  char isedg;
+  int    ip1,ip2;
+  int8_t isedg;
 
   ip1 = pt->v[MMG5_iare[ia][0]];
   ip2 = pt->v[MMG5_iare[ia][1]];

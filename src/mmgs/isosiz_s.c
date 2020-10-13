@@ -55,7 +55,7 @@
  */
 static inline
 int MMGS_sum_reqEdgeLengthsAtPoint(MMG5_pMesh mesh,MMG5_pSol met,MMG5_Hash *hash,
-                                  MMG5_pTria pt,char i) {
+                                  MMG5_pTria pt,int8_t i) {
   int         ip0,ip1;
 
   ip0 = pt->v[MMG5_inxt2[i]];
@@ -144,7 +144,7 @@ int MMGS_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   double      ps,ps2,ux,uy,uz,ll,l,lm,dd,M1,M2,hausd,hmin,hmax;
   int         k,j,ip1,ip2,isloc;
   int8_t      ismet;
-  char        i,i1,i2;
+  int8_t      i,i1,i2;
 
   if ( !MMG5_defsiz_startingMessage (mesh,met,__func__) ) {
     return 0;

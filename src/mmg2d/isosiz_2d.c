@@ -47,7 +47,7 @@
  * we have processed this extremities.
  *
  */
-int MMG2D_sum_reqEdgeLengthsAtPoint(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,char i) {
+int MMG2D_sum_reqEdgeLengthsAtPoint(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,int8_t i) {
   int         ip0,ip1;
 
   ip0 = pt->v[MMG5_iprv2[i]];
@@ -128,14 +128,14 @@ return 1;
  *
  */
 int MMG2D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
-  MMG5_pTria       pt;
-  MMG5_pPoint      p0,p1,p2;
-  MMG5_pPar        ppa;
-  double           t1[2],t2[2],b1[2],b2[2],gpp1[2],gpp2[2],pv,M1,M2;
-  double           ps1,ps2,ux,uy,ll,li,lm,hmax,hausd,hmin,lhmax,lhausd;
-  int              k,l,ip,ip1,ip2;
-  int8_t           ismet;
-  unsigned char    i,i1,i2;
+  MMG5_pTria  pt;
+  MMG5_pPoint p0,p1,p2;
+  MMG5_pPar   ppa;
+  double      t1[2],t2[2],b1[2],b2[2],gpp1[2],gpp2[2],pv,M1,M2;
+  double      ps1,ps2,ux,uy,ll,li,lm,hmax,hausd,hmin,lhmax,lhausd;
+  int         k,l,ip,ip1,ip2;
+  int8_t      ismet;
+  uint8_t     i,i1,i2;
 
   if ( !MMG5_defsiz_startingMessage (mesh,met,__func__) ) {
     return 0;

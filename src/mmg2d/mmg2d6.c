@@ -71,7 +71,7 @@ double MMG2D_vfrac(MMG5_pMesh mesh,MMG5_pSol sol,int k,int pm) {
   MMG5_pPoint   ppt[3];
   double        v[3],vfp,vfm,lam,area,eps,o1[2],o2[2];
   int           ip[3],nplus,nminus,nzero;
-  char          i,i0,i1,i2,imin1,iplus1,iz;
+  int8_t        i,i0,i1,i2,imin1,iplus1,iz;
 
   eps = MMG5_EPS*MMG5_EPS;
   pt = &mesh->tria[k];
@@ -192,7 +192,7 @@ int MMG2D_resetRef(MMG5_pMesh mesh) {
   MMG5_pTria      pt;
   MMG5_pPoint     p0;
   int             k,ref;
-  char            i;
+  int8_t          i;
 
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
@@ -218,17 +218,17 @@ int MMG2D_resetRef(MMG5_pMesh mesh) {
 
 /* Check whether snapping the value of vertex i of k to 0 exactly leads to a non manifold situation
  assumption: the triangle k has vertex i with value 0 and the other two with changing values */
-int MMG2D_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, int start, char istart) {
+int MMG2D_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, int start, int8_t istart) {
   MMG5_pTria       pt;
   double           v1, v2;
   int              *adja,k,ip1,ip2,end1,refstart;
-  char             i,i1,smsgn;
-  static char      mmgWarn=0;
-  
+  int8_t           i,i1,smsgn;
+  static int8_t    mmgWarn=0;
+
   k = start;
   refstart = mesh->tria[k].ref;
   i = MMG5_inxt2[istart];
-  
+
   /* First loop: stop if an external boundary, or a change in signs (or a 0) is met
      recall that MG_SMGSGN(a,b) = 1 provided a*b >0 */
   do{
@@ -240,13 +240,13 @@ int MMG2D_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, int start, char istart) {
     if ( k==0 ) break;
 
     pt = &mesh->tria[k];
-    
+
     ip1 = pt->v[i1];
     ip2 = pt->v[i];
 
     v1 = sol->m[ip1];
     v2 = sol->m[ip2];
-    
+
     /* Authorize change of references only provided the boundary reference is MG_ISO */
     if ( pt->ref != refstart && pt->edg[i1] != MG_ISO )
       smsgn = 0;
@@ -272,10 +272,10 @@ int MMG2D_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, int start, char istart) {
     pt = &mesh->tria[k];
     ip1 = pt->v[i1];
     ip2 = pt->v[i];
-    
+
     v1 = sol->m[ip1];
     v2 = sol->m[ip2];
-    
+
     if ( pt->ref != refstart && pt->edg[i1] != MG_ISO )
       smsgn = 0;
     else
@@ -283,7 +283,7 @@ int MMG2D_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, int start, char istart) {
     // smsgn = MG_SMSGN(v1,v2) ? 1 : 0;
   }
   while ( smsgn );
-  
+
   /* If first stop was due to an external boundary, the second one must too;
      else, the final triangle for the first travel must be that of the second one */
   if ( k != end1 ) {
@@ -312,7 +312,7 @@ int MMG2D_snapval(MMG5_pMesh mesh, MMG5_pSol sol) {
   MMG5_pPoint      p0;
   double           v1,v2,*tmp;
   int              k,kk,iel,ns,nc,ip,ip1,ip2,npl,nmn,ilist,list[MMG2D_LONMAX+2];
-  char             i,j,j1,j2;
+  int8_t           i,j,j1,j2;
 
   /* Allocate memory for tmp */
   MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(double),"temporary table",
@@ -402,10 +402,10 @@ int MMG2D_snapval(MMG5_pMesh mesh, MMG5_pSol sol) {
 
 /* Check whether the ball of vertex i in tria start is manifold;
  by assumption, i inxt[i] is one edge of the implicit boundary */
-int MMG2D_chkmaniball(MMG5_pMesh mesh, int start, char istart) {
+int MMG2D_chkmaniball(MMG5_pMesh mesh, int start, int8_t istart) {
   MMG5_pTria         pt;
   int                *adja,k,refstart;
-  char               i,i1;
+  int8_t             i,i1;
 
   pt = &mesh->tria[start];
   k = start;
@@ -475,8 +475,8 @@ int MMG2D_chkmaniball(MMG5_pMesh mesh, int start, char istart) {
 int MMG2D_chkmanimesh(MMG5_pMesh mesh) {
   MMG5_pTria      pt,pt1;
   int             *adja,k,cnt,iel;
-  char            i,i1;
-  static char     mmgWarn=0;
+  int8_t          i,i1;
+  static int8_t   mmgWarn=0;
 
   /* First check: check whether one triangle in the mesh has 3 boundary faces */
   for (k=1; k<=mesh->nt; k++) {
@@ -546,7 +546,7 @@ int MMG2D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
   MMG5_pTria     pt,pt1,pt2;
   double         volc,voltot,v0,v1,v2;
   int            k,kk,l,ll,ncp,ncm,ip0,ip1,ip2,base,cur,ipile,*pile,*adja;
-  char           i,i1,i2;
+  int8_t         i,i1,i2;
 
   ncp = 0;
   ncm = 0;
@@ -792,7 +792,7 @@ int MMG2D_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol met){
   MMG5_Hash    hash;
   double       v0,v1,s,c[2];
   int          k,ip0,ip1,nb,np,nt,ns,refint,refext,vx[3];
-  char         i,i0,i1,ier;
+  int8_t       i,i0,i1,ier;
 
   /* Reset flag field for points */
   for (k=1; k<=mesh->np; k++)
@@ -938,7 +938,7 @@ int MMG2D_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol){
   MMG5_pTria    pt;
   double        v,v1;
   int           k,ip,ip1,ier,ref,refint,refext;
-  char          i,i1,i2,nmn,npl,nz;
+  int8_t        i,i1,i2,nmn,npl,nz;
 
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
@@ -1019,19 +1019,19 @@ int MMG2D_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met) {
     fprintf(stderr,"\n  ## Problem in setting boundary. Exit program.\n");
     return 0;
   }
-  
+
   /* Snap values of the level set function which are very close to 0 to 0 exactly */
   if ( !MMG2D_snapval(mesh,sol) ) {
     fprintf(stderr,"\n  ## Wrong input implicit function. Exit program.\n");
     return 0;
   }
-  
+
   /* Removal of small parasitic components */
   if ( mesh->info.rmc > 0. && !MMG2D_rmc(mesh,sol) ) {
     fprintf(stderr,"\n  ## Error in removing small parasitic components. Exit program.\n");
     return 0;
   }
-  
+
   /* No need to keep adjacencies from now on */
   MMG5_DEL_MEM(mesh,mesh->adja);
 
@@ -1040,7 +1040,7 @@ int MMG2D_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met) {
     fprintf(stderr,"\n  ## Problem in resetting references. Exit program.\n");
     return 0;
   }
-  
+
   /* Effective splitting of the crossed triangles */
   if ( !MMG2D_cuttri_ls(mesh,sol,met) ) {
     fprintf(stderr,"\n  ## Problem in cutting triangles. Exit program.\n");
@@ -1052,19 +1052,19 @@ int MMG2D_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met) {
     fprintf(stderr,"\n  ## Problem in setting references. Exit program.\n");
     return 0;
   }
-  
+
   /* Creation of adjacency relations in the mesh */
   if ( !MMG2D_hashTria(mesh) ) {
     fprintf(stderr,"\n  ## Hashing problem. Exit program.\n");
     return 0;
   }
-  
+
   /* Check that the resulting mesh is manifold */
   if ( !MMG2D_chkmanimesh(mesh) ) {
     fprintf(stderr,"\n  ## No manifold resulting situation. Exit program.\n");
     return 0;
   }
-    
+
   /* Clean memory */
   MMG5_DEL_MEM(mesh,sol->m);
   sol->np = 0;

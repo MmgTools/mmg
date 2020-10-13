@@ -51,12 +51,12 @@
  *
  */
 static int
-MMGS_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, int start, char istart) {
+MMGS_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, int start, int8_t istart) {
   MMG5_pTria       pt;
   double           v1, v2;
   int              *adja,k,ip1,ip2,end1;
-  char             i,i1,smsgn;
-  static char      mmgWarn=0;
+  int8_t           i,i1,smsgn;
+  static int8_t    mmgWarn=0;
 
   k = start;
   i = MMG5_inxt2[istart];
@@ -141,7 +141,7 @@ int MMGS_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pPoint   p0;
   double        *tmp,v1,v2;
   int           k,nc,ns,ip,ip1,ip2;
-  char          i;
+  int8_t        i;
 
   MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(double),"temporary table",
                 fprintf(stderr,"  Exit program.\n");
@@ -220,17 +220,19 @@ int MMGS_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
  * \warning i inxt[i] is one edge of the implicit boundary.
  *
  */
-int MMGS_chkmaniball(MMG5_pMesh mesh, int start, char istart) {
-  MMG5_pTria         pt;
+int MMGS_chkmaniball(MMG5_pMesh mesh, int start, int8_t istart) {
   int                *adja,k;
-  char               i,i1;
+  int8_t             i,i1;
 
-  pt = &mesh->tria[start];
   k = start;
   i = istart;
 
   i1 = MMG5_iprv2[i];
+
+#ifndef NDEBUG
+  MMG5_pTria pt = &mesh->tria[start];
   assert( MG_EDG(pt->tag[i1]) && (pt->edg[i1]==MG_ISO) );
+#endif
 
   /* First travel, while another part of the implicit boundary is not met */
   do {
@@ -315,8 +317,8 @@ static
 int MMGS_chkmanimesh(MMG5_pMesh mesh) {
   MMG5_pTria      pt;
   int             *adja,k,cnt,iel;
-  char            i,i1;
-  static char     mmgWarn0 = 0;
+  int8_t          i,i1;
+  static int8_t   mmgWarn0 = 0;
 
 
   /* First check: check whether one triangle in the mesh has 3 boundary faces */
@@ -388,7 +390,7 @@ static int MMGS_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
   MMG5_Hash   hash;
   double       c[3],v0,v1,s;
   int          vx[3],nb,k,ip0,ip1,np,ns,nt,ier;
-  char         ia;
+  int8_t       ia;
   /* reset point flags and h */
   for (k=1; k<=mesh->np; k++)
     mesh->point[k].flag = 0;
@@ -548,7 +550,7 @@ static int MMGS_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol) {
   MMG5_pTria   pt;
   double       v,v1;
   int          k,ip,ip1;
-  char         nmns,npls,nz,i;
+  int8_t       nmns,npls,nz,i;
 
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];

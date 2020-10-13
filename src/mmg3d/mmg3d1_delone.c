@@ -38,7 +38,7 @@
 
 #ifndef PATTERN
 
-char  ddb;
+int8_t  ddb;
 
 #define MMG3D_LOPTLMMG5_DEL     1.41
 #define MMG3D_LOPTSMMG5_DEL     0.6
@@ -68,23 +68,23 @@ char  ddb;
 static inline int
 MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
                  int* ifilt,int* ns,int* nc,int* warn,int it) {
-  MMG5_pTetra  pt;
-  MMG5_pxTetra pxt;
-  MMG5_Tria    ptt;
-  MMG5_pPoint  p0,p1,ppt;
-  MMG5_pxPoint pxp;
-  double       dd,len,lmax,o[3],to[3],no1[3],no2[3],v[3];
-  int          k,ip,ip1,ip2,src,list[MMG3D_LMAX+2],ilist,lists[MMG3D_LMAX+2],ilists,ref;
-  int16_t      tag;
-  char         imax,j,i,i1,i2,ifa0,ifa1;
-  int          lon,ret,ier;
-  double       lmin,lfilt;
-  int          imin,iq;
-  int          ii;
-  double       lmaxtet,lmintet,volmin;
-  int          imaxtet,imintet,base,countMemFailure;
-  char         chkRidTet;
-  static char  mmgWarn0 = 0;
+  MMG5_pTetra   pt;
+  MMG5_pxTetra  pxt;
+  MMG5_Tria     ptt;
+  MMG5_pPoint   p0,p1,ppt;
+  MMG5_pxPoint  pxp;
+  double        dd,len,lmax,o[3],to[3],no1[3],no2[3],v[3];
+  int           k,ip,ip1,ip2,src,list[MMG3D_LMAX+2],ilist,lists[MMG3D_LMAX+2],ilists,ref;
+  int16_t       tag;
+  int8_t        imax,j,i,i1,i2,ifa0,ifa1;
+  int           lon,ret,ier;
+  double        lmin,lfilt;
+  int           imin,iq;
+  int           ii;
+  double        lmaxtet,lmintet,volmin;
+  int           imaxtet,imintet,base,countMemFailure;
+  int8_t        chkRidTet;
+  static int8_t mmgWarn0 = 0;
 
   countMemFailure = 0;
 

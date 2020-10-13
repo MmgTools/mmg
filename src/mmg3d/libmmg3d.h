@@ -2567,7 +2567,7 @@ int MMG3D_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol);
  *
  */
   int MMG3D_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol,double critmin,
-                       double lmin, double lmax, int *eltab,char metRidTyp);
+                       double lmin, double lmax, int *eltab,int8_t metRidTyp);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.
@@ -2589,7 +2589,7 @@ int MMG3D_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol);
  *
  */
   void  MMG3D_searchqua(MMG5_pMesh mesh, MMG5_pSol met, double critmin,
-                        int *eltab,char metRidTyp);
+                        int *eltab,int8_t metRidTyp);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.
@@ -2617,7 +2617,7 @@ int MMG3D_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol);
  *
  */
   int  MMG3D_searchlen(MMG5_pMesh mesh, MMG5_pSol met, double lmin,
-                       double lmax,int *eltab,char  metRidTyp);
+                       double lmax,int *eltab,int8_t  metRidTyp);
 
 /** Utils */
 /**

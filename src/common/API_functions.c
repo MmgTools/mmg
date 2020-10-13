@@ -523,7 +523,7 @@ void MMG5_mmgFree_names(MMG5_pMesh mesh,MMG5_pSol met){
 }
 
 inline
-int MMG5_Set_defaultTruncatureSizes(MMG5_pMesh mesh,char sethmin,char sethmax) {
+int MMG5_Set_defaultTruncatureSizes(MMG5_pMesh mesh,int8_t sethmin,int8_t sethmax) {
 
   if ( !sethmin ) {
     if ( sethmax ) {
@@ -553,7 +553,7 @@ int MMG5_Set_defaultTruncatureSizes(MMG5_pMesh mesh,char sethmin,char sethmax) {
 }
 
 int MMG5_Compute_constantSize(MMG5_pMesh mesh,MMG5_pSol met,double *hsiz) {
-  char         sethmin,sethmax;
+  int8_t         sethmin,sethmax;
 
 
   if ( mesh->info.hmin > mesh->info.hsiz ) {

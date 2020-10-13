@@ -9,7 +9,7 @@ extern double (*MMG5_caltri)(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
 extern int    (*MMG3D_defsiz)(MMG5_pMesh ,MMG5_pSol );
 extern int    (*MMG3D_gradsiz)(MMG5_pMesh ,MMG5_pSol );
 extern int    (*MMG3D_gradsizreq)(MMG5_pMesh ,MMG5_pSol );
-extern int    (*MMG5_intmet)(MMG5_pMesh,MMG5_pSol,int,char,int, double);
+extern int    (*MMG5_intmet)(MMG5_pMesh,MMG5_pSol,int,int8_t,int, double);
 extern int    (*MMG5_interp4bar)(MMG5_pMesh,MMG5_pSol,int,int,double *);
 extern int    (*MMG5_movintpt)(MMG5_pMesh ,MMG5_pSol, MMG3D_pPROctree ,int *, int , int );
 extern int    (*MMG5_movbdyregpt)(MMG5_pMesh, MMG5_pSol, MMG3D_pPROctree ,int*, int, int*, int, int ,int);

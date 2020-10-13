@@ -36,7 +36,7 @@
 #include "mmgs.h"
 #include "inlined_functions.h"
 
-extern char  ddb;
+extern int8_t ddb;
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -283,7 +283,7 @@ int MMGS_prilen(MMG5_pMesh mesh, MMG5_pSol met, int metRidTyp) {
   MMG5_Hash      hash;
   double          len,avlen,lmin,lmax;
   int             k,np,nq,amin,bmin,amax,bmax,ned,hl[9],nullEdge;
-  char            ia,i0,i1,i;
+  int8_t          ia,i0,i1,i;
   static double   bd[9]= {0.0, 0.3, 0.6, 0.7071, 0.9, 1.3, 1.4142, 2.0, 5.0};
 
   memset(hl,0,9*sizeof(int));
@@ -507,7 +507,7 @@ int MMGS_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
 #define COS145   -0.81915204428899
 
 /* return 0: triangle ok, 1: needle, 2: obtuse; ia: edge problem */
-char typelt(MMG5_pPoint p[3],char *ia) {
+int8_t typelt(MMG5_pPoint p[3],int8_t *ia) {
   double   h1,h2,h3,hmi,hma,ux,uy,uz,vx,vy,vz,wx,wy,wz,dd;
 
   ux = p[1]->c[0] - p[0]->c[0];

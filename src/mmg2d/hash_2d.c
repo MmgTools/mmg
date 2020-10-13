@@ -34,10 +34,10 @@
  */
 int MMG2D_hashTria(MMG5_pMesh mesh) {
   MMG5_pTria     pt,pt1;
-  int       k,kk,pp,l,ll,mins,mins1,maxs,maxs1;
-  int      *hcode,*link,inival,hsize,iadr;
-  unsigned char   i,ii,i1,i2;
-  unsigned int    key;
+  int            k,kk,pp,l,ll,mins,mins1,maxs,maxs1;
+  int            *hcode,*link,inival,hsize,iadr;
+  uint8_t        i,ii,i1,i2;
+  unsigned int   key;
 
   if ( mesh->adja )  return 1;
   if ( !mesh->nt )  return 0;
@@ -154,7 +154,7 @@ int MMG2D_hashQuad(MMG5_pMesh mesh) {
   MMG5_Hash      hash;
   int            k,kk,pp,l,ll,mins,mins1,maxs,maxs1,iadr;
   int           *hcode,*link,hsize,inival;
-  unsigned char  i,ii,i1,i2;
+  uint8_t        i,ii,i1,i2;
   unsigned int   key;
 
   /** Step 1: Fill adjacendies between quadrangles */
@@ -337,7 +337,7 @@ int MMG2D_assignEdge(MMG5_pMesh mesh) {
   MMG5_pEdge      pa;
   int             k,ia;
   int8_t          ier;
-  char            i,i1,i2;
+  uint8_t         i,i1,i2;
 
   /* Try to clean triangle structure (in case where mmg2dlib is called after
    * mmg2dmesh) */
@@ -435,7 +435,7 @@ int MMG2D_bdryEdge(MMG5_pMesh mesh) {
   MMG5_pEdge      pa;
   MMG5_pPoint     p0;
   int             k,*adja,natmp,iel;
-  char            i,i1,i2;
+  int8_t          i,i1,i2;
 
   natmp = 0;
   mesh->na = 0;
@@ -518,7 +518,7 @@ int MMG2D_pack(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
   MMG5_pPoint        ppt,pptnew;
   int                np,ned,nt,k,iel,nbl,isol,isolnew,memWarn,nc;
   int                iadr,iadrnew,iadrv,*adjav,*adja,*adjanew,voy;
-  char               i,i1,i2;
+  int8_t             i,i1,i2;
 
   /* Keep only one domain if asked */
   MMG2D_keep_only1Subdomain ( mesh, mesh->info.nsd );

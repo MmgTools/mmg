@@ -51,7 +51,7 @@ extern MMG5_Info  info;
 int MMG5_boulep(MMG5_pMesh mesh,int start,int ip,int *adja, int *list) {
   MMG5_pTria    pt;
   int           *adj,k,ilist;
-  char          i,i1,i2;
+  int8_t        i,i1,i2;
 
   pt = &mesh->tria[start];
   if ( !MG_EOK(pt) )  return 0;
@@ -114,7 +114,7 @@ int MMG5_boulen(MMG5_pMesh mesh,int *adjt,int start,int ip,double *nn) {
   MMG5_pTria    pt;
   double        n[3],dd;
   int           *adja,k;
-  char          i,i1,i2;
+  int8_t        i,i1,i2;
 
   pt = &mesh->tria[start];
   if ( !MG_EOK(pt) )  return 0;
@@ -191,7 +191,7 @@ int MMG5_boulec(MMG5_pMesh mesh,int *adjt,int start,int ip,double *tt) {
   MMG5_pPoint   p0,p1,p2;
   double        dd;
   int           *adja,k;
-  char          i,i1,i2;
+  int8_t        i,i1,i2;
 
   pt = &mesh->tria[start];
   if ( !MG_EOK(pt) )       return 0;
@@ -278,7 +278,7 @@ int MMG5_bouler(MMG5_pMesh mesh,int *adjt,int start,int ip,
                  int *list,int *listref,int *ng,int *nr,int lmax) {
   MMG5_pTria    pt;
   int           *adja,k,ns;
-  char          i,i1,i2;
+  int8_t        i,i1,i2;
 
   pt  = &mesh->tria[start];
   if ( !MG_EOK(pt) )  return 0;

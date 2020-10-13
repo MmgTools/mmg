@@ -34,7 +34,7 @@
 
 #include "mmg3d.h"
 
-extern char ddb;
+extern int8_t ddb;
 
 /**
  * \param c1 coordinates of the first point of the curve.
@@ -149,7 +149,7 @@ MMG5_BezierGeod(double c1[3],double c2[3],double t1[3],double t2[3]) {
  *
  */
 inline int
-MMG5_BezierEdge(MMG5_pMesh mesh,int ip0,int ip1,double b0[3],double b1[3],char ised, double v[3]) {
+MMG5_BezierEdge(MMG5_pMesh mesh,int ip0,int ip1,double b0[3],double b1[3],int8_t ised, double v[3]) {
   MMG5_pPoint   p0,p1;
   MMG5_pxPoint  pxp0,pxp1;
   double   ux,uy,uz,ps,ps1,ps2,*n1,*n2,np0[3],np1[3],t0[3],t1[3],il,ll,alpha;
@@ -324,12 +324,12 @@ MMG5_BezierEdge(MMG5_pMesh mesh,int ip0,int ip1,double b0[3],double b1[3],char i
  * \todo merge with the MMG5_mmg3dBeizerCP function and remove the pointer
  * toward this functions.
  */
-int MMG5_mmg3dBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,MMG5_pBezier pb,char ori) {
+int MMG5_mmg3dBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,MMG5_pBezier pb,int8_t ori) {
   MMG5_pPoint    p[3];
   MMG5_xPoint   *pxp;
   double        *n1,*n2,nt[3],t1[3],t2[3],ps,ps2,dd,ux,uy,uz,l,ll,alpha;
   int            ia,ib,ic;
-  char           i,i1,i2,im,isnm;
+  int8_t         i,i1,i2,im,isnm;
 
   ia   = pt->v[0];
   ib   = pt->v[1];
@@ -570,7 +570,7 @@ int MMG5_mmg3dBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,MMG5_pBezier pb,char ori) {
  */
 int MMG3D_bezierInt(MMG5_pBezier pb,double uv[2],double o[3],double no[3],double to[3]) {
   double    dd,u,v,w,ps,ux,uy,uz;
-  char      i;
+  int8_t    i;
 
   memset(to,0,3*sizeof(double));
   u = uv[0];

@@ -159,7 +159,7 @@ int MMG3D_coledges(MMG5_pMesh mesh,MMG5_pSol met,int k,int i) {
   double      len;
   int         ied,iedg,iq,i1,ilistcol,listcol[MMG3D_LMAX+2];
   int         ier;
-  char        iface,ief;
+  int8_t      iface,ief;
 
   pt = &mesh->tetra[k];
 

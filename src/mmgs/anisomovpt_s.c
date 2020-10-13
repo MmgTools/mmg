@@ -53,7 +53,7 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   double         gv[2],area,detloc,step,lambda[3],o[3],no[3],to[3],uv[2];
   double         calold,calnew,caltmp;
   int            k,iel,kel,nump,nbeg,nend;
-  char           i0,i1,i2,ier;
+  int8_t         i0,i1,i2,ier;
   static int     warn=0;
   step = 0.1;
 
@@ -240,8 +240,8 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   double        lam0,lam1,lam2,o[3],nn1[3],nn2[3],to[3],mo[6];
   double        l1new,l2new,calold,calnew;
   int           it1,it2,ip0,ip1,ip2,k,iel;
-  char          voy1,voy2,isrid,isrid1,isrid2,i0,i1,i2;
-  static char   mmgWarn0 = 0;
+  int8_t        voy1,voy2,isrid,isrid1,isrid2,i0,i1,i2;
+  static int8_t mmgWarn0 = 0;
 
   step  = 0.2;
   isrid1 = isrid2 = 0;

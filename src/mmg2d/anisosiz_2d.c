@@ -47,7 +47,7 @@
  * able to truncate it with the local params later.
  *
  */
-int MMG2D_defaultmet_2d(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
+int MMG2D_defaultmet_2d(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t i) {
   MMG5_pTria       pt;
   double           *m,isqhmax;
   int              ip;
@@ -82,7 +82,7 @@ int MMG2D_defaultmet_2d(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
  * imposing the local parameters later.
  *
  */
-int MMG2D_defmetbdy_2d(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
+int MMG2D_defmetbdy_2d(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t i) {
   MMG5_pTria      pt;
   MMG5_pPoint     p0,p1,p2;
   MMG5_pPar       ppa;
@@ -91,7 +91,7 @@ int MMG2D_defmetbdy_2d(MMG5_pMesh mesh,MMG5_pSol met,int k,char i) {
   double          gpp1[2],gpp2[2];
   int             ilist,iel,ip,ip1,ip2,it[2],l,list[MMG2D_LONMAX+2];
   int8_t          isloc,hausdloc;
-  char            i0,i1,i2,j;
+  int8_t          i0,i1,i2,j;
   static int8_t   mmgWarn0=0,mmgWarn1=0,mmgWarn2=0;
 
   hmin   = mesh->info.hmin;
@@ -364,7 +364,7 @@ int MMG2D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   double         mm[3],mr[3],isqhmax;
   int            k,l,ip;
   int8_t         ismet;
-  char           isdef,i;
+  int8_t         isdef,i;
 
   if ( !MMG5_defsiz_startingMessage (mesh,met,__func__) ) {
     return 0;

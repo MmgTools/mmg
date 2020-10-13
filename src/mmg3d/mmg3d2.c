@@ -35,7 +35,7 @@
 
 #include "mmg3d.h"
 
-extern char  ddb;
+extern int8_t ddb;
 
 /**
  * \param ppt array of points containing the tetra vertices
@@ -53,9 +53,9 @@ extern char  ddb;
  *
  */
 static inline
-double MMG3D_vfrac_1vertex(MMG5_pPoint ppt[4],char i0,double v[4],int8_t part_opp) {
+double MMG3D_vfrac_1vertex(MMG5_pPoint ppt[4],int8_t i0,double v[4],int8_t part_opp) {
   double      vfrac,lam,area,o1[3],o2[3],o3[3];
-  char        i1,i2,i3;
+  int8_t      i1,i2,i3;
 
   i1 = MMG5_idir[i0][0];
   i2 = MMG5_idir[i0][1];
@@ -103,14 +103,14 @@ double MMG3D_vfrac_1vertex(MMG5_pPoint ppt[4],char i0,double v[4],int8_t part_op
  *
  **/
 double MMG3D_vfrac(MMG5_pMesh mesh,MMG5_pSol sol,int k,int pm) {
-  MMG5_pTetra   pt;
-  MMG5_pPoint   ppt[4];
-  double        v[4],vfm,vfp,lam,eps,o[18];
-  int           ip[4],nplus,nminus,nzero;
-  int8_t        flag,cfg,ia;
-  char          i,i0,i1,imin1,imin2,iplus1,iplus2,iz;
-  unsigned char tau[4];
-  const unsigned char *taued;
+  MMG5_pTetra    pt;
+  MMG5_pPoint    ppt[4];
+  double         v[4],vfm,vfp,lam,eps,o[18];
+  int            ip[4],nplus,nminus,nzero;
+  int8_t         flag,cfg,ia;
+  int8_t         i,i0,i1,imin1,imin2,iplus1,iplus2,iz;
+  uint8_t        tau[4];
+  const uint8_t *taued;
 
   eps = MMG5_EPS*MMG5_EPS;
   pt = &mesh->tetra[k];
@@ -311,7 +311,7 @@ int MMG3D_resetRef(MMG5_pMesh mesh) {
   MMG5_pTetra     pt;
   MMG5_pPoint     p0;
   int             k,ref;
-  char            i;
+  int8_t          i;
 
   /* Travel edges and reset tags at edges extremities */
 
@@ -401,11 +401,11 @@ MMG5_invsl(double A[3][3],double b[3],double r[3]) {
 
 static int
 MMG5_ismaniball(MMG5_pMesh mesh,MMG5_pSol sol,int k,int indp) {
-  MMG5_pTetra  pt,pt1;
-  double       v,v0,v1,v2;
-  int         *adja,list[MMG3D_LMAX+1],bdy[MMG3D_LMAX+1],ibdy,np,ilist,base,cur,iel,jel,res,l;
-  char         i,i0,i1,i2,j0,j1,j2,j,ip,nzeros,nopp,nsame;
-  static char  mmgWarn0 = 0;
+  MMG5_pTetra   pt,pt1;
+  double        v,v0,v1,v2;
+  int          *adja,list[MMG3D_LMAX+1],bdy[MMG3D_LMAX+1],ibdy,np,ilist,base,cur,iel,jel,res,l;
+  int8_t        i,i0,i1,i2,j0,j1,j2,j,ip,nzeros,nopp,nsame;
+  static int8_t mmgWarn0 = 0;
 
   pt = &mesh->tetra[k];
   np = pt->v[indp];
@@ -665,7 +665,7 @@ static int MMG3D_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pPoint   p0;
   double        *tmp;
   int      k,nc,ns,ip;
-  char     i;
+  int8_t   i;
 
   /* create tetra adjacency */
   if ( !MMG3D_hashTetra(mesh,1) ) {
@@ -769,7 +769,7 @@ int MMG3D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
   MMG5_pxTetra   pxt;
   double         volc,voltot,v0,v1,v2,v3;
   int            k,kk,l,ll,ncp,ncm,ip0,ip1,ip2,ip3,base,cur,ipile,*pile,*adja;
-  char           i,j,i1,onbr;
+  int8_t         i,j,i1,onbr;
 
   ncp = 0;
   ncm = 0;
@@ -1018,8 +1018,8 @@ static int MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
   MMG5_Hash     hash;
   double        c[3],v0,v1,s;
   int           vx[6],nb,k,ip0,ip1,np,ns,ne,ier,src,refext,refint;
-  char          ia,j,npneg;
-  static char   mmgWarn = 0;
+  int8_t        ia,j,npneg;
+  static int8_t mmgWarn = 0;
 
   /* reset point flags and h */
   for (k=1; k<=mesh->np; k++)
@@ -1224,7 +1224,7 @@ static int MMG3D_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol) {
   MMG5_pTetra   pt;
   double        v;
   int           k,ip,ref,refint,refext,ier;
-  char     nmns,npls,nz,i;
+  int8_t   nmns,npls,nz,i;
 
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
@@ -1379,11 +1379,11 @@ int MMG3D_update_xtetra ( MMG5_pMesh mesh ) {
  * Beware : may return 0 when implicit boundary is tangent to outer boundary
  *
  */
-int MMG5_chkmaniball(MMG5_pMesh mesh, int start, char ip){
+int MMG5_chkmaniball(MMG5_pMesh mesh, int start, int8_t ip){
   MMG5_pTetra    pt,pt1;
   int       ref,base,ilist,nump,k,cur,k1,nref;
   int       *adja,list[MMG3D_LMAX+2];
-  char      i,l,j;
+  int8_t    i,l,j;
 
   base = ++mesh->base;
   ilist = 0;
@@ -1483,11 +1483,11 @@ int MMG5_chkmaniball(MMG5_pMesh mesh, int start, char ip){
 
 /** Check whether implicit surface enclosed in volume is orientable */
 int MMG5_chkmani(MMG5_pMesh mesh){
-  MMG5_pTetra  pt,pt1;
-  int          k,iel,ref;
-  int         *adja;
-  char         i,j,ip,cnt;
-  static char  mmgWarn0 = 0;
+  MMG5_pTetra   pt,pt1;
+  int           k,iel,ref;
+  int          *adja;
+  int8_t        i,j,ip,cnt;
+  static int8_t mmgWarn0 = 0;
 
   for(k=1; k<=mesh->np; k++){
     mesh->point[k].flag = 0;
@@ -1560,7 +1560,7 @@ int MMG5_chkmani2(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTetra    pt,pt1;
   int       k,iel;
   int       *adja;
-  char      i,j,ip,cnt;
+  int8_t    i,j,ip,cnt;
 
   for(k=1; k<=mesh->np; k++){
     mesh->point[k].flag = 0;
@@ -1627,11 +1627,11 @@ int MMG5_chkmani2(MMG5_pMesh mesh,MMG5_pSol sol) {
  * not in shell of (np,nq).
  *
  */
-int MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int ndepplus,int refmin,int refplus,char isminp,char isplp) {
+int MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int ndepplus,int refmin,int refplus,int8_t isminp,int8_t isplp) {
   MMG5_pTetra    pt,pt1;
   int       nump,numq,ilist,ref,cur,stor,iel,jel,base,ndepmq,ndeppq;
   int       list[MMG3D_LMAX+2],*adja,*adja1;
-  char      i,j,ip,jp,iq,jq,voy,indp,indq,isminq,isplq,ismin,ispl;
+  int8_t    i,j,ip,jp,iq,jq,voy,indp,indq,isminq,isplq,ismin,ispl;
 
   ilist = 0;
   ndepmq = ndeppq = 0;
