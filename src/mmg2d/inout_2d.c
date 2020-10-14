@@ -70,8 +70,9 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
       return 0;
     }
   }
-  if ( mesh->info.imprim >= 0 )
+  if ( mesh->info.imprim >= 0 ) {
     fprintf(stdout,"  %%%% %s OPENED\n",data);
+  }
   MMG5_SAFE_FREE(data);
 
   if (!bin) {
@@ -266,9 +267,6 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
     }
 
   }
-
-  if ( abs(mesh->info.imprim) > 5 )
-    fprintf(stdout,"  -- READING DATA FILE %s\n",data);
 
   if ( !mesh->np  ) {
     fprintf(stdout,"  ** MISSING DATA : no point\n");
