@@ -64,6 +64,18 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t i,int *list,int8_t typchk)
   i2  = MMG5_iprv2[i];
   ip1 = pt->v[i1];
   ip2 = pt->v[i2];
+
+#ifndef NDEBUG
+  /* suppression of maybe-uninitialized value on arm */
+  lon = 0.;
+  n00old[0] = n00old[1] = n00old[2] = 0.;
+  n0old[0]  = n0old[1]  = n0old[2]  = 0.;
+  n1old[0]  = n1old[1]  = n1old[2]  = 0.;
+  n00new[0] = n00new[1] = n00new[2] = 0.;
+  n0new[0]  = n0new[1]  = n0new[2]  = 0.;
+  n1new[0]  = n1new[1]  = n1new[2]  = 0.;
+#endif
+
   if ( typchk == 2 && met->m ) {
     lon = MMG5_lenSurfEdg(mesh,met,ip1,ip2,0);
     if ( !lon ) return 0;
@@ -458,7 +470,8 @@ int colver2(MMG5_pMesh mesh,int* list) {
 int litcol(MMG5_pMesh mesh,int k,int8_t i,double kali) {
   MMG5_pTria     pt,pt0,pt1;
   MMG5_pPoint    p1,p2;
-  double         kal,ps,cosnold,cosnnew,n0old[3],n0new[3],n1old[3],n1new[3],n00old[3],n00new[3];
+  double         kal,ps,cosnold,cosnnew;
+  double         n0old[3],n0new[3],n1old[3],n1new[3],n00old[3],n00new[3];
   int            *adja,list[MMGS_LMAX+2],jel,ip2,l,ilist;
   int8_t         i1,i2,j,jj,j2,open;
 

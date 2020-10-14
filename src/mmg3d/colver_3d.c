@@ -388,6 +388,12 @@ int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t iface,
   p0   = &mesh->point[nump];
   assert(p0->tag & MG_BDY);
   assert(p0->xp);
+
+  /* Remove maybe-uninitialized value warning */
+  nprvold[0] = nprvold[1] = nprvold[2] = 0.;
+  ncurold[0] = ncurold[1] = ncurold[2]  = 0.;
+  nprvnew[0] = nprvnew[1] = nprvnew[2] = 0.;
+  ncurnew[0] = ncurnew[1] = ncurnew[2]  = 0.;
 #endif
 
   ndepmin = ndepplus = 0;

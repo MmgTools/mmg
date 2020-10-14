@@ -37,15 +37,26 @@
 #include <math.h>
 
 
-/* compute movement of an internal point whose ball is passed */
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param list pointer toward the ball of the point.
+ * \param ilist size of the ball.
+ *
+ * \return 0 if we can't move the point, 1 if we can.
+ *
+ * Move internal point whose volumic is passed.
+ *
+ */
 int movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   MMG5_pPoint   p0,p1,ppt0;
   MMG5_pTria    pt,pt0;
   MMG5_Bezier   b;
-  double   aa,bb,ab,ll,l,mlon,devmean,GV[3],gv[2],cosalpha,sinalpha,r[3][3],*n,lispoi[3*MMGS_LMAX+3];
-  double   ux,uy,uz,det2d,detloc,step,lambda[3],uv[2],o[3],no[3],to[3],Vold,Vnew,calold,calnew,caltmp;
-  int      ier,iel,ipp,k,kel,npt,ibeg,iend;
-  int8_t   i0,i1,i2;
+  double        aa,bb,ab,ll,l,mlon,devmean,GV[3],gv[2],cosalpha,sinalpha,r[3][3],*n,lispoi[3*MMGS_LMAX+3];
+  double        ux,uy,uz,det2d,detloc,step,lambda[3],uv[2],o[3],no[3],to[3],Vold,Vnew,calold,calnew,caltmp;
+  int           ier,iel,ipp,k,kel,npt,ibeg,iend;
+  int8_t        i0,i1,i2;
+  static int8_t mmgErr0=0,mmgErr1=0;
 
   step = 0.1;
   Vold = 0.0;
@@ -243,7 +254,14 @@ int movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   pt = &mesh->tria[iel];
 
   ier = MMG5_bezierCP(mesh,pt,&b,1);
-  assert(ier);
+  if ( !ier ) {
+    if( !mmgErr0 ) {
+      mmgErr0 = 1;
+      fprintf(stderr,"\n  ## Warning: %s: function MMG5_bezierCP return 0.\n",
+              __func__);
+    }
+    return 0;
+  }
 
   /* Now, for Bezier interpolation, one should identify which of i,i1,i2 is 0,1,2
      recall uv[0] = barycentric coord associated to pt->v[1], uv[1] associated to pt->v[2] */
@@ -259,8 +277,16 @@ int movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
     uv[0] = lambda[2];
     uv[1] = lambda[0];
   }
+
   ier = MMGS_bezierInt(&b,uv,o,no,to);
-  assert(ier);
+  if ( !ier ) {
+    if( !mmgErr1 ) {
+      mmgErr1 = 1;
+      fprintf(stderr,"  ## Warning: %s: function MMGS_bezierInt return 0.\n",
+              __func__);
+    }
+    return 0;
+  }
 
   /* First test : check whether variance has been decreased */
   mlon = 0.0;

@@ -55,6 +55,8 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   int            k,iel,kel,nump,nbeg,nend;
   int8_t         i0,i1,i2,ier;
   static int     warn=0;
+  static int8_t  mmgErr0=0,mmgErr1=0;
+
   step = 0.1;
 
   /* Make sure ball of point is closed */
@@ -104,7 +106,7 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   }
 
   /* At this point : gv = - gradient of V = direction to follow */
-  /* Step 3 : locate new point in the ball, and compute its barycentric coordinates */
+  /** Step 3 : locate new point in the ball, and compute its barycentric coordinates */
   area = lispoi[1]*gv[1] - lispoi[2]*gv[0];
   kel = 0;
   if ( area >= 0.0 ) {
@@ -152,13 +154,20 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   lambda[2]*= (area);
   lambda[0] = 1.0 - lambda[1] - lambda[2];
 
-  /* Step 4 : come back to original problem, and compute patch in triangle iel */
+  /** Step 4 : come back to original problem, and compute patch in triangle iel */
   iel = list[kel] / 3;
   i0  = list[kel] % 3;
   pt  = &mesh->tria[iel];
 
   ier = MMG5_bezierCP(mesh,pt,&pb,1);
-  assert(ier);
+  if ( !ier ) {
+    if( !mmgErr0 ) {
+      mmgErr0 = 1;
+      fprintf(stderr,"\n  ## Warning: %s: function MMG5_bezierCP return 0.\n",
+              __func__);
+    }
+    return 0;
+  }
 
   /* Now, for Bezier interpolation, one should identify which of i,i1,i2 is 0,1,2
      recall uv[0] = barycentric coord associated to pt->v[1], uv[1] associated to pt->v[2] */
@@ -176,7 +185,14 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   }
 
   ier = MMGS_bezierInt(&pb,uv,o,no,to);
-  assert(ier);
+  if ( !ier ) {
+    if( !mmgErr1 ) {
+      mmgErr1 = 1;
+      fprintf(stderr,"  ## Warning: %s: function MMGS_bezierInt return 0.\n",
+              __func__);
+    }
+    return 0;
+  }
 
   /* Second test : check whether geometric approximation has not been too much degraded */
   ppt0 = &mesh->point[0];
