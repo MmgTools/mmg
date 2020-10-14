@@ -26,8 +26,8 @@
 |**develop branch**|[![Build Status][dev-build]][dev-sq-build]|[![Quality Gate][dev-qual-gate]][dev-sq-qual-gate]|[![Vulnerabilities][dev-vulnerabilities]][dev-sq-vulnerabilities]|[![Coverage][dev-coverage]][dev-sq-coverage]|[![Duplication (%)][dev-code-dpl]][dev-sq-code-dpl]|
 
 
-[master-build]: https://ci.inria.fr/mmg/buildStatus/icon?job=Mmg-multiConf
-[master-sq-build]: https://ci.inria.fr/mmg/job/Mmg-multiConf
+[master-build]: https://ci.inria.fr/mmg/buildStatus/icon?job=Mmg-multiConf-master
+[master-sq-build]: https://ci.inria.fr/mmg/job/Mmg-multiConf-master
 
 [master-qual-gate]: https://sonarqube.inria.fr/sonarqube/api/badges/gate?key=cardamom%3Ammg%3Agithub%3Amaster
 [master-sq-qual-gate]: https://sonarqube.inria.fr/sonarqube/dashboard?id=cardamom%3Ammg%3Agithub%3Amaster

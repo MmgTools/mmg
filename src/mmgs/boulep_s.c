@@ -104,7 +104,7 @@ int boulet(MMG5_pMesh mesh,int start,int ip,int *list) {
  * the ball.
  * \param list pointer toward the computed ball of point.
  *
- * Find all triangles sharing \a ip, \f$list[0] = start\f$. Do not stop when
+ * Find all triangles sharing \a ip, \f$list[0] = start\f$ . Do not stop when
  * crossing ridge. Check whether resulting configuration is manifold.
  *
  */
