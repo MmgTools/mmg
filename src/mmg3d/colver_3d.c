@@ -393,6 +393,11 @@ int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t iface,
   ndepmin = ndepplus = 0;
   isminp  = isplp = 0;
 
+  if ( !isnm ) {
+    refmin  = MG_MINUS;
+    refplus = MG_PLUS;
+  }
+
   /* prevent collapse in case surface ball has 3 triangles */
   if ( ilists <= 2 )  return 0;  // ATTENTION, Normalement, avec 2 c est bon !
 
@@ -406,10 +411,8 @@ int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t iface,
     ipp = listv[l] % 4;
     pt  = &mesh->tetra[iel];
 
-    if ( isnm ) {
-      if ( pt->ref == refmin ) isminp = 1;
-      else if ( pt->ref == refplus ) isplp = 1;
-    }
+    if ( pt->ref == refmin ) isminp = 1;
+    else if ( pt->ref == refplus ) isplp = 1;
 
     /* Topological test for tetras of the shell */
     for (iq=0; iq<4; iq++)
@@ -444,12 +447,14 @@ int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t iface,
       continue;
     }
 
-    if ( isnm ) {
+    if ( isnm || mesh->info.iso ) {
       /* Volume test for tetras outside the shell */
-      if ( !ndepmin && pt->ref == refmin )
+      if ( (!ndepmin) && (pt->ref == refmin) ) {
         ndepmin = iel;
-      else if ( !ndepplus && pt->ref == refplus )
+      }
+      else if ( (!ndepplus) && (pt->ref == refplus) ) {
         ndepplus = iel;
+      }
     }
 
     /* Prevent from creating a tetra with 4 ridges vertices */
@@ -687,7 +692,7 @@ int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t iface,
     }
   }
 
-  if ( isnm ) {
+  if ( isnm || mesh->info.iso ) {
     ier = MMG5_chkmanicoll(mesh,k,iface,iedg,ndepmin,ndepplus,refmin,refplus,isminp,isplp);
     if ( !ier )  return 0;
   }
