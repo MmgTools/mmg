@@ -140,6 +140,10 @@ MACRO ( ADD_AND_INSTALL_LIBRARY
   ADD_LIBRARY ( ${target_name} ${target_type} ${sources} )
   ADD_LIBRARY ( Mmg::${target_name} ALIAS ${target_name} )
 
+  IF ( "${CMAKE_C_COMPILER_ID}" STREQUAL "Clang"  AND  ${CMAKE_C_COMPILER_VERSION} VERSION_GREATER 10 )
+      target_compile_options(${target_name} PRIVATE "-fcommon")
+  ENDIF()
+
   IF (NOT WIN32 OR MINGW)
     ADD_DEPENDENCIES(${target_name} GenerateGitHash)
   ENDIF()
