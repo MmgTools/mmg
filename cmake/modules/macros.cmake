@@ -95,7 +95,9 @@ MACRO ( ADD_AND_INSTALL_LIBRARY
 
   ADD_LIBRARY ( ${target_name} ${target_type} ${sources} )
   ADD_LIBRARY ( Mmg::${target_name} ALIAS ${target_name} )
-  
+  IF ( "${CMAKE_C_COMPILER_ID}" STREQUAL "Clang"  AND  ${CMAKE_C_COMPILER_VERSION} VERSION_GREATER 10 )
+      target_compile_options(${target_name} PRIVATE "-fcommon")
+  ENDIF()
   IF ( CMAKE_VERSION VERSION_LESS 2.8.12 )
     INCLUDE_DIRECTORIES ( ${target_name} PUBLIC
       ${COMMON_BINARY_DIR} ${COMMON_SOURCE_DIR} ${PROJECT_BINARY_DIR}/include )
