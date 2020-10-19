@@ -37,6 +37,69 @@
 extern MMG5_Info  info;
 
 /**
+ * \param mesh pointer toward mesh structure.
+ * \param start a triangle to which \a ip belongs.
+ * \param ip point index
+ * \param adja pointer toward the adjacency array.
+ * \param list pointer toward the list of points connected to \a ip.
+ *
+ * \return -ilist if buffer overflow, ilist otherwise.
+ *
+ * Return all vertices connected to ip (with list[0] = ip).
+ *
+ **/
+int MMG5_boulep(MMG5_pMesh mesh,int start,int ip,int *adja, int *list) {
+  MMG5_pTria    pt;
+  int           *adj,k,ilist;
+  int8_t        i,i1,i2;
+
+  pt = &mesh->tria[start];
+  if ( !MG_EOK(pt) )  return 0;
+  list[0] = pt->v[ip];
+  ilist   = 0;
+
+  /* store neighbors */
+  k  = start;
+  i  = ip;
+  i1 = MMG5_inxt2[i];
+  i2 = MMG5_iprv2[i];
+  do {
+    if ( ilist > MMG5_LMAX-2 )  return -ilist;
+    ilist++;
+    list[ilist] = pt->v[i2];
+
+    adj = &adja[3*(k-1)+1];
+    k  = adj[i1] / 3;
+    i2 = adj[i1] % 3;
+    i1 = MMG5_iprv2[i2];
+    pt = &mesh->tria[k];
+  }
+  while ( k && k != start );
+  if ( k > 0 )  return ilist;
+
+  /* reverse loop */
+  k  = start;
+  i  = ip;
+  pt = &mesh->tria[k];
+  i1 = MMG5_inxt2[i];
+  i2 = MMG5_inxt2[i1];
+  do {
+    if ( ilist > MMG5_LMAX-2 )  return -ilist;
+    ilist++;
+    list[ilist] = pt->v[i1];
+
+    adj = &adja[3*(k-1)+1];
+    k  = adj[i2] / 3;
+    i1 = adj[i2] % 3;
+    i2 = MMG5_iprv2[i1];
+    pt = &mesh->tria[k];
+  }
+  while ( k > 0 );
+
+  return ilist;
+}
+
+/**
  * \param mesh pointer toward the mesh structure.
  * \param adjt pointer toward the table of triangle adjacency.
  * \param start index of triangle where we start to work.
@@ -51,7 +114,7 @@ int MMG5_boulen(MMG5_pMesh mesh,int *adjt,int start,int ip,double *nn) {
   MMG5_pTria    pt;
   double        n[3],dd;
   int           *adja,k;
-  char          i,i1,i2;
+  int8_t        i,i1,i2;
 
   pt = &mesh->tria[start];
   if ( !MG_EOK(pt) )  return 0;
@@ -128,7 +191,7 @@ int MMG5_boulec(MMG5_pMesh mesh,int *adjt,int start,int ip,double *tt) {
   MMG5_pPoint   p0,p1,p2;
   double        dd;
   int           *adja,k;
-  char          i,i1,i2;
+  int8_t        i,i1,i2;
 
   pt = &mesh->tria[start];
   if ( !MG_EOK(pt) )       return 0;
@@ -215,7 +278,7 @@ int MMG5_bouler(MMG5_pMesh mesh,int *adjt,int start,int ip,
                  int *list,int *listref,int *ng,int *nr,int lmax) {
   MMG5_pTria    pt;
   int           *adja,k,ns;
-  char          i,i1,i2;
+  int8_t        i,i1,i2;
 
   pt  = &mesh->tria[start];
   if ( !MG_EOK(pt) )  return 0;

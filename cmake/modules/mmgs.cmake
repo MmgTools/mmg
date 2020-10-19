@@ -57,10 +57,17 @@ FILE(
   mmgs_library_files
   ${MMGS_SOURCE_DIR}/*.c
   ${COMMON_SOURCE_DIR}/*.c
+  ${MMGS_SOURCE_DIR}/inoutcpp_s.cpp
   )
 LIST(REMOVE_ITEM mmgs_library_files
   ${MMGS_SOURCE_DIR}/mmgs.c
   ${REMOVE_FILE} )
+
+IF ( VTK_FOUND )
+  LIST(APPEND  mmgs_library_files
+   ${COMMON_SOURCE_DIR}/vtkparser.cpp )
+ENDIF ( )
+
 FILE(
   GLOB
   mmgs_main_file
@@ -75,13 +82,13 @@ FILE(
 
 # Compile static library
 IF ( LIBMMGS_STATIC )
-  ADD_AND_INSTALL_LIBRARY ( lib${PROJECT_NAME}s_a STATIC
+  ADD_AND_INSTALL_LIBRARY ( lib${PROJECT_NAME}s_a STATIC copy_s_headers
     "${mmgs_library_files}" ${PROJECT_NAME}s )
 ENDIF()
 
 # Compile shared library
 IF ( LIBMMGS_SHARED )
-  ADD_AND_INSTALL_LIBRARY ( lib${PROJECT_NAME}s_so SHARED
+  ADD_AND_INSTALL_LIBRARY ( lib${PROJECT_NAME}s_so SHARED copy_s_headers
     "${mmgs_library_files}" ${PROJECT_NAME}s )
 ENDIF()
 
@@ -91,17 +98,18 @@ SET( mmgs_headers
   ${MMGS_BINARY_DIR}/libmmgsf.h
   ${COMMON_SOURCE_DIR}/libmmgtypes.h
   ${COMMON_BINARY_DIR}/libmmgtypesf.h
+  ${COMMON_BINARY_DIR}/mmgcmakedefines.h
+  ${COMMON_BINARY_DIR}/mmgversion.h
   )
+IF (NOT WIN32 OR MINGW)
+  LIST(APPEND mmgs_headers  ${COMMON_BINARY_DIR}/git_log_mmg.h )
+ENDIF()
 
 # Install header files in /usr/local or equivalent
 INSTALL(FILES ${mmgs_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/mmg/mmgs COMPONENT headers)
 
-COPY_FORTRAN_HEADER_AND_CREATE_TARGET ( ${MMGS_BINARY_DIR} ${MMGS_INCLUDE} s )
-
-# Copy header files in project directory at configuration step
-# (generated file don't exists yet or are outdated)
-FILE(INSTALL  ${mmgs_headers} DESTINATION ${MMGS_INCLUDE}
-  PATTERN "libmmg*f.h"  EXCLUDE)
+# Copy header files in project directory at build step
+COPY_HEADERS_AND_CREATE_TARGET ( ${MMGS_SOURCE_DIR} ${MMGS_BINARY_DIR} ${MMGS_INCLUDE} s )
 
 ############################################################################
 #####
@@ -118,7 +126,7 @@ ENDIF()
 #####         Compile MMGS executable
 #####
 ###############################################################################
-ADD_AND_INSTALL_EXECUTABLE ( ${PROJECT_NAME}s
+ADD_AND_INSTALL_EXECUTABLE ( ${PROJECT_NAME}s copy_s_headers
   "${mmgs_library_files}" ${mmgs_main_file} )
 
 ###############################################################################
@@ -131,8 +139,9 @@ IF ( BUILD_TESTING )
   ##-------------------------------------------------------------------##
   ##------- Set the continuous integration options --------------------##
   ##-------------------------------------------------------------------##
-  SET(MMGS_CI_TESTS ${CI_DIR}/mmgs )
-  SET(MMG_CI_TESTS ${CI_DIR}/mmg )
+  SET(MMG2D_CI_TESTS ${CI_DIR}/mmg2d )
+  SET(MMGS_CI_TESTS  ${CI_DIR}/mmgs )
+  SET(MMG_CI_TESTS   ${CI_DIR}/mmg )
 
   ##-------------------------------------------------------------------##
   ##--------------------------- Add tests and configure it ------------##
@@ -153,6 +162,8 @@ IF ( BUILD_TESTING )
       SET(LIBMMGS_EXEC1   ${EXECUTABLE_OUTPUT_PATH}/libmmgs_example1)
       SET(LIBMMGS_EXEC2   ${EXECUTABLE_OUTPUT_PATH}/libmmgs_example2)
       SET(LIBMMGS_EXEC3   ${EXECUTABLE_OUTPUT_PATH}/libmmgs_example3)
+      SET(LIBMMGS_LSONLY  ${EXECUTABLE_OUTPUT_PATH}/libmmgs_lsOnly )
+      SET(LIBMMGS_LSANDMETRIC ${EXECUTABLE_OUTPUT_PATH}/libmmgs_lsAndMetric )
 
 
       ADD_TEST(NAME libmmgs_example0_a   COMMAND ${LIBMMGS_EXEC0_a}
@@ -178,13 +189,24 @@ IF ( BUILD_TESTING )
       ADD_TEST(NAME libmmgs_example3_io_1   COMMAND ${LIBMMGS_EXEC3}
         "${PROJECT_SOURCE_DIR}/libexamples/mmgs/io_multisols_example3/torus.mesh"
         "${CTEST_OUTPUT_DIR}/libmmgs_io_3-naca.o" "1"
-       )
-
+        )
+      ADD_TEST(NAME libmmgs_lsOnly   COMMAND ${LIBMMGS_LSONLY}
+        "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/multi-mat.mesh"
+        "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/multi-mat-sol.sol"
+        "${CTEST_OUTPUT_DIR}/libmmgs_lsOnly_multimat.o"
+        )
+      ADD_TEST(NAME libmmgs_lsAndMetric   COMMAND ${LIBMMGS_LSANDMETRIC}
+        "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/multi-mat.mesh"
+        "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/multi-mat-sol.sol"
+        "${CTEST_OUTPUT_DIR}/libmmgs_lsAndMetric_multimat.o"
+        )
 
       IF ( CMAKE_Fortran_COMPILER)
         SET(LIBMMGS_EXECFORTRAN_a ${EXECUTABLE_OUTPUT_PATH}/libmmgs_fortran_a)
         SET(LIBMMGS_EXECFORTRAN_b ${EXECUTABLE_OUTPUT_PATH}/libmmgs_fortran_b)
         SET(LIBMMGS_EXECFORTRAN_IO ${EXECUTABLE_OUTPUT_PATH}/libmmgs_fortran_io)
+        SET(LIBMMGS_EXECFORTRAN_LSONLY ${EXECUTABLE_OUTPUT_PATH}/libmmgs_fortran_lsOnly )
+        SET(LIBMMGS_EXECFORTRAN_LSANDMETRIC ${EXECUTABLE_OUTPUT_PATH}/libmmgs_fortran_lsAndMetric )
 
         ADD_TEST(NAME libmmgs_fortran_a   COMMAND ${LIBMMGS_EXECFORTRAN_a}
           "${PROJECT_SOURCE_DIR}/libexamples/mmgs/adaptation_example0_fortran/example0_a/cube.mesh"
@@ -200,9 +222,18 @@ IF ( BUILD_TESTING )
         ADD_TEST(NAME libmmgs_fortran_io_1   COMMAND ${LIBMMGS_EXECFORTRAN_IO}
           "${PROJECT_SOURCE_DIR}/libexamples/mmgs/io_multisols_example3/torus.mesh"
           "${CTEST_OUTPUT_DIR}/libmmgs_Fortran_io-torus.o" "1"
-         )
-
-      ENDIF()
+          )
+        ADD_TEST(NAME libmmgs_fortran_lsOnly   COMMAND ${LIBMMGS_EXECFORTRAN_LSONLY}
+          "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/multi-mat.mesh"
+          "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/multi-mat-sol.sol"
+          "${CTEST_OUTPUT_DIR}/libmmgs_lsOnly_multimat.o"
+          )
+        ADD_TEST(NAME libmmgs_fortran_lsAndMetric   COMMAND ${LIBMMGS_EXECFORTRAN_LSANDMETRIC}
+          "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/multi-mat.mesh"
+          "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/multi-mat-sol.sol"
+          "${CTEST_OUTPUT_DIR}/libmmgs_lsAndMetric_multimat.o"
+          )
+     ENDIF()
 
     ENDIF()
 

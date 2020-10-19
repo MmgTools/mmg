@@ -98,6 +98,7 @@ int main (int argc, char ** argv)
     /* Compute the size of the C pointer for the Fortran programm */
     fprintf(file, "#define MMG5_DATA_PTR_T INTEGER(kind=%d)\n",
             (int)sizeof(void*));
+    fprintf(file, "#include \"mmgversion.h\"\n");
   }
   fclose(file);
 

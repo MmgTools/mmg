@@ -33,23 +33,20 @@
  * \todo Doxygen documentation
  */
 
-#ifdef USE_ELAS
-
 #include "mmg3d.h"
-#include "ls_calls.h"
 #include "inlined_functions_3d.h"
 
 #define MMG5_DEGTOL  1.e-1
 
-extern char  ddb;
+extern int8_t  ddb;
 
 /** Calculate an estimate of the average (isotropic) length of edges in the mesh */
 double MMG5_estavglen(MMG5_pMesh mesh) {
-  MMG5_pTetra    pt;
-  MMG5_pPoint    p1,p2;
-  int       k,na;
-  double    len,lent,dna;
-  char      i,i1,i2;
+  MMG5_pTetra pt;
+  MMG5_pPoint p1,p2;
+  int         k,na;
+  double      len,lent,dna;
+  int8_t      i,i1,i2;
 
   na = 0;
   lent = 0.0;
@@ -82,7 +79,7 @@ double MMG5_estavglen(MMG5_pMesh mesh) {
 /** Interpolate displacement between v1 and v2 at intermediate position 0<=t<=1 */
 static
 inline int MMG5_intdispvol(double *v1, double *v2, double *vp, double t) {
-  char i;
+  int8_t i;
 
   for(i=0; i<3; i++)
     vp[i] = (1.0-t)*v1[i] + t*v2[i];
@@ -103,14 +100,14 @@ inline int MMG5_intdispvol(double *v1, double *v2, double *vp, double t) {
  *
  */
 static int MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itdeg, int* warn) {
-  MMG5_pTetra  pt;
-  MMG5_pxTetra pxt;
-  MMG5_pPoint  p0,p1;
-  double       len,lmax,o[3],hma2;
-  double      *m1,*m2,*mp;
-  int          k,ip,ip1,ip2,list[MMG3D_LMAX+2],ilist,ns,ier,iadr;
-  char         imax,i,i1,i2;
-  static char  mmgWarn0 = 0;
+  MMG5_pTetra    pt;
+  MMG5_pxTetra   pxt;
+  MMG5_pPoint    p0,p1;
+  double         len,lmax,o[3],hma2;
+  double         *m1,*m2,*mp;
+  int            k,ip,ip1,ip2,list[MMG3D_LMAX+2],ilist,ns,ier,iadr,src;
+  int8_t         imax,i,i1,i2;
+  static int8_t  mmgWarn0 = 0;
 
   *warn=0;
   ns = 0;
@@ -179,11 +176,16 @@ static int MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itdeg, i
     o[1] = 0.5*(p0->c[1] + p1->c[1]);
     o[2] = 0.5*(p0->c[2] + p1->c[2]);
 
-    ip = MMG3D_newPt(mesh,o,MG_NOTAG);
+#ifdef USE_POINTMAP
+    src = p0->src;
+#else
+    src = 1;
+#endif
+    ip = MMG3D_newPt(mesh,o,MG_NOTAG,src);
 
     if ( !ip )  {
       /* reallocation of point table */
-      MMG3D_POINT_REALLOC(mesh,met,ip,mesh->gap,*warn=1;break,o,MG_NOTAG);
+      MMG3D_POINT_REALLOC(mesh,met,ip,mesh->gap,*warn=1;break,o,MG_NOTAG,src);
     }
 
     /* Interpolation of metric, if any */
@@ -240,10 +242,10 @@ static int MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itdeg, i
  *
  */
 int MMG5_swptetlag(MMG5_pMesh mesh,MMG5_pSol met,double crit,MMG3D_pPROctree PROctree,int itdeg) {
-  MMG5_pTetra   pt;
-  MMG5_pxTetra  pxt;
-  int      list[MMG3D_LMAX+2],ilist,k,it,nconf,maxit,ns,nns,ier;
-  char     i;
+  MMG5_pTetra  pt;
+  MMG5_pxTetra pxt;
+  int          list[MMG3D_LMAX+2],ilist,k,it,nconf,maxit,ns,nns,ier;
+  int8_t       i;
 
   maxit = 2;
   it = nns = 0;
@@ -289,10 +291,10 @@ int MMG5_swptetlag(MMG5_pMesh mesh,MMG5_pSol met,double crit,MMG3D_pPROctree PRO
  *
  */
 int MMG5_movtetlag(MMG5_pMesh mesh,MMG5_pSol met, int itdeg) {
-  MMG5_pTetra        pt;
-  MMG5_pPoint        ppt;
+  MMG5_pTetra   pt;
+  MMG5_pPoint   ppt;
   int           k,ier,nm,nnm,listv[MMG3D_LMAX+2],ilistv,it;
-  unsigned char i,base;
+  uint8_t       i,base;
   int           maxit;
 
   base = 1;
@@ -347,12 +349,12 @@ int MMG5_movtetlag(MMG5_pMesh mesh,MMG5_pSol met, int itdeg) {
  *
  */
 static int MMG5_coltetlag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
-  MMG5_pTetra     pt;
-  MMG5_pPoint     p0,p1;
-  double     ll,ux,uy,uz,hmi2;
-  int        k,nc,list[MMG3D_LMAX+2],ilist,base,nnm;
-  int        ier;
-  char       i,j,ip,iq,isnm;
+  MMG5_pTetra pt;
+  MMG5_pPoint p0,p1;
+  double      ll,ux,uy,uz,hmi2;
+  int         k,nc,list[MMG3D_LMAX+2],ilist,base,nnm;
+  int         ier;
+  int8_t      i,j,ip,iq,isnm;
 
   nc = nnm = 0;
   hmi2 = mesh->info.hmin*mesh->info.hmin;
@@ -413,16 +415,29 @@ static int MMG5_coltetlag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
   return nc;
 }
 
-/** Check if moving mesh with disp for a fraction t yields a valid mesh */
-int MMG5_chkmovmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t) {
+/**
+ * \param mesh pointer toward the mesh structure
+ * \param disp pointer toward the displacement structure.
+ * \param t fraction of displacement to test
+ * \param tetIdx to fill with the list of non valid tetra if provided.
+ *
+ * \return 0 if success (movement can be achieved), 1 or the number of invalid
+ * tetra otherwise.
+ *
+ * Check if moving mesh with disp for a fraction t yields a
+ * valid mesh.
+ *
+ */
+int MMG5_chkmovmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t,int *tetIdx) {
   MMG5_pTetra  pt;
   MMG5_pPoint  ppt;
   double       *v,c[4][3],tau;
-  int          k,np;
-  char         i,j;
+  int          k,np,idx;
+  int8_t       i,j;
 
   /* Pseudo time-step = fraction of disp to perform */
   tau = (double)t / MMG3D_SHORTMAX;
+  idx = 0;
 
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
@@ -436,17 +451,32 @@ int MMG5_chkmovmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t) {
         c[i][j] = ppt->c[j]+tau*v[j];
     }
 
-    if( MMG5_caltet_iso_4pt(c[0],c[1],c[2],c[3]) < MMG5_EPSOK) return 0;  //     Other criteria : eg. a rate of degradation, etc... ?
-  }
+    //     Other criteria : eg. a rate of degradation, etc... ?
+    if( MMG5_caltet_iso_4pt(c[0],c[1],c[2],c[3]) < MMG5_EPSOK) {
 
-  return 1;
+      if ( tetIdx ) {
+        tetIdx[idx++] = k;
+      }
+      else {
+        return 1;
+      }
+    }
+  }
+  return idx;
 }
 
-/** Return the largest fraction t that makes the motion along disp valid */
-short MMG5_dikomv(MMG5_pMesh mesh,MMG5_pSol disp) {
+/**
+ * \param mesh pointer toward the mesh structure
+ * \param disp pointer toward the displacement field
+ * \param lastt 0 if a movement is possible, pointer toward the last tested fraction otherwise
+ *
+ * Return the largest fraction t that makes the motion along disp valid.
+ *
+ */
+short MMG5_dikmov(MMG5_pMesh mesh,MMG5_pSol disp,short *lastt) {
   int     it,maxit;
   short   t,tmin,tmax;
-  char    ier;
+  int8_t  ier;
 
   maxit = 200;
   it = 0;
@@ -454,8 +484,10 @@ short MMG5_dikomv(MMG5_pMesh mesh,MMG5_pSol disp) {
   tmin = 0;
   tmax = MMG3D_SHORTMAX;
 
+  *lastt = 0;
+
   /* If full displacement can be achieved */
-  if ( MMG5_chkmovmesh(mesh,disp,tmax) )
+  if ( !MMG5_chkmovmesh(mesh,disp,tmax,NULL) )
     return tmax;
 
   /* Else, find the largest displacement by dichotomy */
@@ -464,21 +496,31 @@ short MMG5_dikomv(MMG5_pMesh mesh,MMG5_pSol disp) {
 
     /* Case that tmax = tmin +1 : check move with tmax */
     if ( t == tmin ) {
-      ier = MMG5_chkmovmesh(mesh,disp,tmax);
-      if ( ier )
+      ier = MMG5_chkmovmesh(mesh,disp,tmax,NULL);
+      if ( !ier ) {
         return tmax;
-      else
+      }
+      else {
+        if ( tmin==0 ) {
+          *lastt = tmax;
+        }
         return tmin;
+      }
     }
 
     /* General case: check move with t */
-    ier = MMG5_chkmovmesh(mesh,disp,t);
-    if ( ier )
+    ier = MMG5_chkmovmesh(mesh,disp,t,NULL);
+    if ( !ier ) {
       tmin = t;
+    }
     else
       tmax = t;
 
     it++;
+  }
+
+  if ( tmin==0 ) {
+    *lastt=t;
   }
 
   return tmin;
@@ -490,7 +532,7 @@ int MMG5_dispmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t,int itdeg) {
   MMG5_pPoint   ppt;
   double        *v,tau,ctau,c[4][3],ocal,ncal;
   int           k,np;
-  char          i,j;
+  int8_t        i,j;
 
   tau = (double)t /MMG3D_SHORTMAX;
   ctau = 1.0 - tau;
@@ -570,8 +612,11 @@ int MMG5_saveDisp(MMG5_pMesh mesh,MMG5_pSol disp) {
  * \param mesh mesh structure
  * \param disp displacement structure
  * \param met metric structure
+ * \param invalidTets array to store the list of invalid tetra if we are unable
+ * to move.
  *
- * \return 0 if fail, 1 if success
+ * \return 0 if fail, 1 if success to move, the opposite of the number of non
+ * valid tets if we can't move (- ninvalidTets).
  *
  * Lagrangian node displacement and meshing.
  * Code for options: info.lag >= 0 -> displacement,
@@ -579,17 +624,19 @@ int MMG5_saveDisp(MMG5_pMesh mesh,MMG5_pSol disp) {
  *                   info.lag > 1  -> displacement+remeshing with split+collapse+swap+move
  *
  */
-int MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met) {
+int MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int **invalidTets) {
   double  avlen,tau;
   int     itdc,itmn,maxitmn,maxitdc,nspl,ns,nm,nc,iit,k,warn;
-  int     nns,nnm,nnc,nnspl,nnns,nnnm,nnnc,nnnspl;
-  short   t;
-  char    ier;
+  int     nns,nnm,nnc,nnspl,nnns,nnnm,nnnc,nnnspl,ninvalidTets;
+  short   t,lastt;
+  int8_t  ier;
 
   tau = 0.0;
   maxitmn = 10;
   maxitdc = 100;
   t  = 0;
+  ninvalidTets = 0;
+  lastt = 0;
 
   //++mesh->info.fem;
 
@@ -610,11 +657,17 @@ int MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met) {
   for (itmn=0; itmn<maxitmn; itmn++) {
     nnnspl = nnnc = nnns = nnnm = 0;
 
+#ifdef USE_ELAS
     /* Extension of the velocity field */
     if ( !MMG5_velextLS(mesh,disp) ) {
       fprintf(stderr,"\n  ## Problem in func. MMG5_packLS. Exit program.\n");
       return 0;
     }
+#else
+    fprintf(stderr,"\n  ## Error: %s: you need to compile with the USE_ELAS"
+            " CMake's flag set to ON to use the rigidbody movement.\n",__func__);
+    return 0;
+#endif
 
     //MMG5_saveDisp(mesh,disp);
 
@@ -622,7 +675,7 @@ int MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met) {
     for (itdc=0; itdc<maxitdc; itdc++) {
       nnspl = nnc = nns = nnm = 0;
 
-      t = MMG5_dikomv(mesh,disp);
+      t = MMG5_dikmov(mesh,disp,&lastt);
       if ( t == 0 ) {
         if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
           fprintf(stderr,"\n   *** Stop: impossible to proceed further\n");
@@ -696,31 +749,34 @@ int MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met) {
       nnnc   += nnc;
       nnns   += nns;
 
-      if ( t == MMG3D_SHORTMAX ) break;
-    }
-    if ( mesh->info.imprim > 0 && abs(mesh->info.imprim) < 4 ) {
-      printf("   ---> Realized displacement: %f\n",tau);
-      if ( abs(mesh->info.imprim) > 2 )
+      if ( (mesh->info.imprim > 0) && (mesh->info.imprim < 4) ) {
+        printf("   ---> Realized displacement: %f\n",tau);
+      }
+
+      if ( abs(mesh->info.imprim) > 2 && mesh->info.lag )
         printf(" %d edges splitted, %d vertices collapsed, %d elements"
                " swapped, %d vertices moved.\n",nnnspl,nnnc,nnns,nnnm);
     }
-
-    if ( t == MMG3D_SHORTMAX ) break;
+    if ( t == MMG3D_SHORTMAX || (t==0 && itdc==0) ) break;
   }
+  if ( tau < MMG5_EPSD2 ) {
+    MMG5_SAFE_CALLOC(*invalidTets,mesh->np,int,
+                     printf("## Warning: Not enough memory to keep track of"
+                            " the invalid tetrahedron.\n");
+                     MMG5_DEL_MEM(mesh,disp->m);
+                     return 1);
+    ninvalidTets = MMG5_chkmovmesh(mesh,disp,lastt,*invalidTets);
+    assert ( ninvalidTets );
+  }
+
   /* Clean memory */
   /* Doing this, memcur of mesh is decreased by size of displacement */
   MMG5_DEL_MEM(mesh,disp->m);
 
-  return 1;
+  if ( ninvalidTets ) {
+    return -ninvalidTets;
+  }
+  else {
+    return 1;
+  }
 }
-#else
-/**
- *
- * Hack to avoid to have an empty translation unit (forbidden by ISO C)
- *
- */
-static void MMG3D_unused_function(void) {
-  return;
-}
-
-#endif

@@ -43,7 +43,7 @@ double MMG2D_estavglen(MMG5_pMesh mesh) {
   MMG5_pPoint    p1,p2;
   int            k,na;
   double         len,lent,dna;
-  char           i,i1,i2;
+  int8_t         i,i1,i2;
 
   na = 0;
   lent = 0.0;
@@ -102,16 +102,29 @@ inline double MMG2D_caltri_iso_3pt(double *a,double *b,double *c) {
   }
 }
 
-/** Check if moving mesh with disp for a fraction t yields a valid mesh */
-int MMG2D_chkmovmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t) {
+/**
+ * \param mesh pointer toward the mesh structure
+ * \param disp pointer toward the displacement structure.
+ * \param t fraction of displacement to test
+ * \param tetIdx to fill with the list of non valid tria if provided.
+ *
+ * \return 0 if success (movement can be achieved), 1 or the number of invalid
+ * tria otherwise.
+ *
+ * Check if moving mesh with disp for a fraction t yields a
+ * valid mesh.
+ *
+ */
+int MMG2D_chkmovmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t,int *triIdx) {
   MMG5_pTria   pt;
   MMG5_pPoint  ppt;
   double       *v,c[3][2],tau;
-  int          k,np;
-  char         i,j;
+  int          k,np,idx;
+  int8_t       i,j;
 
   /* Pseudo time-step = fraction of disp to perform */
   tau = (double)t / MMG2D_SHORTMAX;
+  idx = 0;
 
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
@@ -125,17 +138,32 @@ int MMG2D_chkmovmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t) {
         c[i][j] = ppt->c[j]+tau*v[j];
     }
 
-    if( MMG2D_caltri_iso_3pt(c[0],c[1],c[2]) < MMG2D_NULKAL) return 0;  //     Other criteria : eg. a rate of degradation, etc... ?
+    //     Other criteria : eg. a rate of degradation, etc... ?
+    if( MMG2D_caltri_iso_3pt(c[0],c[1],c[2]) < MMG2D_NULKAL) {
+      if ( triIdx ) {
+        triIdx[idx++] = k;
+      }
+      else {
+        return 1;
+      }
+    }
   }
 
-  return 1;
+  return idx;
 }
 
-/* Return the largest fraction t that makes the motion along disp valid */
-short MMG2D_dikomv(MMG5_pMesh mesh,MMG5_pSol disp) {
+/**
+ * \param mesh pointer toward the mesh structure
+ * \param disp pointer toward the displacement field
+ * \param lastt 0 if a movement is possible, pointer toward the last tested fraction otherwise
+ *
+ * Return the largest fraction t that makes the motion along disp valid.
+ *
+ */
+short MMG2D_dikomv(MMG5_pMesh mesh,MMG5_pSol disp,short *lastt) {
   int     it,maxit;
   short   t,tmin,tmax;
-  char    ier;
+  int8_t  ier;
 
   maxit = 200;
   it    = 0;
@@ -143,8 +171,10 @@ short MMG2D_dikomv(MMG5_pMesh mesh,MMG5_pSol disp) {
   tmin  = 0;
   tmax  = MMG2D_SHORTMAX;
 
+  *lastt = 0;
+
   /* If full displacement can be achieved */
-  if ( MMG2D_chkmovmesh(mesh,disp,tmax) )
+  if ( !MMG2D_chkmovmesh(mesh,disp,tmax,NULL) )
     return tmax;
 
   /* Else, find the largest displacement by dichotomy */
@@ -153,21 +183,30 @@ short MMG2D_dikomv(MMG5_pMesh mesh,MMG5_pSol disp) {
 
     /* Case that tmax = tmin +1 : check move with tmax */
     if ( t == tmin ) {
-      ier = MMG2D_chkmovmesh(mesh,disp,tmax);
-      if ( ier )
+      ier = MMG2D_chkmovmesh(mesh,disp,tmax,NULL);
+      if ( !ier ) {
         return tmax;
-      else
+      }
+      else {
+        if ( tmin==0 ) {
+          *lastt = tmax;
+        }
         return tmin;
+      }
     }
 
     /* General case: check move with t */
-    ier = MMG2D_chkmovmesh(mesh,disp,t);
-    if ( ier )
+    ier = MMG2D_chkmovmesh(mesh,disp,t,NULL);
+    if ( !ier )
       tmin = t;
     else
       tmax = t;
 
     it++;
+  }
+
+  if ( tmin==0 ) {
+    *lastt=t;
   }
 
   return tmin;
@@ -179,7 +218,7 @@ int MMG2D_dispmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t,int itdeg) {
   MMG5_pPoint   ppt;
   double        *v,tau,ctau,c[3][2],ocal,ncal;
   int           k,np;
-  char          i,j;
+  int8_t        i,j;
 
   tau = (double)t /MMG2D_SHORTMAX;
   ctau = 1.0 - tau;
@@ -246,8 +285,8 @@ int MMG2D_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itdeg,int *war
   MMG5_pPoint     p1,p2;
   double          hma2,lmax,len;
   int             k,ns,ip,ip1,ip2;
-  char            i,i1,i2,imax,ier;
-  static char     mmgWarn0=0;
+  int8_t          i,i1,i2,imax,ier;
+  static int8_t   mmgWarn0=0;
 
   *warn = 0;
   ns    = 0;
@@ -333,7 +372,7 @@ int MMG2D_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itdeg,int *war
  * \return -1 if failed.
  * \return number of collapsed points.
  *
- * Attempt to collapse small internal edges in the Lagrangian mode; only affects tetras with cc itdeg.
+ * Attempt to collapse small internal edges in the Lagrangian mode; only affects tria with cc itdeg.
  *
  */
 static int MMG2D_coleltlag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
@@ -341,7 +380,7 @@ static int MMG2D_coleltlag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
   MMG5_pPoint    p1,p2;
   double         hmi2,len;
   int            nc,k,ilist,list[MMG2D_LONMAX+2];
-  char           i,i1,i2,open;
+  int8_t         i,i1,i2,open;
 
   nc    = 0;
   hmi2  = mesh->info.hmin*mesh->info.hmin;
@@ -401,7 +440,7 @@ static int MMG2D_coleltlag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
 int MMG2D_swpmshlag(MMG5_pMesh mesh,MMG5_pSol met,double crit,int itdeg) {
   MMG5_pTria   pt;
   int          k,it,maxit,ns,nns;
-  char         i;
+  int8_t       i;
 
   maxit = 2;
   it    = 0;
@@ -470,7 +509,7 @@ int MMG2D_movtrilag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
   MMG5_pTria        pt;
   MMG5_pPoint       p0;
   int               k,it,base,maxit,nm,nnm,ilist,list[MMG2D_LONMAX+2];
-  char              i,ier;
+  int8_t            i,ier;
 
   nnm   = 0;
   it    = 0;
@@ -518,8 +557,10 @@ int MMG2D_movtrilag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
  * \param mesh mesh structure
  * \param disp displacement structure
  * \param met metric structure
+ * \param invalidTriax array to store the list of invalid tria if we are unable to move
  *
- * \return 0 if fail, 1 if success
+ * \return 0 if fail, 1 if success to move, the opposite of the number of non
+ * valid trias if we can't move (-ninvalidTrias).
  *
  * Lagrangian node displacement and meshing.
  * Code for options: info.lag >= 0 -> displacement,
@@ -527,19 +568,20 @@ int MMG2D_movtrilag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
  *                   info.lag > 1  -> displacement+remeshing with split+collapse+swap+move
  *
  */
-int MMG2D_mmg2d9(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met) {
+int MMG2D_mmg2d9(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int **invalidTrias) {
   double             avlen,tau,hmintmp,hmaxtmp;
-  int                k,itmn,itdc,maxitmn,maxitdc,iit,warn;
+  int                k,itmn,itdc,maxitmn,maxitdc,iit,warn,ninvalidTrias;
   int                nspl,nnspl,nnnspl,nc,nnc,nnnc,ns,nns,nnns,nm,nnm,nnnm;
-  short              t;
-  char               ier;
+  short              t,lastt;
+  int8_t             ier;
 
   maxitmn = 10;
   maxitdc = 100;
   t = 0;
   tau = 0.0;
+  ninvalidTrias = 0;
 
-  nnnspl = nnnc = nnns = nnnm = 0;
+  nnnspl = nnnc = nnns = nnnm = lastt = 0;
 
   if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
     fprintf(stdout,"  ** LAGRANGIAN MOTION\n");
@@ -572,10 +614,10 @@ int MMG2D_mmg2d9(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met) {
 #endif
     //MMG2D_saveDisp(mesh,disp);
     /* Sequence of dichotomy loops to find the largest admissible displacements */
-    for (itdc=1; itdc<=maxitdc; itdc++) {
+    for (itdc=0; itdc<maxitdc; itdc++) {
       nnspl = nnc = nns = nnm = 0;
 
-      t = MMG2D_dikomv(mesh,disp);
+      t = MMG2D_dikomv(mesh,disp,&lastt);
       if ( t == 0 ) {
         if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
           printf("   *** Stop: impossible to proceed further\n");
@@ -610,26 +652,26 @@ int MMG2D_mmg2d9(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met) {
             /* Collapse of points */
             nc = MMG2D_coleltlag(mesh,met,itdc);
             if ( nc < 0 ) {
-              fprintf(stdout,"  ## Problem in coltetlag. Exiting.\n");
+              fprintf(stdout,"  ## Problem in coleltlag. Exiting.\n");
               return 0;
             }
           }
 
-          /* Swap of edges in tetra that have resulted distorted from the process */
+          /* Swap of edges in tria that have resulted distorted from the process */
           /* I do not know whether it is safe to put NULL in metric here (a
            * priori ok, since there is no vertex creation or suppression) */
           if ( !mesh->info.noswap ) {
             ns = MMG2D_swpmshlag(mesh,met,1.1,itdc);
             if ( ns < 0 ) {
-              fprintf(stdout,"  ## Problem in swaptetlag. Exiting.\n");
+              fprintf(stdout,"  ## Problem in swapeltlag. Exiting.\n");
               return 0;
             }
           }
-          /* Relocate vertices of tetra which have been distorted in the displacement process */
+          /* Relocate vertices of tria which have been distorted in the displacement process */
           if ( !mesh->info.nomove ) {
             nm = MMG2D_movtrilag(mesh,met,itdc);
             if ( nm < 0 ) {
-              fprintf(stdout,"  ## Problem in movtetlag. Exiting.\n");
+              fprintf(stdout,"  ## Problem in moveltlag. Exiting.\n");
               return 0;
             }
           }
@@ -658,12 +700,12 @@ int MMG2D_mmg2d9(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met) {
     }
     if ( mesh->info.imprim > 0 && abs(mesh->info.imprim) < 4 ) {
       printf("   ---> Realized displacement: %f\n",tau);
-      if ( abs(mesh->info.imprim) > 2 )
-        printf(" %d edges splitted, %d vertices collapsed, %d elements"
-               " swapped, %d vertices moved.\n",nnnspl,nnnc,nnns,nnnm);
     }
+    if ( abs(mesh->info.imprim) > 2 && mesh->info.lag )
+      printf(" %d edges splitted, %d vertices collapsed, %d elements"
+             " swapped, %d vertices moved.\n",nnnspl,nnnc,nnns,nnnm);
 
-    if ( t == MMG2D_SHORTMAX ) break;
+    if ( (t == MMG2D_SHORTMAX) || (t==0 && itdc==0) ) break;
   }
 
   /* Reinsert standard values for hmin, hmax */
@@ -686,8 +728,23 @@ int MMG2D_mmg2d9(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met) {
     }
   }
 
+  if ( tau < MMG5_EPSD2 ) {
+    MMG5_SAFE_CALLOC(*invalidTrias,mesh->np,int,
+                     printf("## Warning: Not enough memory to keep track of"
+                            " the invalid triangles.\n");
+                     MMG5_DEL_MEM(mesh,disp->m);
+                     return 1);
+    ninvalidTrias = MMG2D_chkmovmesh(mesh,disp,lastt,*invalidTrias);
+    assert ( ninvalidTrias );
+  }
+
   /* Clean memory */
   MMG5_DEL_MEM(mesh,disp->m);
 
-  return 1;
+  if ( ninvalidTrias ) {
+    return -ninvalidTrias;
+  }
+  else {
+    return 1;
+  }
 }

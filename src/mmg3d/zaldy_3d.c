@@ -36,7 +36,7 @@
 #include "mmg3d.h"
 
 /** get new point address */
-int MMG3D_newPt(MMG5_pMesh mesh,double c[3],int16_t tag) {
+int MMG3D_newPt(MMG5_pMesh mesh,double c[3],int16_t tag,int src) {
   MMG5_pPoint  ppt;
   int     curpt;
 
@@ -56,7 +56,7 @@ int MMG3D_newPt(MMG5_pMesh mesh,double c[3],int16_t tag) {
     mesh->xp++;
     if(mesh->xp > mesh->xpmax){
       /* reallocation of xpoint table */
-      MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,MMG5_xPoint,
+      MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,MMG5_GAP,MMG5_xPoint,
                          "larger xpoint table",
                          return 0);
     }
@@ -69,6 +69,10 @@ int MMG3D_newPt(MMG5_pMesh mesh,double c[3],int16_t tag) {
   ppt->n[2]   = 0;
   ppt->tag    = tag;
   ppt->tagdel = 0;
+#ifdef USE_POINTMAP
+  assert( src );
+  ppt->src = src;
+#endif
   return curpt;
 }
 
@@ -166,8 +170,8 @@ int MMG3D_memOption_memSet(MMG5_pMesh mesh) {
  *
  */
 int MMG3D_memOption_memRepartition(MMG5_pMesh mesh) {
-  size_t     usedMem,avMem,reservedMem,npadd;
-  int        ctri,bytes;
+  size_t     usedMem,avMem,reservedMem;
+  int        ctri,bytes,npadd;
 
   /* init allocation need MMG5_MEMMIN B */
   reservedMem = MMG5_MEMMIN +
@@ -205,7 +209,7 @@ int MMG3D_memOption_memRepartition(MMG5_pMesh mesh) {
   /* If npadd is exactly the maximum memory available, we will use all the
    * memory and the analysis step will fail. As arrays may be reallocated, we
    * can have smaller values for npmax,ntmax and nemax (npadd/2). */
-  npadd = avMem/(double)(2*bytes);
+  npadd = (int)(avMem/(double)(2*bytes));
   mesh->npmax = MG_MIN(mesh->npmax,mesh->np+npadd);
   mesh->ntmax = MG_MIN(mesh->ntmax,ctri*npadd+mesh->nt);
   mesh->nemax = MG_MIN(mesh->nemax,6*npadd+mesh->ne);
@@ -229,16 +233,14 @@ int MMG3D_memOption_memRepartition(MMG5_pMesh mesh) {
  *
  * \return 0 if fail, 1 otherwise
  *
- * memory repartition for the -m option
+ * memory repartition for the -m option.
  *
  */
 int MMG3D_memOption(MMG5_pMesh mesh) {
 
-  mesh->memMax = MMG5_memSize();
-
-  mesh->npmax = MG_MAX(1.5*mesh->np,MMG3D_NPMAX);
-  mesh->nemax = MG_MAX(1.5*mesh->ne,MMG3D_NEMAX);
-  mesh->ntmax = MG_MAX(1.5*mesh->nt,MMG3D_NTMAX);
+  mesh->npmax = MG_MAX((int)(1.5*mesh->np),MMG3D_NPMAX);
+  mesh->nemax = MG_MAX((int)(1.5*mesh->ne),MMG3D_NEMAX);
+  mesh->ntmax = MG_MAX((int)(1.5*mesh->nt),MMG3D_NTMAX);
 
   return  MMG3D_memOption_memSet(mesh);
 }
@@ -291,10 +293,6 @@ int MMG3D_setMeshSize_alloc( MMG5_pMesh mesh ) {
   mesh->nenil = mesh->ne + 1;
 
   for (k=mesh->npnil; k<mesh->npmax-1; k++) {
-    /* Set tangent field of point to 0 */
-    mesh->point[k].n[0] = 0;
-    mesh->point[k].n[1] = 0;
-    mesh->point[k].n[2] = 0;
     /* link */
     mesh->point[k].tmp  = k+1;
   }

@@ -56,21 +56,26 @@ void MMG5_Init_parameters(MMG5_pMesh mesh) {
   /* [-1..10], Tune level of imprim */
   mesh->info.imprim   =  1;
   /* [0/1]    ,Turn on/off levelset meshing */
-  mesh->info.iso      =  0;
+  mesh->info.iso      =  MMG5_OFF;
   /* [n/-1]   ,Set memory size to n Mbytes/keep the default value */
   mesh->info.mem      = MMG5_NONSET_MEM;
   /* [0/1]    ,Turn on/off debug mode */
-  mesh->info.ddebug   =  0;
+  mesh->info.ddebug   =  MMG5_OFF;
   /* [n]      ,number of local parameters */
-  mesh->info.npar     =  0;
+  mesh->info.npar     =  MMG5_OFF;
   /* [0/1]    ,avoid/allow point insertion/deletion */
-  mesh->info.noinsert =  0;
+  mesh->info.noinsert =  MMG5_OFF;
   /* [0/1]    ,avoid/allow edge or face flipping */
-  mesh->info.noswap   =  0;
+  mesh->info.noswap   =  MMG5_OFF;
   /* [0/1]    ,avoid/allow point relocation */
-  mesh->info.nomove   =  0;
+  mesh->info.nomove   =  MMG5_OFF;
   /* [n]    ,number of user-defined references */
-  mesh->info.nmat = 0;
+  mesh->info.nmat = MMG5_OFF;
+  /* [-1/val]    ,Turn off/on the removal of small bubles in levelset meshing */
+  mesh->info.rmc      =  MMG5_NONSET;
+  /* [0/1]    ,avoid/allow  */
+  mesh->info.nosizreq =  MMG5_OFF;
+
 
   /* default values for doubles */
   /* angle detection */
@@ -101,7 +106,7 @@ void MMG5_Init_parameters(MMG5_pMesh mesh) {
   mesh->memMax = MMG5_memSize();
   if ( mesh->memMax ) {
     /* maximal memory = 50% of total physical memory */
-    mesh->memMax = mesh->memMax*MMG5_MEMPERCENT;
+    mesh->memMax = (size_t)(mesh->memMax*MMG5_MEMPERCENT);
   } else {
     /* default value = 800 MB */
     printf("  Maximum memory set to default value: %d MB.\n",MMG5_MEMMAX);
@@ -123,12 +128,13 @@ void MMG5_Init_fileNames(MMG5_pMesh mesh,MMG5_pSol sol
   MMG5_Set_inputMeshName(mesh,"");
   MMG5_Set_outputMeshName(mesh,"");
 
-  MMG5_Set_inputSolName(mesh,sol,"");
-  MMG5_Set_outputSolName(mesh,sol,"");
+  if ( sol ) {
+    MMG5_Set_inputSolName(mesh,sol,"");
+    MMG5_Set_outputSolName(mesh,sol,"");
+  }
 
   return;
 }
-
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -144,7 +150,7 @@ int MMG5_Set_inputMeshName(MMG5_pMesh mesh, const char* meshin) {
     MMG5_DEL_MEM(mesh,mesh->namein);
   }
 
-  if ( strlen(meshin) ) {
+  if ( meshin && strlen(meshin) ) {
     MMG5_ADD_MEM(mesh,(strlen(meshin)+1)*sizeof(char),"input mesh name",
                   fprintf(stderr,"  Exit program.\n");
                   return 0);
@@ -180,7 +186,7 @@ int MMG5_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solin) {
   if ( sol->namein )
     MMG5_DEL_MEM(mesh,sol->namein);
 
-  if ( strlen(solin) ) {
+  if ( solin && strlen(solin) ) {
     MMG5_ADD_MEM(mesh,(strlen(solin)+1)*sizeof(char),"input sol name",
                   fprintf(stderr,"  Exit program.\n");
                   return 0);
@@ -223,55 +229,93 @@ int MMG5_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solin) {
  *
  */
 int MMG5_Set_outputMeshName(MMG5_pMesh mesh, const char* meshout) {
-  char *ptrMed,*ptrGmsh;
-
-  ptrMed = ptrGmsh = NULL;
+  int  fmt = MMG5_FMT_MeditASCII,fmtin;
+  char *ptr,*ptrin;
 
   if ( mesh->nameout )
     MMG5_DEL_MEM(mesh,mesh->nameout);
 
-  if ( strlen(meshout) ) {
-    MMG5_ADD_MEM(mesh,(strlen(meshout)+1)*sizeof(char),"output mesh name",
+  if ( meshout && strlen(meshout) ) {
+    ptr   = strrchr(meshout, '.');
+
+    MMG5_ADD_MEM(mesh,(strlen(meshout)+7)*sizeof(char),"output mesh name",
                   fprintf(stderr,"  Exit program.\n");
                   return 0);
-    MMG5_SAFE_CALLOC(mesh->nameout,strlen(meshout)+1,char,return 0);
+    MMG5_SAFE_CALLOC(mesh->nameout,strlen(meshout)+7,char,return 0);
     strcpy(mesh->nameout,meshout);
+
+    if ( ( ptr && MMG5_Get_format(ptr,0)==MMG5_FMT_Unknown ) || (!ptr) || ptr == meshout ) {
+      /* No extension */
+      ptrin   = MMG5_Get_filenameExt(mesh->namein);
+      fmtin   = MMG5_Get_format(ptrin,MMG5_FMT_MeditASCII);
+      fmt     = MMG5_FMT_Unknown;
+    }
+    strcpy(mesh->nameout,meshout);
+
+    if ( fmt == MMG5_FMT_Unknown ) {
+      /* No extension */
+      switch ( fmtin ) {
+      case ( MMG5_FMT_GmshASCII ):
+        strcat(mesh->nameout,".msh");
+        break;
+      case ( MMG5_FMT_GmshBinary ):
+        strcat(mesh->nameout,".mshb");
+        break;
+      case ( MMG5_FMT_VtkVtu ):
+        strcat(mesh->nameout,".vtu");
+        break;
+      case ( MMG5_FMT_VtkVtp ):
+        strcat(mesh->nameout,".vtp");
+        break;
+      case ( MMG5_FMT_VtkVtk ):
+        strcat(mesh->nameout,".vtk");
+        break;
+      case ( MMG5_FMT_MeditBinary ):
+        strcat(mesh->nameout,".meshb");
+        break;
+      case ( MMG5_FMT_MeditASCII ): default:
+        strcat(mesh->nameout,".mesh");
+        break;
+      }
+    }
   }
   else {
     if ( mesh->namein && strlen(mesh->namein) ) {
-      MMG5_ADD_MEM(mesh,(strlen(mesh->namein)+3)*sizeof(char),"output mesh name",
+      MMG5_ADD_MEM(mesh,(strlen(mesh->namein)+9)*sizeof(char),"output mesh name",
                     fprintf(stderr,"  Exit program.\n");
                     return 0);
-      MMG5_SAFE_CALLOC(mesh->nameout,strlen(mesh->namein)+3,char,return 0);
+      MMG5_SAFE_CALLOC(mesh->nameout,strlen(mesh->namein)+9,char,return 0);
       strcpy(mesh->nameout,mesh->namein);
 
-      /* medit format? */
-      ptrMed = strstr(mesh->nameout,".mesh");
-      if ( !ptrMed )
-        /* Gmsh format? */
-        ptrGmsh = strstr(mesh->nameout,".msh");
+      ptr   = MMG5_Get_filenameExt(mesh->nameout);
+      fmt   = MMG5_Get_format(ptr,MMG5_FMT_MeditASCII);
 
-      if ( !ptrMed && !ptrGmsh ) {
-        /* filename without extension */
-        strcat(mesh->nameout,".o");
-      }
-      else if ( ptrMed ) {
-        *ptrMed = '\0';
-        strcat(mesh->nameout,".o.mesh");
-      }
-      else if ( ptrGmsh ) {
-        *ptrGmsh = '\0';
+      if ( ptr ) *ptr = '\0';
+
+      switch ( fmt ) {
+
+      case ( MMG5_FMT_GmshASCII ):
         strcat(mesh->nameout,".o.msh");
+        break;
+      case ( MMG5_FMT_GmshBinary ):
+        strcat(mesh->nameout,".o.mshb");
+        break;
+      case ( MMG5_FMT_VtkVtu ):
+        strcat(mesh->nameout,".o.vtu");
+        break;
+      case ( MMG5_FMT_VtkVtp ):
+        strcat(mesh->nameout,".o.vtp");
+        break;
+      case ( MMG5_FMT_VtkVtk ):
+        strcat(mesh->nameout,".o.vtk");
+        break;
+      case ( MMG5_FMT_MeditBinary ):
+        strcat(mesh->nameout,".o.meshb");
+        break;
+      case ( MMG5_FMT_MeditASCII ): default:
+        strcat(mesh->nameout,".o.mesh");
+        break;
       }
-
-      ptrMed = strstr(mesh->namein,".meshb");
-      ptrGmsh = strstr(mesh->namein,".mshb");
-      if ( ptrMed || ptrGmsh ) {
-        /* binary file */
-        strcat(mesh->nameout,"b");
-      }
-
-
     }
     else {
       MMG5_ADD_MEM(mesh,12*sizeof(char),"output mesh name",
@@ -306,7 +350,7 @@ int MMG5_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solout) {
   if ( sol->nameout )
     MMG5_DEL_MEM(mesh,sol->nameout);
 
-  if ( strlen(solout) ) {
+  if ( solout && strlen(solout) ) {
     MMG5_ADD_MEM(mesh,(strlen(solout)+1)*sizeof(char),"output sol name",
                   fprintf(stderr,"  Exit program.\n");
                   return 0);
@@ -314,7 +358,7 @@ int MMG5_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solout) {
     strcpy(sol->nameout,solout);
   }
   else {
-    if ( strlen(mesh->nameout) ) {
+    if ( mesh->nameout && strlen(mesh->nameout) ) {
       ptr = strstr(mesh->nameout,".mesh");
       if ( ptr ) {
         MMG5_SAFE_CALLOC(sol->nameout,strlen(mesh->nameout)+1,char,return 0);
@@ -391,6 +435,21 @@ void MMG5_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met,double hsiz) {
   return;
 }
 
+int MMG5_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol) {
+  int i;
+
+  if ( sol ) {
+    if ( mesh->nsols ) {
+      for ( i=0; i<mesh->nsols; ++i ) {
+        MMG5_DEL_MEM(mesh,(*sol)[i].m);
+      }
+    }
+    MMG5_DEL_MEM(mesh,(*sol));
+  }
+
+  return 1;
+}
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the sol structure.
@@ -408,6 +467,15 @@ void MMG5_Free_structures(MMG5_pMesh mesh,MMG5_pSol sol){
 
   if ( mesh->edge )
     MMG5_DEL_MEM(mesh,mesh->edge);
+
+  if ( mesh->adja )
+    MMG5_DEL_MEM(mesh,mesh->adja);
+
+  if ( mesh->tria )
+    MMG5_DEL_MEM(mesh,mesh->tria);
+
+  if ( mesh->adjt )
+    MMG5_DEL_MEM(mesh,mesh->adjt);
 
   /* sol */
   if ( sol && sol->m )
@@ -455,7 +523,7 @@ void MMG5_mmgFree_names(MMG5_pMesh mesh,MMG5_pSol met){
 }
 
 inline
-int MMG5_Set_defaultTruncatureSizes(MMG5_pMesh mesh,char sethmin,char sethmax) {
+int MMG5_Set_defaultTruncatureSizes(MMG5_pMesh mesh,int8_t sethmin,int8_t sethmax) {
 
   if ( !sethmin ) {
     if ( sethmax ) {
@@ -485,7 +553,7 @@ int MMG5_Set_defaultTruncatureSizes(MMG5_pMesh mesh,char sethmin,char sethmax) {
 }
 
 int MMG5_Compute_constantSize(MMG5_pMesh mesh,MMG5_pSol met,double *hsiz) {
-  char         sethmin,sethmax;
+  int8_t         sethmin,sethmax;
 
 
   if ( mesh->info.hmin > mesh->info.hsiz ) {
@@ -581,3 +649,64 @@ const char* MMG5_Get_typeName(enum MMG5_type typ)
   }
 }
 
+int MMG5_Set_multiMat(MMG5_pMesh mesh,MMG5_pSol sol,int ref,
+                      int split,int rin,int rex){
+  MMG5_pMat mat;
+  int k;
+
+  if ( !mesh->info.nmat ) {
+    fprintf(stderr,"\n  ## Error: %s: You must set the number of material",__func__);
+    fprintf(stderr," with the MMG2D_Set_iparameters function before setting");
+    fprintf(stderr," values in multi material structure. \n");
+    return 0;
+  }
+  if ( mesh->info.nmati >= mesh->info.nmat ) {
+    fprintf(stderr,"\n  ## Error: %s: unable to set a new material.\n",
+            __func__);
+    fprintf(stderr,"    max number of materials: %d\n",mesh->info.nmat);
+    return 0;
+  }
+  if ( ref < 0 ) {
+    fprintf(stderr,"\n  ## Error: %s: negative references are not allowed.\n",
+            __func__);
+    return 0;
+  }
+
+  for (k=0; k<mesh->info.nmati; k++) {
+    mat = &mesh->info.mat[k];
+
+    if ( mat->ref == ref ) {
+      mat->dospl = split;
+      if ( split ) {
+        mat->rin   = rin;
+        mat->rex   = rex;
+      }
+      else {
+        mat->rin = mat->ref;
+        mat->rex = mat->ref;
+      }
+      if ( (mesh->info.imprim > 5) || mesh->info.ddebug ) {
+        fprintf(stderr,"\n  ## Warning: %s: new materials (interior, exterior)",
+                __func__);
+        fprintf(stderr," for material of ref %d\n",ref);
+      }
+      return 1;
+    }
+  }
+
+  if ( ( split != MMG5_MMAT_Split ) && ( split != MMG5_MMAT_NoSplit ) ) {
+    fprintf(stderr,"\n ## Error: %s: unexpected value for the 'split' argument."
+            " You must use the MMG5_MMAT_Split or MMG5_MMAT_NpSplit keywords \n",
+            __func__);
+    return 0;
+  }
+
+  mesh->info.mat[mesh->info.nmati].ref   = ref;
+  mesh->info.mat[mesh->info.nmati].dospl = split;
+  mesh->info.mat[mesh->info.nmati].rin   = rin;
+  mesh->info.mat[mesh->info.nmati].rex   = rex;
+
+  mesh->info.nmati++;
+
+  return 1;
+}

@@ -38,9 +38,9 @@ int MMG5_mmg2dChkmsh(MMG5_pMesh mesh, int severe,int base) {
   int           *adja,*adja1,adj,adj1,k,i,iadr;
   int            kk,l,nk,j,ip,lon,len;
   int           *list;
-  unsigned char  voy,voy1;
-  static char    mmgErr0=0,mmgErr1=0,mmgErr2=0,mmgErr3=0,mmgErr4=0,mmgErr5=0;
-  static char    mmgErr6=0;
+  uint8_t        voy,voy1;
+  static int8_t  mmgErr0=0,mmgErr1=0,mmgErr2=0,mmgErr3=0,mmgErr4=0,mmgErr5=0;
+  static int8_t  mmgErr6=0;
 
   for (k=1; k<=mesh->nt; k++) {
     pt1 = &mesh->tria[k];
@@ -205,9 +205,9 @@ int MMG2D_chkmsh(MMG5_pMesh mesh) {
   MMG5_pTria        pt,pt1;
   MMG5_pPoint       p1,p2;
   int               *adja,*adjaj,k,jel;
-  char              i,i1,i2,j;
-  static char       mmgErr0=0,mmgErr1=0,mmgErr2=0,mmgErr3=0,mmgErr4=0;
-  static char       mmgErr6=0,mmgErr5=0;
+  int8_t            i,i1,i2,j;
+  static int8_t     mmgErr0=0,mmgErr1=0,mmgErr2=0,mmgErr3=0,mmgErr4=0;
+  static int8_t     mmgErr6=0,mmgErr5=0;
 
   /* Check adjacencies */
   for (k=1; k<=mesh->nt; k++) {

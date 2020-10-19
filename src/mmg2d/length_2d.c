@@ -81,7 +81,7 @@ double MMG2D_lencurv_iso(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2) {
 double MMG2D_lencurv_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2) {
   MMG5_pPoint      p1,p2;
   double           len,*m1,*m2,ux,uy,l1,l2;
-  static char      mmgWarn0=0,mmgWarn1=0;
+  static int8_t    mmgWarn0=0,mmgWarn1=0;
 
   p1 = &mesh->point[ip1];
   p2 = &mesh->point[ip2];

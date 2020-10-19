@@ -53,13 +53,13 @@
  *
  */
 int MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,
-                    int *ilist,int *list,double crit,char typchk) {
+                    int *ilist,int *list,double crit,int8_t typchk) {
   MMG5_pTetra    pt,pt0;
   MMG5_pPoint    p0;
   double         calold,calnew,caltmp;
   int            na,nb,np,adj,piv,npol,refdom,k,l,iel;
   int            *adja,pol[MMG3D_LMAX+2];
-  char           i,ip,ier,ifac;
+  int8_t         i,ip,ier,ifac;
 
   pt  = &mesh->tetra[start];
   refdom = pt->ref;
@@ -244,12 +244,12 @@ int MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,
  *
  */
 int MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,int *list,
-                 MMG3D_pPROctree PROctree, char typchk) {
+                 MMG3D_pPROctree PROctree, int8_t typchk) {
   MMG5_pTetra    pt;
   MMG5_pPoint    p0,p1;
-  int       iel,na,nb,np,nball,ret,start;
+  int       iel,na,nb,np,nball,src,ret,start;
   double    m[3];
-  char      ia,ip,iq;
+  int8_t    ia,ip,iq;
   int       ier;
 
   iel = list[0] / 6;
@@ -266,14 +266,19 @@ int MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,int *list,
   m[1] = 0.5*(p0->c[1] + p1->c[1]);
   m[2] = 0.5*(p0->c[2] + p1->c[2]);
 
-  np  = MMG3D_newPt(mesh,m,0);
+#ifdef USE_POINTMAP
+  src = mesh->point[na].src;
+#else
+  src = 1;
+#endif
+  np  = MMG3D_newPt(mesh,m,0,src);
   if(!np){
     MMG3D_POINT_REALLOC(mesh,met,np,mesh->gap,
                          fprintf(stderr,"\n  ## Error: %s: unable to allocate"
                                  " a new point\n",__func__);
                          MMG5_INCREASE_MEM_MESSAGE();
                          return -1
-                         ,m,0);
+                         ,m,0,src);
   }
   assert ( met );
   if ( met->m ) {

@@ -62,9 +62,9 @@ int delref(MMG5_pMesh mesh) {
  *
  */
 int setref(MMG5_pMesh mesh,int start,int ref,int putreq) {
-  MMG5_pTria      pt,pt1;
+  MMG5_pTria pt,pt1;
   int        *list,*adja,cur,base,k,iel,jel,ilist;
-  char       j,voy;
+  int8_t     j,voy;
 
   ilist = cur = 0;
   MMG5_SAFE_CALLOC(list,mesh->nt+1,int,return 0);
@@ -148,4 +148,30 @@ int MMGS_indPt(MMG5_pMesh mesh, int kp) {
     }
   }
   return 0;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param nsd index of subdomain to keep.
+ *
+ * Keep only subdomain of index \a nsd and remove other subdomains.
+ *
+ */
+void MMGS_keep_only1Subdomain ( MMG5_pMesh mesh,int nsd ) {
+
+  if ( !nsd ) {
+    return;
+  }
+
+  if ( mesh->info.imprim > 4 || mesh->info.ddebug ) {
+    fprintf(stdout,"\n  -- ONLY KEEP DOMAIN OF REF %d\n",nsd );
+  }
+
+  MMG5_mark_verticesAsUnused ( mesh );
+
+  MMG5_keep_subdomainElts ( mesh, nsd, MMGS_delElt );
+
+  MMG5_mark_usedVertices ( mesh,MMGS_delPt );
+
+  return;
 }

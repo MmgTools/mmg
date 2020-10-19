@@ -180,12 +180,12 @@ void MMG3D_freePROctree(MMG5_pMesh mesh,MMG3D_pPROctree *q)
  */
 int64_t MMG3D_getPROctreeCoordinate(MMG3D_pPROctree q, double* ver, int dim)
 {
-  int64_t s    = 1<<10;
+  int64_t s    = 1<<20;
   double  prec = 1./(1<<30);
   int place = 0;
-  int ix = floor((ver[0]-prec)*s);
-  int iy = floor((ver[1]-prec)*s);
-  int iz = floor((ver[2]-prec)*s);
+  int ix = (int)floor((ver[0]-prec)*s);
+  int iy = (int)floor((ver[1]-prec)*s);
+  int iz = (int)floor((ver[2]-prec)*s);
   ix = (ix > 0) ? ix:0;
   iy = (iy > 0) ? iy:0;
   iz = (iz > 0) ? iz:0;
@@ -222,7 +222,7 @@ int64_t MMG3D_getPROctreeCoordinate(MMG3D_pPROctree q, double* ver, int dim)
  */
 int MMG3D_movePROctree(MMG5_pMesh mesh, MMG3D_pPROctree q, int no, double* newVer, double* oldVer)
 {
-  int oldCoor, newCoor;
+  int64_t oldCoor, newCoor;
   double pt[3];
   int dim;
 
@@ -315,7 +315,7 @@ void MMG3D_placeInListPROctree(MMG3D_PROctree_s** qlist, MMG3D_PROctree_s* q, in
 {
   memmove(&(qlist[index+2]),&(qlist[index+1]),(size-(index+1))*sizeof(MMG3D_PROctree_s*));
   #ifdef DEBUG
-  if (index+2+(size-(index+1)>61 || index+1<0)
+  if (index+2+(size-(index+1))>61 || index+1<0)
     fprintf(stderr, "\n  ## Error: %s: index"
             " too large %i > 61\n",__func__, index+2+(size-(index+1));
   #endif
@@ -439,7 +439,8 @@ int MMG3D_intersectRect(double *rectin, double *rectinout)
  *
  */
 int MMG3D_getListSquareRec(MMG3D_PROctree_s* q, double* center, double* rect,
-                            MMG3D_PROctree_s*** qlist, double* dist, double* ani, double l0, int nc, int dim, int* index)
+                            MMG3D_PROctree_s*** qlist, double* dist, double* ani,
+                           double l0, int nc, int dim, int* index)
 {
   double recttemp[6];
   double centertemp[3];
@@ -463,6 +464,7 @@ int MMG3D_getListSquareRec(MMG3D_PROctree_s* q, double* center, double* rect,
     //~ return;
   //~ }
 
+  assert ( nc>= 3 );
   if (q->branches==NULL && q->v != NULL)
   {
     // the vector dist is of size nc whereas qlist allows nc-3 inputs
@@ -582,6 +584,7 @@ int MMG3D_getListSquare(MMG5_pMesh mesh, double* ani, MMG3D_pPROctree q, double*
   //instead of counting exactly the number of cells to be listed, the
   //maximum size is set to nc-3 (so the list dist can have nc-3 values + 3 coordinates of
   //the center of the rectangle)
+  assert(q->nc>=3);
   index = q->nc-3;
 
   MMG5_ADD_MEM(mesh,index*sizeof(MMG3D_PROctree_s*),"PROctree cell",return -1);
@@ -645,9 +648,9 @@ int MMG3D_getListSquare(MMG5_pMesh mesh, double* ani, MMG3D_pPROctree q, double*
 int MMG3D_addPROctreeRec(MMG5_pMesh mesh, MMG3D_PROctree_s* q, double* ver,
                          const int no, int nv)
 {
-  double   pt[3];
+  double   pt[3],quadrant;
   int      dim, nbBitsInt,depthMax,i,j,k;
-  int      quadrant,sizBr;
+  int      sizBr;
   int      sizeRealloc;
 
   nbBitsInt = sizeof(int64_t)*8;
@@ -714,7 +717,7 @@ int MMG3D_addPROctreeRec(MMG5_pMesh mesh, MMG3D_PROctree_s* q, double* ver,
 
     }else // Recursive call in the corresponding sub cell
     {
-      quadrant = 0;
+      quadrant = 0.;
       for ( i = 0; i<dim; i++)
       {
         quadrant += ((double) (ver[i]>0.5))*(1<<i);
@@ -723,7 +726,7 @@ int MMG3D_addPROctreeRec(MMG5_pMesh mesh, MMG3D_PROctree_s* q, double* ver,
       }
 
       q->nbVer++;
-      if (!MMG3D_addPROctreeRec(mesh, &(q->branches[quadrant]), ver, no, nv))
+      if (!MMG3D_addPROctreeRec(mesh, &(q->branches[(int)quadrant]), ver, no, nv))
         return 0;
     }
   }else // maximum PROctree depth reached
@@ -890,8 +893,8 @@ void MMG3D_mergeBranches(MMG5_pMesh mesh,MMG3D_PROctree_s* q, int dim, int nv)
  */
 int MMG3D_delPROctreeRec(MMG5_pMesh mesh, MMG3D_PROctree_s* q, double* ver, const int no, const int nv)
 {
+  double quadrant;
   int i;
-  int quadrant;
   int dim = mesh->dim;
   int nbVerTemp;
 
@@ -913,7 +916,7 @@ int MMG3D_delPROctreeRec(MMG5_pMesh mesh, MMG3D_PROctree_s* q, double* ver, cons
 
   }else if ( q->nbVer == nv+1)
   {
-    quadrant = 0;
+    quadrant = 0.;
     for ( i = 0; i<dim; ++i)
     {
       quadrant += ((double) (ver[i]>0.5))*(1<<i);
@@ -921,13 +924,13 @@ int MMG3D_delPROctreeRec(MMG5_pMesh mesh, MMG3D_PROctree_s* q, double* ver, cons
       ver[i] *= 2;
     }
     --q->nbVer;
-    nbVerTemp = q->branches[quadrant].nbVer;
+    nbVerTemp = q->branches[(int)quadrant].nbVer;
 
     // warning: calling recursively here is not optimal
-    if(!MMG3D_delPROctreeRec(mesh, &(q->branches[quadrant]), ver, no, nv))
+    if(!MMG3D_delPROctreeRec(mesh, &(q->branches[(int)quadrant]), ver, no, nv))
       return 0;
 
-    if (nbVerTemp > q->branches[quadrant].nbVer)
+    if (nbVerTemp > q->branches[(int)quadrant].nbVer)
     {
       MMG5_ADD_MEM(mesh,nv*sizeof(int),"PROctree vertices table",
                     return 0);
@@ -940,7 +943,7 @@ int MMG3D_delPROctreeRec(MMG5_pMesh mesh, MMG3D_PROctree_s* q, double* ver, cons
 
   }else if (q->branches != NULL)
   {
-    quadrant = 0;
+    quadrant = 0.;
     for ( i = 0; i<dim; ++i)
     {
       quadrant += ((double) (ver[i]>0.5))*(1<<i);
@@ -949,10 +952,10 @@ int MMG3D_delPROctreeRec(MMG5_pMesh mesh, MMG3D_PROctree_s* q, double* ver, cons
     }
 
     --q->nbVer;
-    nbVerTemp = q->branches[quadrant].nbVer;
-    if(!MMG3D_delPROctreeRec(mesh, &(q->branches[quadrant]), ver, no, nv))
+    nbVerTemp = q->branches[(int)quadrant].nbVer;
+    if(!MMG3D_delPROctreeRec(mesh, &(q->branches[(int)quadrant]), ver, no, nv))
       return 0;
-    if (nbVerTemp <= q->branches[quadrant].nbVer) // test if deletion worked
+    if (nbVerTemp <= q->branches[(int)quadrant].nbVer) // test if deletion worked
     {
       ++q->nbVer;
     }
@@ -1027,7 +1030,7 @@ void MMG3D_printArbre(MMG3D_pPROctree q)
 
   dim = 3;
   int i;
-  for (i = 0; i<sizeof(int)*8/dim; i++)
+  for (i = 0; i<(int)sizeof(int)*8/dim; i++)
   {
     fprintf(stdout,"\n depth %i \n", i);
     MMG3D_printArbreDepth(q->q0, i, q->nv, dim);
@@ -1049,7 +1052,7 @@ void MMG3D_printArbre(MMG3D_pPROctree q)
 void MMG3D_printSubArbre(MMG3D_PROctree_s* q, int nv, int dim)
 {
   int i;
-  for (i = 0; i<sizeof(int)*8/dim; i++)
+  for (i = 0; i<(int)sizeof(int)*8/dim; i++)
   {
     fprintf(stdout,"\n depth %i \n", i);
     MMG3D_printArbreDepth(q, i, nv, dim);
@@ -1078,7 +1081,7 @@ void MMG3D_sizeArbreRec(MMG3D_PROctree_s* q, int nv, int dim,int* s1, int* s2)
     for (i= 0; i <(1<<dim); i++)
     {
       MMG3D_sizeArbreRec(&(q->branches[i]),nv,dim, s1, s2);
-      (*s1) += sizeof(MMG3D_PROctree_s)+(1<<dim)*sizeof(MMG3D_PROctree_s*);
+      (*s1) +=(int)( sizeof(MMG3D_PROctree_s)+(1<<dim)*sizeof(MMG3D_PROctree_s*));
     }
   }else if(q->v != NULL)
   {
@@ -1091,7 +1094,7 @@ void MMG3D_sizeArbreRec(MMG3D_PROctree_s* q, int nv, int dim,int* s1, int* s2)
     nVer |= nVer >> 8;
     nVer |= nVer >> 16;
     nVer++;
-    nVer = (nVer < nv) ? nVer : ((q->nbVer-0.1)/nv+1)*nv;
+    nVer = (nVer < nv) ? nVer : (int)(((q->nbVer-0.1)/nv+1)*nv);
     (*s2) += nVer*sizeof(int);
     (*s1) += sizeof(MMG3D_PROctree_s);
   }else

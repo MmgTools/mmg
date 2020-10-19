@@ -27,7 +27,7 @@
 #include <time.h>
 #include "mmgcommon.h"
 
-#ifndef POSIX
+#ifndef MMG_POSIX
 #include <windows.h>
 #else
 #include <sys/time.h>
@@ -57,7 +57,7 @@ extern "C" {
  */
 typedef struct mytime {
   double  gini,gend,gdif,uini,uend,udif,sini,send,sdif;
-#ifdef POSIX
+#ifdef MMG_POSIX
   struct  timeval rutim;
   struct  rusage  ru;
 #else

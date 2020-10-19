@@ -34,7 +34,7 @@
 
 #include "mmg3d.h"
 
-extern char ddb;
+extern int8_t ddb;
 
 /**
  * \param c1 coordinates of the first point of the curve.
@@ -149,7 +149,7 @@ MMG5_BezierGeod(double c1[3],double c2[3],double t1[3],double t2[3]) {
  *
  */
 inline int
-MMG5_BezierEdge(MMG5_pMesh mesh,int ip0,int ip1,double b0[3],double b1[3],char ised, double v[3]) {
+MMG5_BezierEdge(MMG5_pMesh mesh,int ip0,int ip1,double b0[3],double b1[3],int8_t ised, double v[3]) {
   MMG5_pPoint   p0,p1;
   MMG5_pxPoint  pxp0,pxp1;
   double   ux,uy,uz,ps,ps1,ps2,*n1,*n2,np0[3],np1[3],t0[3],t1[3],il,ll,alpha;
@@ -324,12 +324,12 @@ MMG5_BezierEdge(MMG5_pMesh mesh,int ip0,int ip1,double b0[3],double b1[3],char i
  * \todo merge with the MMG5_mmg3dBeizerCP function and remove the pointer
  * toward this functions.
  */
-int MMG5_mmg3dBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,MMG5_pBezier pb,char ori) {
+int MMG5_mmg3dBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,MMG5_pBezier pb,int8_t ori) {
   MMG5_pPoint    p[3];
   MMG5_xPoint   *pxp;
   double        *n1,*n2,nt[3],t1[3],t2[3],ps,ps2,dd,ux,uy,uz,l,ll,alpha;
   int            ia,ib,ic;
-  char           i,i1,i2,im,isnm;
+  int8_t         i,i1,i2,im,isnm;
 
   ia   = pt->v[0];
   ib   = pt->v[1];
@@ -373,6 +373,7 @@ int MMG5_mmg3dBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,MMG5_pBezier pb,char ori) {
           nt[1] *= -1.0;
           nt[2] *= -1.0;
         }
+        /* Choose the closest normal to our surface to ensure smoothness */
         ps  = pxp->n1[0]*nt[0] + pxp->n1[1]*nt[1] + pxp->n1[2]*nt[2];
         ps2 = pxp->n2[0]*nt[0] + pxp->n2[1]*nt[1] + pxp->n2[2]*nt[2];
         if ( fabs(ps) > fabs(ps2) )
@@ -380,12 +381,22 @@ int MMG5_mmg3dBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,MMG5_pBezier pb,char ori) {
         else
           memcpy(&pb->n[i],pxp->n2,3*sizeof(double));
         memcpy(&pb->t[i],p[i]->n,3*sizeof(double));
+
+        /* Normal reorientation if needed */
+        ps  = pb->n[i][0]*nt[0] + pb->n[i][1]*nt[1] + pb->n[i][2]*nt[2];
+        if ( ps < 0.0 ) {
+          pb->n[i][0] *= -1.0;
+          pb->n[i][1] *= -1.0;
+          pb->n[i][2] *= -1.0;
+        }
       }
       else
         memcpy(&pb->n[i],pxp->n1,3*sizeof(double));
     }
   }
 
+  /** Orientation of the normals at non-manifold points */
+  /* Detect non-manifold points */
   im = -1;
   isnm = 0;
   for (i=0; i<3; i++) {
@@ -395,7 +406,10 @@ int MMG5_mmg3dBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,MMG5_pBezier pb,char ori) {
       im = i;
   }
 
+  /* Orientation of the normal */
   if ( isnm ) {
+    /* with respect to the normal at manifold points if at least one manifold
+     * point is detected. */
     if ( im != -1 ) {
       for (i=0; i<3; i++) {
         if ( p[i]->tag & MG_NOM ) {
@@ -409,6 +423,8 @@ int MMG5_mmg3dBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,MMG5_pBezier pb,char ori) {
       }
     }
     else {
+      /* with respect to the normal at point 0 in the other case (all vertices are
+       * non-manifold) */
       for (i=1; i<3; i++) {
         if ( p[i]->tag & MG_NOM ) {
           ps = pb->n[i][0]*pb->n[0][0] + pb->n[i][1]*pb->n[0][1] + pb->n[i][2]*pb->n[0][2];
@@ -432,7 +448,7 @@ int MMG5_mmg3dBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,MMG5_pBezier pb,char ori) {
     uz = p[i2]->c[2] - p[i1]->c[2];
 
     ll = ux*ux + uy*uy + uz*uz;   // A PROTEGER !!!!
-    l = sqrt(ll);
+    l  = sqrt(ll);
 
     /* choose normals */
     n1 = pb->n[i1];
@@ -469,7 +485,9 @@ int MMG5_mmg3dBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,MMG5_pBezier pb,char ori) {
         }
       }
 
-      /* tangent evaluation */
+      /* tangent evaluation using quadratic variation theory (cf Vlachos, Curve
+       * PN Triangles: 3.3): reflection of the mean tangent across the plane
+       * perpendicular to the edge */
       ps = ux*(pb->t[i1][0]+pb->t[i2][0]) + uy*(pb->t[i1][1]+pb->t[i2][1]) + uz*(pb->t[i1][2]+pb->t[i2][2]);
       ps = 2.0 * ps / ll;
       pb->t[i+3][0] = pb->t[i1][0] + pb->t[i2][0] - ps*ux;
@@ -506,7 +524,9 @@ int MMG5_mmg3dBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,MMG5_pBezier pb,char ori) {
     pb->b[2*i+4][1] = p[i2]->c[1] + alpha * t2[1];
     pb->b[2*i+4][2] = p[i2]->c[2] + alpha * t2[2];
 
-    /* normal evaluation */
+    /* normal evaluation using quadratic variation theory (cf Vlachos, Curve PN
+     * Triangles: 3.3): reflection of the mean normal across the plane
+     * perpendicular to the edge */
     ps = ux*(n1[0]+n2[0]) + uy*(n1[1]+n2[1]) + uz*(n1[2]+n2[2]);
     ps = 2.0*ps / ll;
     pb->n[i+3][0] = n1[0] + n2[0] - ps*ux;
@@ -550,7 +570,7 @@ int MMG5_mmg3dBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,MMG5_pBezier pb,char ori) {
  */
 int MMG3D_bezierInt(MMG5_pBezier pb,double uv[2],double o[3],double no[3],double to[3]) {
   double    dd,u,v,w,ps,ux,uy,uz;
-  char      i;
+  int8_t    i;
 
   memset(to,0,3*sizeof(double));
   u = uv[0];
@@ -570,6 +590,7 @@ int MMG3D_bezierInt(MMG5_pBezier pb,double uv[2],double o[3],double no[3],double
     /* linear interpolation, not used here
        no[i] = pb->n[0][i]*w + pb->n[1][i]*u + pb->n[2][i]*v; */
   }
+  assert ( no[0]*no[0] + no[1]*no[1] + no[2]*no[2] >0 );
 
   /* tangent */
   if ( w < MMG5_EPSD2 ) {

@@ -34,7 +34,7 @@
 
 #include "inlined_functions_3d.h"
 
-extern char ddb;
+extern int8_t ddb;
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -53,7 +53,7 @@ extern char ddb;
  *
  */
 int MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
-                    int it1,int it2,char typchk) {
+                    int it1,int it2,int8_t typchk) {
   MMG5_pTetra   pt,pt0;
   MMG5_pxTetra  pxt;
   MMG5_pPoint   p0,p1,ppt0;
@@ -62,7 +62,7 @@ int MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
   double        b0[3],b1[3],n[3],v[3],c[3],ux,uy,uz,ps,disnat,dischg;
   double        cal1,cal2,calnat,calchg,calold,calnew,caltmp,hausd;
   int           iel,iel1,iel2,np,nq,na1,na2,k,nminus,nplus,isloc,l,info;
-  char          ifa1,ifa2,ia,ip,iq,ia1,ia2,j,isshell,ier;
+  int8_t        ifa1,ifa2,ia,ip,iq,ia1,ia2,j,isshell,ier;
 
   iel = list[0] / 6;
   ia  = list[0] % 6;
@@ -432,12 +432,12 @@ int MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
  *
  */
 int MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,
-                 MMG3D_pPROctree PROctree, char typchk) {
+                 MMG3D_pPROctree PROctree, int8_t typchk) {
   MMG5_pTetra   pt,pt1;
   MMG5_pPoint   p0,p1;
-  int           iel,iel1,ilist,np,nq,nm;
+  int           iel,iel1,ilist,np,nq,nm,src;
   double        c[3];
-  char          ia,iface1,j,ipa,im;
+  int8_t        ia,iface1,j,ipa,im;
   int           ier;
 #ifndef NDEBUG
   int           na;
@@ -477,14 +477,19 @@ int MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,
   c[0] = 0.5*( p0->c[0] + p1->c[0]);
   c[1] = 0.5*( p0->c[1] + p1->c[1]);
   c[2] = 0.5*( p0->c[2] + p1->c[2]);
-  nm = MMG3D_newPt(mesh,c,MG_BDY);
+#ifdef USE_POINTMAP
+  src = mesh->point[np].src;
+#else
+  src = 1;
+#endif
+  nm = MMG3D_newPt(mesh,c,MG_BDY,src);
   if ( !nm ) {
     MMG3D_POINT_REALLOC(mesh,met,nm,mesh->gap,
                          fprintf(stderr,"\n  ## Error: %s: unable to allocate a"
                                  " new point\n",__func__);
                          MMG5_INCREASE_MEM_MESSAGE();
                          return -1
-                         ,c,MG_BDY);
+                         ,c,MG_BDY,src);
   }
   assert ( met );
   if ( met->m ) {
@@ -558,16 +563,16 @@ int MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,
  * \remark used in anatet4 to remove the tetra with multiple boundary faces.
  *
  */
-int MMG3D_swap23(MMG5_pMesh mesh,MMG5_pSol met,int k,char metRidTyp,
+int MMG3D_swap23(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t metRidTyp,
                  int ifac,int conf0,int adj,int conf1) {
-  MMG5_pTetra          pt0,pt1,ptnew;
-  MMG5_xTetra          xt[3];
-  MMG5_pxTetra         pxt0,pxt1;
-  int                  k1,*adja,iel,np,xt1;
-  int                  adj0_2,adj0_3,adj1_1,adj1_2,adj1_3;
-  char                 i,isxt[3];
-  unsigned char        tau0[4],tau1[4];
-  const unsigned char *taued0,*taued1;
+  MMG5_pTetra   pt0,pt1,ptnew;
+  MMG5_xTetra   xt[3];
+  MMG5_pxTetra  pxt0,pxt1;
+  int           k1,*adja,iel,np,xt1;
+  int           adj0_2,adj0_3,adj1_1,adj1_2,adj1_3;
+  int8_t        i,isxt[3];
+  uint8_t       tau0[4],tau1[4];
+  const uint8_t *taued0,*taued1;
 
   pt0     = &mesh->tetra[k];
 
@@ -897,7 +902,7 @@ int MMG3D_swap23(MMG5_pMesh mesh,MMG5_pSol met,int k,char metRidTyp,
           mesh->xt++;
           if ( mesh->xt > mesh->xtmax ) {
             /* realloc of xtetras table */
-            MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
+            MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
                                "larger xtetra table",
                                mesh->xt--;
                                fprintf(stderr,"  Exit program.\n");
@@ -920,7 +925,7 @@ int MMG3D_swap23(MMG5_pMesh mesh,MMG5_pSol met,int k,char metRidTyp,
         mesh->xt++;
         if ( mesh->xt > mesh->xtmax ) {
           /* realloc of xtetras table */
-          MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
+          MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
                              "larger xtetra table",
                              mesh->xt--;
                              fprintf(stderr,"  Exit program.\n");
@@ -936,7 +941,7 @@ int MMG3D_swap23(MMG5_pMesh mesh,MMG5_pSol met,int k,char metRidTyp,
         mesh->xt++;
         if ( mesh->xt > mesh->xtmax ) {
           /* realloc of xtetras table */
-          MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
+          MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
                              "larger xtetra table",
                              mesh->xt--;
                              fprintf(stderr,"  Exit program.\n");
@@ -961,7 +966,7 @@ int MMG3D_swap23(MMG5_pMesh mesh,MMG5_pSol met,int k,char metRidTyp,
       mesh->xt++;
       if ( mesh->xt > mesh->xtmax ) {
         /* realloc of xtetras table */
-        MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
+        MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
                            "larger xtetra table",
                            mesh->xt--;
                            fprintf(stderr,"  Exit program.\n");

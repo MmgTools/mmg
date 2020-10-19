@@ -1,4 +1,3 @@
-
 !> @author
 !> Cecile Dobrzynski, Charles Dapogny, Pascal Frey and Algiane Froehly
 !> @brief

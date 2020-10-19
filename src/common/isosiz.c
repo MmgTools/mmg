@@ -167,6 +167,7 @@ int MMG5_sum_reqEdgeLengthsAtPoint ( MMG5_pMesh mesh,MMG5_pSol met,int ip0,int i
 int MMG5_compute_meanMetricAtMarkedPoints_iso ( MMG5_pMesh mesh,MMG5_pSol met ) {
   MMG5_pPoint p0;
   int         k;
+  int         mmgWarn = 0;
 
   for ( k=1; k<=mesh->np; k++ ) {
     p0 = &mesh->point[k];
@@ -176,6 +177,14 @@ int MMG5_compute_meanMetricAtMarkedPoints_iso ( MMG5_pMesh mesh,MMG5_pSol met ) 
 
     met->m[k] /= p0->s;
     p0->flag = 3;
+
+    /* Warn the user that edge size is erased */
+    if ( !mmgWarn ) {
+      mmgWarn = 1;
+      if ( mesh->info.ddebug || (mesh->info.imprim > 4) ) {
+        printf("\n  -- SIZEMAP CORRECTION : overwritten of sizes at required vertices\n");
+      }
+    }
   }
 
   return 1;
@@ -184,6 +193,7 @@ int MMG5_compute_meanMetricAtMarkedPoints_iso ( MMG5_pMesh mesh,MMG5_pSol met ) 
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
+ * \param ismet 1 if user provided metric
  *
  * \return 1 if success, 0 if fail.
  *
@@ -191,10 +201,9 @@ int MMG5_compute_meanMetricAtMarkedPoints_iso ( MMG5_pMesh mesh,MMG5_pSol met ) 
  * that are at the extremities of a required edge.
  *
  */
-int MMG5_reset_metricAtReqEdges_surf ( MMG5_pMesh mesh,MMG5_pSol met ) {
+int MMG5_reset_metricAtReqEdges_surf ( MMG5_pMesh mesh,MMG5_pSol met,int8_t ismet ) {
   MMG5_pTria  pt;
   int         k,i,j,ip0,ip1,iad0,iad1;
-  int8_t      ismet = mesh->info.inputMet;
 
   if ( ismet ) {
     for ( k=1; k<=mesh->nt; k++ ) {

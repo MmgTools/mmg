@@ -51,12 +51,12 @@
  *
  */
 static int
-MMGS_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, int start, char istart) {
+MMGS_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, int start, int8_t istart) {
   MMG5_pTria       pt;
   double           v1, v2;
   int              *adja,k,ip1,ip2,end1;
-  char             i,i1,smsgn;
-  static char      mmgWarn=0;
+  int8_t           i,i1,smsgn;
+  static int8_t    mmgWarn=0;
 
   k = start;
   i = MMG5_inxt2[istart];
@@ -141,7 +141,7 @@ int MMGS_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pPoint   p0;
   double        *tmp,v1,v2;
   int           k,nc,ns,ip,ip1,ip2;
-  char          i;
+  int8_t        i;
 
   MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(double),"temporary table",
                 fprintf(stderr,"  Exit program.\n");
@@ -220,17 +220,19 @@ int MMGS_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
  * \warning i inxt[i] is one edge of the implicit boundary.
  *
  */
-int MMGS_chkmaniball(MMG5_pMesh mesh, int start, char istart) {
-  MMG5_pTria         pt;
+int MMGS_chkmaniball(MMG5_pMesh mesh, int start, int8_t istart) {
   int                *adja,k;
-  char               i,i1;
+  int8_t             i,i1;
 
-  pt = &mesh->tria[start];
   k = start;
   i = istart;
 
   i1 = MMG5_iprv2[i];
+
+#ifndef NDEBUG
+  MMG5_pTria pt = &mesh->tria[start];
   assert( MG_EDG(pt->tag[i1]) && (pt->edg[i1]==MG_ISO) );
+#endif
 
   /* First travel, while another part of the implicit boundary is not met */
   do {
@@ -315,8 +317,8 @@ static
 int MMGS_chkmanimesh(MMG5_pMesh mesh) {
   MMG5_pTria      pt;
   int             *adja,k,cnt,iel;
-  char            i,i1;
-  static char     mmgWarn0 = 0;
+  int8_t          i,i1;
+  static int8_t   mmgWarn0 = 0;
 
 
   /* First check: check whether one triangle in the mesh has 3 boundary faces */
@@ -375,19 +377,20 @@ int MMGS_chkmanimesh(MMG5_pMesh mesh) {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the level-set values.
+ * \param met pointer toward a metric (non-mandatory).
  * \return 1 if success, 0 otherwise.
  *
  * Proceed to discretization of the implicit function carried by sol into mesh,
  * once values of sol have been snapped/checked
  *
  */
-static int MMGS_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol){
+static int MMGS_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
   MMG5_pTria   pt;
   MMG5_pPoint  p0,p1;
   MMG5_Hash   hash;
   double       c[3],v0,v1,s;
   int          vx[3],nb,k,ip0,ip1,np,ns,nt,ier;
-  char         ia;
+  int8_t       ia;
   /* reset point flags and h */
   for (k=1; k<=mesh->np; k++)
     mesh->point[k].flag = 0;
@@ -455,6 +458,24 @@ static int MMGS_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol){
                             ,c,NULL);
       }
       sol->m[np] = mesh->info.ls;
+
+      /* If user provide a metric, interpolate it at the new point */
+      if ( met && met->m ) {
+        if ( met->size > 1 ) {
+          ier = MMGS_intmet33_ani(mesh,met,k,ia,np,s);
+        }
+        else {
+          ier = intmet_iso(mesh,met,k,ia,np,s);
+        }
+        if ( ier <= 0 ) {
+          // Unable to compute the metric
+          fprintf(stderr,"\n  ## Error: %s: unable to"
+                  " interpolate the metric during the level-set"
+                  " discretization\n",__func__);
+          return 0;
+        }
+      }
+
       MMG5_hashEdge(mesh,&hash,ip0,ip1,np);
     }
   }
@@ -509,6 +530,10 @@ static int MMGS_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol){
   if ( (mesh->info.ddebug || abs(mesh->info.imprim) > 5) && ns > 0 )
     fprintf(stdout,"     %7d splitted\n",ns);
 
+  /* reset point flags */
+  for (k=1; k<=mesh->np; k++)
+    mesh->point[k].flag = 0;
+
   MMG5_DEL_MEM(mesh,hash.item);
   return ns;
 }
@@ -525,7 +550,7 @@ static int MMGS_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol) {
   MMG5_pTria   pt;
   double       v,v1;
   int          k,ip,ip1;
-  char         nmns,npls,nz,i;
+  int8_t       nmns,npls,nz,i;
 
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
@@ -574,13 +599,15 @@ static int MMGS_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol) {
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param sol pointer toward the solution structure
+ * \param sol pointer toward the level-set
+ * \param met pointer toward a metric (optionnal)
+ *
  * \return 0 if fail, 1 otherwise.
  *
  * Create implicit surface in mesh.
  *
  */
-int MMGS_mmgs2(MMG5_pMesh mesh,MMG5_pSol sol) {
+int MMGS_mmgs2(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
 
   if ( abs(mesh->info.imprim) > 3 )
     fprintf(stdout,"  ** ISOSURFACE EXTRACTION\n");
@@ -599,7 +626,7 @@ int MMGS_mmgs2(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   MMG5_DEL_MEM(mesh,mesh->adja);
 
-  if ( !MMGS_cuttri_ls(mesh,sol) ) {
+  if ( !MMGS_cuttri_ls(mesh,sol,met) ) {
     fprintf(stderr,"\n  ## Problem in discretizing implicit function. Exit program.\n");
     return 0;
   }

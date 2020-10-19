@@ -37,13 +37,14 @@
 
 #include <stdarg.h>
 
+#include "libmmgtypes.h"
+
 #include "chrono.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include "libmmgtypes.h"
 
 /*----------------------------- functions header -----------------------------*/
 /* Initialization functions */
@@ -157,6 +158,22 @@ int  MMG5_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solout);
  */
 void MMG5_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met,double hsiz);
 
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the sol structure.
+ * \param ref input tetra reference.
+ * \param split MMG5_MMAT_NoSplit if the entity must not be splitted, MMG5_MMAT_Split otherwise
+ * \param rin internal reference after ls discretization
+ * \param rex external reference after ls discretization
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Set the reference mapping for the elements of ref \a ref in ls discretization mode.
+ *
+ */
+  int  MMG5_Set_multiMat(MMG5_pMesh mesh, MMG5_pSol sol,int ref,int split,
+                         int rin, int rex);
+
+
 /* deallocations */
 void MMG5_Free_structures(MMG5_pMesh mesh,MMG5_pSol sol);
 
@@ -186,7 +203,7 @@ void MMG5_mmgFree_names(MMG5_pMesh mesh, MMG5_pSol met);
  * \Remark not for extern users.
  *
  */
-extern int MMG5_Set_defaultTruncatureSizes(MMG5_pMesh mesh,char sethmin,char sethmax);
+extern int MMG5_Set_defaultTruncatureSizes(MMG5_pMesh mesh,int8_t sethmin,int8_t sethmax);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -221,6 +238,36 @@ const char* MMG5_Get_entitiesName(enum MMG5_entities ent);
  *
  */
 const char* MMG5_Get_typeName(enum MMG5_type typ);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward an array of solution structure (that stores solution fields).
+ * \return 1
+ *
+ * Deallocation of an array of solution fields
+ *
+ */
+int MMG5_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param filename name of file.
+ *
+ * \return 1 if success, 0 if fail.
+ *
+ * Save node list at .node file format (Tetgen/Triangle).
+ */
+int MMG5_saveNode(MMG5_pMesh mesh,const char *filename);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param filename name of file.
+ *
+ * \return 1 if success, 0 if fail.
+ *
+ * Save edge list at .edge file format (Tetgen/Triangle).
+ */
+int MMG5_saveEdge(MMG5_pMesh mesh,const char *filename);
 
 #ifdef __cplusplus
 }

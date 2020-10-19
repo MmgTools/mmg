@@ -22,14 +22,14 @@
 */
 #include "mmg2d.h"
 
-// extern char ddb;
+// extern int8_t ddb;
 
 /* Check if triangle k should be split based on geometric and rough edge length considerations */
 int MMG2D_chkedg(MMG5_pMesh mesh, int k) {
   MMG5_pTria        pt;
   MMG5_pPoint       p1,p2;
   double            hausd,hmax,ps,cosn,ux,uy,ll,li,t1[2],t2[2];
-  char              i,i1,i2;
+  int8_t            i,i1,i2;
 
   pt = &mesh->tria[k];
   hausd = mesh->info.hausd;
@@ -66,7 +66,7 @@ int MMG2D_chkedg(MMG5_pMesh mesh, int k) {
     if ( !MG_EDG(pt->tag[i]) ) continue;
 
     /* Collect tangent vectors at both endpoints; remark t1 and t2 need not be oriented in the same fashion */
-    if ( MG_SIN(p1->tag) || (p1->tag & MG_NOM) ) {
+    if ( (MG_CRN & p1->tag) || (p1->tag & MG_NOM) ) {
       li = 1.0 / sqrt(ll);
       t1[0] = li*ux;
       t1[1] = li*uy;
@@ -76,7 +76,7 @@ int MMG2D_chkedg(MMG5_pMesh mesh, int k) {
       t1[1] = p1->n[0];
     }
 
-    if ( MG_SIN(p2->tag) || (p2->tag & MG_NOM) ) {
+    if ( (MG_CRN & p2->tag) || (p2->tag & MG_NOM) ) {
       li = 1.0 / sqrt(ll);
       t2[0] = li*ux;
       t2[1] = li*uy;
@@ -114,11 +114,11 @@ int MMG2D_chkedg(MMG5_pMesh mesh, int k) {
 
 /* Calculate coordinates o[2] and interpolated normal vector no[2] of a new point
  situated at parametric distance s from i1 = inxt2[i] */
-int MMG2D_bezierCurv(MMG5_pMesh mesh,int k,char i,double s,double *o,double *no) {
+int MMG2D_bezierCurv(MMG5_pMesh mesh,int k,int8_t i,double s,double *o,double *no) {
   MMG5_pTria         pt;
   MMG5_pPoint        p1,p2;
   double             b1[2],b2[2],t1[2],t2[2],n1[2],n2[2],bn[2],ux,uy,ll,li,ps;
-  char               i1,i2;
+  int8_t             i1,i2;
 
   pt = &mesh->tria[k];
   if ( !MG_EOK(pt) ) return 0;
@@ -143,7 +143,7 @@ int MMG2D_bezierCurv(MMG5_pMesh mesh,int k,char i,double s,double *o,double *no)
   if ( ll < MMG5_EPSD ) return 0;
 
   /* Recover normal and tangent vectors */
-  if ( MG_SIN(p1->tag) || (p1->tag & MG_NOM) ) {
+  if ( (MG_CRN & p1->tag) || (p1->tag & MG_NOM) ) {
     li = 1.0 / sqrt(ll);
     t1[0] = li*ux;
     t1[1] = li*uy;
@@ -159,7 +159,7 @@ int MMG2D_bezierCurv(MMG5_pMesh mesh,int k,char i,double s,double *o,double *no)
     t1[1] = p1->n[0];
   }
 
-  if ( MG_SIN(p2->tag) || (p2->tag & MG_NOM) ) {
+  if ( (MG_CRN & p2->tag) || (p2->tag & MG_NOM) ) {
     li = 1.0 / sqrt(ll);
     t2[0] = li*ux;
     t2[1] = li*uy;
@@ -177,14 +177,14 @@ int MMG2D_bezierCurv(MMG5_pMesh mesh,int k,char i,double s,double *o,double *no)
 
   /* When either p1 or p2 is singular, make orientation of both normal vectors consistent
    (otherwise, it is already the case) */
-  if ( MG_SIN(p1->tag) || (p1->tag & MG_NOM) ){
+  if ( (MG_CRN & p1->tag) || (p1->tag & MG_NOM) ){
     ps = n1[0]*n2[0] + n1[1]*n2[1];
     if ( ps < 0.0 ) {
       n1[0] *= -1.0;
       n1[1] *= -1.0;
     }
   }
-  else if ( MG_SIN(p2->tag) || (p2->tag & MG_NOM) ) {
+  else if ( (MG_CRN & p2->tag) || (p2->tag & MG_NOM) ) {
     ps = n1[0]*n2[0] + n1[1]*n2[1];
     if ( ps < 0.0 ) {
       n2[0] *= -1.0;

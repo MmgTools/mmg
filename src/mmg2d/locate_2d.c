@@ -37,7 +37,7 @@
 int MMG2D_coorbary(MMG5_pMesh mesh,MMG5_pTria pt,double c[2],double* det,double* l1,double* l2) {
   MMG5_pPoint      p1,p2,p3;
   double           b2,b3;
-  static char      mmgWarn0=0;
+  static int8_t    mmgWarn0=0;
 
   p1 = &mesh->point[pt->v[0]];
   p2 = &mesh->point[pt->v[1]];
@@ -69,7 +69,7 @@ int MMG2D_coorbary(MMG5_pMesh mesh,MMG5_pTria pt,double c[2],double* det,double*
 int MMG2D_isInTriangle(MMG5_pMesh mesh,int k,double c[2]) {
   MMG5_pTria      pt;
   double          det,l1,l2,l3;
-  char            ier;
+  int8_t          ier;
 
   pt = &mesh->tria[k];
   if ( !MG_EOK(pt) ) return 0;
@@ -90,7 +90,7 @@ int MMG2D_isInTriangle(MMG5_pMesh mesh,int k,double c[2]) {
 int MMG2D_cutEdge(MMG5_pMesh mesh,MMG5_pTria pt,MMG5_pPoint ppa,MMG5_pPoint ppb) {
   double      la[3],lb[3],det;
   int         icompt,ireturn;
-  char        ier,i;
+  int8_t      ier,i;
 
   ier = MMG2D_coorbary(mesh,pt,ppa->c,&det,&la[0],&la[1]);
   if ( !ier ) return 0;
@@ -131,7 +131,7 @@ int MMG2D_cutEdgeTriangle(MMG5_pMesh mesh,int k,int ia,int ib) {
   MMG5_pPoint  p1,p2,p3,ppa,ppb;
   double       a11,a21,a12,a22,area1,area2,area3,prod1,prod2,prod3;
   int          ibreak,iare;
-  char         i;
+  int8_t       i;
 
   ppa = &mesh->point[ia];
   ppb = &mesh->point[ib];
@@ -213,11 +213,11 @@ int MMG2D_cutEdgeTriangle(MMG5_pMesh mesh,int k,int ia,int ib) {
 
 /** Return the index of one triangle containing ip */
 int MMG2D_findTria(MMG5_pMesh mesh,int ip) {
-  MMG5_pTria  pt,pt1;
-  int         iel,base,iadr,*adja,iter,ier;
-  int         mvDir[3],jel,i;
-  double      l1,l2,l3,det,eps;
-  static char mmgWarn0 = 0;
+  MMG5_pTria    pt,pt1;
+  int           iel,base,iadr,*adja,iter,ier;
+  int           mvDir[3],jel,i;
+  double        l1,l2,l3,det,eps;
+  static int8_t mmgWarn0 = 0;
 
   ++mesh->base;
   base = ++mesh->base;
@@ -326,7 +326,7 @@ int MMG2D_locateEdge(MMG5_pMesh mesh,int ia,int ib,int* kdep,int* list) {
   double             a[3],a11,a21,a12,a22,area1,area2,area3,prod1,prod2,prod3;
   double             niaib,npti;
   int                iadr,*adja,k,ibreak,i,ncompt,lon,iare,ivert;
-  static char        mmgWarn=0;
+  static int8_t      mmgWarn=0;
   //int       ktemp;
 
   k = *kdep;

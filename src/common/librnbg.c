@@ -38,7 +38,7 @@
 #include "librnbg.h"
 
 /**
- * \param graf the input graph structure.
+ * \param graf pointer toward the input graph structure.
  * \param vertNbr the number of vertices.
  * \param boxVertNbr the number of vertices of each box.
  * \param permVrtTab the new numbering.
@@ -49,7 +49,7 @@
  * k-partitioning and assuming that baseval of the graph is 1.
  *
  **/
-int MMG5_kPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr,
+int MMG5_kPartBoxCompute(SCOTCH_Graph *graf, int vertNbr, int boxVertNbr,
                           SCOTCH_Num *permVrtTab,MMG5_pMesh mesh) {
   int boxNbr, vertIdx;
   SCOTCH_Num logMaxVal, SupMaxVal, InfMaxVal, maxVal;
@@ -80,7 +80,7 @@ int MMG5_kPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr,
   MMG5_SAFE_CALLOC(sortPartTb,2*vertNbr,SCOTCH_Num,return 0);
 
   /* Partionning the graph */
-  if ( 0!=SCOTCH_graphMap(&graf, &arch, &strat, sortPartTb) ) {
+  if ( 0!=SCOTCH_graphMap(graf, &arch, &strat, sortPartTb) ) {
     perror("scotch_graphMap");
     MMG5_DEL_MEM(mesh,sortPartTb);
     return 0;
@@ -141,8 +141,10 @@ int MMG5_kPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr,
 }
 
 /**
+ * \param mesh pointer toward the mesh
  * \param points pointer toward a table containing the point structures.
  * \param sols pointer toward a table containing the solution structures.
+ * \param fields pointer toward an array of solution fields to permute.
  * \param *perm pointer toward the permutation table (to perform in place
  * permutations).
  * \param ind1 index of the first tetra to swap.
@@ -152,11 +154,12 @@ int MMG5_kPartBoxCompute(SCOTCH_Graph graf, int vertNbr, int boxVertNbr,
  * Swap two nodes in the table of vertices.
  *
  */
-void MMG5_swapNod(MMG5_pPoint points, double* sols, int* perm,
-                   int ind1, int ind2, int solsiz) {
+void MMG5_swapNod(MMG5_pMesh mesh,MMG5_pPoint points, double* sols,
+                  MMG5_pSol field,int* perm,int ind1, int ind2, int solsiz) {
   MMG5_Point ptttmp;
+  MMG5_pSol  psl;
   MMG5_Sol   soltmp;
-  int        tmp,addr2,addr1;
+  int        tmp,addr2,addr1,i,pslsiz;
 
   /* swap the points */
   memcpy(&ptttmp      ,&points[ind2],sizeof(MMG5_Point));
@@ -172,6 +175,22 @@ void MMG5_swapNod(MMG5_pPoint points, double* sols, int* perm,
     memcpy(&sols[addr1],&soltmp     ,solsiz*sizeof(double));
   }
 
+  /* swap solution fields (for ParMmg) */
+  if ( field ) {
+    for ( i=0; i<mesh->nsols; ++i ) {
+      psl    = field+i;
+      assert ( psl && psl->m );
+
+      pslsiz = psl->size;
+      addr1  = ind1*pslsiz;
+      addr2  = ind2*pslsiz;
+
+      memcpy(&soltmp       , psl->m + addr2,pslsiz*sizeof(double));
+      memcpy(psl->m + addr2, psl->m + addr1,pslsiz*sizeof(double));
+      memcpy(psl->m + addr1, &soltmp       ,pslsiz*sizeof(double));
+    }
+  }
+
   /* swap the permutaion table */
   tmp        = perm[ind2];
   perm[ind2] = perm[ind1];
@@ -182,6 +201,9 @@ void MMG5_swapNod(MMG5_pPoint points, double* sols, int* perm,
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the solution structure.
+ * \param fields pointer toward an array of solution fields (non mandatory)
+ * \param permNodGlob store the global permutation of nodes (if provided).
+ *
  * \return 0 if \a MMG5_renumbering fail (non conformal mesh), 1 otherwise
  * (renumerotation success of renumerotation fail but the mesh is still
  *  conformal).
@@ -189,15 +211,16 @@ void MMG5_swapNod(MMG5_pPoint points, double* sols, int* perm,
  * Call scotch renumbering.
  *
  **/
-int MMG5_scotchCall(MMG5_pMesh mesh, MMG5_pSol met)
+int MMG5_scotchCall(MMG5_pMesh mesh, MMG5_pSol met,
+                    MMG5_pSol fields, int *permNodGlob)
 {
 
 #ifdef USE_SCOTCH
-  static char mmgWarn  = 0;
-  static char mmgError = 0;
+  static int8_t mmgWarn  = 0;
+  static int8_t mmgError = 0;
 
   /*check enough vertex to renum*/
-  if ( mesh->info.renum && (mesh->np/2. > MMG5_BOXSIZE) && mesh->np>100000 ) {
+  if ( mesh->info.renum && (mesh->np/2. > MMG5_BOXSIZE) ) {
 
     if ( (SCOTCH_5 && SCOTCH_6 ) || ( (!SCOTCH_5) && (!SCOTCH_6) ) ) {
       if ( !mmgWarn ) {
@@ -212,9 +235,9 @@ int MMG5_scotchCall(MMG5_pMesh mesh, MMG5_pSol met)
     if ( mesh->info.imprim > 5 )
       fprintf(stdout,"  -- RENUMBERING. \n");
 
-    if ( !MMG5_renumbering(MMG5_BOXSIZE,mesh, met) ) {
+    if ( !MMG5_renumbering(MMG5_BOXSIZE,mesh, met,fields,permNodGlob) ) {
       if ( !mmgError ) {
-        fprintf(stderr,"\n  ## Error: %s: Unable to renumbering mesh. "
+        fprintf(stderr,"\n  ## Error: %s: Unable to renumber mesh. "
                 "Try to run without renumbering option (-rn 0).\n",
                 __func__);
         mmgError = 1;

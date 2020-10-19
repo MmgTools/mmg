@@ -55,7 +55,7 @@ void  chrono(int cmode,mytime *ptt) {
     ptt->uini = ptt->uend = ptt->udif = 0.0;
   }
   else {
-#ifdef POSIX
+#ifdef MMG_POSIX
     gettimeofday(&(ptt->rutim), NULL);
 #else
 	  QueryPerformanceCounter(&ptt->rutim);
@@ -65,7 +65,7 @@ void  chrono(int cmode,mytime *ptt) {
     FileTimeToSystemTime(&ptt->ftUser, &ptt->stUser);
 #endif
     if ( cmode == ON ) {
-#ifdef POSIX
+#ifdef MMG_POSIX
       ptt->gini  = (double)((ptt->rutim.tv_sec ) + (ptt->rutim.tv_usec) * BIG1);
 
       getrusage(RUSAGE_SELF,&(ptt->ru));
@@ -83,7 +83,7 @@ void  chrono(int cmode,mytime *ptt) {
 #endif
     }
     else if ( cmode == OFF ) {
-#ifdef POSIX
+#ifdef MMG_POSIX
       ptt->gend  = (double)((ptt->rutim.tv_sec ) + (ptt->rutim.tv_usec) * BIG1);
 
       getrusage(RUSAGE_SELF,&(ptt->ru));
@@ -121,7 +121,7 @@ void  tminit(mytime *t,int maxtim) {
   mytime  *ptt;
   int      k;
 
-#ifndef POSIX
+#ifndef MMG_POSIX
   QueryPerformanceFrequency(&t[0].frequency);
 
   t[0].thisProcess = GetCurrentProcess();
@@ -152,14 +152,14 @@ void printim(double elps,char *stim) {
   if ( elps < 60.0 )
     sprintf(stim,"%5.3lfs",elps);
   else if ( elps < 3600.0 ) {
-    mm = elps / 60.0;
+    mm = (int)(elps / 60.0);
     ss = (int)elps - mm * 60;
     sprintf(stim,"%dm%ds (%7.3lfs)",mm,ss,elps);
   }
   else {
-    hh = elps / 3600;
-    mm = (elps - hh*3600) / 60;
-    ss = elps - mm*60 - hh*3600;
+    hh = (int)(elps / 3600);
+    mm = (int)((elps - hh*3600) / 60);
+    ss = (int)(elps - mm*60 - hh*3600);
     sprintf(stim,"%dh%dm%ds",hh,mm,ss);
   }
 }

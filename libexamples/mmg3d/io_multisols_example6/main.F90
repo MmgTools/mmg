@@ -150,9 +150,10 @@ PROGRAM main
   IF ( ier /= 1 ) CALL EXIT(111)
 
   !!> 3) Free the MMG3D structures
+  CALL MMG3D_Free_allSols(mmgMesh,mmgSol,ier)
+
   CALL MMG3D_Free_all(MMG5_ARG_start, &
        MMG5_ARG_ppMesh,mmgMesh,MMG5_ARG_ppSols,tmpSol, &
-       MMG5_ARG_ppSols,mmgSol, &
        MMG5_ARG_end)
 
 END PROGRAM main

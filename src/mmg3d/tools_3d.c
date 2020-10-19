@@ -35,10 +35,20 @@
 
 #include "mmg3d.h"
 
-extern char ddb;
+extern int8_t ddb;
+
+/** Return 1 if reference ref is in the br table, 0 otherwise */
+int MMG5_isbr(MMG5_pMesh mesh,int ref) {
+  int k;
+
+  for(k=0; k<mesh->info.nbr; k++)
+    if ( ref == mesh->info.br[k] ) return(1);
+
+  return(0);
+}
 
 /** naive (increasing) sorting algorithm, for very small tabs ; permutation is stored in perm */
-inline void MMG5_nsort(int n,double *val,char *perm){
+inline void MMG5_nsort(int n,double *val,int8_t *perm){
     int   i,j,aux;
 
     for (i=0; i<n; i++)  perm[i] = i;
@@ -71,9 +81,9 @@ int MMG5_norface(MMG5_pMesh mesh,int k,int iface,double n[3]) {
     the direct sense with respect to direction n anchored at point ip (ip = global num.):
     return 2 = orientation reversed, 1 otherwise */
 inline int MMG5_directsurfball(MMG5_pMesh mesh, int ip, int *list, int ilist, double n[3]){
-    int             j,aux,iel;
-    double          nt[3],ps;
-    unsigned char   iface;
+    int     j,aux,iel;
+    double  nt[3],ps;
+    uint8_t iface;
 
     iel   = list[0] / 4;
     iface = list[0] % 4;
@@ -95,9 +105,9 @@ inline int MMG5_directsurfball(MMG5_pMesh mesh, int ip, int *list, int ilist, do
     edge (p,q) (nump,q = global num) as edge MMG5_iprv2[ip] of face iface.
     return 2 = orientation reversed, 1 otherwise */
 int MMG5_startedgsurfball(MMG5_pMesh mesh,int nump,int numq,int *list,int ilist) {
-    MMG5_pTetra          pt;
-    int             iel,tmp,l;
-    unsigned char   iface,ip,ipt;
+    MMG5_pTetra pt;
+    int         iel,tmp,l;
+    uint8_t     iface,ip,ipt;
 
     iel = list[0]/4;
     iface = list[0]%4;
@@ -526,6 +536,7 @@ inline int MMG5_BezierNom(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,dou
     MMG5_pPoint      p0,p1;
     double      ux,uy,uz,il,ll,ps,alpha,dd;
     double      t0[3],t1[3],b0[3],b1[3],n0[3],n1[3],bn[3];
+    int8_t      intnom;
 
     p0 = &mesh->point[ip0];
     p1 = &mesh->point[ip1];
@@ -607,31 +618,36 @@ inline int MMG5_BezierNom(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,dou
         memcpy(n1,&(mesh->xpoint[p1->xp].n1[0]),3*sizeof(double));
     }
 
+    /* Check for internal non manifold edge */
+    intnom = ( mesh->xpoint[p0->xp].nnor ) || ( mesh->xpoint[p1->xp].nnor );
+
     /* Normal interpolation */
-    ps = ux*(n0[0] + n1[0]) + uy*(n0[1] + n1[1]) + uz*(n0[2] + n1[2]);
-    ps = 2.0*ps/ll;
+    if ( !intnom ) {
+      ps = ux*(n0[0] + n1[0]) + uy*(n0[1] + n1[1]) + uz*(n0[2] + n1[2]);
+      ps = 2.0*ps/ll;
 
-    bn[0] = n0[0] + n1[0] -ps*ux;
-    bn[1] = n0[1] + n1[1] -ps*uy;
-    bn[2] = n0[2] + n1[2] -ps*uz;
+      bn[0] = n0[0] + n1[0] -ps*ux;
+      bn[1] = n0[1] + n1[1] -ps*uy;
+      bn[2] = n0[2] + n1[2] -ps*uz;
 
-    dd = bn[0]*bn[0] + bn[1]*bn[1] + bn[2]*bn[2];
-    if ( dd > MMG5_EPSD ) {
-        dd = 1.0 / sqrt(dd);
-        bn[0] *= dd;
-        bn[1] *= dd;
-        bn[2] *= dd;
-    }
-    no[0] = (1.0-s)*(1.0-s)*n0[0] + 2.0*s*(1.0-s)*bn[0] + s*s*n1[0];
-    no[1] = (1.0-s)*(1.0-s)*n0[1] + 2.0*s*(1.0-s)*bn[1] + s*s*n1[1];
-    no[2] = (1.0-s)*(1.0-s)*n0[2] + 2.0*s*(1.0-s)*bn[2] + s*s*n1[2];
+      dd = bn[0]*bn[0] + bn[1]*bn[1] + bn[2]*bn[2];
+      if ( dd > MMG5_EPSD ) {
+          dd = 1.0 / sqrt(dd);
+          bn[0] *= dd;
+          bn[1] *= dd;
+          bn[2] *= dd;
+      }
+      no[0] = (1.0-s)*(1.0-s)*n0[0] + 2.0*s*(1.0-s)*bn[0] + s*s*n1[0];
+      no[1] = (1.0-s)*(1.0-s)*n0[1] + 2.0*s*(1.0-s)*bn[1] + s*s*n1[1];
+      no[2] = (1.0-s)*(1.0-s)*n0[2] + 2.0*s*(1.0-s)*bn[2] + s*s*n1[2];
 
-    dd = no[0]*no[0] + no[1]*no[1] + no[2]*no[2];
-    if ( dd > MMG5_EPSD2 ) {
-        dd = 1.0/sqrt(dd);
-        no[0] *= dd;
-        no[1] *= dd;
-        no[2] *= dd;
+      dd = no[0]*no[0] + no[1]*no[1] + no[2]*no[2];
+      if ( dd > MMG5_EPSD2 ) {
+          dd = 1.0/sqrt(dd);
+          no[0] *= dd;
+          no[1] *= dd;
+          no[2] *= dd;
+      }
     }
 
     /* Tangent interpolation : possibly flip (back) t1 */
@@ -646,10 +662,12 @@ inline int MMG5_BezierNom(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,dou
     to[2] = (1.0-s)*t0[2] + s*t1[2];
 
     /* Projection of the tangent in the tangent plane defined by no */
-    ps = to[0]*no[0] + to[1]*no[1] + to[2]*no[2];
-    to[0] = to[0] -ps*no[0];
-    to[1] = to[1] -ps*no[1];
-    to[2] = to[2] -ps*no[2];
+    if ( !intnom ) {
+      ps = to[0]*no[0] + to[1]*no[1] + to[2]*no[2];
+      to[0] = to[0] -ps*no[0];
+      to[1] = to[1] -ps*no[1];
+      to[2] = to[2] -ps*no[2];
+    }
 
     dd = to[0]*to[0] + to[1]*to[1] + to[2]*to[2];
     if ( dd > MMG5_EPSD2) {
@@ -1052,13 +1070,13 @@ int MMG3D_localParamReg(MMG5_pMesh mesh,int ip,int *listv,int ilistv,
 int MMG3D_localParamNm(MMG5_pMesh mesh,int iel,int iface,int ia,
                          double* hausd_ip,double *hmin_ip,double *hmax_ip) {
 
-  MMG5_pTetra  pt;
-  MMG5_pxTetra pxt;
-  MMG5_pPar    par;
-  double       hausd, hmin, hmax;
-  int          l,k,isloc,ifac1,ifac2;
-  int          listv[MMG3D_LMAX+2],ilistv;
-  static char  mmgWarn0;
+  MMG5_pTetra   pt;
+  MMG5_pxTetra  pxt;
+  MMG5_pPar     par;
+  double        hausd, hmin, hmax;
+  int           l,k,isloc,ifac1,ifac2;
+  int           listv[MMG3D_LMAX+2],ilistv;
+  static int8_t mmgWarn0;
 
 
   hausd = mesh->info.hausd;
@@ -1183,4 +1201,131 @@ int MMG3D_localParamNm(MMG5_pMesh mesh,int iel,int iface,int ia,
   if ( hmax_ip ) *hmax_ip = hmax;
 
   return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ *
+ * Mark the mesh vertices that belong to triangles or quadrangles as used (for
+ * Mmgs or Mmg2d).
+ *
+ */
+static inline
+void MMG3D_mark_usedVertices ( MMG5_pMesh mesh ) {
+  MMG5_pTetra pt;
+  MMG5_pPrism pq;
+  MMG5_pPoint ppt;
+  int         k,i;
+
+  /* Preserve isolated required points */
+  for ( k=1; k<=mesh->np; k++ ) {
+    ppt = &mesh->point[k];
+    if ( ppt->flag || !(ppt->tag & MG_REQ) ) {
+      continue;
+    }
+    ppt->tag &= ~MG_NUL;
+  }
+
+  /* Mark points used by the connectivity */
+  for ( k=1; k<=mesh->ne; k++ ) {
+    pt = &mesh->tetra[k];
+    if ( !MG_EOK(pt) )  continue;
+
+    for (i=0; i<4; i++) {
+      ppt = &mesh->point[ pt->v[i] ];
+      ppt->tag &= ~MG_NUL;
+    }
+  }
+
+  for ( k=1; k<=mesh->nprism; k++ ) {
+    pq = &mesh->prism[k];
+    if ( !MG_EOK(pq) )  continue;
+
+    for (i=0; i<6; i++) {
+      ppt = &mesh->point[ pq->v[i] ];
+      ppt->tag &= ~MG_NUL;
+    }
+  }
+
+  /* Finally, clean point array */
+  while ( (!MG_VOK(&mesh->point[mesh->np])) && mesh->np ) {
+    MMG3D_delPt(mesh,mesh->np);
+  }
+
+  return;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param nsd subdomain index.
+ *
+ * Remove tetra that do not belong to subdomain of index \a nsd
+ *
+ */
+static
+void MMG3D_keep_subdomainElts ( MMG5_pMesh mesh, int nsd ) {
+  MMG5_pTetra pt;
+  int         k,i,*adja,iadr,iadrv,iv;
+  int         nfac = 4; // number of faces per elt
+
+  for ( k=1 ; k <= mesh->ne ; k++) {
+    pt = &mesh->tetra[k];
+
+    if ( !MG_EOK(pt) ) continue;
+
+    /* Mark tetra vertices as seen to be able to detect isolated points */
+    mesh->point[pt->v[0]].flag = 1;
+    mesh->point[pt->v[1]].flag = 1;
+    mesh->point[pt->v[2]].flag = 1;
+    mesh->point[pt->v[3]].flag = 1;
+
+    if ( pt->ref == nsd ) continue;
+
+    /* Update adjacency relationship: we will delete elt k so k adjacent will
+     * not be adjacent to k anymore */
+    if ( mesh->adja ) {
+      iadr = nfac*(k-1) + 1;
+      adja = &mesh->adja[iadr];
+      for ( i=0; i<nfac; ++i ) {
+        iadrv = adja[i];
+        if ( !iadrv ) {
+          continue;
+        }
+        iv = iadrv%nfac;
+        iadrv /= nfac;
+        mesh->adja[nfac*(iadrv-1)+1+iv] = 0;
+      }
+    }
+
+    /* Delete element */
+    MMG3D_delElt(mesh,k);
+  }
+
+  return;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param nsd index of subdomain to keep.
+ *
+ * Keep only subdomain of index \a nsd and remove other subdomains.
+ *
+ */
+void MMG3D_keep_only1Subdomain ( MMG5_pMesh mesh,int nsd ) {
+
+  if ( !nsd ) {
+    return;
+  }
+
+  if ( mesh->info.imprim > 4 || mesh->info.ddebug ) {
+    fprintf(stdout,"\n  -- ONLY KEEP DOMAIN OF REF %d\n",nsd );
+  }
+
+  MMG5_mark_verticesAsUnused ( mesh );
+
+  MMG3D_keep_subdomainElts ( mesh, nsd );
+
+  MMG3D_mark_usedVertices ( mesh );
+
+  return;
 }

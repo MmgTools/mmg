@@ -50,7 +50,7 @@ int boulet(MMG5_pMesh mesh,int start,int ip,int *list) {
   MMG5_pTria    pt;
   MMG5_pPoint   ppt;
   int           *adja,k,ilist;
-  char          i,i1,i2;
+  int8_t        i,i1,i2;
 
   pt = &mesh->tria[start];
 
@@ -104,7 +104,7 @@ int boulet(MMG5_pMesh mesh,int start,int ip,int *list) {
  * the ball.
  * \param list pointer toward the computed ball of point.
  *
- * Find all triangles sharing \a ip, \f$list[0] = start\f$. Do not stop when
+ * Find all triangles sharing \a ip, \f$list[0] = start\f$ . Do not stop when
  * crossing ridge. Check whether resulting configuration is manifold.
  *
  */
@@ -112,7 +112,7 @@ int boulechknm(MMG5_pMesh mesh,int start,int ip,int *list) {
   MMG5_pTria    pt;
   MMG5_pPoint   ppt;
   int           *adja,k,ilist,base,iel;
-  char          i,i1,i2,ia,iq,voy;
+  int8_t        i,i1,i2,ia,iq,voy;
 
   base = ++mesh->base;
 
@@ -238,58 +238,6 @@ int boulechknm(MMG5_pMesh mesh,int start,int ip,int *list) {
   return ilist;
 }
 
-/* return all vertices connected to ip, list[0] = ip */
-int boulep(MMG5_pMesh mesh,int start,int ip,int *list) {
-  MMG5_pTria    pt;
-  int     *adja,k,ilist;
-  char     i,i1,i2;
-
-  pt = &mesh->tria[start];
-  if ( !MG_EOK(pt) )  return 0;
-  list[0] = pt->v[ip];
-  ilist   = 0;
-
-  /* store neighbors */
-  k  = start;
-  i  = ip;
-  i1 = MMG5_inxt2[i];
-  i2 = MMG5_iprv2[i];
-  do {
-    if ( ilist > MMGS_LMAX-2 )  return -ilist;
-    ilist++;
-    list[ilist] = pt->v[i2];
-
-    adja = &mesh->adja[3*(k-1)+1];
-    k  = adja[i1] / 3;
-    i2 = adja[i1] % 3;
-    i1 = MMG5_iprv2[i2];
-    pt = &mesh->tria[k];
-  }
-  while ( k && k != start );
-  if ( k > 0 )  return ilist;
-
-  /* reverse loop */
-  k  = start;
-  i  = ip;
-  pt = &mesh->tria[k];
-  i1 = MMG5_inxt2[i];
-  i2 = MMG5_inxt2[i1];
-  do {
-    if ( ilist > MMGS_LMAX-2 )  return -ilist;
-    ilist++;
-    list[ilist] = pt->v[i1];
-
-    adja = &mesh->adja[3*(k-1)+1];
-    k  = adja[i2] / 3;
-    i1 = adja[i2] % 3;
-    i2 = MMG5_iprv2[i1];
-    pt = &mesh->tria[k];
-  }
-  while ( k > 0 );
-
-  return ilist;
-}
-
 /**
  * \param mesh pointer toward the mesh structure.
  * \param start index of the starting triangle.
@@ -310,11 +258,11 @@ int boulep(MMG5_pMesh mesh,int start,int ip,int *list) {
  *
  */
 int bouletrid(MMG5_pMesh mesh,int start,int ip,int *il1,int *l1,int *il2,int *l2,int *ip0,int *ip1) {
-  MMG5_pTria           pt;
-  MMG5_pPoint          ppt;
-  int                  idp,k,kold,*adja,iel,*ilist1,*ilist2,*list1,*list2,aux;
-  unsigned char        i,iold,i1,i2,ipn;
-  double               *n1,*n2,nt[3],ps1,ps2;
+  MMG5_pTria   pt;
+  MMG5_pPoint  ppt;
+  int          idp,k,kold,*adja,iel,*ilist1,*ilist2,*list1,*list2,aux;
+  uint8_t      i,iold,i1,i2,ipn;
+  double       *n1,*n2,nt[3],ps1,ps2;
 
   pt = &mesh->tria[start];
   if ( !MG_EOK(pt) )  return 0;

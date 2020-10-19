@@ -1,21 +1,65 @@
 
-# mmg - Surface and volume remeshers 
-[![Build Status](https://ci.inria.fr/mmg/buildStatus/icon?job=Mmg-multiConf)](https://ci.inria.fr/mmg/job/Mmg-multiConf/)[![Quality Gate](https://sonarqube.inria.fr/sonarqube/api/badges/gate?key=cardamom%3Ammg%3Agithub%3Adevelop)](https://sonarqube.inria.fr/sonarqube/dashboard?id=cardamom%3Ammg%3Agithub%3Adevelop)
+<h1 align="center"> mmg - Surface and volume remeshers </h1>
+<h3 align="center"> open source software for bidimensional and tridimensional surface and volume remeshing </h3>
 
-[![Vulnerabilities](https://sonarqube.inria.fr/sonarqube/api/badges/measure?key=cardamom%3Ammg%3Agithub%3Adevelop&metric=vulnerabilities)](https://sonarqube.inria.fr/sonarqube/component_measures?id=cardamom%3Ammg%3Agithub%3Adevelop&metric=vulnerabilities)[![Potential Bugs](https://sonarqube.inria.fr/sonarqube/api/badges/measure?key=cardamom%3Ammg%3Agithub%3Adevelop&metric=bugs)](https://sonarqube.inria.fr/sonarqube/component_measures?id=cardamom%3Ammg%3Agithub%3Adevelop&metric=bugs)[![Coverage](https://sonarqube.inria.fr/sonarqube/api/badges/measure?key=cardamom%3Ammg%3Agithub%3Adevelop&metric=coverage)](https://sonarqube.inria.fr/sonarqube/component_measures?id=cardamom%3Ammg%3Agithub%3Adevelop&metric=coverage)
+<div align="center" markdown="1">
 
-[![New Vulnerabilities](https://sonarqube.inria.fr/sonarqube/api/badges/measure?key=cardamom%3Ammg%3Agithub%3Adevelop&metric=new_vulnerabilities)](https://sonarqube.inria.fr/sonarqube/component_measures?id=cardamom%3Ammg%3Agithub%3Adevelop&metric=new_vulnerabilities)[![New Potential Bugs](https://sonarqube.inria.fr/sonarqube/api/badges/measure?key=cardamom%3Ammg%3Agithub%3Adevelop&metric=new_bugs)](https://sonarqube.inria.fr/sonarqube/component_measures?id=cardamom%3Ammg%3Agithub%3Adevelop&metric=new_bugs)
+[![Release][release-image]][releases] [![License][license-image]][license]
+
+[release-image]: https://img.shields.io/github/v/release/MmgTools/mmg?color=blue&label=release&style=flat
+[releases]: https://github.com/MmgTools/mmg/releases
+
+[license-image]: https://img.shields.io/badge/license-LGPL-blue.svg?style=flat
+[license]: https://github.com/MmgTools/mmg/blob/master/LICENSE
+
+</div>
+<div align="center">
+  <img src="https://img.shields.io/static/v1?label=macOS&logo=apple&logoColor=white&message=support&color=success" alt="macOS support">
+  <img src="https://img.shields.io/static/v1?label=Ubuntu&logo=Ubuntu&logoColor=white&message=support&color=success" alt="Ubuntu support">
+  <img src="https://img.shields.io/static/v1?label=Windows&logo=windows&logoColor=white&message=support&color=success" alt="Windows support">
+</div>
+
+---
+
+|**master branch (release)**|[![Build Status][master-build]][master-sq-build]|[![Quality Gate][master-qual-gate]][master-sq-qual-gate]|[![Vulnerabilities][master-vulnerabilities]][master-sq-vulnerabilities]|[![Coverage][master-coverage]][master-sq-coverage]|[![Duplication (%)][master-code-dpl]][master-sq-code-dpl]|
+|:---:|:---:|:---:|:---:|:---:|:---:|
+|**develop branch**|[![Build Status][dev-build]][dev-sq-build]|[![Quality Gate][dev-qual-gate]][dev-sq-qual-gate]|[![Vulnerabilities][dev-vulnerabilities]][dev-sq-vulnerabilities]|[![Coverage][dev-coverage]][dev-sq-coverage]|[![Duplication (%)][dev-code-dpl]][dev-sq-code-dpl]|
 
 
+[master-build]: https://ci.inria.fr/mmg/buildStatus/icon?job=Mmg-multiConf-master
+[master-sq-build]: https://ci.inria.fr/mmg/job/Mmg-multiConf-master
+
+[master-qual-gate]: https://sonarqube.inria.fr/sonarqube/api/badges/gate?key=cardamom%3Ammg%3Agithub%3Amaster
+[master-sq-qual-gate]: https://sonarqube.inria.fr/sonarqube/dashboard?id=cardamom%3Ammg%3Agithub%3Amaster
+
+[master-vulnerabilities]: https://img.shields.io/sonar/vulnerabilities/cardamom:mmg:github:master?server=https%3A%2F%2Fsonarqube.inria.fr%2Fsonarqube
+[master-sq-vulnerabilities]: https://sonarqube.inria.fr/sonarqube/component_measures?id=cardamom%3Ammg%3Agithub%3Amaster&metric=vulnerabilities
+
+[master-coverage]:https://img.shields.io/sonar/coverage/cardamom:mmg:github:master?server=https%3A%2F%2Fsonarqube.inria.fr%2Fsonarqube
+[master-sq-coverage]:https://sonarqube.inria.fr/sonarqube/component_measures?id=cardamom%3Ammg%3Agithub%3Amaster&metric=coverage
+
+[master-code-dpl]:https://sonarqube.inria.fr/sonarqube/api/badges/measure?key=cardamom%3Ammg%3Agithub%3Amaster&metric=duplicated_lines_density
+[master-sq-code-dpl]:https://sonarqube.inria.fr/sonarqube/component_measures?id=cardamom%3Ammg%3Agithub%3Amaster&metric=duplications
 
 
+[dev-build]: https://ci.inria.fr/mmg/buildStatus/icon?job=Mmg-multiConf
+[dev-sq-build]: https://ci.inria.fr/mmg/job/Mmg-multiConf
 
+[dev-qual-gate]: https://sonarqube.inria.fr/sonarqube/api/badges/gate?key=cardamom%3Ammg%3Agithub%3Adevelop
+[dev-sq-qual-gate]: https://sonarqube.inria.fr/sonarqube/dashboard?id=cardamom%3Ammg%3Agithub%3Adevelop
 
+[dev-vulnerabilities]: https://img.shields.io/sonar/vulnerabilities/cardamom:mmg:github:develop?server=https%3A%2F%2Fsonarqube.inria.fr%2Fsonarqube
+[dev-sq-vulnerabilities]: https://sonarqube.inria.fr/sonarqube/component_measures?id=cardamom%3Ammg%3Agithub%3Adevelop&metric=vulnerabilities
 
+[dev-coverage]:https://img.shields.io/sonar/coverage/cardamom:mmg:github:develop?server=https%3A%2F%2Fsonarqube.inria.fr%2Fsonarqube
+[dev-sq-coverage]:https://sonarqube.inria.fr/sonarqube/component_measures?id=cardamom%3Ammg%3Agithub%3Adevelop&metric=coverage
 
-mmg is an open source software for bidimensional and tridimensional surface and volume remeshing.
+[dev-code-dpl]:https://sonarqube.inria.fr/sonarqube/api/badges/measure?key=cardamom%3Ammg%3Agithub%3Adevelop&metric=duplicated_lines_density
+[dev-sq-code-dpl]:https://sonarqube.inria.fr/sonarqube/component_measures?id=cardamom%3Ammg%3Agithub%3Adevelop&metric=duplications
 
-It provides 3 applications and 4 libraries:
+---
+
+Mmg provides 3 applications and 4 libraries:
   * the **mmg2d** application and library: mesh generation from a set of edges, adaptation and optimization of a bidimensionnal triangulation and isovalue discretization;
   * the **mmgs** application and library: adaptation and optimization of a surface triangulation and isovalue discretization;
   * the **mmg3d** application and library: adaptation and optimization of a tetrahedral mesh, isovalue discretization and lagrangian movement;

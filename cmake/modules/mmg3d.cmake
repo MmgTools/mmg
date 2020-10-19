@@ -71,10 +71,17 @@ FILE(
   mmg3d_library_files
   ${MMG3D_SOURCE_DIR}/*.c
   ${COMMON_SOURCE_DIR}/*.c
+  ${MMG3D_SOURCE_DIR}/inoutcpp_3d.cpp
   )
 LIST(REMOVE_ITEM mmg3d_library_files
   ${MMG3D_SOURCE_DIR}/${PROJECT_NAME}3d.c
-)
+  )
+
+IF ( VTK_FOUND )
+  LIST(APPEND  mmg3d_library_files
+    ${COMMON_SOURCE_DIR}/vtkparser.cpp)
+ENDIF ( )
+
 FILE(
   GLOB
   mmg3d_main_file
@@ -87,9 +94,9 @@ FILE(
 #####
 ############################################################################
 
-IF( USE_ELAS )
+IF( ELAS_FOUND )
   # Set flags for building test program
-  INCLUDE_DIRECTORIES(${ELAS_INCLUDE_DIR})
+  INCLUDE_DIRECTORIES(PUBLIC ${ELAS_INCLUDE_DIR})
 
   SET(CMAKE_REQUIRED_INCLUDES ${ELAS_INCLUDE_DIR})
   SET(CMAKE_REQUIRED_LIBRARIES ${ELAS_LIBRARY})
@@ -101,15 +108,6 @@ IF( USE_ELAS )
   SET( LIBRARIES ${ELAS_LIBRARY} ${LIBRARIES})
 ENDIF()
 
-IF (ELAS_NOTFOUND)
-  MESSAGE ( WARNING "Elas is a library to solve the linear elasticity "
-    "problem (see https://github.com/ISCDtoolbox/LinearElasticity to"
-    " download it). "
-    "This library is needed to use the lagrangian motion option. "
-    "If you have already installed Elas and want to use it, "
-    "please set the CMake variable or environment variable ELAS_DIR "
-    "to your Elas directory.")
-ENDIF ( )
 
 ############################################################################
 #####
@@ -119,13 +117,13 @@ ENDIF ( )
 
 # Compile static library
 IF ( LIBMMG3D_STATIC )
-  ADD_AND_INSTALL_LIBRARY ( lib${PROJECT_NAME}3d_a STATIC
+  ADD_AND_INSTALL_LIBRARY ( lib${PROJECT_NAME}3d_a STATIC copy_3d_headers
     "${mmg3d_library_files}" ${PROJECT_NAME}3d )
 ENDIF()
 
 # Compile shared library
 IF ( LIBMMG3D_SHARED )
-  ADD_AND_INSTALL_LIBRARY ( lib${PROJECT_NAME}3d_so SHARED
+  ADD_AND_INSTALL_LIBRARY ( lib${PROJECT_NAME}3d_so SHARED copy_3d_headers
     "${mmg3d_library_files}" ${PROJECT_NAME}3d )
 ENDIF()
 
@@ -135,17 +133,19 @@ SET( mmg3d_headers
   ${MMG3D_BINARY_DIR}/libmmg3df.h
   ${COMMON_SOURCE_DIR}/libmmgtypes.h
   ${COMMON_BINARY_DIR}/libmmgtypesf.h
+  ${COMMON_BINARY_DIR}/mmgcmakedefines.h
+  ${COMMON_BINARY_DIR}/mmgversion.h
   )
+IF (NOT WIN32 OR MINGW)
+  LIST(APPEND mmg3d_headers  ${COMMON_BINARY_DIR}/git_log_mmg.h )
+ENDIF()
+
 
 # Install header files in /usr/local or equivalent
 INSTALL(FILES ${mmg3d_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/mmg/mmg3d COMPONENT headers)
 
-COPY_FORTRAN_HEADER_AND_CREATE_TARGET ( ${MMG3D_BINARY_DIR} ${MMG3D_INCLUDE} 3d )
-
-# Copy header files in project directory at configuration step
-# (generated file don't exists yet or are outdated)
-FILE(INSTALL  ${mmg3d_headers} DESTINATION ${MMG3D_INCLUDE}
-  PATTERN "libmmg*f.h"  EXCLUDE)
+# Copy header files in project directory at build step
+COPY_HEADERS_AND_CREATE_TARGET ( ${MMG3D_SOURCE_DIR} ${MMG3D_BINARY_DIR} ${MMG3D_INCLUDE} 3d )
 
 ############################################################################
 #####
@@ -164,7 +164,7 @@ ENDIF()
 #####         Compile MMG3D executable
 #####
 ###############################################################################
-ADD_AND_INSTALL_EXECUTABLE ( ${PROJECT_NAME}3d
+ADD_AND_INSTALL_EXECUTABLE ( ${PROJECT_NAME}3d copy_3d_headers
   "${mmg3d_library_files}" ${mmg3d_main_file} )
 
 ###############################################################################
@@ -206,7 +206,10 @@ IF ( BUILD_TESTING )
       SET(LIBMMG3D_EXEC4   ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_example4)
       SET(LIBMMG3D_EXEC5   ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_example5)
       SET(LIBMMG3D_EXEC6   ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_example6_io)
+      SET(LIBMMG3D_LSONLY ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_lsOnly )
+      SET(LIBMMG3D_LSANDMETRIC ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_lsAndMetric )
       SET(TEST_API3D_EXEC0 ${EXECUTABLE_OUTPUT_PATH}/test_api3d_0)
+      SET(TEST_API3D_DOMSEL ${EXECUTABLE_OUTPUT_PATH}/test_api3d_domain-selection)
 
       ADD_TEST(NAME libmmg3d_example0_a COMMAND ${LIBMMG3D_EXEC0_a}
         "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/adaptation_example0/example0_a/cube.mesh"
@@ -223,16 +226,12 @@ IF ( BUILD_TESTING )
         "${CTEST_OUTPUT_DIR}/libmmg3d_Adaptation_1-2spheres_1.o"
         "${CTEST_OUTPUT_DIR}/libmmg3d_Adaptation_1-2spheres_2.o"
         )
-      IF ( USE_ELAS )
+      IF ( ELAS_FOUND )
         ADD_TEST(NAME libmmg3d_example4   COMMAND ${LIBMMG3D_EXEC4}
           "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/LagrangianMotion_example0/tinyBoxt"
           "${CTEST_OUTPUT_DIR}/libmmg3d_LagrangianMotion_0-tinyBoxt.o"
           )
       ENDIF ()
-      ADD_TEST(NAME libmmg3d_example5   COMMAND ${LIBMMG3D_EXEC5}
-        "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_example0/test"
-        "${CTEST_OUTPUT_DIR}/libmmg3d-IsosurfDiscretization_0-test.o"
-        )
       ADD_TEST(NAME libmmg3d_example6_io_0   COMMAND ${LIBMMG3D_EXEC6}
         "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/io_multisols_example6/torus.mesh"
         "${CTEST_OUTPUT_DIR}/libmmg3d_io_6-naca.o" "0"
@@ -241,15 +240,33 @@ IF ( BUILD_TESTING )
         "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/io_multisols_example6/torus.mesh"
         "${CTEST_OUTPUT_DIR}/libmmg3d_io_6-naca.o" "1"
        )
+      ADD_TEST(NAME libmmg3d_lsOnly   COMMAND ${LIBMMG3D_LSONLY}
+        "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsOnly/plane.mesh"
+        "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsOnly/m.sol"
+        "${CTEST_OUTPUT_DIR}/libmmg3d_lsOnly_multimat.o"
+        )
+      ADD_TEST(NAME libmmg3d_lsAndMetric   COMMAND ${LIBMMG3D_LSANDMETRIC}
+        "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsOnly/plane.mesh"
+        "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsOnly/m.sol"
+        "${CTEST_OUTPUT_DIR}/libmmg3d_lsAndMetric_multimat.o"
+        )
       ADD_TEST(NAME test_api3d_0   COMMAND ${TEST_API3D_EXEC0}
         "${MMG3D_CI_TESTS}/API_tests/2dom.mesh"
         "${CTEST_OUTPUT_DIR}/test_API3d.o"
+       )
+      ADD_TEST(NAME test_api3d_domain-selection   COMMAND ${TEST_API3D_DOMSEL}
+        "${MMG3D_CI_TESTS}/OptLs_plane/plane.mesh"
+        "${MMG3D_CI_TESTS}/OptLs_plane/p.sol"
+        "${CTEST_OUTPUT_DIR}/test_API3d-domsel-whole.o"
+        "${CTEST_OUTPUT_DIR}/test_API3d-domsel-dom2.o"
        )
 
       IF ( CMAKE_Fortran_COMPILER)
         SET(LIBMMG3D_EXECFORTRAN_a  ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_fortran_a)
         SET(LIBMMG3D_EXECFORTRAN_b  ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_fortran_b)
         SET(LIBMMG3D_EXECFORTRAN_IO ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_fortran_io)
+        SET(LIBMMG3D_EXECFORTRAN_LSONLY ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_fortran_lsOnly )
+        SET(LIBMMG3D_EXECFORTRAN_LSANDMETRIC ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_fortran_lsAndMetric )
         SET(TEST_API3D_FORTRAN_EXEC0 ${EXECUTABLE_OUTPUT_PATH}/test_api3d_fortran_0)
 
 
@@ -267,7 +284,16 @@ IF ( BUILD_TESTING )
         ADD_TEST(NAME libmmg3d_fortran_io_1   COMMAND ${LIBMMG3D_EXECFORTRAN_IO}
           "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/io_multisols_example6/torus.mesh"
           "${CTEST_OUTPUT_DIR}/libmmg3d_Fortran_io-torus.o" "1"
-         )
+          )
+       ADD_TEST(NAME libmmg3d_fortran_lsOnly3d   COMMAND ${LIBMMG3D_EXECFORTRAN_LSONLY}
+         "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsOnly/plane.mesh"
+         "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsOnly/m.sol"
+         "${CTEST_OUTPUT_DIR}/libmmg3d_lsOnly_multimat.o" )
+
+       ADD_TEST(NAME libmmg3d_fortran_lsAndMetric3d   COMMAND ${LIBMMG3D_EXECFORTRAN_LSANDMETRIC}
+          "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsOnly/plane.mesh"
+          "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsOnly/m.sol"
+          "${CTEST_OUTPUT_DIR}/libmmg3d_lsAndMetric_multimat.o" )
        ADD_TEST(NAME test_api3d_fortran_0   COMMAND ${TEST_API3D_FORTRAN_EXEC0}
          "${MMG3D_CI_TESTS}/API_tests/2dom.mesh"
          "${CTEST_OUTPUT_DIR}/test_API3d.o"

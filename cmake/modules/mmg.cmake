@@ -39,6 +39,9 @@
 FILE(
   GLOB
   mmg_library_files
+  ${MMG2D_SOURCE_DIR}/inoutcpp_2d.cpp
+  ${MMG3D_SOURCE_DIR}/inoutcpp_3d.cpp
+  ${MMGS_SOURCE_DIR}/inoutcpp_s.cpp
   ${MMG2D_SOURCE_DIR}/*.c
   ${MMG3D_SOURCE_DIR}/*.c
   ${MMGS_SOURCE_DIR}/*.c
@@ -50,9 +53,14 @@ LIST(REMOVE_ITEM mmg_library_files
   ${MMG3D_SOURCE_DIR}/mmg3d.c
   ${REMOVE_FILE} )
 
+IF ( VTK_FOUND )
+  LIST(APPEND  mmg_library_files
+    ${COMMON_SOURCE_DIR}/vtkparser.cpp )
+ENDIF ( )
 
 IF ( LIBMMG_STATIC )
   ADD_AND_INSTALL_LIBRARY ( lib${PROJECT_NAME}_a  STATIC
+    copy_mmg_headers
     "${mmg_library_files}"
     ${PROJECT_NAME} )
 ENDIF()
@@ -60,6 +68,7 @@ ENDIF()
 # Compile shared library
 IF ( LIBMMG_SHARED )
   ADD_AND_INSTALL_LIBRARY ( lib${PROJECT_NAME}_so  SHARED
+    copy_mmg_headers
     "${mmg_library_files}"
     ${PROJECT_NAME} )
 ENDIF()
@@ -71,18 +80,21 @@ IF ( LIBMMG_STATIC OR LIBMMG_SHARED )
     ${MMG2D_BINARY_DIR}/libmmg2df.h
     ${COMMON_SOURCE_DIR}/libmmgtypes.h
     ${COMMON_BINARY_DIR}/libmmgtypesf.h
+    ${COMMON_BINARY_DIR}/mmgcmakedefines.h
     )
   SET( mmg3d_headers
     ${MMG3D_SOURCE_DIR}/libmmg3d.h
     ${MMG3D_BINARY_DIR}/libmmg3df.h
     ${COMMON_SOURCE_DIR}/libmmgtypes.h
     ${COMMON_BINARY_DIR}/libmmgtypesf.h
+    ${COMMON_BINARY_DIR}/mmgcmakedefines.h
     )
   SET( mmgs_headers
     ${MMGS_SOURCE_DIR}/libmmgs.h
     ${MMGS_BINARY_DIR}/libmmgsf.h
     ${COMMON_SOURCE_DIR}/libmmgtypes.h
     ${COMMON_BINARY_DIR}/libmmgtypesf.h
+    ${COMMON_BINARY_DIR}/mmgcmakedefines.h
     )
   SET( mmg_headers
     ${PROJECT_SOURCE_DIR}/src/mmg/libmmg.h
@@ -121,7 +133,8 @@ IF ( LIBMMG_STATIC OR LIBMMG_SHARED )
     copy_2d_headers copy_s_headers copy_3d_headers
     ${PROJECT_BINARY_DIR}/include/mmg/libmmgf.h
     ${PROJECT_BINARY_DIR}/include/mmg/libmmg.h
-    ${PROJECT_BINARY_DIR}/include/mmg/mmg3d/libmmgtypes.h )
+    ${PROJECT_BINARY_DIR}/include/mmg/mmg3d/libmmgtypes.h
+    ${PROJECT_BINARY_DIR}/include/mmg/mmg3d/mmgcmakedefines.h)
 
 ENDIF()
 

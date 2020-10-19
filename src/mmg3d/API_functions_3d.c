@@ -39,6 +39,7 @@
  */
 
 #include "mmg3d.h"
+#include "inlined_functions_3d.h"
 
 int MMG3D_Init_mesh(const int starter,...) {
   va_list argptr;
@@ -84,7 +85,7 @@ void MMG3D_Init_parameters(MMG5_pMesh mesh) {
 
   /* default values for integers */
   mesh->info.lag      = MMG5_LAG;
-  mesh->info.fem      = MMG5_FEM;
+  mesh->info.setfem   = MMG5_FEM;
   mesh->info.optim    = MMG5_OFF;
   mesh->info.optimLES = MMG5_OFF;
   /* [0/1]    ,avoid/allow surface modifications */
@@ -127,6 +128,8 @@ int MMG3D_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int
   }
   else if ( typSol == MMG5_Tensor ) {
     sol->size = 6;
+    /* User will provide its own metric: classical storage at ridges */
+    mesh->info.metRidTyp = 0;
   }
   else {
     fprintf(stderr,"\n  ## Error: %s: type of solution not yet implemented.\n",
@@ -136,8 +139,6 @@ int MMG3D_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int
 
   sol->dim = 3;
   if ( np ) {
-    mesh->info.inputMet = 1;
-
     sol->np  = np;
     sol->npi = np;
     if ( sol->m )
@@ -154,6 +155,7 @@ int MMG3D_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, int np, int
 int MMG3D_Set_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol *sol,int nsols,
                                  int nentities, int *typSol) {
   MMG5_pSol psl;
+  char      data[18];
   int       j;
 
   if ( ( (mesh->info.imprim > 5) || mesh->info.ddebug ) && mesh->nsols ) {
@@ -174,6 +176,17 @@ int MMG3D_Set_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol *sol,int nsols,
   for ( j=0; j<nsols; ++j ) {
     psl = *sol + j;
     psl->ver = 2;
+
+    /* Give an arbitrary name to the solution */
+    sprintf(data,"sol_%d",j);
+    if ( !MMG3D_Set_inputSolName(mesh,psl,data) ) {
+      return 0;
+    }
+    /* Give an arbitrary name to the solution */
+    sprintf(data,"sol_%d.o",j);
+    if ( !MMG3D_Set_outputSolName(mesh,psl,data) ) {
+      return 0;
+    }
 
     if ( !MMG3D_Set_solSize(mesh,psl,MMG5_Vertex,mesh->np,typSol[j]) ) {
       fprintf(stderr,"\n  ## Error: %s: unable to set the size of the"
@@ -400,21 +413,34 @@ int MMG3D_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2, int* r
     return 0;
   }
 
-  *c0  = mesh->point[mesh->npi].c[0];
-  *c1  = mesh->point[mesh->npi].c[1];
-  *c2  = mesh->point[mesh->npi].c[2];
+  return MMG3D_GetByIdx_vertex( mesh,c0,c1,c2,ref,isCorner,isRequired,mesh->npi);
+}
+
+int MMG3D_GetByIdx_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2, int* ref,
+                          int* isCorner, int* isRequired, int idx) {
+
+  if ( idx < 1 || idx > mesh->np ) {
+    fprintf(stderr,"\n  ## Error: %s: unable to get point at position %d.\n",
+            __func__,idx);
+    fprintf(stderr,"     Your vertices numbering goes from 1 to %d\n",mesh->np);
+    return 0;
+  }
+
+  *c0  = mesh->point[idx].c[0];
+  *c1  = mesh->point[idx].c[1];
+  *c2  = mesh->point[idx].c[2];
   if ( ref != NULL )
-    *ref = mesh->point[mesh->npi].ref;
+    *ref = mesh->point[idx].ref;
 
   if ( isCorner != NULL ) {
-    if ( mesh->point[mesh->npi].tag & MG_CRN )
+    if ( mesh->point[idx].tag & MG_CRN )
       *isCorner = 1;
     else
       *isCorner = 0;
   }
 
   if ( isRequired != NULL ) {
-    if ( mesh->point[mesh->npi].tag & MG_REQ )
+    if ( mesh->point[idx].tag & MG_REQ )
       *isRequired = 1;
     else
       *isRequired = 0;
@@ -1192,15 +1218,34 @@ int MMG3D_Set_corner(MMG5_pMesh mesh, int k) {
   return 1;
 }
 
+int MMG3D_Unset_corner(MMG5_pMesh mesh, int k) {
+  assert ( k <= mesh->np );
+  mesh->point[k].tag &= ~MG_CRN;
+  return 1;
+}
+
 int MMG3D_Set_requiredVertex(MMG5_pMesh mesh, int k) {
   assert ( k <= mesh->np );
   mesh->point[k].tag |= MG_REQ;
+  mesh->point[k].tag &= ~MG_NUL;
+  return 1;
+}
+
+int MMG3D_Unset_requiredVertex(MMG5_pMesh mesh, int k) {
+  assert ( k <= mesh->np );
+  mesh->point[k].tag &= ~MG_REQ;
   return 1;
 }
 
 int MMG3D_Set_requiredTetrahedron(MMG5_pMesh mesh, int k) {
   assert ( k <= mesh->ne );
   mesh->tetra[k].tag |= MG_REQ;
+  return 1;
+}
+
+int MMG3D_Unset_requiredTetrahedron(MMG5_pMesh mesh, int k) {
+  assert ( k <= mesh->ne );
+  mesh->tetra[k].tag &= ~MG_REQ;
   return 1;
 }
 
@@ -1214,11 +1259,29 @@ int MMG3D_Set_requiredTetrahedra(MMG5_pMesh mesh, int *reqIdx, int nreq) {
   return 1;
 }
 
+int MMG3D_Unset_requiredTetrahedra(MMG5_pMesh mesh, int *reqIdx, int nreq) {
+  int k;
+
+  for ( k=0; k<nreq; ++k ){
+    mesh->tetra[reqIdx[k]].tag &= ~MG_REQ;
+  }
+
+  return 1;
+}
+
 int MMG3D_Set_requiredTriangle(MMG5_pMesh mesh, int k) {
   assert ( k <= mesh->nt );
   mesh->tria[k].tag[0] |= MG_REQ;
   mesh->tria[k].tag[1] |= MG_REQ;
   mesh->tria[k].tag[2] |= MG_REQ;
+  return 1;
+}
+
+int MMG3D_Unset_requiredTriangle(MMG5_pMesh mesh, int k) {
+  assert ( k <= mesh->nt );
+  mesh->tria[k].tag[0] &= ~MG_REQ;
+  mesh->tria[k].tag[1] &= ~MG_REQ;
+  mesh->tria[k].tag[2] &= ~MG_REQ;
   return 1;
 }
 
@@ -1233,11 +1296,30 @@ int MMG3D_Set_requiredTriangles(MMG5_pMesh mesh, int* reqIdx, int nreq) {
   return 1;
 }
 
+int MMG3D_Unset_requiredTriangles(MMG5_pMesh mesh, int* reqIdx, int nreq) {
+  int k;
+
+  for ( k=0; k<nreq; ++k ){
+    mesh->tria[reqIdx[k]].tag[0] &= ~MG_REQ;
+    mesh->tria[reqIdx[k]].tag[1] &= ~MG_REQ;
+    mesh->tria[reqIdx[k]].tag[2] &= ~MG_REQ;
+  }
+  return 1;
+}
+
 int MMG3D_Set_parallelTriangle(MMG5_pMesh mesh, int k) {
   assert ( k <= mesh->nt );
   mesh->tria[k].tag[0] |= MG_PARBDY;
   mesh->tria[k].tag[1] |= MG_PARBDY;
   mesh->tria[k].tag[2] |= MG_PARBDY;
+  return 1;
+}
+
+int MMG3D_Unset_parallelTriangle(MMG5_pMesh mesh, int k) {
+  assert ( k <= mesh->nt );
+  mesh->tria[k].tag[0] &= ~MG_PARBDY;
+  mesh->tria[k].tag[1] &= ~MG_PARBDY;
+  mesh->tria[k].tag[2] &= ~MG_PARBDY;
   return 1;
 }
 
@@ -1252,15 +1334,38 @@ int MMG3D_Set_parallelTriangles(MMG5_pMesh mesh, int* parIdx, int npar) {
   return 1;
 }
 
+int MMG3D_Unset_parallelTriangles(MMG5_pMesh mesh, int* parIdx, int npar) {
+  int k;
+
+  for ( k=0; k<npar; ++k ){
+    mesh->tria[parIdx[k]].tag[0] &= ~MG_PARBDY;
+    mesh->tria[parIdx[k]].tag[1] &= ~MG_PARBDY;
+    mesh->tria[parIdx[k]].tag[2] &= ~MG_PARBDY;
+  }
+  return 1;
+}
+
 int MMG3D_Set_ridge(MMG5_pMesh mesh, int k) {
   assert ( k <= mesh->na );
   mesh->edge[k].tag |= MG_GEO;
   return 1;
 }
 
+int MMG3D_Unset_ridge(MMG5_pMesh mesh, int k) {
+  assert ( k <= mesh->na );
+  mesh->edge[k].tag &= ~MG_GEO;
+  return 1;
+}
+
 int MMG3D_Set_requiredEdge(MMG5_pMesh mesh, int k) {
   assert ( k <= mesh->na );
   mesh->edge[k].tag |= MG_REQ;
+  return 1;
+}
+
+int MMG3D_Unset_requiredEdge(MMG5_pMesh mesh, int k) {
+  assert ( k <= mesh->na );
+  mesh->edge[k].tag &= ~MG_REQ;
   return 1;
 }
 
@@ -1284,6 +1389,38 @@ int MMG3D_Get_normalAtVertex(MMG5_pMesh mesh, int k, double *n0, double *n1, dou
   (*n2) = mesh->point[k].n[2];
 
   return 1;
+}
+
+double MMG3D_Get_tetrahedronQuality(MMG5_pMesh mesh,MMG5_pSol met, int k) {
+  double qual = 0.;
+  MMG5_pTetra pt;
+
+  if ( k < 1 || k > mesh->ne ) {
+    fprintf(stderr,"\n  ## Error: %s: unable to access to tetra %d.\n",
+            __func__,k);
+    fprintf(stderr,"     Tetra numbering goes from 1 to %d\n",mesh->ne);
+    return 0.;
+  }
+  pt = &mesh->tetra[k];
+  assert ( MG_EOK(pt) );
+
+  if ( (!met) || (!met->m) || met->size==1 ) {
+    if ( mesh->info.optimLES) {
+      /* Skewness */
+      qual =  MMG3D_ALPHAD * MMG3D_caltetLES_iso(mesh,met,pt);
+    } else {
+      /* iso quality */
+      qual =  MMG3D_ALPHAD * MMG5_caltet_iso(mesh,NULL,pt);
+    }
+  }
+  else if ( !mesh->info.metRidTyp ) {
+    qual =  MMG3D_ALPHAD * MMG5_caltet33_ani(mesh,met,pt);
+  }
+  else {
+    qual = MMG3D_ALPHAD * MMG5_caltet_ani(mesh,met,pt);
+  }
+
+  return qual;
 }
 
 int MMG3D_Set_scalarSol(MMG5_pSol met, double s, int pos) {
@@ -1940,7 +2077,7 @@ int MMG3D_Add_vertex(MMG5_pMesh mesh,double c0,double c1,double c2,int ref) {
   c[1] = c1;
   c[2] = c2;
 
-  ip = MMG3D_newPt(mesh,c,0);
+  ip = MMG3D_newPt(mesh,c,0,1);
   if ( !ip ) {
     MMG5_TAB_RECALLOC(mesh,mesh->point,mesh->npmax,mesh->gap,MMG5_Point,
                        "larger point table",
@@ -1953,7 +2090,7 @@ int MMG3D_Add_vertex(MMG5_pMesh mesh,double c0,double c1,double c2,int ref) {
       mesh->point[klink].tmp  = klink+1;
 
     /* We try again to add the point */
-    ip = MMG3D_newPt(mesh,c,0);
+    ip = MMG3D_newPt(mesh,c,0,1);
     if ( !ip ) {
       fprintf(stderr,"\n  ## Error: %s: unable to allocate"
               " a new point\n",__func__);
@@ -2008,7 +2145,7 @@ int MMG3D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam,int val){
     }
     break;
   case MMG3D_IPARAM_nofem :
-    mesh->info.fem      = (val==1)? 0 : 1;
+    mesh->info.setfem = (val==1)? 0 : 1;
     break;
   case MMG3D_IPARAM_opnbdy :
     mesh->info.opnbdy = val;
@@ -2037,6 +2174,9 @@ int MMG3D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam,int val){
     return 0;
 #endif
     break;
+  case MMG3D_IPARAM_numsubdomain :
+    mesh->info.nsd = val;
+    break;
   case MMG3D_IPARAM_optim :
     mesh->info.optim = val;
     break;
@@ -2054,6 +2194,12 @@ int MMG3D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam,int val){
     break;
   case MMG3D_IPARAM_nosurf :
     mesh->info.nosurf   = val;
+    break;
+  case MMG3D_IPARAM_nreg :
+    mesh->info.nreg     = val;
+    break;
+  case MMG3D_IPARAM_nosizreq :
+    mesh->info.nosizreq = val;
     break;
   case MMG3D_IPARAM_numberOfLocalParam :
     if ( mesh->info.par ) {
@@ -2079,6 +2225,37 @@ int MMG3D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam,int val){
     }
 
     break;
+  case MMG3D_IPARAM_numberOfLSBaseReferences :
+    mesh->info.nbr = val;
+    MMG5_ADD_MEM(mesh,mesh->info.nbr*sizeof(int),"References",
+                 printf("  Exit program.\n");
+                 return 0);
+    MMG5_SAFE_CALLOC(mesh->info.br,mesh->info.nbr,int,return 0);
+
+    for (k=0; k<mesh->info.nbr; k++)
+      mesh->info.br[k] = 0;
+
+    break;
+
+  case MMG3D_IPARAM_numberOfMat :
+    if ( mesh->info.mat ) {
+      MMG5_DEL_MEM(mesh,mesh->info.mat);
+      if ( (mesh->info.imprim > 5) || mesh->info.ddebug )
+        fprintf(stderr,"\n  ## Warning: %s: new multi materials values\n",__func__);
+    }
+    mesh->info.nmat   = val;
+    mesh->info.nmati  = 0;
+
+    MMG5_ADD_MEM(mesh,(mesh->info.nmat)*sizeof(MMG5_Mat),"multi material",
+                 printf("  Exit program.\n");
+                 return 0);
+    MMG5_SAFE_CALLOC(mesh->info.mat,mesh->info.nmat,MMG5_Mat,return 0);
+    for (k=0; k<mesh->info.nmat; k++) {
+      mesh->info.mat[k].ref   = 0;
+    }
+
+    break;
+
 #ifdef USE_SCOTCH
   case MMG3D_IPARAM_renum :
     mesh->info.renum    = val;
@@ -2087,7 +2264,7 @@ int MMG3D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam,int val){
   case MMG3D_IPARAM_anisosize :
     if ( !MMG3D_Set_solSize(mesh,sol,MMG5_Vertex,0,MMG5_Tensor) )
       return 0;
-
+    break;
   default :
     fprintf(stderr,"\n  ## Error: %s: unknown type of parameter\n",__func__);
     return 0;
@@ -2141,8 +2318,14 @@ int MMG3D_Get_iparameter(MMG5_pMesh mesh, int iparam) {
   case MMG3D_IPARAM_nosurf :
     return  mesh->info.nosurf;
     break;
+  case MMG3D_IPARAM_nreg :
+    return mesh->info.nreg;
+    break;
   case MMG3D_IPARAM_numberOfLocalParam :
     return  mesh->info.npar;
+    break;
+  case MMG3D_IPARAM_numberOfMat :
+    return  mesh->info.nmat;
     break;
 #ifdef USE_SCOTCH
   case MMG3D_IPARAM_renum :
@@ -2165,9 +2348,11 @@ int MMG3D_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val)
     mesh->info.dhd = cos(mesh->info.dhd*M_PI/180.0);
     break;
   case MMG3D_DPARAM_hmin :
+    mesh->info.sethmin  = 1;
     mesh->info.hmin     = val;
     break;
   case MMG3D_DPARAM_hmax :
+    mesh->info.sethmax  = 1;
     mesh->info.hmax     = val;
     break;
   case MMG3D_DPARAM_hsiz :
@@ -2198,6 +2383,16 @@ int MMG3D_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val)
     break;
   case MMG3D_DPARAM_ls :
     mesh->info.ls       = val;
+    break;
+  case MMG3D_DPARAM_rmc :
+    if ( !val ) {
+      /* Default value */
+      mesh->info.rmc      = MMG3D_VOLFRAC;
+    }
+    else {
+      /* User customized value */
+      mesh->info.rmc      = val;
+    }
     break;
   default :
     fprintf(stderr,"\n  ## Error: %s: unknown type of parameter\n", __func__);
@@ -2262,20 +2457,30 @@ int MMG3D_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref,
 
   switch ( typ )
   {
-  case ( MMG5_Vertex ):
-    mesh->info.parTyp |= MG_Vert;
-    break;
   case ( MMG5_Triangle ):
     mesh->info.parTyp |= MG_Tria;
     break;
   case ( MMG5_Tetrahedron ):
     mesh->info.parTyp |= MG_Tetra;
     break;
+  default:
+    fprintf(stderr,"\n  ## Error: %s: unexpected entity type: %s.\n",
+            __func__,MMG5_Get_entitiesName(typ));
+    return 0;
   }
 
   mesh->info.npari++;
 
   return 1;
+}
+
+int MMG3D_Set_multiMat(MMG5_pMesh mesh,MMG5_pSol sol,int ref,int split,int rin,int rout) {
+  return MMG5_Set_multiMat(mesh,sol,ref,split,rin,rout);
+}
+
+int MMG3D_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol) {
+
+  return MMG5_Free_allSols(mesh,sol);
 }
 
 int MMG3D_Free_all(const int starter,...)

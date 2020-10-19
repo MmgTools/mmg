@@ -28,6 +28,9 @@
 #include <stdarg.h>
 #include <stddef.h>
 
+#include "mmgcmakedefines.h"
+#include "mmgversion.h"
+
 #ifndef _LIBMMGTYPES_H
 #define _LIBMMGTYPES_H
 
@@ -167,6 +170,30 @@
 #define MMG5_NSOLS_MAX   100
 
 /**
+ * \def MMG5_FILENAME_LEN_MAX
+ *
+ * Maximal length of filenames
+ *
+ */
+#define  MMG5_FILENAME_LEN_MAX 255
+
+/**
+ * \def MMG5_MMAT_NOSPLIT
+ *
+ * Entity that must not be splitted in multimat mode
+ *
+ */
+#define MMG5_MMAT_NoSplit  0
+
+/**
+ * \def MMG5_MMAT_Split
+ *
+ * Entity that must be splitted in multimat mode
+ *
+ */
+#define MMG5_MMAT_Split  1
+
+/**
  * \enum MMG5_type
  * \brief Type of solutions.
  */
@@ -203,7 +230,7 @@ typedef struct {
   double   hmax; /*!< maximal size for edges */
   double   hausd; /*!< Hausdorff value */
   int      ref; /*!< Reference value */
-  char     elt; /*!< Element type */
+  int8_t   elt; /*!< Element type */
 } MMG5_Par; typedef MMG5_Par * MMG5_pPar;
 
 /**
@@ -214,6 +241,9 @@ typedef struct {
 typedef struct {
   double   c[3]; /*!< Coordinates of point */
   double   n[3]; /*!< Normal or Tangent for mmgs and Tangent (if needed) for mmg3d */
+#ifdef USE_POINTMAP
+  int      src; /*!< Source point in input mesh */
+#endif
   int      ref; /*!< Reference of point */
   int      xp; /*!< Surface point number */
   int      tmp; /*!< Index of point in the saved mesh (we don't count
@@ -222,7 +252,7 @@ typedef struct {
   int      s;
   int16_t  tag; /*!< Contains binary flags : if \f$tag=23=16+4+2+1\f$, then
                   the point is \a MG_REF, \a MG_GEO, \a MG_REQ and \a MG_BDY */
-  char     tagdel; /*!< Tag for delaunay */
+  int8_t   tagdel; /*!< Tag for delaunay */
 } MMG5_Point;
 typedef MMG5_Point * MMG5_pPoint;
 
@@ -233,6 +263,7 @@ typedef MMG5_Point * MMG5_pPoint;
 typedef struct {
   double   n1[3],n2[3]; /*!< Normals at boundary vertex;
                           n1!=n2 if the vertex belong to a ridge */
+  int8_t   nnor; /* By default 0; 1 if no normal available (internal NOM point) */
 } MMG5_xPoint;
 typedef MMG5_xPoint * MMG5_pxPoint;
 
@@ -362,7 +393,7 @@ typedef struct {
                       \f$i^{th}\f$ face of the tetrahedron */
   int16_t  tag[6]; /*!< tag[i] contains the tag associated to the
                      \f$i^{th}\f$ edge of the tetrahedron */
-  char     ori; /*!< Orientation of the triangles of the tetrahedron:
+  int8_t   ori; /*!< Orientation of the triangles of the tetrahedron:
                   the $\f$i^{th}\f$ bit of ori is set to 0 when the
                   \f$i^{th}\f$ face is bad orientated */
 } MMG5_xTetra;
@@ -404,7 +435,7 @@ typedef struct {
   int      flag;
   int      xpr; /*!< Index of the surface \ref MMG5_xPrism associated to
                   the prism*/
-  char     tag;
+  int8_t   tag;
 } MMG5_Prism;
 typedef MMG5_Prism * MMG5_pPrism;
 
@@ -427,12 +458,12 @@ typedef struct {
 typedef MMG5_xPrism * MMG5_pxPrism;
 
 /**
- * \struc MMG5_Mat
+ * \struct MMG5_Mat
  * \brief To store user-defined references in the mesh (useful in LS mode)
  */
 typedef struct {
-  char dospl;
-  int  ref,rin,rex;
+  int8_t dospl;
+  int    ref,rin,rex;
 } MMG5_Mat;
 typedef MMG5_Mat * MMG5_pMat;
 
@@ -443,19 +474,31 @@ typedef MMG5_Mat * MMG5_pMat;
 typedef struct {
   MMG5_pPar     par;
   double        dhd,hmin,hmax,hsiz,hgrad,hgradreq,hausd;
-  double        min[3],max[3],delta,ls;
+  double        min[3],max[3],delta,ls,rmc;
   int           mem,npar,npari;
-  int           opnbdy;
-  int           renum;
-  int           PROctree;
-  int           nmat;
-  char          nreg;
-  char          imprim,ddebug,badkal,iso,fem,lag;
-  char          parTyp; /*!< Contains binary flags to say which kind of local
+  int           nbr,*br;
+  int           opnbdy; /*!< floating surfaces */
+  int           renum; /*!< scotch renumbering */
+  int           PROctree; /*!< octree to speedup delaunay insertion */
+  int           nmati,nmat; /*!< number of materials in ls multimat mode */
+  int           imprim; /*!< verbosity level */
+  int           nsd; /*!< index of subdomain to save (0 by default == all subdomains are saved) */
+  int8_t        nreg; /*!< normal regularization */
+  int8_t        ddebug; /*!< debug mode if 1 */
+  int8_t        badkal; /*!< 1 if the mesh contains a very bad element */
+  int8_t        iso; /*!< level-set discretization mode */
+  int8_t        setfem; /*!< Enforce finite element mesh (try to avoid edges
+                      * connecting 2 bdy points and tet with more than 1 bdy
+                      * face) */
+  int8_t        fem; /*!< internal value for fem / no fem mesh output */
+  int8_t        lag; /*!< lagrangian mode */
+  int8_t        parTyp; /*!< Contains binary flags to say which kind of local
                           param are setted: if \f$tag = 1+2+4\f$ then the point
                           is \a MG_Vert, MG_Tria and MG_Tetra */
-  unsigned char optim, optimLES, noinsert, noswap, nomove, nosurf;
-  unsigned char inputMet; /*!< 1 if we don't have a metric when we enter in mmg3d1, 0 otherwise */
+  int8_t        sethmin; /*!< 1 if user set hmin, 0 otherwise (needed for multiple library calls) */
+  int8_t        sethmax; /*!< 1 if user set hmin, 0 otherwise (needed for multiple library calls) */
+  uint8_t optim, optimLES, noinsert, noswap, nomove, nosurf, nosizreq;
+  uint8_t metRidTyp; /*!< 0 for a classical storage of the aniso metric at ridge, 1 for the Mmg storage (modified by defsiz) */
   MMG5_pMat     mat;
 } MMG5_Info;
 
@@ -466,7 +509,7 @@ typedef struct {
 typedef struct {
   int     a; /*!< First extremity of edge */
   int     b;  /*!< Second extremity of edge */
-  int     ref; /*!< Reference of edge */
+  int     ref; /*!< Reference or idx (2D) of edge */
   int     nxt; /*!< Next element of hash table */
   int16_t tag; /*!< tag of edge */
 } MMG5_hgeom;
@@ -538,6 +581,10 @@ typedef struct {
                     \f$adjapr[5*(i-1)+1+j]=5*k+l\f$ then the \f$i^{th}\f$ and
                     \f$k^th\f$ prism are adjacent and share their
                     faces \a j and \a l (resp.) */
+  int      *adjq; /*!< Table of quadrangles adjacency: if
+                    \f$adjq[4*(i-1)+1+j]=4*k+l\f$ then the \f$i^{th}\f$ and
+                    \f$k^th\f$ quadrilaterals are adjacent and share their
+                    edges \a j and \a l (resp.) */
   int      *ipar;   /*!< Store indices of the local parameters */
   MMG5_pPoint    point; /*!< Pointer toward the \ref MMG5_Point structure */
   MMG5_pxPoint   xpoint; /*!< Pointer toward the \ref MMG5_xPoint structure */
@@ -550,8 +597,8 @@ typedef struct {
   MMG5_pEdge     edge; /*!< Pointer toward the \ref MMG5_Edge structure */
   MMG5_HGeom     htab; /*!< \ref MMG5_HGeom structure */
   MMG5_Info      info; /*!< \ref MMG5_Info structure */
-  char     *namein; /*!< Input mesh name */
-  char     *nameout; /*!< Output mesh name */
+  char           *namein; /*!< Input mesh name */
+  char           *nameout; /*!< Output mesh name */
 
 } MMG5_Mesh;
 typedef MMG5_Mesh  * MMG5_pMesh;

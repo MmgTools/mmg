@@ -32,6 +32,8 @@ FIND_PATH(ELAS_INCLUDE_DIR
   $ENV{HOME}/include
   ${ELAS_DIR}/include
   $ENV{ELAS_DIR}/include
+  ${ELAS_DIR}/sources
+  $ENV{ELAS_DIR}/sources
   PATH_SUFFIXES ELAS
   DOC "Directory of ELAS Header")
 

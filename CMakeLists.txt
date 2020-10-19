@@ -55,10 +55,11 @@ include(GNUInstallDirs)
 #####         Release version and date
 #####
 ###############################################################################
+
 SET (CMAKE_RELEASE_VERSION_MAJOR "5" )
-SET (CMAKE_RELEASE_VERSION_MINOR "4" )
-SET (CMAKE_RELEASE_VERSION_PATCH "3" )
-SET (CMAKE_RELEASE_DATE "Feb. 26, 2020" )
+SET (CMAKE_RELEASE_VERSION_MINOR "5" )
+SET (CMAKE_RELEASE_VERSION_PATCH "1" )
+SET (CMAKE_RELEASE_DATE "Oct. 14, 2020" )
 
 SET (CMAKE_RELEASE_VERSION
   "${CMAKE_RELEASE_VERSION_MAJOR}.${CMAKE_RELEASE_VERSION_MINOR}.${CMAKE_RELEASE_VERSION_PATCH}")
@@ -70,15 +71,26 @@ SET (CMAKE_RELEASE_VERSION
 ###############################################################################
 IF (NOT WIN32)
   # Set preprocessor flags to say that we are posix and gnu compatible
-  SET (DEF_POSIX "#define POSIX")
-  SET (DEF_GNU "#define GNU")
+  SET (DEF_POSIX "#define MMG_POSIX")
+  SET (DEF_GNU "#define MMG_GNU")
 ELSEIF(MINGW)
-  SET (DEF_GNU "#define GNU")
+  SET (DEF_GNU "#define MMG_GNU")
 ENDIF ()
 
-# Create mmgcommon.h file with the good release and architecture infos.
-CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/src/common/mmgcommon.h.in
-  ${PROJECT_BINARY_DIR}/src/common/mmgcommon.h @ONLY)
+# Do not print warnings about the use of secure function with MSVC
+if ( MSVC )
+  add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+  add_definitions(-Dstrdup=_strdup)
+endif()
+
+# Create mmgcmakedefines.h file with the architecture infos and
+# the definition ot the USE_POINTMAP flag.
+CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/src/common/mmgcmakedefines.h.in
+  ${PROJECT_BINARY_DIR}/src/common/mmgcmakedefines.h @ONLY)
+
+# Create mmgversion.h file with the release infos
+CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/src/common/mmgversion.h.in
+  ${PROJECT_BINARY_DIR}/src/common/mmgversion.h @ONLY)
 
 ###############################################################################
 #####
@@ -101,7 +113,6 @@ MARK_AS_ADVANCED(CMAKE_OSX_ARCHITECTURES
   CMAKE_OSX_SYSROOT)
 
 IF(CMAKE_COMPILER_IS_GNUCC)
-  SET(CMAKE_C_FLAGS " -Wno-char-subscripts ${CMAKE_C_FLAGS}")
   IF(APPLE)
     # Add flags to the compiler to work on old mac
     ADD_DEFINITIONS( -mmacosx-version-min=10.4 -arch x86_64)
@@ -212,21 +223,68 @@ ENDIF()
 
 ############################################################################
 #####
+#####         Point map
+#####
+############################################################################
+
+# add point map?
+OPTION ( USE_POINTMAP "Use map for point tracking" OFF )
+
+############################################################################
+#####
 #####         Scotch
 #####
 ############################################################################
 # Find SCOTCH library?
 SET(SCOTCH_DIR "" CACHE PATH "Installation directory for scotch")
 LIST(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules)
-FIND_PACKAGE(Scotch)
 
-IF ( NOT SCOTCH_FOUND )
-  MESSAGE ( WARNING "Scotch library not found:"
-    "Using scotch reduce the execution time of mmg3d "
-    "(see https://gforge.inria.fr/frs/?group_id=248 to download it)."
-    "If you have already installed Scotch and want to use it, "
-    "please set the CMake variable or environment variable SCOTCH_DIR "
-    "to your scotch directory.")
+# add Scotch library?
+OPTION ( USE_SCOTCH "Use SCOTCH TOOL for renumbering" ON )
+
+IF ( USE_SCOTCH )
+  FIND_PACKAGE(SCOTCH)
+
+  IF ( NOT SCOTCH_FOUND )
+    MESSAGE ( WARNING "Scotch library not found:"
+      "Using scotch reduce the execution time of mmg3d "
+      "(see https://gforge.inria.fr/frs/?group_id=248 to download it)."
+      "If you have already installed Scotch and want to use it, "
+      "please set the CMake variable or environment variable SCOTCH_DIR "
+      "to your scotch directory.")
+  ENDIF ( )
+ENDIF ( )
+
+# add LinearElasticity library?
+SET(ELAS_DIR "" CACHE PATH "Installation directory for Elas")
+OPTION (
+  USE_ELAS "Use the Elas library for lagrangian motion option" ON )
+
+IF ( USE_ELAS )
+  INCLUDE(cmake/modules/FindElas.cmake)
+  IF ( NOT ELAS_FOUND )
+    MESSAGE ( WARNING "Elas is a library to solve the linear elasticity "
+      "problem (see https://github.com/ISCDtoolbox/LinearElasticity to"
+      " download it). "
+      "This library is needed to use the lagrangian motion option. "
+      "If you have already installed Elas and want to use it, "
+      "please set the CMake variable or environment variable ELAS_DIR "
+      "to your Elas directory.")
+  ENDIF ( )
+ENDIF ( )
+
+############################################################################
+#####
+#####         VTK (to parse (p)vtp/(p)vtu files )
+#####
+############################################################################
+# add the VTK library ?
+OPTION ( USE_VTK "Use VTK I/O" ON )
+IF ( USE_VTK )
+  FIND_PACKAGE(VTK QUIET)
+  IF ( NOT VTK_FOUND )
+    MESSAGE ( WARNING "VTK library not found: vtk I/O will not be available.")
+  ENDIF ( )
 ENDIF ( )
 
 ############################################################################
@@ -273,13 +331,6 @@ CMAKE_DEPENDENT_OPTION(
   MMG2D_CI "Enable/Disable continuous integration for mmg2d" ON
   "BUILD_TESTING;BUILD_MMG2D" OFF)
 
-# add LinearElasticity library?
-SET(ELAS_DIR "" CACHE PATH "Installation directory for Elas")
-INCLUDE(cmake/modules/FindElas.cmake)
-CMAKE_DEPENDENT_OPTION (
-  USE_ELAS "Use the Elas library for lagrangian motion option" ON
-  "BUILD_MMG2D;ELAS_FOUND" OFF)
-
 #------------------------------- mmgs
 CMAKE_DEPENDENT_OPTION ( LIBMMGS_STATIC "Compile the mmgs static library" ${BUILD_STATIC_LIBS}
   "BUILD_MMGS" OFF)
@@ -324,18 +375,8 @@ CMAKE_DEPENDENT_OPTION ( PATTERN
 #-- Remove the next line to have this option visible in basic cmake mode
 MARK_AS_ADVANCED(PATTERN)
 
-# add Elastic library?
-SET(ELAS_DIR "" CACHE PATH "Installation directory for Elas")
-INCLUDE(cmake/modules/FindElas.cmake)
-CMAKE_DEPENDENT_OPTION (
-  USE_ELAS "Use the Elas library for lagrangian motion option" ON
-  "BUILD_MMG3D;ELAS_FOUND" OFF)
 
-# add Scotch library?
-CMAKE_DEPENDENT_OPTION ( USE_SCOTCH "Use SCOTCH TOOL for renumbering" ON
-  "SCOTCH_FOUND;BUILD_MMGS3D" OFF)
-
-IF( USE_SCOTCH )
+IF( SCOTCH_FOUND )
   SET(CMAKE_C_FLAGS "-DUSE_SCOTCH ${CMAKE_C_FLAGS}")
 
   MESSAGE(STATUS
@@ -343,6 +384,18 @@ IF( USE_SCOTCH )
   SET( LIBRARIES ${SCOTCH_LIBRARIES} ${LIBRARIES})
 ENDIF()
 
+
+IF ( VTK_FOUND )
+  ADD_DEFINITIONS(-DUSE_VTK)
+
+  MESSAGE ( STATUS "Compilation with VTK: add vtk, vtp and vtu I/O." )
+
+  IF( "${VTK_MAJOR_VERSION}.${VTK_MINOR_VERSION}" LESS 8.90 )
+    INCLUDE ( ${VTK_USE_FILE} )
+  ENDIF()
+
+  SET( LIBRARIES ${VTK_LIBRARIES} ${LIBRARIES} )
+ENDIF ( )
 
 #---------------------------- mmg library gathering mmg2d, mmgs and mmg3d libs
 CMAKE_DEPENDENT_OPTION ( LIBMMG_STATIC
@@ -388,18 +441,18 @@ IF ( BUILD_MMG )
   INCLUDE(cmake/modules/mmg.cmake)
 ENDIF ( )
 
-IF( USE_SCOTCH )
+IF( SCOTCH_FOUND )
   # Include Scotch Dir here to ensure that Mmg doesn't search it's own headers in /usr/local
-  INCLUDE_DIRECTORIES(${SCOTCH_INCLUDE_DIRS})
+  INCLUDE_DIRECTORIES(PUBLIC ${SCOTCH_INCLUDE_DIRS})
 ENDIF()
 
 IF ( MmgTargetsExported )
   set( MMG_CMAKE_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/mmg )
 
-  configure_package_config_file(mmgConfig.cmake.in
+  configure_package_config_file(cmake/config/mmgConfig.cmake.in
     ${PROJECT_BINARY_DIR}/mmgConfig.cmake
     INSTALL_DESTINATION ${MMG_CMAKE_INSTALL_DIR} )
-  
+
   install(EXPORT MmgTargets
     FILE MmgTargets.cmake
     NAMESPACE Mmg::
@@ -409,7 +462,7 @@ IF ( MmgTargetsExported )
     DESTINATION ${MMG_CMAKE_INSTALL_DIR} )
 
   install(FILES
-    ${PROJECT_SOURCE_DIR}/cmake/modules/FindScotch.cmake
+    ${PROJECT_SOURCE_DIR}/cmake/modules/FindSCOTCH.cmake
     ${PROJECT_SOURCE_DIR}/cmake/modules/FindElas.cmake
     DESTINATION ${MMG_CMAKE_INSTALL_DIR} )
 ENDIF()
@@ -437,7 +490,10 @@ CMAKE_DEPENDENT_OPTION ( COVERAGE "Watch code coverage (Linux only)" OFF
 
 IF( BUILD_TESTING )
 
-  SET ( CTEST_OUTPUT_DIR ${PROJECT_BINARY_DIR}/TEST_OUTPUTS )
+  SET ( CTEST_OUTPUT_DIR ${PROJECT_BINARY_DIR}/TEST_OUTPUTS
+    CACHE PATH "Path toward the tests outputs" )
+  MARK_AS_ADVANCED ( CTEST_OUTPUT_DIR )
+
   FILE ( MAKE_DIRECTORY  ${CTEST_OUTPUT_DIR} )
 
   IF ( NOT ONLY_VERY_SHORT_TESTS )
@@ -466,8 +522,6 @@ ENDIF ( )
       "${PROJECT_SOURCE_DIR}/cmake/Supp/libSystem.supp")
   ENDIF(APPLE)
   # Copy config file and custom file in the good directories
-  CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/cmake/config/CTestConfig.cmake
-    ${PROJECT_SOURCE_DIR}/CTestConfig.cmake)
   CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/cmake/config/CTestCustom.cmake
     ./CTestCustom.cmake)
 
@@ -520,6 +574,21 @@ ENDIF ( )
   ENDIF ( )
 
 ENDIF ( BUILD_TESTING )
+
+############################################################################
+#####
+#####         Print git hash to source file
+#####
+############################################################################
+
+IF (NOT WIN32 OR MINGW)
+
+  ADD_CUSTOM_TARGET(GenerateGitHash
+    COMMAND ./git_log_mmg.sh ${PROJECT_SOURCE_DIR} ${COMMON_BINARY_DIR}
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/scripts/
+    COMMENT "Getting git commit hash"
+  )
+ENDIF ()
 
 ###############################################################################
 #####
@@ -580,7 +649,7 @@ IF(DOXYGEN_FOUND)
       VERBATIM )
   else()
     add_dependencies( doc mmgs_doc mmg3d_doc mmg2d_doc )
-  endif() 
+  endif()
 ENDIF ( DOXYGEN_FOUND )
 
 ###############################################################################
@@ -610,33 +679,5 @@ SET(CPACK_PACKAGE_INSTALL_DIRECTORY "${PROJECT_NAME}-${CPACK_PACKAGE_VERSION}")
 SET(CPACK_PACKAGE_FILE_NAME ${CPACK_PACKAGE_INSTALL_DIRECTORY}-${CMAKE_SYSTEM})
 SET(CPACK_PACKAGE_EXECUTABLES "${PROJECT_NAME}")
 SET(CPACK_OUTPUT_FILE_PREFIX "../archives")
-
-#SET(CPACK_SOURCE_IGNORE_FILES ";src/common/mmgtypes.h$" ${CPACK_SOURCE_IGNORE_FILE})
-#SET(CPACK_SOURCE_IGNORE_FILES ";.\\\\\\\\.#;/\\\\\\\\.git;.~;.#;.-e;.DS_Store"
-#  ${CPACK_SOURCE_IGNORE_FILES})
-#SET(CPACK_IGNORE_FILES ";lib/;bin;archives;def"
-#  ${CPACK_IGNORE_FILES})
-#SET(CPACK_SOURCE_IGNORE_FILES ";.dir-locals.el;.tm_properties"
-#  ${CPACK_SOURCE_IGNORE_FILES})
-#SET(CPACK_SOURCE_IGNORE_FILES ";libexamples/mmg3d/example0/example0_a/mesh.o.*"
-#  ${CPACK_SOURCE_IGNORE_FILES})
-#SET(CPACK_SOURCE_IGNORE_FILES ";libexamples/mmg3d/example0/example0_b/mesh.o.*"
-#  ${CPACK_SOURCE_IGNORE_FILES})
-#SET(CPACK_SOURCE_IGNORE_FILES ";libexamples/mmg3d/example1/result0.*"
-#  ${CPACK_SOURCE_IGNORE_FILES})
-#SET(CPACK_SOURCE_IGNORE_FILES ";libexamples/mmg3d/example2/result1.*"
-#  ${CPACK_SOURCE_IGNORE_FILES})
-#SET(CPACK_SOURCE_IGNORE_FILES ";libexamples/mmg3d/example3/SphereIso.*"
-#  ${CPACK_SOURCE_IGNORE_FILES})
-#SET(CPACK_SOURCE_IGNORE_FILES ";CMakeFiles" ${CPACK_SOURCE_IGNORE_FILES})
-#SET(CPACK_SOURCE_IGNORE_FILES ";cmake/supp/libSystem.supp"
-#  ${CPACK_SOURCE_IGNORE_FILES})
-#SET(CPACK_SOURCE_IGNORE_FILES ";CTestConfig.cmake" ${CPACK_SOURCE_IGNORE_FILES})
-#SET(CPACK_SOURCE_IGNORE_FILES ";cmake/testing/testing.cmake"
-#  ${CPACK_SOURCE_IGNORE_FILES})
-#SET(CPACK_SOURCE_IGNORE_FILES ";.#$"      ${CPACK_SOURCE_IGNORE_FILES})
-#SET(CPACK_SOURCE_IGNORE_FILES ";build*" ${CPACK_SOURCE_IGNORE_FILES}  )
-#SET(CPACK_SOURCE_IGNORE_FILES ";doc/doxygen/.*/html;doc/doxygen/.*/Doxyfile$"
-#  ${CPACK_SOURCE_IGNORE_FILES}  )
 
 INCLUDE(CPack)

@@ -33,7 +33,7 @@
  **/
 #include "mmg2d.h"
 
-//extern char ddb;
+//extern int8_t ddb;
 
 /**
  * \param mesh pointer toward the mesh
@@ -49,13 +49,13 @@
  * isotropic and anisotropic case
  *
  */
-int MMG2D_movedgpt(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list, char improve) {
+int MMG2D_movedgpt(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list, int8_t improve) {
   MMG5_pTria         pt,pt0;
   MMG5_pPoint        p0,p1,p2,ppt;
   double             step,ll1,ll2,o[2],no[2],calold,calnew;
   int                k,iel,ip0,ip1,ip2,it1,it2;
-  char               i,i1,i2;
-  static char        mmgWarn0=0,mmgWarn1=0;
+  int8_t             i,i1,i2;
+  static int8_t      mmgWarn0=0,mmgWarn1=0;
 
   pt0 = &mesh->tria[0];
   step = 0.1;
@@ -209,12 +209,12 @@ int MMG2D_movedgpt(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list, char impro
  * Relocate internal vertex whose ball is passed.
  *
  */
-int MMG2D_movintpt(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list,char improve) {
+int MMG2D_movintpt(MMG5_pMesh mesh,MMG5_pSol met,int ilist,int *list,int8_t improve) {
   MMG5_pTria        pt,pt0;
   MMG5_pPoint       p0,p1,p2,ppt0;
   double            calold,calnew,vol,volbal,b[2];
   int               k,iel;
-  char              i,i1,i2;
+  int8_t            i,i1,i2;
 
   ppt0 = &mesh->point[0];
   pt0  = &mesh->tria[0];

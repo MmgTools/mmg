@@ -222,6 +222,18 @@ FORTRAN_NAME(MMGS_GET_VERTEX,mmgs_get_vertex,
   *retval = MMGS_Get_vertex(*mesh,c0,c1,c2,ref,isCorner,isRequired);
   return;
 }
+
+/**
+ * See \ref MMGS_GetByIdx_vertex function in \ref mmgs/libmmgs.h file.
+ */
+FORTRAN_NAME(MMGS_GETBYIDX_VERTEX,mmgs_getbyidx_vertex,
+             (MMG5_pMesh *mesh, double* c0, double* c1, double* c2, int* ref,
+              int* isCorner, int* isRequired, int* idx,int* retval),
+             (mesh,c0,c1,c2,ref,isCorner,isRequired,idx, retval)) {
+  *retval = MMGS_GetByIdx_vertex(*mesh,c0,c1,c2,ref,isCorner,isRequired,*idx);
+  return;
+}
+
 /**
  * See \ref MMGS_Set_vertices function in \ref mmgs/libmmgs.h file.
  */
@@ -336,6 +348,15 @@ FORTRAN_NAME(MMGS_SET_CORNER,mmgs_set_corner,(MMG5_pMesh *mesh, int *k, int* ret
 }
 
 /**
+ * See \ref MMGS_Unset_corner function in \ref mmgs/libmmgs.h file.
+ */
+FORTRAN_NAME(MMGS_UNSET_CORNER,mmgs_unset_corner,(MMG5_pMesh *mesh, int *k, int* retval),
+             (mesh,k,retval)) {
+  *retval =  MMGS_Unset_corner(*mesh,*k);
+  return;
+}
+
+/**
  * See \ref MMGS_Set_requiredVertex function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_NAME(MMGS_SET_REQUIREDVERTEX,mmgs_set_requiredvertex,
@@ -344,6 +365,17 @@ FORTRAN_NAME(MMGS_SET_REQUIREDVERTEX,mmgs_set_requiredvertex,
   *retval =  MMGS_Set_requiredVertex(*mesh,*k);
   return;
 }
+
+/**
+ * See \ref MMGS_Unset_requiredVertex function in \ref mmgs/libmmgs.h file.
+ */
+FORTRAN_NAME(MMGS_UNSET_REQUIREDVERTEX,mmgs_unset_requiredvertex,
+             (MMG5_pMesh *mesh, int *k, int* retval),
+             (mesh,k,retval)) {
+  *retval =  MMGS_Unset_requiredVertex(*mesh,*k);
+  return;
+}
+
 /**
  * See \ref MMGS_Set_requiredTriangle function in \ref mmgs/libmmgs.h file.
  */
@@ -351,6 +383,16 @@ FORTRAN_NAME(MMGS_SET_REQUIREDTRIANGLE,mmgs_set_requiredtriangle,
              (MMG5_pMesh *mesh, int *k, int* retval),
              (mesh,k,retval)) {
   *retval = MMGS_Set_requiredTriangle(*mesh, *k);
+  return;
+}
+
+/**
+ * See \ref MMGS_Unset_requiredTriangle function in \ref mmgs/libmmgs.h file.
+ */
+FORTRAN_NAME(MMGS_UNSET_REQUIREDTRIANGLE,mmgs_unset_requiredtriangle,
+             (MMG5_pMesh *mesh, int *k, int* retval),
+             (mesh,k,retval)) {
+  *retval = MMGS_Unset_requiredTriangle(*mesh, *k);
   return;
 }
 
@@ -365,6 +407,16 @@ FORTRAN_NAME(MMGS_SET_RIDGE,mmgs_set_ridge,
 }
 
 /**
+ * See \ref MMGS_Unset_ridge function in \ref mmgs/libmmgs.h file.
+ */
+FORTRAN_NAME(MMGS_UNSET_RIDGE,mmgs_unset_ridge,
+             (MMG5_pMesh *mesh, int *k, int* retval),
+             (mesh,k,retval)) {
+  *retval = MMGS_Unset_ridge(*mesh,*k);
+  return;
+}
+
+/**
  * See \ref MMGS_Set_requiredEdge function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_NAME(MMGS_SET_REQUIREDEDGE,mmgs_set_requirededge,
@@ -374,6 +426,15 @@ FORTRAN_NAME(MMGS_SET_REQUIREDEDGE,mmgs_set_requirededge,
   return;
 }
 
+/**
+ * See \ref MMGS_Unset_requiredEdge function in \ref mmgs/libmmgs.h file.
+ */
+FORTRAN_NAME(MMGS_UNSET_REQUIREDEDGE,mmgs_unset_requirededge,
+             (MMG5_pMesh *mesh, int *k, int* retval),
+             (mesh,k,retval)) {
+  *retval = MMGS_Unset_requiredEdge(*mesh,*k);
+  return;
+}
 /**
  * See \ref MMGS_Set_normalAtVertex function in \ref mmgs/libmmgs.h file.
  */
@@ -392,6 +453,17 @@ FORTRAN_NAME(MMGS_GET_NORMALATVERTEX,mmgs_get_normalatvertex,
   *retval = MMGS_Get_normalAtVertex(*mesh,*k, n0, n1, n2);
   return;
 }
+
+/**
+ * See \ref MMGS_Get_triangleQuality function in \ref mmgs/libmmgs.h file.
+ */
+FORTRAN_NAME(MMGS_GET_TRIANGLEQUALITY,mmgs_get_trianglequality,
+             (MMG5_pMesh *mesh, MMG5_pSol *met, int* k, double* retval),
+             (mesh,met,k,retval)) {
+  *retval = MMGS_Get_triangleQuality(*mesh,*met,*k);
+  return;
+}
+
 
 /**
  * See \ref MMGS_Set_scalarSol function in \ref mmgs/libmmgs.h file.
@@ -601,6 +673,19 @@ FORTRAN_NAME(MMGS_SET_LOCALPARAMETER,mmgs_set_localparameter,
 }
 
 /**
+ * See \ref MMGS_Free_allSols function in \ref mmgs/libmmgs.h file.
+ */
+FORTRAN_NAME(MMGS_FREE_ALLSOLS,mmgs_free_allsols,
+             (MMG5_pMesh *mesh,MMG5_pSol *sol,int* retval),
+             (mesh,sol,retval)){
+
+  *retval = MMGS_Free_allSols(*mesh,sol);
+
+  return;
+}
+
+
+/**
  * See \ref MMGS_Free_all function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_VARIADIC(MMGS_FREE_ALL,mmgs_free_all,
@@ -677,6 +762,116 @@ FORTRAN_NAME(MMGS_LOADMESH,mmgs_loadmesh,
 
   return;
 }
+
+/**
+ * See \ref MMGS_loadVtkMesh function in \ref mmgs/libmmgs.h file.
+ */
+FORTRAN_NAME(MMGS_LOADVTKMESH,mmgs_loadvtkmesh,
+             (MMG5_pMesh *mesh, MMG5_pSol *sol,char* filename, int *strlen0,int* retval),
+             (mesh,sol,filename,strlen0, retval)){
+  char *tmp = NULL;
+
+  MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
+  strncpy(tmp,filename,*strlen0);
+  tmp[*strlen0] = '\0';
+
+  *retval = MMGS_loadVtkMesh(*mesh,*sol,tmp);
+
+  MMG5_SAFE_FREE(tmp);
+
+  return;
+}
+/**
+ * See \ref MMGS_loadvtkMesh_and_allData function in \ref mmgs/libmmgs.h file.
+ */
+FORTRAN_NAME(MMGS_LOADVTKMESH_AND_ALLDATA,mmgs_loadvtkmesh_and_alldata,
+             (MMG5_pMesh *mesh, MMG5_pSol *sol,char* filename, int *strlen0,int* retval),
+             (mesh,sol,filename,strlen0, retval)){
+  char *tmp = NULL;
+
+  MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
+  strncpy(tmp,filename,*strlen0);
+  tmp[*strlen0] = '\0';
+
+  *retval = MMGS_loadVtkMesh_and_allData(*mesh,sol,tmp);
+
+  MMG5_SAFE_FREE(tmp);
+
+  return;
+}
+/**
+ * See \ref MMGS_loadVtpMesh function in \ref mmgs/libmmgs.h file.
+ */
+FORTRAN_NAME(MMGS_LOADVTPMESH,mmgs_loadvtpmesh,
+             (MMG5_pMesh *mesh, MMG5_pSol *sol,char* filename, int *strlen0,int* retval),
+             (mesh,sol,filename,strlen0, retval)){
+  char *tmp = NULL;
+
+  MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
+  strncpy(tmp,filename,*strlen0);
+  tmp[*strlen0] = '\0';
+
+  *retval = MMGS_loadVtpMesh(*mesh,*sol,tmp);
+
+  MMG5_SAFE_FREE(tmp);
+
+  return;
+}
+/**
+ * See \ref MMGS_loadvtpMesh_and_allData function in \ref mmgs/libmmgs.h file.
+ */
+FORTRAN_NAME(MMGS_LOADVTPMESH_AND_ALLDATA,mmgs_loadvtpmesh_and_alldata,
+             (MMG5_pMesh *mesh, MMG5_pSol *sol,char* filename, int *strlen0,int* retval),
+             (mesh,sol,filename,strlen0, retval)){
+  char *tmp = NULL;
+
+  MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
+  strncpy(tmp,filename,*strlen0);
+  tmp[*strlen0] = '\0';
+
+  *retval = MMGS_loadVtpMesh_and_allData(*mesh,sol,tmp);
+
+  MMG5_SAFE_FREE(tmp);
+
+  return;
+}
+/**
+ * See \ref MMGS_loadVtuMesh function in \ref mmgs/libmmgs.h file.
+ */
+FORTRAN_NAME(MMGS_LOADVTUMESH,mmgs_loadvtumesh,
+             (MMG5_pMesh *mesh, MMG5_pSol *sol,char* filename, int *strlen0,int* retval),
+             (mesh,sol,filename,strlen0, retval)){
+  char *tmp = NULL;
+
+  MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
+  strncpy(tmp,filename,*strlen0);
+  tmp[*strlen0] = '\0';
+
+  *retval = MMGS_loadVtuMesh(*mesh,*sol,tmp);
+
+  MMG5_SAFE_FREE(tmp);
+
+  return;
+}
+/**
+ * See \ref MMGS_loadVtuMesh function in \ref mmgs/libmmgs.h file.
+ */
+FORTRAN_NAME(MMGS_LOADVTUMESH_AND_ALLDATA,mmgs_loadvtumesh_and_alldata,
+             (MMG5_pMesh *mesh, MMG5_pSol *sol,char* filename, int *strlen0,int* retval),
+             (mesh,sol,filename,strlen0, retval)){
+  char *tmp = NULL;
+
+  MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
+  strncpy(tmp,filename,*strlen0);
+  tmp[*strlen0] = '\0';
+
+  *retval = MMGS_loadVtuMesh_and_allData(*mesh,sol,tmp);
+
+  MMG5_SAFE_FREE(tmp);
+
+  return;
+}
+
 /**
  * See \ref MMGS_loadMshMesh function in \ref mmgs/libmmgs.h file.
  */
@@ -772,6 +967,123 @@ FORTRAN_NAME(MMGS_SAVEMESH,mmgs_savemesh,
 
   return;
 }
+/**
+ * See \ref MMGS_saveVtkMesh function in \ref mmgs/libmmgs.h file.
+ */
+FORTRAN_NAME(MMGS_SAVEVTKMESH,mmgs_savevtkmesh,
+             (MMG5_pMesh *mesh, MMG5_pSol *sol,char* filename, int *strlen0,
+              int* retval),
+             (mesh,sol,filename,strlen0,retval)){
+  char *tmp = NULL;
+
+  MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
+  strncpy(tmp,filename,*strlen0);
+  tmp[*strlen0] = '\0';
+
+  *retval = MMGS_saveVtkMesh(*mesh,*sol,tmp);
+
+  MMG5_SAFE_FREE(tmp);
+
+  return;
+}
+/**
+ * See \ref MMGS_saveVtkMesh_and_allData function in \ref mmgs/libmmgs.h file.
+ */
+FORTRAN_NAME(MMGS_SAVEVTKMESH_AND_ALLDATA,mmgs_savevtkmesh_and_alldata,
+             (MMG5_pMesh *mesh, MMG5_pSol *sol,char* filename, int *strlen0,
+              int* retval),
+             (mesh,sol,filename,strlen0,retval)){
+  char *tmp = NULL;
+
+  MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
+  strncpy(tmp,filename,*strlen0);
+  tmp[*strlen0] = '\0';
+
+  *retval = MMGS_saveVtkMesh_and_allData(*mesh,sol,tmp);
+
+  MMG5_SAFE_FREE(tmp);
+
+  return;
+}
+
+/**
+ * See \ref MMGS_saveVtuMesh function in \ref mmgs/libmmgs.h file.
+ */
+FORTRAN_NAME(MMGS_SAVEVTUMESH,mmgs_savevtumesh,
+             (MMG5_pMesh *mesh, MMG5_pSol *sol,char* filename, int *strlen0,
+              int* retval),
+             (mesh,sol,filename,strlen0,retval)){
+  char *tmp = NULL;
+
+  MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
+  strncpy(tmp,filename,*strlen0);
+  tmp[*strlen0] = '\0';
+
+  *retval = MMGS_saveVtuMesh(*mesh,*sol,tmp);
+
+  MMG5_SAFE_FREE(tmp);
+
+  return;
+}
+/**
+ * See \ref MMGS_saveVtuMesh_and_allData function in \ref mmgs/libmmgs.h file.
+ */
+FORTRAN_NAME(MMGS_SAVEVTUMESH_AND_ALLDATA,mmgs_savevtumesh_and_alldata,
+             (MMG5_pMesh *mesh, MMG5_pSol *sol,char* filename, int *strlen0,
+              int* retval),
+             (mesh,sol,filename,strlen0,retval)){
+  char *tmp = NULL;
+
+  MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
+  strncpy(tmp,filename,*strlen0);
+  tmp[*strlen0] = '\0';
+
+  *retval = MMGS_saveVtuMesh_and_allData(*mesh,sol,tmp);
+
+  MMG5_SAFE_FREE(tmp);
+
+  return;
+}
+
+/**
+ * See \ref MMGS_saveVtpMesh function in \ref mmgs/libmmgs.h file.
+ */
+FORTRAN_NAME(MMGS_SAVEVTPMESH,mmgs_savevtpmesh,
+             (MMG5_pMesh *mesh, MMG5_pSol *sol,char* filename, int *strlen0,
+              int* retval),
+             (mesh,sol,filename,strlen0,retval)){
+  char *tmp = NULL;
+
+  MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
+  strncpy(tmp,filename,*strlen0);
+  tmp[*strlen0] = '\0';
+
+  *retval = MMGS_saveVtpMesh(*mesh,*sol,tmp);
+
+  MMG5_SAFE_FREE(tmp);
+
+  return;
+}
+/**
+ * See \ref MMGS_saveVtpmesh_and_allData function in \ref mmgs/libmmgs.h file.
+ */
+FORTRAN_NAME(MMGS_SAVEVTPMESH_AND_ALLDATA,mmgs_savevtpmesh_and_alldata,
+             (MMG5_pMesh *mesh, MMG5_pSol *sol,char* filename, int *strlen0,
+              int* retval),
+             (mesh,sol,filename,strlen0,retval)){
+  char *tmp = NULL;
+
+  MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
+  strncpy(tmp,filename,*strlen0);
+  tmp[*strlen0] = '\0';
+
+  *retval = MMGS_saveVtpMesh_and_allData(*mesh,sol,tmp);
+
+  MMG5_SAFE_FREE(tmp);
+
+  return;
+}
+
 /**
  * See \ref MMGS_saveMshMesh function in \ref mmgs/libmmgs.h file.
  */

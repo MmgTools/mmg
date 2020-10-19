@@ -51,7 +51,7 @@ int* MMG2D_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
   double          u[2];
   int             k,iel,jel,n,npf,nef,ip,nlay,refdirh,refdirnh,ilist,ilisto,ilistck;
   int             vper[3],*perm,*list,*adja,*invperm;
-  char            i,j,jedg;
+  int8_t          i,j,jedg;
 
   nlay       = 20;
   refdirh    = 0;
@@ -318,7 +318,7 @@ int* MMG2D_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int *npfin) {
 int MMG2D_unpackLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,int npf,int *invperm) {
   double      *u;
   int         k,ip;
-  char        i;
+  int8_t      i;
 
   u = LS_getSol(lsst);
 

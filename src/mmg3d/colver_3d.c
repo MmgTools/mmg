@@ -35,17 +35,17 @@
 
 #include "inlined_functions_3d.h"
 
-extern char  ddb;
+extern int8_t  ddb;
 
 /** Check whether collapse ip -> iq could be performed, ip internal ;
  *  'mechanical' tests (positive jacobian) are not performed here */
-int MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
-                     char iedg,int *list,int ilist,char typchk) {
+int MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t iface,
+                    int8_t iedg,int *list,int ilist,int8_t typchk) {
   MMG5_pTetra   pt,pt0;
   MMG5_pPoint   p0;
-  double   calold,calnew,caltmp,ll,lon;
-  int      j,iel,nq,nr;
-  char     i,jj,ip,iq;
+  double        calold,calnew,caltmp,ll,lon;
+  int           j,iel,nq,nr;
+  int8_t        i,jj,ip,iq;
 
   iq  = MMG5_idir[iface][MMG5_iprv2[iedg]];
   pt  = &mesh->tetra[k];
@@ -177,13 +177,13 @@ int MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
  *
  */
 static int
-MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,char iedg,int *lists,
+MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,int8_t iedg,int *lists,
                     int ilists) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
   double        n0[3],n1[3],devnew;
   int           nump,numq,piv,iel,jel,jel1,nap,nbp,naq,nbq,nro,adj,*adja;
-  char          ip,iq,ipiv,iopp,i,j,j1,jface,jface1,isface;
+  int8_t        ip,iq,ipiv,iopp,i,j,j1,jface,jface1,isface;
 
   pt = &mesh->tetra[k];
   ip = MMG5_idir[iface][MMG5_inxt2[iedg]];
@@ -211,7 +211,6 @@ MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,char iedg,int *lists,
   /* Unfold shell of (nq,nro), starting from (k,iface), with pivot np */
   adj = k;
   piv = nump;
-  pxt = NULL;
   do {
     iel = adj;
     pt = &mesh->tetra[iel];
@@ -236,14 +235,16 @@ MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,char iedg,int *lists,
 
     isface = 0;
     if ( pt->xt ) {
-      pxt = &mesh->xtetra[pt->xt];
-      isface = (MG_BDY & pxt->ftag[iopp]);
+      isface = (MG_BDY & mesh->xtetra[pt->xt].ftag[iopp]);
     }
   }
   while ( adj && ( adj != k ) && !isface );
 
   naq = piv;
   if ( nap == naq ) return 0;
+
+  assert ( mesh->tetra[k].xt && "initial tetra is not boundary");
+  pxt = &mesh->xtetra[mesh->tetra[k].xt];
 
   if ( !( (pxt->tag[MMG5_iarf[iface][MMG5_inxt2[iedg]]] & MG_GEO) ||
           (pxt->tag[MMG5_iarf[iface][MMG5_iprv2[iedg]]] & MG_GEO)   ) ) {
@@ -306,8 +307,7 @@ MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,char iedg,int *lists,
 
     isface = 0;
     if ( pt->xt ) {
-      pxt    = &mesh->xtetra[pt->xt];
-      isface = (MG_BDY & pxt->ftag[iopp]);
+      isface = (MG_BDY & mesh->xtetra[pt->xt].ftag[iopp]);
     }
   }
   while ( adj && ( adj != k ) && !isface );
@@ -344,20 +344,25 @@ MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,char iedg,int *lists,
  * \param ilistv number of tetra in the ball of \a p0.
  * \param lists pointer toward the surfacic ball of \a p0.
  * \param ilists number of tetra in the surfacic ball of \a p0.
+ * \param refmin reference of one of the two subdomains in presence
+ * \param refplus reference of the other subdomain in presence
  * \param typchk  typchk type of checking permformed for edge length
  * (hmax or MMG3D_LLONG criterion).
+ * \param isnm 1 if edge is non-manifold
  *
- * \return 1 if success, 0 if the point cannot be collapsed, -1 if fail.
+ * \return ilistv if success, 0 if the point cannot be collapsed, -1 if fail.
  *
  * Check whether collapse ip -> iq could be performed, ip boundary point ;
  *  'mechanical' tests (positive jacobian) are not performed here ;
  *  iface = boundary face on which lie edge iedg - in local face num.
  *  (pq, or ia in local tet notation).
+ * If isnm is 1, the collapse occurs along an external MG_NOM edge.
  *
+ * \remark we don't check edge lengths.
  */
-int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
-                     char iedg,int *listv,int ilistv,int *lists,int ilists,
-                     char typchk) {
+int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t iface,
+                    int8_t iedg,int *listv,int ilistv,int *lists,int ilists,
+                    int refmin,int refplus, int8_t typchk,int isnm) {
   MMG5_pTetra  pt,pt0,pt1;
   MMG5_pxTetra pxt;
   MMG5_Tria    tt;
@@ -367,7 +372,7 @@ int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
   int          ipp,nump,numq,l,iel,kk;
   int          nr,nbbdy,ndepmin,ndepplus,isloc,iedgeOpp;
   int16_t      tag;
-  char         iopp,iopp2,ia,ip,i,iq,i0,i1,ier,isminp,isplp;
+  int8_t       iopp,iopp2,ia,ip,i,iq,i0,i1,ier,isminp,isplp;
 #ifndef NDEBUG
   MMG5_pPoint  p0;
 #endif
@@ -388,6 +393,11 @@ int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
   ndepmin = ndepplus = 0;
   isminp  = isplp = 0;
 
+  if ( !isnm ) {
+    refmin  = MG_MINUS;
+    refplus = MG_PLUS;
+  }
+
   /* prevent collapse in case surface ball has 3 triangles */
   if ( ilists <= 2 )  return 0;  // ATTENTION, Normalement, avec 2 c est bon !
 
@@ -401,8 +411,8 @@ int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
     ipp = listv[l] % 4;
     pt  = &mesh->tetra[iel];
 
-    if ( pt->ref == MG_MINUS ) isminp = 1;
-    else if ( pt->ref == MG_PLUS ) isplp = 1;
+    if ( pt->ref == refmin ) isminp = 1;
+    else if ( pt->ref == refplus ) isplp = 1;
 
     /* Topological test for tetras of the shell */
     for (iq=0; iq<4; iq++)
@@ -437,12 +447,14 @@ int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
       continue;
     }
 
-    /* Volume test for tetras outside the shell */
-    if ( mesh->info.iso ) {
-      if ( !ndepmin && pt->ref == MG_MINUS )
+    if ( isnm || mesh->info.iso ) {
+      /* Volume test for tetras outside the shell */
+      if ( (!ndepmin) && (pt->ref == refmin) ) {
         ndepmin = iel;
-      else if ( !ndepplus && pt->ref == MG_PLUS )
+      }
+      else if ( (!ndepplus) && (pt->ref == refplus) ) {
         ndepplus = iel;
+      }
     }
 
     /* Prevent from creating a tetra with 4 ridges vertices */
@@ -584,7 +596,7 @@ int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
         if ( tt.v[i] == nump )  break;
       }
       assert(i<3);
-      /* Index of the third point of the first collapsed triangle */
+      /* Index of the third point of the second collapsed triangle */
       i  = MMG5_iprv2[i];
       ia = MMG5_iprv2[i];
       tag = pxt->tag[MMG5_iarf[iopp][ia]];
@@ -644,7 +656,8 @@ int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
       }
     }
 
-    if ( MMG5_chkedg(mesh,&tt,MG_GET(pxt->ori,iopp),hmax,hausd,isloc) )  return 0;
+    /* If some edges must be splitted, refuse the collapse */
+    if ( MMG5_chkedg(mesh,&tt,MG_GET(pxt->ori,iopp),hmax,hausd,isloc) > 0 )  return 0;
 
     memcpy(nprvold,ncurold,3*sizeof(double));
     memcpy(nprvnew,ncurnew,3*sizeof(double));
@@ -679,17 +692,130 @@ int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
     }
   }
 
-  /* Ensure collapse does not lead to a non manifold configuration (case of implicit surface)*/
-  if ( mesh->info.iso ) {
-    ier = MMG5_chkmanicoll(mesh,k,iface,iedg,ndepmin,ndepplus,isminp,isplp);
+  if ( isnm || mesh->info.iso ) {
+    ier = MMG5_chkmanicoll(mesh,k,iface,iedg,ndepmin,ndepplus,refmin,refplus,isminp,isplp);
     if ( !ier )  return 0;
   }
-  /* Topological check for surface ball */
   else {
+    /* Topological check for surface ball */
     ier = MMG5_topchkcol_bdy(mesh,k,iface,iedg,lists,ilists);
     if ( ier<0 ) return -1;
     else if ( !ier )  return 0;
   }
+
+  return ilistv;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param k index of element in which we collapse.
+ * \param iface face through wich we perform the collapse
+ * \param iedg edge to collapse (in local face num)
+ * \param listv pointer toward the list of the tetra in the ball of \a p0.
+ * \param ilistv number of tetra in the ball of \a p0.
+ * \param typchk  typchk type of checking permformed for edge length
+ * (hmax or MMG3D_LLONG criterion).
+ *
+ * \return 1 if success, 0 if the point cannot be collapsed, -1 if fail.
+ *
+ * Check whether collapse ip -> iq could be performed, ip internal non manifold point;
+ *  'mechanical' tests (positive jacobian) are not performed here ;
+ *  iface = boundary face on which lie edge iedg - in local face num.
+ *  (pq, or ia in local tet notation).
+ *
+ */
+int MMG5_chkcol_nomint(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t iface,
+                    int8_t iedg,int *listv,int ilistv,int8_t typchk) {
+  MMG5_pTetra  pt,pt0;
+  MMG5_pxTetra pxt;
+  double       calold,calnew,caltmp;
+  int          ipp,nump,numq,l,iel;
+  int          nr,nbbdy;
+  int8_t       ia,ip,i,iq,i0,i1;
+#ifndef NDEBUG
+  MMG5_pPoint  p0;
+#endif
+
+  pt   = &mesh->tetra[k];
+  pxt  = 0;
+  pt0  = &mesh->tetra[0];
+  ip   = MMG5_idir[iface][MMG5_inxt2[iedg]];
+  nump = pt->v[ip];
+  numq = pt->v[MMG5_idir[iface][MMG5_iprv2[iedg]]];
+
+#ifndef NDEBUG
+  p0   = &mesh->point[nump];
+  assert(p0->tag & MG_BDY);
+  assert(p0->xp);
+#endif
+
+  /* check tetra quality */
+  calold = calnew = DBL_MAX;
+  for (l=0; l<ilistv; l++) {
+    iel = listv[l] / 4;
+    ipp = listv[l] % 4;
+    pt  = &mesh->tetra[iel];
+
+    /* Topological test for tetras of the shell */
+    for (iq=0; iq<4; iq++)
+      if ( pt->v[iq] == numq )  break;
+
+    if ( iq < 4 ) {
+      nbbdy = 0;
+      if ( pt->xt )  pxt = &mesh->xtetra[pt->xt];
+      for (i=0; i<4; i++) {
+        if ( pt->xt && (pxt->ftag[i] & MG_BDY) )  nbbdy++;
+      }
+
+      /* Topological problem triggered when one of the two faces of collapsed edge is the only
+      internal one : closing a part of the domain */
+      if ( nbbdy == 4 )
+        return 0;
+      else if ( nbbdy == 3 ) {
+
+        /* Identification of edge number in tetra iel */
+        if ( !MMG3D_findEdge(mesh,pt,iel,numq,nump,1,NULL,&ia) ) return -1;
+
+        i0 = MMG5_ifar[ia][0];
+        i1 = MMG5_ifar[ia][1];
+        if ( pt->xt && (!(pxt->ftag[i0] & MG_BDY) || !(pxt->ftag[i1] & MG_BDY)) )
+          return 0;
+      }
+
+      /* Now check that the 2 faces identified by collapse are not boundary */
+      if ( pt->xt && (pxt->ftag[ipp] & MG_BDY) && (pxt->ftag[iq] & MG_BDY) )
+        return 0;
+
+      continue;
+    }
+
+   /* Prevent from creating a tetra with 4 ridges vertices */
+   if ( mesh->point[numq].tag & MG_GEO ) {
+      i  = ipp;
+      nr = 0;
+      for (iq=0; iq<3; iq++) {
+        i = MMG5_inxt3[i];
+        if ( mesh->point[pt->v[i]].tag & MG_GEO ) ++nr;
+      }
+      if ( nr==3 ) return 0;
+    }
+
+    /* Quality checks for tetrahedra outside the shell */
+    memcpy(pt0,pt,sizeof(MMG5_Tetra));
+    pt0->v[ipp] = numq;
+
+    calold = MG_MIN(calold, pt->qual);
+    if ( typchk==1 && met->m && met->size > 1 )
+      caltmp = MMG5_caltet33_ani(mesh,met,pt0);
+    else
+      caltmp = MMG5_orcal(mesh,met,0);
+
+    if ( caltmp < MMG5_NULKAL )  return 0;
+    calnew = MG_MIN(calnew,caltmp);
+  }
+  if ( calold < MMG5_EPSOK && calnew <= calold )  return 0;
+  else if ( calnew < MMG5_EPSOK || calnew < 0.3*calold )  return 0;
 
   return ilistv;
 }
@@ -710,30 +836,23 @@ int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,int k,char iface,
  * (i.e. approximation of the surface, etc... must be performed outside).
  *
  */
-int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,char typchk) {
+int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int8_t indq,int8_t typchk) {
   MMG5_pTetra          pt,pt1;
   MMG5_pxTetra         pxt,pxt1;
   MMG5_xTetra          xt,xts;
   int             i,iel,jel,pel,qel,k,np,nq,*adja,p0,p1;
-  unsigned char   ip,iq,j,voy,voyp,voyq,ia,iav;
-  unsigned char   (*ind)[2];
-  int             *p0_c,*p1_c;
-  char            indar[4][4][2] = {
+  uint8_t         ip,iq,j,voy,voyp,voyq,ia,iav;
+  uint8_t         (ind)[MMG3D_LMAX][2];
+  int             p0_c[MMG3D_LMAX],p1_c[MMG3D_LMAX];
+  int8_t          indar[4][4][2] = {
     /* indar[ip][iq][0/1]: indices of edges which have iq for extremity but not ip*/
     { {-1,-1}, { 3, 4}, { 3, 5}, { 4, 5} },
     { { 1, 2}, {-1,-1}, { 1, 5}, { 2, 5} },
     { { 0, 2}, { 0, 4}, {-1,-1}, { 2, 4} },
     { { 0, 1}, { 0, 3}, { 1, 3}, {-1,-1} } };
 
-  // Dynamic allocations for windows compatibility
-  if (!(ind = malloc(ilist * sizeof(unsigned char[2])))) {
-    perror("  ## Memory problem: malloc");
-    return 0;
-  }
-
-  MMG5_SAFE_CALLOC(p0_c, ilist, int,free(ind);ind=NULL;return -1);
-  MMG5_SAFE_CALLOC(p1_c, ilist, int,
-                    free(ind);ind=NULL;MMG5_SAFE_FREE(p1_c);return -1);
+  memset( p0_c,0x00,ilist*sizeof(int) );
+  memset( p1_c,0x00,ilist*sizeof(int) );
 
   iel = list[0] / 4;
   ip  = list[0] % 4;
@@ -821,8 +940,6 @@ int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,char
     voy  = adja[ip] % 4;
     pt = &mesh->tetra[jel];
     if (pt->v[voy] == nq) {
-      free(ind);ind=NULL;
-      MMG5_SAFE_FREE(p0_c); MMG5_SAFE_FREE(p1_c);
       return 0;
     }
   }
@@ -871,19 +988,33 @@ int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,char
           pxt1->ref[voyp] = MG_MAX(pxt1->ref[voyp],pxt->ref[ip]);
           pxt1->ftag[voyp] = pxt1->ftag[voyp] | pxt->ftag[ip];
 
-          if ( qel ) {
-            if ( pt1->ref < mesh->tetra[qel].ref )  MG_CLR( pxt1->ori,voyp );
-            else if ( mesh->info.opnbdy && (pt1->ref == mesh->tetra[qel].ref) ) {
-              if ( pxt->ftag[ip] ) {
-                if ( MG_GET(pxt->ori,ip) )
-                  MG_SET( pxt1->ori,voyp );
-                else
-                  MG_CLR( pxt1->ori,voyp );
-              }
-            }
-            else  MG_SET( pxt1->ori,voyp );
+          /* the face voyp of pxt1 is projected into the face ip of pxt so it
+           * takes its orientation */
+          if ( pxt->ftag[ip] & MG_BDY ) {
+            if ( MG_GET(pxt->ori,ip) )
+              MG_SET( pxt1->ori,voyp );
+            else
+              MG_CLR( pxt1->ori,voyp );
           }
-          else  MG_SET( pxt1->ori,voyp );
+
+#ifndef NDEBUG
+          if ( qel ) {
+            /* Check that the domain of max ref imposes its orientation */
+            if ( pt1->ref < mesh->tetra[qel].ref ) {
+              assert ( !MG_GET(pxt1->ori,voyp) );
+            }
+            else if ( pt1->ref > mesh->tetra[qel].ref ) {
+              assert ( MG_GET(pxt1->ori,voyp ) );
+            }
+          }
+          else {
+            /* Check that a non parallel external boundary face has always a good
+             * orientation */
+            if ( (pxt1->ftag[voyp] & MG_BDY) && !(pxt1->ftag[voyp] & MG_PARBDY) ) {
+              assert ( MG_GET( pxt1->ori,voyp ) );
+            }
+          }
+#endif
 
           /* update tags for edges */
           for ( j=0; j<3; j++ ) {
@@ -947,8 +1078,8 @@ int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,char
                 }
               }
               assert(i!=3);
-              pxt1->tag[iav] = pxt->tag[ia];
-              pxt1->edg[iav] = pxt->edg[ia];
+              pxt1->tag[iav] |= pxt->tag[ia];
+              pxt1->edg[iav] = MG_MAX ( pxt1->edg[iav],pxt->edg[ia] );
             }
           }
           /* Recover the already used place by pxt */
@@ -975,19 +1106,33 @@ int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,char
             pxt1->ref[voyq]  = MG_MAX(pxt1->ref[voyq],pxt->ref[iq]);
             pxt1->ftag[voyq] = (pxt1->ftag[voyq] | pxt->ftag[iq]);
 
-            if ( pel ) {
-              if ( pt1->ref < mesh->tetra[pel].ref )  MG_CLR( pxt1->ori,voyq );
-              else if ( mesh->info.opnbdy && (pt1->ref == mesh->tetra[pel].ref) ) {
-                if ( pxt->ftag[iq] ) {
-                  if ( MG_GET(pxt->ori,iq) )
-                    MG_SET( pxt1->ori,voyq );
-                  else
-                    MG_CLR( pxt1->ori,voyq );
-                }
-              }
-              else  MG_SET( pxt1->ori,voyq );
+            /* the face voyq of pxt1 is projected into the face iq of pxt so it
+             * takes its orientation */
+            if ( pxt->ftag[iq] & MG_BDY ) {
+              if ( MG_GET(pxt->ori,iq) )
+                MG_SET( pxt1->ori,voyq );
+              else
+                MG_CLR( pxt1->ori,voyq );
             }
-            else  MG_SET( pxt1->ori,voyq );
+
+#ifndef NDEBUG
+            if ( pel ) {
+              /* Check that the domain of max ref imposes its orientation */
+              if ( pt1->ref < mesh->tetra[pel].ref ) {
+                assert ( !MG_GET(pxt1->ori,voyq) );
+              }
+              else if ( pt1->ref > mesh->tetra[pel].ref ) {
+                assert ( MG_GET(pxt1->ori,voyq ) );
+              }
+            }
+            else {
+              /* Check that a non parallel external boundary face has always a good
+               * orientation */
+              if ( (pxt1->ftag[voyq] & MG_BDY) && !(pxt1->ftag[voyq] & MG_PARBDY) ) {
+                assert ( MG_GET( pxt1->ori,voyq ) );
+              }
+            }
+#endif
 
             /* update tags for edges */
             for ( j=0; j<3; j++ ) {
@@ -1049,18 +1194,16 @@ int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,char
                   }
                 }
                 assert(i!=3);
-                pxt1->tag[iav] = pxt->tag[ia];
-                pxt1->edg[iav] = pxt->edg[ia];
+                pxt1->tag[iav] |= pxt->tag[ia];
+                pxt1->edg[iav] = MG_MAX ( pxt1->edg[iav],pxt->edg[ia]);
               }
             }
             /* Create new field xt */
             mesh->xt++;
             if ( mesh->xt > mesh->xtmax ) {
-              MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,0.2,MMG5_xTetra,
+              MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
                                  "larger xtetra table",
-                                 mesh->xt--;
-                                 free(ind);ind=0;MMG5_SAFE_FREE(p0_c);
-                                 MMG5_SAFE_FREE(p1_c);return -1;);
+                                 mesh->xt--;return -1;);
             }
             pt1->xt = mesh->xt;
             pxt = &mesh->xtetra[pt1->xt];
@@ -1115,8 +1258,8 @@ int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,char
                 }
               }
               assert(i!=3);
-              pxt1->tag[iav] = pxt->tag[ia];
-              pxt1->edg[iav] = pxt->edg[ia];
+              pxt1->tag[iav] |= pxt->tag[ia];
+              pxt1->edg[iav] = MG_MAX ( pxt1->edg[iav], pxt->edg[ia]);
             }
           }
         }
@@ -1152,8 +1295,8 @@ int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,char
                 }
               }
               assert(i!=3);
-              pxt1->tag[iav] = pxt->tag[ia];
-              pxt1->edg[iav] = pxt->edg[ia];
+              pxt1->tag[iav] |= pxt->tag[ia];
+              pxt1->edg[iav] =  MG_MAX ( pxt1->edg[iav],pxt->edg[ia]);
             }
           }
           /* Recover the already used place by pxt */
@@ -1163,7 +1306,6 @@ int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,char
       }
     }
     if ( !MMG3D_delElt(mesh,iel) ) {
-      free(ind);ind=0; MMG5_SAFE_FREE(p0_c); MMG5_SAFE_FREE(p1_c);
       return -1;
     }
   }
@@ -1182,6 +1324,5 @@ int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,char indq,char
     pt->mark=mesh->mark;
   }
 
-  free(ind);ind=0; MMG5_SAFE_FREE(p0_c); MMG5_SAFE_FREE(p1_c);
   return np;
 }

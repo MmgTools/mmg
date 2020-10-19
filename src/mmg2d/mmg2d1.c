@@ -36,7 +36,7 @@
  based on patterns, collapses and swaps.
    typchk = 1 -> adaptation based on edge lengths
    typchk = 2 -> adaptation based on lengths calculated in metric met */
-int MMG2D_anatri(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
+int MMG2D_anatri(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
   int      it,maxit,ns,nc,nsw,nns,nnc,nnsw;
 
   nns = nnc = nnsw = 0;
@@ -109,11 +109,11 @@ int MMG2D_anatri(MMG5_pMesh mesh,MMG5_pSol met,char typchk) {
 int MMG2D_anaelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
   MMG5_pTria      pt;
   MMG5_pPoint     ppt,p1,p2;
-  MMG5_Hash      hash;
+  MMG5_Hash       hash;
   double          len,s,o[2],no[2];
   int             ns,nc,npinit,ni,k,nt,ip1,ip2,ip,it,vx[3];
-  char            i,ic,i1,i2,ier;
-  static char     mmgWarn0=0;
+  int8_t          i,ic,i1,i2,ier;
+  static int8_t   mmgWarn0=0;
 
   s = 0.5;
   ns = 0;
@@ -193,6 +193,7 @@ int MMG2D_anaelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
       }
 
       /* If there is a metric in the mesh, interpolate it at the new point */
+      assert ( met );
       if ( met->m )
         MMG2D_intmet(mesh,met,k,i,ip,s);
 
@@ -360,7 +361,7 @@ int MMG2D_dichoto(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
   double       o[3][2],p[3][2];
   float        to,tp,t;
   int          ia,ib,ier,it,maxit;
-  char         i,i1,i2;
+  int8_t       i,i1,i2;
 
   pt = &mesh->tria[k];
 
@@ -431,11 +432,11 @@ int MMG2D_dichoto(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
 
 /* Travel triangles and collapse short edges */
 int MMG2D_colelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
-  MMG5_pTria         pt;
-  MMG5_pPoint        p1,p2;
-  double             ux,uy,ll,hmin2;
-  int                list[MMG2D_LONMAX+2],ilist,nc,k;
-  unsigned char      i,i1,i2,open;
+  MMG5_pTria   pt;
+  MMG5_pPoint  p1,p2;
+  double       ux,uy,ll,hmin2;
+  int          list[MMG2D_LONMAX+2],ilist,nc,k;
+  uint8_t      i,i1,i2,open;
 
   nc = 0;
   hmin2 = mesh->info.hmin * mesh->info.hmin;
@@ -505,9 +506,9 @@ int MMG2D_colelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
 
 /* Travel triangles and swap edges to improve quality */
 int MMG2D_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
-  MMG5_pTria          pt;
-  int                 it,maxit,ns,nns,k;
-  unsigned char       i;
+  MMG5_pTria pt;
+  int        it,maxit,ns,nns,k;
+  uint8_t    i;
 
   it = nns = 0;
   maxit = 2;
@@ -633,7 +634,7 @@ int MMG2D_adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria         pt;
   double             lmax,len;
   int                k,ns,nt,ip,ier;
-  char               i,i1,i2,imax;
+  int8_t             i,i1,i2,imax;
 
   ns = 0;
 
@@ -690,7 +691,7 @@ int MMG2D_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pPoint       p1,p2;
   double            len;
   int               k,nc,ilist,list[MMG2D_LONMAX+2];
-  char              i,i1,i2,open;
+  int8_t            i,i1,i2,open;
 
   nc = 0;
   for (k=1; k<=mesh->nt; k++) {
@@ -742,11 +743,11 @@ int MMG2D_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
 }
 
 /* Analyze points to relocate them according to a quality criterion */
-int MMG2D_movtri(MMG5_pMesh mesh,MMG5_pSol met,int maxit,char improve) {
+int MMG2D_movtri(MMG5_pMesh mesh,MMG5_pSol met,int maxit,int8_t improve) {
   MMG5_pTria           pt;
   MMG5_pPoint          p0;
   int                  base,k,nnm,nm,ns,it,ilist,list[MMG2D_LONMAX+2];
-  char                 i,ier;
+  int8_t               i,ier;
 
   it = nnm = 0;
   base = 0;
@@ -808,7 +809,7 @@ int MMG2D_mmg2d1n(MMG5_pMesh mesh,MMG5_pSol met) {
   /* Stage 1: creation of a geometric mesh */
   if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
     fprintf(stdout,"  ** GEOMETRIC MESH\n");
-
+  
   if ( !MMG2D_anatri(mesh,met,1) ) {
     fprintf(stderr,"  ## Unable to split mesh-> Exiting.\n");
     return 0;

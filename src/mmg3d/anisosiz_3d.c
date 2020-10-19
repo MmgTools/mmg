@@ -34,7 +34,7 @@
  */
 
 #include "inlined_functions_3d.h"
-#include "mmg3dexterns.c"
+#include "mmg3dexterns.h"
 
 int MMG3D_chk4ridVertices(MMG5_pMesh mesh, MMG5_pTetra pt) {
   MMG5_pPoint  ppt;
@@ -124,8 +124,8 @@ static int MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int 
   double             c[3],kappa,maxkappa,alpha, hausd,hausd_v;
   int                lists[MMG3D_LMAX+2],listv[MMG3D_LMAX+2],ilist,ilists,ilistv;
   int                k,iel,idp,ifac,isloc,init_s;
-  unsigned char      i,i0,i1,i2;
-  static char        mmgWarn = 0;
+  uint8_t            i,i0,i1,i2;
+  static int8_t      mmgWarn = 0;
 
   pt  = &mesh->tetra[kel];
   idp = pt->v[ip];
@@ -328,7 +328,7 @@ static int MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int kel,
   double         r[3][3],lispoi[3*MMG3D_LMAX+1];
   double         detg,detd;
   int            i,i0,i1,i2,ifac,isloc;
-  static char    mmgWarn = 0;
+  static int8_t  mmgWarn = 0;
 
   pt  = &mesh->tetra[kel];
   idp = pt->v[ip];
@@ -539,8 +539,8 @@ static int MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int kel, int iface, int 
   double        *m,isqhmin,isqhmax,*n,r[3][3],lispoi[3*MMG3D_LMAX+1];
   double        ux,uy,uz,det2d,c[3];
   double        tAA[6],tAb[3], hausd;
-  unsigned char i1,i2,itri1,itri2,i;
-  static char   mmgWarn0=0,mmgWarn1=0;
+  uint8_t       i1,i2,itri1,itri2,i;
+  static int8_t mmgWarn0=0,mmgWarn1=0;
 
   ipref[0] = ipref[1] = 0;
   pt  = &mesh->tetra[kel];
@@ -805,8 +805,8 @@ static int MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int kel,int iface, int i
   double         *n,*m,r[3][3],ux,uy,uz,lispoi[3*MMG3D_LMAX+1];
   double         det2d,c[3],isqhmin,isqhmax;
   double         tAA[6],tAb[3],hausd;
-  unsigned char  i1,i;
-  static char    mmgWarn = 0;
+  uint8_t        i1,i;
+  static int8_t  mmgWarn = 0;
 
   pt  = &mesh->tetra[kel];
   idp = pt->v[ip];
@@ -1007,6 +1007,7 @@ static int MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int kel,int iface, int i
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
+ * \param ismet 1 if user provided metric
  * \return 1 if success, 0 otherwise.
  *
  * Define metric map at a non-boundary vertex of the mesh.
@@ -1015,19 +1016,16 @@ static int MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int kel,int iface, int i
  *
  */
 static inline
-int MMG5_defmetvol(MMG5_pMesh mesh,MMG5_pSol met) {
+int MMG5_defmetvol(MMG5_pMesh mesh,MMG5_pSol met,int8_t ismet) {
   MMG5_pTetra   pt,ptloc;
   MMG5_pPoint   ppt;
   MMG5_pPar     par;
   double        v[3][3],lambda[3],isqhmax,isqhmin,*m;
   int           list[MMG3D_LMAX+2],ilist,k,l,i,j,isloc,ip;
-  int8_t        ismet;
-  static char   mmgWarn = 0;
+  static int8_t mmgWarn = 0;
 
   isqhmin = 1./(mesh->info.hmin*mesh->info.hmin);
   isqhmax = 1./(mesh->info.hmax*mesh->info.hmax);
-
-  ismet = mesh->info.inputMet;
 
   if ( !ismet ) {
 
@@ -1259,8 +1257,9 @@ int MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pPoint   ppt;
   double        mm[6];
   int           k,l,iploc;
-  char          i;
-  static char   mmgErr = 0;
+  int8_t        ismet;
+  int8_t        i;
+  static int8_t mmgErr = 0;
 
   if ( !MMG5_defsiz_startingMessage (mesh,met,__func__) ) {
     return 0;
@@ -1273,30 +1272,34 @@ int MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
   if ( !met->m ) {
+    ismet = 0;
+
     /* Allocate and store the header informations for each solution */
     if ( !MMG3D_Set_solSize(mesh,met,MMG5_Vertex,mesh->np,3) ) {
       return 0;
     }
 
-    /* Set_solSize modify the value of the inputMet field => we need to reset it */
-    mesh->info.inputMet = 0;
-
     MMG5_caltet         = MMG5_caltet_ani;
     MMG5_caltri         = MMG5_caltri_ani;
     MMG5_lenedg         = MMG5_lenedg_ani;
-    MMG3D_lenedgCoor     = MMG5_lenedgCoor_ani;
+    MMG3D_lenedgCoor    = MMG5_lenedgCoor_ani;
     MMG5_lenSurfEdg     = MMG5_lenSurfEdg_ani;
+  }
+  else {
+    ismet = 1;
   }
 
   /** Step 1: Set metric at points belonging to a required edge: compute the
    * metric as the mean of the length of the required eges passing through the
    * point */
-  if ( !MMG3D_set_metricAtPointsOnReqEdges ( mesh,met ) ) {
-    return 0;
+  if ( !mesh->info.nosizreq ) {
+    if ( !MMG3D_set_metricAtPointsOnReqEdges ( mesh,met,ismet ) ) {
+      return 0;
+    }
   }
 
   /* Step 2: metric definition at internal points */
-  if ( !MMG5_defmetvol(mesh,met) )  return 0;
+  if ( !MMG5_defmetvol(mesh,met,ismet) )  return 0;
 
   /* Step 3: metric definition at boundary points */
   for (k=1; k<=mesh->ne; k++) {
@@ -1320,7 +1323,7 @@ int MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
 
         if ( ppt->flag > 1 ) continue;
 
-        if ( mesh->info.inputMet )  memcpy(mm,&met->m[6*(pt->v[iploc])],6*sizeof(double));
+        if ( ismet )  memcpy(mm,&met->m[6*(pt->v[iploc])],6*sizeof(double));
 
         if ( (MG_SIN(ppt->tag) || (ppt->tag & MG_NOM) ) ) {
           if ( !MMG5_defmetsin(mesh,met,k,l,iploc) )  continue;
@@ -1333,7 +1336,7 @@ int MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
         } else {
           if ( !MMG5_defmetreg(mesh,met,k,l,iploc) )  continue;
         }
-        if ( mesh->info.inputMet ) {
+        if ( ismet ) {
           if ( !MMG3D_intextmet(mesh,met,pt->v[iploc],mm) ) {
             if ( !mmgErr ) {
               fprintf(stderr,"\n  ## Error: %s: unable to intersect metrics"
@@ -1348,9 +1351,11 @@ int MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
       }
     }
   }
+  /* Now the metric storage at ridges is the "mmg" one. */
+  mesh->info.metRidTyp = 1;
 
   /* search for unintialized metric */
-  MMG5_defUninitSize(mesh,met);
+  MMG5_defUninitSize(mesh,met,ismet);
 
   return 1;
 }
@@ -1375,8 +1380,8 @@ int MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int np1,int np
   double         c[5],l,val,t[3],rbasis1[3][3],rbasis2[3][3];
   double         lambda[3],vp[3][3],alpha,beta,mu[3];
   int            kmin,i;
-  char           ichg;
-  static char    mmgWarn = 0;
+  int8_t         ichg;
+  static int8_t  mmgWarn = 0;
 
   p1  = &mesh->point[np1];
   p2  = &mesh->point[np2];
@@ -1603,9 +1608,9 @@ static inline
 int MMG3D_simred(MMG5_pMesh mesh,double *m,double *n,double dm[3],
                  double dn[3],double vp[3][3] ) {
 
-  double       lambda[3],im[6],imn[9];
-  int          order;
-  static char  mmgWarn0=0;
+  double        lambda[3],im[6],imn[9];
+  int           order;
+  static int8_t mmgWarn0=0;
 
   /* Compute imn = M^{-1}N */
   if ( !MMG5_invmat ( m,im ) ) {

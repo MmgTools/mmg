@@ -39,6 +39,7 @@
 /**
  * \param n1 first normal
  * \param n2 second normal
+ * \param crit ridge threshold
  *
  * \return 1 if success, 0 if fail
  *
@@ -578,16 +579,17 @@ size_t MMG5_memSize (void) {
 /**
  * \param mesh pointer toward the mesh structure
  *
- * Set the memMax value to its "true" value (50% of the RAM or memory asked by
- * user).
+ * Set the memMax value to its "true" value if memory asked by
+ * user. Here the MMG5_MEMPERCENT coef is already applied on memMax.
  *
  */
 void MMG5_memOption_memSet(MMG5_pMesh mesh) {
 
+  assert ( mesh->memMax );
   if ( mesh->info.mem <= 0 ) {
     if ( mesh->memMax )
       /* maximal memory = 50% of total physical memory */
-      mesh->memMax = mesh->memMax*MMG5_MEMPERCENT;
+      mesh->memMax = (size_t)(MMG5_memSize()*MMG5_MEMPERCENT);
     else {
       /* default value = 800 MB */
       printf("  Maximum memory set to default value: %d MB.\n",MMG5_MEMMAX);
@@ -596,7 +598,7 @@ void MMG5_memOption_memSet(MMG5_pMesh mesh) {
   }
   else {
     /* memory asked by user if possible, otherwise total physical memory */
-    if ( (size_t)mesh->info.mem*MMG5_MILLION > mesh->memMax && mesh->memMax ) {
+    if ( (size_t)mesh->info.mem*MMG5_MILLION > (mesh->memMax/MMG5_MEMPERCENT) && mesh->memMax ) {
       fprintf(stderr,"\n  ## Warning: %s: asking for %d MB of memory ",
               __func__,mesh->info.mem);
       fprintf(stderr,"when only %zu available.\n",mesh->memMax/MMG5_MILLION);
@@ -830,7 +832,7 @@ inline double MMG5_det4pt(double c0[3],double c1[3],double c2[3],double c3[3]) {
  *
  * \return the oriented volume of tetra
  *
- * Compute oriented volume of a tetrahedron
+ * Compute oriented volume of a tetrahedron (x6)
  *
  */
 inline double MMG5_orvol(MMG5_pPoint point,int *v) {
@@ -870,3 +872,126 @@ double MMG2D_quickarea(double a[2],double b[2],double c[2]) {
   return aire;
 }
 
+/**
+ * \param mesh pointer toward the mesh structure.
+ *
+ * Mark all mesh vertices as unused.
+ *
+ */
+void MMG5_mark_verticesAsUnused ( MMG5_pMesh mesh ) {
+  MMG5_pPoint ppt;
+  int         k;
+
+  for ( k=1; k<=mesh->np; k++ ) {
+    ppt = &mesh->point[k];
+    if ( !MG_VOK(ppt) )  continue;
+
+    /* reset ppt->flag to detect isolated points in keep_subdomainElts */
+    ppt->flag = 0;
+    ppt->tag |= MG_NUL;
+  }
+
+  return;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param delPt function to call to delete point.
+ *
+ * Mark the mesh vertices that belong to triangles or quadrangles as used (for
+ * Mmgs or Mmg2d).
+ *
+ */
+void MMG5_mark_usedVertices ( MMG5_pMesh mesh,void (*delPt)(MMG5_pMesh,int)  ) {
+  MMG5_pTria  pt;
+  MMG5_pQuad  pq;
+  MMG5_pPoint ppt;
+  int         k,i;
+
+  /* Preserve isolated required points */
+  for ( k=1; k<=mesh->np; k++ ) {
+    ppt = &mesh->point[k];
+
+    if ( ppt->flag || !(ppt->tag & MG_REQ) ) {
+      continue;
+    }
+    ppt->tag &= ~MG_NUL;
+  }
+
+  /* Mark points used by the connectivity */
+  for ( k=1; k<=mesh->nt; k++ ) {
+    pt = &mesh->tria[k];
+    if ( !MG_EOK(pt) )  continue;
+
+    for (i=0; i<3; i++) {
+      ppt = &mesh->point[ pt->v[i] ];
+      ppt->tag &= ~MG_NUL;
+    }
+  }
+
+  for ( k=1; k<=mesh->nquad; k++ ) {
+    pq = &mesh->quadra[k];
+    if ( !MG_EOK(pq) )  continue;
+
+    for (i=0; i<4; i++) {
+      ppt = &mesh->point[ pq->v[i] ];
+      ppt->tag &= ~MG_NUL;
+    }
+  }
+
+  /* Finally, clean point array */
+  while ( (!MG_VOK(&mesh->point[mesh->np])) && mesh->np ) {
+    delPt(mesh,mesh->np);
+  }
+
+  return;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param nsd subdomain index.
+ * \param delElt function to call to delete elt.
+ *
+ * Remove triangles that do not belong to subdomain of index \a nsd
+ *
+ */
+void MMG5_keep_subdomainElts ( MMG5_pMesh mesh, int nsd,
+                               int (*delElt)(MMG5_pMesh,int) ) {
+  MMG5_pTria  pt;
+  int         k,i,*adja,iadr,iadrv,iv;
+  int         nfac = 3; // number of faces per elt
+
+  for ( k=1 ; k <= mesh->nt ; k++) {
+    pt = &mesh->tria[k];
+
+    if ( !MG_EOK(pt) ) continue;
+
+    /* Mark triangle vertices as seen to be able to detect isolated points */
+    mesh->point[pt->v[0]].flag = 1;
+    mesh->point[pt->v[1]].flag = 1;
+    mesh->point[pt->v[2]].flag = 1;
+
+    if ( pt->ref == nsd ) continue;
+
+    /* Update adjacency relationship: we will delete elt k so k adjacent will
+     * not be adjacent to k anymore */
+    if ( mesh->adja ) {
+      iadr = nfac*(k-1) + 1;
+      adja = &mesh->adja[iadr];
+      for ( i=0; i<nfac; ++i ) {
+        iadrv = adja[i];
+        if ( !iadrv ) {
+          continue;
+        }
+        iv = iadrv%nfac;
+        iadrv /= nfac;
+        mesh->adja[nfac*(iadrv-1)+1+iv] = 0;
+      }
+    }
+
+    /* Delete element (triangle in 2D and surface, tetra in 3D) */
+    delElt(mesh,k);
+  }
+
+  return;
+}

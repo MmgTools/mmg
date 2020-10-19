@@ -301,6 +301,12 @@ ADD_TEST(NAME mmg3d_ascii_gmsh_3d
   ${CTEST_OUTPUT_DIR}/mmg3d_ascii_gmsh_3d-cube.o
 )
 
+# Tetgen
+ADD_TEST ( NAME mmg3d_cube-tetgen
+  COMMAND ${EXECUT_MMG3D} -v 5
+  ${MMG3D_CI_TESTS}/Cube/cube
+  ${CTEST_OUTPUT_DIR}/mmg3d_cube-tetgen.o.node
+ )
 
 ##############################################################################
 #####
@@ -313,7 +319,7 @@ ADD_TEST(NAME mmg3d_LeakCheck_AbnormalEnd3
   ${MMG3D_CI_TESTS}/LeakCheck_AbnormalEnd3/d -sol
   ${MMG3D_CI_TESTS}/LeakCheck_AbnormalEnd3/dsol.sol -ls
   -out ${CTEST_OUTPUT_DIR}/mmg3d_LeakCheck_AbnormalEnd3-d.o.meshb)
-SET(passRegex "## ERROR: WRONG DATA TYPE OR WRONG SOLUTION NUMBER")
+SET(passRegex "## ERROR: UNABLE TO LOAD SOLUTION")
 SET_PROPERTY(TEST mmg3d_LeakCheck_AbnormalEnd3
   PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}")
 #####
@@ -343,6 +349,31 @@ ADD_TEST(NAME mmg3d_hsizAndNosurfAni
   ${MMG3D_CI_TESTS}/Cube/cube
   -out ${CTEST_OUTPUT_DIR}/mmg3d_hsizNosurfAni.o.meshb)
 
+ADD_TEST(NAME mmg3d_val
+  COMMAND ${EXECUT_MMG3D} -v 5 -val
+  ${MMG3D_CI_TESTS}/Cube/cube
+  ${CTEST_OUTPUT_DIR}/mmg3d_cube-val.o.meshb
+  )
+
+#ADD_TEST(NAME mmg3d_default
+#  COMMAND ${EXECUT_MMG3D} -v 5 -default
+#  ${MMG3D_CI_TESTS}/Cube/cube
+#  -out ${CTEST_OUTPUT_DIR}/mmg3d_default.o.meshb)
+
+SET_PROPERTY(TEST mmg3d_val #mmg3d_default
+  PROPERTY WILL_FAIL TRUE)
+
+# default hybrid
+ADD_TEST(NAME mmg3d_hybrid_3d
+  COMMAND ${EXECUT_MMG3D} -v 5
+  ${MMG3D_CI_TESTS}/Hybrid/prism.mesh
+  ${CTEST_OUTPUT_DIR}/mmg3d_hybrid_3d-default.msh)
+
+# nsd + hybrid
+ADD_TEST(NAME mmg3d_hybrid-nsd1
+  COMMAND ${EXECUT_MMG3D} -v 5 -nsd 1
+  ${MMG3D_CI_TESTS}/Hybrid/prism.mesh
+  ${CTEST_OUTPUT_DIR}/mmg3d_hybrid-nsd.mesh)
 
 ###############################################################################
 #####
@@ -394,22 +425,35 @@ ADD_TEST(NAME mmg3d_ChkBdry_multidomCube3
   ${CTEST_OUTPUT_DIR}/mmg3d_ChkBdry_multidomCube2-cube.o
   )
 
-ADD_TEST(NAME mmg3d_OpnBdy_unref_peninsula
+ADD_TEST(NAME mmg3d_opnbdy_unref_peninsula
   COMMAND ${EXECUT_MMG3D} -v 5 -opnbdy
   -in ${MMG3D_CI_TESTS}/OpnBdy_peninsula/peninsula
   -out ${CTEST_OUTPUT_DIR}/mmg3d_OpnBdy_peninsula.o.meshb)
 
-ADD_TEST(NAME mmg3d_OpnBdy_ref_peninsula
+ADD_TEST(NAME mmg3d_opnbdy_ls_peninsula
+  COMMAND ${EXECUT_MMG3D} -v 5 -opnbdy -ls
+  -in ${MMG3D_CI_TESTS}/OpnBdy_peninsula/peninsula
+  -sol  ${MMG3D_CI_TESTS}/OpnBdy_peninsula/ls.sol
+  -out ${CTEST_OUTPUT_DIR}/mmg3d_OpnBdy_ls_peninsula.o.meshb)
+
+# ls + nsd
+ADD_TEST(NAME mmg3d_opnbdy_ls_peninsula-nsd3
+  COMMAND ${EXECUT_MMG3D} -v 5 -opnbdy -ls -nsd 3
+  -in ${MMG3D_CI_TESTS}/OpnBdy_peninsula/peninsula
+  -sol  ${MMG3D_CI_TESTS}/OpnBdy_peninsula/ls.sol
+  -out ${CTEST_OUTPUT_DIR}/mmg3d_OpnBdy_ls_peninsula-nsd3.o.meshb)
+
+ADD_TEST(NAME mmg3d_opnbdy_ref_peninsula
   COMMAND ${EXECUT_MMG3D} -v 5 -hmax 0.06 -opnbdy
   -in ${MMG3D_CI_TESTS}/OpnBdy_peninsula/peninsula
   -out ${CTEST_OUTPUT_DIR}/mmg3d_OpnBdy_peninsula.o.meshb)
 
-ADD_TEST(NAME mmg3d_OpnBdy_unref_island
+ADD_TEST(NAME mmg3d_opnbdy_unref_island
   COMMAND ${EXECUT_MMG3D} -v 5 -opnbdy
   -in ${MMG3D_CI_TESTS}/OpnBdy_island/island
   -out ${CTEST_OUTPUT_DIR}/mmg3d_OpnBdy_island.o.meshb)
 
-ADD_TEST(NAME mmg3d_OpnBdy_ref_island
+ADD_TEST(NAME mmg3d_opnbdy_ref_island
   COMMAND ${EXECUT_MMG3D} -v 5 -hmax 0.06 -opnbdy
   -in ${MMG3D_CI_TESTS}/OpnBdy_island/island
   -out ${CTEST_OUTPUT_DIR}/mmg3d_OpnBdy_island.o.meshb)
@@ -420,7 +464,7 @@ ADD_TEST(NAME mmg3d_OpnBdy_ref_island
 #####
 ###############################################################################
 #####
-IF ( USE_ELAS )
+IF ( ELAS_FOUND )
   ADD_TEST(NAME mmg3d_LagMotion0_tinyBoxt
     COMMAND ${EXECUT_MMG3D} -v 5  -lag 0
     -in ${MMG3D_CI_TESTS}/LagMotion1_tinyBoxt/tinyBoxt
@@ -439,6 +483,14 @@ IF ( USE_ELAS )
     -sol ${MMG3D_CI_TESTS}/LagMotion1_tinyBoxt/tinyBoxt.sol
     -out ${CTEST_OUTPUT_DIR}/mmg3d_LagMotion2_tinyBoxt-tinyBoxt.o.meshb
     )
+  # nsd
+  ADD_TEST(NAME mmg3d_LagMotion2_tinyBoxt-nsd3
+    COMMAND ${EXECUT_MMG3D} -v 5  -lag 2 -nsd 3
+    -in ${MMG3D_CI_TESTS}/LagMotion1_tinyBoxt/tinyBoxt
+    -sol ${MMG3D_CI_TESTS}/LagMotion1_tinyBoxt/tinyBoxt.sol
+    -out ${CTEST_OUTPUT_DIR}/mmg3d_LagMotion2_tinyBoxt-nsd3.o.meshb
+    )
+
 ENDIF()
 
 ##############################################################################
@@ -466,6 +518,17 @@ ADD_TEST(NAME mmg3d_OptimAni_Sphere
   ${CTEST_OUTPUT_DIR}/mmg3d_OptimAni_Sphere.o.mesh
   )
 
+##############################################################################
+#####
+#####         Check optimLES
+#####
+##############################################################################
+#####
+ADD_TEST(NAME mmg3d_OptimLES_sphere
+  COMMAND ${EXECUT_MMG3D} -v 5 -optimLES
+  ${MMG3D_CI_TESTS}/SphereIso_0.25h_met/SphereIso0.5
+  ${CTEST_OUTPUT_DIR}/mmg3d_OptimLES_Sphere.o.mesh
+  )
 
 ###############################################################################
 #####
@@ -473,18 +536,111 @@ ADD_TEST(NAME mmg3d_OptimAni_Sphere
 #####
 ###############################################################################
 #####
+ADD_TEST(NAME mmg3d_LSMultiMat
+  COMMAND ${EXECUT_MMG3D} -v 5 -ls -nr
+  ${MMG3D_CI_TESTS}/LSMultiMat/step.0.mesh
+  -sol ${MMG3D_CI_TESTS}/LSMultiMat/step.0.phi.sol
+  ${CTEST_OUTPUT_DIR}/mmg3d_LSMultiMat.o.meshb)
 
+ADD_TEST(NAME mmg3d_OptLs_plane_val
+  COMMAND ${EXECUT_MMG3D} -v 5 -ls -val
+  ${MMG3D_CI_TESTS}/OptLs_plane/plane
+  -sol ${MMG3D_CI_TESTS}/OptLs_plane/m.sol
+  -met ${MMG3D_CI_TESTS}/OptLs_plane/met.sol
+  ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_plane-nonzero.o.meshb)
+
+#ADD_TEST(NAME mmg3d_OptLs_plane_default
+#  COMMAND ${EXECUT_MMG3D} -v 5 -ls -default
+#  ${MMG3D_CI_TESTS}/OptLs_plane/plane
+#  -sol ${MMG3D_CI_TESTS}/OptLs_plane/m.sol
+#  -met ${MMG3D_CI_TESTS}/OptLs_plane/met.sol
+#  ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_plane-nonzero.o.meshb)
+
+SET_PROPERTY(TEST  mmg3d_OptLs_plane_val #mmg3d_OptLs_plane_default
+  PROPERTY WILL_FAIL TRUE)
+
+# ls oritentation
 ADD_TEST(NAME mmg3d_OptLs_plane_p
   COMMAND ${EXECUT_MMG3D} -v 5 -ls
   ${MMG3D_CI_TESTS}/OptLs_plane/plane
   -sol ${MMG3D_CI_TESTS}/OptLs_plane/p.sol
-  mmg3d_OptLs_plane-p.o.meshb)
+  ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_plane-p.o.meshb)
 
 ADD_TEST(NAME mmg3d_OptLs_plane_m
   COMMAND ${EXECUT_MMG3D} -v 5 -ls
   ${MMG3D_CI_TESTS}/OptLs_plane/plane
   -sol ${MMG3D_CI_TESTS}/OptLs_plane/m.sol
-  mmg3d_OptLs_plane-m.o.meshb)
+  ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_plane-m.o.meshb)
+
+# non-zero ls
+ADD_TEST(NAME mmg3d_OptLs_plane_nonzero
+  COMMAND ${EXECUT_MMG3D} -v 5 -ls 0.1
+  ${MMG3D_CI_TESTS}/OptLs_plane/plane
+  -sol ${MMG3D_CI_TESTS}/OptLs_plane/m.sol
+  ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_plane-nonzero.o.meshb)
+
+# ls discretization + optim
+ADD_TEST(NAME mmg3d_OptLs_plane_optim
+  COMMAND ${EXECUT_MMG3D} -v 5 -ls -optim
+  ${MMG3D_CI_TESTS}/OptLs_plane/plane
+  -sol ${MMG3D_CI_TESTS}/OptLs_plane/m.sol
+  ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_plane-nonzero.o.meshb)
+
+# ls discretization + optim + aniso
+ADD_TEST(NAME mmg3d_OptLs_plane_optimAni
+  COMMAND ${EXECUT_MMG3D} -v 5 -ls -optim -A
+  ${MMG3D_CI_TESTS}/OptLs_plane/plane
+  -sol ${MMG3D_CI_TESTS}/OptLs_plane/m.sol
+  ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_plane-nonzero.o.meshb)
+
+# ls discretization + hsiz
+ADD_TEST(NAME mmg3d_OptLs_plane_hsiz
+  COMMAND ${EXECUT_MMG3D} -v 5 -ls -hsiz 0.2
+  ${MMG3D_CI_TESTS}/OptLs_plane/plane
+  -sol ${MMG3D_CI_TESTS}/OptLs_plane/m.sol
+  ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_plane-nonzero.o.meshb)
+
+# ls discretization + hsiz
+ADD_TEST(NAME mmg3d_OptLs_plane_hsizAni
+  COMMAND ${EXECUT_MMG3D} -v 5 -ls -hsiz 0.2 -A
+  ${MMG3D_CI_TESTS}/OptLs_plane/plane
+  -sol ${MMG3D_CI_TESTS}/OptLs_plane/m.sol
+  ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_plane-nonzero.o.meshb)
+
+# ls discretization + metric
+ADD_TEST(NAME mmg3d_OptLs_plane_withMetAndLs
+  COMMAND ${EXECUT_MMG3D} -v 5 -ls
+  ${MMG3D_CI_TESTS}/OptLs_plane/plane
+  -sol ${MMG3D_CI_TESTS}/OptLs_plane/m.sol
+  -met ${MMG3D_CI_TESTS}/OptLs_plane/met.sol
+  ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_plane-nonzero.o.meshb)
+
+# ls + rmc
+ADD_TEST(NAME mmg3d_OptLs_plane_withbub
+  COMMAND ${EXECUT_MMG3D} -v 5 -ls
+  ${MMG3D_CI_TESTS}/OptLs_plane/plane
+  -sol ${MMG3D_CI_TESTS}/OptLs_plane/bub.sol
+  ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_plane-withbub.o.meshb)
+
+ADD_TEST(NAME mmg3d_OptLs_plane_rembub
+  COMMAND ${EXECUT_MMG3D} -v 5 -ls
+  ${MMG3D_CI_TESTS}/OptLs_plane/plane
+  -sol ${MMG3D_CI_TESTS}/OptLs_plane/bub.sol
+  ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_plane-rembub.o.meshb -rmc)
+
+ADD_TEST(NAME mmg3d_OptLs_plane_rembub2
+  COMMAND ${EXECUT_MMG3D} -v 5 -ls -rmc 0.1
+  ${MMG3D_CI_TESTS}/OptLs_plane/plane
+  -sol ${MMG3D_CI_TESTS}/OptLs_plane/bub.sol
+  ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_plane-rembub2.o.meshb)
+
+# Preservation of orphan points
+ADD_TEST(NAME mmg3d_OptLs_temp_orphan
+  COMMAND ${EXECUT_MMG3D} -v 5 -ls
+  ${MMG3D_CI_TESTS}/OptLs_temp_hminMax_hgrad1.2_hausd0.1/temp
+  -sol ${MMG3D_CI_TESTS}/OptLs_temp_hminMax_hgrad1.2_hausd0.1/temp.sol
+  -hausd 0.5 -nr -hgrad -1 -nsd 3
+  ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_temp_orphan.o.meshb)
 
 IF ( LONG_TESTS )
   # Test the Ls option
@@ -493,7 +649,7 @@ IF ( LONG_TESTS )
     ${MMG3D_CI_TESTS}/OptLs_cube303d_hminMax_hgrad1.2_hausd0.005/cube303d
     -sol ${MMG3D_CI_TESTS}/OptLs_cube303d_hminMax_hgrad1.2_hausd0.005/cube303d.sol
     -hausd 0.005 -nr -hgrad 1.2 -hmin 0.001 -hmax 0.1
-    mmg3d_OptLs_cube303d_hminMax_hgrad1.2_hausd0.005-cube303d.o.meshb)
+    ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_cube303d_hminMax_hgrad1.2_hausd0.005-cube303d.o.meshb)
   ADD_TEST(NAME mmg3d_OptLs_temp_hminMax_hgrad1.2_hausd0.1
     COMMAND ${EXECUT_MMG3D} -v 5 -ls
     ${MMG3D_CI_TESTS}/OptLs_temp_hminMax_hgrad1.2_hausd0.1/temp
@@ -507,7 +663,7 @@ IF ( LONG_TESTS )
   #####
   ###############################################################################
   #####
-  IF ( USE_ELAS )
+  IF ( ELAS_FOUND )
     ADD_TEST(NAME mmg3d_LagMotion0_boxt
       COMMAND ${EXECUT_MMG3D} -v 5  -lag 0
       -in ${MMG3D_CI_TESTS}/LagMotion1_boxt/boxt

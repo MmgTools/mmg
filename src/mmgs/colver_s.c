@@ -50,13 +50,13 @@
  * check if geometry preserved by collapsing edge i
  *
  */
-int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
+int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t i,int *list,int8_t typchk) {
   MMG5_pTria     pt,pt0,pt1,pt2;
   MMG5_pPoint    p1,p2;
   double         len,lon,ps,cosnold,cosnnew,kal,n0old[3],n1old[3],n00old[3];
   double         n0new[3],n1new[3],n00new[3];
   int            *adja,jel,kel,ip1,ip2,l,ll,ilist;
-  char           i1,i2,j,jj,j2,lj,open,voy;
+  int8_t         i1,i2,j,jj,j2,lj,open,voy;
 
   pt0 = &mesh->tria[0];
   pt  = &mesh->tria[k];
@@ -79,7 +79,7 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
   adja = &mesh->adja[3*(k-1)+1];
   open = adja[i] == 0;
 
-  if ( ilist > 3 ) {
+  if ( ilist+open > 3 ) {
     /* check references */
     if ( MG_EDG(pt->tag[i2]) ) {
       jel = list[1] / 3;
@@ -182,6 +182,9 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
 
   /* specific test: no collapse if any interior edge is EDG */
   else if ( ilist == 3 ) {
+    /* Remark: if ilist==3 and i is an open ridge, we pass in the previous
+     * test (open+ilist > 3) so here, ip1 is in the middle of the 3
+     * triangles */
 
     p1 = &mesh->point[pt->v[i1]];
     if ( MS_SIN(p1->tag) )  return 0;
@@ -235,7 +238,7 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
     else if ( !(pt1->tag[jj] & MG_GEO) )  return 0;
 
     p1 = &mesh->point[pt->v[i1]];
-    p2 = &mesh->point[pt1->v[jj]];
+    p2 = &mesh->point[pt1->v[j]];
     if ( p2->tag > p1->tag || p2->ref != p1->ref )  return 0;
 
     /* Check geometric approximation */
@@ -262,7 +265,7 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,int k,char i,int *list,char typchk) {
 int colver(MMG5_pMesh mesh,int *list,int ilist) {
   MMG5_pTria    pt,pt1,pt2;
   int     *adja,k,iel,jel,kel,ip1,ip2;
-  char     i,i1,i2,j,jj,open;
+  int8_t   i,i1,i2,j,jj,open;
 
   iel = list[0] / 3;
   i1  = list[0] % 3;
@@ -345,14 +348,14 @@ int colver(MMG5_pMesh mesh,int *list,int ilist) {
  * \param list pointer toward the ball of the point to collapse.
  * \return 1 if success, 0 if fail.
  *
- * Collapse edge \f$list[0]%3\f$ in tet \f$list[0]/3\f$ (\f$ ip->i1\f$ ) for a
+ * Collapse edge \f$list[0]\%3\f$ in tet \f$list[0]/3\f$ (\f$ ip->i1\f$ ) for a
  * ball of the collapsed point of size 3: the collapsed point is removed.
  *
  */
 int colver3(MMG5_pMesh mesh,int* list) {
   MMG5_pTria   pt,pt1,pt2;
   int          *adja,iel,jel,kel,mel,ip;
-  char         i,i1,j,j1,j2,k,m;
+  int8_t       i,i1,j,j1,j2,k,m;
 
   /* update of new point for triangle list[0] */
   iel = list[0] / 3;
@@ -415,7 +418,7 @@ int colver3(MMG5_pMesh mesh,int* list) {
 int colver2(MMG5_pMesh mesh,int* list) {
   MMG5_pTria   pt,pt1;
   int          *adja,iel,jel,kel,ip;
-  char         i1,i2,jj,j2,k;
+  int8_t       i1,i2,jj,j2,k;
 
   /* update of new point for triangle list[0] */
   iel = list[0] / 3;
@@ -452,12 +455,12 @@ int colver2(MMG5_pMesh mesh,int* list) {
 }
 
 /* collapse edge i of k, i1->i2 */
-int litcol(MMG5_pMesh mesh,int k,char i,double kali) {
+int litcol(MMG5_pMesh mesh,int k,int8_t i,double kali) {
   MMG5_pTria     pt,pt0,pt1;
   MMG5_pPoint    p1,p2;
   double         kal,ps,cosnold,cosnnew,n0old[3],n0new[3],n1old[3],n1new[3],n00old[3],n00new[3];
   int            *adja,list[MMGS_LMAX+2],jel,ip2,l,ilist;
-  char           i1,i2,j,jj,j2,open;
+  int8_t         i1,i2,j,jj,j2,open;
 
   pt0 = &mesh->tria[0];
   pt  = &mesh->tria[k];

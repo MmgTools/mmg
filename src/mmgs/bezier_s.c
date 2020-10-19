@@ -35,7 +35,7 @@
 
 #include "mmgs.h"
 
-extern char ddb;
+extern int8_t ddb;
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -52,11 +52,11 @@ extern char ddb;
  *
  */
 int MMG5_mmgsBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,MMG5_pBezier pb,
-                       char ori) {
+                       int8_t ori) {
   MMG5_pPoint    p[3];
   double         *n1,*n2,nt[3],ps,ps2,dd,ux,uy,uz,ll;
   int            ia,ib,ic;
-  char           i,i1,i2;
+  int8_t         i,i1,i2;
 
   ia   = pt->v[0];
   ib   = pt->v[1];
@@ -206,7 +206,7 @@ int MMG5_mmgsBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,MMG5_pBezier pb,
  */
 int MMGS_bezierInt(MMG5_pBezier pb,double uv[2],double o[3],double no[3],double to[3]) {
   double    dd,u,v,w,ps,ux,uy,uz;
-  char      i;
+  int8_t    i;
 
   memset(to,0,3*sizeof(double));
   u = uv[0];

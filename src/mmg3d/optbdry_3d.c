@@ -159,9 +159,13 @@ int MMG3D_coledges(MMG5_pMesh mesh,MMG5_pSol met,int k,int i) {
   double      len;
   int         ied,iedg,iq,i1,ilistcol,listcol[MMG3D_LMAX+2];
   int         ier;
-  char        iface,ief;
+  int8_t      iface,ief;
 
   pt = &mesh->tetra[k];
+
+  if ( MG_SIN(mesh->point[pt->v[i]].tag) ) {
+    return 0;
+  }
 
   /*3 possibilities to remove the vertex ib*/
   for(ied = 0 ; ied<3 ;ied++) {
@@ -209,7 +213,14 @@ int MMG3D_coledges(MMG5_pMesh mesh,MMG5_pSol met,int k,int i) {
  */
 int MMG3D_deletePoint(MMG5_pMesh mesh,  MMG5_pSol met,MMG3D_pPROctree PROctree,
                        int k,int i) {
+  MMG5_pTetra pt;
   int         il,ilist,iel,ip,list[MMG3D_LMAX+2];
+
+  pt = &mesh->tetra[k];
+
+  if ( MG_SIN(mesh->point[pt->v[i]].tag) ) {
+    return 0;
+  }
 
   ilist = MMG5_boulevolp(mesh,k,i,list);
   if (ilist > 30 ) return 0;
