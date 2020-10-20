@@ -596,7 +596,7 @@ int MMG2D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
     pt->flag = base;
     pile[ipile] = k;
     ipile++;
-    if ( ipile >= mesh->nt ) {
+    if ( ipile > mesh->nt ) {
       fprintf(stderr,"\n  ## Problem in length of pile; function rmc.\n"
               " Check that the level-set intersect the mesh.\n"
               " Exit program.\n");
@@ -630,7 +630,7 @@ int MMG2D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
             pt2->flag = base;
             pile[ipile] = ll;
             ipile++;
-            if ( ipile >= mesh->nt ) {
+            if ( ipile > mesh->nt ) {
               fprintf(stderr,"\n  ## Problem in length of pile; function rmc. Exit program.\n");
               return 0;
             }
@@ -645,7 +645,7 @@ int MMG2D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
             pt2->flag = base;
             pile[ipile] = ll;
             ipile++;
-            if ( ipile >= mesh->nt-1 ) {
+            if ( ipile > mesh->nt ) {
               fprintf(stderr,"\n  ## Problem in length of pile; function rmc. Exit program.\n");
               return 0;
             }
@@ -694,7 +694,7 @@ int MMG2D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
     pt->flag = base;
     pile[ipile] = k;
     ipile++;
-    if ( ipile >= mesh->nt -1 ) {
+    if ( ipile > mesh->nt ) {
       fprintf(stderr,"\n  ## Problem in length of pile; function rmc. Exit program.\n");
       return 0;
     }
@@ -724,7 +724,7 @@ int MMG2D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
             pt2->flag = base;
             pile[ipile] = ll;
             ipile++;
-            if ( ipile >= mesh->nt -1 ) {
+            if ( ipile > mesh->nt ) {
               fprintf(stderr,"\n  ## Problem in length of pile; function rmc. Exit program.\n");
               return 0;
             }
@@ -739,7 +739,7 @@ int MMG2D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
             pt2->flag = base;
             pile[ipile] = ll;
             ipile++;
-            if ( ipile >= mesh->nt -1 ) {
+            if ( ipile > mesh->nt ) {
               fprintf(stderr,"\n  ## Problem in length of pile; function rmc. Exit program.\n");
               return 0;
             }
