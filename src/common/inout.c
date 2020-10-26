@@ -2309,22 +2309,25 @@ void MMG5_writeDoubleSol3D(MMG5_pMesh mesh,MMG5_pSol sol,FILE *inm,int bin,
  * \param inm allocatable pointer toward the FILE structure.
  * \param ver file version (1=simple precision, 2=double).
  * \param bin 1 if the file is a binary.
+ * \param bpos cumulative field position for binary Medit format.
  * \param np number of solutions of each type.
  * \param dim solution dimension.
  * \param nsols number of solutions of different types in the file.
+ * \param entities kind of entity on which the solution applies (Vertex or Tetra)
  * \param type type of solutions.
  * \param size size of solutions.
  *
  * \return 0 if unable to open the file, 1 if success.
  *
- * Open the "filename" solution file and read the file header.
+ * Open the "filename" solution file and save the file header and the number and
+ * type of solutions at vertices (Native solutions for Mmg).
  *
  */
 int MMG5_saveSolHeader( MMG5_pMesh mesh,const char *filename,
-                        FILE **inm,int ver,int *bin,int np,int dim,
-                        int nsols,int *type,int *size) {
+                        FILE **inm,int ver,int *bin,int *bpos,int np,int dim,
+                        int nsols,int *entities,int *type,int *size) {
   MMG5_pPoint ppt;
-  int         binch,bpos;
+  int         binch;
   int         k;
   char        *ptr,*data,chaine[MMG5_FILESTR_LGTH];
 
@@ -2370,7 +2373,7 @@ int MMG5_saveSolHeader( MMG5_pMesh mesh,const char *filename,
   MMG5_SAFE_FREE(data);
 
   /*entete fichier*/
-  binch=bpos=0;
+  binch=(*bpos)=0;
   if(!*bin) {
     strcpy(&chaine[0],"MeshVersionFormatted\n");
     fprintf(*inm,"%s %d",chaine,ver);
@@ -2383,8 +2386,8 @@ int MMG5_saveSolHeader( MMG5_pMesh mesh,const char *filename,
     fwrite(&binch,MMG5_SW,1,*inm);
     binch = 3; //Dimension
     fwrite(&binch,MMG5_SW,1,*inm);
-    bpos = 20; //Pos
-    fwrite(&bpos,MMG5_SW,1,*inm);
+    (*bpos) = 20; //Pos
+    fwrite(bpos,MMG5_SW,1,*inm);
     binch = dim;
     fwrite(&binch,MMG5_SW,1,*inm);
   }
@@ -2395,32 +2398,190 @@ int MMG5_saveSolHeader( MMG5_pMesh mesh,const char *filename,
     if ( MG_VOK(ppt) )  np++;
   }
 
+  /* Count the number of solutions at vertices */
+  int npointSols = 0;
+  for (k=0; k<nsols; ++k ) {
+    if ( (entities[k]==MMG5_Noentity) || (entities[k]==MMG5_Vertex) ) {
+      ++npointSols;
+    }
+  }
+
+  /* Sol at vertices header */
   if(!*bin) {
     strcpy(&chaine[0],"\n\nSolAtVertices\n");
     fprintf(*inm,"%s",chaine);
     fprintf(*inm,"%d\n",np);
-    fprintf(*inm,"%d",nsols);
-    for (k=0; k<nsols; ++k )
+    fprintf(*inm,"%d",npointSols);
+    for (k=0; k<nsols; ++k ) {
+      if ( (entities[k]!=MMG5_Noentity) && (entities[k]!=MMG5_Vertex) ) {
+        continue;
+      }
       fprintf(*inm," %d",type[k]);
+    }
     fprintf(*inm,"\n");
   } else {
     binch = 62; //Vertices
     fwrite(&binch,MMG5_SW,1,*inm);
-    bpos += 16;
+    (*bpos) += 16;
 
-    for (k=0; k<nsols; ++k )
-      bpos += 4 + (size[k]*ver)*4*np; //Pos
-    fwrite(&bpos,MMG5_SW,1,*inm);
+    for (k=0; k<nsols; ++k ) {
+      if ( (entities[k]!=MMG5_Noentity) && (entities[k]!=MMG5_Vertex) ) {
+        continue;
+      }
+      (*bpos) += 4 + (size[k]*ver)*4*np; //Pos
+    }
+    fwrite(bpos,MMG5_SW,1,*inm);
 
     fwrite(&np,MMG5_SW,1,*inm);
-    fwrite(&nsols,MMG5_SW,1,*inm);
-    for (k=0; k<nsols; ++k )
+    fwrite(&npointSols,MMG5_SW,1,*inm);
+    for (k=0; k<nsols; ++k ) {
+      if ( (entities[k]!=MMG5_Noentity) && (entities[k]!=MMG5_Vertex) ) {
+        continue;
+      }
       fwrite(&type[k],MMG5_SW,1,*inm);
+    }
   }
 
   return 1;
 }
 
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param inm pointer toward the opened file unit.
+ * \param ver file version (1=simple precision, 2=double).
+ * \param bin 1 if the file is a binary.
+ * \param bpos cumulative field position for binary Medit format.
+ * \param nsols number of solutions of different types in the file.
+ * \param nsolsAtTriangles number of solutions at triangles in the file.
+ * \param entities kind of entity on which the solution applies.
+ * \param type type of solutions.
+ * \param size size of solutions.
+ *
+ * Save the number and type of solutions at Triangles (not used by Mmg).
+ *
+ */
+int MMG5_saveSolAtTrianglesHeader( MMG5_pMesh mesh,
+                                   FILE *inm,int ver,int bin,int *bpos,
+                                   int nsols,int nsolsAtTriangles,
+                                   int *entities,int *type,int *size) {
+  MMG5_pTria  pt;
+  int         binch;
+  int         k,nt;
+
+  nt = 0;
+  for (k=1; k<=mesh->nt; k++) {
+    pt = &mesh->tria[k];
+    if ( MG_EOK(pt) )  {
+      ++nt;
+    }
+  }
+
+  /* Sol at vertices header */
+  if(!bin) {
+    fprintf(inm,"\n\nSolAtTriangles\n");
+    fprintf(inm,"%d\n",nt);
+    fprintf(inm,"%d",nsolsAtTriangles);
+    for (k=0; k<nsols; ++k ) {
+      if ( entities[k]!=MMG5_Triangle ) {
+        continue;
+      }
+      fprintf(inm," %d",type[k]);
+    }
+    fprintf(inm,"\n");
+  } else {
+    binch = 64; //SolsAtTriangles
+    fwrite(&binch,MMG5_SW,1,inm);
+    (*bpos) += 16;
+
+    for (k=0; k<nsols; ++k ) {
+      if ( entities[k]!=MMG5_Triangle ) {
+        continue;
+      }
+      (*bpos) += 4 + (size[k]*ver)*4*nt; //Pos
+    }
+    fwrite(bpos,MMG5_SW,1,inm);
+
+    fwrite(&nt,MMG5_SW,1,inm);
+    fwrite(&nsolsAtTriangles,MMG5_SW,1,inm);
+    for (k=0; k<nsols; ++k ) {
+      if ( entities[k]!=MMG5_Triangle ) {
+        continue;
+      }
+      fwrite(&type[k],MMG5_SW,1,inm);
+    }
+  }
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param inm pointer toward the opened file unit.
+ * \param ver file version (1=simple precision, 2=double).
+ * \param bin 1 if the file is a binary.
+ * \param bpos cumulative field position for binary Medit format.
+ * \param nsols number of solutions of different types in the file.
+ * \param nsolsAtTetra number of solutions at tetra in the file.
+ * \param entities kind of entity on which the solution applies.
+ * \param type type of solutions.
+ * \param size size of solutions.
+ *
+ * Save the number and type of solutions at Tetrahedron (not used by Mmg).
+ *
+ */
+int MMG5_saveSolAtTetrahedraHeader( MMG5_pMesh mesh,
+                                    FILE *inm,int ver,int bin,int *bpos,
+                                    int nsols,int nsolsAtTetra,
+                                    int *entities,int *type,int *size) {
+  MMG5_pTetra  pt;
+  int          binch;
+  int          k,ne;
+
+  ne = 0;
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+    if ( MG_EOK(pt) )  {
+      ++ne;
+    }
+  }
+
+  /* Sol at vertices header */
+  if(!bin) {
+    fprintf(inm,"\n\nSolAtTetrahedra\n");
+    fprintf(inm,"%d\n",ne);
+    fprintf(inm,"%d",nsolsAtTetra);
+    for (k=0; k<nsols; ++k ) {
+      if ( entities[k]!=MMG5_Tetrahedron ) {
+        continue;
+      }
+      fprintf(inm," %d",type[k]);
+    }
+    fprintf(inm,"\n");
+  } else {
+    binch = 66; //SolsAtTetrahedron
+    fwrite(&binch,MMG5_SW,1,inm);
+    (*bpos) += 16;
+
+    for (k=0; k<nsols; ++k ) {
+      if ( entities[k]!=MMG5_Tetrahedron ) {
+        continue;
+      }
+      (*bpos) += 4 + (size[k]*ver)*4*ne; //Pos
+    }
+    fwrite(bpos,MMG5_SW,1,inm);
+
+    fwrite(&ne,MMG5_SW,1,inm);
+    fwrite(&nsolsAtTetra,MMG5_SW,1,inm);
+    for (k=0; k<nsols; ++k ) {
+      if ( entities[k]!=MMG5_Tetrahedron ) {
+        continue;
+      }
+      fwrite(&type[k],MMG5_SW,1,inm);
+    }
+  }
+
+  return 1;
+}
 
 /**
  * \param mesh pointer toward the mesh structure.

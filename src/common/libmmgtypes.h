@@ -615,7 +615,8 @@ typedef struct {
   int       npi; /* Temporary number of points (internal use only) */
   int       size; /* Number of solutions per entity */
   int       type; /* Type of the solution (scalar, vectorial of tensorial) */
-  double   *m; /*!< Solution values */
+  int       entities; /* Type of the solution (scalar, vectorial of tensorial) */
+  double    *m; /*!< Solution values */
   double    umin,umax; /*!<Min/max values for the solution */
   char     *namein; /*!< Input solution file name */
   char     *nameout; /*!< Output solution file name */

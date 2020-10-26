@@ -1478,7 +1478,7 @@ int MMG2D_saveSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   FILE*        inm;
   MMG5_pPoint  ppt;
   int          k,ier;
-  int          binch,bin,dim;
+  int          binch,bin,bpos,dim;
 
   if ( !sol->np )  return 1;
 
@@ -1498,8 +1498,9 @@ int MMG2D_saveSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
     dim = 2;
   }
 
-  ier = MMG5_saveSolHeader( mesh,filename,&inm,sol->ver,&bin,mesh->np,dim,
-                            1,&sol->type,&sol->size);
+  bpos = 0;
+  ier = MMG5_saveSolHeader( mesh,filename,&inm,sol->ver,&bin,&bpos,mesh->np,dim,
+                            1,&sol->entities,&sol->type,&sol->size);
 
   if ( ier < 1 ) return ier;
 
@@ -1538,26 +1539,43 @@ int MMG2D_saveAllSols(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename) {
   MMG5_pPoint  ppt;
   MMG5_pSol    psl;
   int          j,k,ier;
-  int          binch,bin;
-  int          *type,*size;
+  int          binch,bin,bpos,npointSols,ncellSols;
+  int          *type,*size,*entities;
 
 
   if ( !(*sol)[0].np )  return 1;
 
   MMG5_SAFE_CALLOC(type,mesh->nsols,int,return 0);
   MMG5_SAFE_CALLOC(size,mesh->nsols,int,MMG5_SAFE_FREE(type);return 0);
+  MMG5_SAFE_CALLOC(entities,mesh->nsols,int,
+                   MMG5_SAFE_FREE(type);MMG5_SAFE_FREE(size);return 0);
 
+  npointSols = 0;
+  ncellSols = 0;
   for (k=0; k<mesh->nsols; ++k ) {
     (*sol)[k].ver = 2;
+
+    if ( ((*sol)[k].entities==MMG5_Noentity) || ((*sol)[k].entities==MMG5_Vertex) ) {
+      ++npointSols;
+    }
+    else if ( (*sol)[k].entities == MMG5_Triangle ) {
+      ++ncellSols;
+    }
+    else {
+      printf("\n  ## Warning: %s: unexpected entity type for solution %d: %s."
+             "\n Ignored.\n",
+             __func__,k,MMG5_Get_entitiesName((*sol)[k].entities));
+    }
+
     type[k]     = (*sol)[k].type;
     size[k]     = (*sol)[k].size;
+    entities[k] = (*sol)[k].entities;
   }
 
-  ier = MMG5_saveSolHeader( mesh,filename,&inm,(*sol)[0].ver,&bin,mesh->np,
-                            (*sol)[0].dim,mesh->nsols,type,size);
+  bpos = 0;
+  ier = MMG5_saveSolHeader( mesh,filename,&inm,(*sol)[0].ver,&bin,&bpos,mesh->np,
+                            (*sol)[0].dim,mesh->nsols,entities,type,size);
 
-  MMG5_SAFE_FREE(type);
-  MMG5_SAFE_FREE(size);
 
   if ( ier < 1 ) return ier;
 
@@ -1567,10 +1585,33 @@ int MMG2D_saveAllSols(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename) {
 
     for ( j=0; j<mesh->nsols; ++j ) {
       psl = *sol + j;
-      MMG2D_writeDoubleSol(psl,inm,bin,k);
+
+      if ( (psl->entities==MMG5_Noentity) || (psl->entities==MMG5_Vertex) ) {
+        MMG2D_writeDoubleSol(psl,inm,bin,k);
+      }
     }
     fprintf(inm,"\n");
   }
+
+  MMG5_saveSolAtTrianglesHeader( mesh,inm,(*sol)[0].ver,bin,&bpos,mesh->nsols,
+                                 ncellSols,entities,type,size );
+
+  for (k=1; k<=mesh->nt; k++) {
+    MMG5_pTria ptt = &mesh->tria[k];
+    if ( !MG_EOK(ptt) )  continue;
+
+    for ( j=0; j<mesh->nsols; ++j ) {
+      psl = *sol + j;
+      if ( psl->entities==MMG5_Triangle ) {
+        MMG2D_writeDoubleSol(psl,inm,bin,k);
+      }
+    }
+    fprintf(inm,"\n");
+  }
+
+  MMG5_SAFE_FREE(type);
+  MMG5_SAFE_FREE(size);
+  MMG5_SAFE_FREE(entities);
 
   /* End file */
   if ( !bin ) {
