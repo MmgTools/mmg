@@ -615,6 +615,7 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
   psl->dim = mesh->dim;
   psl->type = 1;
 
+  int isol = 0;
   if ( nsols ) {
     auto *pd = (*dataset)->GetPointData();
 
@@ -623,8 +624,7 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
     if ( pd ) {
       int npointData = pd->GetNumberOfArrays();
 
-      int isol = 0;
-      for (int k = 0; k < npointData; k++) {
+      for (int j = 0; j < npointData; j++) {
         psl = *sol + isol;
         psl->ver = mesh->ver;
         psl->dim = mesh->dim;
@@ -634,7 +634,7 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
         char *ptr = NULL;
         bool metricData = 0;
         char chaine[MMG5_FILESTR_LGTH];
-        strcpy(chaine,pd->GetArrayName(k));
+        strcpy(chaine,pd->GetArrayName(j));
 
         if  ( strstr(chaine,"medit:ref" ) ) {
           continue;
@@ -652,7 +652,7 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
           }
         }
 
-        auto ar = pd->GetArray(k);
+        auto ar = pd->GetArray(j);
 
         psl->np = ar->GetNumberOfTuples();
         if ( mesh->np != psl->np ) {
@@ -699,7 +699,7 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
 
         switch ( psl->type ) {
         case ( 1 ): case ( 2 ):
-          for (k=1; k<=psl->np; k++) {
+          for (int k=1; k<=psl->np; k++) {
             int iadr = k*psl->size;
             ar->GetTuple ( k-1, &psl->m[iadr] );
           }
@@ -709,7 +709,7 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
           // anisotropic sol
           double dbuf[9];
 
-          for (k=1; k<=psl->np; k++) {
+          for (int k=1; k<=psl->np; k++) {
             ar->GetTuple ( k-1, dbuf );
             int iadr = psl->size*k;
 
@@ -762,8 +762,7 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
     if ( cd ) {
       int ncellData = cd->GetNumberOfArrays();
 
-      int isol = 0;
-      for (int k = 0; k < ncellData; k++) {
+      for (int j = 0; j < ncellData; j++) {
         psl = *sol + isol;
         psl->ver = mesh->ver;
         psl->dim = mesh->dim;
@@ -772,7 +771,7 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
 
         char *ptr = NULL;
         char chaine[MMG5_FILESTR_LGTH];
-        strcpy(chaine,pd->GetArrayName(k));
+        strcpy(chaine,pd->GetArrayName(j));
 
         if  ( strstr(chaine,"medit:ref" ) ) {
           continue;
@@ -786,7 +785,7 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
           }
         }
 
-        auto ar = cd->GetArray(k);
+        auto ar = cd->GetArray(j);
 
         psl->np = ar->GetNumberOfTuples();
         if ( mesh->ne != psl->np ) {
@@ -808,7 +807,7 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
           psl->type = 2;
         }
         else if ( ncp == (mesh->dim * mesh->dim) ) {
-          psl->size = (psl->dim*(psl->dim+1))/2;
+          psl->size = ncp;
           psl->type = 3;
         }
         else {
@@ -827,7 +826,7 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
 
         switch ( psl->type ) {
         case ( 1 ): case ( 2 ):
-          for (k=1; k<=psl->np; k++) {
+          for (int k=1; k<=psl->np; k++) {
             int iadr = k*psl->size;
             ar->GetTuple ( k-1, &psl->m[iadr] );
           }
@@ -837,7 +836,7 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
           // anisotropic sol
           double dbuf[9];
 
-          for (k=1; k<=psl->np; k++) {
+          for (int k=1; k<=psl->np; k++) {
             ar->GetTuple ( k-1, dbuf );
             int iadr = psl->size*k;
 
