@@ -195,16 +195,7 @@ int MMG5_count_vtkEntities ( vtkDataSet *dataset, MMG5_pMesh mesh,
         *eltMeditRef = k;
         ++ncellRef;
       }
-      // else {
-      //   printf( "  ## Warning:%s: %s VTK cell data used"
-      //           " only to assign reference to cells (cell data labelled 'medit:ref')."
-      //           " Cell data ignored.\n",__func__,cd->GetArrayName(k));
-      // }
     }
-    // if ( ncellRef > 1 ) {
-    //   printf( "  ## Warning:%s: %d reference fields detected (labelled 'medit:ref')."
-    //           " Only the first is used, others are ignored.\n",__func__,ncellRef);
-    // }
   }
 
   // Count the number of field data
@@ -754,7 +745,6 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
           fprintf(stderr,"  ** UNEXPECTED METRIC TYPE (%d). EXIT PROGRAM \n",psl->type);
           return -1;
         }
-
         ++isol;
       }
     }
@@ -771,7 +761,7 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
 
         char *ptr = NULL;
         char chaine[MMG5_FILESTR_LGTH];
-        strcpy(chaine,pd->GetArrayName(j));
+        strcpy(chaine,cd->GetArrayName(j));
 
         if  ( strstr(chaine,"medit:ref" ) ) {
           continue;
@@ -789,8 +779,8 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
 
         psl->np = ar->GetNumberOfTuples();
         if ( mesh->ne != psl->np ) {
-          fprintf(stderr,"  ** MISMATCHES DATA: THE NUMBER OF VERTICES IN "
-                  "THE MESH (%d) DIFFERS FROM THE NUMBER OF VERTICES IN "
+          fprintf(stderr,"  ** MISMATCHES DATA: THE NUMBER OF ELEMENTS IN "
+                  "THE MESH (%d) DIFFERS FROM THE NUMBER OF CELLS DATA IN "
                   "THE SOLUTION (%d) \n",mesh->ne,psl->np);
           return -1;
         }
