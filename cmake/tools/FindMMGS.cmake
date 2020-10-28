@@ -122,7 +122,7 @@ if(MMG_INCDIR)
   find_path(MMGS_libmmgtypes.h_DIRS
     NAMES libmmgtypes.h
     HINTS ${MMG_INCDIR}
-    PATH_SUFFIXES "mmgs")
+    PATH_SUFFIXES "mmg/mmgs" "mmgs")
 elseif(MMG_BUILDDIR)
   set(MMGS_libmmgtypes.h_DIRS "MMGS_libmmgtypes.h_DIRS-NOTFOUND")
   find_path(MMGS_libmmgtypes.h_DIRS

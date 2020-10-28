@@ -122,7 +122,7 @@ if(MMG_INCDIR)
   find_path(MMG3D_libmmgtypes.h_DIRS
     NAMES libmmgtypes.h
     HINTS ${MMG_INCDIR}
-    PATH_SUFFIXES "mmg3d")
+    PATH_SUFFIXES "mmg/mmg3d" "mmg3d")
 elseif(MMG_BUILDDIR)
   set(MMG3D_libmmgtypes.h_DIRS "MMG3D_libmmgtypes.h_DIRS-NOTFOUND")
   find_path(MMG3D_libmmgtypes.h_DIRS
