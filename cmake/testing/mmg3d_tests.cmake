@@ -92,7 +92,7 @@ IF ( LONG_TESTS )
     mmg3d_CubeSkin0.2_Inside0.4
     mmg3d_CubeSkin0.0125_Inside0.125
     mmg3d_CubeSkin0.0125_Inside0.25
-    mmg3d_CubeSkin0.0125_Inside0.5
+    # mmg3d_CubeSkin0.0125_Inside0.5
     # Check results on various meshes
     # First: Meshes that we want unrefined
     mmg3d_Various_unref_Linkrods_met0.2
@@ -144,7 +144,7 @@ IF ( LONG_TESTS )
     ${MMG3D_CI_TESTS}/CubeSkin0.2_Inside0.4/CubeSkin0.2
     ${MMG3D_CI_TESTS}/CubeSkin0.0125_Inside0.125/CubeSkin0.125
     ${MMG3D_CI_TESTS}/CubeSkin0.0125_Inside0.25/CubeSkin0.25
-    ${MMG3D_CI_TESTS}/CubeSkin0.0125_Inside0.5/CubeSkin0.5
+    # ${MMG3D_CI_TESTS}/CubeSkin0.0125_Inside0.5/CubeSkin0.5
     ### Linkrods
     ${MMG3D_CI_TESTS}/Various_unref_Linkrods_met0.2/linkrods
     ${MMG3D_CI_TESTS}/Various_unref_Linkrods_met0.2_hausd0.01/linkrods
@@ -193,7 +193,7 @@ IF ( LONG_TESTS )
     "-v 5"
     "-v 5"
     "-v 5"
-    "-v 5"
+    # "-v 5"
     ### Linkrods
     "-v 5 -hausd 0.1"
     "-v 5 -hausd 0.01"
