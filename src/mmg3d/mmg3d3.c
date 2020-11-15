@@ -185,7 +185,28 @@ static int MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itdeg, i
 
     if ( !ip )  {
       /* reallocation of point table */
+      int oldnpmax = mesh->npmax;
       MMG3D_POINT_REALLOC(mesh,met,ip,mesh->gap,*warn=1;break,o,MG_NOTAG,src);
+      if( disp->m ) {
+        MMG5_ADD_MEM(mesh,(disp->size*(mesh->npmax-disp->npmax))*sizeof(double),
+                     "larger solution",
+                     MMG5_SAFE_RECALLOC(mesh->point,mesh->npmax+1,oldnpmax+1,MMG5_Point,,);
+                     mesh->memCur -= (mesh->npmax - oldnpmax)*sizeof(MMG5_Point);
+                     mesh->npmax = oldnpmax;
+                     mesh->np = mesh->npmax-1;
+                     mesh->npnil = 0;
+                     break);
+        MMG5_SAFE_REALLOC(disp->m,disp->size*(disp->npmax+1),
+                          disp->size*(mesh->npmax+1),
+                          double,"larger displacement",
+                          MMG5_SAFE_RECALLOC(mesh->point,mesh->npmax+1,oldnpmax+1,MMG5_Point,,);
+                          mesh->memCur -= (mesh->npmax - oldnpmax)*sizeof(MMG5_Point);
+                          mesh->npmax = oldnpmax;
+                          mesh->np = mesh->npmax-1;
+                          mesh->npnil = 0;
+                          break);
+      }
+      disp->npmax = mesh->npmax;
     }
 
     /* Interpolation of metric, if any */
