@@ -1124,12 +1124,35 @@ static int MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
 #endif
       np = MMG3D_newPt(mesh,c,0,src);
       if ( !np ) {
+        int oldnpmax = mesh->npmax;
         MMG3D_POINT_REALLOC(mesh,sol,np,MMG5_GAP,
                              fprintf(stderr,"\n  ## Error: %s: unable to"
                                      " allocate a new point\n",__func__);
                              MMG5_INCREASE_MEM_MESSAGE();
                              return 0
                              ,c,0,src);
+        if( met ) {
+          if( met->m ) {
+            MMG5_ADD_MEM(mesh,(met->size*(mesh->npmax-met->npmax))*sizeof(double),
+                         "larger solution",
+                         MMG5_SAFE_RECALLOC(mesh->point,mesh->npmax+1,oldnpmax+1,MMG5_Point,,);
+                         mesh->memCur -= (mesh->npmax - oldnpmax)*sizeof(MMG5_Point);
+                         mesh->npmax = oldnpmax;
+                         mesh->np = mesh->npmax-1;
+                         mesh->npnil = 0;
+                         return 0);
+            MMG5_SAFE_REALLOC(met->m,met->size*(met->npmax+1),
+                              met->size*(mesh->npmax+1),
+                              double,"larger solution",
+                              MMG5_SAFE_RECALLOC(mesh->point,mesh->npmax+1,oldnpmax+1,MMG5_Point,,);
+                              mesh->memCur -= (mesh->npmax - oldnpmax)*sizeof(MMG5_Point);
+                              mesh->npmax = oldnpmax;
+                              mesh->np = mesh->npmax-1;
+                              mesh->npnil = 0;
+                              return 0);
+          }
+          met->npmax = mesh->npmax;
+        }
       }
       sol->m[np] = mesh->info.ls;
       /* If user provide a metric, interpolate it at the new point */
