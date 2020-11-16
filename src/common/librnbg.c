@@ -177,17 +177,32 @@ void MMG5_swapNod(MMG5_pMesh mesh,MMG5_pPoint points, double* sols,
 
   /* swap solution fields (for ParMmg) */
   if ( field ) {
-    for ( i=0; i<mesh->nsols; ++i ) {
-      psl    = field+i;
-      assert ( psl && psl->m );
+    if( mesh->nsols ) { /* swap solution fields (for ParMmg) */
+      for ( i=0; i<mesh->nsols; ++i ) {
+        psl    = field+i;
+        assert ( psl && psl->m );
 
-      pslsiz = psl->size;
-      addr1  = ind1*pslsiz;
-      addr2  = ind2*pslsiz;
+        pslsiz = psl->size;
+        addr1  = ind1*pslsiz;
+        addr2  = ind2*pslsiz;
 
-      memcpy(&soltmp       , psl->m + addr2,pslsiz*sizeof(double));
-      memcpy(psl->m + addr2, psl->m + addr1,pslsiz*sizeof(double));
-      memcpy(psl->m + addr1, &soltmp       ,pslsiz*sizeof(double));
+        memcpy(&soltmp       , psl->m + addr2,pslsiz*sizeof(double));
+        memcpy(psl->m + addr2, psl->m + addr1,pslsiz*sizeof(double));
+        memcpy(psl->m + addr1, &soltmp       ,pslsiz*sizeof(double));
+      }
+    } else { /* swap a single displacement field (for Lagrangian motion) */
+      psl = field;
+      assert ( psl );
+
+      if( psl->m ) { /* it is null after Lagrangian step */
+        pslsiz = psl->size;
+        addr1  = ind1*pslsiz;
+        addr2  = ind2*pslsiz;
+
+        memcpy(&soltmp       , psl->m + addr2,pslsiz*sizeof(double));
+        memcpy(psl->m + addr2, psl->m + addr1,pslsiz*sizeof(double));
+        memcpy(psl->m + addr1, &soltmp       ,pslsiz*sizeof(double));
+      }
     }
   }
 
