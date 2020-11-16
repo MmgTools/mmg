@@ -773,7 +773,7 @@ int MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int **invalidTets) 
       nnnc   += nnc;
       nnns   += nns;
 
-      if ( (mesh->info.imprim > 0) && (mesh->info.imprim < 4) ) {
+      if ( (mesh->info.imprim > 1) && (mesh->info.imprim < 4) ) {
         printf("   ---> Realized displacement: %f\n",tau);
       }
 

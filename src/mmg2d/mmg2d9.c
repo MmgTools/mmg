@@ -698,7 +698,7 @@ int MMG2D_mmg2d9(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int **invalidTrias
 
       if ( t == MMG2D_SHORTMAX ) break;
     }
-    if ( mesh->info.imprim > 0 && abs(mesh->info.imprim) < 4 ) {
+    if ( mesh->info.imprim > 1 && abs(mesh->info.imprim) < 4 ) {
       printf("   ---> Realized displacement: %f\n",tau);
     }
     if ( abs(mesh->info.imprim) > 2 && mesh->info.lag )
