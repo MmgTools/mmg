@@ -133,6 +133,8 @@ static int MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itdeg, i
 
       /* Skip the non-internal edges */
       if ( pxt && (pxt->tag[i] & MG_BDY) )  continue;
+      /* Skip boundary edges - WARNING: This also skips edges connecting two
+       * boundary points. */
       if( (p0->tag & MG_BDY) && (p1->tag & MG_BDY) ) continue;
 
       len = (p1->c[0]-p0->c[0])*(p1->c[0]-p0->c[0])
