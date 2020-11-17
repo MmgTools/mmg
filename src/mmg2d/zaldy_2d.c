@@ -189,7 +189,7 @@ int MMG2D_memOption_memSet(MMG5_pMesh mesh) {
   /* If npadd is exactly the maximum memory available, we will use all the
    * memory and the analysis step will fail. As arrays may be reallocated, we
    * can have smaller values for npmax and ntmax (npadd/2). */
-  npadd = avMem/(double)(2*bytes);
+  npadd = avMem/(2*bytes);
   mesh->npmax = MG_MIN(mesh->npmax,mesh->np+npadd);
   mesh->ntmax = MG_MIN(mesh->ntmax,ctri*npadd+mesh->nt);
   mesh->namax = MG_MIN(mesh->namax,ctri*npadd+mesh->na);
