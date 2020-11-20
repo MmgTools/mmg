@@ -501,7 +501,7 @@ IF( BUILD_TESTING )
     ##------- Get the continuous integration tests ----------------------##
     ##-------------------------------------------------------------------##
     INCLUDE(cmake/modules/LoadCiTests.cmake)
-ENDIF ( )
+  ENDIF ( )
 
   ##-------------------------------------------------------------------##
   ##------- Set the continuous integration options --------------------##
@@ -556,17 +556,17 @@ ENDIF ( )
     SET(EXECUT_MMG ${EXECUT_MMGS} ${EXECUT_MMG3D})
 
     # Change authorisations for some files...
-    IF ( EXISTS ${CTEST_OUTPUT_DIR}/LeakCheck_AbnormalEnd7/unreadable.meshb)
+    IF ( EXISTS ${CTEST_OUTPUT_DIR}/LeakCheck_AbnormalEnd7/unwrittable.meshb)
       FILE(REMOVE ${CTEST_OUTPUT_DIR}/LeakCheck_AbnormalEnd7/unwrittable.meshb)
     ENDIF()
     FILE(COPY ${MMG_CI_TESTS}/LeakCheck_AbnormalEnd7/dout.mesh
-      DESTINATION ${CTEST_OUTPUT_DIR}/AbnormalEnd7/unwrittable.meshb)
+      DESTINATION ${CTEST_OUTPUT_DIR}/LeakCheck_AbnormalEnd7/unwrittable.meshb)
 
     IF ( EXISTS ${CTEST_OUTPUT_DIR}/LeakCheck_AbnormalEnd8/unwrittable.sol)
       FILE(REMOVE ${CTEST_OUTPUT_DIR}/LeakCheck_AbnormalEnd8/unwrittable.sol)
     ENDIF()
     FILE(COPY ${MMG_CI_TESTS}/LeakCheck_AbnormalEnd8/dsol.sol
-      DESTINATION ${CTEST_OUTPUT_DIR}/AbnormalEnd8/unwrittable.sol)
+      DESTINATION ${CTEST_OUTPUT_DIR}/LeakCheck_AbnormalEnd8/unwrittable.sol)
 
     # Add common tests for mmgs/3d appli
     INCLUDE( ${PROJECT_SOURCE_DIR}/cmake/testing/mmg_tests.cmake )

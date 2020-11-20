@@ -91,8 +91,8 @@ IF ( LONG_TESTS )
     mmg3d_CubeSkin0.1_Inside0.4
     mmg3d_CubeSkin0.2_Inside0.4
     mmg3d_CubeSkin0.0125_Inside0.125
-    mmg3d_CubeSkin0.0125_Inside0.25
-    # mmg3d_CubeSkin0.0125_Inside0.5
+    # mmg3d_CubeSkin0.0125_Inside0.25 # too long on OSX
+    # mmg3d_CubeSkin0.0125_Inside0.5 # too long on all machine
     # Check results on various meshes
     # First: Meshes that we want unrefined
     mmg3d_Various_unref_Linkrods_met0.2
@@ -621,6 +621,13 @@ ADD_TEST(NAME mmg3d_OptLs_plane_withbub
   ${MMG3D_CI_TESTS}/OptLs_plane/plane
   -sol ${MMG3D_CI_TESTS}/OptLs_plane/bub.sol
   ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_plane-withbub.o.meshb)
+
+# ls + rmc: max pile bug
+ADD_TEST(NAME mmg3d_OptLs_plane_rmcmaxpile
+  COMMAND ${EXECUT_MMG3D} -v 5 -ls -rmc
+  ${MMG3D_CI_TESTS}/OptLs_plane/plane
+  -sol ${MMG3D_CI_TESTS}/OptLs_plane/whole.sol
+  ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_plane-rmcmaxpile.o.meshb)
 
 ADD_TEST(NAME mmg3d_OptLs_plane_rembub
   COMMAND ${EXECUT_MMG3D} -v 5 -ls
