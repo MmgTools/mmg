@@ -266,6 +266,12 @@ IF ( BUILD_TESTING )
         "${CTEST_OUTPUT_DIR}/test_API3d-vtk2mesh.o"
         )
 
+      IF ( NOT VTK_FOUND )
+        SET(expr "VTK library not founded")
+        SET_PROPERTY(TEST test_api3d_vtk2mesh
+          PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
+      ENDIF ( )
+
       IF ( CMAKE_Fortran_COMPILER)
         SET(LIBMMG3D_EXECFORTRAN_a  ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_fortran_a)
         SET(LIBMMG3D_EXECFORTRAN_b  ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_fortran_b)
