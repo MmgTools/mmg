@@ -556,10 +556,18 @@ IF( BUILD_TESTING )
     SET(EXECUT_MMG ${EXECUT_MMGS} ${EXECUT_MMG3D})
 
     # Make some files not openable
+    IF ( EXISTS ${CTEST_OUTPUT_DIR}/unwrittable7.meshb
+        AND NOT IS_DIRECTORY ${CTEST_OUTPUT_DIR}/unwrittable7.meshb )
+      FILE ( REMOVE ${CTEST_OUTPUT_DIR}/unwrittable7.meshb )
+    ENDIF ()
     IF ( NOT EXISTS ${CTEST_OUTPUT_DIR}/unwrittable7.meshb)
       FILE(MAKE_DIRECTORY ${CTEST_OUTPUT_DIR}/unwrittable7.meshb)
     ENDIF()
 
+    IF ( EXISTS ${CTEST_OUTPUT_DIR}/unwrittable8.sol
+        AND NOT IS_DIRECTORY ${CTEST_OUTPUT_DIR}/unwrittable8.sol )
+      FILE ( REMOVE ${CTEST_OUTPUT_DIR}/unwrittable8.sol )
+    ENDIF ()
     IF ( NOT EXISTS ${CTEST_OUTPUT_DIR}/unwrittable8.sol)
       FILE(MAKE_DIRECTORY ${CTEST_OUTPUT_DIR}/unwrittable8.sol)
     ENDIF()
