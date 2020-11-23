@@ -555,18 +555,14 @@ IF( BUILD_TESTING )
     SET(LISTEXEC_MMG ${LISTEXEC_MMGS} ${LISTEXEC_MMG3D})
     SET(EXECUT_MMG ${EXECUT_MMGS} ${EXECUT_MMG3D})
 
-    # Change authorisations for some files...
-    IF ( EXISTS ${CTEST_OUTPUT_DIR}/LeakCheck_AbnormalEnd7/unwrittable.meshb)
-      FILE(REMOVE ${CTEST_OUTPUT_DIR}/LeakCheck_AbnormalEnd7/unwrittable.meshb)
+    # Make some files not openable
+    IF ( NOT EXISTS ${CTEST_OUTPUT_DIR}/unwrittable7.meshb)
+      FILE(MAKE_DIRECTORY ${CTEST_OUTPUT_DIR}/unwrittable7.meshb)
     ENDIF()
-    FILE(COPY ${MMG_CI_TESTS}/LeakCheck_AbnormalEnd7/dout.mesh
-      DESTINATION ${CTEST_OUTPUT_DIR}/LeakCheck_AbnormalEnd7/unwrittable.meshb)
 
-    IF ( EXISTS ${CTEST_OUTPUT_DIR}/LeakCheck_AbnormalEnd8/unwrittable.sol)
-      FILE(REMOVE ${CTEST_OUTPUT_DIR}/LeakCheck_AbnormalEnd8/unwrittable.sol)
+    IF ( NOT EXISTS ${CTEST_OUTPUT_DIR}/unwrittable8.sol)
+      FILE(MAKE_DIRECTORY ${CTEST_OUTPUT_DIR}/unwrittable8.sol)
     ENDIF()
-    FILE(COPY ${MMG_CI_TESTS}/LeakCheck_AbnormalEnd8/dsol.sol
-      DESTINATION ${CTEST_OUTPUT_DIR}/LeakCheck_AbnormalEnd8/unwrittable.sol)
 
     # Add common tests for mmgs/3d appli
     INCLUDE( ${PROJECT_SOURCE_DIR}/cmake/testing/mmg_tests.cmake )
