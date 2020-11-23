@@ -184,9 +184,6 @@ IF ( BUILD_TESTING )
   # Add runtime that we want to test for mmg3d
   IF ( MMG3D_CI )
 
-    SET ( CTEST_OUTPUT_DIR ${PROJECT_BINARY_DIR}/TEST_OUTPUTS )
-    FILE ( MAKE_DIRECTORY  ${CTEST_OUTPUT_DIR} )
-
     IF ( LONG_TESTS )
       # Run some tests twice with the output of the previous test as input
       OPTION ( RUN_AGAIN "Enable/Disable second run of some tests" ON )
