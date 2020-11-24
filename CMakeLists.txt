@@ -425,6 +425,17 @@ CMAKE_DEPENDENT_OPTION(
 ###############################################################################
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 
+# CTEST_OUTPUT_DIR MUST BE SETTED HERE TO AVOID UNINITIALIZATION FOR LIBRARY
+# TESTS DEFS
+OPTION ( BUILD_TESTING "Enable/Disable continuous integration" OFF )
+
+IF( BUILD_TESTING )
+  SET ( CTEST_OUTPUT_DIR ${PROJECT_BINARY_DIR}/TEST_OUTPUTS
+    CACHE PATH "Path toward the tests outputs" )
+  MARK_AS_ADVANCED ( CTEST_OUTPUT_DIR )
+  FILE ( MAKE_DIRECTORY  ${CTEST_OUTPUT_DIR} )
+ENDIF ( )
+
 IF ( BUILD_MMG2D )
   INCLUDE(cmake/modules/mmg2d.cmake)
 ENDIF ( )
@@ -473,8 +484,6 @@ ENDIF()
 #####
 ###############################################################################
 
-OPTION ( BUILD_TESTING "Enable/Disable continuous integration" OFF )
-
 CMAKE_DEPENDENT_OPTION (
   ONLY_VERY_SHORT_TESTS "Enable/Disable very short tests" OFF
   "BUILD_TESTING;NOT LONG_TESTS" OFF )
@@ -489,12 +498,6 @@ CMAKE_DEPENDENT_OPTION ( COVERAGE "Watch code coverage (Linux only)" OFF
 "BUILD_TESTING;CMAKE_COMPILER_IS_GNUCC" OFF )
 
 IF( BUILD_TESTING )
-
-  SET ( CTEST_OUTPUT_DIR ${PROJECT_BINARY_DIR}/TEST_OUTPUTS
-    CACHE PATH "Path toward the tests outputs" )
-  MARK_AS_ADVANCED ( CTEST_OUTPUT_DIR )
-
-  FILE ( MAKE_DIRECTORY  ${CTEST_OUTPUT_DIR} )
 
   IF ( NOT ONLY_VERY_SHORT_TESTS )
     ##-------------------------------------------------------------------##
