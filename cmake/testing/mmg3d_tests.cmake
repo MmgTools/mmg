@@ -75,7 +75,7 @@ IF ( LONG_TESTS )
     mmg3d_SphereIso_0.25h_met
     mmg3d_SphereIso_0.125h_met
     mmg3d_SphereIso_0.020_met
-    mmg3d_SphereIso_0.020-0.015_met
+    # mmg3d_SphereIso_0.020-0.015_met # not enough mem on windows 4G
     mmg3d_SphereAni_0.02
     # Check what happend when we unrefine a sphere of size smallh with a
     # constant metric (2*smallh, 4*smallh and 8*smallh)
@@ -129,7 +129,7 @@ IF ( LONG_TESTS )
     ${MMG3D_CI_TESTS}/SphereIso_0.25h_met/SphereIso0.5
     ${MMG3D_CI_TESTS}/SphereIso_0.125h_met/SphereIso0.5
     ${MMG3D_CI_TESTS}/SphereIso_0.020_met/SphereIso0.5
-    ${MMG3D_CI_TESTS}/SphereIso_0.020-0.015_met/SphereIso0.020
+    # ${MMG3D_CI_TESTS}/SphereIso_0.020-0.015_met/SphereIso0.020
     ${MMG3D_CI_TESTS}/SphereAni_0.02/sphere
     ###
     ${MMG3D_CI_TESTS}/SphereIso_2smallh_met/SphereIso0.0625
@@ -178,7 +178,7 @@ IF ( LONG_TESTS )
     "-v 5 -hausd 0.1"
     "-v 5 -hausd 0.1"
     "-v 5 -hausd 0.1"
-    "-v 5 -hausd 0.1"
+    # "-v 5 -hausd 0.1"
     "-v 5"
     ###
     "-v 5 -hausd 0.1"
