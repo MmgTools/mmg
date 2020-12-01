@@ -14,7 +14,7 @@ private:
 	MMG5_pSol mmgSol = NULL;
 
 	double* m_verts;
-	int* m_tets;
+    int *m_tets, *m_faces, *m_faceRefs;
 	int m_nverts, m_ntets, m_nfaces;
 
 
@@ -25,17 +25,28 @@ public:
   double m_hgrad = 1.3;
   double m_hausd = 0.01;
 
-  TetMesh(py::array_t<double> verts, py::array_t<int> tets, py::array_t<double>scalars) {
+  TetMesh(
+      py::array_t<double> verts, 
+      py::array_t<int> tets,
+      py::array_t<int> faces,
+      py::array_t<int> faceRefs,
+      py::array_t<double>vertSizes
+  ) {
 	  //TODO check correct ordering/packing of input arrays
 
     /*handle numpy arrays*/
     py::buffer_info verts_buf = verts.request();
     py::buffer_info tets_buf = tets.request();
-    py::buffer_info scalars_buf = scalars.request();
+    py::buffer_info faces_buf = faces.request();
+    py::buffer_info faceRefs_buf = faceRefs.request();
+    py::buffer_info vertSizes_buf = vertSizes.request();
 
     // check arrays
-    if (verts_buf.size / 3 != scalars_buf.size) {
+    if (verts_buf.size / 3 != vertSizes_buf.size) {
 	    throw std::runtime_error("Input shapes must match");
+    }
+    if (faces_buf.size / 3 != faceRefs_buf.size) {
+        throw std::runtime_error("Input shapes must match");
     }
 
     /*init mesh and sol (vertex scalar field here)*/
@@ -43,11 +54,11 @@ public:
 	    MMG5_ARG_ppMesh, &mmgMesh, MMG5_ARG_ppMet, &mmgSol,
 	    MMG5_ARG_end);
 
-    if (MMG3D_Set_meshSize(mmgMesh, verts_buf.size / 3, tets_buf.size / 4, 0, 0, 0, 0) != 1) {
+    if (MMG3D_Set_meshSize(mmgMesh, verts_buf.size / 3, tets_buf.size / 4, 0, faces_buf.size / 3, 0, 0) != 1) {
 	    throw std::runtime_error("MMG3D_Set_meshSize failed");
     }
 
-    if (MMG3D_Set_solSize(mmgMesh, mmgSol, MMG5_Vertex, scalars_buf.size, MMG5_Scalar) != 1) {
+    if (MMG3D_Set_solSize(mmgMesh, mmgSol, MMG5_Vertex, vertSizes_buf.size, MMG5_Scalar) != 1) {
 	    throw std::runtime_error("MMG3D_Set_solSize failed");
     }
 
@@ -59,20 +70,29 @@ public:
 	    throw std::runtime_error("MMG3D_Set_tetra failed");
     }
 
-    if (MMG3D_Set_scalarSols(mmgSol, (double*)scalars_buf.ptr) != 1) {
+    if (MMG3D_Set_triangles(mmgMesh, (int*)faces_buf.ptr, (int*)faceRefs_buf.ptr) != 1) {
+        throw std::runtime_error("MMG3D_Set_triangles failed");
+    }
+
+    if (MMG3D_Set_scalarSols(mmgSol, (double*)vertSizes_buf.ptr) != 1) {
 	    throw std::runtime_error("MMG3D_Set_scalarSols failed");
     }
 
     // get the mesh sizes
     MMG3D_Get_meshSize(mmgMesh, &m_nverts, &m_ntets, NULL, &m_nfaces, NULL, NULL);
 
-    // set vertices
+    // get vertices
     m_verts = new double[m_nverts * 3];
     MMG3D_Get_vertices(mmgMesh, m_verts, NULL, NULL, NULL);
 
-    // set tets
+    // get tets
     m_tets = new int[m_ntets * 4];
     MMG3D_Get_tetrahedra(mmgMesh, m_tets, NULL, NULL);
+
+    // get faces (triangles) and their refs for keeping track of bnd-surfaces
+    m_faces = new int[m_nfaces * 3];
+    m_faceRefs = new int[m_nfaces];
+	MMG3D_Get_triangles(mmgMesh, m_faces, m_faceRefs, NULL);
 
 	}
 
@@ -84,6 +104,8 @@ public:
 
 		delete(m_verts);
 		delete(m_tets);
+        delete(m_faces);
+        delete(m_faceRefs);
 
 	}
 
@@ -117,14 +139,23 @@ public:
 	m_tets = new int[m_ntets * 4];
 	MMG3D_Get_tetrahedra(mmgMesh, m_tets, NULL, NULL);
 
-  }
+    // get faces (triangles) and their refs for keeping track of bnd-surfaces
+    m_faces = new int[m_nfaces * 3];
+    m_faceRefs = new int[m_nfaces];
+    MMG3D_Get_triangles(mmgMesh, m_faces, m_faceRefs, NULL);
 
-  int getNumberOfTets() {
-    return m_ntets;
   }
 
   int getNumberOfVerts() {
     return m_nverts;
+  }
+
+  int getNumberOfTets() {
+      return m_ntets;
+  }
+
+  int getNumberOfFaces() {
+      return m_nfaces;
   }
 
   py::array_t<double> getVerts(){
@@ -135,16 +166,35 @@ public:
     return py::array_t<int>({m_ntets, 4}, &m_tets[0]);
   }
 
+  py::array_t<int> getFaces() {
+      return py::array_t<int>({ m_nfaces, 3 }, &m_faces[0]);
+  }
+
+
+  py::array_t<int> getFaceRefs() {
+      return py::array_t<int>({ m_nfaces }, &m_faceRefs[0]);
+  }
+
+
 };
 
 PYBIND11_MODULE(pymmg, m) {
 	py::class_<TetMesh>(m, "TetMesh")
-		.def(py::init<py::array_t<double>, py::array_t<int>, py::array_t<double>>())
+		.def(py::init<
+            py::array_t<double>, 
+            py::array_t<int>, 
+            py::array_t<int>,
+            py::array_t<int>,
+            py::array_t<double>
+        >())
     .def("remesh", &TetMesh::remesh)
     .def("getNumberOfVerts", &TetMesh::getNumberOfVerts)
     .def("getNumberOfTets", &TetMesh::getNumberOfTets)
+	.def("getNumberOfFaces", &TetMesh::getNumberOfFaces)
     .def("getVerts", &TetMesh::getVerts)
     .def("getTets", &TetMesh::getTets)
+	.def("getFaces", &TetMesh::getFaces)
+	.def("getFaceRefs", &TetMesh::getFaceRefs)
     .def_readwrite("hmin", &TetMesh::m_hmin)
     .def_readwrite("hmax", &TetMesh::m_hmax)
     .def_readwrite("hgrad", &TetMesh::m_hgrad)
