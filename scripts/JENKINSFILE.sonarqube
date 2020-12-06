@@ -12,7 +12,7 @@ node('mmg-sonnar-new') {
         mkdir -p buildPattern'''+list[i]+'''
         cd buildPattern'''+list[i]+'''
         rm -rf *
-        export CFLAGS="-O0 -g -fPIC --coverage -Wall -Wunused-parameter -Wundef -Wno-long-long -Wsign-compare -Wmissing-prototypes -Wstrict-prototypes -Wcomment -pedantic -fdiagnostics-show-option"
+        export CFLAGS="-O0 -g --coverage -Wall -Wunused-parameter -Wundef -Wno-long-long -Wsign-compare -Wmissing-prototypes -Wstrict-prototypes -Wcomment -pedantic -fdiagnostics-show-option"
         export LDFLAGS="--coverage"
         cmake .. -DCMAKE_BUILD_TYPE=Debug -DPATTERN='''+list[i]+''' -DBUILD_TESTING=ON -DCMAKE_C_FLAGS="$CFLAGS" -DCMAKE_EXE_LINKER_FLAGS="$LDFLAGS" -DCMAKE_INSTALL_PREFIX=$PWD/../install -DBUILD_TESTING=ON -DLONG_TESTS=OFF -DRUN_AGAIN=ON -DLIBMMG2D_STATIC=ON -DLIBMMG3D_STATIC=ON -DLIBMMG_STATIC=ON -DLIBMMG2D_STATIC=ON -DLIBMMGS_STATIC=ON -DTEST_LIBMMG=ON -DTEST_LIBMMG2D=ON -DTEST_LIBMMG3D=ON -DTEST_LIBMMGS=ON -DSCOTCH_DIR=/home/ci/scotch_6.0.6 -DSCOTCH_LIBRARIES=/builds/scotch_6.0.6/lib/libscotch.a -DUSE_SCOTCH=ON -DELAS_DIR=/home/ci/LinearElasticity -DUSE_ELAS=ON
         make clean
