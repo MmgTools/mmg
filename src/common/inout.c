@@ -2602,6 +2602,9 @@ int MMG5_chkMetricType(MMG5_pMesh mesh,int *type, FILE *inm) {
   if ( mesh->info.lag == -1 ) {
     if ( type[0]!=1 && type[0]!=3) {
       fprintf(stderr,"  ** DATA TYPE IGNORED %d \n",type[0]);
+      fprintf(stderr,"  ## Error: %s: if your input file is at a non Medit"
+              " file format, please ensure that the metric field"
+              " contains the \":metric\" string.\n",__FILE__);
       if ( inm ) fclose(inm);
       return -1;
     }
