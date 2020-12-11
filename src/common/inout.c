@@ -2589,8 +2589,9 @@ int MMG5_saveSolAtTetrahedraHeader( MMG5_pMesh mesh,
  * \param inm metric file
  * \return 1 if success, -1 if fail
  *
- * Check if the type of the metric is compatible with the remeshing mode.
- * If not, deallocate the type array and close the metric file.
+ * Check if the type of the metric is compatible with the remeshing mode.  If
+ * not, close the metric file (note that if type is an allocated array, you must
+ * unallocate it outside).
  *
  */
 int MMG5_chkMetricType(MMG5_pMesh mesh,int *type, FILE *inm) {
@@ -2601,7 +2602,9 @@ int MMG5_chkMetricType(MMG5_pMesh mesh,int *type, FILE *inm) {
   if ( mesh->info.lag == -1 ) {
     if ( type[0]!=1 && type[0]!=3) {
       fprintf(stderr,"  ** DATA TYPE IGNORED %d \n",type[0]);
-      MMG5_SAFE_FREE(type);
+      fprintf(stderr,"  ## Error: %s: if your input file is at a non Medit"
+              " file format, please ensure that the metric field"
+              " contains the \":metric\" string.\n",__FILE__);
       if ( inm ) fclose(inm);
       return -1;
     }
@@ -2610,7 +2613,6 @@ int MMG5_chkMetricType(MMG5_pMesh mesh,int *type, FILE *inm) {
     if ( type[0] != 2 ) {
       fprintf(stderr,"  ** MISMATCH DATA TYPE FOR LAGRANGIAN MODE %d \n",
               type[0]);
-      MMG5_SAFE_FREE(type);
       if ( inm ) fclose(inm);
       return -1;
     }

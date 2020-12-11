@@ -2130,7 +2130,11 @@ int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
 
   ier = MMG5_chkMetricType(mesh,type,inm);
 
-  if ( ier <1 ) return ier;
+  if ( ier < 1 ) {
+    MMG5_SAFE_FREE(type);
+    return ier;
+  }
+
   /* Allocate and store the header informations for each solution */
   if ( !MMG3D_Set_solSize(mesh,met,MMG5_Vertex,mesh->np,type[0]) ) {
     fclose(inm);

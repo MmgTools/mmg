@@ -184,9 +184,6 @@ IF ( BUILD_TESTING )
   # Add runtime that we want to test for mmg3d
   IF ( MMG3D_CI )
 
-    SET ( CTEST_OUTPUT_DIR ${PROJECT_BINARY_DIR}/TEST_OUTPUTS )
-    FILE ( MAKE_DIRECTORY  ${CTEST_OUTPUT_DIR} )
-
     IF ( LONG_TESTS )
       # Run some tests twice with the output of the previous test as input
       OPTION ( RUN_AGAIN "Enable/Disable second run of some tests" ON )
@@ -210,6 +207,7 @@ IF ( BUILD_TESTING )
       SET(LIBMMG3D_LSANDMETRIC ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_lsAndMetric )
       SET(TEST_API3D_EXEC0 ${EXECUTABLE_OUTPUT_PATH}/test_api3d_0)
       SET(TEST_API3D_DOMSEL ${EXECUTABLE_OUTPUT_PATH}/test_api3d_domain-selection)
+      SET(TEST_API3D_VTK2MESH ${EXECUTABLE_OUTPUT_PATH}/test_api3d_vtk2mesh)
 
       ADD_TEST(NAME libmmg3d_example0_a COMMAND ${LIBMMG3D_EXEC0_a}
         "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/adaptation_example0/example0_a/cube.mesh"
@@ -259,7 +257,17 @@ IF ( BUILD_TESTING )
         "${MMG3D_CI_TESTS}/OptLs_plane/p.sol"
         "${CTEST_OUTPUT_DIR}/test_API3d-domsel-whole.o"
         "${CTEST_OUTPUT_DIR}/test_API3d-domsel-dom2.o"
-       )
+        )
+      ADD_TEST(NAME test_api3d_vtk2mesh   COMMAND ${TEST_API3D_VTK2MESH}
+        "${MMG3D_CI_TESTS}/API_tests/cellsAndNode-data.vtk"
+        "${CTEST_OUTPUT_DIR}/test_API3d-vtk2mesh.o"
+        )
+
+      IF ( NOT VTK_FOUND )
+        SET(expr "VTK library not founded")
+        SET_PROPERTY(TEST test_api3d_vtk2mesh
+          PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
+      ENDIF ( )
 
       IF ( CMAKE_Fortran_COMPILER)
         SET(LIBMMG3D_EXECFORTRAN_a  ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_fortran_a)

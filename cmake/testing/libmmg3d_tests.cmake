@@ -37,6 +37,7 @@ SET ( MMG3D_LIB_TESTS
   libmmg3d_lsAndMetric
   test_api3d_0
   test_api3d_domain-selection
+  test_api3d_vtk2mesh
   )
 SET ( MMG3D_LIB_TESTS_MAIN_PATH
   ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/adaptation_example0/example0_a/main.c
@@ -49,6 +50,7 @@ SET ( MMG3D_LIB_TESTS_MAIN_PATH
   ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsAndMetric/main.c
   ${MMG3D_CI_TESTS}/API_tests/3d.c
   ${MMG3D_CI_TESTS}/API_tests/domain-selection.c
+  ${MMG3D_CI_TESTS}/API_tests/vtk2mesh.c
   )
 
 IF ( LIBMMG3D_STATIC )
