@@ -727,6 +727,7 @@ float  MMG5_swapf(float sbin);
 double MMG5_swapd(double sbin);
 int MMG5_isLevelSet(MMG5_pMesh,int,int);
 int MMG5_isSplit(MMG5_pMesh ,int ,int *,int *);
+int MMG5_isNotSplit(MMG5_pMesh ,int);
 int MMG5_getIniRef(MMG5_pMesh ,int );
 
 

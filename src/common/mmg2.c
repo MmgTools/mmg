@@ -71,6 +71,31 @@ int MMG5_isSplit(MMG5_pMesh mesh,int ref,int *refint,int *refext) {
 
 }
 
+/**
+ * \param mesh   pointer toward the mesh structure.
+ * \param ref    initial reference.
+ * \return 1 if entity cannot be split, 0 if can be split.
+ *
+ * Identify whether an entity with reference ref should not be split.
+ *
+ */
+int MMG5_isNotSplit(MMG5_pMesh mesh,int ref) {
+  MMG5_pMat    pm;
+  int          k;
+
+  /* Split material by default if not in multi-material mode */
+  if( !mesh->info.nmat ) return 0;
+
+  for (k=0; k<mesh->info.nmat; k++) {
+    pm = &mesh->info.mat[k];
+    if ( pm->ref == ref ) {
+      if ( !pm->dospl ) {
+        return 1;
+      } else return 0;
+    }
+  }
+}
+
 int MMG5_isLevelSet(MMG5_pMesh mesh,int ref0,int ref1) {
   MMG5_pMat pm;
   int       k;
