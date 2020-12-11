@@ -71,6 +71,29 @@ int MMG5_isSplit(MMG5_pMesh mesh,int ref,int *refint,int *refext) {
 
 }
 
+int MMG5_isLevelSet(MMG5_pMesh mesh,int ref0,int ref1) {
+  MMG5_pMat pm;
+  int       k;
+  int       found0,found1;
+
+  for (k=0; k<mesh->info.nmat; k++) {
+    pm = &mesh->info.mat[k];
+    if( pm->ref == ref0 ) { found0 = MG_NOTAG; break; }
+    if( pm->rin == ref0 ) { found0 = MG_PLUS;  break; }
+    if( pm->rex == ref0 ) { found0 = MG_MINUS; break; }
+  }
+  for (k=0; k<mesh->info.nmat; k++) {
+    pm = &mesh->info.mat[k];
+    if( pm->ref == ref1 ) { found1 = MG_NOTAG; break; }
+    if( pm->rin == ref1 ) { found1 = MG_PLUS;  break; }
+    if( pm->rex == ref1 ) { found1 = MG_MINUS; break; }
+  }
+
+  if( (found0+found1) == (MG_MINUS+MG_PLUS) ) return 1;
+  else return 0;
+
+}
+
 /**
  * \param mesh pointer toward the mesh
  * \param ref  final reference for which we are searching the initial one

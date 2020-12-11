@@ -1407,6 +1407,7 @@ int MMG5_chkmaniball(MMG5_pMesh mesh, int start, int8_t ip){
   int       ref,base,ilist,nump,k,cur,k1,nref;
   int       *adja,list[MMG3D_LMAX+2];
   int8_t    i,l,j;
+  int       dummyrin,dummyrex;
 
   base = ++mesh->base;
   ilist = 0;
@@ -1435,6 +1436,7 @@ int MMG5_chkmaniball(MMG5_pMesh mesh, int start, int8_t ip){
       if(!k1) continue;
       k1 /= 4;
       pt1 = &mesh->tetra[k1];
+      if( !MMG5_isSplit(mesh,pt1->ref,&dummyrin,&dummyrex) ) continue;
 
       if( pt1 ->ref != ref ) continue;
 
@@ -1473,6 +1475,8 @@ int MMG5_chkmaniball(MMG5_pMesh mesh, int start, int8_t ip){
       k1/=4;
 
       pt1 = &mesh->tetra[k1];
+      if( !MMG5_isSplit(mesh,pt1->ref,&dummyrin,&dummyrex) ) continue;
+
       if(pt1->flag == base) continue;
       pt1->flag = base;
 
@@ -1553,7 +1557,7 @@ int MMG5_chkmani(MMG5_pMesh mesh){
       if(!adja[i]) continue;
       iel = adja[i] / 4;
       pt1 = &mesh->tetra[iel];
-      if(pt1->ref == pt->ref) continue;
+      if( !MMG5_isLevelSet(mesh,pt1->ref,pt->ref) ) continue;
 
       for(j=0; j<3; j++){
         ip = MMG5_idir[i][j];
