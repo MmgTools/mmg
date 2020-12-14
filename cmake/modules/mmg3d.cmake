@@ -130,8 +130,6 @@ ENDIF()
 # mmg3d header files needed for library
 SET( mmg3d_headers
   ${MMG3D_SOURCE_DIR}/libmmg3d.h
-  ${MMG3D_SOURCE_DIR}/mmg3d.h
-  ${MMG3D_SOURCE_DIR}/inlined_functions_3d.h
   ${MMG3D_BINARY_DIR}/libmmg3df.h
   ${COMMON_SOURCE_DIR}/libmmgtypes.h
   ${COMMON_BINARY_DIR}/libmmgtypesf.h
@@ -140,10 +138,6 @@ SET( mmg3d_headers
   )
 IF (NOT WIN32 OR MINGW)
   LIST(APPEND mmg3d_headers  ${COMMON_BINARY_DIR}/git_log_mmg.h )
-  IF (LIBMMG_STATIC OR LIBMMG_SHARED)
-    SET(mmg3d_git_header  ${COMMON_BINARY_DIR}/git_log_mmg.h)
-    INSTALL(FILES ${mmg3d_git_header} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/mmg/ COMPONENT headers)
-  ENDIF()
 ENDIF()
 
 

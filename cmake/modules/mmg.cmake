@@ -52,11 +52,6 @@ LIST(REMOVE_ITEM mmg_library_files
   ${MMGS_SOURCE_DIR}/mmgs.c
   ${MMG3D_SOURCE_DIR}/mmg3d.c
   ${REMOVE_FILE} )
-FILE(
-  GLOB
-  mmg_header_files
-  ${COMMON_SOURCE_DIR}/*.h
-  )
 
 IF ( VTK_FOUND )
   LIST(APPEND  mmg_library_files
@@ -104,9 +99,6 @@ IF ( LIBMMG_STATIC OR LIBMMG_SHARED )
   SET( mmg_headers
     ${PROJECT_SOURCE_DIR}/src/mmg/libmmg.h
     ${PROJECT_SOURCE_DIR}/src/mmg/libmmgf.h
-    ${COMMON_BINARY_DIR}/mmgcmakedefines.h
-    ${COMMON_BINARY_DIR}/mmgversion.h
-    ${mmg_header_files}
     )
   SET(MMG2D_INCLUDE ${PROJECT_BINARY_DIR}/include/mmg/mmg2d )
   SET(MMGS_INCLUDE ${PROJECT_BINARY_DIR}/include/mmg/mmgs )
