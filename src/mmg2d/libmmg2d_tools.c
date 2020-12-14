@@ -124,6 +124,11 @@ int MMG2D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
             pm->dospl = 1;
           }
         }
+        if( !MMG5_MultiMat_init(mesh) ) {
+          fprintf(stderr,"  %%%% Error: %s: unable to create lookup table for multiple materials.\n",
+              __func__);
+          return 0;
+        }
       }
     }
     /* Read user-defined local parameters and store them in the structure info->par */
