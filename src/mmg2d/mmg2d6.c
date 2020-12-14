@@ -209,7 +209,7 @@ int MMG2D_resetRef(MMG5_pMesh mesh) {
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !pt->v[0] ) continue;
-    ref = MMG5_getIniRef(mesh,pt->ref);
+    if( !MMG5_getStartRef(mesh,pt->ref,&ref) ) return 0;
     pt->ref = ref;
   }
 

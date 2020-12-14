@@ -38,26 +38,52 @@ static int MMG5_InvMat_key(MMG5_pInvMat pim,int ref) {
   return (ref - pim->offset);
 }
 
-static void MMG5_InvMat_set(MMG5_pInvMat pim,MMG5_pMat pm) {
-  /** Store the dosplit attribute of the parent material */
-  pim->lookup[MMG5_InvMat_key(pim,pm->ref)] = pm->dospl;
+static int MMG5_InvMat_index(MMG5_pInvMat pim,int ref) {
+  int key = MMG5_InvMat_key(pim,ref);
+  /* The parent index is stored as 4*(k+1) */
+  return (pim->lookup[key] / 4 - 1);
+}
 
-  /** Store the child material sign with the parent material reference.
-   *  1) 0 is a legit material reference, so store the parent as 4*(ref+1).
+static void MMG5_InvMat_set(MMG5_pMesh mesh,MMG5_pInvMat pim,int k) {
+  MMG5_pMat pm;
+  int       key;
+
+  /* Get material */
+  pm = &mesh->info.mat[k];
+
+  /** Store the dosplit attribute of the parent material */
+  key = MMG5_InvMat_key(pim,pm->ref);
+  pim->lookup[key] = 4*(k+1)+pm->dospl;
+
+  /** Store the child material sign with the parent material index (in the
+   *  lookup table).
+   *  1) 0 is a legit material index, so store the parent as 4*(k+1).
    *  2) If a child material has the same reference as the parent, this
    *     effectively overwrites the result of the previous instruction.
    *  3) No different child materials are allowed to have the same reference,
    *     and this must have already been checked. */
   if( pm->dospl ) {
-    pim->lookup[MMG5_InvMat_key(pim,pm->rin)] = 4*(pm->ref+1)+MG_MINUS;
-    pim->lookup[MMG5_InvMat_key(pim,pm->rex)] = 4*(pm->ref+1)+MG_PLUS;
+    key = MMG5_InvMat_key(pim,pm->rin);
+    pim->lookup[key] = 4*(k+1)+MG_MINUS;
+    key = MMG5_InvMat_key(pim,pm->rex);
+    pim->lookup[key] = 4*(k+1)+MG_PLUS;
   }
 }
 
-static int MMG5_InvMat_getParent(MMG5_pInvMat pim,int ref) {
-  int key = MMG5_InvMat_key(pim,ref);
-  /* The parent is stored as 4*(ref+1) */
-  return (pim->lookup[key] / 4 - 1);
+static int MMG5_InvMat_getParent(MMG5_pMesh mesh,MMG5_pInvMat pim,int ref,int *pref) {
+  MMG5_pMat pm;
+  int       k;
+
+  /* The parent index */
+  k = MMG5_InvMat_index(pim,ref);
+
+  /* Material not found in the table */
+  if( k == -1 ) return 0;
+
+  /* Get the material in the lookup table and return the parent reference */
+  pm = &mesh->info.mat[k];
+  *pref = pm->ref;
+  return 1;
 }
 
 static int MMG5_InvMat_getTag(MMG5_pInvMat pim,int ref) {
@@ -67,12 +93,14 @@ static int MMG5_InvMat_getTag(MMG5_pInvMat pim,int ref) {
   return (pim->lookup[key] % 4);
 }
 
-static void MMG5_InvMat_print(MMG5_pInvMat pim) {
-  int ref;
+static void MMG5_InvMat_print(MMG5_pMesh mesh,MMG5_pInvMat pim) {
+  int ref,pref;
 
+  /* Scan all references in the table limits, some may not exist */
   for( ref = pim->offset; ref < pim->offset + pim->size; ref++ ) {
-    printf("%d (%d): %d %d\n",ref,MMG5_InvMat_key(pim,ref),
-        MMG5_InvMat_getParent(pim,ref),MMG5_InvMat_getTag(pim,ref));
+    if( !MMG5_InvMat_getParent(mesh,pim,ref,&pref) ) continue;
+    printf("%d (%d): %d %d\n",ref,MMG5_InvMat_key(pim,ref),pref,
+        MMG5_InvMat_getTag(pim,ref));
   }
 }
 
@@ -125,10 +153,10 @@ int MMG5_MultiMat_init(MMG5_pMesh mesh) {
 
   /* Fill lookup table */
   for( k = 0; k < mesh->info.nmat; k++ ) {
-    pm = &mesh->info.mat[k];
-    MMG5_InvMat_set(pim,pm);
+    MMG5_InvMat_set(mesh,pim,k);
   }
 
+//  MMG5_InvMat_print(mesh,pim);
   return 1;
 }
 
@@ -146,29 +174,31 @@ int MMG5_MultiMat_init(MMG5_pMesh mesh) {
  *
  */
 int MMG5_isSplit(MMG5_pMesh mesh,int ref,int *refint,int *refext) {
+  MMG5_pInvMat pim;
   MMG5_pMat    pm;
   int          k;
 
-  /* Check in the info->mat table if reference ref is supplied by the user */
-  for (k=0; k<mesh->info.nmat; k++) {
-    pm = &mesh->info.mat[k];
-    if ( pm->ref == ref ) {
-      if ( !pm->dospl ) {
-        return 0;
-      }
-      else {
-        *refint = pm->rin;
-        *refext = pm->rex;
-        return 1;
-      }
-    }
+  /* Default case: split with references MG_MINUS, MG_PLUS */
+  if( !mesh->info.nmat ) {
+    *refint = MG_MINUS;
+    *refext = MG_PLUS;
+    return 1;
   }
 
-  /* Default case: split with references MG_MINUS, MG_PLUS */
-  *refint = MG_MINUS;
-  *refext = MG_PLUS;
-  return 1;
+  /* Check in the info->mat table if reference ref is supplied by the user */
+  pim = &mesh->info.invmat;
+  k = MMG5_InvMat_index(pim,ref);
 
+  assert( k != -1 );
+  pm = &mesh->info.mat[k];
+
+  if ( !pm->dospl ) {
+    return 0;
+  } else {
+    *refint = pm->rin;
+    *refext = pm->rex;
+    return 1;
+  }
 }
 
 /**
@@ -213,22 +243,24 @@ int MMG5_isLevelSet(MMG5_pMesh mesh,int ref0,int ref1) {
  * \param ref  final reference for which we are searching the initial one
  * \return initial reference associated to \a ref if founded, \a ref if not founded.
  *
- * Retrieve the initial domain reference associated to the (split) reference ref.
+ * Retrieve the starting domain reference associated to the (split) reference ref.
  *
  */
-int MMG5_getIniRef(MMG5_pMesh mesh,int ref) {
+int MMG5_getStartRef(MMG5_pMesh mesh,int ref,int *pref) {
   MMG5_pInvMat pim;
-  int          k;
 
-  /* No materials */
-  if( !mesh->info.nmat ) return 0;
+  /* No multi-materials nor single material reference preservation */
+  if( !mesh->info.nmat ) {
+    *pref = 0;
+    return 1;
+  }
 
   /* Get parent of material */
   pim = &mesh->info.invmat;
-  k = MMG5_InvMat_getParent(pim,ref);
 
-  /* The current material is the parent */
-  if( k == -1 ) k = ref;
-
-  return k;
+  /* Return 0 if the material does not exist, 1 otherwise */
+  if( !MMG5_InvMat_getParent(mesh,pim,ref,pref) )
+    return 0;
+  else
+    return 1;
 }

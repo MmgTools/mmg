@@ -341,7 +341,7 @@ int MMG3D_resetRef(MMG5_pMesh mesh) {
 
     if ( !MG_EOK(pt) ) continue;
 
-    ref = MMG5_getIniRef(mesh,pt->ref);
+    if( !MMG5_getStartRef(mesh,pt->ref,&ref) ) return 0;
     pt->ref = ref;
   }
 

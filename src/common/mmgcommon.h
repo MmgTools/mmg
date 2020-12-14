@@ -729,7 +729,7 @@ int MMG5_MultiMat_init(MMG5_pMesh);
 int MMG5_isLevelSet(MMG5_pMesh,int,int);
 int MMG5_isSplit(MMG5_pMesh ,int ,int *,int *);
 int MMG5_isNotSplit(MMG5_pMesh ,int);
-int MMG5_getIniRef(MMG5_pMesh ,int );
+int MMG5_getStartRef(MMG5_pMesh ,int, int *);
 
 
 /* tools */
