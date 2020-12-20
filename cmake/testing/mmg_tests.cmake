@@ -126,8 +126,8 @@ FOREACH(EXEC ${LISTEXEC_MMG})
     )
 
   SET ( args
-    "-v 5 -hgrad 1.15"
-    "-v 5 -hgrad 1.15"
+    "-v 5 -hgrad 1.25"
+    "-v 5 -hgrad 1.25"
     )
 
   ADD_RUN_AGAIN_TESTS ( ${EXEC} "${test_names}" "${args}" "${input_files}" )

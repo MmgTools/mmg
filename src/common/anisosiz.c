@@ -1111,44 +1111,48 @@ int MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int np1,
       mm1[kmin] += beta;
     }
     else{
-      /* Update the metric eigenvalue associated to the main metric direction
-       * which is closest to our edge direction (because this is the one that is
-       * the more influent on our edge length). */
-      mu[0] = lambda[0];
-      mu[1] = lambda[1];
-      mu[2] = mr1[5];
-
-      mu[ichg] += beta;
-
-      mtan1[0] = mu[0]*vp[0][0]*vp[0][0] + mu[1]*vp[1][0]*vp[1][0];
-      mtan1[1] = mu[0]*vp[0][0]*vp[0][1] + mu[1]*vp[1][0]*vp[1][1];
-      mtan1[2] = mu[0]*vp[0][1]*vp[0][1] + mu[1]*vp[1][1]*vp[1][1];
-
-      /* Return in initial basis */
-      /* Because of the rotation, we know that:
-       * mr.[2] = mr.[4]= 0 */
-      mtmp[0][0] = mtan1[0]*r1[0][0] + mtan1[1]*r1[1][0];
-      mtmp[0][1] = mtan1[0]*r1[0][1] + mtan1[1]*r1[1][1];
-      mtmp[0][2] = mtan1[0]*r1[0][2] + mtan1[1]*r1[1][2];
-
-      mtmp[1][0] = mtan1[1]*r1[0][0] + mtan1[2]*r1[1][0];
-      mtmp[1][1] = mtan1[1]*r1[0][1] + mtan1[2]*r1[1][1];
-      mtmp[1][2] = mtan1[1]*r1[0][2] + mtan1[2]*r1[1][2];
-
-      mtmp[2][0] = mr1[5]*r1[2][0];
-      mtmp[2][1] = mr1[5]*r1[2][1];
-      mtmp[2][2] = mr1[5]*r1[2][2];
-
-      m1[0] = r1[0][0]*mtmp[0][0] + r1[1][0]*mtmp[1][0] + r1[2][0]*mtmp[2][0];
-      m1[1] = r1[0][0]*mtmp[0][1] + r1[1][0]*mtmp[1][1] + r1[2][0]*mtmp[2][1];
-      m1[2] = r1[0][0]*mtmp[0][2] + r1[1][0]*mtmp[1][2] + r1[2][0]*mtmp[2][2];
-
-      m1[3] = r1[0][1]*mtmp[0][1] + r1[1][1]*mtmp[1][1] + r1[2][1]*mtmp[2][1];
-      m1[4] = r1[0][1]*mtmp[0][2] + r1[1][1]*mtmp[1][2] + r1[2][1]*mtmp[2][2];
-
-      m1[5] = r1[0][2]*mtmp[0][2] + r1[1][2]*mtmp[1][2] + r1[2][2]*mtmp[2][2];
-
-      memcpy(mm1,m1,6*sizeof(double));
+//      /* Update the metric eigenvalue associated to the main metric direction
+//       * which is closest to our edge direction (because this is the one that is
+//       * the more influent on our edge length). */
+//      mu[0] = lambda[0];
+//      mu[1] = lambda[1];
+//      mu[2] = mr1[5];
+//
+//      mu[ichg] += beta;
+//
+//      mtan1[0] = mu[0]*vp[0][0]*vp[0][0] + mu[1]*vp[1][0]*vp[1][0];
+//      mtan1[1] = mu[0]*vp[0][0]*vp[0][1] + mu[1]*vp[1][0]*vp[1][1];
+//      mtan1[2] = mu[0]*vp[0][1]*vp[0][1] + mu[1]*vp[1][1]*vp[1][1];
+//
+//      /* Return in initial basis */
+//      /* Because of the rotation, we know that:
+//       * mr.[2] = mr.[4]= 0 */
+//      mtmp[0][0] = mtan1[0]*r1[0][0] + mtan1[1]*r1[1][0];
+//      mtmp[0][1] = mtan1[0]*r1[0][1] + mtan1[1]*r1[1][1];
+//      mtmp[0][2] = mtan1[0]*r1[0][2] + mtan1[1]*r1[1][2];
+//
+//      mtmp[1][0] = mtan1[1]*r1[0][0] + mtan1[2]*r1[1][0];
+//      mtmp[1][1] = mtan1[1]*r1[0][1] + mtan1[2]*r1[1][1];
+//      mtmp[1][2] = mtan1[1]*r1[0][2] + mtan1[2]*r1[1][2];
+//
+//      mtmp[2][0] = mr1[5]*r1[2][0];
+//      mtmp[2][1] = mr1[5]*r1[2][1];
+//      mtmp[2][2] = mr1[5]*r1[2][2];
+//
+//      m1[0] = r1[0][0]*mtmp[0][0] + r1[1][0]*mtmp[1][0] + r1[2][0]*mtmp[2][0];
+//      m1[1] = r1[0][0]*mtmp[0][1] + r1[1][0]*mtmp[1][1] + r1[2][0]*mtmp[2][1];
+//      m1[2] = r1[0][0]*mtmp[0][2] + r1[1][0]*mtmp[1][2] + r1[2][0]*mtmp[2][2];
+//
+//      m1[3] = r1[0][1]*mtmp[0][1] + r1[1][1]*mtmp[1][1] + r1[2][1]*mtmp[2][1];
+//      m1[4] = r1[0][1]*mtmp[0][2] + r1[1][1]*mtmp[1][2] + r1[2][1]*mtmp[2][2];
+//
+//      m1[5] = r1[0][2]*mtmp[0][2] + r1[1][2]*mtmp[1][2] + r1[2][2]*mtmp[2][2];
+//
+//      memcpy(mm1,m1,6*sizeof(double));
+      double eta;
+      eta = ps1*(1.0/ps2+mesh->info.hgrad*l);
+      eta = 1./(eta*eta);
+      for(int i = 0; i < 6; i++) mm1[i] *= eta;
     }
     return np1;
   }
@@ -1207,39 +1211,43 @@ int MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int np1,
       mm2[kmin] += beta;
     }
     else{
-      mu[0] = lambda[0];
-      mu[1] = lambda[1];
-      mu[2] = mr2[5];
-
-      mu[ichg] += beta;
-
-      mtan2[0] = mu[0]*vp[0][0]*vp[0][0] + mu[1]*vp[1][0]*vp[1][0];
-      mtan2[1] = mu[0]*vp[0][0]*vp[0][1] + mu[1]*vp[1][0]*vp[1][1];
-      mtan2[2] = mu[0]*vp[0][1]*vp[0][1] + mu[1]*vp[1][1]*vp[1][1];
-
-      /* Return in initial basis */
-      mtmp[0][0] = mtan2[0]*r2[0][0] + mtan2[1]*r2[1][0];
-      mtmp[0][1] = mtan2[0]*r2[0][1] + mtan2[1]*r2[1][1];
-      mtmp[0][2] = mtan2[0]*r2[0][2] + mtan2[1]*r2[1][2];
-
-      mtmp[1][0] = mtan2[1]*r2[0][0] + mtan2[2]*r2[1][0];
-      mtmp[1][1] = mtan2[1]*r2[0][1] + mtan2[2]*r2[1][1];
-      mtmp[1][2] = mtan2[1]*r2[0][2] + mtan2[2]*r2[1][2];
-
-      mtmp[2][0] =  mr2[5]*r2[2][0];
-      mtmp[2][1] =  mr2[5]*r2[2][1];
-      mtmp[2][2] =  mr2[5]*r2[2][2];
-
-      m2[0] = r2[0][0]*mtmp[0][0] + r2[1][0]*mtmp[1][0] + r2[2][0]*mtmp[2][0];
-      m2[1] = r2[0][0]*mtmp[0][1] + r2[1][0]*mtmp[1][1] + r2[2][0]*mtmp[2][1];
-      m2[2] = r2[0][0]*mtmp[0][2] + r2[1][0]*mtmp[1][2] + r2[2][0]*mtmp[2][2];
-
-      m2[3] = r2[0][1]*mtmp[0][1] + r2[1][1]*mtmp[1][1] + r2[2][1]*mtmp[2][1];
-      m2[4] = r2[0][1]*mtmp[0][2] + r2[1][1]*mtmp[1][2] + r2[2][1]*mtmp[2][2];
-
-      m2[5] = r2[0][2]*mtmp[0][2] + r2[1][2]*mtmp[1][2] + r2[2][2]*mtmp[2][2];
-
-      memcpy(mm2,m2,6*sizeof(double));
+//      mu[0] = lambda[0];
+//      mu[1] = lambda[1];
+//      mu[2] = mr2[5];
+//
+//      mu[ichg] += beta;
+//
+//      mtan2[0] = mu[0]*vp[0][0]*vp[0][0] + mu[1]*vp[1][0]*vp[1][0];
+//      mtan2[1] = mu[0]*vp[0][0]*vp[0][1] + mu[1]*vp[1][0]*vp[1][1];
+//      mtan2[2] = mu[0]*vp[0][1]*vp[0][1] + mu[1]*vp[1][1]*vp[1][1];
+//
+//      /* Return in initial basis */
+//      mtmp[0][0] = mtan2[0]*r2[0][0] + mtan2[1]*r2[1][0];
+//      mtmp[0][1] = mtan2[0]*r2[0][1] + mtan2[1]*r2[1][1];
+//      mtmp[0][2] = mtan2[0]*r2[0][2] + mtan2[1]*r2[1][2];
+//
+//      mtmp[1][0] = mtan2[1]*r2[0][0] + mtan2[2]*r2[1][0];
+//      mtmp[1][1] = mtan2[1]*r2[0][1] + mtan2[2]*r2[1][1];
+//      mtmp[1][2] = mtan2[1]*r2[0][2] + mtan2[2]*r2[1][2];
+//
+//      mtmp[2][0] =  mr2[5]*r2[2][0];
+//      mtmp[2][1] =  mr2[5]*r2[2][1];
+//      mtmp[2][2] =  mr2[5]*r2[2][2];
+//
+//      m2[0] = r2[0][0]*mtmp[0][0] + r2[1][0]*mtmp[1][0] + r2[2][0]*mtmp[2][0];
+//      m2[1] = r2[0][0]*mtmp[0][1] + r2[1][0]*mtmp[1][1] + r2[2][0]*mtmp[2][1];
+//      m2[2] = r2[0][0]*mtmp[0][2] + r2[1][0]*mtmp[1][2] + r2[2][0]*mtmp[2][2];
+//
+//      m2[3] = r2[0][1]*mtmp[0][1] + r2[1][1]*mtmp[1][1] + r2[2][1]*mtmp[2][1];
+//      m2[4] = r2[0][1]*mtmp[0][2] + r2[1][1]*mtmp[1][2] + r2[2][1]*mtmp[2][2];
+//
+//      m2[5] = r2[0][2]*mtmp[0][2] + r2[1][2]*mtmp[1][2] + r2[2][2]*mtmp[2][2];
+//
+//      memcpy(mm2,m2,6*sizeof(double));
+      double eta;
+      eta = ps2*(1.0/ps1+mesh->info.hgrad*l);
+      eta = 1./(eta*eta);
+      for(int i = 0; i < 6; i++) mm2[i] *= eta;
     }
     return np2;
   }
