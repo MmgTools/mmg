@@ -1536,7 +1536,7 @@ int MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int np1,int np
         }
       }
       MMG5_rmtr(r,m1,mm1);
-      memcpy(mm1,m1,6*sizeof(double));
+//      memcpy(mm1,m1,6*sizeof(double));
     }
     return np1;
   }
@@ -1632,7 +1632,7 @@ int MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int np1,int np
         }
       }
       MMG5_rmtr(r,m2,mm2);
-      memcpy(mm2,m2,6*sizeof(double));
+//      memcpy(mm2,m2,6*sizeof(double));
     }
     return np2;
   }
