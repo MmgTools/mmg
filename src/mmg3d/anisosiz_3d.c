@@ -1512,11 +1512,31 @@ int MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int np1,int np
 //      m1[4] = mu[0]*vp[0][1]*vp[0][2] + mu[1]*vp[1][1]*vp[1][2] + vp[2][1]*vp[2][2]*mu[2];
 //      m1[5] = mu[0]*vp[0][2]*vp[0][2] + mu[1]*vp[1][2]*vp[1][2] + vp[2][2]*vp[2][2]*mu[2];
 //
-//      memcpy(mm1,m1,6*sizeof(double));
-      double eta;
-      eta = ps1*(1.0/ps2+mesh->info.hgrad*l);
-      eta = 1./(eta*eta);
-      for(int i = 0; i < 6; i++) mm1[i] *= eta;
+      double r[3][3];
+      MMG5_rotmatrix(t,r);
+      assert( fabs(r[0][0]*t[0]+r[0][1]*t[1]+r[0][2]*t[2]) < 1.e-3 );
+      assert( fabs(r[1][0]*t[0]+r[1][1]*t[1]+r[1][2]*t[2]) < 1.e-3 );
+      assert( fabs(r[2][0]*t[0]+r[2][1]*t[1]+r[2][2]*t[2]-1.0) < 1.e-3 );
+      MMG5_rmtr(r,m1,mm1);
+      double ieta;
+      /* eta = ps1*(1.0/ps2+mesh->info.hgrad*l); */
+      ieta = 1.0/(ps1*(1.0/ps2+mesh->info.hgrad*l));
+      m1[0] = mm1[0];
+      m1[1] = mm1[1];
+      m1[2] = mm1[2]*ieta;
+      m1[3] = mm1[3];
+      m1[4] = mm1[4]*ieta;
+      m1[5] = mm1[5]*ieta*ieta;
+      double tmp;
+      for( int i = 0; i < 2; i++ ) {
+        for( int k = i+1; k < 3; k++ ) {
+          tmp     = r[i][k];
+          r[i][k] = r[k][i];
+          r[k][i] = tmp;
+        }
+      }
+      MMG5_rmtr(r,m1,mm1);
+      memcpy(mm1,m1,6*sizeof(double));
     }
     return np1;
   }
@@ -1588,11 +1608,31 @@ int MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int np1,int np
 //      m2[3] = mu[0]*vp[0][1]*vp[0][1] + mu[1]*vp[1][1]*vp[1][1] + vp[2][1]*vp[2][1]*mu[2];
 //      m2[4] = mu[0]*vp[0][1]*vp[0][2] + mu[1]*vp[1][1]*vp[1][2] + vp[2][1]*vp[2][2]*mu[2];
 //      m2[5] = mu[0]*vp[0][2]*vp[0][2] + mu[1]*vp[1][2]*vp[1][2] + vp[2][2]*vp[2][2]*mu[2];
-//      memcpy(mm2,m2,6*sizeof(double));
-      double eta;
-      eta = ps2*(1.0/ps1+mesh->info.hgrad*l);
-      eta = 1./(eta*eta);
-      for(int i = 0; i < 6; i++) mm2[i] *= eta;
+      double r[3][3];
+      MMG5_rotmatrix(t,r);
+      assert( fabs(r[0][0]*t[0]+r[0][1]*t[1]+r[0][2]*t[2]) < 1.e-3 );
+      assert( fabs(r[1][0]*t[0]+r[1][1]*t[1]+r[1][2]*t[2]) < 1.e-3 );
+      assert( fabs(r[2][0]*t[0]+r[2][1]*t[1]+r[2][2]*t[2]-1.0) < 1.e-3 );
+      MMG5_rmtr(r,m2,mm2);
+      double ieta;
+      /* eta = ps2*(1.0/ps1+mesh->info.hgrad*l); */
+      ieta = 1.0/(ps2*(1.0/ps1+mesh->info.hgrad*l));
+      m2[0] = mm2[0];
+      m2[1] = mm2[1];
+      m2[2] = mm2[2]*ieta;
+      m2[3] = mm2[3];
+      m2[4] = mm2[4]*ieta;
+      m2[5] = mm2[5]*ieta*ieta;
+      double tmp;
+      for( int i = 0; i < 2; i++ ) {
+        for( int k = i+1; k < 3; k++ ) {
+          tmp     = r[i][k];
+          r[i][k] = r[k][i];
+          r[k][i] = tmp;
+        }
+      }
+      MMG5_rmtr(r,m2,mm2);
+      memcpy(mm2,m2,6*sizeof(double));
     }
     return np2;
   }
