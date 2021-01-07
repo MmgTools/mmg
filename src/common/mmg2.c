@@ -34,16 +34,37 @@
 
 #include "mmgcommon.h"
 
+/**
+ * \param pim    multimaterials inverse data table.
+ * \param ref    material reference.
+ * \return the key of the material in the lookup/hash table.
+ *
+ * Compute key for the material in the hash table.
+ */
 static int MMG5_InvMat_key(MMG5_pInvMat pim,int ref) {
   return (ref - pim->offset);
 }
 
-static int MMG5_InvMat_index(MMG5_pInvMat pim,int ref) {
+/**
+ * \param pim multimaterials inverse data table.
+ * \param ref    material reference.
+ * \return Index of the material.
+ *
+ * Get index of the material from lookup table.
+ */
+static int MMG5_InvMat_getIndex(MMG5_pInvMat pim,int ref) {
   int key = MMG5_InvMat_key(pim,ref);
   /* The parent index is stored as 4*(k+1) */
   return (pim->lookup[key] / 4 - 1);
 }
 
+/**
+ * \param mesh   pointer toward the mesh structure.
+ * \param pim    multimaterials inverse data table.
+ * \param k      index of the material in the input table.
+ *
+ * Set materials lookup table entry.
+ */
 static void MMG5_InvMat_set(MMG5_pMesh mesh,MMG5_pInvMat pim,int k) {
   MMG5_pMat pm;
   int       key;
@@ -70,12 +91,22 @@ static void MMG5_InvMat_set(MMG5_pMesh mesh,MMG5_pInvMat pim,int k) {
   }
 }
 
+/**
+ * \param mesh   pointer toward the mesh structure.
+ * \param pim    multimaterials inverse data table.
+ * \param ref    material reference.
+ * \param pref   pointer to the parent material reference.
+ * \return 1 if found, 0 if not found.
+ *
+ * Get reference of the parent material in multimaterial mode.
+ *.
+ */
 static int MMG5_InvMat_getParent(MMG5_pMesh mesh,MMG5_pInvMat pim,int ref,int *pref) {
   MMG5_pMat pm;
   int       k;
 
   /* The parent index */
-  k = MMG5_InvMat_index(pim,ref);
+  k = MMG5_InvMat_getIndex(pim,ref);
 
   /* Material not found in the table */
   if( k == -1 ) return 0;
@@ -86,13 +117,25 @@ static int MMG5_InvMat_getParent(MMG5_pMesh mesh,MMG5_pInvMat pim,int ref,int *p
   return 1;
 }
 
-static int MMG5_InvMat_getTag(MMG5_pInvMat pim,int ref) {
+/**
+ * \param mesh   pointer toward the mesh structure.
+ * \param pim    multimaterials inverse data table.
+ * \param ref    material reference.
+ * \return the nosplit/split/plus/minus attribute of the material.
+ */
+static int MMG5_InvMat_getAttrib(MMG5_pInvMat pim,int ref) {
   int key = MMG5_InvMat_key(pim,ref);
   /* The nosplit/split/plus/minus attribute is stored as the rest of the
    * integer division. */
   return (pim->lookup[key] % 4);
 }
 
+/**
+ * \param mesh   pointer toward the mesh structure.
+ * \param pim    multimaterials inverse data table.
+ *
+ * Print materials lookup table.
+ */
 static void MMG5_InvMat_print(MMG5_pMesh mesh,MMG5_pInvMat pim) {
   int ref,pref;
 
@@ -100,7 +143,7 @@ static void MMG5_InvMat_print(MMG5_pMesh mesh,MMG5_pInvMat pim) {
   for( ref = pim->offset; ref < pim->offset + pim->size; ref++ ) {
     if( !MMG5_InvMat_getParent(mesh,pim,ref,&pref) ) continue;
     printf("%d (%d): %d %d\n",ref,MMG5_InvMat_key(pim,ref),pref,
-        MMG5_InvMat_getTag(pim,ref));
+        MMG5_InvMat_getAttrib(pim,ref));
   }
 }
 
@@ -122,7 +165,7 @@ static void MMG5_InvMat_print(MMG5_pMesh mesh,MMG5_pInvMat pim) {
  *   ...   | ...         | ...       | ...       |
  *   n-1   | dospl_{n-1} | ref_{n-1} | rin_{n-1} | rex_{n-1}
  *
- * where dospl is the split/preserve character of the material, and rin,rex
+ * where dospl is the split/preserve attribute of the material, and rin,rex
  * are its child materials (if dospl). Viceversa, ref is the parent material
  * for rin,rex.
  *
@@ -133,19 +176,19 @@ static void MMG5_InvMat_print(MMG5_pMesh mesh,MMG5_pInvMat pim) {
  *
  * For all references, it is important to store
  * - the index k of the row in the original table,
- * - the character (parent-split, parent-preserve, child-interior,
+ * - the characteristic attribute (parent-split, parent-preserve, child-interior,
  *   child-exterior) of the material.
  *
  * Since
  *   dospl = 0 or 1,  MG_PLUS = 2, and MG_MINUS = 3
  *
- * we can store the character as dospl (for the parent material) or MG_MINUS/
+ * we can store the attribute as dospl (for the parent material) or MG_MINUS/
  * MG_PLUS (for the child materials), with its value ranging between 0 and 3.
  *
- * A convenient entry to store both the index and the character in the lookup
+ * A convenient entry to store both the index and the attribute in the lookup
  * table is thus:
  *
- *   entry = 4*(index+1) + character
+ *   entry = 4*(index+1) + attribute
  *
  * leading to a lookup table in the form (the key ordering is only an example):
  *
@@ -159,17 +202,17 @@ static void MMG5_InvMat_print(MMG5_pMesh mesh,MMG5_pInvMat pim) {
  *   rex_k | 4*(k+1)+MG_PLUS
  *   ...   | ...
  *
- * where the index and the character of the material can be retrieved as
+ * where the index and the attribute of the material can be retrieved as
  *
  *   index     = entry / 4 -1
- *   character = entry % 4
+ *   attribute = entry % 4
  *
  *
  * What if two materials have the same reference?
  *  - child references should be distinct (the entry in the lookup table would
  *    be overwritten),
- *  - a parent material can have itself as child (a positive character would say
- *    it should be split, the character value would say if it is interior or
+ *  - a parent material can have itself as child (a positive attribute would say
+ *    it should be split, the attribute value would say if it is interior or
  *    exterior).
  * Thus, each of the maps parent->child_in and parent->child_ext is injective,
  * but a fixed point is allowed.
@@ -236,8 +279,6 @@ int MMG5_MultiMat_init(MMG5_pMesh mesh) {
   return 1;
 }
 
-
-
 /**
  * \param mesh   pointer toward the mesh structure.
  * \param ref    initial reference.
@@ -263,7 +304,7 @@ int MMG5_isSplit(MMG5_pMesh mesh,int ref,int *refint,int *refext) {
 
   /* Check in the info->mat table if reference ref is supplied by the user */
   pim = &mesh->info.invmat;
-  k = MMG5_InvMat_index(pim,ref);
+  k = MMG5_InvMat_getIndex(pim,ref);
 
   assert( k != -1 );
   pm = &mesh->info.mat[k];
@@ -294,7 +335,7 @@ int MMG5_isNotSplit(MMG5_pMesh mesh,int ref) {
 
   /* Look in the table otherwise */
   pim = &mesh->info.invmat;
-  if( !MMG5_InvMat_getTag(pim,ref) )
+  if( !MMG5_InvMat_getAttrib(pim,ref) )
     return 0;
   else
     return 1;
@@ -318,8 +359,8 @@ int MMG5_isLevelSet(MMG5_pMesh mesh,int ref0,int ref1) {
   if( mesh->info.nmat ) {
     /* Retrieve levelset information from the lookup table */
     pim = &mesh->info.invmat;
-    found0 = MMG5_InvMat_getTag(pim,ref0);
-    found1 = MMG5_InvMat_getTag(pim,ref1);
+    found0 = MMG5_InvMat_getAttrib(pim,ref0);
+    found1 = MMG5_InvMat_getAttrib(pim,ref1);
 
     if( (found0+found1) == (MG_MINUS+MG_PLUS) ) return 1;
     else return 0;
