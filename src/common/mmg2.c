@@ -46,19 +46,6 @@ static int MMG5_InvMat_key(MMG5_pInvMat pim,int ref) {
 }
 
 /**
- * \param pim multimaterials inverse data table.
- * \param ref    material reference.
- * \return Index of the material.
- *
- * Get index of the material from lookup table.
- */
-static int MMG5_InvMat_getIndex(MMG5_pInvMat pim,int ref) {
-  int key = MMG5_InvMat_key(pim,ref);
-  /* The parent index is stored as 4*(k+1) */
-  return (pim->lookup[key] / 4 - 1);
-}
-
-/**
  * \param mesh   pointer toward the mesh structure.
  * \param pim    multimaterials inverse data table.
  * \param k      index of the material in the input table.
@@ -92,6 +79,32 @@ static void MMG5_InvMat_set(MMG5_pMesh mesh,MMG5_pInvMat pim,int k) {
 }
 
 /**
+ * \param pim multimaterials inverse data table.
+ * \param ref    material reference.
+ * \return Index of the material.
+ *
+ * Get index of the material from lookup table.
+ */
+static int MMG5_InvMat_getIndex(MMG5_pInvMat pim,int ref) {
+  int key = MMG5_InvMat_key(pim,ref);
+  /* The parent index is stored as 4*(k+1) */
+  return (pim->lookup[key] / 4 - 1);
+}
+
+/**
+ * \param mesh   pointer toward the mesh structure.
+ * \param pim    multimaterials inverse data table.
+ * \param ref    material reference.
+ * \return the nosplit/split/plus/minus attribute of the material.
+ */
+static int MMG5_InvMat_getAttrib(MMG5_pInvMat pim,int ref) {
+  int key = MMG5_InvMat_key(pim,ref);
+  /* The nosplit/split/plus/minus attribute is stored as the rest of the
+   * integer division. */
+  return (pim->lookup[key] % 4);
+}
+
+/**
  * \param mesh   pointer toward the mesh structure.
  * \param pim    multimaterials inverse data table.
  * \param ref    material reference.
@@ -118,16 +131,32 @@ static int MMG5_InvMat_getParent(MMG5_pMesh mesh,MMG5_pInvMat pim,int ref,int *p
 }
 
 /**
- * \param mesh   pointer toward the mesh structure.
- * \param pim    multimaterials inverse data table.
- * \param ref    material reference.
- * \return the nosplit/split/plus/minus attribute of the material.
+ * \param mesh pointer toward the mesh
+ * \param ref  final reference for which we are searching the initial one
+ * \param pref pointer to the reference of the parent material.
+ * \return 1 if found, 0 otherwise.
+ *
+ * Retrieve the starting domain reference (parent material) associated to the
+ * split reference ref. Allow the call in non-multimaterial mode.
+ *
  */
-static int MMG5_InvMat_getAttrib(MMG5_pInvMat pim,int ref) {
-  int key = MMG5_InvMat_key(pim,ref);
-  /* The nosplit/split/plus/minus attribute is stored as the rest of the
-   * integer division. */
-  return (pim->lookup[key] % 4);
+int MMG5_getStartRef(MMG5_pMesh mesh,int ref,int *pref) {
+  MMG5_pInvMat pim;
+
+  /* No multi-materials nor single material reference preservation */
+  if( !mesh->info.nmat ) {
+    *pref = 0;
+    return 1;
+  }
+
+  /* Get parent of material */
+  pim = &mesh->info.invmat;
+
+  /* Return 0 if the material does not exist, 1 otherwise */
+  if( !MMG5_InvMat_getParent(mesh,pim,ref,pref) )
+    return 0;
+  else
+    return 1;
 }
 
 /**
@@ -371,33 +400,4 @@ int MMG5_isLevelSet(MMG5_pMesh mesh,int ref0,int ref1) {
         ( ref1 == MG_MINUS && ref0 == MG_PLUS ) ) return 1;
     else return 0;
   }
-}
-
-/**
- * \param mesh pointer toward the mesh
- * \param ref  final reference for which we are searching the initial one
- * \param pref pointer to the reference of the parent material.
- * \return 1 if found, 0 otherwise.
- *
- * Retrieve the starting domain reference (parent material) associated to the
- * split reference ref.
- *
- */
-int MMG5_getStartRef(MMG5_pMesh mesh,int ref,int *pref) {
-  MMG5_pInvMat pim;
-
-  /* No multi-materials nor single material reference preservation */
-  if( !mesh->info.nmat ) {
-    *pref = 0;
-    return 1;
-  }
-
-  /* Get parent of material */
-  pim = &mesh->info.invmat;
-
-  /* Return 0 if the material does not exist, 1 otherwise */
-  if( !MMG5_InvMat_getParent(mesh,pim,ref,pref) )
-    return 0;
-  else
-    return 1;
 }
