@@ -104,6 +104,82 @@ static void MMG5_InvMat_print(MMG5_pMesh mesh,MMG5_pInvMat pim) {
   }
 }
 
+/**
+ * \param mesh   pointer toward the mesh structure.
+ * \return 1 if success, 0 if fail.
+ *
+ *
+ * Initialize handling of multimaterial mode.
+ *
+ * An indexed table of materials has been provided by the MMG5_Mat datatype in
+ * the form:
+ *
+ *   index | dospl       | ref       | rin       | rex
+ *   -------------------------------------------------------
+ *   0     | dospl_0     | ref_0     | rin_0     | rex_0
+ *   ...   | ...         | ...       | ...       |
+ *   k     | dospl_k     | ref_k     | rin_k     | rex_k
+ *   ...   | ...         | ...       | ...       |
+ *   n-1   | dospl_{n-1} | ref_{n-1} | rin_{n-1} | rex_{n-1}
+ *
+ * where dospl is the split/preserve character of the material, and rin,rex
+ * are its child materials (if dospl). Viceversa, ref is the parent material
+ * for rin,rex.
+ *
+ * Here a lookup table for material references is built through trivial hashing
+ * for all references (both parent and child materials) with the key:
+ *
+ *   key = ref - ref_min,    ref_min = min_{k = 0,n-1} (ref_k, rin_k, rex_k)
+ *
+ * For all references, it is important to store
+ * - the index k of the row in the original table,
+ * - the character (parent-split, parent-preserve, child-interior,
+ *   child-exterior) of the material.
+ *
+ * Since
+ *   dospl = 0 or 1,  MG_PLUS = 2, and MG_MINUS = 3
+ *
+ * we can store the character as dospl (for the parent material) or MG_MINUS/
+ * MG_PLUS (for the child materials), with its value ranging between 0 and 3.
+ *
+ * A convenient entry to store both the index and the character in the lookup
+ * table is thus:
+ *
+ *   entry = 4*(index+1) + character
+ *
+ * leading to a lookup table in the form (the key ordering is only an example):
+ *
+ *   key   | entry
+ *   ------------------------
+ *   ...   | ...
+ *   ref_k | 4*(k+1)+dospl_k
+ *   ...   | ...
+ *   rin_k | 4*(k+1)+MG_MINUS
+ *   ...   | ...
+ *   rex_k | 4*(k+1)+MG_PLUS
+ *   ...   | ...
+ *
+ * where the index and the character of the material can be retrieved as
+ *
+ *   index     = entry / 4 -1
+ *   character = entry % 4
+ *
+ *
+ * What if two materials have the same reference?
+ *  - child references should be distinct (the entry in the lookup table would
+ *    be overwritten),
+ *  - a parent material can have itself as child (a positive character would say
+ *    it should be split, the character value would say if it is interior or
+ *    exterior).
+ * Thus, each of the maps parent->child_in and parent->child_ext is injective,
+ * but a fixed point is allowed.
+ *
+ * Why child materials should be different?
+ *  - because on failure it is necessary to recover the parent references and
+ *    apply them on the tetrahedra to restore the starting materials
+ *    distribution.
+ *
+ */
 int MMG5_MultiMat_init(MMG5_pMesh mesh) {
   MMG5_pMat    pm;
   MMG5_pInvMat pim;
@@ -259,9 +335,11 @@ int MMG5_isLevelSet(MMG5_pMesh mesh,int ref0,int ref1) {
 /**
  * \param mesh pointer toward the mesh
  * \param ref  final reference for which we are searching the initial one
- * \return initial reference associated to \a ref if founded, \a ref if not founded.
+ * \param pref pointer to the reference of the parent material.
+ * \return 1 if found, 0 otherwise.
  *
- * Retrieve the starting domain reference associated to the (split) reference ref.
+ * Retrieve the starting domain reference (parent material) associated to the
+ * split reference ref.
  *
  */
 int MMG5_getStartRef(MMG5_pMesh mesh,int ref,int *pref) {
