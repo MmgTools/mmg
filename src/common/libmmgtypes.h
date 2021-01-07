@@ -467,6 +467,10 @@ typedef struct {
 } MMG5_Mat;
 typedef MMG5_Mat * MMG5_pMat;
 
+/**
+ * \struct MMG5_InvMat
+ * \brief To store lookup table for references in the mesh (useful in LS mode)
+ */
 typedef struct {
   int offset;
   int size;
