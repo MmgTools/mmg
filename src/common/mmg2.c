@@ -225,17 +225,35 @@ int MMG5_isNotSplit(MMG5_pMesh mesh,int ref) {
 
 }
 
+/**
+ * \param mesh   pointer toward the mesh structure.
+ * \param ref0   reference of the first tetrahedron sharing the face.
+ * \param ref1   reference of the second tetrahedron sharing the face..
+ * \return 1 if face is on the discrete level set, 0 if not.
+ *
+ * Identify whether a face is on the discrete level set or not.
+ *
+ */
 int MMG5_isLevelSet(MMG5_pMesh mesh,int ref0,int ref1) {
   MMG5_pInvMat pim;
   int8_t       found0,found1;
 
-  pim = &mesh->info.invmat;
-  found0 = MMG5_InvMat_getTag(pim,ref0);
-  found1 = MMG5_InvMat_getTag(pim,ref1);
+  /* Check whether multimaterial case or not */
+  if( mesh->info.nmat ) {
+    /* Retrieve levelset information from the lookup table */
+    pim = &mesh->info.invmat;
+    found0 = MMG5_InvMat_getTag(pim,ref0);
+    found1 = MMG5_InvMat_getTag(pim,ref1);
 
-  if( (found0+found1) == (MG_MINUS+MG_PLUS) ) return 1;
-  else return 0;
+    if( (found0+found1) == (MG_MINUS+MG_PLUS) ) return 1;
+    else return 0;
 
+  } else {
+    /* Single material, check references directly */
+    if( ( ref0 == MG_MINUS && ref1 == MG_PLUS ) ||
+        ( ref1 == MG_MINUS && ref0 == MG_PLUS ) ) return 1;
+    else return 0;
+  }
 }
 
 /**
