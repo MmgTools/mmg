@@ -210,7 +210,7 @@ GENERATE_FORTRAN_HEADER ( mmg
 ###############################################################################
 
 # Libraries
-IF ( NOT WIN32 OR MINGW )
+IF ( NOT (WIN32 OR MINGW) )
 
   IF(NOT DEFINED M_LIB)
     MESSAGE(STATUS "M_LIB not defined. Searching it")
