@@ -210,7 +210,7 @@ GENERATE_FORTRAN_HEADER ( mmg
 ###############################################################################
 
 # Libraries
-IF ( NOT WIN32 OR MINGW )
+IF ( NOT (WIN32 OR MINGW) )
 
   IF(NOT DEFINED M_LIB)
     MESSAGE(STATUS "M_LIB not defined. Searching it")
@@ -311,6 +311,9 @@ ENDFUNCTION()
 
 OPTION(BUILD_SHARED_LIBS "Build shared libraries" OFF)
 INVERT_BOOL("BUILD_STATIC_LIBS" ${BUILD_SHARED_LIBS})
+IF (${BUILD_STATIC_LIBS} AND NOT CMAKE_POSITION_INDEPENDENT_CODE)
+  SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
+ENDIF()
 
 #------------------------------- mmg2d
 CMAKE_DEPENDENT_OPTION ( LIBMMG2D_STATIC "Compile the mmg2d static library" ${BUILD_STATIC_LIBS}
