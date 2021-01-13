@@ -865,7 +865,7 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
     fprintf(stdout,"\n  -- PHASE 3 : MESH IMPROVEMENT\n");
   }
 
-  if ( (!mesh->info.noinsert) && !MMG2D_mmg2d1n(mesh,met) ) {
+  if ( !MMG2D_mmg2d1n(mesh,met) ) {
     if ( mettofree ) {
       MMG5_DEL_MEM(mesh,met->m);
       MMG5_SAFE_FREE (met);
