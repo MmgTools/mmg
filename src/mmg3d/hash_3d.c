@@ -1303,8 +1303,10 @@ int MMG5_bdryTria(MMG5_pMesh mesh, int ntmesh) {
             /* Triangle at the interface between two tets is set to the user-defined ref if any, or else to MG_ISO ref */
             if ( pxt && pxt->ftag[i] & MG_BDY )
               ptt->ref = pxt->ref[i];
+            else if( MMG5_isLevelSet(mesh,pt->ref,pt1->ref) )
+              ptt->ref = MG_ISO;
             else
-            ptt->ref = MG_ISO;
+              ptt->ref = MG_MIN(pt->ref,pt1->ref);
           }
           /* useful only when saving mesh or in ls mode */
           else {
