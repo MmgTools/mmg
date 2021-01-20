@@ -184,7 +184,7 @@ MACRO ( ADD_AND_INSTALL_LIBRARY
 
   SET_PROPERTY(TARGET ${target_name} PROPERTY C_STANDARD 99)
 
-  TARGET_LINK_LIBRARIES ( ${target_name} ${LIBRARIES} )
+  TARGET_LINK_LIBRARIES ( ${target_name} PRIVATE ${LIBRARIES} )
 
   IF (NOT CMAKE_INSTALL_LIBDIR)
     SET(CMAKE_INSTALL_LIBDIR lib)
@@ -218,9 +218,9 @@ MACRO ( ADD_AND_INSTALL_EXECUTABLE
     SET_PROPERTY(TARGET ${exec_name} PROPERTY C_STANDARD 99)
 
     IF ( NOT TARGET lib${exec_name}_a )
-      TARGET_LINK_LIBRARIES(${exec_name} lib${exec_name}_so)
+      TARGET_LINK_LIBRARIES(${exec_name} PRIVATE lib${exec_name}_so)
     ELSE ( )
-      TARGET_LINK_LIBRARIES(${exec_name} lib${exec_name}_a)
+      TARGET_LINK_LIBRARIES(${exec_name} PRIVATE lib${exec_name}_a)
     ENDIF ( )
 
   ENDIF ( )
@@ -242,7 +242,7 @@ MACRO ( ADD_AND_INSTALL_EXECUTABLE
      ${COMMON_BINARY_DIR} ${COMMON_SOURCE_DIR} ${PROJECT_BINARY_DIR}/include ${PROJECT_BINARY_DIR} )
  ENDIF ( )
 
-  TARGET_LINK_LIBRARIES ( ${exec_name} ${LIBRARIES}  )
+  TARGET_LINK_LIBRARIES ( ${exec_name} PRIVATE ${LIBRARIES}  )
 
   INSTALL(TARGETS ${exec_name} RUNTIME DESTINATION bin COMPONENT appli)
 
@@ -323,7 +323,7 @@ MACRO ( ADD_LIBRARY_TEST target_name main_path target_dependency lib_name )
     MY_ADD_LINK_FLAGS ( ${target_name} "/SAFESEH:NO" )
   ENDIF ( )
 
-  TARGET_LINK_LIBRARIES ( ${target_name}  ${lib_name} )
+  TARGET_LINK_LIBRARIES ( ${target_name}  PRIVATE ${lib_name} )
   INSTALL(TARGETS ${target_name} RUNTIME DESTINATION bin COMPONENT appli )
 
 ENDMACRO ( )
