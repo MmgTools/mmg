@@ -14,7 +14,7 @@ private:
 	MMG5_pSol mmgSol = NULL;
 
 	double* m_verts;
-    int *m_tets, *m_faces, *m_faceRefs;
+    int *m_tets, *m_tetRefs, *m_faces, *m_faceRefs;
 	int m_nverts, m_ntets, m_nfaces;
 
 
@@ -28,6 +28,7 @@ public:
   TetMesh(
       py::array_t<double> verts, 
       py::array_t<int> tets,
+      py::array_t<int> tetRefs,
       py::array_t<int> faces,
       py::array_t<int> faceRefs,
       py::array_t<double>vertSizes
@@ -37,6 +38,7 @@ public:
     /*handle numpy arrays*/
     py::buffer_info verts_buf = verts.request();
     py::buffer_info tets_buf = tets.request();
+    py::buffer_info tetRefs_buf = tetRefs.request();
     py::buffer_info faces_buf = faces.request();
     py::buffer_info faceRefs_buf = faceRefs.request();
     py::buffer_info vertSizes_buf = vertSizes.request();
@@ -44,6 +46,9 @@ public:
     // check arrays
     if (verts_buf.size / 3 != vertSizes_buf.size) {
 	    throw std::runtime_error("Input shapes must match");
+    }
+    if (tets_buf.size / 4 != tetRefs_buf.size) {
+            throw std::runtime_error("Input shapes must match");
     }
     if (faces_buf.size / 3 != faceRefs_buf.size) {
         throw std::runtime_error("Input shapes must match");
@@ -66,7 +71,7 @@ public:
 	    throw std::runtime_error("MMG3D_Set_vertices failed");
     }
 
-    if (MMG3D_Set_tetrahedra(mmgMesh, (int*)tets_buf.ptr, NULL) != 1) {
+    if (MMG3D_Set_tetrahedra(mmgMesh, (int*)tets_buf.ptr, (int*)tetRefs_buf.ptr) != 1) {
 	    throw std::runtime_error("MMG3D_Set_tetra failed");
     }
 
@@ -85,9 +90,10 @@ public:
     m_verts = new double[m_nverts * 3];
     MMG3D_Get_vertices(mmgMesh, m_verts, NULL, NULL, NULL);
 
-    // get tets
+    // get tets and their refs for keeping track of domains/materials
     m_tets = new int[m_ntets * 4];
-    MMG3D_Get_tetrahedra(mmgMesh, m_tets, NULL, NULL);
+    m_tetRefs = new int[m_ntets];
+    MMG3D_Get_tetrahedra(mmgMesh, m_tets, m_tetRefs, NULL);
 
     // get faces (triangles) and their refs for keeping track of bnd-surfaces
     m_faces = new int[m_nfaces * 3];
@@ -104,6 +110,7 @@ public:
 
 		delete(m_verts);
 		delete(m_tets);
+        delete(m_tetRefs);
         delete(m_faces);
         delete(m_faceRefs);
 
@@ -137,7 +144,8 @@ public:
 	// update tets
 	delete(m_tets);
 	m_tets = new int[m_ntets * 4];
-	MMG3D_Get_tetrahedra(mmgMesh, m_tets, NULL, NULL);
+    m_tetRefs = new int[m_ntets];
+    MMG3D_Get_tetrahedra(mmgMesh, m_tets, m_tetRefs, NULL);
 
     // get faces (triangles) and their refs for keeping track of bnd-surfaces
     m_faces = new int[m_nfaces * 3];
@@ -166,6 +174,10 @@ public:
     return py::array_t<int>({m_ntets, 4}, &m_tets[0]);
   }
 
+  py::array_t<int> getTetRefs() {
+      return py::array_t<int>({ m_ntets }, &m_tetRefs[0]);
+  }
+
   py::array_t<int> getFaces() {
       return py::array_t<int>({ m_nfaces, 3 }, &m_faces[0]);
   }
@@ -182,6 +194,7 @@ PYBIND11_MODULE(pymmg, m) {
 	py::class_<TetMesh>(m, "TetMesh")
 		.def(py::init<
             py::array_t<double>, 
+            py::array_t<int>,
             py::array_t<int>, 
             py::array_t<int>,
             py::array_t<int>,
@@ -193,6 +206,7 @@ PYBIND11_MODULE(pymmg, m) {
 	.def("getNumberOfFaces", &TetMesh::getNumberOfFaces)
     .def("getVerts", &TetMesh::getVerts)
     .def("getTets", &TetMesh::getTets)
+	.def("getTetRefs", &TetMesh::getTetRefs)
 	.def("getFaces", &TetMesh::getFaces)
 	.def("getFaceRefs", &TetMesh::getFaceRefs)
     .def_readwrite("hmin", &TetMesh::m_hmin)
