@@ -330,7 +330,7 @@ int MMG2D_snapval(MMG5_pMesh mesh, MMG5_pSol sol) {
     p0 = &mesh->point[k];
     if ( !MG_VOK(p0) ) continue;
     if ( fabs(sol->m[k]) < MMG5_EPS ) {
-      tmp[k] =  - 100.0*MMG5_EPS;
+      tmp[k] =  sol->m[k];
       p0->flag = 1;
       sol->m[k] = 0.0;
       ns++;
