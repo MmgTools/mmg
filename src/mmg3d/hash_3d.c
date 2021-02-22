@@ -1154,9 +1154,10 @@ int MMG5_hGeom(MMG5_pMesh mesh) {
           if ( !MMG5_hEdge(mesh,&mesh->htab,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]) )
             return 0;
         }
-         else if ( k < kk && ( pt->edg[i] || pt->tag[i] ) )
+        else if ( k < kk && ( pt->edg[i] || pt->tag[i] ) ) {
           if ( !MMG5_hEdge(mesh,&mesh->htab,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]))
             return 0;
+        }
       }
     }
     /* now check triangles */

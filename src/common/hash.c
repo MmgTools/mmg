@@ -48,7 +48,7 @@
  *
  */
 int MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, MMG5_Hash *hash, int chkISO) {
-  MMG5_pTria     pt,pt1;
+  MMG5_pTria     pt,pt1,pt2;
   MMG5_hedge    *ph;
   int            *adja,k,kk,jel,lel,hmax,dup,nmf,ia,ib;
   int8_t         i,i1,i2,j,l;
@@ -118,22 +118,17 @@ int MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, MMG5_Hash *hash, int chkISO) {
           }
           /* non-manifold case */
           else if ( adja[i] != 3*jel+j ) {
+            lel = adjt[3*(jel-1)+1+j]/3;
+            l   = adjt[3*(jel-1)+1+j]%3;
+            pt2 = &mesh->tria[lel];
             if ( chkISO && ( (pt->ref == MG_ISO) || (pt->ref < 0)) ) {
-              lel = adjt[3*(jel-1)+1+j]/3;
-              l   = adjt[3*(jel-1)+1+j]%3;
               adjt[3*(lel-1)+1+l] = 0;
               adja[i] = 3*jel+j;
               adjt[3*(jel-1)+1+j] = 3*k + i;
-              (mesh->tria[jel]).tag[j] |= MG_GEO + MG_NOM;
-              (mesh->tria[lel]).tag[l] |= MG_GEO + MG_NOM;
-            }
-            else {
-              lel = adjt[3*(jel-1)+1+j]/3;
-              l   = adjt[3*(jel-1)+1+j]%3;
-              (mesh->tria[lel]).tag[l] |= MG_GEO + MG_NOM;
-              pt1->tag[j] |= MG_GEO + MG_NOM;
             }
             pt->tag[i] |= MG_GEO + MG_NOM;
+            pt1->tag[j] |= MG_GEO + MG_NOM;
+            pt2->tag[l] |= MG_GEO + MG_NOM;
             nmf++;
             ++ph->s;
           }
