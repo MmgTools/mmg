@@ -1081,7 +1081,7 @@ int MMG5_hGeom(MMG5_pMesh mesh) {
     for (k=1; k<=mesh->nt; k++) {
       pt = &mesh->tria[k];
       for (i=0; i<3; i++) {
-        if( pt->tag[i] & MG_PARBDY ) continue;
+        if( (pt->tag[i] & MG_PARBDY) && !(pt->tag[i] & MG_PARBDYBDY) ) continue;
         i1 = MMG5_inxt2[i];
         i2 = MMG5_iprv2[i];
         /* transfer non manifold tag to edges */
@@ -1123,7 +1123,7 @@ int MMG5_hGeom(MMG5_pMesh mesh) {
       pt   = &mesh->tria[k];
       adja = &mesh->adjt[3*(k-1)+1];
       for (i=0; i<3; i++) {
-        if( pt->tag[i] & MG_PARBDY ) continue;
+        if( (pt->tag[i] & MG_PARBDY) && !(pt->tag[i] & MG_PARBDYBDY) ) continue;
         kk  = adja[i] / 3;
         if ( !kk || pt->tag[i] & MG_NOM )
           mesh->na++;
@@ -1145,7 +1145,7 @@ int MMG5_hGeom(MMG5_pMesh mesh) {
       pt   = &mesh->tria[k];
       adja = &mesh->adjt[3*(k-1)+1];
       for (i=0; i<3; i++) {
-        if( pt->tag[i] & MG_PARBDY ) continue;
+        if( (pt->tag[i] & MG_PARBDY) && !(pt->tag[i] & MG_PARBDYBDY) ) continue;
         i1  = MMG5_inxt2[i];
         i2  = MMG5_iprv2[i];
         kk  = adja[i] / 3;
@@ -1167,7 +1167,7 @@ int MMG5_hGeom(MMG5_pMesh mesh) {
     for (k=1; k<=mesh->nt; k++) {
       pt = &mesh->tria[k];
       for (i=0; i<3; i++) {
-        if( pt->tag[i] & MG_PARBDY ) continue;
+        if( (pt->tag[i] & MG_PARBDY) && !(pt->tag[i] & MG_PARBDYBDY) ) continue;
         i1 = MMG5_inxt2[i];
         i2 = MMG5_iprv2[i];
         MMG5_hGet(&mesh->htab,pt->v[i1],pt->v[i2],&edg,&tag);

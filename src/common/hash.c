@@ -80,7 +80,7 @@ int MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, MMG5_Hash *hash, int chkISO) {
     for (i=0; i<3; i++) {
 
       /* Skip parallel edges */
-      if( pt->tag[i] & MG_PARBDY ) continue;
+      if( (pt->tag[i] & MG_PARBDY) && !(pt->tag[i] & MG_PARBDYBDY) ) continue;
 
       i1 = MMG5_inxt2[i];
       i2 = MMG5_iprv2[i];
@@ -180,14 +180,14 @@ int MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, MMG5_Hash *hash, int chkISO) {
     }
   }
 
-  /* Now loop on parallel edges in order to add a MG_PARBDYBDY tag on those
+  /* Now loop on "only" parallel edges in order to add a MG_BDY tag on those
    * that are found in the hash table and their adjacents (if manifold; in the
    * non-manifold case the MG_NOM tag suffices). */
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) )  continue;
     for (i=0; i<3; i++) {
-      if( !(pt->tag[i] & MG_PARBDY) ) continue;
+      if( !(pt->tag[i] & MG_PARBDY) || (pt->tag[i] & MG_PARBDYBDY) ) continue;
       i1 = MMG5_inxt2[i];
       i2 = MMG5_iprv2[i];
 
@@ -203,13 +203,13 @@ int MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, MMG5_Hash *hash, int chkISO) {
           jel = ph->k / 3;
           j   = ph->k % 3;
           pt1 = &mesh->tria[jel];
-          pt1->tag[j] |= MG_PARBDYBDY;
+          pt1->tag[j] |= MG_BDY;
           /* update adjacent */
           lel = adjt[3*(jel-1)+1+j]/3;
           l   = adjt[3*(jel-1)+1+j]%3;
           if( lel ) {
             pt2 = &mesh->tria[lel];
-            pt2->tag[l] |= MG_PARBDYBDY;
+            pt2->tag[l] |= MG_BDY;
           }
           break;
         } else if ( !ph->nxt ) {
