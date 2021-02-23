@@ -1102,8 +1102,6 @@ int MMG5_hGeom(MMG5_pMesh mesh) {
         if ( mesh->info.nosurf && (tag & MG_REQ) )
           pt->tag[i] &= ~MG_NOSURF;
 
-        /* Mark edges as boundary edges */
-        pt->tag[i] |= (tag | MG_BDY);
         MMG5_hTag(&mesh->htab,pt->v[i1],pt->v[i2],edg,pt->tag[i]);
       }
     }
