@@ -302,7 +302,8 @@ int MMG5_setdhd(MMG5_pMesh mesh) {
     MMG5_nortri(mesh,pt,n1);
     adja = &mesh->adjt[3*(k-1)+1];
     for (i=0; i<3; i++) {
-      if ( pt->tag[i] & MG_PARBDY ) continue;
+      if ( ((pt->tag[i] & MG_PARBDY) && !(pt->tag[i] & MG_PARBDYBDY)) ||
+           (pt->tag[i] & MG_BDY) ) continue;
 
       kk  = adja[i] / 3;
       ii  = adja[i] % 3;
