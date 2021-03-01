@@ -1204,7 +1204,7 @@ int MMG5_bdryTria(MMG5_pMesh mesh, int ntmesh) {
   MMG5_pxPrism   pxpr;
   MMG5_Hash     hash;
   int       ref,*adja,adj,k,ia,ib,ic,kt, tofree=0,ntinit;
-  int8_t    i;
+  int8_t    i,j;
 
   hash.item = NULL;
 
@@ -1293,13 +1293,15 @@ int MMG5_bdryTria(MMG5_pMesh mesh, int ntmesh) {
 
         if ( pxt ) {
           /* useful only when saving mesh or in ls mode */
-          if ( pxt->tag[MMG5_iarf[i][0]] )  ptt->tag[0] = pxt->tag[MMG5_iarf[i][0]];
-          if ( pxt->tag[MMG5_iarf[i][1]] )  ptt->tag[1] = pxt->tag[MMG5_iarf[i][1]];
-          if ( pxt->tag[MMG5_iarf[i][2]] )  ptt->tag[2] = pxt->tag[MMG5_iarf[i][2]];
-
-          if ( pxt->edg[MMG5_iarf[i][0]] )  ptt->edg[0] = pxt->edg[MMG5_iarf[i][0]];
-          if ( pxt->edg[MMG5_iarf[i][1]] )  ptt->edg[1] = pxt->edg[MMG5_iarf[i][1]];
-          if ( pxt->edg[MMG5_iarf[i][2]] )  ptt->edg[2] = pxt->edg[MMG5_iarf[i][2]];
+          for( j = 0; j < 3; j++ ) {
+            if ( pxt->tag[MMG5_iarf[i][j]] ) {
+              ptt->tag[j] = pxt->tag[MMG5_iarf[i][j]];
+              /* Remove redundant boundary tag */
+              ptt->tag[j] &= ~MG_BDY;
+            }
+            if ( pxt->edg[MMG5_iarf[i][j]] )
+              ptt->edg[j] = pxt->edg[MMG5_iarf[i][j]];
+          }
         }
         if ( adj ) {
           if ( mesh->info.iso ) {
