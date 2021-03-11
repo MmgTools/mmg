@@ -196,7 +196,7 @@ ENDIF()
 #####
 ############################################################################
 ADD_EXECUTABLE(genheader ${PROJECT_SOURCE_DIR}/scripts/genheader.c)
-TARGET_LINK_LIBRARIES ( genheader ${LIBRARIES}  )
+TARGET_LINK_LIBRARIES ( genheader PRIVATE ${LIBRARIES}  )
 GENERATE_FORTRAN_HEADER ( mmg
   ${COMMON_SOURCE_DIR} libmmgtypes.h
   ${COMMON_BINARY_DIR}
