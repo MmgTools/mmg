@@ -1626,13 +1626,13 @@ int MMG2D_Set_tensorSols(MMG5_pSol met, double *sols) {
     return 0;
   }
 
-  for ( k=0; k<met->np; ++k ) {
+  for ( k=1; k<=met->np; ++k ) {
     j = 3*k;
-    m = &met->m[j+3];
+    m = &met->m[j];
 
-    m[1] = sols[j];
-    m[2] = sols[j+1];
-    m[3] = sols[j+2];
+    m[0] = sols[j];
+    m[1] = sols[j+1];
+    m[2] = sols[j+2];
   }
   return 1;
 }
