@@ -1628,7 +1628,7 @@ int MMG2D_Set_tensorSols(MMG5_pSol met, double *sols) {
 
   for ( k=0; k<met->np; ++k ) {
     j = 3*k;
-    m = &met->m[j];
+    m = &met->m[j+3];
 
     m[1] = sols[j];
     m[2] = sols[j+1];
@@ -1643,7 +1643,7 @@ int MMG2D_Get_tensorSols(MMG5_pSol met, double *sols) {
 
   for ( k=0; k<met->np; ++k ) {
     j = 3*k;
-    m = &met->m[j];
+    m = &met->m[j+3];
 
     sols[j]   = m[1];
     sols[j+1] = m[2];
