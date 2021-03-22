@@ -246,7 +246,7 @@ int MMG5_boulenm(MMG5_pMesh mesh,int start,int ip,int iface,
         iopp = MMG5_ifar[i][1];
         piv = pt->v[ipiv];
       }
-      isface = (adja[iopp] == 0);
+      isface = ((adja[iopp] == 0) || (mesh->tetra[adj].ref != pt->ref));
     }
     while ( adj && (adj != nvstart) && !isface );
   }
