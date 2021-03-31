@@ -248,9 +248,10 @@ int MMG2D_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, int start, int8_t istart) {
     v2 = sol->m[ip2];
 
     /* Authorize change of references only provided the boundary reference is MG_ISO */
-    if ( pt->ref != refstart && pt->edg[i1] != MG_ISO )
+    if ( pt->ref != refstart && pt->edg[i1] != MG_ISO ) {
       smsgn = 0;
-    else
+      k = 0;
+    } else
       smsgn = (fabs(v1) < MMG5_EPS) || ( (fabs(v2) > MMG5_EPS) && MG_SMSGN(v1,v2) ) ? 1 : 0;
     // smsgn =  MG_SMSGN(v1,v2) ? 1 : 0;
   }
@@ -276,9 +277,10 @@ int MMG2D_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, int start, int8_t istart) {
     v1 = sol->m[ip1];
     v2 = sol->m[ip2];
 
-    if ( pt->ref != refstart && pt->edg[i1] != MG_ISO )
+    if ( pt->ref != refstart && pt->edg[i1] != MG_ISO ) {
       smsgn = 0;
-    else
+      k = 0;
+    } else
       smsgn = (fabs(v2) < MMG5_EPS) || ( (fabs(v1) > MMG5_EPS) && MG_SMSGN(v1,v2) ) ? 1 : 0;
     // smsgn = MG_SMSGN(v1,v2) ? 1 : 0;
   }
