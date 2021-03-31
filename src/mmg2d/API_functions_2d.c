@@ -84,6 +84,7 @@ void MMG2D_Init_parameters(MMG5_pMesh mesh) {
 
   /* default values for integers */
   mesh->info.lag      = MMG5_LAG;
+  mesh->info.setfem   = MMG5_FEM;
   mesh->info.optim    = MMG5_OFF;
   /* [0/1]   ,avoid/allow surface modifications */
   mesh->info.nosurf   =  MMG5_OFF;
@@ -136,6 +137,9 @@ int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
                 " set to default value\n",__func__);
       mesh->info.dhd    = MMG5_ANGEDG;
     }
+    break;
+  case MMG2D_IPARAM_nofem :
+    mesh->info.setfem = (val==1)? 0 : 1;
     break;
   case MMG2D_IPARAM_opnbdy :
     mesh->info.opnbdy = val;
@@ -235,7 +239,7 @@ int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
     return 0;
   }
   /* other options */
-  mesh->info.setfem      = MMG5_OFF;
+
   return 1;
 }
 
