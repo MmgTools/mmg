@@ -536,6 +536,10 @@ int MMG5_setEdgeNmTag(MMG5_pMesh mesh, MMG5_Hash *hash) {
     if ( !MG_EOK(ptt) ) continue;
 
     for (l=0; l<3; l++) {
+
+      /* Skip edges at the intersection of a parallel interface */
+      if ( ptt->tag[l] & MG_BDY ) continue;
+
       if ( ptt->tag[l] & MG_NOM ) {
         i1 = MMG5_inxt2[l];
         i2 = MMG5_iprv2[l];
@@ -699,6 +703,10 @@ int MMG5_setVertexNmTag(MMG5_pMesh mesh) {
 
     for ( i=0; i<4; ++i ) {
       ppt = &mesh->point[ptet->v[i]];
+
+      /* Skip parallel points */
+      if ( ppt->tag & MG_PARBDY ) continue;
+
       if ( (!MG_VOK(ppt)) || (ppt->flag==mesh->base)  ) continue;
       ppt->flag = mesh->base;
 
