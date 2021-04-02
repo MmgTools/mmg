@@ -54,6 +54,7 @@ static int MMG2D_usage(char *name) {
 
   fprintf(stdout,"\n");
 
+  fprintf(stdout,"-nofem       do not force Mmg to create a finite element mesh \n");
   fprintf(stdout,"-nosurf      no surface modifications\n");
 
   /* Common parameters (second section) */
@@ -472,6 +473,10 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
         }
         break;
       case 'n':
+        if ( !strcmp(argv[i],"-nofem") ) {
+          if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_nofem,1) )
+            return 0;
+        }
         if ( !strcmp(argv[i],"-nreg") ) {
           if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_nreg,1) )
             return 0;
