@@ -203,13 +203,13 @@ int MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, MMG5_Hash *hash, int chkISO) {
           jel = ph->k / 3;
           j   = ph->k % 3;
           pt1 = &mesh->tria[jel];
-          pt1->tag[j] |= MG_BDY;
+          pt1->tag[j] |= MG_BDY + MG_PARBDYBDY;
           /* update adjacent */
           lel = adjt[3*(jel-1)+1+j]/3;
           l   = adjt[3*(jel-1)+1+j]%3;
           if( lel ) {
             pt2 = &mesh->tria[lel];
-            pt2->tag[l] |= MG_BDY;
+            pt2->tag[l] |= MG_BDY + MG_PARBDYBDY;
           }
           break;
         } else if ( !ph->nxt ) {
