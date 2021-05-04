@@ -90,7 +90,7 @@ double MMG5_surf(MMG5_pMesh mesh,double m[3][6],MMG5_pTria ptt) {
 
     dens = tJmJ[0][0]*tJmJ[1][1] - tJmJ[1][0]*tJmJ[0][1];
     if ( dens <= MMG5_EPSD2 ) {
-#ifndef DNDEBUG
+#ifndef NDEBUG
       if ( !mmgErr ) {
         fprintf(stderr,"\n  ## Warning: %s: at least 1 negative or null density.\n",
                 __func__);
