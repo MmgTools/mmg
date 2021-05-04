@@ -190,6 +190,13 @@ IF ( BUILD_MMG3D OR BUILD_MMGS )
 ELSE ()
   SET(BUILD_MMGS3D OFF)
 ENDIF()
+
+# Explicitly set the DNDEBUG flag in case the user or a parent project overrides
+# it.
+if (NOT CMAKE_BUILD_TYPE MATCHES Debug)
+    add_definitions(-DNDEBUG)
+endif()
+
 ############################################################################
 #####
 #####         Fortran header: libmmgtypesf.h
