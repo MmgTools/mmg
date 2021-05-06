@@ -1002,6 +1002,15 @@ int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int8_t indq,in
             else
               MG_CLR( pxt1->ori,voyp );
           }
+          /* correct the orientation if the new adjacent has a different
+           * reference */
+          if( qel ) {
+            if( mesh->tetra[pel].ref > mesh->tetra[qel].ref )
+              MG_SET( pxt1->ori,voyp );
+            else if( mesh->tetra[pel].ref < mesh->tetra[qel].ref )
+              MG_CLR( pxt1->ori,voyp );
+          }
+
 
 #ifndef NDEBUG
           if ( qel ) {
@@ -1118,6 +1127,14 @@ int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int8_t indq,in
               if ( MG_GET(pxt->ori,iq) )
                 MG_SET( pxt1->ori,voyq );
               else
+                MG_CLR( pxt1->ori,voyq );
+            }
+            /* correct the orientation if the new adjacent has a different
+             * reference */
+            if( pel ) {
+              if( mesh->tetra[qel].ref > mesh->tetra[pel].ref )
+                MG_SET( pxt1->ori,voyq );
+              else if( mesh->tetra[qel].ref < mesh->tetra[pel].ref )
                 MG_CLR( pxt1->ori,voyq );
             }
 
