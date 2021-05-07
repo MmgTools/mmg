@@ -1005,23 +1005,14 @@ int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int8_t indq,in
           /* correct the orientation if the new adjacent has a different
            * reference */
           if( qel ) {
-            if( mesh->tetra[pel].ref > mesh->tetra[qel].ref )
+            if( pt1->ref > mesh->tetra[qel].ref )
               MG_SET( pxt1->ori,voyp );
-            else if( mesh->tetra[pel].ref < mesh->tetra[qel].ref )
+            else if( pt1->ref < mesh->tetra[qel].ref )
               MG_CLR( pxt1->ori,voyp );
           }
 
 
 #ifndef NDEBUG
-          if ( qel ) {
-            /* Check that the domain of max ref imposes its orientation */
-            if ( pt1->ref < mesh->tetra[qel].ref ) {
-              assert ( !MG_GET(pxt1->ori,voyp) );
-            }
-            else if ( pt1->ref > mesh->tetra[qel].ref ) {
-              assert ( MG_GET(pxt1->ori,voyp ) );
-            }
-          }
           else {
             /* Check that a non parallel external boundary face has always a good
              * orientation */
@@ -1132,22 +1123,13 @@ int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int8_t indq,in
             /* correct the orientation if the new adjacent has a different
              * reference */
             if( pel ) {
-              if( mesh->tetra[qel].ref > mesh->tetra[pel].ref )
+              if( pt1->ref > mesh->tetra[pel].ref )
                 MG_SET( pxt1->ori,voyq );
-              else if( mesh->tetra[qel].ref < mesh->tetra[pel].ref )
+              else if( pt1->ref < mesh->tetra[pel].ref )
                 MG_CLR( pxt1->ori,voyq );
             }
 
 #ifndef NDEBUG
-            if ( pel ) {
-              /* Check that the domain of max ref imposes its orientation */
-              if ( pt1->ref < mesh->tetra[pel].ref ) {
-                assert ( !MG_GET(pxt1->ori,voyq) );
-              }
-              else if ( pt1->ref > mesh->tetra[pel].ref ) {
-                assert ( MG_GET(pxt1->ori,voyq ) );
-              }
-            }
             else {
               /* Check that a non parallel external boundary face has always a good
                * orientation */
