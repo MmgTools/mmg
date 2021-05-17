@@ -1584,7 +1584,7 @@ int MMG5_grad2metSurfreq(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int npma
     if( !MMG5_eigenv(1,mm2,ll, rr) ) {
       return 0;
     }
-    llmin = 1.0/MMG5_EPSOK;
+    llmin = DBL_MAX;
     for( i = 0; i < 3; i++ )
       if( ll[i] < llmin )
         llmin = ll[i];
