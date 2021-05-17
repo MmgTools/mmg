@@ -1815,10 +1815,12 @@ int MMG5_grad2metVolreq(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int npmaste
      * found. So, compute the eigenvalues. */
     double ll[3],rr[3][3],llmin;
     int i;
-    if( !MMG5_eigenv(1,mm2,ll, rr) ) return 0;
-    llmin = 0.0;
+    if( !MMG5_eigenv(1,mm2,ll, rr) )
+      return 0;
+    llmin = 1.0/MMG5_EPSOK;
     for( i = 0; i < 3; i++ )
-      if( ll[i] < llmin ) llmin = ll[i];
+      if( ll[i] < llmin )
+        llmin = ll[i];
 
 
     beta = mu[0] - llmin;
