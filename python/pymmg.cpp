@@ -1,3 +1,4 @@
+
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
 #include <stdio.h>
@@ -19,6 +20,8 @@ private:
 
 
 public:
+
+  int m_nreg = 0;
 
   double m_hmax = -1.0;
   double m_hmin = -1.0;
@@ -98,52 +101,53 @@ public:
     // get faces (triangles) and their refs for keeping track of bnd-surfaces
     m_faces = new int[m_nfaces * 3];
     m_faceRefs = new int[m_nfaces];
-	MMG3D_Get_triangles(mmgMesh, m_faces, m_faceRefs, NULL);
+    MMG3D_Get_triangles(mmgMesh, m_faces, m_faceRefs, NULL);
 
 	}
 
 	~TetMesh() {
 
 		MMG3D_Free_all(MMG5_ARG_start,
-			MMG5_ARG_ppMesh, &mmgMesh, MMG5_ARG_ppMet, &mmgSol,
-			MMG5_ARG_end);
+                   MMG5_ARG_ppMesh, &mmgMesh, MMG5_ARG_ppMet, &mmgSol,
+                   MMG5_ARG_end);
 
 		delete(m_verts);
 		delete(m_tets);
-        delete(m_tetRefs);
-        delete(m_faces);
-        delete(m_faceRefs);
+    delete(m_tetRefs);
+    delete(m_faces);
+    delete(m_faceRefs);
 
 	}
 
   void remesh(){
 
     // set the control parameters
+    MMG3D_Set_dparameter(mmgMesh, mmgSol, MMG3D_IPARAM_nreg, m_nreg);
     MMG3D_Set_dparameter(mmgMesh, mmgSol, MMG3D_DPARAM_hmin, m_hmin);
     MMG3D_Set_dparameter(mmgMesh, mmgSol, MMG3D_DPARAM_hmax, m_hmax);
     MMG3D_Set_dparameter(mmgMesh, mmgSol, MMG3D_DPARAM_hausd, m_hausd);
     MMG3D_Set_dparameter(mmgMesh, mmgSol, MMG3D_DPARAM_hgrad, m_hgrad);
 
     // run the mesher
-	int ierr = MMG3D_mmg3dlib(mmgMesh, mmgSol);
-	if (ierr == MMG5_STRONGFAILURE) {
-		throw std::runtime_error("MMG was not able to remesh the mesh.");
-	}
-	else if (ierr == MMG5_LOWFAILURE){
-		printf("MMG completed remeshing with a warning");
-	}
+    int ierr = MMG3D_mmg3dlib(mmgMesh, mmgSol);
+    if (ierr == MMG5_STRONGFAILURE) {
+      throw std::runtime_error("MMG was not able to remesh the mesh.");
+    }
+    else if (ierr == MMG5_LOWFAILURE){
+      printf("MMG completed remeshing with a warning");
+    }
 
-	// get the new mesh sizes
-	MMG3D_Get_meshSize(mmgMesh, &m_nverts, &m_ntets, NULL, &m_nfaces, NULL, NULL);
+    // get the new mesh sizes
+    MMG3D_Get_meshSize(mmgMesh, &m_nverts, &m_ntets, NULL, &m_nfaces, NULL, NULL);
 
-	// update vertices
-	delete(m_verts);
-	m_verts = new double[m_nverts * 3];
-	MMG3D_Get_vertices(mmgMesh, m_verts, NULL, NULL, NULL);
+    // update vertices
+    delete(m_verts);
+    m_verts = new double[m_nverts * 3];
+    MMG3D_Get_vertices(mmgMesh, m_verts, NULL, NULL, NULL);
 
-	// update tets
-	delete(m_tets);
-	m_tets = new int[m_ntets * 4];
+    // update tets
+    delete(m_tets);
+    m_tets = new int[m_ntets * 4];
     m_tetRefs = new int[m_ntets];
     MMG3D_Get_tetrahedra(mmgMesh, m_tets, m_tetRefs, NULL);
 
