@@ -122,7 +122,7 @@ public:
   void remesh(){
 
     // set the control parameters
-    MMG3D_Set_dparameter(mmgMesh, mmgSol, MMG3D_IPARAM_nreg, m_nreg);
+    MMG3D_Set_iparameter(mmgMesh, mmgSol, MMG3D_IPARAM_nreg, m_nreg);
     MMG3D_Set_dparameter(mmgMesh, mmgSol, MMG3D_DPARAM_hmin, m_hmin);
     MMG3D_Set_dparameter(mmgMesh, mmgSol, MMG3D_DPARAM_hmax, m_hmax);
     MMG3D_Set_dparameter(mmgMesh, mmgSol, MMG3D_DPARAM_hausd, m_hausd);
