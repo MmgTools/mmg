@@ -213,6 +213,7 @@ PYBIND11_MODULE(pymmg, m) {
 	.def("getTetRefs", &TetMesh::getTetRefs)
 	.def("getFaces", &TetMesh::getFaces)
 	.def("getFaceRefs", &TetMesh::getFaceRefs)
+	.def_readwrite("nreg", &TetMesh::m_nreg)
     .def_readwrite("hmin", &TetMesh::m_hmin)
     .def_readwrite("hmax", &TetMesh::m_hmax)
     .def_readwrite("hgrad", &TetMesh::m_hgrad)
