@@ -1850,7 +1850,18 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename,
   }
 
   /** Write solution */
-  nsols = (metricData==1)? 1 : mesh->nsols;
+  if ( metricData==1 ) {
+    if ( sol && *sol && sol[0]->np ) {
+      nsols = 1;
+    }
+    else {
+      /* In analysis mode (-noinsert -noswap -nomove), metric is not allocated */
+      nsols = 0;
+    }
+  }
+  else {
+    nsols = mesh->nsols;
+  }
 
   for ( isol=0; isol<nsols; ++isol) {
     psl = *sol + isol;
