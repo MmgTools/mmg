@@ -182,7 +182,15 @@ int MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, MMG5_Hash *hash, int chkISO) {
 
   /* Now loop on "only" parallel edges in order to add a MG_BDY tag on those
    * that are found in the hash table and their adjacents (if manifold; in the
-   * non-manifold case the MG_NOM tag suffices). */
+   * non-manifold case the MG_NOM tag suffices).
+   *
+   * Rationale:
+   *   - put MG_BDY tags on edges that are contact edges between a true
+   *     boundary (!MG_PARBDY || (MG_PARBDY && MG_PARBDYBDY) and a parallel one
+   *     (MG_PARBDY && !MG_PARBDYBDY);
+   *   - add also a MG_PARBDYBDY tag on those edges (as it cannot be inherited
+   *     from any triangle there).
+   */
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) )  continue;
