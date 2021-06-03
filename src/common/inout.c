@@ -2751,9 +2751,14 @@ int MMG5_saveNode(MMG5_pMesh mesh,const char *filename) {
 int MMG5_saveEdge(MMG5_pMesh mesh,const char *filename,const char *ext) {
   FILE*             inm;
   MMG5_pEdge        pt;
+  size_t            na_tot;
   int               k,polyfile;
+  char              *ptr_c = (char*)mesh->edge;
   char              *ptr,*data;
 
+  if ( !mesh->edge ) {
+    return 1;
+  }
   if ( !mesh->na ) {
     return 1;
   }
@@ -2798,13 +2803,24 @@ int MMG5_saveEdge(MMG5_pMesh mesh,const char *filename,const char *ext) {
     /* Save 0 nodes (saved in a separated .node file), dim, 0 attributes, 1 bdy
      * marker */
     fprintf(inm, "0 %d 0 1\n",mesh->dim);
-
   }
 
-  /* Save node number, dim, no attributes, 1 bdy marker */
-  fprintf(inm, "%d %d\n",mesh->na,1);
+  /* Get either the number of boundary edges or the total number of edges
+   * (depending if they have been append to the bdy edges, if yes, edges 1->na
+   * are bdy, na->na_tot are internal. */
 
-  for ( k=1; k<=mesh->na; ++k ) {
+  /* Get size of the array in octets */
+  ptr_c = ptr_c-sizeof(size_t);
+  na_tot = (*((size_t*)ptr_c));
+  /* Recover number of edges allocated */
+  na_tot /= sizeof(MMG5_Edge);
+  /* Array is allocated at size na+1, recover na */
+  --na_tot;
+
+  /* Save node number, dim, no attributes, 1 bdy marker */
+  fprintf(inm, "%zu %d\n",na_tot,1);
+
+  for ( k=1; k<=na_tot; ++k ) {
     /* Save edge idx */
     fprintf(inm, "%d ",k);
 
@@ -2820,7 +2836,7 @@ int MMG5_saveEdge(MMG5_pMesh mesh,const char *filename,const char *ext) {
     fprintf(inm, "0 \n");
   }
 
-  fprintf(stdout,"     NUMBER OF EDGES       %8d\n",mesh->na);
+  fprintf(stdout,"     NUMBER OF EDGES       %8zu\n",na_tot);
 
   fclose(inm);
 

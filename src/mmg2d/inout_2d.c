@@ -2042,8 +2042,23 @@ int MMG2D_saveNeigh(MMG5_pMesh mesh,const char *filename) {
 
 static inline
 int MMG2D_saveEdge(MMG5_pMesh mesh,const char *filename) {
+  int ier,nb_edges;
 
-  return MMG5_saveEdge(mesh,filename,".poly");
+  ier = MMG5_saveEdge(mesh,filename,".poly");
+  if ( !ier ) {
+    printf("\n  ## Error: %s: unable to save boundary edges\n.",__func__);
+    return 0;
+  }
+
+  nb_edges = 0;
+  ier = MMG2D_Get_numberOfNonBdyEdges( mesh, &nb_edges);
+  if ( !ier ) {
+    printf("\n  ## Error: %s: unable to count and append internal edges\n.",__func__);
+    return 0;
+  }
+
+  ier = MMG5_saveEdge(mesh,filename,".edge");
+  return ier;
 }
 
 
