@@ -2040,6 +2040,13 @@ int MMG2D_saveNeigh(MMG5_pMesh mesh,const char *filename) {
   return 1;
 }
 
+static inline
+int MMG2D_saveEdge(MMG5_pMesh mesh,const char *filename) {
+
+  return MMG5_saveEdge(mesh,filename,".poly");
+}
+
+
 int MMG2D_saveTetgenMesh(MMG5_pMesh mesh,const char *filename) {
 
   if ( !MMG5_saveNode(mesh,filename) ) {
@@ -2050,7 +2057,7 @@ int MMG2D_saveTetgenMesh(MMG5_pMesh mesh,const char *filename) {
     return 0;
   }
 
-  if ( !MMG5_saveEdge(mesh,filename) ) {
+  if ( !MMG2D_saveEdge(mesh,filename) ) {
     return 0;
   }
 
