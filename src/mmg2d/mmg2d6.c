@@ -830,7 +830,8 @@ int MMG2D_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol met){
   }
   if ( !nb ) return 1;
 
-  /* Create the intersection points between the edges in the mesh and the 0 level set */
+  /* Create the intersection points between the edges in the mesh and the 0
+   * level set */
   if ( !MMG5_hashNew(mesh,&hash,nb,2*nb) ) return 0;
 
   for (k=1; k<=mesh->nt; k++) {
