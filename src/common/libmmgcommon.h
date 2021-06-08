@@ -262,12 +262,13 @@ int MMG5_saveNode(MMG5_pMesh mesh,const char *filename);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param filename name of file.
+ * \param ext file extension (.poly or .edge)
  *
  * \return 1 if success, 0 if fail.
  *
  * Save edge list at .edge file format (Tetgen/Triangle).
  */
-int MMG5_saveEdge(MMG5_pMesh mesh,const char *filename);
+int MMG5_saveEdge(MMG5_pMesh mesh,const char *filename,const char *ext);
 
 #ifdef __cplusplus
 }
