@@ -681,7 +681,7 @@ int MMG5_setVertexNmTag(MMG5_pMesh mesh) {
   MMG5_pTetra         ptet;
   MMG5_pPoint         ppt;
   MMG5_Hash           hash;
-  int                 k,i;
+  int                 k,i,base;
   int                 nc, nre, ng, nrp,ier;
 
   /* Second: seek the non-required non-manifold points and try to analyse
@@ -692,15 +692,15 @@ int MMG5_setVertexNmTag(MMG5_pMesh mesh) {
   if ( ! MMG5_hashNew(mesh,&hash,mesh->np,(int)(3.71*mesh->np)) ) return 0;
 
   nc = nre = 0;
-  ++mesh->base;
+  base = ++mesh->base;
   for (k=1; k<=mesh->ne; ++k) {
     ptet = &mesh->tetra[k];
     if ( !MG_EOK(ptet) ) continue;
 
     for ( i=0; i<4; ++i ) {
       ppt = &mesh->point[ptet->v[i]];
-      if ( (!MG_VOK(ppt)) || (ppt->flag==mesh->base)  ) continue;
-      ppt->flag = mesh->base;
+      if ( (!MG_VOK(ppt)) || (ppt->flag==base)  ) continue;
+      ppt->flag = base;
 
       if ( (!(ppt->tag & MG_NOM)) || (ppt->tag & MG_REQ) ) continue;
 
