@@ -357,7 +357,6 @@ int MMG5_isSplit(MMG5_pMesh mesh,int ref,int *refint,int *refext) {
  */
 int MMG5_isNotSplit(MMG5_pMesh mesh,int ref) {
   MMG5_pInvMat pim;
-  int8_t       k;
 
   /* Split material by default if not in multi-material mode */
   if( !mesh->info.nmat ) return 0;
