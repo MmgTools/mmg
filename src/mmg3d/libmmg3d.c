@@ -1398,48 +1398,50 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet) {
   if ( mesh->info.imprim > 0 )
     fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
 
-  /* mesh adaptation */
-  chrono(ON,&(ctim[4]));
-  if ( mesh->info.imprim > 0 ) {
-    fprintf(stdout,"\n  -- PHASE 3 : MESH IMPROVEMENT\n");
-  }
+  if ( (!mesh->info.nomove) || (!mesh->info.noswap) || (!mesh->info.noinsert) ) {
 
-  /* renumerotation if available */
-  if ( !MMG5_scotchCall(mesh,met,NULL,NULL) )
-  {
-    if ( mettofree ) { MMG5_DEL_MEM(mesh,met->m);MMG5_SAFE_FREE (met); }
-    if ( !MMG5_unscaleMesh(mesh,met,sol) )    _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
-    MMG5_RETURN_AND_PACK(mesh,sol,met,MMG5_LOWFAILURE);
-  }
+    /* mesh adaptation */
+    chrono(ON,&(ctim[4]));
+    if ( mesh->info.imprim > 0 ) {
+      fprintf(stdout,"\n  -- PHASE 3 : MESH IMPROVEMENT\n");
+    }
+
+    /* renumerotation if available */
+    if ( !MMG5_scotchCall(mesh,met,NULL,NULL) )
+    {
+      if ( mettofree ) { MMG5_DEL_MEM(mesh,met->m);MMG5_SAFE_FREE (met); }
+      if ( !MMG5_unscaleMesh(mesh,met,sol) )    _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+      MMG5_RETURN_AND_PACK(mesh,sol,met,MMG5_LOWFAILURE);
+    }
 
 #ifdef PATTERN
-  if ( !MMG5_mmg3d1_pattern(mesh,met,NULL) ) {
-    if ( mettofree ) { MMG5_DEL_MEM(mesh,met->m);MMG5_SAFE_FREE (met); }
-    if ( !(mesh->adja) && !MMG3D_hashTetra(mesh,1) ) {
-      fprintf(stderr,"\n  ## Hashing problem. Invalid mesh.\n");
-      _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+    if ( !MMG5_mmg3d1_pattern(mesh,met,NULL) ) {
+      if ( mettofree ) { MMG5_DEL_MEM(mesh,met->m);MMG5_SAFE_FREE (met); }
+      if ( !(mesh->adja) && !MMG3D_hashTetra(mesh,1) ) {
+        fprintf(stderr,"\n  ## Hashing problem. Invalid mesh.\n");
+        _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+      }
+      if ( !MMG5_unscaleMesh(mesh,met,sol) )    _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+      MMG5_RETURN_AND_PACK(mesh,sol,met,MMG5_LOWFAILURE);
     }
-    if ( !MMG5_unscaleMesh(mesh,met,sol) )    _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
-    MMG5_RETURN_AND_PACK(mesh,sol,met,MMG5_LOWFAILURE);
-  }
 #else
-  if ( !MMG5_mmg3d1_pattern(mesh,met,NULL) ) {
-    if ( mettofree ) { MMG5_DEL_MEM(mesh,met->m);MMG5_SAFE_FREE (met); }
-    if ( !(mesh->adja) && !MMG3D_hashTetra(mesh,1) ) {
-      fprintf(stderr,"\n  ## Hashing problem. Invalid mesh.\n");
-      _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+    if ( !MMG5_mmg3d1_pattern(mesh,met,NULL) ) {
+      if ( mettofree ) { MMG5_DEL_MEM(mesh,met->m);MMG5_SAFE_FREE (met); }
+      if ( !(mesh->adja) && !MMG3D_hashTetra(mesh,1) ) {
+        fprintf(stderr,"\n  ## Hashing problem. Invalid mesh.\n");
+        _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+      }
+      if ( !MMG5_unscaleMesh(mesh,met,sol) )    _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+      MMG5_RETURN_AND_PACK(mesh,sol,met,MMG5_LOWFAILURE);
     }
-    if ( !MMG5_unscaleMesh(mesh,met,sol) )    _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
-    MMG5_RETURN_AND_PACK(mesh,sol,met,MMG5_LOWFAILURE);
-  }
 #endif
 
-  chrono(OFF,&(ctim[4]));
-  printim(ctim[4].gdif,stim);
-  if ( mesh->info.imprim > 0 ) {
-    fprintf(stdout,"  -- PHASE 3 COMPLETED.     %s\n",stim);
+    chrono(OFF,&(ctim[4]));
+    printim(ctim[4].gdif,stim);
+    if ( mesh->info.imprim > 0 ) {
+      fprintf(stdout,"  -- PHASE 3 COMPLETED.     %s\n",stim);
+    }
   }
-
   /* last renum to give back a good numbering to the user */
   if ( !MMG5_scotchCall(mesh,met,NULL,NULL) )
   {
@@ -1666,44 +1668,47 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
     fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
   }
 
-  /* End with a classical remeshing stage, provided mesh->info.lag >= 1 */
-  if ( (ier > 0) && (mesh->info.lag >= 1) ) {
-    chrono(ON,&(ctim[4]));
-    if ( mesh->info.imprim > 0 ) {
-      fprintf(stdout,"\n  -- PHASE 3 : MESH IMPROVEMENT\n");
-    }
+  if ( (!mesh->info.nomove) || (!mesh->info.noswap) || (!mesh->info.noinsert) ) {
 
-    /* renumerotation if available */
-    if ( !MMG5_scotchCall(mesh,met,disp,NULL) )
-    {
-      if ( !MMG5_unscaleMesh(mesh,met,disp) )    _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
-      MMG5_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE);
-    }
+    /* End with a classical remeshing stage, provided mesh->info.lag >= 1 */
+    if ( (ier > 0) && (mesh->info.lag >= 1) ) {
+      chrono(ON,&(ctim[4]));
+      if ( mesh->info.imprim > 0 ) {
+        fprintf(stdout,"\n  -- PHASE 3 : MESH IMPROVEMENT\n");
+      }
+
+      /* renumerotation if available */
+      if ( !MMG5_scotchCall(mesh,met,disp,NULL) )
+      {
+        if ( !MMG5_unscaleMesh(mesh,met,disp) )    _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
+        MMG5_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE);
+      }
 
 #ifdef PATTERN
-    if ( !MMG5_mmg3d1_pattern(mesh,met,NULL) ) {
-      if ( !(mesh->adja) && !MMG3D_hashTetra(mesh,1) ) {
-        fprintf(stderr,"\n  ## Hashing problem. Invalid mesh.\n");
-        _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
+      if ( !MMG5_mmg3d1_pattern(mesh,met,NULL) ) {
+        if ( !(mesh->adja) && !MMG3D_hashTetra(mesh,1) ) {
+          fprintf(stderr,"\n  ## Hashing problem. Invalid mesh.\n");
+          _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
+        }
+        if ( !MMG5_unscaleMesh(mesh,met,disp) )    _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
+        MMG5_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE);
       }
-      if ( !MMG5_unscaleMesh(mesh,met,disp) )    _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
-      MMG5_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE);
-    }
 #else
-    if ( !MMG5_mmg3d1_delone(mesh,met,NULL) ) {
-      if ( !(mesh->adja) && !MMG3D_hashTetra(mesh,1) ) {
-        fprintf(stderr,"\n  ## Hashing problem. Invalid mesh.\n");
-        _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
+      if ( !MMG5_mmg3d1_delone(mesh,met,NULL) ) {
+        if ( !(mesh->adja) && !MMG3D_hashTetra(mesh,1) ) {
+          fprintf(stderr,"\n  ## Hashing problem. Invalid mesh.\n");
+          _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
+        }
+        if ( !MMG5_unscaleMesh(mesh,met,disp) )    _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
+        MMG5_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE);
       }
-      if ( !MMG5_unscaleMesh(mesh,met,disp) )    _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
-      MMG5_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE);
-    }
 #endif
 
-    chrono(OFF,&(ctim[4]));
-    printim(ctim[4].gdif,stim);
-    if ( mesh->info.imprim > 0 ) {
-      fprintf(stdout,"  -- PHASE 3 COMPLETED.     %s\n",stim);
+      chrono(OFF,&(ctim[4]));
+      printim(ctim[4].gdif,stim);
+      if ( mesh->info.imprim > 0 ) {
+        fprintf(stdout,"  -- PHASE 3 COMPLETED.     %s\n",stim);
+      }
     }
   }
 
