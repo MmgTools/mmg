@@ -319,29 +319,32 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol met)
   if ( mesh->info.imprim > 0 )
     fprintf(stdout,"  -- PHASE 1 COMPLETED.     %s\n",stim);
 
-  /* remeshing */
-  chrono(ON,&ctim[3]);
+  if ( (!mesh->info.nomove) || (!mesh->info.noswap) || (!mesh->info.noinsert) ) {
 
-  if ( mesh->info.imprim > 0 )
-    fprintf(stdout,"\n  -- PHASE 2 : %s MESHING\n",met->size < 3 ? "ISOTROPIC" : "ANISOTROPIC");
+    /* remeshing */
+    chrono(ON,&ctim[3]);
 
-  /* Mesh improvement */
-  if ( !MMG2D_mmg2d1n(mesh,met) ) {
-    if ( !MMG5_unscaleMesh(mesh,met,NULL) )  _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
-    MMG2D_RETURN_AND_PACK(mesh,met,sol,MMG5_LOWFAILURE);
-  }
+    if ( mesh->info.imprim > 0 )
+      fprintf(stdout,"\n  -- PHASE 2 : %s MESHING\n",met->size < 3 ? "ISOTROPIC" : "ANISOTROPIC");
 
-  chrono(OFF,&(ctim[3]));
-  printim(ctim[3].gdif,stim);
-  if ( mesh->info.imprim > 0 ) {
-    fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
+    /* Mesh improvement */
+    if ( !MMG2D_mmg2d1n(mesh,met) ) {
+      if ( !MMG5_unscaleMesh(mesh,met,NULL) )  _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+      MMG2D_RETURN_AND_PACK(mesh,met,sol,MMG5_LOWFAILURE);
+    }
+
+    chrono(OFF,&(ctim[3]));
+    printim(ctim[3].gdif,stim);
+    if ( mesh->info.imprim > 0 ) {
+      fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
+    }
   }
 
   /* Print output quality history */
   if ( !MMG2D_outqua(mesh,met) ) {
-     if ( !MMG5_unscaleMesh(mesh,met,NULL) )  _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
-     MMG2D_RETURN_AND_PACK(mesh,met,sol,MMG5_LOWFAILURE);
-   }
+    if ( !MMG5_unscaleMesh(mesh,met,NULL) )  _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+    MMG2D_RETURN_AND_PACK(mesh,met,sol,MMG5_LOWFAILURE);
+  }
 
   /* Print edge length histories */
   if ( abs(mesh->info.imprim) > 4 )  {
@@ -585,25 +588,25 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( mesh->info.imprim > 0 )
     fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
 
-  /* Mesh improvement - call new version of mmg2d1 */
-  chrono(ON,&(ctim[4]));
-  if ( mesh->info.imprim > 0 )
-    fprintf(stdout,"\n  -- PHASE 3 : MESH IMPROVEMENT (%s)\n",
-            met->size < 3 ? "ISOTROPIC" : "ANISOTROPIC");
+  if ( (!mesh->info.nomove) || (!mesh->info.noswap) || (!mesh->info.noinsert) ) {
 
-  if ( !MMG2D_mmg2d1n(mesh,met) ) {
-    if ( !MMG5_unscaleMesh(mesh,met,NULL) )  _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
-    MMG2D_RETURN_AND_PACK(mesh,met,sol,MMG5_LOWFAILURE);
+    /* Mesh improvement - call new version of mmg2d1 */
+    chrono(ON,&(ctim[4]));
+    if ( mesh->info.imprim > 0 )
+      fprintf(stdout,"\n  -- PHASE 3 : MESH IMPROVEMENT (%s)\n",
+              met->size < 3 ? "ISOTROPIC" : "ANISOTROPIC");
+
+    if ( !MMG2D_mmg2d1n(mesh,met) ) {
+      if ( !MMG5_unscaleMesh(mesh,met,NULL) )  _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+      MMG2D_RETURN_AND_PACK(mesh,met,sol,MMG5_LOWFAILURE);
+    }
+
+    chrono(OFF,&(ctim[4]));
+    printim(ctim[4].gdif,stim);
+    if ( mesh->info.imprim > 0 ) {
+      fprintf(stdout,"  -- PHASE 3 COMPLETED.     %s\n",stim);
+    }
   }
-
-  chrono(OFF,&(ctim[4]));
-  printim(ctim[4].gdif,stim);
-  if ( mesh->info.imprim > 0 ) {
-    fprintf(stdout,"  -- PHASE 3 COMPLETED.     %s\n",stim);
-  }
-
-  /* Unscale mesh */
-  if ( !MMG5_unscaleMesh(mesh,met,NULL) )  _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
 
   /* Print quality histories */
   if ( !MMG2D_outqua(mesh,met) ) {
@@ -614,6 +617,9 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( abs(mesh->info.imprim) > 4 )  {
     MMG2D_prilen(mesh,met);
   }
+
+  /* Unscale mesh */
+  if ( !MMG5_unscaleMesh(mesh,met,NULL) )  _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
 
   chrono(ON,&(ctim[1]));
   if ( mesh->info.imprim > 0 )  fprintf(stdout,"\n  -- MESH PACKED UP\n");
@@ -859,35 +865,29 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
   if ( mesh->info.imprim > 0 )
     fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
 
-  /* Mesh improvement - call new version of mmg2d1 */
-  chrono(ON,&ctim[4]);
-  if ( mesh->info.imprim > 0 ) {
-    fprintf(stdout,"\n  -- PHASE 3 : MESH IMPROVEMENT\n");
-  }
+  if ( (!mesh->info.nomove) || (!mesh->info.noswap) || (!mesh->info.noinsert) ) {
 
-  if ( (!mesh->info.noinsert) && !MMG2D_mmg2d1n(mesh,met) ) {
-    if ( mettofree ) {
-      MMG5_DEL_MEM(mesh,met->m);
-      MMG5_SAFE_FREE (met);
+    /* Mesh improvement - call new version of mmg2d1 */
+    chrono(ON,&ctim[4]);
+    if ( mesh->info.imprim > 0 ) {
+      fprintf(stdout,"\n  -- PHASE 3 : MESH IMPROVEMENT\n");
     }
-    if ( !MMG5_unscaleMesh(mesh,met,NULL) ) _LIBMMG5_RETURN(mesh,sol,met,MMG5_STRONGFAILURE);
-    MMG2D_RETURN_AND_PACK(mesh,sol,met,MMG5_LOWFAILURE);
-  }
 
-  /* End of mmg2dls */
-  chrono(OFF,&(ctim[4]));
-  printim(ctim[4].gdif,stim);
-  if ( mesh->info.imprim > 0 ) {
-    fprintf(stdout,"  -- PHASE 3 COMPLETED.     %s\n",stim);
-  }
-
-  /* Unscale mesh */
-  if ( !MMG5_unscaleMesh(mesh,met,NULL) ) {
-    if ( mettofree ) {
-      MMG5_DEL_MEM(mesh,met->m);
-      MMG5_SAFE_FREE (met);
+    if ( !MMG2D_mmg2d1n(mesh,met) ) {
+      if ( mettofree ) {
+        MMG5_DEL_MEM(mesh,met->m);
+        MMG5_SAFE_FREE (met);
+      }
+      if ( !MMG5_unscaleMesh(mesh,met,NULL) ) _LIBMMG5_RETURN(mesh,sol,met,MMG5_STRONGFAILURE);
+      MMG2D_RETURN_AND_PACK(mesh,sol,met,MMG5_LOWFAILURE);
     }
-    _LIBMMG5_RETURN(mesh,sol,met,MMG5_STRONGFAILURE);
+
+    /* End of mmg2dls */
+    chrono(OFF,&(ctim[4]));
+    printim(ctim[4].gdif,stim);
+    if ( mesh->info.imprim > 0 ) {
+      fprintf(stdout,"  -- PHASE 3 COMPLETED.     %s\n",stim);
+    }
   }
 
   /* Print quality histories */
@@ -897,6 +897,15 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
       MMG5_SAFE_FREE (met);
     }
     MMG2D_RETURN_AND_PACK(mesh,sol,met,MMG5_LOWFAILURE);
+  }
+
+  /* Unscale mesh */
+  if ( !MMG5_unscaleMesh(mesh,met,NULL) ) {
+    if ( mettofree ) {
+      MMG5_DEL_MEM(mesh,met->m);
+      MMG5_SAFE_FREE (met);
+    }
+    _LIBMMG5_RETURN(mesh,sol,met,MMG5_STRONGFAILURE);
   }
 
   chrono(ON,&(ctim[1]));
@@ -1088,32 +1097,35 @@ int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
     fprintf(stdout,"  -- PHASE 2 COMPLETED.     %s\n",stim);
   }
 
-  /* End with a classical remeshing stage, provided mesh->info.lag > 1 */
-  if ( (ier > 0) && (mesh->info.lag >= 1) ) {
-    chrono(ON,&(ctim[4]));
-    if ( mesh->info.imprim > 0 ) {
-      fprintf(stdout,"\n  -- PHASE 3 : MESH IMPROVEMENT\n");
-    }
+  if ( (!mesh->info.nomove) || (!mesh->info.noswap) || (!mesh->info.noinsert) ) {
 
-    if ( !MMG2D_mmg2d1n(mesh,met) ) {
-      if ( !MMG5_unscaleMesh(mesh,met,NULL) )  _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
-      MMG2D_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE);
-    }
+    /* End with a classical remeshing stage, provided mesh->info.lag > 1 */
+    if ( (ier > 0) && (mesh->info.lag >= 1) ) {
+      chrono(ON,&(ctim[4]));
+      if ( mesh->info.imprim > 0 ) {
+        fprintf(stdout,"\n  -- PHASE 3 : MESH IMPROVEMENT\n");
+      }
 
-    chrono(OFF,&(ctim[4]));
-    printim(ctim[4].gdif,stim);
-    if ( mesh->info.imprim > 0 ) {
-      fprintf(stdout,"  -- PHASE 3 COMPLETED.     %s\n",stim);
+      if ( !MMG2D_mmg2d1n(mesh,met) ) {
+        if ( !MMG5_unscaleMesh(mesh,met,NULL) )  _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
+        MMG2D_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE);
+      }
+
+      chrono(OFF,&(ctim[4]));
+      printim(ctim[4].gdif,stim);
+      if ( mesh->info.imprim > 0 ) {
+        fprintf(stdout,"  -- PHASE 3 COMPLETED.     %s\n",stim);
+      }
     }
   }
-
-  /* Unscale mesh */
-  if ( !MMG5_unscaleMesh(mesh,met,NULL) )  _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
 
   /* Print quality histories */
   if ( !MMG2D_outqua(mesh,met) ) {
     MMG2D_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE);
   }
+
+  /* Unscale mesh */
+  if ( !MMG5_unscaleMesh(mesh,met,NULL) )  _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
 
   chrono(ON,&(ctim[1]));
   if ( mesh->info.imprim > 0 )  fprintf(stdout,"\n  -- MESH PACKED UP\n");

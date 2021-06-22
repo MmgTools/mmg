@@ -1365,7 +1365,7 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet) {
   if ( mesh->info.imprim > 0 ) {
     fprintf(stdout,"\n  -- PHASE 2 : ANALYSIS\n");
   }
-  
+
   /* Specific meshing */
   if ( mesh->info.optim ) {
     if ( !MMG3D_doSol(mesh,met) ) {
