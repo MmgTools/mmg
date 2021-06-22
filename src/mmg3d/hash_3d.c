@@ -682,14 +682,21 @@ int MMG5_setVertexNmTag(MMG5_pMesh mesh) {
   MMG5_pPoint         ppt;
   MMG5_Hash           hash;
   int                 k,i,base;
-  int                 nc, nre, ng, nrp,ier;
+  int                 np,nc, nre, ng, nrp,ier;
 
   /* Second: seek the non-required non-manifold points and try to analyse
    * whether they are corner or required. */
 
   /* Hash table used by boulernm to store the special edges passing through
    * a given point */
-  if ( ! MMG5_hashNew(mesh,&hash,mesh->np,(int)(3.71*mesh->np)) ) return 0;
+  np = 0;
+  for (k=1; k<=mesh->np; ++k) {
+    ppt = &mesh->point[k];
+    if ( (!(ppt->tag & MG_NOM)) || (ppt->tag & MG_REQ) ) continue;
+    ++np;
+  }
+
+  if ( ! MMG5_hashNew(mesh,&hash,np,(int)(3.71*np)) ) return 0;
 
   nc = nre = 0;
   base = ++mesh->base;
