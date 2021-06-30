@@ -1175,7 +1175,7 @@ int MMG3D_Set_edges(MMG5_pMesh mesh, int *edges, int *refs) {
     mesh->edge[i].a    = edges[j];
     mesh->edge[i].b    = edges[j+1];
     if ( refs != NULL )
-      mesh->edge[i].ref  = refs[i];
+      mesh->edge[i].ref  = refs[i-1];
     mesh->edge[i].tag |= MG_REF;
   }
 
