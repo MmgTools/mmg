@@ -281,7 +281,7 @@ int MMG5_mmg3dChkmsh(MMG5_pMesh mesh,int severe,int base) {
                       " face is a limit of two subdomains"
                       " and is not tagged %d %d %d -->%d\n",__func__,
                       MMG3D_indElt(mesh,k),i,
-                       MMG3D_indElt(mesh,pt->v[MMG5_idir[i][0]]),
+                      MMG3D_indElt(mesh,pt->v[MMG5_idir[i][0]]),
                       MMG3D_indPt(mesh,pt->v[MMG5_idir[i][1]]),
                       MMG3D_indPt(mesh,pt->v[MMG5_idir[i][2]]), pxt->ftag[i]);
             }
