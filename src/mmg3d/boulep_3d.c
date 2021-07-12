@@ -1823,7 +1823,7 @@ int MMG5_coquilface(MMG5_pMesh mesh,int start,int8_t iface,int ia,int *list,
           // 2) we have a non-manifold shape immersed in a domain (3 triangles
           // sharing the edge and a closed shell)
           printf("  ## Warning: %s: you have %d boundaries in the shell"
-                 " of your edge.\n",__func__,nbdy+1);
+                 " of a manifold edge.\n",__func__,nbdy+1);
           printf("  Problem may occur during remesh process.\n");
           mmgWarn0 = 1;
         }
