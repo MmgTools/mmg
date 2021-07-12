@@ -1092,6 +1092,7 @@ int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int8_t indq,in
           MMG3D_update_edgeTag(pt,pxt,np,nq,ip,pt1,pxt1,voyp);
         }
         else {
+          /* shell tet has a xtetra and pel exists but pel don't have a xtetra */
           pxt1 = &xt;
           memset(pxt1,0,sizeof(MMG5_xTetra));
           pxt1->ref[voyp] = pxt->ref[ip];
@@ -1108,7 +1109,8 @@ int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int8_t indq,in
         }
       }
       else {
-        /* Only the values corresponding to pt become 0 */
+        /* Shell tet don't have a xtetra: only the values of pel corresponding
+         * to pt become 0 */
         if ( pt1->xt > 0 ) {
           pxt1 = &mesh->xtetra[pt1->xt];
           pxt1->ref[voyp]  = 0;
@@ -1157,12 +1159,15 @@ int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int8_t indq,in
             MMG3D_update_edgeTag(pt,pxt,nq,np,iq,pt1,pxt1,voyq);
           }
           else {
+            /* pel exists, shell tet has a xtetra but qel doesn't have boundary
+             * tetra: create it */
             pxt1 = &xt;
             memset(pxt1,0,sizeof(MMG5_xTetra));
             pxt1->ref[voyq] = pxt->ref[iq];
             pxt1->ftag[voyq] = pxt->ftag[iq];
             pxt1->ori = 15;
             if ( !MG_GET(pxt->ori,iq) )  MG_CLR(pxt1->ori,voyq);
+
             /* update tags for edges */
             MMG3D_update_edgeTag(pt,pxt,nq,np,iq,pt1,pxt1,voyq);
 
@@ -1179,7 +1184,8 @@ int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int8_t indq,in
           }
         }
         else {
-          /* Only the values corresponding to pt become 0 */
+          /* pel exist but shell tet doesn't have a boundary tetra: only the
+           * values of qel corresponding to pt become 0 */
           if ( pt1->xt > 0 ) {
             pxt1 = &mesh->xtetra[pt1->xt];
             pxt1->ref[voyq]  = 0;
@@ -1190,6 +1196,7 @@ int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int8_t indq,in
       }
     }
     else {
+      /* pel==0: No adjacent through face iq */
       assert(pt->xt);
       pxt = &mesh->xtetra[pt->xt];
       if ( qel ) {
