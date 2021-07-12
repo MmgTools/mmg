@@ -875,7 +875,11 @@ int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int8_t indq,in
     for (j=0; j<3; j++) {
       i = MMG5_inxt3[i];
       if ( pt->v[i] == nq ) {
-        /* list edges that we need to update */
+        /* In each tetra of the shell, 2 edges coming from np will be merged
+         * with 2 edges coming from nq: list the local indices of the edges
+         * comig from nq (ind array) and store the global indices of the non nq
+         * vertices of these edges if they are tagged (so edges np-p0_c and
+         * np-p1_c must be updated in all tetra) */
         if ( pt->xt ) {
           pxt = &mesh->xtetra[pt->xt];
           ip  = list[k]%4;
@@ -896,14 +900,19 @@ int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int8_t indq,in
     }
   }
 
-  /* avoid recreating existing elt */
+  /* avoid recreating existing elt and update the tags of the edge ip-p0_c and
+   * ip-p1_c */
   for (k=0; k<ilist; k++) {
+
+    /* Avoid recreating existing elt */
     if ( list[k] < 0 )  continue;
+
     iel = list[k] / 4;
     ip  = list[k] % 4;
     pt  = &mesh->tetra[iel];
 
-    /* update edges of elements that do not belong to the shell of pq */
+    /* update edges ip-p0_c and ip-p1_c in elts of the ball of ip but that do
+     * not belong to the shell of pq */
     if ( !pt->xt ) {
       continue;
     }
@@ -913,6 +922,8 @@ int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int8_t indq,in
       pt1  = &mesh->tetra[-list[i]/4];
       pxt1 = &mesh->xtetra[pt1->xt];
       if ( p0_c[i] ) {
+        /* edge nq-p0_c has a tag in the ith tetra of the shell, update
+         * np-p0_c */
         for ( j=0; j<3; j++) {
           ia = MMG5_idir[ip][j];
           if ( pt->v[ia]==p0_c[i] ) {
@@ -927,6 +938,8 @@ int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int8_t indq,in
         }
       }
       if ( p1_c[i] ) {
+        /* edge nq-p1_c has a tag in the ith tetra of the shell, update
+         * np-p1_c */
         for ( j=0; j<3; j++) {
           ia = MMG5_idir[ip][j];
           if ( pt->v[ia]==p1_c[i] ) {
