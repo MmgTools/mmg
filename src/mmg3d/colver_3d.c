@@ -827,6 +827,59 @@ int MMG5_chkcol_nomint(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t iface,
 }
 
 /**
+ * \param pt tetra of the shell of the edge to collapse
+ * \param pxt xtetra associated to \a pt
+ * \param np global index of point to collapse
+ * \param nq global index of point on which we collapse
+ * \param ip local index of \a np in \a pt
+ * \param pt1 tetra neighbour to \a pt through \a nq
+ * \param pxt1 xtetra associated to \a pt1
+ * \param voyp point facing tetra \a pt in \a pt1
+ *
+ * Update tag and ref of the edges of \a pxt1 that belongs to the face sharing
+ * \a pt1 and \a pt (face \a ip in \a pt).
+ *
+ */
+static inline
+void MMG3D_update_edgeTag(MMG5_pTetra pt,MMG5_pxTetra pxt,int np, int nq,
+                          uint8_t ip, MMG5_pTetra pt1,MMG5_pxTetra pxt1,
+                          uint8_t voyp) {
+
+  int     i,j,p0,p1;
+  uint8_t ia,iav;
+
+  /* update tags for edges */
+  for ( j=0; j<3; j++ ) {
+    ia = MMG5_iarf[ip][j];
+    p0 = pt->v[MMG5_iare[ia][0]];
+    p1 = pt->v[MMG5_iare[ia][1]];
+    if ( pxt->tag[ia] ) {
+      for ( i=0; i<3; i++ ) {
+        iav=MMG5_iarf[voyp][i];
+        if ( p0==nq ) {
+          if ( ((pt1->v[MMG5_iare[iav][0]]==np) && (pt1->v[MMG5_iare[iav][1]]==p1)) ||
+               ((pt1->v[MMG5_iare[iav][0]]==p1) && (pt1->v[MMG5_iare[iav][1]]==np)) )
+            break;
+        }
+        else if ( p1==nq ) {
+          if ( ((pt1->v[MMG5_iare[iav][0]]==np ) && (pt1->v[MMG5_iare[iav][1]]==p0)) ||
+               ((pt1->v[MMG5_iare[iav][0]]==p0) && (pt1->v[MMG5_iare[iav][1]]==np )) )
+            break;
+        }
+        else {
+          if ( ((pt1->v[MMG5_iare[iav][0]]==p0) && (pt1->v[MMG5_iare[iav][1]]==p1)) ||
+               ((pt1->v[MMG5_iare[iav][0]]==p1) && (pt1->v[MMG5_iare[iav][1]]==p0)) )
+            break;
+        }
+      }
+      assert(i!=3);
+      pxt1->tag[iav] |= pxt->tag[ia];
+      pxt1->edg[iav] = MG_MAX ( pxt1->edg[iav],pxt->edg[ia] );
+    }
+  }
+}
+
+/**
  * \param mesh pointer toward the mesh
  * \param met pointer toward the metric
  * \param list pointer toward the ball of the point
@@ -846,8 +899,8 @@ int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int8_t indq,in
   MMG5_pTetra          pt,pt1;
   MMG5_pxTetra         pxt,pxt1;
   MMG5_xTetra          xt,xts;
-  int             i,iel,jel,pel,qel,k,np,nq,*adja,p0,p1;
-  uint8_t         ip,iq,j,voy,voyp,voyq,ia,iav;
+  int             i,iel,jel,pel,qel,k,np,nq,*adja;
+  uint8_t         ip,iq,j,voy,voyp,voyq,ia;
   uint8_t         (ind)[MMG3D_LMAX][2];
   int             p0_c[MMG3D_LMAX],p1_c[MMG3D_LMAX];
   int8_t          indar[4][4][2] = {
@@ -1036,34 +1089,7 @@ int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int8_t indq,in
 #endif
 
           /* update tags for edges */
-          for ( j=0; j<3; j++ ) {
-            ia = MMG5_iarf[ip][j];
-            p0 = pt->v[MMG5_iare[ia][0]];
-            p1 = pt->v[MMG5_iare[ia][1]];
-            if ( pxt->tag[ia] ) {
-              for ( i=0; i<3; i++ ) {
-                iav=MMG5_iarf[voyp][i];
-                if ( p0==nq ) {
-                  if ( ((pt1->v[MMG5_iare[iav][0]]==np) && (pt1->v[MMG5_iare[iav][1]]==p1)) ||
-                       ((pt1->v[MMG5_iare[iav][0]]==p1) && (pt1->v[MMG5_iare[iav][1]]==np)) )
-                    break;
-                }
-                else if ( p1==nq ) {
-                  if ( ((pt1->v[MMG5_iare[iav][0]]==np) && (pt1->v[MMG5_iare[iav][1]]==p0)) ||
-                       ((pt1->v[MMG5_iare[iav][0]]==p0) && (pt1->v[MMG5_iare[iav][1]]==np)) )
-                    break;
-                }
-                else {
-                  if ( ((pt1->v[MMG5_iare[iav][0]]==p0) && (pt1->v[MMG5_iare[iav][1]]==p1)) ||
-                       ((pt1->v[MMG5_iare[iav][0]]==p1) && (pt1->v[MMG5_iare[iav][1]]==p0)) )
-                    break;
-                }
-              }
-              assert(i!=3);
-              pxt1->tag[iav] = pxt1->tag[iav] | pxt->tag[ia];
-              pxt1->edg[iav] = MG_MAX(pxt1->edg[iav],pxt->edg[ia]);
-            }
-          }
+          MMG3D_update_edgeTag(pt,pxt,np,nq,ip,pt1,pxt1,voyp);
         }
         else {
           pxt1 = &xt;
@@ -1074,34 +1100,8 @@ int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int8_t indq,in
           if ( !MG_GET(pxt->ori,ip) )  MG_CLR(pxt1->ori,voyp);
 
           /* update tags for edges */
-          for ( j=0; j<3; j++ ) {
-            ia = MMG5_iarf[ip][j];
-            p0 = pt->v[MMG5_iare[ia][0]];
-            p1 = pt->v[MMG5_iare[ia][1]];
-            if ( pxt->tag[ia] ) {
-              for ( i=0; i<3; i++ ) {
-                iav=MMG5_iarf[voyp][i];
-                if ( p0==nq ) {
-                  if ( ((pt1->v[MMG5_iare[iav][0]]==np) && (pt1->v[MMG5_iare[iav][1]]==p1)) ||
-                       ((pt1->v[MMG5_iare[iav][0]]==p1) && (pt1->v[MMG5_iare[iav][1]]==np)) )
-                    break;
-                }
-                else if ( p1==nq ) {
-                  if ( ((pt1->v[MMG5_iare[iav][0]]==np ) && (pt1->v[MMG5_iare[iav][1]]==p0)) ||
-                       ((pt1->v[MMG5_iare[iav][0]]==p0) && (pt1->v[MMG5_iare[iav][1]]==np )) )
-                    break;
-                }
-                else {
-                  if ( ((pt1->v[MMG5_iare[iav][0]]==p0) && (pt1->v[MMG5_iare[iav][1]]==p1)) ||
-                       ((pt1->v[MMG5_iare[iav][0]]==p1) && (pt1->v[MMG5_iare[iav][1]]==p0)) )
-                    break;
-                }
-              }
-              assert(i!=3);
-              pxt1->tag[iav] |= pxt->tag[ia];
-              pxt1->edg[iav] = MG_MAX ( pxt1->edg[iav],pxt->edg[ia] );
-            }
-          }
+          MMG3D_update_edgeTag(pt,pxt,np,nq,ip,pt1,pxt1,voyp);
+
           /* Recover the already used place by pxt */
           pt1->xt = pt->xt;
           memcpy(pxt,pxt1,sizeof(MMG5_xTetra));
@@ -1154,34 +1154,7 @@ int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int8_t indq,in
 #endif
 
             /* update tags for edges */
-            for ( j=0; j<3; j++ ) {
-              ia = MMG5_iarf[iq][j];
-              p0 = pt->v[MMG5_iare[ia][0]];
-              p1 = pt->v[MMG5_iare[ia][1]];
-              if ( pxt->tag[ia] ) {
-                for ( i=0; i<3; i++ ) {
-                  iav=MMG5_iarf[voyq][i];
-                  if ( p0==np ) {
-                    if ( ((pt1->v[MMG5_iare[iav][0]]==nq) && (pt1->v[MMG5_iare[iav][1]]==p1)) ||
-                         ((pt1->v[MMG5_iare[iav][0]]==p1) && (pt1->v[MMG5_iare[iav][1]]==nq)) )
-                      break;
-                  }
-                  else if ( p1==np ) {
-                    if ( ((pt1->v[MMG5_iare[iav][0]]==nq ) && (pt1->v[MMG5_iare[iav][1]]==p0)) ||
-                         ((pt1->v[MMG5_iare[iav][0]]==p0) && (pt1->v[MMG5_iare[iav][1]]==nq )) )
-                      break;
-                  }
-                  else {
-                    if ( ((pt1->v[MMG5_iare[iav][0]]==p0) && (pt1->v[MMG5_iare[iav][1]]==p1)) ||
-                         ((pt1->v[MMG5_iare[iav][0]]==p1) && (pt1->v[MMG5_iare[iav][1]]==p0)) )
-                      break;
-                  }
-                }
-                assert(i!=3);
-                pxt1->tag[iav] = pxt1->tag[iav] | pxt->tag[ia];
-                pxt1->edg[iav] = MG_MAX(pxt1->edg[iav],pxt->edg[ia]);
-              }
-            }
+            MMG3D_update_edgeTag(pt,pxt,nq,np,iq,pt1,pxt1,voyq);
           }
           else {
             pxt1 = &xt;
@@ -1191,34 +1164,8 @@ int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int8_t indq,in
             pxt1->ori = 15;
             if ( !MG_GET(pxt->ori,iq) )  MG_CLR(pxt1->ori,voyq);
             /* update tags for edges */
-            for ( j=0; j<3; j++ ) {
-              ia = MMG5_iarf[iq][j];
-              p0 = pt->v[MMG5_iare[ia][0]];
-              p1 = pt->v[MMG5_iare[ia][1]];
-              if ( pxt->tag[ia] ) {
-                for ( i=0; i<3; i++ ) {
-                  iav=MMG5_iarf[voyq][i];
-                  if ( p0==np ) {
-                    if ( ((pt1->v[MMG5_iare[iav][0]]==nq) && (pt1->v[MMG5_iare[iav][1]]==p1)) ||
-                         ((pt1->v[MMG5_iare[iav][0]]==p1) && (pt1->v[MMG5_iare[iav][1]]==nq)) )
-                      break;
-                  }
-                  else if ( p1==np ) {
-                    if ( ((pt1->v[MMG5_iare[iav][0]]==nq ) && (pt1->v[MMG5_iare[iav][1]]==p0)) ||
-                         ((pt1->v[MMG5_iare[iav][0]]==p0) && (pt1->v[MMG5_iare[iav][1]]==nq )) )
-                      break;
-                  }
-                  else {
-                    if ( ((pt1->v[MMG5_iare[iav][0]]==p0) && (pt1->v[MMG5_iare[iav][1]]==p1)) ||
-                         ((pt1->v[MMG5_iare[iav][0]]==p1) && (pt1->v[MMG5_iare[iav][1]]==p0)) )
-                      break;
-                  }
-                }
-                assert(i!=3);
-                pxt1->tag[iav] |= pxt->tag[ia];
-                pxt1->edg[iav] = MG_MAX ( pxt1->edg[iav],pxt->edg[ia]);
-              }
-            }
+            MMG3D_update_edgeTag(pt,pxt,nq,np,iq,pt1,pxt1,voyq);
+
             /* Create new field xt */
             mesh->xt++;
             if ( mesh->xt > mesh->xtmax ) {
@@ -1255,34 +1202,7 @@ int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int8_t indq,in
           MG_SET(pxt1->ori,voyq);
 
           /* update tags for edges */
-          for ( j=0; j<3; j++ ) {
-            ia = MMG5_iarf[iq][j];
-            p0 = pt->v[MMG5_iare[ia][0]];
-            p1 = pt->v[MMG5_iare[ia][1]];
-            if ( pxt->tag[ia] ) {
-              for ( i=0; i<3; i++ ) {
-                iav=MMG5_iarf[voyq][i];
-                if ( p0==np ) {
-                  if ( ((pt1->v[MMG5_iare[iav][0]]==nq) && (pt1->v[MMG5_iare[iav][1]]==p1)) ||
-                       ((pt1->v[MMG5_iare[iav][0]]==p1) && (pt1->v[MMG5_iare[iav][1]]==nq)) )
-                    break;
-                }
-                else if ( p1==np ) {
-                  if ( ((pt1->v[MMG5_iare[iav][0]]==nq ) && (pt1->v[MMG5_iare[iav][1]]==p0)) ||
-                       ((pt1->v[MMG5_iare[iav][0]]==p0) && (pt1->v[MMG5_iare[iav][1]]==nq )) )
-                    break;
-                }
-                else {
-                  if ( ((pt1->v[MMG5_iare[iav][0]]==p0) && (pt1->v[MMG5_iare[iav][1]]==p1)) ||
-                       ((pt1->v[MMG5_iare[iav][0]]==p1) && (pt1->v[MMG5_iare[iav][1]]==p0)) )
-                    break;
-                }
-              }
-              assert(i!=3);
-              pxt1->tag[iav] |= pxt->tag[ia];
-              pxt1->edg[iav] = MG_MAX ( pxt1->edg[iav], pxt->edg[ia]);
-            }
-          }
+          MMG3D_update_edgeTag(pt,pxt,nq,np,iq,pt1,pxt1,voyq);
         }
         else {
           pxt1 = &xt;
@@ -1292,34 +1212,8 @@ int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int8_t indq,in
           pxt1->ori = 15;
 
           /* update tags for edges */
-          for ( j=0; j<3; j++ ) {
-            ia = MMG5_iarf[iq][j];
-            p0 = pt->v[MMG5_iare[ia][0]];
-            p1 = pt->v[MMG5_iare[ia][1]];
-            if ( pxt->tag[ia] ) {
-              for ( i=0; i<3; i++ ) {
-                iav = MMG5_iarf[voyq][i];
-                if ( p0==np ) {
-                  if ( ((pt1->v[MMG5_iare[iav][0]]==nq) && (pt1->v[MMG5_iare[iav][1]]==p1)) ||
-                       ((pt1->v[MMG5_iare[iav][0]]==p1) && (pt1->v[MMG5_iare[iav][1]]==nq)) )
-                    break;
-                }
-                else if ( p1==np ) {
-                  if ( ((pt1->v[MMG5_iare[iav][0]]==nq ) && (pt1->v[MMG5_iare[iav][1]]==p0)) ||
-                       ((pt1->v[MMG5_iare[iav][0]]==p0) && (pt1->v[MMG5_iare[iav][1]]==nq )) )
-                    break;
-                }
-                else {
-                  if ( ((pt1->v[MMG5_iare[iav][0]]==p0) && (pt1->v[MMG5_iare[iav][1]]==p1)) ||
-                       ((pt1->v[MMG5_iare[iav][0]]==p1) && (pt1->v[MMG5_iare[iav][1]]==p0)) )
-                    break;
-                }
-              }
-              assert(i!=3);
-              pxt1->tag[iav] |= pxt->tag[ia];
-              pxt1->edg[iav] =  MG_MAX ( pxt1->edg[iav],pxt->edg[ia]);
-            }
-          }
+          MMG3D_update_edgeTag(pt,pxt,nq,np,iq,pt1,pxt1,voyq);
+
           /* Recover the already used place by pxt */
           pt1->xt = pt->xt;
           memcpy(pxt,pxt1,sizeof(MMG5_xTetra));
