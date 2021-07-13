@@ -1480,12 +1480,19 @@ void MMG3D_gradEigenv(MMG5_pMesh mesh,double m[6],double mext[6],int8_t iloc,int
   }
 
   /* Gradation of sizes */
+  double ratio = 1.0;
   for( int i = 0; i< 3; i++ ) {
     if( dmext[i] > dm[i] ) {
-      dm[i] = dmext[i];
+      if( dmext[i]/dm[i] > ratio )
+        ratio = dmext[i]/dm[i];
+//      dm[i] = dmext[i];
       (*ier) = (*ier) | iloc;
     }
   }
+
+  for( int i = 0; i < 6; i++ )
+    m[i] *= ratio;
+  return;
 
   if( (*ier) & iloc ) {
     /* Simultaneous reduction basis is non-orthogonal, so invert it for the
