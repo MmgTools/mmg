@@ -1614,11 +1614,16 @@ int MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int np1,int np
     }
   }
 
-  MMG3D_gradEigenv(mesh,mm2,m1,2,&ier);
-  if( ier == -1 ) return ier;
 
-  MMG3D_gradEigenv(mesh,mm1,m2,1,&ier);
-  if( ier == -1 ) return ier;
+  if( mesh->point[np1].flag >= mesh->base-1 ) {
+    MMG3D_gradEigenv(mesh,mm2,m1,2,&ier);
+    if( ier == -1 ) return ier;
+  }
+
+  if( mesh->point[np2].flag >= mesh->base-1 ) {
+    MMG3D_gradEigenv(mesh,mm1,m2,1,&ier);
+    if( ier == -1 ) return ier;
+  }
 
   return ier;
 
