@@ -1490,9 +1490,12 @@ void MMG3D_gradEigenv(MMG5_pMesh mesh,double m[6],double mext[6],int8_t iloc,int
     }
   }
 
-  for( int i = 0; i < 6; i++ )
-    m[i] *= ratio;
-  return;
+//  for( int i = 0; i < 6; i++ )
+//    m[i] *= ratio;
+//  return;
+
+  for( int i = 0; i < 3; i++ )
+    dm[i] *= ratio;
 
   if( (*ier) & iloc ) {
     /* Simultaneous reduction basis is non-orthogonal, so invert it for the
