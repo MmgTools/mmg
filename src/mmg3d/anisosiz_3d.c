@@ -36,6 +36,37 @@
 #include "inlined_functions_3d.h"
 #include "mmg3dexterns.h"
 
+int MMG3D_recomposeMat(int symmat,double dm[3],double vp[3][3],double *m) {
+  double ivp[3][3];
+  int i,j,k,ij;
+
+  if( symmat ) {
+    ij = 0;
+    for( i = 0; i < 3; i++ ) {
+      for( j = i; j < 3; j++ ) {
+        m[ij] = 0.;
+        for( k = 0; k < 3; k++ ) {
+          m[ij] += dm[k]*vp[k][i]*vp[k][j];
+        }
+        ++ij;
+      }
+    }
+  } else {
+    if( !MMG5_invmat33(vp,ivp) )
+      return 0;
+    for( i = 0; i < 3; i++ ) {
+      for( j = 0; j < 3; j++ ) {
+        m[3*i+j] = 0.;
+        for( k = 0; k < 3; k++ ) {
+          m[3*i+j] += dm[k]*vp[k][i]*ivp[j][k];
+        }
+      }
+    }
+  }
+
+  return 1;
+}
+
 int MMG3D_chk4ridVertices(MMG5_pMesh mesh, MMG5_pTetra pt) {
   MMG5_pPoint  ppt;
   int          i;
