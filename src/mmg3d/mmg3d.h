@@ -445,6 +445,7 @@ int  MMG3D_bdryBuild(MMG5_pMesh);
 int MMG3D_simred(MMG5_pMesh mesh,double *m,double *n,double dm[3],
                  double dn[3],double vp[3][3] );
 int MMG3D_recomposeMat(int symmat,double dm[3],double vp[3][3],double *m);
+int MMG3D_recomposeMat_simred(double dm[3],double vp[3][3],double *m);
 
 /* rmc option */
 double MMG3D_vfrac(MMG5_pMesh ,MMG5_pSol ,int ,int );

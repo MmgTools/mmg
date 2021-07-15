@@ -36,6 +36,26 @@
 #include "inlined_functions_3d.h"
 #include "mmg3dexterns.h"
 
+int MMG3D_recomposeMat_simred(double dm[3],double vp[3][3],double *m) {
+  double ivp[3][3];
+  int i,j,k,ij;
+
+  if( !MMG5_invmat33(vp,ivp) )
+    return 0;
+  ij = 0;
+  for( i = 0; i < 3; i++ ) {
+    for( j = i; j < 3; j++ ) {
+      m[ij] = 0.;
+      for( k = 0; k < 3; k++ ) {
+        m[ij] += dm[k]*ivp[i][k]*ivp[j][k];
+      }
+      ij++;
+    }
+  }
+
+  return 1;
+}
+
 int MMG3D_recomposeMat(int symmat,double dm[3],double vp[3][3],double *m) {
   double ivp[3][3];
   int i,j,k,ij;
@@ -1531,23 +1551,14 @@ void MMG3D_gradEigenv(MMG5_pMesh mesh,double m[6],double mext[6],int8_t iloc,int
   if( (*ier) & iloc ) {
     /* Simultaneous reduction basis is non-orthogonal, so invert it for the
      * inverse transformation */
-    if( !MMG5_invmat33(vp,ivp) ) {
+    if( !MMG3D_recomposeMat_simred(dm,vp,m) ) {
       *ier = -1;
       return;
     }
 
-    int ij = 0;
-    for( int i = 0; i < 3; i++ ) {
-      for( int j = i; j < 3; j++ ) {
-        m[ij] = 0.;
-        for( int k = 0; k < 3; k++ ) {
-          m[ij] += dm[k]*ivp[k][i]*ivp[k][j];
-        }
-        ++ij;
-      }
-    }
   }
 }
+
 
 /**
  * \param mesh pointer toward the mesh.
