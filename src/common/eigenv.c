@@ -519,9 +519,9 @@ int MMG5_eigenv(int symmat,double *mat,double lambda[3],double v[3][3]) {
   v[1][1] = 1.0; v[1][0] = v[1][2] = 0.0;
   v[2][2] = 1.0; v[2][0] = v[2][1] = 0.0;
 
-  w1[1] = a12;  w1[2] = a13;
-  w2[0] = a21;  w2[2] = a23;
-  w3[0] = a31;  w3[1] = a32;
+  w1[1] = a21;  w1[2] = a31;
+  w2[0] = a12;  w2[2] = a32;
+  w3[0] = a13;  w3[1] = a23;
 
   if ( n == 1 ) {
     /* vk = crsprd(wi,wj) */
