@@ -913,6 +913,20 @@ int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int8_t indq,in
   memset( p0_c,0x00,ilist*sizeof(int) );
   memset( p1_c,0x00,ilist*sizeof(int) );
 
+  /* coledge[i] contains the local indices of edges that will be merged by the
+   * collapse corresponding with the configuration i. The edge coledge[i][0] is
+   * merged with the edge coledge[i][1] a,d the edge coledge[i][2] is merged
+   * with edge coledge[i][3].
+   * Config 0: merge of vertices 0 and 1
+   * config 1: merge of vertices 0 and 2
+   * config 2: merge of vertices 0 and 3
+   * config 3: merge of vertices 1 and 2
+   * config 4: merge of vertices 1 and 3
+   * config 5: merge of vertices 2 and 3
+   */
+  const int8_t MMG5_coledge[6][4] = {
+  {1,2,2,4}, {0,3,2,5}, {0,4,1,5},{0,1,4,5}, {0,2,3,5}, {4,3,2,1} };
+
   iel = list[0] / 4;
   ip  = list[0] % 4;
   pt  = &mesh->tetra[iel];
@@ -1023,12 +1037,68 @@ int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int8_t indq,in
     ip  = (-list[k]) % 4;
     pt  = &mesh->tetra[iel];
 
-    iq  = ip;
+    iq  = MMG5_inxt3[ip];
     for (j=0; j<3; j++) {
-      iq = MMG5_inxt3[iq];
       if ( pt->v[iq] == nq )  break;
+      iq = MMG5_inxt3[iq];
     }
     assert(j<3);
+
+    if ( pt->xt ) {
+      pxt = &mesh->xtetra[pt->xt];
+      /* If shell tetra has a xtetra, update tags of edges that will be merged */
+      /* The configuration is computed by setting the ip and iq bits to 1 */
+      int8_t cfg = 0;
+      MG_SET(cfg,ip);
+      MG_SET(cfg,iq);
+
+      const int8_t *coled;
+      switch(cfg) {
+      case 3:
+        /* collapse of vertices 0 and 1 */
+        coled = MMG5_coledge[0];
+        break;
+      case 5:
+        /* collapse of vertices 0 and 2 */
+        coled = MMG5_coledge[1];
+        break;
+      case 9:
+        /* collapse of vertices 0 and 3 */
+        coled = MMG5_coledge[2];
+        break;
+      case 6:
+        /* collapse of vertices 1 and 2 */
+        coled = MMG5_coledge[3];
+        break;
+      case 10:
+        /* collapse of vertices 1 and 3 */
+        coled = MMG5_coledge[4];
+        break;
+      case 12:
+        /* collapse of vertices 2 and 3 */
+        coled = MMG5_coledge[5];
+        break;
+      default:
+        assert ( 0 && "Unexpected collapse configuration");
+      }
+
+      j = 0;
+      for ( j=0; j<3; j+=2 ) {
+        /* when j=0 we update 2 edges that will be merged together, when j=2 we
+         * update the two others */
+        int ia1 = coled[j+0];
+        int ia2 = coled[j+1];
+        if ( pxt->edg[ia1] > pxt->edg[ia2] ) {
+          pxt->edg[ia2] = pxt->edg[ia1];
+        }
+        else {
+          pxt->edg[ia1] = pxt->edg[ia2];
+        }
+
+        pxt->tag[ia1] |= pxt->tag[ia2];
+        pxt->tag[ia2] |= pxt->tag[ia1];
+      }
+    }
 
     adja = &mesh->adja[4*(iel-1)+1];
 
