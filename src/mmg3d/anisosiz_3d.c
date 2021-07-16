@@ -37,6 +37,26 @@
 #include "mmg3dexterns.h"
 
 /**
+ * \param dm matrix eigenvalues (1x3 array).
+ * \param vp eigenvectors matrix (3x3 array, eigenvectors stored by lines).
+ * \return 1 if success, 0 if fail.
+ *
+ * Print eigendecomposition.
+ */
+int MMG3D_printEigenv(double dm[3],double vp[3][3]) {
+  int i;
+
+  printf("--- Eigenvalues:\n");
+  printf("%e %e %e\n",dm[0],dm[1],dm[2]);
+  printf("---Eigenvectors (visualization by columns):\n");
+  printf("%e %e %e\n",vp[0][0],vp[1][0],vp[2][0]);
+  printf("%e %e %e\n",vp[0][1],vp[1][1],vp[2][1]);
+  printf("%e %e %e\n",vp[0][2],vp[1][2],vp[2][2]);
+
+  return 1;
+}
+
+/**
  * \param symmat flag for symmetric(1) or non-symmetric(0) matrix..
  * \param m matrix (1x6 or 1x9 array).
  * \return 1 if success, 0 if fail.

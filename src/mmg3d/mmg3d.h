@@ -447,6 +447,7 @@ int MMG3D_simred(MMG5_pMesh mesh,double *m,double *n,double dm[3],
 int MMG3D_recomposeMat(int8_t symmat,double dm[3],double vp[3][3],double *m);
 int MMG3D_recomposeMat_simred(double dm[3],double vp[3][3],double *m);
 int MMG3D_printErrorMat(int8_t symmat,double *m,double *mr);
+int MMG3D_printEigenv(double dm[3],double vp[3][3]);
 
 /* rmc option */
 double MMG3D_vfrac(MMG5_pMesh ,MMG5_pSol ,int ,int );
