@@ -36,6 +36,70 @@
 #include "inlined_functions_3d.h"
 #include "mmg3dexterns.h"
 
+/**
+ * \param symmat flag for symmetric(1) or non-symmetric(0) matrix..
+ * \param m matrix (1x6 or 1x9 array).
+ * \return 1 if success, 0 if fail.
+ *
+ * Print matrix entries.
+ */
+int MMG3D_printMat(int8_t symmat,double *m) {
+  int i;
+
+  if( symmat ) {
+    printf("%e %e %e\n",m[0],m[1],m[2]);
+    printf("%e %e %e\n",m[1],m[3],m[4]);
+    printf("%e %e %e\n",m[2],m[4],m[5]);
+  } else {
+    printf("%e %e %e\n",m[0],m[1],m[2]);
+    printf("%e %e %e\n",m[3],m[4],m[5]);
+    printf("%e %e %e\n",m[6],m[7],m[8]);
+  }
+
+  return 1;
+}
+
+/**
+ * \param symmat flag for symmetric(1) or non-symmetric(0) matrix..
+ * \param m first matrix (1x6 or 1x9 array).
+ * \param mr second matrix (1x6 or 1x9 array).
+ * \return 1 if success, 0 if fail.
+ *
+ * Print relative error between two matrices, for each matrix entry.
+ */
+int MMG3D_printErrorMat(int8_t symmat,double *m,double *mr) {
+  double dm[9],dd;
+  int i,dim;
+
+  if( symmat )
+    dim = 6;
+  else
+    dim = 9;
+
+  dd = 0.0;
+  for( i = 0; i < dim; i++ )
+    if( fabs(m[i]) > dd )
+      dd = fabs(m[i]);
+  dd = 1.0 / dd;
+
+  for( i = 0; i < dim; i++ )
+      dm[i] = (m[i]-mr[i])*dd;
+
+  if( !MMG3D_printMat(symmat,dm) ) return 0;
+
+  return 1;
+}
+
+/**
+ * \param dm matrix diagonalization (1x3 array).
+ * \param vp basis vectors (3x3 array, eigenvectors stored by lines).
+ * \param m recomposed matrix (1x6 array).
+ * \return 1 if success, 0 if fail.
+ *
+ * Recompose a matrix given its decomposition on a coreduction basis V:
+ *   M = transpose(inv(V)) * diag(mu) * inv(V)
+ *
+ */
 int MMG3D_recomposeMat_simred(double dm[3],double vp[3][3],double *m) {
   double ivp[3][3];
   int i,j,k,ij;
@@ -56,7 +120,18 @@ int MMG3D_recomposeMat_simred(double dm[3],double vp[3][3],double *m) {
   return 1;
 }
 
-int MMG3D_recomposeMat(int symmat,double dm[3],double vp[3][3],double *m) {
+/**
+ * \param symmat flag for symmetric(1) or non-symmetric(0) matrix..
+ * \param dm matrix eigenvalues (1x3 array).
+ * \param vp eigenvectors matrix (3x3 array, eigenvectors stored by lines).
+ * \param m recomposed matrix (1x6 or 1x9 array).
+ * \return 1 if success, 0 if fail.
+ *
+ * Recompose a matrix given its eigendecomposition:
+ *   M = V * diag(lambda) * inv(V)
+ *
+ */
+int MMG3D_recomposeMat(int8_t symmat,double dm[3],double vp[3][3],double *m) {
   double ivp[3][3];
   int i,j,k,ij;
 
