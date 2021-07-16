@@ -456,7 +456,8 @@ void MMG3D_keep_only1Subdomain ( MMG5_pMesh mesh,int nsd );
 int  MMG3D_indElt(MMG5_pMesh mesh,int kel);
 int  MMG3D_indPt(MMG5_pMesh mesh,int kp);
 void MMG5_printTetra(MMG5_pMesh mesh,char* fileName);
-
+void MMG3D_chkpointtag(MMG5_pMesh mesh);
+void MMG3D_chkmeshedgestags(MMG5_pMesh mesh);
 
 #ifdef USE_SCOTCH
 int MMG5_mmg3dRenumbering(int,MMG5_pMesh,MMG5_pSol,MMG5_pSol,int*);
@@ -494,7 +495,7 @@ int  MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree PROctree,
                   double clickSurf,double clickVol,int moveVol,int improveSurf,int improveVolSurf,
                   int improveVol,int maxit,int testmark);
 int  MMG5_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree PROctree, int);
-  int  MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double,double,MMG3D_pPROctree, int,int);
+int  MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double,double,MMG3D_pPROctree, int,int);
 
 /* pointers */
 /* init structures */

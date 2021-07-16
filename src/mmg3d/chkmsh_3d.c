@@ -71,6 +71,183 @@ void MMG5_chkvol(MMG5_pMesh mesh) {
 }
 
 /**
+ * \param mesh pointer toward the mesh
+ *
+ * Test consistency between the tags in the xtetra of all mesh edges marked as
+ * boundaries.
+ *
+ * \warning Not used.
+ */
+void MMG3D_chkmeshedgestags(MMG5_pMesh mesh) {
+  MMG5_pTetra    pt;
+  MMG5_pxTetra   pxt;
+  MMG5_Hash      hash;
+  int            k,nt,i,ip1,ip2,tag;
+
+  /* Rough eval of the number of boundary triangles */
+  nt = 0;
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+    if ( !MG_EOK(pt) )  continue;
+    if ( !pt->xt ) continue;
+
+    pxt = &mesh->xtetra[pt->xt];
+    for (i=0; i<4; i++) {
+      if ( pxt->ftag[i] & MG_BDY ) {
+        ++nt;
+      }
+    }
+  }
+  nt = nt/2 + 1;
+
+  /* Travel mesh edges and hash boundary ones */
+  MMG5_hashNew(mesh,&hash,nt,3*nt);
+
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+    if ( !MG_EOK(pt) )  continue;
+    if ( !pt->xt ) continue;
+
+    pxt = &mesh->xtetra[pt->xt];
+    for (i=0; i<6; i++) {
+      if ( pxt->tag[i] & MG_BDY ) {
+        ip1 = pt->v[MMG5_iare[i][0]];
+        ip2 = pt->v[MMG5_iare[i][1]];
+        tag = MMG5_hashEdgeTag ( mesh,&hash,ip1,ip2,pxt->tag[i]);
+        if ( tag != pxt->tag[i] ) {
+          fprintf(stderr,"Error: %s: %d: Non consistency at tet %d (%d), edge %d:%d--%d\n ",
+                  __func__,__LINE__,k,MMG3D_indElt(mesh,k),i,ip1,ip2);
+          assert( tag == pxt->tag[i] && "edge tag error" );
+        }
+      }
+    }
+  }
+  MMG5_DEL_MEM(mesh,hash.item);
+}
+
+
+/**
+ * \param mesh pointer toward the mesh
+ * \param ip1 first vertex of edge to test
+ * \param ip2 second vertex of edge to test
+ * \param tag edge tag
+ *
+ * Test consistency between the tags of the edge \a ip1 - \a ip2 from all the
+ * tetra of the edge shell.
+ *
+ * \warning Not used.
+ */
+void MMG3D_chkedgetag(MMG5_pMesh mesh, int ip1, int ip2, int tag) {
+  MMG5_pTetra    pt;
+  MMG5_pxTetra   pxt;
+  int            k,i,i1,i2;
+
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+    if ( !MG_EOK(pt) )  continue;
+    if ( !pt->xt ) continue;
+
+    pxt = &mesh->xtetra[pt->xt];
+    for (i=0; i<6; i++) {
+      i1 = pt->v[MMG5_iare[i][0]];
+      i2 = pt->v[MMG5_iare[i][1]];
+
+      if ( ((i1==ip1) && (i2==ip2)) || ((i2==ip1) && (i1==ip2)) ) {
+        if ( pxt->tag[i] != tag ) {
+          fprintf(stderr,"Error: %s: %d: Non consistency at tet %d (%d), edge %d\n ",
+                  __func__,__LINE__,k,MMG3D_indElt(mesh,k),i);
+          assert(0);
+        }
+      }
+    }
+  }
+}
+
+
+/**
+ * \param mesh
+ *
+ * Test consistency between points and edges tags. If an error is detected,
+ * hash mesh edges to check the consistency between the tags of tetra edges.
+ *
+ * \warning Not used.
+ */
+void MMG3D_chkpointtag(MMG5_pMesh mesh) {
+  MMG5_pTetra    pt;
+  MMG5_pxTetra   pxt;
+  MMG5_pPoint    p1,p2;
+  int            k,i,i1,i2,ip1,ip2;
+
+  /** Check consistency between edge tags and point tags */
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+    if ( !MG_EOK(pt) )  continue;
+    if ( !pt->xt ) continue;
+
+    pxt = &mesh->xtetra[pt->xt];
+
+    for ( i=0; i<6; ++i ) {
+      i1  = MMG5_iare[i][0];
+      i2  = MMG5_iare[i][1];
+      ip1 = pt->v[i1];
+      ip2 = pt->v[i2];
+      p1 = &mesh->point[ip1];
+      p2 = &mesh->point[ip2];
+
+      if ( MG_EDG(pxt->tag[i]) ) {
+        if ( !(MG_EDG(p1->tag) || MG_SIN(p1->tag)) ) {
+          fprintf(stderr,"Error: %s: %d: Tag error at point %d (%d), "
+                  "tetra %d (%d), edge %d:%d--%d (%d--%d).\n",__func__,__LINE__,
+                  ip1,MMG3D_indPt(mesh,ip1),k,MMG3D_indElt(mesh,k),i,ip1,ip2,
+                  MMG3D_indPt(mesh,ip1),MMG3D_indPt(mesh,ip2));
+          fprintf(stderr," point tag: %d; edge tag: %d\n",p1->tag,pxt->tag[i]);
+          /** An error has been detected: check the consistency between the tags of
+           * tetra edges */
+          MMG3D_chkedgetag(mesh,ip1,ip2,pxt->tag[i]);
+          assert(0);
+        }
+        if ( !(MG_EDG(p2->tag) || MG_SIN(p2->tag)) ) {
+          fprintf(stderr,"Error: %s: %d: Tag error at point %d (%d), "
+                  "tetra %d (%d), edge %d:%d--%d (%d--%d).\n",__func__,__LINE__,
+                  ip2,MMG3D_indPt(mesh,ip2),k,MMG3D_indElt(mesh,k),i,ip1,ip2,
+                  MMG3D_indPt(mesh,ip1),MMG3D_indPt(mesh,ip2));
+          fprintf(stderr," point tag: %d; edge tag: %d\n",p2->tag,pxt->tag[i]);
+          /** An error has been detected: check the consistency between the tags of
+           * tetra edges */
+          MMG3D_chkedgetag(mesh,ip1,ip2,pxt->tag[i]);
+          assert(0);
+        }
+      }
+
+      if ( pxt->tag[i] & MG_NOM ) {
+        if ( !(MG_SIN(p1->tag) || (p1->tag & MG_NOM)) ) {
+          fprintf(stderr,"Error: %s: %d: Tag error at point %d (%d), "
+                  "tetra %d (%d), edge %d:%d--%d (%d--%d).\n",__func__,__LINE__,
+                  ip1,MMG3D_indPt(mesh,ip1),k,MMG3D_indElt(mesh,k),i,ip1,ip2,
+                  MMG3D_indPt(mesh,ip1),MMG3D_indPt(mesh,ip2));
+          fprintf(stderr," point tag: %d; edge tag: %d\n",p1->tag,pxt->tag[i]);
+          /** An error has been detected: check the consistency between the tags of
+           * tetra edges */
+          MMG3D_chkedgetag(mesh,ip1,ip2,pxt->tag[i]);
+          assert(0);
+        }
+        if ( !(MG_SIN(p2->tag) || (p2->tag & MG_NOM)) ) {
+          fprintf(stderr,"Error: %s: %d: Tag error at point %d (%d), "
+                  "tetra %d (%d), edge %d:%d--%d (%d--%d).\n",__func__,__LINE__,
+                  ip2,MMG3D_indPt(mesh,ip2),k,MMG3D_indElt(mesh,k),i,ip1,ip2,
+                  MMG3D_indPt(mesh,ip1),MMG3D_indPt(mesh,ip2));
+          fprintf(stderr," point tag: %d; edge tag: %d\n",p2->tag,pxt->tag[i]);
+          /** An error has been detected: check the consistency between the tags of
+           * tetra edges */
+          MMG3D_chkedgetag(mesh,ip1,ip2,pxt->tag[i]);
+          assert(0);
+        }
+      }
+    }
+  }
+}
+
+/**
 * \return 0 if fail, 1 otherwise
  *
  * \warning Not used.
