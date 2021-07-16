@@ -1960,6 +1960,21 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
 // void (*MMG2D_callbackinsert) (int ,int ,int ,int, int);
 
 /**
+ * \param mesh pointer toward the mesh structure.
+ * \return 0 if fail, 1 if success.
+ *
+ * Print the default parameters values.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG2D_DEFAULTVALUES(mesh,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int MMG2D_defaultValues(MMG5_pMesh mesh);
+
+/**
  * \param mesh pointer toward the mesh structure
  * \param met pointer toward the sol structure
  * \return 1 if success

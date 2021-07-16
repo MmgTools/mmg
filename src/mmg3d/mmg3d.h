@@ -425,7 +425,6 @@ void MMG3D_computeLESqua(MMG5_pMesh,MMG5_pSol,int*,double*,double*,double*,int*,
 int MMG3D_computePrilen(MMG5_pMesh,MMG5_pSol,double*,double*,double*,int*,int*,int*,
                         int*,int*,int*,int8_t,double**, int [9] );
 int  MMG3D_prilen(MMG5_pMesh mesh,MMG5_pSol met,int8_t);
-void MMG5_defaultValues(MMG5_pMesh);
 int  MMG5_intridmet(MMG5_pMesh,MMG5_pSol,int,int,double,double*,double*);
 int  MMG5_intregmet(MMG5_pMesh,MMG5_pSol,int,int8_t,double, double*);
 int  MMG5_intvolmet(MMG5_pMesh,MMG5_pSol,int,int8_t,double, double*);

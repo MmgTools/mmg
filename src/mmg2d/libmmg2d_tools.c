@@ -57,6 +57,22 @@ void MMG2D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
 }
 
 /**
+ * \param mesh pointer toward the mesh structure.
+ * \return 0 if fail, 1 if success.
+ *
+ * Print the default parameters values.
+ *
+ */
+int MMG2D_defaultValues(MMG5_pMesh mesh) {
+
+  MMG5_mmgDefaultValues(mesh);
+
+  fprintf(stdout,"\n\n");
+
+  return 1;
+}
+
+/**
  * \param mesh pointer toward the mesh
  * \param met pointer toward the metric
  *
