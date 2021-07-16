@@ -1519,7 +1519,6 @@ int MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
  * Perform simultaneous reduction of matrices \a m and \a n.
  *
  */
-static inline
 int MMG3D_simred(MMG5_pMesh mesh,double *m,double *n,double dm[3],
                  double dn[3],double vp[3][3] ) {
 
