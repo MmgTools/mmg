@@ -419,6 +419,9 @@ int MMG5_mmg3dChkmsh(MMG5_pMesh mesh,int severe,int base) {
   uint8_t         voy,voy1;
   static int8_t   mmgErr0=0,mmgErr1=0,mmgErr2=0,mmgErr3=0,mmgErr4=0,mmgErr5=0;
 
+  MMG3D_chkmeshedgestags(mesh);
+  MMG3D_chkpointtag(mesh);
+
   for (k=1; k<=mesh->ne; k++) {
     pt1 = &mesh->tetra[k];
     if ( !MG_EOK(pt1) || pt1->ref < 0 )   continue;

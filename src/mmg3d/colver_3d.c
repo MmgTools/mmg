@@ -1156,13 +1156,6 @@ int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int8_t indq,in
   int                  iel,jel,pel,qel,k,np,nq,*adja;
   uint8_t              ip,iq,j,voy,voyp,voyq;
 
-#ifndef NDEBUG
-  //if ( mesh->info.ddebug ) {
-    MMG3D_chkmeshedgestags(mesh);
-    MMG3D_chkpointtag(mesh);
-  //}
-#endif
-
   /* coledge[i] contains the local indices of edges that will be merged by the
    * collapse corresponding with the configuration i. The edge coledge[i][0] is
    * merged with the edge coledge[i][1] a,d the edge coledge[i][2] is merged
@@ -1557,13 +1550,6 @@ int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int8_t indq,in
       pt->qual=MMG5_orcal(mesh,met,iel);
     pt->mark=mesh->mark;
   }
-
-#ifndef NDEBUG
-  //if ( mesh->info.ddebug ) {
-    MMG3D_chkmeshedgestags(mesh);
-    MMG3D_chkpointtag(mesh);
-  //}
-#endif
 
   return np;
 }
