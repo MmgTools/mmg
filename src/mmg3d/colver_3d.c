@@ -1138,10 +1138,10 @@ int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int8_t indq,in
   uint8_t              ip,iq,j,voy,voyp,voyq;
 
 #ifndef NDEBUG
-  if ( mesh->info.ddebug ) {
+  //if ( mesh->info.ddebug ) {
     MMG3D_chkmeshedgestags(mesh);
     MMG3D_chkpointtag(mesh);
-  }
+  //}
 #endif
 
   /* coledge[i] contains the local indices of edges that will be merged by the
@@ -1371,7 +1371,6 @@ int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int8_t indq,in
               MG_CLR( pxt1->ori,voyp );
           }
 
-
 #ifndef NDEBUG
           else {
             /* Check that a non parallel external boundary face has always a good
@@ -1541,10 +1540,10 @@ int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int8_t indq,in
   }
 
 #ifndef NDEBUG
-  if ( mesh->info.ddebug ) {
+  //if ( mesh->info.ddebug ) {
     MMG3D_chkmeshedgestags(mesh);
     MMG3D_chkpointtag(mesh);
-  }
+  //}
 #endif
 
   return np;
