@@ -1030,8 +1030,7 @@ int MMG3D_get_shellEdgeTag_oneDir(MMG5_pMesh  mesh,int start, int na, int nb,
       *ref  = pxt->edg[i];
       *tag |= pxt->tag[i];
       *filled = 1;
-#warning to test
-      //return adj;
+      return adj;
     }
 
     /* set new triangle for travel */
@@ -1081,8 +1080,7 @@ int MMG3D_get_shellEdgeTag(MMG5_pMesh  mesh,int start, int8_t ia,int16_t *tag,in
     pxt = &mesh->xtetra[pt->xt];
     *tag |= pxt->tag[ia];
     *ref = pxt->edg[ia];
-#warning to test
-    //return 1;
+    return 1;
   }
 
   /* Travel in one direction */
