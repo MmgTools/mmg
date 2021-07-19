@@ -901,6 +901,7 @@ int MMG3D_update_shellEdgeTag_oneDir(MMG5_pMesh  mesh,int start, int na, int nb,
   MMG5_pTetra  pt;
   MMG5_pxTetra pxt;
   int          *adja;
+  int16_t      xtag,atag;
   int8_t       i;
 
   while ( adj && (adj != start) ) {
@@ -912,6 +913,16 @@ int MMG3D_update_shellEdgeTag_oneDir(MMG5_pMesh  mesh,int start, int na, int nb,
     /* update edge ref and tag */
     if ( pt->xt ) {
       pxt = &mesh->xtetra[pt->xt];
+
+      /* if tag and edge are already consistent, non need to update the shell (do
+       * not consider the MG_BDY tag) */
+      xtag = pxt->tag[i] & ~MG_BDY;
+      atag = tag & ~MG_BDY;
+
+      if ( xtag == atag &&  pxt->edg[i] == ref ) {
+        return start;
+      }
+
       pxt->edg[i] = ref;
       pxt->tag[i] |= tag;
     }
@@ -942,12 +953,12 @@ int MMG3D_update_shellEdgeTag_oneDir(MMG5_pMesh  mesh,int start, int na, int nb,
  * Update tag and ref of the edge \ia of tetra \a start by traveling its shell.
  *
  */
-#warning I think that it is not mandatory to travel the entirely shell if the first met xtetra has the suitable tag
 static inline
 int MMG3D_update_shellEdgeTag(MMG5_pMesh  mesh,int start, int8_t ia,int16_t tag,int ref) {
   MMG5_pTetra  pt;
   MMG5_pxTetra pxt;
   int          piv,na,nb,adj,*adja;
+  int16_t      xtag,atag;
 
   pt   = &mesh->tetra[start];
 
@@ -959,6 +970,16 @@ int MMG3D_update_shellEdgeTag(MMG5_pMesh  mesh,int start, int8_t ia,int16_t tag,
 
   if ( pt->xt ) {
     pxt = &mesh->xtetra[pt->xt];
+
+    /* if tag and edge are already consistent, non need to update the shell (do
+     * not consider the MG_BDY tag) */
+    xtag = pxt->tag[ia] & ~MG_BDY;
+    atag = tag & ~MG_BDY;
+
+    if ( xtag == atag &&  pxt->edg[ia] == ref ) {
+      return 1;
+    }
+
     pxt->tag[ia] |= tag;
     pxt->edg[ia]  = ref;
   }
