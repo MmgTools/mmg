@@ -459,7 +459,7 @@ int8_t MMG5_chkedg(MMG5_pMesh mesh,MMG5_Tria *pt,int8_t ori, double hmax,
           if ( !mmgWarn0 ) {
             fprintf(stderr,"\n  ## Warning: %s: a- at least 1 geometrical"
                     " problem: non consistency between point tag (%d) and"
-                    " edge tag (%d.)\n",__func__,p[i1]->tag,pt->tag[i]);
+                    " edge tag (%d).\n",__func__,p[i1]->tag,pt->tag[i]);
             mmgWarn0 = 1;
           }
           return -1;
@@ -482,7 +482,7 @@ int8_t MMG5_chkedg(MMG5_pMesh mesh,MMG5_Tria *pt,int8_t ori, double hmax,
           if ( !mmgWarn1 ) {
             fprintf(stderr,"\n  ## Warning: %s: b- at least 1 geometrical"
                     " problem: non consistency between point tag (%d) and"
-                    " edge tag (%d.)\n",__func__,p[i2]->tag,pt->tag[i]);
+                    " edge tag (%d).\n",__func__,p[i2]->tag,pt->tag[i]);
             mmgWarn1 = 1;
           }
           return -1;

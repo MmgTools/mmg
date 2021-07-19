@@ -72,6 +72,129 @@ void MMG5_chkvol(MMG5_pMesh mesh) {
 
 /**
  * \param mesh pointer toward the mesh
+ * \param start tetra from which we start to travel
+ * \param na edge vertex
+ * \param nb edge vertex
+ * \param tag edge tag
+ * \param ref edge ref
+ * \param piv global index of the pivot to set the sense of travel
+ * \param adj index of adjacent tetra for the travel
+ *
+ * \return -1 if fail, \a start if shell has been completely travelled, 0
+ * otherwise (open shell).
+ *
+ * Test consistency of tag and ref of the edge \a na \a nb from tetra \a start
+ * by traveling its shell in one direction (given by the pivot \a piv).
+ *
+ */
+static inline
+int MMG3D_chk_shellEdgeTag_oneDir(MMG5_pMesh  mesh,int start, int na, int nb,
+                                  int16_t tag,int ref, int piv,int adj) {
+  MMG5_pTetra  pt;
+  MMG5_pxTetra pxt;
+  int          *adja;
+  int16_t      xtag;
+  int8_t       i;
+
+  /* Remove the BDY tag as it may be non consistent */
+  tag &= ~MG_BDY;
+
+  while ( adj && (adj != start) ) {
+    pt     = &mesh->tetra[adj];
+
+    /* identification of edge number in tetra adj */
+    if ( !MMG3D_findEdge(mesh,pt,adj,na,nb,1,NULL,&i) ) return -1;
+
+    /* update edge ref and tag */
+    if ( pt->xt ) {
+      pxt = &mesh->xtetra[pt->xt];
+      xtag = (pxt->tag[i] & ~MG_BDY);
+      assert (xtag == tag && "non consistent tags");
+      assert (pxt->edg[i] == ref && "non consistent refs");
+    }
+
+    /* set new triangle for travel */
+    adja = &mesh->adja[4*(adj-1)+1];
+    if ( pt->v[ MMG5_ifar[i][0] ] == piv ) {
+      adj = adja[ MMG5_ifar[i][0] ] / 4;
+      piv = pt->v[ MMG5_ifar[i][1] ];
+    }
+    else {
+      adj = adja[ MMG5_ifar[i][1] ] /4;
+      piv = pt->v[ MMG5_ifar[i][0] ];
+    }
+  }
+
+  return adj;
+}
+
+/**
+ * \param mesh pointer toward the mesh
+ * \param start tetra from which we start to travel
+ * \param ia local index of edge that must be updated
+ * \param tag edge tag
+ * \param ref edge ref
+ * \return 1 if success, 0 if fail.
+ *
+ * Test consistency of tag and ref of the edge \ia of tetra \a start by
+ * traveling its shell.
+ *
+ */
+int MMG3D_chk_shellEdgeTag(MMG5_pMesh  mesh,int start, int8_t ia,int16_t tag,int ref) {
+  MMG5_pTetra  pt;
+  MMG5_pxTetra pxt;
+  int          piv,na,nb,adj,*adja;
+  int16_t      xtag;
+
+  pt   = &mesh->tetra[start];
+
+  assert( start >= 1 &&  MG_EOK(pt) );
+
+  pxt  = NULL;
+  na   = pt->v[MMG5_iare[ia][0]];
+  nb   = pt->v[MMG5_iare[ia][1]];
+
+  /* Remove the BDY tag as it may be non consistent */
+  tag &= ~MG_BDY;
+
+  if ( pt->xt ) {
+    pxt = &mesh->xtetra[pt->xt];
+    /* Remove the BDY tag as it may be non consistent */
+    xtag = (pxt->tag[ia] & ~MG_BDY);
+    assert (xtag == tag && "non consistent tags"); ;
+    assert (pxt->edg[ia] == ref && "non consistent refs"); ;
+  }
+
+  /* Travel in one direction */
+  adja = &mesh->adja[4*(start-1)+1];
+  adj = adja[MMG5_ifar[ia][0]] / 4;
+  piv = pt->v[MMG5_ifar[ia][1]];
+
+  adj = MMG3D_chk_shellEdgeTag_oneDir(mesh,start,na,nb,tag,ref,piv,adj);
+
+  /* If all shell has been travelled, stop, else, travel it the other sense */
+  if ( adj > 0 ) {
+    assert ( adj == start );
+    return 1;
+  }
+  else if ( adj < 0 ) return 0;
+
+  assert(!adj);
+
+  pt = &mesh->tetra[start];
+  adja = &mesh->adja[4*(start-1)+1];
+  adj = adja[MMG5_ifar[ia][1]] / 4;
+  piv = pt->v[MMG5_ifar[ia][0]];
+
+  adj = MMG3D_chk_shellEdgeTag_oneDir(mesh,start,na,nb,tag,ref,piv,adj);
+
+  if ( adj < 0 ) return 0;
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh
  *
  * Test consistency between the tags in the xtetra of all mesh edges marked as
  * boundaries.

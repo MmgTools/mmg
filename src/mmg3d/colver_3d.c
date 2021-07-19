@@ -881,6 +881,241 @@ void MMG3D_update_edgeTag(MMG5_pTetra pt,MMG5_pxTetra pxt,int np, int nq,
 
 /**
  * \param mesh pointer toward the mesh
+ * \param start tetra from which we start to travel
+ * \param na edge vertex
+ * \param nb edge vertex
+ * \param tag new edge tag
+ * \param ref new edge ref
+ * \param piv global index of the pivot to set the sense of travel
+ * \param adj index of adjacent tetra for the travel
+ *
+ * \return -1 if fail, \a start if shell has been completely travelled, 0 otherwise
+ *
+ * Update tag and ref of the edge \a na \a nb from tetra \a start by traveling
+ * its shell in one direction (given by the pivot \a piv).
+ *
+ */
+static inline
+int MMG3D_update_shellEdgeTag_oneDir(MMG5_pMesh  mesh,int start, int na, int nb,
+                                     int16_t tag,int ref, int piv,int adj) {
+  MMG5_pTetra  pt;
+  MMG5_pxTetra pxt;
+  int          *adja;
+  int8_t       i;
+
+  while ( adj && (adj != start) ) {
+    pt     = &mesh->tetra[adj];
+
+    /* identification of edge number in tetra adj */
+    if ( !MMG3D_findEdge(mesh,pt,adj,na,nb,1,NULL,&i) ) return -1;
+
+    /* update edge ref and tag */
+    if ( pt->xt ) {
+      pxt = &mesh->xtetra[pt->xt];
+      pxt->edg[i] = ref;
+      pxt->tag[i] |= tag;
+    }
+
+    /* set new triangle for travel */
+    adja = &mesh->adja[4*(adj-1)+1];
+    if ( pt->v[ MMG5_ifar[i][0] ] == piv ) {
+      adj = adja[ MMG5_ifar[i][0] ] / 4;
+      piv = pt->v[ MMG5_ifar[i][1] ];
+    }
+    else {
+      adj = adja[ MMG5_ifar[i][1] ] /4;
+      piv = pt->v[ MMG5_ifar[i][0] ];
+    }
+  }
+
+  return adj;
+}
+
+/**
+ * \param mesh pointer toward the mesh
+ * \param start tetra from which we start to travel
+ * \param ia local index of edge that must be updated
+ * \param tag new edge tag
+ * \param ref new edge ref
+ * \return 1 if success, 0 if fail.
+ *
+ * Update tag and ref of the edge \ia of tetra \a start by traveling its shell.
+ *
+ */
+#warning I think that it is not mandatory to travel the entirely shell if the first met xtetra has the suitable tag
+static inline
+int MMG3D_update_shellEdgeTag(MMG5_pMesh  mesh,int start, int8_t ia,int16_t tag,int ref) {
+  MMG5_pTetra  pt;
+  MMG5_pxTetra pxt;
+  int          piv,na,nb,adj,*adja;
+
+  pt   = &mesh->tetra[start];
+
+  assert( start >= 1 &&  MG_EOK(pt) );
+
+  pxt  = NULL;
+  na   = pt->v[MMG5_iare[ia][0]];
+  nb   = pt->v[MMG5_iare[ia][1]];
+
+  if ( pt->xt ) {
+    pxt = &mesh->xtetra[pt->xt];
+    pxt->tag[ia] |= tag;
+    pxt->edg[ia]  = ref;
+  }
+
+  /* Travel in one direction */
+  adja = &mesh->adja[4*(start-1)+1];
+  adj = adja[MMG5_ifar[ia][0]] / 4;
+  piv = pt->v[MMG5_ifar[ia][1]];
+
+  adj =   MMG3D_update_shellEdgeTag_oneDir(mesh,start,na,nb,tag,ref,piv,adj);
+
+  /* If all shell has been travelled, stop, else, travel it the other sense */
+  if ( adj == start )  return 1;
+  else if ( adj < 0 ) return 0;
+
+  assert(!adj);
+
+  pt = &mesh->tetra[start];
+  adja = &mesh->adja[4*(start-1)+1];
+  adj = adja[MMG5_ifar[ia][1]] / 4;
+  piv = pt->v[MMG5_ifar[ia][0]];
+
+  adj = MMG3D_update_shellEdgeTag_oneDir(mesh,start,na,nb,tag,ref,piv,adj);
+
+  if ( adj < 0 ) return 0;
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh
+ * \param start tetra from which we start to travel
+ * \param na edge vertex
+ * \param nb edge vertex
+ * \param tag new edge tag
+ * \param ref new edge ref
+ * \param piv global index of the pivot to set the sense of travel
+ * \param adj index of adjacent tetra for the travel
+ * \param filled 1 if an xtetra has been found (so tag and ref are filled)
+ *
+ * \return -1 if fail, \a start if shell has been completely travelled without
+ * founding an xtetra, adj if an xtetra has been found, 0 otherwise
+ *
+ * Get tag and ref of the edge \a na \a nb from tetra \a start by traveling
+ * its shell in one direction (given by the pivot \a piv).
+ * Stop when meeting the first xtetra (it is sufficient if tags and refs are
+ * consistent through the edge shell);
+ *
+ */
+static inline
+int MMG3D_get_shellEdgeTag_oneDir(MMG5_pMesh  mesh,int start, int na, int nb,
+                                  int16_t *tag,int *ref, int piv,int adj,
+                                  int8_t *filled) {
+  MMG5_pTetra  pt;
+  MMG5_pxTetra pxt;
+  int          *adja;
+  int8_t       i;
+
+  *filled = 0;
+  while ( adj && (adj != start) ) {
+    pt     = &mesh->tetra[adj];
+
+    /* identification of edge number in tetra adj */
+    if ( !MMG3D_findEdge(mesh,pt,adj,na,nb,1,NULL,&i) ) return -1;
+
+    /* update edge ref and tag */
+    if ( pt->xt ) {
+      pxt = &mesh->xtetra[pt->xt];
+      *ref  = pxt->edg[i];
+      *tag |= pxt->tag[i];
+      *filled = 1;
+#warning to test
+      //return adj;
+    }
+
+    /* set new triangle for travel */
+    adja = &mesh->adja[4*(adj-1)+1];
+    if ( pt->v[ MMG5_ifar[i][0] ] == piv ) {
+      adj = adja[ MMG5_ifar[i][0] ] / 4;
+      piv = pt->v[ MMG5_ifar[i][1] ];
+    }
+    else {
+      adj = adja[ MMG5_ifar[i][1] ] /4;
+      piv = pt->v[ MMG5_ifar[i][0] ];
+    }
+  }
+
+  return adj;
+}
+
+/**
+ * \param mesh pointer toward the mesh
+ * \param start tetra from which we start to travel
+ * \param ia local index of edge that must be updated
+ * \param tag new edge tag
+ * \param ref new edge ref
+ * \return 1 if success, 0 if fail.
+ *
+ * Get tag and ref of the edge \ia of tetra \a start by traveling its shell.
+ * Stop when meeting the first xtetra (it is sufficient if tags and refs are
+ * consistent through the edge shell);
+ *
+ */
+static inline
+int MMG3D_get_shellEdgeTag(MMG5_pMesh  mesh,int start, int8_t ia,int16_t *tag,int *ref) {
+  MMG5_pTetra  pt;
+  MMG5_pxTetra pxt;
+  int          piv,na,nb,adj,*adja;
+  int8_t       filled;
+
+  pt   = &mesh->tetra[start];
+
+  assert( start >= 1 &&  MG_EOK(pt) );
+
+  pxt  = NULL;
+  na   = pt->v[MMG5_iare[ia][0]];
+  nb   = pt->v[MMG5_iare[ia][1]];
+
+  if ( pt->xt ) {
+    pxt = &mesh->xtetra[pt->xt];
+    *tag |= pxt->tag[ia];
+    *ref = pxt->edg[ia];
+#warning to test
+    //return 1;
+  }
+
+  /* Travel in one direction */
+  adja = &mesh->adja[4*(start-1)+1];
+  adj = adja[MMG5_ifar[ia][0]] / 4;
+  piv = pt->v[MMG5_ifar[ia][1]];
+
+  adj = MMG3D_get_shellEdgeTag_oneDir(mesh,start,na,nb,tag,ref,piv,adj,&filled);
+
+  /* If an xtetra has been found or if all shell has been travelled, stop, else,
+   * travel it the other sense */
+  if ( adj > 0 ) {
+    assert ( (adj == start) || filled );
+    return 1;
+  }
+  else if ( adj < 0 ) return 0;
+
+  assert(!adj);
+
+  pt = &mesh->tetra[start];
+  adja = &mesh->adja[4*(start-1)+1];
+  adj = adja[MMG5_ifar[ia][1]] / 4;
+  piv = pt->v[MMG5_ifar[ia][0]];
+
+  adj = MMG3D_get_shellEdgeTag_oneDir(mesh,start,na,nb,tag,ref,piv,adj,&filled);
+
+  if ( adj < 0 ) return 0;
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh
  * \param met pointer toward the metric
  * \param list pointer toward the ball of the point
  * \param ilist number of elements in the ball of the point
@@ -899,19 +1134,15 @@ int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int8_t indq,in
   MMG5_pTetra          pt,pt1;
   MMG5_pxTetra         pxt,pxt1;
   MMG5_xTetra          xt,xts;
-  int             i,iel,jel,pel,qel,k,np,nq,*adja;
-  uint8_t         ip,iq,j,voy,voyp,voyq,ia;
-  uint8_t         (ind)[MMG3D_LMAX][2];
-  int             p0_c[MMG3D_LMAX],p1_c[MMG3D_LMAX];
-  int8_t          indar[4][4][2] = {
-    /* indar[ip][iq][0/1]: indices of edges which have iq for extremity but not ip*/
-    { {-1,-1}, { 3, 4}, { 3, 5}, { 4, 5} },
-    { { 1, 2}, {-1,-1}, { 1, 5}, { 2, 5} },
-    { { 0, 2}, { 0, 4}, {-1,-1}, { 2, 4} },
-    { { 0, 1}, { 0, 3}, { 1, 3}, {-1,-1} } };
+  int                  iel,jel,pel,qel,k,np,nq,*adja;
+  uint8_t              ip,iq,j,voy,voyp,voyq;
 
-  memset( p0_c,0x00,ilist*sizeof(int) );
-  memset( p1_c,0x00,ilist*sizeof(int) );
+#ifndef NDEBUG
+  if ( mesh->info.ddebug ) {
+    MMG3D_chkmeshedgestags(mesh);
+    MMG3D_chkpointtag(mesh);
+  }
+#endif
 
   /* coledge[i] contains the local indices of edges that will be merged by the
    * collapse corresponding with the configuration i. The edge coledge[i][0] is
@@ -925,7 +1156,7 @@ int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int8_t indq,in
    * config 5: merge of vertices 2 and 3
    */
   const int8_t MMG5_coledge[6][4] = {
-  {1,2,2,4}, {0,3,2,5}, {0,4,1,5},{0,1,4,5}, {0,2,3,5}, {4,3,2,1} };
+  {1,3,2,4}, {0,3,2,5}, {0,4,1,5},{0,1,4,5}, {0,2,3,5}, {4,3,2,1} };
 
   iel = list[0] / 4;
   ip  = list[0] % 4;
@@ -936,31 +1167,12 @@ int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int8_t indq,in
   /* Mark elements of the shell of edge (pq) */
   for (k=0; k<ilist; k++) {
     iel = list[k] / 4;
-    i   = list[k] % 4;
+    ip  = list[k] % 4;
     pt  = &mesh->tetra[iel];
 
     for (j=0; j<3; j++) {
-      i = MMG5_inxt3[i];
-      if ( pt->v[i] == nq ) {
-        /* In each tetra of the shell, 2 edges coming from np will be merged
-         * with 2 edges coming from nq: list the local indices of the edges
-         * comig from nq (ind array) and store the global indices of the non nq
-         * vertices of these edges if they are tagged (so edges np-p0_c and
-         * np-p1_c must be updated in all tetra) */
-        if ( pt->xt ) {
-          pxt = &mesh->xtetra[pt->xt];
-          ip  = list[k]%4;
-          ind[k][0] = indar[ip][i][0];
-          if ( pxt->tag[ind[k][0]] || pxt->edg[ind[k][0]] ) {
-            if ( MMG5_iare[ind[k][0]][0]==i )  p0_c[k] = pt->v[MMG5_iare[ind[k][0]][1]];
-            else  p0_c[k] = pt->v[MMG5_iare[ind[k][0]][0]];
-          }
-          ind[k][1] = indar[ip][i][1];
-          if ( pxt->tag[ind[k][1]] || pxt->edg[ind[k][1]] ) {
-            if ( MMG5_iare[ind[k][1]][0]==i )  p1_c[k] = pt->v[MMG5_iare[ind[k][1]][1]];
-            else  p1_c[k] = pt->v[MMG5_iare[ind[k][1]][0]];
-          }
-        }
+      iq = MMG5_idir[ip][j];
+      if ( pt->v[iq] == nq ) {
         list[k] *= -1;
         break;
       }
@@ -978,46 +1190,6 @@ int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int8_t indq,in
     ip  = list[k] % 4;
     pt  = &mesh->tetra[iel];
 
-    /* update edges ip-p0_c and ip-p1_c in elts of the ball of ip but that do
-     * not belong to the shell of pq */
-    if ( !pt->xt ) {
-      continue;
-    }
-    pxt = &mesh->xtetra[pt->xt];
-    for ( i=0; i<ilist; i++ ) {
-      if ( (list[i]>0) || (!(mesh->tetra[-list[i]/4].xt)) )  continue;
-      pt1  = &mesh->tetra[-list[i]/4];
-      pxt1 = &mesh->xtetra[pt1->xt];
-      if ( p0_c[i] ) {
-        /* edge nq-p0_c has a tag in the ith tetra of the shell, update
-         * np-p0_c */
-        for ( j=0; j<3; j++) {
-          ia = MMG5_idir[ip][j];
-          if ( pt->v[ia]==p0_c[i] ) {
-            pxt->tag[MMG5_arpt[ip][j]] |= pxt1->tag[ind[i][0]];
-            if ( !pxt->edg[MMG5_arpt[ip][j]] )
-              pxt->edg[MMG5_arpt[ip][j]] = pxt1->edg[ind[i][0]];
-            else if ( pxt1->edg[ind[i][0]] )
-              pxt->edg[MMG5_arpt[ip][j]] =
-                MG_MAX(pxt->edg[MMG5_arpt[ip][j]],pxt1->edg[ind[i][0]]);
-            break;
-          }
-        }
-      }
-      if ( p1_c[i] ) {
-        /* edge nq-p1_c has a tag in the ith tetra of the shell, update
-         * np-p1_c */
-        for ( j=0; j<3; j++) {
-          ia = MMG5_idir[ip][j];
-          if ( pt->v[ia]==p1_c[i] ) {
-            pxt->tag[MMG5_arpt[ip][j]] |= pxt1->tag[ind[i][1]];
-            pxt->edg[MMG5_arpt[ip][j]] =
-              MG_MAX(pxt->edg[MMG5_arpt[ip][j]],pxt1->edg[ind[i][1]]);
-            break;
-          }
-        }
-      }
-    }
     adja = &mesh->adja[4*(iel-1)+1];
     jel  = adja[ip];
     if ( !jel )  continue;
@@ -1027,6 +1199,113 @@ int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int8_t indq,in
     pt = &mesh->tetra[jel];
     if (pt->v[voy] == nq) {
       return 0;
+    }
+  }
+
+  /** Merge tags and references of edges that will merge due to the collapse
+   * (the shell of each edge is travelled so each xtetra of the shell is
+   * updated). Note that it can't be done in the previous loop because the mesh
+   * would be corrupted if we stop the collapse. It can't neither be done in the
+   * next loop because we start to delete the elements of the shell. */
+  for (k=0; k<ilist; k++) {
+
+    if ( list[k] > 0 )  continue;
+
+    iel = -list[k] / 4;
+    ip  = -list[k] % 4;
+    pt  = &mesh->tetra[iel];
+
+    for (j=0; j<3; j++) {
+      iq = MMG5_idir[ip][j];
+      if ( pt->v[iq] == nq ) {
+        break;
+      }
+    }
+
+    /* The configuration is computed by setting the ip and iq bits to 1 */
+    int8_t cfg = 0;
+    MG_SET(cfg,ip);
+    MG_SET(cfg,iq);
+
+    const int8_t *coled;
+    switch(cfg) {
+    case 3:
+      /* collapse of vertices 0 and 1 */
+      coled = MMG5_coledge[0];
+      break;
+    case 5:
+      /* collapse of vertices 0 and 2 */
+      coled = MMG5_coledge[1];
+      break;
+    case 9:
+      /* collapse of vertices 0 and 3 */
+      coled = MMG5_coledge[2];
+      break;
+    case 6:
+      /* collapse of vertices 1 and 2 */
+      coled = MMG5_coledge[3];
+      break;
+    case 10:
+      /* collapse of vertices 1 and 3 */
+      coled = MMG5_coledge[4];
+      break;
+    case 12:
+      /* collapse of vertices 2 and 3 */
+      coled = MMG5_coledge[5];
+      break;
+    default:
+      assert ( 0 && "Unexpected collapse configuration");
+    }
+
+    int l = 0;
+    for ( l=0; l<3; l+=2 ) {
+      /* when l=0 we update 2 edges that will be merged together, when l=2 we
+       * update the two others. In practice we don't care which edge comes
+       * from ip and which one from iq, it only matters that iped and iqed
+       * will be merged at the end of the collapse. */
+      int iped = coled[l+0];
+      int iqed = coled[l+1];
+
+      int16_t tagip = 0;
+      int     refip = 0;
+      int16_t tagiq = 0;
+      int     refiq = 0;
+
+      if ( !MMG3D_get_shellEdgeTag(mesh,iel,iped,&tagip,&refip) ) {
+        fprintf(stderr,"\n  ## Error: %s: 1. unable to get edge info.\n",__func__);
+        return 0;
+      }
+      if ( !MMG3D_get_shellEdgeTag(mesh,iel,iqed,&tagiq,&refiq) ) {
+        fprintf(stderr,"\n  ## Error: %s: 2. unable to get edge info.\n",__func__);
+        return 0;
+      }
+
+      if ( (tagip != tagiq) || (refip != refiq) ) {
+        /* Update edge infos */
+        tagip |= tagiq;
+        refip = (refip > refiq )? refip : refiq;
+
+        /* If the xtetra info are consistent when entering in colver taged and
+         * refed contains suitable values and we can travel the shell of
+         * iped and iqed to update all the needed info on edges */
+        if ( !MMG3D_update_shellEdgeTag(mesh,iel,iped,tagip,refip) ) {
+          fprintf(stderr,"\n  ## Error: %s: 1. unable to update edge info.\n",__func__);
+          return 0;
+        }
+        if ( !MMG3D_update_shellEdgeTag(mesh,iel,iqed,tagip,refip) ) {
+          fprintf(stderr,"\n  ## Error: %s: 1. unable to update edge info.\n",__func__);
+          return 0;
+        }
+      }
+#ifndef NDEBUG
+      else {
+        assert ( tagip == tagiq && refip == refiq );
+        if ( mesh->info.ddebug ) {
+          MMG3D_chk_shellEdgeTag(mesh,iel,iped,tagip,refip);
+          MMG3D_chk_shellEdgeTag(mesh,iel,iqed,tagip,refip);
+        }
+      }
+#endif
     }
   }
 
@@ -1044,61 +1323,6 @@ int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int8_t indq,in
     }
     assert(j<3);
 
-    if ( pt->xt ) {
-      pxt = &mesh->xtetra[pt->xt];
-      /* If shell tetra has a xtetra, update tags of edges that will be merged */
-      /* The configuration is computed by setting the ip and iq bits to 1 */
-      int8_t cfg = 0;
-      MG_SET(cfg,ip);
-      MG_SET(cfg,iq);
-
-      const int8_t *coled;
-      switch(cfg) {
-      case 3:
-        /* collapse of vertices 0 and 1 */
-        coled = MMG5_coledge[0];
-        break;
-      case 5:
-        /* collapse of vertices 0 and 2 */
-        coled = MMG5_coledge[1];
-        break;
-      case 9:
-        /* collapse of vertices 0 and 3 */
-        coled = MMG5_coledge[2];
-        break;
-      case 6:
-        /* collapse of vertices 1 and 2 */
-        coled = MMG5_coledge[3];
-        break;
-      case 10:
-        /* collapse of vertices 1 and 3 */
-        coled = MMG5_coledge[4];
-        break;
-      case 12:
-        /* collapse of vertices 2 and 3 */
-        coled = MMG5_coledge[5];
-        break;
-      default:
-        assert ( 0 && "Unexpected collapse configuration");
-      }
-
-      j = 0;
-      for ( j=0; j<3; j+=2 ) {
-        /* when j=0 we update 2 edges that will be merged together, when j=2 we
-         * update the two others */
-        int ia1 = coled[j+0];
-        int ia2 = coled[j+1];
-        if ( pxt->edg[ia1] > pxt->edg[ia2] ) {
-          pxt->edg[ia2] = pxt->edg[ia1];
-        }
-        else {
-          pxt->edg[ia1] = pxt->edg[ia2];
-        }
-
-        pxt->tag[ia1] |= pxt->tag[ia2];
-        pxt->tag[ia2] |= pxt->tag[ia1];
-      }
-    }
 
     adja = &mesh->adja[4*(iel-1)+1];
 
@@ -1315,6 +1539,13 @@ int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int8_t indq,in
       pt->qual=MMG5_orcal(mesh,met,iel);
     pt->mark=mesh->mark;
   }
+
+#ifndef NDEBUG
+  if ( mesh->info.ddebug ) {
+    MMG3D_chkmeshedgestags(mesh);
+    MMG3D_chkpointtag(mesh);
+  }
+#endif
 
   return np;
 }

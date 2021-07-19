@@ -458,6 +458,7 @@ int  MMG3D_indPt(MMG5_pMesh mesh,int kp);
 void MMG5_printTetra(MMG5_pMesh mesh,char* fileName);
 void MMG3D_chkpointtag(MMG5_pMesh mesh);
 void MMG3D_chkmeshedgestags(MMG5_pMesh mesh);
+int MMG3D_chk_shellEdgeTag(MMG5_pMesh  mesh,int start, int8_t ia,int16_t tag,int ref);
 
 #ifdef USE_SCOTCH
 int MMG5_mmg3dRenumbering(int,MMG5_pMesh,MMG5_pSol,MMG5_pSol,int*);

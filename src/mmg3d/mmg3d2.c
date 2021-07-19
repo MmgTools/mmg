@@ -1436,7 +1436,7 @@ int MMG5_chkmaniball(MMG5_pMesh mesh, int start, int8_t ip){
       k1 /= 4;
       pt1 = &mesh->tetra[k1];
 
-      if( pt1 ->ref != ref ) continue;
+      if( pt1->ref != ref ) continue;
 
       if( pt1->flag == base ) continue;
       pt1->flag = base;
