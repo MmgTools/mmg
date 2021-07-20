@@ -1133,55 +1133,37 @@ int MMG5_bouletrid(MMG5_pMesh mesh,int start,int iface,int ip,int *il1,int *l1,
 }
 
 /**
- * \param mesh pointer toward the mesh structure
- * \param start tetra from which we start
- * \param ia local index of the edge in \a start
- * \param tag tag to set
- * \param edge edge reference to set
+ * \param mesh pointer toward the mesh
+ * \param start tetra from which we start to travel
+ * \param na edge vertex
+ * \param nb edge vertex
+ * \param tag new edge tag
+ * \param ref new edge ref
+ * \param piv global index of the pivot to set the sense of travel
+ * \param adj index of adjacent tetra for the travel
  *
- * \return 1 if success, 0 if fail.
+ * \return -1 if fail, \a start if shell has been completely travelled, 0 otherwise
  *
- * Set tag \a tag and ref \a edg of edge \a ia (if need be) in tetra \a start by
- * travelling its shell.
+ * Set tag and ref of the edge \a na \a nb from tetra \a start by traveling
+ * its shell in one direction (given by the pivot \a piv).
  *
  */
-int MMG5_settag(MMG5_pMesh mesh,int start,int ia,int16_t tag,int edg) {
-  MMG5_pTetra        pt;
-  MMG5_pxTetra       pxt;
-  int                na,nb,*adja,adj,piv;
-  int16_t            taginit;
-  int8_t             i;
+static inline
+int MMG3D_settag_oneDir(MMG5_pMesh  mesh,int start, int na, int nb,
+                                     int16_t tag,int edg, int piv,int adj) {
+  MMG5_pTetra  pt;
+  MMG5_pxTetra pxt;
+  int          *adja;
+  int16_t      taginit;
+  int8_t       i;
 
-  assert( start >= 1 );
-  pt = &mesh->tetra[start];
-  assert ( MG_EOK(pt) );
-
-  na   = pt->v[ MMG5_iare[ia][0] ];
-  nb   = pt->v[ MMG5_iare[ia][1] ];
-
-  adja = &mesh->adja[4*(start-1)+1];
-  adj = adja[MMG5_ifar[ia][0]] / 4;
-  piv = pt->v[MMG5_ifar[ia][1]];
-
-  if ( pt->xt ) {
-    pxt = &mesh->xtetra[pt->xt];
-    if ( (pxt->ftag[MMG5_ifar[ia][0]] & MG_BDY) ||
-         (pxt->ftag[MMG5_ifar[ia][1]] & MG_BDY) ) {
-      taginit = pxt->tag[ia];
-      pxt->tag[ia] |= tag;
-      /* Remove the potential nosurf tag if initially the edge is
-       * really required */
-      if ( (taginit & MG_REQ) && ( (!(taginit & MG_NOSURF)) || !(tag & MG_NOSURF) ) ) {
-        pxt->tag[ia] &= ~MG_NOSURF;
-      }
-      pxt->edg[ia]  = MG_MAX(pxt->edg[ia],edg);
-    }
-  }
   while ( adj && (adj != start) ) {
     pt = &mesh->tetra[adj];
 
     /* identification of edge number in tetra adj */
-    if ( !MMG3D_findEdge(mesh,pt,adj,na,nb,1,NULL,&i) ) return 0;
+    if ( !MMG3D_findEdge(mesh,pt,adj,na,nb,1,NULL,&i) ) {
+      return -1;
+    }
 
     if ( pt->xt ) {
       pxt = &mesh->xtetra[pt->xt];
@@ -1208,9 +1190,60 @@ int MMG5_settag(MMG5_pMesh mesh,int start,int ia,int16_t tag,int edg) {
       piv = pt->v[ MMG5_ifar[i][0] ];
     }
   }
+  return adj;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure
+ * \param start tetra from which we start
+ * \param ia local index of the edge in \a start
+ * \param tag tag to set
+ * \param edge edge reference to set
+ *
+ * \return 1 if success, 0 if fail.
+ *
+ * Set tag \a tag and ref \a edg of edge \a ia (if need be) in tetra \a start by
+ * travelling its shell.
+ *
+ */
+int MMG5_settag(MMG5_pMesh mesh,int start,int ia,int16_t tag,int edg) {
+  MMG5_pTetra        pt;
+  MMG5_pxTetra       pxt;
+  int                na,nb,*adja,adj,piv;
+  int16_t            taginit;
+
+  assert( start >= 1 );
+  pt = &mesh->tetra[start];
+  assert ( MG_EOK(pt) );
+
+  na   = pt->v[ MMG5_iare[ia][0] ];
+  nb   = pt->v[ MMG5_iare[ia][1] ];
+
+  adja = &mesh->adja[4*(start-1)+1];
+  adj = adja[MMG5_ifar[ia][0]] / 4;
+  piv = pt->v[MMG5_ifar[ia][1]];
+
+  if ( pt->xt ) {
+    pxt = &mesh->xtetra[pt->xt];
+    if ( (pxt->ftag[MMG5_ifar[ia][0]] & MG_BDY) ||
+         (pxt->ftag[MMG5_ifar[ia][1]] & MG_BDY) ) {
+      taginit = pxt->tag[ia];
+      pxt->tag[ia] |= tag;
+      /* Remove the potential nosurf tag if initially the edge is
+       * really required */
+      if ( (taginit & MG_REQ) && ( (!(taginit & MG_NOSURF)) || !(tag & MG_NOSURF) ) ) {
+        pxt->tag[ia] &= ~MG_NOSURF;
+      }
+      pxt->edg[ia]  = MG_MAX(pxt->edg[ia],edg);
+    }
+  }
+
+  adj = MMG3D_settag_oneDir(mesh,start,na,nb,tag,edg,piv,adj);
 
   /* If all shell has been travelled, stop, else, travel it the other sense */
   if ( adj == start )  return 1;
+  else if ( adj < 0 ) return 0;
+
   assert(!adj);
 
   pt = &mesh->tetra[start];
@@ -1218,37 +1251,10 @@ int MMG5_settag(MMG5_pMesh mesh,int start,int ia,int16_t tag,int edg) {
   adj = adja[MMG5_ifar[ia][1]] / 4;
   piv = pt->v[MMG5_ifar[ia][0]];
 
-  while ( adj && (adj != start) ) {
-    pt = &mesh->tetra[adj];
+  adj = MMG3D_settag_oneDir(mesh,start,na,nb,tag,edg,piv,adj);
 
-    /* identification of edge number in tetra adj */
-    if ( !MMG3D_findEdge(mesh,pt,adj,na,nb,1,NULL,&i) ) return 0;
+  if ( adj < 0 ) return 0;
 
-    if ( pt->xt ) {
-      pxt = &mesh->xtetra[pt->xt];
-      if ( (pxt->ftag[MMG5_ifar[i][0]] & MG_BDY) ||
-           (pxt->ftag[MMG5_ifar[i][1]] & MG_BDY) ) {
-        taginit = pxt->tag[i];
-        pxt->tag[i] |= tag;
-        /* Remove the potential nosurf tag if initially the edge is
-         * really required */
-        if ( (taginit & MG_REQ) && !(taginit & MG_NOSURF) ) {
-          pxt->tag[ia] &= ~MG_NOSURF;
-        }
-        pxt->edg[i]  = MG_MAX(pxt->edg[i],edg);
-      }
-    }
-    /* set new triangle for travel */
-    adja = &mesh->adja[4*(adj-1)+1];
-    if ( pt->v[ MMG5_ifar[i][0] ] == piv ) {
-      adj = adja[ MMG5_ifar[i][0] ] / 4;
-      piv = pt->v[ MMG5_ifar[i][1] ];
-    }
-    else {
-      adj = adja[ MMG5_ifar[i][1] ] /4;
-      piv = pt->v[ MMG5_ifar[i][0] ];
-    }
-  }
   return 1;
 }
 
