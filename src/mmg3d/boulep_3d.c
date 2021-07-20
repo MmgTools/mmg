@@ -1127,7 +1127,7 @@ int MMG5_bouletrid(MMG5_pMesh mesh,int start,int iface,int ip,int *il1,int *l1,
  * \param na edge vertex
  * \param nb edge vertex
  * \param tag new edge tag
- * \param ref new edge ref
+ * \param edg new edge ref
  * \param piv global index of the pivot to set the sense of travel
  * \param adj index of adjacent tetra for the travel
  *
@@ -1187,7 +1187,7 @@ int MMG3D_settag_oneDir(MMG5_pMesh  mesh,int start, int na, int nb,
  * \param start tetra from which we start
  * \param ia local index of the edge in \a start
  * \param tag tag to set
- * \param edge edge reference to set
+ * \param edg edge reference to set
  *
  * \return 1 if success, 0 if fail.
  *
@@ -1248,6 +1248,58 @@ int MMG5_settag(MMG5_pMesh mesh,int start,int ia,int16_t tag,int edg) {
 }
 
 /**
+ * \param mesh pointer toward the mesh
+ * \param start tetra from which we start to travel
+ * \param na edge vertex
+ * \param nb edge vertex
+ * \param tag new edge tag
+ * \param piv global index of the pivot to set the sense of travel
+ * \param adj index of adjacent tetra for the travel
+ *
+ * \return -1 if fail, \a start if shell has been completely travelled, 0 otherwise
+ *
+ * Remove the tag \a tag of edge \a ia in tetra \a start by travelling its
+ * shell in one direction (given by the pivot \a piv).
+ *
+ */
+static inline
+int MMG3D_deltag_oneDir(MMG5_pMesh  mesh,int start, int na, int nb,
+                        int16_t tag,int piv,int adj) {
+  MMG5_pTetra  pt;
+  MMG5_pxTetra pxt;
+  int          *adja;
+  int8_t       i;
+
+  while ( adj && (adj != start) ) {
+    pt = &mesh->tetra[adj];
+
+    /* identification of edge number in tetra adj */
+    if ( !MMG3D_findEdge(mesh,pt,adj,na,nb,1,NULL,&i) ) {
+      return -1;
+    }
+
+    if ( pt->xt ) {
+      pxt = &mesh->xtetra[pt->xt];
+      if ( (pxt->ftag[MMG5_ifar[i][0]] & MG_BDY) ||
+           (pxt->ftag[MMG5_ifar[i][1]] & MG_BDY) ) {
+        pxt->tag[i] &= ~tag;
+      }
+    }
+    /* set new triangle for travel */
+    adja = &mesh->adja[4*(adj-1)+1];
+    if ( pt->v[ MMG5_ifar[i][0] ] == piv ) {
+      adj = adja[ MMG5_ifar[i][0] ] / 4;
+      piv = pt->v[ MMG5_ifar[i][1] ];
+    }
+    else {
+      adj = adja[ MMG5_ifar[i][1] ] /4;
+      piv = pt->v[ MMG5_ifar[i][0] ];
+    }
+  }
+  return adj;
+}
+
+/**
  * \param mesh pointer toward the mesh structure
  * \param start index of the starting tetra
  * \param ia index of the edge in tetra \a start that we want to modify
@@ -1262,7 +1314,6 @@ int MMG5_deltag(MMG5_pMesh mesh,int start,int ia,int16_t tag) {
   MMG5_pTetra        pt;
   MMG5_pxTetra       pxt;
   int                na,nb,*adja,adj,piv;
-  int8_t             i;
 
   assert( start >= 1 );
   pt = &mesh->tetra[start];
@@ -1282,33 +1333,13 @@ int MMG5_deltag(MMG5_pMesh mesh,int start,int ia,int16_t tag) {
       pxt->tag[ia] &= ~tag;
     }
   }
-  while ( adj && (adj != start) ) {
-    pt = &mesh->tetra[adj];
 
-    /* identification of edge number in tetra adj */
-    if ( !MMG3D_findEdge(mesh,pt,adj,na,nb,1,NULL,&i) ) return 0;
-
-    if ( pt->xt ) {
-      pxt = &mesh->xtetra[pt->xt];
-      if ( (pxt->ftag[MMG5_ifar[i][0]] & MG_BDY) ||
-           (pxt->ftag[MMG5_ifar[i][1]] & MG_BDY) ) {
-        pxt->tag[i] &= ~tag;
-      }
-    }
-    /* set new triangle for travel */
-    adja = &mesh->adja[4*(adj-1)+1];
-    if ( pt->v[ MMG5_ifar[i][0] ] == piv ) {
-      adj = adja[ MMG5_ifar[i][0] ] / 4;
-      piv = pt->v[ MMG5_ifar[i][1] ];
-    }
-    else {
-      adj = adja[ MMG5_ifar[i][1] ] /4;
-      piv = pt->v[ MMG5_ifar[i][0] ];
-    }
-  }
+  adj = MMG3D_deltag_oneDir(mesh,start,na,nb,tag,piv,adj);
 
   /* If all shell has been travelled, stop, else, travel it the other sense */
   if ( adj == start )  return 1;
+  else if ( adj < 0 ) return 0;
+
   assert(!adj);
 
   pt = &mesh->tetra[start];
@@ -1316,29 +1347,10 @@ int MMG5_deltag(MMG5_pMesh mesh,int start,int ia,int16_t tag) {
   adj = adja[MMG5_ifar[ia][1]] / 4;
   piv = pt->v[MMG5_ifar[ia][0]];
 
-  while ( adj && (adj != start) ) {
-    pt = &mesh->tetra[adj];
-    /* identification of edge number in tetra adj */
-    if ( !MMG3D_findEdge(mesh,pt,adj,na,nb,1,NULL,&i) ) return 0;
+  adj = MMG3D_deltag_oneDir(mesh,start,na,nb,tag,piv,adj);
 
-    if ( pt->xt ) {
-      pxt = &mesh->xtetra[pt->xt];
-      if ( (pxt->ftag[MMG5_ifar[i][0]] & MG_BDY) ||
-           (pxt->ftag[MMG5_ifar[i][1]] & MG_BDY) ) {
-        pxt->tag[i] &= ~tag;
-      }
-    }
-    /* set new triangle for travel */
-    adja = &mesh->adja[4*(adj-1)+1];
-    if ( pt->v[ MMG5_ifar[i][0] ] == piv ) {
-      adj = adja[ MMG5_ifar[i][0] ] / 4;
-      piv = pt->v[ MMG5_ifar[i][1] ];
-    }
-    else {
-      adj = adja[ MMG5_ifar[i][1] ] /4;
-      piv = pt->v[ MMG5_ifar[i][0] ];
-    }
-  }
+  if ( adj < 0 ) return 0;
+
   return 1;
 }
 
