@@ -901,8 +901,10 @@ int MMG3D_update_shellEdgeTag_oneDir(MMG5_pMesh  mesh,int start, int na, int nb,
   MMG5_pTetra  pt;
   MMG5_pxTetra pxt;
   int          *adja;
-  int16_t      xtag,atag;
+  int16_t      xtag;
   int8_t       i;
+
+  assert ( tag & MG_BDY && "Unexpected non boundary tag");
 
   while ( adj && (adj != start) ) {
     pt     = &mesh->tetra[adj];
@@ -914,13 +916,15 @@ int MMG3D_update_shellEdgeTag_oneDir(MMG5_pMesh  mesh,int start, int na, int nb,
     if ( pt->xt ) {
       pxt = &mesh->xtetra[pt->xt];
 
-      /* if tag and edge are already consistent, non need to update the shell (do
-       * not consider the MG_BDY tag) */
-      xtag = pxt->tag[i] & ~MG_BDY;
-      atag = tag & ~MG_BDY;
+      /* if tag and edge are already consistent, no need to update the shell (do
+       * not consider edges with tag 0 as they com from the creation of a xtetra
+       * during a previous collapse and are not updated) */
+      xtag = pxt->tag[i] | MG_BDY;
 
-      if ( xtag == atag &&  pxt->edg[i] == ref ) {
-        return start;
+      if ( pxt->tag[i] & MG_BDY ) {
+        if ( xtag == tag &&  pxt->edg[i] == ref ) {
+          return start;
+        }
       }
 
       pxt->edg[i] = ref;
@@ -958,11 +962,12 @@ int MMG3D_update_shellEdgeTag(MMG5_pMesh  mesh,int start, int8_t ia,int16_t tag,
   MMG5_pTetra  pt;
   MMG5_pxTetra pxt;
   int          piv,na,nb,adj,*adja;
-  int16_t      xtag,atag;
+  int16_t      xtag;
 
   pt   = &mesh->tetra[start];
 
-  assert( start >= 1 &&  MG_EOK(pt) );
+  assert( start >= 1 &&  MG_EOK(pt) && "invalid tetra" );
+  assert ( tag & MG_BDY && "Unexpected non boundary tag");
 
   pxt  = NULL;
   na   = pt->v[MMG5_iare[ia][0]];
@@ -971,13 +976,15 @@ int MMG3D_update_shellEdgeTag(MMG5_pMesh  mesh,int start, int8_t ia,int16_t tag,
   if ( pt->xt ) {
     pxt = &mesh->xtetra[pt->xt];
 
-    /* if tag and edge are already consistent, non need to update the shell (do
-     * not consider the MG_BDY tag) */
-    xtag = pxt->tag[ia] & ~MG_BDY;
-    atag = tag & ~MG_BDY;
+    /* if tag and edge are already consistent, no need to update the shell (do
+     * not consider edges with tag 0 as they com from the creation of a xtetra
+     * during a previous collapse and are not updated) */
+    xtag = pxt->tag[ia] | MG_BDY;
 
-    if ( xtag == atag &&  pxt->edg[ia] == ref ) {
-      return 1;
+    if ( pxt->tag[ia] & MG_BDY ) {
+      if ( xtag == tag &&  pxt->edg[ia] == ref ) {
+        return 1;
+      }
     }
 
     pxt->tag[ia] |= tag;
@@ -1023,10 +1030,10 @@ int MMG3D_update_shellEdgeTag(MMG5_pMesh  mesh,int start, int8_t ia,int16_t tag,
  * \return -1 if fail, \a start if shell has been completely travelled without
  * founding an xtetra, adj if an xtetra has been found, 0 otherwise
  *
- * Get tag and ref of the edge \a na \a nb from tetra \a start by traveling
- * its shell in one direction (given by the pivot \a piv).
- * Stop when meeting the first xtetra (it is sufficient if tags and refs are
- * consistent through the edge shell);
+ * Get tag and ref of the edge \a na \a nb from tetra \a start by traveling its
+ * shell in one direction (given by the pivot \a piv).  Stop when meeting the
+ * first xtetra with a non 0 tag (it is sufficient if tags and refs are
+ * consistent through the edge shell except for edges with null tags);
  *
  */
 static inline
@@ -1049,9 +1056,11 @@ int MMG3D_get_shellEdgeTag_oneDir(MMG5_pMesh  mesh,int start, int na, int nb,
     if ( pt->xt ) {
       pxt = &mesh->xtetra[pt->xt];
       *ref  = pxt->edg[i];
-      *tag |= pxt->tag[i];
-      *filled = 1;
-      return adj;
+      if ( pxt->tag[i] & MG_BDY ) {
+        *tag |= pxt->tag[i];
+        *filled = 1;
+        return adj;
+      }
     }
 
     /* set new triangle for travel */
@@ -1099,9 +1108,11 @@ int MMG3D_get_shellEdgeTag(MMG5_pMesh  mesh,int start, int8_t ia,int16_t *tag,in
 
   if ( pt->xt ) {
     pxt = &mesh->xtetra[pt->xt];
-    *tag |= pxt->tag[ia];
-    *ref = pxt->edg[ia];
-    return 1;
+    if ( pxt->tag[ia] & MG_BDY ) {
+      *tag |= pxt->tag[ia];
+      *ref = pxt->edg[ia];
+      return 1;
+    }
   }
 
   /* Travel in one direction */
@@ -1312,7 +1323,7 @@ int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int8_t indq,in
 #ifndef NDEBUG
       else {
         assert ( tagip == tagiq && refip == refiq );
-        if ( mesh->info.ddebug ) {
+        if ( mesh->info.ddebug && (tagip & MG_BDY) ) {
           MMG3D_chk_shellEdgeTag(mesh,iel,iped,tagip,refip);
           MMG3D_chk_shellEdgeTag(mesh,iel,iqed,tagip,refip);
         }
@@ -1408,7 +1419,10 @@ int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int8_t indq,in
           /* update tags for edges */
           MMG3D_update_edgeTag(pt,pxt,np,nq,ip,pt1,pxt1,voyp);
 
-          /* Recover the already used place by pxt */
+          /* Recover the already used place by pxt: now pel has a xtetra but the
+           * edges coming from voyp (not directly involved in the collapse) will
+           * have the tag 0 that may be non consistent with other tags in their
+           * respective shells. */
           pt1->xt = pt->xt;
           memcpy(pxt,pxt1,sizeof(MMG5_xTetra));
         }
@@ -1483,6 +1497,9 @@ int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int8_t indq,in
                                  "larger xtetra table",
                                  mesh->xt--;return -1;);
             }
+            /* Now qel has a xtetra but the edges coming from voyq (not directly
+             * involved in the collapse) will have the tag 0 that may be non
+             * consistent with other tags in their respective shells. */
             pt1->xt = mesh->xt;
             pxt = &mesh->xtetra[pt1->xt];
             memcpy(pxt,pxt1,sizeof(MMG5_xTetra));

@@ -93,11 +93,7 @@ int MMG3D_chk_shellEdgeTag_oneDir(MMG5_pMesh  mesh,int start, int na, int nb,
   MMG5_pTetra  pt;
   MMG5_pxTetra pxt;
   int          *adja;
-  int16_t      xtag;
   int8_t       i;
-
-  /* Remove the BDY tag as it may be non consistent */
-  tag &= ~MG_BDY;
 
   while ( adj && (adj != start) ) {
     pt     = &mesh->tetra[adj];
@@ -108,9 +104,11 @@ int MMG3D_chk_shellEdgeTag_oneDir(MMG5_pMesh  mesh,int start, int na, int nb,
     /* update edge ref and tag */
     if ( pt->xt ) {
       pxt = &mesh->xtetra[pt->xt];
-      xtag = (pxt->tag[i] & ~MG_BDY);
-      assert (xtag == tag && "non consistent tags");
-      assert (pxt->edg[i] == ref && "non consistent refs");
+      /* Test only BDY edges */
+      if ( pxt->tag[i] & MG_BDY ) {
+        assert (pxt->tag[i] == tag && "non consistent tags");
+        assert (pxt->edg[i] == ref && "non consistent refs");
+      }
     }
 
     /* set new triangle for travel */
@@ -136,7 +134,7 @@ int MMG3D_chk_shellEdgeTag_oneDir(MMG5_pMesh  mesh,int start, int na, int nb,
  * \param ref edge ref
  * \return 1 if success, 0 if fail.
  *
- * Test consistency of tag and ref of the edge \ia of tetra \a start by
+ * Test consistency of tag and ref of the boundary edge \ia of tetra \a start by
  * traveling its shell.
  *
  */
@@ -144,25 +142,23 @@ int MMG3D_chk_shellEdgeTag(MMG5_pMesh  mesh,int start, int8_t ia,int16_t tag,int
   MMG5_pTetra  pt;
   MMG5_pxTetra pxt;
   int          piv,na,nb,adj,*adja;
-  int16_t      xtag;
 
   pt   = &mesh->tetra[start];
 
-  assert( start >= 1 &&  MG_EOK(pt) );
+  assert( start >= 1 &&  MG_EOK(pt) && "invalid tetra" );
+  assert ( tag & MG_BDY && "Unexpected non boundary tag");
 
   pxt  = NULL;
   na   = pt->v[MMG5_iare[ia][0]];
   nb   = pt->v[MMG5_iare[ia][1]];
 
-  /* Remove the BDY tag as it may be non consistent */
-  tag &= ~MG_BDY;
-
   if ( pt->xt ) {
     pxt = &mesh->xtetra[pt->xt];
-    /* Remove the BDY tag as it may be non consistent */
-    xtag = (pxt->tag[ia] & ~MG_BDY);
-    assert (xtag == tag && "non consistent tags"); ;
-    assert (pxt->edg[ia] == ref && "non consistent refs"); ;
+    /* Test only BDY edges */
+    if ( pxt->tag[ia] & MG_BDY ) {
+      assert (pxt->tag[ia] == tag && "non consistent tags"); ;
+      assert (pxt->edg[ia] == ref && "non consistent refs"); ;
+    }
   }
 
   /* Travel in one direction */
