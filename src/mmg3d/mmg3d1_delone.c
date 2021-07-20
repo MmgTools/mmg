@@ -198,6 +198,15 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
         else if ( tag & MG_REF ) {
           if ( !MMG5_BezierRef(mesh,ip1,ip2,0.5,o,no1,to) )
             goto collapse;
+          if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
+            MMG5_tet2tri(mesh,k,i,&ptt);
+            MMG5_nortri(mesh,&ptt,no1);
+            if ( !MG_GET(pxt->ori,i) ) {
+              no1[0] *= -1.0;
+              no1[1] *= -1.0;
+              no1[2] *= -1.0;
+            }
+          }
         }
         else {
           if ( !MMG5_norface(mesh,k,i,v) )  goto collapse;
@@ -557,6 +566,15 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
           else if ( tag & MG_REF ) {
             if ( !MMG5_BezierRef(mesh,ip1,ip2,0.5,o,no1,to) )
               goto collapse2;
+            if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
+              MMG5_tet2tri(mesh,k,i,&ptt);
+              MMG5_nortri(mesh,&ptt,no1);
+              if ( !MG_GET(pxt->ori,i) ) {
+                no1[0] *= -1.0;
+                no1[1] *= -1.0;
+                no1[2] *= -1.0;
+              }
+            }
           }
           else {
             if ( !MMG5_norface(mesh,k,i,v) )  goto collapse2;
