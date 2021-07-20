@@ -1850,7 +1850,18 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename,
   }
 
   /** Write solution */
-  nsols = (metricData==1)? 1 : mesh->nsols;
+  if ( metricData==1 ) {
+    if ( sol && *sol && sol[0]->np ) {
+      nsols = 1;
+    }
+    else {
+      /* In analysis mode (-noinsert -noswap -nomove), metric is not allocated */
+      nsols = 0;
+    }
+  }
+  else {
+    nsols = mesh->nsols;
+  }
 
   for ( isol=0; isol<nsols; ++isol) {
     psl = *sol + isol;
@@ -2737,12 +2748,17 @@ int MMG5_saveNode(MMG5_pMesh mesh,const char *filename) {
   return 1;
 }
 
-int MMG5_saveEdge(MMG5_pMesh mesh,const char *filename) {
+int MMG5_saveEdge(MMG5_pMesh mesh,const char *filename,const char *ext) {
   FILE*             inm;
   MMG5_pEdge        pt;
-  int               k;
+  size_t            na_tot;
+  int               k,polyfile;
+  char              *ptr_c = (char*)mesh->edge;
   char              *ptr,*data;
 
+  if ( !mesh->edge ) {
+    return 1;
+  }
   if ( !mesh->na ) {
     return 1;
   }
@@ -2757,15 +2773,15 @@ int MMG5_saveEdge(MMG5_pMesh mesh,const char *filename) {
   }
 
   /* Name of file */
-  MMG5_SAFE_CALLOC(data,strlen(filename)+6,char,return 0);
+  MMG5_SAFE_CALLOC(data,strlen(filename)+strlen(ext),char,return 0);
   strcpy(data,filename);
   ptr = strstr(data,".node");
   if ( ptr ) {
     *ptr = '\0';
   }
 
-  /* Add .node ext  */
-  strcat(data,".edge");
+  /* Add file ext  */
+  strcat(data,ext);
   if( !(inm = fopen(data,"wb")) ) {
     fprintf(stderr,"  ** UNABLE TO OPEN %s.\n",data);
     MMG5_SAFE_FREE(data);
@@ -2775,10 +2791,36 @@ int MMG5_saveEdge(MMG5_pMesh mesh,const char *filename) {
   fprintf(stdout,"  %%%% %s OPENED\n",data);
   MMG5_SAFE_FREE(data);
 
-  /* Save node number, dim, no attributes, 1 bdy marker */
-  fprintf(inm, "%d %d\n\n",mesh->na,1);
+  /* For .poly file, add header */
+  if ( !strcmp(ext,".poly") ) {
+    polyfile = 1;
+  }
+  else {
+    polyfile = 0;
+  }
 
-  for ( k=1; k<=mesh->na; ++k ) {
+  if ( polyfile ) {
+    /* Save 0 nodes (saved in a separated .node file), dim, 0 attributes, 1 bdy
+     * marker */
+    fprintf(inm, "0 %d 0 1\n",mesh->dim);
+  }
+
+  /* Get either the number of boundary edges or the total number of edges
+   * (depending if they have been append to the bdy edges, if yes, edges 1->na
+   * are bdy, na->na_tot are internal. */
+
+  /* Get size of the array in octets */
+  ptr_c = ptr_c-sizeof(size_t);
+  na_tot = (*((size_t*)ptr_c));
+  /* Recover number of edges allocated */
+  na_tot /= sizeof(MMG5_Edge);
+  /* Array is allocated at size na+1, recover na */
+  --na_tot;
+
+  /* Save node number, dim, no attributes, 1 bdy marker */
+  fprintf(inm, "%zu %d\n",na_tot,1);
+
+  for ( k=1; k<=na_tot; ++k ) {
     /* Save edge idx */
     fprintf(inm, "%d ",k);
 
@@ -2788,7 +2830,13 @@ int MMG5_saveEdge(MMG5_pMesh mesh,const char *filename) {
     fprintf(inm,"%d %d %d\n",mesh->point[pt->a].tmp,mesh->point[pt->b].tmp,pt->ref);
 
   }
-  fprintf(stdout,"     NUMBER OF EDGES       %8d\n",mesh->na);
+
+  /* For .poly file, add last line: 0 holes */
+  if ( polyfile ) {
+    fprintf(inm, "0 \n");
+  }
+
+  fprintf(stdout,"     NUMBER OF EDGES       %8zu\n",na_tot);
 
   fclose(inm);
 

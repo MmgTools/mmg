@@ -2624,7 +2624,7 @@ int MMG3D_saveTetgenMesh(MMG5_pMesh mesh,const char *filename) {
     return 0;
   }
 
-  if ( !MMG5_saveEdge(mesh,filename) ) {
+  if ( !MMG5_saveEdge(mesh,filename,".edge") ) {
     return 0;
   }
 

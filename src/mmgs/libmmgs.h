@@ -1863,6 +1863,10 @@ void  MMGS_setfunc(MMG5_pMesh mesh,MMG5_pSol met);
  * boundary if it is located at the interface of 2 domains with different
  * references, if it belongs to one triangle only or if it is a singular edge
  * (ridge or required).
+ * Append these edges to the list of edge.
+ *
+ * \warning reallocate the edge array and append the internal edges. This may
+ * modify the behaviour of other functions.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_GET_NUMBEROFNONBDYEDGES(mesh,nb_edges,retval)\n

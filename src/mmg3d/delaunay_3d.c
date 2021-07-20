@@ -146,7 +146,7 @@ int MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
   int           vois[4],iadrold;
   short         i1;
   char          alert;
-  int           isused = 0,ixt,ielnum[3*MMG3D_LONMAX+1],ll;
+  int           isused = 0,ixt,ielnum[3*MMG3D_LONMAX+1];
   MMG5_Hash    hedg;
 #ifndef NDEBUG
   int tref;

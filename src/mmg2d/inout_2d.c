@@ -2040,6 +2040,28 @@ int MMG2D_saveNeigh(MMG5_pMesh mesh,const char *filename) {
   return 1;
 }
 
+static inline
+int MMG2D_saveEdge(MMG5_pMesh mesh,const char *filename) {
+  int ier,nb_edges;
+
+  ier = MMG5_saveEdge(mesh,filename,".poly");
+  if ( !ier ) {
+    printf("\n  ## Error: %s: unable to save boundary edges\n.",__func__);
+    return 0;
+  }
+
+  nb_edges = 0;
+  ier = MMG2D_Get_numberOfNonBdyEdges( mesh, &nb_edges);
+  if ( !ier ) {
+    printf("\n  ## Error: %s: unable to count and append internal edges\n.",__func__);
+    return 0;
+  }
+
+  ier = MMG5_saveEdge(mesh,filename,".edge");
+  return ier;
+}
+
+
 int MMG2D_saveTetgenMesh(MMG5_pMesh mesh,const char *filename) {
 
   if ( !MMG5_saveNode(mesh,filename) ) {
@@ -2050,7 +2072,7 @@ int MMG2D_saveTetgenMesh(MMG5_pMesh mesh,const char *filename) {
     return 0;
   }
 
-  if ( !MMG5_saveEdge(mesh,filename) ) {
+  if ( !MMG2D_saveEdge(mesh,filename) ) {
     return 0;
   }
 

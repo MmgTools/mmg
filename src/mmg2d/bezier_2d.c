@@ -57,7 +57,8 @@ int MMG2D_chkedg(MMG5_pMesh mesh, int k) {
     else if ( ll < MMG5_EPSD ) continue;
 
     /* Split non geometric edges connecting two parts of the border */
-    else if ( !MG_EDG(pt->tag[i]) && p1->tag > MG_NOTAG && p2->tag > MG_NOTAG ) {
+    else if ( mesh->info.fem &&
+              ( (!MG_EDG(pt->tag[i])) && (p1->tag > MG_NOTAG) && (p2->tag > MG_NOTAG)) ) {
       MG_SET(pt->flag,i);
       continue;
     }

@@ -70,22 +70,6 @@ static int MMG2D_usage(char *name) {
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \return 0 if fail, 1 if success.
- *
- * Print the default parameters values.
- *
- */
-static inline int MMG5_defaultValues(MMG5_pMesh mesh) {
-
-  MMG5_mmgDefaultValues(mesh);
-
-  fprintf(stdout,"\n\n");
-
-  return 1;
-}
-
-/**
- * \param mesh pointer toward the mesh structure.
  * \param bdyRefs pointer toward the list of the boundary references.
  * \return npar, the number of local parameters at edges if success,
  * 0 otherwise.
@@ -331,7 +315,7 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
   /* First step: search if user want to see the default parameters values. */
   for ( i=1; i< argc; ++i ) {
     if ( !strcmp(argv[i],"-val") ) {
-      MMG5_defaultValues(mesh);
+      MMG2D_defaultValues(mesh);
       return 0;
     }
   }

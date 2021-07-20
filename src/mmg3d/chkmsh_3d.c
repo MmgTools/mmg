@@ -41,6 +41,9 @@
 extern int8_t ddb;
 
 /**
+ * \param mesh pointer toward mesh
+ *
+ * Test that tetra have positive volumes.
  *
  * \warning Not used.
  */
