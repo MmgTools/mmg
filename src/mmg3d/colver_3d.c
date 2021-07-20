@@ -159,6 +159,62 @@ int MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t iface,
 }
 
 /**
+ * \param mesh pointer toward the mesh
+ * \param start tetra from which we start to travel
+ * \param end tetra at which we stop the travel
+ * \param na edge vertex
+ * \param nb edge vertex
+ * \param piv global index of the pivot to set the sense of travel
+ * \param iel pointer toward the last element of the shell
+ * \param iopp pointer toward the ending boundary face of the shell
+ *
+ * \return -1 if fail, \a piv otherwise.
+ *
+ * Unfold the shell of the edge \a na \a nb from tetra \a start in the direction
+ * given by the pivot \a piv).
+ *
+ */
+static inline
+int MMG3D_unfold_shell(MMG5_pMesh  mesh,int start,int end, int na, int nb,int piv,
+                       int *iel,int8_t *iopp) {
+  MMG5_pTetra  pt;
+  int          adj,*adja;
+  int8_t       i,ipiv,isface;
+
+  adj = start;
+  do {
+    *iel  = adj;
+    pt   = &mesh->tetra[*iel];
+    adja = &mesh->adja[4*(*iel-1)+1];
+
+    /* Identification of edge number in tetra iel */
+    if ( !MMG3D_findEdge(mesh,pt,*iel,na,nb,1,NULL,&i) ) return -1;
+
+    /* set sense of travel */
+    if ( pt->v[ MMG5_ifar[i][0] ] == piv ) {
+      adj  = adja[ MMG5_ifar[i][0] ] / 4;
+      ipiv = MMG5_ifar[i][1];
+      *iopp = MMG5_ifar[i][0];
+      piv  = pt->v[ipiv];
+    }
+    else {
+      adj  = adja[ MMG5_ifar[i][1] ] / 4;
+      ipiv = MMG5_ifar[i][0];
+      *iopp = MMG5_ifar[i][1];
+      piv  = pt->v[ipiv];
+    }
+
+    isface = 0;
+    if ( pt->xt ) {
+      isface = (MG_BDY & mesh->xtetra[pt->xt].ftag[*iopp]);
+    }
+  }
+  while ( adj && ( adj != end ) && !isface );
+
+  return piv;
+}
+
+/**
  * \param mesh pointer toward the mesh structure.
  * \param k index of the starting tetra.
  * \param iface local index of the starting face in the tetra \a k.
@@ -182,8 +238,8 @@ MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,int8_t iedg,int *lists,
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
   double        n0[3],n1[3],devnew;
-  int           nump,numq,piv,iel,jel,jel1,nap,nbp,naq,nbq,nro,adj,*adja;
-  int8_t        ip,iq,ipiv,iopp,i,j,j1,jface,jface1,isface;
+  int           nump,numq,iel,jel,jel1,nap,nbp,naq,nbq,nro;
+  int8_t        ip,iq,iopp,i,j,j1,jface,jface1;
 
   pt = &mesh->tetra[k];
   ip = MMG5_idir[iface][MMG5_inxt2[iedg]];
@@ -208,40 +264,15 @@ MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,int8_t iedg,int *lists,
 
   nap = pt->v[i];
 
-  /* Unfold shell of (nq,nro), starting from (k,iface), with pivot np */
-  adj = k;
-  piv = nump;
-  do {
-    iel = adj;
-    pt = &mesh->tetra[iel];
-    adja = &mesh->adja[4*(iel-1)+1];
+  /* Unfold shell of (numq,nro), starting from (jel,jface), with pivot nump */
+  naq = MMG3D_unfold_shell(mesh,k,k,numq,nro,nump,&iel,&iopp);
 
-    /* Identification of edge number in tetra iel */
-    if ( !MMG3D_findEdge(mesh,pt,iel,numq,nro,1,NULL,&i) ) return -1;
-
-    /* set sense of travel */
-    if ( pt->v[ MMG5_ifar[i][0] ] == piv ) {
-      adj  = adja[ MMG5_ifar[i][0] ] / 4;
-      ipiv = MMG5_ifar[i][1];
-      iopp = MMG5_ifar[i][0];
-      piv  = pt->v[ipiv];
-    }
-    else {
-      adj  = adja[ MMG5_ifar[i][1] ] / 4;
-      ipiv = MMG5_ifar[i][0];
-      iopp = MMG5_ifar[i][1];
-      piv  = pt->v[ipiv];
-    }
-
-    isface = 0;
-    if ( pt->xt ) {
-      isface = (MG_BDY & mesh->xtetra[pt->xt].ftag[iopp]);
-    }
+  if ( naq < 0 ) {
+    return -1;
   }
-  while ( adj && ( adj != k ) && !isface );
-
-  naq = piv;
-  if ( nap == naq ) return 0;
+  else if ( nap == naq ) {
+    return 0;
+  }
 
   assert ( mesh->tetra[k].xt && "initial tetra is not boundary");
   pxt = &mesh->xtetra[mesh->tetra[k].xt];
@@ -280,40 +311,13 @@ MMG5_topchkcol_bdy(MMG5_pMesh mesh,int k,int iface,int8_t iedg,int *lists,
 
   nbp = pt->v[i];
 
-  /* Unfold shell of (nq,nro), starting from (jel,jface), with pivot np */
-  adj = lists[ilists-1] / 4;
-  piv = nump;
-  do {
-    iel  = adj;
-    pt   = &mesh->tetra[iel];
-    adja = &mesh->adja[4*(iel-1)+1];
+  /* Unfold shell of (numq,nro), starting from (jel,jface), with pivot nump */
+  nbq = MMG3D_unfold_shell(mesh,lists[ilists-1]/4,k,numq,nro,nump,&iel,&iopp);
 
-    /* Identification of edge number in tetra iel */
-    if ( !MMG3D_findEdge(mesh,pt,iel,numq,nro,1,NULL,&i) ) return -1;
-
-    /* set sense of travel */
-    if ( pt->v[ MMG5_ifar[i][0] ] == piv ) {
-      adj  = adja[ MMG5_ifar[i][0] ] / 4;
-      ipiv = MMG5_ifar[i][1];
-      iopp = MMG5_ifar[i][0];
-      piv  = pt->v[ipiv];
-    }
-    else {
-      adj  = adja[ MMG5_ifar[i][1] ] / 4;
-      ipiv = MMG5_ifar[i][0];
-      iopp = MMG5_ifar[i][1];
-      piv  = pt->v[ipiv];
-    }
-
-    isface = 0;
-    if ( pt->xt ) {
-      isface = (MG_BDY & mesh->xtetra[pt->xt].ftag[iopp]);
-    }
+  if ( nbq < 0 ) {
+    return -1;
   }
-  while ( adj && ( adj != k ) && !isface );
-
-  nbq = piv;
-  if ( nbp == nbq ) {
+  else if ( nbp == nbq ) {
     return 0;
   }
 
