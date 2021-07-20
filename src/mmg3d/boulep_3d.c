@@ -139,6 +139,44 @@ int MMG3D_findEdge(MMG5_pMesh mesh,MMG5_pTetra pt,int k,int na,int nb,int error,
   return 0;
 }
 
+static inline
+void MMG3D_compute_tangent(MMG5_pMesh mesh,int nump,int ip0,int ip1,double t[3]) {
+  MMG5_pPoint ppt,p0,p1;
+  double      l0,l1,dd;
+  int8_t      i;
+
+  ppt = &mesh->point[nump];
+  p0 = &mesh->point[ip0];
+  p1 = &mesh->point[ip1];
+
+  l0 = (ppt->c[0] - p0->c[0])*(ppt->c[0] - p0->c[0]) \
+    + (ppt->c[1] - p0->c[1])*(ppt->c[1] - p0->c[1]) + (ppt->c[2] - p0->c[2])*(ppt->c[2] - p0->c[2]);
+  l1 = (ppt->c[0] - p1->c[0])*(ppt->c[0] - p1->c[0]) \
+    + (ppt->c[1] - p1->c[1])*(ppt->c[1] - p1->c[1]) + (ppt->c[2] - p1->c[2])*(ppt->c[2] - p1->c[2]);
+  l0 = sqrt(l0);
+  l1 = sqrt(l1);
+
+  if ( (l0 < MMG5_EPSD2) || (l1 < MMG5_EPSD2) ) {
+    for ( i=0; i<3; ++i ) {
+      t[i] = p1->c[i] - p0->c[i];
+    }
+  }
+  else if ( l0 < l1 ) {
+    dd = l0 / l1;
+    for ( i=0; i<3; ++i ) {
+      t[i] = dd*(p1->c[i] - ppt->c[i]) + ppt->c[i] - p0->c[i];
+    }
+  }
+  else {
+    dd = l1 / l0;
+    for ( i=0; i<3; ++i ) {
+      t[i] = dd*(p0->c[i] - ppt->c[i]) + ppt->c[i] - p1->c[i];
+    }
+  }
+
+  return;
+}
+
 /**
  * \param mesh pointer toward the mesh  structure.
  * \param start tetra index.
@@ -155,8 +193,7 @@ int MMG3D_findEdge(MMG5_pMesh mesh,MMG5_pTetra pt,int k,int na,int nb,int error,
 int MMG5_boulenm(MMG5_pMesh mesh,int start,int ip,int iface,
                   double n[3],double t[3]) {
   MMG5_pTetra   pt;
-  MMG5_pPoint   p0,p1,ppt;
-  double   dd,nt[3],l0,l1;
+  double   dd,nt[3];
   int      base,nump,nr,nnm,k,piv,na,nb,adj,nvstart,fstart,aux,ip0,ip1;
   int     *adja;
   int16_t  tag;
@@ -264,34 +301,8 @@ int MMG5_boulenm(MMG5_pMesh mesh,int start,int ip,int iface,
   assert( ip0 && ip1 );
   if ( ip0 == ip1 )  return 0;
 
-  p0 = &mesh->point[ip0];
-  p1 = &mesh->point[ip1];
-  ppt = &mesh->point[nump];
+  MMG3D_compute_tangent(mesh,nump,ip0,ip1,t);
 
-  l0 = (ppt->c[0] - p0->c[0])*(ppt->c[0] - p0->c[0]) \
-    + (ppt->c[1] - p0->c[1])*(ppt->c[1] - p0->c[1]) + (ppt->c[2] - p0->c[2])*(ppt->c[2] - p0->c[2]);
-  l1 = (ppt->c[0] - p1->c[0])*(ppt->c[0] - p1->c[0]) \
-    + (ppt->c[1] - p1->c[1])*(ppt->c[1] - p1->c[1]) + (ppt->c[2] - p1->c[2])*(ppt->c[2] - p1->c[2]);
-  l0 = sqrt(l0);
-  l1 = sqrt(l1);
-
-  if ( (l0 < MMG5_EPSD2) || (l1 < MMG5_EPSD2) ) {
-    t[0] = p1->c[0] - p0->c[0];
-    t[1] = p1->c[1] - p0->c[1];
-    t[2] = p1->c[2] - p0->c[2];
-  }
-  else if ( l0 < l1 ) {
-    dd = l0 / l1;
-    t[0] = dd*(p1->c[0] - ppt->c[0]) + ppt->c[0] - p0->c[0];
-    t[1] = dd*(p1->c[1] - ppt->c[1]) + ppt->c[1] - p0->c[1];
-    t[2] = dd*(p1->c[2] - ppt->c[2]) + ppt->c[2] - p0->c[2];
-  }
-  else {
-    dd = l1 / l0;
-    t[0] = dd*(p0->c[0] - ppt->c[0]) + ppt->c[0] - p1->c[0];
-    t[1] = dd*(p0->c[1] - ppt->c[1]) + ppt->c[1] - p1->c[1];
-    t[2] = dd*(p0->c[2] - ppt->c[2]) + ppt->c[2] - p1->c[2];
-  }
   dd = t[0]*n[0] + t[1]*n[1] + t[2]*n[2];
   t[0] -= dd*n[0];
   t[1] -= dd*n[1];
@@ -308,16 +319,21 @@ int MMG5_boulenm(MMG5_pMesh mesh,int start,int ip,int iface,
   return 1;
 }
 
-/** 
-Travel the ball of the internal non manifold point ip in tetra start
- and calculate the tangent vector to the underlying curve.
- Return 1 when the procedure has completed successfully, 0 when more than two NOM points are attached to ip.
-*/
+/**
+ * \param mesh pointer toward the mesh  structure.
+ * \param start tetra index.
+ * \param ip point index.
+ * \param t computed tangent vector.
+ * \return 0 when more than two NOM points are attached to ip, 1 if sucess.
+ *
+ * Travel the ball of the internal non manifold point ip in tetra start
+ * and calculate the tangent vector to the underlying curve.
+ *
+ */
 int MMG5_boulenmInt(MMG5_pMesh mesh,int start,int ip,double t[3]) {
   MMG5_pTetra    pt,pt1;
   MMG5_pxTetra   pxt;
-  MMG5_pPoint    p0,p1,ppt;
-  double         l0,l1,dd;
+  double         dd;
   int            k,kk,ip0,ip1,nump,na,nb,base,cur,ilist,*adja;
   int            list[MMG3D_LMAX+2];
   int8_t         i,j,ii,ie;
@@ -395,34 +411,7 @@ int MMG5_boulenmInt(MMG5_pMesh mesh,int start,int ip,double t[3]) {
   }
   
   /* At this point, the two points connected to ppt via the NOM curve are ip0 and ip1 */
-  ppt = &mesh->point[nump];
-  p0  = &mesh->point[ip0];
-  p1  = &mesh->point[ip1];
-  
-  l0 = (ppt->c[0] - p0->c[0])*(ppt->c[0] - p0->c[0]) \
-  + (ppt->c[1] - p0->c[1])*(ppt->c[1] - p0->c[1]) + (ppt->c[2] - p0->c[2])*(ppt->c[2] - p0->c[2]);
-  l1 = (ppt->c[0] - p1->c[0])*(ppt->c[0] - p1->c[0]) \
-  + (ppt->c[1] - p1->c[1])*(ppt->c[1] - p1->c[1]) + (ppt->c[2] - p1->c[2])*(ppt->c[2] - p1->c[2]);
-  l0 = sqrt(l0);
-  l1 = sqrt(l1);
-  
-  if ( (l0 < MMG5_EPSD2) || (l1 < MMG5_EPSD2) ) {
-    t[0] = p1->c[0] - p0->c[0];
-    t[1] = p1->c[1] - p0->c[1];
-    t[2] = p1->c[2] - p0->c[2];
-  }
-  else if ( l0 < l1 ) {
-    dd = l0 / l1;
-    t[0] = dd*(p1->c[0] - ppt->c[0]) + ppt->c[0] - p0->c[0];
-    t[1] = dd*(p1->c[1] - ppt->c[1]) + ppt->c[1] - p0->c[1];
-    t[2] = dd*(p1->c[2] - ppt->c[2]) + ppt->c[2] - p0->c[2];
-  }
-  else {
-    dd = l1 / l0;
-    t[0] = dd*(p0->c[0] - ppt->c[0]) + ppt->c[0] - p1->c[0];
-    t[1] = dd*(p0->c[1] - ppt->c[1]) + ppt->c[1] - p1->c[1];
-    t[2] = dd*(p0->c[2] - ppt->c[2]) + ppt->c[2] - p1->c[2];
-  }
+  MMG3D_compute_tangent(mesh,nump,ip0,ip1,t);
   
   dd = t[0]*t[0] + t[1]*t[1] + t[2]*t[2];
   if ( dd > MMG5_EPSD2 ) {
