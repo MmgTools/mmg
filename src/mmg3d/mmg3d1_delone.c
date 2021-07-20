@@ -156,6 +156,7 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
 
       /* Case of a boundary face */
       if ( pt->xt && (pxt->ftag[i] & MG_BDY) ) {
+        if ( (p0->tag & MG_PARBDY) && (p1->tag & MG_PARBDY) ) continue;
         if ( !(MG_GET(pxt->ori,i)) ) continue;
         ref = pxt->edg[MMG5_iarf[i][j]];
         tag = pxt->tag[MMG5_iarf[i][j]];
@@ -524,6 +525,7 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
 
         /* Case of a boundary face */
         if ( pt->xt && (pxt->ftag[i] & MG_BDY) ) {
+          if ( (p0->tag & MG_PARBDY) && (p1->tag & MG_PARBDY) ) continue;
           if ( !(MG_GET(pxt->ori,i)) ) continue;
           ref = pxt->edg[MMG5_iarf[i][j]];
           tag = pxt->tag[MMG5_iarf[i][j]];
