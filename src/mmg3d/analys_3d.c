@@ -118,6 +118,8 @@ int MMG5_setadj(MMG5_pMesh mesh){
 
       adja = &mesh->adjt[3*(k-1)+1];
       for (i=0; i<3; i++) {
+        if( ((pt->tag[i] & MG_PARBDY) && !(pt->tag[i] & MG_PARBDYBDY)) ||
+            (pt->tag[i] & MG_BDY) ) continue;
         i1  = MMG5_inxt2[i];
         i2  = MMG5_iprv2[i];
         ip1 = pt->v[i1];
@@ -300,7 +302,8 @@ int MMG5_setdhd(MMG5_pMesh mesh) {
     MMG5_nortri(mesh,pt,n1);
     adja = &mesh->adjt[3*(k-1)+1];
     for (i=0; i<3; i++) {
-      if ( pt->tag[i] & MG_PARBDY ) continue;
+      if ( ((pt->tag[i] & MG_PARBDY) && !(pt->tag[i] & MG_PARBDYBDY)) ||
+           (pt->tag[i] & MG_BDY) ) continue;
 
       kk  = adja[i] / 3;
       ii  = adja[i] % 3;
@@ -530,7 +533,7 @@ int MMG5_norver(MMG5_pMesh mesh) {
         ppt->flag = mesh->base;
         if ( mesh->nc1 ) {
           if ( ppt->n[0]*ppt->n[0] + ppt->n[1]*ppt->n[1] + ppt->n[2]*ppt->n[2] > 0 ) {
-            if ( ppt->tag & MG_CRN || ppt->tag & MG_NOM || MG_EDG(ppt->tag) ) {
+            if ( ppt->tag & MG_PARBDY || ppt->tag & MG_CRN || ppt->tag & MG_NOM || MG_EDG(ppt->tag) ) {
               ++nnr;
               continue;
             }
@@ -558,7 +561,7 @@ int MMG5_norver(MMG5_pMesh mesh) {
     adja = &mesh->adjt[3*(k-1)+1];
     for (i=0; i<3; i++) {
       ppt = &mesh->point[pt->v[i]];
-      if ( ppt->tag & MG_CRN || ppt->tag & MG_NOM || ppt->flag == mesh->base )  continue;
+      if ( ppt->tag & MG_PARBDY || ppt->tag & MG_CRN || ppt->tag & MG_NOM || ppt->flag == mesh->base )  continue;
 
       /* C1 point */
       if ( !MG_EDG(ppt->tag) ) {
