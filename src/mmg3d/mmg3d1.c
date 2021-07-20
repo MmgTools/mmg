@@ -1472,7 +1472,7 @@ int MMG3D_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,int k,
   p0  = &mesh->point[ip1];
   p1  = &mesh->point[ip2];
 
-  if ( (p0->tag & MG_PARBDY) && (p1->tag & MG_PARBDY) ) continue;
+  if ( (p0->tag & MG_PARBDY) && (p1->tag & MG_PARBDY) ) return 0;
 
   ref = pxt->edg[imax];
   tag = pxt->tag[imax];
