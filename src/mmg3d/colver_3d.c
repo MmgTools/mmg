@@ -1196,6 +1196,7 @@ int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int8_t indq,in
     for (j=0; j<3; j++) {
       iq = MMG5_idir[ip][j];
       if ( pt->v[iq] == nq ) {
+
         list[k] *= -1;
         break;
       }
