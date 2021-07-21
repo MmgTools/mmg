@@ -369,6 +369,7 @@ int    MMG5_movintpt_iso(MMG5_pMesh ,MMG5_pSol,MMG3D_pPROctree, int *, int , int
 int    MMG3D_movnormal_iso(MMG5_pMesh ,MMG5_pSol ,int ,int );
 int    MMG5_movintptLES_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree,int *,int,int);
 int    MMG5_movintpt_ani(MMG5_pMesh ,MMG5_pSol,MMG3D_pPROctree,int *,int ,int);
+int    MMG3D_movbdyregpt_geom(MMG5_pMesh,int *,const int,const int,double[3],double[3],double[3],double[3]);
 int    MMG5_movbdyregpt_iso(MMG5_pMesh, MMG5_pSol,MMG3D_pPROctree,
                              int*, int, int*, int, int ,int);
 int    MMG5_movbdyregpt_ani(MMG5_pMesh, MMG5_pSol,MMG3D_pPROctree,

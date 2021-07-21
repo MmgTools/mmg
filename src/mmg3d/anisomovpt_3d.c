@@ -197,18 +197,18 @@ int MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
                           int improveSurf, int improveVol) {
   MMG5_pTetra       pt,pt0;
   MMG5_pxTetra      pxt;
-  MMG5_pPoint       p0,p1,p2,ppt0;
+  MMG5_pPoint       p0;
   MMG5_Tria         tt;
   MMG5_pxPoint      pxp;
   MMG5_Bezier       b;
   double            *n,r[3][3],lispoi[3*MMG3D_LMAX+1],det2d;
   double            detloc,gv[2],step,lambda[3];
-  double            uv[2],o[3],no[3],to[3],*m0,ncur[3],nprev[3],nneighi[3];
+  double            o[3],no[3],*m0,ncur[3],nprev[3],nneighi[3];
   double            calold,calnew,caltmp,*callist;
-  int               k,kel,iel,l,ip0,na,nb,ntempb,ntempc,nxp,ier;
+  int               k,kel,iel,l,ip0,nxp,ier;
   uint8_t           i0,iface,i;
   static int        warn = 0;
-  static int8_t     mmgErr0=0,mmgErr1=0;
+  static int8_t     mmgErr0=0;
 
   step = 0.1;
   if ( ilists < 2 )      return 0;
@@ -326,115 +326,18 @@ int MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
   lambda[2]*= (det2d);
   lambda[0] = 1.0 - lambda[1] - lambda[2];
 
-  /** Step 5 : come back to original problem, and compute patch in triangle iel */
-  iel    = lists[kel] / 4;
-  iface  = lists[kel] % 4;
-  pt     = &mesh->tetra[iel];
-  pxt    = &mesh->xtetra[pt->xt];
-
-  MMG5_tet2tri(mesh,iel,iface,&tt);
-
-  if(!MMG5_bezierCP(mesh,&tt,&b,MG_GET(pxt->ori,iface))){
-    if( !mmgErr0 ) {
-      mmgErr0 = 1;
-      fprintf(stderr,"\n  ## Error: %s: function MMG5_bezierCP return 0.\n",
-              __func__);
-    }
+  /** Step 5 : come back to original problem, compute patch in triangle iel and
+   * check that geometric approx has not been degraded too much */
+  nxp = MMG3D_movbdyregpt_geom(mesh,lists,kel,ip0,n,lambda,o,no);
+  if ( nxp < 0 ) {
     return -1;
   }
-
-  /* Now, for Bezier interpolation, one should identify which of i,i1,i2 is 0,1,2
-     recall uv[0] = barycentric coord associated to pt->v[1], uv[1] associated to pt->v[2] and
-     1 - uv[0] - uv[1] is associated to pt->v[0]. For this, use the fact that kel, kel + 1 is
-     positively oriented with respect to n */
-  na = nb = 0;
-  for( i=0 ; i<4 ; i++ ){
-    if ( (pt->v[i] != ip0) && (pt->v[i] != pt->v[iface]) ) {
-      if ( !na )
-        na = pt->v[i];
-      else
-        nb = pt->v[i];
-    }
+  else if ( !nxp ) {
+    return 0;
   }
-  p1 = &mesh->point[na];
-  p2 = &mesh->point[nb];
-  detloc = MMG5_det3pt1vec(p0->c,p1->c,p2->c,n);
-
-  /* ntempa = point to which is associated 1 -uv[0] - uv[1], ntempb = uv[0], ntempc = uv[1] */
-  ntempb = pt->v[MMG5_idir[iface][1]];
-  ntempc = pt->v[MMG5_idir[iface][2]];
-
-  /* na = lispoi[kel] -> lambda[1], nb = lispoi[kel+1] -> lambda[2] */
-  if ( detloc > 0.0 ) {
-    if ( ntempb == na )
-      uv[0] = lambda[1];
-    else if (ntempb == nb )
-      uv[0] = lambda[2];
-    else {
-      assert(ntempb == ip0);
-      uv[0] = lambda[0];
-    }
-    if ( ntempc == na )
-      uv[1] = lambda[1];
-    else if (ntempc == nb )
-      uv[1] = lambda[2];
-    else {
-      assert(ntempc == ip0);
-      uv[1] = lambda[0];
-    }
-  }
-  /* nb = lispoi[kel] -> lambda[1], na = lispoi[kel+1] -> lambda[2] */
-  else {
-    if ( ntempb == na )
-      uv[0] = lambda[2];
-    else if (ntempb == nb )
-      uv[0] = lambda[1];
-    else {
-      assert(ntempb == ip0);
-      uv[0] = lambda[0];
-    }
-    if ( ntempc == na )
-      uv[1] = lambda[2];
-    else if (ntempc == nb )
-      uv[1] = lambda[1];
-    else {
-      assert(ntempc == ip0);
-      uv[1] = lambda[0];
-    }
-  }
-  if(!MMG3D_bezierInt(&b,uv,o,no,to)){
-    if( !mmgErr1 ) {
-      mmgErr1 = 1;
-      fprintf(stderr,"  ## Error: %s: function MMG3D_bezierInt return 0.\n",
-              __func__);
-    }
-    return -1;
-  }
-
-  /* Test : make sure that geometric approximation has not been degraded too much */
-  ppt0 = &mesh->point[0];
-  ppt0->c[0] = o[0];
-  ppt0->c[1] = o[1];
-  ppt0->c[2] = o[2];
-
-  ppt0->tag      = p0->tag;
-  ppt0->ref      = p0->ref;
-
-
-  nxp = mesh->xp + 1;
-  if ( nxp > mesh->xpmax ) {
-    MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,MMG5_GAP,MMG5_xPoint,
-                       "larger xpoint table",return 0);
-    n = &(mesh->xpoint[p0->xp].n1[0]);
-  }
-  ppt0->xp = nxp;
   pxp = &mesh->xpoint[nxp];
-  memcpy(pxp,&(mesh->xpoint[p0->xp]),sizeof(MMG5_xPoint));
-  pxp->n1[0] = no[0];
-  pxp->n1[1] = no[1];
-  pxp->n1[2] = no[2];
 
-  // parallel transport of metric at p0 to new point.
+  /* parallel transport of metric at p0 to new point. */
   if ( !MMG5_paratmet(p0->c,n,m0,o,no,&met->m[0]) ) {
     return 0;
   }
