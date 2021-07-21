@@ -200,7 +200,7 @@ int MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
   MMG5_pPoint       p0,p1,p2,ppt0;
   MMG5_Tria         tt;
   MMG5_pxPoint      pxp;
-  MMG5_Bezier       pb;
+  MMG5_Bezier       b;
   double            *n,r[3][3],lispoi[3*MMG3D_LMAX+1],det2d;
   double            detloc,gv[2],step,lambda[3];
   double            uv[2],o[3],no[3],to[3],*m0,ncur[3],nprev[3],nneighi[3];
@@ -247,7 +247,7 @@ int MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
 
     MMG5_tet2tri(mesh,iel,iface,&tt);
 
-    if(!MMG5_bezierCP(mesh,&tt,&pb,MG_GET(pxt->ori,iface))){
+    if(!MMG5_bezierCP(mesh,&tt,&b,MG_GET(pxt->ori,iface))){
       if( !mmgErr0 ) {
         mmgErr0 = 1;
         fprintf(stderr,"\n  ## Error: %s: function MMG5_bezierCP return 0.\n",
@@ -257,7 +257,7 @@ int MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
     }
 
     /* Compute integral of sqrt(T^J(xi)  M(P(xi)) J(xi)) * P(xi) over the triangle */
-    if ( !MMG5_elementWeight(mesh,met,&tt,p0,&pb,r,gv) ) {
+    if ( !MMG5_elementWeight(mesh,met,&tt,p0,&b,r,gv) ) {
       if ( !warn ) {
         ++warn;
         fprintf(stderr,"\n  ## Warning: %s:"
@@ -334,7 +334,7 @@ int MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
 
   MMG5_tet2tri(mesh,iel,iface,&tt);
 
-  if(!MMG5_bezierCP(mesh,&tt,&pb,MG_GET(pxt->ori,iface))){
+  if(!MMG5_bezierCP(mesh,&tt,&b,MG_GET(pxt->ori,iface))){
     if( !mmgErr0 ) {
       mmgErr0 = 1;
       fprintf(stderr,"\n  ## Error: %s: function MMG5_bezierCP return 0.\n",
@@ -402,7 +402,7 @@ int MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
       uv[1] = lambda[0];
     }
   }
-  if(!MMG3D_bezierInt(&pb,uv,o,no,to)){
+  if(!MMG3D_bezierInt(&b,uv,o,no,to)){
     if( !mmgErr1 ) {
       mmgErr1 = 1;
       fprintf(stderr,"  ## Error: %s: function MMG3D_bezierInt return 0.\n",
@@ -423,8 +423,8 @@ int MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
 
   nxp = mesh->xp + 1;
   if ( nxp > mesh->xpmax ) {
-    MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,0.2,MMG5_xPoint,
-                       "larger xpoint table",return 0;);
+    MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,MMG5_GAP,MMG5_xPoint,
+                       "larger xpoint table",return 0);
     n = &(mesh->xpoint[p0->xp].n1[0]);
   }
   ppt0->xp = nxp;
