@@ -184,7 +184,7 @@ int MMG5_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree, i
  * \param improve force the new minimum element quality to be greater or equal
  * than 1.02 of the old minimum element quality.
 
- * \return 0 if we can't move the point, 1 if we can.
+ * \return 0 if we can't move the point, 1 if we can, -1 if we fail.
  *
  * \remark we don't check if we break the hausdorff criterion.
  * \remark the metric is not interpolated at the new position.
@@ -208,6 +208,7 @@ int MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
   int               k,kel,iel,l,ip0,na,nb,ntempb,ntempc,nxp,ier;
   uint8_t           i0,iface,i;
   static int        warn = 0;
+  static int8_t     mmgErr0=0,mmgErr1=0;
 
   step = 0.1;
   if ( ilists < 2 )      return 0;
@@ -247,7 +248,12 @@ int MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
     MMG5_tet2tri(mesh,iel,iface,&tt);
 
     if(!MMG5_bezierCP(mesh,&tt,&pb,MG_GET(pxt->ori,iface))){
-      return 0;
+      if( !mmgErr0 ) {
+        mmgErr0 = 1;
+        fprintf(stderr,"\n  ## Error: %s: function MMG5_bezierCP return 0.\n",
+                __func__);
+      }
+      return -1;
     }
 
     /* Compute integral of sqrt(T^J(xi)  M(P(xi)) J(xi)) * P(xi) over the triangle */
@@ -329,7 +335,12 @@ int MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
   MMG5_tet2tri(mesh,iel,iface,&tt);
 
   if(!MMG5_bezierCP(mesh,&tt,&pb,MG_GET(pxt->ori,iface))){
-    return 0;
+    if( !mmgErr0 ) {
+      mmgErr0 = 1;
+      fprintf(stderr,"\n  ## Error: %s: function MMG5_bezierCP return 0.\n",
+              __func__);
+    }
+    return -1;
   }
 
   /* Now, for Bezier interpolation, one should identify which of i,i1,i2 is 0,1,2
@@ -392,7 +403,12 @@ int MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
     }
   }
   if(!MMG3D_bezierInt(&pb,uv,o,no,to)){
-    return 0;
+    if( !mmgErr1 ) {
+      mmgErr1 = 1;
+      fprintf(stderr,"  ## Error: %s: function MMG3D_bezierInt return 0.\n",
+              __func__);
+    }
+    return -1;
   }
 
   /* Test : make sure that geometric approximation has not been degraded too much */
