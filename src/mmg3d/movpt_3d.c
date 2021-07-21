@@ -871,7 +871,7 @@ int MMG5_movbdyrefpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
   int                   l,iel,ip0,ipa,ipb,iptmpa,iptmpb,ip1,ip2,ip,nxp;
   int                   isloc,j;
   int16_t               tag;
-  uint8_t       i,i0,ie,iface,iea,ieb;
+  uint8_t               i,i0,ie,iface,iea,ieb;
 
   step = 0.1;
   ip1 = ip2 = 0;
@@ -1066,7 +1066,8 @@ int MMG5_movbdyrefpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
     pxt         = &mesh->xtetra[pt->xt];
 
     MMG5_tet2tri(mesh,iel,iface,&tt);
-    calold = MG_MIN(calold,MMG5_caltri(mesh,met,&tt));
+    caltmp = MMG5_caltri(mesh,met,&tt);
+    calold = MG_MIN(calold,caltmp);
 
     for( i=0 ; i<3 ; i++ )
       if ( tt.v[i] == ip0 )      break;
