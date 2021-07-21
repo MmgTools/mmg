@@ -57,13 +57,10 @@ int MMG5_movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree,
   MMG5_pTetra               pt,pt0;
   MMG5_pPoint               p0,p1,p2,p3,ppt0;
   double               vol,totvol;
-  double               calold,calnew,*callist;
-  double len1,len2;
-  int    iloc;
+  double               calold,calnew,callist[MMG3D_LMAX+2];
+  double               len1,len2;
+  int                  iloc;
   int                  k,iel,i0;
-
-  // Dynamic alloc for windows comptibility
-  MMG5_SAFE_MALLOC(callist, ilist, double,return 0);
 
   pt0    = &mesh->tetra[0];
   ppt0   = &mesh->point[0];
@@ -88,7 +85,6 @@ int MMG5_movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree,
     calold = MG_MIN(calold, pt->qual);
   }
   if (totvol < MMG5_EPSD2) {
-    MMG5_SAFE_FREE(callist);
     return 0;
   }
 
@@ -109,7 +105,6 @@ int MMG5_movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree,
     pt0->v[i0] = 0;
     callist[k] = MMG5_orcal(mesh,met,0);
     if (callist[k] < MMG5_NULKAL) {
-      MMG5_SAFE_FREE(callist);
       return 0;
     }
     calnew = MG_MIN(calnew,callist[k]);
@@ -120,13 +115,11 @@ int MMG5_movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree,
         len2 =  MMG5_lenedg_iso(mesh,met,MMG5_arpt[i0][iloc],pt0);
         if ( (len1 < MMG3D_LOPTL && len2 >= MMG3D_LOPTL) ||
              (len1 > MMG3D_LOPTL && len2 >len1 ) ) {
-          MMG5_SAFE_FREE(callist);
           return 0;
         }
 
         if ( (len1 > MMG3D_LOPTS && len2 <= MMG3D_LOPTS) ||
              (len1 < MMG3D_LOPTS && len2 <len1 ) ) {
-          MMG5_SAFE_FREE(callist);
           return 0;
         }
       }
@@ -134,19 +127,15 @@ int MMG5_movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree,
 
   }
   if (calold < MMG5_EPSOK && calnew <= calold) {
-    MMG5_SAFE_FREE(callist);
     return 0;
   }
   else if (calnew < MMG5_EPSOK) {
-    MMG5_SAFE_FREE(callist);
     return 0;
   }
   else if ( improve && calnew < 1.02 * calold ) {
-    MMG5_SAFE_FREE(callist);
     return 0;
   }
   else if ( calnew < 0.3 * calold ) {
-    MMG5_SAFE_FREE(callist);
     return 0;
   }
 
@@ -164,8 +153,6 @@ int MMG5_movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree,
     (&mesh->tetra[list[k]/4])->mark=mesh->mark;
   }
 
-
-  MMG5_SAFE_FREE(callist);
   return 1;
 }
 
@@ -196,13 +183,10 @@ int MMG5_movintptLES_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree
   MMG5_pTetra               pt,pt0;
   MMG5_pPoint               p0,p1,p2,p3,ppt0;
   double               vol,totvol;
-  double               calold,calnew,*callist;
+  double               calold,calnew,callist[MMG3D_LMAX+2];
   double               x21,y21,z21,x31,y31,z31,nx,ny,nz,bary[3],dd,len;
   double               u10[3],u20[3],u30[3],oldc[3],coe;
   int                  k,iel,ifac,iter,maxtou;
-
-  // Dynamic alloc for windows comptibility
-  MMG5_SAFE_MALLOC(callist, ilist, double,return 0);
 
   pt0    = &mesh->tetra[0];
   ppt0   = &mesh->point[0];
@@ -287,7 +271,6 @@ int MMG5_movintptLES_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree
     calold = MG_MIN(calold, pt->qual);
   }
   if (totvol < MMG5_EPSD2) {
-    MMG5_SAFE_FREE(callist);
     return 0;
   }
 
@@ -330,7 +313,6 @@ int MMG5_movintptLES_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree
 
   if ( iter > maxtou ) {
     memcpy(p0->c,oldc,3*sizeof(double));
-    MMG5_SAFE_FREE(callist);
     return 0;
   }
 
@@ -343,7 +325,6 @@ int MMG5_movintptLES_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree
      (&mesh->tetra[list[k]/4])->mark=mesh->mark;
    }
 
-   MMG5_SAFE_FREE(callist);
    return 1;
 }
 
@@ -645,7 +626,7 @@ int MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
   double            *n,r[3][3],lispoi[3*MMG3D_LMAX+1],ux,uy,det2d;
   double            detloc,oppt[2],step,lambda[3];
   double            ll,m[2],o[3],no[3];
-  double            calold,calnew,caltmp,*callist;
+  double            calold,calnew,caltmp,callist[MMG3D_LMAX+2];
   int               k,kel,l,ip0,nut,nxp;
   uint8_t           i0,iface,i;
 
@@ -779,10 +760,6 @@ int MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
   memset(pxp,0,sizeof(MMG5_xPoint));
 
   /* Test : check whether all volumes remain positive with new position of the point */
-
-  // Dynamic allocations for windows compatibility
-  MMG5_SAFE_MALLOC(callist, ilistv, double,return 0);
-
   calold = calnew = DBL_MAX;
 
   for (l=0; l<ilistv; l++) {
@@ -796,7 +773,6 @@ int MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
     callist[l]=MMG5_orcal(mesh,met,0);
 
     if (callist[l] < MMG5_NULKAL) {
-      MMG5_SAFE_FREE(callist);
       return 0;
     }
     calnew = MG_MIN(calnew,callist[l]);
@@ -805,19 +781,15 @@ int MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
 
 
   if (calold < MMG5_EPSOK && calnew <= calold) {
-    MMG5_SAFE_FREE(callist);
     return 0;
   }
   else if (calnew < MMG5_EPSOK) {
-    MMG5_SAFE_FREE(callist);
     return 0;
   }
   else if (improveVol && calnew < calold) {
-    MMG5_SAFE_FREE(callist);
     return 0;
   }
   else if (calnew < 0.3*calold) {
-    MMG5_SAFE_FREE(callist);
     return 0;
   }
 
@@ -837,7 +809,6 @@ int MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
     (&mesh->tetra[listv[l]/4])->qual= callist[l];
     (&mesh->tetra[listv[l]/4])->mark=mesh->mark;
   }
-  MMG5_SAFE_FREE(callist);
   return 1;
 }
 
@@ -870,7 +841,7 @@ int MMG3D_movbdycurvept_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
   MMG5_pxPoint          pxp;
   MMG5_pPar             par;
   double                step,ll1old,ll2old,o[3],no[3],no2[3],to[3];
-  double                calold,calnew,caltmp,*callist,hmax,hausd;
+  double                calold,calnew,caltmp,callist[MMG3D_LMAX+2],hmax,hausd;
   int                   l,iel,ip0,ipa,ipb,iptmpa,iptmpb,ip1,ip2,ip,nxp;
   int                   isloc,j;
   int16_t               tag;
@@ -1174,9 +1145,6 @@ int MMG3D_movbdycurvept_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
   memset(pxp,0,sizeof(MMG5_xPoint));
 
   /* Test : check whether all volumes remain positive with new position of the point */
-  // Dynamic allocations for windows compatibility
-  MMG5_SAFE_MALLOC(callist, ilistv, double,return 0);
-
   calold = calnew = DBL_MAX;
   for( l=0 ; l<ilistv ; l++ ){
     iel = listv[l] / 4;
@@ -1188,17 +1156,14 @@ int MMG3D_movbdycurvept_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
     calold = MG_MIN(calold, pt->qual);
     callist[l] = MMG5_orcal(mesh,met,0);
     if (callist[l] < MMG5_NULKAL) {
-      MMG5_SAFE_FREE(callist);
       return 0;
     }
     calnew = MG_MIN(calnew,callist[l]);
   }
   if ((calold < MMG5_EPSOK && calnew <= calold) ||
       (calnew < MMG5_EPSOK) || (calnew <= 0.3*calold)) {
-    MMG5_SAFE_FREE(callist);
     return 0;
   } else if (improve && calnew < calold) {
-    MMG5_SAFE_FREE(callist);
     return 0;
   }
 
@@ -1230,7 +1195,6 @@ int MMG3D_movbdycurvept_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
     (&mesh->tetra[listv[l]/4])->qual = callist[l];
     (&mesh->tetra[listv[l]/4])->mark = mesh->mark;
   }
-  MMG5_SAFE_FREE(callist);
   return 1;
 }
 
@@ -1300,7 +1264,7 @@ int MMG5_movbdynomintpt_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROct
   MMG5_pTetra       pt,pt0;
   MMG5_pxTetra      pxt;
   MMG5_pPoint       p0,p1,p2,ppt0;
-  double            step,ll1old,ll2old,calold,calnew,*callist;
+  double            step,ll1old,ll2old,calold,calnew,callist[MMG3D_LMAX+2];
   double            o[3],no[3],to[3];
   int               ip0,ip1,ip2,ip,iel,ipa,l;
   int8_t            i,i0,ie;
@@ -1354,9 +1318,6 @@ int MMG5_movbdynomintpt_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROct
   if ( !(MMG5_BezierNom(mesh,ip0,ip,step,o,no,to)) )  return 0;
 
   /* Test : check whether all volumes remain positive with new position of the point */
-  // Dynamic allocations for windows compatibility
-  MMG5_SAFE_MALLOC(callist, ilistv, double,return 0);
-
   ppt0 = &mesh->point[0];
   ppt0->c[0] = o[0];
   ppt0->c[1] = o[1];
@@ -1375,17 +1336,14 @@ int MMG5_movbdynomintpt_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROct
     calold = MG_MIN(calold, pt->qual);
     callist[l]= MMG5_orcal(mesh,met,0);
     if (callist[l] < MMG5_NULKAL) {
-      MMG5_SAFE_FREE(callist);
       return 0;
     }
     calnew = MG_MIN(calnew,callist[l]);
   }
   if ((calold < MMG5_EPSOK && calnew <= calold) ||
       (calnew < MMG5_EPSOK) || (calnew <= 0.3*calold)) {
-    MMG5_SAFE_FREE(callist);
     return 0;
   } else if (improve && calnew < calold) {
-    MMG5_SAFE_FREE(callist);
     return 0;
   }
 
@@ -1406,7 +1364,6 @@ int MMG5_movbdynomintpt_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROct
     (&mesh->tetra[listv[l]/4])->mark = mesh->mark;
   }
 
-  MMG5_SAFE_FREE(callist);
   return 1;
 }
 
