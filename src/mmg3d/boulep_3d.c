@@ -319,7 +319,7 @@ int MMG5_boulenm(MMG5_pMesh mesh,int start,int ip,int iface,
   return 1;
 }
 
-/**
+/** 
  * \param mesh pointer toward the mesh  structure.
  * \param start tetra index.
  * \param ip point index.
@@ -329,7 +329,7 @@ int MMG5_boulenm(MMG5_pMesh mesh,int start,int ip,int iface,
  * Travel the ball of the internal non manifold point ip in tetra start
  * and calculate the tangent vector to the underlying curve.
  *
- */
+*/
 int MMG5_boulenmInt(MMG5_pMesh mesh,int start,int ip,double t[3]) {
   MMG5_pTetra    pt,pt1;
   MMG5_pxTetra   pxt;
@@ -337,23 +337,23 @@ int MMG5_boulenmInt(MMG5_pMesh mesh,int start,int ip,double t[3]) {
   int            k,kk,ip0,ip1,nump,na,nb,base,cur,ilist,*adja;
   int            list[MMG3D_LMAX+2];
   int8_t         i,j,ii,ie;
-
+  
   base = ++mesh->base;
   ip0 = ip1 = 0;
   cur = ilist = 0;
-
+  
   /* Store initial tetrahedron */
   pt = &mesh->tetra[start];
   nump = pt->v[ip];
   list[0] = 4*start+ip;
   pt->flag = base;
   ilist++;
-
+  
   while ( cur < ilist ) {
     k = list[cur] / 4;
     i = list[cur] % 4;
     pt = &mesh->tetra[k];
-
+    
     /* If pt bears geometric information, search for endpoints of the NOM curve of ppt */
     if ( pt->xt ) {
       pxt = &mesh->xtetra[pt->xt];
@@ -385,34 +385,34 @@ int MMG5_boulenmInt(MMG5_pMesh mesh,int start,int ip,double t[3]) {
         }
       }
     }
-
+    
     /* Pile up tetrahedra in the ball of nump */
     adja = &mesh->adja[4*(k-1)+1];
-
+    
     for (j=0; j<3; j++) {
       i = MMG5_inxt3[i];
       kk = adja[i] / 4;
       assert ( kk );
-
+      
       pt1 = &mesh->tetra[kk];
       if ( pt1->flag == base ) continue;
-
+      
       for (ii=0; ii<4; ii++)
         if ( pt1->v[ii] == nump ) break;
       assert ( ii < 4 );
-
+      
       list[ilist] = 4*kk+ii;
       pt1->flag = base;
       if ( ilist > MMG3D_LMAX-3 )  return 0;
       ilist++;
     }
-
+    
     cur++;
   }
-
+  
   /* At this point, the two points connected to ppt via the NOM curve are ip0 and ip1 */
   MMG3D_compute_tangent(mesh,nump,ip0,ip1,t);
-
+  
   dd = t[0]*t[0] + t[1]*t[1] + t[2]*t[2];
   if ( dd > MMG5_EPSD2 ) {
     dd = 1.0 / sqrt(dd);
@@ -420,7 +420,7 @@ int MMG5_boulenmInt(MMG5_pMesh mesh,int start,int ip,double t[3]) {
     t[1] *= dd;
     t[2] *= dd;
   }
-
+  
   return 1;
 }
 
@@ -749,26 +749,26 @@ int MMG5_boulesurfvolpNom(MMG5_pMesh mesh,int start,int ip,int iface,
   int  base,nump,k,k1,*adja,piv,na,nb,adj,cur,nvstart,fstart,aux;
   int8_t iopp,ipiv,i,j,l,isface;
   static int8_t mmgErr0=0, mmgErr1=0, mmgErr2=0;
-
+  
   if ( isnm ) assert(!mesh->adja[4*(start-1)+iface+1]);
-
+  
   base = ++mesh->base;
   *ilists  = 0;
   *ilistv  = 0;
   *refmin  = -1;
   *refplus = -1;
-
+  
   pt = &mesh->tetra[start];
   nump = pt->v[ip];
   k = start;
-
+  
   na = pt->v[ip];
   nb = pt->v[MMG5_idir[iface][MMG5_inxt2[MMG5_idirinv[iface][ip]]]];
   piv = pt->v[MMG5_idir[iface][MMG5_iprv2[MMG5_idirinv[iface][ip]]]];
-
+  
   iopp = iface;
   fstart = 4*k+iopp;
-
+  
   do {
     /* A boundary face has been hit : change travel edge */
     lists[(*ilists)] = 4*k+iopp;
@@ -783,16 +783,16 @@ int MMG5_boulesurfvolpNom(MMG5_pMesh mesh,int start,int ip,int iface,
                 MMG3D_indPt(mesh,nump));
         mmgErr0 = 1;
       }
-
+      
       return -1;
     }
-
+    
     aux = nb;
     nb = piv;
     piv = aux;
     nvstart = k;
     adj = k;
-
+    
     /* Now unfold shell of edge (na,nb) starting from k (included)*/
     do {
       k = adj;
@@ -804,7 +804,7 @@ int MMG5_boulesurfvolpNom(MMG5_pMesh mesh,int start,int ip,int iface,
         assert(i<4);
         listv[(*ilistv)] = 4*k+i;
         (*ilistv)++;
-
+        
         /* Identify references of both subdomains in presence */
         if ( *refmin == -1 )
           *refmin = pt->ref;
@@ -816,10 +816,10 @@ int MMG5_boulesurfvolpNom(MMG5_pMesh mesh,int start,int ip,int iface,
         }
         pt->flag = base;
       }
-
+      
       /* identification of edge number in tetra k */
       if ( !MMG3D_findEdge(mesh,pt,k,na,nb,0,&mmgErr2,&i) ) return -1;
-
+      
       /* set sense of travel */
       if ( pt->v[ MMG5_ifar[i][0] ] == piv ) {
         iopp = MMG5_ifar[i][0];
@@ -847,14 +847,14 @@ int MMG5_boulesurfvolpNom(MMG5_pMesh mesh,int start,int ip,int iface,
     while ( adj && (adj != nvstart) && !isface );
   }
   while ( 4*k+iopp != fstart );
-
+  
   /* Now, surfacic ball is complete ; finish travel of volumic ball */
   cur = 0;  // Check numerotation
   while ( cur < (*ilistv) ) {
     k = listv[cur]/4;
     i = listv[cur]%4; // index of point p in tetra k
     adja = &mesh->adja[4*(k-1)+1];
-
+    
     for (l=0; l<3; l++) {
       i  = MMG5_inxt3[i];
       k1 = adja[i];
@@ -863,11 +863,11 @@ int MMG5_boulesurfvolpNom(MMG5_pMesh mesh,int start,int ip,int iface,
       pt1 = &mesh->tetra[k1];
       if ( pt1->flag == base )  continue;
       pt1->flag = base;
-
+      
       for (j=0; j<4; j++)
         if ( pt1->v[j] == nump )  break;
       assert(j<4);
-
+      
       /* overflow */
       if ( *ilistv > MMG3D_LMAX-3 ) {
         if ( !mmgErr1 ) {
@@ -882,7 +882,7 @@ int MMG5_boulesurfvolpNom(MMG5_pMesh mesh,int start,int ip,int iface,
       }
       listv[(*ilistv)] = 4*k1+j;
       (*ilistv)++;
-
+      
       /* Identify references of both subdomains in presence */
       if ( *refmin == -1 )
         *refmin = pt1->ref;
@@ -895,7 +895,7 @@ int MMG5_boulesurfvolpNom(MMG5_pMesh mesh,int start,int ip,int iface,
     }
     cur++;
   }
-
+  
   return 1;
 }
 
