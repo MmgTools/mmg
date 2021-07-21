@@ -200,12 +200,12 @@ int MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
   MMG5_pPoint       p0,p1,p2,ppt0;
   MMG5_Tria         tt;
   MMG5_pxPoint      pxp;
-  MMG5_Bezier      pb;
-  double            *n,r[3][3],lispoi[3*MMG3D_LMAX+1],ux,uy,uz,det2d;
+  MMG5_Bezier       pb;
+  double            *n,r[3][3],lispoi[3*MMG3D_LMAX+1],det2d;
   double            detloc,gv[2],step,lambda[3];
   double            uv[2],o[3],no[3],to[3],*m0,ncur[3],nprev[3],nneighi[3];
   double            calold,calnew,caltmp,*callist;
-  int               k,kel,iel,l,n0,na,nb,ntempa,ntempb,ntempc,nxp,ier;
+  int               k,kel,iel,l,ip0,na,nb,ntempb,ntempc,nxp,ier;
   uint8_t           i0,iface,i;
   static int        warn = 0;
 
@@ -215,9 +215,9 @@ int MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
   k  = listv[0] / 4;
   i0 = listv[0] % 4;
   pt = &mesh->tetra[k];
-  n0 = pt->v[i0];
-  p0 = &mesh->point[n0];
-  m0 = &met->m[6*n0];
+  ip0 = pt->v[i0];
+  p0 = &mesh->point[ip0];
+  m0 = &met->m[6*ip0];
   assert( p0->xp && !MG_EDG(p0->tag) );
 
   n = &(mesh->xpoint[p0->xp].n1[0]);
@@ -229,103 +229,7 @@ int MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
 
   /** Step 2 : rotation of the oriented surfacic ball with r : lispoi[k] is the common edge
       between faces lists[k-1] and lists[k] */
-  k                     = lists[0] / 4;
-  iface = lists[0] % 4;
-  pt            = &mesh->tetra[k];
-  na = nb = 0;
-  for (i=0; i<3; i++) {
-    if ( pt->v[MMG5_idir[iface][i]] != n0 ) {
-      if ( !na )
-        na = pt->v[MMG5_idir[iface][i]];
-      else
-        nb = pt->v[MMG5_idir[iface][i]];
-    }
-  }
-
-  for (l=1; l<ilists; l++) {
-    k                   = lists[l] / 4;
-    iface = lists[l] % 4;
-    pt          = &mesh->tetra[k];
-    ntempa = ntempb = 0;
-    for (i=0; i<3; i++) {
-      if ( pt->v[MMG5_idir[iface][i]] != n0 ) {
-        if ( !ntempa )
-          ntempa = pt->v[MMG5_idir[iface][i]];
-        else
-          ntempb = pt->v[MMG5_idir[iface][i]];
-      }
-    }
-    if ( ntempa == na )
-      p1 = &mesh->point[na];
-    else if ( ntempa == nb )
-      p1 = &mesh->point[nb];
-    else if ( ntempb == na )
-      p1 = &mesh->point[na];
-    else {
-      assert(ntempb == nb);
-      p1 = &mesh->point[nb];
-    }
-    ux = p1->c[0] - p0->c[0];
-    uy = p1->c[1] - p0->c[1];
-    uz = p1->c[2] - p0->c[2];
-
-    lispoi[3*l+1] =      r[0][0]*ux + r[0][1]*uy + r[0][2]*uz;
-    lispoi[3*l+2] =      r[1][0]*ux + r[1][1]*uy + r[1][2]*uz;
-    lispoi[3*l+3] =      r[2][0]*ux + r[2][1]*uy + r[2][2]*uz;
-
-    na = ntempa;
-    nb = ntempb;
-  }
-
-  /* Finish with point 0 */;
-  k      = lists[0] / 4;
-  iface  = lists[0] % 4;
-  pt     = &mesh->tetra[k];
-  ntempa = ntempb = 0;
-  for (i=0; i<3; i++) {
-    if ( pt->v[MMG5_idir[iface][i]] != n0 ) {
-      if ( !ntempa )
-        ntempa = pt->v[MMG5_idir[iface][i]];
-      else
-        ntempb = pt->v[MMG5_idir[iface][i]];
-    }
-  }
-  if ( ntempa == na )
-    p1 = &mesh->point[na];
-  else if ( ntempa == nb )
-    p1 = &mesh->point[nb];
-  else if ( ntempb == na )
-    p1 = &mesh->point[na];
-  else {
-    assert(ntempb == nb);
-    p1 = &mesh->point[nb];
-  }
-
-  ux = p1->c[0] - p0->c[0];
-  uy = p1->c[1] - p0->c[1];
-  uz = p1->c[2] - p0->c[2];
-
-  lispoi[1] =    r[0][0]*ux + r[0][1]*uy + r[0][2]*uz;
-  lispoi[2] =    r[1][0]*ux + r[1][1]*uy + r[1][2]*uz;
-  lispoi[3] =    r[2][0]*ux + r[2][1]*uy + r[2][2]*uz;
-
-  /* list goes modulo ilist */
-  lispoi[3*ilists+1] = lispoi[1];
-  lispoi[3*ilists+2] = lispoi[2];
-  lispoi[3*ilists+3] = lispoi[3];
-
-  /* At this point, lispoi contains the oriented surface ball of point p0, that has been rotated
-     through r, with the convention that triangle l has edges lispoi[l]; lispoi[l+1] */
-
-  /* Check all projections over tangent plane. */
-  for (k=0; k<ilists-1; k++) {
-    det2d = lispoi[3*k+1]*lispoi[3*(k+1)+2] - lispoi[3*k+2]*lispoi[3*(k+1)+1];
-    if ( det2d < 0.0 ) {
-      return 0;
-    }
-  }
-  det2d = lispoi[3*(ilists-1)+1]*lispoi[3*0+2] - lispoi[3*(ilists-1)+2]*lispoi[3*0+1];
-  if ( det2d < 0.0 ) {
+  if ( !MMG3D_rotate_surfacicBall(mesh,lists,ilists,ip0,r,lispoi) ) {
     return 0;
   }
 
@@ -434,7 +338,7 @@ int MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
      positively oriented with respect to n */
   na = nb = 0;
   for( i=0 ; i<4 ; i++ ){
-    if ( (pt->v[i] != n0) && (pt->v[i] != pt->v[iface]) ) {
+    if ( (pt->v[i] != ip0) && (pt->v[i] != pt->v[iface]) ) {
       if ( !na )
         na = pt->v[i];
       else
@@ -456,7 +360,7 @@ int MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
     else if (ntempb == nb )
       uv[0] = lambda[2];
     else {
-      assert(ntempb == n0);
+      assert(ntempb == ip0);
       uv[0] = lambda[0];
     }
     if ( ntempc == na )
@@ -464,7 +368,7 @@ int MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
     else if (ntempc == nb )
       uv[1] = lambda[2];
     else {
-      assert(ntempc == n0);
+      assert(ntempc == ip0);
       uv[1] = lambda[0];
     }
   }
@@ -475,7 +379,7 @@ int MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
     else if (ntempb == nb )
       uv[0] = lambda[1];
     else {
-      assert(ntempb == n0);
+      assert(ntempb == ip0);
       uv[0] = lambda[0];
     }
     if ( ntempc == na )
@@ -483,7 +387,7 @@ int MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
     else if (ntempc == nb )
       uv[1] = lambda[1];
     else {
-      assert(ntempc == n0);
+      assert(ntempc == ip0);
       uv[1] = lambda[0];
     }
   }
@@ -522,14 +426,14 @@ int MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
   /* For each surfacic triangle build a virtual displaced triangle for check
    * purposes :
    *      - check the new triangle qualities;
-   *      - check normal deviation with the adjacent through the edge facing n0
+   *      - check normal deviation with the adjacent through the edge facing ip0
    *        and the previous one */
   k           = lists[ilists-1] / 4;
   iface       = lists[ilists-1] % 4;
 
   MMG5_tet2tri(mesh,k,iface,&tt);
   for( i=0 ; i<3 ; i++ )
-    if ( tt.v[i] == n0 )      break;
+    if ( tt.v[i] == ip0 )      break;
   assert ( i<3 );
   if ( i>=3 ) return 0;
   tt.v[i] = 0;
@@ -545,7 +449,7 @@ int MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
     calold = MG_MIN(calold,MMG5_caltri(mesh,met,&tt));
 
     for( i=0 ; i<3 ; i++ )
-      if ( tt.v[i] == n0 )      break;
+      if ( tt.v[i] == ip0 )      break;
 
     assert ( i<3 );
     if ( i>=3 ) return 0;
@@ -562,7 +466,7 @@ int MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
     if ( !MMG5_nortri(mesh, &tt, ncur) ) return 0;
 
     if ( ( !(tt.tag[i] & MG_GEO) ) && ( !(tt.tag[i] & MG_NOM) ) ) {
-      /* Check normal deviation between k and the triangle facing n0 */
+      /* Check normal deviation between k and the triangle facing ip0 */
       ier = MMG3D_normalAdjaTri(mesh,k,iface, i,nneighi);
       if ( ier <= 0 ) {
         return 0;
@@ -636,7 +540,7 @@ int MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
 
   /* When all tests have been carried out, update coordinates, normals and metrics*/
   if ( PROctree )
-    MMG3D_movePROctree(mesh, PROctree, n0, o, p0->c);
+    MMG3D_movePROctree(mesh, PROctree, ip0, o, p0->c);
 
   p0->c[0] = o[0];
   p0->c[1] = o[1];
