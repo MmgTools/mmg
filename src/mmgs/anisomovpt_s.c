@@ -340,9 +340,6 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
 
   if ( (!l1old) || (!l2old) ) return 0;
 
-  ll1old = l1old*l1old;
-  ll2old = l2old*l2old;
-
   /* Third step : infer arc length of displacement, parameterized over edges */
   if ( !MMGS_paramDisp ( mesh,it1,it2,l1old,l2old,isrid1,isrid2,
                          ip0,ip1,ip2,step,o,&isrid ) ) {
@@ -356,6 +353,9 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   lam2 = step*step;
 
   /* Move is made towards p2 */
+  ll1old = l1old*l1old;
+  ll2old = l2old*l2old;
+
   if ( l2old > l1old ) {
     if ( !MMGS_moveTowardPoint(mesh,p0,p2,ll2old,lam0,lam1,lam2,nn1,nn2,to) ) {
       return 0;
