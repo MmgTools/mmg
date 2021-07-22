@@ -1106,6 +1106,19 @@ int MMG3D_split2sf_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]){
   return 1;
 }
 
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param newtet list of indices of the new tetra.
+ * \param nnew number of tetra in the list.
+ * \param pt list of tetra.
+ * \param xt list of xtetra.
+ * \param pxt0 xtetra associated to the first tetra of the list
+ *
+ * \return 0 if fail, 1 otherwise
+ *
+ * Create a list of new tetra whose indices are passed in \a newtet.
+ *
+ */
 static inline
 int MMG3D_crea_newTetra(MMG5_pMesh mesh,const int nnew,int *newtet,
                         MMG5_pTetra *pt,MMG5_xTetra *xt,MMG5_pxTetra *pxt0) {
@@ -1141,6 +1154,39 @@ int MMG3D_crea_newTetra(MMG5_pMesh mesh,const int nnew,int *newtet,
     memset(xt,0x0,nnew*sizeof(MMG5_xTetra));
   }
   return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param nnew number of tetra in the list
+ * \param newtet list of tetra indices
+ * \param pt list of tetra
+ * \param metRidTyp metric storage (classic or special)
+ *
+ * \return 0 if fail, 1 otherwise
+ *
+ * Compute the quality of the \a nnew tetra of the list \a pt.
+ *
+ */
+static inline
+void MMG3D_update_qual(MMG5_pMesh mesh,MMG5_pSol met,const int nnew,
+                       int *newtet,MMG5_pTetra *pt,int8_t metRidTyp) {
+  int i;
+
+  if ( (!metRidTyp) && met->m && met->size>1 ) {
+    for (i=0; i<nnew; i++) {
+      pt[i]->qual=MMG5_caltet33_ani(mesh,met,pt[i]);
+    }
+  }
+  else
+  {
+    for (i=0; i<nnew; i++) {
+      pt[i]->qual=MMG5_orcal(mesh,met,newtet[i]);
+    }
+  }
+
+  return;
 }
 
 /**
@@ -1276,18 +1322,10 @@ int MMG5_split2sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp
       pt[0]->xt = 0;
     }
   }
+
   /* Quality update */
-  if ( (!metRidTyp) && met->m && met->size>1 ) {
-    for (i=0; i<nnew; i++) {
-      pt[i]->qual=MMG5_caltet33_ani(mesh,met,pt[i]);
-    }
-  }
-  else
-  {
-    for (i=0; i<nnew; i++) {
-      pt[i]->qual=MMG5_orcal(mesh,met,newtet[i]);
-    }
-  }
+  MMG3D_update_qual(mesh,met,nnew,newtet,pt,metRidTyp);
+
   return 1;
 }
 
