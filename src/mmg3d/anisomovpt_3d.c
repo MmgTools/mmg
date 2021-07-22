@@ -759,13 +759,17 @@ int MMG3D_movbdycurvept_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
     iface       = lists[l] % 4;
 
     MMG5_tet2tri(mesh,iel,iface,&tt);
-    calold = MG_MIN(calold,MMG5_caltri(mesh,met,&tt));
+    caltmp = MMG5_caltri(mesh,met,&tt);
+    calold = MG_MIN(calold,caltmp);
 
-    for( i=0 ; i<3 ; i++ )
-      if ( tt.v[i] == ip0 )      break;
+    for( i=0 ; i<3 ; i++ ) {
+      if ( tt.v[i] == ip0 ) {
+        break;
+      }
+    }
+    assert(i<3);
+    if ( i==3 ) return 0;
 
-    assert ( i<3 );
-    if ( i>=3 ) return 0;
     tt.v[i] = 0;
 
     caltmp = MMG5_caltri(mesh,met,&tt);
