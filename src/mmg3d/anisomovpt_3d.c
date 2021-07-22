@@ -479,7 +479,6 @@ int MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
   return 1;
 }
 
-
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
@@ -490,23 +489,25 @@ int MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
  * \param ilists size of the surfacic ball.
  * \param improve force the new minimum element quality to be greater or equal
  * than 1.02 of the old minimum element quality.
-
+ * \param edgTag Type of edge on which we move (MG_REF, MG_NOM or MG_GEO).
+ *
  * \return 0 if fail, 1 if success.
  *
  * \remark we don't check if we break the hausdorff criterion.
  *
- * Move boundary reference point, whose volumic and surfacic balls are passed.
+ * Move boundary reference, ridge or non-manifold point, whose volumic and
+ * surfacic balls are passed.
  *
  */
-int MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctree, int *listv,
-                          int ilistv, int *lists, int ilists,
-                          int improve){
+static inline
+int MMG3D_movbdycurvept_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctree, int *listv,
+                            int ilistv, int *lists, int ilists,int improve,const int16_t edgTag){
   MMG5_pTetra           pt,pt0;
   MMG5_pPoint           p0,ppt0;
   MMG5_Tria             tt;
   MMG5_pxPoint          pxp;
   double                step,ll1old,ll2old,l1new,l2new;
-  double                o[3],no[3],to[3], ncur[3],nprev[3],nneighi[3];
+  double                o[3],no[3],no2[3],to[3], ncur[3],nprev[3],nneighi[3];
   double                calold,calnew,caltmp,*callist;
   int                   l,iel,ip0,ipa,ipb,iptmpa,iptmpb,ip1,ip2,ip,nxp;
   int16_t               tag,ier;
@@ -518,10 +519,10 @@ int MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
   ip0 = pt->v[listv[0]%4];
   p0    = &mesh->point[ip0];
 
-  assert ( MG_REF & p0->tag );
+  assert ( edgTag & p0->tag );
 
-  /* Travel surfacic ball and recover the two ending points of ref curve :
-     two senses must be used */
+  /* Travel surfacic ball and recover the two ending points of curve : two
+     senses must be used */
   iel = lists[0]/4;
   iface = lists[0]%4;
   pt = &mesh->tetra[iel];
@@ -565,7 +566,7 @@ int MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
     if ( (iptmpa == ipa) || (iptmpa == ipb) ) {
       if ( pt->xt )  tag = mesh->xtetra[pt->xt].tag[iea];
       else  tag = 0;
-      if ( MG_REF & tag ) {
+      if ( edgTag & tag ) {
         ip1 = iptmpa;
         break;
       }
@@ -573,7 +574,7 @@ int MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
     if ( (iptmpb == ipa) || (iptmpb == ipb) ) {
       if ( pt->xt )  tag = mesh->xtetra[pt->xt].tag[ieb];
       else  tag = 0;
-      if ( MG_REF & tag ) {
+      if ( edgTag & tag ) {
         ip1 = iptmpb;
         break;
       }
@@ -582,7 +583,7 @@ int MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
     ipb = iptmpb;
   }
 
-  /* Now travel surfacic list in the reverse sense so as to get the second ridge */
+  /* Now travel surfacic list in the reverse sense so as to get the second curve */
   iel = lists[0]/4;
   iface = lists[0]%4;
   pt = &mesh->tetra[iel];
@@ -626,15 +627,20 @@ int MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
     if ( (iptmpa == ipa) || (iptmpa == ipb) ) {
       if ( pt->xt )  tag = mesh->xtetra[pt->xt].tag[iea];
       else  tag = 0;
-      if ( MG_REF & tag ) {
+      if ( edgTag & tag ) {
         ip2 = iptmpa;
         break;
       }
     }
     if ( (iptmpb == ipa) || (iptmpb == ipb) ) {
-      assert(pt->xt);
-      tag = mesh->xtetra[pt->xt].tag[ieb];
-      if ( MG_REF & tag ) {
+      if ( (MG_GEO & edgTag) && (!pt->xt) ) {
+        tag = 0;
+      }
+      else {
+        assert(pt->xt);
+        tag = mesh->xtetra[pt->xt].tag[ieb];
+      }
+      if ( edgTag & tag ) {
         ip2 = iptmpb;
         break;
       }
@@ -644,9 +650,9 @@ int MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
   }
   if ( !(ip1 && ip2 && (ip1 != ip2)) )  return 0;
 
-  /* At this point, we get the point extremities of the ref limit curve passing through ip0 :
-     ip1, ip2, along with support tets it1,it2, the surface faces iface1,iface2, and the
-     associated edges ie1,ie2.*/
+  /* At this point, we get the point extremities of the curve passing through
+     ip0 : ip1, ip2, along with support tets it1,it2, the surface faces
+     iface1,iface2, and the associated edges ie1,ie2.*/
 
   /* Changes needed for choice of time step : see manuscript notes */
   ll1old = MMG5_lenSurfEdg(mesh,met,ip0,ip1,0);
@@ -662,7 +668,25 @@ int MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
   }
 
   /* Compute support of the associated edge, and features of the new position */
-  if ( !(MMG5_BezierRef(mesh,ip0,ip,step,o,no,to)) )  return 0;
+  if ( MG_NOM & edgTag ) {
+    if ( !(MMG5_BezierNom(mesh,ip0,ip,step,o,no,to)) ) {
+      return 0;
+    }
+  }
+  else if ( MG_GEO & edgTag ) {
+    if ( !(MMG5_BezierRidge(mesh,ip0,ip,step,o,no,no2,to)) ) {
+      return 0;
+    }
+  }
+  else if ( MG_REF & edgTag ) {
+    if ( !(MMG5_BezierRef(mesh,ip0,ip,step,o,no,to)) ) {
+      return 0;
+    }
+  }
+  else {
+    assert ( 0 && "Unexpected edge tag in this function");
+    return 0;
+  }
 
   /* Test : make sure that geometric approximation has not been degraded too much */
   ppt0 = &mesh->point[0];
@@ -690,9 +714,25 @@ int MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
   pxp->n1[1] = no[1];
   pxp->n1[2] = no[2];
 
-  /* Interpolation of metric between ip0 and ip2 */
-  if ( !MMG5_paratmet(p0->c,mesh->xpoint[p0->xp].n1,&met->m[6*ip0],o,no,&met->m[0]) )
-    return 0;
+  if ( (MG_GEO & edgTag) && !(MG_NOM & edgTag) ) {
+    /* Copy the second normal for ridge point */
+    pxp->n2[0] = no2[0];
+    pxp->n2[1] = no2[1];
+    pxp->n2[2] = no2[2];
+  }
+
+  if ( (MG_GEO & edgTag) && !(MG_NOM & edgTag) ) {
+    /* Interpolation of metric between ip0 and ip2 along ridge */
+    if ( !MMG5_intridmet(mesh,met,ip0,ip,step,no,&met->m[0]) ) {
+      return 0;
+    }
+  }
+  else {
+    /* Interpolation of metric between ip0 and ip2 along non manifold or ref edge */
+    if ( !MMG5_paratmet(p0->c,mesh->xpoint[p0->xp].n1,&met->m[6*ip0],o,no,&met->m[0]) ) {
+      return 0;
+    }
+  }
 
   /* Check whether proposed move is admissible under consideration of distances */
   l1new = MMG5_lenSurfEdg(mesh,met,0,ip1,0);
@@ -712,8 +752,11 @@ int MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
   iface       = lists[ilists-1] % 4;
 
   MMG5_tet2tri(mesh,iel,iface,&tt);
-  for( i=0 ; i<3 ; i++ )
-    if ( tt.v[i] == ip0 )      break;
+  for( i=0 ; i<3 ; i++ ) {
+    if ( tt.v[i] == ip0 ) {
+      break;
+    }
+  }
 
   assert ( i<3 );
   if ( i>=3 ) return 0;
@@ -819,6 +862,13 @@ int MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
   p0->n[1] = to[1];
   p0->n[2] = to[2];
 
+  if ( (MG_GEO & edgTag) && !(MG_NOM & edgTag) ) {
+    /* Copy the second normal for ridge point */
+    pxp->n2[0] = no2[0];
+    pxp->n2[1] = no2[1];
+    pxp->n2[2] = no2[2];
+  }
+
   memcpy(&met->m[6*ip0],&met->m[0],6*sizeof(double));
 
   for( l=0 ; l<ilistv ; l++ ){
@@ -829,6 +879,29 @@ int MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
   return 1;
 }
 
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param PROctree pointer toward the PROctree structure.
+ * \param listv pointer toward the volumic ball of the point.
+ * \param ilistv size of the volumic ball.
+ * \param lists pointer toward the surfacic ball of the point.
+ * \param ilists size of the surfacic ball.
+ * \param improve force the new minimum element quality to be greater or equal
+ * than 1.02 of the old minimum element quality.
+
+ * \return 0 if fail, 1 if success.
+ *
+ * \remark we don't check if we break the hausdorff criterion.
+ *
+ * Move boundary reference point, whose volumic and surfacic balls are passed.
+ *
+ */
+int MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctree, int *listv,
+                          int ilistv, int *lists, int ilists,int improve){
+
+  return MMG3D_movbdycurvept_ani(mesh,met,PROctree,listv,ilistv,lists,ilists,improve,MG_REF);
+}
 
 /**
  * \param mesh pointer toward the mesh structure.
