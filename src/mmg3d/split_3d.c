@@ -1109,7 +1109,7 @@ int MMG3D_split2sf_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]){
 /**
  * \param mesh pointer toward the mesh structure.
  * \param newtet list of indices of the new tetra.
- * \param nnew number of tetra in the list.
+ * \param ne number of tetra in the list.
  * \param pt list of tetra.
  * \param xt list of xtetra.
  * \param pxt0 xtetra associated to the first tetra of the list
@@ -1120,11 +1120,12 @@ int MMG3D_split2sf_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]){
  *
  */
 static inline
-int MMG3D_crea_newTetra(MMG5_pMesh mesh,const int nnew,int *newtet,
+int MMG3D_crea_newTetra(MMG5_pMesh mesh,const int ne,int *newtet,
                         MMG5_pTetra *pt,MMG5_xTetra *xt,MMG5_pxTetra *pxt0) {
   int          iel,i,j;
 
-  for ( i=1; i<nnew; ++i ) {
+  /* The first tetra is the one that is splitted so it already exists */
+  for ( i=1; i<ne; ++i ) {
     iel = MMG3D_newElt(mesh);
     if ( !iel ) {
       MMG3D_TETRA_REALLOC(mesh,iel,mesh->gap,
@@ -1143,15 +1144,16 @@ int MMG3D_crea_newTetra(MMG5_pMesh mesh,const int nnew,int *newtet,
     newtet[i]=iel;
   }
 
+  /* If need copy the initial xtetra */
   if ( pt[0]->xt ) {
     *pxt0 = &mesh->xtetra[(pt[0])->xt];
-    for ( i=0; i<nnew; ++i  ) {
+    for ( i=0; i<ne; ++i  ) {
       memcpy(&xt[i],*pxt0,sizeof(MMG5_xTetra));
     }
   }
   else {
     *pxt0 = 0;
-    memset(xt,0x0,nnew*sizeof(MMG5_xTetra));
+    memset(xt,0x0,ne*sizeof(MMG5_xTetra));
   }
   return 1;
 }
@@ -1159,7 +1161,7 @@ int MMG3D_crea_newTetra(MMG5_pMesh mesh,const int nnew,int *newtet,
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
- * \param nnew number of tetra in the list
+ * \param ne number of tetra in the list
  * \param newtet list of tetra indices
  * \param pt list of tetra
  * \param metRidTyp metric storage (classic or special)
@@ -1170,18 +1172,18 @@ int MMG3D_crea_newTetra(MMG5_pMesh mesh,const int nnew,int *newtet,
  *
  */
 static inline
-void MMG3D_update_qual(MMG5_pMesh mesh,MMG5_pSol met,const int nnew,
+void MMG3D_update_qual(MMG5_pMesh mesh,MMG5_pSol met,const int ne,
                        int *newtet,MMG5_pTetra *pt,int8_t metRidTyp) {
   int i;
 
   if ( (!metRidTyp) && met->m && met->size>1 ) {
-    for (i=0; i<nnew; i++) {
+    for (i=0; i<ne; i++) {
       pt[i]->qual=MMG5_caltet33_ani(mesh,met,pt[i]);
     }
   }
   else
   {
-    for (i=0; i<nnew; i++) {
+    for (i=0; i<ne; i++) {
       pt[i]->qual=MMG5_orcal(mesh,met,newtet[i]);
     }
   }
@@ -1210,14 +1212,14 @@ int MMG5_split2sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp
   int8_t              imin,firstxt,isxt[3];
   uint8_t             tau[4];
   const uint8_t       *taued;
-  const int           nnew=3;
+  const int           ne=3;
 
   pt[0] = &mesh->tetra[k];
   flg   = pt[0]->flag;
   pt[0]->flag = 0;
   newtet[0]=k;
 
-  if ( !MMG3D_crea_newTetra(mesh,nnew,newtet,pt,xt,&pxt0) ) {
+  if ( !MMG3D_crea_newTetra(mesh,ne,newtet,pt,xt,&pxt0) ) {
     return 0;
   }
 
@@ -1324,7 +1326,7 @@ int MMG5_split2sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp
   }
 
   /* Quality update */
-  MMG3D_update_qual(mesh,met,nnew,newtet,pt,metRidTyp);
+  MMG3D_update_qual(mesh,met,ne,newtet,pt,metRidTyp);
 
   return 1;
 }
@@ -1411,14 +1413,14 @@ int MMG5_split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp) 
   int8_t              flg,firstxt,isxt[4];
   uint8_t             tau[4];
   const uint8_t       *taued;
-  const int           nnew=4;
+  const int           ne=4;
 
   pt[0] = &mesh->tetra[k];
   flg   = pt[0]->flag;
   pt[0]->flag = 0;
   newtet[0]=k;
 
-  if ( !MMG3D_crea_newTetra(mesh,nnew,newtet,pt,xt,&pxt0) ) {
+  if ( !MMG3D_crea_newTetra(mesh,ne,newtet,pt,xt,&pxt0) ) {
     return 0;
   }
 
@@ -1474,7 +1476,7 @@ int MMG5_split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp) 
   memset(isxt,0,4*sizeof(int8_t));
   for (i=0; i<4; i++) {
     int j;
-    for (j=0; j<nnew; j++) {
+    for (j=0; j<ne; j++) {
       if ( xt[j].ref[i] || xt[j].ftag[i] )  isxt[j] = 1;
     }
   }
@@ -1536,7 +1538,7 @@ int MMG5_split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp) 
   }
 
   /* Quality update */
-  MMG3D_update_qual(mesh,met,nnew,newtet,pt,metRidTyp);
+  MMG3D_update_qual(mesh,met,ne,newtet,pt,metRidTyp);
 
   return 1;
 }
@@ -1622,7 +1624,7 @@ int MMG5_split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp) 
   int8_t              flg,firstxt,isxt[4];
   uint8_t             tau[4];
   const uint8_t       *taued;
-  const int           nnew=4;
+  const int           ne=4;
 
   pt[0] = &mesh->tetra[k];
   flg   = pt[0]->flag;
@@ -1630,7 +1632,7 @@ int MMG5_split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp) 
   newtet[0]=k;
 
   /* create 4 new tetras */
-  if ( !MMG3D_crea_newTetra(mesh,nnew,newtet,pt,xt,&pxt0) ) {
+  if ( !MMG3D_crea_newTetra(mesh,ne,newtet,pt,xt,&pxt0) ) {
     return 0;
   }
 
@@ -1687,7 +1689,7 @@ int MMG5_split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp) 
   memset(isxt,0,4*sizeof(int8_t));
   for (i=0; i<4; i++) {
     int j;
-    for (j=0; j<nnew; j++) {
+    for (j=0; j<ne; j++) {
       if ( xt[j].ref[i] || xt[j].ftag[i] )  isxt[j] = 1;
     }
   }
@@ -1745,7 +1747,7 @@ int MMG5_split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp) 
   }
 
   /* Quality update */
-  MMG3D_update_qual(mesh,met,nnew,newtet,pt,metRidTyp);
+  MMG3D_update_qual(mesh,met,ne,newtet,pt,metRidTyp);
 
   return 1;
 }
@@ -1951,7 +1953,7 @@ int MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidT
   int8_t              flg,firstxt,isxt[4],ia,ib;
   uint8_t             tau[4];
   const uint8_t       *taued;
-  const int           nnew=4;
+  const int           ne=4;
 
   pt[0]  = &mesh->tetra[k];
   flg = pt[0]->flag;
@@ -1959,7 +1961,7 @@ int MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidT
   newtet[0]=k;
 
   /* create 4 new tetras */
-  if ( !MMG3D_crea_newTetra(mesh,nnew,newtet,pt,xt,&pxt0) ) {
+  if ( !MMG3D_crea_newTetra(mesh,ne,newtet,pt,xt,&pxt0) ) {
     return 0;
   }
 
@@ -2168,7 +2170,7 @@ int MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidT
 
   for (i=0; i<4; i++) {
     int j;
-    for (j=0; j<nnew; j++) {
+    for (j=0; j<ne; j++) {
       if ( xt[j].ref[i] || xt[j].ftag[i] )  isxt[j] = 1;
     }
   }
@@ -2226,7 +2228,7 @@ int MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidT
   }
 
   /* Quality update */
-  MMG3D_update_qual(mesh,met,nnew,newtet,pt,metRidTyp);
+  MMG3D_update_qual(mesh,met,ne,newtet,pt,metRidTyp);
 
 
   return 1;
@@ -2554,7 +2556,7 @@ int MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],int8_t metRid
   uint8_t              imin12,imin03,tau[4],sym[4],symed[6],ip0,ip1,ip2,ip3,ie0,ie1;
   uint8_t              ie2,ie3,ie4,ie5,isxt[5],firstxt,i;
   const uint8_t       *taued=NULL;
-  const int            nnew=4;
+  const int            ne=4;
 
   pt[0]  = &mesh->tetra[k];
   newtet[0]=k;
@@ -2565,7 +2567,7 @@ int MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],int8_t metRid
   pt[0]->flag  = 0;
 
   /* create 4 new tetras, the fifth being created only if needed. */
-  if ( !MMG3D_crea_newTetra(mesh,nnew,newtet,pt,xt,&pxt0) ) {
+  if ( !MMG3D_crea_newTetra(mesh,ne,newtet,pt,xt,&pxt0) ) {
     return 0;
   }
   newtet[4] = 0;
@@ -2774,10 +2776,10 @@ int MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],int8_t metRid
     isxt[0] = isxt[1] = isxt[2] = isxt[3] = 0;
 
     for (i=0; i<4; i++) {
-      if ( (xt[0]).ref[i] || xt[0].ftag[i] ) isxt[0] = 1;
-      if ( (xt[1]).ref[i] || xt[1].ftag[i] ) isxt[1] = 1;
-      if ( (xt[2]).ref[i] || xt[2].ftag[i] ) isxt[2] = 1;
-      if ( (xt[3]).ref[i] || xt[3].ftag[i] ) isxt[3] = 1;
+      int j;
+      for (j=0; j<ne; j++) {
+        if ( xt[j].ref[i] || xt[j].ftag[i] )  isxt[j] = 1;
+      }
     }
 
     if ( pt[0]->xt ) {
@@ -2839,11 +2841,10 @@ int MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],int8_t metRid
     isxt[0] = isxt[1] = isxt[2] = isxt[3] = isxt[4] = 0;
 
     for (i=0; i<4; i++) {
-      if ( (xt[0]).ref[i] || xt[0].ftag[i] ) isxt[0] = 1;
-      if ( (xt[1]).ref[i] || xt[1].ftag[i] ) isxt[1] = 1;
-      if ( (xt[2]).ref[i] || xt[2].ftag[i] ) isxt[2] = 1;
-      if ( (xt[3]).ref[i] || xt[3].ftag[i] ) isxt[3] = 1;
-      if ( (xt[4]).ref[i] || xt[4].ftag[i] ) isxt[4] = 1;
+      int j;
+      for (j=0; j<=ne; j++) {
+        if ( xt[j].ref[i] || xt[j].ftag[i] )  isxt[j] = 1;
+      }
     }
 
     if ( pt[0]->xt ) {
@@ -2900,6 +2901,7 @@ int MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],int8_t metRid
       }
     }
   }
+
   /* Quality update */
   if ( (!metRidTyp) && met->m && met->size>1 ) {
     pt[0]->qual=MMG5_caltet33_ani(mesh,met,pt[0]);
