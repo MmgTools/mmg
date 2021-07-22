@@ -605,7 +605,7 @@ int MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
                   int cas,int8_t metRidTyp,int8_t chkRidTet){
   MMG5_pTetra          pt,pt1,pt0;
   double               lmin,lmax,len;
-  int                  ilist,k,open,iel,jel,*newtet,nump,*adja,j;
+  int                  ilist,k,open,iel,jel,newtet[MMG3D_LMAX+2],nump,*adja,j;
   int                 *adjan,nei2,nei3,mel;
   int8_t               ie,i,voy;
   uint8_t              tau[4];
@@ -679,8 +679,6 @@ int MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
     }
     if ( j < ilist )  return 0;
   }
-
-  MMG5_SAFE_CALLOC(newtet,ilist,int,return -1);
 
   iel = list[0] / 6;
   ie  = list[0] % 6;
@@ -765,8 +763,6 @@ int MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
     pt->mark  = mesh->mark;
     pt1->mark = mesh->mark;
 
-
-    MMG5_SAFE_FREE(newtet);
     return 1;
   }
 
@@ -976,7 +972,6 @@ int MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
     pt1->mark = mesh->mark;
   }
 
-  MMG5_SAFE_FREE(newtet);
   return 1;
 }
 
