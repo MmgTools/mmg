@@ -1424,9 +1424,6 @@ int MMG5_movbdyridpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
 
   if ( (!l1old) || (!l2old) ) return 0;
 
-  l1old = l1old*l1old;
-  l2old = l2old*l2old;
-
   if ( l1old < l2old ) { //move towards p2
     ip = ip2;
   }
