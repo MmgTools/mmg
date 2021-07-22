@@ -845,13 +845,17 @@ int MMG3D_movbdycurvept_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
   int                   l,iel,ip0,ipa,ipb,iptmpa,iptmpb,ip1,ip2,ip,nxp;
   int                   isloc,j;
   int16_t               tag;
-  uint8_t               i,i0,ie,iface,iea,ieb;
+  uint8_t               i,i0,ie,iface,iea,ieb,isrid;
 
-  step = 0.1;
+  step      = 0.1;
   ip1 = ip2 = 0;
-  pt    = &mesh->tetra[listv[0]/4];
-  ip0 = pt->v[listv[0]%4];
-  p0    = &mesh->point[ip0];
+  pt        = &mesh->tetra[listv[0]/4];
+  ip0       = pt->v[listv[0]%4];
+  p0        = &mesh->point[ip0];
+
+  /* Compute if the edge is a simple ridge to know if we have to compute a
+   * second normal at point */
+  isrid     = ((MG_GEO & edgTag) && !(MG_NOM & edgTag));
 
   assert ( edgTag & p0->tag );
 
@@ -1053,7 +1057,7 @@ int MMG3D_movbdycurvept_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
   pxp->n1[1] = no[1];
   pxp->n1[2] = no[2];
 
-  if ( (MG_GEO & edgTag) && !(MG_NOM & edgTag) ) {
+  if ( isrid ) {
     /* Copy the second normal for ridge point */
     pxp->n2[0] = no2[0];
     pxp->n2[1] = no2[1];
@@ -1182,7 +1186,7 @@ int MMG3D_movbdycurvept_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROc
   pxp->n1[1] = no[1];
   pxp->n1[2] = no[2];
 
-  if ( (MG_GEO & edgTag) && !(MG_NOM & edgTag) ) {
+  if ( isrid ) {
     /* Copy the second normal for ridge point */
     pxp->n2[0] = no2[0];
     pxp->n2[1] = no2[1];
