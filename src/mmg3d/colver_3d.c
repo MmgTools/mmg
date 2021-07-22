@@ -1108,16 +1108,13 @@ int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist,int8_t indq,in
     }
   }
 
-  /* avoid recreating existing elt and update the tags of the edge ip-p0_c and
-   * ip-p1_c */
+  /* Avoid recreating existing elt */
   for (k=0; k<ilist; k++) {
 
-    /* Avoid recreating existing elt */
     if ( list[k] < 0 )  continue;
 
     iel = list[k] / 4;
     ip  = list[k] % 4;
-    pt  = &mesh->tetra[iel];
 
     adja = &mesh->adja[4*(iel-1)+1];
     jel  = adja[ip];

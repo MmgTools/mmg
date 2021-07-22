@@ -588,7 +588,6 @@ int MMG3D_movbdyregpt_geom(MMG5_pMesh mesh,int *lists,const int kel,
     MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,MMG5_GAP,MMG5_xPoint,
                        "larger xpoint table",
                        return 0);
-    n = &(mesh->xpoint[p0->xp].n1[0]);
   }
   ppt0->xp = nxp;
   pxp = &mesh->xpoint[nxp];
