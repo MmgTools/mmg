@@ -1629,7 +1629,7 @@ int MMG5_split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp) 
   pt[0]->flag  = 0;
   newtet[0]=k;
 
-  /* create 3 new tetras */
+  /* create 4 new tetras */
   if ( !MMG3D_crea_newTetra(mesh,nnew,newtet,pt,xt,&pxt0) ) {
     return 0;
   }
@@ -1951,6 +1951,7 @@ int MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidT
   int8_t              flg,firstxt,isxt[4],ia,ib;
   uint8_t             tau[4];
   const uint8_t       *taued;
+  const int           nnew=4;
 
   pt[0]  = &mesh->tetra[k];
   flg = pt[0]->flag;
@@ -1958,64 +1959,8 @@ int MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidT
   newtet[0]=k;
 
   /* create 3 new tetras */
-  iel = MMG3D_newElt(mesh);
-  if ( !iel ) {
-    MMG3D_TETRA_REALLOC(mesh,iel,mesh->gap,
-                        fprintf(stderr,"\n  ## Error: %s: unable to allocate"
-                                " a new element.\n",__func__);
-                        MMG5_INCREASE_MEM_MESSAGE();
-                        fprintf(stderr,"  Exit program.\n");
-                        return 0);
-    pt[0] = &mesh->tetra[newtet[0]];
-  }
-  pt[1] = &mesh->tetra[iel];
-  memcpy(pt[1],pt[0],sizeof(MMG5_Tetra));
-  newtet[1]=iel;
-
-  iel = MMG3D_newElt(mesh);
-  if ( !iel ) {
-    MMG3D_TETRA_REALLOC(mesh,iel,mesh->gap,
-                        fprintf(stderr,"\n  ## Error: %s: unable to allocate"
-                                " a new element.\n",__func__);
-                        MMG5_INCREASE_MEM_MESSAGE();
-                        fprintf(stderr,"  Exit program.\n");
-                        return 0);
-    pt[0] = &mesh->tetra[newtet[0]];
-    pt[1] = &mesh->tetra[newtet[1]];
-  }
-  pt[2] = &mesh->tetra[iel];
-  memcpy(pt[2],pt[0],sizeof(MMG5_Tetra));
-  newtet[2]=iel;
-
-  iel = MMG3D_newElt(mesh);
-  if ( !iel ) {
-    MMG3D_TETRA_REALLOC(mesh,iel,mesh->gap,
-                        fprintf(stderr,"\n  ## Error: %s: unable to allocate a"
-                                " new element.\n",__func__);
-                        MMG5_INCREASE_MEM_MESSAGE();
-                        fprintf(stderr,"  Exit program.\n");
-                        return 0);
-    pt[0] = &mesh->tetra[newtet[0]];
-    pt[1] = &mesh->tetra[newtet[1]];
-    pt[2] = &mesh->tetra[newtet[2]];
-  }
-  pt[3] = &mesh->tetra[iel];
-  memcpy(pt[3],pt[0],sizeof(MMG5_Tetra));
-  newtet[3]=iel;
-
-  if ( pt[0]->xt ) {
-    pxt0 = &mesh->xtetra[(pt[0])->xt];
-    memcpy(&xt[0],pxt0, sizeof(MMG5_xTetra));
-    memcpy(&xt[1],pxt0, sizeof(MMG5_xTetra));
-    memcpy(&xt[2],pxt0, sizeof(MMG5_xTetra));
-    memcpy(&xt[3],pxt0, sizeof(MMG5_xTetra));
-  }
-  else {
-    pxt0 = 0;
-    memset(&xt[0],0, sizeof(MMG5_xTetra));
-    memset(&xt[1],0, sizeof(MMG5_xTetra));
-    memset(&xt[2],0, sizeof(MMG5_xTetra));
-    memset(&xt[3],0, sizeof(MMG5_xTetra));
+  if ( !MMG3D_crea_newTetra(mesh,nnew,newtet,pt,xt,&pxt0) ) {
+    return 0;
   }
 
   /* Set permutation of vertices : reference configuration is 7 */
@@ -2222,10 +2167,10 @@ int MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidT
   isxt[0] = isxt[1] = isxt[2] = isxt[3] = 0;
 
   for (i=0; i<4; i++) {
-    if ( xt[0].ref[i] || xt[0].ftag[i] ) isxt[0] = 1;
-    if ( xt[1].ref[i] || xt[1].ftag[i] ) isxt[1] = 1;
-    if ( xt[2].ref[i] || xt[2].ftag[i] ) isxt[2] = 1;
-    if ( xt[3].ref[i] || xt[3].ftag[i] ) isxt[3] = 1;
+    int j;
+    for (j=0; j<nnew; j++) {
+      if ( xt[j].ref[i] || xt[j].ftag[i] )  isxt[j] = 1;
+    }
   }
 
   if ( (pt[0])->xt ) {
@@ -2279,19 +2224,11 @@ int MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidT
       (pt[0])->xt = 0;
     }
   }
+
   /* Quality update */
-  if ( (!metRidTyp) && met->m && met->size>1 ) {
-    pt[0]->qual=MMG5_caltet33_ani(mesh,met,pt[0]);
-    pt[1]->qual=MMG5_caltet33_ani(mesh,met,pt[1]);
-    pt[2]->qual=MMG5_caltet33_ani(mesh,met,pt[2]);
-    pt[3]->qual=MMG5_caltet33_ani(mesh,met,pt[3]);
-  }
-  else {
-    pt[0]->qual=MMG5_orcal(mesh,met,newtet[0]);
-    pt[1]->qual=MMG5_orcal(mesh,met,newtet[1]);
-    pt[2]->qual=MMG5_orcal(mesh,met,newtet[2]);
-    pt[3]->qual=MMG5_orcal(mesh,met,newtet[3]);
-  }
+  MMG3D_update_qual(mesh,met,nnew,newtet,pt,metRidTyp);
+
+
   return 1;
 }
 
