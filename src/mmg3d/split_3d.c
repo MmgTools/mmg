@@ -1106,6 +1106,43 @@ int MMG3D_split2sf_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]){
   return 1;
 }
 
+static inline
+int MMG3D_crea_newTetra(MMG5_pMesh mesh,const int nnew,int *newtet,
+                        MMG5_pTetra *pt,MMG5_xTetra *xt,MMG5_pxTetra *pxt0) {
+  int          iel,i,j;
+
+  for ( i=1; i<nnew; ++i ) {
+    iel = MMG3D_newElt(mesh);
+    if ( !iel ) {
+      MMG3D_TETRA_REALLOC(mesh,iel,mesh->gap,
+                          fprintf(stderr,"\n  ## Error: %s: unable to allocate"
+                                  " a new element.\n",__func__);
+                          MMG5_INCREASE_MEM_MESSAGE();
+                          fprintf(stderr,"  Exit program.\n");
+                          return 0);
+      /* update pointer list */
+      for ( j=0; j<i; ++j ) {
+        pt[j] = &mesh->tetra[newtet[j]];
+      }
+    }
+    pt[i] = &mesh->tetra[iel];
+    memcpy(pt[i],pt[0],sizeof(MMG5_Tetra));
+    newtet[i]=iel;
+  }
+
+  if ( pt[0]->xt ) {
+    *pxt0 = &mesh->xtetra[(pt[0])->xt];
+    for ( i=0; i<nnew; ++i  ) {
+      memcpy(&xt[i],*pxt0,sizeof(MMG5_xTetra));
+    }
+  }
+  else {
+    *pxt0 = 0;
+    memset(xt,0x0,nnew*sizeof(MMG5_xTetra));
+  }
+  return 1;
+}
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
@@ -1122,57 +1159,20 @@ int MMG5_split2sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp
   MMG5_pTetra         pt[3];
   MMG5_xTetra         xt[3];
   MMG5_pxTetra        pxt0;
-  int                 iel,i,flg;
+  int                 i,flg;
   int                 newtet[3];
   int8_t              imin,firstxt,isxt[3];
   uint8_t             tau[4];
   const uint8_t       *taued;
+  const int           nnew=3;
 
   pt[0] = &mesh->tetra[k];
   flg   = pt[0]->flag;
   pt[0]->flag = 0;
   newtet[0]=k;
 
-  iel = MMG3D_newElt(mesh);
-  if ( !iel ) {
-    MMG3D_TETRA_REALLOC(mesh,iel,mesh->gap,
-                        fprintf(stderr,"\n  ## Error: %s: unable to allocate"
-                                " a new element.\n",__func__);
-                        MMG5_INCREASE_MEM_MESSAGE();
-                        fprintf(stderr,"  Exit program.\n");
-                        return 0);
-    pt[0] = &mesh->tetra[newtet[0]];
-  }
-  pt[1] = &mesh->tetra[iel];
-  memcpy(pt[1],pt[0],sizeof(MMG5_Tetra));
-  newtet[1]=iel;
-
-  iel = MMG3D_newElt(mesh);
-  if ( !iel ) {
-    MMG3D_TETRA_REALLOC(mesh,iel,mesh->gap,
-                        fprintf(stderr,"\n  ## Error: %s: unable to allocate"
-                                " a new element.\n",__func__);
-                        MMG5_INCREASE_MEM_MESSAGE();
-                        fprintf(stderr,"  Exit program.\n");
-                        return 0);
-    pt[0] = &mesh->tetra[newtet[0]];
-    pt[1] = &mesh->tetra[newtet[1]];
-  }
-  pt[2] = &mesh->tetra[iel];
-  memcpy(pt[2],pt[0],sizeof(MMG5_Tetra));
-  newtet[2]=iel;
-
-  if ( pt[0]->xt ) {
-    pxt0 = &mesh->xtetra[(pt[0])->xt];
-    memcpy(&xt[0],pxt0,sizeof(MMG5_xTetra));
-    memcpy(&xt[1],pxt0,sizeof(MMG5_xTetra));
-    memcpy(&xt[2],pxt0,sizeof(MMG5_xTetra));
-  }
-  else {
-    pxt0 = 0;
-    memset(&xt[0],0,sizeof(MMG5_xTetra));
-    memset(&xt[1],0,sizeof(MMG5_xTetra));
-    memset(&xt[2],0,sizeof(MMG5_xTetra));
+  if ( !MMG3D_crea_newTetra(mesh,nnew,newtet,pt,xt,&pxt0) ) {
+    return 0;
   }
 
   imin = MMG3D_split2sf_cfg(flg,tau,&taued,pt[0]);
@@ -1278,15 +1278,15 @@ int MMG5_split2sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp
   }
   /* Quality update */
   if ( (!metRidTyp) && met->m && met->size>1 ) {
-    pt[0]->qual=MMG5_caltet33_ani(mesh,met,pt[0]);
-    pt[1]->qual=MMG5_caltet33_ani(mesh,met,pt[1]);
-    pt[2]->qual=MMG5_caltet33_ani(mesh,met,pt[2]);
+    for (i=0; i<nnew; i++) {
+      pt[i]->qual=MMG5_caltet33_ani(mesh,met,pt[i]);
+    }
   }
   else
   {
-    pt[0]->qual=MMG5_orcal(mesh,met,newtet[0]);
-    pt[1]->qual=MMG5_orcal(mesh,met,newtet[1]);
-    pt[2]->qual=MMG5_orcal(mesh,met,newtet[2]);
+    for (i=0; i<nnew; i++) {
+      pt[i]->qual=MMG5_orcal(mesh,met,newtet[i]);
+    }
   }
   return 1;
 }
