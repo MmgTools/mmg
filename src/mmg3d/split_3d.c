@@ -37,6 +37,16 @@
 
 extern int8_t  ddb;
 
+/**
+ * \param flag flag to detect the splitting configuration
+ * \param tau vertices permutation
+ * \param taued edges permutation
+ *
+ * Compute vertices and edges permutation for the split of 1 edge depending of
+ * the edge that is splitted (i^th bit of flag is 1 if the i^th edge is
+ * splitted).
+ *
+ */
 static inline
 void MMG3D_split1_cfg(int flag,uint8_t *tau,const uint8_t **taued) {
 
@@ -474,7 +484,105 @@ int MMG3D_normalAdjaTri(MMG5_pMesh mesh , int start, int8_t iface, int ia,
   return 1;
 }
 
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param ip index of new point.
+ * \param k position of the tetra to split in the shell of edge.
+ * \param list pointer toward the shell of edge.
+ * \param newtet list of indices of created tetra
+ * \param tau vertices permutation
+ *
+ * \return 1 if success, 0 if fail.
+ *
+ * Update and fill the tetra and xtetra data when splitting one edge of a tetra.
+ *
+ */
+static inline
+int MMG5_split1b_eltspl(MMG5_pMesh mesh,int ip,int k,int *list,int *newtet,uint8_t tau[4]) {
+  MMG5_pTetra          pt,pt1;
+  MMG5_xTetra          xt,xt1;
+  MMG5_pxTetra         pxt0;
+  int                  iel,jel;
+  int8_t               ie,isxt,isxt1,i;
+  const uint8_t       *taued;
 
+  iel = list[k] / 6;
+  ie  = list[k] % 6;
+  pt = &mesh->tetra[iel];
+  jel = abs(newtet[k]);
+  pt1 = &mesh->tetra[jel];
+
+  pxt0 = 0;
+  if ( pt->xt ) {
+    pxt0 = &mesh->xtetra[pt->xt];
+    memcpy(&xt,pxt0,sizeof(MMG5_xTetra));
+    memcpy(&xt1,pxt0,sizeof(MMG5_xTetra));
+  }
+  else {
+    memset(&xt,0, sizeof(MMG5_xTetra));
+    memset(&xt1,0, sizeof(MMG5_xTetra));
+  }
+
+  int flag = 0;
+  MG_SET(flag,ie);
+  MMG3D_split1_cfg(flag,tau,&taued);
+
+  /* Generic formulation of split of 1 edge */
+  pt->v[tau[1]] = pt1->v[tau[0]] = ip;
+  if ( pt->xt ) {
+    /* Reset edge tag */
+    xt.tag [taued[3]] = 0;  xt.tag [taued[4]] = 0;
+    xt1.tag[taued[1]] = 0;  xt1.tag[taued[2]] = 0;
+    xt.edg [taued[3]] = 0;  xt.edg [taued[4]] = 0;
+    xt1.edg[taued[1]] = 0;  xt1.edg[taued[2]] = 0;
+    xt.ref [  tau[0]] = 0;  xt.ftag [ tau[0]] = 0;  MG_SET( xt.ori, tau[0]);
+    xt1.ref[  tau[1]] = 0;  xt1.ftag[ tau[1]] = 0;  MG_SET(xt1.ori, tau[1]);
+  }
+
+  pt->flag = pt1->flag = 0;
+
+  isxt = 0 ;
+  isxt1 = 0;
+
+  for (i=0; i<4; i++) {
+    if ( xt.ref[i]  || xt.ftag[i]  )  isxt  = 1;
+    if ( xt1.ref[i] || xt1.ftag[i] )  isxt1 = 1;
+  }
+
+  if ( pt->xt ) {
+    if ( (isxt)&&(!isxt1) ) {
+      pt1->xt = 0;
+      pxt0 = &mesh->xtetra[pt->xt];
+      memcpy(pxt0,&xt,sizeof(MMG5_xTetra));
+    }
+    else if ((!isxt)&&(isxt1) ) {
+      pt1->xt = pt->xt;
+      pt->xt = 0;
+      pxt0 = &mesh->xtetra[pt1->xt];
+      memcpy(pxt0,&xt1,sizeof(MMG5_xTetra));
+    }
+    else if (isxt && isxt1 ) {
+      mesh->xt++;
+      if ( mesh->xt > mesh->xtmax ) {
+        /* realloc of xtetras table */
+        MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
+                          "larger xtetra table",
+                          mesh->xt--;
+                          return 0);
+      }
+      pt1->xt = mesh->xt;
+      pxt0 = &mesh->xtetra[pt->xt];
+      memcpy(pxt0,&xt,sizeof(MMG5_xTetra));
+      pxt0 = &mesh->xtetra[pt1->xt];
+      memcpy(pxt0,&xt1,sizeof(MMG5_xTetra));
+    }
+    else {
+      pt->xt = 0;
+      pt1->xt = 0;
+    }
+  }
+  return 1;
+}
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -496,12 +604,10 @@ int MMG3D_normalAdjaTri(MMG5_pMesh mesh , int start, int8_t iface, int ia,
 int MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
                   int cas,int8_t metRidTyp,int8_t chkRidTet){
   MMG5_pTetra          pt,pt1,pt0;
-  MMG5_xTetra          xt,xt1;
-  MMG5_pxTetra         pxt0;
   double               lmin,lmax,len;
   int                  ilist,k,open,iel,jel,*newtet,nump,*adja,j;
   int                 *adjan,nei2,nei3,mel;
-  int8_t               ie,isxt,isxt1,i,voy;
+  int8_t               ie,i,voy;
   uint8_t              tau[4];
   const uint8_t       *taued;
 
@@ -588,25 +694,11 @@ int MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
     iel = list[k] / 6;
     ie  = list[k] % 6;
     pt  = &mesh->tetra[iel];
-    /* identity : case 0 */
-    tau[0] = 0 ; tau[1] = 1 ; tau[2] = 2 ; tau[3] = 3;
-    switch(ie) {
-    case 1:
-      tau[0] = 2; tau[1] = 0; tau[2] = 1; tau[3] = 3;
-      break;
-    case 2:
-      tau[0] = 0; tau[1] = 3; tau[2] = 1; tau[3] = 2;
-      break;
-    case 3:
-      tau[0] = 1; tau[1] = 2; tau[2] = 0; tau[3] = 3;
-      break;
-    case 4:
-      tau[0] = 3; tau[1] = 1; tau[2] = 0; tau[3] = 2;
-      break;
-    case 5:
-      tau[0] = 3; tau[1] = 2; tau[2] = 1; tau[3] = 0;
-      break;
-    }
+
+    int flag = 0;
+    MG_SET(flag,ie);
+    MMG3D_split1_cfg(flag,tau,&taued);
+
     jel = MMG3D_newElt(mesh);
     if ( !jel ) {
       MMG3D_TETRA_REALLOC(mesh,jel,mesh->gap,
@@ -632,83 +724,17 @@ int MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
   /* Special case : only one element in the shell */
   if ( ilist == 1 ) {
     assert(open);
+
+    if ( !MMG5_split1b_eltspl(mesh,ip,0,list,newtet,tau) ) {
+      return -1;
+    }
+
+    /* Update of adjacency relations */
     iel = list[0] / 6;
-    ie  = list[0] % 6;
     pt = &mesh->tetra[iel];
     jel = abs(newtet[0]);
     pt1 = &mesh->tetra[jel];
 
-    pxt0 = 0;
-    if ( pt->xt ) {
-      pxt0 = &mesh->xtetra[pt->xt];
-      memcpy(&xt,pxt0,sizeof(MMG5_xTetra));
-      memcpy(&xt1,pxt0,sizeof(MMG5_xTetra));
-    }
-    else {
-      memset(&xt,0, sizeof(MMG5_xTetra));
-      memset(&xt1,0, sizeof(MMG5_xTetra));
-    }
-
-    int flag = 0;
-    MG_SET(flag,ie);
-    MMG3D_split1_cfg(flag,tau,&taued);
-
-    /* Generic formulation of split of 1 edge */
-    pt->v[tau[1]] = pt1->v[tau[0]] = ip;
-    if ( pt->xt ) {
-      /* Reset edge tag */
-      xt.tag [taued[3]] = 0;  xt.tag [taued[4]] = 0;
-      xt1.tag[taued[1]] = 0;  xt1.tag[taued[2]] = 0;
-      xt.edg [taued[3]] = 0;  xt.edg [taued[4]] = 0;
-      xt1.edg[taued[1]] = 0;  xt1.edg[taued[2]] = 0;
-      xt.ref [  tau[0]] = 0;  xt.ftag [ tau[0]] = 0;  MG_SET( xt.ori, tau[0]);
-      xt1.ref[  tau[1]] = 0;  xt1.ftag[ tau[1]] = 0;  MG_SET(xt1.ori, tau[1]);
-    }
-
-    pt->flag = pt1->flag = 0;
-
-    isxt = 0 ;
-    isxt1 = 0;
-
-    for (i=0; i<4; i++) {
-      if ( xt.ref[i]  || xt.ftag[i] )  isxt = 1;
-      if ( xt1.ref[i] || xt1.ftag[i])  isxt1 = 1;
-    }
-
-    if ( pt->xt ) {
-      if ( (isxt) && (!isxt1) ) {
-        pt1->xt = 0;
-        pxt0 = &mesh->xtetra[pt->xt];
-        memcpy(pxt0,&xt,sizeof(MMG5_xTetra));
-      }
-      else if ( (!isxt) && (isxt1) ) {
-        pt1->xt = pt->xt;
-        pt->xt = 0;
-        pxt0 = &mesh->xtetra[pt1->xt];
-        memcpy(pxt0,&xt1,sizeof(MMG5_xTetra));
-      }
-      else if ( isxt && isxt1 ) {
-        mesh->xt++;
-        if ( mesh->xt > mesh->xtmax ) {
-          /* realloc of xtetras table */
-          MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
-                             "larger xtetra table",
-                             mesh->xt--;
-                             return -1);
-        }
-        pt1->xt = mesh->xt;
-        pxt0 = &mesh->xtetra[pt->xt];
-        memcpy(pxt0,&xt,sizeof(MMG5_xTetra));
-        pxt0 = &mesh->xtetra[pt1->xt];
-        memcpy(pxt0,&xt1,sizeof(MMG5_xTetra));
-      }
-      else {
-        pt->xt = 0;
-        pt1->xt = 0;
-      }
-    }
-
-    /* Update of adjacency relations */
     adja = &mesh->adja[4*(iel-1)+1];
     adjan = &mesh->adja[4*(jel-1)+1];
 
@@ -746,83 +772,16 @@ int MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
 
   /* General case : update each element of the shell */
   for (k=0; k<ilist; k++) {
+    if ( !MMG5_split1b_eltspl(mesh,ip,k,list,newtet,tau) ) {
+      return -1;
+    }
+
+    /* Update of adjacency relations */
     iel = list[k] / 6;
-    ie  = list[k] % 6;
     pt = &mesh->tetra[iel];
     jel = abs(newtet[k]);
     pt1 = &mesh->tetra[jel];
 
-    pxt0 = 0;
-    if ( pt->xt ) {
-      pxt0 = &mesh->xtetra[pt->xt];
-      memcpy(&xt,pxt0,sizeof(MMG5_xTetra));
-      memcpy(&xt1,pxt0,sizeof(MMG5_xTetra));
-    }
-    else {
-      memset(&xt,0, sizeof(MMG5_xTetra));
-      memset(&xt1,0, sizeof(MMG5_xTetra));
-    }
-
-    int flag = 0;
-    MG_SET(flag,ie);
-    MMG3D_split1_cfg(flag,tau,&taued);
-
-    /* Generic formulation of split of 1 edge */
-    pt->v[tau[1]] = pt1->v[tau[0]] = ip;
-    if ( pt->xt ) {
-      /* Reset edge tag */
-      xt.tag [taued[3]] = 0;  xt.tag [taued[4]] = 0;
-      xt1.tag[taued[1]] = 0;  xt1.tag[taued[2]] = 0;
-      xt.edg [taued[3]] = 0;  xt.edg [taued[4]] = 0;
-      xt1.edg[taued[1]] = 0;  xt1.edg[taued[2]] = 0;
-      xt.ref [  tau[0]] = 0;  xt.ftag [ tau[0]] = 0;  MG_SET( xt.ori, tau[0]);
-      xt1.ref[  tau[1]] = 0;  xt1.ftag[ tau[1]] = 0;  MG_SET(xt1.ori, tau[1]);
-    }
-
-    pt->flag = pt1->flag = 0;
-
-    isxt = 0 ;
-    isxt1 = 0;
-
-    for (i=0; i<4; i++) {
-      if ( xt.ref[i]  || xt.ftag[i]  )  isxt  = 1;
-      if ( xt1.ref[i] || xt1.ftag[i] )  isxt1 = 1;
-    }
-
-    if ( pt->xt ) {
-      if ( (isxt)&&(!isxt1) ) {
-        pt1->xt = 0;
-        pxt0 = &mesh->xtetra[pt->xt];
-        memcpy(pxt0,&xt,sizeof(MMG5_xTetra));
-      }
-      else if ((!isxt)&&(isxt1) ) {
-        pt1->xt = pt->xt;
-        pt->xt = 0;
-        pxt0 = &mesh->xtetra[pt1->xt];
-        memcpy(pxt0,&xt1,sizeof(MMG5_xTetra));
-      }
-      else if (isxt && isxt1 ) {
-        mesh->xt++;
-        if ( mesh->xt > mesh->xtmax ) {
-          /* realloc of xtetras table */
-          MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
-                             "larger xtetra table",
-                             mesh->xt--;
-                             return -1);
-        }
-        pt1->xt = mesh->xt;
-        pxt0 = &mesh->xtetra[pt->xt];
-        memcpy(pxt0,&xt,sizeof(MMG5_xTetra));
-        pxt0 = &mesh->xtetra[pt1->xt];
-        memcpy(pxt0,&xt1,sizeof(MMG5_xTetra));
-      }
-      else {
-        pt->xt = 0;
-        pt1->xt = 0;
-      }
-    }
-
-    /* Update of adjacency relations */
     adja = &mesh->adja[4*(iel-1)+1];
     adjan = &mesh->adja[4*(jel-1)+1];
 
