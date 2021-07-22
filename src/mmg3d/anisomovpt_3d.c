@@ -1546,7 +1546,7 @@ int MMG5_movbdyridpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
   }
 
   if ( calold < MMG5_EPSOK && calnew <= calold )    return 0;
-  else if ( calnew <= calold )  return 0;
+  else if ( calnew < calold )  return 0;
   memset(pxp,0,sizeof(MMG5_xPoint));
 
   /* Test : check whether all volumes remain positive with new position of the point */
