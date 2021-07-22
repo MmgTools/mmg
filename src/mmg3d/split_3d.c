@@ -981,6 +981,77 @@ int MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
 }
 
 /**
+ * \param flag flag to detect the splitting configuration
+ * \param tau vertices permutation
+ * \param taued edges permutation
+ * \param pt tetra in which the splitting is performed
+ *
+ * Compute vertices and edges permutation for the split of 2 edge along the same
+ * face. The configuration flag is computed such as the i^th bit of flag is 1 if
+ * the i^th edge is splitted).
+ *
+ */
+static inline
+uint8_t MMG3D_split2sf_cfg(int flag,uint8_t *tau,const uint8_t **taued,MMG5_pTetra pt) {
+  uint8_t imin;
+
+  /* identity is case 48 */
+  tau[0] = 0 ; tau[1] = 1 ; tau[2] = 2 ; tau[3] = 3;
+  *taued = &MMG5_permedge[0][0];
+  switch(flag){
+  case 24 :
+    tau[0] = 0 ; tau[1] = 2 ; tau[2] = 3 ; tau[3] = 1;
+    *taued = &MMG5_permedge[1][0];
+    break;
+  case 40 :
+    tau[0] = 0 ; tau[1] = 3 ; tau[2] = 1 ; tau[3] = 2;
+    *taued = &MMG5_permedge[2][0];
+    break;
+  case 6 :
+    tau[0] = 1 ; tau[1] = 3 ; tau[2] = 2 ; tau[3] = 0;
+    *taued = &MMG5_permedge[5][0];
+    break;
+  case 34 :
+    tau[0] = 1 ; tau[1] = 0 ; tau[2] = 3 ; tau[3] = 2;
+    *taued = &MMG5_permedge[3][0];
+    break;
+  case 36 :
+    tau[0] = 1 ; tau[1] = 2 ; tau[2] = 0 ; tau[3] = 3;
+    *taued = &MMG5_permedge[4][0];
+    break;
+  case 20 :
+    tau[0] = 2 ; tau[1] = 0 ; tau[2] = 1 ; tau[3] = 3;
+    *taued = &MMG5_permedge[6][0];
+    break;
+  case 5 :
+    tau[0] = 2 ; tau[1] = 1 ; tau[2] = 3 ; tau[3] = 0;
+    *taued = &MMG5_permedge[7][0];
+    break;
+  case 17 :
+    tau[0] = 2 ; tau[1] = 3 ; tau[2] = 0 ; tau[3] = 1;
+    *taued = &MMG5_permedge[8][0];
+    break;
+  case 9 :
+    tau[0] = 3 ; tau[1] = 0 ; tau[2] = 2 ; tau[3] = 1;
+    *taued = &MMG5_permedge[9][0];
+    break;
+  case 3 :
+    tau[0] = 3 ; tau[1] = 2 ; tau[2] = 1 ; tau[3] = 0;
+    *taued = &MMG5_permedge[11][0];
+    break;
+  case 10 :
+    tau[0] = 3 ; tau[1] = 1 ; tau[2] = 0 ; tau[3] = 2;
+    *taued = &MMG5_permedge[10][0];
+    break;
+  }
+
+  imin = (pt->v[tau[1]] < pt->v[tau[2]]) ? tau[1] : tau[2] ;
+
+  return imin;
+}
+
+
+/**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
  * \param k index of element to split.
@@ -1003,58 +1074,9 @@ int MMG3D_split2sf_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]){
 
   if ( vold < MMG5_EPSOK ) return 0;
 
-  /* identity is case 48 */
-  tau[0] = 0 ; tau[1] = 1 ; tau[2] = 2 ; tau[3] = 3;
-  taued = &MMG5_permedge[0][0];
-  switch(pt->flag){
-  case 24 :
-    tau[0] = 0 ; tau[1] = 2 ; tau[2] = 3 ; tau[3] = 1;
-    taued = &MMG5_permedge[1][0];
-    break;
-  case 40 :
-    tau[0] = 0 ; tau[1] = 3 ; tau[2] = 1 ; tau[3] = 2;
-    taued = &MMG5_permedge[2][0];
-    break;
-  case 6 :
-    tau[0] = 1 ; tau[1] = 3 ; tau[2] = 2 ; tau[3] = 0;
-    taued = &MMG5_permedge[5][0];
-    break;
-  case 34 :
-    tau[0] = 1 ; tau[1] = 0 ; tau[2] = 3 ; tau[3] = 2;
-    taued = &MMG5_permedge[3][0];
-    break;
-  case 36 :
-    tau[0] = 1 ; tau[1] = 2 ; tau[2] = 0 ; tau[3] = 3;
-    taued = &MMG5_permedge[4][0];
-    break;
-  case 20 :
-    tau[0] = 2 ; tau[1] = 0 ; tau[2] = 1 ; tau[3] = 3;
-    taued = &MMG5_permedge[6][0];
-    break;
-  case 5 :
-    tau[0] = 2 ; tau[1] = 1 ; tau[2] = 3 ; tau[3] = 0;
-    taued = &MMG5_permedge[7][0];
-    break;
-  case 17 :
-    tau[0] = 2 ; tau[1] = 3 ; tau[2] = 0 ; tau[3] = 1;
-    taued = &MMG5_permedge[8][0];
-    break;
-  case 9 :
-    tau[0] = 3 ; tau[1] = 0 ; tau[2] = 2 ; tau[3] = 1;
-    taued = &MMG5_permedge[9][0];
-    break;
-  case 3 :
-    tau[0] = 3 ; tau[1] = 2 ; tau[2] = 1 ; tau[3] = 0;
-    taued = &MMG5_permedge[11][0];
-    break;
-  case 10 :
-    tau[0] = 3 ; tau[1] = 1 ; tau[2] = 0 ; tau[3] = 2;
-    taued = &MMG5_permedge[10][0];
-    break;
-  }
+  imin = MMG3D_split2sf_cfg(pt->flag,tau,&taued,pt);
 
   /* Test orientation of the three tets to be created */
-  imin = (pt->v[tau[1]] < pt->v[tau[2]]) ? tau[1] : tau[2] ;
 
   memcpy(pt0,pt,sizeof(MMG5_Tetra));
   pt0->v[tau[1]] = vx[taued[4]];
@@ -1105,9 +1127,9 @@ int MMG5_split2sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp
   MMG5_pTetra         pt[3];
   MMG5_xTetra         xt[3];
   MMG5_pxTetra        pxt0;
-  int                 iel,i;
+  int                 iel,i,flg;
   int                 newtet[3];
-  int8_t              flg,imin,firstxt,isxt[3];
+  int8_t              imin,firstxt,isxt[3];
   uint8_t             tau[4];
   const uint8_t       *taued;
 
@@ -1157,58 +1179,10 @@ int MMG5_split2sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp
     memset(&xt[1],0,sizeof(MMG5_xTetra));
     memset(&xt[2],0,sizeof(MMG5_xTetra));
   }
-  /* identity is case 48 */
-  tau[0] = 0 ; tau[1] = 1 ; tau[2] = 2 ; tau[3] = 3;
-  taued = &MMG5_permedge[0][0];
-  switch(flg){
-  case 24 :
-    tau[0] = 0 ; tau[1] = 2 ; tau[2] = 3 ; tau[3] = 1;
-    taued = &MMG5_permedge[1][0];
-    break;
-  case 40 :
-    tau[0] = 0 ; tau[1] = 3 ; tau[2] = 1 ; tau[3] = 2;
-    taued = &MMG5_permedge[2][0];
-    break;
-  case 6 :
-    tau[0] = 1 ; tau[1] = 3 ; tau[2] = 2 ; tau[3] = 0;
-    taued = &MMG5_permedge[5][0];
-    break;
-  case 34 :
-    tau[0] = 1 ; tau[1] = 0 ; tau[2] = 3 ; tau[3] = 2;
-    taued = &MMG5_permedge[3][0];
-    break;
-  case 36 :
-    tau[0] = 1 ; tau[1] = 2 ; tau[2] = 0 ; tau[3] = 3;
-    taued = &MMG5_permedge[4][0];
-    break;
-  case 20 :
-    tau[0] = 2 ; tau[1] = 0 ; tau[2] = 1 ; tau[3] = 3;
-    taued = &MMG5_permedge[6][0];
-    break;
-  case 5 :
-    tau[0] = 2 ; tau[1] = 1 ; tau[2] = 3 ; tau[3] = 0;
-    taued = &MMG5_permedge[7][0];
-    break;
-  case 17 :
-    tau[0] = 2 ; tau[1] = 3 ; tau[2] = 0 ; tau[3] = 1;
-    taued = &MMG5_permedge[8][0];
-    break;
-  case 9 :
-    tau[0] = 3 ; tau[1] = 0 ; tau[2] = 2 ; tau[3] = 1;
-    taued = &MMG5_permedge[9][0];
-    break;
-  case 3 :
-    tau[0] = 3 ; tau[1] = 2 ; tau[2] = 1 ; tau[3] = 0;
-    taued = &MMG5_permedge[11][0];
-    break;
-  case 10 :
-    tau[0] = 3 ; tau[1] = 1 ; tau[2] = 0 ; tau[3] = 2;
-    taued = &MMG5_permedge[10][0];
-    break;
-  }
+
+  imin = MMG3D_split2sf_cfg(flg,tau,&taued,pt[0]);
 
   /* Generic formulation for the split of 2 edges belonging to a common face */
-  imin = (pt[0]->v[tau[1]] < pt[0]->v[tau[2]]) ? tau[1] : tau[2] ;
   pt[0]->v[tau[1]]  = vx[taued[4]] ;  pt[0]->v[tau[2]] = vx[taued[5]];
   xt[0].tag[taued[0]] = 0;  xt[0].tag[taued[1]] = 0;
   xt[0].tag[taued[3]] = 0;  xt[0].edg[taued[0]] = 0;
