@@ -1534,19 +1534,10 @@ int MMG5_split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp) 
       pt[0]->xt = 0;
     }
   }
+
   /* Quality update */
-  if ( (!metRidTyp) && met->m && met->size>1 ) {
-    pt[0]->qual=MMG5_caltet33_ani(mesh,met,pt[0]);
-    pt[1]->qual=MMG5_caltet33_ani(mesh,met,pt[1]);
-    pt[2]->qual=MMG5_caltet33_ani(mesh,met,pt[2]);
-    pt[3]->qual=MMG5_caltet33_ani(mesh,met,pt[3]);
-  }
-  else {
-    pt[0]->qual=MMG5_orcal(mesh,met,newtet[0]);
-    pt[1]->qual=MMG5_orcal(mesh,met,newtet[1]);
-    pt[2]->qual=MMG5_orcal(mesh,met,newtet[2]);
-    pt[3]->qual=MMG5_orcal(mesh,met,newtet[3]);
-  }
+  MMG3D_update_qual(mesh,met,nnew,newtet,pt,metRidTyp);
+
   return 1;
 }
 
