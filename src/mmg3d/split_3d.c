@@ -1219,6 +1219,7 @@ int MMG5_split2sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp
   pt[0]->flag = 0;
   newtet[0]=k;
 
+  /* Create 2 new tetra */
   if ( !MMG3D_crea_newTetra(mesh,ne,newtet,pt,xt,&pxt0) ) {
     return 0;
   }
@@ -1420,6 +1421,7 @@ int MMG5_split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp) 
   pt[0]->flag = 0;
   newtet[0]=k;
 
+  /* Create 3 new tetra */
   if ( !MMG3D_crea_newTetra(mesh,ne,newtet,pt,xt,&pxt0) ) {
     return 0;
   }
@@ -1631,7 +1633,7 @@ int MMG5_split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp) 
   pt[0]->flag  = 0;
   newtet[0]=k;
 
-  /* create 4 new tetras */
+  /* create 3 new tetras */
   if ( !MMG3D_crea_newTetra(mesh,ne,newtet,pt,xt,&pxt0) ) {
     return 0;
   }
@@ -1960,7 +1962,7 @@ int MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidT
   pt[0]->flag  = 0;
   newtet[0]=k;
 
-  /* create 4 new tetras */
+  /* create 3 new tetras */
   if ( !MMG3D_crea_newTetra(mesh,ne,newtet,pt,xt,&pxt0) ) {
     return 0;
   }
@@ -2566,7 +2568,7 @@ int MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],int8_t metRid
                        &ie0,&ie1,&ie2,&ie3,&ie4,&ie5,&imin03,&imin12);
   pt[0]->flag  = 0;
 
-  /* create 4 new tetras, the fifth being created only if needed. */
+  /* create 3 new tetras, the fifth being created only if needed. */
   if ( !MMG3D_crea_newTetra(mesh,ne,newtet,pt,xt,&pxt0) ) {
     return 0;
   }
