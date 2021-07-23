@@ -4309,6 +4309,7 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp) 
   int            i,j,iel,nxt0;
   int            newtet[8];
   int8_t         isxt0,isxt;
+  const int8_t   ne=8;
 
   pt[0]  = &mesh->tetra[k];
   pt[0]->flag  = 0;
@@ -4319,7 +4320,7 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp) 
   memcpy(&xt0,pxt,sizeof(MMG5_xTetra));
 
   /* create 7 new tetras */
-  for (i=1; i<8; i++) {
+  for (i=1; i<ne; i++) {
     iel = MMG3D_newElt(mesh);
     if ( !iel ) {
       MMG3D_TETRA_REALLOC(mesh,iel,mesh->gap,
@@ -4653,16 +4654,10 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp) 
       }
     }
   }
-  if ( (!metRidTyp) && met->m && met->size>1 ) {
-    for (i=0; i<8; i++) {
-      pt[i]->qual=MMG5_caltet33_ani(mesh,met,pt[i]);
-    }
-  }
-  else {
-    for (i=0; i<8; i++) {
-      pt[i]->qual=MMG5_orcal(mesh,met,newtet[i]);
-    }
-  }
+
+  /* Quality update */
+  MMG3D_update_qual(mesh,met,ne,newtet,pt,metRidTyp);
+
   return 1;
 }
 
