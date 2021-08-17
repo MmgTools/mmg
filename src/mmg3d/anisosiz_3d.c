@@ -1810,21 +1810,34 @@ int MMG5_grad2metVolreq(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int npmaste
      * of the singular points. Thus:
      * lambda_new = = 0.5 lambda_1 + 0.5 lambda_new = lambda_1 + 0.5 beta.
      * with beta the smallest variation of the eigenvalues (lambda_new-lambda_1). */
-    assert ( fabs(mm2[0]-mm2[3]) < MMG5_EPSOK && fabs(mm2[3]-mm2[5]) < MMG5_EPSOK
-             && "iso metric?" );
 
-    beta = mu[0] - mm2[0];
+    /* This point can have an anisotropic metric if a user-provided metric is
+     * found. So, compute the eigenvalues. */
+    double ll[3],rr[3][3],llmin;
+    int i;
+    if( !MMG5_eigenv(1,mm2,ll, rr) )
+      return 0;
+    llmin = DBL_MAX;
+    for( i = 0; i < 3; i++ )
+      if( ll[i] < llmin )
+        llmin = ll[i];
 
-    if ( fabs(beta) < fabs(mm2[0]-mu[1]) ) {
-      beta = mu[1] - mm2[0];
+
+    beta = mu[0] - llmin;
+
+    if ( fabs(beta) < fabs(llmin-mu[1]) ) {
+      beta = mu[1] - llmin;
     }
-    if ( fabs(beta) < fabs(mm2[0]-mu[2]) ) {
-      beta = mu[2] - mm2[0];
-    }
-
-    mm2[0] += 0.5*beta;
-    mm2[3] += 0.5*beta;
-    mm2[5] += 0.5*beta;
+    ll[0] += 0.5*beta;
+    ll[1] += 0.5*beta;
+    ll[2] += 0.5*beta;
+    assert ( ll[0]>0. && ll[1]>0. && ll[2]>0. );
+    mm2[0] = ll[0]*rr[0][0]*rr[0][0] + ll[1]*rr[1][0]*rr[1][0] + ll[2]*rr[2][0]*rr[2][0];
+    mm2[1] = ll[0]*rr[0][0]*rr[0][1] + ll[1]*rr[1][0]*rr[1][1] + ll[2]*rr[2][0]*rr[2][1];
+    mm2[2] = ll[0]*rr[0][0]*rr[0][2] + ll[1]*rr[1][0]*rr[1][2] + ll[2]*rr[2][0]*rr[2][2];
+    mm2[3] = ll[0]*rr[0][1]*rr[0][1] + ll[1]*rr[1][1]*rr[1][1] + ll[2]*rr[2][1]*rr[2][1];
+    mm2[4] = ll[0]*rr[0][1]*rr[0][2] + ll[1]*rr[1][1]*rr[1][2] + ll[2]*rr[2][1]*rr[2][2];
+    mm2[5] = ll[0]*rr[0][2]*rr[0][2] + ll[1]*rr[1][2]*rr[1][2] + ll[2]*rr[2][2]*rr[2][2];
   }
   else if( p2->tag & MG_GEO ){
 

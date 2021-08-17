@@ -248,9 +248,10 @@ int MMG2D_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, int start, int8_t istart) {
     v2 = sol->m[ip2];
 
     /* Authorize change of references only provided the boundary reference is MG_ISO */
-    if ( pt->ref != refstart && pt->edg[i1] != MG_ISO )
+    if ( pt->ref != refstart && pt->edg[i1] != MG_ISO ) {
       smsgn = 0;
-    else
+      k = 0;
+    } else
       smsgn = (fabs(v1) < MMG5_EPS) || ( (fabs(v2) > MMG5_EPS) && MG_SMSGN(v1,v2) ) ? 1 : 0;
     // smsgn =  MG_SMSGN(v1,v2) ? 1 : 0;
   }
@@ -276,9 +277,10 @@ int MMG2D_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, int start, int8_t istart) {
     v1 = sol->m[ip1];
     v2 = sol->m[ip2];
 
-    if ( pt->ref != refstart && pt->edg[i1] != MG_ISO )
+    if ( pt->ref != refstart && pt->edg[i1] != MG_ISO ) {
       smsgn = 0;
-    else
+      k = 0;
+    } else
       smsgn = (fabs(v2) < MMG5_EPS) || ( (fabs(v1) > MMG5_EPS) && MG_SMSGN(v1,v2) ) ? 1 : 0;
     // smsgn = MG_SMSGN(v1,v2) ? 1 : 0;
   }
@@ -330,7 +332,7 @@ int MMG2D_snapval(MMG5_pMesh mesh, MMG5_pSol sol) {
     p0 = &mesh->point[k];
     if ( !MG_VOK(p0) ) continue;
     if ( fabs(sol->m[k]) < MMG5_EPS ) {
-      tmp[k] =  - 100.0*MMG5_EPS;
+      tmp[k] =  sol->m[k];
       p0->flag = 1;
       sol->m[k] = 0.0;
       ns++;
@@ -828,7 +830,8 @@ int MMG2D_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol met){
   }
   if ( !nb ) return 1;
 
-  /* Create the intersection points between the edges in the mesh and the 0 level set */
+  /* Create the intersection points between the edges in the mesh and the 0
+   * level set */
   if ( !MMG5_hashNew(mesh,&hash,nb,2*nb) ) return 0;
 
   for (k=1; k<=mesh->nt; k++) {
@@ -908,13 +911,13 @@ int MMG2D_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol met){
     switch( pt->flag ) {
       /* 1 edge split -> 0-+ */
       case 1: case 2: case 4:
-        ier = MMG2D_split1(mesh,sol,k,vx);
+        ier = MMG2D_split1(mesh,met,k,vx);
         ns++;
         break;
 
       /* 2 edge split -> +-- or -++ */
       case 3: case 5: case 6:
-        ier = MMG2D_split2(mesh,sol,k,vx);
+        ier = MMG2D_split2(mesh,met,k,vx);
         ns++;
         break;
 

@@ -83,6 +83,7 @@ extern "C" {
     MMG2D_DPARAM_hgradreq,          /*!< [val], Control gradation on required entites (advanced usage) */
     MMG2D_DPARAM_ls,                /*!< [val], Value of level-set */
     MMG2D_DPARAM_rmc,               /*!< [-1/val], Remove small connex componants in level-set mode */
+    MMG2D_IPARAM_nofem,             /*!< [1/0], Generate a non finite element mesh */
   };
 
 /*----------------------------- functions header -----------------------------*/
@@ -1959,6 +1960,21 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
 // void (*MMG2D_callbackinsert) (int ,int ,int ,int, int);
 
 /**
+ * \param mesh pointer toward the mesh structure.
+ * \return 0 if fail, 1 if success.
+ *
+ * Print the default parameters values.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG2D_DEFAULTVALUES(mesh,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int MMG2D_defaultValues(MMG5_pMesh mesh);
+
+/**
  * \param mesh pointer toward the mesh structure
  * \param met pointer toward the sol structure
  * \return 1 if success
@@ -2015,6 +2031,10 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * boundary if it is located at the interface of 2 domains with different
  * references, if it belongs to one triangle only or if it is a singular edge
  * (ridge or required).
+ * Append these edges to the list of edge.
+ *
+ * \warning reallocate the edge array and append the internal edges. This may
+ * modify the behaviour of other functions.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_GET_NUMBEROFNONBDYEDGES(mesh,nb_edges,retval)\n
@@ -2036,7 +2056,7 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  *
  * Get extremities \a e0, \a e1 and reference \a ref of the idx^th non boundary
  * edge (for DG methods for example). An edge is boundary if it is located at
- * the interface of 2 domains witch different references, if it belongs to one
+ * the interface of 2 domains with different references, if it belongs to one
  * triangle only or if it is a singular edge (ridge or required).
  *
  * \remark Fortran interface:

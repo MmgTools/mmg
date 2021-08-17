@@ -312,6 +312,9 @@ IF ( NOT VTK_FOUND )
 ENDIF()
 
 # Triangle output
+#
+# Respect the default Tetgen behaviour: saves only boundary edges in
+# .edge file.
 ADD_TEST(NAME mmg2d_Circle-triangle
   COMMAND ${EXECUT_MMG2D} -v 5
   ${MMG2D_CI_TESTS}/Circle/cercle

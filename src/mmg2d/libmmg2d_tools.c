@@ -57,6 +57,22 @@ void MMG2D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
 }
 
 /**
+ * \param mesh pointer toward the mesh structure.
+ * \return 0 if fail, 1 if success.
+ *
+ * Print the default parameters values.
+ *
+ */
+int MMG2D_defaultValues(MMG5_pMesh mesh) {
+
+  MMG5_mmgDefaultValues(mesh);
+
+  fprintf(stdout,"\n\n");
+
+  return 1;
+}
+
+/**
  * \param mesh pointer toward the mesh
  * \param met pointer toward the metric
  *
@@ -302,12 +318,14 @@ int MMG2D_Get_nonBdyEdge(MMG5_pMesh mesh, int* e0, int* e1, int* ref, int idx) {
             " before the %s one and check that the number of internal"
             " edges is non null.\n",
             __func__,__func__);
+    return 0;
   }
 
   if ( mesh->namax+idx > na_tot ) {
     fprintf(stderr,"\n  ## Error: %s: Can't get the internal edge of index %d."
             " Index must be between 1 and %zu.\n",
             __func__,idx,na_tot-mesh->namax);
+    return 0;
   }
 
   ped = &mesh->edge[mesh->namax+idx];

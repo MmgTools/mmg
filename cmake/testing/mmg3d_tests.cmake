@@ -302,6 +302,8 @@ ADD_TEST(NAME mmg3d_ascii_gmsh_3d
 )
 
 # Tetgen
+# Default Tetgen behaviour saves only boundary tria (resp. edges) in
+# .face (resp. .edge) file.
 ADD_TEST ( NAME mmg3d_cube-tetgen
   COMMAND ${EXECUT_MMG3D} -v 5
   ${MMG3D_CI_TESTS}/Cube/cube

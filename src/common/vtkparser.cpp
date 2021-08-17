@@ -616,12 +616,6 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
       int npointData = pd->GetNumberOfArrays();
 
       for (int j = 0; j < npointData; j++) {
-        psl = *sol + isol;
-        psl->ver = mesh->ver;
-        psl->dim = mesh->dim;
-        psl->type = 1;
-        psl->entities = MMG5_Vertex;
-
         char *ptr = NULL;
         bool metricData = 0;
         char chaine[MMG5_FILESTR_LGTH];
@@ -634,6 +628,12 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
           *ptr = '\0';
           metricData = 1;
         }
+
+        psl = *sol + isol;
+        psl->ver = mesh->ver;
+        psl->dim = mesh->dim;
+        psl->type = 1;
+        psl->entities = MMG5_Vertex;
 
         if ( !MMG5_Set_inputSolName(mesh,psl,chaine) ) {
           if ( !mmgWarn1 ) {
@@ -753,12 +753,6 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
       int ncellData = cd->GetNumberOfArrays();
 
       for (int j = 0; j < ncellData; j++) {
-        psl = *sol + isol;
-        psl->ver = mesh->ver;
-        psl->dim = mesh->dim;
-        psl->type = 1;
-        psl->entities = MMG5_Tetrahedron;
-
         char *ptr = NULL;
         char chaine[MMG5_FILESTR_LGTH];
         strcpy(chaine,cd->GetArrayName(j));
@@ -766,6 +760,12 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
         if  ( strstr(chaine,"medit:ref" ) ) {
           continue;
         }
+
+        psl = *sol + isol;
+        psl->ver = mesh->ver;
+        psl->dim = mesh->dim;
+        psl->type = 1;
+        psl->entities = MMG5_Tetrahedron;
 
         if ( !MMG5_Set_inputSolName(mesh,psl,chaine) ) {
           if ( !mmgWarn1 ) {
