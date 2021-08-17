@@ -356,6 +356,7 @@ int MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
     pt  = &mesh->tetra[iel];
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     calold = MG_MIN(calold, pt->qual);
+    assert ( isfinite(calold) );
 
     ia1 = ia2 = ip = iq = -1;
     for (j=0; j< 4; j++) {
@@ -429,6 +430,8 @@ int MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
         caltmp = MMG5_caltet33_ani(mesh,met,pt0);
       else
         caltmp = MMG5_orcal(mesh,met,0);
+
+      if ( caltmp < MMG5_NULKAL )  return 0;
 
       calnew = MG_MIN(calnew,caltmp);
     }
