@@ -347,7 +347,7 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol met)
   }
 
   /* Print edge length histories */
-  if ( abs(mesh->info.imprim) > 4 )  {
+  if ( (abs(mesh->info.imprim) > 4) && met->m && met->np )  {
     MMG2D_prilen(mesh,met);
   }
 
@@ -614,7 +614,7 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
   /* Print edge length histories */
-  if ( abs(mesh->info.imprim) > 4 )  {
+  if ( abs(mesh->info.imprim) > 4  && met->m && met->np )  {
     MMG2D_prilen(mesh,met);
   }
 
