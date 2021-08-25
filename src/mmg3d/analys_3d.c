@@ -147,6 +147,7 @@ int MMG5_setadj(MMG5_pMesh mesh){
         tag = MG_GEO;
         if ( mesh->info.opnbdy ) tag += MG_OPNBDY;
         if ( !adja[i] ) {
+          tag += MG_NOM;
           pt->tag[i] |= tag;
           mesh->point[ip1].tag |= tag;
           mesh->point[ip2].tag |= tag;
