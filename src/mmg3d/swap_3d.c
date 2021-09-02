@@ -61,7 +61,7 @@ int MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
   MMG5_pPar     par;
   double        b0[3],b1[3],n[3],v[3],c[3],ux,uy,uz,ps,disnat,dischg;
   double        cal1,cal2,calnat,calchg,calold,calnew,caltmp,hausd;
-  int           iel,iel1,iel2,np,nq,na1,na2,k,nminus,nplus,isloc,l,info;
+  int           iel,iel1,iel2,np,nq,na1,na2,k,nminus,nplus,isloc,l,info,refm;
   int8_t        ifa1,ifa2,ia,ip,iq,ia1,ia2,j,isshell,ier;
 
   iel = list[0] / 6;
@@ -81,20 +81,23 @@ int MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
          (pxt->tag[ia] & MG_NOM) )  return 0;
   }
 
-  /* No swap when either internal or external component has only 1 element */
-  //Algiane: warning, to check in multi-dom...
-  if ( mesh->info.iso ) {
-    nminus = nplus = 0;
-    for (k=0; k<ilist; k++) {
-      iel = list[k] / 6;
-      pt = &mesh->tetra[iel];
-      if ( pt->ref == MG_MINUS )
-        nminus++;
-      else
-        nplus++;
+  /* No swap when either internal or external component has only 1 element (as
+   * we can't swap geometric edges here we know that the edge shares at most 2
+   * domains).*/
+  nminus = nplus = 0;
+  refm   = pt->ref;
+  for (k=0; k<ilist; k++) {
+    iel = list[k] / 6;
+    pt = &mesh->tetra[iel];
+    if ( pt->ref == refm ) {
+      nminus++;
     }
-    if ( nplus == 1 || nminus == 1 )  return 0;
+    else {
+      nplus++;
+    }
   }
+  if ( nplus == 1 || nminus == 1 )  return 0;
+
   iel1 = it1 / 4;
   ifa1 = it1 % 4;
 
