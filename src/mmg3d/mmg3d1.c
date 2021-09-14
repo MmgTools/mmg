@@ -1467,6 +1467,8 @@ int MMG3D_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,int k,
   p0  = &mesh->point[ip1];
   p1  = &mesh->point[ip2];
 
+  if ( (p0->tag & MG_PARBDY) && (p1->tag & MG_PARBDY) ) return 0;
+
   ref = pxt->edg[imax];
   tag = pxt->tag[imax];
 
@@ -2020,7 +2022,7 @@ MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
     for (i=0; i<4; i++) {
       /* virtual triangle */
       memset(&ptt,0,sizeof(MMG5_Tria));
-      if ( pt->xt && pxt->ftag[i] ) {
+      if ( pt->xt && pxt->ftag[i] && pxt->ftag[i] != MG_OLDPARBDY ) {
         MMG5_tet2tri(mesh,k,i,&ptt);
       }
 

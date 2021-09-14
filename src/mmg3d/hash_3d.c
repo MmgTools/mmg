@@ -537,8 +537,8 @@ int MMG5_setEdgeNmTag(MMG5_pMesh mesh, MMG5_Hash *hash) {
 
     for (l=0; l<3; l++) {
 
-      /* Skip edges at the intersection of a parallel interface */
-      if ( ptt->tag[l] & MG_BDY ) continue;
+      /* Skip parallel edges */
+      if ( (ptt->tag[l] & MG_PARBDY) || (ptt->tag[l] & MG_BDY) ) continue;
 
       if ( ptt->tag[l] & MG_NOM ) {
         i1 = MMG5_inxt2[l];

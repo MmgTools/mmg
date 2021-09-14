@@ -147,6 +147,7 @@ int MMG5_setadj(MMG5_pMesh mesh){
         tag = MG_GEO;
         if ( mesh->info.opnbdy ) tag += MG_OPNBDY;
         if ( !adja[i] ) {
+          tag += MG_NOM;
           pt->tag[i] |= tag;
           mesh->point[ip1].tag |= tag;
           mesh->point[ip2].tag |= tag;
@@ -691,7 +692,7 @@ int MMG3D_nmgeom(MMG5_pMesh mesh){
         ip = MMG5_idir[i][j];
         p0 = &mesh->point[pt->v[ip]];
         if ( p0->flag == base )  continue;
-        else if ( !(p0->tag & MG_NOM) )  continue;
+        else if ( !(p0->tag & MG_NOM) || (p0->tag & MG_PARBDY) )  continue;
 
         p0->flag = base;
         ier = MMG5_boulenm(mesh,k,ip,i,n,t);
@@ -728,7 +729,8 @@ int MMG3D_nmgeom(MMG5_pMesh mesh){
     
     for (i=0; i<4; i++) {
       p0 = &mesh->point[pt->v[i]];
-      if ( p0->tag & MG_REQ || !(p0->tag & MG_NOM) || p0->xp ) continue;
+      if ( p0->tag & MG_REQ || !(p0->tag & MG_NOM) ||
+           p0->xp || (p0->tag & MG_PARBDY) ) continue;
       ier = MMG5_boulenmInt(mesh,k,i,t);
       if ( ier ) {
         ++mesh->xp;
