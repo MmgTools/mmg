@@ -297,8 +297,7 @@ int  MMG5_settag(MMG5_pMesh,int,int,int16_t,int);
 int  MMG5_deltag(MMG5_pMesh,int,int,int16_t);
 int  MMG5_setNmTag(MMG5_pMesh mesh, MMG5_Hash *hash);
 int  MMG5_chkcol_int(MMG5_pMesh,MMG5_pSol,int,int8_t,int8_t,int*,int,int8_t);
-int  MMG5_chkcol_bdy(MMG5_pMesh,MMG5_pSol,int,int8_t,int8_t,int*,int,int*,int,int,int,int8_t,int);
-int  MMG5_chkcol_nomint(MMG5_pMesh,MMG5_pSol,int,int8_t,int8_t,int*,int,int8_t);
+int  MMG5_chkcol_bdy(MMG5_pMesh,MMG5_pSol,int,int8_t,int8_t,int*,int,int*,int,int,int,int8_t,int,int8_t);
 int  MMG5_chkmanicoll(MMG5_pMesh,int,int,int,int,int,int,int,int8_t,int8_t);
 int  MMG5_chkmani(MMG5_pMesh mesh);
 int  MMG5_colver(MMG5_pMesh,MMG5_pSol,int *,int,int8_t,int8_t);
@@ -365,10 +364,12 @@ int  MMG5_split4bar(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t);
 int  MMG3D_simbulgept(MMG5_pMesh mesh,MMG5_pSol met, int *list, int ilist,int);
 void MMG5_nsort(int ,double *,int8_t *);
 int    MMG3D_optlap(MMG5_pMesh ,MMG5_pSol );
+int  MMG3D_rotate_surfacicBall(MMG5_pMesh,int*,int,int,double r[3][3],double*);
 int    MMG5_movintpt_iso(MMG5_pMesh ,MMG5_pSol,MMG3D_pPROctree, int *, int , int);
 int    MMG3D_movnormal_iso(MMG5_pMesh ,MMG5_pSol ,int ,int );
 int    MMG5_movintptLES_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree,int *,int,int);
 int    MMG5_movintpt_ani(MMG5_pMesh ,MMG5_pSol,MMG3D_pPROctree,int *,int ,int);
+int    MMG3D_movbdyregpt_geom(MMG5_pMesh,int *,const int,const int,double[3],double[3],double[3],double[3]);
 int    MMG5_movbdyregpt_iso(MMG5_pMesh, MMG5_pSol,MMG3D_pPROctree,
                              int*, int, int*, int, int ,int);
 int    MMG5_movbdyregpt_ani(MMG5_pMesh, MMG5_pSol,MMG3D_pPROctree,
@@ -455,7 +456,9 @@ void MMG3D_keep_only1Subdomain ( MMG5_pMesh mesh,int nsd );
 int  MMG3D_indElt(MMG5_pMesh mesh,int kel);
 int  MMG3D_indPt(MMG5_pMesh mesh,int kp);
 void MMG5_printTetra(MMG5_pMesh mesh,char* fileName);
-
+void MMG3D_chkpointtag(MMG5_pMesh mesh);
+void MMG3D_chkmeshedgestags(MMG5_pMesh mesh);
+int MMG3D_chk_shellEdgeTag(MMG5_pMesh  mesh,int start, int8_t ia,int16_t tag,int ref);
 
 #ifdef USE_SCOTCH
 int MMG5_mmg3dRenumbering(int,MMG5_pMesh,MMG5_pSol,MMG5_pSol,int*);
@@ -493,7 +496,7 @@ int  MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree PROctree,
                   double clickSurf,double clickVol,int moveVol,int improveSurf,int improveVolSurf,
                   int improveVol,int maxit,int testmark);
 int  MMG5_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree PROctree, int);
-  int  MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double,double,MMG3D_pPROctree, int,int);
+int  MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double,double,MMG3D_pPROctree, int,int);
 
 /* pointers */
 /* init structures */

@@ -357,18 +357,12 @@ int movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
 
 /**
  * \param mesh pointer toward the mesh
- * \param it1 triangle to which belongs the first edge
- * \param it2 triangle to which belongs the second edge
- * \param l1old length of the first edge
- * \param l2old length of the second edge
- * \param isrid1 1 if the first edge is a ridge
- * \param isrid2 1 if the second edge is a ridge
+ * \param it triangle to which belongs the edge along which we move
+ * \param isrid 1 if the edge is a ridge
  * \param ip0 edge point that we want to move
- * \param ip1 edge point connected by the ref/ridge edge to \a p0
- * \param ip2 edge point connected by the ref/ridge edge to \a p0
+ * \param ip edge point connected by the ref/ridge edge to \a p0
  * \param step displacement factor along the ref/ridge edge
  * \param o coordinates of point after relocation
- * \param isrid 1 if point is moved toward a ridge.
  *
  * \return 1 if success, 0 otherwise.
  *
@@ -376,99 +370,52 @@ int movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
  * edges.
  *
  */
-int MMGS_paramDisp(MMG5_pMesh mesh,int it1,int it2,
-                   double l1old,double l2old,
-                   int8_t isrid1, int8_t isrid2,int ip0,int ip1,int ip2,
-                   double step,double o[3],int8_t *isrid) {
+int MMGS_paramDisp(MMG5_pMesh mesh,int it,int8_t isrid,int ip0,int ip,
+                   double step,double o[3]) {
   MMG5_pTria  pt;
   MMG5_Bezier b;
   double      uv[2],nn1[3],to[3];
   int         ier;
 
-  /* move towards p2 */
-  if ( l2old > l1old ) {
-    *isrid = isrid2;
-    pt = &mesh->tria[it2];
+  /* move towards ip */
+  pt = &mesh->tria[it];
 
-    ier = MMG5_bezierCP(mesh,pt,&b,1);
-    assert(ier);
+  ier = MMG5_bezierCP(mesh,pt,&b,1);
+  assert(ier);
 
-    /* fill table uv */
-    if ( pt->v[0] == ip0 ) {
-      if ( pt->v[1] == ip2 ) {
-        uv[0] = step;
-        uv[1] = 0.0;
-      }
-      else if ( pt->v[2] == ip2 ) {
-        uv[0] = 0.0;
-        uv[1] = step;
-      }
+  /* fill table uv */
+  if ( pt->v[0] == ip0 ) {
+    if ( pt->v[1] == ip ) {
+      uv[0] = step;
+      uv[1] = 0.0;
     }
-    else if ( pt->v[0] == ip2 ) {
-      if ( pt->v[1] == ip0 ) {
-        uv[0] = 1.0 - step;
-        uv[1] = 0.0;
-      }
-      else if ( pt->v[2] == ip0 ) {
-        uv[0] = 0.0;
-        uv[1] = 1.0-step;
-      }
+    else if ( pt->v[2] == ip ) {
+      uv[0] = 0.0;
+      uv[1] = step;
     }
-    else {
-      if ( pt->v[1] == ip0 ) {
-        uv[0] = 1.0 - step;
-        uv[1] = step;
-      }
-      else if ( pt->v[2] == ip0 ) {
-        uv[0] = step;
-        uv[1] = 1.0-step;
-      }
-    }
-    ier = MMGS_bezierInt(&b,uv,o,nn1,to);
-    assert(ier);
   }
-  /* move towards p1 */
+  else if ( pt->v[0] == ip ) {
+    if ( pt->v[1] == ip0 ) {
+      uv[0] = 1.0 - step;
+      uv[1] = 0.0;
+    }
+    else if ( pt->v[2] == ip0 ) {
+      uv[0] = 0.0;
+      uv[1] = 1.0-step;
+    }
+  }
   else {
-    *isrid = isrid1;
-    pt = &mesh->tria[it1];
-
-    ier = MMG5_bezierCP(mesh,pt,&b,1);
-    assert(ier);
-
-    /* fill table uv */
-    if ( pt->v[0] == ip0 ) {
-      if ( pt->v[1] == ip1 ) {
-        uv[0] = step;
-        uv[1] = 0.0;
-      }
-      else if ( pt->v[2] == ip1 ) {
-        uv[0] = 0.0;
-        uv[1] = step;
-      }
+    if ( pt->v[1] == ip0 ) {
+      uv[0] = 1.0 - step;
+      uv[1] = step;
     }
-    else if ( pt->v[0] == ip1 ) {
-      if ( pt->v[1] == ip0 ) {
-        uv[0] = 1.0 - step;
-        uv[1] = 0.0;
-      }
-      else if ( pt->v[2] == ip0 ) {
-        uv[0] = 0.0;
-        uv[1] = 1.0-step;
-      }
+    else if ( pt->v[2] == ip0 ) {
+      uv[0] = step;
+      uv[1] = 1.0-step;
     }
-    else {
-      if ( pt->v[1] == ip0 ) {
-        uv[0] = 1.0-step;
-        uv[1] = step;
-      }
-      else if ( pt->v[2] == ip0 ) {
-        uv[0] = step;
-        uv[1] = 1.0-step;
-      }
-    }
-    ier = MMGS_bezierInt(&b,uv,o,nn1,to);
-    assert(ier);
   }
+  ier = MMGS_bezierInt(&b,uv,o,nn1,to);
+  assert(ier);
 
   return ier;
 }
@@ -649,7 +596,7 @@ int movridpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   MMG5_pPoint  p0,p1,p2,ppt0;
   double       step,ll1old,ll1new,ll2old,ll2new,o[3];
   double       nn1[3],nn2[3],to[3],calold,calnew,lam0,lam1,lam2;
-  int          k,iel,ip0,ip1,ip2,it1,it2;
+  int          k,iel,ip,ip0,ip1,ip2,it,it1,it2;
   int8_t       i0,i1,i2,isrid1,isrid2,isrid;
 
   step   = 0.1;
@@ -719,9 +666,22 @@ int movridpt_iso(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
     + (p2->c[1]-p0->c[1])*(p2->c[1]-p0->c[1])
     + (p2->c[2]-p0->c[2])*(p2->c[2]-p0->c[2]);
 
+  if ( (!ll1old) || (!ll2old) ) return 0;
+
+  if ( ll1old < ll2old ) { //move towards p2
+    ip    = ip2;
+    isrid = isrid2;
+    it    = it2;
+  }
+  else {
+    ip    = ip1;
+    isrid = isrid1;
+    it    = it1;
+  }
+
+
   /* Third step : infer arc length of displacement, parameterized over edges */
-  if ( !MMGS_paramDisp ( mesh,it1,it2,ll1old,ll2old,isrid1,isrid2,
-                         ip0,ip1,ip2,step,o,&isrid ) ) {
+  if ( !MMGS_paramDisp ( mesh,it,isrid,ip0,ip,step,o) ) {
     return 0;
   }
 

@@ -458,7 +458,8 @@ int8_t MMG5_chkedg(MMG5_pMesh mesh,MMG5_Tria *pt,int8_t ori, double hmax,
         if(!((p[i1]->tag & MG_NOM) ||  MG_EDG(p[i1]->tag) ) ) {
           if ( !mmgWarn0 ) {
             fprintf(stderr,"\n  ## Warning: %s: a- at least 1 geometrical"
-                    " problem\n",__func__);
+                    " problem: non consistency between point tag (%d) and"
+                    " edge tag (%d).\n",__func__,p[i1]->tag,pt->tag[i]);
             mmgWarn0 = 1;
           }
           return -1;
@@ -480,7 +481,8 @@ int8_t MMG5_chkedg(MMG5_pMesh mesh,MMG5_Tria *pt,int8_t ori, double hmax,
         if(!((p[i2]->tag & MG_NOM) || MG_EDG(p[i2]->tag) ) ) {
           if ( !mmgWarn1 ) {
             fprintf(stderr,"\n  ## Warning: %s: b- at least 1 geometrical"
-                    " problem\n",__func__);
+                    " problem: non consistency between point tag (%d) and"
+                    " edge tag (%d).\n",__func__,p[i2]->tag,pt->tag[i]);
             mmgWarn1 = 1;
           }
           return -1;
@@ -1031,19 +1033,12 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
           if ( p0->tag > tag )  continue;
 
           isnm = ( tag & MG_NOM );
-          if ( isnm ) {
-            isnmint = ( p0->xp && mesh->xpoint[p0->xp].nnor );
-            if ( isnmint ) {
-              ilist = MMG5_chkcol_nomint(mesh,met,k,i,j,list,ilist,typchk);
-            }
-            else {
-              if ( mesh->adja[4*(k-1)+1+i] )  continue;
-              ilist = MMG5_chkcol_bdy(mesh,met,k,i,j,list,ilist,lists,ilists,refmin,refplus,typchk,isnm);
-            }
+          isnmint = ( tag & MG_NOM ) ? ( p0->xp && mesh->xpoint[p0->xp].nnor ) : 0;
+          if ( isnm && (!isnmint) ) {
+            /* Treat surfacic non manifold points from a surface triangle */
+            if ( mesh->adja[4*(k-1)+1+i] )  continue;
           }
-          else {
-            ilist = MMG5_chkcol_bdy(mesh,met,k,i,j,list,ilist,lists,ilists,0,0,typchk,isnm);
-          }
+          ilist = MMG5_chkcol_bdy(mesh,met,k,i,j,list,ilist,lists,ilists,refmin,refplus,typchk,isnm,isnmint);
         }
         /* internal face */
         else {

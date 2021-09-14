@@ -1201,23 +1201,23 @@ static int MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
     }
     switch (pt->flag) {
     case 1: case 2: case 4: case 8: case 16: case 32: /* 1 edge split */
-      ier = MMG5_split1(mesh,sol,k,vx,1);
+      ier = MMG5_split1(mesh,met,k,vx,1);
       ns++;
       break;
 
     case 48: case 24: case 40: case 6: case 34: case 36:
     case 20: case 5: case 17: case 9: case 3: case 10: /* 2 edges (same face) split */
-      ier = MMG5_split2sf(mesh,sol,k,vx,1);
+      ier = MMG5_split2sf(mesh,met,k,vx,1);
       ns++;
       break;
 
     case 7: case 25: case 42: case 52: /* 3 edges on conic configuration splitted */
-      ier = MMG5_split3cone(mesh,sol,k,vx,1);
+      ier = MMG5_split3cone(mesh,met,k,vx,1);
       ns++;
       break;
 
     case 30: case 45: case 51:
-      ier = MMG5_split4op(mesh,sol,k,vx,1);
+      ier = MMG5_split4op(mesh,met,k,vx,1);
       ns++;
       break;
 
@@ -1436,7 +1436,7 @@ int MMG5_chkmaniball(MMG5_pMesh mesh, int start, int8_t ip){
       k1 /= 4;
       pt1 = &mesh->tetra[k1];
 
-      if( pt1 ->ref != ref ) continue;
+      if( pt1->ref != ref ) continue;
 
       if( pt1->flag == base ) continue;
       pt1->flag = base;
@@ -1496,7 +1496,9 @@ int MMG5_chkmaniball(MMG5_pMesh mesh, int start, int8_t ip){
     pt = &mesh->tetra[k];
     if( pt->ref == ref ) {
       fprintf(stderr,"   *** Topological problem:");
-      fprintf(stderr," non manifold surface at point %d \n",nump);
+      fprintf(stderr," non manifold surface at point %d %d\n",nump, MMG3D_indPt(mesh,nump));
+      fprintf(stderr," non manifold surface at tet %d (ip %d)\n", MMG3D_indElt(mesh,start),ip);
+      fprintf(stderr,"nref (color %d) %d\n",nref,ref);
       return 0;
     }
   }

@@ -911,13 +911,13 @@ int MMG2D_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol met){
     switch( pt->flag ) {
       /* 1 edge split -> 0-+ */
       case 1: case 2: case 4:
-        ier = MMG2D_split1(mesh,sol,k,vx);
+        ier = MMG2D_split1(mesh,met,k,vx);
         ns++;
         break;
 
       /* 2 edge split -> +-- or -++ */
       case 3: case 5: case 6:
-        ier = MMG2D_split2(mesh,sol,k,vx);
+        ier = MMG2D_split2(mesh,met,k,vx);
         ns++;
         break;
 

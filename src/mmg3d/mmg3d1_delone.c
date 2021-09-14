@@ -457,7 +457,7 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
                                 list,&ilist,lists,&ilists,(p0->tag & MG_NOM)) < 0 )
           return -1;
 
-        ilist = MMG5_chkcol_bdy(mesh,met,k,i,j,list,ilist,lists,ilists,0,0,2,0);
+        ilist = MMG5_chkcol_bdy(mesh,met,k,i,j,list,ilist,lists,ilists,0,0,2,0,0);
         if ( ilist > 0 ) {
           ier = MMG5_colver(mesh,met,list,ilist,i2,2);
 
@@ -809,7 +809,7 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
                                 list,&ilist,lists,&ilists,(p0->tag & MG_NOM)) < 0 )
           return -1;
 
-        ilist = MMG5_chkcol_bdy(mesh,met,k,i,j,list,ilist,lists,ilists,0,0,2,0);
+        ilist = MMG5_chkcol_bdy(mesh,met,k,i,j,list,ilist,lists,ilists,0,0,2,0,0);
         if ( ilist > 0 ) {
           ier = MMG5_colver(mesh,met,list,ilist,i2,2);
           if ( ier < 0 ) return -1;

@@ -249,7 +249,7 @@ static int MMG5_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
                               list,&ilist,lists,&ilists,(p0->tag & MG_NOM)) < 0 )
         return -1;
 
-      ilist = MMG5_chkcol_bdy(mesh,met,k,i,j,list,ilist,lists,ilists,0,0,2,0);
+      ilist = MMG5_chkcol_bdy(mesh,met,k,i,j,list,ilist,lists,ilists,0,0,2,0,0);
     }
     /* Case of an internal face */
     else {
@@ -455,7 +455,7 @@ int MMG5_mmg3d1_pattern(MMG5_pMesh mesh,MMG5_pSol met,int *permNodGlob) {
 
   if ( abs(mesh->info.imprim) > 4 )
     fprintf(stdout,"  ** MESH ANALYSIS\n");
-  
+
   if ( mesh->info.iso && !MMG5_chkmani(mesh) ) {
     fprintf(stderr,"\n  ## Non orientable implicit surface. Exit program.\n");
     return 0;
@@ -496,7 +496,7 @@ int MMG5_mmg3d1_pattern(MMG5_pMesh mesh,MMG5_pSol met,int *permNodGlob) {
     MMG3D_gradsizreq(mesh,met);
   }
 
-  /*update quality*/
+  /* update quality*/
   if ( !MMG3D_tetraQual(mesh,met,1) ) return 0;
 
   if ( !MMG5_anatet(mesh,met,2,1) ) {
