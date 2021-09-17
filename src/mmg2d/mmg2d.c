@@ -50,8 +50,7 @@ static int MMG2D_usage(char *name) {
   MMG5_2d3dUsage();
 
   /* Specific parameters */
-  fprintf(stdout,"-3dMedit val read and write to gmsh visu if val = 1 (out) if val=2 (in and out)\n");
-
+  fprintf(stdout,"-3dMedit val read and write for gmsh visu: output only if val=1, input and output if val=2, input if val=3\n");
   fprintf(stdout,"\n");
 
   fprintf(stdout,"-nofem       do not force Mmg to create a finite element mesh \n");
