@@ -463,6 +463,12 @@ ADD_TEST(NAME mmg2d_LSMultiMat_val
   ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat
   ${CTEST_OUTPUT_DIR}/mmg2d_multi-mat-val.o.meshb
   )
+#multi-mat + opnbdy + non-manifold check
+ADD_TEST(NAME mmg2d_LSMultiMat_nm
+  COMMAND ${EXECUT_MMG2D} -v 5 -ls 3 -opnbdy -nr
+  ${MMG2D_CI_TESTS}/LSMultiMat/2d-opn.mesh
+  ${CTEST_OUTPUT_DIR}/mmg2d_2d-opn.o.meshb
+  )
 
 ####### -nsd
 ADD_TEST(NAME mmg2d_LSMultiMat-nsd22
