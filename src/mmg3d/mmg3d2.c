@@ -1495,10 +1495,10 @@ int MMG5_chkmaniball(MMG5_pMesh mesh, int start, int8_t ip){
     k = list[cur] / 4;
     pt = &mesh->tetra[k];
     if( pt->ref == ref ) {
-      fprintf(stderr,"   *** Topological problem:");
-      fprintf(stderr," non manifold surface at point %d %d\n",nump, MMG3D_indPt(mesh,nump));
-      fprintf(stderr," non manifold surface at tet %d (ip %d)\n", MMG3D_indElt(mesh,start),ip);
-      fprintf(stderr,"nref (color %d) %d\n",nref,ref);
+      fprintf(stderr,"   *** Topological problem\n");
+      fprintf(stderr,"       non manifold surface at point %d %d\n",nump, MMG3D_indPt(mesh,nump));
+      fprintf(stderr,"       non manifold surface at tet %d (ip %d)\n", MMG3D_indElt(mesh,start),ip);
+      fprintf(stderr,"       nref (color %d) %d\n",nref,ref);
       return 0;
     }
   }
