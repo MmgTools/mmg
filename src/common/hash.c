@@ -189,7 +189,7 @@ int MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, MMG5_Hash *hash, int chkISO) {
    *     boundary (!MG_PARBDY || (MG_PARBDY && MG_PARBDYBDY) and a parallel one
    *     (MG_PARBDY && !MG_PARBDYBDY);
    *   - add also a MG_PARBDYBDY tag on those edges (as it cannot be inherited
-   *     from any triangle there).
+   *     from any triangle there) and their extremities.
    */
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
@@ -212,12 +212,16 @@ int MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, MMG5_Hash *hash, int chkISO) {
           j   = ph->k % 3;
           pt1 = &mesh->tria[jel];
           pt1->tag[j] |= MG_BDY + MG_PARBDYBDY;
+          mesh->point[ia].tag |= MG_PARBDYBDY;
+          mesh->point[ib].tag |= MG_PARBDYBDY;
           /* update adjacent */
           lel = adjt[3*(jel-1)+1+j]/3;
           l   = adjt[3*(jel-1)+1+j]%3;
           if( lel ) {
             pt2 = &mesh->tria[lel];
             pt2->tag[l] |= MG_BDY + MG_PARBDYBDY;
+            mesh->point[ia].tag |= MG_PARBDYBDY;
+            mesh->point[ib].tag |= MG_PARBDYBDY;
           }
           break;
         } else if ( !ph->nxt ) {
