@@ -1566,7 +1566,7 @@ int MMG5_srcbdy(MMG5_pMesh mesh,int start,int ia) {
  void MMG5_coquilFaceErrorMessage(MMG5_pMesh mesh, int k1, int k2) {
   MMG5_pTetra pt;
   int         kel1, kel2;
-  static int8_t mmgErr0;
+  static int8_t mmgErr0 = 0;
 
   if ( mmgErr0 ) return;
 
@@ -1625,7 +1625,7 @@ int MMG5_srcbdy(MMG5_pMesh mesh,int start,int ia) {
  * (to fill).
  * \param adj pointer toward the adjacent to treat in the shell (to update)
  * \param hasadja pointer toward 0 if we don't have adja through iface,
- * 0 otherwise (to fill)
+ * 1 otherwise (to fill)
  * \param nbdy pointer toward the number of boundaries found minus 1 (to update)
  * \param silent if 1, print error message for more than 2 boundary triangles
  * in the shell
@@ -1667,7 +1667,7 @@ int MMG3D_coquilFaceFirstLoop(MMG5_pMesh mesh,int start,int na,int nb,int8_t ifa
 
 #ifndef NDEBUG
   pxt = &mesh->xtetra[pt->xt];
-  assert ( pxt->ftag[iface] );
+  assert ( MG_BDY & pxt->ftag[iface] );
 #endif
 
   (*it1) = 4*start + iface;
@@ -1706,12 +1706,18 @@ int MMG3D_coquilFaceFirstLoop(MMG5_pMesh mesh,int start,int na,int nb,int8_t ifa
 
     if ( !(*it2) ) {
       *it2 = 4*pradj+iface;
+      (*nbdy)++;
     }
     else {
       (*nbdy)++;
     }
 
   } while ( (*adj) && ((*adj) != start) );
+
+  if ( (*adj) != start ) {
+    /* The starting boundary face has not been counted (open shell) */
+    ++(*nbdy);
+  }
 
   return 1;
 }
@@ -1760,7 +1766,7 @@ void MMG3D_coquilFaceSecondLoopInit(MMG5_pMesh mesh,int piv,int8_t *iface,
     (*iface) = MMG5_ifar[(*ia)][0];
   }
 
-  assert ( pxt->ftag[(*iface)] );
+  assert ( pxt->ftag[(*iface)] & MG_BDY );
 
   *it1 = 4*(*pradj) + (*iface);
 
@@ -1818,10 +1824,12 @@ int MMG5_coquilface(MMG5_pMesh mesh,int start,int8_t iface,int ia,int *list,
       return -1;
     }
 
-    if ( !nbdy ) {
-      MMG5_coquilFaceErrorMessage(mesh, (*it1)/4, (*it2)/4);
-      return -1;
-    } else if ( nbdy > 1 ) {
+    if ( nbdy != 2 ) {
+      if ( nbdy < 2 ) {
+        MMG5_coquilFaceErrorMessage(mesh, (*it1)/4, (*it2)/4);
+        return -1;
+      }
+
       if ( !silent ) {
         if ( !mmgWarn0 ) {
           // Algiane: for a manifold edge 2 cases :
@@ -1829,10 +1837,14 @@ int MMG5_coquilface(MMG5_pMesh mesh,int start,int8_t iface,int ia,int *list,
           // (highly non-manifold)
           // 2) we have a non-manifold shape immersed in a domain (3 triangles
           // sharing the edge and a closed shell)
-          printf("  ## Warning: %s: you have %d boundaries in the shell"
-                 " of a manifold edge.\n",__func__,nbdy+1);
+          printf("  ## Warning: %s: you have %d boundary triangles in the close shell"
+                 " of a manifold edge.\n",__func__,nbdy);
           printf("  Problem may occur during remesh process.\n");
           mmgWarn0 = 1;
+
+          /* MMG5_coquilface is called only on edges marked as manifold, check this */
+          assert ( pt->xt );
+          assert ( !(mesh->xtetra[pt->xt].tag[ia] & MG_NOM) );
         }
       }
     }

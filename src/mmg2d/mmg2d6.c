@@ -473,7 +473,8 @@ int MMG2D_chkmaniball(MMG5_pMesh mesh, int start, int8_t istart) {
   return 1;
 }
 
-/* Check whether the resulting two subdomains occupying mesh are manifold */
+/* Check whether the resulting two subdomains coming from isovalue
+ * discretization are manifold */
 int MMG2D_chkmanimesh(MMG5_pMesh mesh) {
   MMG5_pTria      pt,pt1;
   int             *adja,k,cnt,iel;
@@ -505,13 +506,12 @@ int MMG2D_chkmanimesh(MMG5_pMesh mesh) {
         fprintf(stderr,"\n  ## Warning: %s: at least 1 triangle with 3 boundary"
                 " edges.\n",__func__);
       }
-      /* return 0; */
     }
   }
 
-  /* Second check: check whether the configuration is manifold in the ball of each point;
-     each vertex on the implicit boundary is caught in such a way that i1 inxt[i1] is one edge of the implicit
-     boundary */
+  /* Second check: check whether the configuration is manifold in the ball of
+     each point; each vertex on the implicit boundary is caught in such a way
+     that i1 inxt[i1] is one edge of the implicit boundary */
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) ) continue;
@@ -522,10 +522,15 @@ int MMG2D_chkmanimesh(MMG5_pMesh mesh) {
 
       if (! iel ) continue;
       pt1 = &mesh->tria[iel];
-      if ( pt->ref == pt1->ref ) continue;
+      if ( pt->ref == pt1->ref || pt->edg[i]!= MG_ISO ) continue;
 
       i1 = MMG5_inxt2[i];
-      if ( !MMG2D_chkmaniball(mesh,k,i1) ) return 0;
+      if ( !MMG2D_chkmaniball(mesh,k,i1) ) {
+        fprintf(stderr,"   *** Topological problem\n");
+        fprintf(stderr,"       non manifold curve at point %d %d\n",pt->v[i1], MMG2D_indPt(mesh,pt->v[i1]));
+        fprintf(stderr,"       non manifold curve at tria %d (ip %d)\n", MMG2D_indElt(mesh,k),i1);
+        return 0;
+      }
     }
   }
 
