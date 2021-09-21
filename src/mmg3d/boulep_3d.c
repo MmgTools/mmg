@@ -1667,7 +1667,7 @@ int MMG3D_coquilFaceFirstLoop(MMG5_pMesh mesh,int start,int na,int nb,int8_t ifa
 
 #ifndef NDEBUG
   pxt = &mesh->xtetra[pt->xt];
-  assert ( pxt->ftag[iface] );
+  assert ( MG_BDY & pxt->ftag[iface] );
 #endif
 
   (*it1) = 4*start + iface;
@@ -1766,7 +1766,7 @@ void MMG3D_coquilFaceSecondLoopInit(MMG5_pMesh mesh,int piv,int8_t *iface,
     (*iface) = MMG5_ifar[(*ia)][0];
   }
 
-  assert ( pxt->ftag[(*iface)] );
+  assert ( pxt->ftag[(*iface)] & MG_BDY );
 
   *it1 = 4*(*pradj) + (*iface);
 
