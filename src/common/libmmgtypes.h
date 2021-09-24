@@ -468,6 +468,17 @@ typedef struct {
 typedef MMG5_Mat * MMG5_pMat;
 
 /**
+ * \struct MMG5_InvMat
+ * \brief To store lookup table for references in the mesh (useful in LS mode)
+ */
+typedef struct {
+  int offset;
+  int size;
+  int *lookup;
+} MMG5_InvMat;
+typedef MMG5_InvMat * MMG5_pInvMat;
+
+/**
  * \struct MMG5_Info
  * \brief Store input parameters of the run.
  */
@@ -500,6 +511,7 @@ typedef struct {
   uint8_t optim, optimLES, noinsert, noswap, nomove, nosurf, nosizreq;
   uint8_t metRidTyp; /*!< 0 for a classical storage of the aniso metric at ridge, 1 for the Mmg storage (modified by defsiz) */
   MMG5_pMat     mat;
+  MMG5_InvMat   invmat;
 } MMG5_Info;
 
 /**
