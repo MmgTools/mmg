@@ -1162,7 +1162,8 @@ int MMG3D_settag_oneDir(MMG5_pMesh  mesh,int start, int na, int nb,
         pxt->tag[i] |= tag;
         /* Remove the potential nosurf tag if initially the edge is
          * really required */
-        if ( (taginit & MG_REQ) && ( (!(taginit & MG_NOSURF)) || !(tag & MG_NOSURF) ) ) {
+        if ( ((taginit & MG_REQ) && !(taginit & MG_NOSURF)) ||
+             ((    tag & MG_REQ) && !(    tag & MG_NOSURF)) ) {
           pxt->tag[i] &= ~MG_NOSURF;
         }
         pxt->edg[i]  = MG_MAX(pxt->edg[i],edg);
@@ -1220,7 +1221,8 @@ int MMG5_settag(MMG5_pMesh mesh,int start,int ia,int16_t tag,int edg) {
       pxt->tag[ia] |= tag;
       /* Remove the potential nosurf tag if initially the edge is
        * really required */
-      if ( (taginit & MG_REQ) && ( (!(taginit & MG_NOSURF)) || !(tag & MG_NOSURF) ) ) {
+      if ( ((taginit & MG_REQ) && !(taginit & MG_NOSURF)) ||
+           ((    tag & MG_REQ) && !(    tag & MG_NOSURF)) ) {
         pxt->tag[ia] &= ~MG_NOSURF;
       }
       pxt->edg[ia]  = MG_MAX(pxt->edg[ia],edg);
@@ -1837,7 +1839,7 @@ int MMG5_coquilface(MMG5_pMesh mesh,int start,int8_t iface,int ia,int *list,
           // (highly non-manifold)
           // 2) we have a non-manifold shape immersed in a domain (3 triangles
           // sharing the edge and a closed shell)
-          printf("  ## Warning: %s: you have %d boundary triangles in the close shell"
+          printf("  ## Warning: %s: you have %d boundary triangles in the closed shell"
                  " of a manifold edge.\n",__func__,nbdy);
           printf("  Problem may occur during remesh process.\n");
           mmgWarn0 = 1;
