@@ -146,7 +146,7 @@ int MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
   int           vois[4],iadrold;
   short         i1;
   char          alert;
-  int           isused = 0,ixt,ielnum[3*MMG3D_LONMAX+1],ll;
+  int           isused = 0,ixt,ielnum[3*MMG3D_LONMAX+1];
   MMG5_Hash    hedg;
 #ifndef NDEBUG
   int tref;
@@ -212,10 +212,6 @@ int MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
       MMG3D_TETRA_REALLOC(mesh,ielnum[k],mesh->gap,
                           fprintf(stderr,"\n  ## Error: %s: unable to allocate a"
                                   " new element.\n",__func__);
-                          for(ll=1 ; ll<k ; ll++) {
-                            mesh->tetra[ielnum[ll]].v[0] = 1;
-                            if ( !MMG3D_delElt(mesh,ielnum[ll]) )  return -1;
-                          }
                           return -1);
     }
   }

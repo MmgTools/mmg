@@ -370,7 +370,7 @@ int MMG5_gradsizreq_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pPoint       p1,p2;
   double            hgrad,ll,h1,h2,hn,ux,uy;
   int               k,it,ip1,ip2,ipmaster,ipslave,maxit,nup,nu;
-  unsigned char     i,i1,i2;
+  uint8_t           i,i1,i2;
 
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {

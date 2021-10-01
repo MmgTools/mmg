@@ -163,7 +163,7 @@ FOREACH(EXEC ${LISTEXEC_MMG})
  ADD_TEST(NAME mmg_LeakCheck_AbnormalEnd7_${SHRT_EXEC}
    COMMAND ${EXEC} -v 5 ${common_args}
    ${MMG_CI_TESTS}/LeakCheck_AbnormalEnd7/d
-   -out ${CTEST_OUTPUT_DIR}/AbnormalEnd7/unwrittable.meshb)
+   -out ${CTEST_OUTPUT_DIR}/unwrittable7.meshb)
  SET(passRegex "\\*\\* UNABLE TO OPEN.*")
  SET_PROPERTY(TEST mmg_LeakCheck_AbnormalEnd7_${SHRT_EXEC}
    PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}")
@@ -171,7 +171,7 @@ FOREACH(EXEC ${LISTEXEC_MMG})
  ADD_TEST(NAME mmg_LeakCheck_AbnormalEnd8_${SHRT_EXEC}
    COMMAND ${EXEC} -v 5 ${common_args}
    ${MMG_CI_TESTS}/LeakCheck_AbnormalEnd8/d
-   -out ${CTEST_OUTPUT_DIR}/AbnormalEnd8/unwrittable.meshb)
+   -out ${CTEST_OUTPUT_DIR}/unwrittable8.meshb)
  SET(passRegex "\\*\\* UNABLE TO OPEN.*.sol")
  SET_PROPERTY(TEST mmg_LeakCheck_AbnormalEnd8_${SHRT_EXEC}
    PROPERTY PASS_REGULAR_EXPRESSION "${passRegex}")

@@ -55,6 +55,8 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   int            k,iel,kel,nump,nbeg,nend;
   int8_t         i0,i1,i2,ier;
   static int     warn=0;
+  static int8_t  mmgErr0=0,mmgErr1=0;
+
   step = 0.1;
 
   /* Make sure ball of point is closed */
@@ -104,7 +106,7 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   }
 
   /* At this point : gv = - gradient of V = direction to follow */
-  /* Step 3 : locate new point in the ball, and compute its barycentric coordinates */
+  /** Step 3 : locate new point in the ball, and compute its barycentric coordinates */
   area = lispoi[1]*gv[1] - lispoi[2]*gv[0];
   kel = 0;
   if ( area >= 0.0 ) {
@@ -152,13 +154,20 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   lambda[2]*= (area);
   lambda[0] = 1.0 - lambda[1] - lambda[2];
 
-  /* Step 4 : come back to original problem, and compute patch in triangle iel */
+  /** Step 4 : come back to original problem, and compute patch in triangle iel */
   iel = list[kel] / 3;
   i0  = list[kel] % 3;
   pt  = &mesh->tria[iel];
 
   ier = MMG5_bezierCP(mesh,pt,&pb,1);
-  assert(ier);
+  if ( !ier ) {
+    if( !mmgErr0 ) {
+      mmgErr0 = 1;
+      fprintf(stderr,"\n  ## Warning: %s: function MMG5_bezierCP return 0.\n",
+              __func__);
+    }
+    return 0;
+  }
 
   /* Now, for Bezier interpolation, one should identify which of i,i1,i2 is 0,1,2
      recall uv[0] = barycentric coord associated to pt->v[1], uv[1] associated to pt->v[2] */
@@ -176,7 +185,14 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   }
 
   ier = MMGS_bezierInt(&pb,uv,o,no,to);
-  assert(ier);
+  if ( !ier ) {
+    if( !mmgErr1 ) {
+      mmgErr1 = 1;
+      fprintf(stderr,"  ## Warning: %s: function MMGS_bezierInt return 0.\n",
+              __func__);
+    }
+    return 0;
+  }
 
   /* Second test : check whether geometric approximation has not been too much degraded */
   ppt0 = &mesh->point[0];
@@ -239,7 +255,7 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   double        *m0,*m00,step,l1old,l2old,ll1old,ll2old;
   double        lam0,lam1,lam2,o[3],nn1[3],nn2[3],to[3],mo[6];
   double        l1new,l2new,calold,calnew;
-  int           it1,it2,ip0,ip1,ip2,k,iel;
+  int           it,it1,it2,ip,ip0,ip1,ip2,k,iel;
   int8_t        voy1,voy2,isrid,isrid1,isrid2,i0,i1,i2;
   static int8_t mmgWarn0 = 0;
 
@@ -324,12 +340,19 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
 
   if ( (!l1old) || (!l2old) ) return 0;
 
-  ll1old = l1old*l1old;
-  ll2old = l2old*l2old;
+  if ( l1old < l2old ) { //move towards p2
+    ip    = ip2;
+    isrid = isrid2;
+    it    = it2;
+  }
+  else {
+    ip    = ip1;
+    isrid = isrid1;
+    it    = it1;
+  }
 
   /* Third step : infer arc length of displacement, parameterized over edges */
-  if ( !MMGS_paramDisp ( mesh,it1,it2,l1old,l2old,isrid1,isrid2,
-                         ip0,ip1,ip2,step,o,&isrid ) ) {
+  if ( !MMGS_paramDisp ( mesh,it,isrid,ip0,ip,step,o) ) {
     return 0;
   }
 
@@ -340,6 +363,9 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   lam2 = step*step;
 
   /* Move is made towards p2 */
+  ll1old = l1old*l1old;
+  ll2old = l2old*l2old;
+
   if ( l2old > l1old ) {
     if ( !MMGS_moveTowardPoint(mesh,p0,p2,ll2old,lam0,lam1,lam2,nn1,nn2,to) ) {
       return 0;

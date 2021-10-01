@@ -70,8 +70,9 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
       return 0;
     }
   }
-  if ( mesh->info.imprim >= 0 )
+  if ( mesh->info.imprim >= 0 ) {
     fprintf(stdout,"  %%%% %s OPENED\n",data);
+  }
   MMG5_SAFE_FREE(data);
 
   if (!bin) {
@@ -88,7 +89,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
       }
       else if(!strncmp(chaine,"Dimension",strlen("Dimension"))) {
         MMG_FSCANF(inm,"%d",&mesh->dim);
-        if(mesh->info.renum==2) {
+        if ( mesh->info.renum >= 2) {
           if(mesh->dim!=3) {
             fprintf(stdout,"WRONG USE OF 3dMedit option \n");
             return 0;
@@ -267,9 +268,6 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
 
   }
 
-  if ( abs(mesh->info.imprim) > 5 )
-    fprintf(stdout,"  -- READING DATA FILE %s\n",data);
-
   if ( !mesh->np  ) {
     fprintf(stdout,"  ** MISSING DATA : no point\n");
     return -1;
@@ -293,7 +291,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
     ppt = &mesh->point[k];
     if (mesh->ver < 2) { /*float*/
       if (!bin) {
-        if(mesh->info.renum==2) {
+        if ( mesh->info.renum >=2 ) {
           for (i=0 ; i<3 ; i++) {
             MMG_FSCANF(inm,"%f",&fc);
             if(i==2) break;
@@ -307,7 +305,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
         }
         MMG_FSCANF(inm,"%d",&ppt->ref);
       } else {
-        if(mesh->info.renum==2) {
+        if ( mesh->info.renum >= 2 ) {
           fprintf(stderr,"  ## Warning: %s: binary not available with"
                   " -msh option.\n",__func__);
           return 0;
@@ -322,7 +320,7 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
       }
     } else {
       if (!bin) {
-        if(mesh->info.renum==2) {
+        if ( mesh->info.renum >= 2 ) {
           MMG_FSCANF(inm,"%lf %lf %lf %d",&ppt->c[0],&ppt->c[1],&dtmp,&ppt->ref);
         } else {
           MMG_FSCANF(inm,"%lf %lf %d",&ppt->c[0],&ppt->c[1],&ppt->ref);
@@ -822,7 +820,7 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 
   /** Read the file header */
   meshDim = 2;
-  if ( mesh->info.renum == 2 ) {
+  if ( mesh->info.renum >= 2 ) {
     /* -msh mode */
     meshDim = 3;
   }
@@ -851,7 +849,10 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   }
 
   ier = MMG5_chkMetricType(mesh,type,inm);
-  if ( ier <1 ) return ier;
+  if ( ier < 1 ) {
+    MMG5_SAFE_FREE(type);
+    return ier;
+  }
 
   /* Allocate and store the header informations for each solution */
   if ( !MMG2D_Set_solSize(mesh,sol,MMG5_Vertex,mesh->np,type[0]) ) {
@@ -909,7 +910,7 @@ int MMG2D_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
 
   /** Read the file header */
   meshDim = 2;
-  if ( mesh->info.renum == 2 ) {
+  if ( mesh->info.renum >= 2 ) {
     /* -msh mode */
     meshDim = 3;
   }
@@ -1010,8 +1011,10 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
   MMG5_pQuad        pq;
   double            dblb;
   int               k,ne,np,nc,nreq,nereq,nedreq,nq,nqreq,ref;
-  int               bin, binch, bpos;
+  int               bin, binch, bpos,gmsh;
   char              *ptr,*data,chaine[MMG5_FILESTR_LGTH];
+
+  gmsh = (mesh->info.renum==1||mesh->info.renum==2);
 
   mesh->ver = 2;
   bin = 0;
@@ -1054,7 +1057,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
   if ( !bin ) {
     strcpy(&chaine[0],"MeshVersionFormatted 2\n");
     fprintf(inm,"%s",chaine);
-    if(mesh->info.renum) {
+    if ( gmsh ) {
       strcpy(&chaine[0],"\n\nDimension 3\n");
     }
     else {
@@ -1072,7 +1075,9 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
     fwrite(&binch,MMG5_SW,1,inm);
     bpos = 20; //Pos
     fwrite(&bpos,MMG5_SW,1,inm);
-    if(mesh->info.renum) binch = 3; //Dimension
+    if ( gmsh ) {
+      binch = 3; //Dimension
+    }
     else binch = 2;
     fwrite(&binch,MMG5_SW,1,inm);
   }
@@ -1093,7 +1098,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
   else {
     binch = 4; //Vertices
     fwrite(&binch,MMG5_SW,1,inm);
-    if ( mesh->info.renum )
+    if ( gmsh )
       bpos += (3+(1+3*mesh->ver)*np)*MMG5_SW; //NullPos
     else
       bpos += (3+(1+2*mesh->ver)*np)*MMG5_SW; //NullPos
@@ -1107,7 +1112,7 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
     ppt = &mesh->point[k];
     if ( MG_VOK(ppt) ) {
       ref = ppt->ref;
-      if ( mesh->info.renum ) {
+      if ( gmsh ) {
         if ( !bin )
           fprintf(inm,"%.15lg %.15lg 0 %d\n",ppt->c[0],ppt->c[1],ref);
         else {
@@ -1446,23 +1451,61 @@ int MMG2D_saveMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * \param inm pointer toward the solution file
  * \param bin 1 if binary file
  * \param index of the writted solution
+ * \param gmsh write in 3D (for gmsh) if 1
  *
  * Write the solution value for vertex of index pos in double precision.
  *
  */
 static inline
-void MMG2D_writeDoubleSol(MMG5_pSol sol,FILE *inm,int bin,int pos) {
+void MMG2D_writeDoubleSol(MMG5_pSol sol,FILE *inm,int bin,int pos,int gmsh) {
   int          i,isol;
 
   isol = pos * sol->size;
 
-  if ( !bin ) {
-    for (i=0; i<sol->size; i++)
-      fprintf(inm," %.15lg",sol->m[isol + i]);
+  if ( gmsh ) {
+    if ( !bin ) {
+      switch ( sol->size ) {
+      case 1:
+        fprintf(inm," %.15lg",sol->m[isol]);
+        break;
+      case 2:
+        fprintf(inm," %.15lg %.15lg 0",sol->m[isol],sol->m[isol+1]);
+        break;
+      case 3:
+        fprintf(inm," %.15lg %.15lg %.15lg 0 0 1",sol->m[isol],sol->m[isol+1],sol->m[isol+2]);
+        break;
+      }
+    }
+    else {
+      double dbuf = 0.;
+
+      switch ( sol->size ) {
+      case 1:
+        fwrite(&sol->m[isol],MMG5_SD,1,inm);
+        break;
+      case 2:
+        fwrite(&sol->m[isol],MMG5_SD,2,inm);
+        fwrite(&dbuf,MMG5_SD,1,inm);
+        break;
+      case 3:
+        fwrite(&sol->m[isol],MMG5_SD,3,inm);
+        fwrite(&dbuf,MMG5_SD,1,inm);
+        fwrite(&dbuf,MMG5_SD,1,inm);
+        dbuf = 1.;
+        fwrite(&dbuf,MMG5_SD,1,inm);
+        break;
+      }
+    }
   }
   else {
-    for (i=0; i<sol->size; i++)
-      fwrite(&sol->m[isol + i],MMG5_SD,1,inm);
+    if ( !bin ) {
+      for (i=0; i<sol->size; i++)
+        fprintf(inm," %.15lg",sol->m[isol + i]);
+    }
+    else {
+      for (i=0; i<sol->size; i++)
+        fwrite(&sol->m[isol + i],MMG5_SD,1,inm);
+    }
   }
 }
 
@@ -1480,7 +1523,7 @@ int MMG2D_saveSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   FILE*        inm;
   MMG5_pPoint  ppt;
   int          k,ier;
-  int          binch,bin,dim;
+  int          binch,bin,bpos,dim,gmsh;
 
   if ( !sol->np )  return 1;
 
@@ -1490,18 +1533,20 @@ int MMG2D_saveSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
     return 1;
   }
 
+  gmsh = (mesh->info.renum==1||mesh->info.renum==2);
 
   sol->ver = 2;
 
-  if ( sol->dim==2 && mesh->info.renum ) {
+  if ( sol->dim==2 && gmsh ) {
     dim = 3;
   }
   else {
     dim = 2;
   }
 
-  ier = MMG5_saveSolHeader( mesh,filename,&inm,sol->ver,&bin,mesh->np,dim,
-                            1,&sol->type,&sol->size);
+  bpos = 0;
+  ier = MMG5_saveSolHeader( mesh,filename,&inm,sol->ver,&bin,&bpos,mesh->np,dim,
+                            1,&sol->entities,&sol->type,&sol->size);
 
   if ( ier < 1 ) return ier;
 
@@ -1509,7 +1554,7 @@ int MMG2D_saveSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
     ppt = &mesh->point[k];
     if ( !MG_VOK(ppt) )  continue;
 
-    MMG2D_writeDoubleSol(sol,inm,bin,k);
+    MMG2D_writeDoubleSol(sol,inm,bin,k,gmsh);
     fprintf(inm,"\n");
   }
 
@@ -1540,26 +1585,53 @@ int MMG2D_saveAllSols(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename) {
   MMG5_pPoint  ppt;
   MMG5_pSol    psl;
   int          j,k,ier;
-  int          binch,bin;
-  int          *type,*size;
+  int          binch,bin,bpos,npointSols,ncellSols;
+  int          *type,*size,*entities,gmsh,dim;
 
 
   if ( !(*sol)[0].np )  return 1;
 
   MMG5_SAFE_CALLOC(type,mesh->nsols,int,return 0);
   MMG5_SAFE_CALLOC(size,mesh->nsols,int,MMG5_SAFE_FREE(type);return 0);
+  MMG5_SAFE_CALLOC(entities,mesh->nsols,int,
+                   MMG5_SAFE_FREE(type);MMG5_SAFE_FREE(size);return 0);
+
+  npointSols = 0;
+  ncellSols = 0;
+
+  gmsh = (mesh->info.renum==1||mesh->info.renum==2);
+
+  if ( gmsh ) {
+    dim = 3;
+  }
+  else {
+    dim = 2;
+  }
 
   for (k=0; k<mesh->nsols; ++k ) {
     (*sol)[k].ver = 2;
+
+    if ( ((*sol)[k].entities==MMG5_Noentity) || ((*sol)[k].entities==MMG5_Vertex) ) {
+      ++npointSols;
+    }
+    else if ( (*sol)[k].entities == MMG5_Triangle ) {
+      ++ncellSols;
+    }
+    else {
+      printf("\n  ## Warning: %s: unexpected entity type for solution %d: %s."
+             "\n Ignored.\n",
+             __func__,k,MMG5_Get_entitiesName((*sol)[k].entities));
+    }
+
     type[k]     = (*sol)[k].type;
     size[k]     = (*sol)[k].size;
+    entities[k] = (*sol)[k].entities;
   }
 
-  ier = MMG5_saveSolHeader( mesh,filename,&inm,(*sol)[0].ver,&bin,mesh->np,
-                            (*sol)[0].dim,mesh->nsols,type,size);
+  bpos = 0;
+  ier = MMG5_saveSolHeader( mesh,filename,&inm,(*sol)[0].ver,&bin,&bpos,mesh->np,
+                            dim,mesh->nsols,entities,type,size);
 
-  MMG5_SAFE_FREE(type);
-  MMG5_SAFE_FREE(size);
 
   if ( ier < 1 ) return ier;
 
@@ -1569,10 +1641,33 @@ int MMG2D_saveAllSols(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename) {
 
     for ( j=0; j<mesh->nsols; ++j ) {
       psl = *sol + j;
-      MMG2D_writeDoubleSol(psl,inm,bin,k);
+
+      if ( (psl->entities==MMG5_Noentity) || (psl->entities==MMG5_Vertex) ) {
+        MMG2D_writeDoubleSol(psl,inm,bin,k,gmsh);
+      }
     }
     fprintf(inm,"\n");
   }
+
+  MMG5_saveSolAtTrianglesHeader( mesh,inm,(*sol)[0].ver,bin,&bpos,mesh->nsols,
+                                 ncellSols,entities,type,size );
+
+  for (k=1; k<=mesh->nt; k++) {
+    MMG5_pTria ptt = &mesh->tria[k];
+    if ( !MG_EOK(ptt) )  continue;
+
+    for ( j=0; j<mesh->nsols; ++j ) {
+      psl = *sol + j;
+      if ( psl->entities==MMG5_Triangle ) {
+        MMG2D_writeDoubleSol(psl,inm,bin,k,gmsh);
+      }
+    }
+    fprintf(inm,"\n");
+  }
+
+  MMG5_SAFE_FREE(type);
+  MMG5_SAFE_FREE(size);
+  MMG5_SAFE_FREE(entities);
 
   /* End file */
   if ( !bin ) {
@@ -1998,6 +2093,28 @@ int MMG2D_saveNeigh(MMG5_pMesh mesh,const char *filename) {
   return 1;
 }
 
+static inline
+int MMG2D_saveEdge(MMG5_pMesh mesh,const char *filename) {
+  int ier,nb_edges;
+
+  ier = MMG5_saveEdge(mesh,filename,".poly");
+  if ( !ier ) {
+    printf("\n  ## Error: %s: unable to save boundary edges\n.",__func__);
+    return 0;
+  }
+
+  nb_edges = 0;
+  ier = MMG2D_Get_numberOfNonBdyEdges( mesh, &nb_edges);
+  if ( !ier ) {
+    printf("\n  ## Error: %s: unable to count and append internal edges\n.",__func__);
+    return 0;
+  }
+
+  ier = MMG5_saveEdge(mesh,filename,".edge");
+  return ier;
+}
+
+
 int MMG2D_saveTetgenMesh(MMG5_pMesh mesh,const char *filename) {
 
   if ( !MMG5_saveNode(mesh,filename) ) {
@@ -2008,7 +2125,7 @@ int MMG2D_saveTetgenMesh(MMG5_pMesh mesh,const char *filename) {
     return 0;
   }
 
-  if ( !MMG5_saveEdge(mesh,filename) ) {
+  if ( !MMG2D_saveEdge(mesh,filename) ) {
     return 0;
   }
 

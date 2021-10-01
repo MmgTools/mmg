@@ -449,10 +449,14 @@ static int movtri(MMG5_pMesh mesh,MMG5_pSol met,int maxit) {
 
         if ( MG_EDG(ppt->tag) ) {
           ier = movridpt(mesh,met,list,ilist);
-          if ( ier )  ns++;
+          if ( ier ) {
+            ns++;
+          }
         }
-        else
+        else {
           ier = movintpt(mesh,met,list,ilist);
+        }
+
         if ( ier ) {
           nm++;
           ppt->flag = base;
@@ -747,6 +751,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
 
   it = 1;
   nc = 0;
+  j  = 0; // To remove maybe-uninitialized warning on arm
   do {
     ni = 0;
     for (k=1; k<=mesh->nt; k++) {
@@ -895,11 +900,11 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
 int chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,int i) {
   MMG5_pTria    pt,pt1;
   MMG5_pPoint   ppt;
-  MMG5_pxPoint    go;
+  MMG5_pxPoint  go;
   MMG5_Bezier   b;
-  double   s,uv[2],o[3],no[3],to[3];
-  int     *adja,jel,ip,ier;
-  int8_t   i1,i2,j,jj,j2;
+  double        s,uv[2],o[3],no[3],to[3];
+  int           *adja,jel,ip,ier;
+  int8_t        i1,i2,j,jj,j2;
 
   if ( mesh->xp > mesh->xpmax-2 )  return 0;
   pt = &mesh->tria[k];
@@ -917,7 +922,7 @@ int chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,int i) {
   }
 
   ier = MMG5_bezierCP(mesh,pt,&b,1);
-  assert(ier);
+  assert ( ier );
 
   /* create midedge point */
   uv[0] = 0.5;
@@ -946,7 +951,8 @@ int chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,int i) {
   }
   s = 0.5;
 
-  if ( !intmet(mesh,met,k,i,ip,s) ) return 0;
+  ier = intmet(mesh,met,k,i,ip,s);
+  if ( !ier ) return 0;
 
   return ip;
 }

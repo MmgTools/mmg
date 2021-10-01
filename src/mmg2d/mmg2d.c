@@ -50,10 +50,10 @@ static int MMG2D_usage(char *name) {
   MMG5_2d3dUsage();
 
   /* Specific parameters */
-  fprintf(stdout,"-3dMedit val read and write to gmsh visu if val = 1 (out) if val=2 (in and out)\n");
-
+  fprintf(stdout,"-3dMedit val read and write for gmsh visu: output only if val=1, input and output if val=2, input if val=3\n");
   fprintf(stdout,"\n");
 
+  fprintf(stdout,"-nofem       do not force Mmg to create a finite element mesh \n");
   fprintf(stdout,"-nosurf      no surface modifications\n");
 
   /* Common parameters (second section) */
@@ -61,22 +61,6 @@ static int MMG2D_usage(char *name) {
 
   /* Common options for advanced users */
   MMG5_advancedUsage();
-
-  fprintf(stdout,"\n\n");
-
-  return 1;
-}
-
-/**
- * \param mesh pointer toward the mesh structure.
- * \return 0 if fail, 1 if success.
- *
- * Print the default parameters values.
- *
- */
-static inline int MMG5_defaultValues(MMG5_pMesh mesh) {
-
-  MMG5_mmgDefaultValues(mesh);
 
   fprintf(stdout,"\n\n");
 
@@ -330,7 +314,7 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
   /* First step: search if user want to see the default parameters values. */
   for ( i=1; i< argc; ++i ) {
     if ( !strcmp(argv[i],"-val") ) {
-      MMG5_defaultValues(mesh);
+      MMG2D_defaultValues(mesh);
       return 0;
     }
   }
@@ -472,6 +456,10 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
         }
         break;
       case 'n':
+        if ( !strcmp(argv[i],"-nofem") ) {
+          if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_nofem,1) )
+            return 0;
+        }
         if ( !strcmp(argv[i],"-nreg") ) {
           if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_nreg,1) )
             return 0;

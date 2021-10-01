@@ -45,8 +45,9 @@ int MMG2D_anatri(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
 
   /* Main routine; intertwine split, collapse and swaps */
   do {
-    if ( typchk == 2 && it == 0 )  mesh->info.fem = 1;
-
+    if ( typchk == 2 && it == 0 ) {
+// #warning Luca: check consistency with 3D
+    }
     if ( !mesh->info.noinsert ) {
       /* Memory free */
       MMG5_DEL_MEM(mesh,mesh->adja);

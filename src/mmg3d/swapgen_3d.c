@@ -146,13 +146,17 @@ int MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,
     ier = 1;
 
     if ( mesh->info.fem ) {
+      /* Do not create internal edges between boundary points */
       p0 = &mesh->point[np];
       if ( p0->tag & MG_BDY ) {
+        /* One of the vertices of the pseudo polygon is boundary */
         for (l=0; l<npol;l++) {
           if ( k < npol-1 ) {
+            /* Skip the two elts of the pseudo polygon that contains p0 */
             if ( l == k || l == k+1 )  continue;
           }
           else {
+            /* Skip the two elts of the pseudo polygon that contains p0 (for k==npol-1) */
             if ( l == npol-1 || l == 0 )  continue;
           }
           iel = pol[l] / 4;
@@ -160,6 +164,7 @@ int MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,
           pt = &mesh->tetra[iel];
           p0 = &mesh->point[pt->v[ip]];
           if ( p0->tag & MG_BDY ) {
+            /* Another vertex is boundary */
             ier = 0;
             break;
           }
@@ -172,14 +177,32 @@ int MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,int start,int ia,
     for (l=0; l<(*ilist); l++) {
       /* Do not consider tets of the shell of collapsed edge */
       if ( k < npol-1 ) {
+        /* Skip the two elts of the pseudo polygon that contains np */
         if ( l == k || l == k+1 )  continue;
       }
       else {
+        /* Skip the two elts of the pseudo polygon that contains np for the last polygon elt */
         if ( l == npol-1 || l == 0 )  continue;
       }
       iel = list[l] / 6;
       i   = list[l] % 6;
       pt  = &mesh->tetra[iel];
+
+      /* Check that we will not insert a node that we will fail to collapse
+       * (recreation of an existing element) */
+      adja = &mesh->adja[4*(iel-1)+1];
+      adj = adja[MMG5_iare[i][0]]/4;
+      piv = adja[MMG5_iare[i][0]]%4;
+      if ( adj && mesh->tetra[adj].v[piv]==np ) {
+        ier = 0;
+        break;
+      }
+      adj = adja[MMG5_iare[i][1]]/4;
+      piv = adja[MMG5_iare[i][1]]%4;
+      if ( adj && mesh->tetra[adj].v[piv]==np ) {
+        ier = 0;
+        break;
+      }
 
       /* Prevent from creating a tetra with 4 bdy vertices */
       if ( mesh->point[np].tag & MG_BDY ) {
@@ -323,7 +346,13 @@ int MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,int *list,
       __func__);
     return -1;
   }
-  else if ( ier ) MMG3D_delPt(mesh,ier);
+  else if ( ier ) {
+    MMG3D_delPt(mesh,ier);
+  }
+
+  /* Check for non convex situation */
+  assert ( ier && "Unable to collapse the point created during the internal swap");
+
 
   return 1;
 }

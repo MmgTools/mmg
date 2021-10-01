@@ -1,5 +1,5 @@
 node('mmg-sonnar-new') {
-   def list = ['ON','OFF']
+   def list = ['OFF','ON']
     stage('GitClone'){
         checkout([$class: 'GitSCM', branches: [[name: '*/develop']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/MmgTools/mmg.git']]])
         step([$class: 'LastChangesPublisher', since:'PREVIOUS_REVISION',specificRevision: '', format: 'LINE', matchWordsThreshold: '0.25', matching: 'NONE', matchingMaxComparisons: '1000', showFiles: true, synchronisedScroll: true])
@@ -7,14 +7,13 @@ node('mmg-sonnar-new') {
     }
 
     for ( i=0; i<list.size(); i++ ) {
-    stage('buildPattern'+list[i]){
+    stage('buildPattern'+list[i]+'useScotch'+list[i]){
         sh '''#!/bin/bash -l
-        mkdir -p buildPattern'''+list[i]+'''
-        cd buildPattern'''+list[i]+'''
+        mkdir -p buildPattern'''+list[i]+'''useScotch'''+list[i]+'''
+        cd buildPattern'''+list[i]+'''useScotch'''+list[i]+'''
         rm -rf *
-        export CFLAGS="-O0 -g -fPIC --coverage -Wall -Wunused-parameter -Wundef -Wno-long-long -Wsign-compare -Wmissing-prototypes -Wstrict-prototypes -Wcomment -pedantic -fdiagnostics-show-option"
-        export LDFLAGS="--coverage"
-        cmake .. -DCMAKE_BUILD_TYPE=Debug -DPATTERN='''+list[i]+''' -DBUILD_TESTING=ON -DCMAKE_C_FLAGS="$CFLAGS" -DCMAKE_EXE_LINKER_FLAGS="$LDFLAGS" -DCMAKE_INSTALL_PREFIX=$PWD/../install -DBUILD_TESTING=ON -DLONG_TESTS=OFF -DRUN_AGAIN=ON -DLIBMMG2D_STATIC=ON -DLIBMMG3D_STATIC=ON -DLIBMMG_STATIC=ON -DLIBMMG2D_STATIC=ON -DLIBMMGS_STATIC=ON -DTEST_LIBMMG=ON -DTEST_LIBMMG2D=ON -DTEST_LIBMMG3D=ON -DTEST_LIBMMGS=ON -DSCOTCH_DIR=/home/ci/scotch_6.0.6 -DSCOTCH_LIBRARIES=/builds/scotch_6.0.6/lib/libscotch.a -DUSE_SCOTCH=ON -DELAS_DIR=/home/ci/LinearElasticity -DUSE_ELAS=ON
+        export CFLAGS="-O0 -g -fPIC"
+                cmake .. -DCMAKE_BUILD_TYPE=Debug -DUSE_VTK=OFF -DCMAKE_Fortran_COMPILER="" -DPATTERN='''+list[i]+''' -DBUILD_TESTING=ON -DCMAKE_C_FLAGS="$CFLAGS" -DCMAKE_EXE_LINKER_FLAGS="$LDFLAGS" -DCMAKE_INSTALL_PREFIX=$PWD/../install -DBUILD_TESTING=ON -DLONG_TESTS=OFF -DRUN_AGAIN=ON -DLIBMMG2D_STATIC=OFF -DLIBMMG3D_STATIC=OFF -DLIBMMG_STATIC=OFF -DLIBMMG2D_STATIC=OFF -DLIBMMGS_STATIC=OFF -DTEST_LIBMMG=OFF -DTEST_LIBMMG2D=OFF -DTEST_LIBMMG3D=OFF -DTEST_LIBMMGS=OFF -DSCOTCH_DIR=/home/ci/scotch_6.0.6 -DSCOTCH_LIBRARIES=/builds/scotch_6.0.6/lib/libscotch.a -DUSE_SCOTCH='''+list[i]+''' -DELAS_DIR=/home/ci/LinearElasticity -DUSE_ELAS=OFF
         make clean
         scan-build -plist --intercept-first --analyze-headers -o analyzer_reports make 2>&1 |tee mmg-build.log
         make install |tee -a mmg-build.log
@@ -23,9 +22,9 @@ node('mmg-sonnar-new') {
     try {
         stage('Test'+list[i]){
             sh '''#!/bin/bash -l
-            cd buildPattern'''+list[i]+'''
+            cd buildPattern'''+list[i]+'''useScotch'''+list[i]+'''
             ctest --no-compress-output -T Test -V || /usr/bin/true
-            lcov --directory . --capture --output-file mmg-pattern'''+list[i]+'''.lcov
+            lcov --directory . --capture --output-file mmg-pattern'''+list[i]+'''-use-scotch'''+list[i]+'''.lcov
             '''
         }
     } catch (Exception err) {
@@ -35,9 +34,9 @@ node('mmg-sonnar-new') {
 
     stage('Analysis'){
         sh '''#!/bin/bash -l
-        lcov -a buildPatternON/mmg-patternON.lcov -a buildPatternOFF/mmg-patternOFF.lcov -o mmg.lcov
+        lcov -a buildPatternONuseScotchON/mmg-patternON-use-scotchON.lcov -a buildPatternOFFuseScotchOFF/mmg-patternOFF-use-scotchOFF.lcov -o mmg.lcov
         python /builds/sonar/lcov-to-cobertura-xml-1.6/lcov_cobertura/lcov_cobertura.py mmg.lcov --output mmg-coverage.xml
-        export CPPCHECK_INCLUDES="-IbuildPatternON/include -IbuildPatternOFF/include -IbuildPatternON/src/common -IbuildPatternOFF/src/common"
+        export CPPCHECK_INCLUDES="-IbuildPatternONuseScotchON/include -IbuildPatternOFFuseScotchOFF/include -IbuildPatternONuseScotchON/src/common -IbuildPatternOFFuseScotchOFF/src/common"
         export SOURCES_TO_ANALYZE="./src"
         cppcheck  -v -f --language=c --platform=unix64 --check-config --enable=all --xml --xml-version=2 --suppress=missingIncludeSystem ${CPPCHECK_INCLUDES} ${SOURCES_TO_ANALYZE} 2> mmg-cppcheck.xml
         /usr/local/bin/rats -w 3 --xml ${SOURCES_TO_ANALYZE} > mmg-rats.xml
@@ -53,11 +52,11 @@ sonar.links.issue=https://github.com/MmgTools/mmg/issues
 sonar.projectKey=cardamom:mmg:github:develop
 sonar.projectDescription=open source software for bidimensional and tridimensional remeshing
 sonar.projectVersion=$version_mmg
-sonar.language=c
 sonar.sources=./src
 sonar.sourceEncoding=UTF-8
 sonar.c.suffixes.sources=.c
 sonar.c.suffixes.headers=.h
+sonar.lang.patterns.c++ : **/*.cxx,**/*.cpp,**/*.hxx,**/*.hpp
 sonar.c.errorRecoveryEnabled=True
 sonar.c.includeDirectories=src/common, src/mmg, src/mmg3d, src/mmg2d, src/mmgs, build/src/mmg2d, build/src/mmg3d, build/src/mmgs, build/src/common, build/include, bu\
 ild/src

@@ -698,8 +698,12 @@ int             MMG5_loadSolHeader(const char*,int,FILE**,int*,int*,int*,int*,
 int             MMG5_chkMetricType(MMG5_pMesh mesh,int *type, FILE *inm);
 int             MMG5_readFloatSol3D(MMG5_pSol,FILE*,int,int,int);
 int             MMG5_readDoubleSol3D(MMG5_pSol,FILE*,int,int,int);
-int             MMG5_saveSolHeader( MMG5_pMesh,const char*,FILE**,int,int*,int,
-                                    int,int,int*,int*);
+int             MMG5_saveSolHeader( MMG5_pMesh,const char*,FILE**,int,int*,int*,int,
+                                    int,int,int*,int*,int*);
+int             MMG5_saveSolAtTrianglesHeader( MMG5_pMesh,FILE *,int,int,int*,int,
+                                               int,int*,int*,int*);
+int             MMG5_saveSolAtTetrahedraHeader( MMG5_pMesh,FILE *,int,int,int*,int,
+                                                int,int*,int*,int*);
 void            MMG5_writeDoubleSol3D(MMG5_pMesh,MMG5_pSol,FILE*,int,int,int);
 void            MMG5_printMetStats(MMG5_pMesh mesh,MMG5_pSol met);
 void            MMG5_printSolStats(MMG5_pMesh mesh,MMG5_pSol *sol);
@@ -722,8 +726,11 @@ int  MMG5_updatemetreq_ani(double *n,double dn[2],double vp[2][2]);
 int    MMG5_swapbin(int sbin);
 float  MMG5_swapf(float sbin);
 double MMG5_swapd(double sbin);
+int MMG5_MultiMat_init(MMG5_pMesh);
+int MMG5_isLevelSet(MMG5_pMesh,int,int);
 int MMG5_isSplit(MMG5_pMesh ,int ,int *,int *);
-int MMG5_getIniRef(MMG5_pMesh ,int );
+int MMG5_isNotSplit(MMG5_pMesh ,int);
+int MMG5_getStartRef(MMG5_pMesh ,int, int *);
 
 
 /* tools */

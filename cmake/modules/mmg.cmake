@@ -156,9 +156,6 @@ ENDIF()
 
 IF ( BUILD_TESTING )
 
-  SET ( CTEST_OUTPUT_DIR ${PROJECT_BINARY_DIR}/TEST_OUTPUTS )
-  FILE ( MAKE_DIRECTORY  ${CTEST_OUTPUT_DIR} )
-
   ##-------------------------------------------------------------------##
   ##--------------------------- Add tests and configure it ------------##
   ##-------------------------------------------------------------------##

@@ -140,7 +140,7 @@ MACRO ( ADD_AND_INSTALL_LIBRARY
   ADD_LIBRARY ( ${target_name} ${target_type} ${sources} )
   ADD_LIBRARY ( Mmg::${target_name} ALIAS ${target_name} )
 
-  IF ( "${CMAKE_C_COMPILER_ID}" STREQUAL "Clang"  AND  ${CMAKE_C_COMPILER_VERSION} VERSION_GREATER 10 )
+  IF ( ${CMAKE_C_COMPILER_ID} STREQUAL "Clang"  AND  ${CMAKE_C_COMPILER_VERSION} VERSION_GREATER 10 )
       target_compile_options(${target_name} PRIVATE "-fcommon")
   ENDIF()
 
@@ -150,7 +150,7 @@ MACRO ( ADD_AND_INSTALL_LIBRARY
   ADD_DEPENDENCIES( ${target_name} ${target_dependencies})
 
   IF ( CMAKE_VERSION VERSION_LESS 2.8.12 )
-    INCLUDE_DIRECTORIES ( ${target_name} PUBLIC
+    INCLUDE_DIRECTORIES (
       ${COMMON_BINARY_DIR} ${COMMON_SOURCE_DIR} ${PROJECT_BINARY_DIR}/include ${PROJECT_BINARY_DIR})
   ELSE ( )
     target_include_directories( ${target_name} PUBLIC
@@ -170,7 +170,7 @@ MACRO ( ADD_AND_INSTALL_LIBRARY
   if ( SCOTCH_FOUND )
     message(STATUS "[mmg] add include scotch directories ${SCOTCH_INCLUDE_DIRS}")
     IF ( CMAKE_VERSION VERSION_LESS 2.8.12 )
-      INCLUDE_DIRECTORIES ( ${target_name} PUBLIC ${SCOTCH_INCLUDE_DIRS} )
+      INCLUDE_DIRECTORIES (${SCOTCH_INCLUDE_DIRS} )
     ELSE ( )
       target_include_directories( ${target_name} PUBLIC ${SCOTCH_INCLUDE_DIRS} )
     endif()
@@ -235,7 +235,7 @@ MACRO ( ADD_AND_INSTALL_EXECUTABLE
   ENDIF ( )
 
  IF ( CMAKE_VERSION VERSION_LESS 2.8.12 )
-   INCLUDE_DIRECTORIES ( ${exec_name} PUBLIC
+   INCLUDE_DIRECTORIES (
      ${COMMON_BINARY_DIR} ${COMMON_SOURCE_DIR} ${PROJECT_BINARY_DIR}/include ${PROJECT_BINARY_DIR} )
  ELSE ( )
    TARGET_INCLUDE_DIRECTORIES ( ${exec_name} PUBLIC
@@ -314,7 +314,7 @@ MACRO ( ADD_LIBRARY_TEST target_name main_path target_dependency lib_name )
   ADD_DEPENDENCIES( ${target_name} ${target_dependency} )
 
   IF ( CMAKE_VERSION VERSION_LESS 2.8.12 )
-    INCLUDE_DIRECTORIES ( ${target_name} PUBLIC ${PROJECT_BINARY_DIR}/include )
+    INCLUDE_DIRECTORIES (${PROJECT_BINARY_DIR}/include )
   ELSE ( )
     TARGET_INCLUDE_DIRECTORIES ( ${target_name} PUBLIC ${PROJECT_BINARY_DIR}/include )
   ENDIF ( )

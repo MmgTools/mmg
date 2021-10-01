@@ -312,6 +312,9 @@ IF ( NOT VTK_FOUND )
 ENDIF()
 
 # Triangle output
+#
+# Respect the default Tetgen behaviour: saves only boundary edges in
+# .edge file.
 ADD_TEST(NAME mmg2d_Circle-triangle
   COMMAND ${EXECUT_MMG2D} -v 5
   ${MMG2D_CI_TESTS}/Circle/cercle
@@ -460,6 +463,12 @@ ADD_TEST(NAME mmg2d_LSMultiMat_val
   ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat
   ${CTEST_OUTPUT_DIR}/mmg2d_multi-mat-val.o.meshb
   )
+#multi-mat + opnbdy + non-manifold check
+ADD_TEST(NAME mmg2d_LSMultiMat_nm
+  COMMAND ${EXECUT_MMG2D} -v 5 -ls 3 -opnbdy -nr
+  ${MMG2D_CI_TESTS}/LSMultiMat/2d-opn.mesh
+  ${CTEST_OUTPUT_DIR}/mmg2d_2d-opn.o.meshb
+  )
 
 ####### -nsd
 ADD_TEST(NAME mmg2d_LSMultiMat-nsd22
@@ -505,6 +514,13 @@ ADD_TEST(NAME mmg2d_OptLs_dom_withbub
   ${MMG2D_CI_TESTS}/LSDiscretization/dom
   -sol ${MMG2D_CI_TESTS}/LSDiscretization/bub.sol
   ${CTEST_OUTPUT_DIR}/mmg2d_OptLs_dom-withbub.o.meshb)
+
+# ls + rmc: max pile size bug
+ADD_TEST(NAME mmg2d_OptLs_dom_rmcmaxpile
+  COMMAND ${EXECUT_MMG2D} -v 5 -ls -rmc
+  ${MMG2D_CI_TESTS}/LSDiscretization/dom
+  -sol ${MMG2D_CI_TESTS}/LSDiscretization/whole.sol
+  ${CTEST_OUTPUT_DIR}/mmg2d_OptLs_dom-rmcmaxpile.o.meshb)
 
 ADD_TEST(NAME mmg2d_OptLs_dom_rembub
   COMMAND ${EXECUT_MMG2D} -v 5 -ls

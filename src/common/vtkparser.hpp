@@ -336,7 +336,20 @@ int MMG5_saveVtkMesh_i(MMG5_pMesh mesh,MMG5_pSol *sol,
 
   // Transfer point solutions into data set
   MMG5_pSol   psl   = NULL;
-  int         nsols = (metricData==1 && sol && *sol)? 1 : mesh->nsols;
+  int         nsols;
+
+  if ( metricData==1 ) {
+    if ( sol && *sol && sol[0]->np ) {
+      nsols = 1;
+    }
+    else {
+      /* In analysis mode (-noinsert -noswap -nomove), metric is not allocated */
+      nsols = 0;
+    }
+  }
+  else {
+    nsols = mesh->nsols;
+  }
 
   static int mmgWarn = 0;
   for ( int isol=0; isol<nsols; ++isol) {

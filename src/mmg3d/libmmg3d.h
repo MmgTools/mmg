@@ -2759,6 +2759,10 @@ int MMG3D_switch_metricStorage(MMG5_pMesh mesh, MMG5_pSol met);
  * A triangle is
  * boundary if it is located at the interface of 2 domains with different
  * references or if it belongs to one tetra only.
+ * Append these triangles to the list of triangles.
+ *
+ * \warning reallocate the triangle array and append the internal triangles.
+ * This may modify the behaviour of other functions.
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_GET_NUMBEROFNONBDYTRIANGLESS(mesh,nb_tria,retval)\n

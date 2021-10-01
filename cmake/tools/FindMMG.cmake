@@ -122,7 +122,8 @@ if(MMG_INCDIR)
   find_path(MMG_libmmgtypes.h_DIRS
     NAMES libmmgtypes.h
     HINTS ${MMG_INCDIR}
-    PATH_SUFFIXES "mmg2d" "mmgs" "mmg3d")
+    PATH_SUFFIXES "mmg" "mmg/mmg2d" "mmg/mmgs" "mmg/mmg3d" "mmg2d"
+    "mmgs" "mmg3d")
 elseif(MMG_BUILDDIR)
   set(MMG_libmmgtypes.h_DIRS "MMG_libmmgtypes.h_DIRS-NOTFOUND")
   find_path(MMG_libmmgtypes.h_DIRS
@@ -152,7 +153,8 @@ else()
     find_path(MMG_libmmgtypes.h_DIRS
       NAMES libmmgtypes.h
       HINTS ${_inc_env}
-      PATH_SUFFIXES "include/mmg" "include/mmg/mmg")
+      PATH_SUFFIXES  "mmg" "mmg/mmg2d" "mmg/mmgs" "mmg/mmg3d" "mmg2d"
+      "mmgs" "mmg3d")
   endif()
 endif()
 STRING(REGEX REPLACE "(mmg/mmg2d)|(mmg/mmgs)|(mmg/mmg3d)" ""

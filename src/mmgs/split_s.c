@@ -225,6 +225,7 @@ int split1b(MMG5_pMesh mesh,int k,int8_t i,int ip) {
   double         uv[2],o[3],no[3],to[3];
   int            *adja,iel,jel,kel,mel,ier;
   int8_t         i1,i2,j,j1,j2,m;
+  static int8_t mmgErr0=0,mmgErr1=0;
 
   iel = MMGS_newElt(mesh);
   if ( !iel )  {
@@ -251,14 +252,28 @@ int split1b(MMG5_pMesh mesh,int k,int8_t i,int ip) {
   /* update normal n2 if need be */
   if ( jel && pt->tag[i] & MG_GEO ) {
     ier = MMG5_bezierCP(mesh,&mesh->tria[jel],&b,1);
-    assert(ier);
+    if ( !ier ) {
+      if( !mmgErr0 ) {
+        mmgErr0 = 1;
+        fprintf(stderr,"\n  ## Warning: %s: function MMG5_bezierCP return 0.\n",
+                __func__);
+      }
+      assert(0);
+    }
     uv[0] = 0.5;
     uv[1] = 0.5;
     if ( j == 1 )       uv[0] = 0.0;
     else if ( j == 2 )  uv[1] = 0.0;
 
     ier = MMGS_bezierInt(&b,uv,o,no,to);
-    assert(ier);
+    if ( !ier ) {
+      if( !mmgErr1 ) {
+        mmgErr1 = 1;
+        fprintf(stderr,"  ## Warning: %s: function MMGS_bezierInt return 0.\n",
+                __func__);
+      }
+      assert(0);
+    }
     go = &mesh->xpoint[ppt->xp];
     memcpy(go->n2,no,3*sizeof(double));
   }

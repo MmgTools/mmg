@@ -57,13 +57,10 @@ int MMG5_movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree,
   MMG5_pTetra               pt,pt0;
   MMG5_pPoint               p0,p1,p2,p3,ppt0;
   double               vol,totvol;
-  double               calold,calnew,*callist;
-  double len1,len2;
-  int    iloc;
+  double               calold,calnew,callist[MMG3D_LMAX+2];
+  double               len1,len2;
+  int                  iloc;
   int                  k,iel,i0;
-
-  // Dynamic alloc for windows comptibility
-  MMG5_SAFE_MALLOC(callist, ilist, double,return 0);
 
   pt0    = &mesh->tetra[0];
   ppt0   = &mesh->point[0];
@@ -88,7 +85,6 @@ int MMG5_movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree,
     calold = MG_MIN(calold, pt->qual);
   }
   if (totvol < MMG5_EPSD2) {
-    MMG5_SAFE_FREE(callist);
     return 0;
   }
 
@@ -109,7 +105,6 @@ int MMG5_movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree,
     pt0->v[i0] = 0;
     callist[k] = MMG5_orcal(mesh,met,0);
     if (callist[k] < MMG5_NULKAL) {
-      MMG5_SAFE_FREE(callist);
       return 0;
     }
     calnew = MG_MIN(calnew,callist[k]);
@@ -120,13 +115,11 @@ int MMG5_movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree,
         len2 =  MMG5_lenedg_iso(mesh,met,MMG5_arpt[i0][iloc],pt0);
         if ( (len1 < MMG3D_LOPTL && len2 >= MMG3D_LOPTL) ||
              (len1 > MMG3D_LOPTL && len2 >len1 ) ) {
-          MMG5_SAFE_FREE(callist);
           return 0;
         }
 
         if ( (len1 > MMG3D_LOPTS && len2 <= MMG3D_LOPTS) ||
              (len1 < MMG3D_LOPTS && len2 <len1 ) ) {
-          MMG5_SAFE_FREE(callist);
           return 0;
         }
       }
@@ -134,19 +127,15 @@ int MMG5_movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree,
 
   }
   if (calold < MMG5_EPSOK && calnew <= calold) {
-    MMG5_SAFE_FREE(callist);
     return 0;
   }
   else if (calnew < MMG5_EPSOK) {
-    MMG5_SAFE_FREE(callist);
     return 0;
   }
   else if ( improve && calnew < 1.02 * calold ) {
-    MMG5_SAFE_FREE(callist);
     return 0;
   }
   else if ( calnew < 0.3 * calold ) {
-    MMG5_SAFE_FREE(callist);
     return 0;
   }
 
@@ -164,8 +153,6 @@ int MMG5_movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree,
     (&mesh->tetra[list[k]/4])->mark=mesh->mark;
   }
 
-
-  MMG5_SAFE_FREE(callist);
   return 1;
 }
 
@@ -196,13 +183,10 @@ int MMG5_movintptLES_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree
   MMG5_pTetra               pt,pt0;
   MMG5_pPoint               p0,p1,p2,p3,ppt0;
   double               vol,totvol;
-  double               calold,calnew,*callist;
+  double               calold,calnew,callist[MMG3D_LMAX+2];
   double               x21,y21,z21,x31,y31,z31,nx,ny,nz,bary[3],dd,len;
   double               u10[3],u20[3],u30[3],oldc[3],coe;
   int                  k,iel,ifac,iter,maxtou;
-
-  // Dynamic alloc for windows comptibility
-  MMG5_SAFE_MALLOC(callist, ilist, double,return 0);
 
   pt0    = &mesh->tetra[0];
   ppt0   = &mesh->point[0];
@@ -287,7 +271,6 @@ int MMG5_movintptLES_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree
     calold = MG_MIN(calold, pt->qual);
   }
   if (totvol < MMG5_EPSD2) {
-    MMG5_SAFE_FREE(callist);
     return 0;
   }
 
@@ -330,7 +313,6 @@ int MMG5_movintptLES_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree
 
   if ( iter > maxtou ) {
     memcpy(p0->c,oldc,3*sizeof(double));
-    MMG5_SAFE_FREE(callist);
     return 0;
   }
 
@@ -343,69 +325,39 @@ int MMG5_movintptLES_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree
      (&mesh->tetra[list[k]/4])->mark=mesh->mark;
    }
 
-   MMG5_SAFE_FREE(callist);
    return 1;
 }
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \param PROctree pointer toward the PROctree structure.
- * \param listv pointer toward the volumic ball of the point.
- * \param ilistv size of the volumic ball.
  * \param lists pointer toward the surfacic ball of the point.
  * \param ilists size of the surfacic ball.
- * \param improve force the new minimum element quality to be greater or equal
- * than 1.02 of the old minimum element quality.
- * \return 0 if we can not move, 1 if success, -1 if fail.
+ * \param ip0 global index of the point that we move
+ * \param r rotation matrix that sends the normal at \a ip0 to z-axis
+ * \param lispoi rotated surfacic ball (lispoi[k] is the common edge
+ * between faces lists[k-1] and lists[k])
  *
- * Move boundary regular point, whose volumic and surfacic balls are passed.
+ * \return 1 if success, 0 if the projection along the tangent plane are invalid.
  *
- * \remark the metric is not interpolated at the new position.
+ * Rotation of the oriented surfacic ball of \a ip0.
+ *
  */
-int MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctree, int *listv,
-                          int ilistv,int *lists,int ilists,
-                          int improveSurf,int improveVol) {
-  MMG5_pTetra       pt,pt0;
-  MMG5_pxTetra      pxt;
-  MMG5_pPoint       p0,p1,p2,ppt0;
-  MMG5_Tria         tt;
-  MMG5_pxPoint      pxp;
-  MMG5_Bezier      b;
-  double            *n,r[3][3],lispoi[3*MMG3D_LMAX+1],ux,uy,uz,det2d;
-  double            detloc,oppt[2],step,lambda[3];
-  double            ll,m[2],uv[2],o[3],no[3],to[3];
-  double            calold,calnew,caltmp,*callist;
-  int               k,kel,iel,l,n0,na,nb,ntempa,ntempb,ntempc,nut,nxp;
-  uint8_t           i0,iface,i;
-  static int8_t     mmgErr0=0,mmgErr1=0;
+int MMG3D_rotate_surfacicBall(MMG5_pMesh mesh,int *lists,int ilists,int ip0,
+                              double r[3][3],double *lispoi) {
+  MMG5_pTetra       pt;
+  MMG5_pPoint       p0,p1;
+  double            ux,uy,uz,det2d;
+  int               k,l,na,nb,ntempa,ntempb;
+  uint8_t           iface,i;
 
-  step = 0.1;
-  nut    = 0;
-  oppt[0] = 0.0;
-  oppt[1] = 0.0;
-  if ( ilists < 2 )      return 0;
-
-  k      = listv[0] / 4;
-  i0 = listv[0] % 4;
-  pt = &mesh->tetra[k];
-  n0 = pt->v[i0];
-  p0 = &mesh->point[n0];
-  assert( p0->xp && !MG_EDG(p0->tag) );
-
-  n = &(mesh->xpoint[p0->xp].n1[0]);
-
-  /** Step 1 : rotation matrix that sends normal n to the third coordinate vector of R^3 */
-  if ( !MMG5_rotmatrix(n,r) ) return 0;
-
-  /** Step 2 : rotation of the oriented surfacic ball with r : lispoi[k] is the common edge
-      between faces lists[k-1] and lists[k] */
   k     = lists[0] / 4;
   iface = lists[0] % 4;
   pt    = &mesh->tetra[k];
+  p0    = &mesh->point[ip0];
+
   na = nb = 0;
   for (i=0; i<3; i++) {
-    if ( pt->v[MMG5_idir[iface][i]] != n0 ) {
+    if ( pt->v[MMG5_idir[iface][i]] != ip0 ) {
       if ( !na )
         na = pt->v[MMG5_idir[iface][i]];
       else
@@ -419,7 +371,7 @@ int MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
     pt    = &mesh->tetra[k];
     ntempa = ntempb = 0;
     for (i=0; i<3; i++) {
-      if ( pt->v[MMG5_idir[iface][i]] != n0 ) {
+      if ( pt->v[MMG5_idir[iface][i]] != ip0 ) {
         if ( !ntempa )
           ntempa = pt->v[MMG5_idir[iface][i]];
         else
@@ -454,7 +406,7 @@ int MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
   pt     = &mesh->tetra[k];
   ntempa = ntempb = 0;
   for (i=0; i<3; i++) {
-    if ( pt->v[MMG5_idir[iface][i]] != n0 ) {
+    if ( pt->v[MMG5_idir[iface][i]] != ip0 ) {
       if ( !ntempa )
         ntempa = pt->v[MMG5_idir[iface][i]];
       else
@@ -485,16 +437,221 @@ int MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
   lispoi[3*ilists+2] = lispoi[2];
   lispoi[3*ilists+3] = lispoi[3];
 
-  /* At this point, lispoi contains the oriented surface ball of point p0, that has been rotated
-     through r, with the convention that triangle l has edges lispoi[l]; lispoi[l+1] */
-
+  /** At this point, lispoi contains the oriented surface ball of point p0, that
+      has been rotated through r, with the convention that triangle l has edges
+      lispoi[l]; lispoi[l+1] */
   /* Check all projections over tangent plane. */
   for (k=0; k<ilists-1; k++) {
     det2d = lispoi[3*k+1]*lispoi[3*(k+1)+2] - lispoi[3*k+2]*lispoi[3*(k+1)+1];
-    if ( det2d < 0.0 )  return 0;
+    if ( det2d < 0.0 ) {
+      return 0;
+    }
   }
   det2d = lispoi[3*(ilists-1)+1]*lispoi[3*0+2] - lispoi[3*(ilists-1)+2]*lispoi[3*0+1];
-  if ( det2d < 0.0 )    return 0;
+  if ( det2d < 0.0 ) {
+    return 0;
+  }
+
+  return 1;
+}
+
+
+/**
+* \param mesh pointer toward the mesh
+* \param lists pointer toward the surface ball of \a ip0
+* \param kel index of the current element in the ball
+* \param ip0 global index of the point to move
+* \param n normal at \a ip0
+* \param lambda barycentric coor of the new point in triangle
+* \param o coordinates of the new point (to compute)
+* \param no normal at new point (to compute)
+*
+* \return -1 if fail, 0 if we can't move the point, \a nxp the index of the new
+* xpoint at \a ip0 if success.
+*
+* Compute the Bezier patch at element \a lists[kel], compute the new point
+* coordinates, normal and tangent and check the geometric approximation.
+*
+*/
+int MMG3D_movbdyregpt_geom(MMG5_pMesh mesh,int *lists,const int kel,
+                           const int ip0,double n[3],double lambda[3],double o[3],
+                           double no[3]) {
+  MMG5_pTetra       pt;
+  MMG5_pxTetra      pxt;
+  MMG5_pPoint       p1,p2,ppt0,p0;
+  MMG5_Tria         tt;
+  MMG5_pxPoint      pxp;
+  MMG5_Bezier       b;
+  double            uv[2],to[3],detloc;
+  int               iel,na,nb,ntempb,ntempc,nxp;
+  uint8_t           iface,i;
+  static int8_t     mmgErr0=0,mmgErr1=0;
+
+  iel    = lists[kel] / 4;
+  iface  = lists[kel] % 4;
+  pt     = &mesh->tetra[iel];
+  pxt    = &mesh->xtetra[pt->xt];
+  p0     = &mesh->point[ip0];
+
+  MMG5_tet2tri(mesh,iel,iface,&tt);
+
+  if(!MMG5_bezierCP(mesh,&tt,&b,MG_GET(pxt->ori,iface))){
+    if( !mmgErr0 ) {
+      mmgErr0 = 1;
+      fprintf(stderr,"\n  ## Error: %s: function MMG5_bezierCP return 0.\n",
+              __func__);
+    }
+    return -1;
+  }
+
+  /* Now, for Bezier interpolation, one should identify which of i,i1,i2 is
+     0,1,2 recall uv[0] = barycentric coord associated to pt->v[1], uv[1]
+     associated to pt->v[2] and 1-uv[0]-uv[1] is associated to pt->v[0]. For
+     this, use the fact that kel, kel + 1 is positively oriented with respect to
+     n */
+  na = nb = 0;
+  for( i=0 ; i<4 ; i++ ){
+    if ( (pt->v[i] != ip0) && (pt->v[i] != pt->v[iface]) ) {
+      if ( !na )
+        na = pt->v[i];
+      else
+        nb = pt->v[i];
+    }
+  }
+  p1 = &mesh->point[na];
+  p2 = &mesh->point[nb];
+  detloc = MMG5_det3pt1vec(p0->c,p1->c,p2->c,n);
+
+  /* ntempa=point to which is associated 1-uv[0]-uv[1], ntempb=uv[0], ntempc=uv[1] */
+  ntempb = pt->v[MMG5_idir[iface][1]];
+  ntempc = pt->v[MMG5_idir[iface][2]];
+
+  /* na = lispoi[kel] -> lambda[1], nb = lispoi[kel+1] -> lambda[2] */
+  if ( detloc > 0.0 ) {
+    if ( ntempb == na )
+      uv[0] = lambda[1];
+    else if (ntempb == nb )
+      uv[0] = lambda[2];
+    else {
+      assert(ntempb == ip0);
+      uv[0] = lambda[0];
+    }
+    if ( ntempc == na )
+      uv[1] = lambda[1];
+    else if (ntempc == nb )
+      uv[1] = lambda[2];
+    else {
+      assert(ntempc == ip0);
+      uv[1] = lambda[0];
+    }
+  }
+  /* nb = lispoi[kel] -> lambda[1], na = lispoi[kel+1] -> lambda[2] */
+  else {
+    if ( ntempb == na )
+      uv[0] = lambda[2];
+    else if (ntempb == nb )
+      uv[0] = lambda[1];
+    else {
+      assert(ntempb == ip0);
+      uv[0] = lambda[0];
+    }
+    if ( ntempc == na )
+      uv[1] = lambda[2];
+    else if (ntempc == nb )
+      uv[1] = lambda[1];
+    else {
+      assert(ntempc == ip0);
+      uv[1] = lambda[0];
+    }
+  }
+  if(!MMG3D_bezierInt(&b,uv,o,no,to)){
+   if( !mmgErr1 ) {
+      mmgErr1 = 1;
+      fprintf(stderr,"  ## Error: %s: function MMG3D_bezierInt return 0.\n",
+              __func__);
+   }
+   return -1;
+  }
+
+  /* Test : make sure that geometric approximation has not been degraded too much */
+  ppt0 = &mesh->point[0];
+  ppt0->c[0] = o[0];
+  ppt0->c[1] = o[1];
+  ppt0->c[2] = o[2];
+
+  ppt0->tag      = p0->tag;
+  ppt0->ref      = p0->ref;
+
+
+  nxp = mesh->xp + 1;
+  if ( nxp > mesh->xpmax ) {
+    MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,MMG5_GAP,MMG5_xPoint,
+                       "larger xpoint table",
+                       return 0);
+  }
+  ppt0->xp = nxp;
+  pxp = &mesh->xpoint[nxp];
+  memcpy(pxp,&(mesh->xpoint[p0->xp]),sizeof(MMG5_xPoint));
+  pxp->n1[0] = no[0];
+  pxp->n1[1] = no[1];
+  pxp->n1[2] = no[2];
+
+  return nxp;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param PROctree pointer toward the PROctree structure.
+ * \param listv pointer toward the volumic ball of the point.
+ * \param ilistv size of the volumic ball.
+ * \param lists pointer toward the surfacic ball of the point.
+ * \param ilists size of the surfacic ball.
+ * \param improve force the new minimum element quality to be greater or equal
+ * than 1.02 of the old minimum element quality.
+ * \return 0 if we can not move, 1 if success, -1 if fail.
+ *
+ * Move boundary regular point, whose volumic and surfacic balls are passed.
+ *
+ * \remark the metric is not interpolated at the new position.
+ */
+int MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctree, int *listv,
+                          int ilistv,int *lists,int ilists,
+                          int improveSurf,int improveVol) {
+  MMG5_pTetra       pt,pt0;
+  MMG5_pPoint       p0;
+  MMG5_Tria         tt;
+  MMG5_pxPoint      pxp;
+  double            *n,r[3][3],lispoi[3*MMG3D_LMAX+1],ux,uy,det2d;
+  double            detloc,oppt[2],step,lambda[3];
+  double            ll,m[2],o[3],no[3];
+  double            calold,calnew,caltmp,callist[MMG3D_LMAX+2];
+  int               k,kel,l,ip0,nut,nxp;
+  uint8_t           i0,iface,i;
+
+  step = 0.1;
+  nut    = 0;
+  oppt[0] = 0.0;
+  oppt[1] = 0.0;
+  if ( ilists < 2 )      return 0;
+
+  k      = listv[0] / 4;
+  i0 = listv[0] % 4;
+  pt = &mesh->tetra[k];
+  ip0 = pt->v[i0];
+  p0 = &mesh->point[ip0];
+  assert( p0->xp && !MG_EDG(p0->tag) );
+
+  n = &(mesh->xpoint[p0->xp].n1[0]);
+
+  /** Step 1 : rotation matrix that sends normal n to the third coordinate vector of R^3 */
+  if ( !MMG5_rotmatrix(n,r) ) return 0;
+
+  /** Step 2 : rotation of the oriented surfacic ball with r : lispoi[k] is the common edge
+      between faces lists[k-1] and lists[k] */
+  if ( !MMG3D_rotate_surfacicBall(mesh,lists,ilists,ip0,r,lispoi) ) {
+    return 0;
+  }
 
   /** Step 3 : Compute optimal position to make current triangle equilateral, and average of
       these positions*/
@@ -562,113 +719,14 @@ int MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
   lambda[0] = 1.0 - lambda[1] - lambda[2];
 
   /** Step 5 : come back to original problem, and compute patch in triangle iel */
-  iel    = lists[kel] / 4;
-  iface  = lists[kel] % 4;
-  pt     = &mesh->tetra[iel];
-  pxt    = &mesh->xtetra[pt->xt];
-
-  MMG5_tet2tri(mesh,iel,iface,&tt);
-
-  if(!MMG5_bezierCP(mesh,&tt,&b,MG_GET(pxt->ori,iface))){
-    if( !mmgErr0 ) {
-      mmgErr0 = 1;
-      fprintf(stderr,"\n  ## Error: %s: function MMG5_bezierCP return 0.\n",
-              __func__);
-    }
+  nxp = MMG3D_movbdyregpt_geom(mesh,lists,kel,ip0,n,lambda,o,no);
+  if ( nxp < 0 ) {
     return -1;
   }
-
-  /* Now, for Bezier interpolation, one should identify which of i,i1,i2 is 0,1,2
-     recall uv[0] = barycentric coord associated to pt->v[1], uv[1] associated to pt->v[2] and
-     1 - uv[0] - uv[1] is associated to pt->v[0]. For this, use the fact that kel, kel + 1 is
-     positively oriented with respect to n */
-  na = nb = 0;
-  for( i=0 ; i<4 ; i++ ){
-    if ( (pt->v[i] != n0) && (pt->v[i] != pt->v[iface]) ) {
-      if ( !na )
-        na = pt->v[i];
-      else
-        nb = pt->v[i];
-    }
+  else if ( !nxp ) {
+    return 0;
   }
-  p1 = &mesh->point[na];
-  p2 = &mesh->point[nb];
-  detloc = MMG5_det3pt1vec(p0->c,p1->c,p2->c,n);
-
-  /* ntempa = point to which is associated 1 -uv[0] - uv[1], ntempb = uv[0], ntempc = uv[1] */
-  ntempb = pt->v[MMG5_idir[iface][1]];
-  ntempc = pt->v[MMG5_idir[iface][2]];
-
-  /* na = lispoi[kel] -> lambda[1], nb = lispoi[kel+1] -> lambda[2] */
-  if ( detloc > 0.0 ) {
-    if ( ntempb == na )
-      uv[0] = lambda[1];
-    else if (ntempb == nb )
-      uv[0] = lambda[2];
-    else {
-      assert(ntempb == n0);
-      uv[0] = lambda[0];
-    }
-    if ( ntempc == na )
-      uv[1] = lambda[1];
-    else if (ntempc == nb )
-      uv[1] = lambda[2];
-    else {
-      assert(ntempc == n0);
-      uv[1] = lambda[0];
-    }
-  }
-  /* nb = lispoi[kel] -> lambda[1], na = lispoi[kel+1] -> lambda[2] */
-  else {
-    if ( ntempb == na )
-      uv[0] = lambda[2];
-    else if (ntempb == nb )
-      uv[0] = lambda[1];
-    else {
-      assert(ntempb == n0);
-      uv[0] = lambda[0];
-    }
-    if ( ntempc == na )
-      uv[1] = lambda[2];
-    else if (ntempc == nb )
-      uv[1] = lambda[1];
-    else {
-      assert(ntempc == n0);
-      uv[1] = lambda[0];
-    }
-  }
-  if(!MMG3D_bezierInt(&b,uv,o,no,to)){
-   if( !mmgErr1 ) {
-      mmgErr1 = 1;
-      fprintf(stderr,"  ## Error: %s: function MMG3D_bezierInt return 0.\n",
-              __func__);
-   }
-    return -1;
-  }
-
-  /* Test : make sure that geometric approximation has not been degraded too much */
-  ppt0 = &mesh->point[0];
-  ppt0->c[0] = o[0];
-  ppt0->c[1] = o[1];
-  ppt0->c[2] = o[2];
-
-  ppt0->tag      = p0->tag;
-  ppt0->ref      = p0->ref;
-
-
-  nxp = mesh->xp + 1;
-  if ( nxp > mesh->xpmax ) {
-    MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,MMG5_GAP,MMG5_xPoint,
-                       "larger xpoint table",
-                       return 0);
-    n = &(mesh->xpoint[p0->xp].n1[0]);
-  }
-  ppt0->xp = nxp;
   pxp = &mesh->xpoint[nxp];
-  memcpy(pxp,&(mesh->xpoint[p0->xp]),sizeof(MMG5_xPoint));
-  pxp->n1[0] = no[0];
-  pxp->n1[1] = no[1];
-  pxp->n1[2] = no[2];
 
   /* For each surfacic triangle, build a virtual displaced triangle for check purposes */
   calold = calnew = DBL_MAX;
@@ -680,7 +738,7 @@ int MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
     calold = MG_MIN(calold,MMG5_caltri(mesh,met,&tt));
 
     for( i=0 ; i<3 ; i++ )
-      if ( tt.v[i] == n0 )      break;
+      if ( tt.v[i] == ip0 )      break;
     assert(i<3);
     if ( i==3 ) return 0;
 
@@ -701,10 +759,6 @@ int MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
   memset(pxp,0,sizeof(MMG5_xPoint));
 
   /* Test : check whether all volumes remain positive with new position of the point */
-
-  // Dynamic allocations for windows compatibility
-  MMG5_SAFE_MALLOC(callist, ilistv, double,return 0);
-
   calold = calnew = DBL_MAX;
 
   for (l=0; l<ilistv; l++) {
@@ -718,7 +772,6 @@ int MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
     callist[l]=MMG5_orcal(mesh,met,0);
 
     if (callist[l] < MMG5_NULKAL) {
-      MMG5_SAFE_FREE(callist);
       return 0;
     }
     calnew = MG_MIN(calnew,callist[l]);
@@ -727,25 +780,21 @@ int MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
 
 
   if (calold < MMG5_EPSOK && calnew <= calold) {
-    MMG5_SAFE_FREE(callist);
     return 0;
   }
   else if (calnew < MMG5_EPSOK) {
-    MMG5_SAFE_FREE(callist);
     return 0;
   }
   else if (improveVol && calnew < calold) {
-    MMG5_SAFE_FREE(callist);
     return 0;
   }
   else if (calnew < 0.3*calold) {
-    MMG5_SAFE_FREE(callist);
     return 0;
   }
 
   /* When all tests have been carried out, update coordinates and normals */
   if ( PROctree )
-    MMG3D_movePROctree(mesh, PROctree, n0, o, p0->c);
+    MMG3D_movePROctree(mesh, PROctree, ip0, o, p0->c);
 
   p0->c[0] = o[0];
   p0->c[1] = o[1];
@@ -759,7 +808,6 @@ int MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
     (&mesh->tetra[listv[l]/4])->qual= callist[l];
     (&mesh->tetra[listv[l]/4])->mark=mesh->mark;
   }
-  MMG5_SAFE_FREE(callist);
   return 1;
 }
 
@@ -773,38 +821,45 @@ int MMG5_movbdyregpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
  * \param ilists size of the surfacic ball.
  * \param improve force the new minimum element quality to be greater or equal
  * than 1.02 of the old minimum element quality.
+ * \param edgTag Type of edge on which we move (MG_REF, MG_NOM or MG_GEO).
+ *
  * \return 0 if fail, 1 if success.
  *
- * Move boundary reference point, whose volumic and surfacic balls are passed.
+ * Move boundary reference, ridge or non-manifold point, whose volumic and
+ * surfacic balls are passed.
  *
  * \remark the metric is not interpolated at the new position.
  */
-int MMG5_movbdyrefpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctree, int *listv,
-                          int ilistv, int *lists, int ilists,
-                          int improve){
+static inline
+int MMG3D_movbdycurvept_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctree, int *listv,
+                           int ilistv, int *lists, int ilists,int improve,const int16_t edgTag){
   MMG5_pTetra           pt,pt0;
   MMG5_pxTetra          pxt;
   MMG5_pPoint           p0,p1,p2,ppt0;
   MMG5_Tria             tt;
   MMG5_pxPoint          pxp;
   MMG5_pPar             par;
-  double                step,ll1old,ll2old,o[3],no[3],to[3];
-  double                calold,calnew,caltmp,*callist,hmax,hausd;
+  double                step,ll1old,ll2old,o[3],no[3],no2[3],to[3];
+  double                calold,calnew,caltmp,callist[MMG3D_LMAX+2],hmax,hausd;
   int                   l,iel,ip0,ipa,ipb,iptmpa,iptmpb,ip1,ip2,ip,nxp;
   int                   isloc,j;
   int16_t               tag;
-  uint8_t       i,i0,ie,iface,iea,ieb;
+  uint8_t               i,i0,ie,iface,iea,ieb,isrid;
 
-  step = 0.1;
+  step      = 0.1;
   ip1 = ip2 = 0;
-  pt    = &mesh->tetra[listv[0]/4];
-  ip0 = pt->v[listv[0]%4];
-  p0    = &mesh->point[ip0];
+  pt        = &mesh->tetra[listv[0]/4];
+  ip0       = pt->v[listv[0]%4];
+  p0        = &mesh->point[ip0];
 
-  assert ( MG_REF & p0->tag );
+  /* Compute if the edge is a simple ridge to know if we have to compute a
+   * second normal at point */
+  isrid     = ((MG_GEO & edgTag) && !(MG_NOM & edgTag));
 
-  /* Travel surfacic ball and recover the two ending points of ref curve :
-     two senses must be used */
+  assert ( edgTag & p0->tag );
+
+  /* Travel surfacic ball and recover the two ending points of curve : two
+   * senses must be used */
   iel = lists[0]/4;
   iface = lists[0]%4;
   pt = &mesh->tetra[iel];
@@ -848,7 +903,7 @@ int MMG5_movbdyrefpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
     if ( (iptmpa == ipa) || (iptmpa == ipb) ) {
       if ( pt->xt )  tag = mesh->xtetra[pt->xt].tag[iea];
       else  tag = 0;
-      if ( MG_REF & tag ) {
+      if ( edgTag & tag ) {
         ip1 = iptmpa;
         break;
       }
@@ -856,7 +911,7 @@ int MMG5_movbdyrefpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
     if ( (iptmpb == ipa) || (iptmpb == ipb) ) {
       if ( pt->xt )  tag = mesh->xtetra[pt->xt].tag[ieb];
       else  tag = 0;
-      if ( MG_REF & tag ) {
+      if ( edgTag & tag ) {
         ip1 = iptmpb;
         break;
       }
@@ -909,15 +964,20 @@ int MMG5_movbdyrefpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
     if ( (iptmpa == ipa) || (iptmpa == ipb) ) {
       if ( pt->xt )  tag = mesh->xtetra[pt->xt].tag[iea];
       else  tag = 0;
-      if ( MG_REF & tag ) {
+      if ( edgTag & tag ) {
         ip2 = iptmpa;
         break;
       }
     }
     if ( (iptmpb == ipa) || (iptmpb == ipb) ) {
-      assert(pt->xt);
-      tag = mesh->xtetra[pt->xt].tag[ieb];
-      if ( MG_REF & tag ) {
+      if ( (MG_GEO & edgTag) && (!pt->xt) ) {
+        tag = 0;
+      }
+      else {
+        assert(pt->xt);
+        tag = mesh->xtetra[pt->xt].tag[ieb];
+      }
+      if ( edgTag & tag ) {
         ip2 = iptmpb;
         break;
       }
@@ -927,9 +987,9 @@ int MMG5_movbdyrefpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
   }
   if ( !(ip1 && ip2 && (ip1 != ip2)) )  return 0;
 
-  /* At this point, we get the point extremities of the ref limit curve passing through ip0 :
-     ip1, ip2, along with support tets it1,it2, the surface faces iface1,iface2, and the
-     associated edges ie1,ie2.*/
+  /* At this point, we get the point extremities of the curve passing through
+     ip0 : ip1, ip2, along with support tets it1,it2, the surface faces
+     iface1,iface2, and the associated edges ie1,ie2.*/
 
   /* Changes needed for choice of time step : see manuscript notes */
   p1 = &mesh->point[ip1];
@@ -950,359 +1010,25 @@ int MMG5_movbdyrefpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
   }
 
   /* Compute support of the associated edge, and features of the new position */
-  if ( !(MMG5_BezierRef(mesh,ip0,ip,step,o,no,to)) )  return 0;
-
-  /* Test : make sure that geometric approximation has not been degraded too much */
-  ppt0 = &mesh->point[0];
-  ppt0->c[0] = o[0];
-  ppt0->c[1] = o[1];
-  ppt0->c[2] = o[2];
-  ppt0->tag  = p0->tag;
-  ppt0->ref  = p0->ref;
-
-
-  nxp = mesh->xp + 1;
-  if ( nxp > mesh->xpmax ) {
-    MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,MMG5_GAP,MMG5_xPoint,
-                       "larger xpoint table",
-                       return 0);
-  }
-  ppt0->xp = nxp;
-  pxp = &mesh->xpoint[nxp];
-  memcpy(pxp,&(mesh->xpoint[p0->xp]),sizeof(MMG5_xPoint));
-
-  ppt0->n[0] = to[0];
-  ppt0->n[1] = to[1];
-  ppt0->n[2] = to[2];
-
-  pxp->n1[0] = no[0];
-  pxp->n1[1] = no[1];
-  pxp->n1[2] = no[2];
-
-  /* For each surface triangle, build a virtual displaced triangle for check purposes */
-  calold = calnew = DBL_MAX;
-  for( l=0 ; l<ilists ; l++ ){
-    iel         = lists[l] / 4;
-    iface       = lists[l] % 4;
-    pt          = &mesh->tetra[iel];
-    pxt         = &mesh->xtetra[pt->xt];
-
-    MMG5_tet2tri(mesh,iel,iface,&tt);
-    calold = MG_MIN(calold,MMG5_caltri(mesh,met,&tt));
-
-    for( i=0 ; i<3 ; i++ )
-      if ( tt.v[i] == ip0 )      break;
-    assert(i<3);
-    if ( i==3 ) return 0;
-
-    tt.v[i] = 0;
-
-    caltmp = MMG5_caltri(mesh,met,&tt);
-    if ( caltmp < MMG5_EPSD2 ) {
-      /* We don't check the input triangle qualities, thus we may have a very
-       * bad triangle in our mesh */
-      return 0;
-    }
-    calnew = MG_MIN(calnew,caltmp);
-
-    /* Local parameters for tt and iel */
-    hmax  = mesh->info.hmax;
-    hausd = mesh->info.hausd;
-
-    isloc = 0;
-    if ( mesh->info.parTyp & MG_Tetra ) {
-      for ( j=0; j<mesh->info.npar; ++j ) {
-        par = &mesh->info.par[j];
-
-        if ( par->elt != MMG5_Tetrahedron )  continue;
-        if ( par->ref != pt->ref ) continue;
-
-        hmax = par->hmax;
-        hausd = par->hausd;
-        isloc = 1;
-        break;
-      }
-    }
-    if ( mesh->info.parTyp & MG_Tria ) {
-      if ( isloc ) {
-        for ( j=0; j<mesh->info.npar; ++j ) {
-          par = &mesh->info.par[j];
-
-          if ( par->elt != MMG5_Triangle )  continue;
-          if ( par->ref != tt.ref ) continue;
-
-          hmax = MG_MIN(hmax,par->hmax);
-          hausd = MG_MIN(hausd,par->hausd);
-          break;
-        }
-      }
-      else {
-        for ( j=0; j<mesh->info.npar; ++j ) {
-          par = &mesh->info.par[j];
-
-          if ( par->elt != MMG5_Triangle )  continue;
-          if ( par->ref != tt.ref ) continue;
-
-          hmax  = par->hmax;
-          hausd = par->hausd;
-          isloc = 1;
-          break;
-        }
-      }
-    }
-
-    if ( MMG5_chkedg(mesh,&tt,MG_GET(pxt->ori,iface),hmax,hausd,isloc) > 0 ) {
-      memset(pxp,0,sizeof(MMG5_xPoint));
+  if ( MG_NOM & edgTag ) {
+    if ( !(MMG5_BezierNom(mesh,ip0,ip,step,o,no,to)) ) {
       return 0;
     }
   }
-  if ( calold < MMG5_EPSOK && calnew <= calold )    return 0;
-  else if ( calnew < calold )    return 0;
-  memset(pxp,0,sizeof(MMG5_xPoint));
-
-  /* Test : check whether all volumes remain positive with new position of the point */
-  // Dynamic allocations for windows compatibility
-  MMG5_SAFE_MALLOC(callist, ilistv, double,return 0);
-
-  calold = calnew = DBL_MAX;
-  for( l=0 ; l<ilistv ; l++ ){
-    iel = listv[l] / 4;
-    i0  = listv[l] % 4;
-    pt  = &mesh->tetra[iel];
-    pt0 = &mesh->tetra[0];
-    memcpy(pt0,pt,sizeof(MMG5_Tetra));
-    pt0->v[i0] = 0;
-    calold = MG_MIN(calold, pt->qual);
-    callist[l] = MMG5_orcal(mesh,met,0);
-    if (callist[l] < MMG5_NULKAL) {
-      MMG5_SAFE_FREE(callist);
+  else if ( MG_GEO & edgTag ) {
+    if ( !(MMG5_BezierRidge(mesh,ip0,ip,step,o,no,no2,to)) ) {
       return 0;
     }
-    calnew = MG_MIN(calnew,callist[l]);
   }
-  if ((calold < MMG5_EPSOK && calnew <= calold) ||
-      (calnew < MMG5_EPSOK) || (calnew <= 0.3*calold)) {
-    MMG5_SAFE_FREE(callist);
-    return 0;
-  } else if (improve && calnew < calold) {
-    MMG5_SAFE_FREE(callist);
-    return 0;
-  }
-
-  /* Update coordinates, normals, for new point */
-  if ( PROctree )
-    MMG3D_movePROctree(mesh, PROctree, ip0, o, p0->c);
-
-  p0->c[0] = o[0];
-  p0->c[1] = o[1];
-  p0->c[2] = o[2];
-
-  pxp = &mesh->xpoint[p0->xp];
-  pxp->n1[0] = no[0];
-  pxp->n1[1] = no[1];
-  pxp->n1[2] = no[2];
-
-  p0->n[0] = to[0];
-  p0->n[1] = to[1];
-  p0->n[2] = to[2];
-
-  for( l=0 ; l<ilistv ; l++ ){
-    (&mesh->tetra[listv[l]/4])->qual = callist[l];
-    (&mesh->tetra[listv[l]/4])->mark = mesh->mark;
-  }
-  MMG5_SAFE_FREE(callist);
-  return 1;
-}
-
-
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the metric structure.
- * \param PROctree pointer toward the PROctree structure.
- * \param listv pointer toward the volumic ball of the point.
- * \param ilistv size of the volumic ball.
- * \param lists pointer toward the surfacic ball of the point.
- * \param ilists size of the surfacic ball.
- * \param improve force the new minimum element quality to be greater or equal
- * than 1.02 of the old minimum element quality.
- * \return 0 if fail, 1 if success.
- *
- * Move boundary non manifold point, whose volumic and (exterior)
- * surfacic balls are passed
- *
- * \remark the metric is not interpolated at the new position.
- */
-int MMG5_movbdynompt_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree, int *listv,
-                          int ilistv, int *lists, int ilists,
-                          int improve){
-  MMG5_pTetra       pt,pt0;
-  MMG5_pxTetra      pxt;
-  MMG5_pPoint       p0,p1,p2,ppt0;
-  MMG5_pxPoint      pxp;
-  MMG5_Tria         tt;
-  MMG5_pPar         par;
-  double            step,ll1old,ll2old,calold,calnew,caltmp,*callist;
-  double            o[3],no[3],to[3],hmax,hausd;
-  int               ip0,ip1,ip2,ip,iel,ipa,ipb,l,iptmpa,iptmpb,nxp;
-  int               j,isloc;
-  int16_t           tag;
-  int8_t            iface,i,i0,iea,ieb,ie;
-
-  step = 0.1;
-  ip1 = ip2 = 0;
-  pt = &mesh->tetra[listv[0]/4];
-  ip0 = pt->v[listv[0]%4];
-  p0 = &mesh->point[ip0];
-
-  assert ( p0->tag & MG_NOM );
-
-  /* Travel surfacic ball and recover the two ending points of non manifold curve :
-     two senses must be used */
-  iel = lists[0]/4;
-  iface = lists[0]%4;
-  pt = &mesh->tetra[iel];
-  ipa = ipb = 0;
-  for (i=0; i<3; i++) {
-    if ( pt->v[MMG5_idir[iface][i]] != ip0 ) {
-      if ( !ipa )
-        ipa = pt->v[MMG5_idir[iface][i]];
-      else
-        ipb = pt->v[MMG5_idir[iface][i]];
+  else if ( MG_REF & edgTag ) {
+    if ( !(MMG5_BezierRef(mesh,ip0,ip,step,o,no,to)) ) {
+      return 0;
     }
-  }
-  assert(ipa && ipb);
-
-  for (l=1; l<ilists; l++) {
-    iel = lists[l]/4;
-    iface = lists[l]%4;
-    pt = &mesh->tetra[iel];
-    iea = ieb = 0;
-    for (i=0; i<3; i++) {
-      ie = MMG5_iarf[iface][i]; //edge i on face iface
-      if ( (pt->v[MMG5_iare[ie][0]] == ip0) || (pt->v[MMG5_iare[ie][1]] == ip0) ) {
-        if ( !iea )
-          iea = ie;
-        else
-          ieb = ie;
-      }
-    }
-    if ( pt->v[MMG5_iare[iea][0]] != ip0 )
-      iptmpa = pt->v[MMG5_iare[iea][0]];
-    else {
-      assert(pt->v[MMG5_iare[iea][1]] != ip0);
-      iptmpa = pt->v[MMG5_iare[iea][1]];
-    }
-    if ( pt->v[MMG5_iare[ieb][0]] != ip0 )
-      iptmpb = pt->v[MMG5_iare[ieb][0]];
-    else {
-      assert(pt->v[MMG5_iare[ieb][1]] != ip0);
-      iptmpb = pt->v[MMG5_iare[ieb][1]];
-    }
-    if ( (iptmpa == ipa) || (iptmpa == ipb) ) {
-      if ( pt->xt )  tag = mesh->xtetra[pt->xt].tag[iea];
-      else  tag = 0;
-      if ( MG_NOM & tag ) {
-        ip1 = iptmpa;
-        break;
-      }
-    }
-    if ( (iptmpb == ipa) || (iptmpb == ipb) ) {
-      if ( pt->xt )  tag = mesh->xtetra[pt->xt].tag[ieb];
-      else  tag = 0;
-      if ( MG_NOM & tag ) {
-        ip1 = iptmpb;
-        break;
-      }
-    }
-    ipa = iptmpa;
-    ipb = iptmpb;
-  }
-
-  /* Now travel surfacic list in the reverse sense so as to get the second non manifold point */
-  iel = lists[0]/4;
-  iface = lists[0]%4;
-  pt = &mesh->tetra[iel];
-  ipa = ipb = 0;
-  for (i=0; i<3; i++) {
-    if ( pt->v[MMG5_idir[iface][i]] != ip0 ) {
-      if ( !ipa )
-        ipa = pt->v[MMG5_idir[iface][i]];
-      else
-        ipb = pt->v[MMG5_idir[iface][i]];
-    }
-  }
-  assert(ipa && ipb);
-
-  for (l=ilists-1; l>0; l--) {
-    iel         = lists[l] / 4;
-    iface = lists[l] % 4;
-    pt          = &mesh->tetra[iel];
-    iea         = ieb = 0;
-    for (i=0; i<3; i++) {
-      ie = MMG5_iarf[iface][i]; //edge i on face iface
-      if ( (pt->v[MMG5_iare[ie][0]] == ip0) || (pt->v[MMG5_iare[ie][1]] == ip0) ) {
-        if ( !iea )
-          iea = ie;
-        else
-          ieb = ie;
-      }
-    }
-    if ( pt->v[MMG5_iare[iea][0]] != ip0 )
-      iptmpa = pt->v[MMG5_iare[iea][0]];
-    else {
-      assert(pt->v[MMG5_iare[iea][1]] != ip0);
-      iptmpa = pt->v[MMG5_iare[iea][1]];
-    }
-    if ( pt->v[MMG5_iare[ieb][0]] != ip0 )
-      iptmpb = pt->v[MMG5_iare[ieb][0]];
-    else {
-      assert(pt->v[MMG5_iare[ieb][1]] != ip0);
-      iptmpb = pt->v[MMG5_iare[ieb][1]];
-    }
-    if ( (iptmpa == ipa) || (iptmpa == ipb) ) {
-      if ( pt->xt )  tag = mesh->xtetra[pt->xt].tag[iea];
-      else  tag = 0;
-      if ( MG_NOM & tag ) {
-        ip2 = iptmpa;
-        break;
-      }
-    }
-    if ( (iptmpb == ipa) || (iptmpb == ipb) ) {
-      assert(pt->xt);
-      tag = mesh->xtetra[pt->xt].tag[ieb];
-      if ( MG_NOM & tag ) {
-        ip2 = iptmpb;
-        break;
-      }
-    }
-    ipa = iptmpa;
-    ipb = iptmpb;
-  }
-  if ( !(ip1 && ip2 && (ip1 != ip2)) )  return 0;
-
-  /* At this point, we get the point extremities of the non manifold curve passing through ip0 :
-     ip1, ip2, along with support tets it1,it2, the surface faces iface1,iface2, and the
-     associated edges ie1,ie2.*/
-
-  p1 = &mesh->point[ip1];
-  p2 = &mesh->point[ip2];
-
-  ll1old = (p1->c[0] -p0->c[0])* (p1->c[0] -p0->c[0]) \
-    + (p1->c[1] -p0->c[1])* (p1->c[1] -p0->c[1])      \
-    + (p1->c[2] -p0->c[2])* (p1->c[2] -p0->c[2]);
-  ll2old = (p2->c[0] -p0->c[0])* (p2->c[0] -p0->c[0]) \
-    + (p2->c[1] -p0->c[1])* (p2->c[1] -p0->c[1])      \
-    + (p2->c[2] -p0->c[2])* (p2->c[2] -p0->c[2]);
-
-  if ( ll1old < ll2old ) { //move towards p2
-    ip = ip2;
   }
   else {
-    ip = ip1;
+    assert ( 0 && "Unexpected edge tag in this function");
+    return 0;
   }
-
-  /* Compute support of the associated edge, and features of the new position */
-  if ( !(MMG5_BezierNom(mesh,ip0,ip,step,o,no,to)) )  return 0;
 
   /* Test : make sure that geometric approximation has not been degraded too much */
   ppt0 = &mesh->point[0];
@@ -1329,6 +1055,13 @@ int MMG5_movbdynompt_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree
   pxp->n1[0] = no[0];
   pxp->n1[1] = no[1];
   pxp->n1[2] = no[2];
+
+  if ( isrid ) {
+    /* Copy the second normal for ridge point */
+    pxp->n2[0] = no2[0];
+    pxp->n2[1] = no2[1];
+    pxp->n2[2] = no2[2];
+  }
 
   /* For each surface triangle, build a virtual displaced triangle for check purposes */
   calold = calnew = DBL_MAX;
@@ -1342,8 +1075,11 @@ int MMG5_movbdynompt_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree
     caltmp = MMG5_caltri(mesh,met,&tt);
     calold = MG_MIN(calold,caltmp);
 
-    for( i=0 ; i<3 ; i++ )
-      if ( tt.v[i] == ip0 )      break;
+    for( i=0 ; i<3 ; i++ ) {
+      if ( tt.v[i] == ip0 ) {
+        break;
+      }
+    }
     assert(i<3);
     if ( i==3 ) return 0;
 
@@ -1413,9 +1149,6 @@ int MMG5_movbdynompt_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree
   memset(pxp,0,sizeof(MMG5_xPoint));
 
   /* Test : check whether all volumes remain positive with new position of the point */
-  // Dynamic allocations for windows compatibility
-  MMG5_SAFE_MALLOC(callist, ilistv, double,return 0);
-
   calold = calnew = DBL_MAX;
   for( l=0 ; l<ilistv ; l++ ){
     iel = listv[l] / 4;
@@ -1425,25 +1158,24 @@ int MMG5_movbdynompt_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     pt0->v[i0] = 0;
     calold = MG_MIN(calold, pt->qual);
-    callist[l]= MMG5_orcal(mesh,met,0);
+    callist[l] = MMG5_orcal(mesh,met,0);
     if (callist[l] < MMG5_NULKAL) {
-      MMG5_SAFE_FREE(callist);
       return 0;
     }
     calnew = MG_MIN(calnew,callist[l]);
   }
   if ((calold < MMG5_EPSOK && calnew <= calold) ||
       (calnew < MMG5_EPSOK) || (calnew <= 0.3*calold)) {
-    MMG5_SAFE_FREE(callist);
     return 0;
   } else if (improve && calnew < calold) {
-    MMG5_SAFE_FREE(callist);
     return 0;
   }
 
   /* Update coordinates, normals, for new point */
-  if ( PROctree )
+  if ( PROctree ) {
     MMG3D_movePROctree(mesh, PROctree, ip0, o, p0->c);
+  }
+
   p0->c[0] = o[0];
   p0->c[1] = o[1];
   p0->c[2] = o[2];
@@ -1453,16 +1185,69 @@ int MMG5_movbdynompt_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree
   pxp->n1[1] = no[1];
   pxp->n1[2] = no[2];
 
+  if ( isrid ) {
+    /* Copy the second normal for ridge point */
+    pxp->n2[0] = no2[0];
+    pxp->n2[1] = no2[1];
+    pxp->n2[2] = no2[2];
+  }
+
   p0->n[0] = to[0];
   p0->n[1] = to[1];
   p0->n[2] = to[2];
 
-  for(l=0; l<ilistv; l++){
+  for( l=0 ; l<ilistv ; l++ ){
     (&mesh->tetra[listv[l]/4])->qual = callist[l];
     (&mesh->tetra[listv[l]/4])->mark = mesh->mark;
   }
-  MMG5_SAFE_FREE(callist);
   return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param PROctree pointer toward the PROctree structure.
+ * \param listv pointer toward the volumic ball of the point.
+ * \param ilistv size of the volumic ball.
+ * \param lists pointer toward the surfacic ball of the point.
+ * \param ilists size of the surfacic ball.
+ * \param improve force the new minimum element quality to be greater or equal
+ * than 1.02 of the old minimum element quality.
+ *
+ * \return 0 if fail, 1 if success.
+ *
+ * Move boundary reference point, whose volumic and surfacic balls are passed.
+ *
+ * \remark the metric is not interpolated at the new position.
+ */
+int MMG5_movbdyrefpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctree, int *listv,
+                         int ilistv, int *lists, int ilists,int improve){
+
+  return MMG3D_movbdycurvept_iso(mesh,met,PROctree,listv,ilistv,lists,ilists,improve,MG_REF);
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param PROctree pointer toward the PROctree structure.
+ * \param listv pointer toward the volumic ball of the point.
+ * \param ilistv size of the volumic ball.
+ * \param lists pointer toward the surfacic ball of the point.
+ * \param ilists size of the surfacic ball.
+ * \param improve force the new minimum element quality to be greater or equal
+ * than 1.02 of the old minimum element quality.
+ *
+ * \return 0 if fail, 1 if success.
+ *
+ * Move boundary non-manifold point, whose volumic and surfacic balls are
+ * passed.
+ *
+ * \remark the metric is not interpolated at the new position.
+ */
+int MMG5_movbdynompt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctree, int *listv,
+                         int ilistv, int *lists, int ilists,int improve){
+
+  return MMG3D_movbdycurvept_iso(mesh,met,PROctree,listv,ilistv,lists,ilists,improve,MG_NOM);
 }
 
 /**
@@ -1484,7 +1269,7 @@ int MMG5_movbdynomintpt_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROct
   MMG5_pTetra       pt,pt0;
   MMG5_pxTetra      pxt;
   MMG5_pPoint       p0,p1,p2,ppt0;
-  double            step,ll1old,ll2old,calold,calnew,*callist;
+  double            step,ll1old,ll2old,calold,calnew,callist[MMG3D_LMAX+2];
   double            o[3],no[3],to[3];
   int               ip0,ip1,ip2,ip,iel,ipa,l;
   int8_t            i,i0,ie;
@@ -1538,9 +1323,6 @@ int MMG5_movbdynomintpt_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROct
   if ( !(MMG5_BezierNom(mesh,ip0,ip,step,o,no,to)) )  return 0;
 
   /* Test : check whether all volumes remain positive with new position of the point */
-  // Dynamic allocations for windows compatibility
-  MMG5_SAFE_MALLOC(callist, ilistv, double,return 0);
-
   ppt0 = &mesh->point[0];
   ppt0->c[0] = o[0];
   ppt0->c[1] = o[1];
@@ -1559,17 +1341,14 @@ int MMG5_movbdynomintpt_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROct
     calold = MG_MIN(calold, pt->qual);
     callist[l]= MMG5_orcal(mesh,met,0);
     if (callist[l] < MMG5_NULKAL) {
-      MMG5_SAFE_FREE(callist);
       return 0;
     }
     calnew = MG_MIN(calnew,callist[l]);
   }
   if ((calold < MMG5_EPSOK && calnew <= calold) ||
       (calnew < MMG5_EPSOK) || (calnew <= 0.3*calold)) {
-    MMG5_SAFE_FREE(callist);
     return 0;
   } else if (improve && calnew < calold) {
-    MMG5_SAFE_FREE(callist);
     return 0;
   }
 
@@ -1590,7 +1369,6 @@ int MMG5_movbdynomintpt_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROct
     (&mesh->tetra[listv[l]/4])->mark = mesh->mark;
   }
 
-  MMG5_SAFE_FREE(callist);
   return 1;
 }
 
@@ -1610,341 +1388,9 @@ int MMG5_movbdynomintpt_iso(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROct
  *
  */
 int MMG5_movbdyridpt_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctree, int *listv,
-                          int ilistv,int *lists,int ilists,
-                          int improve) {
-  MMG5_pTetra          pt,pt0;
-  MMG5_pxTetra         pxt;
-  MMG5_pPoint          p0,p1,p2,ppt0;
-  MMG5_Tria            tt;
-  MMG5_pxPoint         pxp;
-  MMG5_pPar            par;
-  double               step,ll1old,ll2old,o[3],no1[3],no2[3],to[3];
-  double               calold,calnew,caltmp,*callist,hmax,hausd;
-  int                  l,iel,ip0,ipa,ipb,iptmpa,iptmpb,ip1,ip2,ip,nxp;
-  int                  j,isloc;
-  int16_t              tag;
-  uint8_t              i,i0,ie,iface,iea,ieb;
+                          int ilistv,int *lists,int ilists,int improve) {
 
-  step = 0.1;
-  ip1 = ip2 = 0;
-  pt    = &mesh->tetra[listv[0]/4];
-  ip0 = pt->v[listv[0]%4];
-  p0    = &mesh->point[ip0];
-
-  assert ( MG_GEO & p0->tag );
-
-  /* Travel surfacic ball an recover the two ending points of ridge : two senses must be used
-     POSSIBLE OPTIMIZATION HERE : One travel only is needed */
-  iel           = lists[0] / 4;
-  iface         = lists[0] % 4;
-  pt            = &mesh->tetra[iel];
-  ipa           = ipb = 0;
-  for (i=0; i<3; i++) {
-    if ( pt->v[MMG5_idir[iface][i]] != ip0 ) {
-      if ( !ipa )
-        ipa = pt->v[MMG5_idir[iface][i]];
-      else
-        ipb = pt->v[MMG5_idir[iface][i]];
-    }
-  }
-  assert(ipa && ipb);
-
-  for (l=1; l<ilists; l++) {
-    iel         = lists[l] / 4;
-    iface = lists[l] % 4;
-    pt  = &mesh->tetra[iel];
-    iea = ieb = 0;
-    for (i=0; i<3; i++) {
-      ie = MMG5_iarf[iface][i]; //edge i on face iface
-      if ( (pt->v[MMG5_iare[ie][0]] == ip0) || (pt->v[MMG5_iare[ie][1]] == ip0) ) {
-        if ( !iea )
-          iea = ie;
-        else
-          ieb = ie;
-      }
-    }
-    if ( pt->v[MMG5_iare[iea][0]] != ip0 )
-      iptmpa = pt->v[MMG5_iare[iea][0]];
-    else {
-      assert(pt->v[MMG5_iare[iea][1]] != ip0);
-      iptmpa = pt->v[MMG5_iare[iea][1]];
-    }
-    if ( pt->v[MMG5_iare[ieb][0]] != ip0 )
-      iptmpb = pt->v[MMG5_iare[ieb][0]];
-    else {
-      assert(pt->v[MMG5_iare[ieb][1]] != ip0);
-      iptmpb = pt->v[MMG5_iare[ieb][1]];
-    }
-    if ( (iptmpa == ipa) || (iptmpa == ipb) ) {
-      if ( pt->xt )  tag = mesh->xtetra[pt->xt].tag[iea];
-      else  tag = 0;
-      if ( MG_GEO & tag ) {
-        ip1 = iptmpa;
-        break;
-      }
-    }
-    if ( (iptmpb == ipa) || (iptmpb == ipb) ) {
-      if ( pt->xt )  tag = mesh->xtetra[pt->xt].tag[ieb];
-      else  tag = 0;
-      if ( MG_GEO & tag ) {
-        ip1 = iptmpb;
-        break;
-      }
-    }
-    ipa = iptmpa;
-    ipb = iptmpb;
-  }
-
-  /* Now travel surfacic list in the reverse sense so as to get the second ridge */
-  iel           = lists[0] / 4;
-  iface = lists[0] % 4;
-  pt    = &mesh->tetra[iel];
-  ipa = ipb = 0;
-  for (i=0; i<3; i++) {
-    if ( pt->v[MMG5_idir[iface][i]] != ip0 ) {
-      if ( !ipa )
-        ipa = pt->v[MMG5_idir[iface][i]];
-      else
-        ipb = pt->v[MMG5_idir[iface][i]];
-    }
-  }
-  assert(ipa && ipb);
-
-  for (l=ilists-1; l>0; l--) {
-    iel         = lists[l]/4;
-    iface = lists[l]%4;
-    pt  = &mesh->tetra[iel];
-    iea = ieb = 0;
-    for (i=0; i<3; i++) {
-      ie = MMG5_iarf[iface][i]; //edge i on face iface
-      if ( (pt->v[MMG5_iare[ie][0]] == ip0) || (pt->v[MMG5_iare[ie][1]] == ip0) ) {
-        if ( !iea )
-          iea = ie;
-        else
-          ieb = ie;
-      }
-    }
-    if ( pt->v[MMG5_iare[iea][0]] != ip0 )
-      iptmpa = pt->v[MMG5_iare[iea][0]];
-    else {
-      assert(pt->v[MMG5_iare[iea][1]] != ip0);
-      iptmpa = pt->v[MMG5_iare[iea][1]];
-    }
-    if ( pt->v[MMG5_iare[ieb][0]] != ip0 )
-      iptmpb = pt->v[MMG5_iare[ieb][0]];
-    else {
-      assert(pt->v[MMG5_iare[ieb][1]] != ip0);
-      iptmpb = pt->v[MMG5_iare[ieb][1]];
-    }
-    if ( (iptmpa == ipa) || (iptmpa == ipb) ) {
-      if ( pt->xt )  tag = mesh->xtetra[pt->xt].tag[iea];
-      else  tag = 0;
-      if ( MG_GEO & tag ) {
-        ip2 = iptmpa;
-        break;
-      }
-    }
-    if ( (iptmpb == ipa) || (iptmpb == ipb) ) {
-      if ( pt->xt )  tag = mesh->xtetra[pt->xt].tag[ieb];
-      else  tag = 0;
-      if ( MG_GEO & tag ) {
-        ip2 = iptmpb;
-        break;
-      }
-    }
-    ipa = iptmpa;
-    ipb = iptmpb;
-  }
-  if ( !(ip1 && ip2 && (ip1 != ip2)) ) return 0;
-
-  /* At this point, we get the point extremities of the ridge curve passing through ip0 :
-     ip1, ip2, along with support tets it1,it2, the surface faces iface1,iface2, and the
-     associated edges ie1,ie2.*/
-
-  /* Changes needed for choice of time step : see manuscript notes */
-  p1 = &mesh->point[ip1];
-  p2 = &mesh->point[ip2];
-
-  ll1old = (p1->c[0] -p0->c[0])* (p1->c[0] -p0->c[0]) \
-    + (p1->c[1] -p0->c[1])* (p1->c[1] -p0->c[1])      \
-    + (p1->c[2] -p0->c[2])* (p1->c[2] -p0->c[2]);
-  ll2old = (p2->c[0] -p0->c[0])* (p2->c[0] -p0->c[0]) \
-    + (p2->c[1] -p0->c[1])* (p2->c[1] -p0->c[1])      \
-    + (p2->c[2] -p0->c[2])* (p2->c[2] -p0->c[2]);
-
-  if ( ll1old < ll2old ) { //move towards p2
-    ip = ip2;
-  }
-  else {
-    ip = ip1;
-  }
-
-  /* Compute support of the associated edge, and features of the new position */
-  if ( !(MMG5_BezierRidge(mesh,ip0,ip,step,o,no1,no2,to)) )  return 0;
-
-  /* Test : make sure that geometric approximation has not been degraded too much */
-  ppt0 = &mesh->point[0];
-  ppt0->c[0] = o[0];
-  ppt0->c[1] = o[1];
-  ppt0->c[2] = o[2];
-  ppt0->tag      = p0->tag;
-  ppt0->ref      = p0->ref;
-
-  nxp = mesh->xp+1;
-  if ( nxp > mesh->xpmax ) {
-    MMG5_TAB_RECALLOC(mesh,mesh->xpoint,mesh->xpmax,MMG5_GAP,MMG5_xPoint,
-                       "larger xpoint table",
-                       return 0);
-  }
-  ppt0->xp = nxp;
-  pxp = &mesh->xpoint[nxp];
-  memcpy(pxp,&(mesh->xpoint[p0->xp]),sizeof(MMG5_xPoint));
-
-  ppt0->n[0] = to[0];
-  ppt0->n[1] = to[1];
-  ppt0->n[2] = to[2];
-
-  pxp->n1[0] = no1[0];
-  pxp->n1[1] = no1[1];
-  pxp->n1[2] = no1[2];
-
-  pxp->n2[0] = no2[0];
-  pxp->n2[1] = no2[1];
-  pxp->n2[2] = no2[2];
-
-  /* For each surfacic triangle, build a virtual displaced triangle for check purposes */
-  calold = calnew = DBL_MAX;
-  for (l=0; l<ilists; l++) {
-    iel         = lists[l] / 4;
-    iface       = lists[l] % 4;
-    pt          = &mesh->tetra[iel];
-    pxt         = &mesh->xtetra[pt->xt];
-
-    MMG5_tet2tri(mesh,iel,iface,&tt);
-    calold = MG_MIN(calold,MMG5_caltri(mesh,met,&tt));
-
-    for (i=0; i<3; i++) {
-      if ( tt.v[i] == ip0 )      break;
-    }
-    assert(i<3);
-
-    tt.v[i] = 0;
-
-    caltmp = MMG5_caltri(mesh,met,&tt);
-    if ( caltmp < MMG5_EPSD2 )        return 0;
-    calnew = MG_MIN(calnew,caltmp);
-
-    /* Local parameters for tt and iel */
-    hmax  = mesh->info.hmax;
-    hausd = mesh->info.hausd;
-
-    isloc = 0;
-    if ( mesh->info.parTyp & MG_Tetra ) {
-      for ( j=0; j<mesh->info.npar; ++j ) {
-        par = &mesh->info.par[j];
-
-        if ( par->elt != MMG5_Tetrahedron )  continue;
-        if ( par->ref != pt->ref ) continue;
-
-        hmax = par->hmax;
-        hausd = par->hausd;
-        isloc = 1;
-        break;
-      }
-    }
-    if ( mesh->info.parTyp & MG_Tria ) {
-      if ( isloc ) {
-        for ( j=0; j<mesh->info.npar; ++j ) {
-          par = &mesh->info.par[j];
-
-          if ( par->elt != MMG5_Triangle )  continue;
-          if ( par->ref != tt.ref ) continue;
-
-          hmax = MG_MIN(hmax,par->hmax);
-          hausd = MG_MIN(hausd,par->hausd);
-          break;
-        }
-      }
-      else {
-        for ( j=0; j<mesh->info.npar; ++j ) {
-          par = &mesh->info.par[j];
-
-          if ( par->elt != MMG5_Triangle )  continue;
-          if ( par->ref != tt.ref ) continue;
-
-          hmax  = par->hmax;
-          hausd = par->hausd;
-          isloc = 1;
-          break;
-        }
-      }
-    }
-
-    if ( MMG5_chkedg(mesh,&tt,MG_GET(pxt->ori,iface),hmax,hausd,isloc) > 0 ) {
-      memset(pxp,0,sizeof(MMG5_xPoint));
-      return 0;
-    }
-  }
-  if ( calold < MMG5_EPSOK && calnew <= calold )    return 0;
-  else if ( calnew <= calold )  return 0;
-  memset(pxp,0,sizeof(MMG5_xPoint));
-
-  /* Test : check whether all volumes remain positive with new position of the point */
-  // Dynamic allocations for windows compatibility
-  MMG5_SAFE_MALLOC(callist, ilistv, double,return 0);
-
-  calold = calnew = DBL_MAX;
-  for (l=0; l<ilistv; l++) {
-    iel = listv[l] / 4;
-    i0  = listv[l] % 4;
-    pt  = &mesh->tetra[iel];
-    pt0 = &mesh->tetra[0];
-    memcpy(pt0,pt,sizeof(MMG5_Tetra));
-    pt0->v[i0] = 0;
-    calold = MG_MIN(calold, pt->qual);
-    callist[l]=MMG5_orcal(mesh,met,0);
-    if (callist[l] < MMG5_NULKAL) {
-      MMG5_SAFE_FREE(callist);
-      return 0;
-    }
-    calnew = MG_MIN(calnew,callist[l]);
-  }
-  if ((calold < MMG5_EPSOK && calnew <= calold) ||
-      (calnew < MMG5_EPSOK) || (calnew <= 0.3*calold)) {
-    MMG5_SAFE_FREE(callist);
-    return 0;
-  } else if (improve && calnew < calold) {
-    MMG5_SAFE_FREE(callist);
-    return 0;
-  }
-
-  /* Update coordinates, normals, for new point */
-  if ( PROctree )
-    MMG3D_movePROctree(mesh, PROctree, ip0, o, p0->c);
-
-  p0->c[0] = o[0];
-  p0->c[1] = o[1];
-  p0->c[2] = o[2];
-
-  pxp = &mesh->xpoint[p0->xp];
-  pxp->n1[0] = no1[0];
-  pxp->n1[1] = no1[1];
-  pxp->n1[2] = no1[2];
-
-  pxp->n2[0] = no2[0];
-  pxp->n2[1] = no2[1];
-  pxp->n2[2] = no2[2];
-
-  p0->n[0] = to[0];
-  p0->n[1] = to[1];
-  p0->n[2] = to[2];
-
-  for(l=0; l<ilistv; l++){
-    (&mesh->tetra[listv[l]/4])->qual = callist[l];
-    (&mesh->tetra[listv[l]/4])->mark = mesh->mark;
-  }
-  MMG5_SAFE_FREE(callist);
-  return 1;
+  return MMG3D_movbdycurvept_iso(mesh,met,PROctree,listv,ilistv,lists,ilists,improve,MG_GEO);
 }
 
 

@@ -237,8 +237,12 @@ nextstep1:
     pt->qual=MMG5_caltet33_ani(mesh,met,pt);
     pt1->qual=MMG5_caltet33_ani(mesh,met,pt1);
   }
-  else
-  {
+  else if ( (!met) || (!met->m) ) {
+    /* in ls mode + -A option, orcal calls caltet_ani that fails */
+    pt->qual=MMG5_caltet_iso(mesh,met,pt);
+    pt1->qual=MMG5_caltet_iso(mesh,met,pt1);
+  }
+  else {
     pt->qual=MMG5_orcal(mesh,met,k);
     pt1->qual=MMG5_orcal(mesh,met,iel);
   }
@@ -1434,8 +1438,13 @@ int MMG5_split2sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp
     pt[1]->qual=MMG5_caltet33_ani(mesh,met,pt[1]);
     pt[2]->qual=MMG5_caltet33_ani(mesh,met,pt[2]);
   }
-  else
-  {
+  else if ( (!met) || (!met->m) ) {
+    /* in ls mode + -A option, orcal calls caltet_ani that fails */
+    pt[0]->qual=MMG5_caltet_iso(mesh,met,pt[0]);
+    pt[1]->qual=MMG5_caltet_iso(mesh,met,pt[1]);
+    pt[2]->qual=MMG5_caltet_iso(mesh,met,pt[2]);
+  }
+  else {
     pt[0]->qual=MMG5_orcal(mesh,met,newtet[0]);
     pt[1]->qual=MMG5_orcal(mesh,met,newtet[1]);
     pt[2]->qual=MMG5_orcal(mesh,met,newtet[2]);
@@ -2526,6 +2535,12 @@ int MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidT
     pt[1]->qual=MMG5_caltet33_ani(mesh,met,pt[1]);
     pt[2]->qual=MMG5_caltet33_ani(mesh,met,pt[2]);
     pt[3]->qual=MMG5_caltet33_ani(mesh,met,pt[3]);
+  }
+  else if ( (!met) || (!met->m) ) {
+    /* in ls mode + -A option, orcal calls caltet_ani that fails */
+    for (i=0; i<4; i++) {
+      pt[i]->qual=MMG5_caltet_iso(mesh,met,pt[i]);
+    }
   }
   else {
     pt[0]->qual=MMG5_orcal(mesh,met,newtet[0]);
@@ -4362,6 +4377,12 @@ int MMG5_split4op(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp
   if ( (!metRidTyp) && met->m && met->size>1 ) {
     for (i=0; i<6; i++) {
       pt[i]->qual=MMG5_caltet33_ani(mesh,met,pt[i]);
+    }
+  }
+  else if ( (!met) || (!met->m) ) {
+    /* in ls mode + -A option, orcal calls caltet_ani that fails */
+    for (i=0; i<6; i++) {
+      pt[i]->qual=MMG5_caltet_iso(mesh,met,pt[i]);
     }
   }
   else {
