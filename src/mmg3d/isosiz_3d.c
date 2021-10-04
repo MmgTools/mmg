@@ -1026,7 +1026,7 @@ void MMG3D_mark_pointsOnReqEdge_fromTetra (  MMG5_pMesh mesh ) {
   MMG5_pxTetra pxt;
   MMG5_pPoint  ppt;
   int          k;
-  int8_t       i;
+  int8_t       ia,i;
 
   for ( k=1; k<=mesh->np; k++ ) {
     ppt = &mesh->point[k];
@@ -1039,10 +1039,17 @@ void MMG3D_mark_pointsOnReqEdge_fromTetra (  MMG5_pMesh mesh ) {
     if ( (!MG_EOK(pt)) || !pt->xt ) { continue; }
 
     pxt = &mesh->xtetra[pt->xt];
-    for (i=0; i<6; i++) {
-      if ( pxt->tag[i] & MG_REQ ) {
-        mesh->point[pt->v[MMG5_iare[i][0]]].s = 4*mesh->ne+3;
-        mesh->point[pt->v[MMG5_iare[i][1]]].s = 4*mesh->ne+3;
+    for (ia=0; ia<6; ia++) {
+      if ( pxt->tag[ia] & MG_REQ ) {
+        for (i=0; i<2; i++) {
+          ppt = &mesh->point[pt->v[MMG5_iare[ia][i]]];
+          if( !ppt->s ) {
+            ppt->s = 4*mesh->ne+3;
+#ifdef USE_POINTMAP
+            ppt->src *= -1;
+#endif
+          }
+        }
       }
     }
   }
@@ -1218,6 +1225,11 @@ int MMG3D_gradsizreq_iso(MMG5_pMesh mesh,MMG5_pSol met) {
             }
           }
           met->m[ipslave]           = hn;
+#ifdef USE_POINTMAP
+          if( !mesh->point[ipslave].s ) {
+            mesh->point[ipslave].src *= -1;
+          }
+#endif
           mesh->point[ipslave].s    = mesh->point[ipmaster].s - 1;
           nu++;
         }

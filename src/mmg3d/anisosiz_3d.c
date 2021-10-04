@@ -2092,6 +2092,11 @@ int MMG3D_gradsizreq_ani(MMG5_pMesh mesh,MMG5_pSol met) {
               /* gradation along the tangent plane */
               ier = MMG5_grad2metSurfreq(mesh,met,&ptt,npmaster,npslave);
               if ( ier ) {
+#ifdef USE_POINTMAP
+                if( !mesh->point[npslave].s ) {
+                  mesh->point[npslave].src *= -1;
+                }
+#endif
                 mesh->point[npslave].s = mesh->point[npmaster].s - 1;
                 nu++;
               }
