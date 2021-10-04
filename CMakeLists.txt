@@ -20,7 +20,7 @@
 ##  use this copy of the mmg distribution only if you accept them.
 ## =============================================================================
 
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8.12)
 
 # if PROJECT_NAME is defined, mmg is a subproject
 if(DEFINED PROJECT_NAME)
@@ -318,7 +318,7 @@ ENDFUNCTION()
 
 OPTION(BUILD_SHARED_LIBS "Build shared libraries" OFF)
 INVERT_BOOL("BUILD_STATIC_LIBS" ${BUILD_SHARED_LIBS})
-IF (${BUILD_STATIC_LIBS} AND NOT CMAKE_POSITION_INDEPENDENT_CODE)
+IF ( (${BUILD_STATIC_LIBS} EQUAL ON) AND NOT CMAKE_POSITION_INDEPENDENT_CODE)
   SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
 ENDIF()
 
