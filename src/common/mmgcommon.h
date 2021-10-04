@@ -726,8 +726,11 @@ int  MMG5_updatemetreq_ani(double *n,double dn[2],double vp[2][2]);
 int    MMG5_swapbin(int sbin);
 float  MMG5_swapf(float sbin);
 double MMG5_swapd(double sbin);
+int MMG5_MultiMat_init(MMG5_pMesh);
+int MMG5_isLevelSet(MMG5_pMesh,int,int);
 int MMG5_isSplit(MMG5_pMesh ,int ,int *,int *);
-int MMG5_getIniRef(MMG5_pMesh ,int );
+int MMG5_isNotSplit(MMG5_pMesh ,int);
+int MMG5_getStartRef(MMG5_pMesh ,int, int *);
 
 
 /* tools */

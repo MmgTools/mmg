@@ -82,7 +82,7 @@ int MMG2D_defaultValues(MMG5_pMesh mesh) {
  *
  */
 int MMG2D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
-  int        ret,ref,i,j,npar;
+  int        ret,ref,i,j,npar,rin,rex,split;
   float      fp1,fp2,fp3;
   char       *ptr,data[256];
   FILE       *in;
@@ -113,32 +113,29 @@ int MMG2D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
 
     /* Read user-defined references for the LS mode */
     if ( !strcmp(data,"lsreferences") ) {
-      ret = fscanf(in,"%d",&mesh->info.nmat);
-
+      ret = fscanf(in,"%d",&npar);
       if ( !ret ) {
-        fprintf(stderr,"  %%%% Wrong format for lsreferences: %d\n",mesh->info.nmat);
+        fprintf(stderr,"  %%%% Wrong format for lsreferences: %d\n",npar);
         return (0);
       }
 
-      if ( mesh->info.nmat ) {
-        MMG5_ADD_MEM(mesh,(mesh->info.nmat)*sizeof(MMG5_Mat),"multi material params",return 0);
-        MMG5_SAFE_CALLOC(mesh->info.mat,mesh->info.nmat,MMG5_Mat,return 0);
-        for (i=0; i<mesh->info.nmat; i++) {
-          pm = &mesh->info.mat[i];
-          MMG_FSCANF(in,"%d",&pm->ref);
-          fgetpos(in,&position);
-          MMG_FSCANF(in,"%255s",data);
-          if ( !strcmp(data,"nosplit") ) {
-            pm->dospl = 0;
-            pm->rin = pm->ref;
-            pm->rex = pm->ref;
-          }
-          else {
-            fsetpos(in,&position);
-            MMG_FSCANF(in,"%d",&pm->rin);
-            MMG_FSCANF(in,"%d",&pm->rex);
-            pm->dospl = 1;
-          }
+      if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_numberOfMat,npar) ) {
+        return 0;
+      }
+      for (i=0; i<mesh->info.nmat; i++) {
+        MMG_FSCANF(in,"%d",&ref);
+        fgetpos(in,&position);
+        MMG_FSCANF(in,"%255s",data);
+        split = MMG5_MMAT_NoSplit;
+        rin = rex = ref;
+        if ( strcmp(data,"nosplit") ) {
+          fsetpos(in,&position);
+          split = MMG5_MMAT_Split;
+          MMG_FSCANF(in,"%d",&rin);
+          MMG_FSCANF(in,"%d",&rex);
+        }
+        if ( !MMG2D_Set_multiMat(mesh,met,ref,split,rin,rex) ) {
+          return 0;
         }
       }
     }
