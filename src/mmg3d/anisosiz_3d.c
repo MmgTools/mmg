@@ -2093,7 +2093,7 @@ int MMG3D_gradsizreq_ani(MMG5_pMesh mesh,MMG5_pSol met) {
               ier = MMG5_grad2metSurfreq(mesh,met,&ptt,npmaster,npslave);
               if ( ier ) {
 #ifdef USE_POINTMAP
-                if( !mesh->point[npslave].s ) {
+                if( !mesh->point[npslave].s ) {
                   mesh->point[npslave].src *= -1;
                 }
 #endif
