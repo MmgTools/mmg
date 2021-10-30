@@ -68,10 +68,6 @@ extern "C" {
 #define MMG5_BITWIZE_MB_TO_B 20 /**< Bitwise convertion from Mo to O */
 #define MMG5_MEMPERCENT 0.5     /**< Percent of RAM used by default */
 
-/* Domain refs in iso mode */
-#define MG_PLUS    2
-#define MG_MINUS   3
-
 /* Macro for unset or unititialized mark */
 #define MMG5_UNSET -1
 
