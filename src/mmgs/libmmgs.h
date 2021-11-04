@@ -1458,6 +1458,24 @@ int MMGS_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *file
  * \param filename name of file.
  * \return 0 if failed, 1 otherwise.
  *
+ * Read mesh data.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMGS_LOADGENERICMESH(mesh,sol,filename,strlen0,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
+ * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int MMGS_loadGenericMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param filename name of file.
+ * \return 0 if failed, 1 otherwise.
+ *
  * Save mesh data.
  *
  * \remark Fortran interface:
@@ -1618,6 +1636,25 @@ int MMGS_saveMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *file
  *
  */
   int MMGS_saveVtpMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param filename name of file.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Save mesh data in a file whose format depends on the filename extension.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMGS_SAVEGENERICMESH(mesh,sol,filename,strlen0,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
+ * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int MMGS_saveGenericMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.

@@ -1636,6 +1636,25 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  *
  */
   int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,const char * filename);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param filename name of file.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Read mesh data.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG2D_LOADGENERICMESH(mesh,sol,filename,strlen0,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
+ * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int MMG2D_loadGenericMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the solutions array
@@ -1839,6 +1858,23 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  */
   int MMG2D_saveTetgenMesh(MMG5_pMesh ,const char *);
 
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param filename name of file.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Save mesh data in a file whose format depends on the filename extension.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG2D_SAVEGENERICMESH(mesh,sol,filename,strlen0,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
+ * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int MMG2D_saveGenericMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
 
 /**
  * \param mesh pointer toward the mesh structure.

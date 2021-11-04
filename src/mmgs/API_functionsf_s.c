@@ -892,6 +892,25 @@ FORTRAN_NAME(MMGS_LOADMSHMESH,mmgs_loadmshmesh,
 }
 
 /**
+ * See \ref MMGS_loadGenericMesh function in \ref mmgs/libmmgs.h file.
+ */
+FORTRAN_NAME(MMGS_LOADGENERICMESH,mmgs_loadgenericmesh,
+             (MMG5_pMesh *mesh, MMG5_pSol *sol,char* filename, int *strlen0,int* retval),
+             (mesh,sol,filename,strlen0, retval)){
+  char *tmp = NULL;
+
+  MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
+  strncpy(tmp,filename,*strlen0);
+  tmp[*strlen0] = '\0';
+
+  *retval = MMGS_loadGenericMesh(*mesh,*sol,tmp);
+
+  MMG5_SAFE_FREE(tmp);
+
+  return;
+}
+
+/**
  * See \ref MMGS_loadMshMesh_and_allData function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_NAME(MMGS_LOADMSHMESH_AND_ALLDATA,mmgs_loadmshmesh_and_alldata,
@@ -1103,6 +1122,26 @@ FORTRAN_NAME(MMGS_SAVEMSHMESH,mmgs_savemshmesh,
 
   return;
 }
+
+/**
+ * See \ref MMGS_saveGenericMesh function in \ref mmgs/libmmgs.h file.
+ */
+FORTRAN_NAME(MMGS_SAVEGENERICMESH,mmgs_savegenericmesh,
+             (MMG5_pMesh *mesh, MMG5_pSol *sol,char* filename, int *strlen0,int* retval),
+             (mesh,sol,filename,strlen0, retval)){
+  char *tmp = NULL;
+
+  MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
+  strncpy(tmp,filename,*strlen0);
+  tmp[*strlen0] = '\0';
+
+  *retval = MMGS_saveGenericMesh(*mesh,*sol,tmp);
+
+  MMG5_SAFE_FREE(tmp);
+
+  return;
+}
+
 
 /**
  * See \ref MMGS_saveSol function in \ref mmgs/libmmgs.h file.
