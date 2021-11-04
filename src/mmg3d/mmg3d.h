@@ -310,7 +310,6 @@ int  MMG5_setdhd(MMG5_pMesh mesh);
 int  MMG5_singul(MMG5_pMesh mesh);
 int  MMG3D_nmgeom(MMG5_pMesh mesh);
 int  MMG5_paktet(MMG5_pMesh mesh);
-int  MMG5_hashFace(MMG5_pMesh,MMG5_Hash*,int,int,int,int);
 int  MMG5_hashGetFace(MMG5_Hash*,int,int,int);
 int  MMG3D_hashTria(MMG5_pMesh mesh, MMG5_Hash*);
 int   MMG3D_hashPrism(MMG5_pMesh mesh);
