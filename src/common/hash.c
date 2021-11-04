@@ -79,6 +79,8 @@ int MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, MMG5_Hash *hash, int chkISO) {
     adja = &adjt[3*(k-1)+1];
     for (i=0; i<3; i++) {
 
+      if ( !MG_EOK(pt) )  continue;
+
       /* Skip parallel edges */
       if( (pt->tag[i] & MG_PARBDY) && !(pt->tag[i] & MG_PARBDYBDY) ) continue;
 
@@ -111,7 +113,7 @@ int MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, MMG5_Hash *hash, int chkISO) {
           pt1 = &mesh->tria[jel];
           /* discard duplicate face */
           if ( pt1->v[j] == pt->v[i] ) {
-            pt1->v[0] = 0;
+            pt->v[0] = 0;
             dup++;
           }
           /* update adjacent */
