@@ -203,6 +203,7 @@ IF ( BUILD_TESTING )
       SET(LIBMMG3D_EXEC4   ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_example4)
       SET(LIBMMG3D_EXEC5   ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_example5)
       SET(LIBMMG3D_EXEC6   ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_example6_io)
+      SET(LIBMMG3D_GENERICIO ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_generic_io)
       SET(LIBMMG3D_LSONLY ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_lsOnly )
       SET(LIBMMG3D_LSANDMETRIC ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_lsAndMetric )
       SET(TEST_API3D_EXEC0 ${EXECUTABLE_OUTPUT_PATH}/test_api3d_0)
@@ -262,10 +263,30 @@ IF ( BUILD_TESTING )
         "${MMG3D_CI_TESTS}/API_tests/cellsAndNode-data.vtk"
         "${CTEST_OUTPUT_DIR}/test_API3d-vtk2mesh.o"
         )
+      ADD_TEST(NAME libmmg3d_generic_io_msh   COMMAND ${LIBMMG3D_GENERICIO}
+        "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/io_generic_and_get_adja/cube.msh"
+        "${CTEST_OUTPUT_DIR}/cube.o.msh"
+        )
+      ADD_TEST(NAME libmmg3d_generic_io_mesh   COMMAND ${LIBMMG3D_GENERICIO}
+        "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/io_generic_and_get_adja/cube.mesh"
+        "${CTEST_OUTPUT_DIR}/cube.o.mesh"
+        )
+      ADD_TEST(NAME libmmg3d_generic_io_vtk   COMMAND ${LIBMMG3D_GENERICIO}
+        "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/io_generic_and_get_adja/cube.vtk"
+        "${CTEST_OUTPUT_DIR}/cube.o.vtk"
+        )
+      ADD_TEST(NAME libmmg3d_generic_io_vtu   COMMAND ${LIBMMG3D_GENERICIO}
+        "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/io_generic_and_get_adja/cube.vtu"
+        "${CTEST_OUTPUT_DIR}/cube.o.vtu"
+        )
 
       IF ( NOT VTK_FOUND )
         SET(expr "VTK library not founded")
         SET_PROPERTY(TEST test_api3d_vtk2mesh
+          PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
+        SET_PROPERTY(TEST libmmg3d_generic_io_vtk
+          PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
+        SET_PROPERTY(TEST libmmg3d_generic_io_vtu
           PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
       ENDIF ( )
 
