@@ -140,6 +140,8 @@ IF (NOT WIN32 OR MINGW)
   LIST(APPEND mmg3d_headers  ${COMMON_BINARY_DIR}/git_log_mmg.h )
 ENDIF()
 
+# install man pages
+INSTALL(FILES ${PROJECT_SOURCE_DIR}/doc/man/mmg3d.1.gz DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
 
 # Install header files in /usr/local or equivalent
 INSTALL(FILES ${mmg3d_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/mmg/mmg3d COMPONENT headers)
