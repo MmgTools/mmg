@@ -42,9 +42,9 @@
  * find the element index in packed numerotation
  *
  */
-int MMG2D_indElt(MMG5_pMesh mesh, int kel) {
+MMG_int MMG2D_indElt(MMG5_pMesh mesh, MMG_int kel) {
     MMG5_pTria pt;
-    int        ne, k;
+    MMG_int        ne, k;
 
     ne = 0;
     for (k=1; k<=mesh->nt; k++) {
@@ -66,9 +66,9 @@ int MMG2D_indElt(MMG5_pMesh mesh, int kel) {
  * find the point index in packed numerotation
  *
  */
-int MMG2D_indPt(MMG5_pMesh mesh, int kp) {
+MMG_int MMG2D_indPt(MMG5_pMesh mesh, MMG_int kp) {
     MMG5_pPoint ppt;
-    int         np, k;
+    MMG_int         np, k;
 
     np = 0;
     for (k=1; k<=mesh->np; k++) {
@@ -88,7 +88,7 @@ int MMG2D_indPt(MMG5_pMesh mesh, int kp) {
  * Keep only subdomain of index \a nsd and remove other subdomains.
  *
  */
-void MMG2D_keep_only1Subdomain ( MMG5_pMesh mesh,int nsd ) {
+void MMG2D_keep_only1Subdomain ( MMG5_pMesh mesh,MMG_int nsd ) {
 
   if ( !nsd ) {
     return;

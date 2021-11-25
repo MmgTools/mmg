@@ -70,7 +70,7 @@ SET (CMAKE_RELEASE_VERSION
 #####
 ###############################################################################
 IF (NOT WIN32)
-  # Set preprocessor flags to say that we are posix and gnu compatible
+# Set preprocessor flags to say that we are posix and gnu compatible
   SET (DEF_POSIX "#define MMG_POSIX")
   SET (DEF_GNU "#define MMG_GNU")
 ELSEIF(MINGW)
@@ -82,6 +82,21 @@ if ( MSVC )
   add_definitions(-D_CRT_SECURE_NO_WARNINGS)
   add_definitions(-Dstrdup=_strdup)
 endif()
+
+############################################################################
+#####
+#####         Integer type
+#####
+############################################################################
+
+# type of integer
+
+SET (MMG_INT "int32_t" CACHE STRING "Integer type")
+IF (${MMG_INT} STREQUAL "int64_t")
+  SET ( DEF_MMG_INT "#define MMG_int int64_t")
+ELSE ()
+  SET ( DEF_MMG_INT "#define MMG_int int32_t")
+ENDIF ()
 
 # Create mmgcmakedefines.h file with the architecture infos and
 # the definition ot the USE_POINTMAP flag.
@@ -227,6 +242,7 @@ IF ( NOT (WIN32 OR MINGW) )
   MARK_AS_ADVANCED(FORCE M_LIB)
   SET( LIBRARIES ${M_LIB} ${LIBRARIES})
 ENDIF()
+
 
 ############################################################################
 #####

@@ -35,9 +35,9 @@
 
 
 /* Create a new vertex in the mesh, and return its number */
-int MMG2D_newPt(MMG5_pMesh mesh,double c[2],int16_t tag) {
+MMG_int MMG2D_newPt(MMG5_pMesh mesh,double c[2],int16_t tag) {
   MMG5_pPoint  ppt;
-  int     curpt;
+  MMG_int     curpt;
 
   if ( !mesh->npnil )  return 0;
 
@@ -54,7 +54,7 @@ int MMG2D_newPt(MMG5_pMesh mesh,double c[2],int16_t tag) {
 }
 
 /* Delete a point in the mesh and update the garbage collector accordingly */
-void MMG2D_delPt(MMG5_pMesh mesh,int ip) {
+void MMG2D_delPt(MMG5_pMesh mesh,MMG_int ip) {
   MMG5_pPoint   ppt;
 
   ppt = &mesh->point[ip];
@@ -67,7 +67,7 @@ void MMG2D_delPt(MMG5_pMesh mesh,int ip) {
   if ( ip == mesh->np )  mesh->np--;
 }
 
-void MMG5_delEdge(MMG5_pMesh mesh,int iel) {
+void MMG5_delEdge(MMG5_pMesh mesh,MMG_int iel) {
   MMG5_pEdge    pt;
 
   pt = &mesh->edge[iel];
@@ -82,8 +82,8 @@ void MMG5_delEdge(MMG5_pMesh mesh,int iel) {
 }
 
 /* Create a new triangle in the mesh and return its address */
-int MMG2D_newElt(MMG5_pMesh mesh) {
-  int     curiel;
+MMG_int MMG2D_newElt(MMG5_pMesh mesh) {
+  MMG_int     curiel;
 
   if ( !mesh->nenil ) {
     return 0;
@@ -102,9 +102,9 @@ int MMG2D_newElt(MMG5_pMesh mesh) {
 }
 
 /* Delete a triangle in the mesh and update the garbage collector accordingly */
-int MMG2D_delElt(MMG5_pMesh mesh,int iel) {
+MMG_int MMG2D_delElt(MMG5_pMesh mesh,MMG_int iel) {
   MMG5_pTria    pt;
-  int      iadr;
+  MMG_int      iadr;
 
   pt = &mesh->tria[iel];
   if ( !MG_EOK(pt) ) {
@@ -116,7 +116,7 @@ int MMG2D_delElt(MMG5_pMesh mesh,int iel) {
   pt->qual = 0.0;
   iadr = (iel-1)*3 + 1;
   if ( mesh->adja )
-    memset(&mesh->adja[iadr],0,3*sizeof(int));
+    memset(&mesh->adja[iadr],0,3*sizeof(MMG_int));
 
   mesh->nenil = iel;
   if ( iel == mesh->nt )  mesh->nt--;
@@ -125,8 +125,8 @@ int MMG2D_delElt(MMG5_pMesh mesh,int iel) {
 
 
 /* check if n elets available */
-int MMG5_getnElt(MMG5_pMesh mesh,int n) {
-  int     curiel;
+MMG_int MMG5_getnElt(MMG5_pMesh mesh,MMG_int n) {
+  MMG_int     curiel;
 
   if ( !mesh->nenil )  return 0;
   curiel = mesh->nenil;
@@ -154,9 +154,9 @@ int MMG5_getnElt(MMG5_pMesh mesh,int n) {
  *
  */
 static inline
-int MMG2D_memOption_memSet(MMG5_pMesh mesh) {
+MMG_int MMG2D_memOption_memSet(MMG5_pMesh mesh) {
   size_t   usedMem,avMem,reservedMem,npadd;
-  int      ctri,bytes;
+  MMG_int      ctri,bytes;
 
   MMG5_memOption_memSet(mesh);
 
@@ -165,7 +165,7 @@ int MMG2D_memOption_memSet(MMG5_pMesh mesh) {
 
   /* Compute the needed initial memory */
   usedMem = reservedMem + (mesh->np+1)*sizeof(MMG5_Point)
-    + (mesh->nt+1)*sizeof(MMG5_Tria) + (3*mesh->nt+1)*sizeof(int)
+    + (mesh->nt+1)*sizeof(MMG5_Tria) + (3*mesh->nt+1)*sizeof(MMG_int)
     + (mesh->na+1)*sizeof(MMG5_Edge) + (mesh->np+1)*sizeof(double);
 
   if ( usedMem > mesh->memMax  ) {
@@ -181,7 +181,7 @@ int MMG2D_memOption_memSet(MMG5_pMesh mesh) {
   /* Euler-poincare: ne = 6*np; nt = 2*np; na = np/5 *
    * point+tria+edges+adjt+ aniso sol */
   bytes = sizeof(MMG5_Point) +
-    2*sizeof(MMG5_Tria) + 3*2*sizeof(int)
+    2*sizeof(MMG5_Tria) + 3*2*sizeof(MMG_int)
     + 0.2*sizeof(MMG5_Edge) + 3*sizeof(double);
 
   avMem = mesh->memMax-usedMem;
@@ -215,7 +215,7 @@ int MMG2D_memOption_memSet(MMG5_pMesh mesh) {
  * memory repartition for the -m option
  *
  */
-int MMG2D_memOption(MMG5_pMesh mesh) {
+MMG_int MMG2D_memOption(MMG5_pMesh mesh) {
 
   mesh->memMax = MMG5_memSize();
 
@@ -234,8 +234,8 @@ int MMG2D_memOption(MMG5_pMesh mesh) {
  * Allocation of the array fields of the mesh.
  *
  */
-int MMG2D_setMeshSize_alloc( MMG5_pMesh mesh ) {
-  int k;
+MMG_int MMG2D_setMeshSize_alloc( MMG5_pMesh mesh ) {
+  MMG_int k;
 
   MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(MMG5_Point),"initial vertices",
                 printf("  Exit program.\n");
@@ -285,7 +285,7 @@ int MMG2D_setMeshSize_alloc( MMG5_pMesh mesh ) {
  * allocate main structure
  *
  */
-int MMG2D_zaldy(MMG5_pMesh mesh) {
+MMG_int MMG2D_zaldy(MMG5_pMesh mesh) {
 
   if ( !MMG2D_memOption(mesh) )  return 0;
 

@@ -114,7 +114,7 @@ extern "C" {
  * \remark No fortran interface to allow variadic arguments.
  *
  */
-  int MMG2D_Init_mesh(const int starter,...);
+  MMG_int MMG2D_Init_mesh(const MMG_int starter,...);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -159,7 +159,7 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG2D_Set_inputMeshName(MMG5_pMesh mesh, const char* meshin);
+  MMG_int  MMG2D_Set_inputMeshName(MMG5_pMesh mesh, const char* meshin);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param meshout name of the output mesh file.
@@ -176,7 +176,7 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG2D_Set_outputMeshName(MMG5_pMesh mesh, const char* meshout);
+  MMG_int  MMG2D_Set_outputMeshName(MMG5_pMesh mesh, const char* meshout);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the sol structure.
@@ -194,7 +194,7 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG2D_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solin);
+  MMG_int  MMG2D_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solin);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the sol structure.
@@ -212,7 +212,7 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG2D_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solout);
+  MMG_int  MMG2D_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solout);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the sol structure.
@@ -230,7 +230,7 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val);
+  MMG_int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, MMG_int iparam, MMG_int val);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -250,7 +250,7 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val);
+  MMG_int MMG2D_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, MMG_int dparam, double val);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -275,8 +275,8 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG2D_Set_localParameter(MMG5_pMesh mesh, MMG5_pSol sol, int typ,
-                                int ref,double hmin,double hmax,double hausd);
+  MMG_int  MMG2D_Set_localParameter(MMG5_pMesh mesh, MMG5_pSol sol, MMG_int typ,
+                                MMG_int ref,double hmin,double hmax,double hausd);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -297,8 +297,8 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG2D_Set_multiMat(MMG5_pMesh mesh, MMG5_pSol sol,int ref,int split,
-                          int rin, int rex);
+  MMG_int  MMG2D_Set_multiMat(MMG5_pMesh mesh, MMG5_pSol sol,MMG_int ref,MMG_int split,
+                          MMG_int rin, MMG_int rex);
 
 /* init structure datas */
 /**
@@ -321,7 +321,7 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG2D_Set_meshSize(MMG5_pMesh mesh, int np, int nt, int nquad, int na);
+  MMG_int  MMG2D_Set_meshSize(MMG5_pMesh mesh, MMG_int np, MMG_int nt, MMG_int nquad, MMG_int na);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the sol structure.
@@ -342,8 +342,8 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity,
-                        int np, int typSol);
+  MMG_int MMG2D_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, MMG_int typEntity,
+                        MMG_int np, MMG_int typSol);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward an allocatable sol structure.
@@ -367,8 +367,8 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_Set_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol *sol,int nsols,
-                                   int nentities, int *typSol);
+  MMG_int MMG2D_Set_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol *sol,MMG_int nsols,
+                                   MMG_int nentities, MMG_int *typSol);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param c0 coordinate of the point along the first dimension.
@@ -389,8 +389,8 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG2D_Set_vertex(MMG5_pMesh mesh, double c0, double c1,
-                        int ref,int pos);
+  MMG_int  MMG2D_Set_vertex(MMG5_pMesh mesh, double c0, double c1,
+                        MMG_int ref,MMG_int pos);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param vertices table of the points coor.
@@ -413,7 +413,7 @@ extern "C" {
  * > !  END SUBROUTINE\n
  *
  */
-  int  MMG2D_Set_vertices(MMG5_pMesh mesh, double *vertices,int *refs);
+  MMG_int  MMG2D_Set_vertices(MMG5_pMesh mesh, double *vertices,MMG_int *refs);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param k vertex index.
@@ -430,7 +430,7 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG2D_Set_corner(MMG5_pMesh mesh, int k);
+  MMG_int  MMG2D_Set_corner(MMG5_pMesh mesh, MMG_int k);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param k vertex index.
@@ -447,7 +447,7 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG2D_Unset_corner(MMG5_pMesh mesh, int k);
+  MMG_int  MMG2D_Unset_corner(MMG5_pMesh mesh, MMG_int k);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -464,7 +464,7 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG2D_Set_requiredVertex(MMG5_pMesh mesh, int k);
+  MMG_int  MMG2D_Set_requiredVertex(MMG5_pMesh mesh, MMG_int k);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -481,7 +481,7 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG2D_Unset_requiredVertex(MMG5_pMesh mesh, int k);
+  MMG_int  MMG2D_Unset_requiredVertex(MMG5_pMesh mesh, MMG_int k);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -503,8 +503,8 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_Set_triangle(MMG5_pMesh mesh, int v0, int v1,
-                         int v2, int ref, int pos);
+  MMG_int MMG2D_Set_triangle(MMG5_pMesh mesh, MMG_int v0, MMG_int v1,
+                         MMG_int v2, MMG_int ref, MMG_int pos);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param tria pointer toward the table of the tria vertices.
@@ -524,7 +524,7 @@ extern "C" {
  * > !  END SUBROUTINE\n
  *
  */
-  int  MMG2D_Set_triangles(MMG5_pMesh mesh, int *tria, int *refs);
+  MMG_int  MMG2D_Set_triangles(MMG5_pMesh mesh, MMG_int *tria, MMG_int *refs);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -541,7 +541,7 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG2D_Set_requiredTriangle(MMG5_pMesh mesh, int k);
+  MMG_int  MMG2D_Set_requiredTriangle(MMG5_pMesh mesh, MMG_int k);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -558,7 +558,7 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG2D_Unset_requiredTriangle(MMG5_pMesh mesh, int k);
+  MMG_int  MMG2D_Unset_requiredTriangle(MMG5_pMesh mesh, MMG_int k);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -581,8 +581,8 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG2D_Set_quadrilateral(MMG5_pMesh mesh, int v0, int v1,
-                               int v2, int v3, int ref, int pos);
+  MMG_int  MMG2D_Set_quadrilateral(MMG5_pMesh mesh, MMG_int v0, MMG_int v1,
+                               MMG_int v2, MMG_int v3, MMG_int ref, MMG_int pos);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -604,8 +604,8 @@ extern "C" {
  * > !  END SUBROUTINE\n
  *
  */
-  int  MMG2D_Set_quadrilaterals(MMG5_pMesh mesh, int *quadra,
-                                int *refs);
+  MMG_int  MMG2D_Set_quadrilaterals(MMG5_pMesh mesh, MMG_int *quadra,
+                                MMG_int *refs);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -626,7 +626,7 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_Set_edge(MMG5_pMesh mesh, int v0, int v1, int ref, int pos);
+  MMG_int MMG2D_Set_edge(MMG5_pMesh mesh, MMG_int v0, MMG_int v1, MMG_int ref, MMG_int pos);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param edges pointer toward the array of edges.
@@ -644,7 +644,7 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_Set_edges(MMG5_pMesh mesh, int *edges, int* refs);
+  MMG_int MMG2D_Set_edges(MMG5_pMesh mesh, MMG_int *edges, MMG_int* refs);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param k edge index.
@@ -660,7 +660,7 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG2D_Set_requiredEdge(MMG5_pMesh mesh, int k);
+  MMG_int  MMG2D_Set_requiredEdge(MMG5_pMesh mesh, MMG_int k);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param k edge index.
@@ -676,7 +676,7 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG2D_Unset_requiredEdge(MMG5_pMesh mesh, int k);
+  MMG_int  MMG2D_Unset_requiredEdge(MMG5_pMesh mesh, MMG_int k);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param k edge index.
@@ -692,7 +692,7 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG2D_Set_parallelEdge(MMG5_pMesh mesh, int k);
+  MMG_int  MMG2D_Set_parallelEdge(MMG5_pMesh mesh, MMG_int k);
 /**
  * \param met pointer toward the sol structure.
  * \param s solution scalar value.
@@ -711,7 +711,7 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_Set_scalarSol(MMG5_pSol met, double s, int pos);
+  MMG_int MMG2D_Set_scalarSol(MMG5_pSol met, double s, MMG_int pos);
 /**
  * \param met pointer toward the sol structure.
  * \param s table of the scalar solutions values.
@@ -728,7 +728,7 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG2D_Set_scalarSols(MMG5_pSol met, double *s);
+  MMG_int  MMG2D_Set_scalarSols(MMG5_pSol met, double *s);
 /**
  * \param met pointer toward the sol structure.
  * \param vx x value of the vectorial solution.
@@ -748,8 +748,8 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_Set_vectorSol(MMG5_pSol met, double vx,double vy,
-                          int pos);
+  MMG_int MMG2D_Set_vectorSol(MMG5_pSol met, double vx,double vy,
+                          MMG_int pos);
 /**
  * \param met pointer toward the sol structure.
  * \param sols table of the vectorial solutions
@@ -766,7 +766,7 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_Set_vectorSols(MMG5_pSol met, double *sols);
+  MMG_int MMG2D_Set_vectorSols(MMG5_pSol met, double *sols);
 /**
  * \param met pointer toward the sol structure.
  * \param m11 value at position (1,1) in the solution tensor.
@@ -787,8 +787,8 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_Set_tensorSol(MMG5_pSol met, double m11, double m12, double m22,
-                          int pos);
+  MMG_int MMG2D_Set_tensorSol(MMG5_pSol met, double m11, double m12, double m22,
+                          MMG_int pos);
 /**
  * \param met pointer toward the sol structure.
  * \param sols table of the tensorial solutions.
@@ -806,7 +806,7 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_Set_tensorSols(MMG5_pSol met, double *sols);
+  MMG_int MMG2D_Set_tensorSols(MMG5_pSol met, double *sols);
 /**
  * \param sol pointer toward the array of solutions
  * \param i position of the solution field that we want to set.
@@ -827,7 +827,7 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG2D_Set_ithSol_inSolsAtVertices(MMG5_pSol sol,int i, double* s,int pos);
+  MMG_int  MMG2D_Set_ithSol_inSolsAtVertices(MMG5_pSol sol,MMG_int i, double* s,MMG_int pos);
 /**
  * \param sol pointer toward the array of solutions
  * \param i position of the solution field that we want to set.
@@ -849,7 +849,7 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG2D_Set_ithSols_inSolsAtVertices(MMG5_pSol sol,int i, double* s);
+  MMG_int  MMG2D_Set_ithSols_inSolsAtVertices(MMG5_pSol sol,MMG_int i, double* s);
 
 /** recover datas */
 /**
@@ -870,7 +870,7 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG2D_Get_meshSize(MMG5_pMesh mesh, int* np, int* nt, int* nquad, int* na);
+  MMG_int  MMG2D_Get_meshSize(MMG5_pMesh mesh, MMG_int* np, MMG_int* nt, MMG_int* nquad, MMG_int* na);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the sol structure.
@@ -889,8 +889,8 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG2D_Get_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int* typEntity, int* np,
-                         int* typSol);
+  MMG_int  MMG2D_Get_solSize(MMG5_pMesh mesh, MMG5_pSol sol, MMG_int* typEntity, MMG_int* np,
+                         MMG_int* typSol);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward an array of sol structure.
@@ -911,8 +911,8 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG2D_Get_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol* sol,int *nsols,
-                                    int* nentities,int* typSol);
+  MMG_int  MMG2D_Get_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol* sol,MMG_int *nsols,
+                                    MMG_int* nentities,MMG_int* typSol);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param c0 pointer toward the coordinate of the point along the first dimension.
@@ -934,8 +934,8 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG2D_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, int* ref,
-                        int* isCorner, int* isRequired);
+  MMG_int  MMG2D_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, MMG_int* ref,
+                        MMG_int* isCorner, MMG_int* isRequired);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param c0 pointer toward the coordinate of the point along the first dimension.
@@ -958,8 +958,8 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG2D_GetByIdx_vertex(MMG5_pMesh mesh, double* c0, double* c1, int* ref,
-                             int* isCorner, int* isRequired,int idx);
+  MMG_int  MMG2D_GetByIdx_vertex(MMG5_pMesh mesh, double* c0, double* c1, MMG_int* ref,
+                             MMG_int* isCorner, MMG_int* isRequired,MMG_int idx);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param vertices pointer toward the table of the points coordinates.
@@ -987,8 +987,8 @@ extern "C" {
  * > !  END SUBROUTINE\n
  *
  */
-  int  MMG2D_Get_vertices(MMG5_pMesh mesh, double* vertices, int* refs,
-                          int* areCorners, int* areRequired);
+  MMG_int  MMG2D_Get_vertices(MMG5_pMesh mesh, double* vertices, MMG_int* refs,
+                          MMG_int* areCorners, MMG_int* areRequired);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param v0 pointer toward the first vertex of triangle.
@@ -1010,8 +1010,8 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_Get_triangle(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* ref
-                         ,int* isRequired);
+  MMG_int MMG2D_Get_triangle(MMG5_pMesh mesh, MMG_int* v0, MMG_int* v1, MMG_int* v2, MMG_int* ref
+                         ,MMG_int* isRequired);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param tria pointer toward the table of the triangles vertices
@@ -1035,8 +1035,8 @@ extern "C" {
  * > !  END SUBROUTINE\n
  *
  */
-  int  MMG2D_Get_triangles(MMG5_pMesh mesh, int* tria, int* refs,
-                           int* areRequired);
+  MMG_int  MMG2D_Get_triangles(MMG5_pMesh mesh, MMG_int* tria, MMG_int* refs,
+                           MMG_int* areRequired);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1062,8 +1062,8 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG2D_Get_quadrilateral(MMG5_pMesh mesh, int* v0, int* v1, int* v2,
-                               int* v3,int* ref, int* isRequired);
+  MMG_int  MMG2D_Get_quadrilateral(MMG5_pMesh mesh, MMG_int* v0, MMG_int* v1, MMG_int* v2,
+                               MMG_int* v3,MMG_int* ref, MMG_int* isRequired);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param quadra pointer toward the table of the quadrilaterals vertices.
@@ -1089,8 +1089,8 @@ extern "C" {
  * > !  END SUBROUTINE\n
  *
  */
-  int  MMG2D_Get_quadrilaterals(MMG5_pMesh mesh, int* quadra,int* refs,
-                                int* areRequired);
+  MMG_int  MMG2D_Get_quadrilaterals(MMG5_pMesh mesh, MMG_int* quadra,MMG_int* refs,
+                                MMG_int* areRequired);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param e0 pointer toward the first extremity of the edge.
@@ -1114,8 +1114,8 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_Get_edge(MMG5_pMesh mesh, int* e0, int* e1, int* ref
-                     ,int* isRidge, int* isRequired);
+  MMG_int MMG2D_Get_edge(MMG5_pMesh mesh, MMG_int* e0, MMG_int* e1, MMG_int* ref
+                     ,MMG_int* isRidge, MMG_int* isRequired);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param edges pointer toward the array of edges.
@@ -1136,8 +1136,8 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_Get_edges(MMG5_pMesh mesh,int *edges,int* refs,
-                      int *areRidges,int *areRequired);
+  MMG_int MMG2D_Get_edges(MMG5_pMesh mesh,MMG_int *edges,MMG_int* refs,
+                      MMG_int *areRidges,MMG_int *areRequired);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1155,7 +1155,7 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  double MMG2D_Get_triangleQuality(MMG5_pMesh mesh,MMG5_pSol met, int k);
+  double MMG2D_Get_triangleQuality(MMG5_pMesh mesh,MMG5_pSol met, MMG_int k);
 
 /**
  * \param met pointer toward the sol structure.
@@ -1172,7 +1172,7 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG2D_Get_scalarSol(MMG5_pSol met, double* s);
+  MMG_int  MMG2D_Get_scalarSol(MMG5_pSol met, double* s);
 /**
  * \param met pointer toward the sol structure.
  * \param s table of the scalar solutions at mesh vertices. s[i-1] is
@@ -1189,7 +1189,7 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG2D_Get_scalarSols(MMG5_pSol met, double* s);
+  MMG_int  MMG2D_Get_scalarSols(MMG5_pSol met, double* s);
 /**
  * \param met pointer toward the sol structure.
  * \param vx x value of the vectorial solution.
@@ -1206,7 +1206,7 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_Get_vectorSol(MMG5_pSol met, double* vx, double* vy);
+  MMG_int MMG2D_Get_vectorSol(MMG5_pSol met, double* vx, double* vy);
 /**
  * \param met pointer toward the sol structure.
  * \param sols table of the solutions at mesh vertices. sols[2*(i-1)]\@2 is
@@ -1223,7 +1223,7 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_Get_vectorSols(MMG5_pSol met, double* sols);
+  MMG_int MMG2D_Get_vectorSols(MMG5_pSol met, double* sols);
 /**
  * \param met pointer toward the sol structure.
  * \param m11 pointer toward the position (1,1) in the solution tensor.
@@ -1241,7 +1241,7 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_Get_tensorSol(MMG5_pSol met, double *m11,double *m12,double *m22);
+  MMG_int MMG2D_Get_tensorSol(MMG5_pSol met, double *m11,double *m12,double *m22);
 /**
  * \param met pointer toward the sol structure.
  * \param sols table of the solutions at mesh vertices.
@@ -1258,7 +1258,7 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_Get_tensorSols(MMG5_pSol met, double *sols);
+  MMG_int MMG2D_Get_tensorSols(MMG5_pSol met, double *sols);
 /**
  * \param sol pointer toward the array of solutions
  * \param i position of the solution field that we want to set.
@@ -1279,7 +1279,7 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG2D_Get_ithSol_inSolsAtVertices(MMG5_pSol sol,int i, double* s,int pos);
+  MMG_int  MMG2D_Get_ithSol_inSolsAtVertices(MMG5_pSol sol,MMG_int i, double* s,MMG_int pos);
 /**
  * \param sol pointer toward the array of solutions
  * \param i position of the solution field that we want to get.
@@ -1301,7 +1301,7 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG2D_Get_ithSols_inSolsAtVertices(MMG5_pSol sol,int i, double* s);
+  MMG_int  MMG2D_Get_ithSols_inSolsAtVertices(MMG5_pSol sol,MMG_int i, double* s);
 
 
 /**
@@ -1319,7 +1319,7 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_Chk_meshData(MMG5_pMesh mesh,MMG5_pSol met);
+  MMG_int MMG2D_Chk_meshData(MMG5_pMesh mesh,MMG5_pSol met);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1335,7 +1335,7 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-int MMG2D_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol);
+MMG_int MMG2D_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol);
 
 /* deallocations */
 /**
@@ -1369,7 +1369,7 @@ int MMG2D_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol);
  * \remark no Fortran interface to allow variadic args.
  *
  */
-  int MMG2D_Free_all(const int starter,...);
+  MMG_int MMG2D_Free_all(const MMG_int starter,...);
 
 /**
  * \param starter dummy argument used to initialize the variadic argument
@@ -1404,7 +1404,7 @@ int MMG2D_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol);
  * \remark no Fortran interface to allow variadic args.
  *
  */
-  int MMG2D_Free_structures(const int starter,...);
+  MMG_int MMG2D_Free_structures(const MMG_int starter,...);
 
 /**
  * \param starter dummy argument used to initialize the variadic argument
@@ -1439,7 +1439,7 @@ int MMG2D_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol);
  * \remark no Fortran interface to allow variadic args.
  *
  */
-  int MMG2D_Free_names(const int starter,...);
+  MMG_int MMG2D_Free_names(const MMG_int starter,...);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1457,7 +1457,7 @@ int MMG2D_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol);
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_loadMesh(MMG5_pMesh mesh,const char * filename);
+  MMG_int MMG2D_loadMesh(MMG5_pMesh mesh,const char * filename);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1477,7 +1477,7 @@ int MMG2D_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol);
  * >   END SUBROUTINE\n
  *
  */
-int MMG2D_loadVtpMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+MMG_int MMG2D_loadVtpMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the solution structure.
@@ -1496,7 +1496,7 @@ int MMG2D_loadVtpMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
  * >   END SUBROUTINE\n
  *
  */
-int MMG2D_loadVtpMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
+MMG_int MMG2D_loadVtpMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1516,7 +1516,7 @@ int MMG2D_loadVtpMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * >   END SUBROUTINE\n
  *
  */
-int MMG2D_loadVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+MMG_int MMG2D_loadVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1536,7 +1536,7 @@ int MMG2D_loadVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
  * >   END SUBROUTINE\n
  *
  */
-int MMG2D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
+MMG_int MMG2D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1556,7 +1556,7 @@ int MMG2D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * >   END SUBROUTINE\n
  *
  */
-int MMG2D_loadVtkMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+MMG_int MMG2D_loadVtkMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1576,7 +1576,7 @@ int MMG2D_loadVtkMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
  * >   END SUBROUTINE\n
  *
  */
-int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
+MMG_int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1596,7 +1596,7 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+  MMG_int MMG2D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward a list of solution structures.
@@ -1615,7 +1615,7 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
+  MMG_int MMG2D_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1635,7 +1635,7 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,const char * filename);
+  MMG_int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,const char * filename);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the solutions array
@@ -1653,9 +1653,9 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char* filename);
+  MMG_int MMG2D_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char* filename);
 
-  int MMG2D_loadVect(MMG5_pMesh ,char *);
+  MMG_int MMG2D_loadVect(MMG5_pMesh ,char *);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1673,7 +1673,7 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_saveMesh(MMG5_pMesh ,const char *);
+  MMG_int MMG2D_saveMesh(MMG5_pMesh ,const char *);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the solution structure.
@@ -1692,7 +1692,7 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+  MMG_int MMG2D_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the solution structure.
@@ -1711,7 +1711,7 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_saveMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
+  MMG_int MMG2D_saveMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the solution structure.
@@ -1729,7 +1729,7 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_saveVtkMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+  MMG_int MMG2D_saveVtkMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the solution structure.
@@ -1747,7 +1747,7 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_saveVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
+  MMG_int MMG2D_saveVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the solution structure.
@@ -1765,7 +1765,7 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_saveVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+  MMG_int MMG2D_saveVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the solution structure.
@@ -1783,7 +1783,7 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_saveVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
+  MMG_int MMG2D_saveVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the solution structure.
@@ -1801,7 +1801,7 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_saveVtpMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+  MMG_int MMG2D_saveVtpMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the solution structure.
@@ -1819,7 +1819,7 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_saveVtpMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
+  MMG_int MMG2D_saveVtpMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1837,7 +1837,7 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_saveTetgenMesh(MMG5_pMesh ,const char *);
+  MMG_int MMG2D_saveTetgenMesh(MMG5_pMesh ,const char *);
 
 
 /**
@@ -1857,7 +1857,7 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_saveSol(MMG5_pMesh  mesh,MMG5_pSol sol ,const char *filename);
+  MMG_int MMG2D_saveSol(MMG5_pMesh  mesh,MMG5_pSol sol ,const char *filename);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the solutions array
@@ -1875,10 +1875,10 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_saveAllSols(MMG5_pMesh  mesh,MMG5_pSol *sol ,const char *filename);
+  MMG_int MMG2D_saveAllSols(MMG5_pMesh  mesh,MMG5_pSol *sol ,const char *filename);
 
 
-  int MMG2D_saveVect(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename,double lambda);
+  MMG_int MMG2D_saveVect(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename,double lambda);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1896,7 +1896,7 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol);
+  MMG_int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol sol);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1914,7 +1914,7 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol);
+  MMG_int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol sol);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1935,7 +1935,7 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) ;
+  MMG_int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) ;
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward a sol structure (displacement).
@@ -1954,10 +1954,10 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp);
+  MMG_int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp);
 
 /* Tools for the library */
-// void (*MMG2D_callbackinsert) (int ,int ,int ,int, int);
+// void (*MMG2D_callbackinsert) (MMG_int ,MMG_int ,MMG_int ,MMG_int, MMG_int);
 
 /**
  * \param mesh pointer toward the mesh structure
@@ -1974,7 +1974,7 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_doSol(MMG5_pMesh mesh ,MMG5_pSol met );
+  MMG_int MMG2D_doSol(MMG5_pMesh mesh ,MMG5_pSol met );
 
 /**
  * \param mesh pointer toward the mesh structure
@@ -1991,7 +1991,7 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met);
+  MMG_int MMG2D_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -2029,7 +2029,7 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_Get_numberOfNonBdyEdges(MMG5_pMesh mesh, int* nb_edges);
+  MMG_int MMG2D_Get_numberOfNonBdyEdges(MMG5_pMesh mesh, MMG_int* nb_edges);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -2054,7 +2054,7 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_Get_nonBdyEdge(MMG5_pMesh mesh, int* e0, int* e1, int* ref, int idx);
+  MMG_int MMG2D_Get_nonBdyEdge(MMG5_pMesh mesh, MMG_int* e0, MMG_int* e1, MMG_int* ref, MMG_int idx);
 
 /**
  * \brief Return adjacent elements of a triangle.
@@ -2077,7 +2077,7 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_Get_adjaTri(MMG5_pMesh mesh, int kel, int listri[3]);
+  MMG_int MMG2D_Get_adjaTri(MMG5_pMesh mesh, MMG_int kel, MMG_int listri[3]);
 
 /**
  * \brief Return adjacent elements of a triangle.
@@ -2099,7 +2099,7 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_Get_adjaVertices(MMG5_pMesh mesh, int ip, int lispoi[MMG2D_LMAX]);
+  MMG_int MMG2D_Get_adjaVertices(MMG5_pMesh mesh, MMG_int ip, MMG_int lispoi[MMG2D_LMAX]);
 
 /**
  * \brief Return adjacent elements of a triangle.
@@ -2122,8 +2122,8 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start,
-                                 int lispoi[MMG2D_LMAX]);
+  MMG_int MMG2D_Get_adjaVerticesFast(MMG5_pMesh mesh, MMG_int ip,MMG_int start,
+                                 MMG_int lispoi[MMG2D_LMAX]);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param ked index of the boundary edge.
@@ -2144,7 +2144,7 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_Get_triFromEdge(MMG5_pMesh mesh, int ked, int *ktri, int *ied);
+  MMG_int MMG2D_Get_triFromEdge(MMG5_pMesh mesh, MMG_int ked, MMG_int *ktri, MMG_int *ied);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param ked index of the boundary edge.
@@ -2168,7 +2168,7 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_Get_trisFromEdge(MMG5_pMesh mesh, int ked, int ktri[2], int ied[2]);
+  MMG_int MMG2D_Get_trisFromEdge(MMG5_pMesh mesh, MMG_int ked, MMG_int ktri[2], MMG_int ied[2]);
 
 /**
  * \param m upper part of a symetric matric diagonalizable in |R
@@ -2192,7 +2192,7 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_Compute_eigenv(double m[3],double lambda[2],double vp[2][2]);
+  MMG_int MMG2D_Compute_eigenv(double m[3],double lambda[2],double vp[2][2]);
 
 
 /**

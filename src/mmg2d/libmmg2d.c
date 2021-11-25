@@ -56,7 +56,7 @@
 void MMG2D_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
   MMG5_pTria  ptt;
   MMG5_pPoint ppt;
-  int         k,i,iadr;
+  MMG_int         k,i,iadr;
   double      isqhmin, isqhmax;
   int8_t      sethmin, sethmax;
 
@@ -161,7 +161,7 @@ void MMG2D_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
   return;
 }
 
-int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol met)
+MMG_int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol met)
 {
   MMG5_pSol sol=NULL; // unused
   mytime    ctim[TIMEMAX];
@@ -378,8 +378,8 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol met)
  *
  */
 static inline
-int MMG2D_restart(MMG5_pMesh mesh){
-  int k;
+MMG_int MMG2D_restart(MMG5_pMesh mesh){
+  MMG_int k;
 
   /** If needed, reallocate the missing structures */
   if ( !mesh->tria ) {
@@ -410,7 +410,7 @@ int MMG2D_restart(MMG5_pMesh mesh){
 }
 
 
-int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol met) {
+MMG_int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pSol sol=NULL; // unused
   mytime    ctim[TIMEMAX];
   char      stim[32];
@@ -528,10 +528,10 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( mesh->info.ddebug && !MMG5_chkmsh(mesh,1,0) )  _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
 
   /* Memory alloc */
-  MMG5_ADD_MEM(mesh,(3*mesh->ntmax+5)*sizeof(int),"adjacency table",
+  MMG5_ADD_MEM(mesh,(3*mesh->ntmax+5)*sizeof(MMG_int),"adjacency table",
                 printf("  Exit program.\n");
                 return MMG5_STRONGFAILURE);
-  MMG5_SAFE_CALLOC(mesh->adja,3*mesh->ntmax+5,int,return MMG5_STRONGFAILURE);
+  MMG5_SAFE_CALLOC(mesh->adja,3*mesh->ntmax+5,MMG_int,return MMG5_STRONGFAILURE);
 
   /* Delaunay triangulation of the set of points contained in the mesh,
    * enforcing the edges of the mesh */
@@ -633,7 +633,7 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol met) {
 
 }
 
-int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
+MMG_int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
 {
   MMG5_pSol met=NULL;
   mytime    ctim[TIMEMAX];
@@ -924,11 +924,11 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
 
 }
 
-int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
+MMG_int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   mytime    ctim[TIMEMAX];
   char      stim[32];
-  int       ier;
-  int       k,*invalidTris;
+  MMG_int       ier;
+  MMG_int       k,*invalidTris;
 
 
   if ( mesh->info.imprim >= 0 ) {

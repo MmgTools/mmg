@@ -65,8 +65,8 @@ void MMG2D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
  * Read parameter file DEFAULT.mmg2d
  *
  */
-int MMG2D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
-  int        ret,ref,i,j,npar;
+MMG_int MMG2D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
+  MMG_int        ret,ref,i,j,npar;
   float      fp1,fp2,fp3;
   char       *ptr,data[256];
   FILE       *in;
@@ -182,7 +182,7 @@ int MMG2D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
 }
 
 /* Free the structure dedicated to the management of multiple local parameters */
-int MMG2D_freeLocalPar(MMG5_pMesh mesh) {
+MMG_int MMG2D_freeLocalPar(MMG5_pMesh mesh) {
 
   free(mesh->info.par);
   mesh->info.npar = 0;
@@ -190,10 +190,10 @@ int MMG2D_freeLocalPar(MMG5_pMesh mesh) {
   return 1;
 }
 
-int MMG2D_Get_numberOfNonBdyEdges(MMG5_pMesh mesh, int* nb_edges) {
+MMG_int MMG2D_Get_numberOfNonBdyEdges(MMG5_pMesh mesh, MMG_int* nb_edges) {
   MMG5_pTria pt,pt1;
   MMG5_pEdge ped;
-  int        *adja,k,i,j,i1,i2,iel;
+  MMG_int        *adja,k,i,j,i1,i2,iel;
 
   *nb_edges = 0;
   if ( mesh->tria ) {
@@ -283,7 +283,7 @@ int MMG2D_Get_numberOfNonBdyEdges(MMG5_pMesh mesh, int* nb_edges) {
   return 1;
 }
 
-int MMG2D_Get_nonBdyEdge(MMG5_pMesh mesh, int* e0, int* e1, int* ref, int idx) {
+MMG_int MMG2D_Get_nonBdyEdge(MMG5_pMesh mesh, MMG_int* e0, MMG_int* e1, MMG_int* ref, MMG_int idx) {
   MMG5_pEdge ped;
   size_t     na_tot=0;
   char       *ptr_c = (char*)mesh->edge;
@@ -327,7 +327,7 @@ int MMG2D_Get_nonBdyEdge(MMG5_pMesh mesh, int* e0, int* e1, int* ref, int idx) {
   return 1;
 }
 
-int MMG2D_Get_adjaTri(MMG5_pMesh mesh, int kel, int listri[3]) {
+MMG_int MMG2D_Get_adjaTri(MMG5_pMesh mesh, MMG_int kel, MMG_int listri[3]) {
 
   if ( ! mesh->adja ) {
     if (! MMG2D_hashTria(mesh))
@@ -341,9 +341,9 @@ int MMG2D_Get_adjaTri(MMG5_pMesh mesh, int kel, int listri[3]) {
   return 1;
 }
 
-int MMG2D_Get_adjaVertices(MMG5_pMesh mesh, int ip, int lispoi[MMG2D_LMAX])
+MMG_int MMG2D_Get_adjaVertices(MMG5_pMesh mesh, MMG_int ip, MMG_int lispoi[MMG2D_LMAX])
 {
-  int start;
+  MMG_int start;
 
   if ( !mesh->tria ) return 0;
 
@@ -353,10 +353,10 @@ int MMG2D_Get_adjaVertices(MMG5_pMesh mesh, int ip, int lispoi[MMG2D_LMAX])
   return MMG2D_Get_adjaVerticesFast(mesh,ip,start,lispoi);
 }
 
-int MMG2D_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMG2D_LMAX])
+MMG_int MMG2D_Get_adjaVerticesFast(MMG5_pMesh mesh, MMG_int ip,MMG_int start, MMG_int lispoi[MMG2D_LMAX])
 {
   MMG5_pTria pt;
-  int k,prevk,nbpoi,iploc,i,i1,i2,*adja;
+  MMG_int k,prevk,nbpoi,iploc,i,i1,i2,*adja;
 
   pt   = &mesh->tria[start];
 
@@ -427,9 +427,9 @@ int MMG2D_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMG
   return nbpoi;
 }
 
-int MMG2D_Get_triFromEdge(MMG5_pMesh mesh, int ked, int *ktri, int *ied)
+MMG_int MMG2D_Get_triFromEdge(MMG5_pMesh mesh, MMG_int ked, MMG_int *ktri, MMG_int *ied)
 {
-  int val;
+  MMG_int val;
 
   val = mesh->edge[ked].base;
 
@@ -446,11 +446,11 @@ int MMG2D_Get_triFromEdge(MMG5_pMesh mesh, int ked, int *ktri, int *ied)
   return 1;
 }
 
-int MMG2D_Get_trisFromEdge(MMG5_pMesh mesh, int ked, int ktri[2], int ied[2])
+MMG_int MMG2D_Get_trisFromEdge(MMG5_pMesh mesh, MMG_int ked, MMG_int ktri[2], MMG_int ied[2])
 {
-  int ier,itri;
+  MMG_int ier,itri;
 #ifndef NDEBUG
-  int ia0,ib0,ia1,ib1;
+  MMG_int ia0,ib0,ia1,ib1;
 #endif
 
   ktri[0]  =  ktri[1] = 0;
@@ -486,7 +486,7 @@ int MMG2D_Get_trisFromEdge(MMG5_pMesh mesh, int ked, int ktri[2], int ied[2])
   return 1;
 }
 
-int MMG2D_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met) {
+MMG_int MMG2D_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met) {
   double      hsiz;
 
   /* Memory alloc */
@@ -509,7 +509,7 @@ int MMG2D_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met) {
   return 1;
 }
 
-int MMG2D_Compute_eigenv(double m[3],double lambda[2],double vp[2][2]) {
+MMG_int MMG2D_Compute_eigenv(double m[3],double lambda[2],double vp[2][2]) {
 
   return  MMG5_eigensym(m,lambda,vp);
 
@@ -517,7 +517,7 @@ int MMG2D_Compute_eigenv(double m[3],double lambda[2],double vp[2][2]) {
 
 
 void MMG2D_Reset_verticestags(MMG5_pMesh mesh) {
-  int k;
+  MMG_int k;
 
   for ( k=1; k<=mesh->np;  ++k ) {
     mesh->point[k].tag = 0;

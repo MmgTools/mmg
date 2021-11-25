@@ -45,11 +45,11 @@
  * Truncate the metric sizes between hmin/hmax
  *
  */
-int MMG2D_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
+MMG_int MMG2D_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
   double         dd,isqhmin,isqhmax;
   double         *m;
   double         lambda[2],v[2][2];
-  int            i,k,iadr;
+  MMG_int            i,k,iadr;
   int8_t         sethmin,sethmax;
   static int8_t  mmgWarn0=0, mmgWarn1=0;
 

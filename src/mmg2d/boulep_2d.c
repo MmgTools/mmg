@@ -31,10 +31,10 @@ static uint8_t iprev[3] = {2,0,1};
    in:  ifirst    : triangle containing p
    iploc     : index of p in start
    out: list  : list of triangles */
-int MMG2D_boulep(MMG5_pMesh mesh, int ifirst, int iploc, int * list) {
+MMG_int MMG2D_boulep(MMG5_pMesh mesh, MMG_int ifirst, MMG_int iploc, MMG_int * list) {
   MMG5_pTria  pt;
   MMG5_pPoint ppt;
-  int    ip,voy,ilist,iel,*adja,i,iadr;
+  MMG_int    ip,voy,ilist,iel,*adja,i,iadr;
 
   if ( ifirst < 1 ) return 0;
   pt = &mesh->tria[ifirst];
@@ -109,11 +109,11 @@ int MMG2D_boulep(MMG5_pMesh mesh, int ifirst, int iploc, int * list) {
  * of ip in kk.
  *
  */
-int MMG2D_boulen(MMG5_pMesh mesh, int start,int8_t ip, int *pleft, int *pright, double *nn) {
+MMG_int MMG2D_boulen(MMG5_pMesh mesh, MMG_int start,int8_t ip, MMG_int *pleft, MMG_int *pright, double *nn) {
   MMG5_pTria        pt;
   MMG5_pPoint       p1,p2;
   double            ux,uy,dd,n1[2],n2[2];
-  int               *adja,k,kk,refs;
+  MMG_int               *adja,k,kk,refs;
   int8_t            notedg;
   int8_t            i,ii,i1,i2;
 
@@ -226,8 +226,8 @@ int MMG2D_boulen(MMG5_pMesh mesh, int start,int8_t ip, int *pleft, int *pright, 
  * crossing ridge.
  *
  */
-int MMG2D_boulet(MMG5_pMesh mesh,int start,int8_t ip,int *list) {
-  int           *adja,k,ilist;
+MMG_int MMG2D_boulet(MMG5_pMesh mesh,MMG_int start,int8_t ip,MMG_int *list) {
+  MMG_int           *adja,k,ilist;
   int8_t        i,i1,i2;
 
   ilist = 0;
@@ -279,9 +279,9 @@ int MMG2D_boulet(MMG5_pMesh mesh,int start,int8_t ip,int *list) {
  * \a ip2 with their indices.
  *
  */
-int MMG2D_bouleendp(MMG5_pMesh mesh,int start,int8_t ip,int *ip1,int *ip2) {
+MMG_int MMG2D_bouleendp(MMG5_pMesh mesh,MMG_int start,int8_t ip,MMG_int *ip1,MMG_int *ip2) {
   MMG5_pTria    pt;
-  int           *adja,k;
+  MMG_int           *adja,k;
   int8_t        i,i1,i2;
   static int8_t mmgWarn0=0;
 

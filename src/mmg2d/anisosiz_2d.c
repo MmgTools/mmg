@@ -47,10 +47,10 @@
  * able to truncate it with the local params later.
  *
  */
-int MMG2D_defaultmet_2d(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t i) {
+MMG_int MMG2D_defaultmet_2d(MMG5_pMesh mesh,MMG5_pSol met,MMG_int k,int8_t i) {
   MMG5_pTria       pt;
   double           *m,isqhmax;
-  int              ip;
+  MMG_int              ip;
 
   isqhmax = mesh->info.hmax;
 
@@ -82,14 +82,14 @@ int MMG2D_defaultmet_2d(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t i) {
  * imposing the local parameters later.
  *
  */
-int MMG2D_defmetbdy_2d(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t i) {
+MMG_int MMG2D_defmetbdy_2d(MMG5_pMesh mesh,MMG5_pSol met,MMG_int k,int8_t i) {
   MMG5_pTria      pt;
   MMG5_pPoint     p0,p1,p2;
   MMG5_pPar       ppa;
   double          hausd,hmin,hmax,sqhmin,sqhmax,ux,uy,ll,li,ps1,ps2,lm,ltmp,pv;
   double          M1,M2,t1[2],t2[2],b1[2],b2[2],*n,*m;
   double          gpp1[2],gpp2[2];
-  int             ilist,iel,ip,ip1,ip2,it[2],l,list[MMG2D_LONMAX+2];
+  MMG_int             ilist,iel,ip,ip1,ip2,it[2],l,list[MMG2D_LONMAX+2];
   int8_t          isloc,hausdloc;
   int8_t          i0,i1,i2,j;
   static int8_t   mmgWarn0=0,mmgWarn1=0,mmgWarn2=0;
@@ -357,12 +357,12 @@ int MMG2D_defmetbdy_2d(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t i) {
  * Definition of an anisotropic metric tensor field based on the geometry of the
  * domain; this tensor field is intersected by a user-defined tensor field
  */
-int MMG2D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
+MMG_int MMG2D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria     pt;
   MMG5_pPoint    ppt;
   MMG5_pPar      ppa;
   double         mm[3],mr[3],isqhmax;
-  int            k,l,ip;
+  MMG_int            k,l,ip;
   int8_t         ismet;
   int8_t         isdef,i;
 
@@ -528,7 +528,7 @@ void MMG2D_gradEigenv(double dm[2],double dn[2],double difsiz,int8_t dir,int8_t 
  *
  */
 static inline
-int MMG2D_updatemet_ani(double *m,double *n,double dm[2],double dn[2],
+MMG_int MMG2D_updatemet_ani(double *m,double *n,double dm[2],double dn[2],
                          double vp[2][2],int8_t ier ) {
   double det,ip[4];
 
@@ -571,7 +571,7 @@ int MMG2D_updatemet_ani(double *m,double *n,double dm[2],double dn[2],
  * Ref : https://www.rocq.inria.fr/gamma/Frederic.Alauzet/cours/cea2010_V2.pdf
  *
  */
-int MMG2D_grad2met_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,int np1,int np2) {
+MMG_int MMG2D_grad2met_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,MMG_int np1,MMG_int np2) {
   MMG5_pPoint  p1,p2;
   double       dm[2],dn[2];
   double       vp[2][2],*m,*n,ll,difsiz;
@@ -634,8 +634,8 @@ int MMG2D_grad2met_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,int np1,int n
  * Ref : https://www.rocq.inria.fr/gamma/Frederic.Alauzet/cours/cea2010_V2.pdf
  *
  */
-int MMG2D_grad2metreq_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,
-                          int npmaster,int npslave) {
+MMG_int MMG2D_grad2metreq_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,
+                          MMG_int npmaster,MMG_int npslave) {
   MMG5_pPoint  p2,p1;
   double       ux,uy,dm[2],dn[2];
   double       vp[2][2],*m,*n,ll,difsiz;

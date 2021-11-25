@@ -35,7 +35,7 @@ static void MMG5_endcod(void) {
   fprintf(stdout,"\n   ELAPSED TIME  %s\n",stim);
 }
 
-static int MMG2D_usage(char *name) {
+static MMG_int MMG2D_usage(char *name) {
 
   /* Common generic options, file options and mode options */
   MMG5_mmgUsage(name);
@@ -75,7 +75,7 @@ static int MMG2D_usage(char *name) {
  * Print the default parameters values.
  *
  */
-static inline int MMG5_defaultValues(MMG5_pMesh mesh) {
+static inline MMG_int MMG5_defaultValues(MMG5_pMesh mesh) {
 
   MMG5_mmgDefaultValues(mesh);
 
@@ -95,8 +95,8 @@ static inline int MMG5_defaultValues(MMG5_pMesh mesh) {
  *
  */
 static inline
-int MMG2D_countLocalParamAtEdg( MMG5_pMesh mesh,MMG5_iNode **bdyRefs) {
-  int         npar,k,ier;
+MMG_int MMG2D_countLocalParamAtEdg( MMG5_pMesh mesh,MMG5_iNode **bdyRefs) {
+  MMG_int         npar,k,ier;
 
   /** Count the number of different boundary references and list it */
   (*bdyRefs) = NULL;
@@ -139,7 +139,7 @@ int MMG2D_countLocalParamAtEdg( MMG5_pMesh mesh,MMG5_iNode **bdyRefs) {
  *
  */
 static inline
-int MMG2D_writeLocalParamAtEdg( MMG5_pMesh mesh, MMG5_iNode *bdryRefs,
+MMG_int MMG2D_writeLocalParamAtEdg( MMG5_pMesh mesh, MMG5_iNode *bdryRefs,
                                  FILE *out ) {
   MMG5_iNode *cur;
 
@@ -164,9 +164,9 @@ int MMG2D_writeLocalParamAtEdg( MMG5_pMesh mesh, MMG5_iNode *bdryRefs,
  *
  */
 static inline
-int MMG2D_writeLocalParam( MMG5_pMesh mesh ) {
+MMG_int MMG2D_writeLocalParam( MMG5_pMesh mesh ) {
   MMG5_iNode  *edgRefs,*triRefs;
-  int          nparEdg,nparTri;
+  MMG_int          nparEdg,nparTri;
   char         *ptr,data[MMG5_FILESTR_LGTH];
   FILE         *out;
 
@@ -232,7 +232,7 @@ int MMG2D_writeLocalParam( MMG5_pMesh mesh ) {
  *
  */
 static inline
-int MMG2D_defaultOption(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
+MMG_int MMG2D_defaultOption(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
   mytime    ctim[TIMEMAX];
   double    hsiz;
   char      stim[32];
@@ -323,9 +323,9 @@ int MMG2D_defaultOption(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
 
 // In ls mode : metric must be provided using -met option (-sol or default is the ls).
 // In adp mode : -sol or -met or default allow to store the metric.
-int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
+MMG_int parsar(MMG_int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
   MMG5_pSol tmp = NULL;
-  int     i;
+  MMG_int     i;
   char    namein[MMG5_FILESTR_LGTH];
 
   /* First step: search if user want to see the default parameters values. */
@@ -668,10 +668,10 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
   return 1;
 }
 
-int main(int argc,char *argv[]) {
+MMG_int main(MMG_int argc,char *argv[]) {
   MMG5_pMesh    mesh;
   MMG5_pSol     sol,met,disp,ls;
-  int           ier,ierSave,fmtin,fmtout;
+  MMG_int           ier,ierSave,fmtin,fmtout;
   char          stim[32],*ptr;
 
   fprintf(stdout,"  -- MMG2D, Release %s (%s) \n",MMG_VERSION_RELEASE,MMG_RELEASE_DATE);

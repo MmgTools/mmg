@@ -48,7 +48,7 @@
  * See \ref MMG2D_mmg2dlib function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_MMG2DLIB,mmg2d_mmg2dlib,(MMG5_pMesh *mesh,MMG5_pSol *met
-                                            ,int* retval),(mesh,met
+                                            ,MMG_int* retval),(mesh,met
                                                            ,retval)){
 
   *retval = MMG2D_mmg2dlib(*mesh,*met);
@@ -59,7 +59,7 @@ FORTRAN_NAME(MMG2D_MMG2DLIB,mmg2d_mmg2dlib,(MMG5_pMesh *mesh,MMG5_pSol *met
  * See \ref MMG2D_mmg2dmesh function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_MMG2DMESH,mmg2d_mmg2dmesh,(MMG5_pMesh *mesh,MMG5_pSol *met
-                                              ,int* retval),(mesh,met
+                                              ,MMG_int* retval),(mesh,met
                                                              ,retval)){
 
   *retval = MMG2D_mmg2dmesh(*mesh,*met);
@@ -70,7 +70,7 @@ FORTRAN_NAME(MMG2D_MMG2DMESH,mmg2d_mmg2dmesh,(MMG5_pMesh *mesh,MMG5_pSol *met
  * See \ref MMG2D_mmg2dls function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_MMG2DLS,mmg2d_mmg2dls,(MMG5_pMesh *mesh,MMG5_pSol *sol,
-                                          MMG5_pSol *met,int* retval),
+                                          MMG5_pSol *met,MMG_int* retval),
              (mesh,sol,met,retval)){
 
   if ( met ) {
@@ -86,7 +86,7 @@ FORTRAN_NAME(MMG2D_MMG2DLS,mmg2d_mmg2dls,(MMG5_pMesh *mesh,MMG5_pSol *sol,
  * See \ref MMG2D_mmg2dmov function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_MMG2DMOV,mmg2d_mmg2dmov,(MMG5_pMesh *mesh,MMG5_pSol *met,MMG5_pSol *disp
-                                            ,int* retval),(mesh,met,disp
+                                            ,MMG_int* retval),(mesh,met,disp
                                                            ,retval)){
 
   *retval = MMG2D_mmg2dmov(*mesh,*met,*disp);

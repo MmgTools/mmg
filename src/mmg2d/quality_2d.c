@@ -96,7 +96,7 @@ double MMG2D_caltri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt) {
   double     abx,aby,acx,acy,bcx,bcy;
   double     *a,*b,*c,*ma,*mb,*mc;
   double     area,aream,hm,m[6],h1,h2,h3;
-  int        ipa,ipb,ipc,i;
+  MMG_int        ipa,ipb,ipc,i;
 
   ipa = pt->v[0];
   ipb = pt->v[1];
@@ -153,10 +153,10 @@ double MMG2D_caltri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt) {
  * Print histogram of mesh qualities.
  *
  */
-int MMG2D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
+MMG_int MMG2D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria    pt;
   double        rap,rapmin,rapmax,rapavg,med,good;
-  int           i,k,iel,ok,ir,imax,nex,his[5];
+  MMG_int           i,k,iel,ok,ir,imax,nex,his[5];
   static int8_t mmgWarn0;
 
   /* Compute triangle quality*/
@@ -207,7 +207,7 @@ int MMG2D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
     if ( rap < MMG2D_BADKAL )  mesh->info.badkal = 1;
     rapavg += rap;
     rapmax  = MG_MAX(rapmax,rap);
-    ir = MG_MIN(4,(int)(5.0*rap));
+    ir = MG_MIN(4,(MMG_int)(5.0*rap));
     his[ir] += 1;
   }
 
@@ -227,8 +227,8 @@ int MMG2D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
   fprintf(stdout,"  %6.2f %% > 0.12\n",100.0*(good/(float)(mesh->nt-nex)));
   if ( abs(mesh->info.imprim) > 3 ) {
     fprintf(stdout,"                  %6.2f %% >  0.5\n",100.0*( med/(float)(mesh->nt-nex)));
-    imax = MG_MIN(4,(int)(5.*rapmax));
-    for (i=imax; i>=(int)(5*rapmin); i--) {
+    imax = MG_MIN(4,(MMG_int)(5.*rapmax));
+    for (i=imax; i>=(MMG_int)(5*rapmin); i--) {
       fprintf(stdout,"     %5.1f < Q < %5.1f   %7d   %6.2f %%\n",
               i/5.,i/5.+0.2,his[i],100.*(his[i]/(float)(mesh->nt-nex)));
     }

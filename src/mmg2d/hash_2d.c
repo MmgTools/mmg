@@ -32,24 +32,24 @@
  * Create adjacency relations between the triangles dein the mesh
  *
  */
-int MMG2D_hashTria(MMG5_pMesh mesh) {
+MMG_int MMG2D_hashTria(MMG5_pMesh mesh) {
   MMG5_pTria     pt,pt1;
-  int            k,kk,pp,l,ll,mins,mins1,maxs,maxs1;
-  int            *hcode,*link,inival,hsize,iadr;
+  MMG_int            k,kk,pp,l,ll,mins,mins1,maxs,maxs1;
+  MMG_int            *hcode,*link,inival,hsize,iadr;
   uint8_t        i,ii,i1,i2;
-  unsigned int   key;
+  unsigned MMG_int   key;
 
   if ( mesh->adja )  return 1;
   if ( !mesh->nt )  return 0;
 
   /* memory alloc */
-  MMG5_SAFE_CALLOC(hcode,mesh->nt+1,int,return 0);
+  MMG5_SAFE_CALLOC(hcode,mesh->nt+1,MMG_int,return 0);
 
   /* memory alloc */
-  MMG5_ADD_MEM(mesh,(3*mesh->ntmax+5)*sizeof(int),"adjacency table",
+  MMG5_ADD_MEM(mesh,(3*mesh->ntmax+5)*sizeof(MMG_int),"adjacency table",
                 printf("  Exit program.\n");
                 return 0;);
-  MMG5_SAFE_CALLOC(mesh->adja,3*mesh->ntmax+5,int,return 0);
+  MMG5_SAFE_CALLOC(mesh->adja,3*mesh->ntmax+5,MMG_int,return 0);
 
   link  = mesh->adja;
   hsize = mesh->nt;
@@ -148,14 +148,14 @@ int MMG2D_hashTria(MMG5_pMesh mesh) {
  * adja[4*(k1-1)+1+i1] = -(3*k2+i2) \f$.
  *
  */
-int MMG2D_hashQuad(MMG5_pMesh mesh) {
+MMG_int MMG2D_hashQuad(MMG5_pMesh mesh) {
   MMG5_pQuad     pq,pq1;
   MMG5_pTria     pt;
   MMG5_Hash      hash;
-  int            k,kk,pp,l,ll,mins,mins1,maxs,maxs1,iadr;
-  int           *hcode,*link,hsize,inival;
+  MMG_int            k,kk,pp,l,ll,mins,mins1,maxs,maxs1,iadr;
+  MMG_int           *hcode,*link,hsize,inival;
   uint8_t        i,ii,i1,i2;
-  unsigned int   key;
+  unsigned MMG_int   key;
 
   /** Step 1: Fill adjacendies between quadrangles */
   if ( !mesh->nquad ) {
@@ -175,11 +175,11 @@ int MMG2D_hashQuad(MMG5_pMesh mesh) {
     fprintf(stdout,"  ** SETTING QUAD ADJACENCY\n");
 
   /* memory alloc */
-  MMG5_ADD_MEM(mesh,(4*mesh->nquad+5)*sizeof(int),"quad adjacency table",
+  MMG5_ADD_MEM(mesh,(4*mesh->nquad+5)*sizeof(MMG_int),"quad adjacency table",
                fprintf(stderr,"  Exit program.\n");
                return 0);
-  MMG5_SAFE_CALLOC(mesh->adjq,4*mesh->nquad+5,int,return 0);
-  MMG5_SAFE_CALLOC(hcode,mesh->nquad+5,int,return 0);
+  MMG5_SAFE_CALLOC(mesh->adjq,4*mesh->nquad+5,MMG_int,return 0);
+  MMG5_SAFE_CALLOC(hcode,mesh->nquad+5,MMG_int,return 0);
 
   link  = mesh->adjq;
   hsize = mesh->nquad;
@@ -330,12 +330,12 @@ int MMG2D_hashQuad(MMG5_pMesh mesh) {
  * Transfer some input edge data to the corresponding triangles fields
  *
  */
-int MMG2D_assignEdge(MMG5_pMesh mesh) {
+MMG_int MMG2D_assignEdge(MMG5_pMesh mesh) {
   MMG5_Hash       hash;
   MMG5_pTria      pt;
   MMG5_pQuad      pq;
   MMG5_pEdge      pa;
-  int             k,ia;
+  MMG_int             k,ia;
   int8_t          ier;
   uint8_t         i,i1,i2;
 
@@ -430,11 +430,11 @@ int MMG2D_assignEdge(MMG5_pMesh mesh) {
  * \remark Call in debug mode only
  *
  */
-int MMG2D_bdryEdge(MMG5_pMesh mesh) {
+MMG_int MMG2D_bdryEdge(MMG5_pMesh mesh) {
   MMG5_pTria      pt,pt1;
   MMG5_pEdge      pa;
   MMG5_pPoint     p0;
-  int             k,*adja,natmp,iel;
+  MMG_int             k,*adja,natmp,iel;
   int8_t          i,i1,i2;
 
   natmp = 0;
@@ -511,13 +511,13 @@ int MMG2D_bdryEdge(MMG5_pMesh mesh) {
  * (edges).
  *
  */
-int MMG2D_pack(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
+MMG_int MMG2D_pack(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
   MMG5_pTria         pt,ptnew,pt1;
   MMG5_pQuad         pq,pq1;
   MMG5_pEdge         ped;
   MMG5_pPoint        ppt,pptnew;
-  int                np,ned,nt,k,iel,nbl,isol,isolnew,memWarn,nc;
-  int                iadr,iadrnew,iadrv,*adjav,*adja,*adjanew,voy;
+  MMG_int                np,ned,nt,k,iel,nbl,isol,isolnew,memWarn,nc;
+  MMG_int                iadr,iadrnew,iadrv,*adjav,*adja,*adjanew,voy;
   int8_t             i,i1,i2;
 
   /* Keep only one domain if asked */

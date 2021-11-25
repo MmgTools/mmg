@@ -28,11 +28,11 @@
 #define KTB    11
 
 /* Cavity correction for quality */
-static int MMG2D_correction_iso(MMG5_pMesh mesh,int ip,int *list,int ilist,int nedep) {
+static MMG_int MMG2D_correction_iso(MMG5_pMesh mesh,MMG_int ip,MMG_int *list,MMG_int ilist,MMG_int nedep) {
   MMG5_pTria      pt;
   MMG5_pPoint     ppt,p1,p2;
   double           dd,ux,uy,vx,vy;
-  int             *adja,i,ipil,iel,lon,iadr,adj,ib,ic,base,ncor,nei[3];
+  MMG_int             *adja,i,ipil,iel,lon,iadr,adj,ib,ic,base,ncor,nei[3];
 
   ppt  = &mesh->point[ip];
   if ( !MG_VOK(ppt) )  return ilist;
@@ -103,9 +103,9 @@ static int MMG2D_correction_iso(MMG5_pMesh mesh,int ip,int *list,int ilist,int n
  * face has already been seen.
  *
  */
-static int MMG2D_hashEdgeDelone(MMG5_pMesh mesh,MMG5_Hash *hash,int iel,int i) {
+static MMG_int MMG2D_hashEdgeDelone(MMG5_pMesh mesh,MMG5_Hash *hash,MMG_int iel,MMG_int i) {
   MMG5_pTria      pt;
-  int             *adja,iadr,jel,j,ip1,ip2;
+  MMG_int             *adja,iadr,jel,j,ip1,ip2;
   int16_t         i1,i2;
 
   pt  = &mesh->tria[iel];
@@ -144,11 +144,11 @@ static int MMG2D_hashEdgeDelone(MMG5_pMesh mesh,MMG5_Hash *hash,int iel,int i) {
 
 /**  Create the cavity point ip, starting from triangle list[0];
      Return a negative value for ilist if one of the triangles of the cavity is required */
-int MMG2D_cavity(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list) {
+MMG_int MMG2D_cavity(MMG5_pMesh mesh,MMG5_pSol sol,MMG_int ip,MMG_int *list) {
   MMG5_pTria      pt,pt1,ptc;
   MMG5_pPoint     ppt;
   double          c[2],crit,dd,eps,rad,ct[6];
-  int             *adja,*adjb,adj,adi,voy,i,j,ilist,ipil,jel,iadr,base,nei[3],l,tref; //isreq;
+  MMG_int             *adja,*adjb,adj,adi,voy,i,j,ilist,ipil,jel,iadr,base,nei[3],l,tref; //isreq;
   static int8_t   mmgWarn0=0;
 
   ppt = &mesh->point[ip];
@@ -244,11 +244,11 @@ int MMG2D_cavity(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list) {
  *  Insertion in point ip in the cavity described by list.
  *
  */
-int MMG2D_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist) {
+MMG_int MMG2D_delone(MMG5_pMesh mesh,MMG5_pSol sol,MMG_int ip,MMG_int *list,MMG_int ilist) {
   MMG5_pTria      pt,pt1;
   MMG5_pPoint     ppt;
-  int             *adja,*adjb,i,j,k,iel,jel,old,iadr,base,size,nei[3],iadrold;
-  int             tref,ielnum[3*MMG2D_LONMAX+1];
+  MMG_int             *adja,*adjb,i,j,k,iel,jel,old,iadr,base,size,nei[3],iadrold;
+  MMG_int             tref,ielnum[3*MMG2D_LONMAX+1];
   int8_t          ier;
   short           i1;
   int8_t          alert;

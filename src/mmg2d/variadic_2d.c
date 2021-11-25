@@ -52,7 +52,7 @@
  *
  */
 static inline
-int MMG2D_Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *met, MMG5_pSol *ls,
+MMG_int MMG2D_Alloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *met, MMG5_pSol *ls,
                      MMG5_pSol *disp) {
 
   /* mesh allocation */
@@ -172,18 +172,18 @@ void MMG2D_Init_woalloc_mesh(MMG5_pMesh *mesh, MMG5_pSol *met,MMG5_pSol *ls,MMG5
  * Internal function for structure allocations (taking a va_list argument).
  *
  */
-int MMG2D_Init_mesh_var( va_list argptr ) {
+MMG_int MMG2D_Init_mesh_var( va_list argptr ) {
   MMG5_pMesh     *mesh;
   MMG5_pSol      *sol,*disp,*ls;
-  int            typArg;
-  int            meshCount;
+  MMG_int            typArg;
+  MMG_int            meshCount;
 
   meshCount = 0;
   mesh = NULL;
   disp = sol = ls = NULL;
 
 
-  while ( (typArg = va_arg(argptr,int          )) != MMG5_ARG_end )
+  while ( (typArg = va_arg(argptr,MMG_int          )) != MMG5_ARG_end )
   {
     switch ( typArg )
     {
@@ -265,19 +265,19 @@ int MMG2D_Init_mesh_var( va_list argptr ) {
  * \remark we pass the structures by reference in order to have argument
  * compatibility between the library call from a Fortran code and a C code.
  */
-int MMG2D_Free_all_var(va_list argptr)
+MMG_int MMG2D_Free_all_var(va_list argptr)
 {
 
   MMG5_pMesh     *mesh;
   MMG5_pSol      *sol,*disp,*ls,*sols;
-  int            typArg;
-  int            meshCount,metCount,lsCount,dispCount,fieldsCount;
-  int            ier;
+  MMG_int            typArg;
+  MMG_int            meshCount,metCount,lsCount,dispCount,fieldsCount;
+  MMG_int            ier;
 
   meshCount = metCount = lsCount = dispCount = fieldsCount = 0;
   disp = sol = sols = ls = NULL;
 
-  while ( (typArg = va_arg(argptr,int          )) != MMG5_ARG_end )
+  while ( (typArg = va_arg(argptr,MMG_int          )) != MMG5_ARG_end )
   {
     switch ( typArg )
     {
@@ -374,19 +374,19 @@ int MMG2D_Free_all_var(va_list argptr)
  * compatibility between the library call from a Fortran code and a C code.
  *
  */
-int MMG2D_Free_structures_var(va_list argptr)
+MMG_int MMG2D_Free_structures_var(va_list argptr)
 {
 
   MMG5_pMesh     *mesh;
   MMG5_pSol      *sol,*disp,*ls,*sols;
-  int            typArg,i;
-  int            meshCount;
+  MMG_int            typArg,i;
+  MMG_int            meshCount;
 
   meshCount = 0;
   mesh = NULL;
   disp = sol = ls = sols = NULL;
 
-  while ( (typArg = va_arg(argptr,int          )) != MMG5_ARG_end )
+  while ( (typArg = va_arg(argptr,MMG_int          )) != MMG5_ARG_end )
   {
     switch ( typArg )
     {
@@ -489,18 +489,18 @@ int MMG2D_Free_structures_var(va_list argptr)
  * compatibility between the library call from a Fortran code and a C code.
  *
  */
-int MMG2D_Free_names_var(va_list argptr)
+MMG_int MMG2D_Free_names_var(va_list argptr)
 {
 
   MMG5_pMesh     *mesh;
   MMG5_pSol      psl,*sol,*disp,*ls,*sols;
-  int            typArg,i;
-  int            meshCount;
+  MMG_int            typArg,i;
+  MMG_int            meshCount;
 
   meshCount = 0;
   disp = sol = ls = sols = NULL;
 
-  while ( (typArg = va_arg(argptr,int          )) != MMG5_ARG_end )
+  while ( (typArg = va_arg(argptr,MMG_int          )) != MMG5_ARG_end )
   {
     switch ( typArg )
     {

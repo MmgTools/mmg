@@ -47,11 +47,11 @@ extern uint8_t ddb;
  * possibly perform a dichotomy to find the latest valid position for the point.
  *
  */
-int MMG2D_chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t i) {
+MMG_int MMG2D_chkspl(MMG5_pMesh mesh,MMG5_pSol met,MMG_int k,int8_t i) {
   MMG5_pTria           pt,pt1,pt0;
   MMG5_pPoint          p1,p2,ppt;
   double               mid[2],o[2],no[2],calnew,caltmp,tp,to,t,calseuil;
-  int                  ip,jel,*adja,it,maxit,npinit;
+  MMG_int                  ip,jel,*adja,it,maxit,npinit;
   int8_t               i1,i2,j,j1,j2,ier,isv;
 
   calseuil = 1e-4 / MMG2D_ALPHAD;
@@ -236,9 +236,9 @@ int MMG2D_chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t i) {
  * adjacency structure in the mesh is preserved
  *
  */
-int MMG2D_split1b(MMG5_pMesh mesh,int k,int8_t i,int ip) {
+MMG_int MMG2D_split1b(MMG5_pMesh mesh,MMG_int k,int8_t i,MMG_int ip) {
   MMG5_pTria         pt,pt1;
-  int                *adja,iel,jel,kel,mel;
+  MMG_int                *adja,iel,jel,kel,mel;
   int8_t             i1,i2,m,j,j1,j2;
 
   iel = MMG2D_newElt(mesh);
@@ -262,7 +262,7 @@ int MMG2D_split1b(MMG5_pMesh mesh,int k,int8_t i,int ip) {
 
   pt1 = &mesh->tria[iel];
   memcpy(pt1,pt,sizeof(MMG5_Tria));
-  memcpy(&mesh->adja[3*(iel-1)+1],&mesh->adja[3*(k-1)+1],3*sizeof(int));
+  memcpy(&mesh->adja[3*(iel-1)+1],&mesh->adja[3*(k-1)+1],3*sizeof(MMG_int));
 
   /* Update both triangles */
   pt->v[i2]  = ip;
@@ -300,7 +300,7 @@ int MMG2D_split1b(MMG5_pMesh mesh,int k,int8_t i,int ip) {
     pt->base = mesh->base;
 
     memcpy(pt1,pt,sizeof(MMG5_Tria));
-    memcpy(&mesh->adja[3*(kel-1)+1],&mesh->adja[3*(jel-1)+1],3*sizeof(int));
+    memcpy(&mesh->adja[3*(kel-1)+1],&mesh->adja[3*(jel-1)+1],3*sizeof(MMG_int));
 
     /* Update triangles */
     pt->v[j1]    = ip;
@@ -337,7 +337,7 @@ int MMG2D_split1b(MMG5_pMesh mesh,int k,int8_t i,int ip) {
  * Simulate the split of one edge in triangle k
  *
  */
-int MMG2D_split1_sim(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
+MMG_int MMG2D_split1_sim(MMG5_pMesh mesh, MMG5_pSol sol, MMG_int k, MMG_int vx[3]) {
   MMG5_pTria  pt,pt0;
   double      cal;
   uint8_t     tau[3];
@@ -382,10 +382,10 @@ int MMG2D_split1_sim(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
  * Split 1 edge of triangle k
  *
  */
-int MMG2D_split1(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
+MMG_int MMG2D_split1(MMG5_pMesh mesh, MMG5_pSol sol, MMG_int k, MMG_int vx[3]) {
   MMG5_pTria   pt,pt1;
   MMG5_pPoint  p0;
-  int          iel;
+  MMG_int          iel;
   uint8_t      tau[3];
 
   pt = &mesh->tria[k];
@@ -448,7 +448,7 @@ int MMG2D_split1(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
  * Simulate the split of two edges in triangle k
  *
  */
-int MMG2D_split2_sim(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
+MMG_int MMG2D_split2_sim(MMG5_pMesh mesh, MMG5_pSol sol, MMG_int k, MMG_int vx[3]) {
   MMG5_pTria  pt,pt0;
   double      cal;
   uint8_t     tau[3];
@@ -497,10 +497,10 @@ int MMG2D_split2_sim(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
  * Split 2 edges of triangle k
  *
  */
-int MMG2D_split2(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
+MMG_int MMG2D_split2(MMG5_pMesh mesh, MMG5_pSol sol, MMG_int k, MMG_int vx[3]) {
   MMG5_pTria  pt,pt1,pt2;
   MMG5_pPoint p1,p2;
-  int         iel,jel;
+  MMG_int         iel,jel;
   uint8_t     tau[3];
 
   pt = &mesh->tria[k];
@@ -584,7 +584,7 @@ int MMG2D_split2(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
  * Simulate the split of three edges in triangle k
  *
  */
-int MMG2D_split3_sim(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
+MMG_int MMG2D_split3_sim(MMG5_pMesh mesh, MMG5_pSol sol, MMG_int k, MMG_int vx[3]) {
   MMG5_pTria         pt,pt0;
   double             cal;
 
@@ -622,10 +622,10 @@ int MMG2D_split3_sim(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
  * Split the three edges of triangle k
  *
  */
-int MMG2D_split3(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
+MMG_int MMG2D_split3(MMG5_pMesh mesh, MMG5_pSol sol, MMG_int k, MMG_int vx[3]) {
   MMG5_pTria          pt,pt1,pt2,pt3;
   MMG5_pPoint         p0,p1,p2;
-  int                 iel,jel,kel;
+  MMG_int                 iel,jel,kel;
 
   pt = &mesh->tria[k];
   pt->flag = 0;
@@ -713,11 +713,11 @@ int MMG2D_split3(MMG5_pMesh mesh, MMG5_pSol sol, int k, int vx[3]) {
  * Insert the point ip inside the tria k
  *
  */
-int MMG2D_splitbar(MMG5_pMesh mesh,int k,int ip) {
+MMG_int MMG2D_splitbar(MMG5_pMesh mesh,MMG_int k,MMG_int ip) {
   MMG5_pTria         pt,pt0,pt1,pt2;
   MMG5_pPoint        p0,p1,p2,ppt;
-  int                *adja,iel1,iel2,jel0,jel2;
-  int                ip0,ip1,ip2;
+  MMG_int                *adja,iel1,iel2,jel0,jel2;
+  MMG_int                ip0,ip1,ip2;
   int8_t             j2,j0;
   double             cal,calseuil;
 
@@ -779,10 +779,10 @@ int MMG2D_splitbar(MMG5_pMesh mesh,int k,int ip) {
 
   pt1 = &mesh->tria[iel1];
   memcpy(pt1,pt,sizeof(MMG5_Tria));
-  memcpy(&mesh->adja[3*(iel1-1)+1],&mesh->adja[3*(k-1)+1],3*sizeof(int));
+  memcpy(&mesh->adja[3*(iel1-1)+1],&mesh->adja[3*(k-1)+1],3*sizeof(MMG_int));
   pt2 = &mesh->tria[iel2];
   memcpy(pt2,pt,sizeof(MMG5_Tria));
-  memcpy(&mesh->adja[3*(iel2-1)+1],&mesh->adja[3*(k-1)+1],3*sizeof(int));
+  memcpy(&mesh->adja[3*(iel2-1)+1],&mesh->adja[3*(k-1)+1],3*sizeof(MMG_int));
 
   /* Update the three triangles */
   pt->v[1]  = ip;

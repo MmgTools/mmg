@@ -27,6 +27,8 @@
 @DEF_POSIX@
 @DEF_GNU@
 
+@DEF_MMG_INT@
+
 #cmakedefine USE_POINTMAP /*!< Flag to enable and export the pointmap used */
 
 #endif
