@@ -1046,7 +1046,8 @@ void MMG3D_mark_pointsOnReqEdge_fromTetra (  MMG5_pMesh mesh ) {
           if( !ppt->s ) {
             ppt->s = 4*mesh->ne+3;
 #ifdef USE_POINTMAP
-            ppt->src *= -1;
+            if( !mesh->info.nosizreq )
+              ppt->src *= -1;
 #endif
           }
         }
