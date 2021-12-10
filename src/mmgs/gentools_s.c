@@ -38,7 +38,7 @@
 /* Delete all triangle references in mesh */
 int delref(MMG5_pMesh mesh) {
   MMG5_pTria    pt;
-  int      k;
+  MMG_int      k;
 
   for(k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
@@ -61,9 +61,9 @@ int delref(MMG5_pMesh mesh) {
  * if boundary edges met must be set to MG_REQ, 0 otherwise.
  *
  */
-int setref(MMG5_pMesh mesh,int start,int ref,int putreq) {
+int setref(MMG5_pMesh mesh,MMG_int start,int ref,int putreq) {
   MMG5_pTria pt,pt1;
-  int        *list,*adja,cur,base,k,iel,jel,ilist;
+  MMG_int        *list,*adja,cur,base,k,iel,jel,ilist;
   int8_t     j,voy;
 
   ilist = cur = 0;
@@ -119,9 +119,9 @@ int setref(MMG5_pMesh mesh,int start,int ref,int putreq) {
 }
 
 /** find the element number in packed numerotation */
-int MMGS_indElt(MMG5_pMesh mesh, int kel) {
+MMG_int MMGS_indElt(MMG5_pMesh mesh, MMG_int kel) {
   MMG5_pTria pt;
-  int    ne, k;
+  MMG_int    ne, k;
 
   ne = 0;
   for (k=1; k<=mesh->nt; k++) {
@@ -135,9 +135,9 @@ int MMGS_indElt(MMG5_pMesh mesh, int kel) {
 }
 
 /** find the point number in packed numerotation */
-int MMGS_indPt(MMG5_pMesh mesh, int kp) {
+MMG_int MMGS_indPt(MMG5_pMesh mesh, MMG_int kp) {
   MMG5_pPoint ppt;
-  int         np, k;
+  MMG_int         np, k;
 
   np = 0;
   for (k=1; k<=mesh->np; k++) {
@@ -157,7 +157,7 @@ int MMGS_indPt(MMG5_pMesh mesh, int kp) {
  * Keep only subdomain of index \a nsd and remove other subdomains.
  *
  */
-void MMGS_keep_only1Subdomain ( MMG5_pMesh mesh,int nsd ) {
+void MMGS_keep_only1Subdomain ( MMG5_pMesh mesh,MMG_int nsd ) {
 
   if ( !nsd ) {
     return;

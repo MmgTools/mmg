@@ -115,7 +115,7 @@ inline double MMG2D_caltri_iso_3pt(double *a,double *b,double *c) {
  * valid mesh.
  *
  */
-MMG_int MMG2D_chkmovmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t,MMG_int *triIdx) {
+int MMG2D_chkmovmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t,int *triIdx) {
   MMG5_pTria   pt;
   MMG5_pPoint  ppt;
   double       *v,c[3][2],tau;
@@ -161,7 +161,7 @@ MMG_int MMG2D_chkmovmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t,MMG_int *triIdx)
  *
  */
 short MMG2D_dikomv(MMG5_pMesh mesh,MMG5_pSol disp,short *lastt) {
-  MMG_int     it,maxit;
+  int     it,maxit;
   short   t,tmin,tmax;
   int8_t  ier;
 
@@ -213,7 +213,7 @@ short MMG2D_dikomv(MMG5_pMesh mesh,MMG5_pSol disp,short *lastt) {
 }
 
 /** Perform mesh motion along disp, for a fraction t, and the corresponding updates */
-MMG_int MMG2D_dispmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t,MMG_int itdeg) {
+int MMG2D_dispmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t,int itdeg) {
   MMG5_pTria    pt;
   MMG5_pPoint   ppt;
   double        *v,tau,ctau,c[3][2],ocal,ncal;
@@ -280,7 +280,7 @@ MMG_int MMG2D_dispmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t,MMG_int itdeg) {
  * Only affects triangles with cc itdeg
  *
  */
-MMG_int MMG2D_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,MMG_int itdeg,MMG_int *warn) {
+int MMG2D_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,MMG_int itdeg,int *warn) {
   MMG5_pTria      pt;
   MMG5_pPoint     p1,p2;
   double          hma2,lmax,len;
@@ -375,11 +375,12 @@ MMG_int MMG2D_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,MMG_int itdeg,
  * Attempt to collapse small internal edges in the Lagrangian mode; only affects tria with cc itdeg.
  *
  */
-static MMG_int MMG2D_coleltlag(MMG5_pMesh mesh,MMG5_pSol met,MMG_int itdeg) {
+static int MMG2D_coleltlag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
   MMG5_pTria     pt;
   MMG5_pPoint    p1,p2;
   double         hmi2,len;
-  MMG_int            nc,k,ilist,list[MMG2D_LONMAX+2];
+  MMG_int            nc,k,ilist;
+  MMG_int        list[MMG2D_LONMAX+2];
   int8_t         i,i1,i2,open;
 
   nc    = 0;
@@ -437,10 +438,11 @@ static MMG_int MMG2D_coleltlag(MMG5_pMesh mesh,MMG5_pSol met,MMG_int itdeg) {
  * Internal edge flipping in the Lagrangian mode; only affects trias with cc itdeg
  *
  */
-MMG_int MMG2D_swpmshlag(MMG5_pMesh mesh,MMG5_pSol met,double crit,MMG_int itdeg) {
+int MMG2D_swpmshlag(MMG5_pMesh mesh,MMG5_pSol met,double crit,int itdeg) {
   MMG5_pTria   pt;
-  MMG_int          k,it,maxit,ns,nns;
+  int          it,maxit,ns,nns;
   int8_t       i;
+  MMG_int      k;
 
   maxit = 2;
   it    = 0;
@@ -471,7 +473,7 @@ MMG_int MMG2D_swpmshlag(MMG5_pMesh mesh,MMG5_pSol met,double crit,MMG_int itdeg)
   return nns;
 }
 /** For debugging purposes: save disp */
-MMG_int MMG2D_saveDisp(MMG5_pMesh mesh,MMG5_pSol disp) {
+int MMG2D_saveDisp(MMG5_pMesh mesh,MMG5_pSol disp) {
   FILE        *out;
   MMG_int         k;
   char        data[256],*ptr;
@@ -505,10 +507,11 @@ MMG_int MMG2D_saveDisp(MMG5_pMesh mesh,MMG5_pSol disp) {
  * Analyze trias with cc = itdeg and move internal points so as to make mesh more uniform.
  *
  */
-MMG_int MMG2D_movtrilag(MMG5_pMesh mesh,MMG5_pSol met,MMG_int itdeg) {
+int MMG2D_movtrilag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
   MMG5_pTria        pt;
   MMG5_pPoint       p0;
-  MMG_int               k,it,base,maxit,nm,nnm,ilist,list[MMG2D_LONMAX+2];
+  int               it,base,maxit,nm,nnm,ilist;
+  MMG_int           k,list[MMG2D_LONMAX+2];
   int8_t            i,ier;
 
   nnm   = 0;
@@ -568,12 +571,13 @@ MMG_int MMG2D_movtrilag(MMG5_pMesh mesh,MMG5_pSol met,MMG_int itdeg) {
  *                   info.lag > 1  -> displacement+remeshing with split+collapse+swap+move
  *
  */
-MMG_int MMG2D_mmg2d9(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,MMG_int **invalidTrias) {
+int MMG2D_mmg2d9(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,MMG_int **invalidTrias) {
   double             avlen,tau,hmintmp,hmaxtmp;
-  MMG_int                k,itmn,itdc,maxitmn,maxitdc,iit,warn,ninvalidTrias;
-  MMG_int                nspl,nnspl,nnnspl,nc,nnc,nnnc,ns,nns,nnns,nm,nnm,nnnm;
+  int                itmn,itdc,maxitmn,maxitdc,iit,warn;
+  int                nspl,nnspl,nnnspl,nc,nnc,nnnc,ns,nns,nnns,nm,nnm,nnnm;
   short              t,lastt;
   int8_t             ier;
+  MMG_int            k,ninvalidTrias;
 
   maxitmn = 10;
   maxitdc = 100;

@@ -34,7 +34,7 @@
 #include "mmg2d.h"
 
 /* Relocate internal vertex whose ball is passed */
-MMG_int MMG2D_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG_int ilist,MMG_int *list,int8_t improve) {
+int MMG2D_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int ilist,MMG_int *list,int8_t improve) {
   MMG5_pTria         pt,pt0;
   MMG5_pPoint        ppt0,p0,p1,p2;
   double             calold,calnew,area,det,alpha,ps,ps1,ps2,step,sqdetm1,sqdetm2;

@@ -49,14 +49,14 @@
  * size.
  *
  */
-static int MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
+static int MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,MMG_int it,MMG_int ip) {
   MMG5_pTria         pt;
   MMG5_pPoint        p0;
   MMG5_pPar          par;
   double             *m,n[3],isqhmin,isqhmax,b0[3],b1[3],ps1,tau[3];
   double             ntau2,gammasec[3];
   double             c[3],kappa,maxkappa,alpha,hausd,hausd_v;
-  int                ilist,list[MMGS_LMAX+2],k,i,iel,idp,init_s;
+  MMG_int                ilist,list[MMGS_LMAX+2],k,i,iel,idp,init_s;
   uint8_t            i0,i1,i2;
 
   pt  = &mesh->tria[it];
@@ -164,13 +164,14 @@ static int MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
  * and at each time, metric tensor has to be recomputed, depending on the side.
  *
  */
-static int MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
+static int MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,MMG_int it,MMG_int ip) {
   MMG5_pTria     pt;
   MMG5_pPoint    p0,p1,p2;
   MMG5_Bezier    b;
   MMG5_pPar      par;
-  int            k,iel,idp,ilist1,ilist2,ilist,*list,list1[MMGS_LMAX+2];
-  int            list2[MMGS_LMAX+2],iprid[2],ier,isloc;
+  MMG_int            k,iel,idp,ilist1,ilist2,ilist,*list,list1[MMGS_LMAX+2];
+  MMG_int            list2[MMGS_LMAX+2],iprid[2],isloc;
+  int            ier;
   double         *m,isqhmin,isqhmax,*n1,*n2,*n,*t,trot[2],u[2];
   double         r[3][3],lispoi[3*MMGS_LMAX+1],ux,uy,uz,det,bcu[3];
   double         detg,detd;
@@ -341,12 +342,12 @@ static int MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
  * geometric approx of the surface.
  *
  */
-static int MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
+static int MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,MMG_int it,MMG_int ip) {
   MMG5_pTria         pt;
   MMG5_pPoint        p0,p1;
   MMG5_Bezier       b;
   MMG5_pPar          par;
-  int                i,ilist,list[MMGS_LMAX+2],k,iel,ipref[2],idp,isloc;
+  MMG_int                i,ilist,list[MMGS_LMAX+2],k,iel,ipref[2],idp,isloc;
   double             *m,isqhmin,isqhmax,*n,r[3][3],lispoi[3*MMGS_LMAX+1];
   double             ux,uy,uz,det2d,intm[3],c[3];
   double             tAA[6],tAb[3],hausd;
@@ -515,12 +516,12 @@ static int MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
  * and apply this rotation to the ball of \a p0.
  *
  */
-int MMGS_surfballRotation(MMG5_pMesh mesh,MMG5_pPoint p0,int *list,int ilist,
+int MMGS_surfballRotation(MMG5_pMesh mesh,MMG5_pPoint p0,MMG_int *list,MMG_int ilist,
                           double r[3][3],double *lispoi) {
   MMG5_pTria  pt;
   MMG5_pPoint p1;
   double      *n,ux,uy,uz,area;
-  int         iel,i0,i1,k;
+  MMG_int         iel,i0,i1,k;
 
   /* Computation of the rotation matrix T_p0 S -> [z = 0] */
   n  = p0->n;
@@ -579,12 +580,12 @@ int MMGS_surfballRotation(MMG5_pMesh mesh,MMG5_pPoint p0,int *list,int ilist,
  * the geometric approx of the surface.
  *
  */
-static int MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
+static int MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,MMG_int it,MMG_int ip) {
   MMG5_pTria          pt;
   MMG5_pPoint         p0;
   MMG5_Bezier         b;
   MMG5_pPar           par;
-  int                 ilist,list[MMGS_LMAX+2],k,iel,idp,isloc,i;
+  MMG_int                 ilist,list[MMGS_LMAX+2],k,iel,idp,isloc,i;
   double              *m,r[3][3],lispoi[3*MMGS_LMAX+1];
   double              c[3],isqhmin,isqhmax;
   double              tAA[6],tAb[3],hausd;
@@ -676,7 +677,7 @@ static int MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,int it,int ip) {
  *
  */
 static inline
-int MMGS_intextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6]) {
+int MMGS_intextmet(MMG5_pMesh mesh,MMG5_pSol met,MMG_int np,double me[6]) {
   MMG5_pPoint         p0;
   double              *n;
   double              dummy_n[3];
@@ -709,7 +710,7 @@ int MMGS_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria    pt;
   MMG5_pPoint   ppt;
   double        mm[6];
-  int           k;
+  MMG_int           k;
   int8_t        ismet;
   int8_t        i;
   static int8_t mmgErr=0;
@@ -805,7 +806,7 @@ int MMGS_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
 int MMGS_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pPoint  p1;
   double       *m,mv;
-  int          k,it;
+  MMG_int          k,it;
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
     fprintf(stdout,"  ** Anisotropic mesh gradation\n");

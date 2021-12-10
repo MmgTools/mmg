@@ -66,7 +66,7 @@ inline double MMG2D_voltri(MMG5_pMesh mesh,MMG_int ip0,MMG_int ip1,MMG_int ip2) 
  * inside triangle k defined by the ls function in sol
  *
  **/
-double MMG2D_vfrac(MMG5_pMesh mesh,MMG5_pSol sol,MMG_int k,MMG_int pm) {
+double MMG2D_vfrac(MMG5_pMesh mesh,MMG5_pSol sol,MMG_int k,int pm) {
   MMG5_pTria    pt;
   MMG5_pPoint   ppt[3];
   double        v[3],vfp,vfm,lam,area,eps,o1[2],o2[2];
@@ -188,10 +188,11 @@ double MMG2D_vfrac(MMG5_pMesh mesh,MMG5_pSol sol,MMG_int k,MMG_int pm) {
  * Reset MG_ISO vertex and edge references to 0.
  *
  */
-MMG_int MMG2D_resetRef(MMG5_pMesh mesh) {
+int MMG2D_resetRef(MMG5_pMesh mesh) {
   MMG5_pTria      pt;
   MMG5_pPoint     p0;
-  MMG_int             k,ref;
+  MMG_int             k;
+  int		  ref;
   int8_t          i;
 
   for (k=1; k<=mesh->nt; k++) {
@@ -218,7 +219,7 @@ MMG_int MMG2D_resetRef(MMG5_pMesh mesh) {
 
 /* Check whether snapping the value of vertex i of k to 0 exactly leads to a non manifold situation
  assumption: the triangle k has vertex i with value 0 and the other two with changing values */
-MMG_int MMG2D_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, MMG_int start, int8_t istart) {
+int MMG2D_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, MMG_int start, int8_t istart) {
   MMG5_pTria       pt;
   double           v1, v2;
   MMG_int              *adja,k,ip1,ip2,end1,refstart;
@@ -309,12 +310,13 @@ MMG_int MMG2D_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, MMG_int start, int8_t i
  * Snap values of sol very close to 0 to 0 exactly (to avoid very small
  * triangles in cutting)
  */
-MMG_int MMG2D_snapval(MMG5_pMesh mesh, MMG5_pSol sol) {
+int MMG2D_snapval(MMG5_pMesh mesh, MMG5_pSol sol) {
   MMG5_pTria       pt,pt1;
   MMG5_pPoint      p0;
   double           v1,v2,*tmp;
-  MMG_int              k,kk,iel,ns,nc,ip,ip1,ip2,npl,nmn,ilist,list[MMG2D_LONMAX+2];
+  MMG_int              k,kk,iel,ns,nc,ip,ip1,ip2,npl,nmn,ilist;
   int8_t           i,j,j1,j2;
+  MMG_int          list[MMG2D_LONMAX+2];
 
   /* Allocate memory for tmp */
   MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(double),"temporary table",
@@ -404,7 +406,7 @@ MMG_int MMG2D_snapval(MMG5_pMesh mesh, MMG5_pSol sol) {
 
 /* Check whether the ball of vertex i in tria start is manifold;
  by assumption, i inxt[i] is one edge of the implicit boundary */
-MMG_int MMG2D_chkmaniball(MMG5_pMesh mesh, MMG_int start, int8_t istart) {
+int MMG2D_chkmaniball(MMG5_pMesh mesh, MMG_int start, int8_t istart) {
   MMG5_pTria         pt;
   MMG_int                *adja,k,refstart;
   int8_t             i,i1;
@@ -474,7 +476,7 @@ MMG_int MMG2D_chkmaniball(MMG5_pMesh mesh, MMG_int start, int8_t istart) {
 }
 
 /* Check whether the resulting two subdomains occupying mesh are manifold */
-MMG_int MMG2D_chkmanimesh(MMG5_pMesh mesh) {
+int MMG2D_chkmanimesh(MMG5_pMesh mesh) {
   MMG5_pTria      pt,pt1;
   MMG_int             *adja,k,cnt,iel;
   int8_t          i,i1;
@@ -544,7 +546,7 @@ MMG_int MMG2D_chkmanimesh(MMG5_pMesh mesh) {
  * mesh->info.rmc * volume of the mesh.
  *
  */
-MMG_int MMG2D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
+int MMG2D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
   MMG5_pTria     pt,pt1,pt2;
   double         volc,voltot,v0,v1,v2;
   MMG_int            k,kk,l,ll,ncp,ncm,ip0,ip1,ip2,base,cur,ipile,*pile,*adja;
@@ -568,7 +570,7 @@ MMG_int MMG2D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
   }
 
   /* Memory allocation for pile */
-  MMG5_ADD_MEM(mesh,(mesh->nt+1)*sizeof(MMG_int),"temporary table",
+  MMG5_ADD_MEM(mesh,(mesh->nt+1)*sizeof(int),"temporary table",
                printf("  Exit program.\n");
                return 0);
   MMG5_SAFE_CALLOC(pile,mesh->nt+1,MMG_int,return 0);
@@ -788,7 +790,7 @@ MMG_int MMG2D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
  * Effective discretization of the 0 level set encoded in sol in the mesh
  *
  */
-MMG_int MMG2D_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol met){
+int MMG2D_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol met){
   MMG5_pTria   pt;
   MMG5_pPoint  p0,p1;
   MMG5_Hash    hash;
@@ -937,10 +939,11 @@ MMG_int MMG2D_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol met){
 }
 
 /* Set references to the new triangles */
-MMG_int MMG2D_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol){
+int MMG2D_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol){
   MMG5_pTria    pt;
   double        v,v1;
-  MMG_int           k,ip,ip1,ier,ref,refint,refext;
+  int           ier,ref,refint,refext;
+  MMG_int       k,ip,ip1;
   int8_t        i,i1,i2,nmn,npl,nz;
 
   for (k=1; k<=mesh->nt; k++) {
@@ -1001,7 +1004,7 @@ MMG_int MMG2D_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol){
 }
 
 /* Main function of the -ls mode */
-MMG_int MMG2D_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met) {
+int MMG2D_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met) {
   MMG_int k;
 
   if ( abs(mesh->info.imprim) > 3 )

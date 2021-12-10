@@ -361,9 +361,9 @@ int MMG5_hashEdgeTag(MMG5_pMesh mesh,MMG5_Hash *hash, int a,int b,int16_t tag) {
  * Find the index of point stored along  \f$[a;b]\f$.
  *
  */
-int MMG5_hashGet(MMG5_Hash *hash,int a,int b) {
+int MMG5_hashGet(MMG5_Hash *hash,MMG_int a,MMG_int b) {
   MMG5_hedge  *ph;
-  int          key,ia,ib;
+  MMG_int          key,ia,ib;
 
   if ( !hash->item ) return 0;
 

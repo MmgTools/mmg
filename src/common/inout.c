@@ -239,12 +239,12 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,const char *filename,
                            FILE **inm,
                            long *posNodes, long *posElts,
                            long **posNodeData, int *bin, int *iswp,
-                           int *nelts,int *nsols) {
+                           MMG_int *nelts,MMG_int *nsols) {
   double      dbuf[9];
   float       fbuf[9];
-  int         ver,oneBin,k,i;
-  int         nt,na,nq,ne,npr,np;
-  int         typ,tagNum,posNodeDataSize,initPosNodeDataSize;
+  MMG_int         ver,oneBin,k,i;
+  MMG_int         nt,na,nq,ne,npr,np;
+  MMG_int         typ,tagNum,posNodeDataSize,initPosNodeDataSize;
   char        *ptr,*data,chaine[MMG5_FILESTR_LGTH],verNum[5];
 
   ver = oneBin = 0;
@@ -2028,7 +2028,7 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename,
  *
  */
 int MMG5_loadSolHeader( const char *filename,int meshDim,FILE **inm,int *ver,
-                        int *bin,int *iswp,int *np,int *dim,int *nsols,int **type,
+                        int *bin,int *iswp,MMG_int *np,MMG_int *dim,MMG_int *nsols,int **type,
                         long *posnp, int imprim) {
   int         binch,bdim;
   int         bpos,i;
@@ -2335,11 +2335,11 @@ void MMG5_writeDoubleSol3D(MMG5_pMesh mesh,MMG5_pSol sol,FILE *inm,int bin,
  *
  */
 int MMG5_saveSolHeader( MMG5_pMesh mesh,const char *filename,
-                        FILE **inm,int ver,int *bin,int *bpos,int np,int dim,
-                        int nsols,int *entities,int *type,int *size) {
+                        FILE **inm,int ver,int *bin,int *bpos,MMG_int np,MMG_int dim,
+                        int nsols,int *entities,int *type,MMG_int *size) {
   MMG5_pPoint ppt;
   int         binch;
-  int         k;
+  MMG_int         k;
   char        *ptr,*data,chaine[MMG5_FILESTR_LGTH];
 
   *bin = 0;

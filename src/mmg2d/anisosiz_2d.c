@@ -47,10 +47,10 @@
  * able to truncate it with the local params later.
  *
  */
-MMG_int MMG2D_defaultmet_2d(MMG5_pMesh mesh,MMG5_pSol met,MMG_int k,int8_t i) {
+int MMG2D_defaultmet_2d(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t i) {
   MMG5_pTria       pt;
   double           *m,isqhmax;
-  MMG_int              ip;
+  int              ip;
 
   isqhmax = mesh->info.hmax;
 
@@ -82,7 +82,7 @@ MMG_int MMG2D_defaultmet_2d(MMG5_pMesh mesh,MMG5_pSol met,MMG_int k,int8_t i) {
  * imposing the local parameters later.
  *
  */
-MMG_int MMG2D_defmetbdy_2d(MMG5_pMesh mesh,MMG5_pSol met,MMG_int k,int8_t i) {
+int MMG2D_defmetbdy_2d(MMG5_pMesh mesh,MMG5_pSol met,MMG_int k,int8_t i) {
   MMG5_pTria      pt;
   MMG5_pPoint     p0,p1,p2;
   MMG5_pPar       ppa;
@@ -357,7 +357,7 @@ MMG_int MMG2D_defmetbdy_2d(MMG5_pMesh mesh,MMG5_pSol met,MMG_int k,int8_t i) {
  * Definition of an anisotropic metric tensor field based on the geometry of the
  * domain; this tensor field is intersected by a user-defined tensor field
  */
-MMG_int MMG2D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
+int MMG2D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria     pt;
   MMG5_pPoint    ppt;
   MMG5_pPar      ppa;
@@ -528,7 +528,7 @@ void MMG2D_gradEigenv(double dm[2],double dn[2],double difsiz,int8_t dir,int8_t 
  *
  */
 static inline
-MMG_int MMG2D_updatemet_ani(double *m,double *n,double dm[2],double dn[2],
+int MMG2D_updatemet_ani(double *m,double *n,double dm[2],double dn[2],
                          double vp[2][2],int8_t ier ) {
   double det,ip[4];
 
@@ -571,7 +571,7 @@ MMG_int MMG2D_updatemet_ani(double *m,double *n,double dm[2],double dn[2],
  * Ref : https://www.rocq.inria.fr/gamma/Frederic.Alauzet/cours/cea2010_V2.pdf
  *
  */
-MMG_int MMG2D_grad2met_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,MMG_int np1,MMG_int np2) {
+int MMG2D_grad2met_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,MMG_int np1,MMG_int np2) {
   MMG5_pPoint  p1,p2;
   double       dm[2],dn[2];
   double       vp[2][2],*m,*n,ll,difsiz;
@@ -634,7 +634,7 @@ MMG_int MMG2D_grad2met_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,MMG_int n
  * Ref : https://www.rocq.inria.fr/gamma/Frederic.Alauzet/cours/cea2010_V2.pdf
  *
  */
-MMG_int MMG2D_grad2metreq_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,
+int MMG2D_grad2metreq_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,
                           MMG_int npmaster,MMG_int npslave) {
   MMG5_pPoint  p2,p1;
   double       ux,uy,dm[2],dn[2];

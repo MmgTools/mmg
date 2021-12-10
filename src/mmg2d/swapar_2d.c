@@ -36,7 +36,7 @@
 /* Version of edge swapping specific to the boundary enforcement stage in Delaunay meshing;
    the quality of the resulting criterion should be > crit.
    list returns both modified triangles */
-MMG_int MMG2D_swapdelone(MMG5_pMesh mesh,MMG5_pSol sol,MMG_int k,int8_t i,double crit,MMG_int *list) {
+int MMG2D_swapdelone(MMG5_pMesh mesh,MMG5_pSol sol,MMG_int k,int8_t i,double crit,MMG_int *list) {
   MMG5_pTria         pt,pt1,pt0;
   double             cal1,cal2,area1,area2,arean1,arean2;
   MMG_int                *adja,*adja1,k1,k2,k3,vo2,vo3,num1,numa1;
@@ -125,7 +125,7 @@ MMG_int MMG2D_swapdelone(MMG5_pMesh mesh,MMG5_pSol sol,MMG_int k,int8_t i,double
 }
 
 /* Check whether swap of edge i in triangle k is valid, and suitable for the mesh */
-MMG_int MMG2D_chkswp(MMG5_pMesh mesh, MMG5_pSol met,MMG_int k,int8_t i,int8_t typchk) {
+int MMG2D_chkswp(MMG5_pMesh mesh, MMG5_pSol met,MMG_int k,int8_t i,int8_t typchk) {
   MMG5_pTria          pt,pt0,pt1;
   double              /*loni,lona,*/cal1,cal2,calnat,calchg;
   MMG_int                 *adja,ip,ip1,ip2,iq,kk;
@@ -218,7 +218,7 @@ MMG_int MMG2D_chkswp(MMG5_pMesh mesh, MMG5_pSol met,MMG_int k,int8_t i,int8_t ty
 }
 
 /* Effective swap of edge i in triangle k */
-MMG_int MMG2D_swapar(MMG5_pMesh mesh,MMG_int k,int8_t i) {
+int MMG2D_swapar(MMG5_pMesh mesh,MMG_int k,int8_t i) {
   MMG5_pTria    pt,pt1;
   MMG_int     *adja,adj,k11,k21;
   int8_t   i1,i2,j,jj,j2,v11,v21;

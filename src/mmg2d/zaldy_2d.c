@@ -35,9 +35,9 @@
 
 
 /* Create a new vertex in the mesh, and return its number */
-MMG_int MMG2D_newPt(MMG5_pMesh mesh,double c[2],int16_t tag) {
+int MMG2D_newPt(MMG5_pMesh mesh,double c[2],int16_t tag) {
   MMG5_pPoint  ppt;
-  MMG_int     curpt;
+  int     curpt;
 
   if ( !mesh->npnil )  return 0;
 
@@ -54,7 +54,7 @@ MMG_int MMG2D_newPt(MMG5_pMesh mesh,double c[2],int16_t tag) {
 }
 
 /* Delete a point in the mesh and update the garbage collector accordingly */
-void MMG2D_delPt(MMG5_pMesh mesh,MMG_int ip) {
+void MMG2D_delPt(MMG5_pMesh mesh,int ip) {
   MMG5_pPoint   ppt;
 
   ppt = &mesh->point[ip];
@@ -102,7 +102,7 @@ MMG_int MMG2D_newElt(MMG5_pMesh mesh) {
 }
 
 /* Delete a triangle in the mesh and update the garbage collector accordingly */
-MMG_int MMG2D_delElt(MMG5_pMesh mesh,MMG_int iel) {
+int MMG2D_delElt(MMG5_pMesh mesh,MMG_int iel) {
   MMG5_pTria    pt;
   MMG_int      iadr;
 
@@ -116,7 +116,7 @@ MMG_int MMG2D_delElt(MMG5_pMesh mesh,MMG_int iel) {
   pt->qual = 0.0;
   iadr = (iel-1)*3 + 1;
   if ( mesh->adja )
-    memset(&mesh->adja[iadr],0,3*sizeof(MMG_int));
+    memset(&mesh->adja[iadr],0,3*sizeof(int));
 
   mesh->nenil = iel;
   if ( iel == mesh->nt )  mesh->nt--;
@@ -125,7 +125,7 @@ MMG_int MMG2D_delElt(MMG5_pMesh mesh,MMG_int iel) {
 
 
 /* check if n elets available */
-MMG_int MMG5_getnElt(MMG5_pMesh mesh,MMG_int n) {
+int MMG5_getnElt(MMG5_pMesh mesh,int n) {
   MMG_int     curiel;
 
   if ( !mesh->nenil )  return 0;
@@ -154,9 +154,9 @@ MMG_int MMG5_getnElt(MMG5_pMesh mesh,MMG_int n) {
  *
  */
 static inline
-MMG_int MMG2D_memOption_memSet(MMG5_pMesh mesh) {
+int MMG2D_memOption_memSet(MMG5_pMesh mesh) {
   size_t   usedMem,avMem,reservedMem,npadd;
-  MMG_int      ctri,bytes;
+  int      ctri,bytes;
 
   MMG5_memOption_memSet(mesh);
 
@@ -215,7 +215,7 @@ MMG_int MMG2D_memOption_memSet(MMG5_pMesh mesh) {
  * memory repartition for the -m option
  *
  */
-MMG_int MMG2D_memOption(MMG5_pMesh mesh) {
+int MMG2D_memOption(MMG5_pMesh mesh) {
 
   mesh->memMax = MMG5_memSize();
 
@@ -234,7 +234,7 @@ MMG_int MMG2D_memOption(MMG5_pMesh mesh) {
  * Allocation of the array fields of the mesh.
  *
  */
-MMG_int MMG2D_setMeshSize_alloc( MMG5_pMesh mesh ) {
+int MMG2D_setMeshSize_alloc( MMG5_pMesh mesh ) {
   MMG_int k;
 
   MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(MMG5_Point),"initial vertices",
@@ -285,7 +285,7 @@ MMG_int MMG2D_setMeshSize_alloc( MMG5_pMesh mesh ) {
  * allocate main structure
  *
  */
-MMG_int MMG2D_zaldy(MMG5_pMesh mesh) {
+int MMG2D_zaldy(MMG5_pMesh mesh) {
 
   if ( !MMG2D_memOption(mesh) )  return 0;
 

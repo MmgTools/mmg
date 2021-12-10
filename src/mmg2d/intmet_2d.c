@@ -35,7 +35,7 @@
 
 /* Interpolation of isotropic metric met along edge i of triangle k, according to parameter s;
    ip = index of the new point */
-MMG_int MMG2D_intmet_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG_int k,int8_t i,MMG_int ip,double s) {
+int MMG2D_intmet_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG_int k,int8_t i,MMG_int ip,double s) {
   MMG5_pTria  pt;
   MMG_int         ip1,ip2;
   int8_t      i1,i2;
@@ -51,7 +51,7 @@ MMG_int MMG2D_intmet_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG_int k,int8_t i,MMG_in
 }
 
 /* Interpolation of metrics m and n according to parameter s; result is stored in mr. A simultaneous reduction of both matrices is performed and the sizes are interpolated. */
-MMG_int MMG5_interpmet22(MMG5_pMesh mesh,double *m,double *n,double s,double *mr) {
+int MMG5_interpmet22(MMG5_pMesh mesh,double *m,double *n,double s,double *mr) {
   double        det,imn[4],dd,den,sqDelta,trimn,lambda[2],vp[2][2],dm[2];
   double        dn[2],vnorm,d0,d1,ip[4];
   static int8_t mmgWarn0=0,mmgWarn1=0;
@@ -206,7 +206,7 @@ MMG_int MMG5_interpmet22(MMG5_pMesh mesh,double *m,double *n,double s,double *mr
 
 /* Interpolation of anisotropic metric met along edge i of triangle k, according to parameter s;
  ip = index of the new point */
-MMG_int MMG2D_intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG_int k,int8_t i,MMG_int ip,double s) {
+int MMG2D_intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG_int k,int8_t i,MMG_int ip,double s) {
   MMG5_pTria     pt;
   double         *m1,*m2,*mr;
 #ifndef NDEBUG

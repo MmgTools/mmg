@@ -44,7 +44,7 @@
  * Skip edges with a required extremity (treated in lissmetreq_ani).
  *
  */
-MMG_int lissmet_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
+int lissmet_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_Hash      edgeTable;
   MMG5_hedge     *pht;
   MMG5_pTria     pt;
@@ -52,7 +52,8 @@ MMG_int lissmet_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
   double         logh,logs,*ma,*mb,ux,uy,d1,d2,dd,rap,dh;
   double         tail,coef,ma1[3],mb1[3],m[3],dd1,dd2;
   double         SQRT3DIV2=0.8660254037844386;
-  MMG_int            i,nc,k,itour,maxtou,ncor,a,b,iadr;
+  int            i,itour,maxtou,a,b,iadr;
+  MMG_int        ncor,nc,k;
   int8_t         ier;
   static int8_t  mmgWarn = 0;
 

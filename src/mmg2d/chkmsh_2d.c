@@ -31,7 +31,7 @@
  * Check the mesh validity
  *
  */
-MMG_int MMG5_mmg2dChkmsh(MMG5_pMesh mesh, MMG_int severe,MMG_int base) {
+int MMG5_mmg2dChkmsh(MMG5_pMesh mesh, int severe,int base) {
   MMG5_pPoint    ppt;
   MMG5_pTria     pt1,pt2;
   MMG5_pEdge     ped;
@@ -201,7 +201,7 @@ MMG_int MMG5_mmg2dChkmsh(MMG5_pMesh mesh, MMG_int severe,MMG_int base) {
 }
 
 /* Check of adjacency relations and edge tags */
-MMG_int MMG2D_chkmsh(MMG5_pMesh mesh) {
+int MMG2D_chkmsh(MMG5_pMesh mesh) {
   MMG5_pTria        pt,pt1;
   MMG5_pPoint       p1,p2;
   MMG_int               *adja,*adjaj,k,jel;
@@ -401,7 +401,7 @@ MMG_int MMG2D_chkmsh(MMG5_pMesh mesh) {
 }
 
 /* Check orientation of elements in the mesh */
-MMG_int MMG2D_chkor(MMG5_pMesh mesh) {
+int MMG2D_chkor(MMG5_pMesh mesh) {
   MMG5_pTria        pt;
   MMG5_pPoint       p0,p1,p2;
   double            det;

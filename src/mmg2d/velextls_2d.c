@@ -63,8 +63,8 @@ MMG_int* MMG2D_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,MMG_int *npfin) 
   MMG5_ADD_MEM(mesh,(mesh->nt+1)*sizeof(MMG_int),"element list",return NULL);
   MMG5_SAFE_CALLOC(list,mesh->nt+1,MMG_int,return NULL);
 
-  MMG5_ADD_MEM(mesh,(mesh->np+1)*sizeof(MMG_int),"point permutation",return NULL);
-  MMG5_SAFE_CALLOC(perm,mesh->np+1,MMG_int,return NULL);
+  MMG5_ADD_MEM(mesh,(mesh->np+1)*sizeof(int),"point permutation",return NULL);
+  MMG5_SAFE_CALLOC(perm,mesh->np+1,int,return NULL);
 
 
   /* Reset flag field at triangles */
@@ -135,11 +135,11 @@ MMG_int* MMG2D_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,MMG_int *npfin) 
   }
 
   /* Creation of the inverse permutation table */
-  MMG5_ADD_MEM ( mesh,(npf+1)*sizeof(MMG_int),"permutation table",
+  MMG5_ADD_MEM ( mesh,(npf+1)*sizeof(int),"permutation table",
                   MMG5_DEL_MEM ( mesh,list );
                   MMG5_DEL_MEM ( mesh,perm );
                   return NULL );
-  MMG5_SAFE_CALLOC ( invperm,(npf+1),MMG_int,
+  MMG5_SAFE_CALLOC ( invperm,(npf+1),int,
                       MMG5_DEL_MEM ( mesh,list );
                       MMG5_DEL_MEM ( mesh,perm );
                       return NULL );
@@ -315,7 +315,7 @@ MMG_int* MMG2D_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,MMG_int *npfin) 
 }
 
 /** Transfer solution from the submesh to the global mesh */
-MMG_int MMG2D_unpackLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,MMG_int npf,MMG_int *invperm) {
+int MMG2D_unpackLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,MMG_int npf,MMG_int *invperm) {
   double      *u;
   MMG_int         k,ip;
   int8_t      i;
@@ -337,7 +337,7 @@ MMG_int MMG2D_unpackLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,MMG_int npf,MMG
 }
 
 /** Extension of the displacement at the nodes of edges tagged MMG5_DISPREF */
-MMG_int MMG2D_velextLS(MMG5_pMesh mesh,MMG5_pSol disp) {
+int MMG2D_velextLS(MMG5_pMesh mesh,MMG5_pSol disp) {
   LSst       *lsst;
   MMG_int        npf,*invperm;
 

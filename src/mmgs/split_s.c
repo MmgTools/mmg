@@ -47,7 +47,7 @@
  * triangles are not empty (otherwise we can create a 0 surface triangle).
  *
  */
-int MMGS_split1_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,int *vx) {
+int MMGS_split1_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG_int k,MMG_int i,MMG_int *vx) {
   MMG5_pTria      pt,pt0;
   double          n[3],nref[3],vnew,vold;
   int             is;
@@ -104,7 +104,7 @@ int MMGS_split1_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,int *vx) {
  * Split element \a k along edge \a i.
  *
  */
-int MMGS_split1(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,int *vx) {
+int MMGS_split1(MMG5_pMesh mesh,MMG5_pSol met,MMG_int k,MMG_int i,MMG_int *vx) {
   MMG5_pTria      pt,pt1;
   MMG5_pPoint     ppt;
   int             iel;
@@ -155,11 +155,12 @@ int MMGS_split1(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,int *vx) {
  *
  * \remark Don't work for non-manifold edge.
  */
-int MMGS_simbulgept(MMG5_pMesh mesh,MMG5_pSol met, int k,int i,int ip) {
+int MMGS_simbulgept(MMG5_pMesh mesh,MMG5_pSol met, MMG_int k,MMG_int i,MMG_int ip) {
   MMG5_pTria     pt,pt0;
   MMG5_pPoint    ppt0;
   double         cal;
-  int            kadja,iadja,is;
+  MMG_int            kadja;
+  int            iadja,is;
 
   pt0  = &mesh->tria[0];
   ppt0 = &mesh->point[0];
@@ -217,13 +218,13 @@ int MMGS_simbulgept(MMG5_pMesh mesh,MMG5_pSol met, int k,int i,int ip) {
  *
  * \remark do not call this function in non-manifold case
  */
-int split1b(MMG5_pMesh mesh,int k,int8_t i,int ip) {
+int split1b(MMG5_pMesh mesh,MMG_int k,int8_t i,MMG_int ip) {
   MMG5_pTria     pt,pt1;
   MMG5_pPoint    ppt;
   MMG5_Bezier    b;
   MMG5_pxPoint   go;
   double         uv[2],o[3],no[3],to[3];
-  int            *adja,iel,jel,kel,mel,ier;
+  MMG_int            *adja,iel,jel,kel,mel,ier;
   int8_t         i1,i2,j,j1,j2,m;
   static int8_t mmgErr0=0,mmgErr1=0;
 
@@ -239,7 +240,7 @@ int split1b(MMG5_pMesh mesh,int k,int8_t i,int ip) {
 
   pt1 = &mesh->tria[iel];
   memcpy(pt1,pt,sizeof(MMG5_Tria));
-  memcpy(&mesh->adja[3*(iel-1)+1],&mesh->adja[3*(k-1)+1],3*sizeof(int));
+  memcpy(&mesh->adja[3*(iel-1)+1],&mesh->adja[3*(k-1)+1],3*sizeof(MMG_int));
 
   ppt = &mesh->point[ip];
   if ( pt->edg[i] )  ppt->ref = pt->edg[i];
@@ -310,7 +311,7 @@ int split1b(MMG5_pMesh mesh,int k,int8_t i,int ip) {
     pt->flag = 0;
     pt->base = mesh->base;
     memcpy(pt1,pt,sizeof(MMG5_Tria));
-    memcpy(&mesh->adja[3*(kel-1)+1],&mesh->adja[3*(jel-1)+1],3*sizeof(int));
+    memcpy(&mesh->adja[3*(kel-1)+1],&mesh->adja[3*(jel-1)+1],3*sizeof(MMG_int));
 
     j1 = MMG5_inxt2[j];
     j2 = MMG5_iprv2[j];
@@ -350,7 +351,7 @@ int split1b(MMG5_pMesh mesh,int k,int8_t i,int ip) {
  * surface triangle).
  *
  */
-int MMG5_split2_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
+int MMG5_split2_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG_int k,MMG_int *vx) {
   MMG5_pTria    pt,pt0;
   double        n[3],nref[3],vold,vnew;
   int           i1,i2,i;
@@ -426,10 +427,10 @@ int MMG5_split2_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
  * Split element \a k along the 2 edges \a i1 and \a i2.
  *
  */
-int MMGS_split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
+int MMGS_split2(MMG5_pMesh mesh,MMG5_pSol met,MMG_int k,MMG_int *vx) {
   MMG5_pTria    pt,pt1,pt2;
   MMG5_pPoint   p3,p4;
-  int           iel,jel;
+  MMG_int           iel,jel;
   int8_t        i,i1,i2;
 
   /* create 2 elements */
@@ -499,7 +500,7 @@ int MMGS_split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
  * triangles are not empty (otherwise we can create a 0 surface triangle).
  *
  */
-int MMGS_split3_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
+int MMGS_split3_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG_int k,MMG_int *vx) {
   MMG5_pTria    pt,pt0;
   double        n[3],nref[3],vnew,vold;
 
@@ -587,10 +588,10 @@ int MMGS_split3_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
  * Split element \a k along the 3 edges
  *
  */
-int MMGS_split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
+int MMGS_split3(MMG5_pMesh mesh,MMG5_pSol met,MMG_int k,MMG_int *vx) {
   MMG5_pTria    pt,pt1,pt2,pt3;
   MMG5_pPoint   p3,p4,p5;
-  int           iel,jel,kel;
+  MMG_int           iel,jel,kel;
 
   /* create 3 elements */
   iel = MMGS_newElt(mesh);

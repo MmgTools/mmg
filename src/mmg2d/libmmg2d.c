@@ -161,7 +161,7 @@ void MMG2D_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
   return;
 }
 
-MMG_int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol met)
+int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol met)
 {
   MMG5_pSol sol=NULL; // unused
   mytime    ctim[TIMEMAX];
@@ -378,8 +378,8 @@ MMG_int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol met)
  *
  */
 static inline
-MMG_int MMG2D_restart(MMG5_pMesh mesh){
-  MMG_int k;
+int MMG2D_restart(MMG5_pMesh mesh){
+  int k;
 
   /** If needed, reallocate the missing structures */
   if ( !mesh->tria ) {
@@ -410,7 +410,7 @@ MMG_int MMG2D_restart(MMG5_pMesh mesh){
 }
 
 
-MMG_int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol met) {
+int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pSol sol=NULL; // unused
   mytime    ctim[TIMEMAX];
   char      stim[32];
@@ -528,7 +528,7 @@ MMG_int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( mesh->info.ddebug && !MMG5_chkmsh(mesh,1,0) )  _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
 
   /* Memory alloc */
-  MMG5_ADD_MEM(mesh,(3*mesh->ntmax+5)*sizeof(MMG_int),"adjacency table",
+  MMG5_ADD_MEM(mesh,(3*mesh->ntmax+5)*sizeof(int),"adjacency table",
                 printf("  Exit program.\n");
                 return MMG5_STRONGFAILURE);
   MMG5_SAFE_CALLOC(mesh->adja,3*mesh->ntmax+5,MMG_int,return MMG5_STRONGFAILURE);
@@ -633,7 +633,7 @@ MMG_int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol met) {
 
 }
 
-MMG_int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
+int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
 {
   MMG5_pSol met=NULL;
   mytime    ctim[TIMEMAX];
@@ -924,10 +924,10 @@ MMG_int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
 
 }
 
-MMG_int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
+int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   mytime    ctim[TIMEMAX];
   char      stim[32];
-  MMG_int       ier;
+  int       ier;
   MMG_int       k,*invalidTris;
 
 

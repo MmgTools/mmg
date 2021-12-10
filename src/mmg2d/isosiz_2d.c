@@ -47,7 +47,7 @@
  * we have processed this extremities.
  *
  */
-MMG_int MMG2D_sum_reqEdgeLengthsAtPoint(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,int8_t i) {
+int MMG2D_sum_reqEdgeLengthsAtPoint(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,int8_t i) {
   MMG_int         ip0,ip1;
 
   ip0 = pt->v[MMG5_iprv2[i]];
@@ -72,7 +72,7 @@ MMG_int MMG2D_sum_reqEdgeLengthsAtPoint(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria
  * marked with flag 3.
  *
  */
-MMG_int MMG2D_set_metricAtPointsOnReqEdges ( MMG5_pMesh mesh,MMG5_pSol met, int8_t ismet ) {
+int MMG2D_set_metricAtPointsOnReqEdges ( MMG5_pMesh mesh,MMG5_pSol met, int8_t ismet ) {
   MMG5_pTria pt;
   MMG_int        k,i,iadj;
 
@@ -127,7 +127,7 @@ return 1;
  * curvature of the external and internal curves present in the mesh
  *
  */
-MMG_int MMG2D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
+int MMG2D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria  pt;
   MMG5_pPoint p0,p1,p2;
   MMG5_pPar   ppa;

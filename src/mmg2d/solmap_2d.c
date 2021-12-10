@@ -43,12 +43,13 @@
  * passing through a point.
  *
  */
-MMG_int MMG2D_doSol(MMG5_pMesh mesh,MMG5_pSol sol) {
+int MMG2D_doSol(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTria      ptt,pt;
   MMG5_pPoint     p1,p2;
   double          ux,uy,dd;
-  MMG_int             i,k,ib,iadr,ipa,ipb;
-  MMG_int             MMG_inxtt[5] = {0,1,2,0,1};
+  MMG_int             k,iadr,ipa,ipb;
+  int             i,ib;
+  int             MMG_inxtt[5] = {0,1,2,0,1};
 
   /* Memory alloc */
   if ( sol->size!=1 && sol->size!=3 ) {

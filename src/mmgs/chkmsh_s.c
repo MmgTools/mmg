@@ -48,8 +48,8 @@
 int MMG5_mmgsChkmsh(MMG5_pMesh mesh,int severe,int base) {
     MMG5_pPoint         ppt;
     MMG5_pTria          pt1,pt2;
-    int                 adj,adj1,k,kk,l,nk,i,j,ip,lon,len;
-    int                 *adja,*adjb,list[MMGS_LMAX+2];
+    MMG_int                 adj,adj1,k,kk,l,nk,i,j,ip,lon,len;
+    MMG_int                 *adja,*adjb,list[MMGS_LMAX+2];
     int8_t              voy,voy1,i1,i2,j1,j2;
     static int8_t       mmgErr0=0,mmgErr1=0,mmgErr2=0,mmgErr3=0,mmgErr4=0;
     static int8_t       mmgErr5=0,mmgErr6=0,mmgErr7=0;
@@ -242,7 +242,7 @@ int chknor(MMG5_pMesh mesh) {
     MMG5_pPoint   p0;
     MMG5_pxPoint    go;
     double   dd,ps,*n,nt[3];
-    int      k;
+    MMG_int      k;
     int8_t   i;
     static int8_t mmgWarn0=0, mmgWarn1=0;
 

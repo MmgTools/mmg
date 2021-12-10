@@ -36,10 +36,10 @@
 
 #ifdef USE_VTK
 
-static MMG_int MMG2D_loadVtkMesh_part2 ( MMG5_pMesh mesh,MMG5_pSol *sol,
+static int MMG2D_loadVtkMesh_part2 ( MMG5_pMesh mesh,MMG5_pSol *sol,
                                      vtkDataSet **dataset, int8_t ptMeditRef,
-                                     int8_t eltMeditRef,MMG_int nsols ) {
-  MMG_int ier;
+                                     int8_t eltMeditRef,int nsols ) {
+  int ier;
 
   if ( !MMG2D_zaldy(mesh) ) {
     return 0;
@@ -78,14 +78,14 @@ static MMG_int MMG2D_loadVtkMesh_part2 ( MMG5_pMesh mesh,MMG5_pSol *sol,
 
 #endif
 
-MMG_int MMG2D_loadVtpMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
+int MMG2D_loadVtpMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 #ifndef USE_VTK
 
   fprintf(stderr,"  ** VTK library not founded. Unavailable file format.\n");
   return -1;
 
 #else
-  MMG_int         ier,nsols;
+  int         ier,nsols;
   int8_t      ptMeditRef,eltMeditRef;
   vtkDataSet  *dataset;
 
@@ -114,14 +114,14 @@ MMG_int MMG2D_loadVtpMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 #endif
 }
 
-MMG_int MMG2D_loadVtpMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename) {
+int MMG2D_loadVtpMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename) {
 #ifndef USE_VTK
 
   fprintf(stderr,"  ** VTK library not founded. Unavailable file format.\n");
   return -1;
 
 #else
-  MMG_int         ier,nsols;
+  int         ier,nsols;
   int8_t      ptMeditRef,eltMeditRef;
   vtkDataSet  *dataset;
 
@@ -145,14 +145,14 @@ MMG_int MMG2D_loadVtpMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char 
 #endif
 }
 
-MMG_int MMG2D_loadVtkMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
+int MMG2D_loadVtkMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 #ifndef USE_VTK
 
   fprintf(stderr,"  ** VTK library not founded. Unavailable file format.\n");
   return -1;
 
 #else
-  MMG_int         ier,nsols;
+  int         ier,nsols;
   int8_t      ptMeditRef,eltMeditRef;
   vtkDataSet  *dataset;
 
@@ -181,14 +181,14 @@ MMG_int MMG2D_loadVtkMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 #endif
 }
 
-MMG_int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename) {
+int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename) {
 #ifndef USE_VTK
 
   fprintf(stderr,"  ** VTK library not founded. Unavailable file format.\n");
   return -1;
 
 #else
-  MMG_int         ier,nsols;
+  int         ier,nsols;
   int8_t      ptMeditRef,eltMeditRef;
   vtkDataSet  *dataset;
 
@@ -212,14 +212,14 @@ MMG_int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char 
 #endif
 }
 
-MMG_int MMG2D_loadVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
+int MMG2D_loadVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 #ifndef USE_VTK
 
   fprintf(stderr,"  ** VTK library not founded. Unavailable file format.\n");
   return -1;
 
 #else
-  MMG_int         ier,nsols;
+  int         ier,nsols;
   int8_t      ptMeditRef,eltMeditRef;
   vtkDataSet  *dataset;
 
@@ -248,7 +248,7 @@ MMG_int MMG2D_loadVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 #endif
 }
 
-MMG_int MMG2D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename) {
+int MMG2D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename) {
 
 #ifndef USE_VTK
 
@@ -256,7 +256,7 @@ MMG_int MMG2D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char 
   return -1;
 
 #else
-  MMG_int         ier,nsols;
+  int         ier,nsols;
   int8_t      ptMeditRef,eltMeditRef;
   vtkDataSet  *dataset;
 
@@ -286,7 +286,7 @@ MMG_int MMG2D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char 
 #endif
 }
 
-MMG_int MMG2D_saveVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
+int MMG2D_saveVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 
 #ifndef USE_VTK
 
@@ -301,7 +301,7 @@ MMG_int MMG2D_saveVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 #endif
 }
 
-MMG_int MMG2D_saveVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename) {
+int MMG2D_saveVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename) {
 
 #ifndef USE_VTK
 
@@ -316,7 +316,7 @@ MMG_int MMG2D_saveVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char 
 #endif
 }
 
-MMG_int MMG2D_saveVtkMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
+int MMG2D_saveVtkMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 
 #ifndef USE_VTK
 
@@ -331,7 +331,7 @@ MMG_int MMG2D_saveVtkMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 #endif
 }
 
-MMG_int MMG2D_saveVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename) {
+int MMG2D_saveVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename) {
 
 #ifndef USE_VTK
 
@@ -346,7 +346,7 @@ MMG_int MMG2D_saveVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char 
 #endif
 }
 
-MMG_int MMG2D_saveVtpMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
+int MMG2D_saveVtpMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 
 #ifndef USE_VTK
 
@@ -362,7 +362,7 @@ MMG_int MMG2D_saveVtpMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 
 }
 
-MMG_int MMG2D_saveVtpMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename) {
+int MMG2D_saveVtpMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename) {
 
 #ifndef USE_VTK
 

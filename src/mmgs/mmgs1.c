@@ -47,12 +47,12 @@ extern int8_t ddb;
  * Find acceptable position for splitting.
  *
  */
-int MMGS_dichoto(MMG5_pMesh mesh,MMG5_pSol met,int k,int *vx) {
+int MMGS_dichoto(MMG5_pMesh mesh,MMG5_pSol met,MMG_int k,MMG_int *vx) {
   MMG5_pTria   pt;
   MMG5_pPoint  pa,pb,ps;
   double       o[3][3],p[3][3];
   float        to,tp,t;
-  int          i1,i2,ia,ib,ier,it,maxit;
+  MMG_int          i1,i2,ia,ib,ier,it,maxit;
   int8_t       i,j;
 
   pt = &mesh->tria[k];

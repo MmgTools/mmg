@@ -685,7 +685,7 @@ void           MMG5_check_hminhmax(MMG5_pMesh mesh, int8_t sethmin, int8_t sethm
  int            MMG5_loadMshMesh_part1(MMG5_pMesh mesh,const char *filename,
                                        FILE **inm,long *posNodes, long *posElts,
                                        long **posNodeData, int *bin, int *iswp,
-                                       int *nelts,int *nsols);
+                                       MMG_int *nelts,MMG_int *nsols);
  int            MMG5_check_readedMesh(MMG5_pMesh mesh,int nref);
  int            MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
                                        const long posNodes,const long posElts,

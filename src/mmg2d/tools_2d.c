@@ -37,6 +37,7 @@
  * \param mesh pointer toward the mesh structure.
  * \param kel index of the element in the unpacked mesh
  *
+ *
  * \return 0 if fail, index of the element in packed numerotation otherwise.
  *
  * find the element index in packed numerotation
@@ -88,7 +89,7 @@ MMG_int MMG2D_indPt(MMG5_pMesh mesh, MMG_int kp) {
  * Keep only subdomain of index \a nsd and remove other subdomains.
  *
  */
-void MMG2D_keep_only1Subdomain ( MMG5_pMesh mesh,MMG_int nsd ) {
+void MMG2D_keep_only1Subdomain ( MMG5_pMesh mesh,int nsd ) {
 
   if ( !nsd ) {
     return;

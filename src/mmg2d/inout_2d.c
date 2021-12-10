@@ -23,7 +23,7 @@
 #include "mmg2d.h"
 
 /* read mesh data */
-MMG_int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
+int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
   FILE        *inm;
   MMG5_pPoint  ppt;
   MMG5_pEdge   ped;
@@ -592,7 +592,7 @@ MMG_int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
  * the mesh (mesh generation) and check that all z-componants are 0.
  *
  */
-MMG_int MMG2D_2dMeshCheck(MMG5_pMesh mesh) {
+int MMG2D_2dMeshCheck(MMG5_pMesh mesh) {
   MMG5_pPoint ppt;
   double      z;
   MMG_int         k;
@@ -619,11 +619,11 @@ MMG_int MMG2D_2dMeshCheck(MMG5_pMesh mesh) {
   return 1;
 }
 
-MMG_int MMG2D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
+int MMG2D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   FILE*       inm;
   long        posNodes,posElts,*posNodeData;
-  MMG_int         ier;
-  MMG_int         bin,iswp,nelts,nsols;
+  int         ier;
+  int         bin,iswp,nelts,nsols;
 
   mesh->dim = 2;
 
@@ -680,11 +680,11 @@ MMG_int MMG2D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   return 1;
 }
 
-MMG_int MMG2D_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename) {
+int MMG2D_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename) {
   FILE*       inm;
   long        posNodes,posElts,*posNodeData;
-  MMG_int         ier;
-  MMG_int         bin,iswp,nelts,nsols;
+  int         ier;
+  int         bin,iswp,nelts,nsols;
 
   mesh->dim = 2;
 
@@ -754,7 +754,7 @@ MMG_int MMG2D_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char 
  *
  */
 static inline
-MMG_int MMG2D_readFloatSol(MMG5_pSol sol,FILE *inm,MMG_int bin,MMG_int iswp,MMG_int pos) {
+int MMG2D_readFloatSol(MMG5_pSol sol,FILE *inm,int bin,int iswp,MMG_int pos) {
   float       fbuf;
   MMG_int         i;
 
@@ -785,7 +785,7 @@ MMG_int MMG2D_readFloatSol(MMG5_pSol sol,FILE *inm,MMG_int bin,MMG_int iswp,MMG_
  *
  */
 static inline
-MMG_int MMG2D_readDoubleSol(MMG5_pSol sol,FILE *inm,MMG_int bin,MMG_int iswp,MMG_int pos) {
+int MMG2D_readDoubleSol(MMG5_pSol sol,FILE *inm,int bin,int iswp,MMG_int pos) {
   double       dbuf;
   MMG_int          i;
 
@@ -812,10 +812,10 @@ MMG_int MMG2D_readDoubleSol(MMG5_pSol sol,FILE *inm,MMG_int bin,MMG_int iswp,MMG
  * Load metric field.
  *
  */
-MMG_int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
+int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   FILE       *inm;
   long        posnp;
-  MMG_int         iswp,ier,dim,meshDim;
+  int         iswp,ier,dim,meshDim;
   MMG_int         k,ver,bin,np,nsols,*type;
 
   /** Read the file header */
@@ -899,7 +899,7 @@ MMG_int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
  * Load a medit solution file containing 1 or more solutions.
  *
  */
-MMG_int MMG2D_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
+int MMG2D_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
   MMG5_pSol   psl;
   FILE       *inm;
   long        posnp;
@@ -1003,7 +1003,7 @@ MMG_int MMG2D_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) 
   return 1;
 }
 
-MMG_int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
+int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
   FILE*             inm;
   MMG5_pPoint       ppt;
   MMG5_pEdge        ped;
@@ -1011,7 +1011,7 @@ MMG_int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
   MMG5_pQuad        pq;
   double            dblb;
   MMG_int               k,ne,np,nc,nreq,nereq,nedreq,nq,nqreq,ref;
-  MMG_int               bin, binch, bpos;
+  int               bin, binch, bpos;
   char              *ptr,*data,chaine[MMG5_FILESTR_LGTH];
 
   mesh->ver = 2;
@@ -1434,11 +1434,11 @@ MMG_int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
   return 1;
 }
 
-MMG_int MMG2D_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
+int MMG2D_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   return MMG5_saveMshMesh(mesh,&sol,filename,1);
 }
 
-MMG_int MMG2D_saveMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename) {
+int MMG2D_saveMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename) {
   return MMG5_saveMshMesh(mesh,sol,filename,0);
 }
 
@@ -1452,8 +1452,8 @@ MMG_int MMG2D_saveMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char 
  *
  */
 static inline
-void MMG2D_writeDoubleSol(MMG5_pSol sol,FILE *inm,MMG_int bin,MMG_int pos) {
-  MMG_int          i,isol;
+void MMG2D_writeDoubleSol(MMG5_pSol sol,FILE *inm,int bin,int pos) {
+  int          i,isol;
 
   isol = pos * sol->size;
 
@@ -1477,11 +1477,11 @@ void MMG2D_writeDoubleSol(MMG5_pSol sol,FILE *inm,MMG_int bin,MMG_int pos) {
  * Write isotropic or anisotropic metric.
  *
  */
-MMG_int MMG2D_saveSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
+int MMG2D_saveSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   FILE*        inm;
   MMG5_pPoint  ppt;
   MMG_int          k,ier;
-  MMG_int          binch,bin,bpos,dim;
+  int          binch,bin,bpos,dim;
 
   if ( !sol->np )  return 1;
 
@@ -1537,20 +1537,20 @@ MMG_int MMG2D_saveSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
  * Write 1 or more solutions.
  *
  */
-MMG_int MMG2D_saveAllSols(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename) {
+int MMG2D_saveAllSols(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename) {
   FILE*        inm;
   MMG5_pPoint  ppt;
   MMG5_pSol    psl;
   MMG_int          j,k,ier;
-  MMG_int          binch,bin,bpos,npointSols,ncellSols;
-  MMG_int          *type,*size,*entities;
+  int          binch,bin,bpos,npointSols,ncellSols;
+  int          *type,*size,*entities;
 
 
   if ( !(*sol)[0].np )  return 1;
 
-  MMG5_SAFE_CALLOC(type,mesh->nsols,MMG_int,return 0);
-  MMG5_SAFE_CALLOC(size,mesh->nsols,MMG_int,MMG5_SAFE_FREE(type);return 0);
-  MMG5_SAFE_CALLOC(entities,mesh->nsols,MMG_int,
+  MMG5_SAFE_CALLOC(type,mesh->nsols,int,return 0);
+  MMG5_SAFE_CALLOC(size,mesh->nsols,int,MMG5_SAFE_FREE(type);return 0);
+  MMG5_SAFE_CALLOC(entities,mesh->nsols,int,
                    MMG5_SAFE_FREE(type);MMG5_SAFE_FREE(size);return 0);
 
   npointSols = 0;
@@ -1630,7 +1630,7 @@ MMG_int MMG2D_saveAllSols(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename) {
 }
 
 /* Custom version of Savemesh for debugging purpose */
-MMG_int MMG2D_savemesh_db(MMG5_pMesh mesh,char *filename,int8_t pack) {
+int MMG2D_savemesh_db(MMG5_pMesh mesh,char *filename,int8_t pack) {
   MMG5_pTria         pt;
   MMG5_pEdge         pa;
   MMG5_pPoint        ppt,p0,p1,p2;
@@ -1723,7 +1723,7 @@ MMG_int MMG2D_savemesh_db(MMG5_pMesh mesh,char *filename,int8_t pack) {
 }
 
 /* Custom version of Savemet for debugging purpose */
-MMG_int MMG2D_savemet_db(MMG5_pMesh mesh,MMG5_pSol met,char *filename,int8_t pack) {
+int MMG2D_savemet_db(MMG5_pMesh mesh,MMG5_pSol met,char *filename,int8_t pack) {
   MMG5_pPoint        ppt;
   MMG_int                k,np;
   char               *ptr,typ=0,*data;
@@ -1783,7 +1783,7 @@ MMG_int MMG2D_savemet_db(MMG5_pMesh mesh,MMG5_pSol met,char *filename,int8_t pac
 }
 
 /* Save normal vector field for debugging purpose */
-MMG_int MMG2D_savenor_db(MMG5_pMesh mesh,char *filename,int8_t pack) {
+int MMG2D_savenor_db(MMG5_pMesh mesh,char *filename,int8_t pack) {
   MMG5_pPoint        ppt;
   MMG_int                k,np;
   char               *ptr,*data;
@@ -1838,7 +1838,7 @@ MMG_int MMG2D_savenor_db(MMG5_pMesh mesh,char *filename,int8_t pack) {
 }
 
 /* Save displacement field for debugging purpose */
-MMG_int MMG2D_savedisp_db(MMG5_pMesh mesh,MMG5_pSol disp,char *filename,int8_t pack) {
+int MMG2D_savedisp_db(MMG5_pMesh mesh,MMG5_pSol disp,char *filename,int8_t pack) {
   MMG5_pPoint        ppt;
   MMG_int                k,np;
   char               *ptr,*data;
@@ -1890,7 +1890,7 @@ MMG_int MMG2D_savedisp_db(MMG5_pMesh mesh,MMG5_pSol disp,char *filename,int8_t p
 }
 
 static inline
-MMG_int MMG2D_saveEle(MMG5_pMesh mesh,const char *filename) {
+int MMG2D_saveEle(MMG5_pMesh mesh,const char *filename) {
   FILE*             inm;
   MMG5_pTria        pt;
   MMG_int               k,i,ne;
@@ -1962,7 +1962,7 @@ MMG_int MMG2D_saveEle(MMG5_pMesh mesh,const char *filename) {
 }
 
 static inline
-MMG_int MMG2D_saveNeigh(MMG5_pMesh mesh,const char *filename) {
+int MMG2D_saveNeigh(MMG5_pMesh mesh,const char *filename) {
   FILE*             inm;
   MMG5_pTria        pt;
   MMG_int               k,i,ne,idx;
@@ -2041,7 +2041,7 @@ MMG_int MMG2D_saveNeigh(MMG5_pMesh mesh,const char *filename) {
 }
 
 static inline
-MMG_int MMG2D_saveEdge(MMG5_pMesh mesh,const char *filename) {
+int MMG2D_saveEdge(MMG5_pMesh mesh,const char *filename) {
   MMG_int ier,nb_edges;
 
   ier = MMG5_saveEdge(mesh,filename,".poly");
@@ -2062,7 +2062,7 @@ MMG_int MMG2D_saveEdge(MMG5_pMesh mesh,const char *filename) {
 }
 
 
-MMG_int MMG2D_saveTetgenMesh(MMG5_pMesh mesh,const char *filename) {
+int MMG2D_saveTetgenMesh(MMG5_pMesh mesh,const char *filename) {
 
   if ( !MMG5_saveNode(mesh,filename) ) {
     return 0;

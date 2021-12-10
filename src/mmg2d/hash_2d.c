@@ -32,12 +32,12 @@
  * Create adjacency relations between the triangles dein the mesh
  *
  */
-MMG_int MMG2D_hashTria(MMG5_pMesh mesh) {
+int MMG2D_hashTria(MMG5_pMesh mesh) {
   MMG5_pTria     pt,pt1;
   MMG_int            k,kk,pp,l,ll,mins,mins1,maxs,maxs1;
   MMG_int            *hcode,*link,inival,hsize,iadr;
   uint8_t        i,ii,i1,i2;
-  unsigned MMG_int   key;
+  unsigned int   key;
 
   if ( mesh->adja )  return 1;
   if ( !mesh->nt )  return 0;
@@ -148,14 +148,14 @@ MMG_int MMG2D_hashTria(MMG5_pMesh mesh) {
  * adja[4*(k1-1)+1+i1] = -(3*k2+i2) \f$.
  *
  */
-MMG_int MMG2D_hashQuad(MMG5_pMesh mesh) {
+int MMG2D_hashQuad(MMG5_pMesh mesh) {
   MMG5_pQuad     pq,pq1;
   MMG5_pTria     pt;
   MMG5_Hash      hash;
   MMG_int            k,kk,pp,l,ll,mins,mins1,maxs,maxs1,iadr;
   MMG_int           *hcode,*link,hsize,inival;
   uint8_t        i,ii,i1,i2;
-  unsigned MMG_int   key;
+  unsigned int   key;
 
   /** Step 1: Fill adjacendies between quadrangles */
   if ( !mesh->nquad ) {
@@ -175,7 +175,7 @@ MMG_int MMG2D_hashQuad(MMG5_pMesh mesh) {
     fprintf(stdout,"  ** SETTING QUAD ADJACENCY\n");
 
   /* memory alloc */
-  MMG5_ADD_MEM(mesh,(4*mesh->nquad+5)*sizeof(MMG_int),"quad adjacency table",
+  MMG5_ADD_MEM(mesh,(4*mesh->nquad+5)*sizeof(int),"quad adjacency table",
                fprintf(stderr,"  Exit program.\n");
                return 0);
   MMG5_SAFE_CALLOC(mesh->adjq,4*mesh->nquad+5,MMG_int,return 0);
@@ -330,12 +330,13 @@ MMG_int MMG2D_hashQuad(MMG5_pMesh mesh) {
  * Transfer some input edge data to the corresponding triangles fields
  *
  */
-MMG_int MMG2D_assignEdge(MMG5_pMesh mesh) {
+int MMG2D_assignEdge(MMG5_pMesh mesh) {
   MMG5_Hash       hash;
   MMG5_pTria      pt;
   MMG5_pQuad      pq;
   MMG5_pEdge      pa;
-  MMG_int             k,ia;
+  int             ia;
+  MMG_int         k;
   int8_t          ier;
   uint8_t         i,i1,i2;
 
@@ -430,7 +431,7 @@ MMG_int MMG2D_assignEdge(MMG5_pMesh mesh) {
  * \remark Call in debug mode only
  *
  */
-MMG_int MMG2D_bdryEdge(MMG5_pMesh mesh) {
+int MMG2D_bdryEdge(MMG5_pMesh mesh) {
   MMG5_pTria      pt,pt1;
   MMG5_pEdge      pa;
   MMG5_pPoint     p0;
@@ -511,7 +512,7 @@ MMG_int MMG2D_bdryEdge(MMG5_pMesh mesh) {
  * (edges).
  *
  */
-MMG_int MMG2D_pack(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
+int MMG2D_pack(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
   MMG5_pTria         pt,ptnew,pt1;
   MMG5_pQuad         pq,pq1;
   MMG5_pEdge         ped;

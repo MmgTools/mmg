@@ -55,7 +55,7 @@ int MMGS_newPt(MMG5_pMesh mesh,double c[3],double n[3]) {
   return curpt;
 }
 
-void MMGS_delPt(MMG5_pMesh mesh,int ip) {
+void MMGS_delPt(MMG5_pMesh mesh,MMG_int ip) {
   MMG5_pPoint   ppt;
 
   ppt = &mesh->point[ip];
@@ -68,8 +68,8 @@ void MMGS_delPt(MMG5_pMesh mesh,int ip) {
   }
 }
 
-int MMGS_newElt(MMG5_pMesh mesh) {
-  int     curiel;
+MMG_int MMGS_newElt(MMG5_pMesh mesh) {
+  MMG_int     curiel;
 
   if ( !mesh->nenil )  return 0;
   curiel = mesh->nenil;
@@ -90,7 +90,7 @@ int MMGS_newElt(MMG5_pMesh mesh) {
  * Delete the element \a iel
  *
  */
-int MMGS_delElt(MMG5_pMesh mesh,int iel) {
+int MMGS_delElt(MMG5_pMesh mesh,MMG_int iel) {
   MMG5_pTria    pt;
 
   pt = &mesh->tria[iel];
@@ -101,7 +101,7 @@ int MMGS_delElt(MMG5_pMesh mesh,int iel) {
   memset(pt,0,sizeof(MMG5_Tria));
   pt->v[2] = mesh->nenil;
   if ( mesh->adja )
-    memset(&mesh->adja[3*(iel-1)+1],0,3*sizeof(int));
+    memset(&mesh->adja[3*(iel-1)+1],0,3*sizeof(MMG_int));
   mesh->nenil = iel;
   if ( iel == mesh->nt ) {
     while ( !MG_EOK((&mesh->tria[mesh->nt])) )  mesh->nt--;
@@ -136,7 +136,7 @@ int MMGS_memOption_memSet(MMG5_pMesh mesh) {
 
   /* Compute the needed initial memory */
   usedMem = reservedMem + (mesh->np+1)*sizeof(MMG5_Point)
-    + (mesh->nt+1)*sizeof(MMG5_Tria) + (3*mesh->nt+1)*sizeof(int)
+    + (mesh->nt+1)*sizeof(MMG5_Tria) + (3*mesh->nt+1)*sizeof(MMG_int)
     + (mesh->np+1)*sizeof(double);
 
   if ( usedMem > mesh->memMax  ) {
@@ -148,7 +148,7 @@ int MMGS_memOption_memSet(MMG5_pMesh mesh) {
 
   /* point+xpoint+tria+adja+aniso sol */
   bytes = sizeof(MMG5_Point) + sizeof(MMG5_xPoint) +
-    2*sizeof(MMG5_Tria) + 3*sizeof(int) + 6*sizeof(double);
+    2*sizeof(MMG5_Tria) + 3*sizeof(MMG_int) + 6*sizeof(double);
 
   avMem = mesh->memMax-usedMem;
 
@@ -199,7 +199,7 @@ int MMGS_memOption(MMG5_pMesh mesh) {
  *
  */
 int MMGS_setMeshSize_alloc( MMG5_pMesh mesh ) {
-  int k;
+  MMG_int k;
 
   MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(MMG5_Point),"initial vertices",
                 fprintf(stderr,"  Exit program.\n");

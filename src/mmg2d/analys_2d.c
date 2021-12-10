@@ -45,7 +45,7 @@ extern int8_t ddb;
  * count number of subdomains or connected components
  *
  */
-MMG_int MMG2D_setadj(MMG5_pMesh mesh) {
+int MMG2D_setadj(MMG5_pMesh mesh) {
   MMG5_pTria       pt,pt1;
   MMG5_pQuad       pq;
   MMG_int              *pile,*adja,ipil,k,kk,ncc,ip1,ip2,nr,nref;
@@ -56,7 +56,7 @@ MMG_int MMG2D_setadj(MMG5_pMesh mesh) {
     fprintf(stdout,"  ** SETTING TOPOLOGY\n");
 
   /** Step 1: Tags setting from triangles analysis */
-  MMG5_SAFE_MALLOC(pile,mesh->nt+1,MMG_int,return 0);
+  MMG5_SAFE_MALLOC(pile,mesh->nt+1,int,return 0);
 
   /* Initialization of the pile */
   ncc = 1;
@@ -264,7 +264,7 @@ MMG_int MMG2D_setadj(MMG5_pMesh mesh) {
  * Identify singularities in the mesh.
  *
  */
-MMG_int MMG2D_singul(MMG5_pMesh mesh, MMG_int ref ) {
+int MMG2D_singul(MMG5_pMesh mesh, int ref ) {
   MMG5_pTria          pt;
   MMG5_pPoint         ppt,p1,p2;
   double              ux,uy,uz,vx,vy,vz,dd;
@@ -397,7 +397,7 @@ MMG_int MMG2D_singul(MMG5_pMesh mesh, MMG_int ref ) {
  * Calculate normal vectors at vertices of the mesh.
  *
  */
-MMG_int MMG2D_norver(MMG5_pMesh mesh, MMG_int ref) {
+int MMG2D_norver(MMG5_pMesh mesh, int ref) {
   MMG5_pTria       pt,pt1;
   MMG5_pPoint      ppt;
   MMG_int              k,kk,nn,pleft,pright;
@@ -502,7 +502,7 @@ MMG_int MMG2D_norver(MMG5_pMesh mesh, MMG_int ref) {
  * antilaplacian smoothing
  *
  */
-MMG_int MMG2D_regnor(MMG5_pMesh mesh) {
+int MMG2D_regnor(MMG5_pMesh mesh) {
   MMG5_pTria            pt;
   MMG5_pPoint           ppt,p1,p2;
   double                *tmp,dd,ps,lm1,lm2,nx,ny,ux,uy,nxt,nyt,res,res0,n[2];
@@ -758,7 +758,7 @@ MMG_int MMG2D_regnor(MMG5_pMesh mesh) {
 }
 
 /** preprocessing stage: mesh analysis */
-MMG_int MMG2D_analys(MMG5_pMesh mesh) {
+int MMG2D_analys(MMG5_pMesh mesh) {
 
   /* Transfer the boundary edge references to the triangles, if it has not been
    * already done (option 1) */

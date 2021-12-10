@@ -34,7 +34,7 @@
 
 /* Calculate the barycentric coordinates of point P(c[0],c[1]) in tria pt and the associated determinant */
 /* l1 = barycentric coordinate with respect to p1, l2 = barycentric coordinate with respect to p2 */
-MMG_int MMG2D_coorbary(MMG5_pMesh mesh,MMG5_pTria pt,double c[2],double* det,double* l1,double* l2) {
+int MMG2D_coorbary(MMG5_pMesh mesh,MMG5_pTria pt,double c[2],double* det,double* l1,double* l2) {
   MMG5_pPoint      p1,p2,p3;
   double           b2,b3;
   static int8_t    mmgWarn0=0;
@@ -87,9 +87,9 @@ MMG_int MMG2D_isInTriangle(MMG5_pMesh mesh,MMG_int k,double c[2]) {
    of this triangle are crossed by (ppa-ppb), or only one, and ppa or ppb is a
    vertex of pt; if at least one edge is crossed by ia-ib, return i+1, where i
    is the index of one of the crossed edges */
-MMG_int MMG2D_cutEdge(MMG5_pMesh mesh,MMG5_pTria pt,MMG5_pPoint ppa,MMG5_pPoint ppb) {
+int MMG2D_cutEdge(MMG5_pMesh mesh,MMG5_pTria pt,MMG5_pPoint ppa,MMG5_pPoint ppb) {
   double      la[3],lb[3],det;
-  MMG_int         icompt,ireturn;
+  int         icompt,ireturn;
   int8_t      ier,i;
 
   ier = MMG2D_coorbary(mesh,pt,ppa->c,&det,&la[0],&la[1]);
@@ -126,11 +126,11 @@ MMG_int MMG2D_cutEdge(MMG5_pMesh mesh,MMG5_pTria pt,MMG5_pPoint ppa,MMG5_pPoint 
 
 /* Return i+1>0 if Edge ia-ib intersects triangle k at edge i, 0 if
    it does not intersect k, and return -3 if edge ia-ib is one edge of k*/
-MMG_int MMG2D_cutEdgeTriangle(MMG5_pMesh mesh,MMG_int k,MMG_int ia,MMG_int ib) {
+int MMG2D_cutEdgeTriangle(MMG5_pMesh mesh,MMG_int k,MMG_int ia,MMG_int ib) {
   MMG5_pTria   pt;
   MMG5_pPoint  p1,p2,p3,ppa,ppb;
   double       a11,a21,a12,a22,area1,area2,area3,prod1,prod2,prod3;
-  MMG_int          ibreak,iare;
+  int          ibreak,iare;
   int8_t       i;
 
   ppa = &mesh->point[ia];
@@ -212,10 +212,10 @@ MMG_int MMG2D_cutEdgeTriangle(MMG5_pMesh mesh,MMG_int k,MMG_int ia,MMG_int ib) {
 }
 
 /** Return the index of one triangle containing ip */
-MMG_int MMG2D_findTria(MMG5_pMesh mesh,MMG_int ip) {
+int MMG2D_findTria(MMG5_pMesh mesh,MMG_int ip) {
   MMG5_pTria    pt,pt1;
   MMG_int           iel,base,iadr,*adja,iter,ier;
-  MMG_int           mvDir[3],jel,i;
+  int           mvDir[3],jel,i;
   double        l1,l2,l3,det,eps;
   static int8_t mmgWarn0 = 0;
 
@@ -320,14 +320,14 @@ MMG_int MMG2D_findTria(MMG5_pMesh mesh,MMG_int ip) {
  * and \a iare is an intersected edge.
  *
  */
-MMG_int MMG2D_locateEdge(MMG5_pMesh mesh,MMG_int ia,MMG_int ib,MMG_int* kdep,MMG_int* list) {
+int MMG2D_locateEdge(MMG5_pMesh mesh,MMG_int ia,MMG_int ib,MMG_int* kdep,MMG_int* list) {
   MMG5_pTria         pt;
   MMG5_pPoint        ppt1,ppt2,ppt3,ppt4,ppa,ppb;
   double             a[3],a11,a21,a12,a22,area1,area2,area3,prod1,prod2,prod3;
   double             niaib,npti;
   MMG_int                iadr,*adja,k,ibreak,i,ncompt,lon,iare,ivert;
   static int8_t      mmgWarn=0;
-  //MMG_int       ktemp;
+  //int       ktemp;
 
   k = *kdep;
   ncompt = 0;

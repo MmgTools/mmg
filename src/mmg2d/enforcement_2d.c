@@ -31,14 +31,15 @@
  * Check if all edges exist in the mesh and if not force them.
  *
  */
-MMG_int MMG2D_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
+int MMG2D_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTria      pt,pt1;
   MMG5_pEdge      ped;
   MMG5_pPoint     ppt;
-  MMG_int             k,l,kk,nex,list[MMG2D_LONMAX],kdep,lon,iel,iare,ied;
-  MMG_int             ia,ib,ilon,rnd,idep,*adja,ir,adj,list2[3];
+  MMG_int         list[MMG2D_LONMAX],list2[3];
+  MMG_int             k,l,kk,nex,kdep,lon,iel,iare,ied;
+  MMG_int             ia,ib,ilon,rnd,idep,*adja,ir,adj;
   int8_t          i,i1,i2,j;
-//  MMG_int       iadr2,*adja2,ndel,iadr,ped0,ped1;
+//  int       iadr2,*adja2,ndel,iadr,ped0,ped1;
   static int8_t   mmgWarn0=0,mmgWarn1=0,mmgWarn2=0,mmgWarn3=0;
   static int8_t   mmgWarn4=0,mmgWarn5=0,mmgWarn6=0,mmgWarn7=0;
   static int8_t   mmgWarn8=0;

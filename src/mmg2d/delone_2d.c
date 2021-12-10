@@ -28,7 +28,7 @@
 #define KTB    11
 
 /* Cavity correction for quality */
-static MMG_int MMG2D_correction_iso(MMG5_pMesh mesh,MMG_int ip,MMG_int *list,MMG_int ilist,MMG_int nedep) {
+static MMG_int MMG2D_correction_iso(MMG5_pMesh mesh,MMG_int ip,MMG_int *list,MMG_int ilist,int nedep) {
   MMG5_pTria      pt;
   MMG5_pPoint     ppt,p1,p2;
   double           dd,ux,uy,vx,vy;
@@ -103,7 +103,7 @@ static MMG_int MMG2D_correction_iso(MMG5_pMesh mesh,MMG_int ip,MMG_int *list,MMG
  * face has already been seen.
  *
  */
-static MMG_int MMG2D_hashEdgeDelone(MMG5_pMesh mesh,MMG5_Hash *hash,MMG_int iel,MMG_int i) {
+static int MMG2D_hashEdgeDelone(MMG5_pMesh mesh,MMG5_Hash *hash,MMG_int iel,int i) {
   MMG5_pTria      pt;
   MMG_int             *adja,iadr,jel,j,ip1,ip2;
   int16_t         i1,i2;
@@ -148,7 +148,8 @@ MMG_int MMG2D_cavity(MMG5_pMesh mesh,MMG5_pSol sol,MMG_int ip,MMG_int *list) {
   MMG5_pTria      pt,pt1,ptc;
   MMG5_pPoint     ppt;
   double          c[2],crit,dd,eps,rad,ct[6];
-  MMG_int             *adja,*adjb,adj,adi,voy,i,j,ilist,ipil,jel,iadr,base,nei[3],l,tref; //isreq;
+  MMG_int             *adja,*adjb,adj,adi,voy,ilist,ipil,jel,iadr,base,nei[3],l; //isreq;
+  int             tref,i,j;
   static int8_t   mmgWarn0=0;
 
   ppt = &mesh->point[ip];
@@ -244,11 +245,12 @@ MMG_int MMG2D_cavity(MMG5_pMesh mesh,MMG5_pSol sol,MMG_int ip,MMG_int *list) {
  *  Insertion in point ip in the cavity described by list.
  *
  */
-MMG_int MMG2D_delone(MMG5_pMesh mesh,MMG5_pSol sol,MMG_int ip,MMG_int *list,MMG_int ilist) {
+int MMG2D_delone(MMG5_pMesh mesh,MMG5_pSol sol,MMG_int ip,MMG_int *list,MMG_int ilist) {
   MMG5_pTria      pt,pt1;
   MMG5_pPoint     ppt;
   MMG_int             *adja,*adjb,i,j,k,iel,jel,old,iadr,base,size,nei[3],iadrold;
-  MMG_int             tref,ielnum[3*MMG2D_LONMAX+1];
+  int             tref;
+  MMG_int         ielnum[3*MMG2D_LONMAX+1];
   int8_t          ier;
   short           i1;
   int8_t          alert;

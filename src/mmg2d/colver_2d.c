@@ -38,7 +38,7 @@ extern uint8_t ddb;
  * preserved when collapsing edge i (p1->p2)
  *
  */
-MMG_int MMG2D_chkcol(MMG5_pMesh mesh, MMG5_pSol met,MMG_int k,int8_t i,MMG_int *list,int8_t typchk) {
+int MMG2D_chkcol(MMG5_pMesh mesh, MMG5_pSol met,MMG_int k,int8_t i,MMG_int *list,int8_t typchk) {
   MMG5_pTria     pt0,pt,pt1,pt2;
   MMG5_pPoint    ppt,p2;
   double         lon,len,calold,calnew,caltmp;
@@ -267,7 +267,7 @@ MMG_int MMG2D_chkcol(MMG5_pMesh mesh, MMG5_pSol met,MMG_int k,int8_t i,MMG_int *
 }
 
 /* Perform effective collapse of edge i in tria k, i1->i2 */
-MMG_int MMG2D_colver(MMG5_pMesh mesh,MMG_int ilist,MMG_int *list) {
+int MMG2D_colver(MMG5_pMesh mesh,MMG_int ilist,MMG_int *list) {
   MMG5_pTria   pt,pt1,pt2;
   MMG_int          iel,jel,ip1,ip2,k,kel,*adja;
   uint8_t      i,j,jj,i1,i2,open;
@@ -353,7 +353,7 @@ MMG_int MMG2D_colver(MMG5_pMesh mesh,MMG_int ilist,MMG_int *list) {
 
 /* Perform effective collapse of edge i in tria k, i1->i2
    in the particular case where only three elements are in the ball of i */
-MMG_int MMG2D_colver3(MMG5_pMesh mesh,MMG_int *list) {
+int MMG2D_colver3(MMG5_pMesh mesh,MMG_int *list) {
   MMG5_pTria  pt,pt1,pt2;
   MMG_int         iel,jel,kel,mel,ip,*adja;
   uint8_t     i,i1,j,j1,j2,k,m;
@@ -415,7 +415,7 @@ MMG_int MMG2D_colver3(MMG5_pMesh mesh,MMG_int *list) {
 
 /* Perform effective collapse of edge i in tria k, i1->i2
  in the particular case where only two elements are in the ball of i */
-MMG_int MMG2D_colver2(MMG5_pMesh mesh,MMG_int *list) {
+int MMG2D_colver2(MMG5_pMesh mesh,MMG_int *list) {
   MMG5_pTria   pt,pt1;
   MMG_int          *adja,iel,jel,kel,ip1,ip2;
   int8_t       i1,i2,jj,j2,k;

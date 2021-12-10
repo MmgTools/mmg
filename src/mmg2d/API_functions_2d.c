@@ -40,9 +40,9 @@
 
 #include "mmg2d.h"
 
-MMG_int MMG2D_Init_mesh(const MMG_int starter,...) {
+int MMG2D_Init_mesh(const int starter,...) {
   va_list argptr;
-  MMG_int     ier;
+  int     ier;
 
   va_start(argptr, starter);
 
@@ -60,21 +60,21 @@ void MMG2D_Init_fileNames(MMG5_pMesh mesh,MMG5_pSol sol
   return;
 }
 
-MMG_int MMG2D_Set_inputMeshName(MMG5_pMesh mesh, const char* meshin) {
+int MMG2D_Set_inputMeshName(MMG5_pMesh mesh, const char* meshin) {
 
   return MMG5_Set_inputMeshName(mesh,meshin);
 }
 
-MMG_int MMG2D_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solin) {
+int MMG2D_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solin) {
   return MMG5_Set_inputSolName(mesh,sol,solin);
 }
 
-MMG_int MMG2D_Set_outputMeshName(MMG5_pMesh mesh, const char* meshout) {
+int MMG2D_Set_outputMeshName(MMG5_pMesh mesh, const char* meshout) {
 
   return MMG5_Set_outputMeshName(mesh,meshout);
 }
 
-MMG_int MMG2D_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solout) {
+int MMG2D_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solout) {
   return MMG5_Set_outputSolName(mesh,sol,solout);
 }
 void MMG2D_Init_parameters(MMG5_pMesh mesh) {
@@ -100,8 +100,8 @@ void MMG2D_Init_parameters(MMG5_pMesh mesh) {
   mesh->info.dhd      = MMG5_ANGEDG;
 }
 
-MMG_int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, MMG_int iparam, MMG_int val){
-  MMG_int k;
+int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
+  int k;
 
   switch ( iparam ) {
     /* Integer parameters */
@@ -243,7 +243,7 @@ MMG_int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, MMG_int iparam, MMG
   return 1;
 }
 
-MMG_int MMG2D_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, MMG_int dparam, double val){
+int MMG2D_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val){
 
   switch ( dparam ) {
     /* double parameters */
@@ -311,10 +311,10 @@ MMG_int MMG2D_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, MMG_int dparam, dou
   return 1;
 }
 
-MMG_int MMG2D_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, MMG_int typ, MMG_int ref,
+int MMG2D_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref,
                              double hmin,double hmax,double hausd){
   MMG5_pPar par;
-  MMG_int k;
+  int k;
 
   if ( !mesh->info.npar ) {
     fprintf(stderr,"\n  ## Error: %s: You must set the number of local"
@@ -384,13 +384,13 @@ MMG_int MMG2D_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, MMG_int typ, MMG
   return 1;
 }
 
-MMG_int MMG2D_Set_multiMat(MMG5_pMesh mesh,MMG5_pSol sol,MMG_int ref,
-                       MMG_int split,MMG_int rin,MMG_int rout){
+int MMG2D_Set_multiMat(MMG5_pMesh mesh,MMG5_pSol sol,int ref,
+                       int split,int rin,int rout){
   return MMG5_Set_multiMat(mesh,sol,ref,split,rin,rout);
 }
 
 
-MMG_int MMG2D_Set_meshSize(MMG5_pMesh mesh, MMG_int np, MMG_int nt, MMG_int nquad, MMG_int na) {
+int MMG2D_Set_meshSize(MMG5_pMesh mesh, MMG_int np, MMG_int nt, MMG_int nquad, MMG_int na) {
 
   if ( ( (mesh->info.imprim > 5) || mesh->info.ddebug ) &&
        ( mesh->point || mesh->tria || mesh->edge) )
@@ -432,7 +432,7 @@ MMG_int MMG2D_Set_meshSize(MMG5_pMesh mesh, MMG_int np, MMG_int nt, MMG_int nqua
   return 1;
 }
 
-MMG_int MMG2D_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, MMG_int typEntity, MMG_int np, MMG_int typSol) {
+int MMG2D_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, MMG_int typEntity, MMG_int np, MMG_int typSol) {
 
   if ( ( (mesh->info.imprim > 5) || mesh->info.ddebug ) && sol->m )
     fprintf(stderr,"\n  ## Warning: %s: old solution deletion.\n",__func__);
@@ -476,7 +476,7 @@ MMG_int MMG2D_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, MMG_int typEntity, MMG
   return 1;
 }
 
-MMG_int MMG2D_Set_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol *sol,MMG_int nsols,
+int MMG2D_Set_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol *sol,MMG_int nsols,
                                  MMG_int np, MMG_int *typSol) {
   MMG5_pSol psl;
   char      data[18];
@@ -521,7 +521,7 @@ MMG_int MMG2D_Set_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol *sol,MMG_int nso
   return 1;
 }
 
-MMG_int MMG2D_Get_solSize(MMG5_pMesh mesh, MMG5_pSol sol, MMG_int* typEntity, MMG_int* np,
+int MMG2D_Get_solSize(MMG5_pMesh mesh, MMG5_pSol sol, MMG_int* typEntity, MMG_int* np,
                       MMG_int* typSol) {
 
   if ( typEntity != NULL )
@@ -546,7 +546,7 @@ MMG_int MMG2D_Get_solSize(MMG5_pMesh mesh, MMG5_pSol sol, MMG_int* typEntity, MM
   return 1;
 }
 
-MMG_int MMG2D_Get_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol *sol, MMG_int *nsols,
+int MMG2D_Get_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol *sol, MMG_int *nsols,
                                  MMG_int* np, MMG_int* typSol) {
   MMG5_pSol psl;
   MMG_int       j;
@@ -575,7 +575,7 @@ MMG_int MMG2D_Get_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol *sol, MMG_int *n
   return 1;
 }
 
-MMG_int MMG2D_Get_meshSize(MMG5_pMesh mesh, MMG_int* np, MMG_int* nt, MMG_int* nquad, MMG_int* na) {
+int MMG2D_Get_meshSize(MMG5_pMesh mesh, MMG_int* np, MMG_int* nt, MMG_int* nquad, MMG_int* na) {
   MMG_int k;
 
   if ( np != NULL )
@@ -599,7 +599,7 @@ MMG_int MMG2D_Get_meshSize(MMG5_pMesh mesh, MMG_int* np, MMG_int* nt, MMG_int* n
   return 1;
 }
 
-MMG_int MMG2D_Set_vertex(MMG5_pMesh mesh, double c0, double c1, MMG_int ref, MMG_int pos) {
+int MMG2D_Set_vertex(MMG5_pMesh mesh, double c0, double c1, int ref, MMG_int pos) {
 
   if ( !mesh->np ) {
     fprintf(stderr,"\n  ## Error: %s: you must set the number of points with the",
@@ -639,33 +639,33 @@ MMG_int MMG2D_Set_vertex(MMG5_pMesh mesh, double c0, double c1, MMG_int ref, MMG
   return 1;
 }
 
-MMG_int MMG2D_Set_corner(MMG5_pMesh mesh, MMG_int k) {
+int MMG2D_Set_corner(MMG5_pMesh mesh, MMG_int k) {
   assert ( k <= mesh->np );
   mesh->point[k].tag |= MG_CRN;
   return 1;
 }
 
-MMG_int MMG2D_Unset_corner(MMG5_pMesh mesh, MMG_int k) {
+int MMG2D_Unset_corner(MMG5_pMesh mesh, MMG_int k) {
   assert ( k <= mesh->np );
   mesh->point[k].tag &= ~MG_CRN;
   return 1;
 }
 
-MMG_int MMG2D_Set_requiredVertex(MMG5_pMesh mesh, MMG_int k) {
+int MMG2D_Set_requiredVertex(MMG5_pMesh mesh, MMG_int k) {
   assert ( k <= mesh->np );
   mesh->point[k].tag |= MG_REQ;
   mesh->point[k].tag &= ~MG_NUL;
   return 1;
 }
 
-MMG_int MMG2D_Unset_requiredVertex(MMG5_pMesh mesh, MMG_int k) {
+int MMG2D_Unset_requiredVertex(MMG5_pMesh mesh, MMG_int k) {
   assert ( k <= mesh->np );
   mesh->point[k].tag &= ~MG_REQ;
   return 1;
 }
 
-MMG_int MMG2D_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, MMG_int* ref,
-                     MMG_int* isCorner, MMG_int* isRequired) {
+int MMG2D_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, int* ref,
+                     int* isCorner, int* isRequired) {
 
   if ( mesh->npi == mesh->np ) {
     mesh->npi = 0;
@@ -691,8 +691,8 @@ MMG_int MMG2D_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, MMG_int* ref,
   return MMG2D_GetByIdx_vertex( mesh,c0,c1,ref,isCorner,isRequired,mesh->npi);
 }
 
-MMG_int MMG2D_GetByIdx_vertex(MMG5_pMesh mesh, double* c0, double* c1, MMG_int* ref,
-                          MMG_int* isCorner, MMG_int* isRequired, MMG_int idx) {
+int MMG2D_GetByIdx_vertex(MMG5_pMesh mesh, double* c0, double* c1, int* ref,
+                          int* isCorner, int* isRequired, int idx) {
 
   if ( idx < 1 || idx > mesh->np ) {
     fprintf(stderr,"\n  ## Error: %s: unable to get point at position %d.\n",
@@ -723,9 +723,9 @@ MMG_int MMG2D_GetByIdx_vertex(MMG5_pMesh mesh, double* c0, double* c1, MMG_int* 
   return 1;
 }
 
-MMG_int  MMG2D_Set_vertices(MMG5_pMesh mesh, double *vertices,MMG_int *refs) {
+int  MMG2D_Set_vertices(MMG5_pMesh mesh, double *vertices,int *refs) {
   MMG5_pPoint ppt;
-  MMG_int i,j;
+  int i,j;
 
   /*coordinates vertices*/
   for (i=1;i<=mesh->np;i++)
@@ -751,10 +751,10 @@ MMG_int  MMG2D_Set_vertices(MMG5_pMesh mesh, double *vertices,MMG_int *refs) {
   return 1;
 }
 
-MMG_int  MMG2D_Get_vertices(MMG5_pMesh mesh, double* vertices, MMG_int* refs,
-                        MMG_int* areCorners, MMG_int* areRequired) {
+int  MMG2D_Get_vertices(MMG5_pMesh mesh, double* vertices, int* refs,
+                        int* areCorners, int* areRequired) {
   MMG5_pPoint ppt;
-  MMG_int i,j;
+  int i,j;
 
   for (i=1;i<=mesh->np;i++)
   {
@@ -786,11 +786,11 @@ MMG_int  MMG2D_Get_vertices(MMG5_pMesh mesh, double* vertices, MMG_int* refs,
   return 1;
 }
 
-MMG_int MMG2D_Set_triangle(MMG5_pMesh mesh, MMG_int v0, MMG_int v1, MMG_int v2, MMG_int ref, MMG_int pos) {
+int MMG2D_Set_triangle(MMG5_pMesh mesh, MMG_int v0, MMG_int v1, MMG_int v2, int ref, int pos) {
   MMG5_pPoint ppt;
   MMG5_pTria  pt;
   double      vol;
-  MMG_int         i,j,ip,tmp;
+  int         i,j,ip,tmp;
 
   if ( !mesh->nt ) {
     fprintf(stderr,"  ## Error: %s: You must set the number of elements with the",
@@ -861,7 +861,7 @@ MMG_int MMG2D_Set_triangle(MMG5_pMesh mesh, MMG_int v0, MMG_int v1, MMG_int v2, 
   return 1;
 }
 
-MMG_int MMG2D_Set_requiredTriangle(MMG5_pMesh mesh, MMG_int k) {
+int MMG2D_Set_requiredTriangle(MMG5_pMesh mesh, MMG_int k) {
   MMG5_pTria pt;
 
   assert ( k <= mesh->nt );
@@ -874,7 +874,7 @@ MMG_int MMG2D_Set_requiredTriangle(MMG5_pMesh mesh, MMG_int k) {
   return 1;
 }
 
-MMG_int MMG2D_Unset_requiredTriangle(MMG5_pMesh mesh, MMG_int k) {
+int MMG2D_Unset_requiredTriangle(MMG5_pMesh mesh, MMG_int k) {
   MMG5_pTria pt;
 
   assert ( k <= mesh->nt );
@@ -887,8 +887,8 @@ MMG_int MMG2D_Unset_requiredTriangle(MMG5_pMesh mesh, MMG_int k) {
   return 1;
 }
 
-MMG_int MMG2D_Get_triangle(MMG5_pMesh mesh, MMG_int* v0, MMG_int* v1, MMG_int* v2, MMG_int* ref
-                       ,MMG_int* isRequired) {
+int MMG2D_Get_triangle(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* ref
+                       ,int* isRequired) {
   MMG5_pTria  ptt;
 
   if ( mesh->nti == mesh->nt ) {
@@ -932,11 +932,11 @@ MMG_int MMG2D_Get_triangle(MMG5_pMesh mesh, MMG_int* v0, MMG_int* v1, MMG_int* v
   return 1;
 }
 
-MMG_int  MMG2D_Set_triangles(MMG5_pMesh mesh, MMG_int *tria, MMG_int *refs) {
+int  MMG2D_Set_triangles(MMG5_pMesh mesh, int *tria, int *refs) {
   MMG5_pPoint ppt;
   MMG5_pTria ptt;
   double vol;
-  MMG_int i, j,ip,tmp;
+  int i, j,ip,tmp;
 
   mesh->xt = 0;
   for (i=1;i<=mesh->nt;i++)
@@ -953,7 +953,7 @@ MMG_int  MMG2D_Set_triangles(MMG5_pMesh mesh, MMG_int *tria, MMG_int *refs) {
     mesh->point[ptt->v[1]].tag &= ~MG_NUL;
     mesh->point[ptt->v[2]].tag &= ~MG_NUL;
 
-    MMG_int ii;
+    int ii;
     for( ii=0 ; ii<3 ; ii++)
       ptt->edg[ii] = 0;
 
@@ -965,7 +965,7 @@ MMG_int  MMG2D_Set_triangles(MMG5_pMesh mesh, MMG_int *tria, MMG_int *refs) {
               __func__,i);
       for ( ip=0; ip<3; ip++ ) {
         ppt = &mesh->point[ptt->v[ip]];
-        MMG_int jj;
+        int jj;
         for ( jj=0; jj<3; jj++ ) {
           if ( fabs(ppt->c[jj])>0. ) {
             fprintf(stderr," Check that you don't have a sliver triangle.\n");
@@ -989,10 +989,10 @@ MMG_int  MMG2D_Set_triangles(MMG5_pMesh mesh, MMG_int *tria, MMG_int *refs) {
   return 1;
 }
 
-MMG_int  MMG2D_Get_triangles(MMG5_pMesh mesh, MMG_int* tria, MMG_int* refs,
-                         MMG_int* areRequired) {
+int  MMG2D_Get_triangles(MMG5_pMesh mesh, int* tria, int* refs,
+                         int* areRequired) {
   MMG5_pTria ptt;
-  MMG_int        i, j;
+  int        i, j;
 
   for (i=1;i<=mesh->nt;i++)
   {
@@ -1015,7 +1015,7 @@ MMG_int  MMG2D_Get_triangles(MMG5_pMesh mesh, MMG_int* tria, MMG_int* refs,
   return 1;
 }
 
-MMG_int MMG2D_Set_quadrilateral(MMG5_pMesh mesh, MMG_int v0, MMG_int v1, MMG_int v2, MMG_int v3, MMG_int ref, MMG_int pos) {
+int MMG2D_Set_quadrilateral(MMG5_pMesh mesh, MMG_int v0, MMG_int v1, MMG_int v2, MMG_int v3, int ref, int pos) {
   MMG5_pQuad  pq;
 
   if ( !mesh->nquad ) {
@@ -1049,9 +1049,9 @@ MMG_int MMG2D_Set_quadrilateral(MMG5_pMesh mesh, MMG_int v0, MMG_int v1, MMG_int
   return 1;
 }
 
-MMG_int MMG2D_Get_quadrilateral(MMG5_pMesh mesh, MMG_int* v0, MMG_int* v1, MMG_int* v2, MMG_int* v3,
-                            MMG_int* ref, MMG_int* isRequired) {
-  static MMG_int nqi = 0;
+int MMG2D_Get_quadrilateral(MMG5_pMesh mesh, MMG_int* v0, MMG_int* v1, MMG_int* v2, MMG_int* v3,
+                            int* ref, int* isRequired) {
+  static int nqi = 0;
 
   if ( nqi == mesh->nquad ) {
     nqi = 0;
@@ -1095,9 +1095,9 @@ MMG_int MMG2D_Get_quadrilateral(MMG5_pMesh mesh, MMG_int* v0, MMG_int* v1, MMG_i
   return 1;
 }
 
-MMG_int  MMG2D_Set_quadrilaterals(MMG5_pMesh mesh, MMG_int *quadra, MMG_int *refs) {
+int  MMG2D_Set_quadrilaterals(MMG5_pMesh mesh, MMG_int *quadra, int *refs) {
   MMG5_pQuad pq;
-  MMG_int        i,j;
+  int        i,j;
 
   for (i=1;i<=mesh->nquad;i++)
   {
@@ -1120,9 +1120,9 @@ MMG_int  MMG2D_Set_quadrilaterals(MMG5_pMesh mesh, MMG_int *quadra, MMG_int *ref
   return 1;
 }
 
-MMG_int  MMG2D_Get_quadrilaterals(MMG5_pMesh mesh, MMG_int *quadra, MMG_int *refs, MMG_int * areRequired) {
+int  MMG2D_Get_quadrilaterals(MMG5_pMesh mesh, MMG_int *quadra, int *refs, int * areRequired) {
   MMG5_pQuad pq;
-  MMG_int        i, j;
+  int        i, j;
 
   for (i=1;i<=mesh->nquad;i++)
   {
@@ -1150,7 +1150,7 @@ MMG_int  MMG2D_Get_quadrilaterals(MMG5_pMesh mesh, MMG_int *quadra, MMG_int *ref
 }
 
 
-MMG_int MMG2D_Set_edge(MMG5_pMesh mesh, MMG_int v0, MMG_int v1, MMG_int ref, MMG_int pos) {
+int MMG2D_Set_edge(MMG5_pMesh mesh, MMG_int v0, MMG_int v1, int ref, int pos) {
   MMG5_pEdge pt;
 
   if ( !mesh->na ) {
@@ -1181,7 +1181,7 @@ MMG_int MMG2D_Set_edge(MMG5_pMesh mesh, MMG_int v0, MMG_int v1, MMG_int ref, MMG
   return 1;
 }
 
-MMG_int MMG2D_Set_requiredEdge(MMG5_pMesh mesh, MMG_int k) {
+int MMG2D_Set_requiredEdge(MMG5_pMesh mesh, MMG_int k) {
   MMG5_pEdge  ped;
 
   assert ( k <= mesh->na );
@@ -1193,7 +1193,7 @@ MMG_int MMG2D_Set_requiredEdge(MMG5_pMesh mesh, MMG_int k) {
   return 1;
 }
 
-MMG_int MMG2D_Unset_requiredEdge(MMG5_pMesh mesh, MMG_int k) {
+int MMG2D_Unset_requiredEdge(MMG5_pMesh mesh, MMG_int k) {
   MMG5_pEdge  ped;
 
   assert ( k <= mesh->na );
@@ -1205,7 +1205,7 @@ MMG_int MMG2D_Unset_requiredEdge(MMG5_pMesh mesh, MMG_int k) {
   return 1;
 }
 
-MMG_int MMG2D_Set_parallelEdge(MMG5_pMesh mesh, MMG_int k) {
+int MMG2D_Set_parallelEdge(MMG5_pMesh mesh, MMG_int k) {
   MMG5_pPoint ppt;
   MMG5_pEdge  ped;
 
@@ -1223,8 +1223,8 @@ MMG_int MMG2D_Set_parallelEdge(MMG5_pMesh mesh, MMG_int k) {
   return 1;
 }
 
-MMG_int MMG2D_Get_edge(MMG5_pMesh mesh, MMG_int* e0, MMG_int* e1, MMG_int* ref
-                   ,MMG_int* isRidge, MMG_int* isRequired) {
+int MMG2D_Get_edge(MMG5_pMesh mesh, MMG_int* e0, MMG_int* e1, int* ref
+                   ,int* isRidge, int* isRequired) {
   MMG5_pEdge        ped;
 
   if ( mesh->nai == mesh->na ) {
@@ -1279,8 +1279,8 @@ MMG_int MMG2D_Get_edge(MMG5_pMesh mesh, MMG_int* e0, MMG_int* e1, MMG_int* ref
   return 1;
 }
 
-MMG_int MMG2D_Set_edges(MMG5_pMesh mesh, MMG_int *edges, MMG_int *refs) {
-  MMG_int i,j;
+int MMG2D_Set_edges(MMG5_pMesh mesh, MMG_int *edges, int *refs) {
+  int i,j;
 
   for (i=1;i<=mesh->na;i++)
   {
@@ -1299,8 +1299,8 @@ MMG_int MMG2D_Set_edges(MMG5_pMesh mesh, MMG_int *edges, MMG_int *refs) {
   return 1;
 }
 
-MMG_int MMG2D_Get_edges(MMG5_pMesh mesh, MMG_int* edges,MMG_int *refs,MMG_int* areRidges,MMG_int* areRequired) {
-  MMG_int i,j;
+int MMG2D_Get_edges(MMG5_pMesh mesh, MMG_int* edges,int *refs,int* areRidges,int* areRequired) {
+  int i,j;
 
   for (i=1;i<=mesh->na;i++)
   {
@@ -1353,7 +1353,7 @@ double MMG2D_Get_triangleQuality(MMG5_pMesh mesh,MMG5_pSol met, MMG_int k) {
   return qual;
 }
 
-MMG_int MMG2D_Set_scalarSol(MMG5_pSol met, double s, MMG_int pos) {
+int MMG2D_Set_scalarSol(MMG5_pSol met, double s, int pos) {
 
   if ( !met->np ) {
     fprintf(stderr,"\n  ## Error: %s: You must set the number of"
@@ -1383,9 +1383,9 @@ MMG_int MMG2D_Set_scalarSol(MMG5_pSol met, double s, MMG_int pos) {
   return 1;
 }
 
-MMG_int  MMG2D_Get_scalarSol(MMG5_pSol met, double* s)
+int  MMG2D_Get_scalarSol(MMG5_pSol met, double* s)
 {
-  MMG_int ddebug = 0;
+  int ddebug = 0;
 
   if ( met->npi == met->np ) {
     met->npi = 0;
@@ -1414,8 +1414,8 @@ MMG_int  MMG2D_Get_scalarSol(MMG5_pSol met, double* s)
   return 1;
 }
 
-MMG_int  MMG2D_Set_scalarSols(MMG5_pSol met, double *s) {
-  MMG_int k;
+int  MMG2D_Set_scalarSols(MMG5_pSol met, double *s) {
+  int k;
 
   if ( !met->np ) {
     fprintf(stderr,"\n  ## Error: %s: you must set the number of"
@@ -1431,8 +1431,8 @@ MMG_int  MMG2D_Set_scalarSols(MMG5_pSol met, double *s) {
   return 1;
 }
 
-MMG_int  MMG2D_Get_scalarSols(MMG5_pSol met, double* s) {
-  MMG_int k;
+int  MMG2D_Get_scalarSols(MMG5_pSol met, double* s) {
+  int k;
 
   for ( k=0; k<met->np; ++k )
     s[k]  = met->m[k+1];
@@ -1440,8 +1440,8 @@ MMG_int  MMG2D_Get_scalarSols(MMG5_pSol met, double* s) {
   return 1;
 }
 
-MMG_int MMG2D_Set_vectorSol(MMG5_pSol met, double vx,double vy, MMG_int pos) {
-  MMG_int isol;
+int MMG2D_Set_vectorSol(MMG5_pSol met, double vx,double vy, int pos) {
+  int isol;
 
   if ( !met->np ) {
     fprintf(stderr,"\n  ## Error: %s: you must set the number of"
@@ -1481,9 +1481,9 @@ MMG_int MMG2D_Set_vectorSol(MMG5_pSol met, double vx,double vy, MMG_int pos) {
 }
 
 
-MMG_int MMG2D_Get_vectorSol(MMG5_pSol met, double* vx, double* vy) {
+int MMG2D_Get_vectorSol(MMG5_pSol met, double* vx, double* vy) {
 
-  MMG_int ddebug = 0;
+  int ddebug = 0;
 
   if ( met->npi == met->np ) {
     met->npi = 0;
@@ -1512,9 +1512,9 @@ MMG_int MMG2D_Get_vectorSol(MMG5_pSol met, double* vx, double* vy) {
   return 1;
 }
 
-MMG_int MMG2D_Set_vectorSols(MMG5_pSol met, double *sols) {
+int MMG2D_Set_vectorSols(MMG5_pSol met, double *sols) {
   double *m;
-  MMG_int k,j;
+  int k,j;
 
   if ( !met->np ) {
     fprintf(stderr,"\n  ## Error: %s: you must set the number of"
@@ -1534,9 +1534,9 @@ MMG_int MMG2D_Set_vectorSols(MMG5_pSol met, double *sols) {
   return 1;
 }
 
-MMG_int MMG2D_Get_vectorSols(MMG5_pSol met, double* sols) {
+int MMG2D_Get_vectorSols(MMG5_pSol met, double* sols) {
   double *m;
-  MMG_int k, j;
+  int k, j;
 
   for ( k=0; k<met->np; ++k ) {
     j = 2*k;
@@ -1550,9 +1550,9 @@ MMG_int MMG2D_Get_vectorSols(MMG5_pSol met, double* sols) {
 }
 
 
-MMG_int MMG2D_Set_tensorSol(MMG5_pSol met, double m11, double m12, double m22,
-                        MMG_int pos) {
-  MMG_int isol;
+int MMG2D_Set_tensorSol(MMG5_pSol met, double m11, double m12, double m22,
+                        int pos) {
+  int isol;
 
   if ( !met->np ) {
     fprintf(stderr,"\n  ## Error: %s: you must set the number of"
@@ -1584,10 +1584,10 @@ MMG_int MMG2D_Set_tensorSol(MMG5_pSol met, double m11, double m12, double m22,
   return 1;
 }
 
-MMG_int MMG2D_Get_tensorSol(MMG5_pSol met, double *m11,double *m12,double *m22)
+int MMG2D_Get_tensorSol(MMG5_pSol met, double *m11,double *m12,double *m22)
 {
-  MMG_int ddebug = 0;
-  MMG_int isol;
+  int ddebug = 0;
+  int isol;
 
   if ( met->npi == met->np ) {
     met->npi = 0;
@@ -1618,9 +1618,9 @@ MMG_int MMG2D_Get_tensorSol(MMG5_pSol met, double *m11,double *m12,double *m22)
   return 1;
 }
 
-MMG_int MMG2D_Set_tensorSols(MMG5_pSol met, double *sols) {
+int MMG2D_Set_tensorSols(MMG5_pSol met, double *sols) {
   double *m;
-  MMG_int k,j;
+  int k,j;
 
   if ( !met->np ) {
     fprintf(stderr,"\n  ## Error: %s: You must set the number"
@@ -1641,9 +1641,9 @@ MMG_int MMG2D_Set_tensorSols(MMG5_pSol met, double *sols) {
   return 1;
 }
 
-MMG_int MMG2D_Get_tensorSols(MMG5_pSol met, double *sols) {
+int MMG2D_Get_tensorSols(MMG5_pSol met, double *sols) {
   double *m;
-  MMG_int k,j;
+  int k,j;
 
   for ( k=0; k<met->np; ++k ) {
     j = 3*k;
@@ -1657,7 +1657,7 @@ MMG_int MMG2D_Get_tensorSols(MMG5_pSol met, double *sols) {
   return 1;
 }
 
-MMG_int  MMG2D_Set_ithSols_inSolsAtVertices(MMG5_pSol sol,MMG_int i, double *s) {
+int  MMG2D_Set_ithSols_inSolsAtVertices(MMG5_pSol sol,int i, double *s) {
   MMG5_pSol psl;
 
   /* Warning: users give indices from 1 to nsols */
@@ -1685,7 +1685,7 @@ MMG_int  MMG2D_Set_ithSols_inSolsAtVertices(MMG5_pSol sol,MMG_int i, double *s) 
   return 1;
 }
 
-MMG_int  MMG2D_Get_ithSols_inSolsAtVertices(MMG5_pSol sol,MMG_int i, double *s) {
+int  MMG2D_Get_ithSols_inSolsAtVertices(MMG5_pSol sol,int i, double *s) {
   MMG5_pSol psl;
 
   /* Warning: users give indices from 1 to nsols */
@@ -1713,7 +1713,7 @@ MMG_int  MMG2D_Get_ithSols_inSolsAtVertices(MMG5_pSol sol,MMG_int i, double *s) 
   return 1;
 }
 
-MMG_int  MMG2D_Set_ithSol_inSolsAtVertices(MMG5_pSol sol,MMG_int i, double* s,MMG_int pos) {
+int  MMG2D_Set_ithSol_inSolsAtVertices(MMG5_pSol sol,int i, double* s,int pos) {
   MMG5_pSol psl;
 
   /* Warning: users give indices from 1 to nsols */
@@ -1740,7 +1740,7 @@ MMG_int  MMG2D_Set_ithSol_inSolsAtVertices(MMG5_pSol sol,MMG_int i, double* s,MM
   return 1;
 }
 
-MMG_int  MMG2D_Get_ithSol_inSolsAtVertices(MMG5_pSol sol,MMG_int i, double *s,MMG_int pos) {
+int  MMG2D_Get_ithSol_inSolsAtVertices(MMG5_pSol sol,int i, double *s,int pos) {
   MMG5_pSol psl;
 
   /* Warning: users give indices from 1 to nsols */
@@ -1770,7 +1770,7 @@ MMG_int  MMG2D_Get_ithSol_inSolsAtVertices(MMG5_pSol sol,MMG_int i, double *s,MM
   return 1;
 }
 
-MMG_int MMG2D_Chk_meshData(MMG5_pMesh mesh,MMG5_pSol met) {
+int MMG2D_Chk_meshData(MMG5_pMesh mesh,MMG5_pSol met) {
 
   if ( (mesh->npi != mesh->np) || (mesh->nti != mesh->nt) ) {
     fprintf(stderr,"\n  ## Error: %s: if you don't use the MMG2D_loadMesh function,",
@@ -1815,16 +1815,16 @@ MMG_int MMG2D_Chk_meshData(MMG5_pMesh mesh,MMG5_pSol met) {
   return 1;
 }
 
-MMG_int MMG2D_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol) {
+int MMG2D_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol) {
 
   return MMG5_Free_allSols(mesh,sol);
 }
 
 
-MMG_int MMG2D_Free_all(const MMG_int starter,...)
+int MMG2D_Free_all(const int starter,...)
 {
   va_list argptr;
-  MMG_int     ier;
+  int     ier;
 
   va_start(argptr, starter);
 
@@ -1835,9 +1835,9 @@ MMG_int MMG2D_Free_all(const MMG_int starter,...)
   return ier;
 }
 
-MMG_int MMG2D_Free_structures(const MMG_int starter,...)
+int MMG2D_Free_structures(const int starter,...)
 {
-  MMG_int ier;
+  int ier;
 
   va_list argptr;
 
@@ -1850,10 +1850,10 @@ MMG_int MMG2D_Free_structures(const MMG_int starter,...)
   return ier;
 }
 
-MMG_int MMG2D_Free_names(const MMG_int starter,...)
+int MMG2D_Free_names(const int starter,...)
 {
   va_list argptr;
-  MMG_int     ier;
+  int     ier;
 
   va_start(argptr, starter);
 
