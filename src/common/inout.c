@@ -87,9 +87,10 @@ double MMG5_swapd(double sbin)
 
 static
 int MMG5_countBinaryElts(FILE **inm, const int nelts,const int iswp,
-                         int *np, int *na, int* nt,int *nq, int *ne, int *npr)
+                         MMG_int *np, MMG_int *na, MMG_int* nt,MMG_int *nq, MMG_int *ne, MMG_int *npr)
 {
-  int    typ,num,tagNum,i,k,l,idx;
+  int    typ,tagNum,i,l;
+  MMG_int  k,num,idx;
   static char mmgWarn = 0;
 
   k = 0;
@@ -242,9 +243,9 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,const char *filename,
                            MMG_int *nelts,MMG_int *nsols) {
   double      dbuf[9];
   float       fbuf[9];
-  MMG_int         ver,oneBin,k,i;
-  MMG_int         nt,na,nq,ne,npr,np;
-  MMG_int         typ,tagNum,posNodeDataSize,initPosNodeDataSize;
+  int         ver,oneBin,i;
+  MMG_int        k,nt,na,nq,ne,npr,np;
+  int         typ,tagNum,posNodeDataSize,initPosNodeDataSize;
   char        *ptr,*data,chaine[MMG5_FILESTR_LGTH],verNum[5];
 
   ver = oneBin = 0;

@@ -630,7 +630,7 @@ void           MMG5_check_hminhmax(MMG5_pMesh mesh, int8_t sethmin, int8_t sethm
  int           MMG5_hashEdge(MMG5_pMesh mesh,MMG5_Hash *hash,int a,int b,int k);
  int           MMG5_hashUpdate(MMG5_Hash *hash,int a,int b,int k);
  int           MMG5_hashEdgeTag(MMG5_pMesh mesh,MMG5_Hash *hash,int a,int b,int16_t k);
- int           MMG5_hashGet(MMG5_Hash *hash,int a,int b);
+ int           MMG5_hashGet(MMG5_Hash *hash,MMG_int a,MMG_int b);
  int           MMG5_hashNew(MMG5_pMesh mesh, MMG5_Hash *hash,int hsiz,int hmax);
  int           MMG5_intmetsavedir(MMG5_pMesh mesh, double *m,double *n,double *mr);
  int           MMG5_intridmet(MMG5_pMesh,MMG5_pSol,int,int,double,double*,double*);
@@ -693,13 +693,13 @@ void           MMG5_check_hminhmax(MMG5_pMesh mesh, int8_t sethmin, int8_t sethm
                                        const int iswp,const int nelts,
                                        const int nsols);
 int             MMG5_saveMshMesh(MMG5_pMesh,MMG5_pSol*,const char*, int);
-int             MMG5_loadSolHeader(const char*,int,FILE**,int*,int*,int*,int*,
-                                   int*,int*,int**,long*,int);
+int             MMG5_loadSolHeader(const char*,int,FILE**,int*,int*,int*,MMG_int*,
+                                   MMG_int*,MMG_int*,int**,long*,int);
 int             MMG5_chkMetricType(MMG5_pMesh mesh,int *type, FILE *inm);
 int             MMG5_readFloatSol3D(MMG5_pSol,FILE*,int,int,int);
 int             MMG5_readDoubleSol3D(MMG5_pSol,FILE*,int,int,int);
-int             MMG5_saveSolHeader( MMG5_pMesh,const char*,FILE**,int,int*,int*,int,
-                                    int,int,int*,int*,int*);
+int             MMG5_saveSolHeader( MMG5_pMesh,const char*,FILE**,int,int*,int*,MMG_int,
+                                    MMG_int,int,int*,int*,MMG_int*);
 int             MMG5_saveSolAtTrianglesHeader( MMG5_pMesh,FILE *,int,int,int*,int,
                                                int,int*,int*,int*);
 int             MMG5_saveSolAtTetrahedraHeader( MMG5_pMesh,FILE *,int,int,int*,int,
