@@ -150,10 +150,11 @@ int MMGS_dichoto(MMG5_pMesh mesh,MMG5_pSol met,MMG_int k,MMG_int *vx) {
  * Find acceptable position for MMG5_split1b, starting from point ip.
  *
  */
-int MMGS_dichoto1b(MMG5_pMesh mesh, MMG5_pSol met, int iel, int ia, int ip) {
+int MMGS_dichoto1b(MMG5_pMesh mesh, MMG5_pSol met, MMG_int iel, int ia, MMG_int ip) {
   MMG5_pTria   pt;
   MMG5_pPoint  p0,p1,ppt;
-  int          np,nq,it,maxit,i1,i2;
+  MMG_int          np,nq;
+  int          it,maxit,i1,i2;
   double       m[3],o[3],tp,to,t;
   int8_t       ier;
 
@@ -388,7 +389,8 @@ int chkedg(MMG5_pMesh mesh,int iel) {
 
 static int swpmsh(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
   MMG5_pTria    pt;
-  int      k,it,ns,nns,maxit;
+  int      it,ns,nns,maxit;
+  MMG_int  k;
   int8_t   i;
 
   it = nns = 0;
@@ -421,7 +423,8 @@ static int swpmsh(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
 static int movtri(MMG5_pMesh mesh,MMG5_pSol met,int maxit) {
   MMG5_pTria    pt;
   MMG5_pPoint   ppt;
-  int      it,k,ier,base,nm,ns,nnm,list[MMGS_LMAX+2],ilist;
+  int      it,ier,base,nm,ns,nnm;
+  MMG_int    k,list[MMGS_LMAX+2],ilist;
   int8_t   i;
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
@@ -486,7 +489,8 @@ static inline
 int MMGS_delPatternPts(MMG5_pMesh mesh,MMG5_Hash hash)
 {
   MMG5_pTria   pt;
-  int          vx[3],k,i,i1,i2;
+  MMG_int          vx[3],k;
+  int          i,i1,i2;
 
   /* Delete the useless added points */
   for (k=1; k<=mesh->nt; k++) {
@@ -531,7 +535,8 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
   MMG5_Bezier  pb;
   MMG5_pxPoint  go;
   double        s,o[3],no[3],to[3],dd,len;
-  int           vx[3],i,j,ip,ip1,ip2,ier,k,ns,nc,ni,ic,nt,it;
+  int           i,ier,ns,nc,ni,ic,it;
+  MMG_int       k,nt,vx[3],j,ip,ip1,ip2;
   int8_t        i1,i2;
   static double uv[3][2] = { {0.5,0.5}, {0.,0.5}, {0.5,0.} };
   static int8_t mmgWarn0=0,mmgWarn1=0,mmgWarn2=0,mmgWarn3=0;
@@ -897,13 +902,14 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
  * Check if splitting edge \a i of element \a k is ok.
  *
  */
-int chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,int i) {
+int chkspl(MMG5_pMesh mesh,MMG5_pSol met,MMG_int k,MMG_int i) {
   MMG5_pTria    pt,pt1;
   MMG5_pPoint   ppt;
   MMG5_pxPoint  go;
   MMG5_Bezier   b;
   double        s,uv[2],o[3],no[3],to[3];
-  int           *adja,jel,ip,ier;
+  int           ip,ier;
+  MMG_int       *adja,jel;
   int8_t        i1,i2,j,jj,j2;
 
   if ( mesh->xp > mesh->xpmax-2 )  return 0;
@@ -963,7 +969,8 @@ static int colelt(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
   MMG5_pPoint   p1,p2;
   MMG5_pPar     par;
   double        ll,ux,uy,uz,hmin;
-  int           list[MMGS_LMAX+2],ilist,k,nc,l,isloc,ier;
+  MMG_int           list[MMGS_LMAX+2],ilist,k;
+  int           nc,l,isloc,ier;
   int8_t        i,i1,i2;
 
   nc = 0;
@@ -1061,7 +1068,8 @@ static int adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria    pt;
   MMG5_pPoint   p1,p2;
   double   len,lmax;
-  int      ip,k,ns,ier;
+  int      ip,ns,ier;
+  MMG_int   k;
   int8_t   i,i1,i2,imax;
 
   ns = 0;
@@ -1136,7 +1144,8 @@ static int adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria    pt;
   MMG5_pPoint   p1,p2;
   double   len;
-  int      k,list[MMGS_LMAX+2],ilist,nc,ier;
+  MMG_int      k,list[MMGS_LMAX+2],ilist;
+  int      nc,ier;
   int8_t   i,i1,i2;
 
   nc = 0;

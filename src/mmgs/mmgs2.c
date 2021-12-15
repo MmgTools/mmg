@@ -51,10 +51,10 @@
  *
  */
 static int
-MMGS_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, int start, int8_t istart) {
+MMGS_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, MMG_int start, int8_t istart) {
   MMG5_pTria       pt;
   double           v1, v2;
-  int              *adja,k,ip1,ip2,end1;
+  MMG_int              *adja,k,ip1,ip2,end1;
   int8_t           i,i1,smsgn;
   static int8_t    mmgWarn=0;
 
@@ -140,8 +140,9 @@ int MMGS_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTria    pt;
   MMG5_pPoint   p0;
   double        *tmp,v1,v2;
-  int           k,nc,ns,ip,ip1,ip2;
+  int           nc,ns,ip;
   int8_t        i;
+  MMG_int       k,ip1,ip2;
 
   MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(double),"temporary table",
                 fprintf(stderr,"  Exit program.\n");
@@ -220,8 +221,8 @@ int MMGS_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
  * \warning i inxt[i] is one edge of the implicit boundary.
  *
  */
-int MMGS_chkmaniball(MMG5_pMesh mesh, int start, int8_t istart) {
-  int                *adja,k;
+int MMGS_chkmaniball(MMG5_pMesh mesh, MMG_int start, int8_t istart) {
+  MMG_int                *adja,k;
   int8_t             i,i1;
 
   k = start;
@@ -316,7 +317,8 @@ int MMGS_chkmaniball(MMG5_pMesh mesh, int start, int8_t istart) {
 static
 int MMGS_chkmanimesh(MMG5_pMesh mesh) {
   MMG5_pTria      pt;
-  int             *adja,k,cnt,iel;
+  MMG_int             *adja,k;
+  int             cnt,iel;
   int8_t          i,i1;
   static int8_t   mmgWarn0 = 0;
 
@@ -389,7 +391,8 @@ static int MMGS_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
   MMG5_pPoint  p0,p1;
   MMG5_Hash   hash;
   double       c[3],v0,v1,s;
-  int          vx[3],nb,k,ip0,ip1,np,ns,nt,ier;
+  MMG_int          vx[3],k,np;
+  int          ip0,ip1,ns,nt,ier,nb;
   int8_t       ia;
   /* reset point flags and h */
   for (k=1; k<=mesh->np; k++)
@@ -488,7 +491,7 @@ static int MMGS_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) )  continue;
     pt->flag = 0;
-    memset(vx,0,3*sizeof(int));
+    memset(vx,0,3*sizeof(MMG_int));
     for (ia=0; ia<3; ia++) {
       vx[ia] = MMG5_hashGet(&hash,pt->v[MMG5_inxt2[ia]],pt->v[MMG5_iprv2[ia]]);
       if ( vx[ia] ) {
@@ -549,7 +552,7 @@ static int MMGS_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
 static int MMGS_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol) {
   MMG5_pTria   pt;
   double       v,v1;
-  int          k,ip,ip1;
+  MMG_int          k,ip,ip1;
   int8_t       nmns,npls,nz,i;
 
   for (k=1; k<=mesh->nt; k++) {

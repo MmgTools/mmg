@@ -155,7 +155,7 @@ int MMGS_split1(MMG5_pMesh mesh,MMG5_pSol met,MMG_int k,MMG_int i,MMG_int *vx) {
  *
  * \remark Don't work for non-manifold edge.
  */
-int MMGS_simbulgept(MMG5_pMesh mesh,MMG5_pSol met, MMG_int k,MMG_int i,MMG_int ip) {
+int MMGS_simbulgept(MMG5_pMesh mesh,MMG5_pSol met, MMG_int k,int i,MMG_int ip) {
   MMG5_pTria     pt,pt0;
   MMG5_pPoint    ppt0;
   double         cal;
