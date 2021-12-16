@@ -24,6 +24,7 @@
 /**
  * \file mmg/mmg2.c
  * \author Algiane Froehly (Bx INP/Inria/UBordeaux)
+ * \author Luca Cirrottola (Inria)
  * \version 5
  * \date 01 2014
  * \copyright GNU Lesser General Public License.
@@ -46,36 +47,15 @@ static int MMG5_InvMat_key(MMG5_pInvMat pim,int ref) {
 }
 
 /**
- * \param mesh   pointer toward the mesh structure.
- * \param pim    multimaterials inverse data table.
- * \param k      index of the material in the input table.
+ * \param k      index of the material.
+ * \param attr   the attribute of the material (nosplit/split/plus/minus).
+ * \return the code to be stored in the inverse data table entry.
  *
- * Set materials lookup table entry.
+ * Compute the material entry in the inverse data table, storing the index of
+ * the parent material and the attribute of the child material.
  */
-static void MMG5_InvMat_set(MMG5_pMesh mesh,MMG5_pInvMat pim,int k) {
-  MMG5_pMat pm;
-  int       key;
-
-  /* Get material */
-  pm = &mesh->info.mat[k];
-
-  /** Store the dosplit attribute of the parent material */
-  key = MMG5_InvMat_key(pim,pm->ref);
-  pim->lookup[key] = 4*(k+1)+pm->dospl;
-
-  /** Store the child material sign with the parent material index (in the
-   *  lookup table).
-   *  1) 0 is a legit material index, so store the parent as 4*(k+1).
-   *  2) If a child material has the same reference as the parent, this
-   *     effectively overwrites the result of the previous instruction.
-   *  3) No different child materials are allowed to have the same reference,
-   *     and this must have already been checked. */
-  if( pm->dospl ) {
-    key = MMG5_InvMat_key(pim,pm->rin);
-    pim->lookup[key] = 4*(k+1)+MG_MINUS;
-    key = MMG5_InvMat_key(pim,pm->rex);
-    pim->lookup[key] = 4*(k+1)+MG_PLUS;
-  }
+static int MMG5_InvMat_code(int k,int attr) {
+  return 4*(k+1)+attr;
 }
 
 /**
@@ -83,7 +63,7 @@ static void MMG5_InvMat_set(MMG5_pMesh mesh,MMG5_pInvMat pim,int k) {
  * \param ref    material reference.
  * \return Index of the material.
  *
- * Get index of the material from lookup table.
+ * Get index of the parent material from lookup table.
  */
 static int MMG5_InvMat_getIndex(MMG5_pInvMat pim,int ref) {
   int key = MMG5_InvMat_key(pim,ref);
@@ -96,12 +76,93 @@ static int MMG5_InvMat_getIndex(MMG5_pInvMat pim,int ref) {
  * \param pim    multimaterials inverse data table.
  * \param ref    material reference.
  * \return the nosplit/split/plus/minus attribute of the material.
+ *
+ * Get attribute of the child material (nosplit/split/plus/minus) from lookup
+ * table.
  */
 static int MMG5_InvMat_getAttrib(MMG5_pInvMat pim,int ref) {
   int key = MMG5_InvMat_key(pim,ref);
   /* The nosplit/split/plus/minus attribute is stored as the rest of the
    * integer division. */
   return (pim->lookup[key] % 4);
+}
+
+/**
+ * \param pim    multimaterials inverse data table.
+ * \param key    material key in the inverse data table.
+ * \return 0 if an entry for the material already exists, 1 otherwise.
+ *
+ * Check if a material reference already exists in the material lookup table.
+ */
+static int MMG5_InvMat_check(MMG5_pInvMat pim,int key) {
+  return pim->lookup[key] ? 0 : 1;
+}
+
+/**
+ * \param pim    multimaterials inverse data table.
+ * \param ref    reference of the material..
+ * \param k      index of the material in the direct table.
+ * \return 0 if an entry for the material already exists, 1 otherwise.
+ *
+ * Raise an error if trying to overwrite a reference entry in the material
+ * lookup table.
+ */
+static void MMG5_InvMat_error(MMG5_pInvMat pim,int ref,int k) {
+  fprintf(stderr,"\n   ## Error: Trying to overwrite material reference %d"
+    " (from LSReferences line %d) with another entry from LSReferences line %d."
+    ,ref,MMG5_InvMat_getIndex(pim,ref)+1,k+1);
+  fprintf(stderr,"\n             Check your LSReferences table: each material"
+    " reference should be unique!\n");
+}
+
+/**
+ * \param mesh   pointer toward the mesh structure.
+ * \param pim    multimaterials inverse data table.
+ * \param k      index of the material in the input table.
+ *
+ * Set materials lookup table entry.
+ */
+static int MMG5_InvMat_set(MMG5_pMesh mesh,MMG5_pInvMat pim,int k) {
+  MMG5_pMat pm;
+  int       key;
+
+  /* Get material */
+  pm = &mesh->info.mat[k];
+
+  /** Store the dosplit attribute of the parent material */
+  key = MMG5_InvMat_key(pim,pm->ref);
+  if( MMG5_InvMat_check(pim,key) ) {
+    pim->lookup[key] = MMG5_InvMat_code(k,pm->dospl);
+  } else {
+    MMG5_InvMat_error(pim,pm->ref,k);
+    return 0;
+  }
+
+  /** Store the child material sign with the parent material index (in the
+   *  lookup table).
+   *  1) 0 is a legit material index, so store the parent as 4*(k+1).
+   *  2) If a child material has the same reference as the parent, this
+   *     effectively overwrites the result of the previous instruction.
+   *  3) No different child materials are allowed to have the same reference,
+   *     and this must have already been checked. */
+  if( pm->dospl ) {
+    key = MMG5_InvMat_key(pim,pm->rin);
+    if( MMG5_InvMat_check(pim,key) ) {
+      pim->lookup[key] = MMG5_InvMat_code(k,MG_MINUS);
+    } else {
+      MMG5_InvMat_error(pim,pm->rin,k);
+      return 0;
+    }
+    key = MMG5_InvMat_key(pim,pm->rex);
+    if( MMG5_InvMat_check(pim,key) ) {
+      pim->lookup[key] = MMG5_InvMat_code(k,MG_PLUS);
+    } else {
+      MMG5_InvMat_error(pim,pm->rex,k);
+      return 0;
+    }
+  }
+
+  return 1;
 }
 
 /**
@@ -301,7 +362,8 @@ int MMG5_MultiMat_init(MMG5_pMesh mesh) {
 
   /* Fill lookup table */
   for( k = 0; k < mesh->info.nmat; k++ ) {
-    MMG5_InvMat_set(mesh,pim,k);
+    if( !MMG5_InvMat_set(mesh,pim,k) )
+      return 0;
   }
 
 //  MMG5_InvMat_print(mesh,pim);
