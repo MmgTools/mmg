@@ -272,7 +272,7 @@ typedef MMG5_xPoint * MMG5_pxPoint;
  * \brief Structure to store edges of a MMG mesh.
  */
 typedef struct {
-  int      a,b; /*!< Extremities of the edge */
+  MMG_int      a,b; /*!< Extremities of the edge */
   int      ref; /*!< Reference of the edge */
   int      base; /*!< 2Donly: used to store the tria+ tria edge indices
                    that allow to access to the edge */
@@ -300,7 +300,7 @@ typedef MMG5_Edge * MMG5_pEdge;
  */
 typedef struct {
   double   qual;   /*Quality of the triangle*/
-  int      v[3]; /*!< Vertices of the triangle */
+  MMG_int      v[3]; /*!< Vertices of the triangle */
   int      ref; /*!< Reference of the triangle */
   int      base;
   int      cc; /*!< used to store the tetra + tetra face indices
@@ -333,7 +333,7 @@ typedef MMG5_Tria * MMG5_pTria;
  *
  */
 typedef struct {
-  int      v[4]; /*!< Vertices of the quadrangle */
+  MMG_int      v[4]; /*!< Vertices of the quadrangle */
   int      ref; /*!< Reference of the quadrangle */
   int      base;
   int      edg[4]; /*!< edg[i] contains the ref of the \f$i^{th}\f$ edge
@@ -369,7 +369,7 @@ typedef MMG5_Quad * MMG5_pQuad;
  */
 typedef struct {
   double   qual; /*!< Quality of the element */
-  int      v[4]; /*!< Vertices of the tetrahedron */
+  MMG_int      v[4]; /*!< Vertices of the tetrahedron */
   int      ref; /*!< Reference of the tetrahedron */
   int      base;
   int      mark; /*!< Used for delaunay */
@@ -429,7 +429,7 @@ typedef MMG5_xTetra * MMG5_pxTetra;
  *
  */
 typedef struct {
-  int      v[6]; /*!< Vertices of the prism */
+  MMG_int      v[6]; /*!< Vertices of the prism */
   int      ref; /*!< Reference of the prism */
   int      base;
   int      flag;
@@ -507,10 +507,10 @@ typedef struct {
  * \brief Cell of the hash table of geom edges.
  */
 typedef struct {
-  int     a; /*!< First extremity of edge */
-  int     b;  /*!< Second extremity of edge */
+  MMG_int     a; /*!< First extremity of edge */
+  MMG_int     b;  /*!< Second extremity of edge */
   int     ref; /*!< Reference or idx (2D) of edge */
-  int     nxt; /*!< Next element of hash table */
+  MMG_int     nxt; /*!< Next element of hash table */
   int16_t tag; /*!< tag of edge */
 } MMG5_hgeom;
 
@@ -554,10 +554,10 @@ typedef struct {
   size_t    memCur; /*!< Current memory used */
   double    gap; /*!< Gap for table reallocation */
   int       ver; /*!< Version of the mesh file */
-  int       dim; /*!< Dimension of the mesh */
+  MMG_int       dim; /*!< Dimension of the mesh */
   int       type; /*!< Type of the mesh */
-  int       npi,nti,nai,nei,np,na,nt,ne,npmax,namax,ntmax,nemax,xpmax,xtmax;
-  int       nquad,nprism; /* number of quadrangles and prisms */
+  MMG_int       npi,nti,nai,nei,np,na,nt,ne,npmax,namax,ntmax,nemax,xpmax,xtmax;
+  MMG_int       nquad,nprism; /* number of quadrangles and prisms */
   int       nsols; /* number of solutions (metric excluded) in the solution file */
   int       nc1;
 
@@ -565,23 +565,23 @@ typedef struct {
                     treated */
   int       mark; /*!< Flag for delaunay (to know if an entity has
                     been treated) */
-  int       xp,xt,xpr; /*!< Number of surfaces points, triangles/tetrahedra and prisms */
+  MMG_int       xp,xt,xpr; /*!< Number of surfaces points, triangles/tetrahedra and prisms */
   int       npnil; /*!< Index of first unused point */
   int       nenil; /*!< Index of first unused element */
   int       nanil; /*!< Index of first unused edge (2d only)*/
-  int      *adja; /*!< Table of tetrahedron adjacency: if
+  MMG_int      *adja; /*!< Table of tetrahedron adjacency: if
                     \f$adja[4*(i-1)+1+j]=4*k+l\f$ then the \f$i^{th}\f$ and
                     \f$k^th\f$ tetrahedra are adjacent and share their
                     faces \a j and \a l (resp.) */
-  int      *adjt; /*!< Table of triangles adjacency: if
+  MMG_int      *adjt; /*!< Table of triangles adjacency: if
                     \f$adjt[3*(i-1)+1+j]=3*k+l\f$ then the \f$i^{th}\f$ and
                     \f$k^th\f$ triangles are adjacent and share their
                     edges \a j and \a l (resp.) */
-  int      *adjapr; /*!< Table of prisms adjacency: if
+  MMG_int      *adjapr; /*!< Table of prisms adjacency: if
                     \f$adjapr[5*(i-1)+1+j]=5*k+l\f$ then the \f$i^{th}\f$ and
                     \f$k^th\f$ prism are adjacent and share their
                     faces \a j and \a l (resp.) */
-  int      *adjq; /*!< Table of quadrangles adjacency: if
+  MMG_int      *adjq; /*!< Table of quadrangles adjacency: if
                     \f$adjq[4*(i-1)+1+j]=4*k+l\f$ then the \f$i^{th}\f$ and
                     \f$k^th\f$ quadrilaterals are adjacent and share their
                     edges \a j and \a l (resp.) */
@@ -609,9 +609,9 @@ typedef MMG5_Mesh  * MMG5_pMesh;
  */
 typedef struct {
   int       ver; /* Version of the solution file */
-  int       dim; /* Dimension of the solution file*/
-  int       np; /* Number of points of the solution */
-  int       npmax; /* Maximum number of points */
+  MMG_int       dim; /* Dimension of the solution file*/
+  MMG_int       np; /* Number of points of the solution */
+  MMG_int       npmax; /* Maximum number of points */
   int       npi; /* Temporary number of points (internal use only) */
   int       size; /* Number of solutions per entity */
   int       type; /* Type of the solution (scalar, vectorial of tensorial) */
