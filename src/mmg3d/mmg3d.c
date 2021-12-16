@@ -305,6 +305,12 @@ int main(int argc,char *argv[]) {
   int             ier,ierSave,fmtin,fmtout;
   char            stim[32],*ptr;
 
+  /* Select line buffering even if the output is not a terminal and force stderr
+   * and stdout to print in the same order as the events */
+  setvbuf(stdout, NULL, _IOLBF, 1024);
+  setvbuf(stderr, NULL, _IOLBF, 1024);
+
+  /* Version info */
   fprintf(stdout,"  -- MMG3D, Release %s (%s) \n",MMG_VERSION_RELEASE,MMG_RELEASE_DATE);
   fprintf(stdout,"     %s\n",MMG_COPYRIGHT);
   fprintf(stdout,"     %s %s\n",__DATE__,__TIME__);
