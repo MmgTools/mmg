@@ -2025,7 +2025,7 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_doSol(MMG5_pMesh mesh ,MMG5_pSol met );
+  extern int (*MMG2D_doSol)(MMG5_pMesh mesh ,MMG5_pSol met );
 
 /**
  * \param mesh pointer toward the mesh structure
