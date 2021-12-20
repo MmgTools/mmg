@@ -396,6 +396,11 @@ ADD_TEST(NAME mmg2d_Circle-hsizAni
   ${MMG2D_CI_TESTS}/Circle/cercle
   -out ${CTEST_OUTPUT_DIR}/mmg2d_Circle-hsizAni.o.mesh)
 
+ADD_TEST(NAME mmg2d_Disk-optimAni
+  COMMAND ${EXECUT_MMG2D} -v 5 -optim -A -sol 2
+  ${MMG2D_CI_TESTS}/Disk/disk
+  -out ${CTEST_OUTPUT_DIR}/mmg2d_disk-optimAni.o.mesh)
+
 ###############################################################################
 #####
 #####         Mesh generation
