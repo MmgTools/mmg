@@ -761,8 +761,8 @@ int MMGS_doSol_iso(MMG5_pMesh mesh,MMG5_pSol met) {
 int MMGS_doSol_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria   ptt;
   MMG5_pPoint  p1,p2;
-  double       ux,uy,uz,dd;
-  int          i,k,iadr,ipa,ipb,type;
+  double       u[3],dd,tensordot[6];
+  int          i,j,k,iadr,ipa,ipb,type;
   int          *mark;
 
   MMG5_SAFE_CALLOC(mark,mesh->np+1,int,return 0);
@@ -790,50 +790,104 @@ int MMGS_doSol_ani(MMG5_pMesh mesh,MMG5_pSol met) {
       p1  = &mesh->point[ipa];
       p2  = &mesh->point[ipb];
 
-      ux  = p1->c[0] - p2->c[0];
-      uy  = p1->c[1] - p2->c[1];
-      uz  = p1->c[2] - p2->c[2];
-      dd  = sqrt(ux*ux + uy*uy + uz*uz);
+      u[0]  = p1->c[0] - p2->c[0];
+      u[1]  = p1->c[1] - p2->c[1];
+      u[2]  = p1->c[2] - p2->c[2];
+
+      tensordot[0] = u[0]*u[0];
+      tensordot[1] = u[0]*u[1];
+      tensordot[2] = u[0]*u[2];
+      tensordot[3] = u[1]*u[1];
+      tensordot[4] = u[1]*u[2];
+      tensordot[5] = u[2]*u[2];
 
       iadr = 6*ipa;
-      met->m[iadr]   += dd;
+      for ( j=0; j<6; ++j ) {
+        met->m[iadr+j]   += tensordot[j];
+      }
       mark[ipa]++;
 
       iadr = 6*ipb;
-      met->m[iadr] += dd;
+      for ( j=0; j<6; ++j ) {
+        met->m[iadr+j]   += tensordot[j];
+      }
       mark[ipb]++;
     }
   }
 
   /* if hmax is not specified, compute it from the metric */
-  if ( mesh->info.hmax < 0. ) {
-
-    dd = FLT_MAX;
-    for (k=1; k<=mesh->np; k++) {
-      if ( !mark[k] ) continue;
-      iadr = 6*k;
-      dd = MG_MIN(dd,met->m[iadr]);
+  double hmax = FLT_MAX;
+  for (k=1; k<=mesh->np; k++) {
+    p1 = &mesh->point[k];
+    if ( !mark[k] ) {
+      continue;
     }
-    assert ( dd < FLT_MAX );
-    dd = 1./sqrt(dd);
 
-    mesh->info.hmax = 10.*dd;
+    /* Metric = nedges/dim * inv (sum(tensor_dot(edges,edges))).
+     * sum(tensor_dot) is stored in sol->m so reuse tensordot to
+     * compute M.  */
+    iadr = 6*k;
+    if ( !MMG5_invmat(met->m+iadr,tensordot) ) {
+      /* Non invertible matrix: impose FLT_MIN, it will be truncated by hmax
+       * later */
+      fprintf(stdout, " ## Warning: %s: %d: non invertible matrix."
+             " Impose hmax size at point\n",__func__,__LINE__);
+      met->m[iadr+0] = FLT_MIN;
+      met->m[iadr+1] = 0;
+      met->m[iadr+2] = 0;
+      met->m[iadr+3] = FLT_MIN;
+      met->m[iadr+4] = 0;
+      met->m[iadr+5] = FLT_MIN;
+      continue;
+    }
+
+    dd = (double)mark[k]*0.5;
+
+    for ( j=0; j<6; ++j ) {
+      met->m[iadr+j] = dd*tensordot[j];
+    }
+
+    /* Check metric */
+    double lambda[3],vp[3][3];
+    if (!MMG5_eigenv(1,met->m+iadr,lambda,vp) ) {
+      fprintf(stdout, " ## Warning: %s: %d: non diagonalizable metric."
+              " Impose hmax size at point\n",__func__,__LINE__);
+      met->m[iadr+0] = FLT_MIN;
+      met->m[iadr+1] = 0;
+      met->m[iadr+2] = 0;
+      met->m[iadr+3] = FLT_MIN;
+      met->m[iadr+4] = 0;
+      met->m[iadr+5] = FLT_MIN;
+      continue;
+    }
+
+    assert ( lambda[0] > 0. && lambda[1] > 0.  && lambda[2] > 0.
+            && "Negative eigenvalue");
+
+    /* If the vertex belongs to only colinear edges one of the eigenvalue is
+     * infinite: do not take it into account, it will be truncated by hmax
+     * later */
+    for ( j=0; j<3; ++j ) {
+      if ( isfinite(lambda[j]) ) {
+        hmax = MG_MIN(hmax,lambda[0]);
+      }
+    }
+  }
+  if ( mesh->info.hmax < 0.) {
+    assert ( hmax > 0. && hmax < FLT_MAX && "Wrong hmax value" );
+    mesh->info.hmax = 10./sqrt(hmax);
   }
 
-  /* vertex size */
-
+  /* vertex size at orphan points: impose hmax size */
+  hmax = 1./(mesh->info.hmax*mesh->info.hmax);
   for (k=1; k<=mesh->np; k++) {
-    iadr = 6*k;
+    p1 = &mesh->point[k];
     if ( !mark[k] ) {
-      met->m[iadr]   = 1./(mesh->info.hmax*mesh->info.hmax);
+      iadr = 6*k;
+      met->m[iadr]   = hmax;
       met->m[iadr+3] = met->m[iadr];
       met->m[iadr+5] = met->m[iadr];
       continue;
-    }
-    else {
-      met->m[iadr]   = (double)mark[k]*(double)mark[k]/(met->m[iadr]*met->m[iadr]);
-      met->m[iadr+3] = met->m[iadr];
-      met->m[iadr+5] = met->m[iadr];
     }
   }
 

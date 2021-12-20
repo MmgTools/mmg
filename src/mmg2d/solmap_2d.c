@@ -241,6 +241,7 @@ int MMG2D_doSol_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
   hmax = 1./(mesh->info.hmax*mesh->info.hmax);
   for (k=1; k<=mesh->np; k++) {
     p1 = &mesh->point[k];
+
     if ( !p1->tagdel )  {
       iadr = 3*k;
       sol->m[iadr]   = hmax;
