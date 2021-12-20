@@ -1947,7 +1947,7 @@ void  MMGS_setfunc(MMG5_pMesh mesh,MMG5_pSol met);
  * \param met pointer toward the sol structure
  * \return 1 if success
  *
- * Compute isotropic size map according to the mean of the length of the
+ * Compute unit size map according to the mean of the length of the
  * edges passing through a point.
  *
  * \remark Fortran interface:

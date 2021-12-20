@@ -1214,6 +1214,16 @@ int MMG3D_searchlen(MMG5_pMesh mesh, MMG5_pSol met, double lmin,
 #include "MMG5_doSol_template.h"
 #undef MMG5_ELEMENT_TYPE
 
+/**
+ * \param mesh pointer toward the mesh
+ * \param met pointer toward the metric
+ *
+ * \return 1 if succeed, 0 if fail
+ *
+ * Compute isotropic size map according to the mean of the length of the
+ * edges passing through a point.
+ *
+ */
 int MMG3D_doSol_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   int ier;
 
@@ -1224,6 +1234,16 @@ int MMG3D_doSol_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   return ier;
 }
 
+/**
+ * \param mesh pointer toward the mesh
+ * \param met pointer toward the metric
+ *
+ * \return 1 if succeed, 0 if fail
+ *
+ * Compute anisotropic unit size map using statistical concept of
+ * length distribution tensors (formula 5 of \cite COUPEZ20112391).
+ *
+  */
 int MMG3D_doSol_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   int ier;
 

@@ -14,6 +14,23 @@
 #define MMG_EVALUATOR(x,y)  MMG_PASTER(x,y)
 #define MMG_FUNCTION_NAME(a,b) MMG_EVALUATOR(a, b)
 
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the sol structure.
+ * \param Set_solSize pointer toward the MMG3D_Set_solSize or MMGS_Set_solSize function.
+ * \param ne number of element to treat.
+ * \param elt pointer toward the element array (mesh->tetra or mesh->tria).
+ * \param na number of edges per element.
+ * \param iare array of local indices of element edges vertices.
+ *
+ * \return 1 if succeed, 0 if fail
+ *
+ * Compute isotropic unit size map using mean edge lengths.
+ *
+ * \remark This function is expended into the \a MMG5_doSol_ani_MMG5_Tria and
+ * the \a MMG5_doSol_ani_MMG5_Tetra functions.
+ *
+ */
 static inline
 int MMG_FUNCTION_NAME(MMG5_doSol_iso, MMG5_ELEMENT_TYPE)
   (MMG5_pMesh mesh,MMG5_pSol met,
@@ -89,6 +106,24 @@ int MMG_FUNCTION_NAME(MMG5_doSol_iso, MMG5_ELEMENT_TYPE)
   return 1;
 }
 
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param sol pointer toward the sol structure.
+ * \param Set_solSize pointer toward the MMG3D_Set_solSize or MMGS_Set_solSize function.
+ * \param ne number of element to treat.
+ * \param elt pointer toward the element array (mesh->tetra or mesh->tria).
+ * \param na number of edges per element.
+ * \param iare array of local indices of element edges vertices.
+ *
+ * \return 1 if succeed, 0 if fail
+ *
+ * Compute anisotropic unit size map using statistical concept of
+ * length distribution tensors (formula 5 of \cite COUPEZ20112391).
+ *
+ * \remark This function is expended into the \a MMG5_doSol_ani_MMG5_Tria and
+ * the \a MMG5_doSol_ani_MMG5_Tetra functions.
+ *
+ */
 static inline
 int MMG_FUNCTION_NAME(MMG5_doSol_ani, MMG5_ELEMENT_TYPE)
   (MMG5_pMesh mesh,MMG5_pSol met,

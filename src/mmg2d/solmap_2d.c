@@ -130,7 +130,7 @@ int MMG2D_doSol_iso(MMG5_pMesh mesh,MMG5_pSol sol) {
  * \param sol pointer toward the sol structure
  * \return 1 if success
  *
- * Compute unit mesh anisotropic size map using statistical concept of
+ * Compute anisotropic unit size map using statistical concept of
  * length distribution tensors (formula 5 of \cite COUPEZ20112391).
  *
  */
