@@ -50,6 +50,7 @@ extern "C" {
 
 #define MS_SIN(tag)      ((tag & MG_CRN) || (tag & MG_REQ) || (tag & MG_NOM))
 
+static const uint8_t MMGS_iare[3][2] = {{1,2},{2,0},{0,1}};
 
 /** Free allocated pointers of mesh and sol structure and return value val */
 #define MMGS_RETURN_AND_FREE(mesh,met,ls,val)do                     \
