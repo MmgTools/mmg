@@ -60,10 +60,15 @@ int MMG2D_doSol_iso(MMG5_pMesh mesh,MMG5_pSol sol) {
   if ( !MMG2D_Set_solSize(mesh,sol,MMG5_Vertex,mesh->np,sol->size) )
     return 0;
 
+  /* tagdel will be used to count the number of edges passing through each
+   * point */
   for (k=1; k<=mesh->np; k++) {
     p1 = &mesh->point[k];
     p1->tagdel = 0;
   }
+
+  /* Travel the triangles edges and add the edge contribution to edges
+   * extermities */
   for (k=1; k<=mesh->nt; k++) {
     ptt = &mesh->tria[k];
     if ( !ptt->v[0] )  continue;
@@ -149,10 +154,15 @@ int MMG2D_doSol_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
   if ( !MMG2D_Set_solSize(mesh,sol,MMG5_Vertex,mesh->np,sol->size) )
     return 0;
 
+  /* tagdel will be used to count the number of edges passing through each
+   * point */
   for (k=1; k<=mesh->np; k++) {
     p1 = &mesh->point[k];
     p1->tagdel = 0;
   }
+
+  /* Travel the triangles edges and add the edge contribution to edges
+   * extermities */
   for (k=1; k<=mesh->nt; k++) {
     ptt = &mesh->tria[k];
     if ( !ptt->v[0] )  continue;
