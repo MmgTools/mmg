@@ -354,15 +354,69 @@ void MMG5_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
     for (k=1; k<=mesh->np; k++) {
       ppt = &mesh->point[k];
       if ( !MG_VOK(ppt) ) continue;
-      iadr = 6*k;
-      met->m[iadr]   = MG_MAX(isqhmax,MG_MIN(isqhmin,met->m[iadr]));
-      met->m[iadr+3] = met->m[iadr];
-      met->m[iadr+5] = met->m[iadr];
+
+      if ( !MMG5_truncate_met3d(met,k,isqhmin,isqhmax) ) {
+        /* Fail to diagonalize metric: put hmax */
+        iadr = 6*k;
+        met->m[iadr]   = isqhmax;
+        met->m[iadr+1] = 0.;
+        met->m[iadr+2] = 0.;
+        met->m[iadr+3] = isqhmax;
+        met->m[iadr+4] = 0.;
+        met->m[iadr+5] = isqhmax;
+      }
     }
   }
 
   return;
 }
+
+int MMG5_truncate_met3d(MMG5_pSol met, int ip, double isqhmin, double isqhmax) {
+  double        v[3][3],lambda[3],*m;
+  int           i;
+  static int8_t mmgWarn = 0;
+
+  m = &met->m[met->size*ip];
+
+  if ( !MMG5_eigenv(1,m,lambda,v) ) {
+    if ( !mmgWarn ) {
+      fprintf(stderr,"\n  ## Warning: %s: Unable to diagonalize at least"
+              " 1 metric.\n",__func__);
+      mmgWarn = 1;
+    }
+    return 0;
+  }
+
+  for (i=0; i<3; i++) {
+    if(lambda[i]<=0) {
+      if ( !mmgWarn ) {
+        fprintf(stderr,"\n  ## Warning: %s: at least 1 wrong metric "
+                "(eigenvalues : %e %e %e).\n",__func__,lambda[0],
+                lambda[1],lambda[2]);
+        mmgWarn = 1;
+      }
+      return 0;
+    }
+    lambda[i]=MG_MIN(isqhmin,lambda[i]);
+    lambda[i]=MG_MAX(isqhmax,lambda[i]);
+  }
+
+  m[0] = v[0][0]*v[0][0]*lambda[0] + v[1][0]*v[1][0]*lambda[1]
+    + v[2][0]*v[2][0]*lambda[2];
+  m[1] = v[0][0]*v[0][1]*lambda[0] + v[1][0]*v[1][1]*lambda[1]
+    + v[2][0]*v[2][1]*lambda[2];
+  m[2] = v[0][0]*v[0][2]*lambda[0] + v[1][0]*v[1][2]*lambda[1]
+    + v[2][0]*v[2][2]*lambda[2];
+  m[3] = v[0][1]*v[0][1]*lambda[0] + v[1][1]*v[1][1]*lambda[1]
+    + v[2][1]*v[2][1]*lambda[2];
+  m[4] = v[0][1]*v[0][2]*lambda[0] + v[1][1]*v[1][2]*lambda[1]
+    + v[2][1]*v[2][2]*lambda[2];
+  m[5] = v[0][2]*v[0][2]*lambda[0] + v[1][2]*v[1][2]*lambda[1]
+    + v[2][2]*v[2][2]*lambda[2];
+
+  return 1;
+}
+
 
 /**
  * \param filename string containing a filename
