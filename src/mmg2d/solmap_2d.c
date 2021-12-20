@@ -197,12 +197,9 @@ int MMG2D_doSol_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   /* Compute metric tensor and hmax if not specified */
   double hmax = FLT_MAX;
-  int norphan = 0;
   for (k=1; k<=mesh->np; k++) {
     p1 = &mesh->point[k];
     if ( !p1->tagdel ) {
-      /* Count number of non connected points */
-      ++norphan;
       continue;
     }
 
@@ -226,6 +223,9 @@ int MMG2D_doSol_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
     MMG5_eigensym(sol->m+iadr,lambda,vp);
 
     assert (lambda[0] > 0. && lambda[1] > 0. && "Negative eigenvalue");
+
+    /* Normally the case where the point belongs to only 2 colinear points is
+    impossible */
     assert (isfinite(lambda[0]) && isfinite(lambda[1]) && "wrong eigenvalue");
 
     hmax = MG_MIN(hmax,lambda[0]);
@@ -237,13 +237,13 @@ int MMG2D_doSol_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
     mesh->info.hmax = 10./sqrt(hmax);
   }
 
-  /* vertex size at orphan points*/
+  /* vertex size: impose hmax size */
+  hmax = 1./(mesh->info.hmax*mesh->info.hmax);
   for (k=1; k<=mesh->np; k++) {
     p1 = &mesh->point[k];
-
     if ( !p1->tagdel )  {
       iadr = 3*k;
-      sol->m[iadr]   = hmax/100.;
+      sol->m[iadr]   = hmax;
       sol->m[iadr+2] = sol->m[iadr];
       continue;
     }
