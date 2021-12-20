@@ -627,6 +627,8 @@ int MMGS_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
   /* scaling mesh */
   if ( !MMG5_scaleMesh(mesh,met,NULL) )   _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
 
+  MMGS_setfunc(mesh,met);
+
   /* specific meshing */
   if ( mesh->info.optim ) {
     if ( !MMGS_doSol(mesh,met) ) {
@@ -642,8 +644,6 @@ int MMGS_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
       _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
     }
   }
-
-  MMGS_setfunc(mesh,met);
 
   /* mesh analysis */
   if ( !MMGS_analys(mesh) ) {

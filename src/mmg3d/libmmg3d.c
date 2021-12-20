@@ -1082,6 +1082,8 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
   /* scaling mesh */
   if ( !MMG5_scaleMesh(mesh,met,NULL) )   _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
 
+  MMG3D_setfunc(mesh,met);
+
   /* specific meshing */
   if ( mesh->info.optim ) {
     if ( !MMG3D_doSol(mesh,met) ) {
@@ -1097,8 +1099,6 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
       _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
     }
   }
-
-  MMG3D_setfunc(mesh,met);
 
   if ( !MMG3D_tetraQual(mesh,met,0) )   _LIBMMG5_RETURN(mesh,met,sol,MMG5_LOWFAILURE);
 
