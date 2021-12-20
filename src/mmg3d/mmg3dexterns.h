@@ -6,6 +6,7 @@ extern double (*MMG5_lenedg)(MMG5_pMesh ,MMG5_pSol ,int, MMG5_pTetra );
 extern double (*MMG5_lenedgspl)(MMG5_pMesh ,MMG5_pSol ,int, MMG5_pTetra );
 extern double (*MMG5_caltet)(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt);
 extern double (*MMG5_caltri)(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
+extern int    (*MMG3D_doSol)(MMG5_pMesh,MMG5_pSol);
 extern int    (*MMG3D_defsiz)(MMG5_pMesh ,MMG5_pSol );
 extern int    (*MMG3D_gradsiz)(MMG5_pMesh ,MMG5_pSol );
 extern int    (*MMG3D_gradsizreq)(MMG5_pMesh ,MMG5_pSol );

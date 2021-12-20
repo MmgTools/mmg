@@ -2734,7 +2734,7 @@ extern  double (*MMG3D_lenedgCoor)(double *ca,double *cb,double *sa,double *sb);
  * >   END SUBROUTINE\n
  *
  */
-  int MMG3D_doSol(MMG5_pMesh mesh,MMG5_pSol met);
+  extern int (*MMG3D_doSol)(MMG5_pMesh mesh,MMG5_pSol met);
 
 /**
  * \param mesh pointer toward the mesh structure

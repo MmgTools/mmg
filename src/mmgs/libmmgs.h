@@ -1957,7 +1957,7 @@ void  MMGS_setfunc(MMG5_pMesh mesh,MMG5_pSol met);
  * >   END SUBROUTINE\n
  *
  */
-int MMGS_doSol(MMG5_pMesh mesh,MMG5_pSol met);
+extern int (*MMGS_doSol)(MMG5_pMesh mesh,MMG5_pSol met);
 
 /**
  * \param mesh pointer toward the mesh structure
