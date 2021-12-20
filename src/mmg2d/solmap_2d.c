@@ -49,6 +49,9 @@ int MMG2D_doSol_iso(MMG5_pMesh mesh,MMG5_pSol sol) {
   double          ux,uy,dd;
   int             i,k,ib,ipa,ipb;
   int             MMG_inxtt[5] = {0,1,2,0,1};
+  int             *mark;
+
+  MMG5_SAFE_CALLOC(mark,mesh->np+1,int,return 0);
 
   /* Memory alloc */
   if ( sol->size!=1 ) {
@@ -59,13 +62,6 @@ int MMG2D_doSol_iso(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   if ( !MMG2D_Set_solSize(mesh,sol,MMG5_Vertex,mesh->np,sol->size) )
     return 0;
-
-  /* tagdel will be used to count the number of edges passing through each
-   * point */
-  for (k=1; k<=mesh->np; k++) {
-    p1 = &mesh->point[k];
-    p1->tagdel = 0;
-  }
 
   /* Travel the triangles edges and add the edge contribution to edges
    * extermities */
@@ -85,9 +81,9 @@ int MMG2D_doSol_iso(MMG5_pMesh mesh,MMG5_pSol sol) {
       dd  = sqrt(ux*ux + uy*uy);
 
       sol->m[ipa] += dd;
-      p1->tagdel++;
+      mark[ipa]++;
       sol->m[ipb] += dd;
-      p2->tagdel++;
+      mark[ipb]++;
     }
   }
 
@@ -96,7 +92,7 @@ int MMG2D_doSol_iso(MMG5_pMesh mesh,MMG5_pSol sol) {
     dd = 0.;
     for (k=1; k<=mesh->np; k++) {
       p1 = &mesh->point[k];
-      if ( !p1->tagdel ) continue;
+      if ( !mark[k] ) continue;
       dd = MG_MAX(dd,sol->m[k]);
     }
     assert ( dd > 0. );
@@ -106,13 +102,12 @@ int MMG2D_doSol_iso(MMG5_pMesh mesh,MMG5_pSol sol) {
   /* vertex size */
   for (k=1; k<=mesh->np; k++) {
     p1 = &mesh->point[k];
-    if ( !p1->tagdel )  {
+    if ( !mark[k] )  {
       sol->m[k] = mesh->info.hmax;
       continue;
     }
 
-    sol->m[k] = sol->m[k] / (double)p1->tagdel;
-    p1->tagdel = 0;
+    sol->m[k] = sol->m[k] / (double)mark[k];
   }
 
   /* compute quality */
@@ -125,6 +120,8 @@ int MMG2D_doSol_iso(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   if ( mesh->info.imprim < -4 )
     fprintf(stdout,"   HMAX %f\n",mesh->info.hmax);
+
+  MMG5_SAFE_FREE(mark);
   return 1;
 }
 
@@ -143,6 +140,9 @@ int MMG2D_doSol_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
   double          ux,uy,dd,tensordot[3];
   int             i,k,ib,iadr,ipa,ipb;
   int             MMG_inxtt[5] = {0,1,2,0,1};
+  int         *mark;
+
+  MMG5_SAFE_CALLOC(mark,mesh->np+1,int,return 0);
 
   /* Memory alloc */
   if ( sol->size!=3 ) {
@@ -153,13 +153,6 @@ int MMG2D_doSol_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   if ( !MMG2D_Set_solSize(mesh,sol,MMG5_Vertex,mesh->np,sol->size) )
     return 0;
-
-  /* tagdel will be used to count the number of edges passing through each
-   * point */
-  for (k=1; k<=mesh->np; k++) {
-    p1 = &mesh->point[k];
-    p1->tagdel = 0;
-  }
 
   /* Travel the triangles edges and add the edge contribution to edges
    * extermities */
@@ -185,13 +178,13 @@ int MMG2D_doSol_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
       sol->m[iadr]   += tensordot[0];
       sol->m[iadr+1] += tensordot[1];
       sol->m[iadr+2] += tensordot[2];
-      p1->tagdel++;
+      mark[ipa]++;
 
       iadr = 3*ipb;
       sol->m[iadr]   += tensordot[0];
       sol->m[iadr+1] += tensordot[1];
       sol->m[iadr+2] += tensordot[2];
-      p2->tagdel++;
+      mark[ipb]++;
     }
   }
 
@@ -199,7 +192,7 @@ int MMG2D_doSol_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
   double hmax = FLT_MAX;
   for (k=1; k<=mesh->np; k++) {
     p1 = &mesh->point[k];
-    if ( !p1->tagdel ) {
+    if ( !mark[k] ) {
       continue;
     }
 
@@ -208,7 +201,7 @@ int MMG2D_doSol_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
      * sum(tensor_dot) is stored in sol->m so reuse tensordot to
      * compute M.  */
     dd = 1./(sol->m[iadr]*sol->m[iadr+2] - sol->m[iadr+1]*sol->m[iadr+1]);
-    dd *= (double)p1->tagdel*0.5;
+    dd *= (double)mark[k]*0.5;
 
     tensordot[0] = sol->m[iadr+2];
     tensordot[1] = -sol->m[iadr+1];
@@ -242,13 +235,12 @@ int MMG2D_doSol_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
   for (k=1; k<=mesh->np; k++) {
     p1 = &mesh->point[k];
 
-    if ( !p1->tagdel )  {
+    if ( !mark[k] )  {
       iadr = 3*k;
       sol->m[iadr]   = hmax;
       sol->m[iadr+2] = sol->m[iadr];
       continue;
     }
-    p1->tagdel = 0;
   }
 
   /* compute quality */
@@ -261,5 +253,7 @@ int MMG2D_doSol_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   if ( mesh->info.imprim < -4 )
     fprintf(stdout,"   HMAX %f\n",mesh->info.hmax);
+
+  MMG5_SAFE_FREE(mark);
   return 1;
 }
