@@ -100,7 +100,15 @@ int main(int argc,char *argv[]) {
   /**---------------- Enable the level set discretization --------------------*/
   /* Ask for level set discretization: note that it is important to do this step
    * here because in iso mode, some filters are applied at mesh loading   */
-  if ( MMG3D_Set_iparameter(mmgMesh,mmgLs,MMG3D_IPARAM_iso, 1) != 1 )
+  if ( MMG3D_Set_iparameter(mmgMesh,NULL,MMG3D_IPARAM_iso, 1) != 1 )
+    exit(EXIT_FAILURE);
+
+  /* Ask for constant mesh size with edges of length 0.1. */
+  if ( MMG3D_Set_dparameter(mmgMesh,NULL,MMG3D_DPARAM_hsiz, 0.5) != 1 )
+    exit(EXIT_FAILURE);
+
+  /* Ask to do this with anisotropic metric */
+  if ( MMG3D_Set_iparameter(mmgMesh,NULL,MMG3D_IPARAM_anisosize, 1) != 1 )
     exit(EXIT_FAILURE);
 
   /** 2) Build mesh in MMG5 format */

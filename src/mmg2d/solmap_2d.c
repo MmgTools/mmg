@@ -50,11 +50,12 @@ int MMG2D_doSol(MMG5_pMesh mesh,MMG5_pSol sol) {
   int             i,k,ib,iadr,ipa,ipb;
   int             MMG_inxtt[5] = {0,1,2,0,1};
 
-  /* Memory alloc */
-  if ( sol->size!=1 && sol->size!=3 ) {
-    fprintf(stderr,"\n  ## Error: %s: unexpected size of metric: %d.\n",
-            __func__,sol->size);
-    return 0;
+  /* Set solution size */
+  if ( mesh->info.ani ) {
+    sol->size = 3;
+  }
+  else {
+    sol->size = 1;
   }
 
   if ( !MMG2D_Set_solSize(mesh,sol,MMG5_Vertex,mesh->np,sol->size) )

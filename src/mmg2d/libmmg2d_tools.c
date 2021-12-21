@@ -34,7 +34,13 @@
 
 
 void MMG2D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
-  if ( met->size == 3 ) {
+  if ( mesh->info.ani || (met && met->size==3 ) ) {
+    /* Force data consistency: if aniso metric is provided, met->size==3 and
+     * info.ani==0; with -A option, met->size==1 and info.ani==1 */
+    met->size = 3;
+    mesh->info.ani = 1;
+
+    /* Set pointers */
     MMG2D_lencurv  = MMG2D_lencurv_ani;
     MMG5_compute_meanMetricAtMarkedPoints = MMG5_compute_meanMetricAtMarkedPoints_ani;
     MMG2D_defsiz     = MMG2D_defsiz_ani;
@@ -502,13 +508,15 @@ int MMG2D_Get_trisFromEdge(MMG5_pMesh mesh, int ked, int ktri[2], int ied[2])
 int MMG2D_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met) {
   double      hsiz;
 
-  /* Memory alloc */
-  if ( met->size!=1 && met->size!=3 ) {
-    fprintf(stderr,"\n  ## Error: %s: unexpected size of metric: %d.\n",
-            __func__,met->size);
-    return 0;
+  /* Set solution size */
+  if ( mesh->info.ani ) {
+    met->size = 3;
+  }
+  else {
+    met->size = 1;
   }
 
+  /* Memory alloc */
   if ( !MMG2D_Set_solSize(mesh,met,MMG5_Vertex,mesh->np,met->size) )
     return 0;
 

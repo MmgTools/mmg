@@ -49,7 +49,7 @@
 
 int main(int argc,char *argv[]) {
   MMG5_pMesh      mmgMesh;
-  MMG5_pSol       mmgLs;
+  MMG5_pSol       mmgLs,mmgMet;
   int             ier;
   char            *inname,*lsname,*outname;
 
@@ -93,14 +93,20 @@ int main(int argc,char *argv[]) {
    */
   mmgMesh = NULL;
   mmgLs   = NULL;
+  mmgMet  = NULL;
   MMG3D_Init_mesh(MMG5_ARG_start,
                   MMG5_ARG_ppMesh,&mmgMesh,MMG5_ARG_ppLs,&mmgLs,
+                  MMG5_ARG_ppMet,&mmgMet,
                   MMG5_ARG_end);
 
   /**---------------- Enable the level set discretization --------------------*/
   /* Ask for level set discretization: note that it is important to do this step
    * here because in iso mode, some filters are applied at mesh loading   */
-  if ( MMG3D_Set_iparameter(mmgMesh,mmgLs,MMG3D_IPARAM_iso, 1) != 1 )
+  if ( MMG3D_Set_iparameter(mmgMesh,NULL,MMG3D_IPARAM_iso, 1) != 1 )
+    exit(EXIT_FAILURE);
+
+  /* Ask for constant mesh size with edges of length 0.1 */
+  if ( MMG3D_Set_dparameter(mmgMesh,NULL,MMG3D_DPARAM_hsiz, 0.5) != 1 )
     exit(EXIT_FAILURE);
 
   /** 2) Build mesh in MMG5 format */
@@ -129,7 +135,7 @@ int main(int argc,char *argv[]) {
 
   /** isovalue discretization: as we don't want to impose an input metric we
    * pass NULL instead of the metric structure as function argument */
-  ier = MMG3D_mmg3dls(mmgMesh,mmgLs,NULL);
+  ier = MMG3D_mmg3dls(mmgMesh,mmgLs,mmgMet);
 
   if ( ier == MMG5_STRONGFAILURE ) {
     fprintf(stdout,"BAD ENDING OF MMG3DLS: UNABLE TO SAVE MESH\n");
@@ -144,6 +150,7 @@ int main(int argc,char *argv[]) {
   /* 9) free the MMG3D5 structures */
   MMG3D_Free_all(MMG5_ARG_start,
                  MMG5_ARG_ppMesh,&mmgMesh,MMG5_ARG_ppLs,&mmgLs,
+                 MMG5_ARG_ppMet,&mmgMet,
                  MMG5_ARG_end);
 
   free(inname);

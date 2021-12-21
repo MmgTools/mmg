@@ -22,7 +22,7 @@
 */
 
 /**
- * Example of use of the mmg3dls function of the mmg3d library (basic use of
+ * Example of use of the mmgsls function of the mmgs library (basic use of
  * level-set discretization option): here the user only provide the level-set
  *
  * \author Charles Dapogny (LJLL, UPMC)
@@ -41,19 +41,19 @@
 #include <math.h>
 #include <float.h>
 
-/** Include the mmg3d library hader file */
+/** Include the mmgs library hader file */
 // if the header file is in the "include" directory
-// #include "libmmg3d.h"
-// if the header file is in "include/mmg/mmg3d"
-#include "mmg/mmg3d/libmmg3d.h"
+// #include "libmmgs.h"
+// if the header file is in "include/mmg/mmgs"
+#include "mmg/mmgs/libmmgs.h"
 
 int main(int argc,char *argv[]) {
   MMG5_pMesh      mmgMesh;
-  MMG5_pSol       mmgLs;
+  MMG5_pSol       mmgLs,mmgMet;
   int             ier;
   char            *inname,*lsname,*outname;
 
-  fprintf(stdout,"  -- TEST MMG3DLS \n");
+  fprintf(stdout,"  -- TEST MMGSLS \n");
 
   if ( argc != 4 ) {
     printf(" Usage: %s meshfile lsfile meshout\n",argv[0]);
@@ -93,35 +93,41 @@ int main(int argc,char *argv[]) {
    */
   mmgMesh = NULL;
   mmgLs   = NULL;
-  MMG3D_Init_mesh(MMG5_ARG_start,
-                  MMG5_ARG_ppMesh,&mmgMesh,MMG5_ARG_ppLs,&mmgLs,
-                  MMG5_ARG_end);
+  mmgMet  = NULL;
+  MMGS_Init_mesh(MMG5_ARG_start,
+                 MMG5_ARG_ppMesh,&mmgMesh,MMG5_ARG_ppLs,&mmgLs,
+                 MMG5_ARG_ppMet,&mmgMet,
+                 MMG5_ARG_end);
 
   /**---------------- Enable the level set discretization --------------------*/
   /* Ask for level set discretization: note that it is important to do this step
    * here because in iso mode, some filters are applied at mesh loading   */
-  if ( MMG3D_Set_iparameter(mmgMesh,mmgLs,MMG3D_IPARAM_iso, 1) != 1 )
+  if ( MMGS_Set_iparameter(mmgMesh,NULL,MMGS_IPARAM_iso, 1) != 1 )
+    exit(EXIT_FAILURE);
+
+  /* Ask for constant mesh size with edges of length 0.1 */
+  if ( MMGS_Set_dparameter(mmgMesh,NULL,MMGS_DPARAM_hsiz, 0.5) != 1 )
     exit(EXIT_FAILURE);
 
   /** 2) Build mesh in MMG5 format */
-  /** Two solutions: just use the MMG3D_loadMesh function that will read a .mesh(b)
-     file formatted or manually set your mesh using the MMG3D_Set* functions */
+  /** Two solutions: just use the MMGS_loadMesh function that will read a .mesh(b)
+     file formatted or manually set your mesh using the MMGS_Set* functions */
 
-  /** with MMG3D_loadMesh function */
-  if ( MMG3D_loadMesh(mmgMesh,inname) != 1 )  exit(EXIT_FAILURE);
+  /** with MMGS_loadMesh function */
+  if ( MMGS_loadMesh(mmgMesh,inname) != 1 )  exit(EXIT_FAILURE);
 
   /** 3) Build the level-set in MMG5 format */
-  /** Two solutions: just use the MMG3D_loadSol function that will read a .sol(b)
-      file formatted or manually set your level-set using the MMG3D_Set* functions */
-  /** load the level-set With the MMG3D_loadSol function */
-  if ( MMG3D_loadSol(mmgMesh,mmgLs,lsname) != 1 )
+  /** Two solutions: just use the MMGS_loadSol function that will read a .sol(b)
+      file formatted or manually set your level-set using the MMGS_Set* functions */
+  /** load the level-set With the MMGS_loadSol function */
+  if ( MMGS_loadSol(mmgMesh,mmgLs,lsname) != 1 )
     exit(EXIT_FAILURE);
 
   /** 4) (not mandatory): check if the number of given entities match with mesh size */
-  if ( MMG3D_Chk_meshData(mmgMesh,mmgLs) != 1 ) exit(EXIT_FAILURE);
+  if ( MMGS_Chk_meshData(mmgMesh,mmgLs) != 1 ) exit(EXIT_FAILURE);
 
   /** 5) (not mandatory): set your global parameters using the
-      MMG3D_Set_iparameter and MMG3D_Set_dparameter function
+      MMGS_Set_iparameter and MMGS_Set_dparameter function
       (resp. for integer parameters and double param)*/
 
 
@@ -129,22 +135,28 @@ int main(int argc,char *argv[]) {
 
   /** isovalue discretization: as we don't want to impose an input metric we
    * pass NULL instead of the metric structure as function argument */
-  ier = MMG3D_mmg3dls(mmgMesh,mmgLs,NULL);
+  ier = MMGS_mmgsls(mmgMesh,mmgLs,mmgMet);
 
   if ( ier == MMG5_STRONGFAILURE ) {
-    fprintf(stdout,"BAD ENDING OF MMG3DLS: UNABLE TO SAVE MESH\n");
+    fprintf(stdout,"BAD ENDING OF MMGSLS: UNABLE TO SAVE MESH\n");
     return(ier);
   } else if ( ier == MMG5_LOWFAILURE )
-    fprintf(stdout,"BAD ENDING OF MMG3DLS\n");
+    fprintf(stdout,"BAD ENDING OF MMGSLS\n");
 
   /* (Not mandatory) Automatically save the mesh */
-  if ( MMG3D_saveMesh(mmgMesh,outname) != 1 )
+  if ( MMGS_saveMesh(mmgMesh,outname) != 1 )
     exit(EXIT_FAILURE);
 
-  /* 9) free the MMG3D5 structures */
-  MMG3D_Free_all(MMG5_ARG_start,
-                 MMG5_ARG_ppMesh,&mmgMesh,MMG5_ARG_ppLs,&mmgLs,
-                 MMG5_ARG_end);
+  /* (Not mandatory) Automatically save the output metric */
+  if ( MMGS_saveSol(mmgMesh,mmgMet,outname) != 1 )
+    exit(EXIT_FAILURE);
+
+
+  /* 9) free the MMGS5 structures */
+  MMGS_Free_all(MMG5_ARG_start,
+                MMG5_ARG_ppMesh,&mmgMesh,MMG5_ARG_ppLs,&mmgLs,
+                MMG5_ARG_ppMet,&mmgMet,
+                MMG5_ARG_end);
 
   free(inname);
   inname = NULL;

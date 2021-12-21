@@ -35,7 +35,12 @@
 
 void MMG3D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
 
-  if ( met && met->size == 6 ) {
+  if ( mesh->info.ani || (met && met->size == 6) ) {
+    /* Force data consistency: if aniso metric is provided, met->size==6 and
+     * info.ani==0; with -A option, met->size==1 and info.ani==1 */
+    met->size = 6;
+    mesh->info.ani = 1;
+
     if ( (!met->m) && (!mesh->info.optim) && mesh->info.hsiz<=0. ) {
       MMG5_caltet          = MMG5_caltet_iso;
       MMG5_caltri          = MMG5_caltri_iso;
@@ -1215,13 +1220,14 @@ int MMG3D_doSol(MMG5_pMesh mesh,MMG5_pSol met) {
 
     MMG5_SAFE_CALLOC(mark,mesh->np+1,int,return 0);
 
-    /* Memory alloc */
-    if ( met->size==1 ) type=1;
-    else if ( met->size==6 ) type = 3;
+    /* Set solution size */
+    if ( mesh->info.ani ) {
+      met->size = 6;
+      type = 3;
+    }
     else {
-      fprintf(stderr,"\n  ## Error: %s: unexpected size of metric: %d.\n",
-              __func__,met->size);
-      return 0;
+      met->size = 1;
+      type = 1;
     }
 
     if ( !MMG3D_Set_solSize(mesh,met,MMG5_Vertex,mesh->np,type) )
@@ -1342,14 +1348,17 @@ int MMG3D_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met) {
   double      hsiz;
   int         type;
 
-  /* Memory alloc */
-  if ( met->size==1 ) type=1;
-  else if ( met->size==6 ) type = 3;
-  else {
-    fprintf(stderr,"\n  ## Error: %s: unexpected size of metric: %d.\n",
-            __func__,met->size);
-    return 0;
+  /* Set solution size */
+  if ( mesh->info.ani ) {
+    met->size = 6;
+    type = 3;
   }
+  else {
+    met->size = 1;
+    type = 1;
+  }
+
+  /* Memory alloc */
   if ( !MMG3D_Set_solSize(mesh,met,MMG5_Vertex,mesh->np,type) )
     return 0;
 
