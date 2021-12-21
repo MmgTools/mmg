@@ -35,6 +35,8 @@ SET ( MMG2D_LIB_TESTS
   libmmg2d_gene_example0
   libmmg2d_ls_example0
   libmmg2d_lsOnly
+  libmmg2d_lsOnly_optim
+  libmmg2d_lsOnly_hsiz
   libmmg2d_lsAndMetric
   test_api2d_0
   )
@@ -46,6 +48,8 @@ SET ( MMG2D_LIB_TESTS_MAIN_PATH
   ${PROJECT_SOURCE_DIR}/libexamples/mmg2d/squareGeneration_example0/main.c
   ${PROJECT_SOURCE_DIR}/libexamples/mmg2d/io_multisols_example0/main.c
   ${PROJECT_SOURCE_DIR}/libexamples/mmg2d/IsosurfDiscretization_lsOnly/main.c
+  ${PROJECT_SOURCE_DIR}/libexamples/mmg2d/IsosurfDiscretization_lsOnly/main_optim.c
+  ${PROJECT_SOURCE_DIR}/libexamples/mmg2d/IsosurfDiscretization_lsOnly/main_hsiz.c
   ${PROJECT_SOURCE_DIR}/libexamples/mmg2d/IsosurfDiscretization_lsAndMetric/main.c
   ${MMG2D_CI_TESTS}/API_tests/2d.c
   )
@@ -68,6 +72,8 @@ IF ( CMAKE_Fortran_COMPILER )
     libmmg2d_fortran_b
     libmmg2d_fortran_io
     libmmg2d_fortran_lsOnly
+    libmmg2d_fortran_lsOnly_optim
+    libmmg2d_fortran_lsOnly_hsiz
     libmmg2d_fortran_lsAndMetric
     test_api2d_fortran_0
     test_io2d_fortran
@@ -78,6 +84,8 @@ IF ( CMAKE_Fortran_COMPILER )
     ${PROJECT_SOURCE_DIR}/libexamples/mmg2d/adaptation_example0_fortran/example0_b/main.F90
     ${PROJECT_SOURCE_DIR}/libexamples/mmg2d/io_multisols_example0/main.F90
     ${PROJECT_SOURCE_DIR}/libexamples/mmg2d/IsosurfDiscretization_lsOnly/main.F90
+    ${PROJECT_SOURCE_DIR}/libexamples/mmg2d/IsosurfDiscretization_lsOnly/main_optim.F90
+    ${PROJECT_SOURCE_DIR}/libexamples/mmg2d/IsosurfDiscretization_lsOnly/main_hsiz.F90
     ${PROJECT_SOURCE_DIR}/libexamples/mmg2d/IsosurfDiscretization_lsAndMetric/main.F90
     ${MMG2D_CI_TESTS}/API_tests/2d.F90
     ${PROJECT_SOURCE_DIR}/cmake/testing/code/mmg2d_io.F90

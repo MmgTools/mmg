@@ -318,11 +318,12 @@ int MMGS_mmgsls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
   if ( !mesh->info.iso ) { mesh->info.iso = 1; }
 
   if ( !umet ) {
-    /* User doesn't provide the metric, allocate our own one */
+    /* User doesn't provide the metric (library mode only), allocate our own one */
     MMG5_SAFE_CALLOC(met,1,MMG5_Sol,_LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE));
     mettofree = 1;
   }
   else {
+    /* Using appli we always pass here */
     met = umet;
   }
 

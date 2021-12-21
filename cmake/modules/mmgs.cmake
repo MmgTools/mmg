@@ -162,6 +162,8 @@ IF ( BUILD_TESTING )
       SET(LIBMMGS_EXEC2   ${EXECUTABLE_OUTPUT_PATH}/libmmgs_example2)
       SET(LIBMMGS_EXEC3   ${EXECUTABLE_OUTPUT_PATH}/libmmgs_example3)
       SET(LIBMMGS_LSONLY  ${EXECUTABLE_OUTPUT_PATH}/libmmgs_lsOnly )
+      SET(LIBMMGS_LSONLY_OPTIM  ${EXECUTABLE_OUTPUT_PATH}/libmmgs_lsOnly_optim )
+      SET(LIBMMGS_LSONLY_HSIZ  ${EXECUTABLE_OUTPUT_PATH}/libmmgs_lsOnly_hsiz )
       SET(LIBMMGS_LSANDMETRIC ${EXECUTABLE_OUTPUT_PATH}/libmmgs_lsAndMetric )
 
 
@@ -193,6 +195,16 @@ IF ( BUILD_TESTING )
         "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/multi-mat.mesh"
         "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/multi-mat-sol.sol"
         "${CTEST_OUTPUT_DIR}/libmmgs_lsOnly_multimat.o"
+        )
+      ADD_TEST(NAME libmmgs_lsOnly_optim   COMMAND ${LIBMMGS_LSONLY_OPTIM}
+        "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/multi-mat.mesh"
+        "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/multi-mat-sol.sol"
+        "${CTEST_OUTPUT_DIR}/libmmgs_lsOnly_optim_multimat.o"
+        )
+      ADD_TEST(NAME libmmgs_lsOnly_hsiz   COMMAND ${LIBMMGS_LSONLY_HSIZ}
+        "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/multi-mat.mesh"
+        "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/multi-mat-sol.sol"
+        "${CTEST_OUTPUT_DIR}/libmmgs_lsOnly_hsiz_multimat.o"
         )
       ADD_TEST(NAME libmmgs_lsAndMetric   COMMAND ${LIBMMGS_LSANDMETRIC}
         "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/multi-mat.mesh"
