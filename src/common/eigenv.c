@@ -672,6 +672,82 @@ int MMG5_eigenv(int symmat,double *mat,double lambda[3],double v[3][3]) {
 
 /**
  * \brief Find eigenvalues and vectors of a 2x2 matrix.
+ * \param symmat 0 if matrix is not symetric, 1 otherwise.
+ * \param mat pointer toward the matrix.
+ * \param lambda eigenvalues.
+ * \param v eigenvectors.
+ *
+ * \return order of eigenvalues (1,2) or 0 if failed.
+ *
+ * \remark the i^{th} eigenvector is stored in v[i][.].
+ *
+ */
+int MMG5_eigenv2(int symmat,double *mat,double lambda[2],double vp[2][2]) {
+  double dd,sqDelta,trmat,vnorm;
+  static int8_t  mmgWarn0=0;
+
+  dd = mat[0] - mat[3];
+  sqDelta = sqrt(fabs(dd*dd + 4.0*mat[1]*mat[2]));
+  trmat = mat[0] + mat[3];
+
+  lambda[0] = 0.5 * (trmat - sqDelta);
+  if ( lambda[0] < 0.0 ) {
+    if ( !mmgWarn0 ) {
+      mmgWarn0 = 1;
+      fprintf(stderr,"\n  ## Warning: %s: at least 1 metric with a "
+              "negative eigenvalue: %f \n",__func__,lambda[0]);
+    }
+    return 0;
+  }
+
+  /* First case : matrices m and n are homothetic: n = lambda0*m */
+  if ( sqDelta < MMG5_EPS ) {
+
+    /* only one eigenvalue with degree 2 */
+    return 2;
+
+  }
+  /* Second case: both eigenvalues of mat are distinct ; theory says qf associated to m and n
+   are diagonalizable in basis (vp[0], vp[1]) - the coreduction basis */
+  else {
+    lambda[1] = 0.5 * (trmat + sqDelta);
+    assert(lambda[1] >= 0.0);
+
+    vp[0][0] = mat[1];
+    vp[0][1] = (lambda[0] - mat[0]);
+    vnorm  = sqrt(vp[0][0]*vp[0][0] + vp[0][1]*vp[0][1]);
+
+    if ( vnorm < MMG5_EPS ) {
+      vp[0][0] = (lambda[0] - mat[3]);
+      vp[0][1] = mat[2];
+      vnorm  = sqrt(vp[0][0]*vp[0][0] + vp[0][1]*vp[0][1]);
+    }
+
+    vnorm   = 1.0 / vnorm;
+    vp[0][0] *= vnorm;
+    vp[0][1] *= vnorm;
+
+    vp[1][0] = mat[1];
+    vp[1][1] = (lambda[1] - mat[0]);
+    vnorm  = sqrt(vp[1][0]*vp[1][0] + vp[1][1]*vp[1][1]);
+
+    if ( vnorm < MMG5_EPS ) {
+      vp[1][0] = (lambda[1] - mat[3]);
+      vp[1][1] = mat[2];
+      vnorm  = sqrt(vp[1][0]*vp[1][0] + vp[1][1]*vp[1][1]);
+    }
+
+    vnorm   = 1.0 / vnorm;
+    vp[1][0] *= vnorm;
+    vp[1][1] *= vnorm;
+
+    /* two distinct eigenvalues with degree 1 */
+    return 1;
+  }
+}
+
+/**
+ * \brief Find eigenvalues and vectors of a 2x2 matrix.
  * \param mm pointer toward the matrix.
  * \param lambda pointer toward the output eigenvalues.
  * \param vp eigenvectors.
@@ -863,80 +939,4 @@ inline int MMG5_eigensym(double m[3],double lambda[2],double vp[2][2]) {
   assert ( fabs(vp[0][0]*vp[1][0] + vp[0][1]*vp[1][1]) <= MG_EIGENV_EPS6 );
 
   return 1;
-}
-
-/**
- * \brief Find eigenvalues and vectors of a 2x2 matrix.
- * \param symmat 0 if matrix is not symetric, 1 otherwise.
- * \param mat pointer toward the matrix.
- * \param lambda eigenvalues.
- * \param v eigenvectors.
- *
- * \return order of eigenvalues (1,2) or 0 if failed.
- *
- * \remark the i^{th} eigenvector is stored in v[i][.].
- *
- */
-int MMG5_eigenv2(int symmat,double *imn,double lambda[2],double vp[2][2]) {
-  double dd,sqDelta,trimn,vnorm;
-  static int8_t  mmgWarn0=0;
-
-  dd = imn[0] - imn[3];
-  sqDelta = sqrt(fabs(dd*dd + 4.0*imn[1]*imn[2]));
-  trimn = imn[0] + imn[3];
-
-  lambda[0] = 0.5 * (trimn - sqDelta);
-  if ( lambda[0] < 0.0 ) {
-    if ( !mmgWarn0 ) {
-      mmgWarn0 = 1;
-      fprintf(stderr,"\n  ## Warning: %s: at least 1 metric with a "
-              "negative eigenvalue: %f \n",__func__,lambda[0]);
-    }
-    return 0;
-  }
-
-  /* First case : matrices m and n are homothetic: n = lambda0*m */
-  if ( sqDelta < MMG5_EPS ) {
-
-    /* only one eigenvalue with degree 2 */
-    return 2;
-
-  }
-  /* Second case: both eigenvalues of imn are distinct ; theory says qf associated to m and n
-   are diagonalizable in basis (vp[0], vp[1]) - the coreduction basis */
-  else {
-    lambda[1] = 0.5 * (trimn + sqDelta);
-    assert(lambda[1] >= 0.0);
-
-    vp[0][0] = imn[1];
-    vp[0][1] = (lambda[0] - imn[0]);
-    vnorm  = sqrt(vp[0][0]*vp[0][0] + vp[0][1]*vp[0][1]);
-
-    if ( vnorm < MMG5_EPS ) {
-      vp[0][0] = (lambda[0] - imn[3]);
-      vp[0][1] = imn[2];
-      vnorm  = sqrt(vp[0][0]*vp[0][0] + vp[0][1]*vp[0][1]);
-    }
-
-    vnorm   = 1.0 / vnorm;
-    vp[0][0] *= vnorm;
-    vp[0][1] *= vnorm;
-
-    vp[1][0] = imn[1];
-    vp[1][1] = (lambda[1] - imn[0]);
-    vnorm  = sqrt(vp[1][0]*vp[1][0] + vp[1][1]*vp[1][1]);
-
-    if ( vnorm < MMG5_EPS ) {
-      vp[1][0] = (lambda[1] - imn[3]);
-      vp[1][1] = imn[2];
-      vnorm  = sqrt(vp[1][0]*vp[1][0] + vp[1][1]*vp[1][1]);
-    }
-
-    vnorm   = 1.0 / vnorm;
-    vp[1][0] *= vnorm;
-    vp[1][1] *= vnorm;
-
-    /* two distinct eigenvalues with degree 1 */
-    return 1;
-  }
 }
