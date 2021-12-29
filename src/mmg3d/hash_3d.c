@@ -536,6 +536,10 @@ int MMG5_setEdgeNmTag(MMG5_pMesh mesh, MMG5_Hash *hash) {
     if ( !MG_EOK(ptt) ) continue;
 
     for (l=0; l<3; l++) {
+
+      /* Skip parallel edges */
+      if ( (ptt->tag[l] & MG_PARBDY) || (ptt->tag[l] & MG_BDY) ) continue;
+
       if ( ptt->tag[l] & MG_NOM ) {
         i1 = MMG5_inxt2[l];
         i2 = MMG5_iprv2[l];
@@ -570,11 +574,10 @@ int MMG5_setEdgeNmTag(MMG5_pMesh mesh, MMG5_Hash *hash) {
 
 
           /* Travel throug the shell of the edge until reaching a tetra without adjacent
-           * or until reaching th starting tetra */
+           * or until reaching the starting tetra */
           iface = ptt->cc%4;
           MMG3D_coquilFaceFirstLoop(mesh,start,na,nb,iface,ia,list,&ilist,&it1,&it2,
-                                     &piv,&adj,&hasadja,&nbdy,1);
-
+                                    &piv,&adj,&hasadja,&nbdy,1);
 
           /* At this point, the first travel, in one direction, of the shell is
              complete. Now, analyze why the travel ended. */
@@ -582,12 +585,12 @@ int MMG5_setEdgeNmTag(MMG5_pMesh mesh, MMG5_Hash *hash) {
             if ( !it2 ) {
               if ( !mmgWarn0 ) {
                 mmgWarn0 = 1;
-                fprintf(stderr,"\n  ## Warning: %s: at lesat 1 wrong boundary tag:"
-                       " Only 1 boundary face found in the shell of the edge\n",
+                fprintf(stderr,"\n  ## Warning: %s: at least 1 wrong boundary tag:"
+                       " Only 0 or 1 boundary triangles founded in the shell of the edge\n",
                        __func__);
               }
             }
-            if ( !nbdy )
+            if ( nbdy < 2 )
               MMG5_coquilFaceErrorMessage(mesh, it1/4, it2/4);
           }
           else {
@@ -598,13 +601,13 @@ int MMG5_setEdgeNmTag(MMG5_pMesh mesh, MMG5_Hash *hash) {
               MMG3D_coquilFaceSecondLoopInit(mesh,piv,&iface,&i,list,&ilist,&it1,
                                               &pradj,&adj);
 
-              nbdy = 0;
-
+              nbdy = 1;
               while ( adj ) {
                 pradj = adj;
 
-                if ( MMG5_openCoquilTravel(mesh,na,nb,&adj,&piv,&iface,&i)<0 )
-                  return 0;;
+                if ( MMG5_openCoquilTravel(mesh,na,nb,&adj,&piv,&iface,&i)<0 ) {
+                  return 0;
+                }
 
                 /* overflow */
                 if ( ++ilist > MMG3D_LMAX-2 ) {
@@ -623,7 +626,7 @@ int MMG5_setEdgeNmTag(MMG5_pMesh mesh, MMG5_Hash *hash) {
                 pt = &mesh->tetra[pradj];
                 if ( pt->xt ) {
                   pxt = &mesh->xtetra[pt->xt];
-                  if ( pxt->ftag[iface] ) ++nbdy;
+                  if ( pxt->ftag[iface] & MG_BDY ) ++nbdy;
                 }
               }
 
@@ -639,7 +642,7 @@ int MMG5_setEdgeNmTag(MMG5_pMesh mesh, MMG5_Hash *hash) {
 
           /* If ph->s do not match the number of encountred boundaries we have
              separated domains. */
-          if ( nbdy+1 != ph->s ) {
+          if ( nbdy != ph->s ) {
             if ( !(ptt->tag[l] & MG_REQ) ) {
               ptt->tag[l] |= MG_REQ;
               ptt->tag[l] &= ~MG_NOSURF;
@@ -681,26 +684,37 @@ int MMG5_setVertexNmTag(MMG5_pMesh mesh) {
   MMG5_pTetra         ptet;
   MMG5_pPoint         ppt;
   MMG5_Hash           hash;
-  int                 k,i;
-  int                 nc, nre, ng, nrp,ier;
+  int                 k,i,base;
+  int                 np,nc, nre, ng, nrp,ier;
 
   /* Second: seek the non-required non-manifold points and try to analyse
    * whether they are corner or required. */
 
   /* Hash table used by boulernm to store the special edges passing through
    * a given point */
-  if ( ! MMG5_hashNew(mesh,&hash,mesh->np,(int)(3.71*mesh->np)) ) return 0;
+  np = 0;
+  for (k=1; k<=mesh->np; ++k) {
+    ppt = &mesh->point[k];
+    if ( (!(ppt->tag & MG_NOM)) || (ppt->tag & MG_REQ) ) continue;
+    ++np;
+  }
+
+  if ( ! MMG5_hashNew(mesh,&hash,np,(int)(3.71*np)) ) return 0;
 
   nc = nre = 0;
-  ++mesh->base;
+  base = ++mesh->base;
   for (k=1; k<=mesh->ne; ++k) {
     ptet = &mesh->tetra[k];
     if ( !MG_EOK(ptet) ) continue;
 
     for ( i=0; i<4; ++i ) {
       ppt = &mesh->point[ptet->v[i]];
-      if ( (!MG_VOK(ppt)) || (ppt->flag==mesh->base)  ) continue;
-      ppt->flag = mesh->base;
+
+      /* Skip parallel points */
+      if ( ppt->tag & MG_PARBDY ) continue;
+
+      if ( (!MG_VOK(ppt)) || (ppt->flag==base)  ) continue;
+      ppt->flag = base;
 
       if ( (!(ppt->tag & MG_NOM)) || (ppt->tag & MG_REQ) ) continue;
 
@@ -1081,6 +1095,7 @@ int MMG5_hGeom(MMG5_pMesh mesh) {
     for (k=1; k<=mesh->nt; k++) {
       pt = &mesh->tria[k];
       for (i=0; i<3; i++) {
+        if( (pt->tag[i] & MG_PARBDY) && !(pt->tag[i] & MG_PARBDYBDY) ) continue;
         i1 = MMG5_inxt2[i];
         i2 = MMG5_iprv2[i];
         /* transfer non manifold tag to edges */
@@ -1101,8 +1116,9 @@ int MMG5_hGeom(MMG5_pMesh mesh) {
         if ( mesh->info.nosurf && (tag & MG_REQ) )
           pt->tag[i] &= ~MG_NOSURF;
 
-        /* Mark edges as boundary edges */
-        pt->tag[i] |= (tag | MG_BDY);
+        /* Store the edge tag inside the triangle */
+        pt->tag[i] |= tag;
+
         MMG5_hTag(&mesh->htab,pt->v[i1],pt->v[i2],edg,pt->tag[i]);
       }
     }
@@ -1122,6 +1138,7 @@ int MMG5_hGeom(MMG5_pMesh mesh) {
       pt   = &mesh->tria[k];
       adja = &mesh->adjt[3*(k-1)+1];
       for (i=0; i<3; i++) {
+        if( (pt->tag[i] & MG_PARBDY) && !(pt->tag[i] & MG_PARBDYBDY) ) continue;
         kk  = adja[i] / 3;
         if ( !kk || pt->tag[i] & MG_NOM )
           mesh->na++;
@@ -1143,6 +1160,7 @@ int MMG5_hGeom(MMG5_pMesh mesh) {
       pt   = &mesh->tria[k];
       adja = &mesh->adjt[3*(k-1)+1];
       for (i=0; i<3; i++) {
+        if( (pt->tag[i] & MG_PARBDY) && !(pt->tag[i] & MG_PARBDYBDY) ) continue;
         i1  = MMG5_inxt2[i];
         i2  = MMG5_iprv2[i];
         kk  = adja[i] / 3;
@@ -1154,15 +1172,17 @@ int MMG5_hGeom(MMG5_pMesh mesh) {
           if ( !MMG5_hEdge(mesh,&mesh->htab,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]) )
             return 0;
         }
-         else if ( k < kk && ( pt->edg[i] || pt->tag[i] ) )
+        else if ( k < kk && ( pt->edg[i] || pt->tag[i] ) ) {
           if ( !MMG5_hEdge(mesh,&mesh->htab,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]))
             return 0;
+        }
       }
     }
     /* now check triangles */
     for (k=1; k<=mesh->nt; k++) {
       pt = &mesh->tria[k];
       for (i=0; i<3; i++) {
+        if( (pt->tag[i] & MG_PARBDY) && !(pt->tag[i] & MG_PARBDYBDY) ) continue;
         i1 = MMG5_inxt2[i];
         i2 = MMG5_iprv2[i];
         MMG5_hGet(&mesh->htab,pt->v[i1],pt->v[i2],&edg,&tag);
@@ -1201,7 +1221,7 @@ int MMG5_bdryTria(MMG5_pMesh mesh, int ntmesh) {
   MMG5_pxPrism   pxpr;
   MMG5_Hash     hash;
   int       ref,*adja,adj,k,ia,ib,ic,kt, tofree=0,ntinit;
-  int8_t    i;
+  int8_t    i,j;
 
   hash.item = NULL;
 
@@ -1290,21 +1310,25 @@ int MMG5_bdryTria(MMG5_pMesh mesh, int ntmesh) {
 
         if ( pxt ) {
           /* useful only when saving mesh or in ls mode */
-          if ( pxt->tag[MMG5_iarf[i][0]] )  ptt->tag[0] = pxt->tag[MMG5_iarf[i][0]];
-          if ( pxt->tag[MMG5_iarf[i][1]] )  ptt->tag[1] = pxt->tag[MMG5_iarf[i][1]];
-          if ( pxt->tag[MMG5_iarf[i][2]] )  ptt->tag[2] = pxt->tag[MMG5_iarf[i][2]];
-
-          if ( pxt->edg[MMG5_iarf[i][0]] )  ptt->edg[0] = pxt->edg[MMG5_iarf[i][0]];
-          if ( pxt->edg[MMG5_iarf[i][1]] )  ptt->edg[1] = pxt->edg[MMG5_iarf[i][1]];
-          if ( pxt->edg[MMG5_iarf[i][2]] )  ptt->edg[2] = pxt->edg[MMG5_iarf[i][2]];
+          for( j = 0; j < 3; j++ ) {
+            if ( pxt->tag[MMG5_iarf[i][j]] ) {
+              ptt->tag[j] = pxt->tag[MMG5_iarf[i][j]];
+              /* Remove redundant boundary tag */
+              ptt->tag[j] &= ~MG_BDY;
+            }
+            if ( pxt->edg[MMG5_iarf[i][j]] )
+              ptt->edg[j] = pxt->edg[MMG5_iarf[i][j]];
+          }
         }
         if ( adj ) {
           if ( mesh->info.iso ) {
             /* Triangle at the interface between two tets is set to the user-defined ref if any, or else to MG_ISO ref */
             if ( pxt && pxt->ftag[i] & MG_BDY )
               ptt->ref = pxt->ref[i];
+            else if( MMG5_isLevelSet(mesh,pt->ref,pt1->ref) )
+              ptt->ref = MG_ISO;
             else
-            ptt->ref = MG_ISO;
+              ptt->ref = MG_MIN(pt->ref,pt1->ref);
           }
           /* useful only when saving mesh or in ls mode */
           else {

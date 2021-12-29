@@ -676,7 +676,7 @@ int MMG5_mmgIntextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6],
     /* Intersection of metrics in the tangent plane */
     if ( !MMG5_intersecmet22(mesh,mtan,metan,mr) ) {
       if ( !mmgWarn1 ) {
-        fprintf(stderr,"\n  ## Warning: %s: impossible metric inersection:"
+        fprintf(stderr,"\n  ## Warning: %s: impossible metric intersection:"
                 " surfacic metric skipped.\n",__func__);
         mmgWarn1 = 1;
       }

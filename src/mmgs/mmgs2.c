@@ -409,12 +409,10 @@ static int MMGS_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
       v1  = sol->m[ip1]-mesh->info.ls;
       if ( fabs(v0) > MMG5_EPSD2 && fabs(v1) > MMG5_EPSD2 && v0*v1 < 0.0 ) {
         if ( !p0->flag ) {
-          p0->flag = nb;
-          nb++;
+          p0->flag = ++nb;
         }
         if ( !p1->flag ) {
-          p1->flag = nb;
-          nb++;
+          p1->flag = ++nb;
         }
       }
     }
@@ -497,27 +495,27 @@ static int MMGS_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
     }
     switch (pt->flag) {
     case 1: /* 1 edge split */
-      ier = MMGS_split1(mesh,sol,k,0,vx);
+      ier = MMGS_split1(mesh,met,k,0,vx);
       ns++;
       break;
 
     case 2: /* 1 edge split */
-      ier = MMGS_split1(mesh,sol,k,1,vx);
+      ier = MMGS_split1(mesh,met,k,1,vx);
       ns++;
       break;
 
     case 4: /* 1 edge split */
-      ier = MMGS_split1(mesh,sol,k,2,vx);
+      ier = MMGS_split1(mesh,met,k,2,vx);
       ns++;
       break;
 
     case 3: case 5: case 6: /* 2 edges split */
-      ier = MMGS_split2(mesh,sol,k,vx);
+      ier = MMGS_split2(mesh,met,k,vx);
       ns++;
       break;
 
     case 7: /* 3 edges splitted */
-      ier =MMGS_split3(mesh,sol,k,vx);
+      ier =MMGS_split3(mesh,met,k,vx);
       ns++;
       break;
 

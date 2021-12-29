@@ -302,6 +302,8 @@ ADD_TEST(NAME mmg3d_ascii_gmsh_3d
 )
 
 # Tetgen
+# Default Tetgen behaviour saves only boundary tria (resp. edges) in
+# .face (resp. .edge) file.
 ADD_TEST ( NAME mmg3d_cube-tetgen
   COMMAND ${EXECUT_MMG3D} -v 5
   ${MMG3D_CI_TESTS}/Cube/cube
@@ -541,6 +543,12 @@ ADD_TEST(NAME mmg3d_LSMultiMat
   ${MMG3D_CI_TESTS}/LSMultiMat/step.0.mesh
   -sol ${MMG3D_CI_TESTS}/LSMultiMat/step.0.phi.sol
   ${CTEST_OUTPUT_DIR}/mmg3d_LSMultiMat.o.meshb)
+
+#multi-mat + opnbdy + non-manifold check
+ADD_TEST(NAME mmg3d_LSMultiMat_nm
+  COMMAND ${EXECUT_MMG3D} -v 5 -ls -0.1 -hausd 0.05 -hgrad 1.8 -nr -opnbdy
+  ${MMG3D_CI_TESTS}/LSMultiMat/3d-opn
+  ${CTEST_OUTPUT_DIR}/mmg3d_3d-opn.o.meshb)
 
 ADD_TEST(NAME mmg3d_OptLs_plane_val
   COMMAND ${EXECUT_MMG3D} -v 5 -ls -val

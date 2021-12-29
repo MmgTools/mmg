@@ -624,7 +624,7 @@ int MMG2D_pack(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
   }
 
   /** Pack edges */
-  mesh->namax = mesh->na+1;
+  mesh->namax = mesh->na;
   if ( mesh->na ) {
 
     MMG5_ADD_MEM(mesh,(mesh->namax+1)*sizeof(MMG5_Edge),"final edges", memWarn=1);

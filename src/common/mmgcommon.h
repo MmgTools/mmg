@@ -34,13 +34,14 @@
 #include <float.h>
 #include <math.h>
 #include <complex.h>
+#include "mmgcmakedefines.h"
 
 #if (defined(__APPLE__) && defined(__MACH__))
 #include <sys/sysctl.h>
 #elif defined(__unix__) || defined(__unix) || defined(unix)
 #include <unistd.h>
 #elif defined(_WIN16) || defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__TOS_WIN__) || defined(__WINDOWS__)
-#ifndef GNU
+#ifndef MMG_GNU
 #define _WIN32_WINNT 0x0500
 #endif
 
@@ -66,10 +67,6 @@ extern "C" {
 #define MMG5_MEMMAX  800        /**< Default mem if unable to compute memMax */
 #define MMG5_BITWIZE_MB_TO_B 20 /**< Bitwise convertion from Mo to O */
 #define MMG5_MEMPERCENT 0.5     /**< Percent of RAM used by default */
-
-/* Domain refs in iso mode */
-#define MG_PLUS    2
-#define MG_MINUS   3
 
 /* Macro for unset or unititialized mark */
 #define MMG5_UNSET -1
@@ -726,8 +723,11 @@ int  MMG5_updatemetreq_ani(double *n,double dn[2],double vp[2][2]);
 int    MMG5_swapbin(int sbin);
 float  MMG5_swapf(float sbin);
 double MMG5_swapd(double sbin);
+int MMG5_MultiMat_init(MMG5_pMesh);
+int MMG5_isLevelSet(MMG5_pMesh,int,int);
 int MMG5_isSplit(MMG5_pMesh ,int ,int *,int *);
-int MMG5_getIniRef(MMG5_pMesh ,int );
+int MMG5_isNotSplit(MMG5_pMesh ,int);
+int MMG5_getStartRef(MMG5_pMesh ,int, int *);
 
 
 /* tools */

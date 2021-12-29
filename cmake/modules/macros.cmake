@@ -140,8 +140,10 @@ MACRO ( ADD_AND_INSTALL_LIBRARY
   ADD_LIBRARY ( ${target_name} ${target_type} ${sources} )
   ADD_LIBRARY ( Mmg::${target_name} ALIAS ${target_name} )
 
-  IF ( "${CMAKE_C_COMPILER_ID}" STREQUAL "Clang"  AND  ${CMAKE_C_COMPILER_VERSION} VERSION_GREATER 10 )
+  IF ( ${CMAKE_C_COMPILER_ID} STREQUAL "Clang" AND DEFINED CMAKE_C_COMPILER_VERSION )
+    IF ( ${CMAKE_C_COMPILER_VERSION} VERSION_GREATER 10 )
       target_compile_options(${target_name} PRIVATE "-fcommon")
+    ENDIF()
   ENDIF()
 
   IF (NOT WIN32 OR MINGW)
@@ -150,7 +152,7 @@ MACRO ( ADD_AND_INSTALL_LIBRARY
   ADD_DEPENDENCIES( ${target_name} ${target_dependencies})
 
   IF ( CMAKE_VERSION VERSION_LESS 2.8.12 )
-    INCLUDE_DIRECTORIES ( ${target_name} PUBLIC
+    INCLUDE_DIRECTORIES (
       ${COMMON_BINARY_DIR} ${COMMON_SOURCE_DIR} ${PROJECT_BINARY_DIR}/include ${PROJECT_BINARY_DIR})
   ELSE ( )
     target_include_directories( ${target_name} PUBLIC
@@ -170,7 +172,7 @@ MACRO ( ADD_AND_INSTALL_LIBRARY
   if ( SCOTCH_FOUND )
     message(STATUS "[mmg] add include scotch directories ${SCOTCH_INCLUDE_DIRS}")
     IF ( CMAKE_VERSION VERSION_LESS 2.8.12 )
-      INCLUDE_DIRECTORIES ( ${target_name} PUBLIC ${SCOTCH_INCLUDE_DIRS} )
+      INCLUDE_DIRECTORIES (${SCOTCH_INCLUDE_DIRS} )
     ELSE ( )
       target_include_directories( ${target_name} PUBLIC ${SCOTCH_INCLUDE_DIRS} )
     endif()
@@ -184,7 +186,7 @@ MACRO ( ADD_AND_INSTALL_LIBRARY
 
   SET_PROPERTY(TARGET ${target_name} PROPERTY C_STANDARD 99)
 
-  TARGET_LINK_LIBRARIES ( ${target_name} ${LIBRARIES} )
+  TARGET_LINK_LIBRARIES ( ${target_name} PRIVATE ${LIBRARIES} )
 
   IF (NOT CMAKE_INSTALL_LIBDIR)
     SET(CMAKE_INSTALL_LIBDIR lib)
@@ -218,9 +220,9 @@ MACRO ( ADD_AND_INSTALL_EXECUTABLE
     SET_PROPERTY(TARGET ${exec_name} PROPERTY C_STANDARD 99)
 
     IF ( NOT TARGET lib${exec_name}_a )
-      TARGET_LINK_LIBRARIES(${exec_name} lib${exec_name}_so)
+      TARGET_LINK_LIBRARIES(${exec_name} PRIVATE lib${exec_name}_so)
     ELSE ( )
-      TARGET_LINK_LIBRARIES(${exec_name} lib${exec_name}_a)
+      TARGET_LINK_LIBRARIES(${exec_name} PRIVATE lib${exec_name}_a)
     ENDIF ( )
 
   ENDIF ( )
@@ -235,14 +237,14 @@ MACRO ( ADD_AND_INSTALL_EXECUTABLE
   ENDIF ( )
 
  IF ( CMAKE_VERSION VERSION_LESS 2.8.12 )
-   INCLUDE_DIRECTORIES ( ${exec_name} PUBLIC
+   INCLUDE_DIRECTORIES (
      ${COMMON_BINARY_DIR} ${COMMON_SOURCE_DIR} ${PROJECT_BINARY_DIR}/include ${PROJECT_BINARY_DIR} )
  ELSE ( )
    TARGET_INCLUDE_DIRECTORIES ( ${exec_name} PUBLIC
      ${COMMON_BINARY_DIR} ${COMMON_SOURCE_DIR} ${PROJECT_BINARY_DIR}/include ${PROJECT_BINARY_DIR} )
  ENDIF ( )
 
-  TARGET_LINK_LIBRARIES ( ${exec_name} ${LIBRARIES}  )
+  TARGET_LINK_LIBRARIES ( ${exec_name} PRIVATE ${LIBRARIES}  )
 
   INSTALL(TARGETS ${exec_name} RUNTIME DESTINATION bin COMPONENT appli)
 
@@ -314,7 +316,7 @@ MACRO ( ADD_LIBRARY_TEST target_name main_path target_dependency lib_name )
   ADD_DEPENDENCIES( ${target_name} ${target_dependency} )
 
   IF ( CMAKE_VERSION VERSION_LESS 2.8.12 )
-    INCLUDE_DIRECTORIES ( ${target_name} PUBLIC ${PROJECT_BINARY_DIR}/include )
+    INCLUDE_DIRECTORIES (${PROJECT_BINARY_DIR}/include )
   ELSE ( )
     TARGET_INCLUDE_DIRECTORIES ( ${target_name} PUBLIC ${PROJECT_BINARY_DIR}/include )
   ENDIF ( )
@@ -323,7 +325,7 @@ MACRO ( ADD_LIBRARY_TEST target_name main_path target_dependency lib_name )
     MY_ADD_LINK_FLAGS ( ${target_name} "/SAFESEH:NO" )
   ENDIF ( )
 
-  TARGET_LINK_LIBRARIES ( ${target_name}  ${lib_name} )
+  TARGET_LINK_LIBRARIES ( ${target_name}  PRIVATE ${lib_name} )
   INSTALL(TARGETS ${target_name} RUNTIME DESTINATION bin COMPONENT appli )
 
 ENDMACRO ( )

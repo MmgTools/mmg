@@ -255,7 +255,7 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   double        *m0,*m00,step,l1old,l2old,ll1old,ll2old;
   double        lam0,lam1,lam2,o[3],nn1[3],nn2[3],to[3],mo[6];
   double        l1new,l2new,calold,calnew;
-  int           it1,it2,ip0,ip1,ip2,k,iel;
+  int           it,it1,it2,ip,ip0,ip1,ip2,k,iel;
   int8_t        voy1,voy2,isrid,isrid1,isrid2,i0,i1,i2;
   static int8_t mmgWarn0 = 0;
 
@@ -340,12 +340,19 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
 
   if ( (!l1old) || (!l2old) ) return 0;
 
-  ll1old = l1old*l1old;
-  ll2old = l2old*l2old;
+  if ( l1old < l2old ) { //move towards p2
+    ip    = ip2;
+    isrid = isrid2;
+    it    = it2;
+  }
+  else {
+    ip    = ip1;
+    isrid = isrid1;
+    it    = it1;
+  }
 
   /* Third step : infer arc length of displacement, parameterized over edges */
-  if ( !MMGS_paramDisp ( mesh,it1,it2,l1old,l2old,isrid1,isrid2,
-                         ip0,ip1,ip2,step,o,&isrid ) ) {
+  if ( !MMGS_paramDisp ( mesh,it,isrid,ip0,ip,step,o) ) {
     return 0;
   }
 
@@ -356,6 +363,9 @@ int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist) {
   lam2 = step*step;
 
   /* Move is made towards p2 */
+  ll1old = l1old*l1old;
+  ll2old = l2old*l2old;
+
   if ( l2old > l1old ) {
     if ( !MMGS_moveTowardPoint(mesh,p0,p2,ll2old,lam0,lam1,lam2,nn1,nn2,to) ) {
       return 0;

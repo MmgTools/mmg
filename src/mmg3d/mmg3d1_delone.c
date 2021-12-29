@@ -156,6 +156,7 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
 
       /* Case of a boundary face */
       if ( pt->xt && (pxt->ftag[i] & MG_BDY) ) {
+        if ( (p0->tag & MG_PARBDY) && (p1->tag & MG_PARBDY) ) continue;
         if ( !(MG_GET(pxt->ori,i)) ) continue;
         ref = pxt->edg[MMG5_iarf[i][j]];
         tag = pxt->tag[MMG5_iarf[i][j]];
@@ -198,6 +199,15 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
         else if ( tag & MG_REF ) {
           if ( !MMG5_BezierRef(mesh,ip1,ip2,0.5,o,no1,to) )
             goto collapse;
+          if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
+            MMG5_tet2tri(mesh,k,i,&ptt);
+            MMG5_nortri(mesh,&ptt,no1);
+            if ( !MG_GET(pxt->ori,i) ) {
+              no1[0] *= -1.0;
+              no1[1] *= -1.0;
+              no1[2] *= -1.0;
+            }
+          }
         }
         else {
           if ( !MMG5_norface(mesh,k,i,v) )  goto collapse;
@@ -447,7 +457,7 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
                                 list,&ilist,lists,&ilists,(p0->tag & MG_NOM)) < 0 )
           return -1;
 
-        ilist = MMG5_chkcol_bdy(mesh,met,k,i,j,list,ilist,lists,ilists,0,0,2,0);
+        ilist = MMG5_chkcol_bdy(mesh,met,k,i,j,list,ilist,lists,ilists,0,0,2,0,0);
         if ( ilist > 0 ) {
           ier = MMG5_colver(mesh,met,list,ilist,i2,2);
 
@@ -515,6 +525,7 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
 
         /* Case of a boundary face */
         if ( pt->xt && (pxt->ftag[i] & MG_BDY) ) {
+          if ( (p0->tag & MG_PARBDY) && (p1->tag & MG_PARBDY) ) continue;
           if ( !(MG_GET(pxt->ori,i)) ) continue;
           ref = pxt->edg[MMG5_iarf[i][j]];
           tag = pxt->tag[MMG5_iarf[i][j]];
@@ -557,6 +568,15 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
           else if ( tag & MG_REF ) {
             if ( !MMG5_BezierRef(mesh,ip1,ip2,0.5,o,no1,to) )
               goto collapse2;
+            if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
+              MMG5_tet2tri(mesh,k,i,&ptt);
+              MMG5_nortri(mesh,&ptt,no1);
+              if ( !MG_GET(pxt->ori,i) ) {
+                no1[0] *= -1.0;
+                no1[1] *= -1.0;
+                no1[2] *= -1.0;
+              }
+            }
           }
           else {
             if ( !MMG5_norface(mesh,k,i,v) )  goto collapse2;
@@ -755,7 +775,7 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
       }
     collapse2:
       if ( countMemFailure > 10 ) {
-        printf("  ## Error:%s: too much reallocation errors. Exit program.\n",__func__);
+        fprintf(stderr,"  ## Error:%s: too much reallocation errors. Exit program.\n",__func__);
         return -1;
       }
 
@@ -789,7 +809,7 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
                                 list,&ilist,lists,&ilists,(p0->tag & MG_NOM)) < 0 )
           return -1;
 
-        ilist = MMG5_chkcol_bdy(mesh,met,k,i,j,list,ilist,lists,ilists,0,0,2,0);
+        ilist = MMG5_chkcol_bdy(mesh,met,k,i,j,list,ilist,lists,ilists,0,0,2,0,0);
         if ( ilist > 0 ) {
           ier = MMG5_colver(mesh,met,list,ilist,i2,2);
           if ( ier < 0 ) return -1;

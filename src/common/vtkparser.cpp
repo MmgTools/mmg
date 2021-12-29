@@ -514,8 +514,8 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
         pq->v[i] = (*dataset)->GetCell(k)->GetPointId(i)+1;
       }
       if ( pq->ref < 0 ) {
-          pq->ref = -pq->ref;
-          ++nref;
+        pq->ref = -pq->ref;
+        ++nref;
       }
       break;
 
@@ -575,10 +575,10 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
 
       else if ( nt < mesh->nt ) {
         MMG5_ADD_MEM(mesh,(nt-mesh->nt)*sizeof(MMG5_Tria),"triangles",
-                      fprintf(stderr,"  Exit program.\n");
-                      return 0);
+                     fprintf(stderr,"  Exit program.\n");
+                     return 0);
         MMG5_SAFE_RECALLOC(mesh->tria,mesh->nt+1,(nt+1),MMG5_Tria,"triangles",
-                            return 0);
+                           return 0);
       }
       mesh->nt = nt;
     }
@@ -587,10 +587,10 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
         MMG5_DEL_MEM(mesh,mesh->edge);
       else if ( na < mesh->na ) {
         MMG5_ADD_MEM(mesh,(na-mesh->na)*sizeof(MMG5_Edge),"edges",
-                      fprintf(stderr,"  Exit program.\n");
-                      return 0);
+                     fprintf(stderr,"  Exit program.\n");
+                     return 0);
         MMG5_SAFE_RECALLOC(mesh->edge,mesh->na+1,(na+1),MMG5_Edge,"edges",
-                            return 0);
+                           return 0);
       }
       mesh->na = na;
     }
@@ -599,112 +599,238 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
   ier = MMG5_check_readedMesh(mesh,nref);
   if ( ier < 1 ) return ier;
 
-  // Read the solution at nodes
-  // Init (*sol)[0] for the case where nsols=0
-  MMG5_pSol psl = *sol;
-  psl->ver = mesh->ver;
-  psl->dim = mesh->dim;
-  psl->type = 1;
+  if ( sol && *sol ) {
+    // Read the solution at nodes
+    // Init (*sol)[0] for the case where nsols=0
+    MMG5_pSol psl = *sol;
+    psl->ver = mesh->ver;
+    psl->dim = mesh->dim;
+    psl->type = 1;
 
-  int isol = 0;
-  if ( nsols ) {
-    auto *pd = (*dataset)->GetPointData();
+    int isol = 0;
+    if ( nsols ) {
+      auto *pd = (*dataset)->GetPointData();
 
-    auto *cd = (*dataset)->GetCellData();
+      auto *cd = (*dataset)->GetCellData();
 
-    if ( pd ) {
-      int npointData = pd->GetNumberOfArrays();
+      if ( pd ) {
+        int npointData = pd->GetNumberOfArrays();
 
-      for (int j = 0; j < npointData; j++) {
-        psl = *sol + isol;
-        psl->ver = mesh->ver;
-        psl->dim = mesh->dim;
-        psl->type = 1;
-        psl->entities = MMG5_Vertex;
+        for (int j = 0; j < npointData; j++) {
+          char *ptr = NULL;
+          bool metricData = 0;
+          char chaine[MMG5_FILESTR_LGTH];
+          strcpy(chaine,pd->GetArrayName(j));
 
-        char *ptr = NULL;
-        bool metricData = 0;
-        char chaine[MMG5_FILESTR_LGTH];
-        strcpy(chaine,pd->GetArrayName(j));
-
-        if  ( strstr(chaine,"medit:ref" ) ) {
-          continue;
-        }
-        else if ( (ptr = strstr(chaine,":metric")) ) {
-          *ptr = '\0';
-          metricData = 1;
-        }
-
-        if ( !MMG5_Set_inputSolName(mesh,psl,chaine) ) {
-          if ( !mmgWarn1 ) {
-            mmgWarn1 = 1;
-            fprintf(stderr,"\n  ## Warning: %s: unable to set solution name for"
-                    " at least 1 solution.\n",__func__);
+          if  ( strstr(chaine,"medit:ref" ) ) {
+            continue;
           }
-        }
+          else if ( (ptr = strstr(chaine,":metric")) ) {
+            *ptr = '\0';
+            metricData = 1;
+          }
 
-        auto ar = pd->GetArray(j);
-
-        psl->np = ar->GetNumberOfTuples();
-        if ( mesh->np != psl->np ) {
-          fprintf(stderr,"  ** MISMATCHES DATA: THE NUMBER OF VERTICES IN "
-                  "THE MESH (%d) DIFFERS FROM THE NUMBER OF VERTICES IN "
-                  "THE SOLUTION (%d) \n",mesh->np,psl->np);
-          return -1;
-        }
-
-        int ncp = ar->GetNumberOfComponents();
-
-        if ( ncp == 1 ) {
-          psl->size = 1;
+          psl = *sol + isol;
+          psl->ver = mesh->ver;
+          psl->dim = mesh->dim;
           psl->type = 1;
+          psl->entities = MMG5_Vertex;
+
+          if ( !MMG5_Set_inputSolName(mesh,psl,chaine) ) {
+            if ( !mmgWarn1 ) {
+              mmgWarn1 = 1;
+              fprintf(stderr,"\n  ## Warning: %s: unable to set solution name for"
+                      " at least 1 solution.\n",__func__);
+            }
+          }
+
+          auto ar = pd->GetArray(j);
+
+          psl->np = ar->GetNumberOfTuples();
+          if ( mesh->np != psl->np ) {
+            fprintf(stderr,"  ** MISMATCHES DATA: THE NUMBER OF VERTICES IN "
+                    "THE MESH (%d) DIFFERS FROM THE NUMBER OF VERTICES IN "
+                    "THE SOLUTION (%d) \n",mesh->np,psl->np);
+            return -1;
+          }
+
+          int ncp = ar->GetNumberOfComponents();
+
+          if ( ncp == 1 ) {
+            psl->size = 1;
+            psl->type = 1;
+          }
+          else if ( ncp == 2 || ncp == 3 ) {
+            assert ( ncp == mesh->dim );
+            psl->size = ncp;
+            psl->type = 2;
+          }
+          else if ( ncp == (mesh->dim * mesh->dim) ) {
+            if ( metricData ) {
+              psl->size = (psl->dim*(psl->dim+1))/2;
+              psl->type = 3;
+            }
+            else {
+              psl->size = ncp;
+              psl->type = 4;
+            }
+          }
+          else {
+            fprintf(stderr,"  ** UNEXPECTED NUMBER OF COMPONENTS (%d). IGNORED \n",ncp);
+            return -1;
+          }
+
+          // mem alloc
+          if ( psl->m )  MMG5_DEL_MEM(mesh,psl->m);
+          psl->npmax = mesh->npmax;
+
+          MMG5_ADD_MEM(mesh,(psl->size*(psl->npmax+1))*sizeof(double),"initial solution",
+                       fprintf(stderr,"  Exit program.\n");
+                       return -1);
+          MMG5_SAFE_CALLOC(psl->m,psl->size*(psl->npmax+1),double,return 0);
+
+          switch ( psl->type ) {
+          case ( 1 ): case ( 2 ):
+            for (int k=1; k<=psl->np; k++) {
+              int iadr = k*psl->size;
+              ar->GetTuple ( k-1, &psl->m[iadr] );
+            }
+            break;
+
+          case ( 3 ):
+            // anisotropic sol
+            double dbuf[9];
+
+            for (int k=1; k<=psl->np; k++) {
+              ar->GetTuple ( k-1, dbuf );
+              int iadr = psl->size*k;
+
+              if ( !metricData ) {
+                // Non symmetric tensor
+                if ( psl->dim ==2 ) {
+                  psl->m[iadr] = dbuf[0];
+                  psl->m[iadr+1] = dbuf[1];
+                  psl->m[iadr+2] = dbuf[3];
+                  psl->m[iadr+3] = dbuf[4];
+                }
+                else {
+                  for ( int i=0 ; i<9 ; i++ ) {
+                    psl->m[iadr+i] = dbuf[i];
+                  }
+                }
+              }
+              else {
+                // Symmetric tensor
+                if ( psl->dim ==2 ) {
+                  assert ( dbuf[1] == dbuf[2] );
+
+                  psl->m[iadr] = dbuf[0];
+                  psl->m[iadr+1] = dbuf[1];
+                  psl->m[iadr+2] = dbuf[3];
+                }
+                else {
+                  assert ( dbuf[1]==dbuf[3] || dbuf[2]==dbuf[6] || dbuf[5]==dbuf[7] );
+
+                  psl->m[iadr+0] = dbuf[0];
+                  psl->m[iadr+1] = dbuf[1];
+                  psl->m[iadr+2] = dbuf[2];
+                  psl->m[iadr+3] = dbuf[4];
+                  psl->m[iadr+4] = dbuf[5];
+                  psl->m[iadr+5] = dbuf[8];
+                }
+              }
+            }
+
+            break;
+          default:
+            fprintf(stderr,"  ** UNEXPECTED METRIC TYPE (%d). EXIT PROGRAM \n",psl->type);
+            return -1;
+          }
+          ++isol;
         }
-        else if ( ncp == 2 || ncp == 3 ) {
-          assert ( ncp == mesh->dim );
-          psl->size = ncp;
-          psl->type = 2;
-        }
-        else if ( ncp == (mesh->dim * mesh->dim) ) {
-          if ( metricData ) {
-            psl->size = (psl->dim*(psl->dim+1))/2;
+      }
+
+      if ( cd ) {
+        int ncellData = cd->GetNumberOfArrays();
+
+        for (int j = 0; j < ncellData; j++) {
+          char *ptr = NULL;
+          char chaine[MMG5_FILESTR_LGTH];
+          strcpy(chaine,cd->GetArrayName(j));
+
+          if  ( strstr(chaine,"medit:ref" ) ) {
+            continue;
+          }
+
+          psl = *sol + isol;
+          psl->ver = mesh->ver;
+          psl->dim = mesh->dim;
+          psl->type = 1;
+          psl->entities = MMG5_Tetrahedron;
+
+          if ( !MMG5_Set_inputSolName(mesh,psl,chaine) ) {
+            if ( !mmgWarn1 ) {
+              mmgWarn1 = 1;
+              fprintf(stderr,"\n  ## Warning: %s: unable to set solution name for"
+                      " at least 1 solution.\n",__func__);
+            }
+          }
+
+          auto ar = cd->GetArray(j);
+
+          psl->np = ar->GetNumberOfTuples();
+          if ( mesh->ne != psl->np ) {
+            fprintf(stderr,"  ** MISMATCHES DATA: THE NUMBER OF ELEMENTS IN "
+                    "THE MESH (%d) DIFFERS FROM THE NUMBER OF CELLS DATA IN "
+                    "THE SOLUTION (%d) \n",mesh->ne,psl->np);
+            return -1;
+          }
+
+          int ncp = ar->GetNumberOfComponents();
+
+          if ( ncp == 1 ) {
+            psl->size = 1;
+            psl->type = 1;
+          }
+          else if ( ncp == 2 || ncp == 3 ) {
+            assert ( ncp == mesh->dim );
+            psl->size = ncp;
+            psl->type = 2;
+          }
+          else if ( ncp == (mesh->dim * mesh->dim) ) {
+            psl->size = ncp;
             psl->type = 3;
           }
           else {
-            psl->size = ncp;
-            psl->type = 4;
+            fprintf(stderr,"  ** UNEXPECTED NUMBER OF COMPONENTS (%d). IGNORED \n",ncp);
+            return -1;
           }
-        }
-        else {
-          fprintf(stderr,"  ** UNEXPECTED NUMBER OF COMPONENTS (%d). IGNORED \n",ncp);
-          return -1;
-        }
 
-        // mem alloc
-        if ( psl->m )  MMG5_DEL_MEM(mesh,psl->m);
-        psl->npmax = mesh->npmax;
+          // mem alloc
+          if ( psl->m )  MMG5_DEL_MEM(mesh,psl->m);
+          psl->npmax = mesh->nemax;
 
-        MMG5_ADD_MEM(mesh,(psl->size*(psl->npmax+1))*sizeof(double),"initial solution",
-                     fprintf(stderr,"  Exit program.\n");
-                     return -1);
-        MMG5_SAFE_CALLOC(psl->m,psl->size*(psl->npmax+1),double,return 0);
+          MMG5_ADD_MEM(mesh,(psl->size*(psl->npmax+1))*sizeof(double),"initial solution",
+                       fprintf(stderr,"  Exit program.\n");
+                       return -1);
+          MMG5_SAFE_CALLOC(psl->m,psl->size*(psl->npmax+1),double,return 0);
 
-        switch ( psl->type ) {
-        case ( 1 ): case ( 2 ):
-          for (int k=1; k<=psl->np; k++) {
-            int iadr = k*psl->size;
-            ar->GetTuple ( k-1, &psl->m[iadr] );
-          }
-          break;
+          switch ( psl->type ) {
+          case ( 1 ): case ( 2 ):
+            for (int k=1; k<=psl->np; k++) {
+              int iadr = k*psl->size;
+              ar->GetTuple ( k-1, &psl->m[iadr] );
+            }
+            break;
 
-        case ( 3 ):
-          // anisotropic sol
-          double dbuf[9];
+          case ( 3 ):
+            // anisotropic sol
+            double dbuf[9];
 
-          for (int k=1; k<=psl->np; k++) {
-            ar->GetTuple ( k-1, dbuf );
-            int iadr = psl->size*k;
+            for (int k=1; k<=psl->np; k++) {
+              ar->GetTuple ( k-1, dbuf );
+              int iadr = psl->size*k;
 
-            if ( !metricData ) {
               // Non symmetric tensor
               if ( psl->dim ==2 ) {
                 psl->m[iadr] = dbuf[0];
@@ -718,139 +844,15 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
                 }
               }
             }
-            else {
-              // Symmetric tensor
-              if ( psl->dim ==2 ) {
-                assert ( dbuf[1] == dbuf[2] );
 
-                psl->m[iadr] = dbuf[0];
-                psl->m[iadr+1] = dbuf[1];
-                psl->m[iadr+2] = dbuf[3];
-              }
-              else {
-                assert ( dbuf[1]==dbuf[3] || dbuf[2]==dbuf[6] || dbuf[5]==dbuf[7] );
-
-                psl->m[iadr+0] = dbuf[0];
-                psl->m[iadr+1] = dbuf[1];
-                psl->m[iadr+2] = dbuf[2];
-                psl->m[iadr+3] = dbuf[4];
-                psl->m[iadr+4] = dbuf[5];
-                psl->m[iadr+5] = dbuf[8];
-              }
-            }
+            break;
+          default:
+            fprintf(stderr,"  ** UNEXPECTED METRIC TYPE (%d). EXIT PROGRAM \n",psl->type);
+            return -1;
           }
 
-          break;
-        default:
-          fprintf(stderr,"  ** UNEXPECTED METRIC TYPE (%d). EXIT PROGRAM \n",psl->type);
-          return -1;
+          ++isol;
         }
-        ++isol;
-      }
-    }
-
-    if ( cd ) {
-      int ncellData = cd->GetNumberOfArrays();
-
-      for (int j = 0; j < ncellData; j++) {
-        psl = *sol + isol;
-        psl->ver = mesh->ver;
-        psl->dim = mesh->dim;
-        psl->type = 1;
-        psl->entities = MMG5_Tetrahedron;
-
-        char *ptr = NULL;
-        char chaine[MMG5_FILESTR_LGTH];
-        strcpy(chaine,cd->GetArrayName(j));
-
-        if  ( strstr(chaine,"medit:ref" ) ) {
-          continue;
-        }
-
-        if ( !MMG5_Set_inputSolName(mesh,psl,chaine) ) {
-          if ( !mmgWarn1 ) {
-            mmgWarn1 = 1;
-            fprintf(stderr,"\n  ## Warning: %s: unable to set solution name for"
-                    " at least 1 solution.\n",__func__);
-          }
-        }
-
-        auto ar = cd->GetArray(j);
-
-        psl->np = ar->GetNumberOfTuples();
-        if ( mesh->ne != psl->np ) {
-          fprintf(stderr,"  ** MISMATCHES DATA: THE NUMBER OF ELEMENTS IN "
-                  "THE MESH (%d) DIFFERS FROM THE NUMBER OF CELLS DATA IN "
-                  "THE SOLUTION (%d) \n",mesh->ne,psl->np);
-          return -1;
-        }
-
-        int ncp = ar->GetNumberOfComponents();
-
-        if ( ncp == 1 ) {
-          psl->size = 1;
-          psl->type = 1;
-        }
-        else if ( ncp == 2 || ncp == 3 ) {
-          assert ( ncp == mesh->dim );
-          psl->size = ncp;
-          psl->type = 2;
-        }
-        else if ( ncp == (mesh->dim * mesh->dim) ) {
-          psl->size = ncp;
-          psl->type = 3;
-        }
-        else {
-          fprintf(stderr,"  ** UNEXPECTED NUMBER OF COMPONENTS (%d). IGNORED \n",ncp);
-          return -1;
-        }
-
-        // mem alloc
-        if ( psl->m )  MMG5_DEL_MEM(mesh,psl->m);
-        psl->npmax = mesh->nemax;
-
-        MMG5_ADD_MEM(mesh,(psl->size*(psl->npmax+1))*sizeof(double),"initial solution",
-                     fprintf(stderr,"  Exit program.\n");
-                     return -1);
-        MMG5_SAFE_CALLOC(psl->m,psl->size*(psl->npmax+1),double,return 0);
-
-        switch ( psl->type ) {
-        case ( 1 ): case ( 2 ):
-          for (int k=1; k<=psl->np; k++) {
-            int iadr = k*psl->size;
-            ar->GetTuple ( k-1, &psl->m[iadr] );
-          }
-          break;
-
-        case ( 3 ):
-          // anisotropic sol
-          double dbuf[9];
-
-          for (int k=1; k<=psl->np; k++) {
-            ar->GetTuple ( k-1, dbuf );
-            int iadr = psl->size*k;
-
-            // Non symmetric tensor
-            if ( psl->dim ==2 ) {
-              psl->m[iadr] = dbuf[0];
-              psl->m[iadr+1] = dbuf[1];
-              psl->m[iadr+2] = dbuf[3];
-              psl->m[iadr+3] = dbuf[4];
-            }
-            else {
-              for ( int i=0 ; i<9 ; i++ ) {
-                psl->m[iadr+i] = dbuf[i];
-              }
-            }
-          }
-
-          break;
-        default:
-          fprintf(stderr,"  ** UNEXPECTED METRIC TYPE (%d). EXIT PROGRAM \n",psl->type);
-          return -1;
-        }
-
-        ++isol;
       }
     }
   }

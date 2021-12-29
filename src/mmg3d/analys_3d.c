@@ -118,6 +118,8 @@ int MMG5_setadj(MMG5_pMesh mesh){
 
       adja = &mesh->adjt[3*(k-1)+1];
       for (i=0; i<3; i++) {
+        if( ((pt->tag[i] & MG_PARBDY) && !(pt->tag[i] & MG_PARBDYBDY)) ||
+            (pt->tag[i] & MG_BDY) ) continue;
         i1  = MMG5_inxt2[i];
         i2  = MMG5_iprv2[i];
         ip1 = pt->v[i1];
@@ -145,6 +147,7 @@ int MMG5_setadj(MMG5_pMesh mesh){
         tag = MG_GEO;
         if ( mesh->info.opnbdy ) tag += MG_OPNBDY;
         if ( !adja[i] ) {
+          tag += MG_NOM;
           pt->tag[i] |= tag;
           mesh->point[ip1].tag |= tag;
           mesh->point[ip2].tag |= tag;
@@ -300,7 +303,8 @@ int MMG5_setdhd(MMG5_pMesh mesh) {
     MMG5_nortri(mesh,pt,n1);
     adja = &mesh->adjt[3*(k-1)+1];
     for (i=0; i<3; i++) {
-      if ( pt->tag[i] & MG_PARBDY ) continue;
+      if ( ((pt->tag[i] & MG_PARBDY) && !(pt->tag[i] & MG_PARBDYBDY)) ||
+           (pt->tag[i] & MG_BDY) ) continue;
 
       kk  = adja[i] / 3;
       ii  = adja[i] % 3;
@@ -530,7 +534,7 @@ int MMG5_norver(MMG5_pMesh mesh) {
         ppt->flag = mesh->base;
         if ( mesh->nc1 ) {
           if ( ppt->n[0]*ppt->n[0] + ppt->n[1]*ppt->n[1] + ppt->n[2]*ppt->n[2] > 0 ) {
-            if ( ppt->tag & MG_CRN || ppt->tag & MG_NOM || MG_EDG(ppt->tag) ) {
+            if ( ppt->tag & MG_PARBDY || ppt->tag & MG_CRN || ppt->tag & MG_NOM || MG_EDG(ppt->tag) ) {
               ++nnr;
               continue;
             }
@@ -558,7 +562,7 @@ int MMG5_norver(MMG5_pMesh mesh) {
     adja = &mesh->adjt[3*(k-1)+1];
     for (i=0; i<3; i++) {
       ppt = &mesh->point[pt->v[i]];
-      if ( ppt->tag & MG_CRN || ppt->tag & MG_NOM || ppt->flag == mesh->base )  continue;
+      if ( ppt->tag & MG_PARBDY || ppt->tag & MG_CRN || ppt->tag & MG_NOM || ppt->flag == mesh->base )  continue;
 
       /* C1 point */
       if ( !MG_EDG(ppt->tag) ) {
@@ -688,7 +692,7 @@ int MMG3D_nmgeom(MMG5_pMesh mesh){
         ip = MMG5_idir[i][j];
         p0 = &mesh->point[pt->v[ip]];
         if ( p0->flag == base )  continue;
-        else if ( !(p0->tag & MG_NOM) )  continue;
+        else if ( !(p0->tag & MG_NOM) || (p0->tag & MG_PARBDY) )  continue;
 
         p0->flag = base;
         ier = MMG5_boulenm(mesh,k,ip,i,n,t);
@@ -725,7 +729,8 @@ int MMG3D_nmgeom(MMG5_pMesh mesh){
     
     for (i=0; i<4; i++) {
       p0 = &mesh->point[pt->v[i]];
-      if ( p0->tag & MG_REQ || !(p0->tag & MG_NOM) || p0->xp ) continue;
+      if ( p0->tag & MG_REQ || !(p0->tag & MG_NOM) ||
+           p0->xp || (p0->tag & MG_PARBDY) ) continue;
       ier = MMG5_boulenmInt(mesh,k,i,t);
       if ( ier ) {
         ++mesh->xp;

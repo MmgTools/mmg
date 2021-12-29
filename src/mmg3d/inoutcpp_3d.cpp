@@ -94,9 +94,15 @@ int MMG3D_loadVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 
   // Mesh alloc and transfer of the mesh from dataset toward the MMG5 Mesh Sol
   ier = MMG3D_loadVtkMesh_part2(mesh,&sol,&dataset,ptMeditRef,eltMeditRef,nsols);
+  if ( ier < 1 ) {
+    fprintf(stderr,"  ** ERROR WHEN PARSING THE INPUT FILE\n");
+    return  ier;
+  }
 
-  /* Check the metric type */
-  ier = MMG5_chkMetricType(mesh,&sol->type,NULL);
+  if ( sol ) {
+    /* Check the metric type */
+    ier = MMG5_chkMetricType(mesh,&sol->type,NULL);
+  }
 
   return ier;
 #endif
@@ -159,9 +165,15 @@ int MMG3D_loadVtkMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 
   // Mesh alloc and transfer of the mesh from dataset toward the MMG5 Mesh Sol
   ier = MMG3D_loadVtkMesh_part2(mesh,&sol,&dataset,ptMeditRef,eltMeditRef,nsols);
+  if ( ier < 1 ) {
+    fprintf(stderr,"  ** ERROR WHEN PARSING THE INPUT FILE\n");
+    return  ier;
+  }
 
-  /* Check the metric type */
-  ier = MMG5_chkMetricType(mesh,&sol->type,NULL);
+  if ( sol ) {
+    /* Check the metric type */
+    ier = MMG5_chkMetricType(mesh,&sol->type,NULL);
+  }
 
   return ier;
 #endif
