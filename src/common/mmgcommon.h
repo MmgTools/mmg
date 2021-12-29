@@ -655,6 +655,7 @@ void           MMG5_check_hminhmax(MMG5_pMesh mesh, int8_t sethmin, int8_t sethm
  int           MMG5_invmat(double *m,double *mi);
  int           MMG5_invmatg(double m[9],double mi[9]);
  int           MMG5_invmat33(double m[3][3],double mi[3][3]);
+ int           MMG5_invmat22(double m[2][2],double mi[2][2]);
  int           MMG5_regnor(MMG5_pMesh mesh);
  double        MMG5_ridSizeInNormalDir(MMG5_pMesh,int,double*,MMG5_pBezier,double,double);
  double        MMG5_ridSizeInTangentDir(MMG5_pMesh, MMG5_pPoint,int,int*,double,double);

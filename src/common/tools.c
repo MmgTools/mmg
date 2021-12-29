@@ -453,6 +453,28 @@ int MMG5_invmat33(double m[3][3],double mi[3][3]) {
 }
 
 /**
+ * \param m initial matrix.
+ * \param mi inverted matrix.
+ *
+ * Invert 2x2 non-symmetric matrix stored in 2 dimensions
+ *
+ */
+int MMG5_invmat22(double m[2][2],double mi[2][2]) {
+  double det;
+
+  det = m[0][0]*m[1][1] - m[0][1]*m[1][0];
+  if ( fabs(det) < MMG5_EPS )  return 0;
+  det = 1.0 / det;
+
+  mi[0][0] =  m[1][1]*det;
+  mi[0][1] = -m[0][1]*det;
+  mi[1][0] = -m[1][0]*det;
+  mi[1][1] =  m[0][0]*det;
+
+  return 1;
+}
+
+/**
  * \param a matrix to invert.
  * \param b last member.
  * \param r vector of unknowns.
