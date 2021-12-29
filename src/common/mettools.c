@@ -36,6 +36,129 @@
 
 /**
  * \param mesh pointer toward the mesh structure.
+ * \param symmat integer flag (1 if the matrix is symmetric, 0 otherwise).
+ * \param m matrix array.
+ * \param lambda eigenvalues array.
+ * \param v eigenvectors array of arrays.
+ * \return 1 if success, 0 if failure.
+ *
+ * Recompose a matrix from its eigenvalue decomposition.
+ * \warning Eigenvectors in Mmg are stored as matrix rows (the first dimension
+ * of the double array spans the number of eigenvectors, the second dimension
+ * spans the number of entries of each eigenvector).
+ */
+int MMG5_eigenvRecomp(MMG5_pMesh mesh,int8_t symmat,double m[],double lambda[],
+                      double v[][mesh->dim]) {
+  int8_t i,j,k,ij;
+
+  /* Storage of a matrix as a one-dimensional array: dim^2 entries for a
+   * non-symmetric matrix, (dim+1)*dim/2 entries for a symmetric matrix (loop on
+   * each symmetric entry only once). */
+  ij = 0;
+
+  if( symmat ) {
+    /** Case of a symmetric matrix */
+
+    /* Loop on matrix rows */
+    for( i = 0; i < mesh->dim; i++ ) {
+      /* Loop on the upper-triangular part of the matrix */
+      for( j = i; j < mesh->dim; j++ ) {
+        /* Initialize matrix entry */
+        m[ij] = 0.0;
+        /* Compute matrix entry as the recomposition of eigenvalues and
+         * eigenvectors:
+         *
+         * M_{ij} = \sum_{k,l} V_{ik} Lambda_{kl} V_{jl} =
+         *        = \sum_{k} lambda_{k} V_{ik} V_{jk}
+         *
+         * Eigenvectors are stored as rows in Mmg (not columns) so their indices
+         * have to be exchanged when implementing the above formula. */
+        for( k = 0; k < mesh->dim; k++ ) {
+          m[ij] += lambda[k]*v[k][i]*v[k][j];
+        }
+        /* Go to next entry */
+        ++ij;
+      }
+    }
+    assert( ij == (mesh->dim+1)*mesh->dim/2 + 1 );
+
+  } else {
+    /** Case of a non-symmetric matrix */
+
+    /* Compute the inverse of the eigenvectors matrix */
+    double iv[mesh->dim][mesh->dim];
+    if( mesh->dim == 2 ) {
+      if( !MMG5_invmat22(v,iv) )
+        return 0;
+    } else if( mesh->dim == 3 ) {
+      if( !MMG5_invmat33(v,iv) )
+        return 0;
+    }
+
+    /* Loop on matrix rows */
+    for( i = 0; i < mesh->dim; i++ ) {
+      /* Loop on matrix columns */
+      for( j = 0; j < mesh->dim; j++ ) {
+        /* Initialize matrix entry */
+        m[ij] = 0.0;
+        /* Compute matrix entry as the recomposition of eigenvalues and
+         * eigenvectors:
+         *
+         * M_{ij} = \sum_{k,l} V_{ik} Lambda_{kl} V^{-1}_{lj} =
+         *        = \sum_{k} lambda_{k} V_{ik} V^{-1}_{kj}
+         *
+         * Eigenvectors are stored as rows in Mmg (not columns) so their indices
+         * have to be exchanged when implementing the above formula. */
+        for( k = 0; k < mesh->dim; k++ ) {
+          m[ij] += lambda[k]*v[k][i]*iv[j][k];
+        }
+        /* Go to next entry */
+        ++ij;
+      }
+    }
+    assert( ij == mesh->dim*mesh->dim + 1 );
+  }
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param symmat integer flag (1 if the matrix is symmetric, 0 otherwise).
+ * \param m matrix array.
+ * \return 1 if success, 0 if failure.
+ *
+ * Check the recomposition of a matrix from its eigenvalue decomposition.
+ */
+int MMG5_eigenvRecomp_check(MMG5_pMesh mesh,int8_t symmat,double m[]) {
+  double lambda[mesh->dim],v[mesh->dim][mesh->dim];
+  int    msize = symmat ? (mesh->dim+1)*mesh->dim/2 : mesh->dim*mesh->dim;
+  double mnew[msize];
+  int    k;
+
+  /* Compute eigendecomposition */
+  if( mesh->dim == 2 ) {
+    if( !MMG5_eigenv2(symmat,m,lambda,v) )
+      return 0;
+  } else if( mesh->dim == 3 ) {
+    if( !MMG5_eigenv(symmat,m,lambda,v) )
+      return 0;
+  }
+
+  /* Recompose matrix from eigendecomposition */
+  if( !MMG5_eigenvRecomp(mesh,symmat,mnew,lambda,v) )
+    return 0;
+
+  /* Check result against input matrix */
+  for( k = 0; k < msize; k++ )
+    if( fabs( m[k] - mnew[k] ) > MMG5_EPSD )
+      return 0;
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
  * \param t tangent at the ridge point.
  * \param n normal at the ridge point.
  * \param dtan metric size along the tangent direction.
