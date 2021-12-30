@@ -1607,6 +1607,44 @@ int MMG3D_simred(MMG5_pMesh mesh,double *m,double *n,double dm[3],
 }
 
 /**
+ * \param mesh pointer toward the mesh structure.
+ * \param m pointer toward a \f$(3x3)\f$ metric.
+ * \param n pointer toward a \f$(3x3)\f$ metric.
+ * \param mr computed \f$(3x3)\f$ metric.
+ * \return 0 if fail, 1 otherwise.
+ *
+ * Compute the intersected (3 x 3) metric from metrics \a m and \a n : take
+ * simultaneous reduction, and proceed to truncation in sizes.
+ *
+ */
+int MMG5_intersecmet33(MMG5_pMesh mesh, double *m,double *n,double *mr) {
+  double  vp[3][3],dm[3],dn[3],d[3];
+  double  isqhmin,isqhmax;
+  static int8_t mmgWarn0 = 0;
+  int8_t  i;
+
+  isqhmin  = 1.0 / (mesh->info.hmin*mesh->info.hmin);
+  isqhmax  = 1.0 / (mesh->info.hmax*mesh->info.hmax);
+
+  /* Simultaneous reduction */
+  if( !MMG3D_simred(mesh,m,n,dm,dn,vp) )
+    return 0;
+
+  /* Diagonal values of the intersected metric */
+  for( i = 0; i < 3; i++ ) {
+    d[i] = MG_MAX(dm[i],dn[i]);
+    d[i] = MG_MIN(isqhmin,MG_MAX(d[i],isqhmax));
+  }
+
+  /* Intersected metric = tP^-1 diag(d0,d1,d2)P^-1, P = (vp0, vp1,vp2) stored in
+   * columns */
+  if( !MMG3D_recomposeMat_simred(d,vp,mr) )
+    return 0;
+
+  return 1;
+}
+
+/**
  * \param m first matrix
  * \param mext second (extended) matrix
  * \param iloc index of the point on the edge (1 or 2)
