@@ -80,7 +80,7 @@ int MMG5_eigenvRecomp(MMG5_pMesh mesh,int8_t symmat,double m[],double lambda[],
         ++ij;
       }
     }
-    assert( ij == (mesh->dim+1)*mesh->dim/2 + 1 );
+    assert( ij == (mesh->dim+1)*mesh->dim/2 );
 
   } else {
     /** Case of a non-symmetric matrix */
@@ -116,7 +116,7 @@ int MMG5_eigenvRecomp(MMG5_pMesh mesh,int8_t symmat,double m[],double lambda[],
         ++ij;
       }
     }
-    assert( ij == mesh->dim*mesh->dim + 1 );
+    assert( ij == mesh->dim*mesh->dim );
   }
 
   return 1;
