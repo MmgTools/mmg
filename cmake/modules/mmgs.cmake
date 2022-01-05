@@ -164,6 +164,8 @@ IF ( BUILD_TESTING )
       SET(LIBMMGS_LSONLY  ${EXECUTABLE_OUTPUT_PATH}/libmmgs_lsOnly )
       SET(LIBMMGS_LSONLY_OPTIM  ${EXECUTABLE_OUTPUT_PATH}/libmmgs_lsOnly_optim )
       SET(LIBMMGS_LSONLY_HSIZ  ${EXECUTABLE_OUTPUT_PATH}/libmmgs_lsOnly_hsiz )
+      SET(LIBMMGS_LSWITHMET_OPTIM  ${EXECUTABLE_OUTPUT_PATH}/libmmgs_lsAndMetric_optim )
+      SET(LIBMMGS_LSWITHMET_HSIZ  ${EXECUTABLE_OUTPUT_PATH}/libmmgs_lsAndMetric_hsiz )
       SET(LIBMMGS_LSANDMETRIC ${EXECUTABLE_OUTPUT_PATH}/libmmgs_lsAndMetric )
 
 
@@ -206,6 +208,16 @@ IF ( BUILD_TESTING )
         "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/multi-mat-sol.sol"
         "${CTEST_OUTPUT_DIR}/libmmgs_lsOnly_hsiz_multimat.o"
         )
+      ADD_TEST(NAME libmmgs_lsAndMetric_optim   COMMAND ${LIBMMGS_LSWITHMET_OPTIM}
+        "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/multi-mat.mesh"
+        "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/multi-mat-sol.sol"
+        "${CTEST_OUTPUT_DIR}/libmmgs_lsAndMetric_optim_multimat.o"
+        )
+      ADD_TEST(NAME libmmgs_lsAndMetric_hsiz   COMMAND ${LIBMMGS_LSWITHMET_HSIZ}
+        "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/multi-mat.mesh"
+        "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/multi-mat-sol.sol"
+        "${CTEST_OUTPUT_DIR}/libmmgs_lsAndMetric_hsiz_multimat.o"
+        )
       ADD_TEST(NAME libmmgs_lsAndMetric   COMMAND ${LIBMMGS_LSANDMETRIC}
         "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/multi-mat.mesh"
         "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/multi-mat-sol.sol"
@@ -217,6 +229,10 @@ IF ( BUILD_TESTING )
         SET(LIBMMGS_EXECFORTRAN_b ${EXECUTABLE_OUTPUT_PATH}/libmmgs_fortran_b)
         SET(LIBMMGS_EXECFORTRAN_IO ${EXECUTABLE_OUTPUT_PATH}/libmmgs_fortran_io)
         SET(LIBMMGS_EXECFORTRAN_LSONLY ${EXECUTABLE_OUTPUT_PATH}/libmmgs_fortran_lsOnly )
+        SET(LIBMMGS_EXECFORTRAN_LSONLY_OPTIM ${EXECUTABLE_OUTPUT_PATH}/libmmgs_fortran_lsOnly_optim )
+        SET(LIBMMGS_EXECFORTRAN_LSONLY_HSIZ ${EXECUTABLE_OUTPUT_PATH}/libmmgs_fortran_lsOnly_hsiz )
+        SET(LIBMMGS_EXECFORTRAN_LSWITHMET_OPTIM ${EXECUTABLE_OUTPUT_PATH}/libmmgs_fortran_lsAndMetric_optim )
+        SET(LIBMMGS_EXECFORTRAN_LSWITHMET_HSIZ ${EXECUTABLE_OUTPUT_PATH}/libmmgs_fortran_lsAndMetric_hsiz )
         SET(LIBMMGS_EXECFORTRAN_LSANDMETRIC ${EXECUTABLE_OUTPUT_PATH}/libmmgs_fortran_lsAndMetric )
 
         ADD_TEST(NAME libmmgs_fortran_a   COMMAND ${LIBMMGS_EXECFORTRAN_a}
@@ -238,6 +254,26 @@ IF ( BUILD_TESTING )
           "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/multi-mat.mesh"
           "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/multi-mat-sol.sol"
           "${CTEST_OUTPUT_DIR}/libmmgs_lsOnly_multimat.o"
+          )
+       ADD_TEST(NAME libmmgs_fortran_lsOnly_optim   COMMAND ${LIBMMGS_EXECFORTRAN_LSONLY_OPTIM}
+         "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/multi-mat.mesh"
+         "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/multi-mat-sol.sol"
+         "${CTEST_OUTPUT_DIR}/libmmgs_lsOnly_optim_multimat.o"
+          )
+       ADD_TEST(NAME libmmgs_fortran_lsOnly_hsiz   COMMAND ${LIBMMGS_EXECFORTRAN_LSONLY_HSIZ}
+         "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/multi-mat.mesh"
+         "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/multi-mat-sol.sol"
+         "${CTEST_OUTPUT_DIR}/libmmgs_lsOnly_hsiz_multimat.o"
+          )
+       ADD_TEST(NAME libmmgs_fortran_lsAndMetric_optim   COMMAND ${LIBMMGS_EXECFORTRAN_LSWITHMET_OPTIM}
+         "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/multi-mat.mesh"
+         "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/multi-mat-sol.sol"
+         "${CTEST_OUTPUT_DIR}/libmmgs_lsAndMetric_optim_multimat.o"
+          )
+       ADD_TEST(NAME libmmgs_fortran_lsAndMetric_hsiz   COMMAND ${LIBMMGS_EXECFORTRAN_LSWITHMET_HSIZ}
+         "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/multi-mat.mesh"
+         "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/multi-mat-sol.sol"
+         "${CTEST_OUTPUT_DIR}/libmmgs_lsAndMetric_hsiz_multimat.o"
           )
         ADD_TEST(NAME libmmgs_fortran_lsAndMetric   COMMAND ${LIBMMGS_EXECFORTRAN_LSANDMETRIC}
           "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/multi-mat.mesh"

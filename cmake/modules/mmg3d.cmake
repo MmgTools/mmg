@@ -209,6 +209,8 @@ IF ( BUILD_TESTING )
       SET(LIBMMG3D_LSONLY ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_lsOnly )
       SET(LIBMMG3D_LSONLY_OPTIM ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_lsOnly_optim )
       SET(LIBMMG3D_LSONLY_HSIZ ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_lsOnly_hsiz )
+      SET(LIBMMG3D_LSWITHMET_OPTIM ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_lsAndMetric_optim )
+      SET(LIBMMG3D_LSWITHMET_HSIZ ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_lsAndMetric_hsiz )
       SET(LIBMMG3D_LSANDMETRIC ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_lsAndMetric )
       SET(TEST_API3D_EXEC0 ${EXECUTABLE_OUTPUT_PATH}/test_api3d_0)
       SET(TEST_API3D_DOMSEL ${EXECUTABLE_OUTPUT_PATH}/test_api3d_domain-selection)
@@ -257,6 +259,16 @@ IF ( BUILD_TESTING )
         "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsOnly/plane.mesh"
         "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsOnly/m.sol"
         "${CTEST_OUTPUT_DIR}/libmmg3d_lsOnly_hsiz_multimat.o"
+        )
+      ADD_TEST(NAME libmmg3d_lsAndMetric_optim   COMMAND ${LIBMMG3D_LSWITHMET_OPTIM}
+        "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsOnly/plane.mesh"
+        "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsOnly/m.sol"
+        "${CTEST_OUTPUT_DIR}/libmmg3d_lsAndMetric_optim_multimat.o"
+        )
+      ADD_TEST(NAME libmmg3d_lsAndMetric_hsiz   COMMAND ${LIBMMG3D_LSWITHMET_HSIZ}
+        "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsOnly/plane.mesh"
+        "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsOnly/m.sol"
+        "${CTEST_OUTPUT_DIR}/libmmg3d_lsAndMetric_hsiz_multimat.o"
         )
       ADD_TEST(NAME libmmg3d_lsAndMetric   COMMAND ${LIBMMG3D_LSANDMETRIC}
         "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsOnly/plane.mesh"
@@ -311,6 +323,8 @@ IF ( BUILD_TESTING )
         SET(LIBMMG3D_EXECFORTRAN_LSONLY ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_fortran_lsOnly )
         SET(LIBMMG3D_EXECFORTRAN_LSONLY_OPTIM ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_fortran_lsOnly_optim )
         SET(LIBMMG3D_EXECFORTRAN_LSONLY_HSIZ ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_fortran_lsOnly_hsiz )
+        SET(LIBMMG3D_EXECFORTRAN_LSWITHMET_OPTIM ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_fortran_lsAndMetric_optim )
+        SET(LIBMMG3D_EXECFORTRAN_LSWITHMET_HSIZ ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_fortran_lsAndMetric_hsiz )
 
         SET(LIBMMG3D_EXECFORTRAN_LSANDMETRIC ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_fortran_lsAndMetric )
         SET(TEST_API3D_FORTRAN_EXEC0 ${EXECUTABLE_OUTPUT_PATH}/test_api3d_fortran_0)
@@ -331,19 +345,30 @@ IF ( BUILD_TESTING )
           "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/io_multisols_example6/torus.mesh"
           "${CTEST_OUTPUT_DIR}/libmmg3d_Fortran_io-torus.o" "1"
           )
-       ADD_TEST(NAME libmmg3d_fortran_lsOnly3d   COMMAND ${LIBMMG3D_EXECFORTRAN_LSONLY}
+       ADD_TEST(NAME libmmg3d_fortran_lsOnly   COMMAND ${LIBMMG3D_EXECFORTRAN_LSONLY}
          "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsOnly/plane.mesh"
          "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsOnly/m.sol"
-         "${CTEST_OUTPUT_DIR}/libmmg3d_lsOnly_multimat.o" )
-       ADD_TEST(NAME libmmg3d_fortran_lsOnly3d_optim   COMMAND ${LIBMMG3D_EXECFORTRAN_LSONLY_OPTIM}
+         "${CTEST_OUTPUT_DIR}/libmmg3d_lsOnly_multimat.o"
+          )
+       ADD_TEST(NAME libmmg3d_fortran_lsOnly_optim   COMMAND ${LIBMMG3D_EXECFORTRAN_LSONLY_OPTIM}
          "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsOnly/plane.mesh"
          "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsOnly/m.sol"
-         "${CTEST_OUTPUT_DIR}/libmmg3d_lsOnly_optim_multimat.o" )
+         "${CTEST_OUTPUT_DIR}/libmmg3d_lsOnly_optim_multimat.o"
+          )
+       ADD_TEST(NAME libmmg3d_fortran_lsOnly_hsiz   COMMAND ${LIBMMG3D_EXECFORTRAN_LSONLY_HSIZ}
+         "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsOnly/plane.mesh"
+         "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsOnly/m.sol"
+         "${CTEST_OUTPUT_DIR}/libmmg3d_lsOnly_hsiz_multimat.o"
+          )
+       ADD_TEST(NAME libmmg3d_fortran_lsAndMetric_optim   COMMAND ${LIBMMG3D_EXECFORTRAN_LSWITHMET_OPTIM}
+         "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsOnly/plane.mesh"
+         "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsOnly/m.sol"
+         "${CTEST_OUTPUT_DIR}/libmmg3d_lsAndMetric_optim_multimat.o" )
 
-       ADD_TEST(NAME libmmg3d_fortran_lsOnly3d_hsiz   COMMAND ${LIBMMG3D_EXECFORTRAN_LSONLY_HSIZ}
+       ADD_TEST(NAME libmmg3d_fortran_lsAndMetric_hsiz   COMMAND ${LIBMMG3D_EXECFORTRAN_LSWITHMET_HSIZ}
          "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsOnly/plane.mesh"
          "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsOnly/m.sol"
-         "${CTEST_OUTPUT_DIR}/libmmg3d_lsOnly_hsiz_multimat.o" )
+         "${CTEST_OUTPUT_DIR}/libmmg3d_lsAndMetric_hsiz_multimat.o" )
 
        ADD_TEST(NAME libmmg3d_fortran_lsAndMetric3d   COMMAND ${LIBMMG3D_EXECFORTRAN_LSANDMETRIC}
           "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsOnly/plane.mesh"

@@ -427,7 +427,21 @@ int MMGS_mmgsls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
     if ( mettofree ) { MMG5_DEL_MEM(mesh,met->m);MMG5_SAFE_FREE (met); }
     _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
   }
-  if ( !MMGS_mmgs2(mesh,sol,umet) ) {
+
+  /* Specific meshing: compute optim option here because after isovalue
+   * discretization mesh elements have too bad qualities */
+  if ( mesh->info.optim ) {
+    if ( !MMGS_doSol(mesh,met) ) {
+      if ( mettofree ) { MMG5_DEL_MEM(mesh,met->m);MMG5_SAFE_FREE (met); }
+      if ( !MMG5_unscaleMesh(mesh,met,sol) ) {
+        _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE); }
+      MMGS_RETURN_AND_PACK(mesh,met,sol,MMG5_LOWFAILURE);
+    }
+    MMG5_solTruncatureForOptim(mesh,met);
+  }
+
+  /* Discretization of the mesh->info.ls isovalue of sol in the mesh */
+  if ( !MMGS_mmgs2(mesh,sol,met) ) {
     if ( mettofree ) { MMG5_DEL_MEM(mesh,met->m);MMG5_SAFE_FREE (met); }
     _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
   }
@@ -441,16 +455,7 @@ int MMGS_mmgsls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
     fprintf(stdout,"\n  -- PHASE 2 : ANALYSIS\n");
   }
 
-  if ( mesh->info.optim ) {
-    if ( !MMGS_doSol(mesh,met) ) {
-      if ( mettofree ) { MMG5_DEL_MEM(mesh,met->m);MMG5_SAFE_FREE (met); }
-      if ( !MMG5_unscaleMesh(mesh,met,sol) ) {
-        _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE); }
-      MMGS_RETURN_AND_PACK(mesh,met,sol,MMG5_LOWFAILURE);
-    }
-    MMG5_solTruncatureForOptim(mesh,met);
-  }
-
+  /* Specific meshing: compute hsiz on mesh after isovalue discretization */
   if ( mesh->info.hsiz > 0. ) {
     if ( !MMGS_Set_constantSize(mesh,met) ) {
       if ( mettofree ) { MMG5_DEL_MEM(mesh,met->m);MMG5_SAFE_FREE (met); }
