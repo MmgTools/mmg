@@ -100,8 +100,10 @@ int MMGS_loadVtpMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
     return  ier;
   }
 
-  /* Check the metric type */
-  ier = MMG5_chkMetricType(mesh,&sol->type,NULL);
+  if ( sol ) {
+    /* Check the metric type */
+    ier = MMG5_chkMetricType(mesh,&sol->type,NULL);
+  }
 
   return ier;
 #endif
@@ -168,8 +170,10 @@ int MMGS_loadVtkMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
     return  ier;
   }
 
-  /* Check the metric type */
-  ier = MMG5_chkMetricType(mesh,&sol->type,NULL);
+  if ( sol ) {
+    /* Check the metric type */
+    ier = MMG5_chkMetricType(mesh,&sol->type,NULL);
+  }
 
   return ier;
 #endif
@@ -236,8 +240,10 @@ int MMGS_loadVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
     return  ier;
   }
 
-  /* Check the metric type */
-  ier = MMG5_chkMetricType(mesh,&sol->type,NULL);
+  if ( sol ) {
+    /* Check the metric type */
+    ier = MMG5_chkMetricType(mesh,&sol->type,NULL);
+  }
 
   return ier;
 #endif

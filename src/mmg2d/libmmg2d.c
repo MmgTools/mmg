@@ -347,7 +347,7 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol met)
   }
 
   /* Print edge length histories */
-  if ( abs(mesh->info.imprim) > 4 )  {
+  if ( (abs(mesh->info.imprim) > 4) && met->m && met->np )  {
     MMG2D_prilen(mesh,met);
   }
 
@@ -614,7 +614,7 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
   /* Print edge length histories */
-  if ( abs(mesh->info.imprim) > 4 )  {
+  if ( abs(mesh->info.imprim) > 4  && met->m && met->np )  {
     MMG2D_prilen(mesh,met);
   }
 
@@ -808,7 +808,10 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
   /* Discretization of the mesh->info.ls isovalue of sol in the mesh */
   if ( !MMG2D_mmg2d6(mesh,sol,umet) ) {
     if ( mettofree ) { MMG5_SAFE_FREE (met); }
-    _LIBMMG5_RETURN(mesh,sol,met,MMG5_STRONGFAILURE);
+    if ( !MMG5_unscaleMesh(mesh,met,sol) ) {
+      _LIBMMG5_RETURN(mesh,sol,met,MMG5_STRONGFAILURE);
+    }
+    MMG2D_RETURN_AND_PACK(mesh,sol,met,MMG5_LOWFAILURE);
   }
 
   chrono(OFF,&(ctim[2]));

@@ -187,17 +187,6 @@ int MMGS_Init_mesh_var( va_list argptr ) {
     return 0;
   }
 
-  if ( !(sol || ls) ) {
-    fprintf(stderr,"\n  ## Error: %s: MMGS_Init_mesh:\n"
-            " you need to initialize a solution structure"
-            " (of type MMG5_pSol and indentified by the MMG5_ARG_ppMet or "
-            " MMG5_ARG_ppLs preprocessor variable)"
-            " that will contain the output mesh metric or the level-set.\n",
-            __func__);
-    return 0;
-  }
-
-
   /* allocations */
   if ( !MMGS_Alloc_mesh(mesh,sol,ls) )  return 0;
 

@@ -231,8 +231,12 @@ nextstep1:
     pt->qual=MMG5_caltet33_ani(mesh,met,pt);
     pt1->qual=MMG5_caltet33_ani(mesh,met,pt1);
   }
-  else
-  {
+  else if ( (!met) || (!met->m) ) {
+    /* in ls mode + -A option, orcal calls caltet_ani that fails */
+    pt->qual=MMG5_caltet_iso(mesh,met,pt);
+    pt1->qual=MMG5_caltet_iso(mesh,met,pt1);
+  }
+  else {
     pt->qual=MMG5_orcal(mesh,met,k);
     pt1->qual=MMG5_orcal(mesh,met,iel);
   }
@@ -774,6 +778,7 @@ int MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
 
     /* Update of adjacency relations */
     iel = list[k] / 6;
+    ie  = list[k] % 6;
     pt = &mesh->tetra[iel];
     jel = abs(newtet[k]);
     pt1 = &mesh->tetra[jel];
@@ -1179,6 +1184,12 @@ void MMG3D_update_qual(MMG5_pMesh mesh,MMG5_pSol met,const int ne,
   if ( (!metRidTyp) && met->m && met->size>1 ) {
     for (i=0; i<ne; i++) {
       pt[i]->qual=MMG5_caltet33_ani(mesh,met,pt[i]);
+    }
+  }
+  else if ( (!met) || (!met->m) ) {
+    /* in ls mode + -A option, orcal calls caltet_ani that fails */
+    for (i=0; i<ne; i++) {    
+      pt[i]->qual=MMG5_caltet_iso(mesh,met,pt[i]);
     }
   }
   else
@@ -2565,7 +2576,7 @@ int MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],int8_t metRid
 
   /* Set permutation /symmetry of vertices : generic case : 35 */
   MMG3D_configSplit3op(pt[0],vx,tau,&taued,sym,symed,&ip0,&ip1,&ip2,&ip3,
-                       &ie0,&ie1,&ie2,&ie3,&ie4,&ie5,&imin03,&imin12);
+                        &ie0,&ie1,&ie2,&ie3,&ie4,&ie5,&imin03,&imin12);
   pt[0]->flag  = 0;
 
   /* create 3 new tetras, the fifth being created only if needed. */

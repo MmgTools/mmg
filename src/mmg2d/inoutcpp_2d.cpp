@@ -107,11 +107,13 @@ int MMG2D_loadVtpMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
     return  ier;
   }
 
-  /* Check the metric type */
-  ier = MMG5_chkMetricType(mesh,&sol->type,NULL);
-  if ( ier <1 ) {
-    fprintf(stderr,"  ** UNEXPECTED METRIC TYPE\n");
-    return ier;
+  if ( sol ) {
+    /* Check the metric type */
+    ier = MMG5_chkMetricType(mesh,&sol->type,NULL);
+    if ( ier <1 ) {
+      fprintf(stderr,"  ** UNEXPECTED METRIC TYPE\n");
+      return ier;
+    }
   }
 
   return ier;
@@ -178,11 +180,13 @@ int MMG2D_loadVtkMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
     return  ier;
   }
 
-  /* Check the metric type */
-  ier = MMG5_chkMetricType(mesh,&sol->type,NULL);
-  if ( ier <1 ) {
-    fprintf(stderr,"  ** UNEXPECTED METRIC TYPE\n");
-    return ier;
+  if ( sol ) {
+    /* Check the metric type */
+    ier = MMG5_chkMetricType(mesh,&sol->type,NULL);
+    if ( ier <1 ) {
+      fprintf(stderr,"  ** UNEXPECTED METRIC TYPE\n");
+      return ier;
+    }
   }
 
   return ier;
@@ -249,11 +253,13 @@ int MMG2D_loadVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
     return  ier;
   }
 
-  /* Check the metric type */
-  ier = MMG5_chkMetricType(mesh,&sol->type,NULL);
-  if ( ier <1 ) {
-    fprintf(stderr,"  ** UNEXPECTED METRIC TYPE\n");
-    return ier;
+  if ( sol ) {
+    /* Check the metric type */
+    ier = MMG5_chkMetricType(mesh,&sol->type,NULL);
+    if ( ier <1 ) {
+      fprintf(stderr,"  ** UNEXPECTED METRIC TYPE\n");
+      return ier;
+    }
   }
 
   return ier;

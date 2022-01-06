@@ -485,6 +485,13 @@ void MMG5_Free_structures(MMG5_pMesh mesh,MMG5_pSol sol){
   if ( mesh->info.npar && mesh->info.par )
     MMG5_DEL_MEM(mesh,mesh->info.par);
 
+  if ( mesh->info.nmat ) {
+    if( mesh->info.mat )
+      MMG5_DEL_MEM(mesh,mesh->info.mat);
+    if( mesh->info.invmat.lookup )
+      MMG5_DEL_MEM(mesh,mesh->info.invmat.lookup);
+  }
+
   if ( mesh->info.imprim>5 || mesh->info.ddebug ) {
     printf("  MEMORY USED AT END (Bytes) %zu\n",mesh->memCur);
   }
@@ -707,6 +714,14 @@ int MMG5_Set_multiMat(MMG5_pMesh mesh,MMG5_pSol sol,int ref,
   mesh->info.mat[mesh->info.nmati].rex   = rex;
 
   mesh->info.nmati++;
+
+  /* Invert the table if all materials have been set */
+  if( mesh->info.nmati == mesh->info.nmat )
+    if( !MMG5_MultiMat_init(mesh) ) {
+      fprintf(stderr,"\n ## Error: %s: unable to create lookup table for multiple materials.\n",
+              __func__);
+      return 0;
+    }
 
   return 1;
 }
