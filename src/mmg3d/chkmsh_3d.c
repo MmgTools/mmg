@@ -400,7 +400,44 @@ int MMG5_chkmshsurf(MMG5_pMesh mesh){
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param severe level of performed check
+ * \return 0 if fail, 1 otherwise
+ *
+ * Check the number of boundary faces in each edge shell and the consistency of the edge tag.
+ */
+static inline
+int  MMG3D_chkcoquilface(MMG5_pMesh mesh) {
+  MMG5_pTetra pt;
+  MMG5_pxTetra pxt;
+  int k,i,j,ret,it1,it2,list[MMG3D_LMAX+2];
+  int8_t ia;
+
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+    if ( (!MG_EOK(pt)) || pt->ref < 0 || (pt->tag & MG_REQ) )   continue;
+    else if ( !pt->xt ) continue;
+    pxt = &mesh->xtetra[pt->xt];
+
+    for (i=0; i<4; i++) {
+      if ( !(pxt->ftag[i] & MG_BDY) ) continue;
+      for (j=0; j<3; j++) {
+        ia  = MMG5_iarf[i][j];
+
+        /* No check for geom edge (I am not sure that it can works) */
+        if ( MG_EDG(pxt->tag[ia]) || (pxt->tag[ia] & MG_REQ) ||
+             (pxt->tag[ia] & MG_NOM) )
+          continue;
+
+        ret = MMG5_coquilface(mesh,k,i,ia,list,&it1,&it2,0);
+        if ( ret < 0 )  return 0;
+      }
+    }
+  }
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param severe level of performed check (unused)
  * \param base unused argument.
  * \return 0 if fail, 1 if success.
  *
@@ -415,8 +452,16 @@ int MMG5_mmg3dChkmsh(MMG5_pMesh mesh,int severe,int base) {
   uint8_t         voy,voy1;
   static int8_t   mmgErr0=0,mmgErr1=0,mmgErr2=0,mmgErr3=0,mmgErr4=0,mmgErr5=0;
 
+  /* Check edge tag consistency (between xtetra) */
   MMG3D_chkmeshedgestags(mesh);
+
+  /* Check point tags consistency with edge tag */
   MMG3D_chkpointtag(mesh);
+
+  if ( !mesh->adja ) return 1;
+
+  /* Check edge tag consistency with number of boundary faces in the edge shell */
+  MMG3D_chkcoquilface(mesh);
 
   for (k=1; k<=mesh->ne; k++) {
     pt1 = &mesh->tetra[k];
