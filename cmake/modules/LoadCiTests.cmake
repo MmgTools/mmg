@@ -98,19 +98,44 @@ ENDMACRO ( )
 #####
 ###############################################################################
 
-# Check if the ci_tests directory exists
-IF ( NOT EXISTS ${CI_DIR} )
+if ( MSVC )
+    execute_process(
+        COMMAND ping www.mmgtools.org -n 2
+        OUTPUT_QUIET
+        ERROR_QUIET
+        RESULT_VARIABLE NO_CONNECTION
+    )
+else ( )
+    execute_process(
+        COMMAND ping www.mmgtools.org -c 2
+        OUTPUT_QUIET
+        ERROR_QUIET
+        RESULT_VARIABLE NO_CONNECTION
+    )
+endif ( )
 
-  # First download of the tests
-  MESSAGE("-- Creation of continuous integration directory: ${CI_DIR}")
-  FILE(MAKE_DIRECTORY ${CI_DIR})
+if ( NOT NO_CONNECTION EQUAL 0 )
+    set ( CONNECTED OFF )
+    message ( STATUS "Offline mode: requires already downloaded test cases")
+else()
+    set ( CONNECTED ON )
+endif()
 
+IF ( CONNECTED )
+  # Check if the ci_tests directory exists
+  IF ( NOT EXISTS ${CI_DIR} )
+
+    # First download of the tests
+    MESSAGE("-- Creation of continuous integration directory: ${CI_DIR}")
+    FILE(MAKE_DIRECTORY ${CI_DIR})
+
+  ENDIF ( )
+
+  #
+  # Download the tests if needed
+  ##--------------> mmg
+  DOWNLOAD_TESTS ( "2d" )
+  DOWNLOAD_TESTS ( "3d" )
+  DOWNLOAD_TESTS ( "s" )
+  DOWNLOAD_TESTS ( "" )
 ENDIF ( )
-
-#
-# Download the tests if needed
-##--------------> mmg
-DOWNLOAD_TESTS ( "2d" )
-DOWNLOAD_TESTS ( "3d" )
-DOWNLOAD_TESTS ( "s" )
-DOWNLOAD_TESTS ( "" )

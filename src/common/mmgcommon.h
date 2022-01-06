@@ -68,10 +68,6 @@ extern "C" {
 #define MMG5_BITWIZE_MB_TO_B 20 /**< Bitwise convertion from Mo to O */
 #define MMG5_MEMPERCENT 0.5     /**< Percent of RAM used by default */
 
-/* Domain refs in iso mode */
-#define MG_PLUS    2
-#define MG_MINUS   3
-
 /* Macro for unset or unititialized mark */
 #define MMG5_UNSET -1
 
@@ -627,6 +623,7 @@ void           MMG5_check_hminhmax(MMG5_pMesh mesh, int8_t sethmin, int8_t sethm
  char         *MMG5_Remove_ext( char *path, char* );
  const char    *MMG5_Get_formatName(enum MMG5_Format fmt);
  int           MMG5_Get_format( char *ptr, int );
+ int           MMG5_hashFace(MMG5_pMesh,MMG5_Hash*,int,int,int,int);
  int           MMG5_hashEdge(MMG5_pMesh mesh,MMG5_Hash *hash,int a,int b,int k);
  int           MMG5_hashUpdate(MMG5_Hash *hash,int a,int b,int k);
  int           MMG5_hashEdgeTag(MMG5_pMesh mesh,MMG5_Hash *hash,int a,int b,int16_t k);
@@ -726,8 +723,11 @@ int  MMG5_updatemetreq_ani(double *n,double dn[2],double vp[2][2]);
 int    MMG5_swapbin(int sbin);
 float  MMG5_swapf(float sbin);
 double MMG5_swapd(double sbin);
+int MMG5_MultiMat_init(MMG5_pMesh);
+int MMG5_isLevelSet(MMG5_pMesh,int,int);
 int MMG5_isSplit(MMG5_pMesh ,int ,int *,int *);
-int MMG5_getIniRef(MMG5_pMesh ,int );
+int MMG5_isNotSplit(MMG5_pMesh ,int);
+int MMG5_getStartRef(MMG5_pMesh ,int, int *);
 
 
 /* tools */

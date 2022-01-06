@@ -217,16 +217,6 @@ int MMG2D_Init_mesh_var( va_list argptr ) {
     return 0;
   }
 
-  if ( !(sol || ls || disp) ) {
-    fprintf(stderr,"\n  ## Error: %s: MMG2D_Init_mesh:\n"
-            " you need to initialize a solution structure"
-            " (of type MMG5_pSol and indentified by the MMG5_ARG_ppMet, "
-            " MMG5_ARG_ppLs or MMG5_ARG_ppDisp preprocessor variable)"
-            " that will contain the output mesh metric, level-set or"
-            " displacement.\n",__func__);
-    return 0;
-  }
-
   /* allocations */
   if ( !MMG2D_Alloc_mesh(mesh,sol,ls,disp) )  return 0;
 
