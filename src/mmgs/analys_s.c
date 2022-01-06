@@ -697,8 +697,61 @@ static int norver(MMG5_pMesh mesh) {
   return 1;
 }
 
+/**
+ * \param mesh pointer to the mesh structure.
+ *
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Remove duplicated triangles.
+ *
+ */
+int MMGS_remDup(MMG5_pMesh mesh) {
+  MMG5_Hash     hash;
+  MMG5_pTria    ptt;
+  int           k,jel,dup;
+
+  if ( !mesh->nt ) return 1;
+
+  /* Hash triangles */
+  if ( ! MMG5_hashNew(mesh,&hash,(int)(0.51*mesh->nt),(int)(1.51*mesh->nt)) ) {
+    return 0;
+  }
+
+  dup = 0;
+  for (k=1; k<=mesh->nt; k++) {
+    ptt = &mesh->tria[k];
+    jel = MMG5_hashFace(mesh,&hash,ptt->v[0],ptt->v[1],ptt->v[2],k);
+    if ( !jel ) {
+      MMG5_DEL_MEM(mesh,hash.item);
+      return 0;
+    }
+    else if ( jel > 0 ) {
+      ++dup;
+      /* Remove duplicated face */
+      MMGS_delElt(mesh,k);
+    }
+  }
+
+  if ( abs(mesh->info.imprim) > 5 && dup > 0 ) {
+    fprintf(stdout,"  ## ");  fflush(stdout);
+    if ( dup > 0 )  fprintf(stdout," %d duplicate removed",dup);
+    fprintf(stdout,"\n");
+  }
+
+  MMG5_DEL_MEM(mesh,hash.item);
+
+  return 1;
+}
+
 /* preprocessing stage: mesh analysis */
 int MMGS_analys(MMG5_pMesh mesh) {
+
+  /* Remove duplicated triangles */
+  if ( !MMGS_remDup(mesh) ) {
+    fprintf(stderr,"\n  ## Analysis problem."
+            " Unable to remove duplicated faces. Exit program.\n");
+    return 0;
+  }
 
   /* Update tags stored into tria */
   if ( !MMGS_bdryUpdate(mesh) ) {

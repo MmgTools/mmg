@@ -2,6 +2,10 @@
 
 include(CMakeFindDependencyMacro)
 
+# Allows us to use all .cmake files in this directory
+# required for `find_package({SCOTCH,VTK}) to work.
+list(INSERT CMAKE_MODULE_PATH 0 "${CMAKE_CURRENT_LIST_DIR}")
+
 find_package(SCOTCH)
 find_package(VTK)
 

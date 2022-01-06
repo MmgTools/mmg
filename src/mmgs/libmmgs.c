@@ -697,7 +697,7 @@ int MMGS_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
     MMGS_RETURN_AND_PACK(mesh,met,sol,MMG5_LOWFAILURE);
   }
 
-  if ( mesh->info.imprim > 1 )
+  if ( mesh->info.imprim > 4 && met->m )
     MMGS_prilen(mesh,met,1);
 
   chrono(ON,&(ctim[1]));

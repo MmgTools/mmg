@@ -59,10 +59,21 @@
 #define MMG5_STRONGFAILURE 2
 
 /**
- * Implicite domain ref in iso mode
+ * Implicit boundary in iso mode
  *
  */
 #define MG_ISO    10
+
+/**
+ * Default reference to assign to positive domain in iso mode
+ *
+ */
+#define MG_PLUS    2
+/**
+ * Default reference to assign to negative domain in iso mode
+ *
+ */
+#define MG_MINUS   3
 
 /**
  * \def MMG5_ARG_start

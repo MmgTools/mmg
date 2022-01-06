@@ -1039,12 +1039,10 @@ static int MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
       v1  = sol->m[ip1]-mesh->info.ls;
       if ( fabs(v0) > MMG5_EPSD2 && fabs(v1) > MMG5_EPSD2 && v0*v1 < 0.0 ) {
         if ( !p0->flag ) {
-          p0->flag = nb;
-          nb++;
+          p0->flag = ++nb;
         }
         if ( !p1->flag ) {
-          p1->flag = nb;
-          nb++;
+          p1->flag = ++nb;
         }
       }
     }

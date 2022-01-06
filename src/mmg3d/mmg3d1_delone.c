@@ -790,7 +790,7 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
       }
     collapse2:
       if ( countMemFailure > 10 ) {
-        printf("  ## Error:%s: too much reallocation errors. Exit program.\n",__func__);
+        fprintf(stderr,"  ## Error:%s: too much reallocation errors. Exit program.\n",__func__);
         return -1;
       }
 
