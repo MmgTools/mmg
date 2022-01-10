@@ -1743,43 +1743,20 @@ int MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int np1,int np
   else
     memcpy(m2,mm2,6*sizeof(double));
 
+
   l = sqrt(ux*ux+uy*uy+uz*uz);
 
-  t[0] = ux/l;
-  t[1] = uy/l;
-  t[2] = uz/l;
-
-  double l1[3],l2[3],ieta,vv[9],ivv[9],tmp[9],tmpa[9];
-  double R[3][3];
-
-  MMG5_eigenv3d(1,m1,lambda,R);
+  MMG5_eigenv3d(1,m1,lambda,vp);
   for( int i = 0; i < 3; i++ ) {
     lambda[i] = 1./pow( 1./sqrt(lambda[i]) + mesh->info.hgrad*l + MMG5_EPSOK, 2.0);
   }
+  MMG5_eigenvmat(mesh,mesh->dim,1,m1,lambda,vp);
 
-  MMG5_eigenv3d(1,m2,lambda,R);
+  MMG5_eigenv3d(1,m2,lambda,vp);
   for( int i = 0; i < 3; i++ ) {
     lambda[i] = 1./pow( 1./sqrt(lambda[i]) + mesh->info.hgrad*l + MMG5_EPSOK, 2.0);
   }
-
-//  m2[0] = lambda[0]*R[0][0]*R[0][0]+lambda[1]*R[1][0]*R[1][0]+lambda[2]*R[2][0]*R[2][0];
-//  m2[1] = lambda[0]*R[0][0]*R[0][1]+lambda[1]*R[1][0]*R[1][1]+lambda[2]*R[2][0]*R[2][1];
-//  m2[2] = lambda[0]*R[0][0]*R[0][2]+lambda[1]*R[1][0]*R[1][2]+lambda[2]*R[2][0]*R[2][2];
-//  m2[3] = lambda[0]*R[0][1]*R[0][1]+lambda[1]*R[1][1]*R[1][1]+lambda[2]*R[2][1]*R[2][1];
-//  m2[4] = lambda[0]*R[0][1]*R[0][2]+lambda[1]*R[1][1]*R[1][2]+lambda[2]*R[2][1]*R[2][2];
-//  m2[5] = lambda[0]*R[0][2]*R[0][2]+lambda[1]*R[1][2]*R[1][2]+lambda[2]*R[2][2]*R[2][2];
-
-  ij = 0;
-  for( int i = 0; i < 3; i++ ) {
-    for( int j = i; j < 3; j++ ) {
-      m2[ij] = 0.;
-      for( int k = 0; k < 3; k++ ) {
-        m2[ij] += lambda[k]*R[k][i]*R[k][j];
-      }
-      ++ij;
-    }
-  }
-
+  MMG5_eigenvmat(mesh,mesh->dim,1,m2,lambda,vp);
 
   if( mesh->point[np1].flag >= mesh->base-1 ) {
     MMG3D_gradEigenv(mesh,mm2,m1,2,&ier);
