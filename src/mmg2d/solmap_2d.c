@@ -89,26 +89,26 @@ int MMG2D_doSol_iso(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   /* if hmax is not specified, compute it from the metric */
   if ( mesh->info.hmax < 0. ) {
-      dd = 0.;
-      for (k=1; k<=mesh->np; k++) {
-        p1 = &mesh->point[k];
+    dd = 0.;
+    for (k=1; k<=mesh->np; k++) {
+      p1 = &mesh->point[k];
       if ( !mark[k] ) continue;
-        dd = MG_MAX(dd,sol->m[k]);
-      }
+      dd = MG_MAX(dd,sol->m[k]);
+    }
     assert ( dd > 0. );
     mesh->info.hmax = 10.*dd;
-    }
+  }
 
   /* vertex size */
-      for (k=1; k<=mesh->np; k++) {
-        p1 = &mesh->point[k];
+  for (k=1; k<=mesh->np; k++) {
+    p1 = &mesh->point[k];
     if ( !mark[k] )  {
       sol->m[k] = mesh->info.hmax;
       continue;
-      }
+    }
 
     sol->m[k] = sol->m[k] / (double)mark[k];
-    }
+  }
 
   /* compute quality */
   if ( MMG2D_caltri ) {
@@ -190,11 +190,11 @@ int MMG2D_doSol_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   /* Compute metric tensor and hmax if not specified */
   double hmax = FLT_MAX;
-    for (k=1; k<=mesh->np; k++) {
-      p1 = &mesh->point[k];
+  for (k=1; k<=mesh->np; k++) {
+    p1 = &mesh->point[k];
     if ( !mark[k] ) {
-        continue;
-      }
+      continue;
+    }
 
     iadr = 3*k;
     /* Metric = nedges/dim * inv (sum(tensor_dot(edges,edges))).
@@ -224,7 +224,7 @@ int MMG2D_doSol_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
     hmax = MG_MIN(hmax,lambda[0]);
     hmax = MG_MIN(hmax,lambda[1]);
 
-    }
+  }
   if ( mesh->info.hmax < 0.) {
     assert ( hmax > 0. && hmax < FLT_MAX && "Wrong hmax value" );
     mesh->info.hmax = 10./sqrt(hmax);
@@ -232,15 +232,15 @@ int MMG2D_doSol_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   /* vertex size: impose hmax size */
   hmax = 1./(mesh->info.hmax*mesh->info.hmax);
-    for (k=1; k<=mesh->np; k++) {
-      p1 = &mesh->point[k];
+  for (k=1; k<=mesh->np; k++) {
+    p1 = &mesh->point[k];
 
     if ( !mark[k] )  {
       iadr = 3*k;
       sol->m[iadr]   = hmax;
-        sol->m[iadr+2] = sol->m[iadr];
-        continue;
-      }
+      sol->m[iadr+2] = sol->m[iadr];
+      continue;
+    }
   }
 
   /* compute quality */
