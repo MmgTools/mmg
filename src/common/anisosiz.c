@@ -1340,7 +1340,7 @@ int MMG5_simred(MMG5_pMesh mesh,double *m,double *n,double dm[2],
   imn[3] = det * (-m[1]*n[1] + m[0]*n[2]);
 
   /* Find eigenvalues of imn */
-  order = MMG5_eigenv2(0,imn,lambda,vp);
+  order = MMG5_eigenv2d(0,imn,lambda,vp);
 
   if ( !order ) {
     if ( !mmgWarn0 ) {
@@ -1607,7 +1607,7 @@ int MMG5_grad2metSurfreq(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int npma
      * found. So, compute the eigenvalues. */
     double ll[3],rr[3][3],llmin;
     int i;
-    if( !MMG5_eigenv(1,mm2,ll, rr) ) {
+    if( !MMG5_eigenv3d(1,mm2,ll, rr) ) {
       return 0;
     }
     llmin = DBL_MAX;
@@ -1699,7 +1699,7 @@ int MMG5_grad2metSurfreq(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int npma
 
 #ifndef NDEBUG
     /* Check the validity of the output metric */
-    ier = MMG5_eigenv(1,m2,mu, r2);
+    ier = MMG5_eigenv3d(1,m2,mu, r2);
 
     assert ( ier );
     assert ( mu[0] > 0.);

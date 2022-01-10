@@ -381,7 +381,7 @@ int MMG5_check_accuracy(double mat[6],double lambda[3], double v[3][3],
  * \remark the i^{th} eigenvector is stored in v[i][.].
  *
  */
-int MMG5_eigenv(int symmat,double *mat,double lambda[3],double v[3][3]) {
+int MMG5_eigenv3d(int symmat,double *mat,double lambda[3],double v[3][3]) {
   double    a11,a12,a13,a21,a22,a23,a31,a32,a33;
   double    aa,bb,cc,dd,ee,ii,vx1[3],vx2[3],vx3[3],dd1,dd2,dd3;
   double    maxd,maxm,valm,p[4],w1[3],w2[3],w3[3],epsd;
@@ -682,7 +682,7 @@ int MMG5_eigenv(int symmat,double *mat,double lambda[3],double v[3][3]) {
  * \remark the i^{th} eigenvector is stored in v[i][.].
  *
  */
-int MMG5_eigenv2(int symmat,double *mat,double lambda[2],double vp[2][2]) {
+int MMG5_eigenv2d(int symmat,double *mat,double lambda[2],double vp[2][2]) {
   double dd,sqDelta,trmat,vnorm;
   static int8_t  mmgWarn0=0;
 

@@ -138,10 +138,10 @@ int MMG5_eigenvRecomp_check(MMG5_pMesh mesh,int8_t symmat,double m[]) {
 
   /* Compute eigendecomposition */
   if( mesh->dim == 2 ) {
-    if( !MMG5_eigenv2(symmat,m,lambda,v) )
+    if( !MMG5_eigenv2d(symmat,m,lambda,v) )
       return 0;
   } else if( mesh->dim == 3 ) {
-    if( !MMG5_eigenv(symmat,m,lambda,v) )
+    if( !MMG5_eigenv3d(symmat,m,lambda,v) )
       return 0;
   }
 
@@ -400,7 +400,7 @@ int MMG5_intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr) {
   imn[3] = det * (-m[1]*n[1] + m[0]*n[2]);
 
   /* Find eigenvalues of imn */
-  order = MMG5_eigenv2(0,imn,lambda,vp);
+  order = MMG5_eigenv2d(0,imn,lambda,vp);
 
   if ( !order ) {
     if ( !mmgWarn0 ) {
@@ -636,7 +636,7 @@ int MMG5_mmgIntextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6],
 
     /* Truncate the metric in the third direction (because me was not
      * truncated) */
-    order = MMG5_eigenv(1,m,lambda,vp);
+    order = MMG5_eigenv3d(1,m,lambda,vp);
     if ( !order ) {
       if ( !mmgWarn ) {
         fprintf(stderr,"\n  ## Warning: %s: Unable to diagonalize at least"

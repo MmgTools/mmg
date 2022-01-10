@@ -840,7 +840,7 @@ int MMGS_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met) {
 
 int MMGS_Compute_eigenv(double m[6],double lambda[3],double vp[3][3]) {
 
-  return  MMG5_eigenv(1,m,lambda,vp);
+  return  MMG5_eigenv3d(1,m,lambda,vp);
 
 }
 

@@ -1305,7 +1305,7 @@ int MMG5_defmetvol(MMG5_pMesh mesh,MMG5_pSol met,int8_t ismet) {
 
       /** Second step: set metric */
       m = &met->m[met->size*ip];
-      if ( !MMG5_eigenv(1,m,lambda,v) ) {
+      if ( !MMG5_eigenv3d(1,m,lambda,v) ) {
         if ( !mmgWarn ) {
           fprintf(stderr,"\n  ## Warning: %s: Unable to diagonalize at least"
                   " 1 metric.\n",__func__);
@@ -1538,7 +1538,7 @@ int MMG3D_simred(MMG5_pMesh mesh,double *m,double *n,double dm[3],
   MMG5_mn(im,n,imn);
 
   /* Find eigenvalues of imn */
-  order = MMG5_eigenv(0,imn,lambda,vp);
+  order = MMG5_eigenv3d(0,imn,lambda,vp);
 
   if ( !order ) {
     if ( !mmgWarn0 ) {
@@ -1569,7 +1569,7 @@ int MMG3D_simred(MMG5_pMesh mesh,double *m,double *n,double dm[3],
     }
     else {
       /* Subcase where m is not diagonal; dd,trimn,... are reused */
-      MMG5_eigenv(1,m,dm,vp);
+      MMG5_eigenv3d(1,m,dm,vp);
     }
     /* Eigenvalues of metric n */
     dn[0] = lambda[0]*dm[0];
@@ -1752,30 +1752,12 @@ int MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int np1,int np
   double l1[3],l2[3],ieta,vv[9],ivv[9],tmp[9],tmpa[9];
   double R[3][3];
 
-  MMG5_eigenv(1,m1,lambda,R);
+  MMG5_eigenv3d(1,m1,lambda,R);
   for( int i = 0; i < 3; i++ ) {
     lambda[i] = 1./pow( 1./sqrt(lambda[i]) + mesh->info.hgrad*l + MMG5_EPSOK, 2.0);
   }
 
-//  m1[0] = lambda[0]*R[0][0]*R[0][0]+lambda[1]*R[1][0]*R[1][0]+lambda[2]*R[2][0]*R[2][0];
-//  m1[1] = lambda[0]*R[0][0]*R[0][1]+lambda[1]*R[1][0]*R[1][1]+lambda[2]*R[2][0]*R[2][1];
-//  m1[2] = lambda[0]*R[0][0]*R[0][2]+lambda[1]*R[1][0]*R[1][2]+lambda[2]*R[2][0]*R[2][2];
-//  m1[3] = lambda[0]*R[0][1]*R[0][1]+lambda[1]*R[1][1]*R[1][1]+lambda[2]*R[2][1]*R[2][1];
-//  m1[4] = lambda[0]*R[0][1]*R[0][2]+lambda[1]*R[1][1]*R[1][2]+lambda[2]*R[2][1]*R[2][2];
-//  m1[5] = lambda[0]*R[0][2]*R[0][2]+lambda[1]*R[1][2]*R[1][2]+lambda[2]*R[2][2]*R[2][2];
-
-  int ij = 0;
-  for( int i = 0; i < 3; i++ ) {
-    for( int j = i; j < 3; j++ ) {
-      m1[ij] = 0.;
-      for( int k = 0; k < 3; k++ ) {
-        m1[ij] += lambda[k]*R[k][i]*R[k][j];
-      }
-      ++ij;
-    }
-  }
-
-  MMG5_eigenv(1,m2,lambda,R);
+  MMG5_eigenv3d(1,m2,lambda,R);
   for( int i = 0; i < 3; i++ ) {
     lambda[i] = 1./pow( 1./sqrt(lambda[i]) + mesh->info.hgrad*l + MMG5_EPSOK, 2.0);
   }
@@ -1937,7 +1919,7 @@ int MMG5_grad2metVolreq(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int npmaste
      * found. So, compute the eigenvalues. */
     double ll[3],rr[3][3],llmin;
     int i;
-    if( !MMG5_eigenv(1,mm2,ll, rr) )
+    if( !MMG5_eigenv3d(1,mm2,ll, rr) )
       return 0;
     llmin = DBL_MAX;
     for( i = 0; i < 3; i++ )
