@@ -46,6 +46,8 @@
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the solution structure.
  *
+ * \return 0 if fail, 1 if succeed.
+ *
  * Truncate the metric computed by the DoSol function by hmax and hmin values
  * (if setted by the user). Set hmin and hmax if they are not setted.
  *
@@ -53,12 +55,11 @@
  * suppose that we have a diagonal tensor in aniso.
  *
  */
-void MMG2D_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
+int MMG2D_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
   MMG5_pTria  ptt;
   MMG5_pPoint ppt;
   int         k,i,iadr;
   double      isqhmin, isqhmax;
-  int8_t      sethmin, sethmax;
 
   assert ( mesh->info.optim || mesh->info.hsiz > 0. );
 
@@ -75,11 +76,28 @@ void MMG2D_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
     }
   }
 
+  /* Security check: if hmin (resp. hmax) is not setted, it means that sethmin
+   * (resp. sethmax) is not setted too */
+  if ( mesh->info.hmin < 0 ) {
+    if ( mesh->info.sethmin ) {
+      fprintf(stderr,"\n  ## Error: %s: unexpected case (negative user setted"
+              " hmin).\n",__func__);
+      return 0;
+    }
+  }
+
+  if ( mesh->info.hmax < 0 ) {
+    if ( mesh->info.sethmax ) {
+      fprintf(stderr,"\n  ## Error: %s: unexpected case (negative user setted"
+              " hmax).\n",__func__);
+      return 0;
+    }
+  }
+
+
   /* If not provided by the user, compute hmin/hmax from the metric computed by
    * the DoSol function. */
-  sethmin = sethmax = 1;
-  if ( mesh->info.hmin < 0. ) {
-    sethmin = 0;
+  if ( !mesh->info.sethmin ) {
     if ( met->size == 1 ) {
       mesh->info.hmin = FLT_MAX;
       for (k=1; k<=mesh->np; k++)  {
@@ -89,19 +107,23 @@ void MMG2D_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
       }
     }
     else if ( met->size == 3 ){
-      mesh->info.hmin = 0.;
+      double isqhmin = 0.;
       for (k=1; k<=mesh->np; k++)  {
         ppt = &mesh->point[k];
         if ( (!MG_VOK(ppt)) || ppt->flag ) continue;
         iadr = met->size*k;
-        mesh->info.hmin = MG_MAX(mesh->info.hmin,met->m[iadr]);
-        mesh->info.hmin = MG_MAX(mesh->info.hmin,met->m[iadr+2]);
+
+        double lambda[2],vp[2][2];
+        MMG5_eigensym(met->m+iadr,lambda,vp);
+
+        assert (lambda[0] > 0. && lambda[1] > 0. && "Negative eigenvalue");
+        isqhmin = MG_MAX(isqhmin,lambda[0]);
+        isqhmin = MG_MAX(isqhmin,lambda[1]);
       }
-      mesh->info.hmin = 1./sqrt(mesh->info.hmin);
+      mesh->info.hmin = 1./sqrt(isqhmin);
     }
   }
-  if ( mesh->info.hmax < 0. ) {
-    sethmax = 1;
+  if ( !mesh->info.sethmax ) {
     if ( met->size == 1 ) {
       mesh->info.hmax = 0.;
       for (k=1; k<=mesh->np; k++)  {
@@ -111,19 +133,25 @@ void MMG2D_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
       }
     }
     else if ( met->size == 3 ){
-      mesh->info.hmax = FLT_MAX;
+      double isqhmax = FLT_MAX;
       for (k=1; k<=mesh->np; k++)  {
         ppt = &mesh->point[k];
         if ( (!MG_VOK(ppt)) || ppt->flag ) continue;
         iadr = met->size*k;
-        mesh->info.hmax = MG_MIN(mesh->info.hmax,met->m[iadr]);
-        mesh->info.hmax = MG_MIN(mesh->info.hmax,met->m[iadr+2]);
+
+        double lambda[2],vp[2][2];
+        MMG5_eigensym(met->m+iadr,lambda,vp);
+
+        assert (lambda[0] > 0. && lambda[1] > 0. && "Negative eigenvalue");
+
+        isqhmax = MG_MIN(isqhmax,lambda[0]);
+        isqhmax = MG_MIN(isqhmax,lambda[1]);
       }
-      mesh->info.hmax = 1./sqrt(mesh->info.hmax);
+      mesh->info.hmax = 1./sqrt(isqhmax);
     }
   }
 
-  if ( !sethmin ) {
+  if ( !mesh->info.sethmin ) {
     mesh->info.hmin *=.1;
     /* Check that user has not given a hmax value lower that the founded
      * hmin. */
@@ -131,7 +159,7 @@ void MMG2D_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
       mesh->info.hmin = 0.1*mesh->info.hmax;
     }
   }
-  if ( !sethmax ) {
+  if ( !mesh->info.sethmax ) {
     mesh->info.hmax *=10.;
     /* Check that user has not given a hmin value bigger that the founded
      * hmax. */
@@ -165,7 +193,7 @@ void MMG2D_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
     }
 
   }
-  return;
+  return 1;
 }
 
 int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol met)

@@ -140,7 +140,7 @@ int MMG2D_doSol_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
   double          ux,uy,dd,tensordot[3];
   int             i,k,ib,iadr,ipa,ipb;
   int             MMG_inxtt[5] = {0,1,2,0,1};
-  int         *mark;
+  int             *mark;
 
   MMG5_SAFE_CALLOC(mark,mesh->np+1,int,return 0);
 
@@ -189,7 +189,7 @@ int MMG2D_doSol_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
   }
 
   /* Compute metric tensor and hmax if not specified */
-  double hmax = FLT_MAX;
+  double isqhmax = FLT_MAX;
   for (k=1; k<=mesh->np; k++) {
     p1 = &mesh->point[k];
     if ( !mark[k] ) {
@@ -221,23 +221,22 @@ int MMG2D_doSol_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
     impossible */
     assert (isfinite(lambda[0]) && isfinite(lambda[1]) && "wrong eigenvalue");
 
-    hmax = MG_MIN(hmax,lambda[0]);
-    hmax = MG_MIN(hmax,lambda[1]);
-
+    isqhmax = MG_MIN(isqhmax,lambda[0]);
+    isqhmax = MG_MIN(isqhmax,lambda[1]);
   }
   if ( mesh->info.hmax < 0.) {
-    assert ( hmax > 0. && hmax < FLT_MAX && "Wrong hmax value" );
-    mesh->info.hmax = 10./sqrt(hmax);
+    assert ( isqhmax > 0. && isqhmax < FLT_MAX && "Wrong hmax value" );
+    mesh->info.hmax = 10./sqrt(isqhmax);
   }
 
   /* vertex size: impose hmax size */
-  hmax = 1./(mesh->info.hmax*mesh->info.hmax);
+  isqhmax = 1./(mesh->info.hmax*mesh->info.hmax);
   for (k=1; k<=mesh->np; k++) {
     p1 = &mesh->point[k];
 
     if ( !mark[k] )  {
       iadr = 3*k;
-      sol->m[iadr]   = hmax;
+      sol->m[iadr]   = isqhmax;
       sol->m[iadr+2] = sol->m[iadr];
       continue;
     }

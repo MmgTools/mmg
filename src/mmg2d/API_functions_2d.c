@@ -255,8 +255,14 @@ int MMG2D_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val)
     mesh->info.sethmin  = 1;
     mesh->info.hmin     = val;
     if ( mesh->info.sethmax && ( mesh->info.hmin >=  mesh->info.hmax ) ) {
-      fprintf(stderr,"\n  ## Warning: hmin value must be strictly lower than hmax one"
+      fprintf(stderr,"\n  ## Error: hmin value must be strictly lower than hmax one"
               " (hmin = %lf  hmax = %lf ).\n",mesh->info.hmin, mesh->info.hmax);
+      return 0;
+    }
+    if ( val <= 0. ) {
+      fprintf(stderr,"\n  ## Error: hmin must be strictly positive "
+              "(minimal edge length).\n");
+      return 0;
     }
 
     break;
@@ -264,8 +270,14 @@ int MMG2D_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val)
     mesh->info.sethmax  = 1;
     mesh->info.hmax     = val;
     if ( mesh->info.sethmin && ( mesh->info.hmin >=  mesh->info.hmax ) ) {
-      fprintf(stderr,"\n  ## Warning: hmin value must be strictly lower than hmax one"
+      fprintf(stderr,"\n  ## Error: hmin value must be strictly lower than hmax one"
               " (hmin = %lf  hmax = %lf ).\n",mesh->info.hmin, mesh->info.hmax);
+      return 0;
+    }
+    if ( val <= 0. ) {
+      fprintf(stderr,"\n  ## Error: hmax must be strictly positive "
+              "(maximal edge length).\n");
+      return 0;
     }
 
     break;
