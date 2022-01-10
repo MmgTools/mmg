@@ -111,7 +111,7 @@ int MMG2D_doSol_iso(MMG5_pMesh mesh,MMG5_pSol sol) {
   }
 
   /* Size truncature */
-  MMG2D_solTruncatureForOptim(mesh,sol);
+  MMG2D_solTruncatureForOptim_iso(mesh,sol);
 
   /* compute quality */
   if ( MMG2D_caltri ) {
@@ -246,7 +246,7 @@ int MMG2D_doSol_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
   }
 
   /* Size truncature */
-  MMG2D_solTruncatureForOptim(mesh,sol);
+  MMG2D_solTruncatureForOptim_ani(mesh,sol);
 
   /* compute quality */
   if ( MMG2D_caltri ) {

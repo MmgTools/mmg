@@ -51,11 +51,81 @@
  * Truncate the metric computed by the DoSol function by hmax and hmin values
  * (if setted by the user). Set hmin and hmax if they are not setted.
  *
- * \warning works only for a metric computed by the DoSol function because we
- * suppose that we have a diagonal tensor in aniso.
+ */
+int MMG2D_solTruncatureForOptim_iso(MMG5_pMesh mesh, MMG5_pSol met) {
+  MMG5_pTria  ptt;
+  MMG5_pPoint ppt;
+  int         k,i;
+
+  assert ( mesh->info.optim || mesh->info.hsiz > 0. );
+
+  /* Detect the points not used by triangles */
+  for (k=1; k<=mesh->np; k++) {
+    mesh->point[k].flag = 1;
+  }
+  for (k=1; k<=mesh->nt; k++) {
+    ptt = &mesh->tria[k];
+    if ( !MG_EOK(ptt) ) continue;
+
+    for (i=0; i<3; i++) {
+      mesh->point[ptt->v[i]].flag = 0;
+    }
+  }
+
+  /* Security check: if hmin (resp. hmax) is not setted, it means that sethmin
+   * (resp. sethmax) is not setted too */
+  if ( !MMG5_check_setted_hminhmax(mesh) ) {
+    return 0;
+  }
+
+  /* If not provided by the user, compute hmin/hmax from the metric computed by
+   * the DoSol function. */
+  if ( !mesh->info.sethmin ) {
+    mesh->info.hmin = FLT_MAX;
+    for (k=1; k<=mesh->np; k++)  {
+      ppt = &mesh->point[k];
+      if ( (!MG_VOK(ppt)) || ppt->flag ) continue;
+      mesh->info.hmin = MG_MIN(mesh->info.hmin,met->m[k]);
+    }
+  }
+  if ( !mesh->info.sethmax ) {
+    mesh->info.hmax = 0.;
+    for (k=1; k<=mesh->np; k++)  {
+      ppt = &mesh->point[k];
+      if ( !MG_VOK(ppt) ) continue;
+      mesh->info.hmax = MG_MAX(mesh->info.hmax,met->m[k]);
+    }
+  }
+
+  MMG5_check_hminhmax(mesh, mesh->info.sethmin, mesh->info.sethmax);
+
+  /* vertex size */
+  for (k=1; k<=mesh->np; k++) {
+    met->m[k] = MG_MIN(mesh->info.hmax,MG_MAX(mesh->info.hmin,met->m[k]));
+  }
+
+  if ( mesh->info.ddebug ) {
+    /* print unscaled values for debug purpose */
+    fprintf(stdout,"     After optim computation:   hmin %lf (user setted %d)\n"
+            "                                hmax %lf (user setted %d)\n",
+            mesh->info.delta * mesh->info.hmin,mesh->info.sethmin,
+            mesh->info.delta * mesh->info.hmax,mesh->info.sethmax);
+  }
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the solution structure.
+ *
+ * \return 0 if fail, 1 if succeed.
+ *
+ * Truncate the metric computed by the DoSol function by hmax and hmin values
+ * (if setted by the user). Set hmin and hmax if they are not setted.
  *
  */
-int MMG2D_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
+int MMG2D_solTruncatureForOptim_ani(MMG5_pMesh mesh, MMG5_pSol met) {
   MMG5_pTria  ptt;
   MMG5_pPoint ppt;
   int         k,i,iadr;
@@ -78,105 +148,64 @@ int MMG2D_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
 
   /* Security check: if hmin (resp. hmax) is not setted, it means that sethmin
    * (resp. sethmax) is not setted too */
-  if ( mesh->info.hmin < 0 ) {
-    if ( mesh->info.sethmin ) {
-      fprintf(stderr,"\n  ## Error: %s: unexpected case (negative user setted"
-              " hmin).\n",__func__);
-      return 0;
-    }
+  if ( !MMG5_check_setted_hminhmax(mesh) ) {
+    return 0;
   }
-
-  if ( mesh->info.hmax < 0 ) {
-    if ( mesh->info.sethmax ) {
-      fprintf(stderr,"\n  ## Error: %s: unexpected case (negative user setted"
-              " hmax).\n",__func__);
-      return 0;
-    }
-  }
-
 
   /* If not provided by the user, compute hmin/hmax from the metric computed by
    * the DoSol function. */
   if ( !mesh->info.sethmin ) {
-    if ( met->size == 1 ) {
-      mesh->info.hmin = FLT_MAX;
-      for (k=1; k<=mesh->np; k++)  {
-        ppt = &mesh->point[k];
-        if ( (!MG_VOK(ppt)) || ppt->flag ) continue;
-        mesh->info.hmin = MG_MIN(mesh->info.hmin,met->m[k]);
-      }
-    }
-    else if ( met->size == 3 ){
-      double isqhmin = 0.;
-      for (k=1; k<=mesh->np; k++)  {
-        ppt = &mesh->point[k];
-        if ( (!MG_VOK(ppt)) || ppt->flag ) continue;
-        iadr = met->size*k;
+    double isqhmin = 0.;
+    for (k=1; k<=mesh->np; k++)  {
+      ppt = &mesh->point[k];
+      if ( (!MG_VOK(ppt)) || ppt->flag ) continue;
+      iadr = met->size*k;
 
-        double lambda[2],vp[2][2];
-        MMG5_eigensym(met->m+iadr,lambda,vp);
+      double lambda[2],vp[2][2];
+      MMG5_eigensym(met->m+iadr,lambda,vp);
 
-        assert (lambda[0] > 0. && lambda[1] > 0. && "Negative eigenvalue");
-        isqhmin = MG_MAX(isqhmin,lambda[0]);
-        isqhmin = MG_MAX(isqhmin,lambda[1]);
-      }
-      mesh->info.hmin = 1./sqrt(isqhmin);
+      assert (lambda[0] > 0. && lambda[1] > 0. && "Negative eigenvalue");
+      isqhmin = MG_MAX(isqhmin,lambda[0]);
+      isqhmin = MG_MAX(isqhmin,lambda[1]);
     }
+    mesh->info.hmin = 1./sqrt(isqhmin);
   }
   if ( !mesh->info.sethmax ) {
-    if ( met->size == 1 ) {
-      mesh->info.hmax = 0.;
-      for (k=1; k<=mesh->np; k++)  {
-        ppt = &mesh->point[k];
-        if ( !MG_VOK(ppt) ) continue;
-        mesh->info.hmax = MG_MAX(mesh->info.hmax,met->m[k]);
-      }
+    double isqhmax = FLT_MAX;
+    for (k=1; k<=mesh->np; k++)  {
+      ppt = &mesh->point[k];
+      if ( (!MG_VOK(ppt)) || ppt->flag ) continue;
+      iadr = met->size*k;
+
+      double lambda[2],vp[2][2];
+      MMG5_eigensym(met->m+iadr,lambda,vp);
+
+      assert (lambda[0] > 0. && lambda[1] > 0. && "Negative eigenvalue");
+
+      isqhmax = MG_MIN(isqhmax,lambda[0]);
+      isqhmax = MG_MIN(isqhmax,lambda[1]);
     }
-    else if ( met->size == 3 ){
-      double isqhmax = FLT_MAX;
-      for (k=1; k<=mesh->np; k++)  {
-        ppt = &mesh->point[k];
-        if ( (!MG_VOK(ppt)) || ppt->flag ) continue;
-        iadr = met->size*k;
-
-        double lambda[2],vp[2][2];
-        MMG5_eigensym(met->m+iadr,lambda,vp);
-
-        assert (lambda[0] > 0. && lambda[1] > 0. && "Negative eigenvalue");
-
-        isqhmax = MG_MIN(isqhmax,lambda[0]);
-        isqhmax = MG_MIN(isqhmax,lambda[1]);
-      }
-      mesh->info.hmax = 1./sqrt(isqhmax);
-    }
+    mesh->info.hmax = 1./sqrt(isqhmax);
   }
 
   MMG5_check_hminhmax(mesh, mesh->info.sethmin, mesh->info.sethmax);
 
   /* vertex size */
-  if ( met->size == 1 ) {
-    for (k=1; k<=mesh->np; k++) {
-      met->m[k] = MG_MIN(mesh->info.hmax,MG_MAX(mesh->info.hmin,met->m[k]));
-    }
-  }
-  else if ( met->size==3 ) {
-    isqhmin = 1./(mesh->info.hmin*mesh->info.hmin);
-    isqhmax = 1./(mesh->info.hmax*mesh->info.hmax);
+  isqhmin = 1./(mesh->info.hmin*mesh->info.hmin);
+  isqhmax = 1./(mesh->info.hmax*mesh->info.hmax);
 
-    for (k=1; k<=mesh->np; k++) {
-      iadr = 3*k;
+  for (k=1; k<=mesh->np; k++) {
+    iadr = 3*k;
 
-      double lambda[2],vp[2][2];
-      MMG5_eigensym(met->m+iadr,lambda,vp);
+    double lambda[2],vp[2][2];
+    MMG5_eigensym(met->m+iadr,lambda,vp);
 
-      lambda[0]=MG_MAX(isqhmax,MG_MIN(isqhmin,lambda[0]));
-      lambda[1]=MG_MAX(isqhmax,MG_MIN(isqhmin,lambda[1]));
+    lambda[0]=MG_MAX(isqhmax,MG_MIN(isqhmin,lambda[0]));
+    lambda[1]=MG_MAX(isqhmax,MG_MIN(isqhmin,lambda[1]));
 
-      met->m[iadr]   = vp[0][0]*vp[0][0]*lambda[0] + vp[1][0]*vp[1][0]*lambda[1];
-      met->m[iadr+1] = vp[0][0]*vp[0][1]*lambda[0] + vp[1][0]*vp[1][1]*lambda[1];
-      met->m[iadr+2] = vp[0][1]*vp[0][1]*lambda[0] + vp[1][1]*vp[1][1]*lambda[1];
-    }
-
+    met->m[iadr]   = vp[0][0]*vp[0][0]*lambda[0] + vp[1][0]*vp[1][0]*lambda[1];
+    met->m[iadr+1] = vp[0][0]*vp[0][1]*lambda[0] + vp[1][0]*vp[1][1]*lambda[1];
+    met->m[iadr+2] = vp[0][1]*vp[0][1]*lambda[0] + vp[1][1]*vp[1][1]*lambda[1];
   }
 
   if ( mesh->info.ddebug ) {

@@ -252,6 +252,34 @@ int MMG5_writeLocalParamAtTri( MMG5_pMesh mesh, MMG5_iNode *bdryRefs,
 
 /**
  * \param mesh pointer toward the mesh structure.
+ * \return 0 if fail, 1 if succeed
+ *
+ * Check that hmin (resp. hmax) is not user setted if it is negative.
+ *
+ */
+int MMG5_check_setted_hminhmax(MMG5_pMesh mesh) {
+
+  if ( mesh->info.hmin < 0 ) {
+    if ( mesh->info.sethmin ) {
+      fprintf(stderr,"\n  ## Error: %s: unexpected case (negative user setted"
+              " hmin).\n",__func__);
+      return 0;
+    }
+  }
+
+  if ( mesh->info.hmax < 0 ) {
+    if ( mesh->info.sethmax ) {
+      fprintf(stderr,"\n  ## Error: %s: unexpected case (negative user setted"
+              " hmax).\n",__func__);
+      return 0;
+    }
+  }
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the solution structure.
  *
  * Truncate the metric computed by the DoSol function by hmax and hmin values

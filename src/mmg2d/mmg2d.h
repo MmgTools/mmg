@@ -218,7 +218,8 @@ int  MMG2D_Free_all_var( va_list argptr );
 int  MMG2D_Free_structures_var( va_list argptr );
 int  MMG2D_Free_names_var( va_list argptr );
 
-int MMG2D_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met);
+int MMG2D_solTruncatureForOptim_iso(MMG5_pMesh mesh, MMG5_pSol met);
+int MMG2D_solTruncatureForOptim_ani(MMG5_pMesh mesh, MMG5_pSol met);
 
 int MMG2D_mmg2d2(MMG5_pMesh , MMG5_pSol);
 int MMG2D_mmg2d6(MMG5_pMesh ,MMG5_pSol,MMG5_pSol );
