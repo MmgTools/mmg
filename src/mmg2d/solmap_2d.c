@@ -69,22 +69,22 @@ int MMG2D_doSol_iso(MMG5_pMesh mesh,MMG5_pSol sol) {
     ptt = &mesh->tria[k];
     if ( !ptt->v[0] )  continue;
 
-      for (i=0; i<3; i++) {
-        ib  = MMG_inxtt[i+1];
-        ipa = ptt->v[i];
-        ipb = ptt->v[ib];
-        p1  = &mesh->point[ipa];
-        p2  = &mesh->point[ipb];
+    for (i=0; i<3; i++) {
+      ib  = MMG_inxtt[i+1];
+      ipa = ptt->v[i];
+      ipb = ptt->v[ib];
+      p1  = &mesh->point[ipa];
+      p2  = &mesh->point[ipb];
 
-        ux  = p1->c[0] - p2->c[0];
-        uy  = p1->c[1] - p2->c[1];
-        dd  = sqrt(ux*ux + uy*uy);
+      ux  = p1->c[0] - p2->c[0];
+      uy  = p1->c[1] - p2->c[1];
+      dd  = sqrt(ux*ux + uy*uy);
 
-        sol->m[ipa] += dd;
+      sol->m[ipa] += dd;
       mark[ipa]++;
-        sol->m[ipb] += dd;
+      sol->m[ipb] += dd;
       mark[ipb]++;
-      }
+    }
   }
 
   /* if hmax is not specified, compute it from the metric */
@@ -110,7 +110,7 @@ int MMG2D_doSol_iso(MMG5_pMesh mesh,MMG5_pSol sol) {
     sol->m[k] = sol->m[k] / (double)mark[k];
   }
 
-  /* Size truncature */
+  /* Computation of hmin/hmax if not provided + size truncature */
   MMG2D_solTruncatureForOptim_iso(mesh,sol);
 
   /* compute quality */
