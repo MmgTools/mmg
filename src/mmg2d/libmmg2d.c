@@ -63,17 +63,15 @@ void MMG2D_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
   assert ( mesh->info.optim || mesh->info.hsiz > 0. );
 
   /* Detect the points not used by triangles */
-  if ( mesh->nquad ) {
-    for (k=1; k<=mesh->np; k++) {
-      mesh->point[k].flag = 1;
-    }
-    for (k=1; k<=mesh->nt; k++) {
-      ptt = &mesh->tria[k];
-      if ( !MG_EOK(ptt) ) continue;
+  for (k=1; k<=mesh->np; k++) {
+    mesh->point[k].flag = 1;
+  }
+  for (k=1; k<=mesh->nt; k++) {
+    ptt = &mesh->tria[k];
+    if ( !MG_EOK(ptt) ) continue;
 
-      for (i=0; i<3; i++) {
-        mesh->point[ptt->v[i]].flag = 0;
-      }
+    for (i=0; i<3; i++) {
+      mesh->point[ptt->v[i]].flag = 0;
     }
   }
 
