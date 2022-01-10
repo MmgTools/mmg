@@ -151,22 +151,7 @@ int MMG2D_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
     }
   }
 
-  if ( !mesh->info.sethmin ) {
-    mesh->info.hmin *=.1;
-    /* Check that user has not given a hmax value lower that the founded
-     * hmin. */
-    if ( mesh->info.hmin > mesh->info.hmax ) {
-      mesh->info.hmin = 0.1*mesh->info.hmax;
-    }
-  }
-  if ( !mesh->info.sethmax ) {
-    mesh->info.hmax *=10.;
-    /* Check that user has not given a hmin value bigger that the founded
-     * hmax. */
-    if ( mesh->info.hmax < mesh->info.hmin ) {
-      mesh->info.hmax = 10.*mesh->info.hmin;
-    }
-  }
+  MMG5_check_hminhmax(mesh, mesh->info.sethmin, mesh->info.sethmax);
 
   /* vertex size */
   if ( met->size == 1 ) {
