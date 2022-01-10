@@ -62,7 +62,7 @@ void MMG2D_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
 
   assert ( mesh->info.optim || mesh->info.hsiz > 0. );
 
-  /* Detect the point used only by quads */
+  /* Detect the points not used by triangles */
   if ( mesh->nquad ) {
     for (k=1; k<=mesh->np; k++) {
       mesh->point[k].flag = 1;
