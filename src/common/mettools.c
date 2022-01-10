@@ -36,6 +36,7 @@
 
 /**
  * \param mesh pointer toward the mesh structure.
+ * \param dim size of the matrix.
  * \param symmat integer flag (1 if the matrix is symmetric, 0 otherwise).
  * \param m matrix array.
  * \param lambda eigenvalues array.
@@ -47,8 +48,8 @@
  * of the double array spans the number of eigenvectors, the second dimension
  * spans the number of entries of each eigenvector).
  */
-int MMG5_eigenvRecomp(MMG5_pMesh mesh,int8_t symmat,double m[],double lambda[],
-                      double v[][mesh->dim]) {
+int MMG5_eigenvmat(MMG5_pMesh mesh,int8_t dim,int8_t symmat,double m[],
+                   double lambda[],double v[][dim]) {
   int8_t i,j,k,ij;
 
   /* Storage of a matrix as a one-dimensional array: dim^2 entries for a
@@ -60,9 +61,9 @@ int MMG5_eigenvRecomp(MMG5_pMesh mesh,int8_t symmat,double m[],double lambda[],
     /** Case of a symmetric matrix */
 
     /* Loop on matrix rows */
-    for( i = 0; i < mesh->dim; i++ ) {
+    for( i = 0; i < dim; i++ ) {
       /* Loop on the upper-triangular part of the matrix */
-      for( j = i; j < mesh->dim; j++ ) {
+      for( j = i; j < dim; j++ ) {
         /* Initialize matrix entry */
         m[ij] = 0.0;
         /* Compute matrix entry as the recomposition of eigenvalues and
@@ -73,32 +74,32 @@ int MMG5_eigenvRecomp(MMG5_pMesh mesh,int8_t symmat,double m[],double lambda[],
          *
          * Eigenvectors are stored as rows in Mmg (not columns) so their indices
          * have to be exchanged when implementing the above formula. */
-        for( k = 0; k < mesh->dim; k++ ) {
+        for( k = 0; k < dim; k++ ) {
           m[ij] += lambda[k]*v[k][i]*v[k][j];
         }
         /* Go to next entry */
         ++ij;
       }
     }
-    assert( ij == (mesh->dim+1)*mesh->dim/2 );
+    assert( ij == (dim+1)*dim/2 );
 
   } else {
     /** Case of a non-symmetric matrix */
 
     /* Compute the inverse of the eigenvectors matrix */
-    double iv[mesh->dim][mesh->dim];
-    if( mesh->dim == 2 ) {
+    double iv[dim][dim];
+    if( dim == 2 ) {
       if( !MMG5_invmat22(v,iv) )
         return 0;
-    } else if( mesh->dim == 3 ) {
+    } else if( dim == 3 ) {
       if( !MMG5_invmat33(v,iv) )
         return 0;
     }
 
     /* Loop on matrix rows */
-    for( i = 0; i < mesh->dim; i++ ) {
+    for( i = 0; i < dim; i++ ) {
       /* Loop on matrix columns */
-      for( j = 0; j < mesh->dim; j++ ) {
+      for( j = 0; j < dim; j++ ) {
         /* Initialize matrix entry */
         m[ij] = 0.0;
         /* Compute matrix entry as the recomposition of eigenvalues and
@@ -109,14 +110,14 @@ int MMG5_eigenvRecomp(MMG5_pMesh mesh,int8_t symmat,double m[],double lambda[],
          *
          * Eigenvectors are stored as rows in Mmg (not columns) so their indices
          * have to be exchanged when implementing the above formula. */
-        for( k = 0; k < mesh->dim; k++ ) {
+        for( k = 0; k < dim; k++ ) {
           m[ij] += lambda[k]*v[k][i]*iv[j][k];
         }
         /* Go to next entry */
         ++ij;
       }
     }
-    assert( ij == mesh->dim*mesh->dim );
+    assert( ij == dim*dim );
   }
 
   return 1;
@@ -124,29 +125,30 @@ int MMG5_eigenvRecomp(MMG5_pMesh mesh,int8_t symmat,double m[],double lambda[],
 
 /**
  * \param mesh pointer toward the mesh structure.
+ * \param dim matrix size.
  * \param symmat integer flag (1 if the matrix is symmetric, 0 otherwise).
  * \param m matrix array.
  * \return 1 if success, 0 if failure.
  *
  * Check the recomposition of a matrix from its eigenvalue decomposition.
  */
-int MMG5_eigenvRecomp_check(MMG5_pMesh mesh,int8_t symmat,double m[]) {
-  double lambda[mesh->dim],v[mesh->dim][mesh->dim];
-  int    msize = symmat ? (mesh->dim+1)*mesh->dim/2 : mesh->dim*mesh->dim;
+int MMG5_eigenvmat_check(MMG5_pMesh mesh,int8_t dim,int8_t symmat,double m[]) {
+  double lambda[dim],v[dim][dim];
+  int    msize = symmat ? (dim+1)*dim/2 : dim*dim;
   double mnew[msize];
   int    k;
 
   /* Compute eigendecomposition */
-  if( mesh->dim == 2 ) {
+  if( dim == 2 ) {
     if( !MMG5_eigenv2d(symmat,m,lambda,v) )
       return 0;
-  } else if( mesh->dim == 3 ) {
+  } else if( dim == 3 ) {
     if( !MMG5_eigenv3d(symmat,m,lambda,v) )
       return 0;
   }
 
   /* Recompose matrix from eigendecomposition */
-  if( !MMG5_eigenvRecomp(mesh,symmat,mnew,lambda,v) )
+  if( !MMG5_eigenvmat(mesh,dim,symmat,mnew,lambda,v) )
     return 0;
 
   /* Check result against input matrix */
