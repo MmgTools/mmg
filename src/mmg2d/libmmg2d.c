@@ -330,7 +330,6 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol met)
       if ( !MMG5_unscaleMesh(mesh,met,NULL) ) _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
       _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
     }
-    MMG2D_solTruncatureForOptim(mesh,met);
   }
 
   if ( mesh->info.hsiz > 0. ) {
@@ -605,7 +604,6 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol met) {
         _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
       MMG2D_RETURN_AND_PACK(mesh,met,sol,MMG5_LOWFAILURE);
     }
-    MMG2D_solTruncatureForOptim(mesh,met);
   } else if (mesh->info.hsiz > 0.) {
     if ( !MMG2D_Set_constantSize(mesh,met) ) {
       if ( !MMG5_unscaleMesh(mesh,met,NULL) ) _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
@@ -862,7 +860,6 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
         _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE); }
       MMG2D_RETURN_AND_PACK(mesh,met,sol,MMG5_LOWFAILURE);
     }
-    MMG2D_solTruncatureForOptim(mesh,met);
   }
 
   /* Discretization of the mesh->info.ls isovalue of sol in the mesh */

@@ -110,6 +110,9 @@ int MMG2D_doSol_iso(MMG5_pMesh mesh,MMG5_pSol sol) {
     sol->m[k] = sol->m[k] / (double)mark[k];
   }
 
+  /* Size truncature */
+  MMG2D_solTruncatureForOptim(mesh,sol);
+
   /* compute quality */
   if ( MMG2D_caltri ) {
     for (k=1; k<=mesh->nt; k++) {
@@ -241,6 +244,9 @@ int MMG2D_doSol_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
       continue;
     }
   }
+
+  /* Size truncature */
+  MMG2D_solTruncatureForOptim(mesh,sol);
 
   /* compute quality */
   if ( MMG2D_caltri ) {
