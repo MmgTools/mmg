@@ -250,9 +250,6 @@ int MMG2D_doSol_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
     }
   }
 
-  if ( mesh->info.imprim < -4 )
-    fprintf(stdout,"   HMAX %f\n",mesh->info.hmax);
-
   MMG5_SAFE_FREE(mark);
   return 1;
 }

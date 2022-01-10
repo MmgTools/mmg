@@ -193,6 +193,15 @@ int MMG2D_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
     }
 
   }
+
+  if ( mesh->info.ddebug ) {
+    /* print unscaled values for debug purpose */
+    fprintf(stdout,"     After optim computation:   hmin %lf (user setted %d)\n"
+            "                                hmax %lf (user setted %d)\n",
+            mesh->info.delta * mesh->info.hmin,mesh->info.sethmin,
+            mesh->info.delta * mesh->info.hmax,mesh->info.sethmax);
+  }
+
   return 1;
 }
 
