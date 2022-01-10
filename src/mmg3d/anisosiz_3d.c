@@ -1159,7 +1159,7 @@ int MMG5_defmetvol(MMG5_pMesh mesh,MMG5_pSol met,int8_t ismet) {
 
       /** Second step: set metric */
       m = &met->m[met->size*ip];
-      if ( !MMG5_eigenv(1,m,lambda,v) ) {
+      if ( !MMG5_eigenv3d(1,m,lambda,v) ) {
         if ( !mmgWarn ) {
           fprintf(stderr,"\n  ## Warning: %s: Unable to diagonalize at least"
                   " 1 metric.\n",__func__);
@@ -1624,7 +1624,7 @@ int MMG3D_simred(MMG5_pMesh mesh,double *m,double *n,double dm[3],
   MMG5_mn(im,n,imn);
 
   /* Find eigenvalues of imn */
-  order = MMG5_eigenv(0,imn,lambda,vp);
+  order = MMG5_eigenv3d(0,imn,lambda,vp);
 
   if ( !order ) {
     if ( !mmgWarn0 ) {
@@ -1655,7 +1655,7 @@ int MMG3D_simred(MMG5_pMesh mesh,double *m,double *n,double dm[3],
     }
     else {
       /* Subcase where m is not diagonal; dd,trimn,... are reused */
-      MMG5_eigenv(1,m,dm,vp);
+      MMG5_eigenv3d(1,m,dm,vp);
     }
     /* Eigenvalues of metric n */
     dn[0] = lambda[0]*dm[0];
@@ -1853,7 +1853,7 @@ int MMG5_grad2metVolreq(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int npmaste
      * found. So, compute the eigenvalues. */
     double ll[3],rr[3][3],llmin;
     int i;
-    if( !MMG5_eigenv(1,mm2,ll, rr) )
+    if( !MMG5_eigenv3d(1,mm2,ll, rr) )
       return 0;
     llmin = DBL_MAX;
     for( i = 0; i < 3; i++ )
