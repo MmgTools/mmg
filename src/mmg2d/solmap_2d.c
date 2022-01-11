@@ -87,26 +87,12 @@ int MMG2D_doSol_iso(MMG5_pMesh mesh,MMG5_pSol sol) {
     }
   }
 
-  /* if hmax is not specified, compute it from the metric */
-  if ( mesh->info.hmax < 0. ) {
-    dd = 0.;
-    for (k=1; k<=mesh->np; k++) {
-      p1 = &mesh->point[k];
-      if ( !mark[k] ) continue;
-      dd = MG_MAX(dd,sol->m[k]);
-    }
-    assert ( dd > 0. );
-    mesh->info.hmax = 10.*dd;
-  }
-
   /* vertex size */
   for (k=1; k<=mesh->np; k++) {
     p1 = &mesh->point[k];
     if ( !mark[k] )  {
-      sol->m[k] = mesh->info.hmax;
       continue;
     }
-
     sol->m[k] = sol->m[k] / (double)mark[k];
   }
 
@@ -192,7 +178,6 @@ int MMG2D_doSol_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
   }
 
   /* Compute metric tensor and hmax if not specified */
-  double isqhmax = FLT_MAX;
   for (k=1; k<=mesh->np; k++) {
     p1 = &mesh->point[k];
     if ( !mark[k] ) {
@@ -214,6 +199,7 @@ int MMG2D_doSol_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
     sol->m[iadr+1] = dd*tensordot[1];
     sol->m[iadr+2] = dd*tensordot[2];
 
+#ifndef NDEBUG
     /* Check metric */
     double lambda[2],vp[2][2];
     MMG5_eigensym(sol->m+iadr,lambda,vp);
@@ -223,26 +209,7 @@ int MMG2D_doSol_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
     /* Normally the case where the point belongs to only 2 colinear points is
     impossible */
     assert (isfinite(lambda[0]) && isfinite(lambda[1]) && "wrong eigenvalue");
-
-    isqhmax = MG_MIN(isqhmax,lambda[0]);
-    isqhmax = MG_MIN(isqhmax,lambda[1]);
-  }
-  if ( mesh->info.hmax < 0.) {
-    assert ( isqhmax > 0. && isqhmax < FLT_MAX && "Wrong hmax value" );
-    mesh->info.hmax = 10./sqrt(isqhmax);
-  }
-
-  /* vertex size: impose hmax size */
-  isqhmax = 1./(mesh->info.hmax*mesh->info.hmax);
-  for (k=1; k<=mesh->np; k++) {
-    p1 = &mesh->point[k];
-
-    if ( !mark[k] )  {
-      iadr = 3*k;
-      sol->m[iadr]   = isqhmax;
-      sol->m[iadr+2] = sol->m[iadr];
-      continue;
-    }
+#endif
   }
 
   /* Size truncature */
