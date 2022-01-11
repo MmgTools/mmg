@@ -164,29 +164,38 @@ int MMG5_intregmet(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t i,double s,
   MMG5_pTetra     pt;
   MMG5_pxTetra    pxt;
   MMG5_Tria       ptt;
-  int             ifa0, ifa1, iloc;
+  int             ifa0, ifa1, iloc, ier;
 
   pt   = &mesh->tetra[k];
   pxt  = &mesh->xtetra[pt->xt];
   ifa0 = MMG5_ifar[i][0];
   ifa1 = MMG5_ifar[i][1];
 
+  ier  = -1;
+
   if ( pxt->ftag[ifa0] & MG_BDY ) {
     MMG5_tet2tri( mesh,k,ifa0,&ptt);
     iloc = MMG5_iarfinv[ifa0][i];
     assert(iloc >= 0);
-    return MMG5_interpreg_ani(mesh,met,&ptt,iloc,s,mr);
+    ier = MMG5_interpreg_ani(mesh,met,&ptt,iloc,s,mr);
   }
   else if ( pxt->ftag[ifa1] & MG_BDY ) {
     MMG5_tet2tri( mesh,k,ifa1,&ptt);
     iloc = MMG5_iarfinv[ifa1][i];
     assert(iloc >= 0);
-    return MMG5_interpreg_ani(mesh,met,&ptt,iloc,s,mr);
+    ier = MMG5_interpreg_ani(mesh,met,&ptt,iloc,s,mr);
   }
 
-  /* if we pass here, then i is a boundary edge but the tet has no bdy
-   * face. Don't do anything, the edge will be split via a boundary tetra. */
-  return -1;
+  /* if ier = -1, then i is a boundary edge but the tet has no bdy face. Don't
+   * do anything, the edge will be split via a boundary tetra. Otherwise, if
+   * ier=0, interpreg_ani has failed, if ier=1, interpreg_ani succeed. */
+  if ( mesh->info.ddebug && !ier ) {
+    fprintf(stderr," %s: %d: interpreg_ani error.\n",__func__,__LINE__);
+    fprintf(stderr," Elt %d: %d %d %d %d\n",MMG3D_indElt(mesh,k),MMG3D_indPt(mesh,pt->v[0]),
+            MMG3D_indPt(mesh,pt->v[1]),MMG3D_indPt(mesh,pt->v[2]),MMG3D_indPt(mesh,pt->v[3]));
+  }
+
+  return ier;
 }
 
 

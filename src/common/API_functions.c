@@ -656,6 +656,69 @@ const char* MMG5_Get_typeName(enum MMG5_type typ)
   }
 }
 
+const char* MMG5_Get_tagName(int tag)
+{
+  static char tags_name[1024];
+
+  if ( !tag )
+  {
+    return "No tag";
+  }
+
+  if ( tag & MG_NUL ) {
+    return "Removed";
+  }
+
+  strcpy(tags_name, "\0");
+
+  if ( tag & MG_REF ) {
+    strcat(tags_name,"Reference ");
+  }
+
+  if ( tag & MG_GEO) {
+    strcat(tags_name,"Ridge ");
+  }
+
+  if ( tag & MG_REQ) {
+    strcat(tags_name,"Required ");
+  }
+
+  if ( tag & MG_NOM) {
+    strcat(tags_name,"Non-manifold ");
+  }
+
+  if ( tag & MG_BDY) {
+    strcat(tags_name,"Boundary ");
+  }
+
+  if ( tag & MG_CRN) {
+    strcat(tags_name,"Corner ");
+  }
+
+  if ( tag & MG_NOSURF) {
+    strcat(tags_name,"Nosurf ");
+  }
+
+  if ( tag & MG_OPNBDY) {
+    strcat(tags_name,"Opnbdy ");
+  }
+
+  if ( tag & MG_OLDPARBDY) {
+    strcat(tags_name,"Old-parbdy ");
+  }
+
+  if ( tag & MG_OLDPARBDY) {
+    strcat(tags_name,"Parbdybdy ");
+  }
+
+  if ( tag & MG_OLDPARBDY) {
+    strcat(tags_name,"Parbdy ");
+  }
+  strcat(tags_name,"tag(s).");
+
+  return tags_name;
+}
+
 int MMG5_Set_multiMat(MMG5_pMesh mesh,MMG5_pSol sol,int ref,
                       int split,int rin,int rex){
   MMG5_pMat mat;

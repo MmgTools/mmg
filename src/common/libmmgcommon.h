@@ -240,6 +240,17 @@ const char* MMG5_Get_entitiesName(enum MMG5_entities ent);
 const char* MMG5_Get_typeName(enum MMG5_type typ);
 
 /**
+ * \param tag input entity tag
+ *
+ * \return the list of the flags contained in \a tag
+ *
+ * Print the name associated to the \a typ value in the \a MMG5_type enum.
+ *
+ * \warning for debug purpose, no thread safe.
+ */
+const char* MMG5_Get_tagName(int tag);
+
+/**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward an array of solution structure (that stores solution fields).
  * \return 1
