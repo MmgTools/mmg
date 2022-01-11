@@ -887,7 +887,7 @@ int MMG2D_Unset_requiredTriangle(MMG5_pMesh mesh, MMG_int k) {
   return 1;
 }
 
-int MMG2D_Get_triangle(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* ref
+int MMG2D_Get_triangle(MMG5_pMesh mesh, MMG_int* v0, MMG_int* v1, MMG_int* v2, int* ref
                        ,int* isRequired) {
   MMG5_pTria  ptt;
 
@@ -989,7 +989,7 @@ int  MMG2D_Set_triangles(MMG5_pMesh mesh, int *tria, int *refs) {
   return 1;
 }
 
-int  MMG2D_Get_triangles(MMG5_pMesh mesh, int* tria, int* refs,
+int  MMG2D_Get_triangles(MMG5_pMesh mesh, MMG_int* tria, int* refs,
                          int* areRequired) {
   MMG5_pTria ptt;
   int        i, j;

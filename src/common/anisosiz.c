@@ -1739,7 +1739,8 @@ int MMG5_compute_meanMetricAtMarkedPoints_ani ( MMG5_pMesh mesh,MMG5_pSol met ) 
 int MMG5_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met,int *it) {
   MMG5_pTria   pt;
   MMG5_pPoint  p1,p2;
-  int          k,nup,nu,maxit,np1,np2,ier;
+  int          nup,nu,maxit,ier;
+  MMG_int      k,np1,np2;
   int8_t       i;
 
   /** Mark the edges belonging to a required entity */

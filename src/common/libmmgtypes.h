@@ -557,7 +557,7 @@ typedef struct {
   MMG_int       dim; /*!< Dimension of the mesh */
   int       type; /*!< Type of the mesh */
   MMG_int       npi,nti,nai,nei,np,na,nt,ne,npmax,namax,ntmax,nemax,xpmax,xtmax;
-  MMG_int       nquad,nprism; /* number of quadrangles and prisms */
+  int       nquad,nprism; /* number of quadrangles and prisms */
   int       nsols; /* number of solutions (metric excluded) in the solution file */
   int       nc1;
 
@@ -566,8 +566,8 @@ typedef struct {
   int       mark; /*!< Flag for delaunay (to know if an entity has
                     been treated) */
   MMG_int       xp,xt,xpr; /*!< Number of surfaces points, triangles/tetrahedra and prisms */
-  int       npnil; /*!< Index of first unused point */
-  int       nenil; /*!< Index of first unused element */
+  MMG_int       npnil; /*!< Index of first unused point */
+  MMG_int       nenil; /*!< Index of first unused element */
   int       nanil; /*!< Index of first unused edge (2d only)*/
   MMG_int      *adja; /*!< Table of tetrahedron adjacency: if
                     \f$adja[4*(i-1)+1+j]=4*k+l\f$ then the \f$i^{th}\f$ and

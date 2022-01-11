@@ -11,11 +11,11 @@ extern int    (*MMG3D_gradsiz)(MMG5_pMesh ,MMG5_pSol );
 extern int    (*MMG3D_gradsizreq)(MMG5_pMesh ,MMG5_pSol );
 extern int    (*MMG5_intmet)(MMG5_pMesh,MMG5_pSol,int,int8_t,int, double);
 extern int    (*MMG5_interp4bar)(MMG5_pMesh,MMG5_pSol,int,int,double *);
-extern int    (*MMG5_movintpt)(MMG5_pMesh ,MMG5_pSol, MMG3D_pPROctree ,int *, int , int );
-extern int    (*MMG5_movbdyregpt)(MMG5_pMesh, MMG5_pSol, MMG3D_pPROctree ,int*, int, int*, int, int ,int);
-extern int    (*MMG5_movbdyrefpt)(MMG5_pMesh, MMG5_pSol, MMG3D_pPROctree ,int*, int, int*, int ,int);
-extern int    (*MMG5_movbdynompt)(MMG5_pMesh, MMG5_pSol, MMG3D_pPROctree ,int*, int, int*, int ,int);
-extern int    (*MMG5_movbdyridpt)(MMG5_pMesh, MMG5_pSol, MMG3D_pPROctree ,int*, int, int*, int ,int);
+extern int    (*MMG5_movintpt)(MMG5_pMesh ,MMG5_pSol, MMG3D_pPROctree ,MMG_int *, MMG_int , int );
+extern int    (*MMG5_movbdyregpt)(MMG5_pMesh, MMG5_pSol, MMG3D_pPROctree ,MMG_int*, MMG_int, MMG_int*, MMG_int, int ,int);
+extern int    (*MMG5_movbdyrefpt)(MMG5_pMesh, MMG5_pSol, MMG3D_pPROctree ,MMG_int*, MMG_int, MMG_int*, MMG_int ,int);
+extern int    (*MMG5_movbdynompt)(MMG5_pMesh, MMG5_pSol, MMG3D_pPROctree ,MMG_int*, MMG_int, MMG_int*, MMG_int ,int);
+extern int    (*MMG5_movbdyridpt)(MMG5_pMesh, MMG5_pSol, MMG3D_pPROctree ,MMG_int*, MMG_int, MMG_int*, MMG_int ,int);
 extern int    (*MMG5_cavity)(MMG5_pMesh ,MMG5_pSol ,int ,int ,int *,int ,double);
 extern int    (*MMG3D_PROctreein)(MMG5_pMesh ,MMG5_pSol ,MMG3D_pPROctree ,int,double );
 

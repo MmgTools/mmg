@@ -580,7 +580,7 @@ int MMGS_surfballRotation(MMG5_pMesh mesh,MMG5_pPoint p0,MMG_int *list,MMG_int i
  * the geometric approx of the surface.
  *
  */
-static int MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,MMG_int it,MMG_int ip) {
+static int MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,MMG_int it,int ip) {
   MMG5_pTria          pt;
   MMG5_pPoint         p0;
   MMG5_Bezier         b;

@@ -50,9 +50,10 @@ extern MMG5_Info  info;
  * of the tetra, jel = local index of p within kel.
  *
  */
-int MMG5_boulevolp (MMG5_pMesh mesh, int start, int ip, int * list){
+int MMG5_boulevolp (MMG5_pMesh mesh, MMG_int start, int ip, MMG_int * list){
   MMG5_pTetra  pt,pt1;
-  int    *adja,nump,ilist,base,cur,k,k1;
+  MMG_int    *adja,nump,k,k1;
+  int        base,ilist,cur;
   int8_t  j,l,i;
 
   base = ++mesh->base;
@@ -107,7 +108,7 @@ int MMG5_boulevolp (MMG5_pMesh mesh, int start, int ip, int * list){
  * Find the local index of the edge \a ia in the tetra \a pt of index \a k;
  *
  */
-int MMG3D_findEdge(MMG5_pMesh mesh,MMG5_pTetra pt,int k,int na,int nb,int error,
+int MMG3D_findEdge(MMG5_pMesh mesh,MMG5_pTetra pt,MMG_int k,MMG_int na,MMG_int nb,int error,
                    int8_t *mmgWarn,int8_t *ia) {
   int8_t ipa,ipb;
 
@@ -152,13 +153,13 @@ int MMG3D_findEdge(MMG5_pMesh mesh,MMG5_pTetra pt,int k,int na,int nb,int error,
  * supported by face \a iface), enumerating its (outer)surfacic ball.
  *
  */
-int MMG5_boulenm(MMG5_pMesh mesh,int start,int ip,int iface,
+int MMG5_boulenm(MMG5_pMesh mesh,MMG_int start,MMG_int ip,int iface,
                   double n[3],double t[3]) {
   MMG5_pTetra   pt;
   MMG5_pPoint   p0,p1,ppt;
   double   dd,nt[3],l0,l1;
-  int      base,nump,nr,nnm,k,piv,na,nb,adj,nvstart,fstart,aux,ip0,ip1;
-  int     *adja;
+  int      base,nr,nnm;
+  MMG_int     nump,k,*adja,piv,nvstart,aux,na,nb,adj,fstart,ip0,ip1;
   int16_t  tag;
   int8_t   iopp,ipiv,indb,inda,i,isface;
   int8_t   indedg[4][4] = { {-1,0,1,2}, {0,-1,3,4}, {1,3,-1,5}, {2,4,5,-1} };
@@ -313,13 +314,14 @@ Travel the ball of the internal non manifold point ip in tetra start
  and calculate the tangent vector to the underlying curve.
  Return 1 when the procedure has completed successfully, 0 when more than two NOM points are attached to ip.
 */
-int MMG5_boulenmInt(MMG5_pMesh mesh,int start,int ip,double t[3]) {
+int MMG5_boulenmInt(MMG5_pMesh mesh,MMG_int start,MMG_int ip,double t[3]) {
   MMG5_pTetra    pt,pt1;
   MMG5_pxTetra   pxt;
   MMG5_pPoint    p0,p1,ppt;
   double         l0,l1,dd;
-  int            k,kk,ip0,ip1,nump,na,nb,base,cur,ilist,*adja;
-  int            list[MMG3D_LMAX+2];
+  int            base,cur,ilist;
+  MMG_int        kk,ip0,ip1,na,nb,k,*adja,nump;
+  MMG_int            list[MMG3D_LMAX+2];
   int8_t         i,j,ii,ie;
   
   base = ++mesh->base;
@@ -591,12 +593,13 @@ int MMG5_boulernm(MMG5_pMesh mesh,MMG5_Hash *hash,int start,int ip,int *ng,int *
  * non-manifold, must be called only if \a start has no adjacent through iface.
  *
  */
-int MMG5_boulesurfvolp(MMG5_pMesh mesh,int start,int ip,int iface,
-                        int *listv,int *ilistv,int *lists,int*ilists, int isnm)
+int MMG5_boulesurfvolp(MMG5_pMesh mesh,MMG_int start,MMG_int ip,int iface,
+                        MMG_int *listv,MMG_int *ilistv,MMG_int *lists,MMG_int*ilists, int isnm)
 {
   MMG5_pTetra  pt,pt1;
   MMG5_pxTetra pxt;
-  int  base,nump,k,k1,*adja,piv,na,nb,adj,cur,nvstart,fstart,aux;
+  int  base;
+  MMG_int k,*adja,nump,k1,fstart,piv,na,nb,adj,nvstart,aux,cur;
   int8_t iopp,ipiv,i,j,l,isface;
   static int8_t mmgErr0=0, mmgErr1=0, mmgErr2=0;
 

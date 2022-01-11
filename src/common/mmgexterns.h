@@ -27,9 +27,9 @@
 extern int  (*MMG5_chkmsh)(MMG5_pMesh,int,int);
 extern int  (*MMG5_bezierCP)(MMG5_pMesh ,MMG5_Tria *,MMG5_pBezier ,int8_t );
 extern double (*MMG5_lenSurfEdg)(MMG5_pMesh mesh,MMG5_pSol sol ,int ,int, int8_t );
-extern int  (*MMG5_indElt)(MMG5_pMesh mesh,int kel);
-extern int  (*MMG5_indPt)(MMG5_pMesh mesh,int kp);
-extern int  (*MMG5_grad2met_ani)(MMG5_pMesh,MMG5_pSol,MMG5_pTria,int,int);
+extern MMG_int  (*MMG5_indElt)(MMG5_pMesh mesh,MMG_int kel);
+extern MMG_int  (*MMG5_indPt)(MMG5_pMesh mesh,MMG_int kp);
+extern int  (*MMG5_grad2met_ani)(MMG5_pMesh,MMG5_pSol,MMG5_pTria,MMG_int,MMG_int);
 extern int  (*MMG5_grad2metreq_ani)(MMG5_pMesh,MMG5_pSol,MMG5_pTria,int,int);
 extern int    (*MMG5_compute_meanMetricAtMarkedPoints)( MMG5_pMesh,MMG5_pSol);
 #ifdef USE_SCOTCH

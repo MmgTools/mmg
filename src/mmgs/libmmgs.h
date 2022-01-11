@@ -451,7 +451,7 @@ int  MMGS_Set_requiredVertex(MMG5_pMesh mesh, MMG_int k);
  * >   END SUBROUTINE\n
  *
  */
-  int  MMGS_Unset_requiredVertex(MMG5_pMesh mesh, MMGint k);
+  int  MMGS_Unset_requiredVertex(MMG5_pMesh mesh, MMG_int k);
 
 /**
  * \param mesh pointer toward the mesh structure.

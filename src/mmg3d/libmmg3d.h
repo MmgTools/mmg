@@ -257,7 +257,7 @@ enum MMG3D_Param {
  *
  */
   int  MMG3D_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity,
-                         int np, int typSol);
+                         MMG_int np, int typSol);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -281,8 +281,8 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int MMG3D_Set_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol *sol,int nsols,
-                                   int nentities, int *typSol);
+  int MMG3D_Set_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol *sol,MMG_int nsols,
+                                   MMG_int nentities, int *typSol);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -306,8 +306,8 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Set_meshSize(MMG5_pMesh mesh,int np,int ne,int nprism,
-                          int nt,int nquad,int na);
+  int  MMG3D_Set_meshSize(MMG5_pMesh mesh,MMG_int np,MMG_int ne,int nprism,
+                          MMG_int nt,int nquad,MMG_int na);
 
 /* init structure datas */
 /**
@@ -332,7 +332,7 @@ enum MMG3D_Param {
  *
  */
   int  MMG3D_Set_vertex(MMG5_pMesh mesh, double c0, double c1,
-                        double c2, int ref,int pos);
+                        double c2, int ref,MMG_int pos);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param vertices table of the points coor.
@@ -377,8 +377,8 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Set_tetrahedron(MMG5_pMesh mesh, int v0, int v1,
-                             int v2, int v3, int ref, int pos);
+  int  MMG3D_Set_tetrahedron(MMG5_pMesh mesh, MMG_int v0, MMG_int v1,
+                             MMG_int v2, MMG_int v3, int ref, MMG_int pos);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param tetra vertices of the tetras of the mesh
@@ -399,7 +399,7 @@ enum MMG3D_Param {
  * > !  END SUBROUTINE\n
  *
  */
-  int  MMG3D_Set_tetrahedra(MMG5_pMesh mesh, int *tetra,
+  int  MMG3D_Set_tetrahedra(MMG5_pMesh mesh, MMG_int *tetra,
                             int *refs);
 /**
  * \param mesh pointer toward the mesh structure.
@@ -424,8 +424,8 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Set_prism(MMG5_pMesh mesh, int v0, int v1,
-                       int v2, int v3, int v4, int v5, int ref, int pos);
+  int  MMG3D_Set_prism(MMG5_pMesh mesh, MMG_int v0, MMG_int v1,
+                       MMG_int v2, MMG_int v3, MMG_int v4, MMG_int v5, int ref, MMG_int pos);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param prisms vertices of the prisms of the mesh
@@ -469,8 +469,8 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Set_triangle(MMG5_pMesh mesh, int v0, int v1,
-                          int v2, int ref,int pos);
+  int  MMG3D_Set_triangle(MMG5_pMesh mesh, MMG_int v0, MMG_int v1,
+                          MMG_int v2, int ref,MMG_int pos);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param tria pointer toward the table of the tria vertices
@@ -491,7 +491,7 @@ enum MMG3D_Param {
  * > !  END SUBROUTINE\n
  *
  */
-  int  MMG3D_Set_triangles(MMG5_pMesh mesh, int *tria, int *refs);
+  int  MMG3D_Set_triangles(MMG5_pMesh mesh, MMG_int *tria, int *refs);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param v0 first vertex of quadrilateral.
@@ -513,8 +513,8 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Set_quadrilateral(MMG5_pMesh mesh, int v0, int v1,
-                               int v2, int v3, int ref,int pos);
+  int  MMG3D_Set_quadrilateral(MMG5_pMesh mesh, MMG_int v0, MMG_int v1,
+                               MMG_int v2, MMG_int v3, int ref,MMG_int pos);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param quads pointer toward the table of the quads vertices
@@ -555,7 +555,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Set_edge(MMG5_pMesh mesh, int v0, int v1, int ref,int pos);
+  int  MMG3D_Set_edge(MMG5_pMesh mesh, MMG_int v0, MMG_int v1, int ref,MMG_int pos);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param k vertex index.
@@ -571,7 +571,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Set_corner(MMG5_pMesh mesh, int k);
+  int  MMG3D_Set_corner(MMG5_pMesh mesh, MMG_int k);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -589,7 +589,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Unset_corner(MMG5_pMesh mesh, int k);
+  int  MMG3D_Unset_corner(MMG5_pMesh mesh, MMG_int k);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -606,7 +606,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Set_requiredVertex(MMG5_pMesh mesh, int k);
+  int  MMG3D_Set_requiredVertex(MMG5_pMesh mesh, MMG_int k);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -623,7 +623,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Unset_requiredVertex(MMG5_pMesh mesh, int k);
+  int  MMG3D_Unset_requiredVertex(MMG5_pMesh mesh, MMG_int k);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -640,7 +640,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Set_requiredTetrahedron(MMG5_pMesh mesh, int k);
+  int  MMG3D_Set_requiredTetrahedron(MMG5_pMesh mesh, MMG_int k);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -658,7 +658,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Unset_requiredTetrahedron(MMG5_pMesh mesh, int k);
+  int  MMG3D_Unset_requiredTetrahedron(MMG5_pMesh mesh, MMG_int k);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -677,7 +677,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Set_requiredTetrahedra(MMG5_pMesh mesh, int *reqIdx, int nreq);
+  int  MMG3D_Set_requiredTetrahedra(MMG5_pMesh mesh, int *reqIdx, MMG_int nreq);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -697,7 +697,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Unset_requiredTetrahedra(MMG5_pMesh mesh, int *reqIdx, int nreq);
+  int  MMG3D_Unset_requiredTetrahedra(MMG5_pMesh mesh, int *reqIdx, MMG_int nreq);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -714,7 +714,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Set_requiredTriangle(MMG5_pMesh mesh, int k);
+  int  MMG3D_Set_requiredTriangle(MMG5_pMesh mesh, MMG_int k);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -731,7 +731,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Unset_requiredTriangle(MMG5_pMesh mesh, int k);
+  int  MMG3D_Unset_requiredTriangle(MMG5_pMesh mesh, MMG_int k);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -750,7 +750,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Set_requiredTriangles(MMG5_pMesh mesh, int *reqIdx, int nreq);
+  int  MMG3D_Set_requiredTriangles(MMG5_pMesh mesh, int *reqIdx, MMG_int nreq);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -769,7 +769,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Unset_requiredTriangles(MMG5_pMesh mesh, int *reqIdx, int nreq);
+  int  MMG3D_Unset_requiredTriangles(MMG5_pMesh mesh, int *reqIdx, MMG_int nreq);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -787,7 +787,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Set_parallelTriangle(MMG5_pMesh mesh, int k);
+  int  MMG3D_Set_parallelTriangle(MMG5_pMesh mesh, MMG_int k);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -805,7 +805,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Unset_parallelTriangle(MMG5_pMesh mesh, int k);
+  int  MMG3D_Unset_parallelTriangle(MMG5_pMesh mesh, MMG_int k);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -825,7 +825,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Set_parallelTriangles(MMG5_pMesh mesh, int *parIdx, int npar);
+  int  MMG3D_Set_parallelTriangles(MMG5_pMesh mesh, int *parIdx, MMG_int npar);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -845,7 +845,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Unset_parallelTriangles(MMG5_pMesh mesh, int *parIdx, int npar);
+  int  MMG3D_Unset_parallelTriangles(MMG5_pMesh mesh, int *parIdx, MMG_int npar);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -862,7 +862,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Set_ridge(MMG5_pMesh mesh, int k);
+  int  MMG3D_Set_ridge(MMG5_pMesh mesh, MMG_int k);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -879,7 +879,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Unset_ridge(MMG5_pMesh mesh, int k);
+  int  MMG3D_Unset_ridge(MMG5_pMesh mesh, MMG_int k);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -896,7 +896,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Set_requiredEdge(MMG5_pMesh mesh, int k);
+  int  MMG3D_Set_requiredEdge(MMG5_pMesh mesh, MMG_int k);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -913,7 +913,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Unset_requiredEdge(MMG5_pMesh mesh, int k);
+  int  MMG3D_Unset_requiredEdge(MMG5_pMesh mesh, MMG_int k);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -935,7 +935,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Set_normalAtVertex(MMG5_pMesh mesh, int k, double n0, double n1,
+  int  MMG3D_Set_normalAtVertex(MMG5_pMesh mesh, MMG_int k, double n0, double n1,
                                 double n2) ;
 
 /**
@@ -956,7 +956,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Set_scalarSol(MMG5_pSol met, double s,int pos);
+  int  MMG3D_Set_scalarSol(MMG5_pSol met, double s,MMG_int pos);
 /**
  * \param met pointer toward the sol structure.
  * \param s table of the scalar solutions values.
@@ -995,7 +995,7 @@ enum MMG3D_Param {
  *
  */
   int MMG3D_Set_vectorSol(MMG5_pSol met, double vx,double vy, double vz,
-                          int pos);
+                          MMG_int pos);
 /**
  * \param met pointer toward the sol structure.
  * \param sols table of the vectorial solutions
@@ -1037,7 +1037,7 @@ enum MMG3D_Param {
  *
  */
   int MMG3D_Set_tensorSol(MMG5_pSol met, double m11,double m12, double m13,
-                          double m22,double m23, double m33, int pos);
+                          double m22,double m23, double m33, MMG_int pos);
 /**
  * \param met pointer toward the sol structure.
  * \param sols table of the tensorial solutions.
@@ -1076,7 +1076,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Set_ithSol_inSolsAtVertices(MMG5_pSol sol,int i, double* s,int pos);
+  int  MMG3D_Set_ithSol_inSolsAtVertices(MMG5_pSol sol,int i, double* s,MMG_int pos);
 /**
  * \param sol pointer toward the array of solutions
  * \param i position of the solution field that we want to set.
@@ -1242,8 +1242,8 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Get_meshSize(MMG5_pMesh mesh, int* np, int* ne,int *nprism, int* nt,
-                          int* nquad, int* na);
+  int  MMG3D_Get_meshSize(MMG5_pMesh mesh, MMG_int* np, MMG_int* ne,int *nprism, MMG_int* nt,
+                          int* nquad, MMG_int* na);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the sol structure.
@@ -1265,7 +1265,7 @@ enum MMG3D_Param {
  *
  */
   int  MMG3D_Get_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int* typEntity,
-                         int* np,int* typSol);
+                         MMG_int* np,int* typSol);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward an array of sol structure.
@@ -1287,8 +1287,8 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Get_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol* sol,int *nsols,
-                                    int* nentities,int* typSol);
+  int  MMG3D_Get_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol* sol,MMG_int *nsols,
+                                    MMG_int* nentities,int* typSol);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param c0 pointer toward the coordinate of the point along the first
@@ -1342,7 +1342,7 @@ enum MMG3D_Param {
  *
  */
  int  MMG3D_GetByIdx_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2, int* ref,
-                            int* isCorner, int* isRequired,int idx);
+                            int* isCorner, int* isRequired,MMG_int idx);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1398,8 +1398,8 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Get_tetrahedron(MMG5_pMesh mesh, int* v0, int* v1, int* v2,
-                             int* v3,int* ref, int* isRequired);
+  int  MMG3D_Get_tetrahedron(MMG5_pMesh mesh, MMG_int* v0, MMG_int* v1, MMG_int* v2,
+                             MMG_int* v3,int* ref, int* isRequired);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param tetra pointer toward the table of the tetrahedra vertices.
@@ -1425,7 +1425,7 @@ enum MMG3D_Param {
  * > !  END SUBROUTINE\n
  *
  */
-  int  MMG3D_Get_tetrahedra(MMG5_pMesh mesh, int* tetra,int* refs,
+  int  MMG3D_Get_tetrahedra(MMG5_pMesh mesh, MMG_int* tetra,int* refs,
                             int* areRequired);
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1453,8 +1453,8 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Get_prism(MMG5_pMesh mesh, int* v0, int* v1, int* v2,
-                       int* v3,int* v4,int* v5,int* ref, int* isRequired);
+  int  MMG3D_Get_prism(MMG5_pMesh mesh, MMG_int* v0, MMG_int* v1, MMG_int* v2,
+                       MMG_int* v3,MMG_int* v4,MMG_int* v5,int* ref, int* isRequired);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param prisms pointer toward the table of the prisms vertices.
@@ -1503,7 +1503,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Get_triangle(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* ref,
+  int  MMG3D_Get_triangle(MMG5_pMesh mesh, MMG_int* v0, MMG_int* v1, MMG_int* v2, int* ref,
                           int* isRequired);
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1529,7 +1529,7 @@ enum MMG3D_Param {
  * > !  END SUBROUTINE\n
  *
  */
-  int  MMG3D_Get_triangles(MMG5_pMesh mesh, int* tria, int* refs,
+  int  MMG3D_Get_triangles(MMG5_pMesh mesh, MMG_int* tria, int* refs,
                            int* areRequired);
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1553,7 +1553,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Get_quadrilateral(MMG5_pMesh mesh, int* v0, int* v1, int* v2,int* v3,
+  int  MMG3D_Get_quadrilateral(MMG5_pMesh mesh, MMG_int* v0, MMG_int* v1, MMG_int* v2,MMG_int* v3,
                                int* ref, int* isRequired);
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1601,7 +1601,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Get_edge(MMG5_pMesh mesh, int* e0, int* e1, int* ref,
+  int  MMG3D_Get_edge(MMG5_pMesh mesh, MMG_int* e0, MMG_int* e1, int* ref,
                       int* isRidge, int* isRequired);
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1620,7 +1620,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int MMG3D_Set_edges(MMG5_pMesh mesh, int *edges, int* refs);
+  int MMG3D_Set_edges(MMG5_pMesh mesh, MMG_int *edges, int* refs);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param edges pointer toward the array of edges.
@@ -1641,7 +1641,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int MMG3D_Get_edges(MMG5_pMesh mesh,int *edges,int* refs,
+  int MMG3D_Get_edges(MMG5_pMesh mesh,MMG_int *edges,int* refs,
                       int *areRidges,int *areRequired);
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1663,7 +1663,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Get_normalAtVertex(MMG5_pMesh mesh, int k, double *n0, double *n1,
+  int  MMG3D_Get_normalAtVertex(MMG5_pMesh mesh, MMG_int k, double *n0, double *n1,
                                 double *n2) ;
 
 /**
@@ -1682,7 +1682,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  double MMG3D_Get_tetrahedronQuality(MMG5_pMesh mesh,MMG5_pSol met, int k);
+  double MMG3D_Get_tetrahedronQuality(MMG5_pMesh mesh,MMG5_pSol met, MMG_int k);
 
 /**
  * \param met pointer toward the sol structure.
@@ -1811,7 +1811,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Get_ithSol_inSolsAtVertices(MMG5_pSol sol,int i, double* s,int pos);
+  int  MMG3D_Get_ithSol_inSolsAtVertices(MMG5_pSol sol,int i, double* s,MMG_int pos);
 /**
  * \param sol pointer toward the array of solutions
  * \param i position of the solution field that we want to get.
@@ -1875,8 +1875,8 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Add_tetrahedron(MMG5_pMesh mesh, int v0, int v1,
-                             int v2, int v3, int ref);
+  int  MMG3D_Add_tetrahedron(MMG5_pMesh mesh, MMG_int v0, MMG_int v1,
+                             MMG_int v2, MMG_int v3, int ref);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1900,7 +1900,7 @@ enum MMG3D_Param {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Add_vertex(MMG5_pMesh mesh, double c0, double c1,
+  MMG_int  MMG3D_Add_vertex(MMG5_pMesh mesh, double c0, double c1,
                         double c2, int ref);
 
 /* input/output functions */
