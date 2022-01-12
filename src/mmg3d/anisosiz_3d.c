@@ -1750,13 +1750,13 @@ int MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int np1,int np
   for( int i = 0; i < 3; i++ ) {
     lambda[i] = 1./pow( 1./sqrt(lambda[i]) + mesh->info.hgrad*l + MMG5_EPSOK, 2.0);
   }
-  MMG5_eigenvmat(mesh,mesh->dim,1,m1,lambda,(double *)vp);
+  MMG5_eigenvmatsym3d(mesh,m1,lambda,vp);
 
   MMG5_eigenv3d(1,m2,lambda,vp);
   for( int i = 0; i < 3; i++ ) {
     lambda[i] = 1./pow( 1./sqrt(lambda[i]) + mesh->info.hgrad*l + MMG5_EPSOK, 2.0);
   }
-  MMG5_eigenvmat(mesh,mesh->dim,1,m2,lambda,(double *)vp);
+  MMG5_eigenvmatsym3d(mesh,m2,lambda,vp);
 
   if( mesh->point[np1].flag >= mesh->base-1 ) {
     MMG3D_gradEigenv(mesh,mm2,m1,2,&ier);
