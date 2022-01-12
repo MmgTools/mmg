@@ -168,6 +168,8 @@ int MMG5_scale_scalarMetric(MMG5_pMesh mesh, MMG5_pSol met, double dd) {
 int MMG5_scale_tensorMetric(MMG5_pMesh mesh, MMG5_pSol met, double dd) {
   int    k,i,ier,iadr;
 
+  dd = 1.0 / (dd*dd);
+
   for (k=1; k<=mesh->np; k++)  {
 
     if( !MG_VOK( &mesh->point[k] ) ) {

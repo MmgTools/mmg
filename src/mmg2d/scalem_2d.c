@@ -47,7 +47,6 @@
  */
 int MMG2D_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
   double         dd;
-  int            i,k,iadr;
 
   if ( !MMG5_scale_meshAndSol ( mesh, met, sol, &dd ) ) {
     return 0;
@@ -68,13 +67,7 @@ int MMG2D_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
     break;
 
   case 3:
-    dd = 1.0 / (dd*dd);
-    /* Normalization */
-    for (k=1; k<=mesh->np; k++) {
-      iadr = k*met->size;
-      for (i=0; i<met->size; i++)  met->m[iadr+i] *= dd;
-    }
-    if ( !MMG5_solTruncature_ani(mesh,met) ) {
+    if ( !MMG5_scale_tensorMetric ( mesh, met, dd ) ) {
       return 0;
     }
 
