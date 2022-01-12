@@ -55,6 +55,7 @@
 int MMG2D_solTruncatureForOptim_iso(MMG5_pMesh mesh, MMG5_pSol met) {
   MMG5_pTria  ptt;
   MMG5_pPoint ppt;
+  double      hmin,hmax;
   int         k,i;
 
   assert ( mesh->info.optim || mesh->info.hsiz > 0. );
@@ -80,21 +81,23 @@ int MMG2D_solTruncatureForOptim_iso(MMG5_pMesh mesh, MMG5_pSol met) {
 
   /* If not provided by the user, compute hmin/hmax from the metric computed by
    * the DoSol function. */
-  if ( !mesh->info.sethmin ) {
-    mesh->info.hmin = FLT_MAX;
+  hmin = FLT_MAX;
+  hmax = 0.;
+  if ( (!mesh->info.sethmin) || (!mesh->info.sethmax) ) {
     for (k=1; k<=mesh->np; k++)  {
       ppt = &mesh->point[k];
       if ( (!MG_VOK(ppt)) || ppt->flag ) continue;
-      mesh->info.hmin = MG_MIN(mesh->info.hmin,met->m[k]);
+      hmin = MG_MIN(hmin,met->m[k]);
+      hmax = MG_MAX(hmax,met->m[k]);
     }
   }
+
+  if ( !mesh->info.sethmin ) {
+    mesh->info.hmin = hmin;
+  }
+
   if ( !mesh->info.sethmax ) {
-    mesh->info.hmax = 0.;
-    for (k=1; k<=mesh->np; k++)  {
-      ppt = &mesh->point[k];
-      if ( !MG_VOK(ppt) ) continue;
-      mesh->info.hmax = MG_MAX(mesh->info.hmax,met->m[k]);
-    }
+    mesh->info.hmax = hmax;
   }
 
   MMG5_check_hminhmax(mesh, mesh->info.sethmin, mesh->info.sethmax);
@@ -136,6 +139,8 @@ int MMG2D_solTruncatureForOptim_ani(MMG5_pMesh mesh, MMG5_pSol met) {
   MMG5_pPoint ppt;
   int         k,i,iadr;
   double      isqhmin, isqhmax;
+  double      lambda[2],vp[2][2];
+
 
   assert ( mesh->info.optim || mesh->info.hsiz > 0. );
 
@@ -160,37 +165,31 @@ int MMG2D_solTruncatureForOptim_ani(MMG5_pMesh mesh, MMG5_pSol met) {
 
   /* If not provided by the user, compute hmin/hmax from the metric computed by
    * the DoSol function. */
-  if ( !mesh->info.sethmin ) {
-    double isqhmin = 0.;
+  isqhmin = 0.;
+  isqhmax = FLT_MAX;
+  if ( (!mesh->info.sethmin) || (!mesh->info.sethmax) ) {
     for (k=1; k<=mesh->np; k++)  {
       ppt = &mesh->point[k];
       if ( (!MG_VOK(ppt)) || ppt->flag ) continue;
       iadr = met->size*k;
 
-      double lambda[2],vp[2][2];
       MMG5_eigensym(met->m+iadr,lambda,vp);
 
       assert (lambda[0] > 0. && lambda[1] > 0. && "Negative eigenvalue");
+
       isqhmin = MG_MAX(isqhmin,lambda[0]);
       isqhmin = MG_MAX(isqhmin,lambda[1]);
-    }
-    mesh->info.hmin = 1./sqrt(isqhmin);
-  }
-  if ( !mesh->info.sethmax ) {
-    double isqhmax = FLT_MAX;
-    for (k=1; k<=mesh->np; k++)  {
-      ppt = &mesh->point[k];
-      if ( (!MG_VOK(ppt)) || ppt->flag ) continue;
-      iadr = met->size*k;
-
-      double lambda[2],vp[2][2];
-      MMG5_eigensym(met->m+iadr,lambda,vp);
-
-      assert (lambda[0] > 0. && lambda[1] > 0. && "Negative eigenvalue");
 
       isqhmax = MG_MIN(isqhmax,lambda[0]);
       isqhmax = MG_MIN(isqhmax,lambda[1]);
     }
+  }
+
+  if ( !mesh->info.sethmin ) {
+    mesh->info.hmin = 1./sqrt(isqhmin);
+  }
+
+  if ( !mesh->info.sethmax ) {
     mesh->info.hmax = 1./sqrt(isqhmax);
   }
 
@@ -209,7 +208,6 @@ int MMG2D_solTruncatureForOptim_ani(MMG5_pMesh mesh, MMG5_pSol met) {
       met->m[iadr+1] = 0;
     }
     else {
-      double lambda[2],vp[2][2];
       MMG5_eigensym(met->m+iadr,lambda,vp);
 
       lambda[0]=MG_MAX(isqhmax,MG_MIN(isqhmin,lambda[0]));
