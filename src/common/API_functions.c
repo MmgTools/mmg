@@ -556,12 +556,18 @@ int MMG5_Set_defaultTruncatureSizes(MMG5_pMesh mesh,int8_t sethmin,int8_t sethma
     return 0;
   }
 
+  if ( mesh->info.ddebug ) {
+    /* print unscaled values for debug purpose */
+    fprintf(stdout,"     After truncature computation:   hmin %lf (user setted %d)\n"
+            "                                     hmax %lf (user setted %d)\n",
+            mesh->info.delta * mesh->info.hmin,mesh->info.sethmin,
+            mesh->info.delta * mesh->info.hmax,mesh->info.sethmax);
+  }
+
   return 1;
 }
 
 int MMG5_Compute_constantSize(MMG5_pMesh mesh,MMG5_pSol met,double *hsiz) {
-  int8_t         sethmin,sethmax;
-
 
   if ( mesh->info.hmin > mesh->info.hsiz ) {
     fprintf(stderr,"\n  ## Error: %s: Mismatched options: hmin (%e) is greater"
@@ -579,20 +585,21 @@ int MMG5_Compute_constantSize(MMG5_pMesh mesh,MMG5_pSol met,double *hsiz) {
 
   *hsiz = mesh->info.hsiz;
 
-  sethmin = sethmax = 0;
-  if ( mesh->info.hmin > 0. ) {
-    sethmin = 1;
+  if ( !MMG5_check_setted_hminhmax(mesh) ) {
+    return 0;
+  }
+
+  if ( mesh->info.sethmin ) {
     *hsiz    =  MG_MAX(mesh->info.hmin,*hsiz);
   }
 
-  if ( mesh->info.hmax > 0. ) {
-    sethmax = 1;
+  if ( mesh->info.sethmax ) {
     *hsiz    = MG_MIN(mesh->info.hmax,*hsiz);
   }
 
   /* Set hmin */
-  if ( !sethmin ) {
-    if ( sethmax ) {
+  if ( !mesh->info.sethmin ) {
+    if ( mesh->info.sethmax ) {
       mesh->info.hmin  = MG_MIN(0.1*(*hsiz),0.1*mesh->info.hmax);
     } else {
       mesh->info.hmin  = 0.1*(*hsiz);
@@ -600,12 +607,20 @@ int MMG5_Compute_constantSize(MMG5_pMesh mesh,MMG5_pSol met,double *hsiz) {
   }
 
   /* Set hmax */
-  if ( !sethmax ) {
-    if ( sethmin ) {
+  if ( !mesh->info.sethmax ) {
+    if ( mesh->info.sethmin ) {
       mesh->info.hmax  = MG_MAX(10.*(*hsiz),10.*mesh->info.hmin);
     } else {
       mesh->info.hmax  = 10.*(*hsiz);
     }
+  }
+
+  if ( mesh->info.ddebug ) {
+    /* print unscaled values for debug purpose */
+    fprintf(stdout,"     After hsiz computation:   hmin %lf (user setted %d)\n"
+            "                               hmax %lf (user setted %d)\n",
+            mesh->info.delta * mesh->info.hmin,mesh->info.sethmin,
+            mesh->info.delta * mesh->info.hmax,mesh->info.sethmax);
   }
 
   return 1;

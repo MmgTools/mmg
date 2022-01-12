@@ -46,14 +46,10 @@
  *
  */
 int MMG2D_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
-  double         dd,isqhmin,isqhmax;
-  double         *m;
-  double         lambda[2],v[2][2];
+  double         dd;
   int            i,k,iadr;
-  int8_t         sethmin,sethmax;
-  static int8_t  mmgWarn0=0, mmgWarn1=0;
 
-  if ( !MMG5_scale_meshAndSol(mesh,met,sol,&dd,&sethmin,&sethmax) ) {
+  if ( !MMG5_scale_meshAndSol ( mesh, met, sol, &dd ) ) {
     return 0;
   }
 
@@ -66,7 +62,7 @@ int MMG2D_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
    * and 10 \times the max of the metric sizes for hmax ). */
   switch (met->size) {
   case 1:
-    if ( !MMG5_scale_scalarMetric ( mesh, met, dd, sethmin, sethmax ) ) {
+    if ( !MMG5_scale_scalarMetric ( mesh, met, dd ) ) {
       return 0;
     }
     break;
@@ -78,84 +74,10 @@ int MMG2D_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
       iadr = k*met->size;
       for (i=0; i<met->size; i++)  met->m[iadr+i] *= dd;
     }
-
-    /* compute hmin and hmax parameters if not provided by the user */
-    if ( !sethmin ) {
-      mesh->info.hmin = FLT_MAX;
-    }
-    if ( !sethmax ) {
-      mesh->info.hmax = 0.;
+    if ( !MMG5_solTruncature_ani(mesh,met) ) {
+      return 0;
     }
 
-    for (k=1; k<=mesh->np; k++)  {
-      iadr = k*met->size;
-      m    = &met->m[iadr];
-
-      /* Check the input metric */
-      if ( !MMG5_eigensym(m,lambda,v) ) {
-        if ( !mmgWarn0 ) {
-          mmgWarn0 = 1;
-          fprintf(stderr,"\n  ## Error: %s: at least 1 wrong metric.\n",
-                  __func__);
-        }
-        return 0;
-      }
-      for (i=0; i<2; i++) {
-        if(lambda[i]<=0) {
-          if ( !mmgWarn1 ) {
-            mmgWarn1 = 1;
-            fprintf(stderr,"\n  ## Error: %s: at least 1 wrong metric"
-                    " (eigenvalue : %e %e -- det %e\n",__func__,lambda[0],
-                    lambda[1],m[0]*m[2]-m[1]*m[1]);
-          }
-          return 0;
-        }
-        if ( !sethmin ) {
-          mesh->info.hmin = MG_MIN(mesh->info.hmin,1./sqrt(lambda[i]));
-        }
-
-        if ( !sethmax ) {
-          mesh->info.hmax = MG_MAX(mesh->info.hmax,1./sqrt(lambda[i]));
-        }
-      }
-    }
-
-    /* Check the compatibility between the user settings and the automatically
-     * computed values */
-    MMG5_check_hminhmax(mesh,sethmin,sethmax);
-
-    /* Truncature */
-    isqhmin  = 1.0 / (mesh->info.hmin*mesh->info.hmin);
-    isqhmax  = 1.0 / (mesh->info.hmax*mesh->info.hmax);
-    for (k=1; k<=mesh->np; k++) {
-      iadr = k*met->size;
-
-      m    = &met->m[iadr];
-      if ( !MMG5_eigensym(m,lambda,v) ) {
-        if ( !mmgWarn0 ) {
-          mmgWarn0 = 1;
-          fprintf(stderr,"\n  ## Error: %s: at least 1 wrong metric.\n",
-                  __func__);
-        }
-        return 0;
-      }
-      for (i=0; i<2; i++) {
-        if(lambda[i]<=0) {
-          if ( !mmgWarn1 ) {
-            mmgWarn1 = 1;
-            fprintf(stderr,"\n  ## Error: %s: at least 1 wrong metric"
-                    " (eigenvalue : %e %e -- det %e\n",__func__,lambda[0],
-                    lambda[1],m[0]*m[2]-m[1]*m[1]);
-          }
-          return 0;
-        }
-        lambda[i]=MG_MIN(isqhmin,lambda[i]);
-        lambda[i]=MG_MAX(isqhmax,lambda[i]);
-      }
-      m[0] = v[0][0]*v[0][0]*lambda[0] + v[1][0]*v[1][0]*lambda[1];
-      m[1] = v[0][0]*v[0][1]*lambda[0] + v[1][0]*v[1][1]*lambda[1];
-      m[2] = v[0][1]*v[0][1]*lambda[0] + v[1][1]*v[1][1]*lambda[1];
-    }
     break;
   default:
     fprintf(stderr,"\n  ## Error: %s: unexpected metric size (%d)\n",__func__,met->size);
