@@ -101,7 +101,13 @@ int MMG2D_solTruncatureForOptim_iso(MMG5_pMesh mesh, MMG5_pSol met) {
 
   /* vertex size */
   for (k=1; k<=mesh->np; k++) {
-    met->m[k] = MG_MIN(mesh->info.hmax,MG_MAX(mesh->info.hmin,met->m[k]));
+    ppt = &mesh->point[k];
+    if ( ppt->flag ) {
+      met->m[k] = mesh->info.hmax;
+    }
+    else {
+      met->m[k] = MG_MIN(mesh->info.hmax,MG_MAX(mesh->info.hmin,met->m[k]));
+    }
   }
 
   if ( mesh->info.ddebug ) {
@@ -197,15 +203,22 @@ int MMG2D_solTruncatureForOptim_ani(MMG5_pMesh mesh, MMG5_pSol met) {
   for (k=1; k<=mesh->np; k++) {
     iadr = 3*k;
 
-    double lambda[2],vp[2][2];
-    MMG5_eigensym(met->m+iadr,lambda,vp);
+    ppt = &mesh->point[k];
+    if ( ppt->flag ) {
+      met->m[iadr] = met->m[iadr+2] = isqhmax;
+      met->m[iadr+1] = 0;
+    }
+    else {
+      double lambda[2],vp[2][2];
+      MMG5_eigensym(met->m+iadr,lambda,vp);
 
-    lambda[0]=MG_MAX(isqhmax,MG_MIN(isqhmin,lambda[0]));
-    lambda[1]=MG_MAX(isqhmax,MG_MIN(isqhmin,lambda[1]));
+      lambda[0]=MG_MAX(isqhmax,MG_MIN(isqhmin,lambda[0]));
+      lambda[1]=MG_MAX(isqhmax,MG_MIN(isqhmin,lambda[1]));
 
-    met->m[iadr]   = vp[0][0]*vp[0][0]*lambda[0] + vp[1][0]*vp[1][0]*lambda[1];
-    met->m[iadr+1] = vp[0][0]*vp[0][1]*lambda[0] + vp[1][0]*vp[1][1]*lambda[1];
-    met->m[iadr+2] = vp[0][1]*vp[0][1]*lambda[0] + vp[1][1]*vp[1][1]*lambda[1];
+      met->m[iadr]   = vp[0][0]*vp[0][0]*lambda[0] + vp[1][0]*vp[1][0]*lambda[1];
+      met->m[iadr+1] = vp[0][0]*vp[0][1]*lambda[0] + vp[1][0]*vp[1][1]*lambda[1];
+      met->m[iadr+2] = vp[0][1]*vp[0][1]*lambda[0] + vp[1][1]*vp[1][1]*lambda[1];
+    }
   }
 
   if ( mesh->info.ddebug ) {
