@@ -36,90 +36,185 @@
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param dim size of the matrix.
- * \param symmat integer flag (1 if the matrix is symmetric, 0 otherwise).
  * \param m matrix array.
+ * \param dim matrix size.
  * \param lambda eigenvalues array.
- * \param varr array of eigenvectors (pointer).
+ * \param v double array of eigenvectors.
  * \return 1 if success, 0 if failure.
  *
- * Recompose a matrix from its eigenvalue decomposition.
+ * Recompose a generic-size symmetric matrix from its eigenvalue
+ * decomposition.
  * \warning Eigenvectors in Mmg are stored as matrix rows (the first dimension
  * of the double array spans the number of eigenvectors, the second dimension
  * spans the number of entries of each eigenvector).
  */
-int MMG5_eigenvmat(MMG5_pMesh mesh,int8_t dim,int8_t symmat,double m[],
-                   double lambda[],double varr[]) {
-  double (*v)[dim] = (double (*)[dim])varr;
+static inline
+void MMG5_eigenvmat_buildsym(MMG5_pMesh mesh,int8_t dim,double m[],
+                             double lambda[],double v[]) {
+  int8_t i,j,k,ij;
+
+  /* Storage of a matrix as a one-dimensional array: (dim+1)*dim/2 entries for a
+   * symmetric matrix (loop on each symmetric entry only once). */
+  ij = 0;
+
+  /* Loop on matrix rows */
+  for( i = 0; i < dim; i++ ) {
+    /* Loop on the upper-triangular part of the matrix */
+    for( j = i; j < dim; j++ ) {
+      /* Initialize matrix entry */
+      m[ij] = 0.0;
+      /* Compute matrix entry as the recomposition of eigenvalues and
+       * eigenvectors:
+       *
+       * M_{ij} = \sum_{k,l} V_{ik} Lambda_{kl} V_{jl} =
+       *        = \sum_{k} lambda_{k} V_{ik} V_{jk}
+       *
+       * Eigenvectors are stored as rows in Mmg (not columns) so their indices
+       * have to be exchanged when implementing the above formula. */
+      for( k = 0; k < dim; k++ ) {
+        m[ij] += lambda[k]*v[k*dim+i]*v[k*dim+j];
+      }
+      /* Go to next entry */
+      ++ij;
+    }
+  }
+  assert( ij == (dim+1)*dim/2 );
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param m matrix array.
+ * \param dim matrix size.
+ * \param lambda eigenvalues array.
+ * \param v double array of right eigenvectors.
+ * \param iv double array of left eigenvectors.
+ * \return 1 if success, 0 if failure.
+ *
+ * Recompose a generic-size non-symmetric matrix from its eigenvalue
+ * decomposition.
+ * \warning Eigenvectors in Mmg are stored as matrix rows (the first dimension
+ * of the double array spans the number of eigenvectors, the second dimension
+ * spans the number of entries of each eigenvector).
+ */
+static inline
+void MMG5_eigenvmat_buildnonsym(MMG5_pMesh mesh,int8_t dim,double m[],
+                                double lambda[],double v[],double iv[]){
   int8_t i,j,k,ij;
 
   /* Storage of a matrix as a one-dimensional array: dim^2 entries for a
-   * non-symmetric matrix, (dim+1)*dim/2 entries for a symmetric matrix (loop on
-   * each symmetric entry only once). */
+   * non-symmetric matrix. */
   ij = 0;
 
-  if( symmat ) {
-    /** Case of a symmetric matrix */
-
-    /* Loop on matrix rows */
-    for( i = 0; i < dim; i++ ) {
-      /* Loop on the upper-triangular part of the matrix */
-      for( j = i; j < dim; j++ ) {
-        /* Initialize matrix entry */
-        m[ij] = 0.0;
-        /* Compute matrix entry as the recomposition of eigenvalues and
-         * eigenvectors:
-         *
-         * M_{ij} = \sum_{k,l} V_{ik} Lambda_{kl} V_{jl} =
-         *        = \sum_{k} lambda_{k} V_{ik} V_{jk}
-         *
-         * Eigenvectors are stored as rows in Mmg (not columns) so their indices
-         * have to be exchanged when implementing the above formula. */
-        for( k = 0; k < dim; k++ ) {
-          m[ij] += lambda[k]*v[k][i]*v[k][j];
-        }
-        /* Go to next entry */
-        ++ij;
+  /* Loop on matrix rows */
+  for( i = 0; i < dim; i++ ) {
+    /* Loop on matrix columns */
+    for( j = 0; j < dim; j++ ) {
+      /* Initialize matrix entry */
+      m[ij] = 0.0;
+      /* Compute matrix entry as the recomposition of eigenvalues and
+       * eigenvectors:
+       *
+       * M_{ij} = \sum_{k,l} V_{ik} Lambda_{kl} V^{-1}_{lj} =
+       *        = \sum_{k} lambda_{k} V_{ik} V^{-1}_{kj}
+       *
+       * Eigenvectors are stored as rows in Mmg (not columns) so their indices
+       * have to be exchanged when implementing the above formula. */
+      for( k = 0; k < dim; k++ ) {
+        m[ij] += lambda[k]*v[k*dim+i]*iv[j*dim+k];
       }
+      /* Go to next entry */
+      ++ij;
     }
-    assert( ij == (dim+1)*dim/2 );
-
-  } else {
-    /** Case of a non-symmetric matrix */
-
-    /* Compute the inverse of the eigenvectors matrix */
-    double iv[dim][dim];
-    if( dim == 2 ) {
-      if( !MMG5_invmat22(v,iv) )
-        return 0;
-    } else if( dim == 3 ) {
-      if( !MMG5_invmat33(v,iv) )
-        return 0;
-    }
-
-    /* Loop on matrix rows */
-    for( i = 0; i < dim; i++ ) {
-      /* Loop on matrix columns */
-      for( j = 0; j < dim; j++ ) {
-        /* Initialize matrix entry */
-        m[ij] = 0.0;
-        /* Compute matrix entry as the recomposition of eigenvalues and
-         * eigenvectors:
-         *
-         * M_{ij} = \sum_{k,l} V_{ik} Lambda_{kl} V^{-1}_{lj} =
-         *        = \sum_{k} lambda_{k} V_{ik} V^{-1}_{kj}
-         *
-         * Eigenvectors are stored as rows in Mmg (not columns) so their indices
-         * have to be exchanged when implementing the above formula. */
-        for( k = 0; k < dim; k++ ) {
-          m[ij] += lambda[k]*v[k][i]*iv[j][k];
-        }
-        /* Go to next entry */
-        ++ij;
-      }
-    }
-    assert( ij == dim*dim );
   }
+  assert( ij == dim*dim );
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param m matrix array.
+ * \param lambda eigenvalues array.
+ * \param v double array of eigenvectors.
+ * \return 1 if success, 0 if failure.
+ *
+ * Recompose a 2x2 symmetric matrix from its eigenvalue decomposition.
+ * \warning Eigenvectors in Mmg are stored as matrix rows (the first dimension
+ * of the double array spans the number of eigenvectors, the second dimension
+ * spans the number of entries of each eigenvector).
+ */
+int MMG5_eigenvmatsym2d(MMG5_pMesh mesh,double m[],double lambda[],double v[][2]) {
+
+  /* Build matrix */
+  MMG5_eigenvmat_buildsym(mesh,2,m,lambda,(double *)v);
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param m matrix array.
+ * \param lambda eigenvalues array.
+ * \param v double array of eigenvectors.
+ * \return 1 if success, 0 if failure.
+ *
+ * Recompose a 3x3 symmetric matrix from its eigenvalue decomposition.
+ * \warning Eigenvectors in Mmg are stored as matrix rows (the first dimension
+ * of the double array spans the number of eigenvectors, the second dimension
+ * spans the number of entries of each eigenvector).
+ */
+int MMG5_eigenvmatsym3d(MMG5_pMesh mesh,double m[],double lambda[],double v[][3]) {
+
+  /* Build matrix */
+  MMG5_eigenvmat_buildsym(mesh,3,m,lambda,(double *)v);
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param m matrix array.
+ * \param lambda eigenvalues array.
+ * \param v double array of eigenvectors.
+ * \return 1 if success, 0 if failure.
+ *
+ * Recompose a 2x2 non-symmetric matrix from its eigenvalue decomposition.
+ * \warning Eigenvectors in Mmg are stored as matrix rows (the first dimension
+ * of the double array spans the number of eigenvectors, the second dimension
+ * spans the number of entries of each eigenvector).
+ */
+int MMG5_eigenvmatnonsym2d(MMG5_pMesh mesh,double m[],double lambda[],double v[][2]) {
+  double iv[2][2];
+
+  /* Compute the inverse of the eigenvectors matrix */
+  if( !MMG5_invmat22(v,iv) )
+    return 0;
+
+  /* Build matrix */
+  MMG5_eigenvmat_buildnonsym(mesh,2,m,lambda,(double *)v,(double *)iv);
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param m matrix array.
+ * \param lambda eigenvalues array.
+ * \param v double array of eigenvectors.
+ * \return 1 if success, 0 if failure.
+ *
+ * Recompose a 3x3 non-symmetric matrix from its eigenvalue decomposition.
+ * \warning Eigenvectors in Mmg are stored as matrix rows (the first dimension
+ * of the double array spans the number of eigenvectors, the second dimension
+ * spans the number of entries of each eigenvector).
+ */
+int MMG5_eigenvmatnonsym3d(MMG5_pMesh mesh,double m[],double lambda[],double v[][3]) {
+  double iv[3][3];
+
+  /* Compute the inverse of the eigenvectors matrix */
+  if( !MMG5_invmat33(v,iv) )
+    return 0;
+
+  /* Build matrix */
+  MMG5_eigenvmat_buildnonsym(mesh,3,m,lambda,(double *)v,(double *)iv);
 
   return 1;
 }
@@ -134,23 +229,40 @@ int MMG5_eigenvmat(MMG5_pMesh mesh,int8_t dim,int8_t symmat,double m[],
  * Check the recomposition of a matrix from its eigenvalue decomposition.
  */
 int MMG5_eigenvmat_check(MMG5_pMesh mesh,int8_t dim,int8_t symmat,double m[]) {
-  double lambda[dim],v[dim][dim];
   int    msize = symmat ? (dim+1)*dim/2 : dim*dim;
-  double mnew[msize];
+  double mnew[9];  /* allocate with maximum size */
   int    k;
 
-  /* Compute eigendecomposition */
+  /* Compute eigendecomposition, recompose matrix from eigendecomposition */
   if( dim == 2 ) {
+    double lambda[2],v[2][2];
+
     if( !MMG5_eigenv2d(symmat,m,lambda,v) )
       return 0;
+
+    if( symmat ) {
+      if( !MMG5_eigenvmatsym2d(mesh,mnew,lambda,v) )
+        return 0;
+    } else {
+      if( !MMG5_eigenvmatnonsym2d(mesh,mnew,lambda,v) )
+        return 0;
+    }
+
   } else if( dim == 3 ) {
+    double lambda[3],v[3][3];
+
     if( !MMG5_eigenv3d(symmat,m,lambda,v) )
       return 0;
+
+    if( symmat ) {
+      if( !MMG5_eigenvmatsym3d(mesh,mnew,lambda,v) )
+        return 0;
+    } else {
+      if( !MMG5_eigenvmatnonsym3d(mesh,mnew,lambda,v) )
+        return 0;
+    }
   }
 
-  /* Recompose matrix from eigendecomposition */
-  if( !MMG5_eigenvmat(mesh,dim,symmat,mnew,lambda,(double *)v) )
-    return 0;
 
   /* Check result against input matrix */
   for( k = 0; k < msize; k++ )
