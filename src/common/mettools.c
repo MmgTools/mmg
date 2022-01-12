@@ -40,7 +40,7 @@
  * \param symmat integer flag (1 if the matrix is symmetric, 0 otherwise).
  * \param m matrix array.
  * \param lambda eigenvalues array.
- * \param v eigenvectors array of arrays.
+ * \param varr array of eigenvectors (pointer).
  * \return 1 if success, 0 if failure.
  *
  * Recompose a matrix from its eigenvalue decomposition.
@@ -49,7 +49,8 @@
  * spans the number of entries of each eigenvector).
  */
 int MMG5_eigenvmat(MMG5_pMesh mesh,int8_t dim,int8_t symmat,double m[],
-                   double lambda[],double v[][dim]) {
+                   double lambda[],double varr[]) {
+  double (*v)[dim] = (double (*)[dim])varr;
   int8_t i,j,k,ij;
 
   /* Storage of a matrix as a one-dimensional array: dim^2 entries for a
@@ -148,7 +149,7 @@ int MMG5_eigenvmat_check(MMG5_pMesh mesh,int8_t dim,int8_t symmat,double m[]) {
   }
 
   /* Recompose matrix from eigendecomposition */
-  if( !MMG5_eigenvmat(mesh,dim,symmat,mnew,lambda,v) )
+  if( !MMG5_eigenvmat(mesh,dim,symmat,mnew,lambda,(double *)v) )
     return 0;
 
   /* Check result against input matrix */
