@@ -285,9 +285,6 @@ int MMG5_check_setted_hminhmax(MMG5_pMesh mesh) {
  * Truncate the metric computed by the DoSol function by hmax and hmin values
  * (if setted by the user). Set hmin and hmax if they are not setted.
  *
- * \warning works only for a metric computed by the DoSol function because we
- * suppose that we have a diagonal tensor in aniso.
- *
  */
 void MMG5_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
   MMG5_pTetra pt;
@@ -338,13 +335,33 @@ void MMG5_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
         ppt = &mesh->point[k];
         if ( !MG_VOK(ppt) || ppt->flag ) continue;
         iadr = met->size*k;
-        isqhmin = MG_MAX(isqhmin,met->m[iadr]);
-        isqhmin = MG_MAX(isqhmin,met->m[iadr+3]);
-        isqhmin = MG_MAX(isqhmin,met->m[iadr+5]);
 
-        isqhmax = MG_MIN(isqhmax,met->m[iadr]);
-        isqhmax = MG_MIN(isqhmax,met->m[iadr+3]);
-        isqhmax = MG_MIN(isqhmax,met->m[iadr+5]);
+        /* Check metric */
+        double lambda[3],vp[3][3];
+        if (!MMG5_eigenv(1,met->m+iadr,lambda,vp) ) {
+          fprintf(stdout, " ## Warning: %s: %d: non diagonalizable metric."
+                  " Impose hmax size at point\n",__func__,__LINE__);
+          met->m[iadr+0] = FLT_MIN;
+          met->m[iadr+1] = 0;
+          met->m[iadr+2] = 0;
+          met->m[iadr+3] = FLT_MIN;
+          met->m[iadr+4] = 0;
+          met->m[iadr+5] = FLT_MIN;
+          continue;
+        }
+
+        assert ( lambda[0] > 0. && lambda[1] > 0.  && lambda[2] > 0.
+                 && "Negative eigenvalue");
+
+        /* If one of the eigenvalue is infinite: do not take it into account, it
+         * will be truncated by hmax later */
+        int j;
+        for ( j=0; j<3; ++j ) {
+          if ( isfinite(lambda[j]) ) {
+            isqhmax = MG_MIN(isqhmax,lambda[j]);
+            isqhmin = MG_MAX(isqhmin,lambda[j]);
+          }
+        }
       }
     }
   }
