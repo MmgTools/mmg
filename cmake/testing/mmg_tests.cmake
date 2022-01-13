@@ -266,11 +266,17 @@ ADD_TEST(NAME mmg_hsizAni_${SHRT_EXEC}
   ${MMG_CI_TESTS}/TorusholesAni_chocCyl/torusholesTiny
   -out ${CTEST_OUTPUT_DIR}/mmg_hsizAni_${SHRT_EXEC}.o.meshb)
 
-# optim Ani
+# optim + Ani + orphan + unused point
 ADD_TEST(NAME mmg_sphere-optimAni_${SHRT_EXEC}
   COMMAND ${EXEC} -v 5 ${common_args}
-  ${MMG_CI_TESTS}/SphereVolAni/sphere2 -sol 2 -optim -A -v 5
+  ${MMG_CI_TESTS}/SphereVolAni/sphere3 -sol 2 -optim -A -v 5
   -out ${CTEST_OUTPUT_DIR}/mmg_sphere-optimAni_${SHRT_EXEC}-sphere-optimAni.o.meshb)
+
+# optim + Iso + orphan + unused point
+ADD_TEST(NAME mmg_sphere-optim_${SHRT_EXEC}
+  COMMAND ${EXEC} -v 5 ${common_args}
+  ${MMG_CI_TESTS}/SphereVolAni/sphere3 -sol 2 -optim -v 5
+  -out ${CTEST_OUTPUT_DIR}/mmg_sphere-optim_${SHRT_EXEC}-sphere-optim.o.meshb)
 
 
 ADD_TEST(NAME mmg_hsizHmax_${SHRT_EXEC}

@@ -397,16 +397,16 @@ ADD_TEST(NAME mmg2d_Circle-hsizAni
   ${MMG2D_CI_TESTS}/Circle/cercle
   -out ${CTEST_OUTPUT_DIR}/mmg2d_Circle-hsizAni.o.mesh)
 
-# optim + ani + oprhan
+# optim + ani + oprhan + unused point
 ADD_TEST(NAME mmg2d_Disk-optimAni
   COMMAND ${EXECUT_MMG2D} -v 5 -optim -A -sol 2
-  ${MMG2D_CI_TESTS}/Disk/disk
+  ${MMG2D_CI_TESTS}/Disk/disk-orphan
   -out ${CTEST_OUTPUT_DIR}/mmg2d_disk-optimAni.o.mesh)
 
-# optim + iso + oprhan
+# optim + iso + oprhan + unused point
 ADD_TEST(NAME mmg2d_Disk-optim
   COMMAND ${EXECUT_MMG2D} -v 5 -optim -sol 2
-  ${MMG2D_CI_TESTS}/Disk/disk
+  ${MMG2D_CI_TESTS}/Disk/disk-orphan
   -out ${CTEST_OUTPUT_DIR}/mmg2d_disk-optim.o.mesh)
 
 ###############################################################################
