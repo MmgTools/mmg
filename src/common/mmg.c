@@ -386,7 +386,7 @@ void MMG5_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
       ppt = &mesh->point[k];
       if ( !MG_VOK(ppt) ) continue;
 
-      if ( !MMG5_truncate_met3d(met,k,isqhmin,isqhmax) ) {
+      if ( ppt->flag || !MMG5_truncate_met3d(met,k,isqhmin,isqhmax) ) {
         /* Fail to diagonalize metric: put hmax */
         iadr = 6*k;
         met->m[iadr]   = isqhmax;
