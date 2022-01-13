@@ -466,10 +466,7 @@ int MMG5_scale_meshAndSol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol,double *dd
  *
  */
 int MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
-  double         dd,d1;
-  int            k,i;
-  double         *m;
-  double         lambda[3],v[3][3],isqhmin,isqhmax;
+  double         dd;
 
   if ( !MMG5_scale_meshAndSol(mesh,met,sol,&dd) ) {
     return 0;
@@ -488,93 +485,13 @@ int MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
 
   case 6:
 
-      d1 = 1.0 / (dd*dd);
-      /* Normalization */
-      for (k=1; k<=mesh->np; k++) {
+    /* Set function pointer before it is used */
+    MMG5_solTruncature_ani = MMG5_3dSolTruncature_ani;
+    if ( !MMG5_scale_tensorMetric ( mesh, met, dd ) ) {
+      return 0;
+    }
+    break;
 
-        if( !MG_VOK( &mesh->point[k] ) ) continue;
-
-        for ( i=0; i<met->size; ++i ) {
-          met->m[6*k+i] *= d1;
-        }
-      }
-
-      /* compute hmin and hmax parameters if not provided by the user and check
-       * the input metric */
-      if ( !mesh->info.sethmin ) {
-        mesh->info.hmin = FLT_MAX;
-      }
-
-      if ( !mesh->info.sethmax ) {
-        mesh->info.hmax = 0.;
-      }
-
-      for (k=1; k<=mesh->np; k++) {
-        if( !MG_VOK( &mesh->point[k] ) ) continue;
-
-        m    = &met->m[6*k];
-
-        /* Check the input metric */
-        if ( !MMG5_eigenv(1,m,lambda,v) ) {
-          fprintf(stderr,"\n  ## Error: %s: unable to diagonalize at least"
-                  " 1 metric (point %d).\n",__func__,k);
-          return 0;
-        }
-        for (i=0; i<3; i++) {
-          if(lambda[i]<=0) {
-            fprintf(stderr,"\n  ## Error: %s: at least 1 wrong metric "
-                    "(point %d -> eigenvalues : %e %e %e).\n"
-                    "            metric tensor: %e %e %e %e %e %e.\n",
-                    __func__,k,lambda[0],lambda[1],lambda[2],
-                              m[0],m[1],m[2],m[3],m[4],m[5]);
-            return 0;
-          }
-          if ( !mesh->info.sethmin )
-            mesh->info.hmin = MG_MIN(mesh->info.hmin,1./sqrt(lambda[i]));
-          if ( !mesh->info.sethmax )
-            mesh->info.hmax = MG_MAX(mesh->info.hmax,1./sqrt(lambda[i]));
-        }
-      }
-
-      /* Check the compatibility between the user settings and the automatically
-       * computed values */
-      MMG5_check_hminhmax(mesh,mesh->info.sethmin,mesh->info.sethmax);
-
-      /* Truncature */
-      isqhmin  = 1.0 / (mesh->info.hmin*mesh->info.hmin);
-      isqhmax  = 1.0 / (mesh->info.hmax*mesh->info.hmax);
-      for (k=1; k<=mesh->np; k++) {
-
-        if( !MG_VOK( &mesh->point[k] ) ) continue;
-
-        m    = &met->m[6*k];
-
-        if ( !MMG5_eigenv(1,m,lambda,v) ) {
-          fprintf(stderr,"\n  ## Error: %s: unable to diagonalize at least"
-                  " 1 metric (point %d).\n",__func__,k);
-          return 0;
-        }
-        for (i=0; i<3; i++) {
-          if(lambda[i]<=0) {
-            fprintf(stderr,"\n  ## Error: %s: at least 1 wrong metric "
-                    "(point %d -> eigenvalues : %e %e %e).\n"
-                    "            metric tensor: %e %e %e %e %e %e.\n",
-                    __func__,k,lambda[0],lambda[1],lambda[2],
-                              m[0],m[1],m[2],m[3],m[4],m[5]);
-            return 0;
-          }
-          lambda[i]=MG_MIN(isqhmin,lambda[i]);
-          lambda[i]=MG_MAX(isqhmax,lambda[i]);
-        }
-        m[0] = v[0][0]*v[0][0]*lambda[0] + v[1][0]*v[1][0]*lambda[1] + v[2][0]*v[2][0]*lambda[2];
-        m[1] = v[0][0]*v[0][1]*lambda[0] + v[1][0]*v[1][1]*lambda[1] + v[2][0]*v[2][1]*lambda[2];
-        m[2] = v[0][0]*v[0][2]*lambda[0] + v[1][0]*v[1][2]*lambda[1] + v[2][0]*v[2][2]*lambda[2];
-        m[3] = v[0][1]*v[0][1]*lambda[0] + v[1][1]*v[1][1]*lambda[1] + v[2][1]*v[2][1]*lambda[2];
-        m[4] = v[0][1]*v[0][2]*lambda[0] + v[1][1]*v[1][2]*lambda[1] + v[2][1]*v[2][2]*lambda[2];
-        m[5] = v[0][2]*v[0][2]*lambda[0] + v[1][2]*v[1][2]*lambda[1] + v[2][2]*v[2][2]*lambda[2];
-      }
-
-      break;
   default:
     fprintf(stderr,"\n  ## Error: %s: unexpected metric size (%d)\n",__func__,met->size);
     break;
