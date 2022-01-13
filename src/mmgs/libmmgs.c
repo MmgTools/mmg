@@ -437,7 +437,6 @@ int MMGS_mmgsls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
         _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE); }
       MMGS_RETURN_AND_PACK(mesh,met,sol,MMG5_LOWFAILURE);
     }
-    MMG5_solTruncatureForOptim(mesh,met);
   }
 
   /* Discretization of the mesh->info.ls isovalue of sol in the mesh */
@@ -641,7 +640,6 @@ int MMGS_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
       if ( !MMG5_unscaleMesh(mesh,met,NULL) )   _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
       _LIBMMG5_RETURN(mesh,met,sol,MMG5_LOWFAILURE);
     }
-    MMG5_solTruncatureForOptim(mesh,met);
   }
 
   if ( mesh->info.hsiz > 0. ) {

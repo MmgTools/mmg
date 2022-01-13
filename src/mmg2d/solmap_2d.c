@@ -95,6 +95,7 @@ int MMG2D_doSol_iso(MMG5_pMesh mesh,MMG5_pSol sol) {
     }
     sol->m[k] = sol->m[k] / (double)mark[k];
   }
+  MMG5_SAFE_FREE(mark);
 
   /* Computation of hmin/hmax if not provided + size truncature */
   MMG2D_solTruncatureForOptim_iso(mesh,sol);
@@ -107,10 +108,6 @@ int MMG2D_doSol_iso(MMG5_pMesh mesh,MMG5_pSol sol) {
     }
   }
 
-  if ( mesh->info.imprim < -4 )
-    fprintf(stdout,"   HMAX %f\n",mesh->info.hmax);
-
-  MMG5_SAFE_FREE(mark);
   return 1;
 }
 
@@ -211,6 +208,7 @@ int MMG2D_doSol_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
     assert (isfinite(lambda[0]) && isfinite(lambda[1]) && "wrong eigenvalue");
 #endif
   }
+  MMG5_SAFE_FREE(mark);
 
   /* Size truncature */
   MMG2D_solTruncatureForOptim_ani(mesh,sol);
@@ -223,6 +221,5 @@ int MMG2D_doSol_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
     }
   }
 
-  MMG5_SAFE_FREE(mark);
   return 1;
 }

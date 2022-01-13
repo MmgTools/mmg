@@ -1090,7 +1090,6 @@ int MMG3D_mmg3dlib(MMG5_pMesh mesh,MMG5_pSol met) {
       if ( !MMG5_unscaleMesh(mesh,met,NULL) )   _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
       _LIBMMG5_RETURN(mesh,met,sol,MMG5_LOWFAILURE);
     }
-    MMG5_solTruncatureForOptim(mesh,met);
   }
 
   if ( mesh->info.hsiz > 0. ) {
@@ -1361,7 +1360,6 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet) {
         _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE); }
       MMG5_RETURN_AND_PACK(mesh,met,sol,MMG5_LOWFAILURE);
     }
-    MMG5_solTruncatureForOptim(mesh,met);
   }
 
   /* Discretization of the mesh->info.ls isovalue of sol in the mesh */
@@ -1663,7 +1661,6 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
       if ( !MMG5_unscaleMesh(mesh,met,disp) )    _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
       MMG5_RETURN_AND_PACK(mesh,met,disp,MMG5_LOWFAILURE);
     }
-    MMG5_solTruncatureForOptim(mesh,met);
   }
 
   chrono(OFF,&(ctim[3]));
