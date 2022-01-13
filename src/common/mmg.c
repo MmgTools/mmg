@@ -320,49 +320,48 @@ void MMG5_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
 
   /* If not provided by the user, compute hmin/hmax from the metric computed by
    * the DoSol function. */
-  if ( !mesh->info.sethmin ) {
+  isqhmin = 0.;
+  isqhmax = FLT_MAX;
+  double hmin = FLT_MAX;
+  double hmax = 0.;
+  if ( (!mesh->info.sethmin) || (!mesh->info.sethmax) ) {
     if ( met->size == 1 ) {
-      mesh->info.hmin = FLT_MAX;
       for (k=1; k<=mesh->np; k++)  {
         ppt = &mesh->point[k];
         if ( !MG_VOK(ppt) || ppt->flag ) continue;
-        mesh->info.hmin = MG_MIN(mesh->info.hmin,met->m[k]);
+        hmin = MG_MIN(hmin,met->m[k]);
+        hmax = MG_MAX(hmax,met->m[k]);
       }
     }
     else if ( met->size == 6 ){
-      mesh->info.hmin = 0.;
       for (k=1; k<=mesh->np; k++)  {
         ppt = &mesh->point[k];
         if ( !MG_VOK(ppt) || ppt->flag ) continue;
         iadr = met->size*k;
-        mesh->info.hmin = MG_MAX(mesh->info.hmin,met->m[iadr]);
-        mesh->info.hmin = MG_MAX(mesh->info.hmin,met->m[iadr+3]);
-        mesh->info.hmin = MG_MAX(mesh->info.hmin,met->m[iadr+5]);
+        isqhmin = MG_MAX(isqhmin,met->m[iadr]);
+        isqhmin = MG_MAX(isqhmin,met->m[iadr+3]);
+        isqhmin = MG_MAX(isqhmin,met->m[iadr+5]);
+
+        isqhmax = MG_MIN(isqhmax,met->m[iadr]);
+        isqhmax = MG_MIN(isqhmax,met->m[iadr+3]);
+        isqhmax = MG_MIN(isqhmax,met->m[iadr+5]);
       }
-      mesh->info.hmin = 1./sqrt(mesh->info.hmin);
+    }
+  }
+
+  if ( !mesh->info.sethmin ) {
+    if ( met->size == 1 ) {
+      mesh->info.hmin = hmin;
+    } else {
+      mesh->info.hmin = 1./sqrt(isqhmin);
     }
   }
 
   if ( !mesh->info.sethmax ) {
     if ( met->size == 1 ) {
-      mesh->info.hmax = 0.;
-      for (k=1; k<=mesh->np; k++)  {
-        ppt = &mesh->point[k];
-        if ( !MG_VOK(ppt) || ppt->flag ) continue;
-        mesh->info.hmax = MG_MAX(mesh->info.hmax,met->m[k]);
-      }
-    }
-    else if ( met->size == 6 ){
-      mesh->info.hmax = FLT_MAX;
-      for (k=1; k<=mesh->np; k++)  {
-        ppt = &mesh->point[k];
-        if ( !MG_VOK(ppt) || ppt->flag ) continue;
-        iadr = met->size*k;
-        mesh->info.hmax = MG_MIN(mesh->info.hmax,met->m[iadr]);
-        mesh->info.hmax = MG_MIN(mesh->info.hmax,met->m[iadr+3]);
-        mesh->info.hmax = MG_MIN(mesh->info.hmax,met->m[iadr+5]);
-      }
-      mesh->info.hmax = 1./sqrt(mesh->info.hmax);
+      mesh->info.hmax = hmax;
+    } else {
+      mesh->info.hmax = 1./sqrt(isqhmax);
     }
   }
 
