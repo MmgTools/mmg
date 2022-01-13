@@ -107,6 +107,81 @@ void MMG5_check_hminhmax(MMG5_pMesh mesh, int8_t sethmin, int8_t sethmax) {
 
 /**
  * \param mesh pointer toward the mesh structure.
+ * \return 0 if fail, 1 if succeed
+ *
+ * Check that hmin (resp. hmax) is not user setted if it is negative.
+ *
+ */
+int MMG5_check_setted_hminhmax(MMG5_pMesh mesh) {
+
+  if ( mesh->info.hmin < 0 ) {
+    if ( mesh->info.sethmin ) {
+      fprintf(stderr,"\n  ## Error: %s: unexpected case (negative user setted"
+              " hmin).\n",__func__);
+      return 0;
+    }
+  }
+
+  if ( mesh->info.hmax < 0 ) {
+    if ( mesh->info.sethmax ) {
+      fprintf(stderr,"\n  ## Error: %s: unexpected case (negative user setted"
+              " hmax).\n",__func__);
+      return 0;
+    }
+  }
+
+  return 1;
+}
+
+
+int MMG5_truncate_met3d(MMG5_pSol met, int ip, double isqhmin, double isqhmax) {
+  double        v[3][3],lambda[3],*m;
+  int           i;
+  static int8_t mmgWarn = 0;
+
+  m = &met->m[met->size*ip];
+
+  if ( !MMG5_eigenv(1,m,lambda,v) ) {
+    if ( !mmgWarn ) {
+      fprintf(stderr,"\n  ## Warning: %s: Unable to diagonalize at least"
+              " 1 metric.\n",__func__);
+      mmgWarn = 1;
+    }
+    return 0;
+  }
+
+  for (i=0; i<3; i++) {
+    if(lambda[i]<=0) {
+      if ( !mmgWarn ) {
+        fprintf(stderr,"\n  ## Warning: %s: at least 1 wrong metric "
+                "(eigenvalues : %e %e %e).\n",__func__,lambda[0],
+                lambda[1],lambda[2]);
+        mmgWarn = 1;
+      }
+      return 0;
+    }
+    lambda[i]=MG_MIN(isqhmin,lambda[i]);
+    lambda[i]=MG_MAX(isqhmax,lambda[i]);
+  }
+
+  m[0] = v[0][0]*v[0][0]*lambda[0] + v[1][0]*v[1][0]*lambda[1]
+    + v[2][0]*v[2][0]*lambda[2];
+  m[1] = v[0][0]*v[0][1]*lambda[0] + v[1][0]*v[1][1]*lambda[1]
+    + v[2][0]*v[2][1]*lambda[2];
+  m[2] = v[0][0]*v[0][2]*lambda[0] + v[1][0]*v[1][2]*lambda[1]
+    + v[2][0]*v[2][2]*lambda[2];
+  m[3] = v[0][1]*v[0][1]*lambda[0] + v[1][1]*v[1][1]*lambda[1]
+    + v[2][1]*v[2][1]*lambda[2];
+  m[4] = v[0][1]*v[0][2]*lambda[0] + v[1][1]*v[1][2]*lambda[1]
+    + v[2][1]*v[2][2]*lambda[2];
+  m[5] = v[0][2]*v[0][2]*lambda[0] + v[1][2]*v[1][2]*lambda[1]
+    + v[2][2]*v[2][2]*lambda[2];
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
  * \param dd scaling value.
  *
