@@ -211,6 +211,8 @@ IF ( BUILD_TESTING )
       SET(TEST_API3D_EXEC0 ${EXECUTABLE_OUTPUT_PATH}/test_api3d_0)
       SET(TEST_API3D_DOMSEL ${EXECUTABLE_OUTPUT_PATH}/test_api3d_domain-selection)
       SET(TEST_API3D_VTK2MESH ${EXECUTABLE_OUTPUT_PATH}/test_api3d_vtk2mesh)
+      SET(TEST_MET3D ${EXECUTABLE_OUTPUT_PATH}/test_met3d)
+
 
       ADD_TEST(NAME libmmg3d_example0_a COMMAND ${LIBMMG3D_EXEC0_a}
         "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/adaptation_example0/example0_a/cube.mesh"
@@ -264,6 +266,8 @@ IF ( BUILD_TESTING )
       ADD_TEST(NAME test_api3d_vtk2mesh   COMMAND ${TEST_API3D_VTK2MESH}
         "${MMG3D_CI_TESTS}/API_tests/cellsAndNode-data.vtk"
         "${CTEST_OUTPUT_DIR}/test_API3d-vtk2mesh.o"
+        )
+      ADD_TEST(NAME test_met3d   COMMAND ${TEST_MET3D}
         )
       ADD_TEST(NAME libmmg3d_generic_io_msh   COMMAND ${LIBMMG3D_GENERICIO}
         "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/io_generic_and_get_adja/cube.msh"
