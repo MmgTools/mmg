@@ -273,6 +273,73 @@ int MMG5_eigenvmat_check(MMG5_pMesh mesh,int8_t dim,int8_t symmat,double m[]) {
 }
 
 /**
+ *
+ * For a 3x3 symmetric matrix, Test:
+ * - the recomposition of the matrix from its exact eigendecomposition;
+ * - the computation of the eigenvalues of the matrix;
+ * - the computation of the eigenvectors of the matrix.
+ *
+ */
+int MMG5_test_eigenvmatsym3d() {
+  MMG5_pMesh mesh;
+  double mex[6] = {2.,0.,0.,3.,4.,9.}; /* Test matrix */
+  double lambdaex[3] = {11.,2.,1.}; /* Exact eigenvalues */
+  double vpex[3][3] = {{0.,1./sqrt(5.),2./sqrt(5.)},
+                       {1.,0.,0.},
+                       {0.,-2./sqrt(5.),1./sqrt(5.)}}; /* Exact eigenvectors */
+  double mnum[6],lambdanum[3],vpnum[3][3],maxerr,err; /* Numerical quantities */
+  int8_t perm[3] = {0,1,2}; /* eigenvalues permutation array */
+
+
+  /** Recompose matrix from its eigendecomposition */
+  MMG5_eigenvmat_buildsym(mesh,3,mnum,lambdaex,(double *)vpex);
+
+  /* Check error in norm inf */
+  maxerr = MMG5_test_mat_error(6,(double *)mex,(double *)mnum);
+  if( maxerr > 10.*MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error matrix recomposition: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+
+
+  /** Compute eigendecomposition */
+  if( !MMG5_eigenv3d(1,mex,lambdanum,vpnum) )
+    return 0;
+
+  /* Naively sort eigenpairs in decreasing order */
+  MMG5_nsort(3,lambdanum,perm);
+  MMG5_nperm(3,0,1,lambdanum,perm);
+  for( int8_t i = 0; i < 3; i++ )
+    MMG5_nperm(3,i,3,(double *)vpnum,perm);
+
+  /* Check eigenvalues error in norm inf */
+  maxerr = MMG5_test_mat_error(3,(double *)lambdaex,(double *)lambdanum);
+  if( maxerr > 10*MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error matrix eigenvalues: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+
+  /* Check eigenvectors error through scalar product */
+  maxerr = 0.;
+  for( int8_t i = 0; i < 3; i++ ) {
+    err = 0.;
+    for( int8_t j = 0; j < 3; j++ )
+      err += vpex[i][j] * vpnum[i][j];
+    err = 1.-fabs(err);
+    maxerr = MG_MAX(maxerr,err);
+  }
+  if( maxerr > MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error matrix eigenvectors: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+
+  return 1;
+}
+
+/**
  * \param mesh pointer toward the mesh structure.
  * \param t tangent at the ridge point.
  * \param n normal at the ridge point.
