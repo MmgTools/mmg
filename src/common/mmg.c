@@ -294,17 +294,29 @@ void MMG5_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
 
   assert ( mesh->info.optim );
 
-  /* Detect the point used only by prisms */
-  if ( mesh->nprism ) {
-    for (k=1; k<=mesh->np; k++) {
-      mesh->point[k].flag = 1;
-    }
-    for (k=1; k<=mesh->ne; k++) {
-      pt = &mesh->tetra[k];
-      if ( !MG_EOK(pt) ) continue;
+  /* Detect the point not used by the mesh */
+  for (k=1; k<=mesh->np; k++) {
+    mesh->point[k].flag = 1;
+  }
 
-      for (i=0; i<4; i++) {
-        mesh->point[pt->v[i]].flag = 0;
+  /* For mmg3d, detect points used by triangles */
+  for (k=1; k<=mesh->ne; k++) {
+    pt = &mesh->tetra[k];
+    if ( !MG_EOK(pt) ) continue;
+
+    for (i=0; i<4; i++) {
+      mesh->point[pt->v[i]].flag = 0;
+    }
+  }
+
+  /* For mmgs, detect points used by triangles */
+  if ( !mesh->ne ) {
+    for (k=1; k<=mesh->nt; k++) {
+      MMG5_pTria ptt = &mesh->tria[k];
+      if ( !MG_EOK(ptt) ) continue;
+
+      for (i=0; i<3; i++) {
+        mesh->point[ptt->v[i]].flag = 0;
       }
     }
   }
@@ -333,7 +345,9 @@ void MMG5_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
     else if ( met->size == 6 ){
       for (k=1; k<=mesh->np; k++)  {
         ppt = &mesh->point[k];
-        if ( !MG_VOK(ppt) || ppt->flag ) continue;
+        if ( !MG_VOK(ppt) || ppt->flag ) {
+          continue;
+        }
         iadr = met->size*k;
 
         /* Check metric */
