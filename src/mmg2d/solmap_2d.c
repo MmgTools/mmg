@@ -98,7 +98,7 @@ int MMG2D_doSol_iso(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_SAFE_FREE(mark);
 
   /* Computation of hmin/hmax if not provided + size truncature */
-  MMG2D_solTruncatureForOptim_iso(mesh,sol);
+  MMG2D_solTruncatureForOptim_iso(mesh,sol,0);
 
   /* compute quality */
   if ( MMG2D_caltri ) {
@@ -211,7 +211,7 @@ int MMG2D_doSol_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_SAFE_FREE(mark);
 
   /* Size truncature */
-  MMG2D_solTruncatureForOptim_ani(mesh,sol);
+  MMG2D_solTruncatureForOptim(mesh,sol,1);
 
   /* compute quality */
   if ( MMG2D_caltri ) {
