@@ -696,6 +696,48 @@ int MMGS_Get_adjaVerticesFast(MMG5_pMesh mesh, int ip,int start, int lispoi[MMGS
 }
 
 /**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the solution structure.
+ * \param ani 1 for aniso metric, 0 for iso one
+ *
+ * \return 0 if fail, 1 if succeed.
+ *
+ * Truncate the metric computed by the DoSol function by hmax and hmin values
+ * (if setted by the user). Set hmin and hmax if they are not setted.
+ *
+ */
+static inline
+int MMGS_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met,int ani) {
+  int         i,k,ier;
+
+  assert ( mesh->info.optim );
+
+  /* Detect the point not used by the mesh */
+  for (k=1; k<=mesh->np; k++) {
+    mesh->point[k].flag = 1;
+  }
+
+  for (k=1; k<=mesh->nt; k++) {
+    MMG5_pTria ptt = &mesh->tria[k];
+    if ( !MG_EOK(ptt) ) continue;
+
+    for (i=0; i<3; i++) {
+      mesh->point[ptt->v[i]].flag = 0;
+    }
+  }
+
+  /* Compute hmin/hmax on unflagged points and truncate the metric */
+  if ( !ani ) {
+    ier = MMG5_solTruncature_iso(mesh,met);
+  }
+  else {
+    ier = MMG5_3dSolTruncature_ani(mesh,met);
+  }
+
+  return ier;
+}
+
+/**
  * \param mesh pointer toward the mesh
  * \param met pointer toward the metric
  *
@@ -772,7 +814,7 @@ int MMGS_doSol_iso(MMG5_pMesh mesh,MMG5_pSol met) {
 
   MMG5_SAFE_FREE(mark);
 
-  MMG5_solTruncatureForOptim(mesh,met,0);
+  MMGS_solTruncatureForOptim(mesh,met,0);
 
   return 1;
 }
