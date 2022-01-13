@@ -237,7 +237,7 @@ int MMG5_eigenvmat_check(MMG5_pMesh mesh,int8_t dim,int8_t symmat,double m[]) {
   if( dim == 2 ) {
     double lambda[2],v[2][2];
 
-    if( !MMG5_eigenv2d(symmat,m,lambda,v) )
+    if( !MMG5_eigenv2d(m,lambda,v) )
       return 0;
 
     if( symmat ) {
@@ -515,7 +515,7 @@ int MMG5_intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr) {
   imn[3] = det * (-m[1]*n[1] + m[0]*n[2]);
 
   /* Find eigenvalues of imn */
-  order = MMG5_eigenv2d(0,imn,lambda,vp);
+  order = MMG5_eigenv2d(imn,lambda,vp);
 
   if ( !order ) {
     if ( !mmgWarn0 ) {
