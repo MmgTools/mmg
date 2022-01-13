@@ -293,7 +293,7 @@ void MMG5_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
   MMG5_pTetra pt;
   MMG5_pPoint ppt;
   double      isqhmin, isqhmax;
-  int         i,k,iadr,sethmin,sethmax;
+  int         i,k,iadr;
 
   assert ( mesh->info.optim );
 
@@ -312,11 +312,15 @@ void MMG5_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
     }
   }
 
+  /* Security check: if hmin (resp. hmax) is not setted, it means that sethmin
+   * (resp. sethmax) is not setted too */
+  if ( !MMG5_check_setted_hminhmax(mesh) ) {
+    exit(EXIT_FAILURE);
+  }
+
   /* If not provided by the user, compute hmin/hmax from the metric computed by
    * the DoSol function. */
-  sethmin = sethmax = 1;
-  if ( mesh->info.hmin < 0 ) {
-    sethmin = 0;
+  if ( !mesh->info.sethmin ) {
     if ( met->size == 1 ) {
       mesh->info.hmin = FLT_MAX;
       for (k=1; k<=mesh->np; k++)  {
@@ -339,8 +343,7 @@ void MMG5_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
     }
   }
 
-  if ( mesh->info.hmax < 0 ) {
-    sethmax = 0;
+  if ( !mesh->info.sethmax ) {
     if ( met->size == 1 ) {
       mesh->info.hmax = 0.;
       for (k=1; k<=mesh->np; k++)  {
@@ -365,7 +368,7 @@ void MMG5_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
 
   /* Check the compatibility between the user settings and the automatically
    * computed values */
-  MMG5_check_hminhmax(mesh,sethmin,sethmax);
+  MMG5_check_hminhmax(mesh,mesh->info.sethmin,mesh->info.sethmax);
 
   /* vertex size */
   if ( met->size == 1 ) {
@@ -394,6 +397,14 @@ void MMG5_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
         met->m[iadr+5] = isqhmax;
       }
     }
+  }
+
+  if ( mesh->info.ddebug ) {
+    /* print unscaled values for debug purpose */
+    fprintf(stdout,"     After truncature computation:   hmin %lf (user setted %d)\n"
+            "                                     hmax %lf (user setted %d)\n",
+            mesh->info.delta * mesh->info.hmin,mesh->info.sethmin,
+            mesh->info.delta * mesh->info.hmax,mesh->info.sethmax);
   }
 
   return;
