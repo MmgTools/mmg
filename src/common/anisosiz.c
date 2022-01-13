@@ -1284,7 +1284,7 @@ int MMG5_simred(MMG5_pMesh mesh,double *m,double *n,double dm[2],
   imn[3] = det * (-m[1]*n[1] + m[0]*n[2]);
 
   /* Find eigenvalues of imn */
-  order = MMG5_eigenv2d(imn,lambda,vp);
+  order = MMG5_eigenv2d(0,imn,lambda,vp);
 
   if ( !order ) {
     if ( !mmgWarn0 ) {

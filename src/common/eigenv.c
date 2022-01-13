@@ -672,6 +672,7 @@ int MMG5_eigenv3d(int symmat,double *mat,double lambda[3],double v[3][3]) {
 
 /**
  * \brief Find eigenvalues and vectors of a 2x2 matrix.
+ * \param symmat 0 if matrix is not symetric, 1 otherwise.
  * \param mat pointer toward the matrix.
  * \param lambda eigenvalues.
  * \param v eigenvectors.
@@ -681,9 +682,14 @@ int MMG5_eigenv3d(int symmat,double *mat,double lambda[3],double v[3][3]) {
  * \remark the i^{th} eigenvector is stored in v[i][.].
  *
  */
-int MMG5_eigenv2d(double *mat,double lambda[2],double vp[2][2]) {
+int MMG5_eigenv2d(int symmat,double *mat,double lambda[2],double vp[2][2]) {
   double dd,sqDelta,trmat,vnorm;
   static int8_t  mmgWarn0=0;
+
+  /* wrapper function if symmetric matrix */
+  if( symmat )
+    return MMG5_eigensym(mat,lambda,vp);
+
 
   dd = mat[0] - mat[3];
   sqDelta = sqrt(fabs(dd*dd + 4.0*mat[1]*mat[2]));
