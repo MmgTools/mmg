@@ -1314,21 +1314,9 @@ int MMG3D_doSol_iso(MMG5_pMesh mesh,MMG5_pSol met) {
     }
   }
 
-  /* if hmax is not specified, compute it from the metric */
-  if ( mesh->info.hmax < 0. ) {
-    dd = 0.;
-    for (k=1; k<=mesh->np; k++) {
-      if ( !mark[k] ) continue;
-      dd = MG_MAX(dd,met->m[k]);
-    }
-    assert ( dd );
-    mesh->info.hmax = 10.*dd;
-  }
-
   /* vertex size */
   for (k=1; k<=mesh->np; k++) {
     if ( !mark[k] ) {
-      met->m[k] = mesh->info.hmax;
       continue;
     }
     else
