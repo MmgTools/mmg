@@ -1365,8 +1365,6 @@ int MMG3D_doSol_ani(MMG5_pMesh mesh,MMG5_pSol met) {
     }
   }
 
-  /* if hmax is not specified, compute it from the metric */
-  double hmax = FLT_MAX;
   for (k=1; k<=mesh->np; k++) {
     p1 = &mesh->point[k];
     if ( !mark[k] ) {
@@ -1397,47 +1395,19 @@ int MMG3D_doSol_ani(MMG5_pMesh mesh,MMG5_pSol met) {
       met->m[iadr+j] = dd*tensordot[j];
     }
 
+#ifndef NDEBUG
     /* Check metric */
     double lambda[3],vp[3][3];
     if (!MMG5_eigenv(1,met->m+iadr,lambda,vp) ) {
-      fprintf(stdout, " ## Warning: %s: %d: non diagonalizable metric."
-              " Impose hmax size at point\n",__func__,__LINE__);
-      met->m[iadr+0] = FLT_MIN;
-      met->m[iadr+1] = 0;
-      met->m[iadr+2] = 0;
-      met->m[iadr+3] = FLT_MIN;
-      met->m[iadr+4] = 0;
-      met->m[iadr+5] = FLT_MIN;
-      continue;
+      fprintf(stdout, " ## Warning: %s: %d: non diagonalizable metric.",
+              __func__,__LINE__);
     }
 
     assert ( lambda[0] > 0. && lambda[1] > 0.  && lambda[2] > 0.
-            && "Negative eigenvalue");
-
-    /* If the vertex belongs to only colinear edges one of the eigenvalue is
-     * infinite: do not take it into account, it will be truncated by hmax
-     * later */
-    for ( j=0; j<3; ++j ) {
-      if ( isfinite(lambda[j]) ) {
-        hmax = MG_MIN(hmax,lambda[j]);
-      }
-    }
-  }
-  if ( mesh->info.hmax < 0.) {
-    assert ( hmax > 0. && hmax < FLT_MAX && "Wrong hmax value" );
-    mesh->info.hmax = 10./sqrt(hmax);
-  }
-
-  /* vertex size at orphan points: impose hmax size */
-  hmax = 1./(mesh->info.hmax*mesh->info.hmax);
-  for (k=1; k<=mesh->np; k++) {
-    p1 = &mesh->point[k];
-    if ( !mark[k] ) {
-      iadr = 6*k;
-      met->m[iadr]   = hmax;
-      met->m[iadr+3] = met->m[iadr];
-      met->m[iadr+5] = met->m[iadr];
-    }
+             && "Negative eigenvalue" );
+    assert ( isfinite(lambda[0]) && isfinite(lambda[1]) && isfinite(lambda[2])
+             && "Infinite eigenvalue" );
+#endif
   }
 
   MMG5_SAFE_FREE(mark);
