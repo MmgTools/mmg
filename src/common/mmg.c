@@ -282,15 +282,121 @@ int MMG5_check_setted_hminhmax(MMG5_pMesh mesh) {
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the solution structure.
  *
+ * \return 0 if fail, 1 if succeed.
+ *
+ * Compute hmin and hmax values from unflagged points (if not setted by the
+ * user), check the values and truncate the 3D metric.
+ *
+ */
+int MMG5_3dSolTruncature_ani(MMG5_pMesh mesh, MMG5_pSol met) {
+  MMG5_pPoint ppt;
+  int         k,iadr;
+  double      isqhmin, isqhmax;
+  double      lambda[3],vp[3][3];
+
+  /* Security check: if hmin (resp. hmax) is not setted, it means that sethmin
+   * (resp. sethmax) is not setted too */
+  if ( !MMG5_check_setted_hminhmax(mesh) ) {
+    return 0;
+  }
+
+  /* If not provided by the user, compute hmin/hmax from the metric computed by
+   * the DoSol function. */
+  isqhmin = 0.;
+  isqhmax = FLT_MAX;
+  if ( (!mesh->info.sethmin) || (!mesh->info.sethmax) ) {
+    for (k=1; k<=mesh->np; k++)  {
+      ppt = &mesh->point[k];
+      if ( !MG_VOK(ppt) || ppt->flag ) {
+        continue;
+      }
+      iadr = met->size*k;
+
+      /* Check metric */
+      if (!MMG5_eigenv(1,met->m+iadr,lambda,vp) ) {
+        fprintf(stdout, " ## Warning: %s: %d: non diagonalizable metric."
+                " Impose hmax size at point\n",__func__,__LINE__);
+        met->m[iadr+0] = FLT_MIN;
+        met->m[iadr+1] = 0;
+        met->m[iadr+2] = 0;
+        met->m[iadr+3] = FLT_MIN;
+        met->m[iadr+4] = 0;
+        met->m[iadr+5] = FLT_MIN;
+        continue;
+      }
+
+      assert ( lambda[0] > 0. && lambda[1] > 0.  && lambda[2] > 0.
+               && "Negative eigenvalue");
+
+      /* If one of the eigenvalue is infinite: do not take it into account, it
+       * will be truncated by hmax later */
+      int j;
+      for ( j=0; j<3; ++j ) {
+        if ( isfinite(lambda[j]) ) {
+          isqhmax = MG_MIN(isqhmax,lambda[j]);
+          isqhmin = MG_MAX(isqhmin,lambda[j]);
+        }
+      }
+    }
+  }
+
+  if ( !mesh->info.sethmin ) {
+    mesh->info.hmin = 1./sqrt(isqhmin);
+  }
+
+  if ( !mesh->info.sethmax ) {
+    mesh->info.hmax = 1./sqrt(isqhmax);
+  }
+
+  /* Check the compatibility between the user settings and the automatically
+   * computed values */
+  MMG5_check_hminhmax(mesh,mesh->info.sethmin,mesh->info.sethmax);
+
+  /* vertex size */
+  isqhmin = 1./(mesh->info.hmin*mesh->info.hmin);
+  isqhmax = 1./(mesh->info.hmax*mesh->info.hmax);
+
+  for (k=1; k<=mesh->np; k++) {
+    ppt = &mesh->point[k];
+    if ( !MG_VOK(ppt) ) continue;
+
+    if ( ppt->flag || !MMG5_truncate_met3d(met,k,isqhmin,isqhmax) ) {
+      /* Fail to diagonalize metric: put hmax */
+      iadr = 6*k;
+      met->m[iadr]   = isqhmax;
+      met->m[iadr+1] = 0.;
+      met->m[iadr+2] = 0.;
+      met->m[iadr+3] = isqhmax;
+      met->m[iadr+4] = 0.;
+      met->m[iadr+5] = isqhmax;
+    }
+  }
+
+  if ( mesh->info.ddebug ) {
+    /* print unscaled values for debug purpose */
+    fprintf(stdout,"     After truncature computation:   hmin %lf (user setted %d)\n"
+            "                                     hmax %lf (user setted %d)\n",
+            mesh->info.delta * mesh->info.hmin,mesh->info.sethmin,
+            mesh->info.delta * mesh->info.hmax,mesh->info.sethmax);
+  }
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the solution structure.
+ * \param ani 1 for aniso metric, 0 for iso one
+ *
+ * \return 0 if fail, 1 if succeed.
+ *
  * Truncate the metric computed by the DoSol function by hmax and hmin values
  * (if setted by the user). Set hmin and hmax if they are not setted.
  *
  */
-void MMG5_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
+int MMG5_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met,int ani) {
   MMG5_pTetra pt;
-  MMG5_pPoint ppt;
-  double      isqhmin, isqhmax;
-  int         i,k,iadr;
+  int         i,k,ier;
 
   assert ( mesh->info.optim );
 
@@ -321,123 +427,15 @@ void MMG5_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
     }
   }
 
-  /* Security check: if hmin (resp. hmax) is not setted, it means that sethmin
-   * (resp. sethmax) is not setted too */
-  if ( !MMG5_check_setted_hminhmax(mesh) ) {
-    exit(EXIT_FAILURE);
+  /* Compute hmin/hmax on unflagged points and truncate the metric */
+  if ( !ani ) {
+    ier = MMG5_solTruncature_iso(mesh,met);
+  }
+  else {
+    ier = MMG5_3dSolTruncature_ani(mesh,met);
   }
 
-  /* If not provided by the user, compute hmin/hmax from the metric computed by
-   * the DoSol function. */
-  isqhmin = 0.;
-  isqhmax = FLT_MAX;
-  double hmin = FLT_MAX;
-  double hmax = 0.;
-  if ( (!mesh->info.sethmin) || (!mesh->info.sethmax) ) {
-    if ( met->size == 1 ) {
-      for (k=1; k<=mesh->np; k++)  {
-        ppt = &mesh->point[k];
-        if ( !MG_VOK(ppt) || ppt->flag ) continue;
-        hmin = MG_MIN(hmin,met->m[k]);
-        hmax = MG_MAX(hmax,met->m[k]);
-      }
-    }
-    else if ( met->size == 6 ){
-      for (k=1; k<=mesh->np; k++)  {
-        ppt = &mesh->point[k];
-        if ( !MG_VOK(ppt) || ppt->flag ) {
-          continue;
-        }
-        iadr = met->size*k;
-
-        /* Check metric */
-        double lambda[3],vp[3][3];
-        if (!MMG5_eigenv(1,met->m+iadr,lambda,vp) ) {
-          fprintf(stdout, " ## Warning: %s: %d: non diagonalizable metric."
-                  " Impose hmax size at point\n",__func__,__LINE__);
-          met->m[iadr+0] = FLT_MIN;
-          met->m[iadr+1] = 0;
-          met->m[iadr+2] = 0;
-          met->m[iadr+3] = FLT_MIN;
-          met->m[iadr+4] = 0;
-          met->m[iadr+5] = FLT_MIN;
-          continue;
-        }
-
-        assert ( lambda[0] > 0. && lambda[1] > 0.  && lambda[2] > 0.
-                 && "Negative eigenvalue");
-
-        /* If one of the eigenvalue is infinite: do not take it into account, it
-         * will be truncated by hmax later */
-        int j;
-        for ( j=0; j<3; ++j ) {
-          if ( isfinite(lambda[j]) ) {
-            isqhmax = MG_MIN(isqhmax,lambda[j]);
-            isqhmin = MG_MAX(isqhmin,lambda[j]);
-          }
-        }
-      }
-    }
-  }
-
-  if ( !mesh->info.sethmin ) {
-    if ( met->size == 1 ) {
-      mesh->info.hmin = hmin;
-    } else {
-      mesh->info.hmin = 1./sqrt(isqhmin);
-    }
-  }
-
-  if ( !mesh->info.sethmax ) {
-    if ( met->size == 1 ) {
-      mesh->info.hmax = hmax;
-    } else {
-      mesh->info.hmax = 1./sqrt(isqhmax);
-    }
-  }
-
-  /* Check the compatibility between the user settings and the automatically
-   * computed values */
-  MMG5_check_hminhmax(mesh,mesh->info.sethmin,mesh->info.sethmax);
-
-  /* vertex size */
-  if ( met->size == 1 ) {
-    for (k=1; k<=mesh->np; k++) {
-      ppt = &mesh->point[k];
-      if ( !MG_VOK(ppt) ) continue;
-      met->m[k] = MG_MIN(mesh->info.hmax,MG_MAX(mesh->info.hmin,met->m[k]));
-    }
-  }
-  else if ( met->size == 6 ) {
-    isqhmin = 1./(mesh->info.hmin*mesh->info.hmin);
-    isqhmax = 1./(mesh->info.hmax*mesh->info.hmax);
-
-    for (k=1; k<=mesh->np; k++) {
-      ppt = &mesh->point[k];
-      if ( !MG_VOK(ppt) ) continue;
-
-      if ( ppt->flag || !MMG5_truncate_met3d(met,k,isqhmin,isqhmax) ) {
-        /* Fail to diagonalize metric: put hmax */
-        iadr = 6*k;
-        met->m[iadr]   = isqhmax;
-        met->m[iadr+1] = 0.;
-        met->m[iadr+2] = 0.;
-        met->m[iadr+3] = isqhmax;
-        met->m[iadr+4] = 0.;
-        met->m[iadr+5] = isqhmax;
-      }
-    }
-  }
-
-  if ( mesh->info.ddebug ) {
-    /* print unscaled values for debug purpose */
-    fprintf(stdout,"     After truncature computation:   hmin %lf (user setted %d)\n"
-            "                                     hmax %lf (user setted %d)\n",
-            mesh->info.delta * mesh->info.hmin,mesh->info.sethmin,
-            mesh->info.delta * mesh->info.hmax,mesh->info.sethmax);
-  }
-
-  return;
+  return ier;
 }
 
 int MMG5_truncate_met3d(MMG5_pSol met, int ip, double isqhmin, double isqhmax) {

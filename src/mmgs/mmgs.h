@@ -234,6 +234,7 @@ void MMGS_Set_commonFunc(void) {
   MMG5_indElt            = MMGS_indElt;
   MMG5_grad2met_ani      = MMG5_grad2metSurf;
   MMG5_grad2metreq_ani   = MMG5_grad2metSurfreq;
+
 #ifdef USE_SCOTCH
   MMG5_renumbering       = MMG5_mmgsRenumbering;
 #endif

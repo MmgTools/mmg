@@ -772,7 +772,7 @@ int MMGS_doSol_iso(MMG5_pMesh mesh,MMG5_pSol met) {
 
   MMG5_SAFE_FREE(mark);
 
-  MMG5_solTruncatureForOptim(mesh,met);
+  MMG5_solTruncatureForOptim(mesh,met,0);
 
   return 1;
 }
@@ -881,7 +881,7 @@ int MMGS_doSol_ani(MMG5_pMesh mesh,MMG5_pSol met) {
 
   MMG5_SAFE_FREE(mark);
 
-  MMG5_solTruncatureForOptim(mesh,met);
+  MMG5_solTruncatureForOptim(mesh,met,1);
 
   return 1;
 }

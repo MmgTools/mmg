@@ -260,93 +260,6 @@ int MMG5_solTruncature_iso(MMG5_pMesh mesh, MMG5_pSol met) {
   return 1;
 }
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the solution structure.
- *
- * \return 0 if fail, 1 if succeed.
- *
- * Compute hmin and hmax values from unflagged points (if not setted by the
- * user), check the values and truncate the metric.
- *
- */
-int MMG5_solTruncature_ani(MMG5_pMesh mesh, MMG5_pSol met) {
-  MMG5_pPoint ppt;
-  int         k,iadr;
-  double      isqhmin, isqhmax;
-  double      lambda[2],vp[2][2];
-
- /* Security check: if hmin (resp. hmax) is not setted, it means that sethmin
-   * (resp. sethmax) is not setted too */
-  if ( !MMG5_check_setted_hminhmax(mesh) ) {
-    return 0;
-  }
-
-  /* If not provided by the user, compute hmin/hmax from the metric computed by
-   * the DoSol function. */
-  isqhmin = 0.;
-  isqhmax = FLT_MAX;
-  if ( (!mesh->info.sethmin) || (!mesh->info.sethmax) ) {
-    for (k=1; k<=mesh->np; k++)  {
-      ppt = &mesh->point[k];
-      if ( (!MG_VOK(ppt)) || ppt->flag ) continue;
-      iadr = met->size*k;
-
-      MMG5_eigensym(met->m+iadr,lambda,vp);
-
-      assert (lambda[0] > 0. && lambda[1] > 0. && "Negative eigenvalue");
-
-      isqhmin = MG_MAX(isqhmin,lambda[0]);
-      isqhmin = MG_MAX(isqhmin,lambda[1]);
-
-      isqhmax = MG_MIN(isqhmax,lambda[0]);
-      isqhmax = MG_MIN(isqhmax,lambda[1]);
-    }
-  }
-
-  if ( !mesh->info.sethmin ) {
-    mesh->info.hmin = 1./sqrt(isqhmin);
-  }
-
-  if ( !mesh->info.sethmax ) {
-    mesh->info.hmax = 1./sqrt(isqhmax);
-  }
-
-  MMG5_check_hminhmax(mesh, mesh->info.sethmin, mesh->info.sethmax);
-
-  /* vertex size */
-  isqhmin = 1./(mesh->info.hmin*mesh->info.hmin);
-  isqhmax = 1./(mesh->info.hmax*mesh->info.hmax);
-
-  for (k=1; k<=mesh->np; k++) {
-    iadr = 3*k;
-
-    ppt = &mesh->point[k];
-    if ( ppt->flag ) {
-      met->m[iadr] = met->m[iadr+2] = isqhmax;
-      met->m[iadr+1] = 0;
-    }
-    else {
-      MMG5_eigensym(met->m+iadr,lambda,vp);
-
-      lambda[0]=MG_MAX(isqhmax,MG_MIN(isqhmin,lambda[0]));
-      lambda[1]=MG_MAX(isqhmax,MG_MIN(isqhmin,lambda[1]));
-
-      met->m[iadr]   = vp[0][0]*vp[0][0]*lambda[0] + vp[1][0]*vp[1][0]*lambda[1];
-      met->m[iadr+1] = vp[0][0]*vp[0][1]*lambda[0] + vp[1][0]*vp[1][1]*lambda[1];
-      met->m[iadr+2] = vp[0][1]*vp[0][1]*lambda[0] + vp[1][1]*vp[1][1]*lambda[1];
-    }
-  }
-
-  if ( mesh->info.ddebug ) {
-    /* print unscaled values for debug purpose */
-    fprintf(stdout,"     After truncature computation:   hmin %lf (user setted %d)\n"
-            "                                     hmax %lf (user setted %d)\n",
-            mesh->info.delta * mesh->info.hmin,mesh->info.sethmin,
-            mesh->info.delta * mesh->info.hmax,mesh->info.sethmax);
-  }
-  return 1;
-}
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -470,6 +383,7 @@ int MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
     break;
 
   case 6:
+
       d1 = 1.0 / (dd*dd);
       /* Normalization */
       for (k=1; k<=mesh->np; k++) {

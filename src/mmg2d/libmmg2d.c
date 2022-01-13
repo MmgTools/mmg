@@ -45,7 +45,7 @@
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the solution structure.
- * \param ani 1 for aniso metric, 0 for iso one
+ * \param ani 1 for aniso metric, 0 for iso one.
  *
  * \return 0 if fail, 1 if succeed.
  *
@@ -77,6 +77,7 @@ int MMG2D_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met, int ani) {
     ier = MMG5_solTruncature_iso(mesh,met);
   }
   else {
+    MMG5_solTruncature_ani = MMG2D_solTruncature_ani;
     ier = MMG5_solTruncature_ani(mesh,met);
   }
 
