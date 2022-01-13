@@ -659,6 +659,7 @@ void           MMG5_check_hminhmax(MMG5_pMesh mesh, int8_t sethmin, int8_t sethm
  int           MMG5_scale_scalarMetric(MMG5_pMesh, MMG5_pSol,double);
  int           MMG5_scale_tensorMetric(MMG5_pMesh, MMG5_pSol,double);
  int           MMG5_solTruncature_iso(MMG5_pMesh mesh, MMG5_pSol met);
+ int           MMG5_2dSolTruncature_ani(MMG5_pMesh mesh, MMG5_pSol met);
  int           MMG5_3dSolTruncature_ani(MMG5_pMesh mesh, MMG5_pSol met);
  int           MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol ls);
  int           MMG5_scotchCall(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol fields,int*);

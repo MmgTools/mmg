@@ -42,48 +42,6 @@
     _LIBMMG5_RETURN(mesh,met,sol,val);            \
   }while(0)
 
-/**
- * \param mesh pointer toward the mesh structure.
- * \param met pointer toward the solution structure.
- * \param ani 1 for aniso metric, 0 for iso one.
- *
- * \return 0 if fail, 1 if succeed.
- *
- * Truncate the metric computed by the DoSol function by hmax and hmin values
- * (if setted by the user). Set hmin and hmax if they are not setted.
- *
- */
-int MMG2D_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met, int ani) {
-  MMG5_pTria  ptt;
-  int         k,i,ier;
-
-  assert ( mesh->info.optim || mesh->info.hsiz > 0. );
-
-  /* Detect the points not used by triangles */
-  for (k=1; k<=mesh->np; k++) {
-    mesh->point[k].flag = 1;
-  }
-  for (k=1; k<=mesh->nt; k++) {
-    ptt = &mesh->tria[k];
-    if ( !MG_EOK(ptt) ) continue;
-
-    for (i=0; i<3; i++) {
-      mesh->point[ptt->v[i]].flag = 0;
-    }
-  }
-
-  /* Compute hmin/hmax on unflagged points and truncate the metric */
-  if ( !ani ) {
-    ier = MMG5_solTruncature_iso(mesh,met);
-  }
-  else {
-    MMG5_solTruncature_ani = MMG2D_solTruncature_ani;
-    ier = MMG5_solTruncature_ani(mesh,met);
-  }
-
-  return ier;
-}
-
 int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol met)
 {
   MMG5_pSol sol=NULL; // unused
@@ -201,7 +159,7 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol met)
   mesh->info.fem = mesh->info.setfem;
 
   /* Scale input mesh */
-  if ( !MMG2D_scaleMesh(mesh,met,NULL) )  _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+  if ( !MMG5_scaleMesh(mesh,met,NULL) )  _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
 
   /* Specific meshing */
   if ( mesh->info.optim ) {
@@ -448,7 +406,7 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol met) {
   mesh->info.fem = mesh->info.setfem;
 
   /* scaling mesh */
-  if ( !MMG2D_scaleMesh(mesh,met,NULL) )  _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+  if ( !MMG5_scaleMesh(mesh,met,NULL) )  _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
 
   if ( mesh->info.ddebug && !MMG5_chkmsh(mesh,1,0) )  _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
 
@@ -697,7 +655,7 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
   mesh->info.fem = mesh->info.setfem;
 
   /* scaling mesh */
-  if ( !MMG2D_scaleMesh(mesh,met,sol) ) {
+  if ( !MMG5_scaleMesh(mesh,met,sol) ) {
     if ( mettofree ) { MMG5_SAFE_FREE (met); }
     _LIBMMG5_RETURN(mesh,sol,met,MMG5_STRONGFAILURE);
   }
@@ -969,7 +927,7 @@ int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   mesh->info.fem = mesh->info.setfem;
 
   /* scaling mesh  */
-  if ( !MMG2D_scaleMesh(mesh,NULL,disp) )  _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
+  if ( !MMG5_scaleMesh(mesh,NULL,disp) )  _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
 
   if ( mesh->nt && !MMG2D_hashTria(mesh) )  _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);
   if ( mesh->info.ddebug && !MMG5_chkmsh(mesh,1,0) )  _LIBMMG5_RETURN(mesh,met,disp,MMG5_STRONGFAILURE);

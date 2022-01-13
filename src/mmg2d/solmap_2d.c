@@ -35,6 +35,49 @@
 #include "mmg2d.h"
 
 /**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the solution structure.
+ * \param ani 1 for aniso metric, 0 for iso one.
+ *
+ * \return 0 if fail, 1 if succeed.
+ *
+ * Truncate the metric computed by the DoSol function by hmax and hmin values
+ * (if setted by the user). Set hmin and hmax if they are not setted.
+ *
+ */
+static inline
+int MMG2D_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met, int ani) {
+  MMG5_pTria  ptt;
+  int         k,i,ier;
+
+  assert ( mesh->info.optim || mesh->info.hsiz > 0. );
+
+  /* Detect the points not used by triangles */
+  for (k=1; k<=mesh->np; k++) {
+    mesh->point[k].flag = 1;
+  }
+  for (k=1; k<=mesh->nt; k++) {
+    ptt = &mesh->tria[k];
+    if ( !MG_EOK(ptt) ) continue;
+
+    for (i=0; i<3; i++) {
+      mesh->point[ptt->v[i]].flag = 0;
+    }
+  }
+
+  /* Compute hmin/hmax on unflagged points and truncate the metric */
+  if ( !ani ) {
+    ier = MMG5_solTruncature_iso(mesh,met);
+  }
+  else {
+    MMG5_solTruncature_ani = MMG5_2dSolTruncature_ani;
+    ier = MMG5_solTruncature_ani(mesh,met);
+  }
+
+  return ier;
+}
+
+/**
  * \param mesh pointer toward the mesh structure
  * \param sol pointer toward the sol structure
  * \return 1 if success

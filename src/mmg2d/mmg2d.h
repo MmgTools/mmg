@@ -202,7 +202,6 @@ size_t MMG5_memSize(void);
 int MMG2D_memOption(MMG5_pMesh mesh);
 int  MMG2D_setMeshSize_alloc(MMG5_pMesh);
 
-int MMG2D_scaleMesh(MMG5_pMesh ,MMG5_pSol, MMG5_pSol );
 int MMG2D_unscaleMesh(MMG5_pMesh ,MMG5_pSol, MMG5_pSol );
 int MMG2D_pack(MMG5_pMesh ,MMG5_pSol, MMG5_pSol );
 int MMG2D_outqua(MMG5_pMesh ,MMG5_pSol );
@@ -217,9 +216,6 @@ int  MMG2D_Init_mesh_var( va_list argptr );
 int  MMG2D_Free_all_var( va_list argptr );
 int  MMG2D_Free_structures_var( va_list argptr );
 int  MMG2D_Free_names_var( va_list argptr );
-
-int MMG2D_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met,int ani);
-int MMG2D_solTruncature_ani(MMG5_pMesh mesh, MMG5_pSol met);
 
 int MMG2D_mmg2d2(MMG5_pMesh , MMG5_pSol);
 int MMG2D_mmg2d6(MMG5_pMesh ,MMG5_pSol,MMG5_pSol );
@@ -379,6 +375,7 @@ void MMG2D_Set_commonFunc(void) {
   MMG5_chkmsh            = MMG5_mmg2dChkmsh;
   MMG5_grad2met_ani      = MMG2D_grad2met_ani;
   MMG5_grad2metreq_ani   = MMG2D_grad2metreq_ani;
+  MMG5_solTruncature_ani = MMG5_2dSolTruncature_ani;
 
   return;
 }
