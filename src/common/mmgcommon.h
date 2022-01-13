@@ -734,6 +734,9 @@ int MMG5_isSplit(MMG5_pMesh ,int ,int *,int *);
 int MMG5_isNotSplit(MMG5_pMesh ,int);
 int MMG5_getStartRef(MMG5_pMesh ,int, int *);
 
+/* test functions */
+int MMG5_test_invmat22();
+int MMG5_test_invmat33();
 
 /* tools */
 void MMG5_mark_verticesAsUnused ( MMG5_pMesh mesh );
