@@ -283,11 +283,12 @@ int MMG5_eigenvmat_check(MMG5_pMesh mesh,int8_t dim,int8_t symmat,double m[]) {
 int MMG5_test_eigenvmatsym3d() {
   MMG5_pMesh mesh;
   double mex[6] = {2.,0.,0.,3.,4.,9.}; /* Test matrix */
-  double lambdaex[3] = {11.,2.,1.}; /* Exact eigenvalues */
-  double vpex[3][3] = {{0.,1./sqrt(5.),2./sqrt(5.)},
+  double lambdaex[3] = {1.,2.,11.}; /* Exact eigenvalues */
+  double vpex[3][3] = {{0.,-2./sqrt(5.),1./sqrt(5.)},
                        {1.,0.,0.},
-                       {0.,-2./sqrt(5.),1./sqrt(5.)}}; /* Exact eigenvectors */
-  double mnum[6],lambdanum[3],vpnum[3][3],maxerr,err; /* Numerical quantities */
+                       {0.,1./sqrt(5.),2./sqrt(5.)}}; /* Exact eigenvectors */
+  double mnum[6],lambdanum[3],vpnum[3][3]; /* Numerical quantities */
+  double swap[3],maxerr,err;
   int8_t perm[3] = {0,1,2}; /* eigenvalues permutation array */
 
 
@@ -307,11 +308,11 @@ int MMG5_test_eigenvmatsym3d() {
   if( !MMG5_eigenv3d(1,mex,lambdanum,vpnum) )
     return 0;
 
-  /* Naively sort eigenpairs in decreasing order */
+  /* Naively sort eigenpairs in increasing order */
   MMG5_nsort(3,lambdanum,perm);
-  MMG5_nperm(3,0,1,lambdanum,perm);
+  MMG5_nperm(3,0,1,lambdanum,swap,perm);
   for( int8_t i = 0; i < 3; i++ )
-    MMG5_nperm(3,i,3,(double *)vpnum,perm);
+    MMG5_nperm(3,i,3,(double *)vpnum,swap,perm);
 
   /* Check eigenvalues error in norm inf */
   maxerr = MMG5_test_mat_error(3,(double *)lambdaex,(double *)lambdanum);

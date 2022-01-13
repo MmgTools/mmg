@@ -581,7 +581,7 @@ typedef struct MMG5_dNode_s {
 
 /* Functions declarations */
  void MMG5_nsort(int ,double *,int8_t *);
- void MMG5_nperm(int8_t n,int8_t shift,int8_t stride,double *val,int8_t *perm);
+ void MMG5_nperm(int8_t n,int8_t shift,int8_t stride,double *val,double *oldval,int8_t *perm);
  extern double MMG5_det3pt1vec(double c0[3],double c1[3],double c2[3],double v[3]);
  extern double MMG5_det4pt(double c0[3],double c1[3],double c2[3],double c3[3]);
  int           MMG5_devangle(double* n1, double *n2, double crit);
