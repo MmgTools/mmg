@@ -1724,7 +1724,7 @@ int MMG5_intersecmet33(MMG5_pMesh mesh, double *m,double *n,double *mr) {
 
   /* Intersected metric = tP^-1 diag(d0,d1,d2)P^-1, P = (vp0, vp1,vp2) stored in
    * columns */
-  if( !MMG3D_recomposeMat_simred(d,vp,mr) )
+  if( !MMG5_eigenvmatnonsym3d(mesh,mr,d,vp) )
     return 0;
 
   return 1;
