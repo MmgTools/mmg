@@ -37,6 +37,7 @@ SET ( MMG2D_LIB_TESTS
   libmmg2d_lsOnly
   libmmg2d_lsAndMetric
   test_api2d_0
+  test_met2d
   )
 SET ( MMG2D_LIB_TESTS_MAIN_PATH
   ${PROJECT_SOURCE_DIR}/libexamples/mmg2d/adaptation_example0/example0_a/main.c
@@ -48,6 +49,7 @@ SET ( MMG2D_LIB_TESTS_MAIN_PATH
   ${PROJECT_SOURCE_DIR}/libexamples/mmg2d/IsosurfDiscretization_lsOnly/main.c
   ${PROJECT_SOURCE_DIR}/libexamples/mmg2d/IsosurfDiscretization_lsAndMetric/main.c
   ${MMG2D_CI_TESTS}/API_tests/2d.c
+  ${PROJECT_SOURCE_DIR}/cmake/testing/code/test_met2d.c
   )
 
 IF ( LIBMMG2D_STATIC )

@@ -1017,3 +1017,75 @@ void MMG5_keep_subdomainElts ( MMG5_pMesh mesh, int nsd,
 
   return;
 }
+
+/**
+ * \param dim square matrix size.
+ * \param m1 first matrix (single array).
+ * \param m2 second matrix (single array).
+ *
+ * Compute maximum error between two matrices.
+ *
+ */
+static inline
+double MMG5_test_mat_error( int8_t dim,double m1[],double m2[] ) {
+  double maxerr;
+  int8_t i,j;
+
+  /* Compute max error */
+  maxerr = 0;
+  for( i = 0; i < dim; i++ )
+    for( j = 0; j < dim; j++ )
+      maxerr = MG_MAX(maxerr,fabs(m1[i*dim+j] - m2[i*dim+j]));
+
+  return maxerr;
+}
+
+/**
+ *
+ * Test inversion of 2x2 non-symmetric matrix stored in 2 dimensions
+ *
+ */
+int MMG5_test_invmat22() {
+  double A[2][2] = {{4.0,2.0},{1.0,1.0}}; /* Test matrix */
+  double iAex[2][2] = {{0.5,-1.0},{-0.5,2.0}}; /* Analytical inverse */
+  double iAnum[2][2]; /* Numerical inverse */
+
+  /* Compute matrix inverse */
+  if( !MMG5_invmat22(A,iAnum) )
+    return 0;
+
+  /* Check error in norm inf */
+  double maxerr = MMG5_test_mat_error(2,(double *)iAex,(double *)iAnum);
+  if( maxerr > MMG5_EPSD ) {
+    fprintf(stderr,"  ## Error matrix inversion: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+
+  return 1;
+}
+
+/**
+ *
+ * Test inversion of 3x3 non-symmetric matrix stored in 2 dimensions
+ *
+ */
+int MMG5_test_invmat33() {
+  double A[3][3] = {{7.0,2.0,1.0},{0.0,3.0,-1.0},{-3.0,4.0,-2.0}}; /* Test matrix */
+  double iAex[3][3] = {{-2.0,8.0,-5.0},{3.0,-11.0,7.0},{9.0,-34.0,21.0}}; /* Analytical inverse */
+  double iAnum[3][3]; /* Numerical inverse */
+
+  /* Compute matrix inverse */
+  if( !MMG5_invmat33(A,iAnum) )
+    return 0;
+
+  /* Check error in norm inf */
+  double maxerr = MMG5_test_mat_error(3,(double *)iAex,(double *)iAnum);
+  if( maxerr > MMG5_EPSD ) {
+    fprintf(stderr,"  ## Error matrix inversion: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+
+  return 1;
+}
