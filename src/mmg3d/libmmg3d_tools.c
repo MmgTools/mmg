@@ -1419,7 +1419,7 @@ int MMG3D_doSol_ani(MMG5_pMesh mesh,MMG5_pSol met) {
      * later */
     for ( j=0; j<3; ++j ) {
       if ( isfinite(lambda[j]) ) {
-        hmax = MG_MIN(hmax,lambda[0]);
+        hmax = MG_MIN(hmax,lambda[j]);
       }
     }
   }
