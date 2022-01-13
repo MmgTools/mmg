@@ -428,6 +428,14 @@ int MMGS_mmgsls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
     _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
   }
 
+  /* mesh analysis: normal at vertices are needed for doSol function */
+  if ( !MMGS_analys(mesh) ) {
+    if ( mettofree ) { MMG5_DEL_MEM(mesh,met->m);MMG5_SAFE_FREE (met); }
+    if ( !MMG5_unscaleMesh(mesh,met,sol) )
+      _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+    MMGS_RETURN_AND_PACK(mesh,met,sol,MMG5_LOWFAILURE);
+  }
+
   /* Specific meshing: compute optim option here because after isovalue
    * discretization mesh elements have too bad qualities */
   if ( mesh->info.optim ) {
@@ -635,13 +643,6 @@ int MMGS_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
   MMGS_setfunc(mesh,met);
 
   /* specific meshing */
-  if ( mesh->info.optim ) {
-    if ( !MMGS_doSol(mesh,met) ) {
-      if ( !MMG5_unscaleMesh(mesh,met,NULL) )   _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
-      _LIBMMG5_RETURN(mesh,met,sol,MMG5_LOWFAILURE);
-    }
-  }
-
   if ( mesh->info.hsiz > 0. ) {
     if ( !MMGS_Set_constantSize(mesh,met) ) {
       if ( !MMG5_unscaleMesh(mesh,met,NULL) )   _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
@@ -656,6 +657,13 @@ int MMGS_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
     MMGS_RETURN_AND_PACK(mesh,met,sol,MMG5_LOWFAILURE);
   }
 
+  /* specific meshing: optim mode needs normal at vertices */
+  if ( mesh->info.optim ) {
+    if ( !MMGS_doSol(mesh,met) ) {
+      if ( !MMG5_unscaleMesh(mesh,met,NULL) )   _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
+      _LIBMMG5_RETURN(mesh,met,sol,MMG5_LOWFAILURE);
+    }
+  }
 
   if ( mesh->info.imprim > 0 ||  mesh->info.imprim < -1 ) {
     if ( !MMGS_inqua(mesh,met) ) {
