@@ -1433,7 +1433,7 @@ int MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int np1,int np
     if( ps1 >= alpha -MMG5_EPS )
       return -1;
 
-    if ( !MMG5_eigenv(1,m1,lambda,vp) ) {
+    if ( !MMG5_eigenv3d(1,m1,lambda,vp) ) {
       if ( !mmgWarn ) {
         fprintf(stderr,"\n  ## Warning: %s: Unable to diagonalize at least"
                 " 1 metric.\n",__func__);
@@ -1522,7 +1522,7 @@ int MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int np1,int np
     if( ps2 >= alpha - MMG5_EPS)
       return -1;
 
-    MMG5_eigenv(1,m2,lambda,vp);
+    MMG5_eigenv3d(1,m2,lambda,vp);
 
     c[0] = t[0]*vp[0][0] + t[1]*vp[0][1] + t[2]*vp[0][2];
     c[1] = t[0]*vp[1][0] + t[1]*vp[1][1] + t[2]*vp[1][2];
