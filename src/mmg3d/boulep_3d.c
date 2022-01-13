@@ -450,13 +450,14 @@ int MMG5_boulenmInt(MMG5_pMesh mesh,MMG_int start,MMG_int ip,double t[3]) {
  * the vertex \a ip when ip is non-manifold.
  *
  */
-int MMG5_boulernm(MMG5_pMesh mesh,MMG5_Hash *hash,int start,int ip,int *ng,int *nr){
+int MMG5_boulernm(MMG5_pMesh mesh,MMG5_Hash *hash,MMG_int start,int ip,int *ng,int *nr){
   MMG5_pTetra    pt,pt1;
   MMG5_pxTetra   pxt;
   MMG5_hedge    *ph;
-  int            *adja,nump,ilist,base,cur,k,k1,ns;
-  int            list[MMG3D_LMAX+2];
-  int            key,ia,ib,jj,a,b;
+  MMG_int            *adja,nump,k,k1;
+  int            ns,ilist,base,cur;
+  MMG_int            list[MMG3D_LMAX+2],ia,ib,a,b;
+  int            key,jj;
   int8_t         j,l,i;
   uint8_t        ie;
 
@@ -593,7 +594,7 @@ int MMG5_boulernm(MMG5_pMesh mesh,MMG5_Hash *hash,int start,int ip,int *ng,int *
  * non-manifold, must be called only if \a start has no adjacent through iface.
  *
  */
-int MMG5_boulesurfvolp(MMG5_pMesh mesh,MMG_int start,MMG_int ip,int iface,
+int MMG5_boulesurfvolp(MMG5_pMesh mesh,MMG_int start,int ip,int iface,
                         MMG_int *listv,MMG_int *ilistv,MMG_int *lists,MMG_int*ilists, int isnm)
 {
   MMG5_pTetra  pt,pt1;

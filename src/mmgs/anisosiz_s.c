@@ -49,7 +49,7 @@
  * size.
  *
  */
-static int MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,MMG_int it,MMG_int ip) {
+static int MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,MMG_int it,int ip) {
   MMG5_pTria         pt;
   MMG5_pPoint        p0;
   MMG5_pPar          par;
@@ -342,7 +342,7 @@ static int MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,MMG_int it,MMG_int ip) {
  * geometric approx of the surface.
  *
  */
-static int MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,MMG_int it,MMG_int ip) {
+static int MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,MMG_int it,int ip) {
   MMG5_pTria         pt;
   MMG5_pPoint        p0,p1;
   MMG5_Bezier       b;

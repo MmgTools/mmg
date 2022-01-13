@@ -114,7 +114,7 @@ inline int MMG5_moymet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,double *m1) 
  * size.
  *
  */
-static int MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,MMG_int kel, int iface, MMG_int ip) {
+static int MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,MMG_int kel, int iface, int ip) {
   MMG5_pTetra        pt;
   MMG5_pxTetra       pxt;
   MMG5_pPoint        p0;
@@ -527,7 +527,7 @@ static int MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,MMG_int kel,
  * geometric approx of the surface.
  *
  */
-static int MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,MMG_int kel, int iface, MMG_int ip) {
+static int MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,MMG_int kel, int iface, int ip) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
   MMG5_Tria     ptt;

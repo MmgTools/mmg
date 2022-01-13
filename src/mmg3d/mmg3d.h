@@ -271,13 +271,13 @@ extern int  MMG5_BezierRidge(MMG5_pMesh mesh,int ip0, int ip1, double s, double 
 extern int  MMG5_BezierNom(MMG5_pMesh mesh,int ip0,int ip1,double s,double *o,double *no,double *to);
 int  MMG5_norface(MMG5_pMesh mesh ,int k, int iface, double v[3]);
 int  MMG3D_findEdge(MMG5_pMesh,MMG5_pTetra,MMG_int,MMG_int,MMG_int,int,int8_t*,int8_t* );
-int  MMG5_boulernm (MMG5_pMesh mesh,MMG5_Hash *hash, int start, int ip, int *ng, int *nr);
+int  MMG5_boulernm (MMG5_pMesh mesh,MMG5_Hash *hash, MMG_int start, int ip, int *ng, int *nr);
 int  MMG5_boulenm(MMG5_pMesh mesh, MMG_int start, MMG_int ip, int iface, double n[3],double t[3]);
 int  MMG5_boulenmInt(MMG5_pMesh mesh, MMG_int start, MMG_int ip, double t[3]);
 int  MMG5_boulevolp(MMG5_pMesh mesh, MMG_int start, int ip, MMG_int * list);
 int  MMG5_boulesurfvolpNom(MMG5_pMesh mesh,int start,int ip,int iface,int *listv,
                           int *ilistv,int *lists,int*ilists,int*refmin,int*refplus,int isnm);
-int  MMG5_boulesurfvolp(MMG5_pMesh mesh,MMG_int start,MMG_int ip,int iface,MMG_int *listv,
+int  MMG5_boulesurfvolp(MMG5_pMesh mesh,MMG_int start,int ip,int iface,MMG_int *listv,
                          MMG_int *ilistv,MMG_int *lists,MMG_int*ilists, int isnm);
 int  MMG5_bouletrid(MMG5_pMesh,int,int,int,int *,int *,int *,int *,int *,int *);
 int  MMG5_startedgsurfball(MMG5_pMesh mesh,int nump,int numq,int *list,int ilist);
