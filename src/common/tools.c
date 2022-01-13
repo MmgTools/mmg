@@ -35,6 +35,47 @@
 
 #include "mmgcommon.h"
 
+/** naive (increasing) sorting algorithm, for very small tabs ; permutation is stored in perm */
+inline void MMG5_nsort(int n,double *val,int8_t *perm){
+    int   i,j,aux;
+
+    for (i=0; i<n; i++)  perm[i] = i;
+
+    for (i=0; i<n; i++) {
+        for (j=i+1; j<n; j++) {
+            if ( val[perm[i]] > val[perm[j]] ) {
+                aux = perm[i];
+                perm[i] = perm[j];
+                perm[j] = aux;
+            }
+        }
+    }
+}
+
+/**
+ * \param n array size
+ * \param shift shift to apply when taking array value
+ * \param stride stride to apply when taking array value
+ * \param val array of double precision floating points
+ * \param perm permutation array
+ *
+ * Naively permute a small array. Use shift and stride to eventually permute
+ * matrix columns.
+ *
+ */
+inline void MMG5_nperm(int8_t n,int8_t shift,int8_t stride,double *val,int8_t *perm) {
+  double tmp;
+  int8_t i,k,ii,kk;
+
+  for( i = 0; i < n; i++ ) {
+    k = perm[i];
+    ii = shift+i*stride;
+    kk = shift+k*stride;
+    tmp = val[ii];
+    val[ii] = val[kk];
+    val[kk] = tmp;
+  }
+}
 
 /**
  * \param n1 first normal

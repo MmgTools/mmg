@@ -361,7 +361,6 @@ int  MMG3D_split6_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]);
 int  MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t);
 int  MMG5_split4bar(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t);
 int  MMG3D_simbulgept(MMG5_pMesh mesh,MMG5_pSol met, int *list, int ilist,int);
-void MMG5_nsort(int ,double *,int8_t *);
 int    MMG3D_optlap(MMG5_pMesh ,MMG5_pSol );
 int  MMG3D_rotate_surfacicBall(MMG5_pMesh,int*,int,int,double r[3][3],double*);
 int    MMG5_movintpt_iso(MMG5_pMesh ,MMG5_pSol,MMG3D_pPROctree, int *, int , int);
