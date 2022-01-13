@@ -274,6 +274,72 @@ int MMG5_eigenvmat_check(MMG5_pMesh mesh,int8_t dim,int8_t symmat,double m[]) {
 
 /**
  *
+ * For a 2x2 symmetric matrix, Test:
+ * - the recomposition of the matrix from its exact eigendecomposition;
+ * - the computation of the eigenvalues of the matrix;
+ * - the computation of the eigenvectors of the matrix.
+ *
+ */
+int MMG5_test_eigenvmatsym2d() {
+  MMG5_pMesh mesh;
+  double mex[3] = {2.,1.,2.}; /* Test matrix, non-symmetric storage */
+  double lambdaex[2] = {1.,3.}; /* Exact eigenvalues */
+  double vpex[2][2] = {{1./sqrt(2.),-1./sqrt(2.)},
+                       {1./sqrt(2.),1./sqrt(2.)}}; /* Exact eigenvectors */
+  double mnum[3],lambdanum[2],vpnum[2][2]; /* Numerical quantities */
+  double swap[2],maxerr,err;
+  int8_t perm[2] = {0,1}; /* eigenvalues permutation array */
+
+
+  /** Recompose matrix from its eigendecomposition */
+  MMG5_eigenvmat_buildsym(mesh,2,mnum,lambdaex,(double *)vpex);
+
+  /* Check error in norm inf */
+  maxerr = MMG5_test_mat_error(3,(double *)mex,(double *)mnum);
+  if( maxerr > 10.*MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error matrix recomposition: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+
+
+  /** Compute eigendecomposition */
+  if( !MMG5_eigenv2d(1,mex,lambdanum,vpnum) )
+    return 0;
+
+  /* Naively sort eigenpairs in increasing order */
+  MMG5_nsort(2,lambdanum,perm);
+  MMG5_nperm(2,0,1,lambdanum,swap,perm);
+  for( int8_t i = 0; i < 2; i++ )
+    MMG5_nperm(2,i,2,(double *)vpnum,swap,perm);
+
+  /* Check eigenvalues error in norm inf */
+  maxerr = MMG5_test_mat_error(2,(double *)lambdaex,(double *)lambdanum);
+  if( maxerr > 10*MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error matrix eigenvalues: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+
+  /* Check eigenvectors error through scalar product */
+  maxerr = 0.;
+  for( int8_t i = 0; i < 2; i++ ) {
+    err = 0.;
+    for( int8_t j = 0; j < 2; j++ )
+      err += vpex[i][j] * vpnum[i][j];
+    err = 1.-fabs(err);
+    maxerr = MG_MAX(maxerr,err);
+  }
+  if( maxerr > MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error matrix eigenvectors: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+
+  return 1;
+}
+/**
+ *
  * For a 3x3 symmetric matrix, Test:
  * - the recomposition of the matrix from its exact eigendecomposition;
  * - the computation of the eigenvalues of the matrix;

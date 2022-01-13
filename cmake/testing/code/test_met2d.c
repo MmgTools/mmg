@@ -55,6 +55,8 @@ int main(int argc,char *argv[]) {
   if( !MMG5_test_invmat22() )
     return(EXIT_FAILURE);
 
+  if( !MMG5_test_eigenvmatsym2d() )
+    return EXIT_FAILURE;
 
   /** ------------------------------ STEP III -------------------------- */
 
