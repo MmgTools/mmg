@@ -58,6 +58,9 @@ int main(int argc,char *argv[]) {
   if( !MMG5_test_eigenvmatsym2d() )
     return EXIT_FAILURE;
 
+  if( !MMG5_test_eigenvmatnonsym2d() )
+    return EXIT_FAILURE;
+
   /** ------------------------------ STEP III -------------------------- */
 
   /** 3) Free the MMG2D structures */
