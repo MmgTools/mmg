@@ -58,6 +58,9 @@ int main(int argc,char *argv[]) {
   if( !MMG5_test_eigenvmatsym3d() )
     return(EXIT_FAILURE);
 
+  if( !MMG5_test_eigenvmatnonsym3d() )
+    return(EXIT_FAILURE);
+
   /** ------------------------------ STEP III -------------------------- */
 
   /** 3) Free the MMG3D structures */

@@ -742,6 +742,7 @@ int MMG5_test_invmat22();
 int MMG5_test_invmat33();
 int MMG5_test_eigenvmatsym2d();
 int MMG5_test_eigenvmatsym3d();
+int MMG5_test_eigenvmatnonsym3d();
 
 /* tools */
 void MMG5_mark_verticesAsUnused ( MMG5_pMesh mesh );
