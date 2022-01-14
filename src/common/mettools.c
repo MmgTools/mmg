@@ -223,15 +223,15 @@ int MMG5_eigenvmatnonsym3d(MMG5_pMesh mesh,double m[],double lambda[],double v[]
  * \param mesh pointer toward the mesh structure.
  * \param dim matrix size.
  * \param symmat integer flag (1 if the matrix is symmetric, 0 otherwise).
- * \param m matrix array.
+ * \param m input matrix array.
+ * <param mnew output matrix array.
  * \return 1 if success, 0 if failure.
  *
- * Check the recomposition of a matrix from its eigenvalue decomposition.
+ * Check the recomposition of a matrix from its numerical eigenvalue
+ * decomposition.
  */
-int MMG5_eigenvmat_check(MMG5_pMesh mesh,int8_t dim,int8_t symmat,double m[]) {
-  int    msize = symmat ? (dim+1)*dim/2 : dim*dim;
-  double mnew[9];  /* allocate with maximum size */
-  int    k;
+int MMG5_eigenvmat_check(MMG5_pMesh mesh,int8_t dim,int8_t symmat,double m[],
+                         double mnew[]) {
 
   /* Compute eigendecomposition, recompose matrix from eigendecomposition */
   if( dim == 2 ) {
@@ -262,12 +262,6 @@ int MMG5_eigenvmat_check(MMG5_pMesh mesh,int8_t dim,int8_t symmat,double m[]) {
         return 0;
     }
   }
-
-
-  /* Check result against input matrix */
-  for( k = 0; k < msize; k++ )
-    if( fabs( m[k] - mnew[k] ) > MMG5_EPSD )
-      return 0;
 
   return 1;
 }
@@ -351,6 +345,17 @@ int MMG5_test_eigenvmatsym2d() {
     return 0;
   }
 
+
+  /** Compute both eigendecomposition and recomposition, and check matrix */
+  if( !MMG5_eigenvmat_check(mesh,2,1,mex,mnum) )
+    return 0;
+  maxerr = MMG5_test_mat_error(3,(double *)mex,(double *)mnum);
+  if( maxerr > 10*MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error matrix eigendecomposition and recomposition: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+
   return 1;
 }
 
@@ -418,6 +423,17 @@ int MMG5_test_eigenvmatnonsym2d() {
     return 0;
   }
 
+
+  /** Compute both eigendecomposition and recomposition, and check matrix */
+  if( !MMG5_eigenvmat_check(mesh,2,0,mex,mnum) )
+    return 0;
+  maxerr = MMG5_test_mat_error(4,(double *)mex,(double *)mnum);
+  if( maxerr > 100*MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error matrix eigendecomposition and recomposition: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+
   return 1;
 }
 
@@ -479,6 +495,17 @@ int MMG5_test_eigenvmatsym3d() {
   }
   if( maxerr > MMG5_EPSOK ) {
     fprintf(stderr,"  ## Error matrix eigenvectors: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+
+
+  /** Compute both eigendecomposition and recomposition, and check matrix */
+  if( !MMG5_eigenvmat_check(mesh,3,1,mex,mnum) )
+    return 0;
+  maxerr = MMG5_test_mat_error(6,(double *)mex,(double *)mnum);
+  if( maxerr > 10*MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error matrix eigendecomposition and recomposition: in function %s, max error %e\n",
       __func__,maxerr);
     return 0;
   }
@@ -549,6 +576,17 @@ int MMG5_test_eigenvmatnonsym3d() {
   }
   if( maxerr > MMG5_EPSOK ) {
     fprintf(stderr,"  ## Error matrix eigenvectors: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+
+
+  /** Compute both eigendecomposition and recomposition, and check matrix */
+  if( !MMG5_eigenvmat_check(mesh,3,0,mex,mnum) )
+    return 0;
+  maxerr = MMG5_test_mat_error(9,(double *)mex,(double *)mnum);
+  if( maxerr > 1000*MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error matrix eigendecomposition and recomposition: in function %s, max error %e\n",
       __func__,maxerr);
     return 0;
   }
