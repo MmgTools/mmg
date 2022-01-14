@@ -1516,6 +1516,64 @@ int MMG5_test_simred2d() {
 }
 
 /**
+ *
+ * For a couple of 3x3 symmetric matrices, Test:
+ * - the computation of the simultaneous reduction values of the matrices;
+ * - the computation of the simultaneous reduction basis vectors..
+ *
+ */
+int MMG5_test_simred3d() {
+  MMG5_pMesh mesh;
+  double mex[6] = {111./2.,-109./2.,  89./2.,111./2.,-91./2.,111./2.}; /* Test matrix 1 */
+  double nex[6] = {409./2.,-393./2.,-407./2.,409./2.,391./2.,409./2.}; /* Test matrix 2 */
+  double dmex[3] = {1., 10.,100.}; /* Exact cobasis projection 1 */
+  double dnex[3] = {8.,400.,  1.}; /* Exact cobasis projection 2 */
+  double vpex[3][3] = {{1./sqrt(2.),1./sqrt(2.),0.},
+                       {0.,         1./sqrt(2.),1./sqrt(2.)},
+                       {1./sqrt(2.),         0.,1./sqrt(2.)}}; /* Exact cobasis vectors */
+  double dmnum[3],dnnum[3],vpnum[3][3]; /* Numerical quantities */
+  double swap[3],maxerr,err;
+  int8_t perm[3]; /* permutation array */
+
+  /** Compute simultaneous reduction */
+  if( !MMG5_simred3d(mesh,mex,nex,dmnum,dnnum,vpnum ) )
+    return 0;
+
+  /* Naively sort eigenpairs in increasing order */
+  MMG5_sort_simred(3,dmnum,dnnum,(double *)vpnum,swap,perm);
+
+  /* Check diagonal values error in norm inf */
+  maxerr = MMG5_test_mat_error(3,(double *)dmex,(double *)dmnum);
+  if( maxerr > 100*MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error first matrix coreduction values: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+  maxerr = MMG5_test_mat_error(3,(double *)dnex,(double *)dnnum);
+  if( maxerr > 1000*MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error second matrix coreduction values: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+
+  /* Check eigenvectors error through scalar product */
+  maxerr = 0.;
+  for( int8_t i = 0; i < 3; i++ ) {
+    err = 0.;
+    for( int8_t j = 0; j < 3; j++ )
+      err += vpex[i][j] * vpnum[i][j];
+    err = 1.-fabs(err);
+    maxerr = MG_MAX(maxerr,err);
+  }
+  if( maxerr > MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error matrix coreduction vectors: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+
+  return 1;
+}
+/**
  * \param dm eigenvalues of the first matrix (not modified)
  * \param dn eigenvalues of the second matrix (modified)
  * \param difsiz maximal size gap authorized by the gradation.
