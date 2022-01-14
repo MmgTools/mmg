@@ -1437,6 +1437,85 @@ int MMG5_simred3d(MMG5_pMesh mesh,double *m,double *n,double dm[3],
 }
 
 /**
+ * \param dim square matrix size
+ * \param dm diagonal values array
+ * \param dn diagonal values array
+ * \param vp basis vectors array
+ * \param swap swap array
+ * \param perm permutation array
+ *
+ * Sort and permute diagonal values (and basis vectors) in increasing order
+ * with respect to the first matrix.
+ *
+ */
+void MMG5_sort_simred( int8_t dim,double *dm,double *dn,double *vp,
+                       double *swap,int8_t *perm ) {
+  MMG5_nsort(dim,dm,perm);
+  MMG5_nperm(dim,0,1,dm,swap,perm);
+  MMG5_nperm(dim,0,1,dn,swap,perm);
+  for( int8_t i = 0; i < dim; i++ )
+    MMG5_nperm(dim,i,dim,vp,swap,perm);
+}
+
+/**
+ *
+ * For a couple of 2x2 symmetric matrices, Test:
+ * - the computation of the simultaneous reduction values of the matrices;
+ * - the computation of the simultaneous reduction basis vectors..
+ *
+ */
+int MMG5_test_simred2d() {
+  MMG5_pMesh mesh;
+  double mex[3] = { 508., -504,  502.}; /* Test matrix 1 */
+  double nex[3] = {4020.,-2020.,1020.}; /* Test matrix 2 */
+  double dmex[2] = {  1., 100. }; /* Exact cobasis projection 1 */
+  double dnex[2] = {500.,   4. }; /* Exact cobasis projection 2 */
+  double vpex[2][2] = {{ 1./sqrt(2.),1./sqrt(2.)},
+                        {1./sqrt(5.),2./sqrt(5.)}}; /* Exact cobasis vectors */
+  double dmnum[2],dnnum[2],vpnum[2][2]; /* Numerical quantities */
+  double swap[2],maxerr,err;
+  int8_t perm[2]; /* permutation array */
+
+  /** Compute simultaneous reduction */
+  if( !MMG5_simred2d(mesh,mex,nex,dmnum,dnnum,vpnum ) )
+    return 0;
+
+  /* Naively sort eigenpairs in increasing order */
+  MMG5_sort_simred(2,dmnum,dnnum,(double *)vpnum,swap,perm);
+
+  /* Check diagonal values error in norm inf */
+  maxerr = MMG5_test_mat_error(2,(double *)dmex,(double *)dmnum);
+  if( maxerr > 100*MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error first matrix coreduction values: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+  maxerr = MMG5_test_mat_error(2,(double *)dnex,(double *)dnnum);
+  if( maxerr > 1000*MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error second matrix coreduction values: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+
+  /* Check eigenvectors error through scalar product */
+  maxerr = 0.;
+  for( int8_t i = 0; i < 2; i++ ) {
+    err = 0.;
+    for( int8_t j = 0; j < 2; j++ )
+      err += vpex[i][j] * vpnum[i][j];
+    err = 1.-fabs(err);
+    maxerr = MG_MAX(maxerr,err);
+  }
+  if( maxerr > MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error matrix coreduction vectors: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+
+  return 1;
+}
+
+/**
  * \param dm eigenvalues of the first matrix (not modified)
  * \param dn eigenvalues of the second matrix (modified)
  * \param difsiz maximal size gap authorized by the gradation.
