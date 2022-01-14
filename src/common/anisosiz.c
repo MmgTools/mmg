@@ -1259,8 +1259,8 @@ int MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int np1,
  * Perform simultaneous reduction of matrices \a m and \a n.
  *
  */
-int MMG5_simred(MMG5_pMesh mesh,double *m,double *n,double dm[2],
-                 double dn[2],double vp[2][2] ) {
+int MMG5_simred2d(MMG5_pMesh mesh,double *m,double *n,double dm[2],
+                  double dn[2],double vp[2][2] ) {
 
   double         det,lambda[2],imn[4];
   int            order;
@@ -1349,8 +1349,8 @@ int MMG5_simred(MMG5_pMesh mesh,double *m,double *n,double dm[2],
  * Perform simultaneous reduction of matrices \a m and \a n.
  *
  */
-int MMG3D_simred(MMG5_pMesh mesh,double *m,double *n,double dm[3],
-                 double dn[3],double vp[3][3] ) {
+int MMG5_simred3d(MMG5_pMesh mesh,double *m,double *n,double dm[3],
+                  double dn[3],double vp[3][3] ) {
 
   double        lambda[3],im[6],imn[9];
   int           order;
@@ -1626,7 +1626,7 @@ int MMG5_grad2metSurfreq(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int npma
   difsiz = mesh->info.hgradreq*l;
 
   /* Simultaneous reduction of mtan1 and mtan2 */
-  if ( !MMG5_simred(mesh,mtan1,mtan2,lambda,mu,vp) ) {
+  if ( !MMG5_simred2d(mesh,mtan1,mtan2,lambda,mu,vp) ) {
     return 0;
   }
 

@@ -593,7 +593,7 @@ int MMG2D_grad2met_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,int np1,int n
   n = &met->m[met->size*np2];
 
   /* Simultaneous reduction of m1 and m2 */
-  if ( !MMG5_simred(mesh,m,n,dm,dn,vp) ) {
+  if ( !MMG5_simred2d(mesh,m,n,dm,dn,vp) ) {
     return 0;
   }
 
@@ -659,7 +659,7 @@ int MMG2D_grad2metreq_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,
   n = &met->m[met->size*npslave];
 
   /* Simultaneous reduction of m1 and m2 */
-  if ( !MMG5_simred(mesh,m,n,dm,dn,vp) ) {
+  if ( !MMG5_simred2d(mesh,m,n,dm,dn,vp) ) {
     return 0;
   }
 

@@ -1611,7 +1611,7 @@ int MMG5_intersecmet33(MMG5_pMesh mesh, double *m,double *n,double *mr) {
   isqhmax  = 1.0 / (mesh->info.hmax*mesh->info.hmax);
 
   /* Simultaneous reduction */
-  if( !MMG3D_simred(mesh,m,n,dm,dn,vp) )
+  if( !MMG5_simred3d(mesh,m,n,dm,dn,vp) )
     return 0;
 
   /* Diagonal values of the intersected metric */
@@ -1723,7 +1723,7 @@ int MMG5_grad2metVolreq(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int npmaste
   difsiz = mesh->info.hgradreq*l;
 
   /* Simultaneous reduction of mtan1 and mtan2 */
-  if ( !MMG3D_simred(mesh,m1,m2,lambda,mu,vp) ) {
+  if ( !MMG5_simred3d(mesh,m1,m2,lambda,mu,vp) ) {
     return 0;
   }
 
