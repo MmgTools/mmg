@@ -224,6 +224,48 @@ void MMG5_mn(double m[6], double n[6], double mn[9] ){
   return;
 }
 
+/**
+ *
+ * Test product of 3x3 symmetric matrices.
+ *
+ */
+int MMG5_test_mn() {
+  double m[6] = {1.,2.,3.,4.,5.,6.}; /* Test matrix 1 */
+  double n[6] = {2.,3.,4.,5.,6.,7.}; /* Test matrix 2 */
+  double mnex[9] = {20., 31., 37.,
+                    36., 56., 67.,
+                    45., 70., 84.}; /* Exact m*n product */
+  double nmex[9] = {20., 36., 45.,
+                    31., 56., 70.,
+                    37., 67., 84.}; /* Exact n*m product */
+  double prodnum[9],maxerr; /* Numerical approximation */
+
+  /** Compute product m*n */
+  MMG5_mn(m,n,prodnum);
+
+  /* Check error in norm inf */
+  maxerr = MMG5_test_mat_error(9,mnex,prodnum);
+  if( maxerr > MMG5_EPSD ) {
+    fprintf(stderr,"  ## Error 3x3 symmetric matrix product m*n: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+
+
+  /** Compute product n*m */
+  MMG5_mn(n,m,prodnum);
+
+  /* Check error in norm inf */
+  maxerr = MMG5_test_mat_error(9,nmex,prodnum);
+  if( maxerr > MMG5_EPSD ) {
+    fprintf(stderr,"  ## Error 3x3 symmetric matrix product n*m: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+
+  return 1;
+}
+
 
 /**
  * \param r 3x3 matrix
