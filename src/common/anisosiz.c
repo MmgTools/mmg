@@ -1585,7 +1585,7 @@ int MMG5_test_simred3d() {
  * \return 0 if fail, 1 otherwise
  *
  * Update of the metrics = tP^-1 diag(d0,d1)P^-1, P = (vp[0], vp[1]) stored in
- * columns
+ * columns in 2D.
  *
  */
 inline
@@ -1611,6 +1611,56 @@ int MMG5_updatemet2d_ani(double *m,double *n,double dm[2],double dn[2],
     n[0] = dn[0]*ip[0]*ip[0] + dn[1]*ip[2]*ip[2];
     n[1] = dn[0]*ip[0]*ip[1] + dn[1]*ip[2]*ip[3];
     n[2] = dn[0]*ip[1]*ip[1] + dn[1]*ip[3]*ip[3];
+  }
+  return 1;
+}
+
+/**
+ * \param m first matrix
+ * \param n second matrix
+ * \param dm eigenvalues of m in the coreduction basis
+ * \param dn eigenvalues of n in the coreduction basis
+ * \param vp coreduction basis
+ * \param ier flag of the updated sizes: (ier & 1) if we dm has been modified, (ier & 2) if dn has been modified.
+ *
+ * \return 0 if fail, 1 otherwise
+ *
+ * Update of the metrics = tP^-1 diag(d0,d1)P^-1, P = (vp[0], vp[1]) stored in
+ * columns in 3D.
+ *
+ */
+inline
+int MMG5_updatemet3d_ani(double *m,double *n,double dm[3],double dn[3],
+                         double vp[3][3],int8_t ier ) {
+  double det,ivp[3][3];
+  int8_t i,j,k,ij;
+
+  if( !MMG5_invmat33(vp,ivp) )
+    return 0;
+
+  if ( ier & 1 ) {
+    ij = 0;
+    for( i = 0; i < 3; i++ ) {
+      for( j = i; j < 3; j++ ) {
+        m[ij] = 0.;
+        for( k = 0; k < 3; k++ ) {
+          m[ij] += dm[k]*ivp[i][k]*ivp[j][k];
+        }
+        ij++;
+      }
+    }
+  }
+  if ( ier & 2 ) {
+    ij = 0;
+    for( i = 0; i < 3; i++ ) {
+      for( j = i; j < 3; j++ ) {
+        n[ij] = 0.;
+        for( k = 0; k < 3; k++ ) {
+          n[ij] += dn[k]*ivp[i][k]*ivp[j][k];
+        }
+        ij++;
+      }
+    }
   }
   return 1;
 }
