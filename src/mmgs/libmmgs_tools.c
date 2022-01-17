@@ -737,11 +737,14 @@ int MMGS_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met,int ani) {
   return ier;
 }
 
+
 /**
  * \param mesh pointer toward the mesh
  * \param met pointer toward the metric
  *
  * \return 1 if succeed, 0 if fail
+ *
+ * \remark need the normal at vertices.
  *
  * Compute isotropic size map according to the mean of the length of the
  * edges passing through a point.
@@ -813,6 +816,12 @@ int MMGS_doSol_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   double       u[3],dd,tensordot[6];
   int          i,j,k,iadr,ipa,ipb,type;
   int          *mark;
+
+  /* Mesh analysis: normal at vertices are needed. In adaptation mode,
+   * analysis has already been computed */
+  if ( !MMGS_analys_for_norver(mesh) ) {
+    return 0;
+  }
 
   MMG5_SAFE_CALLOC(mark,mesh->np+1,int,return 0);
 

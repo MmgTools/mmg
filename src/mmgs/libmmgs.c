@@ -428,17 +428,10 @@ int MMGS_mmgsls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
     _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
   }
 
-  /* mesh analysis: normal at vertices are needed for doSol function */
-  if ( !MMGS_analys(mesh) ) {
-    if ( mettofree ) { MMG5_DEL_MEM(mesh,met->m);MMG5_SAFE_FREE (met); }
-    if ( !MMG5_unscaleMesh(mesh,met,sol) )
-      _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
-    MMGS_RETURN_AND_PACK(mesh,met,sol,MMG5_LOWFAILURE);
-  }
-
   /* Specific meshing: compute optim option here because after isovalue
    * discretization mesh elements have too bad qualities */
   if ( mesh->info.optim ) {
+    /* Mean metric computation */
     if ( !MMGS_doSol(mesh,met) ) {
       if ( mettofree ) { MMG5_DEL_MEM(mesh,met->m);MMG5_SAFE_FREE (met); }
       if ( !MMG5_unscaleMesh(mesh,met,sol) ) {

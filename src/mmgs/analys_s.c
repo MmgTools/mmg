@@ -730,7 +730,6 @@ static int norver(MMG5_pMesh mesh) {
  * Preprocessing stage: mesh analysis.
  *
  */
-static inline
 int MMGS_analys_for_norver(MMG5_pMesh mesh) {
 
   /* create adjacency */
