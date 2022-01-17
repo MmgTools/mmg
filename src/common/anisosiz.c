@@ -1616,6 +1616,42 @@ int MMG5_updatemet2d_ani(double *m,double *n,double dm[2],double dn[2],
 }
 
 /**
+ *
+ * Test Update of the metrics = tP^-1 diag(d0,d1)P^-1, P = (vp[0], vp[1]) stored
+ * in columns in 2D.
+ *
+ */
+int MMG5_test_updatemet2d_ani() {
+  double mex[3] = { 508., -504,  502.}; /* Test matrix 1 */
+  double nex[3] = {4020.,-2020.,1020.}; /* Test matrix 2 */
+  double dm[2] = {  1., 100. }; /* Exact cobasis projection 1 */
+  double dn[2] = {500.,   4. }; /* Exact cobasis projection 2 */
+  double vp[2][2] = {{ 1./sqrt(2.),1./sqrt(2.)},
+                     {1./sqrt(5.),2./sqrt(5.)}}; /* Exact cobasis vectors */
+  double mnum[3],nnum[3],maxerr; /* Numerical quantities */
+
+  /** Recompose matrices from exact simultaneous diagonalization */
+  if( !MMG5_updatemet2d_ani(mnum,nnum,dm,dn,vp,3) )
+    return 0;
+
+  /* Check values error in norm inf */
+  maxerr = MMG5_test_mat_error(3,(double *)mex,(double *)mnum);
+  if( maxerr > 1.e4*MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error first matrix recomposition from simultaneous reduction: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+  maxerr = MMG5_test_mat_error(3,(double *)nex,(double *)nnum);
+  if( maxerr > 1.e4*MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error second matrix recomposition from simultaneous reduction: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+
+  return 1;
+}
+
+/**
  * \param dm eigenvalues of the first matrix (not modified)
  * \param dn eigenvalues of the second matrix (modified)
  * \param difsiz maximal size gap authorized by the gradation.
