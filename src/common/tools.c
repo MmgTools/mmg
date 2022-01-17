@@ -385,7 +385,7 @@ inline int MMG5_rotmatrix(double n[3],double r[3][3]) {
  *
  */
 int MMG5_test_rotmatrix() {
-  double n[3] = {1./sqrt(1000101.),10./sqrt(1000101.),1000./sqrt(1000101.)}; /* Test unit vector */
+  double n[3] = {1./sqrt(1000101.),1000./sqrt(1000101.),10./sqrt(1000101.)}; /* Test unit vector */
   double idex[6] = {1.,0.,0.,1.,0.,1.}; /*Exact identity matrix */
   double ezex [3] = {0.,0.,1.}; /* Exact z-unit vector */
   double R[3][3],idnum[6],eznum[3],maxerr; /* Numerical quantities */
