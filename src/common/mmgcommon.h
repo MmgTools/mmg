@@ -753,6 +753,7 @@ int MMG5_test_rotmatrix();
 int MMG5_test_simred2d();
 int MMG5_test_simred3d();
 int MMG5_test_updatemet2d_ani();
+int MMG5_test_updatemet3d_ani();
 
 /* tools */
 void MMG5_mark_verticesAsUnused ( MMG5_pMesh mesh );
