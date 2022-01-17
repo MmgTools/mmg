@@ -912,6 +912,91 @@ int MMG5_intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr) {
 
 /**
  * \param mesh pointer toward the mesh structure.
+ * \return 0 if fail, 1 otherwise.
+ *
+ * Test the intersection of (2 x 2) metrics.
+ *
+ */
+int MMG5_test_intersecmet22(MMG5_pMesh mesh) {
+  double m[3] = { 508., -504,  502.}; /* Test matrix 1 */
+  double n[3] = {4020.,-2020.,1020.}; /* Test matrix 2 */
+  double intex[3] = {4500.,-2500.,1500.}; /* Exact intersection */
+  double intnum[3],maxerr; /* Numerical quantities */
+
+  /** Compute intersection m^{-1}n */
+  if( !MMG5_intersecmet22(mesh,m,n,intnum) )
+    return 0;
+
+  /* Check error in norm inf */
+  maxerr = MMG5_test_mat_error(3,intex,intnum);
+  if( maxerr > 1000.*MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error metric intersection: in function %s, line %d, max error %e\n",
+      __func__,__LINE__,maxerr);
+    return 0;
+  }
+
+  /** Iteratively Recompute intersection of the result with (m,n), changing the
+   *  matrix to be inverted. */
+  for( int8_t it = 0; it < 20; it++ ) {
+
+    /** Compute the intersection with n, invert n */
+    if( !MMG5_intersecmet22(mesh,n,intnum,intnum) )
+      return 0;
+
+    /* Check error in norm inf */
+    maxerr = MMG5_test_mat_error(3,intex,intnum);
+    if( maxerr > 1.e5*MMG5_EPSOK ) {
+      fprintf(stderr,"  ## Error metric re-intersection: in function %s, line %d, iteration %d, max error %e\n",
+        __func__,__LINE__,it,maxerr);
+      return 0;
+    }
+
+
+    /** Compute the intersection with n, invert intnum */
+    if( !MMG5_intersecmet22(mesh,intnum,n,intnum) )
+      return 0;
+
+    /* Check error in norm inf */
+    maxerr = MMG5_test_mat_error(3,intex,intnum);
+    if( maxerr > 1.e5*MMG5_EPSOK ) {
+      fprintf(stderr,"  ## Error metric re-intersection: in function %s, line %d, iteration %d, max error %e\n",
+        __func__,__LINE__,it,maxerr);
+      return 0;
+    }
+
+
+    /** Compute the intersection with n, invert n */
+    if( !MMG5_intersecmet22(mesh,m,intnum,intnum) )
+      return 0;
+
+    /* Check error in norm inf */
+    maxerr = MMG5_test_mat_error(3,intex,intnum);
+    if( maxerr > 1.e5*MMG5_EPSOK ) {
+      fprintf(stderr,"  ## Error metric re-intersection: in function %s, line %d, iteration %d, max error %e\n",
+        __func__,__LINE__,it,maxerr);
+      return 0;
+    }
+
+
+    /** Compute the intersection with m, invert intnum */
+    if( !MMG5_intersecmet22(mesh,intnum,m,intnum) )
+      return 0;
+
+    /* Check error in norm inf */
+    maxerr = MMG5_test_mat_error(3,intex,intnum);
+    if( maxerr > 1.e5*MMG5_EPSOK ) {
+      fprintf(stderr,"  ## Error metric re-intersection: in function %s, line %d, iteration %d, max error %e\n",
+        __func__,__LINE__,it,maxerr);
+      return 0;
+    }
+
+  }
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
  * \param np global index of vertex in which we intersect the metrics.
  * \param me physical metric at point \a np.
