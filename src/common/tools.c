@@ -303,6 +303,34 @@ inline int MMG5_rmtr(double r[3][3],double m[6], double mr[6]){
 }
 
 /**
+ *
+ * Test computation of product R*M*tR when M is symmetric
+ *
+ */
+inline int MMG5_test_rmtr() {
+  double m[6] = {111./2.,-109./2.,  89./2.,111./2.,-91./2.,111./2.}; /* Test matrix */
+  double r[3][3] = {{1./sqrt(2.),1./sqrt(2.),         0.},
+                    {         0.,1./sqrt(2.),1./sqrt(2.)},
+                    {1./sqrt(2.),         0.,1./sqrt(2.)}}; /* Test transformation */
+  double outex[6] = {1., 0., 0., 10., 0., 100.}; /* Exact result */
+  double outnum[6],maxerr; /* Numerical result */
+
+  /** Compute transformation */
+  if( !MMG5_rmtr(r,m,outnum) )
+    return 0;
+
+  /* Check error in norm inf */
+  maxerr = MMG5_test_mat_error(6,outex,outnum);
+  if( maxerr > 10.*MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error linear transformation of symmetric matrix: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+
+  return 1;
+}
+
+/**
  * \param n pointer toward the vector that we want to send on the third vector
  * of canonical basis.
  * \param r computed rotation matrix.
