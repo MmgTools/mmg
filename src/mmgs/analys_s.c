@@ -241,7 +241,13 @@ static int setadj(MMG5_pMesh mesh){
   return 1;
 }
 
-/* Detect non manifold points */
+/**
+ * \param mesh pointer toward the mesh structure.
+ *
+ * \return 1 if succeed, 0 if fail
+ *
+ * Detect non manifold points
+ */
 static void nmpoints(MMG5_pMesh mesh) {
   MMG5_pTria      pt;
   MMG5_pPoint     p0;
@@ -423,7 +429,13 @@ static void nmpoints(MMG5_pMesh mesh) {
 /* } */
 
 
-/* check for ridges: dihedral angle */
+/**
+ * \param mesh pointer toward the mesh structure.
+ *
+ * \return 1 if succeed, 0 if fail
+ *
+ * check for ridges: dihedral angle
+ */
 static int setdhd(MMG5_pMesh mesh) {
   MMG5_pTria    pt,pt1;
   double   n1[3],n2[3],dhd;
@@ -467,7 +479,14 @@ static int setdhd(MMG5_pMesh mesh) {
   return 1;
 }
 
-/** check for singularities */
+/**
+ * \param mesh pointer toward the mesh structure.
+ *
+ * \return 1 if succeed, 0 if fail
+ *
+ * check for singularities
+ *
+ */
 static int MMG5_singul(MMG5_pMesh mesh) {
   MMG5_pTria     pt;
   MMG5_pPoint    ppt,p1,p2;
@@ -556,8 +575,14 @@ static int MMG5_singul(MMG5_pMesh mesh) {
   return 1;
 }
 
-
-/* compute normals at C1 vertices, for C0: tangents */
+/**
+ * \param mesh pointer toward the mesh structure.
+ *
+ * \return 1 if succeed, 0 if fail
+ *
+ * Compute normals at C1 vertices, for C0: tangents
+ *
+ */
 static int norver(MMG5_pMesh mesh) {
   MMG5_pTria     pt;
   MMG5_pPoint    ppt;
@@ -697,20 +722,16 @@ static int norver(MMG5_pMesh mesh) {
   return 1;
 }
 
-/* preprocessing stage: mesh analysis */
-int MMGS_analys(MMG5_pMesh mesh) {
-
-  /* Update tags stored into tria */
-  if ( !MMGS_bdryUpdate(mesh) ) {
-    fprintf(stderr,"\n  ## Analysis problem. Exit program.\n");
-    return 0;
-  }
-
-  /* set edges tags and refs to tria */
-  if ( !MMGS_assignEdge(mesh) ) {
-    fprintf(stderr,"\n  ## Analysis problem. Exit program.\n");
-    return 0;
-  }
+/**
+ * \param mesh pointer toward the mesh structure.
+ *
+ * \return 1 if succeed, 0 if fail
+ *
+ * Preprocessing stage: mesh analysis.
+ *
+ */
+static inline
+int MMGS_analys_for_norver(MMG5_pMesh mesh) {
 
   /* create adjacency */
   if ( !MMGS_hashTria(mesh) ) {
@@ -757,7 +778,32 @@ int MMGS_analys(MMG5_pMesh mesh) {
       return 0;
     }
   }
-
   return 1;
 }
 
+/**
+ * \param mesh pointer toward the mesh structure.
+ *
+ * \return 1 if succeed, 0 if fail
+ *
+ * Perform minimal surface analysis needed to compute normal at vertices.
+ *
+ */
+int MMGS_analys(MMG5_pMesh mesh) {
+  int ier;
+
+  /* Update tags stored into tria */
+  if ( !MMGS_bdryUpdate(mesh) ) {
+    fprintf(stderr,"\n  ## Analysis problem. Exit program.\n");
+    return 0;
+  }
+
+  /* set edges tags and refs to tria */
+  if ( !MMGS_assignEdge(mesh) ) {
+    fprintf(stderr,"\n  ## Analysis problem. Exit program.\n");
+    return 0;
+  }
+
+  ier = MMGS_analys_for_norver(mesh);
+  return ier;
+}
