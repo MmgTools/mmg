@@ -379,6 +379,55 @@ inline int MMG5_rotmatrix(double n[3],double r[3][3]) {
 }
 
 /**
+ *
+ * Test computation of the rotation matrix that sends vector \a n to the third
+ * vector of canonical basis.
+ *
+ */
+int MMG5_test_rotmatrix() {
+  double n[3] = {1./sqrt(1000101.),10./sqrt(1000101.),1000./sqrt(1000101.)}; /* Test unit vector */
+  double idex[6] = {1.,0.,0.,1.,0.,1.}; /*Exact identity matrix */
+  double ezex [3] = {0.,0.,1.}; /* Exact z-unit vector */
+  double R[3][3],idnum[6],eznum[3],maxerr; /* Numerical quantities */
+
+  /** Rodrigues' rotation formula (transposed to give a map from n to [0,0,1]).
+   *  Input vector must be a unit vector. */
+  if( !MMG5_rotmatrix(n,R) )
+    return 0;
+
+
+  /** Approximate z-unit vector */
+  for( int8_t i = 0; i < 3; i++ ) {
+    eznum[i] = 0.;
+    for( int8_t j = 0; j < 3; j++ )
+      eznum[i] += R[i][j]*n[j];
+  }
+
+  /* Check error in norm inf */
+  maxerr = MMG5_test_mat_error(3,ezex,eznum);
+  if( maxerr > 10.*MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error vector rotation: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+
+
+  /** Check orthonormality */
+  if( !MMG5_rmtr(R,idex,idnum) )
+    return 0;
+
+  /* Check error in norm inf */
+  maxerr = MMG5_test_mat_error(6,idex,idnum);
+  if( maxerr > MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error rotation matrix orthonormality: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+
+  return 1;
+}
+
+/**
  * \param m pointer toward a 3x3 symetric matrix
  * \param mi pointer toward the computed 3x3 matrix.
  *

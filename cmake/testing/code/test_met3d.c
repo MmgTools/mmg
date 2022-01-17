@@ -67,6 +67,9 @@ int main(int argc,char *argv[]) {
   if( !MMG5_test_rmtr() )
     return(EXIT_FAILURE);
 
+  if( !MMG5_test_rotmatrix() )
+    return(EXIT_FAILURE);
+
   if( !MMG5_test_simred3d() )
     return(EXIT_FAILURE);
 

@@ -747,6 +747,7 @@ int MMG5_test_eigenvmatsym3d();
 int MMG5_test_eigenvmatnonsym3d();
 int MMG5_test_mn();
 int MMG5_test_rmtr();
+int MMG5_test_rotmatrix();
 int MMG5_test_simred2d();
 int MMG5_test_simred3d();
 
