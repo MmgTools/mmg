@@ -1573,6 +1573,48 @@ int MMG5_test_simred3d() {
 
   return 1;
 }
+
+/**
+ * \param m first matrix
+ * \param n second matrix
+ * \param dm eigenvalues of m in the coreduction basis
+ * \param dn eigenvalues of n in the coreduction basis
+ * \param vp coreduction basis
+ * \param ier flag of the updated sizes: (ier & 1) if we dm has been modified, (ier & 2) if dn has been modified.
+ *
+ * \return 0 if fail, 1 otherwise
+ *
+ * Update of the metrics = tP^-1 diag(d0,d1)P^-1, P = (vp[0], vp[1]) stored in
+ * columns
+ *
+ */
+inline
+int MMG5_updatemet2d_ani(double *m,double *n,double dm[2],double dn[2],
+                         double vp[2][2],int8_t ier ) {
+  double det,ip[4];
+
+  det = vp[0][0]*vp[1][1] - vp[0][1]*vp[1][0];
+  if ( fabs(det) < MMG5_EPS )  return 0;
+  det = 1.0 / det;
+
+  ip[0] =  vp[1][1]*det;
+  ip[1] = -vp[1][0]*det;
+  ip[2] = -vp[0][1]*det;
+  ip[3] =  vp[0][0]*det;
+
+  if ( ier & 1 ) {
+    m[0] = dm[0]*ip[0]*ip[0] + dm[1]*ip[2]*ip[2];
+    m[1] = dm[0]*ip[0]*ip[1] + dm[1]*ip[2]*ip[3];
+    m[2] = dm[0]*ip[1]*ip[1] + dm[1]*ip[3]*ip[3];
+  }
+  if ( ier & 2 ) {
+    n[0] = dn[0]*ip[0]*ip[0] + dn[1]*ip[2]*ip[2];
+    n[1] = dn[0]*ip[0]*ip[1] + dn[1]*ip[2]*ip[3];
+    n[2] = dn[0]*ip[1]*ip[1] + dn[1]*ip[3]*ip[3];
+  }
+  return 1;
+}
+
 /**
  * \param dm eigenvalues of the first matrix (not modified)
  * \param dn eigenvalues of the second matrix (modified)
