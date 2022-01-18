@@ -265,7 +265,7 @@ int MMG2D_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val)
     break;
   case MMG2D_DPARAM_hgrad :
     mesh->info.hgrad    = val;
-    if ( mesh->info.hgrad < 0.0 ) {
+    if ( mesh->info.hgrad <= 0.0 ) {
       mesh->info.hgrad = MMG5_NOHGRAD;
     }
     else {
@@ -274,7 +274,7 @@ int MMG2D_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val)
     break;
   case MMG2D_DPARAM_hgradreq :
     mesh->info.hgradreq    = val;
-    if ( mesh->info.hgradreq < 0.0 ) {
+    if ( mesh->info.hgradreq <= 0.0 ) {
       mesh->info.hgradreq = MMG5_NOHGRAD;
     }
     else {
