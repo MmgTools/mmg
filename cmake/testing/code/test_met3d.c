@@ -55,6 +55,26 @@ int main(int argc,char *argv[]) {
   if( !MMG5_test_invmat33() )
     return(EXIT_FAILURE);
 
+  if( !MMG5_test_eigenvmatsym3d() )
+    return(EXIT_FAILURE);
+
+  if( !MMG5_test_eigenvmatnonsym3d() )
+    return(EXIT_FAILURE);
+
+  if( !MMG5_test_mn() )
+    return(EXIT_FAILURE);
+
+  if( !MMG5_test_rmtr() )
+    return(EXIT_FAILURE);
+
+  if( !MMG5_test_rotmatrix() )
+    return(EXIT_FAILURE);
+
+  if( !MMG5_test_simred3d() )
+    return(EXIT_FAILURE);
+
+  if( !MMG5_test_updatemet3d_ani() )
+    return EXIT_FAILURE;
 
   /** ------------------------------ STEP III -------------------------- */
 

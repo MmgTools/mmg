@@ -35,6 +35,47 @@
 
 #include "mmgcommon.h"
 
+/** naive (increasing) sorting algorithm, for very small tabs ; permutation is stored in perm */
+inline void MMG5_nsort(int n,double *val,int8_t *perm){
+    int   i,j,aux;
+
+    for (i=0; i<n; i++)  perm[i] = i;
+
+    for (i=0; i<n; i++) {
+        for (j=i+1; j<n; j++) {
+            if ( val[perm[i]] > val[perm[j]] ) {
+                aux = perm[i];
+                perm[i] = perm[j];
+                perm[j] = aux;
+            }
+        }
+    }
+}
+
+/**
+ * \param n array size
+ * \param shift shift to apply when taking array value
+ * \param stride stride to apply when taking array value
+ * \param val array of double precision floating points
+ * \param oldval array to store input values
+ * \param perm permutation array
+ *
+ * Naively permute a small array. Use shift and stride to eventually permute
+ * matrix columns.
+ *
+ */
+inline void MMG5_nperm(int8_t n,int8_t shift,int8_t stride,double *val,double *oldval,int8_t *perm) {
+  double tmp;
+  int8_t i,k;
+
+  for( i = 0; i < n; i++ )
+    oldval[i] = val[shift+i*stride];
+
+  for( i = 0; i < n; i++ ) {
+    k = perm[i];
+    val[shift+i*stride] = oldval[k];
+  }
+}
 
 /**
  * \param n1 first normal
@@ -183,6 +224,48 @@ void MMG5_mn(double m[6], double n[6], double mn[9] ){
   return;
 }
 
+/**
+ *
+ * Test product of 3x3 symmetric matrices.
+ *
+ */
+int MMG5_test_mn() {
+  double m[6] = {1.,2.,3.,4.,5.,6.}; /* Test matrix 1 */
+  double n[6] = {2.,3.,4.,5.,6.,7.}; /* Test matrix 2 */
+  double mnex[9] = {20., 31., 37.,
+                    36., 56., 67.,
+                    45., 70., 84.}; /* Exact m*n product */
+  double nmex[9] = {20., 36., 45.,
+                    31., 56., 70.,
+                    37., 67., 84.}; /* Exact n*m product */
+  double prodnum[9],maxerr; /* Numerical approximation */
+
+  /** Compute product m*n */
+  MMG5_mn(m,n,prodnum);
+
+  /* Check error in norm inf */
+  maxerr = MMG5_test_mat_error(9,mnex,prodnum);
+  if( maxerr > MMG5_EPSD ) {
+    fprintf(stderr,"  ## Error 3x3 symmetric matrix product m*n: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+
+
+  /** Compute product n*m */
+  MMG5_mn(n,m,prodnum);
+
+  /* Check error in norm inf */
+  maxerr = MMG5_test_mat_error(9,nmex,prodnum);
+  if( maxerr > MMG5_EPSD ) {
+    fprintf(stderr,"  ## Error 3x3 symmetric matrix product n*m: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+
+  return 1;
+}
+
 
 /**
  * \param r 3x3 matrix
@@ -215,6 +298,34 @@ inline int MMG5_rmtr(double r[3][3],double m[6], double mr[6]){
   mr[3] = r[1][0]*n[0][1] + r[1][1]*n[1][1] + r[1][2]*n[2][1];
   mr[4] = r[1][0]*n[0][2] + r[1][1]*n[1][2] + r[1][2]*n[2][2];
   mr[5] = r[2][0]*n[0][2] + r[2][1]*n[1][2] + r[2][2]*n[2][2];
+
+  return 1;
+}
+
+/**
+ *
+ * Test computation of product R*M*tR when M is symmetric
+ *
+ */
+inline int MMG5_test_rmtr() {
+  double m[6] = {111./2.,-109./2.,  89./2.,111./2.,-91./2.,111./2.}; /* Test matrix */
+  double r[3][3] = {{1./sqrt(2.),1./sqrt(2.),         0.},
+                    {         0.,1./sqrt(2.),1./sqrt(2.)},
+                    {1./sqrt(2.),         0.,1./sqrt(2.)}}; /* Test transformation */
+  double outex[6] = {1., 0., 0., 10., 0., 100.}; /* Exact result */
+  double outnum[6],maxerr; /* Numerical result */
+
+  /** Compute transformation */
+  if( !MMG5_rmtr(r,m,outnum) )
+    return 0;
+
+  /* Check error in norm inf */
+  maxerr = MMG5_test_mat_error(6,outex,outnum);
+  if( maxerr > 10.*MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error linear transformation of symmetric matrix: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
 
   return 1;
 }
@@ -264,6 +375,55 @@ inline int MMG5_rotmatrix(double n[3],double r[3][3]) {
     r[2][1] = n[1]*sinalpha/l;
     r[2][2] = cosalpha;
   }
+  return 1;
+}
+
+/**
+ *
+ * Test computation of the rotation matrix that sends vector \a n to the third
+ * vector of canonical basis.
+ *
+ */
+int MMG5_test_rotmatrix() {
+  double n[3] = {1./sqrt(1000101.),1000./sqrt(1000101.),10./sqrt(1000101.)}; /* Test unit vector */
+  double idex[6] = {1.,0.,0.,1.,0.,1.}; /*Exact identity matrix */
+  double ezex [3] = {0.,0.,1.}; /* Exact z-unit vector */
+  double R[3][3],idnum[6],eznum[3],maxerr; /* Numerical quantities */
+
+  /** Rodrigues' rotation formula (transposed to give a map from n to [0,0,1]).
+   *  Input vector must be a unit vector. */
+  if( !MMG5_rotmatrix(n,R) )
+    return 0;
+
+
+  /** Approximate z-unit vector */
+  for( int8_t i = 0; i < 3; i++ ) {
+    eznum[i] = 0.;
+    for( int8_t j = 0; j < 3; j++ )
+      eznum[i] += R[i][j]*n[j];
+  }
+
+  /* Check error in norm inf */
+  maxerr = MMG5_test_mat_error(3,ezex,eznum);
+  if( maxerr > 10.*MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error vector rotation: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+
+
+  /** Check orthonormality */
+  if( !MMG5_rmtr(R,idex,idnum) )
+    return 0;
+
+  /* Check error in norm inf */
+  maxerr = MMG5_test_mat_error(6,idex,idnum);
+  if( maxerr > MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error rotation matrix orthonormality: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+
   return 1;
 }
 
@@ -1017,30 +1177,29 @@ void MMG5_keep_subdomainElts ( MMG5_pMesh mesh, int nsd,
 }
 
 /**
- * \param dim square matrix size.
+ * \param nelem number of matrix elements.
  * \param m1 first matrix (single array).
  * \param m2 second matrix (single array).
  *
  * Compute maximum error between two matrices.
  *
  */
-static inline
-double MMG5_test_mat_error( int8_t dim,double m1[],double m2[] ) {
+inline
+double MMG5_test_mat_error( int8_t nelem,double m1[],double m2[] ) {
   double maxerr;
-  int8_t i,j;
+  int8_t k;
 
   /* Compute max error */
   maxerr = 0;
-  for( i = 0; i < dim; i++ )
-    for( j = 0; j < dim; j++ )
-      maxerr = MG_MAX(maxerr,fabs(m1[i*dim+j] - m2[i*dim+j]));
+  for( k = 0; k < nelem; k++ )
+    maxerr = MG_MAX(maxerr,fabs(m1[k] - m2[k]));
 
   return maxerr;
 }
 
 /**
  *
- * Test inversion of 2x2 non-symmetric matrix stored in 2 dimensions
+ * Test inversion of 2x2 non-symmetric matrix stored in 2 dimensions.
  *
  */
 int MMG5_test_invmat22() {
@@ -1053,7 +1212,7 @@ int MMG5_test_invmat22() {
     return 0;
 
   /* Check error in norm inf */
-  double maxerr = MMG5_test_mat_error(2,(double *)iAex,(double *)iAnum);
+  double maxerr = MMG5_test_mat_error(4,(double *)iAex,(double *)iAnum);
   if( maxerr > MMG5_EPSD ) {
     fprintf(stderr,"  ## Error matrix inversion: in function %s, max error %e\n",
       __func__,maxerr);
@@ -1065,7 +1224,7 @@ int MMG5_test_invmat22() {
 
 /**
  *
- * Test inversion of 3x3 non-symmetric matrix stored in 2 dimensions
+ * Test inversion of 3x3 non-symmetric matrix stored in 2 dimensions.
  *
  */
 int MMG5_test_invmat33() {
@@ -1078,7 +1237,7 @@ int MMG5_test_invmat33() {
     return 0;
 
   /* Check error in norm inf */
-  double maxerr = MMG5_test_mat_error(3,(double *)iAex,(double *)iAnum);
+  double maxerr = MMG5_test_mat_error(9,(double *)iAex,(double *)iAnum);
   if( maxerr > MMG5_EPSD ) {
     fprintf(stderr,"  ## Error matrix inversion: in function %s, max error %e\n",
       __func__,maxerr);

@@ -686,6 +686,11 @@ int MMG5_eigenv2d(int symmat,double *mat,double lambda[2],double vp[2][2]) {
   double dd,sqDelta,trmat,vnorm;
   static int8_t  mmgWarn0=0;
 
+  /* wrapper function if symmetric matrix */
+  if( symmat )
+    return MMG5_eigensym(mat,lambda,vp);
+
+
   dd = mat[0] - mat[3];
   sqDelta = sqrt(fabs(dd*dd + 4.0*mat[1]*mat[2]));
   trmat = mat[0] + mat[3];

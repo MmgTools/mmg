@@ -1507,144 +1507,6 @@ int MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
 }
 
 /**
- * \param mesh pointer toward the mesh
- * \param m first matrix
- * \param n second matrix
- * \param dm eigenvalues of m in the coreduction basis (to fill)
- * \param dn eigenvalues of n in the coreduction basis (to fill)
- * \param vp coreduction basis (to fill)
- *
- * \return 0 if fail 1 otherwise.
- *
- * Perform simultaneous reduction of matrices \a m and \a n.
- *
- */
-int MMG3D_simred(MMG5_pMesh mesh,double *m,double *n,double dm[3],
-                 double dn[3],double vp[3][3] ) {
-
-  double        lambda[3],im[6],imn[9];
-  int           order;
-  static int8_t mmgWarn0=0;
-
-  /* Compute imn = M^{-1}N */
-  if ( !MMG5_invmat ( m,im ) ) {
-    if ( !mmgWarn0 ) {
-      mmgWarn0 = 1;
-      fprintf(stderr,"\n  ## Warning: %s: unable to invert the matrix.\n",__func__);
-    }
-    return 0;
-  }
-
-  MMG5_mn(im,n,imn);
-
-  /* Find eigenvalues of imn */
-  order = MMG5_eigenv3d(0,imn,lambda,vp);
-
-  if ( !order ) {
-    if ( !mmgWarn0 ) {
-      mmgWarn0 = 1;
-      fprintf(stderr,"\n  ## Warning: %s: at least 1 failing"
-              " simultaneous reduction.\n",__func__);
-    }
-    return 0;
-  }
-
-  if ( order == 3 ) {
-    /* First case : matrices m and n are homothetic: n = lambda0*m */
-    if ( (fabs(m[1]) < MMG5_EPS && fabs(m[2]) < MMG5_EPS
-          && fabs(m[4]) < MMG5_EPS) ) {
-      /* Subcase where m is diaonal */
-        dm[0]   = m[0];
-        dm[1]   = m[3];
-        dm[2]   = m[5];
-        vp[0][0] = 1;
-        vp[0][1] = 0;
-        vp[0][2] = 0;
-        vp[1][0] = 0;
-        vp[1][1] = 1;
-        vp[1][2] = 0;
-        vp[2][0] = 0;
-        vp[2][1] = 0;
-        vp[2][2] = 1;
-    }
-    else {
-      /* Subcase where m is not diagonal; dd,trimn,... are reused */
-      MMG5_eigenv3d(1,m,dm,vp);
-    }
-    /* Eigenvalues of metric n */
-    dn[0] = lambda[0]*dm[0];
-    dn[1] = lambda[0]*dm[1];
-    dn[2] = lambda[0]*dm[2];
-  }
-  else {
-    /* Second case: eigenvalues of imn are distinct ; theory says qf associated
-       to m and n are diagonalizable in basis (vp[0], vp[1], vp[2]) - the
-       coreduction basis */
-    /* Compute diagonal values in simultaneous reduction basis */
-    dm[0] = m[0]*vp[0][0]*vp[0][0] + 2.0*m[1]*vp[0][0]*vp[0][1] + 2.0*m[2]*vp[0][0]*vp[0][2]
-          + m[3]*vp[0][1]*vp[0][1] + 2.0*m[4]*vp[0][1]*vp[0][2]     + m[5]*vp[0][2]*vp[0][2];
-    dm[1] = m[0]*vp[1][0]*vp[1][0] + 2.0*m[1]*vp[1][0]*vp[1][1] + 2.0*m[2]*vp[1][0]*vp[1][2]
-          + m[3]*vp[1][1]*vp[1][1] + 2.0*m[4]*vp[1][1]*vp[1][2]     + m[5]*vp[1][2]*vp[1][2];
-    dm[2] = m[0]*vp[2][0]*vp[2][0] + 2.0*m[1]*vp[2][0]*vp[2][1] + 2.0*m[2]*vp[2][0]*vp[2][2]
-          + m[3]*vp[2][1]*vp[2][1] + 2.0*m[4]*vp[2][1]*vp[2][2]     + m[5]*vp[2][2]*vp[2][2];
-
-    dn[0] = n[0]*vp[0][0]*vp[0][0] + 2.0*n[1]*vp[0][0]*vp[0][1] + 2.0*n[2]*vp[0][0]*vp[0][2]
-          + n[3]*vp[0][1]*vp[0][1] + 2.0*n[4]*vp[0][1]*vp[0][2]     + n[5]*vp[0][2]*vp[0][2];
-    dn[1] = n[0]*vp[1][0]*vp[1][0] + 2.0*n[1]*vp[1][0]*vp[1][1] + 2.0*n[2]*vp[1][0]*vp[1][2]
-          + n[3]*vp[1][1]*vp[1][1] + 2.0*n[4]*vp[1][1]*vp[1][2]     + n[5]*vp[1][2]*vp[1][2];
-    dn[2] = n[0]*vp[2][0]*vp[2][0] + 2.0*n[1]*vp[2][0]*vp[2][1] + 2.0*n[2]*vp[2][0]*vp[2][2]
-          + n[3]*vp[2][1]*vp[2][1] + 2.0*n[4]*vp[2][1]*vp[2][2]     + n[5]*vp[2][2]*vp[2][2];
-  }
-
-  assert ( dm[0] >= MMG5_EPSD2 && dm[1] >= MMG5_EPSD2 && dm[2] >= MMG5_EPSD2 && "positive eigenvalue" );
-  assert ( dn[0] >= MMG5_EPSD2 && dn[1] >= MMG5_EPSD2 && dn[2] >= MMG5_EPSD2 && "positive eigenvalue" );
-
-  if ( dm[0] < MMG5_EPSOK || dn[0] < MMG5_EPSOK ) { return 0; }
-  if ( dm[1] < MMG5_EPSOK || dn[1] < MMG5_EPSOK ) { return 0; }
-  if ( dm[2] < MMG5_EPSOK || dn[2] < MMG5_EPSOK ) { return 0; }
-
-  return 1;
-}
-
-/**
- * \param mesh pointer toward the mesh structure.
- * \param m pointer toward a \f$(3x3)\f$ metric.
- * \param n pointer toward a \f$(3x3)\f$ metric.
- * \param mr computed \f$(3x3)\f$ metric.
- * \return 0 if fail, 1 otherwise.
- *
- * Compute the intersected (3 x 3) metric from metrics \a m and \a n : take
- * simultaneous reduction, and proceed to truncation in sizes.
- *
- */
-int MMG5_intersecmet33(MMG5_pMesh mesh, double *m,double *n,double *mr) {
-  double  vp[3][3],dm[3],dn[3],d[3];
-  double  isqhmin,isqhmax;
-  static int8_t mmgWarn0 = 0;
-  int8_t  i;
-
-  isqhmin  = 1.0 / (mesh->info.hmin*mesh->info.hmin);
-  isqhmax  = 1.0 / (mesh->info.hmax*mesh->info.hmax);
-
-  /* Simultaneous reduction */
-  if( !MMG3D_simred(mesh,m,n,dm,dn,vp) )
-    return 0;
-
-  /* Diagonal values of the intersected metric */
-  for( i = 0; i < 3; i++ ) {
-    d[i] = MG_MAX(dm[i],dn[i]);
-    d[i] = MG_MIN(isqhmin,MG_MAX(d[i],isqhmax));
-  }
-
-  /* Intersected metric = tP^-1 diag(d0,d1,d2)P^-1, P = (vp0, vp1,vp2) stored in
-   * columns */
-  if( !MMG3D_recomposeMat_simred(d,vp,mr) )
-    return 0;
-
-  return 1;
-}
-
-/**
  * \param m first matrix
  * \param mext second (extended) matrix
  * \param iloc index of the point on the edge (1 or 2)
@@ -1657,7 +1519,7 @@ static inline
 void MMG3D_gradEigenv(MMG5_pMesh mesh,double m[6],double mext[6],int8_t iloc,int *ier) {
   double dm[3],dmext[3],vp[3][3],ivp[3][3];
 
-  if( !MMG3D_simred(mesh,m,mext,dm,dmext,vp) ) {
+  if( !MMG5_simred3d(mesh,m,mext,dm,dmext,vp) ) {
     *ier = -1;
     return;
   }
@@ -1868,7 +1730,7 @@ int MMG5_grad2metVolreq(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int npmaste
   difsiz = mesh->info.hgradreq*l;
 
   /* Simultaneous reduction of mtan1 and mtan2 */
-  if ( !MMG3D_simred(mesh,m1,m2,lambda,mu,vp) ) {
+  if ( !MMG5_simred3d(mesh,m1,m2,lambda,mu,vp) ) {
     return 0;
   }
 

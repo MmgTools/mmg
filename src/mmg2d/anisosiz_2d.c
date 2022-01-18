@@ -514,47 +514,6 @@ void MMG2D_gradEigenv(double dm[2],double dn[2],double difsiz,int8_t dir,int8_t 
 }
 
 /**
- * \param m first matrix
- * \param n second matrix
- * \param dm eigenvalues of m in the coreduction basis
- * \param dn eigenvalues of n in the coreduction basis
- * \param vp coreduction basis
- * \param ier flag of the updated sizes: (ier & 1) if we dm has been modified, (ier & 2) if dn has been modified.
- *
- * \return 0 if fail, 1 otherwise
- *
- * Update of the metrics = tP^-1 diag(d0,d1)P^-1, P = (vp[0], vp[1]) stored in
- * columns
- *
- */
-static inline
-int MMG2D_updatemet_ani(double *m,double *n,double dm[2],double dn[2],
-                         double vp[2][2],int8_t ier ) {
-  double det,ip[4];
-
-  det = vp[0][0]*vp[1][1] - vp[0][1]*vp[1][0];
-  if ( fabs(det) < MMG5_EPS )  return 0;
-  det = 1.0 / det;
-
-  ip[0] =  vp[1][1]*det;
-  ip[1] = -vp[1][0]*det;
-  ip[2] = -vp[0][1]*det;
-  ip[3] =  vp[0][0]*det;
-
-  if ( ier & 1 ) {
-    m[0] = dm[0]*ip[0]*ip[0] + dm[1]*ip[2]*ip[2];
-    m[1] = dm[0]*ip[0]*ip[1] + dm[1]*ip[2]*ip[3];
-    m[2] = dm[0]*ip[1]*ip[1] + dm[1]*ip[3]*ip[3];
-  }
-  if ( ier & 2 ) {
-    n[0] = dn[0]*ip[0]*ip[0] + dn[1]*ip[2]*ip[2];
-    n[1] = dn[0]*ip[0]*ip[1] + dn[1]*ip[2]*ip[3];
-    n[2] = dn[0]*ip[1]*ip[1] + dn[1]*ip[3]*ip[3];
-  }
-  return 1;
-}
-
-/**
  * \param mesh pointer toward the mesh
  * \param met pointer toward the metric
  * \param pt pointer toward the processed triangle.
@@ -593,7 +552,7 @@ int MMG2D_grad2met_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,int np1,int n
   n = &met->m[met->size*np2];
 
   /* Simultaneous reduction of m1 and m2 */
-  if ( !MMG5_simred(mesh,m,n,dm,dn,vp) ) {
+  if ( !MMG5_simred2d(mesh,m,n,dm,dn,vp) ) {
     return 0;
   }
 
@@ -609,7 +568,7 @@ int MMG2D_grad2met_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,int np1,int n
 
   /* Update of the metrics = tP^-1 diag(d0,d1)P^-1, P = (vp[0], vp[1]) stored in
    * columns */
-  if ( !MMG2D_updatemet_ani(m,n,dm,dn,vp,ier ) ) {
+  if ( !MMG5_updatemet2d_ani(m,n,dm,dn,vp,ier ) ) {
     return 0;
   }
 
@@ -659,7 +618,7 @@ int MMG2D_grad2metreq_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,
   n = &met->m[met->size*npslave];
 
   /* Simultaneous reduction of m1 and m2 */
-  if ( !MMG5_simred(mesh,m,n,dm,dn,vp) ) {
+  if ( !MMG5_simred2d(mesh,m,n,dm,dn,vp) ) {
     return 0;
   }
 
