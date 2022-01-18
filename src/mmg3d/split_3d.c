@@ -38,6 +38,48 @@
 extern int8_t  ddb;
 
 /**
+ * \param flag flag to detect the splitting configuration
+ * \param tau vertices permutation
+ * \param taued edges permutation
+ *
+ * Compute vertices and edges permutation for the split of 1 edge depending of
+ * the edge that is splitted (i^th bit of flag is 1 if the i^th edge is
+ * splitted).
+ *
+ */
+static inline
+void MMG3D_split1_cfg(int flag,uint8_t *tau,const uint8_t **taued) {
+
+  /* default is case 1 */
+  tau[0] = 0 ; tau[1] = 1 ; tau[2] = 2 ; tau[3] = 3;
+  *taued = &MMG5_permedge[0][0];
+  switch(flag) {
+  case 2:
+    tau[0] = 2 ; tau[1] = 0 ; tau[2] = 1 ; tau[3] = 3;
+    *taued = &MMG5_permedge[6][0];
+    break;
+  case 4:
+    tau[0] = 0 ; tau[1] = 3 ; tau[2] = 1 ; tau[3] = 2;
+    *taued = &MMG5_permedge[2][0];
+    break;
+  case 8:
+    tau[0] = 1 ; tau[1] = 2 ; tau[2] = 0 ; tau[3] = 3;
+    *taued = &MMG5_permedge[4][0];
+    break;
+  case 16:
+    tau[0] = 3 ; tau[1] = 1 ; tau[2] = 0 ; tau[3] = 2;
+    *taued = &MMG5_permedge[10][0];
+    break;
+  case 32:
+    tau[0] = 3 ; tau[1] = 2 ; tau[2] = 1 ; tau[3] = 0;
+    *taued = &MMG5_permedge[11][0];
+    break;
+  }
+
+  return;
+}
+
+/**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
  * \param k index of element to split.
@@ -61,31 +103,7 @@ int MMG3D_split1_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]) {
 
   pt0 = &mesh->tetra[0];
 
-  /* default is case 1 */
-  tau[0] = 0 ; tau[1] = 1 ; tau[2] = 2 ; tau[3] = 3;
-  taued = &MMG5_permedge[0][0];
-  switch(pt->flag) {
-  case 2:
-    tau[0] = 2 ; tau[1] = 0 ; tau[2] = 1 ; tau[3] = 3;
-    taued = &MMG5_permedge[6][0];
-    break;
-  case 4:
-    tau[0] = 0 ; tau[1] = 3 ; tau[2] = 1 ; tau[3] = 2;
-    taued = &MMG5_permedge[2][0];
-    break;
-  case 8:
-    tau[0] = 1 ; tau[1] = 2 ; tau[2] = 0 ; tau[3] = 3;
-    taued = &MMG5_permedge[4][0];
-    break;
-  case 16:
-    tau[0] = 3 ; tau[1] = 1 ; tau[2] = 0 ; tau[3] = 2;
-    taued = &MMG5_permedge[10][0];
-    break;
-  case 32:
-    tau[0] = 3 ; tau[1] = 2 ; tau[2] = 1 ; tau[3] = 0;
-    taued = &MMG5_permedge[11][0];
-    break;
-  }
+  MMG3D_split1_cfg(pt->flag,tau,&taued);
 
   /* Test volume of the two created tets */
   memcpy(pt0,pt,sizeof(MMG5_Tetra));
@@ -148,31 +166,7 @@ int MMG5_split1(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp) 
     memset(&xt1,0,sizeof(MMG5_xTetra));
   }
 
-  /* default is case 1 */
-  tau[0] = 0; tau[1] = 1; tau[2] = 2; tau[3] = 3;
-  taued = &MMG5_permedge[0][0];
-  switch(pt->flag) {
-  case 2:
-    tau[0] = 2; tau[1] = 0; tau[2] = 1; tau[3] = 3;
-    taued = &MMG5_permedge[6][0];
-    break;
-  case 4:
-    tau[0] = 0; tau[1] = 3; tau[2] = 1; tau[3] = 2;
-    taued = &MMG5_permedge[2][0];
-    break;
-  case 8:
-    tau[0] = 1; tau[1] = 2; tau[2] = 0; tau[3] = 3;
-    taued = &MMG5_permedge[4][0];
-    break;
-  case 16:
-    tau[0] = 3; tau[1] = 1; tau[2] = 0; tau[3] = 2;
-    taued = &MMG5_permedge[10][0];
-    break;
-  case 32:
-    tau[0] = 3; tau[1] = 2; tau[2] = 1; tau[3] = 0;
-    taued = &MMG5_permedge[11][0];
-    break;
-  }
+  MMG3D_split1_cfg(pt->flag,tau,&taued);
 
   /* Generic formulation of split of 1 edge */
   pt->v[tau[1]] = pt1->v[tau[0]] = vx[taued[0]];
@@ -494,7 +488,105 @@ int MMG3D_normalAdjaTri(MMG5_pMesh mesh , int start, int8_t iface, int ia,
   return 1;
 }
 
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param ip index of new point.
+ * \param k position of the tetra to split in the shell of edge.
+ * \param list pointer toward the shell of edge.
+ * \param newtet list of indices of created tetra
+ * \param tau vertices permutation
+ *
+ * \return 1 if success, 0 if fail.
+ *
+ * Update and fill the tetra and xtetra data when splitting one edge of a tetra.
+ *
+ */
+static inline
+int MMG5_split1b_eltspl(MMG5_pMesh mesh,int ip,int k,int *list,int *newtet,uint8_t tau[4]) {
+  MMG5_pTetra          pt,pt1;
+  MMG5_xTetra          xt,xt1;
+  MMG5_pxTetra         pxt0;
+  int                  iel,jel;
+  int8_t               ie,isxt,isxt1,i;
+  const uint8_t       *taued;
 
+  iel = list[k] / 6;
+  ie  = list[k] % 6;
+  pt = &mesh->tetra[iel];
+  jel = abs(newtet[k]);
+  pt1 = &mesh->tetra[jel];
+
+  pxt0 = 0;
+  if ( pt->xt ) {
+    pxt0 = &mesh->xtetra[pt->xt];
+    memcpy(&xt,pxt0,sizeof(MMG5_xTetra));
+    memcpy(&xt1,pxt0,sizeof(MMG5_xTetra));
+  }
+  else {
+    memset(&xt,0, sizeof(MMG5_xTetra));
+    memset(&xt1,0, sizeof(MMG5_xTetra));
+  }
+
+  int flag = 0;
+  MG_SET(flag,ie);
+  MMG3D_split1_cfg(flag,tau,&taued);
+
+  /* Generic formulation of split of 1 edge */
+  pt->v[tau[1]] = pt1->v[tau[0]] = ip;
+  if ( pt->xt ) {
+    /* Reset edge tag */
+    xt.tag [taued[3]] = 0;  xt.tag [taued[4]] = 0;
+    xt1.tag[taued[1]] = 0;  xt1.tag[taued[2]] = 0;
+    xt.edg [taued[3]] = 0;  xt.edg [taued[4]] = 0;
+    xt1.edg[taued[1]] = 0;  xt1.edg[taued[2]] = 0;
+    xt.ref [  tau[0]] = 0;  xt.ftag [ tau[0]] = 0;  MG_SET( xt.ori, tau[0]);
+    xt1.ref[  tau[1]] = 0;  xt1.ftag[ tau[1]] = 0;  MG_SET(xt1.ori, tau[1]);
+  }
+
+  pt->flag = pt1->flag = 0;
+
+  isxt = 0 ;
+  isxt1 = 0;
+
+  for (i=0; i<4; i++) {
+    if ( xt.ref[i]  || xt.ftag[i]  )  isxt  = 1;
+    if ( xt1.ref[i] || xt1.ftag[i] )  isxt1 = 1;
+  }
+
+  if ( pt->xt ) {
+    if ( (isxt)&&(!isxt1) ) {
+      pt1->xt = 0;
+      pxt0 = &mesh->xtetra[pt->xt];
+      memcpy(pxt0,&xt,sizeof(MMG5_xTetra));
+    }
+    else if ((!isxt)&&(isxt1) ) {
+      pt1->xt = pt->xt;
+      pt->xt = 0;
+      pxt0 = &mesh->xtetra[pt1->xt];
+      memcpy(pxt0,&xt1,sizeof(MMG5_xTetra));
+    }
+    else if (isxt && isxt1 ) {
+      mesh->xt++;
+      if ( mesh->xt > mesh->xtmax ) {
+        /* realloc of xtetras table */
+        MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
+                          "larger xtetra table",
+                          mesh->xt--;
+                          return 0);
+      }
+      pt1->xt = mesh->xt;
+      pxt0 = &mesh->xtetra[pt->xt];
+      memcpy(pxt0,&xt,sizeof(MMG5_xTetra));
+      pxt0 = &mesh->xtetra[pt1->xt];
+      memcpy(pxt0,&xt1,sizeof(MMG5_xTetra));
+    }
+    else {
+      pt->xt = 0;
+      pt1->xt = 0;
+    }
+  }
+  return 1;
+}
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -516,12 +608,11 @@ int MMG3D_normalAdjaTri(MMG5_pMesh mesh , int start, int8_t iface, int ia,
 int MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
                   int cas,int8_t metRidTyp,int8_t chkRidTet){
   MMG5_pTetra          pt,pt1,pt0;
-  MMG5_xTetra          xt,xt1;
-  MMG5_pxTetra         pxt0;
   double               lmin,lmax,len;
-  int                  ilist,k,open,iel,jel,*newtet,nump,*adja,j;
+  int                  ilist,k,open,iel,jel,newtet[MMG3D_LMAX+2],nump,*adja,j;
   int                 *adjan,nei2,nei3,mel;
-  int8_t               ie,tau[4],isxt,isxt1,i,voy;
+  int8_t               ie,i,voy;
+  uint8_t              tau[4];
   const uint8_t       *taued;
 
   ilist = ret / 2;
@@ -559,31 +650,10 @@ int MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
       ie  = list[j] % 6;
       pt0 = &mesh->tetra[0];
       memcpy(pt0,pt,sizeof(MMG5_Tetra));
-      /* tau = sigma^-1 = permutation that sends the ref config (edge 01 split) to current */
-      tau[0] = 0; tau[1] = 1; tau[2] = 2; tau[3] = 3;
-      taued = &MMG5_permedge[0][0];
-      switch(ie){
-      case 1:
-        tau[0] = 2; tau[1] = 0; tau[2] = 1; tau[3] = 3;
-        taued = &MMG5_permedge[6][0];
-        break;
-      case 2:
-        tau[0] = 0; tau[1] = 3; tau[2] = 1; tau[3] = 2;
-        taued = &MMG5_permedge[2][0];
-        break;
-      case 3:
-        tau[0] = 1; tau[1] = 2; tau[2] = 0; tau[3] = 3;
-        taued = &MMG5_permedge[4][0];
-        break;
-      case 4:
-        tau[0] = 3; tau[1] = 1; tau[2] = 0; tau[3] = 2;
-        taued = &MMG5_permedge[10][0];
-        break;
-      case 5:
-        tau[0] = 3; tau[1] = 2; tau[2] = 1; tau[3] = 0;
-        taued = &MMG5_permedge[11][0];
-        break;
-      }
+
+      int flag = 0;
+      MG_SET(flag,ie);
+      MMG3D_split1_cfg(flag,tau,&taued);
 
       pt0->v[MMG5_isar[ie][1]] = ip;
       if ( chkRidTet ) {
@@ -614,8 +684,6 @@ int MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
     if ( j < ilist )  return 0;
   }
 
-  MMG5_SAFE_CALLOC(newtet,ilist,int,return -1);
-
   iel = list[0] / 6;
   ie  = list[0] % 6;
   pt  = &mesh->tetra[iel];
@@ -628,25 +696,11 @@ int MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
     iel = list[k] / 6;
     ie  = list[k] % 6;
     pt  = &mesh->tetra[iel];
-    /* identity : case 0 */
-    tau[0] = 0 ; tau[1] = 1 ; tau[2] = 2 ; tau[3] = 3;
-    switch(ie) {
-    case 1:
-      tau[0] = 2; tau[1] = 0; tau[2] = 1; tau[3] = 3;
-      break;
-    case 2:
-      tau[0] = 0; tau[1] = 3; tau[2] = 1; tau[3] = 2;
-      break;
-    case 3:
-      tau[0] = 1; tau[1] = 2; tau[2] = 0; tau[3] = 3;
-      break;
-    case 4:
-      tau[0] = 3; tau[1] = 1; tau[2] = 0; tau[3] = 2;
-      break;
-    case 5:
-      tau[0] = 3; tau[1] = 2; tau[2] = 1; tau[3] = 0;
-      break;
-    }
+
+    int flag = 0;
+    MG_SET(flag,ie);
+    MMG3D_split1_cfg(flag,tau,&taued);
+
     jel = MMG3D_newElt(mesh);
     if ( !jel ) {
       MMG3D_TETRA_REALLOC(mesh,jel,mesh->gap,
@@ -672,105 +726,17 @@ int MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
   /* Special case : only one element in the shell */
   if ( ilist == 1 ) {
     assert(open);
+
+    if ( !MMG5_split1b_eltspl(mesh,ip,0,list,newtet,tau) ) {
+      return -1;
+    }
+
+    /* Update of adjacency relations */
     iel = list[0] / 6;
-    ie  = list[0] % 6;
     pt = &mesh->tetra[iel];
     jel = abs(newtet[0]);
     pt1 = &mesh->tetra[jel];
 
-    pxt0 = 0;
-    if ( pt->xt ) {
-      pxt0 = &mesh->xtetra[pt->xt];
-      memcpy(&xt,pxt0,sizeof(MMG5_xTetra));
-      memcpy(&xt1,pxt0,sizeof(MMG5_xTetra));
-    }
-    else {
-      memset(&xt,0, sizeof(MMG5_xTetra));
-      memset(&xt1,0, sizeof(MMG5_xTetra));
-    }
-
-    /* tau = sigma^-1 = permutation that sends the reference config (edge 01 split) to current */
-    tau[0] = 0; tau[1] = 1; tau[2] = 2; tau[3] = 3;
-    taued = &MMG5_permedge[0][0];
-    switch(ie){
-    case 1:
-      tau[0] = 2; tau[1] = 0; tau[2] = 1; tau[3] = 3;
-      taued = &MMG5_permedge[6][0];
-      break;
-    case 2:
-      tau[0] = 0; tau[1] = 3; tau[2] = 1; tau[3] = 2;
-      taued = &MMG5_permedge[2][0];
-      break;
-    case 3:
-      tau[0] = 1; tau[1] = 2; tau[2] = 0; tau[3] = 3;
-      taued = &MMG5_permedge[4][0];
-      break;
-    case 4:
-      tau[0] = 3; tau[1] = 1; tau[2] = 0; tau[3] = 2;
-      taued = &MMG5_permedge[10][0];
-      break;
-    case 5:
-      tau[0] = 3; tau[1] = 2; tau[2] = 1; tau[3] = 0;
-      taued = &MMG5_permedge[11][0];
-      break;
-    }
-
-    /* Generic formulation of split of 1 edge */
-    pt->v[tau[1]] = pt1->v[tau[0]] = ip;
-    if ( pt->xt ) {
-      /* Reset edge tag */
-      xt.tag [taued[3]] = 0;  xt.tag [taued[4]] = 0;
-      xt1.tag[taued[1]] = 0;  xt1.tag[taued[2]] = 0;
-      xt.edg [taued[3]] = 0;  xt.edg [taued[4]] = 0;
-      xt1.edg[taued[1]] = 0;  xt1.edg[taued[2]] = 0;
-      xt.ref [  tau[0]] = 0;  xt.ftag [ tau[0]] = 0;  MG_SET( xt.ori, tau[0]);
-      xt1.ref[  tau[1]] = 0;  xt1.ftag[ tau[1]] = 0;  MG_SET(xt1.ori, tau[1]);
-    }
-
-    pt->flag = pt1->flag = 0;
-
-    isxt = 0 ;
-    isxt1 = 0;
-
-    for (i=0; i<4; i++) {
-      if ( xt.ref[i]  || xt.ftag[i] )  isxt = 1;
-      if ( xt1.ref[i] || xt1.ftag[i])  isxt1 = 1;
-    }
-
-    if ( pt->xt ) {
-      if ( (isxt) && (!isxt1) ) {
-        pt1->xt = 0;
-        pxt0 = &mesh->xtetra[pt->xt];
-        memcpy(pxt0,&xt,sizeof(MMG5_xTetra));
-      }
-      else if ( (!isxt) && (isxt1) ) {
-        pt1->xt = pt->xt;
-        pt->xt = 0;
-        pxt0 = &mesh->xtetra[pt1->xt];
-        memcpy(pxt0,&xt1,sizeof(MMG5_xTetra));
-      }
-      else if ( isxt && isxt1 ) {
-        mesh->xt++;
-        if ( mesh->xt > mesh->xtmax ) {
-          /* realloc of xtetras table */
-          MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
-                             "larger xtetra table",
-                             mesh->xt--;
-                             return -1);
-        }
-        pt1->xt = mesh->xt;
-        pxt0 = &mesh->xtetra[pt->xt];
-        memcpy(pxt0,&xt,sizeof(MMG5_xTetra));
-        pxt0 = &mesh->xtetra[pt1->xt];
-        memcpy(pxt0,&xt1,sizeof(MMG5_xTetra));
-      }
-      else {
-        pt->xt = 0;
-        pt1->xt = 0;
-      }
-    }
-
-    /* Update of adjacency relations */
     adja = &mesh->adja[4*(iel-1)+1];
     adjan = &mesh->adja[4*(jel-1)+1];
 
@@ -801,112 +767,22 @@ int MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
     pt->mark  = mesh->mark;
     pt1->mark = mesh->mark;
 
-
-    MMG5_SAFE_FREE(newtet);
     return 1;
   }
 
   /* General case : update each element of the shell */
   for (k=0; k<ilist; k++) {
+    if ( !MMG5_split1b_eltspl(mesh,ip,k,list,newtet,tau) ) {
+      return -1;
+    }
+
+    /* Update of adjacency relations */
     iel = list[k] / 6;
     ie  = list[k] % 6;
     pt = &mesh->tetra[iel];
     jel = abs(newtet[k]);
     pt1 = &mesh->tetra[jel];
 
-    pxt0 = 0;
-    if ( pt->xt ) {
-      pxt0 = &mesh->xtetra[pt->xt];
-      memcpy(&xt,pxt0,sizeof(MMG5_xTetra));
-      memcpy(&xt1,pxt0,sizeof(MMG5_xTetra));
-    }
-    else {
-      memset(&xt,0, sizeof(MMG5_xTetra));
-      memset(&xt1,0, sizeof(MMG5_xTetra));
-    }
-
-    /* tau = sigma^-1 = permutation that sends the reference config (edge 01 split) to current */
-    tau[0] = 0; tau[1] = 1; tau[2] = 2; tau[3] = 3;
-    taued = &MMG5_permedge[0][0];
-    switch(ie){
-    case 1:
-      tau[0] = 2; tau[1] = 0; tau[2] = 1; tau[3] = 3;
-      taued = &MMG5_permedge[6][0];
-      break;
-    case 2:
-      tau[0] = 0; tau[1] = 3; tau[2] = 1; tau[3] = 2;
-      taued = &MMG5_permedge[2][0];
-      break;
-    case 3:
-      tau[0] = 1; tau[1] = 2; tau[2] = 0; tau[3] = 3;
-      taued = &MMG5_permedge[4][0];
-      break;
-    case 4:
-      tau[0] = 3; tau[1] = 1; tau[2] = 0; tau[3] = 2;
-      taued = &MMG5_permedge[10][0];
-      break;
-    case 5:
-      tau[0] = 3; tau[1] = 2; tau[2] = 1; tau[3] = 0;
-      taued = &MMG5_permedge[11][0];
-      break;
-    }
-
-    /* Generic formulation of split of 1 edge */
-    pt->v[tau[1]] = pt1->v[tau[0]] = ip;
-    if ( pt->xt ) {
-      /* Reset edge tag */
-      xt.tag [taued[3]] = 0;  xt.tag [taued[4]] = 0;
-      xt1.tag[taued[1]] = 0;  xt1.tag[taued[2]] = 0;
-      xt.edg [taued[3]] = 0;  xt.edg [taued[4]] = 0;
-      xt1.edg[taued[1]] = 0;  xt1.edg[taued[2]] = 0;
-      xt.ref [  tau[0]] = 0;  xt.ftag [ tau[0]] = 0;  MG_SET( xt.ori, tau[0]);
-      xt1.ref[  tau[1]] = 0;  xt1.ftag[ tau[1]] = 0;  MG_SET(xt1.ori, tau[1]);
-    }
-
-    pt->flag = pt1->flag = 0;
-
-    isxt = 0 ;
-    isxt1 = 0;
-
-    for (i=0; i<4; i++) {
-      if ( xt.ref[i]  || xt.ftag[i]  )  isxt  = 1;
-      if ( xt1.ref[i] || xt1.ftag[i] )  isxt1 = 1;
-    }
-
-    if ( pt->xt ) {
-      if ( (isxt)&&(!isxt1) ) {
-        pt1->xt = 0;
-        pxt0 = &mesh->xtetra[pt->xt];
-        memcpy(pxt0,&xt,sizeof(MMG5_xTetra));
-      }
-      else if ((!isxt)&&(isxt1) ) {
-        pt1->xt = pt->xt;
-        pt->xt = 0;
-        pxt0 = &mesh->xtetra[pt1->xt];
-        memcpy(pxt0,&xt1,sizeof(MMG5_xTetra));
-      }
-      else if (isxt && isxt1 ) {
-        mesh->xt++;
-        if ( mesh->xt > mesh->xtmax ) {
-          /* realloc of xtetras table */
-          MMG5_TAB_RECALLOC(mesh,mesh->xtetra,mesh->xtmax,MMG5_GAP,MMG5_xTetra,
-                             "larger xtetra table",
-                             mesh->xt--;
-                             return -1);
-        }
-        pt1->xt = mesh->xt;
-        pxt0 = &mesh->xtetra[pt->xt];
-        memcpy(pxt0,&xt,sizeof(MMG5_xTetra));
-        pxt0 = &mesh->xtetra[pt1->xt];
-        memcpy(pxt0,&xt1,sizeof(MMG5_xTetra));
-      }
-      else {
-        pt->xt = 0;
-        pt1->xt = 0;
-      }
-    }
-
-    /* Update of adjacency relations */
     adja = &mesh->adja[4*(iel-1)+1];
     adjan = &mesh->adja[4*(jel-1)+1];
 
@@ -1101,9 +977,79 @@ int MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,int *list, int ret, int ip,
     pt1->mark = mesh->mark;
   }
 
-  MMG5_SAFE_FREE(newtet);
   return 1;
 }
+
+/**
+ * \param flag flag to detect the splitting configuration
+ * \param tau vertices permutation
+ * \param taued edges permutation
+ * \param pt tetra in which the splitting is performed
+ *
+ * Compute vertices and edges permutation for the split of 2 edge along the same
+ * face. The configuration flag is computed such as the i^th bit of flag is 1 if
+ * the i^th edge is splitted).
+ *
+ */
+static inline
+uint8_t MMG3D_split2sf_cfg(int flag,uint8_t *tau,const uint8_t **taued,MMG5_pTetra pt) {
+  uint8_t imin;
+
+  /* identity is case 48 */
+  tau[0] = 0 ; tau[1] = 1 ; tau[2] = 2 ; tau[3] = 3;
+  *taued = &MMG5_permedge[0][0];
+  switch(flag){
+  case 24 :
+    tau[0] = 0 ; tau[1] = 2 ; tau[2] = 3 ; tau[3] = 1;
+    *taued = &MMG5_permedge[1][0];
+    break;
+  case 40 :
+    tau[0] = 0 ; tau[1] = 3 ; tau[2] = 1 ; tau[3] = 2;
+    *taued = &MMG5_permedge[2][0];
+    break;
+  case 6 :
+    tau[0] = 1 ; tau[1] = 3 ; tau[2] = 2 ; tau[3] = 0;
+    *taued = &MMG5_permedge[5][0];
+    break;
+  case 34 :
+    tau[0] = 1 ; tau[1] = 0 ; tau[2] = 3 ; tau[3] = 2;
+    *taued = &MMG5_permedge[3][0];
+    break;
+  case 36 :
+    tau[0] = 1 ; tau[1] = 2 ; tau[2] = 0 ; tau[3] = 3;
+    *taued = &MMG5_permedge[4][0];
+    break;
+  case 20 :
+    tau[0] = 2 ; tau[1] = 0 ; tau[2] = 1 ; tau[3] = 3;
+    *taued = &MMG5_permedge[6][0];
+    break;
+  case 5 :
+    tau[0] = 2 ; tau[1] = 1 ; tau[2] = 3 ; tau[3] = 0;
+    *taued = &MMG5_permedge[7][0];
+    break;
+  case 17 :
+    tau[0] = 2 ; tau[1] = 3 ; tau[2] = 0 ; tau[3] = 1;
+    *taued = &MMG5_permedge[8][0];
+    break;
+  case 9 :
+    tau[0] = 3 ; tau[1] = 0 ; tau[2] = 2 ; tau[3] = 1;
+    *taued = &MMG5_permedge[9][0];
+    break;
+  case 3 :
+    tau[0] = 3 ; tau[1] = 2 ; tau[2] = 1 ; tau[3] = 0;
+    *taued = &MMG5_permedge[11][0];
+    break;
+  case 10 :
+    tau[0] = 3 ; tau[1] = 1 ; tau[2] = 0 ; tau[3] = 2;
+    *taued = &MMG5_permedge[10][0];
+    break;
+  }
+
+  imin = (pt->v[tau[1]] < pt->v[tau[2]]) ? tau[1] : tau[2] ;
+
+  return imin;
+}
+
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1128,58 +1074,9 @@ int MMG3D_split2sf_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]){
 
   if ( vold < MMG5_EPSOK ) return 0;
 
-  /* identity is case 48 */
-  tau[0] = 0 ; tau[1] = 1 ; tau[2] = 2 ; tau[3] = 3;
-  taued = &MMG5_permedge[0][0];
-  switch(pt->flag){
-  case 24 :
-    tau[0] = 0 ; tau[1] = 2 ; tau[2] = 3 ; tau[3] = 1;
-    taued = &MMG5_permedge[1][0];
-    break;
-  case 40 :
-    tau[0] = 0 ; tau[1] = 3 ; tau[2] = 1 ; tau[3] = 2;
-    taued = &MMG5_permedge[2][0];
-    break;
-  case 6 :
-    tau[0] = 1 ; tau[1] = 3 ; tau[2] = 2 ; tau[3] = 0;
-    taued = &MMG5_permedge[5][0];
-    break;
-  case 34 :
-    tau[0] = 1 ; tau[1] = 0 ; tau[2] = 3 ; tau[3] = 2;
-    taued = &MMG5_permedge[3][0];
-    break;
-  case 36 :
-    tau[0] = 1 ; tau[1] = 2 ; tau[2] = 0 ; tau[3] = 3;
-    taued = &MMG5_permedge[4][0];
-    break;
-  case 20 :
-    tau[0] = 2 ; tau[1] = 0 ; tau[2] = 1 ; tau[3] = 3;
-    taued = &MMG5_permedge[6][0];
-    break;
-  case 5 :
-    tau[0] = 2 ; tau[1] = 1 ; tau[2] = 3 ; tau[3] = 0;
-    taued = &MMG5_permedge[7][0];
-    break;
-  case 17 :
-    tau[0] = 2 ; tau[1] = 3 ; tau[2] = 0 ; tau[3] = 1;
-    taued = &MMG5_permedge[8][0];
-    break;
-  case 9 :
-    tau[0] = 3 ; tau[1] = 0 ; tau[2] = 2 ; tau[3] = 1;
-    taued = &MMG5_permedge[9][0];
-    break;
-  case 3 :
-    tau[0] = 3 ; tau[1] = 2 ; tau[2] = 1 ; tau[3] = 0;
-    taued = &MMG5_permedge[11][0];
-    break;
-  case 10 :
-    tau[0] = 3 ; tau[1] = 1 ; tau[2] = 0 ; tau[3] = 2;
-    taued = &MMG5_permedge[10][0];
-    break;
-  }
+  imin = MMG3D_split2sf_cfg(pt->flag,tau,&taued,pt);
 
   /* Test orientation of the three tets to be created */
-  imin = (pt->v[tau[1]] < pt->v[tau[2]]) ? tau[1] : tau[2] ;
 
   memcpy(pt0,pt,sizeof(MMG5_Tetra));
   pt0->v[tau[1]] = vx[taued[4]];
@@ -1216,6 +1113,97 @@ int MMG3D_split2sf_sim(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6]){
 
 /**
  * \param mesh pointer toward the mesh structure.
+ * \param newtet list of indices of the new tetra.
+ * \param ne number of tetra in the list.
+ * \param pt list of tetra.
+ * \param xt list of xtetra.
+ * \param pxt0 xtetra associated to the first tetra of the list
+ *
+ * \return 0 if fail, 1 otherwise
+ *
+ * Create a list of new tetra whose indices are passed in \a newtet.
+ *
+ */
+static inline
+int MMG3D_crea_newTetra(MMG5_pMesh mesh,const int ne,int *newtet,
+                        MMG5_pTetra *pt,MMG5_xTetra *xt,MMG5_pxTetra *pxt0) {
+  int          iel,i,j;
+
+  /* The first tetra is the one that is splitted so it already exists */
+  for ( i=1; i<ne; ++i ) {
+    iel = MMG3D_newElt(mesh);
+    if ( !iel ) {
+      MMG3D_TETRA_REALLOC(mesh,iel,mesh->gap,
+                          fprintf(stderr,"\n  ## Error: %s: unable to allocate"
+                                  " a new element.\n",__func__);
+                          MMG5_INCREASE_MEM_MESSAGE();
+                          fprintf(stderr,"  Exit program.\n");
+                          return 0);
+      /* update pointer list */
+      for ( j=0; j<i; ++j ) {
+        pt[j] = &mesh->tetra[newtet[j]];
+      }
+    }
+    pt[i] = &mesh->tetra[iel];
+    memcpy(pt[i],pt[0],sizeof(MMG5_Tetra));
+    newtet[i]=iel;
+  }
+
+  /* If need copy the initial xtetra */
+  if ( pt[0]->xt ) {
+    *pxt0 = &mesh->xtetra[(pt[0])->xt];
+    for ( i=0; i<ne; ++i  ) {
+      memcpy(&xt[i],*pxt0,sizeof(MMG5_xTetra));
+    }
+  }
+  else {
+    *pxt0 = 0;
+    memset(xt,0x0,ne*sizeof(MMG5_xTetra));
+  }
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param met pointer toward the metric structure.
+ * \param ne number of tetra in the list
+ * \param newtet list of tetra indices
+ * \param pt list of tetra
+ * \param metRidTyp metric storage (classic or special)
+ *
+ * \return 0 if fail, 1 otherwise
+ *
+ * Compute the quality of the \a nnew tetra of the list \a pt.
+ *
+ */
+static inline
+void MMG3D_update_qual(MMG5_pMesh mesh,MMG5_pSol met,const int ne,
+                       int *newtet,MMG5_pTetra *pt,int8_t metRidTyp) {
+  int i;
+
+  if ( (!metRidTyp) && met->m && met->size>1 ) {
+    for (i=0; i<ne; i++) {
+      pt[i]->qual=MMG5_caltet33_ani(mesh,met,pt[i]);
+    }
+  }
+  else if ( (!met) || (!met->m) ) {
+    /* in ls mode + -A option, orcal calls caltet_ani that fails */
+    for (i=0; i<ne; i++) {    
+      pt[i]->qual=MMG5_caltet_iso(mesh,met,pt[i]);
+    }
+  }
+  else
+  {
+    for (i=0; i<ne; i++) {
+      pt[i]->qual=MMG5_orcal(mesh,met,newtet[i]);
+    }
+  }
+
+  return;
+}
+
+/**
+ * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
  * \param k index of element to split.
  * \param vx \f$vx[i]\f$ is the index of the point to add on the edge \a i.
@@ -1230,110 +1218,26 @@ int MMG5_split2sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp
   MMG5_pTetra         pt[3];
   MMG5_xTetra         xt[3];
   MMG5_pxTetra        pxt0;
-  int                 iel,i;
+  int                 i,flg;
   int                 newtet[3];
-  int8_t              flg,imin,firstxt,isxt[3];
+  int8_t              imin,firstxt,isxt[3];
   uint8_t             tau[4];
   const uint8_t       *taued;
+  const int           ne=3;
 
   pt[0] = &mesh->tetra[k];
   flg   = pt[0]->flag;
   pt[0]->flag = 0;
   newtet[0]=k;
 
-  iel = MMG3D_newElt(mesh);
-  if ( !iel ) {
-    MMG3D_TETRA_REALLOC(mesh,iel,mesh->gap,
-                        fprintf(stderr,"\n  ## Error: %s: unable to allocate"
-                                " a new element.\n",__func__);
-                        MMG5_INCREASE_MEM_MESSAGE();
-                        fprintf(stderr,"  Exit program.\n");
-                        return 0);
-    pt[0] = &mesh->tetra[newtet[0]];
+  /* Create 2 new tetra */
+  if ( !MMG3D_crea_newTetra(mesh,ne,newtet,pt,xt,&pxt0) ) {
+    return 0;
   }
-  pt[1] = &mesh->tetra[iel];
-  memcpy(pt[1],pt[0],sizeof(MMG5_Tetra));
-  newtet[1]=iel;
 
-  iel = MMG3D_newElt(mesh);
-  if ( !iel ) {
-    MMG3D_TETRA_REALLOC(mesh,iel,mesh->gap,
-                        fprintf(stderr,"\n  ## Error: %s: unable to allocate"
-                                " a new element.\n",__func__);
-                        MMG5_INCREASE_MEM_MESSAGE();
-                        fprintf(stderr,"  Exit program.\n");
-                        return 0);
-    pt[0] = &mesh->tetra[newtet[0]];
-    pt[1] = &mesh->tetra[newtet[1]];
-  }
-  pt[2] = &mesh->tetra[iel];
-  memcpy(pt[2],pt[0],sizeof(MMG5_Tetra));
-  newtet[2]=iel;
-
-  if ( pt[0]->xt ) {
-    pxt0 = &mesh->xtetra[(pt[0])->xt];
-    memcpy(&xt[0],pxt0,sizeof(MMG5_xTetra));
-    memcpy(&xt[1],pxt0,sizeof(MMG5_xTetra));
-    memcpy(&xt[2],pxt0,sizeof(MMG5_xTetra));
-  }
-  else {
-    pxt0 = 0;
-    memset(&xt[0],0,sizeof(MMG5_xTetra));
-    memset(&xt[1],0,sizeof(MMG5_xTetra));
-    memset(&xt[2],0,sizeof(MMG5_xTetra));
-  }
-  /* identity is case 48 */
-  tau[0] = 0 ; tau[1] = 1 ; tau[2] = 2 ; tau[3] = 3;
-  taued = &MMG5_permedge[0][0];
-  switch(flg){
-  case 24 :
-    tau[0] = 0 ; tau[1] = 2 ; tau[2] = 3 ; tau[3] = 1;
-    taued = &MMG5_permedge[1][0];
-    break;
-  case 40 :
-    tau[0] = 0 ; tau[1] = 3 ; tau[2] = 1 ; tau[3] = 2;
-    taued = &MMG5_permedge[2][0];
-    break;
-  case 6 :
-    tau[0] = 1 ; tau[1] = 3 ; tau[2] = 2 ; tau[3] = 0;
-    taued = &MMG5_permedge[5][0];
-    break;
-  case 34 :
-    tau[0] = 1 ; tau[1] = 0 ; tau[2] = 3 ; tau[3] = 2;
-    taued = &MMG5_permedge[3][0];
-    break;
-  case 36 :
-    tau[0] = 1 ; tau[1] = 2 ; tau[2] = 0 ; tau[3] = 3;
-    taued = &MMG5_permedge[4][0];
-    break;
-  case 20 :
-    tau[0] = 2 ; tau[1] = 0 ; tau[2] = 1 ; tau[3] = 3;
-    taued = &MMG5_permedge[6][0];
-    break;
-  case 5 :
-    tau[0] = 2 ; tau[1] = 1 ; tau[2] = 3 ; tau[3] = 0;
-    taued = &MMG5_permedge[7][0];
-    break;
-  case 17 :
-    tau[0] = 2 ; tau[1] = 3 ; tau[2] = 0 ; tau[3] = 1;
-    taued = &MMG5_permedge[8][0];
-    break;
-  case 9 :
-    tau[0] = 3 ; tau[1] = 0 ; tau[2] = 2 ; tau[3] = 1;
-    taued = &MMG5_permedge[9][0];
-    break;
-  case 3 :
-    tau[0] = 3 ; tau[1] = 2 ; tau[2] = 1 ; tau[3] = 0;
-    taued = &MMG5_permedge[11][0];
-    break;
-  case 10 :
-    tau[0] = 3 ; tau[1] = 1 ; tau[2] = 0 ; tau[3] = 2;
-    taued = &MMG5_permedge[10][0];
-    break;
-  }
+  imin = MMG3D_split2sf_cfg(flg,tau,&taued,pt[0]);
 
   /* Generic formulation for the split of 2 edges belonging to a common face */
-  imin = (pt[0]->v[tau[1]] < pt[0]->v[tau[2]]) ? tau[1] : tau[2] ;
   pt[0]->v[tau[1]]  = vx[taued[4]] ;  pt[0]->v[tau[2]] = vx[taued[5]];
   xt[0].tag[taued[0]] = 0;  xt[0].tag[taued[1]] = 0;
   xt[0].tag[taued[3]] = 0;  xt[0].edg[taued[0]] = 0;
@@ -1432,23 +1336,10 @@ int MMG5_split2sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp
       pt[0]->xt = 0;
     }
   }
+
   /* Quality update */
-  if ( (!metRidTyp) && met->m && met->size>1 ) {
-    pt[0]->qual=MMG5_caltet33_ani(mesh,met,pt[0]);
-    pt[1]->qual=MMG5_caltet33_ani(mesh,met,pt[1]);
-    pt[2]->qual=MMG5_caltet33_ani(mesh,met,pt[2]);
-  }
-  else if ( (!met) || (!met->m) ) {
-    /* in ls mode + -A option, orcal calls caltet_ani that fails */
-    pt[0]->qual=MMG5_caltet_iso(mesh,met,pt[0]);
-    pt[1]->qual=MMG5_caltet_iso(mesh,met,pt[1]);
-    pt[2]->qual=MMG5_caltet_iso(mesh,met,pt[2]);
-  }
-  else {
-    pt[0]->qual=MMG5_orcal(mesh,met,newtet[0]);
-    pt[1]->qual=MMG5_orcal(mesh,met,newtet[1]);
-    pt[2]->qual=MMG5_orcal(mesh,met,newtet[2]);
-  }
+  MMG3D_update_qual(mesh,met,ne,newtet,pt,metRidTyp);
+
   return 1;
 }
 
@@ -1529,76 +1420,23 @@ int MMG5_split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp) 
   MMG5_pTetra         pt[4];
   MMG5_xTetra         xt[4];
   MMG5_pxTetra        pxt0;
-  int                 i,iel;
+  int                 i;
   int                 newtet[4];
   int8_t              flg,firstxt,isxt[4];
   uint8_t             tau[4];
   const uint8_t       *taued;
+  const int           ne=4;
 
   pt[0] = &mesh->tetra[k];
   flg   = pt[0]->flag;
   pt[0]->flag = 0;
   newtet[0]=k;
 
-  iel = MMG3D_newElt(mesh);
-  if ( !iel ) {
-    MMG3D_TETRA_REALLOC(mesh,iel,mesh->gap,
-                        fprintf(stderr,"\n  ## Error: %s: unable to allocate"
-                                " a new element.\n",__func__);
-                        MMG5_INCREASE_MEM_MESSAGE();
-                        fprintf(stderr,"  Exit program.\n");
-                        return 0);
-    pt[0] = &mesh->tetra[newtet[0]];
+  /* Create 3 new tetra */
+  if ( !MMG3D_crea_newTetra(mesh,ne,newtet,pt,xt,&pxt0) ) {
+    return 0;
   }
-  pt[1] = &mesh->tetra[iel];
-  memcpy(pt[1],pt[0],sizeof(MMG5_Tetra));
-  newtet[1]=iel;
 
-  iel = MMG3D_newElt(mesh);
-  if ( !iel ) {
-    MMG3D_TETRA_REALLOC(mesh,iel,mesh->gap,
-                        fprintf(stderr,"\n  ## Error: %s: unable to allocate"
-                                " a new element.\n",__func__);
-                        MMG5_INCREASE_MEM_MESSAGE();
-                        fprintf(stderr,"  Exit program.\n");
-                        return 0);
-    pt[0] = &mesh->tetra[newtet[0]];
-    pt[1] = &mesh->tetra[newtet[1]];
-  }
-  pt[2] = &mesh->tetra[iel];
-  memcpy(pt[2],pt[0],sizeof(MMG5_Tetra));
-  newtet[2]=iel;
-
-  iel = MMG3D_newElt(mesh);
-  if ( !iel ) {
-    MMG3D_TETRA_REALLOC(mesh,iel,mesh->gap,
-                        fprintf(stderr,"\n  ## Error: %s: unable to allocate"
-                                " a new element.\n",__func__);
-                        MMG5_INCREASE_MEM_MESSAGE();
-                        fprintf(stderr,"  Exit program.\n");
-                        return 0);
-    pt[0] = &mesh->tetra[newtet[0]];
-    pt[1] = &mesh->tetra[newtet[1]];
-    pt[2] = &mesh->tetra[newtet[2]];
-  }
-  pt[3] = &mesh->tetra[iel];
-  memcpy(pt[3],pt[0],sizeof(MMG5_Tetra));
-  newtet[3]=iel;
-
-  pxt0 = 0;
-  if ( pt[0]->xt) {
-    pxt0 = &mesh->xtetra[(pt[0])->xt];
-    memcpy(&xt[0],pxt0,sizeof(MMG5_xTetra));
-    memcpy(&xt[1],pxt0,sizeof(MMG5_xTetra));
-    memcpy(&xt[2],pxt0,sizeof(MMG5_xTetra));
-    memcpy(&xt[3],pxt0,sizeof(MMG5_xTetra));
-  }
-  else {
-    memset(&xt[0],0,sizeof(MMG5_xTetra));
-    memset(&xt[1],0,sizeof(MMG5_xTetra));
-    memset(&xt[2],0,sizeof(MMG5_xTetra));
-    memset(&xt[3],0,sizeof(MMG5_xTetra));
-  }
   /* identity : case 33 */
   tau[0] = 0;  tau[1] = 1;  tau[2] = 2;  tau[3] = 3;
   taued = &MMG5_permedge[0][0];
@@ -1650,10 +1488,10 @@ int MMG5_split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp) 
   /* Assignation of the xt fields to the appropriate tets */
   memset(isxt,0,4*sizeof(int8_t));
   for (i=0; i<4; i++) {
-    if ( xt[0].ref[i] || xt[0].ftag[i] )  isxt[0] = 1;
-    if ( xt[1].ref[i] || xt[1].ftag[i] )  isxt[1] = 1;
-    if ( xt[2].ref[i] || xt[2].ftag[i] )  isxt[2] = 1;
-    if ( xt[3].ref[i] || xt[3].ftag[i] )  isxt[3] = 1;
+    int j;
+    for (j=0; j<ne; j++) {
+      if ( xt[j].ref[i] || xt[j].ftag[i] )  isxt[j] = 1;
+    }
   }
 
   if ( pt[0]->xt) {
@@ -1711,19 +1549,10 @@ int MMG5_split2(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp) 
       pt[0]->xt = 0;
     }
   }
+
   /* Quality update */
-  if ( (!metRidTyp) && met->m && met->size>1 ) {
-    pt[0]->qual=MMG5_caltet33_ani(mesh,met,pt[0]);
-    pt[1]->qual=MMG5_caltet33_ani(mesh,met,pt[1]);
-    pt[2]->qual=MMG5_caltet33_ani(mesh,met,pt[2]);
-    pt[3]->qual=MMG5_caltet33_ani(mesh,met,pt[3]);
-  }
-  else {
-    pt[0]->qual=MMG5_orcal(mesh,met,newtet[0]);
-    pt[1]->qual=MMG5_orcal(mesh,met,newtet[1]);
-    pt[2]->qual=MMG5_orcal(mesh,met,newtet[2]);
-    pt[3]->qual=MMG5_orcal(mesh,met,newtet[3]);
-  }
+  MMG3D_update_qual(mesh,met,ne,newtet,pt,metRidTyp);
+
   return 1;
 }
 
@@ -1803,11 +1632,12 @@ int MMG5_split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp) 
   MMG5_pTetra         pt[4];
   MMG5_xTetra         xt[4];
   MMG5_pxTetra        pxt0;
-  int                 iel,i;
+  int                 i;
   int                 newtet[4];
   int8_t              flg,firstxt,isxt[4];
   uint8_t             tau[4];
   const uint8_t       *taued;
+  const int           ne=4;
 
   pt[0] = &mesh->tetra[k];
   flg   = pt[0]->flag;
@@ -1815,64 +1645,8 @@ int MMG5_split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp) 
   newtet[0]=k;
 
   /* create 3 new tetras */
-  iel = MMG3D_newElt(mesh);
-  if ( !iel ) {
-    MMG3D_TETRA_REALLOC(mesh,iel,mesh->gap,
-                        fprintf(stderr,"\n  ## Error: %s: unable to allocate"
-                                " a new element.\n",__func__);
-                        MMG5_INCREASE_MEM_MESSAGE();
-                        fprintf(stderr,"  Exit program.\n");
-                        return 0);
-    pt[0] = &mesh->tetra[newtet[0]];
-  }
-  pt[1] = &mesh->tetra[iel];
-  pt[1] = memcpy(pt[1],pt[0],sizeof(MMG5_Tetra));
-  newtet[1]=iel;
-
-  iel = MMG3D_newElt(mesh);
-  if ( !iel ) {
-    MMG3D_TETRA_REALLOC(mesh,iel,mesh->gap,
-                        fprintf(stderr,"\n  ## Error: %s: unable to allocate a"
-                                " new element.\n",__func__);
-                        MMG5_INCREASE_MEM_MESSAGE();
-                        fprintf(stderr,"  Exit program.\n");
-                        return 0);
-    pt[0] = &mesh->tetra[newtet[0]];
-    pt[1] = &mesh->tetra[newtet[1]];
-  }
-  pt[2] = &mesh->tetra[iel];
-  pt[2] = memcpy(pt[2],pt[0],sizeof(MMG5_Tetra));
-  newtet[2]=iel;
-
-  iel = MMG3D_newElt(mesh);
-  if ( !iel ) {
-    MMG3D_TETRA_REALLOC(mesh,iel,mesh->gap,
-                        fprintf(stderr,"\n  ## Error: %s: unable to allocate"
-                                " a new element.\n",__func__);
-                        MMG5_INCREASE_MEM_MESSAGE();
-                        fprintf(stderr,"  Exit program.\n");
-                        return 0);
-    pt[0] = &mesh->tetra[newtet[0]];
-    pt[1] = &mesh->tetra[newtet[1]];
-    pt[2] = &mesh->tetra[newtet[2]];
-  }
-  pt[3] = &mesh->tetra[iel];
-  pt[3] = memcpy(pt[3],pt[0],sizeof(MMG5_Tetra));
-  newtet[3]=iel;
-
-  pxt0 = 0;
-  if ( pt[0]->xt ) {
-    pxt0 = &mesh->xtetra[(pt[0])->xt];
-    memcpy(&xt[0],pxt0, sizeof(MMG5_xTetra));
-    memcpy(&xt[1],pxt0, sizeof(MMG5_xTetra));
-    memcpy(&xt[2],pxt0, sizeof(MMG5_xTetra));
-    memcpy(&xt[3],pxt0, sizeof(MMG5_xTetra));
-  }
-  else {
-    memset(&xt[0],0, sizeof(MMG5_xTetra));
-    memset(&xt[1],0, sizeof(MMG5_xTetra));
-    memset(&xt[2],0, sizeof(MMG5_xTetra));
-    memset(&xt[3],0, sizeof(MMG5_xTetra));
+  if ( !MMG3D_crea_newTetra(mesh,ne,newtet,pt,xt,&pxt0) ) {
+    return 0;
   }
 
   /* update vertices, case 11 is default */
@@ -1927,10 +1701,10 @@ int MMG5_split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp) 
   /* Assignation of the xt fields to the appropriate tets */
   memset(isxt,0,4*sizeof(int8_t));
   for (i=0; i<4; i++) {
-    if ( xt[0].ref[i] || xt[0].ftag[i] ) isxt[0] = 1;
-    if ( xt[1].ref[i] || xt[1].ftag[i] ) isxt[1] = 1;
-    if ( xt[2].ref[i] || xt[2].ftag[i] ) isxt[2] = 1;
-    if ( xt[3].ref[i] || xt[3].ftag[i] ) isxt[3] = 1;
+    int j;
+    for (j=0; j<ne; j++) {
+      if ( xt[j].ref[i] || xt[j].ftag[i] )  isxt[j] = 1;
+    }
   }
 
   if ( pt[0]->xt ) {
@@ -1984,19 +1758,10 @@ int MMG5_split3(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp) 
       pt[0]->xt = 0;
     }
   }
+
   /* Quality update */
-  if ( (!metRidTyp) && met->m && met->size>1 ) {
-    pt[0]->qual=MMG5_caltet33_ani(mesh,met,pt[0]);
-    pt[1]->qual=MMG5_caltet33_ani(mesh,met,pt[1]);
-    pt[2]->qual=MMG5_caltet33_ani(mesh,met,pt[2]);
-    pt[3]->qual=MMG5_caltet33_ani(mesh,met,pt[3]);
-  }
-  else {
-    pt[0]->qual=MMG5_orcal(mesh,met,newtet[0]);
-    pt[1]->qual=MMG5_orcal(mesh,met,newtet[1]);
-    pt[2]->qual=MMG5_orcal(mesh,met,newtet[2]);
-    pt[3]->qual=MMG5_orcal(mesh,met,newtet[3]);
-  }
+  MMG3D_update_qual(mesh,met,ne,newtet,pt,metRidTyp);
+
   return 1;
 }
 
@@ -2196,11 +1961,12 @@ int MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidT
   MMG5_pTetra         pt[4];
   MMG5_xTetra         xt[4];
   MMG5_pxTetra        pxt0;
-  int                 iel,i;
+  int                 i;
   int                 newtet[4];
   int8_t              flg,firstxt,isxt[4],ia,ib;
   uint8_t             tau[4];
   const uint8_t       *taued;
+  const int           ne=4;
 
   pt[0]  = &mesh->tetra[k];
   flg = pt[0]->flag;
@@ -2208,64 +1974,8 @@ int MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidT
   newtet[0]=k;
 
   /* create 3 new tetras */
-  iel = MMG3D_newElt(mesh);
-  if ( !iel ) {
-    MMG3D_TETRA_REALLOC(mesh,iel,mesh->gap,
-                        fprintf(stderr,"\n  ## Error: %s: unable to allocate"
-                                " a new element.\n",__func__);
-                        MMG5_INCREASE_MEM_MESSAGE();
-                        fprintf(stderr,"  Exit program.\n");
-                        return 0);
-    pt[0] = &mesh->tetra[newtet[0]];
-  }
-  pt[1] = &mesh->tetra[iel];
-  memcpy(pt[1],pt[0],sizeof(MMG5_Tetra));
-  newtet[1]=iel;
-
-  iel = MMG3D_newElt(mesh);
-  if ( !iel ) {
-    MMG3D_TETRA_REALLOC(mesh,iel,mesh->gap,
-                        fprintf(stderr,"\n  ## Error: %s: unable to allocate"
-                                " a new element.\n",__func__);
-                        MMG5_INCREASE_MEM_MESSAGE();
-                        fprintf(stderr,"  Exit program.\n");
-                        return 0);
-    pt[0] = &mesh->tetra[newtet[0]];
-    pt[1] = &mesh->tetra[newtet[1]];
-  }
-  pt[2] = &mesh->tetra[iel];
-  memcpy(pt[2],pt[0],sizeof(MMG5_Tetra));
-  newtet[2]=iel;
-
-  iel = MMG3D_newElt(mesh);
-  if ( !iel ) {
-    MMG3D_TETRA_REALLOC(mesh,iel,mesh->gap,
-                        fprintf(stderr,"\n  ## Error: %s: unable to allocate a"
-                                " new element.\n",__func__);
-                        MMG5_INCREASE_MEM_MESSAGE();
-                        fprintf(stderr,"  Exit program.\n");
-                        return 0);
-    pt[0] = &mesh->tetra[newtet[0]];
-    pt[1] = &mesh->tetra[newtet[1]];
-    pt[2] = &mesh->tetra[newtet[2]];
-  }
-  pt[3] = &mesh->tetra[iel];
-  memcpy(pt[3],pt[0],sizeof(MMG5_Tetra));
-  newtet[3]=iel;
-
-  if ( pt[0]->xt ) {
-    pxt0 = &mesh->xtetra[(pt[0])->xt];
-    memcpy(&xt[0],pxt0, sizeof(MMG5_xTetra));
-    memcpy(&xt[1],pxt0, sizeof(MMG5_xTetra));
-    memcpy(&xt[2],pxt0, sizeof(MMG5_xTetra));
-    memcpy(&xt[3],pxt0, sizeof(MMG5_xTetra));
-  }
-  else {
-    pxt0 = 0;
-    memset(&xt[0],0, sizeof(MMG5_xTetra));
-    memset(&xt[1],0, sizeof(MMG5_xTetra));
-    memset(&xt[2],0, sizeof(MMG5_xTetra));
-    memset(&xt[3],0, sizeof(MMG5_xTetra));
+  if ( !MMG3D_crea_newTetra(mesh,ne,newtet,pt,xt,&pxt0) ) {
+    return 0;
   }
 
   /* Set permutation of vertices : reference configuration is 7 */
@@ -2472,10 +2182,10 @@ int MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidT
   isxt[0] = isxt[1] = isxt[2] = isxt[3] = 0;
 
   for (i=0; i<4; i++) {
-    if ( xt[0].ref[i] || xt[0].ftag[i] ) isxt[0] = 1;
-    if ( xt[1].ref[i] || xt[1].ftag[i] ) isxt[1] = 1;
-    if ( xt[2].ref[i] || xt[2].ftag[i] ) isxt[2] = 1;
-    if ( xt[3].ref[i] || xt[3].ftag[i] ) isxt[3] = 1;
+    int j;
+    for (j=0; j<ne; j++) {
+      if ( xt[j].ref[i] || xt[j].ftag[i] )  isxt[j] = 1;
+    }
   }
 
   if ( (pt[0])->xt ) {
@@ -2529,25 +2239,11 @@ int MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidT
       (pt[0])->xt = 0;
     }
   }
+
   /* Quality update */
-  if ( (!metRidTyp) && met->m && met->size>1 ) {
-    pt[0]->qual=MMG5_caltet33_ani(mesh,met,pt[0]);
-    pt[1]->qual=MMG5_caltet33_ani(mesh,met,pt[1]);
-    pt[2]->qual=MMG5_caltet33_ani(mesh,met,pt[2]);
-    pt[3]->qual=MMG5_caltet33_ani(mesh,met,pt[3]);
-  }
-  else if ( (!met) || (!met->m) ) {
-    /* in ls mode + -A option, orcal calls caltet_ani that fails */
-    for (i=0; i<4; i++) {
-      pt[i]->qual=MMG5_caltet_iso(mesh,met,pt[i]);
-    }
-  }
-  else {
-    pt[0]->qual=MMG5_orcal(mesh,met,newtet[0]);
-    pt[1]->qual=MMG5_orcal(mesh,met,newtet[1]);
-    pt[2]->qual=MMG5_orcal(mesh,met,newtet[2]);
-    pt[3]->qual=MMG5_orcal(mesh,met,newtet[3]);
-  }
+  MMG3D_update_qual(mesh,met,ne,newtet,pt,metRidTyp);
+
+
   return 1;
 }
 
@@ -2873,79 +2569,21 @@ int MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],int8_t metRid
   uint8_t              imin12,imin03,tau[4],sym[4],symed[6],ip0,ip1,ip2,ip3,ie0,ie1;
   uint8_t              ie2,ie3,ie4,ie5,isxt[5],firstxt,i;
   const uint8_t       *taued=NULL;
+  const int            ne=4;
 
   pt[0]  = &mesh->tetra[k];
   newtet[0]=k;
-
-  // To avoid warning about potentially uninitialized value for newtet[4]
-  newtet[4] = 0;
 
   /* Set permutation /symmetry of vertices : generic case : 35 */
   MMG3D_configSplit3op(pt[0],vx,tau,&taued,sym,symed,&ip0,&ip1,&ip2,&ip3,
                         &ie0,&ie1,&ie2,&ie3,&ie4,&ie5,&imin03,&imin12);
   pt[0]->flag  = 0;
 
-  /* Create new elements according to the current configuration */
-  iel = MMG3D_newElt(mesh);
-  if ( !iel ) {
-    MMG3D_TETRA_REALLOC(mesh,iel,mesh->gap,
-                        fprintf(stderr,"\n  ## Error: %s: unable to allocate"
-                                " a new element.\n",__func__);
-                        MMG5_INCREASE_MEM_MESSAGE();
-                        fprintf(stderr,"  Exit program.\n");
-                        return 0);
-    pt[0] = &mesh->tetra[newtet[0]];
+  /* create 3 new tetras, the fifth being created only if needed. */
+  if ( !MMG3D_crea_newTetra(mesh,ne,newtet,pt,xt,&pxt0) ) {
+    return 0;
   }
-
-  pt[1] = &mesh->tetra[iel];
-  pt[1] = memcpy(pt[1],pt[0],sizeof(MMG5_Tetra));
-  newtet[1]=iel;
-
-  iel = MMG3D_newElt(mesh);
-  if ( !iel ) {
-    MMG3D_TETRA_REALLOC(mesh,iel,mesh->gap,
-                        fprintf(stderr,"\n  ## Error: %s: unable to allocate a"
-                                " new element.\n",__func__);
-                        MMG5_INCREASE_MEM_MESSAGE();
-                        fprintf(stderr,"  Exit program.\n");
-                        return 0);
-    pt[0] = &mesh->tetra[newtet[0]];
-    pt[1] = &mesh->tetra[newtet[1]];
-  }
-  pt[2] = &mesh->tetra[iel];
-  pt[2] = memcpy(pt[2],pt[0],sizeof(MMG5_Tetra));
-  newtet[2]=iel;
-
-  iel = MMG3D_newElt(mesh);
-  if ( !iel ) {
-    MMG3D_TETRA_REALLOC(mesh,iel,mesh->gap,
-                        fprintf(stderr,"\n  ## Error: %s: unable to allocate"
-                                " a new element.\n",__func__);
-                        MMG5_INCREASE_MEM_MESSAGE();
-                        fprintf(stderr,"  Exit program.\n");
-                        return 0);
-    pt[0] = &mesh->tetra[newtet[0]];
-    pt[1] = &mesh->tetra[newtet[1]];
-    pt[2] = &mesh->tetra[newtet[2]];
-  }
-  pt[3] = &mesh->tetra[iel];
-  pt[3] = memcpy(pt[3],pt[0],sizeof(MMG5_Tetra));
-  newtet[3]=iel;
-
-  if ( (pt[0])->xt ) {
-    pxt0 = &mesh->xtetra[(pt[0])->xt];
-    memcpy(&xt[0],pxt0, sizeof(MMG5_xTetra));
-    memcpy(&xt[1],pxt0, sizeof(MMG5_xTetra));
-    memcpy(&xt[2],pxt0, sizeof(MMG5_xTetra));
-    memcpy(&xt[3],pxt0, sizeof(MMG5_xTetra));
-  }
-  else {
-    pxt0 = 0;
-    memset(&xt[0],0, sizeof(MMG5_xTetra));
-    memset(&xt[1],0, sizeof(MMG5_xTetra));
-    memset(&xt[2],0, sizeof(MMG5_xTetra));
-    memset(&xt[3],0, sizeof(MMG5_xTetra));
-  }
+  newtet[4] = 0;
 
   if ( !((imin12 == ip1) && (imin03 == ip3)) ) {
     iel = MMG3D_newElt(mesh);
@@ -2966,12 +2604,10 @@ int MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],int8_t metRid
     newtet[4]=iel;
 
     if ( pt[0]->xt ) {
-      pxt0 = &mesh->xtetra[(pt[0])->xt];
       memcpy(&xt[4],pxt0, sizeof(MMG5_xTetra));
     }
 
     else {
-      pxt0 = 0;
       memset(&xt[4],0, sizeof(MMG5_xTetra));
     }
   }
@@ -3153,10 +2789,10 @@ int MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],int8_t metRid
     isxt[0] = isxt[1] = isxt[2] = isxt[3] = 0;
 
     for (i=0; i<4; i++) {
-      if ( (xt[0]).ref[i] || xt[0].ftag[i] ) isxt[0] = 1;
-      if ( (xt[1]).ref[i] || xt[1].ftag[i] ) isxt[1] = 1;
-      if ( (xt[2]).ref[i] || xt[2].ftag[i] ) isxt[2] = 1;
-      if ( (xt[3]).ref[i] || xt[3].ftag[i] ) isxt[3] = 1;
+      int j;
+      for (j=0; j<ne; j++) {
+        if ( xt[j].ref[i] || xt[j].ftag[i] )  isxt[j] = 1;
+      }
     }
 
     if ( pt[0]->xt ) {
@@ -3218,11 +2854,10 @@ int MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],int8_t metRid
     isxt[0] = isxt[1] = isxt[2] = isxt[3] = isxt[4] = 0;
 
     for (i=0; i<4; i++) {
-      if ( (xt[0]).ref[i] || xt[0].ftag[i] ) isxt[0] = 1;
-      if ( (xt[1]).ref[i] || xt[1].ftag[i] ) isxt[1] = 1;
-      if ( (xt[2]).ref[i] || xt[2].ftag[i] ) isxt[2] = 1;
-      if ( (xt[3]).ref[i] || xt[3].ftag[i] ) isxt[3] = 1;
-      if ( (xt[4]).ref[i] || xt[4].ftag[i] ) isxt[4] = 1;
+      int j;
+      for (j=0; j<=ne; j++) {
+        if ( xt[j].ref[i] || xt[j].ftag[i] )  isxt[j] = 1;
+      }
     }
 
     if ( pt[0]->xt ) {
@@ -3279,6 +2914,7 @@ int MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, int k, int vx[6],int8_t metRid
       }
     }
   }
+
   /* Quality update */
   if ( (!metRidTyp) && met->m && met->size>1 ) {
     pt[0]->qual=MMG5_caltet33_ani(mesh,met,pt[0]);
@@ -3320,9 +2956,10 @@ int MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k,int8_t metRidTyp) {
   MMG5_xTetra   xt[4];
   MMG5_pxTetra  pxt0;
   double        o[3],cb[4];
-  int           i,ib,iel,iadr,*adja,adj1,adj2,adj3;
+  int           i,ib,iadr,*adja,adj1,adj2,adj3;
   int           src,newtet[4];
   uint8_t       isxt[4],firstxt;
+  const int     ne=4;
 
   pt[0] = &mesh->tetra[k];
   pt[0]->flag = 0;
@@ -3363,65 +3000,8 @@ int MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k,int8_t metRidTyp) {
   }
 
   /* create 3 new tetras */
-  iel = MMG3D_newElt(mesh);
-  if ( !iel ) {
-    MMG3D_TETRA_REALLOC(mesh,iel,mesh->gap,
-                        fprintf(stderr,"\n  ## Error: %s: unable to allocate"
-                                " a new element.\n",__func__);
-                        MMG5_INCREASE_MEM_MESSAGE();
-                        MMG3D_delPt(mesh,ib);
-                        return 0);
-    pt[0] = &mesh->tetra[newtet[0]];
-  }
-  pt[1] = &mesh->tetra[iel];
-  pt[1] = memcpy(pt[1],pt[0],sizeof(MMG5_Tetra));
-  newtet[1]=iel;
-
-  iel = MMG3D_newElt(mesh);
-  if ( !iel ) {
-    MMG3D_TETRA_REALLOC(mesh,iel,mesh->gap,
-                        fprintf(stderr,"\n  ## Error: %s: unable to allocate"
-                                " a new element.\n",__func__);
-                        MMG5_INCREASE_MEM_MESSAGE();
-                        MMG3D_delPt(mesh,ib);
-                        if ( !MMG3D_delElt(mesh,newtet[1]) ) return 0;
-                        return 0);
-    pt[0] = &mesh->tetra[newtet[0]];
-    pt[1] = &mesh->tetra[newtet[1]];
-  }
-  pt[2] = &mesh->tetra[iel];
-  pt[2] = memcpy(pt[2],pt[0],sizeof(MMG5_Tetra));
-  newtet[2]=iel;
-
-  iel = MMG3D_newElt(mesh);
-  if ( !iel ) {
-    MMG3D_TETRA_REALLOC(mesh,iel,mesh->gap,
-                        fprintf(stderr,"\n  ## Error: %s: unable to allocate"
-                                " a new element.\n",__func__);
-                        MMG5_INCREASE_MEM_MESSAGE();
-                        MMG3D_delPt(mesh,ib);
-                        if ( !MMG3D_delElt(mesh,newtet[1]) ) return 0;
-                        if ( !MMG3D_delElt(mesh,newtet[2]) ) return 0;
-                        return 0);
-    pt[0] = &mesh->tetra[newtet[0]];
-    pt[1] = &mesh->tetra[newtet[1]];
-    pt[2] = &mesh->tetra[newtet[2]];
-  }
-  pt[3] = &mesh->tetra[iel];
-  pt[3] = memcpy(pt[3],pt[0],sizeof(MMG5_Tetra));
-  newtet[3]=iel;
-
-  memset(&xt[0],0, sizeof(MMG5_xTetra));
-  memset(&xt[1],0, sizeof(MMG5_xTetra));
-  memset(&xt[2],0, sizeof(MMG5_xTetra));
-  memset(&xt[3],0, sizeof(MMG5_xTetra));
-  pxt0 = 0;
-  if ( pt[0]->xt ) {
-    pxt0 = &mesh->xtetra[pt[0]->xt];
-    memcpy(&xt[0],pxt0,sizeof(MMG5_xTetra));
-    memcpy(&xt[1],pxt0,sizeof(MMG5_xTetra));
-    memcpy(&xt[2],pxt0,sizeof(MMG5_xTetra));
-    memcpy(&xt[3],pxt0,sizeof(MMG5_xTetra));
+  if ( !MMG3D_crea_newTetra(mesh,ne,newtet,pt,xt,&pxt0) ) {
+    return 0;
   }
 
   /* Update adjacency */
@@ -3499,12 +3079,12 @@ int MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k,int8_t metRidTyp) {
   MG_SET(xt[3].ori, 0);  MG_SET(xt[3].ori, 1);  MG_SET(xt[3].ori, 2);
 
   /* Assignation of the xt fields to the appropriate tets */
-  memset(isxt,0,4*sizeof(int8_t));
-  for (i=0; i<4; i++) {
-    if ( xt[0].ref[i] || xt[0].ftag[i] ) isxt[0] = 1;
-    if ( xt[1].ref[i] || xt[1].ftag[i] ) isxt[1] = 1;
-    if ( xt[2].ref[i] || xt[2].ftag[i] ) isxt[2] = 1;
-    if ( xt[3].ref[i] || xt[3].ftag[i] ) isxt[3] = 1;
+  memset(isxt,0,ne*sizeof(int8_t));
+  for (i=0; i<ne; i++) {
+    int j;
+    for (j=0; j<ne; j++) {
+      if ( xt[j].ref[i] || xt[j].ftag[i] )  isxt[j] = 1;
+    }
   }
 
   if ( pt[0]->xt ) {
@@ -3560,19 +3140,9 @@ int MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, int k,int8_t metRidTyp) {
       pt[0]->xt = 0;
     }
   }
+
   /* Quality update */
-  if ( (!metRidTyp) && met->m && met->size>1 ) {
-    pt[0]->qual=MMG5_caltet33_ani(mesh,met,pt[0]);
-    pt[1]->qual=MMG5_caltet33_ani(mesh,met,pt[1]);
-    pt[2]->qual=MMG5_caltet33_ani(mesh,met,pt[2]);
-    pt[3]->qual=MMG5_caltet33_ani(mesh,met,pt[3]);
-  }
-  else {
-    pt[0]->qual=MMG5_orcal(mesh,met,newtet[0]);
-    pt[1]->qual=MMG5_orcal(mesh,met,newtet[1]);
-    pt[2]->qual=MMG5_orcal(mesh,met,newtet[2]);
-    pt[3]->qual=MMG5_orcal(mesh,met,newtet[3]);
-  }
+  MMG3D_update_qual(mesh,met,ne,newtet,pt,metRidTyp);
 
   return ib;
 }
@@ -3774,11 +3344,11 @@ int MMG5_split4sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp
   MMG5_pTetra         pt[6];
   MMG5_xTetra         xt[6];
   MMG5_pxTetra        pxt0;
-  int                 iel;
   int                 newtet[6];
   int8_t              firstxt,isxt[6],j,i;
   uint8_t             tau[4],imin23,imin12;
   const uint8_t       *taued = NULL;
+  const int           ne=6;
 
   pt[0]  = &mesh->tetra[k];
   newtet[0]=k;
@@ -3788,34 +3358,8 @@ int MMG5_split4sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp
   pt[0]->flag  = 0;
 
   /* create 5 new tetras */
-  for (j=1; j<6; j++) {
-    iel = MMG3D_newElt(mesh);
-    if ( !iel ) {
-      MMG3D_TETRA_REALLOC(mesh,iel,mesh->gap,
-                          fprintf(stderr,"\n  ## Error: %s: unable to allocate"
-                                  " a new element.\n",__func__);
-                          MMG5_INCREASE_MEM_MESSAGE();
-                          fprintf(stderr,"  Exit program.\n");
-                          return 0);
-      for ( i=0; i<j; i++)
-        pt[i] = &mesh->tetra[newtet[i]];
-    }
-    pt[j] = &mesh->tetra[iel];
-    pt[j] = memcpy(pt[j],pt[0],sizeof(MMG5_Tetra));
-    newtet[j]=iel;
-  }
-
-  if ( (pt[0])->xt ) {
-    pxt0 = &mesh->xtetra[(pt[0])->xt];
-    for (j=0; j<6; j++) {
-      memcpy(&xt[j],pxt0, sizeof(MMG5_xTetra));
-    }
-  }
-  else {
-    pxt0 = 0;
-    for (j=0; j<6; j++) {
-      memset(&xt[j],0, sizeof(MMG5_xTetra));
-    }
+  if ( !MMG3D_crea_newTetra(mesh,ne,newtet,pt,xt,&pxt0) ) {
+    return 0;
   }
 
   /* Generic formulation of split of 4 edges (with 3 on same face) */
@@ -3919,12 +3463,9 @@ int MMG5_split4sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp
   }
 
   /* Assignation of the xt fields to the appropriate tets */
-  for (j=0; j<6;j++) {
-    isxt[j] = 0;
-  }
-
+  memset(isxt,0,ne*sizeof(int8_t));
   for (i=0; i<4; i++) {
-    for (j=0; j<6; j++) {
+    for (j=0; j<ne; j++) {
       if ( (xt[j]).ref[i] || xt[j].ftag[i] ) isxt[j] = 1;
     }
   }
@@ -3983,16 +3524,9 @@ int MMG5_split4sf(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp
     }
   }
 
-  if ( (!metRidTyp) && met->m && met->size>1 ) {
-    for (i=0; i<6; i++) {
-      pt[i]->qual=MMG5_caltet33_ani(mesh,met,pt[i]);
-    }
-  }
-  else {
-    for (i=0; i<6; i++) {
-      pt[i]->qual=MMG5_orcal(mesh,met,newtet[i]);
-    }
-  }
+  /* Quality update */
+  MMG3D_update_qual(mesh,met,ne,newtet,pt,metRidTyp);
+
   return 1;
 }
 
@@ -4132,11 +3666,11 @@ int MMG5_split4op(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp
   MMG5_pTetra         pt[6];
   MMG5_xTetra         xt[6];
   MMG5_pxTetra        pxt0;
-  int                 iel;
   int                 newtet[6];
   int8_t              flg,firstxt,isxt[6],i,j,imin01,imin23;
   uint8_t             tau[4];
   const uint8_t       *taued;
+  const int           ne=6;
 
   pt[0]  = &mesh->tetra[k];
   flg = pt[0]->flag;
@@ -4163,34 +3697,8 @@ int MMG5_split4op(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp
   imin23 = ((pt[0])->v[tau[2]] < (pt[0])->v[tau[3]]) ? tau[2] : tau[3];
 
   /* create 5 new tetras */
-  for (j=1; j<6; j++) {
-    iel = MMG3D_newElt(mesh);
-    if ( !iel ) {
-      MMG3D_TETRA_REALLOC(mesh,iel,mesh->gap,
-                          fprintf(stderr,"\n  ## Error: %s: unable to allocate"
-                                  " a new element.\n",__func__);
-                          MMG5_INCREASE_MEM_MESSAGE();
-                          fprintf(stderr,"  Exit program.\n");
-                          return 0);
-      for ( i=0; i<j; i++)
-        pt[i] = &mesh->tetra[newtet[i]];
-    }
-    pt[j] = &mesh->tetra[iel];
-    pt[j] = memcpy(pt[j],pt[0],sizeof(MMG5_Tetra));
-    newtet[j]=iel;
-  }
-
-  if ( (pt[0])->xt ) {
-    pxt0 = &mesh->xtetra[(pt[0])->xt];
-    for (j=0; j<6; j++) {
-      memcpy(&xt[j],pxt0, sizeof(MMG5_xTetra));
-    }
-  }
-  else {
-    pxt0 = 0;
-    for (j=0; j<6; j++) {
-      memset(&xt[j],0, sizeof(MMG5_xTetra));
-    }
+  if ( !MMG3D_crea_newTetra(mesh,ne,newtet,pt,xt,&pxt0) ) {
+    return 0;
   }
 
   /* Generic formulation for split of 4 edges, with no 3 edges lying on the same face */
@@ -4309,12 +3817,10 @@ int MMG5_split4op(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp
   }
 
   /* Assignation of the xt fields to the appropriate tets */
-  for (j=0; j<6; j++) {
-    isxt[j] = 0;
-  }
+  memset(isxt,0,ne*sizeof(int8_t));
 
   for (i=0; i<4; i++) {
-    for(j=0;j<6;j++ ) {
+    for(j=0;j<ne;j++ ) {
       if ( (xt[j]).ref[i] || xt[j].ftag[i] ) isxt[j] = 1;
     }
   }
@@ -4374,22 +3880,10 @@ int MMG5_split4op(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp
 
     }
   }
-  if ( (!metRidTyp) && met->m && met->size>1 ) {
-    for (i=0; i<6; i++) {
-      pt[i]->qual=MMG5_caltet33_ani(mesh,met,pt[i]);
-    }
-  }
-  else if ( (!met) || (!met->m) ) {
-    /* in ls mode + -A option, orcal calls caltet_ani that fails */
-    for (i=0; i<6; i++) {
-      pt[i]->qual=MMG5_caltet_iso(mesh,met,pt[i]);
-    }
-  }
-  else {
-    for (i=0; i<6; i++) {
-      pt[i]->qual=MMG5_orcal(mesh,met,newtet[i]);
-    }
-  }
+
+  /* Quality update */
+  MMG3D_update_qual(mesh,met,ne,newtet,pt,metRidTyp);
+
   return 1;
 }
 
@@ -4549,11 +4043,12 @@ int MMG5_split5(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp) 
   MMG5_pTetra         pt[7];
   MMG5_xTetra         xt[7];
   MMG5_pxTetra        pxt0;
-  int                 iel,i,j;
+  int                 i,j;
   int                 newtet[7];
   int8_t              firstxt,isxt[7];
   uint8_t             tau[4],imin;
   const uint8_t       *taued=NULL;
+  const int           ne=7;
 
   pt[0]  = &mesh->tetra[k];
   newtet[0]=k;
@@ -4563,34 +4058,8 @@ int MMG5_split5(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp) 
   pt[0]->flag  = 0;
 
   /* create 6 new tetras */
-  for (i=1; i<7; i++) {
-    iel = MMG3D_newElt(mesh);
-    if ( !iel ) {
-      MMG3D_TETRA_REALLOC(mesh,iel,mesh->gap,
-                          fprintf(stderr,"\n  ## Error: %s: unable to allocate"
-                                  " a new element.\n",__func__);
-                          MMG5_INCREASE_MEM_MESSAGE();
-                          fprintf(stderr,"  Exit program.\n");
-                          return 0);
-      for ( j=0; j<i; j++)
-        pt[j] = &mesh->tetra[newtet[j]];
-    }
-    pt[i] = &mesh->tetra[iel];
-    pt[i] = memcpy(pt[i],pt[0],sizeof(MMG5_Tetra));
-    newtet[i]=iel;
-  }
-
-  if ( pt[0]->xt ) {
-    pxt0 = &mesh->xtetra[(pt[0])->xt];
-    for (i=0; i<7; i++) {
-      memcpy(&xt[i],pxt0, sizeof(MMG5_xTetra));
-    }
-  }
-  else {
-    pxt0 = 0;
-    for (i=0; i<7; i++) {
-      memset(&xt[i],0, sizeof(MMG5_xTetra));
-    }
+  if ( !MMG3D_crea_newTetra(mesh,ne,newtet,pt,xt,&pxt0) ) {
+    return 0;
   }
 
   /* Generic formulation of split of 5 edges */
@@ -4695,12 +4164,10 @@ int MMG5_split5(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp) 
   }
 
   /* Assignation of the xt fields to the appropriate tets */
-  for (j=0; j<7; j++) {
-    isxt[j] = 0;
-  }
+  memset(isxt,0,ne*sizeof(int8_t));
 
   for (i=0; i<4; i++) {
-    for (j=0; j<7; j++) {
+    for (j=0; j<ne; j++) {
       if ( (xt[j]).ref[i] || xt[j].ftag[i] ) isxt[j] = 1;
     }
   }
@@ -4759,16 +4226,10 @@ int MMG5_split5(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp) 
 
     }
   }
-  if ( (!metRidTyp) && met->m && met->size>1 ) {
-    for (i=0; i<7; i++) {
-      pt[i]->qual=MMG5_caltet33_ani(mesh,met,pt[i]);
-    }
-  }
-  else {
-    for (i=0; i<7; i++) {
-      pt[i]->qual=MMG5_orcal(mesh,met,newtet[i]);
-    }
-  }
+
+  /* Quality update */
+  MMG3D_update_qual(mesh,met,ne,newtet,pt,metRidTyp);
+
   return 1;
 }
 
@@ -4859,6 +4320,7 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp) 
   int            i,j,iel,nxt0;
   int            newtet[8];
   int8_t         isxt0,isxt;
+  const int8_t   ne=8;
 
   pt[0]  = &mesh->tetra[k];
   pt[0]->flag  = 0;
@@ -4869,7 +4331,7 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp) 
   memcpy(&xt0,pxt,sizeof(MMG5_xTetra));
 
   /* create 7 new tetras */
-  for (i=1; i<8; i++) {
+  for (i=1; i<ne; i++) {
     iel = MMG3D_newElt(mesh);
     if ( !iel ) {
       MMG3D_TETRA_REALLOC(mesh,iel,mesh->gap,
@@ -5203,16 +4665,10 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,int k,int vx[6],int8_t metRidTyp) 
       }
     }
   }
-  if ( (!metRidTyp) && met->m && met->size>1 ) {
-    for (i=0; i<8; i++) {
-      pt[i]->qual=MMG5_caltet33_ani(mesh,met,pt[i]);
-    }
-  }
-  else {
-    for (i=0; i<8; i++) {
-      pt[i]->qual=MMG5_orcal(mesh,met,newtet[i]);
-    }
-  }
+
+  /* Quality update */
+  MMG3D_update_qual(mesh,met,ne,newtet,pt,metRidTyp);
+
   return 1;
 }
 

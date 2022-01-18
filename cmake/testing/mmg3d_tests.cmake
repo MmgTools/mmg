@@ -30,12 +30,15 @@ GET_FILENAME_COMPONENT ( SHRT_EXECUT_MMG3D ${EXECUT_MMG3D} NAME )
 
 SET ( test_names
   # Simple test: must already pass
-  mmg3d_SimpleCube
+  mmg3d_SimpleCube_fast
   # MultiDomain
   mmg3d_MultiDom_Ellipse_fast
   # Non-manifold test case
   mmg3d_NM_Cube_fast
   mmg3d_NM_Complex_fast
+  # test case with non-manifold, ridges, ref edges and a curve surface
+  mmg3d_NM_cone_fast
+  # mmg3d_NM_cone_ani_fast #Fail because at second run a tetra we have a tet with 4 ridge vertices
   )
 
 SET ( input_files
@@ -45,6 +48,8 @@ SET ( input_files
    ### non-manifold
   ${MMG3D_CI_TESTS}/NM_Cube/nm
   ${MMG3D_CI_TESTS}/NM_Complex/nm4
+  ${MMG3D_CI_TESTS}/cone-nm.mesh
+  #${MMG3D_CI_TESTS}/cone-nm.mesh
   )
 
 SET ( args
@@ -54,6 +59,8 @@ SET ( args
   ### non-manifold
   "-v 5 -hmax 0.1"
   "-v 5"
+  "-v 5"
+  #"-v 5 -A"
   )
 
 IF ( LONG_TESTS )
