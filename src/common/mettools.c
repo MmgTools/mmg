@@ -36,11 +36,10 @@
 
 /**
  * \param mesh pointer toward the mesh structure.
- * \param m matrix array.
  * \param dim matrix size.
+ * \param m matrix array.
  * \param lambda eigenvalues array.
- * \param v double array of eigenvectors.
- * \return 1 if success, 0 if failure.
+ * \param v array of eigenvectors.
  *
  * Recompose a generic-size symmetric matrix from its eigenvalue
  * decomposition.
@@ -922,10 +921,9 @@ int MMG5_intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr) {
  *
  */
 int MMG5_intersecmet33(MMG5_pMesh mesh, double *m,double *n,double *mr) {
-  double  vp[3][3],dm[3],dn[3],d[3];
+  double  vp[3][3],dm[3],dn[3],d[3],ivp[3][3];
   double  isqhmin,isqhmax;
-  static int8_t mmgWarn0 = 0;
-  int8_t  i;
+  int8_t  i,j,k,ij;
 
   isqhmin  = 1.0 / (mesh->info.hmin*mesh->info.hmin);
   isqhmax  = 1.0 / (mesh->info.hmax*mesh->info.hmax);
@@ -942,8 +940,13 @@ int MMG5_intersecmet33(MMG5_pMesh mesh, double *m,double *n,double *mr) {
 
   /* Intersected metric = tP^-1 diag(d0,d1,d2)P^-1, P = (vp0, vp1,vp2) stored in
    * columns */
-  if( !MMG5_eigenvmatnonsym3d(mesh,mr,d,vp) )
+
+  /* Compute the inverse of the eigenvectors matrix */
+  if( !MMG5_invmat33(vp,ivp) )
     return 0;
+
+  /* Recompose matrix */
+  MMG5_simredmat(mesh,3,mr,d,(double *)ivp);
 
   return 1;
 }

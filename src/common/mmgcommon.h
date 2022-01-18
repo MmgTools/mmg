@@ -724,6 +724,7 @@ int  MMG5_gradsiz_iso ( MMG5_pMesh mesh,MMG5_pSol met );
 int  MMG5_gradsizreq_iso(MMG5_pMesh ,MMG5_pSol );
 int  MMG5_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met,int *it);
 int  MMG5_gradsizreq_ani(MMG5_pMesh mesh,MMG5_pSol met);
+void MMG5_simredmat(MMG5_pMesh mesh,int8_t dim,double *m,double *dm,double *iv);
 int  MMG5_simred2d(MMG5_pMesh,double*,double*,double dm[2],double dn[2],double vp[2][2]);
 int  MMG5_simred3d(MMG5_pMesh mesh,double *m,double *n,double dm[3],double dn[3],double vp[3][3]);
 int  MMG5_updatemet2d_ani(double *m,double *n,double dm[2],double dn[2],double vp[2][2],int8_t ier );
