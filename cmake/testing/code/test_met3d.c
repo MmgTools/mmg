@@ -66,18 +66,23 @@ int main(int argc,char *argv[]) {
     return(EXIT_FAILURE);
 
   /* non-symmetric matrix eigendecomposition test */
-  double m_nonsym[9] = {500.5,-499.5,499.5,
-                        -49.5,  50.5, 49.5,
-                        450., -450., 550.}; /* Test matrix */
-  double lambda_nonsym[3] = {1.,100.,1000.}; /* Exact eigenvalues */
+  double m_nonsym[2][9] = {{500.5,-499.5,499.5,
+                            -49.5,  50.5, 49.5,
+                            450., -450., 550.},
+                           {50.5,-49.5,49.5,
+                             0.,   1.,  0.,
+                            49.5,-49.5,50.5}}; /* Test matrices */
+  double lambda_nonsym[2][3] = {{1.,100.,1000.},
+                                {1.,  1., 100.}}; /* Exact eigenvalues */
   double vp_nonsym[3][3] = {{1./sqrt(2.),1./sqrt(2.),0.},
                             {0.,         1./sqrt(2.),1./sqrt(2.)},
                             {1./sqrt(2.),         0.,1./sqrt(2.)}}; /* Exact right eigenvectors */
   double ivp_nonsym[3][3] = {{ 1./sqrt(2.),-1./sqrt(2.), 1./sqrt(2.)},
                              { 1./sqrt(2.), 1./sqrt(2.),-1./sqrt(2.)},
                              {-1./sqrt(2.), 1./sqrt(2.), 1./sqrt(2.)}}; /* Exact right eigenvectors inverse */
-  if( !MMG5_test_eigenvmatnonsym3d(mmgMesh,m_nonsym,lambda_nonsym,vp_nonsym,ivp_nonsym) )
-    return(EXIT_FAILURE);
+  for( int8_t i = 0; i < 2; i++ )
+    if( !MMG5_test_eigenvmatnonsym3d(mmgMesh,m_nonsym[i],lambda_nonsym[i],vp_nonsym,ivp_nonsym) )
+      return(EXIT_FAILURE);
 
   /* symmetric matrix multiplication test */
   if( !MMG5_test_mn() )
