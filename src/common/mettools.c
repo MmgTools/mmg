@@ -563,20 +563,7 @@ int MMG5_test_eigenvmatnonsym3d(MMG5_pMesh mesh,double *mex,double lambdaex[],
     return 0;
   }
 
-  /* Check eigenvectors error through scalar product */
-  maxerr = 0.;
-  for( int8_t i = 0; i < 3; i++ ) {
-    err = 0.;
-    for( int8_t j = 0; j < 3; j++ )
-      err += vpex[i][j] * vpnum[i][j];
-    err = 1.-fabs(err);
-    maxerr = MG_MAX(maxerr,err);
-  }
-  if( maxerr > MMG5_EPSOK ) {
-    fprintf(stderr,"  ## Error matrix eigenvectors: in function %s, max error %e\n",
-      __func__,maxerr);
-    return 0;
-  }
+  /* skip eigenvectors check */
 
 
   /** Compute both eigendecomposition and recomposition, and check matrix */
