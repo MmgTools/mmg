@@ -52,27 +52,50 @@ int main(int argc,char *argv[]) {
 
   /** ------------------------------ STEP  II -------------------------- */
 
+  /* matrix inversion test */
   if( !MMG5_test_invmat33() )
     return(EXIT_FAILURE);
 
-  if( !MMG5_test_eigenvmatsym3d() )
+  /* symmetric matrix eigendecomposition test */
+  double m_sym[6] = {2.,0.,0.,3.,4.,9.}; /* Test matrix */
+  double lambda_sym[3] = {1.,2.,11.}; /* Exact eigenvalues */
+  double vp_sym[3][3] = {{0.,-2./sqrt(5.),1./sqrt(5.)},
+                         {1.,0.,0.},
+                         {0.,1./sqrt(5.),2./sqrt(5.)}}; /* Exact eigenvectors */
+  if( !MMG5_test_eigenvmatsym3d(mmgMesh,m_sym,lambda_sym,vp_sym) )
     return(EXIT_FAILURE);
 
-  if( !MMG5_test_eigenvmatnonsym3d() )
+  /* non-symmetric matrix eigendecomposition test */
+  double m_nonsym[9] = {500.5,-499.5,499.5,
+                        -49.5,  50.5, 49.5,
+                        450., -450., 550.}; /* Test matrix */
+  double lambda_nonsym[3] = {1.,100.,1000.}; /* Exact eigenvalues */
+  double vp_nonsym[3][3] = {{1./sqrt(2.),1./sqrt(2.),0.},
+                            {0.,         1./sqrt(2.),1./sqrt(2.)},
+                            {1./sqrt(2.),         0.,1./sqrt(2.)}}; /* Exact right eigenvectors */
+  double ivp_nonsym[3][3] = {{ 1./sqrt(2.),-1./sqrt(2.), 1./sqrt(2.)},
+                             { 1./sqrt(2.), 1./sqrt(2.),-1./sqrt(2.)},
+                             {-1./sqrt(2.), 1./sqrt(2.), 1./sqrt(2.)}}; /* Exact right eigenvectors inverse */
+  if( !MMG5_test_eigenvmatnonsym3d(mmgMesh,m_nonsym,lambda_nonsym,vp_nonsym,ivp_nonsym) )
     return(EXIT_FAILURE);
 
+  /* symmetric matrix multiplication test */
   if( !MMG5_test_mn() )
     return(EXIT_FAILURE);
 
+  /* matrix linear transformation test */
   if( !MMG5_test_rmtr() )
     return(EXIT_FAILURE);
 
+  /* rotation matrix test */
   if( !MMG5_test_rotmatrix() )
     return(EXIT_FAILURE);
 
+  /* simultaneous reduction test */
   if( !MMG5_test_simred3d() )
     return(EXIT_FAILURE);
 
+  /* matrix inverse transformation test */
   if( !MMG5_test_updatemet3d_ani() )
     return EXIT_FAILURE;
 

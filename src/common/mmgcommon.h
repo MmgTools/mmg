@@ -744,10 +744,14 @@ int MMG5_getStartRef(MMG5_pMesh ,int, int *);
 double MMG5_test_mat_error( int8_t nelem,double m1[],double m2[] );
 int MMG5_test_invmat22();
 int MMG5_test_invmat33();
-int MMG5_test_eigenvmatsym2d();
-int MMG5_test_eigenvmatnonsym2d();
-int MMG5_test_eigenvmatsym3d();
-int MMG5_test_eigenvmatnonsym3d();
+int MMG5_test_eigenvmatsym2d(MMG5_pMesh mesh,double *mex,double lambdaex[],
+                             double vpex[][2]);
+int MMG5_test_eigenvmatnonsym2d(MMG5_pMesh mesh,double *mex,double lambdaex[],
+                                double vpex[][2],double ivpex[][2]);
+int MMG5_test_eigenvmatsym3d(MMG5_pMesh mesh,double *mex,double lambdaex[],
+                             double vpex[][3]);
+int MMG5_test_eigenvmatnonsym3d(MMG5_pMesh mesh,double *mex,double lambdaex[],
+                                double vpex[][3],double ivpex[][3]);
 int MMG5_test_mn();
 extern int MMG5_test_rmtr();
 int MMG5_test_rotmatrix();

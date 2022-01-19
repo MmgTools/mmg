@@ -58,21 +58,38 @@ int main(int argc,char *argv[]) {
 
   /** ------------------------------ STEP  II -------------------------- */
 
+  /* matrix inversion test */
   if( !MMG5_test_invmat22() )
     return(EXIT_FAILURE);
 
-  if( !MMG5_test_eigenvmatsym2d() )
+  /* symmetric matrix eigendecomposition test */
+  double m_sym[3] = {2.,1.,2.}; /* Test matrix, non-symmetric storage */
+  double lambda_sym[2] = {1.,3.}; /* Exact eigenvalues */
+  double vp_sym[2][2] = {{1./sqrt(2.),-1./sqrt(2.)},
+                         {1./sqrt(2.),1./sqrt(2.)}}; /* Exact eigenvectors */
+  if( !MMG5_test_eigenvmatsym2d(mmgMesh,m_sym,lambda_sym,vp_sym) )
     return EXIT_FAILURE;
 
-  if( !MMG5_test_eigenvmatnonsym2d() )
+  /* non-symmetric matrix eigendecomposition test */
+  double m_nonsym[4] = { -98., 99.,
+                        -198.,199.}; /* Test matrix, non-symmetric storage */
+  double lambda_nonsym[2] = {1.,100.}; /* Exact eigenvalues */
+  double vp_nonsym[2][2] = {{1./sqrt(2.),1./sqrt(2.)},
+                            {1./sqrt(5.),2./sqrt(5.)}}; /* Exact right eigenvectors */
+  double ivp_nonsym[2][2] = {{2.*sqrt(2.),-sqrt(5.)},
+                             {  -sqrt(2.), sqrt(5.)}}; /* Exact right eigenvectors inverse */
+  if( !MMG5_test_eigenvmatnonsym2d(mmgMesh,m_nonsym,lambda_nonsym,vp_nonsym,ivp_nonsym) )
     return EXIT_FAILURE;
 
+  /* simultaneous reduction test */
   if( !MMG5_test_simred2d() )
     return EXIT_FAILURE;
 
+  /* matrix inverse transformation test */
   if( !MMG5_test_updatemet2d_ani() )
     return EXIT_FAILURE;
 
+  /* metrics intersection test */
   if( !MMG5_test_intersecmet22(mmgMesh) )
     return EXIT_FAILURE;
 

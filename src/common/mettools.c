@@ -284,19 +284,21 @@ void MMG5_sort_eigenv( int8_t dim,double *lambda,double *vp,
 }
 
 /**
+ * \param mesh pointer toward the mesh structure.
+ * \param mex test matrix array.
+ * \param lambdaex exact eigenvalues array.
+ * \param vpex double array of exact eigenvectors.
+ * \return 1 if success, 0 if failure.
  *
  * For a 2x2 symmetric matrix, Test:
  * - the recomposition of the matrix from its exact eigendecomposition;
  * - the computation of the eigenvalues of the matrix;
- * - the computation of the eigenvectors of the matrix.
+ * - the computation of the eigenvectors of the matrix;
+ * - the recomposition of the matrix from its numerical eigendecomposition.
  *
  */
-int MMG5_test_eigenvmatsym2d() {
-  MMG5_pMesh mesh;
-  double mex[3] = {2.,1.,2.}; /* Test matrix, non-symmetric storage */
-  double lambdaex[2] = {1.,3.}; /* Exact eigenvalues */
-  double vpex[2][2] = {{1./sqrt(2.),-1./sqrt(2.)},
-                       {1./sqrt(2.),1./sqrt(2.)}}; /* Exact eigenvectors */
+int MMG5_test_eigenvmatsym2d(MMG5_pMesh mesh,double *mex,double lambdaex[],
+                             double vpex[][2]) {
   double mnum[3],lambdanum[2],vpnum[2][2]; /* Numerical quantities */
   double swap[2],maxerr,err;
   int8_t perm[2] = {0,1}; /* eigenvalues permutation array */
@@ -359,22 +361,22 @@ int MMG5_test_eigenvmatsym2d() {
 }
 
 /**
+ * \param mesh pointer toward the mesh structure.
+ * \param mex test matrix array.
+ * \param lambdaex exact eigenvalues array.
+ * \param vpex double array of exact right eigenvectors.
+ * \param ivpex double array of exact right eigenvectors inverse.
+ * \return 1 if success, 0 if failure.
  *
  * For a 2x2 non-symmetric matrix, Test:
  * - the recomposition of the matrix from its exact eigendecomposition;
  * - the computation of the eigenvalues of the matrix;
- * - the computation of the eigenvectors of the matrix.
+ * - the computation of the eigenvectors of the matrix;
+ * - the recomposition of the matrix from its numerical eigendecomposition.
  *
  */
-int MMG5_test_eigenvmatnonsym2d() {
-  MMG5_pMesh mesh;
-  double mex[4] = { -98., 99.,
-                   -198.,199.}; /* Test matrix, non-symmetric storage */
-  double lambdaex[2] = {1.,100.}; /* Exact eigenvalues */
-  double vpex[2][2] = {{1./sqrt(2.),1./sqrt(2.)},
-                       {1./sqrt(5.),2./sqrt(5.)}}; /* Exact right eigenvectors */
-  double ivpex[2][2] = {{2.*sqrt(2.),-sqrt(5.)},
-                        {  -sqrt(2.), sqrt(5.)}}; /* Exact right eigenvectors inverse */
+int MMG5_test_eigenvmatnonsym2d(MMG5_pMesh mesh,double *mex,double lambdaex[],
+                                double vpex[][2],double ivpex[][2]) {
   double mnum[4],lambdanum[2],vpnum[2][2]; /* Numerical quantities */
   double swap[2],maxerr,err;
   int8_t perm[2] = {0,1}; /* eigenvalues permutation array */
@@ -437,20 +439,21 @@ int MMG5_test_eigenvmatnonsym2d() {
 }
 
 /**
+ * \param mesh pointer toward the mesh structure.
+ * \param mex test matrix array.
+ * \param lambdaex exact eigenvalues array.
+ * \param vpex double array of exact eigenvectors.
+ * \return 1 if success, 0 if failure.
  *
  * For a 3x3 symmetric matrix, Test:
  * - the recomposition of the matrix from its exact eigendecomposition;
  * - the computation of the eigenvalues of the matrix;
- * - the computation of the eigenvectors of the matrix.
+ * - the computation of the eigenvectors of the matrix;
+ *   the recomposition of the matrix from its numerical eigendecomposition.
  *
  */
-int MMG5_test_eigenvmatsym3d() {
-  MMG5_pMesh mesh;
-  double mex[6] = {2.,0.,0.,3.,4.,9.}; /* Test matrix */
-  double lambdaex[3] = {1.,2.,11.}; /* Exact eigenvalues */
-  double vpex[3][3] = {{0.,-2./sqrt(5.),1./sqrt(5.)},
-                       {1.,0.,0.},
-                       {0.,1./sqrt(5.),2./sqrt(5.)}}; /* Exact eigenvectors */
+int MMG5_test_eigenvmatsym3d(MMG5_pMesh mesh,double *mex,double lambdaex[],
+                             double vpex[][3]) {
   double mnum[6],lambdanum[3],vpnum[3][3]; /* Numerical quantities */
   double swap[3],maxerr,err;
   int8_t perm[3] = {0,1,2}; /* eigenvalues permutation array */
@@ -513,25 +516,21 @@ int MMG5_test_eigenvmatsym3d() {
 }
 
 /**
+ * \param mesh pointer toward the mesh structure.
+ * \param mex test matrix array.
+ * \param lambdaex exact eigenvalues array.
+ * \param vpex double array of exact right eigenvectors.
+ * \param ivpex double array of exact right eigenvectors inverse.
+ * \return 1 if success, 0 if failure.
  *
  * For a 3x3 non-symmetric matrix, Test:
  * - the recomposition of the matrix from its exact eigendecomposition;
  * - the computation of the eigenvalues of the matrix;
- * - the computation of the eigenvectors of the matrix.
- *
+ * - the computation of the eigenvectors of the matrix;
+ * - the recomposition of the matrix from its numerical eigendecomposition.
  */
-int MMG5_test_eigenvmatnonsym3d() {
-  MMG5_pMesh mesh;
-  double mex[9] = {500.5,-499.5,499.5,
-                   -49.5,  50.5, 49.5,
-                   450., -450., 550.}; /* Test matrix */
-  double lambdaex[3] = {1.,100.,1000.}; /* Exact eigenvalues */
-  double vpex[3][3] = {{1./sqrt(2.),1./sqrt(2.),0.},
-                       {0.,         1./sqrt(2.),1./sqrt(2.)},
-                       {1./sqrt(2.),         0.,1./sqrt(2.)}}; /* Exact right eigenvectors */
-  double ivpex[3][3] = {{ 1./sqrt(2.),-1./sqrt(2.), 1./sqrt(2.)},
-                        { 1./sqrt(2.), 1./sqrt(2.),-1./sqrt(2.)},
-                        {-1./sqrt(2.), 1./sqrt(2.), 1./sqrt(2.)}}; /* Exact right eigenvectors inverse */
+int MMG5_test_eigenvmatnonsym3d(MMG5_pMesh mesh,double *mex,double lambdaex[],
+                                double vpex[][3],double ivpex[][3]) {
   double mnum[9],lambdanum[3],vpnum[3][3]; /* Numerical quantities */
   double swap[3],maxerr,err;
   int8_t perm[3] = {0,1,2}; /* eigenvalues permutation array */
