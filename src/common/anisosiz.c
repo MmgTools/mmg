@@ -1454,8 +1454,55 @@ int MMG5_simred3d(MMG5_pMesh mesh,double *m,double *n,double dm[3],
     dn[1] = lambda[0]*dm[1];
     dn[2] = lambda[0]*dm[2];
   }
+  else if( order == 2 ) {
+    /* Second case: two eigenvalues of imn are coincident (first two entries of
+     * the lambda array) and one is distinct (last entry).
+     * Simultaneous reduction gives a block diagonalization. The 2x2 blocks are
+     * homothetic and can be diagonalized through the eigenvectors of one of the
+     * two blocks. */
+    double mred[6],nred[6];
+    /* project matrices on the coreduction basis: they should have the
+     * block-diagonal form [ m0, m1, 0, m3, 0, m5 ] */
+    MMG5_rmtr(vp,m,mred);
+    MMG5_rmtr(vp,n,nred);
+    /* compute projections on the last eigenvector (that with multiplicity 1) */
+    dm[2] = mred[5];
+    dn[2] = nred[5];
+    /* re-arrange matrices so that the first three entries describe the
+     * 2x2 blocks to be diagonalized (the two blocks are homothetic) */
+    mred[2] = mred[3];
+    nred[2] = nred[3];
+    /* diagonalization of the first 2x2 block */
+    if( fabs(mred[1]) < MMG5_EPS ) {
+     /* first case: the blocks are diagonal, basis vp is unchanged */
+      dm[0] = mred[0];
+      dm[1] = mred[2];
+    } else {
+      /* second case: the blocks are not diagonal */
+      double wp[2][2],up[2][3];
+      int8_t i,j,k;
+      MMG5_eigensym(mred,dm,wp);
+      /* change the basis vp (vp[2] is unchanged) */
+      for( j = 0; j < 2; j++ ) {
+        for( i = 0; i < 3; i++ ) {
+          up[j][i] = 0.;
+          for( k = 0; k < 2; k++ ) {
+            up[j][i] += vp[k][i]*wp[j][k];
+          }
+        }
+      }
+      for( j = 0; j < 2; j++ ) {
+        for( i = 0; i < 3; i++ ) {
+          vp[j][i] = up[j][i];
+        }
+      }
+    }
+    /* homothetic diagonalization of the second 2x2 block */
+    dn[0] = lambda[0]*dm[0];
+    dn[1] = lambda[0]*dm[1];
+  }
   else {
-    /* Second case: eigenvalues of imn are distinct ; theory says qf associated
+    /* Third case: eigenvalues of imn are distinct ; theory says qf associated
        to m and n are diagonalizable in basis (vp[0], vp[1], vp[2]) - the
        coreduction basis */
     /* Compute diagonal values in simultaneous reduction basis */
