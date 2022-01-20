@@ -49,6 +49,12 @@ int main(int argc,char *argv[]) {
                   MMG5_ARG_ppMesh,&mmgMesh,MMG5_ARG_ppMet,&mmgSol,
                   MMG5_ARG_end);
 
+  /* Set inoffensive hmin and hmax for metric intersection */
+  if( !MMG3D_Set_dparameter(mmgMesh,mmgSol,MMG3D_DPARAM_hmin,1.e-6) )
+    return EXIT_FAILURE;
+  if( !MMG3D_Set_dparameter(mmgMesh,mmgSol,MMG3D_DPARAM_hmax,1.e+6) )
+    return EXIT_FAILURE;
+
 
   /** ------------------------------ STEP  II -------------------------- */
 
@@ -102,6 +108,10 @@ int main(int argc,char *argv[]) {
 
   /* matrix inverse transformation test */
   if( !MMG5_test_updatemet3d_ani() )
+    return EXIT_FAILURE;
+
+  /* metrics intersection test */
+  if( !MMG5_test_intersecmet33(mmgMesh) )
     return EXIT_FAILURE;
 
   /** ------------------------------ STEP III -------------------------- */
