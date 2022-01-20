@@ -580,13 +580,15 @@ int MMG5_eigenv3d(int symmat,double *mat,double lambda[3],double v[3][3]) {
 
   /* (vp1,vp2) double,  vp3 simple root */
   else if ( n == 2 ) {
+    /* generating vectors of Im(A-lambda[2]*I) */
+    double z1[3],z2[3];
 
     /** rows of A-lambda[2]*I */
     w1[0] = a11 - lambda[2];
     w2[1] = a22 - lambda[2];
     w3[2] = a33 - lambda[2];
 
-    /** find linearly independent rows and compute cross product */
+    /* compute cross product */
     vx1[0] = w1[1]*w3[2] - w1[2]*w3[1];
     vx1[1] = w1[2]*w3[0] - w1[0]*w3[2];
     vx1[2] = w1[0]*w3[1] - w1[1]*w3[0];
@@ -602,19 +604,23 @@ int MMG5_eigenv3d(int symmat,double *mat,double lambda[3],double v[3][3]) {
     vx3[2] = w2[0]*w3[1] - w2[1]*w3[0];
     dd3    = vx3[0]*vx3[0] + vx3[1]*vx3[1] + vx3[2]*vx3[2];
 
-    /* find vector of max norm to pick linearly independent rows */
+    /* find vector of max norm to pick the two linearly independent rows */
     if ( dd1 > dd2 ) {
       if ( dd1 > dd3 ) {
         dd1 = 1.0 / sqrt(dd1);
         v[2][0] = vx1[0] * dd1;
         v[2][1] = vx1[1] * dd1;
         v[2][2] = vx1[2] * dd1;
+        memcpy(z1,w1,3*sizeof(double));
+        memcpy(z2,w3,3*sizeof(double));
       }
       else {
         dd3 = 1.0 / sqrt(dd3);
         v[2][0] = vx3[0] * dd3;
         v[2][1] = vx3[1] * dd3;
         v[2][2] = vx3[2] * dd3;
+        memcpy(z1,w2,3*sizeof(double));
+        memcpy(z2,w3,3*sizeof(double));
       }
     }
     else {
@@ -623,12 +629,16 @@ int MMG5_eigenv3d(int symmat,double *mat,double lambda[3],double v[3][3]) {
         v[2][0] = vx2[0] * dd2;
         v[2][1] = vx2[1] * dd2;
         v[2][2] = vx2[2] * dd2;
+        memcpy(z1,w1,3*sizeof(double));
+        memcpy(z2,w2,3*sizeof(double));
       }
       else {
         dd3 = 1.0 / sqrt(dd3);
         v[2][0] = vx3[0] * dd3;
         v[2][1] = vx3[1] * dd3;
         v[2][2] = vx3[2] * dd3;
+        memcpy(z1,w2,3*sizeof(double));
+        memcpy(z2,w3,3*sizeof(double));
       }
     }
 
@@ -638,13 +648,13 @@ int MMG5_eigenv3d(int symmat,double *mat,double lambda[3],double v[3][3]) {
     w2[1] = a22 - lambda[0];
     w3[2] = a33 - lambda[0];
 
-    /* find the linear independent row and compute cross product with the first
-     * vector */
+    /* find the linear independent row and compute cross product with the
+     * vectors in Im(A-lambda[2]*I) */
     dd1 = w1[0]*w1[0] + w1[1]*w1[1] + w1[2]*w1[2];
     dd2 = w2[0]*w2[0] + w2[1]*w2[1] + w2[2]*w2[2];
     dd3 = w3[0]*w3[0] + w3[1]*w3[1] + w3[2]*w3[2];
 
-    /* find vector of max norm to pick linearly independent rows */
+    /* find vector of max norm to pick the linearly independent row */
     if( dd1 > dd2 ) {
       if( dd1 > dd3 ) {
         dd1 = 1.0 / sqrt(dd1);
@@ -670,21 +680,24 @@ int MMG5_eigenv3d(int symmat,double *mat,double lambda[3],double v[3][3]) {
         vx1[2] = w3[2]*dd3;
       }
     }
-    /* cross product of the first vector with the linearly independent row */
-    v[0][0] = v[2][1]*vx1[2] - v[2][2]*vx1[1];
-    v[0][1] = v[2][2]*vx1[0] - v[2][0]*vx1[2];
-    v[0][2] = v[2][0]*vx1[1] - v[2][1]*vx1[0];
+    /* cross product of the first generator with the linearly independent row */
+    v[0][0] = z1[1]*vx1[2] - z1[2]*vx1[1];
+    v[0][1] = z1[2]*vx1[0] - z1[0]*vx1[2];
+    v[0][2] = z1[0]*vx1[1] - z1[1]*vx1[0];
     dd1 = v[0][0]*v[0][0] + v[0][1]*v[0][1] + v[0][2]*v[0][2];
+    assert( dd1 > MG_EIGENV_EPS27 );
     dd1 = 1.0 / sqrt(dd1);
     v[0][0] *= dd1;
     v[0][1] *= dd1;
     v[0][2] *= dd1;
 
-    /* 3rd vector orthogonal to Im(A-lambda[0]*I] and vp[0]*/
-    v[1][0] = vx1[1]*v[0][2] - vx1[2]*v[0][1];
-    v[1][1] = vx1[2]*v[0][0] - vx1[0]*v[0][2];
-    v[1][2] = vx1[0]*v[0][1] - vx1[1]*v[0][0];
+    /* 3rd vector cross product of the second generator with the linearly
+     * independent row */
+    v[1][0] = vx1[1]*z2[2] - vx1[2]*z2[1];
+    v[1][1] = vx1[2]*z2[0] - vx1[0]*z2[2];
+    v[1][2] = vx1[0]*z2[1] - vx1[1]*z2[0];
     dd2 = v[1][0]*v[1][0] + v[1][1]*v[1][1] + v[1][2]*v[1][2];
+    assert( dd2 > MG_EIGENV_EPS27 );
     dd2 = 1.0 / sqrt(dd2);
     v[1][0] *= dd2;
     v[1][1] *= dd2;
