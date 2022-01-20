@@ -580,42 +580,58 @@ int MMG5_eigenv3d(int symmat,double *mat,double lambda[3],double v[3][3]) {
 
   /* (vp1,vp2) double,  vp3 simple root */
   else if ( n == 2 ) {
-    /* pointers to matrix rows */
-    double *row1, *row2;
 
     /** rows of A-lambda[2]*I */
     w1[0] = a11 - lambda[2];
     w2[1] = a22 - lambda[2];
     w3[2] = a33 - lambda[2];
 
-    /* find linearly independent rows and compute cross product */
-    row1 = w1;
-    row2 = w2;
-    vx3[0] = row1[1]*row2[2] - row1[2]*row2[1];
-    vx3[1] = row1[2]*row2[0] - row1[0]*row2[2];
-    vx3[2] = row1[0]*row2[1] - row1[1]*row2[0];
-    dd3 = vx3[0]*vx3[0] + vx3[1]*vx3[1] + vx3[2]*vx3[2];
-    if( dd3 < MMG5_EPS ) {
-      row1 = w2;
-      row2 = w3;
-      vx3[0] = row1[1]*row2[2] - row1[2]*row2[1];
-      vx3[1] = row1[2]*row2[0] - row1[0]*row2[2];
-      vx3[2] = row1[0]*row2[1] - row1[1]*row2[0];
-      dd3 = vx3[0]*vx3[0] + vx3[1]*vx3[1] + vx3[2]*vx3[2];
-      if( dd3 < MMG5_EPS ) {
-        row1 = w3;
-        row2 = w1;
-        vx3[0] = row1[1]*row2[2] - row1[2]*row2[1];
-        vx3[1] = row1[2]*row2[0] - row1[0]*row2[2];
-        vx3[2] = row1[0]*row2[1] - row1[1]*row2[0];
-        dd3 = vx3[0]*vx3[0] + vx3[1]*vx3[1] + vx3[2]*vx3[2];
+    /** find linearly independent rows and compute cross product */
+    vx1[0] = w1[1]*w3[2] - w1[2]*w3[1];
+    vx1[1] = w1[2]*w3[0] - w1[0]*w3[2];
+    vx1[2] = w1[0]*w3[1] - w1[1]*w3[0];
+    dd1    = vx1[0]*vx1[0] + vx1[1]*vx1[1] + vx1[2]*vx1[2];
+
+    vx2[0] = w1[1]*w2[2] - w1[2]*w2[1];
+    vx2[1] = w1[2]*w2[0] - w1[0]*w2[2];
+    vx2[2] = w1[0]*w2[1] - w1[1]*w2[0];
+    dd2    = vx2[0]*vx2[0] + vx2[1]*vx2[1] + vx2[2]*vx2[2];
+
+    vx3[0] = w2[1]*w3[2] - w2[2]*w3[1];
+    vx3[1] = w2[2]*w3[0] - w2[0]*w3[2];
+    vx3[2] = w2[0]*w3[1] - w2[1]*w3[0];
+    dd3    = vx3[0]*vx3[0] + vx3[1]*vx3[1] + vx3[2]*vx3[2];
+
+    /* find vector of max norm to pick linearly independent rows */
+    if ( dd1 > dd2 ) {
+      if ( dd1 > dd3 ) {
+        dd1 = 1.0 / sqrt(dd1);
+        v[2][0] = vx1[0] * dd1;
+        v[2][1] = vx1[1] * dd1;
+        v[2][2] = vx1[2] * dd1;
+      }
+      else {
+        dd3 = 1.0 / sqrt(dd3);
+        v[2][0] = vx3[0] * dd3;
+        v[2][1] = vx3[1] * dd3;
+        v[2][2] = vx3[2] * dd3;
       }
     }
-    assert( dd3 >= MMG5_EPS );
-    dd3 = 1.0 / sqrt(dd3);
-    v[2][0] = vx3[0] * dd3;
-    v[2][1] = vx3[1] * dd3;
-    v[2][2] = vx3[2] * dd3;
+    else {
+      if ( dd2 > dd3 ) {
+        dd2 = 1.0 / sqrt(dd2);
+        v[2][0] = vx2[0] * dd2;
+        v[2][1] = vx2[1] * dd2;
+        v[2][2] = vx2[2] * dd2;
+      }
+      else {
+        dd3 = 1.0 / sqrt(dd3);
+        v[2][0] = vx3[0] * dd3;
+        v[2][1] = vx3[1] * dd3;
+        v[2][2] = vx3[2] * dd3;
+      }
+    }
+
 
     /** rows of A-lambda[0]*I */
     w1[0] = a11 - lambda[0];
@@ -625,27 +641,36 @@ int MMG5_eigenv3d(int symmat,double *mat,double lambda[3],double v[3][3]) {
     /* find the linear independent row and compute cross product with the first
      * vector */
     dd1 = w1[0]*w1[0] + w1[1]*w1[1] + w1[2]*w1[2];
-    if( dd1 >= MMG5_EPS ) {
-      dd1 = 1.0 / sqrt(dd1);
-      vx1[0] = w1[0]*dd1;
-      vx1[1] = w1[1]*dd1;
-      vx1[2] = w1[2]*dd1;
+    dd2 = w2[0]*w2[0] + w2[1]*w2[1] + w2[2]*w2[2];
+    dd3 = w3[0]*w3[0] + w3[1]*w3[1] + w3[2]*w3[2];
+
+    /* find vector of max norm to pick linearly independent rows */
+    if( dd1 > dd2 ) {
+      if( dd1 > dd3 ) {
+        dd1 = 1.0 / sqrt(dd1);
+        vx1[0] = w1[0]*dd1;
+        vx1[1] = w1[1]*dd1;
+        vx1[2] = w1[2]*dd1;
+      } else {
+        dd3 = 1.0 / sqrt(dd3);
+        vx1[0] = w3[0]*dd3;
+        vx1[1] = w3[1]*dd3;
+        vx1[2] = w3[2]*dd3;
+      }
     } else {
-      dd2 = w2[0]*w2[0] + w2[1]*w2[1] + w2[2]*w2[2];
-      if( dd2 >= MMG5_EPS ) {
+      if( dd2 > dd3 ) {
         dd2 = 1.0 / sqrt(dd2);
         vx1[0] = w2[0]*dd2;
         vx1[1] = w2[1]*dd2;
         vx1[2] = w2[2]*dd2;
       } else {
-        dd3 = w3[0]*w3[0] + w3[1]*w3[1] + w3[2]*w3[2];
-        assert( dd3 >= MMG5_EPS );
         dd3 = 1.0 / sqrt(dd3);
         vx1[0] = w3[0]*dd3;
         vx1[1] = w3[1]*dd3;
         vx1[2] = w3[2]*dd3;
       }
     }
+    /* cross product of the first vector with the linearly independent row */
     v[0][0] = v[2][1]*vx1[2] - v[2][2]*vx1[1];
     v[0][1] = v[2][2]*vx1[0] - v[2][0]*vx1[2];
     v[0][2] = v[2][0]*vx1[1] - v[2][1]*vx1[0];
