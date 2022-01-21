@@ -464,7 +464,7 @@ int MMG5_test_eigenvmatsym3d(MMG5_pMesh mesh,double *mex,double lambdaex[],
 
   /* Check error in norm inf */
   maxerr = MMG5_test_mat_error(6,(double *)mex,(double *)mnum);
-  if( maxerr > 10.*MMG5_EPSOK ) {
+  if( maxerr > 100.*MMG5_EPSOK ) {
     fprintf(stderr,"  ## Error matrix recomposition: in function %s, max error %e\n",
       __func__,maxerr);
     return 0;
@@ -486,17 +486,20 @@ int MMG5_test_eigenvmatsym3d(MMG5_pMesh mesh,double *mex,double lambdaex[],
     return 0;
   }
 
-  /* Check eigenvectors error through scalar product */
+  /* Check eigenvectors orthogonality (checking numerical eigenvectors against
+   * the exact ones does not make sense in case of multiple eigenvalues) */
   maxerr = 0.;
-  for( int8_t i = 0; i < 3; i++ ) {
-    err = 0.;
-    for( int8_t j = 0; j < 3; j++ )
-      err += vpex[i][j] * vpnum[i][j];
-    err = 1.-fabs(err);
-    maxerr = MG_MAX(maxerr,err);
+  for( int8_t i = 0; i < 2; i++ ) {
+    for( int8_t j = i+1; j < 3; j++ ) {
+      err = 0.;
+      for( int8_t k = 0; k < 3; k++ )
+        err += vpnum[i][k] * vpnum[j][k];
+      err = fabs(err);
+      maxerr = MG_MAX(maxerr,err);
+    }
   }
   if( maxerr > MMG5_EPSOK ) {
-    fprintf(stderr,"  ## Error matrix eigenvectors: in function %s, max error %e\n",
+    fprintf(stderr,"  ## Error matrix eigenvectors orthogonality: in function %s, max error %e\n",
       __func__,maxerr);
     return 0;
   }
@@ -506,7 +509,7 @@ int MMG5_test_eigenvmatsym3d(MMG5_pMesh mesh,double *mex,double lambdaex[],
   if( !MMG5_eigenvmat_check(mesh,3,1,mex,mnum) )
     return 0;
   maxerr = MMG5_test_mat_error(6,(double *)mex,(double *)mnum);
-  if( maxerr > 10*MMG5_EPSOK ) {
+  if( maxerr > 100*MMG5_EPSOK ) {
     fprintf(stderr,"  ## Error matrix eigendecomposition and recomposition: in function %s, max error %e\n",
       __func__,maxerr);
     return 0;

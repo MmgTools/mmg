@@ -63,13 +63,19 @@ int main(int argc,char *argv[]) {
     return(EXIT_FAILURE);
 
   /* symmetric matrix eigendecomposition test */
-  double m_sym[6] = {2.,0.,0.,3.,4.,9.}; /* Test matrix */
-  double lambda_sym[3] = {1.,2.,11.}; /* Exact eigenvalues */
-  double vp_sym[3][3] = {{0.,-2./sqrt(5.),1./sqrt(5.)},
-                         {1.,0.,0.},
-                         {0.,1./sqrt(5.),2./sqrt(5.)}}; /* Exact eigenvectors */
-  if( !MMG5_test_eigenvmatsym3d(mmgMesh,m_sym,lambda_sym,vp_sym) )
-    return(EXIT_FAILURE);
+  double m_sym[2][6] = {{2.,0.,0.,3.,4.,9.},
+                        {1.,0.,0.,50.5,49.5,50.5}}; /* Test matrices */
+  double lambda_sym[2][3] = {{1.,2.,11.},
+                             {1.,1.,100.}}; /* Exact eigenvalues */
+  double vp_sym[2][3][3] = {{{0.,-2./sqrt(5.),1./sqrt(5.)},
+                             {1.,0.,0.},
+                             {0.,1./sqrt(5.),2./sqrt(5.)}},
+                            {{1.,0.,0.},
+                             {0.,1./sqrt(2.),-1./sqrt(2.)},
+                             {0.,1./sqrt(2.),1./sqrt(2.)}}}; /* Exact eigenvectors */
+  for( int8_t i = 0; i < 2; i++ )
+    if( !MMG5_test_eigenvmatsym3d(mmgMesh,m_sym[i],lambda_sym[i],vp_sym[i]) )
+      return(EXIT_FAILURE);
 
   /* non-symmetric matrix eigendecomposition test */
   double m_nonsym[2][9] = {{500.5,-499.5,499.5,
