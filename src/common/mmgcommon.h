@@ -727,7 +727,7 @@ int  MMG5_gradsizreq_ani(MMG5_pMesh mesh,MMG5_pSol met);
 void MMG5_simredmat(MMG5_pMesh mesh,int8_t dim,double *m,double *dm,double *iv);
 int  MMG5_simred2d(MMG5_pMesh,double*,double*,double dm[2],double dn[2],double vp[2][2]);
 int  MMG5_simred3d(MMG5_pMesh mesh,double *m,double *n,double dm[3],double dn[3],double vp[3][3]);
-int  MMG5_updatemet2d_ani(double *m,double *n,double dm[2],double dn[2],double vp[2][2],int8_t ier );
+extern int  MMG5_updatemet2d_ani(double *m,double *n,double dm[2],double dn[2],double vp[2][2],int8_t ier );
 int  MMG5_updatemet3d_ani(double *m,double *n,double dm[3],double dn[3],double vp[3][3],int8_t ier );
 void MMG5_gradEigenvreq(double *dm,double *dn,double,int8_t,int8_t *);
 int  MMG5_updatemetreq_ani(double *n,double dn[2],double vp[2][2]);
@@ -741,7 +741,7 @@ int MMG5_isNotSplit(MMG5_pMesh ,int);
 int MMG5_getStartRef(MMG5_pMesh ,int, int *);
 
 /* test functions */
-double MMG5_test_mat_error( int8_t nelem,double m1[],double m2[] );
+extern double MMG5_test_mat_error( int8_t nelem,double m1[],double m2[] );
 int MMG5_test_invmat22();
 int MMG5_test_invmat33();
 int MMG5_test_eigenvmatsym2d(MMG5_pMesh mesh,double *mex,double lambdaex[],
