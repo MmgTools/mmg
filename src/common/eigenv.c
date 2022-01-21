@@ -738,6 +738,16 @@ int MMG5_eigenv3d(int symmat,double *mat,double lambda[3],double v[3][3]) {
     v[1][0] *= dd2;
     v[1][1] *= dd2;
     v[1][2] *= dd2;
+
+    /* enforce orthogonality in the symmetric case (can't prove that c20 and
+     * c21 are orthogonal in a general symmetric case), the result will still
+     * belong to ker(A-lambda[0]*I) */
+    if( symmat ) {
+      dd1 = v[1][0]*v[0][0] + v[1][1]*v[0][1] + v[1][2]*v[0][2];
+      v[1][0] -= dd1*v[0][0];
+      v[1][1] -= dd1*v[0][1];
+      v[1][2] -= dd1*v[0][2];
+    }
   }
 
   lambda[0] *= maxm;
