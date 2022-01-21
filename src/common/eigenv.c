@@ -747,6 +747,13 @@ int MMG5_eigenv3d(int symmat,double *mat,double lambda[3],double v[3][3]) {
       v[1][0] -= dd1*v[0][0];
       v[1][1] -= dd1*v[0][1];
       v[1][2] -= dd1*v[0][2];
+      /* normalize again */
+      dd2 = v[1][0]*v[1][0] + v[1][1]*v[1][1] + v[1][2]*v[1][2];
+      assert( dd2 > MG_EIGENV_EPS27 );
+      dd2 = 1.0 / sqrt(dd2);
+      v[1][0] *= dd2;
+      v[1][1] *= dd2;
+      v[1][2] *= dd2;
     }
   }
 
