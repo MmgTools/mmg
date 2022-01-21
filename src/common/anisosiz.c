@@ -1301,6 +1301,54 @@ int MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int np1,
   }
 }
 
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param dim matrix size.
+ * \param m matrix array.
+ * \param dm diagonal values array.
+ * \param iv array of inverse coreduction basis.
+ *
+ * Recompose a symmetric matrix from its diagonalization on a simultaneous
+ * reduction basis.
+ * \warning Eigenvectors in Mmg are stored as matrix rows (the first dimension
+ * of the double array spans the number of eigenvectors, the second dimension
+ * spans the number of entries of each eigenvector). So the inverse (left
+ * eigenvectors) is also stored with transposed indices.
+ */
+inline
+void MMG5_simredmat(MMG5_pMesh mesh,int8_t dim,double *m,double *dm,double *iv) {
+  int8_t i,j,k,ij;
+
+  /* Storage of a matrix as a one-dimensional array: dim*(dim+1)/2 entries for
+   * a symmetric matrix. */
+  ij = 0;
+
+  /* Loop on matrix rows */
+  for( i = 0; i < dim; i++ ) {
+    /* Loop on the upper-triangular part of the matrix */
+    for( j = i; j < dim; j++ ) {
+      /* Initialize matrix entry */
+      m[ij] = 0.0;
+      /* Compute matrix entry as the recomposition of diagonal values after
+       * projection on the coreduction basis, using the inverse of the
+       * transformation:
+       *
+       * M_{ij} = \sum_{k,l} V^{-1}_{ki} Lambda_{kl} V^{-1}_{lj} =
+       *        = \sum_{k} lambda_{k} V^{-1}_{ki} V^{-1}_{kj}
+       *
+       * Since the inverse of the transformation is the inverse of an
+       * eigenvectors matrix (which is stored in Mmg by columns, and not by
+       * rows), the storage of the inverse matrix is also transposed and the
+       * indices have to be exchanged when implementing the above formula. */
+      for( k = 0; k < dim; k++ ) {
+        m[ij] += dm[k]*iv[i*dim+k]*iv[j*dim+k];
+      }
+      /* Go to the next entry */
+      ++ij;
+    }
+  }
+  assert( ij == (dim+1)*dim/2 );
+}
 
 /**
  * \param mesh pointer toward the mesh
@@ -1462,8 +1510,55 @@ int MMG5_simred3d(MMG5_pMesh mesh,double *m,double *n,double dm[3],
     dn[1] = lambda[0]*dm[1];
     dn[2] = lambda[0]*dm[2];
   }
+  else if( order == 2 ) {
+    /* Second case: two eigenvalues of imn are coincident (first two entries of
+     * the lambda array) and one is distinct (last entry).
+     * Simultaneous reduction gives a block diagonalization. The 2x2 blocks are
+     * homothetic and can be diagonalized through the eigenvectors of one of the
+     * two blocks. */
+    double mred[6],nred[6];
+    /* project matrices on the coreduction basis: they should have the
+     * block-diagonal form [ m0, m1, 0, m3, 0, m5 ] */
+    MMG5_rmtr(vp,m,mred);
+    MMG5_rmtr(vp,n,nred);
+    /* compute projections on the last eigenvector (that with multiplicity 1) */
+    dm[2] = mred[5];
+    dn[2] = nred[5];
+    /* re-arrange matrices so that the first three entries describe the
+     * 2x2 blocks to be diagonalized (the two blocks are homothetic) */
+    mred[2] = mred[3];
+    nred[2] = nred[3];
+    /* diagonalization of the first 2x2 block */
+    if( fabs(mred[1]) < MMG5_EPS ) {
+     /* first case: the blocks are diagonal, basis vp is unchanged */
+      dm[0] = mred[0];
+      dm[1] = mred[2];
+    } else {
+      /* second case: the blocks are not diagonal */
+      double wp[2][2],up[2][3];
+      int8_t i,j,k;
+      MMG5_eigensym(mred,dm,wp);
+      /* change the basis vp (vp[2] is unchanged) */
+      for( j = 0; j < 2; j++ ) {
+        for( i = 0; i < 3; i++ ) {
+          up[j][i] = 0.;
+          for( k = 0; k < 2; k++ ) {
+            up[j][i] += vp[k][i]*wp[j][k];
+          }
+        }
+      }
+      for( j = 0; j < 2; j++ ) {
+        for( i = 0; i < 3; i++ ) {
+          vp[j][i] = up[j][i];
+        }
+      }
+    }
+    /* homothetic diagonalization of the second 2x2 block */
+    dn[0] = lambda[0]*dm[0];
+    dn[1] = lambda[0]*dm[1];
+  }
   else {
-    /* Second case: eigenvalues of imn are distinct ; theory says qf associated
+    /* Third case: eigenvalues of imn are distinct ; theory says qf associated
        to m and n are diagonalizable in basis (vp[0], vp[1], vp[2]) - the
        coreduction basis */
     /* Compute diagonal values in simultaneous reduction basis */
@@ -1528,7 +1623,7 @@ int MMG5_test_simred2d() {
   double dnex[2] = {500.,   4. }; /* Exact cobasis projection 2 */
   double vpex[2][2] = {{ 1./sqrt(2.),1./sqrt(2.)},
                         {1./sqrt(5.),2./sqrt(5.)}}; /* Exact cobasis vectors */
-  double dmnum[2],dnnum[2],vpnum[2][2]; /* Numerical quantities */
+  double dmnum[2],dnnum[2],vpnum[2][2],ivpnum[2][2],mnum[3],nnum[3]; /* Numerical quantities */
   double swap[2],maxerr,err;
   int8_t perm[2]; /* permutation array */
 
@@ -1568,6 +1663,26 @@ int MMG5_test_simred2d() {
     return 0;
   }
 
+  /** Recompose matrices from diagonal values */
+  if( !MMG5_invmat22(vpnum,ivpnum) )
+    return 0;
+  MMG5_simredmat(mesh,2,mnum,dmnum,(double *)ivpnum);
+  MMG5_simredmat(mesh,2,nnum,dnnum,(double *)ivpnum);
+
+  /* Check matrices in norm inf */
+  maxerr = MMG5_test_mat_error(3,mex,mnum);
+  if( maxerr > 1.e2*MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error first matrix coreduction recomposition: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+  maxerr = MMG5_test_mat_error(3,nex,nnum);
+  if( maxerr > 1.e4*MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error second matrix coreduction recomposition: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+
   return 1;
 }
 
@@ -1587,7 +1702,7 @@ int MMG5_test_simred3d() {
   double vpex[3][3] = {{1./sqrt(2.),1./sqrt(2.),0.},
                        {0.,         1./sqrt(2.),1./sqrt(2.)},
                        {1./sqrt(2.),         0.,1./sqrt(2.)}}; /* Exact cobasis vectors */
-  double dmnum[3],dnnum[3],vpnum[3][3]; /* Numerical quantities */
+  double dmnum[3],dnnum[3],vpnum[3][3],ivpnum[3][3],mnum[6],nnum[6]; /* Numerical quantities */
   double swap[3],maxerr,err;
   int8_t perm[3]; /* permutation array */
 
@@ -1623,6 +1738,26 @@ int MMG5_test_simred3d() {
   }
   if( maxerr > MMG5_EPSOK ) {
     fprintf(stderr,"  ## Error matrix coreduction vectors: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+
+  /** Recompose matrices from diagonal values */
+  if( !MMG5_invmat33(vpnum,ivpnum) )
+    return 0;
+  MMG5_simredmat(mesh,3,mnum,dmnum,(double *)ivpnum);
+  MMG5_simredmat(mesh,3,nnum,dnnum,(double *)ivpnum);
+
+  /* Check matrices in norm inf */
+  maxerr = MMG5_test_mat_error(6,mex,mnum);
+  if( maxerr > 1.e2*MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error first matrix coreduction recomposition: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+  maxerr = MMG5_test_mat_error(6,nex,nnum);
+  if( maxerr > 1.e3*MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error second matrix coreduction recomposition: in function %s, max error %e\n",
       __func__,maxerr);
     return 0;
   }
