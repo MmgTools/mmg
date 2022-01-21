@@ -235,7 +235,7 @@ void MMG5_defUninitSize(MMG5_pMesh mesh,MMG5_pSol met,int8_t ismet )
 
     m = &met->m[6*k];
     if(ismet) {
-      if ( !MG_SIN(ppt->tag) && (ppt->tag & MG_GEO) ) {
+      if ( !(MG_SIN(ppt->tag) || (ppt->tag & MG_NOM)) && (ppt->tag & MG_GEO) ) {
         m[0] = m[1] = m[2] = m[3] = m[4] = isqhmax;
         m[5] = 0;
       }
