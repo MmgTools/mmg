@@ -921,6 +921,7 @@ void MMG3D_update_edgeTag(MMG5_pTetra pt,MMG5_pxTetra pxt,int np, int nq,
 
   int     i,j,p0,p1;
   uint8_t ia,iav;
+  int16_t tag,tag1;
 
   /* update tags for edges */
   for ( j=0; j<3; j++ ) {
@@ -947,7 +948,12 @@ void MMG3D_update_edgeTag(MMG5_pTetra pt,MMG5_pxTetra pxt,int np, int nq,
         }
       }
       assert(i!=3);
+      tag1 = pxt1->tag[iav];
+      tag  =  pxt->tag[ia];
       pxt1->tag[iav] |= pxt->tag[ia];
+      if( ((tag1 & MG_REQ) && !(tag1 & MG_NOSURF)) ||
+          (( tag & MG_REQ) && !( tag & MG_NOSURF)) )
+        pxt1->tag[iav] &= ~MG_NOSURF;
       pxt1->edg[iav] = MG_MAX ( pxt1->edg[iav],pxt->edg[ia] );
     }
   }
@@ -1003,6 +1009,9 @@ int MMG3D_update_shellEdgeTag_oneDir(MMG5_pMesh  mesh,int start, int na, int nb,
 
       pxt->edg[i] = ref;
       pxt->tag[i] |= tag;
+      if( ((xtag & MG_REQ) && !(xtag & MG_NOSURF)) ||
+          (( tag & MG_REQ) && !( tag & MG_NOSURF)))
+        pxt->tag[i] &= ~MG_NOSURF;
     }
 
     /* set new triangle for travel */
@@ -1062,6 +1071,9 @@ int MMG3D_update_shellEdgeTag(MMG5_pMesh  mesh,int start, int8_t ia,int16_t tag,
     }
 
     pxt->tag[ia] |= tag;
+    if( ((xtag & MG_REQ) && !(xtag & MG_NOSURF)) ||
+        (( tag & MG_REQ) && !( tag & MG_NOSURF)))
+      pxt->tag[ia] &= ~MG_NOSURF;
     pxt->edg[ia]  = ref;
   }
 

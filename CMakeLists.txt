@@ -20,7 +20,7 @@
 ##  use this copy of the mmg distribution only if you accept them.
 ## =============================================================================
 
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.0)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8.12)
 
 # if PROJECT_NAME is defined, mmg is a subproject
 if(DEFINED PROJECT_NAME)
@@ -57,9 +57,9 @@ include(GNUInstallDirs)
 ###############################################################################
 
 SET (CMAKE_RELEASE_VERSION_MAJOR "5" )
-SET (CMAKE_RELEASE_VERSION_MINOR "5" )
-SET (CMAKE_RELEASE_VERSION_PATCH "2" )
-SET (CMAKE_RELEASE_DATE "Nov. 17, 2020" )
+SET (CMAKE_RELEASE_VERSION_MINOR "6" )
+SET (CMAKE_RELEASE_VERSION_PATCH "0" )
+SET (CMAKE_RELEASE_DATE "Nov. 05, 2021" )
 
 SET (CMAKE_RELEASE_VERSION
   "${CMAKE_RELEASE_VERSION_MAJOR}.${CMAKE_RELEASE_VERSION_MINOR}.${CMAKE_RELEASE_VERSION_PATCH}")
@@ -318,7 +318,7 @@ ENDFUNCTION()
 
 OPTION(BUILD_SHARED_LIBS "Build shared libraries" OFF)
 INVERT_BOOL("BUILD_STATIC_LIBS" ${BUILD_SHARED_LIBS})
-IF (${BUILD_STATIC_LIBS} AND NOT CMAKE_POSITION_INDEPENDENT_CODE)
+IF ( (${BUILD_STATIC_LIBS} EQUAL ON) AND NOT CMAKE_POSITION_INDEPENDENT_CODE)
   SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
 ENDIF()
 
@@ -615,58 +615,22 @@ ENDIF ()
 FIND_PACKAGE(Doxygen)
 IF(DOXYGEN_FOUND)
 
-  # MMG2D Documentation
-  CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg2d/Doxyfile.in
-    ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg2d/Doxyfile @ONLY)
+  # MMG Documentation
+  SET( MMG_DOC_DIR ${PROJECT_BINARY_DIR}/doc/ CACHE PATH "Path toward generated Doxygen doc.")
+  mark_as_advanced(MMG_DOC_DIR)
 
-  SET(MMG2DDOC_DIR ${PROJECT_BINARY_DIR}/doc/mmg2d)
-  SET(MMGSDOC_DIR ${PROJECT_BINARY_DIR}/doc/mmgs)
-  SET(MMG3DDOC_DIR ${PROJECT_BINARY_DIR}/doc/mmg3d)
+  FILE(MAKE_DIRECTORY ${MMG_DOC_DIR})
 
-  FILE(MAKE_DIRECTORY ${MMG2DDOC_DIR})
-  FILE(MAKE_DIRECTORY ${MMGSDOC_DIR})
-  FILE(MAKE_DIRECTORY ${MMG3DDOC_DIR})
-
-  ADD_CUSTOM_TARGET(mmg2d_doc
+  CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/Doxyfile.in
+    ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
+  ADD_CUSTOM_TARGET(doc
     COMMAND ${DOXYGEN_EXECUTABLE}
-    ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg2d/Doxyfile
-    WORKING_DIRECTORY ${MMG2DDOC_DIR}
-    COMMENT "Generating MMG2D API
-    documentation with Doxygen.  Open up the
-    ${MMG2DDOC_DIR}/html/index.html file to see
-    it." VERBATIM )
-
-  # MMGS Documentation
-  CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmgs/Doxyfile.in
-    ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmgs/Doxyfile @ONLY)
-  ADD_CUSTOM_TARGET(mmgs_doc
-    COMMAND ${DOXYGEN_EXECUTABLE}
-    ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmgs/Doxyfile
-    WORKING_DIRECTORY ${MMGSDOC_DIR}
-    COMMENT "Generating MMGS API
-    documentation with Doxygen.  Open up the
-    ${MMGSDOC_DIR}/html/index.html file to see
-    it." VERBATIM )
-
-  # MMG3D Documentation
-  CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg3d/Doxyfile.in
-    ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg3d/Doxyfile @ONLY)
-  ADD_CUSTOM_TARGET(mmg3d_doc
-    COMMAND ${DOXYGEN_EXECUTABLE}
-    ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg3d/Doxyfile
-    WORKING_DIRECTORY ${MMG3DDOC_DIR}
-    COMMENT "Generating MMG3D API documentation with Doxygen. Open up the
-    ${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/mmg3d/html/index.html file to see
+    ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
+    WORKING_DIRECTORY ${MMG_DOC_DIR}
+    COMMENT "Generating Mmg documentation with Doxygen. Open up the
+    ${MMG_DOC_DIR}/index.html file to see
     it" VERBATIM )
 
-  if ( NOT TARGET doc )
-    ADD_CUSTOM_TARGET(doc DEPENDS mmgs_doc mmg3d_doc mmg2d_doc COMMENT "Generating
-    MMG API documentation with Doxygen.  Open up the
-    ${PROJECT_BINARY_DIR}/doc/mmg*/html/index.html file to see it"
-      VERBATIM )
-  else()
-    add_dependencies( doc mmgs_doc mmg3d_doc mmg2d_doc )
-  endif()
 ENDIF ( DOXYGEN_FOUND )
 
 ###############################################################################
