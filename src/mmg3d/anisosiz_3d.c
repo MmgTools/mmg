@@ -110,78 +110,6 @@ int MMG3D_printErrorMat(int8_t symmat,double *m,double *mr) {
   return 1;
 }
 
-/**
- * \param dm matrix diagonalization (1x3 array).
- * \param vp basis vectors (3x3 array, eigenvectors stored by lines).
- * \param m recomposed matrix (1x6 array).
- * \return 1 if success, 0 if fail.
- *
- * Recompose a matrix given its decomposition on a coreduction basis V:
- *   M = transpose(inv(V)) * diag(mu) * inv(V)
- *
- */
-int MMG3D_recomposeMat_simred(double dm[3],double vp[3][3],double *m) {
-  double ivp[3][3];
-  int i,j,k,ij;
-
-  if( !MMG5_invmat33(vp,ivp) )
-    return 0;
-  ij = 0;
-  for( i = 0; i < 3; i++ ) {
-    for( j = i; j < 3; j++ ) {
-      m[ij] = 0.;
-      for( k = 0; k < 3; k++ ) {
-        m[ij] += dm[k]*ivp[i][k]*ivp[j][k];
-      }
-      ij++;
-    }
-  }
-
-  return 1;
-}
-
-/**
- * \param symmat flag for symmetric(1) or non-symmetric(0) matrix..
- * \param dm matrix eigenvalues (1x3 array).
- * \param vp eigenvectors matrix (3x3 array, eigenvectors stored by lines).
- * \param m recomposed matrix (1x6 or 1x9 array).
- * \return 1 if success, 0 if fail.
- *
- * Recompose a matrix given its eigendecomposition:
- *   M = V * diag(lambda) * inv(V)
- *
- */
-int MMG3D_recomposeMat(int8_t symmat,double dm[3],double vp[3][3],double *m) {
-  double ivp[3][3];
-  int i,j,k,ij;
-
-  if( symmat ) {
-    ij = 0;
-    for( i = 0; i < 3; i++ ) {
-      for( j = i; j < 3; j++ ) {
-        m[ij] = 0.;
-        for( k = 0; k < 3; k++ ) {
-          m[ij] += dm[k]*vp[k][i]*vp[k][j];
-        }
-        ++ij;
-      }
-    }
-  } else {
-    if( !MMG5_invmat33(vp,ivp) )
-      return 0;
-    for( i = 0; i < 3; i++ ) {
-      for( j = 0; j < 3; j++ ) {
-        m[3*i+j] = 0.;
-        for( k = 0; k < 3; k++ ) {
-          m[3*i+j] += dm[k]*vp[k][i]*ivp[j][k];
-        }
-      }
-    }
-  }
-
-  return 1;
-}
-
 int MMG3D_chk4ridVertices(MMG5_pMesh mesh, MMG5_pTetra pt) {
   MMG5_pPoint  ppt;
   int          i;
@@ -1545,10 +1473,12 @@ void MMG3D_gradEigenv(MMG5_pMesh mesh,double m[6],double mext[6],int8_t iloc,int
   if( (*ier) & iloc ) {
     /* Simultaneous reduction basis is non-orthogonal, so invert it for the
      * inverse transformation */
-    if( !MMG3D_recomposeMat_simred(dm,vp,m) ) {
+    double ivp[3][3];
+    if( !MMG5_invmat33(vp,ivp) ) {
       *ier = -1;
       return;
     }
+    MMG5_simredmat(mesh,3,m,dm,(double *)ivp);
 
   }
 }
