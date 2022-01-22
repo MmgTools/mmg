@@ -1302,7 +1302,6 @@ int MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int np1,
 }
 
 /**
- * \param mesh pointer toward the mesh structure.
  * \param dim matrix size.
  * \param m matrix array.
  * \param dm diagonal values array.
@@ -1316,7 +1315,7 @@ int MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int np1,
  * eigenvectors) is also stored with transposed indices.
  */
 inline
-void MMG5_simredmat(MMG5_pMesh mesh,int8_t dim,double *m,double *dm,double *iv) {
+void MMG5_simredmat(int8_t dim,double *m,double *dm,double *iv) {
   int8_t i,j,k,ij;
 
   /* Storage of a matrix as a one-dimensional array: dim*(dim+1)/2 entries for
@@ -1666,8 +1665,8 @@ int MMG5_test_simred2d() {
   /** Recompose matrices from diagonal values */
   if( !MMG5_invmat22(vpnum,ivpnum) )
     return 0;
-  MMG5_simredmat(mesh,2,mnum,dmnum,(double *)ivpnum);
-  MMG5_simredmat(mesh,2,nnum,dnnum,(double *)ivpnum);
+  MMG5_simredmat(2,mnum,dmnum,(double *)ivpnum);
+  MMG5_simredmat(2,nnum,dnnum,(double *)ivpnum);
 
   /* Check matrices in norm inf */
   maxerr = MMG5_test_mat_error(3,mex,mnum);
@@ -1745,8 +1744,8 @@ int MMG5_test_simred3d() {
   /** Recompose matrices from diagonal values */
   if( !MMG5_invmat33(vpnum,ivpnum) )
     return 0;
-  MMG5_simredmat(mesh,3,mnum,dmnum,(double *)ivpnum);
-  MMG5_simredmat(mesh,3,nnum,dnnum,(double *)ivpnum);
+  MMG5_simredmat(3,mnum,dmnum,(double *)ivpnum);
+  MMG5_simredmat(3,nnum,dnnum,(double *)ivpnum);
 
   /* Check matrices in norm inf */
   maxerr = MMG5_test_mat_error(6,mex,mnum);
@@ -1823,35 +1822,16 @@ int MMG5_updatemet2d_ani(double *m,double *n,double dm[2],double dn[2],
 inline
 int MMG5_updatemet3d_ani(double *m,double *n,double dm[3],double dn[3],
                          double vp[3][3],int8_t ier ) {
-  double det,ivp[3][3];
-  int8_t i,j,k,ij;
+  double ivp[3][3];
 
   if( !MMG5_invmat33(vp,ivp) )
     return 0;
 
   if ( ier & 1 ) {
-    ij = 0;
-    for( i = 0; i < 3; i++ ) {
-      for( j = i; j < 3; j++ ) {
-        m[ij] = 0.;
-        for( k = 0; k < 3; k++ ) {
-          m[ij] += dm[k]*ivp[i][k]*ivp[j][k];
-        }
-        ij++;
-      }
-    }
+    MMG5_simredmat(3,m,dm,(double *)ivp);
   }
   if ( ier & 2 ) {
-    ij = 0;
-    for( i = 0; i < 3; i++ ) {
-      for( j = i; j < 3; j++ ) {
-        n[ij] = 0.;
-        for( k = 0; k < 3; k++ ) {
-          n[ij] += dn[k]*ivp[i][k]*ivp[j][k];
-        }
-        ij++;
-      }
-    }
+    MMG5_simredmat(3,n,dn,(double *)ivp);
   }
   return 1;
 }

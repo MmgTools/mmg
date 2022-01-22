@@ -935,7 +935,7 @@ int MMG5_intersecmet33(MMG5_pMesh mesh, double *m,double *n,double *mr) {
     return 0;
 
   /* Recompose matrix */
-  MMG5_simredmat(mesh,3,mr,d,(double *)ivp);
+  MMG5_simredmat(3,mr,d,(double *)ivp);
 
   return 1;
 }
