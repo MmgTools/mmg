@@ -1479,7 +1479,7 @@ void MMG3D_gradEigenv(MMG5_pMesh mesh,double m[6],double mext[6],int8_t iloc,int
       *ier = -1;
       return;
     }
-    MMG5_simredmat(mesh,3,m,dm,(double *)ivp);
+    MMG5_simredmat(3,m,dm,(double *)ivp);
 
   }
 }
