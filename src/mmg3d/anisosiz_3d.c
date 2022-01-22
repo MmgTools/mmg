@@ -1447,28 +1447,29 @@ static inline
 void MMG3D_gradEigenv(MMG5_pMesh mesh,double m[6],double mext[6],int8_t iloc,int *ier) {
   double dm[3],dmext[3],vp[3][3],ivp[3][3];
 
+//#ifndef NDEBUG
+//  FILE *fid;
+//  fid = fopen("mymat.txt","w");
+//  for(int k = 0; k < 6; k++ )
+//    fprintf(fid,"%25.20f\n",m[k]);
+//  for(int k = 0; k < 6; k++ )
+//    fprintf(fid,"%25.20f\n",mext[k]);
+//  fclose(fid);
+//#endif
+
   if( !MMG5_simred3d(mesh,m,mext,dm,dmext,vp) ) {
     *ier = -1;
     return;
   }
 
   /* Gradation of sizes */
-  double ratio = 1.0;
   for( int i = 0; i< 3; i++ ) {
     if( dmext[i] > dm[i] ) {
-      if( dmext[i]/dm[i] > ratio )
-        ratio = dmext[i]/dm[i];
-//      dm[i] = dmext[i];
+      dm[i] = dmext[i];
       (*ier) = (*ier) | iloc;
     }
   }
 
-//  for( int i = 0; i < 6; i++ )
-//    m[i] *= ratio;
-//  return;
-
-  for( int i = 0; i < 3; i++ )
-    dm[i] *= ratio;
 
   if( (*ier) & iloc ) {
     /* Simultaneous reduction basis is non-orthogonal, so invert it for the
