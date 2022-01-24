@@ -1107,7 +1107,7 @@ int MMG5_hGeom(MMG5_pMesh mesh) {
         if ( !kk || pt->tag[i] & MG_NOM ) {
           if ( pt->tag[i] & MG_NOM ) {
             if ( mesh->info.iso )
-              pt->edg[i] = ( pt->edg[i] != 0 ) ?  -abs(pt->edg[i]) : MG_ISO;
+              pt->edg[i] = ( pt->edg[i] != 0 ) ?  -abs(pt->edg[i]) : mesh->info.isoref;
           }
           if ( !MMG5_hEdge(mesh,&mesh->htab,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]) )
             return 0;
@@ -1262,11 +1262,11 @@ int MMG5_bdryTria(MMG5_pMesh mesh, int ntmesh) {
         }
         if ( adj ) {
           if ( mesh->info.iso ) {
-            /* Triangle at the interface between two tets is set to the user-defined ref if any, or else to MG_ISO ref */
+            /* Triangle at the interface between two tets is set to the user-defined ref if any, or else to mesh->info.isoref ref */
             if ( pxt && pxt->ftag[i] & MG_BDY )
               ptt->ref = pxt->ref[i];
             else if( MMG5_isLevelSet(mesh,pt->ref,pt1->ref) )
-              ptt->ref = MG_ISO;
+              ptt->ref = mesh->info.isoref;
             else
               ptt->ref = MG_MIN(pt->ref,pt1->ref);
           }
@@ -1361,7 +1361,7 @@ int MMG5_bdryTria(MMG5_pMesh mesh, int ntmesh) {
           if ( pxpr->tag[MMG5_iarf_pr[i][2]] )  ptt->tag[2] = pxpr->tag[MMG5_iarf_pr[i][2]];
         }
         if ( adj ) {
-          if ( mesh->info.iso ) ptt->ref = MG_ISO;
+          if ( mesh->info.iso ) ptt->ref = mesh->info.isoref;
           /* useful only when saving mesh */
           else ptt->ref  = pxpr ? pxpr->ref[i] : 0;
         }

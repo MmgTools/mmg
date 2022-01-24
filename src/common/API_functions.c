@@ -57,6 +57,7 @@ void MMG5_Init_parameters(MMG5_pMesh mesh) {
   mesh->info.imprim   =  1;
   /* [0/1]    ,Turn on/off levelset meshing */
   mesh->info.iso      =  MMG5_OFF;
+  mesh->info.isoref   =  MG_ISO;
   /* [n/-1]   ,Set memory size to n Mbytes/keep the default value */
   mesh->info.mem      = MMG5_NONSET_MEM;
   /* [0/1]    ,Turn on/off debug mode */

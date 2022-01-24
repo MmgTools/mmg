@@ -721,8 +721,8 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
       switch (typ) {
       case 1:
         /* Edge */
-        /* Skip edges with MG_ISO refs */
-        if ( mesh->info.iso && abs(ref)== MG_ISO ) {
+        /* Skip edges with mesh->info.isoref refs */
+        if ( mesh->info.iso && abs(ref)== mesh->info.isoref ) {
           /* Skip this edge but advance the file pointer */
           pa = &mesh->edge[0];
           MMG_FSCANF((*inm),"%d %d ",&pa->a,&pa->b);
@@ -742,8 +742,8 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
         break;
       case 2:
         /* Tria */
-        /* Skip triangles with MG_ISO refs in 3D */
-        if ( mesh->info.iso && abs(ref)== MG_ISO && mesh->dim == 3 ) {
+        /* Skip triangles with mesh->info.isoref refs in 3D */
+        if ( mesh->info.iso && abs(ref)== mesh->info.isoref && mesh->dim == 3 ) {
           /* Skip this triangle but advance the file pointer */
           ptt = &mesh->tria[0];
           MMG_FSCANF((*inm),"%d %d %d",&ptt->v[0],&ptt->v[1],&ptt->v[2]);
@@ -856,8 +856,8 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
 
           if(iswp) ref = MMG5_swapbin(ref);
 
-          /* Skip edges with MG_ISO refs */
-          if ( mesh->info.iso &&  abs(ref) == MG_ISO ) {
+          /* Skip edges with mesh->info.isoref refs */
+          if ( mesh->info.iso &&  abs(ref) == mesh->info.isoref ) {
             /* Skip this edge but advance the file pointer */
             pa = &mesh->edge[0];
             MMG_FREAD(&pa->a,MMG5_SW,1,(*inm));
@@ -911,8 +911,8 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
 
           if(iswp) ref = MMG5_swapbin(ref);
 
-          /* Skip triangles with MG_ISO refs in 3D */
-          if ( mesh->info.iso && abs(ref) == MG_ISO && mesh->dim == 3 ) {
+          /* Skip triangles with mesh->info.isoref refs in 3D */
+          if ( mesh->info.iso && abs(ref) == mesh->info.isoref && mesh->dim == 3 ) {
             /* Skip this triangle but advance the file pointer */
             for ( i=0; i<3 ; ++i ) {
               MMG_FREAD(&l,MMG5_SW,1,(*inm));

@@ -185,7 +185,7 @@ double MMG2D_vfrac(MMG5_pMesh mesh,MMG5_pSol sol,int k,int pm) {
 /**
  * \param mesh pointer toward the mesh
  *
- * Reset MG_ISO vertex and edge references to 0.
+ * Reset mesh->info.isoref vertex and edge references to 0.
  *
  */
 int MMG2D_resetRef(MMG5_pMesh mesh) {
@@ -200,8 +200,8 @@ int MMG2D_resetRef(MMG5_pMesh mesh) {
 
     for (i=0; i<3; i++) {
       p0 = &mesh->point[pt->v[i]];
-      if ( pt->edg[i] == MG_ISO ) pt->edg[i] = 0;
-      if ( p0->ref == MG_ISO ) p0->ref = 0;
+      if ( pt->edg[i] == mesh->info.isoref ) pt->edg[i] = 0;
+      if ( p0->ref == mesh->info.isoref ) p0->ref = 0;
     }
   }
 
@@ -247,8 +247,8 @@ int MMG2D_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, int start, int8_t istart) {
     v1 = sol->m[ip1];
     v2 = sol->m[ip2];
 
-    /* Authorize change of references only provided the boundary reference is MG_ISO */
-    if ( pt->ref != refstart && pt->edg[i1] != MG_ISO ) {
+    /* Authorize change of references only provided the boundary reference is mesh->info.isoref */
+    if ( pt->ref != refstart && pt->edg[i1] != mesh->info.isoref ) {
       smsgn = 0;
       k = 0;
     } else
@@ -277,7 +277,7 @@ int MMG2D_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, int start, int8_t istart) {
     v1 = sol->m[ip1];
     v2 = sol->m[ip2];
 
-    if ( pt->ref != refstart && pt->edg[i1] != MG_ISO ) {
+    if ( pt->ref != refstart && pt->edg[i1] != mesh->info.isoref ) {
       smsgn = 0;
       k = 0;
     } else
@@ -522,7 +522,7 @@ int MMG2D_chkmanimesh(MMG5_pMesh mesh) {
 
       if (! iel ) continue;
       pt1 = &mesh->tria[iel];
-      if ( pt->ref == pt1->ref || pt->edg[i]!= MG_ISO ) continue;
+      if ( pt->ref == pt1->ref || pt->edg[i]!= mesh->info.isoref ) continue;
 
       i1 = MMG5_inxt2[i];
       if ( !MMG2D_chkmaniball(mesh,k,i1) ) {
@@ -982,7 +982,7 @@ int MMG2D_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol){
       }
     }
 
-    /* Set MG_ISO ref at ls edges and at the points of these edges */
+    /* Set mesh->info.isoref ref at ls edges and at the points of these edges */
     if ( nz == 2 ) {
       for (i=0; i<3; i++) {
         ip  = pt->v[MMG5_inxt2[i]];
@@ -990,12 +990,12 @@ int MMG2D_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol){
         v   = sol->m[ip];
         v1  = sol->m[ip1];
         if ( v == 0.0 && v1 == 0.0) {
-          pt->edg[i]  = MG_ISO;
+          pt->edg[i]  = mesh->info.isoref;
           pt->tag[i] |= MG_REF;
           i1 = MMG5_inxt2[i];
           i2 = MMG5_inxt2[i1];
-          mesh->point[pt->v[i1]].ref = MG_ISO;
-          mesh->point[pt->v[i2]].ref = MG_ISO;
+          mesh->point[pt->v[i1]].ref = mesh->info.isoref;
+          mesh->point[pt->v[i2]].ref = mesh->info.isoref;
         }
       }
     }
@@ -1043,7 +1043,7 @@ int MMG2D_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met) {
   /* No need to keep adjacencies from now on */
   MMG5_DEL_MEM(mesh,mesh->adja);
 
-  /* Reset the MG_ISO field everywhere it appears */
+  /* Reset the mesh->info.isoref field everywhere it appears */
   if ( !MMG2D_resetRef(mesh) ) {
     fprintf(stderr,"\n  ## Problem in resetting references. Exit program.\n");
     return 0;

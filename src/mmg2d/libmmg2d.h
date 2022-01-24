@@ -84,6 +84,7 @@ extern "C" {
     MMG2D_DPARAM_ls,                /*!< [val], Value of level-set */
     MMG2D_DPARAM_rmc,               /*!< [-1/val], Remove small connex componants in level-set mode */
     MMG2D_IPARAM_nofem,             /*!< [1/0], Generate a non finite element mesh */
+    MMG2D_IPARAM_isoref,            /*!< [0/n], Iso-surface boundary material reference */
   };
 
 /*----------------------------- functions header -----------------------------*/

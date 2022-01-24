@@ -63,6 +63,7 @@ enum MMGS_Param {
   MMGS_IPARAM_debug,             /*!< [1/0], Turn on/off debug mode */
   MMGS_IPARAM_angle,             /*!< [1/0], Turn on/off angle detection */
   MMGS_IPARAM_iso,               /*!< [1/0], Level-set meshing */
+  MMGS_IPARAM_isoref,            /*!< [0/n], Iso-surface boundary material reference */
   MMGS_IPARAM_keepRef,           /*!< [1/0], Preserve the initial domain references in level-set mode */
   MMGS_IPARAM_optim,             /*!< [1/0], Optimize mesh keeping its initial edge sizes */
   MMGS_IPARAM_noinsert,          /*!< [1/0], Avoid/allow point insertion */

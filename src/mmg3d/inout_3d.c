@@ -545,7 +545,7 @@ int MMG3D_loadMesh_opened(MMG5_pMesh mesh,FILE *inm,int bin) {
   if ( mesh->nt ) {
     rewind(inm);
     fseek(inm,posnt,SEEK_SET);
-    /* Skip triangles with MG_ISO refs */
+    /* Skip triangles with mesh->info.isoref refs */
     if( mesh->info.iso ) {
       mesh->nt = 0;
       MMG5_SAFE_CALLOC(ina,nt+1,int,return -1);
@@ -562,7 +562,7 @@ int MMG3D_loadMesh_opened(MMG5_pMesh mesh,FILE *inm,int bin) {
           MMG_FREAD(&ref,MMG5_SW,1,inm);
           if(iswp) ref=MMG5_swapbin(ref);
         }
-        if( abs(ref) != MG_ISO ) {
+        if( abs(ref) != mesh->info.isoref ) {
           pt1 = &mesh->tria[++mesh->nt];
           pt1->v[0] = v[0];
           pt1->v[1] = v[1];
@@ -576,7 +576,7 @@ int MMG3D_loadMesh_opened(MMG5_pMesh mesh,FILE *inm,int bin) {
         }
         else {
           /* To uncomment when the normals reading will be enabled in iso mode */
-          /* Mark the MG_ISO point to be able to delete the normal at points */
+          /* Mark the mesh->info.isoref point to be able to delete the normal at points */
           /* mesh->point[v[0]].xp = -1; */
           /* mesh->point[v[1]].xp = -1; */
           /* mesh->point[v[2]].xp = -1; */
@@ -792,7 +792,7 @@ int MMG3D_loadMesh_opened(MMG5_pMesh mesh,FILE *inm,int bin) {
       }
 
       if ( mesh->info.iso ) {
-        if( pa->ref != MG_ISO ) {
+        if( pa->ref != mesh->info.isoref ) {
           ++mesh->na;
           memmove(&mesh->edge[mesh->na],&mesh->edge[k],sizeof(MMG5_Edge));
           ina[k] = mesh->na;
@@ -1106,7 +1106,7 @@ int MMG3D_loadMesh_opened(MMG5_pMesh mesh,FILE *inm,int bin) {
         }
         if ( idn > 0 && ip < mesh->np+1 ) {
           if ( (mesh->info.iso ) &&  mesh->point[ip].xp == -1 ) {
-            /* Do not store the normals at MG_ISO points (ls mode) */
+            /* Do not store the normals at mesh->info.isoref points (ls mode) */
             continue;
           }
           memcpy(&mesh->point[ip].n,&norm[3*(idn-1)+1],3*sizeof(double));
