@@ -1245,6 +1245,53 @@ int MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int np1,
   }
 }
 
+/**
+ * \param dim matrix size.
+ * \param m matrix array.
+ * \param dm diagonal values array.
+ * \param iv array of inverse coreduction basis.
+ *
+ * Recompose a symmetric matrix from its diagonalization on a simultaneous
+ * reduction basis.
+ * \warning Eigenvectors in Mmg are stored as matrix rows (the first dimension
+ * of the double array spans the number of eigenvectors, the second dimension
+ * spans the number of entries of each eigenvector). So the inverse (left
+ * eigenvectors) is also stored with transposed indices.
+ */
+inline
+void MMG5_simredmat(int8_t dim,double *m,double *dm,double *iv) {
+  int8_t i,j,k,ij;
+
+  /* Storage of a matrix as a one-dimensional array: dim*(dim+1)/2 entries for
+   * a symmetric matrix. */
+  ij = 0;
+
+  /* Loop on matrix rows */
+  for( i = 0; i < dim; i++ ) {
+    /* Loop on the upper-triangular part of the matrix */
+    for( j = i; j < dim; j++ ) {
+      /* Initialize matrix entry */
+      m[ij] = 0.0;
+      /* Compute matrix entry as the recomposition of diagonal values after
+       * projection on the coreduction basis, using the inverse of the
+       * transformation:
+       *
+       * M_{ij} = \sum_{k,l} V^{-1}_{ki} Lambda_{kl} V^{-1}_{lj} =
+       *        = \sum_{k} lambda_{k} V^{-1}_{ki} V^{-1}_{kj}
+       *
+       * Since the inverse of the transformation is the inverse of an
+       * eigenvectors matrix (which is stored in Mmg by columns, and not by
+       * rows), the storage of the inverse matrix is also transposed and the
+       * indices have to be exchanged when implementing the above formula. */
+      for( k = 0; k < dim; k++ ) {
+        m[ij] += dm[k]*iv[i*dim+k]*iv[j*dim+k];
+      }
+      /* Go to the next entry */
+      ++ij;
+    }
+  }
+  assert( ij == (dim+1)*dim/2 );
+}
 
 /**
  * \param mesh pointer toward the mesh
@@ -1259,10 +1306,11 @@ int MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int np1,
  * Perform simultaneous reduction of matrices \a m and \a n.
  *
  */
-int MMG5_simred(MMG5_pMesh mesh,double *m,double *n,double dm[2],
-                 double dn[2],double vp[2][2] ) {
+int MMG5_simred2d(MMG5_pMesh mesh,double *m,double *n,double dm[2],
+                  double dn[2],double vp[2][2] ) {
 
-  double         det,dd,sqDelta,trimn,vnorm,lambda[2],imn[4];
+  double         det,lambda[2],imn[4];
+  int            order;
   static int8_t  mmgWarn0=0;
 
   /* Compute imn = M^{-1}N */
@@ -1281,22 +1329,21 @@ int MMG5_simred(MMG5_pMesh mesh,double *m,double *n,double dm[2],
   imn[1] = det * ( m[2]*n[1] - m[1]*n[2]);
   imn[2] = det * (-m[1]*n[0] + m[0]*n[1]);
   imn[3] = det * (-m[1]*n[1] + m[0]*n[2]);
-  dd = imn[0] - imn[3];
-  sqDelta = sqrt(fabs(dd*dd + 4.0*imn[1]*imn[2]));
-  trimn = imn[0] + imn[3];
 
-  lambda[0] = 0.5 * (trimn - sqDelta);
-  if ( lambda[0] < 0.0 ) {
+  /* Find eigenvalues of imn */
+  order = MMG5_eigenv2d(0,imn,lambda,vp);
+
+  if ( !order ) {
     if ( !mmgWarn0 ) {
       mmgWarn0 = 1;
-      fprintf(stderr,"\n  ## Warning: %s: at least 1 metric with a "
-              "negative eigenvalue: %f \n",__func__,lambda[0]);
+      fprintf(stderr,"\n  ## Warning: %s: at least 1 failing"
+              " simultaneous reduction.\n",__func__);
     }
     return 0;
   }
 
   /* First case : matrices m and n are homothetic: n = lambda0*m */
-  if ( sqDelta < MMG5_EPS ) {
+  if ( order == 2 ) {
 
     /* Subcase where m is diaonal */
     if ( fabs(m[1]) < MMG5_EPS ) {
@@ -1318,37 +1365,7 @@ int MMG5_simred(MMG5_pMesh mesh,double *m,double *n,double dm[2],
   }
   /* Second case: both eigenvalues of imn are distinct ; theory says qf associated to m and n
    are diagonalizable in basis (vp[0], vp[1]) - the coreduction basis */
-  else {
-    lambda[1] = 0.5 * (trimn + sqDelta);
-    assert(lambda[1] >= 0.0);
-
-    vp[0][0] = imn[1];
-    vp[0][1] = (lambda[0] - imn[0]);
-    vnorm  = sqrt(vp[0][0]*vp[0][0] + vp[0][1]*vp[0][1]);
-
-    if ( vnorm < MMG5_EPS ) {
-      vp[0][0] = (lambda[0] - imn[3]);
-      vp[0][1] = imn[2];
-      vnorm  = sqrt(vp[0][0]*vp[0][0] + vp[0][1]*vp[0][1]);
-    }
-
-    vnorm   = 1.0 / vnorm;
-    vp[0][0] *= vnorm;
-    vp[0][1] *= vnorm;
-
-    vp[1][0] = imn[1];
-    vp[1][1] = (lambda[1] - imn[0]);
-    vnorm  = sqrt(vp[1][0]*vp[1][0] + vp[1][1]*vp[1][1]);
-
-    if ( vnorm < MMG5_EPS ) {
-      vp[1][0] = (lambda[1] - imn[3]);
-      vp[1][1] = imn[2];
-      vnorm  = sqrt(vp[1][0]*vp[1][0] + vp[1][1]*vp[1][1]);
-    }
-
-    vnorm   = 1.0 / vnorm;
-    vp[1][0] *= vnorm;
-    vp[1][1] *= vnorm;
+  else if( order == 1 ) {
 
     /* Compute diagonal values in simultaneous reduction basis */
     dm[0] = m[0]*vp[0][0]*vp[0][0] + 2.0*m[1]*vp[0][0]*vp[0][1] + m[2]*vp[0][1]*vp[0][1];
@@ -1362,6 +1379,476 @@ int MMG5_simred(MMG5_pMesh mesh,double *m,double *n,double dm[2],
 
   if ( dm[0] < MMG5_EPSOK || dn[0] < MMG5_EPSOK ) { return 0; }
   if ( dm[1] < MMG5_EPSOK || dn[1] < MMG5_EPSOK ) { return 0; }
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh
+ * \param m first matrix
+ * \param n second matrix
+ * \param dm eigenvalues of m in the coreduction basis (to fill)
+ * \param dn eigenvalues of n in the coreduction basis (to fill)
+ * \param vp coreduction basis (to fill)
+ *
+ * \return 0 if fail 1 otherwise.
+ *
+ * Perform simultaneous reduction of matrices \a m and \a n.
+ *
+ */
+int MMG5_simred3d(MMG5_pMesh mesh,double *m,double *n,double dm[3],
+                  double dn[3],double vp[3][3] ) {
+
+  double        lambda[3],im[6],imn[9];
+  int           order;
+  static int8_t mmgWarn0=0;
+
+  /* Compute imn = M^{-1}N */
+  if ( !MMG5_invmat ( m,im ) ) {
+    if ( !mmgWarn0 ) {
+      mmgWarn0 = 1;
+      fprintf(stderr,"\n  ## Warning: %s: unable to invert the matrix.\n",__func__);
+    }
+    return 0;
+  }
+
+  MMG5_mn(im,n,imn);
+
+  /* Find eigenvalues of imn */
+  order = MMG5_eigenv3d(0,imn,lambda,vp);
+
+  if ( !order ) {
+    if ( !mmgWarn0 ) {
+      mmgWarn0 = 1;
+      fprintf(stderr,"\n  ## Warning: %s: at least 1 failing"
+              " simultaneous reduction.\n",__func__);
+    }
+    return 0;
+  }
+
+  if ( order == 3 ) {
+    /* First case : matrices m and n are homothetic: n = lambda0*m */
+    if ( (fabs(m[1]) < MMG5_EPS && fabs(m[2]) < MMG5_EPS
+          && fabs(m[4]) < MMG5_EPS) ) {
+      /* Subcase where m is diaonal */
+        dm[0]   = m[0];
+        dm[1]   = m[3];
+        dm[2]   = m[5];
+        vp[0][0] = 1;
+        vp[0][1] = 0;
+        vp[0][2] = 0;
+        vp[1][0] = 0;
+        vp[1][1] = 1;
+        vp[1][2] = 0;
+        vp[2][0] = 0;
+        vp[2][1] = 0;
+        vp[2][2] = 1;
+    }
+    else {
+      /* Subcase where m is not diagonal; dd,trimn,... are reused */
+      MMG5_eigenv3d(1,m,dm,vp);
+    }
+    /* Eigenvalues of metric n */
+    dn[0] = lambda[0]*dm[0];
+    dn[1] = lambda[0]*dm[1];
+    dn[2] = lambda[0]*dm[2];
+  }
+  else if( order == 2 ) {
+    /* Second case: two eigenvalues of imn are coincident (first two entries of
+     * the lambda array) and one is distinct (last entry).
+     * Simultaneous reduction gives a block diagonalization. The 2x2 blocks are
+     * homothetic and can be diagonalized through the eigenvectors of one of the
+     * two blocks. */
+    double mred[6],nred[6];
+    /* project matrices on the coreduction basis: they should have the
+     * block-diagonal form [ m0, m1, 0, m3, 0, m5 ] */
+    MMG5_rmtr(vp,m,mred);
+    MMG5_rmtr(vp,n,nred);
+    /* compute projections on the last eigenvector (that with multiplicity 1) */
+    dm[2] = mred[5];
+    dn[2] = nred[5];
+    /* re-arrange matrices so that the first three entries describe the
+     * 2x2 blocks to be diagonalized (the two blocks are homothetic) */
+    mred[2] = mred[3];
+    nred[2] = nred[3];
+    /* diagonalization of the first 2x2 block */
+    if( fabs(mred[1]) < MMG5_EPS ) {
+     /* first case: the blocks are diagonal, basis vp is unchanged */
+      dm[0] = mred[0];
+      dm[1] = mred[2];
+    } else {
+      /* second case: the blocks are not diagonal */
+      double wp[2][2],up[2][3];
+      int8_t i,j,k;
+      MMG5_eigensym(mred,dm,wp);
+      /* change the basis vp (vp[2] is unchanged) */
+      for( j = 0; j < 2; j++ ) {
+        for( i = 0; i < 3; i++ ) {
+          up[j][i] = 0.;
+          for( k = 0; k < 2; k++ ) {
+            up[j][i] += vp[k][i]*wp[j][k];
+          }
+        }
+      }
+      for( j = 0; j < 2; j++ ) {
+        for( i = 0; i < 3; i++ ) {
+          vp[j][i] = up[j][i];
+        }
+      }
+    }
+    /* homothetic diagonalization of the second 2x2 block */
+    dn[0] = lambda[0]*dm[0];
+    dn[1] = lambda[0]*dm[1];
+  }
+  else {
+    /* Third case: eigenvalues of imn are distinct ; theory says qf associated
+       to m and n are diagonalizable in basis (vp[0], vp[1], vp[2]) - the
+       coreduction basis */
+    /* Compute diagonal values in simultaneous reduction basis */
+    dm[0] = m[0]*vp[0][0]*vp[0][0] + 2.0*m[1]*vp[0][0]*vp[0][1] + 2.0*m[2]*vp[0][0]*vp[0][2]
+          + m[3]*vp[0][1]*vp[0][1] + 2.0*m[4]*vp[0][1]*vp[0][2]     + m[5]*vp[0][2]*vp[0][2];
+    dm[1] = m[0]*vp[1][0]*vp[1][0] + 2.0*m[1]*vp[1][0]*vp[1][1] + 2.0*m[2]*vp[1][0]*vp[1][2]
+          + m[3]*vp[1][1]*vp[1][1] + 2.0*m[4]*vp[1][1]*vp[1][2]     + m[5]*vp[1][2]*vp[1][2];
+    dm[2] = m[0]*vp[2][0]*vp[2][0] + 2.0*m[1]*vp[2][0]*vp[2][1] + 2.0*m[2]*vp[2][0]*vp[2][2]
+          + m[3]*vp[2][1]*vp[2][1] + 2.0*m[4]*vp[2][1]*vp[2][2]     + m[5]*vp[2][2]*vp[2][2];
+
+    dn[0] = n[0]*vp[0][0]*vp[0][0] + 2.0*n[1]*vp[0][0]*vp[0][1] + 2.0*n[2]*vp[0][0]*vp[0][2]
+          + n[3]*vp[0][1]*vp[0][1] + 2.0*n[4]*vp[0][1]*vp[0][2]     + n[5]*vp[0][2]*vp[0][2];
+    dn[1] = n[0]*vp[1][0]*vp[1][0] + 2.0*n[1]*vp[1][0]*vp[1][1] + 2.0*n[2]*vp[1][0]*vp[1][2]
+          + n[3]*vp[1][1]*vp[1][1] + 2.0*n[4]*vp[1][1]*vp[1][2]     + n[5]*vp[1][2]*vp[1][2];
+    dn[2] = n[0]*vp[2][0]*vp[2][0] + 2.0*n[1]*vp[2][0]*vp[2][1] + 2.0*n[2]*vp[2][0]*vp[2][2]
+          + n[3]*vp[2][1]*vp[2][1] + 2.0*n[4]*vp[2][1]*vp[2][2]     + n[5]*vp[2][2]*vp[2][2];
+  }
+
+  assert ( dm[0] >= MMG5_EPSD2 && dm[1] >= MMG5_EPSD2 && dm[2] >= MMG5_EPSD2 && "positive eigenvalue" );
+  assert ( dn[0] >= MMG5_EPSD2 && dn[1] >= MMG5_EPSD2 && dn[2] >= MMG5_EPSD2 && "positive eigenvalue" );
+
+  if ( dm[0] < MMG5_EPSOK || dn[0] < MMG5_EPSOK ) { return 0; }
+  if ( dm[1] < MMG5_EPSOK || dn[1] < MMG5_EPSOK ) { return 0; }
+  if ( dm[2] < MMG5_EPSOK || dn[2] < MMG5_EPSOK ) { return 0; }
+
+  return 1;
+}
+
+/**
+ * \param dim square matrix size
+ * \param dm diagonal values array
+ * \param dn diagonal values array
+ * \param vp basis vectors array
+ * \param swap swap array
+ * \param perm permutation array
+ *
+ * Sort and permute diagonal values (and basis vectors) in increasing order
+ * with respect to the first matrix.
+ *
+ */
+void MMG5_sort_simred( int8_t dim,double *dm,double *dn,double *vp,
+                       double *swap,int8_t *perm ) {
+  MMG5_nsort(dim,dm,perm);
+  MMG5_nperm(dim,0,1,dm,swap,perm);
+  MMG5_nperm(dim,0,1,dn,swap,perm);
+  for( int8_t i = 0; i < dim; i++ )
+    MMG5_nperm(dim,i,dim,vp,swap,perm);
+}
+
+/**
+ *
+ * For a couple of 2x2 symmetric matrices, Test:
+ * - the computation of the simultaneous reduction values of the matrices;
+ * - the computation of the simultaneous reduction basis vectors..
+ *
+ */
+int MMG5_test_simred2d() {
+  MMG5_pMesh mesh;
+  double mex[3] = { 508., -504,  502.}; /* Test matrix 1 */
+  double nex[3] = {4020.,-2020.,1020.}; /* Test matrix 2 */
+  double dmex[2] = {  1., 100. }; /* Exact cobasis projection 1 */
+  double dnex[2] = {500.,   4. }; /* Exact cobasis projection 2 */
+  double vpex[2][2] = {{ 1./sqrt(2.),1./sqrt(2.)},
+                        {1./sqrt(5.),2./sqrt(5.)}}; /* Exact cobasis vectors */
+  double dmnum[2],dnnum[2],vpnum[2][2],ivpnum[2][2],mnum[3],nnum[3]; /* Numerical quantities */
+  double swap[2],maxerr,err;
+  int8_t perm[2]; /* permutation array */
+
+  /** Compute simultaneous reduction */
+  if( !MMG5_simred2d(mesh,mex,nex,dmnum,dnnum,vpnum ) )
+    return 0;
+
+  /* Naively sort eigenpairs in increasing order */
+  MMG5_sort_simred(2,dmnum,dnnum,(double *)vpnum,swap,perm);
+
+  /* Check diagonal values error in norm inf */
+  maxerr = MMG5_test_mat_error(2,(double *)dmex,(double *)dmnum);
+  if( maxerr > 100*MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error first matrix coreduction values: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+  maxerr = MMG5_test_mat_error(2,(double *)dnex,(double *)dnnum);
+  if( maxerr > 1000*MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error second matrix coreduction values: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+
+  /* Check eigenvectors error through scalar product */
+  maxerr = 0.;
+  for( int8_t i = 0; i < 2; i++ ) {
+    err = 0.;
+    for( int8_t j = 0; j < 2; j++ )
+      err += vpex[i][j] * vpnum[i][j];
+    err = 1.-fabs(err);
+    maxerr = MG_MAX(maxerr,err);
+  }
+  if( maxerr > MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error matrix coreduction vectors: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+
+  /** Recompose matrices from diagonal values */
+  if( !MMG5_invmat22(vpnum,ivpnum) )
+    return 0;
+  MMG5_simredmat(2,mnum,dmnum,(double *)ivpnum);
+  MMG5_simredmat(2,nnum,dnnum,(double *)ivpnum);
+
+  /* Check matrices in norm inf */
+  maxerr = MMG5_test_mat_error(3,mex,mnum);
+  if( maxerr > 1.e2*MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error first matrix coreduction recomposition: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+  maxerr = MMG5_test_mat_error(3,nex,nnum);
+  if( maxerr > 1.e4*MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error second matrix coreduction recomposition: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+
+  return 1;
+}
+
+/**
+ *
+ * For a couple of 3x3 symmetric matrices, Test:
+ * - the computation of the simultaneous reduction values of the matrices;
+ * - the computation of the simultaneous reduction basis vectors..
+ *
+ */
+int MMG5_test_simred3d() {
+  MMG5_pMesh mesh;
+  double mex[6] = {111./2.,-109./2.,  89./2.,111./2.,-91./2.,111./2.}; /* Test matrix 1 */
+  double nex[6] = {409./2.,-393./2.,-407./2.,409./2.,391./2.,409./2.}; /* Test matrix 2 */
+  double dmex[3] = {1., 10.,100.}; /* Exact cobasis projection 1 */
+  double dnex[3] = {8.,400.,  1.}; /* Exact cobasis projection 2 */
+  double vpex[3][3] = {{1./sqrt(2.),1./sqrt(2.),0.},
+                       {0.,         1./sqrt(2.),1./sqrt(2.)},
+                       {1./sqrt(2.),         0.,1./sqrt(2.)}}; /* Exact cobasis vectors */
+  double dmnum[3],dnnum[3],vpnum[3][3],ivpnum[3][3],mnum[6],nnum[6]; /* Numerical quantities */
+  double swap[3],maxerr,err;
+  int8_t perm[3]; /* permutation array */
+
+  /** Compute simultaneous reduction */
+  if( !MMG5_simred3d(mesh,mex,nex,dmnum,dnnum,vpnum ) )
+    return 0;
+
+  /* Naively sort eigenpairs in increasing order */
+  MMG5_sort_simred(3,dmnum,dnnum,(double *)vpnum,swap,perm);
+
+  /* Check diagonal values error in norm inf */
+  maxerr = MMG5_test_mat_error(3,(double *)dmex,(double *)dmnum);
+  if( maxerr > 100*MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error first matrix coreduction values: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+  maxerr = MMG5_test_mat_error(3,(double *)dnex,(double *)dnnum);
+  if( maxerr > 1000*MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error second matrix coreduction values: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+
+  /* Check eigenvectors error through scalar product */
+  maxerr = 0.;
+  for( int8_t i = 0; i < 3; i++ ) {
+    err = 0.;
+    for( int8_t j = 0; j < 3; j++ )
+      err += vpex[i][j] * vpnum[i][j];
+    err = 1.-fabs(err);
+    maxerr = MG_MAX(maxerr,err);
+  }
+  if( maxerr > MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error matrix coreduction vectors: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+
+  /** Recompose matrices from diagonal values */
+  if( !MMG5_invmat33(vpnum,ivpnum) )
+    return 0;
+  MMG5_simredmat(3,mnum,dmnum,(double *)ivpnum);
+  MMG5_simredmat(3,nnum,dnnum,(double *)ivpnum);
+
+  /* Check matrices in norm inf */
+  maxerr = MMG5_test_mat_error(6,mex,mnum);
+  if( maxerr > 1.e2*MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error first matrix coreduction recomposition: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+  maxerr = MMG5_test_mat_error(6,nex,nnum);
+  if( maxerr > 1.e3*MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error second matrix coreduction recomposition: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+
+  return 1;
+}
+
+/**
+ * \param m first matrix
+ * \param n second matrix
+ * \param dm eigenvalues of m in the coreduction basis
+ * \param dn eigenvalues of n in the coreduction basis
+ * \param vp coreduction basis
+ * \param ier flag of the updated sizes: (ier & 1) if we dm has been modified, (ier & 2) if dn has been modified.
+ *
+ * \return 0 if fail, 1 otherwise
+ *
+ * Update of the metrics = tP^-1 diag(d0,d1)P^-1, P = (vp[0], vp[1]) stored in
+ * columns in 2D.
+ *
+ */
+inline
+int MMG5_updatemet2d_ani(double *m,double *n,double dm[2],double dn[2],
+                         double vp[2][2],int8_t ier ) {
+  double det,ip[4];
+
+  det = vp[0][0]*vp[1][1] - vp[0][1]*vp[1][0];
+  if ( fabs(det) < MMG5_EPS )  return 0;
+  det = 1.0 / det;
+
+  ip[0] =  vp[1][1]*det;
+  ip[1] = -vp[1][0]*det;
+  ip[2] = -vp[0][1]*det;
+  ip[3] =  vp[0][0]*det;
+
+  if ( ier & 1 ) {
+    m[0] = dm[0]*ip[0]*ip[0] + dm[1]*ip[2]*ip[2];
+    m[1] = dm[0]*ip[0]*ip[1] + dm[1]*ip[2]*ip[3];
+    m[2] = dm[0]*ip[1]*ip[1] + dm[1]*ip[3]*ip[3];
+  }
+  if ( ier & 2 ) {
+    n[0] = dn[0]*ip[0]*ip[0] + dn[1]*ip[2]*ip[2];
+    n[1] = dn[0]*ip[0]*ip[1] + dn[1]*ip[2]*ip[3];
+    n[2] = dn[0]*ip[1]*ip[1] + dn[1]*ip[3]*ip[3];
+  }
+  return 1;
+}
+
+/**
+ * \param m first matrix
+ * \param n second matrix
+ * \param dm eigenvalues of m in the coreduction basis
+ * \param dn eigenvalues of n in the coreduction basis
+ * \param vp coreduction basis
+ * \param ier flag of the updated sizes: (ier & 1) if we dm has been modified, (ier & 2) if dn has been modified.
+ *
+ * \return 0 if fail, 1 otherwise
+ *
+ * Update of the metrics = tP^-1 diag(d0,d1)P^-1, P = (vp[0], vp[1]) stored in
+ * columns in 3D.
+ *
+ */
+inline
+int MMG5_updatemet3d_ani(double *m,double *n,double dm[3],double dn[3],
+                         double vp[3][3],int8_t ier ) {
+  double ivp[3][3];
+
+  if( !MMG5_invmat33(vp,ivp) )
+    return 0;
+
+  if ( ier & 1 ) {
+    MMG5_simredmat(3,m,dm,(double *)ivp);
+  }
+  if ( ier & 2 ) {
+    MMG5_simredmat(3,n,dn,(double *)ivp);
+  }
+  return 1;
+}
+
+/**
+ *
+ * Test Update of the metrics = tP^-1 diag(d0,d1)P^-1, P = (vp[0], vp[1]) stored
+ * in columns in 2D.
+ *
+ */
+int MMG5_test_updatemet2d_ani() {
+  double mex[3] = { 508., -504,  502.}; /* Test matrix 1 */
+  double nex[3] = {4020.,-2020.,1020.}; /* Test matrix 2 */
+  double dm[2] = {  1., 100. }; /* Exact cobasis projection 1 */
+  double dn[2] = {500.,   4. }; /* Exact cobasis projection 2 */
+  double vp[2][2] = {{ 1./sqrt(2.),1./sqrt(2.)},
+                     {1./sqrt(5.),2./sqrt(5.)}}; /* Exact cobasis vectors */
+  double mnum[3],nnum[3],maxerr; /* Numerical quantities */
+
+  /** Recompose matrices from exact simultaneous diagonalization */
+  if( !MMG5_updatemet2d_ani(mnum,nnum,dm,dn,vp,3) )
+    return 0;
+
+  /* Check values error in norm inf */
+  maxerr = MMG5_test_mat_error(3,(double *)mex,(double *)mnum);
+  if( maxerr > 1.e4*MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error first matrix recomposition from simultaneous reduction: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+  maxerr = MMG5_test_mat_error(3,(double *)nex,(double *)nnum);
+  if( maxerr > 1.e4*MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error second matrix recomposition from simultaneous reduction: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+
+  return 1;
+}
+
+/**
+ *
+ * Test Update of the metrics = tP^-1 diag(d0,d1)P^-1, P = (vp[0], vp[1]) stored
+ * in columns in 3D.
+ *
+ */
+int MMG5_test_updatemet3d_ani() {
+  double mex[6] = {111./2.,-109./2.,  89./2.,111./2.,-91./2.,111./2.}; /* Test matrix 1 */
+  double nex[6] = {409./2.,-393./2.,-407./2.,409./2.,391./2.,409./2.}; /* Test matrix 2 */
+  double dm[3] = {1., 10.,100.}; /* Exact cobasis projection 1 */
+  double dn[3] = {8.,400.,  1.}; /* Exact cobasis projection 2 */
+  double vp[3][3] = {{1./sqrt(2.),1./sqrt(2.),0.},
+                     {0.,         1./sqrt(2.),1./sqrt(2.)},
+                     {1./sqrt(2.),         0.,1./sqrt(2.)}}; /* Exact cobasis vectors */
+  double mnum[6],nnum[6],maxerr; /* Numerical quantities */
+
+  /** Recompose matrices from exact simultaneous diagonalization */
+  if( !MMG5_updatemet3d_ani(mnum,nnum,dm,dn,vp,3) )
+    return 0;
+
+  /* Check values error in norm inf */
+  maxerr = MMG5_test_mat_error(6,(double *)mex,(double *)mnum);
+  if( maxerr > 100*MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error first matrix recomposition from simultaneous reduction: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+  maxerr = MMG5_test_mat_error(6,(double *)nex,(double *)nnum);
+  if( maxerr > 100*MMG5_EPSOK ) {
+    fprintf(stderr,"  ## Error second matrix recomposition from simultaneous reduction: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
 
   return 1;
 }
@@ -1556,7 +2043,7 @@ int MMG5_grad2metSurfreq(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int npma
   difsiz = mesh->info.hgradreq*l;
 
   /* Simultaneous reduction of mtan1 and mtan2 */
-  if ( !MMG5_simred(mesh,mtan1,mtan2,lambda,mu,vp) ) {
+  if ( !MMG5_simred2d(mesh,mtan1,mtan2,lambda,mu,vp) ) {
     return 0;
   }
 
@@ -1581,7 +2068,7 @@ int MMG5_grad2metSurfreq(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int npma
      * found. So, compute the eigenvalues. */
     double ll[3],rr[3][3],llmin;
     int i;
-    if( !MMG5_eigenv(1,mm2,ll, rr) ) {
+    if( !MMG5_eigenv3d(1,mm2,ll, rr) ) {
       return 0;
     }
     llmin = DBL_MAX;
@@ -1673,7 +2160,7 @@ int MMG5_grad2metSurfreq(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, int npma
 
 #ifndef NDEBUG
     /* Check the validity of the output metric */
-    ier = MMG5_eigenv(1,m2,mu, r2);
+    ier = MMG5_eigenv3d(1,m2,mu, r2);
 
     assert ( ier );
     assert ( mu[0] > 0.);

@@ -381,7 +381,7 @@ int MMG5_check_accuracy(double mat[6],double lambda[3], double v[3][3],
  * \remark the i^{th} eigenvector is stored in v[i][.].
  *
  */
-int MMG5_eigenv(int symmat,double *mat,double lambda[3],double v[3][3]) {
+int MMG5_eigenv3d(int symmat,double *mat,double lambda[3],double v[3][3]) {
   double    a11,a12,a13,a21,a22,a23,a31,a32,a33;
   double    aa,bb,cc,dd,ee,ii,vx1[3],vx2[3],vx3[3],dd1,dd2,dd3;
   double    maxd,maxm,valm,p[4],w1[3],w2[3],w3[3],epsd;
@@ -580,39 +580,54 @@ int MMG5_eigenv(int symmat,double *mat,double lambda[3],double v[3][3]) {
 
   /* (vp1,vp2) double,  vp3 simple root */
   else if ( n == 2 ) {
+    /* basis vectors of Im(tA-lambda[2]*I) */
+    double z1[3],z2[3];
+
+    /** rows of A-lambda[2]*I */
     w1[0] = a11 - lambda[2];
     w2[1] = a22 - lambda[2];
     w3[2] = a33 - lambda[2];
 
-    /* cross product */
+    /* ker(A-lambda[2]*I) has dimension 1 and it is orthogonal to
+     * Im(tA-lambda[2]*I), which has dimension 2.
+     * So the eigenvector vp[2] can be computed as the cross product of the two
+     * linearly independent rows of (A-lambda[2]*I).
+     *
+     * Compute all pairwise cross products of the rows of (A-lambda[2]*I), and
+     * pick the one with maximum norm (the other two will have zero norm, but
+     * this is tricky to detect numerically due to cancellation errors). */
     vx1[0] = w1[1]*w3[2] - w1[2]*w3[1];
     vx1[1] = w1[2]*w3[0] - w1[0]*w3[2];
     vx1[2] = w1[0]*w3[1] - w1[1]*w3[0];
-    dd1 = vx1[0]*vx1[0] + vx1[1]*vx1[1] + vx1[2]*vx1[2];
+    dd1    = vx1[0]*vx1[0] + vx1[1]*vx1[1] + vx1[2]*vx1[2];
 
     vx2[0] = w1[1]*w2[2] - w1[2]*w2[1];
     vx2[1] = w1[2]*w2[0] - w1[0]*w2[2];
     vx2[2] = w1[0]*w2[1] - w1[1]*w2[0];
-    dd2 = vx2[0]*vx2[0] + vx2[1]*vx2[1] + vx2[2]*vx2[2];
+    dd2    = vx2[0]*vx2[0] + vx2[1]*vx2[1] + vx2[2]*vx2[2];
 
     vx3[0] = w2[1]*w3[2] - w2[2]*w3[1];
     vx3[1] = w2[2]*w3[0] - w2[0]*w3[2];
     vx3[2] = w2[0]*w3[1] - w2[1]*w3[0];
-    dd3 = vx3[0]*vx3[0] + vx3[1]*vx3[1] + vx3[2]*vx3[2];
+    dd3    = vx3[0]*vx3[0] + vx3[1]*vx3[1] + vx3[2]*vx3[2];
 
-    /* find vector of max norm */
+    /* find vector of max norm to pick the two linearly independent rows */
     if ( dd1 > dd2 ) {
       if ( dd1 > dd3 ) {
         dd1 = 1.0 / sqrt(dd1);
         v[2][0] = vx1[0] * dd1;
         v[2][1] = vx1[1] * dd1;
         v[2][2] = vx1[2] * dd1;
+        memcpy(z1,w1,3*sizeof(double));
+        memcpy(z2,w3,3*sizeof(double));
       }
       else {
         dd3 = 1.0 / sqrt(dd3);
         v[2][0] = vx3[0] * dd3;
         v[2][1] = vx3[1] * dd3;
         v[2][2] = vx3[2] * dd3;
+        memcpy(z1,w2,3*sizeof(double));
+        memcpy(z2,w3,3*sizeof(double));
       }
     }
     else {
@@ -621,40 +636,125 @@ int MMG5_eigenv(int symmat,double *mat,double lambda[3],double v[3][3]) {
         v[2][0] = vx2[0] * dd2;
         v[2][1] = vx2[1] * dd2;
         v[2][2] = vx2[2] * dd2;
+        memcpy(z1,w1,3*sizeof(double));
+        memcpy(z2,w2,3*sizeof(double));
       }
       else {
         dd3 = 1.0 / sqrt(dd3);
         v[2][0] = vx3[0] * dd3;
         v[2][1] = vx3[1] * dd3;
         v[2][2] = vx3[2] * dd3;
+        memcpy(z1,w2,3*sizeof(double));
+        memcpy(z2,w3,3*sizeof(double));
       }
     }
+    /* The two linearly independent rows provide a basis for Im(tA-lambda[2]*I).
+     * Normalize them to reduce roundoff errors. */
+    dd1 = z1[0]*z1[0] + z1[1]*z1[1] + z1[2]*z1[2];
+    dd1 = 1.0 / sqrt(dd1);
+    z1[0] *= dd1;
+    z1[1] *= dd1;
+    z1[2] *= dd1;
+    dd2 = z2[0]*z2[0] + z2[1]*z2[1] + z2[2]*z2[2];
+    dd2 = 1.0 / sqrt(dd2);
+    z2[0] *= dd2;
+    z2[1] *= dd2;
+    z2[2] *= dd2;
 
-    /* compute v1 and v2 in Im(A-vp3*Id) */
+
+    /** rows of A-lambda[0]*I */
+    w1[0] = a11 - lambda[0];
+    w2[1] = a22 - lambda[0];
+    w3[2] = a33 - lambda[0];
+
+    /* ker(A-lambda[0]*I) has dimension 2 and it is orthogonal to
+     * Im(tA-lambda[0]*I), which has dimension 1.
+     * Eigenvectors vp[0],vp[1] belong to ker(A-lambda[0]*I) and can't belong to
+     * ker(A-lambda[2]*I) since eigenvalue lambda[2] is distinct. Thus, by
+     * orthogonality, the vectors belonging to Im(tA-lambda[2]*I) can't belong
+     * to Im(tA-lambda[0]*I).
+     * Denoting as c20 and c21 the two basis vectors for Im(tA-lambda[2]*I), and
+     * as c0 the only basis vector for Im(tA-lambda[0]*I), two _distinct_
+     * eigenvectors vp[0] and vp[0] in ker(A-lambda[0]*I) can thus be computed
+     * as:
+     *   vp[0] = c0 x c20
+     *   vp[1] = c0 x c21
+     * (Stated differently, vp[0] and vp[1] would be colinear only if
+     * Im(tA-lambda[0]*I) belonged to Im(tA-lambda[2]), which would imply that
+     * ker(A-lambda[2]*I) belong to ker(A-lambda[0]*I), that is not possible).
+     *
+     * Find the basis of Im(tA-lambda[0]*I) as the row with maximum norm.
+     */
     dd1 = w1[0]*w1[0] + w1[1]*w1[1] + w1[2]*w1[2];
     dd2 = w2[0]*w2[0] + w2[1]*w2[1] + w2[2]*w2[2];
-    if ( dd1 > dd2 ) {
-      dd1 = 1.0 / sqrt(dd1);
-      v[0][0] = w1[0]*dd1;
-      v[0][1] = w1[1]*dd1;
-      v[0][2] = w1[2]*dd1;
-    }
-    else {
-      dd2 = 1.0 / sqrt(dd2);
-      v[0][0] = w2[0]*dd2;
-      v[0][1] = w2[1]*dd2;
-      v[0][2] = w2[2]*dd2;
-    }
+    dd3 = w3[0]*w3[0] + w3[1]*w3[1] + w3[2]*w3[2];
 
-    /* 3rd vector orthogonal */
-    v[1][0] = v[2][1]*v[0][2] - v[2][2]*v[0][1];
-    v[1][1] = v[2][2]*v[0][0] - v[2][0]*v[0][2];
-    v[1][2] = v[2][0]*v[0][1] - v[2][1]*v[0][0];
-    dd1 = v[1][0]*v[1][0] + v[1][1]*v[1][1] + v[1][2]*v[1][2];
+    /* find vector of max norm to pick the linearly independent row */
+    if( dd1 > dd2 ) {
+      if( dd1 > dd3 ) {
+        dd1 = 1.0 / sqrt(dd1);
+        vx1[0] = w1[0]*dd1;
+        vx1[1] = w1[1]*dd1;
+        vx1[2] = w1[2]*dd1;
+      } else {
+        dd3 = 1.0 / sqrt(dd3);
+        vx1[0] = w3[0]*dd3;
+        vx1[1] = w3[1]*dd3;
+        vx1[2] = w3[2]*dd3;
+      }
+    } else {
+      if( dd2 > dd3 ) {
+        dd2 = 1.0 / sqrt(dd2);
+        vx1[0] = w2[0]*dd2;
+        vx1[1] = w2[1]*dd2;
+        vx1[2] = w2[2]*dd2;
+      } else {
+        dd3 = 1.0 / sqrt(dd3);
+        vx1[0] = w3[0]*dd3;
+        vx1[1] = w3[1]*dd3;
+        vx1[2] = w3[2]*dd3;
+      }
+    }
+    /* cross product of the first basis vector of Im(tA-lambda[2]*I) with the
+     * basis vector of Im(tA-lambda[0]) */
+    v[0][0] = z1[1]*vx1[2] - z1[2]*vx1[1];
+    v[0][1] = z1[2]*vx1[0] - z1[0]*vx1[2];
+    v[0][2] = z1[0]*vx1[1] - z1[1]*vx1[0];
+    dd1 = v[0][0]*v[0][0] + v[0][1]*v[0][1] + v[0][2]*v[0][2];
+    assert( dd1 > MG_EIGENV_EPS27 );
     dd1 = 1.0 / sqrt(dd1);
-    v[1][0] *= dd1;
-    v[1][1] *= dd1;
-    v[1][2] *= dd1;
+    v[0][0] *= dd1;
+    v[0][1] *= dd1;
+    v[0][2] *= dd1;
+
+    /* 3rd vector as the cross product of the second basis vector of
+     * Im(tA-lambda[2]*I) with the basis vector of Im(tA-lambda[0]) */
+    v[1][0] = vx1[1]*z2[2] - vx1[2]*z2[1];
+    v[1][1] = vx1[2]*z2[0] - vx1[0]*z2[2];
+    v[1][2] = vx1[0]*z2[1] - vx1[1]*z2[0];
+    dd2 = v[1][0]*v[1][0] + v[1][1]*v[1][1] + v[1][2]*v[1][2];
+    assert( dd2 > MG_EIGENV_EPS27 );
+    dd2 = 1.0 / sqrt(dd2);
+    v[1][0] *= dd2;
+    v[1][1] *= dd2;
+    v[1][2] *= dd2;
+
+    /* enforce orthogonality in the symmetric case (can't prove that c20 and
+     * c21 are orthogonal in a general symmetric case), the result will still
+     * belong to ker(A-lambda[0]*I) */
+    if( symmat ) {
+      dd1 = v[1][0]*v[0][0] + v[1][1]*v[0][1] + v[1][2]*v[0][2];
+      v[1][0] -= dd1*v[0][0];
+      v[1][1] -= dd1*v[0][1];
+      v[1][2] -= dd1*v[0][2];
+      /* normalize again */
+      dd2 = v[1][0]*v[1][0] + v[1][1]*v[1][1] + v[1][2]*v[1][2];
+      assert( dd2 > MG_EIGENV_EPS27 );
+      dd2 = 1.0 / sqrt(dd2);
+      v[1][0] *= dd2;
+      v[1][1] *= dd2;
+      v[1][2] *= dd2;
+    }
   }
 
   lambda[0] *= maxm;
@@ -668,6 +768,87 @@ int MMG5_eigenv(int symmat,double *mat,double lambda[3],double v[3][3]) {
   }
 
   return n;
+}
+
+/**
+ * \brief Find eigenvalues and vectors of a 2x2 matrix.
+ * \param symmat 0 if matrix is not symetric, 1 otherwise.
+ * \param mat pointer toward the matrix.
+ * \param lambda eigenvalues.
+ * \param v eigenvectors.
+ *
+ * \return order of eigenvalues (1,2) or 0 if failed.
+ *
+ * \remark the i^{th} eigenvector is stored in v[i][.].
+ *
+ */
+int MMG5_eigenv2d(int symmat,double *mat,double lambda[2],double vp[2][2]) {
+  double dd,sqDelta,trmat,vnorm;
+  static int8_t  mmgWarn0=0;
+
+  /* wrapper function if symmetric matrix */
+  if( symmat )
+    return MMG5_eigensym(mat,lambda,vp);
+
+
+  dd = mat[0] - mat[3];
+  sqDelta = sqrt(fabs(dd*dd + 4.0*mat[1]*mat[2]));
+  trmat = mat[0] + mat[3];
+
+  lambda[0] = 0.5 * (trmat - sqDelta);
+  if ( lambda[0] < 0.0 ) {
+    if ( !mmgWarn0 ) {
+      mmgWarn0 = 1;
+      fprintf(stderr,"\n  ## Warning: %s: at least 1 metric with a "
+              "negative eigenvalue: %f \n",__func__,lambda[0]);
+    }
+    return 0;
+  }
+
+  /* First case : matrices m and n are homothetic: n = lambda0*m */
+  if ( sqDelta < MMG5_EPS ) {
+
+    /* only one eigenvalue with degree 2 */
+    return 2;
+
+  }
+  /* Second case: both eigenvalues of mat are distinct ; theory says qf associated to m and n
+   are diagonalizable in basis (vp[0], vp[1]) - the coreduction basis */
+  else {
+    lambda[1] = 0.5 * (trmat + sqDelta);
+    assert(lambda[1] >= 0.0);
+
+    vp[0][0] = mat[1];
+    vp[0][1] = (lambda[0] - mat[0]);
+    vnorm  = sqrt(vp[0][0]*vp[0][0] + vp[0][1]*vp[0][1]);
+
+    if ( vnorm < MMG5_EPS ) {
+      vp[0][0] = (lambda[0] - mat[3]);
+      vp[0][1] = mat[2];
+      vnorm  = sqrt(vp[0][0]*vp[0][0] + vp[0][1]*vp[0][1]);
+    }
+
+    vnorm   = 1.0 / vnorm;
+    vp[0][0] *= vnorm;
+    vp[0][1] *= vnorm;
+
+    vp[1][0] = mat[1];
+    vp[1][1] = (lambda[1] - mat[0]);
+    vnorm  = sqrt(vp[1][0]*vp[1][0] + vp[1][1]*vp[1][1]);
+
+    if ( vnorm < MMG5_EPS ) {
+      vp[1][0] = (lambda[1] - mat[3]);
+      vp[1][1] = mat[2];
+      vnorm  = sqrt(vp[1][0]*vp[1][0] + vp[1][1]*vp[1][1]);
+    }
+
+    vnorm   = 1.0 / vnorm;
+    vp[1][0] *= vnorm;
+    vp[1][1] *= vnorm;
+
+    /* two distinct eigenvalues with degree 1 */
+    return 1;
+  }
 }
 
 /**

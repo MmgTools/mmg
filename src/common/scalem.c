@@ -320,7 +320,7 @@ int MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
         m    = &met->m[6*k];
 
         /* Check the input metric */
-        if ( !MMG5_eigenv(1,m,lambda,v) ) {
+        if ( !MMG5_eigenv3d(1,m,lambda,v) ) {
           fprintf(stderr,"\n  ## Error: %s: unable to diagonalize at least"
                   " 1 metric (point %d).\n",__func__,k);
           return 0;
@@ -354,7 +354,7 @@ int MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
 
         m    = &met->m[6*k];
 
-        if ( !MMG5_eigenv(1,m,lambda,v) ) {
+        if ( !MMG5_eigenv3d(1,m,lambda,v) ) {
           fprintf(stderr,"\n  ## Error: %s: unable to diagonalize at least"
                   " 1 metric (point %d).\n",__func__,k);
           return 0;

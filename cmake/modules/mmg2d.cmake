@@ -183,6 +183,7 @@ IF ( BUILD_TESTING )
       SET(LIBMMG2D_LSONLY ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_lsOnly )
       SET(LIBMMG2D_LSANDMETRIC ${EXECUTABLE_OUTPUT_PATH}/libmmg2d_lsAndMetric )
       SET(TEST_API2D_EXEC0 ${EXECUTABLE_OUTPUT_PATH}/test_api2d_0)
+      SET(TEST_MET2D ${EXECUTABLE_OUTPUT_PATH}/test_met2d)
 
 
       ADD_TEST(NAME libmmg2d_adp_example0_a   COMMAND ${LIBMMG2D_ADP0_a}
@@ -227,6 +228,8 @@ IF ( BUILD_TESTING )
         "${MMG2D_CI_TESTS}/API_tests/2dom.mesh"
         "${CTEST_OUTPUT_DIR}/test_API2d.o"
        )
+     ADD_TEST(NAME test_met2d   COMMAND ${TEST_MET2D}
+        )
 
 
       IF ( CMAKE_Fortran_COMPILER)

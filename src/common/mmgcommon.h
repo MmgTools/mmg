@@ -580,12 +580,18 @@ typedef struct MMG5_dNode_s {
 
 
 /* Functions declarations */
+ extern void MMG5_nsort(int ,double *,int8_t *);
+ extern void MMG5_nperm(int8_t n,int8_t shift,int8_t stride,double *val,double *oldval,int8_t *perm);
  extern double MMG5_det3pt1vec(double c0[3],double c1[3],double c2[3],double v[3]);
  extern double MMG5_det4pt(double c0[3],double c1[3],double c2[3],double c3[3]);
  int           MMG5_devangle(double* n1, double *n2, double crit);
  extern double MMG5_orvol(MMG5_pPoint point,int *v);
  int           MMG5_Add_inode( MMG5_pMesh mesh, MMG5_iNode **liLi, int val );
  int           MMG5_Add_dnode( MMG5_pMesh mesh, MMG5_dNode **liLi, int, double);
+ int           MMG5_eigenvmatsym2d(MMG5_pMesh mesh,double m[],double lambda[],double v[][2]);
+ int           MMG5_eigenvmatsym3d(MMG5_pMesh mesh,double m[],double lambda[],double v[][3]);
+ int           MMG5_eigenvmatnonsym2d(MMG5_pMesh mesh,double m[],double lambda[],double v[][2]);
+ int           MMG5_eigenvmatnonsym3d(MMG5_pMesh mesh,double m[],double lambda[],double v[][3]);
  extern void   MMG5_bezierEdge(MMG5_pMesh, int, int, double*, double*, int8_t,double*);
  int           MMG5_buildridmet(MMG5_pMesh,MMG5_pSol,int,double,double,double,double*,double[3][3]);
  extern int    MMG5_buildridmetfic(MMG5_pMesh,double*,double*,double,double,double,double*);
@@ -653,6 +659,7 @@ void           MMG5_check_hminhmax(MMG5_pMesh mesh, int8_t sethmin, int8_t sethm
  int           MMG5_invmat(double *m,double *mi);
  int           MMG5_invmatg(double m[9],double mi[9]);
  int           MMG5_invmat33(double m[3][3],double mi[3][3]);
+ int           MMG5_invmat22(double m[2][2],double mi[2][2]);
  int           MMG5_regnor(MMG5_pMesh mesh);
  double        MMG5_ridSizeInNormalDir(MMG5_pMesh,int,double*,MMG5_pBezier,double,double);
  double        MMG5_ridSizeInTangentDir(MMG5_pMesh, MMG5_pPoint,int,int*,double,double);
@@ -717,7 +724,11 @@ int  MMG5_gradsiz_iso ( MMG5_pMesh mesh,MMG5_pSol met );
 int  MMG5_gradsizreq_iso(MMG5_pMesh ,MMG5_pSol );
 int  MMG5_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met,int *it);
 int  MMG5_gradsizreq_ani(MMG5_pMesh mesh,MMG5_pSol met);
-int  MMG5_simred(MMG5_pMesh,double*,double*,double dm[2],double dn[2],double vp[2][2]);
+void MMG5_simredmat(int8_t dim,double *m,double *dm,double *iv);
+int  MMG5_simred2d(MMG5_pMesh,double*,double*,double dm[2],double dn[2],double vp[2][2]);
+int  MMG5_simred3d(MMG5_pMesh mesh,double *m,double *n,double dm[3],double dn[3],double vp[3][3]);
+extern int  MMG5_updatemet2d_ani(double *m,double *n,double dm[2],double dn[2],double vp[2][2],int8_t ier );
+int  MMG5_updatemet3d_ani(double *m,double *n,double dm[3],double dn[3],double vp[3][3],int8_t ier );
 void MMG5_gradEigenvreq(double *dm,double *dn,double,int8_t,int8_t *);
 int  MMG5_updatemetreq_ani(double *n,double dn[2],double vp[2][2]);
 int    MMG5_swapbin(int sbin);
@@ -729,6 +740,27 @@ int MMG5_isSplit(MMG5_pMesh ,int ,int *,int *);
 int MMG5_isNotSplit(MMG5_pMesh ,int);
 int MMG5_getStartRef(MMG5_pMesh ,int, int *);
 
+/* test functions */
+extern double MMG5_test_mat_error( int8_t nelem,double m1[],double m2[] );
+int MMG5_test_invmat22();
+int MMG5_test_invmat33();
+int MMG5_test_eigenvmatsym2d(MMG5_pMesh mesh,double *mex,double lambdaex[],
+                             double vpex[][2]);
+int MMG5_test_eigenvmatnonsym2d(MMG5_pMesh mesh,double *mex,double lambdaex[],
+                                double vpex[][2],double ivpex[][2]);
+int MMG5_test_eigenvmatsym3d(MMG5_pMesh mesh,double *mex,double lambdaex[],
+                             double vpex[][3]);
+int MMG5_test_eigenvmatnonsym3d(MMG5_pMesh mesh,double *mex,double lambdaex[],
+                                double vpex[][3],double ivpex[][3]);
+int MMG5_test_mn();
+extern int MMG5_test_rmtr();
+int MMG5_test_rotmatrix();
+int MMG5_test_simred2d();
+int MMG5_test_simred3d();
+int MMG5_test_updatemet2d_ani();
+int MMG5_test_updatemet3d_ani();
+int MMG5_test_intersecmet22(MMG5_pMesh mesh);
+int MMG5_test_intersecmet33(MMG5_pMesh mesh);
 
 /* tools */
 void MMG5_mark_verticesAsUnused ( MMG5_pMesh mesh );
