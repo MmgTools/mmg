@@ -1434,6 +1434,72 @@ int MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   return 1;
 }
 
+static inline
+int MMG5_grad2metVol_buildmet(MMG5_pMesh mesh,MMG5_pSol met,int ip,double ux,double uy,double uz,double *m,double r[3][3]) {
+  MMG5_pPoint  ppt;
+  MMG5_pxPoint pxp;
+  double *mm,*nn1,*nn2,*n,rbasis[3][3],ps1,ps2;
+
+  ppt = &mesh->point[ip];
+  mm  = &met->m[6*ip];
+
+
+  if( MG_SIN(ppt->tag) || (MG_NOM & ppt->tag) ){
+
+    /* no normal, no tangent plane */
+    memcpy(m,mm,6*sizeof(double));
+
+  }
+  else if( ppt->tag & MG_GEO ) {
+
+    /* Recover normal and metric */
+    pxp = &mesh->xpoint[ppt->xp];
+    nn1 = pxp->n1;
+    nn2 = pxp->n2;
+    ps1 = ux*nn1[0] + uy*nn1[1] + uz*nn1[2];
+    ps2 = ux*nn2[0] + uy*nn2[1] + uz*nn2[2];
+    if ( fabs(ps2)<fabs(ps1) ) {
+      n = nn2;
+    }
+    else{
+      n = nn1;
+    }
+    /* Rotation matrices mapping n to e_3 */
+    MMG5_rotmatrix(n,r);
+    /* Note that rbasis is not used in this function */
+    if( !MMG5_buildridmet(mesh,met,ip,ux,uy,uz,m,rbasis) )
+      return 0;
+
+  }
+  else if( ppt->tag & MG_BDY ) {
+
+    pxp = &mesh->xpoint[ppt->xp];
+    MMG5_rotmatrix(pxp->n1,r);
+    memcpy(m,mm,6*sizeof(double));
+
+  }
+  else {
+
+    /* internal point */
+    memcpy(m,mm,6*sizeof(double));
+
+  }
+
+  return 1;
+}
+
+static inline
+void MMG5_grad2metVol_extmet(MMG5_pMesh mesh,MMG5_pPoint ppt,double l,double *m,double *mext) {
+  double lambda[3],vp[3][3];
+
+  MMG5_eigenv3d(1,m,lambda,vp);
+  for( int8_t i = 0; i < 3; i++ ) {
+    lambda[i] = 1./pow( 1./sqrt(lambda[i]) + mesh->info.hgrad*l + MMG5_EPSOK, 2.0);
+  }
+  MMG5_eigenvmatsym3d(mesh,mext,lambda,vp);
+
+}
+
 /**
  * \param m first matrix
  * \param mext second (extended) matrix
@@ -1444,46 +1510,138 @@ int MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
  *
  */
 static inline
-void MMG3D_gradEigenv(MMG5_pMesh mesh,double m[6],double mext[6],int8_t iloc,int *ier) {
-  double dm[3],dmext[3],vp[3][3],ivp[3][3];
+void MMG3D_gradEigenv(MMG5_pMesh mesh,MMG5_pSol met,int ip,double m[6],double mext[6],double r[3][3],int8_t iloc,int *ier) {
+  MMG5_pPoint ppt = &mesh->point[ip];
+  double *mm;
 
-//#ifndef NDEBUG
-//  FILE *fid;
-//  fid = fopen("mymat.txt","w");
-//  for(int k = 0; k < 6; k++ )
-//    fprintf(fid,"%25.20f\n",m[k]);
-//  for(int k = 0; k < 6; k++ )
-//    fprintf(fid,"%25.20f\n",mext[k]);
-//  fclose(fid);
-//#endif
+  ppt = &mesh->point[ip];
+  mm = &met->m[6*ip];
 
-  if( !MMG5_simred3d(mesh,m,mext,dm,dmext,vp) ) {
-    *ier = -1;
-    return;
-  }
+  if( MG_SIN(ppt->tag) || (MG_NOM & ppt->tag) ) {
+    double dm[3],dmext[3],vp[3][3],beta;
 
-  /* Gradation of sizes */
-  for( int i = 0; i< 3; i++ ) {
-    if( dmext[i] > dm[i] ) {
-      dm[i] = dmext[i];
-      (*ier) = (*ier) | iloc;
-    }
-  }
-
-
-  if( (*ier) & iloc ) {
-    /* Simultaneous reduction basis is non-orthogonal, so invert it for the
-     * inverse transformation */
-    double ivp[3][3];
-    if( !MMG5_invmat33(vp,ivp) ) {
+    /* Simultaneous reduction basis */
+    if( !MMG5_simred3d(mesh,m,mext,dm,dmext,vp) ) {
       *ier = -1;
       return;
     }
-    MMG5_simredmat(3,m,dm,(double *)ivp);
+    beta = 1.0;
+    for( int8_t i = 0; i < 3; i++ ) {
+      if( dmext[i] > dm[i] ) {
+        beta = MG_MAX(beta,dmext[i]/dm[i]);
+        (*ier) = (*ier) | iloc;
+      }
+    }
+    if( (*ier) & iloc ) {
+      /* lambda_new = 0.5 lambda_1 + 0.5 beta lambda_1: here we choose to not
+       * respect the gradation in order to restric the influence of the singular
+       * points. */
+      mm[0] += 0.5*beta;
+      mm[3] += 0.5*beta;
+      mm[5] += 0.5*beta;
+    }
 
   }
-}
+  else if( ppt->tag & MG_GEO ) {
 
+    return;  // XXX
+
+  }
+  else if( ppt->tag & MG_BDY ) {
+    double mr[6],mrext[6],mtan[3],mtanext[3];
+    double dm[3],dmext[3],vp[2][2],beta;
+
+    /* Rotate metrics in the tangent plane */
+    MMG5_rmtr(r,m,mr);
+    mtan[0] = mr[0];
+    mtan[1] = mr[1];
+    mtan[2] = mr[3];
+    MMG5_rmtr(r,mext,mrext);
+    mtanext[0] = mrext[0];
+    mtanext[1] = mrext[1];
+    mtanext[2] = mrext[3];
+    /* Simultaneous reduction basis */
+    if( !MMG5_simred2d(mesh,mtan,mtanext,dm,dmext,vp) ) {
+      *ier = -1;
+      return;
+    }
+    /* Truncation in the tangent plane */
+    beta = 1.0;
+    for( int8_t i = 0; i < 2; i++ ) {
+      if( dmext[i] > dm[i] ) {
+        beta = MG_MAX(beta,dmext[i]/dm[i]);
+        dm[i] = dmext[i];
+        (*ier) = (*ier) | iloc;
+      }
+    }
+    /* Truncation in the normal direction XXX */
+    dm[2]    = mr[5];
+    dmext[2] = mrext[5];
+    if( dmext[2] > dm[2] ) {
+      beta = MG_MAX(beta,dmext[2]/dm[2]);
+      dm[2] = dmext[2];
+      (*ier) = (*ier) | iloc;
+    }
+    /* Update */
+    if( (*ier) & iloc ) {
+      /* Simultaneous reduction basis is non-orthogonal, so invert it for the
+       * inverse transformation */
+      double ivp[2][2];
+      if( !MMG5_invmat22(vp,ivp) ) {
+        *ier = -1;
+        return;
+      }
+      MMG5_simredmat(2,mtan,dm,(double *)ivp);
+      /* Re-assemble 3D metric */
+      mr[0] = mtan[0];
+      mr[1] = mtan[1];
+      mr[3] = mtan[2];
+      mr[2] = mr[4] = 0.0;
+      mr[5] = dm[2];
+      /* Transpose rotation matrix and rotate back into the point metric*/
+      double swp;
+      for( int8_t i = 0; i < 2; i++ ) {
+        for( int8_t j = i+1; j < 3; j++ ) {
+          swp = r[i][j];
+          r[i][j] = r[j][i];
+          r[j][i] = swp;
+        }
+      }
+      MMG5_rmtr(r,mr,mm);
+    }
+
+  }
+  else { /* internal point */
+    double dm[3],dmext[3],vp[3][3];
+
+    /* Simultaneous reduction basis */
+    if( !MMG5_simred3d(mesh,m,mext,dm,dmext,vp) ) {
+      *ier = -1;
+      return;
+    }
+
+    /* Gradation of sizes in the simultaneous reduction basis */
+    for( int8_t i = 0; i< 3; i++ ) {
+      if( dmext[i] > dm[i] ) {
+        dm[i] = dmext[i];
+        (*ier) = (*ier) | iloc;
+      }
+    }
+    /* Update */
+    if( (*ier) & iloc ) {
+      /* Simultaneous reduction basis is non-orthogonal, so invert it for the
+       * inverse transformation */
+      double ivp[3][3];
+      if( !MMG5_invmat33(vp,ivp) ) {
+        *ier = -1;
+        return;
+      }
+      MMG5_simredmat(3,mm,dm,(double *)ivp);
+    }
+
+  }
+
+}
 
 /**
  * \param mesh pointer toward the mesh.
@@ -1501,13 +1659,9 @@ void MMG3D_gradEigenv(MMG5_pMesh mesh,double m[6],double mext[6],int8_t iloc,int
 static inline
 int MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int np1,int np2) {
   MMG5_pPoint    p1,p2;
-  double         *mm1,*mm2,m1[6],m2[6],ps1,ps2,ux,uy,uz;
-  double         c[5],l,val,t[3],rbasis1[3][3],rbasis2[3][3];
-  double         lambda[3],vp[3][3],alpha,beta,mu[3];
-  int            kmin,i;
-  int ier = 0;
-  int8_t         ichg;
-  static int8_t  mmgWarn = 0;
+  double         *mm1,*mm2,m1[6],m2[6],mext1[6],mext2[6],r1[3][3],r2[3][3];
+  double         ux,uy,uz,l;
+  int            ier = 0;
 
   p1  = &mesh->point[np1];
   p2  = &mesh->point[np2];
@@ -1518,51 +1672,37 @@ int MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int np1,int np
   ux = p2->c[0] - p1->c[0];
   uy = p2->c[1] - p1->c[1];
   uz = p2->c[2] - p1->c[2];
-
-  if ( (!( MG_SIN(p1->tag) || (p1->tag & MG_NOM) )) &&  p1->tag & MG_GEO ) {
-    /* Recover normal and metric associated to p1 */
-    /* Note that rbasis1/2 are not used in this function */
-//    if( !MMG5_buildridmet(mesh,met,np1,ux,uy,uz,m1,rbasis1) )
-      return -1;
-  }
-  else
-    memcpy(m1,mm1,6*sizeof(double));
-
-  if ( (!( MG_SIN(p2->tag) || (p2->tag & MG_NOM) )) && p2->tag & MG_GEO ) {
-    /* Recover normal and metric associated to p2 */
-//    if( !MMG5_buildridmet(mesh,met,np2,ux,uy,uz,m2,rbasis2) )
-      return -1;
-  }
-  else
-    memcpy(m2,mm2,6*sizeof(double));
-
-
   l = sqrt(ux*ux+uy*uy+uz*uz);
 
-  MMG5_eigenv3d(1,m1,lambda,vp);
-  for( int i = 0; i < 3; i++ ) {
-    lambda[i] = 1./pow( 1./sqrt(lambda[i]) + mesh->info.hgrad*l + MMG5_EPSOK, 2.0);
-  }
-  MMG5_eigenvmatsym3d(mesh,m1,lambda,vp);
 
-  MMG5_eigenv3d(1,m2,lambda,vp);
-  for( int i = 0; i < 3; i++ ) {
-    lambda[i] = 1./pow( 1./sqrt(lambda[i]) + mesh->info.hgrad*l + MMG5_EPSOK, 2.0);
+  /* Recover normal and metric associated to p1 and p2 */
+  if( !MMG5_grad2metVol_buildmet(mesh,met,np1,ux,uy,uz,m1,r1) ) {
+    return -1;
   }
-  MMG5_eigenvmatsym3d(mesh,m2,lambda,vp);
-
-  if( mesh->point[np1].flag >= mesh->base-1 ) {
-    MMG3D_gradEigenv(mesh,mm2,m1,2,&ier);
-    if( ier == -1 ) return ier;
+  if( !MMG5_grad2metVol_buildmet(mesh,met,np2,ux,uy,uz,m2,r2) ) {
+    return -1;
   }
 
-  if( mesh->point[np2].flag >= mesh->base-1 ) {
-    MMG3D_gradEigenv(mesh,mm1,m2,1,&ier);
-    if( ier == -1 ) return ier;
+
+  /* Extend metrics */
+  MMG5_grad2metVol_extmet(mesh,p1,l,m1,mext1);
+  MMG5_grad2metVol_extmet(mesh,p2,l,m2,mext2);
+
+
+  /* Gradate metrics */
+  if( p1->flag >= mesh->base-1 ) {
+    MMG3D_gradEigenv(mesh,met,np2,m2,mext1,r2,2,&ier);
+    if( ier == -1 )
+      return ier;
+  }
+
+  if( p2->flag >= mesh->base-1 ) {
+    MMG3D_gradEigenv(mesh,met,np1,m1,mext2,r1,1,&ier);
+    if( ier == -1 )
+      return ier;
   }
 
   return ier;
-
 }
 
 
