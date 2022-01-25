@@ -1513,6 +1513,7 @@ static inline
 void MMG3D_gradEigenv(MMG5_pMesh mesh,MMG5_pSol met,int ip,double m[6],double mext[6],double n[3],int8_t ridgedir,int8_t iloc,int *ier) {
   MMG5_pPoint ppt = &mesh->point[ip];
   double *mm;
+  double tol = MMG5_EPSOK;
 
   ppt = &mesh->point[ip];
   mm = &met->m[6*ip];
@@ -1527,7 +1528,7 @@ void MMG3D_gradEigenv(MMG5_pMesh mesh,MMG5_pSol met,int ip,double m[6],double me
     }
     beta = 1.0;
     for( int8_t i = 0; i < 3; i++ ) {
-      if( dmext[i] > dm[i] ) {
+      if( dmext[i] > dm[i]*(1.0 + tol) ) {
         beta = MG_MAX(beta,dmext[i]/dm[i]);
         (*ier) = (*ier) | iloc;
       }
@@ -1564,7 +1565,7 @@ void MMG3D_gradEigenv(MMG5_pMesh mesh,MMG5_pSol met,int ip,double m[6],double me
     dmext[2] = mrext[5];
    /* Truncation XXX */
     for( int8_t i = 0; i < 3; i++ ) {
-      if( dmext[i] > dm[i] ) {
+      if( dmext[i] > dm[i]*(1.0 + tol) ) {
         dm[i] = dmext[i];
         (*ier) = (*ier) | iloc;
       }
@@ -1602,7 +1603,7 @@ void MMG3D_gradEigenv(MMG5_pMesh mesh,MMG5_pSol met,int ip,double m[6],double me
     /* Truncation in the tangent plane */
     beta = 1.0;
     for( int8_t i = 0; i < 2; i++ ) {
-      if( dmext[i] > dm[i] ) {
+      if( dmext[i] > dm[i]*(1.0 + tol) ) {
         beta = MG_MAX(beta,dmext[i]/dm[i]);
         dm[i] = dmext[i];
         (*ier) = (*ier) | iloc;
@@ -1611,7 +1612,7 @@ void MMG3D_gradEigenv(MMG5_pMesh mesh,MMG5_pSol met,int ip,double m[6],double me
     /* Truncation in the normal direction XXX */
     dm[2]    = mr[5];
     dmext[2] = mrext[5];
-    if( dmext[2] > dm[2] ) {
+    if( dmext[2] > dm[2]*(1.0 + tol) ) {
       beta = MG_MAX(beta,dmext[2]/dm[2]);
       dm[2] = dmext[2];
       (*ier) = (*ier) | iloc;
@@ -1656,7 +1657,7 @@ void MMG3D_gradEigenv(MMG5_pMesh mesh,MMG5_pSol met,int ip,double m[6],double me
 
     /* Gradation of sizes in the simultaneous reduction basis */
     for( int8_t i = 0; i< 3; i++ ) {
-      if( dmext[i] > dm[i] ) {
+      if( dmext[i] > dm[i]*(1.0 + tol) ) {
         dm[i] = dmext[i];
         (*ier) = (*ier) | iloc;
       }
