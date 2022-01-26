@@ -683,20 +683,25 @@ int MMG5_eigenv3d(int symmat,double *mat,double lambda[3],double v[3][3]) {
      * Im(tA-lambda[0]*I) belonged to Im(tA-lambda[2]), which would imply that
      * ker(A-lambda[2]*I) belong to ker(A-lambda[0]*I), that is not possible).
      *
-     * Find the basis of Im(tA-lambda[0]*I) as the row with maximum norm.
+     * Find the basis of Im(tA-lambda[0]*I) as the row with maximum projection
+     * on vp[2] (this helps in selecting a row that does not belong to
+     * Im(tA-lambda[2]*I) in case lambda[2] is numerically not well separated
+     * from lambda[0]=lambda[1]).
      */
-    dd1 = w1[0]*w1[0] + w1[1]*w1[1] + w1[2]*w1[2];
-    dd2 = w2[0]*w2[0] + w2[1]*w2[1] + w2[2]*w2[2];
-    dd3 = w3[0]*w3[0] + w3[1]*w3[1] + w3[2]*w3[2];
+    dd1 = fabs(w1[0]*v[2][0] + w1[1]*v[2][1] + w1[2]*v[2][2]);
+    dd2 = fabs(w2[0]*v[2][0] + w2[1]*v[2][1] + w2[2]*v[2][2]);
+    dd3 = fabs(w3[0]*v[2][0] + w3[1]*v[2][1] + w3[2]*v[2][2]);
 
-    /* find vector of max norm to pick the linearly independent row */
+    /* find vector with max projection to pick the linearly independent row */
     if( dd1 > dd2 ) {
       if( dd1 > dd3 ) {
+        dd1 = w1[0]*w1[0] + w1[1]*w1[1] + w1[2]*w1[2];
         dd1 = 1.0 / sqrt(dd1);
         vx1[0] = w1[0]*dd1;
         vx1[1] = w1[1]*dd1;
         vx1[2] = w1[2]*dd1;
       } else {
+        dd3 = w3[0]*w3[0] + w3[1]*w3[1] + w3[2]*w3[2];
         dd3 = 1.0 / sqrt(dd3);
         vx1[0] = w3[0]*dd3;
         vx1[1] = w3[1]*dd3;
@@ -704,11 +709,13 @@ int MMG5_eigenv3d(int symmat,double *mat,double lambda[3],double v[3][3]) {
       }
     } else {
       if( dd2 > dd3 ) {
+        dd2 = w2[0]*w2[0] + w2[1]*w2[1] + w2[2]*w2[2];
         dd2 = 1.0 / sqrt(dd2);
         vx1[0] = w2[0]*dd2;
         vx1[1] = w2[1]*dd2;
         vx1[2] = w2[2]*dd2;
       } else {
+        dd3 = w3[0]*w3[0] + w3[1]*w3[1] + w3[2]*w3[2];
         dd3 = 1.0 / sqrt(dd3);
         vx1[0] = w3[0]*dd3;
         vx1[1] = w3[1]*dd3;
