@@ -40,6 +40,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include "eigenv.h"
+#include "mmgcommon.h"
 
 /* seeking at least 1.e-05 accuracy, more if not sufficient */
 #define  MG_EIGENV_EPS27          1.e-27
@@ -531,20 +532,14 @@ int MMG5_eigenv3d(int symmat,double *mat,double lambda[3],double v[3][3]) {
       w3[2] = a33 - lambda[k];
 
       /* cross product vectors in (Im(A-lambda(i) Id) ortho */
-      vx1[0] = w1[1]*w3[2] - w1[2]*w3[1];
-      vx1[1] = w1[2]*w3[0] - w1[0]*w3[2];
-      vx1[2] = w1[0]*w3[1] - w1[1]*w3[0];
-      dd1    = vx1[0]*vx1[0] + vx1[1]*vx1[1] + vx1[2]*vx1[2];
+      MMG5_crossprod3d(w1,w3,vx1);
+      MMG5_dotprod(3,vx1,vx1,&dd1);
 
-      vx2[0] = w1[1]*w2[2] - w1[2]*w2[1];
-      vx2[1] = w1[2]*w2[0] - w1[0]*w2[2];
-      vx2[2] = w1[0]*w2[1] - w1[1]*w2[0];
-      dd2    = vx2[0]*vx2[0] + vx2[1]*vx2[1] + vx2[2]*vx2[2];
+      MMG5_crossprod3d(w1,w2,vx2);
+      MMG5_dotprod(3,vx2,vx2,&dd2);
 
-      vx3[0] = w2[1]*w3[2] - w2[2]*w3[1];
-      vx3[1] = w2[2]*w3[0] - w2[0]*w3[2];
-      vx3[2] = w2[0]*w3[1] - w2[1]*w3[0];
-      dd3    = vx3[0]*vx3[0] + vx3[1]*vx3[1] + vx3[2]*vx3[2];
+      MMG5_crossprod3d(w2,w3,vx3);
+      MMG5_dotprod(3,vx3,vx3,&dd3);
 
       /* find vector of max norm */
       if ( dd1 > dd2 ) {
@@ -596,20 +591,14 @@ int MMG5_eigenv3d(int symmat,double *mat,double lambda[3],double v[3][3]) {
      * Compute all pairwise cross products of the rows of (A-lambda[2]*I), and
      * pick the one with maximum norm (the other two will have zero norm, but
      * this is tricky to detect numerically due to cancellation errors). */
-    vx1[0] = w1[1]*w3[2] - w1[2]*w3[1];
-    vx1[1] = w1[2]*w3[0] - w1[0]*w3[2];
-    vx1[2] = w1[0]*w3[1] - w1[1]*w3[0];
-    dd1    = vx1[0]*vx1[0] + vx1[1]*vx1[1] + vx1[2]*vx1[2];
+    MMG5_crossprod3d(w1,w3,vx1);
+    MMG5_dotprod(3,vx1,vx1,&dd1);
 
-    vx2[0] = w1[1]*w2[2] - w1[2]*w2[1];
-    vx2[1] = w1[2]*w2[0] - w1[0]*w2[2];
-    vx2[2] = w1[0]*w2[1] - w1[1]*w2[0];
-    dd2    = vx2[0]*vx2[0] + vx2[1]*vx2[1] + vx2[2]*vx2[2];
+    MMG5_crossprod3d(w1,w2,vx2);
+    MMG5_dotprod(3,vx2,vx2,&dd2);
 
-    vx3[0] = w2[1]*w3[2] - w2[2]*w3[1];
-    vx3[1] = w2[2]*w3[0] - w2[0]*w3[2];
-    vx3[2] = w2[0]*w3[1] - w2[1]*w3[0];
-    dd3    = vx3[0]*vx3[0] + vx3[1]*vx3[1] + vx3[2]*vx3[2];
+    MMG5_crossprod3d(w2,w3,vx3);
+    MMG5_dotprod(3,vx3,vx3,&dd3);
 
     /* find vector of max norm to pick the two linearly independent rows */
     if ( dd1 > dd2 ) {
@@ -650,12 +639,12 @@ int MMG5_eigenv3d(int symmat,double *mat,double lambda[3],double v[3][3]) {
     }
     /* The two linearly independent rows provide a basis for Im(tA-lambda[2]*I).
      * Normalize them to reduce roundoff errors. */
-    dd1 = z1[0]*z1[0] + z1[1]*z1[1] + z1[2]*z1[2];
+    MMG5_dotprod(3,z1,z1,&dd1);
     dd1 = 1.0 / sqrt(dd1);
     z1[0] *= dd1;
     z1[1] *= dd1;
     z1[2] *= dd1;
-    dd2 = z2[0]*z2[0] + z2[1]*z2[1] + z2[2]*z2[2];
+    MMG5_dotprod(3,z2,z2,&dd2);
     dd2 = 1.0 / sqrt(dd2);
     z2[0] *= dd2;
     z2[1] *= dd2;
@@ -688,20 +677,23 @@ int MMG5_eigenv3d(int symmat,double *mat,double lambda[3],double v[3][3]) {
      * Im(tA-lambda[2]*I) in case lambda[2] is numerically not well separated
      * from lambda[0]=lambda[1]).
      */
-    dd1 = fabs(w1[0]*v[2][0] + w1[1]*v[2][1] + w1[2]*v[2][2]);
-    dd2 = fabs(w2[0]*v[2][0] + w2[1]*v[2][1] + w2[2]*v[2][2]);
-    dd3 = fabs(w3[0]*v[2][0] + w3[1]*v[2][1] + w3[2]*v[2][2]);
+    MMG5_dotprod(3,w1,v[2],&dd1);
+    MMG5_dotprod(3,w2,v[2],&dd2);
+    MMG5_dotprod(3,w3,v[2],&dd3);
+    dd1 = fabs(dd1);
+    dd2 = fabs(dd2);
+    dd3 = fabs(dd3);
 
     /* find vector with max projection to pick the linearly independent row */
     if( dd1 > dd2 ) {
       if( dd1 > dd3 ) {
-        dd1 = w1[0]*w1[0] + w1[1]*w1[1] + w1[2]*w1[2];
+        MMG5_dotprod(3,w1,w1,&dd1);
         dd1 = 1.0 / sqrt(dd1);
         vx1[0] = w1[0]*dd1;
         vx1[1] = w1[1]*dd1;
         vx1[2] = w1[2]*dd1;
       } else {
-        dd3 = w3[0]*w3[0] + w3[1]*w3[1] + w3[2]*w3[2];
+        MMG5_dotprod(3,w3,w3,&dd3);
         dd3 = 1.0 / sqrt(dd3);
         vx1[0] = w3[0]*dd3;
         vx1[1] = w3[1]*dd3;
@@ -709,13 +701,13 @@ int MMG5_eigenv3d(int symmat,double *mat,double lambda[3],double v[3][3]) {
       }
     } else {
       if( dd2 > dd3 ) {
-        dd2 = w2[0]*w2[0] + w2[1]*w2[1] + w2[2]*w2[2];
+        MMG5_dotprod(3,w2,w2,&dd2);
         dd2 = 1.0 / sqrt(dd2);
         vx1[0] = w2[0]*dd2;
         vx1[1] = w2[1]*dd2;
         vx1[2] = w2[2]*dd2;
       } else {
-        dd3 = w3[0]*w3[0] + w3[1]*w3[1] + w3[2]*w3[2];
+        MMG5_dotprod(3,w3,w3,&dd3);
         dd3 = 1.0 / sqrt(dd3);
         vx1[0] = w3[0]*dd3;
         vx1[1] = w3[1]*dd3;
@@ -724,10 +716,8 @@ int MMG5_eigenv3d(int symmat,double *mat,double lambda[3],double v[3][3]) {
     }
     /* cross product of the first basis vector of Im(tA-lambda[2]*I) with the
      * basis vector of Im(tA-lambda[0]) */
-    v[0][0] = z1[1]*vx1[2] - z1[2]*vx1[1];
-    v[0][1] = z1[2]*vx1[0] - z1[0]*vx1[2];
-    v[0][2] = z1[0]*vx1[1] - z1[1]*vx1[0];
-    dd1 = v[0][0]*v[0][0] + v[0][1]*v[0][1] + v[0][2]*v[0][2];
+    MMG5_crossprod3d(z1,vx1,v[0]);
+    MMG5_dotprod(3,v[0],v[0],&dd1);
     assert( dd1 > MG_EIGENV_EPS27 );
     dd1 = 1.0 / sqrt(dd1);
     v[0][0] *= dd1;
@@ -736,10 +726,8 @@ int MMG5_eigenv3d(int symmat,double *mat,double lambda[3],double v[3][3]) {
 
     /* 3rd vector as the cross product of the second basis vector of
      * Im(tA-lambda[2]*I) with the basis vector of Im(tA-lambda[0]) */
-    v[1][0] = vx1[1]*z2[2] - vx1[2]*z2[1];
-    v[1][1] = vx1[2]*z2[0] - vx1[0]*z2[2];
-    v[1][2] = vx1[0]*z2[1] - vx1[1]*z2[0];
-    dd2 = v[1][0]*v[1][0] + v[1][1]*v[1][1] + v[1][2]*v[1][2];
+    MMG5_crossprod3d(vx1,z2,v[1]);
+    MMG5_dotprod(3,v[1],v[1],&dd2);
     assert( dd2 > MG_EIGENV_EPS27 );
     dd2 = 1.0 / sqrt(dd2);
     v[1][0] *= dd2;
@@ -750,12 +738,12 @@ int MMG5_eigenv3d(int symmat,double *mat,double lambda[3],double v[3][3]) {
      * c21 are orthogonal in a general symmetric case), the result will still
      * belong to ker(A-lambda[0]*I) */
     if( symmat ) {
-      dd1 = v[1][0]*v[0][0] + v[1][1]*v[0][1] + v[1][2]*v[0][2];
+      MMG5_dotprod(3,v[1],v[0],&dd1);
       v[1][0] -= dd1*v[0][0];
       v[1][1] -= dd1*v[0][1];
       v[1][2] -= dd1*v[0][2];
       /* normalize again */
-      dd2 = v[1][0]*v[1][0] + v[1][1]*v[1][1] + v[1][2]*v[1][2];
+      MMG5_dotprod(3,v[1],v[1],&dd2);
       assert( dd2 > MG_EIGENV_EPS27 );
       dd2 = 1.0 / sqrt(dd2);
       v[1][0] *= dd2;
