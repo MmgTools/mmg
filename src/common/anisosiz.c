@@ -1552,20 +1552,20 @@ void MMG5_sort_simred( int8_t dim,double *dm,double *dn,double *vp,
 }
 
 /**
+ * \param mesh pointer toward the mesh structure
+ * \param mex first symmetric test matrix
+ * \param nex second symmetric test matrix
+ * \param dm diagonalization of the first matrix on the reduction basis
+ * \param dn diagonalization of the second matrix on the reduction basis
+ * \param vp simultaneous reduction basis (stored by columns)
+ * \return 1 if success, 0 if fail
  *
  * For a couple of 2x2 symmetric matrices, Test:
  * - the computation of the simultaneous reduction values of the matrices;
  * - the computation of the simultaneous reduction basis vectors..
  *
  */
-int MMG5_test_simred2d() {
-  MMG5_pMesh mesh;
-  double mex[3] = { 508., -504,  502.}; /* Test matrix 1 */
-  double nex[3] = {4020.,-2020.,1020.}; /* Test matrix 2 */
-  double dmex[2] = {  1., 100. }; /* Exact cobasis projection 1 */
-  double dnex[2] = {500.,   4. }; /* Exact cobasis projection 2 */
-  double vpex[2][2] = {{ 1./sqrt(2.),1./sqrt(2.)},
-                        {1./sqrt(5.),2./sqrt(5.)}}; /* Exact cobasis vectors */
+int MMG5_test_simred2d(MMG5_pMesh mesh,double *mex,double *nex,double *dmex,double *dnex,double vpex[][2]) {
   double dmnum[2],dnnum[2],vpnum[2][2],ivpnum[2][2],mnum[3],nnum[3]; /* Numerical quantities */
   double swap[2],maxerr,err;
   int8_t perm[2]; /* permutation array */
@@ -1630,21 +1630,20 @@ int MMG5_test_simred2d() {
 }
 
 /**
+ * \param mesh pointer toward the mesh structure
+ * \param mex first symmetric test matrix
+ * \param nex second symmetric test matrix
+ * \param dm diagonalization of the first matrix on the reduction basis
+ * \param dn diagonalization of the second matrix on the reduction basis
+ * \param vp simultaneous reduction basis (stored by columns)
+ * \return 1 if success, 0 if fail
  *
  * For a couple of 3x3 symmetric matrices, Test:
  * - the computation of the simultaneous reduction values of the matrices;
  * - the computation of the simultaneous reduction basis vectors..
  *
  */
-int MMG5_test_simred3d() {
-  MMG5_pMesh mesh;
-  double mex[6] = {111./2.,-109./2.,  89./2.,111./2.,-91./2.,111./2.}; /* Test matrix 1 */
-  double nex[6] = {409./2.,-393./2.,-407./2.,409./2.,391./2.,409./2.}; /* Test matrix 2 */
-  double dmex[3] = {1., 10.,100.}; /* Exact cobasis projection 1 */
-  double dnex[3] = {8.,400.,  1.}; /* Exact cobasis projection 2 */
-  double vpex[3][3] = {{1./sqrt(2.),1./sqrt(2.),0.},
-                       {0.,         1./sqrt(2.),1./sqrt(2.)},
-                       {1./sqrt(2.),         0.,1./sqrt(2.)}}; /* Exact cobasis vectors */
+int MMG5_test_simred3d(MMG5_pMesh mesh,double *mex,double *nex,double *dmex,double *dnex,double vpex[][3]) {
   double dmnum[3],dnnum[3],vpnum[3][3],ivpnum[3][3],mnum[6],nnum[6]; /* Numerical quantities */
   double swap[3],maxerr,err;
   int8_t perm[3]; /* permutation array */

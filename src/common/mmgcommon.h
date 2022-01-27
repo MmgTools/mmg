@@ -755,8 +755,8 @@ int MMG5_test_eigenvmatnonsym3d(MMG5_pMesh mesh,double *mex,double lambdaex[],
 int MMG5_test_mn();
 extern int MMG5_test_rmtr();
 int MMG5_test_rotmatrix();
-int MMG5_test_simred2d();
-int MMG5_test_simred3d();
+int MMG5_test_simred2d(MMG5_pMesh mesh,double *mex,double *nex,double *dmex,double *dnex,double vpex[][2]);
+int MMG5_test_simred3d(MMG5_pMesh mesh,double *mex,double *nex,double *dmex,double *dnex,double vpex[][3]);
 int MMG5_test_updatemet2d_ani();
 int MMG5_test_updatemet3d_ani();
 int MMG5_test_intersecmet22(MMG5_pMesh mesh);

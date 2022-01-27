@@ -82,7 +82,13 @@ int main(int argc,char *argv[]) {
     return EXIT_FAILURE;
 
   /* simultaneous reduction test */
-  if( !MMG5_test_simred2d() )
+  double m[3] = { 508., -504,  502.}; /* Test matrix 1 */
+  double n[3] = {4020.,-2020.,1020.}; /* Test matrix 2 */
+  double dm[2] = {  1., 100. }; /* Exact cobasis projection 1 */
+  double dn[2] = {500.,   4. }; /* Exact cobasis projection 2 */
+  double vp[2][2] = {{1./sqrt(2.),1./sqrt(2.)},
+                     {1./sqrt(5.),2./sqrt(5.)}}; /* Exact cobasis vectors */
+  if( !MMG5_test_simred2d(mmgMesh,m,n,dm,dn,vp) )
     return EXIT_FAILURE;
 
   /* matrix inverse transformation test */
