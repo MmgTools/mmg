@@ -201,6 +201,48 @@ inline int MMG5_nortri(MMG5_pMesh mesh,MMG5_pTria pt,double *n) {
 }
 
 /**
+ * \param m matrix (stored as double array)
+ *
+ * Transpose a square matrix in 3D, stored as double array.
+ */
+void MMG5_transpose3d(double m[3][3]) {
+  double swp;
+  for( int8_t i = 0; i < 2; i++ ) {
+    for( int8_t j = i+1; j < 3; j++ ) {
+      swp = m[i][j];
+      m[i][j] = m[j][i];
+      m[j][i] = swp;
+    }
+  }
+}
+
+/**
+ * \return 1 if success, 0 if fail.
+ *
+ * Test the transposition of a 3x3 matrix.
+ */
+int MMG5_test_transpose3d() {
+  double a[3][3] = {{1.,2.,3.},
+                    {4.,5.,6.},
+                    {7.,8.,9.}};
+  double b[3][3] = {{1.,4.,7.},
+                    {2.,5.,8.},
+                    {3.,6.,9.}};
+  double maxerr;
+
+  MMG5_transpose3d(a);
+
+  maxerr = MMG5_test_mat_error(9,(double *)a,(double *)b);
+  if( maxerr > MMG5_EPSD ) {
+    fprintf(stderr,"  ## Error matrix transposition: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+
+  return 1;
+}
+
+/**
  * \param dim size of the array
  * \param a first array
  * \param b second array

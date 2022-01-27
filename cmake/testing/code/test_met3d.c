@@ -122,6 +122,10 @@ int main(int argc,char *argv[]) {
     if( !MMG5_test_eigenvmatnonsym3d(mmgMesh,m_nonsym[i],lambda_nonsym[i],vp_nonsym[i],ivp_nonsym[i]) )
       return(EXIT_FAILURE);
 
+  /* test 3x3 matrix transposition */
+  if( !MMG5_test_transpose3d() )
+    return(EXIT_FAILURE);
+
   /* test vector scalar product */
   if( !MMG5_test_dotprod() )
     return(EXIT_FAILURE);
