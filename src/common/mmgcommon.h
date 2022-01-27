@@ -598,6 +598,7 @@ typedef struct MMG5_dNode_s {
  int           MMG5_buildridmetnor(MMG5_pMesh, MMG5_pSol, int,double*, double*,double[3][3]);
 void           MMG5_check_hminhmax(MMG5_pMesh mesh, int8_t sethmin, int8_t sethmax);
  int           MMG5_paratmet(double c0[3],double n0[3],double m[6],double c1[3],double n1[3],double mt[6]);
+ void          MMG5_transpose3d(double m[3][3]);
  void          MMG5_dotprod(int8_t dim,double *a,double *b,double *result);
  void          MMG5_crossprod3d(double *a,double *b,double *result);
  void          MMG5_mn(double m[6], double n[6], double mn[9] );
@@ -754,6 +755,7 @@ int MMG5_test_eigenvmatsym3d(MMG5_pMesh mesh,double *mex,double lambdaex[],
                              double vpex[][3]);
 int MMG5_test_eigenvmatnonsym3d(MMG5_pMesh mesh,double *mex,double lambdaex[],
                                 double vpex[][3],double ivpex[][3]);
+int MMG5_test_transpose3d();
 int MMG5_test_dotprod();
 int MMG5_test_crossprod3d();
 int MMG5_test_mn();
