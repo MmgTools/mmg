@@ -200,6 +200,77 @@ inline int MMG5_nortri(MMG5_pMesh mesh,MMG5_pTria pt,double *n) {
 
 }
 
+/**
+ * \param dim size of the array
+ * \param a first array
+ * \param b second array
+ * \param result scalar product of the two arrays
+ *
+ * Compute scalar product of two double precision arrays.
+ */
+void MMG5_dotprod(int8_t dim,double *a,double *b,double *result) {
+  *result = 0.0;
+  for( int8_t i = 0; i < dim; i++ )
+    *result += a[i]*b[i];
+}
+
+/**
+ * \return 1 if success, 0 if fail.
+ *
+ * Test vector scalar product.
+ */
+int MMG5_test_dotprod() {
+  double a[4] = {1.0, 2.0,   3.0,  4.0};
+  double b[4] = {1.0, 0.5, 1./3., 0.25};
+  double cex = 4.0;
+  double cnum,err;
+
+  MMG5_dotprod(4,a,b,&cnum);
+  err = fabs(cex-cnum);
+  if( err > MMG5_EPSD ) {
+    fprintf(stderr,"  ## Error scalar product: in function %s, error %e\n",
+      __func__,err);
+    return 0;
+  }
+
+  return 1;
+}
+
+/**
+ * \param a first array
+ * \param b second array
+ * \param result cross product of the two arrays
+ *
+ * Compute cross product of two double precision arrays in 3D.
+ */
+void MMG5_crossprod3d(double *a,double *b,double *result) {
+  result[0] = a[1]*b[2] - a[2]*b[1];
+  result[1] = a[2]*b[0] - a[0]*b[2];
+  result[2] = a[0]*b[1] - a[1]*b[0];
+}
+
+/**
+ * \return 1 if success, 0 if fail.
+ *
+ * Test vector cross product.
+ */
+int MMG5_test_crossprod3d() {
+  double a[3] = {1., 0., 0.};
+  double b[3] = {1./sqrt(2.),1./sqrt(2.),0.};
+  double cex[3] = {0.,0.,1./sqrt(2.)};
+  double cnum[3],maxerr;
+
+  MMG5_crossprod3d(a,b,cnum);
+
+  maxerr = MMG5_test_mat_error(3,cex,cnum);
+  if( maxerr > MMG5_EPSD ) {
+    fprintf(stderr,"  ## Error 3D cross product: in function %s, max error %e\n",
+      __func__,maxerr);
+    return 0;
+  }
+
+  return 1;
+}
 
 /**
  * \param m symmetric matrix
