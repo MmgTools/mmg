@@ -114,7 +114,14 @@ int main(int argc,char *argv[]) {
     return(EXIT_FAILURE);
 
   /* simultaneous reduction test */
-  if( !MMG5_test_simred3d() )
+  double m[6] = {111./2.,-109./2.,  89./2.,111./2.,-91./2.,111./2.}; /* Test matrix 1 */
+  double n[6] = {409./2.,-393./2.,-407./2.,409./2.,391./2.,409./2.}; /* Test matrix 2 */
+  double dm[3] = {1., 10.,100.}; /* Exact cobasis projection 1 */
+  double dn[3] = {8.,400.,  1.}; /* Exact cobasis projection 2 */
+  double vp[3][3] = {{1./sqrt(2.),1./sqrt(2.),0.},
+                     {0.,         1./sqrt(2.),1./sqrt(2.)},
+                     {1./sqrt(2.),         0.,1./sqrt(2.)}}; /* Exact cobasis vectors */
+  if( !MMG5_test_simred3d(mmgMesh,m,n,dm,dn,vp) )
     return(EXIT_FAILURE);
 
   /* matrix inverse transformation test */
