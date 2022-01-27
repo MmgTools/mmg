@@ -1435,7 +1435,7 @@ int MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
 }
 
 static inline
-int MMG5_grad2metVol_buildmet(MMG5_pMesh mesh,MMG5_pSol met,int ip,double ux,double uy,double uz,double *m,double **n,int8_t *ridgedir) {
+int MMG5_grad2metVol_buildmet(MMG5_pMesh mesh,MMG5_pSol met,int ip,double ux,double uy,double uz,double *m,int8_t *ridgedir) {
   MMG5_pPoint  ppt;
   MMG5_pxPoint pxp;
   double *mm,*nn1,*nn2,rbasis[3][3],ps1,ps2;
@@ -1460,11 +1460,9 @@ int MMG5_grad2metVol_buildmet(MMG5_pMesh mesh,MMG5_pSol met,int ip,double ux,dou
     ps2 = ux*nn2[0] + uy*nn2[1] + uz*nn2[2];
     if ( fabs(ps2)<fabs(ps1) ) {
       *ridgedir = 1;
-      *n = nn2;
     }
     else{
       *ridgedir = 0;
-      *n = nn1;
     }
     /* Note that rbasis is not used in this function */
     if( !MMG5_buildridmet(mesh,met,ip,ux,uy,uz,m,rbasis) )
@@ -1474,7 +1472,6 @@ int MMG5_grad2metVol_buildmet(MMG5_pMesh mesh,MMG5_pSol met,int ip,double ux,dou
   else if( ppt->tag & MG_BDY ) {
 
     pxp = &mesh->xpoint[ppt->xp];
-    *n = pxp->n1;
     memcpy(m,mm,6*sizeof(double));
 
   }
@@ -1510,7 +1507,7 @@ void MMG5_grad2metVol_extmet(MMG5_pMesh mesh,MMG5_pPoint ppt,double l,double *m,
  *
  */
 static inline
-void MMG3D_gradEigenv(MMG5_pMesh mesh,MMG5_pSol met,int ip,double m[6],double mext[6],double n[3],int8_t ridgedir,int8_t iloc,int *ier) {
+void MMG3D_gradEigenv(MMG5_pMesh mesh,MMG5_pSol met,int ip,double m[6],double mext[6],int8_t ridgedir,int8_t iloc,int *ier) {
   MMG5_pPoint ppt = &mesh->point[ip];
   double *mm;
   double tol = MMG5_EPSOK;
@@ -1544,17 +1541,25 @@ void MMG3D_gradEigenv(MMG5_pMesh mesh,MMG5_pSol met,int ip,double m[6],double me
 
   }
   else if( ppt->tag & MG_GEO ) {
+    MMG5_pxPoint pxp;
     double mr[6],mrext[6],dm[3],dmext[3];
-    double u[3],*t,r[3][3];
+    double u[3],r[3][3],*t,*n;
+
+    /* Compute ridge orthonormal basis (t, n x t, n) */
     t = ppt->n;
-    u[0] = n[1]*t[2] - n[2]*t[1];
-    u[1] = n[2]*t[0] - n[0]*t[2];
-    u[2] = n[0]*t[1] - n[1]*t[0];
+    pxp = &mesh->xpoint[ppt->xp];
+    if( ridgedir )
+      n = pxp->n2;
+    else
+      n = pxp->n1;
+    MMG5_crossprod3d(n,ppt->n,u);
+    /* Store basis in rotation matrix */
     for( int8_t i = 0; i < 3; i++ ) {
-      r[0][i] = t[i];
+      r[0][i] = ppt->n[i];
       r[1][i] = u[i];
       r[2][i] = n[i];
     }
+    /* Rotate matrices to the ridge reference system */
     MMG5_rmtr(r,m,mr);
     dm[0] = mr[0];
     dm[1] = mr[3];
@@ -1563,14 +1568,17 @@ void MMG3D_gradEigenv(MMG5_pMesh mesh,MMG5_pSol met,int ip,double m[6],double me
     dmext[0] = mrext[0];
     dmext[1] = mrext[3];
     dmext[2] = mrext[5];
-   /* Truncation XXX */
+    /* The ridge metrics is diagonal and must remain diagonal, while the
+     * extended metric from the other point  is not necessarily diagonal in the
+     * ridge basis. Do not perform intersection, but simply evaluate lengths on
+     * the ridge basis and truncate sizes. */
     for( int8_t i = 0; i < 3; i++ ) {
       if( dmext[i] > dm[i]*(1.0 + tol) ) {
         dm[i] = dmext[i];
         (*ier) = (*ier) | iloc;
       }
     }
-    /* Update */
+    /* Update metric */
     if( (*ier) & iloc ) {
       /* Re-assemble 3D metric in ridge storage */
       mm[0] = dm[0];
@@ -1580,13 +1588,15 @@ void MMG3D_gradEigenv(MMG5_pMesh mesh,MMG5_pSol met,int ip,double m[6],double me
 
   }
   else if( ppt->tag & MG_BDY ) {
+    MMG5_pxPoint pxp;
     double mr[6],mrext[6],mtan[3],mtanext[3],r[3][3];
-    double dm[3],dmext[3],vp[2][2],beta;
+    double dm[3],dmext[3],vp[2][2];
 
     /* Rotation matrices mapping n to e_3 */
-    MMG5_rotmatrix(n,r);
+    pxp = &mesh->xpoint[ppt->xp];
+    MMG5_rotmatrix(pxp->n1,r);
 
-    /* Rotate metrics in the tangent plane */
+    /* Rotate metrics to the tangent plane */
     MMG5_rmtr(r,m,mr);
     mtan[0] = mr[0];
     mtan[1] = mr[1];
@@ -1595,53 +1605,51 @@ void MMG3D_gradEigenv(MMG5_pMesh mesh,MMG5_pSol met,int ip,double m[6],double me
     mtanext[0] = mrext[0];
     mtanext[1] = mrext[1];
     mtanext[2] = mrext[3];
-    /* Simultaneous reduction basis */
+    /* The current point metric is aligned with the surface normal direction,
+     * while the extended metric from the other point need not.
+     * Perform intersection only in the tangent plane, while simply truncate
+     * sizes in the normal direction.
+     *
+     * Simultaneous reduction basis */
     if( !MMG5_simred2d(mesh,mtan,mtanext,dm,dmext,vp) ) {
       *ier = -1;
       return;
     }
-    /* Truncation in the tangent plane */
-    beta = 1.0;
+    /* Intersection in the tangent plane */
     for( int8_t i = 0; i < 2; i++ ) {
       if( dmext[i] > dm[i]*(1.0 + tol) ) {
-        beta = MG_MAX(beta,dmext[i]/dm[i]);
         dm[i] = dmext[i];
         (*ier) = (*ier) | iloc;
       }
     }
-    /* Truncation in the normal direction XXX */
+    /* The current point metric is aligned with the surface normal direction,
+     * while the extended metric from the other point need not.
+     * Simply evaluate lengths in the normal direction and truncate sizes. */
     dm[2]    = mr[5];
     dmext[2] = mrext[5];
     if( dmext[2] > dm[2]*(1.0 + tol) ) {
-      beta = MG_MAX(beta,dmext[2]/dm[2]);
       dm[2] = dmext[2];
       (*ier) = (*ier) | iloc;
     }
-    /* Update */
+    /* Update metric */
     if( (*ier) & iloc ) {
       /* Simultaneous reduction basis is non-orthogonal, so invert it for the
-       * inverse transformation */
+       * inverse transformation for the tangent-plane metric. */
       double ivp[2][2];
       if( !MMG5_invmat22(vp,ivp) ) {
         *ier = -1;
         return;
       }
       MMG5_simredmat(2,mtan,dm,(double *)ivp);
-      /* Re-assemble 3D metric */
+      /* Re-assemble 3D metric: use the intersected metrics in the tangent
+       * plane, and the truncated size in the normal dierction. */
       mr[0] = mtan[0];
       mr[1] = mtan[1];
       mr[3] = mtan[2];
       mr[2] = mr[4] = 0.0;
       mr[5] = dm[2];
       /* Transpose rotation matrix and rotate back into the point metric*/
-      double swp;
-      for( int8_t i = 0; i < 2; i++ ) {
-        for( int8_t j = i+1; j < 3; j++ ) {
-          swp = r[i][j];
-          r[i][j] = r[j][i];
-          r[j][i] = swp;
-        }
-      }
+      MMG5_transpose3d(r);
       MMG5_rmtr(r,mr,mm);
     }
 
@@ -1662,7 +1670,7 @@ void MMG3D_gradEigenv(MMG5_pMesh mesh,MMG5_pSol met,int ip,double m[6],double me
         (*ier) = (*ier) | iloc;
       }
     }
-    /* Update */
+    /* Update metric */
     if( (*ier) & iloc ) {
       /* Simultaneous reduction basis is non-orthogonal, so invert it for the
        * inverse transformation */
@@ -1694,7 +1702,7 @@ void MMG3D_gradEigenv(MMG5_pMesh mesh,MMG5_pSol met,int ip,double m[6],double me
 static inline
 int MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int np1,int np2) {
   MMG5_pPoint    p1,p2;
-  double         *mm1,*mm2,m1[6],m2[6],mext1[6],mext2[6],*n1,*n2;
+  double         *mm1,*mm2,m1[6],m2[6],mext1[6],mext2[6];
   double         ux,uy,uz,l;
   int8_t         ridgedir1,ridgedir2;
   int            ier = 0;
@@ -1712,10 +1720,10 @@ int MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int np1,int np
 
 
   /* Recover normal and metric associated to p1 and p2 */
-  if( !MMG5_grad2metVol_buildmet(mesh,met,np1,ux,uy,uz,m1,&n1,&ridgedir1) ) {
+  if( !MMG5_grad2metVol_buildmet(mesh,met,np1,ux,uy,uz,m1,&ridgedir1) ) {
     return -1;
   }
-  if( !MMG5_grad2metVol_buildmet(mesh,met,np2,ux,uy,uz,m2,&n2,&ridgedir2) ) {
+  if( !MMG5_grad2metVol_buildmet(mesh,met,np2,ux,uy,uz,m2,&ridgedir2) ) {
     return -1;
   }
 
@@ -1727,13 +1735,13 @@ int MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int np1,int np
 
   /* Gradate metrics */
   if( p1->flag >= mesh->base-1 ) {
-    MMG3D_gradEigenv(mesh,met,np2,m2,mext1,n2,ridgedir2,2,&ier);
+    MMG3D_gradEigenv(mesh,met,np2,m2,mext1,ridgedir2,2,&ier);
     if( ier == -1 )
       return ier;
   }
 
   if( p2->flag >= mesh->base-1 ) {
-    MMG3D_gradEigenv(mesh,met,np1,m1,mext2,n1,ridgedir1,1,&ier);
+    MMG3D_gradEigenv(mesh,met,np1,m1,mext2,ridgedir1,1,&ier);
     if( ier == -1 )
       return ier;
   }
