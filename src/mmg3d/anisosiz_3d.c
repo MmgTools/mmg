@@ -1727,24 +1727,33 @@ int MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int np1,int np
     return -1;
   }
 
+  if( p2->flag >= mesh->base-1 ) {
+    /* Expand p2 metrics */
+    MMG5_grad2metVol_extmet(mesh,p2,l,m2,mext2);
 
-  /* Extend metrics */
+    /* Gradate p1 metrics */
+    MMG3D_gradEigenv(mesh,met,np1,m1,mext2,ridgedir1,1,&ier);
+    if( ier == -1 )
+      return ier;
+  }
+
+  if( ier & 1 ) {
+    /* Recover normal and metric associated to p1 */
+    if( !MMG5_grad2metVol_buildmet(mesh,met,np1,ux,uy,uz,m1,&ridgedir1) ) {
+      return -1;
+    }
+  }
+
+  /* Expand p1 metrics */
   MMG5_grad2metVol_extmet(mesh,p1,l,m1,mext1);
-  MMG5_grad2metVol_extmet(mesh,p2,l,m2,mext2);
 
-
-  /* Gradate metrics */
+  /* Gradate p2 metrics */
   if( p1->flag >= mesh->base-1 ) {
     MMG3D_gradEigenv(mesh,met,np2,m2,mext1,ridgedir2,2,&ier);
     if( ier == -1 )
       return ier;
   }
 
-  if( p2->flag >= mesh->base-1 ) {
-    MMG3D_gradEigenv(mesh,met,np1,m1,mext2,ridgedir1,1,&ier);
-    if( ier == -1 )
-      return ier;
-  }
 
   return ier;
 }
@@ -2092,6 +2101,7 @@ int MMG3D_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
         p0 = &mesh->point[np0];
         p1 = &mesh->point[np1];
 
+        /* Skip edge if both nodes have been updated more than 1 iteration ago */
         if ( (p0->flag < mesh->base-1) && (p1->flag < mesh->base-1) ) {
           pht = pht->nxt ? &edgeTable.item[pht->nxt] : 0;
           continue;
