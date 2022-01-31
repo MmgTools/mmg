@@ -1774,6 +1774,14 @@ int MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int np1,int np
     MMG3D_gradEigenv(mesh,p1,m1,mext2,ridgedir1,1,&ier);
     if( ier == -1 )
       return ier;
+#ifndef NDEBUG
+    double mtmp[6];
+    int iertmp = 0;
+    memcpy(mtmp,m1,6*sizeof(double));
+    MMG3D_gradEigenv(mesh,p1,mtmp,mext2,ridgedir1,1,&iertmp);
+    if( iertmp & 1 )
+      ier |= 4;
+#endif
   }
 
 
@@ -1785,6 +1793,14 @@ int MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int np1,int np
     MMG3D_gradEigenv(mesh,p2,m2,mext1,ridgedir2,2,&ier);
     if( ier == -1 )
       return ier;
+#ifndef NDEBUG
+    double mtmp[6];
+    int iertmp = 0;
+    memcpy(mtmp,m2,6*sizeof(double));
+    MMG3D_gradEigenv(mesh,p2,mtmp,mext1,ridgedir2,2,&iertmp);
+    if( iertmp & 2 )
+      ier |= 4;
+#endif
   }
 
   /* Set metrics to the met structure, back to ridge storage */
@@ -2009,7 +2025,7 @@ int MMG3D_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   double        *m,mv;
   int           k,it,itv,nup,nu,nupv,maxit;
   int           i,j,np0,np1,ier;
-  static int8_t  mmgWarn = 0;
+  static int    mmgWarn = 0;
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
     fprintf(stdout,"  ** Anisotropic mesh gradation\n");
@@ -2122,6 +2138,7 @@ int MMG3D_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
 
   nupv = itv = 0;
   maxit = 500;
+  mmgWarn = 0;
 
   /* analyze mesh edges via hash table */
   do {
@@ -2161,6 +2178,9 @@ int MMG3D_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
             p1->flag = mesh->base;
             nu++;
           }
+          if ( !mmgWarn && (ier & 4) ) {
+            mmgWarn = itv;
+          }
         }
 
         /* next edge */
@@ -2172,6 +2192,11 @@ int MMG3D_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_SAFE_FREE(edgeTable.item);
 
   if ( abs(mesh->info.imprim) > 3 ) {
+    if( mmgWarn ) {
+      fprintf(stderr,"\n      ## Warning: %s: Non-idempotent metric"
+                     " intersections since iteration %d.\n",__func__,mmgWarn);
+    }
+
     if ( abs(mesh->info.imprim) < 5 && !mesh->info.ddebug ) {
       fprintf(stdout,"    gradation: %7d updated, %d iter\n",nup+nupv,it+itv);
     }
