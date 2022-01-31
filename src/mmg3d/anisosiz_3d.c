@@ -1507,13 +1507,8 @@ void MMG5_grad2metVol_extmet(MMG5_pMesh mesh,MMG5_pPoint ppt,double l,double *m,
  *
  */
 static inline
-void MMG3D_gradEigenv(MMG5_pMesh mesh,MMG5_pSol met,int ip,double m[6],double mext[6],int8_t ridgedir,int8_t iloc,int *ier) {
-  MMG5_pPoint ppt = &mesh->point[ip];
-  double *mm;
+void MMG3D_gradEigenv(MMG5_pMesh mesh,MMG5_pPoint ppt,double m[6],double mext[6],int8_t ridgedir,int8_t iloc,int *ier) {
   double tol = MMG5_EPSOK;
-
-  ppt = &mesh->point[ip];
-  mm = &met->m[6*ip];
 
   if( MG_SIN(ppt->tag) || (MG_NOM & ppt->tag) ) {
     double dm[3],dmext[3],vp[3][3],beta;
@@ -1534,9 +1529,9 @@ void MMG3D_gradEigenv(MMG5_pMesh mesh,MMG5_pSol met,int ip,double m[6],double me
       /* lambda_new = 0.5 lambda_1 + 0.5 beta lambda_1: here we choose to not
        * respect the gradation in order to restric the influence of the singular
        * points. */
-      mm[0] += 0.5*beta;
-      mm[3] += 0.5*beta;
-      mm[5] += 0.5*beta;
+      m[0] += 0.5*beta;
+      m[3] += 0.5*beta;
+      m[5] += 0.5*beta;
     }
 
   }
@@ -1552,10 +1547,10 @@ void MMG3D_gradEigenv(MMG5_pMesh mesh,MMG5_pSol met,int ip,double m[6],double me
       n = pxp->n2;
     else
       n = pxp->n1;
-    MMG5_crossprod3d(n,ppt->n,u);
+    MMG5_crossprod3d(n,t,u);
     /* Store basis in rotation matrix */
     for( int8_t i = 0; i < 3; i++ ) {
-      r[0][i] = ppt->n[i];
+      r[0][i] = t[i];
       r[1][i] = u[i];
       r[2][i] = n[i];
     }
@@ -1580,10 +1575,8 @@ void MMG3D_gradEigenv(MMG5_pMesh mesh,MMG5_pSol met,int ip,double m[6],double me
     }
     /* Update metric */
     if( (*ier) & iloc ) {
-      /* Re-assemble 3D metric in ridge storage */
-      mm[0] = dm[0];
-      mm[1+ridgedir] = dm[1];
-      mm[3+ridgedir] = dm[2];
+      /* Re-build matrix */
+      MMG5_eigenvmatsym3d(mesh,m,dm,r);
     }
 
   }
@@ -1642,7 +1635,7 @@ void MMG3D_gradEigenv(MMG5_pMesh mesh,MMG5_pSol met,int ip,double m[6],double me
       }
       MMG5_simredmat(2,mtan,dm,(double *)ivp);
       /* Re-assemble 3D metric: use the intersected metrics in the tangent
-       * plane, and the truncated size in the normal dierction. */
+       * plane, and the truncated size in the normal direction. */
       mr[0] = mtan[0];
       mr[1] = mtan[1];
       mr[3] = mtan[2];
@@ -1650,7 +1643,7 @@ void MMG3D_gradEigenv(MMG5_pMesh mesh,MMG5_pSol met,int ip,double m[6],double me
       mr[5] = dm[2];
       /* Transpose rotation matrix and rotate back into the point metric*/
       MMG5_transpose3d(r);
-      MMG5_rmtr(r,mr,mm);
+      MMG5_rmtr(r,mr,m);
     }
 
   }
@@ -1679,11 +1672,54 @@ void MMG3D_gradEigenv(MMG5_pMesh mesh,MMG5_pSol met,int ip,double m[6],double me
         *ier = -1;
         return;
       }
-      MMG5_simredmat(3,mm,dm,(double *)ivp);
+      MMG5_simredmat(3,m,dm,(double *)ivp);
     }
 
   }
 
+}
+
+static inline
+void MMG5_grad2metVol_applymet(MMG5_pMesh mesh,MMG5_pSol met,int ip,double *m,int8_t ridgedir) {
+  MMG5_pPoint ppt;
+  double *mm;
+
+  ppt = &mesh->point[ip];
+  mm = &met->m[6*ip];
+
+  if( !(MG_SIN(ppt->tag) || MG_NOM & ppt->tag) && ppt->tag & MG_GEO ) {
+    MMG5_pxPoint pxp = &mesh->xpoint[ppt->xp];
+    double mr[6];
+    double u[3],r[3][3],*t,*n;
+
+    /* Compute ridge orthonormal basis (t, n x t, n) */
+    t = ppt->n;
+    pxp = &mesh->xpoint[ppt->xp];
+    if( ridgedir )
+      n = pxp->n2;
+    else
+      n = pxp->n1;
+    MMG5_crossprod3d(n,t,u);
+    /* Store basis in rotation matrix */
+    for( int8_t i = 0; i < 3; i++ ) {
+      r[0][i] = t[i];
+      r[1][i] = u[i];
+      r[2][i] = n[i];
+    }
+    /* Rotate matrices to the ridge reference system */
+    MMG5_rmtr(r,m,mr);
+    /* Store matrix in ridge format */
+    mm[0]          = mr[0];
+    mm[1+ridgedir] = mr[3];
+    mm[3+ridgedir] = mr[5];
+
+  } else {
+
+    memcpy(mm,m,6*sizeof(double));
+
+  }
+
+  return;
 }
 
 /**
@@ -1732,28 +1768,25 @@ int MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int np1,int np
     MMG5_grad2metVol_extmet(mesh,p2,l,m2,mext2);
 
     /* Gradate p1 metrics */
-    MMG3D_gradEigenv(mesh,met,np1,m1,mext2,ridgedir1,1,&ier);
+    MMG3D_gradEigenv(mesh,p1,m1,mext2,ridgedir1,1,&ier);
     if( ier == -1 )
       return ier;
   }
 
-  if( ier & 1 ) {
-    /* Recover normal and metric associated to p1 */
-    if( !MMG5_grad2metVol_buildmet(mesh,met,np1,ux,uy,uz,m1,&ridgedir1) ) {
-      return -1;
-    }
-  }
 
   /* Expand p1 metrics */
   MMG5_grad2metVol_extmet(mesh,p1,l,m1,mext1);
 
   /* Gradate p2 metrics */
   if( p1->flag >= mesh->base-1 ) {
-    MMG3D_gradEigenv(mesh,met,np2,m2,mext1,ridgedir2,2,&ier);
+    MMG3D_gradEigenv(mesh,p2,m2,mext1,ridgedir2,2,&ier);
     if( ier == -1 )
       return ier;
   }
 
+  /* Set metrics to the met structure, back to ridge storage */
+  MMG5_grad2metVol_applymet(mesh,met,np1,m1,ridgedir1);
+  MMG5_grad2metVol_applymet(mesh,met,np2,m2,ridgedir2);
 
   return ier;
 }
