@@ -1728,20 +1728,22 @@ void MMG5_grad2metVol_applymet(MMG5_pMesh mesh,MMG5_pSol met,int ip,double *m,in
 /**
  * \param mesh pointer toward the mesh.
  * \param met pointer toward the metric structure.
- * \param pt pointer toward a tetra.
  * \param np1 global index of the first edge extremity.
  * \param np2 global index of the second edge extremity.
  *
- * \return -1 if no gradation is needed, else index of graded point.
+ * \return -1 on failure, else local indices of graded point on the edge
+ * (bitwise encoded, so 0 for no update, 1 if the first point iis updated, 2 if
+ * the second one is updated, 3 if both). Use the third bit to switch on warning
+ * information at output.
  *
- * Enforces gradation of metric in one extremity of edge \a ia in tetra \a pt
- * with respect to the other.
+ * Enforces gradation of metric in both extremities of an edge with respect to
+ * one other.
  *
  */
 static inline
-int MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int np1,int np2) {
+int MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,int np1,int np2) {
   MMG5_pPoint    p1,p2;
-  double         *mm1,*mm2,m1[6],m2[6],mext1[6],mext2[6];
+  double         m1[6],m2[6],mext1[6],mext2[6];
   double         ux,uy,uz,l;
   int8_t         ridgedir1,ridgedir2;
   int            ier = 0;
@@ -1749,25 +1751,26 @@ int MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int np1,int np
   p1  = &mesh->point[np1];
   p2  = &mesh->point[np2];
 
-  mm1  = &met->m[6*np1];
-  mm2  = &met->m[6*np2];
-
   ux = p2->c[0] - p1->c[0];
   uy = p2->c[1] - p1->c[1];
   uz = p2->c[2] - p1->c[2];
   l = sqrt(ux*ux+uy*uy+uz*uz);
 
 
-  /* Recover normal and metric associated to p1 and p2 */
+  /** Recover normal and metric associated to p1 and p2 (metric can be in ridge
+   * storage) */
   if( !MMG5_grad2metVol_buildmet(mesh,met,np1,ux,uy,uz,m1,&ridgedir1) ) {
     return -1;
   }
   if( !MMG5_grad2metVol_buildmet(mesh,met,np2,ux,uy,uz,m2,&ridgedir2) ) {
     return -1;
   }
+  /* (metric now follows standard 3D storage) */
 
+
+  /** Extend p2 metric and gradate p1 */
   if( p2->flag >= mesh->base-1 ) {
-    /* Expand p2 metrics */
+    /* Extend p2 metrics */
     MMG5_grad2metVol_extmet(mesh,p2,l,m2,mext2);
 
     /* Gradate p1 metrics */
@@ -1785,11 +1788,12 @@ int MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int np1,int np
   }
 
 
-  /* Expand p1 metrics */
-  MMG5_grad2metVol_extmet(mesh,p1,l,m1,mext1);
-
-  /* Gradate p2 metrics */
+  /** Extend p1 metric and gradate p2 (p1 has already been updated) */
   if( p1->flag >= mesh->base-1 ) {
+    /* Expand p1 metrics */
+    MMG5_grad2metVol_extmet(mesh,p1,l,m1,mext1);
+
+    /* Gradate p2 metrics */
     MMG3D_gradEigenv(mesh,p2,m2,mext1,ridgedir2,2,&ier);
     if( ier == -1 )
       return ier;
@@ -1802,6 +1806,7 @@ int MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,int np1,int np
       ier |= 4;
 #endif
   }
+
 
   /* Set metrics to the met structure, back to ridge storage */
   MMG5_grad2metVol_applymet(mesh,met,np1,m1,ridgedir1);
@@ -2166,7 +2171,7 @@ int MMG3D_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
           continue;
         }
 
-        ier = MMG5_grad2metVol(mesh,met,pt,np0,np1);
+        ier = MMG5_grad2metVol(mesh,met,np0,np1);
         if( ier == -1 ) {
           break;
         } else {
