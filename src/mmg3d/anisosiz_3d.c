@@ -1508,7 +1508,7 @@ void MMG5_grad2metVol_extmet(MMG5_pMesh mesh,MMG5_pPoint ppt,double l,double *m,
  */
 static inline
 void MMG3D_gradEigenv(MMG5_pMesh mesh,MMG5_pPoint ppt,double m[6],double mext[6],int8_t ridgedir,int8_t iloc,int *ier) {
-  double tol = MMG5_EPSOK;
+  double tol = MMG5_EPS;
 
   if( MG_SIN(ppt->tag) || (MG_NOM & ppt->tag) ) {
     double dm[3],dmext[3],vp[3][3],beta;
