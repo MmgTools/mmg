@@ -2084,7 +2084,7 @@ int MMG3D_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_Tria     ptt;
   MMG5_pPoint   p0,p1;
   double        *m,mv;
-  int           k,it,itv,nup,nu,nupv,maxit;
+  int           k,itv,nu,nupv,maxit;
   int           i,j,np0,np1,ier;
   static int    mmgWarn = 0;
 
@@ -2110,58 +2110,6 @@ int MMG3D_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   /** Mark the edges belonging to a required entity */
   MMG3D_mark_pointsOnReqEdge_fromTetra ( mesh );
 
-  for (k=1; k<=mesh->np; k++)
-    mesh->point[k].flag = mesh->base;
-
-  it = nup = 0;
-  maxit = 100;
-  do {
-    mesh->base++;
-    nu = 0;
-    for (k=1; k<=mesh->ne; k++) {
-      pt = &mesh->tetra[k];
-      if ( !MG_EOK(pt) )  continue;
-      pxt = pt->xt ? &mesh->xtetra[pt->xt] : 0;
-
-      if ( pxt ) {
-        for (i=0; i<4; i++) {
-          if ( pxt->ftag[i] & MG_BDY) {
-            /* Gradation along a surface edge */
-            /* virtual triangle */
-            MMG5_tet2tri(mesh,k,i,&ptt);
-            for (j=0; j<3; j++) {
-              np0 = ptt.v[MMG5_inxt2[j]];
-              np1 = ptt.v[MMG5_iprv2[j]];
-              p0  = &mesh->point[np0];
-              p1  = &mesh->point[np1];
-              if ( (p0->flag < mesh->base-1) && (p1->flag < mesh->base-1) )
-                continue;
-
-              /* Skip points belonging to a required edge */
-              if ( p0->s || p1->s ) continue;
-
-              /* gradation along the tangent plane */
-              ier = 0;
-//              ier = MMG5_grad2metSurf(mesh,met,&ptt,np0,np1);
-              if ( ier == np0 ) {
-                p0->flag = mesh->base;
-                nu++;
-              }
-              else if ( ier == np1 ) {
-                p1->flag = mesh->base;
-                nu++;
-              }
-            }
-          }
-          else continue;
-        }
-      }
-    }
-    nup += nu;
-  }
-  while( ++it < maxit && nu > 0 );
-
-  /////////////////////7
 
   /* alloc hashtable */
   if ( !MMG5_hashNew(mesh,&edgeTable,mesh->nemax,3*mesh->nemax) ) {
@@ -2258,13 +2206,7 @@ int MMG3D_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
                      " intersections since iteration %d.\n",__func__,mmgWarn);
     }
 
-    if ( abs(mesh->info.imprim) < 5 && !mesh->info.ddebug ) {
-      fprintf(stdout,"    gradation: %7d updated, %d iter\n",nup+nupv,it+itv);
-    }
-    else {
-      fprintf(stdout,"    surface gradation: %7d updated, %d iter\n"
-              "    volume gradation:  %7d updated, %d iter\n",nup,it,nupv,itv);
-    }
+    fprintf(stdout,"    gradation: %7d updated, %d iter\n",nupv,itv);
   }
   return 1;
 }
