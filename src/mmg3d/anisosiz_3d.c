@@ -1519,19 +1519,22 @@ void MMG3D_gradEigenv(MMG5_pMesh mesh,MMG5_pPoint ppt,double m[6],double mext[6]
       return;
     }
     beta = 1.0;
+    /* Compute maximum size variation */
     for( int8_t i = 0; i < 3; i++ ) {
-      if( dmext[i] > dm[i]*(1.0 + tol) ) {
-        beta = MG_MAX(beta,dmext[i]/dm[i]);
-        (*ier) = (*ier) | iloc;
-      }
+      beta = MG_MAX(beta,dmext[i]/dm[i]);
+    }
+    if( beta > 1.0 + tol ) {
+      (*ier) = (*ier) | iloc;
     }
     if( (*ier) & iloc ) {
-      /* lambda_new = 0.5 lambda_1 + 0.5 beta lambda_1: here we choose to not
-       * respect the gradation in order to restric the influence of the singular
-       * points. */
-      m[0] += 0.5*beta;
-      m[3] += 0.5*beta;
-      m[5] += 0.5*beta;
+      /* You have to homothetically scale the metric in order to make it
+       * consistent with the above check and for the gradation loop to converge.
+       * Change the gradation law in the metric extension in
+       * MMG5_grad2metVol_extmet if you want to restrict the influence of
+       * singular points. */
+      m[0] *= beta;
+      m[3] *= beta;
+      m[5] *= beta;
     }
 
   }
