@@ -1434,8 +1434,25 @@ int MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   return 1;
 }
 
+/**
+ * \param mesh pointer toward the mesh.
+ * \param met pointer toward the metric structure.
+ * \param ip global point index.
+ * \param ux edge vector x-component.
+ * \param uy edge vector y-component.
+ * \param uz edge vector z-component.
+ * \param m point metric (copy, to be filled).
+ * \param ridgedir pointer to the index of the normal direction used for ridge
+ * metric (on ridge points only).
+ *
+ * \return 0 on failure, 1 if success.
+ *
+ * Get metric tensor from metric structure (pass from ridge storage to classical
+ * storage on non-singular ridge points, copy metric on all other points).
+ *
+ */
 static inline
-int MMG5_grad2metVol_buildmet(MMG5_pMesh mesh,MMG5_pSol met,int ip,double ux,double uy,double uz,double *m,int8_t *ridgedir) {
+int MMG5_grad2metVol_getmet(MMG5_pMesh mesh,MMG5_pSol met,int ip,double ux,double uy,double uz,double *m,int8_t *ridgedir) {
   MMG5_pPoint  ppt;
   MMG5_pxPoint pxp;
   double *mm,*nn1,*nn2,rbasis[3][3],ps1,ps2;
@@ -1485,6 +1502,17 @@ int MMG5_grad2metVol_buildmet(MMG5_pMesh mesh,MMG5_pSol met,int ip,double ux,dou
   return 1;
 }
 
+/**
+ * \param mesh pointer toward the mesh.
+ * \param ppt pointer toward the P point structure.
+ * \param l Euclidean length of the edge PQ.
+ * \param m metric tensor on point P.
+ * \param mext metric tensor extended on Q.
+ *
+ * Extend metric tensor from point P to point Q according to an h-variation law
+ * applied on each eigenvalue.
+ *
+ */
 static inline
 void MMG5_grad2metVol_extmet(MMG5_pMesh mesh,MMG5_pPoint ppt,double l,double *m,double *mext) {
   double lambda[3],vp[3][3];
@@ -1498,16 +1526,30 @@ void MMG5_grad2metVol_extmet(MMG5_pMesh mesh,MMG5_pPoint ppt,double l,double *m,
 }
 
 /**
- * \param m first matrix
- * \param mext second (extended) matrix
- * \param iloc index of the point on the edge (1 or 2)
- * \param ier flag of the modified eigenvalue: (ier & 1) if dm is altered, and (ier & 2) if dn is altered.
+ * \param mesh pointer toward the mesh.
+ * \param ppt pointer toward the P point structure.
+ * \param m metric tensor on point P.
+ * \param mext extended metric tensor from Q to P.
+ * \param ridgedir normal direction for metric reconstruction on P (on ridge only).
+ * \param iloc local index of point P on the edge.
+ * \param ier pointer to the local indices (on the edge) of updated points, with bitwise encoding.
  *
- *  Gradation of sizes = 1/sqrt(eigenv of the tensors) in the \a idir direction.
+ * Use metric intersection to gradate the anisotropic metric on point P, given
+ * the metric extended from point Q on the edge PQ.
+ * 1. On singular points, the metric on P is isotropic (as in MMG5_defmetsin)
+ *    and should remain isotropic.
+ * 2. On non-singular ridge points, the metric on P should remain aligned with
+ *    the ridge directions (thus it is not possible to apply metric intersection,
+ *    sizes are truncated instead).
+ * 3. On regular boundary points, the metric can be anisotropic on the tangent
+ *    plane, but it should remain aligned to the normal direction (thus,
+ *    intersection is used only in the tangent plane and sizes are truncated in
+ *    the normal direction).
+ * 4. On interior volume points, 3D metric intersection can be used.
  *
  */
 static inline
-void MMG3D_gradEigenv(MMG5_pMesh mesh,MMG5_pPoint ppt,double m[6],double mext[6],int8_t ridgedir,int8_t iloc,int *ier) {
+void MMG3D_gradSimred(MMG5_pMesh mesh,MMG5_pPoint ppt,double m[6],double mext[6],int8_t ridgedir,int8_t iloc,int *ier) {
   double tol = MMG5_EPS;
 
   if( MG_SIN(ppt->tag) || (MG_NOM & ppt->tag) ) {
@@ -1682,8 +1724,20 @@ void MMG3D_gradEigenv(MMG5_pMesh mesh,MMG5_pPoint ppt,double m[6],double mext[6]
 
 }
 
+/**
+ * \param mesh pointer toward the mesh.
+ * \param met pointer toward the metric structure.
+ * \param ip global index of the point.
+ * \param m metric tensor on the point (copy).
+ * \param ridgedir normal direction for metric reconstruction (on ridge only).
+ *
+ * Set new metric tensor to the metric structure (pass from classical storage to
+ * ridge storage on non-singular ridge points, copy metric on all other
+ * points).
+ *
+ */
 static inline
-void MMG5_grad2metVol_applymet(MMG5_pMesh mesh,MMG5_pSol met,int ip,double *m,int8_t ridgedir) {
+void MMG5_grad2metVol_setmet(MMG5_pMesh mesh,MMG5_pSol met,int ip,double *m,int8_t ridgedir) {
   MMG5_pPoint ppt;
   double *mm;
 
@@ -1759,10 +1813,10 @@ int MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,int np1,int np2) {
 
   /** Recover normal and metric associated to p1 and p2 (metric can be in ridge
    * storage) */
-  if( !MMG5_grad2metVol_buildmet(mesh,met,np1,ux,uy,uz,m1,&ridgedir1) ) {
+  if( !MMG5_grad2metVol_getmet(mesh,met,np1,ux,uy,uz,m1,&ridgedir1) ) {
     return -1;
   }
-  if( !MMG5_grad2metVol_buildmet(mesh,met,np2,ux,uy,uz,m2,&ridgedir2) ) {
+  if( !MMG5_grad2metVol_getmet(mesh,met,np2,ux,uy,uz,m2,&ridgedir2) ) {
     return -1;
   }
   /* (metric now follows standard 3D storage) */
@@ -1774,14 +1828,14 @@ int MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,int np1,int np2) {
     MMG5_grad2metVol_extmet(mesh,p2,l,m2,mext2);
 
     /* Gradate p1 metrics */
-    MMG3D_gradEigenv(mesh,p1,m1,mext2,ridgedir1,1,&ier);
+    MMG3D_gradSimred(mesh,p1,m1,mext2,ridgedir1,1,&ier);
     if( ier == -1 )
       return ier;
 #ifndef NDEBUG
     double mtmp[6];
     int iertmp = 0;
     memcpy(mtmp,m1,6*sizeof(double));
-    MMG3D_gradEigenv(mesh,p1,mtmp,mext2,ridgedir1,1,&iertmp);
+    MMG3D_gradSimred(mesh,p1,mtmp,mext2,ridgedir1,1,&iertmp);
     if( iertmp & 1 )
       ier |= 4;
 #endif
@@ -1794,14 +1848,14 @@ int MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,int np1,int np2) {
     MMG5_grad2metVol_extmet(mesh,p1,l,m1,mext1);
 
     /* Gradate p2 metrics */
-    MMG3D_gradEigenv(mesh,p2,m2,mext1,ridgedir2,2,&ier);
+    MMG3D_gradSimred(mesh,p2,m2,mext1,ridgedir2,2,&ier);
     if( ier == -1 )
       return ier;
 #ifndef NDEBUG
     double mtmp[6];
     int iertmp = 0;
     memcpy(mtmp,m2,6*sizeof(double));
-    MMG3D_gradEigenv(mesh,p2,mtmp,mext1,ridgedir2,2,&iertmp);
+    MMG3D_gradSimred(mesh,p2,mtmp,mext1,ridgedir2,2,&iertmp);
     if( iertmp & 2 )
       ier |= 4;
 #endif
@@ -1809,8 +1863,10 @@ int MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,int np1,int np2) {
 
 
   /* Set metrics to the met structure, back to ridge storage */
-  MMG5_grad2metVol_applymet(mesh,met,np1,m1,ridgedir1);
-  MMG5_grad2metVol_applymet(mesh,met,np2,m2,ridgedir2);
+  if( ier & 1 )
+    MMG5_grad2metVol_setmet(mesh,met,np1,m1,ridgedir1);
+  if( ier & 2 )
+    MMG5_grad2metVol_setmet(mesh,met,np2,m2,ridgedir2);
 
   return ier;
 }
