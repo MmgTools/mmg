@@ -1141,11 +1141,34 @@ int MMG5_mmgIntextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6],
   p0 = &mesh->point[np];
   m  = &met->m[6*np];
 
-  /* Case of a singular point : take the physical metric */
+  /* Case of a singular point : since MMG5_defmetsin() computes an isotropic
+   * metric, scale it by the physical metric while keeping it isotropic */
   if ( MG_SIN(p0->tag) || (p0->tag & MG_NOM) ) {
-    for(i=0	; i<6; i++) {
-      m[i] = me[i];
+
+    /* Compute minimum size in physical metric */
+    order = MMG5_eigenv3d(1,me,lambda,vp);
+    if ( !order ) {
+      if ( !mmgWarn ) {
+        fprintf(stderr,"\n  ## Warning: %s: Unable to diagonalize at least"
+                " 1 metric.\n",__func__);
+        mmgWarn = 1;
+      }
+      return 0;
     }
+
+    hu = 0.0;
+    for( i = 0; i < 3; i++ ) {
+      hu = MG_MAX(hu,lambda[i]);
+    }
+
+    /* Truncate physical size with respect to mesh constraints */
+    hu = MG_MIN(isqhmin,hu);
+    hu = MG_MAX(isqhmax,hu);
+
+    /* Overwrite diagonal metric if physical metric prescribes smaller sizes */
+    if( hu > m[0] )
+      m[0] = m[3] = m[5] = hu;
+
   }
   /* Case of a ridge point : take sizes in 3 directions t,n1,u */
   else if ( p0->tag & MG_GEO ) {
