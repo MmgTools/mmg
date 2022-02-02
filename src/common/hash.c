@@ -128,7 +128,7 @@ int MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, MMG5_Hash *hash, int chkISO) {
             l   = adjt[3*(jel-1)+1+j]%3;
             pt2 = &mesh->tria[lel];
 
-            if ( chkISO && ( (pt->ref == MG_ISO) || (pt->ref < 0)) ) {
+            if ( chkISO && ( (pt->ref == mesh->info.isoref) || (pt->ref < 0)) ) {
               adjt[3*(lel-1)+1+l] = 0;
               adja[i] = 3*jel+j;
               adjt[3*(jel-1)+1+j] = 3*k + i;

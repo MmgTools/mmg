@@ -1334,6 +1334,9 @@ int MMGS_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
     if ( !mesh->info.iso )
       mesh->info.iso      = val;
     break;
+  case MMGS_IPARAM_isoref :
+      mesh->info.isoref   = val;
+    break;
   case MMGS_IPARAM_keepRef :
     if ( val )
       mesh->info.iso      = 2;
