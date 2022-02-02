@@ -268,8 +268,16 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
             return 0;
           }
         }
+        else if ( !strcmp(argv[i],"-isoref") && ++i <= argc ) {
+          if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_isoref,
+                                     atoi(argv[i])) )
+            return 0;
+        }
+        else {
+          MMG3D_usage(argv[0]);
+          return 0;
+        }
         break;
-
       case 'l':
         if ( !strcmp(argv[i],"-lag") ) {
           if ( ++i < argc && isdigit(argv[i][0]) ) {

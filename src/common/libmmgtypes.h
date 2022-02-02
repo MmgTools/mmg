@@ -509,7 +509,7 @@ typedef struct {
   int8_t        ddebug; /*!< debug mode if 1 */
   int8_t        badkal; /*!< 1 if the mesh contains a very bad element */
   int8_t        iso; /*!< level-set discretization mode */
-  int           isoref;
+  int           isoref; /*!< isovalue reference in ls mode */
   int8_t        setfem; /*!< Enforce finite element mesh (try to avoid edges
                       * connecting 2 bdy points and tet with more than 1 bdy
                       * face) */

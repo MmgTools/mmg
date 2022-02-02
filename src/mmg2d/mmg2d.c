@@ -397,6 +397,15 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
             return 0;
           }
         }
+        else if ( !strcmp(argv[i],"-isoref") && ++i <= argc ) {
+          if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_isoref,
+                                     atoi(argv[i])) )
+            return 0;
+        }
+        else {
+          MMG2D_usage(argv[0]);
+          return 0;
+        }
         break;
       case 'l':
         if ( !strcmp(argv[i],"-lag") ) {

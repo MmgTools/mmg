@@ -203,6 +203,15 @@ int MMGS_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol so
             return 0;
           }
         }
+        else if ( !strcmp(argv[i],"-isoref") && ++i <= argc ) {
+          if ( !MMGS_Set_iparameter(mesh,met,MMGS_IPARAM_isoref,
+                                    atoi(argv[i])) )
+            return 0;
+        }
+        else {
+          MMGS_usage(argv[0]);
+          return 0;
+        }
         break;
       case 'k':
         if ( !strcmp(argv[i],"-keep-ref") ) {
