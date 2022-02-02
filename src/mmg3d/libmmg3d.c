@@ -63,7 +63,7 @@
 
 /** Free adja, xtetra and xpoint tables */
 void MMG3D_Free_topoTables(MMG5_pMesh mesh) {
-  int k;
+  MMG_int k;
 
   mesh->xp = 0;
   if ( mesh->adja )
@@ -97,7 +97,8 @@ void MMG3D_Free_topoTables(MMG5_pMesh mesh) {
 int MMG3D_bdryBuild(MMG5_pMesh mesh) {
   MMG5_pTetra pt;
   MMG5_hgeom  *ph;
-  int         k,i,nr;
+  MMG_int         k,nr;
+  int         i;
 
 
   /* rebuild triangles*/
@@ -194,9 +195,9 @@ int MMG3D_bdryBuild(MMG5_pMesh mesh) {
  *
  */
 
-int MMG3D_mark_packedPoints(MMG5_pMesh mesh,int *np,int *nc) {
+int MMG3D_mark_packedPoints(MMG5_pMesh mesh,iMMG_int *np,MMG_int *nc) {
   MMG5_pPoint   ppt;
-  int           k;
+  MMG_int           k;
 
   for ( k=1; k<=mesh->np; ++k ) {
     mesh->point[k].tmp = 0;
@@ -271,8 +272,8 @@ int MMG3D_mark_packedPoints(MMG5_pMesh mesh,int *np,int *nc) {
  */
 int MMG3D_pack_tetraAndAdja(MMG5_pMesh mesh) {
   MMG5_pTetra   pt,pt1;
-  int           iadr,iadr1,iadrv,*adjav,*adja,*adja1,voy;
-  int           k,i;
+  MMG_int       k,iadr,iadr1,iadrv,*adjav,*adja,*adja1;
+  int           i,voy;
 
   if ( !mesh->ne ) {
     return 1;
@@ -331,7 +332,7 @@ int MMG3D_pack_tetraAndAdja(MMG5_pMesh mesh) {
  */
 int MMG3D_pack_tetra(MMG5_pMesh mesh) {
   MMG5_pTetra   pt,pt1;
-  int           k;
+  MMG_int           k;
 
   if ( !mesh->ne ) {
     return 1;
@@ -419,7 +420,8 @@ int MMG3D_pack_prismsAndQuads(MMG5_pMesh mesh) {
  */
 int MMG3D_pack_sol(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pPoint   ppt,ppt1;
-  int           np,k,isol,isol1,i;
+  int           isol,isol1,i;
+  MMG_int       np,k;
 
   if ( sol && sol->m ) {
     k  = 1;
@@ -467,7 +469,7 @@ int MMG3D_pack_sol(MMG5_pMesh mesh,MMG5_pSol sol) {
  */
 int MMG3D_pack_pointArray(MMG5_pMesh mesh) {
   MMG5_pPoint   ppt,ppt1;
-  int           k;
+  MMG_int           k;
 
   k = 1;
 
@@ -534,9 +536,9 @@ int MMG3D_pack_pointArray(MMG5_pMesh mesh) {
  *
  */
 
-int MMG3D_mark_packedPoints(MMG5_pMesh mesh,int *np,int *nc) {
+int MMG3D_mark_packedPoints(MMG5_pMesh mesh,MMG_int *np,MMG_int *nc) {
   MMG5_pPoint   ppt;
-  int           k;
+  MMG_int           k;
 
   (*np) = (*nc) = 0;
   for (k=1; k<=mesh->np; k++) {
@@ -567,8 +569,8 @@ int MMG3D_mark_packedPoints(MMG5_pMesh mesh,int *np,int *nc) {
  */
 int MMG3D_pack_tetraAndAdja(MMG5_pMesh mesh) {
   MMG5_pTetra   pt,ptnew;
-  int           iadr,iadrnew,iadrv,*adjav,*adja,*adjanew,voy;
-  int           ne,nbl,k,i;
+  MMG_int       ne,nbl,k,iadr,iadrnew,iadrv,*adjav,*adja,*adjanew;
+  int           i,voy;
 
   ne  = 0;
   nbl = 1;
@@ -622,7 +624,7 @@ int MMG3D_pack_tetraAndAdja(MMG5_pMesh mesh) {
  */
 int MMG3D_pack_tetra(MMG5_pMesh mesh) {
   MMG5_pTetra   pt,ptnew;
-  int           ne,nbl,k;
+  MMG_int       ne,nbl,k;
 
   ne  = 0;
   nbl = 1;
@@ -804,7 +806,7 @@ int MMG3D_update_eltsVertices(MMG5_pMesh mesh) {
   MMG5_pTetra   pt;
   MMG5_pPrism   pp;
   MMG5_pQuad    pq;
-  int           k;
+  MMG_int           k;
 
   for (k=1; k<=mesh->ne; k++) {
     pt = &mesh->tetra[k];
@@ -846,8 +848,8 @@ int MMG3D_update_eltsVertices(MMG5_pMesh mesh) {
  * new indices.
  *
  */
-int MMG3D_pack_points(MMG5_pMesh mesh) {
-  int np, nc;
+MMG_int MMG3D_pack_points(MMG5_pMesh mesh) {
+  MMG_int np, nc;
 
   /** Store in tmp the pack index of each point and count the corner*/
   if ( !MMG3D_mark_packedPoints(mesh,&np,&nc) ) return -1;
@@ -870,7 +872,8 @@ int MMG3D_pack_points(MMG5_pMesh mesh) {
  */
 void MMG3D_unset_reqBoundaries(MMG5_pMesh mesh) {
   MMG5_pTetra pt;
-  int         k,i;
+  MMG_int     k;
+  int         i;
 
   for (k=1; k<=mesh->ne; k++) {
     pt   = &mesh->tetra[k];
@@ -898,7 +901,7 @@ void MMG3D_unset_reqBoundaries(MMG5_pMesh mesh) {
  *
  */
 int MMG3D_packMesh(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
-  int           nc,nr;
+  MMG_int           nc,nr;
 
   /* Remove non wanted subdomains if needed */
   MMG3D_keep_only1Subdomain ( mesh, mesh->info.nsd );
@@ -1480,8 +1483,9 @@ int MMG3D_mmg3dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet) {
 int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
   mytime    ctim[TIMEMAX];
   char      stim[32];
-  int       *invalidTets;
-  int       k,ier;
+  MMG_int       *invalidTets;
+  MMG_int       k;
+  MMG_int       ier;
 
   if ( mesh->info.imprim >= 0 ) {
     fprintf(stdout,"\n  %s\n   MODULE MMG3D: %s (%s)\n  %s\n",

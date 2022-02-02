@@ -48,7 +48,7 @@ extern int8_t  ddb;
  */
 int MMG5_paktet(MMG5_pMesh mesh) {
   MMG5_pTetra   pt,pt1;
-  int      k;
+  MMG_int      k;
 
   k = 1;
   do {
@@ -92,9 +92,9 @@ int MMG5_paktet(MMG5_pMesh mesh) {
  *
  *
  **/
-int MMG5_hashFace(MMG5_pMesh mesh,MMG5_Hash *hash,int ia,int ib,int ic,int k) {
+int MMG5_hashFace(MMG5_pMesh mesh,MMG5_Hash *hash,MMG_int ia,MMG_int ib,MMG_int ic,MMG_int k) {
   MMG5_hedge     *ph;
-  int        key,mins,maxs,sum,j;
+  MMG_int        key,mins,maxs,sum,j;
 
   mins = MG_MIN(ia,MG_MIN(ib,ic));
   maxs = MG_MAX(ia,MG_MAX(ib,ic));
@@ -140,9 +140,9 @@ int MMG5_hashFace(MMG5_pMesh mesh,MMG5_Hash *hash,int ia,int ib,int ic,int k) {
 }
 
 /** return index of triangle ia ib ic */
-int MMG5_hashGetFace(MMG5_Hash *hash,int ia,int ib,int ic) {
+int MMG5_hashGetFace(MMG5_Hash *hash,MMG_int ia,MMG_int ib,MMG_int ic) {
   MMG5_hedge  *ph;
-  int     key,mins,maxs,sum;
+  MMG_int     key,mins,maxs,sum;
 
   if ( !hash->item )  return 0;
 
@@ -179,8 +179,8 @@ int MMG5_hashGetFace(MMG5_Hash *hash,int ia,int ib,int ic) {
  */
 int MMG3D_hashTetra(MMG5_pMesh mesh, int pack) {
   MMG5_pTetra    pt,pt1;
-  int            k,kk,pp,l,ll,mins,mins1,maxs,maxs1,sum,sum1,iadr;
-  int           *hcode,*link,hsize,inival;
+  MMG_int            k,kk,pp,l,ll,mins,mins1,maxs,maxs1,sum,sum1,iadr;
+  MMG_int           *hcode,*link,hsize,inival;
   uint8_t        i,ii,i1,i2,i3;
   unsigned int   key;
 
@@ -198,11 +198,11 @@ int MMG3D_hashTetra(MMG5_pMesh mesh, int pack) {
   }
 
   /* memory alloc */
-  MMG5_ADD_MEM(mesh,(4*mesh->nemax+5)*sizeof(int),"adjacency table",
+  MMG5_ADD_MEM(mesh,(4*mesh->nemax+5)*sizeof(MMG_int),"adjacency table",
                 fprintf(stderr,"  Exit program.\n");
                 return 0);
-  MMG5_SAFE_CALLOC(mesh->adja,4*mesh->nemax+5,int,return 0);
-  MMG5_SAFE_CALLOC(hcode,mesh->ne+5,int,return 0);
+  MMG5_SAFE_CALLOC(mesh->adja,4*mesh->nemax+5,MMG_int,return 0);
+  MMG5_SAFE_CALLOC(hcode,mesh->ne+5,MMG_int,return 0);
 
   link  = mesh->adja;
   hsize = mesh->ne;
@@ -296,10 +296,10 @@ int MMG3D_hashTetra(MMG5_pMesh mesh, int pack) {
  */
 int MMG3D_hashPrism(MMG5_pMesh mesh) {
   MMG5_pPrism    pp,pp1;
-  int            k,kk,l,ll,jj;
-  int            max12,min12,max34,min34,mins,mins1,mins_b, mins_b1,maxs,maxs1;
-  int            iadr;
-  int           *hcode,*link,hsize,inival;
+  MMG_int            k,kk,l,ll,jj;
+  MMG_int            max12,min12,max34,min34,mins,mins1,mins_b, mins_b1,maxs,maxs1;
+  MMG_int            iadr;
+  MMG_int           *hcode,*link,hsize,inival;
   uint8_t        i,ii,i1,i2,i3,i4;
   unsigned int   key;
 
@@ -318,11 +318,11 @@ int MMG3D_hashPrism(MMG5_pMesh mesh) {
     fprintf(stdout,"  ** SETTING PRISMS ADJACENCY\n");
 
   /* memory alloc */
-  MMG5_ADD_MEM(mesh,(5*mesh->nprism+6)*sizeof(int),"prism adjacency table",
+  MMG5_ADD_MEM(mesh,(5*mesh->nprism+6)*sizeof(MMG_int),"prism adjacency table",
                 printf("  Exit program.\n");
                 return 0);
-  MMG5_SAFE_CALLOC(mesh->adjapr,5*mesh->nprism+6,int,return 0);
-  MMG5_SAFE_CALLOC(hcode,mesh->nprism+6,int,return 0);
+  MMG5_SAFE_CALLOC(mesh->adjapr,5*mesh->nprism+6,MMG_int,return 0);
+  MMG5_SAFE_CALLOC(hcode,mesh->nprism+6,MMG_int,return 0);
 
   link  = mesh->adjapr;
   hsize = mesh->nprism;
@@ -519,9 +519,10 @@ int MMG5_setEdgeNmTag(MMG5_pMesh mesh, MMG5_Hash *hash) {
   MMG5_pxTetra        pxt;
   MMG5_pTria          ptt;
   MMG5_hedge         *ph;
-  int                 adj,pradj,piv,ilist,list[MMG3D_LMAX+2];
-  int                 k,l,i1,i2,na,nb,ia,it1,it2, nr;
-  int                 ipa,ipb,nbdy,start;
+  MMG_int                 adj,pradj,piv,list[MMG3D_LMAX+2];
+  MMG_int                 k,l,i1,i2,na,nb,ia,it1,it2, nr;
+  MMG_int                 start;
+  int                 ilist,nbdy,ipa,ipb;
   unsigned int        key;
   int8_t              iface,hasadja,i;
   static int8_t       mmgWarn0=0,mmgWarn1=0;
@@ -681,7 +682,8 @@ int MMG5_setVertexNmTag(MMG5_pMesh mesh) {
   MMG5_pTetra         ptet;
   MMG5_pPoint         ppt;
   MMG5_Hash           hash;
-  int                 k,i;
+  MMG_int                 k;
+  int                 i;
   int                 nc, nre, ng, nrp,ier;
 
   /* Second: seek the non-required non-manifold points and try to analyse
@@ -689,7 +691,7 @@ int MMG5_setVertexNmTag(MMG5_pMesh mesh) {
 
   /* Hash table used by boulernm to store the special edges passing through
    * a given point */
-  if ( ! MMG5_hashNew(mesh,&hash,mesh->np,(int)(3.71*mesh->np)) ) return 0;
+  if ( ! MMG5_hashNew(mesh,&hash,mesh->np,(MMG_int)(3.71*mesh->np)) ) return 0;
 
   nc = nre = 0;
   ++mesh->base;
@@ -780,17 +782,17 @@ int MMG3D_hashTria(MMG5_pMesh mesh, MMG5_Hash *hash) {
 
   MMG5_DEL_MEM(mesh,mesh->adjt);
 
-  MMG5_ADD_MEM(mesh,(3*mesh->nt+4)*sizeof(int),"surfacic adjacency table",return 0);
-  MMG5_SAFE_CALLOC(mesh->adjt,3*mesh->nt+4,int,return 0);
+  MMG5_ADD_MEM(mesh,(3*mesh->nt+4)*sizeof(MMG_int),"surfacic adjacency table",return 0);
+  MMG5_SAFE_CALLOC(mesh->adjt,3*mesh->nt+4,MMG_int,return 0);
 
   return  MMG5_mmgHashTria(mesh, mesh->adjt, hash, mesh->info.iso) ;
 }
 
 
 /** remove edge from hash table */
-int MMG5_hashPop(MMG5_Hash *hash,int a,int b) {
+int MMG5_hashPop(MMG5_Hash *hash,MMG_int a,MMG_int b) {
   MMG5_hedge  *ph,*php;
-  int          key,ia,ib,iph,iphp;
+  MMG_int          key,ia,ib,iph,iphp;
 
   ia  = MG_MIN(a,b);
   ib  = MG_MAX(a,b);
@@ -851,9 +853,9 @@ int MMG5_hashPop(MMG5_Hash *hash,int a,int b) {
  * set tag to edge on geometry
  *
  */
-int MMG5_hTag(MMG5_HGeom *hash,int a,int b,int ref,int16_t tag) {
+int MMG5_hTag(MMG5_HGeom *hash,MMG_int a,MMG_int b,int ref,int16_t tag) {
   MMG5_hgeom  *ph;
-  int     key,ia,ib;
+  MMG_int     key,ia,ib;
 
   ia  = MG_MIN(a,b);
   ib  = MG_MAX(a,b);
@@ -883,9 +885,9 @@ int MMG5_hTag(MMG5_HGeom *hash,int a,int b,int ref,int16_t tag) {
 }
 
 /** remove edge from hash table */
-int MMG5_hPop(MMG5_HGeom *hash,int a,int b,int *ref,int16_t *tag) {
+int MMG5_hPop(MMG5_HGeom *hash,MMG_int a,MMG_int b,int *ref,int16_t *tag) {
   MMG5_hgeom  *ph,*php;
-  int     key,ia,ib,iph,iphp;
+  MMG_int     key,ia,ib,iph,iphp;
 
   *ref = 0;
   *tag = 0;
@@ -942,9 +944,9 @@ int MMG5_hPop(MMG5_HGeom *hash,int a,int b,int *ref,int16_t *tag) {
 }
 
 /** get ref and tag to edge on geometry */
-int MMG5_hGet(MMG5_HGeom *hash,int a,int b,int *ref,int16_t *tag) {
+int MMG5_hGet(MMG5_HGeom *hash,MMG_int a,MMG_int b,int *ref,int16_t *tag) {
   MMG5_hgeom  *ph;
-  int     key,ia,ib;
+  MMG_int     key,ia,ib;
 
   *tag = 0;
   *ref = 0;
@@ -974,9 +976,9 @@ int MMG5_hGet(MMG5_HGeom *hash,int a,int b,int *ref,int16_t *tag) {
 }
 
 /** store edge on geometry */
-int MMG5_hEdge(MMG5_pMesh mesh,MMG5_HGeom *hash,int a,int b,int ref,int16_t tag) {
+int MMG5_hEdge(MMG5_pMesh mesh,MMG5_HGeom *hash,MMG_int a,MMG_int b,int ref,int16_t tag) {
   MMG5_hgeom  *ph;
-  int     key,ia,ib,j;
+  MMG_int     key,ia,ib,j;
 
   assert ( hash->siz );
 
@@ -1016,8 +1018,8 @@ int MMG5_hEdge(MMG5_pMesh mesh,MMG5_HGeom *hash,int a,int b,int ref,int16_t tag)
 }
 
 /** to store edge on geometry */
-int MMG5_hNew(MMG5_pMesh mesh,MMG5_HGeom *hash,int hsiz,int hmax) {
-  int   k;
+int MMG5_hNew(MMG5_pMesh mesh,MMG5_HGeom *hash,MMG_int hsiz,MMG_int hmax) {
+  MMG_int   k;
 
   /* adjust hash table params */
   hash->siz  = hsiz + 1;
@@ -1048,7 +1050,8 @@ int MMG5_hGeom(MMG5_pMesh mesh) {
   MMG5_pTria   pt;
   MMG5_pEdge   pa;
   MMG5_Hash    hash;
-  int         *adja,k,kk,edg,ier;
+  MMG_int         *adja,k,kk;
+  int          edg,ier;
   int16_t      tag;
   int8_t       i,i1,i2;
 
@@ -1192,7 +1195,7 @@ int MMG5_hGeom(MMG5_pMesh mesh) {
  *
  */
 static inline
-int MMG5_bdryTria(MMG5_pMesh mesh, int ntmesh) {
+int MMG5_bdryTria(MMG5_pMesh mesh, MMG_int ntmesh) {
   MMG5_pTetra    pt,pt1;
   MMG5_pPrism    pp;
   MMG5_pTria     ptt;
@@ -1200,7 +1203,8 @@ int MMG5_bdryTria(MMG5_pMesh mesh, int ntmesh) {
   MMG5_pxTetra   pxt;
   MMG5_pxPrism   pxpr;
   MMG5_Hash     hash;
-  int       ref,*adja,adj,k,ia,ib,ic,kt, tofree=0,ntinit;
+  int       ref,kt, tofree=0,ntinit;
+  MMG_int       *adja,adj,k,ia,ib,ic;
   int8_t    i;
 
   hash.item = NULL;
@@ -1453,8 +1457,8 @@ int MMG5_chkBdryTria(MMG5_pMesh mesh) {
   MMG5_pTetra    pt,pt1;
   MMG5_pPrism    pp,pp1;
   MMG5_pTria     ptt,pttnew;
-  int            *adja,adj,k,kk,i,j,ntmesh;
-  int            ia,ib,ic, nbl,nt,ntpres;
+  MMG_int        *adja,adj,k,kk,i,j,ntmesh;
+  MMG_int        ia,ib,ic, nbl,nt,ntpres;
   int            iface;
   MMG5_Hash     hashElt, hashTri;
 
@@ -1761,7 +1765,8 @@ int MMG5_bdrySet(MMG5_pMesh mesh) {
   MMG5_pxTetra  pxt;
   MMG5_pxPrism  pxp;
   MMG5_Hash     hash;
-  int      ref,*adja,adj,k,kt,ia,ib,ic,j,na,initedg[3];
+  MMG_int       *adja,adj,k,ia,ib,ic;
+  int           ref,kt,j,na,initedg[3];
   int16_t  tag,inittag[3];
   int8_t   i,i1,i2;
 
@@ -2044,7 +2049,8 @@ int MMG5_bdryUpdate(MMG5_pMesh mesh) {
   MMG5_pTria    ptt;
   MMG5_pxTetra  pxt;
   MMG5_Hash     hash;
-  int      k,kt,ia,ib,ic,j;
+  int      kt,j;
+  MMG_int  ia,ib,ic,k;
   int16_t  tag;
   int8_t   i;
 
@@ -2133,7 +2139,8 @@ int MMG5_bdryPerm(MMG5_pMesh mesh) {
   MMG5_pTetra   pt,pt1;
   MMG5_pTria    ptt;
   MMG5_Hash     hash;
-  int           *adja,adj,k,kt,ia,ib,ic,nf;
+  int           kt,nf;
+  MMG_int       *adja,adj,k,ia,ib,ic;
   int8_t        i;
 
   if ( !mesh->nt ) return 1;

@@ -153,7 +153,7 @@ int MMG3D_findEdge(MMG5_pMesh mesh,MMG5_pTetra pt,MMG_int k,MMG_int na,MMG_int n
  * supported by face \a iface), enumerating its (outer)surfacic ball.
  *
  */
-int MMG5_boulenm(MMG5_pMesh mesh,MMG_int start,MMG_int ip,int iface,
+int MMG5_boulenm(MMG5_pMesh mesh,MMG_int start,int ip,int iface,
                   double n[3],double t[3]) {
   MMG5_pTetra   pt;
   MMG5_pPoint   p0,p1,ppt;
@@ -314,7 +314,7 @@ Travel the ball of the internal non manifold point ip in tetra start
  and calculate the tangent vector to the underlying curve.
  Return 1 when the procedure has completed successfully, 0 when more than two NOM points are attached to ip.
 */
-int MMG5_boulenmInt(MMG5_pMesh mesh,MMG_int start,MMG_int ip,double t[3]) {
+int MMG5_boulenmInt(MMG5_pMesh mesh,MMG_int start,int ip,double t[3]) {
   MMG5_pTetra    pt,pt1;
   MMG5_pxTetra   pxt;
   MMG5_pPoint    p0,p1,ppt;
@@ -595,7 +595,7 @@ int MMG5_boulernm(MMG5_pMesh mesh,MMG5_Hash *hash,MMG_int start,int ip,int *ng,i
  *
  */
 int MMG5_boulesurfvolp(MMG5_pMesh mesh,MMG_int start,int ip,int iface,
-                        MMG_int *listv,MMG_int *ilistv,MMG_int *lists,MMG_int*ilists, int isnm)
+                        MMG_int *listv,int *ilistv,MMG_int *lists,int*ilists, int isnm)
 {
   MMG5_pTetra  pt,pt1;
   MMG5_pxTetra pxt;
@@ -756,12 +756,13 @@ int MMG5_boulesurfvolp(MMG5_pMesh mesh,MMG_int start,int ip,int iface,
  * non-manifold, must be called only if \a start has no adjacent through iface.
  *
  */
-int MMG5_boulesurfvolpNom(MMG5_pMesh mesh,int start,int ip,int iface,
-                       int *listv,int *ilistv,int *lists,int *ilists,int *refmin,int *refplus,int isnm)
+int MMG5_boulesurfvolpNom(MMG5_pMesh mesh,MMG_int start,int ip,int iface,
+                       MMG_int *listv,int *ilistv,MMG_int *lists,int *ilists,int *refmin,int *refplus,int isnm)
 {
   MMG5_pTetra  pt,pt1;
   MMG5_pxTetra pxt;
-  int  base,nump,k,k1,*adja,piv,na,nb,adj,cur,nvstart,fstart,aux;
+  int  base;
+  MMG_int k,k1,nump,*adja,piv,na,nb,adj,cur,nvstart,fstart,aux;
   int8_t iopp,ipiv,i,j,l,isface;
   static int8_t mmgErr0=0, mmgErr1=0, mmgErr2=0;
   
@@ -936,15 +937,16 @@ int MMG5_boulesurfvolpNom(MMG5_pMesh mesh,int start,int ip,int iface,
  * direct order.
  *
  */
-int MMG5_bouletrid(MMG5_pMesh mesh,int start,int iface,int ip,int *il1,int *l1,
-                    int *il2,int *l2,int *ip0,int *ip1)
+int MMG5_bouletrid(MMG5_pMesh mesh,MMG_int start,int iface,int ip,int *il1,MMG_int *l1,
+                    int *il2,MMG_int *l2,MMG_int *ip0,MMG_int *ip1)
 {
   MMG5_pTetra          pt;
   MMG5_pxTetra         pxt;
   MMG5_pPoint          ppt;
-  int                  k,*adja,*ilist1,*ilist2,*list1,*list2,aux;
-  int                  lists[MMG3D_LMAX+2], ilists;
-  int                  idp,na, nb, base, iopp, ipiv, piv, fstart, nvstart, adj;
+  MMG_int                  k,*adja,*list1,*list2,aux;
+  MMG_int                  lists[MMG3D_LMAX+2];
+  int                  ilists, base, iopp, ipiv,*ilist1,*ilist2;
+  int                  idp,na, nb, piv, fstart, nvstart, adj;
   int                  ifac,idx,idx2,idx_tmp,i1,isface;
   double               *n1,*n2,nt[3],ps1,ps2;
   int8_t               i;
@@ -1149,10 +1151,10 @@ int MMG5_bouletrid(MMG5_pMesh mesh,int start,int iface,int ip,int *il1,int *l1,
  * travelling its shell.
  *
  */
-int MMG5_settag(MMG5_pMesh mesh,int start,int ia,int16_t tag,int edg) {
+int MMG5_settag(MMG5_pMesh mesh,MMG_int start,int ia,int16_t tag,int edg) {
   MMG5_pTetra        pt;
   MMG5_pxTetra       pxt;
-  int                na,nb,*adja,adj,piv;
+  MMG_int                na,nb,*adja,adj,piv;
   int16_t            taginit;
   int8_t             i;
 
@@ -1267,10 +1269,10 @@ int MMG5_settag(MMG5_pMesh mesh,int start,int ia,int16_t tag,int edg) {
  * shell.
  *
  */
-int MMG5_deltag(MMG5_pMesh mesh,int start,int ia,int16_t tag) {
+int MMG5_deltag(MMG5_pMesh mesh,MMG_int start,int ia,int16_t tag) {
   MMG5_pTetra        pt;
   MMG5_pxTetra       pxt;
-  int                na,nb,*adja,adj,piv;
+  MMG_int                na,nb,*adja,adj,piv;
   int8_t             i;
 
   assert( start >= 1 );
@@ -1363,9 +1365,10 @@ int MMG5_deltag(MMG5_pMesh mesh,int start,int ia,int16_t tag) {
  * Find all tets sharing edge ia of tetra start.
  *
  */
-int MMG5_coquil(MMG5_pMesh mesh,int start,int ia,int * list) {
+int MMG5_coquil(MMG5_pMesh mesh,MMG_int start,int ia,MMG_int * list) {
   MMG5_pTetra pt;
-  int         ilist,*adja,piv,adj,na,nb;
+  MMG_int     *adja,piv,adj,na,nb;
+  int         ilist;
   int8_t      i;
   static int8_t mmgErr0=0, mmgErr1=0;
 
@@ -1501,10 +1504,10 @@ int MMG5_coquil(MMG5_pMesh mesh,int start,int ia,int * list) {
  * Identify whether edge ia in start is a boundary edge by unfolding its shell.
  *
  */
-int MMG5_srcbdy(MMG5_pMesh mesh,int start,int ia) {
+int MMG5_srcbdy(MMG5_pMesh mesh,MMG_int start,int ia) {
   MMG5_pTetra      pt;
   MMG5_pxTetra     pxt;
-  int         na,nb,adj,piv,*adja;
+  MMG_int         na,nb,adj,piv,*adja;
   int8_t      iadj,i;
 
   pt = &mesh->tetra[start];
@@ -1560,9 +1563,9 @@ int MMG5_srcbdy(MMG5_pMesh mesh,int start,int ia) {
  * Print an error message if MMG5_coquilFace detect a boundary topology problem.
  *
  */
- void MMG5_coquilFaceErrorMessage(MMG5_pMesh mesh, int k1, int k2) {
+ void MMG5_coquilFaceErrorMessage(MMG5_pMesh mesh, MMG_int k1, MMG_int k2) {
   MMG5_pTetra pt;
-  int         kel1, kel2;
+  MMG_int         kel1, kel2;
   static int8_t mmgErr0;
 
   if ( mmgErr0 ) return;
@@ -1633,13 +1636,13 @@ int MMG5_srcbdy(MMG5_pMesh mesh,int start,int ia) {
  * tetra without adjacent. Fill \a it2 and \a list.
  *
  */
-int MMG3D_coquilFaceFirstLoop(MMG5_pMesh mesh,int start,int na,int nb,int8_t iface,
-                               int8_t ia,int *list,int *ilist,int *it1,int *it2,
-                               int *piv,int *adj,int8_t *hasadja,int *nbdy,int silent) {
+int MMG3D_coquilFaceFirstLoop(MMG5_pMesh mesh,MMG_int start,MMG_int na,MMG_int nb,int8_t iface,
+                               int8_t ia,MMG_int *list,int *ilist,MMG_int *it1,MMG_int *it2,
+                               MMG_int *piv,MMG_int *adj,int8_t *hasadja,int *nbdy,int silent) {
 
   MMG5_pTetra   pt;
-  int           *adja;
-  int           pradj,pri,ier,ifar_idx;
+  MMG_int           pradj,*adja;
+  int           pri,ier,ifar_idx;
   int8_t        i;
   static int8_t mmgErr0 = 0;
 
@@ -1728,9 +1731,9 @@ int MMG3D_coquilFaceFirstLoop(MMG5_pMesh mesh,int start,int na,int nb,int8_t ifa
  * the \a coquilFaceFirstLoop function.
  *
  */
-void MMG3D_coquilFaceSecondLoopInit(MMG5_pMesh mesh,int piv,int8_t *iface,
-                                     int8_t *ia,int *list,int *ilist,int *it1,
-                                     int *pradj,int *adj) {
+void MMG3D_coquilFaceSecondLoopInit(MMG5_pMesh mesh,MMG_int piv,int8_t *iface,
+                                     int8_t *ia,MMG_int *list,int *ilist,MMG_int *it1,
+                                     MMG_int *pradj,MMG_int *adj) {
 
   MMG5_pTetra   pt;
 #ifndef NDEBUG
@@ -1784,10 +1787,11 @@ void MMG3D_coquilFaceSecondLoopInit(MMG5_pMesh mesh,int piv,int8_t *iface,
  *
  * \warning Don't work if \a ia has only one boundary face in its shell.
  */
-int MMG5_coquilface(MMG5_pMesh mesh,int start,int8_t iface,int ia,int *list,
-                     int *it1,int *it2, int silent) {
+int MMG5_coquilface(MMG5_pMesh mesh,MMG_int start,int8_t iface,int ia,MMG_int *list,
+                     MMG_int *it1,MMG_int *it2, int silent) {
   MMG5_pTetra   pt;
-  int           piv,adj,na,nb,ilist,pradj,ier,nbdy;
+  MMG_int           piv,adj,na,nb,pradj;
+  int           ier,nbdy,ilist;
   int8_t        hasadja,i;
   static int8_t mmgErr0=0,mmgErr1=0,mmgWarn0=0;
 
@@ -1893,12 +1897,12 @@ int MMG5_coquilface(MMG5_pMesh mesh,int start,int8_t iface,int ia,int *list,
  * \a piv.
  *
  */
-int16_t MMG5_coquilTravel(MMG5_pMesh mesh, int na, int nb, int* adj, int *piv,
+int16_t MMG5_coquilTravel(MMG5_pMesh mesh, MMG_int na, MMG_int nb, MMG_int* adj, MMG_int *piv,
                            int8_t *iface, int8_t *i )
 {
   MMG5_pTetra  pt;
   MMG5_pxTetra pxt;
-  int          *adja;
+  MMG_int          *adja;
   int16_t      isbdy;
 
   pt = &mesh->tetra[*adj];
@@ -1945,11 +1949,11 @@ int16_t MMG5_coquilTravel(MMG5_pMesh mesh, int na, int nb, int* adj, int *piv,
  * through the face \a iface.
  *
  */
-int16_t MMG5_openCoquilTravel(MMG5_pMesh mesh,int na,int nb,int* adj,int *piv,
+int16_t MMG5_openCoquilTravel(MMG5_pMesh mesh,MMG_int na,MMG_int nb,MMG_int* adj,MMG_int *piv,
                               int8_t *iface, int8_t *i )
 {
   MMG5_pTetra  pt;
-  int          *adja;
+  MMG_int          *adja;
 
   pt = &mesh->tetra[*adj];
 

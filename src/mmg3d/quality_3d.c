@@ -48,7 +48,7 @@ extern int8_t ddb;
 int MMG3D_tetraQual(MMG5_pMesh mesh, MMG5_pSol met,int8_t metRidTyp) {
   MMG5_pTetra pt;
   double      minqual;
-  int         k,iel;
+  MMG_int         k,iel;
 
   minqual = 2./MMG3D_ALPHAD;
 
@@ -98,7 +98,8 @@ inline double MMG5_caltet33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
   double       h1,h2,h3,h4,h5,h6,det,vol,rap,v1,v2,v3,num;
   double       *a,*b,*c,*d;
   double       mm[6];
-  int          ip[4],iad0,iad1,iad2,iad3,k;
+  int          iad0,iad1,iad2,iad3;
+  MMG_int      ip[4],k;
 
   ip[0] = pt->v[0];
   ip[1] = pt->v[1];
@@ -204,14 +205,14 @@ inline double MMG5_caltet33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
  *
  */
 int MMG3D_computePrilen( MMG5_pMesh mesh, MMG5_pSol met, double* avlen,
-                         double* lmin, double* lmax, int* ned, int* amin, int* bmin, int* amax,
-                         int* bmax, int* nullEdge, int8_t metRidTyp, double** bd_in, int hl[9] )
+                         double* lmin, double* lmax, int* ned, MMG_int* amin, MMG_int* bmin, MMG_int* amax,
+                         MMG_int* bmax, int* nullEdge, int8_t metRidTyp, double** bd_in, int hl[9] )
 {
   MMG5_pTetra     pt;
   MMG5_pPoint     ppt;
   MMG5_Hash       hash;
   double          len;
-  int             k,np,nq,n;
+  MMG_int             k,np,nq,n;
   int8_t          ia,i0,i1,ier,i;
   static double   bd[9]= {0.0, 0.3, 0.6, 0.7071, 0.9, 1.3, 1.4142, 2.0, 5.0};
 
@@ -324,7 +325,8 @@ int MMG3D_computePrilen( MMG5_pMesh mesh, MMG5_pSol met, double* avlen,
 int MMG3D_prilen(MMG5_pMesh mesh, MMG5_pSol met, int8_t metRidTyp) {
 
   double avlen, lmin, lmax;
-  int    ned, amin, bmin, amax, bmax, nullEdge, hl[9];
+  int    ned, nullEdge, hl[9];
+  MMG_int   amin, bmin, amax, bmax; 
   double *bd;
 
   if (!MMG3D_computePrilen( mesh, met, &avlen, &lmin, &lmax, &ned, &amin,
@@ -356,11 +358,11 @@ int MMG3D_prilen(MMG5_pMesh mesh, MMG5_pSol met, int8_t metRidTyp) {
  * in optimLES mode.
  *
  */
-void MMG3D_computeLESqua(MMG5_pMesh mesh,MMG5_pSol met,int *ne,double *max,double *avg,
-                         double *min,int *iel,int *good,int *med,int his[5],int imprim) {
+void MMG3D_computeLESqua(MMG5_pMesh mesh,MMG5_pSol met,MMG_int *ne,double *max,double *avg,
+                         double *min,MMG_int *iel,MMG_int *good,MMG_int *med,int his[5],int imprim) {
   MMG5_pTetra    pt;
   double         rap;
-  int            k,ok,nex;
+  MMG_int        k,ok,nex;
   static int8_t  mmgWarn0=0;
 
   /*compute tet quality*/
@@ -440,8 +442,8 @@ void MMG3D_computeLESqua(MMG5_pMesh mesh,MMG5_pSol met,int *ne,double *max,doubl
  * that print the histogram for special metric at ridges.
  *
  */
-int MMG3D_displayQualHisto(int ne,double max,double avg,double min,int iel,
-                           int good,int med,int his[5],int nrid,int optimLES,
+int MMG3D_displayQualHisto(MMG_int ne,double max,double avg,double min,MMG_int iel,
+                           MMG_int good,MMG_int med,int his[5],MMG_int nrid,int optimLES,
                            int imprim) {
 
   fprintf(stdout,"\n  -- MESH QUALITY");
@@ -474,8 +476,8 @@ int MMG3D_displayQualHisto(int ne,double max,double avg,double min,int iel,
  * Print histogram of mesh qualities for special storage of metric at ridges.
  *
  */
-int MMG3D_displayQualHisto_internal(int ne,double max,double avg,double min,int iel,
-                                    int good,int med,int his[5],int nrid,int optimLES,
+int MMG3D_displayQualHisto_internal(MMG_int ne,double max,double avg,double min,MMG_int iel,
+                                    MMG_int good,MMG_int med,int his[5],MMG_int nrid,int optimLES,
                                     int imprim)
 {
   const double les_ticks[6] = {0,0.6,0.9,0.93,0.99,1};
@@ -539,11 +541,12 @@ int MMG3D_displayQualHisto_internal(int ne,double max,double avg,double min,int 
  * (for a classic storage of the metric at ridges).
  *
  */
-void MMG3D_computeInqua(MMG5_pMesh mesh,MMG5_pSol met,int *ne,double *max,double *avg,
-                        double *min,int *iel,int *good,int *med,int his[5],int imprim) {
+void MMG3D_computeInqua(MMG5_pMesh mesh,MMG5_pSol met,MMG_int *ne,double *max,double *avg,
+                        double *min,MMG_int *iel,MMG_int *good,MMG_int *med,int his[5],int imprim) {
   MMG5_pTetra   pt;
   double        rap;
-  int           k,ok,ir,nex;
+  MMG_int       k,ok,nex;
+  int           ir;
   static int8_t mmgWarn0 = 0;
 
   /*compute tet quality*/
@@ -612,7 +615,8 @@ void MMG3D_computeInqua(MMG5_pMesh mesh,MMG5_pSol met,int *ne,double *max,double
  */
 int MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
   double      rapmin,rapmax,rapavg;
-  int         k,med,good,iel,ne,his[5];
+  int         k,his[5];
+  MMG_int     med,good,iel,ne;
 
   ne = iel = good = med = 0;
   for ( k=0; k<5; ++k ) {
@@ -658,13 +662,14 @@ int MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
  * (for special storage of the metric at ridges).
  *
  */
-void MMG3D_computeOutqua(MMG5_pMesh mesh,MMG5_pSol met,int *ne,double *max,double *avg,
-                         double *min,int *iel,int *good,int *med,int his[5],
-                         int *nrid,int imprim) {
+void MMG3D_computeOutqua(MMG5_pMesh mesh,MMG5_pSol met,MMG_int *ne,double *max,double *avg,
+                         double *min,MMG_int *iel,MMG_int *good,MMG_int *med,int his[5],
+                         MMG_int *nrid,int imprim) {
   MMG5_pTetra   pt;
   MMG5_pPoint   ppt;
   double        rap;
-  int           i,k,ok,ir,nex,n;
+  int           i,ir,n;
+  MMG_int       k,ok,nex;
   static int8_t mmgWarn0 = 0;
 
   /*compute tet quality*/
@@ -743,7 +748,8 @@ void MMG3D_computeOutqua(MMG5_pMesh mesh,MMG5_pSol met,int *ne,double *max,doubl
  */
 int MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
   double      rapmin,rapmax,rapavg;
-  int         k,med,good,iel,ne,his[5],nrid;
+  int         k,his[5];
+  MMG_int     med,good,iel,ne,nrid;
 
   nrid = ne = iel = good = med = 0;
   for ( k=0; k<5; ++k ) {
@@ -786,13 +792,14 @@ int MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
 int MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcible) {
   MMG5_pTetra pt;
   double      len;
-  int         k,ia,ipa,ipb,lon,l;
+  int         ia,ipa,ipb,lon,l;
   //int   npbdry;
   int        *pdel,lenint,loc,nedel,longen;
   //int      isbdry;
   double   dned,dnface,dnint/*,dnins*/,w,lenavg,lent[6];
   double   dnpdel,dnadd,leninv,dnaddloc,dnpdelloc;
-  int      list[MMG3D_LMAX],ddebug=0,ib,nv;
+  int      ddebug=0,ib,nv;
+  MMG_int  k,list[MMG3D_LMAX];
   long     nptot;
   //FILE *inm;
 

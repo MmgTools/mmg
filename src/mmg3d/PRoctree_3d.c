@@ -62,7 +62,7 @@ void MMG3D_initPROctree_s( MMG3D_PROctree_s* q)
  */
 int MMG3D_initPROctree(MMG5_pMesh mesh,MMG3D_pPROctree* q, int nv)
 {
-  int i;
+  MMG_int i;
 
   MMG5_ADD_MEM(mesh,sizeof(MMG3D_PROctree),"PROctree structure",
                 return 0);
@@ -220,7 +220,7 @@ int64_t MMG3D_getPROctreeCoordinate(MMG3D_pPROctree q, double* ver, int dim)
  * into the PROctree. (ie: one move at a time in the mesh and the PROctree)
  *
  */
-int MMG3D_movePROctree(MMG5_pMesh mesh, MMG3D_pPROctree q, int no, double* newVer, double* oldVer)
+int MMG3D_movePROctree(MMG5_pMesh mesh, MMG3D_pPROctree q, MMG_int no, double* newVer, double* oldVer)
 {
   int64_t oldCoor, newCoor;
   double pt[3];
@@ -770,10 +770,10 @@ int MMG3D_addPROctreeRec(MMG5_pMesh mesh, MMG3D_PROctree_s* q, double* ver,
  * Add the vertex of index \a no to the PROctree.
  *
  */
-int MMG3D_addPROctree(MMG5_pMesh mesh, MMG3D_pPROctree q, const int no)
+int MMG3D_addPROctree(MMG5_pMesh mesh, MMG3D_pPROctree q, const MMG_int no)
 {
   double pt[3];
-  int    dim;
+  MMG_int    dim;
 
   dim = mesh->dim;
   assert(no<=mesh->np);
@@ -1137,11 +1137,12 @@ int* MMG3D_sizeArbre(MMG3D_pPROctree q,int dim)
  * metric).
  *
  */
-int MMG3D_PROctreein_iso(MMG5_pMesh mesh,MMG5_pSol sol,MMG3D_pPROctree PROctree,int ip,double lmax) {
+int MMG3D_PROctreein_iso(MMG5_pMesh mesh,MMG5_pSol sol,MMG3D_pPROctree PROctree,MMG_int ip,double lmax) {
   MMG5_pPoint     ppt,pp1;
   MMG3D_PROctree_s **lococ;
   double          d2,ux,uy,uz,hpi,hp1,hpi2,methalo[6];
-  int             ip1,i,j;
+  int             i,j;
+  MMG_int         ip1;
   int             ncells;
   double          ani[6];
   //double          dmax;
@@ -1217,12 +1218,13 @@ int MMG3D_PROctreein_iso(MMG5_pMesh mesh,MMG5_pSol sol,MMG3D_pPROctree PROctree,
  * anisotropic metric).
  *
  */
-int MMG3D_PROctreein_ani(MMG5_pMesh mesh,MMG5_pSol sol,MMG3D_pPROctree PROctree,int ip,double lmax) {
+int MMG3D_PROctreein_ani(MMG5_pMesh mesh,MMG5_pSol sol,MMG3D_pPROctree PROctree,MMG_int ip,double lmax) {
   MMG5_pPoint     ppt,pp1;
   MMG3D_PROctree_s **lococ;
   double          d2,ux,uy,uz,methalo[6];
   double          det,dmi, *ma, *mb,m1,m2,m3,dx,dy,dz;
-  int             iadr,ip1,i,j;
+  int             i,j;
+  MMG_int         ip1,iadr;
   int             ncells;
   // double          dmax;
 

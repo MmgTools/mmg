@@ -48,13 +48,13 @@
  * Split edges of length bigger than MMG3D_LOPTL.
  *
  */
-static int MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
+static MMG_int MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
  MMG5_pTetra  pt;
  MMG5_pxTetra pxt;
  MMG5_pPoint  p0,p1;
  double       len,lmax,o[3];
- int          k,ip,ip1,ip2,list[MMG3D_LMAX+2],ilist,src;
- int          ns,ier;
+ MMG_int      ns,k,ip,ip1,ip2,list[MMG3D_LMAX+2];
+ int          ier,ilist,src;
  int8_t       imax,j,i,i1,i2,ifa0,ifa1;
  int8_t       chkRidTet;
  static int8_t mmgWarn    = 0;
@@ -181,13 +181,13 @@ static int MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
  * Collapse edges of length smaller than MMG3D_LOPTS.
  *
  */
-static int MMG5_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
+static MMG_int MMG5_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
   MMG5_pPoint   p0,p1;
   double        len,lmin;
-  int           k,ip,iq,list[MMG3D_LMAX+2],ilist,lists[MMG3D_LMAX+2],ilists,nc;
-  int           ier;
+  MMG_int       k,ip,iq,list[MMG3D_LMAX+2],lists[MMG3D_LMAX+2],nc;
+  int           ilist,ier,ilists;
   int16_t       tag;
   int8_t        imin,j,i,i1,i2,ifa0,ifa1;
   static int8_t mmgWarn = 0;
@@ -282,8 +282,9 @@ static int MMG5_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
  * prescribed metric.
  *
  */
-static int MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met,int *permNodGlob) {
-  int      it1,it,nnc,nns,nnf,nnm,maxit,nc,ns,nf,nm;
+static int MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met,MMG_int *permNodGlob) {
+  int      it1,it,maxit;
+  MMG_int  nf,nnf,nnm,nm,nnc,nc,nns,ns;
   int      warn;//,nw;
 
   /* Iterative mesh modifications */
@@ -451,7 +452,7 @@ static int MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met,int *permNodGlob) {
  * Main adaptation routine.
  *
  */
-int MMG5_mmg3d1_pattern(MMG5_pMesh mesh,MMG5_pSol met,int *permNodGlob) {
+int MMG5_mmg3d1_pattern(MMG5_pMesh mesh,MMG5_pSol met,MMG_int *permNodGlob) {
 
   if ( abs(mesh->info.imprim) > 4 )
     fprintf(stdout,"  ** MESH ANALYSIS\n");

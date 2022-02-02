@@ -122,9 +122,9 @@ static int MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,MMG_int kel, int iface, 
   double             *m,n[3],isqhmin,isqhmax,b0[3],b1[3],ps1,tau[3];
   double             ntau2,gammasec[3];
   double             c[3],kappa,maxkappa,alpha, hausd,hausd_v;
-  MMG_int                lists[MMG3D_LMAX+2],listv[MMG3D_LMAX+2],ilists,ilistv;
-  int                ilist,ifac,isloc,init_s;
-  MMG_int            k,idp,iel;
+  MMG_int                lists[MMG3D_LMAX+2],listv[MMG3D_LMAX+2];
+  int                k,ilist,ifac,isloc,init_s,ilists,ilistv;
+  MMG_int            idp,iel;
   uint8_t            i,i0,i1,i2;
   static int8_t      mmgWarn = 0;
 
@@ -322,7 +322,8 @@ static int MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,MMG_int kel,
   MMG5_pPoint    p0,p1,p2;
   MMG5_pPar      par;
   MMG5_Bezier   b;
-  MMG_int            k,iel,idp,ilist1,ilist2,ilist,*list;
+  MMG_int            iel,idp,*list;
+  int            k,ilist1,ilist2,ilist;
   MMG_int            list1[MMG3D_LMAX+2],list2[MMG3D_LMAX+2],iprid[2],ier;
   double         *m,isqhmin,isqhmax,*n1,*n2,*n,*t;
   double         trot[2],u[2],ux,uy,uz,det,bcu[3];
@@ -535,8 +536,9 @@ static int MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,MMG_int kel, int iface, 
   MMG5_pxPoint  px0;
   MMG5_Bezier   b;
   MMG5_pPar     par;
-  MMG_int           lists[MMG3D_LMAX+2],listv[MMG3D_LMAX+2],ilists,ilistv,ilist;
-  MMG_int           k,iel,ipref[2],idp;
+  MMG_int           lists[MMG3D_LMAX+2],listv[MMG3D_LMAX+2];
+  int           k,ilists,ilistv,ilist;
+  MMG_int           iel,ipref[2],idp;
   int           ifac,isloc;
   double        *m,isqhmin,isqhmax,*n,r[3][3],lispoi[3*MMG3D_LMAX+1];
   double        ux,uy,uz,det2d,c[3];
@@ -802,10 +804,10 @@ static int MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,MMG_int kel,int iface, i
   MMG5_pxPoint   px0;
   MMG5_Bezier   b;
   MMG5_pPar      par;
-  MMG_int            lists[MMG3D_LMAX+2],listv[MMG3D_LMAX+2],ilists,ilistv;
-  int            ilist;
+  MMG_int            lists[MMG3D_LMAX+2],listv[MMG3D_LMAX+2];
+  int            k,ilist,ilists,ilistv;
   int            ifac,isloc;
-  MMG_int        k,iel,idp;
+  MMG_int        iel,idp;
   double         *n,*m,r[3][3],ux,uy,uz,lispoi[3*MMG3D_LMAX+1];
   double         det2d,c[3],isqhmin,isqhmax;
   double         tAA[6],tAb[3],hausd;

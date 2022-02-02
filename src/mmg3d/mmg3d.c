@@ -59,7 +59,8 @@ static void MMG5_endcod(void) {
  */
 static inline
 int MMG5_countLocalParamAtTet( MMG5_pMesh mesh,MMG5_iNode **bdyRefs) {
-  int         npar,k,ier;
+  int         npar,ier;
+  MMG_int     k;
 
   /** Count the number of different boundary references and list it */
   (*bdyRefs) = NULL;

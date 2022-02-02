@@ -48,7 +48,7 @@ extern MMG5_Info  info;
  * Return all vertices connected to ip (with list[0] = ip).
  *
  **/
-int MMG5_boulep(MMG5_pMesh mesh,int start,int ip,int *adja, int *list) {
+int MMG5_boulep(MMG5_pMesh mesh,MMG_int start,MMG_int ip,MMG_int *adja, MMG_int *list) {
   MMG5_pTria    pt;
   int           *adj,k,ilist;
   int8_t        i,i1,i2;
@@ -110,10 +110,10 @@ int MMG5_boulep(MMG5_pMesh mesh,int start,int ip,int *adja, int *list) {
  * Compute average normal of triangles sharing P without crossing ridge.
  *
  */
-int MMG5_boulen(MMG5_pMesh mesh,int *adjt,int start,int ip,double *nn) {
+int MMG5_boulen(MMG5_pMesh mesh,MMG_int *adjt,MMG_int start,MMG_int ip,double *nn) {
   MMG5_pTria    pt;
   double        n[3],dd;
-  int           *adja,k;
+  MMG_int           *adja,k;
   int8_t        i,i1,i2;
 
   pt = &mesh->tria[start];
@@ -186,11 +186,11 @@ int MMG5_boulen(MMG5_pMesh mesh,int *adjt,int start,int ip,double *nn) {
  * Compute the tangent to the curve at point \a ip.
  *
  */
-int MMG5_boulec(MMG5_pMesh mesh,int *adjt,int start,int ip,double *tt) {
+int MMG5_boulec(MMG5_pMesh mesh,MMG_int *adjt,MMG_int start,MMG_int ip,double *tt) {
   MMG5_pTria    pt;
   MMG5_pPoint   p0,p1,p2;
   double        dd;
-  int           *adja,k;
+  MMG_int           *adja,k;
   int8_t        i,i1,i2;
 
   pt = &mesh->tria[start];
@@ -274,10 +274,11 @@ int MMG5_boulec(MMG5_pMesh mesh,int *adjt,int start,int ip,double *tt) {
  * the vertex \a ip.
  *
  */
-int MMG5_bouler(MMG5_pMesh mesh,int *adjt,int start,int ip,
-                 int *list,int *listref,int *ng,int *nr,int lmax) {
+int MMG5_bouler(MMG5_pMesh mesh,MMG_int *adjt,MMG_int start,MMG_int ip,
+                 MMG_int *list,MMG_int *listref,int *ng,int *nr,int lmax) {
   MMG5_pTria    pt;
-  int           *adja,k,ns;
+  MMG_int           *adja,k;
+  int           ns;
   int8_t        i,i1,i2;
 
   pt  = &mesh->tria[start];

@@ -587,32 +587,32 @@ typedef struct MMG5_dNode_s {
  extern double MMG5_det3pt1vec(double c0[3],double c1[3],double c2[3],double v[3]);
  extern double MMG5_det4pt(double c0[3],double c1[3],double c2[3],double c3[3]);
  int           MMG5_devangle(double* n1, double *n2, double crit);
- extern double MMG5_orvol(MMG5_pPoint point,int *v);
+ extern double MMG5_orvol(MMG5_pPoint point,MMG_int *v);
  int           MMG5_Add_inode( MMG5_pMesh mesh, MMG5_iNode **liLi, int val );
  int           MMG5_Add_dnode( MMG5_pMesh mesh, MMG5_dNode **liLi, int, double);
- extern void   MMG5_bezierEdge(MMG5_pMesh, int, int, double*, double*, int8_t,double*);
- int           MMG5_buildridmet(MMG5_pMesh,MMG5_pSol,int,double,double,double,double*,double[3][3]);
+ extern void   MMG5_bezierEdge(MMG5_pMesh, MMG_int, MMG_int, double*, double*, int8_t,double*);
+ int           MMG5_buildridmet(MMG5_pMesh,MMG5_pSol,MMG_int,double,double,double,double*,double[3][3]);
  extern int    MMG5_buildridmetfic(MMG5_pMesh,double*,double*,double,double,double,double*);
- int           MMG5_buildridmetnor(MMG5_pMesh, MMG5_pSol, int,double*, double*,double[3][3]);
+ int           MMG5_buildridmetnor(MMG5_pMesh, MMG5_pSol, MMG_int,double*, double*,double[3][3]);
 void           MMG5_check_hminhmax(MMG5_pMesh mesh, int8_t sethmin, int8_t sethmax);
  int           MMG5_paratmet(double c0[3],double n0[3],double m[6],double c1[3],double n1[3],double mt[6]);
  void          MMG5_mn(double m[6], double n[6], double mn[9] );
  extern int    MMG5_rmtr(double r[3][3],double m[6], double mr[6]);
  int           MMG5_boundingBox(MMG5_pMesh mesh);
- int           MMG5_boulep(MMG5_pMesh mesh,int start,int ip,int*,int *list);
- int           MMG5_boulec(MMG5_pMesh, int*, int, int i,double *tt);
- int           MMG5_boulen(MMG5_pMesh, int*, int, int i,double *nn);
- int           MMG5_bouler(MMG5_pMesh, int*, int, int i,int *,int *,int *, int*, int);
+ int           MMG5_boulep(MMG5_pMesh mesh,MMG_int start,MMG_int ip,MMG_int*,MMG_int *list);
+ int           MMG5_boulec(MMG5_pMesh, MMG_int*, MMG_int, MMG_int i,double *tt);
+ int           MMG5_boulen(MMG5_pMesh, MMG_int*, MMG_int, MMG_int i,double *nn);
+ int           MMG5_bouler(MMG5_pMesh, MMG_int*, MMG_int, MMG_int i,MMG_int *,MMG_int *,int *, int*, int);
  double        MMG5_caltri33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt);
  extern double MMG5_caltri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
  extern double MMG5_caltri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
  void          MMG5_defUninitSize(MMG5_pMesh mesh,MMG5_pSol met,int8_t ismet);
- void          MMG5_displayLengthHisto(MMG5_pMesh,int,double*,int,int,double,
-                                        int,int,double,int,double*,int*,int8_t);
- void          MMG5_displayLengthHisto_internal( int,int,int,double,
-                                                 int,int,double, int,double*,
+ void          MMG5_displayLengthHisto(MMG5_pMesh,MMG_int,double*,MMG_int,MMG_int,double,
+                                        MMG_int,MMG_int,double,int,double*,int*,int8_t);
+ void          MMG5_displayLengthHisto_internal( MMG_int,MMG_int,MMG_int,double,
+                                                 MMG_int,MMG_int,double, int,double*,
                                                  int*,int8_t,int);
- int           MMG5_minQualCheck ( int iel, double minqual, double alpha );
+ int           MMG5_minQualCheck ( MMG_int iel, double minqual, double alpha );
  int           MMG5_elementWeight(MMG5_pMesh,MMG5_pSol,MMG5_pTria,MMG5_pPoint,
                                    MMG5_Bezier*,double r[3][3],double gv[2]);
  void          MMG5_fillDefmetregSys( int, MMG5_pPoint, int, MMG5_Bezier,double r[3][3],
@@ -620,26 +620,26 @@ void           MMG5_check_hminhmax(MMG5_pMesh mesh, int8_t sethmin, int8_t sethm
  void          MMG5_Free_ilinkedList( MMG5_pMesh mesh, MMG5_iNode *liLi );
  void          MMG5_Free_dlinkedList( MMG5_pMesh mesh, MMG5_dNode *liLi );
  int           MMG5_grad2metSurf(MMG5_pMesh,MMG5_pSol,MMG5_pTria,int,int);
- int           MMG5_grad2metSurfreq(MMG5_pMesh,MMG5_pSol,MMG5_pTria,int,int);
+ int           MMG5_grad2metSurfreq(MMG5_pMesh,MMG5_pSol,MMG5_pTria,MMG_int,MMG_int);
  char         *MMG5_Get_filenameExt( char *filename );
  char         *MMG5_Get_basename(char *path);
  char         *MMG5_Get_path(char *path);
  char         *MMG5_Remove_ext( char *path, char* );
  const char    *MMG5_Get_formatName(enum MMG5_Format fmt);
  int           MMG5_Get_format( char *ptr, int );
- int           MMG5_hashEdge(MMG5_pMesh mesh,MMG5_Hash *hash,int a,int b,int k);
- int           MMG5_hashUpdate(MMG5_Hash *hash,int a,int b,int k);
- int           MMG5_hashEdgeTag(MMG5_pMesh mesh,MMG5_Hash *hash,int a,int b,int16_t k);
+ int           MMG5_hashEdge(MMG5_pMesh mesh,MMG5_Hash *hash,MMG_int a,MMG_int b,MMG_int k);
+ int           MMG5_hashUpdate(MMG5_Hash *hash,MMG_int a,MMG_int b,MMG_int k);
+ int           MMG5_hashEdgeTag(MMG5_pMesh mesh,MMG5_Hash *hash,MMG_int a,MMG_int b,int16_t k);
  int           MMG5_hashGet(MMG5_Hash *hash,MMG_int a,MMG_int b);
- int           MMG5_hashNew(MMG5_pMesh mesh, MMG5_Hash *hash,int hsiz,int hmax);
+ int           MMG5_hashNew(MMG5_pMesh mesh, MMG5_Hash *hash,MMG_int hsiz,MMG_int hmax);
  int           MMG5_intmetsavedir(MMG5_pMesh mesh, double *m,double *n,double *mr);
- int           MMG5_intridmet(MMG5_pMesh,MMG5_pSol,int,int,double,double*,double*);
+ int           MMG5_intridmet(MMG5_pMesh,MMG5_pSol,MMG_int,MMG_int,double,double*,double*);
  int           MMG5_mmgIntmet33_ani(double*,double*,double*,double);
- int           MMG5_mmgIntextmet(MMG5_pMesh,MMG5_pSol,int,double *,double *);
+ int           MMG5_mmgIntextmet(MMG5_pMesh,MMG5_pSol,MMG_int,double *,double *);
  size_t        MMG5_memSize(void);
  void          MMG5_memOption_memSet(MMG5_pMesh mesh);
  void          MMG5_mmgDefaultValues(MMG5_pMesh mesh);
- int           MMG5_mmgHashTria(MMG5_pMesh mesh, int *adja, MMG5_Hash*, int chkISO);
+ int           MMG5_mmgHashTria(MMG5_pMesh mesh, MMG_int *adja, MMG5_Hash*, int chkISO);
  void          MMG5_mmgInit_parameters(MMG5_pMesh mesh);
  void          MMG5_mmgUsage(char *prog);
  void          MMG5_paramUsage1(void);
@@ -647,9 +647,9 @@ void           MMG5_check_hminhmax(MMG5_pMesh mesh, int8_t sethmin, int8_t sethm
  void          MMG5_2d3dUsage(void);
  void          MMG5_lagUsage(void);
  void          MMG5_advancedUsage(void);
- extern int    MMG5_nonUnitNorPts(MMG5_pMesh,int,int,int,double*);
+ extern int    MMG5_nonUnitNorPts(MMG5_pMesh,MMG_int,MMG_int,MMG_int,double*);
  extern double MMG5_nonorsurf(MMG5_pMesh mesh,MMG5_pTria pt);
- extern int    MMG5_norpts(MMG5_pMesh,int,int,int,double *);
+ extern int    MMG5_norpts(MMG5_pMesh,MMG_int,MMG_int,MMG_int,double *);
  extern int    MMG5_nortri(MMG5_pMesh mesh,MMG5_pTria pt,double *n);
  void          MMG5_printTria(MMG5_pMesh mesh,char* fileName);
  extern int    MMG5_rotmatrix(double n[3],double r[3][3]);
@@ -658,11 +658,11 @@ void           MMG5_check_hminhmax(MMG5_pMesh mesh, int8_t sethmin, int8_t sethm
  int           MMG5_invmat33(double m[3][3],double mi[3][3]);
  int           MMG5_regnor(MMG5_pMesh mesh);
  double        MMG5_ridSizeInNormalDir(MMG5_pMesh,int,double*,MMG5_pBezier,double,double);
- double        MMG5_ridSizeInTangentDir(MMG5_pMesh, MMG5_pPoint,int,int*,double,double);
+ double        MMG5_ridSizeInTangentDir(MMG5_pMesh, MMG5_pPoint,MMG_int,MMG_int*,double,double);
  int           MMG5_scale_meshAndSol(MMG5_pMesh,MMG5_pSol,MMG5_pSol,double*,int8_t*,int8_t*);
  int           MMG5_scale_scalarMetric(MMG5_pMesh, MMG5_pSol,double, int8_t, int8_t);
  int           MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol ls);
- int           MMG5_scotchCall(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol fields,int*);
+ int           MMG5_scotchCall(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol fields,MMG_int*);
  void          MMG5_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met);
  int           MMG5_solveDefmetregSys( MMG5_pMesh, double r[3][3], double *, double *,
                                         double *, double *, double, double, double);
@@ -680,7 +680,7 @@ void           MMG5_check_hminhmax(MMG5_pMesh mesh, int8_t sethmin, int8_t sethm
  extern int    MMG5_countLocalParamAtTri( MMG5_pMesh,MMG5_iNode **);
  extern int    MMG5_writeLocalParamAtTri( MMG5_pMesh,MMG5_iNode *,FILE*);
  double         MMG2D_quickarea(double a[2],double b[2],double c[2]);
- void          MMG5_build3DMetric(MMG5_pMesh mesh,MMG5_pSol sol,int ip,double dbuf[6]);
+ void          MMG5_build3DMetric(MMG5_pMesh mesh,MMG5_pSol sol,MMG_int ip,double dbuf[6]);
  int           MMG5_loadVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
  int            MMG5_loadMshMesh_part1(MMG5_pMesh mesh,const char *filename,
                                        FILE **inm,long *posNodes, long *posElts,
@@ -698,19 +698,19 @@ int             MMG5_loadSolHeader(const char*,int,FILE**,int*,int*,int*,MMG_int
 int             MMG5_chkMetricType(MMG5_pMesh mesh,int *type, FILE *inm);
 int             MMG5_readFloatSol3D(MMG5_pSol,FILE*,int,int,int);
 int             MMG5_readDoubleSol3D(MMG5_pSol,FILE*,int,int,int);
-int             MMG5_saveSolHeader( MMG5_pMesh,const char*,FILE**,int,int*,int*,MMG_int,
+int             MMG5_saveSolHeader( MMG5_pMesh,const char*,FILE**,int,int*,MMG_int*,MMG_int,
                                     MMG_int,int,int*,int*,MMG_int*);
-int             MMG5_saveSolAtTrianglesHeader( MMG5_pMesh,FILE *,int,int,int*,int,
+int             MMG5_saveSolAtTrianglesHeader( MMG5_pMesh,FILE *,int,int,MMG_int*,int,
                                                int,int*,int*,int*);
-int             MMG5_saveSolAtTetrahedraHeader( MMG5_pMesh,FILE *,int,int,int*,int,
+int             MMG5_saveSolAtTetrahedraHeader( MMG5_pMesh,FILE *,int,int,MMG_int*,int,
                                                 int,int*,int*,int*);
-void            MMG5_writeDoubleSol3D(MMG5_pMesh,MMG5_pSol,FILE*,int,int,int);
+void            MMG5_writeDoubleSol3D(MMG5_pMesh,MMG5_pSol,FILE*,int,MMG_int,int);
 void            MMG5_printMetStats(MMG5_pMesh mesh,MMG5_pSol met);
 void            MMG5_printSolStats(MMG5_pMesh mesh,MMG5_pSol *sol);
 
 int MMG5_defsiz_startingMessage (MMG5_pMesh,MMG5_pSol,const char * funcname );
 void MMG5_gradation_info ( MMG5_pMesh );
-int MMG5_sum_reqEdgeLengthsAtPoint ( MMG5_pMesh,MMG5_pSol,int ip0,int ip1 );
+int MMG5_sum_reqEdgeLengthsAtPoint ( MMG5_pMesh,MMG5_pSol,MMG_int ip0,MMG_int ip1 );
 int MMG5_compute_meanMetricAtMarkedPoints_iso ( MMG5_pMesh mesh,MMG5_pSol met);
 int MMG5_compute_meanMetricAtMarkedPoints_ani ( MMG5_pMesh mesh,MMG5_pSol met);
 
@@ -732,15 +732,15 @@ int MMG5_getIniRef(MMG5_pMesh ,int );
 
 /* tools */
 void MMG5_mark_verticesAsUnused ( MMG5_pMesh mesh );
-void MMG5_mark_usedVertices ( MMG5_pMesh mesh,void (*delPt)(MMG5_pMesh,int) );
-void MMG5_keep_subdomainElts ( MMG5_pMesh,int,int (*delElt)(MMG5_pMesh,int) );
+void MMG5_mark_usedVertices ( MMG5_pMesh mesh,void (*delPt)(MMG5_pMesh,MMG_int) );
+void MMG5_keep_subdomainElts ( MMG5_pMesh,int,int (*delElt)(MMG5_pMesh,MMG_int) );
 
 /* function pointers */
 extern int    (*MMG5_chkmsh)(MMG5_pMesh,int,int);
 extern int    (*MMG5_bezierCP)(MMG5_pMesh ,MMG5_Tria *,MMG5_pBezier ,int8_t );
 extern double (*MMG5_lenSurfEdg)(MMG5_pMesh mesh,MMG5_pSol sol ,int ,int, int8_t );
 extern int    (*MMG5_grad2met_ani)(MMG5_pMesh,MMG5_pSol,MMG5_pTria,MMG_int,MMG_int);
-extern int    (*MMG5_grad2metreq_ani)(MMG5_pMesh,MMG5_pSol,MMG5_pTria,int,int);
+extern int    (*MMG5_grad2metreq_ani)(MMG5_pMesh,MMG5_pSol,MMG5_pTria,MMG_int,MMG_int);
 extern int    (*MMG5_compute_meanMetricAtMarkedPoints)( MMG5_pMesh,MMG5_pSol);
 
 
@@ -749,7 +749,7 @@ extern MMG_int  (*MMG5_indElt)(MMG5_pMesh mesh,MMG_int kel);
 extern MMG_int  (*MMG5_indPt)(MMG5_pMesh mesh,MMG_int kp);
 
 #ifdef USE_SCOTCH
-extern int    (*MMG5_renumbering)(int,MMG5_pMesh,MMG5_pSol sol,MMG5_pSol fields,int*);
+extern int    (*MMG5_renumbering)(int,MMG5_pMesh,MMG5_pSol sol,MMG5_pSol fields,MMG_int*);
 #endif
 
 void   MMG5_Set_commonFunc(void);

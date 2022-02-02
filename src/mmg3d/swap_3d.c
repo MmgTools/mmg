@@ -52,8 +52,8 @@ extern int8_t ddb;
  * provided).
  *
  */
-int MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
-                    int it1,int it2,int8_t typchk) {
+int MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, MMG_int *list,int ilist,
+                    MMG_int it1,MMG_int it2,int8_t typchk) {
   MMG5_pTetra   pt,pt0;
   MMG5_pxTetra  pxt;
   MMG5_pPoint   p0,p1,ppt0;
@@ -61,7 +61,8 @@ int MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
   MMG5_pPar     par;
   double        b0[3],b1[3],n[3],v[3],c[3],ux,uy,uz,ps,disnat,dischg;
   double        cal1,cal2,calnat,calchg,calold,calnew,caltmp,hausd;
-  int           iel,iel1,iel2,np,nq,na1,na2,k,nminus,nplus,isloc,l,info;
+  int           nminus,nplus,isloc,l,info;
+  MMG_int       iel,iel1,iel2,np,nq,na1,na2,k;
   int8_t        ifa1,ifa2,ia,ip,iq,ia1,ia2,j,isshell,ier;
 
   iel = list[0] / 6;
@@ -431,16 +432,17 @@ int MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, int *list,int ilist,
  * Swap boundary edge whose shell is provided.
  *
  */
-int MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,
+int MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,MMG_int *list,int ret,MMG_int it1,
                  MMG3D_pPROctree PROctree, int8_t typchk) {
   MMG5_pTetra   pt,pt1;
   MMG5_pPoint   p0,p1;
-  int           iel,iel1,ilist,np,nq,nm,src;
+  int           iel1,ilist,src;
+  MMG_int       iel,np,nq,nm;
   double        c[3];
   int8_t        ia,iface1,j,ipa,im;
   int           ier;
 #ifndef NDEBUG
-  int           na;
+  MMG_int           na;
 #endif
 
   iel = list[0] / 6;
@@ -563,13 +565,13 @@ int MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ret,int it1,
  * \remark used in anatet4 to remove the tetra with multiple boundary faces.
  *
  */
-int MMG3D_swap23(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t metRidTyp,
-                 int ifac,int conf0,int adj,int conf1) {
+int MMG3D_swap23(MMG5_pMesh mesh,MMG5_pSol met,MMG_int k,int8_t metRidTyp,
+                 int ifac,int conf0,MMG_int adj,int conf1) {
   MMG5_pTetra   pt0,pt1,ptnew;
   MMG5_xTetra   xt[3];
   MMG5_pxTetra  pxt0,pxt1;
-  int           k1,*adja,iel,np,xt1;
-  int           adj0_2,adj0_3,adj1_1,adj1_2,adj1_3;
+  MMG_int       xt1,k1,*adja,iel,np;
+  MMG_int       adj0_2,adj0_3,adj1_1,adj1_2,adj1_3;
   int8_t        i,isxt[3];
   uint8_t       tau0[4],tau1[4];
   const uint8_t *taued0,*taued1;

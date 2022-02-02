@@ -52,7 +52,7 @@
  * \remark we don't check if we break the hausdorff criterion.
  *
  */
-int MMG5_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree, MMG_int *list,MMG_int ilist,
+int MMG5_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree, MMG_int *list,int ilist,
                        int improve) {
 
 
@@ -60,8 +60,8 @@ int MMG5_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree, M
   MMG5_pPoint          p0,p1,p2,p3,ppt0;
   double               vol,totvol,m[6];
   double               calold,calnew,*callist,det;
-  MMG_int                  k,iel;
-  int                  i0;
+  MMG_int                  iel;
+  int                  k,i0;
 
   assert ( ilist > 0 );
   if ( ilist <= 0 ) {
@@ -194,7 +194,7 @@ int MMG5_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree, M
  *
  */
 int MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctree, MMG_int *listv,
-                          MMG_int ilistv,MMG_int *lists,MMG_int ilists,
+                          int ilistv,MMG_int *lists,int ilists,
                           int improveSurf, int improveVol) {
   MMG5_pTetra       pt,pt0;
   MMG5_pxTetra      pxt;
@@ -206,8 +206,8 @@ int MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
   double            detloc,gv[2],step,lambda[3];
   double            uv[2],o[3],no[3],to[3],*m0,ncur[3],nprev[3],nneighi[3];
   double            calold,calnew,caltmp,*callist;
-  MMG_int               k,kel,iel,l,n0,na,nb,ntempa,ntempb,ntempc,nxp;
-  int               ier;
+  MMG_int               k,kel,iel,n0,na,nb,ntempa,ntempb,ntempc,nxp;
+  int               ier,l;
   uint8_t           i0,iface,i;
   static int        warn = 0;
 
@@ -678,7 +678,7 @@ int MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
  *
  */
 int MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctree, MMG_int *listv,
-                          MMG_int ilistv, MMG_int *lists, MMG_int ilists,
+                          int ilistv, MMG_int *lists, int ilists,
                           int improve){
   MMG5_pTetra           pt,pt0;
   MMG5_pPoint           p0,ppt0;
@@ -1028,7 +1028,7 @@ int MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
  *
  */
 int MMG5_movbdynompt_ani(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree, MMG_int *listv,
-                          MMG_int ilistv, MMG_int *lists, MMG_int ilists,
+                          int ilistv, MMG_int *lists, int ilists,
                           int improve){
   MMG5_pTetra       pt,pt0;
   MMG5_pPoint       p0,ppt0;
@@ -1375,7 +1375,7 @@ int MMG5_movbdynompt_ani(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree
  *
  */
 int MMG5_movbdyridpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctree, MMG_int *listv,
-                          MMG_int ilistv,MMG_int *lists,MMG_int ilists,
+                          int ilistv,MMG_int *lists,int ilists,
                           int improve) {
   MMG5_pTetra          pt,pt0;
   MMG5_pPoint          p0,ppt0;

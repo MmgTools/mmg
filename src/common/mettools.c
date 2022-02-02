@@ -124,7 +124,7 @@ int MMG5_intmetsavedir(MMG5_pMesh mesh, double *m,double *n,double *mr) {
  * métrique à reconstruire si c'est possible(quand on vient de grad2metSurfreq)?
  *
  */
-int MMG5_buildridmet(MMG5_pMesh mesh,MMG5_pSol met,int np0,
+int MMG5_buildridmet(MMG5_pMesh mesh,MMG5_pSol met,MMG_int np0,
                      double ux,double uy,double uz,double mr[6],
                      double r[3][3] ) {
   MMG5_pPoint  p0;
@@ -188,7 +188,7 @@ int MMG5_buildridmet(MMG5_pMesh mesh,MMG5_pSol met,int np0,
  * given by \a nt and store the basis vectors in \a r.
  *
  */
-int MMG5_buildridmetnor(MMG5_pMesh mesh,MMG5_pSol met,int np0,double nt[3],
+int MMG5_buildridmetnor(MMG5_pMesh mesh,MMG5_pSol met,MMG_int np0,double nt[3],
                         double mr[6],double r[3][3] ) {
   MMG5_pPoint  p0;
   MMG5_pxPoint go;
@@ -440,7 +440,7 @@ int MMG5_intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr) {
  * specific sizes in the \f$n_1\f$ and \f$n_2\f$ directions.
  *
  */
-int MMG5_mmgIntextmet(MMG5_pMesh mesh,MMG5_pSol met,int np,double me[6],
+int MMG5_mmgIntextmet(MMG5_pMesh mesh,MMG5_pSol met,MMG_int np,double me[6],
                        double n[3]) {
   MMG5_pPoint         p0;
   MMG5_pxPoint        go;

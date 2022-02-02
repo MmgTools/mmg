@@ -30,8 +30,8 @@ double (*MMG5_lenSurfEdg)(MMG5_pMesh mesh,MMG5_pSol sol ,int ,int, int8_t )=NULL
 MMG_int  (*MMG5_indElt)(MMG5_pMesh mesh,MMG_int kel)=NULL;
 MMG_int  (*MMG5_indPt)(MMG5_pMesh mesh,MMG_int kp)=NULL;
 int  (*MMG5_grad2met_ani)(MMG5_pMesh,MMG5_pSol,MMG5_pTria,MMG_int,MMG_int)=NULL;
-int  (*MMG5_grad2metreq_ani)(MMG5_pMesh,MMG5_pSol,MMG5_pTria,int,int)=NULL;
+int  (*MMG5_grad2metreq_ani)(MMG5_pMesh,MMG5_pSol,MMG5_pTria,MMG_int,MMG_int)=NULL;
 int    (*MMG5_compute_meanMetricAtMarkedPoints)( MMG5_pMesh,MMG5_pSol)=NULL;
 #ifdef USE_SCOTCH
-int  (*MMG5_renumbering)(int,MMG5_pMesh,MMG5_pSol,MMG5_pSol,int*)=NULL;
+int  (*MMG5_renumbering)(int,MMG5_pMesh,MMG5_pSol,MMG5_pSol,MMG_int*)=NULL;
 #endif

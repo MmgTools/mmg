@@ -44,7 +44,7 @@
  */
 int MMG5_boundingBox(MMG5_pMesh mesh) {
   MMG5_pPoint    ppt;
-  int            k,i;
+  MMG_int            k,i;
   double         dd;
 
   /* compute bounding box */
@@ -121,7 +121,7 @@ void MMG5_check_hminhmax(MMG5_pMesh mesh, int8_t sethmin, int8_t sethmax) {
  */
 int MMG5_scale_scalarMetric(MMG5_pMesh mesh, MMG5_pSol met, double dd,
                             int8_t sethmin, int8_t sethmax) {
-  int    k;
+  MMG_int    k;
   static int8_t mmgWarn0 = 0;
 
   for (k=1; k<=mesh->np; k++)  {
@@ -183,7 +183,7 @@ int MMG5_scale_meshAndSol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol,double *dd
                           int8_t* sethmin,int8_t *sethmax ) {
   MMG5_pPoint    ppt;
   MMG5_pPar      par;
-  int            k,i;
+  MMG_int            k,i;
   int8_t         hsizOrOptim;
 
   /* sol is a level-set or a displacement so it cannot be an aniso metric */
@@ -272,7 +272,8 @@ int MMG5_scale_meshAndSol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol,double *dd
  */
 int MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
   double         dd,d1;
-  int            k,i;
+  MMG_int            k;
+  int            i;
   double         *m;
   double         lambda[3],v[3][3],isqhmin,isqhmax;
   int8_t         sethmin,sethmax;
@@ -401,7 +402,8 @@ int MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
 int MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
   MMG5_pPoint     ppt;
   double          dd;
-  int             k,i,iadr;
+  int             i;
+  MMG_int         k,iadr;
   MMG5_pPar       par;
 
   /* de-normalize coordinates */

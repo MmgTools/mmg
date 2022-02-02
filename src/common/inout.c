@@ -490,7 +490,8 @@ int  MMG5_check_readedMesh ( MMG5_pMesh mesh, int nref ) {
   MMG5_pQuad  pq;
   MMG5_pPrism pp;
   MMG5_pTetra pt;
-  int         i,k,aux;
+  int         i;
+  MMG_int     k,aux;
 
   if ( nref ) {
     fprintf(stdout,"\n     $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ \n");
@@ -637,10 +638,10 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
   MMG5_pSol   psl;
   double      dbuf[9];
   float       fbuf[9],fc;
-  int         k,i,l,nref,iadr,ier;
-  int         nt,na,nq,ne,npr;
+  int         i,l,nref,iadr,ier;
+  MMG_int     k,v[4],nt,na,nq,ne,npr;
   int         nbl_t,nbl_a,typ,tagNum,ref,idx,num;
-  int         v[4],isol;
+  int         isol;
   int8_t      metricData;
   char        chaine[MMG5_FILESTR_LGTH],*ptr;
   static int8_t mmgWarn=0, mmgWarn1=0;
@@ -1477,7 +1478,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
  * Build the metric at point \a ip depending with its type (ridge/not ridge).
  *
  */
-void  MMG5_build3DMetric(MMG5_pMesh mesh,MMG5_pSol sol,int ip,
+void  MMG5_build3DMetric(MMG5_pMesh mesh,MMG5_pSol sol,MMG_int ip,
                          double dbuf[6]) {
   MMG5_pPoint ppt;
   double      mtmp[3],r[3][3];
@@ -1547,8 +1548,9 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename,
   MMG5_pEdge  pa;
   MMG5_pSol   psl;
   double      dbuf[6];
-  int         bin,k,i,typ,nelts,word, header[3],iadr;
-  int         nq,ne,npr,np,nt,na,isol,nsols;
+  int         bin,i,typ,word;
+  MMG_int     header[3],nq,ne,npr,np,nt,na,k,iadr,nelts;
+  int         isol,nsols;
   char        *ptr,*data;
   static char mmgWarn = 0;
 
@@ -2029,7 +2031,7 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename,
  *
  */
 int MMG5_loadSolHeader( const char *filename,int meshDim,FILE **inm,int *ver,
-                        int *bin,int *iswp,MMG_int *np,MMG_int *dim,MMG_int *nsols,int **type,
+                        int *bin,int *iswp,MMG_int *np,MMG_int *dim,int *nsols,int **type,
                         long *posnp, int imprim) {
   int         binch,bdim;
   int         bpos,i;
@@ -2267,7 +2269,7 @@ int MMG5_readDoubleSol3D(MMG5_pSol sol,FILE *inm,int bin,int iswp,int pos) {
  *
  */
 void MMG5_writeDoubleSol3D(MMG5_pMesh mesh,MMG5_pSol sol,FILE *inm,int bin,
-                           int pos,int metricData) {
+                           MMG_int pos,int metricData) {
   double      dbuf[6],tmp;
   int         i;
 
@@ -2336,7 +2338,7 @@ void MMG5_writeDoubleSol3D(MMG5_pMesh mesh,MMG5_pSol sol,FILE *inm,int bin,
  *
  */
 int MMG5_saveSolHeader( MMG5_pMesh mesh,const char *filename,
-                        FILE **inm,int ver,int *bin,int *bpos,MMG_int np,MMG_int dim,
+                        FILE **inm,int ver,int *bin,MMG_int *bpos,MMG_int np,MMG_int dim,
                         int nsols,int *entities,int *type,MMG_int *size) {
   MMG5_pPoint ppt;
   int         binch;
@@ -2473,12 +2475,12 @@ int MMG5_saveSolHeader( MMG5_pMesh mesh,const char *filename,
  *
  */
 int MMG5_saveSolAtTrianglesHeader( MMG5_pMesh mesh,
-                                   FILE *inm,int ver,int bin,int *bpos,
+                                   FILE *inm,int ver,int bin,MMG_int *bpos,
                                    int nsols,int nsolsAtTriangles,
                                    int *entities,int *type,int *size) {
   MMG5_pTria  pt;
   int         binch;
-  int         k,nt;
+  MMG_int         k,nt;
 
   nt = 0;
   for (k=1; k<=mesh->nt; k++) {
@@ -2542,12 +2544,12 @@ int MMG5_saveSolAtTrianglesHeader( MMG5_pMesh mesh,
  *
  */
 int MMG5_saveSolAtTetrahedraHeader( MMG5_pMesh mesh,
-                                    FILE *inm,int ver,int bin,int *bpos,
+                                    FILE *inm,int ver,int bin,MMG_int *bpos,
                                     int nsols,int nsolsAtTetra,
                                     int *entities,int *type,int *size) {
   MMG5_pTetra  pt;
   int          binch;
-  int          k,ne;
+  MMG_int          k,ne;
 
   ne = 0;
   for (k=1; k<=mesh->ne; k++) {
@@ -2678,7 +2680,8 @@ void MMG5_printSolStats(MMG5_pMesh mesh,MMG5_pSol *sol) {
 int MMG5_saveNode(MMG5_pMesh mesh,const char *filename) {
   FILE*             inm;
   MMG5_pPoint       ppt;
-  int               k,np,i;
+  int               i;
+  MMG_int           k,np;
   char              *ptr,*data;
 
   if ( !mesh->np ) {
@@ -2753,7 +2756,8 @@ int MMG5_saveEdge(MMG5_pMesh mesh,const char *filename,const char *ext) {
   FILE*             inm;
   MMG5_pEdge        pt;
   size_t            na_tot;
-  int               k,polyfile;
+  int               polyfile;
+  MMG_int           k;
   char              *ptr_c = (char*)mesh->edge;
   char              *ptr,*data;
 

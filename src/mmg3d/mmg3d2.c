@@ -102,11 +102,12 @@ double MMG3D_vfrac_1vertex(MMG5_pPoint ppt[4],int8_t i0,double v[4],int8_t part_
  * subdomain inside tetra k defined by the ls function in sol
  *
  **/
-double MMG3D_vfrac(MMG5_pMesh mesh,MMG5_pSol sol,int k,int pm) {
+double MMG3D_vfrac(MMG5_pMesh mesh,MMG5_pSol sol,MMG_int k,int pm) {
   MMG5_pTetra    pt;
   MMG5_pPoint    ppt[4];
   double         v[4],vfm,vfp,lam,eps,o[18];
-  int            ip[4],nplus,nminus,nzero;
+  int            nplus,nminus,nzero;
+  MMG_int        ip[4];
   int8_t         flag,cfg,ia;
   int8_t         i,i0,i1,imin1,imin2,iplus1,iplus2,iz;
   uint8_t        tau[4];
@@ -310,7 +311,8 @@ double MMG3D_vfrac(MMG5_pMesh mesh,MMG5_pSol sol,int k,int pm) {
 int MMG3D_resetRef(MMG5_pMesh mesh) {
   MMG5_pTetra     pt;
   MMG5_pPoint     p0;
-  int             k,ref;
+  MMG_int         k;
+  int             ref;
   int8_t          i;
 
   /* Travel edges and reset tags at edges extremities */
@@ -400,10 +402,11 @@ MMG5_invsl(double A[3][3],double b[3],double r[3]) {
  */
 
 static int
-MMG5_ismaniball(MMG5_pMesh mesh,MMG5_pSol sol,int k,int indp) {
+MMG5_ismaniball(MMG5_pMesh mesh,MMG5_pSol sol,MMG_int k,int indp) {
   MMG5_pTetra   pt,pt1;
   double        v,v0,v1,v2;
-  int          *adja,list[MMG3D_LMAX+1],bdy[MMG3D_LMAX+1],ibdy,np,ilist,base,cur,iel,jel,res,l;
+  int           ibdy,ilist,base,cur,l;
+  MMG_int       *adja,list[MMG3D_LMAX+1],bdy[MMG3D_LMAX+1],jel,np,iel,res;
   int8_t        i,i0,i1,i2,j0,j1,j2,j,ip,nzeros,nopp,nsame;
   static int8_t mmgWarn0 = 0;
 
@@ -664,7 +667,7 @@ static int MMG3D_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTetra   pt;
   MMG5_pPoint   p0;
   double        *tmp;
-  int      k,nc,ns,ip;
+  MMG_int      k,nc,ns,ip;
   int8_t   i;
 
   /* create tetra adjacency */
@@ -768,7 +771,8 @@ int MMG3D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
   MMG5_pTetra    pt,pt1,pt2;
   MMG5_pxTetra   pxt;
   double         volc,voltot,v0,v1,v2,v3;
-  int            k,kk,l,ll,ncp,ncm,ip0,ip1,ip2,ip3,base,cur,ipile,*pile,*adja;
+  int            l,ncp,ncm,base,cur,ipile;
+  MMG_int        k,kk,ll,ip0,ip1,ip2,ip3,*adja,*pile;
   int8_t         i,j,i1,onbr;
 
   ncp = 0;
@@ -1017,7 +1021,8 @@ static int MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
   MMG5_pPoint   p0,p1;
   MMG5_Hash     hash;
   double        c[3],v0,v1,s;
-  int           vx[6],nb,k,ip0,ip1,np,ns,ne,ier,src,refext,refint;
+  int           ier,src,refext,refint;
+  MMG_int       vx[6],k,ip0,ip1,np,nb,ns,ne;
   int8_t        ia,j,npneg;
   static int8_t mmgWarn = 0;
 
@@ -1246,7 +1251,8 @@ static int MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
 static int MMG3D_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol) {
   MMG5_pTetra   pt;
   double        v;
-  int           k,ip,ref,refint,refext,ier;
+  int           ref,refint,refext,ier;
+  MMG_int       k,ip;
   int8_t   nmns,npls,nz,i;
 
   for (k=1; k<=mesh->ne; k++) {
@@ -1296,7 +1302,8 @@ static int MMG3D_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol) {
 int MMG3D_update_xtetra ( MMG5_pMesh mesh ) {
   MMG5_pTetra   pt,pt1,ptmax,ptmin;
   MMG5_pxTetra  pxt;
-  int           *adja,k,i,jel,j,imax,imin;
+  int           i,j,imax,imin;
+  MMG_int       *adja,k,jel;
 
   if ( (!mesh->info.iso) || (!mesh->info.opnbdy) ) {
     /* In non opnbdy mode, info stored in xtetra is not used */
@@ -1402,10 +1409,10 @@ int MMG3D_update_xtetra ( MMG5_pMesh mesh ) {
  * Beware : may return 0 when implicit boundary is tangent to outer boundary
  *
  */
-int MMG5_chkmaniball(MMG5_pMesh mesh, int start, int8_t ip){
+int MMG5_chkmaniball(MMG5_pMesh mesh, MMG_int start, int8_t ip){
   MMG5_pTetra    pt,pt1;
-  int       ref,base,ilist,nump,k,cur,k1,nref;
-  int       *adja,list[MMG3D_LMAX+2];
+  int       ref,base,ilist,cur,nref;
+  MMG_int       *adja,list[MMG3D_LMAX+2],k,k1,nump;
   int8_t    i,l,j;
 
   base = ++mesh->base;
@@ -1507,8 +1514,8 @@ int MMG5_chkmaniball(MMG5_pMesh mesh, int start, int8_t ip){
 /** Check whether implicit surface enclosed in volume is orientable */
 int MMG5_chkmani(MMG5_pMesh mesh){
   MMG5_pTetra   pt,pt1;
-  int           k,iel,ref;
-  int          *adja;
+  int           ref;
+  MMG_int       iel,k,*adja;
   int8_t        i,j,ip,cnt;
   static int8_t mmgWarn0 = 0;
 
@@ -1581,8 +1588,8 @@ int MMG5_chkmani(MMG5_pMesh mesh){
  */
 int MMG5_chkmani2(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTetra    pt,pt1;
-  int       k,iel;
-  int       *adja;
+  MMG_int       k,iel;
+  MMG_int       *adja;
   int8_t    i,j,ip,cnt;
 
   for(k=1; k<=mesh->np; k++){
@@ -1650,10 +1657,10 @@ int MMG5_chkmani2(MMG5_pMesh mesh,MMG5_pSol sol) {
  * not in shell of (np,nq).
  *
  */
-int MMG5_chkmanicoll(MMG5_pMesh mesh,int k,int iface,int iedg,int ndepmin,int ndepplus,int refmin,int refplus,int8_t isminp,int8_t isplp) {
+int MMG5_chkmanicoll(MMG5_pMesh mesh,MMG_int k,int iface,int iedg,MMG_int ndepmin,MMG_int ndepplus,int refmin,int refplus,int8_t isminp,int8_t isplp) {
   MMG5_pTetra    pt,pt1;
-  int       nump,numq,ilist,ref,cur,stor,iel,jel,base,ndepmq,ndeppq;
-  int       list[MMG3D_LMAX+2],*adja,*adja1;
+  int       ilist,ref,cur,stor,base;
+  MMG_int       nump,numq,list[MMG3D_LMAX+2],*adja,*adja1,iel,jel,ndepmq,ndeppq;
   int8_t    i,j,ip,jp,iq,jq,voy,indp,indq,isminq,isplq,ismin,ispl;
 
   ilist = 0;
@@ -2259,7 +2266,7 @@ int MMG3D_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
   }
 
   /* Clean old bdy analysis */
-  for ( int k=1; k<=mesh->np; ++k ) {
+  for ( MMG_int k=1; k<=mesh->np; ++k ) {
     if ( mesh->point[k].tag & MG_BDY ) {
       mesh->point[k].tag &= ~MG_BDY;
     }

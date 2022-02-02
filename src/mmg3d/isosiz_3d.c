@@ -86,7 +86,7 @@ inline double MMG5_lenedgCoor_iso(double *ca,double *cb,double *ma,double *mb) {
  *
  */
 static double
-MMG5_defsizreg(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,
+MMG5_defsizreg(MMG5_pMesh mesh,MMG5_pSol met,MMG_int nump,MMG_int *lists,
                 int ilists, double hmin,double hmax,double hausd) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
@@ -96,7 +96,7 @@ MMG5_defsizreg(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,
   double        ux,uy,uz,det2d,h,isqhmin,isqhmax,ll,lmin,lmax,hnm,s;
   double        *n,*t,r[3][3],lispoi[3*MMG3D_LMAX+1],intm[3],b0[3],b1[3],c[3],tAA[6],tAb[3],d[3];
   double        kappa[2],vp[2][2];
-  int           k,na,nb,ntempa,ntempb,iel,ip0;
+  MMG_int           k,na,nb,ntempa,ntempb,iel,ip0;
   int8_t        iface,i,j,i0;
   static int8_t mmgWarn0=0,mmgWarn1=0,mmgWarn2=0,mmgWarn3=0;
 
@@ -459,12 +459,12 @@ MMG5_defsizreg(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,
  * the surface edges passing through \a nump.
  *
  */
-double MMG5_meansizreg_iso(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,
+double MMG5_meansizreg_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG_int nump,MMG_int *lists,
                 int ilists, double hmin,double hmax) {
   MMG5_pTetra       pt;
   MMG5_pPoint       p0,p1;
   double            len,ux,uy,uz;
-  int               k,iel,ip1;
+  MMG_int               k,iel,ip1;
   int8_t            i,iface;
 
   p0 = &mesh->point[nump];
@@ -512,7 +512,7 @@ double MMG5_meansizreg_iso(MMG5_pMesh mesh,MMG5_pSol met,int nump,int *lists,
 static inline
 int MMG3D_sum_reqEdgeLengthsAtPoint(MMG5_pMesh mesh,MMG5_pSol met,MMG5_Hash *hash,
                                   MMG5_pTetra pt,int8_t i) {
-  int         ip0,ip1;
+  MMG_int         ip0,ip1;
 
   ip0 = pt->v[MMG5_iare[i][0]];
   ip1 = pt->v[MMG5_iare[i][1]];
@@ -545,7 +545,8 @@ int MMG3D_set_metricAtPointsOnReqEdges ( MMG5_pMesh mesh,MMG5_pSol met,int8_t is
   MMG5_pTetra  pt;
   MMG5_pxTetra pxt;
   MMG5_Hash    hash;
-  int          k,i,j,ip0,ip1,iad0,iad1;
+  MMG_int          k,j,ip0,ip1,iad0,iad1;
+  int          i;
 
   /* Reset the input metric at required edges extremities */
   if ( ismet ) {
@@ -645,7 +646,8 @@ int MMG3D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pPoint    p0,p1;
   double         hp,v[3],b0[3],b1[3],b0p0[3],b1b0[3],p1b1[3],hausd,hmin,hmax;
   double         secder0[3],secder1[3],kappa,tau[3],gammasec[3],ntau2,intau,ps,lm;
-  int            lists[MMG3D_LMAX+2],listv[MMG3D_LMAX+2],ilists,ilistv,k,ip0,ip1,l;
+  MMG_int            lists[MMG3D_LMAX+2],listv[MMG3D_LMAX+2],k,ip0,ip1;
+  int            ilists,ilistv,l; 
   int            kk,isloc;
   int8_t         ismet;
   int8_t         i,j,ia,ised,i0,i1;
@@ -1025,7 +1027,7 @@ void MMG3D_mark_pointsOnReqEdge_fromTetra (  MMG5_pMesh mesh ) {
   MMG5_pTetra  pt;
   MMG5_pxTetra pxt;
   MMG5_pPoint  ppt;
-  int          k;
+  MMG_int          k;
   int8_t       i;
 
   for ( k=1; k<=mesh->np; k++ ) {
@@ -1060,7 +1062,8 @@ int MMG3D_gradsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTetra    pt;
   MMG5_pPoint    p0,p1;
   double         l,hn,ux,uy,uz;
-  int            ip0,ip1,it,maxit,nu,nup,k;
+  int            it,maxit,nu,nup;
+  MMG_int        ip0,ip1,k;
   int8_t         i,j,ia,i0,i1;
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
@@ -1144,7 +1147,8 @@ int MMG3D_gradsizreq_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTetra    pt;
   MMG5_pPoint    p0,p1;
   double         hgrad,ll,h0,h1,hn,ux,uy,uz;
-  int            ip0,ip1,ipslave,ipmaster,it,maxit,nu,nup,k;
+  int            it,maxit,nu,nup;
+  MMG_int        ip0,ip1,ipslave,ipmaster,k;
   int8_t         i,j,ia,i0,i1;
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {

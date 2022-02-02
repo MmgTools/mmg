@@ -66,20 +66,21 @@ int8_t  ddb;
  *
  */
 static inline int
-MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
-                 int* ifilt,int* ns,int* nc,int* warn,int it) {
+MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,MMG_int ne,
+                 int* ifilt,MMG_int* ns,MMG_int* nc,int* warn,int it) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
   MMG5_Tria     ptt;
   MMG5_pPoint   p0,p1,ppt;
   MMG5_pxPoint  pxp;
   double        dd,len,lmax,o[3],to[3],no1[3],no2[3],v[3];
-  int           k,ip,ip1,ip2,src,list[MMG3D_LMAX+2],ilist,lists[MMG3D_LMAX+2],ilists,ref;
+  int           src,ilist,ilists,ref;
+  MMG_int       k,ip1,ip2,ip,iq,list[MMG3D_LMAX+2],lists[MMG3D_LMAX+2];
   int16_t       tag;
   int8_t        imax,j,i,i1,i2,ifa0,ifa1;
   int           lon,ret,ier;
   double        lmin,lfilt;
-  int           imin,iq;
+  int           imin;
   int           ii;
   double        lmaxtet,lmintet,volmin;
   int           imaxtet,imintet,base,countMemFailure;
@@ -837,7 +838,8 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
  */
 static int
 MMG5_optbad(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree) {
-  int           it,nnm,nnf,maxit,nm,nf,nw;
+  int           it,maxit;
+  MMG_int       nf,nnf,nnm,nm,nw;
   double        crit;
 
   /* shape optim */
@@ -912,8 +914,9 @@ MMG5_optbad(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree) {
  */
 static int
 MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree *PROctree, int* warn) {
-  int        nfilt,ifilt,ne,ier;
-  int        ns,nc,it,nnc,nns,nnf,nnm,maxit,nf,nm,noptim;
+  int        nfilt,ifilt,ier;
+  int        it,maxit,noptim;
+  MMG_int    ns,nc,ne,nnm,nm,nnf,nf,nnc,nns;
   double     maxgap,dd,declic,declicsurf;
 
   /* Iterative mesh modifications */
@@ -1025,7 +1028,8 @@ MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree *PROctree, int* war
  */
 static int
 MMG5_optetLES(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree) {
-  int it,nnm,nnf,maxit,nm,nf,nw;
+  int it,maxit;
+  MMG_int  nnf,nf,nw,nm,nnm;
   double declic;
 
   it = nnm = nnf = 0;
@@ -1119,7 +1123,8 @@ MMG5_optetLES(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree) {
 static int
 MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree) {
   MMG5_pTetra   pt;
-  int           it,nnm,nnf,maxit,nm,nf,nw,k;
+  int           it,maxit;
+  MMG_int       nnf,nf,nw,k,nnm,nm;
   double        crit,declic;
 
   /* shape optim */
@@ -1226,9 +1231,9 @@ MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree) {
  */
 static int
 MMG5_adptet_delone(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree *PROctree,
-                   int * permNodGlob) {
-  int      nnf,ns,nf;
-  int      warn;
+                   MMG_int * permNodGlob) {
+  MMG_int      nnf,nf;
+  int      warn,ns;
 
   /*initial swap*/
   if ( !mesh->info.noswap ) {
@@ -1295,7 +1300,7 @@ MMG5_adptet_delone(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree *PROctree,
  * Main adaptation routine.
  *
  */
-int MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met,int *permNodGlob) {
+int MMG5_mmg3d1_delone(MMG5_pMesh mesh,MMG5_pSol met,MMG_int *permNodGlob) {
   MMG3D_pPROctree PROctree = NULL;
 
   if ( abs(mesh->info.imprim) > 4 )

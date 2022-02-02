@@ -49,9 +49,9 @@
  * k-partitioning and assuming that baseval of the graph is 1.
  *
  **/
-int MMG5_kPartBoxCompute(SCOTCH_Graph *graf, int vertNbr, int boxVertNbr,
+int MMG5_kPartBoxCompute(SCOTCH_Graph *graf, MMG_int vertNbr, MMG_int boxVertNbr,
                           SCOTCH_Num *permVrtTab,MMG5_pMesh mesh) {
-  int boxNbr, vertIdx;
+  MMG_int boxNbr, vertIdx;
   SCOTCH_Num logMaxVal, SupMaxVal, InfMaxVal, maxVal;
   char s[200];
   SCOTCH_Num *sortPartTb;
@@ -155,11 +155,12 @@ int MMG5_kPartBoxCompute(SCOTCH_Graph *graf, int vertNbr, int boxVertNbr,
  *
  */
 void MMG5_swapNod(MMG5_pMesh mesh,MMG5_pPoint points, double* sols,
-                  MMG5_pSol field,int* perm,int ind1, int ind2, int solsiz) {
+                  MMG5_pSol field,MMG_int* perm,MMG_int ind1, MMG_int ind2, int solsiz) {
   MMG5_Point ptttmp;
   MMG5_pSol  psl;
   MMG5_Sol   soltmp;
-  int        tmp,addr2,addr1,i,pslsiz;
+  int        tmp,i,pslsiz;
+  MMG_int    addr2,addr1;
 
   /* swap the points */
   memcpy(&ptttmp      ,&points[ind2],sizeof(MMG5_Point));
@@ -227,7 +228,7 @@ void MMG5_swapNod(MMG5_pMesh mesh,MMG5_pPoint points, double* sols,
  *
  **/
 int MMG5_scotchCall(MMG5_pMesh mesh, MMG5_pSol met,
-                    MMG5_pSol fields, int *permNodGlob)
+                    MMG5_pSol fields, MMG_int *permNodGlob)
 {
 
 #ifdef USE_SCOTCH

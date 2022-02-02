@@ -76,7 +76,7 @@ MMG_int MMG3D_newPt(MMG5_pMesh mesh,double c[3],int16_t tag,int src) {
   return curpt;
 }
 
-void MMG3D_delPt(MMG5_pMesh mesh,int ip) {
+void MMG3D_delPt(MMG5_pMesh mesh,MMG_int ip) {
   MMG5_pPoint   ppt;
   MMG5_xPoint  *pxp;
 
@@ -95,8 +95,8 @@ void MMG3D_delPt(MMG5_pMesh mesh,int ip) {
 }
 
 /** get new elt address */
-int MMG3D_newElt(MMG5_pMesh mesh) {
-  int     curiel;
+MMG_int MMG3D_newElt(MMG5_pMesh mesh) {
+  MMG_int     curiel;
 
   if ( !mesh->nenil )  return 0;
   curiel = mesh->nenil;
@@ -118,9 +118,9 @@ int MMG3D_newElt(MMG5_pMesh mesh) {
  * Delete the element \a iel
  *
  */
-int MMG3D_delElt(MMG5_pMesh mesh,int iel) {
+int MMG3D_delElt(MMG5_pMesh mesh,MMG_int iel) {
   MMG5_pTetra   pt;
-  int      iadr;
+  MMG_int      iadr;
 
   pt = &mesh->tetra[iel];
   if ( !MG_EOK(pt) ) {
@@ -131,7 +131,7 @@ int MMG3D_delElt(MMG5_pMesh mesh,int iel) {
   pt->v[3] = mesh->nenil;
   iadr = 4*(iel-1) + 1;
   if ( mesh->adja )
-    memset(&mesh->adja[iadr],0,4*sizeof(int));
+    memset(&mesh->adja[iadr],0,4*sizeof(MMG_int));
   mesh->nenil = iel;
   if ( iel == mesh->ne ) {
     while ( !MG_EOK((&mesh->tetra[mesh->ne])) )  mesh->ne--;
@@ -254,7 +254,7 @@ int MMG3D_memOption(MMG5_pMesh mesh) {
  *
  */
 int MMG3D_setMeshSize_alloc( MMG5_pMesh mesh ) {
-  int k;
+  MMG_int k;
 
   MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(MMG5_Point),"initial vertices",
                 fprintf(stderr,"  Exit program.\n");
@@ -326,7 +326,7 @@ int MMG3D_zaldy(MMG5_pMesh mesh) {
  */
 void MMG5_freeXTets(MMG5_pMesh mesh) {
   MMG5_pTetra pt;
-  int    k;
+  MMG_int    k;
 
   for (k=1; k<=mesh->ne; k++) {
     pt     = &mesh->tetra[k];

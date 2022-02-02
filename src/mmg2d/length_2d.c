@@ -124,7 +124,8 @@ double MMG2D_lencurv_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2) {
 int MMG2D_prilen(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTria       pt;
   double      lavg,len,ecart,som,lmin,lmax;
-  int         navg,ia,ipa,ipb,iamin,ibmin,iamax,ibmax,nullEdge,hl[9];
+  int         navg,ia,ipa,ipb,nullEdge,hl[9];
+  MMG_int     iamin,ibmin,iamax,ibmax;
   static double bd[9] = {0.0, 0.3, 0.6, 0.7071, 0.9, 1.3, 1.4142, 2.0, 5.0};
   MMG_int     k,l;
 

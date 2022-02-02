@@ -99,8 +99,8 @@ void MMG3D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 }
 
-int MMG3D_Get_adjaTet(MMG5_pMesh mesh, int kel, int listet[4]) {
-  int idx;
+int MMG3D_Get_adjaTet(MMG5_pMesh mesh, MMG_int kel, MMG_int listet[4]) {
+  MMG_int idx;
 
   if ( ! mesh->adja ) {
     if (! MMG3D_hashTetra(mesh, 0))
@@ -679,12 +679,13 @@ int MMG3D_freeLocalPar(MMG5_pMesh mesh) {
   return 1;
 }
 
-int MMG3D_Get_numberOfNonBdyTriangles(MMG5_pMesh mesh, int* nb_tria) {
+int MMG3D_Get_numberOfNonBdyTriangles(MMG5_pMesh mesh, MMG_int* nb_tria) {
   MMG5_pTetra pt,pt1;
   MMG5_pPrism pp;
   MMG5_pTria  ptt;
   MMG5_Hash   hash;
-  int         *adja,ref,k,i,j,iel;
+  int         ref,i;
+  MMG_int     *adja,j,k,iel;
 
   *nb_tria = 0;
   memset ( &hash, 0x0, sizeof(MMG5_Hash));
@@ -893,8 +894,8 @@ int MMG3D_Get_numberOfNonBdyTriangles(MMG5_pMesh mesh, int* nb_tria) {
   return 1;
 }
 
-int MMG3D_Get_nonBdyTriangle(MMG5_pMesh mesh,int* v0,int* v1,int* v2,
-                             int* ref,int idx) {
+int MMG3D_Get_nonBdyTriangle(MMG5_pMesh mesh,MMG_int* v0,MMG_int* v1,MMG_int* v2,
+                             int* ref,MMG_int idx) {
   MMG5_pTria ptt;
   size_t     nt_tot=0;
   char       *ptr_c = (char*)mesh->tria;
@@ -1053,11 +1054,11 @@ int MMG3D_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol,double critmin,
   _LIBMMG5_RETURN(mesh,met,sol,MMG5_SUCCESS);
 }
 
-void MMG3D_searchqua(MMG5_pMesh mesh,MMG5_pSol met,double critmin, int *eltab,
+void MMG3D_searchqua(MMG5_pMesh mesh,MMG5_pSol met,double critmin, MMG_int *eltab,
                     int8_t metRidTyp) {
   MMG5_pTetra   pt;
   double   rap;
-  int      k;
+  MMG_int      k;
 
   assert ( met );
 
@@ -1081,8 +1082,8 @@ void MMG3D_searchqua(MMG5_pMesh mesh,MMG5_pSol met,double critmin, int *eltab,
   return;
 }
 
-int MMG3D_Get_tetFromTria(MMG5_pMesh mesh, int ktri, int *ktet, int *iface) {
-  int val;
+int MMG3D_Get_tetFromTria(MMG5_pMesh mesh, MMG_int ktri, MMG_int *ktet, int *iface) {
+  MMG_int val;
 
   val = mesh->tria[ktri].cc;
 
@@ -1100,12 +1101,12 @@ int MMG3D_Get_tetFromTria(MMG5_pMesh mesh, int ktri, int *ktet, int *iface) {
 }
 
 
-int MMG3D_Get_tetsFromTria(MMG5_pMesh mesh, int ktri, int ktet[2], int iface[2])
+int MMG3D_Get_tetsFromTria(MMG5_pMesh mesh, MMG_int ktri, MMG_int ktet[2], int iface[2])
 {
   int ier;
-  int itet;
+  MMG_int itet;
 #ifndef NDEBUG
-  int ia0,ib0,ic0,ia1,ib1,ic1;
+  MMG_int ia0,ib0,ic0,ia1,ib1,ic1;
 #endif
 
   ktet[0]  =  ktet[1] = 0;
@@ -1146,11 +1147,11 @@ int MMG3D_Get_tetsFromTria(MMG5_pMesh mesh, int ktri, int ktet[2], int iface[2])
 
 
 int MMG3D_searchlen(MMG5_pMesh mesh, MMG5_pSol met, double lmin,
-                    double lmax, int *eltab,int8_t metRidTyp) {
+                    double lmax, MMG_int *eltab,int8_t metRidTyp) {
   MMG5_pTetra pt;
   MMG5_Hash   hash;
   double      len;
-  int         k,np,nq;
+  MMG_int         k,np,nq;
   int8_t      ia,i0,i1,ier;
 
   /* Hash all edges in the mesh */
@@ -1210,10 +1211,11 @@ int MMG3D_doSol(MMG5_pMesh mesh,MMG5_pSol met) {
     MMG5_pTetra  pt;
     MMG5_pPoint  p1,p2;
     double       ux,uy,uz,dd;
-    int          i,k,iadr,ia,ib,ipa,ipb,type;
+    int          i,type;
+    MMG_int      k,iadr,ia,ib,ipa,ipb;
     int         *mark;
 
-    MMG5_SAFE_CALLOC(mark,mesh->np+1,int,return 0);
+    MMG5_SAFE_CALLOC(mark,mesh->np+1,MMG_int,return 0);
 
     /* Memory alloc */
     if ( met->size==1 ) type=1;
@@ -1364,7 +1366,7 @@ int MMG3D_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met) {
 }
 
 int MMG3D_switch_metricStorage(MMG5_pMesh mesh, MMG5_pSol met) {
-  int    k;
+  MMG_int    k;
   double tmp;
 
   if ( met->size!=6 ) { return 1; }

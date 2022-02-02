@@ -42,12 +42,13 @@
  * Try to move the vertices of the tetra \a k to improve its quality.
  *
  */
-int MMG3D_movetetrapoints(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree PROctree,int k) {
+int MMG3D_movetetrapoints(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree PROctree,MMG_int k) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
   MMG5_pPoint   ppt;
   /* double        *n; */
-  int           i,j,i0,ier/*,lists[MMG3D_LMAX+2]*/,listv[MMG3D_LMAX+2]/*,ilists*/,ilistv;
+  MMG_int       ier/*,lists[MMG3D_LMAX+2]*/,listv[MMG3D_LMAX+2]
+  int           i0,i,j,/*,ilists*/,ilistv;
   int           /* improve,*/ internal,nm,/*maxit,*/base,ns;
 
   // improve = 1;
@@ -154,10 +155,11 @@ int MMG3D_movetetrapoints(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree PROctree
  * Try to remove point i of tet k, try the three edges of k containing i.
  *
  */
-int MMG3D_coledges(MMG5_pMesh mesh,MMG5_pSol met,int k,int i) {
+int MMG3D_coledges(MMG5_pMesh mesh,MMG5_pSol met,MMG_int k,int i) {
   MMG5_pTetra pt;
   double      len;
-  int         ied,iedg,iq,i1,ilistcol,listcol[MMG3D_LMAX+2];
+  int         ied,iedg,iq,i1,ilistcol;
+  MMG_int     listcol[MMG3D_LMAX+2];
   int         ier;
   int8_t      iface,ief;
 
@@ -212,9 +214,10 @@ int MMG3D_coledges(MMG5_pMesh mesh,MMG5_pSol met,int k,int i) {
  *
  */
 int MMG3D_deletePoint(MMG5_pMesh mesh,  MMG5_pSol met,MMG3D_pPROctree PROctree,
-                       int k,int i) {
+                       MMG_int k,int i) {
   MMG5_pTetra pt;
-  int         il,ilist,iel,ip,list[MMG3D_LMAX+2];
+  int         il,ilist,ip;
+  MMG_int     iel,list[MMG3D_LMAX+2];
 
   pt = &mesh->tetra[k];
 
@@ -247,11 +250,12 @@ int MMG3D_deletePoint(MMG5_pMesh mesh,  MMG5_pSol met,MMG3D_pPROctree PROctree,
  * Try to optimize the tetra k. This tetra has a face on the boundary.
  *
  */
-int MMG3D_optbdry(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree PROctree,int k) {
+int MMG3D_optbdry(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree PROctree,MMG_int k) {
   MMG5_pTetra  pt;
   MMG5_pxTetra pxt;
-  int          ib,i,j,ipb,list[MMG3D_LMAX+2];
-  int          iedg,ier,ilist,ied,ia,it1,it2,ret,imove;
+  int          ib,i,j;
+  MMG_int      list[MMG3D_LMAX+2],ipb,it1,it2;
+  int          iedg,ier,ilist,ied,ia,ret,imove;
 
   imove = 0;
 

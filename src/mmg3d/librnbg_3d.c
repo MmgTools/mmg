@@ -48,7 +48,7 @@
  *
  */
 static inline
-void MMG5_swapTet(MMG5_pTetra tetras/*, int* adja*/, int* perm, int ind1, int ind2) {
+void MMG5_swapTet(MMG5_pTetra tetras/*, int* adja*/, MMG_int* perm, MMG_int ind1, MMG_int ind2) {
   MMG5_Tetra pttmp;
   int        tmp;
 
@@ -110,26 +110,27 @@ void MMG5_swapTet(MMG5_pTetra tetras/*, int* adja*/, int* perm, int ind1, int in
  * Modifies the node indicies to prevent from cache missing.
  *
  */
-int MMG5_mmg3dRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol,
-                          MMG5_pSol fields,int* permNodGlob) {
+int MMG5_mmg3dRenumbering(MMG_int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol,
+                          MMG5_pSol fields,MMG_int* permNodGlob) {
   MMG5_pPoint ppt;
   MMG5_pTetra ptet;
   MMG5_pPrism pp;
   SCOTCH_Num  edgeNbr;
   SCOTCH_Num  *vertTab, *edgeTab, *permVrtTab;
   SCOTCH_Graph graf ;
-  int    vertNbr, nodeGlbIdx, tetraIdx, ballTetIdx;
-  int    i, j, k;
-  int    edgeSiz;
-  int    *vertOldTab, *permNodTab, nereal, npreal;
-  int    *adja,iadr;
+  MMG_int    vertNbr, nodeGlbIdx, tetraIdx, ballTetIdx;
+  int    i;
+  MMG_int     j, k;
+  MMG_int    edgeSiz;
+  MMG_int    *vertOldTab, *permNodTab, nereal, npreal;
+  MMG_int    *adja,iadr;
 
 
   /* Computing the number of vertices and a contiguous tabular of vertices */
   vertNbr = 0;
 
-  MMG5_ADD_MEM(mesh,(mesh->ne+1)*sizeof(int),"vertOldTab",return 1);
-  MMG5_SAFE_CALLOC(vertOldTab,mesh->ne+1,int,return 1);
+  MMG5_ADD_MEM(mesh,(mesh->ne+1)*sizeof(MMG_int),"vertOldTab",return 1);
+  MMG5_SAFE_CALLOC(vertOldTab,mesh->ne+1,MMG_int,return 1);
 
   for(tetraIdx = 1 ; tetraIdx < mesh->ne + 1 ; tetraIdx++) {
 

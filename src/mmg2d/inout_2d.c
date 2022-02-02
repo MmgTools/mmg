@@ -623,7 +623,8 @@ int MMG2D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   FILE*       inm;
   long        posNodes,posElts,*posNodeData;
   int         ier;
-  int         bin,iswp,nelts,nsols;
+  int         bin,iswp,nsols;
+  MMG_int     nelts;
 
   mesh->dim = 2;
 
@@ -684,7 +685,8 @@ int MMG2D_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
   FILE*       inm;
   long        posNodes,posElts,*posNodeData;
   int         ier;
-  int         bin,iswp,nelts,nsols;
+  int         bin,iswp,nsols;
+  MMG_int     nelts;
 
   mesh->dim = 2;
 
@@ -815,8 +817,8 @@ int MMG2D_readDoubleSol(MMG5_pSol sol,FILE *inm,int bin,int iswp,MMG_int pos) {
 int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   FILE       *inm;
   long        posnp;
-  int         iswp,ier,dim,meshDim;
-  MMG_int         k,ver,bin,np,nsols,*type;
+  int         iswp,ier,meshDim,*type,nsols;
+  MMG_int         k,ver,bin,np,dim;
 
   /** Read the file header */
   meshDim = 2;
@@ -903,8 +905,8 @@ int MMG2D_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
   MMG5_pSol   psl;
   FILE       *inm;
   long        posnp;
-  MMG_int         iswp,ier,dim,meshDim;
-  MMG_int         j,k,ver,bin,np,nsols,*type;
+  int         iswp,ier,meshDim,nsols,*type;
+  MMG_int         j,k,ver,bin,np,dim;
   char        data[16];
   static int8_t mmgWarn = 0;
 

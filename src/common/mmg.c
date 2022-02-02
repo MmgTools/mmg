@@ -190,7 +190,8 @@ void MMG5_mmgDefaultValues(MMG5_pMesh mesh) {
  */
 inline
 int MMG5_countLocalParamAtTri( MMG5_pMesh mesh,MMG5_iNode **bdryRefs) {
-  int         npar,k,ier;
+  int         npar,ier;
+  MMG_int     k;
 
   /** Count the number of different boundary references and list it */
   (*bdryRefs) = NULL;
@@ -264,7 +265,8 @@ void MMG5_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
   MMG5_pTetra pt;
   MMG5_pPoint ppt;
   double      isqhmin, isqhmax;
-  int         i,k,iadr,sethmin,sethmax;
+  int         i,iadr,sethmin,sethmax;
+  MMG_int     k;
 
   assert ( mesh->info.optim );
 

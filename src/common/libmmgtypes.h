@@ -245,7 +245,7 @@ typedef struct {
   int      src; /*!< Source point in input mesh */
 #endif
   int      ref; /*!< Reference of point */
-  int      xp; /*!< Surface point number */
+  MMG_int      xp; /*!< Surface point number */
   int      tmp; /*!< Index of point in the saved mesh (we don't count
                   the unused points)*/
   int      flag; /*!< Flag to know if we have already treated the point */
@@ -303,7 +303,7 @@ typedef struct {
   MMG_int      v[3]; /*!< Vertices of the triangle */
   int      ref; /*!< Reference of the triangle */
   int      base;
-  int      cc; /*!< used to store the tetra + tetra face indices
+  MMG_int      cc; /*!< used to store the tetra + tetra face indices
                  that allow to access to the tria */
   int      edg[3]; /*!< edg[i] contains the ref of the \f$i^{th}\f$ edge
                      of triangle */
@@ -373,7 +373,7 @@ typedef struct {
   int      ref; /*!< Reference of the tetrahedron */
   int      base;
   int      mark; /*!< Used for delaunay */
-  int      xt; /*!< Index of the surface \ref MMG5_xTetra associated to
+  MMG_int      xt; /*!< Index of the surface \ref MMG5_xTetra associated to
                  the tetrahedron*/
   int      flag;
   int16_t  tag;
@@ -520,7 +520,7 @@ typedef struct {
  */
 typedef struct {
   MMG5_hgeom  *geom;
-  int         siz,max,nxt;
+  MMG_int         siz,max,nxt;
 } MMG5_HGeom;
 
 
@@ -529,8 +529,8 @@ typedef struct {
  * \brief Used to hash edges (memory economy compared to \ref MMG5_hgeom).
  */
 typedef struct {
-  int   a,b,nxt;
-  int   k; /*!< k = point along edge a b or triangle index */
+  MMG_int   a,b,nxt;
+  MMG_int   k; /*!< k = point along edge a b or triangle index */
   int   s;
 } MMG5_hedge;
 
@@ -540,7 +540,7 @@ typedef struct {
  * instead of \ref MMG5_hgeom (memory economy).
  */
 typedef struct {
-  int     siz,max,nxt;
+  MMG_int     siz,max,nxt;
   MMG5_hedge  *item;
 } MMG5_Hash;
 

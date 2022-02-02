@@ -2589,7 +2589,7 @@ int MMG3D_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol);
  *
  */
   void  MMG3D_searchqua(MMG5_pMesh mesh, MMG5_pSol met, double critmin,
-                        int *eltab,int8_t metRidTyp);
+                        MMG_int *eltab,int8_t metRidTyp);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.
@@ -2617,7 +2617,7 @@ int MMG3D_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol);
  *
  */
   int  MMG3D_searchlen(MMG5_pMesh mesh, MMG5_pSol met, double lmin,
-                       double lmax,int *eltab,int8_t  metRidTyp);
+                       double lmax,MMG_int *eltab,int8_t  metRidTyp);
 
 /** Utils */
 /**
@@ -2772,7 +2772,7 @@ int MMG3D_switch_metricStorage(MMG5_pMesh mesh, MMG5_pSol met);
  * >   END SUBROUTINE\n
  *
  */
-  int MMG3D_Get_numberOfNonBdyTriangles(MMG5_pMesh mesh, int* nb_tria);
+  int MMG3D_Get_numberOfNonBdyTriangles(MMG5_pMesh mesh, MMG_int* nb_tria);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -2798,7 +2798,7 @@ int MMG3D_switch_metricStorage(MMG5_pMesh mesh, MMG5_pSol met);
  * >   END SUBROUTINE\n
  *
  */
-  int MMG3D_Get_nonBdyTriangle(MMG5_pMesh mesh, int* v0, int* v1, int* v2, int* ref, int idx);
+  int MMG3D_Get_nonBdyTriangle(MMG5_pMesh mesh, MMG_int* v0, MMG_int* v1, MMG_int* v2, int* ref, MMG_int idx);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -2822,7 +2822,8 @@ int MMG3D_switch_metricStorage(MMG5_pMesh mesh, MMG5_pSol met);
  * >   END SUBROUTINE\n
  *
  */
-  int MMG3D_Get_tetFromTria(MMG5_pMesh mesh, int ktri, int *ktet, int *iface);
+  int MMG3D_Get_tetFromTria(MMG5_pMesh mesh, MMG_int ktri, MMG_int *ktet, int *iface);
+
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -2848,7 +2849,7 @@ int MMG3D_switch_metricStorage(MMG5_pMesh mesh, MMG5_pSol met);
  * >   END SUBROUTINE\n
  *
  */
-  int MMG3D_Get_tetsFromTria(MMG5_pMesh mesh, int ktri, int ktet[2], int iface[2]);
+  int MMG3D_Get_tetsFromTria(MMG5_pMesh mesh, MMG_int ktri, MMG_int ktet[2], int iface[2]);
 
 /**
  * \param m upper part of a symetric matric diagonalizable in |R
