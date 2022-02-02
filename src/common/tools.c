@@ -65,7 +65,6 @@ inline void MMG5_nsort(int n,double *val,int8_t *perm){
  *
  */
 inline void MMG5_nperm(int8_t n,int8_t shift,int8_t stride,double *val,double *oldval,int8_t *perm) {
-  double tmp;
   int8_t i,k;
 
   for( i = 0; i < n; i++ )
