@@ -657,6 +657,32 @@ ADD_TEST(NAME mmg3d_OptLs_temp_orphan
   -hausd 0.5 -nr -hgrad -1 -nsd 3
   ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_temp_orphan.o.meshb)
 
+# OptLs and isoref option: compare the result of ls discretization with ref 10
+# and results of the same case with ref 5
+#include(FindUnixCommands)
+
+add_test(
+  NAME mmg3d_OptLs_isoref_defaut
+  COMMAND ${EXECUT_MMG3D} -v 5 -ls ${MMG3D_CI_TESTS}/OptLs_isoref/3d-mesh.mesh
+  -sol ${MMG3D_CI_TESTS}/OptLs_isoref/3d-mesh.sol
+  ${CTEST_OUTPUT_DIR}/mmg3d_isoref.o.mesh
+  )
+add_test(
+  NAME mmg3d_OptLs_isoref_5
+  COMMAND ${EXECUT_MMG3D} -v 5 -isoref 5 -ls
+  ${MMG3D_CI_TESTS}/OptLs_isoref/3d-mesh-isoref5.mesh
+  -sol ${MMG3D_CI_TESTS}/OptLs_isoref/3d-mesh.sol
+  ${CTEST_OUTPUT_DIR}/mmg3d_isoref5.o.mesh
+  )
+
+if (BASH)
+  add_test(
+    NAME mmg3d_optLs_isoref
+    COMMAND ${BASH} -c "diff <(wc -wl ${CTEST_OUTPUT_DIR}/mmg3d_isoref.o.mesh  | awk '{print $1 $2}') <(wc -wl ${CTEST_OUTPUT_DIR}/mmg3d_isoref5.o.mesh | awk '{print $1 $2}')"
+    )
+endif()
+
+
 IF ( LONG_TESTS )
   # Test the Ls option
   ADD_TEST(NAME mmg3d_OptLs_cube303d_hminMax_hgrad1.2_hausd0.005
