@@ -45,7 +45,7 @@
  * Compute movement of an internal point whose ball is passed.
  *
  */
-int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG_int *list,MMG_int ilist) {
+int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG_int *list,int ilist) {
   MMG5_pTria     pt,pt0;
   MMG5_pPoint    p0,ppt0;
   MMG5_Bezier    pb;
@@ -248,7 +248,7 @@ int movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG_int *list,MMG_int ilist) {
 }
 
 /* Compute movement of a ref, or ridge point whose ball is passed */
-int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG_int *list,MMG_int ilist) {
+int movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG_int *list,int ilist) {
   MMG5_pTria    pt,pt0;
   MMG5_pPoint   p0,p1,p2,ppt0;
   MMG5_pxPoint  go;

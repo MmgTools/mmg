@@ -52,7 +52,8 @@ int MMGS_dichoto(MMG5_pMesh mesh,MMG5_pSol met,MMG_int k,MMG_int *vx) {
   MMG5_pPoint  pa,pb,ps;
   double       o[3][3],p[3][3];
   float        to,tp,t;
-  MMG_int          i1,i2,ia,ib,ier;
+  MMG_int          ia,ib,ier;
+  int          i1,i2;
   int          it,maxit;
   int8_t       i,j;
 
@@ -904,7 +905,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
  * Check if splitting edge \a i of element \a k is ok.
  *
  */
-int chkspl(MMG5_pMesh mesh,MMG5_pSol met,MMG_int k,MMG_int i) {
+MMG_int chkspl(MMG5_pMesh mesh,MMG5_pSol met,MMG_int k,int i) {
   MMG5_pTria    pt,pt1;
   MMG5_pPoint   ppt;
   MMG5_pxPoint  go;
@@ -966,13 +967,13 @@ int chkspl(MMG5_pMesh mesh,MMG5_pSol met,MMG_int k,MMG_int i) {
 }
 
 /* attempt to collapse small edges */
-static int colelt(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
+static MMG_int colelt(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
   MMG5_pTria    pt;
   MMG5_pPoint   p1,p2;
   MMG5_pPar     par;
   double        ll,ux,uy,uz,hmin;
-  MMG_int           list[MMGS_LMAX+2],k;
-  int           nc,l,isloc,ier,ilist;
+  MMG_int       nc,list[MMGS_LMAX+2],k;
+  int           l,isloc,ier,ilist;
   int8_t        i,i1,i2;
 
   nc = 0;
@@ -1066,12 +1067,12 @@ static int colelt(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
  * Split edges of length bigger than MMGS_LOPTL.
  *
  */
-static int adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
+static MMG_int adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria    pt;
   MMG5_pPoint   p1,p2;
   double   len,lmax;
-  int      ip,ns,ier;
-  MMG_int   k;
+  int      ier;
+  MMG_int   ip,ns,k;
   int8_t   i,i1,i2,imax;
 
   ns = 0;
@@ -1142,12 +1143,12 @@ static int adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
  * Collapse edges of length smaller than MMGS_LOPTS.
  *
  */
-static int adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
+static MMG_int adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria    pt;
   MMG5_pPoint   p1,p2;
   double   len;
-  MMG_int      k,list[MMGS_LMAX+2];
-  int      nc,ier,ilist;
+  MMG_int  nc,k,list[MMGS_LMAX+2];
+  int      ier,ilist;
   int8_t   i,i1,i2;
 
   nc = 0;

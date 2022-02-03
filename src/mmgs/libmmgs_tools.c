@@ -464,7 +464,8 @@ void MMGS_destockOptions(MMG5_pMesh mesh, MMG5_Info *info) {
 int MMGS_Get_numberOfNonBdyEdges(MMG5_pMesh mesh, MMG_int* nb_edges) {
   MMG5_pTria pt,pt1;
   MMG5_pEdge ped;
-  MMG_int        *adja,k,i,j,i1,i2,iel;
+  MMG_int        *adja,k,j,iel;
+  int        i,i1,i2;
 
   *nb_edges = 0;
   if ( mesh->tria ) {

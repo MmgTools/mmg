@@ -48,7 +48,7 @@
  * Move internal point whose volumic is passed.
  *
  */
-int movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG_int *list,MMG_int ilist) {
+int movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG_int *list,int ilist) {
   MMG5_pPoint   p0,p1,ppt0;
   MMG5_pTria    pt,pt0;
   MMG5_Bezier   b;
@@ -644,7 +644,7 @@ int MMGS_moveTowardPoint(MMG5_pMesh mesh,MMG5_pPoint p0,MMG5_pPoint p,
 }
 
 /* compute movement of a ridge point whose ball (consisting of triangles) is passed */
-int movridpt_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG_int *list,MMG_int ilist) {
+int movridpt_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG_int *list,int ilist) {
   MMG5_pTria   pt,pt0;
   MMG5_pxPoint go;
   MMG5_pPoint  p0,p1,p2,ppt0;

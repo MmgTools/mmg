@@ -140,7 +140,7 @@ int MMGS_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTria    pt;
   MMG5_pPoint   p0;
   double        *tmp,v1,v2;
-  int           nc,ns,ip;
+  MMG_int           nc,ns,ip;
   int8_t        i;
   MMG_int       k,ip1,ip2;
 
@@ -392,7 +392,7 @@ static int MMGS_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
   MMG5_Hash   hash;
   double       c[3],v0,v1,s;
   MMG_int          vx[3],k,np;
-  int          ip0,ip1,ns,nt,ier,nb;
+  MMG_int          ip0,ip1,ns,nt,ier,nb;
   int8_t       ia;
   /* reset point flags and h */
   for (k=1; k<=mesh->np; k++)

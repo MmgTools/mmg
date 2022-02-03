@@ -47,7 +47,7 @@
  * triangles are not empty (otherwise we can create a 0 surface triangle).
  *
  */
-int MMGS_split1_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG_int k,MMG_int i,MMG_int *vx) {
+int MMGS_split1_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG_int k,int i,MMG_int *vx) {
   MMG5_pTria      pt,pt0;
   double          n[3],nref[3],vnew,vold;
   int             is;
@@ -104,7 +104,7 @@ int MMGS_split1_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG_int k,MMG_int i,MMG_int *v
  * Split element \a k along edge \a i.
  *
  */
-int MMGS_split1(MMG5_pMesh mesh,MMG5_pSol met,MMG_int k,MMG_int i,MMG_int *vx) {
+int MMGS_split1(MMG5_pMesh mesh,MMG5_pSol met,MMG_int k,int i,MMG_int *vx) {
   MMG5_pTria      pt,pt1;
   MMG5_pPoint     ppt;
   int             iel;

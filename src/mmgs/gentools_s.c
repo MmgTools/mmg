@@ -63,7 +63,8 @@ int delref(MMG5_pMesh mesh) {
  */
 int setref(MMG5_pMesh mesh,MMG_int start,int ref,int putreq) {
   MMG5_pTria pt,pt1;
-  MMG_int        *list,*adja,cur,base,k,iel,jel,ilist;
+  MMG_int        *list,*adja,cur,k,iel,jel;
+  int        base,ilist;
   int8_t     j,voy;
 
   ilist = cur = 0;
@@ -157,7 +158,7 @@ MMG_int MMGS_indPt(MMG5_pMesh mesh, MMG_int kp) {
  * Keep only subdomain of index \a nsd and remove other subdomains.
  *
  */
-void MMGS_keep_only1Subdomain ( MMG5_pMesh mesh,MMG_int nsd ) {
+void MMGS_keep_only1Subdomain ( MMG5_pMesh mesh,int nsd ) {
 
   if ( !nsd ) {
     return;

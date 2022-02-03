@@ -42,7 +42,8 @@ int chkswp(MMG5_pMesh mesh,MMG5_pSol met,MMG_int k,int i,int8_t typchk) {
   MMG5_pPar      par;
   double   np[3][3],nq[3],*nr1,*nr2,nt[3],ps,ps2,*n1,*n2,dd,c1[3],c2[3],hausd;
   double   cosn1,cosn2,calnat,calchg,cal1,cal2,cosnat,coschg,ux,uy,uz,ll,loni,lona;
-  MMG_int     *adja,j,kk,l,ip0,ip1,ip2,iq,isloc;
+  MMG_int     *adja,j,kk,l,ip0,ip1,ip2,iq;
+  int      isloc;
   int8_t   ii,i1,i2,jj;
 
   pt0 = &mesh->tria[0];
@@ -293,7 +294,7 @@ int chkswp(MMG5_pMesh mesh,MMG5_pSol met,MMG_int k,int i,int8_t typchk) {
  * must be checked outside to prevent the creation of empty elts.
  *
  */
-int swapar(MMG5_pMesh mesh,MMG_int k,MMG_int i) {
+int swapar(MMG5_pMesh mesh,MMG_int k,int i) {
   MMG5_pTria    pt,pt1;
   MMG_int     *adja,adj,k11,k21,ip1,ip2,i2save,j2save;
   int8_t   i1,i2,j,jj,j2,v11,v21;
@@ -424,8 +425,8 @@ int litswp(MMG5_pMesh mesh,MMG_int k,int8_t i,double kali) {
  * \warning not used
  *
  */
-int swpedg(MMG5_pMesh mesh,MMG5_pSol met,MMG_int *list,MMG_int ilist,int8_t typchk) {
-  MMG_int      k,ns,iel;
+int swpedg(MMG5_pMesh mesh,MMG5_pSol met,MMG_int *list,int ilist,int8_t typchk) {
+  int      k,ns,iel;
   int8_t   i,i1;
 
   k  = 0;

@@ -256,7 +256,7 @@ int  MMGS_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, MMG_int np,
  * >   END SUBROUTINE\n
  *
  */
-  int MMGS_Set_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol *sol,MMG_int nsols,
+  int MMGS_Set_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol *sol,int nsols,
                                   MMG_int nentities, int *typSol);
 /**
  * \param mesh pointer toward the mesh structure.
@@ -940,7 +940,7 @@ int  MMGS_Get_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int* typEntity, MMG_int* n
  * >   END SUBROUTINE\n
  *
  */
-  int  MMGS_Get_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol* sol,MMG_int *nsols,
+  int  MMGS_Get_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol* sol,int *nsols,
                                     MMG_int* nentities,int* typSol);
 
 /**

@@ -206,11 +206,11 @@ int    MMGS_paramDisp(MMG5_pMesh mesh,int it1,int it2,
 int     MMGS_moveTowardPoint(MMG5_pMesh mesh,MMG5_pPoint p0,MMG5_pPoint p,
                              double llold,double lam0,double lam1,double lam2,
                              double nn1[3],double nn2[3],double to[3]);
-int    movridpt_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG_int *list,MMG_int ilist);
-int    movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG_int *list,MMG_int ilist);
-int    movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG_int *list,MMG_int ilist);
-int    movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG_int *list,MMG_int ilist);
-int    MMGS_surfballRotation(MMG5_pMesh,MMG5_pPoint,MMG_int*,MMG_int,double r[3][3],double*);
+int    movridpt_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG_int *list,int ilist);
+int    movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG_int *list,int ilist);
+int    movridpt_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG_int *list,int ilist);
+int    movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG_int *list,int ilist);
+int    MMGS_surfballRotation(MMG5_pMesh,MMG5_pPoint,MMG_int*,int,double r[3][3],double*);
 int    MMGS_prilen(MMG5_pMesh mesh,MMG5_pSol met,int);
 int    MMGS_set_metricAtPointsOnReqEdges ( MMG5_pMesh,MMG5_pSol,int8_t );
 

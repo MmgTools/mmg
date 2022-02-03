@@ -46,10 +46,11 @@
  * crossing ridge.
  *
  */
-MMG_int boulet(MMG5_pMesh mesh,MMG_int start,MMG_int ip,MMG_int *list) {
+int boulet(MMG5_pMesh mesh,MMG_int start,int ip,MMG_int *list) {
   MMG5_pTria    pt;
   MMG5_pPoint   ppt;
-  MMG_int           *adja,k,ilist;
+  MMG_int           *adja,k;
+  int           ilist;
   int8_t        i,i1,i2;
 
   pt = &mesh->tria[start];
@@ -108,10 +109,11 @@ MMG_int boulet(MMG5_pMesh mesh,MMG_int start,MMG_int ip,MMG_int *list) {
  * crossing ridge. Check whether resulting configuration is manifold.
  *
  */
-MMG_int boulechknm(MMG5_pMesh mesh,MMG_int start,MMG_int ip,MMG_int *list) {
+int boulechknm(MMG5_pMesh mesh,MMG_int start,int ip,MMG_int *list) {
   MMG5_pTria    pt;
   MMG5_pPoint   ppt;
-  MMG_int           *adja,k,ilist,base,iel;
+  MMG_int           *adja,k,iel;
+  int           ilist,base;
   int8_t        i,i1,i2,ia,iq,voy;
 
   base = ++mesh->base;
@@ -257,7 +259,7 @@ MMG_int boulechknm(MMG5_pMesh mesh,MMG_int start,MMG_int ip,MMG_int *list) {
  * point of the ridge. Both lists are returned enumerated in direct order.
  *
  */
-MMG_int bouletrid(MMG5_pMesh mesh,MMG_int start,MMG_int ip,MMG_int *il1,MMG_int *l1,MMG_int *il2,MMG_int *l2,MMG_int *ip0,MMG_int *ip1) {
+int bouletrid(MMG5_pMesh mesh,MMG_int start,MMG_int ip,MMG_int *il1,MMG_int *l1,MMG_int *il2,MMG_int *l2,MMG_int *ip0,MMG_int *ip1) {
   MMG5_pTria   pt;
   MMG5_pPoint  ppt;
   MMG_int          idp,k,kold,*adja,iel,*ilist1,*ilist2,*list1,*list2,aux;

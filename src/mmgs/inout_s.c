@@ -47,7 +47,8 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
   long        posntreq,posnpreq,posnormal,posnc1;
   MMG_int         k,ia,nq,nri,ip,idn,ng,npreq;
   int         i,ref,nref;
-  MMG_int         ncor,bin,iswp,nedreq,ntreq,posnedreq,bdim,binch,bpos;
+  MMG_int         ncor,bin,iswp,nedreq,ntreq,posnedreq,bdim;
+  int         binch,bpos;
   MMG_int         na,*ina,a,b;
   char        *ptr,*data;
   char        chaine[MMG5_FILESTR_LGTH],strskip[MMG5_FILESTR_LGTH];
@@ -824,7 +825,7 @@ int MMGS_saveMesh(MMG5_pMesh mesh, const char* filename) {
   MMG5_pTria   pt;
   MMG5_pxPoint go;
   MMG_int          k,np,nt,nc,ng,nn,nr,nre,ntreq;
-  MMG_int          bpos;
+  int          bpos;
   int          bin,binch;
   // int          outm;
   char         *data,*ptr,chaine[MMG5_FILESTR_LGTH];
@@ -1460,8 +1461,8 @@ int MMGS_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
 int MMGS_saveSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
   FILE*        inm;
   MMG5_pPoint  ppt;
-  int          binch,bin,ier;
-  MMG_int      bpos,k;
+  int          bpos,binch,bin,ier;
+  MMG_int      k;
 
   if ( !met->m ) {
     fprintf(stderr,"\n  ## Warning: %s: no metric data to save.\n",__func__);
@@ -1499,8 +1500,8 @@ int MMGS_saveAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
   FILE*        inm;
   MMG5_pPoint  ppt;
   int          binch,bin,ier,npointSols,ncellSols;
-  int          *type,*entities;
-  MMG_int      k,j,*size,bpos;
+  int          *type,*entities,*size,bpos,j;
+  MMG_int      k;
 
   if ( !(*sol)[0].m )  return -1;
 
