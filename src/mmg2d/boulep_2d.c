@@ -34,7 +34,8 @@ static uint8_t iprev[3] = {2,0,1};
 int MMG2D_boulep(MMG5_pMesh mesh, MMG_int ifirst, int iploc, MMG_int * list) {
   MMG5_pTria  pt;
   MMG5_pPoint ppt;
-  MMG_int    ip,voy,ilist,iel,*adja,i,iadr;
+  MMG_int    ip,iel,*adja,iadr;
+  int        voy,ilist,i;
 
   if ( ifirst < 1 ) return 0;
   pt = &mesh->tria[ifirst];
@@ -113,7 +114,8 @@ int MMG2D_boulen(MMG5_pMesh mesh, MMG_int start,int8_t ip, MMG_int *pleft, MMG_i
   MMG5_pTria        pt;
   MMG5_pPoint       p1,p2;
   double            ux,uy,dd,n1[2],n2[2];
-  MMG_int               *adja,k,kk,refs;
+  MMG_int               *adja,k,kk;
+  int               refs;
   int8_t            notedg;
   int8_t            i,ii,i1,i2;
 
@@ -227,7 +229,8 @@ int MMG2D_boulen(MMG5_pMesh mesh, MMG_int start,int8_t ip, MMG_int *pleft, MMG_i
  *
  */
 int MMG2D_boulet(MMG5_pMesh mesh,MMG_int start,int8_t ip,MMG_int *list) {
-  MMG_int           *adja,k,ilist;
+  MMG_int           *adja,k;
+  int           ilist;
   int8_t        i,i1,i2;
 
   ilist = 0;

@@ -42,7 +42,8 @@ int MMG2D_chkcol(MMG5_pMesh mesh, MMG5_pSol met,MMG_int k,int8_t i,MMG_int *list
   MMG5_pTria     pt0,pt,pt1,pt2;
   MMG5_pPoint    ppt,p2;
   double         lon,len,calold,calnew,caltmp;
-  MMG_int            ip1,ip2,ipb,l,ll,lj,jel,kel,ilist,*adja;
+  MMG_int            ip1,ip2,ipb,l,ll,lj,jel,kel,*adja;
+  int            ilist;
   uint8_t        i1,i2,j,jj,j2,voy,open;
 
   pt0 = &mesh->tria[0];
@@ -267,7 +268,7 @@ int MMG2D_chkcol(MMG5_pMesh mesh, MMG5_pSol met,MMG_int k,int8_t i,MMG_int *list
 }
 
 /* Perform effective collapse of edge i in tria k, i1->i2 */
-int MMG2D_colver(MMG5_pMesh mesh,MMG_int ilist,MMG_int *list) {
+int MMG2D_colver(MMG5_pMesh mesh,int ilist,MMG_int *list) {
   MMG5_pTria   pt,pt1,pt2;
   MMG_int          iel,jel,ip1,ip2,k,kel,*adja;
   uint8_t      i,j,jj,i1,i2,open;

@@ -165,8 +165,8 @@ int MMG2D_findtrianglestate(MMG5_pMesh mesh,MMG_int k,MMG_int ip1,MMG_int ip2,MM
 int MMG2D_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pPoint   ppt;
   int           lon;
-  MMG_int           k,kk;
-  int           iter,maxiter,ns,nus,nu,nud;
+  MMG_int           k,kk,ns,nus,nu,nud;
+  int           iter,maxiter;
   static int8_t mmgWarn0=0,mmgWarn1=0,mmgWarn2=0;
   MMG_int       list[MMG2D_LONMAX];
 
@@ -312,7 +312,8 @@ int MMG2D_markSD(MMG5_pMesh mesh) {
   MMG5_pEdge   ped;
   MMG5_pPoint  ppt;
   MMG_int          k,l,iadr,*adja,ped0,ped1,ipil,ncurc,nref;
-  MMG_int          kinit,nt,nsd,ip1,ip2,ip3,ip4,ned,iel,voy;
+  MMG_int          kinit,nt,nsd,ip1,ip2,ip3,ip4,ned,iel;
+  int          voy;
   int8_t       i,i1,i2;
   MMG_int      *list;
 

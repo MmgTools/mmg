@@ -342,8 +342,8 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, MMG_int typEntity,
-                        MMG_int np, MMG_int typSol);
+  int MMG2D_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity,
+                        MMG_int np, int typSol);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward an allocatable sol structure.
@@ -367,8 +367,8 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_Set_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol *sol,MMG_int nsols,
-                                   MMG_int nentities, MMG_int *typSol);
+  int MMG2D_Set_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol *sol,int nsols,
+                                   MMG_int nentities, int *typSol);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param c0 coordinate of the point along the first dimension.
@@ -524,7 +524,7 @@ extern "C" {
  * > !  END SUBROUTINE\n
  *
  */
-  int  MMG2D_Set_triangles(MMG5_pMesh mesh, int *tria, int *refs);
+  int  MMG2D_Set_triangles(MMG5_pMesh mesh, MMG_int *tria, int *refs);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -626,7 +626,7 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_Set_edge(MMG5_pMesh mesh, MMG_int v0, MMG_int v1, int ref, int pos);
+  int MMG2D_Set_edge(MMG5_pMesh mesh, MMG_int v0, MMG_int v1, int ref, MMG_int pos);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param edges pointer toward the array of edges.
@@ -711,7 +711,7 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_Set_scalarSol(MMG5_pSol met, double s, int pos);
+  int MMG2D_Set_scalarSol(MMG5_pSol met, double s, MMG_int pos);
 /**
  * \param met pointer toward the sol structure.
  * \param s table of the scalar solutions values.
@@ -749,7 +749,7 @@ extern "C" {
  *
  */
   int MMG2D_Set_vectorSol(MMG5_pSol met, double vx,double vy,
-                          int pos);
+                          MMG_int pos);
 /**
  * \param met pointer toward the sol structure.
  * \param sols table of the vectorial solutions
@@ -788,7 +788,7 @@ extern "C" {
  *
  */
   int MMG2D_Set_tensorSol(MMG5_pSol met, double m11, double m12, double m22,
-                          int pos);
+                          MMG_int pos);
 /**
  * \param met pointer toward the sol structure.
  * \param sols table of the tensorial solutions.
@@ -827,7 +827,7 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG2D_Set_ithSol_inSolsAtVertices(MMG5_pSol sol,int i, double* s,int pos);
+  int  MMG2D_Set_ithSol_inSolsAtVertices(MMG5_pSol sol,MMG_int i, double* s,MMG_int pos);
 /**
  * \param sol pointer toward the array of solutions
  * \param i position of the solution field that we want to set.
@@ -849,7 +849,7 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG2D_Set_ithSols_inSolsAtVertices(MMG5_pSol sol,int i, double* s);
+  int  MMG2D_Set_ithSols_inSolsAtVertices(MMG5_pSol sol,MMG_int i, double* s);
 
 /** recover datas */
 /**
@@ -889,8 +889,8 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG2D_Get_solSize(MMG5_pMesh mesh, MMG5_pSol sol, MMG_int* typEntity, MMG_int* np,
-                         MMG_int* typSol);
+  int  MMG2D_Get_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int* typEntity, MMG_int* np,
+                         int* typSol);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward an array of sol structure.
@@ -911,8 +911,8 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG2D_Get_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol* sol,MMG_int *nsols,
-                                    MMG_int* nentities,MMG_int* typSol);
+  int  MMG2D_Get_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol* sol,int *nsols,
+                                    MMG_int* nentities,int* typSol);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param c0 pointer toward the coordinate of the point along the first dimension.
@@ -1279,7 +1279,7 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG2D_Get_ithSol_inSolsAtVertices(MMG5_pSol sol,int i, double* s,int pos);
+  int  MMG2D_Get_ithSol_inSolsAtVertices(MMG5_pSol sol,MMG_int i, double* s,MMG_int pos);
 /**
  * \param sol pointer toward the array of solutions
  * \param i position of the solution field that we want to get.
@@ -1301,7 +1301,7 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG2D_Get_ithSols_inSolsAtVertices(MMG5_pSol sol,int i, double* s);
+  int  MMG2D_Get_ithSols_inSolsAtVertices(MMG5_pSol sol,MMG_int i, double* s);
 
 
 /**

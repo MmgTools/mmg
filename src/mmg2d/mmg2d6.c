@@ -222,7 +222,8 @@ int MMG2D_resetRef(MMG5_pMesh mesh) {
 int MMG2D_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, MMG_int start, int8_t istart) {
   MMG5_pTria       pt;
   double           v1, v2;
-  MMG_int              *adja,k,ip1,ip2,end1,refstart;
+  MMG_int              *adja,k,ip1,ip2,end1;
+  int              refstart;
   int8_t           i,i1,smsgn;
   static int8_t    mmgWarn=0;
 
@@ -314,7 +315,8 @@ int MMG2D_snapval(MMG5_pMesh mesh, MMG5_pSol sol) {
   MMG5_pTria       pt,pt1;
   MMG5_pPoint      p0;
   double           v1,v2,*tmp;
-  MMG_int              k,kk,iel,ns,nc,ip,ip1,ip2,npl,nmn,ilist;
+  MMG_int              k,kk,iel,ns,nc,ip,ip1,ip2,npl,nmn;
+  int              ilist;
   int8_t           i,j,j1,j2;
   MMG_int          list[MMG2D_LONMAX+2];
 
@@ -408,7 +410,8 @@ int MMG2D_snapval(MMG5_pMesh mesh, MMG5_pSol sol) {
  by assumption, i inxt[i] is one edge of the implicit boundary */
 int MMG2D_chkmaniball(MMG5_pMesh mesh, MMG_int start, int8_t istart) {
   MMG5_pTria         pt;
-  MMG_int                *adja,k,refstart;
+  MMG_int                *adja,k;
+  int                refstart;
   int8_t             i,i1;
 
   pt = &mesh->tria[start];
@@ -478,7 +481,8 @@ int MMG2D_chkmaniball(MMG5_pMesh mesh, MMG_int start, int8_t istart) {
 /* Check whether the resulting two subdomains occupying mesh are manifold */
 int MMG2D_chkmanimesh(MMG5_pMesh mesh) {
   MMG5_pTria      pt,pt1;
-  MMG_int             *adja,k,cnt,iel;
+  MMG_int             *adja,k,iel;
+  int             cnt;
   int8_t          i,i1;
   static int8_t   mmgWarn=0;
 
@@ -549,7 +553,8 @@ int MMG2D_chkmanimesh(MMG5_pMesh mesh) {
 int MMG2D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
   MMG5_pTria     pt,pt1,pt2;
   double         volc,voltot,v0,v1,v2;
-  MMG_int            k,kk,l,ll,ncp,ncm,ip0,ip1,ip2,base,cur,ipile,*pile,*adja;
+  MMG_int            k,kk,l,ll,ncp,ncm,ip0,ip1,ip2,cur,ipile,*pile,*adja;
+  int            base;
   int8_t         i,i1,i2;
 
   ncp = 0;
@@ -795,7 +800,8 @@ int MMG2D_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol met){
   MMG5_pPoint  p0,p1;
   MMG5_Hash    hash;
   double       v0,v1,s,c[2];
-  MMG_int          k,ip0,ip1,nb,np,nt,ns,refint,refext,vx[3];
+  MMG_int          k,ip0,ip1,nb,np,nt,ns,vx[3];
+  int          refint,refext;
   int8_t       i,i0,i1,ier;
 
   /* Reset flag field for points */

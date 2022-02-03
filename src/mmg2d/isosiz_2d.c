@@ -74,7 +74,8 @@ int MMG2D_sum_reqEdgeLengthsAtPoint(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,
  */
 int MMG2D_set_metricAtPointsOnReqEdges ( MMG5_pMesh mesh,MMG5_pSol met, int8_t ismet ) {
   MMG5_pTria pt;
-  MMG_int        k,i,iadj;
+  MMG_int        k,iadj;
+  int        i;
 
   /* Reset the tria flag */
   for ( k=1; k<=mesh->nt; k++ ) {
@@ -133,7 +134,8 @@ int MMG2D_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pPar   ppa;
   double      t1[2],t2[2],b1[2],b2[2],gpp1[2],gpp2[2],pv,M1,M2;
   double      ps1,ps2,ux,uy,ll,li,lm,hmax,hausd,hmin,lhmax,lhausd;
-  MMG_int         k,l,ip,ip1,ip2;
+  MMG_int         k,ip,ip1,ip2;
+  int         l;
   int8_t      ismet;
   uint8_t     i,i1,i2;
 

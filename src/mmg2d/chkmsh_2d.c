@@ -35,8 +35,9 @@ int MMG5_mmg2dChkmsh(MMG5_pMesh mesh, int severe,int base) {
   MMG5_pPoint    ppt;
   MMG5_pTria     pt1,pt2;
   MMG5_pEdge     ped;
-  MMG_int           *adja,*adja1,adj,adj1,k,i,iadr;
-  MMG_int            kk,l,nk,j,ip,lon,len;
+  MMG_int           *adja,*adja1,adj,adj1,k,iadr;
+  int            i,j;
+  MMG_int            kk,l,nk,ip,lon,len;
   MMG_int           *list;
   uint8_t        voy,voy1;
   static int8_t  mmgErr0=0,mmgErr1=0,mmgErr2=0,mmgErr3=0,mmgErr4=0,mmgErr5=0;

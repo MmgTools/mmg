@@ -49,7 +49,7 @@
  * isotropic and anisotropic case
  *
  */
-int MMG2D_movedgpt(MMG5_pMesh mesh,MMG5_pSol met,MMG_int ilist,MMG_int *list, int8_t improve) {
+int MMG2D_movedgpt(MMG5_pMesh mesh,MMG5_pSol met,int ilist,MMG_int *list, int8_t improve) {
   MMG5_pTria         pt,pt0;
   MMG5_pPoint        p0,p1,p2,ppt;
   double             step,ll1,ll2,o[2],no[2],calold,calnew;
@@ -209,7 +209,7 @@ int MMG2D_movedgpt(MMG5_pMesh mesh,MMG5_pSol met,MMG_int ilist,MMG_int *list, in
  * Relocate internal vertex whose ball is passed.
  *
  */
-int MMG2D_movintpt(MMG5_pMesh mesh,MMG5_pSol met,MMG_int ilist,MMG_int *list,int8_t improve) {
+int MMG2D_movintpt(MMG5_pMesh mesh,MMG5_pSol met,int ilist,MMG_int *list,int8_t improve) {
   MMG5_pTria        pt,pt0;
   MMG5_pPoint       p0,p1,p2,ppt0;
   double            calold,calnew,vol,volbal,b[2];

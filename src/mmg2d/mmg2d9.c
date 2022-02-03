@@ -115,7 +115,7 @@ inline double MMG2D_caltri_iso_3pt(double *a,double *b,double *c) {
  * valid mesh.
  *
  */
-int MMG2D_chkmovmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t,int *triIdx) {
+MMG_int MMG2D_chkmovmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t,int *triIdx) {
   MMG5_pTria   pt;
   MMG5_pPoint  ppt;
   double       *v,c[3][2],tau;
@@ -163,7 +163,7 @@ int MMG2D_chkmovmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t,int *triIdx) {
 short MMG2D_dikomv(MMG5_pMesh mesh,MMG5_pSol disp,short *lastt) {
   int     it,maxit;
   short   t,tmin,tmax;
-  int8_t  ier;
+  MMG_int  ier;
 
   maxit = 200;
   it    = 0;
@@ -280,7 +280,7 @@ int MMG2D_dispmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t,int itdeg) {
  * Only affects triangles with cc itdeg
  *
  */
-int MMG2D_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,MMG_int itdeg,int *warn) {
+MMG_int MMG2D_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,MMG_int itdeg,int *warn) {
   MMG5_pTria      pt;
   MMG5_pPoint     p1,p2;
   double          hma2,lmax,len;
@@ -379,7 +379,8 @@ static int MMG2D_coleltlag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
   MMG5_pTria     pt;
   MMG5_pPoint    p1,p2;
   double         hmi2,len;
-  MMG_int            nc,k,ilist;
+  MMG_int            nc,k;
+  int            ilist;
   MMG_int        list[MMG2D_LONMAX+2];
   int8_t         i,i1,i2,open;
 
@@ -438,11 +439,11 @@ static int MMG2D_coleltlag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
  * Internal edge flipping in the Lagrangian mode; only affects trias with cc itdeg
  *
  */
-int MMG2D_swpmshlag(MMG5_pMesh mesh,MMG5_pSol met,double crit,int itdeg) {
+MMG_int MMG2D_swpmshlag(MMG5_pMesh mesh,MMG5_pSol met,double crit,int itdeg) {
   MMG5_pTria   pt;
-  int          it,maxit,ns,nns;
+  int          it,maxit;
   int8_t       i;
-  MMG_int      k;
+  MMG_int      k,ns,nns;
 
   maxit = 2;
   it    = 0;
@@ -507,11 +508,11 @@ int MMG2D_saveDisp(MMG5_pMesh mesh,MMG5_pSol disp) {
  * Analyze trias with cc = itdeg and move internal points so as to make mesh more uniform.
  *
  */
-int MMG2D_movtrilag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
+MMG_int MMG2D_movtrilag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
   MMG5_pTria        pt;
   MMG5_pPoint       p0;
-  int               it,base,maxit,nm,nnm,ilist;
-  MMG_int           k,list[MMG2D_LONMAX+2];
+  int               it,base,maxit,ilist;
+  MMG_int           k,list[MMG2D_LONMAX+2],nm,nnm;
   int8_t            i,ier;
 
   nnm   = 0;
@@ -574,7 +575,7 @@ int MMG2D_movtrilag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
 int MMG2D_mmg2d9(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,MMG_int **invalidTrias) {
   double             avlen,tau,hmintmp,hmaxtmp;
   int                itmn,itdc,maxitmn,maxitdc,iit,warn;
-  int                nspl,nnspl,nnnspl,nc,nnc,nnnc,ns,nns,nnns,nm,nnm,nnnm;
+  MMG_int                nspl,nnspl,nnnspl,nc,nnc,nnnc,ns,nns,nnns,nm,nnm,nnnm;
   short              t,lastt;
   int8_t             ier;
   MMG_int            k,ninvalidTrias;

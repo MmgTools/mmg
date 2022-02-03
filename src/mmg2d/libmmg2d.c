@@ -56,7 +56,8 @@
 void MMG2D_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
   MMG5_pTria  ptt;
   MMG5_pPoint ppt;
-  MMG_int         k,i,iadr;
+  MMG_int         k,iadr;
+  int         i;
   double      isqhmin, isqhmax;
   int8_t      sethmin, sethmax;
 
@@ -379,7 +380,7 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol met)
  */
 static inline
 int MMG2D_restart(MMG5_pMesh mesh){
-  int k;
+  MMG_int k;
 
   /** If needed, reallocate the missing structures */
   if ( !mesh->tria ) {

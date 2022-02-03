@@ -37,7 +37,8 @@
    typchk = 1 -> adaptation based on edge lengths
    typchk = 2 -> adaptation based on lengths calculated in metric met */
 int MMG2D_anatri(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
-  int      it,maxit,ns,nc,nsw,nns,nnc,nnsw;
+  int      it,maxit;
+  MMG_int  ns,nc,nsw,nns,nnc,nnsw;
 
   nns = nnc = nnsw = 0;
   it = 0;
@@ -107,13 +108,13 @@ int MMG2D_anatri(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
 }
 
 /* Travel triangles and split long edges according to patterns */
-int MMG2D_anaelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
+MMG_int MMG2D_anaelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
   MMG5_pTria      pt;
   MMG5_pPoint     ppt,p1,p2;
   MMG5_Hash       hash;
   double          len,s,o[2],no[2];
-  int             ns,nc,npinit,ni;
-  MMG_int         k,nt,ip1,ip2,ip,it,vx[3];
+  int             npinit,ni;
+  MMG_int         ns,nc,k,nt,ip1,ip2,ip,it,vx[3];
   int8_t          i,ic,i1,i2,ier;
   static int8_t   mmgWarn0=0;
 
@@ -434,12 +435,12 @@ int MMG2D_dichoto(MMG5_pMesh mesh,MMG5_pSol met,MMG_int k,MMG_int *vx) {
 }
 
 /* Travel triangles and collapse short edges */
-int MMG2D_colelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
+MMG_int MMG2D_colelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
   MMG5_pTria   pt;
   MMG5_pPoint  p1,p2;
   double       ux,uy,ll,hmin2;
   MMG_int          ilist,k;
-  int          nc;
+  MMG_int          nc;
   uint8_t      i,i1,i2,open;
   MMG_int      list[MMG2D_LONMAX+2];
 
@@ -510,9 +511,10 @@ int MMG2D_colelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
 }
 
 /* Travel triangles and swap edges to improve quality */
-int MMG2D_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
+MMG_int MMG2D_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
   MMG5_pTria pt;
-  int        ns,nns,it,maxit;
+  int        it,maxit;
+  MMG_int    ns,nns;
   MMG_int    k;
   uint8_t    i;
 
@@ -547,7 +549,8 @@ int MMG2D_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
 /* Mesh adaptation routine for the final stage of the algorithm: intertwine splitting
  based on patterns, collapses, swaps and vertex relocations.*/
 int MMG2D_adptri(MMG5_pMesh mesh,MMG5_pSol met) {
-  int                  maxit,it,nns,ns,nnc,nc,nnsw,nsw,nnm,nm;
+  int                  maxit,it;
+  MMG_int              nns,ns,nnc,nc,nnsw,nsw,nnm,nm;
 
   nns = nnc = nnsw = nnm = it = 0;
   maxit = 5;
@@ -636,11 +639,11 @@ int MMG2D_adptri(MMG5_pMesh mesh,MMG5_pSol met) {
  * edges are only splitted on a one-by-one basis
  *
  */
-int MMG2D_adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
+MMG_int MMG2D_adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria         pt;
   double             lmax,len;
-  MMG_int                k,nt;
-  int                ns,ip,ier;
+  MMG_int            ip,ns,k,nt;
+  int                ier;
   int8_t             i,i1,i2,imax;
 
   ns = 0;
@@ -752,11 +755,11 @@ int MMG2D_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
 }
 
 /* Analyze points to relocate them according to a quality criterion */
-int MMG2D_movtri(MMG5_pMesh mesh,MMG5_pSol met,int maxit,int8_t improve) {
+MMG_int MMG2D_movtri(MMG5_pMesh mesh,MMG5_pSol met,int maxit,int8_t improve) {
   MMG5_pTria           pt;
   MMG5_pPoint          p0;
-  MMG_int              k,ilist;
-  int                  base,nnm,nm,ns,it;
+  MMG_int              nnm,nm,ns,k,ilist;
+  int                  base,it;
   int8_t               i,ier;
   MMG_int              list[MMG2D_LONMAX+2];
 

@@ -35,9 +35,9 @@
 
 
 /* Create a new vertex in the mesh, and return its number */
-int MMG2D_newPt(MMG5_pMesh mesh,double c[2],int16_t tag) {
+MMG_int MMG2D_newPt(MMG5_pMesh mesh,double c[2],int16_t tag) {
   MMG5_pPoint  ppt;
-  int     curpt;
+  MMG_int     curpt;
 
   if ( !mesh->npnil )  return 0;
 
@@ -54,7 +54,7 @@ int MMG2D_newPt(MMG5_pMesh mesh,double c[2],int16_t tag) {
 }
 
 /* Delete a point in the mesh and update the garbage collector accordingly */
-void MMG2D_delPt(MMG5_pMesh mesh,int ip) {
+void MMG2D_delPt(MMG5_pMesh mesh,MMG_int ip) {
   MMG5_pPoint   ppt;
 
   ppt = &mesh->point[ip];
@@ -125,7 +125,7 @@ int MMG2D_delElt(MMG5_pMesh mesh,MMG_int iel) {
 
 
 /* check if n elets available */
-int MMG5_getnElt(MMG5_pMesh mesh,int n) {
+int MMG5_getnElt(MMG5_pMesh mesh,MMG_int n) {
   MMG_int     curiel;
 
   if ( !mesh->nenil )  return 0;

@@ -36,7 +36,8 @@ int MMG2D_bdryenforcement(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pEdge      ped;
   MMG5_pPoint     ppt;
   MMG_int         list[MMG2D_LONMAX],list2[3];
-  MMG_int             k,l,kk,nex,kdep,lon,iel,iare,ied;
+  MMG_int             k,l,kk,nex,kdep,lon,iel;
+  int             iare,ied;
   MMG_int             ia,ib,ilon,rnd,idep,*adja,ir,adj;
   int8_t          i,i1,i2,j;
 //  int       iadr2,*adja2,ndel,iadr,ped0,ped1;

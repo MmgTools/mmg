@@ -506,7 +506,8 @@ int MMG2D_regnor(MMG5_pMesh mesh) {
   MMG5_pTria            pt;
   MMG5_pPoint           ppt,p1,p2;
   double                *tmp,dd,ps,lm1,lm2,nx,ny,ux,uy,nxt,nyt,res,res0,n[2];
-  MMG_int                   k,iel,ip1,ip2,nn,it,maxit;
+  MMG_int                   k,iel,ip1,ip2,nn;
+  int                   it,maxit;
   int8_t                i,ier;
 
   it = 0;

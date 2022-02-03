@@ -2219,7 +2219,7 @@ int MMG5_readFloatSol3D(MMG5_pSol sol,FILE *inm,int bin,int iswp,int pos) {
  * Read the solution value for vertex of index pos in double precision.
  *
  */
-int MMG5_readDoubleSol3D(MMG5_pSol sol,FILE *inm,int bin,int iswp,int pos) {
+int MMG5_readDoubleSol3D(MMG5_pSol sol,FILE *inm,int bin,int iswp,MMG_int pos) {
   double      dbuf[6],tmpd;
   int         i;
 
