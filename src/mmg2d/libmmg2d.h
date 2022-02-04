@@ -1010,7 +1010,7 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_Get_triangle(MMG5_pMesh mesh, MMG_int* v0, MMG_int* v1, MMG_int* v2, MMG_int* ref
+  int MMG2D_Get_triangle(MMG5_pMesh mesh, MMG_int* v0, MMG_int* v1, MMG_int* v2, int* ref
                          ,int* isRequired);
 /**
  * \param mesh pointer toward the mesh structure.

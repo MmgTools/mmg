@@ -50,7 +50,8 @@ extern MMG5_Info  info;
  **/
 int MMG5_boulep(MMG5_pMesh mesh,MMG_int start,MMG_int ip,MMG_int *adja, MMG_int *list) {
   MMG5_pTria    pt;
-  int           *adj,k,ilist;
+  int           ilist;
+  MMG_int       *adj,k;
   int8_t        i,i1,i2;
 
   pt = &mesh->tria[start];
