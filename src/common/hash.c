@@ -46,6 +46,12 @@
  *
  * \remark the ph->s field computation is useless in mmgs.
  *
+ *
+ * \remark: as all triangles are boundaries, we do not need to mark their adges
+ * as MG_BDY so the MG_BDY tag may be used inside non-parallel triangles to tag
+ * edges at intersection of MG_PARBDYBDY or MG_PARBDY triangles and triangles
+ * that are not parallel.
+ *
  */
 int MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, MMG5_Hash *hash, int chkISO) {
   MMG5_pTria     pt,pt1,pt2;
