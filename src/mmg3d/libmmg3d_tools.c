@@ -1422,7 +1422,7 @@ int MMG3D_doSol_ani(MMG5_pMesh mesh,MMG5_pSol met) {
       continue;
     }
 
-    dd = (double)mark[k]*0.5;
+    dd = (double)mark[k]/3.;
 
     for ( j=0; j<6; ++j ) {
       met->m[iadr+j] = dd*tensordot[j];
