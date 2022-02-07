@@ -1370,7 +1370,8 @@ int MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
  * \return -1 if no gradation is needed, else index of graded point.
  *
  * Enforces gradation of metric in one extremity of edge \a ia in tetra \a pt
- * with respect to the other.
+ * with respect to the other. See: \cite{borouchaki1998mesh}. The Hv-correction
+ * is used (gradation with respect to H-variation measure).
  *
  */
 static inline
