@@ -488,7 +488,7 @@ int MMG5_solveDefmetregSys( MMG5_pMesh mesh, double r[3][3], double c[3],
      desired metric, except it is expressed in the rotated bc, that is intm = R
      * metric in bc * ^t R, so metric in bc = ^tR*intm*R */
 
-#warning to factorize
+//#warning to factorize
   /* b0, b1 and b2 are the lines of matrix intm*R  */
   // intm = intm[0]  intm[1]    0
   //        intm[1]  intm[2]    0
@@ -681,7 +681,7 @@ int MMG5_solveDefmetrefSys( MMG5_pMesh mesh, MMG5_pPoint p0, int ipref[2],
   /* At this point, intm (with 0 replaced by isqhmax in the z direction) is the
      desired metric, except it is expressed in the rotated bc, that is intm = R
      * metric in bc * ^t R, so metric in bc = ^tR*intm*R */
-#warning to factorize
+//#warning to factorize
   // intm = intm[0]  intm[1]    0
   //        intm[1]  intm[2]    0
   //           0       0     isqhmax
