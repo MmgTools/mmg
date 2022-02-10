@@ -47,10 +47,12 @@
  * \remark the ph->s field computation is useless in mmgs.
  *
  *
- * \remark: as all triangles are boundaries, we do not need to mark their adges
- * as MG_BDY so the MG_BDY tag may be used inside non-parallel triangles to tag
- * edges at intersection of MG_PARBDYBDY or MG_PARBDY triangles and triangles
- * that are not parallel.
+ * \remark: as all triangles are mesh boundaries, we do not need to mark their
+ * adges as MG_BDY so the MG_BDY tag may be used inside geometrical triangles
+ * (external non-parallel, or internal parallel) to tag edges on the
+ * intersection with purely parallel (non-geometrical) triangles.
+ * The MG_PARBDYBDY tag is also added, as it does not have a supporting triangle
+ * to inherit this tag from.
  *
  */
 int MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, MMG5_Hash *hash, int chkISO) {
@@ -194,9 +196,9 @@ int MMG5_mmgHashTria(MMG5_pMesh mesh, int *adjt, MMG5_Hash *hash, int chkISO) {
    * non-manifold case the MG_NOM tag suffices).
    *
    * Rationale:
-   *   - put MG_BDY tags on edges that are contact edges between a true
-   *     boundary (!MG_PARBDY || (MG_PARBDY && MG_PARBDYBDY) and a parallel one
-   *     (MG_PARBDY && !MG_PARBDYBDY);
+   *   - put MG_BDY tags on edges that are contact edges between a "true"
+   *     geometrical boundary (!MG_PARBDY || (MG_PARBDY && MG_PARBDYBDY) and a
+   *     purele parallel (non-geometrical) one (MG_PARBDY && !MG_PARBDYBDY);
    *   - add also a MG_PARBDYBDY tag on those edges (as it cannot be inherited
    *     from any triangle there) and their extremities.
    */

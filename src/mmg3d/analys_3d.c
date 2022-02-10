@@ -93,10 +93,12 @@ void MMG3D_set_reqBoundaries(MMG5_pMesh mesh) {
  * topology: set tria adjacency, detect Moebius, flip faces, count connected
  * comp.
  *
- * \remark: as all triangles are boundaries, we do not need to mark their adges
- * as MG_BDY so the MG_BDY tag may be used inside non-parallel triangles to tag
- * edges at intersection of MG_PARBDYBDY or MG_PARBDY triangles and triangles
- * that are not parallel.
+ * \remark: as all triangles are mesh boundaries, we do not need to mark their
+ * adges as MG_BDY so the MG_BDY tag may be used inside geometrical triangles
+ * (external non-parallel, or internal parallel) to tag edges on the
+ * intersection with purely parallel (non-geometrical) triangles.
+ * The MG_PARBDYBDY tag is also added, as it does not have a supporting triangle
+ * to inherit this tag from.
  *
  * \remark REQ, NOSURF, etc... tags are added only inside xtetra.
  *
