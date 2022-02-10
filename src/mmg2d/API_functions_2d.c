@@ -692,7 +692,7 @@ int MMG2D_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, int* ref,
 }
 
 int MMG2D_GetByIdx_vertex(MMG5_pMesh mesh, double* c0, double* c1, int* ref,
-                          int* isCorner, int* isRequired, int idx) {
+                          int* isCorner, int* isRequired, MMG_int idx) {
 
   if ( idx < 1 || idx > mesh->np ) {
     fprintf(stderr,"\n  ## Error: %s: unable to get point at position %d.\n",
@@ -786,7 +786,7 @@ int  MMG2D_Get_vertices(MMG5_pMesh mesh, double* vertices, int* refs,
   return 1;
 }
 
-int MMG2D_Set_triangle(MMG5_pMesh mesh, MMG_int v0, MMG_int v1, MMG_int v2, int ref, int pos) {
+int MMG2D_Set_triangle(MMG5_pMesh mesh, MMG_int v0, MMG_int v1, MMG_int v2, int ref, MMG_int pos) {
   MMG5_pPoint ppt;
   MMG5_pTria  pt;
   double      vol;

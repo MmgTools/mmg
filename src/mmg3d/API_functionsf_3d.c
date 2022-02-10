@@ -141,7 +141,7 @@ FORTRAN_NAME(MMG3D_SET_OUTPUTSOLNAME,mmg3d_set_outputsolname,
  */
 FORTRAN_NAME(MMG3D_SET_SOLSIZE,mmg3d_set_solsize,
              (MMG5_pMesh *mesh, MMG5_pSol *sol, int* typEntity,
-              int* np, int* typSol, int* retval),
+              MMG_int* np, int* typSol, int* retval),
              (mesh, sol, typEntity, np, typSol, retval)) {
   *retval = MMG3D_Set_solSize(*mesh,*sol,*typEntity,*np,*typSol);
   return;
@@ -152,7 +152,7 @@ FORTRAN_NAME(MMG3D_SET_SOLSIZE,mmg3d_set_solsize,
  */
 FORTRAN_NAME(MMG3D_SET_SOLSATVERTICESSIZE,mmg3d_set_solsatverticessize,
              (MMG5_pMesh *mesh, MMG5_pSol *sol,int* nsols,
-              int* nentities, int* typSol, int* retval),
+              MMG_int* nentities, int* typSol, int* retval),
              (mesh, sol, nsols, nentities, typSol, retval)) {
   *retval = MMG3D_Set_solsAtVerticesSize(*mesh,sol,*nsols,*nentities,typSol);
   return;
@@ -162,8 +162,8 @@ FORTRAN_NAME(MMG3D_SET_SOLSATVERTICESSIZE,mmg3d_set_solsatverticessize,
  * See \ref MMG3D_Set_meshSize function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_SET_MESHSIZE,mmg3d_set_meshsize,
-             (MMG5_pMesh *mesh, int *np, int *ne, int *nprism,
-              int *nt, int *nquad, int *na, int *retval),
+             (MMG5_pMesh *mesh, MMG_int *np, MMG_int *ne, MMG_int *nprism,
+              MMG_int *nt, MMG_int *nquad, MMG_int *na, int *retval),
              (mesh,np,ne,nprism,nt,nquad,na,retval)) {
   *retval = MMG3D_Set_meshSize(*mesh,*np,*ne,*nprism,*nt,*nquad,*na);
   return;
@@ -173,7 +173,7 @@ FORTRAN_NAME(MMG3D_SET_MESHSIZE,mmg3d_set_meshsize,
  * See \ref MMG3D_Get_solSize function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_GET_SOLSIZE,mmg3d_get_solsize,
-             (MMG5_pMesh *mesh, MMG5_pSol *sol, int* typEntity, int* np, int* typSol, int* retval),
+             (MMG5_pMesh *mesh, MMG5_pSol *sol, int* typEntity, MMG_int* np, int* typSol, int* retval),
              (mesh,sol,typEntity,np,typSol,retval)) {
 
   *retval = MMG3D_Get_solSize(*mesh,*sol,typEntity,np,typSol);
@@ -185,7 +185,7 @@ FORTRAN_NAME(MMG3D_GET_SOLSIZE,mmg3d_get_solsize,
  */
 FORTRAN_NAME(MMG3D_GET_SOLSATVERTICESSIZE,mmg3d_get_solsatverticessize,
              (MMG5_pMesh *mesh, MMG5_pSol *sol, int *nsols,
-              int* nentities, int* typSol, int* retval),
+              MMG_int* nentities, int* typSol, int* retval),
              (mesh,sol,nsols,nentities,typSol,retval)) {
 
   *retval = MMG3D_Get_solsAtVerticesSize(*mesh,sol,nsols,nentities,typSol);
@@ -196,8 +196,8 @@ FORTRAN_NAME(MMG3D_GET_SOLSATVERTICESSIZE,mmg3d_get_solsatverticessize,
  * See \ref MMG3D_Get_meshSize function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_GET_MESHSIZE,mmg3d_get_meshsize,
-             (MMG5_pMesh *mesh, int* np, int* ne,int *nprism,
-              int* nt,int *nquad, int* na, int* retval),
+             (MMG5_pMesh *mesh, MMG_int* np, MMG_int* ne,MMG_int *nprism,
+              MMG_int* nt,MMG_int *nquad, MMG_int* na, int* retval),
              (mesh,np,ne,nprism,nt,nquad,na,retval)) {
 
   *retval = MMG3D_Get_meshSize(*mesh,np,ne,nprism,nt,nquad,na);
@@ -209,7 +209,7 @@ FORTRAN_NAME(MMG3D_GET_MESHSIZE,mmg3d_get_meshsize,
  */
 FORTRAN_NAME(MMG3D_SET_VERTEX,mmg3d_set_vertex,
              (MMG5_pMesh *mesh, double* c0, double* c1, double* c2, int* ref,
-              int* pos, int* retval),
+              MMG_int* pos, int* retval),
              (mesh,c0,c1,c2,ref,pos,retval)) {
 
   *retval = MMG3D_Set_vertex(*mesh,*c0,*c1,*c2,*ref,*pos);
@@ -230,7 +230,7 @@ FORTRAN_NAME(MMG3D_GET_VERTEX,mmg3d_get_vertex,
  */
 FORTRAN_NAME(MMG3D_GETBYIDX_VERTEX,mmg3d_getbyidx_vertex,
              (MMG5_pMesh *mesh, double* c0, double* c1, double* c2, int* ref,
-              int* isCorner, int* isRequired, int* idx,int* retval),
+              int* isCorner, int* isRequired, MMG_int* idx,int* retval),
              (mesh,c0,c1,c2,ref,isCorner,isRequired,idx, retval)) {
   *retval = MMG3D_GetByIdx_vertex(*mesh,c0,c1,c2,ref,isCorner,isRequired,*idx);
   return;
@@ -263,8 +263,8 @@ FORTRAN_NAME(MMG3D_GET_VERTICES,mmg3d_get_vertices,
  * See \ref MMG3D_Set_tetrahedron function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_SET_TETRAHEDRON,mmg3d_set_tetrahedron,
-             (MMG5_pMesh *mesh, int *v0, int *v1, int *v2, int *v3, int *ref,
-              int *pos, int* retval),
+             (MMG5_pMesh *mesh, MMG_int *v0, MMG_int *v1, MMG_int *v2, MMG_int *v3, int *ref,
+              MMG_int *pos, int* retval),
              (mesh,v0,v1,v2,v3,ref,pos,retval)){
   *retval = MMG3D_Set_tetrahedron(*mesh,*v0,*v1,*v2,*v3,*ref,*pos);
   return;
@@ -274,7 +274,7 @@ FORTRAN_NAME(MMG3D_SET_TETRAHEDRON,mmg3d_set_tetrahedron,
  * See \ref MMG3D_Set_tetrahedra function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_SET_TETRAHEDRA,mmg3d_set_tetrahedra,
-             (MMG5_pMesh *mesh, int *tetra, int *refs, int* retval),
+             (MMG5_pMesh *mesh, MMG_int *tetra, int *refs, int* retval),
              (mesh,tetra,refs,retval)){
   *retval = MMG3D_Set_tetrahedra(*mesh,tetra,refs);
   return;
@@ -284,7 +284,7 @@ FORTRAN_NAME(MMG3D_SET_TETRAHEDRA,mmg3d_set_tetrahedra,
  * See \ref MMG3D_Get_tetrahedron function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_GET_TETRAHEDRON,mmg3d_get_tetrahedron,
-             (MMG5_pMesh *mesh, int* v0, int* v1, int* v2, int *v3,
+             (MMG5_pMesh *mesh, MMG_int* v0, MMG_int* v1, MMG_int* v2, MMG_int *v3,
               int* ref, int* isRequired, int* retval),
              (mesh,v0,v1,v2,v3,ref,isRequired,retval)) {
   *retval = MMG3D_Get_tetrahedron(*mesh,v0,v1,v2,v3,ref,isRequired);
@@ -294,7 +294,7 @@ FORTRAN_NAME(MMG3D_GET_TETRAHEDRON,mmg3d_get_tetrahedron,
  * See \ref MMG3D_Get_tetrahedra function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_GET_TETRAHEDRA,mmg3d_get_tetrahedra,
-             (MMG5_pMesh *mesh, int* tetra, int* refs, int* areRequired,
+             (MMG5_pMesh *mesh, MMG_int* tetra, int* refs, int* areRequired,
               int* retval),
              (mesh,tetra,refs,areRequired,retval)) {
   *retval = MMG3D_Get_tetrahedra(*mesh,tetra,refs,areRequired);
@@ -305,8 +305,8 @@ FORTRAN_NAME(MMG3D_GET_TETRAHEDRA,mmg3d_get_tetrahedra,
  * See \ref MMG3D_Set_prism function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_SET_PRISM,mmg3d_set_prism,
-             (MMG5_pMesh *mesh, int *v0, int *v1, int *v2, int *v3,
-              int *v4, int *v5,int *ref,int *pos, int* retval),
+             (MMG5_pMesh *mesh, MMG_int *v0, MMG_int *v1, MMG_int *v2, MMG_int *v3,
+              MMG_int *v4, MMG_int *v5,int *ref,MMG_int *pos, int* retval),
              (mesh,v0,v1,v2,v3,v4,v5,ref,pos,retval)){
   *retval = MMG3D_Set_prism(*mesh,*v0,*v1,*v2,*v3,*v4,*v5,*ref,*pos);
   return;
@@ -316,7 +316,7 @@ FORTRAN_NAME(MMG3D_SET_PRISM,mmg3d_set_prism,
  * See \ref MMG3D_Set_prisms function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_SET_PRISMS,mmg3d_set_prisms,
-             (MMG5_pMesh *mesh, int *prisms, int *refs, int* retval),
+             (MMG5_pMesh *mesh, MMG_int *prisms, int *refs, int* retval),
              (mesh,prisms,refs,retval)){
   *retval = MMG3D_Set_prisms(*mesh,prisms,refs);
   return;
@@ -326,8 +326,8 @@ FORTRAN_NAME(MMG3D_SET_PRISMS,mmg3d_set_prisms,
  * See \ref MMG3D_Get_prism function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_GET_PRISM,mmg3d_get_prism,
-             (MMG5_pMesh *mesh, int* v0, int* v1, int* v2, int *v3,
-              int *v4, int* v5,int* ref, int* isRequired, int* retval),
+             (MMG5_pMesh *mesh, MMG_int* v0, MMG_int* v1, MMG_int* v2, MMG_int *v3,
+              MMG_int *v4, MMG_int* v5,int* ref, int* isRequired, int* retval),
              (mesh,v0,v1,v2,v3,v4,v5,ref,isRequired,retval)) {
   *retval = MMG3D_Get_prism(*mesh,v0,v1,v2,v3,v4,v5,ref,isRequired);
   return;
@@ -336,7 +336,7 @@ FORTRAN_NAME(MMG3D_GET_PRISM,mmg3d_get_prism,
  * See \ref MMG3D_Get_prisms function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_GET_PRISMS,mmg3d_get_prisms,
-             (MMG5_pMesh *mesh, int* prisms, int* refs, int* areRequired,
+             (MMG5_pMesh *mesh, MMG_int* prisms, int* refs, int* areRequired,
               int* retval),
              (mesh,prisms,refs,areRequired,retval)) {
   *retval = MMG3D_Get_prisms(*mesh,prisms,refs,areRequired);
@@ -347,7 +347,7 @@ FORTRAN_NAME(MMG3D_GET_PRISMS,mmg3d_get_prisms,
  * See \ref MMG3D_Set_triangle function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_SET_TRIANGLE,mmg3d_set_triangle,
-             (MMG5_pMesh *mesh, int* v0, int* v1, int* v2, int* ref,int* pos,
+             (MMG5_pMesh *mesh, MMG_int* v0, MMG_int* v1, MMG_int* v2, int* ref,MMG_int* pos,
               int* retval),
              (mesh,v0,v1,v2,ref,pos,retval)) {
   *retval = MMG3D_Set_triangle(*mesh, *v0, *v1, *v2, *ref, *pos);
@@ -358,7 +358,7 @@ FORTRAN_NAME(MMG3D_SET_TRIANGLE,mmg3d_set_triangle,
  * See \ref MMG3D_Get_triangle function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_GET_TRIANGLE,mmg3d_get_triangle,
-             (MMG5_pMesh *mesh, int* v0, int* v1, int* v2, int* ref
+             (MMG5_pMesh *mesh, MMG_int* v0, MMG_int* v1, MMG_int* v2, int* ref
               ,int* isRequired, int* retval),
              (mesh,v0,v1,v2,ref,isRequired,retval)) {
   *retval = MMG3D_Get_triangle(*mesh,v0,v1,v2,ref,isRequired);
@@ -368,7 +368,7 @@ FORTRAN_NAME(MMG3D_GET_TRIANGLE,mmg3d_get_triangle,
  * See \ref MMG3D_Set_triangles function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_SET_TRIANGLES,mmg3d_set_triangles,
-             (MMG5_pMesh *mesh, int* tria, int* refs,
+             (MMG5_pMesh *mesh, MMG_int* tria, int* refs,
               int* retval),
              (mesh,tria,refs,retval)) {
   *retval = MMG3D_Set_triangles(*mesh, tria, refs);
@@ -379,7 +379,7 @@ FORTRAN_NAME(MMG3D_SET_TRIANGLES,mmg3d_set_triangles,
  * See \ref MMG3D_Get_triangles function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_GET_TRIANGLES,mmg3d_get_triangles,
-             (MMG5_pMesh *mesh, int* tria, int* refs,int* areRequired,
+             (MMG5_pMesh *mesh, MMG_int* tria, int* refs,int* areRequired,
               int* retval),
              (mesh,tria,refs,areRequired,retval)) {
   *retval = MMG3D_Get_triangles(*mesh,tria,refs,areRequired);
@@ -389,8 +389,8 @@ FORTRAN_NAME(MMG3D_GET_TRIANGLES,mmg3d_get_triangles,
  * See \ref MMG3D_Set_quadrilateral function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_SET_QUADRILATERAL,mmg3d_set_quadrilateral,
-             (MMG5_pMesh *mesh, int* v0, int* v1, int* v2,int *v3,
-              int* ref,int* pos,int* retval),
+             (MMG5_pMesh *mesh, MMG_int* v0, MMG_int* v1, MMG_int* v2,MMG_int *v3,
+              int* ref,MMG_int* pos,int* retval),
              (mesh,v0,v1,v2,v3,ref,pos,retval)) {
   *retval = MMG3D_Set_quadrilateral(*mesh, *v0, *v1, *v2, *v3,*ref, *pos);
   return;
@@ -400,7 +400,7 @@ FORTRAN_NAME(MMG3D_SET_QUADRILATERAL,mmg3d_set_quadrilateral,
  * See \ref MMG3D_Get_quadrilateral function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_GET_QUADRILATERAL,mmg3d_get_quadrilateral,
-             (MMG5_pMesh *mesh, int* v0, int* v1, int* v2,int *v3,
+             (MMG5_pMesh *mesh, MMG_int* v0, MMG_int* v1, MMG_int* v2,MMG_int *v3,
               int* ref,int* isRequired, int* retval),
              (mesh,v0,v1,v2,v3,ref,isRequired,retval)) {
   *retval = MMG3D_Get_quadrilateral(*mesh,v0,v1,v2,v3,ref,isRequired);
@@ -410,7 +410,7 @@ FORTRAN_NAME(MMG3D_GET_QUADRILATERAL,mmg3d_get_quadrilateral,
  * See \ref MMG3D_Set_quadrilaterals function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_SET_QUADRILATERALS,mmg3d_set_quadrilaterals,
-             (MMG5_pMesh *mesh, int* quads, int* refs,
+             (MMG5_pMesh *mesh, MMG_int* quads, int* refs,
               int* retval),
              (mesh,quads,refs,retval)) {
   *retval = MMG3D_Set_quadrilaterals(*mesh, quads, refs);
@@ -421,7 +421,7 @@ FORTRAN_NAME(MMG3D_SET_QUADRILATERALS,mmg3d_set_quadrilaterals,
  * See \ref MMG3D_Get_quadrilaterals function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_GET_QUADRILATERALS,mmg3d_get_quadrilaterals,
-             (MMG5_pMesh *mesh, int* quads, int* refs,int* areRequired,
+             (MMG5_pMesh *mesh, MMG_int* quads, int* refs,int* areRequired,
               int* retval),
              (mesh,quads,refs,areRequired,retval)) {
   *retval = MMG3D_Get_quadrilaterals(*mesh,quads,refs,areRequired);
@@ -432,7 +432,7 @@ FORTRAN_NAME(MMG3D_GET_QUADRILATERALS,mmg3d_get_quadrilaterals,
  * See \ref MMG3D_Set_edge function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_SET_EDGE,mmg3d_set_edge,
-             (MMG5_pMesh *mesh, int *v0, int *v1, int *ref, int *pos, int* retval),
+             (MMG5_pMesh *mesh, MMG_int *v0, MMG_int *v1, int *ref, MMG_int *pos, int* retval),
              (mesh,v0,v1,ref,pos,retval)){
   *retval = MMG3D_Set_edge(*mesh,*v0,*v1,*ref,*pos);
   return;
@@ -441,7 +441,7 @@ FORTRAN_NAME(MMG3D_SET_EDGE,mmg3d_set_edge,
 /**
  * See \ref MMG3D_Get_edge function in \ref mmg3d/libmmg3d.h file.
  */
-FORTRAN_NAME(MMG3D_GET_EDGE,mmg3d_get_edge,(MMG5_pMesh *mesh, int* e0, int* e1, int* ref
+FORTRAN_NAME(MMG3D_GET_EDGE,mmg3d_get_edge,(MMG5_pMesh *mesh, MMG_int* e0, MMG_int* e1, int* ref
                                             ,int* isRidge, int* isRequired, int* retval),
              (mesh,e0,e1,ref,isRidge,isRequired,retval)) {
   *retval = MMG3D_Get_edge(*mesh,e0,e1,ref,isRidge,isRequired);
@@ -451,7 +451,7 @@ FORTRAN_NAME(MMG3D_GET_EDGE,mmg3d_get_edge,(MMG5_pMesh *mesh, int* e0, int* e1, 
  * See \ref MMG3D_Set_edges function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_SET_EDGES,mmg3d_set_edges,
-             (MMG5_pMesh *mesh, int *edges, int *refs, int* retval),
+             (MMG5_pMesh *mesh, MMG_int *edges, int *refs, int* retval),
              (mesh,edges,refs,retval)){
   *retval = MMG3D_Set_edges(*mesh,edges,refs);
   return;
@@ -460,7 +460,7 @@ FORTRAN_NAME(MMG3D_SET_EDGES,mmg3d_set_edges,
 /**
  * See \ref MMG3D_Get_edges function in \ref mmg3d/libmmg3d.h file.
  */
-FORTRAN_NAME(MMG3D_GET_EDGES,mmg3d_get_edges,(MMG5_pMesh *mesh, int* edges,
+FORTRAN_NAME(MMG3D_GET_EDGES,mmg3d_get_edges,(MMG5_pMesh *mesh, MMG_int* edges,
                                               int* refs,int* areRidges,
                                               int* areRequired, int* retval),
              (mesh,edges,refs,areRidges,areRequired,retval)) {
@@ -471,7 +471,7 @@ FORTRAN_NAME(MMG3D_GET_EDGES,mmg3d_get_edges,(MMG5_pMesh *mesh, int* edges,
 /**
  * See \ref MMG3D_Set_corner function in \ref mmg3d/libmmg3d.h file.
  */
-FORTRAN_NAME(MMG3D_SET_CORNER,mmg3d_set_corner,(MMG5_pMesh *mesh, int *k, int* retval),
+FORTRAN_NAME(MMG3D_SET_CORNER,mmg3d_set_corner,(MMG5_pMesh *mesh, MMG_int *k, int* retval),
              (mesh,k,retval)) {
   *retval =  MMG3D_Set_corner(*mesh,*k);
   return;
@@ -480,7 +480,7 @@ FORTRAN_NAME(MMG3D_SET_CORNER,mmg3d_set_corner,(MMG5_pMesh *mesh, int *k, int* r
 /**
  * See \ref MMG3D_Unset_corner function in \ref mmg3d/libmmg3d.h file.
  */
-FORTRAN_NAME(MMG3D_UNSET_CORNER,mmg3d_unset_corner,(MMG5_pMesh *mesh, int *k, int* retval),
+FORTRAN_NAME(MMG3D_UNSET_CORNER,mmg3d_unset_corner,(MMG5_pMesh *mesh, MMG_int *k, int* retval),
              (mesh,k,retval)) {
   *retval =  MMG3D_Unset_corner(*mesh,*k);
   return;
@@ -490,7 +490,7 @@ FORTRAN_NAME(MMG3D_UNSET_CORNER,mmg3d_unset_corner,(MMG5_pMesh *mesh, int *k, in
  * See \ref MMG3D_Set_requiredVertex function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_SET_REQUIREDVERTEX,mmg3d_set_requiredvertex,
-             (MMG5_pMesh *mesh, int *k, int* retval),
+             (MMG5_pMesh *mesh, MMG_int *k, int* retval),
              (mesh,k,retval)) {
   *retval =  MMG3D_Set_requiredVertex(*mesh,*k);
   return;
@@ -500,7 +500,7 @@ FORTRAN_NAME(MMG3D_SET_REQUIREDVERTEX,mmg3d_set_requiredvertex,
  * See \ref MMG3D_Unset_requiredVertex function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_UNSET_REQUIREDVERTEX,mmg3d_unset_requiredvertex,
-             (MMG5_pMesh *mesh, int *k, int* retval),
+             (MMG5_pMesh *mesh, MMG_int *k, int* retval),
              (mesh,k,retval)) {
   *retval =  MMG3D_Unset_requiredVertex(*mesh,*k);
   return;
@@ -510,7 +510,7 @@ FORTRAN_NAME(MMG3D_UNSET_REQUIREDVERTEX,mmg3d_unset_requiredvertex,
  * See \ref MMG3D_Set_requiredTetrahedron function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_SET_REQUIREDTETRAHEDRON,mmg3d_set_requiredtetrahedron,
-             (MMG5_pMesh *mesh, int *k, int* retval),
+             (MMG5_pMesh *mesh, MMG_int *k, int* retval),
              (mesh,k,retval)) {
   *retval = MMG3D_Set_requiredTetrahedron(*mesh,*k);
   return;
@@ -520,7 +520,7 @@ FORTRAN_NAME(MMG3D_SET_REQUIREDTETRAHEDRON,mmg3d_set_requiredtetrahedron,
  * See \ref MMG3D_Unset_requiredTetrahedron function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_UNSET_REQUIREDTETRAHEDRON,mmg3d_unset_requiredtetrahedron,
-             (MMG5_pMesh *mesh, int *k, int* retval),
+             (MMG5_pMesh *mesh, MMG_int *k, int* retval),
              (mesh,k,retval)) {
   *retval = MMG3D_Unset_requiredTetrahedron(*mesh,*k);
   return;
@@ -530,7 +530,7 @@ FORTRAN_NAME(MMG3D_UNSET_REQUIREDTETRAHEDRON,mmg3d_unset_requiredtetrahedron,
  * See \ref MMG3D_Set_requiredTetrahedra function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_SET_REQUIREDTETRAHEDRA,mmg3d_set_requiredtetrahedra,
-             (MMG5_pMesh *mesh, int *reqIdx, int *nreq, int* retval),
+             (MMG5_pMesh *mesh, MMG_int *reqIdx, MMG_int *nreq, int* retval),
              (mesh,reqIdx,nreq,retval)) {
   *retval = MMG3D_Set_requiredTetrahedra(*mesh,reqIdx, *nreq);
   return;
@@ -540,7 +540,7 @@ FORTRAN_NAME(MMG3D_SET_REQUIREDTETRAHEDRA,mmg3d_set_requiredtetrahedra,
  * See \ref MMG3D_Unset_requiredTetrahedra function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_UNSET_REQUIREDTETRAHEDRA,mmg3d_unset_requiredtetrahedra,
-             (MMG5_pMesh *mesh, int *reqIdx, int *nreq, int* retval),
+             (MMG5_pMesh *mesh, MMG_int *reqIdx, MMG_int *nreq, int* retval),
              (mesh,reqIdx,nreq,retval)) {
   *retval = MMG3D_Unset_requiredTetrahedra(*mesh,reqIdx, *nreq);
   return;
@@ -549,7 +549,7 @@ FORTRAN_NAME(MMG3D_UNSET_REQUIREDTETRAHEDRA,mmg3d_unset_requiredtetrahedra,
  * See \ref MMG3D_Set_requiredTriangle function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_SET_REQUIREDTRIANGLE,mmg3d_set_requiredtriangle,
-             (MMG5_pMesh *mesh, int *k, int* retval),
+             (MMG5_pMesh *mesh, MMG_int *k, int* retval),
              (mesh,k,retval)) {
   *retval = MMG3D_Set_requiredTriangle(*mesh, *k);
   return;
@@ -558,7 +558,7 @@ FORTRAN_NAME(MMG3D_SET_REQUIREDTRIANGLE,mmg3d_set_requiredtriangle,
  * See \ref MMG3D_Unset_requiredTriangle function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_UNSET_REQUIREDTRIANGLE,mmg3d_unset_requiredtriangle,
-             (MMG5_pMesh *mesh, int *k, int* retval),
+             (MMG5_pMesh *mesh, MMG_int *k, int* retval),
              (mesh,k,retval)) {
   *retval = MMG3D_Unset_requiredTriangle(*mesh, *k);
   return;
@@ -568,7 +568,7 @@ FORTRAN_NAME(MMG3D_UNSET_REQUIREDTRIANGLE,mmg3d_unset_requiredtriangle,
  * See \ref MMG3D_Set_requiredTriangles function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_SET_REQUIREDTRIANGLES,mmg3d_set_requiredtriangles,
-             (MMG5_pMesh *mesh, int *reqIdx, int *nreq, int* retval),
+             (MMG5_pMesh *mesh, MMG_int *reqIdx, MMG_int *nreq, int* retval),
              (mesh,reqIdx,nreq,retval)) {
   *retval = MMG3D_Set_requiredTriangles(*mesh, reqIdx, *nreq);
   return;
@@ -578,7 +578,7 @@ FORTRAN_NAME(MMG3D_SET_REQUIREDTRIANGLES,mmg3d_set_requiredtriangles,
  * See \ref MMG3D_Unset_requiredTriangles function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_UNSET_REQUIREDTRIANGLES,mmg3d_unset_requiredtriangles,
-             (MMG5_pMesh *mesh, int *reqIdx, int *nreq, int* retval),
+             (MMG5_pMesh *mesh, MMG_int *reqIdx, MMG_int *nreq, int* retval),
              (mesh,reqIdx,nreq,retval)) {
   *retval = MMG3D_Unset_requiredTriangles(*mesh, reqIdx, *nreq);
   return;
@@ -588,7 +588,7 @@ FORTRAN_NAME(MMG3D_UNSET_REQUIREDTRIANGLES,mmg3d_unset_requiredtriangles,
  * See \ref MMG3D_Set_parallelTriangle function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_SET_PARALLELTRIANGLE,mmg3d_set_paralleltriangle,
-             (MMG5_pMesh *mesh, int *k, int* retval),
+             (MMG5_pMesh *mesh, MMG_int *k, int* retval),
              (mesh,k,retval)) {
   *retval = MMG3D_Set_parallelTriangle(*mesh, *k);
   return;
@@ -598,7 +598,7 @@ FORTRAN_NAME(MMG3D_SET_PARALLELTRIANGLE,mmg3d_set_paralleltriangle,
  * See \ref MMG3D_Unset_parallelTriangle function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_UNSET_PARALLELTRIANGLE,mmg3d_unset_paralleltriangle,
-             (MMG5_pMesh *mesh, int *k, int* retval),
+             (MMG5_pMesh *mesh, MMG_int *k, int* retval),
              (mesh,k,retval)) {
   *retval = MMG3D_Unset_parallelTriangle(*mesh, *k);
   return;
@@ -608,7 +608,7 @@ FORTRAN_NAME(MMG3D_UNSET_PARALLELTRIANGLE,mmg3d_unset_paralleltriangle,
  * See \ref MMG3D_Set_parallelTriangles function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_SET_PARALLELTRIANGLES,mmg3d_set_paralleltriangles,
-             (MMG5_pMesh *mesh, int *parIdx, int *npar, int* retval),
+             (MMG5_pMesh *mesh, MMG_int *parIdx, MMG_int *npar, int* retval),
              (mesh,parIdx,npar,retval)) {
   *retval = MMG3D_Set_parallelTriangles(*mesh, parIdx, *npar);
   return;
@@ -618,7 +618,7 @@ FORTRAN_NAME(MMG3D_SET_PARALLELTRIANGLES,mmg3d_set_paralleltriangles,
  * See \ref MMG3D_Unset_parallelTriangles function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_UNSET_PARALLELTRIANGLES,mmg3d_unset_paralleltriangles,
-             (MMG5_pMesh *mesh, int *parIdx, int *npar, int* retval),
+             (MMG5_pMesh *mesh, MMG_int *parIdx, MMG_int *npar, int* retval),
              (mesh,parIdx,npar,retval)) {
   *retval = MMG3D_Unset_parallelTriangles(*mesh, parIdx, *npar);
   return;
@@ -628,7 +628,7 @@ FORTRAN_NAME(MMG3D_UNSET_PARALLELTRIANGLES,mmg3d_unset_paralleltriangles,
  * See \ref MMG3D_Set_ridge function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_SET_RIDGE,mmg3d_set_ridge,
-             (MMG5_pMesh *mesh, int *k, int* retval),
+             (MMG5_pMesh *mesh, MMG_int *k, int* retval),
              (mesh,k,retval)) {
   *retval = MMG3D_Set_ridge(*mesh,*k);
   return;
@@ -638,7 +638,7 @@ FORTRAN_NAME(MMG3D_SET_RIDGE,mmg3d_set_ridge,
  * See \ref MMG3D_unset_ridge function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_UNSET_RIDGE,mmg3d_unset_ridge,
-             (MMG5_pMesh *mesh, int *k, int* retval),
+             (MMG5_pMesh *mesh, MMG_int *k, int* retval),
              (mesh,k,retval)) {
   *retval = MMG3D_Unset_ridge(*mesh,*k);
   return;
@@ -648,7 +648,7 @@ FORTRAN_NAME(MMG3D_UNSET_RIDGE,mmg3d_unset_ridge,
  * See \ref MMG3D_Set_requiredEdge function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_SET_REQUIREDEDGE,mmg3d_set_requirededge,
-             (MMG5_pMesh *mesh, int *k, int* retval),
+             (MMG5_pMesh *mesh, MMG_int *k, int* retval),
              (mesh,k,retval)) {
   *retval = MMG3D_Set_requiredEdge(*mesh,*k);
   return;
@@ -658,7 +658,7 @@ FORTRAN_NAME(MMG3D_SET_REQUIREDEDGE,mmg3d_set_requirededge,
  * See \ref MMG3D_Unset_requiredEdge function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_UNSET_REQUIREDEDGE,mmg3d_unset_requirededge,
-             (MMG5_pMesh *mesh, int *k, int* retval),
+             (MMG5_pMesh *mesh, MMG_int *k, int* retval),
              (mesh,k,retval)) {
   *retval = MMG3D_Unset_requiredEdge(*mesh,*k);
   return;
@@ -668,7 +668,7 @@ FORTRAN_NAME(MMG3D_UNSET_REQUIREDEDGE,mmg3d_unset_requirededge,
  * See \ref MMG3D_Set_normalAtVertex function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_SET_NORMALATVERTEX,mmg3d_set_normalatvertex,
-             (MMG5_pMesh *mesh, int *k, double* n0, double* n1, double* n2,int* retval),
+             (MMG5_pMesh *mesh, MMG_int *k, double* n0, double* n1, double* n2,int* retval),
              (mesh,k,n0,n1,n2,retval)) {
   *retval = MMG3D_Set_normalAtVertex(*mesh,*k, *n0, *n1, *n2);
   return;
@@ -677,7 +677,7 @@ FORTRAN_NAME(MMG3D_SET_NORMALATVERTEX,mmg3d_set_normalatvertex,
  * See \ref MMG3D_Get_normalAtVertex function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_GET_NORMALATVERTEX,mmg3d_get_normalatvertex,
-             (MMG5_pMesh *mesh, int *k, double* n0, double* n1, double* n2,int* retval),
+             (MMG5_pMesh *mesh, MMG_int *k, double* n0, double* n1, double* n2,int* retval),
              (mesh,k,n0,n1,n2,retval)) {
   *retval = MMG3D_Get_normalAtVertex(*mesh,*k, n0, n1, n2);
   return;
@@ -686,7 +686,7 @@ FORTRAN_NAME(MMG3D_GET_NORMALATVERTEX,mmg3d_get_normalatvertex,
  * See \ref MMG3D_Get_tetrahedronQuality function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_GET_TETRAHEDRONQUALITY,mmg3d_get_tetrahedronquality,
-             (MMG5_pMesh *mesh, MMG5_pSol *met, int* k, double* retval),
+             (MMG5_pMesh *mesh, MMG5_pSol *met, MMG_int* k, double* retval),
              (mesh,met,k,retval)) {
   *retval = MMG3D_Get_tetrahedronQuality(*mesh,*met,*k);
   return;
@@ -695,7 +695,7 @@ FORTRAN_NAME(MMG3D_GET_TETRAHEDRONQUALITY,mmg3d_get_tetrahedronquality,
  * See \ref MMG3D_Set_scalarSol function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_SET_SCALARSOL,mmg3d_set_scalarsol,
-             (MMG5_pSol *met, double *s, int *pos, int* retval),
+             (MMG5_pSol *met, double *s, MMG_int *pos, int* retval),
              (met,s,pos,retval)) {
   *retval = MMG3D_Set_scalarSol(*met,*s,*pos);
   return;
@@ -735,7 +735,7 @@ FORTRAN_NAME(MMG3D_GET_SCALARSOLS,mmg3d_get_scalarsols,
  */
 FORTRAN_NAME(MMG3D_SET_VECTORSOL,mmg3d_set_vectorsol,
              (MMG5_pSol *met, double *vx, double *vy, double *vz,
-              int *pos, int* retval),
+              MMG_int *pos, int* retval),
              (met,vx,vy,vz,pos,retval)) {
   *retval = MMG3D_Set_vectorSol(*met,*vx,*vy,*vz,*pos);
   return;
@@ -775,7 +775,7 @@ FORTRAN_NAME(MMG3D_GET_VECTORSOLS,mmg3d_get_vectorsols,
  */
 FORTRAN_NAME(MMG3D_SET_TENSORSOL,mmg3d_set_tensorsol,
              (MMG5_pSol *met, double* m11,double *m12, double *m13,
-              double* m22,double *m23, double *m33, int *pos, int* retval),
+              double* m22,double *m23, double *m33, MMG_int *pos, int* retval),
              (met,m11,m12,m13,m22,m23,m33,pos,retval)) {
   *retval = MMG3D_Set_tensorSol(*met,*m11,*m12,*m13,*m22,*m23,*m33,*pos);
   return;
@@ -814,7 +814,7 @@ FORTRAN_NAME(MMG3D_GET_TENSORSOLS,mmg3d_get_tensorsols,
  * See \ref MMG3D_Set_ithSol_solsAtVertices function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_SET_ITHSOL_INSOLSATVERTICES,mmg3d_set_ithsol_insolsatvertices,
-             (MMG5_pSol *sol, int *i,double *s,int *pos, int* retval),
+             (MMG5_pSol *sol, MMG_int *i,double *s,MMG_int *pos, int* retval),
              (sol,i,s,pos,retval)) {
   *retval = MMG3D_Set_ithSol_inSolsAtVertices(*sol,*i,s,*pos);
   return;
@@ -823,7 +823,7 @@ FORTRAN_NAME(MMG3D_SET_ITHSOL_INSOLSATVERTICES,mmg3d_set_ithsol_insolsatvertices
  * See \ref MMG3D_Get_ithSol_inSolsAtVertices function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_GET_ITHSOL_INSOLSATVERTICES,mmg3d_get_ithsol_insolsatvertices,
-             (MMG5_pSol *sol, int* i,double *s,int *pos, int* retval),
+             (MMG5_pSol *sol, MMG_int* i,double *s,MMG_int *pos, int* retval),
              (sol,i,s,pos,retval)) {
   *retval = MMG3D_Get_ithSol_inSolsAtVertices(*sol,*i,s,*pos);
   return;
@@ -832,7 +832,7 @@ FORTRAN_NAME(MMG3D_GET_ITHSOL_INSOLSATVERTICES,mmg3d_get_ithsol_insolsatvertices
  * See \ref MMG3D_Set_ithSols_inSolsAtVertices function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_SET_ITHSOLS_INSOLSATVERTICES,mmg3d_set_ithsols_insolsatvertices,
-             (MMG5_pSol *sol, int *i,double *s, int* retval),
+             (MMG5_pSol *sol, MMG_int *i,double *s, int* retval),
              (sol,i,s,retval)) {
   *retval = MMG3D_Set_ithSols_inSolsAtVertices(*sol,*i,s);
   return;
@@ -841,7 +841,7 @@ FORTRAN_NAME(MMG3D_SET_ITHSOLS_INSOLSATVERTICES,mmg3d_set_ithsols_insolsatvertic
  * See \ref MMG3D_Get_ithSols_inSolsAtVertices function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_GET_ITHSOLS_INSOLSATVERTICES,mmg3d_get_ithsols_insolsatvertices,
-             (MMG5_pSol *sol, int* i,double *s, int* retval),
+             (MMG5_pSol *sol, MMG_int* i,double *s, int* retval),
              (sol,i,s,retval)) {
   *retval = MMG3D_Get_ithSols_inSolsAtVertices(*sol,*i,s);
   return;
@@ -871,7 +871,7 @@ FORTRAN_NAME(MMG3D_CHK_MESHDATA,mmg3d_chk_meshdata,
  * See \ref MMG3D_Add_tetrahedron function in \ref mmg3d/libmmg3d.h file.
  */
 FORTRAN_NAME(MMG3D_ADD_TETRAHEDRON,mmg3d_add_tetrahedron,
-             (MMG5_pMesh *mesh, int *v0, int *v1, int *v2, int *v3, int *ref,
+             (MMG5_pMesh *mesh, MMG_int *v0, MMG_int *v1, MMG_int *v2, MMG_int *v3, int *ref,
               int* retval),
              (mesh,v0,v1,v2,v3,ref,retval)){
   *retval = MMG3D_Add_tetrahedron(*mesh,*v0,*v1,*v2,*v3,*ref);

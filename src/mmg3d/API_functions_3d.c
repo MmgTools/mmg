@@ -152,11 +152,11 @@ int MMG3D_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity, MMG_int np,
   return 1;
 }
 
-int MMG3D_Set_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol *sol,MMG_int nsols,
+int MMG3D_Set_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol *sol,int nsols,
                                  MMG_int nentities, int *typSol) {
   MMG5_pSol psl;
   char      data[18];
-  MMG_int       j;
+  int       j;
 
   if ( ( (mesh->info.imprim > 5) || mesh->info.ddebug ) && mesh->nsols ) {
     if ( *sol ) {
@@ -255,8 +255,8 @@ int MMG3D_setMeshSize_initData(MMG5_pMesh mesh, MMG_int np, MMG_int ne, int npri
   return 1;
 }
 
-int MMG3D_Set_meshSize(MMG5_pMesh mesh, MMG_int np, MMG_int ne, int nprism,
-                       MMG_int nt, int nquad, MMG_int na ) {
+int MMG3D_Set_meshSize(MMG5_pMesh mesh, MMG_int np, MMG_int ne, MMG_int nprism,
+                       MMG_int nt, MMG_int nquad, MMG_int na ) {
 
   /* Check input data and set mesh->ne/na/np/nt to the suitable values */
   if ( !MMG3D_setMeshSize_initData(mesh,np,ne,nprism,nt,nquad,na) )
@@ -794,10 +794,9 @@ int MMG3D_Get_prism(MMG5_pMesh mesh, MMG_int* v0, MMG_int* v1, MMG_int* v2, MMG_
   return 1;
 }
 
-int  MMG3D_Set_prisms(MMG5_pMesh mesh, int *prisms, int *refs) {
+int  MMG3D_Set_prisms(MMG5_pMesh mesh, MMG_int *prisms, int *refs) {
   MMG5_pPrism pp;
-  int         i;
-  MMG_int     j;
+  MMG_int     j,i;
 
   for (i=1;i<=mesh->nprism;i++)
   {
@@ -825,10 +824,9 @@ int  MMG3D_Set_prisms(MMG5_pMesh mesh, int *prisms, int *refs) {
   return 1;
 }
 
-int  MMG3D_Get_prisms(MMG5_pMesh mesh, int *prisms, int *refs, int * areRequired) {
+int  MMG3D_Get_prisms(MMG5_pMesh mesh, MMG_int *prisms, int *refs, int * areRequired) {
   MMG5_pPrism pp;
-  int         i;
-  MMG_int     j;
+  MMG_int     j,i;
 
   for (i=1;i<=mesh->nprism;i++)
   {
@@ -1047,10 +1045,9 @@ int MMG3D_Get_quadrilateral(MMG5_pMesh mesh, MMG_int* v0, MMG_int* v1, MMG_int* 
   return 1;
 }
 
-int  MMG3D_Set_quadrilaterals(MMG5_pMesh mesh, int *quads, int *refs) {
+int  MMG3D_Set_quadrilaterals(MMG5_pMesh mesh, MMG_int *quads, int *refs) {
   MMG5_pQuad  pq;
-  int         i;
-  MMG_int     j;
+  MMG_int     j,i;
 
   for (i=1;i<=mesh->nquad;i++)
   {
@@ -1066,10 +1063,9 @@ int  MMG3D_Set_quadrilaterals(MMG5_pMesh mesh, int *quads, int *refs) {
   return 1;
 }
 
-int  MMG3D_Get_quadrilaterals(MMG5_pMesh mesh, int *quads, int *refs, int *areRequired) {
+int  MMG3D_Get_quadrilaterals(MMG5_pMesh mesh, MMG_int *quads, int *refs, int *areRequired) {
   MMG5_pQuad  pq;
-  int         i;
-   MMG_int    j;
+   MMG_int    j,i;
 
   for (i=1;i<=mesh->nquad;i++)
   {
@@ -1255,7 +1251,7 @@ int MMG3D_Unset_requiredTetrahedron(MMG5_pMesh mesh, MMG_int k) {
   return 1;
 }
 
-int MMG3D_Set_requiredTetrahedra(MMG5_pMesh mesh, int *reqIdx, MMG_int nreq) {
+int MMG3D_Set_requiredTetrahedra(MMG5_pMesh mesh, MMG_int *reqIdx, MMG_int nreq) {
   MMG_int k;
 
   for ( k=0; k<nreq; ++k ){
@@ -1265,7 +1261,7 @@ int MMG3D_Set_requiredTetrahedra(MMG5_pMesh mesh, int *reqIdx, MMG_int nreq) {
   return 1;
 }
 
-int MMG3D_Unset_requiredTetrahedra(MMG5_pMesh mesh, int *reqIdx, MMG_int nreq) {
+int MMG3D_Unset_requiredTetrahedra(MMG5_pMesh mesh, MMG_int *reqIdx, MMG_int nreq) {
   MMG_int k;
 
   for ( k=0; k<nreq; ++k ){
@@ -1291,7 +1287,7 @@ int MMG3D_Unset_requiredTriangle(MMG5_pMesh mesh, MMG_int k) {
   return 1;
 }
 
-int MMG3D_Set_requiredTriangles(MMG5_pMesh mesh, int* reqIdx, MMG_int nreq) {
+int MMG3D_Set_requiredTriangles(MMG5_pMesh mesh, MMG_int* reqIdx, MMG_int nreq) {
   MMG_int k;
 
   for ( k=0; k<nreq; ++k ){
@@ -1302,7 +1298,7 @@ int MMG3D_Set_requiredTriangles(MMG5_pMesh mesh, int* reqIdx, MMG_int nreq) {
   return 1;
 }
 
-int MMG3D_Unset_requiredTriangles(MMG5_pMesh mesh, int* reqIdx, MMG_int nreq) {
+int MMG3D_Unset_requiredTriangles(MMG5_pMesh mesh, MMG_int* reqIdx, MMG_int nreq) {
   MMG_int k;
 
   for ( k=0; k<nreq; ++k ){
@@ -1749,7 +1745,7 @@ int MMG3D_Get_tensorSols(MMG5_pSol met, double *sols) {
   return 1;
 }
 
-int  MMG3D_Set_ithSol_inSolsAtVertices(MMG5_pSol sol,int i, double* s,MMG_int pos) {
+int  MMG3D_Set_ithSol_inSolsAtVertices(MMG5_pSol sol,MMG_int i, double* s,MMG_int pos) {
   MMG5_pSol psl;
 
   /* Warning: users give indices from 1 to nsols */
@@ -1776,7 +1772,7 @@ int  MMG3D_Set_ithSol_inSolsAtVertices(MMG5_pSol sol,int i, double* s,MMG_int po
   return 1;
 }
 
-int  MMG3D_Get_ithSol_inSolsAtVertices(MMG5_pSol sol,int i, double *s,MMG_int pos) {
+int  MMG3D_Get_ithSol_inSolsAtVertices(MMG5_pSol sol,MMG_int i, double *s,MMG_int pos) {
   MMG5_pSol psl;
 
   /* Warning: users give indices from 1 to nsols */
@@ -1806,7 +1802,7 @@ int  MMG3D_Get_ithSol_inSolsAtVertices(MMG5_pSol sol,int i, double *s,MMG_int po
   return 1;
 }
 
-int  MMG3D_Set_ithSols_inSolsAtVertices(MMG5_pSol sol,int i, double *s) {
+int  MMG3D_Set_ithSols_inSolsAtVertices(MMG5_pSol sol,MMG_int i, double *s) {
   MMG5_pSol psl;
 
   /* Warning: users give indices from 1 to nsols */
@@ -1834,7 +1830,7 @@ int  MMG3D_Set_ithSols_inSolsAtVertices(MMG5_pSol sol,int i, double *s) {
   return 1;
 }
 
-int  MMG3D_Get_ithSols_inSolsAtVertices(MMG5_pSol sol,int i, double *s) {
+int  MMG3D_Get_ithSols_inSolsAtVertices(MMG5_pSol sol,MMG_int i, double *s) {
   MMG5_pSol psl;
 
   /* Warning: users give indices from 1 to nsols */
