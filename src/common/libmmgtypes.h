@@ -613,7 +613,7 @@ typedef struct {
   MMG_int       np; /* Number of points of the solution */
   MMG_int       npmax; /* Maximum number of points */
   int       npi; /* Temporary number of points (internal use only) */
-  int       size; /* Number of solutions per entity */
+  MMG_int       size; /* Number of solutions per entity */
   int       type; /* Type of the solution (scalar, vectorial of tensorial) */
   int       entities; /* Type of the solution (scalar, vectorial of tensorial) */
   double    *m; /*!< Solution values */

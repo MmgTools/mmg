@@ -602,7 +602,7 @@ void           MMG5_check_hminhmax(MMG5_pMesh mesh, int8_t sethmin, int8_t sethm
  int           MMG5_boulep(MMG5_pMesh mesh,MMG_int start,MMG_int ip,MMG_int*,MMG_int *list);
  int           MMG5_boulec(MMG5_pMesh, MMG_int*, MMG_int, MMG_int i,double *tt);
  int           MMG5_boulen(MMG5_pMesh, MMG_int*, MMG_int, MMG_int i,double *nn);
- int           MMG5_bouler(MMG5_pMesh, MMG_int*, MMG_int, MMG_int i,MMG_int *,MMG_int *,int *, int*, int);
+ MMG_int           MMG5_bouler(MMG5_pMesh, MMG_int*, MMG_int, MMG_int i,MMG_int *,MMG_int *,MMG_int *, MMG_int*, int);
  double        MMG5_caltri33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt);
  extern double MMG5_caltri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
  extern double MMG5_caltri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
@@ -685,7 +685,7 @@ void           MMG5_check_hminhmax(MMG5_pMesh mesh, int8_t sethmin, int8_t sethm
  int            MMG5_loadMshMesh_part1(MMG5_pMesh mesh,const char *filename,
                                        FILE **inm,long *posNodes, long *posElts,
                                        long **posNodeData, int *bin, int *iswp,
-                                       MMG_int *nelts,MMG_int *nsols);
+                                       MMG_int *nelts,int *nsols);
  int            MMG5_check_readedMesh(MMG5_pMesh mesh,int nref);
  int            MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
                                        const long posNodes,const long posElts,
@@ -694,16 +694,16 @@ void           MMG5_check_hminhmax(MMG5_pMesh mesh, int8_t sethmin, int8_t sethm
                                        const int nsols);
 int             MMG5_saveMshMesh(MMG5_pMesh,MMG5_pSol*,const char*, int);
 int             MMG5_loadSolHeader(const char*,int,FILE**,int*,int*,int*,MMG_int*,
-                                   MMG_int*,int*,int**,long*,int);
+                                   int*,int*,int**,long*,int);
 int             MMG5_chkMetricType(MMG5_pMesh mesh,int *type, FILE *inm);
 int             MMG5_readFloatSol3D(MMG5_pSol,FILE*,int,int,int);
 int             MMG5_readDoubleSol3D(MMG5_pSol,FILE*,int,int,MMG_int);
 int             MMG5_saveSolHeader( MMG5_pMesh,const char*,FILE**,int,int*,MMG_int*,MMG_int,
                                     MMG_int,int,int*,int*,MMG_int*);
 int             MMG5_saveSolAtTrianglesHeader( MMG5_pMesh,FILE *,int,int,MMG_int*,int,
-                                               int,int*,int*,int*);
+                                               int,int*,int*,MMG_int*);
 int             MMG5_saveSolAtTetrahedraHeader( MMG5_pMesh,FILE *,int,int,MMG_int*,int,
-                                                int,int*,int*,int*);
+                                                int,int*,int*,MMG_int*);
 void            MMG5_writeDoubleSol3D(MMG5_pMesh,MMG5_pSol,FILE*,int,MMG_int,int);
 void            MMG5_printMetStats(MMG5_pMesh mesh,MMG5_pSol met);
 void            MMG5_printSolStats(MMG5_pMesh mesh,MMG5_pSol *sol);

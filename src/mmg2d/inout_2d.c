@@ -34,7 +34,8 @@ int MMG2D_loadMesh(MMG5_pMesh mesh,const char *filename) {
   MMG_int          k,tmp,ncor,norient,nreq,ntreq,nreqed,nqreq,nref;
   int          ref,bin,iswp;
   double       air,dtmp;
-  MMG_int          i,bdim,binch,bpos;
+  int          i,bdim,binch;
+  MMG_int      bpos;
   char         *ptr,*data;
   char         chaine[MMG5_FILESTR_LGTH],strskip[MMG5_FILESTR_LGTH];
 
@@ -1015,8 +1016,8 @@ int MMG2D_saveMesh(MMG5_pMesh mesh,const char *filename) {
   MMG5_pTria        pt;
   MMG5_pQuad        pq;
   double            dblb;
-  MMG_int               k,ne,np,nc,nreq,nereq,nedreq,nq,nqreq;
-  int               bin, binch, bpos,ref;
+  MMG_int               k,ne,np,nc,nreq,nereq,nedreq,nq,nqreq, bpos;
+  int               bin, binch,ref;
   char              *ptr,*data,chaine[MMG5_FILESTR_LGTH];
 
   mesh->ver = 2;
@@ -1485,8 +1486,8 @@ void MMG2D_writeDoubleSol(MMG5_pSol sol,FILE *inm,int bin,MMG_int pos) {
 int MMG2D_saveSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   FILE*        inm;
   MMG5_pPoint  ppt;
-  MMG_int          k,ier;
-  int          binch,bin,bpos,dim;
+  MMG_int          k,bpos;
+  int          binch,bin,dim,ier;
 
   if ( !sol->np )  return 1;
 
@@ -1546,9 +1547,9 @@ int MMG2D_saveAllSols(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename) {
   FILE*        inm;
   MMG5_pPoint  ppt;
   MMG5_pSol    psl;
-  MMG_int          j,k,ier;
-  int          binch,bin,bpos,npointSols,ncellSols;
-  int          *type,*size,*entities;
+  MMG_int          j,k,bpos,*size;
+  int          binch,bin,npointSols,ncellSols;
+  int          *type,*entities,ier;
 
 
   if ( !(*sol)[0].np )  return 1;

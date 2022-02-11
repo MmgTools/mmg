@@ -47,8 +47,8 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
   long        posntreq,posnpreq,posnormal,posnc1;
   MMG_int         k,ia,nq,nri,ip,idn,ng,npreq;
   int         i,ref,nref;
-  MMG_int         ncor,bin,iswp,nedreq,ntreq,posnedreq,bdim;
-  int         binch,bpos;
+  MMG_int         ncor,nedreq,ntreq,posnedreq,bpos;
+  int         binch,bin,iswp,bdim;
   MMG_int         na,*ina,a,b;
   char        *ptr,*data;
   char        chaine[MMG5_FILESTR_LGTH],strskip[MMG5_FILESTR_LGTH];
@@ -1294,8 +1294,8 @@ int MMGS_loadSol(MMG5_pMesh mesh,MMG5_pSol met,const char* filename) {
 
   FILE       *inm;
   long        posnp;
-  int         iswp,ier,*type,ver,bin,nsols;
-  MMG_int         k,np,dim;
+  int         iswp,ier,*type,ver,bin,nsols,dim;
+  MMG_int         k,np;
 
   /** Read the file header */
   ier =  MMG5_loadSolHeader(filename,3,&inm,&ver,&bin,&iswp,&np,&dim,&nsols,
@@ -1366,8 +1366,8 @@ int MMGS_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
   MMG5_pSol   psl;
   FILE       *inm;
   long        posnp;
-  int         iswp,ier,*type,ver,bin,nsols;
-  MMG_int        j,k,np,dim;
+  int         iswp,ier,*type,ver,bin,nsols,dim;
+  MMG_int        j,k,np;
   char        data[16];
   static char mmgWarn = 0;
 
@@ -1461,8 +1461,8 @@ int MMGS_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
 int MMGS_saveSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
   FILE*        inm;
   MMG5_pPoint  ppt;
-  int          bpos,binch,bin,ier;
-  MMG_int      k;
+  int          binch,bin,ier;
+  MMG_int      bpos,k;
 
   if ( !met->m ) {
     fprintf(stderr,"\n  ## Warning: %s: no metric data to save.\n",__func__);
@@ -1500,8 +1500,8 @@ int MMGS_saveAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
   FILE*        inm;
   MMG5_pPoint  ppt;
   int          binch,bin,ier,npointSols,ncellSols;
-  int          *type,*entities,*size,bpos,j;
-  MMG_int      k;
+  int          *type,*entities,j;
+  MMG_int      k,bpos,*size;
 
   if ( !(*sol)[0].m )  return -1;
 

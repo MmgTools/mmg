@@ -240,7 +240,7 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,const char *filename,
                            FILE **inm,
                            long *posNodes, long *posElts,
                            long **posNodeData, int *bin, int *iswp,
-                           MMG_int *nelts,MMG_int *nsols) {
+                           MMG_int *nelts,int *nsols) {
   double      dbuf[9];
   float       fbuf[9];
   int         ver,oneBin,i;
@@ -2031,7 +2031,7 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename,
  *
  */
 int MMG5_loadSolHeader( const char *filename,int meshDim,FILE **inm,int *ver,
-                        int *bin,int *iswp,MMG_int *np,MMG_int *dim,int *nsols,int **type,
+                        int *bin,int *iswp,MMG_int *np,int *dim,int *nsols,int **type,
                         long *posnp, int imprim) {
   int         binch,bdim;
   int         bpos,i;
@@ -2338,7 +2338,7 @@ void MMG5_writeDoubleSol3D(MMG5_pMesh mesh,MMG5_pSol sol,FILE *inm,int bin,
  *
  */
 int MMG5_saveSolHeader( MMG5_pMesh mesh,const char *filename,
-                        FILE **inm,int ver,int *bin,MMG_int *bpos,MMG_int np,MMG_int dim,
+                        FILE **inm,int ver,int *bin,MMG_int *bpos,MMG_int np,int dim,
                         int nsols,int *entities,int *type,MMG_int *size) {
   MMG5_pPoint ppt;
   int         binch;
@@ -2477,7 +2477,7 @@ int MMG5_saveSolHeader( MMG5_pMesh mesh,const char *filename,
 int MMG5_saveSolAtTrianglesHeader( MMG5_pMesh mesh,
                                    FILE *inm,int ver,int bin,MMG_int *bpos,
                                    int nsols,int nsolsAtTriangles,
-                                   int *entities,int *type,int *size) {
+                                   int *entities,int *type,MMG_int *size) {
   MMG5_pTria  pt;
   int         binch;
   MMG_int         k,nt;
@@ -2546,7 +2546,7 @@ int MMG5_saveSolAtTrianglesHeader( MMG5_pMesh mesh,
 int MMG5_saveSolAtTetrahedraHeader( MMG5_pMesh mesh,
                                     FILE *inm,int ver,int bin,MMG_int *bpos,
                                     int nsols,int nsolsAtTetra,
-                                    int *entities,int *type,int *size) {
+                                    int *entities,int *type,MMG_int *size) {
   MMG5_pTetra  pt;
   int          binch;
   MMG_int          k,ne;

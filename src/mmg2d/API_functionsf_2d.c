@@ -427,7 +427,7 @@ FORTRAN_NAME(MMG2D_SET_QUADRILATERALS,mmg2d_set_quadrilaterals,
  * See \ref MMG2D_Get_quadrilaterals function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_GET_QUADRILATERALS,mmg2d_get_quadrilaterals,
-             (MMG5_pMesh *mesh, int* quadra, int* refs,int* areRequired,
+             (MMG5_pMesh *mesh, MMG_int* quadra, int* refs,int* areRequired,
               int* retval),
              (mesh,quadra,refs,areRequired,retval)) {
   *retval = MMG2D_Get_quadrilaterals(*mesh,quadra,refs,areRequired);

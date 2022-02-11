@@ -275,11 +275,11 @@ int MMG5_boulec(MMG5_pMesh mesh,MMG_int *adjt,MMG_int start,MMG_int ip,double *t
  * the vertex \a ip.
  *
  */
-int MMG5_bouler(MMG5_pMesh mesh,MMG_int *adjt,MMG_int start,MMG_int ip,
-                 MMG_int *list,MMG_int *listref,int *ng,int *nr,int lmax) {
+MMG_int MMG5_bouler(MMG5_pMesh mesh,MMG_int *adjt,MMG_int start,MMG_int ip,
+                 MMG_int *list,MMG_int *listref,MMG_int *ng,MMG_int *nr,int lmax) {
   MMG5_pTria    pt;
   MMG_int           *adja,k;
-  int           ns;
+  MMG_int           ns;
   int8_t        i,i1,i2;
 
   pt  = &mesh->tria[start];

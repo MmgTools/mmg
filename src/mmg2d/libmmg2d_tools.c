@@ -283,7 +283,7 @@ int MMG2D_Get_numberOfNonBdyEdges(MMG5_pMesh mesh, MMG_int* nb_edges) {
   return 1;
 }
 
-int MMG2D_Get_nonBdyEdge(MMG5_pMesh mesh, MMG_int* e0, MMG_int* e1, int* ref, int idx) {
+int MMG2D_Get_nonBdyEdge(MMG5_pMesh mesh, MMG_int* e0, MMG_int* e1, int* ref, MMG_int idx) {
   MMG5_pEdge ped;
   size_t     na_tot=0;
   char       *ptr_c = (char*)mesh->edge;

@@ -56,7 +56,7 @@ int MMG2D_setadj(MMG5_pMesh mesh) {
     fprintf(stdout,"  ** SETTING TOPOLOGY\n");
 
   /** Step 1: Tags setting from triangles analysis */
-  MMG5_SAFE_MALLOC(pile,mesh->nt+1,int,return 0);
+  MMG5_SAFE_MALLOC(pile,mesh->nt+1,MMG_int,return 0);
 
   /* Initialization of the pile */
   ncc = 1;
