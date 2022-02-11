@@ -94,8 +94,10 @@ endif()
 SET (MMG_INT "int32_t" CACHE STRING "Integer type")
 IF (${MMG_INT} STREQUAL "int64_t")
   SET ( DEF_MMG_INT "#define MMG_int int64_t")
+  SET ( DEF_MMGF_INT "#define MMGF_INT INTEGER*8")
 ELSE ()
   SET ( DEF_MMG_INT "#define MMG_int int32_t")
+  SET ( DEF_MMGF_INT "#define MMGF_INT INTEGER")
 ENDIF ()
 
 # Create mmgcmakedefines.h file with the architecture infos and
