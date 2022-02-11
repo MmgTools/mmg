@@ -335,8 +335,8 @@ int MMG2D_velextLS(MMG5_pMesh ,MMG5_pSol );
 void MMG2D_keep_only1Subdomain ( MMG5_pMesh mesh,int nsd );
 
 /* useful functions to debug */
-int  MMG2D_indElt(MMG5_pMesh mesh,MMG_int kel);
-int  MMG2D_indPt(MMG5_pMesh mesh,MMG_int kp);
+MMG_int  MMG2D_indElt(MMG5_pMesh mesh,MMG_int kel);
+MMG_int  MMG2D_indPt(MMG5_pMesh mesh,MMG_int kp);
 
 /* Management of local parameters */
 int MMG2D_freeLocalPar(MMG5_pMesh );
