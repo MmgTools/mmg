@@ -731,8 +731,8 @@ int MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree,
           if ( ppt->tag & MG_BDY ) {
             /* Catch a boundary point by an external  face, unless point is internal non manifold */
             if ( (!pt->xt) || !(MG_BDY & pxt->ftag[i]) )  continue;
-            else if( ppt->tag & MG_PARBDY ) continue; /* skip parallel points seen by non-required faces */
-            else if( ppt->tag & MG_NOM ){
+            else if ( (ppt->tag & MG_PARBDY)  || (ppt->tag & MG_PARBDYBDY) ) continue; /* skip parallel points seen by non-required faces */
+            else if ( ppt->tag & MG_NOM ){
               if ( ppt->xp && mesh->xpoint[ppt->xp].nnor ) {
                 ilistv = MMG5_boulevolp(mesh,k,i0,listv);
                 if ( !ilistv )  continue;
