@@ -199,9 +199,9 @@ int    MMGS_gradsizreq_ani(MMG5_pMesh mesh,MMG5_pSol met);
 int    intmet_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG_int k,int8_t i,MMG_int ip,double s);
 int    intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG_int k,int8_t i,MMG_int ip,double s);
 int    MMGS_intmet33_ani(MMG5_pMesh,MMG5_pSol,MMG_int,int8_t,MMG_int,double);
-int    MMGS_paramDisp(MMG5_pMesh mesh,int it1,int it2,
+int    MMGS_paramDisp(MMG5_pMesh mesh,MMG_int it1,MMG_int it2,
                       double l1old,double l2old,
-                      int8_t isrid1, int8_t isrid2,int ip0,int ip1,int ip2,
+                      int8_t isrid1, int8_t isrid2,MMG_int ip0,MMG_int ip1,MMG_int ip2,
                       double step,double o[3],int8_t *isrid);
 int     MMGS_moveTowardPoint(MMG5_pMesh mesh,MMG5_pPoint p0,MMG5_pPoint p,
                              double llold,double lam0,double lam1,double lam2,
