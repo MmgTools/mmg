@@ -139,7 +139,7 @@ FORTRAN_NAME(MMG3D_DESTOCKOPTIONS,mmg3d_destockoptions,
  */
 FORTRAN_NAME(MMG3D_MMG3DCHECK,mmg3d_mmg3dcheck,
              (MMG5_pMesh *mesh,MMG5_pSol *met,MMG5_pSol *sol,double *critmin, double *lmin,
-              double *lmax, int *eltab,int *metRidTyp,int *retval),
+              double *lmax, MMG_int *eltab,int *metRidTyp,int *retval),
              (mesh,met,sol,critmin,lmin,lmax,eltab,metRidTyp,retval)) {
   int8_t tmp = (int8_t)(*metRidTyp);
 
@@ -154,7 +154,7 @@ FORTRAN_NAME(MMG3D_MMG3DCHECK,mmg3d_mmg3dcheck,
  */
 FORTRAN_NAME(MMG3D_SEARCHQUA,mmg3d_searchqua,
              (MMG5_pMesh *mesh,MMG5_pSol *met,double *critmin,
-              int *eltab,int8_t *metRidTyp),
+              MMG_int *eltab,int8_t *metRidTyp),
              (mesh,met,critmin,eltab,metRidTyp)) {
   MMG3D_searchqua(*mesh,*met,*critmin,eltab,*metRidTyp);
   return;
@@ -165,7 +165,7 @@ FORTRAN_NAME(MMG3D_SEARCHQUA,mmg3d_searchqua,
  */
 FORTRAN_NAME(MMG3D_SEARCHLEN,mmg3d_searchlen,
              (MMG5_pMesh *mesh,MMG5_pSol *met, double *lmin,
-              double *lmax, int *eltab,int8_t *metRidTyp,int *retval),
+              double *lmax, MMG_int *eltab,int8_t *metRidTyp,int *retval),
              (mesh,met,lmin,lmax,eltab,metRidTyp,retval)) {
   *retval = MMG3D_searchlen(*mesh,*met,*lmin,*lmax,eltab,*metRidTyp);
   return;

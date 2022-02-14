@@ -391,7 +391,7 @@ int    MMG3D_movv_iso(MMG5_pMesh ,MMG5_pSol ,MMG_int ,int );
 int  MMG3D_normalAdjaTri(MMG5_pMesh,MMG_int,int8_t,int,double n[3]);
 int  MMG5_chkswpbdy(MMG5_pMesh, MMG5_pSol,MMG_int*, int, MMG_int, MMG_int,int8_t);
 int  MMG5_swpbdy(MMG5_pMesh,MMG5_pSol,MMG_int*,int,MMG_int,MMG3D_pPROctree,int8_t);
-int  MMG5_swpgen(MMG5_pMesh,MMG5_pSol,int, int, int*,MMG3D_pPROctree,int8_t);
+int  MMG5_swpgen(MMG5_pMesh,MMG5_pSol,int, int, MMG_int*,MMG3D_pPROctree,int8_t);
 int  MMG5_chkswpgen(MMG5_pMesh,MMG5_pSol,MMG_int,int,int*,MMG_int*,double,int8_t);
 int  MMG3D_swap23(MMG5_pMesh,MMG5_pSol,MMG_int,int8_t,int,int,MMG_int,int);
 int  MMG5_srcface(MMG5_pMesh mesh,int n0,int n1,int n2);
@@ -494,7 +494,7 @@ MMG_int  MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree PROctree,
                   double clickSurf,double clickVol,int moveVol,int improveSurf,int improveVolSurf,
                   int improveVol,int maxit,int testmark);
 MMG_int  MMG5_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree PROctree, int);
-  int  MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double,double,MMG3D_pPROctree, int,int);
+  MMG_int  MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double,double,MMG3D_pPROctree, int,int);
 
 /* pointers */
 /* init structures */

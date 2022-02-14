@@ -960,7 +960,7 @@ void MMG3D_destockOptions(MMG5_pMesh mesh, MMG5_Info *info) {
 }
 
 int MMG3D_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol,double critmin, double lmin,
-                    double lmax, int *eltab,int8_t metRidTyp) {
+                    double lmax, MMG_int *eltab,int8_t metRidTyp) {
 
   mytime    ctim[TIMEMAX];
   int       ier;
@@ -1213,7 +1213,7 @@ int MMG3D_doSol(MMG5_pMesh mesh,MMG5_pSol met) {
     double       ux,uy,uz,dd;
     int          i,type;
     MMG_int      k,iadr,ia,ib,ipa,ipb;
-    int         *mark;
+    MMG_int         *mark;
 
     MMG5_SAFE_CALLOC(mark,mesh->np+1,MMG_int,return 0);
 

@@ -2575,14 +2575,14 @@ int MMG3D_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol);
  * >                               metridtyp,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT)      :: mesh,met,sol\n
  * >     REAL(KIND=8), INTENT(IN)            :: critmin,lmin,lmax\n
- * >     INTEGER,DIMENSION(*), INTENT(OUT)   :: eltab\n
+ * >     MMGF_INT,DIMENSION(*), INTENT(OUT)   :: eltab\n
  * >     INTEGER, INTENT(IN)                 :: metridtyp\n
  * >     INTEGER, INTENT(OUT)                :: retval\n
  * >   END SUBROUTINE\n
  *
  */
   int MMG3D_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol,double critmin,
-                       double lmin, double lmax, int *eltab,int8_t metRidTyp);
+                       double lmin, double lmax, MMG_int *eltab,int8_t metRidTyp);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.
@@ -2598,7 +2598,7 @@ int MMG3D_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol);
  * >   SUBROUTINE MMG3D_SEARCHQUA(mesh,met,critmin,eltab,metridtyp)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT)      :: mesh,met\n
  * >     REAL(KIND=8), INTENT(IN)            :: critmin\n
- * >     INTEGER,DIMENSION(*), INTENT(OUT)   :: eltab\n
+ * >     MMGF_INT,DIMENSION(*), INTENT(OUT)   :: eltab\n
  * >     INTEGER, INTENT(IN)                 :: metridtyp\n
  * >   END SUBROUTINE\n
  *
@@ -2624,7 +2624,7 @@ int MMG3D_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol);
  * >   SUBROUTINE MMG3D_SEARCHLEN(mesh,met,lmin,lmax,eltab,metridtyp,retval)\n
  * >     MMG5_DATA_PTR_T, INTENT(INOUT)      :: mesh,met\n
  * >     REAL(KIND=8), INTENT(IN)            :: lmin,lmax\n
- * >     INTEGER,DIMENSION(*), INTENT(OUT)   :: eltab\n
+ * >     MMGF_INT,DIMENSION(*), INTENT(OUT)   :: eltab\n
  * >     INTEGER, INTENT(IN)                 :: metridtyp\n
  * >     INTEGER, INTENT(OUT)                :: retval\n
  * >   END SUBROUTINE\n
