@@ -115,7 +115,7 @@ inline double MMG2D_caltri_iso_3pt(double *a,double *b,double *c) {
  * valid mesh.
  *
  */
-MMG_int MMG2D_chkmovmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t,int *triIdx) {
+MMG_int MMG2D_chkmovmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t,MMG_int *triIdx) {
   MMG5_pTria   pt;
   MMG5_pPoint  ppt;
   double       *v,c[3][2],tau;

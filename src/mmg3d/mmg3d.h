@@ -106,7 +106,7 @@ extern "C" {
       /* adja table */                                                  \
       MMG5_ADD_MEM(mesh,4*(mesh->nemax-oldSiz)*sizeof(int),            \
                     "larger adja table",law);                           \
-      MMG5_SAFE_RECALLOC(mesh->adja,4*oldSiz+5,4*mesh->nemax+5,int     \
+      MMG5_SAFE_RECALLOC(mesh->adja,4*oldSiz+5,4*mesh->nemax+5,MMG_int     \
                           ,"larger adja table",law);                    \
     }                                                                   \
                                                                         \
@@ -426,7 +426,7 @@ int MMG3D_computePrilen(MMG5_pMesh,MMG5_pSol,double*,double*,double*,int*,MMG_in
                         MMG_int*,MMG_int*,int*,int8_t,double**, int [9] );
 int  MMG3D_prilen(MMG5_pMesh mesh,MMG5_pSol met,int8_t);
 void MMG5_defaultValues(MMG5_pMesh);
-int  MMG5_intridmet(MMG5_pMesh,MMG5_pSol,int,int,double,double*,double*);
+int  MMG5_intridmet(MMG5_pMesh,MMG5_pSol,MMG_int,MMG_int,double,double*,double*);
 int  MMG5_intregmet(MMG5_pMesh,MMG5_pSol,MMG_int,int8_t,double, double*);
 int  MMG5_intvolmet(MMG5_pMesh,MMG5_pSol,MMG_int,int8_t,double, double*);
 int MMG3D_localParamReg(MMG5_pMesh,MMG_int,MMG_int*,int,MMG_int*,int,double*,double*,double*);

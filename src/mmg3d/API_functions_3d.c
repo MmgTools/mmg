@@ -305,7 +305,7 @@ int MMG3D_Get_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int* typEntity, MMG_int* n
   return 1;
 }
 
-int MMG3D_Get_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol *sol, MMG_int *nsols,
+int MMG3D_Get_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol *sol, int *nsols,
                                  MMG_int* np, int* typSol) {
   MMG5_pSol psl;
   MMG_int       j;
@@ -334,8 +334,8 @@ int MMG3D_Get_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol *sol, MMG_int *nsols
   return 1;
 }
 
-int MMG3D_Get_meshSize(MMG5_pMesh mesh, MMG_int* np, MMG_int* ne, int* nprism,
-                       MMG_int* nt, int * nquad, MMG_int* na) {
+int MMG3D_Get_meshSize(MMG5_pMesh mesh, MMG_int* np, MMG_int* ne, MMG_int* nprism,
+                       MMG_int* nt, MMG_int * nquad, MMG_int* na) {
 
   if ( np != NULL )
     *np = mesh->np;
@@ -1325,7 +1325,7 @@ int MMG3D_Unset_parallelTriangle(MMG5_pMesh mesh, MMG_int k) {
   return 1;
 }
 
-int MMG3D_Set_parallelTriangles(MMG5_pMesh mesh, int* parIdx, MMG_int npar) {
+int MMG3D_Set_parallelTriangles(MMG5_pMesh mesh, MMG_int* parIdx, MMG_int npar) {
   MMG_int k;
 
   for ( k=0; k<npar; ++k ){
@@ -1336,7 +1336,7 @@ int MMG3D_Set_parallelTriangles(MMG5_pMesh mesh, int* parIdx, MMG_int npar) {
   return 1;
 }
 
-int MMG3D_Unset_parallelTriangles(MMG5_pMesh mesh, int* parIdx, MMG_int npar) {
+int MMG3D_Unset_parallelTriangles(MMG5_pMesh mesh, MMG_int* parIdx, MMG_int npar) {
   MMG_int k;
 
   for ( k=0; k<npar; ++k ){
