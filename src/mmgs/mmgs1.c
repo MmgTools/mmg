@@ -1208,7 +1208,7 @@ static MMG_int adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
 
 /* analyze triangles and split or collapse to match gradation */
 static int adptri(MMG5_pMesh mesh,MMG5_pSol met,MMG_int* permNodGlob) {
-  int        it,maxits;
+  int        it,maxit;
   MMG_int    nnc,nns,nnf,nnm,nc,ns,nf,nm;
 
   /* iterative mesh modifications */
