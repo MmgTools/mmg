@@ -259,7 +259,7 @@ int boulechknm(MMG5_pMesh mesh,MMG_int start,int ip,MMG_int *list) {
  * point of the ridge. Both lists are returned enumerated in direct order.
  *
  */
-int bouletrid(MMG5_pMesh mesh,MMG_int start,MMG_int ip,MMG_int *il1,MMG_int *l1,MMG_int *il2,MMG_int *l2,MMG_int *ip0,MMG_int *ip1) {
+int bouletrid(MMG5_pMesh mesh,MMG_int start,MMG_int ip,int *il1,MMG_int *l1,int *il2,MMG_int *l2,MMG_int *ip0,MMG_int *ip1) {
   MMG5_pTria   pt;
   MMG5_pPoint  ppt;
   MMG_int          idp,k,kold,*adja,iel,*ilist1,*ilist2,*list1,*list2,aux;
