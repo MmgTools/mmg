@@ -402,7 +402,7 @@ int MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcibl
  MMG_int MMG3D_opttyp(MMG5_pMesh , MMG5_pSol ,MMG3D_pPROctree ,int);
 int MMG3D_swpItem(MMG5_pMesh ,  MMG5_pSol ,MMG3D_pPROctree ,MMG_int ,int );
 int MMG3D_splitItem(MMG5_pMesh ,  MMG5_pSol ,MMG3D_pPROctree ,MMG_int ,int ,double );
-int MMG3D_optbdry(MMG5_pMesh ,MMG5_pSol ,MMG3D_pPROctree ,int );
+int MMG3D_optbdry(MMG5_pMesh ,MMG5_pSol ,MMG3D_pPROctree ,MMG_int );
 int MMG3D_movetetrapoints(MMG5_pMesh ,MMG5_pSol ,MMG3D_pPROctree ,MMG_int ) ;
 
 int MMG5_trydisp(MMG5_pMesh,double *,short);

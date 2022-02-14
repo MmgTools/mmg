@@ -47,8 +47,8 @@ int MMG3D_movetetrapoints(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree PROctree
   MMG5_pxTetra  pxt;
   MMG5_pPoint   ppt;
   /* double        *n; */
-  MMG_int       ier/*,lists[MMG3D_LMAX+2]*/,listv[MMG3D_LMAX+2]
-  int           i0,i,j,/*,ilists*/,ilistv;
+  MMG_int       ier/*,lists[MMG3D_LMAX+2]*/,listv[MMG3D_LMAX+2];
+  int           i0,i,j/*,ilists*/,ilistv;
   int           /* improve,*/ internal,nm,/*maxit,*/base,ns;
 
   // improve = 1;

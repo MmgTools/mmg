@@ -793,7 +793,7 @@ int MMG3D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
   MMG5_ADD_MEM(mesh,(mesh->ne+1)*sizeof(int),"temporary table",
                printf("  Exit program.\n");
                return 0);
-  MMG5_SAFE_CALLOC(pile,mesh->ne+1,int,return 0);
+  MMG5_SAFE_CALLOC(pile,mesh->ne+1,MMG_int,return 0);
 
   /* Investigate only positive connected components */
   base = ++mesh->base;
