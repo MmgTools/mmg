@@ -195,7 +195,7 @@ int MMG3D_bdryBuild(MMG5_pMesh mesh) {
  *
  */
 
-int MMG3D_mark_packedPoints(MMG5_pMesh mesh,iMMG_int *np,MMG_int *nc) {
+int MMG3D_mark_packedPoints(MMG5_pMesh mesh,MMG_int *np,MMG_int *nc) {
   MMG5_pPoint   ppt;
   MMG_int           k;
 
