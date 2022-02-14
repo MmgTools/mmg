@@ -262,7 +262,8 @@ int boulechknm(MMG5_pMesh mesh,MMG_int start,int ip,MMG_int *list) {
 int bouletrid(MMG5_pMesh mesh,MMG_int start,MMG_int ip,int *il1,MMG_int *l1,int *il2,MMG_int *l2,MMG_int *ip0,MMG_int *ip1) {
   MMG5_pTria   pt;
   MMG5_pPoint  ppt;
-  MMG_int          idp,k,kold,*adja,iel,*ilist1,*ilist2,*list1,*list2,aux;
+  MMG_int      idp,k,kold,*adja,iel,*list1,*list2,aux;
+  int          *ilist1,*ilist2;
   uint8_t      i,iold,i1,i2,ipn;
   double       *n1,*n2,nt[3],ps1,ps2;
 
