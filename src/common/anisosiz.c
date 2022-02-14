@@ -534,7 +534,7 @@ int MMG5_solveDefmetregSys( MMG5_pMesh mesh, double r[3][3], double c[3],
  * point.
  *
  */
-int MMG5_solveDefmetrefSys( MMG5_pMesh mesh, MMG5_pPoint p0, int ipref[2],
+int MMG5_solveDefmetrefSys( MMG5_pMesh mesh, MMG5_pPoint p0, MMG_int ipref[2],
                              double r[3][3], double c[3],
                              double tAA[6], double tAb[3], double *m,
                              double isqhmin, double isqhmax, double hausd)
