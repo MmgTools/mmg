@@ -109,7 +109,7 @@ extern "C" {
       /* adja table */                                                  \
       MMG5_ADD_MEM(mesh,3*(mesh->ntmax-oldSiz)*sizeof(int),            \
                     "larger adja table",law);                           \
-      MMG5_SAFE_RECALLOC(mesh->adja,3*oldSiz+5,3*mesh->ntmax+5,int     \
+      MMG5_SAFE_RECALLOC(mesh->adja,3*oldSiz+5,3*mesh->ntmax+5,MMG_int     \
                           ,"larger adja table",law);                    \
     }                                                                   \
                                                                         \
@@ -137,9 +137,9 @@ int  MMGS_bdryUpdate(MMG5_pMesh mesh);
 int  boulet(MMG5_pMesh mesh,MMG_int start,int ip,MMG_int *list);
 int  boulechknm(MMG5_pMesh mesh,MMG_int start,int ip,MMG_int *list);
 int  bouletrid(MMG5_pMesh mesh,MMG_int start,MMG_int ip,int *il1,MMG_int *l1,int *il2,MMG_int *l2,MMG_int *ip0,MMG_int *ip1);
-int  MMGS_newPt(MMG5_pMesh mesh,double c[3],double n[3]);
+MMG_int  MMGS_newPt(MMG5_pMesh mesh,double c[3],double n[3]);
 void MMGS_delPt(MMG5_pMesh mesh,MMG_int ip);
-int  MMGS_newElt(MMG5_pMesh mesh);
+MMG_int  MMGS_newElt(MMG5_pMesh mesh);
 int  MMGS_delElt(MMG5_pMesh mesh,MMG_int iel);
 int  chkedg(MMG5_pMesh ,MMG_int );
 int  MMG5_mmgsBezierCP(MMG5_pMesh ,MMG5_Tria*, MMG5_pBezier, int8_t ori);
