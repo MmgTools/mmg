@@ -165,7 +165,7 @@ int  litcol(MMG5_pMesh mesh,MMG_int k,int8_t i,double kal);
 int  MMG5_mmgsChkmsh(MMG5_pMesh,int,int);
 int  paratmet(double c0[3],double n0[3],double m[6],double c1[3],double n1[3],double mt[6]);
 int  intregmet(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t i,double s,double mr[6]);
-int  MMG5_intridmet(MMG5_pMesh,MMG5_pSol,int,int,double,double*,double*);
+int  MMG5_intridmet(MMG5_pMesh,MMG5_pSol,MMG_int,MMG_int,double,double*,double*);
 int  setref(MMG5_pMesh,MMG_int,int,int);
 int  delref(MMG5_pMesh);
 int  chkmet(MMG5_pMesh,MMG5_pSol);

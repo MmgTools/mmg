@@ -1076,9 +1076,9 @@ int MMG3D_localParamNm(MMG5_pMesh mesh,MMG_int iel,int iface,int ia,
   MMG5_pxTetra  pxt;
   MMG5_pPar     par;
   double        hausd, hmin, hmax;
-  int           l,k,isloc,ifac1,ifac2;
+  int           l,k,isloc;
   int           ilistv;
-  MMG_int       listv[MMG3D_LMAX+2];
+  MMG_int       listv[MMG3D_LMAX+2],ifac1,ifac2;
   static int8_t mmgWarn0;
 
 
