@@ -392,7 +392,7 @@ int  MMG3D_normalAdjaTri(MMG5_pMesh,MMG_int,int8_t,int,double n[3]);
 int  MMG5_chkswpbdy(MMG5_pMesh, MMG5_pSol,MMG_int*, int, MMG_int, MMG_int,int8_t);
 int  MMG5_swpbdy(MMG5_pMesh,MMG5_pSol,MMG_int*,int,MMG_int,MMG3D_pPROctree,int8_t);
 int  MMG5_swpgen(MMG5_pMesh,MMG5_pSol,int, int, MMG_int*,MMG3D_pPROctree,int8_t);
-int  MMG5_chkswpgen(MMG5_pMesh,MMG5_pSol,MMG_int,int,int*,MMG_int*,double,int8_t);
+MMG_int  MMG5_chkswpgen(MMG5_pMesh,MMG5_pSol,MMG_int,int,int*,MMG_int*,double,int8_t);
 int  MMG3D_swap23(MMG5_pMesh,MMG5_pSol,MMG_int,int8_t,int,int,MMG_int,int);
 int  MMG5_srcface(MMG5_pMesh mesh,int n0,int n1,int n2);
 int MMG5_chkptonbdy(MMG5_pMesh,MMG_int);
