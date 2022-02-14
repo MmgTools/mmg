@@ -136,7 +136,7 @@ int  MMGS_mmgs2(MMG5_pMesh ,MMG5_pSol, MMG5_pSol);
 int  MMGS_bdryUpdate(MMG5_pMesh mesh);
 int  boulet(MMG5_pMesh mesh,MMG_int start,int ip,MMG_int *list);
 int  boulechknm(MMG5_pMesh mesh,MMG_int start,int ip,MMG_int *list);
-int  bouletrid(MMG5_pMesh mesh,MMG_int start,MMG_int ip,MMG_int *il1,MMG_int *l1,MMG_int *il2,MMG_int *l2,MMG_int *ip0,MMG_int *ip1);
+int  bouletrid(MMG5_pMesh mesh,MMG_int start,MMG_int ip,int *il1,MMG_int *l1,int *il2,MMG_int *l2,MMG_int *ip0,MMG_int *ip1);
 int  MMGS_newPt(MMG5_pMesh mesh,double c[3],double n[3]);
 void MMGS_delPt(MMG5_pMesh mesh,MMG_int ip);
 int  MMGS_newElt(MMG5_pMesh mesh);
@@ -219,8 +219,8 @@ extern int    (*MMGS_defsiz)(MMG5_pMesh mesh,MMG5_pSol met);
 extern int    (*MMGS_gradsiz)(MMG5_pMesh mesh,MMG5_pSol met);
 extern int    (*MMGS_gradsizreq)(MMG5_pMesh mesh,MMG5_pSol met);
 extern int    (*intmet)(MMG5_pMesh mesh,MMG5_pSol met,MMG_int k,int8_t i,MMG_int ip,double s);
-extern int    (*movridpt)(MMG5_pMesh mesh,MMG5_pSol met,MMG_int *list,MMG_int ilist);
-extern int    (*movintpt)(MMG5_pMesh mesh,MMG5_pSol met,MMG_int *list,MMG_int ilist);
+extern int    (*movridpt)(MMG5_pMesh mesh,MMG5_pSol met,MMG_int *list,int ilist);
+extern int    (*movintpt)(MMG5_pMesh mesh,MMG5_pSol met,MMG_int *list,int ilist);
 
 /**
  * Set common pointer functions between mmgs and mmg3d to the matching mmgs
