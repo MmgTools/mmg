@@ -507,7 +507,7 @@ int    MMG5_intmet_ani(MMG5_pMesh,MMG5_pSol,MMG_int,int8_t,MMG_int, double);
 int    MMG3D_intmet33_ani(MMG5_pMesh,MMG5_pSol,MMG_int,int8_t,MMG_int, double);
 int    MMG5_interp4bar_ani(MMG5_pMesh,MMG5_pSol,MMG_int,MMG_int,double *);
 int    MMG5_interp4bar33_ani(MMG5_pMesh,MMG5_pSol,MMG_int,MMG_int,double *);
-int    MMG5_interp4bar_iso(MMG5_pMesh,MMG5_pSol,int,int,double *);
+int    MMG5_interp4bar_iso(MMG5_pMesh,MMG5_pSol,MMG_int,MMG_int,double *);
 int    MMG3D_defsiz_iso(MMG5_pMesh,MMG5_pSol );
 int    MMG3D_defsiz_ani(MMG5_pMesh ,MMG5_pSol );
 int    MMG3D_gradsiz_iso(MMG5_pMesh ,MMG5_pSol );

@@ -26,7 +26,7 @@
 
 int  (*MMG5_chkmsh)(MMG5_pMesh,int,int)=NULL;
 int  (*MMG5_bezierCP)(MMG5_pMesh ,MMG5_Tria *,MMG5_pBezier ,int8_t )=NULL;
-double (*MMG5_lenSurfEdg)(MMG5_pMesh mesh,MMG5_pSol sol ,int ,int, int8_t )=NULL;
+double (*MMG5_lenSurfEdg)(MMG5_pMesh mesh,MMG5_pSol sol ,MMG_int ,MMG_int, int8_t )=NULL;
 MMG_int  (*MMG5_indElt)(MMG5_pMesh mesh,MMG_int kel)=NULL;
 MMG_int  (*MMG5_indPt)(MMG5_pMesh mesh,MMG_int kp)=NULL;
 int  (*MMG5_grad2met_ani)(MMG5_pMesh,MMG5_pSol,MMG5_pTria,MMG_int,MMG_int)=NULL;
