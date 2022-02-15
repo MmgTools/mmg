@@ -113,8 +113,8 @@ MMG_int MMG2D_anaelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
   MMG5_pPoint     ppt,p1,p2;
   MMG5_Hash       hash;
   double          len,s,o[2],no[2];
-  int             npinit,ni;
-  MMG_int         ns,nc,k,nt,ip1,ip2,ip,it,vx[3];
+  int             npinit,ni,it;
+  MMG_int         ns,nc,k,nt,ip1,ip2,ip,vx[3];
   int8_t          i,ic,i1,i2,ier;
   static int8_t   mmgWarn0=0;
 
@@ -439,7 +439,8 @@ MMG_int MMG2D_colelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
   MMG5_pTria   pt;
   MMG5_pPoint  p1,p2;
   double       ux,uy,ll,hmin2;
-  MMG_int          ilist,k;
+  MMG_int          k;
+  int          ilist;
   MMG_int          nc;
   uint8_t      i,i1,i2,open;
   MMG_int      list[MMG2D_LONMAX+2];
@@ -700,8 +701,8 @@ int MMG2D_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria        pt;
   MMG5_pPoint       p1,p2;
   double            len;
-  MMG_int           k,ilist;
-  int               nc;
+  MMG_int           k,nc;
+  int               ilist;
   int8_t            i,i1,i2,open;
   MMG_int           list[MMG2D_LONMAX+2];
 
