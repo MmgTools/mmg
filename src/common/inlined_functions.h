@@ -318,7 +318,7 @@ inline double MMG5_lenSurfEdg_iso(MMG5_pMesh mesh,MMG5_pSol met,int ip1,int ip2,
  * spans the number of entries of each eigenvector). So the inverse (left
  * eigenvectors) is also stored with transposed indices.
  */
-inline
+static inline
 void MMG5_simredmat(int8_t dim,double *m,double *dm,double *iv) {
   int8_t i,j,k,ij;
 
