@@ -1,11 +1,27 @@
 name: GitHub macOS CI
 
-on: [push, pull_request]
+on:
+  # run tests on push events
+  push:
+  # run tests on PR events
+  pull_request:
+  # run tests manually on a given branch (default is master)
+  workflow_dispatch:
+    # Inputs the workflow accepts.
+    inputs:
+      branch:
+        # branch to test
+        description: 'branch to test'
+        # Default value if no value is explicitly provided
+        default: 'master'
+        required: false
 
+# job
 jobs:
   macOS:
     runs-on: macOS-10.15
 
+    # Launch a matrix of jobs
     strategy:
         matrix:
             build: [Release]
@@ -21,7 +37,15 @@ jobs:
                 vtk: on
 
     steps:
+      # checkout the provided branch name if workflow is manually run
       - uses: actions/checkout@v2
+        if: github.event_name == 'workflow_dispatch'
+        with:
+          ref: ${{github.event.inputs.branch}}
+
+      # checkout the event branch for automatic workflows
+      - uses: actions/checkout@v2
+        if: github.event_name != 'workflow_dispatch'
 
       - name: Install VTK
         run: |
