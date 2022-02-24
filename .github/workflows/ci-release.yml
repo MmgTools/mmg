@@ -105,7 +105,7 @@ jobs:
 
       - name: Install LibCommons
         # LinearElasticity don't build with MSVC
-        if: matrix.os != 'windows'
+        if: matrix.os != 'windows-2022'
         run: |
           git clone https://github.com/ISCDtoolbox/Commons.git
           cd Commons
@@ -116,7 +116,7 @@ jobs:
 
       - name: Install LinearElasticity
         # LinearElasticity don't build with MSVC
-        if: matrix.os != 'windows'
+        if: matrix.os != 'windows-2022'
         run: |
           git clone https://github.com/ISCDtoolbox/LinearElasticity.git
           cd LinearElasticity
@@ -125,27 +125,13 @@ jobs:
           cmake ..
           make install
 
-      - name: Populate environment variables
-        run: |
-          export ARGS="-DCI_CONTEXT=ON \
-            -DBUILD_TESTING=ON \
-            -DCMAKE_BUILD_TYPE=${{matrix.build}} \
-            -DPATTERN=${{matrix.pattern}} \
-            -DUSE_SCOTCH=${{matrix.scotch}} \
-            -DUSE_VTK={{matrix.vtk}} \
-            -DTEST_LIBMMG=ON \
-            -DTEST_LIBMMGS=ON \
-            -DTEST_LIBMMG2D=ON \
-            -DTEST_LIBMMG3D=ON \
-            .."
-          if [ "$RUNNER_OS" == "windows" ]; then
-            export BUILD_LINE="cmake --build . --config Release"
-            export TEST_ARGS="-C Release"
-          else
-            export BUILD_LINE="make -j $NJOBS"
+
+            if [ "$RUNNER_OS" == "windows" ]; then
+              BUILD_LINE:"cmake --build . --config Release"
+              TEST_ARGS:"-C Release"
+            else
+              BUILD_LINE="make -j 2"
           fi
-        env:
-          NJOBS: "2"
 
       - name: Print options
         run: |
@@ -158,51 +144,92 @@ jobs:
             BUILD_LINE: $BUILD_LINE,
             TEST_ARGS:  $TEST_ARGS"
 
-      - name: Configure Mmg for linux
-        if: matrix.os == 'Linux'
+      - name: Configure Mmg for Linux
+        if: matrix.os == 'ubuntu-20.04'
         run: |
           mkdir build
           cd build
           # gfortran compiler depends on the os
-          cmake -DCMAKE_Fortran_COMPILER=gfortran-9 "$ARGS"
+          cmake -DCI_CONTEXT=ON \
+            -DBUILD_TESTING=ON \
+            -DCMAKE_BUILD_TYPE=${{matrix.build}} \
+            -DPATTERN=${{matrix.pattern}} \
+            -DUSE_SCOTCH=${{matrix.scotch}} \
+            -DUSE_VTK={{matrix.vtk}} \
+            -DTEST_LIBMMG=ON \
+            -DTEST_LIBMMGS=ON \
+            -DTEST_LIBMMG2D=ON \
+            -DTEST_LIBMMG3D=ON \
+            -DCMAKE_Fortran_COMPILER=gfortran-9 \
+            .."
 
       - name: Configure Mmg for macOS
-        if: matrix.os == 'macOS'
+        if: matrix.os == 'macos-10.15'
         run: |
           mkdir build
           cd build
           # gfortran compiler depends on the os
-          cmake -DCMAKE_Fortran_COMPILER=gfortran-11 "$ARGS"
+          cmake -DCI_CONTEXT=ON \
+            -DBUILD_TESTING=ON \
+            -DCMAKE_BUILD_TYPE=${{matrix.build}} \
+            -DPATTERN=${{matrix.pattern}} \
+            -DUSE_SCOTCH=${{matrix.scotch}} \
+            -DUSE_VTK={{matrix.vtk}} \
+            -DTEST_LIBMMG=ON \
+            -DTEST_LIBMMGS=ON \
+            -DTEST_LIBMMG2D=ON \
+            -DTEST_LIBMMG3D=ON \
+            -DCMAKE_Fortran_COMPILER=gfortran-11 \
+            .."
 
       - name: Configure Mmg for windows
-        if: matrix.os == 'windows'
+        if: matrix.os == 'windows-2022'
         run: |
           mkdir build
           cd build
-          cmake "$ARGS"
+          cmake -DCI_CONTEXT=ON \
+            -DBUILD_TESTING=ON \
+            -DCMAKE_BUILD_TYPE=${{matrix.build}} \
+            -DPATTERN=${{matrix.pattern}} \
+            -DUSE_SCOTCH=${{matrix.scotch}} \
+            -DUSE_VTK={{matrix.vtk}} \
+            -DTEST_LIBMMG=ON \
+            -DTEST_LIBMMGS=ON \
+            -DTEST_LIBMMG2D=ON \
+            -DTEST_LIBMMG3D=ON \
+            .."
         #shell: powershell
 
       - name: Build Mmg for macOS or Linux
+        if: matrix.os != 'windows-2022'
         run: |
           cd build
-          "$BUILD_LINE"
+          make -j "$NJOBS"
+        env:
+          NJOBS: "2"
 
       - name: Build Mmg for windows
+        if: matrix.os == 'windows-2022'
         run: |
           cd build
-          "$BUILD_LINE"
+          cmake --build . --config Release
         # shell: powershell
 
-      - name: Test Mmg
-        if: ${{ matrix.vtk == 'off' }}
+      - name: Test Mmg for macOS or Linux
+        if: ${{ matrix.vtk == 'off' }} &&  ${{ matrix.os != 'Windows-2022' }}
         run: |
           cd build
-          ctest -VV "$CTEST_ARGS""
+          ctest -VV "$CTEST_ARGS"
+
+      - name: Test Mmg for Windows
+        if: ${{ matrix.vtk == 'off' }} &&  ${{ matrix.os == 'Windows-2022' }}
+        run: |
+          cd build
+          ctest -VV "$CTEST_ARGS" -C Release
         #shell: powershell
 
       - name: Test non native I/Os of Mmg
         if: ${{ matrix.vtk == 'on' }}
         run: |
           cd build
-          ctest -R "msh|vtk" -VV "$CTEST_ARGS""
-        # shell: powershell
+          ctest -R "msh|vtk" -VV
