@@ -180,24 +180,29 @@ jobs:
           mkdir build
           cd build
           cmake "$ARGS"
-        shell: powershell
+        #shell: powershell
 
-      - name: Build Mmg
+      - name: Build Mmg for macOS or Linux
         run: |
           cd build
           "$BUILD_LINE"
-        shell: powershell
+
+      - name: Build Mmg for windows
+        run: |
+          cd build
+          "$BUILD_LINE"
+        # shell: powershell
 
       - name: Test Mmg
         if: ${{ matrix.vtk == 'off' }}
         run: |
           cd build
           ctest -VV "$CTEST_ARGS""
-        shell: powershell
+        #shell: powershell
 
       - name: Test non native I/Os of Mmg
         if: ${{ matrix.vtk == 'on' }}
         run: |
           cd build
           ctest -R "msh|vtk" -VV "$CTEST_ARGS""
-        shell: powershell
+        # shell: powershell
