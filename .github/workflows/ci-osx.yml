@@ -68,20 +68,19 @@ jobs:
             Pattern: ${{ matrix.pattern }},
             Scotch:  ${{ matrix.scotch }},
             VTK:     ${{ matrix.vtk }}"
-          git clone https://github.com/MmgTools/mmg.git && cd mmg
           mkdir build && cd build
           cmake \
-          -DBUILD_TESTING=ON \
-          -DCMAKE_BUILD_TYPE=${{matrix.build}} \
-          -DPATTERN=${{matrix.pattern}} \
-          -DUSE_SCOTCH=${{matrix.scotch}} \
-          -DUSE_VTK={{matrix.vtk}} \
-          -DCMAKE_Fortran_COMPILER=gfortran-11 \
-          -DTEST_LIBMMG=ON \
-          -DTEST_LIBMMGS=ON \
-          -DTEST_LIBMMG2D=ON \
-          -DTEST_LIBMMG3D=ON
-          ..
+            -DBUILD_TESTING=ON \
+            -DCMAKE_BUILD_TYPE=${{matrix.build}} \
+            -DPATTERN=${{matrix.pattern}} \
+            -DUSE_SCOTCH=${{matrix.scotch}} \
+            -DUSE_VTK={{matrix.vtk}} \
+            -DCMAKE_Fortran_COMPILER=gfortran-11 \
+            -DTEST_LIBMMG=ON \
+            -DTEST_LIBMMGS=ON \
+            -DTEST_LIBMMG2D=ON \
+            -DTEST_LIBMMG3D=ON \
+            ..
 
       - name: Build Mmg
         run: |
