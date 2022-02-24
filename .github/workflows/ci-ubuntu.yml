@@ -1,4 +1,4 @@
-name: GitHub macOS CI
+name: GitHub ubuntu CI
 
 on:
   # run tests on push events
@@ -18,8 +18,8 @@ on:
 
 # job
 jobs:
-  macOS:
-    runs-on: macOS-10.15
+  ubuntu:
+    runs-on: ubuntu-20.04
 
     # Launch a matrix of jobs
     strategy:
@@ -49,11 +49,8 @@ jobs:
 
       - name: Install VTK
         run: |
-          brew install vtk@8.2
-          brew link vtk@8.2
-       # cp /usr/local/opt/hdf5/lib/libhdf5.dylib /usr/local/opt/hdf5/lib/libhdf5.200.dylib
-       # cp /usr/local/opt/hdf5/lib/libhdf5_hl.dylib /usr/local/opt/hdf5/lib/libhdf5_hl.200.dylib
-       # cp /usr/local/opt/hdf5/lib/libhdf5_hl_cpp.dylib /usr/local/opt/hdf5/lib/libhdf5_hl_cpp.200.dylib
+          sudo apt-get update
+          sudo apt-get install -y libvtk7-dev
 
       - name: Install Sctoch
         run: |
@@ -61,7 +58,7 @@ jobs:
           cd scotch
           git checkout v6.1.3
           cd src
-          cp Make.inc/Makefile.inc.i686_mac_darwin10 Makefile.inc
+          cp Make.inc/Makefile.inc.x86-64_pc_linux2 Makefile.inc
           make scotch -j "$NJOBS"
           make install scotch -j "$NJOBS"
         env:
