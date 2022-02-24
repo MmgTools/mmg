@@ -148,7 +148,7 @@ jobs:
           mkdir build
           cd build
           # gfortran compiler depends on the os
-          cmake "-DCI_CONTEXT=ON \
+          cmake -DCI_CONTEXT=ON \
             -DBUILD_TESTING=ON \
             -DCMAKE_BUILD_TYPE=${{matrix.build}} \
             -DPATTERN=${{matrix.pattern}} \
@@ -159,7 +159,7 @@ jobs:
             -DTEST_LIBMMG2D=ON \
             -DTEST_LIBMMG3D=ON \
             -DCMAKE_Fortran_COMPILER=gfortran-9 \
-            .."
+            ..
 
       - name: Configure Mmg for macOS
         if: matrix.os == 'macos-10.15'
@@ -178,14 +178,14 @@ jobs:
             -DTEST_LIBMMG2D=ON \
             -DTEST_LIBMMG3D=ON \
             -DCMAKE_Fortran_COMPILER=gfortran-11 \
-            .."
+            ..
 
       - name: Configure Mmg for windows
         if: matrix.os == 'windows-2022'
         run: |
           mkdir build
           cd build
-          cmake "-DCI_CONTEXT=ON \
+          cmake -DCI_CONTEXT=ON \
             -DBUILD_TESTING=ON \
             -DCMAKE_BUILD_TYPE=${{matrix.build}} \
             -DPATTERN=${{matrix.pattern}} \
@@ -195,7 +195,7 @@ jobs:
             -DTEST_LIBMMGS=ON \
             -DTEST_LIBMMG2D=ON \
             -DTEST_LIBMMG3D=ON \
-            .."
+            ..
         #shell: powershell
 
       - name: Build Mmg for macOS or Linux
