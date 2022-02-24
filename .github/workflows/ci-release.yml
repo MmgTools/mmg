@@ -33,8 +33,14 @@ jobs:
             include:
               # test vtk only without scotch and with delaunay insertion (more
               # tests are useless)
-              - build: Release
-                os: [ubuntu-20.04,macos-10.15]
+              - os: ubuntu-20.04
+                build: Release
+                pattern: off
+                scotch: off
+                vtk: on
+
+              - os: macos-10.15
+                build: Release
                 pattern: off
                 scotch: off
                 vtk: on
@@ -43,9 +49,16 @@ jobs:
               # don't build with MSVC)
               - os: windows-2022
                 build: Release
-                pattern: [off,on]
+                pattern: off
                 scotch: off
                 vtk: off
+
+              - os: windows-2022
+                build: Release
+                pattern: on
+                scotch: off
+                vtk: off
+
 
     steps:
       # checkout the provided branch name if workflow is manually run
@@ -80,8 +93,10 @@ jobs:
           cd src
           if [ "$RUNNER_OS" == "macOS" ]; then
             cp Make.inc/Makefile.inc.i686_mac_darwin10 Makefile.inc
-          elif [ "$RUNNER_OS" == "linux" ]; then
+            echo "macOS build"
+          elif [ "$RUNNER_OS" == "Linux" ]; then
             cp Make.inc/Makefile.inc.x86-64_pc_linux2 Makefile.inc
+            echo "Linux build"
           fi
           make scotch -j "$NJOBS"
           make install scotch -j "$NJOBS"
