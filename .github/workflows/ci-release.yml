@@ -140,9 +140,7 @@ jobs:
             Build:   ${{ matrix.build }},
             Pattern: ${{ matrix.pattern }},
             Scotch:  ${{ matrix.scotch }},
-            VTK:     ${{ matrix.vtk }},
-            BUILD_LINE: $BUILD_LINE,
-            TEST_ARGS:  $TEST_ARGS"
+            VTK:     ${{ matrix.vtk }}"
 
       - name: Configure Mmg for Linux
         if: matrix.os == 'ubuntu-20.04'
@@ -150,7 +148,7 @@ jobs:
           mkdir build
           cd build
           # gfortran compiler depends on the os
-          cmake -DCI_CONTEXT=ON \
+          cmake "-DCI_CONTEXT=ON \
             -DBUILD_TESTING=ON \
             -DCMAKE_BUILD_TYPE=${{matrix.build}} \
             -DPATTERN=${{matrix.pattern}} \
@@ -187,7 +185,7 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake -DCI_CONTEXT=ON \
+          cmake "-DCI_CONTEXT=ON \
             -DBUILD_TESTING=ON \
             -DCMAKE_BUILD_TYPE=${{matrix.build}} \
             -DPATTERN=${{matrix.pattern}} \
@@ -216,13 +214,13 @@ jobs:
         # shell: powershell
 
       - name: Test Mmg for macOS or Linux
-        if: ${{ matrix.vtk == 'off' }} &&  ${{ matrix.os != 'Windows-2022' }}
+        if: ${{ matrix.vtk == 'off' }} &&  ${{ matrix.os != 'windows-2022' }}
         run: |
           cd build
           ctest -VV "$CTEST_ARGS"
 
       - name: Test Mmg for Windows
-        if: ${{ matrix.vtk == 'off' }} &&  ${{ matrix.os == 'Windows-2022' }}
+        if: ${{ matrix.vtk == 'off' }} &&  ${{ matrix.os == 'windows-2022' }}
         run: |
           cd build
           ctest -VV "$CTEST_ARGS" -C Release
