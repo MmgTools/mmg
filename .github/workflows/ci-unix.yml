@@ -75,7 +75,7 @@ jobs:
           if [ "$RUNNER_OS" == "macOS" ]; then
             cp Make.inc/Makefile.inc.i686_mac_darwin10 Makefile.inc
           else
-            cp Make.inc/Makefile.inc.x86-64_pc_linux Makefile.inc
+            cp Make.inc/Makefile.inc.x86-64_pc_linux2 Makefile.inc
           fi
           make scotch -j "$NJOBS"
           make install scotch -j "$NJOBS"
