@@ -97,7 +97,7 @@ jobs:
             -DPATTERN=${{matrix.pattern}} \
             -DUSE_SCOTCH=${{matrix.scotch}} \
             -DUSE_VTK={{matrix.vtk}} \
-            -DCMAKE_Fortran_COMPILER=gfortran-11 \
+            -DCMAKE_Fortran_COMPILER=gfortran-9 \
             -DTEST_LIBMMG=ON \
             -DTEST_LIBMMGS=ON \
             -DTEST_LIBMMG2D=ON \
