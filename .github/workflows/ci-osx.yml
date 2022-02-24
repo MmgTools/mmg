@@ -91,12 +91,13 @@ jobs:
           NJOBS: "2"
 
       - name: Test Mmg
-        if: ${{ matrix.vtk }}
-        run: |
-          cd mmg/build
-          ctest -R "msh|vtk" -VV
-
-        else:
+        if: ${{ matrix.vtk == 'off' }}
         run: |
           cd mmg/build
           ctest -VV
+
+      - name: Test non native I/Os of Mmg
+        if: ${{ matrix.vtk == 'on' }}
+        run: |
+          cd mmg/build
+          ctest -R "msh|vtk" -VV
