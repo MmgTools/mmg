@@ -84,7 +84,7 @@ jobs:
 
       - name: Build Mmg
         run: |
-          cd mmg/build
+          cd build
           make -j "$NJOBS"
         env:
           NJOBS: "2"
@@ -92,11 +92,11 @@ jobs:
       - name: Test Mmg
         if: ${{ matrix.vtk == 'off' }}
         run: |
-          cd mmg/build
+          cd build
           ctest -VV
 
       - name: Test non native I/Os of Mmg
         if: ${{ matrix.vtk == 'on' }}
         run: |
-          cd mmg/build
+          cd build
           ctest -R "msh|vtk" -VV
