@@ -143,6 +143,7 @@ jobs:
             export TEST_ARGS="-C Release"
           else
             export BUILD_LINE="make -j $NJOBS"
+          fi
         env:
           NJOBS: "2"
 
@@ -153,7 +154,9 @@ jobs:
             Build:   ${{ matrix.build }},
             Pattern: ${{ matrix.pattern }},
             Scotch:  ${{ matrix.scotch }},
-            VTK:     ${{ matrix.vtk }}"
+            VTK:     ${{ matrix.vtk }},
+            BUILD_LINE: $BUILD_LINE,
+            TEST_ARGS:  $TEST_ARGS"
 
       - name: Configure Mmg for linux
         if: matrix.os == 'linux'
