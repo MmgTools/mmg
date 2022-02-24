@@ -78,7 +78,7 @@ jobs:
           if [ "$RUNNER_OS" == "macOS" ]; then
             brew install vtk@8.2
             brew link vtk@8.2
-          elif [ "$RUNNER_OS" == "linux" ]; then
+          elif [ "$RUNNER_OS" == "Linux" ]; then
             sudo apt-get update
             sudo apt-get install -y libvtk7-dev
           fi
@@ -159,7 +159,7 @@ jobs:
             TEST_ARGS:  $TEST_ARGS"
 
       - name: Configure Mmg for linux
-        if: matrix.os == 'linux'
+        if: matrix.os == 'Linux'
         run: |
           mkdir build
           cd build
