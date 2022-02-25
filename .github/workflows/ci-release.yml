@@ -61,6 +61,36 @@ jobs:
 
 
     steps:
+      - name: Print options and set environment variables
+        run: |
+          echo "${{ github.event.inputs.name }}:
+            Os:      ${{ matrix.os }},
+            Build:   ${{ matrix.build }},
+            Pattern: ${{ matrix.pattern }},
+            Scotch:  ${{ matrix.scotch }},
+            VTK:     ${{ matrix.vtk }}"
+
+          if [ "$RUNNER_OS" == "macOS" ]; then
+             echo "SCOTCH_MAKE=Make.inc/Makefile.inc.i686_mac_darwin10" >> "$GITHUB_ENV"
+             echo "FORT_FLG=\"-DCMAKE_Fortran_COMPILER=gfortran-11\"" >> "$GITHUB_ENV"
+             echo "BUILD_CMD=make -j $NJOBS" >> "$GITHUB_ENV"
+
+          elif [ "$RUNNER_OS" == "Linux" ]; then
+             echo "SCOTCH_MAKE=Make.inc/Makefile.inc.x86-64_pc_linux2" >> "$GITHUB_ENV"
+             echo "FORT_FLG=\"-DCMAKE_Fortran_COMPILER=gfortran-9\"" >> "$GITHUB_ENV"
+             echo "BUILD_CMD=make -j $NJOBS" >> "$GITHUB_ENV"
+
+          else
+             echo "BUILD_CMD=cmake --build . --config Release" >> "$GITHUB_ENV"
+             echo "TEST_FLG=-C Release" >> "$GITHUB_ENV"
+          fi
+
+          # Remark: we can't print env variable value in this context
+        env:
+          NJOBS: "2"
+
+        shell: bash
+
       # checkout the provided branch name if workflow is manually run
       - uses: actions/checkout@v2
         if: github.event_name == 'workflow_dispatch'
@@ -91,13 +121,7 @@ jobs:
           cd scotch
           git checkout v6.1.3
           cd src
-          if [ "$RUNNER_OS" == "macOS" ]; then
-            cp Make.inc/Makefile.inc.i686_mac_darwin10 Makefile.inc
-            echo "macOS build"
-          elif [ "$RUNNER_OS" == "Linux" ]; then
-            cp Make.inc/Makefile.inc.x86-64_pc_linux2 Makefile.inc
-            echo "Linux build"
-          fi
+          cp ${{ env.SCOTCH_MAKE }} Makefile.inc
           make scotch -j "$NJOBS"
           make install scotch -j "$NJOBS"
         env:
@@ -125,97 +149,37 @@ jobs:
           cmake ..
           make install
 
-
-            if [ "$RUNNER_OS" == "windows" ]; then
-              BUILD_LINE:"cmake --build . --config Release"
-              TEST_ARGS:"-C Release"
-            else
-              BUILD_LINE="make -j 2"
-          fi
-
-      - name: Print options
-        run: |
-          echo "${{ github.event.inputs.name }}:
-            Os:      ${{ matrix.os }},
-            Build:   ${{ matrix.build }},
-            Pattern: ${{ matrix.pattern }},
-            Scotch:  ${{ matrix.scotch }},
-            VTK:     ${{ matrix.vtk }}"
-
-      - name: Configure Mmg for Linux
-        if: matrix.os == 'ubuntu-20.04'
+      - name: Configure Mmg
         run: |
           mkdir build
           cd build
           # gfortran compiler depends on the os
-          cmake -DCI_CONTEXT=ON \
+          cmake ${{ env.FORT_FLG }} \
+            -DCI_CONTEXT=ON \
             -DBUILD_TESTING=ON \
-            -DCMAKE_BUILD_TYPE=${{matrix.build}} \
-            -DPATTERN=${{matrix.pattern}} \
-            -DUSE_SCOTCH=${{matrix.scotch}} \
-            -DUSE_VTK=${{matrix.vtk}} \
+            -DCMAKE_BUILD_TYPE=${{ matrix.build }} \
+            -DPATTERN=${{ matrix.pattern }} \
+            -DUSE_SCOTCH=${{ matrix.scotch }} \
+            -DUSE_VTK=${{ matrix.vtk }} \
             -DTEST_LIBMMG=ON \
             -DTEST_LIBMMGS=ON \
             -DTEST_LIBMMG2D=ON \
-            -DTEST_LIBMMG3D=ON \
-            -DCMAKE_Fortran_COMPILER=gfortran-9 \
-            ..
+            -DTEST_LIBMMG3D=ON ..
+        shell: bash
 
-      - name: Configure Mmg for macOS
-        if: matrix.os == 'macos-10.15'
-        run: |
-          mkdir build
-          cd build
-          # gfortran compiler depends on the os
-          cmake -DCI_CONTEXT=ON \
-            -DBUILD_TESTING=ON \
-            -DCMAKE_BUILD_TYPE=${{matrix.build}} \
-            -DPATTERN=${{matrix.pattern}} \
-            -DUSE_SCOTCH=${{matrix.scotch}} \
-            -DUSE_VTK=${{matrix.vtk}} \
-            -DTEST_LIBMMG=ON \
-            -DTEST_LIBMMGS=ON \
-            -DTEST_LIBMMG2D=ON \
-            -DTEST_LIBMMG3D=ON \
-            -DCMAKE_Fortran_COMPILER=gfortran-11 \
-            ..
-
-      - name: Configure Mmg for windows
-        if: matrix.os == 'windows-2022'
-        run: |
-          mkdir build
-          cd build
-          cmake -DCI_CONTEXT=ON -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=${{matrix.build}} -DPATTERN=${{matrix.pattern}} -DUSE_SCOTCH=${{matrix.scotch}} -DUSE_VTK=${{matrix.vtk}} -DTEST_LIBMMG=ON -DTEST_LIBMMGS=ON -DTEST_LIBMMG2D=ON -DTEST_LIBMMG3D=ON ..
-        #shell: powershell
-
-      - name: Build Mmg for macOS or Linux
-        if: matrix.os != 'windows-2022'
+      - name: Build Mmg
         run: |
           cd build
-          make -j "$NJOBS"
-        env:
-          NJOBS: "2"
+          ${{env.BUILD_CMD}}
 
-      - name: Build Mmg for windows
-        if: matrix.os == 'windows-2022'
+      - name: Test Mmg
+        if: matrix.vtk == 'off'
         run: |
           cd build
-          cmake --build . --config Release
-
-      - name: Test Mmg for macOS or Linux
-        if: matrix.vtk == 'off' && matrix.os != 'windows-2022'
-        run: |
-          cd build
-          ctest -VV
-
-      - name: Test Mmg for Windows
-        if: matrix.vtk == 'off' && matrix.os == 'windows-2022'
-        run: |
-          cd build
-          ctest -VV -C Release
+          ctest -VV ${{ env.TEST_FLG }}
 
       - name: Test non native I/Os of Mmg
         if: matrix.vtk == 'on'
         run: |
           cd build
-          ctest -R "msh|vtk" -VV
+          ctest -R "msh|vtk" -VV ${{ env.TEST_FLG }}
