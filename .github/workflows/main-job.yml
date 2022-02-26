@@ -96,7 +96,7 @@ jobs:
 
       # checkout the event branch for automatic workflows
       - uses: actions/checkout@v2
-        if: !inputs.branch_name
+        if: inputs.branch_name == ''
 
       - name: Install VTK
         # Download vtk only if used
