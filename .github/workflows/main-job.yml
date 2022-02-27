@@ -106,6 +106,7 @@ jobs:
             brew install vtk@8.2
             brew link vtk@8.2
           elif [ "$RUNNER_OS" == "Linux" ]; then
+            sudo sed -i 's/azure\.//' /etc/apt/sources.list
             sudo apt-get update
             sudo apt-get install -y libvtk7-dev
           fi
