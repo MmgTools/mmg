@@ -150,7 +150,7 @@ IF ( LONG_TESTS )
     ${MMG3D_CI_TESTS}/CubeSkin0.1_Inside0.4/CubeSkin0.1
     ${MMG3D_CI_TESTS}/CubeSkin0.2_Inside0.4/CubeSkin0.2
     ${MMG3D_CI_TESTS}/CubeSkin0.0125_Inside0.125/CubeSkin0.125
-    ${MMG3D_CI_TESTS}/CubeSkin0.0125_Inside0.25/CubeSkin0.25
+    # ${MMG3D_CI_TESTS}/CubeSkin0.0125_Inside0.25/CubeSkin0.25
     # ${MMG3D_CI_TESTS}/CubeSkin0.0125_Inside0.5/CubeSkin0.5
     ### Linkrods
     ${MMG3D_CI_TESTS}/Various_unref_Linkrods_met0.2/linkrods
@@ -199,7 +199,7 @@ IF ( LONG_TESTS )
     "-v 5"
     "-v 5"
     "-v 5"
-    "-v 5"
+    # "-v 5"
     # "-v 5"
     ### Linkrods
     "-v 5 -hausd 0.1"
