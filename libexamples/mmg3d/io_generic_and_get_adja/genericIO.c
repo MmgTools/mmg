@@ -87,6 +87,8 @@ int main(int argc,char *argv[]) {
   strcpy(fileout_medit,argv[2]);
   strcat(fileout_medit,".mesh");
 
+  silent = atoi(argv[3]);
+
   /** ------------------------------ STEP   I -------------------------- */
   /** 1) Initialisation of mesh  structure of Mmg */
   /* args of InitMesh:
