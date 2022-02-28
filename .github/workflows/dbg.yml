@@ -89,7 +89,7 @@ jobs:
              echo "BUILD_CMD=cmake --build . --config ${{ github.event.inputs.cmake_build_type }}" >> "$GITHUB_ENV"
              echo "TEST_FLG=-C  ${{ github.event.inputs.cmake_build_type }} ${{ github.event.inputs.add_ctest_args }}" >> "$GITHUB_ENV"
           fi
-          echo "CMAKE_FLG: ${{ github.events.inputs.add_cmake_cfg_args }} "
+          echo "CMAKE_FLG: ${{ github.event.inputs.add_cmake_cfg_args }} "
           # Remark: we can't print env variable value in this context
         env:
           NJOBS: "2"
@@ -171,7 +171,7 @@ jobs:
             -DTEST_LIBMMGS=ON \
             -DTEST_LIBMMG2D=ON \
             -DTEST_LIBMMG3D=ON \
-            ${{ github.events.inputs.add_cmake_cfg_args }} ..
+            ${{ github.event.inputs.add_cmake_cfg_args }} ..
         shell: bash
 
       - name: Build Mmg
