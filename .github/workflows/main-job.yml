@@ -24,6 +24,7 @@ jobs:
 
     # Launch a matrix of jobs
     strategy:
+        fail-fast: false
         matrix:
             os: [ubuntu-20.04,macos-10.15]
             pattern: [on,off]

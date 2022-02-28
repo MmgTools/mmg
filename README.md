@@ -26,8 +26,8 @@
 |**develop branch**|[![Build Status][dev-build]][dev-sq-build]|[![Quality Gate][dev-qual-gate]][dev-sq-qual-gate]|[![Vulnerabilities][dev-vulnerabilities]][dev-sq-vulnerabilities]|[![Coverage][dev-coverage]][dev-sq-coverage]|[![Duplication (%)][dev-code-dpl]][dev-sq-code-dpl]|
 
 
-[master-build]: https://github.com/MmgTools/mmg/actions/workflows/ci-unix.yml/badge.svg?branch=master
-[master-sq-build]: https://github.com/AMmgTools/mmg/actions/workflows/ci-unix.yml?query=branch%3Amaster
+[master-build]: https://github.com/MmgTools/mmg/actions/workflows/standard-tests.yml/badge.svg?branch=master
+[master-sq-build]: https://github.com/MmgTools/mmg/actions/workflows/standard-tests.yml?query=branch%3Amaster
 
 [master-qual-gate]: https://sonarqube.inria.fr/sonarqube/api/badges/gate?key=cardamom%3Ammg%3Agithub%3Amaster
 [master-sq-qual-gate]: https://sonarqube.inria.fr/sonarqube/dashboard?id=cardamom%3Ammg%3Agithub%3Amaster
@@ -42,8 +42,8 @@
 [master-sq-code-dpl]:https://sonarqube.inria.fr/sonarqube/component_measures?id=cardamom%3Ammg%3Agithub%3Amaster&metric=duplications
 
 
-[dev-build]: https://github.com/MmgTools/mmg/actions/workflows/ci-unix.yml/badge.svg?branch=develop
-[dev-sq-build]: https://github.com/AMmgTools/mmg/actions/workflows/ci-unix.yml?query=branch%3Amaster
+[dev-build]: https://github.com/MmgTools/mmg/actions/workflows/standard-tests.yml/badge.svg?branch=develop
+[dev-sq-build]: https://github.com/MmgTools/mmg/actions/workflows/standard-tests.yml?query=branch%3Adevelop
 
 [dev-qual-gate]: https://sonarqube.inria.fr/sonarqube/api/badges/gate?key=cardamom%3Ammg%3Agithub%3Adevelop
 [dev-sq-qual-gate]: https://sonarqube.inria.fr/sonarqube/dashboard?id=cardamom%3Ammg%3Agithub%3Adevelop
