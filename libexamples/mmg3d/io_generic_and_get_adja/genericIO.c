@@ -51,7 +51,7 @@
 
 int main(int argc,char *argv[]) {
   MMG5_pMesh      mmgMesh;
-  int             ier;
+  int             ier,silent=0;
   /* To save final mesh in a file */
   FILE*           inm;
   char            *fileout_generic,*fileout_medit,*filein;
@@ -59,8 +59,8 @@ int main(int argc,char *argv[]) {
 
   fprintf(stdout,"  -- TEST LOAD AND GET MESH DATA \n");
 
-  if ( argc != 3 ) {
-    printf(" Usage: %s filein fileout\n",argv[0]);
+  if ( argc != 4 ) {
+    printf(" Usage: %s filein fileout silent_mode\n",argv[0]);
     return(EXIT_FAILURE);
   }
 
@@ -200,8 +200,10 @@ int main(int argc,char *argv[]) {
       return EXIT_FAILURE;
     }
 
-    fprintf(stdout,"Tetra %d is adjacent to tetras %d %d %d %d\n",
-            k,adja[0],adja[1],adja[2],adja[3]);
+    if ( !silent ) {
+      fprintf(stdout,"Tetra %d is adjacent to tetras %d %d %d %d\n",
+              k,adja[0],adja[1],adja[2],adja[3]);
+    }
   }
 
   /** 6) Save output file depending on the detected extension */

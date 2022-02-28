@@ -79,7 +79,7 @@ jobs:
              echo "BUILD_CMD=make -j $NJOBS" >> "$GITHUB_ENV"
 
           else
-             echo "BUILD_CMD=cmake --build . --config ${{ inputs.cmake_build_type }}" >> "$GITHUB_ENV"
+             echo "BUILD_CMD=cmake --build . --config ${{ inputs.cmake_build_type }} -- -noLogo -noConsoleLogger -fl" >> "$GITHUB_ENV"
              echo "TEST_FLG=-C  ${{ inputs.cmake_build_type }}" >> "$GITHUB_ENV"
           fi
 

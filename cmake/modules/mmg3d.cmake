@@ -271,19 +271,19 @@ IF ( BUILD_TESTING )
         )
       ADD_TEST(NAME libmmg3d_generic_io_msh   COMMAND ${LIBMMG3D_GENERICIO}
         "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/io_generic_and_get_adja/cube.msh"
-        "${CTEST_OUTPUT_DIR}/cube.o.msh"
+        "${CTEST_OUTPUT_DIR}/cube.o.msh 1"
         )
       ADD_TEST(NAME libmmg3d_generic_io_mesh   COMMAND ${LIBMMG3D_GENERICIO}
         "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/io_generic_and_get_adja/cube.mesh"
-        "${CTEST_OUTPUT_DIR}/cube.o.mesh"
+        "${CTEST_OUTPUT_DIR}/cube.o.mesh 1"
         )
       ADD_TEST(NAME libmmg3d_generic_io_vtk   COMMAND ${LIBMMG3D_GENERICIO}
         "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/io_generic_and_get_adja/cube.vtk"
-        "${CTEST_OUTPUT_DIR}/cube.o.vtk"
+        "${CTEST_OUTPUT_DIR}/cube.o.vtk 1"
         )
       ADD_TEST(NAME libmmg3d_generic_io_vtu   COMMAND ${LIBMMG3D_GENERICIO}
         "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/io_generic_and_get_adja/cube.vtu"
-        "${CTEST_OUTPUT_DIR}/cube.o.vtu"
+        "${CTEST_OUTPUT_DIR}/cube.o.vtu 1"
         )
 
       IF ( NOT VTK_FOUND )
