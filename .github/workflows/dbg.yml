@@ -163,10 +163,10 @@ jobs:
           cmake ${{ env.FORT_FLG }} \
             -DCI_CONTEXT=ON \
             -DBUILD_TESTING=ON \
-            -DCMAKE_BUILD_TYPE=${{ inputs.cmake_build_type }} \
-            -DPATTERN=${{ matrix.pattern }} \
-            -DUSE_SCOTCH=${{ matrix.scotch }} \
-            -DUSE_VTK=${{ matrix.vtk }} \
+            -DCMAKE_BUILD_TYPE=${{ github.event.inputs.cmake_build_type }} \
+            -DPATTERN=${{ github.event.inputs.pattern }} \
+            -DUSE_SCOTCH=${{ github.event.inputs.scotch }} \
+            -DUSE_VTK=${{ github.event.inputs.vtk }} \
             -DTEST_LIBMMG=ON \
             -DTEST_LIBMMGS=ON \
             -DTEST_LIBMMG2D=ON \
