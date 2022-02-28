@@ -70,8 +70,6 @@ jobs:
 
     steps:
       - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
-        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.debug_enabled }}
 
       - name: Print options and set environment variables
         run: |
@@ -113,6 +111,11 @@ jobs:
       # checkout the event branch for automatic workflows
       - uses: actions/checkout@v2
         if: inputs.branch_name == ''
+
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.debug_enabled  && failure() }}
+        timeout-minutes: 120
 
       - name: Install VTK
         # Download vtk only if used
