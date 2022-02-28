@@ -135,7 +135,7 @@ jobs:
 
       - name: Install LibCommons
         # LinearElasticity don't build with MSVC
-        if: github.event.inputs.os != 'windows-2022' &&  github.event.inputs.os != 'windows-2019' && github.event.inputs.os != 'windows-latest'
+        if: runner.os != 'windows'
         run: |
           git clone https://github.com/ISCDtoolbox/Commons.git
           cd Commons
@@ -146,7 +146,7 @@ jobs:
 
       - name: Install LinearElasticity
         # LinearElasticity don't build with MSVC
-        if: github.event.inputs.os != 'windows-2022' &&  github.event.inputs.os != 'windows-2019' && github.event.inputs.os != 'windows-latest'
+        if: runner.os != 'windows'
         run: |
           git clone https://github.com/ISCDtoolbox/LinearElasticity.git
           cd LinearElasticity
