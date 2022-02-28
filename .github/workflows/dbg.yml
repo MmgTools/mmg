@@ -7,11 +7,12 @@ on:
       cmake_build_type:
         description: 'Value for CMAKE_BUILD_TYPE'
         type: string
-        default: Release
+        default: Debug
         required: true
 
       add_cmake_cfg_args:
         description: 'Additional arguments for configuration step'
+        default: -D LONG_TESTS=ON
         required: false
         type: string
 
@@ -28,7 +29,7 @@ on:
       os:
         description: 'os'
         required: true
-        default: 'ubuntu-20.04'
+        default: 'windows-2019'
         options:
           - 'ubuntu-20.04'
           - 'macos-10.15'
@@ -58,13 +59,20 @@ on:
           - 'on'
           - 'off'
 
-
+      debug_enabled:
+        description: 'Run the build with tmate debugging enabled (https://github.com/marketplace/actions/debugging-with-tmate)'
+        required: false
+        default: false
 # job
 jobs:
   ci:
     runs-on: ${{ github.event.inputs.os }}
 
     steps:
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.debug_enabled }}
+
       - name: Print options and set environment variables
         run: |
           echo "${{ github.event.inputs.name }}:
