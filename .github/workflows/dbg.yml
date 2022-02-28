@@ -2,7 +2,7 @@ name: Dbg
 
 on:
   workflow_dispatch:
-    # Inputs the workflow accepts.
+  # Inputs the workflow accepts.
     inputs:
       cmake_build_type:
         description: 'Value for CMAKE_BUILD_TYPE'
@@ -57,6 +57,7 @@ on:
         options:
           - 'on'
           - 'off'
+
 
 # job
 jobs:
