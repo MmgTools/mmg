@@ -208,6 +208,7 @@ IF ( BUILD_TESTING )
       SET(TEST_API3D_EXEC0 ${EXECUTABLE_OUTPUT_PATH}/test_api3d_0)
       SET(TEST_API3D_DOMSEL ${EXECUTABLE_OUTPUT_PATH}/test_api3d_domain-selection)
       SET(TEST_API3D_VTK2MESH ${EXECUTABLE_OUTPUT_PATH}/test_api3d_vtk2mesh)
+      SET(TEST_COMPARE_PARA_TRIA ${EXECUTABLE_OUTPUT_PATH}/test_compare-para-tria)
 
       ADD_TEST(NAME libmmg3d_example0_a COMMAND ${LIBMMG3D_EXEC0_a}
         "${PROJECT_SOURCE_DIR}/libexamples/mmg3d/adaptation_example0/example0_a/cube.mesh"
@@ -268,6 +269,22 @@ IF ( BUILD_TESTING )
         SET_PROPERTY(TEST test_api3d_vtk2mesh
           PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
       ENDIF ( )
+
+      ADD_TEST(NAME test_para_tria
+        COMMAND ${EXECUT_MMG3D}
+        -ar 0.02 -nofem -nosizreq -hgradreq -1 -hgrad -1
+        ${MMG3D_CI_TESTS}/test_para_tria/proc0.mesh
+        -sol ${MMG3D_CI_TESTS}/test_para_tria/proc0.sol
+        ${CTEST_OUTPUT_DIR}/proc0.o.mesh
+        )
+
+      ADD_TEST(NAME test_compare_para_tria
+        COMMAND ${TEST_COMPARE_PARA_TRIA}
+        ${MMG3D_CI_TESTS}/test_para_tria/proc0.mesh
+        ${CTEST_OUTPUT_DIR}/proc0.o.mesh
+        )
+      SET_TESTS_PROPERTIES ( test_compare_para_tria
+        PROPERTIES FIXTURES_REQUIRED test_para_tria )
 
       IF ( CMAKE_Fortran_COMPILER)
         SET(LIBMMG3D_EXECFORTRAN_a  ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_fortran_a)
