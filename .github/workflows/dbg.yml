@@ -194,14 +194,18 @@ jobs:
           cd build
           ${{env.BUILD_CMD}}
 
-      - name: Test Mmg
-        if: github.event.inputs.vtk == 'off'
-        run: |
-          cd build
-          ctest -VV ${{ env.TEST_FLG }}
+      - name: Archive production artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: Mmg-bin
+          path: |
+            build/bin
 
-      - name: Test non native I/Os of Mmg
-        if: github.event.inputs.vtk == 'on'
+      - name: Test Mmg
         run: |
           cd build
-          ctest -R "msh|vtk" -VV ${{ env.TEST_FLG }}
+          ctest ${{ env.TEST_FLG }}
+
+      - name: Don't kill instace
+        if: ${{ failure() }}
+        run: sleep 1h # Prevent to killing instance after failure
