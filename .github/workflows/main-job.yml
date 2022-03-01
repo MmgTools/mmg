@@ -128,7 +128,7 @@ jobs:
 
       - name: Install LibCommons
         # LinearElasticity don't build with MSVC
-        if: matrix.os != 'windows-2022'
+        if: runner.os != 'windows'
         run: |
           git clone https://github.com/ISCDtoolbox/Commons.git
           cd Commons
@@ -139,7 +139,7 @@ jobs:
 
       - name: Install LinearElasticity
         # LinearElasticity don't build with MSVC
-        if: matrix.os != 'windows-2022'
+        if: runner.os != 'windows'
         run: |
           git clone https://github.com/ISCDtoolbox/LinearElasticity.git
           cd LinearElasticity
@@ -171,6 +171,13 @@ jobs:
         run: |
           cd build
           ${{env.BUILD_CMD}}
+
+      - name: Archive production artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: Mmg-bin
+          path: |
+            build/bin
 
       - name: Test Mmg
         if: matrix.vtk == 'off'

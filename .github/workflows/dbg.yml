@@ -205,7 +205,3 @@ jobs:
         run: |
           cd build
           ctest ${{ env.TEST_FLG }}
-
-      - name: Don't kill instace
-        if: ${{ failure() }}
-        run: sleep 1h # Prevent to killing instance after failure
