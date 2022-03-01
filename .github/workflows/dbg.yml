@@ -194,6 +194,9 @@ jobs:
           cd build
           ${{env.BUILD_CMD}}
 
+      - name: Force failure
+        run: exit 1
+
       - name: Test Mmg
         if: github.event.inputs.vtk == 'off'
         run: |
