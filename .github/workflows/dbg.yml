@@ -71,7 +71,7 @@ jobs:
     steps:
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
-        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.debug_enabled && failure() }}
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.debug_enabled }}
         timeout-minutes: 150
 
       - name: Print options and set environment variables
@@ -193,9 +193,6 @@ jobs:
         run: |
           cd build
           ${{env.BUILD_CMD}}
-
-      - name: Force failure
-        run: exit 1
 
       - name: Test Mmg
         if: github.event.inputs.vtk == 'off'
