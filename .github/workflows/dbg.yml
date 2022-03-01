@@ -115,6 +115,12 @@ jobs:
       - uses: actions/checkout@v2
         if: inputs.branch_name == ''
 
+      - name: Print windows arch info
+        if: runner.os == 'windows'
+        run: |
+          WMIC CPU Get DeviceID, NumberOfCores, NumberOfLogicalProcessors
+          wmic OS get Caption,CSDVersion,OSArchitecture,Version
+
       - name: Install VTK
         # Download vtk only if used
         if: github.event.inputs.vtk == 'on'
