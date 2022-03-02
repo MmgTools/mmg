@@ -304,6 +304,9 @@ IF ( BUILD_TESTING )
         ${CTEST_OUTPUT_DIR}/proc0.o.mesh
         )
 
+      SET_TESTS_PROPERTIES ( test_para_tria
+        PROPERTIES FIXTURES_SETUP test_para_tria )
+
       ADD_TEST(NAME test_compare_para_tria
         COMMAND ${TEST_COMPARE_PARA_TRIA}
         ${MMG3D_CI_TESTS}/test_para_tria/proc0.mesh
