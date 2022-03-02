@@ -115,30 +115,10 @@ MARK_AS_ADVANCED(CMAKE_OSX_ARCHITECTURES
 IF(CMAKE_COMPILER_IS_GNUCC)
   IF(APPLE)
     # Add flags to the compiler to work on old mac
-    ADD_DEFINITIONS( -mmacosx-version-min=10.4 -arch x86_64)
-
-    # To avoid pbs with binary files...
+    ADD_DEFINITIONS(-mmacosx-version-min=10.4 -arch x86_64)
     SET(CMAKE_EXE_LINKER_FLAGS "-arch x86_64 ${CMAKE_EXE_LINKER_FLAGS}")
-
-    # Determine if the processor supports 64bit execution
-    EXECUTE_PROCESS(
-      COMMAND sysctl hw.cpu64bit_capable
-      ERROR_QUIET
-      OUTPUT_VARIABLE 64_CMD
-      OUTPUT_STRIP_TRAILING_WHITESPACE
-      )
-    STRING(REGEX REPLACE "^hw.cpu64bit_capable: (.*)" "\\1" 64_BIT "${64_CMD}")
-    #  ELSEIF(UNIX)# UNIX must be after APPLE becaus APPLE is UNIX too
   ENDIF()
 ENDIF()
-
-CMAKE_DEPENDENT_OPTION ( PROFILING "Enable/Disable PROFILING" OFF
-  "CMAKE_COMPILER_IS_GNUCC" OFF )
-
-IF(PROFILING)
-  ADD_DEFINITIONS(-pg)
-  SET(CMAKE_EXE_LINKER_FLAGS "-pg ${CMAKE_EXE_LINKER_FLAGS}")
-ENDIF(PROFILING)
 
 ###############################################################################
 #####
@@ -147,7 +127,7 @@ ENDIF(PROFILING)
 ###############################################################################
 IF(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   MESSAGE(STATUS "Setting build type to 'Release' as none was specified.")
-  seT(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build." FORCE)
+  SET(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build." FORCE)
   # Set the possible values of build type for cmake-gui
   SET_PROPERTY(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release"
     "MinSizeRel" "RelWithDebInfo")
