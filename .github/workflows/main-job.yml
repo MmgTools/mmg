@@ -196,10 +196,10 @@ jobs:
         if: matrix.vtk == 'off'
         run: |
           cd build
-          ctest -VV ${{ env.TEST_FLG }} -j ${{ env.NJOBS }}
+          ctest -VV -C ${{ inputs.cmake_build_type }} -j ${{ env.NJOBS }}
 
       - name: Test non native I/Os of Mmg
         if: matrix.vtk == 'on'
         run: |
           cd build
-          ctest -R "msh|vtk" -VV ${{ env.TEST_FLG }} -j ${{ env.NJOBS }}
+          ctest -R "msh|vtk" -VV -C ${{ inputs.cmake_build_type }} -j ${{ env.NJOBS }}
