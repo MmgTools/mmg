@@ -91,27 +91,21 @@ jobs:
             VTK:     ${{ matrix.vtk }},
             Build:   ${{ inputs.cmake_build_type }}"
 
-
+          # gfortran compiler and scotch makefile depends on the os
           if [ "$RUNNER_OS" == "macOS" ]; then
              echo "SCOTCH_MAKE=Make.inc/Makefile.inc.i686_mac_darwin10" >> "$GITHUB_ENV"
              echo "FORT_FLG=\"-DCMAKE_Fortran_COMPILER=gfortran-11\"" >> "$GITHUB_ENV"
-             echo "BUILD_CMD=make -j $NJOBS" >> "$GITHUB_ENV"
 
           elif [ "$RUNNER_OS" == "Linux" ]; then
              echo "SCOTCH_MAKE=Make.inc/Makefile.inc.x86-64_pc_linux2" >> "$GITHUB_ENV"
              echo "FORT_FLG=\"-DCMAKE_Fortran_COMPILER=gfortran-9\"" >> "$GITHUB_ENV"
-             echo "BUILD_CMD=make -j $NJOBS" >> "$GITHUB_ENV"
-
-          else
-             echo "BUILD_CMD=cmake --build . --config ${{ inputs.cmake_build_type }} -- -noLogo -noConsoleLogger -fl" >> "$GITHUB_ENV"
-             echo "TEST_FLG=-C  ${{ inputs.cmake_build_type }}" >> "$GITHUB_ENV"
           fi
-
-          # Remark: we can't print env variable value in this context
-        env:
-          NJOBS: "2"
+          echo "NJOBS=$NJOBS" >> "$GITHUB_ENV"
+          # Remark: variable values are still empty inside this context
 
         shell: bash
+        env:
+          NJOBS: "2"
 
       # checkout the provided branch name if workflow is manually run
       - uses: actions/checkout@v2
@@ -145,10 +139,8 @@ jobs:
           git checkout v6.1.3
           cd src
           cp ${{ env.SCOTCH_MAKE }} Makefile.inc
-          make scotch -j "$NJOBS"
-          make install scotch -j "$NJOBS"
-        env:
-          NJOBS: "2"
+          make scotch -j ${{ env.NJOBS }}
+          make install scotch -j ${{ env.NJOBS }}
 
       - name: Install LibCommons
         # LinearElasticity don't build with MSVC
@@ -174,10 +166,8 @@ jobs:
 
       - name: Configure Mmg
         run: |
-          mkdir build
-          cd build
-          # gfortran compiler depends on the os
-          cmake ${{ env.FORT_FLG }} \
+          cmake -S. -Bbuild \
+          ${{ env.FORT_FLG }} \
             -DCI_CONTEXT=ON \
             -DBUILD_TESTING=ON \
             -DCMAKE_BUILD_TYPE=${{ inputs.cmake_build_type }} \
@@ -193,8 +183,7 @@ jobs:
 
       - name: Build Mmg
         run: |
-          cd build
-          ${{env.BUILD_CMD}}
+          cmake --build build --config ${{ inputs.cmake_build_type }} -j ${{ env.NJOBS }}
 
       - name: Archive production artifacts
         uses: actions/upload-artifact@v2
