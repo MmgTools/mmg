@@ -82,7 +82,7 @@ jobs:
                 vtk: off
 
     steps:
-      - name: Print options and set environment variables
+      - name: Print options
         run: |
           echo "${{ github.event.inputs.name }}:
             Os:      ${{ matrix.os }},
@@ -90,28 +90,6 @@ jobs:
             Scotch:  ${{ matrix.scotch }},
             VTK:     ${{ matrix.vtk }},
             Build:   ${{ inputs.cmake_build_type }}"
-
-
-          if [ "$RUNNER_OS" == "macOS" ]; then
-             echo "SCOTCH_MAKE=Make.inc/Makefile.inc.i686_mac_darwin10" >> "$GITHUB_ENV"
-             echo "FORT_FLG=\"-DCMAKE_Fortran_COMPILER=gfortran-11\"" >> "$GITHUB_ENV"
-             echo "BUILD_CMD=make -j $NJOBS" >> "$GITHUB_ENV"
-
-          elif [ "$RUNNER_OS" == "Linux" ]; then
-             echo "SCOTCH_MAKE=Make.inc/Makefile.inc.x86-64_pc_linux2" >> "$GITHUB_ENV"
-             echo "FORT_FLG=\"-DCMAKE_Fortran_COMPILER=gfortran-9\"" >> "$GITHUB_ENV"
-             echo "BUILD_CMD=make -j $NJOBS" >> "$GITHUB_ENV"
-
-          else
-             echo "BUILD_CMD=cmake --build . --config ${{ inputs.cmake_build_type }} -- -noLogo -noConsoleLogger -fl" >> "$GITHUB_ENV"
-             echo "TEST_FLG=-C  ${{ inputs.cmake_build_type }}" >> "$GITHUB_ENV"
-          fi
-
-          # Remark: we can't print env variable value in this context
-        env:
-          NJOBS: "2"
-
-        shell: bash
 
       # checkout the provided branch name if workflow is manually run
       - uses: actions/checkout@v2
@@ -174,10 +152,17 @@ jobs:
 
       - name: Configure Mmg
         run: |
-          mkdir build
-          cd build
           # gfortran compiler depends on the os
-          cmake ${{ env.FORT_FLG }} \
+          if [ "$RUNNER_OS" == "macOS" ]; then
+             SCOTCH_MAKE=Make.inc/Makefile.inc.i686_mac_darwin10
+             FORT_FLG="-DCMAKE_Fortran_COMPILER=gfortran-11"
+          elif [ "$RUNNER_OS" == "Linux" ]; then
+             SCOTCH_MAKE=Make.inc/Makefile.inc.x86-64_pc_linux2
+             FORT_FLG="-DCMAKE_Fortran_COMPILER=gfortran-9"
+          fi
+
+          cmake -S. -Bbuild \
+          ${{ env.FORT_FLG }} \
             -DCI_CONTEXT=ON \
             -DBUILD_TESTING=ON \
             -DCMAKE_BUILD_TYPE=${{ inputs.cmake_build_type }} \
@@ -193,8 +178,9 @@ jobs:
 
       - name: Build Mmg
         run: |
-          cd build
-          ${{env.BUILD_CMD}}
+          cmake --build build --config ${{ inputs.cmake_build_type }} -j $NJOBS
+        env:
+          NJOBS: "2"
 
       - name: Archive production artifacts
         uses: actions/upload-artifact@v2
@@ -207,10 +193,10 @@ jobs:
         if: matrix.vtk == 'off'
         run: |
           cd build
-          ctest -VV ${{ env.TEST_FLG }}
+          ctest -VV -C ${{ inputs.cmake_build_type }}
 
       - name: Test non native I/Os of Mmg
         if: matrix.vtk == 'on'
         run: |
           cd build
-          ctest -R "msh|vtk" -VV ${{ env.TEST_FLG }}
+          ctest -R "msh|vtk" -VV -C ${{ inputs.cmake_build_type }}
