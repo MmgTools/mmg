@@ -28,6 +28,7 @@ jobs:
         matrix:
             os: [ubuntu-20.04,macos-10.15]
             pattern: [on,off]
+            pointmap: [off]
             scotch: [on,off]
             vtk: [off]
 
@@ -36,26 +37,49 @@ jobs:
               # tests are useless)
               - os: ubuntu-20.04
                 pattern: off
+                pointmap: off
                 scotch: off
                 vtk: on
 
               - os: macos-10.15
                 pattern: off
+                pointmap: off
                 scotch: off
                 vtk: on
+
+              # Test pointmap with scotch except on windows
+              - os: ubuntu-20.04
+                pattern: off
+                pointmap: on
+                scotch: on
+                vtk: off
+
+              - os: macos-10.15
+                pattern: off
+                pointmap: on
+                scotch: on
+                vtk: off
 
               # Add windows basic test (matrix is not testable as dependencies
               # don't build with MSVC)
               - os: windows-2022
                 pattern: off
+                pointmap: off
                 scotch: off
                 vtk: off
 
               - os: windows-2022
                 pattern: on
+                pointmap: off
                 scotch: off
                 vtk: off
 
+              # Add test for pointmap only if pattern off
+              - os: windows-2022
+                pattern: off
+                pointmap: on
+                scotch: off
+                vtk: off
 
     steps:
       - name: Print options and set environment variables
