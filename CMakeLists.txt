@@ -112,14 +112,6 @@ MARK_AS_ADVANCED(CMAKE_OSX_ARCHITECTURES
   CMAKE_OSX_DEPLOYMENT_TARGET
   CMAKE_OSX_SYSROOT)
 
-IF(CMAKE_COMPILER_IS_GNUCC)
-  IF(APPLE)
-    # Add flags to the compiler to work on old mac
-    ADD_DEFINITIONS(-mmacosx-version-min=10.4 -arch x86_64)
-    SET(CMAKE_EXE_LINKER_FLAGS "-arch x86_64 ${CMAKE_EXE_LINKER_FLAGS}")
-  ENDIF()
-ENDIF()
-
 ###############################################################################
 #####
 #####         Choose executable target to compile
@@ -499,21 +491,8 @@ IF( BUILD_TESTING )
   ##-------------------------------------------------------------------##
   ##------- Set the continuous integration options --------------------##
   ##-------------------------------------------------------------------##
-
   SET ( MMG_CI_TESTS ${CI_DIR}/mmg )
 
-  # Remove the --show-reachable=yes option from the default valgrind command
-  SET(VALGRIND_COMMAND_OPTIONS "-q --tool=memcheck ")
-  SET(VALGRIND_COMMAND_OPTIONS "--leak-check=yes ${VALGRIND_COMMAND_OPTIONS}")
-  SET(VALGRIND_COMMAND_OPTIONS "--workaround-gcc296-bugs=yes ${VALGRIND_COMMAND_OPTIONS}")
-  SET(VALGRIND_COMMAND_OPTIONS "--num-callers=100 ${VALGRIND_COMMAND_OPTIONS}")
-
-  # Ignore errors coming from the libmesh library
-  IF(APPLE)
-    # and errors from the libSystem.B library
-    SET(MEMORYCHECK_SUPPRESSIONS_FILE
-      "${PROJECT_SOURCE_DIR}/cmake/Supp/libSystem.supp")
-  ENDIF(APPLE)
   # Copy config file and custom file in the good directories
   CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/cmake/config/CTestCustom.cmake
     ./CTestCustom.cmake)
@@ -523,16 +502,6 @@ IF( BUILD_TESTING )
 
   ENABLE_TESTING()
   INCLUDE(CTest)
-
-  IF ( COVERAGE )
-    # Add coverage flags
-    SET(CMAKE_C_FLAGS_DEBUG " -fprofile-arcs ${CMAKE_C_FLAGS_DEBUG}")
-    SET(CMAKE_C_FLAGS_DEBUG " -ftest-coverage ${CMAKE_C_FLAGS_DEBUG}")
-    SET(CMAKE_C_FLAGS_DEBUG " --coverage ${CMAKE_C_FLAGS_DEBUG}")
-    SET(CMAKE_EXE_LINKER_FLAGS_DEBUG " -fprofile-arcs ${CMAKE_EXE_LINKER_FLAGS_DEBUG}")
-    SET(CMAKE_EXE_LINKER_FLAGS_DEBUG " -ftest-coverage ${CMAKE_EXE_LINKER_FLAGS_DEBUG}")
-    SET(CMAKE_EXE_LINKER_FLAGS_DEBUG " --coverage ${CMAKE_EXE_LINKER_FLAGS_DEBUG}")
-  ENDIF()
 
   IF ( CMAKE_COMPILER_IS_GNUCC )
     SET(CMAKE_C_FLAGS_DEBUG "-g -Wall ${CMAKE_C_FLAGS_DEBUG}")
