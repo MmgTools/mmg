@@ -1,0 +1,127 @@
+name: GitHub macOS CI
+
+on:
+  # run tests on push events
+  push:
+  # run tests on PR events
+  pull_request:
+  # run tests manually on a given branch (default is master)
+  workflow_dispatch:
+    # Inputs the workflow accepts.
+    inputs:
+      branch:
+        # branch to test
+        description: 'branch to test'
+        # Default value if no value is explicitly provided
+        default: 'master'
+        required: false
+
+# job
+jobs:
+  macOS:
+    runs-on: macOS-10.15
+
+    # Launch a matrix of jobs
+    strategy:
+        matrix:
+            build: [Release]
+            pattern: [on,off]
+            scotch: [on,off]
+            vtk: [off]
+            include:
+              # test vtk only without scotch and with delaunay insertion (more
+              # tests are useless)
+              - build: Release
+                pattern: off
+                scotch: off
+                vtk: on
+
+    steps:
+      # checkout the provided branch name if workflow is manually run
+      - uses: actions/checkout@v2
+        if: github.event_name == 'workflow_dispatch'
+        with:
+          ref: ${{github.event.inputs.branch}}
+
+      # checkout the event branch for automatic workflows
+      - uses: actions/checkout@v2
+        if: github.event_name != 'workflow_dispatch'
+
+      - name: Install VTK
+        run: |
+          brew install vtk@8.2
+          brew link vtk@8.2
+       # cp /usr/local/opt/hdf5/lib/libhdf5.dylib /usr/local/opt/hdf5/lib/libhdf5.200.dylib
+       # cp /usr/local/opt/hdf5/lib/libhdf5_hl.dylib /usr/local/opt/hdf5/lib/libhdf5_hl.200.dylib
+       # cp /usr/local/opt/hdf5/lib/libhdf5_hl_cpp.dylib /usr/local/opt/hdf5/lib/libhdf5_hl_cpp.200.dylib
+
+      - name: Install Sctoch
+        run: |
+          git clone https://gitlab.inria.fr/scotch/scotch.git
+          cd scotch
+          git checkout v6.1.3
+          cd src
+          cp Make.inc/Makefile.inc.i686_mac_darwin10 Makefile.inc
+          make scotch -j "$NJOBS"
+          make install scotch -j "$NJOBS"
+        env:
+          NJOBS: "2"
+
+      - name: Install LibCommons
+        run: |
+          git clone https://github.com/ISCDtoolbox/Commons.git
+          cd Commons
+          mkdir build
+          cd build
+          cmake ..
+          make install
+
+      - name: Install LinearElasticity
+        run: |
+          git clone https://github.com/ISCDtoolbox/LinearElasticity.git
+          cd LinearElasticity
+          mkdir build
+          cd build
+          cmake ..
+          make install
+
+      - name: Configure Mmg
+        run: |
+          echo "${{ github.event.inputs.name }}:
+            Build:   ${{ matrix.build }},
+            Pattern: ${{ matrix.pattern }},
+            Scotch:  ${{ matrix.scotch }},
+            VTK:     ${{ matrix.vtk }}"
+          mkdir build && cd build
+          cmake \
+            -DCI_CONTEXT=ON \
+            -DBUILD_TESTING=ON \
+            -DCMAKE_BUILD_TYPE=${{matrix.build}} \
+            -DPATTERN=${{matrix.pattern}} \
+            -DUSE_SCOTCH=${{matrix.scotch}} \
+            -DUSE_VTK={{matrix.vtk}} \
+            -DCMAKE_Fortran_COMPILER=gfortran-11 \
+            -DTEST_LIBMMG=ON \
+            -DTEST_LIBMMGS=ON \
+            -DTEST_LIBMMG2D=ON \
+            -DTEST_LIBMMG3D=ON \
+            ..
+
+      - name: Build Mmg
+        run: |
+          cd build
+          make -j "$NJOBS"
+        env:
+          NJOBS: "2"
+
+      - name: Test Mmg
+        if: ${{ matrix.vtk == 'off' }}
+        run: |
+          cd build
+          ctest -VV
+
+      - name: Test non native I/Os of Mmg
+        if: ${{ matrix.vtk == 'on' }}
+        run: |
+          cd build
+          ctest -R "msh|vtk" -VV

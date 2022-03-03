@@ -304,6 +304,8 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
         o[2] = 0.5*(p0->c[2] + p1->c[2]);
 #ifdef USE_POINTMAP
         src = mesh->point[ip1].src;
+#else
+        src = 1;
 #endif
         ip = MMG3D_newPt(mesh,o,MG_NOTAG,src);
 
@@ -352,6 +354,8 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
         o[2] = 0.5*(p0->c[2] + p1->c[2]);
 #ifdef USE_POINTMAP
         src = mesh->point[ip1].src;
+#else
+        src = 1;
 #endif
         ip = MMG3D_newPt(mesh,o,MG_NOTAG,src);
 
@@ -585,6 +589,8 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
           }
 #ifdef USE_POINTMAP
           src = mesh->point[ip1].src;
+#else
+          src = 1;
 #endif
           ip = MMG3D_newPt(mesh,o,tag,src);
           if ( !ip ){
@@ -673,6 +679,8 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
           o[2] = 0.5*(p0->c[2] + p1->c[2]);
 #ifdef USE_POINTMAP
           src = mesh->point[ip1].src;
+#else
+          src = 1;
 #endif
           ip = MMG3D_newPt(mesh,o,MG_NOTAG,src);
 
@@ -720,6 +728,8 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
           o[2] = 0.5*(p0->c[2] + p1->c[2]);
 #ifdef USE_POINTMAP
           src = mesh->point[ip1].src;
+#else
+          src = 1;
 #endif
           ip = MMG3D_newPt(mesh,o,MG_NOTAG,src);
 
