@@ -497,9 +497,6 @@ IF( BUILD_TESTING )
   CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/cmake/config/CTestCustom.cmake
     ./CTestCustom.cmake)
 
-  # Max time for test case
-  SET(DART_TESTING_TIMEOUT 2500 FORCE)
-
   ENABLE_TESTING()
   INCLUDE(CTest)
 
