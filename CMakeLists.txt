@@ -79,8 +79,8 @@ ENDIF ()
 
 # Do not print warnings about the use of secure function with MSVC
 if ( MSVC )
-  add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-  add_definitions(-Dstrdup=_strdup)
+  add_compile_definitions(-D_CRT_SECURE_NO_WARNINGS)
+  add_compile_definitions(-Dstrdup=_strdup)
 endif()
 
 # Create mmgcmakedefines.h file with the architecture infos and
@@ -156,7 +156,7 @@ ENDIF()
 # Explicitly set the DNDEBUG flag in case the user or a parent project overrides
 # it.
 if (NOT CMAKE_BUILD_TYPE MATCHES Debug)
-    add_definitions(-DNDEBUG)
+    add_compile_definitions(-DNDEBUG)
 endif()
 
 ############################################################################
@@ -187,7 +187,7 @@ IF ( NOT (WIN32 OR MINGW) )
   ENDIF(NOT DEFINED M_LIB)
 
   MARK_AS_ADVANCED(FORCE M_LIB)
-  SET( LIBRARIES ${M_LIB} ${LIBRARIES})
+  LIST( PREPEND LIBRARIES ${M_LIB} )
 ENDIF()
 
 ############################################################################
@@ -349,16 +349,16 @@ MARK_AS_ADVANCED(PATTERN)
 
 
 IF( SCOTCH_FOUND )
-  SET(CMAKE_C_FLAGS "-DUSE_SCOTCH ${CMAKE_C_FLAGS}")
+  ADD_COMPILE_DEFINITIONS(-DUSE_SCOTCH)
 
   MESSAGE(STATUS
     "Compilation with scotch: ${SCOTCH_LIBRARIES}")
-  SET( LIBRARIES ${SCOTCH_LIBRARIES} ${LIBRARIES})
+  LIST( PREPEND LIBRARIES ${SCOTCH_LIBRARIES})
 ENDIF()
 
 
 IF ( VTK_FOUND )
-  ADD_DEFINITIONS(-DUSE_VTK)
+  ADD_COMPILE_DEFINITIONS(-DUSE_VTK)
 
   MESSAGE ( STATUS "Compilation with VTK: add vtk, vtp and vtu I/O." )
 
@@ -366,7 +366,7 @@ IF ( VTK_FOUND )
     INCLUDE ( ${VTK_USE_FILE} )
   ENDIF()
 
-  SET( LIBRARIES ${VTK_LIBRARIES} ${LIBRARIES} )
+  LIST( PREPEND LIBRARIES ${VTK_LIBRARIES} )
 ENDIF ( )
 
 #---------------------------- mmg library gathering mmg2d, mmgs and mmg3d libs
@@ -487,6 +487,7 @@ IF( BUILD_TESTING )
   ENABLE_TESTING()
   INCLUDE(CTest)
 
+  # If tests are enabled, adds compiler flags in debug mode
   IF ( CMAKE_COMPILER_IS_GNUCC )
     SET(CMAKE_C_FLAGS_DEBUG "-Wall ${CMAKE_C_FLAGS_DEBUG}")
   ELSEIF( CMAKE_COMPILER_IS_CLANG )
