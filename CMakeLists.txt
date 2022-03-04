@@ -97,16 +97,6 @@ CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/src/common/mmgversion.h.in
 #####         Main CMake compilation variables
 #####
 ###############################################################################
-
-# Find "exotic" compilers
-IF (${CMAKE_C_COMPILER} MATCHES Clang OR ${CMAKE_C_COMPILER} MATCHES clang)
-  # using clang
-  SET(CMAKE_COMPILER_IS_CLANG TRUE)
-ELSEIF(${CMAKE_C_COMPILER} MATCHES Icc OR ${CMAKE_C_COMPILER} MATCHES icc)
-  # using icc
-  SET(CMAKE_COMPILER_IS_INTEL TRUE)
-ENDIF()
-
 # Hide some options
 MARK_AS_ADVANCED(CMAKE_OSX_ARCHITECTURES
   CMAKE_OSX_DEPLOYMENT_TARGET
@@ -553,26 +543,29 @@ ENDIF ()
 #####         Create API Documentation
 #####
 ###############################################################################
-FIND_PACKAGE(Doxygen)
-IF(DOXYGEN_FOUND)
+OPTION ( BUILD_DOC "Enable/Disable Doxygen documentation target" OFF )
+IF ( BUILD_DOC )
+  FIND_PACKAGE(Doxygen)
+  IF(DOXYGEN_FOUND)
 
-  # MMG Documentation
-  SET( MMG_DOC_DIR ${PROJECT_BINARY_DIR}/doc/ CACHE PATH "Path toward generated Doxygen doc.")
-  mark_as_advanced(MMG_DOC_DIR)
+    # MMG Documentation
+    SET( MMG_DOC_DIR ${PROJECT_BINARY_DIR}/doc/ CACHE PATH "Path toward generated Doxygen doc.")
+    mark_as_advanced(MMG_DOC_DIR)
 
-  FILE(MAKE_DIRECTORY ${MMG_DOC_DIR})
+    FILE(MAKE_DIRECTORY ${MMG_DOC_DIR})
 
-  CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/Doxyfile.in
-    ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
-  ADD_CUSTOM_TARGET(doc
-    COMMAND ${DOXYGEN_EXECUTABLE}
-    ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
-    WORKING_DIRECTORY ${MMG_DOC_DIR}
-    COMMENT "Generating Mmg documentation with Doxygen. Open up the
+    CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/Doxyfile.in
+      ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
+    ADD_CUSTOM_TARGET(doc
+      COMMAND ${DOXYGEN_EXECUTABLE}
+      ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
+      WORKING_DIRECTORY ${MMG_DOC_DIR}
+      COMMENT "Generating Mmg documentation with Doxygen. Open up the
     ${MMG_DOC_DIR}/index.html file to see
     it" VERBATIM )
 
-ENDIF ( DOXYGEN_FOUND )
+  ENDIF ( DOXYGEN_FOUND )
+ENDIF ( )
 
 ###############################################################################
 #####
