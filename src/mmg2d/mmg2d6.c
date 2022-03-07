@@ -247,6 +247,11 @@ int MMG2D_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, int start, int8_t istart) {
     v1 = sol->m[ip1];
     v2 = sol->m[ip2];
 
+    if ( (fabs(v1) < MMG5_EPS) && (fabs(v2) < MMG5_EPS) ) {
+      /* Do not authorize a snap that leads to a triangle with only 0 vertices */
+      return 0;
+    }
+
     /* Authorize change of references only provided the boundary reference is MG_ISO */
     if ( pt->ref != refstart && pt->edg[i1] != MG_ISO ) {
       smsgn = 0;
@@ -255,7 +260,16 @@ int MMG2D_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, int start, int8_t istart) {
       smsgn = (fabs(v1) < MMG5_EPS) || ( (fabs(v2) > MMG5_EPS) && MG_SMSGN(v1,v2) ) ? 1 : 0;
     // smsgn =  MG_SMSGN(v1,v2) ? 1 : 0;
   }
-  while ( smsgn );
+  while ( smsgn && (k != start) );
+
+  if ( k==start ) {
+    /* Complete ball has been travelled without crossing a boundary or finding a
+     * sign change: we are in the special case where v1 = v2 = v[istart] = 0 in
+     * tria start. In this case, test MG_SMSGN(v1,v2) returns 0 while smsgn is
+     * computed to 1, which is non consistent.  */
+    assert ( smsgn );
+    return 0;
+  }
 
   end1 = k;
   k = start;
@@ -277,6 +291,11 @@ int MMG2D_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, int start, int8_t istart) {
     v1 = sol->m[ip1];
     v2 = sol->m[ip2];
 
+    if ( (fabs(v1) < MMG5_EPS) && (fabs(v2) < MMG5_EPS) ) {
+      /* Do not authorize a snap that leads to a triangle with only 0 vertices */
+      return 0;
+    }
+
     if ( pt->ref != refstart && pt->edg[i1] != MG_ISO ) {
       smsgn = 0;
       k = 0;
@@ -284,7 +303,9 @@ int MMG2D_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, int start, int8_t istart) {
       smsgn = (fabs(v2) < MMG5_EPS) || ( (fabs(v1) > MMG5_EPS) && MG_SMSGN(v1,v2) ) ? 1 : 0;
     // smsgn = MG_SMSGN(v1,v2) ? 1 : 0;
   }
-  while ( smsgn );
+  while ( smsgn && (k != start) );
+
+  assert ( k!=start );
 
   /* If first stop was due to an external boundary, the second one must too;
      else, the final triangle for the first travel must be that of the second one */
