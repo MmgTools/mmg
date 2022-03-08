@@ -28,7 +28,9 @@ if(DEFINED PROJECT_NAME)
 endif()
 
 INCLUDE(CMakeDependentOption)
-INCLUDE(cmake/modules/macros.cmake)
+
+LIST(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules)
+INCLUDE(macros)
 
 PROJECT (mmg)
 
@@ -66,9 +68,10 @@ SET (CMAKE_RELEASE_VERSION
 
 ###############################################################################
 #####
-#####         Set preprocessor flag to detect windows architecture and MinGW
+#####         Set preprocessor flags
 #####
 ###############################################################################
+# Architecture detection
 IF (NOT WIN32)
   # Set preprocessor flags to say that we are posix and gnu compatible
   SET (DEF_POSIX "#define MMG_POSIX")
@@ -76,12 +79,6 @@ IF (NOT WIN32)
 ELSEIF(MINGW)
   SET (DEF_GNU "#define MMG_GNU")
 ENDIF ()
-
-# Do not print warnings about the use of secure function with MSVC
-if ( MSVC )
-  add_compile_definitions(-D_CRT_SECURE_NO_WARNINGS)
-  add_compile_definitions(-Dstrdup=_strdup)
-endif()
 
 # Create mmgcmakedefines.h file with the architecture infos and
 # the definition ot the USE_POINTMAP flag.
@@ -94,7 +91,7 @@ CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/src/common/mmgversion.h.in
 
 ###############################################################################
 #####
-#####         Main CMake compilation variables
+#####         CMake flags / variables
 #####
 ###############################################################################
 # Hide some options
@@ -102,20 +99,48 @@ MARK_AS_ADVANCED(CMAKE_OSX_ARCHITECTURES
   CMAKE_OSX_DEPLOYMENT_TARGET
   CMAKE_OSX_SYSROOT)
 
-###############################################################################
-#####
-#####         Choose executable target to compile
-#####
-###############################################################################
+include(add_build_types)
+
+# List CMake build types
 IF(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   MESSAGE(STATUS "Setting build type to 'Release' as none was specified.")
   SET(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build." FORCE)
   # Set the possible values of build type for cmake-gui
   SET_PROPERTY(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release"
-    "MinSizeRel" "RelWithDebInfo")
+    "MinSizeRel" "RelWithDebInfo" "Maintainer" "RelWithAssert")
   SET(CMAKE_CONFIGURATION_TYPES ${CMAKE_BUILD_TYPE})
 ENDIF()
 
+# Explicitly set the DNDEBUG flag in case the user or a parent project overrides
+# it.
+if (NOT CMAKE_BUILD_TYPE MATCHES Debug AND NOT CMAKE_BUILD_TYPE MATCHES RelWithAssert)
+    add_compile_definitions(NDEBUG)
+endif()
+
+# Do not print warnings about the use of secure function with MSVC and the use
+# of POSIX strdup
+if ( MSVC )
+  add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
+  add_compile_definitions(strdup=_strdup)
+endif()
+
+MESSAGE(status "flags ${CMAKE_C_FLAGS} ${CMAKE_CXX_FLAGS}" )
+MESSAGE(status "Debug flags ${CMAKE_C_FLAGS_DEBUG} ${CMAKE_CXX_FLAGS_DEBUG}" )
+MESSAGE(status "Release flags ${CMAKE_C_FLAGS_RELEASE} ${CMAKE_CXX_FLAGS_RELEASE}" )
+MESSAGE(status "RelWithDebInfo flags ${CMAKE_C_FLAGS_RELWITHDEBINFO} ${CMAKE_CXX_FLAGS_RELWITHDEBINFO}" )
+MESSAGE(status "Maintener flags ${CMAKE_C_FLAGS_MAINTAINER} ${CMAKE_CXX_FLAGS_MAINTAINER}" )
+MESSAGE(status "RelwithAssert flags ${CMAKE_C_FLAGS_RELWITHASSERT}  ${CMAKE_CXX_FLAGS_RELWITHASSERT}")
+
+MESSAGE(status "linker ${CMAKE_EXE_LINKER_FLAGS}  ${CMAKE_SHARED_LINKER_FLAGS}  ${CMAKE_STATIC_LINKER_FLAGS}")
+MESSAGE(status "linker Debug ${CMAKE_EXE_LINKER_FLAGS_DEBUG}  ${CMAKE_SHARED_LINKER_FLAGS_DEBUG}  ${CMAKE_STATIC_LINKER_FLAGS_DEBUG}")
+MESSAGE(status "linker Release ${CMAKE_EXE_LINKER_FLAGS_RELEASE}  ${CMAKE_SHARED_LINKER_FLAGS_RELEASE}  ${CMAKE_STATIC_LINKER_FLAGS_RELEASE}")
+
+
+###############################################################################
+#####
+#####         Choose executable target to compile
+#####
+###############################################################################
 SET ( BUILD "MMG" CACHE STRING
   "\"MMG3D\", \"MMGS\",\"MMG2D\", or \"MMG\" to compile both MMGS, MMG3D and MMG2D" )
 
@@ -152,12 +177,6 @@ IF ( BUILD_MMG3D OR BUILD_MMGS )
 ELSE ()
   SET(BUILD_MMGS3D OFF)
 ENDIF()
-
-# Explicitly set the DNDEBUG flag in case the user or a parent project overrides
-# it.
-if (NOT CMAKE_BUILD_TYPE MATCHES Debug)
-    add_compile_definitions(-DNDEBUG)
-endif()
 
 ############################################################################
 #####
@@ -206,7 +225,6 @@ OPTION ( USE_POINTMAP "Use map for point tracking" OFF )
 ############################################################################
 # Find SCOTCH library?
 SET(SCOTCH_DIR "" CACHE PATH "Installation directory for scotch")
-LIST(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules)
 
 # add Scotch library?
 OPTION ( USE_SCOTCH "Use SCOTCH TOOL for renumbering" ON )
@@ -230,7 +248,7 @@ OPTION (
   USE_ELAS "Use the Elas library for lagrangian motion option" ON )
 
 IF ( USE_ELAS )
-  INCLUDE(cmake/modules/FindElas.cmake)
+  INCLUDE(FindElas)
   IF ( NOT ELAS_FOUND )
     MESSAGE ( WARNING "Elas is a library to solve the linear elasticity "
       "problem (see https://github.com/ISCDtoolbox/LinearElasticity to"
@@ -349,7 +367,7 @@ MARK_AS_ADVANCED(PATTERN)
 
 
 IF( SCOTCH_FOUND )
-  ADD_COMPILE_DEFINITIONS(-DUSE_SCOTCH)
+  ADD_COMPILE_DEFINITIONS(USE_SCOTCH)
 
   MESSAGE(STATUS
     "Compilation with scotch: ${SCOTCH_LIBRARIES}")
@@ -358,7 +376,7 @@ ENDIF()
 
 
 IF ( VTK_FOUND )
-  ADD_COMPILE_DEFINITIONS(-DUSE_VTK)
+  ADD_COMPILE_DEFINITIONS(USE_VTK)
 
   MESSAGE ( STATUS "Compilation with VTK: add vtk, vtp and vtu I/O." )
 
@@ -409,19 +427,19 @@ IF( BUILD_TESTING )
 ENDIF ( )
 
 IF ( BUILD_MMG2D )
-  INCLUDE(cmake/modules/mmg2d.cmake)
+  INCLUDE(mmg2d)
 ENDIF ( )
 
 IF ( BUILD_MMGS )
-  INCLUDE(cmake/modules/mmgs.cmake)
+  INCLUDE(mmgs)
 ENDIF ( )
 
 IF ( BUILD_MMG3D )
-  INCLUDE(cmake/modules/mmg3d.cmake)
+  INCLUDE(mmg3d)
 ENDIF ( )
 
 IF ( BUILD_MMG )
-  INCLUDE(cmake/modules/mmg.cmake)
+  INCLUDE(mmg)
 ENDIF ( )
 
 IF( SCOTCH_FOUND )
@@ -472,7 +490,7 @@ IF( BUILD_TESTING )
     ##-------------------------------------------------------------------##
     ##------- Get the continuous integration tests ----------------------##
     ##-------------------------------------------------------------------##
-    INCLUDE(cmake/modules/LoadCiTests.cmake)
+    INCLUDE(LoadCiTests)
   ENDIF ( )
 
   ##-------------------------------------------------------------------##
@@ -486,15 +504,6 @@ IF( BUILD_TESTING )
 
   ENABLE_TESTING()
   INCLUDE(CTest)
-
-  # If tests are enabled, adds compiler flags in debug mode
-  IF ( CMAKE_COMPILER_IS_GNUCC )
-    SET(CMAKE_C_FLAGS_DEBUG "-Wall ${CMAKE_C_FLAGS_DEBUG}")
-  ELSEIF( CMAKE_COMPILER_IS_CLANG )
-    SET(CMAKE_C_FLAGS_DEBUG "-Weverything -Wno-sign-conversion")
-    SET(${CMAKE_C_FLAGS_DEBUG} "-Wno-char-subscripts -Wno-padded"
-      ${CMAKE_C_FLAGS_DEBUG})
-  ENDIF ( )
 
   IF ( ( MMG3D_CI OR MMGS_CI ) AND NOT ONLY_VERY_SHORT_TESTS )
     SET(LISTEXEC_MMG ${LISTEXEC_MMGS} ${LISTEXEC_MMG3D})
