@@ -180,7 +180,7 @@ IF ( BUILD_TESTING )
         )
     ELSE ( )
       # Add mmg2d tests that require to download meshes
-      INCLUDE( ${PROJECT_SOURCE_DIR}/cmake/testing/mmg2d_tests.cmake )
+      INCLUDE( mmg2d_tests )
 
     ENDIF ( )
 

@@ -507,26 +507,6 @@ IF( BUILD_TESTING )
   INCLUDE(CTest)
 
   IF ( ( MMG3D_CI OR MMGS_CI ) AND NOT ONLY_VERY_SHORT_TESTS )
-    SET(LISTEXEC_MMG ${LISTEXEC_MMGS} ${LISTEXEC_MMG3D})
-    SET(EXECUT_MMG ${EXECUT_MMGS} ${EXECUT_MMG3D})
-
-    # Make some files not openable
-    IF ( EXISTS ${CTEST_OUTPUT_DIR}/unwrittable7.meshb
-        AND NOT IS_DIRECTORY ${CTEST_OUTPUT_DIR}/unwrittable7.meshb )
-      FILE ( REMOVE ${CTEST_OUTPUT_DIR}/unwrittable7.meshb )
-    ENDIF ()
-    IF ( NOT EXISTS ${CTEST_OUTPUT_DIR}/unwrittable7.meshb)
-      FILE(MAKE_DIRECTORY ${CTEST_OUTPUT_DIR}/unwrittable7.meshb)
-    ENDIF()
-
-    IF ( EXISTS ${CTEST_OUTPUT_DIR}/unwrittable8.sol
-        AND NOT IS_DIRECTORY ${CTEST_OUTPUT_DIR}/unwrittable8.sol )
-      FILE ( REMOVE ${CTEST_OUTPUT_DIR}/unwrittable8.sol )
-    ENDIF ()
-    IF ( NOT EXISTS ${CTEST_OUTPUT_DIR}/unwrittable8.sol)
-      FILE(MAKE_DIRECTORY ${CTEST_OUTPUT_DIR}/unwrittable8.sol)
-    ENDIF()
-
     # Add common tests for mmgs/3d appli
     INCLUDE( mmg_tests )
 

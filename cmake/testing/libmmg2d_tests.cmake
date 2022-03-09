@@ -36,6 +36,7 @@ SET ( MMG2D_LIB_TESTS
   libmmg2d_ls_example0
   libmmg2d_lsOnly
   libmmg2d_lsAndMetric
+  test_met2d
   )
 
 # Additional tests that needs to download ci meshes

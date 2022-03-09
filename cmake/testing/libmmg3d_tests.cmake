@@ -223,25 +223,6 @@ IF ( MMG3D_CI )
       PROPERTY PASS_REGULAR_EXPRESSION "${expr}")
   ENDIF ( )
 
-  ADD_TEST(NAME test_para_tria
-    COMMAND ${EXECUT_MMG3D}
-    -ar 0.02 -nofem -nosizreq -hgradreq -1 -hgrad -1
-    ${MMG3D_CI_TESTS}/test_para_tria/proc0.mesh
-    -sol ${MMG3D_CI_TESTS}/test_para_tria/proc0.sol
-    ${CTEST_OUTPUT_DIR}/proc0.o.mesh
-    )
-
-  SET_TESTS_PROPERTIES ( test_para_tria
-    PROPERTIES FIXTURES_SETUP test_para_tria )
-
-  ADD_TEST(NAME test_compare_para_tria
-    COMMAND ${TEST_COMPARE_PARA_TRIA}
-    ${MMG3D_CI_TESTS}/test_para_tria/proc0.mesh
-    ${CTEST_OUTPUT_DIR}/proc0.o.mesh
-    )
-  SET_TESTS_PROPERTIES ( test_compare_para_tria
-    PROPERTIES FIXTURES_REQUIRED test_para_tria )
-
   IF ( CMAKE_Fortran_COMPILER)
     SET(LIBMMG3D_EXECFORTRAN_a  ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_fortran_a)
     SET(LIBMMG3D_EXECFORTRAN_b  ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_fortran_b)

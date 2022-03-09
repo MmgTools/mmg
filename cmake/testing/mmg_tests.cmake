@@ -20,6 +20,28 @@
 ##  use this copy of the mmg distribution only if you accept them.
 ## =============================================================================
 
+# Runtime list
+SET(LISTEXEC_MMG ${LISTEXEC_MMGS} ${LISTEXEC_MMG3D})
+SET(EXECUT_MMG ${EXECUT_MMGS} ${EXECUT_MMG3D})
+
+# Make some files not openable
+IF ( EXISTS ${CTEST_OUTPUT_DIR}/unwrittable7.meshb
+    AND NOT IS_DIRECTORY ${CTEST_OUTPUT_DIR}/unwrittable7.meshb )
+  FILE ( REMOVE ${CTEST_OUTPUT_DIR}/unwrittable7.meshb )
+ENDIF ()
+IF ( NOT EXISTS ${CTEST_OUTPUT_DIR}/unwrittable7.meshb)
+  FILE(MAKE_DIRECTORY ${CTEST_OUTPUT_DIR}/unwrittable7.meshb)
+ENDIF()
+
+IF ( EXISTS ${CTEST_OUTPUT_DIR}/unwrittable8.sol
+    AND NOT IS_DIRECTORY ${CTEST_OUTPUT_DIR}/unwrittable8.sol )
+  FILE ( REMOVE ${CTEST_OUTPUT_DIR}/unwrittable8.sol )
+ENDIF ()
+IF ( NOT EXISTS ${CTEST_OUTPUT_DIR}/unwrittable8.sol)
+  FILE(MAKE_DIRECTORY ${CTEST_OUTPUT_DIR}/unwrittable8.sol)
+ENDIF()
+
+# Lists of tests that are common to mmgs and mmg3d
 FOREACH(EXEC ${LISTEXEC_MMG})
 
   GET_FILENAME_COMPONENT ( SHRT_EXEC ${EXEC} NAME )

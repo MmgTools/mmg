@@ -162,8 +162,8 @@ IF ( BUILD_TESTING )
 
     ELSE ( )
       # Add mmgs tests that require to download meshes
-      INCLUDE( ${PROJECT_SOURCE_DIR}/cmake/testing/mmgs_tests.cmake )
-      INCLUDE( ${PROJECT_SOURCE_DIR}/cmake/testing/mmg_tests.cmake )
+      INCLUDE( mmgs_tests )
+      INCLUDE( mmg_tests )
     ENDIF ( )
 
   ENDIF ( MMGS_CI )
