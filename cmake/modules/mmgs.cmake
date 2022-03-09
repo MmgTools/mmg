@@ -114,16 +114,6 @@ INSTALL(FILES ${mmgs_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/mmg/mmgs C
 # Copy header files in project directory at build step
 COPY_HEADERS_AND_CREATE_TARGET ( ${MMGS_SOURCE_DIR} ${MMGS_BINARY_DIR} ${MMGS_INCLUDE} s )
 
-############################################################################
-#####
-#####         Compile program to test library
-#####
-############################################################################
-
-IF ( TEST_LIBMMGS )
-  INCLUDE(cmake/testing/libmmgs_tests.cmake)
-ENDIF()
-
 ###############################################################################
 #####
 #####         Compile MMGS executable
@@ -131,6 +121,16 @@ ENDIF()
 ###############################################################################
 ADD_AND_INSTALL_EXECUTABLE ( ${PROJECT_NAME}s copy_s_headers
   "${mmgs_library_files}" ${mmgs_main_file} )
+
+############################################################################
+#####
+#####         Compile program to test library
+#####
+############################################################################
+
+IF ( TEST_LIBMMGS )
+  INCLUDE(libmmgs_tests)
+ENDIF()
 
 ###############################################################################
 #####

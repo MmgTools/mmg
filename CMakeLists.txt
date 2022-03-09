@@ -29,7 +29,10 @@ endif()
 
 INCLUDE(CMakeDependentOption)
 
-LIST(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules)
+LIST(APPEND CMAKE_MODULE_PATH
+  ${CMAKE_SOURCE_DIR}/cmake/modules
+  ${CMAKE_SOURCE_DIR}/cmake/testing )
+
 INCLUDE(macros)
 
 PROJECT (mmg)
@@ -462,8 +465,6 @@ ENDIF()
 #####         Continuous integration
 #####
 ###############################################################################
-LIST(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/testing)
-
 CMAKE_DEPENDENT_OPTION (
   ONLY_VERY_SHORT_TESTS "Enable/Disable very short tests" OFF
   "BUILD_TESTING;NOT LONG_TESTS" OFF )

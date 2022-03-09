@@ -149,6 +149,14 @@ INSTALL(FILES ${mmg3d_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/mmg/mmg3d
 # Copy header files in project directory at build step
 COPY_HEADERS_AND_CREATE_TARGET ( ${MMG3D_SOURCE_DIR} ${MMG3D_BINARY_DIR} ${MMG3D_INCLUDE} 3d )
 
+###############################################################################
+#####
+#####         Compile MMG3D executable
+#####
+###############################################################################
+ADD_AND_INSTALL_EXECUTABLE ( ${PROJECT_NAME}3d copy_3d_headers
+  "${mmg3d_library_files}" ${mmg3d_main_file} )
+
 ############################################################################
 #####
 #####         Compile program to test library
@@ -158,16 +166,8 @@ SET(MMG3D_CI_TESTS ${CI_DIR}/mmg3d )
 SET(MMG_CI_TESTS ${CI_DIR}/mmg )
 
 IF ( TEST_LIBMMG3D )
-  INCLUDE(cmake/testing/libmmg3d_tests.cmake)
+  INCLUDE(libmmg3d_tests)
 ENDIF()
-
-###############################################################################
-#####
-#####         Compile MMG3D executable
-#####
-###############################################################################
-ADD_AND_INSTALL_EXECUTABLE ( ${PROJECT_NAME}3d copy_3d_headers
-  "${mmg3d_library_files}" ${mmg3d_main_file} )
 
 ###############################################################################
 #####

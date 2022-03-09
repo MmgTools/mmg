@@ -148,9 +148,8 @@ ENDIF()
 #####         Compile program to test library
 #####
 ############################################################################
-
 IF ( TEST_LIBMMG )
-  INCLUDE(cmake/testing/libmmg_tests.cmake)
+  INCLUDE(libmmg_tests)
 ENDIF()
 
 ###############################################################################

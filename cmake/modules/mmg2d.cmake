@@ -134,17 +134,6 @@ IF ( LIBMMG2D_SHARED )
     "${mmg2d_library_files}" ${PROJECT_NAME}2d )
 ENDIF()
 
-############################################################################
-#####
-#####         Compile program to test library
-#####
-############################################################################
-SET(MMG2D_CI_TESTS ${CI_DIR}/mmg2d )
-
-IF ( TEST_LIBMMG2D )
-  INCLUDE(cmake/testing/libmmg2d_tests.cmake)
-ENDIF ( )
-
 ###############################################################################
 #####
 #####         Compile MMG2D executable
@@ -153,6 +142,17 @@ ENDIF ( )
 
 ADD_AND_INSTALL_EXECUTABLE ( ${PROJECT_NAME}2d copy_2d_headers
   "${mmg2d_library_files}" ${mmg2d_main_file} )
+
+############################################################################
+#####
+#####         Compile program to test library
+#####
+############################################################################
+SET(MMG2D_CI_TESTS ${CI_DIR}/mmg2d )
+
+IF ( TEST_LIBMMG2D )
+  INCLUDE(libmmg2d_tests)
+ENDIF ( )
 
 ###############################################################################
 #####
