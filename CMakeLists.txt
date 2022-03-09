@@ -206,7 +206,7 @@ IF ( NOT (WIN32 OR MINGW) )
   ENDIF(NOT DEFINED M_LIB)
 
   MARK_AS_ADVANCED(FORCE M_LIB)
-  LIST( PREPEND LIBRARIES ${M_LIB} )
+  SET( LIBRARIES ${M_LIB} ${LIBRARIES})
 ENDIF()
 
 ############################################################################
@@ -371,7 +371,7 @@ IF( SCOTCH_FOUND )
 
   MESSAGE(STATUS
     "Compilation with scotch: ${SCOTCH_LIBRARIES}")
-  LIST( PREPEND LIBRARIES ${SCOTCH_LIBRARIES})
+  SET( LIBRARIES ${SCOTCH_LIBRARIES} ${LIBRARIES})
 ENDIF()
 
 
@@ -384,7 +384,7 @@ IF ( VTK_FOUND )
     INCLUDE ( ${VTK_USE_FILE} )
   ENDIF()
 
-  LIST( PREPEND LIBRARIES ${VTK_LIBRARIES} )
+  SET( LIBRARIES ${VTK_LIBRARIES} ${LIBRARIES} )
 ENDIF ( )
 
 #---------------------------- mmg library gathering mmg2d, mmgs and mmg3d libs
@@ -473,6 +473,7 @@ ENDIF()
 #####         Continuous integration
 #####
 ###############################################################################
+LIST(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/testing)
 
 CMAKE_DEPENDENT_OPTION (
   ONLY_VERY_SHORT_TESTS "Enable/Disable very short tests" OFF
@@ -527,7 +528,7 @@ IF( BUILD_TESTING )
     ENDIF()
 
     # Add common tests for mmgs/3d appli
-    INCLUDE( ${PROJECT_SOURCE_DIR}/cmake/testing/mmg_tests.cmake )
+    INCLUDE( mmg_tests )
 
   ENDIF ( )
 
