@@ -20,8 +20,9 @@
 ##  use this copy of the mmg distribution only if you accept them.
 ## =============================================================================
 
-# Runtime list
-SET(LISTEXEC_MMG ${LISTEXEC_MMGS} ${LISTEXEC_MMG3D})
+# Execut_mmg contains the list of executables to test (for now the mmg3d
+# executable is in EXECUT_MMG3D (filled by mmg3d.cmake) and the mmgs executable
+# is in EXECUTE_MMGS (filled by mmgs.cmake))
 SET(EXECUT_MMG ${EXECUT_MMGS} ${EXECUT_MMG3D})
 
 # Make some files not openable
@@ -42,8 +43,7 @@ IF ( NOT EXISTS ${CTEST_OUTPUT_DIR}/unwrittable8.sol)
 ENDIF()
 
 # Lists of tests that are common to mmgs and mmg3d
-FOREACH(EXEC ${LISTEXEC_MMG})
-
+FOREACH(EXEC ${EXECUT_MMG})
   GET_FILENAME_COMPONENT ( SHRT_EXEC ${EXEC} NAME )
 
   ###############################################################################
@@ -52,7 +52,7 @@ FOREACH(EXEC ${LISTEXEC_MMG})
   #####
   ###############################################################################
 
-  # Gmsh without metric: see mmg3d_tests.cmale and mmgs_tests.cmake
+  # Gmsh without metric: see mmg3d_tests.cmake and mmgs_tests.cmake
 
   # Binary gmsh iso metric
   ADD_TEST(NAME mmg_binary_gmsh_iso_${SHRT_EXEC}

@@ -202,9 +202,9 @@ IF ( BUILD_TESTING )
         "${CTEST_OUTPUT_DIR}/libmmg3d_Adaptation_0_a-cube.o"
         )
     ELSE ( )
-      # Add mmg2d tests that require to download meshes
+      # Add mmg3d tests that require to download meshes
       INCLUDE( mmg3d_tests )
-      INCLUDE( mmg_tests )
+
     ENDIF ( )
 
   ENDIF ( MMG3D_CI )

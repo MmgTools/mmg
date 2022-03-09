@@ -163,7 +163,6 @@ IF ( BUILD_TESTING )
     ELSE ( )
       # Add mmgs tests that require to download meshes
       INCLUDE( mmgs_tests )
-      INCLUDE( mmg_tests )
     ENDIF ( )
 
   ENDIF ( MMGS_CI )

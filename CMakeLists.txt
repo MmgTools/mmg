@@ -315,12 +315,12 @@ ELSE()
   SET(LIBMMG2D_INTERNAL OFF )
 ENDIF()
 CMAKE_DEPENDENT_OPTION (
-  TEST_LIBMMG2D "Compile tests for the mmg2d library" OFF
+  TEST_LIBMMG2D  "Build mmg2d library examples and tests" OFF
   "BUILD_MMG2D;LIBMMG2D_INTERNAL" OFF
   )
 
 CMAKE_DEPENDENT_OPTION(
-  MMG2D_CI "Enable/Disable continuous integration for mmg2d" ON
+  MMG2D_CI "Enable/Disabletest_execution for mmg2d" ON
   "BUILD_TESTING;BUILD_MMG2D" OFF)
 
 #------------------------------- mmgs
@@ -334,12 +334,12 @@ ELSE()
   SET(LIBMMGS_INTERNAL OFF )
 ENDIF()
 CMAKE_DEPENDENT_OPTION (
-  TEST_LIBMMGS "Compile tests for the mmgs library" OFF
+  TEST_LIBMMGS "Build mmgs library examples and tests" OFF
   "LIBMMGS_INTERNAL;BUILD_MMGS" OFF
   )
 
 CMAKE_DEPENDENT_OPTION(
-  MMGS_CI "Enable/Disable continuous integration for mmgs" ON
+  MMGS_CI "Enable/Disable test_execution for mmgs" ON
   "BUILD_TESTING;BUILD_MMGS" OFF )
 
 #------------------------------- mmg3d
@@ -353,11 +353,11 @@ ELSE()
   SET(LIBMMG3D_INTERNAL OFF )
 ENDIF()
 CMAKE_DEPENDENT_OPTION (
-  TEST_LIBMMG3D "Compile tests for the mmg3d library" OFF
+  TEST_LIBMMG3D "Build mmg3d library examples and tests" OFF
   "BUILD_MMG3D;LIBMMG3D_INTERNAL" OFF
   )
 CMAKE_DEPENDENT_OPTION(
-  MMG3D_CI "Enable/Disable continuous integration for mmg3d" ON
+  MMG3D_CI "Enable/Disable test execution for mmg3d" ON
   "BUILD_TESTING;BUILD_MMG3D" OFF)
 
 CMAKE_DEPENDENT_OPTION ( PATTERN
@@ -402,11 +402,11 @@ ELSE()
   SET(LIBMMG_INTERNAL OFF )
 ENDIF()
 CMAKE_DEPENDENT_OPTION (
-  TEST_LIBMMG "Compile tests for the mmg library" OFF
+  TEST_LIBMMG "Build mmg library examples and tests" OFF
   "BUILD_MMG;LIBMMG_INTERNAL" OFF
   )
 CMAKE_DEPENDENT_OPTION(
-  MMG_CI "Enable/Disable continuous integration for mmg" ON
+  MMG_CI "Enable/Disable test execution for mmg library" ON
   "BUILD_TESTING;BUILD_MMG" OFF)
 
 
