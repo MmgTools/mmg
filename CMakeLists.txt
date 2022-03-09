@@ -108,7 +108,8 @@ IF(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   # Set the possible values of build type for cmake-gui
   SET_PROPERTY(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release"
     "MinSizeRel" "RelWithDebInfo" "Maintainer" "RelWithAssert")
-  SET(CMAKE_CONFIGURATION_TYPES ${CMAKE_BUILD_TYPE})
+ELSEIF( CMAKE_CONFIGURATION_TYPES )
+  LIST(APPEND CMAKE_CONFIGURATION_TYPES Maintainer RelWithAssert )
 ENDIF()
 
 # Explicitly set the DNDEBUG flag in case the user or a parent project overrides
