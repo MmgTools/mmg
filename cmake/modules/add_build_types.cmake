@@ -36,13 +36,17 @@ if (CMAKE_C_COMPILER_ID STREQUAL "Clang")
     CACHE STRING
     "Flags used by the C compiler during Maintainer builds."
     FORCE)
-  set(CMAKE_EXE_LINKER_FLAGS_MAINTAINER
-    "-Wl,--warn-unresolved-symbols,--warn-once" CACHE STRING
+  set(CMAKE_EXE_LINKER_FLAGS_MAINTAINER ${CMAKE_EXE_LINKER_FLAGS_DEBUG}
+    CACHE STRING
     "Flags used for linking binaries during Maintainer builds."
     FORCE)
-  set(CMAKE_SHARED_LINKER_FLAGS_MAINTAINER
-    "-Wl,--warn-unresolved-symbols,--warn-once" CACHE STRING
+  set(CMAKE_SHARED_LINKER_FLAGS_MAINTAINER ${CMAKE_SHARED_LINKER_FLAGS_DEBUG}
+    CACHE STRING
     "Flags used by the shared libraries linker during Maintainer builds."
+    FORCE)
+  set(CMAKE_STATIC_LINKER_FLAGS_MAINTAINER ${CMAKE_STATIC_LINKER_FLAGS_DEBUG}
+    CACHE STRING
+    "Flags used by the static libraries linker during Maintainer builds."
     FORCE)
 
 elseif (CMAKE_C_COMPILER_ID STREQUAL "GNU")
@@ -52,13 +56,24 @@ elseif (CMAKE_C_COMPILER_ID STREQUAL "GNU")
   set(CMAKE_C_FLAGS_MAINTAINER "-O0 -g -Wall" CACHE STRING
     "Flags used by the C compiler during Maintainer builds."
     FORCE)
+
+  set ( LD_LINKER_FLAGS "-Wl,--warn-unresolved-symbols,--warn-once" )
+
   set(CMAKE_EXE_LINKER_FLAGS_MAINTAINER
-    "-Wl,--warn-unresolved-symbols,--warn-once" CACHE STRING
+    ${LD_LINKER_FLAGS} ${CMAKE_EXE_LINKER_FLAGS_DEBUG}
+    CACHE STRING
     "Flags used for linking binaries during Maintainer builds."
     FORCE)
   set(CMAKE_SHARED_LINKER_FLAGS_MAINTAINER
-    "-Wl,--warn-unresolved-symbols,--warn-once" CACHE STRING
+    ${LD_LINKER_FLAGS} ${CMAKE_SHARED_LINKER_FLAGS_DEBUG}
+    CACHE STRING
     "Flags used by the shared libraries linker during Maintainer builds."
+    FORCE)
+  # Static lib linking uses ar and not ld: -Wl is not supported
+  set(CMAKE_STATIC_LINKER_FLAGS_MAINTAINER
+    ${CMAKE_STATIC_LINKER_FLAGS_DEBUG}
+    CACHE STRING
+    "Flags used by the static libraries linker during Maintainer builds."
     FORCE)
 
 else ()
@@ -75,9 +90,13 @@ else ()
     CACHE STRING
     "Flags used for linking binaries during Maintainer builds."
     FORCE)
-  set(CMAKE_SHARED_LINKER_FLAGS_MAINTAINER "${CMAKE_EXE_LINKER_FLAGS_DEBUG}"
+  set(CMAKE_SHARED_LINKER_FLAGS_MAINTAINER "${CMAKE_SHARED_LINKER_FLAGS_DEBUG}"
     CACHE STRING
     "Flags used by the shared libraries linker during Maintainer builds."
+    FORCE)
+  set(CMAKE_STATIC_LINKER_FLAGS_MAINTAINER "${CMAKE_STATIC_LINKER_FLAGS_DEBUG}"
+    CACHE STRING
+    "Flags used by the static libraries linker during Maintainer builds."
     FORCE)
 
 endif()
@@ -87,6 +106,7 @@ mark_as_advanced(
   CMAKE_C_FLAGS_MAINTAINER
   CMAKE_EXE_LINKER_FLAGS_MAINTAINER
   CMAKE_SHARED_LINKER_FLAGS_MAINTAINER
+  CMAKE_STATIC_LINKER_FLAGS_MAINTAINER
   )
 
 # Add RelWithAssert mode
@@ -110,9 +130,13 @@ set(CMAKE_EXE_LINKER_FLAGS_RELWITHASSERT "${CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINF
   CACHE STRING
   "Flags used for linking binaries during RelWithAssert builds."
   FORCE)
-set(CMAKE_SHARED_LINKER_FLAGS_RELWITHASSERT "${CMAKE_EXE_LINKER_FLAGS_RELWITHDEINFO}"
+set(CMAKE_SHARED_LINKER_FLAGS_RELWITHASSERT "${CMAKE_SHARED_LINKER_FLAGS_RELWITHDEINFO}"
   CACHE STRING
   "Flags used by the shared libraries linker during maintainer builds."
+  FORCE)
+set(CMAKE_STATIC_LINKER_FLAGS_RELWITHASSERT "${CMAKE_STATIC_LINKER_FLAGS_RELWITHDEINFO}"
+  CACHE STRING
+  "Flags used by the static libraries linker during maintainer builds."
   FORCE)
 
 mark_as_advanced(
@@ -120,4 +144,5 @@ mark_as_advanced(
   CMAKE_C_FLAGS_RELWITHASSERT
   CMAKE_EXE_LINKER_FLAGS_RELWITHASSERT
   CMAKE_SHARED_LINKER_FLAGS_RELWITHASSERT
+  CMAKE_STATIC_LINKER_FLAGS_RELWITHASSERT
   )
