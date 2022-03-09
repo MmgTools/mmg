@@ -36,12 +36,19 @@ SET ( MMG3D_LIB_TESTS
   libmmg3d_lsOnly
   libmmg3d_lsAndMetric
   libmmg3d_generic_io
-  test_api3d_0
-  test_api3d_domain-selection
-  test_api3d_vtk2mesh
   test_met3d
   test_compare-para-tria
   )
+
+# Additional tests that needs to download ci meshes
+IF ( MMG3D_CI )
+  LIST ( APPEND MMG3D_LIB_TESTS
+    test_api3d_0
+    test_api3d_domain-selection
+    test_api3d_vtk2mesh
+    )
+ENDIF ( )
+
 SET ( MMG3D_LIB_TESTS_MAIN_PATH
   ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/adaptation_example0/example0_a/main.c
   ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/adaptation_example0/example0_b/main.c
@@ -52,12 +59,18 @@ SET ( MMG3D_LIB_TESTS_MAIN_PATH
   ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsOnly/main.c
   ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsAndMetric/main.c
   ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/io_generic_and_get_adja/genericIO.c
-  ${MMG3D_CI_TESTS}/API_tests/3d.c
-  ${MMG3D_CI_TESTS}/API_tests/domain-selection.c
-  ${MMG3D_CI_TESTS}/API_tests/vtk2mesh.c
   ${PROJECT_SOURCE_DIR}/cmake/testing/code/test_met3d.c
   ${PROJECT_SOURCE_DIR}/cmake/testing/code/compare-para-tria.c
   )
+
+# Additional tests that needs to download ci meshes
+IF ( MMG3D_CI )
+  LIST ( APPEND MMG3D_LIB_TESTS_MAIN_PATH
+    ${MMG3D_CI_TESTS}/API_tests/3d.c
+    ${MMG3D_CI_TESTS}/API_tests/domain-selection.c
+    ${MMG3D_CI_TESTS}/API_tests/vtk2mesh.c
+    )
+ENDIF( )
 
 IF ( LIBMMG3D_STATIC )
   SET ( lib_name lib${PROJECT_NAME}3d_a )
@@ -78,8 +91,11 @@ IF ( CMAKE_Fortran_COMPILER )
     libmmg3d_fortran_io
     libmmg3d_fortran_lsOnly
     libmmg3d_fortran_lsAndMetric
-    test_api3d_fortran_0
     )
+  # Additional tests that needs to download ci meshes
+  IF ( MMG3D_CI )
+    LIST ( APPEND MMG3D_LIB_TESTS test_api3d_fortran_0 )
+  ENDIF( )
 
   SET ( MMG3D_LIB_TESTS_MAIN_PATH ${MMG3D_LIB_TESTS_MAIN_PATH}
     ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/adaptation_example0_fortran/example0_a/main.F90
@@ -87,8 +103,13 @@ IF ( CMAKE_Fortran_COMPILER )
     ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/io_multisols_example6/main.F90
     ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsOnly/main.F90
     ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsAndMetric/main.F90
-    ${MMG3D_CI_TESTS}/API_tests/3d.F90
     )
+  # Additional tests that needs to download ci meshes
+  IF ( MMG3D_CI )
+    LIST ( APPEND MMG3D_LIB_TESTS_MAIN_PATH
+      ${MMG3D_CI_TESTS}/API_tests/3d.F90
+      )
+  ENDIF( )
 
 ENDIF ( CMAKE_Fortran_COMPILER )
 

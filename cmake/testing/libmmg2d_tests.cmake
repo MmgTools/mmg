@@ -36,9 +36,13 @@ SET ( MMG2D_LIB_TESTS
   libmmg2d_ls_example0
   libmmg2d_lsOnly
   libmmg2d_lsAndMetric
-  test_api2d_0
-  test_met2d
   )
+
+# Additional tests that needs to download ci meshes
+IF ( MMG2D_CI )
+  LIST ( APPEND MMG2D_LIB_TESTS test_api2d_0 )
+ENDIF ( )
+
 SET ( MMG2D_LIB_TESTS_MAIN_PATH
   ${PROJECT_SOURCE_DIR}/libexamples/mmg2d/adaptation_example0/example0_a/main.c
   ${PROJECT_SOURCE_DIR}/libexamples/mmg2d/adaptation_example0/example0_b/main.c
@@ -48,9 +52,15 @@ SET ( MMG2D_LIB_TESTS_MAIN_PATH
   ${PROJECT_SOURCE_DIR}/libexamples/mmg2d/io_multisols_example0/main.c
   ${PROJECT_SOURCE_DIR}/libexamples/mmg2d/IsosurfDiscretization_lsOnly/main.c
   ${PROJECT_SOURCE_DIR}/libexamples/mmg2d/IsosurfDiscretization_lsAndMetric/main.c
-  ${MMG2D_CI_TESTS}/API_tests/2d.c
   ${PROJECT_SOURCE_DIR}/cmake/testing/code/test_met2d.c
   )
+
+# Additional tests that needs to download ci meshes
+IF ( MMG2D_CI )
+  LIST ( APPEND MMG2D_LIB_TESTS_MAIN_PATH
+    ${MMG2D_CI_TESTS}/API_tests/2d.c
+    )
+ENDIF( )
 
 IF ( LIBMMG2D_STATIC )
   SET ( lib_name lib${PROJECT_NAME}2d_a )
@@ -71,9 +81,12 @@ IF ( CMAKE_Fortran_COMPILER )
     libmmg2d_fortran_io
     libmmg2d_fortran_lsOnly
     libmmg2d_fortran_lsAndMetric
-    test_api2d_fortran_0
     test_io2d_fortran
     )
+  # Additional tests that needs to download ci meshes
+  IF ( MMG2D_CI )
+    LIST ( APPEND MMG2D_LIB_TESTS test_api2d_fortran_0 )
+  ENDIF( )
 
   SET ( MMG2D_LIB_TESTS_MAIN_PATH ${MMG2D_LIB_TESTS_MAIN_PATH}
     ${PROJECT_SOURCE_DIR}/libexamples/mmg2d/adaptation_example0_fortran/example0_a/main.F90
@@ -81,9 +94,15 @@ IF ( CMAKE_Fortran_COMPILER )
     ${PROJECT_SOURCE_DIR}/libexamples/mmg2d/io_multisols_example0/main.F90
     ${PROJECT_SOURCE_DIR}/libexamples/mmg2d/IsosurfDiscretization_lsOnly/main.F90
     ${PROJECT_SOURCE_DIR}/libexamples/mmg2d/IsosurfDiscretization_lsAndMetric/main.F90
-    ${MMG2D_CI_TESTS}/API_tests/2d.F90
     ${PROJECT_SOURCE_DIR}/cmake/testing/code/mmg2d_io.F90
     )
+  # Additional tests that needs to download ci meshes
+  IF ( MMG2D_CI )
+    LIST ( APPEND MMG2D_LIB_TESTS_MAIN_PATH
+      ${MMG2D_CI_TESTS}/API_tests/2d.F90
+      )
+  ENDIF( )
+
 
 ENDIF ( CMAKE_Fortran_COMPILER )
 
