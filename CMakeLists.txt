@@ -71,7 +71,7 @@ SET (CMAKE_RELEASE_VERSION
 
 ###############################################################################
 #####
-#####         Set preprocessor flags
+#####  Set preprocessor flags and manage automatically generated headers data
 #####
 ###############################################################################
 # Architecture detection
@@ -91,6 +91,16 @@ CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/src/common/mmgcmakedefines.h.in
 # Create mmgversion.h file with the release infos
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/src/common/mmgversion.h.in
   ${PROJECT_BINARY_DIR}/src/common/mmgversion.h @ONLY)
+
+# Print git hash to source file
+IF (NOT WIN32 OR MINGW)
+
+  ADD_CUSTOM_TARGET(GenerateGitHash
+    COMMAND ./git_log_mmg.sh ${PROJECT_SOURCE_DIR} ${COMMON_BINARY_DIR}
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/scripts/
+    COMMENT "Getting git commit hash"
+  )
+ENDIF ()
 
 ###############################################################################
 #####
@@ -523,21 +533,6 @@ IF( BUILD_TESTING )
   ENDIF ( )
 
 ENDIF ( BUILD_TESTING )
-
-############################################################################
-#####
-#####         Print git hash to source file
-#####
-############################################################################
-
-IF (NOT WIN32 OR MINGW)
-
-  ADD_CUSTOM_TARGET(GenerateGitHash
-    COMMAND ./git_log_mmg.sh ${PROJECT_SOURCE_DIR} ${COMMON_BINARY_DIR}
-    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/scripts/
-    COMMENT "Getting git commit hash"
-  )
-ENDIF ()
 
 ###############################################################################
 #####
