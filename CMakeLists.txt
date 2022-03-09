@@ -488,15 +488,11 @@ MARK_AS_ADVANCED(LONG_TESTS)
 IF( BUILD_TESTING )
 
   IF ( NOT ONLY_VERY_SHORT_TESTS )
-    ##-------------------------------------------------------------------##
-    ##------- Get the continuous integration tests ----------------------##
-    ##-------------------------------------------------------------------##
+    # Get the continuous integration tests
     INCLUDE(LoadCiTests)
   ENDIF ( )
 
-  ##-------------------------------------------------------------------##
-  ##------- Set the continuous integration options --------------------##
-  ##-------------------------------------------------------------------##
+  # Set the continuous integration options
   SET ( MMG_CI_TESTS ${CI_DIR}/mmg )
 
   # Copy config file and custom file in the good directories
