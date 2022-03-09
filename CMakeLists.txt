@@ -114,14 +114,14 @@ ENDIF()
 # Explicitly set the DNDEBUG flag in case the user or a parent project overrides
 # it.
 if (NOT CMAKE_BUILD_TYPE MATCHES Debug AND NOT CMAKE_BUILD_TYPE MATCHES RelWithAssert)
-    add_compile_definitions(NDEBUG)
+    add_definitions(-DNDEBUG)
 endif()
 
 # Do not print warnings about the use of secure function with MSVC and the use
 # of POSIX strdup
 if ( MSVC )
-  add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
-  add_compile_definitions(strdup=_strdup)
+  add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+  add_definitions(-Dstrdup=_strdup)
 endif()
 
 MESSAGE(status "flags ${CMAKE_C_FLAGS} ${CMAKE_CXX_FLAGS}" )
@@ -367,7 +367,7 @@ MARK_AS_ADVANCED(PATTERN)
 
 
 IF( SCOTCH_FOUND )
-  ADD_COMPILE_DEFINITIONS(USE_SCOTCH)
+  add_definitions(-DUSE_SCOTCH)
 
   MESSAGE(STATUS
     "Compilation with scotch: ${SCOTCH_LIBRARIES}")
@@ -376,7 +376,7 @@ ENDIF()
 
 
 IF ( VTK_FOUND )
-  ADD_COMPILE_DEFINITIONS(USE_VTK)
+  add_definitions(-DUSE_VTK)
 
   MESSAGE ( STATUS "Compilation with VTK: add vtk, vtp and vtu I/O." )
 
