@@ -544,29 +544,7 @@ ENDIF ()
 #####         Create API Documentation
 #####
 ###############################################################################
-OPTION ( BUILD_DOC "Enable/Disable Doxygen documentation target" OFF )
-IF ( BUILD_DOC )
-  FIND_PACKAGE(Doxygen)
-  IF(DOXYGEN_FOUND)
-
-    # MMG Documentation
-    SET( MMG_DOC_DIR ${PROJECT_BINARY_DIR}/doc/ CACHE PATH "Path toward generated Doxygen doc.")
-    mark_as_advanced(MMG_DOC_DIR)
-
-    FILE(MAKE_DIRECTORY ${MMG_DOC_DIR})
-
-    CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/Doxyfile.in
-      ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
-    ADD_CUSTOM_TARGET(doc
-      COMMAND ${DOXYGEN_EXECUTABLE}
-      ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
-      WORKING_DIRECTORY ${MMG_DOC_DIR}
-      COMMENT "Generating Mmg documentation with Doxygen. Open up the
-    ${MMG_DOC_DIR}/index.html file to see
-    it" VERBATIM )
-
-  ENDIF ( DOXYGEN_FOUND )
-ENDIF ( )
+include(doxygen)
 
 ###############################################################################
 #####
