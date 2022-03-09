@@ -124,18 +124,6 @@ if ( MSVC )
   add_definitions(-Dstrdup=_strdup)
 endif()
 
-MESSAGE(status "flags ${CMAKE_C_FLAGS} ${CMAKE_CXX_FLAGS}" )
-MESSAGE(status "Debug flags ${CMAKE_C_FLAGS_DEBUG} ${CMAKE_CXX_FLAGS_DEBUG}" )
-MESSAGE(status "Release flags ${CMAKE_C_FLAGS_RELEASE} ${CMAKE_CXX_FLAGS_RELEASE}" )
-MESSAGE(status "RelWithDebInfo flags ${CMAKE_C_FLAGS_RELWITHDEBINFO} ${CMAKE_CXX_FLAGS_RELWITHDEBINFO}" )
-MESSAGE(status "Maintener flags ${CMAKE_C_FLAGS_MAINTAINER} ${CMAKE_CXX_FLAGS_MAINTAINER}" )
-MESSAGE(status "RelwithAssert flags ${CMAKE_C_FLAGS_RELWITHASSERT}  ${CMAKE_CXX_FLAGS_RELWITHASSERT}")
-
-MESSAGE(status "linker ${CMAKE_EXE_LINKER_FLAGS}  ${CMAKE_SHARED_LINKER_FLAGS}  ${CMAKE_STATIC_LINKER_FLAGS}")
-MESSAGE(status "linker Debug ${CMAKE_EXE_LINKER_FLAGS_DEBUG}  ${CMAKE_SHARED_LINKER_FLAGS_DEBUG}  ${CMAKE_STATIC_LINKER_FLAGS_DEBUG}")
-MESSAGE(status "linker Release ${CMAKE_EXE_LINKER_FLAGS_RELEASE}  ${CMAKE_SHARED_LINKER_FLAGS_RELEASE}  ${CMAKE_STATIC_LINKER_FLAGS_RELEASE}")
-
-
 ###############################################################################
 #####
 #####         Choose executable target to compile
