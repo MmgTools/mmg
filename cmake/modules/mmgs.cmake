@@ -122,34 +122,29 @@ COPY_HEADERS_AND_CREATE_TARGET ( ${MMGS_SOURCE_DIR} ${MMGS_BINARY_DIR} ${MMGS_IN
 ADD_AND_INSTALL_EXECUTABLE ( ${PROJECT_NAME}s copy_s_headers
   "${mmgs_library_files}" ${mmgs_main_file} )
 
-############################################################################
-#####
-#####         Compile program to test library
-#####
-############################################################################
-##-------------------------------------------------------------------##
-##------- Set the continuous integration options --------------------##
-##-------------------------------------------------------------------##
-SET(MMG2D_CI_TESTS ${CI_DIR}/mmg2d )
-SET(MMGS_CI_TESTS  ${CI_DIR}/mmgs )
-SET(MMG_CI_TESTS   ${CI_DIR}/mmg )
-
-IF ( TEST_LIBMMGS )
-  # Build executables for library examples
-  INCLUDE(libmmgs_tests)
-ENDIF()
-
 ###############################################################################
 #####
 #####         Continuous integration
 #####
 ###############################################################################
 
+SET(MMG2D_CI_TESTS ${CI_DIR}/mmg2d )
+SET(MMGS_CI_TESTS  ${CI_DIR}/mmgs )
+SET(MMG_CI_TESTS   ${CI_DIR}/mmg )
+
+##-------------------------------------------------------------------##
+##-------------- Library examples and APIs      ---------------------##
+##-------------------------------------------------------------------##
+IF ( TEST_LIBMMGS )
+  # Build executables for library examples and add library tests if needed
+  INCLUDE(libmmgs_tests)
+ENDIF()
+
+##-------------------------------------------------------------------##
+##------------------------ Test Mmgs executable ---------------------##
+##-------------------------------------------------------------------##
 IF ( BUILD_TESTING )
 
-  ##-------------------------------------------------------------------##
-  ##--------------------------- Add tests and configure it ------------##
-  ##-------------------------------------------------------------------##
   # Add runtime that we want to test for mmgs
   IF( MMGS_CI )
 
@@ -157,6 +152,7 @@ IF ( BUILD_TESTING )
     SET ( LISTEXEC_MMG ${EXECUT_MMGS} )
 
     IF ( ONLY_VERY_SHORT_TESTS )
+      # Add tests that doesn't require to download meshes
       SET ( CTEST_OUTPUT_DIR ${PROJECT_BINARY_DIR}/TEST_OUTPUTS )
 
       ADD_TEST(NAME mmgs_very_short   COMMAND ${EXECUT_MMGS}
@@ -165,7 +161,7 @@ IF ( BUILD_TESTING )
         )
 
     ELSE ( )
-      # Add mmgs tests
+      # Add mmgs tests that require to download meshes
       INCLUDE( ${PROJECT_SOURCE_DIR}/cmake/testing/mmgs_tests.cmake )
       INCLUDE( ${PROJECT_SOURCE_DIR}/cmake/testing/mmg_tests.cmake )
     ENDIF ( )

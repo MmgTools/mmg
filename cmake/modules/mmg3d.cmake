@@ -157,33 +157,28 @@ COPY_HEADERS_AND_CREATE_TARGET ( ${MMG3D_SOURCE_DIR} ${MMG3D_BINARY_DIR} ${MMG3D
 ADD_AND_INSTALL_EXECUTABLE ( ${PROJECT_NAME}3d copy_3d_headers
   "${mmg3d_library_files}" ${mmg3d_main_file} )
 
-############################################################################
-#####
-#####         Compile program to test library
-#####
-############################################################################
-SET(MMG3D_CI_TESTS ${CI_DIR}/mmg3d )
-SET(MMG_CI_TESTS ${CI_DIR}/mmg )
-
-IF ( TEST_LIBMMG3D )
-  # Build executables for library examples
-  INCLUDE(libmmg3d_tests)
-ENDIF()
-
 ###############################################################################
 #####
 #####         Continuous integration
 #####
 ###############################################################################
 
-IF ( BUILD_TESTING )
-  ##-------------------------------------------------------------------##
-  ##------- Set the continuous integration options --------------------##
-  ##-------------------------------------------------------------------##
+SET(MMG3D_CI_TESTS ${CI_DIR}/mmg3d )
+SET(MMG_CI_TESTS ${CI_DIR}/mmg )
 
-  ##-------------------------------------------------------------------##
-  ##--------------------------- Add tests and configure it ------------##
-  ##-------------------------------------------------------------------##
+##-------------------------------------------------------------------##
+##-------------- Library examples and APIs      ---------------------##
+##-------------------------------------------------------------------##
+IF ( TEST_LIBMMG3D )
+  # Build executables for library examples and add related tests if needed
+  INCLUDE(libmmg3d_tests)
+ENDIF()
+
+##-------------------------------------------------------------------##
+##----------------------- Test Mmg3d executable ---------------------##
+##-------------------------------------------------------------------##
+IF ( BUILD_TESTING )
+
   # Add runtime that we want to test for mmg3d
   IF ( MMG3D_CI )
 
@@ -199,6 +194,7 @@ IF ( BUILD_TESTING )
     SET ( LISTEXEC_MMG ${EXECUT_MMG3D} )
 
     IF ( ONLY_VERY_SHORT_TESTS )
+      # Add tests that doesn't require to download meshes
       SET ( CTEST_OUTPUT_DIR ${PROJECT_BINARY_DIR}/TEST_OUTPUTS )
 
       ADD_TEST(NAME mmg3d_very_short COMMAND ${EXECUT_MMG3D}
@@ -206,8 +202,7 @@ IF ( BUILD_TESTING )
         "${CTEST_OUTPUT_DIR}/libmmg3d_Adaptation_0_a-cube.o"
         )
     ELSE ( )
-
-      # Add more tests
+      # Add mmg2d tests that require to download meshes
       INCLUDE( ${PROJECT_SOURCE_DIR}/cmake/testing/mmg3d_tests.cmake )
       INCLUDE( ${PROJECT_SOURCE_DIR}/cmake/testing/mmg_tests.cmake )
     ENDIF ( )

@@ -143,17 +143,6 @@ ENDIF()
 ADD_AND_INSTALL_EXECUTABLE ( ${PROJECT_NAME}2d copy_2d_headers
   "${mmg2d_library_files}" ${mmg2d_main_file} )
 
-############################################################################
-#####
-#####         Compile program to test library
-#####
-############################################################################
-SET(MMG2D_CI_TESTS ${CI_DIR}/mmg2d )
-
-IF ( TEST_LIBMMG2D )
-  # Build library executables
-  INCLUDE(libmmg2d_tests)
-ENDIF ( )
 
 ###############################################################################
 #####
@@ -161,20 +150,28 @@ ENDIF ( )
 #####
 ###############################################################################
 
-IF ( BUILD_TESTING )
-  ##-------------------------------------------------------------------##
-  ##------- Set the continuous integration options --------------------##
-  ##-------------------------------------------------------------------##
+SET(MMG2D_CI_TESTS ${CI_DIR}/mmg2d )
 
-  ##-------------------------------------------------------------------##
-  ##--------------------------- Add tests and configure it ------------##
-  ##-------------------------------------------------------------------##
+##-------------------------------------------------------------------##
+##-------------- Library examples and APIs      ---------------------##
+##-------------------------------------------------------------------##
+IF ( TEST_LIBMMG2D )
+  # Build library executables and add library tests if needed
+  INCLUDE(libmmg2d_tests)
+ENDIF ( )
+
+##-------------------------------------------------------------------##
+##----------------------- Test Mmg2d executable ---------------------##
+##-------------------------------------------------------------------##
+IF ( BUILD_TESTING )
+
   # Add runtime that we want to test for mmg2d
   IF ( MMG2D_CI )
 
     ADD_EXEC_TO_CI_TESTS ( ${PROJECT_NAME}2d EXECUT_MMG2D )
 
     IF ( ONLY_VERY_SHORT_TESTS )
+      # Add tests that doesn't require to download meshes
       SET ( CTEST_OUTPUT_DIR ${PROJECT_BINARY_DIR}/TEST_OUTPUTS )
 
       ADD_TEST(NAME mmg2d_very_short COMMAND ${EXECUT_MMG2D}
@@ -182,8 +179,9 @@ IF ( BUILD_TESTING )
         "${CTEST_OUTPUT_DIR}/libmmg2d_Adaptation_0_a-init.o"
         )
     ELSE ( )
-      # Add mmg2d tests
+      # Add mmg2d tests that require to download meshes
       INCLUDE( ${PROJECT_SOURCE_DIR}/cmake/testing/mmg2d_tests.cmake )
+
     ENDIF ( )
 
   ENDIF( MMG2D_CI )
