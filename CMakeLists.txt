@@ -275,7 +275,15 @@ ENDIF ( )
 # add the VTK library ?
 OPTION ( USE_VTK "Use VTK I/O" ON )
 IF ( USE_VTK )
-  FIND_PACKAGE(VTK QUIET)
+  FIND_PACKAGE(VTK COMPONENTS
+    CommonCore
+    CommonDataModel
+    IOLegacy
+    IOParallel
+    IOParallelXML
+    IOXML
+    QUIET)
+
   IF ( NOT VTK_FOUND )
     MESSAGE ( WARNING "VTK library not found: vtk I/O will not be available.")
   ENDIF ( )
