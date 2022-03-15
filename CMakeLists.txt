@@ -275,6 +275,8 @@ ENDIF ( )
 # add the VTK library ?
 OPTION ( USE_VTK "Use VTK I/O" ON )
 IF ( USE_VTK )
+  # Handle vtk components name change between v8.2 and v9
+  # Before v9
   FIND_PACKAGE(VTK COMPONENTS
     CommonCore
     CommonDataModel
@@ -284,10 +286,23 @@ IF ( USE_VTK )
     IOXML
     QUIET)
 
-  IF ( NOT VTK_FOUND )
-    MESSAGE ( WARNING "VTK library not found: vtk I/O will not be available.")
-  ENDIF ( )
-ENDIF ( )
+
+  if (NOT VTK_FOUND)
+    # After v9
+    find_package(VTK  COMPONENTS
+      vtkCommonCore
+      vtkCommonDataModel
+      vtkIOLegacy
+      vtkIOParallel
+      vtkIOParallelXML
+      vtkIOXML
+      QUIET)
+    if (NOT VTK_FOUND)
+      MESSAGE ( WARNING "VTK library not found: vtk I/O will not be available.")
+    endif()
+  endif()
+
+ENDIF ( USE_VTK )
 
 ############################################################################
 #####
