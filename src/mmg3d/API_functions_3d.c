@@ -1925,20 +1925,20 @@ int MMG3D_skipIso(MMG5_pMesh mesh) {
 
   if ( (mesh->info.imprim > 5) || mesh->info.ddebug )
     fprintf(stderr,"\n  ## Warning: %s: skip of all entites with %d reference.\n",
-            __func__,MG_ISO);
+            __func__,mesh->info.isoref);
 
-  /* Skip triangles with MG_ISO refs */
+  /* Skip triangles with mesh->info.isoref refs */
   k = 1;
   do {
     ptt = &mesh->tria[k];
-    if ( abs(ptt->ref) != MG_ISO ) continue;
+    if ( abs(ptt->ref) != mesh->info.isoref ) continue;
     /* here ptt is the first tri of mesh->tria that we want to delete */
     do {
       ptt1 = &mesh->tria[mesh->nti];
     }
-    while( (abs(ptt1->ref) == MG_ISO) && (k <= --mesh->nti) );
+    while( (abs(ptt1->ref) == mesh->info.isoref) && (k <= --mesh->nti) );
 
-    if ( abs(ptt1->ref) != MG_ISO )
+    if ( abs(ptt1->ref) != mesh->info.isoref )
       /* ptt1 is the last tri of mesh->tria that we want to keep */
       memcpy(ptt,ptt1,sizeof(MMG5_Tria));
   } while( ++k <= mesh->nti );
@@ -1954,12 +1954,12 @@ int MMG3D_skipIso(MMG5_pMesh mesh) {
     mesh->nt = mesh->nti;
   }
 
-  /* Skip edges with MG_ISO refs */
+  /* Skip edges with mesh->info.isoref refs */
   if ( mesh->na ) {
     k = 1;
     do {
       pa = &mesh->edge[k];
-      if ( abs(pa->ref) != MG_ISO ) {
+      if ( abs(pa->ref) != mesh->info.isoref ) {
         pa->ref = abs(pa->ref);
         continue;
       }
@@ -1967,9 +1967,9 @@ int MMG3D_skipIso(MMG5_pMesh mesh) {
       do {
         pa1 = &mesh->edge[mesh->nai];
       }
-      while( (abs(pa1->ref) == MG_ISO) && (k <= --mesh->nai) );
+      while( (abs(pa1->ref) == mesh->info.isoref) && (k <= --mesh->nai) );
 
-      if ( abs(pa1->ref) != MG_ISO ) {
+      if ( abs(pa1->ref) != mesh->info.isoref ) {
         /* pa1 is the last edge of mesh->edge that we want to keep */
         memcpy(pa,pa1,sizeof(MMG5_Edge));
         pa1->ref = abs(pa1->ref);
@@ -2155,6 +2155,9 @@ int MMG3D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam,int val){
     if ( mesh->info.iso )
       if ( mesh->nt && !MMG3D_skipIso(mesh) )
         return 0;
+    break;
+  case MMG3D_IPARAM_isoref :
+    mesh->info.isoref   = val;
     break;
   case MMG3D_IPARAM_lag :
 #ifdef USE_ELAS

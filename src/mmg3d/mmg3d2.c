@@ -300,7 +300,7 @@ double MMG3D_vfrac(MMG5_pMesh mesh,MMG5_pSol sol,int k,int pm) {
 /**
  * \param mesh pointer toward the mesh.
  *
- * Reset MG_ISO vertex and tetra references to 0.
+ * Reset mesh->info.isoref vertex and tetra references to 0.
  *
  * \warning to improve: for now, entities linked to the old ls (corners,required
  * points, normals/tangents, triangles and edges) are deleted in loadMesh. It
@@ -326,7 +326,7 @@ int MMG3D_resetRef(MMG5_pMesh mesh) {
       /* Reset triangles */
 
       /* Reset vertices */
-      if ( p0->ref == MG_ISO ) {
+      if ( p0->ref == mesh->info.isoref ) {
         p0->ref = 0;
         /* Reset tags */
         p0->tag &= ~MG_CRN;
@@ -1364,7 +1364,7 @@ int MMG3D_update_xtetra ( MMG5_pMesh mesh ) {
       }
 
       pxt = &mesh->xtetra[ptmax->xt];
-      pxt->ref[imax]   = MG_ISO;
+      pxt->ref[imax]   = mesh->info.isoref;
       pxt->ftag[imax] |= MG_BDY;
       MG_SET(pxt->ori,imax);
 
@@ -1381,7 +1381,7 @@ int MMG3D_update_xtetra ( MMG5_pMesh mesh ) {
       }
 
       pxt = &mesh->xtetra[ptmin->xt];
-      pxt->ref[imin]   = MG_ISO;
+      pxt->ref[imin]   = mesh->info.isoref;
       pxt->ftag[imin] |= MG_BDY;
       MG_CLR(pxt->ori,imin);
     }
@@ -2210,7 +2210,7 @@ int MMG3D_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
     return 0;
   }
 
-  /* Reset the MG_ISO field everywhere it appears */
+  /* Reset the mesh->info.isoref field everywhere it appears */
   if ( !MMG3D_resetRef(mesh) ) {
     fprintf(stderr,"\n  ## Problem in resetting references. Exit program.\n");
     return 0;

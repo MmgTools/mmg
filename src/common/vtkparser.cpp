@@ -441,7 +441,7 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
         ref = car ? car->GetTuple1(k) : 0;
       }
       /* Skip edges with iso ref */
-      if ( mesh->info.iso &&  abs(ref) == MG_ISO ) {
+      if ( mesh->info.iso &&  abs(ref) == mesh->info.isoref ) {
         /* Skip this edge */
         ++nbl_a;
       }
@@ -466,7 +466,7 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
       ref = car ? car->GetTuple1(k) : 0;
 
       // Skip edges with iso ref
-      if ( mesh->info.iso &&  abs(ref) == MG_ISO ) {
+      if ( mesh->info.iso &&  abs(ref) == mesh->info.isoref ) {
         /* Skip this edge */
         ++nbl_a;
       }
@@ -489,7 +489,7 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
       ref = car ? car->GetTuple1(k) : 0;
 
       // skip tria with iso ref in 3D
-      if ( mesh->info.iso && abs(ref) == MG_ISO && mesh->dim == 3 ) {
+      if ( mesh->info.iso && abs(ref) == mesh->info.isoref && mesh->dim == 3 ) {
         /* Skip this edge */
         ++nbl_t;
       }

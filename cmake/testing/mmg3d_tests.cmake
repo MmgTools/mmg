@@ -150,7 +150,7 @@ IF ( LONG_TESTS )
     ${MMG3D_CI_TESTS}/CubeSkin0.1_Inside0.4/CubeSkin0.1
     ${MMG3D_CI_TESTS}/CubeSkin0.2_Inside0.4/CubeSkin0.2
     ${MMG3D_CI_TESTS}/CubeSkin0.0125_Inside0.125/CubeSkin0.125
-    ${MMG3D_CI_TESTS}/CubeSkin0.0125_Inside0.25/CubeSkin0.25
+    # ${MMG3D_CI_TESTS}/CubeSkin0.0125_Inside0.25/CubeSkin0.25
     # ${MMG3D_CI_TESTS}/CubeSkin0.0125_Inside0.5/CubeSkin0.5
     ### Linkrods
     ${MMG3D_CI_TESTS}/Various_unref_Linkrods_met0.2/linkrods
@@ -199,7 +199,7 @@ IF ( LONG_TESTS )
     "-v 5"
     "-v 5"
     "-v 5"
-    "-v 5"
+    # "-v 5"
     # "-v 5"
     ### Linkrods
     "-v 5 -hausd 0.1"
@@ -663,6 +663,32 @@ ADD_TEST(NAME mmg3d_OptLs_temp_orphan
   -sol ${MMG3D_CI_TESTS}/OptLs_temp_hminMax_hgrad1.2_hausd0.1/temp.sol
   -hausd 0.5 -nr -hgrad -1 -nsd 3
   ${CTEST_OUTPUT_DIR}/mmg3d_OptLs_temp_orphan.o.meshb)
+
+# OptLs and isoref option: compare the result of ls discretization with ref 10
+# and results of the same case with ref 5
+#include(FindUnixCommands)
+
+add_test(
+  NAME mmg3d_OptLs_isoref_defaut
+  COMMAND ${EXECUT_MMG3D} -v 5 -ls ${MMG3D_CI_TESTS}/OptLs_isoref/3d-mesh.mesh
+  -sol ${MMG3D_CI_TESTS}/OptLs_isoref/3d-mesh.sol
+  ${CTEST_OUTPUT_DIR}/mmg3d_isoref.o.mesh
+  )
+add_test(
+  NAME mmg3d_OptLs_isoref_5
+  COMMAND ${EXECUT_MMG3D} -v 5 -isoref 5 -ls
+  ${MMG3D_CI_TESTS}/OptLs_isoref/3d-mesh-isoref5.mesh
+  -sol ${MMG3D_CI_TESTS}/OptLs_isoref/3d-mesh.sol
+  ${CTEST_OUTPUT_DIR}/mmg3d_isoref5.o.mesh
+  )
+
+if (BASH)
+  add_test(
+    NAME mmg3d_optLs_isoref
+    COMMAND ${BASH} -c "diff <(wc -wl ${CTEST_OUTPUT_DIR}/mmg3d_isoref.o.mesh  | awk '{print $1 $2}') <(wc -wl ${CTEST_OUTPUT_DIR}/mmg3d_isoref5.o.mesh | awk '{print $1 $2}')"
+    )
+endif()
+
 
 IF ( LONG_TESTS )
   # Test the Ls option

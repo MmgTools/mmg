@@ -1449,7 +1449,8 @@ int MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
  *
  * Get metric tensor from metric structure (pass from ridge storage to classical
  * storage on non-singular ridge points, copy metric on all other points).
- *
+ * See: \cite{borouchaki1998mesh}. The Hv-correction
+ * is used (gradation with respect to H-variation measure).
  */
 static inline
 int MMG5_grad2metVol_getmet(MMG5_pMesh mesh,MMG5_pSol met,int ip,double ux,double uy,double uz,double *m,int8_t *ridgedir) {

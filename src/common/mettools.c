@@ -33,6 +33,7 @@
  */
 
 #include "mmgcommon.h"
+#include "inlined_functions.h"
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -535,7 +536,7 @@ int MMG5_test_eigenvmatsym3d(MMG5_pMesh mesh,double *mex,double lambdaex[],
 int MMG5_test_eigenvmatnonsym3d(MMG5_pMesh mesh,double *mex,double lambdaex[],
                                 double vpex[][3],double ivpex[][3]) {
   double mnum[9],lambdanum[3],vpnum[3][3]; /* Numerical quantities */
-  double swap[3],maxerr,err;
+  double swap[3],maxerr;
   int8_t perm[3] = {0,1,2}; /* eigenvalues permutation array */
 
 
@@ -912,7 +913,7 @@ int MMG5_intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr) {
 int MMG5_intersecmet33(MMG5_pMesh mesh, double *m,double *n,double *mr) {
   double  vp[3][3],dm[3],dn[3],d[3],ivp[3][3];
   double  isqhmin,isqhmax;
-  int8_t  i,j,k,ij;
+  int8_t  i;
 
   isqhmin  = 1.0 / (mesh->info.hmin*mesh->info.hmin);
   isqhmax  = 1.0 / (mesh->info.hmax*mesh->info.hmax);

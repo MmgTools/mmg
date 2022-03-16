@@ -485,7 +485,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
     rewind(inm);
     fseek(inm,posned,SEEK_SET);
 
-    /* Skip edges with MG_ISO refs */
+    /* Skip edges with mesh->info.isoref refs */
     if( mesh->info.iso ) {
       mesh->na = 0;
       MMG5_SAFE_CALLOC(ina,na+1,int,return 0);
@@ -508,7 +508,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
           ++nref;
         }
 
-        if ( ref != MG_ISO ) {
+        if ( ref != mesh->info.isoref ) {
           ped = &mesh->edge[++mesh->na];
           ped->a   = a;
           ped->b   = b;
