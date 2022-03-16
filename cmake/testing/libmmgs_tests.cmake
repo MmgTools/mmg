@@ -23,7 +23,7 @@
 
 ###############################################################################
 #####
-#####         Mmgs Library Examples
+#####  Build executable for Mmgs Library Examples and add tests if needed
 #####
 ###############################################################################
 
@@ -87,3 +87,84 @@ FOREACH ( test_idx RANGE ${nbTests} )
   ADD_LIBRARY_TEST ( ${test_name} ${main_path} copy_s_headers ${lib_name} )
 
 ENDFOREACH ( )
+
+IF ( BUILD_TESTING )
+  SET(LIBMMGS_EXEC0_a ${EXECUTABLE_OUTPUT_PATH}/libmmgs_example0_a)
+  SET(LIBMMGS_EXEC0_b ${EXECUTABLE_OUTPUT_PATH}/libmmgs_example0_b)
+  SET(LIBMMGS_EXEC1   ${EXECUTABLE_OUTPUT_PATH}/libmmgs_example1)
+  SET(LIBMMGS_EXEC2   ${EXECUTABLE_OUTPUT_PATH}/libmmgs_example2)
+  SET(LIBMMGS_EXEC3   ${EXECUTABLE_OUTPUT_PATH}/libmmgs_example3)
+  SET(LIBMMGS_LSONLY  ${EXECUTABLE_OUTPUT_PATH}/libmmgs_lsOnly )
+  SET(LIBMMGS_LSANDMETRIC ${EXECUTABLE_OUTPUT_PATH}/libmmgs_lsAndMetric )
+
+
+  ADD_TEST(NAME libmmgs_example0_a   COMMAND ${LIBMMGS_EXEC0_a}
+    "${PROJECT_SOURCE_DIR}/libexamples/mmgs/adaptation_example0/example0_a/cube.mesh"
+    "${CTEST_OUTPUT_DIR}/libmmgs_Adaptation_0_a-cube.o"
+    )
+  ADD_TEST(NAME libmmgs_example0_b  COMMAND ${LIBMMGS_EXEC0_b}
+    "${CTEST_OUTPUT_DIR}/libmmgs_Adaptation_0_b.o.mesh"
+    )
+  ADD_TEST(NAME libmmgs_example1   COMMAND ${LIBMMGS_EXEC1}
+    "${PROJECT_SOURCE_DIR}/libexamples/mmgs/adaptation_example1/2spheres"
+    "${CTEST_OUTPUT_DIR}/libmmgs_Adaptation_1-2spheres_1.o"
+    "${CTEST_OUTPUT_DIR}/libmmgs_Adaptation_1-2spheres_2.o"
+    )
+  ADD_TEST(NAME libmmgs_example2   COMMAND ${LIBMMGS_EXEC2}
+    "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_example0/teapot"
+    "${CTEST_OUTPUT_DIR}/libmmgs-IsosurfDiscretization_0-teapot.o"
+    )
+  ADD_TEST(NAME libmmgs_example3_io_0   COMMAND ${LIBMMGS_EXEC3}
+    "${PROJECT_SOURCE_DIR}/libexamples/mmgs/io_multisols_example3/torus.mesh"
+    "${CTEST_OUTPUT_DIR}/libmmgs_io_3-naca.o" "0"
+    )
+  ADD_TEST(NAME libmmgs_example3_io_1   COMMAND ${LIBMMGS_EXEC3}
+    "${PROJECT_SOURCE_DIR}/libexamples/mmgs/io_multisols_example3/torus.mesh"
+    "${CTEST_OUTPUT_DIR}/libmmgs_io_3-naca.o" "1"
+    )
+  ADD_TEST(NAME libmmgs_lsOnly   COMMAND ${LIBMMGS_LSONLY}
+    "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/multi-mat.mesh"
+    "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/multi-mat-sol.sol"
+    "${CTEST_OUTPUT_DIR}/libmmgs_lsOnly_multimat.o"
+    )
+  ADD_TEST(NAME libmmgs_lsAndMetric   COMMAND ${LIBMMGS_LSANDMETRIC}
+    "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/multi-mat.mesh"
+    "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/multi-mat-sol.sol"
+    "${CTEST_OUTPUT_DIR}/libmmgs_lsAndMetric_multimat.o"
+    )
+
+  IF ( CMAKE_Fortran_COMPILER)
+    SET(LIBMMGS_EXECFORTRAN_a ${EXECUTABLE_OUTPUT_PATH}/libmmgs_fortran_a)
+    SET(LIBMMGS_EXECFORTRAN_b ${EXECUTABLE_OUTPUT_PATH}/libmmgs_fortran_b)
+    SET(LIBMMGS_EXECFORTRAN_IO ${EXECUTABLE_OUTPUT_PATH}/libmmgs_fortran_io)
+    SET(LIBMMGS_EXECFORTRAN_LSONLY ${EXECUTABLE_OUTPUT_PATH}/libmmgs_fortran_lsOnly )
+    SET(LIBMMGS_EXECFORTRAN_LSANDMETRIC ${EXECUTABLE_OUTPUT_PATH}/libmmgs_fortran_lsAndMetric )
+
+    ADD_TEST(NAME libmmgs_fortran_a   COMMAND ${LIBMMGS_EXECFORTRAN_a}
+      "${PROJECT_SOURCE_DIR}/libexamples/mmgs/adaptation_example0_fortran/example0_a/cube.mesh"
+      "${CTEST_OUTPUT_DIR}/libmmgs-Adaptation_Fortran_0_a-cube.o"
+      )
+    ADD_TEST(NAME libmmgs_fortran_b   COMMAND ${LIBMMGS_EXECFORTRAN_b}
+      "${CTEST_OUTPUT_DIR}/libmmgs_Adaptation_Fortran_0_b.o"
+      )
+    ADD_TEST(NAME libmmgs_fortran_io_0   COMMAND ${LIBMMGS_EXECFORTRAN_IO}
+      "${PROJECT_SOURCE_DIR}/libexamples/mmgs/io_multisols_example3/torus.mesh"
+      "${CTEST_OUTPUT_DIR}/libmmgs_Fortran_io-torus.o" "0"
+      )
+    ADD_TEST(NAME libmmgs_fortran_io_1   COMMAND ${LIBMMGS_EXECFORTRAN_IO}
+      "${PROJECT_SOURCE_DIR}/libexamples/mmgs/io_multisols_example3/torus.mesh"
+      "${CTEST_OUTPUT_DIR}/libmmgs_Fortran_io-torus.o" "1"
+      )
+    ADD_TEST(NAME libmmgs_fortran_lsOnly   COMMAND ${LIBMMGS_EXECFORTRAN_LSONLY}
+      "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/multi-mat.mesh"
+      "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/multi-mat-sol.sol"
+      "${CTEST_OUTPUT_DIR}/libmmgs_lsOnly_multimat.o"
+      )
+    ADD_TEST(NAME libmmgs_fortran_lsAndMetric   COMMAND ${LIBMMGS_EXECFORTRAN_LSANDMETRIC}
+      "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/multi-mat.mesh"
+      "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/multi-mat-sol.sol"
+      "${CTEST_OUTPUT_DIR}/libmmgs_lsAndMetric_multimat.o"
+      )
+  ENDIF()
+
+ENDIF ( )

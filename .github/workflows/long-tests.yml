@@ -21,6 +21,6 @@ jobs:
   mmg-debug:
     uses: ./.github/workflows/main-job.yml
     with:
-      cmake_build_type: Debug
+      cmake_build_type: RelWithAssert
       add_cmake_cfg_args: -D LONG_TESTS=ON
       branch_name:  ${{github.event.inputs.branch}}
