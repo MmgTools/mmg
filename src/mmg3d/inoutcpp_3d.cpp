@@ -88,8 +88,8 @@ int MMG3D_loadVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 
   /* Check element count */
   if ( nsols>1 ) {
-    fprintf(stderr,"SEVERAL SOLUTION => IGNORED: %d\n",nsols);
-    nsols = 0;
+    fprintf(stderr,"Error: SEVERAL SOLUTIONS FOUND (%d)\n",nsols);
+    return -1;
   }
 
   // Mesh alloc and transfer of the mesh from dataset toward the MMG5 Mesh Sol
@@ -159,8 +159,8 @@ int MMG3D_loadVtkMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
 
   // Check solutions number
   if ( nsols>1 ) {
-    fprintf(stderr,"SEVERAL SOLUTION => IGNORED: %d\n",nsols);
-    nsols = 0;
+    fprintf(stderr,"Error: SEVERAL SOLUTIONS FOUND (%d)\n",nsols);
+    return -1;
   }
 
   // Mesh alloc and transfer of the mesh from dataset toward the MMG5 Mesh Sol

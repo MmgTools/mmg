@@ -707,8 +707,10 @@ int MMG2D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   if ( ier < 1 )  return (ier);
 
   if ( nsols>1 ) {
-    fprintf(stderr,"SEVERAL SOLUTION => IGNORED: %d\n",nsols);
-    nsols = 0;
+    fprintf(stderr,"Error: SEVERAL SOLUTIONS FOUND (%d)\n",nsols);
+    fclose(inm);
+    MMG5_SAFE_FREE(posNodeData);
+    return -1;
   }
 
   if ( !MMG2D_zaldy(mesh) ) {
@@ -909,7 +911,7 @@ int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   if ( ier < 1 ) return ier;
 
   if ( nsols!=1 ) {
-    fprintf(stderr,"SEVERAL SOLUTION => IGNORED: %d\n",nsols);
+    fprintf(stderr,"Error: SEVERAL SOLUTIONS FOUND (%d)\n",nsols);
     fclose(inm);
     MMG5_SAFE_FREE(type);
     return -1;
