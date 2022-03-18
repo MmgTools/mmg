@@ -241,6 +241,12 @@ IF ( USE_SCOTCH )
       "If you have already installed Scotch and want to use it, "
       "please set the CMake variable or environment variable SCOTCH_DIR "
       "to your scotch directory.")
+  ELSE ( )
+    add_definitions(-DUSE_SCOTCH)
+
+    MESSAGE(STATUS
+      "Compilation with scotch: ${SCOTCH_LIBRARIES}")
+    SET( LIBRARIES ${SCOTCH_LIBRARIES} ${LIBRARIES})
   ENDIF ( )
 ENDIF ( )
 
@@ -304,6 +310,18 @@ IF ( USE_VTK )
         QUIET)
     endif()
   endif()
+
+  IF ( VTK_FOUND )
+    add_definitions(-DUSE_VTK)
+
+    MESSAGE ( STATUS "Compilation with VTK: add vtk, vtp and vtu I/O." )
+
+    IF( "${VTK_MAJOR_VERSION}.${VTK_MINOR_VERSION}" LESS 8.90 )
+      INCLUDE ( ${VTK_USE_FILE} )
+    ENDIF()
+
+    SET( LIBRARIES ${VTK_LIBRARIES} ${LIBRARIES} )
+  ENDIF ( )
 
 ENDIF ( USE_VTK )
 
@@ -398,28 +416,6 @@ CMAKE_DEPENDENT_OPTION ( PATTERN
 #-- Remove the next line to have this option visible in basic cmake mode
 MARK_AS_ADVANCED(PATTERN)
 
-
-IF( SCOTCH_FOUND )
-  add_definitions(-DUSE_SCOTCH)
-
-  MESSAGE(STATUS
-    "Compilation with scotch: ${SCOTCH_LIBRARIES}")
-  SET( LIBRARIES ${SCOTCH_LIBRARIES} ${LIBRARIES})
-ENDIF()
-
-
-IF ( VTK_FOUND )
-  add_definitions(-DUSE_VTK)
-
-  MESSAGE ( STATUS "Compilation with VTK: add vtk, vtp and vtu I/O." )
-
-  IF( "${VTK_MAJOR_VERSION}.${VTK_MINOR_VERSION}" LESS 8.90 )
-    INCLUDE ( ${VTK_USE_FILE} )
-  ENDIF()
-
-  SET( LIBRARIES ${VTK_LIBRARIES} ${LIBRARIES} )
-ENDIF ( )
-
 #---------------------------- mmg library gathering mmg2d, mmgs and mmg3d libs
 CMAKE_DEPENDENT_OPTION ( LIBMMG_STATIC
   "Compile the mmg static library (mmg2d + mmgs + mmg3d)" ${BUILD_STATIC_LIBS}
@@ -476,7 +472,9 @@ IF ( BUILD_MMG )
 ENDIF ( )
 
 IF( SCOTCH_FOUND )
-  # Include Scotch Dir here to ensure that Mmg doesn't search it's own headers in /usr/local
+  # Located here to ensure that Mmg include dir paths added by mmg<x>.cmake
+  # modules is added before any other path (such as /usr/local) so local headers
+  # are found previous installed ones
   INCLUDE_DIRECTORIES(${SCOTCH_INCLUDE_DIRS})
 ENDIF()
 
