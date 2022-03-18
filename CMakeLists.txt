@@ -247,6 +247,9 @@ IF ( USE_SCOTCH )
     MESSAGE(STATUS
       "Compilation with scotch: ${SCOTCH_LIBRARIES}")
     SET( LIBRARIES ${SCOTCH_LIBRARIES} ${LIBRARIES})
+
+    INCLUDE_DIRECTORIES(AFTER ${SCOTCH_INCLUDE_DIRS})
+
   ENDIF ( )
 ENDIF ( )
 
@@ -470,13 +473,6 @@ ENDIF ( )
 IF ( BUILD_MMG )
   INCLUDE(mmg)
 ENDIF ( )
-
-IF( SCOTCH_FOUND )
-  # Located here to ensure that Mmg include dir paths added by mmg<x>.cmake
-  # modules is added before any other path (such as /usr/local) so local headers
-  # are found previous installed ones
-  INCLUDE_DIRECTORIES(AFTER ${SCOTCH_INCLUDE_DIRS})
-ENDIF()
 
 IF ( MmgTargetsExported )
   set( MMG_CMAKE_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/mmg )
