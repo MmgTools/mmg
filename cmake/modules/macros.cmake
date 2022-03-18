@@ -155,7 +155,7 @@ MACRO ( ADD_AND_INSTALL_LIBRARY
     INCLUDE_DIRECTORIES ( BEFORE
       ${COMMON_BINARY_DIR} ${COMMON_SOURCE_DIR} ${PROJECT_BINARY_DIR}/include ${PROJECT_BINARY_DIR})
   ELSE ( )
-    target_include_directories( BEFORE ${target_name} PUBLIC
+    target_include_directories( ${target_name} BEFORE PUBLIC
       $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include/>
       $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>
       $<BUILD_INTERFACE:${COMMON_SOURCE_DIR}>
@@ -175,7 +175,7 @@ MACRO ( ADD_AND_INSTALL_LIBRARY
     IF ( CMAKE_VERSION VERSION_LESS 2.8.12 )
       INCLUDE_DIRECTORIES ( AFTER ${SCOTCH_INCLUDE_DIRS} )
     ELSE ( )
-      target_include_directories( AFTER ${target_name} PUBLIC ${SCOTCH_INCLUDE_DIRS} )
+      target_include_directories( ${target_name} AFTER PUBLIC ${SCOTCH_INCLUDE_DIRS} )
     endif()
   endif( )
 
@@ -246,11 +246,11 @@ MACRO ( ADD_AND_INSTALL_EXECUTABLE
    ENDIF()
 
  ELSE ( )
-   TARGET_INCLUDE_DIRECTORIES ( BEFORE ${exec_name} PUBLIC
+   TARGET_INCLUDE_DIRECTORIES ( ${exec_name} BEFORE PUBLIC
      ${COMMON_BINARY_DIR} ${COMMON_SOURCE_DIR} ${PROJECT_BINARY_DIR}/include ${PROJECT_BINARY_DIR} )
    if ( SCOTCH_FOUND )
      message(STATUS "[mmg] add include scotch directories ${SCOTCH_INCLUDE_DIRS}")
-     target_include_directories( AFTER ${target_name} PUBLIC ${SCOTCH_INCLUDE_DIRS} )
+     target_include_directories( ${target_name} AFTER PUBLIC ${SCOTCH_INCLUDE_DIRS} )
    ENDIF()
 
  ENDIF ( )
@@ -329,7 +329,7 @@ MACRO ( ADD_LIBRARY_TEST target_name main_path target_dependency lib_name )
   IF ( CMAKE_VERSION VERSION_LESS 2.8.12 )
     INCLUDE_DIRECTORIES ( BEFORE ${PROJECT_BINARY_DIR}/include )
   ELSE ( )
-    TARGET_INCLUDE_DIRECTORIES ( BEFORE ${target_name} PUBLIC ${PROJECT_BINARY_DIR}/include )
+    TARGET_INCLUDE_DIRECTORIES ( ${target_name} BEFORE PUBLIC ${PROJECT_BINARY_DIR}/include )
   ENDIF ( )
 
   IF ( WIN32 AND ((NOT MINGW) AND SCOTCH_FOUND) )
