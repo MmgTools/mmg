@@ -475,7 +475,7 @@ IF( SCOTCH_FOUND )
   # Located here to ensure that Mmg include dir paths added by mmg<x>.cmake
   # modules is added before any other path (such as /usr/local) so local headers
   # are found previous installed ones
-  INCLUDE_DIRECTORIES(${SCOTCH_INCLUDE_DIRS})
+  INCLUDE_DIRECTORIES(AFTER ${SCOTCH_INCLUDE_DIRS})
 ENDIF()
 
 IF ( MmgTargetsExported )
