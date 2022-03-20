@@ -250,7 +250,7 @@ MACRO ( ADD_AND_INSTALL_EXECUTABLE
      ${COMMON_BINARY_DIR} ${COMMON_SOURCE_DIR} ${PROJECT_BINARY_DIR}/include ${PROJECT_BINARY_DIR} )
    if ( SCOTCH_FOUND )
      message(STATUS "[mmg] add include scotch directories ${SCOTCH_INCLUDE_DIRS}")
-     target_include_directories( ${target_name} PUBLIC ${SCOTCH_INCLUDE_DIRS} )
+     target_include_directories( ${exec_name} BEFORE PUBLIC ${SCOTCH_INCLUDE_DIRS} )
    ENDIF()
 
  ENDIF ( )
