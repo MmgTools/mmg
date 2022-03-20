@@ -114,16 +114,6 @@ INSTALL(FILES ${mmgs_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/mmg/mmgs C
 # Copy header files in project directory at build step
 COPY_HEADERS_AND_CREATE_TARGET ( ${MMGS_SOURCE_DIR} ${MMGS_BINARY_DIR} ${MMGS_INCLUDE} s )
 
-############################################################################
-#####
-#####         Compile program to test library
-#####
-############################################################################
-
-IF ( TEST_LIBMMGS )
-  INCLUDE(cmake/testing/libmmgs_tests.cmake)
-ENDIF()
-
 ###############################################################################
 #####
 #####         Compile MMGS executable
@@ -138,105 +128,31 @@ ADD_AND_INSTALL_EXECUTABLE ( ${PROJECT_NAME}s copy_s_headers
 #####
 ###############################################################################
 
-IF ( BUILD_TESTING )
-  ##-------------------------------------------------------------------##
-  ##------- Set the continuous integration options --------------------##
-  ##-------------------------------------------------------------------##
-  SET(MMG2D_CI_TESTS ${CI_DIR}/mmg2d )
-  SET(MMGS_CI_TESTS  ${CI_DIR}/mmgs )
-  SET(MMG_CI_TESTS   ${CI_DIR}/mmg )
+SET(MMG2D_CI_TESTS ${CI_DIR}/mmg2d )
+SET(MMGS_CI_TESTS  ${CI_DIR}/mmgs )
+SET(MMG_CI_TESTS   ${CI_DIR}/mmg )
 
-  ##-------------------------------------------------------------------##
-  ##--------------------------- Add tests and configure it ------------##
-  ##-------------------------------------------------------------------##
+##-------------------------------------------------------------------##
+##-------------- Library examples and APIs      ---------------------##
+##-------------------------------------------------------------------##
+IF ( TEST_LIBMMGS )
+  # Build executables for library examples and add library tests if needed
+  INCLUDE(libmmgs_tests)
+ENDIF()
+
+##-------------------------------------------------------------------##
+##------------------------ Test Mmgs executable ---------------------##
+##-------------------------------------------------------------------##
+IF ( BUILD_TESTING )
+
   # Add runtime that we want to test for mmgs
   IF( MMGS_CI )
 
     ADD_EXEC_TO_CI_TESTS ( ${PROJECT_NAME}s EXECUT_MMGS )
     SET ( LISTEXEC_MMG ${EXECUT_MMGS} )
 
-    IF ( TEST_LIBMMGS )
-      SET(LIBMMGS_EXEC0_a ${EXECUTABLE_OUTPUT_PATH}/libmmgs_example0_a)
-      SET(LIBMMGS_EXEC0_b ${EXECUTABLE_OUTPUT_PATH}/libmmgs_example0_b)
-      SET(LIBMMGS_EXEC1   ${EXECUTABLE_OUTPUT_PATH}/libmmgs_example1)
-      SET(LIBMMGS_EXEC2   ${EXECUTABLE_OUTPUT_PATH}/libmmgs_example2)
-      SET(LIBMMGS_EXEC3   ${EXECUTABLE_OUTPUT_PATH}/libmmgs_example3)
-      SET(LIBMMGS_LSONLY  ${EXECUTABLE_OUTPUT_PATH}/libmmgs_lsOnly )
-      SET(LIBMMGS_LSANDMETRIC ${EXECUTABLE_OUTPUT_PATH}/libmmgs_lsAndMetric )
-
-
-      ADD_TEST(NAME libmmgs_example0_a   COMMAND ${LIBMMGS_EXEC0_a}
-        "${PROJECT_SOURCE_DIR}/libexamples/mmgs/adaptation_example0/example0_a/cube.mesh"
-        "${CTEST_OUTPUT_DIR}/libmmgs_Adaptation_0_a-cube.o"
-        )
-      ADD_TEST(NAME libmmgs_example0_b  COMMAND ${LIBMMGS_EXEC0_b}
-        "${CTEST_OUTPUT_DIR}/libmmgs_Adaptation_0_b.o.mesh"
-        )
-      ADD_TEST(NAME libmmgs_example1   COMMAND ${LIBMMGS_EXEC1}
-        "${PROJECT_SOURCE_DIR}/libexamples/mmgs/adaptation_example1/2spheres"
-        "${CTEST_OUTPUT_DIR}/libmmgs_Adaptation_1-2spheres_1.o"
-        "${CTEST_OUTPUT_DIR}/libmmgs_Adaptation_1-2spheres_2.o"
-        )
-      ADD_TEST(NAME libmmgs_example2   COMMAND ${LIBMMGS_EXEC2}
-        "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_example0/teapot"
-        "${CTEST_OUTPUT_DIR}/libmmgs-IsosurfDiscretization_0-teapot.o"
-        )
-      ADD_TEST(NAME libmmgs_example3_io_0   COMMAND ${LIBMMGS_EXEC3}
-        "${PROJECT_SOURCE_DIR}/libexamples/mmgs/io_multisols_example3/torus.mesh"
-        "${CTEST_OUTPUT_DIR}/libmmgs_io_3-naca.o" "0"
-       )
-      ADD_TEST(NAME libmmgs_example3_io_1   COMMAND ${LIBMMGS_EXEC3}
-        "${PROJECT_SOURCE_DIR}/libexamples/mmgs/io_multisols_example3/torus.mesh"
-        "${CTEST_OUTPUT_DIR}/libmmgs_io_3-naca.o" "1"
-        )
-      ADD_TEST(NAME libmmgs_lsOnly   COMMAND ${LIBMMGS_LSONLY}
-        "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/multi-mat.mesh"
-        "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/multi-mat-sol.sol"
-        "${CTEST_OUTPUT_DIR}/libmmgs_lsOnly_multimat.o"
-        )
-      ADD_TEST(NAME libmmgs_lsAndMetric   COMMAND ${LIBMMGS_LSANDMETRIC}
-        "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/multi-mat.mesh"
-        "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/multi-mat-sol.sol"
-        "${CTEST_OUTPUT_DIR}/libmmgs_lsAndMetric_multimat.o"
-        )
-
-      IF ( CMAKE_Fortran_COMPILER)
-        SET(LIBMMGS_EXECFORTRAN_a ${EXECUTABLE_OUTPUT_PATH}/libmmgs_fortran_a)
-        SET(LIBMMGS_EXECFORTRAN_b ${EXECUTABLE_OUTPUT_PATH}/libmmgs_fortran_b)
-        SET(LIBMMGS_EXECFORTRAN_IO ${EXECUTABLE_OUTPUT_PATH}/libmmgs_fortran_io)
-        SET(LIBMMGS_EXECFORTRAN_LSONLY ${EXECUTABLE_OUTPUT_PATH}/libmmgs_fortran_lsOnly )
-        SET(LIBMMGS_EXECFORTRAN_LSANDMETRIC ${EXECUTABLE_OUTPUT_PATH}/libmmgs_fortran_lsAndMetric )
-
-        ADD_TEST(NAME libmmgs_fortran_a   COMMAND ${LIBMMGS_EXECFORTRAN_a}
-          "${PROJECT_SOURCE_DIR}/libexamples/mmgs/adaptation_example0_fortran/example0_a/cube.mesh"
-          "${CTEST_OUTPUT_DIR}/libmmgs-Adaptation_Fortran_0_a-cube.o"
-          )
-        ADD_TEST(NAME libmmgs_fortran_b   COMMAND ${LIBMMGS_EXECFORTRAN_b}
-          "${CTEST_OUTPUT_DIR}/libmmgs_Adaptation_Fortran_0_b.o"
-          )
-        ADD_TEST(NAME libmmgs_fortran_io_0   COMMAND ${LIBMMGS_EXECFORTRAN_IO}
-          "${PROJECT_SOURCE_DIR}/libexamples/mmgs/io_multisols_example3/torus.mesh"
-          "${CTEST_OUTPUT_DIR}/libmmgs_Fortran_io-torus.o" "0"
-         )
-        ADD_TEST(NAME libmmgs_fortran_io_1   COMMAND ${LIBMMGS_EXECFORTRAN_IO}
-          "${PROJECT_SOURCE_DIR}/libexamples/mmgs/io_multisols_example3/torus.mesh"
-          "${CTEST_OUTPUT_DIR}/libmmgs_Fortran_io-torus.o" "1"
-          )
-        ADD_TEST(NAME libmmgs_fortran_lsOnly   COMMAND ${LIBMMGS_EXECFORTRAN_LSONLY}
-          "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/multi-mat.mesh"
-          "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/multi-mat-sol.sol"
-          "${CTEST_OUTPUT_DIR}/libmmgs_lsOnly_multimat.o"
-          )
-        ADD_TEST(NAME libmmgs_fortran_lsAndMetric   COMMAND ${LIBMMGS_EXECFORTRAN_LSANDMETRIC}
-          "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/multi-mat.mesh"
-          "${PROJECT_SOURCE_DIR}/libexamples/mmgs/IsosurfDiscretization_lsOnly/multi-mat-sol.sol"
-          "${CTEST_OUTPUT_DIR}/libmmgs_lsAndMetric_multimat.o"
-          )
-     ENDIF()
-
-    ENDIF()
-
     IF ( ONLY_VERY_SHORT_TESTS )
+      # Add tests that doesn't require to download meshes
       SET ( CTEST_OUTPUT_DIR ${PROJECT_BINARY_DIR}/TEST_OUTPUTS )
 
       ADD_TEST(NAME mmgs_very_short   COMMAND ${EXECUT_MMGS}
@@ -245,9 +161,8 @@ IF ( BUILD_TESTING )
         )
 
     ELSE ( )
-      # Add mmgs tests
-      INCLUDE( ${PROJECT_SOURCE_DIR}/cmake/testing/mmgs_tests.cmake )
-      INCLUDE( ${PROJECT_SOURCE_DIR}/cmake/testing/mmg_tests.cmake )
+      # Add mmgs tests that require to download meshes
+      INCLUDE( mmgs_tests )
     ENDIF ( )
 
   ENDIF ( MMGS_CI )

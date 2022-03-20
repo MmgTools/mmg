@@ -689,6 +689,26 @@ if (BASH)
     )
 endif()
 
+IF ( TEST_LIBMMG3D )
+  ADD_TEST(NAME test_para_tria
+    COMMAND ${EXECUT_MMG3D}
+    -ar 0.02 -nofem -nosizreq -hgradreq -1 -hgrad -1
+    ${MMG3D_CI_TESTS}/test_para_tria/proc0.mesh
+    -sol ${MMG3D_CI_TESTS}/test_para_tria/proc0.sol
+    ${CTEST_OUTPUT_DIR}/proc0.o.mesh
+    )
+
+  SET_TESTS_PROPERTIES ( test_para_tria
+    PROPERTIES FIXTURES_SETUP test_para_tria )
+
+  ADD_TEST(NAME test_compare_para_tria
+    COMMAND ${TEST_COMPARE_PARA_TRIA}
+    ${MMG3D_CI_TESTS}/test_para_tria/proc0.mesh
+    ${CTEST_OUTPUT_DIR}/proc0.o.mesh
+    )
+  SET_TESTS_PROPERTIES ( test_compare_para_tria
+    PROPERTIES FIXTURES_REQUIRED test_para_tria )
+ENDIF()
 
 IF ( LONG_TESTS )
   # Test the Ls option
