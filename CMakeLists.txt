@@ -235,24 +235,17 @@ IF ( NOT DEFINED USE_SCOTCH )
   # Variable is not provided by user: SCOTCH_FOUND <=> USE_SCOTCH==ON
   FIND_PACKAGE(SCOTCH QUIET)
 
-  IF ( SCOTCH_FOUND )
-    SET ( USE_SCOTCH "OFF" CACHE STRING "Use SCOTCH tool for renumbering" FORCE )
-  ELSE ( )
-    SET ( USE_SCOTCH "ON" CACHE STRING "Use SCOTCH tool for renumbering" FORCE )
-  ENDIF ( )
-
 ELSEIF ( USE_SCOTCH )
   # User wants to use scotch
   FIND_PACKAGE(SCOTCH)
 
   IF ( NOT SCOTCH_FOUND )
-    MESSAGE ( WARNING "Scotch library not found:"
+    MESSAGE ( ERROR "Scotch library not found:"
       "Using scotch reduce the execution time of mmg3d "
       "(see https://gforge.inria.fr/frs/?group_id=248 to download it)."
       "If you have already installed Scotch and want to use it, "
       "please set the CMake variable or environment variable SCOTCH_DIR "
       "to your scotch directory.")
-    SET ( USE_SCOTCH "OFF" CACHE STRING "Use SCOTCH tool for renumbering" FORCE )
   ENDIF ( )
 ENDIF ( )
 
