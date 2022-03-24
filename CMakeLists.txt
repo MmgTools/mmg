@@ -229,9 +229,20 @@ OPTION ( USE_POINTMAP "Use map for point tracking" OFF )
 SET(SCOTCH_DIR "" CACHE PATH "Installation directory for scotch")
 
 # add Scotch library?
-OPTION ( USE_SCOTCH "Use SCOTCH TOOL for renumbering" ON )
+SET ( USE_SCOTCH "" CACHE STRING "Use SCOTCH tool for renumbering" )
 
-IF ( USE_SCOTCH )
+IF ( NOT DEFINED USE_SCOTCH )
+  # Variable is not provided by user: SCOTCH_FOUND <=> USE_SCOTCH==ON
+  FIND_PACKAGE(SCOTCH QUIET)
+
+  IF ( SCOTCH_FOUND )
+    SET ( USE_SCOTCH "OFF" CACHE STRING "Use SCOTCH tool for renumbering" FORCE )
+  ELSE ( )
+    SET ( USE_SCOTCH "ON" CACHE STRING "Use SCOTCH tool for renumbering" FORCE )
+  ENDIF ( )
+
+ELSEIF ( USE_SCOTCH )
+  # User wants to use scotch
   FIND_PACKAGE(SCOTCH)
 
   IF ( NOT SCOTCH_FOUND )
@@ -241,15 +252,18 @@ IF ( USE_SCOTCH )
       "If you have already installed Scotch and want to use it, "
       "please set the CMake variable or environment variable SCOTCH_DIR "
       "to your scotch directory.")
-  ELSE ( )
-    add_definitions(-DUSE_SCOTCH)
-
-    MESSAGE(STATUS
-      "Compilation with scotch: ${SCOTCH_LIBRARIES}")
-    SET( LIBRARIES ${SCOTCH_LIBRARIES} ${LIBRARIES})
-
+    SET ( USE_SCOTCH "OFF" CACHE STRING "Use SCOTCH tool for renumbering" FORCE )
   ENDIF ( )
 ENDIF ( )
+
+If ( USE_SCOTCH )
+  add_definitions(-DUSE_SCOTCH)
+
+  MESSAGE(STATUS
+    "Compilation with scotch: ${SCOTCH_LIBRARIES}")
+  SET( LIBRARIES ${SCOTCH_LIBRARIES} ${LIBRARIES})
+ENDIF()
+
 
 ############################################################################
 #####
