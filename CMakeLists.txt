@@ -248,55 +248,8 @@ INCLUDE(add-mmg-options)
 #####         Build Targets and libmmg if needed
 #####
 ###############################################################################
-SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 
-# CTEST_OUTPUT_DIR MUST BE SETTED HERE TO AVOID UNINITIALIZATION FOR LIBRARY
-# TESTS DEFS
-OPTION ( BUILD_TESTING "Enable/Disable continuous integration" OFF )
-
-IF( BUILD_TESTING )
-  SET ( CTEST_OUTPUT_DIR ${PROJECT_BINARY_DIR}/TEST_OUTPUTS
-    CACHE PATH "Path toward the tests outputs" )
-  MARK_AS_ADVANCED ( CTEST_OUTPUT_DIR )
-  FILE ( MAKE_DIRECTORY  ${CTEST_OUTPUT_DIR} )
-ENDIF ( )
-
-IF ( BUILD_MMG2D )
-  INCLUDE(mmg2d)
-ENDIF ( )
-
-IF ( BUILD_MMGS )
-  INCLUDE(mmgs)
-ENDIF ( )
-
-IF ( BUILD_MMG3D )
-  INCLUDE(mmg3d)
-ENDIF ( )
-
-IF ( BUILD_MMG )
-  INCLUDE(mmg)
-ENDIF ( )
-
-IF ( MmgTargetsExported )
-  set( MMG_CMAKE_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/mmg )
-
-  configure_package_config_file(cmake/config/mmgConfig.cmake.in
-    ${PROJECT_BINARY_DIR}/mmgConfig.cmake
-    INSTALL_DESTINATION ${MMG_CMAKE_INSTALL_DIR} )
-
-  install(EXPORT MmgTargets
-    FILE MmgTargets.cmake
-    NAMESPACE Mmg::
-    DESTINATION ${MMG_CMAKE_INSTALL_DIR}
-    )
-  install(FILES ${PROJECT_BINARY_DIR}/mmgConfig.cmake
-    DESTINATION ${MMG_CMAKE_INSTALL_DIR} )
-
-  install(FILES
-    ${PROJECT_SOURCE_DIR}/cmake/modules/FindSCOTCH.cmake
-    ${PROJECT_SOURCE_DIR}/cmake/modules/FindElas.cmake
-    DESTINATION ${MMG_CMAKE_INSTALL_DIR} )
-ENDIF()
+INCLUDE(build-targets)
 
 ###############################################################################
 #####
