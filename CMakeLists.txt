@@ -267,20 +267,27 @@ ENDIF()
 ############################################################################
 # add LinearElasticity library?
 SET(ELAS_DIR "" CACHE PATH "Installation directory for Elas")
-OPTION (
-  USE_ELAS "Use the Elas library for lagrangian motion option" ON )
 
-IF ( USE_ELAS )
+SET ( USE_ELAS "" CACHE STRING "Use the Elas library for lagrangian motion option" )
+
+IF ( NOT DEFINED USE_ELAS OR USE_ELAS STREQUAL ""  )
   INCLUDE(FindElas)
-  IF ( NOT ELAS_FOUND )
-    MESSAGE ( WARNING "Elas is a library to solve the linear elasticity "
-      "problem (see https://github.com/ISCDtoolbox/LinearElasticity to"
-      " download it). "
-      "This library is needed to use the lagrangian motion option. "
-      "If you have already installed Elas and want to use it, "
-      "please set the CMake variable or environment variable ELAS_DIR "
-      "to your Elas directory.")
+
+ELSE()
+  IF ( USE_ELAS )
+    # User wants to use elas
+    INCLUDE(FindElas)
+    IF ( NOT ELAS_FOUND )
+      MESSAGE ( FATAL_ERROR "Elas is a library to solve the linear elasticity "
+        "problem (see https://github.com/ISCDtoolbox/LinearElasticity to"
+        " download it). "
+        "This library is needed to use the lagrangian motion option. "
+        "If you have already installed Elas and want to use it, "
+        "please set the CMake variable or environment variable ELAS_DIR "
+        "to your Elas directory.")
+    ENDIF ( )
   ENDIF ( )
+
 ENDIF ( )
 
 ############################################################################
@@ -289,17 +296,17 @@ ENDIF ( )
 #####
 ############################################################################
 # add the VTK library ?
-OPTION ( USE_VTK "Use VTK I/O" ON )
-IF ( USE_VTK )
+SET ( USE_VTK "" CACHE STRING "Use VTK I/O" )
+
+IF ( NOT DEFINED USE_VTK OR USE_VTK STREQUAL "" OR USE_VTK )
+  # USE_VTK is not false, ie that it is true or empty (or contains a fake value)
+
   # Handle vtk components name change between v8.2 and v9
   # Before v9
   FIND_PACKAGE(VTK QUIET)
-
-  if (NOT VTK_FOUND)
-    MESSAGE(WARINIG "VTK library not found: vtk I/O will not be available.")
-  else()
+  IF ( VTK_FOUND )
     message (STATUS "VTK_VERSION: ${VTK_VERSION}")
-    if (VTK_VERSION VERSION_LESS "9.0.0")
+    IF (VTK_VERSION VERSION_LESS "9.0.0")
       find_package(VTK  COMPONENTS
         vtkCommonCore
         vtkCommonDataModel
@@ -308,7 +315,7 @@ IF ( USE_VTK )
         vtkIOParallelXML
         vtkIOXML
         QUIET)
-    else()
+    ELSE()
       # After v9
       FIND_PACKAGE(VTK COMPONENTS
         CommonCore
@@ -318,22 +325,25 @@ IF ( USE_VTK )
         IOParallelXML
         IOXML
         QUIET)
-    endif()
-  endif()
-
-  IF ( VTK_FOUND )
-    add_definitions(-DUSE_VTK)
-
-    MESSAGE ( STATUS "Compilation with VTK: add vtk, vtp and vtu I/O." )
-
-    IF( "${VTK_MAJOR_VERSION}.${VTK_MINOR_VERSION}" LESS 8.90 )
-      INCLUDE ( ${VTK_USE_FILE} )
     ENDIF()
 
-    SET( LIBRARIES ${VTK_LIBRARIES} ${LIBRARIES} )
-  ENDIF ( )
+  ELSEIF ( USE_VTK )
+    # USE_VTK is not empty so user explicitely ask for VTK: raise an error
+    MESSAGE(FATAL_ERROR "VTK library not found.")
+  ENDIF()
+ENDIF()
 
-ENDIF ( USE_VTK )
+IF ( VTK_FOUND )
+  add_definitions(-DUSE_VTK)
+
+  MESSAGE ( STATUS "Compilation with VTK: add vtk, vtp and vtu I/O." )
+
+  IF( "${VTK_MAJOR_VERSION}.${VTK_MINOR_VERSION}" LESS 8.90 )
+    INCLUDE ( ${VTK_USE_FILE} )
+  ENDIF()
+
+  SET( LIBRARIES ${VTK_LIBRARIES} ${LIBRARIES} )
+ENDIF ( )
 
 ############################################################################
 #####
