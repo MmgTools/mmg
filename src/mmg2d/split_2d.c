@@ -47,7 +47,7 @@ extern uint8_t ddb;
  * possibly perform a dichotomy to find the latest valid position for the point.
  *
  */
-MMG_int MMG2D_chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t i) {
+MMG_int MMG2D_chkspl(MMG5_pMesh mesh,MMG5_pSol met,MMG_int k,int8_t i) {
   MMG5_pTria           pt,pt1,pt0;
   MMG5_pPoint          p1,p2,ppt;
   double               mid[2],o[2],no[2],calnew,caltmp,tp,to,t,calseuil;
@@ -57,6 +57,7 @@ MMG_int MMG2D_chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t i) {
 
   calseuil = 1e-4 / MMG2D_ALPHAD;
   npinit = mesh->np;
+
 
   pt  = &mesh->tria[k];
   pt0 = &mesh->tria[0];
@@ -73,6 +74,9 @@ MMG_int MMG2D_chkspl(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t i) {
   j1   = MMG5_inxt2[j];
   j2   = MMG5_iprv2[j];
 
+  if (mesh->nt==516 && k==454){ // (k==454 || k== 465)) {
+	printf("jel= %ld\n", jel);
+}
   /* Midpoint of edge i */
   mid[0] = 0.5*(p1->c[0]+p2->c[0]);
   mid[1] = 0.5*(p1->c[1]+p2->c[1]);

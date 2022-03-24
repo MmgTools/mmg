@@ -66,7 +66,7 @@ extern "C" {
 /** Maximal memory used if available memory compitation fail. */
 #define MMG5_MEMMAX  800        /**< Default mem if unable to compute memMax */
 #define MMG5_BITWIZE_MB_TO_B 20 /**< Bitwise convertion from Mo to O */
-#define MMG5_MEMPERCENT 0.5     /**< Percent of RAM used by default */
+#define MMG5_MEMPERCENT 1 //0.5     /**< Percent of RAM used by default */
 
 /* Domain refs in iso mode */
 #define MG_PLUS    2

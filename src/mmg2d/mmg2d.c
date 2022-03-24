@@ -849,7 +849,7 @@ int main(int argc,char *argv[]) {
               " AND A SOLUTION IN ADAPTATION MODE.\n");
       MMG2D_RETURN_AND_FREE(mesh,met,ls,disp,MMG5_STRONGFAILURE);
     }
-
+    
     ier = MMG2D_mmg2dlib(mesh,met);
   }
 

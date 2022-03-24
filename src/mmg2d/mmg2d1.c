@@ -79,7 +79,6 @@ int MMG2D_anatri(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
       ns = 0;
       nc = 0;
     }
-
     /* Swap edges */
     if ( !mesh->info.noswap ) {
       nsw = MMG2D_swpmsh(mesh,met,typchk);
@@ -233,7 +232,6 @@ MMG_int MMG2D_anaelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
     fprintf(stdout,"     %d analyzed  %d proposed\n",mesh->nt,ns);
     fflush(stdout);
   }
-
   /* Step 3: Simulate splitting and delete points leading to an invalid configuration */
   for (k=1; k<=mesh->np; k++)
     mesh->point[k].flag = 0;
@@ -302,7 +300,7 @@ MMG_int MMG2D_anaelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
     fprintf(stdout,"     %d corrected,  %d invalid\n",nc,ni);
     fflush(stdout);
   }
-
+  
   /* step 4: effective splitting */
   ns = 0;
   nt = mesh->nt;
@@ -542,7 +540,6 @@ MMG_int MMG2D_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
   while ( ns > 0 && ++it<maxit );
   if ( (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) && nns > 0 )
     fprintf(stdout,"     %8d edge swapped\n",nns);
-
   return nns;
 }
 
@@ -577,7 +574,7 @@ int MMG2D_adptri(MMG5_pMesh mesh,MMG5_pSol met) {
       ns = 0;
       nc = 0;
     }
-
+    
     if ( !mesh->info.noswap ) {
       nsw = MMG2D_swpmsh(mesh,met,2);
       if ( nsw < 0 ) {
@@ -622,7 +619,6 @@ int MMG2D_adptri(MMG5_pMesh mesh,MMG5_pSol met) {
     }
     nnm += nm;
   }
-
   if ( mesh->info.imprim > 0 ) {
     if ( abs(mesh->info.imprim) < 5 && (nnc > 0 || nns > 0) )
       fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %8d moved, %d iter. \n",nns,nnc,nnsw,nnm,it);
@@ -651,6 +647,7 @@ MMG_int MMG2D_adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
 
   /*loop until nt to avoid the split of new triangle*/
   nt = mesh->nt;
+  printf("number of triangles=%ld\n", nt);
   for (k=1; k<=nt; k++) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) || pt->ref < 0 ) continue;
@@ -672,16 +669,19 @@ MMG_int MMG2D_adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
 
     if ( lmax < MMG2D_LOPTL ) continue;
     else if ( MG_SIN(pt->tag[imax]) ) continue;
-
+    if (nt == 514 && k==453) {
+	MMG_int *adja;
+	adja = &mesh->adja[3*(k-1)+1];
+	printf("before chkspl, adja[1]=%ld\n",adja[1]);
+	}
     /* Check the feasibility of splitting */
     ip = MMG2D_chkspl(mesh,met,k,imax);
-
+	printf("ip=%ld, k=%ld\n",ip,k);
     /* Lack of memory; abort the routine */
     if ( ip < 0 ){
       return ns;
     }
     else if ( ip > 0 ) {
-
       ier = MMG2D_split1b(mesh,k,imax,ip);
 
       /* Lack of memory; abort the routine */
@@ -693,6 +693,7 @@ MMG_int MMG2D_adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
     }
   }
 
+  printf("number of split=%ld\n", ns);
   return ns;
 }
 
@@ -705,7 +706,7 @@ int MMG2D_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
   int               ilist;
   int8_t            i,i1,i2,open;
   MMG_int           list[MMG2D_LONMAX+2];
-
+  
   nc = 0;
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
@@ -831,9 +832,9 @@ int MMG2D_mmg2d1n(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
   /* Stage 2: creation of a computational mesh */
-  if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
+  if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug ){
     fprintf(stdout,"  ** COMPUTATIONAL MESH\n");
-
+}
   if ( !MMG2D_defsiz(mesh,met) ) {
     fprintf(stderr,"  ## Metric undefined. Exit program.\n");
     return 0;

@@ -323,7 +323,7 @@ int MMG3D_computePrilen( MMG5_pMesh mesh, MMG5_pSol met, double* avlen,
  *
  */
 int MMG3D_prilen(MMG5_pMesh mesh, MMG5_pSol met, int8_t metRidTyp) {
-
+  return 1;
   double avlen, lmin, lmax;
   int    ned, nullEdge, hl[9];
   MMG_int   amin, bmin, amax, bmax; 
@@ -747,6 +747,7 @@ void MMG3D_computeOutqua(MMG5_pMesh mesh,MMG5_pSol met,MMG_int *ne,double *max,d
  *
  */
 int MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
+  return 1;
   double      rapmin,rapmax,rapavg;
   int         k,his[5];
   MMG_int     med,good,iel,ne,nrid;

@@ -325,7 +325,7 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol met)
 
   if ( mesh->info.imprim > 0 )
     fprintf(stdout,"\n  -- PHASE 2 : %s MESHING\n",met->size < 3 ? "ISOTROPIC" : "ANISOTROPIC");
-
+ 
   /* Mesh improvement */
   if ( !MMG2D_mmg2d1n(mesh,met) ) {
     if ( !MMG5_unscaleMesh(mesh,met,NULL) )  _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);

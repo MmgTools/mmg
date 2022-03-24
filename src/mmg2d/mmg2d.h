@@ -320,7 +320,7 @@ int MMG2D_intmet_ani(MMG5_pMesh ,MMG5_pSol ,MMG_int ,int8_t ,MMG_int ,double );
 MMG_int MMG2D_adpspl(MMG5_pMesh ,MMG5_pSol );
 int MMG2D_adpcol(MMG5_pMesh ,MMG5_pSol );
 MMG_int MMG2D_movtri(MMG5_pMesh ,MMG5_pSol ,int ,int8_t );
-MMG_int MMG2D_chkspl(MMG5_pMesh ,MMG5_pSol ,int ,int8_t );
+MMG_int MMG2D_chkspl(MMG5_pMesh ,MMG5_pSol ,MMG_int ,int8_t );
 int MMG2D_split1b(MMG5_pMesh ,MMG_int ,int8_t ,MMG_int );
 int MMG2D_movedgpt(MMG5_pMesh ,MMG5_pSol ,int ,MMG_int *,int8_t );
 int MMG2D_movintpt(MMG5_pMesh ,MMG5_pSol ,int ,MMG_int *,int8_t );
