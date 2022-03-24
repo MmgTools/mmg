@@ -122,8 +122,7 @@ jobs:
         if: matrix.vtk == 'on'
         run: |
           if [ "$RUNNER_OS" == "macOS" ]; then
-            brew install vtk@8.2
-            brew link vtk@8.2
+            brew install vtk
           elif [ "$RUNNER_OS" == "Linux" ]; then
             sudo sed -i 's/azure\.//' /etc/apt/sources.list
             sudo apt-get update
