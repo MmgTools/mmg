@@ -112,8 +112,8 @@ MMG_int MMG2D_anaelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
   MMG5_pPoint     ppt,p1,p2;
   MMG5_Hash       hash;
   double          len,s,o[2],no[2];
-  int             npinit,ni,it;
-  MMG_int         ns,nc,k,nt,ip1,ip2,ip,vx[3];
+  int             ni,it;
+  MMG_int         npinit,ns,nc,k,nt,ip1,ip2,ip,vx[3];
   int8_t          i,ic,i1,i2,ier;
   static int8_t   mmgWarn0=0;
 
