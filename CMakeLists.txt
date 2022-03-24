@@ -229,27 +229,29 @@ OPTION ( USE_POINTMAP "Use map for point tracking" OFF )
 SET(SCOTCH_DIR "" CACHE PATH "Installation directory for scotch")
 
 # add Scotch library?
-SET ( USE_SCOTCH "" CACHE STRING "Use SCOTCH tool for renumbering" )
+SET ( USE_SCOTCH "" CACHE STRING "Use SCOTCH tool for renumbering (ON, OFF or <empty>)" )
 
-IF ( NOT DEFINED USE_SCOTCH )
-  # Variable is not provided by user: SCOTCH_FOUND <=> USE_SCOTCH==ON
+IF ( NOT DEFINED USE_SCOTCH OR USE_SCOTCH STREQUAL "" )
+  # Variable is not provided by user
   FIND_PACKAGE(SCOTCH QUIET)
 
-ELSEIF ( USE_SCOTCH )
-  # User wants to use scotch
-  FIND_PACKAGE(SCOTCH)
-
-  IF ( NOT SCOTCH_FOUND )
-    MESSAGE ( ERROR "Scotch library not found:"
-      "Using scotch reduce the execution time of mmg3d "
-      "(see https://gforge.inria.fr/frs/?group_id=248 to download it)."
-      "If you have already installed Scotch and want to use it, "
-      "please set the CMake variable or environment variable SCOTCH_DIR "
-      "to your scotch directory.")
+ELSE ()
+  IF ( USE_SCOTCH )
+    # User wants to use scotch
+    FIND_PACKAGE(SCOTCH)
+    IF ( NOT SCOTCH_FOUND )
+      MESSAGE ( FATAL_ERROR "Scotch library not found:"
+        "Using scotch reduce the execution time of mmg3d "
+        "(see https://gforge.inria.fr/frs/?group_id=248 to download it)."
+        "If you have already installed Scotch and want to use it, "
+        "please set the CMake variable or environment variable SCOTCH_DIR "
+        "to your scotch directory.")
+    ENDIF ( )
   ENDIF ( )
+
 ENDIF ( )
 
-If ( USE_SCOTCH )
+If ( SCOTCH_FOUND )
   add_definitions(-DUSE_SCOTCH)
 
   MESSAGE(STATUS
