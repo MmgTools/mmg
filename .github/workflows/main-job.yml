@@ -172,7 +172,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=${{ inputs.cmake_build_type }} \
             -DPATTERN=${{ matrix.pattern }} \
             -DUSE_SCOTCH=${{ matrix.scotch }} \
-            -DSCOTCH_DIR=/home/runner/work/mmg/scotch/
+            -DSCOTCH_DIR=/home/runner/work/mmg/scotch/ \
             -DUSE_VTK=${{ matrix.vtk }} \
             -DTEST_LIBMMG=ON \
             -DTEST_LIBMMGS=ON \
