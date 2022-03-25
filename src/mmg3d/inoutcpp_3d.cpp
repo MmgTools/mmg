@@ -45,7 +45,7 @@ static int MMG3D_loadVtkMesh_part2 ( MMG5_pMesh mesh,MMG5_pSol *sol,
   int ier;
 
   if ( !MMG3D_zaldy(mesh) ) {
-    return 0;
+    return -1;
   }
   if (mesh->npmax < mesh->np || mesh->ntmax < mesh->nt || mesh->nemax < mesh->ne) {
     return -1;

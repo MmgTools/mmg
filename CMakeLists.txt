@@ -28,7 +28,12 @@ if(DEFINED PROJECT_NAME)
 endif()
 
 INCLUDE(CMakeDependentOption)
-INCLUDE(cmake/modules/macros.cmake)
+
+LIST(APPEND CMAKE_MODULE_PATH
+  ${CMAKE_SOURCE_DIR}/cmake/modules
+  ${CMAKE_SOURCE_DIR}/cmake/testing )
+
+INCLUDE(macros)
 
 PROJECT (mmg)
 
@@ -66,9 +71,10 @@ SET (CMAKE_RELEASE_VERSION
 
 ###############################################################################
 #####
-#####         Set preprocessor flag to detect windows architecture and MinGW
+#####  Set preprocessor flags and manage automatically generated headers data
 #####
 ###############################################################################
+# Architecture detection
 IF (NOT WIN32)
   # Set preprocessor flags to say that we are posix and gnu compatible
   SET (DEF_POSIX "#define MMG_POSIX")
@@ -76,12 +82,6 @@ IF (NOT WIN32)
 ELSEIF(MINGW)
   SET (DEF_GNU "#define MMG_GNU")
 ENDIF ()
-
-# Do not print warnings about the use of secure function with MSVC
-if ( MSVC )
-  add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-  add_definitions(-Dstrdup=_strdup)
-endif()
 
 # Create mmgcmakedefines.h file with the architecture infos and
 # the definition ot the USE_POINTMAP flag.
@@ -92,68 +92,57 @@ CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/src/common/mmgcmakedefines.h.in
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/src/common/mmgversion.h.in
   ${PROJECT_BINARY_DIR}/src/common/mmgversion.h @ONLY)
 
+# Print git hash to source file
+IF (NOT WIN32 OR MINGW)
+
+  ADD_CUSTOM_TARGET(GenerateGitHash
+    COMMAND ./git_log_mmg.sh ${PROJECT_SOURCE_DIR} ${COMMON_BINARY_DIR}
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/scripts/
+    COMMENT "Getting git commit hash"
+  )
+ENDIF ()
+
 ###############################################################################
 #####
-#####         Main CMake compilation variables
+#####         CMake flags / variables
 #####
 ###############################################################################
-
-# Find "exotic" compilers
-IF (${CMAKE_C_COMPILER} MATCHES Clang OR ${CMAKE_C_COMPILER} MATCHES clang)
-  # using clang
-  SET(CMAKE_COMPILER_IS_CLANG TRUE)
-ELSEIF(${CMAKE_C_COMPILER} MATCHES Icc OR ${CMAKE_C_COMPILER} MATCHES icc)
-  # using icc
-  SET(CMAKE_COMPILER_IS_INTEL TRUE)
-ENDIF()
-
 # Hide some options
 MARK_AS_ADVANCED(CMAKE_OSX_ARCHITECTURES
   CMAKE_OSX_DEPLOYMENT_TARGET
   CMAKE_OSX_SYSROOT)
 
-IF(CMAKE_COMPILER_IS_GNUCC)
-  IF(APPLE)
-    # Add flags to the compiler to work on old mac
-    ADD_DEFINITIONS( -mmacosx-version-min=10.4 -arch x86_64)
+include(add_build_types)
 
-    # To avoid pbs with binary files...
-    SET(CMAKE_EXE_LINKER_FLAGS "-arch x86_64 ${CMAKE_EXE_LINKER_FLAGS}")
-
-    # Determine if the processor supports 64bit execution
-    EXECUTE_PROCESS(
-      COMMAND sysctl hw.cpu64bit_capable
-      ERROR_QUIET
-      OUTPUT_VARIABLE 64_CMD
-      OUTPUT_STRIP_TRAILING_WHITESPACE
-      )
-    STRING(REGEX REPLACE "^hw.cpu64bit_capable: (.*)" "\\1" 64_BIT "${64_CMD}")
-    #  ELSEIF(UNIX)# UNIX must be after APPLE becaus APPLE is UNIX too
-  ENDIF()
+# List CMake build types
+IF(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  MESSAGE(STATUS "Setting build type to 'Release' as none was specified.")
+  SET(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build." FORCE)
+  # Set the possible values of build type for cmake-gui
+  SET_PROPERTY(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release"
+    "MinSizeRel" "RelWithDebInfo" "Maintainer" "RelWithAssert")
+ELSEIF( CMAKE_CONFIGURATION_TYPES )
+  LIST(APPEND CMAKE_CONFIGURATION_TYPES Maintainer RelWithAssert )
 ENDIF()
 
-CMAKE_DEPENDENT_OPTION ( PROFILING "Enable/Disable PROFILING" OFF
-  "CMAKE_COMPILER_IS_GNUCC" OFF )
+# Explicitly set the DNDEBUG flag in case the user or a parent project overrides
+# it.
+if (NOT CMAKE_BUILD_TYPE MATCHES Debug AND NOT CMAKE_BUILD_TYPE MATCHES RelWithAssert)
+    add_definitions(-DNDEBUG)
+endif()
 
-IF(PROFILING)
-  ADD_DEFINITIONS(-pg)
-  SET(CMAKE_EXE_LINKER_FLAGS "-pg ${CMAKE_EXE_LINKER_FLAGS}")
-ENDIF(PROFILING)
+# Do not print warnings about the use of secure function with MSVC and the use
+# of POSIX strdup
+if ( MSVC )
+  add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+  add_definitions(-Dstrdup=_strdup)
+endif()
 
 ###############################################################################
 #####
 #####         Choose executable target to compile
 #####
 ###############################################################################
-IF(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
-  MESSAGE(STATUS "Setting build type to 'Release' as none was specified.")
-  seT(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build." FORCE)
-  # Set the possible values of build type for cmake-gui
-  SET_PROPERTY(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release"
-    "MinSizeRel" "RelWithDebInfo")
-  SET(CMAKE_CONFIGURATION_TYPES ${CMAKE_BUILD_TYPE})
-ENDIF()
-
 SET ( BUILD "MMG" CACHE STRING
   "\"MMG3D\", \"MMGS\",\"MMG2D\", or \"MMG\" to compile both MMGS, MMG3D and MMG2D" )
 
@@ -190,12 +179,6 @@ IF ( BUILD_MMG3D OR BUILD_MMGS )
 ELSE ()
   SET(BUILD_MMGS3D OFF)
 ENDIF()
-
-# Explicitly set the DNDEBUG flag in case the user or a parent project overrides
-# it.
-if (NOT CMAKE_BUILD_TYPE MATCHES Debug)
-    add_definitions(-DNDEBUG)
-endif()
 
 ############################################################################
 #####
@@ -244,7 +227,6 @@ OPTION ( USE_POINTMAP "Use map for point tracking" OFF )
 ############################################################################
 # Find SCOTCH library?
 SET(SCOTCH_DIR "" CACHE PATH "Installation directory for scotch")
-LIST(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules)
 
 # add Scotch library?
 OPTION ( USE_SCOTCH "Use SCOTCH TOOL for renumbering" ON )
@@ -259,16 +241,28 @@ IF ( USE_SCOTCH )
       "If you have already installed Scotch and want to use it, "
       "please set the CMake variable or environment variable SCOTCH_DIR "
       "to your scotch directory.")
+  ELSE ( )
+    add_definitions(-DUSE_SCOTCH)
+
+    MESSAGE(STATUS
+      "Compilation with scotch: ${SCOTCH_LIBRARIES}")
+    SET( LIBRARIES ${SCOTCH_LIBRARIES} ${LIBRARIES})
+
   ENDIF ( )
 ENDIF ( )
 
+############################################################################
+#####
+#####         LinearElasticity
+#####
+############################################################################
 # add LinearElasticity library?
 SET(ELAS_DIR "" CACHE PATH "Installation directory for Elas")
 OPTION (
   USE_ELAS "Use the Elas library for lagrangian motion option" ON )
 
 IF ( USE_ELAS )
-  INCLUDE(cmake/modules/FindElas.cmake)
+  INCLUDE(FindElas)
   IF ( NOT ELAS_FOUND )
     MESSAGE ( WARNING "Elas is a library to solve the linear elasticity "
       "problem (see https://github.com/ISCDtoolbox/LinearElasticity to"
@@ -288,11 +282,49 @@ ENDIF ( )
 # add the VTK library ?
 OPTION ( USE_VTK "Use VTK I/O" ON )
 IF ( USE_VTK )
+  # Handle vtk components name change between v8.2 and v9
+  # Before v9
   FIND_PACKAGE(VTK QUIET)
-  IF ( NOT VTK_FOUND )
-    MESSAGE ( WARNING "VTK library not found: vtk I/O will not be available.")
+
+  if (NOT VTK_FOUND)
+    MESSAGE(WARINIG "VTK library not found: vtk I/O will not be available.")
+  else()
+    message (STATUS "VTK_VERSION: ${VTK_VERSION}")
+    if (VTK_VERSION VERSION_LESS "9.0.0")
+      find_package(VTK  COMPONENTS
+        vtkCommonCore
+        vtkCommonDataModel
+        vtkIOLegacy
+        vtkIOParallel
+        vtkIOParallelXML
+        vtkIOXML
+        QUIET)
+    else()
+      # After v9
+      FIND_PACKAGE(VTK COMPONENTS
+        CommonCore
+        CommonDataModel
+        IOLegacy
+        IOParallel
+        IOParallelXML
+        IOXML
+        QUIET)
+    endif()
+  endif()
+
+  IF ( VTK_FOUND )
+    add_definitions(-DUSE_VTK)
+
+    MESSAGE ( STATUS "Compilation with VTK: add vtk, vtp and vtu I/O." )
+
+    IF( "${VTK_MAJOR_VERSION}.${VTK_MINOR_VERSION}" LESS 8.90 )
+      INCLUDE ( ${VTK_USE_FILE} )
+    ENDIF()
+
+    SET( LIBRARIES ${VTK_LIBRARIES} ${LIBRARIES} )
   ENDIF ( )
-ENDIF ( )
+
+ENDIF ( USE_VTK )
 
 ############################################################################
 #####
@@ -333,12 +365,12 @@ ELSE()
   SET(LIBMMG2D_INTERNAL OFF )
 ENDIF()
 CMAKE_DEPENDENT_OPTION (
-  TEST_LIBMMG2D "Compile tests for the mmg2d library" OFF
+  TEST_LIBMMG2D  "Build mmg2d library examples and tests" OFF
   "BUILD_MMG2D;LIBMMG2D_INTERNAL" OFF
   )
 
 CMAKE_DEPENDENT_OPTION(
-  MMG2D_CI "Enable/Disable continuous integration for mmg2d" ON
+  MMG2D_CI "Enable/Disabletest_execution for mmg2d" ON
   "BUILD_TESTING;BUILD_MMG2D" OFF)
 
 #------------------------------- mmgs
@@ -352,12 +384,12 @@ ELSE()
   SET(LIBMMGS_INTERNAL OFF )
 ENDIF()
 CMAKE_DEPENDENT_OPTION (
-  TEST_LIBMMGS "Compile tests for the mmgs library" OFF
+  TEST_LIBMMGS "Build mmgs library examples and tests" OFF
   "LIBMMGS_INTERNAL;BUILD_MMGS" OFF
   )
 
 CMAKE_DEPENDENT_OPTION(
-  MMGS_CI "Enable/Disable continuous integration for mmgs" ON
+  MMGS_CI "Enable/Disable test_execution for mmgs" ON
   "BUILD_TESTING;BUILD_MMGS" OFF )
 
 #------------------------------- mmg3d
@@ -371,11 +403,11 @@ ELSE()
   SET(LIBMMG3D_INTERNAL OFF )
 ENDIF()
 CMAKE_DEPENDENT_OPTION (
-  TEST_LIBMMG3D "Compile tests for the mmg3d library" OFF
+  TEST_LIBMMG3D "Build mmg3d library examples and tests" OFF
   "BUILD_MMG3D;LIBMMG3D_INTERNAL" OFF
   )
 CMAKE_DEPENDENT_OPTION(
-  MMG3D_CI "Enable/Disable continuous integration for mmg3d" ON
+  MMG3D_CI "Enable/Disable test execution for mmg3d" ON
   "BUILD_TESTING;BUILD_MMG3D" OFF)
 
 CMAKE_DEPENDENT_OPTION ( PATTERN
@@ -384,28 +416,6 @@ CMAKE_DEPENDENT_OPTION ( PATTERN
   "BUILD_MMG3D" OFF)
 #-- Remove the next line to have this option visible in basic cmake mode
 MARK_AS_ADVANCED(PATTERN)
-
-
-IF( SCOTCH_FOUND )
-  SET(CMAKE_C_FLAGS "-DUSE_SCOTCH ${CMAKE_C_FLAGS}")
-
-  MESSAGE(STATUS
-    "Compilation with scotch: ${SCOTCH_LIBRARIES}")
-  SET( LIBRARIES ${SCOTCH_LIBRARIES} ${LIBRARIES})
-ENDIF()
-
-
-IF ( VTK_FOUND )
-  ADD_DEFINITIONS(-DUSE_VTK)
-
-  MESSAGE ( STATUS "Compilation with VTK: add vtk, vtp and vtu I/O." )
-
-  IF( "${VTK_MAJOR_VERSION}.${VTK_MINOR_VERSION}" LESS 8.90 )
-    INCLUDE ( ${VTK_USE_FILE} )
-  ENDIF()
-
-  SET( LIBRARIES ${VTK_LIBRARIES} ${LIBRARIES} )
-ENDIF ( )
 
 #---------------------------- mmg library gathering mmg2d, mmgs and mmg3d libs
 CMAKE_DEPENDENT_OPTION ( LIBMMG_STATIC
@@ -420,11 +430,11 @@ ELSE()
   SET(LIBMMG_INTERNAL OFF )
 ENDIF()
 CMAKE_DEPENDENT_OPTION (
-  TEST_LIBMMG "Compile tests for the mmg library" OFF
+  TEST_LIBMMG "Build mmg library examples and tests" OFF
   "BUILD_MMG;LIBMMG_INTERNAL" OFF
   )
 CMAKE_DEPENDENT_OPTION(
-  MMG_CI "Enable/Disable continuous integration for mmg" ON
+  MMG_CI "Enable/Disable test execution for mmg library" ON
   "BUILD_TESTING;BUILD_MMG" OFF)
 
 
@@ -447,25 +457,20 @@ IF( BUILD_TESTING )
 ENDIF ( )
 
 IF ( BUILD_MMG2D )
-  INCLUDE(cmake/modules/mmg2d.cmake)
+  INCLUDE(mmg2d)
 ENDIF ( )
 
 IF ( BUILD_MMGS )
-  INCLUDE(cmake/modules/mmgs.cmake)
+  INCLUDE(mmgs)
 ENDIF ( )
 
 IF ( BUILD_MMG3D )
-  INCLUDE(cmake/modules/mmg3d.cmake)
+  INCLUDE(mmg3d)
 ENDIF ( )
 
 IF ( BUILD_MMG )
-  INCLUDE(cmake/modules/mmg.cmake)
+  INCLUDE(mmg)
 ENDIF ( )
-
-IF( SCOTCH_FOUND )
-  # Include Scotch Dir here to ensure that Mmg doesn't search it's own headers in /usr/local
-  INCLUDE_DIRECTORIES(${SCOTCH_INCLUDE_DIRS})
-ENDIF()
 
 IF ( MmgTargetsExported )
   set( MMG_CMAKE_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/mmg )
@@ -493,7 +498,6 @@ ENDIF()
 #####         Continuous integration
 #####
 ###############################################################################
-
 CMAKE_DEPENDENT_OPTION (
   ONLY_VERY_SHORT_TESTS "Enable/Disable very short tests" OFF
   "BUILD_TESTING;NOT LONG_TESTS" OFF )
@@ -504,161 +508,41 @@ CMAKE_DEPENDENT_OPTION (
   "BUILD_TESTING" OFF )
 MARK_AS_ADVANCED(LONG_TESTS)
 
-CMAKE_DEPENDENT_OPTION ( COVERAGE "Watch code coverage (Linux only)" OFF
-"BUILD_TESTING;CMAKE_COMPILER_IS_GNUCC" OFF )
-
 IF( BUILD_TESTING )
 
   IF ( NOT ONLY_VERY_SHORT_TESTS )
-    ##-------------------------------------------------------------------##
-    ##------- Get the continuous integration tests ----------------------##
-    ##-------------------------------------------------------------------##
-    INCLUDE(cmake/modules/LoadCiTests.cmake)
+    # Get the continuous integration tests
+    INCLUDE(LoadCiTests)
   ENDIF ( )
 
-  ##-------------------------------------------------------------------##
-  ##------- Set the continuous integration options --------------------##
-  ##-------------------------------------------------------------------##
-
+  # Set the continuous integration options
   SET ( MMG_CI_TESTS ${CI_DIR}/mmg )
 
-  # Remove the --show-reachable=yes option from the default valgrind command
-  SET(VALGRIND_COMMAND_OPTIONS "-q --tool=memcheck ")
-  SET(VALGRIND_COMMAND_OPTIONS "--leak-check=yes ${VALGRIND_COMMAND_OPTIONS}")
-  SET(VALGRIND_COMMAND_OPTIONS "--workaround-gcc296-bugs=yes ${VALGRIND_COMMAND_OPTIONS}")
-  SET(VALGRIND_COMMAND_OPTIONS "--num-callers=100 ${VALGRIND_COMMAND_OPTIONS}")
-
-  # Ignore errors coming from the libmesh library
-  IF(APPLE)
-    # and errors from the libSystem.B library
-    SET(MEMORYCHECK_SUPPRESSIONS_FILE
-      "${PROJECT_SOURCE_DIR}/cmake/Supp/libSystem.supp")
-  ENDIF(APPLE)
   # Copy config file and custom file in the good directories
   CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/cmake/config/CTestCustom.cmake
     ./CTestCustom.cmake)
 
-  # Max time for test case
-  SET(DART_TESTING_TIMEOUT 2500 FORCE)
-
   ENABLE_TESTING()
   INCLUDE(CTest)
 
-  IF ( COVERAGE )
-    # Add coverage flags
-    SET(CMAKE_C_FLAGS_DEBUG " -fprofile-arcs ${CMAKE_C_FLAGS_DEBUG}")
-    SET(CMAKE_C_FLAGS_DEBUG " -ftest-coverage ${CMAKE_C_FLAGS_DEBUG}")
-    SET(CMAKE_C_FLAGS_DEBUG " --coverage ${CMAKE_C_FLAGS_DEBUG}")
-    SET(CMAKE_EXE_LINKER_FLAGS_DEBUG " -fprofile-arcs ${CMAKE_EXE_LINKER_FLAGS_DEBUG}")
-    SET(CMAKE_EXE_LINKER_FLAGS_DEBUG " -ftest-coverage ${CMAKE_EXE_LINKER_FLAGS_DEBUG}")
-    SET(CMAKE_EXE_LINKER_FLAGS_DEBUG " --coverage ${CMAKE_EXE_LINKER_FLAGS_DEBUG}")
-  ENDIF()
-
-  IF ( CMAKE_COMPILER_IS_GNUCC )
-    SET(CMAKE_C_FLAGS_DEBUG "-g -Wall ${CMAKE_C_FLAGS_DEBUG}")
-    SET(CMAKE_EXE_LINKER_FLAGS_DEBUG "-g ${CMAKE_EXE_LINKER_FLAGS_DEBUG}")
-  ELSEIF( CMAKE_COMPILER_IS_CLANG )
-    SET(CMAKE_C_FLAGS_DEBUG "-g -Weverything -Wno-sign-conversion")
-    SET(${CMAKE_C_FLAGS_DEBUG} "-Wno-char-subscripts -Wno-padded "
-      ${CMAKE_C_FLAGS_DEBUG})
-    SET(CMAKE_EXE_LINKER_FLAGS_DEBUG "-g ${CMAKE_EXE_LINKER_FLAGS_DEBUG}")
-  ENDIF ( )
-
   IF ( ( MMG3D_CI OR MMGS_CI ) AND NOT ONLY_VERY_SHORT_TESTS )
-    SET(LISTEXEC_MMG ${LISTEXEC_MMGS} ${LISTEXEC_MMG3D})
-    SET(EXECUT_MMG ${EXECUT_MMGS} ${EXECUT_MMG3D})
-
-    # Make some files not openable
-    IF ( EXISTS ${CTEST_OUTPUT_DIR}/unwrittable7.meshb
-        AND NOT IS_DIRECTORY ${CTEST_OUTPUT_DIR}/unwrittable7.meshb )
-      FILE ( REMOVE ${CTEST_OUTPUT_DIR}/unwrittable7.meshb )
-    ENDIF ()
-    IF ( NOT EXISTS ${CTEST_OUTPUT_DIR}/unwrittable7.meshb)
-      FILE(MAKE_DIRECTORY ${CTEST_OUTPUT_DIR}/unwrittable7.meshb)
-    ENDIF()
-
-    IF ( EXISTS ${CTEST_OUTPUT_DIR}/unwrittable8.sol
-        AND NOT IS_DIRECTORY ${CTEST_OUTPUT_DIR}/unwrittable8.sol )
-      FILE ( REMOVE ${CTEST_OUTPUT_DIR}/unwrittable8.sol )
-    ENDIF ()
-    IF ( NOT EXISTS ${CTEST_OUTPUT_DIR}/unwrittable8.sol)
-      FILE(MAKE_DIRECTORY ${CTEST_OUTPUT_DIR}/unwrittable8.sol)
-    ENDIF()
-
     # Add common tests for mmgs/3d appli
-    INCLUDE( ${PROJECT_SOURCE_DIR}/cmake/testing/mmg_tests.cmake )
+    INCLUDE( mmg_tests )
 
   ENDIF ( )
 
 ENDIF ( BUILD_TESTING )
-
-############################################################################
-#####
-#####         Print git hash to source file
-#####
-############################################################################
-
-IF (NOT WIN32 OR MINGW)
-
-  ADD_CUSTOM_TARGET(GenerateGitHash
-    COMMAND ./git_log_mmg.sh ${PROJECT_SOURCE_DIR} ${COMMON_BINARY_DIR}
-    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/scripts/
-    COMMENT "Getting git commit hash"
-  )
-ENDIF ()
 
 ###############################################################################
 #####
 #####         Create API Documentation
 #####
 ###############################################################################
-FIND_PACKAGE(Doxygen)
-IF(DOXYGEN_FOUND)
-
-  # MMG Documentation
-  SET( MMG_DOC_DIR ${PROJECT_BINARY_DIR}/doc/ CACHE PATH "Path toward generated Doxygen doc.")
-  mark_as_advanced(MMG_DOC_DIR)
-
-  FILE(MAKE_DIRECTORY ${MMG_DOC_DIR})
-
-  CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/doc/doxygen/Doxyfile.in
-    ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
-  ADD_CUSTOM_TARGET(doc
-    COMMAND ${DOXYGEN_EXECUTABLE}
-    ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
-    WORKING_DIRECTORY ${MMG_DOC_DIR}
-    COMMENT "Generating Mmg documentation with Doxygen. Open up the
-    ${MMG_DOC_DIR}/index.html file to see
-    it" VERBATIM )
-
-ENDIF ( DOXYGEN_FOUND )
+include(doxygen)
 
 ###############################################################################
 #####
 #####         Create Package
 #####
 ###############################################################################
-INCLUDE(InstallRequiredSystemLibraries)
-SET( CPACK_ARCHIVE_COMPONENT_INSTALL ON )
-SET( CPACK_COMPONENT_ALL appli )
-SET( CPACK_SOURCE_GENERATOR TGZ )
-SET( CPACK_GENERATOR TGZ )
-
-SET(CPACK_PACKAGE_NAME ${PROJECT_NAME})
-SET(CPACK_INCLUDE_TOPLEVEL_DIRECTORY 1)
-SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "MMG: 2d, surface and 3d remeshers")
-SET(CPACK_PACKAGE_VENDOR "Cécile Dobrzynski, Pascal Frey, Charles Dapogny,"
-  " Algiane Froehly")
-SET(CPACK_PACKAGE_CONTACT "contact@mmgtools.org")
-SET(CPACK_PACKAGE_DESCRIPTION_FILE "${PROJECT_SOURCE_DIR}/README.md")
-SET(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/LICENSE")
-SET(CPACK_PACKAGE_VERSION ${CMAKE_RELEASE_VERSION})
-SET(CPACK_PACKAGE_VERSION_MAJOR ${CMAKE_RELEASE_VERSION_MAJOR})
-SET(CPACK_PACKAGE_VERSION_MINOR ${CMAKE_RELEASE_VERSION_MINOR})
-SET(CPACK_PACKAGE_VERSION_PATCH ${CMAKE_RELEASE_VERSION_PATCH})
-SET(CPACK_PACKAGE_INSTALL_DIRECTORY "${PROJECT_NAME}-${CPACK_PACKAGE_VERSION}")
-SET(CPACK_PACKAGE_FILE_NAME ${CPACK_PACKAGE_INSTALL_DIRECTORY}-${CMAKE_SYSTEM})
-SET(CPACK_PACKAGE_EXECUTABLES "${PROJECT_NAME}")
-SET(CPACK_OUTPUT_FILE_PREFIX "../archives")
-
-INCLUDE(CPack)
+include(packages)

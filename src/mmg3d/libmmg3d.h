@@ -1908,7 +1908,9 @@ enum MMG3D_Param {
 /**
  * \param mesh pointer toward the mesh structure.
  * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
+ *
+ * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
+ * format...), 1 if success.
  *
  * Read mesh data.
  *
@@ -1926,7 +1928,9 @@ enum MMG3D_Param {
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the solution structure.
  * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
+ *
+ * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
+ * format...), 1 if success.
  *
  * Read mesh and 0 or 1 data at MSH file format (.msh extension). We read only
  * low-order points, edges, tria, quadra, tetra and prisms.
@@ -1946,7 +1950,9 @@ enum MMG3D_Param {
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the solution structure.
  * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
+ *
+ * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
+ * format...), 1 if success.
  *
  * Read mesh and 0 or 1 data at VTU (VTK) file format (.vtu extension). We read
  * only low-order points, edges, tria, quadra, tetra and prisms. Point and cell
@@ -1967,7 +1973,9 @@ int MMG3D_loadVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the solution structure.
  * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
+ *
+ * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
+ * format...), 1 if success.
  *
  * Read mesh a list of data in VTU file format (.vtu extension). We read
  * only low-order points, edges, tria, quadra, tetra and prisms. Point and cell
@@ -1989,7 +1997,9 @@ int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the solution structure.
  * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
+ *
+ * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
+ * format...), 1 if success.
  *
  * Read mesh and 0 or 1 data at VTK file format (.vtu extension). We read
  * only low-order points, edges, tria, quadra, tetra and prisms. Point and cell
@@ -2010,7 +2020,9 @@ int MMG3D_loadVtkMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the solution structure.
  * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
+ *
+ * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
+ * format...), 1 if success.
  *
  * Read mesh and a list of data in VTK file format (.vtu extension). We read
  * only low-order points, edges, tria, quadra, tetra and prisms. Point and cell
@@ -2032,7 +2044,9 @@ int MMG3D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward a list of solution structures.
  * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
+ *
+ * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
+ * format...), 1 if success.
  *
  * Read mesh and a list of data at MSH file format (.msh extension). We read only
  * low-order points, edges, tria, quadra, tetra and prisms.
@@ -2051,7 +2065,9 @@ int MMG3D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
 /**
  * \param mesh pointer toward the mesh structure.
  * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
+ *
+ * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
+ * format...), 1 if success.
  *
  * Read mesh data in a file whose format depends on the filename extension.
  *
@@ -2238,7 +2254,9 @@ int MMG3D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.
  * \param filename name of file.
- * \return -1 data invalid, 0 no file, 1 ok.
+ *
+ * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
+ * format...), 1 if success.
  *
  * Load metric field. The solution file must contains only 1 solution: the
  * metric
@@ -2257,7 +2275,9 @@ int MMG3D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the solutions array
  * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
+ *
+ * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
+ * format...), 1 if success.
  *
  * Load 1 or more solutions in a solution file at medit file format.
  *
