@@ -198,11 +198,11 @@ jobs:
       - name: Test Mmg
         if: matrix.vtk == 'off'
         run: |
-          cd mmg/build
+          cd build
           ctest -VV -C ${{ inputs.cmake_build_type }} -j ${{ env.NJOBS }}
 
       - name: Test non native I/Os of Mmg
         if: matrix.vtk == 'on'
         run: |
-          cd mmg/build
+          cd build
           ctest -R "msh|vtk" -VV -C ${{ inputs.cmake_build_type }} -j ${{ env.NJOBS }}
