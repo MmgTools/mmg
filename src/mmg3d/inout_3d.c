@@ -43,7 +43,7 @@
  * \param modeASCII mode in which to open an ascii file ("r","r+","w","w+",...)
  * \param modeASCII mode in which to open an ascii file ("r","r+","w","w+",...)
  *
- * \return -1 if lack of memory, 0 if fail to open file, 1 if success.
+ * \return 0 if fail to open file, -1 for other errors, 1 if success.
  *
  * Try to open a Medit file at asked mode (read only, write, etc) and store if
  * file is binary (depending on the extension).
@@ -1212,7 +1212,7 @@ int MMG3D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   if ( ier < 1 ) return (ier);
 
   if ( nsols>1 ) {
-    fprintf(stderr,"SEVERAL SOLUTION => IGNORED: %d\n",nsols);
+    fprintf(stderr,"Error: SEVERAL SOLUTIONS FOUND (%d)\n",nsols);
     fclose(inm);
     MMG5_SAFE_FREE(posNodeData);
     return -1;
@@ -1221,7 +1221,7 @@ int MMG3D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   if ( !MMG3D_zaldy(mesh) ) {
     fclose(inm);
     MMG5_SAFE_FREE(posNodeData);
-    return 0;
+    return -1;
   }
 
   if (mesh->npmax < mesh->np || mesh->ntmax < mesh->nt || mesh->nemax < mesh->ne) {
@@ -1281,7 +1281,7 @@ int MMG3D_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
   if ( !MMG3D_zaldy(mesh) ) {
     fclose(inm);
     MMG5_SAFE_FREE(posNodeData);
-    return 0;
+    return -1;
   }
 
   if (mesh->npmax < mesh->np || mesh->ntmax < mesh->nt || mesh->nemax < mesh->ne) {
@@ -1334,10 +1334,10 @@ int MMG3D_loadGenericMesh(MMG5_pMesh mesh, MMG5_pSol sol, const char *filename) 
     fprintf(stderr,"  ## Error: %s: please provide input file name"
             " (either in the mesh structure or as function argument).\n",
             __func__);
-    return 0;
+    return -1;
   }
 
-  MMG5_SAFE_MALLOC(tmp,strlen(filenameptr)+1,char,return 0);
+  MMG5_SAFE_MALLOC(tmp,strlen(filenameptr)+1,char,return -1);
   strcpy(tmp,filenameptr);
 
   /* read mesh/sol files */
@@ -1364,7 +1364,7 @@ int MMG3D_loadGenericMesh(MMG5_pMesh mesh, MMG5_pSol sol, const char *filename) 
 
     /* Facultative metric */
     if ( sol ) {
-      MMG5_SAFE_MALLOC(soltmp,strlen(solnameptr)+1,char,return 0);
+      MMG5_SAFE_MALLOC(soltmp,strlen(solnameptr)+1,char,return -1);
       strcpy(soltmp,solnameptr);
 
       if ( MMG3D_loadSol(mesh,sol,soltmp) == -1) {
@@ -1377,7 +1377,7 @@ int MMG3D_loadGenericMesh(MMG5_pMesh mesh, MMG5_pSol sol, const char *filename) 
 
   default:
     fprintf(stderr,"  ** I/O AT FORMAT %s NOT IMPLEMENTED.\n",MMG5_Get_formatName(fmt) );
-    ier= 0;
+    ier= -1;
   }
 
   MMG5_SAFE_FREE(tmp);
@@ -2258,7 +2258,7 @@ int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
   if ( ier < 1 ) return ier;
 
   if ( nsols!=1 ) {
-    fprintf(stderr,"SEVERAL SOLUTION => IGNORED: %d\n",nsols);
+    fprintf(stderr,"Error: SEVERAL SOLUTIONS FOUND (%d)\n",nsols);
     fclose(inm);
     MMG5_SAFE_FREE(type);
     return -1;
