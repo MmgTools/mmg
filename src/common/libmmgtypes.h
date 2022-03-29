@@ -229,7 +229,7 @@ typedef struct {
   double   hmin; /*!< minimal size for edges */
   double   hmax; /*!< maximal size for edges */
   double   hausd; /*!< Hausdorff value */
-  int      ref; /*!< Reference value */
+  MMG_int      ref; /*!< Reference value */
   int8_t   elt; /*!< Element type */
 } MMG5_Par; typedef MMG5_Par * MMG5_pPar;
 
@@ -242,11 +242,11 @@ typedef struct {
   double   c[3]; /*!< Coordinates of point */
   double   n[3]; /*!< Normal or Tangent for mmgs and Tangent (if needed) for mmg3d */
 #ifdef USE_POINTMAP
-  int      src; /*!< Source point in input mesh */
+  MMG_int      src; /*!< Source point in input mesh */
 #endif
-  int      ref; /*!< Reference of point */
+  MMG_int      ref; /*!< Reference of point */
   MMG_int      xp; /*!< Surface point number */
-  int      tmp; /*!< Index of point in the saved mesh (we don't count
+  MMG_int      tmp; /*!< Index of point in the saved mesh (we don't count
                   the unused points)*/
   int      flag; /*!< Flag to know if we have already treated the point */
   int      s;
@@ -273,7 +273,7 @@ typedef MMG5_xPoint * MMG5_pxPoint;
  */
 typedef struct {
   MMG_int      a,b; /*!< Extremities of the edge */
-  int      ref; /*!< Reference of the edge */
+  MMG_int      ref; /*!< Reference of the edge */
   int      base; /*!< 2Donly: used to store the tria+ tria edge indices
                    that allow to access to the edge */
   int16_t  tag; /*!< Binary flags */
@@ -334,9 +334,9 @@ typedef MMG5_Tria * MMG5_pTria;
  */
 typedef struct {
   MMG_int      v[4]; /*!< Vertices of the quadrangle */
-  int      ref; /*!< Reference of the quadrangle */
+  MMG_int      ref; /*!< Reference of the quadrangle */
   int      base;
-  int      edg[4]; /*!< edg[i] contains the ref of the \f$i^{th}\f$ edge
+  MMG_int      edg[4]; /*!< edg[i] contains the ref of the \f$i^{th}\f$ edge
                      of quadrangle */
   int16_t  tag[4]; /*!< tag[i] contains the tag associated to the
                      \f$i^{th}\f$ edge of quadrangle */
