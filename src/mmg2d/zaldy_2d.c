@@ -116,7 +116,7 @@ int MMG2D_delElt(MMG5_pMesh mesh,MMG_int iel) {
   pt->qual = 0.0;
   iadr = (iel-1)*3 + 1;
   if ( mesh->adja )
-    memset(&mesh->adja[iadr],0,3*sizeof(int));
+    memset(&mesh->adja[iadr],0,3*sizeof(MMG_int));
 
   mesh->nenil = iel;
   if ( iel == mesh->nt )  mesh->nt--;

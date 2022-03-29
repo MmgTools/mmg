@@ -267,7 +267,7 @@ int MMG2D_split1b(MMG5_pMesh mesh,MMG_int k,int8_t i,MMG_int ip) {
 
   pt1 = &mesh->tria[iel];
   memcpy(pt1,pt,sizeof(MMG5_Tria));
-  memcpy(&mesh->adja[3*(iel-1)+1],&mesh->adja[3*(k-1)+1],3*sizeof(int));
+  memcpy(&mesh->adja[3*(iel-1)+1],&mesh->adja[3*(k-1)+1],3*sizeof(MMG_int));
 
   /* Update both triangles */
   pt->v[i2]  = ip;
@@ -305,7 +305,7 @@ int MMG2D_split1b(MMG5_pMesh mesh,MMG_int k,int8_t i,MMG_int ip) {
     pt->base = mesh->base;
 
     memcpy(pt1,pt,sizeof(MMG5_Tria));
-    memcpy(&mesh->adja[3*(kel-1)+1],&mesh->adja[3*(jel-1)+1],3*sizeof(int));
+    memcpy(&mesh->adja[3*(kel-1)+1],&mesh->adja[3*(jel-1)+1],3*sizeof(MMG_int));
 
     /* Update triangles */
     pt->v[j1]    = ip;
@@ -784,10 +784,10 @@ int MMG2D_splitbar(MMG5_pMesh mesh,MMG_int k,MMG_int ip) {
 
   pt1 = &mesh->tria[iel1];
   memcpy(pt1,pt,sizeof(MMG5_Tria));
-  memcpy(&mesh->adja[3*(iel1-1)+1],&mesh->adja[3*(k-1)+1],3*sizeof(int));
+  memcpy(&mesh->adja[3*(iel1-1)+1],&mesh->adja[3*(k-1)+1],3*sizeof(MMG_int));
   pt2 = &mesh->tria[iel2];
   memcpy(pt2,pt,sizeof(MMG5_Tria));
-  memcpy(&mesh->adja[3*(iel2-1)+1],&mesh->adja[3*(k-1)+1],3*sizeof(int));
+  memcpy(&mesh->adja[3*(iel2-1)+1],&mesh->adja[3*(k-1)+1],3*sizeof(MMG_int));
 
   /* Update the three triangles */
   pt->v[1]  = ip;
