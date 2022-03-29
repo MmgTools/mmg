@@ -49,8 +49,8 @@ MMG_int* MMG2D_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,MMG_int *npfin) 
   MMG5_pTria      pt,pt1;
   MMG5_pPoint     p0;
   double          u[2];
-  MMG_int             k,iel,jel,n,npf,nef,ip,nlay,refdirh,refdirnh,ilist,ilisto,ilistck;
-  MMG_int             vper[3],*perm,*list,*adja,*invperm;
+  MMG_int         k,iel,jel,n,npf,nef,ip,nlay,refdirh,refdirnh,ilist,ilisto,ilistck;
+  MMG_int         vper[3],*perm,*list,*adja,*invperm;
   int8_t          i,j,jedg;
 
   nlay       = 20;
@@ -63,7 +63,7 @@ MMG_int* MMG2D_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,MMG_int *npfin) 
   MMG5_ADD_MEM(mesh,(mesh->nt+1)*sizeof(MMG_int),"element list",return NULL);
   MMG5_SAFE_CALLOC(list,mesh->nt+1,MMG_int,return NULL);
 
-  MMG5_ADD_MEM(mesh,(mesh->np+1)*sizeof(int),"point permutation",return NULL);
+  MMG5_ADD_MEM(mesh,(mesh->np+1)*sizeof(MMG_int),"point permutation",return NULL);
   MMG5_SAFE_CALLOC(perm,mesh->np+1,int,return NULL);
 
 
@@ -135,11 +135,11 @@ MMG_int* MMG2D_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,MMG_int *npfin) 
   }
 
   /* Creation of the inverse permutation table */
-  MMG5_ADD_MEM ( mesh,(npf+1)*sizeof(int),"permutation table",
+  MMG5_ADD_MEM ( mesh,(npf+1)*sizeof(MMG_int),"permutation table",
                   MMG5_DEL_MEM ( mesh,list );
                   MMG5_DEL_MEM ( mesh,perm );
                   return NULL );
-  MMG5_SAFE_CALLOC ( invperm,(npf+1),int,
+  MMG5_SAFE_CALLOC ( invperm,(npf+1),MMG_int,
                       MMG5_DEL_MEM ( mesh,list );
                       MMG5_DEL_MEM ( mesh,perm );
                       return NULL );

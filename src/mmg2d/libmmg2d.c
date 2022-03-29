@@ -529,7 +529,7 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( mesh->info.ddebug && !MMG5_chkmsh(mesh,1,0) )  _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
 
   /* Memory alloc */
-  MMG5_ADD_MEM(mesh,(3*mesh->ntmax+5)*sizeof(int),"adjacency table",
+  MMG5_ADD_MEM(mesh,(3*mesh->ntmax+5)*sizeof(MMG_int),"adjacency table",
                 printf("  Exit program.\n");
                 return MMG5_STRONGFAILURE);
   MMG5_SAFE_CALLOC(mesh->adja,3*mesh->ntmax+5,MMG_int,return MMG5_STRONGFAILURE);

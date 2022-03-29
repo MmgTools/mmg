@@ -370,8 +370,8 @@ typedef MMG5_Quad * MMG5_pQuad;
 typedef struct {
   double   qual; /*!< Quality of the element */
   MMG_int      v[4]; /*!< Vertices of the tetrahedron */
-  int      ref; /*!< Reference of the tetrahedron */
-  int      base;
+  MMG_int      ref; /*!< Reference of the tetrahedron */
+  MMG_int      base;
   int      mark; /*!< Used for delaunay */
   MMG_int      xt; /*!< Index of the surface \ref MMG5_xTetra associated to
                  the tetrahedron*/
@@ -385,9 +385,9 @@ typedef MMG5_Tetra * MMG5_pTetra;
  * \brief Structure to store the surface tetrahedra of a MMG mesh.
  */
 typedef struct {
-  int      ref[4]; /*!< ref[i] is the reference of the opposite triangle to the
+  MMG_int      ref[4]; /*!< ref[i] is the reference of the opposite triangle to the
                      \f$i^{th}\f$ vertex of the tetrahedron;*/
-  int      edg[6]; /*!< edg[i] contains the reference of the
+  MMG_int      edg[6]; /*!< edg[i] contains the reference of the
                      \f$i^{th}\f$ edge of the tetrahedron */
   int16_t  ftag[4]; /*!< ftag[i] contains the tag associated to the
                       \f$i^{th}\f$ face of the tetrahedron */
@@ -430,10 +430,10 @@ typedef MMG5_xTetra * MMG5_pxTetra;
  */
 typedef struct {
   MMG_int      v[6]; /*!< Vertices of the prism */
-  int      ref; /*!< Reference of the prism */
+  MMG_int      ref; /*!< Reference of the prism */
   int      base;
   int      flag;
-  int      xpr; /*!< Index of the surface \ref MMG5_xPrism associated to
+  MMG_int      xpr; /*!< Index of the surface \ref MMG5_xPrism associated to
                   the prism*/
   int8_t   tag;
 } MMG5_Prism;
@@ -444,9 +444,9 @@ typedef MMG5_Prism * MMG5_pPrism;
  * \brief Structure to store the surface prism of a MMG mesh.
  */
 typedef struct {
-  int      ref[5]; /*!< face references: ref[0]={0,1,2}, ref[1]={3,4,5},
+  MMG_int ref[5]; /*!< face references: ref[0]={0,1,2}, ref[1]={3,4,5},
                     * ref[2]={0,3,4,1}, ref[3]={0,2,5,1} */
-  int      edg[9]; /*!< edges references:
+  MMG_int edg[9]; /*!< edges references:
                     * edg[0]={0,1},edg[1]={0,2},edg[2]={0,3},edg[3]={1,2},
                     * edg[4]={1,4},edg[5]={2,5},edg[6]={3,4},edg[7]={3,5},
                     * edg[8]={4,5}*/
@@ -463,7 +463,7 @@ typedef MMG5_xPrism * MMG5_pxPrism;
  */
 typedef struct {
   int8_t dospl;
-  int    ref,rin,rex;
+  MMG_int ref,rin,rex;
 } MMG5_Mat;
 typedef MMG5_Mat * MMG5_pMat;
 
@@ -509,7 +509,7 @@ typedef struct {
 typedef struct {
   MMG_int     a; /*!< First extremity of edge */
   MMG_int     b;  /*!< Second extremity of edge */
-  int     ref; /*!< Reference or idx (2D) of edge */
+  MMG_int     ref; /*!< Reference or idx (2D) of edge */
   MMG_int     nxt; /*!< Next element of hash table */
   int16_t tag; /*!< tag of edge */
 } MMG5_hgeom;
@@ -558,9 +558,8 @@ typedef struct {
   int       type; /*!< Type of the mesh */
   MMG_int       npi,nti,nai,nei,np,na,nt,ne,npmax,namax,ntmax,nemax,xpmax,xtmax;
   MMG_int       nquad,nprism; /* number of quadrangles and prisms */
-  int       nsols; /* number of solutions (metric excluded) in the solution file */
-  int       nc1;
-
+  MMG_int       nsols; /* number of solutions (metric excluded) in the solution file */
+  MMG_int       nc1;
   int       base; /*!< Used with \a flag to know if an entity has been
                     treated */
   int       mark; /*!< Flag for delaunay (to know if an entity has
@@ -568,7 +567,7 @@ typedef struct {
   MMG_int       xp,xt,xpr; /*!< Number of surfaces points, triangles/tetrahedra and prisms */
   MMG_int       npnil; /*!< Index of first unused point */
   MMG_int       nenil; /*!< Index of first unused element */
-  int       nanil; /*!< Index of first unused edge (2d only)*/
+  MMG_int       nanil; /*!< Index of first unused edge (2d only)*/
   MMG_int      *adja; /*!< Table of tetrahedron adjacency: if
                     \f$adja[4*(i-1)+1+j]=4*k+l\f$ then the \f$i^{th}\f$ and
                     \f$k^th\f$ tetrahedra are adjacent and share their
@@ -612,7 +611,7 @@ typedef struct {
   MMG_int       dim; /* Dimension of the solution file*/
   MMG_int       np; /* Number of points of the solution */
   MMG_int       npmax; /* Maximum number of points */
-  int       npi; /* Temporary number of points (internal use only) */
+  MMG_int       npi; /* Temporary number of points (internal use only) */
   MMG_int       size; /* Number of solutions per entity */
   int       type; /* Type of the solution (scalar, vectorial of tensorial) */
   int       entities; /* Type of the solution (scalar, vectorial of tensorial) */

@@ -175,7 +175,7 @@ int MMG2D_hashQuad(MMG5_pMesh mesh) {
     fprintf(stdout,"  ** SETTING QUAD ADJACENCY\n");
 
   /* memory alloc */
-  MMG5_ADD_MEM(mesh,(4*mesh->nquad+5)*sizeof(int),"quad adjacency table",
+  MMG5_ADD_MEM(mesh,(4*mesh->nquad+5)*sizeof(MMG_int),"quad adjacency table",
                fprintf(stderr,"  Exit program.\n");
                return 0);
   MMG5_SAFE_CALLOC(mesh->adjq,4*mesh->nquad+5,MMG_int,return 0);

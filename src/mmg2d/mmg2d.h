@@ -178,7 +178,7 @@ static const unsigned int MMG2D_inxt[5] = {1,2,0,1,2};
                                                                         \
    if ( mesh->adja ) {                                                  \
      /* adja table */                                                   \
-     MMG5_ADD_MEM(mesh,3*(mesh->ntmax-oldSiz)*sizeof(int),             \
+     MMG5_ADD_MEM(mesh,3*(mesh->ntmax-oldSiz)*sizeof(MMG_int),             \
                    "larger adja table",law);                            \
      MMG5_SAFE_RECALLOC(mesh->adja,3*oldSiz+5,3*mesh->ntmax+5,MMG_int      \
                          ,"larger adja table",law);                     \
