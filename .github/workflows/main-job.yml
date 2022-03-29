@@ -107,23 +107,12 @@ jobs:
         env:
           NJOBS: "2"
 
-      # checkout the provided branch name if workflow is manually run
-      - uses: actions/checkout@v2
-        if: inputs.branch_name
-        with:
-          ref: ${{github.event.inputs.branch}}
-
-      # checkout the event branch for automatic workflows
-      - uses: actions/checkout@v2
-        if: inputs.branch_name == ''
-
       - name: Install VTK
         # Download vtk only if used
         if: matrix.vtk == 'on'
         run: |
           if [ "$RUNNER_OS" == "macOS" ]; then
-            brew install vtk@8.2
-            brew link vtk@8.2
+            brew install vtk
           elif [ "$RUNNER_OS" == "Linux" ]; then
             sudo sed -i 's/azure\.//' /etc/apt/sources.list
             sudo apt-get update
@@ -164,15 +153,29 @@ jobs:
           cmake ..
           make install
 
+      # checkout the provided branch name if workflow is manually run
+      - uses: actions/checkout@v2
+        if: inputs.branch_name
+        with:
+          ref: ${{github.event.inputs.branch}}
+          path: mmg
+
+      # checkout the event branch for automatic workflows
+      - uses: actions/checkout@v2
+        if: inputs.branch_name == ''
+        with:
+          path: mmg
+
       - name: Configure Mmg
         run: |
-          cmake -S. -Bbuild \
+          cmake -Smmg -Bbuild \
           ${{ env.FORT_FLG }} \
             -DCI_CONTEXT=ON \
             -DBUILD_TESTING=ON \
             -DCMAKE_BUILD_TYPE=${{ inputs.cmake_build_type }} \
             -DPATTERN=${{ matrix.pattern }} \
             -DUSE_SCOTCH=${{ matrix.scotch }} \
+            -DSCOTCH_DIR=scotch \
             -DUSE_VTK=${{ matrix.vtk }} \
             -DTEST_LIBMMG=ON \
             -DTEST_LIBMMGS=ON \
