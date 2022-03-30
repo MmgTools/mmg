@@ -151,7 +151,7 @@ int MMG5_mmgHashTria(MMG5_pMesh mesh, MMG_int *adjt, MMG5_Hash *hash, int chkISO
           if ( hash->nxt >= hash->max-1 ) {
             if ( mesh->info.ddebug ) {
               fprintf(stderr,"\n  ## Warning: %s: memory alloc problem (edge):"
-                      " %d\n",__func__,hash->max);
+                      " %" PRId64 "\n",__func__,hash->max);
             }
             MMG5_TAB_RECALLOC(mesh,hash->item,hash->max,MMG5_GAP,MMG5_hedge,
                                "MMG5_edge",
@@ -237,7 +237,7 @@ int MMG5_hashEdge(MMG5_pMesh mesh,MMG5_Hash *hash, MMG_int a,MMG_int b,MMG_int k
     if ( hash->nxt >= hash->max-1 ) {
       if ( mesh->info.ddebug )
         fprintf(stderr,"\n  ## Warning: %s: memory alloc problem (edge):"
-                " %d\n",__func__,hash->max);
+                " %" MMG5_PRId "\n",__func__,hash->max);
 
       MMG5_TAB_RECALLOC(mesh,hash->item,hash->max,MMG5_GAP,MMG5_hedge,
                          "MMG5_edge",return 0);

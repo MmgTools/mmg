@@ -24,11 +24,17 @@
 #ifndef MMGCMAKEDEFINE_H
 #define MMGCMAKEDEFINE_H
 
+/* inttypes.h is needed to handle prints of MMG_int using PRId32 and PRId64 macros */
+#include <inttypes.h>
+
 @DEF_POSIX@
 @DEF_GNU@
 
-@DEF_MMG_INT@
-@DEF_MMGF_INT@
+@DEF_MMG_INT@ /*!< Integer type for C */
+
+@DEF_MMG5_PRId@ /*!< Printing format for MMG5_int type */
+
+@DEF_MMGF_INT@ /*!< Integer type for fortran */
 
 #cmakedefine USE_POINTMAP /*!< Flag to enable and export the pointmap used */
 

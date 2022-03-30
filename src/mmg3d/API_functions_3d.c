@@ -364,7 +364,7 @@ int MMG3D_Set_vertex(MMG5_pMesh mesh, double c0, double c1, double c2, int ref, 
 
   if ( pos > mesh->npmax ) {
     fprintf(stderr,"\n  ## Error: %s: unable to allocate a new point.\n",__func__);
-    fprintf(stderr,"    max number of points: %d\n",mesh->npmax);
+    fprintf(stderr,"    max number of points: %" MMG5_PRId "\n",mesh->npmax);
     MMG5_INCREASE_MEM_MESSAGE();
     return 0;
   }

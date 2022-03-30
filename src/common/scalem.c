@@ -323,7 +323,7 @@ int MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
         /* Check the input metric */
         if ( !MMG5_eigenv(1,m,lambda,v) ) {
           fprintf(stderr,"\n  ## Error: %s: unable to diagonalize at least"
-                  " 1 metric (point %d).\n",__func__,k);
+                  " 1 metric (point %" MMG5_PRId ").\n",__func__,k);
           return 0;
         }
         for (i=0; i<3; i++) {
