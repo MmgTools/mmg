@@ -38,7 +38,7 @@
 /* Delete all triangle references in mesh */
 int delref(MMG5_pMesh mesh) {
   MMG5_pTria    pt;
-  MMG_int      k;
+  MMG5_int      k;
 
   for(k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
@@ -61,14 +61,14 @@ int delref(MMG5_pMesh mesh) {
  * if boundary edges met must be set to MG_REQ, 0 otherwise.
  *
  */
-int setref(MMG5_pMesh mesh,MMG_int start,int ref,int putreq) {
+int setref(MMG5_pMesh mesh,MMG5_int start,int ref,int putreq) {
   MMG5_pTria pt,pt1;
-  MMG_int        *list,*adja,cur,k,iel,jel;
+  MMG5_int        *list,*adja,cur,k,iel,jel;
   int        base,ilist;
   int8_t     j,voy;
 
   ilist = cur = 0;
-  MMG5_SAFE_CALLOC(list,mesh->nt+1,MMG_int,return 0);
+  MMG5_SAFE_CALLOC(list,mesh->nt+1,MMG5_int,return 0);
   base = ++mesh->base;
 
   /* Pile up triangles from start, till a GEO boundary is met */
@@ -120,9 +120,9 @@ int setref(MMG5_pMesh mesh,MMG_int start,int ref,int putreq) {
 }
 
 /** find the element number in packed numerotation */
-MMG_int MMGS_indElt(MMG5_pMesh mesh, MMG_int kel) {
+MMG5_int MMGS_indElt(MMG5_pMesh mesh, MMG5_int kel) {
   MMG5_pTria pt;
-  MMG_int    ne, k;
+  MMG5_int    ne, k;
 
   ne = 0;
   for (k=1; k<=mesh->nt; k++) {
@@ -136,9 +136,9 @@ MMG_int MMGS_indElt(MMG5_pMesh mesh, MMG_int kel) {
 }
 
 /** find the point number in packed numerotation */
-MMG_int MMGS_indPt(MMG5_pMesh mesh, MMG_int kp) {
+MMG5_int MMGS_indPt(MMG5_pMesh mesh, MMG5_int kp) {
   MMG5_pPoint ppt;
-  MMG_int         np, k;
+  MMG5_int         np, k;
 
   np = 0;
   for (k=1; k<=mesh->np; k++) {

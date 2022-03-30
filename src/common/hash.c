@@ -47,11 +47,11 @@
  * \remark the ph->s field computation is useless in mmgs.
  *
  */
-int MMG5_mmgHashTria(MMG5_pMesh mesh, MMG_int *adjt, MMG5_Hash *hash, int chkISO) {
+int MMG5_mmgHashTria(MMG5_pMesh mesh, MMG5_int *adjt, MMG5_Hash *hash, int chkISO) {
   MMG5_pTria     pt,pt1;
   MMG5_hedge    *ph;
   int            kk,dup,nmf;
-  MMG_int        *adja,hmax,k,ia,ib,jel,lel;
+  MMG5_int        *adja,hmax,k,ia,ib,jel,lel;
   int8_t         i,i1,i2,j,l;
   unsigned int   key;
 
@@ -215,9 +215,9 @@ int MMG5_mmgHashTria(MMG5_pMesh mesh, MMG_int *adjt, MMG5_Hash *hash, int chkISO
  * Add edge \f$[a;b]\f$ to the hash table.
  *
  */
-int MMG5_hashEdge(MMG5_pMesh mesh,MMG5_Hash *hash, MMG_int a,MMG_int b,MMG_int k) {
+int MMG5_hashEdge(MMG5_pMesh mesh,MMG5_Hash *hash, MMG5_int a,MMG5_int b,MMG5_int k) {
   MMG5_hedge  *ph;
-  MMG_int          key,ia,ib,j;
+  MMG5_int          key,ia,ib,j;
 
   ia  = MG_MIN(a,b);
   ib  = MG_MAX(a,b);
@@ -269,9 +269,9 @@ int MMG5_hashEdge(MMG5_pMesh mesh,MMG5_Hash *hash, MMG_int a,MMG_int b,MMG_int k
  * Update the index of the point stored along the edge \f$[a;b]\f$
  *
  */
-int MMG5_hashUpdate(MMG5_Hash *hash, MMG_int a,MMG_int b,MMG_int k) {
+int MMG5_hashUpdate(MMG5_Hash *hash, MMG5_int a,MMG5_int b,MMG5_int k) {
   MMG5_hedge  *ph;
-  MMG_int          key,ia,ib;
+  MMG5_int          key,ia,ib;
 
   ia  = MG_MIN(a,b);
   ib  = MG_MAX(a,b);
@@ -305,9 +305,9 @@ int MMG5_hashUpdate(MMG5_Hash *hash, MMG_int a,MMG_int b,MMG_int k) {
  * tag. If the edge exist, add the new tag to the already stored tags.
  *
  */
-int MMG5_hashEdgeTag(MMG5_pMesh mesh,MMG5_Hash *hash, MMG_int a,MMG_int b,int16_t tag) {
+int MMG5_hashEdgeTag(MMG5_pMesh mesh,MMG5_Hash *hash, MMG5_int a,MMG5_int b,int16_t tag) {
   MMG5_hedge  *ph;
-  MMG_int          key,ia,ib,j;
+  MMG5_int          key,ia,ib,j;
 
   ia  = MG_MIN(a,b);
   ib  = MG_MAX(a,b);
@@ -362,9 +362,9 @@ int MMG5_hashEdgeTag(MMG5_pMesh mesh,MMG5_Hash *hash, MMG_int a,MMG_int b,int16_
  * Find the index of point stored along  \f$[a;b]\f$.
  *
  */
-MMG_int MMG5_hashGet(MMG5_Hash *hash,MMG_int a,MMG_int b) {
+MMG5_int MMG5_hashGet(MMG5_Hash *hash,MMG5_int a,MMG5_int b) {
   MMG5_hedge  *ph;
-  MMG_int          key,ia,ib;
+  MMG5_int          key,ia,ib;
 
   if ( !hash->item ) return 0;
 
@@ -392,8 +392,8 @@ MMG_int MMG5_hashGet(MMG5_Hash *hash,MMG_int a,MMG_int b) {
  * Hash edges or faces.
  *
  */
-int MMG5_hashNew(MMG5_pMesh mesh,MMG5_Hash *hash,MMG_int hsiz,MMG_int hmax) {
-  MMG_int   k;
+int MMG5_hashNew(MMG5_pMesh mesh,MMG5_Hash *hash,MMG5_int hsiz,MMG5_int hmax) {
+  MMG5_int   k;
 
   /* adjust hash table params */
   hash->siz  = hsiz+1;

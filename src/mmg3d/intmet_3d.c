@@ -48,14 +48,14 @@
  * \a k for a special storage of ridges metric (after defsiz call).
  *
  */
-int MMG5_intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG_int k,int8_t i,MMG_int ip,
+int MMG5_intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t i,MMG5_int ip,
                       double s) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
   MMG5_pPoint   ppt;
   MMG5_pxPoint  pxp;
   double        *m;
-  MMG_int           ip1,ip2;
+  MMG5_int           ip1,ip2;
 
   pt = &mesh->tetra[k];
   m  = &met->m[6*ip];
@@ -98,11 +98,11 @@ int MMG5_intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG_int k,int8_t i,MMG_int ip,
  * \a k for a classic storage of ridges metrics (before defsiz call).
  *
  */
-int MMG3D_intmet33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG_int k,int8_t i,MMG_int ip,
+int MMG3D_intmet33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t i,MMG5_int ip,
                       double s) {
   MMG5_pTetra   pt;
   double        *m,*n,*mr;
-  MMG_int           ip1,ip2;
+  MMG5_int           ip1,ip2;
 
   pt = &mesh->tetra[k];
   ip1 = pt->v[MMG5_iare[i][0]];
@@ -128,10 +128,10 @@ int MMG3D_intmet33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG_int k,int8_t i,MMG_int 
  * \a k.
  *
  */
-int MMG5_intmet_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG_int k,int8_t i,MMG_int ip,
+int MMG5_intmet_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t i,MMG5_int ip,
                       double s) {
   MMG5_pTetra   pt;
-  MMG_int           ip1, ip2;
+  MMG5_int           ip1, ip2;
   double        *m1,*m2,*mm;
 
   pt = &mesh->tetra[k];
@@ -159,7 +159,7 @@ int MMG5_intmet_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG_int k,int8_t i,MMG_int ip,
  * \f$ p_1-p_2 \f$ must not be a ridge.
  *
  * */
-int MMG5_intregmet(MMG5_pMesh mesh,MMG5_pSol met,MMG_int k,int8_t i,double s,
+int MMG5_intregmet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t i,double s,
                     double mr[6]) {
   MMG5_pTetra     pt;
   MMG5_pxTetra    pxt;
@@ -246,12 +246,12 @@ MMG5_intregvolmet(double *ma,double *mb,double *mp,double t) {
  * \f$ p_1-p_2 \f$ is an internal edge.
  *
  */
-int MMG5_intvolmet(MMG5_pMesh mesh,MMG5_pSol met,MMG_int k,int8_t i,double s,
+int MMG5_intvolmet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t i,double s,
                     double mr[6]) {
   MMG5_pTetra     pt;
   MMG5_pPoint     pp1,pp2;
   double          m1[6],m2[6];
-  MMG_int             ip1,ip2;
+  MMG5_int             ip1,ip2;
   int             l,ier;
 
   pt  = &mesh->tetra[k];
@@ -306,7 +306,7 @@ int MMG5_intvolmet(MMG5_pMesh mesh,MMG5_pSol met,MMG_int k,int8_t i,double s,
  * coordinates of the new point in \a k.
  *
  */
-int MMG5_interp4bar_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG_int k, MMG_int ip,
+int MMG5_interp4bar_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k, MMG5_int ip,
                          double cb[4]) {
   MMG5_pTetra pt;
 
@@ -334,7 +334,7 @@ int MMG5_interp4bar_iso(MMG5_pMesh mesh, MMG5_pSol met, MMG_int k, MMG_int ip,
  *
  */
 static inline
-int MMG5_interp4barintern(MMG5_pSol met,MMG_int ip,double cb[4],double dm0[6],
+int MMG5_interp4barintern(MMG5_pSol met,MMG5_int ip,double cb[4],double dm0[6],
                            double dm1[6],double dm2[6],double dm3[6]) {
   double        m0i[6],m1i[6],m2i[6],m3i[6],mi[6];
   int           i;
@@ -376,7 +376,7 @@ int MMG5_interp4barintern(MMG5_pSol met,MMG_int ip,double cb[4],double dm0[6],
  * coordinates of the new point in \a k.
  *
  */
-int MMG5_interp4bar_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG_int k, MMG_int ip,
+int MMG5_interp4bar_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k, MMG5_int ip,
                          double cb[4]) {
   MMG5_pTetra   pt;
   MMG5_pPoint   pp1,pp2,pp3,pp4;
@@ -448,7 +448,7 @@ int MMG5_interp4bar_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG_int k, MMG_int ip,
  * coordinates of the new point in \a k.
  *
  */
-int MMG5_interp4bar33_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG_int k, MMG_int ip,
+int MMG5_interp4bar33_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k, MMG5_int ip,
                            double cb[4]) {
   MMG5_pTetra   pt;
   double        dm0[6],dm1[6],dm2[6],dm3[6];

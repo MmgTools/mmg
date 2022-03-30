@@ -52,13 +52,13 @@
  * configuration. The shell of edge is built during the process.
  *
  */
-MMG_int MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,MMG_int start,int ia,
-                    int *ilist,MMG_int *list,double crit,int8_t typchk) {
+MMG5_int MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int start,int ia,
+                    int *ilist,MMG5_int *list,double crit,int8_t typchk) {
   MMG5_pTetra    pt,pt0;
   MMG5_pPoint    p0;
   double         calold,calnew,caltmp;
   int            npol,refdom,k,l;
-  MMG_int        np,na,nb,piv,*adja,adj,pol[MMG3D_LMAX+2],iel;
+  MMG5_int        np,na,nb,piv,*adja,adj,pol[MMG3D_LMAX+2],iel;
   int8_t         i,ip,ier,ifac;
 
   pt  = &mesh->tetra[start];
@@ -243,12 +243,12 @@ MMG_int MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,MMG_int start,int ia,
  * Perform swap of edge whose shell is passed according to configuration nconf.
  *
  */
-int MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,MMG_int *list,
+int MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,MMG5_int *list,
                  MMG3D_pPROctree PROctree, int8_t typchk) {
   MMG5_pTetra    pt;
   MMG5_pPoint    p0,p1;
   int       nball,src,ret,start;
-  MMG_int   iel,na,nb,np;
+  MMG5_int   iel,na,nb,np;
   double    m[3];
   int8_t    ia,ip,iq;
   int       ier;
@@ -315,7 +315,7 @@ int MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,MMG_int *list,
   }
   assert(ip<4);
 
-  memset(list,0,(MMG3D_LMAX+2)*sizeof(MMG_int));
+  memset(list,0,(MMG3D_LMAX+2)*sizeof(MMG5_int));
   nball = MMG5_boulevolp(mesh,start,ip,list);
 
   ier = MMG5_colver(mesh,met,list,nball,iq,typchk);

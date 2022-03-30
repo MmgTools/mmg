@@ -48,7 +48,7 @@
  * \f$[p0;p1]\f$.
  *
  */
-inline void MMG5_bezierEdge(MMG5_pMesh mesh,MMG_int i0,MMG_int i1,
+inline void MMG5_bezierEdge(MMG5_pMesh mesh,MMG5_int i0,MMG5_int i1,
                              double b0[3],double b1[3], int8_t isrid,double v[3])
 {
   MMG5_pPoint    p0,p1;

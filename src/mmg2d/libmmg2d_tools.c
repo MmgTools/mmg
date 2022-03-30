@@ -190,10 +190,10 @@ int MMG2D_freeLocalPar(MMG5_pMesh mesh) {
   return 1;
 }
 
-int MMG2D_Get_numberOfNonBdyEdges(MMG5_pMesh mesh, MMG_int* nb_edges) {
+int MMG2D_Get_numberOfNonBdyEdges(MMG5_pMesh mesh, MMG5_int* nb_edges) {
   MMG5_pTria pt,pt1;
   MMG5_pEdge ped;
-  MMG_int        *adja,k,i,j,i1,i2,iel;
+  MMG5_int        *adja,k,i,j,i1,i2,iel;
 
   *nb_edges = 0;
   if ( mesh->tria ) {
@@ -283,7 +283,7 @@ int MMG2D_Get_numberOfNonBdyEdges(MMG5_pMesh mesh, MMG_int* nb_edges) {
   return 1;
 }
 
-int MMG2D_Get_nonBdyEdge(MMG5_pMesh mesh, MMG_int* e0, MMG_int* e1, int* ref, MMG_int idx) {
+int MMG2D_Get_nonBdyEdge(MMG5_pMesh mesh, MMG5_int* e0, MMG5_int* e1, int* ref, MMG5_int idx) {
   MMG5_pEdge ped;
   size_t     na_tot=0;
   char       *ptr_c = (char*)mesh->edge;
@@ -327,7 +327,7 @@ int MMG2D_Get_nonBdyEdge(MMG5_pMesh mesh, MMG_int* e0, MMG_int* e1, int* ref, MM
   return 1;
 }
 
-int MMG2D_Get_adjaTri(MMG5_pMesh mesh, MMG_int kel, MMG_int listri[3]) {
+int MMG2D_Get_adjaTri(MMG5_pMesh mesh, MMG5_int kel, MMG5_int listri[3]) {
 
   if ( ! mesh->adja ) {
     if (! MMG2D_hashTria(mesh))
@@ -341,7 +341,7 @@ int MMG2D_Get_adjaTri(MMG5_pMesh mesh, MMG_int kel, MMG_int listri[3]) {
   return 1;
 }
 
-int MMG2D_Get_adjaVertices(MMG5_pMesh mesh, MMG_int ip, MMG_int lispoi[MMG2D_LMAX])
+int MMG2D_Get_adjaVertices(MMG5_pMesh mesh, MMG5_int ip, MMG5_int lispoi[MMG2D_LMAX])
 {
   int start;
 
@@ -353,11 +353,11 @@ int MMG2D_Get_adjaVertices(MMG5_pMesh mesh, MMG_int ip, MMG_int lispoi[MMG2D_LMA
   return MMG2D_Get_adjaVerticesFast(mesh,ip,start,lispoi);
 }
 
-int MMG2D_Get_adjaVerticesFast(MMG5_pMesh mesh, MMG_int ip,MMG_int start, MMG_int lispoi[MMG2D_LMAX])
+int MMG2D_Get_adjaVerticesFast(MMG5_pMesh mesh, MMG5_int ip,MMG5_int start, MMG5_int lispoi[MMG2D_LMAX])
 {
   MMG5_pTria pt;
   int        prevk,nbpoi,iploc,i,i1,i2;
-  MMG_int    k,*adja;
+  MMG5_int    k,*adja;
 
   pt   = &mesh->tria[start];
 
@@ -428,7 +428,7 @@ int MMG2D_Get_adjaVerticesFast(MMG5_pMesh mesh, MMG_int ip,MMG_int start, MMG_in
   return nbpoi;
 }
 
-int MMG2D_Get_triFromEdge(MMG5_pMesh mesh, MMG_int ked, MMG_int *ktri, MMG_int *ied)
+int MMG2D_Get_triFromEdge(MMG5_pMesh mesh, MMG5_int ked, MMG5_int *ktri, MMG5_int *ied)
 {
   int val;
 
@@ -447,7 +447,7 @@ int MMG2D_Get_triFromEdge(MMG5_pMesh mesh, MMG_int ked, MMG_int *ktri, MMG_int *
   return 1;
 }
 
-int MMG2D_Get_trisFromEdge(MMG5_pMesh mesh, MMG_int ked, MMG_int ktri[2], MMG_int ied[2])
+int MMG2D_Get_trisFromEdge(MMG5_pMesh mesh, MMG5_int ked, MMG5_int ktri[2], MMG5_int ied[2])
 {
   int ier,itri;
 #ifndef NDEBUG
@@ -518,7 +518,7 @@ int MMG2D_Compute_eigenv(double m[3],double lambda[2],double vp[2][2]) {
 
 
 void MMG2D_Reset_verticestags(MMG5_pMesh mesh) {
-  MMG_int k;
+  MMG5_int k;
 
   for ( k=1; k<=mesh->np;  ++k ) {
     mesh->point[k].tag = 0;

@@ -47,12 +47,12 @@ extern int8_t ddb;
  * Find acceptable position for splitting.
  *
  */
-int MMGS_dichoto(MMG5_pMesh mesh,MMG5_pSol met,MMG_int k,MMG_int *vx) {
+int MMGS_dichoto(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int *vx) {
   MMG5_pTria   pt;
   MMG5_pPoint  pa,pb,ps;
   double       o[3][3],p[3][3];
   float        to,tp,t;
-  MMG_int          ia,ib,ier;
+  MMG5_int          ia,ib,ier;
   int          i1,i2;
   int          it,maxit;
   int8_t       i,j;
@@ -152,10 +152,10 @@ int MMGS_dichoto(MMG5_pMesh mesh,MMG5_pSol met,MMG_int k,MMG_int *vx) {
  * Find acceptable position for MMG5_split1b, starting from point ip.
  *
  */
-int MMGS_dichoto1b(MMG5_pMesh mesh, MMG5_pSol met, MMG_int iel, int ia, MMG_int ip) {
+int MMGS_dichoto1b(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int iel, int ia, MMG5_int ip) {
   MMG5_pTria   pt;
   MMG5_pPoint  p0,p1,ppt;
-  MMG_int          np,nq;
+  MMG5_int          np,nq;
   int          it,maxit,i1,i2;
   double       m[3],o[3],tp,to,t;
   int8_t       ier;
@@ -210,7 +210,7 @@ int MMGS_dichoto1b(MMG5_pMesh mesh, MMG5_pSol met, MMG_int iel, int ia, MMG_int 
 /* check if edge need to be split and return a binary coding the numbers of the
  * edges of tria iel that should be split according to a hausdorff distance
  * criterion */
-int chkedg(MMG5_pMesh mesh,MMG_int iel) {
+int chkedg(MMG5_pMesh mesh,MMG5_int iel) {
   MMG5_pTria    pt;
   MMG5_pPoint   p[3];
   MMG5_pPar     par;
@@ -392,7 +392,7 @@ int chkedg(MMG5_pMesh mesh,MMG_int iel) {
 static int swpmsh(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
   MMG5_pTria    pt;
   int      it,maxit;
-  MMG_int  k,ns,nns;
+  MMG5_int  k,ns,nns;
   int8_t   i;
 
   it = nns = 0;
@@ -426,7 +426,7 @@ static int movtri(MMG5_pMesh mesh,MMG5_pSol met,int maxit) {
   MMG5_pTria    pt;
   MMG5_pPoint   ppt;
   int      it,ier,base,ilist;
-  MMG_int    k,list[MMGS_LMAX+2],nm,ns,nnm;
+  MMG5_int    k,list[MMGS_LMAX+2],nm,ns,nnm;
   int8_t   i;
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
@@ -491,7 +491,7 @@ static inline
 int MMGS_delPatternPts(MMG5_pMesh mesh,MMG5_Hash hash)
 {
   MMG5_pTria   pt;
-  MMG_int          vx[3],k;
+  MMG5_int          vx[3],k;
   int          i,i1,i2;
 
   /* Delete the useless added points */
@@ -538,8 +538,8 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
   MMG5_pxPoint  go;
   double        s,o[3],no[3],to[3],dd,len;
   int           i,ier,it;
-  MMG_int       ns,nc,ni,ic;
-  MMG_int       k,nt,vx[3],j,ip,ip1,ip2;
+  MMG5_int       ns,nc,ni,ic;
+  MMG5_int       k,nt,vx[3],j,ip,ip1,ip2;
   int8_t        i1,i2;
   static double uv[3][2] = { {0.5,0.5}, {0.,0.5}, {0.5,0.} };
   static int8_t mmgWarn0=0,mmgWarn1=0,mmgWarn2=0,mmgWarn3=0;
@@ -905,14 +905,14 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
  * Check if splitting edge \a i of element \a k is ok.
  *
  */
-MMG_int chkspl(MMG5_pMesh mesh,MMG5_pSol met,MMG_int k,int i) {
+MMG5_int chkspl(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int i) {
   MMG5_pTria    pt,pt1;
   MMG5_pPoint   ppt;
   MMG5_pxPoint  go;
   MMG5_Bezier   b;
   double        s,uv[2],o[3],no[3],to[3];
   int           ier;
-  MMG_int       ip,*adja,jel;
+  MMG5_int       ip,*adja,jel;
   int8_t        i1,i2,j,jj,j2;
 
   if ( mesh->xp > mesh->xpmax-2 )  return 0;
@@ -967,12 +967,12 @@ MMG_int chkspl(MMG5_pMesh mesh,MMG5_pSol met,MMG_int k,int i) {
 }
 
 /* attempt to collapse small edges */
-static MMG_int colelt(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
+static MMG5_int colelt(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
   MMG5_pTria    pt;
   MMG5_pPoint   p1,p2;
   MMG5_pPar     par;
   double        ll,ux,uy,uz,hmin;
-  MMG_int       nc,list[MMGS_LMAX+2],k;
+  MMG5_int       nc,list[MMGS_LMAX+2],k;
   int           l,isloc,ier,ilist;
   int8_t        i,i1,i2;
 
@@ -1067,12 +1067,12 @@ static MMG_int colelt(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
  * Split edges of length bigger than MMGS_LOPTL.
  *
  */
-static MMG_int adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
+static MMG5_int adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria    pt;
   MMG5_pPoint   p1,p2;
   double   len,lmax;
   int      ier;
-  MMG_int   ip,ns,k;
+  MMG5_int   ip,ns,k;
   int8_t   i,i1,i2,imax;
 
   ns = 0;
@@ -1143,11 +1143,11 @@ static MMG_int adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
  * Collapse edges of length smaller than MMGS_LOPTS.
  *
  */
-static MMG_int adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
+static MMG5_int adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria    pt;
   MMG5_pPoint   p1,p2;
   double   len;
-  MMG_int  nc,k,list[MMGS_LMAX+2];
+  MMG5_int  nc,k,list[MMGS_LMAX+2];
   int      ier,ilist;
   int8_t   i,i1,i2;
 
@@ -1207,9 +1207,9 @@ static MMG_int adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
 
 
 /* analyze triangles and split or collapse to match gradation */
-static int adptri(MMG5_pMesh mesh,MMG5_pSol met,MMG_int* permNodGlob) {
+static int adptri(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int* permNodGlob) {
   int        it,maxit;
-  MMG_int    nnc,nns,nnf,nnm,nc,ns,nf,nm;
+  MMG5_int    nnc,nns,nnf,nnm,nc,ns,nf,nm;
 
   /* iterative mesh modifications */
   it = nnc = nns = nnf = nnm = 0;
@@ -1324,7 +1324,7 @@ static int adptri(MMG5_pMesh mesh,MMG5_pSol met,MMG_int* permNodGlob) {
 
 /* analyze tetrahedra and split if needed */
 static int anatri(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
-  MMG_int     nc,ns,nf,nnc,nns,nnf;
+  MMG5_int     nc,ns,nf,nnc,nns,nnf;
   int     it,maxit;
 
   /* analyze tetras : initial splitting */
@@ -1396,7 +1396,7 @@ static int anatri(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
  * Main adaptation routine.
  *
  */
-int MMG5_mmgs1(MMG5_pMesh mesh,MMG5_pSol met,MMG_int *permNodGlob) {
+int MMG5_mmgs1(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *permNodGlob) {
 
   /* renumbering if available */
   if ( abs(mesh->info.imprim) > 4 )

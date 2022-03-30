@@ -47,9 +47,9 @@
  *
  */
 static inline
-void MMG5_swapTri(MMG5_pTria trias, MMG_int* perm, MMG_int ind1, MMG_int ind2) {
+void MMG5_swapTri(MMG5_pTria trias, MMG5_int* perm, MMG5_int ind1, MMG5_int ind2) {
   MMG5_Tria pttmp;
-  MMG_int   tmp;
+  MMG5_int   tmp;
 
   /* 2-- swap the triangles */
   memcpy(&pttmp       ,&trias[ind2],sizeof(MMG5_Tria));
@@ -76,26 +76,26 @@ void MMG5_swapTri(MMG5_pTria trias, MMG_int* perm, MMG_int ind1, MMG_int ind2) {
  * Modifies the node indicies to prevent from cache missing.
  *
  */
-int MMG5_mmgsRenumbering(MMG_int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol,
-                         MMG5_pSol fields,MMG_int* permNodGlob) {
+int MMG5_mmgsRenumbering(MMG5_int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol,
+                         MMG5_pSol fields,MMG5_int* permNodGlob) {
   MMG5_pPoint ppt;
   MMG5_pTria ptri;
   SCOTCH_Num edgeNbr;
   SCOTCH_Num *vertTab, *edgeTab, *permVrtTab;
   SCOTCH_Graph graf ;
-  MMG_int    vertNbr, nodeGlbIdx, triaIdx, ballTriIdx;
+  MMG5_int    vertNbr, nodeGlbIdx, triaIdx, ballTriIdx;
   int    i;
-  MMG_int    j, k;
+  MMG5_int    j, k;
   int    edgeSiz;
-  MMG_int    *vertOldTab, *permNodTab, ntreal, npreal;
-  MMG_int    *adja,iadr;
+  MMG5_int    *vertOldTab, *permNodTab, ntreal, npreal;
+  MMG5_int    *adja,iadr;
 
 
   /* Computing the number of vertices and a contiguous tabular of vertices */
   vertNbr = 0;
 
-  MMG5_ADD_MEM(mesh,(mesh->nt+1)*sizeof(MMG_int),"vertOldTab",return 1);
-  MMG5_SAFE_CALLOC(vertOldTab,mesh->nt+1,MMG_int,return 1);
+  MMG5_ADD_MEM(mesh,(mesh->nt+1)*sizeof(MMG5_int),"vertOldTab",return 1);
+  MMG5_SAFE_CALLOC(vertOldTab,mesh->nt+1,MMG5_int,return 1);
 
   for(triaIdx = 1 ; triaIdx < mesh->nt + 1 ; triaIdx++) {
 
@@ -258,10 +258,10 @@ int MMG5_mmgsRenumbering(MMG_int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol,
   }
   MMG5_DEL_MEM(mesh,vertOldTab);
 
-  MMG5_ADD_MEM(mesh,(mesh->np+1)*sizeof(MMG_int),"permNodTab",
+  MMG5_ADD_MEM(mesh,(mesh->np+1)*sizeof(MMG5_int),"permNodTab",
                 if( !MMGS_hashTria(mesh) ) return 0;
                 return 1);
-  MMG5_SAFE_CALLOC(permNodTab,mesh->np+1,MMG_int,return 1);
+  MMG5_SAFE_CALLOC(permNodTab,mesh->np+1,MMG5_int,return 1);
 
   for(triaIdx = 1 ; triaIdx < mesh->nt + 1 ; triaIdx++) {
     ptri = &mesh->tria[triaIdx];

@@ -43,9 +43,9 @@
  * find the element index in packed numerotation
  *
  */
-MMG_int MMG2D_indElt(MMG5_pMesh mesh, MMG_int kel) {
+MMG5_int MMG2D_indElt(MMG5_pMesh mesh, MMG5_int kel) {
     MMG5_pTria pt;
-    MMG_int        ne, k;
+    MMG5_int        ne, k;
 
     ne = 0;
     for (k=1; k<=mesh->nt; k++) {
@@ -67,9 +67,9 @@ MMG_int MMG2D_indElt(MMG5_pMesh mesh, MMG_int kel) {
  * find the point index in packed numerotation
  *
  */
-MMG_int MMG2D_indPt(MMG5_pMesh mesh, MMG_int kp) {
+MMG5_int MMG2D_indPt(MMG5_pMesh mesh, MMG5_int kp) {
     MMG5_pPoint ppt;
-    MMG_int         np, k;
+    MMG5_int         np, k;
 
     np = 0;
     for (k=1; k<=mesh->np; k++) {

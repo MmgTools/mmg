@@ -47,7 +47,7 @@
 double MMG5_caltri33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt) {
   double   anisurf,dd,abx,aby,abz,acx,acy,acz,bcx,bcy,bcz;
   double  *a,*b,*c,*ma,*mb,*mc,m[6],l0,l1,l2,rap;
-  MMG_int      ia,ib,ic;
+  MMG5_int      ia,ib,ic;
   int8_t   i;
 
   ia = pt->v[0];
@@ -117,7 +117,7 @@ double MMG5_caltri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
   double        rap,anisurf,l0,l1,l2,m[6],mm[6],rbasis[3][3];
   double        abx,aby,abz,acx,acy,acz,bcy,bcx,bcz;
   int           i,j;
-  MMG_int       np[3];
+  MMG5_int       np[3];
   int8_t        i1,i2;
 
   for (i=0; i<3; i++) {
@@ -249,9 +249,9 @@ inline double MMG5_caltri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
  * Display histogram of edge length.
  *
  */
-void MMG5_displayLengthHisto(MMG5_pMesh mesh, MMG_int ned, double *avlen,
-                              MMG_int amin, MMG_int bmin, double lmin,
-                              MMG_int amax, MMG_int bmax, double lmax,
+void MMG5_displayLengthHisto(MMG5_pMesh mesh, MMG5_int ned, double *avlen,
+                              MMG5_int amin, MMG5_int bmin, double lmin,
+                              MMG5_int amax, MMG5_int bmax, double lmax,
                               int nullEdge,double *bd, int *hl,int8_t shift)
 {
   double dned;
@@ -291,8 +291,8 @@ void MMG5_displayLengthHisto(MMG5_pMesh mesh, MMG_int ned, double *avlen,
  * Display histogram of edge length without the histo header
  *
  */
-void MMG5_displayLengthHisto_internal( MMG_int ned,MMG_int amin,
-                                       MMG_int bmin, double lmin,MMG_int amax, MMG_int bmax,
+void MMG5_displayLengthHisto_internal( MMG5_int ned,MMG5_int amin,
+                                       MMG5_int bmin, double lmin,MMG5_int amax, MMG5_int bmax,
                                        double lmax,int nullEdge,double *bd,
                                        int *hl,int8_t shift,int imprim)
 {
@@ -340,7 +340,7 @@ void MMG5_displayLengthHisto_internal( MMG_int ned,MMG_int amin,
  * of the mesh.
  *
  */
-int MMG5_minQualCheck ( MMG_int iel, double minqual, double alpha )
+int MMG5_minQualCheck ( MMG5_int iel, double minqual, double alpha )
 {
   double minqualAlpha;
 

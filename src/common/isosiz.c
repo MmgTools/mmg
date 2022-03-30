@@ -126,9 +126,9 @@ void MMG5_gradation_info ( MMG5_pMesh mesh ) {
  * increment the count of times we have processed this extremities.
  *
  */
-int MMG5_sum_reqEdgeLengthsAtPoint ( MMG5_pMesh mesh,MMG5_pSol met,MMG_int ip0,MMG_int ip1 ) {
+int MMG5_sum_reqEdgeLengthsAtPoint ( MMG5_pMesh mesh,MMG5_pSol met,MMG5_int ip0,MMG5_int ip1 ) {
   MMG5_pPoint p0,p1;
-  MMG_int         j;
+  MMG5_int         j;
   double      len,dist;
 
   /* Compute the euclidean edge length */
@@ -166,7 +166,7 @@ int MMG5_sum_reqEdgeLengthsAtPoint ( MMG5_pMesh mesh,MMG5_pSol met,MMG_int ip0,M
  */
 int MMG5_compute_meanMetricAtMarkedPoints_iso ( MMG5_pMesh mesh,MMG5_pSol met ) {
   MMG5_pPoint p0;
-  MMG_int         k;
+  MMG5_int         k;
   int         mmgWarn = 0;
 
   for ( k=1; k<=mesh->np; k++ ) {
@@ -204,7 +204,7 @@ int MMG5_compute_meanMetricAtMarkedPoints_iso ( MMG5_pMesh mesh,MMG5_pSol met ) 
 int MMG5_reset_metricAtReqEdges_surf ( MMG5_pMesh mesh,MMG5_pSol met,int8_t ismet ) {
   MMG5_pTria  pt;
   int         i,j,iad0,iad1;
-  MMG_int     k,ip0,ip1;
+  MMG5_int     k,ip0,ip1;
 
   if ( ismet ) {
     for ( k=1; k<=mesh->nt; k++ ) {
@@ -243,7 +243,7 @@ int MMG5_reset_metricAtReqEdges_surf ( MMG5_pMesh mesh,MMG5_pSol met,int8_t isme
 void MMG5_mark_pointsOnReqEdge_fromTria (  MMG5_pMesh mesh ) {
   MMG5_pTria  pt;
   MMG5_pPoint ppt;
-  MMG_int         k;
+  MMG5_int         k;
   int8_t      i;
 
   for ( k=1; k<=mesh->np; k++ ) {
@@ -280,7 +280,7 @@ int MMG5_gradsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pPoint       p1,p2;
   double            hgrad,ll,h1,h2,hn,val;
   int               it,maxit,nup,nu;
-  MMG_int           ip1,ip2,k;
+  MMG5_int           ip1,ip2,k;
   int8_t            i,j,i1,i2;
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {
@@ -372,7 +372,7 @@ int MMG5_gradsizreq_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pPoint       p1,p2;
   double            hgrad,ll,h1,h2,hn,ux,uy;
   int               it,maxit,nup,nu;
-  MMG_int           k,ip1,ip2,ipmaster,ipslave;
+  MMG5_int           k,ip1,ip2,ipmaster,ipslave;
   uint8_t           i,i1,i2;
 
 

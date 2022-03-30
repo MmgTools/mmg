@@ -48,7 +48,7 @@ extern int8_t ddb;
 int MMG2D_setadj(MMG5_pMesh mesh) {
   MMG5_pTria       pt,pt1;
   MMG5_pQuad       pq;
-  MMG_int              *pile,*adja,ipil,k,kk,ncc,ip1,ip2,nr,nref;
+  MMG5_int              *pile,*adja,ipil,k,kk,ncc,ip1,ip2,nr,nref;
   int16_t          tag;
   int8_t           i,ii,i1,i2;
 
@@ -56,7 +56,7 @@ int MMG2D_setadj(MMG5_pMesh mesh) {
     fprintf(stdout,"  ** SETTING TOPOLOGY\n");
 
   /** Step 1: Tags setting from triangles analysis */
-  MMG5_SAFE_MALLOC(pile,mesh->nt+1,MMG_int,return 0);
+  MMG5_SAFE_MALLOC(pile,mesh->nt+1,MMG5_int,return 0);
 
   /* Initialization of the pile */
   ncc = 1;
@@ -268,7 +268,7 @@ int MMG2D_singul(MMG5_pMesh mesh, int ref ) {
   MMG5_pTria          pt;
   MMG5_pPoint         ppt,p1,p2;
   double              ux,uy,uz,vx,vy,vz,dd;
-  MMG_int                 list[MMG2D_LONMAX+2],listref[MMG2D_LONMAX+2],k,ns,ng,nr,nm,nre,nc;
+  MMG5_int                 list[MMG2D_LONMAX+2],listref[MMG2D_LONMAX+2],k,ns,ng,nr,nm,nre,nc;
   int8_t              i;
 
   nre = nc = nm = 0;
@@ -400,7 +400,7 @@ int MMG2D_singul(MMG5_pMesh mesh, int ref ) {
 int MMG2D_norver(MMG5_pMesh mesh, int ref) {
   MMG5_pTria       pt,pt1;
   MMG5_pPoint      ppt;
-  MMG_int              k,kk,nn,pleft,pright;
+  MMG5_int              k,kk,nn,pleft,pright;
   int8_t           i,ii;
 
   nn = 0;
@@ -506,7 +506,7 @@ int MMG2D_regnor(MMG5_pMesh mesh) {
   MMG5_pTria            pt;
   MMG5_pPoint           ppt,p1,p2;
   double                *tmp,dd,ps,lm1,lm2,nx,ny,ux,uy,nxt,nyt,res,res0,n[2];
-  MMG_int                   k,iel,ip1,ip2,nn;
+  MMG5_int                   k,iel,ip1,ip2,nn;
   int                   it,maxit;
   int8_t                i,ier;
 

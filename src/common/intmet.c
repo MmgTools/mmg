@@ -159,7 +159,7 @@ int MMG5_mmgIntmet33_ani(double *m,double *n,double *mr,double s) {
  * at pointing towards direction of n1 at interpolated point.
  *
  */
-int MMG5_intridmet(MMG5_pMesh mesh,MMG5_pSol met,MMG_int ip1, MMG_int ip2,double s,
+int MMG5_intridmet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int ip1, MMG5_int ip2,double s,
                     double v[3],double mr[6]) {
   MMG5_pxPoint   go1,go2;
   MMG5_pPoint    p1,p2;
@@ -503,7 +503,7 @@ int MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,int8_t i,
   double         m1old[6],m2old[6],m1[6],m2[6],rbasis[3][3];
   double         *n1,*n2,step,u,r[3][3],dd,ddbn;
   int            nstep,l;
-  MMG_int        ip1,ip2;
+  MMG5_int        ip1,ip2;
   int8_t         i1,i2;
   static int     warn=0;
 

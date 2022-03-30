@@ -45,8 +45,8 @@
  */
 static int setadj(MMG5_pMesh mesh){
   MMG5_pTria   pt,pt1;
-  MMG_int          *adja,*adjb,adji1,adji2,*pile,iad,ipil,ip1,ip2,gen;
-  MMG_int          k,kk,iel,jel,nvf,nf,nr,nt,nre,nreq,ncc,ned;
+  MMG5_int          *adja,*adjb,adji1,adji2,*pile,iad,ipil,ip1,ip2,gen;
+  MMG5_int          k,kk,iel,jel,nvf,nf,nr,nt,nre,nreq,ncc,ned;
   int          ref;
   int16_t      tag;
   int8_t       i,ii,i1,i2,ii1,ii2,voy;
@@ -56,7 +56,7 @@ static int setadj(MMG5_pMesh mesh){
 
   nvf = nf = ncc = ned = 0;
 
-  MMG5_SAFE_MALLOC(pile,mesh->nt+1,MMG_int,return 0);
+  MMG5_SAFE_MALLOC(pile,mesh->nt+1,MMG5_int,return 0);
 
   pile[1] = 1;
   ipil    = 1;
@@ -246,7 +246,7 @@ static int setadj(MMG5_pMesh mesh){
 static void nmpoints(MMG5_pMesh mesh) {
   MMG5_pTria      pt;
   MMG5_pPoint     p0;
-  MMG_int        k,np,numt,iel,jel,nmp,*adja;
+  MMG5_int        k,np,numt,iel,jel,nmp,*adja;
   int8_t     i0,i1,i,jp;
   
   nmp = 0;
@@ -428,7 +428,7 @@ static void nmpoints(MMG5_pMesh mesh) {
 static int setdhd(MMG5_pMesh mesh) {
   MMG5_pTria    pt,pt1;
   double   n1[3],n2[3],dhd;
-  MMG_int     *adja,k,kk,nr;
+  MMG5_int     *adja,k,kk,nr;
   int8_t   i,ii,i1,i2;
 
   nr = 0;
@@ -473,7 +473,7 @@ static int MMG5_singul(MMG5_pMesh mesh) {
   MMG5_pTria     pt;
   MMG5_pPoint    ppt,p1,p2;
   double         ux,uy,uz,vx,vy,vz,dd;
-  MMG_int            list[MMGS_LMAX+2],listref[MMGS_LMAX+2],k,nc,xp,nr,ns,nre;
+  MMG5_int            list[MMGS_LMAX+2],listref[MMGS_LMAX+2],k,nc,xp,nr,ns,nre;
   int8_t         i;
 
   nre = nc = 0;
@@ -564,7 +564,7 @@ static int norver(MMG5_pMesh mesh) {
   MMG5_pPoint    ppt;
   MMG5_pxPoint   go;
   double         n[3],dd;
-  MMG_int            *adja,k,kk,ier,xp,nn,nt,nf,nnr;
+  MMG5_int            *adja,k,kk,ier,xp,nn,nt,nf,nnr;
   int8_t         i,ii,i1;
 
   if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )

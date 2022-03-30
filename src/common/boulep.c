@@ -48,10 +48,10 @@ extern MMG5_Info  info;
  * Return all vertices connected to ip (with list[0] = ip).
  *
  **/
-int MMG5_boulep(MMG5_pMesh mesh,MMG_int start,MMG_int ip,MMG_int *adja, MMG_int *list) {
+int MMG5_boulep(MMG5_pMesh mesh,MMG5_int start,MMG5_int ip,MMG5_int *adja, MMG5_int *list) {
   MMG5_pTria    pt;
   int           ilist;
-  MMG_int       *adj,k;
+  MMG5_int       *adj,k;
   int8_t        i,i1,i2;
 
   pt = &mesh->tria[start];
@@ -111,10 +111,10 @@ int MMG5_boulep(MMG5_pMesh mesh,MMG_int start,MMG_int ip,MMG_int *adja, MMG_int 
  * Compute average normal of triangles sharing P without crossing ridge.
  *
  */
-int MMG5_boulen(MMG5_pMesh mesh,MMG_int *adjt,MMG_int start,MMG_int ip,double *nn) {
+int MMG5_boulen(MMG5_pMesh mesh,MMG5_int *adjt,MMG5_int start,MMG5_int ip,double *nn) {
   MMG5_pTria    pt;
   double        n[3],dd;
-  MMG_int           *adja,k;
+  MMG5_int           *adja,k;
   int8_t        i,i1,i2;
 
   pt = &mesh->tria[start];
@@ -187,11 +187,11 @@ int MMG5_boulen(MMG5_pMesh mesh,MMG_int *adjt,MMG_int start,MMG_int ip,double *n
  * Compute the tangent to the curve at point \a ip.
  *
  */
-int MMG5_boulec(MMG5_pMesh mesh,MMG_int *adjt,MMG_int start,MMG_int ip,double *tt) {
+int MMG5_boulec(MMG5_pMesh mesh,MMG5_int *adjt,MMG5_int start,MMG5_int ip,double *tt) {
   MMG5_pTria    pt;
   MMG5_pPoint   p0,p1,p2;
   double        dd;
-  MMG_int           *adja,k;
+  MMG5_int           *adja,k;
   int8_t        i,i1,i2;
 
   pt = &mesh->tria[start];
@@ -275,11 +275,11 @@ int MMG5_boulec(MMG5_pMesh mesh,MMG_int *adjt,MMG_int start,MMG_int ip,double *t
  * the vertex \a ip.
  *
  */
-MMG_int MMG5_bouler(MMG5_pMesh mesh,MMG_int *adjt,MMG_int start,MMG_int ip,
-                 MMG_int *list,MMG_int *listref,MMG_int *ng,MMG_int *nr,int lmax) {
+MMG5_int MMG5_bouler(MMG5_pMesh mesh,MMG5_int *adjt,MMG5_int start,MMG5_int ip,
+                 MMG5_int *list,MMG5_int *listref,MMG5_int *ng,MMG5_int *nr,int lmax) {
   MMG5_pTria    pt;
-  MMG_int           *adja,k;
-  MMG_int           ns;
+  MMG5_int           *adja,k;
+  MMG5_int           ns;
   int8_t        i,i1,i2;
 
   pt  = &mesh->tria[start];

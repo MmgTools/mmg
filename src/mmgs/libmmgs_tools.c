@@ -461,10 +461,10 @@ void MMGS_destockOptions(MMG5_pMesh mesh, MMG5_Info *info) {
   return;
 }
 
-int MMGS_Get_numberOfNonBdyEdges(MMG5_pMesh mesh, MMG_int* nb_edges) {
+int MMGS_Get_numberOfNonBdyEdges(MMG5_pMesh mesh, MMG5_int* nb_edges) {
   MMG5_pTria pt,pt1;
   MMG5_pEdge ped;
-  MMG_int        *adja,k,j,iel;
+  MMG5_int        *adja,k,j,iel;
   int        i,i1,i2;
 
   *nb_edges = 0;
@@ -557,7 +557,7 @@ int MMGS_Get_numberOfNonBdyEdges(MMG5_pMesh mesh, MMG_int* nb_edges) {
   return 1;
 }
 
-int MMGS_Get_nonBdyEdge(MMG5_pMesh mesh, MMG_int* e0, MMG_int* e1, int* ref, MMG_int idx) {
+int MMGS_Get_nonBdyEdge(MMG5_pMesh mesh, MMG5_int* e0, MMG5_int* e1, int* ref, MMG5_int idx) {
   MMG5_pEdge ped;
   size_t     na_tot=0;
   char       *ptr_c = (char*)mesh->edge;
@@ -599,7 +599,7 @@ int MMGS_Get_nonBdyEdge(MMG5_pMesh mesh, MMG_int* e0, MMG_int* e1, int* ref, MMG
   return 1;
 }
 
-int MMGS_Get_adjaTri(MMG5_pMesh mesh, MMG_int kel, MMG_int listri[3]) {
+int MMGS_Get_adjaTri(MMG5_pMesh mesh, MMG5_int kel, MMG5_int listri[3]) {
 
   if ( ! mesh->adja ) {
     if (! MMGS_hashTria(mesh))
@@ -613,10 +613,10 @@ int MMGS_Get_adjaTri(MMG5_pMesh mesh, MMG_int kel, MMG_int listri[3]) {
   return 1;
 }
 
-int MMGS_Get_adjaVerticesFast(MMG5_pMesh mesh, MMG_int ip,MMG_int start, MMG_int lispoi[MMGS_LMAX])
+int MMGS_Get_adjaVerticesFast(MMG5_pMesh mesh, MMG5_int ip,MMG5_int start, MMG5_int lispoi[MMGS_LMAX])
 {
   MMG5_pTria pt;
-  MMG_int k,prevk,nbpoi,*adja;
+  MMG5_int k,prevk,nbpoi,*adja;
   int i,i1,i2,iploc;
 
   pt   = &mesh->tria[start];
@@ -693,9 +693,9 @@ int MMGS_doSol(MMG5_pMesh mesh,MMG5_pSol met) {
     MMG5_pPoint  p1,p2;
     double       ux,uy,uz,dd;
     int          i,type;
-    MMG_int          ipa,ipb,k,iadr,*mark;
+    MMG5_int          ipa,ipb,k,iadr,*mark;
 
-    MMG5_SAFE_CALLOC(mark,mesh->np+1,MMG_int,return 0);
+    MMG5_SAFE_CALLOC(mark,mesh->np+1,MMG5_int,return 0);
 
     /* Memory alloc */
     if ( met->size==1 ) type=1;

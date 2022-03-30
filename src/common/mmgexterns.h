@@ -26,12 +26,12 @@
 
 extern int  (*MMG5_chkmsh)(MMG5_pMesh,int,int);
 extern int  (*MMG5_bezierCP)(MMG5_pMesh ,MMG5_Tria *,MMG5_pBezier ,int8_t );
-extern double (*MMG5_lenSurfEdg)(MMG5_pMesh mesh,MMG5_pSol sol ,MMG_int ,MMG_int, int8_t );
-extern MMG_int  (*MMG5_indElt)(MMG5_pMesh mesh,MMG_int kel);
-extern MMG_int  (*MMG5_indPt)(MMG5_pMesh mesh,MMG_int kp);
-extern int  (*MMG5_grad2met_ani)(MMG5_pMesh,MMG5_pSol,MMG5_pTria,MMG_int,MMG_int);
-extern int  (*MMG5_grad2metreq_ani)(MMG5_pMesh,MMG5_pSol,MMG5_pTria,MMG_int,MMG_int);
+extern double (*MMG5_lenSurfEdg)(MMG5_pMesh mesh,MMG5_pSol sol ,MMG5_int ,MMG5_int, int8_t );
+extern MMG5_int  (*MMG5_indElt)(MMG5_pMesh mesh,MMG5_int kel);
+extern MMG5_int  (*MMG5_indPt)(MMG5_pMesh mesh,MMG5_int kp);
+extern int  (*MMG5_grad2met_ani)(MMG5_pMesh,MMG5_pSol,MMG5_pTria,MMG5_int,MMG5_int);
+extern int  (*MMG5_grad2metreq_ani)(MMG5_pMesh,MMG5_pSol,MMG5_pTria,MMG5_int,MMG5_int);
 extern int    (*MMG5_compute_meanMetricAtMarkedPoints)( MMG5_pMesh,MMG5_pSol);
 #ifdef USE_SCOTCH
-extern int  (*MMG5_renumbering)(int,MMG5_pMesh,MMG5_pSol,MMG5_pSol,MMG_int*);
+extern int  (*MMG5_renumbering)(int,MMG5_pMesh,MMG5_pSol,MMG5_pSol,MMG5_int*);
 #endif

@@ -392,7 +392,7 @@ int MMG5_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solout) {
 
 void MMG5_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met,double hsiz) {
   MMG5_pPoint ppt;
-  MMG_int         k,iadr;
+  MMG5_int         k,iadr;
 
   if ( met->size == 1 ) {
     for (k=1; k<=mesh->np; k++) {

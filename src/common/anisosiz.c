@@ -121,7 +121,7 @@ double MMG5_surf(MMG5_pMesh mesh,double m[3][6],MMG5_pTria ptt) {
  */
 double MMG5_surftri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
   MMG5_pPoint    p[3];
-  MMG_int            np[3];
+  MMG5_int            np[3];
   double         ux,uy,uz,m[3][6],rbasis[3][3];
   int8_t         i1,i2;
   int            i;
@@ -171,7 +171,7 @@ double MMG5_surftri33_ani(MMG5_pMesh mesh,MMG5_pTria ptt,
   double         mm[6];
   double         *a,*b,*c,abx,aby,abz,acx,acy,acz,dens[3],surf;
   int            i;
-  MMG_int        ia,ib,ic;
+  MMG5_int        ia,ib,ic;
 
   ia = ptt->v[0];
   ib = ptt->v[1];
@@ -227,7 +227,7 @@ void MMG5_defUninitSize(MMG5_pMesh mesh,MMG5_pSol met,int8_t ismet )
 {
   MMG5_pPoint   ppt;
   double        *m,*n,r[3][3],isqhmax;
-  MMG_int           k;
+  MMG5_int           k;
 
   isqhmax = 1.0 / (mesh->info.hmax*mesh->info.hmax);
   for (k=1; k<=mesh->np; k++) {
@@ -534,7 +534,7 @@ int MMG5_solveDefmetregSys( MMG5_pMesh mesh, double r[3][3], double c[3],
  * point.
  *
  */
-int MMG5_solveDefmetrefSys( MMG5_pMesh mesh, MMG5_pPoint p0, MMG_int ipref[2],
+int MMG5_solveDefmetrefSys( MMG5_pMesh mesh, MMG5_pPoint p0, MMG5_int ipref[2],
                              double r[3][3], double c[3],
                              double tAA[6], double tAb[3], double *m,
                              double isqhmin, double isqhmax, double hausd)
@@ -721,8 +721,8 @@ int MMG5_solveDefmetrefSys( MMG5_pMesh mesh, MMG5_pPoint p0, MMG_int ipref[2],
  * ridge.
  *
  **/
-double MMG5_ridSizeInTangentDir(MMG5_pMesh mesh, MMG5_pPoint p0, MMG_int idp,
-                                 MMG_int* iprid, double isqhmin,double isqhmax)
+double MMG5_ridSizeInTangentDir(MMG5_pMesh mesh, MMG5_pPoint p0, MMG5_int idp,
+                                 MMG5_int* iprid, double isqhmin,double isqhmax)
 {
   int    i;
   double n0[3],tau[3],gammasec[3],c[3],ps,ll,l,m;
@@ -908,8 +908,8 @@ double MMG5_ridSizeInNormalDir(MMG5_pMesh mesh,int i0,double* bcu,
  * modifier la grande taille uniquement (car proche de l'arête) sauf que cette
  * modification n'a quasi pas d'influence sur le calcul de la longueur d'arête.
  */
-int MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, MMG_int np1,
-                      MMG_int np2)
+int MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, MMG5_int np1,
+                      MMG5_int np2)
 {
   MMG5_pPoint  p1,p2;
   double      *mm1,*mm2,*nn1,*nn2,ps1,ps2,ux,uy,uz,m1[6],m2[6],n1[3],n2[3],nt[3];
@@ -1446,8 +1446,8 @@ int MMG5_updatemetreq_ani(double *n,double dn[2],double vp[2][2]) {
  * an "isotropic way".
  *
  */
-int MMG5_grad2metSurfreq(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, MMG_int npmaster,
-                         MMG_int npslave)
+int MMG5_grad2metSurfreq(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, MMG5_int npmaster,
+                         MMG5_int npslave)
 {
 
   MMG5_pPoint  p1,p2;
@@ -1686,7 +1686,7 @@ int MMG5_grad2metSurfreq(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, MMG_int 
 int MMG5_compute_meanMetricAtMarkedPoints_ani ( MMG5_pMesh mesh,MMG5_pSol met ) {
   MMG5_pPoint p0;
   double      lm;
-  MMG_int         k,iadr;
+  MMG5_int         k,iadr;
   int         mmgWarn = 0;
 
   for ( k=1; k<=mesh->np; k++ ) {
@@ -1741,7 +1741,7 @@ int MMG5_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met,int *it) {
   MMG5_pTria   pt;
   MMG5_pPoint  p1,p2;
   int          nup,nu,maxit,ier;
-  MMG_int      k,np1,np2;
+  MMG5_int      k,np1,np2;
   int8_t       i;
 
   /** Mark the edges belonging to a required entity */
@@ -1805,7 +1805,7 @@ int MMG5_gradsizreq_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria        pt;
   MMG5_pPoint       p1,p2;
   int               it,maxit,nup,nu,ier;
-  MMG_int           k,np1,np2,npslave,npmaster;
+  MMG5_int           k,np1,np2,npslave,npmaster;
   int8_t            i;
 
 

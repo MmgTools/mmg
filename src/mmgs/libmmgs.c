@@ -62,7 +62,7 @@
 /** Free adja, xtetra and xpoint tables */
 static inline
 void MMGS_Free_topoTables(MMG5_pMesh mesh) {
-  MMG_int k;
+  MMG5_int k;
 
   mesh->xp = 0;
   if ( mesh->adja )
@@ -92,8 +92,8 @@ int MMGS_packMesh(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
   MMG5_pTria    pt,ptnew;
   MMG5_pPoint   ppt,pptnew;
   int           imet,imetnew,i,na;
-  MMG_int           iadr,iadrnew,iadrv,*adjav,*adja,*adjanew,voy;
-  MMG_int       k,nt,np,jel,nc,nr,nbl;
+  MMG5_int           iadr,iadrnew,iadrv,*adjav,*adja,*adjanew,voy;
+  MMG5_int       k,nt,np,jel,nc,nr,nbl;
   int8_t        i1,i2;
 
   /* Remove non wanted subdomains if needed */

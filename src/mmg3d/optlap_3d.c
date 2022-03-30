@@ -46,9 +46,9 @@ int MMG3D_optlap(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pPoint    ppt,pptb,ppta;
 
   int       it,lon,l;
-  MMG_int   k,i,list[MMG3D_LMAX+2],iel,ipt,ipta,iptb;
+  MMG5_int   k,i,list[MMG3D_LMAX+2],iel,ipt,ipta,iptb;
   int       maxiter;
-  MMG_int   ipt0,ipt1,ipt2,ipt3,*compt;
+  MMG5_int   ipt0,ipt1,ipt2,ipt3,*compt;
   double    vol,ax,ay,az,bx,by,bz;
   double    *nv,*pos,res,dd,ox,oy,oz,declic;
   double LLAMBDA  = 0.33;
@@ -63,7 +63,7 @@ int MMG3D_optlap(MMG5_pMesh mesh,MMG5_pSol sol) {
                 return 0);
   MMG5_SAFE_CALLOC(nv, 3*mesh->np+1, double,return 0);
   MMG5_SAFE_CALLOC(pos, 3*mesh->np+1, double,return 0);
-  MMG5_SAFE_CALLOC(compt, mesh->np+1, MMG_int,return 0);
+  MMG5_SAFE_CALLOC(compt, mesh->np+1, MMG5_int,return 0);
 
   it  = 1;
   declic = 3./MMG3D_ALPHAD;

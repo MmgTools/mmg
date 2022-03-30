@@ -114,7 +114,7 @@ inline int MMG5_moymet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,double *m1) 
  * size.
  *
  */
-static int MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,MMG_int kel, int iface, int ip) {
+static int MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int kel, int iface, int ip) {
   MMG5_pTetra        pt;
   MMG5_pxTetra       pxt;
   MMG5_pPoint        p0;
@@ -122,9 +122,9 @@ static int MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,MMG_int kel, int iface, 
   double             *m,n[3],isqhmin,isqhmax,b0[3],b1[3],ps1,tau[3];
   double             ntau2,gammasec[3];
   double             c[3],kappa,maxkappa,alpha, hausd,hausd_v;
-  MMG_int                lists[MMG3D_LMAX+2],listv[MMG3D_LMAX+2];
+  MMG5_int                lists[MMG3D_LMAX+2],listv[MMG3D_LMAX+2];
   int                k,ilist,ifac,isloc,init_s,ilists,ilistv;
-  MMG_int            idp,iel;
+  MMG5_int            idp,iel;
   uint8_t            i,i0,i1,i2;
   static int8_t      mmgWarn = 0;
 
@@ -313,8 +313,8 @@ static int MMG5_defmetsin(MMG5_pMesh mesh,MMG5_pSol met,MMG_int kel, int iface, 
  * and at each time, metric tensor has to be recomputed, depending on the side.
  *
  */
-static int MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,MMG_int kel,
-                           int iface, MMG_int ip)
+static int MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int kel,
+                           int iface, MMG5_int ip)
 {
   MMG5_pTetra    pt;
   MMG5_pxTetra   pxt;
@@ -322,9 +322,9 @@ static int MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,MMG_int kel,
   MMG5_pPoint    p0,p1,p2;
   MMG5_pPar      par;
   MMG5_Bezier   b;
-  MMG_int            iel,idp,*list;
+  MMG5_int            iel,idp,*list;
   int            k,ilist1,ilist2,ilist;
-  MMG_int            list1[MMG3D_LMAX+2],list2[MMG3D_LMAX+2],iprid[2],ier;
+  MMG5_int            list1[MMG3D_LMAX+2],list2[MMG3D_LMAX+2],iprid[2],ier;
   double         *m,isqhmin,isqhmax,*n1,*n2,*n,*t;
   double         trot[2],u[2],ux,uy,uz,det,bcu[3];
   double         r[3][3],lispoi[3*MMG3D_LMAX+1];
@@ -528,7 +528,7 @@ static int MMG5_defmetrid(MMG5_pMesh mesh,MMG5_pSol met,MMG_int kel,
  * geometric approx of the surface.
  *
  */
-static int MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,MMG_int kel, int iface, int ip) {
+static int MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int kel, int iface, int ip) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
   MMG5_Tria     ptt;
@@ -536,9 +536,9 @@ static int MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,MMG_int kel, int iface, 
   MMG5_pxPoint  px0;
   MMG5_Bezier   b;
   MMG5_pPar     par;
-  MMG_int           lists[MMG3D_LMAX+2],listv[MMG3D_LMAX+2];
+  MMG5_int           lists[MMG3D_LMAX+2],listv[MMG3D_LMAX+2];
   int           k,ilists,ilistv,ilist;
-  MMG_int           iel,ipref[2],idp;
+  MMG5_int           iel,ipref[2],idp;
   int           ifac,isloc;
   double        *m,isqhmin,isqhmax,*n,r[3][3],lispoi[3*MMG3D_LMAX+1];
   double        ux,uy,uz,det2d,c[3];
@@ -796,7 +796,7 @@ static int MMG5_defmetref(MMG5_pMesh mesh,MMG5_pSol met,MMG_int kel, int iface, 
  * the geometric approx of the surface.
  *
  */
-static int MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,MMG_int kel,int iface, int ip) {
+static int MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int kel,int iface, int ip) {
   MMG5_pTetra    pt;
   MMG5_pxTetra   pxt;
   MMG5_Tria      ptt;
@@ -804,10 +804,10 @@ static int MMG5_defmetreg(MMG5_pMesh mesh,MMG5_pSol met,MMG_int kel,int iface, i
   MMG5_pxPoint   px0;
   MMG5_Bezier   b;
   MMG5_pPar      par;
-  MMG_int            lists[MMG3D_LMAX+2],listv[MMG3D_LMAX+2];
+  MMG5_int            lists[MMG3D_LMAX+2],listv[MMG3D_LMAX+2];
   int            k,ilist,ilists,ilistv;
   int            ifac,isloc;
-  MMG_int        iel,idp;
+  MMG5_int        iel,idp;
   double         *n,*m,r[3][3],ux,uy,uz,lispoi[3*MMG3D_LMAX+1];
   double         det2d,c[3],isqhmin,isqhmax;
   double         tAA[6],tAb[3],hausd;
@@ -1027,7 +1027,7 @@ int MMG5_defmetvol(MMG5_pMesh mesh,MMG5_pSol met,int8_t ismet) {
   MMG5_pPoint   ppt;
   MMG5_pPar     par;
   double        v[3][3],lambda[3],isqhmax,isqhmin,*m;
-  MMG_int           list[MMG3D_LMAX+2],k,ip;
+  MMG5_int           list[MMG3D_LMAX+2],k,ip;
   int           l,i,j,isloc,ilist;
   static int8_t mmgWarn = 0;
 
@@ -1221,7 +1221,7 @@ int MMG5_defmetvol(MMG5_pMesh mesh,MMG5_pSol met,int8_t ismet) {
  *
  */
 static inline
-int MMG3D_intextmet(MMG5_pMesh mesh,MMG5_pSol met,MMG_int np,double me[6]) {
+int MMG3D_intextmet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int np,double me[6]) {
   MMG5_pPoint         p0;
   MMG5_pxPoint        go;
   double              *n;
@@ -1263,7 +1263,7 @@ int MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pxTetra  pxt;
   MMG5_pPoint   ppt;
   double        mm[6];
-  MMG_int           k,l;
+  MMG5_int           k,l;
   int           iploc;
   int8_t        ismet;
   int8_t        i;
@@ -1382,7 +1382,7 @@ int MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
  *
  */
 static inline
-int MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,MMG_int np1,MMG_int np2) {
+int MMG5_grad2metVol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,MMG5_int np1,MMG5_int np2) {
   MMG5_pPoint    p1,p2;
   double         *mm1,*mm2,m1[6],m2[6],ps1,ps2,ux,uy,uz;
   double         c[5],l,val,t[3],rbasis1[3][3],rbasis2[3][3];
@@ -1747,8 +1747,8 @@ int MMG3D_updatemetreq_ani(double *n,double dn[3],double vp[3][3]) {
  *
  */
 static inline
-int MMG5_grad2metVolreq(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,MMG_int npmaster,
-                        MMG_int npslave) {
+int MMG5_grad2metVolreq(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt,MMG5_int npmaster,
+                        MMG5_int npslave) {
   MMG5_pPoint    p1,p2;
   double         *mm1,*mm2,m1[6],m2[6],ux,uy,uz;
   double         l,difsiz,rbasis1[3][3],rbasis2[3][3];
@@ -1899,7 +1899,7 @@ int MMG3D_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   double        *m,mv;
   int           it,itv,nup,nu,nupv,maxit;
   int           i,j,ier;
-  MMG_int       k,np0,np1;
+  MMG5_int       k,np0,np1;
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
     fprintf(stdout,"  ** Anisotropic mesh gradation\n");
@@ -2038,7 +2038,7 @@ int MMG3D_gradsizreq_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pPoint   p0,p1;
   int           it,itv,nup,nu,nupv,maxit;
   int           i,j,npmaster,npslave,ier;
-  MMG_int       k,np0,np1;
+  MMG5_int       k,np0,np1;
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {
     fprintf(stdout,"  ** Grading required points.\n");

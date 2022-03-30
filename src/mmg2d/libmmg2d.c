@@ -56,7 +56,7 @@
 void MMG2D_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
   MMG5_pTria  ptt;
   MMG5_pPoint ppt;
-  MMG_int         k,iadr;
+  MMG5_int         k,iadr;
   int         i;
   double      isqhmin, isqhmax;
   int8_t      sethmin, sethmax;
@@ -380,7 +380,7 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol met)
  */
 static inline
 int MMG2D_restart(MMG5_pMesh mesh){
-  MMG_int k;
+  MMG5_int k;
 
   /** If needed, reallocate the missing structures */
   if ( !mesh->tria ) {
@@ -529,10 +529,10 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( mesh->info.ddebug && !MMG5_chkmsh(mesh,1,0) )  _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
 
   /* Memory alloc */
-  MMG5_ADD_MEM(mesh,(3*mesh->ntmax+5)*sizeof(MMG_int),"adjacency table",
+  MMG5_ADD_MEM(mesh,(3*mesh->ntmax+5)*sizeof(MMG5_int),"adjacency table",
                 printf("  Exit program.\n");
                 return MMG5_STRONGFAILURE);
-  MMG5_SAFE_CALLOC(mesh->adja,3*mesh->ntmax+5,MMG_int,return MMG5_STRONGFAILURE);
+  MMG5_SAFE_CALLOC(mesh->adja,3*mesh->ntmax+5,MMG5_int,return MMG5_STRONGFAILURE);
 
   /* Delaunay triangulation of the set of points contained in the mesh,
    * enforcing the edges of the mesh */
@@ -929,7 +929,7 @@ int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   mytime    ctim[TIMEMAX];
   char      stim[32];
   int       ier;
-  MMG_int       k,*invalidTris;
+  MMG5_int       k,*invalidTris;
 
 
   if ( mesh->info.imprim >= 0 ) {

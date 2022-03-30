@@ -72,7 +72,7 @@ int MMG5_devangle(double* n1, double *n2, double crit)
  *
  */
 inline int MMG5_nonUnitNorPts(MMG5_pMesh mesh,
-                                MMG_int ip1,MMG_int ip2, MMG_int ip3,double *n) {
+                                MMG5_int ip1,MMG5_int ip2, MMG5_int ip3,double *n) {
   MMG5_pPoint   p1,p2,p3;
   double        abx,aby,abz,acx,acy,acz;
 
@@ -106,7 +106,7 @@ inline int MMG5_nonUnitNorPts(MMG5_pMesh mesh,
  */
 inline double MMG5_nonorsurf(MMG5_pMesh mesh,MMG5_pTria pt) {
   double   n[3];
-  MMG_int      ip1, ip2, ip3;
+  MMG5_int      ip1, ip2, ip3;
 
   ip1 = pt->v[0];
   ip2 = pt->v[1];
@@ -127,7 +127,7 @@ inline double MMG5_nonorsurf(MMG5_pMesh mesh,MMG5_pTria pt) {
  * Compute normalized face normal given three points on the surface.
  *
  */
-inline int MMG5_norpts(MMG5_pMesh mesh,MMG_int ip1,MMG_int ip2, MMG_int ip3,double *n) {
+inline int MMG5_norpts(MMG5_pMesh mesh,MMG5_int ip1,MMG5_int ip2, MMG5_int ip3,double *n) {
   double   dd,det;
 
   MMG5_nonUnitNorPts(mesh,ip1,ip2,ip3,n);
@@ -519,7 +519,7 @@ inline int MMG5_sys33sym(double a[6], double b[3], double r[3]){
  */
 void MMG5_printTria(MMG5_pMesh mesh,char* fileName) {
   MMG5_pTria ptt;
-  MMG_int   k;
+  MMG5_int   k;
   FILE  *inm;
 
   inm = fopen(fileName,"w");
@@ -835,7 +835,7 @@ inline double MMG5_det4pt(double c0[3],double c1[3],double c2[3],double c3[3]) {
  * Compute oriented volume of a tetrahedron (x6)
  *
  */
-inline double MMG5_orvol(MMG5_pPoint point,MMG_int *v) {
+inline double MMG5_orvol(MMG5_pPoint point,MMG5_int *v) {
     MMG5_pPoint  p0,p1,p2,p3;
 
     p0 = &point[v[0]];
@@ -880,7 +880,7 @@ double MMG2D_quickarea(double a[2],double b[2],double c[2]) {
  */
 void MMG5_mark_verticesAsUnused ( MMG5_pMesh mesh ) {
   MMG5_pPoint ppt;
-  MMG_int         k;
+  MMG5_int         k;
 
   for ( k=1; k<=mesh->np; k++ ) {
     ppt = &mesh->point[k];
@@ -902,12 +902,12 @@ void MMG5_mark_verticesAsUnused ( MMG5_pMesh mesh ) {
  * Mmgs or Mmg2d).
  *
  */
-void MMG5_mark_usedVertices ( MMG5_pMesh mesh,void (*delPt)(MMG5_pMesh,MMG_int)  ) {
+void MMG5_mark_usedVertices ( MMG5_pMesh mesh,void (*delPt)(MMG5_pMesh,MMG5_int)  ) {
   MMG5_pTria  pt;
   MMG5_pQuad  pq;
   MMG5_pPoint ppt;
   int         i;
-  MMG_int     k;
+  MMG5_int     k;
 
   /* Preserve isolated required points */
   for ( k=1; k<=mesh->np; k++ ) {
@@ -957,10 +957,10 @@ void MMG5_mark_usedVertices ( MMG5_pMesh mesh,void (*delPt)(MMG5_pMesh,MMG_int) 
  *
  */
 void MMG5_keep_subdomainElts ( MMG5_pMesh mesh, int nsd,
-                               int (*delElt)(MMG5_pMesh,MMG_int) ) {
+                               int (*delElt)(MMG5_pMesh,MMG5_int) ) {
   MMG5_pTria  pt;
   int         i,iv;
-  MMG_int     k,*adja,iadr,iadrv;
+  MMG5_int     k,*adja,iadr,iadrv;
   int         nfac = 3; // number of faces per elt
 
   for ( k=1 ; k <= mesh->nt ; k++) {

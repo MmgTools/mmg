@@ -52,7 +52,7 @@
  * \remark we don't check if we break the hausdorff criterion.
  *
  */
-int MMG5_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree, MMG_int *list,int ilist,
+int MMG5_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree, MMG5_int *list,int ilist,
                        int improve) {
 
 
@@ -60,7 +60,7 @@ int MMG5_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree, M
   MMG5_pPoint          p0,p1,p2,p3,ppt0;
   double               vol,totvol,m[6];
   double               calold,calnew,*callist,det;
-  MMG_int                  iel;
+  MMG5_int                  iel;
   int                  k,i0;
 
   assert ( ilist > 0 );
@@ -193,8 +193,8 @@ int MMG5_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree, M
  * Move boundary regular point, whose volumic and surfacic balls are passed.
  *
  */
-int MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctree, MMG_int *listv,
-                          int ilistv,MMG_int *lists,int ilists,
+int MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctree, MMG5_int *listv,
+                          int ilistv,MMG5_int *lists,int ilists,
                           int improveSurf, int improveVol) {
   MMG5_pTetra       pt,pt0;
   MMG5_pxTetra      pxt;
@@ -206,7 +206,7 @@ int MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
   double            detloc,gv[2],step,lambda[3];
   double            uv[2],o[3],no[3],to[3],*m0,ncur[3],nprev[3],nneighi[3];
   double            calold,calnew,caltmp,*callist;
-  MMG_int               k,kel,iel,n0,na,nb,ntempa,ntempb,ntempc,nxp;
+  MMG5_int               k,kel,iel,n0,na,nb,ntempa,ntempb,ntempc,nxp;
   int               ier,l;
   uint8_t           i0,iface,i;
   static int        warn = 0;
@@ -677,8 +677,8 @@ int MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
  * Move boundary reference point, whose volumic and surfacic balls are passed.
  *
  */
-int MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctree, MMG_int *listv,
-                          int ilistv, MMG_int *lists, int ilists,
+int MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctree, MMG5_int *listv,
+                          int ilistv, MMG5_int *lists, int ilists,
                           int improve){
   MMG5_pTetra           pt,pt0;
   MMG5_pPoint           p0,ppt0;
@@ -687,7 +687,7 @@ int MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
   double                step,ll1old,ll2old,l1new,l2new;
   double                o[3],no[3],to[3], ncur[3],nprev[3],nneighi[3];
   double                calold,calnew,caltmp,*callist;
-  MMG_int                   l,iel,ip0,ipa,ipb,iptmpa,iptmpb,ip1,ip2,ip,nxp;
+  MMG5_int                   l,iel,ip0,ipa,ipb,iptmpa,iptmpb,ip1,ip2,ip,nxp;
   int16_t               tag,ier;
   uint8_t               i,i0,ie,iface,iea,ieb;
 
@@ -1027,8 +1027,8 @@ int MMG5_movbdyrefpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
  * \remark we don't check if we break the hausdorff criterion.
  *
  */
-int MMG5_movbdynompt_ani(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree, MMG_int *listv,
-                          int ilistv, MMG_int *lists, int ilists,
+int MMG5_movbdynompt_ani(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree, MMG5_int *listv,
+                          int ilistv, MMG5_int *lists, int ilists,
                           int improve){
   MMG5_pTetra       pt,pt0;
   MMG5_pPoint       p0,ppt0;
@@ -1037,7 +1037,7 @@ int MMG5_movbdynompt_ani(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree
   double            step,ll1old,ll2old,l1new,l2new;
   double            calold,calnew,caltmp,*callist;
   double            o[3],no[3],to[3],nprev[3],ncur[3],nneighi[3];
-  MMG_int               ip0,ip1,ip2,ip,iel,ipa,ipb,l,iptmpa,iptmpb,nxp;
+  MMG5_int               ip0,ip1,ip2,ip,iel,ipa,ipb,l,iptmpa,iptmpb,nxp;
   int16_t           tag,ier;
   int8_t            iface,i,i0,iea,ieb,ie;
 
@@ -1374,8 +1374,8 @@ int MMG5_movbdynompt_ani(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree
  * Move boundary ridge point, whose volumic and surfacic balls are passed.
  *
  */
-int MMG5_movbdyridpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctree, MMG_int *listv,
-                          int ilistv,MMG_int *lists,int ilists,
+int MMG5_movbdyridpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctree, MMG5_int *listv,
+                          int ilistv,MMG5_int *lists,int ilists,
                           int improve) {
   MMG5_pTetra          pt,pt0;
   MMG5_pPoint          p0,ppt0;
@@ -1384,7 +1384,7 @@ int MMG5_movbdyridpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
   double               step,l1old,l2old,l1new,l2new;
   double               o[3],no1[3],no2[3],to[3],nprev[3],ncur[3],nneighi[3];
   double               calold,calnew,caltmp,*callist;
-  MMG_int                  l,iel,ip0,ipa,ipb,iptmpa,iptmpb,ip1,ip2,ip,nxp;
+  MMG5_int                  l,iel,ip0,ipa,ipb,iptmpa,iptmpb,ip1,ip2,ip,nxp;
   int16_t              tag,ier;
   uint8_t              i,i0,ie,iface,iea,ieb;
 

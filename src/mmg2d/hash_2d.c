@@ -34,8 +34,8 @@
  */
 int MMG2D_hashTria(MMG5_pMesh mesh) {
   MMG5_pTria     pt,pt1;
-  MMG_int            k,kk,pp,l,ll,mins,mins1,maxs,maxs1;
-  MMG_int            *hcode,*link,inival,hsize,iadr;
+  MMG5_int            k,kk,pp,l,ll,mins,mins1,maxs,maxs1;
+  MMG5_int            *hcode,*link,inival,hsize,iadr;
   uint8_t        i,ii,i1,i2;
   unsigned int   key;
 
@@ -43,13 +43,13 @@ int MMG2D_hashTria(MMG5_pMesh mesh) {
   if ( !mesh->nt )  return 0;
 
   /* memory alloc */
-  MMG5_SAFE_CALLOC(hcode,mesh->nt+1,MMG_int,return 0);
+  MMG5_SAFE_CALLOC(hcode,mesh->nt+1,MMG5_int,return 0);
 
   /* memory alloc */
-  MMG5_ADD_MEM(mesh,(3*mesh->ntmax+5)*sizeof(MMG_int),"adjacency table",
+  MMG5_ADD_MEM(mesh,(3*mesh->ntmax+5)*sizeof(MMG5_int),"adjacency table",
                 printf("  Exit program.\n");
                 return 0;);
-  MMG5_SAFE_CALLOC(mesh->adja,3*mesh->ntmax+5,MMG_int,return 0);
+  MMG5_SAFE_CALLOC(mesh->adja,3*mesh->ntmax+5,MMG5_int,return 0);
 
   link  = mesh->adja;
   hsize = mesh->nt;
@@ -152,8 +152,8 @@ int MMG2D_hashQuad(MMG5_pMesh mesh) {
   MMG5_pQuad     pq,pq1;
   MMG5_pTria     pt;
   MMG5_Hash      hash;
-  MMG_int            k,kk,pp,l,ll,mins,mins1,maxs,maxs1,iadr;
-  MMG_int           *hcode,*link,hsize,inival;
+  MMG5_int            k,kk,pp,l,ll,mins,mins1,maxs,maxs1,iadr;
+  MMG5_int           *hcode,*link,hsize,inival;
   uint8_t        i,ii,i1,i2;
   unsigned int   key;
 
@@ -175,11 +175,11 @@ int MMG2D_hashQuad(MMG5_pMesh mesh) {
     fprintf(stdout,"  ** SETTING QUAD ADJACENCY\n");
 
   /* memory alloc */
-  MMG5_ADD_MEM(mesh,(4*mesh->nquad+5)*sizeof(MMG_int),"quad adjacency table",
+  MMG5_ADD_MEM(mesh,(4*mesh->nquad+5)*sizeof(MMG5_int),"quad adjacency table",
                fprintf(stderr,"  Exit program.\n");
                return 0);
-  MMG5_SAFE_CALLOC(mesh->adjq,4*mesh->nquad+5,MMG_int,return 0);
-  MMG5_SAFE_CALLOC(hcode,mesh->nquad+5,MMG_int,return 0);
+  MMG5_SAFE_CALLOC(mesh->adjq,4*mesh->nquad+5,MMG5_int,return 0);
+  MMG5_SAFE_CALLOC(hcode,mesh->nquad+5,MMG5_int,return 0);
 
   link  = mesh->adjq;
   hsize = mesh->nquad;
@@ -336,7 +336,7 @@ int MMG2D_assignEdge(MMG5_pMesh mesh) {
   MMG5_pQuad      pq;
   MMG5_pEdge      pa;
   int             ia;
-  MMG_int         k;
+  MMG5_int         k;
   int8_t          ier;
   uint8_t         i,i1,i2;
 
@@ -435,7 +435,7 @@ int MMG2D_bdryEdge(MMG5_pMesh mesh) {
   MMG5_pTria      pt,pt1;
   MMG5_pEdge      pa;
   MMG5_pPoint     p0;
-  MMG_int             k,*adja,natmp,iel;
+  MMG5_int             k,*adja,natmp,iel;
   int8_t          i,i1,i2;
 
   natmp = 0;
@@ -517,8 +517,8 @@ int MMG2D_pack(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
   MMG5_pQuad         pq,pq1;
   MMG5_pEdge         ped;
   MMG5_pPoint        ppt,pptnew;
-  MMG_int                np,ned,nt,k,iel,nbl,isol,isolnew,memWarn,nc;
-  MMG_int                iadr,iadrnew,iadrv,*adjav,*adja,*adjanew,voy;
+  MMG5_int                np,ned,nt,k,iel,nbl,isol,isolnew,memWarn,nc;
+  MMG5_int                iadr,iadrnew,iadrv,*adjav,*adja,*adjanew,voy;
   int8_t             i,i1,i2;
 
   /* Keep only one domain if asked */

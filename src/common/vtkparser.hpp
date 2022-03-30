@@ -177,7 +177,7 @@ int MMG5_saveVtkMesh_i(MMG5_pMesh mesh,MMG5_pSol *sol,
   vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
 
   int np = 0;
-  for ( MMG_int k=1; k<=mesh->np; ++k ) {
+  for ( MMG5_int k=1; k<=mesh->np; ++k ) {
     MMG5_pPoint ppt = &mesh->point[k];
     if ( !MG_VOK(ppt) ) continue;
 

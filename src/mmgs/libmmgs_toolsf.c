@@ -57,7 +57,7 @@ FORTRAN_NAME(MMGS_SETFUNC,mmgs_setfunc,
  * See \ref MMGS_Get_numberOfNonBdyEdges function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_NAME(MMGS_GET_NUMBEROFNONBDYEDGES,mmgs_get_numberofnonbdyedges,
-             (MMG5_pMesh *mesh,MMG_int* nb_edges, int* retval),
+             (MMG5_pMesh *mesh,MMG5_int* nb_edges, int* retval),
              (mesh,nb_edges,retval)) {
   *retval =  MMGS_Get_numberOfNonBdyEdges(*mesh,nb_edges);
   return;
@@ -67,7 +67,7 @@ FORTRAN_NAME(MMGS_GET_NUMBEROFNONBDYEDGES,mmgs_get_numberofnonbdyedges,
  * See \ref MMGS_Get_nonBdyEdge function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_NAME(MMGS_GET_NONBDYEDGE,mmgs_get_nonbdyedge,
-             (MMG5_pMesh *mesh,MMG_int* e0, MMG_int* e1,int *ref,MMG_int* idx,int* retval),
+             (MMG5_pMesh *mesh,MMG5_int* e0, MMG5_int* e1,int *ref,MMG5_int* idx,int* retval),
              (mesh,e0,e1,ref,idx,retval)) {
   *retval =  MMGS_Get_nonBdyEdge(*mesh,e0,e1,ref,*idx);
   return;
@@ -124,7 +124,7 @@ FORTRAN_NAME(MMGS_DESTOCKOPTIONS,mmgs_destockoptions,
  * See \ref MMGS_Get_adjaTri function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_NAME(MMGS_GET_ADJATRI,mmgs_get_adjatri,
-               (MMG5_pMesh *mesh,MMG_int* kel, MMG_int* listri, int* retval),
+               (MMG5_pMesh *mesh,MMG5_int* kel, MMG5_int* listri, int* retval),
                (mesh,kel,listri,retval)) {
   *retval =  MMGS_Get_adjaTri(*mesh,*kel,listri);
   return;
@@ -134,7 +134,7 @@ FORTRAN_NAME(MMGS_GET_ADJATRI,mmgs_get_adjatri,
  * See \ref MMGS_Get_adjaVerticesFast function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_NAME(MMGS_GET_ADJAVERTICESFAST,mmgs_get_adjaverticesfast,
-               (MMG5_pMesh *mesh,MMG_int* ip, MMG_int *start, MMG_int* lispoi, int* retval),
+               (MMG5_pMesh *mesh,MMG5_int* ip, MMG5_int *start, MMG5_int* lispoi, int* retval),
                (mesh,ip,start,lispoi,retval)) {
   *retval =  MMGS_Get_adjaVerticesFast(*mesh,*ip, *start,lispoi);
   return;
