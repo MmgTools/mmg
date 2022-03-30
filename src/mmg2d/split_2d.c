@@ -74,9 +74,6 @@ MMG_int MMG2D_chkspl(MMG5_pMesh mesh,MMG5_pSol met,MMG_int k,int8_t i) {
   j1   = MMG5_inxt2[j];
   j2   = MMG5_iprv2[j];
 
-  if (mesh->nt==516 && k==454){ // (k==454 || k== 465)) {
-	printf("jel= %ld\n", jel);
-}
   /* Midpoint of edge i */
   mid[0] = 0.5*(p1->c[0]+p2->c[0]);
   mid[1] = 0.5*(p1->c[1]+p2->c[1]);

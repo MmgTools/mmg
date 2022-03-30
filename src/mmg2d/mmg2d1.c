@@ -647,7 +647,6 @@ MMG_int MMG2D_adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
 
   /*loop until nt to avoid the split of new triangle*/
   nt = mesh->nt;
-  printf("number of triangles=%ld\n", nt);
   for (k=1; k<=nt; k++) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) || pt->ref < 0 ) continue;
@@ -669,14 +668,10 @@ MMG_int MMG2D_adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
 
     if ( lmax < MMG2D_LOPTL ) continue;
     else if ( MG_SIN(pt->tag[imax]) ) continue;
-    if (nt == 514 && k==453) {
-	MMG_int *adja;
-	adja = &mesh->adja[3*(k-1)+1];
-	printf("before chkspl, adja[1]=%ld\n",adja[1]);
-	}
+
     /* Check the feasibility of splitting */
     ip = MMG2D_chkspl(mesh,met,k,imax);
-	printf("ip=%ld, k=%ld\n",ip,k);
+
     /* Lack of memory; abort the routine */
     if ( ip < 0 ){
       return ns;
@@ -693,7 +688,6 @@ MMG_int MMG2D_adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
     }
   }
 
-  printf("number of split=%ld\n", ns);
   return ns;
 }
 
