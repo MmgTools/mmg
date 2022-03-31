@@ -113,6 +113,11 @@ int main(int argc,char *argv[]) {
       fprintf(stderr,"  ** UNABLE TO OPEN INPUT FILE.\n");
       return EXIT_FAILURE;
     }
+    else {
+      assert ( ier == -1 );
+      fprintf(stderr,"  ** UNABLE TO READ INPUT FILE.\n");
+      return EXIT_FAILURE;
+    }
   }
 
   /** 3) Get the mesh from Mmg data structure into local data structure */
