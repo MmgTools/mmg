@@ -2126,10 +2126,6 @@ int MMG3D_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
       np0 = pt->v[MMG5_iare[i][0]];
       np1 = pt->v[MMG5_iare[i][1]];
 
-      /* Skip edges with a required vertex */
-      if ( mesh->point[np0].s || mesh->point[np1].s ) {
-        continue;
-      }
       ier = MMG5_hashEdge(mesh,&edgeTable,np0,np1,k);
       if ( !ier ) {
         if ( !mmgWarn ) {
