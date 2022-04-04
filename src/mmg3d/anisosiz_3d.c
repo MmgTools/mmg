@@ -2081,12 +2081,10 @@ int MMG3D_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_Hash     edgeTable;
   MMG5_hedge    *pht;
   MMG5_pTetra   pt;
-  MMG5_pxTetra  pxt;
-  MMG5_Tria     ptt;
   MMG5_pPoint   p0,p1;
   double        *m,mv;
   int           k,itv,nu,nupv,maxit;
-  int           i,j,np0,np1,ier;
+  int           i,np0,np1,ier;
   static int    mmgWarn = 0;
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
