@@ -1520,7 +1520,8 @@ void MMG5_grad2metVol_extmet(MMG5_pMesh mesh,MMG5_pPoint ppt,double l,double *m,
 
   MMG5_eigenv3d(1,m,lambda,vp);
   for( int8_t i = 0; i < 3; i++ ) {
-    lambda[i] = 1./pow( 1./sqrt(lambda[i]) + mesh->info.hgrad*l + MMG5_EPSOK, 2.0);
+    double hext = 1./sqrt(lambda[i]) + mesh->info.hgrad*l + MMG5_EPSOK;
+    lambda[i] = 1./(hext*hext);
   }
   MMG5_eigenvmatsym3d(mesh,mext,lambda,vp);
 
