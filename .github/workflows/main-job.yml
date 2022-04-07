@@ -199,10 +199,10 @@ jobs:
         if: matrix.vtk == 'off'
         run: |
           cd build
-          ctest --timeout 3600 -VV -C ${{ inputs.cmake_build_type }} -j ${{ env.NJOBS }}
+          ctest --timeout 7200 -VV -C ${{ inputs.cmake_build_type }} -j ${{ env.NJOBS }}
 
       - name: Test non native I/Os of Mmg
         if: matrix.vtk == 'on'
         run: |
           cd build
-          ctest --timeout 3600 -R "msh|vtk" -VV -C ${{ inputs.cmake_build_type }} -j ${{ env.NJOBS }}
+          ctest -R "msh|vtk" -VV -C ${{ inputs.cmake_build_type }} -j ${{ env.NJOBS }}
