@@ -122,12 +122,12 @@ double MMG2D_lencurv_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int ip1,MMG5_int ip2
 
 /* print histo of edge lengths */
 int MMG2D_prilen(MMG5_pMesh mesh,MMG5_pSol sol) {
-  MMG5_pTria       pt;
-  double      lavg,len,ecart,som,lmin,lmax;
-  int         navg,ia,ipa,ipb,nullEdge,hl[9];
-  MMG5_int     iamin,ibmin,iamax,ibmax;
+  MMG5_pTria    pt;
+  double        lavg,len,ecart,som,lmin,lmax;
+  int           navg,ia,ipa,ipb,nullEdge,hl[9];
+  MMG5_int      iamin,ibmin,iamax,ibmax;
   static double bd[9] = {0.0, 0.3, 0.6, 0.7071, 0.9, 1.3, 1.4142, 2.0, 5.0};
-  MMG5_int     k,l;
+  MMG5_int      k,l;
 
   navg  = 0;
   lavg  = 0.0;

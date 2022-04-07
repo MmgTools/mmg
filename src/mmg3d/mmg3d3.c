@@ -44,7 +44,7 @@ extern int8_t  ddb;
 double MMG5_estavglen(MMG5_pMesh mesh) {
   MMG5_pTetra pt;
   MMG5_pPoint p1,p2;
-  MMG5_int         k,na;
+  MMG5_int    k,na;
   double      len,lent,dna;
   int8_t      i,i1,i2;
 
@@ -106,7 +106,7 @@ static MMG5_int MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itd
   double         len,lmax,o[3],hma2;
   double         *m1,*m2,*mp;
   int            ilist,ier,src;
-  MMG5_int        ns,k,ip,ip1,ip2,list[MMG3D_LMAX+2],iadr;
+  MMG5_int       ns,k,ip,ip1,ip2,list[MMG3D_LMAX+2],iadr;
   int8_t         imax,i,i1,i2;
   static int8_t  mmgWarn0 = 0;
 
@@ -270,7 +270,7 @@ MMG5_int MMG5_swptetlag(MMG5_pMesh mesh,MMG5_pSol met,double crit,MMG3D_pPROctre
   MMG5_pTetra  pt;
   MMG5_pxTetra pxt;
   int          ilist,it,maxit,ier;
-  MMG5_int      list[MMG3D_LMAX+2],k,nconf,ns,nns;
+  MMG5_int     list[MMG3D_LMAX+2],k,nconf,ns,nns;
   int8_t       i;
 
   maxit = 2;
@@ -320,7 +320,7 @@ MMG5_int MMG5_movtetlag(MMG5_pMesh mesh,MMG5_pSol met, int itdeg) {
   MMG5_pTetra   pt;
   MMG5_pPoint   ppt;
   int           ier,ilistv,it;
-  MMG5_int       k,nm,nnm,listv[MMG3D_LMAX+2];
+  MMG5_int      k,nm,nnm,listv[MMG3D_LMAX+2];
   uint8_t       i,base;
   int           maxit;
 
@@ -380,7 +380,7 @@ static MMG5_int MMG5_coltetlag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
   MMG5_pPoint p0,p1;
   double      ll,ux,uy,uz,hmi2;
   int         ilist,base;
-  MMG5_int     k,nc,list[MMG3D_LMAX+2],nnm;
+  MMG5_int    k,nc,list[MMG3D_LMAX+2],nnm;
   int         ier;
   int8_t      i,j,ip,iq,isnm;
 
@@ -460,7 +460,7 @@ int MMG5_chkmovmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t,MMG5_int *tetIdx) {
   MMG5_pTetra  pt;
   MMG5_pPoint  ppt;
   double       *v,c[4][3],tau;
-  MMG5_int      k,np;
+  MMG5_int     k,np;
   int          idx;
   int8_t       i,j;
 
@@ -560,7 +560,7 @@ int MMG5_dispmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t,int itdeg) {
   MMG5_pTetra   pt;
   MMG5_pPoint   ppt;
   double        *v,tau,ctau,c[4][3],ocal,ncal;
-  MMG5_int       k,np;
+  MMG5_int      k,np;
   int8_t        i,j;
 
   tau = (double)t /MMG3D_SHORTMAX;
@@ -613,7 +613,7 @@ int MMG5_dispmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t,int itdeg) {
 /** For debugging purposes: save disp */
 int MMG5_saveDisp(MMG5_pMesh mesh,MMG5_pSol disp) {
   FILE        *out;
-  MMG5_int     k;
+  MMG5_int    k;
   char        data[256],*ptr;
 
   strcpy(data,disp->namein);
@@ -654,13 +654,13 @@ int MMG5_saveDisp(MMG5_pMesh mesh,MMG5_pSol disp) {
  *
  */
 int MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,MMG5_int **invalidTets) {
-  double  avlen,tau;
-  int     itdc,itmn,maxitmn,maxitdc,iit,warn;
+  double   avlen,tau;
+  int      itdc,itmn,maxitmn,maxitdc,iit,warn;
   MMG5_int nspl,ns,nm,nc,k;
   MMG5_int nns,nnm,nnc,nnspl,nnns,nnnm,nnnc,nnnspl;
-  int     ninvalidTets;
-  short   t,lastt;
-  int8_t  ier;
+  int      ninvalidTets;
+  short    t,lastt;
+  int8_t   ier;
 
   tau = 0.0;
   maxitmn = 10;

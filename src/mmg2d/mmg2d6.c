@@ -70,7 +70,7 @@ double MMG2D_vfrac(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int k,int pm) {
   MMG5_pTria    pt;
   MMG5_pPoint   ppt[3];
   double        v[3],vfp,vfm,lam,area,eps,o1[2],o2[2];
-  MMG5_int           ip[3],nplus,nminus,nzero;
+  MMG5_int      ip[3],nplus,nminus,nzero;
   int8_t        i,i0,i1,i2,imin1,iplus1,iz;
 
   eps = MMG5_EPS*MMG5_EPS;
@@ -191,7 +191,7 @@ double MMG2D_vfrac(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int k,int pm) {
 int MMG2D_resetRef(MMG5_pMesh mesh) {
   MMG5_pTria      pt;
   MMG5_pPoint     p0;
-  MMG5_int             k;
+  MMG5_int        k;
   int		  ref;
   int8_t          i;
 
@@ -222,7 +222,7 @@ int MMG2D_resetRef(MMG5_pMesh mesh) {
 int MMG2D_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_int start, int8_t istart) {
   MMG5_pTria       pt;
   double           v1, v2;
-  MMG5_int              *adja,k,ip1,ip2,end1;
+  MMG5_int         *adja,k,ip1,ip2,end1;
   int              refstart;
   int8_t           i,i1,smsgn;
   static int8_t    mmgWarn=0;
@@ -315,10 +315,10 @@ int MMG2D_snapval(MMG5_pMesh mesh, MMG5_pSol sol) {
   MMG5_pTria       pt,pt1;
   MMG5_pPoint      p0;
   double           v1,v2,*tmp;
-  MMG5_int              k,kk,iel,ns,nc,ip,ip1,ip2,npl,nmn;
+  MMG5_int         k,kk,iel,ns,nc,ip,ip1,ip2,npl,nmn;
   int              ilist;
   int8_t           i,j,j1,j2;
-  MMG5_int          list[MMG2D_LONMAX+2];
+  MMG5_int         list[MMG2D_LONMAX+2];
 
   /* Allocate memory for tmp */
   MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(double),"temporary table",
@@ -410,7 +410,7 @@ int MMG2D_snapval(MMG5_pMesh mesh, MMG5_pSol sol) {
  by assumption, i inxt[i] is one edge of the implicit boundary */
 int MMG2D_chkmaniball(MMG5_pMesh mesh, MMG5_int start, int8_t istart) {
   MMG5_pTria         pt;
-  MMG5_int                *adja,k;
+  MMG5_int           *adja,k;
   int                refstart;
   int8_t             i,i1;
 
@@ -481,7 +481,7 @@ int MMG2D_chkmaniball(MMG5_pMesh mesh, MMG5_int start, int8_t istart) {
 /* Check whether the resulting two subdomains occupying mesh are manifold */
 int MMG2D_chkmanimesh(MMG5_pMesh mesh) {
   MMG5_pTria      pt,pt1;
-  MMG5_int             *adja,k,iel;
+  MMG5_int        *adja,k,iel;
   int             cnt;
   int8_t          i,i1;
   static int8_t   mmgWarn=0;
@@ -553,7 +553,7 @@ int MMG2D_chkmanimesh(MMG5_pMesh mesh) {
 int MMG2D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
   MMG5_pTria     pt,pt1,pt2;
   double         volc,voltot,v0,v1,v2;
-  MMG5_int            k,kk,l,ll,ncp,ncm,ip0,ip1,ip2,cur,ipile,*pile,*adja;
+  MMG5_int       k,kk,l,ll,ncp,ncm,ip0,ip1,ip2,cur,ipile,*pile,*adja;
   int            base;
   int8_t         i,i1,i2;
 
@@ -800,7 +800,7 @@ int MMG2D_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol met){
   MMG5_pPoint  p0,p1;
   MMG5_Hash    hash;
   double       v0,v1,s,c[2];
-  MMG5_int          k,ip0,ip1,nb,np,nt,ns,vx[3];
+  MMG5_int     k,ip0,ip1,nb,np,nt,ns,vx[3];
   int          refint,refext;
   int8_t       i,i0,i1,ier;
 
@@ -949,7 +949,7 @@ int MMG2D_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol){
   MMG5_pTria    pt;
   double        v,v1;
   int           ier,ref,refint,refext;
-  MMG5_int       k,ip,ip1;
+  MMG5_int      k,ip,ip1;
   int8_t        i,i1,i2,nmn,npl,nz;
 
   for (k=1; k<=mesh->nt; k++) {

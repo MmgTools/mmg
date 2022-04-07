@@ -44,7 +44,7 @@ int MMG5_chkcol_int(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t iface,
   MMG5_pTetra   pt,pt0;
   MMG5_pPoint   p0;
   double        calold,calnew,caltmp,ll,lon;
-  MMG5_int           j,iel,nq,nr;
+  MMG5_int      j,iel,nq,nr;
   int8_t        i,jj,ip,iq;
 
   iq  = MMG5_idir[iface][MMG5_iprv2[iedg]];
@@ -182,7 +182,7 @@ MMG5_topchkcol_bdy(MMG5_pMesh mesh,MMG5_int k,int iface,int8_t iedg,MMG5_int *li
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
   double        n0[3],n1[3],devnew;
-  MMG5_int       piv,iel,jel,nump,numq,nro,adj,*adja,jel1,nap,nbp,naq,nbq;
+  MMG5_int      piv,iel,jel,nump,numq,nro,adj,*adja,jel1,nap,nbp,naq,nbq;
   int8_t        ip,iq,ipiv,iopp,i,j,j1,jface,jface1,isface;
 
   pt = &mesh->tetra[k];
@@ -370,7 +370,7 @@ int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t iface,
   double       calold,calnew,caltmp,nadja[3],nprvold[3],nprvnew[3],ncurold[3],ncurnew[3];
   double       ps,devold,devnew,hmax,hausd;
   int          ipp;
-  MMG5_int      nump,numq,ndepmin,ndepplus,l,kk,iel;
+  MMG5_int     nump,numq,ndepmin,ndepplus,l,kk,iel;
   int          nr,nbbdy,isloc,iedgeOpp;
   int16_t      tag;
   int8_t       iopp,iopp2,ia,ip,i,iq,i0,i1,ier,isminp,isplp;
@@ -738,7 +738,7 @@ int MMG5_chkcol_nomint(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t iface,
   MMG5_pxTetra pxt;
   double       calold,calnew,caltmp;
   int          ipp,iel;
-  MMG5_int      nump,numq,l;
+  MMG5_int     nump,numq,l;
   int          nr,nbbdy;
   int8_t       ia,ip,i,iq,i0,i1;
 #ifndef NDEBUG
@@ -845,11 +845,11 @@ int MMG5_chkcol_nomint(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t iface,
  *
  */
 int MMG5_colver(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *list,int ilist,int8_t indq,int8_t typchk) {
-  MMG5_pTetra          pt,pt1;
-  MMG5_pxTetra         pxt,pxt1;
-  MMG5_xTetra          xt,xts;
+  MMG5_pTetra     pt,pt1;
+  MMG5_pxTetra    pxt,pxt1;
+  MMG5_xTetra     xt,xts;
   int             i,jel;
-  MMG5_int         iel,np,nq,*adja,pel,qel,k,p0,p1;
+  MMG5_int        iel,np,nq,*adja,pel,qel,k,p0,p1;
   uint8_t         ip,iq,j,voy,voyp,voyq,ia,iav;
   uint8_t         (ind)[MMG3D_LMAX][2];
   int             p0_c[MMG3D_LMAX],p1_c[MMG3D_LMAX];

@@ -152,7 +152,7 @@ inline int
 MMG5_BezierEdge(MMG5_pMesh mesh,MMG5_int ip0,MMG5_int ip1,double b0[3],double b1[3],int8_t ised, double v[3]) {
   MMG5_pPoint   p0,p1;
   MMG5_pxPoint  pxp0,pxp1;
-  double   ux,uy,uz,ps,ps1,ps2,*n1,*n2,np0[3],np1[3],t0[3],t1[3],il,ll,alpha;
+  double        ux,uy,uz,ps,ps1,ps2,*n1,*n2,np0[3],np1[3],t0[3],t1[3],il,ll,alpha;
 
   p0 = &mesh->point[ip0];
   p1 = &mesh->point[ip1];
@@ -326,9 +326,9 @@ MMG5_BezierEdge(MMG5_pMesh mesh,MMG5_int ip0,MMG5_int ip1,double b0[3],double b1
  */
 int MMG5_mmg3dBezierCP(MMG5_pMesh mesh,MMG5_Tria *pt,MMG5_pBezier pb,int8_t ori) {
   MMG5_pPoint    p[3];
-  MMG5_xPoint   *pxp;
-  double        *n1,*n2,nt[3],t1[3],t2[3],ps,ps2,dd,ux,uy,uz,l,ll,alpha;
-  MMG5_int            ia,ib,ic;
+  MMG5_xPoint    *pxp;
+  double         *n1,*n2,nt[3],t1[3],t2[3],ps,ps2,dd,ux,uy,uz,l,ll,alpha;
+  MMG5_int       ia,ib,ic;
   int8_t         i,i1,i2,im,isnm;
 
   ia   = pt->v[0];

@@ -56,7 +56,7 @@
 void MMG2D_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met) {
   MMG5_pTria  ptt;
   MMG5_pPoint ppt;
-  MMG5_int         k,iadr;
+  MMG5_int    k,iadr;
   int         i;
   double      isqhmin, isqhmax;
   int8_t      sethmin, sethmax;
@@ -929,7 +929,7 @@ int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   mytime    ctim[TIMEMAX];
   char      stim[32];
   int       ier;
-  MMG5_int       k,*invalidTris;
+  MMG5_int  k,*invalidTris;
 
 
   if ( mesh->info.imprim >= 0 ) {

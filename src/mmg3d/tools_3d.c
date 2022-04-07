@@ -81,10 +81,10 @@ int MMG5_norface(MMG5_pMesh mesh,MMG5_int k,int iface,double n[3]) {
     the direct sense with respect to direction n anchored at point ip (ip = global num.):
     return 2 = orientation reversed, 1 otherwise */
 inline int MMG5_directsurfball(MMG5_pMesh mesh, MMG5_int ip, MMG5_int *list, int ilist, double n[3]){
-    int     j;
+    int      j;
     MMG5_int iel,aux;
-    double  nt[3],ps;
-    uint8_t iface;
+    double   nt[3],ps;
+    uint8_t  iface;
 
     iel   = list[0] / 4;
     iface = list[0] % 4;
@@ -108,7 +108,7 @@ inline int MMG5_directsurfball(MMG5_pMesh mesh, MMG5_int ip, MMG5_int *list, int
 int MMG5_startedgsurfball(MMG5_pMesh mesh,MMG5_int nump,MMG5_int numq,MMG5_int *list,int ilist) {
     MMG5_pTetra pt;
     int         l;
-    MMG5_int     tmp,iel;
+    MMG5_int    tmp,iel;
     uint8_t     iface,ip,ipt;
 
     iel = list[0]/4;
@@ -162,8 +162,8 @@ int MMG5_startedgsurfball(MMG5_pMesh mesh,MMG5_int nump,MMG5_int numq,MMG5_int *
 inline int MMG5_BezierRidge ( MMG5_pMesh mesh,MMG5_int ip0,MMG5_int ip1,double s,double *o,
                               double *no1,double *no2,double *to ) {
     MMG5_pPoint    p0,p1;
-    double    ux,uy,uz,n01[3],n02[3],n11[3],n12[3],t0[3],t1[3];
-    double    ps,ps2,b0[3],b1[3],bn[3],ll,il,ntemp[3],dd,alpha;
+    double         ux,uy,uz,n01[3],n02[3],n11[3],n12[3],t0[3],t1[3];
+    double         ps,ps2,b0[3],b1[3],bn[3],ll,il,ntemp[3],dd,alpha;
 
     p0 = &mesh->point[ip0];  /* Ref point, from which step is counted */
     p1 = &mesh->point[ip1];
@@ -363,7 +363,7 @@ inline int MMG5_BezierRidge ( MMG5_pMesh mesh,MMG5_int ip0,MMG5_int ip1,double s
  */
 inline int MMG5_BezierRef ( MMG5_pMesh mesh,MMG5_int ip0,MMG5_int ip1,double s,double *o,
                             double *no,double *to) {
-    MMG5_pPoint          p0,p1;
+    MMG5_pPoint     p0,p1;
     double          ux,uy,uz,n01[3],n02[3],n11[3],n12[3],ntemp[3],t0[3],t1[3];
     double          ps,b0[3],b1[3],bn[3],ll,il,dd,alpha,ps2;
 
@@ -535,7 +535,7 @@ inline int MMG5_BezierRef ( MMG5_pMesh mesh,MMG5_int ip0,MMG5_int ip1,double s,d
  *
  */
 inline int MMG5_BezierNom(MMG5_pMesh mesh,MMG5_int ip0,MMG5_int ip1,double s,double *o,double *no,double *to) {
-    MMG5_pPoint      p0,p1;
+    MMG5_pPoint p0,p1;
     double      ux,uy,uz,il,ll,ps,alpha,dd;
     double      t0[3],t1[3],b0[3],b1[3],n0[3],n1[3],bn[3];
     int8_t      intnom;
@@ -703,8 +703,8 @@ inline int MMG5_BezierNom(MMG5_pMesh mesh,MMG5_int ip0,MMG5_int ip1,double s,dou
  */
 inline int MMG5_BezierReg(MMG5_pMesh mesh,MMG5_int ip0, MMG5_int ip1, double s, double v[3], double *o, double *no){
     MMG5_pPoint p0,p1;
-    double b0[3],b1[3],bn[3],t0[3],t1[3],np0[3],np1[3],alpha,ux,uy,uz,ps1,ps2,ll;
-    double il,dd,*n1,*n2;
+    double      b0[3],b1[3],bn[3],t0[3],t1[3],np0[3],np1[3],alpha,ux,uy,uz,ps1,ps2,ll;
+    double      il,dd,*n1,*n2;
 
     p0 = &mesh->point[ip0];
     p1 = &mesh->point[ip1];
@@ -885,7 +885,7 @@ MMG5_int MMG3D_indElt(MMG5_pMesh mesh, MMG5_int kel) {
 /** find the point number in packed numerotation */
 MMG5_int MMG3D_indPt(MMG5_pMesh mesh, MMG5_int kp) {
     MMG5_pPoint ppt;
-    MMG5_int         np, k;
+    MMG5_int    np, k;
 
     np = 0;
     for (k=1; k<=mesh->np; k++) {
@@ -903,7 +903,7 @@ void MMG5_printTetra(MMG5_pMesh mesh,char* fileName) {
     MMG5_pTetra  pt;
     MMG5_pxTetra pxt;
     MMG5_int     k;
-    FILE    *inm;
+    FILE         *inm;
 
     inm = fopen(fileName,"w");
 
@@ -1078,7 +1078,7 @@ int MMG3D_localParamNm(MMG5_pMesh mesh,MMG5_int iel,int iface,int ia,
   double        hausd, hmin, hmax;
   int           l,k,isloc;
   int           ilistv;
-  MMG5_int       listv[MMG3D_LMAX+2],ifac1,ifac2;
+  MMG5_int      listv[MMG3D_LMAX+2],ifac1,ifac2;
   static int8_t mmgWarn0;
 
 
@@ -1219,7 +1219,7 @@ void MMG3D_mark_usedVertices ( MMG5_pMesh mesh ) {
   MMG5_pPrism pq;
   MMG5_pPoint ppt;
   int         i;
-  MMG5_int     k;
+  MMG5_int    k;
 
   /* Preserve isolated required points */
   for ( k=1; k<=mesh->np; k++ ) {
@@ -1270,7 +1270,7 @@ static
 void MMG3D_keep_subdomainElts ( MMG5_pMesh mesh, int nsd ) {
   MMG5_pTetra pt;
   int         i,iv;
-  MMG5_int     k,*adja,iadr,iadrv;
+  MMG5_int    k,*adja,iadr,iadrv;
   int         nfac = 4; // number of faces per elt
 
   for ( k=1 ; k <= mesh->ne ; k++) {

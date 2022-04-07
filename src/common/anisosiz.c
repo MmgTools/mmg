@@ -121,7 +121,7 @@ double MMG5_surf(MMG5_pMesh mesh,double m[3][6],MMG5_pTria ptt) {
  */
 double MMG5_surftri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
   MMG5_pPoint    p[3];
-  MMG5_int            np[3];
+  MMG5_int       np[3];
   double         ux,uy,uz,m[3][6],rbasis[3][3];
   int8_t         i1,i2;
   int            i;
@@ -171,7 +171,7 @@ double MMG5_surftri33_ani(MMG5_pMesh mesh,MMG5_pTria ptt,
   double         mm[6];
   double         *a,*b,*c,abx,aby,abz,acx,acy,acz,dens[3],surf;
   int            i;
-  MMG5_int        ia,ib,ic;
+  MMG5_int       ia,ib,ic;
 
   ia = ptt->v[0];
   ib = ptt->v[1];
@@ -227,7 +227,7 @@ void MMG5_defUninitSize(MMG5_pMesh mesh,MMG5_pSol met,int8_t ismet )
 {
   MMG5_pPoint   ppt;
   double        *m,*n,r[3][3],isqhmax;
-  MMG5_int           k;
+  MMG5_int      k;
 
   isqhmax = 1.0 / (mesh->info.hmax*mesh->info.hmax);
   for (k=1; k<=mesh->np; k++) {
@@ -912,7 +912,7 @@ int MMG5_grad2metSurf(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, MMG5_int np
                       MMG5_int np2)
 {
   MMG5_pPoint  p1,p2;
-  double      *mm1,*mm2,*nn1,*nn2,ps1,ps2,ux,uy,uz,m1[6],m2[6],n1[3],n2[3],nt[3];
+  double       *mm1,*mm2,*nn1,*nn2,ps1,ps2,ux,uy,uz,m1[6],m2[6],n1[3],n2[3],nt[3];
   double       r1[3][3],r2[3][3],t1[2],t2[2],c[3],mtan1[3],mtan2[3],mr1[6],mr2[6];
   double       mtmp[3][3],val,rbasis[3][3];
   double       /*,l1,l2*/l,dd;
@@ -1451,7 +1451,7 @@ int MMG5_grad2metSurfreq(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, MMG5_int
 {
 
   MMG5_pPoint  p1,p2;
-  double      *mm1,*mm2,*nn1,*nn2,ps1,ps2,ux,uy,uz,m1[6],m2[6],n1[3],n2[3],nt[3];
+  double       *mm1,*mm2,*nn1,*nn2,ps1,ps2,ux,uy,uz,m1[6],m2[6],n1[3],n2[3],nt[3];
   double       r1[3][3],r2[3][3],mtan1[3],mtan2[3],mr1[6],mr2[6];
   double       mtmp[3][3],rbasis1[3][3],rbasis2[3][3];
   double       l,difsiz,rmet3D[6];
@@ -1686,7 +1686,7 @@ int MMG5_grad2metSurfreq(MMG5_pMesh mesh, MMG5_pSol met, MMG5_pTria pt, MMG5_int
 int MMG5_compute_meanMetricAtMarkedPoints_ani ( MMG5_pMesh mesh,MMG5_pSol met ) {
   MMG5_pPoint p0;
   double      lm;
-  MMG5_int         k,iadr;
+  MMG5_int    k,iadr;
   int         mmgWarn = 0;
 
   for ( k=1; k<=mesh->np; k++ ) {
@@ -1741,7 +1741,7 @@ int MMG5_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met,int *it) {
   MMG5_pTria   pt;
   MMG5_pPoint  p1,p2;
   int          nup,nu,maxit,ier;
-  MMG5_int      k,np1,np2;
+  MMG5_int     k,np1,np2;
   int8_t       i;
 
   /** Mark the edges belonging to a required entity */
@@ -1805,7 +1805,7 @@ int MMG5_gradsizreq_ani(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria        pt;
   MMG5_pPoint       p1,p2;
   int               it,maxit,nup,nu,ier;
-  MMG5_int           k,np1,np2,npslave,npmaster;
+  MMG5_int          k,np1,np2,npslave,npmaster;
   int8_t            i;
 
 

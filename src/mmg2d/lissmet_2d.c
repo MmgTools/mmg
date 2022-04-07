@@ -53,7 +53,7 @@ int lissmet_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
   double         tail,coef,ma1[3],mb1[3],m[3],dd1,dd2;
   double         SQRT3DIV2=0.8660254037844386;
   int            i,itour,maxtou,a,b,iadr;
-  MMG5_int        ncor,nc,k;
+  MMG5_int       ncor,nc,k;
   int8_t         ier;
   static int8_t  mmgWarn = 0;
 

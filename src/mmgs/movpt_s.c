@@ -55,7 +55,7 @@ int movintpt_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *list,int ilist) {
   double        aa,bb,ab,ll,l,mlon,devmean,GV[3],gv[2],cosalpha,sinalpha,r[3][3],*n,lispoi[3*MMGS_LMAX+3];
   double        ux,uy,uz,det2d,detloc,step,lambda[3],uv[2],o[3],no[3],to[3],Vold,Vnew,calold,calnew,caltmp;
   int           ier,ipp,kel,npt,ibeg,iend;
-  MMG5_int       k,iel;
+  MMG5_int      k,iel;
   int8_t        i0,i1,i2;
   static int8_t mmgErr0=0,mmgErr1=0;
 

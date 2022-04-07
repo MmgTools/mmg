@@ -92,8 +92,8 @@ int MMGS_packMesh(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
   MMG5_pTria    pt,ptnew;
   MMG5_pPoint   ppt,pptnew;
   int           imet,imetnew,i,na;
-  MMG5_int           iadr,iadrnew,iadrv,*adjav,*adja,*adjanew,voy;
-  MMG5_int       k,nt,np,jel,nc,nr,nbl;
+  MMG5_int      iadr,iadrnew,iadrv,*adjav,*adja,*adjanew,voy;
+  MMG5_int      k,nt,np,jel,nc,nr,nbl;
   int8_t        i1,i2;
 
   /* Remove non wanted subdomains if needed */

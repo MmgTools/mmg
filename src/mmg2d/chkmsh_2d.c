@@ -35,10 +35,10 @@ int MMG5_mmg2dChkmsh(MMG5_pMesh mesh, int severe,int base) {
   MMG5_pPoint    ppt;
   MMG5_pTria     pt1,pt2;
   MMG5_pEdge     ped;
-  MMG5_int           *adja,*adja1,adj,adj1,k,iadr;
+  MMG5_int       *adja,*adja1,adj,adj1,k,iadr;
   int            i,j;
-  MMG5_int            kk,l,nk,ip,lon,len;
-  MMG5_int           *list;
+  MMG5_int       kk,l,nk,ip,lon,len;
+  MMG5_int       *list;
   uint8_t        voy,voy1;
   static int8_t  mmgErr0=0,mmgErr1=0,mmgErr2=0,mmgErr3=0,mmgErr4=0,mmgErr5=0;
   static int8_t  mmgErr6=0;
@@ -205,7 +205,7 @@ int MMG5_mmg2dChkmsh(MMG5_pMesh mesh, int severe,int base) {
 int MMG2D_chkmsh(MMG5_pMesh mesh) {
   MMG5_pTria        pt,pt1;
   MMG5_pPoint       p1,p2;
-  MMG5_int               *adja,*adjaj,k,jel;
+  MMG5_int          *adja,*adjaj,k,jel;
   int8_t            i,i1,i2,j;
   static int8_t     mmgErr0=0,mmgErr1=0,mmgErr2=0,mmgErr3=0,mmgErr4=0;
   static int8_t     mmgErr6=0,mmgErr5=0;
@@ -406,7 +406,7 @@ int MMG2D_chkor(MMG5_pMesh mesh) {
   MMG5_pTria        pt;
   MMG5_pPoint       p0,p1,p2;
   double            det;
-  MMG5_int               k;
+  MMG5_int          k;
 
   for (k=1; k<=mesh->np; k++) {
     pt = &mesh->tria[k];

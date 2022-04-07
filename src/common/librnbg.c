@@ -51,12 +51,12 @@
  **/
 int MMG5_kPartBoxCompute(SCOTCH_Graph *graf, MMG5_int vertNbr, MMG5_int boxVertNbr,
                           SCOTCH_Num *permVrtTab,MMG5_pMesh mesh) {
-  MMG5_int boxNbr, vertIdx;
-  SCOTCH_Num logMaxVal, SupMaxVal, InfMaxVal, maxVal;
-  char s[200];
-  SCOTCH_Num *sortPartTb;
+  MMG5_int     boxNbr, vertIdx;
+  SCOTCH_Num   logMaxVal, SupMaxVal, InfMaxVal, maxVal;
+  char         s[200];
+  SCOTCH_Num   *sortPartTb;
   SCOTCH_Strat strat ;
-  SCOTCH_Arch arch;
+  SCOTCH_Arch  arch;
 
   /* Computing the number of boxes */
   boxNbr = vertNbr / boxVertNbr;
@@ -160,7 +160,7 @@ void MMG5_swapNod(MMG5_pMesh mesh,MMG5_pPoint points, double* sols,
   MMG5_pSol  psl;
   MMG5_Sol   soltmp;
   int        tmp,i,pslsiz;
-  MMG5_int    addr2,addr1;
+  MMG5_int   addr2,addr1;
 
   /* swap the points */
   memcpy(&ptttmp      ,&points[ind2],sizeof(MMG5_Point));

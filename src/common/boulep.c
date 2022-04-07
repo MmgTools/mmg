@@ -51,7 +51,7 @@ extern MMG5_Info  info;
 int MMG5_boulep(MMG5_pMesh mesh,MMG5_int start,MMG5_int ip,MMG5_int *adja, MMG5_int *list) {
   MMG5_pTria    pt;
   int           ilist;
-  MMG5_int       *adj,k;
+  MMG5_int      *adj,k;
   int8_t        i,i1,i2;
 
   pt = &mesh->tria[start];
@@ -114,7 +114,7 @@ int MMG5_boulep(MMG5_pMesh mesh,MMG5_int start,MMG5_int ip,MMG5_int *adja, MMG5_
 int MMG5_boulen(MMG5_pMesh mesh,MMG5_int *adjt,MMG5_int start,MMG5_int ip,double *nn) {
   MMG5_pTria    pt;
   double        n[3],dd;
-  MMG5_int           *adja,k;
+  MMG5_int      *adja,k;
   int8_t        i,i1,i2;
 
   pt = &mesh->tria[start];
@@ -191,7 +191,7 @@ int MMG5_boulec(MMG5_pMesh mesh,MMG5_int *adjt,MMG5_int start,MMG5_int ip,double
   MMG5_pTria    pt;
   MMG5_pPoint   p0,p1,p2;
   double        dd;
-  MMG5_int           *adja,k;
+  MMG5_int      *adja,k;
   int8_t        i,i1,i2;
 
   pt = &mesh->tria[start];
@@ -278,8 +278,8 @@ int MMG5_boulec(MMG5_pMesh mesh,MMG5_int *adjt,MMG5_int start,MMG5_int ip,double
 MMG5_int MMG5_bouler(MMG5_pMesh mesh,MMG5_int *adjt,MMG5_int start,MMG5_int ip,
                  MMG5_int *list,MMG5_int *listref,MMG5_int *ng,MMG5_int *nr,int lmax) {
   MMG5_pTria    pt;
-  MMG5_int           *adja,k;
-  MMG5_int           ns;
+  MMG5_int      *adja,k;
+  MMG5_int      ns;
   int8_t        i,i1,i2;
 
   pt  = &mesh->tria[start];

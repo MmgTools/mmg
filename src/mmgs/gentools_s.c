@@ -63,7 +63,7 @@ int delref(MMG5_pMesh mesh) {
  */
 int setref(MMG5_pMesh mesh,MMG5_int start,int ref,int putreq) {
   MMG5_pTria pt,pt1;
-  MMG5_int        *list,*adja,cur,k,iel,jel;
+  MMG5_int   *list,*adja,cur,k,iel,jel;
   int        base,ilist;
   int8_t     j,voy;
 
@@ -122,7 +122,7 @@ int setref(MMG5_pMesh mesh,MMG5_int start,int ref,int putreq) {
 /** find the element number in packed numerotation */
 MMG5_int MMGS_indElt(MMG5_pMesh mesh, MMG5_int kel) {
   MMG5_pTria pt;
-  MMG5_int    ne, k;
+  MMG5_int   ne, k;
 
   ne = 0;
   for (k=1; k<=mesh->nt; k++) {
@@ -138,7 +138,7 @@ MMG5_int MMGS_indElt(MMG5_pMesh mesh, MMG5_int kel) {
 /** find the point number in packed numerotation */
 MMG5_int MMGS_indPt(MMG5_pMesh mesh, MMG5_int kp) {
   MMG5_pPoint ppt;
-  MMG5_int         np, k;
+  MMG5_int    np, k;
 
   np = 0;
   for (k=1; k<=mesh->np; k++) {

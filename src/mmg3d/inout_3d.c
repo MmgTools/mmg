@@ -121,11 +121,11 @@ int MMG3D_loadMesh_opened(MMG5_pMesh mesh,FILE *inm,int bin) {
   long        posnp,posnt,posne,posned,posncor,posnpreq,posntreq,posnereq,posnedreq;
   long        posnr,posnprism,posnormal,posnc1,posnq,posnqreq;
   long        posnppar,posntpar,posnepar,posnedpar,posnqpar;
-  MMG5_int         npreq,ntreq,nereq,nedreq,nqreq,ncor,ned,ng;
-  MMG5_int         nppar,nedpar,ntpar,nqpar,nepar;
-  MMG5_int         k,ip,idn,bpos;
+  MMG5_int    npreq,ntreq,nereq,nedreq,nqreq,ncor,ned,ng;
+  MMG5_int    nppar,nedpar,ntpar,nqpar,nepar;
+  MMG5_int    k,ip,idn,bpos;
   int         i,bdim,binch,ref,iswp;
-  MMG5_int         *ina,v[3],nt,na,nr,ia,aux,nref;
+  MMG5_int    *ina,v[3],nt,na,nr,ia,aux,nref;
   char        chaine[MMG5_FILESTR_LGTH],strskip[MMG5_FILESTR_LGTH];
 
   posnp = posnt = posne = posncor = 0;
@@ -1204,7 +1204,7 @@ int MMG3D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename) {
   int         ier;
   long        posNodes,posElts,*posNodeData;
   int         bin,iswp;
-  MMG5_int     nelts;
+  MMG5_int    nelts;
   int         nsols;
 
   mesh->dim = 3;
@@ -1262,7 +1262,7 @@ int MMG3D_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
   int         ier;
   long        posNodes,posElts,*posNodeData;
   int         bin,iswp;
-  MMG5_int     nelts;
+  MMG5_int    nelts;
   int         nsols;
 
   mesh->dim = 3;
@@ -1327,17 +1327,17 @@ int MMG3D_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * mesh.
  */
 int MMG3D_saveMesh(MMG5_pMesh mesh, const char *filename) {
-  FILE*        inm;
-  MMG5_pPoint  ppt;
-  MMG5_pTetra  pt;
-  MMG5_pPrism  pp;
-  MMG5_pTria   ptt;
-  MMG5_pQuad   pq;
-  MMG5_xPoint *pxp;
-  MMG5_int          k,na,nc,np,ne,nn,nr,nre,npar,nedreq,nedpar,ntreq,ntpar,nt,nereq,nepar;
-  MMG5_int          npr,nq,nqreq,nqpar,bpos;
-  int          bin,binch;
-  char         chaine[MMG5_FILESTR_LGTH];
+  FILE*         inm;
+  MMG5_pPoint   ppt;
+  MMG5_pTetra   pt;
+  MMG5_pPrism   pp;
+  MMG5_pTria    ptt;
+  MMG5_pQuad    pq;
+  MMG5_xPoint   *pxp;
+  MMG5_int      k,na,nc,np,ne,nn,nr,nre,npar,nedreq,nedpar,ntreq,ntpar,nt,nereq,nepar;
+  MMG5_int      npr,nq,nqreq,nqpar,bpos;
+  int           bin,binch;
+  char          chaine[MMG5_FILESTR_LGTH];
   static int8_t parWarn = 0;
 
   mesh->ver = 2;
@@ -2108,9 +2108,9 @@ int MMG3D_saveMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
 
 int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
   FILE       *inm;
-  long        posnp;
-  int         iswp,ier,ver,bin,*type,nsols,dim;
-  MMG5_int         k,np;
+  long       posnp;
+  int        iswp,ier,ver,bin,*type,nsols,dim;
+  MMG5_int   k,np;
 
   /** Read the file header */
   ier =  MMG5_loadSolHeader(filename,3,&inm,&ver,&bin,&iswp,&np,&dim,&nsols,
@@ -2178,10 +2178,10 @@ int MMG3D_loadSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
 
 int MMG3D_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
   MMG5_pSol   psl;
-  FILE       *inm;
+  FILE        *inm;
   long        posnp;
   int         iswp,ier,ver,bin,*type,nsols,dim;
-  MMG5_int         j,k,np;
+  MMG5_int    j,k,np;
   char        data[16];
   static char mmgWarn = 0;
 
@@ -2278,7 +2278,7 @@ int MMG3D_saveSol(MMG5_pMesh mesh,MMG5_pSol met, const char *filename) {
   FILE*        inm;
   MMG5_pPoint  ppt;
   int          binch,bin,ier;
-  MMG5_int      k,bpos;
+  MMG5_int     k,bpos;
 
   if ( !met->m ) {
     fprintf(stderr,"\n  ## Warning: %s: no metric data to save.\n",__func__);
@@ -2318,7 +2318,7 @@ int MMG3D_saveAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char *filename) {
   MMG5_pPoint  ppt;
   MMG5_pTetra  pt;
   int          binch,bin,ier,npointSols,ncellSols;
-  MMG5_int      j,k,bpos,*size;
+  MMG5_int     j,k,bpos,*size;
   int          *type,*entities;
 
   if ( !(*sol)[0].m )  return -1;
@@ -2405,7 +2405,7 @@ static inline
 int MMG3D_saveEle(MMG5_pMesh mesh,const char *filename) {
   FILE*             inm;
   MMG5_pTetra       pt;
-  MMG5_int               k,i,ne;
+  MMG5_int          k,i,ne;
   char              *ptr,*data;
 
   if ( !mesh->ne ) {
@@ -2477,7 +2477,7 @@ static inline
 int MMG3D_saveNeigh(MMG5_pMesh mesh,const char *filename) {
   FILE*             inm;
   MMG5_pTetra       pt;
-  MMG5_int               k,i,ne;
+  MMG5_int          k,i,ne;
   int               idx;
   char              *ptr,*data;
 
@@ -2557,7 +2557,7 @@ static inline
 int MMG3D_saveFace(MMG5_pMesh mesh,const char *filename) {
   FILE*             inm;
   MMG5_pTria        pt;
-  MMG5_int               k,i;
+  MMG5_int          k,i;
   char              *ptr,*data;
 
   if ( !mesh->nt ) {

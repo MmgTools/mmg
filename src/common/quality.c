@@ -45,10 +45,10 @@
  *
  */
 double MMG5_caltri33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt) {
-  double   anisurf,dd,abx,aby,abz,acx,acy,acz,bcx,bcy,bcz;
-  double  *a,*b,*c,*ma,*mb,*mc,m[6],l0,l1,l2,rap;
-  MMG5_int      ia,ib,ic;
-  int8_t   i;
+  double    anisurf,dd,abx,aby,abz,acx,acy,acz,bcx,bcy,bcz;
+  double    *a,*b,*c,*ma,*mb,*mc,m[6],l0,l1,l2,rap;
+  MMG5_int  ia,ib,ic;
+  int8_t    i;
 
   ia = pt->v[0];
   ib = pt->v[1];
@@ -117,7 +117,7 @@ double MMG5_caltri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt) {
   double        rap,anisurf,l0,l1,l2,m[6],mm[6],rbasis[3][3];
   double        abx,aby,abz,acx,acy,acz,bcy,bcx,bcz;
   int           i,j;
-  MMG5_int       np[3];
+  MMG5_int      np[3];
   int8_t        i1,i2;
 
   for (i=0; i<3; i++) {

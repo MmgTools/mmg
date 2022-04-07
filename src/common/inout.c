@@ -89,8 +89,8 @@ static
 int MMG5_countBinaryElts(FILE **inm, const int nelts,const int iswp,
                          MMG5_int *np, MMG5_int *na, MMG5_int* nt,MMG5_int *nq, MMG5_int *ne, MMG5_int *npr)
 {
-  int    typ,tagNum,i,l;
-  MMG5_int  k,num,idx;
+  int         typ,tagNum,i,l;
+  MMG5_int    k,num,idx;
   static char mmgWarn = 0;
 
   k = 0;
@@ -244,7 +244,7 @@ int MMG5_loadMshMesh_part1(MMG5_pMesh mesh,const char *filename,
   double      dbuf[9];
   float       fbuf[9];
   int         ver,oneBin,i;
-  MMG5_int        k,nt,na,nq,ne,npr,np;
+  MMG5_int    k,nt,na,nq,ne,npr,np;
   int         typ,tagNum,posNodeDataSize,initPosNodeDataSize;
   char        *ptr,*data,chaine[MMG5_FILESTR_LGTH],verNum[5];
 
@@ -491,7 +491,7 @@ int  MMG5_check_readedMesh ( MMG5_pMesh mesh, int nref ) {
   MMG5_pPrism pp;
   MMG5_pTetra pt;
   int         i;
-  MMG5_int     k,aux;
+  MMG5_int    k,aux;
 
   if ( nref ) {
     fprintf(stdout,"\n     $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ \n");
@@ -629,21 +629,21 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
                            const long posNodes,const long posElts,
                            const long *posNodeData,const int bin,const int iswp,
                            const int nelts,const int nsols) {
-  MMG5_pTetra pt;
-  MMG5_pPrism pp;
-  MMG5_pTria  ptt;
-  MMG5_pQuad  pq1;
-  MMG5_pEdge  pa;
-  MMG5_pPoint ppt;
-  MMG5_pSol   psl;
-  double      dbuf[9];
-  float       fbuf[9],fc;
-  int         i,l,nref,iadr,ier;
-  MMG5_int     k,v[4],nt,na,nq,ne,npr;
-  int         nbl_t,nbl_a,typ,tagNum,ref,idx,num;
-  int         isol;
-  int8_t      metricData;
-  char        chaine[MMG5_FILESTR_LGTH],*ptr;
+  MMG5_pTetra   pt;
+  MMG5_pPrism   pp;
+  MMG5_pTria    ptt;
+  MMG5_pQuad    pq1;
+  MMG5_pEdge    pa;
+  MMG5_pPoint   ppt;
+  MMG5_pSol     psl;
+  double        dbuf[9];
+  float         fbuf[9],fc;
+  int           i,l,nref,iadr,ier;
+  MMG5_int      k,v[4],nt,na,nq,ne,npr;
+  int           nbl_t,nbl_a,typ,tagNum,ref,idx,num;
+  int           isol;
+  int8_t        metricData;
+  char          chaine[MMG5_FILESTR_LGTH],*ptr;
   static int8_t mmgWarn=0, mmgWarn1=0;
 
   /** Second step: read the nodes and elements */
@@ -1549,7 +1549,7 @@ int MMG5_saveMshMesh(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename,
   MMG5_pSol   psl;
   double      dbuf[6];
   int         bin,i,typ,word;
-  MMG5_int     header[3],nq,ne,npr,np,nt,na,k,iadr,nelts;
+  MMG5_int    header[3],nq,ne,npr,np,nt,na,k,iadr,nelts;
   int         isol,nsols;
   char        *ptr,*data;
   static char mmgWarn = 0;
@@ -2342,7 +2342,7 @@ int MMG5_saveSolHeader( MMG5_pMesh mesh,const char *filename,
                         int nsols,int *entities,int *type,MMG5_int *size) {
   MMG5_pPoint ppt;
   int         binch;
-  MMG5_int         k;
+  MMG5_int    k;
   char        *ptr,*data,chaine[MMG5_FILESTR_LGTH];
 
   *bin = 0;
@@ -2480,7 +2480,7 @@ int MMG5_saveSolAtTrianglesHeader( MMG5_pMesh mesh,
                                    int *entities,int *type,MMG5_int *size) {
   MMG5_pTria  pt;
   int         binch;
-  MMG5_int         k,nt;
+  MMG5_int    k,nt;
 
   nt = 0;
   for (k=1; k<=mesh->nt; k++) {
@@ -2549,7 +2549,7 @@ int MMG5_saveSolAtTetrahedraHeader( MMG5_pMesh mesh,
                                     int *entities,int *type,MMG5_int *size) {
   MMG5_pTetra  pt;
   int          binch;
-  MMG5_int          k,ne;
+  MMG5_int     k,ne;
 
   ne = 0;
   for (k=1; k<=mesh->ne; k++) {
@@ -2681,7 +2681,7 @@ int MMG5_saveNode(MMG5_pMesh mesh,const char *filename) {
   FILE*             inm;
   MMG5_pPoint       ppt;
   int               i;
-  MMG5_int           k,np;
+  MMG5_int          k,np;
   char              *ptr,*data;
 
   if ( !mesh->np ) {
@@ -2757,7 +2757,7 @@ int MMG5_saveEdge(MMG5_pMesh mesh,const char *filename,const char *ext) {
   MMG5_pEdge        pt;
   size_t            na_tot;
   int               polyfile;
-  MMG5_int           k;
+  MMG5_int          k;
   char              *ptr_c = (char*)mesh->edge;
   char              *ptr,*data;
 

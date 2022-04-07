@@ -49,7 +49,7 @@ int MMG5_regnor(MMG5_pMesh mesh) {
   MMG5_pxPoint  pxp;
   double        *tabl,n[3],*nptr,lm1,lm2,dd,nx,ny,nz,res0,res;
   int           i,iad,it,nn,nit,ilist;
-  MMG5_int       k,iel,list[MMG5_LMAX],*adja;
+  MMG5_int      k,iel,list[MMG5_LMAX],*adja;
 
   /* assign seed to vertex */
   for (k=1; k<=mesh->nt; k++) {

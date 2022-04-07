@@ -52,9 +52,9 @@ extern MMG5_Info  info;
  */
 int MMG5_boulevolp (MMG5_pMesh mesh, MMG5_int start, int ip, MMG5_int * list){
   MMG5_pTetra  pt,pt1;
-  MMG5_int    *adja,nump,k,k1;
-  int        base,ilist,cur;
-  int8_t  j,l,i;
+  MMG5_int     *adja,nump,k,k1;
+  int          base,ilist,cur;
+  int8_t       j,l,i;
 
   base = ++mesh->base;
   pt   = &mesh->tetra[start];
@@ -157,12 +157,12 @@ int MMG5_boulenm(MMG5_pMesh mesh,MMG5_int start,int ip,int iface,
                   double n[3],double t[3]) {
   MMG5_pTetra   pt;
   MMG5_pPoint   p0,p1,ppt;
-  double   dd,nt[3],l0,l1;
-  int      base,nr,nnm;
-  MMG5_int     nump,k,*adja,piv,nvstart,aux,na,nb,adj,fstart,ip0,ip1;
-  int16_t  tag;
-  int8_t   iopp,ipiv,indb,inda,i,isface;
-  int8_t   indedg[4][4] = { {-1,0,1,2}, {0,-1,3,4}, {1,3,-1,5}, {2,4,5,-1} };
+  double        dd,nt[3],l0,l1;
+  int           base,nr,nnm;
+  MMG5_int      nump,k,*adja,piv,nvstart,aux,na,nb,adj,fstart,ip0,ip1;
+  int16_t       tag;
+  int8_t        iopp,ipiv,indb,inda,i,isface;
+  int8_t        indedg[4][4] = { {-1,0,1,2}, {0,-1,3,4}, {1,3,-1,5}, {2,4,5,-1} };
 
   base = ++mesh->base;
   nr  = nnm = 0;
@@ -320,8 +320,8 @@ int MMG5_boulenmInt(MMG5_pMesh mesh,MMG5_int start,int ip,double t[3]) {
   MMG5_pPoint    p0,p1,ppt;
   double         l0,l1,dd;
   int            base,cur,ilist;
-  MMG5_int        kk,ip0,ip1,na,nb,k,*adja,nump;
-  MMG5_int            list[MMG3D_LMAX+2];
+  MMG5_int       kk,ip0,ip1,na,nb,k,*adja,nump;
+  MMG5_int       list[MMG3D_LMAX+2];
   int8_t         i,j,ii,ie;
   
   base = ++mesh->base;
@@ -454,9 +454,9 @@ int MMG5_boulernm(MMG5_pMesh mesh,MMG5_Hash *hash,MMG5_int start,int ip,int *ng,
   MMG5_pTetra    pt,pt1;
   MMG5_pxTetra   pxt;
   MMG5_hedge    *ph;
-  MMG5_int            *adja,nump,k,k1;
+  MMG5_int       *adja,nump,k,k1;
   int            ns,ilist,base,cur;
-  MMG5_int            list[MMG3D_LMAX+2],ia,ib,a,b;
+  MMG5_int       list[MMG3D_LMAX+2],ia,ib,a,b;
   int            key,jj;
   int8_t         j,l,i;
   uint8_t        ie;
@@ -597,11 +597,11 @@ int MMG5_boulernm(MMG5_pMesh mesh,MMG5_Hash *hash,MMG5_int start,int ip,int *ng,
 int MMG5_boulesurfvolp(MMG5_pMesh mesh,MMG5_int start,int ip,int iface,
                         MMG5_int *listv,int *ilistv,MMG5_int *lists,int*ilists, int isnm)
 {
-  MMG5_pTetra  pt,pt1;
-  MMG5_pxTetra pxt;
-  int  base;
-  MMG5_int k,*adja,nump,k1,fstart,piv,na,nb,adj,nvstart,aux,cur;
-  int8_t iopp,ipiv,i,j,l,isface;
+  MMG5_pTetra   pt,pt1;
+  MMG5_pxTetra  pxt;
+  int           base;
+  MMG5_int      k,*adja,nump,k1,fstart,piv,na,nb,adj,nvstart,aux,cur;
+  int8_t        iopp,ipiv,i,j,l,isface;
   static int8_t mmgErr0=0, mmgErr1=0, mmgErr2=0;
 
   if ( isnm ) assert(!mesh->adja[4*(start-1)+iface+1]);
@@ -759,11 +759,11 @@ int MMG5_boulesurfvolp(MMG5_pMesh mesh,MMG5_int start,int ip,int iface,
 int MMG5_boulesurfvolpNom(MMG5_pMesh mesh,MMG5_int start,int ip,int iface,
                        MMG5_int *listv,int *ilistv,MMG5_int *lists,int *ilists,int *refmin,int *refplus,int isnm)
 {
-  MMG5_pTetra  pt,pt1;
-  MMG5_pxTetra pxt;
-  int  base;
-  MMG5_int k,k1,nump,*adja,piv,na,nb,adj,cur,nvstart,fstart,aux;
-  int8_t iopp,ipiv,i,j,l,isface;
+  MMG5_pTetra   pt,pt1;
+  MMG5_pxTetra  pxt;
+  int           base;
+  MMG5_int      k,k1,nump,*adja,piv,na,nb,adj,cur,nvstart,fstart,aux;
+  int8_t        iopp,ipiv,i,j,l,isface;
   static int8_t mmgErr0=0, mmgErr1=0, mmgErr2=0;
   
   if ( isnm ) assert(!mesh->adja[4*(start-1)+iface+1]);
@@ -943,8 +943,8 @@ int MMG5_bouletrid(MMG5_pMesh mesh,MMG5_int start,int iface,int ip,int *il1,MMG5
   MMG5_pTetra          pt;
   MMG5_pxTetra         pxt;
   MMG5_pPoint          ppt;
-  MMG5_int                  k,*adja,*list1,*list2,aux;
-  MMG5_int                  lists[MMG3D_LMAX+2];
+  MMG5_int             k,*adja,*list1,*list2,aux;
+  MMG5_int             lists[MMG3D_LMAX+2];
   int                  ilists, base, iopp, ipiv,*ilist1,*ilist2;
   int                  idp,na, nb, piv, fstart, nvstart, adj;
   int                  ifac,idx,idx2,idx_tmp,i1,isface;
@@ -1154,7 +1154,7 @@ int MMG5_bouletrid(MMG5_pMesh mesh,MMG5_int start,int iface,int ip,int *il1,MMG5
 int MMG5_settag(MMG5_pMesh mesh,MMG5_int start,int ia,int16_t tag,int edg) {
   MMG5_pTetra        pt;
   MMG5_pxTetra       pxt;
-  MMG5_int                na,nb,*adja,adj,piv;
+  MMG5_int           na,nb,*adja,adj,piv;
   int16_t            taginit;
   int8_t             i;
 
@@ -1272,7 +1272,7 @@ int MMG5_settag(MMG5_pMesh mesh,MMG5_int start,int ia,int16_t tag,int edg) {
 int MMG5_deltag(MMG5_pMesh mesh,MMG5_int start,int ia,int16_t tag) {
   MMG5_pTetra        pt;
   MMG5_pxTetra       pxt;
-  MMG5_int                na,nb,*adja,adj,piv;
+  MMG5_int           na,nb,*adja,adj,piv;
   int8_t             i;
 
   assert( start >= 1 );
@@ -1366,10 +1366,10 @@ int MMG5_deltag(MMG5_pMesh mesh,MMG5_int start,int ia,int16_t tag) {
  *
  */
 int MMG5_coquil(MMG5_pMesh mesh,MMG5_int start,int ia,MMG5_int * list) {
-  MMG5_pTetra pt;
-  MMG5_int     *adja,piv,adj,na,nb;
-  int         ilist;
-  int8_t      i;
+  MMG5_pTetra   pt;
+  MMG5_int      *adja,piv,adj,na,nb;
+  int           ilist;
+  int8_t        i;
   static int8_t mmgErr0=0, mmgErr1=0;
 
   assert ( start >= 1 );
@@ -1508,7 +1508,7 @@ int MMG5_srcbdy(MMG5_pMesh mesh,MMG5_int start,int ia) {
   MMG5_pTetra      pt;
   MMG5_pxTetra     pxt;
   MMG5_int         na,nb,adj,piv,*adja;
-  int8_t      iadj,i;
+  int8_t           iadj,i;
 
   pt = &mesh->tetra[start];
   na = pt->v[MMG5_iare[ia][0]];
@@ -1564,8 +1564,8 @@ int MMG5_srcbdy(MMG5_pMesh mesh,MMG5_int start,int ia) {
  *
  */
  void MMG5_coquilFaceErrorMessage(MMG5_pMesh mesh, MMG5_int k1, MMG5_int k2) {
-  MMG5_pTetra pt;
-  MMG5_int         kel1, kel2;
+  MMG5_pTetra   pt;
+  MMG5_int      kel1, kel2;
   static int8_t mmgErr0;
 
   if ( mmgErr0 ) return;
@@ -1641,7 +1641,7 @@ int MMG3D_coquilFaceFirstLoop(MMG5_pMesh mesh,MMG5_int start,MMG5_int na,MMG5_in
                                MMG5_int *piv,MMG5_int *adj,int8_t *hasadja,int *nbdy,int silent) {
 
   MMG5_pTetra   pt;
-  MMG5_int           pradj,*adja;
+  MMG5_int      pradj,*adja;
   int           pri,ier,ifar_idx;
   int8_t        i;
   static int8_t mmgErr0 = 0;
@@ -1790,7 +1790,7 @@ void MMG3D_coquilFaceSecondLoopInit(MMG5_pMesh mesh,MMG5_int piv,int8_t *iface,
 int MMG5_coquilface(MMG5_pMesh mesh,MMG5_int start,int8_t iface,int ia,MMG5_int *list,
                      MMG5_int *it1,MMG5_int *it2, int silent) {
   MMG5_pTetra   pt;
-  MMG5_int           piv,adj,na,nb,pradj;
+  MMG5_int      piv,adj,na,nb,pradj;
   int           ier,nbdy,ilist;
   int8_t        hasadja,i;
   static int8_t mmgErr0=0,mmgErr1=0,mmgWarn0=0;
@@ -1902,7 +1902,7 @@ int16_t MMG5_coquilTravel(MMG5_pMesh mesh, MMG5_int na, MMG5_int nb, MMG5_int* a
 {
   MMG5_pTetra  pt;
   MMG5_pxTetra pxt;
-  MMG5_int          *adja;
+  MMG5_int     *adja;
   int16_t      isbdy;
 
   pt = &mesh->tetra[*adj];
@@ -1953,7 +1953,7 @@ int16_t MMG5_openCoquilTravel(MMG5_pMesh mesh,MMG5_int na,MMG5_int nb,MMG5_int* 
                               int8_t *iface, int8_t *i )
 {
   MMG5_pTetra  pt;
-  MMG5_int          *adja;
+  MMG5_int     *adja;
 
   pt = &mesh->tetra[*adj];
 

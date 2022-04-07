@@ -48,7 +48,7 @@ extern int8_t ddb;
 int MMG3D_tetraQual(MMG5_pMesh mesh, MMG5_pSol met,int8_t metRidTyp) {
   MMG5_pTetra pt;
   double      minqual;
-  MMG5_int         k,iel;
+  MMG5_int    k,iel;
 
   minqual = 2./MMG3D_ALPHAD;
 
@@ -99,7 +99,7 @@ inline double MMG5_caltet33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt) {
   double       *a,*b,*c,*d;
   double       mm[6];
   int          iad0,iad1,iad2,iad3;
-  MMG5_int      ip[4],k;
+  MMG5_int     ip[4],k;
 
   ip[0] = pt->v[0];
   ip[1] = pt->v[1];
@@ -212,7 +212,7 @@ int MMG3D_computePrilen( MMG5_pMesh mesh, MMG5_pSol met, double* avlen,
   MMG5_pPoint     ppt;
   MMG5_Hash       hash;
   double          len;
-  MMG5_int             k,np,nq,n;
+  MMG5_int        k,np,nq,n;
   int8_t          ia,i0,i1,ier,i;
   static double   bd[9]= {0.0, 0.3, 0.6, 0.7071, 0.9, 1.3, 1.4142, 2.0, 5.0};
 
@@ -324,10 +324,10 @@ int MMG3D_computePrilen( MMG5_pMesh mesh, MMG5_pSol met, double* avlen,
  */
 int MMG3D_prilen(MMG5_pMesh mesh, MMG5_pSol met, int8_t metRidTyp) {
   return 1;
-  double avlen, lmin, lmax;
-  int    ned, nullEdge, hl[9];
+  double     avlen, lmin, lmax;
+  int        ned, nullEdge, hl[9];
   MMG5_int   amin, bmin, amax, bmax; 
-  double *bd;
+  double     *bd;
 
   if (!MMG3D_computePrilen( mesh, met, &avlen, &lmin, &lmax, &ned, &amin,
                             &bmin, &amax, &bmax, &nullEdge, metRidTyp, &bd, hl ) )
@@ -362,7 +362,7 @@ void MMG3D_computeLESqua(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *ne,double *max,
                          double *min,MMG5_int *iel,MMG5_int *good,MMG5_int *med,int his[5],int imprim) {
   MMG5_pTetra    pt;
   double         rap;
-  MMG5_int        k,ok,nex;
+  MMG5_int       k,ok,nex;
   static int8_t  mmgWarn0=0;
 
   /*compute tet quality*/
@@ -481,7 +481,7 @@ int MMG3D_displayQualHisto_internal(MMG5_int ne,double max,double avg,double min
                                     int imprim)
 {
   const double les_ticks[6] = {0,0.6,0.9,0.93,0.99,1};
-  int i,imax;
+  int          i,imax;
 
   if ( abs(imprim) >= 3 ){
     if ( optimLES ) {
@@ -545,7 +545,7 @@ void MMG3D_computeInqua(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *ne,double *max,d
                         double *min,MMG5_int *iel,MMG5_int *good,MMG5_int *med,int his[5],int imprim) {
   MMG5_pTetra   pt;
   double        rap;
-  MMG5_int       k,ok,nex;
+  MMG5_int      k,ok,nex;
   int           ir;
   static int8_t mmgWarn0 = 0;
 
@@ -616,7 +616,7 @@ void MMG3D_computeInqua(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *ne,double *max,d
 int MMG3D_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
   double      rapmin,rapmax,rapavg;
   int         k,his[5];
-  MMG5_int     med,good,iel,ne;
+  MMG5_int    med,good,iel,ne;
 
   ne = iel = good = med = 0;
   for ( k=0; k<5; ++k ) {
@@ -669,7 +669,7 @@ void MMG3D_computeOutqua(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *ne,double *max,
   MMG5_pPoint   ppt;
   double        rap;
   int           i,ir,n;
-  MMG5_int       k,ok,nex;
+  MMG5_int      k,ok,nex;
   static int8_t mmgWarn0 = 0;
 
   /*compute tet quality*/
@@ -750,7 +750,7 @@ int MMG3D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
   return 1;
   double      rapmin,rapmax,rapavg;
   int         k,his[5];
-  MMG5_int     med,good,iel,ne,nrid;
+  MMG5_int    med,good,iel,ne,nrid;
 
   nrid = ne = iel = good = med = 0;
   for ( k=0; k<5; ++k ) {
@@ -795,13 +795,13 @@ int MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcibl
   double      len;
   int         ia,ipa,ipb,lon,l;
   //int   npbdry;
-  int        *pdel,lenint,loc,nedel,longen;
+  int         *pdel,lenint,loc,nedel,longen;
   //int      isbdry;
-  double   dned,dnface,dnint/*,dnins*/,w,lenavg,lent[6];
-  double   dnpdel,dnadd,leninv,dnaddloc,dnpdelloc;
-  int      ddebug=0,ib,nv;
-  MMG5_int  k,list[MMG3D_LMAX];
-  long     nptot;
+  double      dned,dnface,dnint/*,dnins*/,w,lenavg,lent[6];
+  double      dnpdel,dnadd,leninv,dnaddloc,dnpdelloc;
+  int         ddebug=0,ib,nv;
+  MMG5_int    k,list[MMG3D_LMAX];
+  long        nptot;
   //FILE *inm;
 
   pdel = (int*) calloc(mesh->np+1,sizeof(int));

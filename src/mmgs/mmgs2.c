@@ -54,7 +54,7 @@ static int
 MMGS_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_int start, int8_t istart) {
   MMG5_pTria       pt;
   double           v1, v2;
-  MMG5_int              *adja,k,ip1,ip2,end1;
+  MMG5_int         *adja,k,ip1,ip2,end1;
   int8_t           i,i1,smsgn;
   static int8_t    mmgWarn=0;
 
@@ -140,9 +140,9 @@ int MMGS_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTria    pt;
   MMG5_pPoint   p0;
   double        *tmp,v1,v2;
-  MMG5_int           nc,ns,ip;
+  MMG5_int      nc,ns,ip;
   int8_t        i;
-  MMG5_int       k,ip1,ip2;
+  MMG5_int      k,ip1,ip2;
 
   MMG5_ADD_MEM(mesh,(mesh->npmax+1)*sizeof(double),"temporary table",
                 fprintf(stderr,"  Exit program.\n");
@@ -222,7 +222,7 @@ int MMGS_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
  *
  */
 int MMGS_chkmaniball(MMG5_pMesh mesh, MMG5_int start, int8_t istart) {
-  MMG5_int                *adja,k;
+  MMG5_int           *adja,k;
   int8_t             i,i1;
 
   k = start;
@@ -317,7 +317,7 @@ int MMGS_chkmaniball(MMG5_pMesh mesh, MMG5_int start, int8_t istart) {
 static
 int MMGS_chkmanimesh(MMG5_pMesh mesh) {
   MMG5_pTria      pt;
-  MMG5_int             *adja,k;
+  MMG5_int        *adja,k;
   int             cnt,iel;
   int8_t          i,i1;
   static int8_t   mmgWarn0 = 0;
@@ -389,10 +389,10 @@ int MMGS_chkmanimesh(MMG5_pMesh mesh) {
 static int MMGS_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
   MMG5_pTria   pt;
   MMG5_pPoint  p0,p1;
-  MMG5_Hash   hash;
+  MMG5_Hash    hash;
   double       c[3],v0,v1,s;
-  MMG5_int          vx[3],k,np;
-  MMG5_int          ip0,ip1,ns,nt,ier,nb;
+  MMG5_int     vx[3],k,np;
+  MMG5_int     ip0,ip1,ns,nt,ier,nb;
   int8_t       ia;
   /* reset point flags and h */
   for (k=1; k<=mesh->np; k++)
@@ -552,7 +552,7 @@ static int MMGS_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
 static int MMGS_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol) {
   MMG5_pTria   pt;
   double       v,v1;
-  MMG5_int          k,ip,ip1;
+  MMG5_int     k,ip,ip1;
   int8_t       nmns,npls,nz,i;
 
   for (k=1; k<=mesh->nt; k++) {

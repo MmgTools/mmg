@@ -49,7 +49,7 @@ int MMG2D_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
   double         dd,isqhmin,isqhmax;
   double         *m;
   double         lambda[2],v[2][2];
-  MMG5_int            i,k,iadr;
+  MMG5_int       i,k,iadr;
   int8_t         sethmin,sethmax;
   static int8_t  mmgWarn0=0, mmgWarn1=0;
 

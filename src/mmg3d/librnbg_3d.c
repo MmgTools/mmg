@@ -112,18 +112,18 @@ void MMG5_swapTet(MMG5_pTetra tetras/*, int* adja*/, MMG5_int* perm, MMG5_int in
  */
 int MMG5_mmg3dRenumbering(MMG5_int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol,
                           MMG5_pSol fields,MMG5_int* permNodGlob) {
-  MMG5_pPoint ppt;
-  MMG5_pTetra ptet;
-  MMG5_pPrism pp;
-  SCOTCH_Num  edgeNbr;
-  SCOTCH_Num  *vertTab, *edgeTab, *permVrtTab;
+  MMG5_pPoint  ppt;
+  MMG5_pTetra  ptet;
+  MMG5_pPrism  pp;
+  SCOTCH_Num   edgeNbr;
+  SCOTCH_Num   *vertTab, *edgeTab, *permVrtTab;
   SCOTCH_Graph graf ;
-  MMG5_int    vertNbr, nodeGlbIdx, tetraIdx, ballTetIdx;
-  int    i;
+  MMG5_int     vertNbr, nodeGlbIdx, tetraIdx, ballTetIdx;
+  int          i;
   MMG5_int     j, k;
-  MMG5_int    edgeSiz;
-  MMG5_int    *vertOldTab, *permNodTab, nereal, npreal;
-  MMG5_int    *adja,iadr;
+  MMG5_int     edgeSiz;
+  MMG5_int     *vertOldTab, *permNodTab, nereal, npreal;
+  MMG5_int     *adja,iadr;
 
 
   /* Computing the number of vertices and a contiguous tabular of vertices */

@@ -44,7 +44,7 @@
  */
 static int paktri(MMG5_pMesh mesh) {
   MMG5_pTria   pt,pt1;
-  MMG5_int          k;
+  MMG5_int     k;
 
   k = 1;
   do {
@@ -114,7 +114,7 @@ int MMGS_assignEdge(MMG5_pMesh mesh) {
   MMG5_Hash  hash;
   MMG5_pTria  pt;
   MMG5_pEdge  pa;
-  MMG5_int         k,ia;
+  MMG5_int    k,ia;
   int8_t      i,i1,i2;
 
   if ( !mesh->na ) return 1;
@@ -169,7 +169,7 @@ int MMGS_assignEdge(MMG5_pMesh mesh) {
 int MMGS_bdryUpdate(MMG5_pMesh mesh) {
   MMG5_Hash   hash;
   MMG5_pTria  pt;
-  MMG5_int         k,tag,nad;
+  MMG5_int    k,tag,nad;
   int8_t      i,i1,i2;
 
   /* adjust hash table params */

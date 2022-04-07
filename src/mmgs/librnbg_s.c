@@ -49,7 +49,7 @@
 static inline
 void MMG5_swapTri(MMG5_pTria trias, MMG5_int* perm, MMG5_int ind1, MMG5_int ind2) {
   MMG5_Tria pttmp;
-  MMG5_int   tmp;
+  MMG5_int  tmp;
 
   /* 2-- swap the triangles */
   memcpy(&pttmp       ,&trias[ind2],sizeof(MMG5_Tria));
@@ -78,17 +78,17 @@ void MMG5_swapTri(MMG5_pTria trias, MMG5_int* perm, MMG5_int ind1, MMG5_int ind2
  */
 int MMG5_mmgsRenumbering(MMG5_int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol,
                          MMG5_pSol fields,MMG5_int* permNodGlob) {
-  MMG5_pPoint ppt;
-  MMG5_pTria ptri;
-  SCOTCH_Num edgeNbr;
-  SCOTCH_Num *vertTab, *edgeTab, *permVrtTab;
+  MMG5_pPoint  ppt;
+  MMG5_pTria   ptri;
+  SCOTCH_Num   edgeNbr;
+  SCOTCH_Num   *vertTab, *edgeTab, *permVrtTab;
   SCOTCH_Graph graf ;
-  MMG5_int    vertNbr, nodeGlbIdx, triaIdx, ballTriIdx;
-  int    i;
-  MMG5_int    j, k;
-  int    edgeSiz;
-  MMG5_int    *vertOldTab, *permNodTab, ntreal, npreal;
-  MMG5_int    *adja,iadr;
+  MMG5_int     vertNbr, nodeGlbIdx, triaIdx, ballTriIdx;
+  int          i;
+  MMG5_int     j, k;
+  int          edgeSiz;
+  MMG5_int     *vertOldTab, *permNodTab, ntreal, npreal;
+  MMG5_int     *adja,iadr;
 
 
   /* Computing the number of vertices and a contiguous tabular of vertices */

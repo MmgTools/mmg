@@ -159,7 +159,7 @@ int MMGS_simbulgept(MMG5_pMesh mesh,MMG5_pSol met, MMG5_int k,int i,MMG5_int ip)
   MMG5_pTria     pt,pt0;
   MMG5_pPoint    ppt0;
   double         cal;
-  MMG5_int            kadja;
+  MMG5_int       kadja;
   int            iadja,is;
 
   pt0  = &mesh->tria[0];
@@ -224,9 +224,9 @@ int split1b(MMG5_pMesh mesh,MMG5_int k,int8_t i,MMG5_int ip) {
   MMG5_Bezier    b;
   MMG5_pxPoint   go;
   double         uv[2],o[3],no[3],to[3];
-  MMG5_int            *adja,iel,jel,kel,mel,ier;
+  MMG5_int       *adja,iel,jel,kel,mel,ier;
   int8_t         i1,i2,j,j1,j2,m;
-  static int8_t mmgErr0=0,mmgErr1=0;
+  static int8_t  mmgErr0=0,mmgErr1=0;
 
   iel = MMGS_newElt(mesh);
   if ( !iel )  {
@@ -430,7 +430,7 @@ int MMG5_split2_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int *vx) {
 int MMGS_split2(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int *vx) {
   MMG5_pTria    pt,pt1,pt2;
   MMG5_pPoint   p3,p4;
-  MMG5_int           iel,jel;
+  MMG5_int      iel,jel;
   int8_t        i,i1,i2;
 
   /* create 2 elements */
@@ -591,7 +591,7 @@ int MMGS_split3_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int *vx) {
 int MMGS_split3(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int *vx) {
   MMG5_pTria    pt,pt1,pt2,pt3;
   MMG5_pPoint   p3,p4,p5;
-  MMG5_int           iel,jel,kel;
+  MMG5_int      iel,jel,kel;
 
   /* create 3 elements */
   iel = MMGS_newElt(mesh);

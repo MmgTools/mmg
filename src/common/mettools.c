@@ -252,8 +252,8 @@ int MMG5_buildridmetnor(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int np0,double nt[3],
  *
  */
 int MMG5_intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr) {
-  double  det,imn[4],dd,sqDelta,trimn,lambda[2],vp0[2],vp1[2],dm[2],dn[2],vnorm,d0,d1,ip[4];
-  double  isqhmin,isqhmax;
+  double        det,imn[4],dd,sqDelta,trimn,lambda[2],vp0[2],vp1[2],dm[2],dn[2],vnorm,d0,d1,ip[4];
+  double        isqhmin,isqhmax;
   static int8_t mmgWarn = 0, mmgWarn1 = 0;
 
   isqhmin  = 1.0 / (mesh->info.hmin*mesh->info.hmin);

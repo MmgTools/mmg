@@ -58,7 +58,7 @@ MMG5_int MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int start,int ia,
   MMG5_pPoint    p0;
   double         calold,calnew,caltmp;
   int            npol,refdom,k,l;
-  MMG5_int        np,na,nb,piv,*adja,adj,pol[MMG3D_LMAX+2],iel;
+  MMG5_int       np,na,nb,piv,*adja,adj,pol[MMG3D_LMAX+2],iel;
   int8_t         i,ip,ier,ifac;
 
   pt  = &mesh->tetra[start];
@@ -247,11 +247,11 @@ int MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,MMG5_int *list
                  MMG3D_pPROctree PROctree, int8_t typchk) {
   MMG5_pTetra    pt;
   MMG5_pPoint    p0,p1;
-  int       nball,src,ret,start;
-  MMG5_int   iel,na,nb,np;
-  double    m[3];
-  int8_t    ia,ip,iq;
-  int       ier;
+  int            nball,src,ret,start;
+  MMG5_int       iel,na,nb,np;
+  double         m[3];
+  int8_t         ia,ip,iq;
+  int            ier;
 
   iel = list[0] / 6;
   ia  = list[0] % 6;

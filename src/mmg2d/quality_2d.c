@@ -96,7 +96,7 @@ double MMG2D_caltri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt) {
   double     abx,aby,acx,acy,bcx,bcy;
   double     *a,*b,*c,*ma,*mb,*mc;
   double     area,aream,hm,m[6],h1,h2,h3;
-  MMG5_int        ipa,ipb,ipc;
+  MMG5_int   ipa,ipb,ipc;
   int        i;
 
   ipa = pt->v[0];
@@ -158,7 +158,7 @@ int MMG2D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria    pt;
   double        rap,rapmin,rapmax,rapavg,med,good;
   int           i,iel,ok,ir,imax,nex,his[5];
-  MMG5_int       k;
+  MMG5_int      k;
   static int8_t mmgWarn0;
 
   /* Compute triangle quality*/

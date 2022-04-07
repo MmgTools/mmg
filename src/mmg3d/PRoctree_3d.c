@@ -223,8 +223,8 @@ int64_t MMG3D_getPROctreeCoordinate(MMG3D_pPROctree q, double* ver, int dim)
 int MMG3D_movePROctree(MMG5_pMesh mesh, MMG3D_pPROctree q, MMG5_int no, double* newVer, double* oldVer)
 {
   int64_t oldCoor, newCoor;
-  double pt[3];
-  int dim;
+  double  pt[3];
+  int     dim;
 
   dim = mesh->dim;
 
@@ -772,8 +772,8 @@ int MMG3D_addPROctreeRec(MMG5_pMesh mesh, MMG3D_PROctree_s* q, double* ver,
  */
 int MMG3D_addPROctree(MMG5_pMesh mesh, MMG3D_pPROctree q, const MMG5_int no)
 {
-  double pt[3];
-  MMG5_int    dim;
+  double    pt[3];
+  int       dim;
 
   dim = mesh->dim;
   assert(no<=mesh->np);
@@ -1138,13 +1138,13 @@ int* MMG3D_sizeArbre(MMG3D_pPROctree q,int dim)
  *
  */
 int MMG3D_PROctreein_iso(MMG5_pMesh mesh,MMG5_pSol sol,MMG3D_pPROctree PROctree,MMG5_int ip,double lmax) {
-  MMG5_pPoint     ppt,pp1;
+  MMG5_pPoint      ppt,pp1;
   MMG3D_PROctree_s **lococ;
-  double          d2,ux,uy,uz,hpi,hp1,hpi2,methalo[6];
-  int             i,j;
+  double           d2,ux,uy,uz,hpi,hp1,hpi2,methalo[6];
+  int              i,j;
   MMG5_int         ip1;
-  int             ncells;
-  double          ani[6];
+  int              ncells;
+  double           ani[6];
   //double          dmax;
 
   ani[0] = sol->m[ip];
@@ -1219,13 +1219,13 @@ int MMG3D_PROctreein_iso(MMG5_pMesh mesh,MMG5_pSol sol,MMG3D_pPROctree PROctree,
  *
  */
 int MMG3D_PROctreein_ani(MMG5_pMesh mesh,MMG5_pSol sol,MMG3D_pPROctree PROctree,MMG5_int ip,double lmax) {
-  MMG5_pPoint     ppt,pp1;
+  MMG5_pPoint      ppt,pp1;
   MMG3D_PROctree_s **lococ;
-  double          d2,ux,uy,uz,methalo[6];
-  double          det,dmi, *ma, *mb,m1,m2,m3,dx,dy,dz;
-  int             i,j;
+  double           d2,ux,uy,uz,methalo[6];
+  double           det,dmi, *ma, *mb,m1,m2,m3,dx,dy,dz;
+  int              i,j;
   MMG5_int         ip1,iadr;
-  int             ncells;
+  int              ncells;
   // double          dmax;
 
   lococ = NULL;

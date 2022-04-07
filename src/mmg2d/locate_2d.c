@@ -214,7 +214,7 @@ int MMG2D_cutEdgeTriangle(MMG5_pMesh mesh,MMG5_int k,MMG5_int ia,MMG5_int ib) {
 /** Return the index of one triangle containing ip */
 int MMG2D_findTria(MMG5_pMesh mesh,MMG5_int ip) {
   MMG5_pTria    pt,pt1;
-  MMG5_int           iel,base,iadr,*adja,iter,ier;
+  MMG5_int      iel,base,iadr,*adja,iter,ier;
   int           mvDir[3],jel,i;
   double        l1,l2,l3,det,eps;
   static int8_t mmgWarn0 = 0;
@@ -325,7 +325,7 @@ int MMG2D_locateEdge(MMG5_pMesh mesh,MMG5_int ia,MMG5_int ib,MMG5_int* kdep,MMG5
   MMG5_pPoint        ppt1,ppt2,ppt3,ppt4,ppa,ppb;
   double             a[3],a11,a21,a12,a22,area1,area2,area3,prod1,prod2,prod3;
   double             niaib,npti;
-  MMG5_int                iadr,*adja,k,ibreak,i,ncompt,lon,iare,ivert;
+  MMG5_int           iadr,*adja,k,ibreak,i,ncompt,lon,iare,ivert;
   static int8_t      mmgWarn=0;
   //int       ktemp;
 

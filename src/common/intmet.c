@@ -503,7 +503,7 @@ int MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,int8_t i,
   double         m1old[6],m2old[6],m1[6],m2[6],rbasis[3][3];
   double         *n1,*n2,step,u,r[3][3],dd,ddbn;
   int            nstep,l;
-  MMG5_int        ip1,ip2;
+  MMG5_int       ip1,ip2;
   int8_t         i1,i2;
   static int     warn=0;
 

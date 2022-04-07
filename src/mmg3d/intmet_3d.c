@@ -55,7 +55,7 @@ int MMG5_intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t i,MMG5_int i
   MMG5_pPoint   ppt;
   MMG5_pxPoint  pxp;
   double        *m;
-  MMG5_int           ip1,ip2;
+  MMG5_int      ip1,ip2;
 
   pt = &mesh->tetra[k];
   m  = &met->m[6*ip];
@@ -102,7 +102,7 @@ int MMG3D_intmet33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t i,MMG5_in
                       double s) {
   MMG5_pTetra   pt;
   double        *m,*n,*mr;
-  MMG5_int           ip1,ip2;
+  MMG5_int      ip1,ip2;
 
   pt = &mesh->tetra[k];
   ip1 = pt->v[MMG5_iare[i][0]];
@@ -131,7 +131,7 @@ int MMG3D_intmet33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t i,MMG5_in
 int MMG5_intmet_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t i,MMG5_int ip,
                       double s) {
   MMG5_pTetra   pt;
-  MMG5_int           ip1, ip2;
+  MMG5_int      ip1, ip2;
   double        *m1,*m2,*mm;
 
   pt = &mesh->tetra[k];
@@ -251,7 +251,7 @@ int MMG5_intvolmet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t i,double s,
   MMG5_pTetra     pt;
   MMG5_pPoint     pp1,pp2;
   double          m1[6],m2[6];
-  MMG5_int             ip1,ip2;
+  MMG5_int        ip1,ip2;
   int             l,ier;
 
   pt  = &mesh->tetra[k];

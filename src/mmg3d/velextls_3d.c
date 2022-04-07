@@ -62,7 +62,7 @@ MMG5_int* MMG5_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,MMG5_int *npfin)
   MMG5_pPoint    p0;
   double         u[3];
   int            n,nlay,ilist,ilisto,ilistck;
-  MMG5_int        k,ip,npf,ntf,iel,jel,*perm,*invperm,*adja,*list,vper[4];
+  MMG5_int       k,ip,npf,ntf,iel,jel,*perm,*invperm,*adja,*list,vper[4];
   int            refdirh,refdirnh;
   int8_t         i,j,jface;
 
@@ -360,7 +360,7 @@ MMG5_int* MMG5_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,MMG5_int *npfin)
  */
 int MMG5_unpackLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,MMG5_int npf,MMG5_int *invperm) {
   double     *u;
-  MMG5_int    ip,k;
+  MMG5_int   ip,k;
   int8_t     i;
 
   u = LS_getSol(lsst);
@@ -391,7 +391,7 @@ int MMG5_unpackLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,MMG5_int npf,MMG5_in
  */
 int MMG5_velextLS(MMG5_pMesh mesh,MMG5_pSol disp) {
   LSst        *lsst;
-  MMG5_int         npf,*invperm;
+  MMG5_int    npf,*invperm;
 
   /* Creation of the data structure for the submesh */
   lsst    = LS_init(mesh->dim,mesh->ver,P1,1);

@@ -480,7 +480,7 @@ int MMG2D_Set_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol *sol,int nsols,
                                  MMG5_int np, int *typSol) {
   MMG5_pSol psl;
   char      data[18];
-  MMG5_int       j;
+  MMG5_int  j;
 
   if ( ( (mesh->info.imprim > 5) || mesh->info.ddebug ) && mesh->nsols ) {
     if ( *sol ) {
@@ -549,7 +549,7 @@ int MMG2D_Get_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int* typEntity, MMG5_int* 
 int MMG2D_Get_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol *sol, int *nsols,
                                  MMG5_int* np, int* typSol) {
   MMG5_pSol psl;
-  MMG5_int       j;
+  MMG5_int  j;
 
   if ( !mesh ) {
     fprintf(stderr,"\n  ## Error: %s: your mesh structure must be allocated"
@@ -993,7 +993,7 @@ int  MMG2D_Set_triangles(MMG5_pMesh mesh, MMG5_int *tria, int *refs) {
 int  MMG2D_Get_triangles(MMG5_pMesh mesh, MMG5_int* tria, int* refs,
                          int* areRequired) {
   MMG5_pTria ptt;
-  MMG5_int        i, j;
+  MMG5_int   i, j;
 
   for (i=1;i<=mesh->nt;i++)
   {

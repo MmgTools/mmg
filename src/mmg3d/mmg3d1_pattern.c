@@ -49,14 +49,14 @@
  *
  */
 static MMG5_int MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
- MMG5_pTetra  pt;
- MMG5_pxTetra pxt;
- MMG5_pPoint  p0,p1;
- double       len,lmax,o[3];
+ MMG5_pTetra   pt;
+ MMG5_pxTetra  pxt;
+ MMG5_pPoint   p0,p1;
+ double        len,lmax,o[3];
  MMG5_int      ns,k,ip,ip1,ip2,list[MMG3D_LMAX+2];
- int          ier,ilist,src;
- int8_t       imax,j,i,i1,i2,ifa0,ifa1;
- int8_t       chkRidTet;
+ int           ier,ilist,src;
+ int8_t        imax,j,i,i1,i2,ifa0,ifa1;
+ int8_t        chkRidTet;
  static int8_t mmgWarn    = 0;
 
   *warn=0;
@@ -186,7 +186,7 @@ static MMG5_int MMG5_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pxTetra  pxt;
   MMG5_pPoint   p0,p1;
   double        len,lmin;
-  MMG5_int       k,ip,iq,list[MMG3D_LMAX+2],lists[MMG3D_LMAX+2],nc;
+  MMG5_int      k,ip,iq,list[MMG3D_LMAX+2],lists[MMG3D_LMAX+2],nc;
   int           ilist,ier,ilists;
   int16_t       tag;
   int8_t        imin,j,i,i1,i2,ifa0,ifa1;
@@ -284,7 +284,7 @@ static MMG5_int MMG5_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
  */
 static int MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *permNodGlob) {
   int      it1,it,maxit;
-  MMG5_int  nf,nnf,nnm,nm,nnc,nc,nns,ns;
+  MMG5_int nf,nnf,nnm,nm,nnc,nc,nns,ns;
   int      warn;//,nw;
 
   /* Iterative mesh modifications */

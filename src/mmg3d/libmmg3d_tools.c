@@ -685,7 +685,7 @@ int MMG3D_Get_numberOfNonBdyTriangles(MMG5_pMesh mesh, MMG5_int* nb_tria) {
   MMG5_pTria  ptt;
   MMG5_Hash   hash;
   int         ref,i;
-  MMG5_int     *adja,j,k,iel;
+  MMG5_int    *adja,j,k,iel;
 
   *nb_tria = 0;
   memset ( &hash, 0x0, sizeof(MMG5_Hash));
@@ -1057,7 +1057,7 @@ int MMG3D_mmg3dcheck(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol,double critmin,
 void MMG3D_searchqua(MMG5_pMesh mesh,MMG5_pSol met,double critmin, MMG5_int *eltab,
                     int8_t metRidTyp) {
   MMG5_pTetra   pt;
-  double   rap;
+  double        rap;
   MMG5_int      k;
 
   assert ( met );
@@ -1103,7 +1103,7 @@ int MMG3D_Get_tetFromTria(MMG5_pMesh mesh, MMG5_int ktri, MMG5_int *ktet, int *i
 
 int MMG3D_Get_tetsFromTria(MMG5_pMesh mesh, MMG5_int ktri, MMG5_int ktet[2], int iface[2])
 {
-  int ier;
+  int      ier;
   MMG5_int itet;
 #ifndef NDEBUG
   MMG5_int ia0,ib0,ic0,ia1,ib1,ic1;
@@ -1151,7 +1151,7 @@ int MMG3D_searchlen(MMG5_pMesh mesh, MMG5_pSol met, double lmin,
   MMG5_pTetra pt;
   MMG5_Hash   hash;
   double      len;
-  MMG5_int         k,np,nq;
+  MMG5_int    k,np,nq;
   int8_t      ia,i0,i1,ier;
 
   /* Hash all edges in the mesh */
@@ -1212,8 +1212,8 @@ int MMG3D_doSol(MMG5_pMesh mesh,MMG5_pSol met) {
     MMG5_pPoint  p1,p2;
     double       ux,uy,uz,dd;
     int          i,type;
-    MMG5_int      k,iadr,ia,ib,ipa,ipb;
-    MMG5_int         *mark;
+    MMG5_int     k,iadr,ia,ib,ipa,ipb;
+    MMG5_int     *mark;
 
     MMG5_SAFE_CALLOC(mark,mesh->np+1,MMG5_int,return 0);
 
@@ -1367,7 +1367,7 @@ int MMG3D_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met) {
 
 int MMG3D_switch_metricStorage(MMG5_pMesh mesh, MMG5_pSol met) {
   MMG5_int    k;
-  double tmp;
+  double      tmp;
 
   if ( met->size!=6 ) { return 1; }
 

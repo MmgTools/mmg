@@ -75,7 +75,7 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,MMG5_in
   MMG5_pxPoint  pxp;
   double        dd,len,lmax,o[3],to[3],no1[3],no2[3],v[3];
   int           src,ilist,ilists,ref;
-  MMG5_int       k,ip1,ip2,ip,iq,list[MMG3D_LMAX+2],lists[MMG3D_LMAX+2];
+  MMG5_int      k,ip1,ip2,ip,iq,list[MMG3D_LMAX+2],lists[MMG3D_LMAX+2];
   int16_t       tag;
   int8_t        imax,j,i,i1,i2,ifa0,ifa1;
   int           lon,ret,ier;
@@ -839,7 +839,7 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,MMG5_in
 static int
 MMG5_optbad(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree) {
   int           it,maxit;
-  MMG5_int       nf,nnf,nnm,nm,nw;
+  MMG5_int      nf,nnf,nnm,nm,nw;
   double        crit;
 
   /* shape optim */
@@ -916,7 +916,7 @@ static int
 MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree *PROctree, int* warn) {
   int        nfilt,ifilt,ier;
   int        it,maxit,noptim;
-  MMG5_int    ns,nc,ne,nnm,nm,nnf,nf,nnc,nns;
+  MMG5_int   ns,nc,ne,nnm,nm,nnf,nf,nnc,nns;
   double     maxgap,dd,declic,declicsurf;
 
   /* Iterative mesh modifications */
@@ -1028,9 +1028,9 @@ MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree *PROctree, int* war
  */
 static int
 MMG5_optetLES(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree) {
-  int it,maxit;
+  int       it,maxit;
   MMG5_int  nnf,nf,nw,nm,nnm;
-  double declic;
+  double    declic;
 
   it = nnm = nnf = 0;
   maxit = 10;
@@ -1124,7 +1124,7 @@ static int
 MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree) {
   MMG5_pTetra   pt;
   int           it,maxit;
-  MMG5_int       nnf,nf,nw,k,nnm,nm;
+  MMG5_int      nnf,nf,nw,k,nnm,nm;
   double        crit,declic;
 
   /* shape optim */
@@ -1232,8 +1232,8 @@ MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree) {
 static int
 MMG5_adptet_delone(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree *PROctree,
                    MMG5_int * permNodGlob) {
-  MMG5_int      nnf,nf;
-  int      warn,ns;
+  MMG5_int  nnf,nf;
+  int       warn,ns;
 
   /*initial swap*/
   if ( !mesh->info.noswap ) {

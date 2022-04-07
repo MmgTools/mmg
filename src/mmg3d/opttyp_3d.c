@@ -64,15 +64,15 @@
 static int MMG3D_typelt(MMG5_pMesh mesh,MMG5_int iel,int *item) {
   MMG5_pTetra    pt;
   MMG5_pPoint    pa,pb,pc,pd;
-  double    abx,aby,abz,acx,acy,acz,adx,ady,adz,v1,v2,v3,vol;
-  double    bcx,bcy,bcz,bdx,bdy,bdz,cdx,cdy,cdz,h[6],volchk,ssmall;
-  double    s[4],dd,rapmin,rapmax,surmin,surmax;
-  int       i,k,isur,isurmax,isurmin,iarmax,iarmin;
-  MMG5_int   ia,ib,ic,id;
-  int       nobtus,naigu;
-  short     i0,i1,i2;
-  double    EPSVOL = 0.001;
-  double    RAPMAX = 0.25;
+  double         abx,aby,abz,acx,acy,acz,adx,ady,adz,v1,v2,v3,vol;
+  double         bcx,bcy,bcz,bdx,bdy,bdz,cdx,cdy,cdz,h[6],volchk,ssmall;
+  double         s[4],dd,rapmin,rapmax,surmin,surmax;
+  int            i,k,isur,isurmax,isurmin,iarmax,iarmin;
+  MMG5_int       ia,ib,ic,id;
+  int            nobtus,naigu;
+  short          i0,i1,i2;
+  double         EPSVOL = 0.001;
+  double         RAPMAX = 0.25;
 
   pt = &mesh->tetra[iel];
   if ( !pt->v[0] )  return -1;
@@ -327,7 +327,7 @@ static int MMG3D_typelt(MMG5_pMesh mesh,MMG5_int iel,int *item) {
 int MMG3D_swpItem(MMG5_pMesh mesh,  MMG5_pSol met,MMG3D_pPROctree PROctree,MMG5_int k,int iar) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
-  MMG5_int       list[MMG3D_LMAX+2],nconf;
+  MMG5_int      list[MMG3D_LMAX+2],nconf;
   int           lon,ier;
   double        OCRIT = 1.01;
 
@@ -395,7 +395,7 @@ int MMG3D_splitItem(MMG5_pMesh mesh,  MMG5_pSol met,MMG3D_pPROctree PROctree,
   double        len;
   double        LLONG2 = 0.1;
   int           j;
-  MMG5_int       ier;
+  MMG5_int      ier;
 
   ier = 0;
   pt = &mesh->tetra[k];
@@ -472,11 +472,11 @@ MMG5_int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree,in
   MMG5_pxTetra   pxt;
   double         crit;
   int            ityp,cs[10],ds[10],item[2];
-  MMG5_int        k,ntot,ne;
+  MMG5_int       k,ntot,ne;
   int            ier,i,nd,npeau;
   int            it,maxit,base;
 //  double         OCRIT = 1.01;
-  MMG5_int            nbdy,nbdy2 ;
+  MMG5_int       nbdy,nbdy2 ;
 
   ntot = 0;
   crit = 0.2 / MMG3D_ALPHAD;

@@ -44,7 +44,7 @@
  */
 void MMG3D_set_reqBoundaries(MMG5_pMesh mesh) {
   MMG5_pTria     ptt;
-  MMG5_int            k;
+  MMG5_int       k;
 
   /* The MG_REQ+MG_NOSURF tag mark the boundary edges that we dont want to touch
    * but that are not really required (-nosurf option) */
@@ -95,8 +95,8 @@ void MMG3D_set_reqBoundaries(MMG5_pMesh mesh) {
  */
 int MMG5_setadj(MMG5_pMesh mesh){
   MMG5_pTria   pt,pt1;
-  MMG5_int          *adja,*adjb,adji1,adji2,*pile,iad,ipil,ip1,ip2,gen;
-  MMG5_int          k,kk,iel,jel,nvf,nf,nr,nt,nre,nreq,ncc,ned,ref;
+  MMG5_int     *adja,*adjb,adji1,adji2,*pile,iad,ipil,ip1,ip2,gen;
+  MMG5_int     k,kk,iel,jel,nvf,nf,nr,nt,nre,nreq,ncc,ned,ref;
   int16_t      tag;
   int8_t       i,ii,i1,i2,ii1,ii2,voy;
 
@@ -288,7 +288,7 @@ int MMG5_setadj(MMG5_pMesh mesh){
 int MMG5_setdhd(MMG5_pMesh mesh) {
   MMG5_pTria    pt,pt1;
   double        n1[3],n2[3],dhd;
-  MMG5_int          *adja,k,kk,ne,nr;
+  MMG5_int      *adja,k,kk,ne,nr;
   int8_t        i,ii,i1,i2;
 
   ne = nr = 0;
@@ -356,7 +356,7 @@ int MMG5_chkVertexConnectedDomains(MMG5_pMesh mesh){
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
   MMG5_pPoint   ppt;
-  MMG5_int           k,lists[MMG3D_LMAX+2],listv[MMG3D_LMAX+2];
+  MMG5_int      k,lists[MMG3D_LMAX+2],listv[MMG3D_LMAX+2];
   int           ilists,ilistv;
   int           i0,ier;
   int8_t        i,j;
@@ -428,7 +428,7 @@ int MMG5_singul(MMG5_pMesh mesh) {
   MMG5_pTria     pt;
   MMG5_pPoint    ppt,p1,p2;
   double         ux,uy,uz,vx,vy,vz,dd;
-  MMG5_int            list[MMG3D_LMAX+2],listref[MMG3D_LMAX+2],k,nc,xp,nr,ns,nre;
+  MMG5_int       list[MMG3D_LMAX+2],listref[MMG3D_LMAX+2],k,nc,xp,nr,ns,nre;
   int8_t         i;
 
   nre = nc = 0;
@@ -503,7 +503,7 @@ int MMG5_norver(MMG5_pMesh mesh) {
   MMG5_pPoint    ppt;
   MMG5_xPoint    *pxp;
   double         n[3],dd;
-  MMG5_int            *adja,k,kk,ng,nn,nt,nf,nnr;
+  MMG5_int       *adja,k,kk,ng,nn,nt,nf,nnr;
   int8_t         i,ii,i1;
 
   /* recomputation of normals only if mesh->xpoint has been freed */
@@ -674,9 +674,9 @@ int MMG3D_nmgeom(MMG5_pMesh mesh){
   MMG5_pTetra     pt;
   MMG5_pPoint     p0;
   MMG5_pxPoint    pxp;
-  MMG5_int             k;
+  MMG5_int        k;
   int             base;
-  MMG5_int             *adja;
+  MMG5_int        *adja;
   double          n[3],t[3];
   int8_t          i,j,ip,ier;
 

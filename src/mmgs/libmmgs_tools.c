@@ -464,7 +464,7 @@ void MMGS_destockOptions(MMG5_pMesh mesh, MMG5_Info *info) {
 int MMGS_Get_numberOfNonBdyEdges(MMG5_pMesh mesh, MMG5_int* nb_edges) {
   MMG5_pTria pt,pt1;
   MMG5_pEdge ped;
-  MMG5_int        *adja,k,j,iel;
+  MMG5_int   *adja,k,j,iel;
   int        i,i1,i2;
 
   *nb_edges = 0;
@@ -616,8 +616,8 @@ int MMGS_Get_adjaTri(MMG5_pMesh mesh, MMG5_int kel, MMG5_int listri[3]) {
 int MMGS_Get_adjaVerticesFast(MMG5_pMesh mesh, MMG5_int ip,MMG5_int start, MMG5_int lispoi[MMGS_LMAX])
 {
   MMG5_pTria pt;
-  MMG5_int k,prevk,nbpoi,*adja;
-  int i,i1,i2,iploc;
+  MMG5_int   k,prevk,nbpoi,*adja;
+  int        i,i1,i2,iploc;
 
   pt   = &mesh->tria[start];
 
@@ -693,7 +693,7 @@ int MMGS_doSol(MMG5_pMesh mesh,MMG5_pSol met) {
     MMG5_pPoint  p1,p2;
     double       ux,uy,uz,dd;
     int          i,type;
-    MMG5_int          ipa,ipb,k,iadr,*mark;
+    MMG5_int     ipa,ipb,k,iadr,*mark;
 
     MMG5_SAFE_CALLOC(mark,mesh->np+1,MMG5_int,return 0);
 

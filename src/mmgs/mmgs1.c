@@ -52,7 +52,7 @@ int MMGS_dichoto(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int *vx) {
   MMG5_pPoint  pa,pb,ps;
   double       o[3][3],p[3][3];
   float        to,tp,t;
-  MMG5_int          ia,ib,ier;
+  MMG5_int     ia,ib,ier;
   int          i1,i2;
   int          it,maxit;
   int8_t       i,j;
@@ -155,7 +155,7 @@ int MMGS_dichoto(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int *vx) {
 int MMGS_dichoto1b(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int iel, int ia, MMG5_int ip) {
   MMG5_pTria   pt;
   MMG5_pPoint  p0,p1,ppt;
-  MMG5_int          np,nq;
+  MMG5_int     np,nq;
   int          it,maxit,i1,i2;
   double       m[3],o[3],tp,to,t;
   int8_t       ier;
@@ -214,10 +214,10 @@ int chkedg(MMG5_pMesh mesh,MMG5_int iel) {
   MMG5_pTria    pt;
   MMG5_pPoint   p[3];
   MMG5_pPar     par;
-  double   n[3][3],t[3][3],nt[3],c1[3],c2[3],*n1,*n2,t1[3],t2[3];
-  double   ps,ps2,cosn,ux,uy,uz,ll,li,dd,hausd,hmax;
-  int      l,isloc;
-  int8_t   i,i1,i2;
+  double        n[3][3],t[3][3],nt[3],c1[3],c2[3],*n1,*n2,t1[3],t2[3];
+  double        ps,ps2,cosn,ux,uy,uz,ll,li,dd,hausd,hmax;
+  int           l,isloc;
+  int8_t        i,i1,i2;
   static int8_t mmgWarn0 = 0, mmgWarn1 = 0;
 
   pt   = &mesh->tria[iel];
@@ -391,9 +391,9 @@ int chkedg(MMG5_pMesh mesh,MMG5_int iel) {
 
 static int swpmsh(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
   MMG5_pTria    pt;
-  int      it,maxit;
-  MMG5_int  k,ns,nns;
-  int8_t   i;
+  int           it,maxit;
+  MMG5_int      k,ns,nns;
+  int8_t        i;
 
   it = nns = 0;
   maxit = 2;
@@ -425,9 +425,9 @@ static int swpmsh(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
 static int movtri(MMG5_pMesh mesh,MMG5_pSol met,int maxit) {
   MMG5_pTria    pt;
   MMG5_pPoint   ppt;
-  int      it,ier,base,ilist;
-  MMG5_int    k,list[MMGS_LMAX+2],nm,ns,nnm;
-  int8_t   i;
+  int           it,ier,base,ilist;
+  MMG5_int      k,list[MMGS_LMAX+2],nm,ns,nnm;
+  int8_t        i;
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
     fprintf(stdout,"  ** OPTIMIZING MESH\n");
@@ -491,7 +491,7 @@ static inline
 int MMGS_delPatternPts(MMG5_pMesh mesh,MMG5_Hash hash)
 {
   MMG5_pTria   pt;
-  MMG5_int          vx[3],k;
+  MMG5_int     vx[3],k;
   int          i,i1,i2;
 
   /* Delete the useless added points */
@@ -533,13 +533,13 @@ int MMGS_delPatternPts(MMG5_pMesh mesh,MMG5_Hash hash)
 static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
   MMG5_pTria    pt;
   MMG5_pPoint   ppt,p1,p2;
-  MMG5_Hash    hash;
-  MMG5_Bezier  pb;
+  MMG5_Hash     hash;
+  MMG5_Bezier   pb;
   MMG5_pxPoint  go;
   double        s,o[3],no[3],to[3],dd,len;
   int           i,ier,it;
-  MMG5_int       ns,nc,ni,ic;
-  MMG5_int       k,nt,vx[3],j,ip,ip1,ip2;
+  MMG5_int      ns,nc,ni,ic;
+  MMG5_int      k,nt,vx[3],j,ip,ip1,ip2;
   int8_t        i1,i2;
   static double uv[3][2] = { {0.5,0.5}, {0.,0.5}, {0.5,0.} };
   static int8_t mmgWarn0=0,mmgWarn1=0,mmgWarn2=0,mmgWarn3=0;
@@ -912,7 +912,7 @@ MMG5_int chkspl(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int i) {
   MMG5_Bezier   b;
   double        s,uv[2],o[3],no[3],to[3];
   int           ier;
-  MMG5_int       ip,*adja,jel;
+  MMG5_int      ip,*adja,jel;
   int8_t        i1,i2,j,jj,j2;
 
   if ( mesh->xp > mesh->xpmax-2 )  return 0;
@@ -972,7 +972,7 @@ static MMG5_int colelt(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
   MMG5_pPoint   p1,p2;
   MMG5_pPar     par;
   double        ll,ux,uy,uz,hmin;
-  MMG5_int       nc,list[MMGS_LMAX+2],k;
+  MMG5_int      nc,list[MMGS_LMAX+2],k;
   int           l,isloc,ier,ilist;
   int8_t        i,i1,i2;
 
@@ -1070,10 +1070,10 @@ static MMG5_int colelt(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
 static MMG5_int adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria    pt;
   MMG5_pPoint   p1,p2;
-  double   len,lmax;
-  int      ier;
-  MMG5_int   ip,ns,k;
-  int8_t   i,i1,i2,imax;
+  double        len,lmax;
+  int           ier;
+  MMG5_int      ip,ns,k;
+  int8_t        i,i1,i2,imax;
 
   ns = 0;
   for (k=1; k<=mesh->nt; k++) {
@@ -1146,10 +1146,10 @@ static MMG5_int adpspl(MMG5_pMesh mesh,MMG5_pSol met) {
 static MMG5_int adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria    pt;
   MMG5_pPoint   p1,p2;
-  double   len;
-  MMG5_int  nc,k,list[MMGS_LMAX+2];
-  int      ier,ilist;
-  int8_t   i,i1,i2;
+  double        len;
+  MMG5_int      nc,k,list[MMGS_LMAX+2];
+  int           ier,ilist;
+  int8_t        i,i1,i2;
 
   nc = 0;
   for (k=1; k<=mesh->nt; k++) {
@@ -1208,7 +1208,7 @@ static MMG5_int adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
 
 /* analyze triangles and split or collapse to match gradation */
 static int adptri(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int* permNodGlob) {
-  int        it,maxit;
+  int         it,maxit;
   MMG5_int    nnc,nns,nnf,nnm,nc,ns,nf,nm;
 
   /* iterative mesh modifications */
@@ -1325,7 +1325,7 @@ static int adptri(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int* permNodGlob) {
 /* analyze tetrahedra and split if needed */
 static int anatri(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
   MMG5_int     nc,ns,nf,nnc,nns,nnf;
-  int     it,maxit;
+  int          it,maxit;
 
   /* analyze tetras : initial splitting */
   nns = nnc = nnf = it = 0;

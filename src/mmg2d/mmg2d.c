@@ -97,7 +97,7 @@ static inline int MMG5_defaultValues(MMG5_pMesh mesh) {
 static inline
 int MMG2D_countLocalParamAtEdg( MMG5_pMesh mesh,MMG5_iNode **bdyRefs) {
   int         npar,ier;
-  MMG5_int     k;
+  MMG5_int    k;
 
   /** Count the number of different boundary references and list it */
   (*bdyRefs) = NULL;

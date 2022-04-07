@@ -48,7 +48,7 @@ void MMG5_chkvol(MMG5_pMesh mesh) {
   MMG5_pTetra    pt;
   MMG5_int       k;
 #ifdef DEBUG
-  int       ier=1;
+  int            ier=1;
 #endif
 
   for (k=1; k<=mesh->ne; k++) {
@@ -74,8 +74,8 @@ void MMG5_chkvol(MMG5_pMesh mesh) {
  */
 int MMG5_chkmshsurf(MMG5_pMesh mesh){
   MMG5_pTria pt;
-  MMG5_int        k,k1;
-  MMG5_int        *adja,*adja1;
+  MMG5_int   k,k1;
+  MMG5_int   *adja,*adja1;
   int8_t     i,voy;
 
   for (k=1; k<=mesh->nt; k++) {
@@ -111,7 +111,7 @@ int MMG5_chkmshsurf(MMG5_pMesh mesh){
 int MMG5_mmg3dChkmsh(MMG5_pMesh mesh,int severe,int base) {
   MMG5_pTetra     pt,pt1,pt2;
   MMG5_pxTetra    pxt;
-  MMG5_int             *adja,*adja1,adj,adj1,k,iadr;
+  MMG5_int        *adja,*adja1,adj,adj1,k,iadr;
   int             iel,a0,a1,a2,b0,b1,b2,i;
   uint8_t         voy,voy1;
   static int8_t   mmgErr0=0,mmgErr1=0,mmgErr2=0,mmgErr3=0,mmgErr4=0,mmgErr5=0;
@@ -302,7 +302,7 @@ int MMG5_chkptonbdy(MMG5_pMesh mesh,MMG5_int np){
   MMG5_pTetra      pt;
   MMG5_pxTetra     pxt;
   MMG5_pPoint      p0;
-  MMG5_int              k;
+  MMG5_int         k;
   int8_t           i,j,ip;
   static int8_t    mmgWarn0=0,mmgWarn1=0;
 
@@ -363,7 +363,7 @@ int MMG5_chkptonbdy(MMG5_pMesh mesh,MMG5_int np){
 int MMG5_cntbdypt(MMG5_pMesh mesh, MMG5_int nump){
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
-  MMG5_int           k,v0,v1,v2;
+  MMG5_int      k,v0,v1,v2;
   int           nf;
   int8_t        i,j,ip;
   static int8_t mmgWarn0 = 0;
@@ -413,7 +413,7 @@ int MMG5_chkfemtopo(MMG5_pMesh mesh) {
   MMG5_pTetra      pt,pt1;
   MMG5_pxTetra     pxt;
   MMG5_pPoint      p0,p1;
-  MMG5_int          k,ntet,ned,np,list[MMG3D_LMAX+2],np1,npchk,iel;
+  MMG5_int         k,ntet,ned,np,list[MMG3D_LMAX+2],np1,npchk,iel;
   int              nf,ischk,ilist,l;
   int8_t           i0,j,i,i1,ia,ier;
 
@@ -495,7 +495,7 @@ int srcface(MMG5_pMesh mesh,MMG5_int n0,MMG5_int n1,MMG5_int n2) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
   int           ref;
-  MMG5_int       minn,maxn,sn,k,ip0,ip1,ip2,mins,maxs,sum;
+  MMG5_int      minn,maxn,sn,k,ip0,ip1,ip2,mins,maxs,sum;
   int16_t       tag;
   int8_t        i;
   static int8_t mmgWarn0 = 0;

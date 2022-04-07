@@ -328,7 +328,7 @@ int MMGS_Set_vertex(MMG5_pMesh mesh, double c0, double c1, double c2, int ref, M
 int  MMGS_Set_vertices(MMG5_pMesh mesh, double *vertices,int *refs) {
 
   MMG5_pPoint ppt;
-  MMG5_int i,j;
+  MMG5_int    i,j;
 
   /*coordinates vertices*/
   for (i=1;i<=mesh->np;i++)
@@ -415,7 +415,7 @@ int MMGS_GetByIdx_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2, in
 int  MMGS_Get_vertices(MMG5_pMesh mesh, double* vertices, int* refs,
                         int* areCorners, int* areRequired) {
   MMG5_pPoint ppt;
-  MMG5_int i,j;
+  MMG5_int    i,j;
 
   for (i=1;i<=mesh->np;i++)
   {
@@ -531,7 +531,7 @@ int MMGS_Get_triangle(MMG5_pMesh mesh, MMG5_int* v0, MMG5_int* v1, MMG5_int* v2,
 
 int  MMGS_Set_triangles(MMG5_pMesh mesh, MMG5_int *tria, int *refs) {
   MMG5_pTria ptt;
-  MMG5_int         i, j;
+  MMG5_int   i, j;
 
    for (i=1;i<=mesh->nt;i++)
    {
@@ -553,7 +553,7 @@ int  MMGS_Set_triangles(MMG5_pMesh mesh, MMG5_int *tria, int *refs) {
 
 int  MMGS_Get_triangles(MMG5_pMesh mesh, MMG5_int *tria, int *refs, int *areRequired) {
   MMG5_pTria ptt;
-  MMG5_int         i, j;
+  MMG5_int   i, j;
 
    for (i=1;i<=mesh->nt;i++)
    {
@@ -977,7 +977,7 @@ int MMGS_Get_vectorSol(MMG5_pSol met, double* vx, double* vy, double* vz) {
 
 
 int MMGS_Set_vectorSols(MMG5_pSol met, double *sols) {
-  double *m;
+  double   *m;
   MMG5_int k,j;
 
   if ( !met->np ) {
@@ -1000,7 +1000,7 @@ int MMGS_Set_vectorSols(MMG5_pSol met, double *sols) {
 }
 
 int MMGS_Get_vectorSols(MMG5_pSol met, double* sols) {
-  double *m;
+  double   *m;
   MMG5_int k, j;
 
   for ( k=0; k<met->np; ++k ) {
@@ -1094,7 +1094,7 @@ int MMGS_Get_tensorSol(MMG5_pSol met, double *m11,double *m12, double *m13,
 
 
 int MMGS_Set_tensorSols(MMG5_pSol met, double *sols) {
-  double *m;
+  double   *m;
   MMG5_int k,j;
 
   if ( !met->np ) {
@@ -1120,7 +1120,7 @@ int MMGS_Set_tensorSols(MMG5_pSol met, double *sols) {
 }
 
 int MMGS_Get_tensorSols(MMG5_pSol met, double *sols) {
-  double *m;
+  double   *m;
   MMG5_int k,j;
 
   for ( k=0; k<met->np; ++k ) {
@@ -1503,7 +1503,7 @@ int MMGS_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val){
 int MMGS_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref,
                             double hmin,double hmax,double hausd){
   MMG5_pPar par;
-  MMG5_int k;
+  MMG5_int  k;
 
   if ( !mesh->info.npar ) {
     fprintf(stderr,"\n  ## Error: %s: You must set the number of local"

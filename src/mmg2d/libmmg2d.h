@@ -316,7 +316,7 @@ extern "C" {
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_SET_MESHSIZE(mesh,np,nt,nquad,na,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     MMG5F_INT                      :: np,nt,nquad,na\n
+ * >     MMG5F_INT                     :: np,nt,nquad,na\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -338,7 +338,7 @@ extern "C" {
  * >   SUBROUTINE MMG2D_SET_SOLSIZE(mesh,sol,typEntity,np,typSol,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol\n
  * >     INTEGER, INTENT(IN)           :: typEntity\n
- * >     MMG5F_INT, INTENT(IN)          :: np\n
+ * >     MMG5F_INT, INTENT(IN)         :: np\n
  * >     INTEGER, INTENT(IN)           :: typSol\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
@@ -364,7 +364,7 @@ extern "C" {
  * >   SUBROUTINE MMG2D_SET_SOLSATVERTICESSIZE(mesh,sol,nsols,nentities,typSol,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol\n
  * >     INTEGER, INTENT(IN)           :: nsols\n
- * >     MMG5F_INT, INTENT(IN)          :: nentities\n
+ * >     MMG5F_INT, INTENT(IN)         :: nentities\n
  * >     INTEGER, INTENT(IN)           :: typSol(*)\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
@@ -388,7 +388,7 @@ extern "C" {
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
  * >     REAL(KIND=8), INTENT(IN)      :: c0,c1\n
  * >     INTEGER, INTENT(IN)           :: ref\n
- * >     MMG5F_INT, INTENT(IN)          :: pos\n
+ * >     MMG5F_INT, INTENT(IN)         :: pos\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -429,7 +429,7 @@ extern "C" {
  *
  * >   SUBROUTINE MMG2D_SET_CORNER(mesh,k,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     MMG5F_INT, INTENT(IN)           :: k\n
+ * >     MMG5F_INT, INTENT(IN)         :: k\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -446,7 +446,7 @@ extern "C" {
  *
  * >   SUBROUTINE MMG2D_UNSET_CORNER(mesh,k,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     MMG5F_INT, INTENT(IN)           :: k\n
+ * >     MMG5F_INT, INTENT(IN)         :: k\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -463,7 +463,7 @@ extern "C" {
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_SET_REQUIREDVERTEX(mesh,k,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     MMG5F_INT, INTENT(IN)           :: k\n
+ * >     MMG5F_INT, INTENT(IN)         :: k\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -480,7 +480,7 @@ extern "C" {
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_UNSET_REQUIREDVERTEX(mesh,k,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     MMG5F_INT, INTENT(IN)           :: k\n
+ * >     MMG5F_INT, INTENT(IN)         :: k\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -502,9 +502,9 @@ extern "C" {
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_SET_TRIANGLE(mesh,v0,v1,v2,ref,pos,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     MMG5F_INT, INTENT(IN)           :: v0,v1,v2\n
+ * >     MMG5F_INT, INTENT(IN)         :: v0,v1,v2\n
  * >     INTEGER, INTENT(IN)           :: ref\n
- * >     MMG5F_INT, INTENT(IN)           :: pos\n
+ * >     MMG5F_INT, INTENT(IN)         :: pos\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -524,10 +524,10 @@ extern "C" {
  * \remark Fortran interface: (commentated in order to allow to pass \%val(0)
  * instead of the refs array)
  * > !  SUBROUTINE MMG2D_SET_TRIANGLES(mesh,tria,refs,retval)\n
- * > !    MMG5_DATA_PTR_T,INTENT(INOUT)    :: mesh\n
+ * > !    MMG5_DATA_PTR_T,INTENT(INOUT)      :: mesh\n
  * > !    MMG5F_INT,DIMENSION(*), INTENT(IN) :: tria\n
- * > !    INTEGER,DIMENSION(*), INTENT(IN) :: refs\n
- * > !    INTEGER, INTENT(OUT)             :: retval\n
+ * > !    INTEGER,DIMENSION(*), INTENT(IN)   :: refs\n
+ * > !    INTEGER, INTENT(OUT)               :: retval\n
  * > !  END SUBROUTINE\n
  *
  */
@@ -543,7 +543,7 @@ extern "C" {
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_SET_REQUIREDTRIANGLE(mesh,k,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     MMG5F_INT, INTENT(IN)           :: k\n
+ * >     MMG5F_INT, INTENT(IN)         :: k\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -560,7 +560,7 @@ extern "C" {
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_UNSET_REQUIREDTRIANGLE(mesh,k,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     MMG5F_INT, INTENT(IN)           :: k\n
+ * >     MMG5F_INT, INTENT(IN)         :: k\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -583,7 +583,7 @@ extern "C" {
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_SET_QUADRILATERAL(mesh,v0,v1,v2,v3,ref,pos,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     MMG5F_INT, INTENT(IN)           :: v0,v1,v2,v3\n
+ * >     MMG5F_INT, INTENT(IN)         :: v0,v1,v2,v3\n
  * >     INTEGER, INTENT(IN)           :: ref,pos\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
@@ -606,9 +606,9 @@ extern "C" {
  * order to allow to pass \%val(0) instead of the refs array)
  *
  * > !  SUBROUTINE MMG2D_SET_QUADRILATERALS(mesh,quadra,refs,retval)\n
- * > !    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * > !    MMG5_DATA_PTR_T,INTENT(INOUT)       :: mesh\n
  * > !    MMG5F_INT, DIMENSION(*), INTENT(IN) :: quadra,refs\n
- * > !    INTEGER, INTENT(OUT)          :: retval\n
+ * > !    INTEGER, INTENT(OUT)                :: retval\n
  * > !  END SUBROUTINE\n
  *
  */
@@ -629,9 +629,9 @@ extern "C" {
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_SET_EDGE(mesh,v0,v1,ref,pos,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     MMG5F_INT, INTENT(IN)           :: v0,v1\n
+ * >     MMG5F_INT, INTENT(IN)         :: v0,v1\n
  * >     INTEGER, INTENT(IN)           :: ref\n
- * >     MMG5F_INT, INTENT(IN)           :: pos\n
+ * >     MMG5F_INT, INTENT(IN)         :: pos\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -649,7 +649,7 @@ extern "C" {
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_SET_EDGES(mesh,edges,refs,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     MMG5F_INT, INTENT(IN)           :: edges(*)\n
+ * >     MMG5F_INT, INTENT(IN)         :: edges(*)\n
  * >     INTEGER, INTENT(IN)           :: refs(*)\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
@@ -666,7 +666,7 @@ extern "C" {
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_SET_REQUIREDEDGE(mesh,k,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     MMG5F_INT, INTENT(IN)           :: k\n
+ * >     MMG5F_INT, INTENT(IN)         :: k\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -682,7 +682,7 @@ extern "C" {
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_UNSET_REQUIREDEDGE(mesh,k,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     MMG5F_INT, INTENT(IN)           :: k\n
+ * >     MMG5F_INT, INTENT(IN)         :: k\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -698,7 +698,7 @@ extern "C" {
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_SET_PARALLELEDGE(mesh,k,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     MMG5F_INT, INTENT(IN)           :: k\n
+ * >     MMG5F_INT, INTENT(IN)         :: k\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -717,7 +717,7 @@ extern "C" {
  * >   SUBROUTINE MMG2D_SET_SCALARSOL(met,s,pos,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: met\n
  * >     REAL(KIND=8), INTENT(IN)      :: s\n
- * >     MMG5F_INT, INTENT(IN)           :: pos\n
+ * >     MMG5F_INT, INTENT(IN)         :: pos\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -754,7 +754,7 @@ extern "C" {
  * >   SUBROUTINE MMG2D_SET_VECTORSOL(met,vx,vy,pos,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: met\n
  * >     REAL(KIND=8), INTENT(IN)      :: vx,vy\n
- * >     MMG5F_INT, INTENT(IN)           :: pos\n
+ * >     MMG5F_INT, INTENT(IN)         :: pos\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -793,7 +793,7 @@ extern "C" {
  * >   SUBROUTINE MMG2D_SET_TENSORSOL(met,m11,m12,m22,pos,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: met\n
  * >     REAL(KIND=8), INTENT(IN)      :: m11,m12,m22\n
- * >     MMG5F_INT, INTENT(IN)           :: pos\n
+ * >     MMG5F_INT, INTENT(IN)         :: pos\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -831,10 +831,10 @@ extern "C" {
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_SET_ITHSOL_INSOLSATVERTICES(sol,i,s,pos,retval)\n
- * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: sol\n
- * >     MMG5F_INT, INTENT(IN)           :: i,pos\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT)          :: sol\n
+ * >     MMG5F_INT, INTENT(IN)                  :: i,pos\n
  * >     REAL(KIND=8), DIMENSION(*),INTENT(OUT) :: s\n
- * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >     INTEGER, INTENT(OUT)                   :: retval\n
  * >   END SUBROUTINE\n
  *
  */
@@ -853,10 +853,10 @@ extern "C" {
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_SET_ITHSOLS_INSOLSATVERTICES(sol,i,s,retval)\n
- * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: sol\n
- * >     MMG5F_INT, INTENT(IN)           :: i\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT)          :: sol\n
+ * >     MMG5F_INT, INTENT(IN)                  :: i\n
  * >     REAL(KIND=8), DIMENSION(*),INTENT(OUT) :: s\n
- * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >     INTEGER, INTENT(OUT)                   :: retval\n
  * >   END SUBROUTINE\n
  *
  */
@@ -876,7 +876,7 @@ extern "C" {
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_GET_MESHSIZE(mesh,np,nt,nquad,na,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     MMG5F_INT                       :: np,nt,nquad,na\n
+ * >     MMG5F_INT                     :: np,nt,nquad,na\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -896,7 +896,7 @@ extern "C" {
  * >   SUBROUTINE MMG2D_GET_SOLSIZE(mesh,sol,typEntity,np,typSol,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol\n
  * >     INTEGER                       :: typEntity,typSol\n
- * >     MMG5F_INT                       :: np\n
+ * >     MMG5F_INT                     :: np\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -918,7 +918,7 @@ extern "C" {
  * >   SUBROUTINE MMG2D_GET_SOLSATVERTICESSIZE(mesh,sol,nsols,nentities,typSol,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol\n
  * >     INTEGER                       :: nsols\n
- * >     MMG5F_INT                       :: nentities\n
+ * >     MMG5F_INT                     :: nentities\n
  * >     INTEGER                       :: typSol(*)\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
@@ -967,7 +967,7 @@ extern "C" {
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
  * >     REAL(KIND=8), INTENT(OUT)     :: c0,c1\n
  * >     INTEGER                       :: ref,isCorner,isRequired\n
- * >     MMG5F_INTEGER                       :: idx\n
+ * >     MMG5F_INT                     :: idx\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -1018,7 +1018,7 @@ extern "C" {
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_GET_TRIANGLE(mesh,v0,v1,v2,ref,isRequired,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     MMG5F_INT, INTENT(OUT)          :: v0,v1,v2\n
+ * >     MMG5F_INT, INTENT(OUT)        :: v0,v1,v2\n
  * >     INTEGER                       :: ref,isRequired\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
@@ -1042,10 +1042,10 @@ extern "C" {
  * \remark Fortran interface: (commentated in order to allow to pass \%val(0)
  * instead of the refs and areRequired arrays)
  * > !  SUBROUTINE MMG2D_GET_TRIANGLES(mesh,tria,refs,areRequired,retval)\n
- * > !    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * > !    MMG5_DATA_PTR_T,INTENT(INOUT)       :: mesh\n
  * > !    MMG5F_INT, DIMENSION(*),INTENT(OUT) :: tria\n
- * > !    INTEGER, DIMENSION(*)         :: refs,areRequired\n
- * > !    INTEGER, INTENT(OUT)          :: retval\n
+ * > !    INTEGER, DIMENSION(*)               :: refs,areRequired\n
+ * > !    INTEGER, INTENT(OUT)                :: retval\n
  * > !  END SUBROUTINE\n
  *
  */
@@ -1070,7 +1070,7 @@ extern "C" {
  * >   SUBROUTINE MMG2D_GET_QUADRILATERAL(mesh,v0,v1,v2,v3,ref,isRequired,&\n
  * >                                      retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     MMG5F_INT, INTENT(OUT)          :: v0,v1,v2,v3\n
+ * >     MMG5F_INT, INTENT(OUT)        :: v0,v1,v2,v3\n
  * >     INTEGER                       :: ref,isRequired\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
@@ -1096,10 +1096,10 @@ extern "C" {
  *
  * > !  SUBROUTINE MMG2D_GET_QUADRILATERALS(mesh,quadra,refs,areRequired,&\n
  * > !                                      retval)\n
- * > !    MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
+ * > !    MMG5_DATA_PTR_T,INTENT(INOUT)       :: mesh\n
  * > !    MMG5F_INT, DIMENSION(*),INTENT(OUT) :: quadra\n
- * > !    INTEGER, DIMENSION(*)         :: refs,areRequired\n
- * > !    INTEGER, INTENT(OUT)          :: retval\n
+ * > !    INTEGER, DIMENSION(*)               :: refs,areRequired\n
+ * > !    INTEGER, INTENT(OUT)                :: retval\n
  * > !  END SUBROUTINE\n
  *
  */
@@ -1122,7 +1122,7 @@ extern "C" {
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_GET_EDGE(mesh,e0,e1,ref,isRidge,isRequired,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     MMG5F_INT, INTENT(OUT)          :: e0,e1\n
+ * >     MMG5F_INT, INTENT(OUT)        :: e0,e1\n
  * >     INTEGER                       :: ref,isRidge,isRequired\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
@@ -1144,7 +1144,7 @@ extern "C" {
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_GET_EDGES(mesh,edges,refs,areRidges,areRequired,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     MMG5F_INT, INTENT(IN)           :: edges(*)\n
+ * >     MMG5F_INT, INTENT(IN)         :: edges(*)\n
  * >     INTEGER, INTENT(OUT)          :: refs(*),areRequired(*),areRidges(*)\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
@@ -1164,7 +1164,7 @@ extern "C" {
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_GET_TRIANGLEQUALITY(mesh,met,k,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,met\n
- * >     MMG5F_INT, INTENT(IN)           :: k\n
+ * >     MMG5F_INT, INTENT(IN)         :: k\n
  * >     REAL(KIND=8), INTENT(OUT)     :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -1286,10 +1286,10 @@ extern "C" {
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_GET_ITHSOL_INSOLSATVERTICES(sol,i,s,pos,retval)\n
- * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: sol\n
- * >     MMG5F_INT, INTENT(IN)           :: i,pos\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT)          :: sol\n
+ * >     MMG5F_INT, INTENT(IN)                  :: i,pos\n
  * >     REAL(KIND=8), DIMENSION(*),INTENT(OUT) :: s\n
- * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >     INTEGER, INTENT(OUT)                   :: retval\n
  * >   END SUBROUTINE\n
  *
  */
@@ -1308,10 +1308,10 @@ extern "C" {
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_GET_ITHSOLS_INSOLSATVERTICES(sol,i,s,retval)\n
- * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: sol\n
- * >     MMG5F_INT, INTENT(IN)           :: i\n
+ * >     MMG5_DATA_PTR_T,INTENT(INOUT)          :: sol\n
+ * >     MMG5F_INT, INTENT(IN)                  :: i\n
  * >     REAL(KIND=8), DIMENSION(*),INTENT(OUT) :: s\n
- * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >     INTEGER, INTENT(OUT)                   :: retval\n
  * >   END SUBROUTINE\n
  *
  */
@@ -2038,7 +2038,7 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_GET_NUMBEROFNONBDYEDGES(mesh,nb_edges,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     MMG5F_INT, INTENT(OUT)          :: nb_edges\n
+ * >     MMG5F_INT, INTENT(OUT)        :: nb_edges\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -2061,9 +2061,9 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_GET_NONBDYEDGE(mesh,e0,e1,ref,idx,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     MMG5F_INT, INTENT(OUT)          :: e0,e1\n
+ * >     MMG5F_INT, INTENT(OUT)        :: e0,e1\n
  * >     INTEGER                       :: ref\n
- * >     MMG5F_INT, INTENT(IN)           :: idx\n
+ * >     MMG5F_INT, INTENT(IN)         :: idx\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
@@ -2084,10 +2084,10 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_GET_ADJATRI(mesh,kel,listri,retval)\n
- * >     MMG5_DATA_PTR_T, INTENT(INOUT)     :: mesh\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT)       :: mesh\n
  * >     MMG5F_INT, INTENT(IN)                :: kel\n
  * >     MMG5F_INT, DIMENSION(3), INTENT(OUT) :: listri\n
- * >     INTEGER, INTENT(OUT)               :: retval\n
+ * >     INTEGER, INTENT(OUT)                 :: retval\n
  * >   END SUBROUTINE\n
  *
  */
@@ -2106,10 +2106,10 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_GET_ADJAVERTICES(mesh,ip,lispoi,retval)\n
- * >     MMG5_DATA_PTR_T, INTENT(INOUT)              :: mesh\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT)                :: mesh\n
  * >     MMG5F_INT, INTENT(IN)                         :: ip\n
  * >     MMG5F_INT, DIMENSION(MMG2D_LMAX), INTENT(OUT) :: lispoi\n
- * >     INTEGER, INTENT(OUT)                        :: retval\n
+ * >     INTEGER, INTENT(OUT)                          :: retval\n
  * >   END SUBROUTINE\n
  *
  */
@@ -2129,10 +2129,10 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_GET_ADJAVERTICESFAST(mesh,ip,start,lispoi,retval)\n
- * >     MMG5_DATA_PTR_T, INTENT(INOUT)              :: mesh\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT)                :: mesh\n
  * >     MMG5F_INT, INTENT(IN)                         :: ip,start\n
  * >     MMG5F_INT, DIMENSION(MMG2D_LMAX), INTENT(OUT) :: lispoi\n
- * >     INTEGER, INTENT(OUT)                        :: retval\n
+ * >     INTEGER, INTENT(OUT)                          :: retval\n
  * >   END SUBROUTINE\n
  *
  */
@@ -2152,10 +2152,10 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_GET_TRIFROMEDGE(mesh,ked,ktri,ied,retval)\n
- * >     MMG5_DATA_PTR_T, INTENT(IN)              :: mesh\n
+ * >     MMG5_DATA_PTR_T, INTENT(IN)                :: mesh\n
  * >     MMG5F_INT, INTENT(IN)                      :: ked\n
  * >     MMG5F_INT, INTENT(OUT)                     :: ktri,ied\n
- * >     INTEGER, INTENT(OUT)                     :: retval\n
+ * >     INTEGER, INTENT(OUT)                       :: retval\n
  * >   END SUBROUTINE\n
  *
  */
@@ -2176,10 +2176,10 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  *
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_GET_TRISFROMEDGE(mesh,ked,ktri,ied,retval)\n
- * >     MMG5_DATA_PTR_T, INTENT(IN)              :: mesh\n
+ * >     MMG5_DATA_PTR_T, INTENT(IN)                :: mesh\n
  * >     MMG5F_INT, INTENT(IN)                      :: ked\n
  * >     MMG5F_INT, DIMENSION(2),INTENT(OUT)        :: ktri,ied\n
- * >     INTEGER, INTENT(OUT)                     :: retval\n
+ * >     INTEGER, INTENT(OUT)                       :: retval\n
  * >   END SUBROUTINE\n
  *
  */

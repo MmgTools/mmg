@@ -76,7 +76,7 @@ int intregmet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t i,double s,double 
  */
 int intmet_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t i,MMG5_int ip,double s) {
   MMG5_pTria pt;
-  MMG5_int        ip1,ip2;
+  MMG5_int   ip1,ip2;
   int8_t     i1,i2;
 
   pt  = &mesh->tria[k];
@@ -107,7 +107,7 @@ int intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t i,MMG5_int ip,dou
   MMG5_pxPoint  go;
   double        *m;
   int           i1, i2;
-  MMG5_int       ip1, ip2;
+  MMG5_int      ip1, ip2;
 
   pt  = &mesh->tria[k];
   i1  = MMG5_inxt2[i];
@@ -145,7 +145,7 @@ int MMGS_intmet33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t i,MMG5_int
   MMG5_pTria    pt;
   double        *mr,*m,*n;
   int           i1, i2;
-  MMG5_int       ip1, ip2; 
+  MMG5_int      ip1, ip2; 
 
   pt  = &mesh->tria[k];
   i1  = MMG5_inxt2[i];

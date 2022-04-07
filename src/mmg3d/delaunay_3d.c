@@ -53,7 +53,7 @@
 
 /* hash mesh edge v[0],v[1] (face i of iel) */
 int MMG5_hashEdgeDelone(MMG5_pMesh mesh,MMG5_Hash *hash,int iel,int i,MMG5_int *v) {
-  MMG5_int             *adja,iadr,jel,mins,maxs;
+  MMG5_int       *adja,iadr,jel,mins,maxs;
   int            j,key;
   MMG5_hedge     *ha;
 
@@ -143,13 +143,13 @@ int MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int ip,MMG5_int *list,int ili
   MMG5_pTetra   pt,pt1;
   MMG5_xTetra   xt;
   MMG5_pxTetra  pxt0;
-  MMG5_int          *adja,*adjb,iel,jel,old,v[3],iadr;
+  MMG5_int      *adja,*adjb,iel,jel,old,v[3],iadr;
   int           base,i,j,k,l,m,size;
-  MMG5_int           vois[4],iadrold;
+  MMG5_int      vois[4],iadrold;
   short         i1;
   char          alert;
   int           isused = 0,ixt,ielnum[3*MMG3D_LONMAX+1];
-  MMG5_Hash    hedg;
+  MMG5_Hash     hedg;
 #ifndef NDEBUG
   int tref;
 #endif
@@ -352,12 +352,12 @@ int MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int ip,MMG5_int *list,int ili
  */
 static int MMG5_correction_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip,MMG5_int* list,
                                 int ilist,int nedep,double volmin) {
-  MMG5_pPoint        ppt,p1,p2,p3;
-  MMG5_pTetra        pt;
+  MMG5_pPoint   ppt,p1,p2,p3;
+  MMG5_pTetra   pt;
   double        dd,det,nn,eps,eps2,ux,uy,uz,vx,vy,vz,v1,v2,v3;
   double        *ma,*mb,*mc,*md,mm[6],h1,h2,h3;
-  MMG5_int           *adja,i,j,iel,iadr,adj,ib,ic,id;
-  MMG5_int           vois[4];
+  MMG5_int      *adja,i,j,iel,iadr,adj,ib,ic,id;
+  MMG5_int      vois[4];
   int           base,ipil,lon,ncor;
 
   ppt  = &mesh->point[ip];
@@ -481,8 +481,8 @@ MMG5_correction_iso(MMG5_pMesh mesh,int ip,MMG5_int *list,int ilist,int nedep,do
   MMG5_pPoint ppt,p1,p2,p3;
   MMG5_pTetra      pt;
   double           dd,nn,eps,eps2,ux,uy,uz,vx,vy,vz,v1,v2,v3;
-  MMG5_int             *adja,i,iel,iadr,adj,ib,ic,id;
-  MMG5_int              vois[4];
+  MMG5_int         *adja,i,iel,iadr,adj,ib,ic,id;
+  MMG5_int         vois[4];
   int              base,ncor,ipil,lon;
 
   ppt  = &mesh->point[ip];
@@ -582,11 +582,11 @@ MMG5_correction_iso(MMG5_pMesh mesh,int ip,MMG5_int *list,int ilist,int nedep,do
 int MMG5_cavity_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int iel,int ip,MMG5_int* list,int lon,double volmin) {
   MMG5_pPoint    ppt;
   MMG5_pTetra    pt,pt1;
-  double    c[3],eps,dd,ray,ux,uy,uz,crit;
-  double    *mj,*mp,ct[12];
+  double         c[3],eps,dd,ray,ux,uy,uz,crit;
+  double         *mj,*mp,ct[12];
   MMG5_int       *adja,*adjb,adj,adi,ia,jel,iadr;
   MMG5_int       vois[4];
-  int       base,k,voy,ilist,ipil,i,j,isreq,tref,l;
+  int            base,k,voy,ilist,ipil,i,j,isreq,tref,l;
 
   if ( lon < 1 )  return 0;
   ppt = &mesh->point[ip];
@@ -743,8 +743,8 @@ int MMG5_cavity_iso(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int iel,int ip,MMG5_int *
   MMG5_pPoint      ppt;
   MMG5_pTetra      pt,pt1;
   double           c[3],crit,dd,eps,ray,ct[12];
-  MMG5_int             *adja,*adjb,adj,adi,jel,iadr;
-  MMG5_int              vois[4],l;
+  MMG5_int         *adja,*adjb,adj,adi,jel,iadr;
+  MMG5_int         vois[4],l;
   int              tref,isreq;
   int              base,voy,i,j,k,ipil,ilist;
 

@@ -193,7 +193,7 @@ int MMG2D_freeLocalPar(MMG5_pMesh mesh) {
 int MMG2D_Get_numberOfNonBdyEdges(MMG5_pMesh mesh, MMG5_int* nb_edges) {
   MMG5_pTria pt,pt1;
   MMG5_pEdge ped;
-  MMG5_int        *adja,k,i,j,i1,i2,iel;
+  MMG5_int   *adja,k,i,j,i1,i2,iel;
 
   *nb_edges = 0;
   if ( mesh->tria ) {
@@ -357,7 +357,7 @@ int MMG2D_Get_adjaVerticesFast(MMG5_pMesh mesh, MMG5_int ip,MMG5_int start, MMG5
 {
   MMG5_pTria pt;
   int        prevk,nbpoi,iploc,i,i1,i2;
-  MMG5_int    k,*adja;
+  MMG5_int   k,*adja;
 
   pt   = &mesh->tria[start];
 

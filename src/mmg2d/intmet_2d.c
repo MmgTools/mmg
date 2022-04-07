@@ -37,7 +37,7 @@
    ip = index of the new point */
 int MMG2D_intmet_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t i,MMG5_int ip,double s) {
   MMG5_pTria  pt;
-  MMG5_int         ip1,ip2;
+  MMG5_int    ip1,ip2;
   int8_t      i1,i2;
   
   pt  = &mesh->tria[k];
@@ -212,7 +212,7 @@ int MMG2D_intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t i,MMG5_int 
 #ifndef NDEBUG
   double         det;
 #endif
-  MMG5_int            ip1,ip2;
+  MMG5_int       ip1,ip2;
   int8_t         i1,i2;
   static int8_t  mmgWarn=0;
 

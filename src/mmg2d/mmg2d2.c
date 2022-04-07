@@ -41,7 +41,7 @@
  */
 int MMG2D_removeBBtriangles(MMG5_pMesh mesh) {
   MMG5_pTria      pt;
-  MMG5_int             ip1,ip2,ip3,ip4,k,iadr,*adja,iadr2,*adja2,iel,nd;
+  MMG5_int        ip1,ip2,ip3,ip4,k,iadr,*adja,iadr2,*adja2,iel,nd;
   int8_t          i,ii;
   static int8_t   mmgWarn0=0;
 
@@ -99,7 +99,7 @@ int MMG2D_removeBBtriangles(MMG5_pMesh mesh) {
 int MMG2D_settagtriangles(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTria        pt;
   int               base,nd,iter,maxiter;
-  MMG5_int           k,ip1,ip2,ip3,ip4;
+  MMG5_int          k,ip1,ip2,ip3,ip4;
 
   /*BB vertex*/
   ip1=(mesh->np-3);
@@ -165,10 +165,10 @@ int MMG2D_findtrianglestate(MMG5_pMesh mesh,MMG5_int k,MMG5_int ip1,MMG5_int ip2
 int MMG2D_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pPoint   ppt;
   int           lon;
-  MMG5_int           k,kk,ns,nus,nu,nud;
+  MMG5_int      k,kk,ns,nus,nu,nud;
   int           iter,maxiter;
   static int8_t mmgWarn0=0,mmgWarn1=0,mmgWarn2=0;
-  MMG5_int       list[MMG2D_LONMAX];
+  MMG5_int      list[MMG2D_LONMAX];
 
   for(k=1; k<=mesh->np-4; k++) {
     ppt = &mesh->point[k];
@@ -311,11 +311,11 @@ int MMG2D_markSD(MMG5_pMesh mesh) {
   MMG5_pTria   pt,pt1;
   MMG5_pEdge   ped;
   MMG5_pPoint  ppt;
-  MMG5_int          k,l,iadr,*adja,ped0,ped1,ipil,ncurc,nref;
-  MMG5_int          kinit,nt,nsd,ip1,ip2,ip3,ip4,ned,iel;
+  MMG5_int     k,l,iadr,*adja,ped0,ped1,ipil,ncurc,nref;
+  MMG5_int     kinit,nt,nsd,ip1,ip2,ip3,ip4,ned,iel;
   int          voy;
   int8_t       i,i1,i2;
-  MMG5_int      *list;
+  MMG5_int     *list;
 
   /* Reset flag field for triangles */
   for(k=1 ; k<=mesh->nt ; k++)
@@ -498,7 +498,7 @@ int MMG2D_markSD(MMG5_pMesh mesh) {
 int MMG2D_mmg2d2(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTria     pt;
   MMG5_pPoint    ppt,ppt2;
-  double    c[2],dd;
+  double         c[2],dd;
   MMG5_int       j,k,kk,ip1,ip2,ip3,ip4,jel,kel,nt,iadr,*adja;
   MMG5_int       *numper;
 

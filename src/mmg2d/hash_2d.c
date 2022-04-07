@@ -34,8 +34,8 @@
  */
 int MMG2D_hashTria(MMG5_pMesh mesh) {
   MMG5_pTria     pt,pt1;
-  MMG5_int            k,kk,pp,l,ll,mins,mins1,maxs,maxs1;
-  MMG5_int            *hcode,*link,inival,hsize,iadr;
+  MMG5_int       k,kk,pp,l,ll,mins,mins1,maxs,maxs1;
+  MMG5_int       *hcode,*link,inival,hsize,iadr;
   uint8_t        i,ii,i1,i2;
   unsigned int   key;
 
@@ -152,8 +152,8 @@ int MMG2D_hashQuad(MMG5_pMesh mesh) {
   MMG5_pQuad     pq,pq1;
   MMG5_pTria     pt;
   MMG5_Hash      hash;
-  MMG5_int            k,kk,pp,l,ll,mins,mins1,maxs,maxs1,iadr;
-  MMG5_int           *hcode,*link,hsize,inival;
+  MMG5_int       k,kk,pp,l,ll,mins,mins1,maxs,maxs1,iadr;
+  MMG5_int       *hcode,*link,hsize,inival;
   uint8_t        i,ii,i1,i2;
   unsigned int   key;
 
@@ -336,7 +336,7 @@ int MMG2D_assignEdge(MMG5_pMesh mesh) {
   MMG5_pQuad      pq;
   MMG5_pEdge      pa;
   int             ia;
-  MMG5_int         k;
+  MMG5_int        k;
   int8_t          ier;
   uint8_t         i,i1,i2;
 
@@ -435,7 +435,7 @@ int MMG2D_bdryEdge(MMG5_pMesh mesh) {
   MMG5_pTria      pt,pt1;
   MMG5_pEdge      pa;
   MMG5_pPoint     p0;
-  MMG5_int             k,*adja,natmp,iel;
+  MMG5_int        k,*adja,natmp,iel;
   int8_t          i,i1,i2;
 
   natmp = 0;
@@ -517,8 +517,8 @@ int MMG2D_pack(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
   MMG5_pQuad         pq,pq1;
   MMG5_pEdge         ped;
   MMG5_pPoint        ppt,pptnew;
-  MMG5_int                np,ned,nt,k,iel,nbl,isol,isolnew,memWarn,nc;
-  MMG5_int                iadr,iadrnew,iadrv,*adjav,*adja,*adjanew,voy;
+  MMG5_int           np,ned,nt,k,iel,nbl,isol,isolnew,memWarn,nc;
+  MMG5_int           iadr,iadrnew,iadrv,*adjav,*adja,*adjanew,voy;
   int8_t             i,i1,i2;
 
   /* Keep only one domain if asked */

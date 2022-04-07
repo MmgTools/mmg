@@ -89,7 +89,7 @@ int MMGS_set_metricAtPointsOnReqEdges ( MMG5_pMesh mesh,MMG5_pSol met,int8_t ism
   MMG5_pTria pt;
   MMG5_Hash  hash;
   int        i;
-  MMG5_int    k;
+  MMG5_int   k;
 
   /* Reset the input metric at required edges extremities */
   if ( !MMG5_reset_metricAtReqEdges_surf (mesh, met,ismet ) ) {
@@ -144,7 +144,7 @@ int MMGS_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   double      n[3][3],t[3][3],nt[3],c1[3],c2[3],*n1,*n2,*t1,*t2;
   double      ps,ps2,ux,uy,uz,ll,l,lm,dd,M1,M2,hausd,hmin,hmax;
   int         j,isloc;
-  MMG5_int     k,ip1,ip2;
+  MMG5_int    k,ip1,ip2;
   int8_t      ismet;
   int8_t      i,i1,i2;
 

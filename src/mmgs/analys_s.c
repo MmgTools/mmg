@@ -45,8 +45,8 @@
  */
 static int setadj(MMG5_pMesh mesh){
   MMG5_pTria   pt,pt1;
-  MMG5_int          *adja,*adjb,adji1,adji2,*pile,iad,ipil,ip1,ip2,gen;
-  MMG5_int          k,kk,iel,jel,nvf,nf,nr,nt,nre,nreq,ncc,ned;
+  MMG5_int     *adja,*adjb,adji1,adji2,*pile,iad,ipil,ip1,ip2,gen;
+  MMG5_int     k,kk,iel,jel,nvf,nf,nr,nt,nre,nreq,ncc,ned;
   int          ref;
   int16_t      tag;
   int8_t       i,ii,i1,i2,ii1,ii2,voy;
@@ -247,7 +247,7 @@ static void nmpoints(MMG5_pMesh mesh) {
   MMG5_pTria      pt;
   MMG5_pPoint     p0;
   MMG5_int        k,np,numt,iel,jel,nmp,*adja;
-  int8_t     i0,i1,i,jp;
+  int8_t          i0,i1,i,jp;
   
   nmp = 0;
   /* Initialize point flags */
@@ -427,9 +427,9 @@ static void nmpoints(MMG5_pMesh mesh) {
 /* check for ridges: dihedral angle */
 static int setdhd(MMG5_pMesh mesh) {
   MMG5_pTria    pt,pt1;
-  double   n1[3],n2[3],dhd;
-  MMG5_int     *adja,k,kk,nr;
-  int8_t   i,ii,i1,i2;
+  double        n1[3],n2[3],dhd;
+  MMG5_int      *adja,k,kk,nr;
+  int8_t        i,ii,i1,i2;
 
   nr = 0;
   for (k=1; k<=mesh->nt; k++) {
@@ -473,7 +473,7 @@ static int MMG5_singul(MMG5_pMesh mesh) {
   MMG5_pTria     pt;
   MMG5_pPoint    ppt,p1,p2;
   double         ux,uy,uz,vx,vy,vz,dd;
-  MMG5_int            list[MMGS_LMAX+2],listref[MMGS_LMAX+2],k,nc,xp,nr,ns,nre;
+  MMG5_int       list[MMGS_LMAX+2],listref[MMGS_LMAX+2],k,nc,xp,nr,ns,nre;
   int8_t         i;
 
   nre = nc = 0;
@@ -564,7 +564,7 @@ static int norver(MMG5_pMesh mesh) {
   MMG5_pPoint    ppt;
   MMG5_pxPoint   go;
   double         n[3],dd;
-  MMG5_int            *adja,k,kk,ier,xp,nn,nt,nf,nnr;
+  MMG5_int       *adja,k,kk,ier,xp,nn,nt,nf,nnr;
   int8_t         i,ii,i1;
 
   if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )

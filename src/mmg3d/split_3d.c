@@ -117,7 +117,7 @@ int MMG5_split1(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
   MMG5_pTetra         pt,pt1;
   MMG5_xTetra         xt,xt1;
   MMG5_pxTetra        pxt0;
-  MMG5_int                 iel;
+  MMG5_int            iel;
   int8_t              i,isxt,isxt1;
   uint8_t             tau[4];
   const uint8_t       *taued;
@@ -326,8 +326,8 @@ int MMG3D_simbulgept(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *list,int ret,MMG5_i
   double         calold,calnew,caltmp;
   double         n0[6],n1[6];
   int            j,k,ilist,idx,iface,ier;
-  MMG5_int        iel,sum1,sum2,mins1,mins2,maxs1,maxs2;
-  MMG5_int            is0,is1,is2;
+  MMG5_int       iel,sum1,sum2,mins1,mins2,maxs1,maxs2;
+  MMG5_int       is0,is1,is2;
   int8_t         ie,ia,ib,complete,wrongOri;
 
   ilist = ret / 2;
@@ -466,7 +466,7 @@ int MMG3D_normalAdjaTri(MMG5_pMesh mesh , MMG5_int start, int8_t iface, int ia,
 {
   MMG5_Tria tt;
   int       iedgeOpp,it;
-  MMG5_int   list[MMG3D_LMAX+2],it1,it2;
+  MMG5_int  list[MMG3D_LMAX+2],it1,it2;
 
   iedgeOpp = MMG5_iarf[iface][ia];
 
@@ -518,10 +518,10 @@ int MMG5_split1b(MMG5_pMesh mesh, MMG5_pSol met,MMG5_int *list, int ret, MMG5_in
   MMG5_pxTetra         pxt0;
   double               lmin,lmax,len;
   int                  ilist,k,open,j;
-  MMG5_int              *newtet,iel,jel,*adja,nump;
-  MMG5_int              *adjan,nei2,nei3,mel;
+  MMG5_int             *newtet,iel,jel,*adja,nump;
+  MMG5_int             *adjan,nei2,nei3,mel;
   int8_t               ie,tau[4],isxt,isxt1,i,voy;
-  const uint8_t       *taued;
+  const uint8_t        *taued;
 
   ilist = ret / 2;
   open  = ret % 2;
@@ -1230,7 +1230,7 @@ int MMG5_split2sf(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t
   MMG5_xTetra         xt[3];
   MMG5_pxTetra        pxt0;
   int                 i;
-  MMG5_int             newtet[3],iel;
+  MMG5_int            newtet[3],iel;
   int8_t              flg,imin,firstxt,isxt[3];
   uint8_t             tau[4];
   const uint8_t       *taued;
@@ -1524,7 +1524,7 @@ int MMG5_split2(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
   MMG5_xTetra         xt[4];
   MMG5_pxTetra        pxt0;
   int                 i;
-  MMG5_int             newtet[4],iel;
+  MMG5_int            newtet[4],iel;
   int8_t              flg,firstxt,isxt[4];
   uint8_t             tau[4];
   const uint8_t       *taued;
@@ -1798,7 +1798,7 @@ int MMG5_split3(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
   MMG5_xTetra         xt[4];
   MMG5_pxTetra        pxt0;
   int                 i;
-  MMG5_int             iel,newtet[4];
+  MMG5_int            iel,newtet[4];
   int8_t              flg,firstxt,isxt[4];
   uint8_t             tau[4];
   const uint8_t       *taued;
@@ -2191,7 +2191,7 @@ int MMG5_split3cone(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8
   MMG5_xTetra         xt[4];
   MMG5_pxTetra        pxt0;
   int                 i;
-  MMG5_int             iel,newtet[4];
+  MMG5_int            iel,newtet[4];
   int8_t              flg,firstxt,isxt[4],ia,ib;
   uint8_t             tau[4];
   const uint8_t       *taued;
@@ -2856,11 +2856,11 @@ int MMG5_split3op(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k, MMG5_int vx[6],int
   MMG5_pTetra          pt[5];
   MMG5_xTetra          xt[5];
   MMG5_pxTetra         pxt0;
-  MMG5_int                  iel;
-  MMG5_int                  newtet[5];
+  MMG5_int             iel;
+  MMG5_int             newtet[5];
   uint8_t              imin12,imin03,tau[4],sym[4],symed[6],ip0,ip1,ip2,ip3,ie0,ie1;
   uint8_t              ie2,ie3,ie4,ie5,isxt[5],firstxt,i;
-  const uint8_t       *taued=NULL;
+  const uint8_t        *taued=NULL;
 
   pt[0]  = &mesh->tetra[k];
   newtet[0]=k;
@@ -3309,7 +3309,7 @@ MMG5_int MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k,int8_t metRid
   MMG5_pxTetra  pxt0;
   double        o[3],cb[4];
   int           i;
-  MMG5_int       ib,iadr,*adja,adj1,adj2,adj3,iel,newtet[4];
+  MMG5_int      ib,iadr,*adja,adj1,adj2,adj3,iel,newtet[4];
   int           src;
   uint8_t       isxt[4],firstxt;
 
@@ -3763,8 +3763,8 @@ int MMG5_split4sf(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t
   MMG5_pTetra         pt[6];
   MMG5_xTetra         xt[6];
   MMG5_pxTetra        pxt0;
-  MMG5_int                 iel;
-  MMG5_int                 newtet[6];
+  MMG5_int            iel;
+  MMG5_int            newtet[6];
   int8_t              firstxt,isxt[6],j,i;
   uint8_t             tau[4],imin23,imin12;
   const uint8_t       *taued = NULL;
@@ -4121,8 +4121,8 @@ int MMG5_split4op(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t
   MMG5_pTetra         pt[6];
   MMG5_xTetra         xt[6];
   MMG5_pxTetra        pxt0;
-  MMG5_int                 iel;
-  MMG5_int                 newtet[6];
+  MMG5_int            iel;
+  MMG5_int            newtet[6];
   int8_t              flg,firstxt,isxt[6],i,j,imin01,imin23;
   uint8_t             tau[4];
   const uint8_t       *taued;
@@ -4533,7 +4533,7 @@ int MMG5_split5(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
   MMG5_xTetra         xt[7];
   MMG5_pxTetra        pxt0;
   int                 i,j;
-  MMG5_int             iel,newtet[7];
+  MMG5_int            iel,newtet[7];
   int8_t              firstxt,isxt[7];
   uint8_t             tau[4],imin;
   const uint8_t       *taued=NULL;
@@ -4840,7 +4840,7 @@ int MMG5_split6(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t m
   MMG5_xTetra    xt0,xt;
   MMG5_pxTetra   pxt;
   int            i,j;
-  MMG5_int        iel,newtet[8],nxt0;
+  MMG5_int       iel,newtet[8],nxt0;
   int8_t         isxt0,isxt;
 
   pt[0]  = &mesh->tetra[k];
@@ -5218,7 +5218,7 @@ int MMG3D_chksplit(MMG5_pMesh mesh, MMG5_pSol met,MMG5_int ip,
   MMG5_pTetra   pt0,pt1;
   double        cal,critloc;
   int           l,na,ipb,lon;
-  MMG5_int       jel;
+  MMG5_int      jel;
 
   lon = ret/2;
   critloc = 1.;
@@ -5272,7 +5272,7 @@ MMG5_int MMG5_splitedg(MMG5_pMesh mesh, MMG5_pSol met,MMG5_int iel, int iar, dou
   MMG5_pPoint  p0,p1;
   double       o[3];
   int          src,warn,lon,ier;
-  MMG5_int      list[MMG3D_LMAX+2],i0,i1,ip;
+  MMG5_int     list[MMG3D_LMAX+2],i0,i1,ip;
   int16_t      tag;
 
   warn = 0;

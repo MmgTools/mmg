@@ -290,7 +290,7 @@ double MMG5_lenSurfEdg33_ani(MMG5_pMesh mesh,MMG5_pSol met,
 static
 inline double MMG5_lenSurfEdg_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int ip1,MMG5_int ip2, int8_t isedg) {
   MMG5_pPoint   p1,p2;
-  double   h1,h2,l,r,len;
+  double        h1,h2,l,r,len;
 
   p1 = &mesh->point[ip1];
   p2 = &mesh->point[ip2];

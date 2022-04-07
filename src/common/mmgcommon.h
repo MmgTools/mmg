@@ -568,7 +568,7 @@ typedef MMG5_Bezier * MMG5_pBezier;
  * \brief Cell for linked list of integer value.
  */
 typedef struct MMG5_iNode_s {
-  int val;
+  int    val;
   struct MMG5_iNode_s *nxt;
 } MMG5_iNode;
 
@@ -602,7 +602,7 @@ void           MMG5_check_hminhmax(MMG5_pMesh mesh, int8_t sethmin, int8_t sethm
  int           MMG5_boulep(MMG5_pMesh mesh,MMG5_int start,MMG5_int ip,MMG5_int*,MMG5_int *list);
  int           MMG5_boulec(MMG5_pMesh, MMG5_int*, MMG5_int, MMG5_int i,double *tt);
  int           MMG5_boulen(MMG5_pMesh, MMG5_int*, MMG5_int, MMG5_int i,double *nn);
- MMG5_int           MMG5_bouler(MMG5_pMesh, MMG5_int*, MMG5_int, MMG5_int i,MMG5_int *,MMG5_int *,MMG5_int *, MMG5_int*, int);
+ MMG5_int      MMG5_bouler(MMG5_pMesh, MMG5_int*, MMG5_int, MMG5_int i,MMG5_int *,MMG5_int *,MMG5_int *, MMG5_int*, int);
  double        MMG5_caltri33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt);
  extern double MMG5_caltri_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
  extern double MMG5_caltri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
@@ -621,16 +621,16 @@ void           MMG5_check_hminhmax(MMG5_pMesh mesh, int8_t sethmin, int8_t sethm
  void          MMG5_Free_dlinkedList( MMG5_pMesh mesh, MMG5_dNode *liLi );
  int           MMG5_grad2metSurf(MMG5_pMesh,MMG5_pSol,MMG5_pTria,MMG5_int,MMG5_int);
  int           MMG5_grad2metSurfreq(MMG5_pMesh,MMG5_pSol,MMG5_pTria,MMG5_int,MMG5_int);
- char         *MMG5_Get_filenameExt( char *filename );
- char         *MMG5_Get_basename(char *path);
- char         *MMG5_Get_path(char *path);
- char         *MMG5_Remove_ext( char *path, char* );
+ char          *MMG5_Get_filenameExt( char *filename );
+ char          *MMG5_Get_basename(char *path);
+ char          *MMG5_Get_path(char *path);
+ char          *MMG5_Remove_ext( char *path, char* );
  const char    *MMG5_Get_formatName(enum MMG5_Format fmt);
  int           MMG5_Get_format( char *ptr, int );
  int           MMG5_hashEdge(MMG5_pMesh mesh,MMG5_Hash *hash,MMG5_int a,MMG5_int b,MMG5_int k);
  int           MMG5_hashUpdate(MMG5_Hash *hash,MMG5_int a,MMG5_int b,MMG5_int k);
  int           MMG5_hashEdgeTag(MMG5_pMesh mesh,MMG5_Hash *hash,MMG5_int a,MMG5_int b,int16_t k);
- MMG5_int           MMG5_hashGet(MMG5_Hash *hash,MMG5_int a,MMG5_int b);
+ MMG5_int      MMG5_hashGet(MMG5_Hash *hash,MMG5_int a,MMG5_int b);
  int           MMG5_hashNew(MMG5_pMesh mesh, MMG5_Hash *hash,MMG5_int hsiz,MMG5_int hmax);
  int           MMG5_intmetsavedir(MMG5_pMesh mesh, double *m,double *n,double *mr);
  int           MMG5_intridmet(MMG5_pMesh,MMG5_pSol,MMG5_int,MMG5_int,double,double*,double*);
@@ -679,10 +679,10 @@ void           MMG5_check_hminhmax(MMG5_pMesh mesh, int8_t sethmin, int8_t sethm
  int           MMG5_intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr);
  extern int    MMG5_countLocalParamAtTri( MMG5_pMesh,MMG5_iNode **);
  extern int    MMG5_writeLocalParamAtTri( MMG5_pMesh,MMG5_iNode *,FILE*);
- double         MMG2D_quickarea(double a[2],double b[2],double c[2]);
+ double        MMG2D_quickarea(double a[2],double b[2],double c[2]);
  void          MMG5_build3DMetric(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int ip,double dbuf[6]);
  int           MMG5_loadVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
- int            MMG5_loadMshMesh_part1(MMG5_pMesh mesh,const char *filename,
+ int           MMG5_loadMshMesh_part1(MMG5_pMesh mesh,const char *filename,
                                        FILE **inm,long *posNodes, long *posElts,
                                        long **posNodeData, int *bin, int *iswp,
                                        MMG5_int *nelts,int *nsols);

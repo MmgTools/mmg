@@ -49,8 +49,8 @@ MMG5_int* MMG2D_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,MMG5_int *npfin
   MMG5_pTria      pt,pt1;
   MMG5_pPoint     p0;
   double          u[2];
-  MMG5_int         k,iel,jel,n,npf,nef,ip,nlay,refdirh,refdirnh,ilist,ilisto,ilistck;
-  MMG5_int         vper[3],*perm,*list,*adja,*invperm;
+  MMG5_int        k,iel,jel,n,npf,nef,ip,nlay,refdirh,refdirnh,ilist,ilisto,ilistck;
+  MMG5_int        vper[3],*perm,*list,*adja,*invperm;
   int8_t          i,j,jedg;
 
   nlay       = 20;
@@ -317,7 +317,7 @@ MMG5_int* MMG2D_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,MMG5_int *npfin
 /** Transfer solution from the submesh to the global mesh */
 int MMG2D_unpackLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,MMG5_int npf,MMG5_int *invperm) {
   double      *u;
-  MMG5_int         k,ip;
+  MMG5_int    k,ip;
   int8_t      i;
 
   u = LS_getSol(lsst);
@@ -339,7 +339,7 @@ int MMG2D_unpackLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,MMG5_int npf,MMG5_i
 /** Extension of the displacement at the nodes of edges tagged MMG5_DISPREF */
 int MMG2D_velextLS(MMG5_pMesh mesh,MMG5_pSol disp) {
   LSst       *lsst;
-  MMG5_int        npf,*invperm;
+  MMG5_int   npf,*invperm;
 
   /* Creation of the data structure for storing the submesh */
   lsst = LS_init(mesh->dim,mesh->ver,P1,1);

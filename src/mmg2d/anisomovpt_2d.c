@@ -39,7 +39,7 @@ int MMG2D_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met,int ilist,MMG5_int *list,in
   MMG5_pPoint        ppt0,p0,p1,p2;
   double             calold,calnew,area,det,alpha,ps,ps1,ps2,step,sqdetm1,sqdetm2;
   double             gr[2],grp[2],*m0,*m1,*m2;
-  MMG5_int                k,iel,ip0,ip1,ip2;
+  MMG5_int           k,iel,ip0,ip1,ip2;
   int8_t             i,i1,i2;
   static int8_t      mmgWarn0=0;
 

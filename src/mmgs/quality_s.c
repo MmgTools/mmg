@@ -54,7 +54,7 @@ double caleltsig_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int iel) {
   MMG5_pPoint   pa,pb,pc;
   double        ps1,ps2,abx,aby,abz,acx,acy,acz,dd,rap,anisurf;
   double        n[3],pv[3],l[3],*ncomp,*a,*b,*c;
-  MMG5_int           ia,ib,ic;
+  MMG5_int      ia,ib,ic;
 
   pt = &mesh->tria[iel];
   ia = pt->v[0];
@@ -139,8 +139,8 @@ double caleltsig_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int iel) {
 double caleltsig_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int iel) {
   MMG5_pTria     pt;
   MMG5_pPoint    pa,pb,pc;
-  double   *a,*b,*c,cal,abx,aby,abz,acx,acy,acz,bcx,bcy,bcz,rap;
-  double    n[3],*ncomp,pv[3],ps1,ps2,sqcal,invsqcal;
+  double         *a,*b,*c,cal,abx,aby,abz,acx,acy,acz,bcx,bcy,bcz,rap;
+  double         n[3],*ncomp,pv[3],ps1,ps2,sqcal,invsqcal;
   MMG5_int       ia,ib,ic;
 
   pt = &mesh->tria[iel];
@@ -280,10 +280,10 @@ inline double diamelt(MMG5_pPoint p0,MMG5_pPoint p1,MMG5_pPoint p2) {
  */
 int MMGS_prilen(MMG5_pMesh mesh, MMG5_pSol met, int metRidTyp) {
   MMG5_pTria      pt;
-  MMG5_Hash      hash;
+  MMG5_Hash       hash;
   double          len,avlen,lmin,lmax;
   int             ned,hl[9],nullEdge;
-  MMG5_int         k,np,nq,amin,bmin,amax,bmax;
+  MMG5_int        k,np,nq,amin,bmin,amax,bmax;
   int8_t          ia,i0,i1,i;
   static double   bd[9]= {0.0, 0.3, 0.6, 0.7071, 0.9, 1.3, 1.4142, 2.0, 5.0};
 

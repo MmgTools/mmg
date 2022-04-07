@@ -47,7 +47,7 @@ int MMG2D_doSol(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTria      ptt,pt;
   MMG5_pPoint     p1,p2;
   double          ux,uy,dd;
-  MMG5_int             k,iadr,ipa,ipb;
+  MMG5_int        k,iadr,ipa,ipb;
   int             i,ib;
   int             MMG_inxtt[5] = {0,1,2,0,1};
 

@@ -44,7 +44,7 @@
  *
  */
 MMG5_int MMG2D_indElt(MMG5_pMesh mesh, MMG5_int kel) {
-    MMG5_pTria pt;
+    MMG5_pTria      pt;
     MMG5_int        ne, k;
 
     ne = 0;
@@ -69,7 +69,7 @@ MMG5_int MMG2D_indElt(MMG5_pMesh mesh, MMG5_int kel) {
  */
 MMG5_int MMG2D_indPt(MMG5_pMesh mesh, MMG5_int kp) {
     MMG5_pPoint ppt;
-    MMG5_int         np, k;
+    MMG5_int    np, k;
 
     np = 0;
     for (k=1; k<=mesh->np; k++) {

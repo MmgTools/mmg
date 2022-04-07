@@ -78,7 +78,7 @@ MMG5_int MMG3D_newPt(MMG5_pMesh mesh,double c[3],int16_t tag,int src) {
 
 void MMG3D_delPt(MMG5_pMesh mesh,MMG5_int ip) {
   MMG5_pPoint   ppt;
-  MMG5_xPoint  *pxp;
+  MMG5_xPoint   *pxp;
 
   ppt = &mesh->point[ip];
   if ( ppt->xp ) {
