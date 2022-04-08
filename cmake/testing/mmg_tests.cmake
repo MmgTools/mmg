@@ -148,8 +148,8 @@ FOREACH(EXEC ${EXECUT_MMG})
     )
 
   SET ( args
-    "-v 5 -hgrad 1.15"
-    "-v 5 -hgrad 1.15"
+    "-v 5 -hgrad 1.25"
+    "-v 5 -hgrad 1.25"
     )
 
   ADD_RUN_AGAIN_TESTS ( ${EXEC} "${test_names}" "${args}" "${input_files}" )
@@ -319,10 +319,14 @@ ADD_TEST(NAME mmg_MultiDom_Cube_ReqEntities_${SHRT_EXEC}
     ${MMG_CI_TESTS}/MultiDom_Cube_ReqEntities/c
     -out ${CTEST_OUTPUT_DIR}/mmg_MultiDom_Cube_ReqEntities_nosizreq_${SHRT_EXEC}.o.meshb)
 
-ADD_TEST(NAME mmg_MultiDom_Ellipse_ReqEntitiesAni_${SHRT_EXEC}
-  COMMAND ${EXEC} -v 5 -hausd 0.002 -A ${common_args}
-  ${MMG_CI_TESTS}/MultiDom_Ellipse_ReqEntities/c.d
-  -out ${CTEST_OUTPUT_DIR}/mmg_MultiDom_Ellipse_ReqEntitiesAni_${SHRT_EXEC}.o.meshb)
+# Too long for github actions on windows (more than 1 hour). Lasts 15mins on winnie
+# (physical windows), 4mins on ubuntu/mac. See gprof-profile.out file of
+# ${MMG_CI_TESTS}/MultiDom_Ellipse_ReqEntities/ (lot of time is passed in gradsiz_ani)
+#
+#ADD_TEST(NAME mmg_MultiDom_Ellipse_ReqEntitiesAni_${SHRT_EXEC}
+#  COMMAND ${EXEC} -v 5 -hausd 0.002 -A ${common_args}
+#  ${MMG_CI_TESTS}/MultiDom_Ellipse_ReqEntities/c.d
+#  -out ${CTEST_OUTPUT_DIR}/mmg_MultiDom_Ellipse_ReqEntitiesAni_${SHRT_EXEC}.o.meshb)
 
 
 # -A

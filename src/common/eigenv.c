@@ -320,9 +320,9 @@ int MMG5_check_accuracy(double mat[6],double lambda[3], double v[3][3],
   k = 0;
   for (i=0; i<3; i++) {
     for (j=i; j<3; j++) {
-      m[k++] = lambda[0]*v[i][0]*v[j][0]
-        + lambda[1]*v[i][1]*v[j][1]
-        + lambda[2]*v[i][2]*v[j][2];
+      m[k++] = lambda[0]*v[0][i]*v[0][j]
+        + lambda[1]*v[1][i]*v[1][j]
+        + lambda[2]*v[2][i]*v[2][j];
     }
   }
   err = fabs(mat[0]-m[0]);

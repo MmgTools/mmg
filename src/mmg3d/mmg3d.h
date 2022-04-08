@@ -440,6 +440,8 @@ int  MMG3D_pack_points(MMG5_pMesh mesh);
 void MMG3D_unset_reqBoundaries(MMG5_pMesh mesh);
 int  MMG3D_packMesh(MMG5_pMesh,MMG5_pSol,MMG5_pSol);
 int  MMG3D_bdryBuild(MMG5_pMesh);
+int MMG3D_printErrorMat(int8_t symmat,double *m,double *mr);
+int MMG3D_printEigenv(double dm[3],double vp[3][3]);
 
 /* rmc option */
 double MMG3D_vfrac(MMG5_pMesh ,MMG5_pSol ,int ,int );
