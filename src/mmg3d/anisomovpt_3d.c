@@ -193,11 +193,7 @@ int MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
   MMG5_Tria         tt;
   MMG5_pxPoint      pxp;
   MMG5_Bezier       b;
-#ifdef FIX1
-  double            *n,r[3][3],lispoi[3*MMG3D_LMAX+1],det2d;
-#else
   double            n[3],r[3][3],lispoi[3*MMG3D_LMAX+1],det2d;
-#endif
   double            detloc,gv[2],step,lambda[3];
   double            o[3],no[3],*m0,ncur[3],nprev[3],nneighi[3];
   double            calold,calnew,caltmp,callist[MMG3D_LMAX+2];
@@ -217,13 +213,9 @@ int MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
   m0 = &met->m[6*ip0];
   assert( p0->xp && !MG_EDG(p0->tag) );
 
-#ifdef FIX1
-  n = &(mesh->xpoint[p0->xp].n1[0]);
-#else
   n[0] = mesh->xpoint[p0->xp].n1[0];
   n[1] = mesh->xpoint[p0->xp].n1[1];
   n[2] = mesh->xpoint[p0->xp].n1[2];
-#endif
 
   /** Step 1 : rotation matrix that sends normal n to the third coordinate vector of R^3 */
   if ( !MMG5_rotmatrix(n,r) ) {
@@ -338,9 +330,6 @@ int MMG5_movbdyregpt_ani(MMG5_pMesh mesh, MMG5_pSol met, MMG3D_pPROctree PROctre
     return 0;
   }
   pxp = &mesh->xpoint[nxp];
-#ifdef FIX1
-  n = &(mesh->xpoint[nxp].n1[0]);
-#endif
 
   /* parallel transport of metric at p0 to new point. */
   if ( !MMG5_paratmet(p0->c,n,m0,o,no,&met->m[0]) ) {
