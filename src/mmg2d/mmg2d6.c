@@ -379,7 +379,7 @@ int MMG2D_snapval(MMG5_pMesh mesh, MMG5_pSol sol) {
           if ( tmp[ip] < 0.0 )
             sol->m[ip] = -100.0*MMG5_EPS;
           else
-            sol->m[ip] = 100.0*MMG5_EPS;
+            sol->m[ip] = 100.0*MMG5_EPS;
           nc++;
         }
         p0->flag = 0;
