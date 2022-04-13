@@ -53,7 +53,7 @@ int MMG2D_doSol(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   /* Memory alloc */
   if ( sol->size!=1 && sol->size!=3 ) {
-    fprintf(stderr,"\n  ## Error: %s: unexpected size of metric: %d.\n",
+    fprintf(stderr,"\n  ## Error: %s: unexpected size of metric: %" MMG5_PRId ".\n",
             __func__,sol->size);
     return 0;
   }
@@ -134,7 +134,7 @@ int MMG2D_doSol(MMG5_pMesh mesh,MMG5_pSol sol) {
       dd = 1./sqrt(dd);
     }
     else {
-      fprintf(stderr,"\n  # Error: %s: Unexpected solution size (%d)\n",
+      fprintf(stderr,"\n  # Error: %s: Unexpected solution size (%" MMG5_PRId ")\n",
               __func__,sol->size);
       return 0;
     }

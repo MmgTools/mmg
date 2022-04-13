@@ -127,7 +127,7 @@ MMG5_int* MMG2D_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,MMG5_int *npfin
   }
   if ( !npf ) {
     fprintf(stderr,
-            "\n  ## Error: %s: no triangle with reference %d in the mesh.\n"
+            "\n  ## Error: %s: no triangle with reference %" MMG5_PRId " in the mesh.\n"
             "              Nothing to move.\n",__func__,MMG5_DISPREF);
     MMG5_DEL_MEM ( mesh,list );
     MMG5_DEL_MEM ( mesh,perm );
@@ -260,7 +260,7 @@ MMG5_int* MMG2D_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,MMG5_int *npfin
   }
 
   if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && (ilist+npf+nef > 0) )
-    printf("Number of packed triangles %d, points %d, edges %d\n",ilist,npf,nef);
+    printf("Number of packed triangles %" MMG5_PRId ", points %" MMG5_PRId ", edges %" MMG5_PRId "\n",ilist,npf,nef);
 
   /* Add boundary conditions */
   /*if ( !LS_setBC(lsst,Dirichlet,refdirnh,'v',LS_edg,v) ) {

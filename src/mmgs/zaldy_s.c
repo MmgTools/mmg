@@ -95,7 +95,7 @@ int MMGS_delElt(MMG5_pMesh mesh,MMG5_int iel) {
 
   pt = &mesh->tria[iel];
   if ( !MG_EOK(pt) ) {
-    fprintf(stderr,"\n  ## INVALID ELEMENT %d.\n",iel);
+    fprintf(stderr,"\n  ## INVALID ELEMENT %" MMG5_PRId ".\n",iel);
     return 0;
   }
   memset(pt,0,sizeof(MMG5_Tria));
@@ -165,8 +165,8 @@ int MMGS_memOption_memSet(MMG5_pMesh mesh) {
   }
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {
-    fprintf(stdout,"  MMG2D_NPMAX    %d\n",mesh->npmax);
-    fprintf(stdout,"  MMG2D_NTMAX    %d\n",mesh->ntmax);
+    fprintf(stdout,"  MMG2D_NPMAX    %" MMG5_PRId "\n",mesh->npmax);
+    fprintf(stdout,"  MMG2D_NTMAX    %" MMG5_PRId "\n",mesh->ntmax);
   }
 
   return 1;

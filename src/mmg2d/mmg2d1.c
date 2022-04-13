@@ -101,7 +101,7 @@ int MMG2D_anatri(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
 
   if ( mesh->info.imprim > 0 ) {
     if ( (abs(mesh->info.imprim) < 5 || mesh->info.ddebug ) && nns+nnc > 0 )
-      fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %d iter.\n",nns,nnc,nnsw,it);
+      fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %" MMG5_PRId " iter.\n",nns,nnc,nnsw,it);
   }
   return 1;
 }
@@ -229,7 +229,7 @@ MMG5_int MMG2D_anaelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
     if ( nc > 0 ) ns++;
   }
   if ( mesh->info.ddebug && ns ) {
-    fprintf(stdout,"     %d analyzed  %d proposed\n",mesh->nt,ns);
+    fprintf(stdout,"     %" MMG5_PRId " analyzed  %" MMG5_PRId " proposed\n",mesh->nt,ns);
     fflush(stdout);
   }
   /* Step 3: Simulate splitting and delete points leading to an invalid configuration */
@@ -297,7 +297,7 @@ MMG5_int MMG2D_anaelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
   while ( ni >0 && ++it <20 );
 
   if ( mesh->info.ddebug && nc ) {
-    fprintf(stdout,"     %d corrected,  %d invalid\n",nc,ni);
+    fprintf(stdout,"     %" MMG5_PRId " corrected,  %" MMG5_PRId " invalid\n",nc,ni);
     fflush(stdout);
   }
   
@@ -621,7 +621,7 @@ int MMG2D_adptri(MMG5_pMesh mesh,MMG5_pSol met) {
   }
   if ( mesh->info.imprim > 0 ) {
     if ( abs(mesh->info.imprim) < 5 && (nnc > 0 || nns > 0) )
-      fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %8d moved, %d iter. \n",nns,nnc,nnsw,nnm,it);
+      fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %8d moved, %" MMG5_PRId " iter. \n",nns,nnc,nnsw,nnm,it);
   }
   return 1;
 }
@@ -796,12 +796,12 @@ MMG5_int MMG2D_movtri(MMG5_pMesh mesh,MMG5_pSol met,int maxit,int8_t improve) {
       }
     }
     nnm += nm;
-    if ( mesh->info.ddebug )  fprintf(stdout,"     %8d moved, %d geometry\n",nm,ns);
+    if ( mesh->info.ddebug )  fprintf(stdout,"     %8d moved, %" MMG5_PRId " geometry\n",nm,ns);
   }
   while ( ++it < maxit && nm > 0 );
 
   if ( (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) && nnm > 0 )
-    fprintf(stdout,"     %8d vertices moved, %d iter.\n",nnm,it);
+    fprintf(stdout,"     %8d vertices moved, %" MMG5_PRId " iter.\n",nnm,it);
 
   return nnm;
 }

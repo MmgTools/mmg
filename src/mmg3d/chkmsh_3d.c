@@ -55,7 +55,7 @@ void MMG5_chkvol(MMG5_pMesh mesh) {
     pt = &mesh->tetra[k];
     if ( !MG_EOK(pt) )  continue;
     if ( MMG5_orvol(mesh->point,pt->v) < MMG5_NULKAL ) {
-      fprintf(stderr,"\n  ## Warning: %s: tetra %d volume %e\n",__func__,
+      fprintf(stderr,"\n  ## Warning: %s: tetra %" MMG5_PRId " volume %e\n",__func__,
              k,MMG5_orvol(mesh->point,pt->v));
 #ifdef DEBUG
       ier = 0;
@@ -91,7 +91,7 @@ int MMG5_chkmshsurf(MMG5_pMesh mesh){
 
       if(adja1[voy] / 3 != k){
         fprintf(stderr,"\n  ## Warning: %s: wrong adjacency relation"
-                " for triangles : %d %d \n",__func__,k,k1);
+                " for triangles : %" MMG5_PRId " %" MMG5_PRId " \n",__func__,k,k1);
         return 0;
       }
     }
@@ -131,12 +131,12 @@ int MMG5_mmg3dChkmsh(MMG5_pMesh mesh,int severe,int base) {
 
       if ( adj == k ) {
         if ( !mmgErr0 ) {
-          fprintf(stderr,"\n  ## Error: %s: 1. at least 1 wrong adjacency %d %d\n",
+          fprintf(stderr,"\n  ## Error: %s: 1. at least 1 wrong adjacency %" MMG5_PRId " %" MMG5_PRId "\n",
                   __func__,MMG3D_indElt(mesh,k),MMG3D_indElt(mesh,adj));
-          fprintf(stderr,"triangle %d: %d %d %d %d\n",MMG3D_indElt(mesh,k),
+          fprintf(stderr,"triangle %" MMG5_PRId ": %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId "\n",MMG3D_indElt(mesh,k),
                   MMG3D_indPt(mesh,pt1->v[0]),MMG3D_indPt(mesh,pt1->v[1]),
                   MMG3D_indPt(mesh,pt1->v[2]),MMG3D_indPt(mesh,pt1->v[3]));
-          fprintf(stderr,"adj (%d): %d %d %d %d\n",MMG3D_indElt(mesh,k),
+          fprintf(stderr,"adj (%" MMG5_PRId "): %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId "\n",MMG3D_indElt(mesh,k),
                   MMG3D_indElt(mesh,adja[0]/4),MMG3D_indElt(mesh,adja[1]/4),
                   MMG3D_indElt(mesh,adja[2]/4),MMG3D_indElt(mesh,adja[3]/4));
           mmgErr0 = 1;
@@ -146,15 +146,15 @@ int MMG5_mmg3dChkmsh(MMG5_pMesh mesh,int severe,int base) {
       pt2 = &mesh->tetra[adj];
       if ( !MG_EOK(pt2) || pt2->ref < 0 ){
         if ( !mmgErr1 ) {
-          fprintf(stderr,"\n  ## Error: %s: 4. at least 1 invalid adjacent %d %d\n",
+          fprintf(stderr,"\n  ## Error: %s: 4. at least 1 invalid adjacent %" MMG5_PRId " %" MMG5_PRId "\n",
                   __func__,MMG3D_indElt(mesh,adj),MMG3D_indElt(mesh,k));
-          fprintf(stderr,"vertices of k   %d: %d %d %d %d\n",MMG3D_indElt(mesh,k),
+          fprintf(stderr,"vertices of k   %" MMG5_PRId ": %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId "\n",MMG3D_indElt(mesh,k),
                   MMG3D_indPt(mesh,pt1->v[0]),MMG3D_indPt(mesh,pt1->v[1]),
                   MMG3D_indPt(mesh,pt1->v[2]),MMG3D_indPt(mesh,pt1->v[3]));
-          fprintf(stderr,"vertices of adj %d: %d %d %d %d\n",MMG3D_indElt(mesh,adj),
+          fprintf(stderr,"vertices of adj %" MMG5_PRId ": %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId "\n",MMG3D_indElt(mesh,adj),
                   MMG3D_indPt(mesh,pt2->v[0]),MMG3D_indPt(mesh,pt2->v[1]),
                   MMG3D_indPt(mesh,pt2->v[2]),MMG3D_indPt(mesh,pt2->v[3]));
-          fprintf(stderr,"adj(%d): %d %d %d %d\n",MMG3D_indElt(mesh,k),
+          fprintf(stderr,"adj(%" MMG5_PRId "): %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId "\n",MMG3D_indElt(mesh,k),
                   MMG3D_indElt(mesh,adja[0]/4),MMG3D_indElt(mesh,adja[1]/4),
                   MMG3D_indElt(mesh,adja[2]/4),MMG3D_indElt(mesh,adja[3]/4));
           mmgErr1 = 1;
@@ -167,18 +167,18 @@ int MMG5_mmg3dChkmsh(MMG5_pMesh mesh,int severe,int base) {
       voy1  = adja1[voy] % 4;
       if ( adj1 != k || voy1 != i ) {
         if ( !mmgErr2 ) {
-          fprintf(stderr,"\n  ## Error: %s: 2. at least 1 wrong adjacency %d %d\n",
+          fprintf(stderr,"\n  ## Error: %s: 2. at least 1 wrong adjacency %" MMG5_PRId " %" MMG5_PRId "\n",
                   __func__,MMG3D_indElt(mesh,k),MMG3D_indElt(mesh,adj1));
-          fprintf(stderr,"vertices of %d: %d %d %d %d\n",MMG3D_indElt(mesh,k),
+          fprintf(stderr,"vertices of %" MMG5_PRId ": %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId "\n",MMG3D_indElt(mesh,k),
                   MMG3D_indPt(mesh,pt1->v[0]),MMG3D_indPt(mesh,pt1->v[1]),
                   MMG3D_indPt(mesh,pt1->v[2]),MMG3D_indPt(mesh,pt1->v[3]));
-          fprintf(stderr,"vertices of adj %d: %d %d %d %d\n",MMG3D_indElt(mesh,adj),
+          fprintf(stderr,"vertices of adj %" MMG5_PRId ": %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId "\n",MMG3D_indElt(mesh,adj),
                   MMG3D_indPt(mesh,pt2->v[0]),MMG3D_indPt(mesh,pt2->v[1]),
                   MMG3D_indPt(mesh,pt2->v[2]),MMG3D_indPt(mesh,pt2->v[3]));
-          fprintf(stderr,"adj(%d): %d %d %d %d\n",MMG3D_indElt(mesh,k),
+          fprintf(stderr,"adj(%" MMG5_PRId "): %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId "\n",MMG3D_indElt(mesh,k),
                   MMG3D_indElt(mesh,adja[0]/4),MMG3D_indElt(mesh,adja[1]/4),
                   MMG3D_indElt(mesh,adja[2]/4),MMG3D_indElt(mesh,adja[3]/4));
-          fprintf(stderr,"adj(%d): %d %d %d %d\n",MMG3D_indElt(mesh,adj),
+          fprintf(stderr,"adj(%" MMG5_PRId "): %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId "\n",MMG3D_indElt(mesh,adj),
                   MMG3D_indElt(mesh,adja1[0]/4),MMG3D_indElt(mesh,adja1[1]/4),
                   MMG3D_indElt(mesh,adja1[2]/4),MMG3D_indElt(mesh,adja1[3]/4));
           mmgErr2 = 1;
@@ -198,12 +198,12 @@ int MMG5_mmg3dChkmsh(MMG5_pMesh mesh,int severe,int base) {
            || ((a0 == b1)&&(a1 == b0)&&(a2 ==b2)) || ((a0 == b1)&&(a1 == b2)&&(a2 ==b0)) \
            || ((a0 == b2)&&(a1 == b0)&&(a2 ==b1)) || ((a0 == b2)&&(a1 == b1)&&(a2 ==b0)) )){
         if ( !mmgErr3 ) {
-          fprintf(stderr,"\n  ## Warning: %s: Inconsistent faces : tetra %d face %d;"
-                  " tetra %d face %i \n",__func__,MMG3D_indElt(mesh,k),i,
+          fprintf(stderr,"\n  ## Warning: %s: Inconsistent faces : tetra %" MMG5_PRId " face %" MMG5_PRId ";"
+                  " tetra %" MMG5_PRId " face %i \n",__func__,MMG3D_indElt(mesh,k),i,
                   MMG3D_indElt(mesh,adj),voy);
-          fprintf(stderr,"Tet 1 : %d %d %d \n",MMG3D_indPt(mesh,a0),
+          fprintf(stderr,"Tet 1 : %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId " \n",MMG3D_indPt(mesh,a0),
                   MMG3D_indPt(mesh,a1),MMG3D_indPt(mesh,a2));
-          fprintf(stderr,"Tet 2 : %d %d %d \n",MMG3D_indPt(mesh,b0),
+          fprintf(stderr,"Tet 2 : %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId " \n",MMG3D_indPt(mesh,b0),
                   MMG3D_indPt(mesh,b1),MMG3D_indPt(mesh,b2));
           mmgErr3 = 1;
         }
@@ -223,8 +223,8 @@ int MMG5_mmg3dChkmsh(MMG5_pMesh mesh,int severe,int base) {
         if(!pt->xt){
           if ( !mmgErr4 ) {
             mmgErr4 = 1;
-            fprintf(stderr,"\n  ## Error: %s: Tetra %d: boundary face"
-                    " not tagged: %d \n",__func__,MMG3D_indElt(mesh,k),i);
+            fprintf(stderr,"\n  ## Error: %s: Tetra %" MMG5_PRId ": boundary face"
+                    " not tagged: %" MMG5_PRId " \n",__func__,MMG3D_indElt(mesh,k),i);
           }
           return 0;
         }
@@ -233,8 +233,8 @@ int MMG5_mmg3dChkmsh(MMG5_pMesh mesh,int severe,int base) {
           if(!(pxt->ftag[i] & MG_BDY)){
             if ( !mmgErr4 ) {
               mmgErr4 = 1;
-              fprintf(stderr,"\n  ## Error: %s: Tetra %d: boundary face"
-                      " not tagged : %d \n",__func__,MMG3D_indElt(mesh,k),i);
+              fprintf(stderr,"\n  ## Error: %s: Tetra %" MMG5_PRId ": boundary face"
+                      " not tagged : %" MMG5_PRId " \n",__func__,MMG3D_indElt(mesh,k),i);
             }
             return 0;
           }
@@ -259,9 +259,9 @@ int MMG5_mmg3dChkmsh(MMG5_pMesh mesh,int severe,int base) {
         if(!pt->xt){
           if ( !mmgErr5 ) {
             mmgErr5 = 1;
-            fprintf(stderr,"\n  ## Error: %s: Tetra %d face %d: common"
+            fprintf(stderr,"\n  ## Error: %s: Tetra %" MMG5_PRId " face %" MMG5_PRId ": common"
                     " face is a limit of two subdomains"
-                    " and has not xt : %d %d %d  \n",__func__,
+                    " and has not xt : %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId "  \n",__func__,
                     MMG3D_indElt(mesh,k),i,
                     MMG3D_indPt(mesh,pt->v[MMG5_idir[i][0]]),
                     MMG3D_indPt(mesh,pt->v[MMG5_idir[i][1]]),
@@ -274,9 +274,9 @@ int MMG5_mmg3dChkmsh(MMG5_pMesh mesh,int severe,int base) {
           if(!(pxt->ftag[i] & MG_BDY)){
             if ( !mmgErr5 ) {
               mmgErr5 = 1;
-              fprintf(stderr,"\n  ## Error: %s: Tetra %d %d : common"
+              fprintf(stderr,"\n  ## Error: %s: Tetra %" MMG5_PRId " %" MMG5_PRId " : common"
                       " face is a limit of two subdomains"
-                      " and is not tagged %d %d %d -->%d\n",__func__,
+                      " and is not tagged %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId " -->%" MMG5_PRId "\n",__func__,
                       MMG3D_indElt(mesh,k),i,
                        MMG3D_indElt(mesh,pt->v[MMG5_idir[i][0]]),
                       MMG3D_indPt(mesh,pt->v[MMG5_idir[i][1]]),
@@ -322,8 +322,8 @@ int MMG5_chkptonbdy(MMG5_pMesh mesh,MMG5_int np){
         if(pt->v[ip] == np) {
           if ( !mmgWarn0 ) {
             mmgWarn0 = 1;
-            fprintf(stderr,"\n  ## Error: %s: point %d on face %d of tetra %d :"
-                   " %d %d %d %d \n",__func__, MMG3D_indPt(mesh,pt->v[ip]),i,
+            fprintf(stderr,"\n  ## Error: %s: point %" MMG5_PRId " on face %" MMG5_PRId " of tetra %" MMG5_PRId " :"
+                   " %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId " \n",__func__, MMG3D_indPt(mesh,pt->v[ip]),i,
                    MMG3D_indElt(mesh,k), MMG3D_indPt(mesh,pt->v[0]),
                    MMG3D_indPt(mesh,pt->v[1]),
                    MMG3D_indPt(mesh,pt->v[2]), MMG3D_indPt(mesh,pt->v[3]));
@@ -344,7 +344,7 @@ int MMG5_chkptonbdy(MMG5_pMesh mesh,MMG5_int np){
     if(p0->tag & MG_BDY){
       if ( !mmgWarn1 ) {
         mmgWarn1 = 1;
-        fprintf(stderr,"\n  ## Error: %s: point %d tagged bdy while belonging to no BDY face\n",
+        fprintf(stderr,"\n  ## Error: %s: point %" MMG5_PRId " tagged bdy while belonging to no BDY face\n",
                 __func__,MMG3D_indPt(mesh,k));
       }
       return 0;
@@ -386,7 +386,7 @@ int MMG5_cntbdypt(MMG5_pMesh mesh, MMG5_int nump){
             v1 = pt->v[MMG5_idir[i][0]];
             v2 = pt->v[MMG5_idir[i][0]];
 
-            fprintf(stderr,"\n  ## Error: %s: face %d %d %d in tetra : %d %d %d %d \n",
+            fprintf(stderr,"\n  ## Error: %s: face %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId " in tetra : %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId " \n",
                    __func__,MMG3D_indPt(mesh,v0),MMG3D_indPt(mesh,v1),
                    MMG3D_indPt(mesh,v2),
                    MMG3D_indPt(mesh,pt->v[0]),MMG3D_indPt(mesh,pt->v[1]),
@@ -435,7 +435,7 @@ int MMG5_chkfemtopo(MMG5_pMesh mesh) {
     if ( nf >= 2 )  ntet++;
   }
   if ( mesh->info.imprim > 0 && ntet )
-    printf("  *** %d tetras with at least 2 boundary faces.\n",ntet);
+    printf("  *** %" MMG5_PRId " tetras with at least 2 boundary faces.\n",ntet);
 
   /* Count internal edges connecting two points of the boundary */
   for (k=1; k<=mesh->ne; k++) {
@@ -480,7 +480,7 @@ int MMG5_chkfemtopo(MMG5_pMesh mesh) {
     }
   }
   if ( mesh->info.imprim > 0 && ned )
-    printf("  *** %d internal edges connecting boundary points.\n",ned);
+    printf("  *** %" MMG5_PRId " internal edges connecting boundary points.\n",ned);
   return 1;
 }
 
@@ -524,8 +524,8 @@ int srcface(MMG5_pMesh mesh,MMG5_int n0,MMG5_int n1,MMG5_int n2) {
       if( mins == minn && maxs == maxn && sum == sn ) {
         if ( !mmgWarn0 ) {
           mmgWarn0 = 1;
-          fprintf(stderr,"\n  ## Error: %s: Face %d in tetra %d with ref %d:"
-                  " corresponding ref %d , tag: %d\n",__func__,i,
+          fprintf(stderr,"\n  ## Error: %s: Face %" MMG5_PRId " in tetra %" MMG5_PRId " with ref %" MMG5_PRId ":"
+                  " corresponding ref %" MMG5_PRId " , tag: %" MMG5_PRId "\n",__func__,i,
                   MMG3D_indElt(mesh,k),pt->ref,ref,tag);
         }
       }

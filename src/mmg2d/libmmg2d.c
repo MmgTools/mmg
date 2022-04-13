@@ -224,7 +224,7 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol met)
   chrono(ON,&(ctim[1]));
 
   if ( met->np && ( met->np != mesh->np ) ) {
-    fprintf(stdout,"\n  ## WARNING: WRONG SOLUTION NUMBER : %d != %d\n",met->np,mesh->np);
+    fprintf(stdout,"\n  ## WARNING: WRONG SOLUTION NUMBER : %" MMG5_PRId " != %" MMG5_PRId "\n",met->np,mesh->np);
     _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
   }
   else if ( met->size!=1 && met->size!=3 ) {
@@ -264,8 +264,8 @@ int MMG2D_mmg2dlib(MMG5_pMesh mesh,MMG5_pSol met)
   MMG2D_Set_commonFunc();
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {
-    fprintf(stdout,"  MAXIMUM NUMBER OF POINTS    (NPMAX) : %8d\n",mesh->npmax);
-    fprintf(stdout,"  MAXIMUM NUMBER OF TRIANGLES (NTMAX) : %8d\n",mesh->ntmax);
+    fprintf(stdout,"  MAXIMUM NUMBER OF POINTS    (NPMAX) : %8" MMG5_PRId "\n",mesh->npmax);
+    fprintf(stdout,"  MAXIMUM NUMBER OF TRIANGLES (NTMAX) : %8" MMG5_PRId "\n",mesh->ntmax);
   }
 
   /* Data analysis */
@@ -490,7 +490,7 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol met) {
   chrono(ON,&(ctim[1]));
 
   if ( met->np && (met->np != mesh->np) ) {
-    fprintf(stdout,"\n  ## WARNING: WRONG SOLUTION NUMBER : %d != %d\n",met->np,mesh->np);
+    fprintf(stdout,"\n  ## WARNING: WRONG SOLUTION NUMBER : %" MMG5_PRId " != %" MMG5_PRId "\n",met->np,mesh->np);
     _LIBMMG5_RETURN(mesh,met,sol,MMG5_STRONGFAILURE);
   }  else if ( met->size!=1 && met->size!=3 ) {
     fprintf(stderr,"\n  ## ERROR: WRONG DATA TYPE.\n");
@@ -507,8 +507,8 @@ int MMG2D_mmg2dmesh(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG2D_Set_commonFunc();
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {
-    fprintf(stdout,"  MAXIMUM NUMBER OF POINTS    (NPMAX) : %8d\n",mesh->npmax);
-    fprintf(stdout,"  MAXIMUM NUMBER OF TRIANGLES (NTMAX) : %8d\n",mesh->ntmax);
+    fprintf(stdout,"  MAXIMUM NUMBER OF POINTS    (NPMAX) : %8" MMG5_PRId "\n",mesh->npmax);
+    fprintf(stdout,"  MAXIMUM NUMBER OF TRIANGLES (NTMAX) : %8" MMG5_PRId "\n",mesh->ntmax);
   }
 
   /* analysis */
@@ -1072,11 +1072,11 @@ int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   }
   else if ( ier < 0 ) {
     printf("\n  ## Warning: Unable to perform any movement "
-           "(%d intersecting triangles).\n",-ier);
+           "(%" MMG5_PRId " intersecting triangles).\n",-ier);
     if ( mesh->info.imprim > 1 ) {
       printf("     List of invalid trias: ");
       for ( k=0; k<-ier; ++k ) {
-        printf("%d ",MMG2D_indElt(mesh,invalidTris[k]));
+        printf("%" MMG5_PRId " ",MMG2D_indElt(mesh,invalidTris[k]));
       }
       printf("\n\n");
     }

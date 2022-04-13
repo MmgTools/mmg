@@ -907,23 +907,23 @@ void MMG5_printTetra(MMG5_pMesh mesh,char* fileName) {
 
     inm = fopen(fileName,"w");
 
-    fprintf(inm,"----------> %d MMG5_TETRAHEDRAS <----------\n",mesh->ne);
+    fprintf(inm,"----------> %" MMG5_PRId " MMG5_TETRAHEDRAS <----------\n",mesh->ne);
     for(k=1; k<=mesh->ne; k++) {
         pt = &mesh->tetra[k];
-        fprintf(inm,"num %d -> %d %d %d %d\n",k,pt->v[0],pt->v[1],
+        fprintf(inm,"num %" MMG5_PRId " -> %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId "\n",k,pt->v[0],pt->v[1],
                 pt->v[2],pt->v[3]);
-        fprintf(inm,"ref,tag,xt  -> %d %d %d\n",pt->ref,pt->tag,pt->xt);
+        fprintf(inm,"ref,tag,xt  -> %" MMG5_PRId " %d %" MMG5_PRId "\n",pt->ref,pt->tag,pt->xt);
         if ( pt->xt ) {
             pxt = &mesh->xtetra[pt->xt];
             fprintf(inm,"tag   -> %d %d %d %d %d %d\n",pxt->tag[0],pxt->tag[1],
                     pxt->tag[2],pxt->tag[3],pxt->tag[4],pxt->tag[5]);
-            fprintf(inm,"edg   -> %d %d %d %d %d %d\n",pxt->edg[0],pxt->edg[1],
+            fprintf(inm,"edg   -> %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId "\n",pxt->edg[0],pxt->edg[1],
                     pxt->edg[2],pxt->edg[3],pxt->edg[4],pxt->edg[5]);
             fprintf(inm,"ftag  -> %d %d %d %d\n",pxt->ftag[0],pxt->ftag[1],
                     pxt->ftag[2],pxt->ftag[3]);
-            fprintf(inm,"ref   -> %d %d %d %d\n",pxt->ref[0],pxt->ref[1],
+            fprintf(inm,"ref   -> %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId "\n",pxt->ref[0],pxt->ref[1],
                     pxt->ref[2],pxt->ref[3]);
-            fprintf(inm,"ori   -> %d \n",pxt->ori);
+            fprintf(inm,"ori   -> %" MMG5_PRId " \n",pxt->ori);
         }
         fprintf(inm,"\n");
     }

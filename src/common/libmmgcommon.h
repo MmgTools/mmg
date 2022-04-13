@@ -170,7 +170,7 @@ void MMG5_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met,double hsiz);
  * Set the reference mapping for the elements of ref \a ref in ls discretization mode.
  *
  */
-  int  MMG5_Set_multiMat(MMG5_pMesh mesh, MMG5_pSol sol,int ref,int split,
+  int  MMG5_Set_multiMat(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_int ref,int split,
                          int rin, int rex);
 
 

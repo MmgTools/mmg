@@ -146,7 +146,7 @@ int MMG2D_writeLocalParamAtEdg( MMG5_pMesh mesh, MMG5_iNode *bdryRefs,
 
   cur = bdryRefs;
   while( cur ) {
-    fprintf(out,"%d Edge %e %e %e \n",cur->val,
+    fprintf(out,"%" MMG5_PRId " Edge %e %e %e \n",cur->val,
             mesh->info.hmin, mesh->info.hmax,mesh->info.hausd);
     cur = cur->nxt;
   }
@@ -198,7 +198,7 @@ int MMG2D_writeLocalParam( MMG5_pMesh mesh ) {
     return 0;
   }
 
-  fprintf(out,"parameters\n %d\n",nparTri+nparEdg);
+  fprintf(out,"parameters\n %" MMG5_PRId "\n",nparTri+nparEdg);
 
   /** Write local param at triangles */
   if (! MMG2D_writeLocalParamAtEdg(mesh,edgRefs,out) ) {
@@ -629,7 +629,7 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
   if ( mesh->info.imprim == -99 ) {
     fprintf(stdout,"\n  -- PRINT (0 10(advised) -10) ?\n");
     fflush(stdin);
-    MMG_FSCANF(stdin,"%d",&i);
+    MMG_FSCANF(stdin,"%" MMG5_PRId "",&i);
     if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_verbose,i) )
       return 0;
   }

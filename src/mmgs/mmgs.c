@@ -62,7 +62,8 @@ static void MMG5_endcod(void) {
  */
 static int MMG5_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
   float      fp1,fp2,hausd;
-  int        ref,i,j,ret,npar;
+  int        i,j,ret,npar;
+  MMG5_int   ref;
   char       *ptr,buf[256],data[256];
   FILE       *in;
 
@@ -98,7 +99,7 @@ static int MMG5_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
         return 0;
 
       for (i=0; i<mesh->info.npar; i++) {
-        MMG_FSCANF(in,"%d %255s ",&ref,buf);
+        MMG_FSCANF(in,"%" MMG5_PRId " %255s ",&ref,buf);
         ret = fscanf(in,"%f %f %f",&fp1,&fp2,&hausd);
 
         if ( !ret ) {

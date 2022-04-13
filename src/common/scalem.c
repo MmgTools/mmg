@@ -329,7 +329,7 @@ int MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
         for (i=0; i<3; i++) {
           if(lambda[i]<=0) {
             fprintf(stderr,"\n  ## Error: %s: at least 1 wrong metric "
-                    "(point %d -> eigenvalues : %e %e %e).\n"
+                    "(point %" MMG5_PRId " -> eigenvalues : %e %e %e).\n"
                     "            metric tensor: %e %e %e %e %e %e.\n",
                     __func__,k,lambda[0],lambda[1],lambda[2],
                               m[0],m[1],m[2],m[3],m[4],m[5]);
@@ -357,13 +357,13 @@ int MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
 
         if ( !MMG5_eigenv(1,m,lambda,v) ) {
           fprintf(stderr,"\n  ## Error: %s: unable to diagonalize at least"
-                  " 1 metric (point %d).\n",__func__,k);
+                  " 1 metric (point %" MMG5_PRId ").\n",__func__,k);
           return 0;
         }
         for (i=0; i<3; i++) {
           if(lambda[i]<=0) {
             fprintf(stderr,"\n  ## Error: %s: at least 1 wrong metric "
-                    "(point %d -> eigenvalues : %e %e %e).\n"
+                    "(point %" MMG5_PRId " -> eigenvalues : %e %e %e).\n"
                     "            metric tensor: %e %e %e %e %e %e.\n",
                     __func__,k,lambda[0],lambda[1],lambda[2],
                               m[0],m[1],m[2],m[3],m[4],m[5]);
@@ -382,7 +382,7 @@ int MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
 
       break;
   default:
-    fprintf(stderr,"\n  ## Error: %s: unexpected metric size (%d)\n",__func__,met->size);
+    fprintf(stderr,"\n  ## Error: %s: unexpected metric size (%" MMG5_PRId ")\n",__func__,met->size);
     break;
   }
 
@@ -481,7 +481,7 @@ int MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
     }
     break;
   default:
-    fprintf(stderr,"\n  ## Error: %s: unexpected metric size (%d)\n",__func__,met->size);
+    fprintf(stderr,"\n  ## Error: %s: unexpected metric size (%" MMG5_PRId ")\n",__func__,met->size);
     break;
   }
 

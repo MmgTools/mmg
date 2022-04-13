@@ -66,7 +66,7 @@ int MMG5_movintpt_ani(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree, M
   assert ( ilist > 0 );
   if ( ilist <= 0 ) {
     fprintf(stderr,"\n  ## Error: %s:"
-            " volumic ball has null or negative size (%d)\n",
+            " volumic ball has null or negative size (%" MMG5_PRId ")\n",
             __func__,ilist);
     return 0;
   }

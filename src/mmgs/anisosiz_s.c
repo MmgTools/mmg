@@ -780,7 +780,7 @@ int MMGS_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
         if ( !MMGS_intextmet(mesh,met,pt->v[i],mm) ) {
           if ( !mmgErr ) {
             fprintf(stderr,"\n  ## Error: %s: unable to intersect metrics"
-                    " at point %d.\n",__func__,
+                    " at point %" MMG5_PRId ".\n",__func__,
                     MMGS_indPt(mesh,pt->v[i]));
             mmgErr = 1;
           }

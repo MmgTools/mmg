@@ -269,14 +269,15 @@ extern "C" {
  * >   SUBROUTINE MMG2D_SET_LOCALPARAMETER(mesh,sol,typ,ref,& \n
  * >                                       hmin,hmax,hausd,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol\n
- * >     INTEGER, INTENT(IN)           :: typ,ref\n
+ * >     INTEGER, INTENT(IN)           :: typ\n
+ * >     MMG5F_INT, INTENT(IN)           :: ref\n
  * >     REAL(KIND=8), INTENT(IN)      :: hmin,hmax,hausd\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
  */
   int  MMG2D_Set_localParameter(MMG5_pMesh mesh, MMG5_pSol sol, int typ,
-                                int ref,double hmin,double hmax,double hausd);
+                                MMG5_int ref,double hmin,double hmax,double hausd);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -502,15 +503,14 @@ extern "C" {
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_SET_TRIANGLE(mesh,v0,v1,v2,ref,pos,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     MMG5F_INT, INTENT(IN)         :: v0,v1,v2\n
- * >     INTEGER, INTENT(IN)           :: ref\n
+ * >     MMG5F_INT, INTENT(IN)         :: v0,v1,v2,ref\n
  * >     MMG5F_INT, INTENT(IN)         :: pos\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
  */
   int MMG2D_Set_triangle(MMG5_pMesh mesh, MMG5_int v0, MMG5_int v1,
-                         MMG5_int v2, int ref, MMG5_int pos);
+                         MMG5_int v2, MMG5_int ref, MMG5_int pos);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param tria pointer toward the table of the tria vertices.

@@ -370,7 +370,7 @@ int MMG2D_assignEdge(MMG5_pMesh mesh) {
   for (k=1; k<=mesh->na; k++) {
     ier = MMG5_hashEdge(mesh,&hash,mesh->edge[k].a,mesh->edge[k].b,k);
     if ( !ier ) {
-      fprintf(stderr,"\n  ## Error: %s: unable to hash edge %d %d.\n",__func__,
+      fprintf(stderr,"\n  ## Error: %s: unable to hash edge %" MMG5_PRId " %" MMG5_PRId ".\n",__func__,
               MMG2D_indPt(mesh,mesh->edge[k].a),MMG2D_indPt(mesh,mesh->edge[k].b));
       return 0;
     }
@@ -861,13 +861,13 @@ int MMG2D_pack(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
   }
 
   if ( mesh->info.imprim > 0 ) {
-    fprintf(stdout,"     NUMBER OF VERTICES       %8d   CORNERS %8d\n",mesh->np,nc);
-    fprintf(stdout,"     NUMBER OF TRIANGLES      %8d\n",mesh->nt);
+    fprintf(stdout,"     NUMBER OF VERTICES       %8" MMG5_PRId "   CORNERS %8" MMG5_PRId "\n",mesh->np,nc);
+    fprintf(stdout,"     NUMBER OF TRIANGLES      %8" MMG5_PRId "\n",mesh->nt);
     if ( mesh->nquad ) {
-      fprintf(stdout,"     NUMBER OF QUADRILATERALS %8d\n",mesh->nquad);
+      fprintf(stdout,"     NUMBER OF QUADRILATERALS %8" MMG5_PRId "\n",mesh->nquad);
     }
     if ( mesh->na )
-      fprintf(stdout,"     NUMBER OF EDGES          %8d\n",mesh->na);
+      fprintf(stdout,"     NUMBER OF EDGES          %8" MMG5_PRId "\n",mesh->na);
   }
 
   if ( memWarn ) return 0;

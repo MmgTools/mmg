@@ -96,7 +96,7 @@ void MMG2D_keep_only1Subdomain ( MMG5_pMesh mesh,int nsd ) {
   }
 
   if ( mesh->info.imprim > 4 || mesh->info.ddebug ) {
-    fprintf(stdout,"\n  -- ONLY KEEP DOMAIN OF REF %d\n",nsd );
+    fprintf(stdout,"\n  -- ONLY KEEP DOMAIN OF REF %" MMG5_PRId "\n",nsd );
   }
 
   MMG5_mark_verticesAsUnused ( mesh );

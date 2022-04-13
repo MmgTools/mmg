@@ -117,7 +117,7 @@ MMGS_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_int start, int8_t istart) {
   if ( k != end1 ) {
     if ( !mmgWarn ) {
       mmgWarn = 1;
-      fprintf(stderr,"\n  ## Warning: %s: triangle %d, point %d; unsnap \n",
+      fprintf(stderr,"\n  ## Warning: %s: triangle %" MMG5_PRId ", point %" MMG5_PRId "; unsnap \n",
               __func__,start,mesh->tria[start].v[istart]);
     }
     return 0;
@@ -167,7 +167,7 @@ int MMGS_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
     if ( !MG_VOK(p0) ) continue;
     if ( fabs(sol->m[k]-mesh->info.ls) < MMG5_EPS ) {
       if ( mesh->info.ddebug )
-        fprintf(stderr,"  ## Warning: %s: snapping value %d; "
+        fprintf(stderr,"  ## Warning: %s: snapping value %" MMG5_PRId "; "
                 "previous value : %E\n",__func__,k,fabs(sol->m[k]));
 
       tmp[k] = ( fabs(sol->m[k]-mesh->info.ls) < MMG5_EPSD ) ?
@@ -201,7 +201,7 @@ int MMGS_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
     }
   }
   if ( (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) && ns+nc > 0 )
-    fprintf(stdout,"     %8d points snapped, %d corrected\n",ns,nc);
+    fprintf(stdout,"     %8" MMG5_PRId " points snapped, %" MMG5_PRId " corrected\n",ns,nc);
 
   /* memory free */
   MMG5_DEL_MEM(mesh,mesh->adja);
@@ -531,7 +531,7 @@ static int MMGS_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
     if ( !ier ) return 0;
   }
   if ( (mesh->info.ddebug || abs(mesh->info.imprim) > 5) && ns > 0 )
-    fprintf(stdout,"     %7d splitted\n",ns);
+    fprintf(stdout,"     %7" MMG5_PRId " splitted\n",ns);
 
   /* reset point flags */
   for (k=1; k<=mesh->np; k++)

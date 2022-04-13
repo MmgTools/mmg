@@ -109,7 +109,7 @@ int MMG5_writeLocalParamAtTet( MMG5_pMesh mesh, MMG5_iNode *bdryRefs,
 
   cur = bdryRefs;
   while( cur ) {
-    fprintf(out,"%d Tetrahedron %e %e %e \n",cur->val,
+    fprintf(out,"%" MMG5_PRId " Tetrahedron %e %e %e \n",cur->val,
             mesh->info.hmin, mesh->info.hmax,mesh->info.hausd);
     cur = cur->nxt;
   }
@@ -162,7 +162,7 @@ int MMG3D_writeLocalParam( MMG5_pMesh mesh ) {
     return 0;
   }
 
-  fprintf(out,"parameters\n %d\n",nparTri+nparTet);
+  fprintf(out,"parameters\n %" MMG5_PRId "\n",nparTri+nparTet);
 
   /** Write local param at triangles */
   if (! MMG5_writeLocalParamAtTri(mesh,triRefs,out) ) {

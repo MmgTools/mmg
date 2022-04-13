@@ -246,7 +246,7 @@ int MMG2D_intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t i,MMG5_int 
     printf("\nInterpolated metrics:\n");
 
     double lambda[2],vp[2][2];
-    printf("Metric %d (tag %d): %e %e %e\n",ip1,mesh->point[ip1].tag,m1[0],m1[1],m1[2]);
+    printf("Metric %" MMG5_PRId " (tag %d): %e %e %e\n",ip1,mesh->point[ip1].tag,m1[0],m1[1],m1[2]);
 
     MMG5_eigen2(m1,lambda,vp);
     printf ("eigenval: %e %e\n",lambda[0],lambda[1] );
@@ -254,7 +254,7 @@ int MMG2D_intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t i,MMG5_int 
     printf ("eigenvec: %e %e\n",vp[0][0],vp[0][1] );
     printf ("eigenvec: %e %e\n\n",vp[1][0],vp[1][1] );
 
-    printf("Metric %d (tag %d): %e %e %e\n",ip2,mesh->point[ip2].tag,m2[0],m2[1],m2[2]);
+    printf("Metric %" MMG5_PRId " (tag %d): %e %e %e\n",ip2,mesh->point[ip2].tag,m2[0],m2[1],m2[2]);
     MMG5_eigen2(m2,lambda,vp);
     printf ("eigenval: %e %e\n",lambda[0],lambda[1] );
     printf ("size:     %e %e\n",1./sqrt(lambda[0]),1./sqrt(lambda[1]) );

@@ -582,7 +582,7 @@ int MMGS_Get_nonBdyEdge(MMG5_pMesh mesh, MMG5_int* e0, MMG5_int* e1, int* ref, M
   }
 
   if ( mesh->namax+idx > na_tot ) {
-    fprintf(stderr,"\n  ## Error: %s: Can't get the internal edge of index %d."
+    fprintf(stderr,"\n  ## Error: %s: Can't get the internal edge of index %" MMG5_PRId "."
             " Index must be between 1 and %zu.\n",
             __func__,idx,na_tot-mesh->namax);
   }
@@ -633,7 +633,7 @@ int MMGS_Get_adjaVerticesFast(MMG5_pMesh mesh, MMG5_int ip,MMG5_int start, MMG5_
   do {
     if ( nbpoi == MMGS_LMAX ) {
       fprintf(stderr,"\n  ## Warning: %s: unable to compute adjacent"
-              " vertices of the vertex %d:\nthe ball of point contain too many"
+              " vertices of the vertex %" MMG5_PRId ":\nthe ball of point contain too many"
               " elements.\n",__func__,ip);
       return 0;
     }
@@ -654,7 +654,7 @@ int MMGS_Get_adjaVerticesFast(MMG5_pMesh mesh, MMG5_int ip,MMG5_int start, MMG5_
   /* store the last point of the boundary triangle */
   if ( nbpoi == MMGS_LMAX ) {
     fprintf(stderr,"\n  ## Warning: %s: unable to compute adjacent vertices of the"
-            " vertex %d:\nthe ball of point contain too many elements.\n",
+            " vertex %" MMG5_PRId ":\nthe ball of point contain too many elements.\n",
             __func__,ip);
     return 0;
   }
@@ -673,7 +673,7 @@ int MMGS_Get_adjaVerticesFast(MMG5_pMesh mesh, MMG5_int ip,MMG5_int start, MMG5_
 
     if ( nbpoi == MMGS_LMAX ) {
       fprintf(stderr,"\n  ## Warning: %s: unable to compute adjacent vertices of the"
-              " vertex %d:\nthe ball of point contain too many elements.\n",
+              " vertex %" MMG5_PRId ":\nthe ball of point contain too many elements.\n",
               __func__,ip);
       return 0;
     }
@@ -701,7 +701,7 @@ int MMGS_doSol(MMG5_pMesh mesh,MMG5_pSol met) {
     if ( met->size==1 ) type=1;
     else if ( met->size==6 ) type = 3;
     else {
-      fprintf(stderr,"\n  ## Error: %s: unexpected size of metric: %d.\n",
+      fprintf(stderr,"\n  ## Error: %s: unexpected size of metric: %" MMG5_PRId ".\n",
               __func__,met->size);
       return 0;
     }
@@ -823,7 +823,7 @@ int MMGS_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( met->size==1 ) type=1;
   else if ( met->size==6 ) type = 3;
   else {
-    fprintf(stderr,"\n  ## Error: %s: unexpected size of metric: %d.\n",
+    fprintf(stderr,"\n  ## Error: %s: unexpected size of metric: %" MMG5_PRId ".\n",
             __func__,met->size);
     return 0;
   }

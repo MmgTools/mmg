@@ -301,11 +301,11 @@ typedef MMG5_Edge * MMG5_pEdge;
 typedef struct {
   double   qual;   /*Quality of the triangle*/
   MMG5_int v[3]; /*!< Vertices of the triangle */
-  int      ref; /*!< Reference of the triangle */
+  MMG5_int ref; /*!< Reference of the triangle */
   int      base;
   MMG5_int cc; /*!< used to store the tetra + tetra face indices
                  that allow to access to the tria */
-  int      edg[3]; /*!< edg[i] contains the ref of the \f$i^{th}\f$ edge
+  MMG5_int edg[3]; /*!< edg[i] contains the ref of the \f$i^{th}\f$ edge
                      of triangle */
   int      flag;
   int16_t  tag[3]; /*!< tag[i] contains the tag associated to the
@@ -554,11 +554,11 @@ typedef struct {
   size_t    memCur; /*!< Current memory used */
   double    gap; /*!< Gap for table reallocation */
   int       ver; /*!< Version of the mesh file */
-  MMG5_int  dim; /*!< Dimension of the mesh */
+  int       dim; /*!< Dimension of the mesh */
   int       type; /*!< Type of the mesh */
   MMG5_int  npi,nti,nai,nei,np,na,nt,ne,npmax,namax,ntmax,nemax,xpmax,xtmax;
   MMG5_int  nquad,nprism; /* number of quadrangles and prisms */
-  MMG5_int  nsols; /* number of solutions (metric excluded) in the solution file */
+  int       nsols; /* number of solutions (metric excluded) in the solution file */
   MMG5_int  nc1;
   int       base; /*!< Used with \a flag to know if an entity has been
                     treated */

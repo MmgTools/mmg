@@ -73,7 +73,7 @@ int MMG5_kPartBoxCompute(SCOTCH_Graph *graf, MMG5_int vertNbr, MMG5_int boxVertN
   else {
     CHECK_SCOTCH(SCOTCH_archVcmplt(&arch), "scotch_archVcmplt", 0) ;
   }
-  sprintf(s, "m{vert=%d,low=r{job=t,map=t,poli=S,sep=m{vert=80,low=h{pass=10}f{bal=0.0005,move=80},asc=f{bal=0.005,move=80}}}}", vertNbr / boxVertNbr);
+  sprintf(s, "m{vert=%" MMG5_PRId ",low=r{job=t,map=t,poli=S,sep=m{vert=80,low=h{pass=10}f{bal=0.0005,move=80},asc=f{bal=0.005,move=80}}}}", vertNbr / boxVertNbr);
   CHECK_SCOTCH(SCOTCH_stratGraphMap(&strat, s), "scotch_stratGraphMap", 0) ;
 
   MMG5_ADD_MEM(mesh,2*vertNbr*sizeof(SCOTCH_Num),"sortPartTb",return 1);

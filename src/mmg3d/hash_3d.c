@@ -612,7 +612,7 @@ int MMG5_setEdgeNmTag(MMG5_pMesh mesh, MMG5_Hash *hash) {
                   if ( !mmgWarn1 ) {
                     mmgWarn1 = 1;
                     fprintf(stderr,"\n  ## Warning: %s: problem in surface remesh"
-                            " process. At least 1 shell of edge (%d-%d) contains"
+                            " process. At least 1 shell of edge (%" MMG5_PRId "-%" MMG5_PRId ") contains"
                             " too many elts.\n",__func__,MMG3D_indPt(mesh,na),
                             MMG3D_indPt(mesh,nb));
                     fprintf(stderr,"\n  ##          Try to modify the hausdorff"
@@ -659,7 +659,7 @@ int MMG5_setEdgeNmTag(MMG5_pMesh mesh, MMG5_Hash *hash) {
     }
   }
   if ( mesh->info.ddebug || abs(mesh->info.imprim) > 3 )
-    fprintf(stdout,"     %d required edges added\n",nr);
+    fprintf(stdout,"     %" MMG5_PRId " required edges added\n",nr);
 
   /* Free the edge hash table */
   MMG5_DEL_MEM(mesh,hash->item);
@@ -740,7 +740,7 @@ int MMG5_setVertexNmTag(MMG5_pMesh mesh) {
   MMG5_DEL_MEM(mesh,hash.item);
 
   if ( mesh->info.ddebug || abs(mesh->info.imprim) > 3 )
-    fprintf(stdout,"     %d corner and %d required vertices added\n",nc,nre);
+    fprintf(stdout,"     %" MMG5_PRId " corner and %" MMG5_PRId " required vertices added\n",nc,nre);
 
   return 1;
 }
@@ -1002,7 +1002,7 @@ int MMG5_hEdge(MMG5_pMesh mesh,MMG5_HGeom *hash,MMG5_int a,MMG5_int b,int ref,in
     ph->nxt = 0;
     if ( hash->nxt >= hash->max ) {
       if ( mesh->info.ddebug )
-        fprintf(stderr,"\n  ## Memory alloc problem (edge): %d\n",hash->max);
+        fprintf(stderr,"\n  ## Memory alloc problem (edge): %" MMG5_PRId "\n",hash->max);
       MMG5_TAB_RECALLOC(mesh,hash->geom,hash->max,MMG5_GAP,MMG5_hgeom,
                          "larger htab table",
                          fprintf(stderr,"  Exit program.\n");return 0;);
@@ -1702,7 +1702,7 @@ int MMG5_chkBdryTria(MMG5_pMesh mesh) {
     }
     nbl = mesh->nt-nt;
     if ( nbl ) {
-      fprintf(stderr,"\n  ## Warning: %s: %d extra boundaries provided."
+      fprintf(stderr,"\n  ## Warning: %s: %" MMG5_PRId " extra boundaries provided."
               " Ignored\n",__func__,nbl);
       MMG5_ADD_MEM(mesh,(-nbl)*sizeof(MMG5_Tria),"triangles",return 0);
       MMG5_SAFE_REALLOC(mesh->tria,mesh->nt+1,nt+1,MMG5_Tria,"triangles",return 0);
@@ -1716,7 +1716,7 @@ int MMG5_chkBdryTria(MMG5_pMesh mesh) {
   /** Step 3: add the missing boundary triangles or, if the mesh contains
    * prisms, set to required the triangles at interface betwen prisms and tet */
   if ( ntpres && (mesh->info.imprim > 5 || mesh->info.ddebug) )
-    printf("     %d triangles between 2 tetrahdra with same"
+    printf("     %" MMG5_PRId " triangles between 2 tetrahdra with same"
            " references\n",ntpres);
 
   if ( mesh->nt==ntmesh && !mesh->nprism ) {
@@ -1743,7 +1743,7 @@ int MMG5_chkBdryTria(MMG5_pMesh mesh) {
     }
   }
   if ( nbl && (mesh->info.imprim > 5 || mesh->info.ddebug) )
-    fprintf(stderr,"\n  ## Warning: %s: %d extra boundaries founded\n",
+    fprintf(stderr,"\n  ## Warning: %s: %" MMG5_PRId " extra boundaries founded\n",
             __func__,nbl);
 
   /* Fill missing bdy triangles */
@@ -2189,7 +2189,7 @@ int MMG5_bdryPerm(MMG5_pMesh mesh) {
     }
   }
   if ( mesh->info.ddebug && nf > 0 )
-    fprintf(stdout,"  ## %d faces reoriented\n",nf);
+    fprintf(stdout,"  ## %" MMG5_PRId " faces reoriented\n",nf);
 
   MMG5_DEL_MEM(mesh,hash.item);
 

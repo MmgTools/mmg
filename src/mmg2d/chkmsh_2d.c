@@ -58,12 +58,12 @@ int MMG5_mmg2dChkmsh(MMG5_pMesh mesh, int severe,int base) {
         if ( !mmgErr0 ) {
           mmgErr0 = 1;
           fprintf(stderr,"\n  ## Error: %s: 1. at least 1 wrong"
-                  " adjacency %d %d\n",__func__,MMG2D_indElt(mesh,k),
+                  " adjacency %" MMG5_PRId " %" MMG5_PRId "\n",__func__,MMG2D_indElt(mesh,k),
                   MMG2D_indElt(mesh,adj));
-          fprintf(stderr,"vertices of %d: %d %d %d \n",MMG2D_indElt(mesh,k),
+          fprintf(stderr,"vertices of %" MMG5_PRId ": %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId " \n",MMG2D_indElt(mesh,k),
                   MMG2D_indPt(mesh,pt1->v[0]),MMG2D_indPt(mesh,pt1->v[1]),
                   MMG2D_indPt(mesh,pt1->v[2]));
-          fprintf(stderr,"adj of %d: %d %d %d \n",
+          fprintf(stderr,"adj of %" MMG5_PRId ": %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId " \n",
                   k,adja[0]/3,adja[1]/3,adja[2]/3);
         }
         return 0;
@@ -73,14 +73,14 @@ int MMG5_mmg2dChkmsh(MMG5_pMesh mesh, int severe,int base) {
         if ( !mmgErr1 ) {
           mmgErr1 = 1;
           fprintf(stderr,"\n  ## Error: %s: 4. at least 1 invalid"
-                  " adjacent %d %d\n",__func__,MMG2D_indElt(mesh,adj),
+                  " adjacent %" MMG5_PRId " %" MMG5_PRId "\n",__func__,MMG2D_indElt(mesh,adj),
                   MMG2D_indElt(mesh,k));
-          fprintf(stderr,"vertices of %d: %d %d %d\n",
+          fprintf(stderr,"vertices of %" MMG5_PRId ": %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId "\n",
                   MMG2D_indElt(mesh,k),MMG2D_indPt(mesh,pt1->v[0]),
                   MMG2D_indPt(mesh,pt1->v[1]),MMG2D_indPt(mesh,pt1->v[2]));
-          fprintf(stderr,"vertices adj %d: %d %d %d \n",
+          fprintf(stderr,"vertices adj %" MMG5_PRId ": %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId " \n",
                   adj,pt2->v[0],pt2->v[1],pt2->v[2]);
-          fprintf(stderr,"adj of %d: %d %d %d\n",MMG2D_indElt(mesh,k),
+          fprintf(stderr,"adj of %" MMG5_PRId ": %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId "\n",MMG2D_indElt(mesh,k),
                   MMG2D_indElt(mesh,adja[0]/3),MMG2D_indElt(mesh,adja[1]/3),
                   MMG2D_indElt(mesh,adja[2]/3));
         }
@@ -94,17 +94,17 @@ int MMG5_mmg2dChkmsh(MMG5_pMesh mesh, int severe,int base) {
         if ( !mmgErr2 ) {
           mmgErr2 = 1;
           fprintf(stderr,"\n  ## Error: %s: 2. at least 1 wrong adjacency"
-                  " %d %d\n",__func__,MMG2D_indElt(mesh,k),MMG2D_indElt(mesh,adj1));
-          fprintf(stderr,"vertices of %d: %d %d %d \n",MMG2D_indElt(mesh,k),
+                  " %" MMG5_PRId " %" MMG5_PRId "\n",__func__,MMG2D_indElt(mesh,k),MMG2D_indElt(mesh,adj1));
+          fprintf(stderr,"vertices of %" MMG5_PRId ": %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId " \n",MMG2D_indElt(mesh,k),
                   MMG2D_indPt(mesh,pt1->v[0]),MMG2D_indPt(mesh,pt1->v[1]),
                   MMG2D_indPt(mesh,pt1->v[2]));
-          fprintf(stderr,"adj(k) %d: %d %d %d \n",MMG2D_indElt(mesh,adj),
+          fprintf(stderr,"adj(k) %" MMG5_PRId ": %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId " \n",MMG2D_indElt(mesh,adj),
                   MMG2D_indPt(mesh,pt2->v[0]),MMG2D_indPt(mesh,pt2->v[1]),
                   MMG2D_indPt(mesh,pt2->v[2]));
-          fprintf(stderr,"adj(%d): %d %d %d\n",
+          fprintf(stderr,"adj(%" MMG5_PRId "): %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId "\n",
                   MMG2D_indElt(mesh,k),MMG2D_indElt(mesh,adja[0]/3),
                   MMG2D_indElt(mesh,adja[1]/3),MMG2D_indElt(mesh,adja[2]/3));
-          fprintf(stderr,"adj(%d): %d %d %d %d\n",
+          fprintf(stderr,"adj(%" MMG5_PRId "): %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId "\n",
                   MMG2D_indElt(mesh,adj),MMG2D_indElt(mesh,adja1[0]/3),
                   MMG2D_indElt(mesh,adja1[1]/3),MMG2D_indElt(mesh,adja1[2]/3),
                   MMG2D_indElt(mesh,adja1[3]/3));
@@ -119,13 +119,13 @@ int MMG5_mmg2dChkmsh(MMG5_pMesh mesh, int severe,int base) {
           mmgErr3 = 1;
           if(!(((ped->a==pt1->v[MMG2D_iare[i][0]]) || (ped->a==pt1->v[MMG2D_iare[i][1]]))
                || ((ped->b==pt1->v[MMG2D_iare[i][0]]) || (ped->b==pt1->v[MMG2D_iare[i][1]])))) {
-            fprintf(stderr,"\n  ## Error: %s: 3. at least 1 wrong edge in triangle %d\n",
+            fprintf(stderr,"\n  ## Error: %s: 3. at least 1 wrong edge in triangle %" MMG5_PRId "\n",
                     __func__,MMG2D_indElt(mesh,k));
-            fprintf(stderr,"vertices of %d: %d %d %d \n",MMG2D_indElt(mesh,k),
+            fprintf(stderr,"vertices of %" MMG5_PRId ": %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId " \n",MMG2D_indElt(mesh,k),
                     MMG2D_indPt(mesh,pt1->v[0]),MMG2D_indPt(mesh,pt1->v[1]),
                     MMG2D_indPt(mesh,pt1->v[2]));
           }
-          fprintf(stderr,"edge %d : %d %d\n",i,ped->a,ped->b);
+          fprintf(stderr,"edge %d : %" MMG5_PRId " %" MMG5_PRId "\n",i,ped->a,ped->b);
           return 0;
         }
       }
@@ -152,9 +152,9 @@ int MMG5_mmg2dChkmsh(MMG5_pMesh mesh, int severe,int base) {
       if ( !MG_VOK(ppt) ) {
         if ( !mmgErr4 ) {
           mmgErr4 = 1;
-          fprintf(stderr,"\n  ## Error: %s: 6. at least 1 unused vertex %d  %d\n",__func__,
+          fprintf(stderr,"\n  ## Error: %s: 6. at least 1 unused vertex %" MMG5_PRId "  %" MMG5_PRId "\n",__func__,
                   MMG2D_indElt(mesh,k),MMG2D_indPt(mesh,ip));
-          fprintf(stderr,"%d %d %d\n",MMG2D_indPt(mesh,pt1->v[0]),
+          fprintf(stderr,"%" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId "\n",MMG2D_indPt(mesh,pt1->v[0]),
                   MMG2D_indPt(mesh,pt1->v[1]),MMG2D_indPt(mesh,pt1->v[2]));
         }
         MMG5_SAFE_FREE(list);
@@ -168,7 +168,7 @@ int MMG5_mmg2dChkmsh(MMG5_pMesh mesh, int severe,int base) {
         if ( pt2->v[nk] != ip ) {
           if ( !mmgErr5 ) {
             mmgErr5 = 1;
-            fprintf(stderr,"\n  ## Error: %s: 5. at least 1 wrong ball %d, %d\n",
+            fprintf(stderr,"\n  ## Error: %s: 5. at least 1 wrong ball %" MMG5_PRId ", %" MMG5_PRId "\n",
                     __func__,MMG2D_indPt(mesh,ip),MMG2D_indPt(mesh,pt2->v[nk]));
           }
           MMG5_SAFE_FREE(list);
@@ -189,7 +189,7 @@ int MMG5_mmg2dChkmsh(MMG5_pMesh mesh, int severe,int base) {
       if ( len != lon ) {
         if ( !mmgErr6 ) {
           mmgErr6 = 1;
-          fprintf(stderr,"\n  ## Error: %s: 7. at least 1 incorrect ball %d: %d %d\n",
+          fprintf(stderr,"\n  ## Error: %s: 7. at least 1 incorrect ball %" MMG5_PRId ": %" MMG5_PRId " %" MMG5_PRId "\n",
                   __func__,MMG2D_indPt(mesh,pt1->v[i]),lon,len);
         }
         MMG5_SAFE_FREE(list);
@@ -226,7 +226,7 @@ int MMG2D_chkmsh(MMG5_pMesh mesh) {
           if ( !mmgErr0 ) {
             mmgErr0 = 1;
             fprintf(stderr,"\n  ## Error: %s: at least 1 wrong  edge tag"
-                    " (edge %d in tria %d.)\n",
+                    " (edge %d in tria %" MMG5_PRId ".)\n",
                     __func__,i,MMG2D_indElt(mesh,k));
           }
           return 0;
@@ -238,7 +238,7 @@ int MMG2D_chkmsh(MMG5_pMesh mesh) {
          if ( !mmgErr1 ) {
             mmgErr1 = 1;
             fprintf(stderr,"\n  ## Error: %s: at least 1 wrong adjacency"
-                    " (%d %d).\n",__func__,MMG2D_indElt(mesh,k),
+                    " (%" MMG5_PRId " %" MMG5_PRId ").\n",__func__,MMG2D_indElt(mesh,k),
                     MMG2D_indElt(mesh,jel));
          }
           return 0;
@@ -260,7 +260,7 @@ int MMG2D_chkmsh(MMG5_pMesh mesh) {
          if ( !mmgErr2 ) {
             mmgErr2 = 1;
             fprintf(stderr,"\n  ## Error: %s: at least 1 tag inconsistency"
-                    " (triangle %d: edge %d, vertex %d)\n",__func__,
+                    " (triangle %" MMG5_PRId ": edge %d, vertex %" MMG5_PRId ")\n",__func__,
                     MMG2D_indElt(mesh,k),i,MMG2D_indPt(mesh,pt->v[i1]));
          }
           return 0;
@@ -269,7 +269,7 @@ int MMG2D_chkmsh(MMG5_pMesh mesh) {
           if ( !mmgErr2 ) {
             mmgErr2 = 1;
             fprintf(stderr,"\n  ## Error: %s: at least 1 tag inconsistency"
-                    " (triangle %d: edge %d, vertex %d)\n",__func__,
+                    " (triangle %" MMG5_PRId ": edge %d, vertex %" MMG5_PRId ")\n",__func__,
                     MMG2D_indElt(mesh,k),i,MMG2D_indPt(mesh,pt->v[i2]));
           }
           return 0;
@@ -281,7 +281,7 @@ int MMG2D_chkmsh(MMG5_pMesh mesh) {
           if ( !mmgErr3 ) {
             mmgErr3 = 1;
             fprintf(stderr,"\n  ## Error: %s: at least 1 tag inconsistency"
-                    " (triangle %d: edge %d, vertex %d)\n",__func__,
+                    " (triangle %" MMG5_PRId ": edge %d, vertex %" MMG5_PRId ")\n",__func__,
                     MMG2D_indElt(mesh,k),i,MMG2D_indPt(mesh,pt->v[i1]));
           }
           return 0;
@@ -290,7 +290,7 @@ int MMG2D_chkmsh(MMG5_pMesh mesh) {
           if ( !mmgErr3 ) {
             mmgErr3 = 1;
             fprintf(stderr,"\n  ## Error: %s: at least 1 tag inconsistency"
-                    " (triangle %d: edge %d, vertex %d)\n",__func__,
+                    " (triangle %" MMG5_PRId ": edge %d, vertex %" MMG5_PRId ")\n",__func__,
                     MMG2D_indElt(mesh,k),i,MMG2D_indPt(mesh,pt->v[i2]));
           }
           return 0;
@@ -316,7 +316,7 @@ int MMG2D_chkmsh(MMG5_pMesh mesh) {
         if ( !mmgErr4 ) {
           mmgErr4 = 1;
           fprintf(stderr,"\n  ## Error: %s: at least 1 edge tagged boundary"
-                  " while it has a neighbour (%d %d).\n",__func__,
+                  " while it has a neighbour (%" MMG5_PRId " %" MMG5_PRId ").\n",__func__,
                   MMG2D_indPt(mesh,pt->v[i1]),MMG2D_indPt(mesh,pt->v[i2]));
         }
         return 0;
@@ -328,7 +328,7 @@ int MMG2D_chkmsh(MMG5_pMesh mesh) {
           if ( !mmgErr5 ) {
             mmgErr5 = 1;
             fprintf(stderr,"\n  ## Error: %s: at least 1 edge tagged ref while"
-                    " both corresponding triangles have same ref (%d %d).\n",
+                    " both corresponding triangles have same ref (%" MMG5_PRId " %" MMG5_PRId ").\n",
                     __func__,
                     MMG2D_indPt(mesh,pt->v[i1]), MMG2D_indPt(mesh,pt->v[i2]));
           }
@@ -363,7 +363,7 @@ int MMG2D_chkmsh(MMG5_pMesh mesh) {
         if ( !(pt->tag[i] & MG_BDY) ) {
           if ( !mmgErr6 ) {
             mmgErr6 = 1;
-            fprintf(stderr,"\n  ## Error: %s: at least 1 edge (%d %d) tagged"
+            fprintf(stderr,"\n  ## Error: %s: at least 1 edge (%" MMG5_PRId " %" MMG5_PRId ") tagged"
                     " %d, but not MG_BDY\n",__func__,MMG2D_indPt(mesh,pt->v[i1]),
                     MMG2D_indPt(mesh,pt->v[i2]),pt->tag[i]);
           }
@@ -376,8 +376,8 @@ int MMG2D_chkmsh(MMG5_pMesh mesh) {
         if ( !(p1->tag & MG_BDY) ) {
           if ( !mmgErr6 ) {
             mmgErr6 = 1;
-            fprintf(stderr,"\n  ## Error: %s: at least 1 edge (%d %d) tagged %d,"
-                    " with a point (%d) not tagged BDY.\n",__func__,
+            fprintf(stderr,"\n  ## Error: %s: at least 1 edge (%" MMG5_PRId " %" MMG5_PRId ") tagged %d,"
+                    " with a point (%" MMG5_PRId ") not tagged BDY.\n",__func__,
                     MMG2D_indPt(mesh,pt->v[i1]),MMG2D_indPt(mesh,pt->v[i2]),
                     pt->tag[i],MMG2D_indPt(mesh,pt->v[i1]));
           }
@@ -387,8 +387,8 @@ int MMG2D_chkmsh(MMG5_pMesh mesh) {
         if ( !(p2->tag & MG_BDY) ) {
           if ( !mmgErr6 ) {
             mmgErr6 = 1;
-            fprintf(stderr,"\n  ## Error: %s: at least 1 edge (%d %d) tagged %d,"
-                    " with a point (%d) not tagged BDY.\n",__func__,
+            fprintf(stderr,"\n  ## Error: %s: at least 1 edge (%" MMG5_PRId " %" MMG5_PRId ") tagged %d,"
+                    " with a point (%" MMG5_PRId ") not tagged BDY.\n",__func__,
                     MMG2D_indPt(mesh,pt->v[i1]),MMG2D_indPt(mesh,pt->v[i2]),
                     pt->tag[i],MMG2D_indPt(mesh,pt->v[i2]));
           }

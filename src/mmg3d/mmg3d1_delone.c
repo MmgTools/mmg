@@ -123,7 +123,7 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,MMG5_in
       if ( (mesh->info.ddebug || mesh->info.imprim > 5 ) ) {
         if ( !mmgWarn0 ) {
           mmgWarn0 = 1;
-          fprintf(stderr,"\n  # Warning: %s: all edges of tetra %d are"
+          fprintf(stderr,"\n  # Warning: %s: all edges of tetra %" MMG5_PRId " are"
                   " boundary and required.\n",
                   __func__,k);
         }
@@ -134,7 +134,7 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,MMG5_in
       if ( (mesh->info.ddebug || mesh->info.imprim > 5 ) ) {
         if ( !mmgWarn0 ) {
           mmgWarn0 = 1;
-          fprintf(stderr,"\n  # Warning: %s: all edges of tetra %d are"
+          fprintf(stderr,"\n  # Warning: %s: all edges of tetra %" MMG5_PRId " are"
                   " boundary and required.\n",
                   __func__,k);
         }
@@ -895,7 +895,7 @@ MMG5_optbad(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree) {
     if ( abs(mesh->info.imprim) < 5 && (nnf > 0 || nnm > 0) )
       fprintf(stdout,"                                                 "
               "        "
-              "      %8d swapped, %8d moved, %d iter. \n",nnf,nnm,it);
+              "      %8d swapped, %8d moved, %" MMG5_PRId " iter. \n",nnf,nnm,it);
   }
   return 1;
 }
@@ -1010,7 +1010,7 @@ MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree *PROctree, int* war
   if ( mesh->info.imprim > 0 ) {
     if ( (abs(mesh->info.imprim) < 5) && ( nnc || nns ) ) {
       fprintf(stdout,"     %8d filtered, %8d splitted, %8d collapsed,"
-              " %8d swapped, %8d moved, %d iter.\n",nfilt,nns,nnc,nnf,nnm, it);
+              " %8d swapped, %8d moved, %" MMG5_PRId " iter.\n",nfilt,nns,nnc,nnf,nnm, it);
     }
   }
 
@@ -1107,7 +1107,7 @@ MMG5_optetLES(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree) {
     if ( abs(mesh->info.imprim) < 5 && (nnf > 0 || nnm > 0) )
       fprintf(stdout,"                                                 "
               "        "
-              "      %8d swapped, %8d moved, %d iter. \n",nnf,nnm,it);
+              "      %8d swapped, %8d moved, %" MMG5_PRId " iter. \n",nnf,nnm,it);
   }
   return 1;
 }
@@ -1213,7 +1213,7 @@ MMG5_optet(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree) {
     if ( abs(mesh->info.imprim) < 5 && (nnf > 0 || nnm > 0) )
       fprintf(stdout,"                                                 "
               "        "
-              "      %8d swapped, %8d moved, %d iter. \n",nnf,nnm,it);
+              "      %8d swapped, %8d moved, %" MMG5_PRId " iter. \n",nnf,nnm,it);
   }
   return 1;
 }

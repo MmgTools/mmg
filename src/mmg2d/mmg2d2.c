@@ -88,7 +88,7 @@ int MMG2D_removeBBtriangles(MMG5_pMesh mesh) {
   }
   else {
     fprintf(stderr,"\n  ## Error: %s: procedure failed :"
-            " %d indetermined triangles.\n",__func__,nd);
+            " %" MMG5_PRId " indetermined triangles.\n",__func__,nd);
     return 0;
   }
   return 1;
@@ -119,7 +119,7 @@ int MMG2D_settagtriangles(MMG5_pMesh mesh,MMG5_pSol sol) {
     }
 
     if(mesh->info.ddebug) {
-      printf(" ** how many undetermined triangles ? %d\n",nd);
+      printf(" ** how many undetermined triangles ? %" MMG5_PRId "\n",nd);
     }
   }
   while (nd && ++iter<maxiter);
@@ -202,7 +202,7 @@ int MMG2D_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
           if ( !mmgWarn0 ) {
             mmgWarn0 = 1;
             fprintf(stderr,"\n  ## Error: %s: unable to find triangle"
-                    " for at least vertex %d.\n",__func__,k);
+                    " for at least vertex %" MMG5_PRId ".\n",__func__,k);
           }
           return 0;
         }
@@ -217,7 +217,7 @@ int MMG2D_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
           mmgWarn1 = 1;
           if ( mesh->info.imprim > 6 || mesh->info.ddebug )
 	          fprintf(stderr,"\n  ## Warning: %s: unable to insert "
-		          "at least 1 vertex. (%d)\n",__func__,k);
+		          "at least 1 vertex. (%" MMG5_PRId ")\n",__func__,k);
         }
         continue;
       } else {
@@ -228,7 +228,7 @@ int MMG2D_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
               mmgWarn2 = 1;
               if(mesh->info.imprim > 6 || mesh->info.ddebug)
 	             	fprintf(stderr,"\n  ## Warning: %s: unable to"
-			            " insert at least 1 point with Delaunay (%d)\n",__func__,k);
+			            " insert at least 1 point with Delaunay (%" MMG5_PRId ")\n",__func__,k);
             }
           }
         } else {
@@ -274,7 +274,7 @@ int MMG2D_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
           if ( !mmgWarn0 ) {
             mmgWarn0 = 1;
             fprintf(stderr,"\n  ## Error: %s: unable to find triangle"
-                    " for at least vertex %d.\n",__func__,k);
+                    " for at least vertex %" MMG5_PRId ".\n",__func__,k);
           }
           return 0;
         }
@@ -284,14 +284,14 @@ int MMG2D_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
           mmgWarn2 = 1;
           if ( mesh->info.imprim >6 || mesh->info.ddebug )
             fprintf(stderr,"\n  ## Warning: %s: unable to"
-                    " insert at least 1 point with splitbar (%d)\n",__func__,k);
+                    " insert at least 1 point with splitbar (%" MMG5_PRId ")\n",__func__,k);
         }
       } else {
         ns++;
       }
     }
     if ( abs(nus-ns) ) {
-      fprintf(stderr,"  ## Warning: %s: %d point(s) not "
+      fprintf(stderr,"  ## Warning: %s: %" MMG5_PRId " point(s) not "
             "inserted. Check your output mesh\n",__func__,abs(nus-ns));
       return 0;
     }

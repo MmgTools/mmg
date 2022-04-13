@@ -214,11 +214,11 @@ int MMG2D_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
   }
 
 #ifndef DEBUG
-  fprintf(stdout,"\n  -- MESH QUALITY   %d\n",mesh->nt - nex);
-  fprintf(stdout,"     BEST   %8.6f  AVRG.   %8.6f  WRST.   %8.6f (%d)\n",
+  fprintf(stdout,"\n  -- MESH QUALITY   %" MMG5_PRId "\n",mesh->nt - nex);
+  fprintf(stdout,"     BEST   %8.6f  AVRG.   %8.6f  WRST.   %8.6f (%" MMG5_PRId ")\n",
           rapmax,rapavg / (mesh->nt-nex),rapmin,iel);
 #else
-  fprintf(stdout,"     BEST   %e  AVRG.   %e  WRST.   %e (%d)\n => %d %d %d\n",
+  fprintf(stdout,"     BEST   %e  AVRG.   %e  WRST.   %e (%" MMG5_PRId ")\n => %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId "\n",
           rapmax,rapavg / (mesh->nt-nex),rapmin,iel,
           MMG5_indPt(mesh,mesh->tria[iel].v[0]),MMG5_indPt(mesh,mesh->tria[iel].v[1]),
           MMG5_indPt(mesh,mesh->tria[iel].v[2]));

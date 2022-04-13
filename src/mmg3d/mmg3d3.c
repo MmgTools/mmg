@@ -150,7 +150,7 @@ static MMG5_int MMG5_spllag(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int itd
     if ( imax==-1 ) {
       if ( !mmgWarn0 ){
         mmgWarn0 = 1;
-        fprintf(stderr,"\n  ## Warning: %s: all edges of tetra %d are required"
+        fprintf(stderr,"\n  ## Warning: %s: all edges of tetra %" MMG5_PRId " are required"
                 " or of length null.\n",__func__,k);
       }
       continue;
@@ -623,8 +623,8 @@ int MMG5_saveDisp(MMG5_pMesh mesh,MMG5_pSol disp) {
 
   out = fopen(data,"w");
 
-  fprintf(out,"MeshVersionFormatted 1\n\nDimension\n%d\n\n",disp->dim);
-  fprintf(out,"SolAtVertices\n%d\n 1 2\n",disp->np);
+  fprintf(out,"MeshVersionFormatted 1\n\nDimension\n%" MMG5_PRId "\n\n",disp->dim);
+  fprintf(out,"SolAtVertices\n%" MMG5_PRId "\n 1 2\n",disp->np);
 
   /* Print solutions */
   for(k=1; k<= disp->np; k++) {
@@ -762,8 +762,8 @@ int MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,MMG5_int **invalidT
           }
 
           if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && (nspl+nc+ns+nm > 0) )
-            printf(" %d edges splitted, %d vertices collapsed, %d elements"
-                   " swapped, %d vertices moved.\n",nspl,nc,ns,nm);
+            printf(" %" MMG5_PRId " edges splitted, %" MMG5_PRId " vertices collapsed, %" MMG5_PRId " elements"
+                   " swapped, %" MMG5_PRId " vertices moved.\n",nspl,nc,ns,nm);
           nnspl+= nspl;
           nnm  += nm;
           nnc  += nc;
@@ -771,8 +771,8 @@ int MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,MMG5_int **invalidT
         }
         if ( abs(mesh->info.imprim) > 3 && abs(mesh->info.imprim) < 5
              && (nnspl+nnm+nns+nnc > 0) )
-          printf(" %d edges splitted, %d vertices collapsed, %d elements"
-                 " swapped, %d vertices moved.\n",nnspl,nnc,nns,nnm);
+          printf(" %" MMG5_PRId " edges splitted, %" MMG5_PRId " vertices collapsed, %" MMG5_PRId " elements"
+                 " swapped, %" MMG5_PRId " vertices moved.\n",nnspl,nnc,nns,nnm);
       }
 
       nnnspl += nnspl;
@@ -785,8 +785,8 @@ int MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,MMG5_int **invalidT
       }
 
       if ( abs(mesh->info.imprim) > 2 && mesh->info.lag )
-        printf(" %d edges splitted, %d vertices collapsed, %d elements"
-               " swapped, %d vertices moved.\n",nnnspl,nnnc,nnns,nnnm);
+        printf(" %" MMG5_PRId " edges splitted, %" MMG5_PRId " vertices collapsed, %" MMG5_PRId " elements"
+               " swapped, %" MMG5_PRId " vertices moved.\n",nnnspl,nnnc,nnns,nnnm);
     }
     if ( t == MMG3D_SHORTMAX || (t==0 && itdc==0) ) break;
   }

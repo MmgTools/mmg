@@ -268,15 +268,15 @@ int MMG5_setadj(MMG5_pMesh mesh){
   }
 
   if ( mesh->info.ddebug ) {
-    fprintf(stdout,"  a- ridges: %d found.\n",nr);
-    fprintf(stdout,"  a- requir: %d found.\n",nreq);
-    fprintf(stdout,"  a- connex: %d connected component(s)\n",ncc);
-    fprintf(stdout,"  a- orient: %d flipped\n",nf);
+    fprintf(stdout,"  a- ridges: %" MMG5_PRId " found.\n",nr);
+    fprintf(stdout,"  a- requir: %" MMG5_PRId " found.\n",nreq);
+    fprintf(stdout,"  a- connex: %" MMG5_PRId " connected component(s)\n",ncc);
+    fprintf(stdout,"  a- orient: %" MMG5_PRId " flipped\n",nf);
   }
   else if ( abs(mesh->info.imprim) > 3 ) {
     gen = (2 - nvf + ned - nt) / 2;
-    fprintf(stdout,"     Connected component: %d,  genus: %d,   reoriented: %d\n",ncc,gen,nf);
-    fprintf(stdout,"     Edges: %d,  tagged: %d,  ridges: %d, required: %d, refs: %d\n",
+    fprintf(stdout,"     Connected component: %" MMG5_PRId ",  genus: %" MMG5_PRId ",   reoriented: %" MMG5_PRId "\n",ncc,gen,nf);
+    fprintf(stdout,"     Edges: %" MMG5_PRId ",  tagged: %" MMG5_PRId ",  ridges: %" MMG5_PRId ", required: %" MMG5_PRId ", refs: %" MMG5_PRId "\n",
             ned,nr+nre+nreq,nr,nreq,nre);
   }
 
@@ -340,7 +340,7 @@ int MMG5_setdhd(MMG5_pMesh mesh) {
     }
   }
   if ( abs(mesh->info.imprim) > 3 && nr > 0 )
-    fprintf(stdout,"     %d ridges, %d edges updated\n",nr,ne);
+    fprintf(stdout,"     %" MMG5_PRId " ridges, %" MMG5_PRId " edges updated\n",nr,ne);
 
   return 1;
 }
@@ -493,7 +493,7 @@ int MMG5_singul(MMG5_pMesh mesh) {
   }
 
   if ( abs(mesh->info.imprim) > 3 && nre > 0 )
-    fprintf(stdout,"     %d corners, %d singular points detected\n",nc,nre);
+    fprintf(stdout,"     %" MMG5_PRId " corners, %" MMG5_PRId " singular points detected\n",nc,nre);
   return 1;
 }
 
@@ -655,8 +655,8 @@ int MMG5_norver(MMG5_pMesh mesh) {
 
   if ( abs(mesh->info.imprim) > 3 && nn+nt > 0 ) {
     if ( nnr )
-      fprintf(stdout,"     %d input normals ignored\n",nnr);
-    fprintf(stdout,"     %d normals,  %d tangents updated  (%d failed)\n",nn,nt,nf);
+      fprintf(stdout,"     %" MMG5_PRId " input normals ignored\n",nnr);
+    fprintf(stdout,"     %" MMG5_PRId " normals,  %" MMG5_PRId " tangents updated  (%" MMG5_PRId " failed)\n",nn,nt,nf);
   }
   return 1;
 }

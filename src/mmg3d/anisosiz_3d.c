@@ -1348,7 +1348,7 @@ int MMG3D_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
           if ( !MMG3D_intextmet(mesh,met,pt->v[iploc],mm) ) {
             if ( !mmgErr ) {
               fprintf(stderr,"\n  ## Error: %s: unable to intersect metrics"
-                      " at point %d.\n",__func__,
+                      " at point %" MMG5_PRId ".\n",__func__,
                       MMG3D_indPt(mesh,pt->v[iploc]));
               mmgErr = 1;
             }
@@ -2013,11 +2013,11 @@ int MMG3D_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met) {
 
   if ( abs(mesh->info.imprim) > 3 ) {
     if ( abs(mesh->info.imprim) < 5 && !mesh->info.ddebug ) {
-      fprintf(stdout,"    gradation: %7d updated, %d iter\n",nup+nupv,it+itv);
+      fprintf(stdout,"    gradation: %7d updated, %" MMG5_PRId " iter\n",nup+nupv,it+itv);
     }
     else {
-      fprintf(stdout,"    surface gradation: %7d updated, %d iter\n"
-              "    volume gradation:  %7d updated, %d iter\n",nup,it,nupv,itv);
+      fprintf(stdout,"    surface gradation: %7d updated, %" MMG5_PRId " iter\n"
+              "    volume gradation:  %7d updated, %" MMG5_PRId " iter\n",nup,it,nupv,itv);
     }
   }
   return 1;
@@ -2147,11 +2147,11 @@ int MMG3D_gradsizreq_ani(MMG5_pMesh mesh,MMG5_pSol met) {
 
   if ( abs(mesh->info.imprim) > 3 ) {
     if ( abs(mesh->info.imprim) < 5 && !mesh->info.ddebug ) {
-      fprintf(stdout,"    gradation: %7d updated, %d iter\n",nup+nupv,it+itv);
+      fprintf(stdout,"    gradation: %7d updated, %" MMG5_PRId " iter\n",nup+nupv,it+itv);
     }
     else {
-      fprintf(stdout,"    surface gradation: %7d updated, %d iter\n"
-              "    volume gradation:  %7d updated, %d iter\n",nup,it,nupv,itv);
+      fprintf(stdout,"    surface gradation: %7d updated, %" MMG5_PRId " iter\n"
+              "    volume gradation:  %7d updated, %" MMG5_PRId " iter\n",nup,it,nupv,itv);
     }
   }
 

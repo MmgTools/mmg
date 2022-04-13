@@ -284,11 +284,11 @@ int MMGS_packMesh(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
   }
 
   if ( mesh->info.imprim > 0 ) {
-    fprintf(stdout,"     NUMBER OF VERTICES   %8d   CORNERS %8d\n",mesh->np,nc);
-    fprintf(stdout,"     NUMBER OF TRIANGLES  %8d\n",mesh->nt);
+    fprintf(stdout,"     NUMBER OF VERTICES   %8" MMG5_PRId "   CORNERS %8" MMG5_PRId "\n",mesh->np,nc);
+    fprintf(stdout,"     NUMBER OF TRIANGLES  %8" MMG5_PRId "\n",mesh->nt);
 
     if ( mesh->na )
-      fprintf(stdout,"     NUMBER OF EDGES      %8d   RIDGES  %8d\n",mesh->na,nr);
+      fprintf(stdout,"     NUMBER OF EDGES      %8" MMG5_PRId "   RIDGES  %8d\n",mesh->na,nr);
   }
   return 1;
 }

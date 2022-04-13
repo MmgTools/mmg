@@ -649,7 +649,7 @@ const char* MMG5_Get_typeName(enum MMG5_type typ)
   }
 }
 
-int MMG5_Set_multiMat(MMG5_pMesh mesh,MMG5_pSol sol,int ref,
+int MMG5_Set_multiMat(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int ref,
                       int split,int rin,int rex){
   MMG5_pMat mat;
   int k;
@@ -688,7 +688,7 @@ int MMG5_Set_multiMat(MMG5_pMesh mesh,MMG5_pSol sol,int ref,
       if ( (mesh->info.imprim > 5) || mesh->info.ddebug ) {
         fprintf(stderr,"\n  ## Warning: %s: new materials (interior, exterior)",
                 __func__);
-        fprintf(stderr," for material of ref %d\n",ref);
+        fprintf(stderr," for material of ref %" MMG5_PRId "\n",ref);
       }
       return 1;
     }

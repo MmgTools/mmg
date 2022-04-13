@@ -158,7 +158,7 @@ int MMG2D_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
     }
     break;
   default:
-    fprintf(stderr,"\n  ## Error: %s: unexpected metric size (%d)\n",__func__,met->size);
+    fprintf(stderr,"\n  ## Error: %s: unexpected metric size (%" MMG5_PRId ")\n",__func__,met->size);
     break;
   }
 

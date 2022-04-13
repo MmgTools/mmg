@@ -711,7 +711,7 @@ static int MMG3D_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
     if ( !MG_VOK(p0) ) continue;
     if ( fabs(sol->m[k]-mesh->info.ls) < MMG5_EPS ) {
       if ( mesh->info.ddebug )
-        fprintf(stderr,"  ## Warning: %s: snapping value %d; "
+        fprintf(stderr,"  ## Warning: %s: snapping value %" MMG5_PRId "; "
                 "previous value: %E.\n",__func__,k,fabs(sol->m[k]));
 
       tmp[k] = ( fabs(sol->m[k]-mesh->info.ls) < MMG5_EPSD ) ?
@@ -744,7 +744,7 @@ static int MMG3D_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
   while ( nc );
 
   if ( (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) && ns+nc > 0 )
-    fprintf(stdout,"     %8d points snapped, %d corrected\n",ns,nc);
+    fprintf(stdout,"     %8d points snapped, %" MMG5_PRId " corrected\n",ns,nc);
 
   /* Reset point flags */
   for (k=1; k<=mesh->np; k++)
@@ -999,7 +999,7 @@ int MMG3D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
   MMG5_DEL_MEM(mesh,pile);
 
   if ( mesh->info.imprim > 0 || mesh->info.ddebug ) {
-    printf("\n  *** Removed %d positive parasitic bubbles and %d negative parasitic bubbles\n",ncp,ncm);
+    printf("\n  *** Removed %" MMG5_PRId " positive parasitic bubbles and %" MMG5_PRId " negative parasitic bubbles\n",ncp,ncm);
   }
 
   return 1;
@@ -1503,7 +1503,7 @@ int MMG5_chkmaniball(MMG5_pMesh mesh, MMG5_int start, int8_t ip){
     pt = &mesh->tetra[k];
     if( pt->ref == ref ) {
       fprintf(stderr,"   *** Topological problem:");
-      fprintf(stderr," non manifold surface at point %d \n",nump);
+      fprintf(stderr," non manifold surface at point %" MMG5_PRId " \n",nump);
       return 0;
     }
   }
@@ -1606,7 +1606,7 @@ int MMG5_chkmani2(MMG5_pMesh mesh,MMG5_pSol sol) {
       if( sol->m[pt->v[j]]-mesh->info.ls == 0.0 ) cnt++;
     }
     if(cnt == 4) {
-      fprintf(stderr,"\n  ## Error: %s: tetra %d: 4 vertices on implicit boundary.\n",
+      fprintf(stderr,"\n  ## Error: %s: tetra %" MMG5_PRId ": 4 vertices on implicit boundary.\n",
               __func__,k);
       return 0;
     }
@@ -1629,7 +1629,7 @@ int MMG5_chkmani2(MMG5_pMesh mesh,MMG5_pSol sol) {
 
         if(!MMG5_chkmaniball(mesh,k,ip)){
           fprintf(stderr,"\n  ## Error: %s: non orientable implicit surface:"
-                  " ball of point %d.\n",__func__,pt->v[ip]);
+                  " ball of point %" MMG5_PRId ".\n",__func__,pt->v[ip]);
           return 0;
         }
       }
@@ -2123,7 +2123,7 @@ int MMG5_chkmanicoll(MMG5_pMesh mesh,MMG5_int k,int iface,int iedg,MMG5_int ndep
         if ( indq == -1 ) {
           if ( mesh->info.ddebug ) {
           fprintf(stderr,"\n  ## Warning: %s: we should rarely passed here. "
-                  "tetra %d =  %d %d %d %d, ref = %d.",__func__,
+                  "tetra %" MMG5_PRId " =  %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId ", ref = %" MMG5_PRId ".",__func__,
                   jel,pt1->v[0],pt1->v[1],pt1->v[2],pt1->v[3],pt1->ref);
           }
           return 0;
@@ -2166,7 +2166,7 @@ int MMG5_chkmanicoll(MMG5_pMesh mesh,MMG5_int k,int iface,int iedg,MMG5_int ndep
         if ( indp == -1 ) {
           if ( mesh->info.ddebug ) {
           fprintf(stderr,"\n  ## Warning: %s: we should rarely passed here. "
-                  "tetra %d =  %d %d %d %d, ref = %d\n",__func__,
+                  "tetra %" MMG5_PRId " =  %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId ", ref = %" MMG5_PRId "\n",__func__,
                   jel,pt1->v[0],pt1->v[1],pt1->v[2],pt1->v[3],pt1->ref);
           }
           return 0;

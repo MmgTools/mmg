@@ -524,14 +524,14 @@ void MMG5_printTria(MMG5_pMesh mesh,char* fileName) {
 
   inm = fopen(fileName,"w");
 
-  fprintf(inm,"----------> %d TRIANGLES <----------\n",mesh->nt);
+  fprintf(inm,"----------> %" MMG5_PRId " TRIANGLES <----------\n",mesh->nt);
   for(k=1; k<=mesh->nt; k++) {
     ptt = &mesh->tria[k];
-    fprintf(inm,"num %d -> %d %d %d\n",k,ptt->v[0],ptt->v[1],
+    fprintf(inm,"num %" MMG5_PRId " -> %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId "\n",k,ptt->v[0],ptt->v[1],
             ptt->v[2]);
-    fprintf(inm,"ref   -> %d\n",ptt->ref);
+    fprintf(inm,"ref   -> %" MMG5_PRId "\n",ptt->ref);
     fprintf(inm,"tag   -> %d %d %d\n",ptt->tag[0],ptt->tag[1],ptt->tag[2]);
-    fprintf(inm,"edg   -> %d %d %d\n",ptt->edg[0],ptt->edg[1],ptt->edg[2]);
+    fprintf(inm,"edg   -> %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId "\n",ptt->edg[0],ptt->edg[1],ptt->edg[2]);
     fprintf(inm,"\n");
   }
   fprintf(inm,"---------> END TRIANGLES <--------\n");

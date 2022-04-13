@@ -161,7 +161,7 @@ int MMG3D_defaultValues(MMG5_pMesh mesh) {
   MMG5_mmgDefaultValues(mesh);
 
 #ifndef PATTERN
-  fprintf(stdout,"Max number of point per octree cell (-octree) : %d\n",
+  fprintf(stdout,"Max number of point per octree cell (-octree) : %" MMG5_PRId "\n",
           mesh->info.PROctree);
 #endif
 #ifdef USE_SCOTCH
@@ -509,7 +509,7 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
   if ( mesh->info.imprim == -99 ) {
     fprintf(stdout,"\n  -- PRINT (0 10(advised) -10) ?\n");
     fflush(stdin);
-    MMG_FSCANF(stdin,"%d",&i);
+    MMG_FSCANF(stdin,"%" MMG5_PRId "",&i);
     if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_verbose,i) )
       return 0;
   }
@@ -589,9 +589,9 @@ int MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
 
     /* Read user-defined references for the LS mode */
     if ( !strcmp(data,"lsreferences") ) {
-      ret = fscanf(in,"%d",&npar);
+      ret = fscanf(in,"%" MMG5_PRId "",&npar);
       if ( !ret ) {
-        fprintf(stderr,"  %%%% Wrong format for lsreferences: %d\n",npar);
+        fprintf(stderr,"  %%%% Wrong format for lsreferences: %" MMG5_PRId "\n",npar);
         return 0;
       }
 
@@ -599,7 +599,7 @@ int MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
         return 0;
       }
       for (i=0; i<mesh->info.nmat; i++) {
-        MMG_FSCANF(in,"%d",&ref);
+        MMG_FSCANF(in,"%" MMG5_PRId "",&ref);
         fgetpos(in,&position);
         MMG_FSCANF(in,"%255s",data);
         split = MMG5_MMAT_NoSplit;
@@ -607,8 +607,8 @@ int MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
         if ( strcmp(data,"nosplit") ) {
           fsetpos(in,&position);
           split = MMG5_MMAT_Split;
-          MMG_FSCANF(in,"%d",&rin);
-          MMG_FSCANF(in,"%d",&rex);
+          MMG_FSCANF(in,"%" MMG5_PRId "",&rin);
+          MMG_FSCANF(in,"%" MMG5_PRId "",&rex);
         }
         if ( !MMG3D_Set_multiMat(mesh,met,ref,split,rin,rex) ) {
           return 0;
@@ -617,10 +617,10 @@ int MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
     }
     /* Read user-defined local parameters and store them in the structure info->par */
     else if ( !strcmp(data,"parameters") ) {
-      ret = fscanf(in,"%d",&npar);
+      ret = fscanf(in,"%" MMG5_PRId "",&npar);
 
       if ( !ret ) {
-        fprintf(stderr,"  %%%% Wrong format for parameters: %d\n",npar);
+        fprintf(stderr,"  %%%% Wrong format for parameters: %" MMG5_PRId "\n",npar);
         return 0;
       }
 
@@ -629,7 +629,7 @@ int MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
       }
 
       for (i=0; i<mesh->info.npar; i++) {
-        ret = fscanf(in,"%d %255s ",&ref,buf);
+        ret = fscanf(in,"%" MMG5_PRId " %255s ",&ref,buf);
         if ( ret )
           ret = fscanf(in,"%f %f %f",&fp1,&fp2,&hausd);
 
@@ -657,12 +657,12 @@ int MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
       }
     }
     else if ( !strcmp(data,"lsbasereferences") ) {
-      MMG_FSCANF(in,"%d",&nbr);
+      MMG_FSCANF(in,"%" MMG5_PRId "",&nbr);
       if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_numberOfLSBaseReferences,nbr) )
         return 0;
 
       for (i=0; i<mesh->info.nbr; i++) {
-        MMG_FSCANF(in,"%d",&br);
+        MMG_FSCANF(in,"%" MMG5_PRId "",&br);
         mesh->info.br[i] = br;
       }
     }
@@ -921,7 +921,7 @@ int MMG3D_Get_nonBdyTriangle(MMG5_pMesh mesh,MMG5_int* v0,MMG5_int* v1,MMG5_int*
   }
 
   if ( mesh->nt+idx > nt_tot ) {
-    fprintf(stderr,"\n  ## Error: %s: Can't get the internal triangle of index %d."
+    fprintf(stderr,"\n  ## Error: %s: Can't get the internal triangle of index %" MMG5_PRId "."
             " Index must be between 1 and %zu.\n",
             __func__,idx,nt_tot-mesh->nt);
     return 0;
@@ -1221,7 +1221,7 @@ int MMG3D_doSol(MMG5_pMesh mesh,MMG5_pSol met) {
     if ( met->size==1 ) type=1;
     else if ( met->size==6 ) type = 3;
     else {
-      fprintf(stderr,"\n  ## Error: %s: unexpected size of metric: %d.\n",
+      fprintf(stderr,"\n  ## Error: %s: unexpected size of metric: %" MMG5_PRId ".\n",
               __func__,met->size);
       return 0;
     }
@@ -1348,7 +1348,7 @@ int MMG3D_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( met->size==1 ) type=1;
   else if ( met->size==6 ) type = 3;
   else {
-    fprintf(stderr,"\n  ## Error: %s: unexpected size of metric: %d.\n",
+    fprintf(stderr,"\n  ## Error: %s: unexpected size of metric: %" MMG5_PRId ".\n",
             __func__,met->size);
     return 0;
   }

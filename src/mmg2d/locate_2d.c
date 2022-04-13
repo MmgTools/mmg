@@ -349,7 +349,7 @@ int MMG2D_locateEdge(MMG5_pMesh mesh,MMG5_int ia,MMG5_int ib,MMG5_int* kdep,MMG5
   }
 
   if ( mesh->info.ddebug || mesh->info.imprim > 6 )
-    printf(" Try to enforce edge %d %d\n",ia,ib);
+    printf(" Try to enforce edge %" MMG5_PRId " %" MMG5_PRId "\n",ia,ib);
 
   mesh->base += 2;
   do {
@@ -578,8 +578,8 @@ int MMG2D_locateEdge(MMG5_pMesh mesh,MMG5_int ia,MMG5_int ib,MMG5_int* kdep,MMG5
       if ( !mmgWarn ) {
         mmgWarn = 1;
         fprintf(stderr,"\n  ## Error: %s: unexpected failure."
-                " Check your initial data and/or report the bug. lon:%d. %e %e %e\n"
-                " tria %d: %d %d %d,\n",
+                " Check your initial data and/or report the bug. lon:%" MMG5_PRId ". %e %e %e\n"
+                " tria %" MMG5_PRId ": %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId ",\n",
                 __func__,lon, area1,area2,area3,k,mesh->tria[k].v[0],
                 mesh->tria[k].v[1],mesh->tria[k].v[2]);
       }
@@ -587,7 +587,7 @@ int MMG2D_locateEdge(MMG5_pMesh mesh,MMG5_int ia,MMG5_int ib,MMG5_int* kdep,MMG5
     }
 
     //ktemp = k;
-    /* printf("adj (base) pour le tri %d : %d(%d) %d(%d) %d(%d)\n",k,adja[0]/3,mesh->tria[adja[0]/3].base>=mesh->base */
+    /* printf("adj (base) pour le tri %" MMG5_PRId " : %" MMG5_PRId "(%" MMG5_PRId ") %" MMG5_PRId "(%" MMG5_PRId ") %" MMG5_PRId "(%" MMG5_PRId ")\n",k,adja[0]/3,mesh->tria[adja[0]/3].base>=mesh->base */
     /*        ,adja[1]/3,mesh->tria[adja[1]/3].base>=mesh->base,adja[2]/3,mesh->tria[adja[2]/3].base>=mesh->base); */
     k = adja[0] / 3;
     if ((mesh->tria[k].base>=mesh->base) || !k || !mesh->tria[k].v[0]) {

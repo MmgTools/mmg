@@ -50,8 +50,8 @@
 int MMG5_mmgHashTria(MMG5_pMesh mesh, MMG5_int *adjt, MMG5_Hash *hash, int chkISO) {
   MMG5_pTria     pt,pt1;
   MMG5_hedge     *ph;
-  int            kk,dup,nmf;
-  MMG5_int       *adja,hmax,k,ia,ib,jel,lel;
+  int            kk;
+  MMG5_int       *adja,hmax,k,ia,ib,jel,lel,dup,nmf;
   int8_t         i,i1,i2,j,l;
   unsigned int   key;
 
@@ -151,7 +151,7 @@ int MMG5_mmgHashTria(MMG5_pMesh mesh, MMG5_int *adjt, MMG5_Hash *hash, int chkIS
           if ( hash->nxt >= hash->max-1 ) {
             if ( mesh->info.ddebug ) {
               fprintf(stderr,"\n  ## Warning: %s: memory alloc problem (edge):"
-                      " %" PRId64 "\n",__func__,hash->max);
+                      " %" MMG5_PRId "\n",__func__,hash->max);
             }
             MMG5_TAB_RECALLOC(mesh,hash->item,hash->max,MMG5_GAP,MMG5_hedge,
                                "MMG5_edge",
@@ -196,7 +196,7 @@ int MMG5_mmgHashTria(MMG5_pMesh mesh, MMG5_int *adjt, MMG5_Hash *hash, int chkIS
   if ( abs(mesh->info.imprim) > 5 && dup+nmf > 0 ) {
     fprintf(stdout,"  ## ");  fflush(stdout);
     if ( nmf > 0 )  fprintf(stdout,"[non-manifold model]  ");
-    if ( dup > 0 )  fprintf(stdout," %d duplicate removed",dup);
+    if ( dup > 0 )  fprintf(stdout," %" MMG5_PRId " duplicate removed",dup);
     fprintf(stdout,"\n");
   }
   if ( mesh->info.ddebug )  fprintf(stdout,"  h- completed.\n");

@@ -387,7 +387,8 @@ int MMGS_prilen(MMG5_pMesh mesh, MMG5_pSol met, int metRidTyp) {
 int MMGS_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria    pt;
   double        rap,rapmin,rapmax,rapavg,med;
-  int           i,k,iel,ok,ir,imax,nex,his[5];
+  int           i,ir,imax,nex,his[5];
+  MMG5_int      k,iel,ok;
 
   rapmin  = 1.0;
   rapmax  = 0.0;
@@ -424,8 +425,8 @@ int MMGS_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
     his[ir] += 1;
   }
 
-  fprintf(stdout,"\n  -- MESH QUALITY   %d\n",mesh->nt - nex);
-  fprintf(stdout,"     BEST   %8.6f  AVRG.   %8.6f  WRST.   %8.6f (%d)\n",
+  fprintf(stdout,"\n  -- MESH QUALITY   %" MMG5_PRId "\n",mesh->nt - nex);
+  fprintf(stdout,"     BEST   %8.6f  AVRG.   %8.6f  WRST.   %8.6f (%" MMG5_PRId ")\n",
           rapmax,rapavg / (mesh->nt-nex),rapmin,iel);
 
   if ( mesh->info.imprim >= 3 ){
@@ -454,7 +455,8 @@ int MMGS_inqua(MMG5_pMesh mesh,MMG5_pSol met) {
 int MMGS_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
   MMG5_pTria    pt;
   double        rap,rapmin,rapmax,rapavg,med;
-  int           i,k,iel,ok,ir,imax,nex,his[5];
+  int           i,ir,imax,nex,his[5];
+  MMG5_int      k,iel,ok;
 
   if ( mesh->info.imprim <= 0 ) return 1;
 
@@ -488,8 +490,8 @@ int MMGS_outqua(MMG5_pMesh mesh,MMG5_pSol met) {
     his[ir] += 1;
   }
 
-  fprintf(stdout,"\n  -- MESH QUALITY   %d\n",mesh->nt - nex);
-  fprintf(stdout,"     BEST   %8.6f  AVRG.   %8.6f  WRST.   %8.6f (%d)\n",
+  fprintf(stdout,"\n  -- MESH QUALITY   %" MMG5_PRId "\n",mesh->nt - nex);
+  fprintf(stdout,"     BEST   %8.6f  AVRG.   %8.6f  WRST.   %8.6f (%" MMG5_PRId ")\n",
           rapmax,rapavg / (mesh->nt-nex),rapmin,iel);
 
   if ( mesh->info.imprim >= 3 ){

@@ -48,8 +48,8 @@ int MMG5_regnor(MMG5_pMesh mesh) {
   MMG5_pPoint   ppt,p0;
   MMG5_pxPoint  pxp;
   double        *tabl,n[3],*nptr,lm1,lm2,dd,nx,ny,nz,res0,res;
-  int           i,iad,it,nn,nit,ilist;
-  MMG5_int      k,iel,list[MMG5_LMAX],*adja;
+  int           i,iad,it,nit,ilist;
+  MMG5_int      k,nn,iel,list[MMG5_LMAX],*adja;
 
   /* assign seed to vertex */
   for (k=1; k<=mesh->nt; k++) {
@@ -218,7 +218,7 @@ int MMG5_regnor(MMG5_pMesh mesh) {
   if ( mesh->info.imprim < -1 || mesh->info.ddebug )  fprintf(stdout,"\n");
 
   if ( abs(mesh->info.imprim) > 4 )
-    fprintf(stdout,"     %d normals regularized: %.3e\n",nn,res);
+    fprintf(stdout,"     %" MMG5_PRId " normals regularized: %.3e\n",nn,res);
 
   MMG5_SAFE_FREE(tabl);
   return 1;

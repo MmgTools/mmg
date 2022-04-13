@@ -416,7 +416,7 @@ static int swpmsh(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
   }
   while ( ns > 0 && ++it < maxit );
   if ( (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) && nns > 0 )
-    fprintf(stdout,"     %8d edge swapped\n",nns);
+    fprintf(stdout,"     %8" MMG5_PRId " edge swapped\n",nns);
 
   return nns;
 }
@@ -469,12 +469,12 @@ static int movtri(MMG5_pMesh mesh,MMG5_pSol met,int maxit) {
       }
     }
     nnm += nm;
-    if ( mesh->info.ddebug )  fprintf(stdout,"     %8d moved, %d geometry\n",nm,ns);
+    if ( mesh->info.ddebug )  fprintf(stdout,"     %8" MMG5_PRId " moved, %" MMG5_PRId " geometry\n",nm,ns);
   }
   while ( ++it < maxit && nm > 0);
 
   if ( (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) && nnm > 0 )
-    fprintf(stdout,"     %8d vertices moved, %d iter.\n",nnm,it);
+    fprintf(stdout,"     %8" MMG5_PRId " vertices moved, %" MMG5_PRId " iter.\n",nnm,it);
 
   return nnm;
 }
@@ -508,7 +508,7 @@ int MMGS_delPatternPts(MMG5_pMesh mesh,MMG5_Hash hash)
         MMGS_delPt(mesh,vx[i]);
         if ( !MMG5_hashUpdate(&hash,pt->v[i1],pt->v[i2],0) ) {
           fprintf(stderr,"\n  ## Error: %s: unable to delete point idx"
-                  " along edge %d %d.\n", __func__,
+                  " along edge %" MMG5_PRId " %" MMG5_PRId ".\n", __func__,
                   MMGS_indPt(mesh,pt->v[i1]),
                   MMGS_indPt(mesh,pt->v[i2]));
           MMG5_DEL_MEM(mesh,hash.item);
@@ -749,7 +749,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
     if ( nc > 0 )  ++ns;
   }
   if ( mesh->info.ddebug && ns ) {
-    fprintf(stdout,"     %d analyzed  %d proposed\n",mesh->nt,ns);
+    fprintf(stdout,"     %" MMG5_PRId " analyzed  %" MMG5_PRId " proposed\n",mesh->nt,ns);
     fflush(stdout);
   }
 
@@ -826,7 +826,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
               if ( !MMG5_hashUpdate(&hash,pt->v[MMG5_iprv2[i]],
                                      pt->v[MMG5_inxt2[i]],0) ) {
                 fprintf(stderr,"\n  ## Error: %s: unable to delete point"
-                        " idx along edge %d %d.\n",
+                        " idx along edge %" MMG5_PRId " %" MMG5_PRId ".\n",
                         __func__,MMGS_indPt(mesh,pt->v[MMG5_iprv2[i]]),
                         MMGS_indPt(mesh,pt->v[MMG5_inxt2[i]]));
                 MMG5_DEL_MEM(mesh,hash.item);
@@ -843,7 +843,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
   while( ni > 0 && ++it < 40 );
 
   if ( mesh->info.ddebug && nc ) {
-    fprintf(stdout,"     %d corrected,  %d invalid\n",nc,ni);
+    fprintf(stdout,"     %" MMG5_PRId " corrected,  %" MMG5_PRId " invalid\n",nc,ni);
     fflush(stdout);
   }
 
@@ -888,7 +888,7 @@ static int anaelt(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
     if ( !ier ) return -1;
   }
   if ( (mesh->info.ddebug || abs(mesh->info.imprim) > 5) && ns > 0 )
-    fprintf(stdout,"     %7d splitted\n",ns);
+    fprintf(stdout,"     %7" MMG5_PRId " splitted\n",ns);
   MMG5_DEL_MEM(mesh,hash.item);
 
   return ns;
@@ -1053,7 +1053,7 @@ static MMG5_int colelt(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
     }
   }
   if ( nc > 0 && (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) )
-    fprintf(stdout,"     %8d vertices removed\n",nc);
+    fprintf(stdout,"     %8" MMG5_PRId " vertices removed\n",nc);
 
   return nc;
 }
@@ -1260,7 +1260,7 @@ static int adptri(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int* permNodGlob) {
     nnf += nf;
     nnm += nm;
     if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && ns+nc+nf+nm > 0 )
-      fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %8d moved\n",ns,nc,nf,nm);
+      fprintf(stdout,"     %8" MMG5_PRId " splitted, %8" MMG5_PRId " collapsed, %8" MMG5_PRId " swapped, %8" MMG5_PRId " moved\n",ns,nc,nf,nm);
     if ( ns < 10 && abs(nc-ns) < 3 )  break;
     else if ( it > 3 && abs(nc-ns) < 0.3 * MG_MAX(nc,ns) )  break;
   }
@@ -1297,7 +1297,7 @@ static int adptri(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int* permNodGlob) {
 
     if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && nf+nm > 0 ){
       fprintf(stdout,"                                            ");
-      fprintf(stdout,"%8d swapped, %8d moved\n",nf,nm);
+      fprintf(stdout,"%8" MMG5_PRId " swapped, %8" MMG5_PRId " moved\n",nf,nm);
     }
   }
   while( ++it < maxit && nm+nf > 0 );
@@ -1317,7 +1317,7 @@ static int adptri(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int* permNodGlob) {
 
   if ( mesh->info.imprim > 0 ) {
     if ( abs(mesh->info.imprim) < 5 && (nnc > 0 || nns > 0) )
-      fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %8d moved, %d iter. \n",nns,nnc,nnf,nnm,it);
+      fprintf(stdout,"     %8" MMG5_PRId " splitted, %8" MMG5_PRId " collapsed, %8" MMG5_PRId " swapped, %8" MMG5_PRId " moved, %" MMG5_PRId " iter. \n",nns,nnc,nnf,nnm,it);
   }
   return 1;
 }
@@ -1374,14 +1374,14 @@ static int anatri(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
     nns += ns;
     nnf += nf;
     if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && ns+nc > 0 )
-      fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped\n",ns,nc,nf);
+      fprintf(stdout,"     %8" MMG5_PRId " splitted, %8" MMG5_PRId " collapsed, %8" MMG5_PRId " swapped\n",ns,nc,nf);
     if ( it > 3 && abs(nc-ns) < 0.1 * MG_MAX(nc,ns) )  break;
   }
   while ( ++it < maxit && ns+nc+nf > 0 );
 
   if ( mesh->info.imprim > 0 ) {
     if ( (abs(mesh->info.imprim) < 5 || mesh->info.ddebug ) && nns+nnc > 0 )
-      fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %d iter.\n",nns,nnc,nnf,it);
+      fprintf(stdout,"     %8" MMG5_PRId " splitted, %8" MMG5_PRId " collapsed, %8" MMG5_PRId " swapped, %d iter.\n",nns,nnc,nnf,it);
   }
 
   return 1;

@@ -106,7 +106,7 @@ MMG5_defsizreg(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int nump,MMG5_int *lists,
     if ( !mmgWarn0 ) {
       mmgWarn0 = 1;
       fprintf(stderr,"\n  ## Error: %s: at least 1 wrong point"
-              " qualification : xp ? %d.\n",__func__,p0->xp);
+              " qualification : xp ? %" MMG5_PRId ".\n",__func__,p0->xp);
     }
     return FLT_MAX;
   }
@@ -1131,7 +1131,7 @@ int MMG3D_gradsiz_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   while( ++it < maxit && nu > 0 );
 
   if ( abs(mesh->info.imprim) > 4 )
-    fprintf(stdout,"     gradation: %7d updated, %d iter.\n",nup,it);
+    fprintf(stdout,"     gradation: %7d updated, %" MMG5_PRId " iter.\n",nup,it);
   return 1;
 }
 
@@ -1232,7 +1232,7 @@ int MMG3D_gradsizreq_iso(MMG5_pMesh mesh,MMG5_pSol met) {
   while ( ++it < maxit && nu > 0 );
 
   if ( abs(mesh->info.imprim) > 4 && nup ) {
-    fprintf(stdout,"     gradation (required): %7d updated, %d iter.\n",nup,it);
+    fprintf(stdout,"     gradation (required): %7d updated, %" MMG5_PRId " iter.\n",nup,it);
   }
 
   return nup;

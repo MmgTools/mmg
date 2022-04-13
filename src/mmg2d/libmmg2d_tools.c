@@ -97,10 +97,10 @@ int MMG2D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
 
     /* Read user-defined references for the LS mode */
     if ( !strcmp(data,"lsreferences") ) {
-      ret = fscanf(in,"%d",&mesh->info.nmat);
+      ret = fscanf(in,"%" MMG5_PRId "",&mesh->info.nmat);
 
       if ( !ret ) {
-        fprintf(stderr,"  %%%% Wrong format for lsreferences: %d\n",mesh->info.nmat);
+        fprintf(stderr,"  %%%% Wrong format for lsreferences: %" MMG5_PRId "\n",mesh->info.nmat);
         return (0);
       }
 
@@ -109,7 +109,7 @@ int MMG2D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
         MMG5_SAFE_CALLOC(mesh->info.mat,mesh->info.nmat,MMG5_Mat,return 0);
         for (i=0; i<mesh->info.nmat; i++) {
           pm = &mesh->info.mat[i];
-          MMG_FSCANF(in,"%d",&pm->ref);
+          MMG_FSCANF(in,"%" MMG5_PRId "",&pm->ref);
           fgetpos(in,&position);
           MMG_FSCANF(in,"%255s",data);
           if ( !strcmp(data,"nosplit") ) {
@@ -119,8 +119,8 @@ int MMG2D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
           }
           else {
             fsetpos(in,&position);
-            MMG_FSCANF(in,"%d",&pm->rin);
-            MMG_FSCANF(in,"%d",&pm->rex);
+            MMG_FSCANF(in,"%" MMG5_PRId "",&pm->rin);
+            MMG_FSCANF(in,"%" MMG5_PRId "",&pm->rex);
             pm->dospl = 1;
           }
         }
@@ -128,14 +128,14 @@ int MMG2D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
     }
     /* Read user-defined local parameters and store them in the structure info->par */
     else if ( !strcmp(data,"parameters") ) {
-      ret = fscanf(in,"%d",&npar);
+      ret = fscanf(in,"%" MMG5_PRId "",&npar);
 
       if ( !ret ) {
-        fprintf(stderr,"  %%%% Wrong format for parameters: %d\n",npar);
+        fprintf(stderr,"  %%%% Wrong format for parameters: %" MMG5_PRId "\n",npar);
         return 0;
       }
       else if ( npar > MMG2D_LPARMAX ) {
-        fprintf(stderr,"  %%%% Too many local parameters %d. Abort\n",npar);
+        fprintf(stderr,"  %%%% Too many local parameters %" MMG5_PRId ". Abort\n",npar);
         return 0;
       }
 
@@ -145,7 +145,7 @@ int MMG2D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
           return 0;
 
         for (i=0; i<mesh->info.npar; i++) {
-          ret = fscanf(in,"%d %255s",&ref,data);
+          ret = fscanf(in,"%" MMG5_PRId " %255s",&ref,data);
           if ( ret ) ret = fscanf(in,"%f %f %f",&fp1,&fp2,&fp3);
 
           if ( !ret ) {
@@ -309,7 +309,7 @@ int MMG2D_Get_nonBdyEdge(MMG5_pMesh mesh, MMG5_int* e0, MMG5_int* e1, int* ref, 
   }
 
   if ( mesh->namax+idx > na_tot ) {
-    fprintf(stderr,"\n  ## Error: %s: Can't get the internal edge of index %d."
+    fprintf(stderr,"\n  ## Error: %s: Can't get the internal edge of index %" MMG5_PRId "."
             " Index must be between 1 and %zu.\n",
             __func__,idx,na_tot-mesh->namax);
     return 0;
@@ -373,7 +373,7 @@ int MMG2D_Get_adjaVerticesFast(MMG5_pMesh mesh, MMG5_int ip,MMG5_int start, MMG5
   do {
     if ( nbpoi == MMG2D_LMAX ) {
       fprintf(stderr,"\n  ## Warning: %s: unable to compute adjacent"
-              " vertices of the vertex %d:\nthe ball of point contain too many"
+              " vertices of the vertex %" MMG5_PRId ":\nthe ball of point contain too many"
               " elements.\n",__func__,ip);
       return 0;
     }
@@ -394,7 +394,7 @@ int MMG2D_Get_adjaVerticesFast(MMG5_pMesh mesh, MMG5_int ip,MMG5_int start, MMG5
   /* store the last point of the boundary triangle */
   if ( nbpoi == MMG2D_LMAX ) {
     fprintf(stderr,"\n  ## Warning: %s: unable to compute adjacent vertices of the"
-            " vertex %d:\nthe ball of point contain too many elements.\n",
+            " vertex %" MMG5_PRId ":\nthe ball of point contain too many elements.\n",
             __func__,ip);
     return 0;
   }
@@ -413,7 +413,7 @@ int MMG2D_Get_adjaVerticesFast(MMG5_pMesh mesh, MMG5_int ip,MMG5_int start, MMG5
 
     if ( nbpoi == MMG2D_LMAX ) {
       fprintf(stderr,"\n  ## Warning: %s: unable to compute adjacent vertices of the"
-              " vertex %d:\nthe ball of point contain too many elements.\n",
+              " vertex %" MMG5_PRId ":\nthe ball of point contain too many elements.\n",
               __func__,ip);
       return 0;
     }
@@ -492,7 +492,7 @@ int MMG2D_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met) {
 
   /* Memory alloc */
   if ( met->size!=1 && met->size!=3 ) {
-    fprintf(stderr,"\n  ## Error: %s: unexpected size of metric: %d.\n",
+    fprintf(stderr,"\n  ## Error: %s: unexpected size of metric: %" MMG5_PRId ".\n",
             __func__,met->size);
     return 0;
   }

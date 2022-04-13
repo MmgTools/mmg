@@ -166,7 +166,7 @@ FORTRAN_NAME(MMG2D_SET_DPARAMETER,mmg2d_set_dparameter,
  * See \ref MMG2D_Set_localParameter function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_SET_LOCALPARAMETER,mmg2d_set_localparameter,
-             (MMG5_pMesh *mesh,MMG5_pSol *sol, int *typ, int *ref,
+             (MMG5_pMesh *mesh,MMG5_pSol *sol, int *typ, MMG5_int *ref,
               double *hmin, double *hmax, double *hausd, int* retval),
              (mesh,sol,typ,ref,hmin, hmax, hausd,retval)){
   *retval = MMG2D_Set_localParameter(*mesh,*sol,*typ,*ref,*hmin,*hmax,*hausd);

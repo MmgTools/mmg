@@ -294,7 +294,7 @@ int MMG2D_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_int start, int8_t ista
     if ( !mmgWarn ) {
       mmgWarn = 1;
       fprintf(stderr,"\n  ## Warning: %s: unsnap at least 1 point "
-              "(point %d in tri %d).\n",__func__,MMG2D_indElt(mesh,start),
+              "(point %" MMG5_PRId " in tri %" MMG5_PRId ").\n",__func__,MMG2D_indElt(mesh,start),
               MMG2D_indPt(mesh,mesh->tria[start].v[istart]));
     }
     return 0;
@@ -401,7 +401,7 @@ int MMG2D_snapval(MMG5_pMesh mesh, MMG5_pSol sol) {
   MMG5_DEL_MEM ( mesh, tmp );
 
   if ( (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) && ns+nc > 0 )
-    fprintf(stdout,"     %8d points snapped, %d corrected\n",ns,nc);
+    fprintf(stdout,"     %8d points snapped, %" MMG5_PRId " corrected\n",ns,nc);
 
   return 1;
 }
@@ -779,7 +779,7 @@ int MMG2D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
   MMG5_DEL_MEM(mesh,pile);
 
   if ( mesh->info.imprim > 0 || mesh->info.ddebug ) {
-    printf("\n  *** Removed %d positive parasitic bubbles and %d negative parasitic bubbles\n",ncp,ncm);
+    printf("\n  *** Removed %" MMG5_PRId " positive parasitic bubbles and %" MMG5_PRId " negative parasitic bubbles\n",ncp,ncm);
   }
 
   return(1);

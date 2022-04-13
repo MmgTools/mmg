@@ -449,9 +449,9 @@ int MMG3D_displayQualHisto(MMG5_int ne,double max,double avg,double min,MMG5_int
   fprintf(stdout,"\n  -- MESH QUALITY");
   if ( optimLES )
     fprintf(stdout," (LES)");
-  fprintf(stdout,"  %d\n",ne);
+  fprintf(stdout,"  %" MMG5_PRId "\n",ne);
 
-  fprintf(stdout,"     BEST   %8.6f  AVRG.   %8.6f  WRST.   %8.6f (%d)\n",
+  fprintf(stdout,"     BEST   %8.6f  AVRG.   %8.6f  WRST.   %8.6f (%" MMG5_PRId ")\n",
           max,avg / ne,min,iel);
 
   return ( MMG3D_displayQualHisto_internal(ne,max,avg,min,iel,good,med,his,
@@ -514,7 +514,7 @@ int MMG3D_displayQualHisto_internal(MMG5_int ne,double max,double avg,double min
                   i/5.,i/5.+0.2,his[i],100.*((float)his[i]/(float)ne));
         }
         if ( nrid ) {
-          fprintf(stdout,"\n  ## WARNING: %d TETRA WITH 4 RIDGES POINTS:"
+          fprintf(stdout,"\n  ## WARNING: %" MMG5_PRId " TETRA WITH 4 RIDGES POINTS:"
                   " UNABLE TO COMPUTE ANISO QUALITY.\n",nrid);
         }
       }
@@ -810,7 +810,7 @@ int MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcibl
   // svg des poids
   // npbdry = 0;
   // inm = fopen("poid.sol","w");
-  // fprintf(inm,"MeshVersionFormatted 2\n Dimension 3 \n SolAtTetrahedra \n %d\n 1 1 \n",mesh->ne);
+  // fprintf(inm,"MeshVersionFormatted 2\n Dimension 3 \n SolAtTetrahedra \n %" MMG5_PRId "\n 1 1 \n",mesh->ne);
 
   // substraction of the half of the number of bdry vertex to avoid the surestimation due of the interface
   // for (k=1; k<=mesh->np; k++) {
@@ -854,7 +854,7 @@ int MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcibl
       }
       /* if ( isbdry )  { */
       /*    assert(longen%2); */
-      /*    //printf("MMG5_coquil %d\n",longen/2); */
+      /*    //printf("MMG5_coquil %" MMG5_PRId "\n",longen/2); */
       /*    continue; */
       /* } */
       //assert(!(longen%2));
@@ -999,7 +999,7 @@ int MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcibl
       w += (2*dnaddloc);//1./lon*(2*dnaddloc + dnpdelloc);
 
     }/*for ia*/
-    if(ddebug) printf("on soustrait %d\n",nedel);
+    if(ddebug) printf("on soustrait %" MMG5_PRId "\n",nedel);
 
     w += 0.5*nedel;
 

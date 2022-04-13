@@ -1644,11 +1644,11 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
   }
   else if ( ier < 0 ) {
     printf("\n  ## Warning: Unable to perform any movement "
-           "(%d intersecting tetrahedra).\n",-ier);
+           "(%" MMG5_PRId " intersecting tetrahedra).\n",-ier);
     if ( mesh->info.imprim > 1 ) {
       printf("     List of invalid tets: ");
       for ( k=0; k<-ier; ++k ) {
-        printf("%d ",MMG3D_indElt(mesh,invalidTets[k]));
+        printf("%" MMG5_PRId " ",MMG3D_indElt(mesh,invalidTets[k]));
       }
       printf("\n\n");
     }

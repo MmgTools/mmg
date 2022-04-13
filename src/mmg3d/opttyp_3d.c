@@ -609,10 +609,10 @@ MMG5_int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree,in
       } /* end switch */
     } /* end for k */
 
-    /* printf("bdry : %d %d\n",nbdy,nbdy2); */
+    /* printf("bdry : %" MMG5_PRId " %" MMG5_PRId "\n",nbdy,nbdy2); */
     /*  for (k=0; k<=7; k++) */
     /*    if ( cs[k] ) */
-    /*    printf("  optim [%d]      = %5d   %5d  %6.2f %%\n",k,cs[k],ds[k],100.0*ds[k]/cs[k]); */
+    /*    printf("  optim [%" MMG5_PRId "]      = %5d   %5d  %6.2f %%\n",k,cs[k],ds[k],100.0*ds[k]/cs[k]); */
 
     ntot += nd;
     if(base==-1) base = mesh->mark-1;

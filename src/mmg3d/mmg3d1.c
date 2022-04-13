@@ -803,12 +803,12 @@ MMG5_int MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree,
       }
     }
     nnm += nm;
-    if ( mesh->info.ddebug )  fprintf(stdout,"     %8d moved, %d geometry\n",nm,ns);
+    if ( mesh->info.ddebug )  fprintf(stdout,"     %8d moved, %" MMG5_PRId " geometry\n",nm,ns);
   }
   while( ++it < maxit && nm > 0 );
 
   if ( (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) && nnm )
-    fprintf(stdout,"     %8d vertices moved, %d iter.\n",nnm,it);
+    fprintf(stdout,"     %8d vertices moved, %" MMG5_PRId " iter.\n",nnm,it);
 
   return nnm;
 }
@@ -1111,7 +1111,7 @@ int MMG3D_delPatternPts(MMG5_pMesh mesh,MMG5_Hash hash)
           MMG3D_delPt(mesh,vx[ia]);
           if ( !MMG5_hashUpdate(&hash,pt->v[i],pt->v[j],-1) ) {
             fprintf(stderr,"\n  ## Error: %s: unable to delete point idx"
-                    " along edge %d %d.\n", __func__,
+                    " along edge %" MMG5_PRId " %" MMG5_PRId ".\n", __func__,
                     MMG3D_indPt(mesh,pt->v[i]),
                     MMG3D_indPt(mesh,pt->v[j]));
             MMG5_DEL_MEM(mesh,hash.item);
@@ -2100,7 +2100,7 @@ MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
     }
   }
   if ( mesh->info.ddebug && nc ) {
-    fprintf(stdout,"     %d added\n",nc);
+    fprintf(stdout,"     %" MMG5_PRId " added\n",nc);
     fflush(stdout);
   }
 
@@ -2193,7 +2193,7 @@ MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
   while( ni > 0 && ++it < 40 );
 
   if ( mesh->info.ddebug && nc ) {
-    fprintf(stdout,"     %d corrected, %d invalid\n",nc,ni);
+    fprintf(stdout,"     %" MMG5_PRId " corrected, %" MMG5_PRId " invalid\n",nc,ni);
     fflush(stdout);
   }
 
@@ -2829,7 +2829,7 @@ int MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk, int patternMode) {
 #ifndef PATTERN
       fprintf(stdout,"                   ");
 #endif
-      fprintf(stdout, "     %8d splitted, %8d collapsed, %8d swapped, %d iter.\n",nns,nnc,nnf,it);
+      fprintf(stdout, "     %8d splitted, %8d collapsed, %8d swapped, %" MMG5_PRId " iter.\n",nns,nnc,nnf,it);
     }
   }
 

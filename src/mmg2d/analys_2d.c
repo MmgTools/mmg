@@ -247,8 +247,8 @@ int MMG2D_setadj(MMG5_pMesh mesh) {
 
 
   if ( abs(mesh->info.imprim) > 4 ) {
-    fprintf(stdout,"     Connected component or subdomains: %d \n",ncc);
-    fprintf(stdout,"     Tagged edges: %d,  ridges: %d,  refs: %d\n",nr+nref,nr,nref);
+    fprintf(stdout,"     Connected component or subdomains: %" MMG5_PRId " \n",ncc);
+    fprintf(stdout,"     Tagged edges: %" MMG5_PRId ",  ridges: %" MMG5_PRId ",  refs: %" MMG5_PRId "\n",nr+nref,nr,nref);
   }
 
   return 1;
@@ -382,7 +382,7 @@ int MMG2D_singul(MMG5_pMesh mesh, int ref ) {
   }
 
   if ( abs(mesh->info.imprim) > 3 && nc+nre+nm > 0 )
-    fprintf(stdout,"     %d corners, %d singular points and %d non manifold points detected\n",nc,nre,nm);
+    fprintf(stdout,"     %" MMG5_PRId " corners, %" MMG5_PRId " singular points and %" MMG5_PRId " non manifold points detected\n",nc,nre,nm);
 
   return 1;
 }
@@ -449,7 +449,7 @@ int MMG2D_norver(MMG5_pMesh mesh, int ref) {
         ppt->s = 1;
         if ( !MMG2D_boulen(mesh,kk,ii,&pleft,&pright,ppt->n) ) {
           fprintf(stderr,"\n  ## Error: %s: Impossible to"
-                  " calculate normal vector at vertex %d.\n",
+                  " calculate normal vector at vertex %" MMG5_PRId ".\n",
                   __func__,MMG2D_indPt(mesh,pt->v[i]));
           return 0;
         }
@@ -471,7 +471,7 @@ int MMG2D_norver(MMG5_pMesh mesh, int ref) {
         ppt->s = 1;
         if ( !MMG2D_boulen(mesh,kk,ii,&pleft,&pright,ppt->n) ) {
           fprintf(stderr,"\n  ## Error: %s: Impossible to"
-                  " calculate normal vector at vertex %d.\n",
+                  " calculate normal vector at vertex %" MMG5_PRId ".\n",
                   __func__,MMG2D_indPt(mesh,pt->v[i]));
           return 0;
         }
@@ -488,7 +488,7 @@ int MMG2D_norver(MMG5_pMesh mesh, int ref) {
   }
 
   if ( abs(mesh->info.imprim) > 3 && nn > 0 )
-    fprintf(stdout,"     %d calculated normal vectors\n",nn);
+    fprintf(stdout,"     %" MMG5_PRId " calculated normal vectors\n",nn);
 
   return 1;
 }
@@ -752,7 +752,7 @@ int MMG2D_regnor(MMG5_pMesh mesh) {
 
 
   if ( abs(mesh->info.imprim) > 4 )
-    fprintf(stdout,"     %d normals regularized: %.3e\n",nn,res);
+    fprintf(stdout,"     %" MMG5_PRId " normals regularized: %.3e\n",nn,res);
 
   MMG5_SAFE_FREE(tmp);
   return 1;

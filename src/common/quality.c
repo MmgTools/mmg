@@ -259,11 +259,11 @@ void MMG5_displayLengthHisto(MMG5_pMesh mesh, MMG5_int ned, double *avlen,
   dned     = (double)ned;
   (*avlen) = (*avlen) / dned;
 
-  fprintf(stdout,"\n  -- RESULTING EDGE LENGTHS  %d\n",ned);
+  fprintf(stdout,"\n  -- RESULTING EDGE LENGTHS  %" MMG5_PRId "\n",ned);
   fprintf(stdout,"     AVERAGE LENGTH         %12.4f\n",(*avlen));
-  fprintf(stdout,"     SMALLEST EDGE LENGTH   %12.4f   %6d %6d\n",
+  fprintf(stdout,"     SMALLEST EDGE LENGTH   %12.4f   %6" MMG5_PRId " %6" MMG5_PRId "\n",
           lmin,amin,bmin);
-  fprintf(stdout,"     LARGEST  EDGE LENGTH   %12.4f   %6d %6d \n",
+  fprintf(stdout,"     LARGEST  EDGE LENGTH   %12.4f   %6" MMG5_PRId " %6" MMG5_PRId " \n",
           lmax,amax,bmax);
 
   MMG5_displayLengthHisto_internal( ned,amin,bmin,lmin,amax,bmax,
@@ -348,12 +348,12 @@ int MMG5_minQualCheck ( MMG5_int iel, double minqual, double alpha )
 
   if ( minqualAlpha < MMG5_NULKAL ) {
     fprintf(stderr,"\n  ## Error: %s: too bad quality for the worst element: "
-            "(elt %d -> %15e)\n",__func__,iel,minqual);
+            "(elt %" MMG5_PRId " -> %15e)\n",__func__,iel,minqual);
     return 0;
   }
   else if ( minqualAlpha < MMG5_EPSOK ) {
     fprintf(stderr,"\n  ## Warning: %s: very bad quality for the worst element: "
-            "(elt %d -> %15e)\n",__func__,iel,minqual);
+            "(elt %" MMG5_PRId " -> %15e)\n",__func__,iel,minqual);
   }
 
   return 1;

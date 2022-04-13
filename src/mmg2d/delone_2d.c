@@ -123,7 +123,7 @@ static int MMG2D_hashEdgeDelone(MMG5_pMesh mesh,MMG5_Hash *hash,MMG5_int iel,int
     /* if not, hash the edge and store its unique key */
     jel = MMG5_hashEdge(mesh,hash,ip1,ip2,3*iel+i);
     if ( !jel ) {
-      printf("  # Error: %s: Unable to add edge %d %d within the hash table\n",
+      printf("  # Error: %s: Unable to add edge %" MMG5_PRId " %" MMG5_PRId " within the hash table\n",
              __func__,MMG2D_indPt(mesh,ip1),MMG2D_indPt(mesh,ip2));
       return 0;
     }
@@ -382,7 +382,7 @@ int MMG2D_delone(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int ip,MMG5_int *list,int il
             ier = MMG2D_hashEdgeDelone(mesh,&hedg,iel,j);
             if ( !ier ) {
               fprintf(stderr,"  ## Warning: %s: unable to update adjacency"
-                      " relationship (elt %d, edge %d).\n",
+                      " relationship (elt %" MMG5_PRId ", edge %d).\n",
                       __func__,MMG2D_indElt(mesh,iel),j);
               return -1;
             }
