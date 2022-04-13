@@ -67,7 +67,7 @@ int MMG5_kPartBoxCompute(SCOTCH_Graph *graf, int vertNbr, int boxVertNbr,
 
   /* Initializing SCOTCH functions */
   CHECK_SCOTCH(SCOTCH_stratInit(&strat), "scotch_stratInit", 0) ;
-  if ( SCOTCH_6 ) {
+  if ( SCOTCH_6 || SCOTCH_7 ) {
     CHECK_SCOTCH(SCOTCH_archCmplt(&arch, boxNbr), "scotch_archCmplt", 0) ;
   }
   else {
@@ -87,7 +87,7 @@ int MMG5_kPartBoxCompute(SCOTCH_Graph *graf, int vertNbr, int boxVertNbr,
   }
 
 
-  if ( SCOTCH_6 ) {
+  if ( SCOTCH_6 || SCOTCH_7 ) {
     // Looking for the max value in sortPartTb and computing sortPartTb as
     // followed :
     //  - sortPartTb[2i] is the box value
@@ -237,7 +237,7 @@ int MMG5_scotchCall(MMG5_pMesh mesh, MMG5_pSol met,
   /*check enough vertex to renum*/
   if ( mesh->info.renum && (mesh->np/2. > MMG5_BOXSIZE) ) {
 
-    if ( (SCOTCH_5 && SCOTCH_6 ) || ( (!SCOTCH_5) && (!SCOTCH_6) ) ) {
+    if ( (SCOTCH_5 && SCOTCH_6 && SCOTCH_7 ) || ( (!SCOTCH_5) && (!SCOTCH_6) && (!SCOTCH_7) ) ) {
       if ( !mmgWarn ) {
         fprintf(stderr,"\n  ## Warning: %s: fail to determine scotch version."
                 " No renumbering.\n",__func__);
