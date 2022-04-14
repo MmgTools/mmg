@@ -346,7 +346,7 @@ int MMG2D_snapval(MMG5_pMesh mesh, MMG5_pSol sol) {
   /* Reset point flags */
   for (k=1; k<=mesh->np; k++)
     mesh->point[k].flag = 0;
-
+  
   /* Snap values of sol that are close to 0 to 0 exactly */
   ns = nc = 0;
   for (k=1; k<=mesh->np; k++) {
@@ -376,7 +376,10 @@ int MMG2D_snapval(MMG5_pMesh mesh, MMG5_pSol sol) {
       /* Catch a snapped point by a triangle where there is a sign change */
       if ( p0->flag && !(MG_SMSGN(v1,v2)) ) {
         if ( !MMG2D_ismaniball(mesh,sol,k,i) ) {
-          sol->m[ip] = tmp[ip];
+          if ( tmp[ip] < 0.0 )
+            sol->m[ip] = -100.0*MMG5_EPS;
+          else
+            sol->m[ip] = 100.0*MMG5_EPS;
           nc++;
         }
         p0->flag = 0;
