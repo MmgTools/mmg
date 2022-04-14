@@ -98,8 +98,8 @@ int MMG2D_removeBBtriangles(MMG5_pMesh mesh) {
    in the supplied mesh: in = base ; out = -base ; undetermined = 0*/
 int MMG2D_settagtriangles(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTria        pt;
-  int               base,nd,iter,maxiter;
-  MMG5_int          k,ip1,ip2,ip3,ip4;
+  int               base,iter,maxiter;
+  MMG5_int          nd,k,ip1,ip2,ip3,ip4;
 
   /*BB vertex*/
   ip1=(mesh->np-3);
@@ -239,9 +239,9 @@ int MMG2D_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
     }
 
     if ( abs(mesh->info.imprim) > 4)
-      fprintf(stdout,"     %8d vertex inserted %8d not inserted\n",ns,nu+nud);
+      fprintf(stdout,"     %8" MMG5_PRId " vertex inserted %8" MMG5_PRId " not inserted\n",ns,nu+nud);
     if ( mesh->info.imprim >6 || mesh->info.ddebug )
-      fprintf(stdout,"     unable to insert %8d vertex : cavity %8d -- delaunay %8d \n",nu+nud,nu,nud);
+      fprintf(stdout,"     unable to insert %8" MMG5_PRId " vertex : cavity %8" MMG5_PRId " -- delaunay %8" MMG5_PRId " \n",nu+nud,nu,nud);
   } while (ns && ++iter<maxiter);
 
 	if(abs(nus-ns)) {

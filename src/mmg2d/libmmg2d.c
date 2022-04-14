@@ -763,8 +763,8 @@ int MMG2D_mmg2dls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
     fprintf(stdout,"\n  -- PHASE 1 : ISOSURFACE DISCRETIZATION\n");
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {
-    fprintf(stdout,"  MAXIMUM NUMBER OF POINTS    (NPMAX) : %8d\n",mesh->npmax);
-    fprintf(stdout,"  MAXIMUM NUMBER OF TRIANGLES (NTMAX) : %8d\n",mesh->ntmax);
+    fprintf(stdout,"  MAXIMUM NUMBER OF POINTS    (NPMAX) : %8" MMG5_PRId "\n",mesh->npmax);
+    fprintf(stdout,"  MAXIMUM NUMBER OF TRIANGLES (NTMAX) : %8" MMG5_PRId "\n",mesh->ntmax);
   }
 
   /* reset fem value to user setting (needed for multiple library call) */
@@ -1025,8 +1025,8 @@ int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   }
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug ) {
-    fprintf(stdout,"  MAXIMUM NUMBER OF POINTS    (NPMAX) : %8d\n",mesh->npmax);
-    fprintf(stdout,"  MAXIMUM NUMBER OF TRIANGLES (NTMAX) : %8d\n",mesh->ntmax);
+    fprintf(stdout,"  MAXIMUM NUMBER OF POINTS    (NPMAX) : %8" MMG5_PRId "\n",mesh->npmax);
+    fprintf(stdout,"  MAXIMUM NUMBER OF TRIANGLES (NTMAX) : %8" MMG5_PRId "\n",mesh->ntmax);
   }
 
   /* Analysis */
@@ -1072,7 +1072,7 @@ int MMG2D_mmg2dmov(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol disp) {
   }
   else if ( ier < 0 ) {
     printf("\n  ## Warning: Unable to perform any movement "
-           "(%" MMG5_PRId " intersecting triangles).\n",-ier);
+           "(%d intersecting triangles).\n",-ier);
     if ( mesh->info.imprim > 1 ) {
       printf("     List of invalid trias: ");
       for ( k=0; k<-ier; ++k ) {

@@ -94,14 +94,14 @@ int MMG2D_anatri(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
     nnsw += nsw;
 
     if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && ns+nc > 0 )
-      fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped\n",ns,nc,nsw);
+      fprintf(stdout,"     %8" MMG5_PRId " splitted, %8" MMG5_PRId " collapsed, %8" MMG5_PRId " swapped\n",ns,nc,nsw);
     if ( it > 3 && abs(nc-ns) < 0.1 * MG_MAX(nc,ns) )  break;
   }
   while ( ++it < maxit && ns+nc+nsw >0 );
 
   if ( mesh->info.imprim > 0 ) {
     if ( (abs(mesh->info.imprim) < 5 || mesh->info.ddebug ) && nns+nnc > 0 )
-      fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %" MMG5_PRId " iter.\n",nns,nnc,nnsw,it);
+      fprintf(stdout,"     %8" MMG5_PRId " splitted, %8" MMG5_PRId " collapsed, %8" MMG5_PRId " swapped, %d iter.\n",nns,nnc,nnsw,it);
   }
   return 1;
 }
@@ -112,8 +112,8 @@ MMG5_int MMG2D_anaelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
   MMG5_pPoint     ppt,p1,p2;
   MMG5_Hash       hash;
   double          len,s,o[2],no[2];
-  int             ni,it;
-  MMG5_int        npinit,ns,nc,k,nt,ip1,ip2,ip,vx[3];
+  int             it;
+  MMG5_int        ni,npinit,ns,nc,k,nt,ip1,ip2,ip,vx[3];
   int8_t          i,ic,i1,i2,ier;
   static int8_t   mmgWarn0=0;
 
@@ -340,7 +340,7 @@ MMG5_int MMG2D_anaelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
     if ( !ier ) return -1;
   }
   if ( (mesh->info.ddebug || abs(mesh->info.imprim) > 5) && ns > 0 )
-    fprintf(stdout,"     %7d splitted\n",ns);
+    fprintf(stdout,"     %7" MMG5_PRId " splitted\n",ns);
   MMG5_DEL_MEM(mesh,hash.item);
 
   return ns;
@@ -504,7 +504,7 @@ MMG5_int MMG2D_colelt(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
   }
 
   if ( nc > 0 && (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) )
-    fprintf(stdout,"     %8d vertices removed\n",nc);
+    fprintf(stdout,"     %8" MMG5_PRId " vertices removed\n",nc);
 
   return nc;
 }
@@ -539,7 +539,7 @@ MMG5_int MMG2D_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,int typchk) {
   }
   while ( ns > 0 && ++it<maxit );
   if ( (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) && nns > 0 )
-    fprintf(stdout,"     %8d edge swapped\n",nns);
+    fprintf(stdout,"     %8" MMG5_PRId " edge swapped\n",nns);
   return nns;
 }
 
@@ -603,7 +603,7 @@ int MMG2D_adptri(MMG5_pMesh mesh,MMG5_pSol met) {
     nnm  += nm;
 
     if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && ns+nc+nsw+nm > 0 )
-      fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %8d moved\n",ns,nc,nsw,nm);
+      fprintf(stdout,"     %8" MMG5_PRId " splitted, %8" MMG5_PRId " collapsed, %8" MMG5_PRId " swapped, %8" MMG5_PRId " moved\n",ns,nc,nsw,nm);
     if ( ns < 10 && abs(nc-ns) < 3 )  break;
     else if ( it > 3 && abs(nc-ns) < 0.3 * MG_MAX(nc,ns) )  break;
   }
@@ -621,7 +621,7 @@ int MMG2D_adptri(MMG5_pMesh mesh,MMG5_pSol met) {
   }
   if ( mesh->info.imprim > 0 ) {
     if ( abs(mesh->info.imprim) < 5 && (nnc > 0 || nns > 0) )
-      fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %8d moved, %" MMG5_PRId " iter. \n",nns,nnc,nnsw,nnm,it);
+      fprintf(stdout,"     %8" MMG5_PRId " splitted, %8" MMG5_PRId " collapsed, %8" MMG5_PRId " swapped, %8" MMG5_PRId " moved, %d iter. \n",nns,nnc,nnsw,nnm,it);
   }
   return 1;
 }
@@ -796,12 +796,12 @@ MMG5_int MMG2D_movtri(MMG5_pMesh mesh,MMG5_pSol met,int maxit,int8_t improve) {
       }
     }
     nnm += nm;
-    if ( mesh->info.ddebug )  fprintf(stdout,"     %8d moved, %" MMG5_PRId " geometry\n",nm,ns);
+    if ( mesh->info.ddebug )  fprintf(stdout,"     %8" MMG5_PRId " moved, %" MMG5_PRId " geometry\n",nm,ns);
   }
   while ( ++it < maxit && nm > 0 );
 
   if ( (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) && nnm > 0 )
-    fprintf(stdout,"     %8d vertices moved, %" MMG5_PRId " iter.\n",nnm,it);
+    fprintf(stdout,"     %8" MMG5_PRId " vertices moved, %d iter.\n",nnm,it);
 
   return nnm;
 }

@@ -94,7 +94,7 @@ int lissmet_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
         if ( !mmgWarn ) {
           mmgWarn = 1;
           fprintf(stderr,"\n  ## Warning: %s: unable to hash at least one edge"
-                  " (tria %" MMG5_PRId ", edge %" MMG5_PRId ").\n",__func__,MMG2D_indElt(mesh,k),i);
+                  " (tria %" MMG5_PRId ", edge %d).\n",__func__,MMG2D_indElt(mesh,k),i);
         }
       }
     }
@@ -198,7 +198,7 @@ int lissmet_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_SAFE_FREE(edgeTable.item);
 
   if ( abs(mesh->info.imprim) > 3 && ncor ) {
-    fprintf(stdout,"     gradation: %7d updated, %" MMG5_PRId " iter.\n",ncor,itour);
+    fprintf(stdout,"     gradation: %7" MMG5_PRId " updated, %d iter.\n",ncor,itour);
   }
 
   return 1;

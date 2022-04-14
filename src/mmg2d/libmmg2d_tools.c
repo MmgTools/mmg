@@ -66,7 +66,8 @@ void MMG2D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
  *
  */
 int MMG2D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
-  int        ret,ref,i,j,npar;
+  int        ret,i,j,npar;
+  MMG5_int   ref;
   float      fp1,fp2,fp3;
   char       *ptr,data[256];
   FILE       *in;
@@ -97,10 +98,10 @@ int MMG2D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
 
     /* Read user-defined references for the LS mode */
     if ( !strcmp(data,"lsreferences") ) {
-      ret = fscanf(in,"%" MMG5_PRId "",&mesh->info.nmat);
+      ret = fscanf(in,"%d",&mesh->info.nmat);
 
       if ( !ret ) {
-        fprintf(stderr,"  %%%% Wrong format for lsreferences: %" MMG5_PRId "\n",mesh->info.nmat);
+        fprintf(stderr,"  %%%% Wrong format for lsreferences: %d\n",mesh->info.nmat);
         return (0);
       }
 
@@ -128,14 +129,14 @@ int MMG2D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
     }
     /* Read user-defined local parameters and store them in the structure info->par */
     else if ( !strcmp(data,"parameters") ) {
-      ret = fscanf(in,"%" MMG5_PRId "",&npar);
+      ret = fscanf(in,"%d",&npar);
 
       if ( !ret ) {
-        fprintf(stderr,"  %%%% Wrong format for parameters: %" MMG5_PRId "\n",npar);
+        fprintf(stderr,"  %%%% Wrong format for parameters: %d\n",npar);
         return 0;
       }
       else if ( npar > MMG2D_LPARMAX ) {
-        fprintf(stderr,"  %%%% Too many local parameters %" MMG5_PRId ". Abort\n",npar);
+        fprintf(stderr,"  %%%% Too many local parameters %d. Abort\n",npar);
         return 0;
       }
 
