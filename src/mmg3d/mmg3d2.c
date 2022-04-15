@@ -721,22 +721,26 @@ static int MMG3D_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   do {
     nc = 0;
-  /* Check snapping did not lead to a nonmanifold situation */
-  for (k=1; k<=mesh->ne; k++) {
-    pt = &mesh->tetra[k];
-    if ( !MG_EOK(pt) ) continue;
-    for (i=0; i<4; i++) {
-      ip = pt->v[i];
-      p0 = &mesh->point[ip];
+    /* Check snapping did not lead to a nonmanifold situation */
+    for (k=1; k<=mesh->ne; k++) {
+      pt = &mesh->tetra[k];
+      if ( !MG_EOK(pt) ) continue;
+      for (i=0; i<4; i++) {
+        ip = pt->v[i];
+        p0 = &mesh->point[ip];
         if ( p0->flag == 1 ) {
-        if ( !MMG5_ismaniball(mesh,sol,k,i) ) {
-          sol->m[ip] = tmp[ip];
+          if ( !MMG5_ismaniball(mesh,sol,k,i) ) {
+            if ( tmp[ip] < 0.0 )
+              sol->m[ip] = -100.0*MMG5_EPS;
+            else
+              sol->m[ip] = 100.0*MMG5_EPS;
+
             p0->flag = 0;
-          nc++;
+            nc++;
+          }
         }
       }
     }
-  }
   }
   while ( nc );
 
