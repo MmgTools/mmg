@@ -463,6 +463,14 @@ ADD_TEST(NAME mmg2d_LSMultiMat_val
   ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat
   ${CTEST_OUTPUT_DIR}/mmg2d_multi-mat-val.o.meshb
   )
+
+ADD_TEST(NAME mmg2d_OptLs_Bridge
+  COMMAND ${EXECUT_MMG2D} -v 5 -ls
+  -sol ${MMG2D_CI_TESTS}/OptLs_bridge/bridge.sol
+  ${MMG2D_CI_TESTS}/OptLs_bridge/bridge
+  ${CTEST_OUTPUT_DIR}/mmg2d_OptLs_bridge.o.meshb
+  )
+
 #multi-mat + opnbdy + non-manifold check
 ADD_TEST(NAME mmg2d_LSMultiMat_nm
   COMMAND ${EXECUT_MMG2D} -v 5 -ls 3 -opnbdy -nr
