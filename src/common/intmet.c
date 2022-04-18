@@ -499,8 +499,8 @@ int MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,int8_t i,
                         double s,double mr[6]) {
   MMG5_pPoint    p1,p2;
   MMG5_Bezier    b;
-  double         b1[3],b2[3],bn[3],c[3],nt[3],cold[3],nold[3],n[3];
-  double         m1old[6],m2old[6],m1[6],m2[6],rbasis[3][3];
+  double         b1[3],b2[3],bn[3],c[3]={0},nt[3]={0},cold[3],nold[3],n[3]={0};
+  double         m1old[6],m2old[6],m1[6]={0},m2[6]={0},rbasis[3][3];
   double         *n1,*n2,step,u,r[3][3],dd,ddbn;
   int            ip1,ip2,nstep,l;
   int8_t         i1,i2;
