@@ -504,7 +504,7 @@ int MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,int8_t i,
   double         *n1,*n2,step,u,r[3][3],dd,ddbn;
   int            ip1,ip2,nstep,l;
   int8_t         i1,i2;
-  static int     warn=0;
+  static int     warn=0,warnnorm=0;
 
   /* Number of steps for parallel transport */
   nstep = 4;
@@ -590,8 +590,19 @@ int MMG5_interpreg_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt,int8_t i,
     memcpy(m2,&met->m[6*ip2],6*sizeof(double));
 
     /* In this pathological case, n is empty */
-    if ( MG_SIN(p1->tag) || (p1->tag & MG_NOM))
+    if ( MG_SIN(p1->tag) || (p1->tag & MG_NOM) ) {
       memcpy(n,n2,3*sizeof(double));
+      assert( MMG5_EPSD < (n2[0]*n2[0]+n2[1]*n2[1]+n2[2]*n2[2]) && "normal at p2 is 0" );
+    }
+    else if (ddbn < MMG5_EPSD) {
+      /* Other case where n is empty: bezier normal is 0 */
+      if ( !warnnorm ) {
+        fprintf(stderr,"  ## Warning: %s: %d: unexpected case (null normal),"
+                " impossible interpolation.\n",__func__,__LINE__);
+        warnnorm = 1;
+      }
+      return 0;
+    }
   }
   else {
     if ( p2->tag & MG_GEO ) {
