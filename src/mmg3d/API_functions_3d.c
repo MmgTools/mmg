@@ -178,19 +178,19 @@ int MMG3D_Set_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol *sol,int nsols,
     psl->ver = 2;
 
     /* Give an arbitrary name to the solution */
-    sprintf(data,"sol_%" MMG5_PRId "",j);
+    sprintf(data,"sol_%d",j);
     if ( !MMG3D_Set_inputSolName(mesh,psl,data) ) {
       return 0;
     }
     /* Give an arbitrary name to the solution */
-    sprintf(data,"sol_%" MMG5_PRId ".o",j);
+    sprintf(data,"sol_%d.o",j);
     if ( !MMG3D_Set_outputSolName(mesh,psl,data) ) {
       return 0;
     }
 
     if ( !MMG3D_Set_solSize(mesh,psl,MMG5_Vertex,mesh->np,typSol[j]) ) {
       fprintf(stderr,"\n  ## Error: %s: unable to set the size of the"
-              " solution num %" MMG5_PRId ".\n",__func__,j);
+              " solution num %d.\n",__func__,j);
       return 0;
     }
   }
@@ -267,7 +267,7 @@ int MMG3D_Set_meshSize(MMG5_pMesh mesh, MMG5_int np, MMG5_int ne, MMG5_int npris
     if((mesh->npmax < mesh->np || mesh->ntmax < mesh->nt || mesh->nemax < mesh->ne)) {
       if ( !MMG3D_memOption(mesh) )  return 0;
     } else if(mesh->info.mem < 39) {
-      fprintf(stderr,"\n  ## Error: %s: not enough memory  %" MMG5_PRId "\n",__func__,
+      fprintf(stderr,"\n  ## Error: %s: not enough memory  %d\n",__func__,
               mesh->info.mem);
       return 0;
     }
@@ -1177,7 +1177,7 @@ int MMG3D_Set_edges(MMG5_pMesh mesh, MMG5_int *edges, int *refs) {
     mesh->edge[i].a    = edges[j];
     mesh->edge[i].b    = edges[j+1];
     if ( refs != NULL )
-      mesh->edge[i].ref  = refs[i];
+      mesh->edge[i].ref  = refs[i-1];
     mesh->edge[i].tag |= MG_REF;
   }
 
@@ -1926,21 +1926,21 @@ int MMG3D_skipIso(MMG5_pMesh mesh) {
   MMG5_int    k;
 
   if ( (mesh->info.imprim > 5) || mesh->info.ddebug )
-    fprintf(stderr,"\n  ## Warning: %s: skip of all entites with %" MMG5_PRId " reference.\n",
-            __func__,MG_ISO);
+    fprintf(stderr,"\n  ## Warning: %s: skip of all entites with %d reference.\n",
+            __func__,mesh->info.isoref);
 
-  /* Skip triangles with MG_ISO refs */
+  /* Skip triangles with mesh->info.isoref refs */
   k = 1;
   do {
     ptt = &mesh->tria[k];
-    if ( abs(ptt->ref) != MG_ISO ) continue;
+    if ( abs(ptt->ref) != mesh->info.isoref ) continue;
     /* here ptt is the first tri of mesh->tria that we want to delete */
     do {
       ptt1 = &mesh->tria[mesh->nti];
     }
-    while( (abs(ptt1->ref) == MG_ISO) && (k <= --mesh->nti) );
+    while( (abs(ptt1->ref) == mesh->info.isoref) && (k <= --mesh->nti) );
 
-    if ( abs(ptt1->ref) != MG_ISO )
+    if ( abs(ptt1->ref) != mesh->info.isoref )
       /* ptt1 is the last tri of mesh->tria that we want to keep */
       memcpy(ptt,ptt1,sizeof(MMG5_Tria));
   } while( ++k <= mesh->nti );
@@ -1956,12 +1956,12 @@ int MMG3D_skipIso(MMG5_pMesh mesh) {
     mesh->nt = mesh->nti;
   }
 
-  /* Skip edges with MG_ISO refs */
+  /* Skip edges with mesh->info.isoref refs */
   if ( mesh->na ) {
     k = 1;
     do {
       pa = &mesh->edge[k];
-      if ( abs(pa->ref) != MG_ISO ) {
+      if ( abs(pa->ref) != mesh->info.isoref ) {
         pa->ref = abs(pa->ref);
         continue;
       }
@@ -1969,9 +1969,9 @@ int MMG3D_skipIso(MMG5_pMesh mesh) {
       do {
         pa1 = &mesh->edge[mesh->nai];
       }
-      while( (abs(pa1->ref) == MG_ISO) && (k <= --mesh->nai) );
+      while( (abs(pa1->ref) == mesh->info.isoref) && (k <= --mesh->nai) );
 
-      if ( abs(pa1->ref) != MG_ISO ) {
+      if ( abs(pa1->ref) != mesh->info.isoref ) {
         /* pa1 is the last edge of mesh->edge that we want to keep */
         memcpy(pa,pa1,sizeof(MMG5_Edge));
         pa1->ref = abs(pa1->ref);
@@ -1998,12 +1998,12 @@ int MMG3D_skipIso(MMG5_pMesh mesh) {
   return 1;
 }
 
-int MMG3D_Add_tetrahedron(MMG5_pMesh mesh, MMG5_int v0, MMG5_int v1, MMG5_int v2, MMG5_int v3, int ref) {
+int MMG3D_Add_tetrahedron(MMG5_pMesh mesh, MMG5_int v0, MMG5_int v1, MMG5_int v2, MMG5_int v3, MMG5_int ref) {
   MMG5_pTetra pt;
   MMG5_pPoint ppt;
   double      vol;
-  int         j,ip,iel;
-  MMG5_int    aux,vv[4];
+  int         j,ip;
+  MMG5_int    aux,vv[4],iel;
 
   vv[0] = v0;
   vv[1] = v1;
@@ -2072,7 +2072,7 @@ int MMG3D_Add_tetrahedron(MMG5_pMesh mesh, MMG5_int v0, MMG5_int v1, MMG5_int v2
   return iel;
 }
 
-MMG5_int MMG3D_Add_vertex(MMG5_pMesh mesh,double c0,double c1,double c2,int ref) {
+MMG5_int MMG3D_Add_vertex(MMG5_pMesh mesh,double c0,double c1,double c2,MMG5_int ref) {
   double      c[3];
   MMG5_int    ip,klink;
 
@@ -2158,6 +2158,9 @@ int MMG3D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam,int val){
     if ( mesh->info.iso )
       if ( mesh->nt && !MMG3D_skipIso(mesh) )
         return 0;
+    break;
+  case MMG3D_IPARAM_isoref :
+    mesh->info.isoref   = val;
     break;
   case MMG3D_IPARAM_lag :
 #ifdef USE_ELAS
@@ -2363,14 +2366,14 @@ int MMG3D_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val)
     break;
   case MMG3D_DPARAM_hgrad :
     mesh->info.hgrad    = val;
-    if ( mesh->info.hgrad < 0.0 )
+    if ( mesh->info.hgrad <= 0.0 )
       mesh->info.hgrad = -1.0;
     else
       mesh->info.hgrad = log(mesh->info.hgrad);
     break;
   case MMG3D_DPARAM_hgradreq :
     mesh->info.hgradreq    = val;
-    if ( mesh->info.hgradreq < 0.0 )
+    if ( mesh->info.hgradreq <= 0.0 )
       mesh->info.hgradreq = -1.0;
     else
       mesh->info.hgradreq = log(mesh->info.hgradreq);
@@ -2404,7 +2407,7 @@ int MMG3D_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val)
   return 1;
 }
 
-int MMG3D_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref,
+int MMG3D_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, MMG5_int ref,
                              double hmin,double hmax,double hausd){
   MMG5_pPar par;
   int k;
@@ -2419,14 +2422,14 @@ int MMG3D_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref,
   if ( mesh->info.npari >= mesh->info.npar ) {
     fprintf(stderr,"\n  ## Error: %s: unable to set a new local parameter.\n",
             __func__);
-    fprintf(stderr,"    max number of local parameters: %" MMG5_PRId "\n",mesh->info.npar);
+    fprintf(stderr,"    max number of local parameters: %d\n",mesh->info.npar);
     return 0;
   }
   if ( typ != MMG5_Triangle && typ != MMG5_Tetrahedron ) {
     fprintf(stderr,"\n  ## Warning: %s: you must apply your local parameters",
             __func__);
-    fprintf(stderr," on triangles (MMG5_Triangle or %" MMG5_PRId ") or tetrahedron"
-            " (MMG5_Tetrahedron or %" MMG5_PRId ").\n",MMG5_Triangle,MMG5_Tetrahedron);
+    fprintf(stderr," on triangles (MMG5_Triangle or %d) or tetrahedron"
+            " (MMG5_Tetrahedron or %d).\n",MMG5_Triangle,MMG5_Tetrahedron);
     fprintf(stderr,"\n  ## Unknown type of entity: ignored.\n");
     return 0;
   }
@@ -2446,7 +2449,7 @@ int MMG3D_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref,
       if ( (mesh->info.imprim > 5) || mesh->info.ddebug ) {
         fprintf(stderr,"\n  ## Warning: %s: new parameters (hausd, hmin and hmax)",
                 __func__);
-        fprintf(stderr," for entities of type %" MMG5_PRId " and of ref %" MMG5_PRId "\n",typ,ref);
+        fprintf(stderr," for entities of type %d and of ref %" MMG5_PRId "\n",typ,ref);
       }
       return 1;
     }
@@ -2477,7 +2480,7 @@ int MMG3D_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, int ref,
   return 1;
 }
 
-int MMG3D_Set_multiMat(MMG5_pMesh mesh,MMG5_pSol sol,int ref,int split,int rin,int rout) {
+int MMG3D_Set_multiMat(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int ref,int split,MMG5_int rin,MMG5_int rout) {
   return MMG5_Set_multiMat(mesh,sol,ref,split,rin,rout);
 }
 

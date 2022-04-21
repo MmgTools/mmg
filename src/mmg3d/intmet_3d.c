@@ -279,11 +279,11 @@ int MMG5_intvolmet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t i,double s,
   ier = MMG5_intregvolmet(m1,m2,mr,s);
   if ( mesh->info.ddebug && ( (!ier) || (fabs(mr[5]) < 1e-6) ) ) {
     fprintf(stderr,"  ## Error: %s:\n",__func__);
-    fprintf(stderr,"            pp1 : %" MMG5_PRId " %" MMG5_PRId " \n",
+    fprintf(stderr,"            pp1 : %d %d \n",
             MG_SIN(pp1->tag) || (MG_NOM & pp1->tag),pp1->tag & MG_GEO);
     fprintf(stderr,"            m1 %e %e %e %e %e %e\n",
             m1[0],m1[1],m1[2],m1[3],m1[4],m1[5]);
-    fprintf(stderr,"            pp2 : %" MMG5_PRId " %" MMG5_PRId " \n",
+    fprintf(stderr,"            pp2 : %d %d \n",
             MG_SIN(pp2->tag) || (MG_NOM & pp2->tag),pp2->tag & MG_GEO);
     fprintf(stderr,"            m2 %e %e %e %e %e %e\n",
             m2[0],m2[1],m2[2],m2[3],m2[4],m2[5]);

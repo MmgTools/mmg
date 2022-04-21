@@ -474,7 +474,7 @@ static int movtri(MMG5_pMesh mesh,MMG5_pSol met,int maxit) {
   while ( ++it < maxit && nm > 0);
 
   if ( (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) && nnm > 0 )
-    fprintf(stdout,"     %8" MMG5_PRId " vertices moved, %" MMG5_PRId " iter.\n",nnm,it);
+    fprintf(stdout,"     %8" MMG5_PRId " vertices moved, %d iter.\n",nnm,it);
 
   return nnm;
 }
@@ -1312,12 +1312,12 @@ static int adptri(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int* permNodGlob) {
   else  nm = 0;
   nnm += nm;
   if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && nm > 0 ) {
-    fprintf(stdout,"                                                              %8d moved\n",nm);
+    fprintf(stdout,"                                                              %8" MMG5_PRId " moved\n",nm);
   }
 
   if ( mesh->info.imprim > 0 ) {
     if ( abs(mesh->info.imprim) < 5 && (nnc > 0 || nns > 0) )
-      fprintf(stdout,"     %8" MMG5_PRId " splitted, %8" MMG5_PRId " collapsed, %8" MMG5_PRId " swapped, %8" MMG5_PRId " moved, %" MMG5_PRId " iter. \n",nns,nnc,nnf,nnm,it);
+      fprintf(stdout,"     %8" MMG5_PRId " splitted, %8" MMG5_PRId " collapsed, %8" MMG5_PRId " swapped, %8" MMG5_PRId " moved, %d iter. \n",nns,nnc,nnf,nnm,it);
   }
   return 1;
 }

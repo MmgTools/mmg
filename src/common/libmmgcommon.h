@@ -171,7 +171,7 @@ void MMG5_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met,double hsiz);
  *
  */
   int  MMG5_Set_multiMat(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_int ref,int split,
-                         int rin, int rex);
+                         MMG5_int rin, MMG5_int rex);
 
 
 /* deallocations */

@@ -63,6 +63,7 @@ enum MMGS_Param {
   MMGS_IPARAM_debug,             /*!< [1/0], Turn on/off debug mode */
   MMGS_IPARAM_angle,             /*!< [1/0], Turn on/off angle detection */
   MMGS_IPARAM_iso,               /*!< [1/0], Level-set meshing */
+  MMGS_IPARAM_isoref,            /*!< [0/n], Iso-surface boundary material reference */
   MMGS_IPARAM_keepRef,           /*!< [1/0], Preserve the initial domain references in level-set mode */
   MMGS_IPARAM_optim,             /*!< [1/0], Optimize mesh keeping its initial edge sizes */
   MMGS_IPARAM_noinsert,          /*!< [1/0], Avoid/allow point insertion */
@@ -878,13 +879,14 @@ int  MMGS_Set_dparameter(MMG5_pMesh mesh,MMG5_pSol sol, int dparam, double val);
  * \remark Fortran interface:
  * >   SUBROUTINE MMGS_SET_LOCALPARAMETER(mesh,sol,typ,ref,hmin,hmax,hausd,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol\n
- * >     INTEGER, INTENT(IN)           :: typ,ref\n
+ * >     INTEGER, INTENT(IN)           :: typ\n
+ * >     MMG5F_INT, INTENT(IN)         :: ref\n
  * >     REAL(KIND=8), INTENT(IN)      :: hmin,hmax,hausd\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
  */
-int  MMGS_Set_localParameter(MMG5_pMesh mesh, MMG5_pSol sol, int typ, int ref,
+int  MMGS_Set_localParameter(MMG5_pMesh mesh, MMG5_pSol sol, int typ, MMG5_int ref,
                              double hmin, double hmax, double hausd);
 
 /** recover datas */
@@ -1468,6 +1470,24 @@ int MMGS_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *file
  * \param filename name of file.
  * \return 0 if failed, 1 otherwise.
  *
+ * Read mesh data.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMGS_LOADGENERICMESH(mesh,sol,filename,strlen0,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
+ * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int MMGS_loadGenericMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param filename name of file.
+ * \return 0 if failed, 1 otherwise.
+ *
  * Save mesh data.
  *
  * \remark Fortran interface:
@@ -1628,6 +1648,25 @@ int MMGS_saveMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *file
  *
  */
   int MMGS_saveVtpMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param filename name of file.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Save mesh data in a file whose format depends on the filename extension.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMGS_SAVEGENERICMESH(mesh,sol,filename,strlen0,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
+ * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int MMGS_saveGenericMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.

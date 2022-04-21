@@ -59,10 +59,21 @@
 #define MMG5_STRONGFAILURE 2
 
 /**
- * Implicite domain ref in iso mode
+ * Implicit boundary in iso mode
  *
  */
 #define MG_ISO    10
+
+/**
+ * Default reference to assign to positive domain in iso mode
+ *
+ */
+#define MG_PLUS    2
+/**
+ * Default reference to assign to negative domain in iso mode
+ *
+ */
+#define MG_MINUS   3
 
 /**
  * \def MMG5_ARG_start
@@ -468,6 +479,17 @@ typedef struct {
 typedef MMG5_Mat * MMG5_pMat;
 
 /**
+ * \struct MMG5_InvMat
+ * \brief To store lookup table for references in the mesh (useful in LS mode)
+ */
+typedef struct {
+  int offset;
+  int size;
+  int *lookup;
+} MMG5_InvMat;
+typedef MMG5_InvMat * MMG5_pInvMat;
+
+/**
  * \struct MMG5_Info
  * \brief Store input parameters of the run.
  */
@@ -487,6 +509,7 @@ typedef struct {
   int8_t        ddebug; /*!< debug mode if 1 */
   int8_t        badkal; /*!< 1 if the mesh contains a very bad element */
   int8_t        iso; /*!< level-set discretization mode */
+  int           isoref; /*!< isovalue reference in ls mode */
   int8_t        setfem; /*!< Enforce finite element mesh (try to avoid edges
                       * connecting 2 bdy points and tet with more than 1 bdy
                       * face) */
@@ -500,6 +523,7 @@ typedef struct {
   uint8_t optim, optimLES, noinsert, noswap, nomove, nosurf, nosizreq;
   uint8_t metRidTyp; /*!< 0 for a classical storage of the aniso metric at ridge, 1 for the Mmg storage (modified by defsiz) */
   MMG5_pMat     mat;
+  MMG5_InvMat   invmat;
 } MMG5_Info;
 
 /**

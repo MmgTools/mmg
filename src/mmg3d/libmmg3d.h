@@ -89,6 +89,7 @@ enum MMG3D_Param {
   MMG3D_IPARAM_anisosize,                 /*!< [1/0], Turn on/off anisotropic metric creation when no metric is provided */
   MMG3D_IPARAM_octree,                    /*!< [n], Specify the max number of points per PROctree cell (DELAUNAY) */
   MMG3D_IPARAM_nosizreq,                  /*!< [0/1], Allow/avoid overwritten of sizes at required points (advanced usage) */
+  MMG3D_IPARAM_isoref,                    /*!< [0/n], Isosurface boundary material reference */
   MMG3D_DPARAM_angleDetection,            /*!< [val], Value for angle detection */
   MMG3D_DPARAM_hmin,                      /*!< [val], Minimal mesh size */
   MMG3D_DPARAM_hmax,                      /*!< [val], Maximal mesh size */
@@ -1200,14 +1201,15 @@ enum MMG3D_Param {
  * >   SUBROUTINE MMG3D_SET_LOCALPARAMETER(mesh,sol,typ,ref,& \n
  * >                                       hmin,hmax,hausd,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol\n
- * >     INTEGER, INTENT(IN)           :: typ,ref\n
+ * >     INTEGER, INTENT(IN)           :: typ\n
+ * >     MMG5F_INT, INTENT(IN)         :: ref\n
  * >     REAL(KIND=8), INTENT(IN)      :: hmin,hmax,hausd\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
  */
   int  MMG3D_Set_localParameter(MMG5_pMesh mesh, MMG5_pSol sol, int typ,
-                                int ref,double hmin,double hmax,double hausd);
+                                MMG5_int ref,double hmin,double hmax,double hausd);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1223,13 +1225,14 @@ enum MMG3D_Param {
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_SET_MULTIMAT(mesh,sol,ref,split,rin,rex,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol\n
- * >     INTEGER, INTENT(IN)           :: ref,split,rin,rex\n
+ * >     INTEGER, INTENT(IN)           :: split\n
+ * >     MMG5F_INT, INTENT(IN)         :: ref,rin,rex\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG3D_Set_multiMat(MMG5_pMesh mesh, MMG5_pSol sol,int ref,int split,
-                          int rin, int rex);
+  int  MMG3D_Set_multiMat(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_int ref,int split,
+                          MMG5_int rin, MMG5_int rex);
 
 /** recover datas */
 /**
@@ -1884,14 +1887,13 @@ enum MMG3D_Param {
  * \remark Fortran interface:
  * >   SUBROUTINE MMG3D_ADD_TETRAHEDRON(mesh,v0,v1,v2,v3,ref,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
- * >     MMG5F_INT, INTENT(IN)         :: v0,v1,v2,v3\n
- * >     INTEGER, INTENT(IN)           :: ref\n
+ * >     MMG5F_INT, INTENT(IN)         :: v0,v1,v2,v3,ref\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
  */
   int  MMG3D_Add_tetrahedron(MMG5_pMesh mesh, MMG5_int v0, MMG5_int v1,
-                             MMG5_int v2, MMG5_int v3, int ref);
+                             MMG5_int v2, MMG5_int v3, MMG5_int ref);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1910,19 +1912,21 @@ enum MMG3D_Param {
  * >   SUBROUTINE MMG3D_ADD_VERTEX(mesh,c0,c1,c2,ref,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
  * >     REAL(KIND=8), INTENT(IN)      :: c0,c1,c2\n
- * >     INTEGER, INTENT(IN)           :: ref\n
+ * >     MMG5F_INT, INTENT(IN)           :: ref\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
  */
   MMG5_int  MMG3D_Add_vertex(MMG5_pMesh mesh, double c0, double c1,
-                        double c2, int ref);
+                        double c2, MMG5_int ref);
 
 /* input/output functions */
 /**
  * \param mesh pointer toward the mesh structure.
  * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
+ *
+ * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
+ * format...), 1 if success.
  *
  * Read mesh data.
  *
@@ -1940,7 +1944,9 @@ enum MMG3D_Param {
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the solution structure.
  * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
+ *
+ * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
+ * format...), 1 if success.
  *
  * Read mesh and 0 or 1 data at MSH file format (.msh extension). We read only
  * low-order points, edges, tria, quadra, tetra and prisms.
@@ -1960,7 +1966,9 @@ enum MMG3D_Param {
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the solution structure.
  * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
+ *
+ * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
+ * format...), 1 if success.
  *
  * Read mesh and 0 or 1 data at VTU (VTK) file format (.vtu extension). We read
  * only low-order points, edges, tria, quadra, tetra and prisms. Point and cell
@@ -1981,7 +1989,9 @@ int MMG3D_loadVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the solution structure.
  * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
+ *
+ * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
+ * format...), 1 if success.
  *
  * Read mesh a list of data in VTU file format (.vtu extension). We read
  * only low-order points, edges, tria, quadra, tetra and prisms. Point and cell
@@ -2003,7 +2013,9 @@ int MMG3D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the solution structure.
  * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
+ *
+ * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
+ * format...), 1 if success.
  *
  * Read mesh and 0 or 1 data at VTK file format (.vtu extension). We read
  * only low-order points, edges, tria, quadra, tetra and prisms. Point and cell
@@ -2024,7 +2036,9 @@ int MMG3D_loadVtkMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the solution structure.
  * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
+ *
+ * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
+ * format...), 1 if success.
  *
  * Read mesh and a list of data in VTK file format (.vtu extension). We read
  * only low-order points, edges, tria, quadra, tetra and prisms. Point and cell
@@ -2046,7 +2060,9 @@ int MMG3D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward a list of solution structures.
  * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
+ *
+ * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
+ * format...), 1 if success.
  *
  * Read mesh and a list of data at MSH file format (.msh extension). We read only
  * low-order points, edges, tria, quadra, tetra and prisms.
@@ -2061,6 +2077,27 @@ int MMG3D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  *
  */
   int MMG3D_loadMshMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *filename);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param filename name of file.
+ *
+ * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
+ * format...), 1 if success.
+ *
+ * Read mesh data in a file whose format depends on the filename extension.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_LOADGENERICMESH(mesh,sol,filename,strlen0,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
+ * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int MMG3D_loadGenericMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \param filename pointer toward the name of file.
@@ -2213,9 +2250,29 @@ int MMG3D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
 
 /**
  * \param mesh pointer toward the mesh structure.
+ * \param filename name of file.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Save mesh data in a file whose format depends on the filename extension.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG3D_SAVEGENERICMESH(mesh,sol,filename,strlen0,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
+ * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int MMG3D_saveGenericMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+
+/**
+ * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the sol structure.
  * \param filename name of file.
- * \return -1 data invalid, 0 no file, 1 ok.
+ *
+ * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
+ * format...), 1 if success.
  *
  * Load metric field. The solution file must contains only 1 solution: the
  * metric
@@ -2234,7 +2291,9 @@ int MMG3D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the solutions array
  * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
+ *
+ * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
+ * format...), 1 if success.
  *
  * Load 1 or more solutions in a solution file at medit file format.
  *

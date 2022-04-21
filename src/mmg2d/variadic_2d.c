@@ -202,7 +202,7 @@ int MMG2D_Init_mesh_var( va_list argptr ) {
       break;
     default:
       fprintf(stderr,"\n  ## Error: %s: MMG2D_Init_mesh:\n"
-              " unexpected argument type: %" MMG5_PRId "\n",__func__,typArg);
+              " unexpected argument type: %d\n",__func__,typArg);
       fprintf(stderr," Argument type must be one of the following"
               " preprocessor variable: MMG5_ARG_ppMesh, MMG5_ARG_ppMet,"
               "  MMG5_ARG_ppLs, MMG5_ARG_ppDisp\n");
@@ -214,16 +214,6 @@ int MMG2D_Init_mesh_var( va_list argptr ) {
     fprintf(stderr,"\n  ## Error: %s: MMG2D_Init_mesh:\n"
             " you need to initialize the mesh structure that"
             " will contain your mesh.\n",__func__);
-    return 0;
-  }
-
-  if ( !(sol || ls || disp) ) {
-    fprintf(stderr,"\n  ## Error: %s: MMG2D_Init_mesh:\n"
-            " you need to initialize a solution structure"
-            " (of type MMG5_pSol and indentified by the MMG5_ARG_ppMet, "
-            " MMG5_ARG_ppLs or MMG5_ARG_ppDisp preprocessor variable)"
-            " that will contain the output mesh metric, level-set or"
-            " displacement.\n",__func__);
     return 0;
   }
 
@@ -303,7 +293,7 @@ int MMG2D_Free_all_var(va_list argptr)
       break;
     default:
       fprintf(stderr,"\n  ## Error: %s: MMG2D_Free_all:\n"
-              " unexpected argument type: %" MMG5_PRId "\n",__func__,typArg);
+              " unexpected argument type: %d\n",__func__,typArg);
       fprintf(stderr," Argument type must be one of the following"
               " preprocessor variable: MMG5_ARG_ppMesh or MMG5_ARG_ppMet\n");
       return 0;
@@ -408,7 +398,7 @@ int MMG2D_Free_structures_var(va_list argptr)
       break;
     default:
       fprintf(stderr,"\n  ## Error: %s: MMG2D_Free_structures:\n"
-              " unexpected argument type: %" MMG5_PRId "\n",__func__,typArg);
+              " unexpected argument type: %d\n",__func__,typArg);
       fprintf(stderr," Argument type must be one of the following"
               " preprocessor variable: MMG5_ARG_ppMesh or MMG5_ARG_ppMet\n");
       return 0;
@@ -522,7 +512,7 @@ int MMG2D_Free_names_var(va_list argptr)
       break;
     default:
       fprintf(stderr,"\n  ## Error: %s: MMG2D_Free_names:\n"
-              " unexpected argument type: %" MMG5_PRId "\n",__func__,typArg);
+              " unexpected argument type: %d\n",__func__,typArg);
       fprintf(stderr," Argument type must be one of the following"
               " preprocessor variable: MMG5_ARG_ppMesh or MMG5_ARG_ppMet\n");
       return 0;

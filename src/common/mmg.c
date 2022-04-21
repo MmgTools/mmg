@@ -171,11 +171,12 @@ void MMG5_mmgDefaultValues(MMG5_pMesh mesh) {
           "metric sizes otherwise.\n",mesh->info.hmax);
   fprintf(stdout,"Hausdorff distance        (-hausd)  : %lf\n",
           mesh->info.hausd);
+
   fprintf(stdout,"gradation control         (-hgrad)  : %lf\n",
-          exp(mesh->info.hgrad));
+          (mesh->info.hgrad < 0) ? mesh->info.hgrad : exp(mesh->info.hgrad) );
 
   fprintf(stdout,"gradation control for required entities (-hgradreq)  : %lf\n",
-          exp(mesh->info.hgradreq));
+          (mesh->info.hgradreq < 0) ? mesh->info.hgradreq : exp(mesh->info.hgradreq) );
 }
 
 /**

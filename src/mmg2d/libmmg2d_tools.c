@@ -57,6 +57,22 @@ void MMG2D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
 }
 
 /**
+ * \param mesh pointer toward the mesh structure.
+ * \return 0 if fail, 1 if success.
+ *
+ * Print the default parameters values.
+ *
+ */
+int MMG2D_defaultValues(MMG5_pMesh mesh) {
+
+  MMG5_mmgDefaultValues(mesh);
+
+  fprintf(stdout,"\n\n");
+
+  return 1;
+}
+
+/**
  * \param mesh pointer toward the mesh
  * \param met pointer toward the metric
  *
@@ -66,8 +82,8 @@ void MMG2D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
  *
  */
 int MMG2D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
-  int        ret,i,j,npar;
-  MMG5_int   ref;
+  int        ret,i,j,npar,split;
+  MMG5_int   ref,rin,rex;
   float      fp1,fp2,fp3;
   char       *ptr,data[256];
   FILE       *in;
@@ -98,32 +114,29 @@ int MMG2D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
 
     /* Read user-defined references for the LS mode */
     if ( !strcmp(data,"lsreferences") ) {
-      ret = fscanf(in,"%d",&mesh->info.nmat);
-
+      ret = fscanf(in,"%d",&npar);
       if ( !ret ) {
-        fprintf(stderr,"  %%%% Wrong format for lsreferences: %d\n",mesh->info.nmat);
+        fprintf(stderr,"  %%%% Wrong format for lsreferences: %d\n",npar);
         return (0);
       }
 
-      if ( mesh->info.nmat ) {
-        MMG5_ADD_MEM(mesh,(mesh->info.nmat)*sizeof(MMG5_Mat),"multi material params",return 0);
-        MMG5_SAFE_CALLOC(mesh->info.mat,mesh->info.nmat,MMG5_Mat,return 0);
-        for (i=0; i<mesh->info.nmat; i++) {
-          pm = &mesh->info.mat[i];
-          MMG_FSCANF(in,"%" MMG5_PRId "",&pm->ref);
-          fgetpos(in,&position);
-          MMG_FSCANF(in,"%255s",data);
-          if ( !strcmp(data,"nosplit") ) {
-            pm->dospl = 0;
-            pm->rin = pm->ref;
-            pm->rex = pm->ref;
-          }
-          else {
-            fsetpos(in,&position);
-            MMG_FSCANF(in,"%" MMG5_PRId "",&pm->rin);
-            MMG_FSCANF(in,"%" MMG5_PRId "",&pm->rex);
-            pm->dospl = 1;
-          }
+      if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_numberOfMat,npar) ) {
+        return 0;
+      }
+      for (i=0; i<mesh->info.nmat; i++) {
+        MMG_FSCANF(in,"%" MMG5_PRId "",&ref);
+        fgetpos(in,&position);
+        MMG_FSCANF(in,"%255s",data);
+        split = MMG5_MMAT_NoSplit;
+        rin = rex = ref;
+        if ( strcmp(data,"nosplit") ) {
+          fsetpos(in,&position);
+          split = MMG5_MMAT_Split;
+          MMG_FSCANF(in,"%" MMG5_PRId "",&rin);
+          MMG_FSCANF(in,"%" MMG5_PRId "",&rex);
+        }
+        if ( !MMG2D_Set_multiMat(mesh,met,ref,split,rin,rex) ) {
+          return 0;
         }
       }
     }

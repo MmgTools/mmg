@@ -357,6 +357,7 @@ int MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int *list,int ilist,
     pt  = &mesh->tetra[iel];
     memcpy(pt0,pt,sizeof(MMG5_Tetra));
     calold = MG_MIN(calold, pt->qual);
+    assert ( isfinite(calold) );
 
     ia1 = ia2 = ip = iq = -1;
     for (j=0; j< 4; j++) {
@@ -380,6 +381,18 @@ int MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int *list,int ilist,
     if ( caltmp < MMG5_NULKAL )  return 0;
 
     if ( !isshell ) {
+      /* Test that we don't recreate an existing elt */
+      int adj = mesh->adja[4*(iel-1)+1+ip];
+      if ( adj ) {
+        int8_t voy  = adj%4;
+        adj /= 4;
+
+        if ( mesh->tetra[adj].v[voy] == na1 ) {
+          return 0;
+        }
+      }
+
+      /* Test future quality */
       pt0->v[ip] = na1;
 
       if ( typchk==1 && met->size > 1 && met->m )
@@ -400,6 +413,18 @@ int MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int *list,int ilist,
     if ( caltmp < MMG5_NULKAL )  return 0;
 
     if ( !isshell ) {
+      /* Test that we don't recreate an existing elt */
+      int adj = mesh->adja[4*(iel-1)+1+iq];
+      if ( adj ) {
+        int8_t voy  = adj%4;
+        adj /= 4;
+
+        if ( mesh->tetra[adj].v[voy] == na1 ) {
+          return 0;
+        }
+      }
+
+      /* Test future quality */
       pt0->v[iq] = na1;
 
       if ( typchk==1 && met->size > 1 && met->m )
@@ -407,10 +432,13 @@ int MMG5_chkswpbdy(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int *list,int ilist,
       else
         caltmp = MMG5_orcal(mesh,met,0);
 
+      if ( caltmp < MMG5_NULKAL )  return 0;
+
       calnew = MG_MIN(calnew,caltmp);
     }
   }
-  if ( calold < MMG5_EPSOK && calnew <= calold )  return 0;
+  if ( calold < MMG5_EPSOK && calnew <= calold ) return 0;
+
   else if ( calnew < 0.3 * calold )  return 0;
 
   return 1;
@@ -543,6 +571,9 @@ int MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *list,int ret,MMG5_int it
     MMG3D_delPt(mesh,ier);
     ier = 1;
   }
+
+  /* Check for non convex situation */
+  assert ( ier && "Unable to collapse the point created during the boundary swap");
 
   return ier;
 }

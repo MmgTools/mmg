@@ -301,7 +301,7 @@ double MMG3D_vfrac(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int k,int pm) {
 /**
  * \param mesh pointer toward the mesh.
  *
- * Reset MG_ISO vertex and tetra references to 0.
+ * Reset mesh->info.isoref vertex and tetra references to 0.
  *
  * \warning to improve: for now, entities linked to the old ls (corners,required
  * points, normals/tangents, triangles and edges) are deleted in loadMesh. It
@@ -328,7 +328,7 @@ int MMG3D_resetRef(MMG5_pMesh mesh) {
       /* Reset triangles */
 
       /* Reset vertices */
-      if ( p0->ref == MG_ISO ) {
+      if ( p0->ref == mesh->info.isoref ) {
         p0->ref = 0;
         /* Reset tags */
         p0->tag &= ~MG_CRN;
@@ -343,7 +343,7 @@ int MMG3D_resetRef(MMG5_pMesh mesh) {
 
     if ( !MG_EOK(pt) ) continue;
 
-    ref = MMG5_getIniRef(mesh,pt->ref);
+    if( !MMG5_getStartRef(mesh,pt->ref,&ref) ) return 0;
     pt->ref = ref;
   }
 
@@ -744,7 +744,7 @@ static int MMG3D_snpval_ls(MMG5_pMesh mesh,MMG5_pSol sol) {
   while ( nc );
 
   if ( (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) && ns+nc > 0 )
-    fprintf(stdout,"     %8d points snapped, %" MMG5_PRId " corrected\n",ns,nc);
+    fprintf(stdout,"     %8" MMG5_PRId " points snapped, %" MMG5_PRId " corrected\n",ns,nc);
 
   /* Reset point flags */
   for (k=1; k<=mesh->np; k++)
@@ -771,8 +771,8 @@ int MMG3D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
   MMG5_pTetra    pt,pt1,pt2;
   MMG5_pxTetra   pxt;
   double         volc,voltot,v0,v1,v2,v3;
-  int            l,ncp,ncm,base,cur,ipile;
-  MMG5_int       k,kk,ll,ip0,ip1,ip2,ip3,*adja,*pile;
+  int            l,base,cur,ipile;
+  MMG5_int       ncp,ncm,k,kk,ll,ip0,ip1,ip2,ip3,*adja,*pile;
   int8_t         i,j,i1,onbr;
 
   ncp = 0;
@@ -1044,12 +1044,10 @@ static int MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
       v1  = sol->m[ip1]-mesh->info.ls;
       if ( fabs(v0) > MMG5_EPSD2 && fabs(v1) > MMG5_EPSD2 && v0*v1 < 0.0 ) {
         if ( !p0->flag ) {
-          p0->flag = nb;
-          nb++;
+          p0->flag = ++nb;
         }
         if ( !p1->flag ) {
-          p1->flag = nb;
-          nb++;
+          p1->flag = ++nb;
         }
       }
     }
@@ -1206,23 +1204,23 @@ static int MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
     }
     switch (pt->flag) {
     case 1: case 2: case 4: case 8: case 16: case 32: /* 1 edge split */
-      ier = MMG5_split1(mesh,sol,k,vx,1);
+      ier = MMG5_split1(mesh,met,k,vx,1);
       ns++;
       break;
 
     case 48: case 24: case 40: case 6: case 34: case 36:
     case 20: case 5: case 17: case 9: case 3: case 10: /* 2 edges (same face) split */
-      ier = MMG5_split2sf(mesh,sol,k,vx,1);
+      ier = MMG5_split2sf(mesh,met,k,vx,1);
       ns++;
       break;
 
     case 7: case 25: case 42: case 52: /* 3 edges on conic configuration splitted */
-      ier = MMG5_split3cone(mesh,sol,k,vx,1);
+      ier = MMG5_split3cone(mesh,met,k,vx,1);
       ns++;
       break;
 
     case 30: case 45: case 51:
-      ier = MMG5_split4op(mesh,sol,k,vx,1);
+      ier = MMG5_split4op(mesh,met,k,vx,1);
       ns++;
       break;
 
@@ -1233,7 +1231,7 @@ static int MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
     if ( !ier ) return 0;
   }
   if ( (mesh->info.ddebug || abs(mesh->info.imprim) > 5) && ns > 0 )
-    fprintf(stdout,"     %7d splitted\n",ns);
+    fprintf(stdout,"     %7" MMG5_PRId " splitted\n",ns);
 
   MMG5_DEL_MEM(mesh,hash.item);
   return ns;
@@ -1373,7 +1371,7 @@ int MMG3D_update_xtetra ( MMG5_pMesh mesh ) {
       }
 
       pxt = &mesh->xtetra[ptmax->xt];
-      pxt->ref[imax]   = MG_ISO;
+      pxt->ref[imax]   = mesh->info.isoref;
       pxt->ftag[imax] |= MG_BDY;
       MG_SET(pxt->ori,imax);
 
@@ -1390,7 +1388,7 @@ int MMG3D_update_xtetra ( MMG5_pMesh mesh ) {
       }
 
       pxt = &mesh->xtetra[ptmin->xt];
-      pxt->ref[imin]   = MG_ISO;
+      pxt->ref[imin]   = mesh->info.isoref;
       pxt->ftag[imin] |= MG_BDY;
       MG_CLR(pxt->ori,imin);
     }
@@ -1411,8 +1409,8 @@ int MMG3D_update_xtetra ( MMG5_pMesh mesh ) {
  */
 int MMG5_chkmaniball(MMG5_pMesh mesh, MMG5_int start, int8_t ip){
   MMG5_pTetra    pt,pt1;
-  int            ref,base,ilist,cur,nref;
-  MMG5_int       *adja,list[MMG3D_LMAX+2],k,k1,nump;
+  int            base,ilist,cur,nref;
+  MMG5_int       ref,*adja,list[MMG3D_LMAX+2],k,k1,nump;
   int8_t         i,l,j;
 
   base = ++mesh->base;
@@ -1442,8 +1440,9 @@ int MMG5_chkmaniball(MMG5_pMesh mesh, MMG5_int start, int8_t ip){
       if(!k1) continue;
       k1 /= 4;
       pt1 = &mesh->tetra[k1];
+      if( MMG5_isNotSplit(mesh,pt1->ref) ) continue;
 
-      if( pt1 ->ref != ref ) continue;
+      if( pt1->ref != ref ) continue;
 
       if( pt1->flag == base ) continue;
       pt1->flag = base;
@@ -1480,6 +1479,8 @@ int MMG5_chkmaniball(MMG5_pMesh mesh, MMG5_int start, int8_t ip){
       k1/=4;
 
       pt1 = &mesh->tetra[k1];
+      if( MMG5_isNotSplit(mesh,pt1->ref) ) continue;
+
       if(pt1->flag == base) continue;
       pt1->flag = base;
 
@@ -1502,8 +1503,10 @@ int MMG5_chkmaniball(MMG5_pMesh mesh, MMG5_int start, int8_t ip){
     k = list[cur] / 4;
     pt = &mesh->tetra[k];
     if( pt->ref == ref ) {
-      fprintf(stderr,"   *** Topological problem:");
-      fprintf(stderr," non manifold surface at point %" MMG5_PRId " \n",nump);
+      fprintf(stderr,"   *** Topological problem\n");
+      fprintf(stderr,"       non manifold surface at point %" MMG5_PRId " %" MMG5_PRId "\n",nump, MMG3D_indPt(mesh,nump));
+      fprintf(stderr,"       non manifold surface at tet %" MMG5_PRId " (ip %d)\n", MMG3D_indElt(mesh,start),ip);
+      fprintf(stderr,"       nref (color %d) %" MMG5_PRId "\n",nref,ref);
       return 0;
     }
   }
@@ -1560,7 +1563,7 @@ int MMG5_chkmani(MMG5_pMesh mesh){
       if(!adja[i]) continue;
       iel = adja[i] / 4;
       pt1 = &mesh->tetra[iel];
-      if(pt1->ref == pt->ref) continue;
+      if( !MMG5_isLevelSet(mesh,pt1->ref,pt->ref) ) continue;
 
       for(j=0; j<3; j++){
         ip = MMG5_idir[i][j];
@@ -2214,7 +2217,7 @@ int MMG3D_mmg3d2(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
     return 0;
   }
 
-  /* Reset the MG_ISO field everywhere it appears */
+  /* Reset the mesh->info.isoref field everywhere it appears */
   if ( !MMG3D_resetRef(mesh) ) {
     fprintf(stderr,"\n  ## Problem in resetting references. Exit program.\n");
     return 0;

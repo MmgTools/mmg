@@ -1334,6 +1334,9 @@ int MMGS_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
     if ( !mesh->info.iso )
       mesh->info.iso      = val;
     break;
+  case MMGS_IPARAM_isoref :
+      mesh->info.isoref   = val;
+    break;
   case MMGS_IPARAM_keepRef :
     if ( val )
       mesh->info.iso      = 2;
@@ -1469,14 +1472,14 @@ int MMGS_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val){
     break;
   case MMGS_DPARAM_hgrad :
     mesh->info.hgrad    = val;
-    if ( mesh->info.hgrad < 0.0 )
+    if ( mesh->info.hgrad <= 0.0 )
       mesh->info.hgrad = -1.0;
     else
       mesh->info.hgrad = log(mesh->info.hgrad);
     break;
   case MMGS_DPARAM_hgradreq :
     mesh->info.hgradreq    = val;
-    if ( mesh->info.hgradreq < 0.0 )
+    if ( mesh->info.hgradreq <= 0.0 )
       mesh->info.hgradreq = -1.0;
     else
       mesh->info.hgradreq = log(mesh->info.hgradreq);

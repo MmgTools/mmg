@@ -25,6 +25,7 @@
 #####         Download test cases for Mmg<x> code
 #####
 ###############################################################################
+OPTION ( CI_CONTEXT "Disable network test and download progress bar for CI runs" OFF)
 
 MACRO ( DOWNLOAD_TESTS x )
 
@@ -61,9 +62,15 @@ MACRO ( DOWNLOAD_TESTS x )
   # Get tests
   IF ( GET_MMG_TESTS MATCHES "TRUE" )
     MESSAGE("-- Mmg${x} test cases download. May take a while...")
-    FILE(DOWNLOAD https://static.bordeaux.inria.fr/mmg/mmg${x}.tgz
-      ${CI_DIR}/mmg${x}.tgz
-      SHOW_PROGRESS)
+
+    IF ( NOT ${CI_CONTEXT} )
+      FILE(DOWNLOAD https://static.bordeaux.inria.fr/mmg/mmg${x}.tgz
+        ${CI_DIR}/mmg${x}.tgz
+        SHOW_PROGRESS)
+    ELSE()
+      FILE(DOWNLOAD https://static.bordeaux.inria.fr/mmg/mmg${x}.tgz
+        ${CI_DIR}/mmg${x}.tgz)
+    ENDIF()
 
     IF ( NOT EXISTS ${CI_DIR}/mmg${x}.tgz )
       MESSAGE("\n")
@@ -97,20 +104,48 @@ ENDMACRO ( )
 #####         Download test cases depending on user options
 #####
 ###############################################################################
+SET ( NO_CONNECTION 0 )
 
-# Check if the ci_tests directory exists
-IF ( NOT EXISTS ${CI_DIR} )
+IF ( NOT ${CI_CONTEXT} )
+  if ( MSVC )
+    execute_process(
+      COMMAND ping www.mmgtools.org -n 2
+      OUTPUT_QUIET
+      ERROR_QUIET
+      RESULT_VARIABLE NO_CONNECTION
+      )
+  else ( )
+    execute_process(
+      COMMAND ping www.mmgtools.org -c 2
+      OUTPUT_QUIET
+      ERROR_QUIET
+      RESULT_VARIABLE NO_CONNECTION
+      )
+  endif ( )
+ENDIF()
 
-  # First download of the tests
-  MESSAGE("-- Creation of continuous integration directory: ${CI_DIR}")
-  FILE(MAKE_DIRECTORY ${CI_DIR})
+if ( NOT NO_CONNECTION EQUAL 0 )
+    set ( CONNECTED OFF )
+    message ( STATUS "Offline mode: requires already downloaded test cases")
+else()
+  set ( CONNECTED ON )
+endif()
 
+IF ( CONNECTED )
+  # Check if the ci_tests directory exists
+  IF ( NOT EXISTS ${CI_DIR} )
+
+    # First download of the tests
+    MESSAGE("-- Creation of continuous integration directory: ${CI_DIR}")
+    FILE(MAKE_DIRECTORY ${CI_DIR})
+
+  ENDIF ( )
+
+  #
+  # Download the tests if needed
+  ##--------------> mmg
+  DOWNLOAD_TESTS ( "2d" )
+  DOWNLOAD_TESTS ( "3d" )
+  DOWNLOAD_TESTS ( "s" )
+  DOWNLOAD_TESTS ( "" )
 ENDIF ( )
-
-#
-# Download the tests if needed
-##--------------> mmg
-DOWNLOAD_TESTS ( "2d" )
-DOWNLOAD_TESTS ( "3d" )
-DOWNLOAD_TESTS ( "s" )
-DOWNLOAD_TESTS ( "" )

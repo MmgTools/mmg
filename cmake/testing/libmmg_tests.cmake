@@ -69,3 +69,28 @@ FOREACH ( test_idx RANGE ${nbTests} )
   ADD_LIBRARY_TEST ( ${test_name} ${main_path} copy_mmg_headers ${lib_name} )
 
 ENDFOREACH ( )
+
+IF( MMG_CI )
+  # Add libmmg tests
+  SET(LIBMMG_EXEC0_a ${EXECUTABLE_OUTPUT_PATH}/libmmg_example0_a )
+  SET(LIBMMG_CPP_a   ${EXECUTABLE_OUTPUT_PATH}/libmmg_cpp_a )
+
+  ADD_TEST(NAME libmmg_example0_a   COMMAND ${LIBMMG_EXEC0_a}
+    ${PROJECT_SOURCE_DIR}/libexamples/mmg/adaptation_example0/init
+    ${PROJECT_SOURCE_DIR}/libexamples/mmg/adaptation_example0/cube
+    "${CTEST_OUTPUT_DIR}/libmmg_Adaptation_0.o")
+  ADD_TEST(NAME libmmg_cpp_a        COMMAND ${LIBMMG_CPP_a}
+    ${PROJECT_SOURCE_DIR}/libexamples/mmg/adaptation_example0_cpp/init
+    ${PROJECT_SOURCE_DIR}/libexamples/mmg/adaptation_example0_cpp/cube
+    "${CTEST_OUTPUT_DIR}/libmmg_Adaptation_0_cpp.o")
+
+  IF ( CMAKE_Fortran_COMPILER)
+    SET(LIBMMG_FORTRAN_a ${EXECUTABLE_OUTPUT_PATH}/libmmg_fortran_a)
+    ADD_TEST(NAME libmmg_fortran   COMMAND ${LIBMMG_FORTRAN_a}
+      ${PROJECT_SOURCE_DIR}/libexamples/mmg/adaptation_example0_fortran/init
+      ${PROJECT_SOURCE_DIR}/libexamples/mmg/adaptation_example0_fortran/cube
+      "${CTEST_OUTPUT_DIR}/libmmg_Adaptation_0_Fortran.o"
+      )
+  ENDIF()
+
+ENDIF( MMG_CI )

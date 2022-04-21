@@ -140,6 +140,44 @@ int MMG3D_findEdge(MMG5_pMesh mesh,MMG5_pTetra pt,MMG5_int k,MMG5_int na,MMG5_in
   return 0;
 }
 
+static inline
+void MMG3D_compute_tangent(MMG5_pMesh mesh,int nump,int ip0,int ip1,double t[3]) {
+  MMG5_pPoint ppt,p0,p1;
+  double      l0,l1,dd;
+  int8_t      i;
+
+  ppt = &mesh->point[nump];
+  p0 = &mesh->point[ip0];
+  p1 = &mesh->point[ip1];
+
+  l0 = (ppt->c[0] - p0->c[0])*(ppt->c[0] - p0->c[0]) \
+    + (ppt->c[1] - p0->c[1])*(ppt->c[1] - p0->c[1]) + (ppt->c[2] - p0->c[2])*(ppt->c[2] - p0->c[2]);
+  l1 = (ppt->c[0] - p1->c[0])*(ppt->c[0] - p1->c[0]) \
+    + (ppt->c[1] - p1->c[1])*(ppt->c[1] - p1->c[1]) + (ppt->c[2] - p1->c[2])*(ppt->c[2] - p1->c[2]);
+  l0 = sqrt(l0);
+  l1 = sqrt(l1);
+
+  if ( (l0 < MMG5_EPSD2) || (l1 < MMG5_EPSD2) ) {
+    for ( i=0; i<3; ++i ) {
+      t[i] = p1->c[i] - p0->c[i];
+    }
+  }
+  else if ( l0 < l1 ) {
+    dd = l0 / l1;
+    for ( i=0; i<3; ++i ) {
+      t[i] = dd*(p1->c[i] - ppt->c[i]) + ppt->c[i] - p0->c[i];
+    }
+  }
+  else {
+    dd = l1 / l0;
+    for ( i=0; i<3; ++i ) {
+      t[i] = dd*(p0->c[i] - ppt->c[i]) + ppt->c[i] - p1->c[i];
+    }
+  }
+
+  return;
+}
+
 /**
  * \param mesh pointer toward the mesh  structure.
  * \param start tetra index.
@@ -156,8 +194,7 @@ int MMG3D_findEdge(MMG5_pMesh mesh,MMG5_pTetra pt,MMG5_int k,MMG5_int na,MMG5_in
 int MMG5_boulenm(MMG5_pMesh mesh,MMG5_int start,int ip,int iface,
                   double n[3],double t[3]) {
   MMG5_pTetra   pt;
-  MMG5_pPoint   p0,p1,ppt;
-  double        dd,nt[3],l0,l1;
+  double        dd,nt[3];
   int           base,nr,nnm;
   MMG5_int      nump,k,*adja,piv,nvstart,aux,na,nb,adj,fstart,ip0,ip1;
   int16_t       tag;
@@ -265,34 +302,8 @@ int MMG5_boulenm(MMG5_pMesh mesh,MMG5_int start,int ip,int iface,
   assert( ip0 && ip1 );
   if ( ip0 == ip1 )  return 0;
 
-  p0 = &mesh->point[ip0];
-  p1 = &mesh->point[ip1];
-  ppt = &mesh->point[nump];
+  MMG3D_compute_tangent(mesh,nump,ip0,ip1,t);
 
-  l0 = (ppt->c[0] - p0->c[0])*(ppt->c[0] - p0->c[0]) \
-    + (ppt->c[1] - p0->c[1])*(ppt->c[1] - p0->c[1]) + (ppt->c[2] - p0->c[2])*(ppt->c[2] - p0->c[2]);
-  l1 = (ppt->c[0] - p1->c[0])*(ppt->c[0] - p1->c[0]) \
-    + (ppt->c[1] - p1->c[1])*(ppt->c[1] - p1->c[1]) + (ppt->c[2] - p1->c[2])*(ppt->c[2] - p1->c[2]);
-  l0 = sqrt(l0);
-  l1 = sqrt(l1);
-
-  if ( (l0 < MMG5_EPSD2) || (l1 < MMG5_EPSD2) ) {
-    t[0] = p1->c[0] - p0->c[0];
-    t[1] = p1->c[1] - p0->c[1];
-    t[2] = p1->c[2] - p0->c[2];
-  }
-  else if ( l0 < l1 ) {
-    dd = l0 / l1;
-    t[0] = dd*(p1->c[0] - ppt->c[0]) + ppt->c[0] - p0->c[0];
-    t[1] = dd*(p1->c[1] - ppt->c[1]) + ppt->c[1] - p0->c[1];
-    t[2] = dd*(p1->c[2] - ppt->c[2]) + ppt->c[2] - p0->c[2];
-  }
-  else {
-    dd = l1 / l0;
-    t[0] = dd*(p0->c[0] - ppt->c[0]) + ppt->c[0] - p1->c[0];
-    t[1] = dd*(p0->c[1] - ppt->c[1]) + ppt->c[1] - p1->c[1];
-    t[2] = dd*(p0->c[2] - ppt->c[2]) + ppt->c[2] - p1->c[2];
-  }
   dd = t[0]*n[0] + t[1]*n[1] + t[2]*n[2];
   t[0] -= dd*n[0];
   t[1] -= dd*n[1];
@@ -310,18 +321,22 @@ int MMG5_boulenm(MMG5_pMesh mesh,MMG5_int start,int ip,int iface,
 }
 
 /** 
-Travel the ball of the internal non manifold point ip in tetra start
- and calculate the tangent vector to the underlying curve.
- Return 1 when the procedure has completed successfully, 0 when more than two NOM points are attached to ip.
+ * \param mesh pointer toward the mesh  structure.
+ * \param start tetra index.
+ * \param ip point index.
+ * \param t computed tangent vector.
+ * \return 0 when more than two NOM points are attached to ip, 1 if sucess.
+ *
+ * Travel the ball of the internal non manifold point ip in tetra start
+ * and calculate the tangent vector to the underlying curve.
+ *
 */
 int MMG5_boulenmInt(MMG5_pMesh mesh,MMG5_int start,int ip,double t[3]) {
   MMG5_pTetra    pt,pt1;
   MMG5_pxTetra   pxt;
-  MMG5_pPoint    p0,p1,ppt;
-  double         l0,l1,dd;
+  double         dd;
+  MMG5_int       k,kk,ip0,ip1,nump,na,nb,list[MMG3D_LMAX+2],*adja;
   int            base,cur,ilist;
-  MMG5_int       kk,ip0,ip1,na,nb,k,*adja,nump;
-  MMG5_int       list[MMG3D_LMAX+2];
   int8_t         i,j,ii,ie;
   
   base = ++mesh->base;
@@ -397,34 +412,7 @@ int MMG5_boulenmInt(MMG5_pMesh mesh,MMG5_int start,int ip,double t[3]) {
   }
   
   /* At this point, the two points connected to ppt via the NOM curve are ip0 and ip1 */
-  ppt = &mesh->point[nump];
-  p0  = &mesh->point[ip0];
-  p1  = &mesh->point[ip1];
-  
-  l0 = (ppt->c[0] - p0->c[0])*(ppt->c[0] - p0->c[0]) \
-  + (ppt->c[1] - p0->c[1])*(ppt->c[1] - p0->c[1]) + (ppt->c[2] - p0->c[2])*(ppt->c[2] - p0->c[2]);
-  l1 = (ppt->c[0] - p1->c[0])*(ppt->c[0] - p1->c[0]) \
-  + (ppt->c[1] - p1->c[1])*(ppt->c[1] - p1->c[1]) + (ppt->c[2] - p1->c[2])*(ppt->c[2] - p1->c[2]);
-  l0 = sqrt(l0);
-  l1 = sqrt(l1);
-  
-  if ( (l0 < MMG5_EPSD2) || (l1 < MMG5_EPSD2) ) {
-    t[0] = p1->c[0] - p0->c[0];
-    t[1] = p1->c[1] - p0->c[1];
-    t[2] = p1->c[2] - p0->c[2];
-  }
-  else if ( l0 < l1 ) {
-    dd = l0 / l1;
-    t[0] = dd*(p1->c[0] - ppt->c[0]) + ppt->c[0] - p0->c[0];
-    t[1] = dd*(p1->c[1] - ppt->c[1]) + ppt->c[1] - p0->c[1];
-    t[2] = dd*(p1->c[2] - ppt->c[2]) + ppt->c[2] - p0->c[2];
-  }
-  else {
-    dd = l1 / l0;
-    t[0] = dd*(p0->c[0] - ppt->c[0]) + ppt->c[0] - p1->c[0];
-    t[1] = dd*(p0->c[1] - ppt->c[1]) + ppt->c[1] - p1->c[1];
-    t[2] = dd*(p0->c[2] - ppt->c[2]) + ppt->c[2] - p1->c[2];
-  }
+  MMG3D_compute_tangent(mesh,nump,ip0,ip1,t);
   
   dd = t[0]*t[0] + t[1]*t[1] + t[2]*t[2];
   if ( dd > MMG5_EPSD2 ) {
@@ -450,7 +438,7 @@ int MMG5_boulenmInt(MMG5_pMesh mesh,MMG5_int start,int ip,double t[3]) {
  * the vertex \a ip when ip is non-manifold.
  *
  */
-int MMG5_boulernm(MMG5_pMesh mesh,MMG5_Hash *hash,MMG5_int start,int ip,int *ng,int *nr){
+int MMG5_boulernm(MMG5_pMesh mesh,MMG5_Hash *hash,MMG5_int start,int ip,MMG5_int *ng,MMG5_int *nr){
   MMG5_pTetra    pt,pt1;
   MMG5_pxTetra   pxt;
   MMG5_hedge    *ph;
@@ -944,9 +932,9 @@ int MMG5_bouletrid(MMG5_pMesh mesh,MMG5_int start,int iface,int ip,int *il1,MMG5
   MMG5_pxTetra         pxt;
   MMG5_pPoint          ppt;
   MMG5_int             k,*adja,*list1,*list2,aux;
-  MMG5_int             lists[MMG3D_LMAX+2];
+  MMG5_int             na, nb, piv,lists[MMG3D_LMAX+2];
   int                  ilists, base, iopp, ipiv,*ilist1,*ilist2;
-  int                  idp,na, nb, piv, fstart, nvstart, adj;
+  int                  idp, fstart, nvstart, adj;
   int                  ifac,idx,idx2,idx_tmp,i1,isface;
   double               *n1,*n2,nt[3],ps1,ps2;
   int8_t               i;
@@ -1139,11 +1127,73 @@ int MMG5_bouletrid(MMG5_pMesh mesh,MMG5_int start,int iface,int ip,int *il1,MMG5
 }
 
 /**
+ * \param mesh pointer toward the mesh
+ * \param start tetra from which we start to travel
+ * \param na edge vertex
+ * \param nb edge vertex
+ * \param tag new edge tag
+ * \param edg new edge ref
+ * \param piv global index of the pivot to set the sense of travel
+ * \param adj index of adjacent tetra for the travel
+ *
+ * \return -1 if fail, \a start if shell has been completely travelled, 0 otherwise
+ *
+ * Set tag and ref of the edge \a na \a nb from tetra \a start by traveling
+ * its shell in one direction (given by the pivot \a piv).
+ *
+ */
+static inline
+int MMG3D_settag_oneDir(MMG5_pMesh  mesh,MMG5_int start, MMG5_int na, MMG5_int nb,
+                                     int16_t tag,int edg, MMG5_int piv,MMG5_int adj) {
+  MMG5_pTetra  pt;
+  MMG5_pxTetra pxt;
+  MMG5_int     *adja;
+  int16_t      taginit;
+  int8_t       i;
+
+  while ( adj && (adj != start) ) {
+    pt = &mesh->tetra[adj];
+
+    /* identification of edge number in tetra adj */
+    if ( !MMG3D_findEdge(mesh,pt,adj,na,nb,1,NULL,&i) ) {
+      return -1;
+    }
+
+    if ( pt->xt ) {
+      pxt = &mesh->xtetra[pt->xt];
+      if ( (pxt->ftag[MMG5_ifar[i][0]] & MG_BDY) ||
+           (pxt->ftag[MMG5_ifar[i][1]] & MG_BDY) ) {
+        taginit = pxt->tag[i];
+        pxt->tag[i] |= tag;
+        /* Remove the potential nosurf tag if initially the edge is
+         * really required */
+        if ( ((taginit & MG_REQ) && !(taginit & MG_NOSURF)) ||
+             ((    tag & MG_REQ) && !(    tag & MG_NOSURF)) ) {
+          pxt->tag[i] &= ~MG_NOSURF;
+        }
+        pxt->edg[i]  = MG_MAX(pxt->edg[i],edg);
+      }
+    }
+    /* set new triangle for travel */
+    adja = &mesh->adja[4*(adj-1)+1];
+    if ( pt->v[ MMG5_ifar[i][0] ] == piv ) {
+      adj = adja[ MMG5_ifar[i][0] ] / 4;
+      piv = pt->v[ MMG5_ifar[i][1] ];
+    }
+    else {
+      adj = adja[ MMG5_ifar[i][1] ] /4;
+      piv = pt->v[ MMG5_ifar[i][0] ];
+    }
+  }
+  return adj;
+}
+
+/**
  * \param mesh pointer toward the mesh structure
  * \param start tetra from which we start
  * \param ia local index of the edge in \a start
  * \param tag tag to set
- * \param edge edge reference to set
+ * \param edg edge reference to set
  *
  * \return 1 if success, 0 if fail.
  *
@@ -1156,7 +1206,6 @@ int MMG5_settag(MMG5_pMesh mesh,MMG5_int start,int ia,int16_t tag,int edg) {
   MMG5_pxTetra       pxt;
   MMG5_int           na,nb,*adja,adj,piv;
   int16_t            taginit;
-  int8_t             i;
 
   assert( start >= 1 );
   pt = &mesh->tetra[start];
@@ -1177,46 +1226,20 @@ int MMG5_settag(MMG5_pMesh mesh,MMG5_int start,int ia,int16_t tag,int edg) {
       pxt->tag[ia] |= tag;
       /* Remove the potential nosurf tag if initially the edge is
        * really required */
-      if ( (taginit & MG_REQ) && ( (!(taginit & MG_NOSURF)) || !(tag & MG_NOSURF) ) ) {
+      if ( ((taginit & MG_REQ) && !(taginit & MG_NOSURF)) ||
+           ((    tag & MG_REQ) && !(    tag & MG_NOSURF)) ) {
         pxt->tag[ia] &= ~MG_NOSURF;
       }
       pxt->edg[ia]  = MG_MAX(pxt->edg[ia],edg);
     }
   }
-  while ( adj && (adj != start) ) {
-    pt = &mesh->tetra[adj];
 
-    /* identification of edge number in tetra adj */
-    if ( !MMG3D_findEdge(mesh,pt,adj,na,nb,1,NULL,&i) ) return 0;
-
-    if ( pt->xt ) {
-      pxt = &mesh->xtetra[pt->xt];
-      if ( (pxt->ftag[MMG5_ifar[i][0]] & MG_BDY) ||
-           (pxt->ftag[MMG5_ifar[i][1]] & MG_BDY) ) {
-        taginit = pxt->tag[i];
-        pxt->tag[i] |= tag;
-        /* Remove the potential nosurf tag if initially the edge is
-         * really required */
-        if ( (taginit & MG_REQ) && ( (!(taginit & MG_NOSURF)) || !(tag & MG_NOSURF) ) ) {
-          pxt->tag[i] &= ~MG_NOSURF;
-        }
-        pxt->edg[i]  = MG_MAX(pxt->edg[i],edg);
-      }
-    }
-    /* set new triangle for travel */
-    adja = &mesh->adja[4*(adj-1)+1];
-    if ( pt->v[ MMG5_ifar[i][0] ] == piv ) {
-      adj = adja[ MMG5_ifar[i][0] ] / 4;
-      piv = pt->v[ MMG5_ifar[i][1] ];
-    }
-    else {
-      adj = adja[ MMG5_ifar[i][1] ] /4;
-      piv = pt->v[ MMG5_ifar[i][0] ];
-    }
-  }
+  adj = MMG3D_settag_oneDir(mesh,start,na,nb,tag,edg,piv,adj);
 
   /* If all shell has been travelled, stop, else, travel it the other sense */
   if ( adj == start )  return 1;
+  else if ( adj < 0 ) return 0;
+
   assert(!adj);
 
   pt = &mesh->tetra[start];
@@ -1224,24 +1247,49 @@ int MMG5_settag(MMG5_pMesh mesh,MMG5_int start,int ia,int16_t tag,int edg) {
   adj = adja[MMG5_ifar[ia][1]] / 4;
   piv = pt->v[MMG5_ifar[ia][0]];
 
+  adj = MMG3D_settag_oneDir(mesh,start,na,nb,tag,edg,piv,adj);
+
+  if ( adj < 0 ) return 0;
+
+  return 1;
+}
+
+/**
+ * \param mesh pointer toward the mesh
+ * \param start tetra from which we start to travel
+ * \param na edge vertex
+ * \param nb edge vertex
+ * \param tag new edge tag
+ * \param piv global index of the pivot to set the sense of travel
+ * \param adj index of adjacent tetra for the travel
+ *
+ * \return -1 if fail, \a start if shell has been completely travelled, 0 otherwise
+ *
+ * Remove the tag \a tag of edge \a ia in tetra \a start by travelling its
+ * shell in one direction (given by the pivot \a piv).
+ *
+ */
+static inline
+int MMG3D_deltag_oneDir(MMG5_pMesh  mesh,MMG5_int start, MMG5_int na, MMG5_int nb,
+                        int16_t tag,MMG5_int piv,MMG5_int adj) {
+  MMG5_pTetra  pt;
+  MMG5_pxTetra pxt;
+  MMG5_int     *adja;
+  int8_t       i;
+
   while ( adj && (adj != start) ) {
     pt = &mesh->tetra[adj];
 
     /* identification of edge number in tetra adj */
-    if ( !MMG3D_findEdge(mesh,pt,adj,na,nb,1,NULL,&i) ) return 0;
+    if ( !MMG3D_findEdge(mesh,pt,adj,na,nb,1,NULL,&i) ) {
+      return -1;
+    }
 
     if ( pt->xt ) {
       pxt = &mesh->xtetra[pt->xt];
       if ( (pxt->ftag[MMG5_ifar[i][0]] & MG_BDY) ||
            (pxt->ftag[MMG5_ifar[i][1]] & MG_BDY) ) {
-        taginit = pxt->tag[i];
-        pxt->tag[i] |= tag;
-        /* Remove the potential nosurf tag if initially the edge is
-         * really required */
-        if ( (taginit & MG_REQ) && !(taginit & MG_NOSURF) ) {
-          pxt->tag[ia] &= ~MG_NOSURF;
-        }
-        pxt->edg[i]  = MG_MAX(pxt->edg[i],edg);
+        pxt->tag[i] &= ~tag;
       }
     }
     /* set new triangle for travel */
@@ -1255,7 +1303,7 @@ int MMG5_settag(MMG5_pMesh mesh,MMG5_int start,int ia,int16_t tag,int edg) {
       piv = pt->v[ MMG5_ifar[i][0] ];
     }
   }
-  return 1;
+  return adj;
 }
 
 /**
@@ -1293,33 +1341,13 @@ int MMG5_deltag(MMG5_pMesh mesh,MMG5_int start,int ia,int16_t tag) {
       pxt->tag[ia] &= ~tag;
     }
   }
-  while ( adj && (adj != start) ) {
-    pt = &mesh->tetra[adj];
 
-    /* identification of edge number in tetra adj */
-    if ( !MMG3D_findEdge(mesh,pt,adj,na,nb,1,NULL,&i) ) return 0;
-
-    if ( pt->xt ) {
-      pxt = &mesh->xtetra[pt->xt];
-      if ( (pxt->ftag[MMG5_ifar[i][0]] & MG_BDY) ||
-           (pxt->ftag[MMG5_ifar[i][1]] & MG_BDY) ) {
-        pxt->tag[i] &= ~tag;
-      }
-    }
-    /* set new triangle for travel */
-    adja = &mesh->adja[4*(adj-1)+1];
-    if ( pt->v[ MMG5_ifar[i][0] ] == piv ) {
-      adj = adja[ MMG5_ifar[i][0] ] / 4;
-      piv = pt->v[ MMG5_ifar[i][1] ];
-    }
-    else {
-      adj = adja[ MMG5_ifar[i][1] ] /4;
-      piv = pt->v[ MMG5_ifar[i][0] ];
-    }
-  }
+  adj = MMG3D_deltag_oneDir(mesh,start,na,nb,tag,piv,adj);
 
   /* If all shell has been travelled, stop, else, travel it the other sense */
   if ( adj == start )  return 1;
+  else if ( adj < 0 ) return 0;
+
   assert(!adj);
 
   pt = &mesh->tetra[start];
@@ -1327,29 +1355,10 @@ int MMG5_deltag(MMG5_pMesh mesh,MMG5_int start,int ia,int16_t tag) {
   adj = adja[MMG5_ifar[ia][1]] / 4;
   piv = pt->v[MMG5_ifar[ia][0]];
 
-  while ( adj && (adj != start) ) {
-    pt = &mesh->tetra[adj];
-    /* identification of edge number in tetra adj */
-    if ( !MMG3D_findEdge(mesh,pt,adj,na,nb,1,NULL,&i) ) return 0;
+  adj = MMG3D_deltag_oneDir(mesh,start,na,nb,tag,piv,adj);
 
-    if ( pt->xt ) {
-      pxt = &mesh->xtetra[pt->xt];
-      if ( (pxt->ftag[MMG5_ifar[i][0]] & MG_BDY) ||
-           (pxt->ftag[MMG5_ifar[i][1]] & MG_BDY) ) {
-        pxt->tag[i] &= ~tag;
-      }
-    }
-    /* set new triangle for travel */
-    adja = &mesh->adja[4*(adj-1)+1];
-    if ( pt->v[ MMG5_ifar[i][0] ] == piv ) {
-      adj = adja[ MMG5_ifar[i][0] ] / 4;
-      piv = pt->v[ MMG5_ifar[i][1] ];
-    }
-    else {
-      adj = adja[ MMG5_ifar[i][1] ] /4;
-      piv = pt->v[ MMG5_ifar[i][0] ];
-    }
-  }
+  if ( adj < 0 ) return 0;
+
   return 1;
 }
 
@@ -1591,7 +1600,7 @@ int MMG5_srcbdy(MMG5_pMesh mesh,MMG5_int start,int ia) {
             MMG3D_indElt(mesh,mesh->adja[4*(k1-1)+2]/4),
             MMG3D_indElt(mesh,mesh->adja[4*(k1-1)+3]/4),
             MMG3D_indElt(mesh,mesh->adja[4*(k1-1)+4]/4));
-    fprintf(stderr,"            vertex required? %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId "\n",
+    fprintf(stderr,"            vertex required? %d %d %d %d\n",
             mesh->point[pt->v[0]].tag & MG_REQ,
             mesh->point[pt->v[1]].tag & MG_REQ,
             mesh->point[pt->v[2]].tag & MG_REQ,
@@ -1625,7 +1634,7 @@ int MMG5_srcbdy(MMG5_pMesh mesh,MMG5_int start,int ia) {
  * (to fill).
  * \param adj pointer toward the adjacent to treat in the shell (to update)
  * \param hasadja pointer toward 0 if we don't have adja through iface,
- * 0 otherwise (to fill)
+ * 1 otherwise (to fill)
  * \param nbdy pointer toward the number of boundaries found minus 1 (to update)
  * \param silent if 1, print error message for more than 2 boundary triangles
  * in the shell
@@ -1667,7 +1676,7 @@ int MMG3D_coquilFaceFirstLoop(MMG5_pMesh mesh,MMG5_int start,MMG5_int na,MMG5_in
 
 #ifndef NDEBUG
   pxt = &mesh->xtetra[pt->xt];
-  assert ( pxt->ftag[iface] );
+  assert ( MG_BDY & pxt->ftag[iface] );
 #endif
 
   (*it1) = 4*start + iface;
@@ -1706,12 +1715,18 @@ int MMG3D_coquilFaceFirstLoop(MMG5_pMesh mesh,MMG5_int start,MMG5_int na,MMG5_in
 
     if ( !(*it2) ) {
       *it2 = 4*pradj+iface;
+      (*nbdy)++;
     }
     else {
       (*nbdy)++;
     }
 
   } while ( (*adj) && ((*adj) != start) );
+
+  if ( (*adj) != start ) {
+    /* The starting boundary face has not been counted (open shell) */
+    ++(*nbdy);
+  }
 
   return 1;
 }
@@ -1760,7 +1775,7 @@ void MMG3D_coquilFaceSecondLoopInit(MMG5_pMesh mesh,MMG5_int piv,int8_t *iface,
     (*iface) = MMG5_ifar[(*ia)][0];
   }
 
-  assert ( pxt->ftag[(*iface)] );
+  assert ( pxt->ftag[(*iface)] & MG_BDY );
 
   *it1 = 4*(*pradj) + (*iface);
 
@@ -1819,10 +1834,12 @@ int MMG5_coquilface(MMG5_pMesh mesh,MMG5_int start,int8_t iface,int ia,MMG5_int 
       return -1;
     }
 
-    if ( !nbdy ) {
-      MMG5_coquilFaceErrorMessage(mesh, (*it1)/4, (*it2)/4);
-      return -1;
-    } else if ( nbdy > 1 ) {
+    if ( nbdy != 2 ) {
+      if ( nbdy < 2 ) {
+        MMG5_coquilFaceErrorMessage(mesh, (*it1)/4, (*it2)/4);
+        return -1;
+      }
+
       if ( !silent ) {
         if ( !mmgWarn0 ) {
           // Algiane: for a manifold edge 2 cases :
@@ -1830,10 +1847,14 @@ int MMG5_coquilface(MMG5_pMesh mesh,MMG5_int start,int8_t iface,int ia,MMG5_int 
           // (highly non-manifold)
           // 2) we have a non-manifold shape immersed in a domain (3 triangles
           // sharing the edge and a closed shell)
-          printf("  ## Warning: %s: you have %" MMG5_PRId " boundaries in the shell"
-                 " of your edge.\n",__func__,nbdy+1);
+          printf("  ## Warning: %s: you have %d boundary triangles in the closed shell"
+                 " of a manifold edge.\n",__func__,nbdy);
           printf("  Problem may occur during remesh process.\n");
           mmgWarn0 = 1;
+
+          /* MMG5_coquilface is called only on edges marked as manifold, check this */
+          assert ( pt->xt );
+          assert ( !(mesh->xtetra[pt->xt].tag[ia] & MG_NOM) );
         }
       }
     }

@@ -999,7 +999,7 @@ int MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcibl
       w += (2*dnaddloc);//1./lon*(2*dnaddloc + dnpdelloc);
 
     }/*for ia*/
-    if(ddebug) printf("on soustrait %" MMG5_PRId "\n",nedel);
+    if(ddebug) printf("on soustrait %d\n",nedel);
 
     w += 0.5*nedel;
 

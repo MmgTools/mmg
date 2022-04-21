@@ -50,8 +50,7 @@ static int MMG2D_usage(char *name) {
   MMG5_2d3dUsage();
 
   /* Specific parameters */
-  fprintf(stdout,"-3dMedit val read and write to gmsh visu if val = 1 (out) if val=2 (in and out)\n");
-
+  fprintf(stdout,"-3dMedit val read and write for gmsh visu: output only if val=1, input and output if val=2, input if val=3\n");
   fprintf(stdout,"\n");
 
   fprintf(stdout,"-nofem       do not force Mmg to create a finite element mesh \n");
@@ -62,22 +61,6 @@ static int MMG2D_usage(char *name) {
 
   /* Common options for advanced users */
   MMG5_advancedUsage();
-
-  fprintf(stdout,"\n\n");
-
-  return 1;
-}
-
-/**
- * \param mesh pointer toward the mesh structure.
- * \return 0 if fail, 1 if success.
- *
- * Print the default parameters values.
- *
- */
-static inline int MMG5_defaultValues(MMG5_pMesh mesh) {
-
-  MMG5_mmgDefaultValues(mesh);
 
   fprintf(stdout,"\n\n");
 
@@ -332,7 +315,7 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
   /* First step: search if user want to see the default parameters values. */
   for ( i=1; i< argc; ++i ) {
     if ( !strcmp(argv[i],"-val") ) {
-      MMG5_defaultValues(mesh);
+      MMG2D_defaultValues(mesh);
       return 0;
     }
   }
@@ -414,6 +397,15 @@ int parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol sol) {
             MMG2D_usage(argv[0]);
             return 0;
           }
+        }
+        else if ( !strcmp(argv[i],"-isoref") && ++i <= argc ) {
+          if ( !MMG2D_Set_iparameter(mesh,met,MMG2D_IPARAM_isoref,
+                                     atoi(argv[i])) )
+            return 0;
+        }
+        else {
+          MMG2D_usage(argv[0]);
+          return 0;
         }
         break;
       case 'l':
@@ -675,6 +667,12 @@ int main(int argc,char *argv[]) {
   int           ier,ierSave,fmtin,fmtout;
   char          stim[32],*ptr;
 
+  /* Select line buffering even if the output is not a terminal and force stderr
+   * and stdout to print in the same order as the events */
+  setvbuf(stdout, NULL, _IOLBF, 1024);
+  setvbuf(stderr, NULL, _IOLBF, 1024);
+
+  /* Version info */
   fprintf(stdout,"  -- MMG2D, Release %s (%s) \n",MMG_VERSION_RELEASE,MMG_RELEASE_DATE);
   fprintf(stdout,"     %s\n",MMG_COPYRIGHT);
   fprintf(stdout,"     %s %s\n",__DATE__,__TIME__);

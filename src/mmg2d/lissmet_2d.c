@@ -40,9 +40,9 @@
  * \return 0 if fail, 1 if success
  *
  * Anisotropic gradation (h-gradation procedure). See:
- * http://www.ljll.math.upmc.fr/frey/publications/ijnme4398.pdf
- * Skip edges with a required extremity (treated in lissmetreq_ani).
- *
+ * \cite{borouchaki1998mesh}. The Hc-correction method is used (gradation with
+ * respect to H-shock measure). Skip edges with a required extremity (treated
+ * in lissmetreq_ani).
  */
 int lissmet_ani(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_Hash      edgeTable;

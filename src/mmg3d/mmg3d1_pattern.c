@@ -53,8 +53,8 @@ static MMG5_int MMG5_adpspl(MMG5_pMesh mesh,MMG5_pSol met, int* warn) {
  MMG5_pxTetra  pxt;
  MMG5_pPoint   p0,p1;
  double        len,lmax,o[3];
- MMG5_int      ns,k,ip,ip1,ip2,list[MMG3D_LMAX+2];
- int           ier,ilist,src;
+ MMG5_int      ns,src,k,ip,ip1,ip2,list[MMG3D_LMAX+2];
+ int           ier,ilist;
  int8_t        imax,j,i,i1,i2,ifa0,ifa1;
  int8_t        chkRidTet;
  static int8_t mmgWarn    = 0;
@@ -249,7 +249,7 @@ static MMG5_int MMG5_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
                               list,&ilist,lists,&ilists,(p0->tag & MG_NOM)) < 0 )
         return -1;
 
-      ilist = MMG5_chkcol_bdy(mesh,met,k,i,j,list,ilist,lists,ilists,0,0,2,0);
+      ilist = MMG5_chkcol_bdy(mesh,met,k,i,j,list,ilist,lists,ilists,0,0,2,0,0);
     }
     /* Case of an internal face */
     else {
@@ -349,7 +349,7 @@ static int MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *permNodGlob) {
     nnm += nm;
 
     if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && ns+nc > 0 )
-      fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %8d moved\n",ns,nc,nf,nm);
+      fprintf(stdout,"     %8" MMG5_PRId " splitted, %8" MMG5_PRId " collapsed, %8" MMG5_PRId " swapped, %8" MMG5_PRId " moved\n",ns,nc,nf,nm);
     if ( ns < 10 && abs(nc-ns) < 3 )  break;
     else if ( it > 3 && abs(nc-ns) < 0.3 * MG_MAX(nc,ns) )  break;
   }
@@ -412,7 +412,7 @@ static int MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *permNodGlob) {
 
     if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && /*nw+*/nf+nm > 0 ){
       fprintf(stdout,"                                            ");
-      fprintf(stdout,"%8d swapped, %8d moved\n",nf,nm);
+      fprintf(stdout,"%8" MMG5_PRId " swapped, %8" MMG5_PRId " moved\n",nf,nm);
     }
   }
   while( ++it < maxit && /*nw+*/nm+nf > 0 );
@@ -430,13 +430,13 @@ static int MMG5_adptet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *permNodGlob) {
 
   if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && nm > 0 ){
     fprintf(stdout,"                                            ");
-    fprintf(stdout,"                  %8d moved\n",nm);
+    fprintf(stdout,"                  %8" MMG5_PRId " moved\n",nm);
   }
 
   if ( mesh->info.imprim > 0 ) {
     if ( abs(mesh->info.imprim) < 5 && (nnc > 0 || nns > 0) )
-      fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped, %8d moved,"
-              " %" MMG5_PRId " iter. \n",
+      fprintf(stdout,"     %8" MMG5_PRId " splitted, %8" MMG5_PRId " collapsed, %8" MMG5_PRId " swapped, %8" MMG5_PRId " moved,"
+              " %d iter. \n",
               nns,nnc,nnf,nnm,it+it1);
   }
   return 1;
@@ -456,7 +456,7 @@ int MMG5_mmg3d1_pattern(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *permNodGlob) {
 
   if ( abs(mesh->info.imprim) > 4 )
     fprintf(stdout,"  ** MESH ANALYSIS\n");
-  
+
   if ( mesh->info.iso && !MMG5_chkmani(mesh) ) {
     fprintf(stderr,"\n  ## Non orientable implicit surface. Exit program.\n");
     return 0;
@@ -497,7 +497,7 @@ int MMG5_mmg3d1_pattern(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *permNodGlob) {
     MMG3D_gradsizreq(mesh,met);
   }
 
-  /*update quality*/
+  /* update quality*/
   if ( !MMG3D_tetraQual(mesh,met,1) ) return 0;
 
   if ( !MMG5_anatet(mesh,met,2,1) ) {

@@ -185,7 +185,7 @@ double MMG2D_vfrac(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int k,int pm) {
 /**
  * \param mesh pointer toward the mesh
  *
- * Reset MG_ISO vertex and edge references to 0.
+ * Reset mesh->info.isoref vertex and edge references to 0.
  *
  */
 int MMG2D_resetRef(MMG5_pMesh mesh) {
@@ -201,8 +201,8 @@ int MMG2D_resetRef(MMG5_pMesh mesh) {
 
     for (i=0; i<3; i++) {
       p0 = &mesh->point[pt->v[i]];
-      if ( pt->edg[i] == MG_ISO ) pt->edg[i] = 0;
-      if ( p0->ref == MG_ISO ) p0->ref = 0;
+      if ( pt->edg[i] == mesh->info.isoref ) pt->edg[i] = 0;
+      if ( p0->ref == mesh->info.isoref ) p0->ref = 0;
     }
   }
 
@@ -210,7 +210,7 @@ int MMG2D_resetRef(MMG5_pMesh mesh) {
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !pt->v[0] ) continue;
-    ref = MMG5_getIniRef(mesh,pt->ref);
+    if( !MMG5_getStartRef(mesh,pt->ref,&ref) ) return 0;
     pt->ref = ref;
   }
 
@@ -249,15 +249,29 @@ int MMG2D_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_int start, int8_t ista
     v1 = sol->m[ip1];
     v2 = sol->m[ip2];
 
-    /* Authorize change of references only provided the boundary reference is MG_ISO */
-    if ( pt->ref != refstart && pt->edg[i1] != MG_ISO ) {
+    if ( (fabs(v1) < MMG5_EPS) && (fabs(v2) < MMG5_EPS) ) {
+      /* Do not authorize a snap that leads to a triangle with only 0 vertices */
+      return 0;
+    }
+
+    /* Authorize change of references only provided the boundary reference is mesh->info.isoref */
+    if ( pt->ref != refstart && pt->edg[i1] != mesh->info.isoref ) {
       smsgn = 0;
       k = 0;
     } else
       smsgn = (fabs(v1) < MMG5_EPS) || ( (fabs(v2) > MMG5_EPS) && MG_SMSGN(v1,v2) ) ? 1 : 0;
     // smsgn =  MG_SMSGN(v1,v2) ? 1 : 0;
   }
-  while ( smsgn );
+  while ( smsgn && (k != start) );
+
+  if ( k==start ) {
+    /* Complete ball has been travelled without crossing a boundary or finding a
+     * sign change: we are in the special case where v1 = v2 = v[istart] = 0 in
+     * tria start. In this case, test MG_SMSGN(v1,v2) returns 0 while smsgn is
+     * computed to 1, which is non consistent.  */
+    assert ( smsgn );
+    return 0;
+  }
 
   end1 = k;
   k = start;
@@ -279,14 +293,21 @@ int MMG2D_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_int start, int8_t ista
     v1 = sol->m[ip1];
     v2 = sol->m[ip2];
 
-    if ( pt->ref != refstart && pt->edg[i1] != MG_ISO ) {
+    if ( (fabs(v1) < MMG5_EPS) && (fabs(v2) < MMG5_EPS) ) {
+      /* Do not authorize a snap that leads to a triangle with only 0 vertices */
+      return 0;
+    }
+
+    if ( pt->ref != refstart && pt->edg[i1] != mesh->info.isoref ) {
       smsgn = 0;
       k = 0;
     } else
       smsgn = (fabs(v2) < MMG5_EPS) || ( (fabs(v1) > MMG5_EPS) && MG_SMSGN(v1,v2) ) ? 1 : 0;
     // smsgn = MG_SMSGN(v1,v2) ? 1 : 0;
   }
-  while ( smsgn );
+  while ( smsgn && (k != start) );
+
+  assert ( k!=start );
 
   /* If first stop was due to an external boundary, the second one must too;
      else, the final triangle for the first travel must be that of the second one */
@@ -329,7 +350,7 @@ int MMG2D_snapval(MMG5_pMesh mesh, MMG5_pSol sol) {
   /* Reset point flags */
   for (k=1; k<=mesh->np; k++)
     mesh->point[k].flag = 0;
-
+  
   /* Snap values of sol that are close to 0 to 0 exactly */
   ns = nc = 0;
   for (k=1; k<=mesh->np; k++) {
@@ -359,7 +380,10 @@ int MMG2D_snapval(MMG5_pMesh mesh, MMG5_pSol sol) {
       /* Catch a snapped point by a triangle where there is a sign change */
       if ( p0->flag && !(MG_SMSGN(v1,v2)) ) {
         if ( !MMG2D_ismaniball(mesh,sol,k,i) ) {
-          sol->m[ip] = tmp[ip];
+          if ( tmp[ip] < 0.0 )
+            sol->m[ip] = -100.0*MMG5_EPS;
+          else
+            sol->m[ip] = 100.0*MMG5_EPS;
           nc++;
         }
         p0->flag = 0;
@@ -401,7 +425,7 @@ int MMG2D_snapval(MMG5_pMesh mesh, MMG5_pSol sol) {
   MMG5_DEL_MEM ( mesh, tmp );
 
   if ( (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) && ns+nc > 0 )
-    fprintf(stdout,"     %8d points snapped, %" MMG5_PRId " corrected\n",ns,nc);
+    fprintf(stdout,"     %8" MMG5_PRId " points snapped, %" MMG5_PRId " corrected\n",ns,nc);
 
   return 1;
 }
@@ -478,7 +502,8 @@ int MMG2D_chkmaniball(MMG5_pMesh mesh, MMG5_int start, int8_t istart) {
   return 1;
 }
 
-/* Check whether the resulting two subdomains occupying mesh are manifold */
+/* Check whether the resulting two subdomains coming from isovalue
+ * discretization are manifold */
 int MMG2D_chkmanimesh(MMG5_pMesh mesh) {
   MMG5_pTria      pt,pt1;
   MMG5_int        *adja,k,iel;
@@ -511,13 +536,12 @@ int MMG2D_chkmanimesh(MMG5_pMesh mesh) {
         fprintf(stderr,"\n  ## Warning: %s: at least 1 triangle with 3 boundary"
                 " edges.\n",__func__);
       }
-      /* return 0; */
     }
   }
 
-  /* Second check: check whether the configuration is manifold in the ball of each point;
-     each vertex on the implicit boundary is caught in such a way that i1 inxt[i1] is one edge of the implicit
-     boundary */
+  /* Second check: check whether the configuration is manifold in the ball of
+     each point; each vertex on the implicit boundary is caught in such a way
+     that i1 inxt[i1] is one edge of the implicit boundary */
   for (k=1; k<=mesh->nt; k++) {
     pt = &mesh->tria[k];
     if ( !MG_EOK(pt) ) continue;
@@ -528,10 +552,15 @@ int MMG2D_chkmanimesh(MMG5_pMesh mesh) {
 
       if (! iel ) continue;
       pt1 = &mesh->tria[iel];
-      if ( pt->ref == pt1->ref ) continue;
+      if ( pt->ref == pt1->ref || pt->edg[i]!= mesh->info.isoref ) continue;
 
       i1 = MMG5_inxt2[i];
-      if ( !MMG2D_chkmaniball(mesh,k,i1) ) return 0;
+      if ( !MMG2D_chkmaniball(mesh,k,i1) ) {
+        fprintf(stderr,"   *** Topological problem\n");
+        fprintf(stderr,"       non manifold curve at point %" MMG5_PRId " %" MMG5_PRId "\n",pt->v[i1], MMG2D_indPt(mesh,pt->v[i1]));
+        fprintf(stderr,"       non manifold curve at tria %" MMG5_PRId " (ip %d)\n", MMG2D_indElt(mesh,k),i1);
+        return 0;
+      }
     }
   }
 
@@ -919,13 +948,13 @@ int MMG2D_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol met){
     switch( pt->flag ) {
       /* 1 edge split -> 0-+ */
       case 1: case 2: case 4:
-        ier = MMG2D_split1(mesh,sol,k,vx);
+        ier = MMG2D_split1(mesh,met,k,vx);
         ns++;
         break;
 
       /* 2 edge split -> +-- or -++ */
       case 3: case 5: case 6:
-        ier = MMG2D_split2(mesh,sol,k,vx);
+        ier = MMG2D_split2(mesh,met,k,vx);
         ns++;
         break;
 
@@ -937,7 +966,7 @@ int MMG2D_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol met){
   }
 
   if ( (mesh->info.ddebug || abs(mesh->info.imprim) > 5) && ns > 0 )
-    fprintf(stdout,"     %7d splitted\n",ns);
+    fprintf(stdout,"     %7" MMG5_PRId " splitted\n",ns);
 
   MMG5_DEL_MEM(mesh,hash.item);
   return ns;
@@ -986,7 +1015,7 @@ int MMG2D_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol){
       }
     }
 
-    /* Set MG_ISO ref at ls edges and at the points of these edges */
+    /* Set mesh->info.isoref ref at ls edges and at the points of these edges */
     if ( nz == 2 ) {
       for (i=0; i<3; i++) {
         ip  = pt->v[MMG5_inxt2[i]];
@@ -994,12 +1023,12 @@ int MMG2D_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol){
         v   = sol->m[ip];
         v1  = sol->m[ip1];
         if ( v == 0.0 && v1 == 0.0) {
-          pt->edg[i]  = MG_ISO;
+          pt->edg[i]  = mesh->info.isoref;
           pt->tag[i] |= MG_REF;
           i1 = MMG5_inxt2[i];
           i2 = MMG5_inxt2[i1];
-          mesh->point[pt->v[i1]].ref = MG_ISO;
-          mesh->point[pt->v[i2]].ref = MG_ISO;
+          mesh->point[pt->v[i1]].ref = mesh->info.isoref;
+          mesh->point[pt->v[i2]].ref = mesh->info.isoref;
         }
       }
     }
@@ -1047,7 +1076,7 @@ int MMG2D_mmg2d6(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met) {
   /* No need to keep adjacencies from now on */
   MMG5_DEL_MEM(mesh,mesh->adja);
 
-  /* Reset the MG_ISO field everywhere it appears */
+  /* Reset the mesh->info.isoref field everywhere it appears */
   if ( !MMG2D_resetRef(mesh) ) {
     fprintf(stderr,"\n  ## Problem in resetting references. Exit program.\n");
     return 0;

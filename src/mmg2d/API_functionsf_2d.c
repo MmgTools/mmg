@@ -905,6 +905,25 @@ FORTRAN_NAME(MMG2D_LOADMSHMESH,mmg2d_loadmshmesh,
 }
 
 /**
+ * See \ref MMG2D_loadGenericMesh function in \ref mmg2d/libmmg2d.h file.
+ */
+FORTRAN_NAME(MMG2D_LOADGENERICMESH,mmg2d_loadgenericmesh,
+             (MMG5_pMesh *mesh, MMG5_pSol *sol,char* filename, int *strlen0,int* retval),
+             (mesh,sol,filename,strlen0, retval)){
+  char *tmp = NULL;
+
+  MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
+  strncpy(tmp,filename,*strlen0);
+  tmp[*strlen0] = '\0';
+
+  *retval = MMG2D_loadGenericMesh(*mesh,*sol,tmp);
+
+  MMG5_SAFE_FREE(tmp);
+
+  return;
+}
+
+/**
  * See \ref MMG2D_loadMshMesh_and_allData function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_LOADMSHMESH_AND_ALLDATA,mmg2d_loadmshmesh_and_alldata,
@@ -1106,6 +1125,25 @@ FORTRAN_NAME(MMG2D_SAVETETGENMESH,mmg2d_savetetgenmesh,(MMG5_pMesh *mesh,char *m
   strncpy(tmp,meshin,*strlen0);
   tmp[*strlen0] = '\0';
   *retval = MMG2D_saveTetgenMesh(*mesh,tmp);
+  MMG5_SAFE_FREE(tmp);
+
+  return;
+}
+
+/**
+ * See \ref MMG2D_saveGenericMesh function in \ref mmg2d/libmmg2d.h file.
+ */
+FORTRAN_NAME(MMG2D_SAVEGENERICMESH,mmg2d_savegenericmesh,
+             (MMG5_pMesh *mesh, MMG5_pSol *sol,char* filename, int *strlen0,int* retval),
+             (mesh,sol,filename,strlen0, retval)){
+  char *tmp = NULL;
+
+  MMG5_SAFE_MALLOC(tmp,*strlen0+1,char,return);
+  strncpy(tmp,filename,*strlen0);
+  tmp[*strlen0] = '\0';
+
+  *retval = MMG2D_saveGenericMesh(*mesh,*sol,tmp);
+
   MMG5_SAFE_FREE(tmp);
 
   return;

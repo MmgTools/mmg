@@ -84,6 +84,7 @@ extern "C" {
     MMG2D_DPARAM_ls,                /*!< [val], Value of level-set */
     MMG2D_DPARAM_rmc,               /*!< [-1/val], Remove small connex componants in level-set mode */
     MMG2D_IPARAM_nofem,             /*!< [1/0], Generate a non finite element mesh */
+    MMG2D_IPARAM_isoref,            /*!< [0/n], Iso-surface boundary material reference */
   };
 
 /*----------------------------- functions header -----------------------------*/
@@ -293,13 +294,14 @@ extern "C" {
  * \remark Fortran interface:
  * >   SUBROUTINE MMG2D_SET_MULTIMAT(mesh,sol,ref,split,rin,rex,retval)\n
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh,sol\n
- * >     INTEGER, INTENT(IN)           :: ref,split,rin,rex\n
+ * >     MMG5F_INT, INTENT(IN)         :: ref,rin,rex\n
+ * >     INTEGER, INTENT(IN)           :: split\n
  * >     INTEGER, INTENT(OUT)          :: retval\n
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG2D_Set_multiMat(MMG5_pMesh mesh, MMG5_pSol sol,int ref,int split,
-                          int rin, int rex);
+  int  MMG2D_Set_multiMat(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_int ref,int split,
+                          MMG5_int rin, MMG5_int rex);
 
 /* init structure datas */
 /**
@@ -1458,7 +1460,9 @@ int MMG2D_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param filename name of the readed file.
- * \return 0 if fail, 1 otherwise
+ *
+ * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
+ * format...), 1 if success.
  *
  * Read mesh data.
  *
@@ -1477,7 +1481,9 @@ int MMG2D_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol);
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the solution structure.
  * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
+ *
+ * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
+ * format...), 1 if success.
  *
  * Read mesh and 0 or 1 data field at VTK vtp file format (.vtp extension). We
  * read only low-order points, edges, tria and quad.
@@ -1496,7 +1502,9 @@ int MMG2D_loadVtpMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the solution structure.
  * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
+ *
+ * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
+ * format...), 1 if success.
  *
  * Read mesh and a list of data fields at VTK vtp file format (.vtp extension). We
  * read only low-order points, edges, tria and quad.
@@ -1516,7 +1524,9 @@ int MMG2D_loadVtpMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the solution structure.
  * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
+ *
+ * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
+ * format...), 1 if success.
  *
  * Read mesh and 0 or 1 data field at VTK vtu file format (.vtu extension). We
  * read only low-order points, edges, tria and quad.
@@ -1536,7 +1546,9 @@ int MMG2D_loadVtuMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the solution structure.
  * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
+ *
+ * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
+ * format...), 1 if success.
  *
  * Read mesh and a list of data field at VTK vtu file format (.vtu extension). We
  * read only low-order points, edges, tria and quad.
@@ -1556,7 +1568,9 @@ int MMG2D_loadVtuMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the solution structure.
  * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
+ *
+ * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
+ * format...), 1 if success.
  *
  * Read mesh and 0 or 1 data field at VTK vtk file format (.vtk extension). We
  * read only low-order points, edges, tria and quad.
@@ -1576,7 +1590,9 @@ int MMG2D_loadVtkMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the solution structure.
  * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
+ *
+ * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
+ * format...), 1 if success.
  *
  * Read mesh and a list of data field at VTK vtk file format (.vtk extension). We
  * read only low-order points, edges, tria and quad.
@@ -1596,7 +1612,9 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the solution structure.
  * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
+ *
+ * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
+ * format...), 1 if success.
  *
  * Read mesh and 0 or 1 data at MSH file format (.msh extension). We read only
  * low-order points, edges, tria, quadra.
@@ -1615,7 +1633,9 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward a list of solution structures.
  * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
+ *
+ * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
+ * format...), 1 if success.
  *
  * Read mesh and a list of data at MSH file format (.msh extension). We read only
  * low-order points, edges, tria, quadra, tetra and prisms.
@@ -1635,7 +1655,9 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the solution structure..
  * \param filename name of the solution file.
- * \return 0 or -1 if fail, 1 otherwise.
+ *
+ * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
+ * format...), 1 if success.
  *
  * Load metric field. The file at medit file format must contains 1 solution:
  * the metric.
@@ -1650,11 +1672,34 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  *
  */
   int MMG2D_loadSol(MMG5_pMesh mesh,MMG5_pSol sol,const char * filename);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param filename name of file.
+ *
+ * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
+ * format...), 1 if success.
+ *
+ * Read mesh data.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG2D_LOADGENERICMESH(mesh,sol,filename,strlen0,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
+ * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int MMG2D_loadGenericMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
+
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the solutions array
  * \param filename name of file.
- * \return 0 if failed, 1 otherwise.
+ *
+ * \return 0 if file is not found, -1 if fail for another reason (mem lack, file
+ * format...), 1 if success.
  *
  * Load 1 or more solutions in a solution file at medit file format
  *
@@ -1853,6 +1898,23 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  */
   int MMG2D_saveTetgenMesh(MMG5_pMesh ,const char *);
 
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \param filename name of file.
+ * \return 0 if failed, 1 otherwise.
+ *
+ * Save mesh data in a file whose format depends on the filename extension.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG2D_SAVEGENERICMESH(mesh,sol,filename,strlen0,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh,sol\n
+ * >     CHARACTER(LEN=*), INTENT(IN)   :: filename\n
+ * >     INTEGER, INTENT(IN)            :: strlen0\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int MMG2D_saveGenericMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1972,6 +2034,21 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
 
 /* Tools for the library */
 // void (*MMG2D_callbackinsert) (int ,int ,int ,int, int);
+
+/**
+ * \param mesh pointer toward the mesh structure.
+ * \return 0 if fail, 1 if success.
+ *
+ * Print the default parameters values.
+ *
+ * \remark Fortran interface:
+ * >   SUBROUTINE MMG2D_DEFAULTVALUES(mesh,retval)\n
+ * >     MMG5_DATA_PTR_T, INTENT(INOUT) :: mesh\n
+ * >     INTEGER, INTENT(OUT)           :: retval\n
+ * >   END SUBROUTINE\n
+ *
+ */
+  int MMG2D_defaultValues(MMG5_pMesh mesh);
 
 /**
  * \param mesh pointer toward the mesh structure

@@ -53,7 +53,9 @@ MMG5_int MMG2D_chkspl(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t i) {
   double               mid[2],o[2],no[2],calnew,caltmp,tp,to,t,calseuil;
   MMG5_int             ip,jel,*adja,npinit;
   int                  it,maxit;
+  const double         s = 0.5;
   int8_t               i1,i2,j,j1,j2,ier,isv;
+  assert ( met );
 
   calseuil = 1e-4 / MMG2D_ALPHAD;
   npinit = mesh->np;
@@ -75,8 +77,8 @@ MMG5_int MMG2D_chkspl(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t i) {
   j2   = MMG5_iprv2[j];
 
   /* Midpoint of edge i */
-  mid[0] = 0.5*(p1->c[0]+p2->c[0]);
-  mid[1] = 0.5*(p1->c[1]+p2->c[1]);
+  mid[0] = s*(p1->c[0]+p2->c[0]);
+  mid[1] = s*(p1->c[1]+p2->c[1]);
 
   /* If the splitted edge is not geometric, the new point is simply its midpoint */
   if ( !MG_EDG(pt->tag[i]) ) {
@@ -92,6 +94,9 @@ MMG5_int MMG2D_chkspl(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t i) {
                            mid,pt->tag[i]);
 
     }
+    /* If there is a metric in the mesh, interpolate it at the new point */
+    if ( met->m )
+      MMG2D_intmet(mesh,met,k,i,ip,s);
 
     ppt = &mesh->point[ip];
     if ( pt->tag[i] ) ppt->tag = pt->tag[i];
@@ -133,7 +138,7 @@ MMG5_int MMG2D_chkspl(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t i) {
   /* Otherwise, the new point is inserted on the underlying curve to the edge;
      a dichotomy is applied to find the largest distance to the edge that yields an admissible configuration */
   else {
-    ier = MMG2D_bezierCurv(mesh,k,i,0.5,o,no);
+    ier = MMG2D_bezierCurv(mesh,k,i,s,o,no);
     if ( !ier ) return 0;
 
     ip  = MMG2D_newPt(mesh,o,pt->tag[i]);
@@ -147,6 +152,8 @@ MMG5_int MMG2D_chkspl(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t i) {
                            } while ( mesh->np>npinit ); return -1;,
                            o,pt->tag[i]);
     }
+    if ( met->m )
+      MMG2D_intmet(mesh,met,k,i,ip,s);
 
     ppt = &mesh->point[ip];
     if ( pt->tag[i] ) ppt->tag = pt->tag[i];
@@ -217,11 +224,6 @@ MMG5_int MMG2D_chkspl(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t i) {
       return 0;
     }
   }
-
-  assert ( met );
-  if ( met->m )
-    /* Interpolate metric at ip, if any */
-    MMG2D_intmet(mesh,met,k,i,ip,0.5);
 
   return ip;
 }

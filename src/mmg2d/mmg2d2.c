@@ -384,7 +384,7 @@ int MMG2D_markSD(MMG5_pMesh mesh) {
 
   if ( mesh->info.imprim > 0  ) {
     /* nref - 1 subdomains because Bounding Box triangles have been counted */
-    fprintf(stdout,"     %8d sub-domains\n",nref-1);
+    fprintf(stdout,"     %8" MMG5_PRId " sub-domains\n",nref-1);
   }
 
   MMG5_SAFE_FREE(list);

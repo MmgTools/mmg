@@ -47,24 +47,6 @@ int MMG5_isbr(MMG5_pMesh mesh,int ref) {
   return(0);
 }
 
-/** naive (increasing) sorting algorithm, for very small tabs ; permutation is stored in perm */
-inline void MMG5_nsort(int n,double *val,int8_t *perm){
-    int   i,j,aux;
-
-    for (i=0; i<n; i++)  perm[i] = i;
-
-    for (i=0; i<n; i++) {
-        for (j=i+1; j<n; j++) {
-            if ( val[perm[i]] > val[perm[j]] ) {
-                aux = perm[i];
-                perm[i] = perm[j];
-                perm[j] = aux;
-            }
-        }
-    }
-}
-
-
 /** Compute normal to face iface of tetra k, exterior to tetra k */
 int MMG5_norface(MMG5_pMesh mesh,MMG5_int k,int iface,double n[3]) {
   MMG5_pTetra     pt;
@@ -923,7 +905,7 @@ void MMG5_printTetra(MMG5_pMesh mesh,char* fileName) {
                     pxt->ftag[2],pxt->ftag[3]);
             fprintf(inm,"ref   -> %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId "\n",pxt->ref[0],pxt->ref[1],
                     pxt->ref[2],pxt->ref[3]);
-            fprintf(inm,"ori   -> %" MMG5_PRId " \n",pxt->ori);
+            fprintf(inm,"ori   -> %d \n",pxt->ori);
         }
         fprintf(inm,"\n");
     }

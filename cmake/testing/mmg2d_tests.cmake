@@ -463,6 +463,12 @@ ADD_TEST(NAME mmg2d_LSMultiMat_val
   ${MMG2D_CI_TESTS}/LSMultiMat/multi-mat
   ${CTEST_OUTPUT_DIR}/mmg2d_multi-mat-val.o.meshb
   )
+#multi-mat + opnbdy + non-manifold check
+ADD_TEST(NAME mmg2d_LSMultiMat_nm
+  COMMAND ${EXECUT_MMG2D} -v 5 -ls 3 -opnbdy -nr
+  ${MMG2D_CI_TESTS}/LSMultiMat/2d-opn.mesh
+  ${CTEST_OUTPUT_DIR}/mmg2d_2d-opn.o.meshb
+  )
 
 ####### -nsd
 ADD_TEST(NAME mmg2d_LSMultiMat-nsd22
@@ -528,6 +534,26 @@ ADD_TEST(NAME mmg2d_OptLs_dom_rembub2
   -sol ${MMG2D_CI_TESTS}/LSDiscretization/bub.sol
   ${CTEST_OUTPUT_DIR}/mmg2d_OptLs_dom-rembub2.o.meshb)
 
+add_test(
+  NAME mmg2d_OptLs_isoref_defaut
+  COMMAND ${EXECUT_MMG2D} -v 5 -ls ${MMG2D_CI_TESTS}/OptLs_isoref/2d-mesh.mesh
+  -sol ${MMG2D_CI_TESTS}/OptLs_isoref/2d-mesh.sol
+  ${CTEST_OUTPUT_DIR}/mmg2d_isoref.o.mesh
+  )
+add_test(
+  NAME mmg2d_OptLs_isoref_5
+  COMMAND ${EXECUT_MMG2D} -v 5 -isoref 5 -ls
+  ${MMG2D_CI_TESTS}/OptLs_isoref/2d-mesh-isoref5.mesh
+  -sol ${MMG2D_CI_TESTS}/OptLs_isoref/2d-mesh.sol
+  ${CTEST_OUTPUT_DIR}/mmg2d_isoref5.o.mesh
+  )
+
+if (BASH)
+  add_test(
+    NAME mmg2d_optLs_isoref
+    COMMAND ${BASH} -c "diff <(wc -wl ${CTEST_OUTPUT_DIR}/mmg2d_isoref.o.mesh  | awk '{print $1 $2}') <(wc -wl ${CTEST_OUTPUT_DIR}/mmg2d_isoref5.o.mesh | awk '{print $1 $2}')"
+    )
+endif()
 
 # ls discretisation + optim option
 ADD_TEST(NAME mmg2d_LSMultiMat_optim

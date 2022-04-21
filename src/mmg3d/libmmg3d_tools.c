@@ -161,7 +161,7 @@ int MMG3D_defaultValues(MMG5_pMesh mesh) {
   MMG5_mmgDefaultValues(mesh);
 
 #ifndef PATTERN
-  fprintf(stdout,"Max number of point per octree cell (-octree) : %" MMG5_PRId "\n",
+  fprintf(stdout,"Max number of point per octree cell (-octree) : %d\n",
           mesh->info.PROctree);
 #endif
 #ifdef USE_SCOTCH
@@ -268,8 +268,16 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
             return 0;
           }
         }
+        else if ( !strcmp(argv[i],"-isoref") && ++i <= argc ) {
+          if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_isoref,
+                                     atoi(argv[i])) )
+            return 0;
+        }
+        else {
+          MMG3D_usage(argv[0]);
+          return 0;
+        }
         break;
-
       case 'l':
         if ( !strcmp(argv[i],"-lag") ) {
           if ( ++i < argc && isdigit(argv[i][0]) ) {
@@ -509,7 +517,7 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
   if ( mesh->info.imprim == -99 ) {
     fprintf(stdout,"\n  -- PRINT (0 10(advised) -10) ?\n");
     fflush(stdin);
-    MMG_FSCANF(stdin,"%" MMG5_PRId "",&i);
+    MMG_FSCANF(stdin,"%d",&i);
     if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_verbose,i) )
       return 0;
   }
@@ -551,7 +559,8 @@ int MMG3D_parsar(int argc,char *argv[],MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol s
 
 int MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
   float      fp1,fp2,hausd;
-  int        ref,i,j,ret,npar,nbr,br,rin,rex,split;
+  int        i,j,ret,npar,nbr,br,split;
+  MMG5_int   ref,rin,rex;
   char       *ptr,buf[256],data[256];
   FILE       *in;
   fpos_t     position;
@@ -589,9 +598,9 @@ int MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
 
     /* Read user-defined references for the LS mode */
     if ( !strcmp(data,"lsreferences") ) {
-      ret = fscanf(in,"%" MMG5_PRId "",&npar);
+      ret = fscanf(in,"%d",&npar);
       if ( !ret ) {
-        fprintf(stderr,"  %%%% Wrong format for lsreferences: %" MMG5_PRId "\n",npar);
+        fprintf(stderr,"  %%%% Wrong format for lsreferences: %d\n",npar);
         return 0;
       }
 
@@ -617,10 +626,10 @@ int MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
     }
     /* Read user-defined local parameters and store them in the structure info->par */
     else if ( !strcmp(data,"parameters") ) {
-      ret = fscanf(in,"%" MMG5_PRId "",&npar);
+      ret = fscanf(in,"%d",&npar);
 
       if ( !ret ) {
-        fprintf(stderr,"  %%%% Wrong format for parameters: %" MMG5_PRId "\n",npar);
+        fprintf(stderr,"  %%%% Wrong format for parameters: %d\n",npar);
         return 0;
       }
 
@@ -657,12 +666,12 @@ int MMG3D_parsop(MMG5_pMesh mesh,MMG5_pSol met) {
       }
     }
     else if ( !strcmp(data,"lsbasereferences") ) {
-      MMG_FSCANF(in,"%" MMG5_PRId "",&nbr);
+      MMG_FSCANF(in,"%d",&nbr);
       if ( !MMG3D_Set_iparameter(mesh,met,MMG3D_IPARAM_numberOfLSBaseReferences,nbr) )
         return 0;
 
       for (i=0; i<mesh->info.nbr; i++) {
-        MMG_FSCANF(in,"%" MMG5_PRId "",&br);
+        MMG_FSCANF(in,"%d",&br);
         mesh->info.br[i] = br;
       }
     }
@@ -1384,7 +1393,7 @@ int MMG3D_switch_metricStorage(MMG5_pMesh mesh, MMG5_pSol met) {
 
 int MMG3D_Compute_eigenv(double m[6],double lambda[3],double vp[3][3]) {
 
-  return  MMG5_eigenv(1,m,lambda,vp);
+  return  MMG5_eigenv3d(1,m,lambda,vp);
 
 }
 

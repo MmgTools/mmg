@@ -193,17 +193,13 @@ double caleltsig_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int iel);
 double caleltsig_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int iel);
 int    MMGS_defsiz_iso(MMG5_pMesh mesh,MMG5_pSol met);
 int    MMGS_defsiz_ani(MMG5_pMesh mesh,MMG5_pSol met);
-void   MMG5_defaultValues(MMG5_pMesh);
 int    MMGS_gradsiz_ani(MMG5_pMesh mesh,MMG5_pSol met);
 int    MMGS_gradsizreq_ani(MMG5_pMesh mesh,MMG5_pSol met);
 int    intmet_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t i,MMG5_int ip,double s);
 int    intmet_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t i,MMG5_int ip,double s);
 int    MMGS_intmet33_ani(MMG5_pMesh,MMG5_pSol,MMG5_int,int8_t,MMG5_int,double);
-int    MMGS_paramDisp(MMG5_pMesh mesh,MMG5_int it1,MMG5_int it2,
-                      double l1old,double l2old,
-                      int8_t isrid1, int8_t isrid2,MMG5_int ip0,MMG5_int ip1,MMG5_int ip2,
-                      double step,double o[3],int8_t *isrid);
-int     MMGS_moveTowardPoint(MMG5_pMesh mesh,MMG5_pPoint p0,MMG5_pPoint p,
+int    MMGS_paramDisp(MMG5_pMesh,MMG5_int,int8_t,MMG5_int,MMG5_int,double,double[3]);
+int    MMGS_moveTowardPoint(MMG5_pMesh mesh,MMG5_pPoint p0,MMG5_pPoint p,
                              double llold,double lam0,double lam1,double lam2,
                              double nn1[3],double nn2[3],double to[3]);
 int    movridpt_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *list,int ilist);

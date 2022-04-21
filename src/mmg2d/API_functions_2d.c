@@ -147,6 +147,9 @@ int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
   case MMG2D_IPARAM_iso :
     mesh->info.iso      = val;
     break;
+  case MMG2D_IPARAM_isoref :
+    mesh->info.isoref   = val;
+    break;
   case MMG2D_IPARAM_lag :
 #ifdef USE_ELAS
     if ( val < 0 || val > 2 )
@@ -265,7 +268,7 @@ int MMG2D_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val)
     break;
   case MMG2D_DPARAM_hgrad :
     mesh->info.hgrad    = val;
-    if ( mesh->info.hgrad < 0.0 ) {
+    if ( mesh->info.hgrad <= 0.0 ) {
       mesh->info.hgrad = MMG5_NOHGRAD;
     }
     else {
@@ -274,7 +277,7 @@ int MMG2D_Set_dparameter(MMG5_pMesh mesh, MMG5_pSol sol, int dparam, double val)
     break;
   case MMG2D_DPARAM_hgradreq :
     mesh->info.hgradreq    = val;
-    if ( mesh->info.hgradreq < 0.0 ) {
+    if ( mesh->info.hgradreq <= 0.0 ) {
       mesh->info.hgradreq = MMG5_NOHGRAD;
     }
     else {
@@ -384,8 +387,8 @@ int MMG2D_Set_localParameter(MMG5_pMesh mesh,MMG5_pSol sol, int typ, MMG5_int re
   return 1;
 }
 
-int MMG2D_Set_multiMat(MMG5_pMesh mesh,MMG5_pSol sol,int ref,
-                       int split,int rin,int rout){
+int MMG2D_Set_multiMat(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int ref,
+                       int split,MMG5_int rin,MMG5_int rout){
   return MMG5_Set_multiMat(mesh,sol,ref,split,rin,rout);
 }
 

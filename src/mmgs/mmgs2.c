@@ -232,7 +232,7 @@ int MMGS_chkmaniball(MMG5_pMesh mesh, MMG5_int start, int8_t istart) {
 
 #ifndef NDEBUG
   MMG5_pTria pt = &mesh->tria[start];
-  assert( MG_EDG(pt->tag[i1]) && (pt->edg[i1]==MG_ISO) );
+  assert( MG_EDG(pt->tag[i1]) && (pt->edg[i1]==mesh->info.isoref) );
 #endif
 
   /* First travel, while another part of the implicit boundary is not met */
@@ -243,7 +243,7 @@ int MMGS_chkmaniball(MMG5_pMesh mesh, MMG5_int start, int8_t istart) {
     k = adja[i1] / 3;
     i = adja[i1] % 3;
 
-    if ( !k || mesh->tria[k].edg[i]==MG_ISO ) break;
+    if ( !k || mesh->tria[k].edg[i]==mesh->info.isoref ) break;
 
     i = MMG5_inxt2[i];
   }
@@ -274,7 +274,7 @@ int MMGS_chkmaniball(MMG5_pMesh mesh, MMG5_int start, int8_t istart) {
       k = adja[i1] / 3;
       i = adja[i1] % 3;
 
-      if ( (!k) || mesh->tria[k].edg[i]==MG_ISO ) break;
+      if ( (!k) || mesh->tria[k].edg[i]==mesh->info.isoref ) break;
 
       i = MMG5_iprv2[i];
     }
@@ -294,7 +294,7 @@ int MMGS_chkmaniball(MMG5_pMesh mesh, MMG5_int start, int8_t istart) {
     k = adja[i1] / 3;
     i = adja[i1] % 3;
 
-    if ( (!k) || mesh->tria[k].edg[i]==MG_ISO ) break;
+    if ( (!k) || mesh->tria[k].edg[i]==mesh->info.isoref ) break;
 
     i = MMG5_inxt2[i];
   }
@@ -338,7 +338,7 @@ int MMGS_chkmanimesh(MMG5_pMesh mesh) {
         continue;
       }
       else {
-        if ( pt->edg[i] == MG_ISO ) cnt++;
+        if ( pt->edg[i] == mesh->info.isoref ) cnt++;
       }
     }
     if( cnt == 3 ) {
@@ -362,7 +362,7 @@ int MMGS_chkmanimesh(MMG5_pMesh mesh) {
       adja = &mesh->adja[3*(k-1)+1];
       iel = adja[i] / 3;
 
-      if ( (!iel) || (pt->edg[i] != MG_ISO) ) continue;
+      if ( (!iel) || (pt->edg[i] != mesh->info.isoref) ) continue;
 
       i1 = MMG5_inxt2[i];
       if ( !MMGS_chkmaniball(mesh,k,i1) )
@@ -412,12 +412,10 @@ static int MMGS_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
       v1  = sol->m[ip1]-mesh->info.ls;
       if ( fabs(v0) > MMG5_EPSD2 && fabs(v1) > MMG5_EPSD2 && v0*v1 < 0.0 ) {
         if ( !p0->flag ) {
-          p0->flag = nb;
-          nb++;
+          p0->flag = ++nb;
         }
         if ( !p1->flag ) {
-          p1->flag = nb;
-          nb++;
+          p1->flag = ++nb;
         }
       }
     }
@@ -500,27 +498,27 @@ static int MMGS_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
     }
     switch (pt->flag) {
     case 1: /* 1 edge split */
-      ier = MMGS_split1(mesh,sol,k,0,vx);
+      ier = MMGS_split1(mesh,met,k,0,vx);
       ns++;
       break;
 
     case 2: /* 1 edge split */
-      ier = MMGS_split1(mesh,sol,k,1,vx);
+      ier = MMGS_split1(mesh,met,k,1,vx);
       ns++;
       break;
 
     case 4: /* 1 edge split */
-      ier = MMGS_split1(mesh,sol,k,2,vx);
+      ier = MMGS_split1(mesh,met,k,2,vx);
       ns++;
       break;
 
     case 3: case 5: case 6: /* 2 edges split */
-      ier = MMGS_split2(mesh,sol,k,vx);
+      ier = MMGS_split2(mesh,met,k,vx);
       ns++;
       break;
 
     case 7: /* 3 edges splitted */
-      ier =MMGS_split3(mesh,sol,k,vx);
+      ier =MMGS_split3(mesh,met,k,vx);
       ns++;
       break;
 
@@ -582,7 +580,7 @@ static int MMGS_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol) {
       }
     }
 
-    // Set MG_ISO ref at ls edges
+    // Set mesh->info.isoref ref at ls edges
     if ( nz == 2 ) {
       for (i=0; i<3; i++) {
         ip  = pt->v[MMG5_inxt2[i]];
@@ -590,7 +588,7 @@ static int MMGS_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol) {
         v   = sol->m[ip] -mesh->info.ls;
         v1  = sol->m[ip1]-mesh->info.ls;
         if ( v == 0.0 && v1 == 0.0) {
-          pt->edg[i]  = MG_ISO;
+          pt->edg[i]  = mesh->info.isoref;
           pt->tag[i] |= MG_REF;
         }
       }

@@ -460,7 +460,8 @@ int8_t MMG5_chkedg(MMG5_pMesh mesh,MMG5_Tria *pt,int8_t ori, double hmax,
         if(!((p[i1]->tag & MG_NOM) ||  MG_EDG(p[i1]->tag) ) ) {
           if ( !mmgWarn0 ) {
             fprintf(stderr,"\n  ## Warning: %s: a- at least 1 geometrical"
-                    " problem\n",__func__);
+                    " problem: non consistency between point tag (%d) and"
+                    " edge tag (%d).\n",__func__,p[i1]->tag,pt->tag[i]);
             mmgWarn0 = 1;
           }
           return -1;
@@ -482,7 +483,8 @@ int8_t MMG5_chkedg(MMG5_pMesh mesh,MMG5_Tria *pt,int8_t ori, double hmax,
         if(!((p[i2]->tag & MG_NOM) || MG_EDG(p[i2]->tag) ) ) {
           if ( !mmgWarn1 ) {
             fprintf(stderr,"\n  ## Warning: %s: b- at least 1 geometrical"
-                    " problem\n",__func__);
+                    " problem: non consistency between point tag (%d) and"
+                    " edge tag (%d).\n",__func__,p[i2]->tag,pt->tag[i]);
             mmgWarn1 = 1;
           }
           return -1;
@@ -591,7 +593,7 @@ MMG5_int MMG5_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree PROctree, int
   }
   while ( ++it < maxit && ns > 0 );
   if ( (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) && nns > 0 )
-    fprintf(stdout,"     %8d edge swapped\n",nns);
+    fprintf(stdout,"     %8" MMG5_PRId " edge swapped\n",nns);
 
   return nns;
 }
@@ -652,7 +654,7 @@ MMG5_int MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double crit,double declic,
   }
   while ( ++it < maxit && ns > 0 );
   if ( (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) && nns > 0 )
-    fprintf(stdout,"     %8d edge swapped\n",nns);
+    fprintf(stdout,"     %8" MMG5_PRId " edge swapped\n",nns);
 
   return nns;
 }
@@ -716,6 +718,9 @@ MMG5_int MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree,
           else if ( MG_SIN(ppt->tag) )  continue;
 
           if( pt->xt && (pxt->ftag[i] & MG_BDY)) {
+            /* skip required faces */
+            if( pxt->ftag[i] & MG_REQ ) continue;
+
             MMG5_tet2tri(mesh,k,i,&tt);
             caltri = MMG5_caltri(mesh,met,&tt);
 
@@ -731,7 +736,8 @@ MMG5_int MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree,
           if ( ppt->tag & MG_BDY ) {
             /* Catch a boundary point by an external  face, unless point is internal non manifold */
             if ( (!pt->xt) || !(MG_BDY & pxt->ftag[i]) )  continue;
-            else if( ppt->tag & MG_NOM ){
+            else if ( (ppt->tag & MG_PARBDY)  || (ppt->tag & MG_PARBDYBDY) ) continue; /* skip parallel points seen by non-required faces */
+            else if ( ppt->tag & MG_NOM ){
               if ( ppt->xp && mesh->xpoint[ppt->xp].nnor ) {
                 ilistv = MMG5_boulevolp(mesh,k,i0,listv);
                 if ( !ilistv )  continue;
@@ -803,12 +809,12 @@ MMG5_int MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree,
       }
     }
     nnm += nm;
-    if ( mesh->info.ddebug )  fprintf(stdout,"     %8d moved, %" MMG5_PRId " geometry\n",nm,ns);
+    if ( mesh->info.ddebug )  fprintf(stdout,"     %8" MMG5_PRId " moved, %" MMG5_PRId " geometry\n",nm,ns);
   }
   while( ++it < maxit && nm > 0 );
 
   if ( (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) && nnm )
-    fprintf(stdout,"     %8d vertices moved, %" MMG5_PRId " iter.\n",nnm,it);
+    fprintf(stdout,"     %8" MMG5_PRId " vertices moved, %d iter.\n",nnm,it);
 
   return nnm;
 }
@@ -1037,19 +1043,12 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
           if ( p0->tag > tag )  continue;
 
           isnm = ( tag & MG_NOM );
-          if ( isnm ) {
-            isnmint = ( p0->xp && mesh->xpoint[p0->xp].nnor );
-            if ( isnmint ) {
-              ilist = MMG5_chkcol_nomint(mesh,met,k,i,j,list,ilist,typchk);
-            }
-            else {
-              if ( mesh->adja[4*(k-1)+1+i] )  continue;
-              ilist = MMG5_chkcol_bdy(mesh,met,k,i,j,list,ilist,lists,ilists,refmin,refplus,typchk,isnm);
-            }
+          isnmint = ( tag & MG_NOM ) ? ( p0->xp && mesh->xpoint[p0->xp].nnor ) : 0;
+          if ( isnm && (!isnmint) ) {
+            /* Treat surfacic non manifold points from a surface triangle */
+            if ( mesh->adja[4*(k-1)+1+i] )  continue;
           }
-          else {
-            ilist = MMG5_chkcol_bdy(mesh,met,k,i,j,list,ilist,lists,ilists,0,0,typchk,isnm);
-          }
+          ilist = MMG5_chkcol_bdy(mesh,met,k,i,j,list,ilist,lists,ilists,refmin,refplus,typchk,isnm,isnmint);
         }
         /* internal face */
         else {
@@ -1077,7 +1076,7 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
     }
   }
   if ( nc > 0 && (abs(mesh->info.imprim) > 5 || mesh->info.ddebug) )
-    fprintf(stdout,"     %8d vertices removed, %8d non manifold,\n",nc,nnm);
+    fprintf(stdout,"     %8" MMG5_PRId " vertices removed, %8" MMG5_PRId " non manifold,\n",nc,nnm);
 
   return nc;
 }
@@ -1382,7 +1381,7 @@ split:
   }
 
   if ( (mesh->info.ddebug || abs(mesh->info.imprim) > 5) && ns > 0 )
-    fprintf(stdout,"     %7d splitted\n",nap);
+    fprintf(stdout,"     %7" MMG5_PRId " splitted\n",nap);
 
   MMG5_DEL_MEM(mesh,hash.item);
   if ( memlack )  return -1;
@@ -1462,8 +1461,8 @@ int MMG3D_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,
   MMG5_pxPoint pxp;
   double       dd,o[3],to[3],no1[3],no2[3],v[3];
   int          ilist;
-  MMG5_int     ip,ip1,ip2,list[MMG3D_LMAX+2];
-  int          src,ref,ier;
+  MMG5_int     src,ip,ip1,ip2,list[MMG3D_LMAX+2],ref;
+  int          ier;
   int16_t      tag;
   int8_t       j,i,i1,i2,ifa0,ifa1;
 
@@ -1480,6 +1479,8 @@ int MMG3D_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,
   ip2 = pt->v[i2];
   p0  = &mesh->point[ip1];
   p1  = &mesh->point[ip2];
+
+  if ( (p0->tag & MG_PARBDY) && (p1->tag & MG_PARBDY) ) return 0;
 
   ref = pxt->edg[imax];
   tag = pxt->tag[imax];
@@ -1851,8 +1852,8 @@ MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
   MMG5_Bezier   pb,pb2;
   MMG5_Hash     hash;
   double        o[3],no[3],to[3],dd;
-  int           ic,it,src,nc,ni,ne,ier;
-  MMG5_int      ip,vx[6],ns,k,ip1,ip2,nap,ixp1,ixp2;
+  int           ic,it,ier;
+  MMG5_int      ip,vx[6],src,nc,ns,ni,ne,k,ip1,ip2,nap,ixp1,ixp2;
   int8_t        i,j,j2,ia,i1,i2,ifac,intnom;
   static double uv[3][2] = { {0.5,0.5}, {0.,0.5}, {0.5,0.} };
   static int8_t mmgWarn = 0, mmgWarn2 = 0;
@@ -2036,7 +2037,7 @@ MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
     for (i=0; i<4; i++) {
       /* virtual triangle */
       memset(&ptt,0,sizeof(MMG5_Tria));
-      if ( pt->xt && pxt->ftag[i] ) {
+      if ( pt->xt && pxt->ftag[i] && pxt->ftag[i] != MG_OLDPARBDY ) {
         MMG5_tet2tri(mesh,k,i,&ptt);
       }
 
@@ -2115,7 +2116,7 @@ MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
     for (k=1; k<=mesh->ne; k++) {
       pt = &mesh->tetra[k];
       if ( !MG_EOK(pt) || (pt->tag & MG_REQ) || !pt->flag )  continue;
-      memset(vx,0,6*sizeof(int));
+      memset(vx,0,6*sizeof(MMG5_int));
       pt->flag = ic = 0;
       for (ia=0,i=0; i<3; i++) {
         for (j=i+1; j<4; j++,ia++) {
@@ -2204,7 +2205,7 @@ MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
   for (k=1; k<=ne; k++) {
     pt = &mesh->tetra[k];
     if ( !MG_EOK(pt) || !pt->flag || (pt->tag & MG_REQ) )  continue;
-    memset(vx,0,6*sizeof(int));
+    memset(vx,0,6*sizeof(MMG5_int));
     for (ia=0,i=0; i<3; i++) {
       for (j=i+1; j<4; j++,ia++) {
         if ( MG_GET(pt->flag,ia) )  {
@@ -2269,7 +2270,7 @@ MMG3D_anatets_iso(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
     }
   }
   if ( (mesh->info.ddebug || abs(mesh->info.imprim) > 5) && ns > 0 )
-    fprintf(stdout,"       %7d elements splitted\n",nap);
+    fprintf(stdout,"       %7" MMG5_PRId " elements splitted\n",nap);
 
   MMG5_DEL_MEM(mesh,hash.item);
   return nap;
@@ -2644,7 +2645,7 @@ static MMG5_int MMG5_anatet4(MMG5_pMesh mesh, MMG5_pSol met,MMG5_int *nf, int8_t
   }
 
   if ( (mesh->info.ddebug || abs(mesh->info.imprim) > 5) && ns > 0 )
-    fprintf(stdout,"     boundary elements: %7d splitted %7d swapped\n",ns,*nf);
+    fprintf(stdout,"     boundary elements: %7" MMG5_PRId " splitted %7" MMG5_PRId " swapped\n",ns,*nf);
   return ns;
 }
 
@@ -2684,7 +2685,7 @@ static MMG5_int MMG5_anatet4rid(MMG5_pMesh mesh, MMG5_pSol met,MMG5_int *nf, int
     }
   }
   if ( (mesh->info.ddebug || abs(mesh->info.imprim) > 5) && ns > 0 )
-    fprintf(stdout,"     boundary elements: %7d splitted\n",ns);
+    fprintf(stdout,"     boundary elements: %7" MMG5_PRId " splitted\n",ns);
   return ns;
 }
 
@@ -2701,8 +2702,8 @@ static MMG5_int MMG5_anatet4rid(MMG5_pMesh mesh, MMG5_pSol met,MMG5_int *nf, int
  *
  */
 int MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk, int patternMode) {
-  int        nc,ns,nnc,nns,nnf,it,minit,maxit,lastit;
-  MMG5_int   ier,nf;
+  int        it,minit,maxit,lastit;
+  MMG5_int   nc,ns,nnc,nns,nnf,ier,nf;
 
   /* pointer toward the suitable anatets function */
   if ( met->m && met->size==6 ) {
@@ -2804,7 +2805,7 @@ int MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk, int patternMode) {
 #ifndef PATTERN
       fprintf(stdout,"                   ");
 #endif
-      fprintf(stdout,"     %8d splitted, %8d collapsed, %8d swapped\n",ns,nc,nf);
+      fprintf(stdout,"     %8" MMG5_PRId " splitted, %8" MMG5_PRId " collapsed, %8" MMG5_PRId " swapped\n",ns,nc,nf);
     }
 
     if ( it > minit-1 && ( !(ns+nc) || (abs(nc-ns) < 0.1 * MG_MAX(nc,ns)) ) ) {
@@ -2829,7 +2830,7 @@ int MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk, int patternMode) {
 #ifndef PATTERN
       fprintf(stdout,"                   ");
 #endif
-      fprintf(stdout, "     %8d splitted, %8d collapsed, %8d swapped, %" MMG5_PRId " iter.\n",nns,nnc,nnf,it);
+      fprintf(stdout, "     %8" MMG5_PRId " splitted, %8" MMG5_PRId " collapsed, %8" MMG5_PRId " swapped, %d iter.\n",nns,nnc,nnf,it);
     }
   }
 
