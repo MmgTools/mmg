@@ -107,7 +107,7 @@ extern "C" {
                                                                         \
     if ( mesh->adja ) {                                                 \
       /* adja table */                                                  \
-      MMG5_ADD_MEM(mesh,3*(mesh->ntmax-oldSiz)*sizeof(int),            \
+      MMG5_ADD_MEM(mesh,3*(mesh->ntmax-oldSiz)*sizeof(MMG5_int),            \
                     "larger adja table",law);                           \
       MMG5_SAFE_RECALLOC(mesh->adja,3*oldSiz+5,3*mesh->ntmax+5,MMG5_int     \
                           ,"larger adja table",law);                    \

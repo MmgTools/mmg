@@ -171,7 +171,8 @@ int MMG3D_memOption_memSet(MMG5_pMesh mesh) {
  */
 int MMG3D_memOption_memRepartition(MMG5_pMesh mesh) {
   size_t     usedMem,avMem,reservedMem,npadd;
-  int        ctri,bytes;
+  int        ctri;
+  MMG5_int   bytes;
 
   /* init allocation need MMG5_MEMMIN B */
   reservedMem = MMG5_MEMMIN +
@@ -180,7 +181,7 @@ int MMG3D_memOption_memRepartition(MMG5_pMesh mesh) {
   /* Compute the needed initial memory */
   usedMem = reservedMem + (mesh->np+1)*sizeof(MMG5_Point)
     + (mesh->nt+1)*sizeof(MMG5_Tria) + (mesh->ne+1)*sizeof(MMG5_Tetra)
-    + (3*mesh->nt+1)*sizeof(int)   + (4*mesh->ne+1)*sizeof(int)
+    + (3*mesh->nt+1)*sizeof(MMG5_int)   + (4*mesh->ne+1)*sizeof(MMG5_int)
     + (mesh->np+1)*sizeof(double);
 
   if ( usedMem > mesh->memMax  ) {
@@ -195,13 +196,13 @@ int MMG3D_memOption_memRepartition(MMG5_pMesh mesh) {
    * point+tria+tets+adja+adjt+aniso sol+item */
   bytes = sizeof(MMG5_Point) + sizeof(MMG5_xPoint) +
     6*sizeof(MMG5_Tetra) + ctri*sizeof(MMG5_xTetra) +
-    4*6*sizeof(int) + ctri*3*sizeof(int) +
+    4*6*sizeof(MMG5_int) + ctri*3*sizeof(MMG5_int) +
     4*sizeof(MMG5_hedge)+6*sizeof(double);
 
 #ifdef USE_SCOTCH
   /* bytes = bytes + vertTab + edgeTab + PermVrtTab *
    * + vertOldTab + sortPartTab - adja */
-  bytes = bytes + 3*6*sizeof(int);
+  bytes = bytes + 3*6*sizeof(MMG5_int);
 #endif
 
   avMem = mesh->memMax-usedMem;

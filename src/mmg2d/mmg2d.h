@@ -135,7 +135,7 @@ static const unsigned int MMG2D_inxt[5] = {1,2,0,1,2};
     of point ip with coordinates o and tag tag*/
 #define MMG2D_POINT_REALLOC(mesh,sol,ip,wantedGap,law,o,tag ) do       \
   {                                                                     \
-    int klink;                                                          \
+    MMG5_int klink;                                                     \
                                                                         \
     assert ( mesh && mesh->point );                                     \
     MMG5_TAB_RECALLOC(mesh,mesh->point,mesh->npmax,wantedGap,MMG5_Point, \
@@ -166,7 +166,7 @@ static const unsigned int MMG2D_inxt[5] = {1,2,0,1,2};
     of tria jel */
 #define MMG2D_TRIA_REALLOC(mesh,jel,wantedGap,law ) do                 \
   {                                                                     \
-   int klink,oldSiz;                                                    \
+   MMG5_int klink,oldSiz;                                               \
                                                                         \
    oldSiz = mesh->ntmax;                                                \
    MMG5_TAB_RECALLOC(mesh,mesh->tria,mesh->ntmax,wantedGap,MMG5_Tria,  \

@@ -733,7 +733,7 @@ extern int  MMG5_updatemet2d_ani(double *m,double *n,double dm[2],double dn[2],d
 int  MMG5_updatemet3d_ani(double *m,double *n,double dm[3],double dn[3],double vp[3][3],int8_t ier );
 void MMG5_gradEigenvreq(double *dm,double *dn,double,int8_t,int8_t *);
 int  MMG5_updatemetreq_ani(double *n,double dn[2],double vp[2][2]);
-int    MMG5_swapbin(int sbin);
+MMG5_int    MMG5_swapbin(MMG5_int sbin);
 float  MMG5_swapf(float sbin);
 double MMG5_swapd(double sbin);
 int MMG5_MultiMat_init(MMG5_pMesh);

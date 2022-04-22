@@ -104,7 +104,7 @@ extern "C" {
                                                                         \
     if ( mesh->adja ) {                                                 \
       /* adja table */                                                  \
-      MMG5_ADD_MEM(mesh,4*(mesh->nemax-oldSiz)*sizeof(int),            \
+      MMG5_ADD_MEM(mesh,4*(mesh->nemax-oldSiz)*sizeof(MMG5_int),            \
                     "larger adja table",law);                           \
       MMG5_SAFE_RECALLOC(mesh->adja,4*oldSiz+5,4*mesh->nemax+5,MMG5_int     \
                           ,"larger adja table",law);                    \
@@ -335,7 +335,7 @@ int  MMG5_mmg3d1_delone(MMG5_pMesh ,MMG5_pSol,MMG5_int* );
 int  MMG3D_mmg3d2(MMG5_pMesh ,MMG5_pSol,MMG5_pSol );
 int  MMG3D_update_xtetra ( MMG5_pMesh mesh );
 int  MMG5_mmg3dChkmsh(MMG5_pMesh,int,int);
-int  MMG3D_setMeshSize_initData(MMG5_pMesh,MMG5_int,MMG5_int,int,MMG5_int,int,MMG5_int);
+int  MMG3D_setMeshSize_initData(MMG5_pMesh,MMG5_int,MMG5_int,MMG5_int,MMG5_int,MMG5_int,MMG5_int);
 int  MMG3D_setMeshSize_alloc(MMG5_pMesh);
 int  MMG3D_split1_sim(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6]);
 int  MMG5_split1(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,MMG5_int vx[6],int8_t metRidTyp);

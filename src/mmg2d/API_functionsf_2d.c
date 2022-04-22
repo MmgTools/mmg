@@ -178,8 +178,8 @@ FORTRAN_NAME(MMG2D_SET_LOCALPARAMETER,mmg2d_set_localparameter,
  * See \ref MMG2D_Set_multiMat function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_SET_MULTIMAT,mmg2d_set_multimat,
-             (MMG5_pMesh *mesh,MMG5_pSol *sol, int *ref,int *split,
-              int* rin,int* rex, int* retval),
+             (MMG5_pMesh *mesh,MMG5_pSol *sol, MMG5_int *ref,int *split,
+              MMG5_int* rin,MMG5_int* rex, int* retval),
              (mesh,sol,ref,split,rin,rex,retval)){
   *retval = MMG2D_Set_multiMat(*mesh,*sol,*ref,*split,*rin,*rex);
   return;
@@ -242,7 +242,7 @@ FORTRAN_NAME(MMG2D_GET_SOLSATVERTICESSIZE,mmg2d_get_solsatverticessize,
  * See \ref MMG2D_Set_vertex function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_SET_VERTEX,mmg2d_set_vertex,
-             (MMG5_pMesh *mesh, double* c0, double* c1, int* ref,
+             (MMG5_pMesh *mesh, double* c0, double* c1, MMG5_int* ref,
               MMG5_int* pos, int* retval),
              (mesh,c0,c1,ref,pos,retval)) {
 
@@ -290,7 +290,7 @@ FORTRAN_NAME(MMG2D_UNSET_REQUIREDVERTEX,mmg2d_unset_requiredvertex,
  * See \ref MMG2D_Get_vertex function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_GET_VERTEX,mmg2d_get_vertex,
-             (MMG5_pMesh *mesh,double* c0, double* c1, int* ref,
+             (MMG5_pMesh *mesh,double* c0, double* c1, MMG5_int* ref,
               int* isCorner, int* isRequired, int* retval),
              (mesh,c0,c1,ref,isCorner,isRequired, retval)) {
   *retval = MMG2D_Get_vertex(*mesh,c0,c1,ref,isCorner,isRequired);
@@ -300,7 +300,7 @@ FORTRAN_NAME(MMG2D_GET_VERTEX,mmg2d_get_vertex,
  * See \ref MMG2D_GetByIdx_vertex function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_GETBYIDX_VERTEX,mmg2d_getbyidx_vertex,
-             (MMG5_pMesh *mesh, double* c0, double* c1, int* ref,
+             (MMG5_pMesh *mesh, double* c0, double* c1, MMG5_int* ref,
               int* isCorner, int* isRequired, MMG5_int* idx,int* retval),
              (mesh,c0,c1,ref,isCorner,isRequired,idx, retval)) {
   *retval = MMG2D_GetByIdx_vertex(*mesh,c0,c1,ref,isCorner,isRequired,*idx);
@@ -311,7 +311,7 @@ FORTRAN_NAME(MMG2D_GETBYIDX_VERTEX,mmg2d_getbyidx_vertex,
  * See \ref MMG2D_Set_vertices function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_SET_VERTICES,mmg2d_set_vertices,
-             (MMG5_pMesh *mesh, double* vertices, int* refs, int* retval),
+             (MMG5_pMesh *mesh, double* vertices, MMG5_int* refs, int* retval),
              (mesh,vertices,refs,retval)) {
 
   *retval = MMG2D_Set_vertices(*mesh,vertices,refs);
@@ -323,7 +323,7 @@ FORTRAN_NAME(MMG2D_SET_VERTICES,mmg2d_set_vertices,
  * See \ref MMG2D_Get_vertices function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_GET_VERTICES,mmg2d_get_vertices,
-             (MMG5_pMesh *mesh, double* vertices, int* refs,
+             (MMG5_pMesh *mesh, double* vertices, MMG5_int* refs,
               int* areCorners, int* areRequired, int* retval),
              (mesh,vertices,refs,areCorners,areRequired, retval)) {
   *retval = MMG2D_Get_vertices(*mesh,vertices,refs,areCorners,areRequired);
@@ -335,7 +335,7 @@ FORTRAN_NAME(MMG2D_GET_VERTICES,mmg2d_get_vertices,
  * See \ref MMG2D_Set_triangle function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_SET_TRIANGLE,mmg2d_set_triangle,
-             (MMG5_pMesh *mesh, MMG5_int* v0, MMG5_int* v1, MMG5_int* v2, int* ref,MMG5_int* pos,
+             (MMG5_pMesh *mesh, MMG5_int* v0, MMG5_int* v1, MMG5_int* v2, MMG5_int* ref,MMG5_int* pos,
               int* retval),
              (mesh,v0,v1,v2,ref,pos,retval)) {
   *retval = MMG2D_Set_triangle(*mesh, *v0, *v1, *v2, *ref, *pos);
@@ -364,7 +364,7 @@ FORTRAN_NAME(MMG2D_UNSET_REQUIREDTRIANGLE,mmg2d_unset_requiredtriangle,
  * See \ref MMG2D_Get_triangle function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_GET_TRIANGLE,mmg2d_get_triangle,
-             (MMG5_pMesh *mesh, MMG5_int* v0, MMG5_int* v1, MMG5_int* v2, int* ref
+             (MMG5_pMesh *mesh, MMG5_int* v0, MMG5_int* v1, MMG5_int* v2, MMG5_int* ref
               ,int* isRequired, int* retval),
              (mesh,v0,v1,v2,ref,isRequired,retval)) {
   *retval = MMG2D_Get_triangle(*mesh,v0,v1,v2,ref,isRequired);
@@ -374,7 +374,7 @@ FORTRAN_NAME(MMG2D_GET_TRIANGLE,mmg2d_get_triangle,
  * See \ref MMG2D_Set_triangles function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_SET_TRIANGLES,mmg2d_set_triangles,
-             (MMG5_pMesh *mesh, MMG5_int* tria, int* refs,
+             (MMG5_pMesh *mesh, MMG5_int* tria, MMG5_int* refs,
               int* retval),
              (mesh,tria,refs,retval)) {
   *retval = MMG2D_Set_triangles(*mesh, tria, refs);
@@ -385,7 +385,7 @@ FORTRAN_NAME(MMG2D_SET_TRIANGLES,mmg2d_set_triangles,
  * See \ref MMG2D_Get_triangles function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_GET_TRIANGLES,mmg2d_get_triangles,
-             (MMG5_pMesh *mesh, MMG5_int* tria, int* refs,int* areRequired,
+             (MMG5_pMesh *mesh, MMG5_int* tria, MMG5_int* refs,int* areRequired,
               int* retval),
              (mesh,tria,refs,areRequired,retval)) {
   *retval = MMG2D_Get_triangles(*mesh,tria,refs,areRequired);
@@ -396,7 +396,7 @@ FORTRAN_NAME(MMG2D_GET_TRIANGLES,mmg2d_get_triangles,
  * See \ref MMG2D_Set_quadrilateral function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_SET_QUADRILATERAL,mmg2d_set_quadrilateral,
-             (MMG5_pMesh *mesh, MMG5_int* v0, MMG5_int* v1, MMG5_int* v2, MMG5_int *v3,int* ref,int* pos,
+             (MMG5_pMesh *mesh, MMG5_int* v0, MMG5_int* v1, MMG5_int* v2, MMG5_int *v3,MMG5_int* ref,MMG5_int* pos,
               int* retval),
              (mesh,v0,v1,v2,v3,ref,pos,retval)) {
   *retval = MMG2D_Set_quadrilateral(*mesh, *v0, *v1, *v2, *v3, *ref, *pos);
@@ -406,7 +406,7 @@ FORTRAN_NAME(MMG2D_SET_QUADRILATERAL,mmg2d_set_quadrilateral,
  * See \ref MMG2D_Get_quadrilateral function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_GET_QUADRILATERAL,mmg2d_get_quadrilateral,
-             (MMG5_pMesh *mesh, MMG5_int* v0, MMG5_int* v1, MMG5_int* v2, MMG5_int *v3, int* ref
+             (MMG5_pMesh *mesh, MMG5_int* v0, MMG5_int* v1, MMG5_int* v2, MMG5_int *v3, MMG5_int* ref
               ,int* isRequired, int* retval),
              (mesh,v0,v1,v2,v3,ref,isRequired,retval)) {
   *retval = MMG2D_Get_quadrilateral(*mesh,v0,v1,v2,v3,ref,isRequired);
@@ -416,7 +416,7 @@ FORTRAN_NAME(MMG2D_GET_QUADRILATERAL,mmg2d_get_quadrilateral,
  * See \ref MMG2D_Set_quadrilaterals function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_SET_QUADRILATERALS,mmg2d_set_quadrilaterals,
-             (MMG5_pMesh *mesh, MMG5_int* quadra, int* refs,
+             (MMG5_pMesh *mesh, MMG5_int* quadra, MMG5_int* refs,
               int* retval),
              (mesh,quadra,refs,retval)) {
   *retval = MMG2D_Set_quadrilaterals(*mesh, quadra, refs);
@@ -427,7 +427,7 @@ FORTRAN_NAME(MMG2D_SET_QUADRILATERALS,mmg2d_set_quadrilaterals,
  * See \ref MMG2D_Get_quadrilaterals function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_GET_QUADRILATERALS,mmg2d_get_quadrilaterals,
-             (MMG5_pMesh *mesh, MMG5_int* quadra, int* refs,int* areRequired,
+             (MMG5_pMesh *mesh, MMG5_int* quadra, MMG5_int* refs,int* areRequired,
               int* retval),
              (mesh,quadra,refs,areRequired,retval)) {
   *retval = MMG2D_Get_quadrilaterals(*mesh,quadra,refs,areRequired);
@@ -438,7 +438,7 @@ FORTRAN_NAME(MMG2D_GET_QUADRILATERALS,mmg2d_get_quadrilaterals,
  * See \ref MMG2D_Set_edge function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_SET_EDGE,mmg2d_set_edge,
-             (MMG5_pMesh *mesh, MMG5_int *v0, MMG5_int *v1, int *ref, MMG5_int *pos, int* retval),
+             (MMG5_pMesh *mesh, MMG5_int *v0, MMG5_int *v1, MMG5_int *ref, MMG5_int *pos, int* retval),
              (mesh,v0,v1,ref,pos,retval)){
   *retval = MMG2D_Set_edge(*mesh,*v0,*v1,*ref,*pos);
   return;
@@ -474,7 +474,7 @@ FORTRAN_NAME(MMG2D_SET_PARALLELEDGE,mmg2d_set_paralleledge,
 /**
  * See \ref MMG2D_Get_edge function in \ref mmg2d/libmmg2d.h file.
  */
-FORTRAN_NAME(MMG2D_GET_EDGE,mmg2d_get_edge,(MMG5_pMesh *mesh, MMG5_int* e0, MMG5_int* e1, int* ref
+FORTRAN_NAME(MMG2D_GET_EDGE,mmg2d_get_edge,(MMG5_pMesh *mesh, MMG5_int* e0, MMG5_int* e1, MMG5_int* ref
                                           ,int* isRidge, int* isRequired, int* retval),
              (mesh,e0,e1,ref,isRidge,isRequired,retval)) {
   *retval = MMG2D_Get_edge(*mesh,e0,e1,ref,isRidge,isRequired);
@@ -484,7 +484,7 @@ FORTRAN_NAME(MMG2D_GET_EDGE,mmg2d_get_edge,(MMG5_pMesh *mesh, MMG5_int* e0, MMG5
  * See \ref MMG2D_Set_edges function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_SET_EDGES,mmg2d_set_edges,
-             (MMG5_pMesh *mesh, MMG5_int *edges, int *refs, int* retval),
+             (MMG5_pMesh *mesh, MMG5_int *edges, MMG5_int *refs, int* retval),
              (mesh,edges,refs,retval)){
   *retval = MMG2D_Set_edges(*mesh,edges,refs);
   return;
@@ -494,7 +494,7 @@ FORTRAN_NAME(MMG2D_SET_EDGES,mmg2d_set_edges,
  * See \ref MMG2D_Get_edges function in \ref mmg2d/libmmg2d.h file.
  */
 FORTRAN_NAME(MMG2D_GET_EDGES,mmg2d_get_edges,(MMG5_pMesh *mesh, MMG5_int* edges,
-                                              int* refs,int* areRidges,
+                                              MMG5_int* refs,int* areRidges,
                                               int* areRequired, int* retval),
              (mesh,edges,refs,areRidges,areRequired,retval)) {
   *retval = MMG2D_Get_edges(*mesh,edges,refs,areRidges,areRequired);

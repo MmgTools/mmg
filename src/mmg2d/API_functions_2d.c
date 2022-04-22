@@ -602,7 +602,7 @@ int MMG2D_Get_meshSize(MMG5_pMesh mesh, MMG5_int* np, MMG5_int* nt, MMG5_int* nq
   return 1;
 }
 
-int MMG2D_Set_vertex(MMG5_pMesh mesh, double c0, double c1, int ref, MMG5_int pos) {
+int MMG2D_Set_vertex(MMG5_pMesh mesh, double c0, double c1, MMG5_int ref, MMG5_int pos) {
 
   if ( !mesh->np ) {
     fprintf(stderr,"\n  ## Error: %s: you must set the number of points with the",
@@ -667,7 +667,7 @@ int MMG2D_Unset_requiredVertex(MMG5_pMesh mesh, MMG5_int k) {
   return 1;
 }
 
-int MMG2D_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, int* ref,
+int MMG2D_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, MMG5_int* ref,
                      int* isCorner, int* isRequired) {
 
   if ( mesh->npi == mesh->np ) {
@@ -694,7 +694,7 @@ int MMG2D_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, int* ref,
   return MMG2D_GetByIdx_vertex( mesh,c0,c1,ref,isCorner,isRequired,mesh->npi);
 }
 
-int MMG2D_GetByIdx_vertex(MMG5_pMesh mesh, double* c0, double* c1, int* ref,
+int MMG2D_GetByIdx_vertex(MMG5_pMesh mesh, double* c0, double* c1, MMG5_int* ref,
                           int* isCorner, int* isRequired, MMG5_int idx) {
 
   if ( idx < 1 || idx > mesh->np ) {
@@ -726,7 +726,7 @@ int MMG2D_GetByIdx_vertex(MMG5_pMesh mesh, double* c0, double* c1, int* ref,
   return 1;
 }
 
-int  MMG2D_Set_vertices(MMG5_pMesh mesh, double *vertices,int *refs) {
+int  MMG2D_Set_vertices(MMG5_pMesh mesh, double *vertices,MMG5_int *refs) {
   MMG5_pPoint ppt;
   MMG5_int i,j;
 
@@ -754,7 +754,7 @@ int  MMG2D_Set_vertices(MMG5_pMesh mesh, double *vertices,int *refs) {
   return 1;
 }
 
-int  MMG2D_Get_vertices(MMG5_pMesh mesh, double* vertices, int* refs,
+int  MMG2D_Get_vertices(MMG5_pMesh mesh, double* vertices, MMG5_int* refs,
                         int* areCorners, int* areRequired) {
   MMG5_pPoint ppt;
   MMG5_int i,j;
@@ -793,7 +793,8 @@ int MMG2D_Set_triangle(MMG5_pMesh mesh, MMG5_int v0, MMG5_int v1, MMG5_int v2, M
   MMG5_pPoint ppt;
   MMG5_pTria  pt;
   double      vol;
-  int         i,j,ip,tmp;
+  int         i,j,ip;
+  MMG5_int    tmp;
 
   if ( !mesh->nt ) {
     fprintf(stderr,"  ## Error: %s: You must set the number of elements with the",
@@ -890,7 +891,7 @@ int MMG2D_Unset_requiredTriangle(MMG5_pMesh mesh, MMG5_int k) {
   return 1;
 }
 
-int MMG2D_Get_triangle(MMG5_pMesh mesh, MMG5_int* v0, MMG5_int* v1, MMG5_int* v2, int* ref
+int MMG2D_Get_triangle(MMG5_pMesh mesh, MMG5_int* v0, MMG5_int* v1, MMG5_int* v2, MMG5_int* ref
                        ,int* isRequired) {
   MMG5_pTria  ptt;
 
@@ -935,7 +936,7 @@ int MMG2D_Get_triangle(MMG5_pMesh mesh, MMG5_int* v0, MMG5_int* v1, MMG5_int* v2
   return 1;
 }
 
-int  MMG2D_Set_triangles(MMG5_pMesh mesh, MMG5_int *tria, int *refs) {
+int  MMG2D_Set_triangles(MMG5_pMesh mesh, MMG5_int *tria, MMG5_int *refs) {
   MMG5_pPoint ppt;
   MMG5_pTria ptt;
   double vol;
@@ -993,7 +994,7 @@ int  MMG2D_Set_triangles(MMG5_pMesh mesh, MMG5_int *tria, int *refs) {
   return 1;
 }
 
-int  MMG2D_Get_triangles(MMG5_pMesh mesh, MMG5_int* tria, int* refs,
+int  MMG2D_Get_triangles(MMG5_pMesh mesh, MMG5_int* tria, MMG5_int* refs,
                          int* areRequired) {
   MMG5_pTria ptt;
   MMG5_int   i, j;
@@ -1019,7 +1020,7 @@ int  MMG2D_Get_triangles(MMG5_pMesh mesh, MMG5_int* tria, int* refs,
   return 1;
 }
 
-int MMG2D_Set_quadrilateral(MMG5_pMesh mesh, MMG5_int v0, MMG5_int v1, MMG5_int v2, MMG5_int v3, int ref, int pos) {
+int MMG2D_Set_quadrilateral(MMG5_pMesh mesh, MMG5_int v0, MMG5_int v1, MMG5_int v2, MMG5_int v3, MMG5_int ref, MMG5_int pos) {
   MMG5_pQuad  pq;
 
   if ( !mesh->nquad ) {
@@ -1054,8 +1055,8 @@ int MMG2D_Set_quadrilateral(MMG5_pMesh mesh, MMG5_int v0, MMG5_int v1, MMG5_int 
 }
 
 int MMG2D_Get_quadrilateral(MMG5_pMesh mesh, MMG5_int* v0, MMG5_int* v1, MMG5_int* v2, MMG5_int* v3,
-                            int* ref, int* isRequired) {
-  static int nqi = 0;
+                            MMG5_int* ref, int* isRequired) {
+  static MMG5_int nqi = 0;
 
   if ( nqi == mesh->nquad ) {
     nqi = 0;
@@ -1099,9 +1100,9 @@ int MMG2D_Get_quadrilateral(MMG5_pMesh mesh, MMG5_int* v0, MMG5_int* v1, MMG5_in
   return 1;
 }
 
-int  MMG2D_Set_quadrilaterals(MMG5_pMesh mesh, MMG5_int *quadra, int *refs) {
+int  MMG2D_Set_quadrilaterals(MMG5_pMesh mesh, MMG5_int *quadra, MMG5_int *refs) {
   MMG5_pQuad pq;
-  int        i,j;
+  MMG5_int   i,j;
 
   for (i=1;i<=mesh->nquad;i++)
   {
@@ -1124,9 +1125,9 @@ int  MMG2D_Set_quadrilaterals(MMG5_pMesh mesh, MMG5_int *quadra, int *refs) {
   return 1;
 }
 
-int  MMG2D_Get_quadrilaterals(MMG5_pMesh mesh, MMG5_int *quadra, int *refs, int * areRequired) {
+int  MMG2D_Get_quadrilaterals(MMG5_pMesh mesh, MMG5_int *quadra, MMG5_int *refs, int * areRequired) {
   MMG5_pQuad pq;
-  int        i, j;
+  MMG5_int   i, j;
 
   for (i=1;i<=mesh->nquad;i++)
   {
@@ -1154,7 +1155,7 @@ int  MMG2D_Get_quadrilaterals(MMG5_pMesh mesh, MMG5_int *quadra, int *refs, int 
 }
 
 
-int MMG2D_Set_edge(MMG5_pMesh mesh, MMG5_int v0, MMG5_int v1, int ref, MMG5_int pos) {
+int MMG2D_Set_edge(MMG5_pMesh mesh, MMG5_int v0, MMG5_int v1, MMG5_int ref, MMG5_int pos) {
   MMG5_pEdge pt;
 
   if ( !mesh->na ) {
@@ -1227,7 +1228,7 @@ int MMG2D_Set_parallelEdge(MMG5_pMesh mesh, MMG5_int k) {
   return 1;
 }
 
-int MMG2D_Get_edge(MMG5_pMesh mesh, MMG5_int* e0, MMG5_int* e1, int* ref
+int MMG2D_Get_edge(MMG5_pMesh mesh, MMG5_int* e0, MMG5_int* e1, MMG5_int* ref
                    ,int* isRidge, int* isRequired) {
   MMG5_pEdge        ped;
 
@@ -1283,7 +1284,7 @@ int MMG2D_Get_edge(MMG5_pMesh mesh, MMG5_int* e0, MMG5_int* e1, int* ref
   return 1;
 }
 
-int MMG2D_Set_edges(MMG5_pMesh mesh, MMG5_int *edges, int *refs) {
+int MMG2D_Set_edges(MMG5_pMesh mesh, MMG5_int *edges, MMG5_int *refs) {
   MMG5_int i,j;
 
   for (i=1;i<=mesh->na;i++)
@@ -1303,8 +1304,8 @@ int MMG2D_Set_edges(MMG5_pMesh mesh, MMG5_int *edges, int *refs) {
   return 1;
 }
 
-int MMG2D_Get_edges(MMG5_pMesh mesh, MMG5_int* edges,int *refs,int* areRidges,int* areRequired) {
-  int i,j;
+int MMG2D_Get_edges(MMG5_pMesh mesh, MMG5_int* edges,MMG5_int *refs,int* areRidges,int* areRequired) {
+  MMG5_int i,j;
 
   for (i=1;i<=mesh->na;i++)
   {

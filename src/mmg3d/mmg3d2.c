@@ -414,8 +414,8 @@ MMG5_ismaniball(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int k,int indp) {
   np = pt->v[indp];
   if ( fabs(sol->m[np]-mesh->info.ls) > MMG5_EPSD2 )  return 1;
 
-  memset(bdy,0,(MMG3D_LMAX+1)*sizeof(int));
-  memset(list,0,(MMG3D_LMAX+1)*sizeof(int));
+  memset(bdy,0,(MMG3D_LMAX+1)*sizeof(MMG5_int));
+  memset(list,0,(MMG3D_LMAX+1)*sizeof(MMG5_int));
 
   /* Sign of a starting point in ball of np */
   for (j=0; j<3; j++) {
@@ -564,7 +564,7 @@ MMG5_ismaniball(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int k,int indp) {
   base = ++mesh->base;
   pt->flag = base;
 
-  memset(list,0,(MMG3D_LMAX+1)*sizeof(int));
+  memset(list,0,(MMG3D_LMAX+1)*sizeof(MMG5_int));
   ilist = cur = 0;
   list[ilist] = res;
   ilist++;
@@ -790,7 +790,7 @@ int MMG3D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
   }
 
   /* Memory allocation for pile */
-  MMG5_ADD_MEM(mesh,(mesh->ne+1)*sizeof(int),"temporary table",
+  MMG5_ADD_MEM(mesh,(mesh->ne+1)*sizeof(MMG5_int),"temporary table",
                printf("  Exit program.\n");
                return 0);
   MMG5_SAFE_CALLOC(pile,mesh->ne+1,MMG5_int,return 0);
@@ -1197,7 +1197,7 @@ static int MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
     pt = &mesh->tetra[k];
     if ( !MG_EOK(pt) )  continue;
     pt->flag = 0;
-    memset(vx,0,6*sizeof(int));
+    memset(vx,0,6*sizeof(MMG5_int));
     for (ia=0; ia<6; ia++) {
       vx[ia] = MMG5_hashGet(&hash,pt->v[MMG5_iare[ia][0]],pt->v[MMG5_iare[ia][1]]);
       if ( vx[ia] > 0 )  MG_SET(pt->flag,ia);
@@ -1737,7 +1737,7 @@ int MMG5_chkmanicoll(MMG5_pMesh mesh,MMG5_int k,int iface,int iedg,MMG5_int ndep
       cur++;
     }
 
-    memset(list,0,(MMG3D_LMAX+2)*sizeof(int));
+    memset(list,0,(MMG3D_LMAX+2)*sizeof(MMG5_int));
     ilist = 0;
   }
 

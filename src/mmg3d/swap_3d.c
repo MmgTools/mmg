@@ -546,7 +546,7 @@ int MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *list,int ret,MMG5_int it
   }
 
   /* Collapse m on na after taking (new) ball of m */
-  memset(list,0,(MMG3D_LMAX+2)*sizeof(int));
+  memset(list,0,(MMG3D_LMAX+2)*sizeof(MMG5_int));
   for (j=0; j<3; j++) {
     im = MMG5_idir[iface1][j];
     if ( pt1->v[im] == nm )  break;

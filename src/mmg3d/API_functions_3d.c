@@ -211,8 +211,8 @@ int MMG3D_Set_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol *sol,int nsols,
  * Check the input mesh size and assign their values to the mesh.
  *
  */
-int MMG3D_setMeshSize_initData(MMG5_pMesh mesh, MMG5_int np, MMG5_int ne, int nprism,
-                               MMG5_int nt, int nquad, MMG5_int na ) {
+int MMG3D_setMeshSize_initData(MMG5_pMesh mesh, MMG5_int np, MMG5_int ne, MMG5_int nprism,
+                               MMG5_int nt, MMG5_int nquad, MMG5_int na ) {
 
   if ( ( (mesh->info.imprim > 5) || mesh->info.ddebug ) &&
        ( mesh->point || mesh->tria || mesh->tetra || mesh->edge) )
@@ -353,7 +353,7 @@ int MMG3D_Get_meshSize(MMG5_pMesh mesh, MMG5_int* np, MMG5_int* ne, MMG5_int* np
   return 1;
 }
 
-int MMG3D_Set_vertex(MMG5_pMesh mesh, double c0, double c1, double c2, int ref, MMG5_int pos) {
+int MMG3D_Set_vertex(MMG5_pMesh mesh, double c0, double c1, double c2, MMG5_int ref, MMG5_int pos) {
 
   if ( !mesh->np ) {
     fprintf(stderr,"\n  ## Error: %s: you must set the number of points with the",
@@ -389,7 +389,7 @@ int MMG3D_Set_vertex(MMG5_pMesh mesh, double c0, double c1, double c2, int ref, 
   return 1;
 }
 
-int MMG3D_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2, int* ref,
+int MMG3D_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2, MMG5_int* ref,
                      int* isCorner, int* isRequired) {
 
   if ( mesh->npi == mesh->np ) {
@@ -416,7 +416,7 @@ int MMG3D_Get_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2, int* r
   return MMG3D_GetByIdx_vertex( mesh,c0,c1,c2,ref,isCorner,isRequired,mesh->npi);
 }
 
-int MMG3D_GetByIdx_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2, int* ref,
+int MMG3D_GetByIdx_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2, MMG5_int* ref,
                           int* isCorner, int* isRequired, MMG5_int idx) {
 
   if ( idx < 1 || idx > mesh->np ) {
@@ -449,7 +449,7 @@ int MMG3D_GetByIdx_vertex(MMG5_pMesh mesh, double* c0, double* c1, double* c2, i
   return 1;
 }
 
-int  MMG3D_Set_vertices(MMG5_pMesh mesh, double *vertices,int *refs) {
+int  MMG3D_Set_vertices(MMG5_pMesh mesh, double *vertices,MMG5_int *refs) {
 
   MMG5_pPoint ppt;
   MMG5_int    i,j;
@@ -476,7 +476,7 @@ int  MMG3D_Set_vertices(MMG5_pMesh mesh, double *vertices,int *refs) {
 }
 
 
-int  MMG3D_Get_vertices(MMG5_pMesh mesh, double* vertices, int* refs,
+int  MMG3D_Get_vertices(MMG5_pMesh mesh, double* vertices, MMG5_int* refs,
                         int* areCorners, int* areRequired) {
   MMG5_pPoint ppt;
   MMG5_int    i,j;
@@ -512,7 +512,7 @@ int  MMG3D_Get_vertices(MMG5_pMesh mesh, double* vertices, int* refs,
   return 1;
 }
 
-int MMG3D_Set_tetrahedron(MMG5_pMesh mesh, MMG5_int v0, MMG5_int v1, MMG5_int v2, MMG5_int v3, int ref, MMG5_int pos) {
+int MMG3D_Set_tetrahedron(MMG5_pMesh mesh, MMG5_int v0, MMG5_int v1, MMG5_int v2, MMG5_int v3, MMG5_int ref, MMG5_int pos) {
   MMG5_pTetra pt;
   MMG5_pPoint ppt;
   double      vol;
@@ -585,7 +585,7 @@ int MMG3D_Set_tetrahedron(MMG5_pMesh mesh, MMG5_int v0, MMG5_int v1, MMG5_int v2
 }
 
 int MMG3D_Get_tetrahedron(MMG5_pMesh mesh, MMG5_int* v0, MMG5_int* v1, MMG5_int* v2, MMG5_int* v3,
-                          int* ref, int* isRequired) {
+                          MMG5_int* ref, int* isRequired) {
 
   if ( mesh->nei == mesh->ne ) {
     mesh->nei = 0;
@@ -626,7 +626,7 @@ int MMG3D_Get_tetrahedron(MMG5_pMesh mesh, MMG5_int* v0, MMG5_int* v1, MMG5_int*
   return 1;
 }
 
-int  MMG3D_Set_tetrahedra(MMG5_pMesh mesh, MMG5_int *tetra, int *refs) {
+int  MMG3D_Set_tetrahedra(MMG5_pMesh mesh, MMG5_int *tetra, MMG5_int *refs) {
   MMG5_pPoint ppt;
   MMG5_pTetra pt;
   double      vol;
@@ -684,7 +684,7 @@ int  MMG3D_Set_tetrahedra(MMG5_pMesh mesh, MMG5_int *tetra, int *refs) {
   return 1;
 }
 
-int  MMG3D_Get_tetrahedra(MMG5_pMesh mesh, MMG5_int *tetra, int *refs, int * areRequired) {
+int  MMG3D_Get_tetrahedra(MMG5_pMesh mesh, MMG5_int *tetra, MMG5_int *refs, int * areRequired) {
   MMG5_pTetra pt;
   MMG5_int    i, j;
 
@@ -709,7 +709,7 @@ int  MMG3D_Get_tetrahedra(MMG5_pMesh mesh, MMG5_int *tetra, int *refs, int * are
 }
 
 int MMG3D_Set_prism(MMG5_pMesh mesh, MMG5_int v0, MMG5_int v1, MMG5_int v2,
-                    MMG5_int v3, MMG5_int v4, MMG5_int v5, int ref, MMG5_int pos) {
+                    MMG5_int v3, MMG5_int v4, MMG5_int v5, MMG5_int ref, MMG5_int pos) {
   MMG5_pPrism pp;
 
   if ( !mesh->nprism ) {
@@ -749,8 +749,8 @@ int MMG3D_Set_prism(MMG5_pMesh mesh, MMG5_int v0, MMG5_int v1, MMG5_int v2,
 }
 
 int MMG3D_Get_prism(MMG5_pMesh mesh, MMG5_int* v0, MMG5_int* v1, MMG5_int* v2, MMG5_int* v3,
-                    MMG5_int* v4, MMG5_int* v5, int* ref, int* isRequired) {
-  static int npri = 0;
+                    MMG5_int* v4, MMG5_int* v5, MMG5_int* ref, int* isRequired) {
+  static MMG5_int npri = 0;
 
   if ( npri == mesh->nprism ) {
     npri = 0;
@@ -794,7 +794,7 @@ int MMG3D_Get_prism(MMG5_pMesh mesh, MMG5_int* v0, MMG5_int* v1, MMG5_int* v2, M
   return 1;
 }
 
-int  MMG3D_Set_prisms(MMG5_pMesh mesh, MMG5_int *prisms, int *refs) {
+int  MMG3D_Set_prisms(MMG5_pMesh mesh, MMG5_int *prisms, MMG5_int *refs) {
   MMG5_pPrism pp;
   MMG5_int    j,i;
 
@@ -824,7 +824,7 @@ int  MMG3D_Set_prisms(MMG5_pMesh mesh, MMG5_int *prisms, int *refs) {
   return 1;
 }
 
-int  MMG3D_Get_prisms(MMG5_pMesh mesh, MMG5_int *prisms, int *refs, int * areRequired) {
+int  MMG3D_Get_prisms(MMG5_pMesh mesh, MMG5_int *prisms, MMG5_int *refs, int * areRequired) {
   MMG5_pPrism pp;
   MMG5_int    j,i;
 
@@ -853,7 +853,7 @@ int  MMG3D_Get_prisms(MMG5_pMesh mesh, MMG5_int *prisms, int *refs, int * areReq
 
 
 
-int MMG3D_Set_triangle(MMG5_pMesh mesh, MMG5_int v0, MMG5_int v1, MMG5_int v2, int ref,MMG5_int pos) {
+int MMG3D_Set_triangle(MMG5_pMesh mesh, MMG5_int v0, MMG5_int v1, MMG5_int v2, MMG5_int ref,MMG5_int pos) {
 
   if ( !mesh->nt ) {
     fprintf(stderr,"\n  ## Error: %s: You must set the number of triangles"
@@ -887,7 +887,7 @@ int MMG3D_Set_triangle(MMG5_pMesh mesh, MMG5_int v0, MMG5_int v1, MMG5_int v2, i
   return 1;
 }
 
-int MMG3D_Get_triangle(MMG5_pMesh mesh, MMG5_int* v0, MMG5_int* v1, MMG5_int* v2, int* ref
+int MMG3D_Get_triangle(MMG5_pMesh mesh, MMG5_int* v0, MMG5_int* v1, MMG5_int* v2, MMG5_int* ref
                        ,int* isRequired) {
   MMG5_pTria  ptt;
 
@@ -929,7 +929,7 @@ int MMG3D_Get_triangle(MMG5_pMesh mesh, MMG5_int* v0, MMG5_int* v1, MMG5_int* v2
 
   return 1;
 }
-int  MMG3D_Set_triangles(MMG5_pMesh mesh, MMG5_int *tria, int *refs) {
+int  MMG3D_Set_triangles(MMG5_pMesh mesh, MMG5_int *tria, MMG5_int *refs) {
 
   MMG5_pTria ptt;
   MMG5_int   i, j;
@@ -947,7 +947,7 @@ int  MMG3D_Set_triangles(MMG5_pMesh mesh, MMG5_int *tria, int *refs) {
   return 1;
 }
 
-int  MMG3D_Get_triangles(MMG5_pMesh mesh, MMG5_int *tria, int *refs, int *areRequired) {
+int  MMG3D_Get_triangles(MMG5_pMesh mesh, MMG5_int *tria, MMG5_int *refs, int *areRequired) {
   MMG5_pTria ptt;
   MMG5_int   i, j;
 
@@ -973,7 +973,7 @@ int  MMG3D_Get_triangles(MMG5_pMesh mesh, MMG5_int *tria, int *refs, int *areReq
 }
 
 int MMG3D_Set_quadrilateral(MMG5_pMesh mesh, MMG5_int v0, MMG5_int v1, MMG5_int v2, MMG5_int v3,
-                            int ref,MMG5_int pos) {
+                            MMG5_int ref,MMG5_int pos) {
 
   if ( !mesh->nquad ) {
     fprintf(stderr,"\n  ## Error: %s: You must set the number of quadrilaterals"
@@ -1001,9 +1001,9 @@ int MMG3D_Set_quadrilateral(MMG5_pMesh mesh, MMG5_int v0, MMG5_int v1, MMG5_int 
 }
 
 int MMG3D_Get_quadrilateral(MMG5_pMesh mesh, MMG5_int* v0, MMG5_int* v1, MMG5_int* v2, MMG5_int* v3,
-                            int* ref,int* isRequired) {
-  MMG5_pQuad  pq;
-  static int  nqi = 0;
+                            MMG5_int* ref,int* isRequired) {
+  MMG5_pQuad       pq;
+  static MMG5_int  nqi = 0;
 
   if ( nqi == mesh->nquad ) {
     nqi = 0;
@@ -1045,7 +1045,7 @@ int MMG3D_Get_quadrilateral(MMG5_pMesh mesh, MMG5_int* v0, MMG5_int* v1, MMG5_in
   return 1;
 }
 
-int  MMG3D_Set_quadrilaterals(MMG5_pMesh mesh, MMG5_int *quads, int *refs) {
+int  MMG3D_Set_quadrilaterals(MMG5_pMesh mesh, MMG5_int *quads, MMG5_int *refs) {
   MMG5_pQuad  pq;
   MMG5_int    j,i;
 
@@ -1063,7 +1063,7 @@ int  MMG3D_Set_quadrilaterals(MMG5_pMesh mesh, MMG5_int *quads, int *refs) {
   return 1;
 }
 
-int  MMG3D_Get_quadrilaterals(MMG5_pMesh mesh, MMG5_int *quads, int *refs, int *areRequired) {
+int  MMG3D_Get_quadrilaterals(MMG5_pMesh mesh, MMG5_int *quads, MMG5_int *refs, int *areRequired) {
   MMG5_pQuad  pq;
    MMG5_int   j,i;
 
@@ -1089,7 +1089,7 @@ int  MMG3D_Get_quadrilaterals(MMG5_pMesh mesh, MMG5_int *quads, int *refs, int *
   return 1;
 }
 
-int MMG3D_Set_edge(MMG5_pMesh mesh, MMG5_int v0, MMG5_int v1, int ref, MMG5_int pos) {
+int MMG3D_Set_edge(MMG5_pMesh mesh, MMG5_int v0, MMG5_int v1, MMG5_int ref, MMG5_int pos) {
 
   if ( !mesh->na ) {
     fprintf(stderr,"\n  ## Error: %s: You must set the number of edges with"
@@ -1121,7 +1121,7 @@ int MMG3D_Set_edge(MMG5_pMesh mesh, MMG5_int v0, MMG5_int v1, int ref, MMG5_int 
   return 1;
 }
 
-int MMG3D_Get_edge(MMG5_pMesh mesh, MMG5_int* e0, MMG5_int* e1, int* ref
+int MMG3D_Get_edge(MMG5_pMesh mesh, MMG5_int* e0, MMG5_int* e1, MMG5_int* ref
                    ,int* isRidge, int* isRequired) {
 
   if ( mesh->nai == mesh->na ) {
@@ -1167,7 +1167,7 @@ int MMG3D_Get_edge(MMG5_pMesh mesh, MMG5_int* e0, MMG5_int* e1, int* ref
   return 1;
 }
 
-int MMG3D_Set_edges(MMG5_pMesh mesh, MMG5_int *edges, int *refs) {
+int MMG3D_Set_edges(MMG5_pMesh mesh, MMG5_int *edges, MMG5_int *refs) {
   MMG5_int i,j;
 
   for (i=1;i<=mesh->na;i++)
@@ -1184,7 +1184,7 @@ int MMG3D_Set_edges(MMG5_pMesh mesh, MMG5_int *edges, int *refs) {
   return 1;
 }
 
-int MMG3D_Get_edges(MMG5_pMesh mesh, MMG5_int* edges,int *refs,int* areRidges,int* areRequired) {
+int MMG3D_Get_edges(MMG5_pMesh mesh, MMG5_int* edges,MMG5_int *refs,int* areRidges,int* areRequired) {
   MMG5_int i,j;
 
   for (i=1;i<=mesh->na;i++)

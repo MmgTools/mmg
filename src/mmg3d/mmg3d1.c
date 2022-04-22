@@ -1314,7 +1314,7 @@ split:
   for (k=1; k<=ne; k++) {
     pt = &mesh->tetra[k];
     if ( !MG_EOK(pt) || (pt->tag & MG_REQ) )  continue;
-    memset(vx,0,6*sizeof(int));
+    memset(vx,0,6*sizeof(MMG5_int));
     pt->flag = 0;
     for (ia=0,i=0; i<3; i++) {
       for (j=i+1; j<4; j++,ia++) {

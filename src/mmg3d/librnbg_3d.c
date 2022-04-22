@@ -290,10 +290,10 @@ int MMG5_mmg3dRenumbering(MMG5_int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol,
   }
   MMG5_DEL_MEM(mesh,vertOldTab);
 
-  MMG5_ADD_MEM(mesh,(mesh->np+1)*sizeof(int),"permNodTab",
+  MMG5_ADD_MEM(mesh,(mesh->np+1)*sizeof(MMG5_int),"permNodTab",
                 if( !MMG3D_hashTetra(mesh,1) ) return 0;
                 return 1);
-  MMG5_SAFE_CALLOC(permNodTab,mesh->np+1,int,return 1);
+  MMG5_SAFE_CALLOC(permNodTab,mesh->np+1,MMG5_int,return 1);
 
   for(tetraIdx = 1 ; tetraIdx < mesh->ne + 1 ; tetraIdx++) {
     ptet = &mesh->tetra[tetraIdx];

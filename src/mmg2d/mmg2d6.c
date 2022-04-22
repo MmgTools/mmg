@@ -604,7 +604,7 @@ int MMG2D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
   }
 
   /* Memory allocation for pile */
-  MMG5_ADD_MEM(mesh,(mesh->nt+1)*sizeof(int),"temporary table",
+  MMG5_ADD_MEM(mesh,(mesh->nt+1)*sizeof(MMG5_int),"temporary table",
                printf("  Exit program.\n");
                return 0);
   MMG5_SAFE_CALLOC(pile,mesh->nt+1,MMG5_int,return 0);

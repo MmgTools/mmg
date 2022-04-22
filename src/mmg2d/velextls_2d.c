@@ -64,7 +64,7 @@ MMG5_int* MMG2D_packLS(MMG5_pMesh mesh,MMG5_pSol disp,LSst *lsst,MMG5_int *npfin
   MMG5_SAFE_CALLOC(list,mesh->nt+1,MMG5_int,return NULL);
 
   MMG5_ADD_MEM(mesh,(mesh->np+1)*sizeof(MMG5_int),"point permutation",return NULL);
-  MMG5_SAFE_CALLOC(perm,mesh->np+1,int,return NULL);
+  MMG5_SAFE_CALLOC(perm,mesh->np+1,MMG5_int,return NULL);
 
 
   /* Reset flag field at triangles */

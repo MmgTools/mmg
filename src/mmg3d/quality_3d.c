@@ -804,7 +804,7 @@ int MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcibl
   long        nptot;
   //FILE *inm;
 
-  pdel = (int*) calloc(mesh->np+1,sizeof(int));
+  pdel = (MMG5_int*) calloc(mesh->np+1,sizeof(MMG5_int));
   nptot = (long) mesh->np;
 
   // svg des poids

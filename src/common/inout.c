@@ -35,9 +35,9 @@
 
 #include "mmgcommon.h"
 
-int MMG5_swapbin(int sbin)
+MMG5_int MMG5_swapbin(MMG5_int sbin)
 {
-  int inv;
+  MMG5_int inv;
   char *p_in = (char *) &sbin;
   char *p = (char *)&inv;
 
