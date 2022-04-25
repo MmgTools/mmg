@@ -1141,8 +1141,8 @@ MMG5_anatetv(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
   MMG5_Hash     hash;
   MMG5_pPar     par;
   double        ll,o[3],ux,uy,uz,hma2,mincal;
-  int           l,src,memlack,ier;
-  MMG5_int      vx[6],ip,ip1,ip2,k,ne,ns,nap; 
+  int           l,memlack,ier;
+  MMG5_int      src,vx[6],ip,ip1,ip2,k,ne,ns,nap; 
   int8_t        i,j,ia;
 
   /** 1. analysis */

@@ -50,7 +50,7 @@
 static inline
 void MMG5_swapTet(MMG5_pTetra tetras/*, int* adja*/, MMG5_int* perm, MMG5_int ind1, MMG5_int ind2) {
   MMG5_Tetra pttmp;
-  int        tmp;
+  MMG5_int   tmp;
 
   /* Commentated part: swap for adja table if we don't free it in renumbering *
    * function (faster but need of 4*mesh->nemax*sizeof(int) extra bytes ) */

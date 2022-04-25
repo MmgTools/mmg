@@ -2959,8 +2959,8 @@ MMG5_int MMG5_split4bar(MMG5_pMesh mesh, MMG5_pSol met, MMG5_int k,int8_t metRid
   MMG5_xTetra   xt[4];
   MMG5_pxTetra  pxt0;
   double        o[3],cb[4];
-  MMG5_int      ib,iadr,*adja,adj1,adj2,adj3,newtet[4];
-  int           i,src;
+  MMG5_int      ib,iadr,*adja,adj1,adj2,adj3,newtet[4],src;
+  int           i;
   uint8_t       isxt[4],firstxt;
   const int     ne=4;
 
@@ -4747,8 +4747,8 @@ MMG5_int MMG5_splitedg(MMG5_pMesh mesh, MMG5_pSol met,MMG5_int iel, int iar, dou
   MMG5_pxTetra pxt;
   MMG5_pPoint  p0,p1;
   double       o[3];
-  int          src,warn,lon,ier;
-  MMG5_int     list[MMG3D_LMAX+2],i0,i1,ip;
+  int          warn,lon,ier;
+  MMG5_int     src,list[MMG3D_LMAX+2],i0,i1,ip;
   int16_t      tag;
 
   warn = 0;

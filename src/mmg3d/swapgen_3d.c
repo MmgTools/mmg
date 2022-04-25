@@ -270,8 +270,8 @@ int MMG5_swpgen(MMG5_pMesh mesh,MMG5_pSol met,int nconf,int ilist,MMG5_int *list
                  MMG3D_pPROctree PROctree, int8_t typchk) {
   MMG5_pTetra    pt;
   MMG5_pPoint    p0,p1;
-  int            nball,src,ret,start;
-  MMG5_int       iel,na,nb,np;
+  int            nball,ret,start;
+  MMG5_int       src,iel,na,nb,np;
   double         m[3];
   int8_t         ia,ip,iq;
   int            ier;

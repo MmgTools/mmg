@@ -464,8 +464,8 @@ int MMG5_swpbdy(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *list,int ret,MMG5_int it
                  MMG3D_pPROctree PROctree, int8_t typchk) {
   MMG5_pTetra   pt,pt1;
   MMG5_pPoint   p0,p1;
-  int           iel1,ilist,src;
-  MMG5_int      iel,np,nq,nm;
+  int           iel1,ilist;
+  MMG5_int      iel,np,nq,nm,src;
   double        c[3];
   int8_t        ia,iface1,j,ipa,im;
   int           ier;

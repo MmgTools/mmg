@@ -159,8 +159,8 @@ void MMG5_swapNod(MMG5_pMesh mesh,MMG5_pPoint points, double* sols,
   MMG5_Point ptttmp;
   MMG5_pSol  psl;
   MMG5_Sol   soltmp;
-  int        tmp,i,pslsiz;
-  MMG5_int   addr2,addr1;
+  int        i,pslsiz;
+  MMG5_int   tmp,addr2,addr1;
 
   /* swap the points */
   memcpy(&ptttmp      ,&points[ind2],sizeof(MMG5_Point));
