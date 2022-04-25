@@ -259,8 +259,8 @@ typedef struct {
   MMG5_int xp; /*!< Surface point number */
   MMG5_int tmp; /*!< Index of point in the saved mesh (we don't count
                   the unused points)*/
-  int      flag; /*!< Flag to know if we have already treated the point */
-  int      s;
+  MMG5_int flag; /*!< Flag to know if we have already treated the point */
+  MMG5_int s;
   int16_t  tag; /*!< Contains binary flags : if \f$tag=23=16+4+2+1\f$, then
                   the point is \a MG_REF, \a MG_GEO, \a MG_REQ and \a MG_BDY */
   int8_t   tagdel; /*!< Tag for delaunay */

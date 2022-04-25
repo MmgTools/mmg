@@ -2188,11 +2188,11 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * >     MMG5_DATA_PTR_T, INTENT(INOUT)                :: mesh\n
  * >     MMG5F_INT, INTENT(IN)                         :: ip\n
  * >     MMG5F_INT, DIMENSION(MMG2D_LMAX), INTENT(OUT) :: lispoi\n
- * >     INTEGER, INTENT(OUT)                          :: retval\n
+ * >     MMG5F_INT, INTENT(OUT)                        :: retval\n
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_Get_adjaVertices(MMG5_pMesh mesh, MMG5_int ip, MMG5_int lispoi[MMG2D_LMAX]);
+  MMG5_int MMG2D_Get_adjaVertices(MMG5_pMesh mesh, MMG5_int ip, MMG5_int lispoi[MMG2D_LMAX]);
 
 /**
  * \brief Return adjacent elements of a triangle.
@@ -2211,11 +2211,11 @@ int MMG2D_loadVtkMesh_and_allData(MMG5_pMesh mesh,MMG5_pSol *sol,const char *fil
  * >     MMG5_DATA_PTR_T, INTENT(INOUT)                :: mesh\n
  * >     MMG5F_INT, INTENT(IN)                         :: ip,start\n
  * >     MMG5F_INT, DIMENSION(MMG2D_LMAX), INTENT(OUT) :: lispoi\n
- * >     INTEGER, INTENT(OUT)                          :: retval\n
+ * >     MMG5F_INT, INTENT(OUT)                        :: retval\n
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_Get_adjaVerticesFast(MMG5_pMesh mesh, MMG5_int ip,MMG5_int start,
+  MMG5_int MMG2D_Get_adjaVerticesFast(MMG5_pMesh mesh, MMG5_int ip,MMG5_int start,
                                  MMG5_int lispoi[MMG2D_LMAX]);
 /**
  * \param mesh pointer toward the mesh structure.

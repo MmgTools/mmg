@@ -2099,11 +2099,11 @@ int MMGS_Get_adjaTri(MMG5_pMesh mesh, MMG5_int kel, MMG5_int listri[3]);
  * >     MMG5_DATA_PTR_T, INTENT(INOUT)               :: mesh\n
  * >     MMG5F_INT, INTENT(IN)                        :: ip,start\n
  * >     MMG5F_INT, DIMENSION(MMGS_LMAX), INTENT(OUT) :: lispoi\n
- * >     INTEGER, INTENT(OUT)                         :: retval\n
+ * >     MMG5F_INT, INTENT(OUT)                       :: retval\n
  * >   END SUBROUTINE\n
  *
  */
-int MMGS_Get_adjaVerticesFast(MMG5_pMesh mesh, MMG5_int ip,MMG5_int start, MMG5_int lispoi[MMGS_LMAX]);
+MMG5_int MMGS_Get_adjaVerticesFast(MMG5_pMesh mesh, MMG5_int ip,MMG5_int start, MMG5_int lispoi[MMGS_LMAX]);
 
 /**
  * \param m upper part of a symetric matric diagonalizable in |R

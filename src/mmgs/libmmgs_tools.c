@@ -566,7 +566,7 @@ int MMGS_Get_numberOfNonBdyEdges(MMG5_pMesh mesh, MMG5_int* nb_edges) {
   return 1;
 }
 
-int MMGS_Get_nonBdyEdge(MMG5_pMesh mesh, MMG5_int* e0, MMG5_int* e1, int* ref, MMG5_int idx) {
+int MMGS_Get_nonBdyEdge(MMG5_pMesh mesh, MMG5_int* e0, MMG5_int* e1, MMG5_int* ref, MMG5_int idx) {
   MMG5_pEdge ped;
   size_t     na_tot=0;
   char       *ptr_c = (char*)mesh->edge;
@@ -622,7 +622,7 @@ int MMGS_Get_adjaTri(MMG5_pMesh mesh, MMG5_int kel, MMG5_int listri[3]) {
   return 1;
 }
 
-int MMGS_Get_adjaVerticesFast(MMG5_pMesh mesh, MMG5_int ip,MMG5_int start, MMG5_int lispoi[MMGS_LMAX])
+MMG5_int MMGS_Get_adjaVerticesFast(MMG5_pMesh mesh, MMG5_int ip,MMG5_int start, MMG5_int lispoi[MMGS_LMAX])
 {
   MMG5_pTria pt;
   MMG5_int   k,prevk,nbpoi,*adja;

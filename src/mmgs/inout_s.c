@@ -45,8 +45,8 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
   float       fc;
   long        posnp,posnt,posne,posncor,posnq,posned,posnr;
   long        posntreq,posnpreq,posnormal,posnc1;
-  MMG5_int    k,ia,nq,nri,ip,idn,ng,npreq,nref;
-  int         i,ref;
+  MMG5_int    k,ia,nq,nri,ip,idn,ng,npreq,nref,ref;
+  int         i;
   MMG5_int    ncor,nedreq,ntreq,posnedreq,bpos;
   int         binch,bin,iswp,bdim;
   MMG5_int    na,*ina,a,b;

@@ -693,8 +693,8 @@ int MMG3D_Get_numberOfNonBdyTriangles(MMG5_pMesh mesh, MMG5_int* nb_tria) {
   MMG5_pPrism pp;
   MMG5_pTria  ptt;
   MMG5_Hash   hash;
-  int         ref,i;
-  MMG5_int    *adja,j,k,iel;
+  int         i;
+  MMG5_int    ref,*adja,j,k,iel;
 
   *nb_tria = 0;
   memset ( &hash, 0x0, sizeof(MMG5_Hash));
@@ -904,7 +904,7 @@ int MMG3D_Get_numberOfNonBdyTriangles(MMG5_pMesh mesh, MMG5_int* nb_tria) {
 }
 
 int MMG3D_Get_nonBdyTriangle(MMG5_pMesh mesh,MMG5_int* v0,MMG5_int* v1,MMG5_int* v2,
-                             int* ref,MMG5_int idx) {
+                             MMG5_int* ref,MMG5_int idx) {
   MMG5_pTria ptt;
   size_t     nt_tot=0;
   char       *ptr_c = (char*)mesh->tria;

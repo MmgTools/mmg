@@ -74,8 +74,8 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,MMG5_in
   MMG5_pPoint   p0,p1,ppt;
   MMG5_pxPoint  pxp;
   double        dd,len,lmax,o[3],to[3],no1[3],no2[3],v[3];
-  int           src,ilist,ilists,ref;
-  MMG5_int      k,ip1,ip2,ip,iq,list[MMG3D_LMAX+2],lists[MMG3D_LMAX+2];
+  int           src,ilist,ilists;
+  MMG5_int      k,ip1,ip2,ip,iq,list[MMG3D_LMAX+2],lists[MMG3D_LMAX+2],ref;
   int16_t       tag;
   int8_t        imax,j,i,i1,i2,ifa0,ifa1;
   int           lon,ret,ier;

@@ -191,8 +191,7 @@ double MMG2D_vfrac(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int k,int pm) {
 int MMG2D_resetRef(MMG5_pMesh mesh) {
   MMG5_pTria      pt;
   MMG5_pPoint     p0;
-  MMG5_int        k;
-  int		  ref;
+  MMG5_int        ref,k;
   int8_t          i;
 
   for (k=1; k<=mesh->nt; k++) {
@@ -222,8 +221,7 @@ int MMG2D_resetRef(MMG5_pMesh mesh) {
 int MMG2D_ismaniball(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_int start, int8_t istart) {
   MMG5_pTria       pt;
   double           v1, v2;
-  MMG5_int         *adja,k,ip1,ip2,end1;
-  int              refstart;
+  MMG5_int         refstart,*adja,k,ip1,ip2,end1;
   int8_t           i,i1,smsgn;
   static int8_t    mmgWarn=0;
 
@@ -434,8 +432,7 @@ int MMG2D_snapval(MMG5_pMesh mesh, MMG5_pSol sol) {
  by assumption, i inxt[i] is one edge of the implicit boundary */
 int MMG2D_chkmaniball(MMG5_pMesh mesh, MMG5_int start, int8_t istart) {
   MMG5_pTria         pt;
-  MMG5_int           *adja,k;
-  int                refstart;
+  MMG5_int           refstart,*adja,k;
   int8_t             i,i1;
 
   pt = &mesh->tria[start];
@@ -829,8 +826,7 @@ int MMG2D_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol met){
   MMG5_pPoint  p0,p1;
   MMG5_Hash    hash;
   double       v0,v1,s,c[2];
-  MMG5_int     k,ip0,ip1,nb,np,nt,ns,vx[3];
-  int          refint,refext;
+  MMG5_int     k,ip0,ip1,nb,np,nt,ns,vx[3],refint,refext;
   int8_t       i,i0,i1,ier;
 
   /* Reset flag field for points */
@@ -977,8 +973,8 @@ int MMG2D_cuttri_ls(MMG5_pMesh mesh, MMG5_pSol sol, MMG5_pSol met){
 int MMG2D_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol){
   MMG5_pTria    pt;
   double        v,v1;
-  int           ier,ref,refint,refext;
-  MMG5_int      k,ip,ip1;
+  int           ier;
+  MMG5_int      k,ip,ip1,ref,refint,refext;
   int8_t        i,i1,i2,nmn,npl,nz;
 
   for (k=1; k<=mesh->nt; k++) {

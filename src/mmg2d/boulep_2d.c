@@ -114,8 +114,7 @@ int MMG2D_boulen(MMG5_pMesh mesh, MMG5_int start,int8_t ip, MMG5_int *pleft, MMG
   MMG5_pTria        pt;
   MMG5_pPoint       p1,p2;
   double            ux,uy,dd,n1[2],n2[2];
-  MMG5_int          *adja,k,kk;
-  int               refs;
+  MMG5_int          *adja,k,kk,refs;
   int8_t            notedg;
   int8_t            i,ii,i1,i2;
 

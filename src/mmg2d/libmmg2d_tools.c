@@ -297,7 +297,7 @@ int MMG2D_Get_numberOfNonBdyEdges(MMG5_pMesh mesh, MMG5_int* nb_edges) {
   return 1;
 }
 
-int MMG2D_Get_nonBdyEdge(MMG5_pMesh mesh, MMG5_int* e0, MMG5_int* e1, int* ref, MMG5_int idx) {
+int MMG2D_Get_nonBdyEdge(MMG5_pMesh mesh, MMG5_int* e0, MMG5_int* e1, MMG5_int* ref, MMG5_int idx) {
   MMG5_pEdge ped;
   size_t     na_tot=0;
   char       *ptr_c = (char*)mesh->edge;
@@ -355,7 +355,7 @@ int MMG2D_Get_adjaTri(MMG5_pMesh mesh, MMG5_int kel, MMG5_int listri[3]) {
   return 1;
 }
 
-int MMG2D_Get_adjaVertices(MMG5_pMesh mesh, MMG5_int ip, MMG5_int lispoi[MMG2D_LMAX])
+MMG5_int MMG2D_Get_adjaVertices(MMG5_pMesh mesh, MMG5_int ip, MMG5_int lispoi[MMG2D_LMAX])
 {
   int start;
 
@@ -367,11 +367,11 @@ int MMG2D_Get_adjaVertices(MMG5_pMesh mesh, MMG5_int ip, MMG5_int lispoi[MMG2D_L
   return MMG2D_Get_adjaVerticesFast(mesh,ip,start,lispoi);
 }
 
-int MMG2D_Get_adjaVerticesFast(MMG5_pMesh mesh, MMG5_int ip,MMG5_int start, MMG5_int lispoi[MMG2D_LMAX])
+MMG5_int MMG2D_Get_adjaVerticesFast(MMG5_pMesh mesh, MMG5_int ip,MMG5_int start, MMG5_int lispoi[MMG2D_LMAX])
 {
   MMG5_pTria pt;
-  int        prevk,nbpoi,iploc,i,i1,i2;
-  MMG5_int   k,*adja;
+  int        iploc,i,i1,i2;
+  MMG5_int   prevk,k,*adja,nbpoi;
 
   pt   = &mesh->tria[start];
 

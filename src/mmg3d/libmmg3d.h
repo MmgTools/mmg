@@ -1921,7 +1921,7 @@ enum MMG3D_Param {
  * >     MMG5_DATA_PTR_T,INTENT(INOUT) :: mesh\n
  * >     REAL(KIND=8), INTENT(IN)      :: c0,c1,c2\n
  * >     MMG5F_INT, INTENT(IN)         :: ref\n
- * >     INTEGER, INTENT(OUT)          :: retval\n
+ * >     MMG5F_INT, INTENT(OUT)        :: retval\n
  * >   END SUBROUTINE\n
  *
  */

@@ -737,10 +737,10 @@ MMG5_int    MMG5_swapbin(MMG5_int sbin);
 float  MMG5_swapf(float sbin);
 double MMG5_swapd(double sbin);
 int MMG5_MultiMat_init(MMG5_pMesh);
-int MMG5_isLevelSet(MMG5_pMesh,int,int);
-int MMG5_isSplit(MMG5_pMesh ,int ,int *,int *);
-int MMG5_isNotSplit(MMG5_pMesh ,int);
-int MMG5_getStartRef(MMG5_pMesh ,int, int *);
+int MMG5_isLevelSet(MMG5_pMesh,MMG5_int,MMG5_int);
+int MMG5_isSplit(MMG5_pMesh ,MMG5_int ,MMG5_int *,MMG5_int *);
+int MMG5_isNotSplit(MMG5_pMesh ,MMG5_int);
+int MMG5_getStartRef(MMG5_pMesh ,MMG5_int, MMG5_int *);
 
 /* test functions */
 extern double MMG5_test_mat_error( int8_t nelem,double m1[],double m2[] );

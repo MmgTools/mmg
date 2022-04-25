@@ -883,7 +883,7 @@ FORTRAN_NAME(MMG3D_ADD_TETRAHEDRON,mmg3d_add_tetrahedron,
  */
 FORTRAN_NAME(MMG3D_ADD_VERTEX,mmg3d_add_vertex,
              (MMG5_pMesh *mesh, double *c0, double *c1, double *c2, MMG5_int *ref,
-              int* retval),
+              MMG5_int* retval),
              (mesh,c0,c1,c2,ref,retval)){
   *retval = MMG3D_Add_vertex(*mesh,*c0,*c1,*c2,*ref);
   return;

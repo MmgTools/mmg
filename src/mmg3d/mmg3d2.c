@@ -311,8 +311,7 @@ double MMG3D_vfrac(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int k,int pm) {
 int MMG3D_resetRef(MMG5_pMesh mesh) {
   MMG5_pTetra     pt;
   MMG5_pPoint     p0;
-  MMG5_int        k;
-  int             ref;
+  MMG5_int        k,ref;
   int8_t          i;
 
   /* Travel edges and reset tags at edges extremities */
@@ -1021,8 +1020,8 @@ static int MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
   MMG5_pPoint   p0,p1;
   MMG5_Hash     hash;
   double        c[3],v0,v1,s;
-  int           ier,src,refext,refint;
-  MMG5_int      vx[6],k,ip0,ip1,np,nb,ns,ne;
+  int           ier;
+  MMG5_int      vx[6],k,ip0,ip1,np,nb,ns,ne,src,refext,refint;
   int8_t        ia,j,npneg;
   static int8_t mmgWarn = 0;
 
@@ -1249,8 +1248,8 @@ static int MMG3D_cuttet_ls(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol met){
 static int MMG3D_setref_ls(MMG5_pMesh mesh, MMG5_pSol sol) {
   MMG5_pTetra   pt;
   double        v;
-  int           ref,refint,refext,ier;
-  MMG5_int      k,ip;
+  int           ier;
+  MMG5_int      ref,refint,refext,k,ip;
   int8_t        nmns,npls,nz,i;
 
   for (k=1; k<=mesh->ne; k++) {
@@ -1517,7 +1516,7 @@ int MMG5_chkmaniball(MMG5_pMesh mesh, MMG5_int start, int8_t ip){
 /** Check whether implicit surface enclosed in volume is orientable */
 int MMG5_chkmani(MMG5_pMesh mesh){
   MMG5_pTetra   pt,pt1;
-  int           ref;
+  MMG5_int      ref;
   MMG5_int      iel,k,*adja;
   int8_t        i,j,ip,cnt;
   static int8_t mmgWarn0 = 0;
@@ -1660,10 +1659,10 @@ int MMG5_chkmani2(MMG5_pMesh mesh,MMG5_pSol sol) {
  * not in shell of (np,nq).
  *
  */
-int MMG5_chkmanicoll(MMG5_pMesh mesh,MMG5_int k,int iface,int iedg,MMG5_int ndepmin,MMG5_int ndepplus,int refmin,int refplus,int8_t isminp,int8_t isplp) {
+int MMG5_chkmanicoll(MMG5_pMesh mesh,MMG5_int k,int iface,int iedg,MMG5_int ndepmin,MMG5_int ndepplus,MMG5_int refmin,MMG5_int refplus,int8_t isminp,int8_t isplp) {
   MMG5_pTetra    pt,pt1;
-  int            ilist,ref,cur,stor,base;
-  MMG5_int       nump,numq,list[MMG3D_LMAX+2],*adja,*adja1,iel,jel,ndepmq,ndeppq;
+  int            ilist,cur,stor,base;
+  MMG5_int       ref,nump,numq,list[MMG3D_LMAX+2],*adja,*adja1,iel,jel,ndepmq,ndeppq;
   int8_t         i,j,ip,jp,iq,jq,voy,indp,indq,isminq,isplq,ismin,ispl;
 
   ilist = 0;

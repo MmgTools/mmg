@@ -264,7 +264,7 @@ int MMG2D_setadj(MMG5_pMesh mesh) {
  * Identify singularities in the mesh.
  *
  */
-int MMG2D_singul(MMG5_pMesh mesh, int ref ) {
+int MMG2D_singul(MMG5_pMesh mesh, MMG5_int ref ) {
   MMG5_pTria          pt;
   MMG5_pPoint         ppt,p1,p2;
   double              ux,uy,uz,vx,vy,vz,dd;
@@ -397,7 +397,7 @@ int MMG2D_singul(MMG5_pMesh mesh, int ref ) {
  * Calculate normal vectors at vertices of the mesh.
  *
  */
-int MMG2D_norver(MMG5_pMesh mesh, int ref) {
+int MMG2D_norver(MMG5_pMesh mesh, MMG5_int ref) {
   MMG5_pTria       pt,pt1;
   MMG5_pPoint      ppt;
   MMG5_int         k,kk,nn,pleft,pright;

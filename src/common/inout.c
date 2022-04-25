@@ -638,9 +638,9 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
   MMG5_pSol     psl;
   double        dbuf[9];
   float         fbuf[9],fc;
-  int           i,l,nref,iadr,ier;
-  MMG5_int      k,v[4],nt,na,nq,ne,npr;
-  int           nbl_t,nbl_a,typ,tagNum,ref,idx,num;
+  int           i,iadr,ier;
+  MMG5_int      l,nref,nbl_t,nbl_a,k,v[4],nt,na,nq,ne,npr,idx,ref,num;
+  int           typ,tagNum;
   int           isol;
   int8_t        metricData;
   char          chaine[MMG5_FILESTR_LGTH],*ptr;
@@ -715,7 +715,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
         fclose(*inm);
         return -1;
       }
-      MMG_FSCANF((*inm),"%d %d ",&ref,&i);
+      MMG_FSCANF((*inm),"%" MMG5_PRId " %d ",&ref,&i);
       for ( l=2; l<tagNum; ++l ) {
         MMG_FSCANF((*inm),"%d ",&i);
       }

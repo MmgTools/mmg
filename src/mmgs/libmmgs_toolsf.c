@@ -67,7 +67,7 @@ FORTRAN_NAME(MMGS_GET_NUMBEROFNONBDYEDGES,mmgs_get_numberofnonbdyedges,
  * See \ref MMGS_Get_nonBdyEdge function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_NAME(MMGS_GET_NONBDYEDGE,mmgs_get_nonbdyedge,
-             (MMG5_pMesh *mesh,MMG5_int* e0, MMG5_int* e1,int *ref,MMG5_int* idx,int* retval),
+             (MMG5_pMesh *mesh,MMG5_int* e0, MMG5_int* e1,MMG5_int *ref,MMG5_int* idx,int* retval),
              (mesh,e0,e1,ref,idx,retval)) {
   *retval =  MMGS_Get_nonBdyEdge(*mesh,e0,e1,ref,*idx);
   return;
@@ -134,7 +134,7 @@ FORTRAN_NAME(MMGS_GET_ADJATRI,mmgs_get_adjatri,
  * See \ref MMGS_Get_adjaVerticesFast function in \ref mmgs/libmmgs.h file.
  */
 FORTRAN_NAME(MMGS_GET_ADJAVERTICESFAST,mmgs_get_adjaverticesfast,
-               (MMG5_pMesh *mesh,MMG5_int* ip, MMG5_int *start, MMG5_int* lispoi, int* retval),
+               (MMG5_pMesh *mesh,MMG5_int* ip, MMG5_int *start, MMG5_int* lispoi, MMG5_int* retval),
                (mesh,ip,start,lispoi,retval)) {
   *retval =  MMGS_Get_adjaVerticesFast(*mesh,*ip, *start,lispoi);
   return;

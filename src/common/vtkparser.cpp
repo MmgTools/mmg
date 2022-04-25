@@ -333,7 +333,8 @@ int MMG5_loadVtuMesh_part1(MMG5_pMesh mesh,const char *filename,vtkDataSet **dat
 int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
                            int8_t ptMeditRef,int8_t eltMeditRef,int nsols) {
   vtkSmartPointer<vtkDataArray> ptar = NULL, car = NULL;
-  int                           nref = 0, ier;
+  int                           ier;
+  MMG5_int                      nref = 0; 
   static int8_t                 mmgWarn1 = 0;
 
   // Point transfers in Mmg data structure
