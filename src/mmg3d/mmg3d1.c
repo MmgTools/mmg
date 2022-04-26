@@ -1434,7 +1434,7 @@ MMG3D_storeGeom(MMG5_pPoint ppt, MMG5_pxPoint pxp, double no[3]) {
  * \param k index of the tetra to split.
  * \param pt tetra to split
  * \param pxt associated xtetra
- * \param imax index of the edge to split to split
+ * \param imax index of the edge to split
  * \param typchk type of check
  * \param chkRidTet check for ridge metric
  * \param *warn \a warn is set to 1 if we don't have enough memory to complete mesh.
@@ -1456,6 +1456,7 @@ int MMG3D_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,int k,
   int          src,ref,ier;
   int16_t      tag;
   int8_t       j,i,i1,i2,ifa0,ifa1;
+  static int8_t warn_n = 0;
 
   assert ( pxt == &mesh->xtetra[pt->xt] );
 
@@ -1503,15 +1504,58 @@ int MMG3D_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,int k,
     if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
       MMG5_tet2tri(mesh,k,i,&ptt);
       MMG5_nortri(mesh,&ptt,no1);
-      no2[0] = to[1]*no1[2] - to[2]*no1[1];
-      no2[1] = to[2]*no1[0] - to[0]*no1[2];
-      no2[2] = to[0]*no1[1] - to[1]*no1[0];
-      dd = no2[0]*no2[0] + no2[1]*no2[1] + no2[2]*no2[2];
-      if ( dd > MMG5_EPSD2 ) {
-        dd = 1.0 / sqrt(dd);
-        no2[0] *= dd;
-        no2[1] *= dd;
-        no2[2] *= dd;
+      if ( !MG_GET(pxt->ori,i) ) {
+        no1[0] *= -1.0;
+        no1[1] *= -1.0;
+        no1[2] *= -1.0;
+      }
+
+      /* In this case, 'to' orientation depends on the edge processing (so on
+       * the triangle from which we come) so we can't use it to compute no2. */
+      ier = MMG3D_normalAdjaTri(mesh,k,i,j,no2);
+      if (  ier < 0 ) {
+        return -1;
+      }
+      else if ( !ier ) {
+        if ( !warn_n ) {
+          warn_n = 1;
+          fprintf(stderr,"  ## Warning: %s: %d: error in the computation of normal"
+                  " at triangle.\n",__func__,__LINE__);
+        }
+        no2[0] = to[1]*no1[2] - to[2]*no1[1];
+        no2[1] = to[2]*no1[0] - to[0]*no1[2];
+        no2[2] = to[0]*no1[1] - to[1]*no1[0];
+
+        dd = no2[0]*no2[0] + no2[1]*no2[1] + no2[2]*no2[2];
+        if ( dd > MMG5_EPSD2 ) {
+          dd = 1.0 / sqrt(dd);
+          no2[0] *= dd;
+          no2[1] *= dd;
+          no2[2] *= dd;
+        }
+      }
+      else {
+        assert ( ier==1 );
+
+        if ( !MG_GET(pxt->ori,i) ) {
+          /* If k belongs to the domain that is not consistent with the normal
+           * orientation, no2 (as no1) has to be inverted */
+          no2[0] *= -1.0;
+          no2[1] *= -1.0;
+          no2[2] *= -1.0;
+        }
+
+        /* Compute 'to' as intersection of no1 and no2 */
+        to[0] = no1[1]*no2[2] - no1[2]*no2[1];
+        to[1] = no1[2]*no2[0] - no1[0]*no2[2];
+        to[2] = no1[0]*no2[1] - no1[1]*no2[0];
+        dd = to[0]*to[0] + to[1]*to[1] + to[2]*to[2];
+        if ( dd > MMG5_EPSD2 ) {
+          dd = 1.0 / sqrt(dd);
+          to[0] *= dd;
+          to[1] *= dd;
+          to[2] *= dd;
+        }
       }
     }
   }
