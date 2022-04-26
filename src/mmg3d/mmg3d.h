@@ -388,6 +388,8 @@ int    MMG5_movbdyridpt_ani(MMG5_pMesh, MMG5_pSol,MMG3D_pPROctree, int*, int,
 int    MMG3D_movv_ani(MMG5_pMesh ,MMG5_pSol ,int ,int );
 int    MMG3D_movv_iso(MMG5_pMesh ,MMG5_pSol ,int ,int );
 int  MMG3D_normalAdjaTri(MMG5_pMesh,int,int8_t,int,double n[3]);
+int  MMG3D_normalAndTangent_at_sinRidge(MMG5_pMesh,int,int,int,MMG5_pxTetra,
+                                        double[3],double[3], double[3] );
 int  MMG5_chkswpbdy(MMG5_pMesh, MMG5_pSol,int*, int, int, int,int8_t);
 int  MMG5_swpbdy(MMG5_pMesh,MMG5_pSol,int*,int,int,MMG3D_pPROctree,int8_t);
 int  MMG5_swpgen(MMG5_pMesh,MMG5_pSol,int, int, int*,MMG3D_pPROctree,int8_t);
