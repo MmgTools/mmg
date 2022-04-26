@@ -73,7 +73,7 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
   MMG5_Tria     ptt;
   MMG5_pPoint   p0,p1,ppt;
   MMG5_pxPoint  pxp;
-  double        dd,len,lmax,o[3],to[3],no1[3],no2[3],v[3];
+  double        len,lmax,o[3],to[3],no1[3],no2[3],v[3];
   int           k,ip,ip1,ip2,src,list[MMG3D_LMAX+2],ilist,lists[MMG3D_LMAX+2],ilists,ref;
   int16_t       tag;
   int8_t        imax,j,i,i1,i2,ifa0,ifa1;
@@ -84,7 +84,7 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
   double        lmaxtet,lmintet,volmin;
   int           imaxtet,imintet,base,countMemFailure;
   int8_t        chkRidTet;
-  static int8_t mmgWarn0 = 0,mmgWarn1 = 0;
+  static int8_t mmgWarn0 = 0;
 
   countMemFailure = 0;
 

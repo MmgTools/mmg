@@ -1533,12 +1533,11 @@ int MMG3D_splsurfedge( MMG5_pMesh mesh,MMG5_pSol met,int k,
   MMG5_Tria    ptt;
   MMG5_pPoint  p0,p1,ppt;
   MMG5_pxPoint pxp;
-  double       dd,o[3],to[3],no1[3],no2[3],v[3];
+  double       o[3],to[3],no1[3],no2[3],v[3];
   int          ip,ip1,ip2,list[MMG3D_LMAX+2],ilist;
   int          src,ref,ier;
   int16_t      tag;
   int8_t       j,i,i1,i2,ifa0,ifa1;
-  static int8_t warn_n = 0;
 
   assert ( pxt == &mesh->xtetra[pt->xt] );
 
