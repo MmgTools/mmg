@@ -108,7 +108,7 @@ static int MMG5_InvMat_check(MMG5_pInvMat pim,MMG5_int key) {
  * lookup table.
  */
 static void MMG5_InvMat_error(MMG5_pInvMat pim,MMG5_int ref,int k) {
-  fprintf(stderr,"\n   ## Error: Trying to overwrite material reference %d"
+  fprintf(stderr,"\n   ## Error: Trying to overwrite material reference %" MMG5_PRId ""
     " (from LSReferences line %d) with another entry from LSReferences line %d."
     ,ref,MMG5_InvMat_getIndex(pim,ref)+1,k+1);
   fprintf(stderr,"\n             Check your LSReferences table: each material"

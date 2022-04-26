@@ -1031,7 +1031,7 @@ int MMG2D_Set_quadrilateral(MMG5_pMesh mesh, MMG5_int v0, MMG5_int v1, MMG5_int 
   }
 
   if ( pos > mesh->nquad ) {
-    fprintf(stderr,"\n  ## Error: %s: attempt to set new quad at position %d.",
+    fprintf(stderr,"\n  ## Error: %s: attempt to set new quad at position %" MMG5_PRId ".",
             __func__,pos);
     fprintf(stderr," Overflow of the given number of quads: %" MMG5_PRId "\n",mesh->nquad);
     fprintf(stderr,"\n  ## Check the mesh size, its compactness or the position");

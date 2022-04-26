@@ -654,7 +654,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
     for ( k=0; k< mesh->np; ++k)
     {
       if ( !bin ) {
-        MMG_FSCANF((*inm),"%d ",&idx);
+        MMG_FSCANF((*inm),"%" MMG5_PRId " ",&idx);
         ppt = &mesh->point[idx];
         for (i=0 ; i<mesh->dim ; i++) {
           MMG_FSCANF((*inm),"%f ",&fc);
@@ -805,7 +805,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
         break;
       case 15:
         /* Node */
-        MMG_FSCANF((*inm),"%d ",&l);
+        MMG_FSCANF((*inm),"%" MMG5_PRId " ",&l);
         ppt = &mesh->point[l];
         ppt->ref = ref;
         if ( ppt->ref < 0 ) {
@@ -1281,7 +1281,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
         if ( psl->ver == 1 ) {
           for (k=1; k<=psl->np; k++) {
             if(!bin){
-              MMG_FSCANF((*inm),"%d ",&idx);
+              MMG_FSCANF((*inm),"%" MMG5_PRId " ",&idx);
               MMG_FSCANF((*inm),"%f ",&fbuf[0]);
             } else {
               MMG_FREAD(&idx,MMG5_SW,1, (*inm));
@@ -1295,7 +1295,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
         else {
           for (k=1; k<=psl->np; k++) {
             if(!bin){
-              MMG_FSCANF((*inm),"%d ",&idx);
+              MMG_FSCANF((*inm),"%" MMG5_PRId " ",&idx);
               MMG_FSCANF((*inm),"%lf ",&dbuf[0]);
             } else {
               MMG_FREAD(&idx,MMG5_SW,1, (*inm));
@@ -1312,7 +1312,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
         if ( psl->ver == 1 ) {
           for (k=1; k<=psl->np; k++) {
             if(!bin){
-              MMG_FSCANF((*inm),"%d ",&idx);
+              MMG_FSCANF((*inm),"%" MMG5_PRId " ",&idx);
               for (i=0; i<psl->dim; i++) {
                 MMG_FSCANF((*inm),"%f ",&fbuf[0]);
                 psl->m[psl->dim*idx+i] = fbuf[0];
@@ -1331,7 +1331,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
         else {
           for (k=1; k<=psl->np; k++) {
             if(!bin){
-              MMG_FSCANF((*inm),"%d ",&idx);
+              MMG_FSCANF((*inm),"%" MMG5_PRId " ",&idx);
 
               for (i=0; i<psl->dim; i++) {
                 MMG_FSCANF((*inm),"%lf ",&dbuf[0]);
@@ -1359,7 +1359,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
           for (k=1; k<=psl->np; k++) {
 
             if(!bin){
-              MMG_FSCANF((*inm),"%d ",&idx);
+              MMG_FSCANF((*inm),"%" MMG5_PRId " ",&idx);
               for(i=0 ; i<9 ; i++)
                 MMG_FSCANF((*inm),"%f ",&fbuf[i]);
             } else {
@@ -1411,7 +1411,7 @@ int MMG5_loadMshMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,FILE **inm,
           for (k=1; k<=psl->np; k++) {
             /* Solution at double precision */
             if(!bin){
-              MMG_FSCANF((*inm),"%d ",&idx);
+              MMG_FSCANF((*inm),"%" MMG5_PRId " ",&idx);
               for(i=0 ; i<9 ; i++)
                 MMG_FSCANF((*inm),"%lf ",&dbuf[i]);
             } else {

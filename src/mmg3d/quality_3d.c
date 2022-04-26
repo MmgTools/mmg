@@ -795,12 +795,12 @@ int MMG5_countelt(MMG5_pMesh mesh,MMG5_pSol sol, double *weightelt, long *npcibl
   double      len;
   int         ia,ipa,ipb,lon,l;
   //int   npbdry;
-  int         *pdel,lenint,loc,nedel,longen;
+  int         lenint,loc,nedel,longen;
   //int      isbdry;
   double      dned,dnface,dnint/*,dnins*/,w,lenavg,lent[6];
   double      dnpdel,dnadd,leninv,dnaddloc,dnpdelloc;
   int         ddebug=0,ib,nv;
-  MMG5_int    k,list[MMG3D_LMAX];
+  MMG5_int    *pdel,k,list[MMG3D_LMAX];
   long        nptot;
   //FILE *inm;
 

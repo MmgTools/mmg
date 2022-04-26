@@ -494,7 +494,7 @@ int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {
 
       for (k=1; k<=na; k++) {
         if (!bin) {
-          MMG_FSCANF(inm,"%" MMG5_PRId " %" MMG5_PRId " %d",&a,&b,&ref);
+          MMG_FSCANF(inm,"%" MMG5_PRId " %" MMG5_PRId " %" MMG5_PRId "",&a,&b,&ref);
         }
         else {
           MMG_FREAD(&a,MMG5_SW,1,inm);
