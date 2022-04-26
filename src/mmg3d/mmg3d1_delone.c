@@ -183,52 +183,8 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
             continue;
 
           if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
-            MMG5_tet2tri(mesh,k,i,&ptt);
-            MMG5_nortri(mesh,&ptt,no1);
-
-            if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
-              MMG5_tet2tri(mesh,k,i,&ptt);
-              MMG5_nortri(mesh,&ptt,no1);
-
-              /* In this case, 'to' orientation depends on the edge processing (so on
-               * the triangle from which we come) so we can't use it to compute no2. */
-              ier = MMG3D_normalAdjaTri(mesh,k,i,j,no2);
-              if (  ier < 0 ) {
-                return -1;
-              }
-              else if ( !ier ) {
-                if ( !mmgWarn1 ) {
-                  mmgWarn1 = 1;
-                  fprintf(stderr,"  ## Warning: %s: %d: error in the computation of normal"
-                          " at triangle.\n",__func__,__LINE__);
-                }
-                no2[0] = to[1]*no1[2] - to[2]*no1[1];
-                no2[1] = to[2]*no1[0] - to[0]*no1[2];
-                no2[2] = to[0]*no1[1] - to[1]*no1[0];
-
-                dd = no2[0]*no2[0] + no2[1]*no2[1] + no2[2]*no2[2];
-                if ( dd > MMG5_EPSD2 ) {
-                  dd = 1.0 / sqrt(dd);
-                  no2[0] *= dd;
-                  no2[1] *= dd;
-                  no2[2] *= dd;
-                }
-              }
-              else {
-                assert ( ier==1 );
-
-                /* Compute 'to' as intersection of no1 and no2 */
-                to[0] = no1[1]*no2[2] - no1[2]*no2[1];
-                to[1] = no1[2]*no2[0] - no1[0]*no2[2];
-                to[2] = no1[0]*no2[1] - no1[1]*no2[0];
-                dd = to[0]*to[0] + to[1]*to[1] + to[2]*to[2];
-                if ( dd > MMG5_EPSD2 ) {
-                  dd = 1.0 / sqrt(dd);
-                  to[0] *= dd;
-                  to[1] *= dd;
-                  to[2] *= dd;
-                }
-              }
+            if ( !MMG3D_normalAndTangent_at_sinRidge(mesh,k,i,j,pxt,no1,no2,to) ) {
+              return -1;
             }
           }
         }
@@ -582,47 +538,8 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
               continue;
 
             if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
-              MMG5_tet2tri(mesh,k,i,&ptt);
-              MMG5_nortri(mesh,&ptt,no1);
-
-              /* In this case, 'to' orientation depends on the edge processing (so on
-               * the triangle from which we come) so we can't use it to compute no2. */
-              ier = MMG3D_normalAdjaTri(mesh,k,i,j,no2);
-              if (  ier < 0 ) {
+              if ( !MMG3D_normalAndTangent_at_sinRidge(mesh,k,i,j,pxt,no1,no2,to) ) {
                 return -1;
-              }
-              else if ( !ier ) {
-                if ( !mmgWarn1 ) {
-                  mmgWarn1 = 1;
-                  fprintf(stderr,"  ## Warning: %s: %d: error in the computation of normal"
-                          " at triangle.\n",__func__,__LINE__);
-                }
-                no2[0] = to[1]*no1[2] - to[2]*no1[1];
-                no2[1] = to[2]*no1[0] - to[0]*no1[2];
-                no2[2] = to[0]*no1[1] - to[1]*no1[0];
-
-                dd = no2[0]*no2[0] + no2[1]*no2[1] + no2[2]*no2[2];
-                if ( dd > MMG5_EPSD2 ) {
-                  dd = 1.0 / sqrt(dd);
-                  no2[0] *= dd;
-                  no2[1] *= dd;
-                  no2[2] *= dd;
-                }
-              }
-              else {
-                assert ( ier==1 );
-
-                /* Compute 'to' as intersection of no1 and no2 */
-                to[0] = no1[1]*no2[2] - no1[2]*no2[1];
-                to[1] = no1[2]*no2[0] - no1[0]*no2[2];
-                to[2] = no1[0]*no2[1] - no1[1]*no2[0];
-                dd = to[0]*to[0] + to[1]*to[1] + to[2]*to[2];
-                if ( dd > MMG5_EPSD2 ) {
-                  dd = 1.0 / sqrt(dd);
-                  to[0] *= dd;
-                  to[1] *= dd;
-                  to[2] *= dd;
-                }
               }
             }
           }
