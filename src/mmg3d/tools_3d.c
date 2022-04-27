@@ -208,8 +208,10 @@ inline int MMG5_BezierRidge ( MMG5_pMesh mesh,int ip0,int ip1,double s,double *o
         3.0*s*s*(1.0-s)*b1[2] + s*s*s*p1->c[2];
 
     if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
-        memcpy(to,t0,3*sizeof(double));
-        return 1;
+      /* In this case, the tangent orientation depends on the triangle from
+       * which we see the ridge */
+      memcpy(to,t0,3*sizeof(double));
+      return 1;
     }
     else if ( MG_SIN(p0->tag) ) {
         memcpy(n11,&(mesh->xpoint[p1->xp].n1[0]),3*sizeof(double));

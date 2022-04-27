@@ -73,7 +73,7 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
   MMG5_Tria     ptt;
   MMG5_pPoint   p0,p1,ppt;
   MMG5_pxPoint  pxp;
-  double        dd,len,lmax,o[3],to[3],no1[3],no2[3],v[3];
+  double        len,lmax,o[3],to[3],no1[3],no2[3],v[3];
   int           k,ip,ip1,ip2,src,list[MMG3D_LMAX+2],ilist,lists[MMG3D_LMAX+2],ilists,ref;
   int16_t       tag;
   int8_t        imax,j,i,i1,i2,ifa0,ifa1;
@@ -181,18 +181,10 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
         else if ( tag & MG_GEO ) {
           if ( !MMG5_BezierRidge(mesh,ip1,ip2,0.5,o,no1,no2,to) )
             continue;
+
           if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
-            MMG5_tet2tri(mesh,k,i,&ptt);
-            MMG5_nortri(mesh,&ptt,no1);
-            no2[0] = to[1]*no1[2] - to[2]*no1[1];
-            no2[1] = to[2]*no1[0] - to[0]*no1[2];
-            no2[2] = to[0]*no1[1] - to[1]*no1[0];
-            dd = no2[0]*no2[0] + no2[1]*no2[1] + no2[2]*no2[2];
-            if ( dd > MMG5_EPSD2 ) {
-              dd = 1.0 / sqrt(dd);
-              no2[0] *= dd;
-              no2[1] *= dd;
-              no2[2] *= dd;
+            if ( !MMG3D_normalAndTangent_at_sinRidge(mesh,k,i,j,pxt,no1,no2,to) ) {
+              return -1;
             }
           }
         }
@@ -202,11 +194,6 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
           if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
             MMG5_tet2tri(mesh,k,i,&ptt);
             MMG5_nortri(mesh,&ptt,no1);
-            if ( !MG_GET(pxt->ori,i) ) {
-              no1[0] *= -1.0;
-              no1[1] *= -1.0;
-              no1[2] *= -1.0;
-            }
           }
         }
         else {
@@ -544,28 +531,15 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
             else if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
               MMG5_tet2tri(mesh,k,i,&ptt);
               MMG5_nortri(mesh,&ptt,no1);
-              if ( !MG_GET(pxt->ori,i) ) {
-                no1[0] *= -1.0;
-                no1[1] *= -1.0;
-                no1[2] *= -1.0;
-              }
             }
           }
           else if ( tag & MG_GEO ) {
             if ( !MMG5_BezierRidge(mesh,ip1,ip2,0.5,o,no1,no2,to) )
               continue;
+
             if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
-              MMG5_tet2tri(mesh,k,i,&ptt);
-              MMG5_nortri(mesh,&ptt,no1);
-              no2[0] = to[1]*no1[2] - to[2]*no1[1];
-              no2[1] = to[2]*no1[0] - to[0]*no1[2];
-              no2[2] = to[0]*no1[1] - to[1]*no1[0];
-              dd = no2[0]*no2[0] + no2[1]*no2[1] + no2[2]*no2[2];
-              if ( dd > MMG5_EPSD2 ) {
-                dd = 1.0 / sqrt(dd);
-                no2[0] *= dd;
-                no2[1] *= dd;
-                no2[2] *= dd;
+              if ( !MMG3D_normalAndTangent_at_sinRidge(mesh,k,i,j,pxt,no1,no2,to) ) {
+                return -1;
               }
             }
           }
@@ -575,11 +549,6 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,int ne,
             if ( MG_SIN(p0->tag) && MG_SIN(p1->tag) ) {
               MMG5_tet2tri(mesh,k,i,&ptt);
               MMG5_nortri(mesh,&ptt,no1);
-              if ( !MG_GET(pxt->ori,i) ) {
-                no1[0] *= -1.0;
-                no1[1] *= -1.0;
-                no1[2] *= -1.0;
-              }
             }
           }
           else {
