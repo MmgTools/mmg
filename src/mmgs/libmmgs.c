@@ -302,7 +302,8 @@ int MMGS_mmgsls(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol umet)
   if ( mesh->info.imprim >= 0 ) {
     fprintf(stdout,"\n  %s\n   MODULE MMGS: %s (%s)\n  %s\n",
             MG_STR,MMG_VERSION_RELEASE,MMG_RELEASE_DATE,MG_STR);
-#ifndef _WIN32
+
+#if !defined _WIN32 && !defined MMG_DIFFOUTPUT
     fprintf(stdout,"     git branch: %s\n",MMG_GIT_BRANCH);
     fprintf(stdout,"     git commit: %s\n",MMG_GIT_COMMIT);
     fprintf(stdout,"     git date:   %s\n\n",MMG_GIT_DATE);
@@ -542,7 +543,8 @@ int MMGS_mmgslib(MMG5_pMesh mesh,MMG5_pSol met)
   if ( mesh->info.imprim >= 0 ) {
     fprintf(stdout,"\n  %s\n   MODULE MMGS: %s (%s)\n  %s\n",
             MG_STR,MMG_VERSION_RELEASE,MMG_RELEASE_DATE,MG_STR);
-#ifndef _WIN32
+
+#if !defined _WIN32 && !defined MMG_DIFFOUTPUT
     fprintf(stdout,"     git branch: %s\n",MMG_GIT_BRANCH);
     fprintf(stdout,"     git commit: %s\n",MMG_GIT_COMMIT);
     fprintf(stdout,"     git date:   %s\n\n",MMG_GIT_DATE);
