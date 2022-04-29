@@ -562,7 +562,7 @@ int MMG5_dispmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t,int itdeg) {
  *
  */
 int MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int **invalidTets) {
-  double  avlen,tau;
+  double  avlen,tau,hmintmp,hmaxtmp;
   int     itdc,itmn,maxitmn,maxitdc,nspl,ns,nm,nc,iit,k,warn;
   int     nns,nnm,nnc,nnspl,nnns,nnnm,nnnc,nnnspl,ninvalidTets;
   short   t,lastt;
@@ -586,10 +586,11 @@ int MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int **invalidTets) 
   /* Estimates of the minimum and maximum edge lengths in the mesh */
   avlen = MMG5_estavglen(mesh);
 
-  mesh->info.hmax = MMG3D_LLONG*avlen;
-  mesh->info.hmin = MMG3D_LOPTS*avlen;
+  hmintmp = mesh->info.hmin;
+  hmaxtmp = mesh->info.hmax;
 
-  //printf("Average length: %f ; proceed with hmin = %f, hmax = %f\n",avlen,mesh->info.hmin,mesh->info.hmax);
+  mesh->info.hmax = MMG3D_LLONG*avlen;
+  mesh->info.hmin = MMG3D_LSHRT*avlen;
 
   for (itmn=0; itmn<maxitmn; itmn++) {
 
@@ -701,6 +702,11 @@ int MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int **invalidTets) 
 
     if ( t == MMG3D_SHORTMAX || (t==0 && itdc==0) ) break;
   }
+
+  /* Reinsert standard values for hmin, hmax */
+  mesh->info.hmin = hmintmp;
+  mesh->info.hmax = hmaxtmp;
+
   if ( tau < MMG5_EPSD2 ) {
     MMG5_SAFE_CALLOC(*invalidTets,mesh->np,int,
                      printf("## Warning: Not enough memory to keep track of"
