@@ -568,10 +568,10 @@ int MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int **invalidTets) 
   short   t,lastt;
   int8_t  ier;
 
-  tau = 0.0;
   maxitmn = 10;
   maxitdc = 100;
   t  = 0;
+  tau = 0.0;
   ninvalidTets = 0;
   lastt = 0;
 
@@ -586,6 +586,7 @@ int MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int **invalidTets) 
 
   /* Estimates of the minimum and maximum edge lengths in the mesh */
   avlen = MMG5_estavglen(mesh);
+
   mesh->info.hmax = MMG3D_LLONG*avlen;
   mesh->info.hmin = MMG3D_LOPTS*avlen;
 
@@ -595,9 +596,9 @@ int MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int **invalidTets) 
     nnnspl = nnnc = nnns = nnnm = 0;
 
 #ifdef USE_ELAS
-    /* Extension of the velocity field */
+    /* Extension of the displacement field */
     if ( !MMG5_velextLS(mesh,disp) ) {
-      fprintf(stderr,"\n  ## Problem in func. MMG5_packLS. Exit program.\n");
+      fprintf(stderr,"\n  ## Problem in func. MMG2D_velextLS. Exit program.\n");
       return 0;
     }
 #else
@@ -608,7 +609,7 @@ int MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int **invalidTets) 
 
     //MMG5_saveDisp(mesh,disp);
 
-    /* Dichotomy loop */
+    /* Sequence of dichotomy loops to find the largest admissible displacements */
     for (itdc=0; itdc<maxitdc; itdc++) {
       nnspl = nnc = nns = nnm = 0;
 
@@ -675,10 +676,11 @@ int MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int **invalidTets) 
           nnc  += nc;
           nns  += ns;
         }
-        if ( abs(mesh->info.imprim) > 3 && abs(mesh->info.imprim) < 5
-             && (nnspl+nnm+nns+nnc > 0) )
+        /* Five iterations of local remeshing have been performed: print final stats */
+        if ( abs(mesh->info.imprim) > 3 && abs(mesh->info.imprim) < 5 && (nnspl+nnm+nns+nnc > 0) )
           printf(" %d edges splitted, %d vertices collapsed, %d elements"
                  " swapped, %d vertices moved.\n",nnspl,nnc,nns,nnm);
+
       }
 
       nnnspl += nnspl;
