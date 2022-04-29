@@ -482,7 +482,7 @@ int MMG2D_mmg2d9(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int **invalidTrias
   mesh->info.hmax = MMG2D_LLONG*avlen;
   mesh->info.hmin = MMG2D_LSHRT*avlen;
 
-  for (itmn=1; itmn<=maxitmn; itmn++) {
+  for (itmn=0; itmn<maxitmn; itmn++) {
 
 #ifdef USE_ELAS
     /* Extension of the displacement field */
@@ -495,7 +495,9 @@ int MMG2D_mmg2d9(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int **invalidTrias
             " CMake's flag set to ON to use the rigidbody movement.\n",__func__);
     return 0;
 #endif
+
     // MMG5_saveDisp(mesh,disp);
+
     /* Sequence of dichotomy loops to find the largest admissible displacements */
     for (itdc=0; itdc<maxitdc; itdc++) {
       nnspl = nnc = nns = nnm = 0;
@@ -503,13 +505,13 @@ int MMG2D_mmg2d9(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int **invalidTrias
       t = MMG5_dikmov(mesh,disp,&lastt,MMG2D_SHORTMAX,MMG2D_chkmovmesh);
       if ( t == 0 ) {
         if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
-          printf("   *** Stop: impossible to proceed further\n");
+          fprintf(stderr,"\n   *** Stop: impossible to proceed further\n");
         break;
       }
 
       ier = MMG2D_dispmesh(mesh,disp,t,itdc);
       if ( !ier ) {
-        fprintf(stdout,"  ** Impossible motion\n");
+        fprintf(stderr,"\n  ** Impossible motion\n");
         return 0;
       }
 
@@ -528,14 +530,14 @@ int MMG2D_mmg2d9(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int **invalidTrias
             /* Split of points */
             nspl = MMG2D_spllag(mesh,disp,met,itdc,&warn);
             if ( nspl < 0 ) {
-              fprintf(stdout,"  ## Problem in spllag. Exiting.\n");
+              fprintf(stderr,"\n  ## Problem in spllag. Exiting.\n");
               return 0;
             }
 
             /* Collapse of points */
             nc = MMG2D_coleltlag(mesh,met,itdc);
             if ( nc < 0 ) {
-              fprintf(stdout,"  ## Problem in coleltlag. Exiting.\n");
+              fprintf(stderr,"\n  ## Problem in coltetlag. Exiting.\n");
               return 0;
             }
           }
@@ -546,7 +548,7 @@ int MMG2D_mmg2d9(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int **invalidTrias
           if ( !mesh->info.noswap ) {
             ns = MMG2D_swpmshlag(mesh,met,1.1,itdc);
             if ( ns < 0 ) {
-              fprintf(stdout,"  ## Problem in swapeltlag. Exiting.\n");
+              fprintf(stderr,"  ## Problem in swapeltlag. Exiting.\n");
               return 0;
             }
           }
@@ -554,7 +556,7 @@ int MMG2D_mmg2d9(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int **invalidTrias
           if ( !mesh->info.nomove ) {
             nm = MMG2D_movtrilag(mesh,met,itdc);
             if ( nm < 0 ) {
-              fprintf(stdout,"  ## Problem in moveltlag. Exiting.\n");
+              fprintf(stderr,"  ## Problem in moveltlag. Exiting.\n");
               return 0;
             }
           }
@@ -582,10 +584,11 @@ int MMG2D_mmg2d9(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int **invalidTrias
       if ( t == MMG2D_SHORTMAX ) break;
     }
     /* End of dichotomy loop: maximal displacement of the extended velocity
-     * fiedl has been performed */
+     * field has been performed */
     if ( mesh->info.imprim > 1 && abs(mesh->info.imprim) < 4 ) {
       printf("   ---> Realized displacement: %f\n",tau);
     }
+
     if ( abs(mesh->info.imprim) > 2 && mesh->info.lag )
       printf(" %d edges splitted, %d vertices collapsed, %d elements"
              " swapped, %d vertices moved.\n",nnnspl,nnnc,nnns,nnnm);
