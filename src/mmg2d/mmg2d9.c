@@ -638,6 +638,8 @@ int MMG2D_mmg2d9(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int **invalidTrias
 
       if ( t == MMG2D_SHORTMAX ) break;
     }
+    /* End of dichotomy loop: maximal displacement of the extended velocity
+     * fiedl has been performed */
     if ( mesh->info.imprim > 1 && abs(mesh->info.imprim) < 4 ) {
       printf("   ---> Realized displacement: %f\n",tau);
     }
