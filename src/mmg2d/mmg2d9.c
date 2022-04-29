@@ -34,7 +34,6 @@
  */
 
 #include "mmg2d.h"
-//#include "ls_calls.h"
 #define MMG2D_DEGTOL  5.e-1
 
 /* Calculate an estimate of the average (isotropic) length of edges in the mesh */
@@ -410,32 +409,7 @@ int MMG2D_swpmshlag(MMG5_pMesh mesh,MMG5_pSol met,double crit,int itdeg) {
 
   return nns;
 }
-/** For debugging purposes: save disp */
-int MMG2D_saveDisp(MMG5_pMesh mesh,MMG5_pSol disp) {
-  FILE        *out;
-  int         k;
-  char        data[256],*ptr;
 
-  strcpy(data,"disp.sol");
-  ptr = strstr(data,".sol");
-  if(ptr) *ptr = '\0';
-  strcat(data,"disp.sol");
-
-  out = fopen(data,"w");
-  printf("save disp\n");
-  fprintf(out,"MeshVersionFormatted 1\n\nDimension\n%d\n\n",disp->dim);
-  fprintf(out,"SolAtVertices\n%d\n 1 2\n",disp->np);
-
-  /* Print solutions */
-  for(k=1; k<= disp->np; k++) {
-    fprintf(out,"%f %f\n",disp->m[2*k+0],disp->m[2*k+1]);
-  }
-
-  fprintf(out,"\nEnd");
-  fclose(out);
-
-  return 1;
-}
 /**
  * \param mesh pointer toward the mesh structure.
  * \param met pointer toward the metric structure.
@@ -552,7 +526,7 @@ int MMG2D_mmg2d9(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int **invalidTrias
             " CMake's flag set to ON to use the rigidbody movement.\n",__func__);
     return 0;
 #endif
-    //MMG2D_saveDisp(mesh,disp);
+    // MMG5_saveDisp(mesh,disp);
     /* Sequence of dichotomy loops to find the largest admissible displacements */
     for (itdc=0; itdc<maxitdc; itdc++) {
       nnspl = nnc = nns = nnm = 0;

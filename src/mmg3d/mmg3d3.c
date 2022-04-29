@@ -544,32 +544,6 @@ int MMG5_dispmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t,int itdeg) {
   return 1;
 }
 
-/** For debugging purposes: save disp */
-int MMG5_saveDisp(MMG5_pMesh mesh,MMG5_pSol disp) {
-  FILE        *out;
-  int         k;
-  char        data[256],*ptr;
-
-  strcpy(data,disp->namein);
-  ptr = strstr(data,".sol");
-  *ptr = '\0';
-  strcat(data,".o.disp.sol");
-
-  out = fopen(data,"w");
-
-  fprintf(out,"MeshVersionFormatted 1\n\nDimension\n%d\n\n",disp->dim);
-  fprintf(out,"SolAtVertices\n%d\n 1 2\n",disp->np);
-
-  /* Print solutions */
-  for(k=1; k<= disp->np; k++) {
-    fprintf(out,"%f %f %f\n",disp->m[3*k+0],disp->m[3*k+1],disp->m[3*k+2]);
-  }
-
-  fprintf(out,"\nEnd");
-  fclose(out);
-
-  return 1;
-}
 
 /**
  * \param mesh mesh structure

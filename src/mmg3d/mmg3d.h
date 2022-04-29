@@ -477,7 +477,6 @@ double MMG5_estavglen(MMG5_pMesh);
 int   MMG5_stiffelt(MMG5_pMesh,int,double*,double*);
 int  MMG5_mmg3d3(MMG5_pMesh ,MMG5_pSol, MMG5_pSol,int** );
 int  MMG5_velextLS(MMG5_pMesh ,MMG5_pSol );
-int MMG5_saveDisp(MMG5_pMesh ,MMG5_pSol );
 
 /* Delaunay functions*/
 int MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,int ip,int *list,int ilist);
