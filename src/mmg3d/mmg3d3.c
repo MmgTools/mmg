@@ -573,9 +573,8 @@ int MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int **invalidTets) 
   t  = 0;
   tau = 0.0;
   ninvalidTets = 0;
-  lastt = 0;
 
-  //++mesh->info.fem;
+  nnnspl = nnnc = nnns = nnnm = lastt = 0;
 
   if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
     fprintf(stdout,"  ** LAGRANGIAN MOTION\n");
@@ -593,12 +592,11 @@ int MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int **invalidTets) 
   //printf("Average length: %f ; proceed with hmin = %f, hmax = %f\n",avlen,mesh->info.hmin,mesh->info.hmax);
 
   for (itmn=0; itmn<maxitmn; itmn++) {
-    nnnspl = nnnc = nnns = nnnm = 0;
 
 #ifdef USE_ELAS
     /* Extension of the displacement field */
     if ( !MMG5_velextLS(mesh,disp) ) {
-      fprintf(stderr,"\n  ## Problem in func. MMG2D_velextLS. Exit program.\n");
+      fprintf(stderr,"\n  ## Problem in func. MMG5_velextLS. Exit program.\n");
       return 0;
     }
 #else
@@ -688,14 +686,19 @@ int MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int **invalidTets) 
       nnnc   += nnc;
       nnns   += nns;
 
-      if ( (mesh->info.imprim > 1) && (mesh->info.imprim < 4) ) {
-        printf("   ---> Realized displacement: %f\n",tau);
-      }
-
-      if ( abs(mesh->info.imprim) > 2 && mesh->info.lag )
-        printf(" %d edges splitted, %d vertices collapsed, %d elements"
-               " swapped, %d vertices moved.\n",nnnspl,nnnc,nnns,nnnm);
+      if ( t == MMG3D_SHORTMAX ) break;
     }
+
+    /* End of dichotomy loop: maximal displacement of the extended velocity
+     * field has been performed */
+    if ( mesh->info.imprim > 1 && abs(mesh->info.imprim) < 4 ) {
+      printf("   ---> Realized displacement: %f\n",tau);
+    }
+
+    if ( abs(mesh->info.imprim) > 2 && mesh->info.lag )
+      printf(" %d edges splitted, %d vertices collapsed, %d elements"
+             " swapped, %d vertices moved.\n",nnnspl,nnnc,nnns,nnnm);
+
     if ( t == MMG3D_SHORTMAX || (t==0 && itdc==0) ) break;
   }
   if ( tau < MMG5_EPSD2 ) {
