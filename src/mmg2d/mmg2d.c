@@ -674,7 +674,9 @@ int main(int argc,char *argv[]) {
   /* Version info */
   fprintf(stdout,"  -- MMG2D, Release %s (%s) \n",MMG_VERSION_RELEASE,MMG_RELEASE_DATE);
   fprintf(stdout,"     %s\n",MMG_COPYRIGHT);
+#ifndef MMG_DIFFOUTPUT
   fprintf(stdout,"     %s %s\n",__DATE__,__TIME__);
+#endif
 
   /* Print timer at exit */
   atexit(MMG5_endcod);
