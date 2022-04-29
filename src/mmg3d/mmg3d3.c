@@ -636,35 +636,41 @@ int MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int **invalidTets) 
           nspl = nc = ns = nm = 0;
 
           if ( mesh->info.lag > 1 ) {
-            /* Split of points */
-            nspl = MMG5_spllag(mesh,disp,met,itdc,&warn);
-            if ( nspl < 0 ) {
-              fprintf(stderr,"\n  ## Problem in spllag. Exiting.\n");
-              return 0;
-            }
+            if ( !mesh->info.noinsert ) {
+              /* Split of points */
+              nspl = MMG5_spllag(mesh,disp,met,itdc,&warn);
+              if ( nspl < 0 ) {
+                fprintf(stderr,"\n  ## Problem in spllag. Exiting.\n");
+                return 0;
+              }
 
-            /* Collapse of points */
-            nc = MMG5_coltetlag(mesh,met,itdc);
-            if ( nc < 0 ) {
-              fprintf(stderr,"\n  ## Problem in coltetlag. Exiting.\n");
-              return 0;
+              /* Collapse of points */
+              nc = MMG5_coltetlag(mesh,met,itdc);
+              if ( nc < 0 ) {
+                fprintf(stderr,"\n  ## Problem in coltetlag. Exiting.\n");
+                return 0;
+              }
             }
           }
 
           /* Swap of edges in tetra that have resulted distorted from the process */
           /* I do not know whether it is safe to put NULL in metric here (a
            * priori ok, since there is no vertex creation or suppression) */
-          ns = MMG5_swptetlag(mesh,met,MMG3D_LSWAPIMPROVE,NULL,itdc);
-          if ( ns < 0 ) {
-            fprintf(stderr,"\n  ## Problem in swaptetlag. Exiting.\n");
-            return 0;
+          if ( !mesh->info.noswap ) {
+            ns = MMG5_swptetlag(mesh,met,MMG3D_LSWAPIMPROVE,NULL,itdc);
+            if ( ns < 0 ) {
+              fprintf(stderr,"\n  ## Problem in swaptetlag. Exiting.\n");
+              return 0;
+            }
           }
 
           /* Relocate vertices of tetra which have been distorted in the displacement process */
-          nm = MMG5_movtetlag(mesh,met,itdc);
-          if ( nm < 0 ) {
-            fprintf(stderr,"\n  ## Problem in movtetlag. Exiting.\n");
-            return 0;
+          if ( !mesh->info.nomove ) {
+            nm = MMG5_movtetlag(mesh,met,itdc);
+            if ( nm < 0 ) {
+              fprintf(stderr,"\n  ## Problem in movtetlag. Exiting.\n");
+              return 0;
+            }
           }
 
           if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && (nspl+nc+ns+nm > 0) )

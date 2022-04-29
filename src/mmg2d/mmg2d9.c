@@ -525,20 +525,22 @@ int MMG2D_mmg2d9(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int **invalidTrias
 
           nspl = nc = ns = nm = 0;
 
-          if ( !mesh->info.noinsert ) {
+          if ( mesh->info.lag > 1 ) {
+            if ( !mesh->info.noinsert ) {
 
-            /* Split of points */
-            nspl = MMG2D_spllag(mesh,disp,met,itdc,&warn);
-            if ( nspl < 0 ) {
-              fprintf(stderr,"\n  ## Problem in spllag. Exiting.\n");
-              return 0;
-            }
+              /* Split of points */
+              nspl = MMG2D_spllag(mesh,disp,met,itdc,&warn);
+              if ( nspl < 0 ) {
+                fprintf(stderr,"\n  ## Problem in spllag. Exiting.\n");
+                return 0;
+              }
 
-            /* Collapse of points */
-            nc = MMG2D_coleltlag(mesh,met,itdc);
-            if ( nc < 0 ) {
-              fprintf(stderr,"\n  ## Problem in coltetlag. Exiting.\n");
-              return 0;
+              /* Collapse of points */
+              nc = MMG2D_coleltlag(mesh,met,itdc);
+              if ( nc < 0 ) {
+                fprintf(stderr,"\n  ## Problem in coltetlag. Exiting.\n");
+                return 0;
+              }
             }
           }
 
