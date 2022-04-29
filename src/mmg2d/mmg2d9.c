@@ -70,37 +70,6 @@ double MMG2D_estavglen(MMG5_pMesh mesh) {
   return lent;
 }
 
-/** Compute quality of a triangle from the datum of its 3 vertices */
-static
-inline double MMG2D_caltri_iso_3pt(double *a,double *b,double *c) {
-  double        abx,aby,acx,acy,bcx,bcy,area,h1,h2,h3,hm;
-
-  abx = b[0] - a[0];
-  aby = b[1] - a[1];
-  acx = c[0] - a[0];
-  acy = c[1] - a[1];
-  bcx = c[0] - b[0];
-  bcy = c[1] - b[1];
-
-  /* orientation */
-  area = abx*acy - aby*acx;
-  if ( area <= 0.0 ) return 0.0;
-
-  /* edge lengths */
-  h1 = abx*abx + aby*aby;
-  h2 = acx*acx + acy*acy;
-  h3 = bcx*bcx + bcy*bcy;
-
-  hm = h1 + h2 + h3;
-
-  if ( hm > MMG2D_EPSD ) {
-    return  area / hm;
-  }
-  else {
-    return 0.0;
-  }
-}
-
 /**
  * \param mesh pointer toward the mesh structure
  * \param disp pointer toward the displacement structure.

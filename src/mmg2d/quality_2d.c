@@ -54,15 +54,19 @@ double MMG2D_quickcal(MMG5_pMesh mesh, MMG5_pTria pt) {
   return cal;
 }
 
-/* Compute quality of the triangle pt when the supplied metric is isotropic;
-   return 0 in the case that the triangle has inverted orientation */
-double MMG2D_caltri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt) {
-  double    abx,aby,acx,acy,bcx,bcy;
-  double    *a,*b,*c,h1,h2,h3,area,hm;
-
-  a  = mesh->point[pt->v[0]].c;
-  b  = mesh->point[pt->v[1]].c;
-  c  = mesh->point[pt->v[2]].c;
+/**
+ * \param a coordinates of first vertex of tria
+ * \param b coordinates of second vertex of tria
+ * \param c coordinates of third vertex of tria
+ *
+ * \return non-normalized quality if success, 0 if triangle is null or inverted.
+ *
+ * Compute quality of a triangle from the datum of its 3 vertices.
+ *
+ */
+inline
+double MMG2D_caltri_iso_3pt(double *a,double *b,double *c) {
+  double        abx,aby,acx,acy,bcx,bcy,area,h1,h2,h3,hm;
 
   abx = b[0] - a[0];
   aby = b[1] - a[1];
@@ -89,6 +93,28 @@ double MMG2D_caltri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt) {
     return 0.0;
   }
 }
+
+/**
+ * \param pointer toward the mesh
+ * \param pointer toward the metric (for compatibility with aniso interface)
+ * \param pt pointer toward the tria
+ *
+ * \return non-normalized quality if success, 0 if triangle is null or inverted.
+ *
+ * Compute quality of the triangle pt when the supplied metric is isotropic;
+ * return 0 in the case that the triangle has inverted orientation.
+ */
+double MMG2D_caltri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria pt) {
+  double    *a,*b,*c;
+
+  a  = mesh->point[pt->v[0]].c;
+  b  = mesh->point[pt->v[1]].c;
+  c  = mesh->point[pt->v[2]].c;
+
+  return MMG2D_caltri_iso_3pt(a,b,c);
+}
+
+
 
 /* Compute quality of the triangle pt when the supplied metric is anisotropic;
  return 0 in the case that the triangle has inverted orientation */
