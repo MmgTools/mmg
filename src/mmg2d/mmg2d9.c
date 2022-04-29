@@ -152,66 +152,6 @@ int MMG2D_chkmovmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t,int *triIdx) {
   return idx;
 }
 
-/**
- * \param mesh pointer toward the mesh structure
- * \param disp pointer toward the displacement field
- * \param lastt 0 if a movement is possible, pointer toward the last tested fraction otherwise
- *
- * Return the largest fraction t that makes the motion along disp valid.
- *
- */
-short MMG2D_dikomv(MMG5_pMesh mesh,MMG5_pSol disp,short *lastt) {
-  int     it,maxit;
-  short   t,tmin,tmax;
-  int8_t  ier;
-
-  maxit = 200;
-  it    = 0;
-
-  tmin  = 0;
-  tmax  = MMG2D_SHORTMAX;
-
-  *lastt = 0;
-
-  /* If full displacement can be achieved */
-  if ( !MMG2D_chkmovmesh(mesh,disp,tmax,NULL) )
-    return tmax;
-
-  /* Else, find the largest displacement by dichotomy */
-  while( tmin != tmax && it < maxit ) {
-    t = (tmin+tmax)/2;
-
-    /* Case that tmax = tmin +1 : check move with tmax */
-    if ( t == tmin ) {
-      ier = MMG2D_chkmovmesh(mesh,disp,tmax,NULL);
-      if ( !ier ) {
-        return tmax;
-      }
-      else {
-        if ( tmin==0 ) {
-          *lastt = tmax;
-        }
-        return tmin;
-      }
-    }
-
-    /* General case: check move with t */
-    ier = MMG2D_chkmovmesh(mesh,disp,t,NULL);
-    if ( !ier )
-      tmin = t;
-    else
-      tmax = t;
-
-    it++;
-  }
-
-  if ( tmin==0 ) {
-    *lastt=t;
-  }
-
-  return tmin;
-}
-
 /** Perform mesh motion along disp, for a fraction t, and the corresponding updates */
 int MMG2D_dispmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t,int itdeg) {
   MMG5_pTria    pt;
@@ -617,7 +557,7 @@ int MMG2D_mmg2d9(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int **invalidTrias
     for (itdc=0; itdc<maxitdc; itdc++) {
       nnspl = nnc = nns = nnm = 0;
 
-      t = MMG2D_dikomv(mesh,disp,&lastt);
+      t = MMG5_dikmov(mesh,disp,&lastt,MMG2D_SHORTMAX,MMG2D_chkmovmesh);
       if ( t == 0 ) {
         if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
           printf("   *** Stop: impossible to proceed further\n");
@@ -684,7 +624,7 @@ int MMG2D_mmg2d9(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int **invalidTrias
           nnc  += nc;
           nns  += ns;
         }
-
+        /* Five iterations of local remeshing have been performed: print final stats */
         if ( abs(mesh->info.imprim) > 3 && abs(mesh->info.imprim) < 5 && (nnspl+nnm+nns+nnc > 0) )
           printf(" %d edges splitted, %d vertices collapsed, %d elements"
                  " swapped, %d vertices moved.\n",nnspl,nnc,nns,nnm);

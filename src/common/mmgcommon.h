@@ -617,6 +617,8 @@ void           MMG5_check_hminhmax(MMG5_pMesh mesh, int8_t sethmin, int8_t sethm
  void          MMG5_displayLengthHisto_internal( int,int,int,double,
                                                  int,int,double, int,double*,
                                                  int*,int8_t,int);
+ short         MMG5_dikmov(MMG5_pMesh,MMG5_pSol,short*,short,
+                           int chkmovmesh(MMG5_pMesh,MMG5_pSol,short,int*));
  int           MMG5_minQualCheck ( int iel, double minqual, double alpha );
  int           MMG5_elementWeight(MMG5_pMesh,MMG5_pSol,MMG5_pTria,MMG5_pPoint,
                                    MMG5_Bezier*,double r[3][3],double gv[2]);

@@ -489,67 +489,6 @@ int MMG5_chkmovmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t,int *tetIdx) {
   return idx;
 }
 
-/**
- * \param mesh pointer toward the mesh structure
- * \param disp pointer toward the displacement field
- * \param lastt 0 if a movement is possible, pointer toward the last tested fraction otherwise
- *
- * Return the largest fraction t that makes the motion along disp valid.
- *
- */
-short MMG5_dikmov(MMG5_pMesh mesh,MMG5_pSol disp,short *lastt) {
-  int     it,maxit;
-  short   t,tmin,tmax;
-  int8_t  ier;
-
-  maxit = 200;
-  it = 0;
-
-  tmin = 0;
-  tmax = MMG3D_SHORTMAX;
-
-  *lastt = 0;
-
-  /* If full displacement can be achieved */
-  if ( !MMG5_chkmovmesh(mesh,disp,tmax,NULL) )
-    return tmax;
-
-  /* Else, find the largest displacement by dichotomy */
-  while( tmin != tmax && it < maxit ) {
-    t = (tmin+tmax)/2;
-
-    /* Case that tmax = tmin +1 : check move with tmax */
-    if ( t == tmin ) {
-      ier = MMG5_chkmovmesh(mesh,disp,tmax,NULL);
-      if ( !ier ) {
-        return tmax;
-      }
-      else {
-        if ( tmin==0 ) {
-          *lastt = tmax;
-        }
-        return tmin;
-      }
-    }
-
-    /* General case: check move with t */
-    ier = MMG5_chkmovmesh(mesh,disp,t,NULL);
-    if ( !ier ) {
-      tmin = t;
-    }
-    else
-      tmax = t;
-
-    it++;
-  }
-
-  if ( tmin==0 ) {
-    *lastt=t;
-  }
-
-  return tmin;
-}
-
 /** Perform mesh motion along disp, for a fraction t, and the corresponding updates */
 int MMG5_dispmesh(MMG5_pMesh mesh,MMG5_pSol disp,short t,int itdeg) {
   MMG5_pTetra   pt;
@@ -699,7 +638,7 @@ int MMG5_mmg3d3(MMG5_pMesh mesh,MMG5_pSol disp,MMG5_pSol met,int **invalidTets) 
     for (itdc=0; itdc<maxitdc; itdc++) {
       nnspl = nnc = nns = nnm = 0;
 
-      t = MMG5_dikmov(mesh,disp,&lastt);
+      t = MMG5_dikmov(mesh,disp,&lastt,MMG3D_SHORTMAX,MMG5_chkmovmesh);
       if ( t == 0 ) {
         if ( abs(mesh->info.imprim) > 4 || mesh->info.ddebug )
           fprintf(stderr,"\n   *** Stop: impossible to proceed further\n");
