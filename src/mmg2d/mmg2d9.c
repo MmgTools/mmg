@@ -440,7 +440,7 @@ int MMG2D_movtrilag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
  * \param mesh mesh structure
  * \param disp displacement structure
  * \param met metric structure
- * \param invalidTriax array to store the list of invalid tria if we are unable to move
+ * \param invalidTrias array to store the list of invalid tria if we are unable to move
  *
  * \return 0 if fail, 1 if success to move, the opposite of the number of non
  * valid trias if we can't move (-ninvalidTrias).
