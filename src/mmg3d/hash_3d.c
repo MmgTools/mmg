@@ -625,8 +625,8 @@ int MMG5_setVertexNmTag(MMG5_pMesh mesh) {
   MMG5_pTetra         ptet;
   MMG5_pPoint         ppt;
   MMG5_Hash           hash;
-  int                 i,base,ier;
-  MMG5_int            k,np,nc, nre, ng, nrp;
+  int                 i,ier;
+  MMG5_int            k,base,np,nc, nre, ng, nrp;
 
   /* Second: seek the non-required non-manifold points and try to analyse
    * whether they are corner or required. */
@@ -1109,7 +1109,7 @@ int MMG5_hGeom(MMG5_pMesh mesh) {
         if ( !kk || pt->tag[i] & MG_NOM ) {
           if ( pt->tag[i] & MG_NOM ) {
             if ( mesh->info.iso )
-              pt->edg[i] = ( pt->edg[i] != 0 ) ?  -abs(pt->edg[i]) : mesh->info.isoref;
+              pt->edg[i] = ( pt->edg[i] != 0 ) ?  -MMG5_abs(pt->edg[i]) : mesh->info.isoref;
           }
           if ( !MMG5_hEdge(mesh,&mesh->htab,pt->v[i1],pt->v[i2],pt->edg[i],pt->tag[i]) )
             return 0;
@@ -1599,7 +1599,7 @@ int MMG5_chkBdryTria(MMG5_pMesh mesh) {
 
         adj /= 5;
 
-        pp1 = &mesh->prism[abs(adj)];
+        pp1 = &mesh->prism[MMG5_abs(adj)];
         if ( pp->ref > pp1->ref ) {
           ia = pp->v[MMG5_idir_pr[i][0]];
           ib = pp->v[MMG5_idir_pr[i][1]];
@@ -1968,7 +1968,7 @@ int MMG5_bdrySet(MMG5_pMesh mesh) {
     for (i=0; i<2; i++) {
       adj = adja[i] / 5;
       if ( adj<0 ) {
-        ref = mesh->tetra[abs(adj)].ref;
+        ref = mesh->tetra[MMG5_abs(adj)].ref;
       } else {
         ref = mesh->prism[adj].ref;
       }

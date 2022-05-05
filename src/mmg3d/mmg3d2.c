@@ -107,8 +107,8 @@ double MMG3D_vfrac(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int k,int pm) {
   MMG5_pPoint    ppt[4];
   double         v[4],vfm,vfp,lam,eps,o[18];
   int            nplus,nminus,nzero;
-  MMG5_int       ip[4];
-  int8_t         flag,cfg,ia;
+  MMG5_int       flag,ip[4];
+  int8_t         cfg,ia;
   int8_t         i,i0,i1,imin1,imin2,iplus1,iplus2,iz;
   uint8_t        tau[4];
   const uint8_t  *taued;
@@ -404,8 +404,8 @@ static int
 MMG5_ismaniball(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int k,int indp) {
   MMG5_pTetra   pt,pt1;
   double        v,v0,v1,v2;
-  int           ibdy,ilist,base,cur,l;
-  MMG5_int      *adja,list[MMG3D_LMAX+1],bdy[MMG3D_LMAX+1],jel,np,iel,res;
+  int           ibdy,ilist,cur,l;
+  MMG5_int      *adja,list[MMG3D_LMAX+1],bdy[MMG3D_LMAX+1],jel,np,iel,res,base;
   int8_t        i,i0,i1,i2,j0,j1,j2,j,ip,nzeros,nopp,nsame;
   static int8_t mmgWarn0 = 0;
 
@@ -770,8 +770,8 @@ int MMG3D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
   MMG5_pTetra    pt,pt1,pt2;
   MMG5_pxTetra   pxt;
   double         volc,voltot,v0,v1,v2,v3;
-  int            l,base,cur,ipile;
-  MMG5_int       ncp,ncm,k,kk,ll,ip0,ip1,ip2,ip3,*adja,*pile;
+  int            l,cur,ipile;
+  MMG5_int       ncp,ncm,base,k,kk,ll,ip0,ip1,ip2,ip3,*adja,*pile;
   int8_t         i,j,i1,onbr;
 
   ncp = 0;
@@ -1408,8 +1408,8 @@ int MMG3D_update_xtetra ( MMG5_pMesh mesh ) {
  */
 int MMG5_chkmaniball(MMG5_pMesh mesh, MMG5_int start, int8_t ip){
   MMG5_pTetra    pt,pt1;
-  int            base,ilist,cur,nref;
-  MMG5_int       ref,*adja,list[MMG3D_LMAX+2],k,k1,nump;
+  int            ilist,cur,nref;
+  MMG5_int       base,ref,*adja,list[MMG3D_LMAX+2],k,k1,nump;
   int8_t         i,l,j;
 
   base = ++mesh->base;
@@ -1661,8 +1661,8 @@ int MMG5_chkmani2(MMG5_pMesh mesh,MMG5_pSol sol) {
  */
 int MMG5_chkmanicoll(MMG5_pMesh mesh,MMG5_int k,int iface,int iedg,MMG5_int ndepmin,MMG5_int ndepplus,MMG5_int refmin,MMG5_int refplus,int8_t isminp,int8_t isplp) {
   MMG5_pTetra    pt,pt1;
-  int            ilist,cur,stor,base;
-  MMG5_int       ref,nump,numq,list[MMG3D_LMAX+2],*adja,*adja1,iel,jel,ndepmq,ndeppq;
+  int            ilist,cur,stor;
+  MMG5_int       ref,nump,numq,list[MMG3D_LMAX+2],*adja,*adja1,iel,jel,ndepmq,ndeppq,base;
   int8_t         i,j,ip,jp,iq,jq,voy,indp,indq,isminq,isplq,ismin,ispl;
 
   ilist = 0;

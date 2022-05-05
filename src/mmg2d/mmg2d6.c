@@ -579,8 +579,7 @@ int MMG2D_chkmanimesh(MMG5_pMesh mesh) {
 int MMG2D_rmc(MMG5_pMesh mesh, MMG5_pSol sol){
   MMG5_pTria     pt,pt1,pt2;
   double         volc,voltot,v0,v1,v2;
-  MMG5_int       k,kk,l,ll,ncp,ncm,ip0,ip1,ip2,cur,ipile,*pile,*adja;
-  int            base;
+  MMG5_int       k,kk,l,ll,ncp,ncm,ip0,ip1,ip2,cur,ipile,*pile,*adja,base;
   int8_t         i,i1,i2;
 
   ncp = 0;

@@ -1183,7 +1183,7 @@ int MMG3D_gradsizreq_iso(MMG5_pMesh mesh,MMG5_pSol met) {
           p0  = &mesh->point[ip0];
           p1  = &mesh->point[ip1];
 
-          if ( abs ( p0->s - p1->s ) < 2 ) {
+          if ( MMG5_abs ( p0->s - p1->s ) < 2 ) {
             /* No size to propagate */
             continue;
           }

@@ -285,7 +285,7 @@ typedef MMG5_xPoint * MMG5_pxPoint;
 typedef struct {
   MMG5_int a,b; /*!< Extremities of the edge */
   MMG5_int ref; /*!< Reference of the edge */
-  int      base; /*!< 2Donly: used to store the tria+ tria edge indices
+  MMG5_int base; /*!< 2Donly: used to store the tria+ tria edge indices
                    that allow to access to the edge */
   int16_t  tag; /*!< Binary flags */
 } MMG5_Edge;
@@ -313,12 +313,12 @@ typedef struct {
   double   qual;   /*Quality of the triangle*/
   MMG5_int v[3]; /*!< Vertices of the triangle */
   MMG5_int ref; /*!< Reference of the triangle */
-  int      base;
+  MMG5_int base;
   MMG5_int cc; /*!< used to store the tetra + tetra face indices
                  that allow to access to the tria */
   MMG5_int edg[3]; /*!< edg[i] contains the ref of the \f$i^{th}\f$ edge
                      of triangle */
-  int      flag;
+  MMG5_int flag;
   int16_t  tag[3]; /*!< tag[i] contains the tag associated to the
                      \f$i^{th}\f$ edge of triangle */
   } MMG5_Tria;
@@ -346,7 +346,7 @@ typedef MMG5_Tria * MMG5_pTria;
 typedef struct {
   MMG5_int v[4]; /*!< Vertices of the quadrangle */
   MMG5_int ref; /*!< Reference of the quadrangle */
-  int      base;
+  MMG5_int base;
   MMG5_int edg[4]; /*!< edg[i] contains the ref of the \f$i^{th}\f$ edge
                      of quadrangle */
   int16_t  tag[4]; /*!< tag[i] contains the tag associated to the
@@ -383,10 +383,10 @@ typedef struct {
   MMG5_int v[4]; /*!< Vertices of the tetrahedron */
   MMG5_int ref; /*!< Reference of the tetrahedron */
   MMG5_int base;
-  int      mark; /*!< Used for delaunay */
+  MMG5_int mark; /*!< Used for delaunay */
   MMG5_int xt; /*!< Index of the surface \ref MMG5_xTetra associated to
                  the tetrahedron*/
-  int      flag;
+  MMG5_int flag;
   int16_t  tag;
 } MMG5_Tetra;
 typedef MMG5_Tetra * MMG5_pTetra;
@@ -442,8 +442,8 @@ typedef MMG5_xTetra * MMG5_pxTetra;
 typedef struct {
   MMG5_int v[6]; /*!< Vertices of the prism */
   MMG5_int ref; /*!< Reference of the prism */
-  int      base;
-  int      flag;
+  MMG5_int base;
+  MMG5_int flag;
   MMG5_int xpr; /*!< Index of the surface \ref MMG5_xPrism associated to
                   the prism*/
   int8_t   tag;
@@ -483,9 +483,9 @@ typedef MMG5_Mat * MMG5_pMat;
  * \brief To store lookup table for references in the mesh (useful in LS mode)
  */
 typedef struct {
-  int offset;
-  int size;
-  int *lookup;
+  MMG5_int offset;
+  MMG5_int size;
+  int      *lookup;
 } MMG5_InvMat;
 typedef MMG5_InvMat * MMG5_pInvMat;
 
@@ -555,7 +555,7 @@ typedef struct {
 typedef struct {
   MMG5_int   a,b,nxt;
   MMG5_int   k; /*!< k = point along edge a b or triangle index */
-  int        s;
+  MMG5_int   s;
 } MMG5_hedge;
 
 /**
@@ -584,9 +584,9 @@ typedef struct {
   MMG5_int  nquad,nprism; /* number of quadrangles and prisms */
   int       nsols; /* number of solutions (metric excluded) in the solution file */
   MMG5_int  nc1;
-  int       base; /*!< Used with \a flag to know if an entity has been
+  MMG5_int  base; /*!< Used with \a flag to know if an entity has been
                     treated */
-  int       mark; /*!< Flag for delaunay (to know if an entity has
+  MMG5_int  mark; /*!< Flag for delaunay (to know if an entity has
                     been treated) */
   MMG5_int  xp,xt,xpr; /*!< Number of surfaces points, triangles/tetrahedra and prisms */
   MMG5_int  npnil; /*!< Index of first unused point */

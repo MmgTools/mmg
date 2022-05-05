@@ -117,7 +117,7 @@ static int setadj(MMG5_pMesh mesh){
           continue;
         }
 
-        if ( abs(pt1->ref) != abs(pt->ref) ) {
+        if ( MMG5_abs(pt1->ref) != MMG5_abs(pt->ref) ) {
           pt->tag[i]   |= MG_REF;
           pt1->tag[ii] |= MG_REF;
           mesh->point[ip1].tag |= MG_REF;
@@ -141,7 +141,7 @@ static int setadj(MMG5_pMesh mesh){
         if ( pt1->v[ii1] == ip1 ) {
           /* Moebius strip */
           if ( pt1->base < 0 ) {
-            pt1->ref      = -abs(pt1->ref);
+            pt1->ref      = -MMG5_abs(pt1->ref);
             /* Add MG_NOM flag because it allows neighbours to have non
              * consistent orientations */
             pt->tag[i]   |= MG_REF + MG_NOM;

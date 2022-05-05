@@ -36,6 +36,10 @@
 
 @DEF_MMGF_INT@ /*!< Integer type for fortran */
 
+@DEF_MMG_SWPBIN@ /*!< MMG5_swapbin function for MMG5_int */
+
+@DEF_MMG_ABS@ /*!< Abs function for MMG5_int */
+
 #cmakedefine USE_POINTMAP /*!< Flag to enable and export the pointmap used */
 
 #endif

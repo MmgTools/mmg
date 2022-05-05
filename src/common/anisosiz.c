@@ -2292,7 +2292,7 @@ int MMG5_gradsizreq_ani(MMG5_pMesh mesh,MMG5_pSol met) {
         p1 = &mesh->point[np1];
         p2 = &mesh->point[np2];
 
-        if ( abs ( p1->s - p2->s ) < 2 ) {
+        if ( MMG5_abs ( p1->s - p2->s ) < 2 ) {
           /* No size to propagate */
           continue;
         }

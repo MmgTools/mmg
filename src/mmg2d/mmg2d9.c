@@ -511,8 +511,8 @@ int MMG2D_saveDisp(MMG5_pMesh mesh,MMG5_pSol disp) {
 MMG5_int MMG2D_movtrilag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
   MMG5_pTria        pt;
   MMG5_pPoint       p0;
-  int               it,base,maxit,ilist;
-  MMG5_int          k,list[MMG2D_LONMAX+2],nm,nnm;
+  int               it,maxit,ilist;
+  MMG5_int          k,base,list[MMG2D_LONMAX+2],nm,nnm;
   int8_t            i,ier;
 
   nnm   = 0;

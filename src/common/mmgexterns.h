@@ -24,7 +24,7 @@
 #include "mmgcommon.h"
 
 
-extern int  (*MMG5_chkmsh)(MMG5_pMesh,int,int);
+extern int  (*MMG5_chkmsh)(MMG5_pMesh,int,MMG5_int);
 extern int  (*MMG5_bezierCP)(MMG5_pMesh ,MMG5_Tria *,MMG5_pBezier ,int8_t );
 extern double (*MMG5_lenSurfEdg)(MMG5_pMesh mesh,MMG5_pSol sol ,MMG5_int ,MMG5_int, int8_t );
 extern MMG5_int  (*MMG5_indElt)(MMG5_pMesh mesh,MMG5_int kel);

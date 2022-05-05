@@ -733,7 +733,8 @@ extern int  MMG5_updatemet2d_ani(double *m,double *n,double dm[2],double dn[2],d
 int  MMG5_updatemet3d_ani(double *m,double *n,double dm[3],double dn[3],double vp[3][3],int8_t ier );
 void MMG5_gradEigenvreq(double *dm,double *dn,double,int8_t,int8_t *);
 int  MMG5_updatemetreq_ani(double *n,double dn[2],double vp[2][2]);
-MMG5_int    MMG5_swapbin(MMG5_int sbin);
+int    MMG5_swapbin(int sbin);
+MMG5_int    MMG5_swapbin_int(MMG5_int sbin);
 float  MMG5_swapf(float sbin);
 double MMG5_swapd(double sbin);
 int MMG5_MultiMat_init(MMG5_pMesh);
@@ -773,7 +774,7 @@ void MMG5_mark_usedVertices ( MMG5_pMesh mesh,void (*delPt)(MMG5_pMesh,MMG5_int)
 void MMG5_keep_subdomainElts ( MMG5_pMesh,int,int (*delElt)(MMG5_pMesh,MMG5_int) );
 
 /* function pointers */
-extern int    (*MMG5_chkmsh)(MMG5_pMesh,int,int);
+extern int    (*MMG5_chkmsh)(MMG5_pMesh,int,MMG5_int);
 extern int    (*MMG5_bezierCP)(MMG5_pMesh ,MMG5_Tria *,MMG5_pBezier ,int8_t );
 extern double (*MMG5_lenSurfEdg)(MMG5_pMesh mesh,MMG5_pSol sol ,MMG5_int ,MMG5_int, int8_t );
 extern int    (*MMG5_grad2met_ani)(MMG5_pMesh,MMG5_pSol,MMG5_pTria,MMG5_int,MMG5_int);

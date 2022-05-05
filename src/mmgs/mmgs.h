@@ -162,11 +162,11 @@ int  swpedg(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int *list,int ilist,int8_t typchk
 int8_t typelt(MMG5_pPoint p[3],int8_t *ia);
 int  litswp(MMG5_pMesh mesh,MMG5_int k,int8_t i,double kal);
 int  litcol(MMG5_pMesh mesh,MMG5_int k,int8_t i,double kal);
-int  MMG5_mmgsChkmsh(MMG5_pMesh,int,int);
+int  MMG5_mmgsChkmsh(MMG5_pMesh,int,MMG5_int);
 int  paratmet(double c0[3],double n0[3],double m[6],double c1[3],double n1[3],double mt[6]);
 int  intregmet(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t i,double s,double mr[6]);
 int  MMG5_intridmet(MMG5_pMesh,MMG5_pSol,MMG5_int,MMG5_int,double,double*,double*);
-int  setref(MMG5_pMesh,MMG5_int,int,int);
+int  setref(MMG5_pMesh,MMG5_int,MMG5_int,int);
 int  delref(MMG5_pMesh);
 int  chkmet(MMG5_pMesh,MMG5_pSol);
 int  chknor(MMG5_pMesh);

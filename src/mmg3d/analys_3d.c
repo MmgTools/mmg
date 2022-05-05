@@ -179,7 +179,7 @@ int MMG5_setadj(MMG5_pMesh mesh){
           continue;
         }
 
-        if ( abs(pt1->ref) != abs(pt->ref) ) {
+        if ( MMG5_abs(pt1->ref) != MMG5_abs(pt->ref) ) {
           pt->tag[i]   |= MG_REF;
           pt1->tag[ii] |= MG_REF;
           mesh->point[ip1].tag |= MG_REF;
@@ -689,8 +689,7 @@ int MMG3D_nmgeom(MMG5_pMesh mesh){
   MMG5_pPoint     p0;
   MMG5_pxPoint    pxp;
   MMG5_int        k;
-  int             base;
-  MMG5_int        *adja;
+  MMG5_int        *adja,base;
   double          n[3],t[3];
   int8_t          i,j,ip,ier;
 

@@ -467,16 +467,16 @@ int MMG3D_splitalmostall(MMG5_pMesh mesh,  MMG5_pSol met,MMG3D_pPROctree PROctre
  * 0.2) and try to improve them by every means.
  *
  */
-MMG5_int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree,int testmark) {
+MMG5_int MMG3D_opttyp(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree PROctree,MMG5_int testmark) {
   MMG5_pTetra    pt;
   MMG5_pxTetra   pxt;
   double         crit;
   int            ityp,cs[10],ds[10],item[2];
   MMG5_int       k,ntot,ne;
   int            ier,i,nd,npeau;
-  int            it,maxit,base;
+  int            it,maxit;
 //  double         OCRIT = 1.01;
-  MMG5_int       nbdy,nbdy2 ;
+  MMG5_int       nbdy,nbdy2,base ;
 
   ntot = 0;
   crit = 0.2 / MMG3D_ALPHAD;

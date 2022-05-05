@@ -52,8 +52,8 @@ extern MMG5_Info  info;
  */
 int MMG5_boulevolp (MMG5_pMesh mesh, MMG5_int start, int ip, MMG5_int * list){
   MMG5_pTetra  pt,pt1;
-  MMG5_int     *adja,nump,k,k1;
-  int          base,ilist,cur;
+  MMG5_int     base,*adja,nump,k,k1;
+  int          ilist,cur;
   int8_t       j,l,i;
 
   base = ++mesh->base;
@@ -195,8 +195,8 @@ int MMG5_boulenm(MMG5_pMesh mesh,MMG5_int start,int ip,int iface,
                   double n[3],double t[3]) {
   MMG5_pTetra   pt;
   double        dd,nt[3];
-  int           base,nr,nnm;
-  MMG5_int      nump,k,*adja,piv,nvstart,aux,na,nb,adj,fstart,ip0,ip1;
+  int           nr,nnm;
+  MMG5_int      base,nump,k,*adja,piv,nvstart,aux,na,nb,adj,fstart,ip0,ip1;
   int16_t       tag;
   int8_t        iopp,ipiv,indb,inda,i,isface;
   int8_t        indedg[4][4] = { {-1,0,1,2}, {0,-1,3,4}, {1,3,-1,5}, {2,4,5,-1} };
@@ -335,8 +335,8 @@ int MMG5_boulenmInt(MMG5_pMesh mesh,MMG5_int start,int ip,double t[3]) {
   MMG5_pTetra    pt,pt1;
   MMG5_pxTetra   pxt;
   double         dd;
-  MMG5_int       k,kk,ip0,ip1,nump,na,nb,list[MMG3D_LMAX+2],*adja;
-  int            base,cur,ilist;
+  MMG5_int       base,k,kk,ip0,ip1,nump,na,nb,list[MMG3D_LMAX+2],*adja;
+  int            cur,ilist;
   int8_t         i,j,ii,ie;
   
   base = ++mesh->base;
@@ -443,8 +443,8 @@ int MMG5_boulernm(MMG5_pMesh mesh,MMG5_Hash *hash,MMG5_int start,int ip,MMG5_int
   MMG5_pxTetra   pxt;
   MMG5_hedge    *ph;
   MMG5_int       *adja,nump,k,k1;
-  int            ns,ilist,base,cur;
-  MMG5_int       list[MMG3D_LMAX+2],ia,ib,a,b;
+  int            ns,ilist,cur;
+  MMG5_int       list[MMG3D_LMAX+2],base,ia,ib,a,b;
   int            key,jj;
   int8_t         j,l,i;
   uint8_t        ie;
@@ -587,8 +587,7 @@ int MMG5_boulesurfvolp(MMG5_pMesh mesh,MMG5_int start,int ip,int iface,
 {
   MMG5_pTetra   pt,pt1;
   MMG5_pxTetra  pxt;
-  int           base;
-  MMG5_int      k,*adja,nump,k1,fstart,piv,na,nb,adj,nvstart,aux,cur;
+  MMG5_int      k,*adja,nump,k1,fstart,piv,na,nb,adj,nvstart,aux,cur,base;
   int8_t        iopp,ipiv,i,j,l,isface;
   static int8_t mmgErr0=0, mmgErr1=0, mmgErr2=0;
 
@@ -745,12 +744,11 @@ int MMG5_boulesurfvolp(MMG5_pMesh mesh,MMG5_int start,int ip,int iface,
  *
  */
 int MMG5_boulesurfvolpNom(MMG5_pMesh mesh,MMG5_int start,int ip,int iface,
-                       MMG5_int *listv,int *ilistv,MMG5_int *lists,int *ilists,int *refmin,int *refplus,int isnm)
+                       MMG5_int *listv,int *ilistv,MMG5_int *lists,int *ilists,MMG5_int *refmin,MMG5_int *refplus,int isnm)
 {
   MMG5_pTetra   pt,pt1;
   MMG5_pxTetra  pxt;
-  int           base;
-  MMG5_int      k,k1,nump,*adja,piv,na,nb,adj,cur,nvstart,fstart,aux;
+  MMG5_int      k,k1,nump,*adja,piv,na,nb,adj,cur,nvstart,fstart,aux,base;
   int8_t        iopp,ipiv,i,j,l,isface;
   static int8_t mmgErr0=0, mmgErr1=0, mmgErr2=0;
   
@@ -932,8 +930,8 @@ int MMG5_bouletrid(MMG5_pMesh mesh,MMG5_int start,int iface,int ip,int *il1,MMG5
   MMG5_pxTetra         pxt;
   MMG5_pPoint          ppt;
   MMG5_int             k,*adja,*list1,*list2,aux;
-  MMG5_int             na, nb, piv,lists[MMG3D_LMAX+2];
-  int                  ilists, base, iopp, ipiv,*ilist1,*ilist2;
+  MMG5_int             na, nb, piv,lists[MMG3D_LMAX+2], base;
+  int                  ilists, iopp, ipiv,*ilist1,*ilist2;
   int                  idp, fstart, nvstart, adj;
   int                  ifac,idx,idx2,idx_tmp,i1,isface;
   double               *n1,*n2,nt[3],ps1,ps2;

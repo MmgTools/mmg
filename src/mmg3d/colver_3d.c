@@ -371,7 +371,7 @@ MMG5_topchkcol_bdy(MMG5_pMesh mesh,MMG5_int k,int iface,int8_t iedg,MMG5_int *li
  */
 int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t iface,
                     int8_t iedg,MMG5_int *listv,int ilistv,MMG5_int *lists,int ilists,
-                    int refmin,int refplus, int8_t typchk,int isnm,int8_t isnmint) {
+                    MMG5_int refmin,MMG5_int refplus, int8_t typchk,int isnm,int8_t isnmint) {
   MMG5_pTetra  pt,pt0,pt1;
   MMG5_pxTetra pxt;
   MMG5_Tria    tt;
@@ -747,13 +747,14 @@ int MMG5_chkcol_bdy(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t iface,
  *
  */
 static inline
-void MMG3D_update_edgeTag(MMG5_pTetra pt,MMG5_pxTetra pxt,int np, int nq,
+void MMG3D_update_edgeTag(MMG5_pTetra pt,MMG5_pxTetra pxt,MMG5_int np, MMG5_int nq,
                           uint8_t ip, MMG5_pTetra pt1,MMG5_pxTetra pxt1,
                           uint8_t voyp) {
 
-  int     i,j,p0,p1;
-  uint8_t ia,iav;
-  int16_t tag,tag1;
+  int      i,j;
+  MMG5_int p0,p1;
+  uint8_t  ia,iav;
+  int16_t  tag,tag1;
 
   /* update tags for edges */
   for ( j=0; j<3; j++ ) {

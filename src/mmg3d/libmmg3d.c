@@ -242,7 +242,7 @@ int MMG3D_mark_packedPoints(MMG5_pMesh mesh,MMG5_int *np,MMG5_int *nc) {
 
     if ( ppt->tag & MG_CRN )  (*nc)++;
 
-    ppt->ref = abs(ppt->ref);
+    ppt->ref = MMG5_abs(ppt->ref);
   }
   while ( ++k < (*np) );
 
@@ -553,7 +553,7 @@ int MMG3D_mark_packedPoints(MMG5_pMesh mesh,MMG5_int *np,MMG5_int *nc) {
 
     if ( ppt->tag & MG_CRN )  (*nc)++;
 
-    ppt->ref = abs(ppt->ref);
+    ppt->ref = MMG5_abs(ppt->ref);
   }
   return 1;
 }

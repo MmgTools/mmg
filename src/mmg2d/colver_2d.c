@@ -141,7 +141,7 @@ int MMG2D_chkcol(MMG5_pMesh mesh, MMG5_pSol met,MMG5_int k,int8_t i,MMG5_int *li
       jel = list[1] / 3;
       if ( ! jel ) return 0;
       pt1 = &mesh->tria[jel];
-      if ( abs(pt->ref) != abs(pt1->ref) )  return 0;
+      if ( MMG5_abs(pt->ref) != MMG5_abs(pt1->ref) )  return 0;
     }*/
 
     /* Travel the ball of i1 (but for the two elements 0 and ilist-1 (the last one in the case of
@@ -246,7 +246,7 @@ int MMG2D_chkcol(MMG5_pMesh mesh, MMG5_pSol met,MMG5_int k,int8_t i,MMG5_int *li
 
     jj  = MMG5_inxt2[j];
     pt1 = &mesh->tria[jel];
-    if ( abs(pt->ref) != abs(pt1->ref) )  return 0;
+    if ( MMG5_abs(pt->ref) != MMG5_abs(pt1->ref) )  return 0;
     else if ( !(pt1->tag[jj] & MG_GEO) )  return 0;
 
     /* Check quality and geometric approximation: elements with two trias in the

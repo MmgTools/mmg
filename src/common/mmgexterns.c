@@ -24,7 +24,7 @@
 #include "mmgcommon.h"
 
 
-int  (*MMG5_chkmsh)(MMG5_pMesh,int,int)=NULL;
+int  (*MMG5_chkmsh)(MMG5_pMesh,int,MMG5_int)=NULL;
 int  (*MMG5_bezierCP)(MMG5_pMesh ,MMG5_Tria *,MMG5_pBezier ,int8_t )=NULL;
 double (*MMG5_lenSurfEdg)(MMG5_pMesh mesh,MMG5_pSol sol ,MMG5_int ,MMG5_int, int8_t )=NULL;
 MMG5_int  (*MMG5_indElt)(MMG5_pMesh mesh,MMG5_int kel)=NULL;

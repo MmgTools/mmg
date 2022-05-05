@@ -61,10 +61,10 @@ int delref(MMG5_pMesh mesh) {
  * if boundary edges met must be set to MG_REQ, 0 otherwise.
  *
  */
-int setref(MMG5_pMesh mesh,MMG5_int start,int ref,int putreq) {
+int setref(MMG5_pMesh mesh,MMG5_int start,MMG5_int ref,int putreq) {
   MMG5_pTria pt,pt1;
-  MMG5_int   *list,*adja,cur,k,iel,jel;
-  int        base,ilist;
+  MMG5_int   base,*list,*adja,cur,k,iel,jel;
+  int        ilist;
   int8_t     j,voy;
 
   ilist = cur = 0;

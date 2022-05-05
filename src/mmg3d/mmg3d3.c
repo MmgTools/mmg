@@ -320,8 +320,8 @@ MMG5_int MMG5_movtetlag(MMG5_pMesh mesh,MMG5_pSol met, int itdeg) {
   MMG5_pTetra   pt;
   MMG5_pPoint   ppt;
   int           ier,ilistv,it;
-  MMG5_int      k,nm,nnm,listv[MMG3D_LMAX+2];
-  uint8_t       i,base;
+  MMG5_int      k,nm,nnm,listv[MMG3D_LMAX+2],base;
+  uint8_t       i;
   int           maxit;
 
   base = 1;
@@ -379,8 +379,8 @@ static MMG5_int MMG5_coltetlag(MMG5_pMesh mesh,MMG5_pSol met,int itdeg) {
   MMG5_pTetra pt;
   MMG5_pPoint p0,p1;
   double      ll,ux,uy,uz,hmi2;
-  int         ilist,base;
-  MMG5_int    k,nc,list[MMG3D_LMAX+2],nnm;
+  int         ilist;
+  MMG5_int    k,nc,list[MMG3D_LMAX+2],nnm,base;
   int         ier;
   int8_t      i,j,ip,iq,isnm;
 

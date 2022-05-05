@@ -112,8 +112,8 @@ int boulet(MMG5_pMesh mesh,MMG5_int start,int ip,MMG5_int *list) {
 int boulechknm(MMG5_pMesh mesh,MMG5_int start,int ip,MMG5_int *list) {
   MMG5_pTria    pt;
   MMG5_pPoint   ppt;
-  MMG5_int      *adja,k,iel;
-  int           ilist,base;
+  MMG5_int      *adja,k,iel,base;
+  int           ilist;
   int8_t        i,i1,i2,ia,iq,voy;
 
   base = ++mesh->base;

@@ -97,7 +97,7 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t i,MMG5_int *list,int8
     if ( MG_EDG(pt->tag[i2]) ) {
       jel = list[1] / 3;
       pt1 = &mesh->tria[jel];
-      if ( abs(pt->ref) != abs(pt1->ref) )  return 0;
+      if ( MMG5_abs(pt->ref) != MMG5_abs(pt1->ref) )  return 0;
     }
 
     /* analyze ball */
@@ -188,7 +188,7 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t i,MMG5_int *list,int8
       if ( MG_EDG(pt->tag[j]) ) {
         jel = list[ilist-2] / 3;
         pt1 = &mesh->tria[jel];
-        if ( abs(pt->ref) != abs(pt1->ref) )  return 0;
+        if ( MMG5_abs(pt->ref) != MMG5_abs(pt1->ref) )  return 0;
       }
     }
   }
@@ -247,7 +247,7 @@ int chkcol(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int k,int8_t i,MMG5_int *list,int8
 
     jj  = MMG5_inxt2[j];
     pt1 = &mesh->tria[jel];
-    if ( abs(pt->ref) != abs(pt1->ref) )  return 0;
+    if ( MMG5_abs(pt->ref) != MMG5_abs(pt1->ref) )  return 0;
     else if ( !(pt1->tag[jj] & MG_GEO) )  return 0;
 
     p1 = &mesh->point[pt->v[i1]];
@@ -505,7 +505,7 @@ int litcol(MMG5_pMesh mesh,MMG5_int k,int8_t i,double kali) {
     /* check references */
     jel = list[1] / 3;
     pt1 = &mesh->tria[jel];
-    if ( abs(pt->ref) != abs(pt1->ref) )  return 0;
+    if ( MMG5_abs(pt->ref) != MMG5_abs(pt1->ref) )  return 0;
 
     /* analyze ball */
     assert ( ilist-1+open > 1 );
@@ -562,7 +562,7 @@ int litcol(MMG5_pMesh mesh,MMG5_int k,int8_t i,double kali) {
       pt  = &mesh->tria[jel];
       jel = list[ilist-2] / 3;
       pt1 = &mesh->tria[jel];
-      if ( abs(pt->ref) != abs(pt1->ref) )  return 0;
+      if ( MMG5_abs(pt->ref) != MMG5_abs(pt1->ref) )  return 0;
     }
 
     return colver(mesh,list,ilist);
@@ -586,7 +586,7 @@ int litcol(MMG5_pMesh mesh,MMG5_int k,int8_t i,double kali) {
     j   = list[1] % 3;
     jj  = MMG5_inxt2[j];
     pt1 = &mesh->tria[jel];
-    if ( abs(pt->ref) != abs(pt1->ref) )  return 0;
+    if ( MMG5_abs(pt->ref) != MMG5_abs(pt1->ref) )  return 0;
     else if ( !(pt1->tag[jj] & MG_GEO) )  return 0;
 
     p1 = &mesh->point[pt->v[i1]];

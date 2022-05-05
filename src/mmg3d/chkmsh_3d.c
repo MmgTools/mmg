@@ -410,7 +410,7 @@ int MMG5_chkmshsurf(MMG5_pMesh mesh){
  * Check the mesh validity
  *
  */
-int MMG5_mmg3dChkmsh(MMG5_pMesh mesh,int severe,int base) {
+int MMG5_mmg3dChkmsh(MMG5_pMesh mesh,int severe,MMG5_int base) {
   MMG5_pTetra     pt,pt1,pt2;
   MMG5_pxTetra    pxt;
   MMG5_int        *adja,*adja1,adj,adj1,k,iadr;
@@ -718,8 +718,8 @@ int MMG5_chkfemtopo(MMG5_pMesh mesh) {
   MMG5_pTetra      pt,pt1;
   MMG5_pxTetra     pxt;
   MMG5_pPoint      p0,p1;
-  MMG5_int         k,ntet,ned,np,list[MMG3D_LMAX+2],np1,npchk,iel;
-  int              nf,ischk,ilist,l;
+  MMG5_int         k,ntet,ned,np,list[MMG3D_LMAX+2],np1,ischk,npchk,iel;
+  int              nf,ilist,l;
   int8_t           i0,j,i,i1,ia,ier;
 
   ntet = ned = 0;

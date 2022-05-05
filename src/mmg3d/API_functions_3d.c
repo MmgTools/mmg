@@ -548,7 +548,7 @@ int MMG3D_Set_tetrahedron(MMG5_pMesh mesh, MMG5_int v0, MMG5_int v1, MMG5_int v2
   pt->v[1] = v1;
   pt->v[2] = v2;
   pt->v[3] = v3;
-  pt->ref  = abs(ref);
+  pt->ref  = MMG5_abs(ref);
 
   mesh->point[pt->v[0]].tag &= ~MG_NUL;
   mesh->point[pt->v[1]].tag &= ~MG_NUL;
@@ -644,7 +644,7 @@ int  MMG3D_Set_tetrahedra(MMG5_pMesh mesh, MMG5_int *tetra, MMG5_int *refs) {
     pt->v[3]  = tetra[j+3];
 
     if ( refs != NULL )
-      pt->ref   = abs(refs[i-1]);
+      pt->ref   = MMG5_abs(refs[i-1]);
 
     mesh->point[pt->v[0]].tag &= ~MG_NUL;
     mesh->point[pt->v[1]].tag &= ~MG_NUL;
@@ -1933,14 +1933,14 @@ int MMG3D_skipIso(MMG5_pMesh mesh) {
   k = 1;
   do {
     ptt = &mesh->tria[k];
-    if ( abs(ptt->ref) != mesh->info.isoref ) continue;
+    if ( MMG5_abs(ptt->ref) != mesh->info.isoref ) continue;
     /* here ptt is the first tri of mesh->tria that we want to delete */
     do {
       ptt1 = &mesh->tria[mesh->nti];
     }
-    while( (abs(ptt1->ref) == mesh->info.isoref) && (k <= --mesh->nti) );
+    while( (MMG5_abs(ptt1->ref) == mesh->info.isoref) && (k <= --mesh->nti) );
 
-    if ( abs(ptt1->ref) != mesh->info.isoref )
+    if ( MMG5_abs(ptt1->ref) != mesh->info.isoref )
       /* ptt1 is the last tri of mesh->tria that we want to keep */
       memcpy(ptt,ptt1,sizeof(MMG5_Tria));
   } while( ++k <= mesh->nti );
@@ -1961,20 +1961,20 @@ int MMG3D_skipIso(MMG5_pMesh mesh) {
     k = 1;
     do {
       pa = &mesh->edge[k];
-      if ( abs(pa->ref) != mesh->info.isoref ) {
-        pa->ref = abs(pa->ref);
+      if ( MMG5_abs(pa->ref) != mesh->info.isoref ) {
+        pa->ref = MMG5_abs(pa->ref);
         continue;
       }
       /* here pa is the first edge of mesh->edge that we want to delete */
       do {
         pa1 = &mesh->edge[mesh->nai];
       }
-      while( (abs(pa1->ref) == mesh->info.isoref) && (k <= --mesh->nai) );
+      while( (MMG5_abs(pa1->ref) == mesh->info.isoref) && (k <= --mesh->nai) );
 
-      if ( abs(pa1->ref) != mesh->info.isoref ) {
+      if ( MMG5_abs(pa1->ref) != mesh->info.isoref ) {
         /* pa1 is the last edge of mesh->edge that we want to keep */
         memcpy(pa,pa1,sizeof(MMG5_Edge));
-        pa1->ref = abs(pa1->ref);
+        pa1->ref = MMG5_abs(pa1->ref);
       }
     } while( ++k <= mesh->nai );
 
@@ -2034,7 +2034,7 @@ int MMG3D_Add_tetrahedron(MMG5_pMesh mesh, MMG5_int v0, MMG5_int v1, MMG5_int v2
   pt->v[1] = v1;
   pt->v[2] = v2;
   pt->v[3] = v3;
-  pt->ref  = abs(ref);
+  pt->ref  = MMG5_abs(ref);
 
   mesh->point[pt->v[0]].tag &= ~MG_NUL;
   mesh->point[pt->v[1]].tag &= ~MG_NUL;

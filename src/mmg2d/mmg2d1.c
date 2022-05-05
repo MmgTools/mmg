@@ -95,7 +95,7 @@ int MMG2D_anatri(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
 
     if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && ns+nc > 0 )
       fprintf(stdout,"     %8" MMG5_PRId " splitted, %8" MMG5_PRId " collapsed, %8" MMG5_PRId " swapped\n",ns,nc,nsw);
-    if ( it > 3 && abs(nc-ns) < 0.1 * MG_MAX(nc,ns) )  break;
+    if ( it > 3 && MMG5_abs(nc-ns) < 0.1 * MG_MAX(nc,ns) )  break;
   }
   while ( ++it < maxit && ns+nc+nsw >0 );
 
@@ -604,8 +604,8 @@ int MMG2D_adptri(MMG5_pMesh mesh,MMG5_pSol met) {
 
     if ( (abs(mesh->info.imprim) > 4 || mesh->info.ddebug) && ns+nc+nsw+nm > 0 )
       fprintf(stdout,"     %8" MMG5_PRId " splitted, %8" MMG5_PRId " collapsed, %8" MMG5_PRId " swapped, %8" MMG5_PRId " moved\n",ns,nc,nsw,nm);
-    if ( ns < 10 && abs(nc-ns) < 3 )  break;
-    else if ( it > 3 && abs(nc-ns) < 0.3 * MG_MAX(nc,ns) )  break;
+    if ( ns < 10 && MMG5_abs(nc-ns) < 3 )  break;
+    else if ( it > 3 && MMG5_abs(nc-ns) < 0.3 * MG_MAX(nc,ns) )  break;
   }
   while( ++it < maxit && (nc+ns+nsw+nm > 0) );
 
@@ -754,10 +754,10 @@ int MMG2D_adpcol(MMG5_pMesh mesh,MMG5_pSol met) {
 MMG5_int MMG2D_movtri(MMG5_pMesh mesh,MMG5_pSol met,int maxit,int8_t improve) {
   MMG5_pTria           pt;
   MMG5_pPoint          p0;
-  MMG5_int             nnm,nm,ns,k,ilist;
-  int                  base,it;
+  MMG5_int             nnm,nm,ns,k;
+  int                  it,ilist;
   int8_t               i,ier;
-  MMG5_int             list[MMG2D_LONMAX+2];
+  MMG5_int             base,list[MMG2D_LONMAX+2];
 
   it = nnm = 0;
   base = 0;

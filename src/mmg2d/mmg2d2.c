@@ -98,8 +98,8 @@ int MMG2D_removeBBtriangles(MMG5_pMesh mesh) {
    in the supplied mesh: in = base ; out = -base ; undetermined = 0*/
 int MMG2D_settagtriangles(MMG5_pMesh mesh,MMG5_pSol sol) {
   MMG5_pTria        pt;
-  int               base,iter,maxiter;
-  MMG5_int          nd,k,ip1,ip2,ip3,ip4;
+  int               iter,maxiter;
+  MMG5_int          base,nd,k,ip1,ip2,ip3,ip4;
 
   /*BB vertex*/
   ip1=(mesh->np-3);
@@ -129,7 +129,7 @@ int MMG2D_settagtriangles(MMG5_pMesh mesh,MMG5_pSol sol) {
 
 /* Find out whether triangle pt is inside or outside (i.e. contains bb points or not) */
 /* Return <0 value if triangle outside ; > 0 if triangle inside */
-int MMG2D_findtrianglestate(MMG5_pMesh mesh,MMG5_int k,MMG5_int ip1,MMG5_int ip2,MMG5_int ip3,MMG5_int ip4,int base) {
+MMG5_int MMG2D_findtrianglestate(MMG5_pMesh mesh,MMG5_int k,MMG5_int ip1,MMG5_int ip2,MMG5_int ip3,MMG5_int ip4,MMG5_int base) {
   MMG5_pTria       pt;
   int              nb;
   int8_t           i;
@@ -244,10 +244,10 @@ int MMG2D_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
       fprintf(stdout,"     unable to insert %8" MMG5_PRId " vertex : cavity %8" MMG5_PRId " -- delaunay %8" MMG5_PRId " \n",nu+nud,nu,nud);
   } while (ns && ++iter<maxiter);
 
-	if(abs(nus-ns)) {
+	if(MMG5_abs(nus-ns)) {
     if ( mesh->info.imprim > 6 || mesh->info.ddebug ) {
       fprintf(stderr,"\n  ## Warning: %s: unable to"
-              " insert %8d point with Delaunay \n",__func__,abs(nus-ns));
+              " insert %8" MMG5_PRId " point with Delaunay \n",__func__,MMG5_abs(nus-ns));
       fprintf(stdout,"     try to insert with splitbar\n");
     }
     mmgWarn2 = 0;
@@ -290,9 +290,9 @@ int MMG2D_insertpointdelone(MMG5_pMesh mesh,MMG5_pSol sol) {
         ns++;
       }
     }
-    if ( abs(nus-ns) ) {
+    if ( MMG5_abs(nus-ns) ) {
       fprintf(stderr,"  ## Warning: %s: %" MMG5_PRId " point(s) not "
-            "inserted. Check your output mesh\n",__func__,abs(nus-ns));
+            "inserted. Check your output mesh\n",__func__,MMG5_abs(nus-ns));
       return 0;
     }
   }

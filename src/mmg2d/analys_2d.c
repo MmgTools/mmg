@@ -149,7 +149,7 @@ int MMG2D_setadj(MMG5_pMesh mesh) {
         /* Case of a boundary (except if opnbdy is enabled, the boundary must be
          * between 2 different subdomains) */
         if ( (mesh->info.opnbdy && ( pt->tag[i] || pt1->tag[ii] ) )
-             || abs(pt1->ref) != abs(pt->ref) ) {
+             || MMG5_abs(pt1->ref) != MMG5_abs(pt->ref) ) {
           tag = ( MG_REF+MG_BDY );
 
           if ( !mesh->info.nosurf ) {
@@ -220,7 +220,7 @@ int MMG2D_setadj(MMG5_pMesh mesh) {
       }
 
       /* The edge is at the interface between a quad and a triangle */
-      kk = abs(kk);
+      kk = MMG5_abs(kk);
       ii = kk%3;
       pt = &mesh->tria[kk/3];
 

@@ -75,7 +75,7 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,MMG5_in
   MMG5_pxPoint  pxp;
   double        dd,len,lmax,o[3],to[3],no1[3],no2[3],v[3];
   int           ilist,ilists;
-  MMG5_int      src,k,ip1,ip2,ip,iq,list[MMG3D_LMAX+2],lists[MMG3D_LMAX+2],ref;
+  MMG5_int      src,k,ip1,ip2,ip,iq,list[MMG3D_LMAX+2],lists[MMG3D_LMAX+2],ref,base;
   int16_t       tag;
   int8_t        imax,j,i,i1,i2,ifa0,ifa1;
   int           lon,ret,ier;
@@ -83,7 +83,7 @@ MMG5_boucle_for(MMG5_pMesh mesh, MMG5_pSol met,MMG3D_pPROctree *PROctree,MMG5_in
   int           imin;
   int           ii;
   double        lmaxtet,lmintet,volmin;
-  int           imaxtet,imintet,base,countMemFailure;
+  int           imaxtet,imintet,countMemFailure;
   int8_t        chkRidTet;
   static int8_t mmgWarn0 = 0;
 
@@ -1021,16 +1021,16 @@ MMG5_adpsplcol(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree *PROctree, int* war
               " %8" MMG5_PRId " swapped, %8" MMG5_PRId " moved\n",ifilt,ns,nc,nf,nm);
 
     /*optimization*/
-    dd = abs(nc-ns);
+    dd = MMG5_abs(nc-ns);
     if ( !noptim && (it==5 || ((dd < 5) || (dd < 0.05*MG_MAX(nc,ns)) || !(ns+nc))) ) {
       MMG5_optbad(mesh,met,*PROctree);
       noptim = 1;
     }
 
     if( it > 5 ) {
-      //  if ( ns < 10 && abs(nc-ns) < 3 )  break;
-      //else if ( it > 3 && abs(nc-ns) < 0.3 * MG_MAX(nc,ns) )  break;
-      dd = abs(nc-ns);
+      //  if ( ns < 10 && MMG5_abs(nc-ns) < 3 )  break;
+      //else if ( it > 3 && MMG5_abs(nc-ns) < 0.3 * MG_MAX(nc,ns) )  break;
+      dd = MMG5_abs(nc-ns);
       if ( dd < 5 || dd < 0.05*MG_MAX(nc,ns) )   break;
       //else if ( it > 12 && nc >= ns )  break;
     }

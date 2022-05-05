@@ -143,15 +143,15 @@ int MMG5_delone(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int ip,MMG5_int *list,int ili
   MMG5_pTetra   pt,pt1;
   MMG5_xTetra   xt;
   MMG5_pxTetra  pxt0;
-  MMG5_int      *adja,*adjb,iel,jel,old,v[3],iadr;
-  int           base,i,j,k,l,m,size;
+  MMG5_int      base,*adja,*adjb,iel,jel,old,v[3],iadr;
+  int           i,j,k,l,m,size;
   MMG5_int      vois[4],iadrold;
   short         i1;
   char          alert;
   int           isused = 0,ixt,ielnum[3*MMG3D_LONMAX+1];
   MMG5_Hash     hedg;
 #ifndef NDEBUG
-  int tref;
+  MMG5_int      tref;
 #endif
 
   base = mesh->base;
@@ -357,8 +357,8 @@ static int MMG5_correction_ani(MMG5_pMesh mesh,MMG5_pSol met,int ip,MMG5_int* li
   double        dd,det,nn,eps,eps2,ux,uy,uz,vx,vy,vz,v1,v2,v3;
   double        *ma,*mb,*mc,*md,mm[6],h1,h2,h3;
   MMG5_int      *adja,i,j,iel,iadr,adj,ib,ic,id;
-  MMG5_int      vois[4];
-  int           base,ipil,lon,ncor;
+  MMG5_int      base,vois[4];
+  int           ipil,lon,ncor;
 
   ppt  = &mesh->point[ip];
   if ( ppt->tag & MG_NUL )  return ilist;
@@ -482,8 +482,8 @@ MMG5_correction_iso(MMG5_pMesh mesh,int ip,MMG5_int *list,int ilist,int nedep,do
   MMG5_pTetra      pt;
   double           dd,nn,eps,eps2,ux,uy,uz,vx,vy,vz,v1,v2,v3;
   MMG5_int         *adja,i,iel,iadr,adj,ib,ic,id;
-  MMG5_int         vois[4];
-  int              base,ncor,ipil,lon;
+  MMG5_int         base,vois[4];
+  int              ncor,ipil,lon;
 
   ppt  = &mesh->point[ip];
   if ( ppt->tag & MG_NUL )  return ilist;
@@ -585,8 +585,8 @@ int MMG5_cavity_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int iel,int ip,MMG5_int* 
   double         c[3],eps,dd,ray,ux,uy,uz,crit;
   double         *mj,*mp,ct[12];
   MMG5_int       *adja,*adjb,adj,adi,ia,jel,iadr;
-  MMG5_int       vois[4];
-  int            base,k,voy,ilist,ipil,i,j,isreq,tref,l;
+  MMG5_int       base,vois[4],tref;
+  int            k,voy,ilist,ipil,i,j,isreq,l;
 
   if ( lon < 1 )  return 0;
   ppt = &mesh->point[ip];
@@ -744,9 +744,9 @@ int MMG5_cavity_iso(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_int iel,int ip,MMG5_int *
   MMG5_pTetra      pt,pt1;
   double           c[3],crit,dd,eps,ray,ct[12];
   MMG5_int         *adja,*adjb,adj,adi,jel,iadr;
-  MMG5_int         vois[4],l;
-  int              tref,isreq;
-  int              base,voy,i,j,k,ipil,ilist;
+  MMG5_int         tref,base,vois[4],l;
+  int              isreq;
+  int              voy,i,j,k,ipil,ilist;
 
   if ( lon < 1 )  return 0;
   ppt = &mesh->point[ip];

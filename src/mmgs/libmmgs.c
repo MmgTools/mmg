@@ -106,7 +106,7 @@ int MMGS_packMesh(MMG5_pMesh mesh,MMG5_pSol sol,MMG5_pSol met) {
     if ( !MG_VOK(ppt) )  continue;
     ppt->tmp = ++np;
     if ( ppt->tag & MG_CRN )  nc++;
-    ppt->ref = abs(ppt->ref);
+    ppt->ref = MMG5_abs(ppt->ref);
   }
 
   /* compact triangles */

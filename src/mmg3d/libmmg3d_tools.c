@@ -797,7 +797,7 @@ int MMG3D_Get_numberOfNonBdyTriangles(MMG5_pMesh mesh, MMG5_int* nb_tria) {
       iel = adja[i] / 5;
 
       if ( iel<0 ) {
-        ref = mesh->tetra[abs(iel)].ref;
+        ref = mesh->tetra[MMG5_abs(iel)].ref;
       } else {
         ref = mesh->prism[iel].ref;
       }
@@ -878,7 +878,7 @@ int MMG3D_Get_numberOfNonBdyTriangles(MMG5_pMesh mesh, MMG5_int* nb_tria) {
       iel = adja[i] / 5;
 
       if ( iel<0 ) {
-        ref = mesh->tetra[abs(iel)].ref;
+        ref = mesh->tetra[MMG5_abs(iel)].ref;
       } else {
         ref = mesh->prism[iel].ref;
       }

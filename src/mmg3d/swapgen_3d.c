@@ -57,8 +57,8 @@ MMG5_int MMG5_chkswpgen(MMG5_pMesh mesh,MMG5_pSol met,MMG5_int start,int ia,
   MMG5_pTetra    pt,pt0;
   MMG5_pPoint    p0;
   double         calold,calnew,caltmp;
-  int            npol,refdom,k,l;
-  MMG5_int       np,na,nb,piv,*adja,adj,pol[MMG3D_LMAX+2],iel;
+  int            npol,k,l;
+  MMG5_int       np,na,nb,piv,*adja,adj,pol[MMG3D_LMAX+2],iel,refdom;
   int8_t         i,ip,ier,ifac;
 
   pt  = &mesh->tetra[start];

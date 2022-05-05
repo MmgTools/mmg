@@ -422,7 +422,7 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
     MMG5_pPrism ppr = NULL;
 
     int typ = (*dataset)->GetCellType(k);
-    int ref = 0;
+    MMG5_int ref = 0;
 
     switch ( typ ) {
     case ( VTK_VERTEX ):
@@ -442,7 +442,7 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
         ref = car ? car->GetTuple1(k) : 0;
       }
       /* Skip edges with iso ref */
-      if ( mesh->info.iso &&  abs(ref) == mesh->info.isoref ) {
+      if ( mesh->info.iso &&  MMG5_abs(ref) == mesh->info.isoref ) {
         /* Skip this edge */
         ++nbl_a;
       }
@@ -467,7 +467,7 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
       ref = car ? car->GetTuple1(k) : 0;
 
       // Skip edges with iso ref
-      if ( mesh->info.iso &&  abs(ref) == mesh->info.isoref ) {
+      if ( mesh->info.iso &&  MMG5_abs(ref) == mesh->info.isoref ) {
         /* Skip this edge */
         ++nbl_a;
       }
@@ -490,7 +490,7 @@ int MMG5_loadVtkMesh_part2(MMG5_pMesh mesh,MMG5_pSol *sol,vtkDataSet **dataset,
       ref = car ? car->GetTuple1(k) : 0;
 
       // skip tria with iso ref in 3D
-      if ( mesh->info.iso && abs(ref) == mesh->info.isoref && mesh->dim == 3 ) {
+      if ( mesh->info.iso && MMG5_abs(ref) == mesh->info.isoref && mesh->dim == 3 ) {
         /* Skip this edge */
         ++nbl_t;
       }

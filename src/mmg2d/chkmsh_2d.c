@@ -31,7 +31,7 @@
  * Check the mesh validity
  *
  */
-int MMG5_mmg2dChkmsh(MMG5_pMesh mesh, int severe,int base) {
+int MMG5_mmg2dChkmsh(MMG5_pMesh mesh, int severe,MMG5_int base) {
   MMG5_pPoint    ppt;
   MMG5_pTria     pt1,pt2;
   MMG5_pEdge     ped;

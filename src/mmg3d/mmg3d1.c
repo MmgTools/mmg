@@ -614,7 +614,7 @@ MMG5_int MMG5_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree PROctree, int
  *
  */
 MMG5_int MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double crit,double declic,
-                MMG3D_pPROctree PROctree,int typchk,int testmark) {
+                MMG3D_pPROctree PROctree,int typchk,MMG5_int testmark) {
   MMG5_pTetra   pt;
   MMG5_pxTetra  pxt;
   int           ilist,it,nconf,maxit,ier;
@@ -678,15 +678,15 @@ MMG5_int MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double crit,double declic,
  */
 MMG5_int MMG5_movtet(MMG5_pMesh mesh,MMG5_pSol met, MMG3D_pPROctree PROctree,
                 double clickSurf,double clickVol,int moveVol, int improveSurf,
-                int improveVolSurf, int improveVol, int maxit,int testmark) {
+                int improveVolSurf, int improveVol, int maxit,MMG5_int testmark) {
   MMG5_pTetra   pt;
   MMG5_pPoint   ppt;
   MMG5_pxTetra  pxt;
   MMG5_Tria     tt;
   double        *n,caltri;
   int           ier,ilists,ilistv,it;
-  MMG5_int      i,k,lists[MMG3D_LMAX+2],listv[MMG3D_LMAX+2],nm,nnm,ns;
-  uint8_t       j,i0,base;
+  MMG5_int      i,k,lists[MMG3D_LMAX+2],listv[MMG3D_LMAX+2],nm,nnm,ns,base;
+  uint8_t       j,i0;
 
   if ( abs(mesh->info.imprim) > 5 || mesh->info.ddebug )
     fprintf(stdout,"  ** OPTIMIZING MESH\n");
@@ -835,8 +835,8 @@ static int MMG5_coltet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk) {
   MMG5_pPar       par;
   double          ll,ux,uy,uz,hmi2;
   int             ilists,ilist;
-  MMG5_int        k,nc,nnm,list[MMG3D_LMAX+2],lists[MMG3D_LMAX+2];
-  int             base,l,kk,isloc,ifac1,refmin,refplus;
+  MMG5_int        base,k,nc,nnm,list[MMG3D_LMAX+2],lists[MMG3D_LMAX+2],refmin,refplus;
+  int             l,kk,isloc,ifac1;
   int16_t         tag,isnm,isnmint;
   int8_t          i,j,ip,iq;
   int             ier;
@@ -2808,7 +2808,7 @@ int MMG5_anatet(MMG5_pMesh mesh,MMG5_pSol met,int8_t typchk, int patternMode) {
       fprintf(stdout,"     %8" MMG5_PRId " splitted, %8" MMG5_PRId " collapsed, %8" MMG5_PRId " swapped\n",ns,nc,nf);
     }
 
-    if ( it > minit-1 && ( !(ns+nc) || (abs(nc-ns) < 0.1 * MG_MAX(nc,ns)) ) ) {
+    if ( it > minit-1 && ( !(ns+nc) || (MMG5_abs(nc-ns) < 0.1 * MG_MAX(nc,ns)) ) ) {
       ++lastit;
       if ( it > minit && lastit>2 ) break;
     }
