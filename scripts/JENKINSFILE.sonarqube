@@ -62,8 +62,7 @@ sonar.c.suffixes.sources=.c
 sonar.c.suffixes.headers=.h
 sonar.lang.patterns.c++ : **/*.cxx,**/*.cpp,**/*.hxx,**/*.hpp
 sonar.c.errorRecoveryEnabled=True
-sonar.c.includeDirectories=src/common, src/mmg, src/mmg3d, src/mmg2d, src/mmgs, build/src/mmg2d, build/src/mmg3d, build/src/mmgs, build/src/common, build/include, bu\
-ild/src
+sonar.c.includeDirectories=src/common, src/mmg, src/mmg3d, src/mmg2d, src/mmgs, buildPatternONuseScotchON/src/mmg2d, buildPatternONuseScotchON/src/mmg3d, buildPatternONuseScotchON/src/mmgs, buildPatternONuseScotchON/src/common, buildPatternONuseScotchON/include, buildPatternONuseScotchON/src,buildPatternOFFuseScotchOFF/src/mmg2d, buildPatternOFFuseScotchOFF/src/mmg3d, buildPatternOFFuseScotchOFF/src/mmgs, buildPatternOFFuseScotchOFF/src/common, buildPatternOFFuseScotchOFF/include, buildPatternOFFuseScotchOFF/src,
 sonar.c.compiler.charset=UTF-8
 sonar.c.compiler.parser=GCC
 sonar.c.compiler.regex=^(.*):(\\\\d+):\\\\d+: warning: (.*)\\\\[(.*)\\\\]$
