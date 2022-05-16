@@ -76,7 +76,7 @@ void MMG5_swapTri(MMG5_pTria trias, MMG5_int* perm, MMG5_int ind1, MMG5_int ind2
  * Modifies the node indicies to prevent from cache missing.
  *
  */
-int MMG5_mmgsRenumbering(MMG5_int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol,
+int MMG5_mmgsRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol,
                          MMG5_pSol fields,MMG5_int* permNodGlob) {
   MMG5_pPoint  ppt;
   MMG5_pTria   ptri;

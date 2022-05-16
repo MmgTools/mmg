@@ -110,7 +110,7 @@ void MMG5_swapTet(MMG5_pTetra tetras/*, int* adja*/, MMG5_int* perm, MMG5_int in
  * Modifies the node indicies to prevent from cache missing.
  *
  */
-int MMG5_mmg3dRenumbering(MMG5_int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol,
+int MMG5_mmg3dRenumbering(int boxVertNbr, MMG5_pMesh mesh, MMG5_pSol sol,
                           MMG5_pSol fields,MMG5_int* permNodGlob) {
   MMG5_pPoint  ppt;
   MMG5_pTetra  ptet;

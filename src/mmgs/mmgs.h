@@ -175,7 +175,7 @@ int MMGS_memOption(MMG5_pMesh mesh);
 int MMGS_setMeshSize_alloc( MMG5_pMesh mesh );
 
 #ifdef USE_SCOTCH
-int MMG5_mmgsRenumbering(MMG5_int,MMG5_pMesh,MMG5_pSol,MMG5_pSol,MMG5_int*);
+int MMG5_mmgsRenumbering(int,MMG5_pMesh,MMG5_pSol,MMG5_pSol,MMG5_int*);
 #endif
 
 /* tools */

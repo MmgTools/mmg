@@ -461,7 +461,7 @@ void MMG3D_chkmeshedgestags(MMG5_pMesh mesh);
 int MMG3D_chk_shellEdgeTag(MMG5_pMesh  mesh,MMG5_int start, int8_t ia,int16_t tag,MMG5_int ref);
 
 #ifdef USE_SCOTCH
-int MMG5_mmg3dRenumbering(MMG5_int,MMG5_pMesh,MMG5_pSol,MMG5_pSol,MMG5_int*);
+int MMG5_mmg3dRenumbering(int,MMG5_pMesh,MMG5_pSol,MMG5_pSol,MMG5_int*);
 #endif
 
 int    MMG5_meancur(MMG5_pMesh mesh,MMG5_int np,double c[3],int ilist,MMG5_int *list,double h[3]);
