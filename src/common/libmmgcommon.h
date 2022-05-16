@@ -41,6 +41,8 @@
 
 #include "chrono.h"
 
+#include "mmg_core_export.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -61,6 +63,7 @@ extern "C" {
  *
  */
 void  MMG5_Init_fileNames(MMG5_pMesh mesh, MMG5_pSol sol);
+
 /**
  * \param mesh pointer toward the mesh structure.
  *
@@ -216,7 +219,7 @@ extern int MMG5_Set_defaultTruncatureSizes(MMG5_pMesh mesh,int8_t sethmin,int8_t
  * Fill hmin and hamx if they are not setted by the user.
  *
  */
-int MMG5_Compute_constantSize(MMG5_pMesh mesh,MMG5_pSol met,double *hsize);
+LIBMMG_CORE_EXPORT int MMG5_Compute_constantSize(MMG5_pMesh mesh,MMG5_pSol met,double *hsize);
 
 /* Enum utilities */
 /**
