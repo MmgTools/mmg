@@ -14,7 +14,17 @@ node('mmg-sonnar-new') {
         rm -rf *
         export CFLAGS="-O0 -g -fPIC --coverage"
         export LDFLAGS="--coverage"
-        cmake .. -DCMAKE_BUILD_TYPE=Debug -DUSE_VTK='''+list[i]+'''  -DUSE_POINTMAP='''+list[i]+''' -DCMAKE_Fortran_COMPILER="gfortran" -DPATTERN='''+list[i]+''' -DBUILD_TESTING=ON -DCMAKE_C_FLAGS="$CFLAGS" -DCMAKE_CXX_FLAGS="$CFLAGS" -DCMAKE_EXE_LINKER_FLAGS="$LDFLAGS" -DCMAKE_INSTALL_PREFIX=$PWD/../install -DBUILD_TESTING=ON -DLONG_TESTS=OFF -DRUN_AGAIN=ON -DLIBMMG2D_STATIC=ON -DLIBMMG3D_STATIC=ON -DLIBMMG_STATIC=ON -DLIBMMG2D_STATIC=ON -DLIBMMGS_STATIC=ON -DTEST_LIBMMG=ON -DTEST_LIBMMG2D=ON -DTEST_LIBMMG3D=ON -DTEST_LIBMMGS=ON -DSCOTCH_DIR=/builds/scotch_6.0.6 -DUSE_SCOTCH='''+list[i]+''' -DELAS_DIR=/builds/LinearElasticity -DUSE_ELAS='''+list[i]+'''
+        cmake .. -DCMAKE_BUILD_TYPE=Debug -DUSE_VTK='''+list[i]+'''\
+          -DUSE_POINTMAP='''+list[i]+''' -DCMAKE_Fortran_COMPILER="gfortran"\
+          -DPATTERN='''+list[i]+''' -DBUILD_TESTING=ON -DCMAKE_C_FLAGS="$CFLAGS"\
+          -DCMAKE_CXX_FLAGS="$CFLAGS" -DCMAKE_EXE_LINKER_FLAGS="$LDFLAGS"\
+          -DCMAKE_INSTALL_PREFIX=$PWD/../install\
+          -DBUILD_TESTING=ON -DLONG_TESTS=OFF -DRUN_AGAIN=ON\
+          -DLIBMMG2D_STATIC=ON -DLIBMMG3D_STATIC=ON -DLIBMMG_STATIC=ON\
+          -DLIBMMG2D_STATIC=ON -DLIBMMGS_STATIC=ON -DTEST_LIBMMG=ON\
+          -DTEST_LIBMMG2D=ON -DTEST_LIBMMG3D=ON -DTEST_LIBMMGS=ON\
+          -DSCOTCH_DIR=/builds/scotch_6.0.6 -DUSE_SCOTCH='''+list[i]+'''\
+          -DELAS_DIR=/builds/LinearElasticity -DUSE_ELAS='''+list[i]+'''
         make clean
         scan-build -plist --intercept-first --analyze-headers -o analyzer_reports make 2>&1 |tee mmg-build.log
         make install |tee -a mmg-build.log
@@ -56,13 +66,30 @@ sonar.links.issue=https://github.com/MmgTools/mmg/issues
 sonar.projectKey=cardamom:mmg:github:develop
 sonar.projectDescription=open source software for bidimensional and tridimensional remeshing
 sonar.projectVersion=$version_mmg
-sonar.sources=./src
+sonar.sources=./src,./libexamples,./cmake/testing/code,/builds/ci_tests
 sonar.sourceEncoding=UTF-8
 sonar.c.suffixes.sources=.c
 sonar.c.suffixes.headers=.h
 sonar.lang.patterns.c++ : **/*.cxx,**/*.cpp,**/*.hxx,**/*.hpp
 sonar.c.errorRecoveryEnabled=True
-sonar.c.includeDirectories=src/common, src/mmg, src/mmg3d, src/mmg2d, src/mmgs, buildPatternONuseScotchON/src/mmg2d, buildPatternONuseScotchON/src/mmg3d, buildPatternONuseScotchON/src/mmgs, buildPatternONuseScotchON/src/common, buildPatternONuseScotchON/include, buildPatternONuseScotchON/src,buildPatternOFFuseScotchOFF/src/mmg2d, buildPatternOFFuseScotchOFF/src/mmg3d, buildPatternOFFuseScotchOFF/src/mmgs, buildPatternOFFuseScotchOFF/src/common, buildPatternOFFuseScotchOFF/include, buildPatternOFFuseScotchOFF/src,
+sonar.c.includeDirectories=\
+   /builds/workspace/mmg-sonarqube/src/common,\
+   /builds/workspace/mmg-sonarqube/src/mmg,\
+   /builds/workspace/mmg-sonarqube/src/mmg3d,\
+   /builds/workspace/mmg-sonarqube/src/mmg2d,\
+   /builds/workspace/mmg-sonarqube/src/mmgs,\
+   /builds/workspace/mmg-sonarqube/buildPatternONuseScotchON/src/mmg2d,\
+   /builds/workspace/mmg-sonarqube/buildPatternONuseScotchON/src/mmg3d,\
+   /builds/workspace/mmg-sonarqube/buildPatternONuseScotchON/src/mmgs,\
+   /builds/workspace/mmg-sonarqube/buildPatternONuseScotchON/src/common,\
+   /builds/workspace/mmg-sonarqube/buildPatternONuseScotchON/include,\
+   /builds/workspace/mmg-sonarqube/buildPatternONuseScotchON/src,\
+   /builds/workspace/mmg-sonarqube/buildPatternOFFuseScotchOFF/src/mmg2d,\
+   /builds/workspace/mmg-sonarqube/buildPatternOFFuseScotchOFF/src/mmg3d,\
+   /builds/workspace/mmg-sonarqube/buildPatternOFFuseScotchOFF/src/mmgs,\
+   /builds/workspace/mmg-sonarqube/buildPatternOFFuseScotchOFF/src/common,\
+   /builds/workspace/mmg-sonarqube/buildPatternOFFuseScotchOFF/include,\
+   /builds/workspace/mmg-sonarqube/buildPatternOFFuseScotchOFF/src,
 sonar.c.compiler.charset=UTF-8
 sonar.c.compiler.parser=GCC
 sonar.c.compiler.regex=^(.*):(\\\\d+):\\\\d+: warning: (.*)\\\\[(.*)\\\\]$
