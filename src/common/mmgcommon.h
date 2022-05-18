@@ -588,7 +588,7 @@ typedef struct MMG5_dNode_s {
  extern double MMG5_det4pt(double c0[3],double c1[3],double c2[3],double c3[3]);
  int           MMG5_devangle(double* n1, double *n2, double crit);
  extern double MMG5_orvol(MMG5_pPoint point,int *v);
- int           MMG5_Add_inode( MMG5_pMesh mesh, MMG5_iNode **liLi, int val );
+ LIBMMG_CORE_EXPORT int           MMG5_Add_inode( MMG5_pMesh mesh, MMG5_iNode **liLi, int val );
  int           MMG5_Add_dnode( MMG5_pMesh mesh, MMG5_dNode **liLi, int, double);
  int           MMG5_eigenvmatsym2d(MMG5_pMesh mesh,double m[],double lambda[],double v[][2]);
  int           MMG5_eigenvmatsym3d(MMG5_pMesh mesh,double m[],double lambda[],double v[][3]);
@@ -624,7 +624,7 @@ void           MMG5_check_hminhmax(MMG5_pMesh mesh, int8_t sethmin, int8_t sethm
                                    MMG5_Bezier*,double r[3][3],double gv[2]);
  void          MMG5_fillDefmetregSys( int, MMG5_pPoint, int, MMG5_Bezier,double r[3][3],
                                        double *, double *, double *, double *);
- void          MMG5_Free_ilinkedList( MMG5_pMesh mesh, MMG5_iNode *liLi );
+ LIBMMG_CORE_EXPORT void          MMG5_Free_ilinkedList( MMG5_pMesh mesh, MMG5_iNode *liLi );
  void          MMG5_Free_dlinkedList( MMG5_pMesh mesh, MMG5_dNode *liLi );
  LIBMMG_CORE_EXPORT int           MMG5_grad2metSurf(MMG5_pMesh,MMG5_pSol,MMG5_pTria,int,int);
  LIBMMG_CORE_EXPORT int           MMG5_grad2metSurfreq(MMG5_pMesh,MMG5_pSol,MMG5_pTria,int,int);
@@ -649,12 +649,12 @@ void           MMG5_check_hminhmax(MMG5_pMesh mesh, int8_t sethmin, int8_t sethm
  void          MMG5_mmgDefaultValues(MMG5_pMesh mesh);
  int           MMG5_mmgHashTria(MMG5_pMesh mesh, int *adja, MMG5_Hash*, int chkISO);
  void          MMG5_mmgInit_parameters(MMG5_pMesh mesh);
- void          MMG5_mmgUsage(char *prog);
- void          MMG5_paramUsage1(void);
- void          MMG5_paramUsage2(void);
- void          MMG5_2d3dUsage(void);
- void          MMG5_lagUsage(void);
- void          MMG5_advancedUsage(void);
+ LIBMMG_CORE_EXPORT void          MMG5_mmgUsage(char *prog);
+ LIBMMG_CORE_EXPORT void          MMG5_paramUsage1(void);
+ LIBMMG_CORE_EXPORT void          MMG5_paramUsage2(void);
+ LIBMMG_CORE_EXPORT void          MMG5_2d3dUsage(void);
+ LIBMMG_CORE_EXPORT void          MMG5_lagUsage(void);
+ LIBMMG_CORE_EXPORT void          MMG5_advancedUsage(void);
  extern int    MMG5_nonUnitNorPts(MMG5_pMesh,int,int,int,double*);
  extern double MMG5_nonorsurf(MMG5_pMesh mesh,MMG5_pTria pt);
  extern int    MMG5_norpts(MMG5_pMesh,int,int,int,double *);

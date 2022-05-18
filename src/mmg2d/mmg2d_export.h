@@ -1,7 +1,7 @@
 /* =============================================================================
 **  This file is part of the mmg software package for the tetrahedral
 **  mesh modification.
-**  Copyright (c) Bx INP/Inria/UBordeaux/UPMC, 2004- .
+**  Copyright (c) Bx INP/CNRS/Inria/UBordeaux/UPMC, 2004-
 **
 **  mmg is free software: you can redistribute it and/or modify it
 **  under the terms of the GNU Lesser General Public License as published
@@ -21,13 +21,13 @@
 ** =============================================================================
 */
 
-#ifndef MMG_CORE_EXPORT_H
-#define MMG_CORE_EXPORT_H
+#ifndef MMG2D_EXPORT_H
+#define MMG2D_EXPORT_H
 
-#if defined(libmmgs_so_EXPORTS) || defined(libmmg2d_so_EXPORTS)
-#  define LIBMMG_CORE_EXPORT __declspec(dllexport)
+#if defined(libmmg2d_so_EXPORTS)
+#  define LIBMMG2D_EXPORT __declspec(dllexport)
 #else
-#  define LIBMMG_CORE_EXPORT __declspec(dllimport)
+#  define LIBMMG2D_EXPORT __declspec(dllimport)
 #endif
 
 #endif
