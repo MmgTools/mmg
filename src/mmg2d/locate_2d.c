@@ -29,7 +29,7 @@
  * \version 5
  * \copyright GNU Lesser General Public License.
  */
-#include "mmg2d.h"
+#include "libmmg2d_private.h"
 #define EPST -1e-18
 
 /* Calculate the barycentric coordinates of point P(c[0],c[1]) in tria pt and the associated determinant */

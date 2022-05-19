@@ -2147,6 +2147,12 @@ LIBMMGS_EXPORT int MMGS_Compute_eigenv(double m[6],double lambda[3],double vp[3]
  */
 LIBMMGS_EXPORT void MMGS_Free_solutions(MMG5_pMesh mesh,MMG5_pSol sol);
 
+/**
+ * Set common pointer functions between mmgs and mmg3d to the matching mmgs
+ * functions.
+ */
+LIBMMGS_EXPORT void MMGS_Set_commonFunc(void);
+
 #ifdef __cplusplus
 }
 #endif

@@ -20,8 +20,8 @@
 **  use this copy of the mmg distribution only if you accept them.
 ** =============================================================================
 */
-#ifndef MMG2D_H
-#define MMG2D_H
+#ifndef LIBMMG2D_PRIVATE_H
+#define LIBMMG2D_PRIVATE_H
 
 #include <assert.h>
 #include <stdlib.h>
@@ -33,7 +33,7 @@
 #include <ctype.h>
 #include <float.h>
 
-#include "libmmg2d.h"
+
 #include "libmmgcommon.h"
 
 #include "mmg2d_export.h"
@@ -227,7 +227,7 @@ int MMG2D_mmg2d6(MMG5_pMesh ,MMG5_pSol,MMG5_pSol );
 int MMG2D_mmg2d9(MMG5_pMesh ,MMG5_pSol ,MMG5_pSol,int** );
 //int MMG2D_cendel(MMG5_pMesh ,MMG5_pSol ,double ,int );
 int MMG2D_swapdelone(MMG5_pMesh ,MMG5_pSol ,int ,int8_t ,double ,int *);
-LIBMMG2D_EXPORT int MMG5_mmg2dChkmsh(MMG5_pMesh , int, int );
+int MMG5_mmg2dChkmsh(MMG5_pMesh , int, int );
 int MMG2D_2dMeshCheck(MMG5_pMesh mesh);
 int MMG2D_boulep(MMG5_pMesh , int , int , int * );
 //int MMG2D_markBdry(MMG5_pMesh );
@@ -293,8 +293,8 @@ int MMG2D_defsiz_iso(MMG5_pMesh ,MMG5_pSol );
 int MMG2D_defsiz_ani(MMG5_pMesh ,MMG5_pSol );
 int MMG2D_defmetbdy_2d(MMG5_pMesh ,MMG5_pSol ,int ,int8_t );
 int MMG2D_defaultmet_2d(MMG5_pMesh ,MMG5_pSol ,int ,int8_t );
-LIBMMG2D_EXPORT int MMG2D_grad2met_ani(MMG5_pMesh ,MMG5_pSol ,MMG5_pTria,int,int);
-LIBMMG2D_EXPORT int MMG2D_grad2metreq_ani(MMG5_pMesh ,MMG5_pSol ,MMG5_pTria,int,int);
+int MMG2D_grad2met_ani(MMG5_pMesh ,MMG5_pSol ,MMG5_pTria,int,int);
+int MMG2D_grad2metreq_ani(MMG5_pMesh ,MMG5_pSol ,MMG5_pTria,int,int);
 int MMG2D_gradsiz_ani(MMG5_pMesh ,MMG5_pSol );
 int MMG2D_gradsizreq_ani(MMG5_pMesh ,MMG5_pSol );
 int MMG2D_anaelt(MMG5_pMesh ,MMG5_pSol ,int );
@@ -369,18 +369,6 @@ extern int    (*MMG2D_defsiz)(MMG5_pMesh ,MMG5_pSol );
 /* init structures */
 void  MMG2D_Init_parameters(MMG5_pMesh mesh);
 
-/**
- * Set common pointer functions between mmgs and mmg2d to the matching mmg2d
- * functions.
- */
-static inline
-void MMG2D_Set_commonFunc(void) {
-  MMG5_chkmsh            = MMG5_mmg2dChkmsh;
-  MMG5_grad2met_ani      = MMG2D_grad2met_ani;
-  MMG5_grad2metreq_ani   = MMG2D_grad2metreq_ani;
-
-  return;
-}
 
 #ifdef __cplusplus
 }

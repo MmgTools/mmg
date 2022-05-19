@@ -2326,6 +2326,11 @@ LIBMMG2D_EXPORT int MMG2D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *
   void MMG2D_Free_solutions(MMG5_pMesh mesh,MMG5_pSol sol);
 
 
+/**
+ * Set common pointer functions between mmgs and mmg2d to the matching mmg2d
+ * functions.
+ */
+  LIBMMG2D_EXPORT void MMG2D_Set_commonFunc(void);
 #ifdef __cplusplus
 }
 #endif

@@ -30,6 +30,7 @@
  * \copyright GNU Lesser General Public License.
  **/
 
+#include "libmmg3d.h"
 #include "inlined_functions_3d.h"
 #include "mmgversion.h"
 
@@ -1420,3 +1421,4 @@ void MMG3D_Free_solutions(MMG5_pMesh mesh,MMG5_pSol sol) {
 
   return;
 }
+

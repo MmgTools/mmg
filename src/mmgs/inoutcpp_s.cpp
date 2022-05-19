@@ -32,7 +32,8 @@
  */
 
 #include <vtkparser.hpp>
-#include "mmgs.h"
+#include "libmmgs.h"
+#include "libmmgs_private.h"
 
 #ifdef USE_VTK
 

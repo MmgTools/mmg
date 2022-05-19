@@ -33,7 +33,7 @@
  * \todo Doxygen documentation
  */
 
-#include "mmg2d.h"
+#include "libmmg2d_private.h"
 //#include "ls_calls.h"
 #define MMG2D_DEGTOL  5.e-1
 

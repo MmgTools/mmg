@@ -32,7 +32,7 @@
  * \copyright GNU Lesser General Public License.
  */
 
-#include "mmg3d.h"
+#include "libmmg3d_private.h"
 
 mytime         MMG5_ctim[TIMEMAX];
 

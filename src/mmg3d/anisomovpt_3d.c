@@ -33,6 +33,7 @@
  * \todo Doxygen documentation
  */
 
+#include "libmmg3d.h"
 #include "inlined_functions_3d.h"
 
 /**

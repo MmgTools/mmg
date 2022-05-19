@@ -41,10 +41,10 @@
  *
  */
 
-#include "mmg2d.h"
+#include "libmmg2d_private.h"
 
 /**
- * See \ref MMG2D_setfunc function in \ref mmg2d/libmmg2d.h file.
+ * See \ref MMG2D_setfunc function in \ref mmg2d/liblibmmg2d_private.h file.
  */
 FORTRAN_NAME(MMG2D_SETFUNC,mmg2d_setfunc,
              (MMG5_pMesh *mesh,MMG5_pSol *met),
@@ -54,7 +54,7 @@ FORTRAN_NAME(MMG2D_SETFUNC,mmg2d_setfunc,
 }
 
 /**
- * See \ref MMG2D_Get_numberOfNonBdyEdges function in \ref mmg2d/libmmg2d.h file.
+ * See \ref MMG2D_Get_numberOfNonBdyEdges function in \ref mmg2d/liblibmmg2d_private.h file.
  */
 FORTRAN_NAME(MMG2D_GET_NUMBEROFNONBDYEDGES,mmg2d_get_numberofnonbdyedges,
              (MMG5_pMesh *mesh,int* nb_edges, int* retval),
@@ -64,7 +64,7 @@ FORTRAN_NAME(MMG2D_GET_NUMBEROFNONBDYEDGES,mmg2d_get_numberofnonbdyedges,
 }
 
 /**
- * See \ref MMG2D_Get_nonBdyEdge function in \ref mmg2d/libmmg2d.h file.
+ * See \ref MMG2D_Get_nonBdyEdge function in \ref mmg2d/liblibmmg2d_private.h file.
  */
 FORTRAN_NAME(MMG2D_GET_NONBDYEDGE,mmg2d_get_nonbdyedge,
              (MMG5_pMesh *mesh,int* e0, int* e1,int *ref,int* idx,int* retval),
@@ -74,7 +74,7 @@ FORTRAN_NAME(MMG2D_GET_NONBDYEDGE,mmg2d_get_nonbdyedge,
 }
 
 /**
- * See \ref MMG2D_Get_adjaTri function in \ref mmg2d/libmmg2d.h file.
+ * See \ref MMG2D_Get_adjaTri function in \ref mmg2d/liblibmmg2d_private.h file.
  */
 FORTRAN_NAME(MMG2D_GET_ADJATRI,mmg2d_get_adjatri,
              (MMG5_pMesh *mesh,int* kel, int* listri, int* retval),
@@ -84,7 +84,7 @@ FORTRAN_NAME(MMG2D_GET_ADJATRI,mmg2d_get_adjatri,
 }
 
 /**
- * See \ref MMG2D_Get_adjaVertices function in \ref mmg2d/libmmg2d.h file.
+ * See \ref MMG2D_Get_adjaVertices function in \ref mmg2d/liblibmmg2d_private.h file.
  */
 FORTRAN_NAME(MMG2D_GET_ADJAVERTICES,mmg2d_get_adjavertices,
              (MMG5_pMesh *mesh,int* ip, int* lispoi, int* retval),
@@ -94,7 +94,7 @@ FORTRAN_NAME(MMG2D_GET_ADJAVERTICES,mmg2d_get_adjavertices,
 }
 
 /**
- * See \ref MMG2D_Get_adjaVerticesFast function in \ref mmg2d/libmmg2d.h file.
+ * See \ref MMG2D_Get_adjaVerticesFast function in \ref mmg2d/liblibmmg2d_private.h file.
  */
 FORTRAN_NAME(MMG2D_GET_ADJAVERTICESFAST,mmg2d_get_adjaverticesfast,
              (MMG5_pMesh *mesh,int* ip, int *start, int* lispoi, int* retval),
@@ -104,7 +104,7 @@ FORTRAN_NAME(MMG2D_GET_ADJAVERTICESFAST,mmg2d_get_adjaverticesfast,
 }
 
 /**
- * See \ref MMG2D_Get_triFromEdge function in \ref mmg2d/libmmg2d.h file.
+ * See \ref MMG2D_Get_triFromEdge function in \ref mmg2d/liblibmmg2d_private.h file.
  */
 FORTRAN_NAME(MMG2D_GET_TRIFROMEDGE,mmg2d_get_trifromedge,
              (MMG5_pMesh *mesh,int *ked, int *ktri, int *ied,int *retval),
@@ -115,7 +115,7 @@ FORTRAN_NAME(MMG2D_GET_TRIFROMEDGE,mmg2d_get_trifromedge,
 }
 
 /**
- * See \ref MMG2D_Get_trisFromEdge function in \ref mmg2d/libmmg2d.h file.
+ * See \ref MMG2D_Get_trisFromEdge function in \ref mmg2d/liblibmmg2d_private.h file.
  */
 FORTRAN_NAME(MMG2D_GET_TRISFROMEDGE,mmg2d_get_trisfromedge,
              (MMG5_pMesh *mesh,int *ked, int ktri[2], int ied[2],int *retval),
@@ -126,7 +126,7 @@ FORTRAN_NAME(MMG2D_GET_TRISFROMEDGE,mmg2d_get_trisfromedge,
 }
 
 /**
- * See \ref MMG2D_Compute_eigenv function in \ref mmg2d/libmmg2d.h file.
+ * See \ref MMG2D_Compute_eigenv function in \ref mmg2d/liblibmmg2d_private.h file.
  */
 FORTRAN_NAME(MMG2D_COMPUTE_EIGENV,mmg2d_compute_eigenv,
              (double m[3],double lambda[2],double vp[2][2],int *retval),
@@ -138,7 +138,7 @@ FORTRAN_NAME(MMG2D_COMPUTE_EIGENV,mmg2d_compute_eigenv,
 
 
 /**
- * See \ref MMG2D_Reset_verticestags function in \ref mmg2d/libmmg2d.h file.
+ * See \ref MMG2D_Reset_verticestags function in \ref mmg2d/liblibmmg2d_private.h file.
  */
 FORTRAN_NAME(MMG2D_RESET_VERTICESTAGS,mmg2d_reset_verticestags,
              (MMG5_pMesh *mesh),(mesh)) {
@@ -149,7 +149,7 @@ FORTRAN_NAME(MMG2D_RESET_VERTICESTAGS,mmg2d_reset_verticestags,
 }
 
 /**
- * See \ref MMG2D_Free_Triangles function in \ref mmg2d/libmmg2d.h file.
+ * See \ref MMG2D_Free_Triangles function in \ref mmg2d/liblibmmg2d_private.h file.
  */
 FORTRAN_NAME(MMG2D_FREE_TRIANGLES,mmg2d_free_triangles,
              (MMG5_pMesh *mesh),(mesh)) {
@@ -160,7 +160,7 @@ FORTRAN_NAME(MMG2D_FREE_TRIANGLES,mmg2d_free_triangles,
 }
 
 /**
- * See \ref MMG2D_Free_Edges function in \ref mmg2d/libmmg2d.h file.
+ * See \ref MMG2D_Free_Edges function in \ref mmg2d/liblibmmg2d_private.h file.
  */
 FORTRAN_NAME(MMG2D_FREE_EDGES,mmg2d_free_edges,
              (MMG5_pMesh *mesh),(mesh)) {
@@ -171,7 +171,7 @@ FORTRAN_NAME(MMG2D_FREE_EDGES,mmg2d_free_edges,
 }
 
 /**
- * See \ref MMG2D_Free_solutions function in \ref mmg2d/libmmg2d.h file.
+ * See \ref MMG2D_Free_solutions function in \ref mmg2d/liblibmmg2d_private.h file.
  */
 FORTRAN_NAME(MMG2D_FREE_SOLUTIONS,mmg2d_free_solutions,
              (MMG5_pMesh *mesh,MMG5_pSol *sol),(mesh,sol)) {
@@ -182,7 +182,7 @@ FORTRAN_NAME(MMG2D_FREE_SOLUTIONS,mmg2d_free_solutions,
 }
 
 /**
- * See \ref MMG2D_DoSol function in \ref mmg2d/libmmg2d.h file.
+ * See \ref MMG2D_DoSol function in \ref mmg2d/liblibmmg2d_private.h file.
  */
 FORTRAN_NAME(MMG2D_DOSOL,mmg2d_dosol,
              (MMG5_pMesh *mesh,MMG5_pSol *met,int *retval),
@@ -192,7 +192,7 @@ FORTRAN_NAME(MMG2D_DOSOL,mmg2d_dosol,
 }
 
 /**
- * See \ref MMG2D_Set_constantSize function in \ref mmg2d/libmmg2d.h file.
+ * See \ref MMG2D_Set_constantSize function in \ref mmg2d/liblibmmg2d_private.h file.
  */
 FORTRAN_NAME(MMG2D_SET_CONSTANTSIZE,mmg2d_set_constantsize,
              (MMG5_pMesh *mesh,MMG5_pSol *met,int *retval),

@@ -21,11 +21,10 @@
 ** =============================================================================
 */
 
-#ifndef MMGS_H
-#define MMGS_H
+#ifndef LIBMMGS_PRIVATE_H
+#define LIBMMGS_PRIVATE_H
 
 #include "libmmgcommon.h"
-#include "libmmgs.h"
 
 #include "mmgs_export.h"
 
@@ -177,7 +176,7 @@ int MMGS_memOption(MMG5_pMesh mesh);
 int MMGS_setMeshSize_alloc( MMG5_pMesh mesh );
 
 #ifdef USE_SCOTCH
-int MMG5_mmgsRenumbering(int,MMG5_pMesh,MMG5_pSol,MMG5_pSol,int*);
+LIBMMGS_EXPORT int MMG5_mmgsRenumbering(int,MMG5_pMesh,MMG5_pSol,MMG5_pSol,int*);
 #endif
 
 /* tools */
@@ -220,22 +219,6 @@ extern int    (*intmet)(MMG5_pMesh mesh,MMG5_pSol met,int k,int8_t i,int ip,doub
 extern int    (*movridpt)(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist);
 extern int    (*movintpt)(MMG5_pMesh mesh,MMG5_pSol met,int *list,int ilist);
 
-/**
- * Set common pointer functions between mmgs and mmg3d to the matching mmgs
- * functions.
- */
-static inline
-void MMGS_Set_commonFunc(void) {
-  MMG5_bezierCP          = MMG5_mmgsBezierCP;
-  MMG5_chkmsh            = MMG5_mmgsChkmsh;
-  MMG5_indPt             = MMGS_indPt;
-  MMG5_indElt            = MMGS_indElt;
-  MMG5_grad2met_ani      = MMG5_grad2metSurf;
-  MMG5_grad2metreq_ani   = MMG5_grad2metSurfreq;
-#ifdef USE_SCOTCH
-  MMG5_renumbering       = MMG5_mmgsRenumbering;
-#endif
-}
 
 #ifdef __cplusplus
 }
