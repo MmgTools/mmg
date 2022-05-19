@@ -42,11 +42,7 @@
 #include <sys/sysctl.h>
 #elif defined(__unix__) || defined(__unix) || defined(unix)
 #include <unistd.h>
-#elif defined(_WIN16) || defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__TOS_WIN__) || defined(__WINDOWS__)
-#ifndef MMG_GNU
-#define _WIN32_WINNT 0x0500
-#endif
-
+#elif defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__TOS_WIN__) || defined(__WINDOWS__)
 #include <windows.h>
 #endif
 

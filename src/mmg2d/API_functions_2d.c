@@ -30,15 +30,15 @@
  * \copyright GNU Lesser General Public License.
  *
  * \note This file contains some internal functions for the API, see
- * the \ref mmg2d/libmmg2d.h header file for the documentation of all
+ * the \ref mmg2d/liblibmmg2d_private.h header file for the documentation of all
  * the usefull user's API functions.
  *
  * C API for MMG2D library.
  *
  */
 
-
-#include "mmg2d.h"
+#include "libmmg2d.h"
+#include "libmmg2d_private.h"
 
 int MMG2D_Init_mesh(const int starter,...) {
   va_list argptr;
@@ -77,6 +77,7 @@ int MMG2D_Set_outputMeshName(MMG5_pMesh mesh, const char* meshout) {
 int MMG2D_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solout) {
   return MMG5_Set_outputSolName(mesh,sol,solout);
 }
+
 void MMG2D_Init_parameters(MMG5_pMesh mesh) {
 
   /* Init common parameters for mmg2d, mmgs and mmg2d. */
@@ -99,6 +100,7 @@ void MMG2D_Init_parameters(MMG5_pMesh mesh) {
   /* Ridge detection */
   mesh->info.dhd      = MMG5_ANGEDG;
 }
+
 
 int MMG2D_Set_iparameter(MMG5_pMesh mesh, MMG5_pSol sol, int iparam, int val){
   int k;

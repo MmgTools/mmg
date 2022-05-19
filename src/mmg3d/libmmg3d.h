@@ -2950,6 +2950,12 @@ int MMG3D_switch_metricStorage(MMG5_pMesh mesh, MMG5_pSol met);
  */
   void MMG3D_Free_solutions(MMG5_pMesh mesh,MMG5_pSol sol);
 
+
+ /**
+  * Set common pointer functions between mmgs and mmg3d to the matching mmg3d
+  * functions.
+  */
+  LIBMMG3D_EXPORT void MMG3D_Set_commonFunc(void);
 #ifdef __cplusplus
 }
 #endif

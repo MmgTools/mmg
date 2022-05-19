@@ -33,7 +33,7 @@
  * \todo Doxygen documentation
  */
 
-#include "mmgs.h"
+#include "libmmgs_private.h"
 
 /* Check whether edge i of triangle k should be swapped for geometric approximation purposes */
 int chkswp(MMG5_pMesh mesh,MMG5_pSol met,int k,int i,int8_t typchk) {

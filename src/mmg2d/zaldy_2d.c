@@ -31,7 +31,7 @@
  * \copyright GNU Lesser General Public License.
  * \todo Doxygen documentation
  */
-#include "mmg2d.h"
+#include "libmmg2d_private.h"
 
 
 /* Create a new vertex in the mesh, and return its number */

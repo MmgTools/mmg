@@ -38,7 +38,7 @@
  *
  */
 
-#include "mmg3d.h"
+#include "libmmg3d_private.h"
 
 /**
  * See \ref MMG3D_Init_mesh function in common/libmmgcommon.h file.

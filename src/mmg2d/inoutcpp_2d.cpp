@@ -32,7 +32,9 @@
  */
 
 #include <vtkparser.hpp>
-#include "mmg2d.h"
+
+#include "libmmg2d.h"
+#include "libmmg2d_private.h"
 
 #ifdef USE_VTK
 

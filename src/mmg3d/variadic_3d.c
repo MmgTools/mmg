@@ -38,7 +38,7 @@
  *
  */
 
-#include "mmg3d.h"
+#include "libmmg3d_private.h"
 
 #include "mmg3dexterns.h"
 

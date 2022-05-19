@@ -33,7 +33,9 @@
  * \todo doxygen documentation.
  */
 
-#include "mmgs.h"
+
+#include "libmmgs.h"
+#include "libmmgs_private.h"
 #include <math.h>
 
 int MMGS_loadMesh(MMG5_pMesh mesh, const char *filename) {

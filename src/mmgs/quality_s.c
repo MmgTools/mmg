@@ -33,7 +33,7 @@
  * \todo Doxygen documentation
  */
 
-#include "mmgs.h"
+#include "libmmgs_private.h"
 #include "inlined_functions.h"
 
 extern int8_t ddb;

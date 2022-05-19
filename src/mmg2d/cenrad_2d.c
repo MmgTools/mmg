@@ -28,7 +28,7 @@
  * \copyright GNU Lesser General Public License.
  */
 
-#include "mmg2d.h"
+#include "libmmg2d_private.h"
 /**
  * \param mesh Pointer toward the mesh structure.
  * \param *ct coordinates of vertices of the element.

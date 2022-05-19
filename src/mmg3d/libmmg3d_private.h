@@ -21,12 +21,11 @@
 ** =============================================================================
 */
 
-#ifndef MMG3D_H
-#define MMG3D_H
+#ifndef LIBMMG3D_PRIVATE_H
+#define LIBMMG3D_PRIVATE_H
 
-#include "libmmg3d.h"
 #include "libmmgcommon.h"
-
+#include "mmg3d_export.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -463,7 +462,7 @@ void MMG3D_chkmeshedgestags(MMG5_pMesh mesh);
 int MMG3D_chk_shellEdgeTag(MMG5_pMesh  mesh,int start, int8_t ia,int16_t tag,int ref);
 
 #ifdef USE_SCOTCH
-int MMG5_mmg3dRenumbering(int,MMG5_pMesh,MMG5_pSol,MMG5_pSol,int*);
+LIBMMG3D_EXPORT int MMG5_mmg3dRenumbering(int,MMG5_pMesh,MMG5_pSol,MMG5_pSol,int*);
 #endif
 
 int    MMG5_meancur(MMG5_pMesh mesh,int np,double c[3],int ilist,int *list,double h[3]);
@@ -566,22 +565,6 @@ void MMG5_warnOrientation(MMG5_pMesh mesh) {
   mesh->xt = 0;
 }
 
-/**
- * Set common pointer functions between mmgs and mmg3d to the matching mmg3d
- * functions.
- */
-static inline
-void MMG3D_Set_commonFunc(void) {
-  MMG5_bezierCP          = MMG5_mmg3dBezierCP;
-  MMG5_chkmsh            = MMG5_mmg3dChkmsh;
-  MMG5_indPt             = MMG3D_indPt;
-  MMG5_indElt            = MMG3D_indElt;
-  MMG5_grad2met_ani      = MMG5_grad2metSurf;
-  MMG5_grad2metreq_ani   = MMG5_grad2metSurfreq;
-#ifdef USE_SCOTCH
-  MMG5_renumbering       = MMG5_mmg3dRenumbering;
-#endif
-}
 
 #ifdef __cplusplus
 }

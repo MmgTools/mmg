@@ -32,7 +32,8 @@
  * \copyright GNU Lesser General Public License.
  */
 
-#include "mmgs.h"
+#include "libmmgs.h"
+#include "libmmgs_private.h"
 #include <math.h>
 
 mytime         MMG5_ctim[TIMEMAX];

@@ -34,7 +34,9 @@
  *
  * \todo Clean the boucle for (code copy...)
  */
-#include "mmg3d.h"
+
+#include "libmmg3d.h"
+#include "libmmg3d_private.h"
 
 #ifndef PATTERN
 

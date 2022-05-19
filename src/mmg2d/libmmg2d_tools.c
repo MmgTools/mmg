@@ -30,7 +30,8 @@
  * \copyright GNU Lesser General Public License.
  **/
 
-#include "mmg2d.h"
+#include "libmmg2d.h"
+#include "libmmg2d_private.h"
 
 
 void MMG2D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {

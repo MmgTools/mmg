@@ -39,6 +39,7 @@
  *
  */
 
+#include "libmmg3d.h"
 #include "inlined_functions_3d.h"
 #include "mmg3dexterns.h"
 
@@ -1753,4 +1754,20 @@ int MMG3D_mmg3dmov(MMG5_pMesh mesh,MMG5_pSol met, MMG5_pSol disp) {
   }
   disp->npi = disp->np;
   _LIBMMG5_RETURN(mesh,met,disp,MMG5_SUCCESS);
+}
+
+/**
+* Set common pointer functions between mmgs and mmg3d to the matching mmg3d
+* functions.
+*/
+void MMG3D_Set_commonFunc(void) {
+    MMG5_bezierCP = MMG5_mmg3dBezierCP;
+    MMG5_chkmsh = MMG5_mmg3dChkmsh;
+    MMG5_indPt = MMG3D_indPt;
+    MMG5_indElt = MMG3D_indElt;
+    MMG5_grad2met_ani = MMG5_grad2metSurf;
+    MMG5_grad2metreq_ani = MMG5_grad2metSurfreq;
+#ifdef USE_SCOTCH
+    MMG5_renumbering = MMG5_mmg3dRenumbering;
+#endif
 }

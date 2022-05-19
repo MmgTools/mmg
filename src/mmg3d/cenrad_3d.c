@@ -31,7 +31,7 @@
  * \remark Delaunay mode only (\a PATTERN flag set to \a OFF).
  */
 
-#include "mmg3d.h"
+#include "libmmg3d_private.h"
 /**
  * \param mesh pointer toward the mesh structure.
  * \param ct coordinates of vertices of the element.
