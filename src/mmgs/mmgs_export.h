@@ -24,10 +24,11 @@
 #ifndef MMGS_EXPORT_H
 #define MMGS_EXPORT_H
 
+#include <mmg_export.h>
 #if defined(libmmgs_so_EXPORTS)
-#  define LIBMMGS_EXPORT __declspec(dllexport)
+#  define LIBMMGS_EXPORT MMG_DECL_EXPORT
 #else
-#  define LIBMMGS_EXPORT __declspec(dllimport)
+#  define LIBMMGS_EXPORT MMG_DECL_IMPORT
 #endif
 
 #endif

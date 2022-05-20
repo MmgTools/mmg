@@ -71,6 +71,8 @@ FILE(
   mmg3d_library_files
   ${MMG3D_SOURCE_DIR}/*.c
   ${COMMON_SOURCE_DIR}/*.c
+  ${MMG3D_SOURCE_DIR}/*.h
+  ${COMMON_SOURCE_DIR}/*.h
   ${MMG3D_SOURCE_DIR}/inoutcpp_3d.cpp
   )
 LIST(REMOVE_ITEM mmg3d_library_files
@@ -129,6 +131,7 @@ ENDIF()
 
 # mmg3d header files needed for library
 SET( mmg3d_headers
+  ${MMG3D_SOURCE_DIR}/mmg3d_export.h
   ${MMG3D_SOURCE_DIR}/libmmg3d.h
   ${MMG3D_BINARY_DIR}/libmmg3df.h
   ${COMMON_SOURCE_DIR}/libmmgtypes.h

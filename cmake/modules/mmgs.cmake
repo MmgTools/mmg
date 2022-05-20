@@ -57,6 +57,8 @@ FILE(
   mmgs_library_files
   ${MMGS_SOURCE_DIR}/*.c
   ${COMMON_SOURCE_DIR}/*.c
+  ${MMGS_SOURCE_DIR}/*.h
+  ${COMMON_SOURCE_DIR}/*.h
   ${MMGS_SOURCE_DIR}/inoutcpp_s.cpp
   )
 LIST(REMOVE_ITEM mmgs_library_files
@@ -94,6 +96,7 @@ ENDIF()
 
 # mmgs header files needed for library
 SET( mmgs_headers
+  ${MMGS_SOURCE_DIR}/mmgs_export.h
   ${MMGS_SOURCE_DIR}/libmmgs.h
   ${MMGS_BINARY_DIR}/libmmgsf.h
   ${COMMON_SOURCE_DIR}/libmmgtypes.h

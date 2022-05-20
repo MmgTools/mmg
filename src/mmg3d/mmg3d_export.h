@@ -24,10 +24,11 @@
 #ifndef MMG3D_EXPORT_H
 #define MMG3D_EXPORT_H
 
+#include <mmg_export.h>
 #if defined(libmmg3d_so_EXPORTS)
-#  define LIBMMG3D_EXPORT __declspec(dllexport)
+#  define LIBMMG3D_EXPORT MMG_DECL_EXPORT
 #else
-#  define LIBMMG3D_EXPORT __declspec(dllimport)
+#  define LIBMMG3D_EXPORT MMG_DECL_IMPORT
 #endif
 
 #endif
