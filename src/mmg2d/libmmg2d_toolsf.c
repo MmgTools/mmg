@@ -201,3 +201,32 @@ FORTRAN_NAME(MMG2D_SET_CONSTANTSIZE,mmg2d_set_constantsize,
   *retval =  MMG2D_Set_constantSize(*mesh,*met);
   return;
 }
+
+/**
+ * See \ref MMG2D_usage function in \ref mmg2d/libmmg2d.h file.
+ */
+FORTRAN_NAME(MMG2D_USAGE,mmg2d_usage,
+             (char *prog, int *strlen),
+             (prog,strlen)) {
+  char *tmp = NULL;
+
+  tmp = (char*)malloc((*strlen+1)*sizeof(char));
+  strncpy(tmp,prog,*strlen);
+  tmp[*strlen] = '\0';
+  MMG2D_usage(tmp);
+  MMG5_SAFE_FREE(tmp);
+
+  return;
+}
+
+/**
+ * See \ref MMG2D_parsop function in \ref mmg2d/libmmg2d.h file.
+ */
+FORTRAN_NAME(MMG2D_PARSOP,mmg2d_parsop,
+             (MMG5_pMesh *mesh,MMG5_pSol *met,int* retval),
+             (mesh,met,retval)) {
+
+  *retval = MMG2D_parsop(*mesh, *met);
+
+  return;
+}

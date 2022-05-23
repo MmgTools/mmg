@@ -640,9 +640,7 @@ typedef struct MMG5_dNode_s {
  double        MMG5_ridSizeInTangentDir(MMG5_pMesh, MMG5_pPoint,int,int*,double,double);
  int           MMG5_scale_meshAndSol(MMG5_pMesh,MMG5_pSol,MMG5_pSol,double*,int8_t*,int8_t*);
  int           MMG5_scale_scalarMetric(MMG5_pMesh, MMG5_pSol,double, int8_t, int8_t);
- int           MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol ls);
  int           MMG5_scotchCall(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol fields,int*);
- void          MMG5_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met);
  int           MMG5_solveDefmetregSys( MMG5_pMesh, double r[3][3], double *, double *,
                                         double *, double *, double, double, double);
  int           MMG5_solveDefmetrefSys( MMG5_pMesh,MMG5_pPoint,int*, double r[3][3],
@@ -652,7 +650,6 @@ typedef struct MMG5_dNode_s {
  double        MMG5_surftri33_ani(MMG5_pMesh,MMG5_pTria,double*,double*,double*);
  double        MMG5_surftri_iso(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTria ptt);
  extern int    MMG5_sys33sym(double a[6], double b[3], double r[3]);
- int           MMG5_unscaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol ls);
  int           MMG5_interpreg_ani(MMG5_pMesh,MMG5_pSol,MMG5_pTria,int8_t,double,double *mr);
  int           MMG5_interp_iso(double *ma,double *mb,double *mp,double t);
  int           MMG5_intersecmet22(MMG5_pMesh mesh, double *m,double *n,double *mr);

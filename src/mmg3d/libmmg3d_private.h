@@ -500,8 +500,7 @@ int  MMG5_swpmsh(MMG5_pMesh mesh,MMG5_pSol met,MMG3D_pPROctree PROctree, int);
 int  MMG5_swptet(MMG5_pMesh mesh,MMG5_pSol met,double,double,MMG3D_pPROctree, int,int);
 
 /* pointers */
-/* init structures */
-void  MMG5_Init_parameters(MMG5_pMesh mesh);
+
 /* iso/aniso computations */
 double MMG5_caltet33_ani(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pTetra pt);
 extern double MMG5_lenedgCoor_iso(double*, double*, double*, double*);

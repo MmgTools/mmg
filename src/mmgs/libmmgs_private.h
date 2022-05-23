@@ -187,8 +187,7 @@ LIBMMGS_EXPORT int  MMGS_indElt(MMG5_pMesh mesh,int kel);
 LIBMMGS_EXPORT int  MMGS_indPt(MMG5_pMesh mesh,int kp);
 
 /* function pointers */
-/* init structures */
-void  MMG5_Init_parameters(MMG5_pMesh mesh);
+
 /* iso/aniso computations */
 double caleltsig_ani(MMG5_pMesh mesh,MMG5_pSol met,int iel);
 double caleltsig_iso(MMG5_pMesh mesh,MMG5_pSol met,int iel);

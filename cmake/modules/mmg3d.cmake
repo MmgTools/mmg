@@ -76,9 +76,8 @@ FILE(
   ${MMG3D_SOURCE_DIR}/inoutcpp_3d.cpp
   )
 LIST(REMOVE_ITEM mmg3d_library_files
-  ${MMG3D_SOURCE_DIR}/${PROJECT_NAME}3d.c
+  ${MMG3D_SOURCE_DIR}/mmg3d.c
   ${COMMON_SOURCE_DIR}/apptools.c
-  ${COMMON_SOURCE_DIR}/mmg.c
   )
 
 IF ( VTK_FOUND )
@@ -162,7 +161,7 @@ COPY_HEADERS_AND_CREATE_TARGET ( ${MMG3D_SOURCE_DIR} ${MMG3D_BINARY_DIR} ${MMG3D
 #####
 ###############################################################################
 ADD_AND_INSTALL_EXECUTABLE ( ${PROJECT_NAME}3d copy_3d_headers
-  "${mmg3d_library_files}" ${mmg3d_main_file} )
+  "${mmg3d_library_files}" "${mmg3d_main_file}" )
 
 ###############################################################################
 #####

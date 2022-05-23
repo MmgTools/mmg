@@ -126,7 +126,7 @@ COPY_HEADERS_AND_CREATE_TARGET ( ${MMGS_SOURCE_DIR} ${MMGS_BINARY_DIR} ${MMGS_IN
 #####
 ###############################################################################
 ADD_AND_INSTALL_EXECUTABLE ( ${PROJECT_NAME}s copy_s_headers
-  "${mmgs_library_files}" ${mmgs_main_file} )
+  "${mmgs_library_files}" "${mmgs_main_file}" )
 
 ###############################################################################
 #####
