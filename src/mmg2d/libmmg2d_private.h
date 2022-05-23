@@ -366,10 +366,6 @@ extern int    (*MMG2D_gradsiz)(MMG5_pMesh ,MMG5_pSol );
 extern int    (*MMG2D_gradsizreq)(MMG5_pMesh ,MMG5_pSol );
 extern int    (*MMG2D_defsiz)(MMG5_pMesh ,MMG5_pSol );
 
-/* init structures */
-void  MMG2D_Init_parameters(MMG5_pMesh mesh);
-
-
 #ifdef __cplusplus
 }
 #endif
