@@ -134,6 +134,7 @@ SET( mmg3d_headers
   ${MMG3D_SOURCE_DIR}/mmg3d_export.h
   ${MMG3D_SOURCE_DIR}/libmmg3d.h
   ${MMG3D_BINARY_DIR}/libmmg3df.h
+  ${COMMON_SOURCE_DIR}/mmg_export.h
   ${COMMON_SOURCE_DIR}/libmmgtypes.h
   ${COMMON_BINARY_DIR}/libmmgtypesf.h
   ${COMMON_BINARY_DIR}/mmgcmakedefines.h

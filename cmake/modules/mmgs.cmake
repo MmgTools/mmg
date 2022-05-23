@@ -99,6 +99,7 @@ SET( mmgs_headers
   ${MMGS_SOURCE_DIR}/mmgs_export.h
   ${MMGS_SOURCE_DIR}/libmmgs.h
   ${MMGS_BINARY_DIR}/libmmgsf.h
+  ${COMMON_SOURCE_DIR}/mmg_export.h
   ${COMMON_SOURCE_DIR}/libmmgtypes.h
   ${COMMON_BINARY_DIR}/libmmgtypesf.h
   ${COMMON_BINARY_DIR}/mmgcmakedefines.h
