@@ -34,6 +34,8 @@
 #include "mmgcommon.h"
 #include "inlined_functions_3d.h"
 #include "mmgversion.h"
+#include "mmgexterns.h"
+
 
 void MMG3D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
 

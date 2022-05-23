@@ -33,7 +33,7 @@
  */
 
 #include "libmmgs_private.h"
-
+#include "mmgexterns.h"
 
 extern int8_t ddb;
 
