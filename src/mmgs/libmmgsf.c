@@ -41,7 +41,7 @@
  *
  */
 
-#include "libmmg.h"
+#include "libmmgs.h"
 #include "mmgcommon.h"
 
 /**

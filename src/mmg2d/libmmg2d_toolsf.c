@@ -42,6 +42,7 @@
  */
 
 #include "libmmg2d_private.h"
+#include "libmmg2d.h"
 
 /**
  * See \ref MMG2D_setfunc function in \ref mmg2d/liblibmmg2d_private.h file.
