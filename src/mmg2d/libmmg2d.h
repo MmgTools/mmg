@@ -1701,7 +1701,6 @@ LIBMMG2D_EXPORT int MMG2D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *
  */
   int MMG2D_loadAllSols(MMG5_pMesh mesh,MMG5_pSol *sol, const char* filename);
 
-  int MMG2D_loadVect(MMG5_pMesh ,char *);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -1938,10 +1937,7 @@ LIBMMG2D_EXPORT int MMG2D_loadMshMesh(MMG5_pMesh mesh,MMG5_pSol sol,const char *
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_saveAllSols(MMG5_pMesh  mesh,MMG5_pSol *sol ,const char *filename);
-
-
-  int MMG2D_saveVect(MMG5_pMesh mesh,MMG5_pSol sol,const char *filename,double lambda);
+  LIBMMG2D_EXPORT int MMG2D_saveAllSols(MMG5_pMesh  mesh,MMG5_pSol *sol ,const char *filename);
 
 /**
  * \param mesh pointer toward the mesh structure.
