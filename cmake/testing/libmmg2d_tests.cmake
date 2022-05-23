@@ -36,7 +36,6 @@ SET ( MMG2D_LIB_TESTS
   libmmg2d_ls_example0
   libmmg2d_lsOnly
   libmmg2d_lsAndMetric
-  test_met2d
   )
 
 # Additional tests that needs to download ci meshes
@@ -53,7 +52,6 @@ SET ( MMG2D_LIB_TESTS_MAIN_PATH
   ${PROJECT_SOURCE_DIR}/libexamples/mmg2d/io_multisols_example0/main.c
   ${PROJECT_SOURCE_DIR}/libexamples/mmg2d/IsosurfDiscretization_lsOnly/main.c
   ${PROJECT_SOURCE_DIR}/libexamples/mmg2d/IsosurfDiscretization_lsAndMetric/main.c
-  ${PROJECT_SOURCE_DIR}/cmake/testing/code/test_met2d.c
   )
 
 # Additional tests that needs to download ci meshes
@@ -117,6 +115,17 @@ FOREACH ( test_idx RANGE ${nbTests} )
   ADD_LIBRARY_TEST ( ${test_name} ${main_path} copy_2d_headers ${lib_name} )
 
 ENDFOREACH ( )
+
+SET ( src_test_met2d
+  ${PROJECT_SOURCE_DIR}/src/common/bezier.c
+  ${PROJECT_SOURCE_DIR}/src/common/eigenv.c
+  ${PROJECT_SOURCE_DIR}/src/common/mettools.c
+  ${PROJECT_SOURCE_DIR}/src/common/anisosiz.c
+  ${PROJECT_SOURCE_DIR}/src/common/isosiz.c
+  ${PROJECT_SOURCE_DIR}/src/common/tools.c
+  ${PROJECT_SOURCE_DIR}/cmake/testing/code/test_met2d.c
+  )
+ADD_LIBRARY_TEST ( test_met2d "${src_test_met2d}" copy_2d_headers ${lib_name} )
 
 IF ( BUILD_TESTING )
 

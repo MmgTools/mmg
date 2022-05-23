@@ -77,6 +77,8 @@ FILE(
   )
 LIST(REMOVE_ITEM mmg3d_library_files
   ${MMG3D_SOURCE_DIR}/${PROJECT_NAME}3d.c
+  ${COMMON_SOURCE_DIR}/apptools.c
+  ${COMMON_SOURCE_DIR}/mmg.c
   )
 
 IF ( VTK_FOUND )
@@ -88,6 +90,7 @@ FILE(
   GLOB
   mmg3d_main_file
   ${MMG3D_SOURCE_DIR}/mmg3d.c
+  ${COMMON_SOURCE_DIR}/apptools.c
   )
 
 ############################################################################

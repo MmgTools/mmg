@@ -346,7 +346,7 @@ extern "C" {
  *
  */
   LIBMMG2D_EXPORT int MMG2D_Set_solSize(MMG5_pMesh mesh, MMG5_pSol sol, int typEntity,
-                        int np, int typSol);
+                                        int np, int typSol);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward an allocatable sol structure.
@@ -370,8 +370,8 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int MMG2D_Set_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol *sol,int nsols,
-                                   int nentities, int *typSol);
+  LIBMMG2D_EXPORT int MMG2D_Set_solsAtVerticesSize(MMG5_pMesh mesh, MMG5_pSol *sol,int nsols,
+                                                   int nentities, int *typSol);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param c0 coordinate of the point along the first dimension.
@@ -392,8 +392,8 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-  int  MMG2D_Set_vertex(MMG5_pMesh mesh, double c0, double c1,
-                        int ref,int pos);
+  LIBMMG2D_EXPORT int  MMG2D_Set_vertex(MMG5_pMesh mesh, double c0, double c1,
+                                        int ref,int pos);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param vertices table of the points coor.

@@ -36,7 +36,6 @@ SET ( MMG3D_LIB_TESTS
   libmmg3d_lsOnly
   libmmg3d_lsAndMetric
   libmmg3d_generic_io
-  test_met3d
   test_compare-para-tria
   )
 
@@ -59,7 +58,6 @@ SET ( MMG3D_LIB_TESTS_MAIN_PATH
   ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsOnly/main.c
   ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/IsosurfDiscretization_lsAndMetric/main.c
   ${PROJECT_SOURCE_DIR}/libexamples/mmg3d/io_generic_and_get_adja/genericIO.c
-  ${PROJECT_SOURCE_DIR}/cmake/testing/code/test_met3d.c
   ${PROJECT_SOURCE_DIR}/cmake/testing/code/compare-para-tria.c
   )
 
@@ -123,6 +121,18 @@ FOREACH ( test_idx RANGE ${nbTests} )
   ADD_LIBRARY_TEST ( ${test_name} ${main_path} copy_3d_headers ${lib_name} )
 
 ENDFOREACH ( )
+
+SET ( src_test_met3d
+  ${PROJECT_SOURCE_DIR}/src/common/bezier.c
+  ${PROJECT_SOURCE_DIR}/src/common/eigenv.c
+  ${PROJECT_SOURCE_DIR}/src/common/mettools.c
+  ${PROJECT_SOURCE_DIR}/src/common/anisosiz.c
+  ${PROJECT_SOURCE_DIR}/src/common/isosiz.c
+  ${PROJECT_SOURCE_DIR}/src/common/tools.c
+  ${PROJECT_SOURCE_DIR}/cmake/testing/code/test_met3d.c
+  )
+ADD_LIBRARY_TEST ( test_met3d "${src_test_met3d}" copy_3d_headers ${lib_name} )
+
 
 IF ( MMG3D_CI )
   SET(LIBMMG3D_EXEC0_a ${EXECUTABLE_OUTPUT_PATH}/libmmg3d_example0_a)

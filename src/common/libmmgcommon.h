@@ -62,7 +62,7 @@ extern "C" {
  * >   END SUBROUTINE\n
  *
  */
-void  MMG5_Init_fileNames(MMG5_pMesh mesh, MMG5_pSol sol);
+LIBMMG_CORE_EXPORT void  MMG5_Init_fileNames(MMG5_pMesh mesh, MMG5_pSol sol);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -75,7 +75,7 @@ void  MMG5_Init_fileNames(MMG5_pMesh mesh, MMG5_pSol sol);
  * >   END SUBROUTINE\n
  *
  */
-void  (MMG5_Init_parameters)(MMG5_pMesh mesh);
+LIBMMG_CORE_EXPORT void  (MMG5_Init_parameters)(MMG5_pMesh mesh);
 
 /* init file names */
 /**
@@ -94,7 +94,7 @@ void  (MMG5_Init_parameters)(MMG5_pMesh mesh);
  * >   END SUBROUTINE\n
  *
  */
-int  MMG5_Set_inputMeshName(MMG5_pMesh mesh, const char* meshin);
+LIBMMG_CORE_EXPORT int  MMG5_Set_inputMeshName(MMG5_pMesh mesh, const char* meshin);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param meshout name of the output mesh file.
@@ -111,7 +111,7 @@ int  MMG5_Set_inputMeshName(MMG5_pMesh mesh, const char* meshin);
  * >   END SUBROUTINE\n
  *
  */
-int  MMG5_Set_outputMeshName(MMG5_pMesh mesh, const char* meshout);
+LIBMMG_CORE_EXPORT int  MMG5_Set_outputMeshName(MMG5_pMesh mesh, const char* meshout);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the sol structure.
@@ -129,7 +129,7 @@ int  MMG5_Set_outputMeshName(MMG5_pMesh mesh, const char* meshout);
  * >   END SUBROUTINE\n
  *
  */
-int  MMG5_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solin);
+LIBMMG_CORE_EXPORT int  MMG5_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solin);
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward the sol structure.
@@ -147,7 +147,7 @@ int  MMG5_Set_inputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solin);
  * >   END SUBROUTINE\n
  *
  */
-int  MMG5_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solout);
+LIBMMG_CORE_EXPORT int  MMG5_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solout);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -159,7 +159,7 @@ int  MMG5_Set_outputSolName(MMG5_pMesh mesh,MMG5_pSol sol, const char* solout);
  * \Remark not for extern users.
  *
  */
-void MMG5_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met,double hsiz);
+LIBMMG_CORE_EXPORT void MMG5_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met,double hsiz);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -173,12 +173,12 @@ void MMG5_Set_constantSize(MMG5_pMesh mesh,MMG5_pSol met,double hsiz);
  * Set the reference mapping for the elements of ref \a ref in ls discretization mode.
  *
  */
-  int  MMG5_Set_multiMat(MMG5_pMesh mesh, MMG5_pSol sol,int ref,int split,
-                         int rin, int rex);
+LIBMMG_CORE_EXPORT int  MMG5_Set_multiMat(MMG5_pMesh mesh, MMG5_pSol sol,int ref,int split,
+                                          int rin, int rex);
 
 
 /* deallocations */
-void MMG5_Free_structures(MMG5_pMesh mesh,MMG5_pSol sol);
+LIBMMG_CORE_EXPORT void MMG5_Free_structures(MMG5_pMesh mesh,MMG5_pSol sol);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -192,7 +192,7 @@ void MMG5_Free_structures(MMG5_pMesh mesh,MMG5_pSol sol);
  * >   END SUBROUTINE\n
  *
  */
-void MMG5_mmgFree_names(MMG5_pMesh mesh, MMG5_pSol met);
+LIBMMG_CORE_EXPORT void MMG5_mmgFree_names(MMG5_pMesh mesh, MMG5_pSol met);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -206,7 +206,7 @@ void MMG5_mmgFree_names(MMG5_pMesh mesh, MMG5_pSol met);
  * \Remark not for extern users.
  *
  */
-extern int MMG5_Set_defaultTruncatureSizes(MMG5_pMesh mesh,int8_t sethmin,int8_t sethmax);
+LIBMMG_CORE_EXPORT extern int MMG5_Set_defaultTruncatureSizes(MMG5_pMesh mesh,int8_t sethmin,int8_t sethmax);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -221,27 +221,6 @@ extern int MMG5_Set_defaultTruncatureSizes(MMG5_pMesh mesh,int8_t sethmin,int8_t
  */
 LIBMMG_CORE_EXPORT int MMG5_Compute_constantSize(MMG5_pMesh mesh,MMG5_pSol met,double *hsize);
 
-/* Enum utilities */
-/**
- * \param ent MMG5_entities enum
- *
- * \return the name of the enum field
- *
- * Print the name associated to the \a ent value in the \a MMG5_entities enum.
- *
- */
-const char* MMG5_Get_entitiesName(enum MMG5_entities ent);
-
-/**
- * \param typ MMG5_type enum
- *
- * \return the name of the enum field
- *
- * Print the name associated to the \a typ value in the \a MMG5_type enum.
- *
- */
-const char* MMG5_Get_typeName(enum MMG5_type typ);
-
 /**
  * \param mesh pointer toward the mesh structure.
  * \param sol pointer toward an array of solution structure (that stores solution fields).
@@ -250,7 +229,7 @@ const char* MMG5_Get_typeName(enum MMG5_type typ);
  * Deallocation of an array of solution fields
  *
  */
-int MMG5_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol);
+LIBMMG_CORE_EXPORT int MMG5_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -260,7 +239,7 @@ int MMG5_Free_allSols(MMG5_pMesh mesh,MMG5_pSol *sol);
  *
  * Save node list at .node file format (Tetgen/Triangle).
  */
-int MMG5_saveNode(MMG5_pMesh mesh,const char *filename);
+LIBMMG_CORE_EXPORT int MMG5_saveNode(MMG5_pMesh mesh,const char *filename);
 
 /**
  * \param mesh pointer toward the mesh structure.
@@ -271,7 +250,94 @@ int MMG5_saveNode(MMG5_pMesh mesh,const char *filename);
  *
  * Save edge list at .edge file format (Tetgen/Triangle).
  */
-int MMG5_saveEdge(MMG5_pMesh mesh,const char *filename,const char *ext);
+LIBMMG_CORE_EXPORT int MMG5_saveEdge(MMG5_pMesh mesh,const char *filename,const char *ext);
+
+/* Useful tools to manage C strings */
+/**
+ * \param path string containing a filename and its path
+ *
+ * \return a pointer toward the allocated string that contains the file basename.
+ *
+ * Extract basename from a path (allocate a string to store it).
+ *
+ */
+LIBMMG_CORE_EXPORT char *MMG5_Get_basename(char *path);
+
+/**
+ * \param ptr pointer toward the file extension (dot included)
+ * \param fmt default file format.
+ *
+ * \return and index associated to the file format detected from the extension.
+ *
+ * Get the wanted file format from the mesh extension. If \a fmt is provided, it
+ * is used as default file format (\a ptr==NULL), otherwise, the default file
+ * format is the medit one.
+ *
+ */
+LIBMMG_CORE_EXPORT int MMG5_Get_format( char *ptr, int fmt );
+
+/**
+ * \param filename string containing a filename
+ *
+ * \return pointer toward the filename extension or toward the end of the string
+ * if no extension have been founded
+ *
+ * Get the extension of the filename string. Do not consider '.o' as an extension.
+ *
+ */
+LIBMMG_CORE_EXPORT char *MMG5_Get_filenameExt( char *filename );
+
+/**
+ * \param path string containing a filename and its path
+ *
+ * \return a pointer toward the path allocated here
+ *
+ * Remove filename from a path and return the path in a newly allocated string.
+ *
+ */
+LIBMMG_CORE_EXPORT char *MMG5_Get_path(char *path);
+
+/**
+ * \param path path from which we want to remove the extension.
+ *
+ * \return allocated string or NULL if the allocation fail.
+ *
+ * Allocate a new string and copy \a path without extension in it.
+ *
+ */
+LIBMMG_CORE_EXPORT char *MMG5_Remove_ext (char* path,char *ext);
+
+/* Enum utilities: print enum fields under a string form */
+/**
+ * \param fmt file format.
+ *
+ * \return The name of the file format in a string.
+ *
+ * Print the name of the file format associated to \a fmt.
+ *
+ */
+LIBMMG_CORE_EXPORT const char* MMG5_Get_formatName(enum MMG5_Format fmt);
+
+/**
+ * \param ent MMG5_entities enum
+ *
+ * \return the name of the enum field
+ *
+ * Print the name associated to the \a ent value in the \a MMG5_entities enum.
+ *
+ */
+LIBMMG_CORE_EXPORT const char* MMG5_Get_entitiesName(enum MMG5_entities ent);
+
+/**
+ * \param typ MMG5_type enum
+ *
+ * \return the name of the enum field
+ *
+ * Print the name associated to the \a typ value in the \a MMG5_type enum.
+ *
+ */
+LIBMMG_CORE_EXPORT const char* MMG5_Get_typeName(enum MMG5_type typ);
+
 
 #ifdef __cplusplus
 }
