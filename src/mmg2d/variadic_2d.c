@@ -38,6 +38,7 @@
  */
 
 #include "libmmg2d_private.h"
+#include "libmmg2d.h"
 #include "mmg2dexterns.h"
 
 /**
