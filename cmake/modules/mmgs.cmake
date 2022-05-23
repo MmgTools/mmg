@@ -63,6 +63,7 @@ FILE(
   )
 LIST(REMOVE_ITEM mmgs_library_files
   ${MMGS_SOURCE_DIR}/mmgs.c
+  ${COMMON_SOURCE_DIR}/apptools.c
   ${REMOVE_FILE} )
 
 IF ( VTK_FOUND )
@@ -74,6 +75,7 @@ FILE(
   GLOB
   mmgs_main_file
   ${MMGS_SOURCE_DIR}/mmgs.c
+  ${COMMON_SOURCE_DIR}/apptools.c
   )
 
 ############################################################################

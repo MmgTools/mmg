@@ -31,6 +31,7 @@
  **/
 
 #include "libmmg3d.h"
+#include "mmgcommon.h"
 #include "inlined_functions_3d.h"
 #include "mmgversion.h"
 

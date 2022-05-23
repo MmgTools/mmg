@@ -61,9 +61,10 @@ FILE(
   ${COMMON_SOURCE_DIR}/*.h
   ${MMG2D_SOURCE_DIR}/inoutcpp_2d.cpp
   )
-  
+
 LIST(REMOVE_ITEM mmg2d_library_files
   ${MMG2D_SOURCE_DIR}/mmg2d.c
+  ${COMMON_SOURCE_DIR}/apptools.c
   ${REMOVE_FILE} )
 
 IF ( VTK_FOUND )
@@ -75,6 +76,7 @@ FILE(
   GLOB
   mmg2d_main_file
   ${MMG2D_SOURCE_DIR}/mmg2d.c
+  ${COMMON_SOURCE_DIR}/apptools.c
   )
 
 ############################################################################
