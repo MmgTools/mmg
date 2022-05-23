@@ -32,6 +32,7 @@
  */
 
 #include "libmmg3d_private.h"
+#include "libmmg3d.h"
 
 #ifdef USE_SCOTCH
 

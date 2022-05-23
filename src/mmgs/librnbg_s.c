@@ -31,6 +31,7 @@
  */
 
 #include "libmmgs_private.h"
+#include "libmmgs.h"
 
 #ifdef USE_SCOTCH
 
