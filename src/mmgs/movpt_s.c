@@ -33,9 +33,10 @@
  * \todo Doxygen documentation
  */
 
-#include "libmmgs_private.h"
 #include <math.h>
 
+#include "libmmgs_private.h"
+#include "mmgexterns.h"
 
 /**
  * \param mesh pointer toward the mesh structure.

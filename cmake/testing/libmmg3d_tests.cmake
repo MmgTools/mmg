@@ -129,6 +129,7 @@ SET ( src_test_met3d
   ${PROJECT_SOURCE_DIR}/src/common/anisosiz.c
   ${PROJECT_SOURCE_DIR}/src/common/isosiz.c
   ${PROJECT_SOURCE_DIR}/src/common/tools.c
+  ${PROJECT_SOURCE_DIR}/src/common/mmgexterns.c
   ${PROJECT_SOURCE_DIR}/cmake/testing/code/test_met3d.c
   )
 ADD_LIBRARY_TEST ( test_met3d "${src_test_met3d}" copy_3d_headers ${lib_name} )

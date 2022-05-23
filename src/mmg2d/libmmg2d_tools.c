@@ -32,7 +32,7 @@
 
 #include "libmmg2d.h"
 #include "libmmg2d_private.h"
-
+#include "mmgexterns.h"
 
 void MMG2D_setfunc(MMG5_pMesh mesh,MMG5_pSol met) {
   if ( met->size == 3 ) {

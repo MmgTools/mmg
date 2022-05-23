@@ -34,8 +34,7 @@
  */
 
 #include "libmmgs_private.h"
-
-
+#include "mmgexterns.h"
 
 /**
  * \param mesh pointer toward the mesh

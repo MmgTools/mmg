@@ -36,8 +36,6 @@
 #include <complex.h>
 #include "mmgcmakedefines.h"
 
-#include "mmg_core_export.h"
-
 #if (defined(__APPLE__) && defined(__MACH__))
 #include <sys/sysctl.h>
 #elif defined(__unix__) || defined(__unix) || defined(unix)
@@ -604,8 +602,8 @@ typedef struct MMG5_dNode_s {
                                        double *, double *, double *, double *);
  void          MMG5_Free_ilinkedList( MMG5_pMesh mesh, MMG5_iNode *liLi );
  void          MMG5_Free_dlinkedList( MMG5_pMesh mesh, MMG5_dNode *liLi );
- LIBMMG_CORE_EXPORT int           MMG5_grad2metSurf(MMG5_pMesh,MMG5_pSol,MMG5_pTria,int,int);
- LIBMMG_CORE_EXPORT int           MMG5_grad2metSurfreq(MMG5_pMesh,MMG5_pSol,MMG5_pTria,int,int);
+ int           MMG5_grad2metSurf(MMG5_pMesh,MMG5_pSol,MMG5_pTria,int,int);
+ int           MMG5_grad2metSurfreq(MMG5_pMesh,MMG5_pSol,MMG5_pTria,int,int);
  int           MMG5_hashFace(MMG5_pMesh,MMG5_Hash*,int,int,int,int);
  int           MMG5_hashEdge(MMG5_pMesh mesh,MMG5_Hash *hash,int a,int b,int k);
  int           MMG5_hashUpdate(MMG5_Hash *hash,int a,int b,int k);
@@ -642,9 +640,9 @@ typedef struct MMG5_dNode_s {
  double        MMG5_ridSizeInTangentDir(MMG5_pMesh, MMG5_pPoint,int,int*,double,double);
  int           MMG5_scale_meshAndSol(MMG5_pMesh,MMG5_pSol,MMG5_pSol,double*,int8_t*,int8_t*);
  int           MMG5_scale_scalarMetric(MMG5_pMesh, MMG5_pSol,double, int8_t, int8_t);
- LIBMMG_CORE_EXPORT int           MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol ls);
+ int           MMG5_scaleMesh(MMG5_pMesh mesh,MMG5_pSol met,MMG5_pSol ls);
  int           MMG5_scotchCall(MMG5_pMesh mesh, MMG5_pSol sol,MMG5_pSol fields,int*);
- LIBMMG_CORE_EXPORT void          MMG5_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met);
+ void          MMG5_solTruncatureForOptim(MMG5_pMesh mesh, MMG5_pSol met);
  int           MMG5_solveDefmetregSys( MMG5_pMesh, double r[3][3], double *, double *,
                                         double *, double *, double, double, double);
  int           MMG5_solveDefmetrefSys( MMG5_pMesh,MMG5_pPoint,int*, double r[3][3],
@@ -745,19 +743,6 @@ int MMG5_test_intersecmet33(MMG5_pMesh mesh);
 void MMG5_mark_verticesAsUnused ( MMG5_pMesh mesh );
 void MMG5_mark_usedVertices ( MMG5_pMesh mesh,void (*delPt)(MMG5_pMesh,int) );
 void MMG5_keep_subdomainElts ( MMG5_pMesh,int,int (*delElt)(MMG5_pMesh,int) );
-
-/* function pointers */
- LIBMMG_CORE_EXPORT extern int    (*MMG5_chkmsh)(MMG5_pMesh,int,int);
- LIBMMG_CORE_EXPORT extern int    (*MMG5_bezierCP)(MMG5_pMesh ,MMG5_Tria *,MMG5_pBezier ,int8_t );
- LIBMMG_CORE_EXPORT extern double (*MMG5_lenSurfEdg)(MMG5_pMesh mesh,MMG5_pSol sol ,int ,int, int8_t );
- LIBMMG_CORE_EXPORT extern int    (*MMG5_grad2met_ani)(MMG5_pMesh,MMG5_pSol,MMG5_pTria,int,int);
- LIBMMG_CORE_EXPORT extern int    (*MMG5_grad2metreq_ani)(MMG5_pMesh,MMG5_pSol,MMG5_pTria,int,int);
- LIBMMG_CORE_EXPORT extern int    (*MMG5_compute_meanMetricAtMarkedPoints)( MMG5_pMesh,MMG5_pSol);
-
-
-/* useful functions to debug */
- LIBMMG_CORE_EXPORT extern int  (*MMG5_indElt)(MMG5_pMesh mesh,int kel);
- LIBMMG_CORE_EXPORT extern int  (*MMG5_indPt)(MMG5_pMesh mesh,int kp);
 
 void   MMG5_Set_commonFunc(void);
 
