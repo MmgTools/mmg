@@ -121,7 +121,31 @@ FORTRAN_NAME(MMG5_SET_OUTPUTSOLNAME,mmg5_set_outputsolname,
 }
 
 /**
- * See \a MMG5_Free_names function in \ref common/libmmgcommon.h file.
+ * See \ref MMG5_scaleMesh function in \ref common/libmmgcommon.h file.
+ */
+FORTRAN_NAME(MMG5_SCALEMESH,mmg5_scalemesh,
+             (MMG5_pMesh *mesh,MMG5_pSol *met,MMG5_pSol *ls,int* retval),
+             (mesh,met,ls,retval)){
+
+  *retval = MMG5_scaleMesh(*mesh,*met,*ls);
+
+  return;
+}
+
+/**
+ * See \ref MMG5_unscaleMesh function in \ref common/libmmgcommon.h file.
+ */
+FORTRAN_NAME(MMG5_UNSCALEMESH,mmg5_unscalemesh,
+             (MMG5_pMesh *mesh,MMG5_pSol *met,MMG5_pSol *ls,int* retval),
+             (mesh,met,ls,retval)){
+
+  *retval = MMG5_unscaleMesh(*mesh,*met,*ls);
+
+  return;
+}
+
+/**
+ * See \a MMG5_unscaleMesh function in \ref common/libmmgcommon.h file.
  */
 FORTRAN_NAME(MMG5_MMGFREE_NAMES,mmg5_mmgfree_names,(MMG5_pMesh *mesh
                                                     ,MMG5_pSol *met

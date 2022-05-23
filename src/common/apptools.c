@@ -237,7 +237,6 @@ void MMG5_Free_dlinkedList( MMG5_pMesh mesh, MMG5_dNode *liLi ) {
  * references.
  *
  */
-inline
 int MMG5_countLocalParamAtTri( MMG5_pMesh mesh,MMG5_iNode **bdryRefs) {
   int         npar,k,ier;
 
@@ -281,7 +280,6 @@ int MMG5_countLocalParamAtTri( MMG5_pMesh mesh,MMG5_iNode **bdryRefs) {
  * Write the local default values at triangles in the parameter file.
  *
  */
-inline
 int MMG5_writeLocalParamAtTri( MMG5_pMesh mesh, MMG5_iNode *bdryRefs,
                                 FILE *out ) {
   MMG5_iNode *cur;
