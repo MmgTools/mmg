@@ -23,6 +23,8 @@
 
 #ifndef MMG_EXPORT_H
 #define MMG_EXPORT_H
+
+#if defined(BUILD_SHARED_LIBS)
 #  if defined(_WIN32) || defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__TOS_WIN__) || defined(__WINDOWS__)
 #    define MMG_DECL_EXPORT     __declspec(dllexport)
 #    define MMG_DECL_IMPORT     __declspec(dllimport)
@@ -31,9 +33,13 @@
 #    define MMG_DECL_EXPORT     __attribute__((visibility("default")))
 #    define MMG_DECL_IMPORT     __attribute__((visibility("default")))
 #    define MMG_DECL_HIDDEN     __attribute__((visibility("hidden")))
-#  else
-#    define MMG_DECL_EXPORT
-#    define MMG_DECL_IMPORT
-#    define MMG_DECL_HIDDEN
 #  endif
+#endif
+
+#if !defined(MMG_DECL_EXPORT)
+#  define MMG_DECL_EXPORT
+#  define MMG_DECL_IMPORT
+#  define MMG_DECL_HIDDEN
+#endif
+
 #endif
